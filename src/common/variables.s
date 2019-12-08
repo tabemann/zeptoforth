@@ -36,12 +36,5 @@
 	;; Flag to determine whether compilation is going to Flash
 	allot compiling_to_flash, 4
 
-	;; Flash writing buffer
-	allot flash_buffer, flash_block_size
-
-	;; Flash writing address
-	allot flash_buffer_addr, 4
-	
-	;; Flash writing offset
-	allot flash_buffer_offset, 4
-	
+	;; Flash buffers
+	allot flash_buffers_start, flash_buffer_size * flash_buffer_count	

@@ -29,7 +29,16 @@
 
 	.equ ram_start, 0x20000000
 	.equ ram_end, 0x20018000
+	.equ rstack_size, 0x0200
+	.equ rstack_top, ram_end
+	.equ stack_size, 0x0200
+	.equ stack_top, ram_end - rstack_size
+	.equ flash_buffers_top, stack_top - stack_size
 	.equ flash_block_size, 16 ; in bytes
+	.equ flash_buffer_count, 32
+	.equ flash_buffer_size, flash_block_size + 8
+	.equ flash_buffer_space, flash_block_size
+	.equ flash_buffer_addr, flash_block_size + 4
 	.equ flash_min_address, 0x00004000
 	.equ flash_dict_start, 0x00004000
 	.equ flash_dict_end, 0x00100000

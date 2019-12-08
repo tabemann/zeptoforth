@@ -247,64 +247,146 @@ _find_last_flash_word:
 	add tos, r1
 	pop {pc}
 
-	;; Write a byte to flash
-	define_word "cflash!", visible_flag
+	;; Initialize the flash buffers
+	define_word "init-flash-buffers", visible_flag
+_init_flash_buffers:
+	ldr r0, =flash_buffers_start
+	mov r1, #0
+	ldr r2, =flash_buffers_start + (flash_buffer_size * flash_buffer_count)
+1:	str r1, [r0], #4
+	str r1, [r0], #4
+	str r1, [r0], #4
+	str r1, [r0], #4
+	str r1, [r0], #4
+	str r1, [r0], #4
+	cmp r0, r2
+	bne 1b
+	bx lr
+
+	;; Find a free flash buffer for an address
+	define_word "get-free-flash-buffer", visible_flag
+_get_free_flash_buffer:
+	push {lr}
+	ldr r0, =flash_buffers_start
+	mov r1, #0
+	ldr r2, =flash_buffers_start + (flash_buffer_size * flash_buffer_count)
+1:	ldr r3, [r0, #flash_buffer_space]
+	cmp r1, r3
+	beq 2f
+	add r0, #flash_buffer_size
+	cmp r0, r2
+	bne 1b
+	ldr tos, =_no_flash_free
+	ldr r0, =_raise
+	blx r0
+2:	ldr r2, =0x7FF
+	bic tos, r2
+	mov r2, #16
+	str tos, [r0, #flash_buffer_addr]
+	mov tos, r0
+	str r1, [r0], #4
+	str r1, [r0], #4
+	str r1, [r0], #4
+	str r1, [r0], #4
+	str r2, [r0]
+	push {pc}
+
+	;; Find a flash buffer for an address
+	define_word "get-flash-buffer", visible_flag
+_get_flash_buffer:
+	push {lr}
+	ldr r0, =flash_buffers_start
+	ldr r1, =flash_buffers_start + (flash_buffer_size * flash_buffer_count)
+	ldr r2, =0x7FF
+	bic tos, r2
+1:	ldr r3, [r0, #flash_buffer_addr]
+	cmp tos, r3
+	beq 2f
+	add r0, #flash_buffer_size
+	cmp r0, r2
+	bne 1b
+	bl _get_free_flash_buffer
+	pop {pc}
+2:	mov tos, r0
+	pop {pc}
+
+	;; Write a byte to an address in a flash buffer
+	define_word "bflash!", visible_flag
 _store_flash_1:
 	push {lr}
-	ldr r0, =flash_buffer
-	ldr r1, =flash_buffer_offset
-	ldr r2, [r1]
-	and tos, #0xFF
-	strb tos, [r0, r1]
+	push_tos
+	bl _get_flash_buffer
+	mov r0, tos
 	pull_tos
-	adds r2, #1
-	str r2, [r1]
-	cmp r2, #flash_block_size
-	bne 1f
-	bl _store_flash_current_block
-1:	pop {pc}
-
-	;; Write a halfword to flash
+	mov r1, tos
+	ldr r2, =0x7FF
+	bic r1, r2
+	sub tos, r1
+	ldr r1, [r0, #flash_buffer_space]
+	sub r1, #1
+	str r1, [r0, #flash_buffer_space]
+	mov r2, r0
+	add r0, tos
+	pull_tos
+	and tos, #0xFF
+	strb tos, [r0]
+	cmp r1, #0
+	beq 1f
+	pull_tos
+	pop {pc}
+1:	mov tos, r2
+	bl _store_flash_buffer
+	pop {pc}
+	
+	;; Write a halfword to an address in one or more flash_buffers
 	define_word "hflash!", visible_flag
 _store_flash_2:
 	push {lr}
-	push_tos
+	mov r0, tos
+	pull_tos
+	push {r0, tos}
 	and tos, #0xFF
+	push_tos
+	mov tos, r0
 	bl _store_flash_1
+	push_tos
+	pop {r0, tos}
 	lsr tos, #8
 	and tos, #0xFF
+	push_tos
+	mov tos, r0
+	add tos, #1
 	bl _store_flash_1
 	pop {pc}
 
-	;; Write a word to flash
+	;; Write a word to an address in one or more flash_buffers
 	define_word "flash!", visible_flag
 _store_flash_4:
 	push {lr}
+	mov r0, tos
+	pull_tos
+	push {r0, tos}
+	ldr r1, =0xFFFF
+	and tos, r1
 	push_tos
-	and tos, #0xFF
-	bl _store_flash_1
-	lsr tos, #8
+	mov tos, r0
+	bl _store_flash_2
 	push_tos
-	and tos, #0xFF
-	bl _store_flash_1
-	lsr tos, #8
+	pop {r0, tos}
+	lsr tos, #16
+	ldr r1, =0xFFFF
+	and tos, r1
 	push_tos
-	and tos, #0xFF
-	bl _store_flash_1
-	lsr tos, #8
-	and tos, #0xFF
-	bl _store_flash_1
+	mov tos, r0
+	add tos, #2
+	bl _store_flash_2
 	pop {pc}
 
 	;; Write out the current block of flash
-	define_word "store-flash-block", visible_flag
-_store_flash_block:
+	define_word "store-flash-buffer", visible_flag
+_store_flash_buffer:
 	push {lr}
-	ldr r0, =flash_buffer
-	ldr r1, =flash_buffer_offset
-	mov r2, #0
-	str r2, [r1]
-	push_tos
+	mov r0, tos
 	ldr tos, [r0]
 	push_tos
 	ldr tos, [r0, #4]
@@ -313,25 +395,16 @@ _store_flash_block:
 	push_tos
 	ldr tos, [r0, #12]
 	push_tos
-	ldr r0, =flash_buffer_addr
-	ldr tos, [r0]
+	ldr tos, [r0, #flash_buffer_addr]
 	bl _store_flash_16
-	ldr r0, =flash_buffer_addr
-	ldr r1, [r0]
-	add r1¸ #flash_block_size
-	str r1, [r0]
 	pop {pc}
 
 	;; Flush writing the flash
 	define_word "flush-flash", visible_flag
 _flush_flash:
 	push {lr}
-1:	ldr r0, =flash_buffer_offset
-	ldr r0, [r0]
-	cmp r0, #0
-	beq 2f
-	push_tos
-	mov tos, #0
-	bl _store_flash_1
-	b 1b
-2:	pop {pc}
+	bl _get_flash_buffer
+	mov r0, #0
+	str r0, [tos, #flash_buffer_space]
+	bl _store_flash_buffer
+	pop {pc}
