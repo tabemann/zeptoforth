@@ -57,8 +57,26 @@ handle_reset:
 	;; pointer.
 	ldr r0, =rstack_top
 	mov sp, r0
+	;; Put a deliberate garbage value in handler
+	ldr r0, =0xF0E1C2D3
+	ldr r1, =handler
+	str r0, [r1]
+	;; Call the rest of the runtime in an exception handler
+	push_tos
+	ldr tos, =outer_exc_handled
+	ldr r0, =_try
+	blx r0
+	;; If the inner loop returns, reboot
+	b handler_reset
 
-	bl use_48mhz
+	;; The outermost exception handling; if an exception happens here the
+	;; system will reboot
+outer_exc_handled:	
+	ldr r0, =_use_48mhz+1
+	blx r0
+
+	ldr r0, =_init_flash_buffers+1
+	blx r0
 
 	.include "flashrom.s"
 	.include "console.s"

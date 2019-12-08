@@ -29,7 +29,7 @@
 
 	;; Raise an exception with the exception type in the TOS register
 	define_word "?raise", visible_flag
-raise:	cmp tos, #0
+_raise:	cmp tos, #0
 	beq 1f
 	ldr r0, =handler
 	ldr sp, [r0]
@@ -42,7 +42,7 @@ raise:	cmp tos, #0
 
 	;; Try to see if an exception occurs
 	define_word "try", visible_flag
-try:	push {lr}
+_try:	push {lr}
 	str dp, [sp, #-4]!
 	str r0, [sp, #-4]!
 	ldr r0, =handler
@@ -51,6 +51,7 @@ try:	push {lr}
 	ldr r0, =handler
 	str sp, [r0]
 	mov r0, tos
+	add r0, #1
 	pull_tos
 	blx r0
 	ldr r0, =handler

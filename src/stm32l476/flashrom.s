@@ -263,6 +263,11 @@ _init_flash_buffers:
 	bne 1b
 	bx lr
 
+	;; No flash buffers are free exception handler
+	define_word "no-flash-buffers-free", visible_flag
+_no_flash_buffers_free:
+	b .
+	
 	;; Find a free flash buffer for an address
 	define_word "get-free-flash-buffer", visible_flag
 _get_free_flash_buffer:
@@ -276,8 +281,8 @@ _get_free_flash_buffer:
 	add r0, #flash_buffer_size
 	cmp r0, r2
 	bne 1b
-	ldr tos, =_no_flash_free
-	ldr r0, =_raise
+	ldr tos, =_no_flash_buffers_free
+	ldr r0, =_raise+1
 	blx r0
 2:	ldr r2, =0x7FF
 	bic tos, r2

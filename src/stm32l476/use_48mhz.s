@@ -50,14 +50,15 @@
 	
 	;; Set system clock to 48 MHz MSI and set the flash latency accordingly
 	define_word "use-48mhz", visible_flag
-use_48mhz:
+_use_48mhz:
+	push {lr}
 	bl set_pwr_for_48mhz
 	bl set_flash_latency_for_48mhz
 	bl set_msi_48mhz
-	bx lr
+	pop {lr}
 
 	define_word "set-pwr-for-48mhz", visible_flag
-set_pwr_for_48hz:	
+_set_pwr_for_48hz:	
 	;; Set up the voltage scale
 	ldr r0, =PWR_CR1
 	ldr r1, [r0]
@@ -73,7 +74,7 @@ set_pwr_for_48hz:
 
 	;; Set the flash latency and prefetch for 48Mhz MSI
 	define_word "set-flash-latency-for-48mhz", visible_flag
-set_flash_latency_for_48mhz:
+_set_flash_latency_for_48mhz:
 	ldr r0, =FLASH_ACR
 	ldr r1, [r0]
 	bic r1, #FLASH_ACR_LATENCY
@@ -83,7 +84,7 @@ set_flash_latency_for_48mhz:
 
 	;; Set 48Mhz clock mode
 	define_word "set-msi-48mhz", visible_flag
-set_msi_48mhz:
+_set_msi_48mhz:
 	ldr r0, =RCC_CR
 	ldr r1, [r0]
 	bic r1, #RCC_CR_MSIRANGE
