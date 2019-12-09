@@ -387,6 +387,18 @@ _store_flash_4:
 	bl _store_flash_2
 	pop {pc}
 
+	;; Write a word to an address in one or more flash_buffers
+	define_word "2flash!", visible_flag
+_store_flash_8:
+	push {lr}
+	push {tos}
+	bl _store_flash_4
+	push_tos
+	pop {tos}
+	add tos, #4
+	bl _store_flash_4
+	pop {pc}
+
 	;; Write out the current block of flash
 	define_word "store-flash-buffer", visible_flag
 _store_flash_buffer:
