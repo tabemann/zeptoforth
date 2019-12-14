@@ -25,20 +25,89 @@
 @ INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 @ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 @ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-@ POSSIBILITY OF SUCH DAMAGE.	
+@ POSSIBILITY OF SUCH DAMAGE.
 
-	.equ ram_start, 0x20000000
-	.equ ram_end, 0x20018000
-	.equ rstack_size, 0x0200
-	.equ rstack_top, ram_end
-	.equ stack_size, 0x0200
-	.equ stack_top, ram_end - rstack_size
-	.equ flash_buffers_top, stack_top - stack_size
-	.equ flash_block_size, 16 @ in bytes
-	.equ flash_buffer_count, 32
-	.equ flash_buffer_size, flash_block_size + 8
-	.equ flash_buffer_space, flash_block_size
-	.equ flash_buffer_addr, flash_block_size + 4
-	.equ flash_min_address, 0x00004000
-	.equ flash_dict_start, 0x00004000
-	.equ flash_dict_end, 0x00100000
+	@@ Assemble a literal
+	define_word "asm-literal", visible_flag
+asm_literal:
+	push {lr}
+	mov r0, tos
+	pull_tos
+	cmp tos, #0
+	blt 1f
+	cmp tos, #0xFF
+	bgt 2f
+	push_tos
+	mov tos, r0
+	bl _asm_mov_imm
+	pop {pc}
+2:	
+1:	neg tos, tos
+	mov r0, #0xFF
+	cmp tos, r0
+	bgt 2f
+	push_tos
+	mov r0, tos
+	push {r0}
+	bl _asm_mov_imm
+	pop {r0}
+	push_tos
+	mov tos, r0
+	push_tos
+	mov tos, r0
+	bl _asm_neg
+	pop {pc}
+2:
+
+	@@ Assemble a move immediate instruction
+	define_word "asm-mov-imm", visible_flag
+_asm_mov_imm:
+	push {lr}
+	mov r0, tos
+	pull_tos
+	and r0, #7
+	and tos, #0xFF
+	lsl r0, #8
+	orr tos, r0
+	ldr r0, =0x2000
+	orr tos, r0
+	bl _current_comma_16
+	pop {pc}	
+	
+	@@ Assemble an unconditional branch
+	define_word "asm-b", visible_flag
+_asm_b: push {lr}
+	mov r0, tos
+	lsr r0, #8
+	and r0, #0x7
+	orr r0, #0xE0
+	and tos, #0xFF
+	lsl r0, #8
+	orr tos, r0
+	bl _current_comma_16
+	pop {pc}
+
+	@@ Assemble a branch on equal zero instruction
+	define_word "asm-beq", visible_flag
+_asm_beq:
+	push {lr}
+	ldr r0, =0xD000
+	and tos, 0xFF
+	orr tos, r0
+	bl _current_comma_16
+	pop {pc}
+	
+	@@ Assemble a compare to constant instruction
+	define_word "asm-cmp-imm", visible_flag
+_asm_cmp_imm:
+	push {lr}
+	mov r0, tos
+	pull_tos
+	and r0, #7
+	and tos, #0xFF
+	lsl r0, #8
+	orr tos, r0
+	ldr r0, =0x2800
+	orr tos, r0
+	bl _current_comma_16
+	pop {pc}
