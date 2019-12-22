@@ -27,6 +27,7 @@
 @ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 @ POSSIBILITY OF SUCH DAMAGE.	
 
+	.equ thumb2, 1
 	.equ ram_start, 0x20000000
 	.equ ram_end, 0x20018000
 	.equ rstack_size, 0x0200

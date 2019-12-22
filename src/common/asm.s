@@ -79,8 +79,91 @@ _asm_neg:
 	ldr r0, =0x4240
 	orr tos, r0
 	bl _current_comma_16
-	.ifdef thumb2
+	pop {pc}
+
+	@@ Compile a blx (register) instruction
+	define_word "asm-blx-reg", visible_flag
+_asm_blx_reg:
+	push {rl}
+	mov r0, #0xF
+	and tos, r0
+	lsl tos, tos, #3
+	ldr r0, =0x4780
+	orr tos, r0
+	bl _current_comma_16
+	pop {pc}
 	
+	.ifdef thumb2
+
+	@@ Call a word at an address
+	define_word "asm-call", visible_flag
+_asm_call:	
+	push {rl}
+	bl _current_here
+	mov r0, tos
+	pull_tos
+	mov r1, tos
+	sub tos, r0
+	ldr r2, =0x00FFFFFF
+	cmp tos, r2
+	bgt 1f
+	ldr r2, =0xFF000000
+	cmp tos, r2
+	blt 1f
+	bl _asm_bl
+	pop {pc}
+1:	mov tos, r1
+	push_tos
+	mov tos, #1
+	bl _asm_literal
+	push_tos
+	mov tos, #1
+	bl _asm_blx_reg
+	pop {pc}
+	
+	@@ Compile a bl instruction
+	define_word "asm-bl", visible_flag
+_asm_bl:
+	push {rl}
+	mov r0, tos
+	lsr tos, tos, #12
+	ldr r1, =0x3FF
+	and tos, r1
+	lsl r1, r0, #24
+	mov r2, #1
+	and r1, r2
+	lsl r2, r1, #10
+	orr tos, r2
+	ldr r2, =0xF000
+	orr tos, r2
+	push {r0, r1}
+	bl _current_comma_16
+	pop {r0, r1}
+	push_tos
+	mov tos, r0
+	lsr tos, tos, #1
+	ldr r2, =0x7FF
+	and tos, r2
+	lsr r2, r0, #22
+	mov r3, #1
+	and r2, r3
+	mvn r2, r2
+	eor r2, r1
+	and r2, r3
+	lsl r2, r2, #11
+	orr tos, r2
+	lsr r2, r0, #23
+	and r2, r3
+	mvn r2, r2
+	eor r2, r1
+	and r2, r3
+	lsl r2, r2, #13
+	orr tos, r2
+	ldr r2, =0xD000
+	orr tos, r2
+	bl _current_comma_16
+	pop {pc}
+
 	@@ Compile a move 16-bit immediate instruction
 	define_word "asm-mov-16-imm", visible_flag
 _asm_mov_16_imm:
@@ -114,7 +197,7 @@ _asm_mov_16_imm:
 
 	@@ Compile a move top 16-bit immediate instruction
 	define_word "asm-movt-imm", visible_flag
-_asm_mov_16_imm:
+_asm_movt_imm:
 	push {lr}
 	mov r0, tos
 	pull_tos
@@ -175,7 +258,10 @@ _asm_literal:
 	mov tos, r0
 	bl _asm_neg
 	pop {pc}
-3:	push_tos
+3:	mov r1, #0xFFFF
+	cmp tos, r1
+	bgt 4f
+	push_tos
 	mov tos, r0
 	push {r0}
 	bl _asm_ldr_long_imm
@@ -186,8 +272,98 @@ _asm_literal:
 	mov tos, r0
 	bl _asm_neg
 	pop {pc}
-	_
+4:	neg tos, tos
+	push_tos
+	mov tos, r0
+	bl _asm_ldr_long_imm
+	pop {pc}
+	
+	@@ Assemble a long load register immediate pseudo-opcode
+	define_word "asm-ldr-long-imm", visible_flag
+_asm_ldr_long_imm:
+	push {lr}
+	mov r0, tos
+	pull_tos
+	mov r1, tos
+	mov r2, #0xFFFF
+	and tos, r2
+	mov r2, #0xFF
+	cmp tos, r2
+	bgt 1f
+	push_tos
+	mov tos, r0
+	push {r0, r1}
+	bl _asm_mov_imm
+	pop {r0, r1}
+2:	mov r2, #0xFFFF
+	cmp r1, r2
+	ble 3f
+	push_tos
+	mov tos, r1
+	lsr tos, tos, #16
+	and tos, r2
+	push_tos
+	mov tos, r0
+	bl _asm_movt_imm
+	pop {pc}
+1:	push_tos
+	mov tos, r0
+	push {r0, r1}
+	bl _asm_mov_16_imm
+	pop {r0, r1}
+	b 2b
+3:	pop {pc}
+	
 	.else
+
+	@@ Call a word at an address
+	define_word "asm-call", visible_flag
+_asm_call:	
+	push {rl}
+	bl _current_here
+	mov r0, tos
+	pull_tos
+	mov r1, tos
+	sub tos, r0
+	ldr r2, =0x003FFFFF
+	cmp tos, r2
+	bgt 1f
+	ldr r2, =0xFFC00000
+	cmp tos, r2
+	blt 1f
+	bl _asm_bl
+	pop {pc}
+1:	mov tos, r1
+	push_tos
+	mov tos, #1
+	bl _asm_literal
+	push_tos
+	mov tos, #1
+	bl _asm_blx_reg
+	pop {pc}
+
+	@@ Compile a bl instruction
+	define_word "asm-bl", visible_flag
+_asm_bl:
+	push {rl}
+	mov r0, tos
+	lsr tos, tos, #12
+	ldr r1, =0x7FF
+	and tos, r1
+	ldr r2, =0xF000
+	orr tos, r2
+	push {r0}
+	bl _current_comma_16
+	pop {r0}
+	push_tos
+	mov tos, r0
+	lsr tos, tos, #1
+	ldr r2, =0x7FF
+	and tos, r2
+	ldr r2, =0xF800
+	orr tos, r2
+	bl _current_comma_16
+	pop {pc}
 
 	@@ Assemble a literal
 	define_word "asm-literal", visible_flag

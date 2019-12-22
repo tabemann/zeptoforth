@@ -30,7 +30,6 @@
 	@@ Aliases for data stack and top of stack registers
 tos 	.req r6
 dp 	.req r7
-zero	.req r8
 	
 	@@ True value
 	.equ true_value, -1
