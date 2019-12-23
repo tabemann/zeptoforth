@@ -28,82 +28,82 @@
 @ POSSIBILITY OF SUCH DAMAGE.
 
 	@@ Assemble a move immediate instruction
-	define_word "asm-mov-imm", visible_flag
+	define_word "mov-imm,", visible_flag
 _asm_mov_imm:
 	push {lr}
-	mov r0, tos
+	movs r0, tos
 	pull_tos
-	mov r1, #7
-	and r0, r1
-	mov r1, #0xFF
-	and tos, r1
-	lsl r0, r0, #8
-	orr tos, r0
+	movs r1, #7
+	ands r0, r1
+	movs r1, #0xFF
+	ands tos, r1
+	lsls r0, r0, #8
+	orrs tos, r0
 	ldr r0, =0x2000
-	orr tos, r0
+	orrs tos, r0
 	bl _current_comma_16
 	pop {pc}	
 
 	@@ Assemble a logical shift left immediate instruction
-	define_word "asm-lsl-imm", visible_flag
+	define_word "lsl-imm,", visible_flag
 _asm_lsl_imm:
 	push {lr}
-	mov r0, tos
+	movs r0, tos
 	pull_tos
-	mov r1, #7
-	and r0, r1
-	mov r1, #0xFF
-	and tos, r1
-	lsl r0, r0, #8
-	orr tos, r0
-	mov r1, tos
+	movs r1, #7
+	ands r0, r1
+	movs r1, #0xFF
+	ands tos, r1
+	lsls r0, r0, #8
+	orrs tos, r0
+	movs r1, tos
 	pull_tos
-	mov r0, #0x1F
-	and tos, r0
-	lsl tos, tos, #6
-	orr tos, r1
+	movs r0, #0x1F
+	ands tos, r0
+	lsls tos, tos, #6
+	orrs tos, r1
 	bl _current_comma_16
 	pop {pc}	
 
 	@@ Assemble an reverse subtract immediate from zero instruction
-	define "asm-neg", visible_flag
+	define "neg,", visible_flag
 _asm_neg:
 	push {lr}
-	mov r0, tos
+	movs r0, tos
 	pull_tos
-	mov r1, #7
-	and tos, r1
-	and r0, r1
-	lsl tos, tos, #3
-	orr tos, r0
+	movs r1, #7
+	ands tos, r1
+	ands r0, r1
+	lsls tos, tos, #3
+	orrs tos, r0
 	ldr r0, =0x4240
-	orr tos, r0
+	orrs tos, r0
 	bl _current_comma_16
 	pop {pc}
 
 	@@ Compile a blx (register) instruction
-	define_word "asm-blx-reg", visible_flag
+	define_word "blx-reg,", visible_flag
 _asm_blx_reg:
 	push {rl}
-	mov r0, #0xF
-	and tos, r0
-	lsl tos, tos, #3
+	movs r0, #0xF
+	ands tos, r0
+	lsls tos, tos, #3
 	ldr r0, =0x4780
-	orr tos, r0
+	orrs tos, r0
 	bl _current_comma_16
 	pop {pc}
 	
 	.ifdef thumb2
 
 	@@ Call a word at an address
-	define_word "asm-call", visible_flag
+	define_word "call,", visible_flag
 _asm_call:	
 	push {rl}
 	bl _current_here
-	mov r0, tos
+	movs r0, tos
 	pull_tos
-	mov r1, tos
-	sub tos, r0
+	movs r1, tos
+	subs tos, tos, r0
 	ldr r2, =0x00FFFFFF
 	cmp tos, r2
 	bgt 1f
@@ -112,181 +112,193 @@ _asm_call:
 	blt 1f
 	bl _asm_bl
 	pop {pc}
-1:	mov tos, r1
+1:	movs tos, r1
+	adds tos, #1
 	push_tos
-	mov tos, #1
+	movs tos, #1
 	bl _asm_literal
 	push_tos
-	mov tos, #1
+	movs tos, #1
 	bl _asm_blx_reg
 	pop {pc}
 	
 	@@ Compile a bl instruction
-	define_word "asm-bl", visible_flag
+	define_word "bl,", visible_flag
 _asm_bl:
 	push {rl}
-	mov r0, tos
-	lsr tos, tos, #12
+	movs r0, tos
+	lsrs tos, tos, #12
 	ldr r1, =0x3FF
-	and tos, r1
-	lsl r1, r0, #24
-	mov r2, #1
-	and r1, r2
-	lsl r2, r1, #10
-	orr tos, r2
+	ands tos, r1
+	lsls r1, r0, #24
+	movs r2, #1
+	ands r1, r2
+	lsls r2, r1, #10
+	orrs tos, r2
 	ldr r2, =0xF000
-	orr tos, r2
+	orrs tos, r2
 	push {r0, r1}
 	bl _current_comma_16
 	pop {r0, r1}
 	push_tos
-	mov tos, r0
-	lsr tos, tos, #1
+	movs tos, r0
+	lsrs tos, tos, #1
 	ldr r2, =0x7FF
-	and tos, r2
-	lsr r2, r0, #22
-	mov r3, #1
-	and r2, r3
+	ands tos, r2
+	lsrs r2, r0, #22
+	movs r3, #1
+	ands r2, r3
 	mvn r2, r2
 	eor r2, r1
-	and r2, r3
-	lsl r2, r2, #11
-	orr tos, r2
-	lsr r2, r0, #23
-	and r2, r3
+	ands r2, r3
+	lsls r2, r2, #11
+	orrs tos, r2
+	lsrs r2, r0, #23
+	ands r2, r3
 	mvn r2, r2
 	eor r2, r1
-	and r2, r3
-	lsl r2, r2, #13
-	orr tos, r2
+	ands r2, r3
+	lsls r2, r2, #13
+	orrs tos, r2
 	ldr r2, =0xD000
-	orr tos, r2
+	orrs tos, r2
 	bl _current_comma_16
 	pop {pc}
 
 	@@ Compile a move 16-bit immediate instruction
-	define_word "asm-mov-16-imm", visible_flag
+	define_word "mov-16-imm,", visible_flag
 _asm_mov_16_imm:
 	push {lr}
-	mov r0, tos
+	movs r0, tos
 	pull_tos
-	mov r1, tos
-	lsr tos, tos, #11
-	and tos, #1
-	lsl tos, tos, #10
-	mov r3, r1
-	lsr r3, r3, #12
-	orr tos, r3
-	mov r3, #0xF240
-	orr tos, r3
+	movs r1, tos
+	lsrs tos, tos, #11
+	movs r5, #1
+	ands tos, r5
+	lsls tos, tos, #10
+	movs r3, r1
+	lsrs r3, r3, #12
+	orrs tos, r3
+	movs r3, #0xF240
+	orrs tos, r3
 	push {r0, r1}
 	bl _current_comma_16
 	pop {r0, r1}
 	push_tos
-	mov tos, r1
-	and tos, #0xFF
-	lsr r1, r1, #8
-	and r1, #7
-	lsl r1, r1, #12
-	orr tos, r1
-	and r0, #0xF
-	lsl r0, r0, #8
-	orr tos, r0
+	movs tos, r1
+	movs r5, #0xFF
+	ands tos, r5
+	lsrs r1, r1, #8
+	movs r5, #7
+	ands r1, r5
+	lsls r1, r1, #12
+	orrs tos, r1
+	movs r5, #0xF
+	ands r0, r5
+	lsls r0, r0, #8
+	orrs tos, r0
 	bl _current_comma_16
 	pop {pc}
 
 	@@ Compile a move top 16-bit immediate instruction
-	define_word "asm-movt-imm", visible_flag
+	define_word "movt-imm,", visible_flag
 _asm_movt_imm:
 	push {lr}
-	mov r0, tos
+	movs r0, tos
 	pull_tos
-	mov r1, tos
-	lsr tos, tos, #11
-	and tos, #1
-	lsl tos, tos, #10
-	mov r3, r1
-	lsr r3, r3, #12
-	orr tos, r3
-	mov r3, #0xF2C0
-	orr tos, r3
+	movs r1, tos
+	lsrs tos, tos, #11
+	movs r5, #1
+	ands tos, r5
+	lsls tos, tos, #10
+	movs r3, r1
+	lsrs r3, r3, #12
+	orrs tos, r3
+	ldr r3, =0xF2C0
+	orrs tos, r3
 	push {r0, r1}
 	bl _current_comma_16
 	pop {r0, r1}
 	push_tos
-	mov tos, r1
-	and tos, #0xFF
-	lsr r1, r1, #8
-	and r1, #7
-	lsl r1, r1, #12
-	orr tos, r1
-	and r0, #0xF
-	lsl r0, r0, #8
-	orr tos, r0
+	movs tos, r1
+	movs r5, #0xFF
+	ands tos, r5
+	lsrs r1, r1, #8
+	movs r5, #7
+	ands r1, r5
+	lsls r1, r1, #12
+	orrs tos, r1
+	movs r5, #0xF
+	ands r0, r5
+	lsls r0, r0, #8
+	orrs tos, r0
 	bl _current_comma_16
 	pop {pc}
 
 	@@ Assemble a literal
-	define_word "asm-literal", visible_flag
+	define_word "literal,", visible_flag
 _asm_literal:
 	push {lr}
-	mov r0, tos
+	movs r0, tos
 	pull_tos
-	cmp tos, #0
+	movs r5, #0
+	cmp tos, r5
 	blt 1f
-	cmp tos, #0xFF
+	movs r5, #0xFF
+	cmp tos, r5
 	bgt 2f
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	bl _asm_mov_imm
 	pop {pc}
 2:	push_tos
-	mov tos, r0
+	movs tos, r0
 	bl _asm_ldr_long_imm
 	pop {pc}
 1:	neg tos, tos
-	cmp tos, #0xFF
+	movs r5, #0xFF
+	cmp tos, r5
 	bgt 3f
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push {r0}
 	bl _asm_mov_imm
 	pop {r0}
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	bl _asm_neg
 	pop {pc}
-3:	mov r1, #0xFFFF
+3:	ldr r1, =0xFFFF
 	cmp tos, r1
 	bgt 4f
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push {r0}
 	bl _asm_ldr_long_imm
 	pop {r0}
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	bl _asm_neg
 	pop {pc}
 4:	neg tos, tos
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	bl _asm_ldr_long_imm
 	pop {pc}
 	
 	@@ Assemble a long load register immediate pseudo-opcode
-	define_word "asm-ldr-long-imm", visible_flag
+	define_word "ldr-long-imm,", visible_flag
 _asm_ldr_long_imm:
 	push {lr}
-	mov r0, tos
+	movs r0, tos
 	pull_tos
-	mov r1, tos
-	mov r2, #0xFFFF
-	and tos, r2
+	movs r1, tos
+	ldr r2, =0xFFFF
+	ands tos, r2
 	mov r2, #0xFF
 	cmp tos, r2
 	bgt 1f
@@ -295,19 +307,19 @@ _asm_ldr_long_imm:
 	push {r0, r1}
 	bl _asm_mov_imm
 	pop {r0, r1}
-2:	mov r2, #0xFFFF
+2:	ldr r2, =0x7FFF
 	cmp r1, r2
 	ble 3f
 	push_tos
-	mov tos, r1
-	lsr tos, tos, #16
-	and tos, r2
+	movs tos, r1
+	lsrs tos, tos, #16
+	ands tos, r2
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	bl _asm_movt_imm
 	pop {pc}
 1:	push_tos
-	mov tos, r0
+	movs tos, r0
 	push {r0, r1}
 	bl _asm_mov_16_imm
 	pop {r0, r1}
@@ -317,14 +329,14 @@ _asm_ldr_long_imm:
 	.else
 
 	@@ Call a word at an address
-	define_word "asm-call", visible_flag
+	define_word "call,", visible_flag
 _asm_call:	
 	push {rl}
 	bl _current_here
-	mov r0, tos
+	movs r0, tos
 	pull_tos
-	mov r1, tos
-	sub tos, r0
+	movs r1, tos
+	subs tos, tos, r0
 	ldr r2, =0x003FFFFF
 	cmp tos, r2
 	bgt 1f
@@ -333,589 +345,592 @@ _asm_call:
 	blt 1f
 	bl _asm_bl
 	pop {pc}
-1:	mov tos, r1
+1:	movs tos, r1
+	adds tos, #1
 	push_tos
-	mov tos, #1
+	movs tos, #1
 	bl _asm_literal
 	push_tos
-	mov tos, #1
+	movs tos, #1
 	bl _asm_blx_reg
 	pop {pc}
 
 	@@ Compile a bl instruction
-	define_word "asm-bl", visible_flag
+	define_word "bl,", visible_flag
 _asm_bl:
 	push {rl}
-	mov r0, tos
-	lsr tos, tos, #12
+	movs r0, tos
+	lsrs tos, tos, #12
 	ldr r1, =0x7FF
-	and tos, r1
+	ands tos, r1
 	ldr r2, =0xF000
-	orr tos, r2
+	orrs tos, r2
 	push {r0}
 	bl _current_comma_16
 	pop {r0}
 	push_tos
-	mov tos, r0
-	lsr tos, tos, #1
+	movs tos, r0
+	lsrs tos, tos, #1
 	ldr r2, =0x7FF
-	and tos, r2
+	ands tos, r2
 	ldr r2, =0xF800
-	orr tos, r2
+	orrs tos, r2
 	bl _current_comma_16
 	pop {pc}
 
 	@@ Assemble a literal
-	define_word "asm-literal", visible_flag
+	define_word "literal,", visible_flag
 _asm_literal:
 	push {lr}
-	mov r0, tos
+	movs r0, tos
 	pull_tos
-	mov r1, #0
+	movs r1, #0
 	cmp tos, r1
 	blt 1f
-	mov r1, #0xFF
+	movs r1, #0xFF
 	cmp tos, r1
 	bgt 2f
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	bl _asm_mov_imm
 	pop {pc}
 2:	push_tos
-	mov tos, r0
+	movs tos, r0
 	bl _asm_ldr_long_imm
 	pop {pc}
 1:	neg tos, tos
-	mov r0, #0xFF
+	movs r0, #0xFF
 	cmp tos, r0
 	bgt 2f
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push {r0}
 	bl _asm_mov_imm
 	pop {r0}
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	bl _asm_neg
 	pop {pc}
 2:	push_tos
-	mov tos, r0
+	movs tos, r0
 	push {r0}
 	bl _asm_ldr_long_imm
 	pop {r0}
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	bl _asm_neg
 	pop {pc}
 
 	@@ Assemble a long load register immediate pseudo-opcode
-	define_word "asm-ldr-long-imm", visible_flag
+	define_word "ldr-long-imm,", visible_flag
 _asm_ldr_long_imm:
 	push {lr}
-	mov r0, tos
+	movs r0, tos
 	pull_tos
-	mov r1, tos
-	lsr r1, r1, #24
+	movs r1, tos
+	lsrs r1, r1, #24
 	bne 1f
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	bl _asm_ldr_long_imm_1st_zero
 	pop {pc}
-1:	mov r2, tos
+1:	movs r2, tos
 	mv tos, r1
 	push_tos
 	mv tos, r0
 	push {r0, r2}
 	bl _asm_mov_imm
 	pop {r0, r2}
-	mov r1, r2
-	lsr r1, r1, #16
-	mov r3, #0xFF
-	and r1, r3
+	movs r1, r2
+	lsrs r1, r1, #16
+	movs r3, #0xFF
+	ands r1, r3
 	bne 1f
 	push_tos
-	mov tos, r2
+	movs tos, r2
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	bl _asm_ldr_long_imm_2nd_zero
 	pop {pc}
 1:	push_tos
-	mov tos, #8
+	movs tos, #8
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push {r0, r1, r2}
 	bl _asm_lsl_imm
 	pop {r0, r1, r2}
 	push_tos
-	mov tos, r1
+	movs tos, r1
 	push_tos
-	mov tos, #0
+	movs tos, #0
 	push {r0, r2}
 	bl _asm_mov_imm
 	pop {r0, r2}
 	push_tos
-	mov tos, #0
+	movs tos, #0
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push {r0, r2}
 	bl _asm_orr
 	pop {r0, r2}
-	mov r1, r2
+	movs r1, r2
 	ldr r1, r1, #8
-	mov r3, #0xFF
-	and r1, r3
+	movs r3, #0xFF
+	ands r1, r3
 	bne 1f
 	push_tos
-	mov tos, r2
+	movs tos, r2
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	bl _asm_ldr_long_imm_3rd_zero
 	pop {pc}
 1:	push_tos
-	mov tos, #8
+	movs tos, #8
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push {r0, r1, r2}
 	bl _asm_lsl_imm
 	pop {r0, r1, r2}
 	push_tos
-	mov tos, r1
+	movs tos, r1
 	push_tos
-	mov tos, #0
+	movs tos, #0
 	push {r0, r2}
 	bl _asm_mov_imm
 	pop {r0, r2}
 	push_tos
-	mov tos, #0
+	movs tos, #0
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push {r0, r2}
 	bl _asm_orr
 	pop {r0, r2}
-	mov r3, #0xFF
-	and r2, r3
+	movs r3, #0xFF
+	ands r2, r3
 	bne 1f
 	pop {pc}
 1:	push_tos
-	mov tos, #8
+	movs tos, #8
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push {r0, r2}
 	bl _asm_lsl_imm
 	pop {r0, r2}
 	push_tos
-	mov tos, r2
+	movs tos, r2
 	push_tos
-	mov tos, #0
+	movs tos, #0
 	push {r0}
 	bl _asm_mov_imm
 	pop {r0}
 	push_tos
-	mov tos, #0
+	movs tos, #0
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	bl _asm_orr
 	pop {pc}
 
 	@@ Assemble a long load register immediate pseudo-opcode
-	define_word "asm-ldr-long-imm-1st-zero", visible_flag
+	define_word "ldr-long-imm-1st-zero,", visible_flag
 _asm_ldr_long_imm_1st_zero:
 	push {lr}
-	mov r0, tos
+	movs r0, tos
 	pull_tos
-	mov r2, tos
-	mov r1, r2
-	lsr r1, r1, #16
-	mov r3, #0xFF
-	and r1, r3
+	movs r2, tos
+	movs r1, r2
+	lsrs r1, r1, #16
+	movs r3, #0xFF
+	ands r1, r3
 	bne 1f
 	push_tos
-	mov tos, r2
+	movs tos, r2
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	bl _asm_ldr_long_imm_1st_2nd_zero
 	pop {pc}
 1:	push_tos
-	mov tos, r1
+	movs tos, r1
 	push_tos
-	mov tos, #0
+	movs tos, #0
 	push {r0, r2}
 	bl _asm_mov_imm
 	pop {r0, r2}
 	push_tos
-	mov tos, #0
+	movs tos, #0
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push {r0, r2}
 	bl _asm_orr
 	pop {r0, r2}
-	mov r1, r2
+	movs r1, r2
 	ldr r1, r1, #8
-	mov r3, #0xFF
-	and r1, r3
+	movs r3, #0xFF
+	ands r1, r3
 	bne 1f
 	push_tos
-	mov tos, r2
+	movs tos, r2
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	bl _asm_ldr_long_imm_1st_3rd_zero
 	pop {pc}
 1:	push_tos
-	mov tos, #8
+	movs tos, #8
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push {r0, r1, r2}
 	bl _asm_lsl_imm
 	pop {r0, r1, r2}
 	push_tos
-	mov tos, r1
+	movs tos, r1
 	push_tos
-	mov tos, #0
+	movs tos, #0
 	push {r0, r2}
 	bl _asm_mov_imm
 	pop {r0, r2}
 	push_tos
-	mov tos, #0
+	movs tos, #0
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push {r0, r2}
 	bl _asm_orr
 	pop {r0, r2}
 	push_tos
-	mov tos, #8
+	movs tos, #8
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push {r0, r2}
 	bl _asm_lsl_imm
 	pop {r0, r2}
-	mov r3, #0xFF
-	and r2, r3
+	movs r3, #0xFF
+	ands r2, r3
 	bne 1f
 	pop {pc}
 1:	push_tos
-	mov tos, r2
+	movs tos, r2
 	push_tos
-	mov tos, #0
+	movs tos, #0
 	push {r0}
 	bl _asm_mov_imm
 	pop {r0}
 	push_tos
-	mov tos, #0
+	movs tos, #0
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	bl _asm_orr
 	pop {pc}
 
 	@@ Assemble a long load register immediate pseudo-opcode
-	define_word "asm-ldr-long-imm-2nd-zero", visible_flag
+	define_word "ldr-long-imm-2nd-zero,", visible_flag
 _asm_ldr_long_imm_2nd_zero:
 	push {lr}
-	mov r0, tos
+	movs r0, tos
 	pull_tos
-	mov r1, tos
-	mov r1, r2
+	movs r1, tos
+	movs r1, r2
 	ldr r1, r1, #8
-	mov r3, #0xFF
-	and r1, r3
+	movs r3, #0xFF
+	ands r1, r3
 	bne 1f
 	push_tos
-	mov tos, r2
+	movs tos, r2
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	bl _asm_ldr_long_imm_2nd_3rd_zero
 	pop {pc}
 1:	push_tos
-	mov tos, #16
+	movs tos, #16
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push {r0, r1, r2}
 	bl _asm_lsl_imm
 	pop {r0, r1, r2}
 	push_tos
-	mov tos, r1
+	movs tos, r1
 	push_tos
-	mov tos, #0
+	movs tos, #0
 	push {r0, r2}
 	bl _asm_mov_imm
 	pop {r0, r2}
 	push_tos
-	mov tos, #0
+	movs tos, #0
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push {r0, r2}
 	bl _asm_orr
 	pop {r0, r2}
-	mov r3, #0xFF
-	and r2, r3
+	movs r3, #0xFF
+	ands r2, r3
 	bne 1f
 	pop {pc}
 1:	push_tos
-	mov tos, #8
+	movs tos, #8
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push {r0, r2}
 	bl _asm_lsl_imm
 	pop {r0, r2}
 	push_tos
-	mov tos, r2
+	movs tos, r2
 	push_tos
-	mov tos, #0
+	movs tos, #0
 	push {r0}
 	bl _asm_mov_imm
 	pop {r0}
 	push_tos
-	mov tos, #0
+	movs tos, #0
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	bl _asm_orr
 	pop {pc}
 
 	@@ Assemble a long load register immediate pseudo-opcode
-	define_word "asm-ldr-long-imm-1st-2nd-zero", visible_flag
+	define_word "ldr-long-imm-1st-2nd-zero,", visible_flag
 _asm_ldr_long_imm_1st_2nd_zero:
 	push {lr}
-	mov r0, tos
+	movs r0, tos
 	pull_tos
-	mov r2, tos
-	mov r1, r2
+	movs r2, tos
+	movs r1, r2
 	ldr r1, r1, #8
-	mov r3, #0xFF
-	and r1, r3
+	movs r3, #0xFF
+	ands r1, r3
 	push_tos
-	mov tos, r1
+	movs tos, r1
 	push_tos
-	mov tos, #0
+	movs tos, #0
 	push {r0, r2}
 	bl _asm_mov_imm
 	pop {r0, r2}
 	push_tos
-	mov tos, #0
+	movs tos, #0
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push {r0, r2}
 	bl _asm_orr
 	pop {r0, r2}
 	push_tos
-	mov tos, #8
+	movs tos, #8
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push {r0, r2}
 	bl _asm_lsl_imm
 	pop {r0, r2}
-	mov r3, #0xFF
-	and r2, r3
+	movs r3, #0xFF
+	ands r2, r3
 	bne 1f
 	pop {pc}
 1:	push_tos
-	mov tos, r2
+	movs tos, r2
 	push_tos
-	mov tos, #0
+	movs tos, #0
 	push {r0}
 	bl _asm_mov_imm
 	pop {r0}
 	push_tos
-	mov tos, #0
+	movs tos, #0
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	bl _asm_orr
 	pop {pc}
 
 	@@ Assemble a long load register immediate pseudo-opcode
-	define_word "asm-ldr-long-imm-1st-3rd-zero", visible_flag
+	define_word "ldr-long-imm-1st-3rd-zero,", visible_flag
 _asm_ldr_long_imm_3rd_zero:
 	push {lr}
-	mov r0, tos
+	movs r0, tos
 	pull_tos
-	mov r2, tos
-	mov tos, #8
+	movs r2, tos
+	movs tos, #8
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push {r0, r2}
 	bl _asm_lsl_imm
 	pop {r0, r2}
-	mov r3, #0xFF
-	and r2, r3
+	movs r3, #0xFF
+	ands r2, r3
 	bne 1f
 	pop {pc}
 1:	push_tos
-	mov tos, r2
+	movs tos, r2
 	push_tos
-	mov tos, #0
+	movs tos, #0
 	push {r0}
 	bl _asm_mov_imm
 	pop {r0}
 	push_tos
-	mov tos, #0
+	movs tos, #0
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	bl _asm_orr
 	pop {pc}
 
 	@@ Assemble a long load register immediate pseudo-opcode
-	define_word "asm-ldr-long-imm-1st-3rd-zero", visible_flag
+	define_word "ldr-long-imm-1st-3rd-zero,", visible_flag
 _asm_ldr_long_imm_1st_3rd_zero:
 	push {lr}
-	mov r0, tos
+	movs r0, tos
 	pull_tos
-	mov r2, tos
-	mov tos, #16
+	movs r2, tos
+	movs tos, #16
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push {r0, r2}
 	bl _asm_lsl_imm
 	pop {r0, r2}
-	mov r3, #0xFF
-	and r2, r3
+	movs r3, #0xFF
+	ands r2, r3
 	bne 1f
 	pop {pc}
 1:	push_tos
-	mov tos, r2
+	movs tos, r2
 	push_tos
-	mov tos, #0
+	movs tos, #0
 	push {r0}
 	bl _asm_mov_imm
 	pop {r0}
 	push_tos
-	mov tos, #0
+	movs tos, #0
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	bl _asm_orr
 	pop {pc}
 
 	@@ Assemble a long load register immediate pseudo-opcode
-	define_word "asm-ldr-long-imm-2nd-3rd-zero", visible_flag
+	define_word "ldr-long-imm-2nd-3rd-zero,", visible_flag
 _asm_ldr_long_imm_2nd_3rd_zero:
 	push {lr}
-	mov r0, tos
+	movs r0, tos
 	pull_tos
-	mov r2, tos
-	mov tos, #24
+	movs r2, tos
+	movs tos, #24
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push {r0, r2}
 	bl _asm_lsl_imm
 	pop {r0, r2}
-	mov r3, #0xFF
-	and r2, r3
+	movs r3, #0xFF
+	ands r2, r3
 	bne 1f
 	pop {pc}
 1:	push_tos
-	mov tos, r2
+	movs tos, r2
 	push_tos
-	mov tos, #0
+	movs tos, #0
 	push {r0}
 	bl _asm_mov_imm
 	pop {r0}
 	push_tos
-	mov tos, #0
+	movs tos, #0
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	bl _asm_orr
 	pop {pc}
 	
 	.endif
 	
 	@@ Assemble an unconditional branch
-	define_word "asm-b", visible_flag
+	define_word "b,", visible_flag
 _asm_b: push {lr}
-	mov r0, tos
-	lsr r0, r0, #8
-	mov r1, #7
-	and r0, r1
-	orr r0, #0xE0
-	mov r1, #0xFF
-	and tos, r1
-	lsl r0, r0, #8
-	orr tos, r0
+	movs r0, tos
+	lsrs r0, r0, #8
+	movs r1, #7
+	ands r0, r1
+	orrs r0, #0xE0
+	movs r1, #0xFF
+	ands tos, r1
+	lsls r0, r0, #8
+	orrs tos, r0
 	bl _current_comma_16
 	pop {pc}
 
 	@@ Assemble a branch on equal zero instruction
-	define_word "asm-beq", visible_flag
+	define_word "beq,", visible_flag
 _asm_beq:
 	push {lr}
 	ldr r0, =0xD000
-	mov r1, #0xFF
-	and tos, r1
-	orr tos, r0
+	movs r1, #0xFF
+	ands tos, r1
+	orrs tos, r0
 	bl _current_comma_16
 	pop {pc}
 	
 	@@ Assemble a compare to immediate instruction
-	define_word "asm-cmp-imm", visible_flag
+	define_word "cmp-imm,", visible_flag
 _asm_cmp_imm:
 	push {lr}
-	mov r0, tos
+	movs r0, tos
 	pull_tos
-	mov r1, #7
-	and r0, r1
-	mov r1, #0xFF
-	and tos, r1
-	lsl r0, r0, #8
-	orr tos, r0
+	movs r1, #7
+	ands r0, r1
+	movs r1, #0xFF
+	ands tos, r1
+	lsls r0, r0, #8
+	orrs tos, r0
 	ldr r0, =0x2800
-	orr tos, r0
+	orrs tos, r0
 	bl _current_comma_16
 	pop {pc}
 
 	@@ Assemble a logical shift left immediate instruction
-	define_word "asm-lsl-imm", visible_flag
+	define_word "lsl-imm,", visible_flag
 _asm_lsl_imm:
 	push {lr}
-	mov r0, tos
-	mov r1, #7
-	and r0, r1
-	lsl r1, r0, #3
-	orr r0, r1
+	movs r0, tos
+	movs r1, #7
+	ands r0, r1
 	pull_tos
-	mov r1, #0x1F
-	and tos, r1
-	lsl tos, tos, #6
-	orr tos, r0
+	ands tos, r1
+	lsls tos, tos, #3
+	orrs r0, tos
+	pull_tos
+	movs r1, #0x1F
+	ands tos, r1
+	lsls tos, tos, #6
+	orrs tos, r0
 	bl _current_comma_16
 	pop {pc}
 
 	@@ Assemble an or instruction
-	define_word "asm-orr", visible_flag
+	define_word "orr,", visible_flag
 _asm_orr:
 	push {lr}
-	mov r1, #7
-	and tos, r1
-	mov r0, tos
+	movs r1, #7
+	ands tos, r1
+	movs r0, tos
 	pull_tos
-	and tos, r1
-	lsl tos, tos, #3
-	orr tos, r0
-	mov r0, #0x43
-	lsl r0, r0, #8
-	orr tos, r0
+	ands tos, r1
+	lsls tos, tos, #3
+	orrs tos, r0
+	movs r0, #0x43
+	lsls r0, r0, #8
+	orrs tos, r0
 	bl _current_comma_16
 	pop {pc}

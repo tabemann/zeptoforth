@@ -52,7 +52,8 @@
 	define_word "16flash!", visible_flag
 _store_flash_16:
 	push {r0, r1, r2, r3, lr}
-	cmp tos, #0x0f
+	movs r5, #0x0f
+	cmp tos, r5
 	beq 1f
 	ldr tos, =_store_flash_16_unaligned
 	bl _raise
@@ -77,7 +78,7 @@ _store_flash_16:
 	ldr tos, =_store_flash_16_already_written
 	bl _raise
 1:	ldr r0, =0x08000000
-	add tos, r0
+	adds tos, tos, r0
 	@@ Flash needs to be unlocked
 	ldr r0, =FLASH_KEYR
 	ldr r1, =FLASH_UNLOCK0
@@ -86,7 +87,7 @@ _store_flash_16:
 	str r1, [r0]
 	@@ Enable writing to the flash
 	ldr r0, =FLASH_CR
-	mov r1, #0x01
+	movs r1, #0x01
 	str r1, [r0]
 	@@ Write the flash
 	ldmia dp!, {r3}
@@ -103,11 +104,11 @@ _store_flash_16:
 	ldr r0, =FLASH_CR
 	ldr r1, [r0]
 	ldr r2, =FLASH_END_PROG_MASK
-	and r1, r2
+	ands r1, r2
 	str r1, [r0]
 	ldr r1, [r0]
 	ldr r2, =FLASH_LOCK
-	orr r1, r2
+	orrs r1, r2
 	str r1, [r0]
 	@@ Get the next value on the stack to put in the TOS
 	pull_tos
@@ -118,7 +119,8 @@ wait_for_flash:
 	push {r0, r1}
 1:	ldr r0, =FLASH_SR
 	ldr r1, [r0]
-	ands r1, #0x01
+	movs r5, #0x01
+	ands r1, r5
 	bne 1b
 	pop {r0, r1}
 	bx lr
@@ -152,35 +154,35 @@ erase_page:
 	str r1, [r0]
 	@@ Turn on erasing
 	ldr r0, =FLASH_CR
-	mov r1, #FLASH_ERASE
+	movs r1, #FLASH_ERASE
 	str r1, [r0]
 	@@ Set up page to be erased
-	mov r1, #8
-	lsr tos, r1
+	movs r1, #8
+	lsrs tos, r1
 	ldr r1, =FLASH_PAGE_MASK
-	and tos, r1
-	mov r1, #FLASH_ERASE
-	orr tos, r1
+	ands tos, r1
+	movs r1, #FLASH_ERASE
+	orrs tos, r1
 	strh tos, [r0]
 	@@ Start erasing the flash
 	ldr r0, =FLASH_CR+2
-	mov r1, #FLASH_START_ERASE
+	movs r1, #FLASH_START_ERASE
 	strh r1, [r0]
 	@@ Wait for the flash to be ready
 	bl wait_for_flash
 	@@ Lock the flash
 	ldr r0, =FLASH_CR+3
-	mov r1, #FLASH_LOCK_ERASE
+	movs r1, #FLASH_LOCK_ERASE
 	strb r1, [r0]
 	@@ Clear the cache
 	ldr r0, =FLASH_ACR
 	ldr r1, [r0]
-	mov r2, r1
+	movs r2, r1
 	ldr r3, =FLASH_CACHE_OFF_MASK
-	and r1, r3
+	ands r1, r3
 	str r1, [r0]
 	ldr r3, =FLASH_RESET_CACHE
-	orr r1, r3
+	orrs r1, r3
 	str r1, [r0]
 	str r2, [r0]
 
@@ -198,7 +200,7 @@ _erase_all:
 	push {tos, lr}
 	ldr tos, =flash_dict_end
 1:	ldr r0, =2048
-	sub tos, r0
+	subs tos, tos, r0
 	ldr r0, =flash_dict_start
 	cmp tos, r0
 	blt 2f
@@ -222,9 +224,10 @@ _find_flash_end:
 	adds r0, #1
 	bne 2f
 	ldr r0, [tos, #-4]!
-	adds r0, r1
+	adds r0, r0, r1
 	beq 1b
-2:	bic tos, #0x0F
+2:	movs r0, #0xF
+	bics tos, r0
 	bx lr
 
 	@@ Find the start of the last flash word
@@ -233,18 +236,19 @@ _find_last_flash_word:
 	push {lr}
 	bl _find_flash_end
 1:	ldrh r0, [tos, #-2]!
-	cmp r0, #0
+	movs r5, #0
+	cmp r0, r5
 	beq 1b
 	push_tos
-	sub tos, r0
-	add tos, r1
+	subs tos, tos, r0
+	adds tos, tos, r1
 	pop {pc}
 
 	@@ Initialize the flash buffers
 	define_word "init-flash-buffers", visible_flag
 _init_flash_buffers:
 	ldr r0, =flash_buffers_start
-	mov r1, #0
+	movs r1, #0
 	ldr r2, =flash_buffers_start + (flash_buffer_size * flash_buffer_count)
 1:	str r1, [r0], #4
 	str r1, [r0], #4
@@ -266,21 +270,21 @@ _no_flash_buffers_free:
 _get_free_flash_buffer:
 	push {lr}
 	ldr r0, =flash_buffers_start
-	mov r1, #0
+	movs r1, #0
 	ldr r2, =flash_buffers_start + (flash_buffer_size * flash_buffer_count)
 1:	ldr r3, [r0, #flash_buffer_space]
 	cmp r1, r3
 	beq 2f
-	add r0, #flash_buffer_size
+	adds r0, #flash_buffer_size
 	cmp r0, r2
 	bne 1b
 	ldr tos, =_no_flash_buffers_free
 	bl _raise
 2:	ldr r2, =0x7FF
-	bic tos, r2
-	mov r2, #16
+	bics tos, r2
+	movs r2, #16
 	str tos, [r0, #flash_buffer_addr]
-	mov tos, r0
+	movs tos, r0
 	str r1, [r0], #4
 	str r1, [r0], #4
 	str r1, [r0], #4
@@ -295,16 +299,16 @@ _get_flash_buffer:
 	ldr r0, =flash_buffers_start
 	ldr r1, =flash_buffers_start + (flash_buffer_size * flash_buffer_count)
 	ldr r2, =0x7FF
-	bic tos, r2
+	bics tos, r2
 1:	ldr r3, [r0, #flash_buffer_addr]
 	cmp tos, r3
 	beq 2f
-	add r0, #flash_buffer_size
+	adds r0, #flash_buffer_size
 	cmp r0, r2
 	bne 1b
 	bl _get_free_flash_buffer
 	pop {pc}
-2:	mov tos, r0
+2:	movs tos, r0
 	pop {pc}
 
 	@@ Write a byte to an address in a flash buffer
@@ -313,25 +317,27 @@ _store_flash_1:
 	push {lr}
 	push_tos
 	bl _get_flash_buffer
-	mov r0, tos
+	movs r0, tos
 	pull_tos
-	mov r1, tos
+	movs r1, tos
 	ldr r2, =0x7FF
-	bic r1, r2
-	sub tos, r1
+	bics r1, r2
+	subs tos, tos, r1
 	ldr r1, [r0, #flash_buffer_space]
-	sub r1, #1
+	subs r1, #1
 	str r1, [r0, #flash_buffer_space]
-	mov r2, r0
-	add r0, tos
+	movs r2, r0
+	adds r0, r0, tos
 	pull_tos
-	and tos, #0xFF
+	movs r5, #0xFF
+	ands tos, r5
 	strb tos, [r0]
-	cmp r1, #0
+	movs r5, #0
+	cmp r1, r5
 	beq 1f
 	pull_tos
 	pop {pc}
-1:	mov tos, r2
+1:	movs tos, r2
 	bl _store_flash_buffer
 	pop {pc}
 	
@@ -339,20 +345,22 @@ _store_flash_1:
 	define_word "hflash!", visible_flag
 _store_flash_2:
 	push {lr}
-	mov r0, tos
+	movs r0, tos
 	pull_tos
 	push {r0, tos}
-	and tos, #0xFF
+	movs r5, #0xFF
+	ands tos, r5
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	bl _store_flash_1
 	push_tos
 	pop {r0, tos}
-	lsr tos, #8
-	and tos, #0xFF
+	lsrs tos, tos, #8
+	movs r5, #0xFF
+	ands tos, r5
 	push_tos
-	mov tos, r0
-	add tos, #1
+	movs tos, r0
+	adds tos, #1
 	bl _store_flash_1
 	pop {pc}
 
@@ -360,22 +368,22 @@ _store_flash_2:
 	define_word "flash!", visible_flag
 _store_flash_4:
 	push {lr}
-	mov r0, tos
+	movs r0, tos
 	pull_tos
 	push {r0, tos}
 	ldr r1, =0xFFFF
-	and tos, r1
+	ands tos, r1
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	bl _store_flash_2
 	push_tos
 	pop {r0, tos}
-	lsr tos, #16
+	lsrs tos, tos, #16
 	ldr r1, =0xFFFF
-	and tos, r1
+	ands tos, r1
 	push_tos
-	mov tos, r0
-	add tos, #2
+	movs tos, r0
+	adds tos, #2
 	bl _store_flash_2
 	pop {pc}
 
@@ -387,7 +395,7 @@ _store_flash_8:
 	bl _store_flash_4
 	push_tos
 	pop {tos}
-	add tos, #4
+	adds tos, #4
 	bl _store_flash_4
 	pop {pc}
 
@@ -395,7 +403,7 @@ _store_flash_8:
 	define_word "store-flash-buffer", visible_flag
 _store_flash_buffer:
 	push {lr}
-	mov r0, tos
+	movs r0, tos
 	ldr tos, [r0]
 	push_tos
 	ldr tos, [r0, #4]
@@ -413,7 +421,7 @@ _store_flash_buffer:
 _flush_flash:
 	push {lr}
 	bl _get_flash_buffer
-	mov r0, #0
+	movs r0, #0
 	str r0, [tos, #flash_buffer_space]
 	bl _store_flash_buffer
 	pop {pc}

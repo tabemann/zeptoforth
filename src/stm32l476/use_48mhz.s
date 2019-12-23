@@ -62,13 +62,16 @@ _set_pwr_for_48hz:
 	@@ Set up the voltage scale
 	ldr r0, =PWR_CR1
 	ldr r1, [r0]
-	bic r1, #PWR_CR1_VOS
-	orr r1, #PWR_CR1_VOS_MODE1
+	movs r2, #PWR_CR1_VOS
+	bics r1, r2
+	movs r2, #PWR_CR1_VOS_MODE1
+	orrs r1, r2
 	str r1, [r0]
 	@@ Wait for it to become ready
 	ldr r0, =PWR_SR2
 1:	ldr r1, [r0]
-	ands r1, #PWR_SR2_VOSF
+	movs r2, #PWR_SR2_VOSF
+	ands r1, r2
 	bne 1b
 	bx lr
 
@@ -77,8 +80,10 @@ _set_pwr_for_48hz:
 _set_flash_latency_for_48mhz:
 	ldr r0, =FLASH_ACR
 	ldr r1, [r0]
-	bic r1, #FLASH_ACR_LATENCY
-	orr r1, #FLASH_ACR_2WAIT_PREFETCH
+	movs r2, #FLASH_ACR_LATENCY
+	bics r1, r2
+	movs r2, #FLASH_ACR_2WAIT_PREFETCH
+	orrs r1, r2
 	str r1, [r0]
 	bx lr
 
@@ -87,9 +92,12 @@ _set_flash_latency_for_48mhz:
 _set_msi_48mhz:
 	ldr r0, =RCC_CR
 	ldr r1, [r0]
-	bic r1, #RCC_CR_MSIRANGE
-	orr r1, #RCC_CR_MSIRANGE_48MHZ
+	movs r2, #RCC_CR_MSIRANGE
+	bics r1, r2
+	movs r2, #RCC_CR_MSIRANGE_48MHZ
+	orrs r1, r2
 	str r1, [r0]
-	orr r1, #RCC_CR_MSIRGSEL
+	movs r2, #RCC_CR_MSIRGSEL
+	orrs r1, r2x
 	str r1, [r0]
 	bx lr

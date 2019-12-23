@@ -29,13 +29,14 @@
 
 	@@ Raise an exception with the exception type in the TOS register
 	define_word "?raise", visible_flag
-_raise:	cmp tos, #0
+_raise:	movs r5, #0
+	cmp tos, r5
 	beq 1f
 	ldr r0, =handler
 	ldr sp, [r0]
 	ldr r1, [sp], #4
 	str r1, [r0]
-	add sp, #4
+	adds sp, #4
 	ldr dp, [sp], #4
 	pop {pc}
 1:	bx lr
@@ -51,7 +52,7 @@ _try:	push {lr}
 	ldr r0, =handler
 	str sp, [r0]
 	mov r0, tos
-	add r0, #1
+	adds r0, #1
 	pull_tos
 	blx r0
 	ldr r0, =handler

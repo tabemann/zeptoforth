@@ -63,8 +63,8 @@ _rot:	ldr r0, [dp, #4]
 
 	@@ Pick a value at a specified depth on the stack
 	define_word "pick", visible_flag
-_pick:	lsl tos, tos, #2
-	add tos, dp
+_pick:	lsls tos, tos, #2
+	adds tos, dp
 	ldr tos, [tos]
 	bx lr
 
@@ -79,7 +79,7 @@ _here:	ldr r0, =here
 	define_word "allot", visible_flag
 _allot:	ldr r0, =here
 	ldr r1, [r0]
-	add r1, tos
+	adds r1, tos
 	str r1, [r0]
 	pull_tos
 	bx lr
@@ -97,7 +97,7 @@ _flash_here:
 _flash_allot:
 	ldr r0, =flash_here
 	ldr r1, [r0]
-	add r1, tos
+	adds r1, tos
 	str r1, [r0]
 	pull_tos
 	bx lr
@@ -109,7 +109,8 @@ _current_here:
 	push {lr}
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
-	cmp r0, #0
+	movs r5, #0
+	cmp r0, r5
 	bne 1f
 	bl _here
 	pop {pc}
@@ -122,7 +123,8 @@ _current_allot:
 	push {lr}
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
-	cmp r0, #0
+	movs r5, #0
+	cmp r0, r5
 	bne 1f
 	bl _allot
 	pop {pc}
@@ -138,7 +140,7 @@ _execute:
 	
 	@@ Exit a word
 	define_word "exit", visible_flag
-_exit:	add sp, #4
+_exit:	adds sp, #4
 	pop {pc}
 
 	@@ Store a byte
@@ -146,7 +148,8 @@ _exit:	add sp, #4
 _store_1:
 	mov r0, tos
 	pull_tos
-	and tos, #0xFF
+	movs r5, #0xFF
+	ands tos, r5
 	strb tos, [r0]
 	pull_tos
 	bx lr
@@ -157,7 +160,7 @@ _store_2:
 	mov r0, tos
 	pull_tos
 	ldr r1, =0xFFFF
-	and tos, r1
+	ands tos, r1
 	strh tos, [r0]
 	pull_tos
 	bx lr
@@ -209,7 +212,8 @@ _get_8:	ldr r0, [tos]
 _comma_1:
 	ldr r0, =here
 	ldr r1, [r0]
-	and tos, #0xFF
+	mov r5, #0xFF
+	ands tos, r5
 	strb tos, [r1], #1
 	str r1, [r0]
 	pull_tos
@@ -221,7 +225,7 @@ _comma_2:
 	ldr r0, =here
 	ldr r1, [r0]
 	ldr r2, =0xFFFF
-	and tos, r2
+	ands tos, r2
 	strh tos, [r1], #2
 	str r1, [r0]
 	pull_tos
@@ -258,7 +262,7 @@ _flash_comma_1:
 	push {r0, tos}
 	bl _store_flash_1
 	pop {r0, r1}
-	add r1, #1
+	adds r1, #1
 	str r1, [r0]
 	pop {pc}
 
@@ -272,7 +276,7 @@ _flash_comma_2:
 	push {r0, tos}
 	bl _store_flash_2
 	pop {r0, r1}
-	add r1, #2
+	adds r1, #2
 	str r1, [r0]
 	pop {pc}
 
@@ -286,7 +290,7 @@ _flash_comma_4:
 	push {r0, tos}
 	bl _store_flash_4
 	pop {r0, r1}
-	add r1, #4
+	adds r1, #4
 	str r1, [r0]
 	pop {pc}
 
@@ -300,7 +304,7 @@ _flash_comma_8:
 	push {r0, tos}
 	bl _store_flash_8
 	pop {r0, r1}
-	add r1, #8
+	adds r1, #8
 	str r1, [r0]
 	pop {pc}
 
@@ -310,7 +314,8 @@ _store_current_1:
 	push {lr}
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
-	cmp r0, #0
+	movs r5, #0
+	cmp r0, r5
 	bne 1f
 	bl _store_1
 	pop {pc}
@@ -323,7 +328,8 @@ _store_current_2:
 	push {lr}
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
-	cmp r0, #0
+	movs r5, #0
+	cmp r0, r5
 	bne 1f
 	bl _store_2
 	pop {pc}
@@ -336,7 +342,8 @@ _store_current_4:
 	push {lr}
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
-	cmp r0, #0
+	movs r5, #0
+	cmp r0, r5
 	bne 1f
 	bl _store_4
 	pop {pc}
@@ -349,7 +356,8 @@ _store_current_8:
 	push {lr}
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
-	cmp r0, #0
+	movs r5, #0
+	cmp r0, r5
 	bne 1f
 	bl _store_8
 	pop {pc}
@@ -362,7 +370,8 @@ _current_comma_1:
 	push {lr}
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
-	cmp r0, #0
+	movs r5, #0
+	cmp r0, r5
 	bne 1f
 	bl _comma_1
 	pop {pc}
@@ -375,7 +384,8 @@ _current_comma_2:
 	push {lr}
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
-	cmp r0, #0
+	movs r5, #0
+	cmp r0, r5
 	bne 1f
 	bl _comma_2
 	pop {pc}
@@ -388,7 +398,8 @@ _current_comma_4:
 	push {lr}
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
-	cmp r0, #0
+	movs r5, #0
+	cmp r0, r5
 	bne 1f
 	bl _comma_4
 	pop {pc}
@@ -401,7 +412,8 @@ _current_comma_8:
 	push {lr}
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
-	cmp r0, #0
+	movs r5, #0
+	cmp r0, r5
 	bne 1f
 	bl _comma_8
 	pop {pc}
@@ -415,7 +427,7 @@ _reserve_1:
 	ldr r1, [r0]
 	push_tos
 	mov tos, r1
-	add r1, #1
+	adds r1, #1
 	str r1, [r0]
 	bx lr
 
@@ -426,7 +438,7 @@ _reserve_2:
 	ldr r1, [r0]
 	push_tos
 	mov tos, r1
-	add r1, #2
+	adds r1, #2
 	str r1, [r0]
 	bx lr
 
@@ -437,7 +449,7 @@ _reserve_4:
 	ldr r1, [r0]
 	push_tos
 	mov tos, r1
-	add r1, #4
+	adds r1, #4
 	str r1, [r0]
 	bx lr
 
@@ -448,7 +460,7 @@ _reserve_8:
 	ldr r1, [r0]
 	push_tos
 	mov tos, r1
-	add r1, #8
+	adds r1, #8
 	str r1, [r0]
 	bx lr
 
@@ -459,7 +471,7 @@ _flash_reserve_1:
 	ldr r1, [r0]
 	push_tos
 	mov tos, r1
-	add r1, #1
+	adds r1, #1
 	str r1, [r0]
 	bx lr
 
@@ -470,7 +482,7 @@ _flash_reserve_2:
 	ldr r1, [r0]
 	push_tos
 	mov tos, r1
-	add r1, #2
+	adds r1, #2
 	str r1, [r0]
 	bx lr
 
@@ -481,7 +493,7 @@ _flash_reserve_4:
 	ldr r1, [r0]
 	push_tos
 	mov tos, r1
-	add r1, #4
+	adds r1, #4
 	str r1, [r0]
 	bx lr
 
@@ -492,7 +504,7 @@ _flash_reserve_8:
 	ldr r1, [r0]
 	push_tos
 	mov tos, r1
-	add r1, #8
+	adds r1, #8
 	str r1, [r0]
 	bx lr
 
@@ -502,7 +514,8 @@ _current_reserve_1:
 	push {lr}
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
-	cmp r0, #0
+	movs r5, #0
+	cmp r0, r5
 	bne 1f
 	bl _reserve_1
 	pop {pc}
@@ -515,7 +528,8 @@ _current_reserve_2:
 	push {lr}
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
-	cmp r0, #0
+	movs r5, #0
+	cmp r0, r5
 	bne 1f
 	bl _reserve_2
 	pop {pc}
@@ -528,7 +542,8 @@ _current_reserve_4:
 	push {lr}
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
-	cmp r0, #0
+	movs r5, #0
+	cmp r0, r5
 	bne 1f
 	bl _reserve_4
 	pop {pc}
@@ -541,7 +556,8 @@ _current_reserve_8:
 	push {lr}
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
-	cmp r0, #0
+	movs r5, #0
+	cmp r0, r5
 	bne 1f
 	bl _reserve_8
 	pop {pc}
@@ -569,5 +585,5 @@ _get_r:	push_tos
 
 	@@ Drop a value from the return stack
 	define_word "rdrop", visible_flag
-_rdrop:	add sp, #4
+_rdrop:	adds sp, #4
 	bx lr
