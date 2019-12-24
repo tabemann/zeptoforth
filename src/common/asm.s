@@ -27,7 +27,7 @@ _asm_mov_imm:
 	orrs tos, r0
 	ldr r0, =0x2000
 	orrs tos, r0
-	bl _current_comma_16
+	bl _current_comma_2
 	pop {pc}	
 
 	@@ Assemble a logical shift left immediate instruction
@@ -48,7 +48,7 @@ _asm_lsl_imm:
 	ands tos, r0
 	lsls tos, tos, #6
 	orrs tos, r1
-	bl _current_comma_16
+	bl _current_comma_2
 	pop {pc}	
 
 	@@ Assemble an reverse subtract immediate from zero instruction
@@ -64,7 +64,7 @@ _asm_neg:
 	orrs tos, r0
 	ldr r0, =0x4240
 	orrs tos, r0
-	bl _current_comma_16
+	bl _current_comma_2
 	pop {pc}
 
 	@@ Compile a blx (register) instruction
@@ -76,7 +76,7 @@ _asm_blx_reg:
 	lsls tos, tos, #3
 	ldr r0, =0x4780
 	orrs tos, r0
-	bl _current_comma_16
+	bl _current_comma_2
 	pop {pc}
 	
 	.ifdef thumb2
@@ -124,7 +124,7 @@ _asm_bl:
 	ldr r2, =0xF000
 	orrs tos, r2
 	push {r0, r1}
-	bl _current_comma_16
+	bl _current_comma_2
 	pop {r0, r1}
 	push_tos
 	movs tos, r0
@@ -148,7 +148,7 @@ _asm_bl:
 	orrs tos, r2
 	ldr r2, =0xD000
 	orrs tos, r2
-	bl _current_comma_16
+	bl _current_comma_2
 	pop {pc}
 
 	@@ Compile a move 16-bit immediate instruction
@@ -168,7 +168,7 @@ _asm_mov_16_imm:
 	movs r3, #0xF240
 	orrs tos, r3
 	push {r0, r1}
-	bl _current_comma_16
+	bl _current_comma_2
 	pop {r0, r1}
 	push_tos
 	movs tos, r1
@@ -183,7 +183,7 @@ _asm_mov_16_imm:
 	ands r0, r5
 	lsls r0, r0, #8
 	orrs tos, r0
-	bl _current_comma_16
+	bl _current_comma_2
 	pop {pc}
 
 	@@ Compile a move top 16-bit immediate instruction
@@ -203,7 +203,7 @@ _asm_movt_imm:
 	ldr r3, =0xF2C0
 	orrs tos, r3
 	push {r0, r1}
-	bl _current_comma_16
+	bl _current_comma_2
 	pop {r0, r1}
 	push_tos
 	movs tos, r1
@@ -218,7 +218,7 @@ _asm_movt_imm:
 	ands r0, r5
 	lsls r0, r0, #8
 	orrs tos, r0
-	bl _current_comma_16
+	bl _current_comma_2
 	pop {pc}
 
 	@@ Assemble a literal
@@ -311,6 +311,130 @@ _asm_ldr_long_imm:
 	b 2b
 3:	pop {pc}
 	
+	@@ Assemble an unconditional branch
+	define_word "b,", visible_flag
+_asm_b:	push {lr}
+	ldr r0, =1023
+	cmp tos, r0
+	ble 1f
+	ldr r0, =8388607
+	cmp tos, r0
+	ble 2f
+	ldr tos, =_out_of_range_branch
+	bl _raise
+	pop {pc}
+1:	ldr r0, =-1024
+	cmp tos, r0
+	bge 3f
+	ldr r0, =-8388608
+	cmp tos, r0
+	bge 2f
+	ldr tos, =_out_of_range_branch
+	bl _raise
+	pop {pc}
+2:	bl _asm_b_32
+3:	bl _asm_b_16
+	pop {pc}
+
+	@@ Assemble a branch on equal zero instruction
+	define_word "beq,", visible_flag
+_asm_beq:
+	push {lr}
+	ldr r0, =127
+	cmp tos, r0
+	ble 1f
+	ldr r0, =524287
+	cmp tos, r0
+	ble 2f
+	ldr tos, =_out_of_range_branch
+	bl _raise
+	pop {pc}
+1:	ldr r0, =-128
+	cmp tos, r0
+	bge 3f
+	ldr r0, =-524288
+	cmp tos, r0
+	bge 2f
+	ldr tos, =_out_of_range_branch
+	bl _raise
+	pop {pc}
+2:	bl _asm_beq_32
+3:	bl _asm_beq_16
+	pop {pc}
+
+	@@ Assemble an unconditional branch
+	define_word "b-32,", visible_flag
+_asm_b_32:
+	push {lr}
+	movs r0, tos
+	lsrs tos, tos, #11
+	ldr r1, =0x3FF
+	ands tos, r1
+	lsrs r1, r0, #23
+	movs r2, #1
+	ands r1, r2
+	lsls r1, r1, #10
+	orr tos, r1
+	ldr r1, =0xF000
+	orr tos, r1
+	push {r0}
+	bl current_comma_2
+	pop {r0}
+	push_tos
+	mov tos, r0
+	ldr r1, =0x7FF
+	ands tos, r1
+	lsrs r1, r0, #21
+	movs r2, #1
+	ands r1, r2
+	lsls r1, r1, #11
+	orr tos, r1
+	lsrs r1, r0, #22
+	ands r1, r2
+	lsls r1, r1, #13
+	orr tos, r1
+	ldr r1, =0x9000
+	orr tos, r1
+	bl current_comma_2
+	pop {pc}
+
+	@@ Assemble a branch on equal zero instruction
+	define_word "beq-32,", visible_flag
+_asm_beq_32:
+	push {lr}
+	push {lr}
+	movs r0, tos
+	lsrs tos, tos, #11
+	ldr r1, =0x3FF
+	ands tos, r1
+	lsrs r1, r0, #19
+	movs r2, #1
+	ands r1, r2
+	lsls r1, r1, #10
+	orr tos, r1
+	ldr r1, =0xF000
+	orr tos, r1
+	push {r0}
+	bl current_comma_2
+	pop {r0}
+	push_tos
+	mov tos, r0
+	ldr r1, =0x7FF
+	ands tos, r1
+	lsrs r1, r0, #17
+	movs r2, #1
+	ands r1, r2
+	lsls r1, r1, #11
+	orr tos, r1
+	lsrs r1, r0, #18
+	ands r1, r2
+	lsls r1, r1, #13
+	orr tos, r1
+	ldr r1, =0x8000
+	orr tos, r1
+	bl current_comma_2
+	pop {pc}
+
 	.else
 
 	@@ Call a word at an address
@@ -351,7 +475,7 @@ _asm_bl:
 	ldr r2, =0xF000
 	orrs tos, r2
 	push {r0}
-	bl _current_comma_16
+	bl _current_comma_2
 	pop {r0}
 	push_tos
 	movs tos, r0
@@ -360,7 +484,7 @@ _asm_bl:
 	ands tos, r2
 	ldr r2, =0xF800
 	orrs tos, r2
-	bl _current_comma_16
+	bl _current_comma_2
 	pop {pc}
 
 	@@ Assemble a literal
@@ -837,33 +961,76 @@ _asm_ldr_long_imm_2nd_3rd_zero:
 	movs tos, r0
 	bl _asm_orr
 	pop {pc}
-	
-	.endif
-	
+
 	@@ Assemble an unconditional branch
 	define_word "b,", visible_flag
-_asm_b: push {lr}
-	movs r0, tos
-	lsrs r0, r0, #8
-	movs r1, #7
-	ands r0, r1
-	orrs r0, #0xE0
-	movs r1, #0xFF
-	ands tos, r1
-	lsls r0, r0, #8
-	orrs tos, r0
-	bl _current_comma_16
+_asm_b:	push {lr}
+	ldr r0, =1023
+	cmp tos, r0
+	ble 1f
+	ldr tos, =_out_of_range_branch
+	bl _raise
+	pop {pc}
+1:	ldr r0, =-1024
+	cmp tos, r0
+	bge 2f
+	ldr tos, =_out_of_range_branch
+	bl _raise
+	pop {pc}
+2:	bl _asm_b_16
 	pop {pc}
 
 	@@ Assemble a branch on equal zero instruction
 	define_word "beq,", visible_flag
 _asm_beq:
 	push {lr}
+	ldr r0, =127
+	cmp tos, r0
+	ble 1f
+	ldr tos, =_out_of_range_branch
+	bl _raise
+	pop {pc}
+1:	ldr r0, =-128
+	cmp tos, r0
+	bge 2f
+	ldr tos, =_out_of_range_branch
+	bl _raise
+	pop {pc}
+2:	bl _asm_beq_16
+	pop {pc}
+	
+	.endif
+
+	@@ Out of range branch exception
+	define_word "out-of-range-branch", visible_flag
+_out_of_range_branch:
+	b . @ implement later
+	
+	@@ Assemble an unconditional branch
+	define_word "b-16,", visible_flag
+_asm_b_16:
+	push {lr}
+	movs r0, tos
+	lsrs r0, r0, #8
+	movs r1, #7
+	ands r0, r1
+	orrs r0, #0xE0
+	ldr r1, =0x7FF
+	ands tos, r1
+	lsls r0, r0, #8
+	orrs tos, r0
+	bl _current_comma_2
+	pop {pc}
+
+	@@ Assemble a branch on equal zero instruction
+	define_word "beq-16,", visible_flag
+_asm_beq_16:
+	push {lr}
 	ldr r0, =0xD000
 	movs r1, #0xFF
 	ands tos, r1
 	orrs tos, r0
-	bl _current_comma_16
+	bl _current_comma_2
 	pop {pc}
 	
 	@@ Assemble a compare to immediate instruction
@@ -880,7 +1047,7 @@ _asm_cmp_imm:
 	orrs tos, r0
 	ldr r0, =0x2800
 	orrs tos, r0
-	bl _current_comma_16
+	bl _current_comma_2
 	pop {pc}
 
 	@@ Assemble a logical shift left immediate instruction
@@ -899,7 +1066,7 @@ _asm_lsl_imm:
 	ands tos, r1
 	lsls tos, tos, #6
 	orrs tos, r0
-	bl _current_comma_16
+	bl _current_comma_2
 	pop {pc}
 
 	@@ Assemble an or instruction
@@ -916,5 +1083,5 @@ _asm_orr:
 	movs r0, #0x43
 	lsls r0, r0, #8
 	orrs tos, r0
-	bl _current_comma_16
+	bl _current_comma_2
 	pop {pc}
