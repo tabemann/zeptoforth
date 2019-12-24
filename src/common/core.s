@@ -124,7 +124,7 @@ _execute:
 	
 	@@ Exit a word
 	define_word "exit", visible_flag
-_exit:	adds sp, #4
+_exit:	adds sp, sp, #4
 	pop {pc}
 
 	@@ Store a byte

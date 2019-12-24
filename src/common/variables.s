@@ -24,3 +24,6 @@
 
 	@@ Flash buffers
 	allot flash_buffers_start, flash_buffer_size * flash_buffer_count	
+
+	@@ The last word compiled
+	allot latest, 4

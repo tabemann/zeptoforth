@@ -13,6 +13,39 @@
 @ You should have received a copy of the GNU General Public License
 @ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+	@@ Compile the end of a word
+	define_word ";", visible_flag
+_asm_end:
+	push {lr}
+	push_tos
+	ldr tos, =0xBD00	@@ pop {pc}
+	bl _current_comma_2
+	bl _current_here
+	movs r0, #3
+	ands tos, r0
+	beq 1f
+	push_tos
+	movs tos, #0
+	bl _current_comma_2
+1:	ldr r0, =compiling_to_flash
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 2f
+	push_tos
+	ldr tos, =latest
+	ldr tos, [tos]
+	bl _current_comma_2
+	ldr r0, =flash_here
+	ldr r0, [r0]
+	movs r1, =0xF
+	movs r2, r0
+	ands r0, r1
+	bne 2f
+	push_tos
+	movs tos, r2
+  	bl _flush_flash
+2:	pop {pc}
+	
 	@@ Assemble a move immediate instruction
 	define_word "mov-imm,", visible_flag
 _asm_mov_imm:

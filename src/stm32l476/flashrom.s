@@ -265,7 +265,7 @@ _get_free_flash_buffer:
 	bne 1b
 	ldr tos, =_no_flash_buffers_free
 	bl _raise
-2:	ldr r2, =0x7FF
+2:	ldr r2, =0xF
 	bics tos, r2
 	movs r2, #16
 	str tos, [r0, #flash_buffer_addr]
@@ -283,7 +283,7 @@ _get_flash_buffer:
 	push {lr}
 	ldr r0, =flash_buffers_start
 	ldr r1, =flash_buffers_start + (flash_buffer_size * flash_buffer_count)
-	ldr r2, =0x7FF
+	movs r2, #0xF
 	bics tos, r2
 1:	ldr r3, [r0, #flash_buffer_addr]
 	cmp tos, r3
@@ -405,7 +405,12 @@ _store_flash_buffer:
 _flush_flash:
 	push {lr}
 	bl _get_flash_buffer
+	ldr r0, [tos, #flash_buffer_space]
+	cmp r0, #16
+	beq 1f
 	movs r0, #0
 	str r0, [tos, #flash_buffer_space]
 	bl _store_flash_buffer
+	pop {pc}
+1:	pull_tos
 	pop {pc}
