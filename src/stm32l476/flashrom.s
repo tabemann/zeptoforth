@@ -39,8 +39,7 @@
 	define_word "16flash!", visible_flag
 _store_flash_16:
 	push {r0, r1, r2, r3, lr}
-	movs r5, #0x0f
-	cmp tos, r5
+	cmp tos, #0xf
 	beq 1f
 	ldr tos, =_store_flash_16_unaligned
 	bl _raise
@@ -223,8 +222,7 @@ _find_last_flash_word:
 	push {lr}
 	bl _find_flash_end
 1:	ldrh r0, [tos, #-2]!
-	movs r5, #0
-	cmp r0, r5
+	cmp r0, #0
 	beq 1b
 	push_tos
 	subs tos, tos, r0
@@ -319,8 +317,7 @@ _store_flash_1:
 	movs r5, #0xFF
 	ands tos, r5
 	strb tos, [r0]
-	movs r5, #0
-	cmp r1, r5
+	cmp r1, #0
 	beq 1f
 	pull_tos
 	pop {pc}
