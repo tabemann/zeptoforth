@@ -79,6 +79,62 @@ _asm_blx_reg:
 	bl _current_comma_2
 	pop {pc}
 	
+	@@ Compile an unconditional branch
+	define_word "branch,", visible_flag
+_asm_branch:
+	push {rl}
+	bl _current_here
+	movs r0, tos
+	pull_tos
+	subs tos, tos, r0
+	asrs tos, tos, #1
+	bl _asm_b
+	pop {pc}
+
+	@@ Compile a branch on equal to zero
+	define_word "0branch,", visible_flag
+_asm_branch_zero:
+	push {rl}
+	bl _current_here
+	movs r0, tos
+	pull_tos
+	subs tos, tos, r0
+	asrs tos, tos, #1
+	bl _asm_beq
+	pop {pc}
+
+	@@ Compile a back-referenced unconditional branch
+	define_word "branch-back!", visible_flag
+_asm_branch_back:
+	push {rl}
+	bl _current_here
+	movs r0, tos
+	pull_tos
+	movs r1, tos
+	pull_tos
+	subs tos, tos, r0
+	asrs tos, tos, #1
+	push_tos
+	movs tos, r1
+	bl _asm_b_back
+	pop {pc}
+
+	@@ Compile a back-referenced branch on equal to zero
+	define_word "0branch-back!", visible_flag
+_asm_branch_zero_back:
+	push {rl}
+	bl _current_here
+	movs r0, tos
+	pull_tos
+	movs r1, tos
+	pull_tos
+	subs tos, tos, r0
+	asrs tos, tos, #1
+	push_tos
+	movs tos, r1
+	bl _asm_beq_back
+	pop {pc}
+
 	.ifdef thumb2
 
 	@@ Call a word at an address
@@ -565,6 +621,13 @@ _asm_beq_32_back:
 	movs tos, r3
 	adds tos, #2
 	bl _store_current_2
+	pop {pc}
+
+	@@ Reserve space for a branch
+	define_word "reserve-branch", visible_flag
+_reserve_branch:
+	push {lr}
+	bl _current_reserve_4
 	pop {pc}
 
 	.else
@@ -1175,6 +1238,13 @@ _asm_beq_back:
 2:	push_tos
 	movs tos, r1
 	bl _asm_beq_16_back
+	pop {pc}
+
+	@@ Reserve space for a branch
+	define_word "reserve-branch", visible_flag
+_reserve_branch:
+	push {lr}
+	bl _current_reserve_2
 	pop {pc}
 
 	.endif
