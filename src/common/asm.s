@@ -227,8 +227,7 @@ _asm_literal:
 	push {lr}
 	movs r0, tos
 	pull_tos
-	movs r5, #0
-	cmp tos, r5
+	cmp tos, #0
 	blt 1f
 	movs r5, #0xFF
 	cmp tos, r5
@@ -370,8 +369,7 @@ _asm_literal:
 	push {lr}
 	movs r0, tos
 	pull_tos
-	movs r1, #0
-	cmp tos, r1
+	cmp tos, #0
 	blt 1f
 	movs r1, #0xFF
 	cmp tos, r1

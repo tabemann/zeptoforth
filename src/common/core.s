@@ -95,8 +95,7 @@ _current_here:
 	push {lr}
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
-	movs r5, #0
-	cmp r0, r5
+	cmp r0, #0
 	bne 1f
 	bl _here
 	pop {pc}
@@ -109,8 +108,7 @@ _current_allot:
 	push {lr}
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
-	movs r5, #0
-	cmp r0, r5
+	cmp r0, #0
 	bne 1f
 	bl _allot
 	pop {pc}
@@ -300,8 +298,7 @@ _store_current_1:
 	push {lr}
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
-	movs r5, #0
-	cmp r0, r5
+	cmp r0, #0
 	bne 1f
 	bl _store_1
 	pop {pc}
@@ -314,8 +311,7 @@ _store_current_2:
 	push {lr}
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
-	movs r5, #0
-	cmp r0, r5
+	cmp r0, #0
 	bne 1f
 	bl _store_2
 	pop {pc}
@@ -328,8 +324,7 @@ _store_current_4:
 	push {lr}
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
-	movs r5, #0
-	cmp r0, r5
+	cmp r0, #0
 	bne 1f
 	bl _store_4
 	pop {pc}
@@ -342,8 +337,7 @@ _store_current_8:
 	push {lr}
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
-	movs r5, #0
-	cmp r0, r5
+	cmp r0, #0
 	bne 1f
 	bl _store_8
 	pop {pc}
@@ -356,8 +350,7 @@ _current_comma_1:
 	push {lr}
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
-	movs r5, #0
-	cmp r0, r5
+	cmp r0, #0
 	bne 1f
 	bl _comma_1
 	pop {pc}
@@ -370,8 +363,7 @@ _current_comma_2:
 	push {lr}
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
-	movs r5, #0
-	cmp r0, r5
+	cmp r0, #0
 	bne 1f
 	bl _comma_2
 	pop {pc}
@@ -384,8 +376,7 @@ _current_comma_4:
 	push {lr}
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
-	movs r5, #0
-	cmp r0, r5
+	cmp r0, #0
 	bne 1f
 	bl _comma_4
 	pop {pc}
@@ -398,8 +389,7 @@ _current_comma_8:
 	push {lr}
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
-	movs r5, #0
-	cmp r0, r5
+	cmp r0, #0
 	bne 1f
 	bl _comma_8
 	pop {pc}
@@ -500,8 +490,7 @@ _current_reserve_1:
 	push {lr}
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
-	movs r5, #0
-	cmp r0, r5
+	cmp r0, #0
 	bne 1f
 	bl _reserve_1
 	pop {pc}
@@ -514,8 +503,7 @@ _current_reserve_2:
 	push {lr}
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
-	movs r5, #0
-	cmp r0, r5
+	cmp r0, #0
 	bne 1f
 	bl _reserve_2
 	pop {pc}
@@ -528,8 +516,7 @@ _current_reserve_4:
 	push {lr}
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
-	movs r5, #0
-	cmp r0, r5
+	cmp r0, #0
 	bne 1f
 	bl _reserve_4
 	pop {pc}
@@ -542,8 +529,7 @@ _current_reserve_8:
 	push {lr}
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
-	movs r5, #0
-	cmp r0, r5
+	cmp r0, #0
 	bne 1f
 	bl _reserve_8
 	pop {pc}

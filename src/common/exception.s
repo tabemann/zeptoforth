@@ -15,8 +15,7 @@
 
 	@@ Raise an exception with the exception type in the TOS register
 	define_word "?raise", visible_flag
-_raise:	movs r5, #0
-	cmp tos, r5
+_raise:	cmp tos, #0
 	beq 1f
 	ldr r0, =handler
 	ldr sp, [r0]
