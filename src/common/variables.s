@@ -27,3 +27,9 @@
 
 	@@ The last word compiled
 	allot latest, 4
+
+	@@ The last word compiled to RAM
+	allot ram_latest, 4
+
+	@@ The last word compiled to Flash
+	allot flash_latest, 4

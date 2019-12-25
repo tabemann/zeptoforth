@@ -13,6 +13,9 @@
 @ You should have received a copy of the GNU General Public License
 @ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+	@@ Compile the start of a word
+	define_word ":", visible flag
+_asm_
 	@@ Compile the end of a word
 	define_word ";", visible_flag
 _asm_end:
@@ -32,7 +35,7 @@ _asm_end:
 	cmp r0, #0
 	beq 2f
 	push_tos
-	ldr tos, =latest
+	ldr tos, =flash_latest
 	ldr tos, [tos]
 	bl _current_comma_2
 	ldr r0, =flash_here
