@@ -1,4 +1,4 @@
-@ Copyright (c) 2019 Travis Bemann
+@ Copyright (c) 2019-2020 Travis Bemann
 @
 @ This program is free software: you can redistribute it and/or modify
 @ it under the terms of the GNU General Public License as published by
@@ -14,10 +14,54 @@
 @ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 	@@ Compile the start of a word
-	define_word ":", visible flag
-_asm_
+	define_word "start-compile", visible flag
+_asm_start:
+	push {lr}
+	push_tos
+	movs tos, #4
+	bl _current_comma_align
+	push_tos
+	bl _current_here
+	ldr r0, =current_compile
+	str tos, [r0]
+	ldr r0, =current_flags
+	movs r1, #0
+	str r1, [r0]
+	push_tos
+	movs tos, #4
+	bl _current_allot
+	bl _asm_link
+	bl _current_comma_cstring
+	bl _current_here
+	movs r0, #1
+	ands tos, r0
+	beq 1f
+	movs tos, #0
+	bl _current_comma_1
+	push_tos
+1:	ldr tos, =0xB500	@@ push {lr}
+	bl _current_comma_2
+	pop {pc}
+
+	@@ Compile a link field
+	define_word "current-link,", visible_flag
+_asm_link:
+	push {lr}
+	push_tos
+	ldr r0, =compiling_to_flash
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 1f
+	ldr r0, =flash_latest
+	b 2f
+1:	ldr r0, =ram_latest
+2:	ldr tos, [r0]
+	adds tos, #4
+	bl _current_comma_4
+	pop {pc}
+	
 	@@ Compile the end of a word
-	define_word ";", visible_flag
+	define_word "end-compile,", visible_flag
 _asm_end:
 	push {lr}
 	push_tos
@@ -30,24 +74,36 @@ _asm_end:
 	push_tos
 	movs tos, #0
 	bl _current_comma_2
+	push_tos
+	ldr tos, =latest_flags
+	ldr tos, [tos]
+	push_tos
+	ldr tos, =latest
+	ldr tos, [tos]
+	bl _current_store_2
 1:	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
 	cmp r0, #0
-	beq 2f
+	beq 1f
 	push_tos
-	ldr tos, =flash_latest
+	ldr tos, =current_compile
 	ldr tos, [tos]
 	bl _current_comma_2
-	ldr r0, =flash_here
-	ldr r0, [r0]
-	movs r1, =0xF
-	movs r2, r0
-	ands r0, r1
-	bne 2f
-	push_tos
-	movs tos, r2
-  	bl _flush_flash
-2:	pop {pc}
+	bl _flush_all_flash
+	ldr r0, =current_compile
+	ldr r1, [r0]
+	ldr r2, =flash_latest
+	str r1, [r2]
+	b 2f
+1:	ldr r0, =current_compile
+	ldr r1, [r0]
+	ldr r2, =ram_latest
+	str r1, [r2]
+2:	ldr r2, =latest
+	str r1, [r2]
+	movs r1, #0
+	str r1, [r0]
+	pop {pc}
 	
 	@@ Assemble a move immediate instruction
 	define_word "mov-imm,", visible_flag

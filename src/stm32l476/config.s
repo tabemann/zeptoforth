@@ -1,4 +1,4 @@
-@ Copyright (c) 2019 Travis Bemann
+@ Copyright (c) 2019-2020 Travis Bemann
 @
 @ This program is free software: you can redistribute it and/or modify
 @ it under the terms of the GNU General Public License as published by
@@ -29,3 +29,4 @@
 	.equ flash_min_address, 0x00004000
 	.equ flash_dict_start, 0x00004000
 	.equ flash_dict_end, 0x00100000
+	.equ input_buffer_size, 255

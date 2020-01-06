@@ -49,8 +49,8 @@ dp 	.req r7
 	
 	@@ Word header macro
 	.macro define_word name, flags
-	.p2align 1
-	.hword \flags
+	.p2align 2
+	.word \flags
 10:	.word 10b
 	.byte 12f - 11f
 11:	.ascii "\name"

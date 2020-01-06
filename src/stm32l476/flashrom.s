@@ -171,7 +171,6 @@ erase_page:
 	orrs r1, r3
 	str r1, [r0]
 	str r2, [r0]
-
 	pop {r0, r1, r2, r3, pc}
 
 	@@ Exception handler for flash writes where flash has already been
@@ -408,9 +407,28 @@ _flush_flash:
 	ldr r0, [tos, #flash_buffer_space]
 	cmp r0, #16
 	beq 1f
+	cmp r0, #0
+	beq 1f
 	movs r0, #0
 	str r0, [tos, #flash_buffer_space]
 	bl _store_flash_buffer
 	pop {pc}
 1:	pull_tos
 	pop {pc}
+
+	@@ Flush all the buffered flash
+	define_word "flush-all-flash", visible_flag
+_flush_all_flash:	
+	push {lr}
+	ldr r0, =flash_buffer_start
+	ldr r1, =flash_buffer_start + (flash_buffer_size * flash_buffer_count)
+1:	cmp r0, r1
+	bge 2f
+	push_tos
+	movs tos, r0
+	push {r0, r1}
+	bl _flush_flash
+	pop {r0, r1}
+	adds r0, #flash_buffer_size
+	b 1b
+2:	pop {pc}

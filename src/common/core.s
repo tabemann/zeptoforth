@@ -1,4 +1,4 @@
-@ Copyright (c) 2019 Travis Bemann
+@ Copyright (c) 2019-2020 Travis Bemann
 @
 @ This program is free software: you can redistribute it and/or modify
 @ it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
 @ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 	@@ Drop the top of the data stack
-	define_word "drop", visble_flag
+	define_word "drop", visible_flag
 _drop:	pull_tos
 	bx lr
 
@@ -126,6 +126,46 @@ _execute:
 	define_word "exit", visible_flag
 _exit:	adds sp, sp, #4
 	pop {pc}
+
+	@@ Set the currently-defined word to be immediate
+	define_word "[immediate]", visible_flag | immediate_flag | compile_only_flag
+_bracket_immediate:
+	ldr r0, =latest_flags
+	ldr r1, [r0]
+	movs r2, #immediate_flag
+	orr r1, r2
+	str r1, [r0]
+	bx lr
+
+	@@ Set the currently-defined word to be compile-only
+	define_word "[compile-only]", visible_flag | immediate_flag | compile_only_flag
+_bracket_compile_only:
+	ldr r0, =latest_flags
+	ldr r1, [r0]
+	movs r2, #compile_only_flag
+	orr r1, r2
+	str r1, [r0]
+	bx lr
+
+	@@ Set the currently-defined word to be immediate
+	define_word "immediate", visible_flag
+_immediate:
+	ldr r0, =latest_flags
+	ldr r1, [r0]
+	movs r2, #immediate_flag
+	orr r1, r2
+	str r1, [r0]
+	bx lr
+
+	@@ Set the currently-defined word to be compile-only
+	define_word "compile-only", visible_flag
+_compile_only:
+	ldr r0, =latest_flags
+	ldr r1, [r0]
+	movs r2, #compile_only_flag
+	orr r1, r2
+	str r1, [r0]
+	bx lr
 
 	@@ Store a byte
 	define_word "b!", visible_flag
@@ -535,6 +575,49 @@ _current_reserve_8:
 	pop {pc}
 1:	bl _flash_reserve_8
 	pop {pc}
+
+	@@ Align to a power of two
+	define_word "current-align,", visible_flag
+_current_comma_align:
+	push {lr}
+	subs tos, #1
+	movs r0, tos
+	pull_tos
+1:	push {r0}
+	bl _current_here
+	pop {r0}
+	ands tos, r0
+	beq 2f
+	movs tos, #0
+	push {r0}
+	bl _current_comma_1
+	pop {r0}
+	b 1b
+2:	pop {pc}
+	
+	@@ Compile a c-string
+	define_word "current-cstring,", visible_flag
+_current_comma_cstring:
+	push {lr}
+	movs r0, #255
+	cmp tos, r0
+	ble 1f
+	movs tos, #255
+1:	push_tos
+	bl _current_comma_1
+	movs r0, tos
+	pull_tos
+	movs r1, tos
+2:	cmp r0, #0
+	beq 1f
+	ldrb tos, [r1]
+	push {r0, r1}
+	bl _current_comma_1
+	pop {r0, r1}
+	sub r0, #1
+	add r1, #1
+	b 2b
+1:	pop {pc}	
 
 	@@ Push a value onto the return stack
 	define_word ">r", visible_flag

@@ -1,4 +1,4 @@
-@ Copyright (c) 2019 Travis Bemann
+@ Copyright (c) 2019-2020 Travis Bemann
 @
 @ This program is free software: you can redistribute it and/or modify
 @ it under the terms of the GNU General Public License as published by
@@ -25,6 +25,9 @@
 	@@ Flash buffers
 	allot flash_buffers_start, flash_buffer_size * flash_buffer_count	
 
+	@@ The word being currently compiled
+	allot current_compile, 4
+	
 	@@ The last word compiled
 	allot latest, 4
 
@@ -33,3 +36,15 @@
 
 	@@ The last word compiled to Flash
 	allot flash_latest, 4
+
+	@@ The flags for the word being currently compiled
+	allot current_flags, 2
+
+	@@ The current input buffer index
+	allot input_buffer_index, 2
+
+	@@ The input buffer count
+	allot input_buffer_count, 1
+
+	@@ The input buffer
+	allot input_buffer, input_buffer_size
