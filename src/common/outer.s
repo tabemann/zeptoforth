@@ -215,3 +215,112 @@ _find:	push {lr}
 	ldr tos, [r0]
 	bl _find_dict
 2:	pop {pc}
+
+	@@ Get an xt from a word
+	define_word ">xt", visible_flag
+_to_xt:	push {lr}
+	ldrb r0, [tos, #8]
+	adds tos, #9
+	adds tos, tos, r0
+	movs r0, #1
+	ands r0, tos
+	bne 1f
+	pop {pc}
+1:	adds tos, #1
+	pop {pc}
+
+	@@ Get the STATE variable address
+	define_word "state", visible_flag
+_state:	push_tos
+	ldr tos, =state
+	bx lr
+
+	@@ The inner loop of Forth
+	define_word "quit", visible_flag
+_quit:	ldr r0, =rstack_top
+	mov sp, r0
+1:	bl _token
+	cmp tos, #0
+	beq 2f
+	movs r0, tos
+	ldr r1, [dp]
+	push_tos
+	movs tos, #visible_flag
+	push {r0, r1}
+	bl _find
+	pop {r0, r1}
+	cmp tos, #0
+	beq 3f
+	ldr r0, =state
+	ldr r0, [r0]
+	bne r0, #0
+	beq 4f
+	ldr r0, [tos]
+	movs r1, #compile_only_flag
+	ands r0, r1
+	bne 5f
+6:	bl _to_xt
+	adds tos, #1
+	movs r0, tos
+	pull_tos
+	blx r0
+	pop {pc}
+2:	bl _refill
+	b 1b
+3:	movs tos, r1
+	push_tos
+	movs tos, r0
+	bl _unknown_word
+	b 1b
+4:	ldr r0, [tos]
+	movs r1, #immediate_flag
+	ands r0, r1
+	bne 6b
+	bl _to_xt
+	bl _asm_call
+	b 1b
+5:	ldr tos, =_not_compiling
+	bl _raise
+	b 1b
+	
+	@@ Start a colon definition
+	define_word ":", visible_flag
+_colon:	push {lr}
+	bl _token
+	cmp tos, #0
+	beq 1f
+	bl _asm_start
+	ldr r0, =latest_flags
+	movs r1, #visible_flag
+	str r1, [r0]
+	pop {pc}
+1:	push_tos
+	ldr tos, =_token_expected
+	bl _raise
+	pop {pc}
+
+	@@ End a colon definition
+	define_word ";", visible_flag | immediate_flag
+_semi:	push {lr}
+	ldr r0, =state
+	ldr r1, [r0]
+	cmp r1, #0
+	beq 1f
+	movs r1, #0
+	str r1, [r0]
+	bl _asm_end
+	pop {pc}
+1:	push_tos
+	ldr tos, =_not_compiling
+	bl _raise
+	pop {pc}
+
+	@@ Token expected exception handler
+	define_word "token-expected", visible_flag
+_token_expected:
+	b .
+
+	@@ We are not currently compiling
+	define_word "not-compiling", visible_flag
+_not_compiling:
+	b .

@@ -1450,3 +1450,61 @@ _asm_orr:
 	orrs tos, r0
 	bl _current_comma_2
 	pop {pc}
+
+	@@ Assemble an str immediate instruction
+	define_word "str-imm,", visible_flag
+_asm_str_imm:
+	push {lr}
+	movs r0, #7
+	ands tos, r0
+	movs r1, tos
+	pull_tos
+	ands tos, r0
+	lsls tos, tos, #3
+	orrs r1, tos
+	pull_tos
+	movs r0, #0x1F
+	ands tos, r0
+	lsls tos, tos, #6
+	orrs tos, r1
+	ldr r0, =0x6000
+	orrs tos, r0
+	bl _current_comma_2
+	pop {pc}
+
+	@@ Assemble a subtract immediate instruction
+	define_word "sub-imm,", visible_flag
+_asm_sub:
+	push {lr}
+	movs r0, #7
+	ands tos, r0
+	lsls r1, tos, #8
+	pull_tos
+	movs r0, #0xFF
+	ands tos, r0
+	orrs tos, r1
+	ldr r0, =0x3800
+	orrs tos, r0
+	bl _current_comma_2
+	pop {pc}
+
+	@@ Assemble instructions to push a value onto the stack
+	define_word "push,", visible_flag
+_asm_push:
+	push {lr}
+	movs r0, tos
+	movs tos, #4
+	push_tos
+	movs tos, #7
+	push {r0}
+	bl _asm_sub
+	pop {r0}
+	push_tos
+	movs tos, #0
+	push_tos
+	movs tos, #7
+	push_tos
+	movs tos, r0
+	bl _asm_str
+	pop {pc}
+	

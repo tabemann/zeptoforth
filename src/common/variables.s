@@ -48,3 +48,6 @@
 
 	@@ The input buffer
 	allot input_buffer, input_buffer_size
+
+	@@ Are we in compilation state
+	allot state, 4
