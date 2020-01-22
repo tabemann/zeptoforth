@@ -51,3 +51,15 @@
 
 	@@ Are we in compilation state
 	allot state, 4
+
+	@@ The prompt hook
+	allot prompt_hook, 4
+
+	@@ The number parser hook
+	allot number_hook, 4
+
+	@@ The failed parse hook
+	allot failed_parse_hook, 4
+
+	@@ The emit hook
+	allot emit_hook, 4

@@ -1344,7 +1344,9 @@ _reserve_branch:
 	@@ Out of range branch exception
 	define_word "out-of-range-branch", visible_flag
 _out_of_range_branch:
-	b . @ implement later
+	string_ln " out of range branch"
+	bl _type
+	bl _abort
 	
 	@@ Assemble an unconditional branch
 	define_word "b-16,", visible_flag

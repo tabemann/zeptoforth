@@ -235,6 +235,12 @@ _state:	push_tos
 	ldr tos, =state
 	bx lr
 
+	@@ Abort
+	define_word "abort", visible_flag
+_abort:	ldr r0, =stack_top
+	mov dp, r0
+	b _quit
+
 	@@ The inner loop of Forth
 	define_word "quit", visible_flag
 _quit:	ldr r0, =rstack_top
@@ -265,7 +271,11 @@ _quit:	ldr r0, =rstack_top
 	pull_tos
 	blx r0
 	pop {pc}
-2:	bl _refill
+2:	ldr r0, =prompt_hook
+	push_tos
+	ldr tos, [r0]
+	bl _execute_nz
+	bl _refill
 	b 1b
 3:	movs tos, r1
 	push_tos
@@ -282,6 +292,43 @@ _quit:	ldr r0, =rstack_top
 5:	ldr tos, =_not_compiling
 	bl _raise
 	b 1b
+
+	@@ Handle an unknown word
+	define_word "unknown-word", visible_flag
+_unknown_word:
+	push {lr}
+	movs r0, tos
+	pull_tos
+	movs r1, tos
+	pull_tos
+	ldr r2, =number_hook
+	ldr r2, [r2]
+	cmp r2, #0
+	beq 1f
+	push {r0, r1}
+	adds r2, #1
+	push_tos
+	movs tos, r1
+	push_tos
+	movs tos, r0
+	blx r2
+	pop {r0, r1}
+	cmp tos, #0
+	beq 1f
+	pull_tos
+	pop {pc}
+1:	ldr r2, =failed_parse_hook
+	ldr r2, [r2]
+	cmp r2, #0
+	beq 2f
+	adds r2, #1
+	push_tos
+	movs tos, r1
+	push_tos
+	movs tos, r0
+	blx r2
+2:	pop {r0}
+	b _abort
 	
 	@@ Start a colon definition
 	define_word ":", visible_flag
@@ -315,12 +362,38 @@ _semi:	push {lr}
 	bl _raise
 	pop {pc}
 
+	@@ The prompt hook
+	define_word "prompt-hook", visible_flag
+_prompt_hook:
+	push_tos
+	ldr tos, =prompt_hook
+	bx lr
+
+	@@ The number parser hook
+	define_word "number-hook", visible_flag
+_number_hook:
+	push_tos
+	ldr tos, =number_hook
+	bx lr
+
+	@@ The failed parse hook
+	define_word "failed-parse-hook", visible_flag
+_failed_parse_hook:
+	push_tos
+	ldr tos, =failed_parse_hook
+	bx lr
+
 	@@ Token expected exception handler
 	define_word "token-expected", visible_flag
 _token_expected:
-	b .
+	string_ln " token expected"
+	bl _type
+	bl _abort
 
 	@@ We are not currently compiling
 	define_word "not-compiling", visible_flag
 _not_compiling:
-	b .
+	string_ln " not compiling"
+	bl _type
+	bl _abort
+

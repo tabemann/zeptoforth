@@ -114,14 +114,65 @@ _current_allot:
 	pop {pc}
 1:	bl _flash_allot
 	pop {pc}
+
+	@@ The emit hook
+	define_word "emit-hook", visible_flag
+_emit_hook:
+	push_tos
+	ldr tos, =emit_hook
+	bx lr
+	
+	@@ Emit a character
+	define_word "emit", visible_flag
+_emit:	push {lr}
+	ldr r0, =emit_hook
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 1f
+	adds r0, #1
+	blx r0
+	pop {pc}
+1:	pull_tos
+	pop {pc}
+
+	@@ Type a string
+	define_word "type", visible_flag
+_type:	push {lr}
+	movs r0, tos
+	pull_tos
+	movs r1, tos
+	pull_tos
+1:	cmp r0, #0
+	beq 2f
+	push_tos
+	ldrb tos, [r1]
+	push {r0, r1}
+	bl _emit
+	pop {r0, r1}
+	subs r0, #1
+	adds r1, #1
+	b 1b
+2:	pop {pc}
 	
 	@@ Execute an xt
 	define_word "execute", visible_flag
 _execute:
 	mov r0, tos
+	adds r0, #1
 	pull_tos
-	blx r0
+	bx r0
 	
+	@@ Execute an xt if it is non-zero
+	define_word "?execute"
+_execute_nz:
+	mov r0, tos
+	pull_tos
+	cmp r0, #0
+	beq 1f
+	adds r0, #1
+	bx r0
+1:	bx lr
+
 	@@ Exit a word
 	define_word "exit", visible_flag
 _exit:	adds sp, sp, #4

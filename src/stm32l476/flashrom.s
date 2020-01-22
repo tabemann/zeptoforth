@@ -113,15 +113,17 @@ wait_for_flash:
 	
 	@@ Exception handler for unaligned 16-byte flash writes
 _store_flash_16_unaligned:
-	@@ Add code here
-	b .
+	string_ln " unaligned 16-byte flash write"
+	bl _type
+	bl _abort
 	
 	@@ Exception handler for flash writes where flash has already been
 	@@ written
 _store_flash_16_already_written:
-	@@ Add code here
-	b .
-
+	string_ln " flash already written"
+	bl _type
+	bl _abort
+	
 	@@ Delete a 2K page of flash
 	define_word "erase-page", visible_word
 erase_page:	
@@ -176,8 +178,9 @@ erase_page:
 	@@ Exception handler for flash writes where flash has already been
 	@@ written
 _attempted_to_erase_core_flash:
-	@@ Add code here
-	b .
+	string_ln " attempted to write to core flash"
+	bl _type
+	bl _abort
 
 	@@ Erase all flash except for the zeptoforth runtime
 	define_word "erase-all", visible_flag
@@ -247,7 +250,9 @@ _init_flash_buffers:
 	@@ No flash buffers are free exception handler
 	define_word "no-flash-buffers-free", visible_flag
 _no_flash_buffers_free:
-	b .
+	string_ln " no flash buffers free"
+	bl _type
+	bl _abort
 	
 	@@ Find a free flash buffer for an address
 	define_word "get-free-flash-buffer", visible_flag

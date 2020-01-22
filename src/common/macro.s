@@ -57,26 +57,6 @@ dp 	.req r7
 12:	.p2align 1
 	.endm
 	
-	@@ String macro
-	.macro string text, dest
-	ldr \dest, =11f
-	b 14f
-11:	.byte 13f - 12f
-12:	.ascii "\text"
-13:	.p2align 1
-14:	nop
-	.endm
-
-	@@ String with newline
-	.macro string_ln text, dest
-	ldr \dest, =11f
-	b 14f
-11:	.byte 13f - 12f
-12:	.ascii "\text\r\n"
-13:	.p2align 1
-14:	nop
-	.endm
-
 	@@ Push the top of the stack onto the data stack
 	.macro push_tos
 	str tos, [dp, #-4]!
@@ -92,6 +72,48 @@ dp 	.req r7
 	.macro pull_tos
 	ldr tos, [dp], #4
 	.endm
+
+	@@ String macro
+	.macro cstring text, dest
+	ldr \dest, =11f
+	b 14f
+11:	.byte 13f - 12f
+12:	.ascii "\text"
+13:	.p2align 1
+14:	nop
+	.endm
+
+	@@ String with newline
+	.macro cstring_ln text, dest
+	ldr \dest, =11f
+	b 14f
+11:	.byte 13f - 12f
+12:	.ascii "\text\r\n"
+13:	.p2align 1
+14:	nop
+	.endm
+
+	@@ Push a string onto the stack macro
+	.macro string text
+	push_tos
+	ldr tos, =11f
+	push_tos
+	ldr tos, =12f - 11f
+	b 13f
+11:	.ascii "\text"
+12:	.p2align 1
+13:	nop.endm
+
+	@@ Push a string onto the stack macro
+	.macro string_ln text
+	push_tos
+	ldr tos, =11f
+	push_tos
+	ldr tos, =12f - 11f
+	b 13f
+11:	.ascii "\text\r\n"
+12:	.p2align 1
+13:	nop.endm
 
 	@@ Blank initial word header
 	.p2align 2
