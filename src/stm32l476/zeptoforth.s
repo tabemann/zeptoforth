@@ -56,13 +56,14 @@ handle_reset:
 
 	@@ The outermost exception handling@ if an exception happens here the
 	@@ system will reboot
-outer_exc_handled:	
+outer_exc_handled:
+	bl _init_hooks
 	bl _use_48mhz
-
 	bl _init_flash_buffers
 
 	.include "src/stm32l476/flashrom.s"
 	@.include "src/stm32l476/console.s"
 	.include "src/common/core.s"
+	.include "src/common/outer.s"
 	.include "src/common/asm.s"
 	.include "src/common/exception.s"

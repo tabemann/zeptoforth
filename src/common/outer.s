@@ -235,6 +235,12 @@ _state:	push_tos
 	ldr tos, =state
 	bx lr
 
+	@@ Get the BASE variable address
+	define_word "base", visible_flag
+_base:	push_tos
+	ldr tos, =base
+	bx lr
+
 	@@ Abort
 	define_word "abort", visible_flag
 _abort:	ldr r0, =stack_top
@@ -293,6 +299,14 @@ _quit:	ldr r0, =rstack_top
 	bl _raise
 	b 1b
 
+	@@ Display a prompt
+	define_word "do-prompt", visible_flag
+_do_prompt:
+	push {lr}
+	string_ln " ok"
+	bl _type
+	pop {pc}
+
 	@@ Handle an unknown word
 	define_word "unknown-word", visible_flag
 _unknown_word:
@@ -301,7 +315,7 @@ _unknown_word:
 	pull_tos
 	movs r1, tos
 	pull_tos
-	ldr r2, =number_hook
+	ldr r2, =handle_number_hook
 	ldr r2, [r2]
 	cmp r2, #0
 	beq 1f
@@ -329,6 +343,65 @@ _unknown_word:
 	blx r2
 2:	pop {r0}
 	b _abort
+
+	@@ Implement the failed parse hook
+	define_word "do-failed-parse", visible_flag
+_do_failed_parse:
+	push {lr}
+	string " unable to parse: "
+	bl _type
+	bl _type
+	string_ln ""
+	bl _type
+	pop {pc}
+
+	@@ Implement the handle number hook
+	define_word "do-handle-number", visible_flag
+_do_handle_number:
+	push {lr}
+	bl _parse_integer
+	cmp tos, #0
+	beq 2f
+	pull_tos
+	ldr r0, =state
+	ldr r0, [r0]
+	cmp r0, #0
+	bne 1f
+	movs r1, tos
+	movs tos, #6
+	push {r1}
+	bl _asm_push
+	pop {r1}
+	push_tos
+	movs tos, r1
+	push_tos
+	movs tos, #6
+	bl _asm_literal
+1:	push_tos
+	movs tos, #-1
+	pop {pc}
+2:	pull_tos
+	movs tos, #0
+	pop {pc}
+
+	@@ Parse an integer
+	define_word "parse-integer", visible_flag
+_parse_integer:
+	push {lr}
+	ldr r0, =parse_integer_hook
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 1f
+	adds r0, #1
+	blx r0
+	pop {pc}
+1:	pull_tos
+	movs tos, #0
+	push_tos
+	movs tos, #0
+	pop {pc}
+
+	@@ Actually parse an integer
 	
 	@@ Start a colon definition
 	define_word ":", visible_flag
@@ -369,11 +442,18 @@ _prompt_hook:
 	ldr tos, =prompt_hook
 	bx lr
 
-	@@ The number parser hook
-	define_word "number-hook", visible_flag
-_number_hook:
+	@@ The handle number hook
+	define_word "handle-number-hook", visible_flag
+_handle_number_hook:
 	push_tos
-	ldr tos, =number_hook
+	ldr tos, =handle_number_hook
+	bx lr
+
+	@@ The parse integer hook
+	define_word "parse-integer-hook", visible_flag
+_parse_integer_hook:
+	push_tos
+	ldr tos, =parse_integer_hook
 	bx lr
 
 	@@ The failed parse hook
@@ -381,6 +461,27 @@ _number_hook:
 _failed_parse_hook:
 	push_tos
 	ldr tos, =failed_parse_hook
+	bx lr
+
+	@@ The emit hook
+	define_word "emit-hook", visible_flag
+_emit_hook:
+	push_tos
+	ldr tos, =emit_hook
+	bx lr
+
+	@@ The key hook
+	define_word "key-hook", visible_flag
+_key_hook:
+	push_tos
+	ldr tos, =key_hook
+	bx lr
+
+	@@ The key? hook
+	define_word "key?-hook", visible_flag
+_key_q_hook:
+	push_tos
+	ldr tos, =key_q_hook
 	bx lr
 
 	@@ Token expected exception handler

@@ -54,6 +54,65 @@ _pick:	lsls tos, tos, #2
 	ldr tos, [tos]
 	bx lr
 
+	@@ Logical shift left
+	define_word "lshift", visible_flag
+_lshift:
+	movs r0, tos
+	pull_tos
+	lsls tos, tos, r0
+	bx lr
+
+	@@ Logical shift right
+	define_word "rshift", visible_flag
+_rshift:
+	movs r0, tos
+	pull_tos
+	lsrs tos, tos, r0
+	bx lr
+
+	@@ Arithmetic shift right
+	define_word "arshift", visible_flag
+_arshift:
+	movs r0, tos
+	pull_tos
+	asrs tos, tos, r0
+	bx lr
+
+	@@ Addition of two two's complement integers
+	define_word "+", visible_flag
+_add:	movs r0, tos
+	pull_tos
+	adds tos, tos, r0
+	bx lr
+
+	@@ Substraction of two two's complement integers
+	define_word "-", visible_flag
+_sub:	movs r0, tos
+	pull_tos
+	subs tos, tos, r0
+	bx lr
+
+	@@ Multiplication of two two's complement integers
+	define_word "*", visible_flag
+_mul:	movs r0, tos
+	pull_tos
+	muls tos, tos, r0
+	bx lr
+
+	@@ Signed division of two two's complement integers
+	define_word "/", visible_flag
+_div:	movs r0, tos
+	pull_tos
+	sdiv tos, tos, r0
+	bx lr
+
+	@@ Unsigned division of two integers
+	define_word "u/", visible_flag
+_udiv:	movs r0, tos
+	pull_tos
+	udiv tos, tos, r0
+	bx lr
+
 	@@ Get the HERE pointer
 	define_word "here", visible_flag
 _here:	ldr r0, =here
@@ -693,3 +752,29 @@ _get_r:	push_tos
 	define_word "rdrop", visible_flag
 _rdrop:	adds sp, #4
 	bx lr
+
+	@@ Initialize the hooks
+	define_word "init-hooks", visible_flag
+_init_hooks:
+	ldr r0, =prompt_hook
+	ldr r1, =_do_prompt
+	str r1, [r0]
+	ldr r0, =handle_number_hook
+	ldr r1, =_do_handle_number
+	str r1, [r0]
+	ldr r0, =parse_integer_hook
+	ldr r1, =_do_parse_integer
+	str r1, [r0]
+	ldr r0, =failed_parse_hook
+	ldr r1, =_do_failed_parse
+	str r1, [r0]
+	ldr r0, =emit_hook
+	ldr r1, =_do_emit
+	str r1, [r0]
+	ldr r0, =key_hook
+	ldr r1, =_do_key
+	str r1, [r0]
+	ldr r0, =key_q_hook
+	ldr r1, =_do_key_q
+	bx lr
+	

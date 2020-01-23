@@ -49,6 +49,9 @@
 	@@ The input buffer
 	allot input_buffer, input_buffer_size
 
+	@@ The current numeric base
+	allot base, 4
+	
 	@@ Are we in compilation state
 	allot state, 4
 
@@ -63,3 +66,9 @@
 
 	@@ The emit hook
 	allot emit_hook, 4
+
+	@@ The key hook
+	allot key_hook, 4
+
+	@@ The key? hook
+	allot key_q_hook, 4
