@@ -401,7 +401,169 @@ _parse_integer:
 	movs tos, #0
 	pop {pc}
 
-	@@ Actually parse an integer
+	@@ Parse an integer ( addr bytes -- n success )
+	define_word "do-parse-integer", visible_flag
+_do_parse_integer:
+	push {lr}
+	bl _parse_base
+	bl _parse_integer_core
+	pop {pc}
+
+	@@ Actually parse an integer base ( addr bytes -- addr bytes base )
+_parse_base:
+	cmp tos, #0
+	beq 5f
+	movs r0, tos
+	pull_tos
+	ldr r1, [tos]
+	cmp r1, #0x24
+	bne 1f
+	movs r1, #16
+	b 6f
+1:	cmp r1, #0x23
+	bne 2f
+	movs r1, #10
+	b 6f
+2:	cmp r1, #0x2F
+	bne 3f
+	movs r1, #8
+	b 6f
+3:	cmp r1, #0x25
+	bne 4f
+	movs r1, #2
+	b 6f
+4:	push_tos
+	movs tos, r0
+5:	push_tos
+	ldr r0, =base
+	movs tos, [r0]
+	pop {pc}
+6:	adds tos, #1
+	push_tos
+	subs r0, #1
+	movs tos, r0
+	push_tos
+	movs tos, r1
+	bx lr
+
+	@@ Actually parse an integer ( addr bytes base -- n success )
+	define_word "parse-integer-core", visible_flag
+_parse_integer_core:
+	push {lr}
+	movs r2, tos
+	pull_tos
+	cmp tos, #0
+	beq 3f
+	movs r0, tos
+	pull_tos
+	ldr r1, [tos]
+	cmp r1, #0x2D
+	beq 1f
+	push_tos
+	movs tos, r0
+	push_tos
+	movs tos, r2
+	bl _parse_unsigned_core
+	pop {pc}
+1:	adds tos, #1
+	push_tos
+	movs tos, r0
+	subs tos, #1
+	push_tos
+	movs tos, r2
+	bl _parse_unsigned_core
+	cmp tos, #0
+	beq 2f
+	pull_tos
+	rsbs tos, tos, #0
+	push_tos
+	movs tos, #-1
+	pop {pc}
+3:	pull_tos
+	movs tos, #0
+	push_tos
+	movs tos, #0
+	pop {pc}
+	
+	@@ Actually parse an unsigned integer ( addr bytes base  -- u success )
+	define_word "parse-unsigned-core", visible_flag
+_parse_unsigned_core:
+	push {lr}
+	movs r0, tos
+	pull_tos
+	movs r1, tos
+	pull_tos
+	movs r2, tos
+	pull_tos
+	movs r3, #0
+	cmp r0, #0
+	bgt 1f
+	movs tos, #0
+	push_tos
+	movs tos, #0
+	pop {pc}
+1:	cmp r0, #36
+	ble 1f
+	movs tos, #0
+	push_tos
+	movs tos, #0
+	pop {pc}
+1:	cmp r1, #0
+	beq 3f
+	push_tos
+	ldr tos, [r2]
+	subs r1, #1
+	adds r2, #1
+	muls r3, r0, r3
+	push_tos
+	movs tos, r0
+	push {r0, r1, r2, r3}
+	bl _parse_digit
+	pop {r0, r1, r2, r3}
+	cmp tos, #0
+	beq 2f
+	pull_tos
+	adds r3, r3, tos
+	pull_tos
+	b 1b
+2:	pull_tos
+	movs tos, #0
+	push_tos
+	movs tos, #0
+	pop {pc}
+3:	push_tos
+	movs tos, r3
+	push_tos
+	movs tos, #-1
+	pop {pc}
+
+	@@ Parse a digit ( c base -- digit success )
+	define_word "parse-digit", visible_flag
+_parse_digit:
+	push {lr}
+	movs r0, tos
+	pull_tos
+	cmp tos, #0x30
+	blt 1f
+	cmp tos, #0x39
+	bgt 2f
+	subs tos, #0x30
+	b 3f
+1:	movs tos, #0
+	push_tos
+	movs tos, #0
+	pop {pc}
+2:	push {r0}
+	bl _to_upper_case
+	pop {r0}
+	cmp tos, #0x41
+	blt 1b
+	cmp tos, #0x5A
+	bgt 1b
+	subs tos, #0x37
+3:	push_tos
+	movs tos, #-1
+	pop {pc}
 	
 	@@ Start a colon definition
 	define_word ":", visible_flag
