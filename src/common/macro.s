@@ -113,7 +113,8 @@ dp 	.req r7
 	b 13f
 11:	.ascii "\text\r\n"
 12:	.p2align 1
-13:	nop.endm
+13:	nop
+	.endm
 
 	@@ Blank initial word header
 	.p2align 2

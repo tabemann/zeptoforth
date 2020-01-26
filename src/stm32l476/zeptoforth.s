@@ -60,6 +60,7 @@ outer_exc_handled:
 	bl _init_hooks
 	bl _use_48mhz
 	bl _init_flash_buffers
+	bl _do_init
 
 	.include "src/stm32l476/flashrom.s"
 	@.include "src/stm32l476/console.s"

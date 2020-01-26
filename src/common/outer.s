@@ -28,18 +28,30 @@ _ws_q:	cmp tos, #0x09
 1:	movs tos, #-1
 	bx lr
 
+	@@ Test whether a character is a newline.
+	define_word "newline?", visible_flag
+_newline_q:
+	cmp tos, #0x0A
+	beq 1f
+	cmp tos, #0x0D
+	beq 1f
+	movs tos, #0
+	bx lr
+1:	movs tos, #-1
+	bx lr
+
 	@@ Parse the input buffer for the start of a token
 	define_word "token-start", visible_flag
 _token_start:
 	push {lr}
-	ldr r0, =index_buffer_index
+	ldr r0, =input_buffer_index
 	ldrh r1, [r0]
 	push_tos
-1:	ldr r0, =index_buffer_count
+1:	ldr r0, =input_buffer_count
 	ldrb r2, [r0]
 	cmp r1, r2
 	beq 2f
-	ldr r0, =index_buffer
+	ldr r0, =input_buffer
 	adds r0, r0, r1
 	ldrb tos, [r0]
 	push {r0}
@@ -56,22 +68,22 @@ _token_start:
 	define_word "token-end", visible_flag
 _token_end:
 	push {lr}
-	movs r0, tos
-1:	ldr r0, =index_buffer_count
+	movs r1, tos
+1:	ldr r0, =input_buffer_count
 	ldrb r2, [r0]
 	cmp r1, r2
 	beq 2f
-	ldr r0, =index_buffer
+	ldr r0, =input_buffer
 	adds r0, r0, r1
 	ldrb tos, [r0]
-	push {r0}
+	push {r1}
 	bl _ws_q
-	pop {r0}
+	pop {r1}
 	cmp tos, #0
 	beq 2f
-	adds r0, #1
+	adds r1, #1
 	b 1b
-2:	movs tos, r0
+2:	movs tos, r1
 	pop {pc}
 
 	@@ Parse a token
@@ -88,8 +100,56 @@ _token:	push {lr}
 	push_tos
 	subs tos, r1, r0
 	ldr r0, =input_buffer_index
-	strb r1, [r0]
+	strh r1, [r0]
 	push {pc}
+
+	@@ Parse a line comment
+	define_word "\\", visible_flag
+_line_comment:
+	push {lr}
+	ldr r0, =input_buffer_index
+	ldrh r0, [r0]
+	ldr r1, =input_buffer_count
+	ldrb r1, [r1]
+	ldr r2, =input_buffer
+1:	cmp r0, r1
+	beq 3f
+	adds r3, r0, r2
+	push_tos
+	ldrb tos, [r3]
+	push {r0, r1, r2}
+	bl _newline_q
+	pop {r0, r1, r3}
+	cmp tos, #0
+	bne 2f
+	adds r0, #1
+	b 1b
+2:	pull_tos
+	ldr r1, =input_buffer_index
+	ldrh r0, [r1]
+3:	pop {pc}
+
+	@@ Parse a paren coment
+	define_word "(", visible_flag
+_paren_comment:
+	push {lr}
+	ldr r0, =input_buffer_index
+	ldrh r0, [r0]
+	ldr r1, =input_buffer_count
+	ldrb r1, [r1]
+	ldr r2, =input_buffer
+1:	cmp r0, r1
+	beq 3f
+	adds r3, r0, r2
+	ldrb r3, [r3]
+	cmp r3, #0x29
+	beq 2f
+	adds r0, #1
+	b 1b
+2:	pull_tos
+	ldr r1, =input_buffer_index
+	ldrh r0, [r1]
+3:	pop {pc}
 	
 	@@ Convert a character to being uppercase
 	define_word "to-upper-char", visible_flag
@@ -251,6 +311,7 @@ _abort:	ldr r0, =stack_top
 	define_word "quit", visible_flag
 _quit:	ldr r0, =rstack_top
 	mov sp, r0
+	bl _flush_all_flash
 1:	bl _token
 	cmp tos, #0
 	beq 2f
@@ -384,32 +445,24 @@ _do_handle_number:
 	movs tos, #0
 	pop {pc}
 
-	@@ Parse an integer
+	@@ Parse an integer ( addr bytes -- n success )
 	define_word "parse-integer", visible_flag
 _parse_integer:
-	push {lr}
-	ldr r0, =parse_integer_hook
-	ldr r0, [r0]
-	cmp r0, #0
-	beq 1f
-	adds r0, #1
-	blx r0
-	pop {pc}
-1:	pull_tos
-	movs tos, #0
-	push_tos
-	movs tos, #0
-	pop {pc}
-
-	@@ Parse an integer ( addr bytes -- n success )
-	define_word "do-parse-integer", visible_flag
-_do_parse_integer:
 	push {lr}
 	bl _parse_base
 	bl _parse_integer_core
 	pop {pc}
 
+	@@ Parse an unsigned integer ( addr bytes -- u success )
+	define_word "parse-unsigned", visible_flag
+_parse_unsigned:
+	push {lr}
+	bl _parse_base
+	bl _parse_unsigned_core
+	pop {pc}
+
 	@@ Actually parse an integer base ( addr bytes -- addr bytes base )
+	define_word "parse-base", visible_flag
 _parse_base:
 	cmp tos, #0
 	beq 5f
@@ -609,13 +662,6 @@ _prompt_hook:
 _handle_number_hook:
 	push_tos
 	ldr tos, =handle_number_hook
-	bx lr
-
-	@@ The parse integer hook
-	define_word "parse-integer-hook", visible_flag
-_parse_integer_hook:
-	push_tos
-	ldr tos, =parse_integer_hook
 	bx lr
 
 	@@ The failed parse hook

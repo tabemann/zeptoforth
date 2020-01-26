@@ -228,7 +228,6 @@ _find_last_flash_word:
 	beq 1b
 	push_tos
 	subs tos, tos, r0
-	adds tos, tos, r1
 	pop {pc}
 
 	@@ Initialize the flash buffers

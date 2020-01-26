@@ -59,7 +59,7 @@
 	allot prompt_hook, 4
 
 	@@ The number parser hook
-	allot number_hook, 4
+	allot handle_number_hook, 4
 
 	@@ The failed parse hook
 	allot failed_parse_hook, 4

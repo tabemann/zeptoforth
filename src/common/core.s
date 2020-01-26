@@ -50,8 +50,23 @@ _rot:	ldr r0, [dp, #4]
 	@@ Pick a value at a specified depth on the stack
 	define_word "pick", visible_flag
 _pick:	lsls tos, tos, #2
-	adds tos, dp
+	adds tos, tos, dp
 	ldr tos, [tos]
+	bx lr
+
+	@@ Rotate a value at a given deph to the top of the stackk
+	define_word "roll", visible_flag
+_roll:	movs r0, tos
+	lsls r0, r0, #2
+	adds r0, r0, dp
+	ldr tos, [r0]
+1:	cmp r0, dp
+	beq 2f
+	ldr r1, [r0, #-4]
+	str r1, [r0]
+	subs r0, #4
+	b 1b
+2:	adds dp, #4
 	bx lr
 
 	@@ Logical shift left
@@ -194,6 +209,25 @@ _emit:	push {lr}
 1:	pull_tos
 	pop {pc}
 
+	@@ Emit a space
+	define_word "space", visible_flag
+_space:	push {lr}
+	push_tos
+	movs tos, #0x20
+	bl _emit
+	pop {pc}
+
+	@@ Emit a newline
+	define_word "cr", visible_flag
+_cr:	push {lr}
+	push_tos
+	movs tos, #0x0D
+	bl _emit
+	push_tos
+	movs tos, #0x0A
+	bl _emit
+	pop {pc}
+
 	@@ Type a string
 	define_word "type", visible_flag
 _type:	push {lr}
@@ -237,6 +271,51 @@ _execute_nz:
 _exit:	adds sp, sp, #4
 	pop {pc}
 
+	@@ Initiatlize the dictionary
+	define_word "init-dict", visible_flag
+_init_dict:
+	push {lr}
+	bl _find_last_flash_word
+	bl _find_last_visible_word
+	ldr r0, =latest
+	str tos, [r0]
+	ldr r0, =flash_latest
+	str tos, [r0]
+	pull_tos
+	movs r1, #0
+	ldr r0, =ram_latest
+	str r1, [r0]
+	pop {pc}
+
+	@@ Find the last visible word
+	define_word "find-last-visible-word", visible_flag
+_find_last_visible_word:
+1:	cmp tos, #0
+	beq 2f
+	ldr r0, [tos]
+	movs r1, #visible_flag
+	tsts r0, r1
+	bne 2f
+	ldr tos, [tos, #4]
+	b 1b
+2:	bx lr
+	
+ 	@@ Run the initialization routine, if there is one
+	define_word "do-init", visible_flag
+_do_init:
+	push {lr}
+	string "init"
+	bl _find
+	cmp tos, #0
+	beq 1f
+	bl _to_xt
+	movs r0, tos
+	pull_tos
+	blx r0
+	pop {pc}
+1:	pull_tos
+	pop {pc}
+	
 	@@ Set the currently-defined word to be immediate
 	define_word "[immediate]", visible_flag | immediate_flag | compile_only_flag
 _bracket_immediate:

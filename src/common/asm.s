@@ -86,8 +86,11 @@ _asm_end:
 	cmp r0, #0
 	beq 1f
 	push_tos
-	ldr tos, =current_compile
+	ldr r0, =current_compile
+	ldr r0, [r0]
+	ldr tos, =flash_here
 	ldr tos, [tos]
+	subs tos, tos, r0
 	bl _current_comma_2
 	bl _flush_all_flash
 	ldr r0, =current_compile
