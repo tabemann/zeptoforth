@@ -68,3 +68,4 @@ outer_exc_handled:
 	.include "src/common/outer.s"
 	.include "src/common/asm.s"
 	.include "src/common/exception.s"
+	.include "src/common/final.s"

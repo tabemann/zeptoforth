@@ -51,7 +51,7 @@ dp 	.req r7
 	.macro define_word name, flags
 	.p2align 2
 	.word \flags
-10:	.word 10b
+10:	.word 10b - 4
 	.byte 12f - 11f
 11:	.ascii "\name"
 12:	.p2align 1

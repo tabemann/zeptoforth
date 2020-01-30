@@ -229,7 +229,6 @@ _find_dict:
 	bne 4f
 	pull_tos
 2:	ldr r0, [r0, #4]
-	subs r0, #4
 	b 1b
 3:	push_tos
 	movs tos, #0

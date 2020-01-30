@@ -56,7 +56,6 @@ _asm_link:
 	b 2f
 1:	ldr r0, =ram_latest
 2:	ldr tos, [r0]
-	adds tos, #4
 	bl _current_comma_4
 	pop {pc}
 	
