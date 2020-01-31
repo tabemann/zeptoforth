@@ -189,13 +189,6 @@ _current_allot:
 1:	bl _flash_allot
 	pop {pc}
 
-	@@ The emit hook
-	define_word "emit-hook", visible_flag
-_emit_hook:
-	push_tos
-	ldr tos, =emit_hook
-	bx lr
-	
 	@@ Emit a character
 	define_word "emit", visible_flag
 _emit:	push {lr}
@@ -207,6 +200,21 @@ _emit:	push {lr}
 	blx r0
 	pop {pc}
 1:	pull_tos
+	pop {pc}
+
+	@@ Test for whether the system is ready to receive a character
+	define_word "emit?", visible_flag
+_emit_q:
+	push {lr}
+	ldr r0, =emit_q_hook
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 1f
+	adds r0, #1
+	blx r0
+	pop {pc}
+1:	push_tos
+	movs tos, #0
 	pop {pc}
 
 	@@ Emit a space
@@ -247,6 +255,34 @@ _type:	push {lr}
 	b 1b
 2:	pop {pc}
 	
+	@@ Receive a character
+	define_word "key", visible_flag
+_key:	push {lr}
+	ldr r0, =key_hook
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 1f
+	adds r0, #1
+	blx r0
+	pop {pc}
+1:	push_tos
+	movs tos, #0x0D
+	pop {pc}
+
+	@@ Test for whether the system is ready to receive a character
+	define_word "key?", visible_flag
+_key_q:	push {lr}
+	ldr r0, =key_q_hook
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 1f
+	adds r0, #1
+	blx r0
+	pop {pc}
+1:	push_tos
+	movs tos, #0
+	pop {pc}
+
 	@@ Execute an xt
 	define_word "execute", visible_flag
 _execute:
@@ -256,7 +292,7 @@ _execute:
 	bx r0
 	
 	@@ Execute an xt if it is non-zero
-	define_word "?execute"
+	define_word "?execute", visible_flag
 _execute_nz:
 	mov r0, tos
 	pull_tos
@@ -266,6 +302,11 @@ _execute_nz:
 	bx r0
 1:	bx lr
 
+	@@ Default implementation of PAUSE, does nothing
+	define_word "do-pause", visible_flag
+_do_pause:
+	bx lr
+	
 	@@ Exit a word
 	define_word "exit", visible_flag
 _exit:	adds sp, sp, #4
@@ -848,12 +889,19 @@ _init_hooks:
 	ldr r1, =_do_failed_parse
 	str r1, [r0]
 	ldr r0, =emit_hook
-	ldr r1, =_do_emit
+	ldr r1, =_serial_emit
+	str r1, [r0]
+	ldr r0, =emit_q_hook
+	ldr r1, =_serial_emit_q
 	str r1, [r0]
 	ldr r0, =key_hook
-	ldr r1, =_do_key
+	ldr r1, =_serial_key
 	str r1, [r0]
 	ldr r0, =key_q_hook
-	ldr r1, =_do_key_q
+	ldr r1, =_serial_key_q
+	str r1, [r0]
+	ldr r0, =pause_hook
+	ldr r1, =_do_pause
+	str r1, [r0]
 	bx lr
 	

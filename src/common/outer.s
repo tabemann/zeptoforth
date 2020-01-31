@@ -677,6 +677,13 @@ _emit_hook:
 	ldr tos, =emit_hook
 	bx lr
 
+	@@ The emit? hook
+	define_word "emit?-hook", visible_flag
+_emit_q_hook:
+	push_tos
+	ldr tos, =emit_q_hook
+	bx lr
+
 	@@ The key hook
 	define_word "key-hook", visible_flag
 _key_hook:
@@ -689,6 +696,13 @@ _key_hook:
 _key_q_hook:
 	push_tos
 	ldr tos, =key_q_hook
+	bx lr
+
+	@@ The pause hook
+	define_word "pause-hook", visible_flag
+_pause_hook:
+	push_tos
+	ldr tos, =pause_hook
 	bx lr
 
 	@@ Token expected exception handler

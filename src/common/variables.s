@@ -67,8 +67,14 @@
 	@@ The emit hook
 	allot emit_hook, 4
 
+	@@ The emit? hook
+	allot emit_q_hook, 4
+
 	@@ The key hook
 	allot key_hook, 4
 
 	@@ The key? hook
 	allot key_q_hook, 4
+
+	@@ The pause hook
+	allot pause_hook, 4
