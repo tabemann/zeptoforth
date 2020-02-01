@@ -900,6 +900,9 @@ _init_hooks:
 	ldr r0, =key_q_hook
 	ldr r1, =_serial_key_q
 	str r1, [r0]
+	ldr r0, =refill_hook
+	ldr r1, =_do_refill
+	str r1, [r0]
 	ldr r0, =pause_hook
 	ldr r1, =_do_pause
 	str r1, [r0]

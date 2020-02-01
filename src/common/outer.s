@@ -404,6 +404,46 @@ _unknown_word:
 2:	pop {r0}
 	b _abort
 
+	@@ Refill the input buffer
+	define_word "refill", visible_flag
+_refill:
+	push {lr}
+	ldr r0, =refill_hook
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 1f
+	adds r0, #1
+	blx r0
+1:	pop {pc}
+	
+	@@ Implement the refill hook
+	define_word "do-refill", visible_flag
+_do_refill:
+	push {lr}
+	ldr r0, =input_buffer_count
+	ldr r0, [r0]
+	ldr r1, =input_buffer_size
+	ldr r2, =input_buffer
+	adds r0, r2
+	adds r1, r2
+1:	cmp r0, r1
+	beq 2f
+	push {r0, r1}
+	bl _key
+	pop {r0, r1}
+	strb tos, [r0]
+	adds r0, #1
+	movs r2, tos
+	pull_tos
+	cmp r2, #0x0A
+	beq 2f
+	b 1b
+2:	ldr r2, =input_buffer
+	subs r0, r0, r2
+	ldr r2, =input_buffer_count
+	str r0, [r2]
+	pop {pc}
+	
 	@@ Implement the failed parse hook
 	define_word "do-failed-parse", visible_flag
 _do_failed_parse:

@@ -76,5 +76,8 @@
 	@@ The key? hook
 	allot key_q_hook, 4
 
+	@@ The refill hook
+	allot refill_hook, 4
+
 	@@ The pause hook
 	allot pause_hook, 4
