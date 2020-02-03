@@ -43,6 +43,165 @@ _asm_start:
 	bl _current_comma_2
 	pop {pc}
 
+	@@ Compile a CREATEd word
+	define_word "create,", visible flag
+_asm_create:
+	push {lr}
+	push_tos
+	movs tos, #4
+	bl _current_comma_align
+	push_tos
+	bl _current_here
+	ldr r0, =current_compile
+	str tos, [r0]
+	ldr r0, =current_flags
+	movs r1, #0
+	str r1, [r0]
+	push_tos
+	movs tos, #4
+	bl _current_allot
+	bl _asm_link
+	bl _current_comma_cstring
+	bl _current_here
+	movs r0, #1
+	ands tos, r0
+	beq 1f
+	movs tos, #0
+	bl _current_comma_1
+	push_tos
+1:	movs tos, #6
+	bl _asm_push
+	bl _current_here
+	movs r0, #2
+	ands tos, r0
+	bne 2f
+	movs tos, #4
+	push_tos
+	movs tos, #6
+	bl _asm_adr
+	push_tos
+	movs tos, #14
+	bl _asm_bx
+	pop {pc}
+2:	movs tos, #0
+	push_tos
+	movs tos, #0
+	push_tos
+	movs tos, #0
+	bl _asm_lsl_imm
+	push_tos
+	movs tos, #4
+	push_tos
+	movs tos, #6
+	bl _asm_adr
+	push_tos
+	movs tos, #14
+	bl _asm_bx
+	pop {pc}
+
+	@@ Compile a BUILDed word
+	define_word "<build,", visible_flag
+_asm_build:
+	push {lr}
+	ldr r0, =building
+	ldr r0, [r0]
+	cmp r0, #0
+	bne 3f
+	push_tos
+	movs tos, #4
+	bl _current_comma_align
+	push_tos
+	bl _current_here
+	ldr r0, =current_compile
+	str tos, [r0]
+	ldr r0, =current_flags
+	movs r1, #0
+	str r1, [r0]
+	push_tos
+	movs tos, #4
+	bl _current_allot
+	bl _asm_link
+	bl _current_comma_cstring
+	bl _current_here
+	movs r0, #1
+	ands tos, r0
+	beq 1f
+	movs tos, #0
+	bl _current_comma_1
+	push_tos
+1:	ldr tos, =0xB500	@@ push {lr}
+	bl _current_comma_2
+	push_tos
+	movs tos, #6
+	bl _asm_push
+	bl _current_here
+	movs r0, #2
+	ands tos, r0
+	beq 2f
+	movs tos, #0
+	push_tos
+	movs tos, #1
+	push_tos
+	movs tos, #1
+	bl _ssm_lsl_imm
+	push_tos
+2:	movs tos, #8
+	push_tos
+	movs tos, #6
+	bl _asm_adr
+	push_tos
+	movs tos, #-4
+	push_tos
+	movs tos, #6
+	push_tos
+	movs tos, #0
+	bl _asm_ldr_imm
+	push_tos
+	movs tos, #0
+	push_tos
+	movs tos, #1
+	push_tos
+	movs tos, #1
+	bl _asm_lsl_imm
+	push_tos
+	movs tos, #0
+	bl _asm_bx
+	bl _current_reserve_4
+	ldr r0, =build_target
+	str tos, [r0]
+	pull_tos
+	ldr r0, =building
+	movs r1, #-1
+	str r1, [r0]
+	pop {pc}
+3:	push_tos
+	ldr tos, =_already_building
+	bl _raise
+	pop {pc}
+
+	@@ Carry out DOES>
+	define_word "does>", visible_flag
+_asm_does:
+	push {lr}
+	ldr r0, =building
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 1f
+	push_tos
+	ldr tos, [sp]
+	push_tos
+	ldr r0, =build_target
+	ldr tos, [r0]
+	bl _store_current_4
+	ldr r0, =building
+	movs r1, #0
+	str r1, [r0]
+	pop {pc}
+1:	push_tos
+	ldr tos, =_not_building
+	bl _raise
+	pop {pc}
+
 	@@ Compile a link field
 	define_word "current-link,", visible_flag
 _asm_link:
@@ -58,21 +217,14 @@ _asm_link:
 2:	ldr tos, [r0]
 	bl _current_comma_4
 	pop {pc}
-	
-	@@ Compile the end of a word
-	define_word "end-compile,", visible_flag
-_asm_end:
+
+	@@ FInalize the compilation of a word
+	define_word "finalize,", visible_flag
+_asm_finalize:
 	push {lr}
 	push_tos
-	ldr tos, =0xBD00	@@ pop {pc}
-	bl _current_comma_2
-	bl _current_here
-	movs r0, #3
-	ands tos, r0
-	beq 1f
-	push_tos
-	movs tos, #0
-	bl _current_comma_2
+	movs tos, #4
+	bl _current_comma_align
 	push_tos
 	ldr tos, =latest_flags
 	ldr tos, [tos]
@@ -90,7 +242,7 @@ _asm_end:
 	ldr tos, =flash_here
 	ldr tos, [tos]
 	subs tos, tos, r0
-	bl _current_comma_2
+	bl _current_comma_4
 	bl _flush_all_flash
 	ldr r0, =current_compile
 	ldr r1, [r0]
@@ -105,6 +257,16 @@ _asm_end:
 	str r1, [r2]
 	movs r1, #0
 	str r1, [r0]
+	pop {pc}
+	
+	@@ Compile the end of a word
+	define_word "end-compile,", visible_flag
+_asm_end:
+	push {lr}
+	push_tos
+	ldr tos, =0xBD00	@@ pop {pc}
+	bl _current_comma_2
+	bl _asm_finalize
 	pop {pc}
 	
 	@@ Assemble a move immediate instruction
@@ -1349,6 +1511,20 @@ _out_of_range_branch:
 	string_ln " out of range branch"
 	bl _type
 	bl _abort
+
+	@@ Already building exception
+	define_word "already-building", visible_flag
+_already_building:
+	string_ln " already building"
+	bl _type
+	bl _abort
+
+	@@ Not building exception
+	define_word "not-building", visible_flag
+_not_building:
+	string_ln " not building"
+	bl _type
+	bl _abort
 	
 	@@ Assemble an unconditional branch
 	define_word "b-16,", visible_flag
@@ -1456,6 +1632,28 @@ _asm_orr:
 	pop {pc}
 
 	@@ Assemble an str immediate instruction
+	define_word "ldr-imm,", visible_flag
+_asm_ldr_imm:
+	push {lr}
+	movs r0, #7
+	ands tos, r0
+	movs r1, tos
+	pull_tos
+	ands tos, r0
+	lsls tos, tos, #3
+	orrs r1, tos
+	pull_tos
+	asrs tos, tos, #2
+	movs r0, #0x1F
+	ands tos, r0
+	lsls tos, tos, #6
+	orrs tos, r1
+	ldr r0, =0x6800
+	orrs tos, r0
+	bl _current_comma_2
+	pop {pc}
+
+	@@ Assemble an str immediate instruction
 	define_word "str-imm,", visible_flag
 _asm_str_imm:
 	push {lr}
@@ -1467,6 +1665,7 @@ _asm_str_imm:
 	lsls tos, tos, #3
 	orrs r1, tos
 	pull_tos
+	asrs tos, tos, #2
 	movs r0, #0x1F
 	ands tos, r0
 	lsls tos, tos, #6
@@ -1509,6 +1708,34 @@ _asm_push:
 	movs tos, #7
 	push_tos
 	movs tos, r0
-	bl _asm_str
+	bl _asm_str_imm
 	pop {pc}
 	
+	@@ Assemble an instruction to generate a PC-relative address
+	define_word "adr,", visible_flag
+_asm_adr:
+	push {lr}
+	movs r1, #7
+	ands r1, tos
+	lsls r1, r1, #8
+	pull_tos
+	asrs tos, tos, #2
+	movs r0, #0xFF
+	ands tos, r0
+	orrs tos, r1
+	ldr r0, =0xC000
+	orrs tos, r0
+	bl _current_comma_2
+	pop {pc}
+
+	@@ Assemble a BX instruction
+	define_word "bx,", visible_flag
+_asm_bx:
+	push {lr}
+	movs r0, 0xF
+	ands tos, r0
+	lsls tos, tos, #3
+	ldr r0, =0x4700
+	orrs tos, r0
+	bl _current_comma_2
+	pop {pc}

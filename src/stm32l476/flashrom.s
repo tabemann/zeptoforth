@@ -126,7 +126,7 @@ _store_flash_16_already_written:
 	
 	@@ Delete a 2K page of flash
 	define_word "erase-page", visible_word
-erase_page:	
+_erase_page:	
 	push {r0, r1, r2, r3, lr}
 	@@ Protect the zeptoforth runtime!
 	ldr r0, =flash_min_address
@@ -223,10 +223,10 @@ _find_flash_end:
 _find_last_flash_word:
 	push {lr}
 	bl _find_flash_end
-1:	ldrh r0, [tos, #-2]!
+1:	subs tos, #4
+	ldr r0, [tos]
 	cmp r0, #0
 	beq 1b
-	push_tos
 	subs tos, tos, r0
 	pop {pc}
 

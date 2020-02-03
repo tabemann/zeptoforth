@@ -37,6 +37,12 @@
 	@@ The last word compiled to Flash
 	allot flash_latest, 4
 
+	@@ The current <BUILD target address
+	allot build_target, 4
+
+	@@ Whether a word is being built
+	allot building, 4
+
 	@@ The flags for the word being currently compiled
 	allot current_flags, 2
 

@@ -656,6 +656,23 @@ _parse_digit:
 3:	push_tos
 	movs tos, #-1
 	pop {pc}
+
+	@@ Create a create definition
+	define_word "create", visible_flag
+_create:
+	push {lr}
+	bl _token
+	cmp tos, #0
+	beq 1f
+	bl _asm_create
+	ldr r0, =latest_flags
+	movs r1, #visible_flag
+	str r1, [r0]
+	pop {pc}
+1:	push_tos
+	ldr tos, =_token_expected
+	bl _raise
+	pop {pc}
 	
 	@@ Start a colon definition
 	define_word ":", visible_flag
