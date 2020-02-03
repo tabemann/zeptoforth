@@ -35,14 +35,16 @@ _else:	push {lr}
 	movs r0, tos
 	pull_tos
 	push {r0}
+	bl _asm_reserve_branch
+	push_tos
+	movs tos, #0
 	bl _current_here
 	pop {r0}
 	push_tos
 	movs tos, r0
 	bl _asm_branch_zero_back
 	pop {pc}
-1:	push_tos
-	ldr tos, =_not_following_if
+1:	ldr tos, =_not_following_if
 	bl _raise
 	pop {pc}
 	
