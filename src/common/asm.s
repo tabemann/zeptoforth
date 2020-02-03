@@ -363,15 +363,12 @@ _asm_branch_zero:
 	define_word "branch-back!", visible_flag
 _asm_branch_back:
 	push {rl}
-	bl _current_here
 	movs r0, tos
-	pull_tos
-	movs r1, tos
 	pull_tos
 	subs tos, tos, r0
 	asrs tos, tos, #1
 	push_tos
-	movs tos, r1
+	movs tos, r0
 	bl _asm_b_back
 	pop {pc}
 
@@ -379,15 +376,12 @@ _asm_branch_back:
 	define_word "0branch-back!", visible_flag
 _asm_branch_zero_back:
 	push {rl}
-	bl _current_here
 	movs r0, tos
-	pull_tos
-	movs r1, tos
 	pull_tos
 	subs tos, tos, r0
 	asrs tos, tos, #1
 	push_tos
-	movs tos, r1
+	movs tos, r0
 	bl _asm_beq_back
 	pop {pc}
 
