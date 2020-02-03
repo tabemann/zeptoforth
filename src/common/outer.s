@@ -288,18 +288,6 @@ _to_xt:	push {lr}
 1:	adds tos, #1
 	pop {pc}
 
-	@@ Get the STATE variable address
-	define_word "state", visible_flag
-_state:	push_tos
-	ldr tos, =state
-	bx lr
-
-	@@ Get the BASE variable address
-	define_word "base", visible_flag
-_base:	push_tos
-	ldr tos, =base
-	bx lr
-
 	@@ Abort
 	define_word "abort", visible_flag
 _abort:	ldr r0, =stack_top
@@ -705,62 +693,6 @@ _semi:	push {lr}
 	ldr tos, =_not_compiling
 	bl _raise
 	pop {pc}
-
-	@@ The prompt hook
-	define_word "prompt-hook", visible_flag
-_prompt_hook:
-	push_tos
-	ldr tos, =prompt_hook
-	bx lr
-
-	@@ The handle number hook
-	define_word "handle-number-hook", visible_flag
-_handle_number_hook:
-	push_tos
-	ldr tos, =handle_number_hook
-	bx lr
-
-	@@ The failed parse hook
-	define_word "failed-parse-hook", visible_flag
-_failed_parse_hook:
-	push_tos
-	ldr tos, =failed_parse_hook
-	bx lr
-
-	@@ The emit hook
-	define_word "emit-hook", visible_flag
-_emit_hook:
-	push_tos
-	ldr tos, =emit_hook
-	bx lr
-
-	@@ The emit? hook
-	define_word "emit?-hook", visible_flag
-_emit_q_hook:
-	push_tos
-	ldr tos, =emit_q_hook
-	bx lr
-
-	@@ The key hook
-	define_word "key-hook", visible_flag
-_key_hook:
-	push_tos
-	ldr tos, =key_hook
-	bx lr
-
-	@@ The key? hook
-	define_word "key?-hook", visible_flag
-_key_q_hook:
-	push_tos
-	ldr tos, =key_q_hook
-	bx lr
-
-	@@ The pause hook
-	define_word "pause-hook", visible_flag
-_pause_hook:
-	push_tos
-	ldr tos, =pause_hook
-	bx lr
 
 	@@ Token expected exception handler
 	define_word "token-expected", visible_flag

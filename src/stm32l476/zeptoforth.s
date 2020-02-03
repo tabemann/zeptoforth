@@ -67,6 +67,7 @@ outer_exc_handled:
 
 	.include "src/stm32l476/flashrom.s"
 	.include "src/stm32l476/console.s"
+	.include "src/common/expose.s"
 	.include "src/common/core.s"
 	.include "src/common/outer.s"
 	.include "src/common/asm.s"
