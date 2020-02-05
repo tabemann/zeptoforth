@@ -20,13 +20,22 @@ _if:	push {lr}
 	movs tos, #0
 	push_tos
 	movs tos, #6
+	push_tos
+	movs tos, #0
+	bl _asm_lsl_imm
+	push_tos
+	movs tos, #6
+	bl _asm_pull
+	push_tos
+	movs tos, #0
+	push_tos
+	movs tos, #0
 	bl _asm_cmp_imm
 	bl _asm_reserve_branch
 	push_tos
 	movs tos, #-1
 	pop {pc}
 
-	@@ ADD MORE TO THIS WORD!
 	@@ ELSE in an IF ELSE THEN block
 	define_word "else", visible_flag | immediate_flag | compile_only_flag
 _else:	push {lr}
@@ -55,7 +64,7 @@ _not_following_if:
 	bl _type
 	bl _abort
 	
-	@@ End an IF Block
+	@@ End an IF block
 	define_word "then", visible_flag | immediate_flag | compile_only_flag
 _then:	push {lr}
 	movs r1, tos
@@ -72,4 +81,67 @@ _then:	push {lr}
 	bl _asm_branch_zero_back
 	pop {pc}
 1:	bl _asm_branch_back
+	pop {pc}
+
+	@@ Start a BEGIN block
+	define_word "begin", visible_flag | immediate_flag | compile_only_flag
+_begin:	push {lr}
+	bl _current_here
+	pop {pc}
+
+	@@ Start a WHILE block
+	define_word "while", visible_flag | immediate_flag | compile_only_flag
+_while:	push {while}
+	push_tos
+	movs tos, #0
+	push_tos
+	movs tos, #6
+	push_tos
+	movs tos, #0
+	bl _asm_lsl_imm
+	push_tos
+	movs tos, #6
+	bl _asm_pull
+	push_tos
+	movs tos, #0
+	push_tos
+	movs tos, #0
+	bl _asm_cmp_imm
+	bl _asm_reserve_branch
+	pop {pc}
+
+	@@ End a BEGIN-WHILE-REPEAT block
+	define_word "repeat", visible_flag | immediate_flag | compile_only_flag
+_repeat:
+	push {lr}
+	movs r0, tos
+	pull_tos
+	push {r0}
+	bl _asm_branch
+	bl _current_here
+	pop {r0}
+	push_tos
+	movs tos, r0
+	bl _asm_branch_zero_back
+	pop {pc}
+
+	@@ End a BEGIN-UNTIL block
+	define_word "until", visible_flag | immediate_flag | compile_only_flag
+_until:	push {lr}
+	push_tos
+	movs tos, #0
+	push_tos
+	movs tos, #6
+	push_tos
+	movs tos, #0
+	bl _asm_lsl_imm
+	push_tos
+	movs tos, #6
+	bl _asm_pull
+	push_tos
+	movs tos, #0
+	push_tos
+	movs tos, #0
+	bl _asm_cmp_imm
+	bl _asm_branch_zero
 	pop {pc}
