@@ -145,3 +145,9 @@ _until:	push {lr}
 	bl _asm_cmp_imm
 	bl _asm_branch_zero
 	pop {pc}
+
+	@@ End a BEGIN-AGAIN block
+	define_word "again", visible_flag | immediate_flag | compile_only_flag
+_again:	push {lr}
+	bl _asm_branch
+	pop {pc}
