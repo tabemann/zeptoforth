@@ -402,8 +402,8 @@ _compile_only:
 _store_1:
 	mov r0, tos
 	pull_tos
-	movs r5, #0xFF
-	ands tos, r5
+	movs r1, #0xFF
+	ands tos, r1
 	strb tos, [r0]
 	pull_tos
 	bx lr
@@ -466,8 +466,8 @@ _get_8:	ldr r0, [tos]
 _comma_1:
 	ldr r0, =here
 	ldr r1, [r0]
-	mov r5, #0xFF
-	ands tos, r5
+	mov r2, #0xFF
+	ands tos, r2
 	strb tos, [r1], #1
 	str r1, [r0]
 	pull_tos
@@ -876,6 +876,8 @@ _rdrop:	adds sp, #4
 	@@ Initialize the hooks
 	define_word "init-hooks", visible_flag
 _init_hooks:
+	push {lr}
+	bl _init_handlers
 	ldr r0, =prompt_hook
 	ldr r1, =_do_prompt
 	str r1, [r0]
@@ -906,5 +908,5 @@ _init_hooks:
 	ldr r0, =pause_hook
 	ldr r1, =_do_pause
 	str r1, [r0]
-	bx lr
+	pop {pc}
 	

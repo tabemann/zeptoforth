@@ -19,7 +19,7 @@
 
 	.include "src/stm32l476/config.s"
 	.include "src/common/macro.s"
-	.include "src/common/variables.s"
+	.include "src/stm32l476/variables.s"
 	
 	.text
 
@@ -67,7 +67,8 @@ outer_exc_handled:
 
 	.include "src/stm32l476/flashrom.s"
 	.include "src/stm32l476/console.s"
-	.include "src/common/expose.s"
+	.include "src/stm32l476/handlers.s"
+	.include "src/stm32l476/expose.s"
 	.include "src/common/core.s"
 	.include "src/common/outer.s"
 	.include "src/common/cond.s"

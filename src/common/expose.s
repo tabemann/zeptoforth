@@ -113,3 +113,24 @@ _pause_hook:
 	push_tos
 	ldr tos, =pause_hook
 	bx lr
+
+	@@ Get the FAULT-HANDLER-HOOK variable address
+	define_word "fault-handler-hook", visible_flag
+_fault_handler_hook:
+	push_tos
+	ldr tos, =fault_handler_hook
+	bx lr
+
+	@@ Get the NULL-HANDLER-HOOK variable address
+	define_word "null-handler-hook", visible_flag
+_null_handler_hook:
+	push_tos
+	ldr tos, =null_handler_hook
+	bx lr
+
+	@@ Get the SYSTICK-HANDLER-HOOK variable address
+	define_word "systick-handler-hook", visible_flag
+_systick_handler_hook:
+	push_tos
+	ldr tos, =systick_handler_hook
+	bx lr

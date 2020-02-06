@@ -465,8 +465,8 @@ _asm_mov_16_imm:
 	pull_tos
 	movs r1, tos
 	lsrs tos, tos, #11
-	movs r5, #1
-	ands tos, r5
+	movs r2, #1
+	ands tos, r2
 	lsls tos, tos, #10
 	movs r3, r1
 	lsrs r3, r3, #12
@@ -478,15 +478,15 @@ _asm_mov_16_imm:
 	pop {r0, r1}
 	push_tos
 	movs tos, r1
-	movs r5, #0xFF
-	ands tos, r5
+	movs r2, #0xFF
+	ands tos, r2
 	lsrs r1, r1, #8
-	movs r5, #7
-	ands r1, r5
+	movs r2, #7
+	ands r1, r2
 	lsls r1, r1, #12
 	orrs tos, r1
-	movs r5, #0xF
-	ands r0, r5
+	movs r2, #0xF
+	ands r0, r2
 	lsls r0, r0, #8
 	orrs tos, r0
 	bl _current_comma_2
@@ -500,8 +500,8 @@ _asm_movt_imm:
 	pull_tos
 	movs r1, tos
 	lsrs tos, tos, #11
-	movs r5, #1
-	ands tos, r5
+	movs r2, #1
+	ands tos, r2
 	lsls tos, tos, #10
 	movs r3, r1
 	lsrs r3, r3, #12
@@ -513,15 +513,15 @@ _asm_movt_imm:
 	pop {r0, r1}
 	push_tos
 	movs tos, r1
-	movs r5, #0xFF
-	ands tos, r5
+	movs r2, #0xFF
+	ands tos, r2
 	lsrs r1, r1, #8
-	movs r5, #7
-	ands r1, r5
+	movs r2, #7
+	ands r1, r2
 	lsls r1, r1, #12
 	orrs tos, r1
-	movs r5, #0xF
-	ands r0, r5
+	movs r2, #0xF
+	ands r0, r2
 	lsls r0, r0, #8
 	orrs tos, r0
 	bl _current_comma_2
@@ -535,8 +535,8 @@ _asm_literal:
 	pull_tos
 	cmp tos, #0
 	blt 1f
-	movs r5, #0xFF
-	cmp tos, r5
+	movs r2, #0xFF
+	cmp tos, r2
 	bgt 2f
 	push_tos
 	movs tos, r0
@@ -547,8 +547,8 @@ _asm_literal:
 	bl _asm_ldr_long_imm
 	pop {pc}
 1:	neg tos, tos
-	movs r5, #0xFF
-	cmp tos, r5
+	movs r2, #0xFF
+	cmp tos, r2
 	bgt 3f
 	push_tos
 	movs tos, r0

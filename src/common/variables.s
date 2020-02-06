@@ -87,3 +87,12 @@
 
 	@@ The pause hook
 	allot pause_hook, 4
+
+	@@ The fault handler hook
+	allot fault_handler_hook, 4
+
+	@@ The null handler hook
+	allot null_handler_hook, 4
+
+	@@ The systick handler hook
+	allot systick_handler_hook, 4

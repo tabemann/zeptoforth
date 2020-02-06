@@ -102,13 +102,13 @@ _store_flash_16:
 
 	@@ Wait for flash opeartions to complete
 wait_for_flash:
-	push {r0, r1}
+	push {r0, r1, r2}
 1:	ldr r0, =FLASH_SR
 	ldr r1, [r0]
-	movs r5, #0x01
-	ands r1, r5
+	movs r2, #0x01
+	ands r1, r2
 	bne 1b
-	pop {r0, r1}
+	pop {r0, r1, r2}
 	bx lr
 	
 	@@ Exception handler for unaligned 16-byte flash writes
@@ -317,8 +317,8 @@ _store_flash_1:
 	movs r2, r0
 	adds r0, r0, tos
 	pull_tos
-	movs r5, #0xFF
-	ands tos, r5
+	movs r3, #0xFF
+	ands tos, r3
 	strb tos, [r0]
 	cmp r1, #0
 	beq 1f
@@ -335,16 +335,16 @@ _store_flash_2:
 	movs r0, tos
 	pull_tos
 	push {r0, tos}
-	movs r5, #0xFF
-	ands tos, r5
+	movs r1, #0xFF
+	ands tos, r1
 	push_tos
 	movs tos, r0
 	bl _store_flash_1
 	push_tos
 	pop {r0, tos}
 	lsrs tos, tos, #8
-	movs r5, #0xFF
-	ands tos, r5
+	movs r1, #0xFF
+	ands tos, r1
 	push_tos
 	movs tos, r0
 	adds tos, #1

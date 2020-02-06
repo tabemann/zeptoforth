@@ -164,7 +164,7 @@ _to_upper_char:
 	@@ Compare whether two strings are equal
 	define_word "equal-case-strings?", visible_flag
 _equal_case_strings:
-	push {lr}
+	push {r4, lr}
 	movs r0, tos
 	pull_tos
 	movs r1, tos
@@ -178,27 +178,31 @@ _equal_case_strings:
 	beq 3f
 	ldr tos, [r1]
 	adds r1, #1
+	push {r0, r1, r2, r3}
 	bl _to_upper_char
+	pop {r0, r1, r2¸ r3}
 	movs r4, tos
 	ldr tos, [r3]
 	adds r3, #1
+	push {r0, r1, r2, r3}
 	bl _to_upper_char
+	pop {r0, r1, r2, r3}
 	cmp r4, tos
 	beq 1b
 	movs tos, #-1
-	pop {pc}
+	pop {r4, pc}
 2:	cmp r2, #0
 	bne 3f
 	movs tos, #-1
-	pop {pc}
+	pop {r4, pc}
 3:	movs tos, #0
-	pop {pc}
+	pop {r4, pc}
 
 	@@ Find a word in a specific dictionary
 	@@ ( addr bytes mask dict -- addr|0 )
 	define_word "find-dict", visible_flag
 _find_dict:
-	push {lr}
+	push {r4, lr}
 	movs r0, tos
 	pull_tos
 	movs r1, tos
@@ -232,9 +236,9 @@ _find_dict:
 	b 1b
 3:	push_tos
 	movs tos, #0
-	pop {pc}
+	pop {r4, pc}
 4:	movs tos, r0
-	pop {pc}
+	pop {r4, pc}
 
 	@@ Find a word in the dictionary
 	@@ ( addr bytes mask -- addr|0 )
