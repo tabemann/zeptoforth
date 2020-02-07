@@ -85,6 +85,9 @@ _set_msi_48mhz:
 	orrs r1, r2
 	str r1, [r0]
 	movs r2, #RCC_CR_MSIRGSEL
-	orrs r1, r2x
+	orrs r1, r2
 	str r1, [r0]
 	bx lr
+
+	.ltorg
+	

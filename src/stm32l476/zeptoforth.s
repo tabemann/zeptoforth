@@ -65,6 +65,8 @@ outer_exc_handled:
 	bl _do_init
 	bl _quit
 
+	.ltorg
+	
 	.include "src/stm32l476/flashrom.s"
 	.include "src/stm32l476/console.s"
 	.include "src/stm32l476/handlers.s"

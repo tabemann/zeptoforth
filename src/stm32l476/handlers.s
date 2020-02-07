@@ -130,3 +130,6 @@ handle_time_4:
 	adds r0, #1
 	bx r0
 1:	bx lr
+
+	.ltorg
+	

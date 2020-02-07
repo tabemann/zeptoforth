@@ -14,7 +14,7 @@
 @ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 	@@ Compile the start of a word
-	define_word "start-compile", visible flag
+	define_word "start-compile", visible_flag
 _asm_start:
 	push {lr}
 	push_tos
@@ -44,7 +44,7 @@ _asm_start:
 	pop {pc}
 
 	@@ Compile a CREATEd word
-	define_word "create,", visible flag
+	define_word "create,", visible_flag
 _asm_create:
 	push {lr}
 	push_tos
@@ -286,29 +286,8 @@ _asm_mov_imm:
 	bl _current_comma_2
 	pop {pc}	
 
-	@@ Assemble a logical shift left immediate instruction
-	define_word "lsl-imm,", visible_flag
-_asm_lsl_imm:
-	push {lr}
-	movs r0, tos
-	pull_tos
-	movs r1, #7
-	ands r0, r1
-	movs r1, #0xFF
-	ands tos, r1
-	lsls r0, r0, #8
-	orrs tos, r0
-	movs r1, tos
-	pull_tos
-	movs r0, #0x1F
-	ands tos, r0
-	lsls tos, tos, #6
-	orrs tos, r1
-	bl _current_comma_2
-	pop {pc}	
-
 	@@ Assemble an reverse subtract immediate from zero instruction
-	define "neg,", visible_flag
+	define_word "neg,", visible_flag
 _asm_neg:
 	push {lr}
 	movs r0, tos
@@ -326,7 +305,7 @@ _asm_neg:
 	@@ Compile a blx (register) instruction
 	define_word "blx-reg,", visible_flag
 _asm_blx_reg:
-	push {rl}
+	push {lr}
 	movs r0, #0xF
 	ands tos, r0
 	lsls tos, tos, #3
@@ -338,7 +317,7 @@ _asm_blx_reg:
 	@@ Compile an unconditional branch
 	define_word "branch,", visible_flag
 _asm_branch:
-	push {rl}
+	push {lr}
 	bl _current_here
 	movs r0, tos
 	pull_tos
@@ -350,7 +329,7 @@ _asm_branch:
 	@@ Compile a branch on equal to zero
 	define_word "0branch,", visible_flag
 _asm_branch_zero:
-	push {rl}
+	push {lr}
 	bl _current_here
 	movs r0, tos
 	pull_tos
@@ -362,7 +341,7 @@ _asm_branch_zero:
 	@@ Compile a back-referenced unconditional branch
 	define_word "branch-back!", visible_flag
 _asm_branch_back:
-	push {rl}
+	push {lr}
 	movs r0, tos
 	pull_tos
 	subs tos, tos, r0
@@ -375,7 +354,7 @@ _asm_branch_back:
 	@@ Compile a back-referenced branch on equal to zero
 	define_word "0branch-back!", visible_flag
 _asm_branch_zero_back:
-	push {rl}
+	push {lr}
 	movs r0, tos
 	pull_tos
 	subs tos, tos, r0
@@ -390,7 +369,7 @@ _asm_branch_zero_back:
 	@@ Call a word at an address
 	define_word "call,", visible_flag
 _asm_call:	
-	push {rl}
+	push {lr}
 	bl _current_here
 	movs r0, tos
 	pull_tos
@@ -417,7 +396,7 @@ _asm_call:
 	@@ Compile a bl instruction
 	define_word "bl,", visible_flag
 _asm_bl:
-	push {rl}
+	push {lr}
 	movs r0, tos
 	lsrs tos, tos, #12
 	ldr r1, =0x3FF
@@ -471,7 +450,7 @@ _asm_mov_16_imm:
 	movs r3, r1
 	lsrs r3, r3, #12
 	orrs tos, r3
-	movs r3, #0xF240
+	ldr r3, =0xF240
 	orrs tos, r3
 	push {r0, r1}
 	bl _current_comma_2
@@ -885,7 +864,7 @@ _reserve_branch:
 	@@ Call a word at an address
 	define_word "call,", visible_flag
 _asm_call:	
-	push {rl}
+	push {lr}
 	bl _current_here
 	movs r0, tos
 	pull_tos
@@ -912,7 +891,7 @@ _asm_call:
 	@@ Compile a bl instruction
 	define_word "bl,", visible_flag
 _asm_bl:
-	push {rl}
+	push {lr}
 	movs r0, tos
 	lsrs tos, tos, #12
 	ldr r1, =0x7FF
@@ -1767,3 +1746,5 @@ _asm_bx:
 	orrs tos, r0
 	bl _current_comma_2
 	pop {pc}
+
+	.ltorg

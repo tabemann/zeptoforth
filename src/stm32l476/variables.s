@@ -27,7 +27,7 @@
 	@@ The EXTI 3 handler hook
 	allot exti_3_handler_hook, 4
 
-i	@@ The EXTI 4 handler hook
+	@@ The EXTI 4 handler hook
 	allot exti_4_handler_hook, 4
 
 	@@ The ADC handler hook

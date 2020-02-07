@@ -101,7 +101,7 @@ _token:	push {lr}
 	subs tos, r1, r0
 	ldr r0, =input_buffer_index
 	strh r1, [r0]
-	push {pc}
+	pop {pc}
 
 	@@ Parse a line comment
 	define_word "\\", visible_flag
@@ -317,7 +317,7 @@ _quit:	ldr r0, =rstack_top
 	beq 3f
 	ldr r0, =state
 	ldr r0, [r0]
-	bne r0, #0
+	cmp r0, #0
 	beq 4f
 	ldr r0, [tos]
 	movs r1, #compile_only_flag
@@ -520,7 +520,7 @@ _parse_base:
 	movs tos, r0
 5:	push_tos
 	ldr r0, =base
-	movs tos, [r0]
+	ldr tos, [r0]
 	pop {pc}
 6:	adds tos, #1
 	push_tos
@@ -712,3 +712,5 @@ _not_compiling:
 	bl _type
 	bl _abort
 
+	.ltorg
+	

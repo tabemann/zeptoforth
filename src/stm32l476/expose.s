@@ -77,3 +77,6 @@ _time_4_handler_hook:
 	push_tos
 	ldr tos, =time_4_handler_hook
 	bx lr
+
+	.ltorg
+	

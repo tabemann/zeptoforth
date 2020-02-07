@@ -49,3 +49,5 @@ _try:	push {lr}
 	push_const 0
 	pop {pc}
 	
+	.ltorg
+	

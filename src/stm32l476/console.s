@@ -152,3 +152,6 @@ _serial_key_q:
 	beq 1f
 	movs tos, #-1
 1:	pop {pc}
+
+	.ltorg
+	

@@ -102,7 +102,8 @@ dp 	.req r7
 	b 13f
 11:	.ascii "\text"
 12:	.p2align 1
-13:	nop.endm
+13:	nop
+	.endm
 
 	@@ Push a string onto the stack macro
 	.macro string_ln text
@@ -123,4 +124,3 @@ dp 	.req r7
 	.byte 12f - 11f
 11:	.ascii "*blank*"
 12:	.p2align 1
-	.endm

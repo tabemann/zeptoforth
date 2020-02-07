@@ -335,7 +335,7 @@ _find_last_visible_word:
 	beq 2f
 	ldr r0, [tos]
 	movs r1, #visible_flag
-	tsts r0, r1
+	tst r0, r1
 	bne 2f
 	ldr tos, [tos, #4]
 	b 1b
@@ -909,4 +909,6 @@ _init_hooks:
 	ldr r1, =_do_pause
 	str r1, [r0]
 	pop {pc}
+	
+	.ltorg
 	

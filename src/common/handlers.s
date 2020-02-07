@@ -54,3 +54,6 @@ handle_systick:
 	adds r0, #1
 	bx r0
 1:	bx lr
+
+	.ltorg
+	

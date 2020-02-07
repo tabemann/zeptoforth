@@ -91,7 +91,7 @@ _begin:	push {lr}
 
 	@@ Start a WHILE block
 	define_word "while", visible_flag | immediate_flag | compile_only_flag
-_while:	push {while}
+_while:	push {lr}
 	push_tos
 	movs tos, #0
 	push_tos
@@ -151,3 +151,6 @@ _until:	push {lr}
 _again:	push {lr}
 	bl _asm_branch
 	pop {pc}
+
+	.ltorg
+	

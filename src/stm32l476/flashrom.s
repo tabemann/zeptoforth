@@ -436,3 +436,6 @@ _flush_all_flash:
 	adds r0, #flash_buffer_size
 	b 1b
 2:	pop {pc}
+
+	.ltorg
+	

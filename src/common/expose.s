@@ -134,3 +134,6 @@ _systick_handler_hook:
 	push_tos
 	ldr tos, =systick_handler_hook
 	bx lr
+
+	.ltorg
+	
