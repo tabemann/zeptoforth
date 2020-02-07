@@ -75,7 +75,7 @@ dp 	.req r7
 
 	@@ String macro
 	.macro cstring text, dest
-	ldr \dest, =11f
+	adr \dest, 11f
 	b 14f
 11:	.byte 13f - 12f
 12:	.ascii "\text"
@@ -85,7 +85,7 @@ dp 	.req r7
 
 	@@ String with newline
 	.macro cstring_ln text, dest
-	ldr \dest, =11f
+	adr \dest, 11f
 	b 14f
 11:	.byte 13f - 12f
 12:	.ascii "\text\r\n"
@@ -95,26 +95,26 @@ dp 	.req r7
 
 	@@ Push a string onto the stack macro
 	.macro string text
+	push {r0}
+	cstring text, r0
 	push_tos
-	ldr tos, =11f
+	movs tos, r0
+	adds tos, #1
 	push_tos
-	ldr tos, =12f - 11f
-	b 13f
-11:	.ascii "\text"
-12:	.p2align 1
-13:	nop
+	ldrb tos, [r0]
+	pop {r0}
 	.endm
 
 	@@ Push a string onto the stack macro
-	.macro string_ln text
+	.macro string_ln, text
+	push {r0}
+	cstring_ln text, r0
 	push_tos
-	ldr tos, =11f
+	movs tos, r0
+	adds tos, #1
 	push_tos
-	ldr tos, =12f - 11f
-	b 13f
-11:	.ascii "\text\r\n"
-12:	.p2align 1
-13:	nop
+	ldrb tos, [r0]
+	pop {r0}
 	.endm
 
 	@@ Blank initial word header

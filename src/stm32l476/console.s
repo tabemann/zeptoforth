@@ -146,7 +146,7 @@ _serial_key_q:
 	push_tos
 	movs tos, #0
 	ldr r0, =USART2_ISR
-	ldr r1, r0
+	ldr r1, [r0]
 	movs r0, #RXNE
 	ands r1, r0
 	beq 1f

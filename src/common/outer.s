@@ -180,7 +180,9 @@ _equal_case_strings:
 	adds r1, #1
 	push {r0, r1, r2, r3}
 	bl _to_upper_char
-	pop {r0, r1, r2¸ r3}
+	@pop {r0, r1, r2¸ r3}
+	pop {r0, r1, r2}
+	pop {r3}
 	movs r4, tos
 	ldr tos, [r3]
 	adds r3, #1
