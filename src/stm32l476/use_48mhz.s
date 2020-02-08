@@ -39,13 +39,13 @@
 	define_word "use-48mhz", visible_flag
 _use_48mhz:
 	push {lr}
-	bl set_pwr_for_48mhz
-	bl set_flash_latency_for_48mhz
-	bl set_msi_48mhz
+	bl _set_pwr_for_48mhz
+	bl _set_flash_latency_for_48mhz
+	bl _set_msi_48mhz
 	pop {lr}
 
 	define_word "set-pwr-for-48mhz", visible_flag
-_set_pwr_for_48hz:	
+_set_pwr_for_48mhz:	
 	@@ Set up the voltage scale
 	ldr r0, =PWR_CR1
 	ldr r1, [r0]

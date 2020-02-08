@@ -17,7 +17,7 @@
 	.equ FLASH_BASE, 0x40022000	      @ Base address
 	.equ FLASH_ACR, FLASH_BASE + 0x00     @ Access control register
 	.equ FLASH_PDKEYR, FLASH_BASE + 0x04  @ Power-down key register
-	.equ FLASH_KEYR, FLASE_BASE + 0x08    @ Key register
+	.equ FLASH_KEYR, FLASH_BASE + 0x08    @ Key register
 	.equ FLASH_OPTKEYR, FLASH_BASE + 0x0C @	Option key register
 	.equ FLASH_SR, FLASH_BASE + 0x10      @ Status register
 	.equ FLASH_CR, FLASH_BASE + 0x14      @ Control register
@@ -112,6 +112,7 @@ wait_for_flash:
 	bx lr
 	
 	@@ Exception handler for unaligned 16-byte flash writes
+	define_word "16flash!-unaligned", visible_flag
 _store_flash_16_unaligned:
 	string_ln " unaligned 16-byte flash write"
 	bl _type
@@ -119,13 +120,14 @@ _store_flash_16_unaligned:
 	
 	@@ Exception handler for flash writes where flash has already been
 	@@ written
+	define_word "16flash!-already-written", visible_flag
 _store_flash_16_already_written:
 	string_ln " flash already written"
 	bl _type
 	bl _abort
 	
 	@@ Delete a 2K page of flash
-	define_word "erase-page", visible_word
+	define_word "erase-page", visible_flag
 _erase_page:	
 	push {r0, r1, r2, r3, lr}
 	@@ Protect the zeptoforth runtime!
@@ -218,11 +220,19 @@ _find_flash_end:
 	bics tos, r0
 	bx lr
 
+	@@ Find the next flash block
+	define_word "next-flash-block", visible_flag
+_next_flash_block:
+	movs r0, #0xF
+	bics tos, r0
+	movs r0, #0x10
+	adds tos, tos, r0
+	bx lr
+
 	@@ Find the start of the last flash word
 	define_word "find-last-flash-word", visible_flag
 _find_last_flash_word:
 	push {lr}
-	bl _find_flash_end
 1:	subs tos, #4
 	ldr r0, [tos]
 	cmp r0, #0
@@ -424,8 +434,8 @@ _flush_flash:
 	define_word "flush-all-flash", visible_flag
 _flush_all_flash:	
 	push {lr}
-	ldr r0, =flash_buffer_start
-	ldr r1, =flash_buffer_start + (flash_buffer_size * flash_buffer_count)
+	ldr r0, =flash_buffers_start
+	ldr r1, =flash_buffers_start + (flash_buffer_size * flash_buffer_count)
 1:	cmp r0, r1
 	bge 2f
 	push_tos

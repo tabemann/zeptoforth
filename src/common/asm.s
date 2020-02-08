@@ -143,7 +143,7 @@ _asm_build:
 	movs tos, #1
 	push_tos
 	movs tos, #1
-	bl _ssm_lsl_imm
+	bl _asm_lsl_imm
 	push_tos
 2:	movs tos, #8
 	push_tos
@@ -226,12 +226,12 @@ _asm_finalize:
 	movs tos, #4
 	bl _current_comma_align
 	push_tos
-	ldr tos, =latest_flags
+	ldr tos, =current_flags
 	ldr tos, [tos]
 	push_tos
 	ldr tos, =latest
 	ldr tos, [tos]
-	bl _current_store_2
+	bl _store_current_2
 1:	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
 	cmp r0, #0
@@ -854,7 +854,7 @@ _asm_beq_32_back:
 
 	@@ Reserve space for a branch
 	define_word "reserve-branch", visible_flag
-_reserve_branch:
+_asm_reserve_branch:
 	push {lr}
 	bl _current_reserve_4
 	pop {pc}
@@ -1471,7 +1471,7 @@ _asm_beq_back:
 
 	@@ Reserve space for a branch
 	define_word "reserve-branch", visible_flag
-_reserve_branch:
+_asm_reserve_branch:
 	push {lr}
 	bl _current_reserve_2
 	pop {pc}

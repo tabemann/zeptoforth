@@ -302,6 +302,17 @@ _execute_nz:
 	bx r0
 1:	bx lr
 
+	@@ Execute a PAUSE word, if one is set
+	define_word "pause", visible_flag
+_pause:	push {lr}
+	ldr r0, =pause_hook
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 1f
+	adds r0, #1
+	blx r0
+1:	pop {pc}
+	
 	@@ Default implementation of PAUSE, does nothing
 	define_word "do-pause", visible_flag
 _do_pause:
@@ -316,6 +327,12 @@ _exit:	adds sp, sp, #4
 	define_word "init-dict", visible_flag
 _init_dict:
 	push {lr}
+	bl _find_flash_end
+	push_tos
+	bl _next_flash_block
+	ldr r0, =flash_here
+	str tos, [r0]
+	pull_tos
 	bl _find_last_flash_word
 	bl _find_last_visible_word
 	ldr r0, =latest
@@ -360,7 +377,7 @@ _do_init:
 	@@ Set the currently-defined word to be immediate
 	define_word "[immediate]", visible_flag | immediate_flag | compile_only_flag
 _bracket_immediate:
-	ldr r0, =latest_flags
+	ldr r0, =current_flags
 	ldr r1, [r0]
 	movs r2, #immediate_flag
 	orr r1, r2
@@ -370,7 +387,7 @@ _bracket_immediate:
 	@@ Set the currently-defined word to be compile-only
 	define_word "[compile-only]", visible_flag | immediate_flag | compile_only_flag
 _bracket_compile_only:
-	ldr r0, =latest_flags
+	ldr r0, =current_flags
 	ldr r1, [r0]
 	movs r2, #compile_only_flag
 	orr r1, r2
@@ -380,7 +397,7 @@ _bracket_compile_only:
 	@@ Set the currently-defined word to be immediate
 	define_word "immediate", visible_flag
 _immediate:
-	ldr r0, =latest_flags
+	ldr r0, =current_flags
 	ldr r1, [r0]
 	movs r2, #immediate_flag
 	orr r1, r2
@@ -390,13 +407,45 @@ _immediate:
 	@@ Set the currently-defined word to be compile-only
 	define_word "compile-only", visible_flag
 _compile_only:
-	ldr r0, =latest_flags
+	ldr r0, =current_flags
 	ldr r1, [r0]
 	movs r2, #compile_only_flag
 	orr r1, r2
 	str r1, [r0]
 	bx lr
 
+	@@ Switch to interpretation mode
+	define_word "[", visible_flag
+_to_interpret:
+	ldr r0, =state
+	movs r1, #0
+	str r1, [r0]
+	bx lr
+
+	@@ Switch to compilation state
+	define_word "]", visible_flag
+_to_compile:
+	ldr r0, =state
+	movs r1, #-1
+	str r1, [r0]
+	bx lr
+
+	@@ Set compilation to RAM
+	define_word "compile-to-ram", visible_flag
+_compile_to_ram:
+	ldr r0, =compiling_to_flash
+	movs r1, #0
+	str r1, [r0]
+	bx lr
+
+	@@ Set compilation to flash
+	define_word "compile-to-flash", visible_flag
+_compile_to_flash:
+	ldr r0, =compiling_to_flash
+	movs r1, #-1
+	str r1, [r0]
+	bx lr
+	
 	@@ Store a byte
 	define_word "b!", visible_flag
 _store_1:
@@ -873,9 +922,9 @@ _get_r:	push_tos
 _rdrop:	adds sp, #4
 	bx lr
 
-	@@ Initialize the hooks
-	define_word "init-hooks", visible_flag
-_init_hooks:
+	@@ Initialize the variables
+	define_word "init-variables", visible_flag
+_init_variables:
 	push {lr}
 	bl _init_handlers
 	ldr r0, =prompt_hook
@@ -883,9 +932,6 @@ _init_hooks:
 	str r1, [r0]
 	ldr r0, =handle_number_hook
 	ldr r1, =_do_handle_number
-	str r1, [r0]
-	ldr r0, =parse_integer_hook
-	ldr r1, =_do_parse_integer
 	str r1, [r0]
 	ldr r0, =failed_parse_hook
 	ldr r1, =_do_failed_parse
@@ -907,6 +953,32 @@ _init_hooks:
 	str r1, [r0]
 	ldr r0, =pause_hook
 	ldr r1, =_do_pause
+	str r1, [r0]
+	ldr r0, =compiling_to_flash
+	movs r1, 0
+	str r1, [r0]
+	ldr r0, =current_compile
+	str r1, [r0]
+	ldr r0, =latest
+	str r1, [r0]
+	ldr r0, =ram_latest
+	str r1, [r0]
+	ldr r0, =flash_latest
+	str r1, [r0]
+	ldr r0, =building
+	str r1, [r0]
+	ldr r0, =build_target
+	str r1, [r0]
+	ldr r0, =current_flags
+	strh r1, [r0]
+	ldr r0, =input_buffer_index
+	strh r1, [r0]
+	ldr r0, =input_buffer_count
+	strb r1, [r0]
+	ldr r0, =state
+	str r1, [r0]
+	movs r1, #10
+	ldr r0, =base
 	str r1, [r0]
 	pop {pc}
 	

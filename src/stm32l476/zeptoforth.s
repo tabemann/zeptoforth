@@ -47,17 +47,22 @@ handle_reset:
 	ldr r0, =0xF0E1C2D3
 	ldr r1, =handler
 	str r0, [r1]
+	@@ Initialize HERE
+	ldr r0, =here
+	ldr r1, =ram_current
+	str r1, [r0]
 	@@ Call the rest of the runtime in an exception handler
 	push_tos
 	ldr tos, =outer_exc_handled
 	bl _try
 	@@ If the inner loop returns, reboot
-	b handler_reset
+	b handle_reset
 
 	@@ The outermost exception handling - if an exception happens here the
 	@@ system will reboot
 outer_exc_handled:
-	bl _init_hooks
+	bl _init_variables
+	bl _init_dict
 	bl _uart_init
 	bl _use_48mhz
 	bl _serial_115200_48mhz

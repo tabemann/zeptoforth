@@ -25,6 +25,9 @@
 	@@ Flash buffers
 	allot flash_buffers_start, flash_buffer_size * flash_buffer_count	
 
+	@@ The current exception handler
+	allot handler, 4
+
 	@@ The word being currently compiled
 	allot current_compile, 4
 	

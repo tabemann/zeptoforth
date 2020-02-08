@@ -273,7 +273,7 @@ _find:	push {lr}
 	push_tos
 	ldr r3, =flash_latest
 	ldr tos, [r3]
-	bl _flash_dict
+	bl _find_dict
 	pop {pc}
 1:	push_tos
 	ldr r0, =flash_latest
@@ -640,7 +640,7 @@ _parse_digit:
 	movs tos, #0
 	pop {pc}
 2:	push {r0}
-	bl _to_upper_case
+	bl _to_upper_char
 	pop {r0}
 	cmp tos, #0x41
 	blt 1b
@@ -659,7 +659,7 @@ _create:
 	cmp tos, #0
 	beq 1f
 	bl _asm_create
-	ldr r0, =latest_flags
+	ldr r0, =current_flags
 	movs r1, #visible_flag
 	str r1, [r0]
 	pop {pc}
@@ -675,7 +675,7 @@ _colon:	push {lr}
 	cmp tos, #0
 	beq 1f
 	bl _asm_start
-	ldr r0, =latest_flags
+	ldr r0, =current_flags
 	movs r1, #visible_flag
 	str r1, [r0]
 	pop {pc}
