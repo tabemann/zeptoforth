@@ -14,7 +14,7 @@
 @ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 	@@ Start an IF block
-	define_word "if", visible_flag | immediate_flag | compile_only_flag
+	define_word "if", visible_flag | immediate_flag | compiled_flag
 _if:	push {lr}
 	push_tos
 	movs tos, #0
@@ -37,7 +37,7 @@ _if:	push {lr}
 	pop {pc}
 
 	@@ ELSE in an IF ELSE THEN block
-	define_word "else", visible_flag | immediate_flag | compile_only_flag
+	define_word "else", visible_flag | immediate_flag | compiled_flag
 _else:	push {lr}
 	cmp r0, #0
 	beq 1f
@@ -65,7 +65,7 @@ _not_following_if:
 	bl _abort
 	
 	@@ End an IF block
-	define_word "then", visible_flag | immediate_flag | compile_only_flag
+	define_word "then", visible_flag | immediate_flag | compiled_flag
 _then:	push {lr}
 	movs r1, tos
 	pull_tos
@@ -84,13 +84,13 @@ _then:	push {lr}
 	pop {pc}
 
 	@@ Start a BEGIN block
-	define_word "begin", visible_flag | immediate_flag | compile_only_flag
+	define_word "begin", visible_flag | immediate_flag | compiled_flag
 _begin:	push {lr}
 	bl _current_here
 	pop {pc}
 
 	@@ Start a WHILE block
-	define_word "while", visible_flag | immediate_flag | compile_only_flag
+	define_word "while", visible_flag | immediate_flag | compiled_flag
 _while:	push {lr}
 	push_tos
 	movs tos, #0
@@ -111,7 +111,7 @@ _while:	push {lr}
 	pop {pc}
 
 	@@ End a BEGIN-WHILE-REPEAT block
-	define_word "repeat", visible_flag | immediate_flag | compile_only_flag
+	define_word "repeat", visible_flag | immediate_flag | compiled_flag
 _repeat:
 	push {lr}
 	movs r0, tos
@@ -126,7 +126,7 @@ _repeat:
 	pop {pc}
 
 	@@ End a BEGIN-UNTIL block
-	define_word "until", visible_flag | immediate_flag | compile_only_flag
+	define_word "until", visible_flag | immediate_flag | compiled_flag
 _until:	push {lr}
 	push_tos
 	movs tos, #0
@@ -147,7 +147,7 @@ _until:	push {lr}
 	pop {pc}
 
 	@@ End a BEGIN-AGAIN block
-	define_word "again", visible_flag | immediate_flag | compile_only_flag
+	define_word "again", visible_flag | immediate_flag | compiled_flag
 _again:	push {lr}
 	bl _asm_branch
 	pop {pc}

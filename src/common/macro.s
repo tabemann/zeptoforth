@@ -33,7 +33,7 @@ dp 	.req r7
 	.equ immediate_flag, 0x0002
 
 	@@ Compile-only word
-	.equ compile_only_flag, 0x0004
+	.equ compiled_flag, 0x0004
 
 	@@ Inlined word
 	.equ inlined_flag, 0x0008

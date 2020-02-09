@@ -322,7 +322,7 @@ _quit:	ldr r0, =rstack_top
 	cmp r0, #0
 	beq 4f
 	ldr r0, [tos]
-	movs r1, #compile_only_flag
+	movs r1, #compiled_flag
 	ands r0, r1
 	bne 5f
 6:	bl _to_xt

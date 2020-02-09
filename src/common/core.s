@@ -375,7 +375,7 @@ _do_init:
 	pop {pc}
 	
 	@@ Set the currently-defined word to be immediate
-	define_word "[immediate]", visible_flag | immediate_flag | compile_only_flag
+	define_word "[immediate]", visible_flag | immediate_flag | compiled_flag
 _bracket_immediate:
 	ldr r0, =current_flags
 	ldr r1, [r0]
@@ -385,11 +385,11 @@ _bracket_immediate:
 	bx lr
 
 	@@ Set the currently-defined word to be compile-only
-	define_word "[compile-only]", visible_flag | immediate_flag | compile_only_flag
+	define_word "[compile-only]", visible_flag | immediate_flag | compiled_flag
 _bracket_compile_only:
 	ldr r0, =current_flags
 	ldr r1, [r0]
-	movs r2, #compile_only_flag
+	movs r2, #compiled_flag
 	orr r1, r2
 	str r1, [r0]
 	bx lr
@@ -409,7 +409,7 @@ _immediate:
 _compile_only:
 	ldr r0, =current_flags
 	ldr r1, [r0]
-	movs r2, #compile_only_flag
+	movs r2, #compiled_flag
 	orr r1, r2
 	str r1, [r0]
 	bx lr
@@ -453,9 +453,10 @@ _compile:
 	bl _asm_call
 	pop {pc}
 
-	@@ Tick
-	define_word "'", visible_flag
-_tick:	push {lr}
+	@@ Get the word corresponding to a token
+	define_word "token-word", visible_flag
+_token_word:
+	push {lr}
 	bl _token
 	cmp tos, #0
 	beq 1f
@@ -470,13 +471,32 @@ _tick:	push {lr}
 2:	ldr tos, =_unknown_word
 	bl _raise
 	pop {pc}
-	
-	
-	@@ Postpone a word
-	define_word "postpone", visible_flag
-_postpone:
+
+	@@ Tick
+	define_word "'", visible_flag
+_tick:	push {lr}
+	bl _token_word
+	bl _to_xt
+	pop {pc}
+
+	@@ Compiled tick
+	define_word "[']", visible_flag | immediate_flag | compiled_flag
+_compiled_tick:
 	push {lr}
 	bl _tick
+	push_tos
+	movs tos, #6
+	bl _asm_push
+	push_tos
+	movs tos, #6
+	bl _asm_literal
+	pop {pc}
+	
+	@@ Postpone a word
+	define_word "postpone", visible_flag | immediate_flag | compiled_flag
+_postpone:
+	push {lr}
+	bl _token_word
 	ldr r0, [tos]
 	tst r0, #immediate_flag
 	beq 1f
@@ -484,19 +504,27 @@ _postpone:
 	bl _compile
 	pop {pc}
 1:	bl _to_xt
-	movs r0, tos
-	movs tos, #6
-	push {r0}
-	bl _asm_push
-	pop {r0}
 	push_tos
-	movs tos, r0
+	movs tos, #6
+	bl _asm_push
 	push_tos
 	movs tos, #6
 	bl _asm_literal
 	push_tos
 	ldr tos, =_compile
 	bl _compile
+	pop {pc}
+
+	@@ Compile a literal
+	define_word "literal", visible_flag | immediate_flag | compiled_flag
+_literal:	
+	push {lr}
+	push_tos
+	movs tos, #6
+	bl _asm_push
+	push_tos
+	movs tos, #6
+	bl _asm_literal
 	pop {pc}
 	
 	@@ Unknown word exception
