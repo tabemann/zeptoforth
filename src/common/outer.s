@@ -340,7 +340,7 @@ _quit:	ldr r0, =rstack_top
 3:	movs tos, r1
 	push_tos
 	movs tos, r0
-	bl _unknown_word
+	bl _parse_literal
 	b 1b
 4:	ldr r0, [tos]
 	movs r1, #immediate_flag
@@ -361,9 +361,9 @@ _do_prompt:
 	bl _type
 	pop {pc}
 
-	@@ Handle an unknown word
-	define_word "unknown-word", visible_flag
-_unknown_word:
+	@@ Parse a literal word
+	define_word "parse-literal", visible_flag
+_parse_literal:
 	push {lr}
 	movs r0, tos
 	pull_tos

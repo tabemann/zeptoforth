@@ -445,6 +445,66 @@ _compile_to_flash:
 	movs r1, #-1
 	str r1, [r0]
 	bx lr
+
+	@@ Compile an xt
+	define_word "compile,", visible_flag
+_compile:
+	push {lr}
+	bl _asm_call
+	pop {pc}
+
+	@@ Tick
+	define_word "'", visible_flag
+_tick:	push {lr}
+	bl _token
+	cmp tos, #0
+	beq 1f
+	push_tos
+	movs tos, #visible_flag
+	bl _find
+	cmp tos, #0
+	beq 2f
+1:	ldr tos, =_token_expected
+	bl _raise
+	pop {pc}
+2:	ldr tos, =_unknown_word
+	bl _raise
+	pop {pc}
+	
+	
+	@@ Postpone a word
+	define_word "postpone", visible_flag
+_postpone:
+	push {lr}
+	bl _tick
+	ldr r0, [tos]
+	tst r0, #immediate_flag
+	beq 1f
+	bl _to_xt
+	bl _compile
+	pop {pc}
+1:	bl _to_xt
+	movs r0, tos
+	movs tos, #6
+	push {r0}
+	bl _asm_push
+	pop {r0}
+	push_tos
+	movs tos, r0
+	push_tos
+	movs tos, #6
+	bl _asm_literal
+	push_tos
+	ldr tos, =_compile
+	bl _compile
+	pop {pc}
+	
+	@@ Unknown word exception
+	define_word "unknown-word", visible_flag
+_unknown_word:
+	string_ln " unknown word"
+	bl _type
+	bl _abort
 	
 	@@ Store a byte
 	define_word "b!", visible_flag
