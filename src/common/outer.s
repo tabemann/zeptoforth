@@ -661,7 +661,7 @@ _create:
 	bl _asm_create
 	ldr r0, =current_flags
 	movs r1, #visible_flag
-	str r1, [r0]
+	strh r1, [r0]
 	pop {pc}
 1:	push_tos
 	ldr tos, =_token_expected
@@ -677,7 +677,7 @@ _colon:	push {lr}
 	bl _asm_start
 	ldr r0, =current_flags
 	movs r1, #visible_flag
-	str r1, [r0]
+	strh r1, [r0]
 	pop {pc}
 1:	push_tos
 	ldr tos, =_token_expected

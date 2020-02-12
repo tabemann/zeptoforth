@@ -254,6 +254,14 @@ _type:	push {lr}
 	adds r1, #1
 	b 1b
 2:	pop {pc}
+
+	@ Convert a cstring to a string
+	define_word "count", visible_flag
+_count:	ldrb r0, [tos]
+	adds tos, #1
+	push_tos
+	movs tos, r0
+	bx lr
 	
 	@@ Receive a character
 	define_word "key", visible_flag
@@ -378,7 +386,7 @@ _do_init:
 	define_word "[immediate]", visible_flag | immediate_flag | compiled_flag
 _bracket_immediate:
 	ldr r0, =current_flags
-	ldr r1, [r0]
+	ldrh r1, [r0]
 	movs r2, #immediate_flag
 	orr r1, r2
 	str r1, [r0]
@@ -388,7 +396,7 @@ _bracket_immediate:
 	define_word "[compile-only]", visible_flag | immediate_flag | compiled_flag
 _bracket_compile_only:
 	ldr r0, =current_flags
-	ldr r1, [r0]
+	ldrh r1, [r0]
 	movs r2, #compiled_flag
 	orr r1, r2
 	str r1, [r0]
@@ -398,7 +406,7 @@ _bracket_compile_only:
 	define_word "immediate", visible_flag
 _immediate:
 	ldr r0, =current_flags
-	ldr r1, [r0]
+	ldrh r1, [r0]
 	movs r2, #immediate_flag
 	orr r1, r2
 	str r1, [r0]
@@ -408,7 +416,7 @@ _immediate:
 	define_word "compile-only", visible_flag
 _compile_only:
 	ldr r0, =current_flags
-	ldr r1, [r0]
+	ldrh r1, [r0]
 	movs r2, #compiled_flag
 	orr r1, r2
 	str r1, [r0]
@@ -525,6 +533,17 @@ _literal:
 	push_tos
 	movs tos, #6
 	bl _asm_literal
+	pop {pc}
+
+	@@ Recursively call a word
+	define_word "recurse", visible_flag | immediate_flag | compiled_flag
+_recurse:
+	push {lr}
+	push_tos
+	ldr tos, =current_compile
+	ldr tos, [tos]
+	bl _to_xt
+	bl _asm_branch
 	pop {pc}
 	
 	@@ Unknown word exception
@@ -975,8 +994,10 @@ _current_comma_cstring:
 	movs r0, tos
 	pull_tos
 	movs r1, tos
+	pull_tos
 2:	cmp r0, #0
 	beq 1f
+	push_tos
 	ldrb tos, [r1]
 	push {r0, r1}
 	bl _current_comma_1
