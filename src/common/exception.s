@@ -24,7 +24,8 @@ _raise:	cmp tos, #0
 	adds sp, #4
 	ldr dp, [sp], #4
 	pop {pc}
-1:	bx lr
+1:	pull_tos
+	bx lr
 
 	@@ Try to see if an exception occurs
 	define_word "try", visible_flag

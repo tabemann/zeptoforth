@@ -47,13 +47,22 @@
 	allot building, 4
 
 	@@ The flags for the word being currently compiled
-	allot current_flags, 2
+	allot current_flags, 4
+
+	@@ The evaluation buffer index pointer
+	allot eval_index_ptr, 4
+
+	@@ The evaluation buffer count pointer
+	allot eval_count_ptr, 4
+
+	@@ The evaluation buffer pointer
+	allot eval_ptr, 4
 
 	@@ The current input buffer index
-	allot input_buffer_index, 2
+	allot input_buffer_index, 4
 
 	@@ The input buffer count
-	allot input_buffer_count, 1
+	allot input_buffer_count, 4
 
 	@@ The input buffer
 	allot input_buffer, input_buffer_size

@@ -17,11 +17,14 @@
 	define_word "parse-to-char", visible_flag
 _parse_to_char:
 	movs r0, tos
-	ldr r1, =input_buffer_index
-	ldrh r1, [r1]
-	ldr r2, =input_buffer_count
-	ldrb r2, [r2]
-	ldr r3, =input_buffer
+	ldr r1, =eval_index_ptr
+	ldr r1, [r1]
+	ldr r1, [r1]
+	ldr r2, =eval_count_ptr
+	ldr r2, [r2]
+	ldr r2, [r2]
+	ldr r3, =eval_ptr
+	ldr r3, [r3]
 	adds r1, r1, r3
 	adds r2, r2, r3
 1:	cmp r1, r2
@@ -31,15 +34,17 @@ _parse_to_char:
 	beq 2f
 	adds r1, #1
 	b 1b
-2:	ldr r0, =input_buffer_index
-	ldrh r2, [r0]
-	ldr r3, =input_buffer
+2:	ldr r0, =eval_index_ptr
+	ldr r0, [r0]
+	ldr r2, [r0]
+	ldr r3, =eval_ptr
+	ldr r3, [r3]
 	adds tos, r0, r3
 	push_tos
 	movs tos, r1
 	subs tos, r3
 	adds r1, #1
-	strh r1, [r0]
+	str r1, [r0]
 	bx lr
 
 	@@ Immediately type a string in the input stream

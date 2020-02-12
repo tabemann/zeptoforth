@@ -44,14 +44,17 @@ _newline_q:
 	define_word "token-start", visible_flag
 _token_start:
 	push {lr}
-	ldr r0, =input_buffer_index
-	ldrh r1, [r0]
+	ldr r0, =eval_index_ptr
+	ldr r0, [r0]
+	ldr r1, [r0]
 	push_tos
-1:	ldr r0, =input_buffer_count
-	ldrb r2, [r0]
+1:	ldr r0, =eval_count_ptr
+	ldr r0, [r0]
+	ldr r2, [r0]
 	cmp r1, r2
 	beq 2f
-	ldr r0, =input_buffer
+	ldr r0, =eval_ptr
+	ldr r0, [r0]
 	adds r0, r0, r1
 	ldrb tos, [r0]
 	push {r0}
@@ -69,11 +72,13 @@ _token_start:
 _token_end:
 	push {lr}
 	movs r1, tos
-1:	ldr r0, =input_buffer_count
-	ldrb r2, [r0]
+1:	ldr r0, =eval_count_ptr
+	ldr r0, [r0]
+	ldr r2, [r0]
 	cmp r1, r2
 	beq 2f
-	ldr r0, =input_buffer
+	ldr r0, =eval_ptr
+	ldr r0, [r0]
 	adds r0, r0, r1
 	ldrb tos, [r0]
 	push {r1}
@@ -95,23 +100,28 @@ _token:	push {lr}
 	bl _token_end
 	pop {r0}
 	movs r1, tos
-	ldr tos, =input_buffer
+	ldr tos, =eval_ptr
+	ldr tos, [tos]
 	adds tos, tos, r0
 	push_tos
 	subs tos, r1, r0
-	ldr r0, =input_buffer_index
-	strh r1, [r0]
+	ldr r0, =eval_index_ptr
+	ldr r0, [r0]
+	str r1, [r0]
 	pop {pc}
 
 	@@ Parse a line comment
 	define_word "\\", visible_flag
 _line_comment:
 	push {lr}
-	ldr r0, =input_buffer_index
-	ldrh r0, [r0]
-	ldr r1, =input_buffer_count
-	ldrb r1, [r1]
-	ldr r2, =input_buffer
+	ldr r0, =eval_index_ptr
+	ldr r0, [r0]
+	ldr r0, [r0]
+	ldr r1, =eval_count_ptr
+	ldr r1, [r1]
+	ldr r1, [r1]
+	ldr r2, =eval_ptr
+	ldr r2, [r2]
 1:	cmp r0, r1
 	beq 3f
 	adds r3, r0, r2
@@ -125,19 +135,23 @@ _line_comment:
 	adds r0, #1
 	b 1b
 2:	pull_tos
-	ldr r1, =input_buffer_index
-	ldrh r0, [r1]
+	ldr r1, =eval_index_ptr
+	ldr r1, [r1]
+	ldr r0, [r1]
 3:	pop {pc}
 
 	@@ Parse a paren coment
 	define_word "(", visible_flag
 _paren_comment:
 	push {lr}
-	ldr r0, =input_buffer_index
-	ldrh r0, [r0]
-	ldr r1, =input_buffer_count
-	ldrb r1, [r1]
-	ldr r2, =input_buffer
+	ldr r0, =eval_index_ptr
+	ldr r0, [r0]
+	ldr r0, [r0]
+	ldr r1, =eval_count_ptr
+	ldr r1, [r1]
+	ldr r1, [r1]
+	ldr r2, =eval_ptr
+	ldr r2, [r2]
 1:	cmp r0, r1
 	beq 3f
 	adds r3, r0, r2
@@ -147,8 +161,9 @@ _paren_comment:
 	adds r0, #1
 	b 1b
 2:	pull_tos
-	ldr r1, =input_buffer_index
-	ldrh r0, [r1]
+	ldr r1, =eval_index_ptr
+	ldr r1, [r1]
+	ldr r0, [r1]
 3:	pop {pc}
 	
 	@@ Convert a character to being uppercase
@@ -294,6 +309,46 @@ _to_xt:	push {lr}
 1:	adds tos, #1
 	pop {pc}
 
+	@@ Evaluate a string
+	define_word "evaluate", visible_flag
+_evaluate:
+	push {pc}
+	ldr r0, =eval_index_ptr
+	ldr r0, [r0]
+	ldr r1, =eval_count_ptr
+	ldr r1, [r1]
+	ldr r2, =eval_ptr
+	ldr r2, [r2]
+	push {r0, r1, r2}
+	movs r0, #0
+	movs r1, tos
+	pull_tos
+	movs r2, tos
+	push {r0, r1, r2}
+	movs r3, sp
+	ldr r0, =eval_index_ptr
+	str r3, [r0]
+	movs r3, sp
+	adds r3, #4
+	ldr r0, =eval_count_ptr
+	str r3, [r0]
+	movs r3, sp
+	adds r3, #8
+	ldr r0, =eval_ptr
+	str r3, [r0]
+	ldr tos, =_inner
+	bl _try
+	pop {r0, r1, r2}
+	pop {r0, r1, r2}
+	ldr r3, =eval_index_ptr
+	str r0, [r3]
+	ldr r3, =eval_count_ptr
+	str r1, [r3]
+	ldr r3, =eval_ptr
+	str r2, [r3]
+	bl _raise
+	pop {pc}
+	
 	@@ Abort
 	define_word "abort", visible_flag
 _abort:	ldr r0, =stack_top
@@ -305,6 +360,17 @@ _abort:	ldr r0, =stack_top
 _quit:	ldr r0, =rstack_top
 	mov sp, r0
 	bl _flush_all_flash
+1:	bl _inner_loop
+	ldr r0, =prompt_hook
+	push_tos
+	ldr tos, [r0]
+	bl _execute_nz
+	bl _refill
+	b 1b
+	
+	@@ The actual inner loop of Forth
+	define_word "inner", visible_flag
+_inner:	push {lr}
 1:	bl _token
 	cmp tos, #0
 	beq 2f
@@ -330,13 +396,8 @@ _quit:	ldr r0, =rstack_top
 	movs r0, tos
 	pull_tos
 	blx r0
-	pop {pc}
-2:	ldr r0, =prompt_hook
-	push_tos
-	ldr tos, [r0]
-	bl _execute_nz
-	bl _refill
 	b 1b
+2:	pop {pc}
 3:	movs tos, r1
 	push_tos
 	movs tos, r0
@@ -661,7 +722,7 @@ _create:
 	bl _asm_create
 	ldr r0, =current_flags
 	movs r1, #visible_flag
-	strh r1, [r0]
+	str r1, [r0]
 	pop {pc}
 1:	push_tos
 	ldr tos, =_token_expected
@@ -677,7 +738,7 @@ _colon:	push {lr}
 	bl _asm_start
 	ldr r0, =current_flags
 	movs r1, #visible_flag
-	strh r1, [r0]
+	str r1, [r0]
 	pop {pc}
 1:	push_tos
 	ldr tos, =_token_expected

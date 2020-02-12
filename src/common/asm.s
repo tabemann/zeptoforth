@@ -26,7 +26,7 @@ _asm_start:
 	str tos, [r0]
 	ldr r0, =current_flags
 	movs r1, #0
-	strh r1, [r0]
+	str r1, [r0]
 	push_tos
 	movs tos, #4
 	bl _current_allot
@@ -56,7 +56,7 @@ _asm_create:
 	str tos, [r0]
 	ldr r0, =current_flags
 	movs r1, #0
-	strh r1, [r0]
+	str r1, [r0]
 	push_tos
 	movs tos, #4
 	bl _current_allot
@@ -116,7 +116,7 @@ _asm_build:
 	str tos, [r0]
 	ldr r0, =current_flags
 	movs r1, #0
-	strh r1, [r0]
+	str r1, [r0]
 	push_tos
 	movs tos, #4
 	bl _current_allot
@@ -227,7 +227,7 @@ _asm_finalize:
 	bl _current_comma_align
 	push_tos
 	ldr tos, =current_flags
-	ldrh tos, [tos]
+	ldr tos, [tos]
 	push_tos
 	ldr tos, =latest
 	ldr tos, [tos]

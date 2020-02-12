@@ -32,6 +32,26 @@ _base:	push_tos
 	ldr tos, =base
 	bx lr
 
+	@@ The parse index
+	define_word ">parse", visible_flag
+_to_parse:
+	push_tos
+	ldr tos, =eval_index_ptr
+	ldr tos, [tos]
+	bx lr
+
+	@@ The source info
+	define_word "source", visible_flag
+_source:
+	push_tos
+	ldr tos, =eval_ptr
+	ldr tos, [tos]
+	push_tos
+	ldr tos, =eval_count_ptr
+	ldr tos, [tos]
+	ldr tos, [tos]
+	bx lr
+
 	@@ The input buffer index
 	define_word ">in", visible_flag
 _to_in:	push_tos

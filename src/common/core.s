@@ -386,7 +386,7 @@ _do_init:
 	define_word "[immediate]", visible_flag | immediate_flag | compiled_flag
 _bracket_immediate:
 	ldr r0, =current_flags
-	ldrh r1, [r0]
+	ldr r1, [r0]
 	movs r2, #immediate_flag
 	orr r1, r2
 	str r1, [r0]
@@ -396,7 +396,7 @@ _bracket_immediate:
 	define_word "[compile-only]", visible_flag | immediate_flag | compiled_flag
 _bracket_compile_only:
 	ldr r0, =current_flags
-	ldrh r1, [r0]
+	ldr r1, [r0]
 	movs r2, #compiled_flag
 	orr r1, r2
 	str r1, [r0]
@@ -406,7 +406,7 @@ _bracket_compile_only:
 	define_word "immediate", visible_flag
 _immediate:
 	ldr r0, =current_flags
-	ldrh r1, [r0]
+	ldr r1, [r0]
 	movs r2, #immediate_flag
 	orr r1, r2
 	str r1, [r0]
@@ -416,7 +416,7 @@ _immediate:
 	define_word "compile-only", visible_flag
 _compile_only:
 	ldr r0, =current_flags
-	ldrh r1, [r0]
+	ldr r1, [r0]
 	movs r2, #compiled_flag
 	orr r1, r2
 	str r1, [r0]
@@ -1079,16 +1079,25 @@ _init_variables:
 	ldr r0, =build_target
 	str r1, [r0]
 	ldr r0, =current_flags
-	strh r1, [r0]
+	str r1, [r0]
 	ldr r0, =input_buffer_index
-	strh r1, [r0]
+	str r1, [r0]
 	ldr r0, =input_buffer_count
-	strb r1, [r0]
+	str r1, [r0]
 	ldr r0, =state
 	str r1, [r0]
 	movs r1, #10
 	ldr r0, =base
 	str r1, [r0]
+	ldr r0, =eval_index_ptr
+	ldr r1, =input_buffer_index
+	str r1, [r0]
+	ldr r0, =eval_count_ptr
+	ldr r1, =input_buffer_count
+	str r1, [r0]
+	ldr r0, =eval_ptr
+	ldr r1, =input_buffer
+	str r1, [r0] 
 	pop {pc}
 	
 	.ltorg
