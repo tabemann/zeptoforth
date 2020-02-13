@@ -180,7 +180,7 @@ _type_space_integer:
 _type_space_unsigned:
 	push {lr}
 	bl _space
-	bl _type_unsignend
+	bl _type_unsigned
 	pop {pc}
 	
 	@@ Copy bytes from one buffer to another one (which may overlap)
