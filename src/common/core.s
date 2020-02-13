@@ -128,11 +128,36 @@ _udiv:	movs r0, tos
 	udiv tos, tos, r0
 	bx lr
 
+	@@ Signed modulus of two two's complement integers
+	define_word "mod", visible_flag
+_mod:	movs r0, tos
+	pull_tos
+	sdiv r1, tos, r0
+	mls tos, r1, r0, tos
+	bx lr
+
+	@@ Unsigned modulus of two two's complement integers
+	define_word "umod", visible_flag
+_umod:	movs r0, tos
+	pull_tos
+	udiv r1, tos, r0
+	mls tos, r1, r0, tos
+	bx lr
+
 	@@ Get the HERE pointer
 	define_word "here", visible_flag
 _here:	ldr r0, =here
 	push_tos
 	ldr tos, [r0]
+	bx lr
+
+	@@ Get the PAD pointer
+	define_word "pad", visible_flag
+_pad:	ldr r0, =here
+	ldr r1, =pad_offset
+	push_tos
+	ldr tos, [r0]
+	adds tos, tos, r1
 	bx lr
 
 	@@ Allot space in RAM

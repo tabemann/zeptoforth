@@ -120,6 +120,68 @@ _compile_imm_cstring:
 	movs tos, #0
 	bl _current_comma_1
 	pop {pc}
+
+	@@ Type an integer without a preceding space
+	define_word "(.)", visible_flag
+_type_integer:
+	push {lr}
+	push_tos
+	ldr r0, =here
+	ldr r0, [r0]
+	movs r1, tos
+	movs tos, r0
+	push_tos
+	movs tos, r1
+	bl _format_integer
+	movs r0, tos
+	push_tos
+	push {r0}
+	bl _allot
+	bl _type
+	pop {r0}
+	push_tos
+	rsbs tos, r0, #0
+	bl _allot
+	pop {pc}
+
+	@@ Type an unsigned integer without a preceding space
+	define_word "(u.)", visible_flag
+_type_unsigned:
+	push {lr}
+	push_tos
+	ldr r0, =here
+	ldr r0, [r0]
+	movs r1, tos
+	movs tos, r0
+	push_tos
+	movs tos, r1
+	bl _format_unsigned
+	movs r0, tos
+	push_tos
+	push {r0}
+	bl _allot
+	bl _type
+	pop {r0}
+	push_tos
+	rsbs tos, r0, #0
+	bl _allot
+	pop {pc}
+
+	@@ Type an integer with a preceding space
+	define_word ".", visible_flag
+_type_space_integer:
+	push {lr}
+	bl _space
+	bl _type_integer
+	pop {pc}
+
+	@@ Type an unsigned integer with a preceding space
+	define_word "u.", visible_flag
+_type_space_unsigned:
+	push {lr}
+	bl _space
+	bl _type_unsignend
+	pop {pc}
 	
 	@@ Copy bytes from one buffer to another one (which may overlap)
 	define_word "move", visible_flag
@@ -172,5 +234,141 @@ _move_from_low:
 	adds r2, #2
 	b 1b
 2:	bx lr
+
+	@@ Reverse bytes in place
+	define_word "reverse", visible_flag
+_reverse:
+	movs r0, tos
+	pull_tos
+	movs r1, tos
+	pull_tos
+	adds r0, r0, r1
+	subs r0, #1
+1:	cmp r1, r0
+	bge 2f
+	ldrb r2, [r1]
+	ldrb r3, [r0]
+	strb r2, [r0]
+	strb r3, [r1]
+	adds r1, #1
+	subs r0, #1
+	b 1b
+2:	bx lr
+
+	@@ Format an unsigned integer as a string
+	define_word "format-unsigned", visible_flag
+_format_unsigned:
+	push {lr}
+	cmp tos, #0
+	beq 1f
+	bl _format_integer_inner
+	ldr r0, =here
+	ldr r0, [r0]
+	movs r1, tos
+	movs tos, r0
+	push_tos
+	movs tos, r1
+	push {r0, r1}
+	bl _reverse
+	pop {r0, r1}
+	movs r2, tos
+	push_tos
+	movs tos, r0
+	push_tos
+	movs tos, r1
+	push {r2}
+	bl _move
+	pop {r2}
+	push_tos
+	movs tos, r2
+	push_tos
+	movs tos, r1
+	pop {pc}
+1:	pull_tos
+	movs r0, #0x30
+	ldrb r0, [tos]
+	push_tos
+	movs tos, #1
+	pop {pc}
+	
+	@@ Format an integer as a string
+	define_word "format-integer", visible_flag
+_format_integer:
+	push {lr}
+	cmp tos, #0
+	blt 1f
+	beq 2f
+	bl _format_integer_inner
+	ldr r0, =here
+	ldr r0, [r0]
+	movs r1, tos
+3:	movs tos, r0
+	push_tos
+	movs tos, r1
+	push {r0, r1}
+	bl _reverse
+	pop {r0, r1}
+	movs r2, tos
+	push_tos
+	movs tos, r0
+	push_tos
+	movs tos, r1
+	push {r2}
+	bl _move
+	pop {r2}
+	push_tos
+	movs tos, r2
+	push_tos
+	movs tos, r1
+	pop {pc}
+1:	rsbs tos, tos, #0
+	bl _format_integer_inner
+	ldr r0, =here
+	ldr r0, [r0]
+	movs r1, tos
+	adds r2, r0, r1
+	movs r3, #0x2D
+	ldrb r3, [r2]
+	adds r1, #1
+	b 3b
+2:	pull_tos
+	movs r0, #0x30
+	ldrb r0, [tos]
+	push_tos
+	movs tos, #1
+	pop {pc}
+
+	@@ The inner portion of formatting an integer as a string
+	define_word "format-integer-inner", visible_flag
+_format_integer_inner:
+	push {lr}
+	ldr r0, =here
+	ldr r0, [r0]
+	ldr r1, =base
+	ldr r1, [r1]
+	movs r2, tos
+1:	cmp r2, #0
+	beq 3f
+	movs tos, r2
+	push_tos
+	movs tos, r1
+	push {r0, r1, r2}
+	bl _umod
+	pop {r0, r1, r2}
+	udiv r2, r2, r1
+	cmp tos, #10
+	ble 2f
+	adds tos, #0x30
+	ldrb tos, [r0]
+	adds r0, #1
+	b 1b
+2:	adds tos, #0x37
+	ldrb tos, [r0]
+	adds r0, #1
+	b 1b
+3:	ldr r1, =here
+	ldr r1, [r1]
+	subs tos, r0, r1
+	pop {pc}
 	
 	.ltorg

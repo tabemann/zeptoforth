@@ -30,3 +30,4 @@
 	.equ flash_dict_start, 0x00004000
 	.equ flash_dict_end, 0x00100000
 	.equ input_buffer_size, 255
+	.equ pad_offset, 256

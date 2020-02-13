@@ -312,7 +312,7 @@ _to_xt:	push {lr}
 	@@ Evaluate a string
 	define_word "evaluate", visible_flag
 _evaluate:
-	push {pc}
+	push {lr}
 	ldr r0, =eval_index_ptr
 	ldr r0, [r0]
 	ldr r1, =eval_count_ptr
@@ -325,14 +325,14 @@ _evaluate:
 	pull_tos
 	movs r2, tos
 	push {r0, r1, r2}
-	movs r3, sp
+	mov r3, sp
 	ldr r0, =eval_index_ptr
 	str r3, [r0]
-	movs r3, sp
+	mov r3, sp
 	adds r3, #4
 	ldr r0, =eval_count_ptr
 	str r3, [r0]
-	movs r3, sp
+	mov r3, sp
 	adds r3, #8
 	ldr r0, =eval_ptr
 	str r3, [r0]
@@ -360,7 +360,7 @@ _abort:	ldr r0, =stack_top
 _quit:	ldr r0, =rstack_top
 	mov sp, r0
 	bl _flush_all_flash
-1:	bl _inner_loop
+1:	bl _inner
 	ldr r0, =prompt_hook
 	push_tos
 	ldr tos, [r0]
