@@ -136,7 +136,7 @@ _mod:	movs r0, tos
 	mls tos, r1, r0, tos
 	bx lr
 
-	@@ Unsigned modulus of two two's complement integers
+	@@ Unsigned modulus of two unsigned integers
 	define_word "umod", visible_flag
 _umod:	movs r0, tos
 	pull_tos

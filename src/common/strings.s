@@ -13,6 +13,17 @@
 @ You should have received a copy of the GNU General Public License
 @ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+	@@ Skip to the start of a token
+	define_word "skip-to-token", visible_flag
+_skip_to_token:
+	push {lr}
+	bl _token_start
+	ldr r0, =eval_count_ptr
+	ldr r0, [r0]
+	str tos, [r0]
+	pull_tos
+	pop {pc}
+	
 	@@ Parse to a character in the input stream
 	define_word "parse-to-char", visible_flag
 _parse_to_char:
@@ -51,6 +62,7 @@ _parse_to_char:
 	define_word ".(", visible_flag
 _type_to_paren:
 	push {lr}
+	bl _skip_to_token
 	push_tos
 	movs tos, #0x29
 	bl _parse_to_char
@@ -81,6 +93,7 @@ _compile_imm_string:
 	define_word "c\"", visible_flag | immediate_flag | compiled_flag
 _compile_imm_cstring:
 	push {lr}
+	bl _skip_to_token
 	push_tos
 	movs tos, #0x22
 	bl _parse_to_char
@@ -119,6 +132,29 @@ _compile_imm_cstring:
 	push_tos
 	movs tos, #0
 	bl _current_comma_1
+	pop {pc}
+
+	@@ Parse a character and put it on the stack
+	define_word "char", visible_flag
+_char:	push {lr}
+	bl _token
+	cmp tos, #0
+	beq 1f
+	pull_tos
+	ldrb tos, [tos]
+	pop {pc}
+
+	@@ Parse a character and compile it
+	define_word "[char]", visible_flag | immediate_flag | compiled_flag
+_compile_char:
+	push {lr}
+	bl _char
+	push_tos
+	movs tos, #6
+	bl _asm_push
+	push_tos
+	movs tos, #6
+	bl _asm_literal
 	pop {pc}
 
 	@@ Type an integer without a preceding space
