@@ -169,6 +169,14 @@ _allot:	ldr r0, =here
 	pull_tos
 	bx lr
 
+	@@ Set the RAM flash pointer
+	define_word "here!", visible_flag
+_store_here:
+	ldr r0, =here
+	str tos, [r0]
+	pull_tos
+	bx lr
+
 	@@ Get the flash HERE pointer
 	define_word "flash-here", visible_flag
 _flash_here:
@@ -353,8 +361,7 @@ _do_pause:
 	
 	@@ Exit a word
 	define_word "exit", visible_flag
-_exit:	adds sp, sp, #4
-	pop {pc}
+_exit:	pop {pc}
 
 	@@ Initiatlize the dictionary
 	define_word "init-dict", visible_flag
@@ -448,7 +455,7 @@ _compile_only:
 	bx lr
 
 	@@ Switch to interpretation mode
-	define_word "[", visible_flag
+	define_word "[", visible_flag | immediate_flag
 _to_interpret:
 	ldr r0, =state
 	movs r1, #0
@@ -549,8 +556,8 @@ _postpone:
 	pop {pc}
 
 	@@ Compile a literal
-	define_word "literal", visible_flag | immediate_flag | compiled_flag
-_literal:	
+	define_word "lit,", visible_flag
+_comma_lit:	
 	push {lr}
 	push_tos
 	movs tos, #6
@@ -558,6 +565,13 @@ _literal:
 	push_tos
 	movs tos, #6
 	bl _asm_literal
+	pop {pc}
+
+	@@ Compile a literal
+	define_word "literal", visible_flag | immediate_flag | compiled_flag
+_literal:	
+	push {lr}
+	bl _comma_lit
 	pop {pc}
 
 	@@ Recursively call a word
@@ -1005,7 +1019,26 @@ _current_comma_align:
 	pop {r0}
 	b 1b
 2:	pop {pc}
-	
+
+	@@ Align to a power of two
+	define_word "align,", visible_flag
+_comma_align:
+	push {lr}
+	subs tos, #1
+	movs r0, tos
+	pull_tos
+1:	push {r0}
+	bl _here
+	pop {r0}
+	ands tos, r0
+	beq 2f
+	movs tos, #0
+	push {r0}
+	bl _comma_1
+	pop {r0}
+	b 1b
+2:	pop {pc}
+
 	@@ Compile a c-string
 	define_word "current-cstring,", visible_flag
 _current_comma_cstring:

@@ -97,13 +97,20 @@ _compile_imm_cstring:
 	push_tos
 	movs tos, #0x22
 	bl _parse_to_char
+	bl _compile_cstring
+	pop {pc}
+
+	@@ Compile a counted-string
+	define_word "compile-cstring", visible_flag
+_compile_cstring:
+	push {lr}
 	movs r0, tos
 	pull_tos
 	movs r1, tos
 	movs tos, #4
 	push_tos
 	movs tos, #6
-	push {r0. r1}
+	push {r0, r1}
 	bl _asm_adr
 	bl _current_here
 	pop {r0, r1}

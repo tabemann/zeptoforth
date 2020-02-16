@@ -720,12 +720,8 @@ _create:
 	cmp tos, #0
 	beq 1f
 	bl _asm_create
-	ldr r0, =current_flags
-	movs r1, #visible_flag
-	str r1, [r0]
 	pop {pc}
-1:	push_tos
-	ldr tos, =_token_expected
+1:	ldr tos, =_token_expected
 	bl _raise
 	pop {pc}
 	
@@ -740,8 +736,7 @@ _colon:	push {lr}
 	movs r1, #visible_flag
 	str r1, [r0]
 	pop {pc}
-1:	push_tos
-	ldr tos, =_token_expected
+1:	ldr tos, =_token_expected
 	bl _raise
 	pop {pc}
 
@@ -761,6 +756,302 @@ _semi:	push {lr}
 	bl _raise
 	pop {pc}
 
+	@@ Create a constant
+	define_word "constant", visible_flag
+_constant_4:
+	push {lr}
+	bl _token
+	cmp tos, #0
+	beq 1f
+	bl _asm_start
+	push_tos
+	movs tos, #6
+	bl _asm_push
+	push_tos
+	movs tos, #6
+	bl _asm_literal
+	bl _asm_end
+	pop {pc}
+1:	ldr tos, =_token_expected
+	bl _raise
+	pop {pc}
+
+	@@ Create a 2-word constant
+	define_word "2constant", visible_flag
+_constant_8:
+	push {lr}
+	bl _token
+	cmp tos, #0
+	beq 1f
+	bl _asm_start
+	push_tos
+	movs tos, #6
+	bl _asm_push
+	push_tos
+	movs tos, #6
+	bl _asm_literal
+	push_tos
+	movs tos, #6
+	bl _asm_literal
+	bl _asm_end
+	pop {pc}
+1:	ldr tos, =_token_expected
+	bl _raise
+	pop {pc}
+
+	@@ Create a RAM buffer immediately
+	define_word "[ram-buffer]", visible_flag | immediate_flag
+_ram_buffer:
+	push {lr}
+	bl _token
+	cmp tos, #0
+	beq 1f
+	ldr r0, =state
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 2f
+	bl _rot
+	push_tos
+	movs tos, #6
+	bl _asm_push
+	push_tos
+	movs tos, #6
+	bl _asm_literal
+	bl _compile_cstring
+	push_tos
+	ldr tos, =_count
+	bl _asm_call
+	push_tos
+	ldr tos, =_do_ram_buffer
+	bl _asm_call
+	pop {pc}
+2:	bl _do_ram_buffer
+	pop {pc}
+1:	ldr tos, =_token_expected
+	bl _raise
+	pop {pc}
+
+	@@ Actually create a RAM buffer
+	define_word "ram-buffer", visible_flag
+_do_ram_buffer:
+	push {lr}
+	bl _asm_ram_create_1
+	bl _allot
+	pop {pc}
+
+	@@ Create an 8-bit RAM variable immediately
+	define_word "[bram-variable]", visible_flag | immediate_flag
+_ram_variable_1:
+	push {lr}
+	bl _token
+	cmp tos, #0
+	beq 1f
+	ldr r0, =state
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 2f
+	bl _compile_cstring
+	push_tos
+	ldr tos, =_count
+	bl _asm_call
+	push_tos
+	ldr tos, =_do_ram_variable_1
+	bl _asm_call
+	pop {pc}
+2:	bl _do_ram_variable_1
+	pop {pc}
+1:	ldr tos, =_token_expected
+	bl _raise
+	pop {pc}
+
+	@@ Actually create an 8-bit RAM variable
+	define_word "bram-variable", visible_flag
+_do_ram_variable_1:
+	push {lr}
+	bl _asm_ram_create_1
+	push_tos
+	movs tos, #1
+	bl _allot
+	pop {pc}
+
+	@@ Create a 16-bit RAM variable immediately
+	define_word "[hram-variable]", visible_flag | immediate_flag
+_ram_variable_2:
+	push {lr}
+	bl _token
+	cmp tos, #0
+	beq 1f
+	ldr r0, =state
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 2f
+	bl _compile_cstring
+	push_tos
+	ldr tos, =_count
+	bl _asm_call
+	push_tos
+	ldr tos, =_do_ram_variable_2
+	bl _asm_call
+	pop {pc}
+2:	bl _do_ram_variable_2
+	pop {pc}
+1:	ldr tos, =_token_expected
+	bl _raise
+	pop {pc}
+
+	@@ Actually create a 16-bit RAM variable
+	define_word "hram-variable", visible_flag
+_do_ram_variable_2:
+	push {lr}
+	bl _asm_ram_create_2
+	push_tos
+	movs tos, #2
+	bl _allot
+	pop {pc}
+
+	@@ Create a 32-bit RAM variable immediately
+	define_word "[ram-variable]", visible_flag | immediate_flag
+_ram_variable_4:
+	push {lr}
+	bl _token
+	cmp tos, #0
+	beq 1f
+	ldr r0, =state
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 2f
+	bl _compile_cstring
+	push_tos
+	ldr tos, =_count
+	bl _asm_call
+	push_tos
+	ldr tos, =_do_ram_variable_4
+	bl _asm_call
+	pop {pc}
+2:	bl _do_ram_variable_4
+	pop {pc}
+1:	ldr tos, =_token_expected
+	bl _raise
+	pop {pc}
+
+	@@ Actually create a 32-bit RAM variable
+	define_word "ram-variable", visible_flag
+_do_ram_variable_4:
+	push {lr}
+	bl _asm_ram_create_4
+	push_tos
+	movs tos, #4
+	bl _allot
+	pop {pc}
+
+	@@ Create a 64-bit RAM variable immediately
+	define_word "[2ram-variable]", visible_flag | immediate_flag
+_ram_variable_8:
+	push {lr}
+	bl _token
+	cmp tos, #0
+	beq 1f
+	ldr r0, =state
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 2f
+	bl _compile_cstring
+	push_tos
+	ldr tos, =_count
+	bl _asm_call
+	push_tos
+	ldr tos, =_do_ram_variable_8
+	bl _asm_call
+	pop {pc}
+2:	bl _do_ram_variable_8
+	pop {pc}
+1:	ldr tos, =_token_expected
+	bl _raise
+	pop {pc}
+
+	@@ Actually create a 64-bit RAM variable
+	define_word "2ram-variable", visible_flag
+_do_ram_variable_8:
+	push {lr}
+	bl _asm_ram_create_4
+	push_tos
+	movs tos, #8
+	bl _allot
+	pop {pc}
+
+	@@ Create a buffer
+	define_word "buffer", visible_flag
+_buffer:
+	push {lr}
+	ldr r0, =compiling_to_flash
+	ldr r0, [r0]
+	cmp r0, #0
+	bne 1f
+	bl _create
+	bl _allot
+	pop {pc}
+1:	ldr tos, =_compile_to_ram_only
+	bl _raise
+	pop {pc}
+
+	@@ Create an 8-bit variable
+	define_word "bvariable", visible_flag
+_variable_1:
+	push {lr}
+	bl _variable_2
+	pop {pc}
+
+	@@ Create a 16-bit variable
+	define_word "hvariable", visible_flag
+_variable_2:
+	push {lr}
+	ldr r0, =compiling_to_flash
+	ldr r0, [r0]
+	cmp r0, #0
+	bne 1f
+	bl _create
+	push_tos
+	movs tos, #2
+	bl _allot
+	pop {pc}
+1:	ldr tos, =_compile_to_ram_only
+	bl _raise
+	pop {pc}
+
+	@@ Create a 32-bit variable
+	define_word "hvariable", visible_flag
+_variable_4:
+	push {lr}
+	ldr r0, =compiling_to_flash
+	ldr r0, [r0]
+	cmp r0, #0
+	bne 1f
+	bl _create
+	push_tos
+	movs tos, #4
+	bl _allot
+	pop {pc}
+1:	ldr tos, =_compile_to_ram_only
+	bl _raise
+	pop {pc}
+
+	@@ Create a 64-bit variable
+	define_word "2variable", visible_flag
+_variable_8:
+	push {lr}
+	ldr r0, =compiling_to_flash
+	ldr r0, [r0]
+	cmp r0, #0
+	bne 1f
+	bl _create
+	push_tos
+	movs tos, #8
+	bl _allot
+	pop {pc}
+1:	ldr tos, =_compile_to_ram_only
+	bl _raise
+	pop {pc}
+
 	@@ Token expected exception handler
 	define_word "token-expected", visible_flag
 _token_expected:
@@ -772,6 +1063,13 @@ _token_expected:
 	define_word "not-compiling", visible_flag
 _not_compiling:
 	string_ln " not compiling"
+	bl _type
+	bl _abort
+
+	@@ We are currently compiling to flash
+	define_word "compile-to-ram-only", visible_flag
+_compile_to_ram_only:
+	string_ln " compile to ram only"
 	bl _type
 	bl _abort
 

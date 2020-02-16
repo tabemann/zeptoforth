@@ -99,6 +99,141 @@ _asm_create:
 	bl _asm_bx
 	pop {pc}
 
+	@@ Compile a byte-aligned RAM CREATEd word
+	define_word "bram-create,", visible_flag
+_asm_ram_create_1:
+	push {lr}
+	ldr r0, =compiling_to_flash
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 2f
+	push_tos
+	movs tos, #4
+	bl _current_comma_align
+	push_tos
+	bl _current_here
+	ldr r0, =current_compile
+	str tos, [r0]
+	ldr r0, =current_flags
+	movs r1, #0
+	str r1, [r0]
+	push_tos
+	movs tos, #4
+	bl _current_allot
+	bl _asm_link
+	bl _current_comma_cstring
+	bl _current_here
+	movs r0, #1
+	ands tos, r0
+	beq 1f
+	movs tos, #0
+	bl _current_comma_1
+	push_tos
+1:	movs tos, #6
+	bl _asm_push
+	bl _here
+	push_tos
+	movs tos, #6
+	bl _asm_literal
+	push_tos
+	movs tos, #14
+	bl _asm_bx
+	pop {pc}
+2:	bl _asm_create
+	pop {pc}
+
+	@@ Compile a halfword-aligned RAM CREATEd word
+	define_word "hram-create,", visible_flag
+_asm_ram_create_2:
+	push {lr}
+	ldr r0, =compiling_to_flash
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 2f
+	push_tos
+	movs tos, #4
+	bl _current_comma_align
+	push_tos
+	bl _current_here
+	ldr r0, =current_compile
+	str tos, [r0]
+	ldr r0, =current_flags
+	movs r1, #0
+	str r1, [r0]
+	push_tos
+	movs tos, #4
+	bl _current_allot
+	bl _asm_link
+	bl _current_comma_cstring
+	bl _current_here
+	movs r0, #1
+	ands tos, r0
+	beq 1f
+	movs tos, #0
+	bl _current_comma_1
+	push_tos
+1:	movs tos, #6
+	bl _asm_push
+	push_tos
+	movs tos, #2
+	bl _comma_align
+	bl _here
+	push_tos
+	movs tos, #6
+	bl _asm_literal
+	push_tos
+	movs tos, #14
+	bl _asm_bx
+	pop {pc}
+2:	bl _asm_create
+	pop {pc}
+
+	@@ Compile a word-aligned RAM CREATEd word
+	define_word "ram-create,", visible_flag
+_asm_ram_create_4:
+	push {lr}
+	ldr r0, =compiling_to_flash
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 2f
+	push_tos
+	movs tos, #4
+	bl _current_comma_align
+	push_tos
+	bl _current_here
+	ldr r0, =current_compile
+	str tos, [r0]
+	ldr r0, =current_flags
+	movs r1, #0
+	str r1, [r0]
+	push_tos
+	movs tos, #4
+	bl _current_allot
+	bl _asm_link
+	bl _current_comma_cstring
+	bl _current_here
+	movs r0, #1
+	ands tos, r0
+	beq 1f
+	movs tos, #0
+	bl _current_comma_1
+	push_tos
+1:	movs tos, #6
+	bl _asm_push
+	push_tos
+	movs tos, #4
+	bl _comma_align
+	bl _here
+	push_tos
+	movs tos, #6
+	bl _asm_literal
+	push_tos
+	movs tos, #14
+	bl _asm_bx
+	pop {pc}
+2:	bl _asm_create
+	pop {pc}
+
 	@@ Compile a BUILDed word
 	define_word "<build,", visible_flag
 _asm_build:
