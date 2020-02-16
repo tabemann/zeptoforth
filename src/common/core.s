@@ -1056,6 +1056,34 @@ _get_r:	push_tos
 _rdrop:	adds sp, #4
 	bx lr
 
+	@@ Get the return stack pointer
+	define_word "rp@", visible_flag
+_get_rp:
+	push_tos
+	mov tos, sp
+	bx lr
+
+	@@ Set the return stack pointer
+	define_word "rp!", visible_flag
+_store_rp:
+	mov sp, tos
+	pull_tos
+	bx lr
+
+	@@ Get the data stack pointer
+	define_word "sp@", visible_flag
+_get_sp:
+	push_tos
+	mov tos, sp
+	bx lr
+
+	@@ Set the data stack pointer
+	define_word "sp!", visible_flag
+_store_sp:
+	mov sp, tos
+	pull_tos
+	bx lr
+
 	@@ Initialize the variables
 	define_word "init-variables", visible_flag
 _init_variables:
