@@ -1074,13 +1074,13 @@ _store_rp:
 	define_word "sp@", visible_flag
 _get_sp:
 	push_tos
-	mov tos, sp
+	mov tos, dp
 	bx lr
 
 	@@ Set the data stack pointer
 	define_word "sp!", visible_flag
 _store_sp:
-	mov sp, tos
+	mov dp, tos
 	pull_tos
 	bx lr
 
