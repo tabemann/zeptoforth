@@ -1,6 +1,6 @@
 MEMORY
 {
-	flash : org = 0x08000000, len = 1024k
+	flash : org = 0x00000000, len = 1024k
 	ram : org = 0x20000000, len = 96k
 }
 

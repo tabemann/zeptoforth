@@ -14,6 +14,7 @@
 @ You should have received a copy of the GNU General Public License
 @ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+vectors:
 	.word rstack_top
 	.word handle_reset+1 	@ 1: the reset handler
 	.word handle_fault+1	@ 2: the NMI handler

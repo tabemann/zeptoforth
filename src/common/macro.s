@@ -116,11 +116,3 @@ dp 	.req r7
 	ldrb tos, [r0]
 	pop {r0}
 	.endm
-
-	@@ Blank initial word header
-	.p2align 2
-	.word 0
-10:	.word 0
-	.byte 12f - 11f
-11:	.ascii "*blank*"
-12:	.p2align 1

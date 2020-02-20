@@ -24,7 +24,6 @@
 	.text
 
 	.include "src/stm32l476/vectors.s"
-	.include "src/stm32l476/use_48mhz.s"
 	
 	@@ The first (null) dictionary entry
 	.p2align 1
@@ -72,6 +71,7 @@ outer_exc_handled:
 
 	.ltorg
 	
+	.include "src/stm32l476/use_48mhz.s"
 	.include "src/stm32l476/flashrom.s"
 	.include "src/stm32l476/console.s"
 	.include "src/stm32l476/handlers.s"

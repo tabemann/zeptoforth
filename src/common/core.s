@@ -229,8 +229,9 @@ _emit:	push {lr}
 	ldr r0, [r0]
 	cmp r0, #0
 	beq 1f
-	adds r0, #1
-	blx r0
+	push_tos
+	movs tos, r0
+	bl _execute
 	pop {pc}
 1:	pull_tos
 	pop {pc}
@@ -243,8 +244,9 @@ _emit_q:
 	ldr r0, [r0]
 	cmp r0, #0
 	beq 1f
-	adds r0, #1
-	blx r0
+	push_tos
+	movs tos, r0
+	bl _execute
 	pop {pc}
 1:	push_tos
 	movs tos, #0
@@ -303,8 +305,9 @@ _key:	push {lr}
 	ldr r0, [r0]
 	cmp r0, #0
 	beq 1f
-	adds r0, #1
-	blx r0
+	push_tos
+	movs tos, r0
+	bl _execute
 	pop {pc}
 1:	push_tos
 	movs tos, #0x0D
@@ -317,8 +320,9 @@ _key_q:	push {lr}
 	ldr r0, [r0]
 	cmp r0, #0
 	beq 1f
-	adds r0, #1
-	blx r0
+	push_tos
+	movs tos, r0
+	bl _execute
 	pop {pc}
 1:	push_tos
 	movs tos, #0
@@ -328,7 +332,7 @@ _key_q:	push {lr}
 	define_word "execute", visible_flag
 _execute:
 	mov r0, tos
-	adds r0, #1
+	adds r0, #1 @ Commented out to deal with an issue with Cutter @@@
 	pull_tos
 	bx r0
 	
@@ -350,8 +354,9 @@ _pause:	push {lr}
 	ldr r0, [r0]
 	cmp r0, #0
 	beq 1f
-	adds r0, #1
-	blx r0
+	push_tos
+	movs tos, r0
+	bl _execute
 1:	pop {pc}
 	
 	@@ Default implementation of PAUSE, does nothing
@@ -407,9 +412,7 @@ _do_init:
 	cmp tos, #0
 	beq 1f
 	bl _to_xt
-	movs r0, tos
-	pull_tos
-	blx r0
+	bl _execute
 	pop {pc}
 1:	pull_tos
 	pop {pc}

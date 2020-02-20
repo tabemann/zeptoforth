@@ -31,14 +31,13 @@ _raise:	cmp tos, #0
 	define_word "try", visible_flag
 _try:	push {lr}
 	str dp, [sp, #-4]!
-	str r0, [sp, #-4]!
 	ldr r0, =handler
 	ldr r0, [r0]
 	str r0, [sp, #-4]!
 	ldr r0, =handler
 	str sp, [r0]
 	mov r0, tos
-	adds r0, #1
+	adds r0, #1 @ Commented out to deal with an issue with Cutter @@@
 	pull_tos
 	blx r0
 	ldr r0, =handler
@@ -46,7 +45,6 @@ _try:	push {lr}
 	ldr r1, [sp], #4
 	str r1, [r0]
 	ldr r1, [dp], #4
-	ldr r0, [sp], #8
 	push_const 0
 	pop {pc}
 	

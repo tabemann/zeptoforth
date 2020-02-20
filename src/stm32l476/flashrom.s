@@ -38,7 +38,7 @@
 	@@ Write 16 bytes starting at a 16-bit-aligned address in flash
 	define_word "16flash!", visible_flag
 _store_flash_16:
-	push {r0, r1, r2, r3, lr}
+	push {lr}
 	cmp tos, #0xf
 	beq 1f
 	ldr tos, =_store_flash_16_unaligned
@@ -63,6 +63,13 @@ _store_flash_16:
 	beq 1f
 	ldr tos, =_store_flash_16_already_written
 	bl _raise
+1:	movs r0, tos
+	adds r0, #0x10
+	ldr r1, =flash_here
+	ldr r2, [r1]
+	cmp r0, r2
+	blt 1f
+	str r0, [r1]
 1:	ldr r0, =0x08000000
 	adds tos, tos, r0
 	@@ Flash needs to be unlocked
@@ -82,10 +89,14 @@ _store_flash_16:
 	ldmia dp!, {r0}
 	stmia tos!, {r0}
 	stmia tos!, {r1}
+	push {r0, r1, r2, r3}
 	bl wait_for_flash
+	pop {r0, r1, r2, r3}
 	stmia tos!, {r2}
 	stmia tos!, {r3}
+	push {r0, r1, r2, r3}
 	bl wait_for_flash
+	pop {r0, r1, r2, r3}
 	@@ Disable writing to the flash
 	ldr r0, =FLASH_CR
 	ldr r1, [r0]
@@ -98,17 +109,15 @@ _store_flash_16:
 	str r1, [r0]
 	@@ Get the next value on the stack to put in the TOS
 	pull_tos
-	pop {r0, r1, r2, r3, pc}
+	pop {pc}
 
 	@@ Wait for flash opeartions to complete
 wait_for_flash:
-	push {r0, r1, r2}
 1:	ldr r0, =FLASH_SR
 	ldr r1, [r0]
 	movs r2, #0x01
 	ands r1, r2
 	bne 1b
-	pop {r0, r1, r2}
 	bx lr
 	
 	@@ Exception handler for unaligned 16-byte flash writes
@@ -129,7 +138,7 @@ _store_flash_16_already_written:
 	@@ Delete a 2K page of flash
 	define_word "erase-page", visible_flag
 _erase_page:	
-	push {r0, r1, r2, r3, lr}
+	push {lr}
 	@@ Protect the zeptoforth runtime!
 	ldr r0, =flash_min_address
 	cmp tos, r0
@@ -159,7 +168,9 @@ _erase_page:
 	movs r1, #FLASH_START_ERASE
 	strh r1, [r0]
 	@@ Wait for the flash to be ready
+	push {r0, r1, r2, r3}
 	bl wait_for_flash
+	pop {r0, r1, r2, r3}
 	@@ Lock the flash
 	ldr r0, =FLASH_CR+3
 	movs r1, #FLASH_LOCK_ERASE
@@ -175,7 +186,7 @@ _erase_page:
 	orrs r1, r3
 	str r1, [r0]
 	str r2, [r0]
-	pop {r0, r1, r2, r3, pc}
+	pop {pc}
 
 	@@ Exception handler for flash writes where flash has already been
 	@@ written

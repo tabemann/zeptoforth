@@ -392,10 +392,7 @@ _inner:	push {lr}
 	ands r0, r1
 	bne 5f
 6:	bl _to_xt
-	adds tos, #1
-	movs r0, tos
-	pull_tos
-	blx r0
+	bl _execute
 	b 1b
 2:	pop {pc}
 3:	movs tos, r1
@@ -435,12 +432,13 @@ _parse_literal:
 	cmp r2, #0
 	beq 1f
 	push {r0, r1}
-	adds r2, #1
 	push_tos
 	movs tos, r1
 	push_tos
 	movs tos, r0
-	blx r2
+	push_tos
+	movs tos, r2
+	bl _execute
 	pop {r0, r1}
 	cmp tos, #0
 	beq 1f
@@ -450,12 +448,13 @@ _parse_literal:
 	ldr r2, [r2]
 	cmp r2, #0
 	beq 2f
-	adds r2, #1
 	push_tos
 	movs tos, r1
 	push_tos
 	movs tos, r0
-	blx r2
+	push_tos
+	movs tos, r2
+	bl _execute
 2:	pop {r0}
 	b _abort
 
@@ -467,8 +466,9 @@ _refill:
 	ldr r0, [r0]
 	cmp r0, #0
 	beq 1f
-	adds r0, #1
-	blx r0
+	push_tos
+	movs tos, r0
+	bl _execute
 1:	pop {pc}
 	
 	@@ Implement the refill hook
@@ -724,6 +724,18 @@ _create:
 1:	ldr tos, =_token_expected
 	bl _raise
 	pop {pc}
+
+	@@ Create a <build definition
+	define_word "<build", visible_flag
+_build: push {lr}
+	bl _token
+	cmp tos, #0
+	beq 1f
+	bl _asm_build
+	pop {pc}
+1:	ldr tos, =_token_expected
+	bl _raise
+	pop {pc}
 	
 	@@ Start a colon definition
 	define_word ":", visible_flag
@@ -738,6 +750,24 @@ _colon:	push {lr}
 	pop {pc}
 1:	ldr tos, =_token_expected
 	bl _raise
+	pop {pc}
+
+	@@ Start an anonymous colon definition
+	define_word ":noname", visible_flag
+_colon_noname:
+	push {lr}
+	push_tos
+	movs tos, #0
+	push_tos
+	movs tos, #0
+	bl _asm_start
+	ldr r0, =current_flags
+	movs r1, #0
+	str r1, [r0]
+	push_tos
+	ldr tos, =current_compile
+	ldr tos, [tos]
+	bl _to_xt
 	pop {pc}
 
 	@@ End a colon definition
