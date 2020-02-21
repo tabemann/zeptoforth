@@ -96,7 +96,7 @@ dp 	.req r7
 	@@ Push a string onto the stack macro
 	.macro string text
 	push {r0}
-	cstring text, r0
+	cstring "\text", r0
 	push_tos
 	movs tos, r0
 	adds tos, #1
@@ -106,9 +106,9 @@ dp 	.req r7
 	.endm
 
 	@@ Push a string onto the stack macro
-	.macro string_ln, text
+	.macro string_ln text
 	push {r0}
-	cstring_ln text, r0
+	cstring_ln "\text", r0
 	push_tos
 	movs tos, r0
 	adds tos, #1

@@ -13,9 +13,10 @@
 @ You should have received a copy of the GNU General Public License
 @ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+	.p2align 2
 	.word 0
 10:	.word 10b - 4
 	.byte 12f - 11f
 11:	.ascii ""
-12:	.p2align 1
+12:	.p2align 2
 	.word 10b - 4

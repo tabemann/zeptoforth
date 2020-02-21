@@ -215,21 +215,23 @@ _erase_all:
 _find_flash_end:
 	push_tos
 	ldr tos, =flash_dict_end
-1:	ldr r0, [tos, #-4]!
+1:	subs tos, #4
+	ldr r0, [tos]
 	adds r0, #1
 	bne 2f
-	ldr r0, [tos, #-4]!
+	subs tos, #4
+	ldr r0, [tos]
 	adds r0, #1
 	bne 2f
-	ldr r0, [tos, #-4]!
+	subs tos, #4
+	ldr r0, [tos]
 	adds r0, #1
 	bne 2f
-	ldr r0, [tos, #-4]!
-	adds r0, r0, r1
+	subs tos, #4
+	ldr r0, [tos]
+	adds r0, #1
 	beq 1b
-2:	movs r0, #0xF
-	bics tos, r0
-	bx lr
+2:	bx lr
 
 	@@ Find the next flash block
 	define_word "next-flash-block", visible_flag
@@ -248,7 +250,7 @@ _find_last_flash_word:
 	ldr r0, [tos]
 	cmp r0, #0
 	beq 1b
-	subs tos, tos, r0
+	movs tos, r0
 	pop {pc}
 
 	@@ Initialize the flash buffers
@@ -313,7 +315,7 @@ _get_flash_buffer:
 	cmp tos, r3
 	beq 2f
 	adds r0, #flash_buffer_size
-	cmp r0, r2
+	cmp r0, r1
 	bne 1b
 	bl _get_free_flash_buffer
 	pop {pc}
