@@ -26,11 +26,12 @@
 	.include "src/stm32l476/vectors.s"
 	
 	@@ The first (null) dictionary entry
-	.p2align 1
-	.hword invisible_flag
+	.p2align 2
+	.word invisible_flag
 	.word 0
-	.byte 0
-	.p2align 1
+10:	.byte 0
+	.p2align 2
+	
 	@@ The entry point
 handle_reset:
 	@@ Initialize the top of stack register
