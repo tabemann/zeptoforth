@@ -42,7 +42,7 @@ _use_48mhz:
 	bl _set_pwr_for_48mhz
 	bl _set_flash_latency_for_48mhz
 	bl _set_msi_48mhz
-	pop {lr}
+	pop {pc}
 
 	define_word "set-pwr-for-48mhz", visible_flag
 _set_pwr_for_48mhz:	

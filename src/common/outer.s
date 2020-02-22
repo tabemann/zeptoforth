@@ -57,14 +57,14 @@ _token_start:
 	ldr r0, [r0]
 	adds r0, r0, r1
 	ldrb tos, [r0]
-	push {r0}
+	push {r1}
 	bl _ws_q
-	pop {r0}
+	pop {r1}
 	cmp tos, #0
-	bne 2f
-	adds r0, #1
+	beq 2f
+	adds r1, #1
 	b 1b
-2:	movs tos, r0
+2:	movs tos, r1
 	pop {pc}
 
 	@@ Parse the input buffer for the end of a token
@@ -80,13 +80,13 @@ _token_end:
 	ldr r0, =eval_ptr
 	ldr r0, [r0]
 	adds r0, r0, r1
+	adds r1, #1
 	ldrb tos, [r0]
 	push {r1}
 	bl _ws_q
 	pop {r1}
 	cmp tos, #0
-	beq 2f
-	adds r1, #1
+	bne 2f
 	b 1b
 2:	movs tos, r1
 	pop {pc}
@@ -187,11 +187,11 @@ _equal_case_strings:
 	movs r2, tos
 	pull_tos
 	movs r3, tos
+	cmp r0, r2
+	bne 3f
 1:	cmp r0, #0
 	beq 2f
-	cmp r2, #0
-	beq 3f
-	ldr tos, [r1]
+	ldrb tos, [r1]
 	adds r1, #1
 	push {r0, r1, r2, r3}
 	bl _to_upper_char
@@ -199,18 +199,17 @@ _equal_case_strings:
 	pop {r0, r1, r2}
 	pop {r3}
 	movs r4, tos
-	ldr tos, [r3]
+	ldrb tos, [r3]
 	adds r3, #1
 	push {r0, r1, r2, r3}
 	bl _to_upper_char
 	pop {r0, r1, r2, r3}
 	cmp r4, tos
+	subs r0, #1
 	beq 1b
-	movs tos, #-1
+	movs tos, #0
 	pop {r4, pc}
-2:	cmp r2, #0
-	bne 3f
-	movs tos, #-1
+2:	movs tos, #-1
 	pop {r4, pc}
 3:	movs tos, #0
 	pop {r4, pc}
@@ -227,7 +226,6 @@ _find_dict:
 	movs r2, tos
 	pull_tos
 	movs r3, tos
-	pull_tos
 1:	cmp r0, #0
 	beq 3f
 	ldr r4, [r0]
@@ -248,11 +246,9 @@ _find_dict:
 	pop {r0, r1, r2, r3}
 	cmp tos, #0
 	bne 4f
-	pull_tos
 2:	ldr r0, [r0, #4]
 	b 1b
-3:	push_tos
-	movs tos, #0
+3:	movs tos, #0
 	pop {r4, pc}
 4:	movs tos, r0
 	pop {r4, pc}
@@ -475,8 +471,7 @@ _refill:
 	define_word "do-refill", visible_flag
 _do_refill:
 	push {lr}
-	ldr r0, =input_buffer_count
-	ldr r0, [r0]
+	movs r0, #0
 	ldr r1, =input_buffer_size
 	ldr r2, =input_buffer
 	adds r0, r2
@@ -486,16 +481,22 @@ _do_refill:
 	push {r0, r1}
 	bl _key
 	pop {r0, r1}
+	cmp tos, #0x0D
+	beq 3f
 	strb tos, [r0]
 	adds r0, #1
 	movs r2, tos
-	pull_tos
-	cmp r2, #0x0A
-	beq 2f
+	push {r0, r1, r2}
+	bl _emit
+	pop {r0, r1, r2}
 	b 1b
+3:	pull_tos
 2:	ldr r2, =input_buffer
 	subs r0, r0, r2
 	ldr r2, =input_buffer_count
+	str r0, [r2]
+	movs r0, #0
+	ldr r2, =input_buffer_index
 	str r0, [r2]
 	pop {pc}
 	
