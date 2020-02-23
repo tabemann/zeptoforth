@@ -315,13 +315,14 @@ _format_unsigned:
 	bl _reverse
 	pop {r0, r1}
 	movs r2, tos
-	push_tos
 	movs tos, r0
 	push_tos
+	movs tos, r2
+	push_tos
 	movs tos, r1
-	push {r2}
+	push {r1, r2}
 	bl _move
-	pop {r2}
+	pop {r1, r2}
 	push_tos
 	movs tos, r2
 	push_tos
@@ -329,7 +330,7 @@ _format_unsigned:
 	pop {pc}
 1:	pull_tos
 	movs r0, #0x30
-	ldrb r0, [tos]
+	strb r0, [tos]
 	push_tos
 	movs tos, #1
 	pop {pc}
@@ -352,13 +353,14 @@ _format_integer:
 	bl _reverse
 	pop {r0, r1}
 	movs r2, tos
-	push_tos
 	movs tos, r0
 	push_tos
+	movs tos, r2
+	push_tos
 	movs tos, r1
-	push {r2}
+	push {r1, r2}
 	bl _move
-	pop {r2}
+	pop {r1, r2}
 	push_tos
 	movs tos, r2
 	push_tos
@@ -376,7 +378,7 @@ _format_integer:
 	b 3b
 2:	pull_tos
 	movs r0, #0x30
-	ldrb r0, [tos]
+	strb r0, [tos]
 	push_tos
 	movs tos, #1
 	pop {pc}
@@ -402,11 +404,11 @@ _format_integer_inner:
 	cmp tos, #10
 	ble 2f
 	adds tos, #0x30
-	ldrb tos, [r0]
+	strb tos, [r0]
 	adds r0, #1
 	b 1b
 2:	adds tos, #0x37
-	ldrb tos, [r0]
+	strb tos, [r0]
 	adds r0, #1
 	b 1b
 3:	ldr r1, =here

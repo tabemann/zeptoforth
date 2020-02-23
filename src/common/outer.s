@@ -170,9 +170,9 @@ _paren_comment:
 	define_word "to-upper-char", visible_flag
 _to_upper_char:
 	cmp tos, #0x61
-	ble 1f
+	blt 1f
 	cmp tos, #0x7A
-	ble 1f
+	bgt 1f
 	subs tos, #0x20
 1:	bx lr
 
@@ -204,8 +204,8 @@ _equal_case_strings:
 	push {r0, r1, r2, r3}
 	bl _to_upper_char
 	pop {r0, r1, r2, r3}
-	cmp r4, tos
 	subs r0, #1
+	cmp r4, tos
 	beq 1b
 	movs tos, #0
 	pop {r4, pc}
@@ -226,21 +226,48 @@ _find_dict:
 	movs r2, tos
 	pull_tos
 	movs r3, tos
+	@@@@ BEGIN TEST
+	push_tos
+	movs tos, r0
+	push {r0, r1, r2, r3}
+	bl _type_integer
+	bl _cr
+	pop {r0, r1, r2, r3}
+	push_tos
+	@@@@ END TEST
 1:	cmp r0, #0
 	beq 3f
 	ldr r4, [r0]
-	ands r4, r1
-	cmp r4, r1
-	bne 2f
+	tst r4, r1
+	beq 2f
 	ldrb r4, [r0, #8]
-	movs tos, r4
+	@@@@ BEGIN TEST
+	movs tos, r3
+	push_tos
+	movs tos, r2
+	push {r0, r1, r2, r3}
+	bl _type
+	bl _space
+	pop {r0, r1, r2, r3}
 	push_tos
 	movs tos, r0
 	adds tos, #9
 	push_tos
+	movs tos, r4
+	push {r0, r1, r2, r3}
+	bl _type
+	bl _cr
+	pop {r0, r1, r2, r3}
+	push_tos
+	@@@@ END TEST
+	movs tos, r3
+	push_tos
 	movs tos, r2
 	push_tos
-	movs tos, r3
+	movs tos, r0
+	adds tos, #9
+	push_tos
+	movs tos, r4
 	push {r0, r1, r2, r3}
 	bl _equal_case_strings
 	pop {r0, r1, r2, r3}
@@ -260,7 +287,7 @@ _find:	push {lr}
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
 	cmp r0, #0
-	beq 1f
+	bne 1f
 	movs r0, tos
 	pull_tos
 	movs r1, tos
@@ -522,7 +549,7 @@ _do_handle_number:
 	ldr r0, =state
 	ldr r0, [r0]
 	cmp r0, #0
-	bne 1f
+	beq 1f
 	movs r1, tos
 	movs tos, #6
 	push {r1}
@@ -563,7 +590,7 @@ _parse_base:
 	beq 5f
 	movs r0, tos
 	pull_tos
-	ldr r1, [tos]
+	ldrb r1, [tos]
 	cmp r1, #0x24
 	bne 1f
 	movs r1, #16
@@ -585,7 +612,7 @@ _parse_base:
 5:	push_tos
 	ldr r0, =base
 	ldr tos, [r0]
-	pop {pc}
+	bx lr
 6:	adds tos, #1
 	push_tos
 	subs r0, #1
@@ -604,7 +631,7 @@ _parse_integer_core:
 	beq 3f
 	movs r0, tos
 	pull_tos
-	ldr r1, [tos]
+	ldrb r1, [tos]
 	cmp r1, #0x2D
 	beq 1f
 	push_tos
@@ -659,7 +686,7 @@ _parse_unsigned_core:
 1:	cmp r1, #0
 	beq 3f
 	push_tos
-	ldr tos, [r2]
+	ldrb tos, [r2]
 	subs r1, #1
 	adds r2, #1
 	muls r3, r0, r3
@@ -709,9 +736,12 @@ _parse_digit:
 	cmp tos, #0x5A
 	bgt 1b
 	subs tos, #0x37
-3:	push_tos
+3:	cmp tos, r0
+	bge 1b
+	push_tos
 	movs tos, #-1
 	pop {pc}
+	
 
 	@@ Create a create definition
 	define_word "create", visible_flag

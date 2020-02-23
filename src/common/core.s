@@ -408,6 +408,8 @@ _find_last_visible_word:
 _do_init:
 	push {lr}
 	string "init"
+	push_tos
+	movs tos, #visible_flag
 	bl _find
 	cmp tos, #0
 	beq 1f
