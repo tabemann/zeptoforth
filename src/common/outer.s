@@ -383,10 +383,10 @@ _inner:	push {lr}
 	ldr r0, =state
 	ldr r0, [r0]
 	cmp r0, #0
-	beq 4f
+	bne 4f
 	ldr r0, [tos]
 	movs r1, #compiled_flag
-	ands r0, r1
+	tst r0, r1
 	bne 5f
 6:	bl _to_xt
 	bl _execute
@@ -399,7 +399,7 @@ _inner:	push {lr}
 	b 1b
 4:	ldr r0, [tos]
 	movs r1, #immediate_flag
-	ands r0, r1
+	tst r0, r1
 	bne 6b
 	bl _to_xt
 	bl _asm_call
