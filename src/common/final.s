@@ -20,3 +20,4 @@
 11:	.ascii ""
 12:	.p2align 2
 	.word 10b - 8
+	.word 0xDEADBEEF

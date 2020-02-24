@@ -21,7 +21,6 @@ _raise:	cmp tos, #0
 	ldr sp, [r0]
 	ldr r1, [sp], #4
 	str r1, [r0]
-	adds sp, #4
 	ldr dp, [sp], #4
 	pop {pc}
 1:	pull_tos
@@ -40,11 +39,10 @@ _try:	push {lr}
 	adds r0, #1 @ Commented out to deal with an issue with Cutter @@@
 	pull_tos
 	blx r0
+	pop {r1}
 	ldr r0, =handler
-	str r1, [dp, #-4]!
-	ldr r1, [sp], #4
 	str r1, [r0]
-	ldr r1, [dp], #4
+	pop {r1}
 	push_const 0
 	pop {pc}
 	

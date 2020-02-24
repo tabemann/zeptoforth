@@ -80,13 +80,13 @@ _token_end:
 	ldr r0, =eval_ptr
 	ldr r0, [r0]
 	adds r0, r0, r1
-	adds r1, #1
 	ldrb tos, [r0]
 	push {r1}
 	bl _ws_q
 	pop {r1}
 	cmp tos, #0
 	bne 2f
+	adds r1, #1
 	b 1b
 2:	movs tos, r1
 	pop {pc}
@@ -226,40 +226,12 @@ _find_dict:
 	movs r2, tos
 	pull_tos
 	movs r3, tos
-	@@@@ BEGIN TEST
-	push_tos
-	movs tos, r0
-	push {r0, r1, r2, r3}
-	bl _type_integer
-	bl _cr
-	pop {r0, r1, r2, r3}
-	push_tos
-	@@@@ END TEST
 1:	cmp r0, #0
 	beq 3f
 	ldr r4, [r0]
 	tst r4, r1
 	beq 2f
 	ldrb r4, [r0, #8]
-	@@@@ BEGIN TEST
-	movs tos, r3
-	push_tos
-	movs tos, r2
-	push {r0, r1, r2, r3}
-	bl _type
-	bl _space
-	pop {r0, r1, r2, r3}
-	push_tos
-	movs tos, r0
-	adds tos, #9
-	push_tos
-	movs tos, r4
-	push {r0, r1, r2, r3}
-	bl _type
-	bl _cr
-	pop {r0, r1, r2, r3}
-	push_tos
-	@@@@ END TEST
 	movs tos, r3
 	push_tos
 	movs tos, r2
@@ -300,7 +272,9 @@ _find:	push {lr}
 	push_tos
 	ldr r3, =ram_latest
 	ldr tos, [r3]
+	push {r0, r1, r2}
 	bl _find_dict
+	pop {r0, r1, r2}
 	cmp tos, #0
 	bne 2f
 	movs tos, r2

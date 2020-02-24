@@ -377,7 +377,6 @@ _init_dict:
 	bl _next_flash_block
 	ldr r0, =flash_here
 	str tos, [r0]
-	pull_tos
 	bl _find_last_flash_word
 	bl _find_last_visible_word
 	ldr r0, =latest

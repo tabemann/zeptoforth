@@ -402,7 +402,7 @@ _format_integer_inner:
 	pop {r0, r1, r2}
 	udiv r2, r2, r1
 	cmp tos, #10
-	ble 2f
+	bge 2f
 	adds tos, #0x30
 	strb tos, [r0]
 	adds r0, #1

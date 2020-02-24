@@ -247,9 +247,13 @@ _next_flash_block:
 _find_last_flash_word:
 	push {lr}
 1:	subs tos, #4
+	cmp tos, #0
+	beq 2f
 	ldr r0, [tos]
-	cmp r0, #0
-	beq 1b
+	ldr r1, =0xDEADBEEF
+	cmp r0, r1
+	bne 1b
+	ldr r0, [tos, #-4]
 	movs tos, r0
 	pop {pc}
 

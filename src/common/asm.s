@@ -373,10 +373,10 @@ _asm_finalize:
 	beq 1f
 	push_tos
 	ldr r0, =current_compile
-	ldr r0, [r0]
-	ldr tos, =flash_here
-	ldr tos, [tos]
-	subs tos, tos, r0
+	ldr tos, [r0]
+	bl _current_comma_4
+	push_tos
+	ldr tos, =0xDEADBEEF
 	bl _current_comma_4
 	bl _flush_all_flash
 	ldr r0, =current_compile
