@@ -748,6 +748,9 @@ _colon:	push {lr}
 	bl _token
 	cmp tos, #0
 	beq 1f
+	ldr r0, =state
+	movs r1, #-1
+	str r1, [r0]
 	bl _asm_start
 	ldr r0, =current_flags
 	movs r1, #visible_flag
@@ -765,6 +768,9 @@ _colon_noname:
 	movs tos, #0
 	push_tos
 	movs tos, #0
+	ldr r0, =state
+	movs r1, #-1
+	str r1, [r0]
 	bl _asm_start
 	ldr r0, =current_flags
 	movs r1, #0

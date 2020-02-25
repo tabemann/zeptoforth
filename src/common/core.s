@@ -93,6 +93,39 @@ _arshift:
 	asrs tos, tos, r0
 	bx lr
 
+	@@ Binary and
+	define_word "and", visible_flag
+_and:	movs r0, tos
+	pull_tos
+	ands tos, r0
+	bx lr
+
+	@@ Binary or
+	define_word "or", visible_flag
+_or:	movs r0, tos
+	pull_tos
+	orrs tos, r0
+	bx lr
+
+	@@ Binary xor
+	define_word "xor", visible_flag
+_xor:	movs r0, tos
+	pull_tos
+	eors tos, r0
+	bx lr
+
+	@@ Binary not
+	define_word "not", visible_flag
+_not:	mvn tos, tos
+	bx lr
+
+	@@ Negation
+	define_word "negate", visible_flag
+_negate:
+	mvn tos, tos
+	adds tos, #1
+	bx lr
+	
 	@@ Addition of two two's complement integers
 	define_word "+", visible_flag
 _add:	movs r0, tos
@@ -142,6 +175,72 @@ _umod:	movs r0, tos
 	pull_tos
 	udiv r1, tos, r0
 	mls tos, r1, r0, tos
+	bx lr
+
+	@@ Equals
+	define_word "=", visible_flag
+_eq:	movs r0, tos
+	pull_tos
+	cmp tos, r0
+	bne 1f
+	movs tos, #-1
+	bx lr
+1:	movs tos, #0
+	bx lr
+
+	@@ Not equal
+	define_word "<>", visible_flag
+_ne:	movs r0, tos
+	pull_tos
+	cmp tos, r0
+	beq 1f
+	movs tos, #-1
+	bx lr
+1:	movs tos, #0
+	bx lr
+
+	@@ Less than
+	define_word "<", visible_flag
+_lt:	movs r0, tos
+	pull_tos
+	cmp tos, r0
+	bge 1f
+	movs tos, #-1
+	bx lr
+1:	movs tos, #0
+	bx lr
+
+	@@ Greater than
+	define_word ">", visible_flag
+_gt:	movs r0, tos
+	pull_tos
+	cmp tos, r0
+	ble 1f
+	movs tos, #-1
+	bx lr
+1:	movs tos, #0
+	bx lr
+
+	@@ Less than or equal
+	define_word "<=", visible_flag
+_le:	movs r0, tos
+	pull_tos
+	cmp tos, r0
+	bgt 1f
+	movs tos, #-1
+	bx lr
+1:	movs tos, #0
+	bx lr
+
+	@@ Greater than or equal
+	define_word ">", visible_flag
+_ge:	movs r0, tos
+	pull_tos
+	cmp tos, r0
+	blt 1f
+	movs tos, #-1
+	bx lr
+1:	movs tos, #0
 	bx lr
 
 	@@ Get the HERE pointer
