@@ -19,20 +19,20 @@ _raise:	cmp tos, #0
 	beq 1f
 	ldr r0, =handler
 	ldr sp, [r0]
-	ldr r1, [sp], #4
+	ldr r1, [sp], #4 @ #2
 	str r1, [r0]
-	ldr dp, [sp], #4
-	pop {pc}
+	ldr dp, [sp], #4 @ #1
+	pop {pc} @ #0
 1:	pull_tos
 	bx lr
 
 	@@ Try to see if an exception occurs
 	define_word "try", visible_flag
-_try:	push {lr}
-	str dp, [sp, #-4]!
+_try:	push {lr} @ #0
+	str dp, [sp, #-4]! @ #1
 	ldr r0, =handler
 	ldr r0, [r0]
-	str r0, [sp, #-4]!
+	str r0, [sp, #-4]! @ #2
 	ldr r0, =handler
 	str sp, [r0]
 	mov r0, tos

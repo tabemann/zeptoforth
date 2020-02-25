@@ -373,7 +373,7 @@ _format_integer:
 	movs r1, tos
 	adds r2, r0, r1
 	movs r3, #0x2D
-	ldrb r3, [r2]
+	strb r3, [r2]
 	adds r1, #1
 	b 3b
 2:	pull_tos

@@ -356,6 +356,15 @@ _abort:	ldr r0, =stack_top
 	define_word "quit", visible_flag
 _quit:	ldr r0, =rstack_top
 	mov sp, r0
+	push_tos
+	ldr tos, =_main
+	bl _try
+	bl _execute_nz
+	b _abort
+
+	@@ The main functionality, within the main exception handler
+	define_word "main", visible_flag
+_main:	push {lr}
 	bl _flush_all_flash
 1:	bl _inner
 	ldr r0, =prompt_hook
