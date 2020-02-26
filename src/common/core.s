@@ -25,7 +25,7 @@ _dup:	push_tos
 
 	@@ Swap the top two places on the data stack
 	define_word "swap", visible_flag
-_swap:	mov r0, tos
+_swap:	movs r0, tos
 	ldr tos, [dp]
 	str r0, [dp]
 	bx lr
@@ -44,7 +44,7 @@ _rot:	ldr r0, [dp, #4]
 	ldr r1, [dp]
 	str tos, [dp]
 	str r1, [dp, #4]
-	mov tos, r0
+	movs tos, r0
 	bx lr
 
 	@@ Pick a value at a specified depth on the stack
@@ -430,7 +430,7 @@ _key_q:	push {lr}
 	@@ Execute an xt
 	define_word "execute", visible_flag
 _execute:
-	mov r0, tos
+	movs r0, tos
 	adds r0, #1 @ Commented out to deal with an issue with Cutter @@@
 	pull_tos
 	bx r0
@@ -438,7 +438,7 @@ _execute:
 	@@ Execute an xt if it is non-zero
 	define_word "?execute", visible_flag
 _execute_nz:
-	mov r0, tos
+	movs r0, tos
 	pull_tos
 	cmp r0, #0
 	beq 1f
@@ -698,7 +698,7 @@ _unknown_word:
 	@@ Store a byte
 	define_word "b!", visible_flag
 _store_1:
-	mov r0, tos
+	movs r0, tos
 	pull_tos
 	movs r1, #0xFF
 	ands tos, r1
@@ -709,7 +709,7 @@ _store_1:
 	@@ Store a halfword
 	define_word "h!", visible_flag
 _store_2:
-	mov r0, tos
+	movs r0, tos
 	pull_tos
 	ldr r1, =0xFFFF
 	ands tos, r1
@@ -720,7 +720,7 @@ _store_2:
 	@@ Store a word
 	define_word "!", visible_flag
 _store_4:
-	mov r0, tos
+	movs r0, tos
 	pull_tos
 	str tos, [r0]
 	pull_tos
@@ -729,7 +729,7 @@ _store_4:
 	@@ Store a doubleword
 	define_word "2!", visible_flag
 _store_8:
-	mov r0, tos
+	movs r0, tos
 	pull_tos
 	str tos, [r0]
 	pull_tos
@@ -756,7 +756,7 @@ _get_4: ldr tos, [tos]
 _get_8:	ldr r0, [tos]
 	ldr tos, [tos, #4]
 	push_tos
-	mov tos, r0
+	movs tos, r0
 	bx lr
 
 	@@ Store a byte at the HERE location
@@ -764,7 +764,7 @@ _get_8:	ldr r0, [tos]
 _comma_1:
 	ldr r0, =here
 	ldr r1, [r0]
-	mov r2, #0xFF
+	movs r2, #0xFF
 	ands tos, r2
 	strb tos, [r1], #1
 	str r1, [r0]
@@ -970,7 +970,7 @@ _reserve_1:
 	ldr r0, =here
 	ldr r1, [r0]
 	push_tos
-	mov tos, r1
+	movs tos, r1
 	adds r1, #1
 	str r1, [r0]
 	bx lr
@@ -981,7 +981,7 @@ _reserve_2:
 	ldr r0, =here
 	ldr r1, [r0]
 	push_tos
-	mov tos, r1
+	movs tos, r1
 	adds r1, #2
 	str r1, [r0]
 	bx lr
@@ -992,7 +992,7 @@ _reserve_4:
 	ldr r0, =here
 	ldr r1, [r0]
 	push_tos
-	mov tos, r1
+	movs tos, r1
 	adds r1, #4
 	str r1, [r0]
 	bx lr
@@ -1003,7 +1003,7 @@ _reserve_8:
 	ldr r0, =here
 	ldr r1, [r0]
 	push_tos
-	mov tos, r1
+	movs tos, r1
 	adds r1, #8
 	str r1, [r0]
 	bx lr
@@ -1014,7 +1014,7 @@ _flash_reserve_1:
 	ldr r0, =flash_here
 	ldr r1, [r0]
 	push_tos
-	mov tos, r1
+	movs tos, r1
 	adds r1, #1
 	str r1, [r0]
 	bx lr
@@ -1025,7 +1025,7 @@ _flash_reserve_2:
 	ldr r0, =flash_here
 	ldr r1, [r0]
 	push_tos
-	mov tos, r1
+	movs tos, r1
 	adds r1, #2
 	str r1, [r0]
 	bx lr
@@ -1036,7 +1036,7 @@ _flash_reserve_4:
 	ldr r0, =flash_here
 	ldr r1, [r0]
 	push_tos
-	mov tos, r1
+	movs tos, r1
 	adds r1, #4
 	str r1, [r0]
 	bx lr
@@ -1047,7 +1047,7 @@ _flash_reserve_8:
 	ldr r0, =flash_here
 	ldr r1, [r0]
 	push_tos
-	mov tos, r1
+	movs tos, r1
 	adds r1, #8
 	str r1, [r0]
 	bx lr
@@ -1121,7 +1121,8 @@ _current_comma_align:
 	bl _current_comma_1
 	pop {r0}
 	b 1b
-2:	pop {pc}
+2:	pull_tos
+	pop {pc}
 
 	@@ Align to a power of two
 	define_word "align,", visible_flag
@@ -1146,10 +1147,10 @@ _comma_align:
 	define_word "current-cstring,", visible_flag
 _current_comma_cstring:
 	push {lr}
-	movs r0, #255
+	ldr r0, =255
 	cmp tos, r0
 	ble 1f
-	movs tos, #255
+	movs tos, r0
 1:	push_tos
 	bl _current_comma_1
 	movs r0, tos
@@ -1164,7 +1165,7 @@ _current_comma_cstring:
 	bl _current_comma_1
 	pop {r0, r1}
 	sub r0, #1
-	add r1, #1
+	adds r1, #1
 	b 2b
 1:	pop {pc}	
 
@@ -1210,13 +1211,13 @@ _store_rp:
 	define_word "sp@", visible_flag
 _get_sp:
 	push_tos
-	mov tos, dp
+	movs tos, dp
 	bx lr
 
 	@@ Set the data stack pointer
 	define_word "sp!", visible_flag
 _store_sp:
-	mov dp, tos
+	movs dp, tos
 	pull_tos
 	bx lr
 

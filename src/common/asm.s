@@ -20,14 +20,12 @@ _asm_start:
 	push_tos
 	movs tos, #4
 	bl _current_comma_align
-	push_tos
 	bl _current_here
 	ldr r0, =current_compile
 	str tos, [r0]
 	ldr r0, =current_flags
 	movs r1, #0
 	str r1, [r0]
-	push_tos
 	movs tos, #4
 	bl _current_allot
 	bl _asm_link
@@ -50,14 +48,12 @@ _asm_create:
 	push_tos
 	movs tos, #4
 	bl _current_comma_align
-	push_tos
 	bl _current_here
 	ldr r0, =current_compile
 	str tos, [r0]
 	ldr r0, =current_flags
 	movs r1, #0
 	str r1, [r0]
-	push_tos
 	movs tos, #4
 	bl _current_allot
 	bl _asm_link
@@ -110,14 +106,12 @@ _asm_ram_create_1:
 	push_tos
 	movs tos, #4
 	bl _current_comma_align
-	push_tos
 	bl _current_here
 	ldr r0, =current_compile
 	str tos, [r0]
 	ldr r0, =current_flags
 	movs r1, #0
 	str r1, [r0]
-	push_tos
 	movs tos, #4
 	bl _current_allot
 	bl _asm_link
@@ -153,14 +147,12 @@ _asm_ram_create_2:
 	push_tos
 	movs tos, #4
 	bl _current_comma_align
-	push_tos
 	bl _current_here
 	ldr r0, =current_compile
 	str tos, [r0]
 	ldr r0, =current_flags
 	movs r1, #0
 	str r1, [r0]
-	push_tos
 	movs tos, #4
 	bl _current_allot
 	bl _asm_link
@@ -199,14 +191,12 @@ _asm_ram_create_4:
 	push_tos
 	movs tos, #4
 	bl _current_comma_align
-	push_tos
 	bl _current_here
 	ldr r0, =current_compile
 	str tos, [r0]
 	ldr r0, =current_flags
 	movs r1, #0
 	str r1, [r0]
-	push_tos
 	movs tos, #4
 	bl _current_allot
 	bl _asm_link
@@ -245,14 +235,12 @@ _asm_build:
 	push_tos
 	movs tos, #4
 	bl _current_comma_align
-	push_tos
 	bl _current_here
 	ldr r0, =current_compile
 	str tos, [r0]
 	ldr r0, =current_flags
 	movs r1, #0
 	str r1, [r0]
-	push_tos
 	movs tos, #4
 	bl _current_allot
 	bl _asm_link
@@ -364,9 +352,9 @@ _asm_finalize:
 	ldr tos, =current_flags
 	ldr tos, [tos]
 	push_tos
-	ldr tos, =latest
+	ldr tos, =current_compile
 	ldr tos, [tos]
-	bl _store_current_2
+	bl _store_current_4
 1:	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
 	cmp r0, #0
@@ -536,7 +524,7 @@ _asm_bl:
 	lsrs tos, tos, #12
 	ldr r1, =0x3FF
 	ands tos, r1
-	lsls r1, r0, #24
+	lsrs r1, r0, #24
 	movs r2, #1
 	ands r1, r2
 	lsls r2, r1, #10
