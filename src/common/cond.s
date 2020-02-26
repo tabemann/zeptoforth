@@ -41,17 +41,18 @@ _if:	push {lr}
 _else:	push {lr}
 	cmp r0, #0
 	beq 1f
+	pull_tos
 	movs r0, tos
 	pull_tos
 	push {r0}
 	bl _asm_reserve_branch
-	push_tos
-	movs tos, #0
 	bl _current_here
 	pop {r0}
 	push_tos
 	movs tos, r0
 	bl _asm_branch_zero_back
+	push_tos
+	movs tos, #0
 	pop {pc}
 1:	ldr tos, =_not_following_if
 	bl _raise
