@@ -39,7 +39,7 @@ _if:	push {lr}
 	@@ ELSE in an IF ELSE THEN block
 	define_word "else", visible_flag | immediate_flag | compiled_flag
 _else:	push {lr}
-	cmp r0, #0
+	cmp tos, #0
 	beq 1f
 	pull_tos
 	movs r0, tos

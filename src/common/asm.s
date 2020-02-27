@@ -827,28 +827,32 @@ _asm_b_32:
 	lsrs r1, r0, #23
 	movs r2, #1
 	ands r1, r2
-	lsls r1, r1, #10
-	orr tos, r1
-	ldr r1, =0xF000
-	orr tos, r1
-	push {r0}
+	lsls r2, r1, #10
+	orrs tos, r2
+	ldr r2, =0xF000
+	orrs tos, r2
+	push {r0, r1}
 	bl _current_comma_2
-	pop {r0}
+	pop {r0, r1}
 	push_tos
 	mov tos, r0
-	ldr r1, =0x7FF
-	ands tos, r1
-	lsrs r1, r0, #21
-	movs r2, #1
-	ands r1, r2
-	lsls r1, r1, #11
-	orr tos, r1
-	lsrs r1, r0, #22
-	ands r1, r2
-	lsls r1, r1, #13
-	orr tos, r1
-	ldr r1, =0x9000
-	orr tos, r1
+	ldr r2, =0x7FF
+	ands tos, r2
+	lsrs r2, r0, #21
+	mvn r2, r2
+	movs r3, #1
+	ands r2, r3
+	eors r2, r1
+	lsls r2, r2, #11
+	orrs tos, r2
+	lsrs r2, r0, #22
+	mvn r2, r2
+	ands r2, r3
+	eors r2, r1
+	lsls r2, r2, #13
+	orrs tos, r2
+	ldr r2, =0x9000
+	orrs tos, r2
 	bl _current_comma_2
 	pop {pc}
 
@@ -856,18 +860,17 @@ _asm_b_32:
 	define_word "beq-32,", visible_flag
 _asm_beq_32:
 	push {lr}
-	push {lr}
 	movs r0, tos
 	lsrs tos, tos, #11
-	ldr r1, =0x3FF
+	ldr r1, =0x3F
 	ands tos, r1
 	lsrs r1, r0, #19
 	movs r2, #1
 	ands r1, r2
 	lsls r1, r1, #10
-	orr tos, r1
+	orrs tos, r1
 	ldr r1, =0xF000
-	orr tos, r1
+	orrs tos, r1
 	push {r0}
 	bl _current_comma_2
 	pop {r0}
@@ -879,20 +882,20 @@ _asm_beq_32:
 	movs r2, #1
 	ands r1, r2
 	lsls r1, r1, #11
-	orr tos, r1
+	orrs tos, r1
 	lsrs r1, r0, #18
 	ands r1, r2
 	lsls r1, r1, #13
-	orr tos, r1
+	orrs tos, r1
 	ldr r1, =0x8000
-	orr tos, r1
+	orrs tos, r1
 	bl _current_comma_2
 	pop {pc}
 
 	@@ Assemble an unconditional branch
 	define_word "b-32-back!", visible_flag
 _asm_b_32_back:
-	push {lr}
+	push {r4, lr}
 	movs r3, tos
 	pull_tos
 	movs r0, tos
@@ -902,35 +905,39 @@ _asm_b_32_back:
 	lsrs r1, r0, #23
 	movs r2, #1
 	ands r1, r2
-	lsls r1, r1, #10
-	orr tos, r1
-	ldr r1, =0xF000
-	orr tos, r1
+	lsls r2, r1, #10
+	orrs tos, r2
+	ldr r2, =0xF000
+	orrs tos, r2
 	push_tos
 	movs tos, r3
-	push {r0, r3}
+	push {r0, r1, r3}
 	bl _store_current_2
-	pop {r0, r3}
+	pop {r0, r1, r3}
 	push_tos
 	mov tos, r0
-	ldr r1, =0x7FF
-	ands tos, r1
-	lsrs r1, r0, #21
-	movs r2, #1
-	ands r1, r2
-	lsls r1, r1, #11
-	orr tos, r1
-	lsrs r1, r0, #22
-	ands r1, r2
-	lsls r1, r1, #13
-	orr tos, r1
-	ldr r1, =0x9000
-	orr tos, r1
+	ldr r2, =0x7FF
+	ands tos, r2
+	lsrs r2, r0, #21
+	mvn r2, r2
+	movs r4, #1
+	ands r2, r4
+	eors r2, r1
+	lsls r2, r2, #11
+	orrs tos, r2
+	lsrs r2, r0, #22
+	mvn r2, r2
+	ands r2, r4
+	eors r2, r1
+	lsls r2, r2, #13
+	orrs tos, r2
+	ldr r2, =0x9000
+	orrs tos, r2
 	push_tos
 	movs tos, r3
 	add tos, #2
-	bls _store_current_2
-	pop {pc}
+	bl _store_current_2
+	pop {r4, pc}
 
 	@@ Assemble a branch on equal zero instruction
 	define_word "beq-32-back!", visible_flag
@@ -940,15 +947,15 @@ _asm_beq_32_back:
 	pull_tos
 	movs r0, tos
 	lsrs tos, tos, #11
-	ldr r1, =0x3FF
+	ldr r1, =0x3F
 	ands tos, r1
 	lsrs r1, r0, #19
 	movs r2, #1
 	ands r1, r2
 	lsls r1, r1, #10
-	orr tos, r1
+	orrs tos, r1
 	ldr r1, =0xF000
-	orr tos, r1
+	orrs tos, r1
 	push_tos
 	movs tos, r3
 	push {r0, r3}
@@ -962,13 +969,13 @@ _asm_beq_32_back:
 	movs r2, #1
 	ands r1, r2
 	lsls r1, r1, #11
-	orr tos, r1
+	orrs tos, r1
 	lsrs r1, r0, #18
 	ands r1, r2
 	lsls r1, r1, #13
-	orr tos, r1
+	orrs tos, r1
 	ldr r1, =0x8000
-	orr tos, r1
+	orrs tos, r1
 	push_tos
 	movs tos, r3
 	adds tos, #2
