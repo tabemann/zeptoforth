@@ -168,7 +168,6 @@ _compile_char:
 	define_word "(.)", visible_flag
 _type_integer:
 	push {lr}
-	push_tos
 	ldr r0, =here
 	ldr r0, [r0]
 	movs r1, tos
@@ -191,7 +190,6 @@ _type_integer:
 	define_word "(u.)", visible_flag
 _type_unsigned:
 	push {lr}
-	push_tos
 	ldr r0, =here
 	ldr r0, [r0]
 	movs r1, tos
