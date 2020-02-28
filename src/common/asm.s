@@ -529,6 +529,7 @@ _asm_inline:
 	ldr r1, =0x003F
 	cmp r2, r1
 	bne 2f
+	pull_tos
 	pop {pc}
 	
 	.ifdef thumb2
