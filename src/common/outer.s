@@ -502,6 +502,8 @@ _do_refill:
 	pop {r0, r1}
 	cmp tos, #0x0D
 	beq 3f
+	cmp tos, #0x7F
+	beq 4f
 	strb tos, [r0]
 	adds r0, #1
 	movs r2, tos
@@ -518,6 +520,18 @@ _do_refill:
 	ldr r2, =input_buffer_index
 	str r0, [r2]
 	pop {pc}
+4:	subs r0, #1
+	push {r0, r1, r2}
+	movs tos, #0x08
+	bl _emit
+	push_tos
+	movs tos, #0x20
+	bl _emit
+	push_tos
+	movs tos, #0x08
+	bl _emit
+	pop {r0, r1, r2}
+	b 1b
 	
 	@@ Implement the failed parse hook
 	define_word "do-failed-parse", visible_flag
