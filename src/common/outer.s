@@ -520,7 +520,10 @@ _do_refill:
 	ldr r2, =input_buffer_index
 	str r0, [r2]
 	pop {pc}
-4:	subs r0, #1
+4:	ldr r2, =input_buffer
+	cmp r0, r2
+	beq 5f
+	subs r0, #1
 	push {r0, r1, r2}
 	movs tos, #0x08
 	bl _emit
@@ -531,6 +534,8 @@ _do_refill:
 	movs tos, #0x08
 	bl _emit
 	pop {r0, r1, r2}
+	b 1b
+5:	pull_tos
 	b 1b
 	
 	@@ Implement the failed parse hook
