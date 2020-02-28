@@ -14,48 +14,54 @@
 @ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 	@@ Drop the top of the data stack
-	define_word "drop", visible_flag
+	define_word "drop", visible_flag | inlined_flag
 _drop:	pull_tos
 	bx lr
+	end_inlined
 
 	@@ Duplicate the top of the data stack
-	define_word "dup", visible_flag
+	define_word "dup", visible_flag | inlined_flag
 _dup:	push_tos
 	bx lr
+	end_inlined
 
 	@@ Swap the top two places on the data stack
-	define_word "swap", visible_flag
+	define_word "swap", visible_flag | inlined_flag
 _swap:	movs r0, tos
 	ldr tos, [dp]
 	str r0, [dp]
 	bx lr
+	end_inlined
 
 	@@ Copy the second place on the data stack onto the top of the stack,
 	@@ pushing the top of the data stack to the second place
-	define_word "over", visible_flag
+	define_word "over", visible_flag | inlined_flag
 _over:	push_tos
 	ldr tos, [dp, #4]
 	bx lr
+	end_inlined
 
 	@@ Rotate the top three places on the data stack, so the third place
 	@@ moves to the first place
-	define_word "rot", visible_flag
+	define_word "rot", visible_flag | inlined_flag
 _rot:	ldr r0, [dp, #4]
 	ldr r1, [dp]
 	str tos, [dp]
 	str r1, [dp, #4]
 	movs tos, r0
 	bx lr
+	end_inlined
 
 	@@ Pick a value at a specified depth on the stack
-	define_word "pick", visible_flag
+	define_word "pick", visible_flag | inlined_flag
 _pick:	lsls tos, tos, #2
 	adds tos, tos, dp
 	ldr tos, [tos]
 	bx lr
+	end_inlined
 
 	@@ Rotate a value at a given deph to the top of the stackk
-	define_word "roll", visible_flag
+	define_word "roll", visible_flag | inlined_flag
 _roll:	movs r0, tos
 	lsls r0, r0, #2
 	adds r0, r0, dp
@@ -68,114 +74,130 @@ _roll:	movs r0, tos
 	b 1b
 2:	adds dp, #4
 	bx lr
+	end_inlined
 
 	@@ Logical shift left
-	define_word "lshift", visible_flag
+	define_word "lshift", visible_flag | inlined_flag
 _lshift:
 	movs r0, tos
 	pull_tos
 	lsls tos, tos, r0
 	bx lr
+	end_inlined
 
 	@@ Logical shift right
-	define_word "rshift", visible_flag
+	define_word "rshift", visible_flag | inlined_flag
 _rshift:
 	movs r0, tos
 	pull_tos
 	lsrs tos, tos, r0
 	bx lr
+	end_inlined
 
 	@@ Arithmetic shift right
-	define_word "arshift", visible_flag
+	define_word "arshift", visible_flag | inlined_flag
 _arshift:
 	movs r0, tos
 	pull_tos
 	asrs tos, tos, r0
 	bx lr
+	end_inlined
 
 	@@ Binary and
-	define_word "and", visible_flag
+	define_word "and", visible_flag | inlined_flag
 _and:	movs r0, tos
 	pull_tos
 	ands tos, r0
 	bx lr
+	end_inlined
 
 	@@ Binary or
-	define_word "or", visible_flag
+	define_word "or", visible_flag | inlined_flag
 _or:	movs r0, tos
 	pull_tos
 	orrs tos, r0
 	bx lr
+	end_inlined
 
 	@@ Binary xor
-	define_word "xor", visible_flag
+	define_word "xor", visible_flag | inlined_flag
 _xor:	movs r0, tos
 	pull_tos
 	eors tos, r0
 	bx lr
+	end_inlined
 
 	@@ Binary not
-	define_word "not", visible_flag
+	define_word "not", visible_flag | inlined_flag
 _not:	mvn tos, tos
 	bx lr
+	end_inlined
 
 	@@ Negation
-	define_word "negate", visible_flag
+	define_word "negate", visible_flag | inlined_flag
 _negate:
 	mvn tos, tos
 	adds tos, #1
 	bx lr
+	end_inlined
 	
 	@@ Addition of two two's complement integers
-	define_word "+", visible_flag
+	define_word "+", visible_flag | inlined_flag
 _add:	movs r0, tos
 	pull_tos
 	adds tos, tos, r0
 	bx lr
+	end_inlined
 
 	@@ Substraction of two two's complement integers
-	define_word "-", visible_flag
+	define_word "-", visible_flag | inlined_flag
 _sub:	movs r0, tos
 	pull_tos
 	subs tos, tos, r0
 	bx lr
+	end_inlined
 
 	@@ Multiplication of two two's complement integers
-	define_word "*", visible_flag
+	define_word "*", visible_flag | inlined_flag
 _mul:	movs r0, tos
 	pull_tos
 	muls tos, tos, r0
 	bx lr
+	end_inlined
 
 	@@ Signed division of two two's complement integers
-	define_word "/", visible_flag
+	define_word "/", visible_flag | inlined_flag
 _div:	movs r0, tos
 	pull_tos
 	sdiv tos, tos, r0
 	bx lr
+	end_inlined
 
 	@@ Unsigned division of two integers
-	define_word "u/", visible_flag
+	define_word "u/", visible_flag | inlined_flag
 _udiv:	movs r0, tos
 	pull_tos
 	udiv tos, tos, r0
 	bx lr
+	end_inlined
 
 	@@ Signed modulus of two two's complement integers
-	define_word "mod", visible_flag
+	define_word "mod", visible_flag | inlined_flag
 _mod:	movs r0, tos
 	pull_tos
 	sdiv r1, tos, r0
 	mls tos, r1, r0, tos
 	bx lr
+	end_inlined
 
 	@@ Unsigned modulus of two unsigned integers
-	define_word "umod", visible_flag
+	define_word "umod", visible_flag | inlined_flag
 _umod:	movs r0, tos
 	pull_tos
 	udiv r1, tos, r0
 	mls tos, r1, r0, tos
 	bx lr
+	end_inlined
 
 	@@ Equals
 	define_word "=", visible_flag
@@ -537,6 +559,16 @@ _bracket_compile_only:
 	str r1, [r0]
 	bx lr
 
+	@@ Set the currently-defined word to be inlined
+	define_word "[inlined]", visible_flag | immediate_flag | compiled_flag
+_bracket_inlined:
+	ldr r0, =current_flags
+	ldr r1, [r0]
+	movs r2, #inlined_flag
+	orr r1, r2
+	str r1, [r0]
+	bx lr
+
 	@@ Set the currently-defined word to be immediate
 	define_word "immediate", visible_flag
 _immediate:
@@ -553,6 +585,16 @@ _compile_only:
 	ldr r0, =current_flags
 	ldr r1, [r0]
 	movs r2, #compiled_flag
+	orr r1, r2
+	str r1, [r0]
+	bx lr
+
+	@@ Set the currently-defined word to be inlined
+	define_word "inlined", visible_flag
+_inlined:
+	ldr r0, =current_flags
+	ldr r1, [r0]
+	movs r2, #inlined_flag
 	orr r1, r2
 	str r1, [r0]
 	bx lr
@@ -608,6 +650,7 @@ _token_word:
 	bl _find
 	cmp tos, #0
 	beq 2f
+	pop {pc}
 1:	ldr tos, =_token_expected
 	bl _raise
 	pop {pc}

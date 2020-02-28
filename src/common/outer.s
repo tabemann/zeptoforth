@@ -366,6 +366,9 @@ _quit:	ldr r0, =rstack_top
 	define_word "main", visible_flag
 _main:	push {lr}
 	bl _flush_all_flash
+	ldr r0, =state
+	movs r1, #0
+	str r1, [r0]
 1:	bl _inner
 	ldr r0, =prompt_hook
 	push_tos
@@ -410,11 +413,17 @@ _inner:	push {lr}
 	movs r1, #immediate_flag
 	tst r0, r1
 	bne 6b
+	movs r1, #inlined_flag
+	tst r0, r1
+	bne 7f
 	bl _to_xt
 	bl _asm_call
 	b 1b
 5:	ldr tos, =_not_compiling
 	bl _raise
+	b 1b
+7:	bl _to_xt
+	bl _asm_inline
 	b 1b
 
 	@@ Display a prompt

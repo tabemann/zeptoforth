@@ -17,6 +17,9 @@
 	define_word "start-compile", visible_flag
 _asm_start:
 	push {lr}
+	movs r0, #0
+	ldr r1, =called
+	str r0, [r1]
 	push_tos
 	movs tos, #4
 	bl _current_comma_align
@@ -351,6 +354,13 @@ _asm_finalize:
 	push_tos
 	ldr tos, =current_flags
 	ldr tos, [tos]
+	ldr r0, =called
+	ldr r0, [r0]
+	ldr r1, =inlined_flag
+	ands r0, r1
+	bics tos, r0
+	ldr r0, =current_flags
+	str tos, [r0]
 	push_tos
 	ldr tos, =current_compile
 	ldr tos, [tos]
@@ -388,6 +398,8 @@ _asm_end:
 	push {lr}
 	push_tos
 	ldr tos, =0xBD00	@@ pop {pc}
+	bl _current_comma_2
+	ldr tos, =0x003F        @@ movs r7, r7
 	bl _current_comma_2
 	bl _asm_finalize
 	pop {pc}
@@ -446,6 +458,7 @@ _asm_branch:
 	pull_tos
 	subs tos, tos, r0
 	asrs tos, tos, #1
+	subs tos, #2
 	bl _asm_b
 	pop {pc}
 
@@ -458,6 +471,7 @@ _asm_branch_zero:
 	pull_tos
 	subs tos, tos, r0
 	asrs tos, tos, #1
+	subs tos, #2
 	bl _asm_beq
 	pop {pc}
 
@@ -469,6 +483,7 @@ _asm_branch_back:
 	pull_tos
 	subs tos, tos, r0
 	asrs tos, tos, #1
+	subs tos, #2
 	push_tos
 	movs tos, r0
 	bl _asm_b_back
@@ -482,17 +497,49 @@ _asm_branch_zero_back:
 	pull_tos
 	subs tos, tos, r0
 	asrs tos, tos, #1
+	subs tos, #2
 	push_tos
 	movs tos, r0
 	bl _asm_beq_back
 	pop {pc}
 
+	@@ Inline a word
+	define_word "inline,", visible_flag
+_asm_inline:
+	push {lr}
+	ldrh r0, [tos]
+	ldr r1, =0xB500
+	cmp r0, r1
+	bne 1f
+	adds tos, #2
+1:	ldrh r0, [tos]
+	ldr r1, =0xBD00
+	cmp r0, r1
+	beq 3f
+	ldr r1, =0x4770
+	cmp r0, r1
+	beq 3f
+2:	movs r1, tos
+	push_tos
+	movs tos, r0
+	bl _current_comma_2
+	adds tos, #2
+	b 1b
+3:	ldrh r2, [tos, #2]
+	ldr r1, =0x003F
+	cmp r2, r1
+	bne 2f
+	pop {pc}
+	
 	.ifdef thumb2
 
 	@@ Call a word at an address
 	define_word "call,", visible_flag
 _asm_call:	
 	push {lr}
+	movs r0, #-1
+	ldr r1, =called
+	str r0, [r1]
 	bl _current_here
 	movs r0, tos
 	pull_tos
@@ -520,6 +567,7 @@ _asm_call:
 	define_word "bl,", visible_flag
 _asm_bl:
 	push {lr}
+	subs tos, #4
 	movs r0, tos
 	lsrs tos, tos, #12
 	ldr r1, =0x3FF
@@ -994,6 +1042,9 @@ _asm_reserve_branch:
 	@@ Call a word at an address
 	define_word "call,", visible_flag
 _asm_call:	
+	movs r0, #-1
+	ldr r1, =called
+	str r0, [r1]
 	push {lr}
 	bl _current_here
 	movs r0, tos
@@ -1852,6 +1903,7 @@ _asm_push:
 	define_word "adr,", visible_flag
 _asm_adr:
 	push {lr}
+	subs tos, #4
 	movs r1, #7
 	ands r1, tos
 	lsls r1, r1, #8

@@ -49,6 +49,9 @@
 	@@ The flags for the word being currently compiled
 	allot current_flags, 4
 
+	@@ Whether a word has been called (without having been inlined)
+	allot called, 4
+
 	@@ The evaluation buffer index pointer
 	allot eval_index_ptr, 4
 

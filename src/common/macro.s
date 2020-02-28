@@ -46,6 +46,11 @@ dp 	.req r7
 	.equ \name, ram_current
 	.set ram_current, ram_current + \size
 	.endm
+
+	@@ Finish an inlined word
+	.macro end_inlined
+	.hword 0x003F @@ movs r7, r7
+	.endm
 	
 	@@ Word header macro
 	.macro define_word name, flags
