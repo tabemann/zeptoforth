@@ -18,7 +18,7 @@
 _skip_to_token:
 	push {lr}
 	bl _token_start
-	ldr r0, =eval_count_ptr
+	ldr r0, =eval_index_ptr
 	ldr r0, [r0]
 	str tos, [r0]
 	pull_tos
@@ -50,13 +50,18 @@ _parse_to_char:
 	ldr r2, [r0]
 	ldr r3, =eval_ptr
 	ldr r3, [r3]
-	adds tos, r0, r3
+	adds tos, r2, r3
 	push_tos
-	movs tos, r1
-	subs tos, r3
+	subs r1, r1, r3
+	subs tos, r1, r2
+	ldr r2, =eval_count_ptr
+	ldr r2, [r2]
+	ldr r2, [r2]
+	cmp r1, r2
+	beq 3f
 	adds r1, #1
 	str r1, [r0]
-	bx lr
+3:	bx lr
 
 	@@ Immediately type a string in the input stream
 	define_word ".(", visible_flag
@@ -104,10 +109,13 @@ _compile_imm_cstring:
 	define_word "compile-cstring", visible_flag
 _compile_cstring:
 	push {lr}
+	push_tos
+	movs tos, #6
+	bl _asm_push
 	movs r0, tos
 	pull_tos
 	movs r1, tos
-	movs tos, #4
+	movs tos, #6
 	push_tos
 	movs tos, #6
 	push {r0, r1}
@@ -115,11 +123,16 @@ _compile_cstring:
 	bl _current_here
 	pop {r0, r1}
 	adds tos, tos, r0
-	adds tos, #2
+	adds tos, #5
 	tst tos, #1
 	bne 1f
 	push {r0, r1}
 	bl _asm_branch
+	pop {r0, r1}
+	push_tos
+	movs tos, #0
+	push {r0, r1}
+	bl _current_comma_2
 	pop {r0, r1}
 	push_tos
 	movs tos, r1

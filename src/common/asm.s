@@ -1904,16 +1904,16 @@ _asm_push:
 	define_word "adr,", visible_flag
 _asm_adr:
 	push {lr}
-	subs tos, #4
 	movs r1, #7
 	ands r1, tos
 	lsls r1, r1, #8
 	pull_tos
+	subs tos, #2
 	asrs tos, tos, #2
-	movs r0, #0xFF
+	ldr r0, =0xFF
 	ands tos, r0
 	orrs tos, r1
-	ldr r0, =0xC000
+	ldr r0, =0xA000
 	orrs tos, r0
 	bl _current_comma_2
 	pop {pc}

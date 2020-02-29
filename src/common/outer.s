@@ -403,7 +403,9 @@ _inner:	push {lr}
 6:	bl _to_xt
 	bl _execute
 	b 1b
-2:	pop {pc}
+2:	pull_tos
+	pull_tos
+	pop {pc}
 3:	movs tos, r1
 	push_tos
 	movs tos, r0

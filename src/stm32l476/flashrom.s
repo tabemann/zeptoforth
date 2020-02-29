@@ -245,17 +245,21 @@ _next_flash_block:
 	@@ Find the start of the last flash word
 	define_word "find-last-flash-word", visible_flag
 _find_last_flash_word:
-	push {lr}
+	ldr r1, =0xDEADBEEF
 1:	subs tos, #4
 	cmp tos, #0
 	beq 2f
 	ldr r0, [tos]
-	ldr r1, =0xDEADBEEF
 	cmp r0, r1
 	bne 1b
-	ldr r0, [tos, #-4]
-	movs tos, r0
-	pop {pc}
+3:	subs tos, #4
+	cmp tos, #0
+	beq 2f
+	ldr r0, [tos]
+	cmp r0, r1
+	beq 3b
+	ldr tos, [tos]
+2:	bx lr
 
 	@@ Initialize the flash buffers
 	define_word "init-flash-buffers", visible_flag

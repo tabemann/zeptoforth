@@ -1207,7 +1207,7 @@ _current_comma_cstring:
 	push {r0, r1}
 	bl _current_comma_1
 	pop {r0, r1}
-	sub r0, #1
+	subs r0, #1
 	adds r1, #1
 	b 2b
 1:	pop {pc}	
