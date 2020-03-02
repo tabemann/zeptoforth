@@ -255,7 +255,7 @@ _le:	movs r0, tos
 	bx lr
 
 	@@ Greater than or equal
-	define_word ">", visible_flag
+	define_word ">=", visible_flag
 _ge:	movs r0, tos
 	pull_tos
 	cmp tos, r0
@@ -314,6 +314,30 @@ _flash_allot:
 	adds r1, tos
 	str r1, [r0]
 	pull_tos
+	bx lr
+
+	@@ Get the base address of the latest word
+	define_word "latest", visible_flag
+_latest:
+	push_tos
+	ldr r0, =latest
+	ldr tos, [r0]
+	bx lr
+
+	@@ Get the base address of the latest RAM word
+	define_word "ram-latest", visible_flag
+_ram_latest:
+	push_tos
+	ldr r0, =ram_latest
+	ldr tos, [r0]
+	bx lr
+
+	@@ Get the base address of the latest flash word
+	define_word "flash-latest", visible_flag
+_flash_latest:
+	push_tos
+	ldr r0, =flash_latest
+	ldr tos, [r0]
 	bx lr
 
 	@@ Get either the HERE pointer or the flash HERE pointer, depending on
@@ -496,9 +520,14 @@ _init_dict:
 	bl _find_flash_end
 	push_tos
 	bl _next_flash_block
+	ldr r1, =flash_dict_start
 	ldr r0, =flash_here
+	cmp tos, r1
+	blt 1f
 	str tos, [r0]
-	bl _find_last_flash_word
+	b 2f
+1:	str r1, [r0]
+2:	bl _find_last_flash_word
 	bl _find_last_visible_word
 	ldr r0, =latest
 	str tos, [r0]
@@ -851,7 +880,16 @@ _comma_8:
 	define_word "bflash,", visible_flag
 _flash_comma_1:
 	push {lr}
-	ldr r0, =here
+
+	@@ Test
+	@@ string "bflash, "
+	@@ bl _type
+	@@ push_tos
+	@@ bl _type_unsigned
+	@@ bl _cr
+	@@ End Test
+	
+	ldr r0, =flash_here
 	push_tos
 	ldr tos, [r0]
 	push {r0, tos}
@@ -865,7 +903,16 @@ _flash_comma_1:
 	define_word "hflash,", visible_flag
 _flash_comma_2:
 	push {lr}
-	ldr r0, =here
+
+	@@ Test
+	@@ string "hflash, "
+	@@ bl _type
+	@@ push_tos
+	@@ bl _type_unsigned
+	@@ bl _cr
+	@@ End Test
+
+	ldr r0, =flash_here
 	push_tos
 	ldr tos, [r0]
 	push {r0, tos}
@@ -879,7 +926,16 @@ _flash_comma_2:
 	define_word "flash,", visible_flag
 _flash_comma_4:
 	push {lr}
-	ldr r0, =here
+
+	@@ Test
+	@@ string "flash, "
+	@@ bl _type
+	@@ push_tos
+	@@ bl _type_unsigned
+	@@ bl _cr
+	@@ End Test
+	
+	ldr r0, =flash_here
 	push_tos
 	ldr tos, [r0]
 	push {r0, tos}
@@ -893,7 +949,7 @@ _flash_comma_4:
 	define_word "2flash,", visible_flag
 _flash_comma_8:
 	push {lr}
-	ldr r0, =here
+	ldr r0, =flash_here
 	push_tos
 	ldr tos, [r0]
 	push {r0, tos}

@@ -260,7 +260,7 @@ _find:	push {lr}
 	ldr r0, [r0]
 	cmp r0, #0
 	bne 1f
-	movs r0, tos
+3:	movs r0, tos
 	pull_tos
 	movs r1, tos
 	pull_tos
@@ -287,7 +287,11 @@ _find:	push {lr}
 	ldr tos, [r3]
 	bl _find_dict
 	pop {pc}
-1:	push_tos
+1:	ldr r0, =state
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 3b
+	push_tos
 	ldr r0, =flash_latest
 	ldr tos, [r0]
 	bl _find_dict
