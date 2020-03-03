@@ -111,7 +111,7 @@ _token:	push {lr}
 	pop {pc}
 
 	@@ Parse a line comment
-	define_word "\\", visible_flag
+	define_word "\\", visible_flag | immediate_flag
 _line_comment:
 	push {lr}
 	ldr r0, =eval_index_ptr
@@ -141,7 +141,7 @@ _line_comment:
 	pop {pc}
 
 	@@ Parse a paren coment
-	define_word "(", visible_flag
+	define_word "(", visible_flag | immediate_flag
 _paren_comment:
 	push {lr}
 	ldr r0, =eval_index_ptr
@@ -161,10 +161,11 @@ _paren_comment:
 	adds r0, #1
 	b 1b
 2:	pull_tos
-	ldr r1, =eval_index_ptr
+	adds r0, #1
+3:	ldr r1, =eval_index_ptr
 	ldr r1, [r1]
 	str r0, [r1]
-3:	pop {pc}
+	pop {pc}
 	
 	@@ Convert a character to being uppercase
 	define_word "to-upper-char", visible_flag
@@ -822,6 +823,9 @@ _constant_4:
 	cmp tos, #0
 	beq 1f
 	bl _asm_start
+	ldr r0, =current_flags
+	movs r1, #visible_flag | inlined_flag
+	str r1, [r0]
 	push_tos
 	movs tos, #6
 	bl _asm_push
@@ -843,6 +847,9 @@ _constant_8:
 	cmp tos, #0
 	beq 1f
 	bl _asm_start
+	ldr r0, =current_flags
+	movs r1, #visible_flag | inlined_flag
+	str r1, [r0]
 	push_tos
 	movs tos, #6
 	bl _asm_push
@@ -852,7 +859,6 @@ _constant_8:
 	push_tos
 	movs tos, #6
 	bl _asm_literal
-	bl _inlined
 	bl _asm_end
 	pop {pc}
 1:	ldr tos, =_token_expected

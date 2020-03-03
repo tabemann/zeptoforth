@@ -28,9 +28,6 @@ compile-to-flash
 \ Tuck a cell under the cell at he top of the stack
 : tuck ( x1 x2 -- x2 x1 x2 ) swap over ;
 
-\ Allocate a buffer
-: buffer: ( # "name" -- ) current-here swap current-allot constant ;
-
 \ Fill memory with zeros up until a given address
 : advance-here ( a -- )
   begin
@@ -124,11 +121,11 @@ compile-to-flash
   advance-here
 ;
 
+\ No word is being built exception
+: no-word-being-built ( -- ) space ." no word is being built" abort ;
+
 \ Specify code for a word created wth <BUILDS
 : does> ( -- )
   build-target @ 0 = if ['] no-word-being-built ?raise then
   r> 0 build-target @ literal!
 ;
-
-\ No word is being built exception
-: no-word-being-built ( -- ) space ." no word is being built" abort ;
