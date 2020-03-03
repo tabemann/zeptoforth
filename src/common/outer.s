@@ -135,10 +135,10 @@ _line_comment:
 	adds r0, #1
 	b 1b
 2:	pull_tos
-	ldr r1, =eval_index_ptr
+3:	ldr r1, =eval_index_ptr
 	ldr r1, [r1]
-	ldr r0, [r1]
-3:	pop {pc}
+	str r0, [r1]
+	pop {pc}
 
 	@@ Parse a paren coment
 	define_word "(", visible_flag
@@ -163,7 +163,7 @@ _paren_comment:
 2:	pull_tos
 	ldr r1, =eval_index_ptr
 	ldr r1, [r1]
-	ldr r0, [r1]
+	str r0, [r1]
 3:	pop {pc}
 	
 	@@ Convert a character to being uppercase

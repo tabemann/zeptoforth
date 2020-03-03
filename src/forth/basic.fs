@@ -13,6 +13,9 @@
 \ You should have received a copy of the GNU General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+\ Compile this to flash
+compile-to-flash
+
 \ TOS register
 6 constant tos
 
