@@ -13,9 +13,9 @@
 @ You should have received a copy of the GNU General Public License
 @ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-	@@ Compile the start of a word
-	define_word "start-compile", visible_flag
-_asm_start:
+	@@ Compile the start of a word without the push {lr}
+	define_word "start-compile-no-push", visible_flag
+_asm_start_no_push:
 	push {lr}
 	movs r0, #0
 	ldr r1, =called
@@ -40,292 +40,15 @@ _asm_start:
 	movs tos, #0
 	bl _current_comma_1
 	push_tos
-1:	ldr tos, =0xB500	@@ push {lr}
+1:	pop {pc}
+	
+	@@ Compile the start of a word
+	define_word "start-compile", visible_flag
+_asm_start:
+	push {lr}
+	bl _asm_start_no_push
+	ldr tos, =0xB500	@@ push {lr}
 	bl _current_comma_2
-	pop {pc}
-
-	@@ Compile a CREATEd word
-	define_word "create,", visible_flag
-_asm_create:
-	push {lr}
-	push_tos
-	movs tos, #4
-	bl _current_comma_align
-	bl _current_here
-	ldr r0, =current_compile
-	str tos, [r0]
-	ldr r0, =current_flags
-	movs r1, #0
-	str r1, [r0]
-	movs tos, #4
-	bl _current_allot
-	bl _asm_link
-	bl _current_comma_cstring
-	bl _current_here
-	movs r0, #1
-	ands tos, r0
-	beq 1f
-	movs tos, #0
-	bl _current_comma_1
-	push_tos
-1:	movs tos, #6
-	bl _asm_push
-	bl _current_here
-	movs r0, #2
-	ands tos, r0
-	bne 2f
-	movs tos, #4
-	push_tos
-	movs tos, #6
-	bl _asm_adr
-	push_tos
-	movs tos, #14
-	bl _asm_bx
-	pop {pc}
-2:	movs tos, #0
-	push_tos
-	movs tos, #0
-	push_tos
-	movs tos, #0
-	bl _asm_lsl_imm
-	push_tos
-	movs tos, #4
-	push_tos
-	movs tos, #6
-	bl _asm_adr
-	push_tos
-	movs tos, #14
-	bl _asm_bx
-	pop {pc}
-
-	@@ Compile a byte-aligned RAM CREATEd word
-	define_word "bram-create,", visible_flag
-_asm_ram_create_1:
-	push {lr}
-	ldr r0, =compiling_to_flash
-	ldr r0, [r0]
-	cmp r0, #0
-	beq 2f
-	push_tos
-	movs tos, #4
-	bl _current_comma_align
-	bl _current_here
-	ldr r0, =current_compile
-	str tos, [r0]
-	ldr r0, =current_flags
-	movs r1, #0
-	str r1, [r0]
-	movs tos, #4
-	bl _current_allot
-	bl _asm_link
-	bl _current_comma_cstring
-	bl _current_here
-	movs r0, #1
-	ands tos, r0
-	beq 1f
-	movs tos, #0
-	bl _current_comma_1
-	push_tos
-1:	movs tos, #6
-	bl _asm_push
-	bl _here
-	push_tos
-	movs tos, #6
-	bl _asm_literal
-	push_tos
-	movs tos, #14
-	bl _asm_bx
-	pop {pc}
-2:	bl _asm_create
-	pop {pc}
-
-	@@ Compile a halfword-aligned RAM CREATEd word
-	define_word "hram-create,", visible_flag
-_asm_ram_create_2:
-	push {lr}
-	ldr r0, =compiling_to_flash
-	ldr r0, [r0]
-	cmp r0, #0
-	beq 2f
-	push_tos
-	movs tos, #4
-	bl _current_comma_align
-	bl _current_here
-	ldr r0, =current_compile
-	str tos, [r0]
-	ldr r0, =current_flags
-	movs r1, #0
-	str r1, [r0]
-	movs tos, #4
-	bl _current_allot
-	bl _asm_link
-	bl _current_comma_cstring
-	bl _current_here
-	movs r0, #1
-	ands tos, r0
-	beq 1f
-	movs tos, #0
-	bl _current_comma_1
-	push_tos
-1:	movs tos, #6
-	bl _asm_push
-	push_tos
-	movs tos, #2
-	bl _comma_align
-	bl _here
-	push_tos
-	movs tos, #6
-	bl _asm_literal
-	push_tos
-	movs tos, #14
-	bl _asm_bx
-	pop {pc}
-2:	bl _asm_create
-	pop {pc}
-
-	@@ Compile a word-aligned RAM CREATEd word
-	define_word "ram-create,", visible_flag
-_asm_ram_create_4:
-	push {lr}
-	ldr r0, =compiling_to_flash
-	ldr r0, [r0]
-	cmp r0, #0
-	beq 2f
-	push_tos
-	movs tos, #4
-	bl _current_comma_align
-	bl _current_here
-	ldr r0, =current_compile
-	str tos, [r0]
-	ldr r0, =current_flags
-	movs r1, #0
-	str r1, [r0]
-	movs tos, #4
-	bl _current_allot
-	bl _asm_link
-	bl _current_comma_cstring
-	bl _current_here
-	movs r0, #1
-	ands tos, r0
-	beq 1f
-	movs tos, #0
-	bl _current_comma_1
-	push_tos
-1:	movs tos, #6
-	bl _asm_push
-	push_tos
-	movs tos, #4
-	bl _comma_align
-	bl _here
-	push_tos
-	movs tos, #6
-	bl _asm_literal
-	push_tos
-	movs tos, #14
-	bl _asm_bx
-	pop {pc}
-2:	bl _asm_create
-	pop {pc}
-
-	@@ Compile a BUILDed word
-	define_word "<build,", visible_flag
-_asm_build:
-	push {lr}
-	ldr r0, =building
-	ldr r0, [r0]
-	cmp r0, #0
-	bne 3f
-	push_tos
-	movs tos, #4
-	bl _current_comma_align
-	bl _current_here
-	ldr r0, =current_compile
-	str tos, [r0]
-	ldr r0, =current_flags
-	movs r1, #0
-	str r1, [r0]
-	movs tos, #4
-	bl _current_allot
-	bl _asm_link
-	bl _current_comma_cstring
-	bl _current_here
-	movs r0, #1
-	ands tos, r0
-	beq 1f
-	movs tos, #0
-	bl _current_comma_1
-	push_tos
-1:	ldr tos, =0xB500	@@ push {lr}
-	bl _current_comma_2
-	push_tos
-	movs tos, #6
-	bl _asm_push
-	bl _current_here
-	movs r0, #2
-	ands tos, r0
-	beq 2f
-	movs tos, #0
-	push_tos
-	movs tos, #1
-	push_tos
-	movs tos, #1
-	bl _asm_lsl_imm
-	push_tos
-2:	movs tos, #8
-	push_tos
-	movs tos, #6
-	bl _asm_adr
-	push_tos
-	movs tos, #-4
-	push_tos
-	movs tos, #6
-	push_tos
-	movs tos, #0
-	bl _asm_ldr_imm
-	push_tos
-	movs tos, #0
-	push_tos
-	movs tos, #1
-	push_tos
-	movs tos, #1
-	bl _asm_lsl_imm
-	push_tos
-	movs tos, #0
-	bl _asm_bx
-	bl _current_reserve_4
-	ldr r0, =build_target
-	str tos, [r0]
-	pull_tos
-	ldr r0, =building
-	movs r1, #-1
-	str r1, [r0]
-	pop {pc}
-3:	push_tos
-	ldr tos, =_already_building
-	bl _raise
-	pop {pc}
-
-	@@ Carry out DOES>
-	define_word "does>", visible_flag
-_asm_does:
-	push {lr}
-	ldr r0, =building
-	ldr r0, [r0]
-	cmp r0, #0
-	beq 1f
-	push_tos
-	ldr tos, [sp]
-	push_tos
-	ldr r0, =build_target
-	ldr tos, [r0]
-	bl _store_current_4
-	ldr r0, =building
-	movs r1, #0
-	str r1, [r0]
-	pop {pc}
-1:	push_tos
-	ldr tos, =_not_building
-	bl _raise
 	pop {pc}
 
 	@@ Compile a link field
@@ -643,6 +366,48 @@ _asm_mov_16_imm:
 	bl _current_comma_2
 	pop {pc}
 
+	@@ Compile a move 16-bit immediate instruction
+	define_word "mov-16-imm!", visible_flag
+_asm_store_mov_16_imm:
+	push {r4, lr}
+	movs r4, tos
+	pull_tos
+	movs r0, tos
+	pull_tos
+	movs r1, tos
+	lsrs tos, tos, #11
+	movs r2, #1
+	ands tos, r2
+	lsls tos, tos, #10
+	movs r3, r1
+	lsrs r3, r3, #12
+	orrs tos, r3
+	ldr r3, =0xF240
+	orrs tos, r3
+	push_tos
+	movs tos, r4
+	push {r0, r1, r4}
+	bl _store_current_2
+	pop {r0, r1, r4}
+	push_tos
+	movs tos, r1
+	movs r2, #0xFF
+	ands tos, r2
+	lsrs r1, r1, #8
+	movs r2, #7
+	ands r1, r2
+	lsls r1, r1, #12
+	orrs tos, r1
+	movs r2, #0xF
+	ands r0, r2
+	lsls r0, r0, #8
+	orrs tos, r0
+	push_tos
+	movs tos, r4
+	adds tos, #2
+	bl _store_current_2
+	pop {r4, pc}
+
 	@@ Compile a move top 16-bit immediate instruction
 	define_word "movt-imm,", visible_flag
 _asm_movt_imm:
@@ -678,95 +443,123 @@ _asm_movt_imm:
 	bl _current_comma_2
 	pop {pc}
 
+	@@ Compile a move top 16-bit immediate instruction
+	define_word "movt-imm!", visible_flag
+_asm_store_movt_imm:
+	push {r4, lr}
+	movs r4, tos
+	pull_tos
+	movs r0, tos
+	pull_tos
+	movs r1, tos
+	lsrs tos, tos, #11
+	movs r2, #1
+	ands tos, r2
+	lsls tos, tos, #10
+	movs r3, r1
+	lsrs r3, r3, #12
+	orrs tos, r3
+	ldr r3, =0xF2C0
+	orrs tos, r3
+	push_tos
+	movs tos, r4
+	push {r0, r1, r4}
+	bl _store_current_2
+	pop {r0, r1, r4}
+	push_tos
+	movs tos, r1
+	movs r2, #0xFF
+	ands tos, r2
+	lsrs r1, r1, #8
+	movs r2, #7
+	ands r1, r2
+	lsls r1, r1, #12
+	orrs tos, r1
+	movs r2, #0xF
+	ands r0, r2
+	lsls r0, r0, #8
+	orrs tos, r0
+	push_tos
+	movs tos, r4
+	adds tos, #2
+	bl _store_current_2
+	pop {pc}
+
 	@@ Assemble a literal
 	define_word "literal,", visible_flag
 _asm_literal:
 	push {lr}
 	movs r0, tos
 	pull_tos
-	cmp tos, #0
-	blt 1f
-	movs r2, #0xFF
-	cmp tos, r2
-	bgt 2f
-	push_tos
-	movs tos, r0
-	bl _asm_mov_imm
-	pop {pc}
-2:	push_tos
-	movs tos, r0
-	bl _asm_ldr_long_imm
-	pop {pc}
-1:	neg tos, tos
-	movs r2, #0xFF
-	cmp tos, r2
-	bgt 3f
-	push_tos
-	movs tos, r0
-	push {r0}
-	bl _asm_mov_imm
-	pop {r0}
-	push_tos
-	movs tos, r0
-	push_tos
-	movs tos, r0
-	bl _asm_neg
-	pop {pc}
-3:	ldr r1, =0xFFFF
-	cmp tos, r1
-	bgt 4f
-	push_tos
-	movs tos, r0
-	push {r0}
-	bl _asm_ldr_long_imm
-	pop {r0}
-	push_tos
-	movs tos, r0
-	push_tos
-	movs tos, r0
-	bl _asm_neg
-	pop {pc}
-4:	neg tos, tos
-	push_tos
-	movs tos, r0
-	bl _asm_ldr_long_imm
-	pop {pc}
-	
-	@@ Assemble a long load register immediate pseudo-opcode
-	define_word "ldr-long-imm,", visible_flag
-_asm_ldr_long_imm:
-	push {lr}
-	movs r0, tos
-	pull_tos
 	movs r1, tos
-	ldr r2, =0xFFFF
-	ands tos, r2
-	mov r2, #0xFF
-	cmp tos, r2
-	bgt 1f
-	push_tos
-	mov tos, r0
-	push {r0, r1}
-	bl _asm_mov_imm
-	pop {r0, r1}
-2:	ldr r2, =0x7FFF
+	ldr r2, =127
 	cmp r1, r2
-	ble 3f
+	bgt 1f
+	ldr r2, =-128
+	cmp r1, r2
+	blt 1f
 	push_tos
-	movs tos, r1
-	lsrs tos, tos, #16
-	ands tos, r2
+	movs tos, r0
+	bl _asm_mov_imm
+	pop {pc}
+1:	ldr r2, =32767
+	cmp r1, r2
+	bgt 2f
+	ldr r2, =-32768
+	cmp r1, r2
+	blt 2f
+	push_tos
+	movs tos, r0
+	bl _asm_mov_16_imm
+	pop {pc}
+2:	ldr r2, =0xFFFF
+	ands tos, r1, r2
+	push_tos
+	movs tos, r0
+	bl _asm_mov_16_imm
+	push_tos
+	lsrs tos, r1, #16
 	push_tos
 	movs tos, r0
 	bl _asm_movt_imm
 	pop {pc}
-1:	push_tos
+
+	@@ Reserve space for a literal
+	define_word "reserve-literal", visible_flag
+_asm_reserve_literal:
+	push {lr}
+	push_tos
+	movs tos, #8
+	bl _current_reserve_4
+	pop {pc}
+
+	@@ Store a literal ( x reg addr -- )
+	define_word "literal!", visible_flag
+_asm_store_literal:	
+	push {lr}
+	movs r0, tos
+	pull_tos
+	movs r1, tos
+	pull_tos
+	movs r2, tos
+	ldr r3, =0xFFFF
+	ands tos, r3
+	push_tos
+	movs tos, r1
+	push_tos
 	movs tos, r0
-	push {r0, r1}
-	bl _asm_mov_16_imm
-	pop {r0, r1}
-	b 2b
-3:	pop {pc}
+	push {r0, r1, r2}
+	bl _asm_store_mov_16_imm
+	pop {r0, r1, r2}
+	push_tos
+	lsrs tos, r2, #16
+	push_tos
+	movs tos, r1
+	push_tos
+	movs tos, r0
+	adds tos, #2
+	bl _asm_store_movt_imm
+	pop {pc}
 	
 	@@ Assemble an unconditional branch
 	define_word "b,", visible_flag

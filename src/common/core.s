@@ -316,6 +316,14 @@ _flash_allot:
 	pull_tos
 	bx lr
 
+	@@ Set the flash HERE pointer
+	define_word "flash-here!", visible_flag
+_store_flash_here:
+	ldr r0, =flash_here
+	str tos, [r0]
+	pull_tos
+	bx lr
+
 	@@ Get the base address of the latest word
 	define_word "latest", visible_flag
 _latest:
@@ -338,6 +346,38 @@ _flash_latest:
 	push_tos
 	ldr r0, =flash_latest
 	ldr tos, [r0]
+	bx lr
+
+	@@ Set the base address of the latest word
+	define_word "latest!", visible_flag
+_store_latest:
+	ldr r0, =latest
+	str tos, [r0]
+	pull_tos
+	bx lr
+
+	@@ Set the base address of the latest RAM word
+	define_word "ram-latest!", visible_flag
+_store_ram_latest:
+	ldr r0, =ram_latest
+	str tos, [r0]
+	pull_tos
+	bx lr
+
+	@@ Set the base address of the latest flash word
+	define_word "flash-latest!", visible_flag
+_store_flash_latest:
+	ldr r0, =flash_latest
+	str tos, [r0]
+	pull_tos
+	bx lr
+
+	@@ Get the address to store a literal in for the word currently being
+	@@ built
+	define_word "build-target", visible_flag
+_build_target:
+	push_tos
+	ldr tos, =build_target
 	bx lr
 
 	@@ Get either the HERE pointer or the flash HERE pointer, depending on
@@ -628,6 +668,16 @@ _inlined:
 	str r1, [r0]
 	bx lr
 
+	@@ Set the currently-defined word to be visible
+	define_word "visible", visible_flag
+_visible:
+	ldr r0, =current_flags
+	ldr r1, [r0]
+	movs r2, #visible_flag
+	orr r1, r2
+	str r1, [r0]
+	bx lr
+
 	@@ Switch to interpretation mode
 	define_word "[", visible_flag | immediate_flag
 _to_interpret:
@@ -658,6 +708,14 @@ _compile_to_flash:
 	ldr r0, =compiling_to_flash
 	movs r1, #-1
 	str r1, [r0]
+	bx lr
+
+	@@ Get whether compilation is to flash
+	define_word "compiling-to-flash", visible_flag
+_compiling_to_flash:
+	ldr r0, =compiling_to_flash
+	push_tos
+	ldr tos, [r0]
 	bx lr
 
 	@@ Compile an xt
