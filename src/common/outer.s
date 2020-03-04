@@ -122,20 +122,20 @@ _line_comment:
 	ldr r1, [r1]
 	ldr r2, =eval_ptr
 	ldr r2, [r2]
-1:	cmp r0, r1
-	beq 3f
-	adds r3, r0, r2
 	push_tos
+1:	cmp r0, r1
+	beq 2f
+	adds r3, r0, r2
 	ldrb tos, [r3]
 	push {r0, r1, r2}
 	bl _newline_q
-	pop {r0, r1, r3}
+	pop {r0, r1, r2}
 	cmp tos, #0
 	bne 2f
 	adds r0, #1
 	b 1b
 2:	pull_tos
-3:	ldr r1, =eval_index_ptr
+	ldr r1, =eval_index_ptr
 	ldr r1, [r1]
 	str r0, [r1]
 	pop {pc}
@@ -160,8 +160,7 @@ _paren_comment:
 	beq 2f
 	adds r0, #1
 	b 1b
-2:	pull_tos
-	adds r0, #1
+2:	adds r0, #1
 3:	ldr r1, =eval_index_ptr
 	ldr r1, [r1]
 	str r0, [r1]
