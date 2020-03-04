@@ -115,24 +115,19 @@ _compile_cstring:
 	movs r0, tos
 	pull_tos
 	movs r1, tos
-	movs tos, #6
+	movs tos, #4
 	push_tos
 	movs tos, #6
 	push {r0, r1}
 	bl _asm_adr
 	bl _current_here
-	pop {r0, r1}
+	pop {r0, r1}  
 	adds tos, tos, r0
-	adds tos, #5
+	adds tos, #3
 	tst tos, #1
 	bne 1f
 	push {r0, r1}
 	bl _asm_branch
-	pop {r0, r1}
-	push_tos
-	movs tos, #0
-	push {r0, r1}
-	bl _current_comma_2
 	pop {r0, r1}
 	push_tos
 	movs tos, r1

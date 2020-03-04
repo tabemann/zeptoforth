@@ -1692,17 +1692,36 @@ _asm_push:
 	movs tos, r0
 	bl _asm_str_imm
 	pop {pc}
-	
+
+	@@ Word-align an address
+	define_word "word-align,", visible_flag
+_asm_word_align:
+	push {lr}
+	bl _current_here
+	movs r0, tos
+	pull_tos
+	tst r0, #2
+	beq 1f
+	push_tos
+	movs tos, #0
+	push_tos
+	movs tos, #0
+	push_tos
+	movs tos, #0
+	bl _asm_lsl_imm
+1:	pop {pc}
+
 	@@ Assemble an instruction to generate a PC-relative address
 	define_word "adr,", visible_flag
 _asm_adr:
 	push {lr}
+	bl _asm_word_align
 	movs r1, #7
 	ands r1, tos
 	lsls r1, r1, #8
 	pull_tos
-	subs tos, #2
-	asrs tos, tos, #2
+	subs tos, #4
+	lsrs tos, tos, #2
 	ldr r0, =0xFF
 	ands tos, r0
 	orrs tos, r1

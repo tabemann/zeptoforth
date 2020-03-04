@@ -33,14 +33,13 @@ compile-to-flash
   begin
     dup current-here >
   while
-    0 bcurrent,
+    0 bcurrent, 1 -
   repeat
+  drop
 ;
 
 \ Align an address to a power of two
-: align ( a power -- a )
-  2dup 1 - not and rot tuck <> if swap 1 - or 1 + else tuck then
-;
+: align ( a power -- a ) swap 1 - swap 1 - or 1 + ;
 
 \ In all cases:
 \
@@ -56,21 +55,33 @@ compile-to-flash
 
 \ Create a word referring to memory after it
 : create ( "name" -- )
+  space ." a"
   token
+  space ." b"
   dup 0 = if ['] token-expected ?raise then
+  space ." c"
   start-compile-no-push
+  space ." d"
   compiling-to-flash if
     current-here 28 + ( 28 bytes ) 4 align
   else
     current-here 16 + ( 16 bytes ) 4 align
   then
+  space ." e"
   tos push,
+  space ." f"
   dup tos literal,
+  space ." g"
   14 bx,
+  space ." h"
   $003F hcurrent,
+  space ." i"
   inlined
+  space ." j"
   finalize,
+  space ." k"
   advance-here
+  space ." l"
 ;
 
 \ Specify a buffer of a given size
@@ -127,5 +138,9 @@ compile-to-flash
 \ Specify code for a word created wth <BUILDS
 : does> ( -- )
   build-target @ 0 = if ['] no-word-being-built ?raise then
-  r> 0 build-target @ literal!
+  r> 1 + ( due to the nature of bx ) 0 build-target @ literal!
+  0 build-target !
 ;
+
+\ Set compilation back to RAM
+compile-to-ram
