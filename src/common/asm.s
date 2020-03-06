@@ -71,9 +71,7 @@ _asm_link:
 	define_word "finalize,", visible_flag
 _asm_finalize:
 	push {lr}
-	push_tos
-	movs tos, #4
-	bl _current_comma_align
+	bl _asm_word_align
 	push_tos
 	ldr tos, =current_flags
 	ldr tos, [tos]
@@ -99,7 +97,7 @@ _asm_finalize:
 	push_tos
 	ldr tos, =0xDEADBEEF
 	bl _current_comma_4
-	bl _flush_all_flash
+	bl _flash_align
 	ldr r0, =current_compile
 	ldr r1, [r0]
 	ldr r2, =flash_latest
@@ -122,6 +120,7 @@ _asm_end:
 	push_tos
 	ldr tos, =0xBD00	@@ pop {pc}
 	bl _current_comma_2
+	push_tos
 	ldr tos, =0x003F        @@ movs r7, r7
 	bl _current_comma_2
 	bl _asm_finalize
@@ -421,6 +420,8 @@ _asm_movt_imm:
 	lsls tos, tos, #10
 	movs r3, r1
 	lsrs r3, r3, #12
+	movs r2, #0xF
+	ands r3, r2
 	orrs tos, r3
 	ldr r3, =0xF2C0
 	orrs tos, r3
@@ -516,7 +517,9 @@ _asm_literal:
 	ands tos, r1, r2
 	push_tos
 	movs tos, r0
+	push {r0, r1}
 	bl _asm_mov_16_imm
+	pop {r0, r1}
 	push_tos
 	lsrs tos, r1, #16
 	push_tos
@@ -530,7 +533,7 @@ _asm_reserve_literal:
 	push {lr}
 	push_tos
 	movs tos, #8
-	bl _current_reserve_4
+	bl _current_reserve_8
 	pop {pc}
 
 	@@ Store a literal ( x reg addr -- )
@@ -557,7 +560,7 @@ _asm_store_literal:
 	movs tos, r1
 	push_tos
 	movs tos, r0
-	adds tos, #2
+	adds tos, #4
 	bl _asm_store_movt_imm
 	pop {pc}
 	

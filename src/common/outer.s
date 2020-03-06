@@ -352,13 +352,15 @@ _evaluate:
 	
 	@@ Abort
 	define_word "abort", visible_flag
-_abort:	ldr r0, =stack_top
+_abort:	ldr r0, =stack_base
+	ldr r0, [r0]
 	mov dp, r0
 	b _quit
 
 	@@ The inner loop of Forth
 	define_word "quit", visible_flag
-_quit:	ldr r0, =rstack_top
+_quit:	ldr r0, =rstack_base
+	ldr r0, [r0]
 	mov sp, r0
 	push_tos
 	ldr tos, =_main
@@ -384,7 +386,8 @@ _main:	push {lr}
 	@@ The actual inner loop of Forth
 	define_word "inner", visible_flag
 _inner:	push {lr}
-1:	bl _token
+1:	bl _validate
+	bl _token
 	cmp tos, #0
 	beq 2f
 	movs r0, tos
@@ -431,6 +434,68 @@ _inner:	push {lr}
 7:	bl _to_xt
 	bl _asm_inline
 	b 1b
+
+	@@ Validate the current state
+	define_word "validate", visible_flag
+_validate:
+	ldr r0, =stack_base
+	ldr r0, [r0]
+	cmp dp, r0
+	ble 1f
+	push_tos
+	ldr tos, =_stack_underflow
+	bl _raise
+1:	ldr r0, =stack_end
+	ldr r0, [r0]
+	cmp dp, r0
+	bge 1f
+	push_tos
+	ldr tos, =_stack_overflow
+	bl _raise
+1:	mov r1, sp
+	ldr r0, =rstack_base
+	ldr r0, [r0]
+	cmp r1, r0
+	ble 1f
+	push_tos
+	ldr tos, =_rstack_underflow
+	bl _raise
+1:	ldr r0, =rstack_end
+	ldr r0, [r0]
+	cmp r1, r0
+	bge 1f
+	push_tos
+	ldr tos, =_rstack_overflow
+	bl _raise
+1:	bx lr
+
+	@@ Stack overflow exception
+	define_word "stack-overflow", visible_flag
+_stack_overflow:
+	string_ln " stack overflow"
+	bl _type
+	bl _abort
+
+	@@ Stack underflow exception
+	define_word "stack-underflow", visible_flag
+_stack_underflow:
+	string_ln " stack underflow"
+	bl _type
+	bl _abort
+
+	@@ Return stack overflow exception
+	define_word "rstack-overflow", visible_flag
+_rstack_overflow:
+	string_ln " return stack overflow"
+	bl _type
+	bl _abort
+
+	@@ Return stack underflow exception
+	define_word "rstack-underflow", visible_flag
+_rstack_underflow:
+	string_ln " return stack underflow"
+	bl _type
+	bl _abort
 
 	@@ Display a prompt
 	define_word "do-prompt", visible_flag

@@ -372,14 +372,6 @@ _store_flash_latest:
 	pull_tos
 	bx lr
 
-	@@ Get the address to store a literal in for the word currently being
-	@@ built
-	define_word "build-target", visible_flag
-_build_target:
-	push_tos
-	ldr tos, =build_target
-	bx lr
-
 	@@ Get either the HERE pointer or the flash HERE pointer, depending on
 	@@ compilation mode
 	define_word "current-here", visible_flag
@@ -553,9 +545,9 @@ _do_pause:
 	define_word "exit", visible_flag
 _exit:	pop {pc}
 
-	@@ Initiatlize the dictionary
-	define_word "init-dict", visible_flag
-_init_dict:
+	@@ Initialize the flash dictionary
+	define_word "init-flash-dict", visible_flag
+_init_flash_dict:
 	push {lr}
 	bl _find_flash_end
 	push_tos
@@ -573,6 +565,13 @@ _init_dict:
 	str tos, [r0]
 	ldr r0, =flash_latest
 	str tos, [r0]
+	pop {pc}
+	
+	@@ Initiatlize the dictionary
+	define_word "init-dict", visible_flag
+_init_dict:
+	push {lr}
+	bl _init_flash_dict
 	pull_tos
 	movs r1, #0
 	ldr r0, =ram_latest
@@ -1378,11 +1377,29 @@ _store_sp:
 	pull_tos
 	bx lr
 
+	@@ Reboot (note that this does not clear RAM, but it does clear the RAM
+	@@ dictionary
+	define_word "reboot", visible_flag
+_reboot:
+	bl handle_reset
+	
 	@@ Initialize the variables
 	define_word "init-variables", visible_flag
 _init_variables:
 	push {lr}
 	bl _init_handlers
+	ldr r0, =stack_base
+	ldr r1, =stack_top
+	str r1, [r0]
+	ldr r0, =stack_end
+	ldr r1, =stack_top - stack_size
+	str r1, [r0]
+	ldr r0, =rstack_base
+	ldr r1, =rstack_top
+	str r1, [r0]
+	ldr r0, =rstack_end
+	ldr r1, =rstack_top - rstack_size
+	str r1, [r0]
 	ldr r0, =prompt_hook
 	ldr r1, =_do_prompt
 	str r1, [r0]
@@ -1420,8 +1437,6 @@ _init_variables:
 	ldr r0, =ram_latest
 	str r1, [r0]
 	ldr r0, =flash_latest
-	str r1, [r0]
-	ldr r0, =building
 	str r1, [r0]
 	ldr r0, =build_target
 	str r1, [r0]

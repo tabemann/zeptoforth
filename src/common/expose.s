@@ -19,17 +19,38 @@ _state:	push_tos
 	ldr tos, =state
 	bx lr
 
-	@@ Expose the building flag
-	define_word "building", visible_flag
-_building:
-	push_tos
-	ldr tos, =building
-	bx lr
-
 	@@ Get the BASE variable address
 	define_word "base", visible_flag
 _base:	push_tos
 	ldr tos, =base
+	bx lr
+
+	@@ Get the current stack base variable address
+	define_word "stack-base", visible_flag
+_stack_base:
+	push_tos
+	ldr tos, =stack_base
+	bx lr
+
+	@@ Get the current stack end variable address
+	define_word "stack-end", visible_flag
+_stack_end:
+	push_tos
+	ldr tos, =stack_end
+	bx lr
+
+	@@ Get the current return stack base variable address
+	define_word "rstack-base", visible_flag
+_rstack_base:
+	push_tos
+	ldr tos, =rstack_base
+	bx lr
+
+	@@ Get the current returns stack end variable address
+	define_word "rstack-end", visible_flag
+_rstack_end:
+	push_tos
+	ldr tos, =rstack_end
 	bx lr
 
 	@@ The parse index
@@ -50,6 +71,14 @@ _source:
 	ldr tos, =eval_count_ptr
 	ldr tos, [tos]
 	ldr tos, [tos]
+	bx lr
+
+	@@ Get the address to store a literal in for the word currently being
+	@@ built
+	define_word "build-target", visible_flag
+_build_target:
+	push_tos
+	ldr tos, =build_target
 	bx lr
 
 	@@ The input buffer index

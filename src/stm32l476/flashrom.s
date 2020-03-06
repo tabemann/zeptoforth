@@ -62,6 +62,11 @@ _store_flash_16:
 	beq 1f
 	ldr tos, =_store_flash_16_already_written
 	bl _raise
+1:	ldr r0, =flash_here
+	ldr r1, [r0]
+	cmp tos, r1
+	ble 1f
+	str tos, [r0]
 1:	ldr r0, =0x08000000
 	adds tos, tos, r0
 	@@ Flash needs to be unlocked
@@ -295,7 +300,8 @@ _erase_all:
 	push_tos
 	bl _erase_page
 	b 1b
-2:	pop {tos, pc}
+2:	bl _init_flash_dict
+	pop {tos, pc}
 
 	@@ Find the end of the flash dictionary
 	define_word "find-flash-end", visible_flag
@@ -553,6 +559,19 @@ _flush_all_flash:
 	adds r0, #flash_buffer_size
 	b 1b
 2:	pop {pc}
+
+	@@ Fill flash until it is aligned to a 16-byte block
+	define_word "flash-align,", visible_flag
+_flash_align:
+	push {lr}
+1:	bl _flash_here
+	tst tos, #0xF
+	beq 2f
+	movs tos, #0
+	bl _current_comma_1
+	b 1b
+2:	pull_tos
+	pop {pc}
 
 	.ltorg
 	

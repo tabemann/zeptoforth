@@ -43,8 +43,17 @@
 	@@ The current <BUILDS target address
 	allot build_target, 4
 
-	@@ Whether a word is being built
-	allot building, 4
+	@@ The stack base (highest point in memory)
+	allot stack_base, 4
+
+	@@ The return stack base (highest point in memory)
+	allot rstack_base, 4
+
+	@@ The stack end (lowest point in memory)
+	allot stack_end, 4
+
+	@@ The return stack end (lowest point in memory)
+	allot rstack_end, 4
 
 	@@ The flags for the word being currently compiled
 	allot current_flags, 4
