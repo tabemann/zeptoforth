@@ -937,15 +937,6 @@ _comma_8:
 	define_word "bflash,", visible_flag
 _flash_comma_1:
 	push {lr}
-
-	@@ Test
-	@@ string "bflash, "
-	@@ bl _type
-	@@ push_tos
-	@@ bl _type_unsigned
-	@@ bl _cr
-	@@ End Test
-	
 	ldr r0, =flash_here
 	push_tos
 	ldr tos, [r0]
@@ -960,15 +951,6 @@ _flash_comma_1:
 	define_word "hflash,", visible_flag
 _flash_comma_2:
 	push {lr}
-
-	@@ Test
-	@@ string "hflash, "
-	@@ bl _type
-	@@ push_tos
-	@@ bl _type_unsigned
-	@@ bl _cr
-	@@ End Test
-
 	ldr r0, =flash_here
 	push_tos
 	ldr tos, [r0]
@@ -983,15 +965,6 @@ _flash_comma_2:
 	define_word "flash,", visible_flag
 _flash_comma_4:
 	push {lr}
-
-	@@ Test
-	@@ string "flash, "
-	@@ bl _type
-	@@ push_tos
-	@@ bl _type_unsigned
-	@@ bl _cr
-	@@ End Test
-	
 	ldr r0, =flash_here
 	push_tos
 	ldr tos, [r0]

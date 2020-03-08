@@ -355,6 +355,7 @@ _evaluate:
 _abort:	ldr r0, =stack_base
 	ldr r0, [r0]
 	mov dp, r0
+	bl _nak
 	b _quit
 
 	@@ The inner loop of Forth
@@ -556,11 +557,45 @@ _refill:
 	movs tos, r0
 	bl _execute
 1:	pop {pc}
-	
+
+	@@ Send XON
+	define_word "xon", visible_flag
+_xon:	push {lr}
+	push_tos
+	movs tos, #0x11
+	bl _emit
+	pop {pc}
+
+	@@ Send XOFF
+	define_word "xoff", visible_flag
+_xoff:	push {lr}
+	push_tos
+	movs tos, #0x13
+	bl _emit
+	pop {pc}
+
+	@@ Send ACK
+	define_word "ack", visible_flag
+_ack:	push {lr}
+	push_tos
+	movs tos, #0x06
+	bl _emit
+	pop {pc}
+
+	@@ Send NAK
+	define_word "nak", visible_flag
+_nak:	push {lr}
+	push_tos
+	movs tos, #0x15
+	bl _emit
+	pop {pc}
+
 	@@ Implement the refill hook
 	define_word "do-refill", visible_flag
 _do_refill:
 	push {lr}
+@	bl _xon
+	bl _ack
 	movs r0, #0
 	ldr r1, =input_buffer_size
 	ldr r2, =input_buffer
@@ -572,6 +607,8 @@ _do_refill:
 	bl _key
 	pop {r0, r1}
 	cmp tos, #0x0D
+	beq 3f
+	cmp tos, #0x0A
 	beq 3f
 	cmp tos, #0x7F
 	beq 4f
@@ -590,6 +627,7 @@ _do_refill:
 	movs r0, #0
 	ldr r2, =input_buffer_index
 	str r0, [r2]
+@	bl _xoff
 	pop {pc}
 4:	ldr r2, =input_buffer
 	cmp r0, r2
@@ -618,7 +656,7 @@ _do_failed_parse:
 	bl _type
 	string_ln ""
 	bl _type
-	pop {pc}
+	bl _abort
 
 	@@ Implement the handle number hook
 	define_word "do-handle-number", visible_flag
@@ -896,11 +934,27 @@ _constant_4:
 	push_tos
 	movs tos, #6
 	bl _asm_literal
-	bl _inlined
 	bl _asm_end
 	pop {pc}
 1:	ldr tos, =_token_expected
 	bl _raise
+	pop {pc}
+
+	@@ Create a constant with a specified name as a string
+	define_word "constant-with-name", visible_flag
+_constant_with_name_4:
+	push {lr}
+	bl _asm_start
+	ldr r0, =current_flags
+	movs r1, #visible_flag | inlined_flag
+	str r1, [r0]
+	push_tos
+	movs tos, #6
+	bl _asm_push
+	push_tos
+	movs tos, #6
+	bl _asm_literal
+	bl _asm_end
 	pop {pc}
 
 	@@ Create a 2-word constant
@@ -927,6 +981,29 @@ _constant_8:
 	pop {pc}
 1:	ldr tos, =_token_expected
 	bl _raise
+	pop {pc}
+
+	@@ Create a 2-word constant with a name specified as a string
+	define_word "2constant-with-name", visible_flag
+_constant_with_name_8:
+	push {lr}
+	bl _token
+	cmp tos, #0
+	beq 1f
+	bl _asm_start
+	ldr r0, =current_flags
+	movs r1, #visible_flag | inlined_flag
+	str r1, [r0]
+	push_tos
+	movs tos, #6
+	bl _asm_push
+	push_tos
+	movs tos, #6
+	bl _asm_literal
+	push_tos
+	movs tos, #6
+	bl _asm_literal
+	bl _asm_end
 	pop {pc}
 
 	@@ Token expected exception handler

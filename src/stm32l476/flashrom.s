@@ -303,6 +303,30 @@ _erase_all:
 2:	bl _init_flash_dict
 	pop {tos, pc}
 
+	@@ Erase flash after a given address
+	define_word "erase-after", visible_flag
+_erase_after:
+	push {lr}
+	movs r1, tos
+	ldr r0, =flash_here
+	ldr tos, [r0]
+	ldr r2, =0x7FF
+	bics tos, r2
+	ldr r0, =2048
+	adds tos, tos, r0
+1:	ldr r0, =2048
+	subs tos, tos, r0
+	cmp tos, r1
+	blt 2f
+	push_tos
+	push {r1}
+	bl _erase_page
+	pop {r1}
+	bl 1b
+2:	pull_tos
+	bl _init_flash_dict
+	pop {pc}
+	
 	@@ Find the end of the flash dictionary
 	define_word "find-flash-end", visible_flag
 _find_flash_end:

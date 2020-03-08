@@ -25,6 +25,18 @@ compile-to-flash
 \ TOS register
 6 constant tos
 
+\ Visible flag
+1 constant visible-flag
+
+\ Immediate flag
+2 constant immediate-flag
+
+\ Compile-only flag
+4 constant compiled-flag
+
+\ Inlined flag
+8 constant inlined-flag
+
 \ Duplicate two cells
 : 2dup ( x1 x2 -- x1 x2 x1 x2 ) over over [inlined] ;
 
@@ -71,20 +83,8 @@ compile-to-flash
 ;
 
 \ Restore flash to a preexisting state
-: restore-flash ( flash-here flash-latest -- )
-  latest ram-latest <> if
-    dup latest!
-  then
-  flash-latest!
-  flash-here $7FF not and
-  begin
-    dup .
-    dup erase-page $800 - 2dup >
-  until
-  drop
-  flash-here!
-  r> drop
-  .s
+: restore-flash ( flash-here -- )
+  erase-after r> drop
 ;
 
 \ Create a MARKER to erase flash/return the flash dictionary to its prior state
@@ -97,9 +97,6 @@ compile-to-flash
   flash-here
   rot rot
   start-compile
-  6 push,
-  6 literal,
-  flash-latest
   6 push,
   6 literal,
   ['] restore-flash call,
@@ -171,10 +168,8 @@ compile-to-flash
 \ 4 bytes for $DEADBEEF
 
 \ Create a word that executes code specified by DOES>
-: <builds ( "name" -- )
-  token
-  dup 0 = if ['] token-expected ?raise then
-  start-compile-no-push
+: <builds-with-name ( addr bytes -- )
+  start-compile
   compiling-to-flash if
     current-here 32 + ( 32 bytes ) 4 align
   else
@@ -186,9 +181,15 @@ compile-to-flash
   0 bx,
   $003F hcurrent,
   visible
-  inlined
   finalize,
   advance-here
+;
+
+\ Create a word that executes code specified by DOES>
+: <builds ( "name" -- )
+  token
+  dup 0 = if ['] token-expected ?raise then
+  <builds-with-name
 ;
 
 \ No word is being built exception
@@ -196,18 +197,103 @@ compile-to-flash
 
 \ Specify code for a word created wth <BUILDS
 : does> ( -- )
-  space ." a"
   build-target @ 0 = if ['] no-word-being-built ?raise then
-  space ." b"
   r>
-  space ." c"
-  1 + ( due to the nature of bx )
-  space ." d"
   0 build-target @ literal!
-  space ." e"
   0 build-target !
-  space ." f"
+;
+
+\ Core of CORNERSTONE's DOES>
+: cornerstone-does> ( -- )
+  does>
+  $800 align
+  erase-after
+;
+
+\ Adapted from Terry Porter's code; not sure what license it was under
+: cornerstone ( "name" -- )
+  compiling-to-flash
+  compile-to-flash
+  <builds
+  pad-flash-erase-block
+  cornerstone-does>
+  not if
+    compile-to-ram
+  then
+;
+
+\ Look up next available RAM space
+: next-ram-space ( -- addr )
+  s" *RAM*" visible-flag flash-latest find-dict dup if
+    >xt execute
+  else
+    0
+  then
+  sys-ram-dict-base +
+;
+
+\ Specify next available RAM space
+: set-next-ram-space ( addr -- )
+  sys-ram-dict-base -
+  compiling-to-flash
+  swap
+  compile-to-flash
+  s" *RAM*" constant-with-name
+  not if
+    compile-to-ram
+  then
+;
+
+\ Allocate a variable in RAM
+: ram-variable ( "name" -- )
+  next-ram-space
+  compiling-to-flash
+  over
+  compile-to-flash
+  constant
+  not if
+    compile-to-ram
+  then
+  4 +
+  set-next-ram-space
+;
+
+\ Allocate a variable in RAM
+: ram-variable ( "name" -- )
+  next-ram-space
+  4 align
+  compiling-to-flash
+  over
+  compile-to-flash
+  constant
+  not if
+    compile-to-ram
+  then
+  4 +
+  set-next-ram-space
+;
+
+\ Allocate a buffer in RAM
+: ram-buffer ( bytes "name" -- )
+  next-ram-space
+  compiling-to-flash
+  over
+  compile-to-flash
+  constant
+  not if
+    compile-to-ram
+  then
+  +
+  set-next-ram-space
+;
+
+\ Initialize the RAM variables
+: init ( -- )
+  next-ram-space here!
 ;
 
 \ Set compilation back to RAM
 compile-to-ram
+
+\ Set a cornerstone for the basic Forth code
+cornerstone <basic>

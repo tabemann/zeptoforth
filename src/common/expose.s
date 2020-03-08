@@ -81,6 +81,13 @@ _build_target:
 	ldr tos, =build_target
 	bx lr
 
+	@@ Get the base of the system RAM dictionary space
+	define_word "sys-ram-dict-base", visible_flag
+_sys_ram_dict_base:
+	push_tos
+	ldr tos, =ram_current
+	bx lr
+
 	@@ The input buffer index
 	define_word ">in", visible_flag
 _to_in:	push_tos

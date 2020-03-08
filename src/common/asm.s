@@ -39,14 +39,16 @@ _asm_start_no_push:
 	beq 1f
 	movs tos, #0
 	bl _current_comma_1
-	push_tos
-1:	pop {pc}
+	pop {pc}
+1:	pull_tos
+	pop {pc}
 	
 	@@ Compile the start of a word
 	define_word "start-compile", visible_flag
 _asm_start:
 	push {lr}
 	bl _asm_start_no_push
+	push_tos
 	ldr tos, =0xB500	@@ push {lr}
 	bl _current_comma_2
 	pop {pc}
@@ -484,7 +486,7 @@ _asm_store_movt_imm:
 	movs tos, r4
 	adds tos, #2
 	bl _store_current_2
-	pop {pc}
+	pop {r4, pc}
 
 	@@ Assemble a literal
 	define_word "literal,", visible_flag
@@ -531,8 +533,6 @@ _asm_literal:
 	define_word "reserve-literal", visible_flag
 _asm_reserve_literal:
 	push {lr}
-	push_tos
-	movs tos, #8
 	bl _current_reserve_8
 	pop {pc}
 
