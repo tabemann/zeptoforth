@@ -22,6 +22,12 @@ compile-to-flash
 \ False constant
 0 constant false
 
+\ Cell size
+4 constant cell
+
+\ Multiple cells size
+: cells ( n -- n ) cell * [inlined] ;
+
 \ TOS register
 6 constant tos
 
@@ -61,6 +67,9 @@ compile-to-flash
 
 \ Align an address to a power of two
 : align ( a power -- a ) swap 1 - swap 1 - or 1 + ;
+
+\ Duplicate a cell if it is non-zero
+: ?dup ( x -- x | 0 ) dup 0 = if drop then ;
 
 \ Dump the contents of the data stack
 : .s ( -- )
@@ -203,6 +212,45 @@ compile-to-flash
   0 build-target !
 ;
 
+\ Begin declaring a structure
+: begin-structure ( "name" -- offset )
+  <builds current-here 0 4 current-allot does> @
+;
+
+\ Finish declaring a structure
+: end-structure ( offset -- ) swap current! ;
+
+\ Create an arbitrary-sized field
+: +field ( offset size "name" -- offset ) <builds over current, + does> @ + ;
+
+\ Create a byte-sized field
+: bfield: ( offset "name" -- offset ) <builds dup current, 1 + does> @ + ;
+
+\ Create a halfword-sized field
+: hfield: ( offset "name" -- offset )
+  space ." a"
+  <builds
+  space ." b"
+  2 align
+  space ." c"
+  dup current,
+  space ." d"
+  2 +
+  space ." e"
+  does> @ +
+  space ." f"
+;
+
+\ Create a cell-sized field
+: field: ( offset "name" -- offset )
+  <builds cell align dup current, cell + does> @ +
+;
+
+\ Create a double cell-sized field
+: 2field: ( offset "name" -- offset )
+  <builds 2 cells align dup current, 2 cells + does> @ +
+;
+
 \ Core of CORNERSTONE's DOES>
 : cornerstone-does> ( -- )
   does>
@@ -247,20 +295,6 @@ compile-to-flash
 \ Allocate a variable in RAM
 : ram-variable ( "name" -- )
   next-ram-space
-  compiling-to-flash
-  over
-  compile-to-flash
-  constant
-  not if
-    compile-to-ram
-  then
-  4 +
-  set-next-ram-space
-;
-
-\ Allocate a variable in RAM
-: ram-variable ( "name" -- )
-  next-ram-space
   4 align
   compiling-to-flash
   over
@@ -274,8 +308,23 @@ compile-to-flash
 ;
 
 \ Allocate a buffer in RAM
-: ram-buffer ( bytes "name" -- )
+: ram-buffer: ( bytes "name" -- )
   next-ram-space
+  compiling-to-flash
+  over
+  compile-to-flash
+  constant
+  not if
+    compile-to-ram
+  then
+  +
+  set-next-ram-space
+;
+
+\ Allocate a cell-aligned buffer in RAM
+: ram-aligned-buffer: ( bytes "name" -- )
+  next-ram-space
+  4 align
   compiling-to-flash
   over
   compile-to-flash
@@ -289,6 +338,7 @@ compile-to-flash
 
 \ Initialize the RAM variables
 : init ( -- )
+  init
   next-ram-space here!
 ;
 

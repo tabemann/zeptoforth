@@ -61,9 +61,10 @@ _else:	push {lr}
 	@@ Not following an IF exception
 	define_word "not-following-if", visible_flag
 _not_following_if:
+	push {lr}
 	string " not following if"
 	bl _type
-	bl _abort
+	pop {pc}
 	
 	@@ End an IF block
 	define_word "then", visible_flag | immediate_flag | compiled_flag

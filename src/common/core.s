@@ -590,6 +590,12 @@ _find_last_visible_word:
 	ldr tos, [tos, #4]
 	b 1b
 2:	bx lr
+
+	@@ An empty init routine, to call if no other init routines are
+	@@ available, so as to enable any source file to call a preceding init
+	@@ routine without having to check if one exists
+	define_word "init", visible_flag
+_init:	bx lr
 	
  	@@ Run the initialization routine, if there is one
 	define_word "do-init", visible_flag
@@ -820,9 +826,10 @@ _recurse:
 	@@ Unknown word exception
 	define_word "unknown-word", visible_flag
 _unknown_word:
+	push {lr}
 	string_ln " unknown word"
 	bl _type
-	bl _abort
+	pop {pc}
 	
 	@@ Store a byte
 	define_word "b!", visible_flag

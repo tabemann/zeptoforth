@@ -473,30 +473,34 @@ _validate:
 	@@ Stack overflow exception
 	define_word "stack-overflow", visible_flag
 _stack_overflow:
+	push {lr}
 	string_ln " stack overflow"
 	bl _type
-	bl _abort
+	pop {pc}
 
 	@@ Stack underflow exception
 	define_word "stack-underflow", visible_flag
 _stack_underflow:
+	push {lr}
 	string_ln " stack underflow"
 	bl _type
-	bl _abort
+	pop {pc}
 
 	@@ Return stack overflow exception
 	define_word "rstack-overflow", visible_flag
 _rstack_overflow:
+	push {lr}
 	string_ln " return stack overflow"
 	bl _type
-	bl _abort
+	pop {pc}
 
 	@@ Return stack underflow exception
 	define_word "rstack-underflow", visible_flag
 _rstack_underflow:
+	push {lr}
 	string_ln " return stack underflow"
 	bl _type
-	bl _abort
+	pop {pc}
 
 	@@ Display a prompt
 	define_word "do-prompt", visible_flag
@@ -656,8 +660,16 @@ _do_failed_parse:
 	bl _type
 	string_ln ""
 	bl _type
-	bl _abort
+	push_tos
+	ldr tos, =_failed_parse
+	bl _raise
 
+	@@ Failed parse exception
+	define_word "failed-parse", visible_flag
+_failed_parse:
+	push {lr}
+	pop {pc}
+	
 	@@ Implement the handle number hook
 	define_word "do-handle-number", visible_flag
 _do_handle_number:
@@ -1009,23 +1021,26 @@ _constant_with_name_8:
 	@@ Token expected exception handler
 	define_word "token-expected", visible_flag
 _token_expected:
+	push {lr}
 	string_ln " token expected"
 	bl _type
-	bl _abort
+	pop {pc}
 
 	@@ We are not currently compiling
 	define_word "not-compiling", visible_flag
 _not_compiling:
+	push {lr}
 	string_ln " not compiling"
 	bl _type
-	bl _abort
+	pop {pc}
 
 	@@ We are currently compiling to flash
 	define_word "compile-to-ram-only", visible_flag
 _compile_to_ram_only:
+	push {lr}
 	string_ln " compile to ram only"
 	bl _type
-	bl _abort
+	pop {pc}
 
 	.ltorg
 	

@@ -1459,23 +1459,26 @@ _asm_reserve_branch:
 	@@ Out of range branch exception
 	define_word "out-of-range-branch", visible_flag
 _out_of_range_branch:
+	push {lr}
 	string_ln " out of range branch"
 	bl _type
-	bl _abort
+	pop {pc}
 
 	@@ Already building exception
 	define_word "already-building", visible_flag
 _already_building:
+	push {lr}
 	string_ln " already building"
 	bl _type
-	bl _abort
+	pop {pc}
 
 	@@ Not building exception
 	define_word "not-building", visible_flag
 _not_building:
+	push {lr}
 	string_ln " not building"
 	bl _type
-	bl _abort
+	pop {pc}
 	
 	@@ Assemble an unconditional branch
 	define_word "b-16,", visible_flag
