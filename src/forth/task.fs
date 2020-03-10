@@ -203,7 +203,7 @@ end-structure
 \ Initialize RAM variables
 : init ( -- )
   init
-  stack-end free-end !
+  stack-end @ free-end !
   init-main-task
   do-pause pause-hook !
 ;
