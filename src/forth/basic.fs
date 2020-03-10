@@ -212,43 +212,42 @@ compile-to-flash
   0 build-target !
 ;
 
+\ Align to flash block if compiling to flash
+: flash-align,
+  compiling-to-flash if flash-align, then
+;
+
 \ Begin declaring a structure
 : begin-structure ( "name" -- offset )
-  <builds current-here 0 4 current-allot does> @
+  <builds current-here 0 4 current-allot flash-align, does> @
 ;
 
 \ Finish declaring a structure
 : end-structure ( offset -- ) swap current! ;
 
 \ Create an arbitrary-sized field
-: +field ( offset size "name" -- offset ) <builds over current, + does> @ + ;
+: +field ( offset size "name" -- offset )
+  <builds over current, flash-align, + does> @ +
+;
 
 \ Create a byte-sized field
-: bfield: ( offset "name" -- offset ) <builds dup current, 1 + does> @ + ;
+: bfield: ( offset "name" -- offset )
+  <builds dup current, flash-align, 1 + does> @ +
+;
 
 \ Create a halfword-sized field
 : hfield: ( offset "name" -- offset )
-  space ." a"
-  <builds
-  space ." b"
-  2 align
-  space ." c"
-  dup current,
-  space ." d"
-  2 +
-  space ." e"
-  does> @ +
-  space ." f"
+  <builds 2 align dup current, flash-align, 2 + does> @ +
 ;
 
 \ Create a cell-sized field
 : field: ( offset "name" -- offset )
-  <builds cell align dup current, cell + does> @ +
+  <builds cell align dup current, flash-align, cell + does> @ +
 ;
 
 \ Create a double cell-sized field
 : 2field: ( offset "name" -- offset )
-  <builds 2 cells align dup current, 2 cells + does> @ +
+  <builds 2 cells align dup current, flash-align, 2 cells + does> @ +
 ;
 
 \ Core of CORNERSTONE's DOES>

@@ -171,14 +171,14 @@ end-structure
   tuck task-stack-size h!
   tuck task-dict-size !
   0 over task-active !
-  task-current @ task-next @ over task-next !
-  dup task-current @ task-next !
+  current-task @ task-next @ over task-next !
+  dup current-task @ task-next !
   dup task-dict-size @ over - free-end !
   0 over task-rstack-offset h!
   0 over task-stack-offset h!
   0 over task-dict-offset !
-  ['] task-entry over task-push-rstack
-  tuck task-push-stack
+  ['] task-entry over push-task-rstack
+  tuck push-task-stack
 ;
 
 \ Handle PAUSE
@@ -196,6 +196,7 @@ end-structure
   dup task-rstack-base over rstack-base !
   dup task-rstack-end over rstack-end !
   dup task-rstack-current rp!
+  dup task-dict-current here!
   task-stack-current sp!
 ;
   
