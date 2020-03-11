@@ -596,7 +596,7 @@ _flash_align:
 	tst tos, #0xF
 	beq 2f
 	movs tos, #0
-	bl _current_comma_1
+	bl _flash_comma_1
 	b 1b
 2:	pull_tos
 	pop {pc}

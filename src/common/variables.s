@@ -85,6 +85,9 @@
 	@@ Are we in compilation state
 	allot state, 4
 
+	@@ Is PAUSE enabled (enabled > 0)
+	allot pause_enabled, 4
+	
 	@@ The prompt hook
 	allot prompt_hook, 4
 

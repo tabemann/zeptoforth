@@ -69,7 +69,7 @@ _asm_link:
 	bl _current_comma_4
 	pop {pc}
 
-	@@ FInalize the compilation of a word
+	@@ Finalize the compilation of a word
 	define_word "finalize,", visible_flag
 _asm_finalize:
 	push {lr}
@@ -115,6 +115,51 @@ _asm_finalize:
 	str r1, [r0]
 	pop {pc}
 	
+	@@ Finalize the compilation of a word without aligning
+	define_word "finalize-no-align,", visible_flag
+_asm_finalize_no_align:
+	push {lr}
+	bl _asm_word_align
+	push_tos
+	ldr tos, =current_flags
+	ldr tos, [tos]
+	ldr r0, =called
+	ldr r0, [r0]
+	ldr r1, =inlined_flag
+	ands r0, r1
+	bics tos, r0
+	ldr r0, =current_flags
+	str tos, [r0]
+	push_tos
+	ldr tos, =current_compile
+	ldr tos, [tos]
+	bl _store_current_4
+1:	ldr r0, =compiling_to_flash
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 1f
+	push_tos
+	ldr r0, =current_compile
+	ldr tos, [r0]
+	bl _current_comma_4
+	push_tos
+	ldr tos, =0xDEADBEEF
+	bl _current_comma_4
+	ldr r0, =current_compile
+	ldr r1, [r0]
+	ldr r2, =flash_latest
+	str r1, [r2]
+	b 2f
+1:	ldr r0, =current_compile
+	ldr r1, [r0]
+	ldr r2, =ram_latest
+	str r1, [r2]
+2:	ldr r2, =latest
+	str r1, [r2]
+	movs r1, #0
+	str r1, [r0]
+	pop {pc}
+
 	@@ Compile the end of a word
 	define_word "end-compile,", visible_flag
 _asm_end:

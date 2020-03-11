@@ -527,6 +527,10 @@ _execute_nz:
 	@@ Execute a PAUSE word, if one is set
 	define_word "pause", visible_flag
 _pause:	push {lr}
+	ldr r0, =pause_enabled
+	ldr r0, [r0]
+	cmp r0, #0
+	ble 1f
 	ldr r0, =pause_hook
 	ldr r0, [r0]
 	cmp r0, #0
@@ -1427,6 +1431,8 @@ _init_variables:
 	ldr r0, =input_buffer_count
 	str r1, [r0]
 	ldr r0, =state
+	str r1, [r0]
+	ldr r0, =pause_enabled
 	str r1, [r0]
 	movs r1, #10
 	ldr r0, =base

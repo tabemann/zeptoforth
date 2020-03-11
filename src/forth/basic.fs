@@ -60,7 +60,7 @@ compile-to-flash
   begin
     dup current-here >
   while
-    0 bcurrent, 1 -
+    0 bcurrent,
   repeat
   drop
 ;
@@ -82,6 +82,14 @@ compile-to-flash
   repeat
   drop
   space ." ]"
+;
+
+\ Safely type a string
+: safe-type ( addr bytes -- )
+  pause-enabled @
+  0 pause-enabled !
+  rot rot type
+  pause-enabled !
 ;
 
 \ Pad flash to a 2048 byte boundary
@@ -134,7 +142,7 @@ compile-to-flash
   dup 0 = if ['] token-expected ?raise then
   start-compile-no-push
   compiling-to-flash if
-    current-here 28 + ( 28 bytes ) 4 align
+    current-here 28 + ( 28 bytes ) 16 align
   else
     current-here 16 + ( 16 bytes ) 4 align
   then
@@ -144,7 +152,7 @@ compile-to-flash
   $003F hcurrent,
   visible
   inlined
-  finalize,
+  finalize-no-align,
   advance-here
 ;
 
@@ -190,7 +198,7 @@ compile-to-flash
   0 bx,
   $003F hcurrent,
   visible
-  finalize,
+  finalize-no-align,
   advance-here
 ;
 
@@ -204,17 +212,18 @@ compile-to-flash
 \ No word is being built exception
 : no-word-being-built ( -- ) space ." no word is being built" abort ;
 
+\ Align to flash block if compiling to flash
+: flash-align,
+  compiling-to-flash if flash-here 16 align advance-here then
+;
+
 \ Specify code for a word created wth <BUILDS
 : does> ( -- )
+  flash-align,
   build-target @ 0 = if ['] no-word-being-built ?raise then
   r>
   0 build-target @ literal!
   0 build-target !
-;
-
-\ Align to flash block if compiling to flash
-: flash-align,
-  compiling-to-flash if flash-align, then
 ;
 
 \ Begin declaring a structure

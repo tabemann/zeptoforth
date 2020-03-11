@@ -25,6 +25,13 @@ _base:	push_tos
 	ldr tos, =base
 	bx lr
 
+	@@ Get the PAUSE enabled variable address
+	define_word "pause-enabled", visible_flag
+_pause_enabled:
+	push_tos
+	ldr tos, =pause_enabled
+	bx lr
+	
 	@@ Get the current stack base variable address
 	define_word "stack-base", visible_flag
 _stack_base:

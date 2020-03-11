@@ -54,18 +54,17 @@ end-structure
 
 \ Get task stack base
 : task-stack-base ( task -- addr )
-  dup task + over task-dict-size @ + swap task-stack-size h@ +
+  dup task + swap task-stack-size h@ +
 ;
 
 \ Get task stack end
 : task-stack-end ( task -- addr )
-  dup task + swap task-dict-size @ +
+  dup task +
 ;
 
 \ Get task return stack base
 : task-rstack-base ( task -- addr )
-  dup task + over task-dict-size @ + over task-stack-size h@ +
-  swap task-rstack-size h@ +
+  dup task + over task-stack-size h@ + swap task-rstack-size h@ +
 ;
 
 \ Get task return stack end
@@ -155,6 +154,7 @@ end-structure
 
 \ Task entry point
 : task-entry ( -- )
+  ." ***" safe-type
   r> drop
   try
   ?dup if execute then
@@ -164,9 +164,8 @@ end-structure
 
 \ Spawn a non-main task
 : spawn ( xt dict-size stack-size rstack-size -- task )
-  2 pick 2 pick + over + task +
-  dup free-end @ swap -
-  over - 2 pick -
+  2dup + task +
+  free-end @ swap -
   tuck task-rstack-size h!
   tuck task-stack-size h!
   tuck task-dict-size !
@@ -183,18 +182,21 @@ end-structure
 
 \ Handle PAUSE
 : do-pause ( -- )
+  pause-enabled @
   current-task @
   rp@ over task-rstack-current!
-  sp@ 4 - over task-stack-current!
+  sp@ 8 + over task-stack-current!
   here over task-dict-current!
   task-next @
-  begin dup task-active @ 1 < while
+  begin
+    dup task-active @ 1 <
+  while
     task-next @
-  then
-  dup task-stack-base over stack-base !
-  dup task-stack-end over stack-end !
-  dup task-rstack-base over rstack-base !
-  dup task-rstack-end over rstack-end !
+  repeat
+  dup task-stack-base stack-base !
+  dup task-stack-end stack-end !
+  dup task-rstack-base rstack-base !
+  dup task-rstack-end rstack-end !
   dup task-rstack-current rp!
   dup task-dict-current here!
   task-stack-current sp!
@@ -205,11 +207,15 @@ end-structure
   init
   stack-end @ free-end !
   init-main-task
-  do-pause pause-hook !
+  ['] do-pause pause-hook !
+  1 pause-enabled !
 ;
 
 \ Set a cornerstone for multitasking
 cornerstone <task>
 
 \ Setting compilation back to RAM
-compile-to-ram
+\ compile-to-ram
+
+\ Reboot to initialize multitasking
+reboot
