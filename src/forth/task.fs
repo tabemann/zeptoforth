@@ -25,6 +25,9 @@ ram-variable main-task
 \ Current task
 ram-variable current-task
 
+\ Pause count
+ram-variable pause-count
+
 \ The task structure
 begin-structure task
   \ Return stack size
@@ -59,7 +62,7 @@ end-structure
 
 \ Get task stack end
 : task-stack-end ( task -- addr )
-  dup task +
+  task +
 ;
 
 \ Get task return stack base
@@ -103,7 +106,7 @@ end-structure
 
 \ Set task current dictionary address
 : task-dict-current! ( addr task -- )
-  dup task-dict-base rot swap - task-dict-offset !
+  dup task-dict-base rot swap - swap task-dict-offset !
 ;
 
 \ Push data onto a task's stack
@@ -162,6 +165,25 @@ end-structure
   pause
 ;
 
+\ Dump information on a task
+: dump-task-info ( task -- )
+  cr ." task-rstack-size:    " dup task-rstack-size h@ .
+  cr ." task-stack-size:     " dup task-stack-size h@ .
+  cr ." task-dict-size:      " dup task-dict-size @ .
+  cr ." task-rstack-offset:  " dup task-rstack-offset h@ .
+  cr ." task-stack-offset:   " dup task-stack-offset h@ .
+  cr ." task-dict-offset:    " dup task-dict-offset @ .
+  cr ." task-rstack-end:     " dup task-rstack-end .
+  cr ." task-stack-end:      " dup task-stack-end .
+  cr ." task-dict-end:       " dup task-dict-end .
+  cr ." task-rstack-base:    " dup task-rstack-base .
+  cr ." task-stack-base:     " dup task-stack-base .
+  cr ." task-dict-base:      " dup task-dict-base .
+  cr ." task-rstack-current: " dup task-rstack-current .
+  cr ." task-stack-current:  " dup task-stack-current .
+  cr ." task-dict-current:   " task-dict-current .
+;
+  
 \ Spawn a non-main task
 : spawn ( xt dict-size stack-size rstack-size -- task )
   2dup + task +
@@ -178,14 +200,15 @@ end-structure
   0 over task-dict-offset !
   ['] task-entry over push-task-rstack
   tuck push-task-stack
+\  dup dump-task-info
 ;
 
 \ Handle PAUSE
 : do-pause ( -- )
-  pause-enabled @
+  pause-count @ 1 + pause-count !
   current-task @
   rp@ over task-rstack-current!
-  sp@ 8 + over task-stack-current!
+  >r sp@ r> tuck task-stack-current!
   here over task-dict-current!
   task-next @
   begin
@@ -193,6 +216,7 @@ end-structure
   while
     task-next @
   repeat
+  dup current-task !
   dup task-stack-base stack-base !
   dup task-stack-end stack-end !
   dup task-rstack-base rstack-base !
@@ -207,6 +231,7 @@ end-structure
   init
   stack-end @ free-end !
   init-main-task
+  0 pause-count !
   ['] do-pause pause-hook !
   1 pause-enabled !
 ;
