@@ -540,20 +540,20 @@ _asm_literal:
 	movs r0, tos
 	pull_tos
 	movs r1, tos
-	ldr r2, =127
+	ldr r2, =255
 	cmp r1, r2
 	bgt 1f
-	ldr r2, =-128
+	ldr r2, =0
 	cmp r1, r2
 	blt 1f
 	push_tos
 	movs tos, r0
 	bl _asm_mov_imm
 	pop {pc}
-1:	ldr r2, =32767
+1:	ldr r2, =65535
 	cmp r1, r2
 	bgt 2f
-	ldr r2, =-32768
+	ldr r2, =0
 	cmp r1, r2
 	blt 2f
 	push_tos

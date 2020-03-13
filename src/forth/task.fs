@@ -28,6 +28,9 @@ ram-variable current-task
 \ Pause count
 ram-variable pause-count
 
+\ Debug mode
+ram-variable debug-mode
+
 \ The task structure
 begin-structure task
   \ Return stack size
@@ -216,14 +219,58 @@ end-structure
   while
     task-next @
   repeat
-  dup current-task !
-  dup task-stack-base stack-base !
-  dup task-stack-end stack-end !
-  dup task-rstack-base rstack-base !
-  dup task-rstack-end rstack-end !
-  dup task-rstack-current rp!
-  dup task-dict-current here!
-  task-stack-current sp!
+  debug-mode @ not if
+    dup current-task !
+    dup task-stack-base stack-base !
+    dup task-stack-end stack-end !
+    dup task-rstack-base rstack-base !
+    dup task-rstack-end rstack-end !
+    dup task-rstack-current rp!
+    dup task-dict-current here!
+    task-stack-current sp!
+  else
+    s" a" safe-type
+    dup current-task !
+    s" b" safe-type
+    dup task-stack-base stack-base !
+    s" c" safe-type
+    dup task-stack-end stack-end !
+    s" d" safe-type
+    dup task-rstack-base rstack-base !
+    s" e" safe-type
+    dup task-rstack-end rstack-end !
+    s" f" safe-type
+    dup task-rstack-current rp!
+    s" g" safe-type
+    dup task-dict-current here!
+    s" h" safe-type
+    task-stack-current sp!
+    s" i" safe-type
+
+    0 pause-enabled !
+    hex
+    space
+    ." (sp:"
+    sp@ .
+    space
+    ." sp@:"
+    sp@ @ .
+    space
+    ." sp@@:"
+    sp@ @ h@ .
+    space
+    ." rp:"
+    rp@ .
+    space
+    ." rp@:"
+    rp@ @ .
+    space
+    ." rp@@:"
+    rp@ @ h@ .
+    ." )"
+    decimal
+    1 pause-enabled !
+  then
 ;
   
 \ Initialize RAM variables
@@ -231,6 +278,7 @@ end-structure
   init
   stack-end @ free-end !
   init-main-task
+  false debug-mode !
   0 pause-count !
   ['] do-pause pause-hook !
   1 pause-enabled !

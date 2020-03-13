@@ -22,6 +22,18 @@ compile-to-flash
 \ False constant
 0 constant false
 
+\ Base 2
+: binary 2 base ! ;
+
+\ Base 8
+: oct 8 base ! ;
+
+\ Base 10
+: decimal 10 base ! ;
+
+\ Base 16
+: hex 16 base ! ;
+
 \ Cell size
 4 constant cell
 
