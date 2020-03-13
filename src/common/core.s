@@ -836,35 +836,34 @@ _unknown_word:
 	pop {pc}
 	
 	@@ Store a byte
-	define_word "b!", visible_flag
+	define_word "b!", visible_flag | inlined_flag
 _store_1:
-	movs r0, tos
-	pull_tos
-	movs r1, #0xFF
-	ands tos, r1
-	strb tos, [r0]
-	pull_tos
+	ldr r0, [dp]
+	str r0, [tos]
+	ldr tos, [dp, #4]
+	adds dp, #8
 	bx lr
+	end_inlined
 
 	@@ Store a halfword
-	define_word "h!", visible_flag
+	define_word "h!", visible_flag | inlined_flag
 _store_2:
-	movs r0, tos
-	pull_tos
-	ldr r1, =0xFFFF
-	ands tos, r1
-	strh tos, [r0]
-	pull_tos
+	ldr r0, [dp]
+	strh r0, [tos]
+	ldr tos, [dp, #4]
+	adds dp, #8
 	bx lr
+	end_inlined
 
 	@@ Store a word
-	define_word "!", visible_flag
+	define_word "!", visible_flag | inlined_flag
 _store_4:
-	movs r0, tos
-	pull_tos
-	str tos, [r0]
-	pull_tos
+	ldr r0, [dp]
+	str r0, [tos]
+	ldr tos, [dp, #4]
+	adds dp, #8
 	bx lr
+	end_inlined
 
 	@@ Store a doubleword
 	define_word "2!", visible_flag
@@ -877,19 +876,22 @@ _store_8:
 	bx lr
 
 	@@ Get a byte
-	define_word "b@", visible_flag
+	define_word "b@", visible_flag | inlined_flag
 _get_1: ldrb tos, [tos]
 	bx lr
+	end_inlined
 
 	@@ Get a halfword
-	define_word "h@", visible_flag
+	define_word "h@", visible_flag | inlined_flag
 _get_2: ldrh tos, [tos]
 	bx lr
+	end_inlined
 
 	@@ Get a word
-	define_word "@", visible_flag
+	define_word "@", visible_flag | inlined_flag
 _get_4: ldr tos, [tos]
 	bx lr
+	end_inlined
 
 	@@ Get a doubleword
 	define_word "2@", visible_flag

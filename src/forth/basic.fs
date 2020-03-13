@@ -271,6 +271,24 @@ compile-to-flash
   <builds 2 cells align dup current, flash-align, 2 cells + does> @ +
 ;
 
+\ Begin lambda
+: [: ( -- )
+  [immediate]
+  [compile-only]
+  reserve-branch
+  $B500 hcurrent,
+;
+
+\ End lambda
+: ;] ( -- )
+  [immediate]
+  [compile-only]
+  $BD00 hcurrent,
+  current-here over branch-back!
+  6 push,
+  4 + 6 literal,
+;
+
 \ Core of CORNERSTONE's DOES>
 : cornerstone-does> ( -- )
   does>

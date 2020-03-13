@@ -60,6 +60,13 @@ _rstack_end:
 	ldr tos, =rstack_end
 	bx lr
 
+	@@ Get the current exception handler variable address
+	define_word "handler", visible_flag
+_handler:
+	push_tos
+	ldr tos, =handler
+	bx lr
+
 	@@ The parse index
 	define_word ">parse", visible_flag
 _to_parse:

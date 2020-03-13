@@ -28,8 +28,19 @@ ram-variable current-task
 \ Pause count
 ram-variable pause-count
 
-\ Debug mode
-ram-variable debug-mode
+\ RAM variable for key read
+ram-variable key-read
+
+\ RAM variable for whether a key has been read
+ram-variable key-read?
+
+\ RAM variable for a character to emit
+ram-variable char-emit
+
+\ RAM variable for a character waiting to be emitted
+ram-variable char-emit?
+
+\ RAM variable for
 
 \ The task structure
 begin-structure task
@@ -51,6 +62,9 @@ begin-structure task
   \ Current dictionary offset
   field: task-dict-offset
 
+  \ Handler
+  field: task-handler
+  
   \ Task active state ( > 0 active, <= 0 inactive )
   field: task-active
 
@@ -130,16 +144,12 @@ end-structure
 
 \ Force-enable a task
 : force-enable-task ( task -- )
-  dup task-active @
-  dup 1 < if drop 1 then
-  swap task-active !
+  1 swap task-active !
 ;
 
 \ Force-disable a task
 : force-disable-task ( task -- )
-  dup task-active @
-  dup -1 > if drop -1 then
-  swap task-active !
+  -1 swap task-active !
 ;
 
 \ Initialize the main task
@@ -160,12 +170,14 @@ end-structure
 
 \ Task entry point
 : task-entry ( -- )
-  ." ***" safe-type
+  s" ***" safe-type
   r> drop
   try
   ?dup if execute then
   current-task @ force-disable-task
-  pause
+  begin
+    pause
+  again
 ;
 
 \ Dump information on a task
@@ -194,6 +206,7 @@ end-structure
   tuck task-rstack-size h!
   tuck task-stack-size h!
   tuck task-dict-size !
+  0 over task-handler !
   0 over task-active !
   current-task @ task-next @ over task-next !
   dup current-task @ task-next !
@@ -201,76 +214,89 @@ end-structure
   0 over task-rstack-offset h!
   0 over task-stack-offset h!
   0 over task-dict-offset !
-  ['] task-entry over push-task-rstack
+  ['] task-entry 1 + over push-task-rstack
   tuck push-task-stack
-\  dup dump-task-info
 ;
+
+\ Wait for a predicate to become true
+: wait ( xt -- )
+  begin
+    dup execute not
+  while
+    pause
+  repeat
+  drop
+;
+
+\ USART2
+$40004400 constant USART2_BASE
+USART2_BASE $1C + constant USART2_ISR
+USART2_BASE $24 + constant USART2_RDR
+USART2_BASE $28 + constant USART2_TDR
+$20 constant RXNE
+$80 constant TXE
+
+\ Handle IO
+: handle-io ( -- )
+  USART2_ISR @
+  dup RXNE and if
+    key-read? @ not if
+      USART2_RDR b@ key-read !
+      true key-read? !
+    then
+  then
+  TXE and if
+    char-emit? @ if
+      char-emit @ USART2_TDR b!
+      false char-emit? !
+    then
+  then
+;
+
+\ Multitasking IO hooks
+: do-emit ( c -- )
+  [: char-emit? @ not ;] wait
+  char-emit !
+  true char-emit? !
+  pause
+  [: char-emit? @ not ;] wait
+;
+
+: do-key ( -- c )
+  [: key-read? @ ;] wait
+  key-read @
+  false key-read? !
+  pause
+;
+
+: do-emit? ( -- flag ) char-emit? @ ;
+
+: do-key? ( -- flag ) key-read? @ ;
 
 \ Handle PAUSE
 : do-pause ( -- )
+  handle-io
   pause-count @ 1 + pause-count !
   current-task @
   rp@ over task-rstack-current!
   >r sp@ r> tuck task-stack-current!
   here over task-dict-current!
+  handler @ over task-handler !
   task-next @
   begin
     dup task-active @ 1 <
   while
     task-next @
   repeat
-  debug-mode @ not if
-    dup current-task !
-    dup task-stack-base stack-base !
-    dup task-stack-end stack-end !
-    dup task-rstack-base rstack-base !
-    dup task-rstack-end rstack-end !
-    dup task-rstack-current rp!
-    dup task-dict-current here!
-    task-stack-current sp!
-  else
-    s" a" safe-type
-    dup current-task !
-    s" b" safe-type
-    dup task-stack-base stack-base !
-    s" c" safe-type
-    dup task-stack-end stack-end !
-    s" d" safe-type
-    dup task-rstack-base rstack-base !
-    s" e" safe-type
-    dup task-rstack-end rstack-end !
-    s" f" safe-type
-    dup task-rstack-current rp!
-    s" g" safe-type
-    dup task-dict-current here!
-    s" h" safe-type
-    task-stack-current sp!
-    s" i" safe-type
-
-    0 pause-enabled !
-    hex
-    space
-    ." (sp:"
-    sp@ .
-    space
-    ." sp@:"
-    sp@ @ .
-    space
-    ." sp@@:"
-    sp@ @ h@ .
-    space
-    ." rp:"
-    rp@ .
-    space
-    ." rp@:"
-    rp@ @ .
-    space
-    ." rp@@:"
-    rp@ @ h@ .
-    ." )"
-    decimal
-    1 pause-enabled !
-  then
+  dup current-task !
+  dup task-handler @ handler !
+  dup task-stack-base stack-base !
+  dup task-stack-end stack-end !
+  dup task-rstack-base rstack-base !
+  dup task-rstack-end rstack-end !
+  dup task-rstack-current rp!
+  dup task-dict-current here!
+  task-stack-current sp!
 ;
   
 \ Initialize RAM variables
@@ -278,8 +304,15 @@ end-structure
   init
   stack-end @ free-end !
   init-main-task
-  false debug-mode !
   0 pause-count !
+  0 key-read !
+  0 key-read? !
+  0 char-emit !
+  0 char-emit? !
+  ['] do-key key-hook !
+  ['] do-emit emit-hook !
+  ['] do-key? key?-hook !
+  ['] do-emit? emit?-hook !
   ['] do-pause pause-hook !
   1 pause-enabled !
 ;
