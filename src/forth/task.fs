@@ -28,19 +28,26 @@ ram-variable current-task
 \ Pause count
 ram-variable pause-count
 
-\ RAM variable for key read
-ram-variable key-read
-
-\ RAM variable for whether a key has been read
-ram-variable key-read?
-
 \ RAM variable for a character to emit
 ram-variable char-emit
 
 \ RAM variable for a character waiting to be emitted
 ram-variable char-emit?
 
-\ RAM variable for
+\ RAM variable for key buffer read-index
+ram-variable key-read-index
+
+\ RAM variable for key buffer write-index
+ram-variable key-write-index
+
+\ RAM variable for key buffer count
+ram-variable key-count
+
+\ Constant for number of keys to buffer
+16 constant key-buffer-size
+
+\ Key buffer
+key-buffer-size ram-buffer: key-buffer
 
 \ The task structure
 begin-structure task
@@ -170,7 +177,6 @@ end-structure
 
 \ Task entry point
 : task-entry ( -- )
-  s" ***" safe-type
   r> drop
   try
   ?dup if execute then
@@ -210,7 +216,7 @@ end-structure
   0 over task-active !
   current-task @ task-next @ over task-next !
   dup current-task @ task-next !
-  dup task-dict-size @ over - free-end !
+  dup dup task-dict-size @ - free-end !
   0 over task-rstack-offset h!
   0 over task-stack-offset h!
   0 over task-dict-offset !
@@ -236,14 +242,33 @@ USART2_BASE $28 + constant USART2_TDR
 $20 constant RXNE
 $80 constant TXE
 
+\ Write a key to the key buffer
+: write-key ( c -- )
+  key-count @ key-buffer-size < if
+    key-write-index @ key-buffer-size mod key-buffer + b!
+    key-write-index @ 1 + key-buffer-size mod key-write-index !
+    key-count @ 1 + key-count !
+  else
+    drop
+  then
+;
+
+\ Read a key from the key buffer
+: read-key ( -- c )
+  key-count @ 0 > if
+    key-read-index @ key-buffer-size mod key-buffer + b@
+    key-read-index @ 1 + key-buffer-size mod key-read-index !
+    key-count @ 1 - key-count !
+  else
+    0
+  then
+;
+
 \ Handle IO
 : handle-io ( -- )
   USART2_ISR @
   dup RXNE and if
-    key-read? @ not if
-      USART2_RDR b@ key-read !
-      true key-read? !
-    then
+    USART2_RDR b@ write-key
   then
   TXE and if
     char-emit? @ if
@@ -254,24 +279,31 @@ $80 constant TXE
 ;
 
 \ Multitasking IO hooks
+
 : do-emit ( c -- )
-  [: char-emit? @ not ;] wait
-  char-emit !
-  true char-emit? !
-  pause
-  [: char-emit? @ not ;] wait
-;
+  pause-enabled @ 0 > if
+    [: char-emit? @ not ;] wait
+    char-emit !
+    true char-emit? !
+    pause
+    [: char-emit? @ not ;] wait
+  else
+    serial-emit
+  then
+; 
 
 : do-key ( -- c )
-  [: key-read? @ ;] wait
-  key-read @
-  false key-read? !
-  pause
+  pause-enabled @ 0 > if
+    [: key-count @ 0 > ;] wait
+    read-key
+  else
+    serial-emit
+  then
 ;
 
-: do-emit? ( -- flag ) char-emit? @ ;
+: do-emit? ( -- flag ) pause-enabled @ 0 > if char-emit? @ else emit? then ;
 
-: do-key? ( -- flag ) key-read? @ ;
+: do-key? ( -- flag ) pause-enabled @ 0 > if key-count @ 0 > else key? then ;
 
 \ Handle PAUSE
 : do-pause ( -- )
@@ -305,8 +337,9 @@ $80 constant TXE
   stack-end @ free-end !
   init-main-task
   0 pause-count !
-  0 key-read !
-  0 key-read? !
+  0 key-read-index !
+  0 key-write-index !
+  0 key-count !
   0 char-emit !
   0 char-emit? !
   ['] do-key key-hook !
