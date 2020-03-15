@@ -81,7 +81,7 @@ compile-to-flash
 : align ( a power -- a ) swap 1 - swap 1 - or 1 + ;
 
 \ Duplicate a cell if it is non-zero
-: ?dup ( x -- x | 0 ) dup 0 = if drop then ;
+: ?dup ( x -- x | 0 ) dup 0 <> if dup then ;
 
 \ Dump the contents of the data stack
 : .s ( -- )
@@ -167,21 +167,6 @@ compile-to-flash
   finalize-no-align,
   advance-here
 ;
-
-\ Specify a buffer of a given size
-: buffer: ( # "name" -- ) create allot ;
-
-\ Create a one-byte variable
-: bvariable ( "name" -- ) create 1 allot ;
-
-\ Create a two-byte variable
-: hvariable ( "name" -- ) create 2 allot ;
-
-\ Create a four-byte variable
-: variable ( "name" -- ) create 4 allot ;
-
-\ Create an eight-byte variable
-: 2variable ( "name" -- ) create 8 allot ;
 
 \ In all cases:
 \
@@ -330,6 +315,34 @@ compile-to-flash
   then
 ;
 
+\ Allocate a byte variable in RAM
+: ram-bvariable ( "name" -- )
+  next-ram-space
+  compiling-to-flash
+  over
+  compile-to-flash
+  constant
+  not if
+    compile-to-ram
+  then
+  1 +
+  set-next-ram-space
+;
+\ Allocate a halfword variable in RAM
+: ram-hvariable ( "name" -- )
+  next-ram-space
+  2 align
+  compiling-to-flash
+  over
+  compile-to-flash
+  constant
+  not if
+    compile-to-ram
+  then
+  2 +
+  set-next-ram-space
+;
+
 \ Allocate a variable in RAM
 : ram-variable ( "name" -- )
   next-ram-space
@@ -342,6 +355,21 @@ compile-to-flash
     compile-to-ram
   then
   4 +
+  set-next-ram-space
+;
+
+\ Allocate a doubleword variable in RAM
+: ram-2variable ( "name" -- )
+  next-ram-space
+  4 align
+  compiling-to-flash
+  over
+  compile-to-flash
+  constant
+  not if
+    compile-to-ram
+  then
+  8 +
   set-next-ram-space
 ;
 
@@ -374,6 +402,60 @@ compile-to-flash
   set-next-ram-space
 ;
 
+\ Specify a buffer of a given size
+: buffer: ( # "name" -- )
+  compiling-to-flash if
+    ram-buffer:
+  else
+    create allot
+  then
+;
+
+\ Specify a buffer of a given size
+: aligned-buffer: ( # "name" -- )
+  compiling-to-flash if
+    ram-aligned-buffer:
+  else
+    create allot
+  then
+;
+
+\ Create a one-byte variable
+: bvariable ( "name" -- )
+  compiling-to-flash if
+    ram-bvariable
+  else
+    create 1 allot
+  then
+;
+
+\ Create a two-byte variable
+: hvariable ( "name" -- )
+  compiling-to-flash if
+    ram-hvariable
+  else
+    create 2 allot
+  then
+;
+
+\ Create a four-byte variable
+: variable ( "name" -- )
+  compiling-to-flash if
+    ram-variable
+  else
+    create 4 allot
+  then
+;
+
+\ Create an eight-byte variable
+: 2variable ( "name" -- )
+  compiling-to-flash if
+    ram-2variable
+  else
+    create 8 allot
+  then
+;
+
 \ Initialize the RAM variables
 : init ( -- )
   init
@@ -382,6 +464,3 @@ compile-to-flash
 
 \ Set compilation back to RAM
 compile-to-ram
-
-\ Set a cornerstone for the basic Forth code
-cornerstone <basic>
