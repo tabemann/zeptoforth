@@ -245,7 +245,7 @@ $80 constant TXE
 \ Write a key to the key buffer
 : write-key ( c -- )
   key-count @ key-buffer-size < if
-    key-write-index @ key-buffer-size mod key-buffer + b!
+    key-write-index @ key-buffer + b!
     key-write-index @ 1 + key-buffer-size mod key-write-index !
     key-count @ 1 + key-count !
   else
@@ -256,7 +256,7 @@ $80 constant TXE
 \ Read a key from the key buffer
 : read-key ( -- c )
   key-count @ 0 > if
-    key-read-index @ key-buffer-size mod key-buffer + b@
+    key-read-index @ key-buffer + b@
     key-read-index @ 1 + key-buffer-size mod key-read-index !
     key-count @ 1 - key-count !
   else
@@ -358,3 +358,4 @@ cornerstone <task>
 
 \ Reboot to initialize multitasking
 reboot
+

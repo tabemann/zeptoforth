@@ -839,7 +839,7 @@ _unknown_word:
 	define_word "b!", visible_flag | inlined_flag
 _store_1:
 	ldr r0, [dp]
-	str r0, [tos]
+	strb r0, [tos]
 	ldr tos, [dp, #4]
 	adds dp, #8
 	bx lr
