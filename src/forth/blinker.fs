@@ -1,4 +1,4 @@
-\ Copyright (c) 2012 Matthias Koch
+\ Copyright (c) 2013? Matthias Koch
 \ Copyright (c) 2020 Travis Bemann
 \
 \ This program is free software: you can redistribute it and/or modify
