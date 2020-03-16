@@ -74,7 +74,7 @@ $18 GPIOE or     constant GPIOE_BSRR
     pause
     2 pick execute
     2 pick mod
-    over >
+    over >=
   until
   drop drop drop
 ;
