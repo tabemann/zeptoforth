@@ -16,6 +16,8 @@
 
 compile-to-flash
 
+marker erase-me
+
 \ Registers
 $40021000 constant RCC_BASE
 $4C RCC_BASE or  constant RCC_AHB2ENR
@@ -59,6 +61,23 @@ $18 GPIOE or     constant GPIOE_BSRR
   1 8 16 + lshift GPIOE_BSRR !
 ;
 
+\ Wait for a counter
+: wait-counter ( xt freq -- )
+  2dup swap execute swap mod
+  begin
+    pause
+    2 pick execute
+    2 pick mod
+    over <
+  until
+  begin
+    pause
+    2 pick execute
+    2 pick mod
+    over >
+  until
+  drop drop drop
+;
 
 \ The blinker
 : blinker ( -- )
@@ -66,11 +85,11 @@ $18 GPIOE or     constant GPIOE_BSRR
   led-red-on
   begin
     pause
-    [: pause-count @ 1000 mod 0 = ;] wait
+    [: pause-count @ ;] 10000 wait-counter
     led-red-off
     led-green-on
     pause
-    [: pause-count @ 1000 mod 0 = ;] wait
+    [: pause-count @ ;] 10000 wait-counter
     led-green-off
     led-red-on
   again
@@ -86,3 +105,6 @@ variable blinker-task
   ['] blinker 256 256 256 spawn blinker-task !
   blinker-task @ enable-task
 ;
+
+\ Reboot to initialize
+reboot
