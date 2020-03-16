@@ -63,17 +63,17 @@ $18 GPIOE or     constant GPIOE_BSRR
 
 \ Wait for a counter
 : wait-counter ( xt freq -- )
-  2dup swap execute swap mod
+  2dup swap execute swap umod
   begin
     pause
     2 pick execute
-    2 pick mod
+    2 pick umod
     over <=
   until
   begin
     pause
     2 pick execute
-    2 pick mod
+    2 pick umod
     over >=
   until
   drop drop drop
