@@ -73,9 +73,9 @@ _then:	push {lr}
 	pull_tos
 	movs r0, tos
 	pull_tos
-	push {r0}
+	push {r0, r1}
 	bl _current_here
-	pop {r0}
+	pop {r0, r1}
 	push_tos
 	movs tos, r0
 	cmp r1, #0

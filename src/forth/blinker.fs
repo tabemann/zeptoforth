@@ -79,17 +79,20 @@ $18 GPIOE or     constant GPIOE_BSRR
   drop drop drop
 ;
 
+\ The blinker delay time
+variable blinker-delay
+
 \ The blinker
 : blinker ( -- )
   led-init
   led-red-on
   begin
     pause
-    [: pause-count @ ;] 10000 wait-counter
+    [: pause-count @ ;] blinker-delay @ wait-counter
     led-red-off
     led-green-on
     pause
-    [: pause-count @ ;] 10000 wait-counter
+    [: pause-count @ ;] blinker-delay @ wait-counter
     led-green-off
     led-red-on
   again
@@ -102,6 +105,7 @@ variable blinker-task
 \ Init
 : init ( -- )
   init
+  10000 blinker-delay !
   ['] blinker 256 256 256 spawn blinker-task !
   blinker-task @ enable-task
 ;
