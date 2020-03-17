@@ -609,6 +609,16 @@ compile-to-flash
   postpone exit
 ;
 
+\ Wait for a predicate to become true
+: wait ( xt -- )
+  begin
+    dup execute not
+  while
+    pause
+  repeat
+  drop
+;
+
 \ Initialize the RAM variables
 : init ( -- )
   init
