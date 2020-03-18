@@ -18,7 +18,7 @@
 compile-to-flash
 
 \ Registers
-$40021000 constant RCC_BASE
+$40021000        constant RCC_BASE
 $4C RCC_BASE or  constant RCC_AHB2ENR
 $48000000        constant GPIOA
 : gpio-port  ( n -- a ) #10 lshift GPIOA or ;

@@ -1312,56 +1312,64 @@ _current_comma_cstring:
 1:	pop {pc}	
 
 	@@ Push a value onto the return stack
-	define_word ">r", visible_flag
+	define_word ">r", visible_flag | inlined_flag
 _push_r:
 	push {tos}
 	pull_tos
 	bx lr
+	end_inlined
 
 	@@ Pop a value off the return stack
-	define_word "r>", visible_flag
+	define_word "r>", visible_flag | inlined_flag
 _pop_r:	push_tos
 	pop {tos}
 	bx lr
+	end_inlined
 
 	@@ Get a value off the return stack without popping it
-	define_word "r@", visible_flag
+	define_word "r@", visible_flag | inlined_flag
 _get_r:	push_tos
 	ldr tos, [sp]
 	bx lr
+	end_inlined
 
 	@@ Drop a value from the return stack
-	define_word "rdrop", visible_flag
+	define_word "rdrop", visible_flag | inlined_flag
 _rdrop:	adds sp, #4
 	bx lr
+	end_inlined
 
 	@@ Get the return stack pointer
-	define_word "rp@", visible_flag
+	define_word "rp@", visible_flag | inlined_flag
 _get_rp:
 	push_tos
 	mov tos, sp
 	bx lr
+	end_inlined
 
 	@@ Set the return stack pointer
-	define_word "rp!", visible_flag
+	define_word "rp!", visible_flag | inlined_flag
 _store_rp:
 	mov sp, tos
 	pull_tos
 	bx lr
+	end_inlined
 
 	@@ Get the data stack pointer
-	define_word "sp@", visible_flag
+	define_word "sp@", visible_flag | inlined_flag
 _get_sp:
 	push_tos
 	movs tos, dp
 	bx lr
+	end_inlined
 
 	@@ Set the data stack pointer
-	define_word "sp!", visible_flag
+	define_word "sp!", visible_flag | inlined_flag
 _store_sp:
 	movs dp, tos
 	pull_tos
 	bx lr
+	end_inlined
 
 	@@ Reboot (note that this does not clear RAM, but it does clear the RAM
 	@@ dictionary

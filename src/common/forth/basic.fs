@@ -67,9 +67,6 @@ compile-to-flash
 \ Tuck a cell under the cell at he top of the stack
 : tuck ( x1 x2 -- x2 x1 x2 ) swap over [inlined] ;
 
-\ Drop a cell from the return stack
-: rdrop ( R: x -- ) r> r> drop >r ;
-
 \ Get the minimum of two numbers
 : min ( n1 n2 -- n3 ) over - dup 0 < and + ;
 
@@ -181,7 +178,7 @@ compile-to-flash
   dup 0 = if ['] token-expected ?raise then
   start-compile-no-push
   compiling-to-flash if
-    current-here 28 + ( 28 bytes ) 16 align
+    current-here 28 + ( 28 bytes ) flash-block-size align
   else
     current-here 16 + ( 16 bytes ) 4 align
   then
@@ -238,7 +235,7 @@ compile-to-flash
 
 \ Align to flash block if compiling to flash
 : flash-align,
-  compiling-to-flash if flash-here 16 align advance-here then
+  compiling-to-flash if flash-here flash-block-size align advance-here then
 ;
 
 \ Specify code for a word created wth <BUILDS

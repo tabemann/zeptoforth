@@ -84,33 +84,6 @@ _store_flash_16:
 	ldr r2, [dp, #4]
 	ldr r1, [dp, #8]
 	ldr r0, [dp, #12]
-
-	@@ Test
-	@@ push {r0, r1, r2, r3}
-	@@ string "16flash! "
-	@@ bl _type
-	@@ push_tos
-	@@ bl _type_unsigned
-	@@ bl _space
-	@@ push_tos
-	@@ movs tos, r0
-	@@ bl _type_unsigned
-	@@ bl _space
-	@@ push_tos
-	@@ movs tos, r1
-	@@ bl _type_unsigned
-	@@ bl _space
-	@@ push_tos
-	@@ movs tos, r2
-	@@ bl _type_unsigned
-	@@ bl _space
-	@@ push_tos
-	@@ movs tos, r2
-	@@ bl _type_unsigned
-	@@ bl _cr
-	@@ pop {r0, r1, r2, r3}
-	@@ End Test
-	
 	adds dp, #16
 	str r0, [tos, #0]
 	str r1, [tos, #4]
@@ -601,5 +574,13 @@ _flash_align:
 2:	pull_tos
 	pop {pc}
 
+	@@ Get the flash block size in bytes
+	define_word "flash-block-size", visible_flag | inlined_flag
+_flash_block_size:
+	push_tos
+	ldr tos, =flash_block_size
+	bx lr
+	end_inlined
+	
 	.ltorg
 	
