@@ -34,14 +34,14 @@ variable vary-step
     begin
       blinker-delay @ vary-max @ <
     while
-      [: pause-count @ ;] vary-delay @ wait-counter
+      vary-delay @ ms
       blinker-delay @ vary-step @ + blinker-delay !
     repeat
     vary-max @ blinker-delay !
     begin
       blinker-delay @ vary-min @ >
     while
-      [: pause-count @ ;] vary-delay @ wait-counter
+      vary-delay @ ms
       blinker-delay @ vary-step @ - blinker-delay !
     repeat
   again
@@ -53,10 +53,10 @@ variable vary-task
 \ Init
 : init ( -- )
   init
-  10000 vary-delay !
-  1000 vary-min !
-  10000 vary-max !
-  1000 vary-step !
+  100 vary-delay !
+  100 vary-min !
+  2000 vary-max !
+  50 vary-step !
   ['] vary 256 256 256 spawn vary-task !
   vary-task @ enable-task
 ;

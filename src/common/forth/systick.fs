@@ -11,6 +11,7 @@
 \ GNU General Public License for more details.
 
 \ Compile to flash
+compile-to-flash
 
 \ RW SysTick Control and Status Register
 $E000E010 constant SYST_CSR
@@ -50,17 +51,31 @@ variable systick-counter
 
 \ SysTick handler
 : systick-handler ( -- )
-  systick-counter @ 1 + systick-counter !
+  SYST_CSR @ SYST_CSR_COUNTFLAG @ and if
+    systick-counter @ 1 + systick-counter !
+  then
+;
+
+\ Wait for n milliseconds
+: ms ( u -- )
+  10 * systick-counter @
+  begin
+    dup systick-counter @ swap - 2 pick u<
+  while
+    pause
+  repeat
+  drop drop
 ;
 
 \ Init
 : init ( -- )
   init
-  SYS_CALIB @ SYS_CALIB_TEMS and 10 / SYST_RVR !
+  SYST_CALIB @ SYST_CALIB_TENMS and 100 / SYST_RVR !
   0 SYST_CVR !
   0 systick-counter !
   ['] systick-handler systick-handler-hook !
-  SYST_CSR @ SYST_CSR_TICKINT or SYST_CSR_ENABLE or SYST_CSR
+  SYST_CSR @ SYST_CSR_TICKINT or SYST_CSR_ENABLE or SYST_CSR !
 ;
 
 \ Reboot
+reboot

@@ -54,6 +54,12 @@ begin-structure task
   \ Task active state ( > 0 active, <= 0 inactive )
   field: task-active
 
+  \ Task systick start time
+  field: task-systick-start
+  
+  \ Task systick delay time
+  field: task-systick-delay
+
   \ Next task
   field: task-next
 end-structure
@@ -148,6 +154,8 @@ end-structure
   stack-base @ sp@ - over task-stack-offset h!
   here next-ram-space - over task-dict-offset !
   1 over task-active !
+  0 over task-systick-start !
+  -1 over task-systick-delay !
   dup dup task-next !
   dup main-task !
   current-task !
@@ -193,6 +201,8 @@ end-structure
   tuck task-dict-size !
   0 over task-handler !
   0 over task-active !
+  0 over task-systick-start !
+  -1 over task-systick-delay !
   current-task @ task-next @ over task-next !
   dup current-task @ task-next !
   dup dup task-dict-size @ - free-end !
@@ -215,6 +225,9 @@ end-structure
   task-next @
   begin
     dup task-active @ 1 <
+    over task-systick-delay @ -1 <>
+    systick-counter @ 3 pick task-systick-start @ -
+    3 pick task-systick-delay @ u< and or
   while
     task-next @
   repeat
@@ -227,6 +240,37 @@ end-structure
   dup task-rstack-current rp!
   dup task-dict-current here!
   task-stack-current sp!
+;
+
+\ Set a delay for a task
+: set-delay ( 1/10ms-delay 1/10ms-start task -- )
+  tuck task-systick-start !
+  task-systick-delay !
+;
+
+\ Get a delay for a task
+: get-delay ( task -- 1/10ms-delay 1/10ms-start )
+  dup task-systick-delay @
+  over task-systick-start @
+;
+
+\ Cancel a delay for a task
+: cancel-delay ( task -- )
+  0 over task-systick-start !
+  -1 swap task-systick-delay !
+;
+
+\ Wait for n milliseconds with multitasking support
+: ms ( u -- )
+  10 * systick-counter @
+  2dup current-task @ set-delay
+  begin
+    dup systick-counter @ swap - 2 pick u<
+  while
+    pause
+  repeat
+  drop drop
+  current-task @ cancel-delay
 ;
   
 \ Init

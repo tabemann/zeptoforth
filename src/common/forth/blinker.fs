@@ -17,24 +17,6 @@ compile-to-flash
 
 marker erase-me
 
-\ Wait for a counter
-: wait-counter ( xt freq -- )
-  2dup swap execute swap umod
-  begin
-    pause
-    2 pick execute
-    2 pick umod
-    over <=
-  until
-  begin
-    pause
-    2 pick execute
-    2 pick umod
-    over >=
-  until
-  drop drop drop
-;
-
 \ The blinker delay time
 variable blinker-delay
 
@@ -43,11 +25,11 @@ variable blinker-delay
   led-red-on
   begin
     pause
-    [: pause-count @ ;] blinker-delay @ wait-counter
+    blinker-delay @ ms
     led-red-off
     led-green-on
     pause
-    [: pause-count @ ;] blinker-delay @ wait-counter
+    blinker-delay @ ms
     led-green-off
     led-red-on
   again
@@ -60,7 +42,7 @@ variable blinker-task
 \ Init
 : init ( -- )
   init
-  10000 blinker-delay !
+  500 blinker-delay !
   ['] blinker 256 256 256 spawn blinker-task !
   blinker-task @ enable-task
 ;

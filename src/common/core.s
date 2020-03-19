@@ -265,6 +265,50 @@ _ge:	movs r0, tos
 1:	movs tos, #0
 	bx lr
 
+	@@ Unsigned less than
+	define_word "u<", visible_flag
+_ult:	movs r0, tos
+	pull_tos
+	cmp tos, r0
+	bhs 1f
+	movs tos, #-1
+	bx lr
+1:	movs tos, #0
+	bx lr
+
+	@@ Unsigned greater than
+	define_word "u>", visible_flag
+_ugt:	movs r0, tos
+	pull_tos
+	cmp tos, r0
+	bls 1f
+	movs tos, #-1
+	bx lr
+1:	movs tos, #0
+	bx lr
+
+	@@ Unsigned less than or equal
+	define_word "u<=", visible_flag
+_ule:	movs r0, tos
+	pull_tos
+	cmp tos, r0
+	bhi 1f
+	movs tos, #-1
+	bx lr
+1:	movs tos, #0
+	bx lr
+
+	@@ Unsigned greater than or equal
+	define_word "u>=", visible_flag
+_uge:	movs r0, tos
+	pull_tos
+	cmp tos, r0
+	blo 1f
+	movs tos, #-1
+	bx lr
+1:	movs tos, #0
+	bx lr
+
 	@@ Get the HERE pointer
 	define_word "here", visible_flag
 _here:	ldr r0, =here
