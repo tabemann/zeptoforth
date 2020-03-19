@@ -74,7 +74,7 @@ variable systick-counter
   0 SYST_CVR !
   0 systick-counter !
   ['] systick-handler systick-handler-hook !
-  SYST_CSR @ SYST_CSR_TICKINT or SYST_CSR_ENABLE or SYST_CSR !
+  SYST_CSR_TICKINT SYST_CSR_ENABLE or SYST_CSR bis!
 ;
 
 \ Reboot
