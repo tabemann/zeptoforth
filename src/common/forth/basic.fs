@@ -67,6 +67,9 @@ compile-to-flash
 \ Tuck a cell under the cell at he top of the stack
 : tuck ( x1 x2 -- x2 x1 x2 ) swap over [inlined] ;
 
+\ Add to a cell
+: +! ( x addr -- ) tuck @ + swap ! [inlined] ;
+
 \ Get the minimum of two numbers
 : min ( n1 n2 -- n3 ) over - dup 0 < and + ;
 

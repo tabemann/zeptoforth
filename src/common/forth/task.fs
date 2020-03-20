@@ -242,20 +242,41 @@ end-structure
   task-stack-current sp!
 ;
 
+\ Start a delay from the present
+: start-task-delay ( 1/10m-delay task -- )
+  dup systick-counter @ swap task-systick-start !
+  task-systick-delay !
+;
+
 \ Set a delay for a task
-: set-delay ( 1/10ms-delay 1/10ms-start task -- )
+: set-task-delay ( 1/10ms-delay 1/10ms-start task -- )
   tuck task-systick-start !
   task-systick-delay !
 ;
 
+\ Advance a delay for a task by a given amount of time
+: advance-task-delay ( 1/10ms-offset task -- )
+  task-systick-delay +!
+;
+
+\ Advance of start a delay from the present, depending on whether the delay
+\ length has changed
+: reset-task-delay ( 1/10ms-delay task -- )
+  dup task-systick-delay @ 2 pick = if
+    advance-task-delay
+  else
+    start-task-delay
+  then
+;
+
 \ Get a delay for a task
-: get-delay ( task -- 1/10ms-delay 1/10ms-start )
+: get-task-delay ( task -- 1/10ms-delay 1/10ms-start )
   dup task-systick-delay @
   over task-systick-start @
 ;
 
 \ Cancel a delay for a task
-: cancel-delay ( task -- )
+: cancel-task-delay ( task -- )
   0 over task-systick-start !
   -1 swap task-systick-delay !
 ;
@@ -263,14 +284,14 @@ end-structure
 \ Wait for n milliseconds with multitasking support
 : ms ( u -- )
   10 * systick-counter @
-  2dup current-task @ set-delay
+  2dup current-task @ set-task-delay
   begin
     dup systick-counter @ swap - 2 pick u<
   while
     pause
   repeat
   drop drop
-  current-task @ cancel-delay
+  current-task @ cancel-task-delay
 ;
   
 \ Init

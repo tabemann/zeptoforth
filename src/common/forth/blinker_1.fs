@@ -22,22 +22,44 @@ variable my-schedule
 \ The schedule task
 variable schedule-task
 
-\ The blinker action
-variable blinker-action
+\ The red LED blinker action
+variable red-blinker-action
 
-\ The LED state variable
-variable led-state
+\ The green LED blinker action
+variable green-blinker-action
 
-\ Do the blinker
-: blinker ( -- )
-  pause-count @ 10000 mod 2 < if
-    led-state @ if
-      led-red-off
-    else
-      led-red-on
-    then
-    led-state @ not led-state !
+\ The red LED state variable
+variable red-led-state
+
+\ The green LED state variable
+variable green-led-state
+
+\ The red LED blinker delay variable
+variable red-blinker-delay
+
+\ The green LED blinker delay variable
+variable green-blinker-delay
+
+\ Blink the red LED
+: red-blinker ( -- )
+  red-led-state @ if
+    led-red-off
+  else
+    led-red-on
   then
+  red-led-state @ not red-led-state !
+  red-blinker-delay @ current-action @ reset-action-delay
+;
+
+\ Blink the green LED
+: green-blinker ( -- )
+  green-led-state @ if
+    led-green-off
+  else
+    led-green-on
+  then
+  green-led-state @ not green-led-state !
+  green-blinker-delay @ current-action @ reset-action-delay
 ;
 
 \ Run the schedule
@@ -48,10 +70,17 @@ variable led-state
 \ Init
 : init ( -- )
   init
-  false led-state !
+  false red-led-state !
+  false green-led-state !
   create-schedule my-schedule !
-  ['] blinker my-schedule @ add-action blinker-action !
-  blinker-action @ enable-action
+  6666 red-blinker-delay !
+  ['] red-blinker my-schedule @ add-action red-blinker-action !
+  red-blinker-delay @ red-blinker-action @ start-action-delay
+  red-blinker-action @ enable-action
+  10000 green-blinker-delay !
+  ['] green-blinker my-schedule @ add-action green-blinker-action !
+  green-blinker-delay @ green-blinker-action @ start-action-delay
+  green-blinker-action @ enable-action
   ['] do-schedule 256 256 256 spawn schedule-task !
   schedule-task @ enable-task
   pause

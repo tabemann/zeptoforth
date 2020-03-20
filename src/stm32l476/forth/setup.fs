@@ -13,38 +13,16 @@
 \ You should have received a copy of the GNU General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-\ Compile this to flash
-compile-to-flash
+\ This is not actual Forth code, but rather setup directives for e4thcom to be
+\ executed from the root of the zeptoforth directory to initialize zeptoforth
+\ on an STM32L476 device.
 
-\ The blinker delay time
-variable blinker-delay
+#include src/common/forth/basic.fs
+#include src/common/forth/systick.fs
+#include src/stm32l476/forth/task_io.fs
+#include src/common/forth/task.fs
+#include src/common/forth/schedule.fs
+#include src/stm32l476/forth/led.fs
 
-\ The blinker
-: blinker ( -- )
-  led-red-on
-  begin
-    pause
-    blinker-delay @ ms
-    led-red-off
-    led-green-on
-    pause
-    blinker-delay @ ms
-    led-green-off
-    led-red-on
-  again
-;
-
-
-\ The blinker task
-variable blinker-task
-
-\ Init
-: init ( -- )
-  init
-  500 blinker-delay !
-  ['] blinker 256 256 256 spawn blinker-task !
-  blinker-task @ enable-task
-;
-
-\ Reboot to initialize
-reboot
+\ Set a cornerstone to enable deleting everything compiled after this code
+cornerstone restore-state

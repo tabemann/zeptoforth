@@ -16,6 +16,9 @@
 \ Compile this to flash
 compile-to-flash
 
+\ The current action
+variable current-action
+
 \ The scheduler structure
 begin-structure schedule
   \ Current action
@@ -32,6 +35,12 @@ begin-structure action
 
   \ Whether the action is active (> 0 means active)
   field: action-active
+
+  \ Action systick start time
+  field: action-systick-start
+  
+  \ Action systick delay time
+  field: action-systick-delay
 end-structure
 
 \ Create a scheduler
@@ -45,6 +54,8 @@ end-structure
   here action allot
   2 roll over action-xt !
   0 over action-active !
+  0 over action-systick-start !
+  -1 over action-systick-delay !
   over schedule-current @ 0 <> if
     over schedule-current @ action-next @
     over action-next !
@@ -75,15 +86,59 @@ end-structure
   -1 swap action-active !
 ;
 
+\ Start a delay from the present
+: start-action-delay ( 1/10m-delay action -- )
+  dup systick-counter @ swap action-systick-start !
+  action-systick-delay !
+;
+
+\ Set a delay for an action
+: set-action-delay ( 1/10ms-delay 1/10ms-start action -- )
+  tuck action-systick-start !
+  action-systick-delay !
+;
+
+\ Advance a delay for an action by a given amount of time
+: advance-action-delay ( 1/10ms-offset action -- )
+  action-systick-delay +!
+;
+
+\ Advance of start a delay from the present, depending on whether the delay
+\ length has changed
+: reset-action-delay ( 1/10ms-delay action -- )
+  dup action-systick-delay @ 2 pick = if
+    advance-action-delay
+  else
+    start-action-delay
+  then
+;
+
+\ Get a delay for an action
+: get-action-delay ( action -- 1/10ms-delay 1/10ms-start )
+  dup action-systick-delay @
+  over action-systick-start @
+;
+
+\ Cancel a delay for an action
+: cancel-action-delay ( action -- )
+  0 over action-systick-start !
+  -1 swap action-systick-delay !
+;
+
 \ Run a schedule
 : run-schedule ( schedule -- )
   begin
     pause
     dup schedule-current @
-    dup action-active @ 0 > if
+    dup action-active @ 0 >
+    over action-systick-delay @ -1 =
+    systick-counter @ 3 pick action-systick-start @ -
+    3 pick action-systick-delay @ u>= or and
+    if
+      dup current-action !
       dup action-xt @ execute
-      action-next @ over schedule-current !
     then
+    action-next @ over schedule-current !
   again
 ;
 
