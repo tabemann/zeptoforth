@@ -27,15 +27,15 @@ ODIR=obj
 _OBJ = zeptoforth.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
-$(ODIR)/zeptoforth.o: src/$(PLATFORM)/zeptoforth.s
-	mkdir -p obj
-	$(AS) $(ASFLAGS) -o $@ $<
-
 zeptoforth.elf: $(OBJ)
 	$(LD) $(OBJ) -T src/$(PLATFORM)/zeptoforth.ld --cref -Map zeptoforth.map -nostartfiles -o $@
 	$(DUMP) -D $@ > zeptoforth.list
 	$(COPY) $@ zeptoforth.bin -O binary
 	$(COPY) $@ zeptoforth.ihex -O ihex
+
+$(ODIR)/zeptoforth.o: src/$(PLATFORM)/*.s src/common/*.s
+	mkdir -p obj
+	$(AS) $(ASFLAGS) -o $@ src/$(PLATFORM)/zeptoforth.s
 
 .PHONY: clean
 
