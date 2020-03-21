@@ -206,7 +206,7 @@ Create a double cell-sized field
 Begin lambda
 
 #### ;]
-( -- )
+( -- ) ( compiled: -- xt )
 
 End lambda
 
