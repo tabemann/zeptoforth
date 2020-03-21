@@ -414,6 +414,63 @@
 #### parse-digit
 ( b base -- digit f )
 
+#### skip-to-token
+( -- )
+
+#### parse-to-char
+( b -- b-addr u )
+
+#### .(
+( "text)" -- )
+
+#### ."
+( "text<quote>" -- )
+
+#### s"
+( "text<quote>" -- b-addr u )
+
+#### c"
+( "text<quote>" -- b-addr )
+
+#### compile-cstring
+( b-addr u -- ) ( compiled: b-addr )
+
+#### char
+( "char" -- ) ( compiled: b )
+
+#### [char]
+( compiling: "char" -- ) ( compiled: b )
+
+#### (.)
+( n -- )
+
+#### (u.)
+( u -- )
+
+#### .
+( n -- )
+
+#### u.
+( u -- )
+
+#### move
+( b-addr1 b-addr2 u -- )
+
+#### <move
+( b-addr1 b-addr2 u -- )
+
+#### move>
+( b-addr1 b-addr2 u -- )
+
+#### reverse
+( b-addr u -- )
+
+#### format-unsigned
+( u1 -- b-addr u2 )
+
+#### format-integer
+( n -- b-addr u ) 
+
 #### :
 ( "name" -- )
 
