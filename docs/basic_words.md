@@ -89,6 +89,12 @@ Align an address to a power of two
 
 Duplicate a cell if it is non-zero
 
+#### depth
+( -- u )
+
+Get the depth of the stack, not including the cell pushed onto it by this
+word
+
 #### .s
 ( -- )
 
@@ -268,7 +274,7 @@ Begin a do loop
 #### ?do
 ( end start -- ) ( R: -- leave start end ) ( compile: -- leave* loop )
 
-Begin a ?dup loop
+Begin a ?do loop
 
 #### loop
 ( R leave current end -- leave current end | )

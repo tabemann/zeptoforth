@@ -17,7 +17,6 @@
 
 #### pick
 ( xi ... x0 i -- xi ... x0 xi )
-
 #### roll
 ( xi ... x0 i -- xi-1 ... x0 xi )
 
@@ -469,7 +468,7 @@
 ( u1 -- b-addr u2 )
 
 #### format-integer
-( n -- b-addr u ) 
+( n -- b-addr u )
 
 #### :
 ( "name" -- )

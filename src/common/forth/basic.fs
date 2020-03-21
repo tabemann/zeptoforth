@@ -92,6 +92,10 @@ compile-to-flash
 \ Duplicate a cell if it is non-zero
 : ?dup ( x -- x | 0 ) dup 0 <> if dup then ;
 
+\ Get the depth of the stack, not including the cell pushed onto it by this
+\ word
+: depth ( -- u ) stack-base @ sp@ - cell / 1 - ;
+
 \ Dump the contents of the data stack
 : .s ( -- )
   space ." ["
@@ -493,7 +497,7 @@ compile-to-flash
   current-here
 ;
 
-\ Begin a ?dup loop
+\ Begin a ?do loop
 : ?do ( end start -- ) ( R: -- leave start end ) ( compile: -- leave* loop )
   [immediate]
   [compile-only]
