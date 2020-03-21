@@ -631,6 +631,7 @@ _asm_b:	push {lr}
 	bl _raise
 	pop {pc}
 2:	bl _asm_b_32
+	pop {pc}
 3:	bl _asm_b_16
 	pop {pc}
 
@@ -657,6 +658,7 @@ _asm_beq:
 	bl _raise
 	pop {pc}
 2:	bl _asm_beq_32
+	pop {pc}
 3:	bl _asm_beq_16
 	pop {pc}
 

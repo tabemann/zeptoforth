@@ -598,7 +598,6 @@ _exit:	pop {pc}
 _init_flash_dict:
 	push {lr}
 	bl _find_flash_end
-	push_tos
 	bl _next_flash_block
 	ldr r1, =flash_dict_start
 	ldr r0, =flash_here
