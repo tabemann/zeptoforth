@@ -337,7 +337,7 @@ _evaluate:
 	adds r3, #8
 	ldr r0, =eval_ptr
 	str r3, [r0]
-	ldr tos, =_inner
+	ldr tos, =_outer
 	bl _try
 	pop {r0, r1, r2}
 	pop {r0, r1, r2}
@@ -358,7 +358,7 @@ _abort:	ldr r0, =stack_base
 	bl _nak
 	b _quit
 
-	@@ The inner loop of Forth
+	@@ The outer loop of Forth
 	define_word "quit", visible_flag
 _quit:	ldr r0, =rstack_base
 	ldr r0, [r0]
@@ -376,7 +376,7 @@ _main:	push {lr}
 	ldr r0, =state
 	movs r1, #0
 	str r1, [r0]
-1:	bl _inner
+1:	bl _outer
 	ldr r0, =prompt_hook
 	push_tos
 	ldr tos, [r0]
@@ -384,9 +384,9 @@ _main:	push {lr}
 	bl _refill
 	b 1b
 	
-	@@ The actual inner loop of Forth
-	define_word "inner", visible_flag
-_inner:	push {lr}
+	@@ The actual outer loop of Forth
+	define_word "outer", visible_flag
+_outer:	push {lr}
 1:	bl _validate
 	bl _token
 	cmp tos, #0

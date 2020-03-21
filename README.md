@@ -30,3 +30,5 @@ Once e4thcom comes up, execute (including the leading '#'):
     #include src/stm32l476/forth/setup.fs
 
 This will load the auxiliary Forth routines that would be useful to have onto the MCU, along with a "cornerstone" named `restore-state` to return zeptoforth to this state.
+
+Note that e4thcom is Linux-specific. Another terminal emulator to use with zeptoforth is screen. Note that zeptoforth uses ACK and NAK for flow control, with ACK indicating readiness to accept a new line of input, and NAK indicating an error; these are not (to my knowledge) are ignored by screen. As a result, one will  have to use `slowpaste 5` with screen to set a proper paste speed. (This is far slower than the ACK/NAK method used with e4thcom.) Additionally, as screen does not honor directives to load files automatically, one will need to use `readbuf <path>` and `paste <path>` to paste files into the terminal manually.
