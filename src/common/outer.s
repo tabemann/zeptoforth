@@ -376,6 +376,7 @@ _main:	push {lr}
 	ldr r0, =state
 	movs r1, #0
 	str r1, [r0]
+	bl _refill
 1:	bl _outer
 	ldr r0, =prompt_hook
 	push_tos

@@ -868,7 +868,7 @@ _recurse:
 	ldr tos, =current_compile
 	ldr tos, [tos]
 	bl _to_xt
-	bl _asm_branch
+	bl _asm_call
 	pop {pc}
 	
 	@@ Unknown word exception
@@ -1305,6 +1305,26 @@ _current_comma_align:
 	movs tos, #0
 	push {r0}
 	bl _current_comma_1
+	pop {r0}
+	b 1b
+2:	pull_tos
+	pop {pc}
+
+	@@ Align to a power of two
+	define_word "flash-align,", visible_flag
+_flash_comma_align:
+	push {lr}
+	subs tos, #1
+	movs r0, tos
+	pull_tos
+1:	push {r0}
+	bl _flash_here
+	pop {r0}
+	ands tos, r0
+	beq 2f
+	movs tos, #0
+	push {r0}
+	bl _flash_comma_1
 	pop {r0}
 	b 1b
 2:	pull_tos

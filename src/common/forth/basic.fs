@@ -153,8 +153,7 @@ compile-to-flash
   flash-here
   rot rot
   start-compile
-  6 push,
-  6 literal,
+  lit,
   ['] restore-flash compile,
   visible
   end-compile,
@@ -297,8 +296,7 @@ compile-to-flash
   [compile-only]
   $BD00 hcurrent,
   current-here over branch-back!
-  6 push,
-  4 + 6 literal,
+  4 + lit,
 ;
 
 \ Core of CORNERSTONE's DOES>
@@ -520,7 +518,7 @@ compile-to-flash
   [compile-only]
   postpone r>
   postpone r>
-  6 push, 1 6 literal, postpone +
+  1 lit, postpone +
   postpone 2dup
   postpone =
   postpone swap
@@ -545,7 +543,7 @@ compile-to-flash
   postpone r>
   postpone rot
   postpone dup
-  6 push, 0 6 literal,
+  0 lit,
   postpone >=
   postpone if
   postpone +
