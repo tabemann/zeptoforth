@@ -1,607 +1,607 @@
 # Zeptoforth Kernel Words
 
 ### drop
-#### ( x -- )
+( x -- )
 
 ### dup
-#### ( x1 -- x1 x1 )
+( x1 -- x1 x1 )
 
 ### swap
-#### ( x1 x2 -- x2 x1 )
+( x1 x2 -- x2 x1 )
 
 ### over
-#### ( x1 x2 -- x1 x2 x1 )
+( x1 x2 -- x1 x2 x1 )
 
 ### rot
-#### ( x1 x2 x3 -- x2 x3 x1 )
+( x1 x2 x3 -- x2 x3 x1 )
 
 ### pick
-#### ( xi ... x0 i -- xi ... x0 xi )
+( xi ... x0 i -- xi ... x0 xi )
 
 ### roll
-#### ( xi ... x0 i -- xi-1 ... x0 xi )
+( xi ... x0 i -- xi-1 ... x0 xi )
 
 ### lshift
-#### ( x1 shift -- x2 )
+( x1 shift -- x2 )
 
 ### rshift
-#### ( x1 shift -- x2 )
+( x1 shift -- x2 )
 
 ### arshift
-#### ( x1 shift -- x2 )
+( x1 shift -- x2 )
 
 ### and
-#### ( x1 x2 -- x3 )
+( x1 x2 -- x3 )
 
 ### or
-#### ( x1 x2 -- x3 )
+( x1 x2 -- x3 )
 
 ### xor
-#### ( x1 x2 -- x3 )
+( x1 x2 -- x3 )
 
 ### not
-#### ( x1 -- x2 )
+( x1 -- x2 )
 
 ### negate
-#### ( x1 -- x2 )
+( x1 -- x2 )
 
 ### +
-#### ( x1 x2 -- x3 )
+( x1 x2 -- x3 )
 
 ### -
-#### ( x1 x2 -- x3 )
+( x1 x2 -- x3 )
 
 ### *
-#### ( x1 x2 -- x3 )
+( x1 x2 -- x3 )
 
 ### /
-#### ( n1 n2 -- n3 )
+( n1 n2 -- n3 )
 
 ### u/
-#### ( u1 u2 -- u3 )
+( u1 u2 -- u3 )
 
 ### mod
-#### ( n1 n2 -- n3 )
+( n1 n2 -- n3 )
 
 ### umod
-#### ( u1 u2 -- u3 )
+( u1 u2 -- u3 )
 
 ### =
-#### ( x1 x2 -- flag )
+( x1 x2 -- flag )
 
 ### <>
-#### ( x1 x2 -- flag )
+( x1 x2 -- flag )
 
 ### <
-#### ( n1 n2 -- flag )
+( n1 n2 -- flag )
 
 ### >
-#### ( n1 n2 -- flag )
+( n1 n2 -- flag )
 
 ### <=
-#### ( n1 n2 -- flag )
+( n1 n2 -- flag )
 
 ### >=
-#### ( n1 n2 -- flag )
+( n1 n2 -- flag )
 
 ### u<
-#### ( u1 u2 -- flag )
+( u1 u2 -- flag )
 
 ### u>
-#### ( u1 u2 -- flag )
+( u1 u2 -- flag )
 
 ### u<=
-#### ( u1 u2 -- flag )
+( u1 u2 -- flag )
 
 ### u>=
-#### ( u1 u2 -- flag )
+( u1 u2 -- flag )
 
 ### b!
-#### ( b addr -- )
+( b addr -- )
 
 ### h!
-#### ( h h-addr -- )
+( h h-addr -- )
 
 ### !
-#### ( x a-addr -- )
+( x a-addr -- )
 
 ### 2!
-#### ( x1 x2 a-addr -- )
+( x1 x2 a-addr -- )
 
 ### bflash!
-#### ( b addr -- )
+( b addr -- )
 
 ### hflash!
-#### ( h h-addr -- )
+( h h-addr -- )
 
 ### flash!
-#### ( x a-addr -- )
+( x a-addr -- )
 
 ### 2flash!
-#### ( x1 x2 a-addr -- )
+( x1 x2 a-addr -- )
 
 ### bcurrent!
-#### ( b addr -- )
+( b addr -- )
 
 ### hcurrent!
-#### ( h h-addr -- )
+( h h-addr -- )
 
 ### current!
-#### ( x a-addr -- )
+( x a-addr -- )
 
 ### 2current!
-#### ( x1 x2 a-addr -- )
+( x1 x2 a-addr -- )
 
 ### b@
-#### ( addr -- b )
+( addr -- b )
 
 ### h@
-#### ( h-addr -- h )
+( h-addr -- h )
 
 ### @
-#### ( a-addr -- x )
+( a-addr -- x )
 
 ### 2@
-#### ( a-addr -- x1 x2 )
+( a-addr -- x1 x2 )
 
 ### b,
-#### ( b -- )
+( b -- )
 
 ### h,
-#### ( h -- )
+( h -- )
 
 ### ,
-#### ( x -- )
+( x -- )
 
 ### 2,
-#### ( x1 x2 -- )
+( x1 x2 -- )
 
 ### bflash,
-#### ( b -- )
+( b -- )
 
 ### hflash,
-#### ( h -- )
+( h -- )
 
 ### flash,
-#### ( x -- )
+( x -- )
 
 ### 2flash,
-#### ( x1 x2 -- )
+( x1 x2 -- )
 
 ### bcurrent,
-#### ( b -- )
+( b -- )
 
 ### hcurrent,
-#### ( h -- )
+( h -- )
 
 ### current,
-#### ( x -- )
+( x -- )
 
 ### 2current,
-#### ( x1 x2 -- )
+( x1 x2 -- )
 
 ### breserve
-#### ( b -- )
+( b -- )
 
 ### hreserve
-#### ( h -- )
+( h -- )
 
 ### reserve
-#### ( x -- )
+( x -- )
 
 ### 2reserve
-#### ( x1 x2 -- )
+( x1 x2 -- )
 
 ### bflash-reserve
-#### ( b -- )
+( b -- )
 
 ### hflash-reserve
-#### ( h -- )
+( h -- )
 
 ### flash-reserve
-#### ( x -- )
+( x -- )
 
 ### 2flash-reserve
-#### ( x1 x2 -- )
+( x1 x2 -- )
 
 ### bcurrent-reserve
-#### ( b -- )
+( b -- )
 
 ### hcurrent-reserve
-#### ( h -- )
+( h -- )
 
 ### current-reserve
-#### ( x -- )
+( x -- )
 
 ### 2current-reserve
-#### ( x1 x2 -- )
+( x1 x2 -- )
 
 ### here
-#### ( -- addr )
+( -- addr )
 
 ### pad
-#### ( -- addr )
+( -- addr )
 
 ### allot
-#### ( bytes -- )
+( bytes -- )
 
 ### here!
-#### ( addr -- )
+( addr -- )
 
 ### flash-here
-#### ( -- addr )
+( -- addr )
 
 ### flash-allot
-#### ( bytes -- )
+( bytes -- )
 
 ### flash-here!
-#### ( addr -- )
+( addr -- )
 
 ### latest
-#### ( -- word )
+( -- word )
 
 ### ram-latest
-#### ( -- word )
+( -- word )
 
 ### flash-latest
-#### ( -- word )
+( -- word )
 
 ### latest!
-#### ( word -- )
+( word -- )
 
 ### ram-latest!
-#### ( word -- )
+( word -- )
 
 ### flash-latest!
-#### ( word -- )
+( word -- )
 
 ### current-here
-#### ( -- addr )
+( -- addr )
 
 ### current-allot
-#### ( bytes -- )
+( bytes -- )
 
 ### align,
-#### ( 2^power -- )
+( 2^power -- )
 
 ### flash-align,
-#### ( 2^power -- )
+( 2^power -- )
 
 ### current-align,
-#### ( 2^power -- )
+( 2^power -- )
 
 ### current-cstring,
-#### ( addr bytes -- )
+( addr bytes -- )
 
 ### >r
-#### ( x1 -- ) ( R: -- x1 )
+( x1 -- ) ( R: -- x1 )
 
 ### r>
-#### ( R: x1 -- ) ( -- x1 )
+( R: x1 -- ) ( -- x1 )
 
 ### r@
-#### ( R: x1 -- x1 ) ( -- x1 )
+( R: x1 -- x1 ) ( -- x1 )
 
 ### rdrop
-#### ( R: x -- )
+( R: x -- )
 
 ### rp@
-#### ( -- a-addr )
+( -- a-addr )
 
 ### rp!
-#### ( a-addr -- )
+( a-addr -- )
 
 ### sp@
-#### ( -- a-addr )
+( -- a-addr )
 
 ### sp!
-#### ( a-addr -- )
+( a-addr -- )
 
 ### emit
-#### ( b -- )
+( b -- )
 
 ### emit?
-#### ( -- flag )
+( -- flag )
 
 ### space
-#### ( -- )
+( -- )
 
 ### cr
-#### ( -- )
+( -- )
 
 ### type
-#### ( addr bytes -- )
+( addr bytes -- )
 
 ### count
-#### ( addr1 -- addr2 bytes )
+( addr1 -- addr2 bytes )
 
 ### key
-#### ( -- b )
+( -- b )
 
 ### key?
-#### ( -- flag )
+( -- flag )
 
 ### execute
-#### ( ??? xt -- ??? )
+( ??? xt -- ??? )
 
 ### ?execute
-#### ( ??? xt -- ??? )
+( ??? xt -- ??? )
 
 ### try
-#### ( ??? xt1 -- ??? xt2 | ??? 0 )
+( ??? xt1 -- ??? xt2 | ??? 0 )
 
 ### ?raise
-#### ( xt -- )
+( xt -- )
 
 ### pause
-#### ( -- )
+( -- )
 
 ### exit
-#### ( R: addr -- )
+( R: addr -- )
 
 ### ws?
-#### ( b -- flag )
+( b -- flag )
 
 ### newline?
-#### ( b -- flag )
+( b -- flag )
 
 ### token-start
-#### ( -- i )
+( -- i )
 
 ### token-end
-#### ( i1 -- i2 )
+( i1 -- i2 )
 
 ### token
-#### ( "token" -- addr bytes )
+( "token" -- addr bytes )
 
 ### \\
-#### ( "comment<NL>" -- )
+( "comment<NL>" -- )
 #
-#### (
-#### ( "comment)" -- )
+(
+( "comment)" -- )
 
 ### to-upper-char
-#### ( b -- b )
+( b -- b )
 
 ### equal-case-strings?
-#### ( addr1 bytes1 addr2 bytes2 -- flag )
+( addr1 bytes1 addr2 bytes2 -- flag )
 
 ### find-dict
-#### ( addr bytes mask dict -- word | 0 )
+( addr bytes mask dict -- word | 0 )
 
 ### find
-#### ( addr bytes mask -- word | 0 )
+( addr bytes mask -- word | 0 )
 
 ### >xt
-#### ( word -- xt )
+( word -- xt )
 
 ### evaluate
-#### ( ??? addr bytes -- ??? )
+( ??? addr bytes -- ??? )
 
 ### abort
-#### ( -- <empty stack> ) ( R: -- <empty stack> )
+( -- <empty stack> ) ( R: -- <empty stack> )
 
 ### quit
-#### ( R: -- <empty stack> )
+( R: -- <empty stack> )
 
 ### main
-#### ( -- )
+( -- )
 
 ### outer
-#### ( -- )
+( -- )
 
 ### refill
-#### ( -- )
+( -- )
 
 ### xon
-#### ( -- )
+( -- )
 
 ### xoff
-#### ( -- )
+( -- )
 
 ### ack
-#### ( -- )
+( -- )
 
 ### nak
-#### ( -- )
+( -- )
 
 ### parse-integer
-#### ( addr bytes -- n flag )
+( addr bytes -- n flag )
 
 ### parse-unsigned
-#### ( addr bytes -- u flag )
+( addr bytes -- u flag )
 
 ### parse-digit
-#### ( b base -- digit flag )
+( b base -- digit flag )
 
 ### :
-#### ( "name" -- )
+( "name" -- )
 
 ### :noname
-#### ( -- xt )
+( -- xt )
 
 ### ;
-#### ( -- )
+( -- )
 
 ### constant
-#### ( x "name" -- )
+( x "name" -- )
 
 ### constant-with-name
-#### ( x addr bytes -- )
+( x addr bytes -- )
 
 ### 2constant
-#### ( x1 x2 "name" -- )
+( x1 x2 "name" -- )
 
 ### 2constant-with-name
-#### ( x1 x2 addr bytes -- )
+( x1 x2 addr bytes -- )
 
 ### if
-#### ( flag -- )
+( flag -- )
 
 ### else
-#### ( -- )
+( -- )
 
 ### then
-#### ( -- )
+( -- )
 
 ### begin
-#### ( -- )
+( -- )
 
 ### until
-#### ( flag -- )
+( flag -- )
 
 ### while
-#### ( flag -- )
+( flag -- )
 
 ### repeat
-#### ( -- )
+( -- )
 
 ### again
-#### ( -- )
+( -- )
 
 ### init
-#### ( -- )
+( -- )
 
 ### [immediate]
-#### ( -- )
+( -- )
 
 ### [compile-only]
-#### ( -- )
+( -- )
 
 ### [inlined]
-#### ( -- )
+( -- )
 
 ### immediate
-#### ( -- )
+( -- )
 
 ### compile-only
-#### ( -- )
+( -- )
 
 ### inlined
-#### ( -- )
+( -- )
 
 ### visible
-#### ( -- )
+( -- )
 
 ### [
-#### ( -- )
+( -- )
 
 ### ]
-#### ( -- )
+( -- )
 
 ### compile-to-ram
-#### ( -- )
+( -- )
 
 ### compile-to-flash
-#### ( -- )
+( -- )
 
 ### compiling-to-flash
-#### ( -- flag )
+( -- flag )
 
 ### compile,
-#### ( xt -- )
+( xt -- )
 
 ### token-word
-#### ( "name" -- word )
+( "name" -- word )
 
 ### '
-#### ( "name" -- xt )
+( "name" -- xt )
 
 ### [']
-#### ( compiling: "name" -- ) ( compiled: -- xt )
+( compiling: "name" -- ) ( compiled: -- xt )
 
 ### postpone
-#### ( "name" -- )
+( "name" -- )
 
 ### lit,
-#### ( x1 -- ) ( compiled: -- x1 )
+( x1 -- ) ( compiled: -- x1 )
 
 ### literal
-#### ( compiling: x1 -- ) ( compiled: -- x1 )
+( compiling: x1 -- ) ( compiled: -- x1 )
 
 ### recurse
-#### ( -- )
+( -- )
 
 ### reboot
-#### ( -- )
+( -- )
 
 ### state
-#### ( -- a-addr )
+( -- a-addr )
 
 ### base
-#### ( -- a-addr )
+( -- a-addr )
 
 ### pause-enabled
-#### ( -- a-addr )
+( -- a-addr )
 
 ### stack-base
-#### ( -- a-addr )
+( -- a-addr )
 
 ### stack-end
-#### ( -- a-addr )
+( -- a-addr )
 
 ### rstack-base
-#### ( -- a-addr )
+( -- a-addr )
 
 ### rstack-end
-#### ( -- a-addr )
+( -- a-addr )
 
 ### handler
-#### ( -- a-addr )
+( -- a-addr )
 
 ### >parse
-#### ( -- a-addr )
+( -- a-addr )
 
 ### source
-#### ( -- addr bytes )
+( -- addr bytes )
 
 ### build-target
-#### ( -- a-addr )
+( -- a-addr )
 
 ### sys-ram-dict-base
-#### ( -- addr )
+( -- addr )
 
 ### >in
-#### ( -- a-addr )
+( -- a-addr )
 
 ### input#
-#### ( -- a-addr )
+( -- a-addr )
 
 ### input
-#### ( -- addr )
+( -- addr )
 
 ### prompt-hook
-#### ( -- a-addr )
+( -- a-addr )
 
 ### handle-number-hook
-#### ( -- a-addr )
+( -- a-addr )
 
 ### failed-parse-hook
-#### ( -- a-addr )
+( -- a-addr )
 
 ### emit-hook
-#### ( -- a-addr )
+( -- a-addr )
 
 ### emit?-hook
-#### ( -- a-addr )
+( -- a-addr )
 
 ### key-hook
-#### ( -- a-addr )
+( -- a-addr )
 
 ### key?-hook
-#### ( -- a-addr )
+( -- a-addr )
 
 ### refill-hook
-#### ( -- a-addr )
+( -- a-addr )
 
 ### pause-hook
-#### ( -- a-addr )
+( -- a-addr )
 
 ### fault-handler-hook
-#### ( -- a-addr )
+( -- a-addr )
 
 ### null-handler-hook
-#### ( -- a-addr )
+( -- a-addr )
 
 ### systick-handler-hook
-#### ( -- a-addr )
+( -- a-addr )
