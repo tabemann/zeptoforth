@@ -38,7 +38,17 @@
 	define_word "16flash!", visible_flag
 _store_flash_16:
 	push {lr}
-	tst tos, #0xf
+	ldr r0, =flash_min_address
+	cmp tos, r0
+	bge 1f
+	ldr tos, =_attempted_to_write_core_flash
+	bl _raise
+1:	ldr r0, =flash_dict_end
+	cmp tos, r0
+	blt 1f
+	ldr tos, =_attempted_to_write_past_flash_end
+	bl _raise
+1:	tst tos, #0xf
 	beq 1f
 	ldr tos, =_store_flash_16_unaligned
 	bl _raise
@@ -147,7 +157,12 @@ _erase_page:
 	cmp r0, r1
 	bge 1f
 	push_tos
-	ldr tos, =_attempted_to_erase_core_flash
+	ldr tos, =_attempted_to_write_core_flash
+	bl _raise
+1:	ldr r0, =flash_dict_end
+	cmp tos, r0
+	blt 1f
+	ldr tos, =_attempted_to_write_past_flash_end
 	bl _raise
 1:  	ldr r2, =FLASH_KEYR
 	ldr r3, =0x45670123
@@ -212,54 +227,18 @@ _erase_page:
 
 	pop {pc}
 
-	@@ @@ Unlock the flash
-	@@ ldr r0, =FLASH_KEYR
-	@@ ldr r1, =FLASH_UNLOCK0
-	@@ str r1, [r0]
-	@@ ldr r1, =FLASH_UNLOCK1
-	@@ str r1, [r0]
-	@@ @@ Turn on erasing
-	@@ ldr r0, =FLASH_CR
-	@@ movs r1, #FLASH_ERASE
-	@@ str r1, [r0]
-	@@ @@ Set up page to be erased
-	@@ lsrs tos, tos, #8
-	@@ ldr r1, =FLASH_PAGE_MASK
-	@@ ands tos, r1
-	@@ movs r1, #FLASH_ERASE
-	@@ orrs tos, r1
-	@@ strh tos, [r0]
-	@@ @@ Start erasing the flash
-	@@ ldr r0, =FLASH_CR+2
-	@@ movs r1, #FLASH_START_ERASE
-	@@ strh r1, [r0]
-	@@ @@ Wait for the flash to be ready
-	@@ push {r0, r1, r2, r3}
-	@@ bl wait_for_flash
-	@@ pop {r0, r1, r2, r3}
-	@@ @@ Lock the flash
-	@@ ldr r0, =FLASH_CR+3
-	@@ movs r1, #FLASH_LOCK_ERASE
-	@@ strb r1, [r0]
-	@@ @@ Clear the cache
-	@@ ldr r0, =FLASH_ACR
-	@@ ldr r1, [r0]
-	@@ movs r2, r1
-	@@ ldr r3, =FLASH_CACHE_OFF_MASK
-	@@ ands r1, r3
-	@@ str r1, [r0]
-	@@ ldr r3, =FLASH_RESET_CACHE
-	@@ orrs r1, r3
-	@@ str r1, [r0]
-	@@ str r2, [r0]
-	@@ pull_tos
-	@@ pop {pc}
-
 	@@ Exception handler for flash writes where flash has already been
 	@@ written
-_attempted_to_erase_core_flash:
+_attempted_to_write_core_flash:
 	push {lr}
 	string_ln " attempted to write to core flash"
+	bl _type
+	pop {pc}
+
+	@@ Exception handler for flash writes past the end of flash
+_attempted_to_write_past_flash_end:
+	push {lr}
+	string_ln " attempted to write past flash end"
 	bl _type
 	pop {pc}
 
@@ -270,7 +249,7 @@ _erase_all:
 	ldr tos, =flash_dict_end
 1:	ldr r0, =2048
 	subs tos, tos, r0
-	ldr r0, =flash_dict_start
+	ldr r0, =flash_min_address
 	cmp tos, r0
 	blt 2f
 	push_tos
