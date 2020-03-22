@@ -1,6 +1,6 @@
 # zeptoforth
 
-zeptoforth is a Cortex-M Forth, currently targeted at the STM32L476 DISCOVERY board even though the intention is to target more boards and MCUs soon (but do not expect Cortex-M0 MCUs to be supported any time soon, due to their using Thumb-1 rather than Thumb-2).
+zeptoforth is a Cortex-M Forth, currently targeted at the STM32L476 DISCOVERY board (with a preliminary, untested port to the STM32F407 DISCOVERY board) even though the intention is to target more boards and MCUs soon (but do not expect Cortex-M0 MCUs to be supported any time soon, due to their using Thumb-1 rather than Thumb-2).
 
 Its kernel is written in Thumb-2 assembly, and a body of other core code that is loaded after it is loaded is written in Forth.
 

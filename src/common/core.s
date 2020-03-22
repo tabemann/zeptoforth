@@ -511,6 +511,26 @@ _type:	push {lr}
 	b 1b
 2:	pop {pc}
 
+	@@ Type a string using the native serial driver
+	define_word "serial-type", visible_flag
+_serial_type:
+	push {lr}
+	movs r0, tos
+	pull_tos
+	movs r1, tos
+	pull_tos
+1:	cmp r0, #0
+	beq 2f
+	push_tos
+	ldrb tos, [r1]
+	push {r0, r1}
+	bl _serial_emit
+	pop {r0, r1}
+	subs r0, #1
+	adds r1, #1
+	b 1b
+2:	pop {pc}
+
 	@ Convert a cstring to a string
 	define_word "count", visible_flag
 _count:	ldrb r0, [tos]
@@ -1438,6 +1458,7 @@ _store_sp:
 	@@ dictionary
 	define_word "reboot", visible_flag
 _reboot:
+	cpsie i
 	bl handle_reset
 	
 	@@ Initialize the variables

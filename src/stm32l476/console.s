@@ -15,40 +15,40 @@
 @ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 	
-	.equ GPIOD_BASE      ,   0x48000C00
-	.equ GPIOD_MODER     ,   GPIOD_BASE + 0x00
-	.equ GPIOD_OTYPER    ,   GPIOD_BASE + 0x04
-	.equ GPIOD_OSPEEDR   ,   GPIOD_BASE + 0x08
-	.equ GPIOD_PUPDR     ,   GPIOD_BASE + 0x0C
-	.equ GPIOD_IDR       ,   GPIOD_BASE + 0x10
-	.equ GPIOD_ODR       ,   GPIOD_BASE + 0x14
-	.equ GPIOD_BSRR      ,   GPIOD_BASE + 0x18
-	.equ GPIOD_LCKR      ,   GPIOD_BASE + 0x1C
-	.equ GPIOD_AFRL      ,   GPIOD_BASE + 0x20
-	.equ GPIOD_AFRH      ,   GPIOD_BASE + 0x24
-	.equ GPIOD_BRR       ,   GPIOD_BASE + 0x28
-	.equ GPIOD_ASCR      ,   GPIOD_BASE + 0x2C
+	.equ GPIOD_Base      ,   0x48000C00
+	.equ GPIOD_MODER     ,   GPIOD_Base + 0x00
+	.equ GPIOD_OTYPER    ,   GPIOD_Base + 0x04
+	.equ GPIOD_OSPEEDR   ,   GPIOD_Base + 0x08
+	.equ GPIOD_PUPDR     ,   GPIOD_Base + 0x0C
+	.equ GPIOD_IDR       ,   GPIOD_Base + 0x10
+	.equ GPIOD_ODR       ,   GPIOD_Base + 0x14
+	.equ GPIOD_BSRR      ,   GPIOD_Base + 0x18
+	.equ GPIOD_LCKR      ,   GPIOD_Base + 0x1C
+	.equ GPIOD_AFRL      ,   GPIOD_Base + 0x20
+	.equ GPIOD_AFRH      ,   GPIOD_Base + 0x24
+	.equ GPIOD_BRR       ,   GPIOD_Base + 0x28
+	.equ GPIOD_ASCR      ,   GPIOD_Base + 0x2C
 	
-	.equ RCC_BASE        ,   0x40021000
-	.equ RCC_AHB1ENR     ,   RCC_BASE + 0x48
-	.equ RCC_AHB2ENR     ,   RCC_BASE + 0x4C @ gpiod  - b3
-	.equ RCC_APB1ENR1    ,   RCC_BASE + 0x58 @ usart2 - b17
+	.equ RCC_Base        ,   0x40021000
+	.equ RCC_AHB1ENR     ,   RCC_Base + 0x48
+	.equ RCC_AHB2ENR     ,   RCC_Base + 0x4C @ gpiod  - b3
+	.equ RCC_APB1ENR1    ,   RCC_Base + 0x58 @ usart2 - b17
 
         @ stm32l476 discovery board uses pd5, pd6 on usart2
         
-        .equ USART2_BASE     ,   0x40004400
+        .equ USART2_Base     ,   0x40004400
         
-        .equ USART2_CR1      ,   USART2_BASE + 0x00
-        .equ USART2_CR2      ,   USART2_BASE + 0x04
-        .equ USART2_CR3      ,   USART2_BASE + 0x08
-        .equ USART2_BRR      ,   USART2_BASE + 0x0C
-        .equ USART2_GTPR     ,   USART2_BASE + 0x10
-        .equ USART2_RTOR     ,   USART2_BASE + 0x14
-        .equ USART2_RQR      ,   USART2_BASE + 0x18
-        .equ USART2_ISR      ,   USART2_BASE + 0x1C
-        .equ USART2_ICR      ,   USART2_BASE + 0x20
-        .equ USART2_RDR      ,   USART2_BASE + 0x24
-        .equ USART2_TDR      ,   USART2_BASE + 0x28
+        .equ USART2_CR1      ,   USART2_Base + 0x00
+        .equ USART2_CR2      ,   USART2_Base + 0x04
+        .equ USART2_CR3      ,   USART2_Base + 0x08
+        .equ USART2_BRR      ,   USART2_Base + 0x0C
+        .equ USART2_GTPR     ,   USART2_Base + 0x10
+        .equ USART2_RTOR     ,   USART2_Base + 0x14
+        .equ USART2_RQR      ,   USART2_Base + 0x18
+        .equ USART2_ISR      ,   USART2_Base + 0x1C
+        .equ USART2_ICR      ,   USART2_Base + 0x20
+        .equ USART2_RDR      ,   USART2_Base + 0x24
+        .equ USART2_TDR      ,   USART2_Base + 0x28
 
         @ Flags for USART2_ISR register:
         .equ RXNE            ,   0x20

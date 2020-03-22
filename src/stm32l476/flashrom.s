@@ -14,25 +14,16 @@
 @ You should have received a copy of the GNU General Public License
 @ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-	.equ FLASH_BASE, 0x40022000	      @ Base address
-	.equ FLASH_ACR, FLASH_BASE + 0x00     @ Access control register
-	.equ FLASH_PDKEYR, FLASH_BASE + 0x04  @ Power-down key register
-	.equ FLASH_KEYR, FLASH_BASE + 0x08    @ Key register
-	.equ FLASH_OPTKEYR, FLASH_BASE + 0x0C @	Option key register
-	.equ FLASH_SR, FLASH_BASE + 0x10      @ Status register
-	.equ FLASH_CR, FLASH_BASE + 0x14      @ Control register
-	.equ FLASH_ECCR, FLASH_BASE + 0x18    @ ECC register
-	.equ FLASH_PCROP1SR, FLASH_BASE + 0x1C @ B1 PCROP start address register
-	.equ FLASH_OPTR, FLASH_BASE + 0x20    @ Option register
-	.equ FLASH_UNLOCK0, 0x45670123  @ Unlock constant 0
-	.equ FLASH_UNLOCK1, 0xCDEF89AB  @ Unlock constant 1
-	.equ FLASH_LOCK, 0x80000000     @ Lock constant
-	@@ .equ FLASH_START_ERASE, 1	      @ Bit to set to start erasing
-	@@ .equ FLASH_ERASE, 2	      @ Bit to set for erasing
-	@@ .equ FLASH_PAGE_MASK, 0x0FF8	      @ Mask for setting page to erase
-	@@ .equ FLASH_LOCK_ERASE, 0x80     @ Bit to set to lock after erasing
-	@@ .equ FLASH_CACHE_OFF_MASK, 0xFFFFF9FF @ Mask for turning off the cach
-	@@ .equ FLASH_RESET_CACHE, 0x00001800    @ Constant for resetting cahe
+	.equ FLASH_Base, 0x40022000	      @ Base address
+	.equ FLASH_ACR, FLASH_Base + 0x00     @ Access control register
+	.equ FLASH_PDKEYR, FLASH_Base + 0x04  @ Power-down key register
+	.equ FLASH_KEYR, FLASH_Base + 0x08    @ Key register
+	.equ FLASH_OPTKEYR, FLASH_Base + 0x0C @	Option key register
+	.equ FLASH_SR, FLASH_Base + 0x10      @ Status register
+	.equ FLASH_CR, FLASH_Base + 0x14      @ Control register
+	.equ FLASH_ECCR, FLASH_Base + 0x18    @ ECC register
+	.equ FLASH_PCROP1SR, FLASH_Base + 0x1C @ B1 PCROP start address register
+	.equ FLASH_OPTR, FLASH_Base + 0x20    @ Option register
 	
 	@@ Write 16 bytes starting at a 16-bit-aligned address in flash
 	define_word "16flash!", visible_flag
@@ -81,9 +72,9 @@ _store_flash_16:
 	adds tos, tos, r0
 	@@ Flash needs to be unlocked
 	ldr r0, =FLASH_KEYR
-	ldr r1, =FLASH_UNLOCK0
+	ldr r1, =0x45670123
 	str r1, [r0]
-	ldr r1, =FLASH_UNLOCK1
+	ldr r1, =0xCDEF89AB
 	str r1, [r0]
 	@@ Enable writing to the flash
 	ldr r0, =FLASH_CR
@@ -112,7 +103,7 @@ _store_flash_16:
 	bics r1, r2
 	strh r1, [r0]
 	ldr r1, [r0]
-	ldr r2, =FLASH_LOCK
+	ldr r2, =0x80000000
 	orrs r1, r2
 	str r1, [r0]
 	@@ Get the next value on the stack to put in the TOS
@@ -149,22 +140,19 @@ _store_flash_16_already_written:
 	define_word "erase-page", visible_flag
 _erase_page:	
 	push {lr}
+	
 	movs r0, tos
 	pull_tos
-	
+
 	@@ Protect the zeptoforth runtime!
 	ldr r1, =flash_min_address
 	cmp r0, r1
-	bge 1f
-	push_tos
-	ldr tos, =_attempted_to_write_core_flash
-	bl _raise
-1:	ldr r0, =flash_dict_end
-	cmp tos, r0
-	blt 1f
-	ldr tos, =_attempted_to_write_past_flash_end
-	bl _raise
-1:  	ldr r2, =FLASH_KEYR
+	blo 2f
+	ldr r1, =flash_dict_end
+	cmp r0, r1
+	bhs 2f
+
+  	ldr r2, =FLASH_KEYR
 	ldr r3, =0x45670123
 	str r3, [r2]
 	ldr r3, =0xCDEF89AB
@@ -197,7 +185,7 @@ _erase_page:
 	
 	@ Wait for Flash BUSY Flag to be cleared
 	ldr r2, =FLASH_SR+2
-1:    	ldrh r3, [r2]
+1:	ldrh r3, [r2]
 	movs r0, #1
 	ands r0, r3
 	bne 1b
@@ -215,18 +203,20 @@ _erase_page:
 	
 	@ turn cache off
 	ldr r0,=0x600
+	bics r1, r0
 	str r1, [r2]
 	
 	@ reset cache
 	ldr r0, =0x1800
+	orrs r1, r0
 	str r1, [r2]
 	
 	@ restore flash settings
 	pop {r1}  
 	str r1, [r2]
 
-	pop {pc}
-
+2:	pop {pc}
+	
 	@@ Exception handler for flash writes where flash has already been
 	@@ written
 _attempted_to_write_core_flash:
@@ -242,44 +232,36 @@ _attempted_to_write_past_flash_end:
 	bl _type
 	pop {pc}
 
-	@@ Erase all flash except for the zeptoforth runtime
-	define_word "erase-all", visible_flag
-_erase_all:
-	push {tos, lr}
-	ldr tos, =flash_dict_end
-1:	ldr r0, =2048
-	subs tos, tos, r0
-	ldr r0, =flash_min_address
-	cmp tos, r0
-	blt 2f
-	push_tos
-	bl _erase_page
-	b 1b
-2:	bl _init_flash_dict
-	pop {tos, pc}
-
 	@@ Erase flash after a given address
 	define_word "erase-after", visible_flag
 _erase_after:
 	push {lr}
-	movs r1, tos
-	ldr r0, =flash_here
-	ldr tos, [r0]
-	ldr r2, =0x7FF
-	bics tos, r2
-	ldr r0, =2048
-	adds tos, tos, r0
-1:	ldr r0, =2048
-	subs tos, tos, r0
-	cmp tos, r1
-	blt 2f
+	movs r0, tos
+	pull_tos
+	ldr r1, =flash_dict_end
+	ldr r2, =0xFFFF
+	cpsid i
+1:	ldrh r3, [r0]
+	cmp r3, r2
+	beq 2f
 	push_tos
-	push {r1}
+	movs tos, r0
+	push {r0, r1, r2}
 	bl _erase_page
-	pop {r1}
-	bl 1b
-2:	pull_tos
-	bl _init_flash_dict
+	pop {r0, r1, r2}
+2:	adds r0, #2
+	cmp r0, r1
+	bne 1b
+	bl _reboot
+	pop {pc}
+
+	@@ Erase all flash except for the zeptoforth runtime
+	define_word "erase-all", visible_flag
+_erase_all:
+	push {lr}
+	push_tos
+	ldr tos, =flash_dict_start
+	bl _erase_after
 	pop {pc}
 	
 	@@ Find the end of the flash dictionary
