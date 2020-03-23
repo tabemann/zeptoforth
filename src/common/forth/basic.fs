@@ -109,6 +109,20 @@ compile-to-flash
   space ." ]"
 ;
 
+\ Display all the words in a dictionary
+: words-dict ( dict -- )
+  begin
+    dup 0 <>
+  while
+    dup 8 + count space type
+    4 + @
+  repeat
+  drop
+;
+
+\ Display all the words
+: words ( -- ) ram-latest words-dict flash-latest words-dict ;
+
 \ Set bits on a byte
 : bbis! ( bits addr -- ) dup b@ rot or swap b! ;
 

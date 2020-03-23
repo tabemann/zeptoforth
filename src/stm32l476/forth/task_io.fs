@@ -39,10 +39,10 @@ bvariable key-count
 key-buffer-size ram-buffer: key-buffer
 
 \ USART2
-$40004400 constant USART2_BASE
-USART2_BASE $1C + constant USART2_ISR
-USART2_BASE $24 + constant USART2_RDR
-USART2_BASE $28 + constant USART2_TDR
+$40004400 constant USART2_Base
+USART2_Base $1C + constant USART2_ISR
+USART2_Base $24 + constant USART2_RDR
+USART2_Base $28 + constant USART2_TDR
 $20 constant RXNE
 $80 constant TXE
 

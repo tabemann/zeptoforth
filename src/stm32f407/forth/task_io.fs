@@ -39,10 +39,10 @@ bvariable key-count
 key-buffer-size ram-buffer: key-buffer
 
 \ USART2
-$40004400 constant USART2_BASE
-USART2_BASE constant CONSOLEL_BASE
-CONSOLE_BASE $00 + constant CONSOLE_SR
-CONSOLE_BASE $04 + constant CONSOLE_DR
+$40004400 constant USART2_Base
+USART2_Base constant CONSOLEL_Base
+CONSOLE_Base $00 + constant CONSOLE_SR
+CONSOLE_Base $04 + constant CONSOLE_DR
 $20 constant RXNE
 $80 constant TXE
 
