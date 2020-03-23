@@ -658,6 +658,14 @@ _find_last_visible_word:
 	b 1b
 2:	bx lr
 
+	@@ Display a welcome message
+	define_word "welcome", visible_flag
+_welcome:
+	push {lr}
+	string_ln "Welcome to zeptoforth ok"
+	bl _serial_type
+	pop {pc}
+	
 	@@ An empty init routine, to call if no other init routines are
 	@@ available, so as to enable any source file to call a preceding init
 	@@ routine without having to check if one exists
