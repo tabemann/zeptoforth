@@ -100,6 +100,16 @@ word
 
 Dump the contents of the data stack
 
+#### words-dict
+( dict -- )
+
+Display all the words in a dictionary
+
+#### words
+( -- )
+
+Display all the words
+
 #### bbis
 ( bits addr -- )
 
