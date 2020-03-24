@@ -276,10 +276,45 @@ Begin lambda
 
 End lambda
 
-#### cornerstone-does>
+#### equal-strings?
+( b-addr1 u1 b-addr2 u2 -- f )
+
+Get whether two strings are equal
+
+#### case
 ( -- )
 
-Core of CORNERSTONE's DOES>
+Start a CASE statement
+
+#### of
+( x -- )
+
+Start an OF clause
+
+#### endof
+( -- )
+
+End an OF clause
+
+#### endcase
+( x -- )
+
+End a CASE statement
+
+#### ofstr
+( x -- )
+
+Start an OFSTR clause
+
+#### ofstrcase
+( x -- )
+
+Start an OFSTRCASE clause
+
+#### endcasestr
+( x -- )
+
+End a CASE statement comparing against a string
 
 #### cornerstone
 ( "name" -- )

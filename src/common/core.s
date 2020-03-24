@@ -662,9 +662,13 @@ _find_last_visible_word:
 	define_word "welcome", visible_flag
 _welcome:
 	push {lr}
+	string_ln
+	bl _serial_type
 	string_ln "Welcome to zeptoforth ok"
 	bl _serial_type
 	pop {pc}
+
+	.ltorg
 	
 	@@ An empty init routine, to call if no other init routines are
 	@@ available, so as to enable any source file to call a preceding init

@@ -317,6 +317,98 @@ compile-to-flash
   4 + lit,
 ;
 
+\ Get whether two strings are equal
+: equal-strings? ( b-addr1 u1 b-addr2 u2 -- f )
+  >r swap r@ = if
+    begin
+      r@ 0 >
+    while
+      dup b@ 2 pick b@ = if
+	1 + swap 1 + r> 1 - >r
+      else
+	2drop rdrop false exit
+      then
+    repeat
+    2drop rdrop true
+  else
+    2drop rdrop false
+  then
+;
+
+\ Start a CASE statement
+: case ( -- )
+  [immediate]
+  [compile-only]
+  0
+;
+
+\ Start an OF clause
+: of ( x -- )
+  [immediate]
+  [compile-only]
+  postpone over
+  postpone =
+  postpone if
+  postpone drop
+;
+
+\ End an OF clause
+: endof ( -- )
+  [immediate]
+  [compile-only]
+  rot ?dup if
+    here swap branch-back!
+  then
+  reserve-branch
+  rot rot postpone then
+;
+
+\ End a CASE statement
+: endcase ( x -- )
+  [immediate]
+  [compile-only]
+  postpone drop
+  ?dup if
+    here swap branch-back!
+  then
+;
+
+\ Start an OFSTR clause
+: ofstr ( x -- )
+  [immediate]
+  [compile-only]
+  3 lit,
+  postpone pick
+  3 lit,
+  postpone pick
+  postpone equal-strings?
+  postpone if
+  postpone 2drop
+;
+
+\ Start an OFSTRCASE clause
+: ofstrcase ( x -- )
+  [immediate]
+  [compile-only]
+  3 lit,
+  postpone pick
+  3 lit,
+  postpone pick
+  postpone equal-case-strings?
+  postpone if
+  postpone 2drop
+;
+
+\ End a CASE statement comparing against a string
+: endcasestr ( x -- )
+  [immediate]
+  [compile-only]
+  postpone 2drop
+  ?dup if
+    here swap branch-back!
+  then
+;
+
 \ Core of CORNERSTONE's DOES>
 : cornerstone-does> ( -- )
   does>
@@ -371,6 +463,7 @@ compile-to-flash
   1 +
   set-next-ram-space
 ;
+
 \ Allocate a halfword variable in RAM
 : ram-hvariable ( "name" -- )
   next-ram-space
