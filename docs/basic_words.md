@@ -100,6 +100,56 @@ word
 
 Dump the contents of the data stack
 
+#### option
+( f true-xt -- )
+
+Execute an xt based on whether a condition is true
+
+#### choose
+( f true-xt false-xt -- )
+
+Execute one of two different xts based on whether a condition is true or false
+
+#### loop-until
+( ??? xt -- ??? )
+
+Execute an until loop with an xt
+
+#### while-loop
+( ??? while-xt body-xt -- ??? )
+
+Execute a while loop with a while-xt and a body-xt
+
+#### count-loop
+( ??? limit init xt -- ??? ) ( the xt: i -- )
+
+Execute a counted loop with an xt
+
+#### count+loop
+( ??? limit init xt -- ??? ) ( the xt: i -- increment )
+
+Execute a counted loop with an arbitrary increment with an xt
+
+#### biter
+( ??? addr count xt -- ??? )
+
+Iterate executing an xt over a byte array
+
+#### hiter
+( ??? addr count xt -- ??? )
+
+Iterate executing an xt over a halfword array
+
+#### iter
+( ??? addr count xt -- ??? )
+
+Iterate executing an xt over a cell array
+
+#### 2iter
+( ??? addr count xt -- ??? )
+
+Iterate executing an xt over a cell array
+
 #### words-dict
 ( dict -- )
 
@@ -199,17 +249,17 @@ Create an arbitrary-sized field
 #### bfield:
 ( offset "name" -- offset )
 
-\ Create a byte-sized field
+Create a byte-sized field
 
 #### hfield:
 ( offset "name" -- offset )
 
-\ Create a halfword-sized field
+Create a halfword-sized field
 
 #### field:
 ( offset "name" -- offset )
 
-\ Create a cell-sized field
+Create a cell-sized field
 
 #### 2field:
 ( offset "name" -- offset )

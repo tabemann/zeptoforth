@@ -625,6 +625,94 @@ compile-to-flash
   postpone exit
 ;
 
+
+\ Execute an xt based on whether a condition is true
+: option ( f true-xt -- )
+  swap if execute else drop then
+;
+
+\ Execute one of two different xts based on whether a condition is true or false
+: choose ( f true-xt false-xt -- )
+  rot if drop execute else nip execute then
+;
+
+\ Execute an until loop with an xt
+: loop-until ( ??? xt -- ??? )
+  >r
+  begin
+    r@ execute
+  until
+  rdrop
+;
+
+\ Execute a while loop with a while-xt and a body-xt
+: while-loop ( ??? while-xt body-xt -- ??? )
+  >r >r
+  begin
+    r@ execute
+  while
+    r> r> swap >r >r r@ execute
+    r> r> swap >r >r
+  repeat
+  rdrop rdrop
+;
+
+\ Execute a counted loop with an xt
+: count-loop ( ??? limit init xt -- ??? ) ( the xt: i -- )
+  rot rot ?do
+    i swap dup >r execute r>
+  loop
+  drop
+;
+
+\ Execute a counted loop with an arbitrary increment with an xt
+: count+loop ( ??? limit init xt -- ??? ) ( the xt: i -- increment )
+  rot rot ?do
+    i swap dup >r execute r> swap
+  +loop
+  drop
+;
+
+\ Iterate executing an xt over a byte array
+: biter ( ??? addr count xt -- ??? )
+  begin
+    over 0 >
+  while
+    dup >r swap >r swap dup >r @ swap execute
+    r> 2 + r> 1 - r>
+  repeat
+;
+
+\ Iterate executing an xt over a halfword array
+: hiter ( ??? addr count xt -- ??? )
+  begin
+    over 0 >
+  while
+    dup >r swap >r swap dup >r h@ swap execute
+    r> 2 + r> 1 - r>
+  repeat
+;
+
+\ Iterate executing an xt over a cell array
+: iter ( ??? addr count xt -- ??? )
+  begin
+    over 0 >
+  while
+    dup >r swap >r swap dup >r @ swap execute
+    r> cell + r> 1 - r>
+  repeat
+;
+
+\ Iterate executing an xt over a cell array
+: 2iter ( ??? addr count xt -- ??? )
+  begin
+    over 0 >
+  while
+    dup >r swap >r swap dup >r 2@ swap execute
+    r> 2 cells + r> 1 - r>
+  repeat
+;
+
 \ Wait for a predicate to become true
 : wait ( xt -- )
   begin
