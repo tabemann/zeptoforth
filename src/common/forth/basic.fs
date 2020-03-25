@@ -728,17 +728,18 @@ compile-to-flash
 ;
 
 \ Execute an xt based on whether a condition is true
-: option ( f true-xt -- )
+: option ( f true-xt -- ) ( true-xt: ??? -- ??? )
   swap if execute else drop then
 ;
 
 \ Execute one of two different xts based on whether a condition is true or false
 : choose ( f true-xt false-xt -- )
+  ( true-xt: ??? -- ??? ) ( false-xt: ??? -- ??? )
   rot if drop execute else nip execute then
 ;
 
 \ Execute an until loop with an xt
-: loop-until ( ??? xt -- ??? )
+: loop-until ( ??? xt -- ??? ) ( xt: ??? -- ??? f )
   >r
   begin
     r@ execute
@@ -748,6 +749,7 @@ compile-to-flash
 
 \ Execute a while loop with a while-xt and a body-xt
 : while-loop ( ??? while-xt body-xt -- ??? )
+  ( while-xt: ??? -- ??? f ) ( body-xt: ??? -- ??? )
   >r >r
   begin
     r@ execute
@@ -759,7 +761,7 @@ compile-to-flash
 ;
 
 \ Execute a counted loop with an xt
-: count-loop ( ??? limit init xt -- ??? ) ( the xt: i -- )
+: count-loop ( ??? limit init xt -- ??? ) ( xt: ??? i -- ??? )
   rot rot ?do
     i swap dup >r execute r>
   loop
@@ -767,7 +769,7 @@ compile-to-flash
 ;
 
 \ Execute a counted loop with an arbitrary increment with an xt
-: count+loop ( ??? limit init xt -- ??? ) ( the xt: i -- increment )
+: count+loop ( ??? limit init xt -- ??? ) ( xt: ??? i -- ???? increment )
   rot rot ?do
     i swap dup >r execute r> swap
   +loop
@@ -775,7 +777,7 @@ compile-to-flash
 ;
 
 \ Iterate executing an xt over a byte array
-: biter ( ??? addr count xt -- ??? )
+: biter ( ??? addr count xt -- ??? ) ( xt: ??? b -- ??? )
   begin
     over 0 >
   while
@@ -785,7 +787,7 @@ compile-to-flash
 ;
 
 \ Iterate executing an xt over a halfword array
-: hiter ( ??? addr count xt -- ??? )
+: hiter ( ??? addr count xt -- ??? ) ( xt: ??? h -- ??? )
   begin
     over 0 >
   while
@@ -795,7 +797,7 @@ compile-to-flash
 ;
 
 \ Iterate executing an xt over a cell array
-: iter ( ??? addr count xt -- ??? )
+: iter ( ??? addr count xt -- ??? ) ( xt: ??? x -- ??? )
   begin
     over 0 >
   while
@@ -805,7 +807,7 @@ compile-to-flash
 ;
 
 \ Iterate executing an xt over a double-word array
-: 2iter ( ??? addr count xt -- ??? )
+: 2iter ( ??? addr count xt -- ??? ) ( xt: ??? d -- ??? )
   begin
     over 0 >
   while
@@ -816,7 +818,7 @@ compile-to-flash
 
 \ Iterate executing at xt over values from a getter
 : iter-get ( ??? get-xt count iter-xt -- ??? )
-  ( get-xt: i -- x ) ( iter-xt: x -- )
+  ( get-xt: ??? i -- ??? x ) ( iter-xt: ??? x -- ??? )
   swap 0 ?do
     i swap dup >r rot dup >r rot swap execute swap execute r> r>
   loop
@@ -825,7 +827,7 @@ compile-to-flash
 
 \ Iterate executing at xt over double-word values from a getter
 : 2iter-get ( ??? get-xt count iter-xt -- ??? )
-  ( get-xt: i -- d ) ( iter-xt: d -- )
+  ( get-xt: ??? i -- ??? d ) ( iter-xt: ??? d -- ??? )
   swap 0 ?do
     i swap dup >r rot dup >r rot swap execute rot execute r> r>
   loop
@@ -833,7 +835,7 @@ compile-to-flash
 ;
 
 \ Find the index of a value in a byte array with a predicate
-: bfind-index ( ??? b-addr count xt -- ??? i|-1 ) ( the xt: x -- f )
+: bfind-index ( ??? b-addr count xt -- ??? i|-1 ) ( xt: ??? x -- ??? f )
   swap 0 ?do
     dup >r swap dup >r b@ swap execute if
       rdrop rdrop i unloop exit
@@ -845,7 +847,7 @@ compile-to-flash
 ;
 
 \ Find the index of a value in a halfword array with a predicate
-: hfind-index ( ??? h-addr count xt -- ??? i|-1 ) ( the xt: x -- f )
+: hfind-index ( ??? h-addr count xt -- ??? i|-1 ) ( xt: ??? x -- ??? f )
   swap 0 ?do
     dup >r swap dup >r h@ swap execute if
       rdrop rdrop i unloop exit
@@ -857,7 +859,7 @@ compile-to-flash
 ;
 
 \ Find the index of a value in a cell array with a predicate
-: find-index ( ??? a-addr count xt -- ??? i|-1 ) ( the xt: x -- f )
+: find-index ( ??? a-addr count xt -- ??? i|-1 ) ( xt: ??? x -- ??? f )
   swap 0 ?do
     dup >r swap dup >r @ swap execute if
       rdrop rdrop i unloop exit
@@ -869,7 +871,7 @@ compile-to-flash
 ;
 
 \ Find the index of a value in a double-word array with a predicate
-: 2find-index ( ??? a-addr count xt -- ??? i|-1 ) ( the xt: d -- f )
+: 2find-index ( ??? a-addr count xt -- ??? i|-1 ) ( xt: ??? d -- ??? f )
   swap 0 ?do
     dup >r swap dup >r 2@ rot execute if
       rdrop rdrop i unloop exit
@@ -882,7 +884,7 @@ compile-to-flash
 
 \ Find the index of a value from a getter with a predicate
 : find-get-index ( ??? get-xt count pred-xt --- ??? i|-1 )
-  ( get-xt: i -- x ) ( pred-xt: x -- f )
+  ( get-xt: ??? i -- ??? x ) ( pred-xt: ??? x -- ??? f )
   swap 0 ?do
     i swap dup >r rot dup >r rot swap execute swap execute if
       rdrop rdrop i unloop exit
@@ -895,7 +897,7 @@ compile-to-flash
 
 \ Find the index of a double-word value from a getter with a predicate
 : 2find-get-index ( ??? get-xt count pred-xt --- ??? i|-1 )
-  ( get-xt: i -- d ) ( pred-xt: d -- f )
+  ( get-xt: ??? i -- ??? d ) ( pred-xt: ??? d -- ??? f )
   swap 0 ?do
     i swap dup >r rot dup >r rot swap execute rot execute if
       rdrop rdrop i unloop exit
@@ -907,7 +909,7 @@ compile-to-flash
 ;
 
 \ Find a value in a byte array with a predicate
-: bfind-value ( ??? a-addr count xt -- ??? x|0 f ) ( the xt: x -- f )
+: bfind-value ( ??? a-addr count xt -- ??? x|0 f ) ( xt: ??? x -- ??? f )
   begin
     over 0 >
   while
@@ -921,7 +923,7 @@ compile-to-flash
 ;
 
 \ Find a value in a halfword array with a predicate
-: hfind-value ( ??? a-addr count xt -- ??? x|0 f ) ( the xt: x -- f )
+: hfind-value ( ??? a-addr count xt -- ??? x|0 f ) ( xt: ??? x -- ??? f )
   begin
     over 0 >
   while
@@ -935,7 +937,7 @@ compile-to-flash
 ;
 
 \ Find a value in a cell array with a predicate
-: find-value ( ??? a-addr count xt -- ??? x|0 f ) ( the xt: x -- f )
+: find-value ( ??? a-addr count xt -- ??? x|0 f ) ( xt: ??? x -- ??? f )
   begin
     over 0 >
   while
@@ -950,7 +952,7 @@ compile-to-flash
 
 
 \ Find a value in a double-word array with a predicate
-: 2find-value ( ??? a-addr count xt -- ??? d|0 f ) ( the xt: d -- f )
+: 2find-value ( ??? a-addr count xt -- ??? d|0 f ) ( xt: ??? d -- ??? f )
   begin
     over 0 >
   while
@@ -965,7 +967,7 @@ compile-to-flash
 
 \ Find a value from a getter with a predicate
 : find-get-value ( ???? get-xt count pred-xt --- ??? x|0 f )
-  ( get-xt: i -- x ) ( pred-xt: x -- f )
+  ( get-xt: ??? i -- ??? x ) ( pred-xt: ??? x -- ??? f )
   swap 0 ?do
     i swap dup >r rot dup >r rot swap execute dup >r swap execute if
       r> rdrop rdrop unloop true exit
@@ -978,7 +980,7 @@ compile-to-flash
 
 \ Find a double-word value from a getter with a predicate
 : 2find-get-value ( ???? get-xt count pred-xt --- ??? d|0 f )
-  ( get-xt: i -- d ) ( pred-xt: d -- f )
+  ( get-xt: ??? i -- ??? d ) ( pred-xt: ??? d -- ??? f )
   swap 0 ?do
     i swap dup >r rot dup >r rot swap execute 2dup >r >r rot execute if
       r> r> rdrop rdrop unloop true exit
