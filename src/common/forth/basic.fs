@@ -718,6 +718,14 @@ compile-to-flash
   postpone exit
 ;
 
+\ Unloop from a do loop (to exit, e.g.)
+: unloop ( R: leave current end -- )
+  [immediate]
+  [compile-only]
+  postpone rdrop
+  postpone rdrop
+  postpone rdrop
+;
 
 \ Execute an xt based on whether a condition is true
 : option ( f true-xt -- )
@@ -796,7 +804,7 @@ compile-to-flash
   repeat
 ;
 
-\ Iterate executing an xt over a cell array
+\ Iterate executing an xt over a double-word array
 : 2iter ( ??? addr count xt -- ??? )
   begin
     over 0 >
@@ -804,6 +812,181 @@ compile-to-flash
     dup >r swap >r swap dup >r 2@ swap execute
     r> 2 cells + r> 1 - r>
   repeat
+;
+
+\ Iterate executing at xt over values from a getter
+: iter-get ( ??? get-xt count iter-xt -- ??? )
+  ( get-xt: i -- x ) ( iter-xt: x -- )
+  swap 0 ?do
+    i swap dup >r rot dup >r rot swap execute swap execute r> r>
+  loop
+  drop drop
+;
+
+\ Iterate executing at xt over double-word values from a getter
+: 2iter-get ( ??? get-xt count iter-xt -- ??? )
+  ( get-xt: i -- d ) ( iter-xt: d -- )
+  swap 0 ?do
+    i swap dup >r rot dup >r rot swap execute rot execute r> r>
+  loop
+  drop drop
+;
+
+\ Find the index of a value in a byte array with a predicate
+: bfind-index ( ??? b-addr count xt -- ??? i|-1 ) ( the xt: x -- f )
+  swap 0 ?do
+    dup >r swap dup >r b@ swap execute if
+      rdrop rdrop i unloop exit
+    else
+      r> 1 + r>
+    then
+  loop
+  drop drop -1
+;
+
+\ Find the index of a value in a halfword array with a predicate
+: hfind-index ( ??? h-addr count xt -- ??? i|-1 ) ( the xt: x -- f )
+  swap 0 ?do
+    dup >r swap dup >r h@ swap execute if
+      rdrop rdrop i unloop exit
+    else
+      r> 2 + r>
+    then
+  loop
+  drop drop -1
+;
+
+\ Find the index of a value in a cell array with a predicate
+: find-index ( ??? a-addr count xt -- ??? i|-1 ) ( the xt: x -- f )
+  swap 0 ?do
+    dup >r swap dup >r @ swap execute if
+      rdrop rdrop i unloop exit
+    else
+      r> cell + r>
+    then
+  loop
+  drop drop -1
+;
+
+\ Find the index of a value in a double-word array with a predicate
+: 2find-index ( ??? a-addr count xt -- ??? i|-1 ) ( the xt: d -- f )
+  swap 0 ?do
+    dup >r swap dup >r 2@ rot execute if
+      rdrop rdrop i unloop exit
+    else
+      r> [ 2 cells ] literal + r>
+    then
+  loop
+  drop drop -1
+;
+
+\ Find the index of a value from a getter with a predicate
+: find-get-index ( ??? get-xt count pred-xt --- ??? i|-1 )
+  ( get-xt: i -- x ) ( pred-xt: x -- f )
+  swap 0 ?do
+    i swap dup >r rot dup >r rot swap execute swap execute if
+      rdrop rdrop i unloop exit
+    else
+      r> r>
+    then
+  loop
+  drop drop -1
+;
+
+\ Find the index of a double-word value from a getter with a predicate
+: 2find-get-index ( ??? get-xt count pred-xt --- ??? i|-1 )
+  ( get-xt: i -- d ) ( pred-xt: d -- f )
+  swap 0 ?do
+    i swap dup >r rot dup >r rot swap execute rot execute if
+      rdrop rdrop i unloop exit
+    else
+      r> r>
+    then
+  loop
+  drop drop -1
+;
+
+\ Find a value in a byte array with a predicate
+: bfind-value ( ??? a-addr count xt -- ??? x|0 f ) ( the xt: x -- f )
+  begin
+    over 0 >
+  while
+    dup >r swap >r swap dup >r b@ swap execute if
+      r> b@ rdrop rdrop true exit
+    else
+      r> 1 + r> 1 - r>
+    then
+  repeat
+  drop drop drop 0 false
+;
+
+\ Find a value in a halfword array with a predicate
+: hfind-value ( ??? a-addr count xt -- ??? x|0 f ) ( the xt: x -- f )
+  begin
+    over 0 >
+  while
+    dup >r swap >r swap dup >r h@ swap execute if
+      r> h@ rdrop rdrop true exit
+    else
+      r> 2 + r> 1 - r>
+    then
+  repeat
+  drop drop drop 0 false
+;
+
+\ Find a value in a cell array with a predicate
+: find-value ( ??? a-addr count xt -- ??? x|0 f ) ( the xt: x -- f )
+  begin
+    over 0 >
+  while
+    dup >r swap >r swap dup >r @ swap execute if
+      r> @ rdrop rdrop true exit
+    else
+      r> cell + r> 1 - r>
+    then
+  repeat
+  drop drop drop 0 false
+;
+
+
+\ Find a value in a double-word array with a predicate
+: 2find-value ( ??? a-addr count xt -- ??? d|0 f ) ( the xt: d -- f )
+  begin
+    over 0 >
+  while
+    dup >r swap >r swap dup >r 2@ rot execute if
+      r> 2@ rdrop rdrop true exit
+    else
+      r> [ 2 cell ] literal + r> 1 - r>
+    then
+  repeat
+  drop drop drop - 0 false
+;
+
+\ Find a value from a getter with a predicate
+: find-get-value ( ???? get-xt count pred-xt --- ??? x|0 f )
+  ( get-xt: i -- x ) ( pred-xt: x -- f )
+  swap 0 ?do
+    i swap dup >r rot dup >r rot swap execute dup >r swap execute if
+      r> rdrop rdrop unloop true exit
+    else
+      rdrop r> r>
+    then
+  loop
+  drop drop 0 false
+;
+
+\ Find a double-word value from a getter with a predicate
+: 2find-get-value ( ???? get-xt count pred-xt --- ??? d|0 f )
+  ( get-xt: i -- d ) ( pred-xt: d -- f )
+  swap 0 ?do
+    i swap dup >r rot dup >r rot swap execute 2dup >r >r rot execute if
+      r> r> rdrop rdrop unloop true exit
+    else
+      rdrop rdrop r> r>
+    then
+  loop
+  drop drop 0 0 false
 ;
 
 \ Wait for a predicate to become true

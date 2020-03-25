@@ -148,7 +148,17 @@ Iterate executing an xt over a cell array
 #### 2iter
 ( ??? addr count xt -- ??? )
 
-Iterate executing an xt over a cell array
+Iterate executing an xt over a double-word array
+
+#### iter-get
+( ??? get-xt count iter-xt -- ??? ) ( get-xt: i -- x ) ( iter-xt: x -- )
+
+Iterate executing at xt over values from a getter
+
+#### 2iter-get
+( ??? get-xt count iter-xt -- ??? ) ( get-xt: i -- d ) ( iter-xt: d -- )
+
+Iterate executing at xt over double-word values from a getter
 
 #### words-dict
 ( dict -- )
@@ -395,6 +405,76 @@ Get the loop index beneath the current loop
 ( R leave current end -- )
 
 Leave a do loop
+
+#### unloop
+( R: leave current end -- )
+
+Unloop from a do loop (to exit, e.g.)
+
+#### bfind-index
+( ??? b-addr count xt -- ??? i|-1 ) ( the xt: x -- f )
+
+Find the index of a value in a byte array with a predicate
+
+#### hfind-index
+( ??? h-addr count xt -- ??? i|-1 ) ( the xt: x -- f )
+
+Find the index of a value in a halfword array with a predicate
+
+#### find-index
+( ??? a-addr count xt -- ??? i|-1 ) ( the xt: x -- f )
+
+Find the index of a value in a cell array with a predicate
+
+#### 2find-index
+( ??? a-addr count xt -- ??? i|-1 ) ( the xt: d -- f )
+
+Find the index of a value in a double-word array with a predicate
+
+#### find-get-index
+( ??? get-xt count pred-xt --- ??? i|-1 ) ( get-xt: i -- x ) ( pred-xt: x -- f )
+
+Find the index of a value from a getter with a predicate
+
+#### 2find-get-index
+( ??? get-xt count pred-xt --- ??? i|-1 ) ( get-xt: i -- d ) ( pred-xt: d -- f )
+
+Find the index of a double-word value from a getter with a predicate
+
+#### bfind-value
+( ??? a-addr count xt -- ??? x|0 f ) ( the xt: x -- f )
+
+Find a value in a byte array with a predicate
+
+
+#### hfind-value
+( ??? a-addr count xt -- ??? x|0 f ) ( the xt: x -- f )
+
+Find a value in a halfword array with a predicate
+
+
+#### find-value
+( ??? a-addr count xt -- ??? x|0 f ) ( the xt: x -- f )
+
+Find a value in a cell array with a predicate
+
+
+#### 2find-value
+( ??? a-addr count xt -- ??? x|0 f ) ( the xt: d -- f )
+
+Find a value in a double-word array with a predicate
+
+#### find-get-value
+( ???? get-xt count pred-xt --- ??? x|0 f ) ( get-xt: i -- x )
+( pred-xt: x -- f )
+
+Find a value from a getter with a predicate
+
+#### 2find-get-value
+( ???? get-xt count pred-xt --- ??? d|0 f ) ( get-xt: i -- d )
+( pred-xt: d -- f )
+
+Find a double-word value from a getter with a predicate
 
 #### wait
 ( xt -- )
