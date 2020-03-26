@@ -172,32 +172,32 @@ Display all the words in a dictionary
 
 Display all the words
 
-#### bbis
+#### bbis!
 ( bits addr -- )
 
 Set bits on a byte
 
-#### bbic
+#### bbic!
 ( bits addr -- )
 
 Clear bits on a byte
 
-#### hbis
+#### hbis!
 ( bits addr -- )
 
 Set bits on a halfword
 
-#### hbic
+#### hbic!
 ( bits addr -- )
 
 Clear bits on a halfword
 
-#### bis
+#### bis!
 ( bits addr -- )
 
 Set bits on a word
 
-#### bic
+#### bic!
 ( bits addr -- )
 
 Clear bits on a word
