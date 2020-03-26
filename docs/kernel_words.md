@@ -320,6 +320,16 @@
 #### key?
 ( -- f )
 
+#### enable-int
+( -- )
+
+Enable interrupts
+
+#### disable-int
+( -- )
+
+Disable interrupts
+
 #### execute
 ( ??? xt -- ??? )
 

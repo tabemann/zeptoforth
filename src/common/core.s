@@ -569,6 +569,18 @@ _key_q:	push {lr}
 	movs tos, #0
 	pop {pc}
 
+	@@ Enable interrupts
+	define_word "enable-int", visible_flag
+_enable_int:
+	cpsie i
+	bx lr
+
+	@@ Disable interrupts
+	define_word "disable-int", visible_flag
+_disable_int:
+	cpsid i
+	bx lr
+	
 	@@ Execute an xt
 	define_word "execute", visible_flag
 _execute:
@@ -662,7 +674,7 @@ _find_last_visible_word:
 	define_word "welcome", visible_flag
 _welcome:
 	push {lr}
-	string_ln
+	string_ln ""
 	bl _serial_type
 	string_ln "Welcome to zeptoforth ok"
 	bl _serial_type
