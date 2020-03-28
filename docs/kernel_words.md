@@ -330,6 +330,11 @@ Enable interrupts
 
 Disable interrupts
 
+#### sleep
+( -- )
+
+Enter sleep mode
+
 #### execute
 ( ??? xt -- ??? )
 

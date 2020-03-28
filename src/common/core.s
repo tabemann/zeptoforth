@@ -580,6 +580,13 @@ _enable_int:
 _disable_int:
 	cpsid i
 	bx lr
+
+	@@ Enter sleep mode
+	define_word "sleep", visible_flag
+_sleep:
+	dsb
+	wfi
+	bx lr
 	
 	@@ Execute an xt
 	define_word "execute", visible_flag
@@ -675,9 +682,9 @@ _find_last_visible_word:
 _welcome:
 	push {lr}
 	string_ln ""
-	bl _serial_type
+	bl _type
 	string_ln "Welcome to zeptoforth ok"
-	bl _serial_type
+	bl _type
 	pop {pc}
 
 	.ltorg

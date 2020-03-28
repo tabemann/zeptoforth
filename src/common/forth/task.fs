@@ -25,6 +25,9 @@ variable main-task
 \ Current task
 variable current-task
 
+\ Starting task for a pause
+variable start-task
+
 \ Pause count
 variable pause-count
 
@@ -53,6 +56,9 @@ begin-structure task
   
   \ Task active state ( > 0 active, <= 0 inactive )
   field: task-active
+
+  \ Task wait state
+  field: task-wait
 
   \ Task systick start time
   field: task-systick-start
@@ -144,6 +150,11 @@ end-structure
   -1 swap task-active !
 ;
 
+\ Mark a task as waiting
+: wait-task ( task -- )
+  true swap task-wait !
+;
+
 \ Initialize the main task
 : init-main-task ( -- )
   free-end @ task -
@@ -154,10 +165,12 @@ end-structure
   stack-base @ sp@ - over task-stack-offset h!
   here next-ram-space - over task-dict-offset !
   1 over task-active !
+  false over task-wait !
   0 over task-systick-start !
   -1 over task-systick-delay !
   dup dup task-next !
   dup main-task !
+  dup start-task !
   current-task !
   free-end @ task - free-end !
 ;
@@ -201,6 +214,7 @@ end-structure
   tuck task-dict-size !
   0 over task-handler !
   0 over task-active !
+  false over task-wait !
   0 over task-systick-start !
   -1 over task-systick-delay !
   current-task @ task-next @ over task-next !
@@ -213,6 +227,48 @@ end-structure
   tuck push-task-stack
 ;
 
+\ Go to the next task
+: go-to-next-task ( task -- task )
+  task-next @
+  begin
+    dup task-active @ 1 <
+    over task-wait @ or
+    over task-systick-delay @ -1 <>
+    systick-counter @ 3 pick task-systick-start @ -
+    3 pick task-systick-delay @ u< and or
+    over start-task @ <> and
+  while
+    task-next @
+  repeat
+;
+
+\ Reset waits
+: reset-waiting-tasks ( -- )
+  main-task @ begin
+    false over task-wait !
+    task-next @
+    dup main-task @ =
+  until
+  drop
+;
+
+\ Handle all tasks are waiting
+: handle-waiting-tasks ( task -- )
+  dup start-task @ = if
+    dup task-active @ 1 <
+    over task-wait @ or
+    over task-systick-delay @ -1 <>
+    systick-counter @ 3 pick task-systick-start @ -
+    3 roll task-systick-delay @ u< and or
+    if
+      sleep
+      reset-waiting-tasks
+    then
+  else
+    drop
+  then
+;
+
 \ Handle PAUSE
 : do-pause ( -- )
   handle-io
@@ -222,15 +278,9 @@ end-structure
   >r sp@ r> tuck task-stack-current!
   here over task-dict-current!
   handler @ over task-handler !
-  task-next @
-  begin
-    dup task-active @ 1 <
-    over task-systick-delay @ -1 <>
-    systick-counter @ 3 pick task-systick-start @ -
-    3 pick task-systick-delay @ u< and or
-  while
-    task-next @
-  repeat
+  dup start-task !
+  go-to-next-task
+  dup handle-waiting-tasks
   dup current-task !
   dup task-handler @ handler !
   dup task-stack-base stack-base !
@@ -293,6 +343,11 @@ end-structure
   drop drop
   current-task @ cancel-task-delay
 ;
+
+\ Wait the current thread
+: do-wait ( -- )
+  current-task @ wait-task
+;
   
 \ Init
 : init ( -- )
@@ -301,6 +356,7 @@ end-structure
   init-main-task
   0 pause-count !
   ['] do-pause pause-hook !
+  ['] do-wait wait-hook !
   1 pause-enabled !
 ;
 

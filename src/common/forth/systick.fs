@@ -70,7 +70,8 @@ variable systick-counter
 \ Init
 : init ( -- )
   init
-  SYST_CALIB @ SYST_CALIB_TENMS and 100 / SYST_RVR !
+  SYST_CALIB @ SYST_CALIB_TENMS and
+  100 / time-multiplier * time-divisor / SYST_RVR !
   0 SYST_CVR !
   0 systick-counter !
   ['] systick-handler systick-handler-hook !

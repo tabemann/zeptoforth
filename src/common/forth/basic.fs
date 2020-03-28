@@ -145,8 +145,18 @@ compile-to-flash
 : safe-type ( addr bytes -- )
   pause-enabled @
   0 pause-enabled !
-  rot rot type
+  rot rot serial-type
   pause-enabled !
+;
+
+\ Safely type an integer
+: safe-type-integer ( n -- )
+  here swap format-integer dup allot dup >r safe-type r> negate allot
+;
+
+\ Safely type an unsigned integer
+: safe-type-unsigned ( n -- )
+  here swap format-unsigned dup allot dup >r safe-type r> negate allot
 ;
 
 \ Pad flash to a 2048 byte boundary
@@ -991,11 +1001,15 @@ compile-to-flash
   drop drop 0 0 false
 ;
 
+\ Wait hook variable
+variable wait-hook
+
 \ Wait for a predicate to become true
 : wait ( xt -- )
   begin
     dup execute not
   while
+    wait-hook @ ?execute
     pause
   repeat
   drop
@@ -1005,6 +1019,7 @@ compile-to-flash
 : init ( -- )
   init
   next-ram-space here!
+  0 wait-hook !
 ;
 
 \ Set compilation back to RAM

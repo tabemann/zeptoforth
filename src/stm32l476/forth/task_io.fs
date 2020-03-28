@@ -17,52 +17,114 @@
 \ Compile to flash
 compile-to-flash
 
-\ RAM variable for a character to emit
-bvariable char-emit
+\ RAM variable for rx buffer read-index
+bvariable rx-read-index
 
-\ RAM variable for a character waiting to be emitted
-bvariable char-emit?
+\ RAM variable for rx buffer write-index
+bvariable rx-write-index
 
-\ RAM variable for key buffer read-index
-bvariable key-read-index
+\ Constant for number of bytes to buffer
+16 constant rx-buffer-size
 
-\ RAM variable for key buffer write-index
-bvariable key-write-index
+\ Rx buffer
+rx-buffer-size ram-buffer: rx-buffer
 
-\ RAM variable for key buffer count
-bvariable key-count
+\ RAM variable for tx buffer read-index
+bvariable tx-read-index
 
-\ Constant for number of keys to buffer
-16 constant key-buffer-size
+\ RAM variable for tx buffer write-index
+bvariable tx-write-index
 
-\ Key buffer
-key-buffer-size ram-buffer: key-buffer
+\ Constant for number of bytes to buffer
+16 constant tx-buffer-size
+
+\ Tx buffer
+tx-buffer-size ram-buffer: tx-buffer
 
 \ USART2
 $40004400 constant USART2_Base
+USART2_Base $00 + constant USART2_CR1
 USART2_Base $1C + constant USART2_ISR
 USART2_Base $24 + constant USART2_RDR
 USART2_Base $28 + constant USART2_TDR
+
+$40021000 constant RCC_Base
+RCC_Base $78 + constant RCC_APB1SMENR1 ( APB1SMENR1 )
+: RCC_APB1SMENR1_USART2SMEN   %1 17 lshift RCC_APB1SMENR1 bis! ;  \ RCC_APB1SMENR1_USART2SMEN    USART2 clocks enable during Sleep and  Stop modes
+: USART2_CR1_TXEIE   %1 7 lshift USART2_CR1 bis! ;  \ USART2_CR1_TXEIE    interrupt enable
+: USART2_CR1_RXNEIE   %1 5 lshift USART2_CR1 bis! ;  \ USART2_CR1_RXNEIE    RXNE interrupt enable
+: USART2_CR1_TXEIE_Clear   %1 7 lshift USART2_CR1 bic! ;  \ USART2_CR1_TXEIE    interrupt disable
+: USART2_CR1_RXNEIE_Clear   %1 5 lshift USART2_CR1 bic! ;  \ USART2_CR1_RXNEIE    RXNE interrupt enable
+$E000E000 constant NVIC_Base ( Nested Vectored Interrupt  Controller )
+NVIC_Base $104 + constant NVIC_ISER1 ( Interrupt Set-Enable Register )
+: NVIC_ISER1_SETENA   ( %XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -- ) 0 lshift NVIC_ISER1 bis! ;  \ NVIC_ISER1_SETENA    SETENA
+NVIC_Base $284 + constant NVIC_ICPR1 ( Interrupt Clear-Pending  Register )
+USART2_Base $20 + constant USART2_ICR ( Interrupt flag clear register ) 
+: USART2_ICR_ORECF %1 3 lshift USART2_ICR bis! ; ( Overrun error clear flag )  
+
 $20 constant RXNE
 $80 constant TXE
+$08 constant ORE
 
-\ Write a key to the key buffer
-: write-key ( c -- )
-  key-count b@ key-buffer-size < if
-    key-write-index b@ key-buffer + b!
-    key-write-index b@ 1 + key-buffer-size mod key-write-index b!
-    key-count b@ 1 + key-count b!
+\ Get whether the rx buffer is full
+: rx-full? ( -- f )
+  rx-read-index b@ rx-write-index b@
+  2dup swap 1 - =
+  rot rot swap rx-buffer-size 1 - = swap 0 = and or
+;
+
+\ Get whether the rx buffer is empty
+: rx-empty? ( -- f )
+  rx-read-index b@ rx-write-index b@ =
+;
+
+\ Write a byte to the rx buffer
+: write-rx ( c -- )
+  rx-full? not if
+    rx-write-index b@ rx-buffer + b!
+    rx-write-index b@ 1 + rx-buffer-size mod rx-write-index b!
   else
     drop
   then
 ;
 
-\ Read a key from the key buffer
-: read-key ( -- c )
-  key-count b@ 0 > if
-    key-read-index b@ key-buffer + b@
-    key-read-index b@ 1 + key-buffer-size mod key-read-index b!
-    key-count b@ 1 - key-count b!
+\ Read a byte from the rx buffer
+: read-rx ( -- c )
+  rx-empty? not if
+    rx-read-index b@ rx-buffer + b@
+    rx-read-index b@ 1 + rx-buffer-size mod rx-read-index b!
+  else
+    0
+  then
+;
+
+\ Get whether the tx buffer is full
+: tx-full? ( -- f )
+  tx-read-index b@ tx-write-index b@
+  2dup swap 1 - =
+  rot rot swap tx-buffer-size 1 - = swap 0 = and or
+;
+
+\ Get whether the tx buffer is empty
+: tx-empty? ( -- f )
+  tx-read-index b@ tx-write-index b@ =
+;
+
+\ Write a byte to the tx buffer
+: write-tx ( c -- )
+  tx-full? not if
+    tx-write-index b@ tx-buffer + b!
+    tx-write-index b@ 1 + tx-buffer-size mod tx-write-index b!
+  else
+    drop
+  then
+;
+
+\ Read a byte from the tx buffer
+: read-tx ( -- c )
+  tx-empty? not if
+    tx-read-index b@ tx-buffer + b@
+    tx-read-index b@ 1 + tx-buffer-size mod tx-read-index b!
   else
     0
   then
@@ -70,69 +132,79 @@ $80 constant TXE
 
 \ Handle IO
 : handle-io ( -- )
-  begin
-    key-count b@ key-buffer-size < if
-      USART2_ISR @
-      dup RXNE and if
-	USART2_RDR b@ write-key false swap
-      else
-	true swap
-      then
-      TXE and if
-	char-emit? b@ if
-	  char-emit b@ USART2_TDR b!
-	  false char-emit? b!
-	then
-      then
-    else
-      true
+  disable-int
+  rx-full? not if
+    USART2_ISR @ RXNE and if
+      USART2_RDR b@ write-rx
     then
-  until
+  then
+  rx-full? if
+    USART2_CR1_RXNEIE_Clear
+  then
+  tx-empty? not if
+    USART2_ISR @ TXE and if
+      read-tx USART2_TDR b!
+    then
+  then
+  tx-empty? if
+    USART2_CR1_TXEIE_Clear
+  then
+  USART2_ISR @ ORE and if
+    USART2_ICR_ORECF
+  then
+  1 38 32 - lshift NVIC_ICPR1 bis!
+  enable-int
+;
+
+\ Null interrupt handler
+: null-handler ( -- )
+  handle-io
 ;
 
 \ Multitasking IO hooks
 
 : do-emit ( c -- )
-  pause-enabled @ 0 > if
-    [: char-emit? b@ not ;] wait
-    char-emit b!
-    true char-emit? b!
-    pause
-    [: char-emit? b@ not ;] wait
-  else
-    serial-emit
-  then
+  [: tx-full? not ;] wait
+  write-tx
+  USART2_CR1_TXEIE
 ; 
 
 : do-key ( -- c )
-  pause-enabled @ 0 > if
-    [: key-count b@ 0 > ;] wait
-    read-key
-  else
-    serial-key
-  then
+  [: rx-empty? not ;] wait
+  read-rx
+  USART2_CR1_RXNEIE
 ;
 
 : do-emit? ( -- flag )
-  pause-enabled @ 0 > if char-emit? b@ 0 <> else serial-emit? then
+  tx-full? not
 ;
 
 : do-key? ( -- flag )
-  pause-enabled @ 0 > if key-count b@ 0 > else serial-key? then
+  rx-empty? not
 ;
 
 \ Init
 : init ( -- )
   init
-  0 key-read-index b!
-  0 key-write-index b!
-  0 key-count b!
-  0 char-emit b!
-  0 char-emit? b!
+  0 rx-read-index b!
+  0 rx-write-index b!
+  0 tx-read-index b!
+  0 tx-write-index b!
+  ['] null-handler null-handler-hook !
   ['] do-key key-hook !
   ['] do-emit emit-hook !
   ['] do-key? key?-hook !
   ['] do-emit? emit?-hook !
+  \ RCC_APB2ENR_SYSCFGEN
+  \ RCC_APB1SMENR1_USART2SMEN
+  \ %011 SYSCFG_EXTICR2_EXTI5
+  \ %011 SYSCFG_EXTICR2_EXTI6
+  \ %11 5 lshift EXTI_IMR1 bis!
+  \ %11 5 lshift EXTI_RTSR1 bis!
+  \ 1 6 lshift NVIC_ISER0_SETENA
+  RCC_APB1SMENR1_USART2SMEN
+  1 38 32 - lshift NVIC_ISER1_SETENA
+  USART2_CR1_RXNEIE
 ;
 
 \ Reboot

@@ -89,5 +89,19 @@ _set_msi_48mhz:
 	str r1, [r0]
 	bx lr
 
+	@@ Time multiplier
+	define_word "time-multiplier", visible_flag
+_time_multiplier:
+	push_tos
+	movs tos, #48
+	bx lr
+
+	@@ Time divisor
+	define_word "time-divisor", visible_flag
+_time_divisor:
+	push_tos
+	movs tos, #8
+	bx lr
+
 	.ltorg
 	

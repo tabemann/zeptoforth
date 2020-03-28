@@ -26,3 +26,4 @@
 
 \ Set a cornerstone to enable deleting everything compiled after this code
 cornerstone restore-state
+
