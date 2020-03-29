@@ -19,7 +19,7 @@
 
 #include src/common/forth/basic.fs
 #include src/common/forth/systick.fs
-#include src/stm32l476/forth/task_io.fs
+#include src/stm32l476/forth/int_io.fs
 #include src/common/forth/task.fs
 #include src/common/forth/schedule.fs
 

@@ -169,5 +169,19 @@ _serial_key_q:
 	movs tos, #-1
 1:	pop {pc}
 
+	@@ Time multiplier
+	define_word "time-multiplier", visible_flag
+_time_multiplier:
+	push_tos
+	movs tos, #1
+	bx lr
+
+	@@ Time divisor
+	define_word "time-divisor", visible_flag
+_time_divisor:
+	push_tos
+	movs tos, #1
+	bx lr
+
 	.ltorg
 	
