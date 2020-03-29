@@ -14,14 +14,14 @@
 @ You should have received a copy of the GNU General Public License
 @ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-.equ FLASH_BASE, 0x40023C00
+.equ FLASH_Base, 0x40023C00
 
-.equ FLASH_ACR,     FLASH_BASE + 0x00 @ Flash Access Control Register
-.equ FLASH_KEYR,    FLASH_BASE + 0x04 @ Flash Key Register
-.equ FLASH_OPTKEYR, FLASH_BASE + 0x08 @ Flash Option Key Register
-.equ FLASH_SR,      FLASH_BASE + 0x0C @ Flash Status Register
-.equ FLASH_CR,      FLASH_BASE + 0x10 @ Flash Control Register
-.equ FLASH_OPTCR,   FLASH_BASE + 0x14 @ Flash Option Control Register
+.equ FLASH_ACR,     FLASH_Base + 0x00 @ Flash Access Control Register
+.equ FLASH_KEYR,    FLASH_Base + 0x04 @ Flash Key Register
+.equ FLASH_OPTKEYR, FLASH_Base + 0x08 @ Flash Option Key Register
+.equ FLASH_SR,      FLASH_Base + 0x0C @ Flash Status Register
+.equ FLASH_CR,      FLASH_Base + 0x10 @ Flash Control Register
+.equ FLASH_OPTCR,   FLASH_Base + 0x14 @ Flash Option Control Register
 
 	@@ Write a byte to flash
 	define_word "bflash!", visible_flag
@@ -33,17 +33,19 @@ _store_flash_1:
 
 	ldr r2, =flash_min_address
 	cmp r0, r2
-	blt 5f
+	blo 5f
 
 	ldr r3, =flash_dict_end
 	cmp r0, r3
 	bhs 6f
 
-	ldr r2, =flash_here
-	ldr r3, [r2]
-	cmp r0, r3
-	ble 1f
-	str r0, [r2]
+@	ldr r2, =flash_here
+@	ldr r3, [r2]
+@	cmp r0, r3
+@	blo 1f
+@	movs r3, r0
+@	adds r3, #1
+@	str r3, [r2]
 	
 	@ Prüfe Inhalt. Schreibe nur, wenn es NICHT -1 ist.
 1:	ldr r3, =0xFF
@@ -52,7 +54,7 @@ _store_flash_1:
 	beq 2f @ Fertig ohne zu Schreiben
 	
 	@ Ist an der gewünschten Stelle -1 im Speicher ?
-	ldrh r2, [r0]
+	ldrb r2, [r0]
 	cmp r2, r3
 	bne 4f
 	
@@ -117,11 +119,13 @@ _store_flash_2:
 	cmp r0, r3
 	bhs 6f
 
-	ldr r2, =flash_here
-	ldr r3, [r2]
-	cmp r0, r3
-	ble 1f
-	str r0, [r2]
+@	ldr r2, =flash_here
+@	ldr r3, [r2]
+@	cmp r0, r3
+@	blo 1f
+@	movs r3, r0
+@	adds r3, #2
+@	str r3, [r2]
 	
 	@ Prüfe Inhalt. Schreibe nur, wenn es NICHT -1 ist.
 1:	ldr r3, =0xFFFF

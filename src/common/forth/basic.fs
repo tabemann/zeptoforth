@@ -969,7 +969,7 @@ compile-to-flash
     dup >r swap >r swap dup >r 2@ rot execute if
       r> 2@ rdrop rdrop true exit
     else
-      r> [ 2 cell ] literal + r> 1 - r>
+      r> [ 2 cells ] literal + r> 1 - r>
     then
   repeat
   drop drop drop - 0 false

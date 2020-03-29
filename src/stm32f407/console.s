@@ -102,8 +102,8 @@ _uart_init:
 	ldr r1, =CONSOLE_BRR
 	@ ldr r0, =0x341  @  9600 bps
 	@ movs r0, #0xD0  @ 38400 bps
-	@ movs r0, #0x45  @ 115200 bps
-	movs r0, #0x46  @ 115200 bps, ein ganz kleines bisschen langsamer...
+	movs r0, #0x45  @ 115200 bps
+	@ movs r0, #0x46  @ 115200 bps, ein ganz kleines bisschen langsamer...
 	str r0, [r1]
 	
 	@ Enable the USART, TX, and RX circuit

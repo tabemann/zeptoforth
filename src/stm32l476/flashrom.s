@@ -63,11 +63,13 @@ _store_flash_16:
 	beq 1f
 	ldr tos, =_store_flash_16_already_written
 	bl _raise
-1:	ldr r0, =flash_here
-	ldr r1, [r0]
-	cmp tos, r1
-	ble 1f
-	str tos, [r0]
+@1:	ldr r0, =flash_here
+@	ldr r1, [r0]
+@	cmp tos, r1
+@	bls 1f
+@	movs r1, tos
+@	adds r1, #16
+@	str r1, [r0]
 1:	ldr r0, =0x08000000
 	adds tos, tos, r0
 	@@ Flash needs to be unlocked
