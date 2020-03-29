@@ -376,6 +376,8 @@ _find_flash_end:
 	@@ Find the next flash block
 	define_word "next-flash-block", visible_flag
 _next_flash_block:
+	ands tos, #3
+	orrs tos, #3
 	adds tos, #1
 	bx lr
 

@@ -87,12 +87,12 @@ _uart_init:
         orrs r0, #0xA0
         str r0, [r1]
 
-        @ Set alternate function 7 to enable CONSOLE pins on Port A
+        @ Set alternate function 7 to enable USART2 pins on Port A
         ldr r1, = GPIOA_AFRL
         ldr r0, = 0x7700              @ Alternate function 7 for TX and RX pins of CONSOLE on PORTA 
         str r0, [r1]
 
-        @ Enable the CONSOLE peripheral clock by setting bit 17
+        @ Enable the USART2 peripheral clock by setting bit 17
         ldr r1, = RCC_APB1ENR
         ldr r0, = 0x20000
         str r0, [r1]
