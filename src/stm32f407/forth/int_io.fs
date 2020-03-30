@@ -24,7 +24,7 @@ bvariable rx-read-index
 bvariable rx-write-index
 
 \ Constant for number of bytes to buffer
-16 constant rx-buffer-size
+32 constant rx-buffer-size
 
 \ Rx buffer
 rx-buffer-size ram-buffer: rx-buffer
@@ -36,7 +36,7 @@ bvariable tx-read-index
 bvariable tx-write-index
 
 \ Constant for number of bytes to buffer
-16 constant tx-buffer-size
+32 constant tx-buffer-size
 
 \ Tx buffer
 tx-buffer-size ram-buffer: tx-buffer
@@ -128,52 +128,35 @@ $80 constant TXE
 
 \ Handle IO
 : handle-io ( -- )
-  disable-int
-  rx-full? not if
-    USART2_SR @ RXNE and if
-      USART2_DR b@ write-rx
-    then
-  then
-  rx-full? if
-    USART2_CR1_RXNEIE_Clear
-  then
-  tx-empty? not if
-    USART2_SR @ TXE and if
-      read-tx USART2_DR b!
-    then
-  then
-  tx-empty? if
-    USART2_CR1_TXEIE_Clear
-  then
-  1 38 32 - lshift NVIC_ICPR1 bis!
-  enable-int
 ;
 
-\ Null interrupt handler
-: null-handler ( -- )
-  handle-io
+\ Handle IO for multitasking
+: task-io ( -- )
 ;
 
 \ Multitasking IO hooks
 
 : do-emit ( c -- )
-  [: tx-full? not ;] wait
-  write-tx
-  USART2_CR1_TXEIE
+  [: serial-emit? ;] wait
+  serial-emit
 ; 
 
 : do-key ( -- c )
-  [: rx-empty? not ;] wait
+  [: serial-key? rx-empty? not or ;] wait
+  begin
+    serial-key? rx-full? not and
+  while
+    serial-key write-rx
+  repeat
   read-rx
-  USART2_CR1_RXNEIE
 ;
 
 : do-emit? ( -- flag )
-  tx-full? not
+  serial-emit?
 ;
 
 : do-key? ( -- flag )
-  rx-empty? not
+  serial-key?
 ;
 
 \ Init
@@ -183,21 +166,11 @@ $80 constant TXE
   0 rx-write-index b!
   0 tx-read-index b!
   0 tx-write-index b!
-  ['] null-handler null-handler-hook !
-  ['] do-key key-hook !
-  ['] do-emit emit-hook !
-  ['] do-key? key?-hook !
-  ['] do-emit? emit?-hook !
-  \ RCC_APB2ENR_SYSCFGEN
-  \ RCC_APB1SMENR1_USART2SMEN
-  \ %011 SYSCFG_EXTICR2_EXTI5
-  \ %011 SYSCFG_EXTICR2_EXTI6
-  \ %11 5 lshift EXTI_IMR1 bis!
-  \ %11 5 lshift EXTI_RTSR1 bis!
-  \ 1 6 lshift NVIC_ISER0_SETENA
+  \ ['] do-key key-hook !
+  \ ['] do-emit emit-hook !
+  \ ['] do-key? key?-hook !
+  \ ['] do-emit? emit?-hook !
   RCC_APB1LPENR_USART2LPEN
-  1 38 32 - lshift NVIC_ISER1_SETENA
-  USART2_CR1_RXNEIE
 ;
 
 \ Reboot

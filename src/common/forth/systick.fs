@@ -58,7 +58,7 @@ variable systick-counter
 
 \ Wait for n milliseconds
 : ms ( u -- )
-  10 * systick-counter @
+  systick-divisor * systick-counter @
   begin
     dup systick-counter @ swap - 2 pick u<
   while
@@ -71,7 +71,7 @@ variable systick-counter
 : init ( -- )
   init
   SYST_CALIB @ SYST_CALIB_TENMS and
-  100 / time-multiplier * time-divisor / SYST_RVR !
+  10 / systick-divisor / time-multiplier * time-divisor / SYST_RVR !
   0 SYST_CVR !
   0 systick-counter !
   ['] systick-handler systick-handler-hook !

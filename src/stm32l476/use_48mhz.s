@@ -103,5 +103,11 @@ _time_divisor:
 	movs tos, #8
 	bx lr
 
+	@@ Divisor to get ms from systicks
+	define_word "systick-divisor", visible_flag
+_systick_divisor:
+	push_tos
+	movs tos, #10
+	bx lr
 	.ltorg
 	

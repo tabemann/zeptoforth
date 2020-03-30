@@ -156,6 +156,9 @@ $08 constant ORE
   enable-int
 ;
 
+\ Handle IO for multitasking
+: task-io ( -- ) ;
+
 \ Null interrupt handler
 : null-handler ( -- )
   handle-io
@@ -195,13 +198,6 @@ $08 constant ORE
   ['] do-emit emit-hook !
   ['] do-key? key?-hook !
   ['] do-emit? emit?-hook !
-  \ RCC_APB2ENR_SYSCFGEN
-  \ RCC_APB1SMENR1_USART2SMEN
-  \ %011 SYSCFG_EXTICR2_EXTI5
-  \ %011 SYSCFG_EXTICR2_EXTI6
-  \ %11 5 lshift EXTI_IMR1 bis!
-  \ %11 5 lshift EXTI_RTSR1 bis!
-  \ 1 6 lshift NVIC_ISER0_SETENA
   RCC_APB1SMENR1_USART2SMEN
   1 38 32 - lshift NVIC_ISER1_SETENA
   USART2_CR1_RXNEIE

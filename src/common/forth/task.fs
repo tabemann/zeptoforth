@@ -272,6 +272,7 @@ end-structure
 \ Handle PAUSE
 : do-pause ( -- )
   pause-count @ 1 + pause-count !
+  task-io
   current-task @
   rp@ over task-rstack-current!
   >r sp@ r> tuck task-stack-current!

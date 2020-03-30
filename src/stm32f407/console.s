@@ -15,46 +15,55 @@
 @ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 	
-	.equ GPIOA_BASE      ,   0x40020000
-	.equ GPIOA_MODER     ,   GPIOA_BASE + 0x00
-	.equ GPIOA_OTYPER    ,   GPIOA_BASE + 0x04
-	.equ GPIOA_OSPEEDR   ,   GPIOA_BASE + 0x08
-	.equ GPIOA_PUPDR     ,   GPIOA_BASE + 0x0C
-	.equ GPIOA_IDR       ,   GPIOA_BASE + 0x10
-	.equ GPIOA_ODR       ,   GPIOA_BASE + 0x14
-	.equ GPIOA_BSRR      ,   GPIOA_BASE + 0x18
-	.equ GPIOA_LCKR      ,   GPIOA_BASE + 0x1C
-	.equ GPIOA_AFRL      ,   GPIOA_BASE + 0x20
-	.equ GPIOA_AFRH      ,   GPIOA_BASE + 0x24
+	.equ GPIOA_Base      ,   0x40020000
+	.equ GPIOA_MODER     ,   GPIOA_Base + 0x00
+	.equ GPIOA_OTYPER    ,   GPIOA_Base + 0x04
+	.equ GPIOA_OSPEEDR   ,   GPIOA_Base + 0x08
+	.equ GPIOA_PUPDR     ,   GPIOA_Base + 0x0C
+	.equ GPIOA_IDR       ,   GPIOA_Base + 0x10
+	.equ GPIOA_ODR       ,   GPIOA_Base + 0x14
+	.equ GPIOA_BSRR      ,   GPIOA_Base + 0x18
+	.equ GPIOA_LCKR      ,   GPIOA_Base + 0x1C
+	.equ GPIOA_AFRL      ,   GPIOA_Base + 0x20
+	.equ GPIOA_AFRH      ,   GPIOA_Base + 0x24
 	
-	.equ RCC_BASE        ,   0x40023800
-	.equ RCC_CR          ,   RCC_BASE + 0x00
-	.equ RCC_CFGR        ,   RCC_BASE + 0x08
-	.equ RCC_AHB1ENR     ,   RCC_BASE + 0x30
-	.equ RCC_APB1ENR     ,   RCC_BASE + 0x40
+	.equ RCC_Base        ,   0x40023800
+	.equ RCC_CR          ,   RCC_Base + 0x00
+	.equ RCC_PLLCRGR     ,   RCC_Base + 0x04
+	.equ RCC_CFGR        ,   RCC_Base + 0x08
+	.equ RCC_AHB1ENR     ,   RCC_Base + 0x30
+	.equ RCC_APB1ENR     ,   RCC_Base + 0x40
 	
 	.equ HSERDY          ,   0x020000
 	.equ HSEON           ,   0x010000
         
-        .equ USART2_BASE     ,   0x40004400
+        .equ USART2_Base     ,   0x40004400
 
-	.equ CONSOLE_BASE    ,   USART2_BASE
+	.equ CONSOLE_Base    ,   USART2_Base
         
-	.equ CONSOLE_SR      ,   CONSOLE_BASE + 0x00
-	.equ CONSOLE_DR      ,   CONSOLE_BASE + 0x04
-	.equ CONSOLE_BRR     ,   CONSOLE_BASE + 0x08
-	.equ CONSOLE_CR1     ,   CONSOLE_BASE + 0x0c
-	.equ CONSOLE_CR2     ,   CONSOLE_BASE + 0x10
-	.equ CONSOLE_CR3     ,   CONSOLE_BASE + 0x14
-	.equ CONSOLE_GTPR    ,   CONSOLE_BASE + 0x18
+	.equ CONSOLE_SR      ,   CONSOLE_Base + 0x00
+	.equ CONSOLE_DR      ,   CONSOLE_Base + 0x04
+	.equ CONSOLE_BRR     ,   CONSOLE_Base + 0x08
+	.equ CONSOLE_CR1     ,   CONSOLE_Base + 0x0c
+	.equ CONSOLE_CR2     ,   CONSOLE_Base + 0x10
+	.equ CONSOLE_CR3     ,   CONSOLE_Base + 0x14
+	.equ CONSOLE_GTPR    ,   CONSOLE_Base + 0x18
+
+	.equ FLASH_ACR       ,   0x40023C00
 
         .equ RXNE            ,   0x20
         .equ TC              ,   0x40
         .equ TXE             ,   0x80
 
+	.equ PLLON           ,   1 << 24
+	.equ PLLRDY          ,   1 << 25
+	.equ PLLSRC          ,   1 << 22
+	
 	@@ Initialize UART
 	define_word "uart-init", visible_flag
 _uart_init:
+	push {lr}
+	
         ldr r1, = RCC_CR
         mov r0, HSEON
         str r0, [r1]            @ turn on the external clock
@@ -105,12 +114,41 @@ _uart_init:
 	movs r0, #0x45  @ 115200 bps
 	@ movs r0, #0x46  @ 115200 bps, ein ganz kleines bisschen langsamer...
 	str r0, [r1]
+
+	@ Enable 168 MHz
+	bl _use_168mhz
 	
 	@ Enable the USART, TX, and RX circuit
 	ldr r1, =CONSOLE_CR1
 	ldr r0, =0x200C @ USART_CR1_UE | USART_CR1_TE | USART_CR1_RE
 	str r0, [r1]
+	
+	pop {pc}
 
+	@@ Enable 168 MHz
+	define_word "use-168mhz", visible_flag
+_use_168mhz:
+	ldr r0, =FLASH_ACR
+	ldr r1, =0x103
+	str r1, [r0]
+	ldr r0, =RCC_PLLCRGR
+	ldr r1, =PLLSRC | 8 | (336 << 6) | (7 << 24)
+	str r1, [r0]
+	ldr r0, =RCC_CR
+	ldr r1, [r0]
+	ldr r2, =PLLON
+	orrs r1, r2
+	str r1, [r0]
+	ldr r2, =PLLRDY
+1:	ldr r1, [r0]
+	tst r1, r2
+	beq 1b
+	ldr r0, =RCC_CFGR
+	ldr r1, =2 | (5 << 10) | (4 << 13)
+	str r1, [r0]
+	ldr r0, =CONSOLE_BRR
+	ldr r1, =0x16D
+	str r1, [r0]
 	bx lr
 
 	@@ Emit one character ( c -- )
@@ -183,5 +221,12 @@ _time_divisor:
 	movs tos, #1
 	bx lr
 
+	@@ Divisor to get ms from systicks
+	define_word "systick-divisor", visible_flag
+_systick_divisor:
+	push_tos
+	movs tos, #1
+	bx lr
+	
 	.ltorg
 	
