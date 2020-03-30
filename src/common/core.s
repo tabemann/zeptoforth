@@ -585,6 +585,7 @@ _disable_int:
 	define_word "sleep", visible_flag
 _sleep:
 	dsb
+	isb
 	wfi
 	bx lr
 	
@@ -693,7 +694,9 @@ _welcome:
 	@@ available, so as to enable any source file to call a preceding init
 	@@ routine without having to check if one exists
 	define_word "init", visible_flag
-_init:	bx lr
+_init:	movs r0, #0
+	msr BASEPRI, r0
+	bx lr
 	
  	@@ Run the initialization routine, if there is one
 	define_word "do-init", visible_flag

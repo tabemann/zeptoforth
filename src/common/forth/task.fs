@@ -333,7 +333,7 @@ end-structure
 
 \ Wait for n milliseconds with multitasking support
 : ms ( u -- )
-  10 * systick-counter @
+  systick-divisor * systick-counter @
   2dup current-task @ set-task-delay
   begin
     dup systick-counter @ swap - 2 pick u<

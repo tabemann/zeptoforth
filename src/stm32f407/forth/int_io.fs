@@ -128,35 +128,56 @@ $80 constant TXE
 
 \ Handle IO
 : handle-io ( -- )
+  disable-int
+  rx-full? not if
+    USART2_SR @ RXNE and if
+      USART2_DR b@ write-rx
+    then
+  then
+  rx-full? if
+    USART2_CR1_RXNEIE_Clear
+  then
+  tx-empty? not if
+    USART2_SR @ TXE and if
+      read-tx USART2_DR b!
+    then
+  then
+  tx-empty? if
+    USART2_CR1_TXEIE_Clear
+  then
+  1 38 32 - lshift NVIC_ICPR1 bis!
+  enable-int
 ;
 
 \ Handle IO for multitasking
 : task-io ( -- )
 ;
 
-\ Multitasking IO hooks
+\ Null interrupt handler
+: null-handler ( -- )
+  handle-io
+;
+
+\ Interrupt-driven IO hooks
 
 : do-emit ( c -- )
-  [: serial-emit? ;] wait
-  serial-emit
+  [: tx-full? not ;] wait
+  write-tx
+  USART2_CR1_TXEIE
 ; 
 
 : do-key ( -- c )
-  [: serial-key? rx-empty? not or ;] wait
-  begin
-    serial-key? rx-full? not and
-  while
-    serial-key write-rx
-  repeat
+  [: rx-empty? not ;] wait
   read-rx
+  USART2_CR1_RXNEIE
 ;
 
 : do-emit? ( -- flag )
-  serial-emit?
+  tx-full? not
 ;
 
 : do-key? ( -- flag )
-  serial-key?
+  rx-empty? not
 ;
 
 \ Init
@@ -166,11 +187,14 @@ $80 constant TXE
   0 rx-write-index b!
   0 tx-read-index b!
   0 tx-write-index b!
-  \ ['] do-key key-hook !
-  \ ['] do-emit emit-hook !
-  \ ['] do-key? key?-hook !
-  \ ['] do-emit? emit?-hook !
+  ['] null-handler null-handler-hook !
+  ['] do-key key-hook !
+  ['] do-emit emit-hook !
+  ['] do-key? key?-hook !
+  ['] do-emit? emit?-hook !
   RCC_APB1LPENR_USART2LPEN
+  1 38 32 - lshift NVIC_ISER1_SETENA
+  USART2_CR1_RXNEIE
 ;
 
 \ Reboot

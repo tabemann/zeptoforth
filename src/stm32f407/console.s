@@ -225,7 +225,7 @@ _time_divisor:
 	define_word "systick-divisor", visible_flag
 _systick_divisor:
 	push_tos
-	movs tos, #1
+	movs tos, #10
 	bx lr
 	
 	.ltorg
