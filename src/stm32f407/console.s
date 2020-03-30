@@ -211,7 +211,7 @@ _serial_key_q:
 	define_word "time-multiplier", visible_flag
 _time_multiplier:
 	push_tos
-	movs tos, #1
+	movs tos, #21
 	bx lr
 
 	@@ Time divisor
