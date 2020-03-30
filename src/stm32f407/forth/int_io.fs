@@ -24,7 +24,7 @@ bvariable rx-read-index
 bvariable rx-write-index
 
 \ Constant for number of bytes to buffer
-32 constant rx-buffer-size
+16 constant rx-buffer-size
 
 \ Rx buffer
 rx-buffer-size ram-buffer: rx-buffer
@@ -36,7 +36,7 @@ bvariable tx-read-index
 bvariable tx-write-index
 
 \ Constant for number of bytes to buffer
-32 constant tx-buffer-size
+16 constant tx-buffer-size
 
 \ Tx buffer
 tx-buffer-size ram-buffer: tx-buffer
