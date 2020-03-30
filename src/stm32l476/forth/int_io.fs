@@ -164,7 +164,7 @@ $08 constant ORE
   handle-io
 ;
 
-\ Multitasking IO hooks
+\ Interrupt-driven IO hooks
 
 : do-emit ( c -- )
   [: tx-full? not ;] wait
