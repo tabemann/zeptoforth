@@ -261,7 +261,7 @@ end-structure
     systick-counter @ 3 pick task-systick-start @ -
     3 roll task-systick-delay @ u< and or
     if
-      sleep
+      \ sleep
       reset-waiting-tasks
     then
   else
