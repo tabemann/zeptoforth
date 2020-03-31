@@ -116,7 +116,7 @@ _uart_init:
 	str r0, [r1]
 
 	@ Enable 168 MHz
-	bl _use_168mhz
+	bl _use_120mhz
 	
 	@ Enable the USART, TX, and RX circuit
 	ldr r1, =CONSOLE_CR1
@@ -124,6 +124,32 @@ _uart_init:
 	str r0, [r1]
 	
 	pop {pc}
+
+	@@ Enable 120 MHz
+	define_word "use-120mhz", visible_flag
+_use_120mhz:
+	ldr r0, =FLASH_ACR
+	ldr r1, =0x103
+	str r1, [r0]
+	ldr r0, =RCC_PLLCRGR
+	ldr r1, =PLLSRC | 8 | (240 << 6) | (8 << 24)
+	str r1, [r0]
+	ldr r0, =RCC_CR
+	ldr r1, [r0]
+	ldr r2, =PLLON
+	orrs r1, r2
+	str r1, [r0]
+	ldr r2, =PLLRDY
+1:	ldr r1, [r0]
+	tst r1, r2
+	beq 1b
+	ldr r0, =RCC_CFGR
+	ldr r1, =2 | (5 << 10) | (5 << 13)
+	str r1, [r0]
+	ldr r0, =CONSOLE_BRR
+	ldr r1, =0x104
+	str r1, [r0]
+	bx lr
 
 	@@ Enable 168 MHz
 	define_word "use-168mhz", visible_flag
@@ -211,7 +237,8 @@ _serial_key_q:
 	define_word "time-multiplier", visible_flag
 _time_multiplier:
 	push_tos
-	movs tos, #21
+	movs tos, #15 @ 120 MHz
+@	movs tos, #21 @ 168 MHz
 	bx lr
 
 	@@ Time divisor
