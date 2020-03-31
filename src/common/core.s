@@ -584,6 +584,9 @@ _disable_int:
 	@@ Enter sleep mode
 	define_word "sleep", visible_flag
 _sleep:
+	mrs r0, BASEPRI
+	bic r0, #0xF0
+	msr BASEPRI, r0
 	dsb
 	isb
 	wfi
@@ -820,6 +823,22 @@ _compile_to_flash:
 	define_word "compiling-to-flash", visible_flag
 _compiling_to_flash:
 	ldr r0, =compiling_to_flash
+	push_tos
+	ldr tos, [r0]
+	bx lr
+
+	@@ Get whether to compress code compiled to flash
+	define_word "compress-flash", visible_flag
+_compress_flash:
+	ldr r0, =compress_flash_enabled
+	movs r1, #-1
+	str r1, [r0]
+	bx lr
+
+	@@ Get whether flash is being compressed
+	define_word "compressing-flash", visible_flag
+_compressing_flash:
+	ldr r0, =compress_flash_enabled
 	push_tos
 	ldr tos, [r0]
 	bx lr
@@ -1561,6 +1580,8 @@ _init_variables:
 	ldr r0, =state
 	str r1, [r0]
 	ldr r0, =pause_enabled
+	str r1, [r0]
+	ldr r0, =compress_flash_enabled
 	str r1, [r0]
 	movs r1, #10
 	ldr r0, =base

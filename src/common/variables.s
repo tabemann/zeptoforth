@@ -87,6 +87,9 @@
 
 	@@ Is PAUSE enabled (enabled > 0)
 	allot pause_enabled, 4
+
+	@@ Is compress flash enabled
+	allot compress_flash_enabled, 4
 	
 	@@ The prompt hook
 	allot prompt_hook, 4

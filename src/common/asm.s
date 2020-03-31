@@ -92,6 +92,10 @@ _asm_finalize:
 	ldr r0, [r0]
 	cmp r0, #0
 	beq 1f
+	ldr r0, =compress_flash_enabled
+	ldr r0, [r0]
+	cmp r0, #0
+	bne 3f
 	push_tos
 	ldr r0, =current_compile
 	ldr tos, [r0]
@@ -100,7 +104,7 @@ _asm_finalize:
 	ldr tos, =0xDEADBEEF
 	bl _current_comma_4
 	bl _flash_align
-	ldr r0, =current_compile
+3:	ldr r0, =current_compile
 	ldr r1, [r0]
 	ldr r2, =flash_latest
 	str r1, [r2]
@@ -138,6 +142,10 @@ _asm_finalize_no_align:
 	ldr r0, [r0]
 	cmp r0, #0
 	beq 1f
+	ldr r0, =compress_flash_enabled
+	ldr r0, [r0]
+	cmp r0, #0
+	bne 3f
 	push_tos
 	ldr r0, =current_compile
 	ldr tos, [r0]
@@ -145,7 +153,7 @@ _asm_finalize_no_align:
 	push_tos
 	ldr tos, =0xDEADBEEF
 	bl _current_comma_4
-	ldr r0, =current_compile
+3:	ldr r0, =current_compile
 	ldr r1, [r0]
 	ldr r2, =flash_latest
 	str r1, [r2]
@@ -172,7 +180,39 @@ _asm_end:
 	bl _current_comma_2
 	bl _asm_finalize
 	pop {pc}
-	
+
+	@@ End flash compression
+	define_word "end-compress-flash", visible_flag
+_asm_end_compress_flash:
+	push {lr}
+	ldr r0, =compress_flash_enabled
+	ldr r1, [r0]
+	cmp r1, #0
+	beq 1f
+	movs r1, #0
+	str r1, [r0]
+	bl _asm_word_align
+	ldr r0, =flash_latest
+	ldr tos, [r0]
+	bl _flash_comma_4
+	push_tos
+	ldr tos, =0xDEADBEEF
+	bl _flash_comma_4
+	bl _flash_align
+1:	pop {pc}
+
+	@@ Commit code to flash without finishing compressing it
+	define_word "commit-flash", visible_flag
+_asm_commit_flash:
+	push {lr}
+	ldr r0, =compress_flash_enabled
+	ldr r1, [r0]
+	cmp r1, #0
+	beq 1f
+	bl _asm_word_align
+	bl _flash_align
+1:	pop {pc}
+
 	@@ Assemble a move immediate instruction
 	define_word "mov-imm,", visible_flag
 _asm_mov_imm:

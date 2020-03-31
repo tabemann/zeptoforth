@@ -16,6 +16,9 @@
 \ Compile this to flash
 compile-to-flash
 
+\ Begin compressing compiled code in flash
+compress-flash
+
 \ True constant
 -1 constant true
 
@@ -38,7 +41,7 @@ compile-to-flash
 4 constant cell
 
 \ Multiple cells size
-: cells ( n -- n ) cell * [inlined] ;
+: cells ( n -- n ) 4 * [inlined] ;
 
 \ TOS register
 6 constant tos
@@ -68,13 +71,13 @@ compile-to-flash
 : tuck ( x1 x2 -- x2 x1 x2 ) swap over [inlined] ;
 
 \ Add to a cell
-: +! ( x addr -- ) tuck @ + swap ! [inlined] ;
+: +! ( x addr -- ) swap over @ + swap ! [inlined] ;
 
 \ Get the minimum of two numbers
 : min ( n1 n2 -- n3 ) over - dup 0 < and + ;
 
 \ Get the maximum of two numbers
-: max ( n1 n2 -- n3 ) 2dup > if drop else nip then ;
+: max ( n1 n2 -- n3 ) 2dup > if drop else swap drop then ;
 
 \ Fill memory with zeros up until a given address
 : advance-here ( a -- )
@@ -120,6 +123,9 @@ compile-to-flash
   drop
 ;
 
+\ Commit code to flash
+commit-flash
+
 \ Display all the words
 : words ( -- ) ram-latest words-dict flash-latest words-dict ;
 
@@ -149,6 +155,9 @@ compile-to-flash
   pause-enabled !
 ;
 
+\ Commit code to flash
+commit-flash
+
 \ Safely type an integer
 : safe-type-integer ( n -- )
   here swap format-integer dup allot dup >r safe-type r> negate allot
@@ -170,6 +179,9 @@ compile-to-flash
 : restore-flash ( flash-here -- )
   erase-after r> drop
 ;
+
+\ Commit code to flash
+commit-flash
 
 \ Create a MARKER to erase flash/return the flash dictionary to its prior state
 : marker ( "name" -- )
@@ -253,6 +265,9 @@ compile-to-flash
   advance-here
 ;
 
+\ Commit changes to flash
+commit-flash
+
 \ Create a word that executes code specified by DOES>
 : <builds ( "name" -- )
   token
@@ -267,6 +282,9 @@ compile-to-flash
 : flash-align,
   compiling-to-flash if flash-here flash-block-size align advance-here then
 ;
+
+\ Commit changes to flash
+commit-flash
 
 \ Specify code for a word created wth <BUILDS
 : does> ( -- )
@@ -383,6 +401,9 @@ compile-to-flash
   then
 ;
 
+\ Commit changes to flash
+commit-flash
+
 \ Start an OFSTR clause
 : ofstr ( x -- )
   [immediate]
@@ -459,6 +480,9 @@ compile-to-flash
     compile-to-ram
   then
 ;
+
+\ Commit changes to flash
+commit-flash
 
 \ Allocate a byte variable in RAM
 : ram-bvariable ( "name" -- )
@@ -547,6 +571,9 @@ compile-to-flash
   +
   set-next-ram-space
 ;
+
+\ Commit changes to flash
+commit-flash
 
 \ Specify a buffer of a given size
 : buffer: ( # "name" -- )
@@ -736,6 +763,9 @@ compile-to-flash
   postpone rdrop
   postpone rdrop
 ;
+
+\ Commit changes to flash
+commit-flash
 
 \ Execute an xt based on whether a condition is true
 : option ( f true-xt -- ) ( true-xt: ??? -- ??? )
@@ -1021,6 +1051,9 @@ variable wait-hook
   next-ram-space here!
   0 wait-hook !
 ;
+
+\ Finish compressing the code
+end-compress-flash
 
 \ Set compilation back to RAM
 compile-to-ram

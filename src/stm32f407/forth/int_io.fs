@@ -58,6 +58,14 @@ $E000E000 constant NVIC_Base ( Nested Vectored Interrupt  Controller )
 NVIC_Base $104 + constant NVIC_ISER1 ( Interrupt Set-Enable Register )
 : NVIC_ISER1_SETENA   ( %XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -- ) 0 lshift NVIC_ISER1 bis! ;  \ NVIC_ISER1_SETENA    SETENA
 NVIC_Base $284 + constant NVIC_ICPR1 ( Interrupt Clear-Pending  Register )
+NVIC_Base $400 + constant NVIC_IPR0 ( Interrupt Priority Register )
+: NVIC_IPR@ dup 4 / NVIC_IPR0 + @ swap 4 mod 8 * rshift $FF and ;
+: NVIC_IPR_Mask 4 mod 8 * $FF swap lshift not ;
+: NVIC_IPR_Masked@ dup NVIC_IPR@ swap NVIC_IPR_Mask and ;
+: NVIC_IPR!
+  dup NVIC_IPR_Masked@ rot $FF and 2 pick 4 mod 8 * lshift or
+  swap 4 / NVIC_IPR0 + !
+;
 
 $20 constant RXNE
 $80 constant TXE
@@ -194,6 +202,7 @@ $80 constant TXE
   ['] do-emit? emit?-hook !
   RCC_APB1LPENR_USART2LPEN
   1 38 32 - lshift NVIC_ISER1_SETENA
+  0 38 NVIC_IPR!
   USART2_CR1_RXNEIE
 ;
 
