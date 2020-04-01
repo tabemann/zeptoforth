@@ -21,7 +21,7 @@ To load the zeptoforth kernel onto an STM32L476 or STM32F407 DISCOVERY board, fi
 
 Note the address referred to above. This will also reboot the board.
 
-To use the board on Linux, download and install e4thcom. If one is using an STM32F407 DISCOVERY board, attach a USB-to-serial converter to your machine (make sure you have the proper permissions to access its device file) and attach the RXD pin on the converter to PA2 on the board and the TXD pin on the converter to PA3 on the board. Then, from the zeptoforth base directory execute:
+To use the board on Linux, download and install e4thcom. If one is using an STM32F407 DISCOVERY board, attach a USB-to-serial converter to your machine (make sure you have the proper permissions to access its device file) and attach the RXD pin on the converter to PA2 on the board and the TXD pin on the converter to PA3 on the board with jumper cables. Then, from the zeptoforth base directory execute:
 
     $ e4thcom -t noforth -b B115200 -d <device, typically one of ttyACM0 or ttyUSB0>
 
