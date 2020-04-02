@@ -26,8 +26,8 @@
 	.equ flash_buffer_size, 0
 	.equ flash_buffer_space, 0
 	.equ flash_buffer_addr, 0
-	.equ flash_min_address, 0x00006000
-	.equ flash_dict_start, 0x00006000
+	.equ flash_min_address, 0x00008000
+	.equ flash_dict_start, 0x00008000
 	.equ flash_dict_end, 0x00100000
 	.equ input_buffer_size, 255
 	.equ pad_offset, 256

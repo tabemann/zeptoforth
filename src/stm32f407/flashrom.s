@@ -220,82 +220,42 @@ _store_flash_already_written:
 	bl _type
 	pop {pc}
 	
-	@@ Delete a 2K page of flash
-	define_word "erase-page", visible_flag
-_erase_page:	
+	@@ Delete a sector of lash
+	define_word "erase-sector", visible_flag
+_erase_sector:	
 	push {lr}
-	pull_tos @@ Temporary
-@	movs r0, tos
-@	pull_tos
-@	
-@	@@ Protect the zeptoforth runtime!
-@	ldr r1, =flash_min_address
-@	cmp r0, r1
-@	bge 1f
-@	push_tos
-@	ldr tos, =_attempted_to_write_core_flash
-@	bl _raise
-@1:  	ldr r2, =FLASH_KEYR
-@	ldr r3, =0x45670123
-@	str r3, [r2]
-@	ldr r3, =0xCDEF89AB
-@	str r3, [r2]
-@	
-@	@ Enable erase
-@	ldr r2, =FLASH_CR
-@	movs r3, #2 @ Set Erase bit
-@	str r3, [r2]
-@	
-@	@ page size 2048 byte
-@	@ bit 10:0 byte address
-@	@ bit 18:11 page number
-@	@ bit 19 bank number
-@	@ Set page to erase
-@	@ shift down bits 19:11 -> bit 11:3
-@	movs r1, #11-3
-@	lsrs r0, r1      @ shift down bankNr and address address to BKER, PNB[7:0]
-@	ldr r2, =0xFF8   @ bank and page mask
-@	ands r0, r2      @ mask out other bits
-@	movs r1 ,#2
-@	orrs r0, r1      @ select page erase  
-@	ldr r2, =FLASH_CR
-@	strh r0, [r2]    @ write page and erase page
-@	
-@	@ start erasing
-@	movs r0,#1     @ select start
-@	ldr r2, =FLASH_CR+2 
-@	strh r0, [r2]  @ start page erase
-@	
-@	@ Wait for Flash BUSY Flag to be cleared
-@	ldr r2, =FLASH_SR+2
-@1:    	ldrh r3, [r2]
-@	movs r0, #1
-@	ands r0, r3
-@	bne 1b
-@	
-@	@ Lock Flash after finishing this
-@	ldr r2, =FLASH_CR + 3
-@	movs r3, #0x80
-@	strb r3, [r2]
-@	
-@	@ clear cache
-@	@ save old cache settings
-@	ldr r2, =FLASH_ACR
-@	ldr r1, [r2]
-@	push {r1}
-@	
-@	@ turn cache off
-@	ldr r0,=0x600
-@	str r1, [r2]
-@	
-@	@ reset cache
-@	ldr r0, =0x1800
-@	str r1, [r2]
-@	
-@	@ restore flash settings
-@	pop {r1}  
-@	str r1, [r2]
-@
+
+	cmp tos, #1   @ Nicht den Kern in Sektor 0 löschen
+	blo 2f
+	cmp tos, #12  @ Es gibt nur 12 Sektoren
+	bhs 2f
+	
+	ldr r2, =FLASH_KEYR
+	ldr r3, =0x45670123
+	str r3, [r2]
+	ldr r3, =0xCDEF89AB
+	str r3, [r2]
+	
+	@ Set sector to erase
+	ldr r2, =FLASH_CR
+	ldr r3, =0x00010002
+	lsls tos, #3
+	orrs r3, tos
+	str r3, [r2]
+	
+	@ Wait for Flash BUSY Flag to be cleared
+	ldr r2, =FLASH_SR
+1:      ldr r3, [r2]
+	ands r3, #0x00010000
+	bne 1b
+	
+	@ Lock Flash after finishing this
+	ldr r2, =FLASH_CR
+	ldr r3, =0x80000000
+	str r3, [r2]
+	
+2:	pull_tos
+	
 	pop {pc}
 
 	@@ Exception handler for flash writes where flash has already been
@@ -313,47 +273,142 @@ _attempted_to_write_past_flash_end:
 	bl _type
 	pop {pc}
 
-	@@ Erase all flash except for the zeptoforth runtime
-	define_word "erase-all", visible_flag
-_erase_all:
-	push {tos, lr}
-@	ldr tos, =flash_dict_end
-@1:	ldr r0, =2048
-@	subs tos, tos, r0
-@	ldr r0, =flash_min_address
-@	cmp tos, r0
-@	blt 2f
-@	push_tos
-@	bl _erase_page
-@	b 1b
-@2:	bl _init_flash_dict
-	pop {tos, pc}
+	@@ Erase a particular address
+	define_word "erase-address", visible_flag
+_erase_address:
+	push {lr}
+	movs r2, tos
+	pull_tos
+	movs r1, tos
+	pull_tos
+	movs r0, tos
+	pull_tos
+	cmp tos, r2
+	blo 1f
+	cmp tos, r1
+	bhi 1f
+	movs tos, r0
+	bl _erase_sector
+	pop {pc}
+1:	pull_tos
+	pop {pc}
+	
+	@@ Choose a sector to erase
+	define_word "choose-sector", visible_flag
+_choose_sector:
+	push {lr}
+	push_tos
+	push_tos
+	movs tos, #2
+	push_tos
+	ldr tos, =0x0000BFFF
+	push_tos
+	ldr tos, =0x00008000
+	bl _erase_address
+	push_tos
+	push_tos
+	movs tos, #3
+	push_tos
+	ldr tos, =0x0000FFFF
+	push_tos
+	ldr tos, =0x0000C000
+	bl _erase_address
+	push_tos
+	push_tos
+	movs tos, #4
+	push_tos
+	ldr tos, =0x0001FFFF
+	push_tos
+	ldr tos, =0x00010000
+	bl _erase_address
+	push_tos
+	push_tos
+	movs tos, #5
+	push_tos
+	ldr tos, =0x0003FFFF
+	push_tos
+	ldr tos, =0x00020000
+	bl _erase_address
+	push_tos
+	push_tos
+	movs tos, #6
+	push_tos
+	ldr tos, =0x0005FFFF
+	push_tos
+	ldr tos, =0x00040000
+	bl _erase_address
+	push_tos
+	push_tos
+	movs tos, #7
+	push_tos
+	ldr tos, =0x0007FFFF
+	push_tos
+	ldr tos, =0x00060000
+	bl _erase_address
+	push_tos
+	push_tos
+	movs tos, #8
+	push_tos
+	ldr tos, =0x0009FFFF
+	push_tos
+	ldr tos, =0x00080000
+	bl _erase_address
+	push_tos
+	push_tos
+	movs tos, #9
+	push_tos
+	ldr tos, =0x000BFFFF
+	push_tos
+	ldr tos, =0x000A0000
+	bl _erase_address
+	push_tos
+	push_tos
+	movs tos, #10
+	push_tos
+	ldr tos, =0x000DFFFF
+	push_tos
+	ldr tos, =0x000C0000
+	bl _erase_address
+	push_tos
+	movs tos, #11
+	push_tos
+	ldr tos, =0x000FFFFF
+	push_tos
+	ldr tos, =0x000E0000
+	bl _erase_address
+	bl _reboot
+	pop {pc}
 
-@	@@ Erase flash after a given address
+	@@ Erase after a given address (including the sector the address is in)
 	define_word "erase-after", visible_flag
 _erase_after:
 	push {lr}
-	pull_tos @@ Temporary
-@	movs r1, tos
-@	ldr r0, =flash_here
-@	ldr tos, [r0]
-@	ldr r2, =0x7FF
-@	bics tos, r2
-@	ldr r0, =2048
-@	adds tos, tos, r0
-@1:	ldr r0, =2048
-@	subs tos, tos, r0
-@	cmp tos, r1
-@	blt 2f
-@	push_tos
-@	push {r1}
-@	bl _erase_page
-@	pop {r1}
-@	bl 1b
-@2:	pull_tos
-@	bl _init_flash_dict
+	cpsid i
+	ldr r0, =0xFFFFFFFF
+	ldr r1, =flash_dict_end
+1:	cmp tos, r1
+	bhs 3f
+	ldr r2, [tos]
+	cmp r2, r0
+	beq 2f
+	push_tos
+	push {r0, r1}
+	bl _choose_sector
+	pop {r0, r1}
+2:	adds tos, #4
+	b 1b
+3:	bl _reboot
 	pop {pc}
 	
+	@@ Erase all flash except for the zeptoforth runtime
+	define_word "erase-all", visible_flag
+_erase_all:
+	push {lr}
+	push_tos
+	ldr tos, =flash_dict_start
+	bl _erase_after
+	pop {pc}
+		
 	@@ Find the end of the flash dictionary
 	define_word "find-flash-end", visible_flag
 _find_flash_end:
