@@ -168,11 +168,57 @@ commit-flash
   here swap format-unsigned dup allot dup >r safe-type r> negate allot
 ;
 
-\ Pad flash to a 2048 byte boundary
-: pad-flash-erase-block
-  begin flash-here $7FF and while
+\ Test for next flash sector
+: check-flash-sector ( addr start end -- addr )
+  dup >r flash-here >= swap flash-here <= and if drop r> 1 + else rdrop then
+;
+
+\ Get the start of the next flash sector
+: next-flash-sector ( -- addr )
+  $100000
+  $000000 $003FFF check-flash-sector
+  $004000 $007FFF check-flash-sector
+  $008000 $00BFFF check-flash-sector
+  $00C000 $00FFFF check-flash-sector
+  $010000 $01FFFF check-flash-sector
+  $020000 $03FFFF check-flash-sector
+  $040000 $05FFFF check-flash-sector
+  $060000 $07FFFF check-flash-sector
+  $080000 $08FFFF check-flash-sector
+  $0A0000 $0BFFFF check-flash-sector
+  $0C0000 $0DFFFF check-flash-sector
+  $0E0000 $0FFFFF check-flash-sector
+;
+
+\ Test for next flash sector
+: check-flash-sector-for-addr ( flash-addr addr start end -- addr )
+  dup >r 3 pick >= swap 3 roll <= and if drop r> 1 + else rdrop then
+;
+
+\ Align an address for a following flash sector
+: erase-align ( addr -- addr )
+  >r $100000
+  r@ swap $000000 $003FFF check-flash-sector-for-addr
+  r@ swap $004000 $007FFF check-flash-sector-for-addr
+  r@ swap $008000 $00BFFF check-flash-sector-for-addr
+  r@ swap $00C000 $00FFFF check-flash-sector-for-addr
+  r@ swap $010000 $01FFFF check-flash-sector-for-addr
+  r@ swap $020000 $03FFFF check-flash-sector-for-addr
+  r@ swap $040000 $05FFFF check-flash-sector-for-addr
+  r@ swap $060000 $07FFFF check-flash-sector-for-addr
+  r@ swap $080000 $08FFFF check-flash-sector-for-addr
+  r@ swap $0A0000 $0BFFFF check-flash-sector-for-addr
+  r@ swap $0C0000 $0DFFFF check-flash-sector-for-addr
+  r> swap $0E0000 $0FFFFF check-flash-sector-for-addr
+;
+
+\ Pad flash to a sector boundary
+: pad-flash-erase-block ( -- )
+  next-flash-sector
+  begin flash-here over < while
     0 bflash,
   repeat
+  drop
 ;
 
 \ Restore flash to a preexisting state
@@ -443,7 +489,7 @@ commit-flash
 \ Core of CORNERSTONE's DOES>
 : cornerstone-does> ( -- )
   does>
-  $800 align
+  erase-align
   erase-after
 ;
 
