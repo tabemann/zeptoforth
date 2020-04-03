@@ -192,6 +192,7 @@ _asm_end_compress_flash:
 	movs r1, #0
 	str r1, [r0]
 	bl _asm_word_align
+	push_tos
 	ldr r0, =flash_latest
 	ldr tos, [r0]
 	bl _flash_comma_4

@@ -355,6 +355,7 @@ _evaluate:
 _abort:	ldr r0, =stack_base
 	ldr r0, [r0]
 	mov dp, r0
+	bl _bel
 	bl _nak
 	b _quit
 
@@ -592,6 +593,14 @@ _ack:	push {lr}
 _nak:	push {lr}
 	push_tos
 	movs tos, #0x15
+	bl _emit
+	pop {pc}
+
+	@@ Send BEL
+	define_word "bel", visible_flag
+_bel:	push {lr}
+	push_tos
+	movs tos, #0x07
 	bl _emit
 	pop {pc}
 
