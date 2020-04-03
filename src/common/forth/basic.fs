@@ -121,11 +121,12 @@ compress-flash
     0 lit,
     postpone =
     postpone if
-    rot compile,
+    rot lit,
+    postpone ?raise
     postpone then
   else
     swap 0 = if
-      execute
+      ?raise
     else
       drop
     then
