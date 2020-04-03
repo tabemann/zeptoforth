@@ -112,6 +112,26 @@ compress-flash
   space ." ]"
 ;
 
+\ Assert that a value is true, otherwise raise a specified exception
+: assert ( f "name" -- )
+  [immediate]
+  token-word
+  >xt
+  state @ if
+    0 lit,
+    postpone =
+    postpone if
+    rot compile,
+    postpone then
+  else
+    swap 0 = if
+      execute
+    else
+      drop
+    then
+  then
+;
+
 \ Display all the words in a dictionary
 : words-dict ( dict -- )
   begin
