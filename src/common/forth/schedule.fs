@@ -56,7 +56,7 @@ end-structure
   0 over action-active !
   0 over action-systick-start !
   -1 over action-systick-delay !
-  over schedule-current @ 0 <> if
+  over schedule-current @ 0<> if
     over schedule-current @ action-next @
     over action-next !
     tuck swap schedule-current @ action-next !
@@ -130,7 +130,7 @@ end-structure
   begin
     pause
     dup schedule-current @
-    dup action-active @ 0 >
+    dup action-active @ 0>
     over action-systick-delay @ -1 =
     systick-counter @ 3 pick action-systick-start @ -
     3 pick action-systick-delay @ u>= or and

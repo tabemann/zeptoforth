@@ -74,7 +74,7 @@ compress-flash
 : +! ( x addr -- ) swap over @ + swap ! [inlined] ;
 
 \ Get the minimum of two numbers
-: min ( n1 n2 -- n3 ) over - dup 0 < and + ;
+: min ( n1 n2 -- n3 ) over - dup 0< and + ;
 
 \ Get the maximum of two numbers
 : max ( n1 n2 -- n3 ) 2dup > if drop else swap drop then ;
@@ -93,7 +93,7 @@ compress-flash
 : align ( a power -- a ) swap 1 - swap 1 - or 1 + ;
 
 \ Duplicate a cell if it is non-zero
-: ?dup ( x -- x | 0 ) dup 0 <> if dup then ;
+: ?dup ( x -- x | 0 ) dup 0<> if dup then ;
 
 \ Get the depth of the stack, not including the cell pushed onto it by this
 \ word
@@ -125,7 +125,7 @@ compress-flash
     postpone ?raise
     postpone then
   else
-    swap 0 = if
+    swap 0= if
       ?raise
     else
       drop
@@ -136,7 +136,7 @@ compress-flash
 \ Display all the words in a dictionary
 : words-dict ( dict -- )
   begin
-    dup 0 <>
+    dup 0<>
   while
     dup 8 + count space type
     4 + @
@@ -254,7 +254,7 @@ commit-flash
 : marker ( "name" -- )
   compiling-to-flash
   token
-  dup 0 = if ['] token-expected ?raise then
+  dup 0= if ['] token-expected ?raise then
   compile-to-flash
   pad-flash-erase-block
   flash-here
@@ -284,7 +284,7 @@ commit-flash
 \ Create a word referring to memory after it
 : create ( "name" -- )
   token
-  dup 0 = if ['] token-expected ?raise then
+  dup 0= if ['] token-expected ?raise then
   start-compile-no-push
   compiling-to-flash if
     current-here 28 + ( 28 bytes ) flash-block-size align
@@ -338,7 +338,7 @@ commit-flash
 \ Create a word that executes code specified by DOES>
 : <builds ( "name" -- )
   token
-  dup 0 = if ['] token-expected ?raise then
+  dup 0= if ['] token-expected ?raise then
   <builds-with-name
 ;
 
@@ -356,7 +356,7 @@ commit-flash
 \ Specify code for a word created wth <BUILDS
 : does> ( -- )
   flash-align,
-  build-target @ 0 = if ['] no-word-being-built ?raise then
+  build-target @ 0= if ['] no-word-being-built ?raise then
   r>
   0 build-target @ literal!
   0 build-target !
@@ -416,7 +416,7 @@ commit-flash
 : equal-strings? ( b-addr1 u1 b-addr2 u2 -- f )
   >r swap r@ = if
     begin
-      r@ 0 >
+      r@ 0>
     while
       dup b@ 2 pick b@ = if
 	1 + swap 1 + r> 1 - >r
@@ -886,7 +886,7 @@ commit-flash
 \ Iterate executing an xt over a byte array
 : biter ( ??? addr count xt -- ??? ) ( xt: ??? b -- ??? )
   begin
-    over 0 >
+    over 0>
   while
     dup >r swap >r swap dup >r @ swap execute
     r> 2 + r> 1 - r>
@@ -896,7 +896,7 @@ commit-flash
 \ Iterate executing an xt over a halfword array
 : hiter ( ??? addr count xt -- ??? ) ( xt: ??? h -- ??? )
   begin
-    over 0 >
+    over 0>
   while
     dup >r swap >r swap dup >r h@ swap execute
     r> 2 + r> 1 - r>
@@ -906,7 +906,7 @@ commit-flash
 \ Iterate executing an xt over a cell array
 : iter ( ??? addr count xt -- ??? ) ( xt: ??? x -- ??? )
   begin
-    over 0 >
+    over 0>
   while
     dup >r swap >r swap dup >r @ swap execute
     r> cell + r> 1 - r>
@@ -916,7 +916,7 @@ commit-flash
 \ Iterate executing an xt over a double-word array
 : 2iter ( ??? addr count xt -- ??? ) ( xt: ??? d -- ??? )
   begin
-    over 0 >
+    over 0>
   while
     dup >r swap >r swap dup >r 2@ swap execute
     r> 2 cells + r> 1 - r>
@@ -1018,7 +1018,7 @@ commit-flash
 \ Find a value in a byte array with a predicate
 : bfind-value ( ??? a-addr count xt -- ??? x|0 f ) ( xt: ??? x -- ??? f )
   begin
-    over 0 >
+    over 0>
   while
     dup >r swap >r swap dup >r b@ swap execute if
       r> b@ rdrop rdrop true exit
@@ -1032,7 +1032,7 @@ commit-flash
 \ Find a value in a halfword array with a predicate
 : hfind-value ( ??? a-addr count xt -- ??? x|0 f ) ( xt: ??? x -- ??? f )
   begin
-    over 0 >
+    over 0>
   while
     dup >r swap >r swap dup >r h@ swap execute if
       r> h@ rdrop rdrop true exit
@@ -1046,7 +1046,7 @@ commit-flash
 \ Find a value in a cell array with a predicate
 : find-value ( ??? a-addr count xt -- ??? x|0 f ) ( xt: ??? x -- ??? f )
   begin
-    over 0 >
+    over 0>
   while
     dup >r swap >r swap dup >r @ swap execute if
       r> @ rdrop rdrop true exit
@@ -1061,7 +1061,7 @@ commit-flash
 \ Find a value in a double-word array with a predicate
 : 2find-value ( ??? a-addr count xt -- ??? d|0 f ) ( xt: ??? d -- ??? f )
   begin
-    over 0 >
+    over 0>
   while
     dup >r swap >r swap dup >r 2@ rot execute if
       r> 2@ rdrop rdrop true exit

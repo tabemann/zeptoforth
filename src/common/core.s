@@ -265,6 +265,49 @@ _ge:	movs r0, tos
 1:	movs tos, #0
 	bx lr
 
+	@@ Equals zero
+	define_word "0=", visible_flag | inlined_flag
+_0eq:	subs tos, #1
+	sbc tos, tos
+	bx lr
+	end_inlined
+
+	@@ Not equal to zero
+	define_word "0<>", visible_flag | inlined_flag
+_0ne:	subs tos, #1
+	sbc tos, tos
+	mvn tos, tos
+	bx lr
+	end_inlined
+
+	@@ Less than zero
+	define_word "0<", visible_flag | inlined_flag
+_0lt:	asrs tos, #31
+	bx lr
+	end_inlined
+
+	@@ Greater than zero
+	define_word "0>", visible_flag | inlined_flag
+_0gt:	subs tos, #1
+	asrs tos, #31
+	mvn tos, tos
+	bx lr
+	end_inlined
+
+	@@ Less than or equal to zero
+	define_word "0<=", visible_flag | inlined_flag
+_0le:	subs tos, #1
+	asrs tos, #31
+	bx lr
+	end_inlined
+
+	@@ Greater than or equal to zero
+	define_word "0>=", visible_flag | inlined_flag
+_0ge:	asrs tos, #31
+	mvn tos, tos
+	bx lr
+	end_inlined
+	
 	@@ Unsigned less than
 	define_word "u<", visible_flag
 _ult:	movs r0, tos
