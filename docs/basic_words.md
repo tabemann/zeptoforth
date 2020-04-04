@@ -100,67 +100,15 @@ word
 
 Dump the contents of the data stack
 
-#### option
-( f true-xt -- ) ( true-xt: ??? -- ??? )
+#### averts
+( f "name" -- )
 
-Execute an xt based on whether a condition is true
+Assert that a value is true, otherwise raise a specified exception
 
-#### choose
-( f true-xt false-xt -- ) ( true-xt: ??? -- ??? ) ( false-xt: ??? -- ??? )
+#### triggers
+( f "name" -- )
 
-Execute one of two different xts based on whether a condition is true or false
-
-#### loop-until
-( ??? xt -- ??? ) ( xt: ??? -- ??? f )
-
-Execute an until loop with an xt
-
-#### while-loop
-( ??? while-xt body-xt -- ??? ) ( while-xt: ??? -- ??? f )
-( body-xt: ??? -- ??? )
-
-Execute a while loop with a while-xt and a body-xt
-
-#### count-loop
-( ??? limit init xt -- ??? ) ( xt: ??? i -- ??? )
-
-Execute a counted loop with an xt
-
-#### count+loop
-( ??? limit init xt -- ??? ) ( xt: ??? i -- ??? increment )
-
-Execute a counted loop with an arbitrary increment with an xt
-
-#### biter
-( ??? addr count xt -- ??? ) ( xt: ??? b -- ??? )
-
-Iterate executing an xt over a byte array
-
-#### hiter
-( ??? addr count xt -- ??? ) ( xt: ??? h -- ??? )
-
-Iterate executing an xt over a halfword array
-
-#### iter
-( ??? addr count xt -- ??? ) ( xt: ??? x -- ??? )
-
-Iterate executing an xt over a cell array
-
-#### 2iter
-( ??? addr count xt -- ??? ) ( xt: ??? d -- ??? )
-
-Iterate executing an xt over a double-word array
-
-#### iter-get
-( ??? get-xt count iter-xt -- ??? ) ( get-xt: ??? i -- ??? x )
-( iter-xt: ??? x -- ??? )
-
-Iterate executing at xt over values from a getter
-
-#### 2iter-get
-( ??? get-xt count iter-xt -- ??? ) ( get-xt: ??? i -- ??? d ) ( iter-xt: ??? d -- ??? )
-
-Iterate executing at xt over double-word values from a getter
+Assert that a value is false, otherwise raise a specified exception
 
 #### words-dict
 ( dict -- )
@@ -412,6 +360,68 @@ Leave a do loop
 ( R: leave current end -- )
 
 Unloop from a do loop (to exit, e.g.)
+
+#### option
+( f true-xt -- ) ( true-xt: ??? -- ??? )
+
+Execute an xt based on whether a condition is true
+
+#### choose
+( f true-xt false-xt -- ) ( true-xt: ??? -- ??? ) ( false-xt: ??? -- ??? )
+
+Execute one of two different xts based on whether a condition is true or false
+
+#### loop-until
+( ??? xt -- ??? ) ( xt: ??? -- ??? f )
+
+Execute an until loop with an xt
+
+#### while-loop
+( ??? while-xt body-xt -- ??? ) ( while-xt: ??? -- ??? f )
+( body-xt: ??? -- ??? )
+
+Execute a while loop with a while-xt and a body-xt
+
+#### count-loop
+( ??? limit init xt -- ??? ) ( xt: ??? i -- ??? )
+
+Execute a counted loop with an xt
+
+#### count+loop
+( ??? limit init xt -- ??? ) ( xt: ??? i -- ??? increment )
+
+Execute a counted loop with an arbitrary increment with an xt
+
+#### biter
+( ??? addr count xt -- ??? ) ( xt: ??? b -- ??? )
+
+Iterate executing an xt over a byte array
+
+#### hiter
+( ??? addr count xt -- ??? ) ( xt: ??? h -- ??? )
+
+Iterate executing an xt over a halfword array
+
+#### iter
+( ??? addr count xt -- ??? ) ( xt: ??? x -- ??? )
+
+Iterate executing an xt over a cell array
+
+#### 2iter
+( ??? addr count xt -- ??? ) ( xt: ??? d -- ??? )
+
+Iterate executing an xt over a double-word array
+
+#### iter-get
+( ??? get-xt count iter-xt -- ??? ) ( get-xt: ??? i -- ??? x )
+( iter-xt: ??? x -- ??? )
+
+Iterate executing at xt over values from a getter
+
+#### 2iter-get
+( ??? get-xt count iter-xt -- ??? ) ( get-xt: ??? i -- ??? d ) ( iter-xt: ??? d -- ??? )
+
+Iterate executing at xt over double-word values from a getter
 
 #### bfind-index
 ( ??? b-addr count xt -- ??? i|-1 ) ( xt: ??? x -- ??? f )
