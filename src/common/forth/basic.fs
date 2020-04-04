@@ -113,19 +113,39 @@ compress-flash
 ;
 
 \ Assert that a value is true, otherwise raise a specified exception
-: assert ( f "name" -- )
+: averts ( f "name" -- )
   [immediate]
   token-word
   >xt
   state @ if
-    0 lit,
-    postpone =
+    postpone 0=
     postpone if
     rot lit,
     postpone ?raise
     postpone then
   else
     swap 0= if
+      ?raise
+    else
+      drop
+    then
+  then
+;
+
+\ Assert that a value is false, otherwise raise a specified exception
+: triggers ( f "name" -- )
+  [immediate]
+  token-word
+  >xt
+  state @ if
+    0 lit,
+    postpone 0<>
+    postpone if
+    rot lit,
+    postpone ?raise
+    postpone then
+  else
+    swap 0<> if
       ?raise
     else
       drop
