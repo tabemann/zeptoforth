@@ -138,7 +138,6 @@ compress-flash
   token-word
   >xt
   state @ if
-    0 lit,
     postpone 0<>
     postpone if
     rot lit,
@@ -149,6 +148,28 @@ compress-flash
       ?raise
     else
       drop
+    then
+  then
+;
+
+\ Check whether an exception, typically returned by `try`, matches a specified
+\ exception and if it does, replace it with zero, marking no exception
+\ otherwise passing the specified argument through.
+: suppress ( exc|0 "name" -- exc|0 )
+  [immediate]
+  token-word
+  >xt
+  state @ if
+    postpone dup
+    lit,
+    postpone =
+    postpone if
+    postpone drop
+    0 lit,
+    postpone then
+  else
+    swap dup rot = if
+      drop 0
     then
   then
 ;

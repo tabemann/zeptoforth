@@ -110,6 +110,13 @@ Assert that a value is true, otherwise raise a specified exception
 
 Assert that a value is false, otherwise raise a specified exception
 
+#### suppress
+( exc|0 "name" -- exc|0 )
+
+Check whether an exception, typically returned by `try`, matches a specified
+exception and if it does, replace it with zero, marking no exception,
+otherwise passing the specified argument through.
+
 #### words-dict
 ( dict -- )
 
