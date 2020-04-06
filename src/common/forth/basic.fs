@@ -548,6 +548,26 @@ commit-flash
   then
 ;
 
+\ Output a hexadecimal nibble
+: h.1 ( b -- )
+  $F and dup 10 < if [char] 0 + else 10 - [char] A + then emit
+;
+
+\ Output a hexadecimal 8 bit value, padded with zeros
+: h.2 ( b -- )
+  $FF and dup 4 rshift h.1 h.1
+;
+
+\ Output a hexadecimal 16 bit value, padded with zeros
+: h.4 ( h -- )
+  $FFFF and dup 8 rshift h.2 h.2
+;
+
+\ Output a hexadecimal 32 bit value, padded with zeros
+: h.8 ( x -- )
+  dup 16 rshift h.4 h.4
+;
+
 \ Core of CORNERSTONE's DOES>
 : cornerstone-does> ( -- )
   does>
