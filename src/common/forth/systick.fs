@@ -67,6 +67,18 @@ variable systick-counter
   drop drop
 ;
 
+\ Turn on systick
+: enable-systick ( -- )
+  ['] systick-handler systick-handler-hook !
+  SYST_CSR_TICKINT SYST_CSR_ENABLE or SYST_CSR bis!
+;  
+
+\ Turn off systick
+: disable-systick ( -- )
+  SYST_CSR_TICKINT SYST_CSR_ENABLE or SYST_CSR bic!
+  0 systick-handler-hook !
+;
+
 \ Init
 : init ( -- )
   init
@@ -74,8 +86,7 @@ variable systick-counter
   10 / systick-divisor / time-multiplier * time-divisor / SYST_RVR !
   0 SYST_CVR !
   0 systick-counter !
-  ['] systick-handler systick-handler-hook !
-  SYST_CSR_TICKINT SYST_CSR_ENABLE or SYST_CSR bis!
+  enable-systick
 ;
 
 \ Reboot

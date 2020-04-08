@@ -24,22 +24,22 @@ bvariable rx-read-index
 bvariable rx-write-index
 
 \ Constant for number of bytes to buffer
-16 constant rx-buffer-size
+128 constant rx-buffer-size
 
 \ Rx buffer
 rx-buffer-size ram-buffer: rx-buffer
 
-\ \ RAM variable for tx buffer read-index
-\ bvariable tx-read-index
+\ RAM variable for tx buffer read-index
+bvariable tx-read-index
 
-\ \ RAM variable for tx buffer write-index
-\ bvariable tx-write-index
+\ RAM variable for tx buffer write-index
+bvariable tx-write-index
 
-\ \ Constant for number of bytes to buffer
-\ 16 constant tx-buffer-size
+\ Constant for number of bytes to buffer
+128 constant tx-buffer-size
 
-\ \ Tx buffer
-\ tx-buffer-size ram-buffer: tx-buffer
+\ Tx buffer
+tx-buffer-size ram-buffer: tx-buffer
 
 \ USART2
 $40004400 constant USART2_Base
@@ -68,9 +68,8 @@ $08 constant ORE
 
 \ Get whether the rx buffer is full
 : rx-full? ( -- f )
-  rx-read-index b@ rx-write-index b@
-  2dup swap 1 - =
-  rot rot swap rx-buffer-size 1 - = swap 0 = and or
+  rx-write-index b@ rx-read-index b@
+  rx-buffer-size 1 - + rx-buffer-size umod =
 ;
 
 \ Get whether the rx buffer is empty
@@ -98,57 +97,68 @@ $08 constant ORE
   then
 ;
 
-\ \ Get whether the tx buffer is full
-\ : tx-full? ( -- f )
-\   tx-read-index b@ tx-write-index b@
-\   2dup swap 1 - =
-\   rot rot swap tx-buffer-size 1 - = swap 0 = and or
-\ ;
+\ Get whether the tx buffer is full
+: tx-full? ( -- f )
+  tx-write-index b@ tx-read-index b@
+  tx-buffer-size 1 - + tx-buffer-size umod =
+;
 
-\ \ Get whether the tx buffer is empty
-\ : tx-empty? ( -- f )
-\   tx-read-index b@ tx-write-index b@ =
-\ ;
+\ Get whether the tx buffer is empty
+: tx-empty? ( -- f )
+  tx-read-index b@ tx-write-index b@ =
+;
 
-\ \ Write a byte to the tx buffer
-\ : write-tx ( c -- )
-\   tx-full? not if
-\     tx-write-index b@ tx-buffer + b!
-\     tx-write-index b@ 1 + tx-buffer-size mod tx-write-index b!
-\   else
-\     drop
-\   then
-\ ;
+\ Write a byte to the tx buffer
+: write-tx ( c -- )
+  tx-full? not if
+    tx-write-index b@ tx-buffer + b!
+    tx-write-index b@ 1 + tx-buffer-size mod tx-write-index b!
+  else
+    drop
+  then
+;
 
-\ \ Read a byte from the tx buffer
-\ : read-tx ( -- c )
-\   tx-empty? not if
-\     tx-read-index b@ tx-buffer + b@
-\     tx-read-index b@ 1 + tx-buffer-size mod tx-read-index b!
-\   else
-\     0
-\   then
-\ ;
+\ Read a byte from the tx buffer
+: read-tx ( -- c )
+  tx-empty? not if
+    tx-read-index b@ tx-buffer + b@
+    tx-read-index b@ 1 + tx-buffer-size mod tx-read-index b!
+  else
+    0
+  then
+;
 
 \ Handle IO
 : handle-io ( -- )
   disable-int
-  rx-full? not if
-    USART2_ISR @ RXNE and if
-      USART2_RDR b@ write-rx
+  begin
+    rx-full? not if
+      USART2_ISR @ RXNE and if
+	USART2_RDR b@ write-rx false
+      else
+	true
+      then
+    else
+      true
     then
-  then
+  until
   rx-full? if
     USART2_CR1_RXNEIE_Clear
   then
-  \ tx-empty? not if
-  \   USART2_ISR @ TXE and if
-  \     read-tx USART2_TDR b!
-  \   then
-  \ then
-  \ tx-empty? if
-  \   USART2_CR1_TXEIE_Clear
-  \ then
+  begin
+    tx-empty? not if
+      USART2_ISR @ TXE and if
+	read-tx USART2_TDR b! false
+      else
+	true
+      then
+    else
+      true
+    then
+  until
+  tx-empty? if
+    USART2_CR1_TXEIE_Clear
+  then
   USART2_ISR @ ORE and if
     USART2_ICR_ORECF
   then
@@ -167,21 +177,19 @@ $08 constant ORE
 \ Interrupt-driven IO hooks
 
 : do-emit ( c -- )
-  \ [: tx-full? not ;] wait
-  \ write-tx
-  \ USART2_CR1_TXEIE
-  serial-emit
+  [: tx-full? not ;] wait
+  write-tx
+  USART2_CR1_TXEIE
 ; 
 
 : do-key ( -- c )
+  USART2_CR1_RXNEIE
   [: rx-empty? not ;] wait
   read-rx
-  USART2_CR1_RXNEIE
 ;
 
 : do-emit? ( -- flag )
-  \ tx-full? not
-  serial-emit?
+  tx-full? not
 ;
 
 : do-key? ( -- flag )
@@ -193,8 +201,8 @@ $08 constant ORE
   init
   0 rx-read-index b!
   0 rx-write-index b!
-  \ 0 tx-read-index b!
-  \ 0 tx-write-index b!
+  0 tx-read-index b!
+  0 tx-write-index b!
   ['] null-handler null-handler-hook !
   ['] do-key key-hook !
   ['] do-emit emit-hook !
