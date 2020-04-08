@@ -82,4 +82,4 @@ $18 GPIOD or     constant GPIOD_BSRR
 ;
 
 \ Reboot
-\ reboot
+reboot
