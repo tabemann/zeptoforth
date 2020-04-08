@@ -54,8 +54,8 @@ variable vary-task
 : init ( -- )
   init
   100 vary-delay !
-  250 vary-min !
-  5000 vary-max !
+  50 vary-min !
+  500 vary-max !
   25 vary-step !
   ['] vary 256 256 256 spawn vary-task !
   vary-task @ enable-task
