@@ -73,11 +73,11 @@ variable green-blinker-delay
   false red-led-state !
   false green-led-state !
   create-schedule my-schedule !
-  6666 red-blinker-delay !
+  3333 red-blinker-delay !
   ['] red-blinker my-schedule @ add-action red-blinker-action !
   red-blinker-delay @ red-blinker-action @ start-action-delay
   red-blinker-action @ enable-action
-  10000 green-blinker-delay !
+  5000 green-blinker-delay !
   ['] green-blinker my-schedule @ add-action green-blinker-action !
   green-blinker-delay @ green-blinker-action @ start-action-delay
   green-blinker-action @ enable-action

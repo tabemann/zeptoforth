@@ -23,6 +23,9 @@ variable current-action
 begin-structure schedule
   \ Current action
   field: schedule-current
+
+  \ Last action executed
+  field: schedule-last
 end-structure
 
 \ The action structure
@@ -47,6 +50,7 @@ end-structure
 : create-schedule ( -- schedule )
   here schedule allot
   0 over schedule-current !
+  0 over schedule-last !
 ;
 
 \ Add an action to a scheduler
@@ -56,6 +60,9 @@ end-structure
   0 over action-active !
   0 over action-systick-start !
   -1 over action-systick-delay !
+  over schedule-last @ 0= if
+    2dup swap schedule-last !
+  then
   over schedule-current @ 0<> if
     over schedule-current @ action-next @
     over action-next !
@@ -137,6 +144,11 @@ end-structure
     if
       dup current-action !
       dup action-xt @ execute
+      2dup swap schedule-last !
+    else
+      2dup swap schedule-last @ = if
+	wait-hook @ ?execute
+      then
     then
     action-next @ over schedule-current !
   again
