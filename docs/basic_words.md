@@ -162,19 +162,6 @@ Clear bits on a word
 
 Safely type a string
 
-#### pad-flash-erase-block
-Pad flash to a 2048 byte boundary
-
-#### restore-flash
-( flash-here -- )
-
-Restore flash to a preexisting state
-
-#### marker
-( "name" -- )
-
-Create a MARKER to erase flash/return the flash dictionary to its prior state
-
 #### create
 ( "name" -- )
 
@@ -272,11 +259,6 @@ Start an OFSTRCASE clause
 ( x -- )
 
 End a CASE statement comparing against a string
-
-#### cornerstone
-( "name" -- )
-
-Adapted from Terry Porter's code; not sure what license it was under
 
 #### next-ram-space
 ( -- addr )
