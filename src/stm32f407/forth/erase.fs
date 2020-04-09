@@ -72,6 +72,14 @@ compress-flash
   drop
 ;
 
+\ Restore flash to a preexisting state
+: restore-flash ( flash-here -- )
+  erase-after rdrop
+;
+
+\ Commit flash
+commit-flash
+
 \ Create a MARKER to erase flash/return the flash dictionary to its prior state
 : marker ( "name" -- )
   compiling-to-flash
