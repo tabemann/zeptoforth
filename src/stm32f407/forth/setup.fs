@@ -18,10 +18,12 @@
 \ on an STM32L476 device.
 
 #include src/common/forth/basic.fs
+#include src/stm32f407/forth/erase.fs
 #include src/common/forth/systick.fs
 #include src/stm32f407/forth/int_io.fs
 #include src/common/forth/task.fs
 #include src/common/forth/schedule.fs
+#include src/stm32f407/forth/led.fs
 
 \ Set a cornerstone to enable deleting everything compiled after this code
 cornerstone restore-state

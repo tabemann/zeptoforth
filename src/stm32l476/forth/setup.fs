@@ -18,6 +18,7 @@
 \ on an STM32L476 device.
 
 #include src/common/forth/basic.fs
+#include src/stm32l476/forth/erase.fs
 #include src/common/forth/systick.fs
 #include src/stm32l476/forth/int_io.fs
 #include src/common/forth/task.fs
