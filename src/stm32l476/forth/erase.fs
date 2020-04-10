@@ -24,7 +24,6 @@ compress-flash
   begin flash-here $7FF and while
     0 bflash,
   repeat
-  drop
 ;
 
 \ Restore flash to a preexisting state
