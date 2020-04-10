@@ -15,7 +15,7 @@
 
 	.equ thumb2, 1
 	.equ ram_start, 0x20000000
-	.equ ram_end, 0x20010000
+	.equ ram_end, 0x20040000
 	.equ rstack_size, 0x0200
 	.equ rstack_top, ram_end
 	.equ stack_size, 0x0200
@@ -28,6 +28,6 @@
 	.equ flash_buffer_addr, flash_block_size + 4
 	.equ flash_min_address, 0x00006000
 	.equ flash_dict_start, 0x00006000
-	.equ flash_dict_end, 0x00080000
+	.equ flash_dict_end, 0x00100000
 	.equ input_buffer_size, 255
 	.equ pad_offset, 256
