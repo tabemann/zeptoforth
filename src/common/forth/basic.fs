@@ -173,23 +173,61 @@ compress-flash
     then
   then
 ;
+\ Actually print a string in one out of four columns, taking up more than one
+\ column if necessary
+: words-column ( b-addr bytes column1 -- column2 )
+  over 0> if
+    over 20 / + 1 +
+    dup 4 >= if
+      drop 0
+    then
+    >r
+    dup 0> if
+      tuck type
+      r@ 0<> if
+	20 mod 20 swap - begin dup 0> while 1 - space repeat drop
+      else
+	drop
+      then
+      r@ 0= if cr then
+    else
+      2drop
+    then
+    r>
+  else
+    rot rot 2drop
+  then
+;
 
-\ Display all the words in a dictionary
-: words-dict ( dict -- )
+\ Print a string in one out of four columns, taking up more than one column
+\ if necessary
+: words-column ( b-addr bytes column1 -- column2 )
+  4 over - 20 * 2 pick < if
+    cr drop 0 words-column
+  else
+    words-column
+  then
+;
+
+\ Display all the words in a dictionary starting at a given column, and
+\ returning the next column
+: words-dict ( dict column1 -- column2 )
   begin
-    dup 0<>
+    over 0<>
   while
-    dup 8 + count space type
-    4 + @
+    over 8 + count rot words-column
+    swap 4 + @ swap
   repeat
-  drop
+  nip
 ;
 
 \ Commit code to flash
 commit-flash
 
-\ Display all the words
-: words ( -- ) ram-latest words-dict flash-latest words-dict ;
+\ Display all the words are four columns
+: words ( -- )
+  cr ram-latest 0 words-dict flash-latest swap words-dict drop
+;
 
 \ Set bits on a byte
 : bbis! ( bits addr -- ) dup b@ rot or swap b! ;
