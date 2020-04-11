@@ -197,5 +197,19 @@ UART_Base $51C + constant UART_TXD
   UART_INTENSET_RXDRDY
 ;
 
+
+\ Disable interrupt-driven IO
+: disable-int-io ( -- )
+  disable-int
+  ['] serial-key key-hook !
+  ['] serial-emit emit-hook !
+  ['] serial-key? key?-hook !
+  ['] serial-emit? emit?-hook !
+  0 null-handler-hook !
+  UART_INTENCLR_RXDRDY
+  UART_INTENCLR_TXDRDY
+  enable-int
+;
+
 \ Reboot
 reboot

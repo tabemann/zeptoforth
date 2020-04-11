@@ -50,6 +50,7 @@ USART2_Base $0C + constant USART2_CR1
 $40023800 constant RCC_Base
 RCC_Base $60 + constant RCC_APB1LPENR ( RCC_APB1LPENR )
 : RCC_APB1LPENR_USART2LPEN   %1 17 lshift RCC_APB1LPENR bis! ;  \ RCC_APB1LPENR_USART2LPEN    USART2 clocks enable during Sleep modes
+: RCC_APB1LPENR_USART2LPEN_Clear   %1 17 lshift RCC_APB1LPENR bic! ;  \ RCC_APB1LPENR_USART2LPEN    USART2 clocks enable during Sleep modes
 : USART2_CR1_TXEIE   %1 7 lshift USART2_CR1 bis! ;  \ USART2_CR1_TXEIE    interrupt enable
 : USART2_CR1_RXNEIE   %1 5 lshift USART2_CR1 bis! ;  \ USART2_CR1_RXNEIE    RXNE interrupt enable
 : USART2_CR1_TXEIE_Clear   %1 7 lshift USART2_CR1 bic! ;  \ USART2_CR1_TXEIE    interrupt disable
@@ -57,6 +58,8 @@ RCC_Base $60 + constant RCC_APB1LPENR ( RCC_APB1LPENR )
 $E000E000 constant NVIC_Base ( Nested Vectored Interrupt  Controller )
 NVIC_Base $104 + constant NVIC_ISER1 ( Interrupt Set-Enable Register )
 : NVIC_ISER1_SETENA   ( %XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -- ) 0 lshift NVIC_ISER1 bis! ;  \ NVIC_ISER1_SETENA    SETENA
+NVIC_Base $184 + constant NVIC_ICER1 ( Interrupt Clear-Enable Register )
+: NVIC_ICER1_CLRENA   ( %XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -- ) 0 lshift NVIC_ICER1 bis! ;  \ NVIC_ICER1_CLRENA    CLRENA
 NVIC_Base $284 + constant NVIC_ICPR1 ( Interrupt Clear-Pending  Register )
 NVIC_Base $400 + constant NVIC_IPR0 ( Interrupt Priority Register )
 : NVIC_IPR@ dup 4 / NVIC_IPR0 + @ swap 4 mod 8 * rshift $FF and ;
@@ -214,6 +217,21 @@ $80 constant TXE
   1 38 32 - lshift NVIC_ISER1_SETENA
   0 38 NVIC_IPR!
   USART2_CR1_RXNEIE
+;
+
+\ Disable interrupt-driven IO
+: disable-int-io ( -- )
+  disable-int
+  ['] serial-key key-hook !
+  ['] serial-emit emit-hook !
+  ['] serial-key? key?-hook !
+  ['] serial-emit? emit?-hook !
+  0 null-handler-hook !
+  USART2_CR1_RXNEIE_Clear
+  USART2_CR1_TXEIE_Clear
+  1 38 32 - lshift NVIC_ICER1_CLRENA
+  RCC_APB1LPENR_USART2LPEN_Clear
+  enable-int
 ;
 
 \ Reboot

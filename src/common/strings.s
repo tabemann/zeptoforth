@@ -216,6 +216,34 @@ _type_unsigned:
 	bl _allot
 	pop {pc}
 
+	@@ Type an unsigned hexadecimal integer safely without a preceding space
+	define_word "debugu.", visible_flag
+_debug_unsigned:
+	push {lr}
+	ldr r0, =base
+	ldr r2, [r0]
+	movs r1, #16
+	str r1, [r0]
+	ldr r0, =here
+	ldr r0, [r0]
+	movs r1, tos
+	movs tos, r0
+	push_tos
+	movs tos, r1
+	bl _format_unsigned
+	movs r0, tos
+	push_tos
+	push {r0, r2}
+	bl _allot
+	bl _serial_type
+	pop {r0, r2}
+	push_tos
+	rsbs tos, r0, #0
+	bl _allot
+	ldr r0, =base
+	str r2, [r0]
+	pop {pc}
+
 	@@ Type an integer with a preceding space
 	define_word ".", visible_flag
 _type_space_integer:
