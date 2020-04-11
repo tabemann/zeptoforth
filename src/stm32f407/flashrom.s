@@ -376,7 +376,6 @@ _choose_sector:
 	push_tos
 	ldr tos, =0x000E0000
 	bl _erase_address
-	bl _reboot
 	pop {pc}
 
 	@@ Erase after a given address (including the sector the address is in)

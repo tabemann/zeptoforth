@@ -1554,8 +1554,9 @@ _store_sp:
 	@@ dictionary
 	define_word "reboot", visible_flag
 _reboot:
-	cpsie i
-	bl handle_reset
+	ldr r0, =0xE000ED0C @ AIRCR
+	ldr r1, =0x05FA0004
+	str r1, [r0]
 	
 	@@ Initialize the variables
 	define_word "init-variables", visible_flag
