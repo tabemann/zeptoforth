@@ -173,6 +173,24 @@ compress-flash
     then
   then
 ;
+
+\ Get whether a word is hidden
+: hidden? ( word -- f )
+  dup @ visible-flag and if
+    8 + count dup 2 > if
+      over b@ [char] * = if
+	+ 1 - b@ [char] * =
+      else
+	2drop false
+      then
+    else
+      2drop true
+    then
+  else
+    drop false
+  then
+;
+
 \ Actually print a string in one out of four columns, taking up more than one
 \ column if necessary
 : words-column ( b-addr bytes column1 -- column2 )
@@ -215,7 +233,9 @@ compress-flash
   begin
     over 0<>
   while
-    over 8 + count rot words-column
+    over hidden? not if
+      over 8 + count rot words-column
+    then
     swap 4 + @ swap
   repeat
   nip
