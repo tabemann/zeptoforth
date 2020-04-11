@@ -35,7 +35,7 @@ or, for the STM32F407:
 
     #include src/stm32f407/forth/setup.fs
 
-This will load the auxiliary Forth routines that would be useful to have onto the MCU. This code is what is included in the `zeptoforth_with_setup.bin` images along with the kernel itself. The last thing that is included is a "cornerstone" named `restore-state` which, when executed, as follows:
+This will load the auxiliary Forth routines that would be useful to have onto the MCU. This code is that is included in the `zeptoforth_full-<version>.bin` images along with the kernel itself. The last thing that is included is a "cornerstone" named `restore-state` which, when executed, as follows:
 
     restore-state
 
