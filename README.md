@@ -41,7 +41,7 @@ This will load the auxiliary Forth routines that would be useful to have onto th
 
 erases everyting compiled to Flash afterwards and then does a warm restart.
 
-To do a warm restart by itself (this does reinitializes zeptoforth, but not the hardware), execute:
+To do a warm restart by itself (which now does a full reset of the hardware, unlike previously where it only reset the zeptoforth software), execute the following:
 
     reboot
 
