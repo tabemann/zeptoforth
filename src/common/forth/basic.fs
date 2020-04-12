@@ -457,7 +457,7 @@ commit-flash
   [immediate]
   [compile-only]
   rot ?dup if
-    here swap branch-back!
+    current-here swap branch-back!
   then
   reserve-branch
   rot rot postpone then
@@ -508,7 +508,7 @@ commit-flash
   [compile-only]
   postpone 2drop
   ?dup if
-    here swap branch-back!
+    current-here swap branch-back!
   then
 ;
 
@@ -836,6 +836,90 @@ commit-flash
   postpone rdrop
   postpone rdrop
 ;
+
+\ Parse until a predicate is met
+: skip-until ( xt -- )
+  >r
+  begin
+    source >parse @ > if >parse @ + b@ r@ execute 1 >parse +! else drop true then
+  until
+  rdrop
+;
+
+\ Begin lambda
+: [: ( -- )
+  [immediate]
+  [compile-only]
+  reserve-branch
+  $B500 hcurrent,
+;
+
+\ End lambda
+: ;] ( -- )
+  [immediate]
+  [compile-only]
+  $BD00 hcurrent,
+  current-here over branch-back!
+  4 + lit,
+;
+
+
+\ s" constant
+2 constant s"-length
+create s"-data char s bcurrent, char " bcurrent,
+
+\ ." constant
+2 constant ."-length
+create ."-data char c bcurrent, char " bcurrent,
+
+\ c" constant
+2 constant c"-length
+create c"-data char c bcurrent, char " bcurrent,
+
+\ Commit to flash
+commit-flash
+
+\ The constants themselves
+s"-data s"-length 2constant s"-constant
+."-data ."-length 2constant ."-constant
+c"-data c"-length 2constant c"-constant
+
+\ Commit to flash
+commit-flash
+
+\ Implement the [else] in [if]/[else]/[then] for conditional
+\ execution/compilation
+: [else] ( -- )
+  [immediate]
+  1 begin
+    begin token dup while
+      case
+	s" [if]" ofstrcase 1 + endof
+        s" [else]" ofstrcase 1 - dup if 1 + then endof
+        s" [then]" ofstrcase 1 - endof
+	s" \" ofstrcase ['] newline? skip-until	endof
+	s" (" ofstrcase [: [char] ) = ;] skip-until endof
+	s"-constant ofstrcase [: [char] " = ;] skip-until endof
+	c"-constant ofstrcase [: [char] " = ;] skip-until endof
+	."-constant ofstrcase [: [char] " = ;] skip-until endof
+	s" .(" ofstrcase [: [char] ) = ;] skip-until endof
+	s" char" ofstrcase state @ not if token 2drop then endof
+	s" [char]" ofstrcase token 2drop endof
+	s" '" ofstrcase state @ not if token 2drop then endof
+	s" [']" ofstrcase token 2drop endof
+	s" postpone" ofstrcase token 2drop endof
+      endcasestr
+      dup 0= if drop exit then
+    repeat 2drop
+    prompt-hook @ ?execute refill
+  again
+;
+
+\ Start conditional execution/compilation
+: [if] ( flag -- ) 0= if postpone [else] then [immediate] ;
+
+\ Finish conditional execution/compilation
+: [then] ( -- ) [immediate] ;
 
 \ Wait hook variable
 variable wait-hook
