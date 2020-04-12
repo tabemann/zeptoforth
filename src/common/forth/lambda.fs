@@ -19,23 +19,6 @@ compile-to-flash
 \ Begin compressing compiled code in flash
 compress-flash
 
-\ Begin lambda
-: [: ( -- )
-  [immediate]
-  [compile-only]
-  reserve-branch
-  $B500 hcurrent,
-;
-
-\ End lambda
-: ;] ( -- )
-  [immediate]
-  [compile-only]
-  $BD00 hcurrent,
-  current-here over branch-back!
-  4 + lit,
-;
-
 \ Execute an xt based on whether a condition is true
 : option ( f true-xt -- ) ( true-xt: ??? -- ??? )
   swap if execute else drop then
