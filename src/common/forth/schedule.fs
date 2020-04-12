@@ -75,12 +75,12 @@ end-structure
 
 \ Enable an action
 : enable-action ( action -- )
-  dup action-active @ 1 + swap action-active !
+  dup action-active @ 1+ swap action-active !
 ;
 
 \ Disable an action
 : disable-action ( action -- )
-  dup action-active @ 1 - swap action-active !
+  dup action-active @ 1- swap action-active !
 ;
 
 \ Force-enable an action

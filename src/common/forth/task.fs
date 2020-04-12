@@ -135,10 +135,10 @@ end-structure
 ;
 
 \ Enable a task
-: enable-task ( task -- ) dup task-active @ 1 + swap task-active ! ;
+: enable-task ( task -- ) dup task-active @ 1+ swap task-active ! ;
 
 \ Disable a task
-: disable-task ( task -- ) dup task-active @ 1 - swap task-active ! ;
+: disable-task ( task -- ) dup task-active @ 1- swap task-active ! ;
 
 \ Force-enable a task
 : force-enable-task ( task -- )
@@ -223,7 +223,7 @@ end-structure
   0 over task-rstack-offset h!
   0 over task-stack-offset h!
   0 over task-dict-offset !
-  ['] task-entry 1 + over push-task-rstack
+  ['] task-entry 1+ over push-task-rstack
   tuck push-task-stack
 ;
 
@@ -271,7 +271,7 @@ end-structure
 
 \ Handle PAUSE
 : do-pause ( -- )
-  pause-count @ 1 + pause-count !
+  pause-count @ 1+ pause-count !
   task-io
   current-task @
   rp@ over task-rstack-current!

@@ -21,7 +21,7 @@ compress-flash
 
 \ Test for next flash sector
 : check-flash-sector ( addr start end -- addr )
-  dup >r flash-here >= swap flash-here <= and if drop r> 1 + else rdrop then
+  dup >r flash-here >= swap flash-here <= and if drop r> 1+ else rdrop then
 ;
 
 \ Get the start of the next flash sector
@@ -43,7 +43,7 @@ compress-flash
 
 \ Test for next flash sector
 : check-flash-sector-for-addr ( flash-addr addr start end -- addr )
-  dup >r 3 pick >= swap 3 roll <= and if drop r> 1 + else rdrop then
+  dup >r 3 pick >= swap 3 roll <= and if drop r> 1+ else rdrop then
 ;
 
 \ Align an address for a following flash sector

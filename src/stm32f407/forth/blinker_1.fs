@@ -73,12 +73,12 @@ variable blink-delay
 \ Adjust blink timing
 : reset-blinking ( -- )
   0 red-blink-on-action @ start-action-delay
-  blink-delay @ 4 / orange-blink-on-action @ start-action-delay
-  blink-delay @ 2 / green-blink-on-action @ start-action-delay
-  blink-delay @ 4 / 3 * blue-blink-on-action @ start-action-delay
-  blink-delay @ 4 / red-blink-off-action @ start-action-delay
-  blink-delay @ 2 / orange-blink-off-action @ start-action-delay
-  blink-delay @ 4 / 3 * green-blink-off-action @ start-action-delay
+  blink-delay @ 4/ orange-blink-on-action @ start-action-delay
+  blink-delay @ 2/ green-blink-on-action @ start-action-delay
+  blink-delay @ 4/ 3 * blue-blink-on-action @ start-action-delay
+  blink-delay @ 4/ red-blink-off-action @ start-action-delay
+  blink-delay @ 2/ orange-blink-off-action @ start-action-delay
+  blink-delay @ 4/ 3 * green-blink-off-action @ start-action-delay
   blink-delay @ blue-blink-off-action @ start-action-delay
 ;
 

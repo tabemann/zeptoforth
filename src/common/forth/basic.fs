@@ -41,7 +41,10 @@ compress-flash
 4 constant cell
 
 \ Multiple cells size
-: cells ( n -- n ) 4 * [inlined] ;
+: cells ( n -- n ) 4* [inlined] ;
+
+\ Add a cell to a value
+: cell+ ( n -- n ) 4+ [inlined] ;
 
 \ TOS register
 6 constant tos
@@ -90,14 +93,14 @@ compress-flash
 ;
 
 \ Align an address to a power of two
-: align ( a power -- a ) swap 1 - swap 1 - or 1 + ;
+: align ( a power -- a ) swap 1- swap 1- or 1+ ;
 
 \ Duplicate a cell if it is non-zero
 : ?dup ( x -- x | 0 ) dup 0<> if dup then ;
 
 \ Get the depth of the stack, not including the cell pushed onto it by this
 \ word
-: depth ( -- u ) stack-base @ sp@ - cell / 1 - ;
+: depth ( -- u ) stack-base @ sp@ - cell / 1- ;
 
 \ Dump the contents of the data stack
 : .s ( -- )
@@ -106,7 +109,7 @@ compress-flash
     dup stack-base @ <
   while
     dup @ .
-    4 +
+    4+
   repeat
   drop
   space ." ]"
@@ -179,7 +182,7 @@ compress-flash
   dup @ visible-flag and if
     8 + count dup 2 > if
       over b@ [char] * = if
-	+ 1 - b@ [char] * =
+	+ 1- b@ [char] * =
       else
 	2drop false
       then
@@ -195,7 +198,7 @@ compress-flash
 \ column if necessary
 : words-column ( b-addr bytes column1 -- column2 )
   over 0> if
-    over 20 / + 1 +
+    over 20 / + 1+
     dup 4 >= if
       drop 0
     then
@@ -203,7 +206,7 @@ compress-flash
     dup 0> if
       tuck type
       r@ 0<> if
-	20 mod 20 swap - begin dup 0> while 1 - space repeat drop
+	20 mod 20 swap - begin dup 0> while 1- space repeat drop
       else
 	drop
       then
@@ -236,7 +239,7 @@ compress-flash
     over hidden? not if
       over 8 + count rot words-column
     then
-    swap 4 + @ swap
+    swap 4+ @ swap
   repeat
   nip
 ;
@@ -399,12 +402,12 @@ commit-flash
 
 \ Create a byte-sized field
 : bfield: ( offset "name" -- offset )
-  <builds dup current, flash-align, 1 + does> @ +
+  <builds dup current, flash-align, 1+ does> @ +
 ;
 
 \ Create a halfword-sized field
 : hfield: ( offset "name" -- offset )
-  <builds 2 align dup current, flash-align, 2 + does> @ +
+  <builds 2 align dup current, flash-align, 2+ does> @ +
 ;
 
 \ Create a cell-sized field
@@ -424,7 +427,7 @@ commit-flash
       r@ 0>
     while
       dup b@ 2 pick b@ = if
-	1 + swap 1 + r> 1 - >r
+	1+ swap 1+ r> 1- >r
       else
 	2drop rdrop false exit
       then
@@ -567,7 +570,7 @@ commit-flash
   not if
     compile-to-ram
   then
-  1 +
+  1+
   set-next-ram-space
 ;
 
@@ -582,7 +585,7 @@ commit-flash
   not if
     compile-to-ram
   then
-  2 +
+  2+
   set-next-ram-space
 ;
 
@@ -597,7 +600,7 @@ commit-flash
   not if
     compile-to-ram
   then
-  4 +
+  4+
   set-next-ram-space
 ;
 
@@ -753,7 +756,7 @@ commit-flash
   postpone rdrop
   postpone rdrop
   postpone rdrop
-  current-here 1 + 6 rot literal!
+  current-here 1+ 6 rot literal!
 ;
 
 \ End a do +loop
@@ -786,7 +789,7 @@ commit-flash
   postpone rdrop
   postpone rdrop
   postpone rdrop
-  current-here 1 + 6 rot literal!
+  current-here 1+ 6 rot literal!
 ;
 
 \ Get the loop index
@@ -860,7 +863,7 @@ commit-flash
   [compile-only]
   $BD00 hcurrent,
   current-here over branch-back!
-  4 + lit,
+  4+ lit,
 ;
 
 
@@ -894,9 +897,9 @@ commit-flash
   1 begin
     begin token dup while
       case
-	s" [if]" ofstrcase 1 + endof
-        s" [else]" ofstrcase 1 - dup if 1 + then endof
-        s" [then]" ofstrcase 1 - endof
+	s" [if]" ofstrcase 1+ endof
+        s" [else]" ofstrcase 1- dup if 1+ then endof
+        s" [then]" ofstrcase 1- endof
 	s" \" ofstrcase ['] newline? skip-until	endof
 	s" (" ofstrcase [: [char] ) = ;] skip-until endof
 	s"-constant ofstrcase [: [char] " = ;] skip-until endof

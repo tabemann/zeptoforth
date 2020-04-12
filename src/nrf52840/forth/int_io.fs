@@ -57,7 +57,7 @@ UART_Base $51C + constant UART_TXD
 \ Get whether the rx buffer is full
 : rx-full? ( -- f )
   rx-write-index b@ rx-read-index b@
-  rx-buffer-size 1 - + rx-buffer-size umod =
+  rx-buffer-size 1- + rx-buffer-size umod =
 ;
 
 \ Get whether the rx buffer is empty
@@ -69,7 +69,7 @@ UART_Base $51C + constant UART_TXD
 : write-rx ( c -- )
   rx-full? not if
     rx-write-index b@ rx-buffer + b!
-    rx-write-index b@ 1 + rx-buffer-size mod rx-write-index b!
+    rx-write-index b@ 1+ rx-buffer-size mod rx-write-index b!
   else
     drop
   then
@@ -79,7 +79,7 @@ UART_Base $51C + constant UART_TXD
 : read-rx ( -- c )
   rx-empty? not if
     rx-read-index b@ rx-buffer + b@
-    rx-read-index b@ 1 + rx-buffer-size mod rx-read-index b!
+    rx-read-index b@ 1+ rx-buffer-size mod rx-read-index b!
   else
     0
   then
@@ -88,7 +88,7 @@ UART_Base $51C + constant UART_TXD
 \ Get whether the tx buffer is full
 : tx-full? ( -- f )
   tx-write-index b@ tx-read-index b@
-  tx-buffer-size 1 - + tx-buffer-size umod =
+  tx-buffer-size 1- + tx-buffer-size umod =
 ;
 
 \ Get whether the tx buffer is empty
@@ -100,7 +100,7 @@ UART_Base $51C + constant UART_TXD
 : write-tx ( c -- )
   tx-full? not if
     tx-write-index b@ tx-buffer + b!
-    tx-write-index b@ 1 + tx-buffer-size mod tx-write-index b!
+    tx-write-index b@ 1+ tx-buffer-size mod tx-write-index b!
   else
     drop
   then
@@ -110,7 +110,7 @@ UART_Base $51C + constant UART_TXD
 : read-tx ( -- c )
   tx-empty? not if
     tx-read-index b@ tx-buffer + b@
-    tx-read-index b@ 1 + tx-buffer-size mod tx-read-index b!
+    tx-read-index b@ 1+ tx-buffer-size mod tx-read-index b!
   else
     0
   then
