@@ -199,6 +199,66 @@ _umod:	movs r0, tos
 	bx lr
 	end_inlined
 
+	@@ Add 1 to an integer
+	define_word "1+", visible_flag | inlined_flag
+_1add:	adds tos, #1
+	bx lr
+	end_inlined
+
+	@@ Add 2 to an integer
+	define_word "2+", visible_flag | inlined_flag
+_2add:	adds tos, #2
+	bx lr
+	end_inlined
+
+	@@ Add 4 to an integer
+	define_word "4+", visible_flag | inlined_flag
+_4add:	adds tos, #4
+	bx lr
+	end_inlined
+	
+	@@ Subtract 1 from an integer
+	define_word "1-", visible_flag | inlined_flag
+_1sub:	subs tos, #1
+	bx lr
+	end_inlined
+
+	@@ Subtract 2 from an integer
+	define_word "2-", visible_flag | inlined_flag
+_2sub:	subs tos, #2
+	bx lr
+	end_inlined
+
+	@@ Subtract 4 from an integer
+	define_word "4-", visible_flag | inlined_flag
+_4sub:	subs tos, #4
+	bx lr
+	end_inlined
+
+	@@ Multiply a value by 2
+	define_word "2*", visible_flag | inlined_flag
+_2mul:	lsls tos, tos, #1
+	bx lr
+	end_inlined
+	
+	@@ Multiply a value by 4
+	define_word "4*", visible_flag | inlined_flag
+_4mul:	lsls tos, tos, #2
+	bx lr
+	end_inlined
+
+	@@ Divide a value by 2
+	define_word "2/", visible_flag | inlined_flag
+_2div:	asrs tos, tos, #1
+	bx lr
+	end_inlined
+	
+	@@ Divide a value by 4
+	define_word "4/", visible_flag | inlined_flag
+_4div:	asrs tos, tos, #2
+	bx lr
+	end_inlined
+
 	@@ Equals
 	define_word "=", visible_flag
 _eq:	movs r0, tos

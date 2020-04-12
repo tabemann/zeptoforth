@@ -74,7 +74,7 @@ compress-flash
     over 0>
   while
     dup >r swap >r swap dup >r @ swap execute
-    r> 2 + r> 1 - r>
+    r> 2+ r> 1- r>
   repeat
 ;
 
@@ -84,7 +84,7 @@ compress-flash
     over 0>
   while
     dup >r swap >r swap dup >r h@ swap execute
-    r> 2 + r> 1 - r>
+    r> 2+ r> 1- r>
   repeat
 ;
 
@@ -94,7 +94,7 @@ compress-flash
     over 0>
   while
     dup >r swap >r swap dup >r @ swap execute
-    r> cell + r> 1 - r>
+    r> cell+ r> 1- r>
   repeat
 ;
 
@@ -104,7 +104,7 @@ compress-flash
     over 0>
   while
     dup >r swap >r swap dup >r 2@ swap execute
-    r> 2 cells + r> 1 - r>
+    r> 2 cells + r> 1- r>
   repeat
 ;
 
@@ -132,7 +132,7 @@ compress-flash
     dup >r swap dup >r b@ swap execute if
       rdrop rdrop i unloop exit
     else
-      r> 1 + r>
+      r> 1+ r>
     then
   loop
   drop drop -1
@@ -144,7 +144,7 @@ compress-flash
     dup >r swap dup >r h@ swap execute if
       rdrop rdrop i unloop exit
     else
-      r> 2 + r>
+      r> 2+ r>
     then
   loop
   drop drop -1
@@ -156,7 +156,7 @@ compress-flash
     dup >r swap dup >r @ swap execute if
       rdrop rdrop i unloop exit
     else
-      r> cell + r>
+      r> cell+ r>
     then
   loop
   drop drop -1
@@ -208,7 +208,7 @@ compress-flash
     dup >r swap >r swap dup >r b@ swap execute if
       r> b@ rdrop rdrop true exit
     else
-      r> 1 + r> 1 - r>
+      r> 1+ r> 1- r>
     then
   repeat
   drop drop drop 0 false
@@ -222,7 +222,7 @@ compress-flash
     dup >r swap >r swap dup >r h@ swap execute if
       r> h@ rdrop rdrop true exit
     else
-      r> 2 + r> 1 - r>
+      r> 2+ r> 1- r>
     then
   repeat
   drop drop drop 0 false
@@ -236,7 +236,7 @@ compress-flash
     dup >r swap >r swap dup >r @ swap execute if
       r> @ rdrop rdrop true exit
     else
-      r> cell + r> 1 - r>
+      r> cell+ r> 1- r>
     then
   repeat
   drop drop drop 0 false
@@ -251,7 +251,7 @@ compress-flash
     dup >r swap >r swap dup >r 2@ rot execute if
       r> 2@ rdrop rdrop true exit
     else
-      r> [ 2 cells ] literal + r> 1 - r>
+      r> [ 2 cells ] literal + r> 1- r>
     then
   repeat
   drop drop drop - 0 false
