@@ -48,7 +48,7 @@
  : ea04generate ( -- print 04 Extended Address Type record )
    ." :02000004"              \ Write 04 Extended Address Type record preamble
    dup h.4                    \ quotient = LBA
-   $06 + not $FF and 1 +      \ calculate checksum. $06 is record preamble value.
+   $06 + not $FF and 1+      \ calculate checksum. $06 is record preamble value.
    h.2  cr                    \ print checksum
  ;
 
