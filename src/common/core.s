@@ -923,7 +923,7 @@ _compile_to_flash:
 	bx lr
 
 	@@ Get whether compilation is to flash
-	define_word "compiling-to-flash", visible_flag
+	define_word "compiling-to-flash?", visible_flag
 _compiling_to_flash:
 	ldr r0, =compiling_to_flash
 	push_tos
