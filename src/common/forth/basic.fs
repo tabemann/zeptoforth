@@ -318,7 +318,7 @@ commit-flash
 \ Create a word referring to memory after it
 : create ( "name" -- )
   token
-  dup 0= if ['] token-expected ?raise then
+  dup 0= triggers token-expected
   start-compile-no-push
   compiling-to-flash? if
     current-here 28 + ( 28 bytes ) flash-block-size align
@@ -372,7 +372,7 @@ commit-flash
 \ Create a word that executes code specified by DOES>
 : <builds ( "name" -- )
   token
-  dup 0= if ['] token-expected ?raise then
+  dup 0= triggers token-expected
   <builds-with-name
 ;
 
@@ -821,7 +821,10 @@ commit-flash
   postpone r>
   postpone r>
   postpone r>
+  postpone r>
   postpone dup
+  postpone >r
+  postpone swap
   postpone >r
   postpone swap
   postpone >r
@@ -847,6 +850,25 @@ commit-flash
   postpone rdrop
   postpone rdrop
   postpone rdrop
+;
+
+\ Commit to flash
+commit-flash
+
+\ Dump memory between two addresses
+: dump ( start-addr end-addr )
+  cr
+  swap ?do
+    i h.8
+    16 0 ?do
+      space j i + b@ h.2
+    loop
+    space [char] ' emit
+    16 0 ?do
+      j i + b@ dup $20 >= over $7F < and if emit else drop [char] . emit then
+    loop
+    [char] ' emit cr
+  16 +loop
 ;
 
 \ Parse until a predicate is met
@@ -875,6 +897,44 @@ commit-flash
   4+ lit,
 ;
 
+\ Create a deferred word
+\ : defer ( "name" -- )
+\   token
+\   dup 0= triggers token-expected
+\   start-compile-no-push
+\   visible
+\   compiling-to-flash? if
+\     flash-align,
+\   then
+\   tos push,
+\   reserve-literal drop
+\   tos bx,
+\   finalize,
+\ ;
+
+\ Set a deferred word; note that a deferred  word stored in flash can only have
+\ its implementation set once
+\ : defer! ( xt xt-deferred -- )
+\   swap 1+ swap
+\   dup ram-base < if
+\     flash-block-size align
+\     tos swap
+\     compiling-to-flash? >r
+\     compile-to-flash
+\     literal!
+\     r> not if
+\       compile-to-ram
+\     then
+\   else
+\     tos swap
+\     compiling-to-flash? >r
+\     compile-to-ram
+\     literal!
+\     r> if
+\       compile-to-flash
+\     then
+\   then
+\ ;
 
 \ s" constant
 2 constant s"-length
