@@ -258,7 +258,7 @@ commit-flash
 
 \ Display all the words are four columns
 : words ( -- )
-  cr ram-latest 0 words-dict flash-latest swap words-dict drop
+  cr ram-latest 0 words-dict flash-latest swap words-dict drop cr
 ;
 
 \ Set bits on a byte
@@ -320,7 +320,7 @@ commit-flash
   token
   dup 0= if ['] token-expected ?raise then
   start-compile-no-push
-  compiling-to-flash if
+  compiling-to-flash? if
     current-here 28 + ( 28 bytes ) flash-block-size align
   else
     current-here 16 + ( 16 bytes ) 4 align
@@ -351,7 +351,7 @@ commit-flash
 \ Create a word that executes code specified by DOES>
 : <builds-with-name ( addr bytes -- )
   start-compile
-  compiling-to-flash if
+  compiling-to-flash? if
     current-here 32 + ( 32 bytes ) 4 align
   else
     current-here 24 + ( 24 bytes ) 4 align
@@ -381,7 +381,7 @@ commit-flash
 
 \ Align to flash block if compiling to flash
 : flash-align,
-  compiling-to-flash if flash-here flash-block-size align advance-here then
+  compiling-to-flash? if flash-here flash-block-size align advance-here then
 ;
 
 \ Commit changes to flash
@@ -557,7 +557,7 @@ commit-flash
 \ Specify next available RAM space
 : set-next-ram-space ( addr -- )
   sys-ram-dict-base -
-  compiling-to-flash
+  compiling-to-flash?
   swap
   compile-to-flash
   s" *RAM*" constant-with-name
@@ -572,7 +572,7 @@ commit-flash
 \ Allocate a byte variable in RAM
 : ram-bvariable ( "name" -- )
   next-ram-space
-  compiling-to-flash
+  compiling-to-flash?
   over
   compile-to-flash
   constant
@@ -587,7 +587,7 @@ commit-flash
 : ram-hvariable ( "name" -- )
   next-ram-space
   2 align
-  compiling-to-flash
+  compiling-to-flash?
   over
   compile-to-flash
   constant
@@ -602,7 +602,7 @@ commit-flash
 : ram-variable ( "name" -- )
   next-ram-space
   4 align
-  compiling-to-flash
+  compiling-to-flash?
   over
   compile-to-flash
   constant
@@ -617,7 +617,7 @@ commit-flash
 : ram-2variable ( "name" -- )
   next-ram-space
   4 align
-  compiling-to-flash
+  compiling-to-flash?
   over
   compile-to-flash
   constant
@@ -631,7 +631,7 @@ commit-flash
 \ Allocate a buffer in RAM
 : ram-buffer: ( bytes "name" -- )
   next-ram-space
-  compiling-to-flash
+  compiling-to-flash?
   over
   compile-to-flash
   constant
@@ -646,7 +646,7 @@ commit-flash
 : ram-aligned-buffer: ( bytes "name" -- )
   next-ram-space
   4 align
-  compiling-to-flash
+  compiling-to-flash?
   over
   compile-to-flash
   constant
@@ -662,7 +662,7 @@ commit-flash
 
 \ Specify a buffer of a given size
 : buffer: ( # "name" -- )
-  compiling-to-flash if
+  compiling-to-flash? if
     ram-buffer:
   else
     create allot
@@ -671,7 +671,7 @@ commit-flash
 
 \ Specify a buffer of a given size
 : aligned-buffer: ( # "name" -- )
-  compiling-to-flash if
+  compiling-to-flash? if
     ram-aligned-buffer:
   else
     create allot
@@ -680,7 +680,7 @@ commit-flash
 
 \ Create a one-byte variable
 : bvariable ( "name" -- )
-  compiling-to-flash if
+  compiling-to-flash? if
     ram-bvariable
   else
     create 1 allot
@@ -689,7 +689,7 @@ commit-flash
 
 \ Create a two-byte variable
 : hvariable ( "name" -- )
-  compiling-to-flash if
+  compiling-to-flash? if
     ram-hvariable
   else
     create 2 allot
@@ -698,7 +698,7 @@ commit-flash
 
 \ Create a four-byte variable
 : variable ( "name" -- )
-  compiling-to-flash if
+  compiling-to-flash? if
     ram-variable
   else
     create 4 allot
@@ -707,7 +707,7 @@ commit-flash
 
 \ Create an eight-byte variable
 : 2variable ( "name" -- )
-  compiling-to-flash if
+  compiling-to-flash? if
     ram-2variable
   else
     create 8 allot
