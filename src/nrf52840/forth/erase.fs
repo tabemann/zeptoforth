@@ -37,7 +37,7 @@ commit-flash
 
 \ Create a MARKER to erase flash/return the flash dictionary to its prior state
 : marker ( "name" -- )
-  compiling-to-flash
+  compiling-to-flash?
   token
   dup 0= if ['] token-expected ?raise then
   compile-to-flash
@@ -66,7 +66,7 @@ commit-flash
 
 \ Adapted from Terry Porter's code; not sure what license it was under
 : cornerstone ( "name" -- )
-  compiling-to-flash
+  compiling-to-flash?
   compile-to-flash
   <builds
   pad-flash-erase-block
