@@ -75,7 +75,7 @@ dp 	.req r7
 
 	@@ Pull the top of the stack into the TOS register
 	.macro pull_tos
-	ldr tos, [dp], #4
+	ldmia dp!, {tos}
 	.endm
 
 	@@ String macro
