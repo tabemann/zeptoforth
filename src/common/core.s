@@ -1001,10 +1001,16 @@ _postpone:
 	ldr r0, [tos]
 	tst r0, #immediate_flag
 	beq 1f
+	tst r0, #inlined_flag
+	bne 3f
 	bl _to_xt
 	bl _compile
 	pop {pc}
-1:	bl _to_xt
+3:	bl _to_xt
+	bl _asm_inline
+	pop {pc}
+1:	push {r0}
+	bl _to_xt
 	push_tos
 	movs tos, #6
 	bl _asm_push
@@ -1012,7 +1018,13 @@ _postpone:
 	movs tos, #6
 	bl _asm_literal
 	push_tos
+	pop {r0}
+	tst r0, #inlined_flag
+	bne 2f
 	ldr tos, =_compile
+	bl _compile
+	pop {pc}
+2:	ldr tos, =_asm_inline
 	bl _compile
 	pop {pc}
 

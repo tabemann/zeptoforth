@@ -177,10 +177,19 @@ compress-flash
   then
 ;
 
+\ Get the flags for a word
+: word-flags ( word -- flags ) @ [inlined] ;
+
+\ Get the previous word for a word
+: prev-word ( word1 -- word2 ) 4+ @ [inlined] ;
+
+\ Get the name of a word (a counted string)
+: word-name ( word -- b-addr ) 8 + [inlined] ;
+
 \ Get whether a word is hidden
 : hidden? ( word -- f )
-  dup @ visible-flag and if
-    8 + count dup 2 > if
+  dup word-flags visible-flag and if
+    word-name count dup 2 > if
       over b@ [char] * = if
 	+ 1- b@ [char] * =
       else
@@ -237,9 +246,9 @@ compress-flash
     over 0<>
   while
     over hidden? not if
-      over 8 + count rot words-column
+      over word-name count rot words-column
     then
-    swap 4+ @ swap
+    swap prev-word swap
   repeat
   nip
 ;
