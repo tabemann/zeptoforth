@@ -856,7 +856,7 @@ commit-flash
 commit-flash
 
 \ Dump memory between two addresses
-: dump ( start-addr end-addr )
+: dump ( start-addr end-addr -- )
   cr
   swap ?do
     i h.8
@@ -871,7 +871,7 @@ commit-flash
   16 +loop
 ;
 
-\ Parse until a predicate is met
+\ Skip characters in the evaluation buffer until a predicate is met
 : skip-until ( xt -- )
   >r
   begin
@@ -988,7 +988,7 @@ commit-flash
 ;
 
 \ Start conditional execution/compilation
-: [if] ( flag -- ) 0= if postpone [else] then [immediate] ;
+: [if] ( f -- ) 0= if postpone [else] then [immediate] ;
 
 \ Finish conditional execution/compilation
 : [then] ( -- ) [immediate] ;
