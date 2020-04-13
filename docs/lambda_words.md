@@ -1,15 +1,5 @@
 # Lambda Words
 
-#### [:
-( -- )
-
-Begin lambda
-
-#### ;]
-( -- ) ( compiled: -- xt )
-
-End lambda
-
 #### option
 ( f true-xt -- ) ( true-xt: ??? -- ??? )
 
