@@ -117,6 +117,26 @@ Check whether an exception, typically returned by `try`, matches a specified
 exception and if it does, replace it with zero, marking no exception,
 otherwise passing the specified argument through.
 
+#### word-flags
+( word -- flags )
+
+Get the flags for a word
+
+#### prev-word
+( word1 -- word2 )
+
+Get the previous word for a word
+
+#### word-name
+( word -- b-addr )
+
+Get the name of a word (a counted word)
+
+#### hidden?
+( word -- f )
+
+Get whether a word is hidden (note that this means whether a word is displayed by WORDS, not whether it will be found by `find` set to find visible words)
+
 #### words-dict
 ( dict -- )
 
@@ -339,6 +359,41 @@ Leave a do loop
 ( R: leave current end -- )
 
 Unloop from a do loop (to exit, e.g.)
+
+#### dump
+( start-addr end-addr -- )
+
+Dump memory between two addresses
+
+#### skip-until
+( xt -- )
+
+Skip characters in the evaluation buffer until a predicate is met
+
+#### [:
+( -- )
+
+Begin lambda
+
+#### ;]
+( -- ) ( compiled: -- xt )
+
+End lambda
+
+#### [else]
+( -- )
+
+Implement the [else] in [if]/[else]/[then] for conditional execution/compilation
+
+#### [if]
+( f -- )
+
+Start conditional execution/compilation
+
+#### [then]
+( -- )
+
+Finish conditional execution/compilation
 
 #### wait
 ( xt -- )
