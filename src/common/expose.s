@@ -31,6 +31,34 @@ _pause_enabled:
 	push_tos
 	ldr tos, =pause_enabled
 	bx lr
+
+	@@ Get the RAM base
+	define_word "ram-base", visible_flag
+_ram_base:
+	push_tos
+	ldr tos, =ram_start
+	bx lr
+
+	@@ Get the RAM end
+	define_word "ram-end", visible_flag
+_ram_end:
+	push_tos
+	ldr tos, =ram_end
+	bx lr
+
+	@@ Get the flash base
+	define_word "flash-base", visible_flag
+_flash_base:
+	push_tos
+	ldr tos, =0x00000000
+	bx lr
+
+	@@ Get the flash end
+	define_word "flash-end", visible_flag
+_flash_end:
+	push_tos
+	ldr tos, =flash_dict_end
+	bx lr
 	
 	@@ Get the current stack base variable address
 	define_word "stack-base", visible_flag

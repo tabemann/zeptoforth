@@ -12,25 +12,7 @@
 \ bootable binary file clone of the target.
 \ -----------------------------------------------------------------------------
 \
-\     Usage:    "1|2 flash-size-register-address clone"
-\
-\     '1' = normal use
-\
-\     '2' = only for a STM32F103C8 which reports 64kB of Flash but actually has
-\           double (128kB)
-\     OR if you suspect your chip MAY have double the flash advertized. Note:
-\        will crash this program with a Exception if it doesn't!
-\
-\     'flash-size-register-address' = "Flash size data register address". Check
-\     your STM reference manual "Device electronic signature" section.
-\
-\     'clone' name of the program as listed below in the source
-\
-\     Example usage for:
-\     STM32F051:     "1 $1FFFF7CC clone"
-\     STM32F103CB:   "1 $1FFFF7E0 clone"
-\     STM32F103C8:   "2 $1FFFF7E0 clone" 
-\ 
+\     Usage:    "clone"
 \ 
 \ The iHex dump starts with the word "clone" and ends with the word "clone_end"
 \ for easy parsing to remove any extraneous text before using
@@ -43,17 +25,6 @@
 \ Notes:
 \ Can produce extended iHex files up to 32 bits, i.e. 4 GB.
 \ iHex Extended Addressing type 04 is used
-\ ihex.fs reads the STM32 MCU "Flash Size Register" to determine the maximum
-\ size and won't attempt to read beyond that because a Exception may be thrown
-\ if it is the Flash end. Check your STM reference manual for your MCU's "Flash
-\ Size Register" address.
-\
-\ flash-size-register-address    MCU
-\ ---------------------------    ----------
-\ $1FFFF7CC                      STM32F0XX
-\ $1FFFF7E0                      STM32F1XX 
-\ $1FFF7A22                      STM32F405/415, STM32F407/417, STM32F427/437
-\                                and STM32F429/439           
 \ -------------------- Shouldn't need to change anything below ----------------
 
  : erased? ( b-addr -- ) \ Check Flash bytes NOT erased.
@@ -81,10 +52,9 @@
    THEN
  ;
 
- : clone ( 1|2 flash-size-register-address -- )
+ : clone ( -- )
    cr      \ Dumps a bootable Flash Image (core + all words)
-   @ $FFFF and 1024 * *        \ calculate flash size
-   0 do   
+   flash-end 0 do   
      i erased?
      if
        insert.04ea?  
