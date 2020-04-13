@@ -1753,18 +1753,14 @@ _asm_sub_imm:
 	define_word "pull,", visible_flag
 _asm_pull:
 	push {lr}
-	movs r0, tos
-	movs tos, #0
-	push_tos
-	movs tos, #7
-	push_tos
+	movs r0, #1
+	lsls r0, r0, tos
+	movs r1, #7 << 8
+	orrs r0, r1
+	ldr r1, =0xC800
+	orrs r0, r1
 	movs tos, r0
-	bl _asm_ldr_imm
-	push_tos
-	movs tos, #4
-	push_tos
-	movs tos, #7
-	bl _asm_add_imm
+	bl _current_comma_2
 	pop {pc}
 
 	@@ Assemble instructions to push a value onto the stack
