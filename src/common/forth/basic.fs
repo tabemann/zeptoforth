@@ -898,43 +898,49 @@ commit-flash
 ;
 
 \ Create a deferred word
-\ : defer ( "name" -- )
-\   token
-\   dup 0= triggers token-expected
-\   start-compile-no-push
-\   visible
-\   compiling-to-flash? if
-\     flash-align,
-\   then
-\   tos push,
-\   reserve-literal drop
-\   tos bx,
-\   finalize,
-\ ;
+: defer ( "name" -- )
+  token
+  dup 0= triggers token-expected
+  start-compile-no-push
+  visible
+  compiling-to-flash? if
+    flash-align,
+  then
+  reserve-literal drop
+  0 bx,
+  finalize,
+;
+
+\ Set a deferred word in RAM
+: defer-ram! ( xt xt-deferred -- )
+  swap 1+ swap
+  0 swap
+  compiling-to-flash? >r
+  compile-to-ram
+  literal!
+  r> if
+    compile-to-flash
+  then
+;
+
+\ Set a deferred word in flash
+: defer-flash! ( xt xt-deferred -- )
+  flash-block-size align
+  swap 1+ swap
+  0 swap
+  compiling-to-flash? >r
+  compile-to-flash
+  literal!
+  r> not if
+    compile-to-ram
+  then
+;
 
 \ Set a deferred word; note that a deferred  word stored in flash can only have
 \ its implementation set once
-\ : defer! ( xt xt-deferred -- )
-\   swap 1+ swap
-\   dup ram-base < if
-\     flash-block-size align
-\     tos swap
-\     compiling-to-flash? >r
-\     compile-to-flash
-\     literal!
-\     r> not if
-\       compile-to-ram
-\     then
-\   else
-\     tos swap
-\     compiling-to-flash? >r
-\     compile-to-ram
-\     literal!
-\     r> if
-\       compile-to-flash
-\     then
-\   then
-\ ;
+: defer! ( xt xt-deferred -- )
+  dup ram-base < if defer-flash! else defer-ram! then
+;
 
 \ s" constant
 2 constant s"-length
