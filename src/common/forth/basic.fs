@@ -936,20 +936,21 @@ commit-flash
   then
 ;
 
-\ Set a deferred word; note that a deferred  word stored in flash can only have
+\ Set a deferred word; note that a deferred word stored in flash can only have
 \ its implementation set once
 : defer! ( xt xt-deferred -- )
   dup ram-base < if defer-flash! else defer-ram! then
 ;
 
 \ Decode the immediate field from a MOVW or MOVT instruction
-: decode-mov16 ( addr -- h )
+: decode-mov16 ( h-addr -- h )
   dup h@ dup $F and 1 lshift swap 10 rshift $1 and or 11 lshift
   swap 2+ h@ dup $FF and swap 4 rshift $700 and or or
 ;
 
-\ Decode a full literal
-: decode-literal ( addr -- x )
+\ Decode the immediate field from a pair of a MOVW instruction followed by a
+\ MOVT instruction
+: decode-literal ( h-addr -- x )
   dup decode-mov16 swap 4+ decode-mov16 16 lshift or
 ;
 

@@ -380,6 +380,31 @@ Begin lambda
 
 End lambda
 
+#### defer
+( "name" -- )
+
+Create a deferred word
+
+#### defer!
+( xt xt-deferred -- )
+
+Set a deferred word; note that a deferred word stored in flash can only have its implementation set once
+
+#### defer@
+( xt-deferred -- xt )
+
+Get the referred xt from a deferred word
+
+#### decode-mov16
+( h-addr -- h )
+
+Decode the immediate field from a MOVW or MOVT instruction
+
+#### decode-literal
+( h-addr -- x )
+
+Decode the immediate field from a pair of a MOVW instruction followed by a MOVT instruction
+
 #### [else]
 ( -- )
 
