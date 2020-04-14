@@ -942,6 +942,32 @@ commit-flash
   dup ram-base < if defer-flash! else defer-ram! then
 ;
 
+\ Decode the immediate field from a MOVW or MOVT instruction
+: decode-mov16 ( addr -- h )
+  dup h@ dup $F and 1 lshift swap 10 rshift $1 and or 11 lshift
+  swap 2+ h@ dup $FF and swap 4 rshift $700 and or or
+;
+
+\ Decode a full literal
+: decode-literal ( addr -- x )
+  dup decode-mov16 swap 4+ decode-mov16 16 lshift or
+;
+
+\ Get the referred xt from a deferred word in RAM
+: defer-ram@ ( xt-deferred -- xt )
+  decode-literal 1 -
+;
+
+\ Get the referred xt from a deferred word in flash
+: defer-flash@ ( xt-deferred -- xt )
+  flash-block-size align decode-literal 1 -
+;
+
+\ Get the referred xt from a deferred word
+: defer@ ( xt-deferred -- xt )
+  dup ram-base < if defer-flash@ else defer-ram@ then
+;
+
 \ s" constant
 2 constant s"-length
 create s"-data char s bcurrent, char " bcurrent,
