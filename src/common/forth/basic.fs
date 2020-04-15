@@ -67,6 +67,9 @@ compress-flash
 \ Drop two cells
 : 2drop ( x1 x2 -- ) drop drop [inlined] ;
 
+\ Swap two cells
+: 2swap ( x1 x2 x3 x4 -- x3 x4 x1 x2 ) 3 roll 3 roll ;
+
 \ Drop the cell under the top of the stack
 : nip ( x1 x2 -- x2 ) swap drop [inlined] ;
 
@@ -81,6 +84,9 @@ compress-flash
 
 \ Get the maximum of two numbers
 : max ( n1 n2 -- n3 ) 2dup > if drop else swap drop then ;
+
+\ Get the absolute value of a number
+: abs ( n -- u ) dup 0< if negate then ;
 
 \ Fill memory with zeros up until a given address
 : advance-here ( a -- )
@@ -178,17 +184,20 @@ compress-flash
 ;
 
 \ Get the flags for a word
-: word-flags ( word -- flags ) @ [inlined] ;
+: word-flags ( word -- flags ) [inlined] ;
 
 \ Get the previous word for a word
-: prev-word ( word1 -- word2 ) 4+ @ [inlined] ;
+: prev-word ( word1 -- word2 ) 4+ [inlined] ;
 
 \ Get the name of a word (a counted string)
 : word-name ( word -- b-addr ) 8 + [inlined] ;
 
+\ Commit to flash
+commit-flash
+
 \ Get whether a word is hidden
 : hidden? ( word -- f )
-  dup word-flags visible-flag and if
+  dup word-flags @ visible-flag and if
     word-name count dup 2 > if
       over b@ [char] * = if
 	+ 1- b@ [char] * =
@@ -248,7 +257,7 @@ compress-flash
     over hidden? not if
       over word-name count rot words-column
     then
-    swap prev-word swap
+    swap prev-word @ swap
   repeat
   nip
 ;
