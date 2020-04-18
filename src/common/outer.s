@@ -608,7 +608,7 @@ _bel:	push {lr}
 	define_word "do-refill", visible_flag
 _do_refill:
 	push {lr}
-@	bl _xon
+	bl _xon
 	bl _ack
 	movs r0, #0
 	ldr r1, =input_buffer_size
@@ -641,7 +641,7 @@ _do_refill:
 	movs r0, #0
 	ldr r2, =input_buffer_index
 	str r0, [r2]
-@	bl _xoff
+	bl _xoff
 	pop {pc}
 4:	ldr r2, =input_buffer
 	cmp r0, r2
