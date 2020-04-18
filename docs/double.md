@@ -23,10 +23,12 @@ Double dup
 #### 2nip
 ( d1 d2 -- d2 )
 
+Double nip
+
 #### 2tuck
 ( d1 d2 -- d2 d1 d2 )
 
-Double nip
+Double tuck
 
 #### d=
 ( d1 d2 -- f )
