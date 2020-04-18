@@ -1020,6 +1020,63 @@ commit-flash
 \ Finish conditional execution/compilation
 : [then] ( -- ) [immediate] ;
 
+\ Maximum pictured numeric output size
+128 constant picture-size
+
+\ Start of pictured numeric output
+variable picture-offset
+
+\ Commit to flash
+commit-flash
+
+\ Add a character to pictured numeric output
+: hold ( b -- )
+  -1 picture-offset +!
+  pad picture-size + picture-offset @ + b!
+;
+
+\ Commit to flash
+commit-flash
+
+\ Start pictured numeric output
+: <# ( -- ) 0 picture-offset ! ;
+
+\ Add a digit to the pictured numeric output
+: # ( ud1 -- ud2 )
+  base @ 0 ud/mod 2swap drop
+  dup 10 >= if
+    [ char A 10 - ] literal +
+  else
+    [char] 0 +
+  then
+  hold
+;
+
+\ Commit to flash
+commit-flash
+
+\ Add one or more digits to the pictured numeric output
+: #s ( ud -- 0 0 )
+  begin
+    base @ 0 ud/mod 2dup d0= >r 2swap drop
+    dup 10 >= if
+      [ char A 10 - ] literal +
+    else
+      [char] 0 +
+    then
+    hold
+  r> until
+;
+
+\ If n (a single number) is negative, append '-' to the pictured numeric output
+: sign ( n -- ) 0< if [char] - hold then ;
+
+\ Finish pictured numeric output
+: #> ( xd -- c-addr bytes )
+  2drop
+  pad picture-size + picture-offset @ + picture-offset @ negate
+;
+
 \ Wait hook variable
 variable wait-hook
 
@@ -1046,3 +1103,6 @@ end-compress-flash
 
 \ Set compilation back to RAM
 compile-to-ram
+
+\ Reboot
+reboot
