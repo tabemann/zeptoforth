@@ -59,7 +59,9 @@
        ea04generate        \ quotient passed to ea04generate as LBA
      ELSE
        drop                \ drop unwanted non zero remainder
-     THEN                  
+     THEN
+   ELSE
+     drop
    THEN
  ;
 
@@ -68,7 +70,7 @@
    0 do   
      i erased?
      if
-       insert.04ea?  
+       i insert.04ea?  
        ." :10" i h.4 ." 00"    \ Write record-intro with 4 digits
        $10                      \ Begin checksum
        i          $FF and +      \ Sum the address bytes 
