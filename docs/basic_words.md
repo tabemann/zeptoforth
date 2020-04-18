@@ -39,16 +39,6 @@
 #### inlined-flag
 ( -- u )
 
-#### 2dup
-( x1 x2 -- x1 x2 x1 x2 )
-
-Duplicate two cells
-
-#### 2drop
-( x1 x2 -- )
-
-Drop two cells
-
 #### nip
 ( x1 x2 -- x2 )
 
