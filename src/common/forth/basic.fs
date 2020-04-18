@@ -61,21 +61,6 @@ compress-flash
 \ Inlined flag
 8 constant inlined-flag
 
-\ Duplicate two cells
-: 2dup ( x1 x2 -- x1 x2 x1 x2 ) over over [inlined] ;
-
-\ Drop two cells
-: 2drop ( x1 x2 -- ) drop drop [inlined] ;
-
-\ Swap two cells
-: 2swap ( x1 x2 x3 x4 -- x3 x4 x1 x2 ) 3 roll 3 roll ;
-
-\ Drop the cell under the top of the stack
-: nip ( x1 x2 -- x2 ) swap drop [inlined] ;
-
-\ Tuck a cell under the cell at he top of the stack
-: tuck ( x1 x2 -- x2 x1 x2 ) swap over [inlined] ;
-
 \ Add to a cell
 : +! ( x addr -- ) swap over @ + swap ! [inlined] ;
 

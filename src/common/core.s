@@ -76,6 +76,20 @@ _roll:	movs r0, tos
 	bx lr
 	end_inlined
 
+	@@ Remove the cell under that on the top of the stack
+	define_word "nip", visible_flag | inlined_flag
+_nip:	adds dp, #4
+	bx lr
+	end_inlined
+
+	@@ Push the cell on top of the stack under the item beneath it
+	define_word "tuck", visible_flag | inlined_flag
+_tuck:	ldr r0, [dp]
+	str tos, [dp]
+	subs dp, #4
+	str r0, [dp]
+	bx lr
+
 	@@ Logical shift left
 	define_word "lshift", visible_flag | inlined_flag
 _lshift:
@@ -348,17 +362,22 @@ _0lt:	asrs tos, #31
 
 	@@ Greater than zero
 	define_word "0>", visible_flag | inlined_flag
-_0gt:	subs tos, #1
-	asrs tos, #31
+_0gt:	movs r0, tos
+	movs tos, #0
+	cmp r0, #0
+	ble 1f
 	mvn tos, tos
-	bx lr
+1:	bx lr
 	end_inlined
 
 	@@ Less than or equal to zero
 	define_word "0<=", visible_flag | inlined_flag
-_0le:	subs tos, #1
-	asrs tos, #31
-	bx lr
+_0le:	movs r0, tos
+	movs tos, #0
+	cmp r0, #0
+	bgt 1f
+	mvn tos, tos
+1:	bx lr
 	end_inlined
 
 	@@ Greater than or equal to zero
@@ -411,7 +430,7 @@ _uge:	movs r0, tos
 	bx lr
 1:	movs tos, #0
 	bx lr
-
+	
 	@@ Get the HERE pointer
 	define_word "here", visible_flag
 _here:	ldr r0, =here
