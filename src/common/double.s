@@ -61,6 +61,19 @@ _2nip:	ldr r0, [dp]
 	bx lr
 	end_inlined
 
+	@@ Double tuck
+	define_word "2tuck", visible_flag
+_2tuck:	ldr r0, [dp]
+	ldr r1, [dp, #4]
+	ldr r2, [dp, #8]
+	str tos, [dp, #4]
+	str r0, [dp, #8]
+	subs dp, #8
+	str r0, [dp]
+	str r1, [dp, #4]
+	str r2, [dp, #8]
+	bx lr
+
 	@@ Test for the equality of two double words
 	define_word "d=", visible_flag
 _deq:	ldmia dp!, {r0, r1, r2}
@@ -324,7 +337,7 @@ _udmul:
 
         bx lr
 
-	@ ( u1 u2 u3 -- u1*u2/u3 ) With double length intermediate result
+	@ ( n1 n2 n3 -- n1*n2/n3 ) With double length intermediate result
 	define_word "*/", visible_flag
 _muldiv:	
 	push {lr}
@@ -501,7 +514,14 @@ _ddivmod:
 	bl _uddivmod
 	pop {pc}
 
-	@@ Divide two double words and get a double word quotient
+	@@ Divide unsigned two double words and get a double word quotient
+	define_word "ud/", visible_flag
+_uddiv:	push {lr}
+	bl _uddivmod
+	bl _2nip
+	pop {pc}
+	
+	@@ Divide signed two double words and get a double word quotient
 	define_word "d/", visible_flag
 _ddiv:	push {lr}
 	bl _ddivmod
