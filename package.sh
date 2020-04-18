@@ -15,24 +15,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 VERSION=$1
 
-build_platform()
-{
-    PLATFORM=$1
-    echo "Building platform $1..."
-    make clean
-    make PLATFORM=$PLATFORM
-    mkdir bin/$VERSION/$PLATFORM
-    cp zeptoforth.bin bin/$VERSION/$PLATFORM/zeptoforth_kernel-$VERSION.bin
-    cp zeptoforth.ihex bin/$VERSION/$PLATFORM/zeptoforth_kernel-$VERSION.ihex
-    cp zeptoforth.elf bin/$VERSION/$PLATFORM/zeptoforth_kernel-$VERSION.elf
-}
-
-mkdir bin/$VERSION
-build_platform stm32l476
-build_platform stm32f407
-build_platform nrf52832
-build_platform nrf52840
+cp -r . ../zeptoforth-$VERSION
+cd ../zeptoforth-$VERSION
+mv bin/$VERSION bin-$VERSION
+rm -rf bin/*
+mv bin-$VERSION bin
+rm -rf .git
+rm -rf `find . -name 'screenlog.*'`
 make clean
+rm -rf `find . -name '*~'`
+cd ..
+tar cfz zeptoforth-$VERSION.tar.gz zeptoforth-$VERSION
