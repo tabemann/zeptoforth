@@ -308,7 +308,7 @@ _move_from_low:
 	ldrb r3, [r2]
 	strb r3, [r1]
 	adds r1, #1
-	adds r2, #2
+	adds r2, #1
 	b 1b
 2:	bx lr
 

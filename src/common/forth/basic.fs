@@ -70,6 +70,9 @@ compress-flash
 \ Get the maximum of two numbers
 : max ( n1 n2 -- n3 ) 2dup > if drop else swap drop then ;
 
+\ Rotate three cells in revese
+: -rot ( x1 x2 x3 -- x3 x1 x2 ) rot rot [inlined] ;
+
 \ Get the absolute value of a number
 : abs ( n -- u ) dup 0< if negate then ;
 
@@ -219,7 +222,7 @@ commit-flash
     then
     r>
   else
-    rot rot 2drop
+    -rot 2drop
   then
 ;
 
@@ -277,7 +280,7 @@ commit-flash
 : safe-type ( addr bytes -- )
   pause-enabled @
   0 pause-enabled !
-  rot rot serial-type
+  -rot serial-type
   pause-enabled !
 ;
 
@@ -466,7 +469,7 @@ commit-flash
     current-here swap branch-back!
   then
   reserve-branch
-  rot rot postpone then
+  -rot postpone then
 ;
 
 \ End a CASE statement
@@ -1075,6 +1078,46 @@ commit-flash
 : #> ( xd -- c-addr bytes )
   2drop
   pad picture-size + picture-offset @ + picture-offset @ negate
+;
+
+\ Commit to flash
+commit-flash
+
+\ Format a signed double-cell number
+: format-double ( b-addr nd -- b-addr bytes )
+  2dup d0< if dnegate <# #s -1 sign #> else <# #s #> then
+  dup >r rot dup >r swap move r> r>
+;
+
+\ Format an unsigned double-cell number
+: format-double-unsigned ( b-addr ud -- b-addr bytes )
+  <# #s #> dup >r rot dup >r swap move r> r>
+;
+
+\ Commit to flash
+commit-flash
+
+\ Type a signed double-cell number without a leading space
+: (d.) ( nd -- )
+  here -rot format-double dup >r dup allot type r> negate allot
+;
+
+\ Type an unsigned double-cell number without a leading space
+: (ud.) ( ud -- )
+  here -rot format-double-unsigned dup >r dup allot type r> negate allot
+;
+
+\ Commit to flash
+commit-flash
+
+\ Type a signed double-cell number with a leading space
+: d. ( nd -- )
+  space (d.)
+;
+
+\ Type an unsigned double-cell number with a leading space
+: ud. ( ud -- )
+  space (ud.)
 ;
 
 \ Wait hook variable
