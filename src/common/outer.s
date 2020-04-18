@@ -378,7 +378,8 @@ _main:	push {lr}
 	movs r1, #0
 	str r1, [r0]
 	bl _refill
-1:	bl _outer
+1:	bl _space
+	bl _outer
 	ldr r0, =prompt_hook
 	push_tos
 	ldr tos, [r0]

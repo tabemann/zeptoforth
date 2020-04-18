@@ -498,10 +498,10 @@ Enter sleep mode
 ( b-addr u -- )
 
 #### format-unsigned
-( u1 -- b-addr u2 )
+( b-addr u1 -- b-addr u2 )
 
 #### format-integer
-( n -- b-addr u )
+( b-addr n -- b-addr u )
 
 #### :
 ( "name" -- )
