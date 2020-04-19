@@ -85,17 +85,25 @@ end-structure
 
 \ Force-enable an action
 : force-enable-action ( action -- )
-  1 swap action-active !
+  dup action-active @ 1 < if
+    1 swap action-active !
+  else
+    drop
+  then
 ;
 
 \ Force-disable an action
 : force-disable-action ( action -- )
-  -1 swap action-active !
+  dup action-active @ 0> if
+    0 swap action-active !
+  else
+    drop
+  then
 ;
 
 \ Start a delay from the present
 : start-action-delay ( 1/10m-delay action -- )
-  dup systick-counter @ swap action-systick-start !
+  dup systick-counter swap action-systick-start !
   action-systick-delay !
 ;
 
@@ -107,7 +115,13 @@ end-structure
 
 \ Advance a delay for an action by a given amount of time
 : advance-action-delay ( 1/10ms-offset action -- )
-  action-systick-delay +!
+  systick-counter over action-systick-start @ - over
+  action-systick-delay @ < if
+    action-systick-delay +!
+  else
+    dup action-systick-delay @ over action-systick-start +!
+    action-systick-delay !
+  then
 ;
 
 \ Advance of start a delay from the present, depending on whether the delay
@@ -139,11 +153,11 @@ end-structure
     dup schedule-current @
     dup action-active @ 0>
     over action-systick-delay @ -1 =
-    systick-counter @ 3 pick action-systick-start @ -
+    systick-counter 3 pick action-systick-start @ -
     3 pick action-systick-delay @ u>= or and
     if
       dup current-action !
-      dup action-xt @ execute
+      dup action-xt @ try ?dup if execute then
       2dup swap schedule-last !
     else
       2dup swap schedule-last @ = if
@@ -153,6 +167,9 @@ end-structure
     action-next @ over schedule-current !
   again
 ;
+
+\ Make current-action read-only
+: current-action ( -- action ) current-action @ ;
 
 \ Reboot
 reboot
