@@ -1,11 +1,11 @@
 # Multitasker Words
 
 #### main-task
-( -- a-addr )
+( -- task )
 Main task
 
 #### current-task
-( -- a-addr )
+( -- task )
 Current task
 
 #### pause-count
@@ -43,7 +43,7 @@ Force-disable a task
 Spawn a non-main task
 
 #### start-task-delay
-( 1/10m-delay task -- )
+( 1/10ms-delay task -- )
 
 Start a delay from the present
 

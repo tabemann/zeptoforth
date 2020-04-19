@@ -89,5 +89,8 @@ variable systick-counter
   enable-systick
 ;
 
+\ Make systick-counter read-only
+: systick-counter ( -- u ) systick-counter @ ;
+
 \ Reboot
 reboot

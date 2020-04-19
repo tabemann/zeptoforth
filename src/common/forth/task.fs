@@ -142,12 +142,20 @@ end-structure
 
 \ Force-enable a task
 : force-enable-task ( task -- )
-  1 swap task-active !
+  dup task-active @ 1 < if
+    1 swap task-active !
+  else
+    drop
+  then
 ;
 
 \ Force-disable a task
 : force-disable-task ( task -- )
-  -1 swap task-active !
+  dup task-active @ 0> if
+    0 swap task-active !
+  else
+    drop
+  then
 ;
 
 \ Mark a task as waiting
@@ -234,7 +242,7 @@ end-structure
     dup task-active @ 1 <
     over task-wait @ or
     over task-systick-delay @ -1 <>
-    systick-counter @ 3 pick task-systick-start @ -
+    systick-counter 3 pick task-systick-start @ -
     3 pick task-systick-delay @ u< and or
     over start-task @ <> and
   while
@@ -258,7 +266,7 @@ end-structure
     dup task-active @ 1 <
     over task-wait @ or
     over task-systick-delay @ -1 <>
-    systick-counter @ 3 pick task-systick-start @ -
+    systick-counter 3 pick task-systick-start @ -
     3 roll task-systick-delay @ u< and or
     if
       sleep
@@ -294,7 +302,7 @@ end-structure
 
 \ Start a delay from the present
 : start-task-delay ( 1/10m-delay task -- )
-  dup systick-counter @ swap task-systick-start !
+  dup systick-counter swap task-systick-start !
   task-systick-delay !
 ;
 
@@ -306,7 +314,12 @@ end-structure
 
 \ Advance a delay for a task by a given amount of time
 : advance-task-delay ( 1/10ms-offset task -- )
-  task-systick-delay +!
+  systick-counter over task-systick-start @ - over task-systick-delay @ < if
+    task-systick-delay +!
+  else
+    dup task-systick-delay @ over task-systick-start +!
+    task-systick-delay !
+  then
 ;
 
 \ Advance of start a delay from the present, depending on whether the delay
@@ -333,10 +346,10 @@ end-structure
 
 \ Wait for n milliseconds with multitasking support
 : ms ( u -- )
-  systick-divisor * systick-counter @
+  systick-divisor * systick-counter
   2dup current-task @ set-task-delay
   begin
-    dup systick-counter @ swap - 2 pick u<
+    dup systick-counter swap - 2 pick u<
   while
     pause
   repeat
@@ -359,6 +372,12 @@ end-structure
   ['] do-wait wait-hook !
   1 pause-enabled !
 ;
+
+\ Make current-task read-only
+: current-task ( -- task ) current-task @ ;
+
+\ Make main-task read-only
+: main-task ( -- task ) main-task @ ;
 
 \ Reboot to initialize multitasking
 reboot
