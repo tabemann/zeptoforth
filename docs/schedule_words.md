@@ -1,7 +1,7 @@
 # Scheduler Words
 
 #### current-action
-( -- a-addr )
+( -- action )
 
 The current action
 

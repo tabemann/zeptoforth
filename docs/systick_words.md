@@ -3,7 +3,7 @@
 #### systick-counter
 ( -- u )
 
-SysTick counter
+The SysTick counter
 
 #### ms
 ( u -- )

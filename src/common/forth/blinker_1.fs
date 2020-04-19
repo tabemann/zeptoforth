@@ -48,7 +48,7 @@ variable green-blinker-delay
     led-red-on
   then
   red-led-state @ not red-led-state !
-  red-blinker-delay @ current-action @ reset-action-delay
+  red-blinker-delay @ current-action reset-action-delay
 ;
 
 \ Blink the green LED
@@ -59,7 +59,7 @@ variable green-blinker-delay
     led-green-on
   then
   green-led-state @ not green-led-state !
-  green-blinker-delay @ current-action @ reset-action-delay
+  green-blinker-delay @ current-action reset-action-delay
 ;
 
 \ Run the schedule
