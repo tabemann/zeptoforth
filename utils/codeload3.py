@@ -116,6 +116,8 @@ class ConnectUcsim(Connection):
 class ConnectSerial(Connection):
     port = { }
     def __init__(self, ttydev, baud):
+        self.ttydev = ttydev
+        self.baud = baud
         try:
             self.port = serial.Serial(
                 port     = ttydev,
@@ -143,8 +145,24 @@ class ConnectSerial(Connection):
             else:
                 return "ok"
         except:
-            print('Error: TTY transmission failed')
-            sys.exit(1)
+            if (re.search('reboot', line)):
+                self.port.close();
+                time.sleep(2)
+                try:
+                    self.port = serial.Serial(
+                        port     = self.ttydev,
+                        baudrate = self.baud,
+                        parity   = serial.PARITY_NONE,
+                        stopbits = serial.STOPBITS_ONE,
+                        bytesize = serial.EIGHTBITS,
+                        timeout  = 5 )
+                except:
+                    print('Error: TTY device %s invalid' % ttydev)
+                    sys.exit(1)
+                return "ok"
+            else:
+                print('Error: TTY transmission failed')
+                sys.exit(1)
 
         if (re.search(' (OK|ok)\r\n$', sioResult)):
             return "ok"
