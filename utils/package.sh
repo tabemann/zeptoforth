@@ -21,7 +21,7 @@ cp -r . ../zeptoforth-$VERSION
 cd ../zeptoforth-$VERSION
 mv bin/$VERSION bin-$VERSION
 rm -rf bin/*
-mv bin-$VERSION bin
+mv bin-$VERSION bin/$VERSION
 rm -rf .git
 rm -rf `find . -name 'screenlog.*'`
 make clean
