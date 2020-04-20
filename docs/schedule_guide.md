@@ -7,45 +7,49 @@ The scheduler involves repeatedly executing words based on the specified timing 
 #### current-action
 ( -- action )
 
-The current action.
+The current *action*.
 
 To create a new scheduler, execute:
 
 #### create-schedule
-( -- schedule )
+( -- scheduler )
 
 Disposing of a scheduler involves disabling any task it is executing in, and then de-alloting the space alloted for it in the dictionary space.
 
 To create a new action for a given scheduler, execute:
 
 #### add-action
-( xt schedule -- action )
+( xt scheduler -- action )
 
-where *xt* is the entry point of the action, *schedule* is the scheduler to create the action for, and *action* is the newly created action. Actions are disposed of for entire schedulers by the means that schedulers are disposed by.
+where *xt* is the entry point of the action, *scheduler* is the scheduler to create the action for, and *action* is the newly created action. Actions are disposed of for entire schedulers by the means that schedulers are disposed by.
 
 New actions do not execute right away, rather to enable their execution, one executes:
 
 #### enable-action
 ( action -- )
 
-which increments the active counter for the action (which is initialized to zero); the action executes if this counter is greater than zero. To force a action to be enabled, one executes:
+which increments the active counter for the *action* (which is initialized to zero); the action executes if this counter is greater than zero.
+
+To force a action to be enabled, one executes:
 
 #### force-enable-action
 ( action -- )
 
-which sets the active counter for the action to one if it is smaller than one.
+which sets the active counter for the *action* to one if it is smaller than one.
 
 In turn a action can be disabled with:
 
 #### disable-action
 ( action -- )
 
-which decrements the active counter for the action. To force a action to be disabled, one executes:
+which decrements the active counter for the *action*.
+
+To force a action to be disabled, one executes:
 
 #### force-disable-action
 ( action -- )
 
-which sets the active counter for the action to zero if is greater than zero.
+which sets the active counter for the *action* to zero if is greater than zero.
 
 The simplest case of delaying a action is simply to execute:
 
