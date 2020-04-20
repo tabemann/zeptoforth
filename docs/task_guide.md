@@ -1,6 +1,6 @@
 # Multitasking Guide
 
-Multitasking in zeptoforth is not part of the zeptoforth kernel, but is provided by `src/common/forth/task.fs`, which in turn relies upon `src/<platform>/forth/int_io.fs` and `src/common/forth/systick.fs`. It is cooperative, and for control to be exchanged between tasks it relies upon `PAUSE` being called, either directly, or by `MS`, `KEY`, or `EMIT` (which are in turn called by words such as `refill` or `type`).
+Multitasking in zeptoforth is not part of the zeptoforth kernel, but is provided by `src/common/forth/task.fs`, which in turn relies upon `src/<platform>/forth/int_io.fs` and `src/common/forth/systick.fs`. It is cooperative, and for control to be exchanged between tasks it relies upon `PAUSE` being called, either directly, or by `MS`, `KEY`, or `EMIT` (which are in turn called by words such as `REFILL` or `TYPE`).
 
 Note that task in zeptoforth are a relatively heavy-weight asynchronous computing means. For lighter-weight asynchronous computing, consider creating a single task for running a scheduler within (so the main task can be devoted to the REPL), and then put all asynchronous actions within that.
 
