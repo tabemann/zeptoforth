@@ -37,24 +37,28 @@ New tasks do not execute right away, rather to enable their execution, one execu
 #### enable-task
 ( task -- )
 
-which increments the active counter for the task (which is initialized to zero); the task executes if this counter is greater than zero. To force a task to be enabled, one executes:
+which increments the active counter for the *task* (which is initialized to zero); the task executes if this counter is greater than zero.
+
+To force a task to be enabled, one executes:
 
 #### force-enable-task
 ( task -- )
 
-which sets the active counter for the task to one if it is smaller than one.
+which sets the active counter for the *task* to one if it is smaller than one.
 
 In turn a task can be disabled with:
 
 #### disable-task
 ( task -- )
 
-which decrements the active counter for the task. To force a task to be disabled, one executes:
+which decrements the active counter for the *task*.
+
+To force a task to be disabled, one executes:
 
 #### force-disable-task
 ( task -- )
 
-which sets the active counter for the task to zero if is greater than zero.
+which sets the active counter for the *task* to zero if is greater than zero.
 
 The simplest case of delaying a task is simply to execute:
 
@@ -65,7 +69,7 @@ This transparently handles executing `PAUSE`.
 
 Otherwise delays are measured in 10ths of milliseconds, as this is the resolution at which the SysTick is set at to measure time.
 
-Note that all the following words do not automatically execute `PAUSE` as, after all, they can be executed for tasks other than the current task. So when executing th em for the current task, this needs to be executed afterwards to have the desired effect.
+Note that all the following words do not automatically execute `PAUSE` as, after all, they can be executed for tasks other than the current task. So when executing them for the current task, this needs to be executed afterwards to have the desired effect.
 
 To start a new delay, resetting the timer, for a task execute:
 
