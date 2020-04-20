@@ -9,8 +9,6 @@ Note that task in zeptoforth are a relatively heavy-weight asynchronous computin
 
 Pass off control to the next active task; if no tasks are active, put the MCU to sleep until an interrupt occurs (typically due to SysTick or USART activity).
 
-To create a task in zeptoforth, one should execute the following:
-
 #### current-task
 ( -- task )
 
@@ -20,6 +18,8 @@ The current task.
 ( -- task )
 
 The main task.
+
+To create a task in zeptoforth, one should execute the following:
 
 #### spawn
 ( xt dictionary-size stack-size rstack-size -- task )
