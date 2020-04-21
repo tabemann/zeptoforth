@@ -32,7 +32,7 @@ which takes *xt* and executes it repeatedly until it returns a non-zero value; *
 #### while-loop
 ( ??? while-xt body-xt -- ??? )
 
-which in a loop first executes *while-xt* and, if it returns a non-zero value, then executes *body-xt* and continues looping, else it exits the loop; *while-xt* has the signature:
+which in a loop first executes *while-xt* and, if it returns a non-zero value, then it executes *body-xt* and continues looping, else it exits the loop; *while-xt* has the signature:
 
 ( ??? -- ??? f )
 
