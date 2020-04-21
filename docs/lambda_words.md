@@ -32,12 +32,12 @@ Execute a counted loop with an xt
 Execute a counted loop with an arbitrary increment with an xt
 
 #### biter
-( ??? addr count xt -- ??? ) ( xt: ??? b -- ??? )
+( ??? b-addr count xt -- ??? ) ( xt: ??? b -- ??? )
 
 Iterate executing an xt over a byte array
 
 #### hiter
-( ??? addr count xt -- ??? ) ( xt: ??? h -- ??? )
+( ??? h-addr count xt -- ??? ) ( xt: ??? h -- ??? )
 
 Iterate executing an xt over a halfword array
 
@@ -63,12 +63,12 @@ Iterate executing at xt over values from a getter
 Iterate executing at xt over double-word values from a getter
 
 #### bfind-index
-( ??? b-addr count xt -- ??? i|-1 ) ( xt: ??? x -- ??? f )
+( ??? b-addr count xt -- ??? i|-1 ) ( xt: ??? b -- ??? f )
 
 Find the index of a value in a byte array with a predicate
 
 #### hfind-index
-( ??? h-addr count xt -- ??? i|-1 ) ( xt: ??? x -- ??? f )
+( ??? h-addr count xt -- ??? i|-1 ) ( xt: ??? h -- ??? f )
 
 Find the index of a value in a halfword array with a predicate
 
@@ -95,25 +95,22 @@ Find the index of a value from a getter with a predicate
 Find the index of a double-word value from a getter with a predicate
 
 #### bfind-value
-( ??? a-addr count xt -- ??? x|0 f ) ( xt: ??? x -- ??? f )
+( ??? a-addr count xt -- ??? b|0 f ) ( xt: ??? b -- ??? f )
 
 Find a value in a byte array with a predicate
 
-
 #### hfind-value
-( ??? a-addr count xt -- ??? x|0 f ) ( xt: ??? x -- ??? f )
+( ??? a-addr count xt -- ??? h|0 f ) ( xt: ??? h -- ??? f )
 
 Find a value in a halfword array with a predicate
-
 
 #### find-value
 ( ??? a-addr count xt -- ??? x|0 f ) ( xt: ??? x -- ??? f )
 
 Find a value in a cell array with a predicate
 
-
 #### 2find-value
-( ??? a-addr count xt -- ??? x|0 f ) ( xt: ??? d -- ??? f )
+( ??? a-addr count xt -- ??? d|0 f ) ( xt: ??? d -- ??? f )
 
 Find a value in a double-word array with a predicate
 
