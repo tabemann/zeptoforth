@@ -17,6 +17,7 @@
 
 #### pick
 ( xi ... x0 i -- xi ... x0 xi )
+
 #### roll
 ( xi ... x0 i -- xi-1 ... x0 xi )
 
@@ -161,16 +162,16 @@
 #### 2@
 ( a-addr -- x1 x2 )
 
-#### b,
+#### bram,
 ( b -- )
 
-#### h,
+#### hram,
 ( h -- )
 
-#### ,
+#### ram,
 ( x -- )
 
-#### 2,
+#### 2ram,
 ( x1 x2 -- )
 
 #### bflash,
@@ -185,28 +186,28 @@
 #### 2flash,
 ( x1 x2 -- )
 
-#### bcurrent,
+#### b,
 ( b -- )
 
-#### hcurrent,
+#### h,
 ( h -- )
 
-#### current,
+#### ,
 ( x -- )
 
-#### 2current,
+#### 2,
 ( x1 x2 -- )
 
-#### breserve
+#### bram-reserve
 ( b -- )
 
-#### hreserve
+#### hram-reserve
 ( h -- )
 
-#### reserve
+#### ram-reserve
 ( x -- )
 
-#### 2reserve
+#### 2ram-reserve
 ( x1 x2 -- )
 
 #### bflash-reserve
@@ -221,28 +222,28 @@
 #### 2flash-reserve
 ( x1 x2 -- )
 
-#### bcurrent-reserve
+#### breserve
 ( b -- )
 
-#### hcurrent-reserve
+#### hreserve
 ( h -- )
 
-#### current-reserve
+#### reserve
 ( x -- )
 
-#### 2current-reserve
+#### 2reserve
 ( x1 x2 -- )
 
-#### here
+#### ram-here
 ( -- b-addr )
 
 #### pad
 ( -- b-addr )
 
-#### allot
+#### ram-allot
 ( u -- )
 
-#### here!
+#### ram-here!
 ( b-addr -- )
 
 #### flash-here
@@ -272,22 +273,22 @@
 #### flash-latest!
 ( word -- )
 
-#### current-here
+#### here
 ( -- b-addr )
 
-#### current-allot
+#### allot
 ( u -- )
 
-#### align,
+#### ram-align,
 ( 2^power -- )
 
 #### flash-align,
 ( 2^power -- )
 
-#### current-align,
+#### align,
 ( 2^power -- )
 
-#### current-cstring,
+#### cstring,
 ( b-addr u -- )
 
 #### >r
