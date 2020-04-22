@@ -48,14 +48,14 @@ end-structure
 
 \ Create a scheduler
 : create-schedule ( -- schedule )
-  here schedule allot
+  ram-here schedule ram-allot
   0 over schedule-current !
   0 over schedule-last !
 ;
 
 \ Add an action to a scheduler
 : add-action ( xt schedule -- action )
-  here action allot
+  ram-here action ram-allot
   2 roll over action-xt !
   0 over action-active !
   0 over action-systick-start !

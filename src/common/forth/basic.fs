@@ -79,9 +79,9 @@ compress-flash
 \ Fill memory with zeros up until a given address
 : advance-here ( a -- )
   begin
-    dup current-here >
+    dup here >
   while
-    0 bcurrent,
+    0 b,
   repeat
   drop
 ;
@@ -289,12 +289,14 @@ commit-flash
 
 \ Safely type an integer
 : safe-type-integer ( n -- )
-  here swap format-integer dup allot dup >r safe-type r> negate allot
+  ram-here swap format-integer dup ram-allot
+  dup >r safe-type r> negate ram-allot
 ;
 
 \ Safely type an unsigned integer
 : safe-type-unsigned ( n -- )
-  here swap format-unsigned dup allot dup >r safe-type r> negate allot
+  ram-here swap format-unsigned dup ram-allot
+  dup >r safe-type r> negate ram-allot
 ;
 
 \ Commit code to flash
@@ -318,14 +320,14 @@ commit-flash
   dup 0= triggers token-expected
   start-compile-no-push
   compiling-to-flash? if
-    current-here 28 + ( 28 bytes ) flash-block-size align
+    here 28 + ( 28 bytes ) flash-block-size align
   else
-    current-here 16 + ( 16 bytes ) 4 align
+    here 16 + ( 16 bytes ) 4 align
   then
   tos push,
   dup tos literal,
   14 bx,
-  $003F hcurrent,
+  $003F h,
   visible
   inlined
   finalize-no-align,
@@ -349,15 +351,15 @@ commit-flash
 : <builds-with-name ( addr bytes -- )
   start-compile
   compiling-to-flash? if
-    current-here 32 + ( 32 bytes ) 4 align
+    here 32 + ( 32 bytes ) 4 align
   else
-    current-here 24 + ( 24 bytes ) 4 align
+    here 24 + ( 24 bytes ) 4 align
   then
   tos push,
   dup tos literal,
   reserve-literal build-target !
   0 bx,
-  $003F hcurrent,
+  $003F h,
   visible
   finalize-no-align,
   advance-here
@@ -395,7 +397,7 @@ commit-flash
 
 \ Begin declaring a structure
 : begin-structure ( "name" -- offset )
-  <builds current-here 0 4 current-allot flash-align, does> @
+  <builds here 0 4 allot flash-align, does> @
 ;
 
 \ Finish declaring a structure
@@ -403,27 +405,27 @@ commit-flash
 
 \ Create an arbitrary-sized field
 : +field ( offset size "name" -- offset )
-  <builds over current, flash-align, + does> @ +
+  <builds over , flash-align, + does> @ +
 ;
 
 \ Create a byte-sized field
 : bfield: ( offset "name" -- offset )
-  <builds dup current, flash-align, 1+ does> @ +
+  <builds dup , flash-align, 1+ does> @ +
 ;
 
 \ Create a halfword-sized field
 : hfield: ( offset "name" -- offset )
-  <builds 2 align dup current, flash-align, 2+ does> @ +
+  <builds 2 align dup , flash-align, 2+ does> @ +
 ;
 
 \ Create a cell-sized field
 : field: ( offset "name" -- offset )
-  <builds cell align dup current, flash-align, cell + does> @ +
+  <builds cell align dup , flash-align, cell + does> @ +
 ;
 
 \ Create a double cell-sized field
 : 2field: ( offset "name" -- offset )
-  <builds 2 cells align dup current, flash-align, 2 cells + does> @ +
+  <builds 2 cells align dup , flash-align, 2 cells + does> @ +
 ;
 
 \ Get whether two strings are equal
@@ -466,7 +468,7 @@ commit-flash
   [immediate]
   [compile-only]
   rot ?dup if
-    current-here swap branch-back!
+    here swap branch-back!
   then
   reserve-branch
   -rot postpone then
@@ -517,7 +519,7 @@ commit-flash
   [compile-only]
   postpone 2drop
   ?dup if
-    current-here swap branch-back!
+    here swap branch-back!
   then
 ;
 
@@ -662,7 +664,7 @@ commit-flash
   compiling-to-flash? if
     ram-buffer:
   else
-    create allot
+    create ram-allot
   then
 ;
 
@@ -671,7 +673,7 @@ commit-flash
   compiling-to-flash? if
     ram-aligned-buffer:
   else
-    create allot
+    create ram-allot
   then
 ;
 
@@ -680,7 +682,7 @@ commit-flash
   compiling-to-flash? if
     ram-bvariable
   else
-    create 1 allot
+    create 1 ram-allot
   then
 ;
 
@@ -689,7 +691,7 @@ commit-flash
   compiling-to-flash? if
     ram-hvariable
   else
-    create 2 allot
+    create 2 ram-allot
   then
 ;
 
@@ -698,7 +700,7 @@ commit-flash
   compiling-to-flash? if
     ram-variable
   else
-    create 4 allot
+    create 4 ram-allot
   then
 ;
 
@@ -707,7 +709,7 @@ commit-flash
   compiling-to-flash? if
     ram-2variable
   else
-    create 8 allot
+    create 8 ram-allot
   then
 ;
 
@@ -720,7 +722,7 @@ commit-flash
   postpone >r
   postpone >r
   postpone >r
-  current-here
+  here
 ;
 
 \ Begin a ?do loop
@@ -739,7 +741,7 @@ commit-flash
   postpone 2drop
   postpone exit
   postpone then
-  current-here
+  here
 ;
 
 \ End a do loop
@@ -762,7 +764,7 @@ commit-flash
   postpone rdrop
   postpone rdrop
   postpone rdrop
-  current-here 1+ 6 rot literal!
+  here 1+ 6 rot literal!
 ;
 
 \ End a do +loop
@@ -795,7 +797,7 @@ commit-flash
   postpone rdrop
   postpone rdrop
   postpone rdrop
-  current-here 1+ 6 rot literal!
+  here 1+ 6 rot literal!
 ;
 
 \ Get the loop index
@@ -882,15 +884,15 @@ commit-flash
   [immediate]
   [compile-only]
   reserve-branch
-  $B500 hcurrent,
+  $B500 h,
 ;
 
 \ End lambda
 : ;] ( -- )
   [immediate]
   [compile-only]
-  $BD00 hcurrent,
-  current-here over branch-back!
+  $BD00 h,
+  here over branch-back!
   4+ lit,
 ;
 
@@ -968,15 +970,15 @@ commit-flash
 
 \ s" constant
 2 constant s"-length
-create s"-data char s bcurrent, char " bcurrent,
+create s"-data char s b, char " b,
 
 \ ." constant
 2 constant ."-length
-create ."-data char c bcurrent, char " bcurrent,
+create ."-data char c b, char " b,
 
 \ c" constant
 2 constant c"-length
-create c"-data char c bcurrent, char " bcurrent,
+create c"-data char c b, char " b,
 
 \ Commit to flash
 commit-flash
@@ -1099,12 +1101,13 @@ commit-flash
 
 \ Type a signed double-cell number without a leading space
 : (d.) ( nd -- )
-  here -rot format-double dup >r dup allot type r> negate allot
+  ram-here -rot format-double dup >r dup ram-allot type r> negate ram-allot
 ;
 
 \ Type an unsigned double-cell number without a leading space
 : (ud.) ( ud -- )
-  here -rot format-double-unsigned dup >r dup allot type r> negate allot
+  ram-here -rot format-double-unsigned
+  dup >r dup ram-allot type r> negate ram-allot
 ;
 
 \ Commit to flash
@@ -1137,7 +1140,7 @@ variable wait-hook
 \ Initialize the RAM variables
 : init ( -- )
   init
-  next-ram-space here!
+  next-ram-space ram-here!
   0 wait-hook !
 ;
 
