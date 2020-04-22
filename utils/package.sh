@@ -26,5 +26,6 @@ rm -rf .git
 rm -rf `find . -name 'screenlog.*'`
 make clean
 rm -rf `find . -name '*~'`
+rm -rf obj
 cd ..
 tar cfz zeptoforth-$VERSION.tar.gz zeptoforth-$VERSION
