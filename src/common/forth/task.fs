@@ -171,7 +171,7 @@ end-structure
   free-end @ task - next-ram-space - over task-dict-size !
   rstack-base @ rp@ - over task-rstack-offset h!
   stack-base @ sp@ - over task-stack-offset h!
-  here next-ram-space - over task-dict-offset !
+  ram-here next-ram-space - over task-dict-offset !
   1 over task-active !
   false over task-wait !
   0 over task-systick-start !
@@ -284,7 +284,7 @@ end-structure
   current-task @
   rp@ over task-rstack-current!
   >r sp@ r> tuck task-stack-current!
-  here over task-dict-current!
+  ram-here over task-dict-current!
   handler @ over task-handler !
   dup start-task !
   go-to-next-task
@@ -296,7 +296,7 @@ end-structure
   dup task-rstack-base rstack-base !
   dup task-rstack-end rstack-end !
   dup task-rstack-current rp!
-  dup task-dict-current here!
+  dup task-dict-current ram-here!
   task-stack-current sp!
 ;
 

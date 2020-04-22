@@ -431,8 +431,8 @@ _uge:	movs r0, tos
 1:	movs tos, #0
 	bx lr
 	
-	@@ Get the HERE pointer
-	define_word "here", visible_flag
+	@@ Get the RAM HERE pointer
+	define_word "ram-here", visible_flag
 _here:	ldr r0, =here
 	push_tos
 	ldr tos, [r0]
@@ -448,7 +448,7 @@ _pad:	ldr r0, =here
 	bx lr
 
 	@@ Allot space in RAM
-	define_word "allot", visible_flag
+	define_word "ram-allot", visible_flag
 _allot:	ldr r0, =here
 	ldr r1, [r0]
 	adds r1, tos
@@ -457,7 +457,7 @@ _allot:	ldr r0, =here
 	bx lr
 
 	@@ Set the RAM flash pointer
-	define_word "here!", visible_flag
+	define_word "ram-here!", visible_flag
 _store_here:
 	ldr r0, =here
 	str tos, [r0]
@@ -540,7 +540,7 @@ _store_flash_latest:
 
 	@@ Get either the HERE pointer or the flash HERE pointer, depending on
 	@@ compilation mode
-	define_word "current-here", visible_flag
+	define_word "here", visible_flag
 _current_here:
 	push {lr}
 	ldr r0, =compiling_to_flash
@@ -553,7 +553,7 @@ _current_here:
 	pop {pc}
 
 	@@ Allot space in RAM or in flash, depending on the compilation mode
-	define_word "current-allot", visible_flag
+	define_word "allot", visible_flag
 _current_allot:
 	push {lr}
 	ldr r0, =compiling_to_flash
@@ -1151,8 +1151,8 @@ _get_8:	ldr r0, [tos]
 	movs tos, r0
 	bx lr
 
-	@@ Store a byte at the HERE location
-	define_word "b,", visible_flag
+	@@ Store a byte at the RAM HERE location
+	define_word "bram,", visible_flag
 _comma_1:
 	ldr r0, =here
 	ldr r1, [r0]
@@ -1163,8 +1163,8 @@ _comma_1:
 	pull_tos
 	bx lr
 
-	@@ Store a halfword at the HERE location
-	define_word "h,", visible_flag
+	@@ Store a halfword at the RAM HERE location
+	define_word "hram,", visible_flag
 _comma_2:
 	ldr r0, =here
 	ldr r1, [r0]
@@ -1175,8 +1175,8 @@ _comma_2:
 	pull_tos
 	bx lr
 
-	@@ Store a word at the HERE location
-	define_word ",", visible_flag
+	@@ Store a word at the RAM HERE location
+	define_word "ram,", visible_flag
 _comma_4:
 	ldr r0, =here
 	ldr r1, [r0]
@@ -1185,8 +1185,8 @@ _comma_4:
 	pull_tos
 	bx lr
 
-	@@ Store a doubleword at the HERE location
-	define_word "2,", visible_flag
+	@@ Store a doubleword at the RAM HERE location
+	define_word "2ram,", visible_flag
 _comma_8:
 	ldr r0, =here
 	ldr r1, [r0]
@@ -1305,7 +1305,7 @@ _store_current_8:
 	pop {pc}
 
 	@@ Store a byte to the RAM or flash HERE location
-	define_word "bcurrent,", visible_flag
+	define_word "b,", visible_flag
 _current_comma_1:
 	push {lr}
 	ldr r0, =compiling_to_flash
@@ -1318,7 +1318,7 @@ _current_comma_1:
 	pop {pc}
 
 	@@ Store a halfword to the RAM or flash HERE location
-	define_word "hcurrent,", visible_flag
+	define_word "h,", visible_flag
 _current_comma_2:
 	push {lr}
 	ldr r0, =compiling_to_flash
@@ -1331,7 +1331,7 @@ _current_comma_2:
 	pop {pc}
 
 	@@ Store a word to the RAM or flash HERE location
-	define_word "current,", visible_flag
+	define_word ",", visible_flag
 _current_comma_4:
 	push {lr}
 	ldr r0, =compiling_to_flash
@@ -1344,7 +1344,7 @@ _current_comma_4:
 	pop {pc}
 
 	@@ Store a doubleword to the RAM or flash HERE location
-	define_word "2current,", visible_flag
+	define_word "2,", visible_flag
 _current_comma_8:
 	push {lr}
 	ldr r0, =compiling_to_flash
@@ -1357,7 +1357,7 @@ _current_comma_8:
 	pop {pc}
 
 	@@ Reserve a byte at the RAM HERE location
-	define_word "breserve", visible_flag
+	define_word "bram-reserve", visible_flag
 _reserve_1:
 	ldr r0, =here
 	ldr r1, [r0]
@@ -1368,7 +1368,7 @@ _reserve_1:
 	bx lr
 
 	@@ Reserve a halfword at the RAM HERE location
-	define_word "hreserve", visible_flag
+	define_word "hram-reserve", visible_flag
 _reserve_2:
 	ldr r0, =here
 	ldr r1, [r0]
@@ -1379,7 +1379,7 @@ _reserve_2:
 	bx lr
 
 	@@ Reserve a word at the RAM HERE location
-	define_word "reserve", visible_flag
+	define_word "ram-reserve", visible_flag
 _reserve_4:
 	ldr r0, =here
 	ldr r1, [r0]
@@ -1390,7 +1390,7 @@ _reserve_4:
 	bx lr
 
 	@@ Reserve a doubleword at the RAM HERE location
-	define_word "2reserve", visible_flag
+	define_word "2ram-reserve", visible_flag
 _reserve_8:
 	ldr r0, =here
 	ldr r1, [r0]
@@ -1445,7 +1445,7 @@ _flash_reserve_8:
 	bx lr
 
 	@@ Reserve a byte at the RAM or flash HERE location
-	define_word "bcurrent-reserve", visible_flag
+	define_word "breserve", visible_flag
 _current_reserve_1:
 	push {lr}
 	ldr r0, =compiling_to_flash
@@ -1458,7 +1458,7 @@ _current_reserve_1:
 	pop {pc}
 
 	@@ Reserve a halfword at the RAM or flash HERE location
-	define_word "hcurrent-reserve", visible_flag
+	define_word "hreserve", visible_flag
 _current_reserve_2:
 	push {lr}
 	ldr r0, =compiling_to_flash
@@ -1471,7 +1471,7 @@ _current_reserve_2:
 	pop {pc}
 
 	@@ Reserve a word at the RAM or flash HERE location
-	define_word "current-reserve", visible_flag
+	define_word "reserve", visible_flag
 _current_reserve_4:
 	push {lr}
 	ldr r0, =compiling_to_flash
@@ -1484,7 +1484,7 @@ _current_reserve_4:
 	pop {pc}
 
 	@@ Reserve a doubleword at the RAM or flash HERE location
-	define_word "2current-reserve", visible_flag
+	define_word "2reserve", visible_flag
 _current_reserve_8:
 	push {lr}
 	ldr r0, =compiling_to_flash
@@ -1497,7 +1497,7 @@ _current_reserve_8:
 	pop {pc}
 
 	@@ Align to a power of two
-	define_word "current-align,", visible_flag
+	define_word "align,", visible_flag
 _current_comma_align:
 	push {lr}
 	subs tos, #1
@@ -1537,7 +1537,7 @@ _flash_comma_align:
 	pop {pc}
 
 	@@ Align to a power of two
-	define_word "align,", visible_flag
+	define_word "ram-align,", visible_flag
 _comma_align:
 	push {lr}
 	subs tos, #1
@@ -1556,7 +1556,7 @@ _comma_align:
 2:	pop {pc}
 
 	@@ Compile a c-string
-	define_word "current-cstring,", visible_flag
+	define_word "cstring,", visible_flag
 _current_comma_cstring:
 	push {lr}
 	ldr r0, =255

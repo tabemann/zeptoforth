@@ -51,7 +51,7 @@ variable blink-delay
 
 \ Create a blink word
 : blink ( xt "name" -- )
-  <builds current, does>
+  <builds , does>
   @ execute blink-delay @ current-action reset-action-delay
 ;
 
