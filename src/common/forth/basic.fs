@@ -543,6 +543,26 @@ commit-flash
   dup 16 rshift h.4 h.4
 ;
 
+\ Look up next available user space
+: next-user-space ( -- offset )
+  s" *USER*" visible-flag flash-latest find-dict dup if
+    >xt execute
+  else
+    0
+  then
+;
+
+\ Specify next available user space
+: set-next-user-space ( offset -- )
+  compiling-to-flash?
+  swap
+  compile-to-flash
+  s" *USER*" constant-with-name
+  not if
+    compile-to-ram
+  then
+;
+
 \ Look up next available RAM space
 : next-ram-space ( -- addr )
   s" *RAM*" visible-flag flash-latest find-dict dup if
@@ -565,8 +585,99 @@ commit-flash
   then
 ;
 
+\ Complete a USER variable word
+: user> ( -- ) does> @ dict-base @ + ;
+
 \ Commit changes to flash
 commit-flash
+
+\ Allocate a byte user variable
+: buser ( "name" -- )
+  next-user-space
+  compiling-to-flash?
+  over
+  compile-to-flash
+  <builds , user>
+  not if
+    compile-to-ram
+  then
+  1+
+  set-next-user-space
+;
+
+\ Allocate a halfword variable in RAM
+: huser ( "name" -- )
+  next-user-space
+  2 align
+  compiling-to-flash?
+  over
+  compile-to-flash
+  <builds , user>
+  not if
+    compile-to-ram
+  then
+  2+
+  set-next-user-space
+;
+
+\ Allocate a user variable
+: user ( "name" -- )
+  next-user-space
+  4 align
+  compiling-to-flash?
+  over
+  compile-to-flash
+  <builds , user>
+  not if
+    compile-to-ram
+  then
+  4+
+  set-next-user-space
+;
+
+\ Allocate a doubleword user variable
+: 2user ( "name" -- )
+  next-user-space
+  4 align
+  compiling-to-flash?
+  over
+  compile-to-flash
+  <builds , user>
+  not if
+    compile-to-ram
+  then
+  8 +
+  set-next-user-space
+;
+
+\ Allocate a user buffer
+: user-buffer: ( bytes "name" -- )
+  next-user-space
+  compiling-to-flash?
+  over
+  compile-to-flash
+  <builds , user>
+  not if
+    compile-to-ram
+  then
+  +
+  set-next-user-space
+;
+
+\ Allocate a cell-aligned user buffer
+: user-aligned-buffer: ( bytes "name" -- )
+  next-user-space
+  4 align
+  compiling-to-flash?
+  over
+  compile-to-flash
+  <builds , user>
+  not if
+    compile-to-ram
+  then
+  +
+  set-next-user-space
+;
 
 \ Allocate a byte variable in RAM
 : ram-bvariable ( "name" -- )
@@ -1140,7 +1251,8 @@ variable wait-hook
 \ Initialize the RAM variables
 : init ( -- )
   init
-  next-ram-space ram-here!
+  next-ram-space dict-base !
+  dict-base @ next-user-space + ram-here!
   0 wait-hook !
 ;
 

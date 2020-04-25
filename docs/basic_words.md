@@ -288,7 +288,7 @@ Specify a buffer of a given size
 #### aligned-buffer:
 ( # "name" -- )
 
-Specify a buffer of a given size
+Specify a cell-aligned buffer of a given size
 
 #### bvariable
 ( "name" -- )
@@ -309,6 +309,36 @@ Create a four-byte variable
 ( "name" -- )
 
 Create an eight-byte variable
+
+#### user-buffer:
+( # "name" -- )
+
+Specify a user buffer of a given size
+
+#### user-aligned-buffer:
+( # "name" -- )
+
+Specify a cell-aligned user buffer of a given size
+
+#### buser
+( "name" -- )
+
+Create a one-byte user variable
+
+#### huser
+( "name" -- )
+
+Create a two-byte user variable
+
+#### user
+( "name" -- )
+
+Create a four-byte user variable
+
+#### 2user
+( "name" -- )
+
+Create an eight-byte user variable
 
 #### do
 ( end start -- ) ( R: -- leave start end ) ( compile: -- leave* loop )

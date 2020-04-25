@@ -31,6 +31,21 @@ variable start-task
 \ Pause count
 variable pause-count
 
+\ The current task handler
+user task-handler
+
+\ Whether a task is waiting
+user task-wait
+
+\ Task systick start time
+user task-systick-start
+
+\ Task systick delay time
+user task-systick-delay
+
+\ The current base for a task
+user task-base
+
 \ The task structure
 begin-structure task
   \ Return stack size
@@ -51,20 +66,8 @@ begin-structure task
   \ Current dictionary offset
   field: task-dict-offset
 
-  \ Handler
-  field: task-handler
-  
   \ Task active state ( > 0 active, <= 0 inactive )
   field: task-active
-
-  \ Task wait state
-  field: task-wait
-
-  \ Task systick start time
-  field: task-systick-start
-  
-  \ Task systick delay time
-  field: task-systick-delay
 
   \ Next task
   field: task-next
@@ -134,15 +137,52 @@ end-structure
   dup task-rstack-current cell - tuck swap task-rstack-current! !
 ;
 
+\ Access a given user variable for a given task
+: for-task ( task xt -- addr )
+  execute dict-base @ - swap task-dict-base +
+;
+
+\ Link a task into the main loop
+: link-task ( task -- )
+  current-task @ task-next @ over task-next !
+  current-task @ task-next !
+;
+
+\ Find the previous task
+: prev-task ( task1 -- task2 )
+  dup
+  begin dup task-next @ 2 pick <> while task-next @ repeat
+  tuck = if drop 0 then
+;
+
+\ Unlink a task from the main loop
+: unlink-task ( task -- )
+  dup prev-task ?dup if
+    over current-task @ = if
+      over task-next @ current-task !
+    then
+    swap task-next @ swap task-next !
+  else
+    0 current-task !
+  then
+;
+
 \ Enable a task
-: enable-task ( task -- ) dup task-active @ 1+ swap task-active ! ;
+: enable-task ( task -- )
+  dup task-active @ 1+
+  dup 1 = if over link-task then
+  swap task-active ! ;
 
 \ Disable a task
-: disable-task ( task -- ) dup task-active @ 1- swap task-active ! ;
+: disable-task ( task -- )
+  dup task-active @ 1-
+  dup 0 = if over unlink-task then
+  swap task-active ! ;
 
 \ Force-enable a task
 : force-enable-task ( task -- )
   dup task-active @ 1 < if
+    dup link-task
     1 swap task-active !
   else
     drop
@@ -152,6 +192,7 @@ end-structure
 \ Force-disable a task
 : force-disable-task ( task -- )
   dup task-active @ 0> if
+    dup unlink-task
     0 swap task-active !
   else
     drop
@@ -160,7 +201,7 @@ end-structure
 
 \ Mark a task as waiting
 : wait-task ( task -- )
-  true swap task-wait !
+  true swap ['] task-wait for-task !
 ;
 
 \ Initialize the main task
@@ -173,9 +214,10 @@ end-structure
   stack-base @ sp@ - over task-stack-offset h!
   ram-here next-ram-space - over task-dict-offset !
   1 over task-active !
-  false over task-wait !
-  0 over task-systick-start !
-  -1 over task-systick-delay !
+  false task-wait !
+  0 task-systick-start !
+  -1 task-systick-delay !
+  base @ task-base !
   dup dup task-next !
   dup main-task !
   dup start-task !
@@ -220,17 +262,17 @@ end-structure
   tuck task-rstack-size h!
   tuck task-stack-size h!
   tuck task-dict-size !
-  0 over task-handler !
+  0 over ['] task-handler for-task !
   0 over task-active !
-  false over task-wait !
-  0 over task-systick-start !
-  -1 over task-systick-delay !
-  current-task @ task-next @ over task-next !
-  dup current-task @ task-next !
+  base @ over ['] task-base for-task !
+  false over ['] task-wait for-task !
+  0 over ['] task-systick-start for-task !
+  -1 over ['] task-systick-delay for-task !
   dup dup task-dict-size @ - free-end !
   0 over task-rstack-offset h!
   0 over task-stack-offset h!
-  0 over task-dict-offset !
+  next-user-space over task-dict-offset !
+  0 over task-next !
   ['] task-entry 1+ over push-task-rstack
   tuck push-task-stack
 ;
@@ -239,11 +281,10 @@ end-structure
 : go-to-next-task ( task -- task )
   task-next @
   begin
-    dup task-active @ 1 <
-    over task-wait @ or
-    over task-systick-delay @ -1 <>
-    systick-counter 3 pick task-systick-start @ -
-    3 pick task-systick-delay @ u< and or
+    dup ['] task-wait for-task @
+    over ['] task-systick-delay for-task @ -1 <>
+    systick-counter 3 pick ['] task-systick-start for-task @ -
+    3 pick ['] task-systick-delay for-task @ u< and or
     over start-task @ <> and
   while
     task-next @
@@ -253,7 +294,7 @@ end-structure
 \ Reset waits
 : reset-waiting-tasks ( -- )
   main-task @ begin
-    false over task-wait !
+    false over ['] task-wait for-task !
     task-next @
     dup main-task @ =
   until
@@ -263,11 +304,10 @@ end-structure
 \ Handle all tasks are waiting
 : handle-waiting-tasks ( task -- )
   dup start-task @ = if
-    dup task-active @ 1 <
-    over task-wait @ or
-    over task-systick-delay @ -1 <>
-    systick-counter 3 pick task-systick-start @ -
-    3 roll task-systick-delay @ u< and or
+    dup ['] task-wait for-task @
+    over ['] task-systick-delay for-task @ -1 <>
+    systick-counter 3 pick ['] task-systick-start for-task @ -
+    3 roll ['] task-systick-delay for-task @ u< and or
     if
       sleep
       reset-waiting-tasks
@@ -280,52 +320,63 @@ end-structure
 \ Handle PAUSE
 : do-pause ( -- )
   pause-count @ 1+ pause-count !
-  task-io
+  begin
+    task-io
+    current-task @ 0<>
+    dup not if
+      sleep
+    then
+  until
   current-task @
   rp@ over task-rstack-current!
   >r sp@ r> tuck task-stack-current!
   ram-here over task-dict-current!
-  handler @ over task-handler !
+  handler @ task-handler !
+  base @ task-base !
   dup start-task !
   go-to-next-task
   dup handle-waiting-tasks
   dup current-task !
-  dup task-handler @ handler !
+  task-base @ base !
+  task-handler @ handler !
   dup task-stack-base stack-base !
   dup task-stack-end stack-end !
   dup task-rstack-base rstack-base !
   dup task-rstack-end rstack-end !
   dup task-rstack-current rp!
   dup task-dict-current ram-here!
+  dup task-dict-base dict-base !
   task-stack-current sp!
 ;
 
 \ Start a delay from the present
 : start-task-delay ( 1/10m-delay task -- )
-  dup systick-counter swap task-systick-start !
-  task-systick-delay !
+  dup systick-counter swap ['] task-systick-start for-task !
+  ['] task-systick-delay for-task !
 ;
 
 \ Set a delay for a task
 : set-task-delay ( 1/10ms-delay 1/10ms-start task -- )
-  tuck task-systick-start !
-  task-systick-delay !
+  tuck ['] task-systick-start for-task !
+  ['] task-systick-delay for-task !
 ;
 
 \ Advance a delay for a task by a given amount of time
 : advance-task-delay ( 1/10ms-offset task -- )
-  systick-counter over task-systick-start @ - over task-systick-delay @ < if
-    task-systick-delay +!
+  systick-counter over ['] task-systick-start for-task @ -
+  over ['] task-systick-delay for-task @ < if
+    ['] task-systick-delay for-task +!
   else
-    dup task-systick-delay @ over task-systick-start +!
-    task-systick-delay !
+    dup ['] task-systick-delay for-task @
+    over ['] task-systick-start for-task +!
+    ['] task-systick-delay for-task !
   then
 ;
 
 \ Advance of start a delay from the present, depending on whether the delay
 \ length has changed
 : reset-task-delay ( 1/10ms-delay task -- )
-  dup task-systick-delay @ 2 pick = if
+  dup ['] task-systick-delay for-task @ 2 pick = if
     advance-task-delay
   else
     start-task-delay
@@ -334,14 +385,14 @@ end-structure
 
 \ Get a delay for a task
 : get-task-delay ( task -- 1/10ms-delay 1/10ms-start )
-  dup task-systick-delay @
-  over task-systick-start @
+  dup ['] task-systick-delay for-task @
+  over ['] task-systick-start for-task @
 ;
 
 \ Cancel a delay for a task
 : cancel-task-delay ( task -- )
-  0 over task-systick-start !
-  -1 swap task-systick-delay !
+  0 over ['] task-systick-start for-task !
+  -1 swap ['] task-systick-delay for-task !
 ;
 
 \ Wait for n milliseconds with multitasking support
