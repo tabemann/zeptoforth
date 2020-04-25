@@ -32,6 +32,13 @@ _pause_enabled:
 	ldr tos, =pause_enabled
 	bx lr
 
+	@@ Get the RAM dictionary base variable address
+	define_word "dict-base", visible_flag
+_dict_base:
+	push_tos
+	ldr tos, =dict_base
+	bx lr
+	
 	@@ Get the RAM base
 	define_word "ram-base", visible_flag
 _ram_base:

@@ -23,7 +23,7 @@ PROJECT=zeptoforth
 rm screenlog.0
 st-flash erase
 st-flash write bin/$VERSION/$PLATFORM/zeptoforth_kernel-$VERSION.bin 08000000
-sleep 2
+sleep 4
 ./utils/codeload3.py -B 115200 -p $PORT serial src/$PLATFORM/forth/setup.fs
 ./utils/codeload3.py -B 115200 -p $PORT serial src/common/forth/ihex.fs
 screen -d -m $PORT 115200

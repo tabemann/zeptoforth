@@ -19,6 +19,9 @@
 	@@ Pointer to the current Flash HERE location
 	allot flash_here, 4
 
+	@@ Pointer to the base of HERE space
+	allot dict_base, 4
+
 	@@ Flag to determine whether compilation is going to Flash
 	allot compiling_to_flash, 4
 
