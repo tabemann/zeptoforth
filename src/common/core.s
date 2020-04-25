@@ -1654,6 +1654,10 @@ _reboot:
 _init_variables:
 	push {lr}
 	bl _init_handlers
+	ldr r0, =here
+	ldr r0, [r0]
+	ldr r1, =dict_base
+	str r0, [r1]
 	ldr r0, =stack_base
 	ldr r1, =stack_top
 	str r1, [r0]
