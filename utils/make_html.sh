@@ -15,20 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-VERSION=$1
+MARKDOWN=~/Markdown_1.0.1/Markdown.pl
+DEST_DIR=html
 
-cp -r . ../zeptoforth-$VERSION
-cd ../zeptoforth-$VERSION
-mv bin/$VERSION bin-$VERSION
-rm -rf bin/*
-mv bin-$VERSION bin/$VERSION
-rm -rf .git
-rm -rf `find . -name 'screenlog.*'`
-make clean
-rm -rf `find . -name '*~'`
-rm -rf obj
-./build_html.sh
-rm -rf docs
-mv html docs
-cd ..
-tar cfz zeptoforth-$VERSION.tar.gz zeptoforth-$VERSION
+mkdir -p $DEST_DIR
+
+for file in docs/*.md
+do
+    base=$(basename -- "$file" | cut -f 1 -d '.')
+    $MARKDOWN < "$file" > "$DEST_DIR/$base.html"
+done
