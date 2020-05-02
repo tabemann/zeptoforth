@@ -19,6 +19,32 @@ compile-to-flash
 \ Begin compressing compiled code in flash
 compress-flash
 
+\ Find a word in a dictionary by address
+: find-dict-by-address ( addr dict -- word|0 )
+  begin
+    dup 0<> if
+      dup >xt 2 pick = if
+	true
+      else
+	prev-word false
+      then
+    else
+      true
+    then
+  until
+  nip
+;
+
+\ Commit to flash
+commit-flash
+
+\ Find a word by address
+: find-by-address ( addr -- word|0 )
+  dup ram-latest find-dict-by-address dup 0= if
+    drop flash-latest find-dict-by-address
+  then
+;
+
 \ Type a condition
 : (cond.) ( cond -- )
   drop
@@ -35,6 +61,18 @@ compress-flash
 
 \ Type a value
 : val. ( u -- ) ." $" base @ >r hex (u.) r> base ! ;
+
+\ Commit to flash
+commit-flash
+
+\ Print out an absolute address
+: addr. ( addr -- )
+  dup find-by-address ?dup if
+    word-name count type space ." <" val. ." >"
+  else
+    ." #" val.
+  then
+;
 
 \ Separator
 : sep. ( -- ) ." , " ;
@@ -137,14 +175,10 @@ compress-flash
   endcase
 ;
 
-\ Make a mask for a set number of bits
-: bits ( bits -- mask ) $FFFFFFFF 32 rot - rshift ;
-
 \ Extract a field
-: bitfield ( data shift bits -- ) -rot rshift swap bits and ;
-
-\ Empty halfword 2 test
-: empty2? ( data -- f ) %1000000000000000 and %0000000000000000 = ;
+: bitfield ( data shift bits -- )
+  -rot rshift swap $FFFFFFFF 32 rot - rshift and
+;
 
 \ Print out a condition if one is specified, otherwise do nothing
 : cond. ( cond -- )
@@ -168,13 +202,19 @@ compress-flash
 : s?. ( low shift -- ) 1 bitfield if ." S" then ;
 
 \ Print out 'S' if bit 4 is set
-: 4s?. ( low -- ) 4 s?. ;
+: 4s?. ( low -- ) 4 1 bitfield if ." S" then ;
 
 \ Type a PC-relative address
-: rel. ( pc rel extend -- ) swap 2 + 1 lshift swap 1 + extend + val. ;
+: rel. ( pc rel extend -- ) swap 2 + 1 lshift swap 1 + extend + addr. ;
 
 \ Type a non-sign-extended PC-relative address
-: nrel. ( pc rel -- ) swap 2 + 1 lshift + val. ;
+: nrel. ( pc rel -- ) swap 2 + 1 lshift + addr. ;
+
+\ Type out .W
+: .w ( -- ) ." .W " ;
+
+\ Commit to flash
+commit-flash
 
 \ 0 3 bitfield
 : 0_3_bf ( data -- field ) 0 3 bitfield ;
@@ -209,6 +249,9 @@ compress-flash
 \ 6 3 bitfield
 : 6_3_bf ( data -- field ) 6 3 bitfield ;
 
+\ Commit to flash
+commit-flash
+
 \ Decode a 16-bit and register
 : decode-and-reg-16 ( low -- )
   dup 0_3_bf reg. sep.
@@ -233,515 +276,332 @@ compress-flash
 ;
 
 \ Parse an ADC immediate instruction
-: parse-adc-imm ( h-addr1 cond -- h-addr2 f )
-  over h@
-  dup %1111101111100000 and %1111000101000000 = if
-    2 pick 2+ h@ dup empty2? if
-      dup instr16. ." ADC" over 4s?. rot cond. space decode-add-imm-32
-      match32
-    else
-      not-match32
-    then
-  else
-    2not-match16
-  then
+: p-adc-imm
+  ." ADC" over 4s?. rot cond. space decode-add-imm-32 drop
 ;
 
 \ Parse an ADC register instruction
-: parse-adc-reg ( h-addr1 cond -- h-addr2 f )
-  over h@
-  dup %1111111111000000 and %0100000101000000 = if
-    dup instr16. ." ADC" swap conds. space
-    decode-and-reg-16
-    match16
-  else
-    dup %1111111111100000 and %1110101101000000 = if
-      2 pick 2+ h@
-      dup instr16. ." ADC" over 4s?. rot cond. ." .W "
-      decode-add-reg-32
-      match32
-    else
-      2not-match16
-    then
-  else
-    2not-match16
-  then
+: p-adc-reg-1
+  ." ADC" swap conds. space decode-and-reg-16 drop
+;
+
+\ Parse an ADC register instruction
+: p-adc-reg-2
+  ." ADC" over 4s?. rot cond. .w decode-add-reg-32 drop
 ;
 
 \ Parse an ADD immediate instruction
-: parse-add-imm ( h-addr1 cond - h-addr2 f )
-  over h@
-  dup %1111111000000000 and %0001110000000000 = if
-    dup instr16. ." ADD"
-    swap conds.
-    dup 0_3_bf reg. sep.
-    dup 3_3_bf reg. sep-imm.
-    6_3_bf val.
-    match16
-  else
-    dup %1111100000000000 and %0011000000000000 = if
-      dup instr16. ." ADD" swap conds. space
-      dup 8 3 bitfield reg. sep-imm.
-      0_8_bf val.
-      match16
-    else
-      dup %1111101111100000 and %1111000100000000 = if
-	2 pick 2+ h@ dup empty2? if
-	  2dup instr32. ." ADD" over 4s?. rot cond. ." .W "
-	  decode-add-imm-32
-	  match32
-	else
-	  not-match32
-	then
-      else
-	dup %1111101111110000 and %1111001000000000 = if
-	  2 pick 2+ h@ dup empty2? if
-	    dup instr32. ." ADDW" rot cond. space
-	    dup 8_4_bf reg. sep.
-	    over 0_4_bf reg. sep-imm.
-	    dup 0_8_bf swap 12_4_bf 8 lshift or
-	    swap 10_1_bf 11 lshift or val.
-	    4 + true
-	  else
-	    not-match32
-	  then
-	else
-	  2not-match16
-	then
-      then
-    then
-  then
+: p-add-imm-1
+  ." ADD" swap conds. dup 0_3_bf reg. sep. dup 3_3_bf reg. sep-imm. 6_3_bf val.
+  drop
+;
+
+\ Parse an ADD immediate instruction
+: p-add-imm-2
+  ." ADD" swap conds. space dup 8 3 bitfield reg. sep-imm. 0_8_bf val. drop
+;
+
+\ Parse an ADD immediate instruction
+: p-add-imm-3
+  ." ADD" over 4s?. rot cond. .w decode-add-imm-32 drop
+;
+
+\ Parse an ADD immediate instruction
+: p-add-imm-4
+  ." ADDW" rot cond. space
+  dup 8_4_bf reg. sep.
+  over 0_4_bf reg. sep-imm.
+  dup 0_8_bf swap 12_4_bf 8 lshift or swap 10_1_bf 11 lshift or val.
+  drop
 ;
 
 \ Parse an ADD register instruction
-: parse-add-reg ( h-addr1 cond h-addr2 f )
-  over h@
-  dup %1111111000000000 and %0001100000000000 = if
-    dup instr16. ." ADD" swap conds.space
-    dup 0_3_bf reg. sep.
-    dup 3_3_bf reg. sep.
-    dup 6_3_bf reg.
-    match16
-  else
-    dup %1111111100000000 and %0100010000000000 = if
-      dup instr16. ." ADD" swap cond. space
-      dup 0_3_bf over 7 1 bitfield 3 lshift or reg. sep.
-      3 4 bitfield reg.
-      match16
-    else
-      dup %1111111111100000 and %1110101100000000 = if
-	2 pick 2+ h@
-	2dup instr32. ." ADD" over 4s?. rot cond. ." .W "
-	decode-add-reg-32
-	match32
-      else
-	2not-match16
-      then
-    then
-  then
+: p-add-reg-1
+  ." ADD" swap conds. space 0_3_bf reg. sep. dup 3_3_bf reg. sep. 6_3_bf reg.
+  drop
+;
+
+\ Parse an ADD register instruction
+: p-add-reg-2
+  ." ADD" swap cond. space
+  dup 0_3_bf over 7 1 bitfield 3 lshift or reg. sep. 3 4 bitfield reg.
+  drop
+;
+
+\ Parse an ADD register instruction
+: p-add-reg
+  ." ADD" over 4s?. rot cond. .w decode-add-reg-32 drop
 ;
 
 \ Parse an ADD SP to immediate instruction
-: parse-add-sp-imm ( h-addr1 cond -- h-addr2 f )
-  over h@
-  dup %1111100000000000 and %1010100000000000 = if
-    dup instr16. ." ADD" swap cond. space
-    dup 8 3 bitfield reg. ." , SP, #"
-    0_8_bf val.
-    match16
-  else
-    dup %1111111110000000 and %1011000000000000 = if
-      dup instr16. ." ADD" swap cond. space ." SP, SP, #"
-      0 7 bitfield val.
-      match16
-    else
-      dup %1111101111101111 and %1111000100001101 = if
-	over 2+ h@ dup empty2? if
-	  2dup instr32. ." ADD" over 4s?. rot cond. space
-	  dup 8_4_bf reg. ." , SP, #"
-	  dup 0_8_bf swap 12_4_bf 8 lshift or
-	  swap 10_1_bf 11 lshift or decode-const12
-	  match32
-	else
-	  not-match32
-	then
-      else
-	dup %1111101111111111 and %1111001000001101 = if
-	  over 2+ h@ dup empty2? if
-	    dup instr32. ." ADDW" rot cond. space
-	    dup 8_4_bf reg. ." , SP, #"
-	    dup 0_8_bf swap 12_4_bf 8 lshift or
-	    swap 10_1_bf 11 lshift or val.
-	    match32
-	  else
-	    not-match32
-	  then
-	else
-	  2not-match16
-	then
-      then
-    then
-  then
+: p-add-sp-imm
+  ." ADD" swap cond. space dup 8 3 bitfield reg. ." , SP, #" 0_8_bf val. drop
+;
+
+\ Parse an ADD SP to immediate instruction
+: p-add-sp-imm
+  ." ADD" swap cond. space ." SP, SP, #" 0 7 bitfield val. drop
+;
+
+\ Parse an ADD SP to immediate instruction
+: p-add-sp-imm
+  ." ADD" over 4s?. rot cond. space
+  dup 8_4_bf reg. ." , SP, #" dup 0_8_bf swap 12_4_bf 8 lshift or
+  swap 10_1_bf 11 lshift or decode-const12 drop
+;
+
+\ Parse an ADD SP to immediate instruction
+: p-add-sp-imm
+  ." ADDW" rot cond. space
+  dup 8_4_bf reg. ." , SP, #" dup 0_8_bf swap 12_4_bf 8 lshift or
+  swap 10_1_bf 11 lshift or val. drop
 ;
 
 \ Parse an ADD SP to register instruction
-: parse-add-sp-reg ( h-addr1 cond -- h-addr2 f )
-  over h@
-  dup %1111111101111000 and %0100010001101000 = if
-    dup instr16. ." ADD" swap cond. space
-    dup 0_3_bf over 7 1 bitfield 3 lshift or dup reg. ." , SP, "
-    reg.
-    match16
-  else
-    dup %1111111110000111 and %0100010010000101 = if
-      dup instr16. ." ADD" swap cond. space ." SP, "
-      2 4 bitfield reg.
-      match16
-    else
-      dup %1111111111101111 and %1110101100001101 = if
-	over 2+ h@ dup empty2? if
-	  2dup instr32. ." ADD" swap 4s?. swap cond. ." W "
-	  dup 8_4_bf reg. ." , SP, "
-	  dup 0_4_bf reg.
-	  dup 4_2_bf
-	  over 6_2_bf rot 12_3_bf lshift 2 or decode-imm-shift
-	  match32
-	else
-	  not-match32
-	then
-      else
-	2not-match16
-      then
-    then
-  then
+: p-add-sp-reg-1
+  ." ADD" swap cond. space
+  dup 0_3_bf over 7 1 bitfield 3 lshift or dup reg. ." , SP, " reg. drop
 ;
 
+\ Parse an ADD SP to register instruction
+: p-add-sp-reg-2
+  ." ADD" swap cond. space ." SP, " 2 4 bitfield reg. drop
+;
+\ Parse an ADD SP to register instruction
+: p-add-sp-reg-3
+  ." ADD" swap 4s?. swap cond. .w
+  dup 8_4_bf reg. ." , SP, " dup 0_4_bf reg. dup 4_2_bf
+  over 6_2_bf rot 12_3_bf lshift 2 or decode-imm-shift drop
+;
 
 \ Parse an ADR instruction
-: parse-adr ( h-addr1 cond -- h-addr2 f )
-  over h@
-  dup %111100000000000 and %1010000000000000 = if
-    dup instr16. ." ADD" swap cond. space
-    dup 8 3 bitfield reg. ." , PC, #"
-    0_8_bf 2 lshift val.
-    match16
-  else
-    dup %1111101111111111 and %1111001010101111 = if
-      over 2+ h@ empty2? if
-	2dup instr32. ." SUB" rot cond. space
-	dup 8_4_bf reg. ." , PC, #"
-	dup 0_8_bf swap 12_3_bf 8 lshift or
-	swap 10_1_bf 12 lshift or val.
-	match32
-      else
-	not-match32
-      then
-    else
-      dup %1111101111111111 and %1111001000001111 = if
-	over 2+ h@ empty2? if
-	  2dup instr32. ." ADD" rot cond. space
-	  dup 8_4_bf reg. ." , PC, #"
-	  dup 0_8_bf swap 12_3_bf 8 lshift or
-	  swap 10_1_bf 12 lshift or val.
-	  match32
-	else
-	  not-match32
-	then
-      else
-	2not-match16
-      then
-    then
-  then
+: p-adr-1
+  ." ADD" swap cond. space dup 8 3 bitfield reg. ." , PC, #"
+  0_8_bf 2 lshift val. drop
+;
+
+\ Parse an ADR instruction
+: p-adr-2
+  ." SUB" rot cond. space dup 8_4_bf reg. ." , PC, #"
+  dup 0_8_bf swap 12_3_bf 8 lshift or swap 10_1_bf 12 lshift or val. drop
+;
+
+\ Parse an ADR instruction
+: p-adr-3
+  ." ADD" rot cond. space dup 8_4_bf reg. ." , PC, #"
+  dup 0_8_bf swap 12_3_bf 8 lshift or swap 10_1_bf 12 lshift or val. drop
 ;
 
 \ Parse an AND immediate instruction
-: parse-and-imm ( h-addr1 cond -- h-addr2 f )
-  over h@
-  dup %1111101111100000 and %1111000000000000 = if
-    over 2+ h@ dup empty2? if
-      2dup instr32. ." AND" over 4s?. rot cond. space
-      dup 8_4_bf reg. sep.
-      over 0_4_bf reg. sep-imm.
-      dup 0_8_bf swap 12_3_bf 8 lshift or
-      swap 10_1_bf 12 lshift or decode-const12
-      match32
-    else
-      not-match32
-    then
-  else
-    2not-match16
-  then
+: p-and-imm
+  ." AND" over 4s?. rot cond. space dup 8_4_bf reg. sep.
+  over 0_4_bf reg. sep-imm. dup 0_8_bf swap 12_3_bf 8 lshift or
+  swap 10_1_bf 12 lshift or decode-const12 drop
 ;
 
 \ Parse an AND register instruction
-: parse-and-reg ( h-addr1 cond -- h-addr2 f )
-  over h@
-  dup %1111111111000000 and %0100000000000000 = if
-    dup instr16. ." AND" swap conds. space
-    decode-and-reg
-    match16
-  else
-    dup %1111111111100000 and %1110101000000000 = if
-      over 2+ h@
-      2dup instr32. ." AND" over 4s?. rot cond. ." .W "
-      dup 8_4_bf reg. sep.
-      swap 0_4_bf reg. sep.
-      dup 0_4_bf reg.
-      dup 4_2_bf
-      over 6_2_bf rot 12_3_bf 2 lshift or decode-imm-shift
-      match32
-    else
-      2not-match16
-    then
-  then
+: p-and-reg-1
+  ." AND" swap conds. space decode-and-reg drop
+;
+
+\ Parse an AND register instruction
+: p-and-reg-2
+  ." AND" over 4s?. rot cond. .w dup 8_4_bf reg. sep. swap 0_4_bf reg. sep.
+  dup 0_4_bf reg. dup 4_2_bf over 6_2_bf rot 12_3_bf 2 lshift or
+  decode-imm-shift drop
 ;
 
 \ Parse an ASR immediate instruction
-: parse-asr-imm ( h-addr1 cond -- h-addr2 f )
-  over h@
-  dup %1111100000000000 and %0001000000000000 = if
-    dup instr16. ." ASR" swap conds. space
-    dup 0_3_bf reg. sep.
-    dup 3_3_bf reg. sep-imm.
-    6 5 bitfield val.
-    match16
-  else
-    dup %1111111111101111 and %1110101001001111 = if
-      over 2+ h@ dup %0000000000110000 and %00000000000100000 = if
-	2dup instr32. ." ASR" swap 4s?. swap cond. ." .W "
-	dup 8_4_bf reg. sep.
-	dup 0_4_bf reg. sep.
-	%10 over 6_2_bf rot 12_3_bf 2 lshift or decode-imm-shift
-	match32
-      else
-	not-match32
-      then
-    else
-      2not-match16
-    then
-  then
+: p-asr-imm-1
+  ." ASR" swap conds. space dup 0_3_bf reg. sep. dup 3_3_bf reg. sep-imm.
+  6 5 bitfield val. drop
+;
+  
+\ Parse an ASR immediate instruction
+: p-asr-imm-2
+  ." ASR" swap 4s?. swap cond. .w dup 8_4_bf reg. sep. dup 0_4_bf reg. sep.
+  %10 over 6_2_bf rot 12_3_bf 2 lshift or decode-imm-shift drop
 ;
 
 \ Parse an ASR register instruction
-: parse-asr-reg ( h-addr1 cond -- h-addr2 f )
-  over h@
-  dup %1111111111000000 and %0100000100000000 = if
-    dup instr16. ." ASR"
-    swap conds. space
-    dup 0_3_bf reg. sep.
-    3_3_bf reg.
-    match16
-  else
-    dup %1111111111100000 and %1111101001000000 = if
-      over 2+ h@ dup %1111000011110000 and %1111000000000000 = if
-	2dup instr32. ." ASR" over 4s?. rot cond. ." .W "
-	dup 8_4_bf reg. sep.
-	swap 0_4_bf reg. sep.
-	0_4_bf reg.
-	4+ reg
-      else
-	not-match32
-      then
-    else
-      2not-match16
-    then
-  then
+: p-asr-reg-1
+  ." ASR" swap conds. space dup 0_3_bf reg. sep. 3_3_bf reg. drop
+;
+
+\ Parse an ASR register instruction
+: p-asr-reg-2
+  ." ASR" over 4s?. rot cond. .w dup 8_4_bf reg. sep. swap 0_4_bf reg. sep.
+  0_4_bf reg. drop
 ;
 
 \ Parse a B instruction
-: parse-b ( h-addr1 cond -- h-addr2 f )
-  over h@
-  dup %1111000000000000 and %1101000000000000 = if
-    dup instr16. ." B" nip dup 8_4_bf cond. space ." #"
-    0_8_bf over swap 8 rel.
-    match16
-  else
-    dup %1111100000000000 and %1110000000000000 = if
-      dup instr16. ." B" swap cond. space ." #"
-      0 11 bitfield over swap 11 rel.
-      match16
-    else
-      dup %1111100000000000 and %1111000000000000 = if
-	over 2+ h@ dup %1101000000000000 and %1000000000000000 = if
-	  2dup instr32. ." B" rot drop over 6 4 bitfield cond. ." .W #"
-	  dup 0 11 bitfield 2 pick 0 6 bitfield 11 lshift or
-	  over 13 1 bitfield 17 lshift or swap 11 1 bitfield 18 lshift or
-	  swap 10_1_bf 19 lshift or over swap 20 rel.
-	  match32
-	else
-	  dup %1101000000000000 and %1001000000000000 = if
-	    2dup instr32. ." B" rot cond. ." .W #"
-	    dup 0 11 bitfield 2 pick 0 10 bitfield 11 lshift or
-	    over 11 1 bitfield 3 pick 10_1_bf xor 21 lshift or
-	    swap 13 1 bitfield 2 pick 10_1_bf xor 22 lshift or
-	    swap 10_1_bf 23 lshift or over swap 24 rel
-	    match32
-	  else
-	    not-match32
-	  then
-	then
-      else
-	not-match16
-      then
-    then
-  then
+: p-b-1
+  ." B" nip dup 8_4_bf cond. space 0_8_bf 8 rel.
+;
+
+\ Parse a B instruction
+: p-b-2
+  ." B" swap cond. space 0 11 bitfield 11 rel.
+;
+
+\ Parse a B instruction
+: p-b-3
+  ." B" rot drop over 6 4 bitfield cond. .w
+  dup 0 11 bitfield 2 pick 0 6 bitfield 11 lshift or
+  over 13 1 bitfield 17 lshift or swap 11 1 bitfield 18 lshift or
+  swap 10_1_bf 19 lshift or 20 rel.
+;
+
+\ Parse a B instruction
+: p-b-4
+  ." B" rot cond. .w
+  dup 0 11 bitfield 2 pick 0 10 bitfield 11 lshift or
+  over 11 1 bitfield 3 pick 10_1_bf xor 21 lshift or
+  swap 13 1 bitfield 2 pick 10_1_bf xor 22 lshift or
+  swap 10_1_bf 23 lshift or 24 rel.
 ;
 
 \ Parse a BFC instruction
-: parse-bfc ( h-addr1 cond -- h-addr2 flag )
-  over h@
-  dup %1111101111111111 and %1111001101101111 = if
-    over 2+ h@ dup empty2? if
-      2dup instr32. ." BFC" rot cond. space nip
-      dup 8_4_bf reg. sep-imm.
-      dup 6_2_bf over 12_3_bf 2 lshift or dup val. sep-imm.
-      over 0 5 bitfield 1+ swap - val.
-      match32
-    else
-      not-match32
-    then
-  else
-    not-match16
-  then
+: p-bfc
+  ." BFC" rot cond. space nip 8_4_bf reg. sep-imm.
+  dup 6_2_bf over 12_3_bf 2 lshift or dup val. sep-imm.
+  over 0 5 bitfield 1+ swap - val. drop
 ;
 
 \ Parse a BFI instruction
-: parse-bfi ( h-addr1 cond -- h-addr2 flag )
-  over h@
-  dup %1111101111110000 and %1111001101100000 = if
-    over 2+ h@ dup empty2? if
-      2dup instr32. ." BFI" rot cond. space
-      dup 8_4_bf reg. sep.
-      swap 0_4_bf reg. sep-imm.
-      dup 6_2_bf over 12_3_bf 2 lshift or dup val. sep-imm.
-      over 0 5 bitfield 1+ swap - val.
-      match32
-    else
-      not-match32
-    then
-  else
-    not-match16
-  then
+: p-bfi
+  ." BFI" rot cond. space dup 8_4_bf reg. sep. swap 0_4_bf reg. sep-imm.
+  dup 6_2_bf over 12_3_bf 2 lshift or dup val. sep-imm.
+  over 0 5 bitfield 1+ swap - val. drop
 ;
 
 \ Parse a BIC immediate instruction
-: parse-bic-imm ( h-addr1 cond -- h-addr2 flag )
-  over h@
-  dup %11111000111100000 and %1111000000100000 = if
-    over 2+ h@ dup empty2? if
-      2dup instr32. ." BIC" over 4s?. space
-      decode-add-imm-32
-      match32
-    else
-      not-match32
-    then
-  else
-    not-match16
-  then
+: p-bic-imm
+  ." BIC" over 4s?. space decode-add-imm-32 drop
 ;
 
 \ Parse a BIC register instruction
-: parse-bic-reg ( h-addr1 cond -- h-addr2 flag )
-  over h@
-  dup %1111111111000000 and %0100001110000000 = if
-    dup instr16. ." BIC" swap conds. space
-    decode-and-reg-16
-    match16
-  else
-    dup %1111111111100000 and %1110101000100000 = if
-      over 2+ h@ dup
-      2dup instr32. ." BIC" over 4s?. rot cond. ." .W "
-      decode-add-reg-32
-      match32
-    else
-      not-match16
-    then
-  then
+: p-bic-reg-1
+  ." BIC" swap conds. space decode-and-reg-16 drop
+;
+
+\ Parse a BIC register instruction
+: p-bic-reg-2
+  ." BIC" over 4s?. rot cond. .w decode-add-reg-32 drop
 ;
 
 \ Parse a BKPT instruction
-: parse-bkpt ( h-addr1 cond -- h-addr2 flag )
-  over h@
-  dup %1111111100000000 and %1011111000000000 = if
-    dup instr16. ." BKPT" nip 0_8_bf ." #" val. match16
-  else
-    not-match16
-  then
+: p-bkpt ( h-addr1 cond -- h-addr2 flag )
+  ." BKPT" nip 0_8_bf ." #" val. drop
 ;
 
 \ Parse a BL immediate instruction
-: parse-bl-imm ( h-addr1 cond -- h-addr2 flag )
-  over h@
-  dup %1111100000000000 and %1111000000000000 = if
-    over 2+ H@ dup %1101000000000000 and %1101000000000000 = if
-      2dup instr32. ." BL" rot cond. space ." #"
-      dup 0 11 bitfield
-      over 0 10 bitfield 11 lshift or
-      dup 11 1 bitfield 2 pick 10 1 bitfield xor invert 1 and 21 lshift or
-      13 1 bitfield over 10 1 bitfield xor invert 1 and 22 lshift or
-      swap 10 1 bitfield 23 lshift or over swap 24 rel.
-      match32
-    else
-      not-match32
-    then
-  else
-    not-match16
-  then
+: p-bl-imm
+  ." BL" rot cond. space
+  dup 0 11 bitfield
+  over 0 10 bitfield 11 lshift or
+  dup 11 1 bitfield 2 pick 10 1 bitfield xor invert 1 and 21 lshift or
+  13 1 bitfield over 10 1 bitfield xor invert 1 and 22 lshift or
+  swap 10 1 bitfield 23 lshift or 24 rel.
 ;
 
 \ Parse a BLX register instruction
-: parse-blx-reg ( h-addr1 cond h-addr2 flag )
-  over h@
-  dup %1111111110000000 and %0100011110000000 = if
-    dup instr16. ." BLX" swap cond. space
-    3 4 bitfield reg.
-    match16
-  else
-    not-match16
-  then
+: p-blx-reg
+  ." BLX" swap cond. space 3 4 bitfield reg. drop
 ;
 
 \ Parse a BX register instruction
-: parse-bx ( h-addr1 cond h-addr2 flag )
-  over h@
-  dup %1111111110000000 and %0100011110000000 = if
-    dup instr16. ." BX" swap cond. space
-    3 4 bitfield reg.
-    match16
-  else
-    not-match16
-  then
+: p-bx
+  ." BX" swap cond. space 3 4 bitfield reg. drop
 ;
+
+\ Highest bit mask
+%1000000000000000 constant highest
 
 \ Commit to flash
 commit-flash
 
-\ All the words for compilation
-create all-words
-' parse-adc-imm ,
-' parse-adc-reg ,
-' parse-add-imm ,
-' parse-add-reg ,
-' parse-add-sp-imm ,
-' parse-add-sp-reg ,
-' parse-adr ,
-' parse-and-imm ,
-' parse-and-reg ,
-' parse-asr-imm ,
-' parse-asr-reg ,
-' parse-b ,
-' parse-bfc ,
-' parse-bfi ,
-' parse-bic-imm ,
-' parse-bic-reg ,
-' parse-bkpt ,
-' parse-bl-imm ,
-' parse-blx-reg ,
-' parse-bx ,
+\ All the 16-bit ops
+create all-ops16
+' p-adc-reg-1 , %1111111111000000 h, %0100000101000000 h,
+' p-add-imm-1 , %1111111000000000 h, %0001110000000000 h,
+' p-add-imm-2 , %1111100000000000 h, %0011000000000000 h,
+' p-add-reg-1 , %1111111000000000 h, %0001100000000000 h,
+' p-add-reg-2 , %1111111100000000 h, %0100010000000000 h,
+' p-add-sp-imm-1 , %1111100000000000 h, %1010100000000000 h,
+' p-add-sp-imm-2 , %1111111110000000 h, %1011000000000000 h,
+' p-add-sp-reg-1 , %1111111101111000 h, %0100010001101000 h,
+' p-add-sp-reg-2 , %1111111110000111 h, %0100010010000101 h,
+' p-adr-1 , %111100000000000 h, %1010000000000000 h,
+' p-and-reg-1 , %1111111111000000 h, %0100000000000000 h,
+' p-asr-imm-1 , %1111100000000000 h, %0001000000000000 h,
+' p-asr-reg-1 , %1111111111000000 h, %0100000100000000 h,
+' p-b-1 , %1111000000000000 h, %1101000000000000 h,
+' p-b-2 , %1111100000000000 h, %1110000000000000 h,
+' p-bic-reg-1 , %1111111111000000 h, %0100001110000000 h,
+' p-bkpt , %1111111100000000 h, %1011111000000000 h,
+' p-blx-reg , %1111111110000000 h, %0100011110000000 h,
+' p-bx , %1111111110000000 h, %0100011100000000 h,
+0 ,
+
+\ All the 32-bit ops
+create all-ops32
+' p-adc-imm , %1111101111100000 h, highest h, %1111000101000000 h, 0 h,
+' p-adc-reg-2 , %1111111111100000 h, 0 h, %1110101101000000 h, 0 h,
+' p-add-imm-3 , %1111101111100000 h, highest h, %1111000100000000 0 h,
+' p-add-imm-4 , %1111101111110000 h, highest h, %1111001000000000 0 h,
+' p-add-reg-3 , %1111111111100000 h, 0 h, %1110101100000000 h, 0 h,
+' p-add-sp-imm-3 , %1111101111101111 h, highest h, %1111000100001101 h, 0 h,
+' p-add-sp-imm-4 , %1111101111111111 h, highest h, %1111001000001101 h, 0 h,
+' p-add-sp-reg-3 , %1111111111101111 h, highest h, %1110101100001101 h, 0 h,
+' p-adr-2 , %1111101111111111 h, highest h, %1111001010101111 h, 0 h,
+' p-adr-3 , %1111101111111111 h, highest h, %1111001000001111 h, 0 h,
+' p-and-imm , %1111101111100000 h, highest h, %1111000000000000 h, 0 h,
+' p-and-reg-2 , %1111111111100000 h, 0 h, %1110101000000000 h, 0 h,
+' p-asr-imm-2 , %1111111111101111 h, %0000000000110000 h,
+                %1110101001001111 h, %0000000000100000 h,
+' p-asr-reg-2 , %1111111111100000 h, %1111000011110000 h,
+                %1111101001000000 h, %1111000000000000 h,
+' p-b-3 , %1111100000000000 h, %1101000000000000 h,
+          %1111000000000000 h, %1000000000000000 h,
+' p-b-4 , %1111100000000000 h, %1101000000000000 h,
+          %1111000000000000 h, %1001000000000000 h,
+' p-bfc , %1111101111111111 h, highest h, %1111001101101111 h, 0 h,
+' p-bfi , %1111101111110000 h, highest h, %1111001101100000 h, 0 h,
+' p-bic-imm , %11111000111100000 h, highest h, %1111000000100000 h, 0 h,
+' p-bic-reg-2 , %1111111111100000 h, 0 h, %1110101000100000 h, 0 h,
+' p-bl-imm , %1111100000000000 h, %1101000000000000 h,
+             %1111000000000000 h, %1101000000000000 h,
 0 ,
 
 \ Commit to flash
 commit-flash
+
+\ Get condition
+: current-cond ( -- cond ) -1 ;
+
+\ Disassemble a 16-bit instruction
+: disassemble16 ( op-addr handler-addr -- match )
+  over h@ over cell+ h@ and over 6 + h@ = if
+    current-cond 2 pick h@ instr16. 2 pick h@ rot execute true
+  else
+    2drop false
+  then
+;
+
+\ Disassemble a 32-bit instruction
+: disassemble32 ( op-addr handler-addr -- match )
+  over h@ over cell+ h@ and over 8 + h@ = if
+    over 2+ h@ over 6 + h@ and over 10 + h@ = if
+      current-cond 2 pick h@ 3 pick 2+ h@ instr32.
+      2 pick h@ 3 pick 2+ h@ 3 roll execute true
+    else
+      2drop false
+    then
+  else
+    2drop false
+  then
+;
 
 \ Disassemble instructions
 : disassemble ( start end -- )
@@ -749,17 +609,33 @@ commit-flash
     over u<
   while
     dup h.8 space
-    all-words begin
+    all-ops16 begin
       dup @ 0<> if
-	2dup @ execute if
-	  nip nip true
+	2dup disassemble16 if
+	  drop 2+ true true
 	else
-	  drop cell+ false
+	  2 cells + false
 	then
       else
-	drop dup h@ instr16. ." ????" 2+ true
+	drop false true
       then
     until
+    not if
+      all-ops32 begin
+	dup @ 0<> if
+	  2dup disassemble32 if
+	    drop 4+ true true
+	  else
+	    3 cells + false
+	  then
+	else
+	  drop false true
+	then
+      until
+      not if
+	dup h@ instr16. ." ????" 2+ true
+      then
+    then
     cr
   repeat
   2drop
