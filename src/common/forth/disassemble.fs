@@ -273,6 +273,9 @@ commit-flash
 \ Type out the condition and .W for 32-bit words
 : c.w ( cond low high -- low high ) rot cond. .w ;
 
+\ Type out the condition and a space for 32-bit words
+: c.sp ( cond low high -- low high ) rot cond. space ;
+
 \ Type out the S, the condition, and .W for 32-bit words
 : 4sc.w ( cond low high -- low high ) over 4s?. rot cond. .w ;
 
@@ -366,17 +369,34 @@ commit-flash
   over 6_2_bf rot 12_3_bf 2 lshift or and decode-imm-shift
 ;
 
+\ Decode a 16-bit ADD immediate with a 3-bit unextended immediate
+: decode-add-imm-1 ( low -- )
+  dup 0_3_bf reg-sep. dup 3_3_bf reg-sep-imm. 6_3_bf val.
+;
+
 \ Decode a 16-bit ADD immediate with a 8-bit unextended immediate
-: decode-add-imm-16 ( low -- )
+: decode-add-imm-2 ( low -- )
   dup 8_3_bf reg-sep-imm. 0_8_bf val.
 ;
 
 \ Decode a 32-bit ADD immediate or ADC immediate instruction
-: decode-add-imm-32 ( low high -- )
+: decode-add-imm-3 ( low high -- )
   dup 8_4_bf reg-sep.
   over 0_4_bf reg-sep-imm.
   dup 0_8_bf swap 12_3_bf 8 lshift or
   swap 10_1_bf 11 lshift or decode-const12
+;
+
+\ Decode a 32-bit ADD immediate with a 12-bit unextended immediate
+: decode-add-imm-4 ( low high -- )
+  dup 8_4_bf reg-sep.
+  over 0_4_bf reg-sep-imm.
+  dup 0_8_bf swap 12_4_bf 8 lshift or swap 10_1_bf 11 lshift or val.
+;
+
+\ Decode the first kind of 16-bit ADD register instructions
+: decode-add-reg-16 ( low -- )
+  dup 0_3_bf reg-sep. dup 3_3_bf reg-sep. 6_3_bf reg.
 ;
 
 \ Decode the second kind of 32-bit ADD register or ADC register instruction
@@ -401,9 +421,59 @@ commit-flash
   dup 12_4_bf reg-sep. dup 8_4_bf reg-sep. swap 0_4_bf reg-sep. 0_4_bf reg.
 ;
 
+\ Decode an LDR immediate instruction
+: decode-ldr-imm-1
+  dup 0_3_bf reg-sep. ." [" dup 3_3_bf reg.
+  6 5 bitfield 2 lshift ?dup if
+    sep-imm. val.
+  then
+  ." ]"
+;
+
+\ Decode an LDR immediate instruction
+: decode-ldr-imm-2
+  dup 8_4_bf reg-sep. ." [SP"
+  0_8_bf 2 lshift ?dup if
+    sep-imm. val.
+  then
+  ." ]"
+;
+
+\ Decode an LDR immediate instruction
+: decode-ldr-imm-3
+  dup 12_4_bf reg-sep. ." [" swap 0_4_bf reg.
+  0 12 bitfield ?dup if
+    sep-imm. val.
+  then
+  ." ]"
+;
+
+\ Decode an LDR immediate instruction
+: decode-ldr-imm-4
+  dup 12_4_bf reg. space ." [" swap 0_4_bf reg.
+  10_1_bf if
+    sep-imm. dup 0_8_bf over 9 1 bitfield 0= if negate then (dec.) ." ]"
+    8 1 bitfield if ." !" then
+  else
+    ." ]" sep-imm.  dup 0_8_bf swap 9 1 bitfield 0= if negate then (dec.)
+  then
+;
+
+\ Decode an LDR register instruction
+: decode-ldr-reg-1
+  dup 0_3_bf reg. ." , [" dup 3_3_bf reg-sep.
+  6_3_bf reg. ." ]"
+;
+
+\ Decode an LDR register instruction
+: decode-ldr-reg-2
+  dup 12_3_bf reg. ." , [" swap 0_3_bf reg-sep.
+  0_3_bf reg. 4_2_bf ?dup if ." , LSL #" (udec.) then ." ]"
+;
+
 \ Parse an ADC immediate instruction
 : p-adc-imm
-  ." ADC" 4sc.sp decode-add-imm-32 drop
+  ." ADC" 4sc.sp decode-add-imm-3 drop
 ;
 
 \ Parse an ADC register instruction
@@ -418,87 +488,80 @@ commit-flash
 
 \ Parse an ADD immediate instruction
 : p-add-imm-1
-  ." ADD" swap conds. dup 0_3_bf reg-sep. dup 3_3_bf reg-sep-imm. 6_3_bf val.
-  drop
+  ." ADD" cssp. decode-add-imm-1 drop
 ;
 
 \ Parse an ADD immediate instruction
 : p-add-imm-2
-  ." ADD" cssp. decode-add-imm-16 drop
+  ." ADD" cssp. decode-add-imm-2 drop
 ;
 
 \ Parse an ADD immediate instruction
 : p-add-imm-3
-  ." ADD" 4sc.w decode-add-imm-32 drop
+  ." ADD" 4sc.w decode-add-imm-3 drop
 ;
 
 \ Parse an ADD immediate instruction
 : p-add-imm-4
-  ." ADDW" rot cond. space
-  dup 8_4_bf reg-sep.
-  over 0_4_bf reg-sep-imm.
-  dup 0_8_bf swap 12_4_bf 8 lshift or swap 10_1_bf 11 lshift or val.
-  drop
+  ." ADDW" c.sp decode-add-imm-4 drop
 ;
 
 \ Parse an ADD register instruction
 : p-add-reg-1
-  ." ADD" cssp. 0_3_bf reg-sep. dup 3_3_bf reg-sep. 6_3_bf reg.
-  drop
+  ." ADD" cssp. decode-add-reg-16 drop
 ;
 
 \ Parse an ADD register instruction
 : p-add-reg-2
   ." ADD" csp.
-  dup 0_3_bf over 7 1 bitfield 3 lshift or reg-sep. 3_4_bf reg.
-  drop
+  dup 0_3_bf over 7 1 bitfield 3 lshift or reg-sep. 3_4_bf reg. drop
 ;
 
 \ Parse an ADD register instruction
-: p-add-reg
+: p-add-reg-3
   ." ADD" 4sc.w decode-add-reg-32 drop
 ;
 
-\ Parse an ADD SP to immediate instruction
-: p-add-sp-imm
-  ." ADD" csp. dup 8_3_bf reg. ." , SP, #" 0_8_bf val. drop
-;
+\ \ Parse an ADD SP to immediate instruction
+\ : p-add-sp-imm
+\   ." ADD" csp. dup 8_3_bf reg. ." , SP, #" 0_8_bf val. drop
+\ ;
 
-\ Parse an ADD SP to immediate instruction
-: p-add-sp-imm
-  ." ADD" csp. ." SP, SP, #" 0 7 bitfield val. drop
-;
+\ \ Parse an ADD SP to immediate instruction
+\ : p-add-sp-imm
+\   ." ADD" csp. ." SP, SP, #" 0 7 bitfield val. drop
+\ ;
 
-\ Parse an ADD SP to immediate instruction
-: p-add-sp-imm
-  ." ADD" 4sc.sp
-  dup 8_4_bf reg. ." , SP, #" dup 0_8_bf swap 12_4_bf 8 lshift or
-  swap 10_1_bf 11 lshift or decode-const12 drop
-;
+\ \ Parse an ADD SP to immediate instruction
+\ : p-add-sp-imm
+\   ." ADD" 4sc.sp
+\   dup 8_4_bf reg. ." , SP, #" dup 0_8_bf swap 12_4_bf 8 lshift or
+\   swap 10_1_bf 11 lshift or decode-const12 drop
+\ ;
 
-\ Parse an ADD SP to immediate instruction
-: p-add-sp-imm
-  ." ADDW" rot cond. space
-  dup 8_4_bf reg. ." , SP, #" dup 0_8_bf swap 12_4_bf 8 lshift or
-  swap 10_1_bf 11 lshift or val. drop
-;
+\ \ Parse an ADD SP to immediate instruction
+\ : p-add-sp-imm
+\   ." ADDW" c.sp
+\   dup 8_4_bf reg. ." , SP, #" dup 0_8_bf swap 12_4_bf 8 lshift or
+\   swap 10_1_bf 11 lshift or val. drop
+\ ;
 
-\ Parse an ADD SP to register instruction
-: p-add-sp-reg-1
-  ." ADD" csp.
-  dup 0_3_bf over 7 1 bitfield 3 lshift or dup reg. ." , SP, " reg. drop
-;
+\ \ Parse an ADD SP to register instruction
+\ : p-add-sp-reg-1
+\   ." ADD" csp.
+\   dup 0_3_bf over 7 1 bitfield 3 lshift or dup reg. ." , SP, " reg. drop
+\ ;
 
-\ Parse an ADD SP to register instruction
-: p-add-sp-reg-2
-  ." ADD" csp. ." SP, " 2 4 bitfield reg. drop
-;
-\ Parse an ADD SP to register instruction
-: p-add-sp-reg-3
-  ." ADD" swap 4s?. swap cond. .w
-  dup 8_4_bf reg. ." , SP, " dup 0_4_bf reg. dup 4_2_bf
-  over 6_2_bf rot 12_3_bf lshift 2 or decode-imm-shift drop
-;
+\ \ Parse an ADD SP to register instruction
+\ : p-add-sp-reg-2
+\   ." ADD" csp. ." SP, " 2 4 bitfield reg. drop
+\ ;
+\ \ Parse an ADD SP to register instruction
+\ : p-add-sp-reg-3
+\   ." ADD" swap 4s?. swap cond. .w
+\   dup 8_4_bf reg. ." , SP, " dup 0_4_bf reg. dup 4_2_bf
+\   over 6_2_bf rot 12_3_bf lshift 2 or decode-imm-shift drop
+\ ;
 
 \ Parse an ADR instruction
 : p-adr-1
@@ -508,13 +571,13 @@ commit-flash
 
 \ Parse an ADR instruction
 : p-adr-2
-  ." SUB" rot cond. space dup 8_4_bf reg. ." , PC, #"
+  ." SUB" c.sp dup 8_4_bf reg. ." , PC, #"
   dup 0_8_bf swap 12_3_bf 8 lshift or swap 10_1_bf 12 lshift or val. drop
 ;
 
 \ Parse an ADR instruction
 : p-adr-3
-  ." ADD" rot cond. space dup 8_4_bf reg. ." , PC, #"
+  ." ADD" c.sp dup 8_4_bf reg. ." , PC, #"
   dup 0_8_bf swap 12_3_bf 8 lshift or swap 10_1_bf 12 lshift or val. drop
 ;
 
@@ -584,21 +647,21 @@ commit-flash
 
 \ Parse a BFC instruction
 : p-bfc
-  ." BFC" rot cond. space nip 8_4_bf reg-sep-imm.
+  ." BFC" c.sp nip 8_4_bf reg-sep-imm.
   dup 6_2_bf over 12_3_bf 2 lshift or dup val. sep-imm.
   over 0 5 bitfield 1+ swap - val. drop
 ;
 
 \ Parse a BFI instruction
 : p-bfi
-  ." BFI" rot cond. space dup 8_4_bf reg-sep. swap 0_4_bf reg-sep-imm.
+  ." BFI" c.sp dup 8_4_bf reg-sep. swap 0_4_bf reg-sep-imm.
   dup 6_2_bf over 12_3_bf 2 lshift or dup val. sep-imm.
   over 0 5 bitfield 1+ swap - val. drop
 ;
 
 \ Parse a BIC immediate instruction
 : p-bic-imm
-  ." BIC" over 4s?. space decode-add-imm-32 drop
+  ." BIC" over 4s?. space decode-add-imm-3 drop
 ;
 
 \ Parse a BIC register instruction
@@ -618,11 +681,11 @@ commit-flash
 
 \ Parse a BL immediate instruction
 : p-bl-imm
-  ." BL" rot cond. space
+  ." BL" c.sp
   dup 0 11 bitfield
   over 0 10 bitfield 11 lshift or
-  dup 11 1 bitfield 2 pick 10 1 bitfield xor invert 1 and 21 lshift or
-  13 1 bitfield over 10 1 bitfield xor invert 1 and 22 lshift or
+  dup 11 1 bitfield 2 pick 10 1 bitfield xor not 1 and 21 lshift or
+  13 1 bitfield over 10 1 bitfield xor not 1 and 22 lshift or
   swap 10 1 bitfield 23 lshift or 1 lshift 25 rel.
 ;
 
@@ -637,14 +700,14 @@ commit-flash
 ;
 
 \ Parse a CBNZ instruction
-: p-cbnz ." CBNZ" decode-cbnz ;
+: p-cbnz ." CBNZ" decode-cbz ;
 
 \ Parse a CBZ instruction
-: p-cbz ." CBZ" decode-cbnz ;
+: p-cbz ." CBZ" decode-cbz ;
 
 \ Parse a CMN immediate instruction
 : p-cmn-imm
-  ." CMN" csp. decode-cmn-imm-13 drop
+  ." CMN" csp. decode-cmn-imm-32 drop
 ;
 
 \ Parse a CMN register instruction
@@ -659,7 +722,7 @@ commit-flash
 
 \ Parse an CMP immediate instruction
 : p-cmp-imm-1
-  ." CMP " nip decode-add-imm-16 drop
+  ." CMP " nip decode-add-imm-2 drop
 ;
 
 \ Parse a CMP immediate instruction
@@ -680,7 +743,7 @@ commit-flash
 
 \ Parse a CMP register instruction
 : p-cmp-reg-3
-  ." CMP" c.w decode-cmn-reg-32
+  ." CMP" c.w decode-cmn-reg-32 drop
 ;
 
 \ Parse a CPS instruction
@@ -699,11 +762,12 @@ commit-flash
     %1110 of space ." ST" endof
     %0110 of space ." UNST" endof
   endcase
+  drop
 ;
 
 \ Parse an EOR immediate instruction
 : p-eor-imm
-  ." EOR" rot drop over 4s?. decode-add-imm-32 drop
+  ." EOR" rot drop over 4s?. decode-add-imm-3 drop
 ;
 
 \ Parse an EOR register instruction
@@ -724,41 +788,22 @@ commit-flash
 
 \ Parse an LDR immediate instruction
 : p-ldr-imm-1
-  ." LDR" size. csp. dup 0_3_bf reg-sep. ." [" dup 3_3_bf reg.
-  6 5 bitfield 2 lshift ?dup if
-    sep-imm. val.
-  then
-  ." ]" drop
+  ." LDR" size. csp. decode-ldr-imm-1 drop
 ;
 
 \ Parse an LDR immediate instruction
 : p-ldr-imm-2
-  ." LDR" size. csp. dup 8_4_bf reg-sep. ." [SP"
-  0_8_bf 2 lshift ?dup if
-    sep-imm. val.
-  then
-  ." ]" drop
+  ." LDR" size. csp. decode-ldr-imm-2 drop
 ;
 
 \ Parse an LDR immediate instruction
 : p-ldr-imm-3
-  ." LDR" size. c.w dup 12_4_bf reg. sep ." [" swap 0_4_bf reg.
-  0 12 bitfield ?dup if
-    sep-imm. val.
-  then
-  ." ]" drop
+  ." LDR" size. c.w decode-ldr-imm-3 drop
 ;
 
 \ Parse an LDR immediate instruction
 : p-ldr-imm-4
-  ." LDR" size. rot cond. space dup 12_4_bf reg. space ." [" swap 0_4_bf reg.
-  10_1_bf if
-    sep-imm. dup 0_8_bf over 9 1 bitfield 0= if negate then (dec.) ." ]"
-    8 1 bitfield if ." !" then
-  else
-    ." ]" sep-imm.  dup 0_8_bf swap 9 1 bitfield 0= if negate then (dec.)
-  then
-  drop
+  ." LDR" size. c.sp decode-ldr-imm-4 drop
 ;
 
 \ Parse an LDR literal instruction
@@ -770,19 +815,17 @@ commit-flash
 \ Parse an LDR literal instruction
 : p-ldr-lit-2
   ." LDR" size. c.w dup dup 12_4_bf reg. ." , [PC, "
-  0_12_bf swap 7 1 bitshift if negate then 12 rel. ." ]"
+  0_12_bf swap 7 1 bitfield if negate then 12 rel. ." ]"
 ;
 
 \ Parse an LDR register instruction
 : p-ldr-reg-1
-  ." LDR" size. csp. dup 0_3_bf reg. ." , [" dup 3_3_bf reg-sep.
-  6_3_bf reg. ." ]" drop
+  ." LDR" size. csp. decode-ldr-reg-1 drop
 ;
 
 \ Parse an LDR register instruction
 : p-ldr-reg-2
-  ." LDR" size. c.w dup 12_3_bf reg. ." , [" swap 0_3_bf reg-sep.
-  0_3_bf reg. 4_2_bf ?dup if ." , LSL #" (udec.) then ." ]" drop
+  ." LDR" size. c.w decode-ldr-reg-2 drop
 ;
 
 \ Parse an LSL immediate instruction
@@ -828,12 +871,12 @@ commit-flash
 \ Parse an MLS instruction
 : p-mls
   ." MLS" rot drop space dup 8_4_bf reg-sep. swap 0_4_bf reg-sep.
-  dup 0_4_bf reg-sep. 12_4_bf reg.
+  dup 0_4_bf reg-sep. 12_4_bf reg. drop
 ;
 
 \ Parse a MOV immediate instruction
 : p-mov-imm-1
-  ." MOV" cssp. decode-add-imm-16 drop
+  ." MOV" cssp. decode-add-imm-2 drop
 ;
 
 \ Parse a MOV immediate instruction
@@ -845,7 +888,7 @@ commit-flash
 
 \ Parse a MOV immediate instruction
 : p-mov-imm-3
-  ." MOVW" rot cond. space decode-mov-imm-32 drop
+  ." MOVW" c.sp decode-mov-imm-32 drop
 ;
 
 \ Parse a MOV register instruction
@@ -865,7 +908,7 @@ commit-flash
 
 \ Parse a MOVT instruction
 : p-movt
-  ." MOVT" rot cond. space decode-mov-imm-32 drop
+  ." MOVT" c.sp decode-mov-imm-32 drop
 ;
 
 \ Parse a MUL instruction
@@ -885,12 +928,12 @@ commit-flash
 
 \ Parse a NOP instruction
 : p-nop-1
-  ." NOP" drop cond.
+  ." NOP" drop cond. drop
 ;
 
 \ Parse an ORR immediate instruction
 : p-orr-imm
-  ." ORR" 4sc.sp decode-add-imm-32 drop
+  ." ORR" 4sc.sp decode-add-imm-3 drop
 ;
 
 \ Parse an ORR register instruction
@@ -930,7 +973,7 @@ commit-flash
 
 \ Parse an SBC immediate instruction
 : p-sbc-imm
-  ." SBC" 4sc.sp decode-add-imm-32 drop
+  ." SBC" 4sc.sp decode-add-imm-3 drop
 ;
 
 \ Parse an SBC register instruction
@@ -945,12 +988,102 @@ commit-flash
 
 \ Parse an SDIV register instruction
 : p-sdiv
-  ." SDIV" rot cond. space decode-asr-reg-32 drop
+  ." SDIV" c.sp decode-asr-reg-32 drop
 ;
 
 \ Parse an SMULL instruction
 : p-smull
-  ." SMULL" rot cond. space decode-smull drop
+  ." SMULL" c.sp decode-smull drop
+;
+
+\ Parse an STR immediate instruction
+: p-str-imm-1
+  ." STR" size. csp. decode-ldr-imm-1 drop
+;
+
+\ Parse an STR immediate instruction
+: p-str-imm-2
+  ." STR" size. csp. decode-ldr-imm-2 drop
+;
+
+\ Parse an STR immediate instruction
+: p-str-imm-3
+  ." STR" size. c.w decode-ldr-imm-3 drop
+;
+
+\ Parse an STR immediate instruction
+: p-str-imm-4
+  ." STR" size. size. c.sp decode-ldr-imm-4 drop
+;
+
+\ Parse an STR register instruction
+: p-str-reg-1
+  ." STR" size. csp. decode-ldr-reg-1 drop
+;
+
+\ Parse an STR register instruction
+: p-str-reg-2
+  ." STR" size. c.w decode-ldr-reg-2 drop
+;
+
+\ Parse an SUB immediate instruction
+: p-sub-imm-1
+  ." SUB" cssp. decode-add-imm-1 drop
+;
+
+\ Parse an SUB immediate instruction
+: p-sub-imm-2
+  ." SUB" cssp. decode-add-imm-2 drop
+;
+
+\ Parse an SUB immediate instruction
+: p-sub-imm-3
+  ." SUB" 4sc.w decode-add-imm-3 drop
+;
+
+\ Parse an SUB immediate instruction
+: p-sub-imm-4
+  ." SUBW" c.sp decode-add-imm-4 drop
+;
+
+\ Parse an SUB register instruction
+: p-sub-reg-1
+  ." SUB" cssp. decode-add-reg-16 drop
+;
+
+\ Parse an SUB register instruction
+: p-sub-reg-2
+  ." SUB" 4sc.w decode-add-reg-32 drop
+;
+
+\ Parse a TST immediate instruction
+: p-tst-imm
+  ." TST" csp. decode-cmn-imm-32 drop
+;
+
+\ Parse a TST register instruction
+: p-tst-reg-1
+  ." TST" csp. decode-and-reg-16 drop
+;
+
+\ Parse a CMP register instruction
+: p-tst-reg-2
+  ." CMP" c.w decode-cmn-reg-32 drop
+;
+
+\ Parse an UDIV register instruction
+: p-udiv
+  ." UDIV" c.sp decode-asr-reg-32 drop
+;
+
+\ Parse an UMULL instruction
+: p-umull
+  ." UMULL" c.sp decode-smull drop
+;
+
+\ Parse an WFI instruction
+: p-wfi-1
+  ." WFI" swap cond. 2drop
 ;
 
 \ Commit to flash
@@ -976,6 +1109,22 @@ char H ' p-ldr-imm-4 w-size p-ldr-imm-4-h
 char H ' p-ldr-lit-2 w-size p-ldr-lit-2-h
 char H ' p-ldr-reg-1 w-size p-ldr-reg-1-h
 char H ' p-ldr-reg-2 w-size p-ldr-reg-2-h
+0 ' p-str-imm-1 w-size p-str-imm-1-w
+0 ' p-str-imm-2 w-size p-str-imm-2-w
+0 ' p-str-imm-3 w-size p-str-imm-3-w
+0 ' p-str-imm-4 w-size p-str-imm-4-w
+0 ' p-str-reg-1 w-size p-str-reg-1-w
+0 ' p-str-reg-2 w-size p-str-reg-2-w
+char B ' p-str-imm-1 w-size p-str-imm-1-b
+char B ' p-str-imm-3 w-size p-str-imm-3-b
+char B ' p-str-imm-4 w-size p-str-imm-4-b
+char B ' p-str-reg-1 w-size p-str-reg-1-b
+char B ' p-str-reg-2 w-size p-str-reg-2-b
+char H ' p-str-imm-1 w-size p-str-imm-1-h
+char H ' p-str-imm-3 w-size p-str-imm-3-h
+char H ' p-str-imm-4 w-size p-str-imm-4-h
+char H ' p-str-reg-1 w-size p-str-reg-1-h
+char H ' p-str-reg-2 w-size p-str-reg-2-h
 
 \ Highest bit mask
 %1000000000000000 constant highest
@@ -990,10 +1139,10 @@ create all-ops16
 ' p-add-imm-2 ,    %1111100000000000 h, %0011000000000000 h,
 ' p-add-reg-1 ,    %1111111000000000 h, %0001100000000000 h,
 ' p-add-reg-2 ,    %1111111100000000 h, %0100010000000000 h,
-' p-add-sp-imm-1 , %1111100000000000 h, %1010100000000000 h,
-' p-add-sp-imm-2 , %1111111110000000 h, %1011000000000000 h,
-' p-add-sp-reg-1 , %1111111101111000 h, %0100010001101000 h,
-' p-add-sp-reg-2 , %1111111110000111 h, %0100010010000101 h,
+\ ' p-add-sp-imm-1 , %1111100000000000 h, %1010100000000000 h,
+\ ' p-add-sp-imm-2 , %1111111110000000 h, %1011000000000000 h,
+\ ' p-add-sp-reg-1 , %1111111101111000 h, %0100010001101000 h,
+\ ' p-add-sp-reg-2 , %1111111110000111 h, %0100010010000101 h,
 ' p-adr-1 ,        %1111000000000000 h, %1010000000000000 h,
 ' p-and-reg-1 ,    %1111111111000000 h, %0100000000000000 h,
 ' p-asr-imm-1 ,    %1111100000000000 h, %0001000000000000 h,
@@ -1036,6 +1185,18 @@ create all-ops16
 ' p-push-1 ,       %1111111000000000 h, %1011010000000000 h,
 ' p-rsb-imm-1 ,    %1111111111000000 h, %0100001001000000 h,
 ' p-sbc-reg-1 ,    %1111111111000000 h, %0100000110000000 ,
+' p-str-imm-1-w ,  %1111100000000000 h, %0110000000000000 h,
+' p-str-imm-2-w ,  %1111100000000000 h, %1001000000000000 h,
+' p-str-reg-1-w ,  %1111111000000000 h, %0101000000000000 h,
+' p-str-imm-1-b ,  %1111100000000000 h, %0111000000000000 h,
+' p-str-reg-1-b ,  %1111111000000000 h, %0101010000000000 h,
+' p-str-imm-1-h ,  %1111100000000000 h, %1000000000000000 h,
+' p-str-reg-1-h ,  %1111111000000000 h, %0101001000000000 h,
+' p-sub-imm-1 ,    %1111111000000000 h, %0001111000000000 h,
+' p-sub-imm-2 ,    %1111100000000000 h, %0011100000000000 h,
+' p-sub-reg-1 ,    %1111111000000000 h, %0001101000000000 h,
+' p-tst-reg-1 ,    %1111111111000000 h, %0100001000000000 h,
+' p-wfi-1 ,        %1111111111111111 h, %1011111100110000 h,
 0 ,
 
 \ All the 32-bit ops
@@ -1045,9 +1206,9 @@ create all-ops32
 ' p-add-imm-3 , %1111101111100000 h, highest h, %1111000100000000 0 h,
 ' p-add-imm-4 , %1111101111110000 h, highest h, %1111001000000000 0 h,
 ' p-add-reg-3 , %1111111111100000 h, 0 h, %1110101100000000 h, 0 h,
-' p-add-sp-imm-3 , %1111101111101111 h, highest h, %1111000100001101 h, 0 h,
-' p-add-sp-imm-4 , %1111101111111111 h, highest h, %1111001000001101 h, 0 h,
-' p-add-sp-reg-3 , %1111111111101111 h, highest h, %1110101100001101 h, 0 h,
+\ ' p-add-sp-imm-3 , %1111101111101111 h, highest h, %1111000100001101 h, 0 h,
+\ ' p-add-sp-imm-4 , %1111101111111111 h, highest h, %1111001000001101 h, 0 h,
+\ ' p-add-sp-reg-3 , %1111111111101111 h, highest h, %1110101100001101 h, 0 h,
 ' p-adr-2 , %1111101111111111 h, highest h, %1111001010101111 h, 0 h,
 ' p-adr-3 , %1111101111111111 h, highest h, %1111001000001111 h, 0 h,
 ' p-and-imm , %1111101111100000 h, highest h, %1111000000000000 h, 0 h,
@@ -1224,10 +1385,89 @@ create all-ops32
 \ ' p-stc ,
 \ ' p-stmdb ,
 \ ' p-stmia ,
+' p-str-imm-3-w , %1111111111110000 h, 0 h, %1111100011000000 h, 0 h,
+' p-str-imm-4-w , %1111111111110000 h, %0000100000000000 h,
+                  %1111100001000000 h, %0000100000000000 h,
+' p-str-reg-2-w , %1111111111110000 h, %0000111111000000 h,
+                  %1111100001000000 h, 0 h,
+' p-str-imm-3-b , %1111111111110000 h, 0 h, %1111100010000000 h, 0 h,
+' p-str-imm-4-b , %1111111111110000 h, %0000100000000000 h,
+                  %1111100000000000 h, %0000100000000000 h,
+' p-str-reg-2-b , %1111111111110000 h, %0000111111000000 h,
+                  %1111100000000000 h, 0 h,
+\ ' p-strbt ,
+\ ' p-strd ,
+\ ' p-strex ,
+\ ' p-strexb ,
+\ ' p-strexd ,
+\ ' p-strexh ,
+' p-str-imm-3-h , %1111111111110000 h, 0 h, %1111100010100000 h, 0 h,
+' p-str-imm-4-h , %1111111111110000 h, %0000100000000000 h,
+                  %1111100000100000 h, %0000100000000000 h,
+' p-str-reg-2-h , %1111111111110000 h, %0000111111000000 h,
+                  %1111100000100000 h, 0 h,
+\ ' p-strht ,
+\ ' p-strt ,
+' p-sub-imm-3 , %1111101111100000 h, highest h, %1111000110100000 0 h,
+' p-sub-imm-4 , %1111101111110000 h, highest h, %1111001010100000 0 h,
+' p-sub-reg-2 , %1111111111100000 h, 0 h, %1110101110100000 h, 0 h,
+\ ' p-sub-sp-imm ,
+\ ' p-sub-sp-reg ,
+\ ' p-sub-pc-lr ,
+\ ' p-svc ,
+\ ' p-sxtab ,
+\ ' p-sxtab16 ,
+\ ' p-sxtah ,
+\ ' p-sxtb ,
+\ ' p-sxtb16 ,
+\ ' p-sxth ,
+\ ' p-tbb ,
+\ ' p-tbh ,
+\ ' p-teq ,
+\ ' p-teqh ,
+' p-tst-imm , %1111101111110000 h, %10001111000000 h,
+              %1111000000010000 h, %00001111000000 h,
+' p-tst-reg-2 , %1111111111110000 h, %0000111100000000 h,
+                %1110101000010000 h, %0000111100000000 h,
+\ ' p-uadd16 ,
+\ ' p-uadd8 ,
+\ ' p-uasx ,
+\ ' p-ubfx ,
+' p-udiv %1111111111110000 h, %0000000011110000 h,
+         %1111101110110000 h, %0000000011110000 h,
+\ ' p-uhadd16 ,
+\ ' p-uhadd8 ,
+\ ' p-uhasx ,
+\ ' p-uhsax ,
+\ ' p-uhsub16 ,
+\ ' p-uhsub8 ,
+\ ' p-umaal ,
+\ ' p-umlal ,
+' p-umull , %1111111111110000 h, %0000000011110000 h,
+            %1111101110100000 h, 0 h,
+\ ' p-uqadd16 ,
+\ ' p-uqadd8 ,
+\ ' p-uqasx ,
+\ ' p-uqsax ,
+\ ' p-uqsub16 ,
+\ ' p-uqsub8 ,
+\ ' p-usad8 ,
+\ ' p-usasa8 ,
+\ ' p-usat ,
+\ ' p-usat16 ,
+\ ' p-usax ,
+\ ' p-usub16 ,
+\ ' p-usub8 ,
+\ ' p-uxtab ,
+\ ' p-uxtab16
+\ ' p-uxtah ,
+\ ' p-uxtb ,
+\ ' p-uxtb16 ,
+\ ' p-uxth ,
+\ ' p-wfe ,
+\ ' p-wfi-2 ,
+\ ' p-yield ,
 0 ,
-
-\ Commit to flash
-commit-flash
 
 \ Get condition
 : current-cond ( -- cond ) -1 ;
@@ -1235,7 +1475,7 @@ commit-flash
 \ Disassemble a 16-bit instruction
 : disassemble16 ( op-addr handler-addr -- match )
   over h@ over cell+ h@ and over 6 + h@ = if
-    current-cond 2 pick h@ instr16. 2 pick h@ rot execute true
+    current-cond 2 pick h@ instr16. 2 pick h@ rot @ execute true
   else
     2drop false
   then
@@ -1246,7 +1486,7 @@ commit-flash
   over h@ over cell+ h@ and over 8 + h@ = if
     over 2+ h@ over 6 + h@ and over 10 + h@ = if
       current-cond 2 pick h@ 3 pick 2+ h@ instr32.
-      2 pick h@ 3 pick 2+ h@ 3 roll execute true
+      2 pick h@ 3 pick 2+ h@ 3 roll @ execute true
     else
       2drop false
     then
@@ -1255,10 +1495,14 @@ commit-flash
   then
 ;
 
+\ Commit to flash
+commit-flash
+
 \ Disassemble instructions
 : disassemble ( start end -- )
+  cr
   swap begin
-    over u<
+    2dup swap u<
   while
     dup h.8 space
     all-ops16 begin
@@ -1266,7 +1510,7 @@ commit-flash
 	2dup disassemble16 if
 	  drop 2+ true true
 	else
-	  4+ false
+	  [ 2 cells ] literal + false
 	then
       else
 	drop false true
@@ -1296,5 +1540,5 @@ commit-flash
 \ Finish compressing the code
 end-compress-flash
 
-\ Reboot
-reboot
+\ Compile to RAM
+compile-to-ram
