@@ -143,14 +143,14 @@ _xor:	movs r0, tos
 
 	@@ Binary not
 	define_word "not", visible_flag | inlined_flag
-_not:	mvn tos, tos
+_not:	mvns tos, tos
 	bx lr
 	end_inlined
 
 	@@ Negation
 	define_word "negate", visible_flag | inlined_flag
 _negate:
-	mvn tos, tos
+	mvns tos, tos
 	adds tos, #1
 	bx lr
 	end_inlined
@@ -350,7 +350,7 @@ _0eq:	subs tos, #1
 	define_word "0<>", visible_flag | inlined_flag
 _0ne:	subs tos, #1
 	sbc tos, tos
-	mvn tos, tos
+	mvns tos, tos
 	bx lr
 	end_inlined
 
@@ -366,7 +366,7 @@ _0gt:	movs r0, tos
 	movs tos, #0
 	cmp r0, #0
 	ble 1f
-	mvn tos, tos
+	mvns tos, tos
 1:	bx lr
 	end_inlined
 
@@ -376,14 +376,14 @@ _0le:	movs r0, tos
 	movs tos, #0
 	cmp r0, #0
 	bgt 1f
-	mvn tos, tos
+	mvns tos, tos
 1:	bx lr
 	end_inlined
 
 	@@ Greater than or equal to zero
 	define_word "0>=", visible_flag | inlined_flag
 _0ge:	asrs tos, #31
-	mvn tos, tos
+	mvns tos, tos
 	bx lr
 	end_inlined
 	

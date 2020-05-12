@@ -401,14 +401,14 @@ _asm_bl:
 	lsrs r2, r0, #22
 	movs r3, #1
 	ands r2, r3
-	mvn r2, r2
+	mvns r2, r2
 	eor r2, r1
 	ands r2, r3
 	lsls r2, r2, #11
 	orrs tos, r2
 	lsrs r2, r0, #23
 	ands r2, r3
-	mvn r2, r2
+	mvns r2, r2
 	eor r2, r1
 	ands r2, r3
 	lsls r2, r2, #13
@@ -772,14 +772,14 @@ _asm_b_32:
 	ldr r2, =0x7FF
 	ands tos, r2
 	lsrs r2, r0, #21
-	mvn r2, r2
+	mvns r2, r2
 	movs r3, #1
 	ands r2, r3
 	eors r2, r1
 	lsls r2, r2, #11
 	orrs tos, r2
 	lsrs r2, r0, #22
-	mvn r2, r2
+	mvns r2, r2
 	ands r2, r3
 	eors r2, r1
 	lsls r2, r2, #13
@@ -852,14 +852,14 @@ _asm_b_32_back:
 	ldr r2, =0x7FF
 	ands tos, r2
 	lsrs r2, r0, #21
-	mvn r2, r2
+	mvns r2, r2
 	movs r4, #1
 	ands r2, r4
 	eors r2, r1
 	lsls r2, r2, #11
 	orrs tos, r2
 	lsrs r2, r0, #22
-	mvn r2, r2
+	mvns r2, r2
 	ands r2, r4
 	eors r2, r1
 	lsls r2, r2, #13
