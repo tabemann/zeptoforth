@@ -692,7 +692,7 @@ commit-flash
 
 \ Parse a BKPT instruction
 : p-bkpt
-  ." BKPT" nip 0_8_bf ." #" val. drop
+  ." BKPT" space nip 0_8_bf ." #" val. drop
 ;
 
 \ Parse a BL immediate instruction
