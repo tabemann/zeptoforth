@@ -26,7 +26,7 @@ compress-flash
       dup >xt 2 pick = if
 	true
       else
-	prev-word false
+	prev-word @ false
       then
     else
       true
@@ -47,7 +47,23 @@ commit-flash
 
 \ Type a condition
 : (cond.) ( cond -- )
-  drop
+  case
+    %0000 of ." EQ" endof
+    %0001 of ." NE" endof
+    %0010 of ." HS" endof \ or ." CS"
+    %0011 of ." LO" endof \ or ." CC"
+    %0100 of ." MI" endof
+    %0101 of ." PL" endof
+    %0110 of ." VS" endof
+    %0111 of ." VC" endof
+    %1000 of ." HI" endof
+    %1001 of ." LS" endof
+    %1010 of ." GE" endof
+    %1011 of ." LT" endof
+    %1100 of ." GT" endof
+    %1101 of ." LE" endof
+\    %1110 of ." AL" endof
+  endcase
 ;
 
 \ Get whether the condition is null
@@ -217,7 +233,7 @@ commit-flash
 
 \ Print out a condition if one is specified, otherwise do nothing
 : cond. ( cond -- )
-  dup null-cond? if
+  dup null-cond? not if
     (cond.)
   else
     drop
@@ -226,7 +242,7 @@ commit-flash
 
 \ Print out a condition if one is specified, otherwise do print out 'S'
 : conds. ( cond -- )
-  dup null-cond? if
+  dup null-cond? not if
     (cond.)
   else
     drop ." S"
@@ -240,16 +256,16 @@ commit-flash
 : 4s?. ( low -- ) 4 1 bitfield if ." S" then ;
 
 \ Type a PC-relative address
-: rel. ( pc rel extend -- ) rot 2 + rot rot extend + addr. ;
+: rel. ( pc rel extend -- ) rot 4 + rot rot extend + addr. ;
 
 \ Type a 4-aligned PC-relative address
-: rel4. ( pc rel extend -- ) rot 2 + 4 align rot rot extend + addr. ;
+: rel4. ( pc rel extend -- ) rot 4 + 4 align rot rot extend + addr. ;
 
 \ Type a non-sign-extended PC-relative address
-: nrel. ( pc rel -- ) swap 2 + swap + addr. ;
+: nrel. ( pc rel -- ) swap 4 + swap + addr. ;
 
 \ Type a non-sign-extended 4-aligned PC-relative address
-: nrel4. ( pc rel -- ) swap 2 + 4 align swap + addr. ;
+: nrel4. ( pc rel -- ) swap 4 + 4 align swap + addr. ;
 
 \ Type out .W
 : .w ( -- ) ." .W " ;
@@ -443,19 +459,19 @@ commit-flash
 : decode-ldr-imm-3
   dup 12_4_bf reg-sep. ." [" swap 0_4_bf reg.
   0 12 bitfield ?dup if
-    sep-imm. val.
+    2 lshift sep-imm. val.
   then
   ." ]"
 ;
 
 \ Decode an LDR immediate instruction
 : decode-ldr-imm-4
-  dup 12_4_bf reg. space ." [" swap 0_4_bf reg.
-  10_1_bf if
+  dup 12_4_bf reg-sep. ." [" swap 0_4_bf reg.
+  dup 10_1_bf if
     sep-imm. dup 0_8_bf over 9 1 bitfield 0= if negate then (dec.) ." ]"
     8 1 bitfield if ." !" then
   else
-    ." ]" sep-imm.  dup 0_8_bf swap 9 1 bitfield 0= if negate then (dec.)
+    ." ]" sep-imm. dup 0_8_bf swap 9 1 bitfield 0= if negate then (dec.)
   then
 ;
 
@@ -640,8 +656,8 @@ commit-flash
 : p-b-4
   ." B" c.w
   dup 0 11 bitfield 2 pick 0 10 bitfield 11 lshift or
-  over 11 1 bitfield 3 pick 10_1_bf xor 21 lshift or
-  swap 13 1 bitfield 2 pick 10_1_bf xor 22 lshift or
+  over 11 1 bitfield 3 pick 10_1_bf xor not 1 and 21 lshift or
+  swap 13 1 bitfield 2 pick 10_1_bf xor not 1 and 22 lshift or
   swap 10_1_bf 23 lshift or 1 lshift 25 rel.
 ;
 
@@ -683,9 +699,9 @@ commit-flash
 : p-bl-imm
   ." BL" c.sp
   dup 0 11 bitfield
-  over 0 10 bitfield 11 lshift or
-  dup 11 1 bitfield 2 pick 10 1 bitfield xor not 1 and 21 lshift or
-  13 1 bitfield over 10 1 bitfield xor not 1 and 22 lshift or
+  2 pick 0 10 bitfield 11 lshift or
+  over 11 1 bitfield 3 pick 10 1 bitfield xor not 1 and 21 lshift or
+  swap 13 1 bitfield 2 pick 10 1 bitfield xor not 1 and 22 lshift or
   swap 10 1 bitfield 23 lshift or 1 lshift 25 rel.
 ;
 
@@ -830,7 +846,7 @@ commit-flash
 
 \ Parse an LSL immediate instruction
 : p-lsl-imm-1
-  ." LSL" cssp. = decode-asr-imm-16 drop
+  ." LSL" cssp. decode-asr-imm-16 drop
 ;
 
 \ Parse an LSL immediate instruction
@@ -898,7 +914,7 @@ commit-flash
 
 \ Parse a MOV register instruction
 : p-mov-reg-2
-  ." MOVS" nip decode-and-reg-16 drop
+  ." MOVS" space nip decode-and-reg-16 drop
 ;
 
 \ Parse a MOV register instruction
@@ -1013,7 +1029,7 @@ commit-flash
 
 \ Parse an STR immediate instruction
 : p-str-imm-4
-  ." STR" size. size. c.sp decode-ldr-imm-4 drop
+  ." STR" size. c.sp decode-ldr-imm-4 drop
 ;
 
 \ Parse an STR register instruction
@@ -1184,7 +1200,7 @@ create all-ops16
 ' p-pop-1 ,        %1111111000000000 h, %1011110000000000 h,
 ' p-push-1 ,       %1111111000000000 h, %1011010000000000 h,
 ' p-rsb-imm-1 ,    %1111111111000000 h, %0100001001000000 h,
-' p-sbc-reg-1 ,    %1111111111000000 h, %0100000110000000 ,
+' p-sbc-reg-1 ,    %1111111111000000 h, %0100000110000000 h,
 ' p-str-imm-1-w ,  %1111100000000000 h, %0110000000000000 h,
 ' p-str-imm-2-w ,  %1111100000000000 h, %1001000000000000 h,
 ' p-str-reg-1-w ,  %1111111000000000 h, %0101000000000000 h,
@@ -1203,8 +1219,8 @@ create all-ops16
 create all-ops32
 ' p-adc-imm , %1111101111100000 h, highest h, %1111000101000000 h, 0 h,
 ' p-adc-reg-2 , %1111111111100000 h, 0 h, %1110101101000000 h, 0 h,
-' p-add-imm-3 , %1111101111100000 h, highest h, %1111000100000000 0 h,
-' p-add-imm-4 , %1111101111110000 h, highest h, %1111001000000000 0 h,
+' p-add-imm-3 , %1111101111100000 h, highest h, %1111000100000000 h, 0 h,
+' p-add-imm-4 , %1111101111110000 h, highest h, %1111001000000000 h, 0 h,
 ' p-add-reg-3 , %1111111111100000 h, 0 h, %1110101100000000 h, 0 h,
 \ ' p-add-sp-imm-3 , %1111101111101111 h, highest h, %1111000100001101 h, 0 h,
 \ ' p-add-sp-imm-4 , %1111101111111111 h, highest h, %1111001000001101 h, 0 h,
@@ -1310,7 +1326,7 @@ create all-ops32
             %1111101100000000 h, %1111000000000000 h,
 
 \ ' p-mvn-imm ,
-\ ' p-mvn-reg-2 ,
+\ ' p-mvn-reg-2 , %1111111111101111 h, 0 h, %1110101001101111 h, 0 h,
 \ ' p-nop-3 ,
 \ ' p-orn-imm ,
 \ ' p-orn-reg ,
@@ -1347,11 +1363,11 @@ create all-ops32
 \ ' p-sadd16 ,
 \ ' p-sadd8 ,
 \ ' p-sasx .
-' p-sbc-imm %1111101111100000 h, highest h, %1111000101100000 h, 0 h,
-' p-sbc-reg-2 %1111111111100000 h, 0 h, %1110101101100000 h, 0 h,
+' p-sbc-imm , %1111101111100000 h, highest h, %1111000101100000 h, 0 h,
+' p-sbc-reg-2 , %1111111111100000 h, 0 h, %1110101101100000 h, 0 h,
 \ ' p-sbfx ,
-' p-sdiv %1111111111110000 h, %0000000011110000 h,
-         %1111101110010000 h, %0000000011110000 h,
+' p-sdiv , %1111111111110000 h, %0000000011110000 h,
+           %1111101110010000 h, %0000000011110000 h,
 \ ' p-sel ,
 \ ' p-setend ,
 \ ' p-sev ,
@@ -1433,8 +1449,8 @@ create all-ops32
 \ ' p-uadd8 ,
 \ ' p-uasx ,
 \ ' p-ubfx ,
-' p-udiv %1111111111110000 h, %0000000011110000 h,
-         %1111101110110000 h, %0000000011110000 h,
+' p-udiv , %1111111111110000 h, %0000000011110000 h,
+           %1111101110110000 h, %0000000011110000 h,
 \ ' p-uhadd16 ,
 \ ' p-uhadd8 ,
 \ ' p-uhasx ,
@@ -1529,7 +1545,7 @@ commit-flash
 	then
       until
       not if
-	dup h@ instr16. ." ????" 2+ true
+	dup h@ instr16. ." ????" 2+
       then
     then
     cr

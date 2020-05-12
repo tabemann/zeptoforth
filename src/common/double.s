@@ -92,7 +92,7 @@ _dne:	ldmia dp!, {r0, r1, r2}
 	orrs tos, r0
 	subs tos, #1
 	sbcs tos, tos
-	mvn tos, tos
+	mvns tos, tos
 	bx lr
 
 	@@ Unsigned double less than
@@ -119,7 +119,7 @@ _duge:	ldmia dp!, {r0, r1, r2}
 	subs r2, r0
 	sbcs r1, tos
 	sbcs tos, tos
-	mvn tos, tos
+	mvns tos, tos
 	bx lr
 	end_inlined
 
@@ -129,7 +129,7 @@ _dule:	ldmia dp!, {r0, r1, r2}
 	subs r0, r2
 	sbcs tos, r1
 	sbcs tos, tos
-	mvn tos, tos
+	mvns tos, tos
 	bx lr
 	end_inlined
 
@@ -196,7 +196,7 @@ _d0ne:	ldmia dp!, {r0}
 	subs r0, #1
 	sbcs tos, #0
 	sbcs tos, tos
-	mvn tos, tos
+	mvns tos, tos
 	bx lr
 	end_inlined
 
@@ -217,7 +217,7 @@ _d0gt:	ldmia dp!, {r0}
 	bne 1f
 	cmp r0, #0
 	beq 1f
-	mvn tos, tos
+	mvns tos, tos
 1:	bx lr
 	
 	@@ Double less than or equal to zero
@@ -226,7 +226,7 @@ _d0le:	ldmia dp!, {r0}
 	movs r1, tos
 	orrs r0, tos
 	movs tos, #0
-	mvn tos, tos
+	mvns tos, tos
 	asrs r1, r1, #31
 	bne 1f
 	cmp r0, #0
@@ -238,7 +238,7 @@ _d0le:	ldmia dp!, {r0}
 	define_word "d0>=", visible_flag | inlined_flag
 _d0ge:	adds dp, #4
 	asrs tos, tos, #31
-	mvn tos, tos
+	mvns tos, tos
 	bx lr
 	end_inlined
 	
