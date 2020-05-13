@@ -113,7 +113,7 @@ commit-flash
       i reg.
     then
   loop
-  2drop ." )"
+  2drop ." }"
 ;
 
 \ Print out an absolute address
