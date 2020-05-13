@@ -21,6 +21,7 @@ _exti_0_handler_hook:
 	push_tos
 	ldr tos, =exti_0_handler_hook
 	bx lr
+	end_inlined
 
 	@@ Get the EXTI-1-HANDLER-HOOK variable address
 	define_word "exti-1-handler-hook", visible_flag
@@ -28,6 +29,7 @@ _exti_1_handler_hook:
 	push_tos
 	ldr tos, =exti_1_handler_hook
 	bx lr
+	end_inlined
 
 	@@ Get the EXTI-2-HANDLER-HOOK variable address
 	define_word "exti-2-handler-hook", visible_flag
@@ -35,6 +37,7 @@ _exti_2_handler_hook:
 	push_tos
 	ldr tos, =exti_2_handler_hook
 	bx lr
+	end_inlined
 
 	@@ Get the EXTI-3-HANDLER-HOOK variable address
 	define_word "exti-3-handler-hook", visible_flag
@@ -42,6 +45,7 @@ _exti_3_handler_hook:
 	push_tos
 	ldr tos, =exti_3_handler_hook
 	bx lr
+	end_inlined
 
 	@@ Get the EXTI-4-HANDLER-HOOK variable address
 	define_word "exti-4-handler-hook", visible_flag
@@ -49,6 +53,7 @@ _exti_4_handler_hook:
 	push_tos
 	ldr tos, =exti_4_handler_hook
 	bx lr
+	end_inlined
 
 	@@ Get the ADC-HANDLER-HOOK variable address
 	define_word "adc-handler-hook", visible_flag
@@ -56,6 +61,7 @@ _adc_handler_hook:
 	push_tos
 	ldr tos, =adc_handler_hook
 	bx lr
+	end_inlined
 
 	@@ Get the TIME-2-HANDLER-HOOK variable address
 	define_word "time-2-handler-hook", visible_flag
@@ -63,6 +69,7 @@ _time_2_handler_hook:
 	push_tos
 	ldr tos, =time_2_handler_hook
 	bx lr
+	end_inlined
 
 	@@ Get the TIME-3-HANDLER-HOOK variable address
 	define_word "time-3-handler-hook", visible_flag
@@ -70,6 +77,7 @@ _time_3_handler_hook:
 	push_tos
 	ldr tos, =time_3_handler_hook
 	bx lr
+	end_inlined
 
 	@@ Get the TIME-4-HANDLER-HOOK variable address
 	define_word "time-4-handler-hook", visible_flag
@@ -77,6 +85,7 @@ _time_4_handler_hook:
 	push_tos
 	ldr tos, =time_4_handler_hook
 	bx lr
+	end_inlined
 
 	.ltorg
 	

@@ -283,6 +283,7 @@ _eq:	movs r0, tos
 	bx lr
 1:	movs tos, #0
 	bx lr
+	end_inlined
 
 	@@ Not equal
 	define_word "<>", visible_flag
@@ -294,6 +295,7 @@ _ne:	movs r0, tos
 	bx lr
 1:	movs tos, #0
 	bx lr
+	end_inlined
 
 	@@ Less than
 	define_word "<", visible_flag
@@ -305,6 +307,7 @@ _lt:	movs r0, tos
 	bx lr
 1:	movs tos, #0
 	bx lr
+	end_inlined
 
 	@@ Greater than
 	define_word ">", visible_flag
@@ -316,6 +319,7 @@ _gt:	movs r0, tos
 	bx lr
 1:	movs tos, #0
 	bx lr
+	end_inlined
 
 	@@ Less than or equal
 	define_word "<=", visible_flag
@@ -338,6 +342,7 @@ _ge:	movs r0, tos
 	bx lr
 1:	movs tos, #0
 	bx lr
+	end_inlined
 
 	@@ Equals zero
 	define_word "0=", visible_flag | inlined_flag
@@ -397,6 +402,7 @@ _ult:	movs r0, tos
 	bx lr
 1:	movs tos, #0
 	bx lr
+	end_inlined
 
 	@@ Unsigned greater than
 	define_word "u>", visible_flag
@@ -408,6 +414,7 @@ _ugt:	movs r0, tos
 	bx lr
 1:	movs tos, #0
 	bx lr
+	end_inlined
 
 	@@ Unsigned less than or equal
 	define_word "u<=", visible_flag
@@ -419,6 +426,7 @@ _ule:	movs r0, tos
 	bx lr
 1:	movs tos, #0
 	bx lr
+	end_inlined
 
 	@@ Unsigned greater than or equal
 	define_word "u>=", visible_flag
@@ -430,6 +438,7 @@ _uge:	movs r0, tos
 	bx lr
 1:	movs tos, #0
 	bx lr
+	end_inlined
 	
 	@@ Get the RAM HERE pointer
 	define_word "ram-here", visible_flag
@@ -437,6 +446,7 @@ _here:	ldr r0, =here
 	push_tos
 	ldr tos, [r0]
 	bx lr
+	end_inlined
 
 	@@ Get the PAD pointer
 	define_word "pad", visible_flag
@@ -446,6 +456,7 @@ _pad:	ldr r0, =here
 	ldr tos, [r0]
 	adds tos, tos, r1
 	bx lr
+	end_inlined
 
 	@@ Allot space in RAM
 	define_word "ram-allot", visible_flag
@@ -455,6 +466,7 @@ _allot:	ldr r0, =here
 	str r1, [r0]
 	pull_tos
 	bx lr
+	end_inlined
 
 	@@ Set the RAM flash pointer
 	define_word "ram-here!", visible_flag
@@ -463,6 +475,7 @@ _store_here:
 	str tos, [r0]
 	pull_tos
 	bx lr
+	end_inlined
 
 	@@ Get the flash HERE pointer
 	define_word "flash-here", visible_flag
@@ -471,6 +484,7 @@ _flash_here:
 	push_tos
 	ldr tos, [r0]
 	bx lr
+	end_inlined
 
 	@@ Allot space in flash
 	define_word "flash-allot", visible_flag
@@ -481,6 +495,7 @@ _flash_allot:
 	str r1, [r0]
 	pull_tos
 	bx lr
+	end_inlined
 
 	@@ Set the flash HERE pointer
 	define_word "flash-here!", visible_flag
@@ -489,6 +504,7 @@ _store_flash_here:
 	str tos, [r0]
 	pull_tos
 	bx lr
+	end_inlined
 
 	@@ Get the base address of the latest word
 	define_word "latest", visible_flag
@@ -497,6 +513,7 @@ _latest:
 	ldr r0, =latest
 	ldr tos, [r0]
 	bx lr
+	end_inlined
 
 	@@ Get the base address of the latest RAM word
 	define_word "ram-latest", visible_flag
@@ -505,6 +522,7 @@ _ram_latest:
 	ldr r0, =ram_latest
 	ldr tos, [r0]
 	bx lr
+	end_inlined
 
 	@@ Get the base address of the latest flash word
 	define_word "flash-latest", visible_flag
@@ -513,6 +531,7 @@ _flash_latest:
 	ldr r0, =flash_latest
 	ldr tos, [r0]
 	bx lr
+	end_inlined
 
 	@@ Set the base address of the latest word
 	define_word "latest!", visible_flag
@@ -521,6 +540,7 @@ _store_latest:
 	str tos, [r0]
 	pull_tos
 	bx lr
+	end_inlined
 
 	@@ Set the base address of the latest RAM word
 	define_word "ram-latest!", visible_flag
@@ -529,6 +549,7 @@ _store_ram_latest:
 	str tos, [r0]
 	pull_tos
 	bx lr
+	end_inlined
 
 	@@ Set the base address of the latest flash word
 	define_word "flash-latest!", visible_flag
@@ -537,6 +558,7 @@ _store_flash_latest:
 	str tos, [r0]
 	pull_tos
 	bx lr
+	end_inlined
 
 	@@ Get either the HERE pointer or the flash HERE pointer, depending on
 	@@ compilation mode
@@ -551,6 +573,7 @@ _current_here:
 	pop {pc}
 1:	bl _flash_here
 	pop {pc}
+	end_inlined
 
 	@@ Allot space in RAM or in flash, depending on the compilation mode
 	define_word "allot", visible_flag
@@ -564,6 +587,7 @@ _current_allot:
 	pop {pc}
 1:	bl _flash_allot
 	pop {pc}
+	end_inlined
 
 	@@ Emit a character
 	define_word "emit", visible_flag
@@ -578,6 +602,7 @@ _emit:	push {lr}
 	pop {pc}
 1:	pull_tos
 	pop {pc}
+	end_inlined
 
 	@@ Test for whether the system is ready to receive a character
 	define_word "emit?", visible_flag
@@ -594,6 +619,7 @@ _emit_q:
 1:	push_tos
 	movs tos, #0
 	pop {pc}
+	end_inlined
 
 	@@ Emit a space
 	define_word "space", visible_flag
@@ -602,6 +628,7 @@ _space:	push {lr}
 	movs tos, #0x20
 	bl _emit
 	pop {pc}
+	end_inlined
 
 	@@ Emit a newline
 	define_word "cr", visible_flag
@@ -613,6 +640,7 @@ _cr:	push {lr}
 	movs tos, #0x0A
 	bl _emit
 	pop {pc}
+	end_inlined
 
 	@@ Type a string
 	define_word "type", visible_flag
@@ -632,6 +660,7 @@ _type:	push {lr}
 	adds r1, #1
 	b 1b
 2:	pop {pc}
+	end_inlined
 
 	@@ Type a string using the native serial driver
 	define_word "serial-type", visible_flag
@@ -652,6 +681,7 @@ _serial_type:
 	adds r1, #1
 	b 1b
 2:	pop {pc}
+	end_inlined
 
 	@ Convert a cstring to a string
 	define_word "count", visible_flag
@@ -660,6 +690,7 @@ _count:	ldrb r0, [tos]
 	push_tos
 	movs tos, r0
 	bx lr
+	end_inlined
 	
 	@@ Receive a character
 	define_word "key", visible_flag
@@ -675,6 +706,7 @@ _key:	push {lr}
 1:	push_tos
 	movs tos, #0x0D
 	pop {pc}
+	end_inlined
 
 	@@ Test for whether the system is ready to receive a character
 	define_word "key?", visible_flag
@@ -690,18 +722,21 @@ _key_q:	push {lr}
 1:	push_tos
 	movs tos, #0
 	pop {pc}
+	end_inlined
 
 	@@ Enable interrupts
 	define_word "enable-int", visible_flag
 _enable_int:
 	cpsie i
 	bx lr
+	end_inlined
 
 	@@ Disable interrupts
 	define_word "disable-int", visible_flag
 _disable_int:
 	cpsid i
 	bx lr
+	end_inlined
 
 	@@ Enter sleep mode
 	define_word "sleep", visible_flag
@@ -713,6 +748,7 @@ _sleep:
 	isb
 	wfi
 	bx lr
+	end_inlined
 	
 	@@ Execute an xt
 	define_word "execute", visible_flag
@@ -721,6 +757,7 @@ _execute:
 	adds r0, #1 @ Commented out to deal with an issue with Cutter @@@
 	pull_tos
 	bx r0
+	end_inlined
 	
 	@@ Execute an xt if it is non-zero
 	define_word "?execute", visible_flag
@@ -732,6 +769,7 @@ _execute_nz:
 	adds r0, #1
 	bx r0
 1:	bx lr
+	end_inlined
 
 	@@ Execute a PAUSE word, if one is set
 	define_word "pause", visible_flag
@@ -748,15 +786,18 @@ _pause:	push {lr}
 	movs tos, r0
 	bl _execute
 1:	pop {pc}
+	end_inlined
 	
 	@@ Default implementation of PAUSE, does nothing
 	define_word "do-pause", visible_flag
 _do_pause:
 	bx lr
+	end_inlined
 	
 	@@ Exit a word
 	define_word "exit", visible_flag
 _exit:	pop {pc}
+	end_inlined
 
 	@@ Initialize the flash dictionary
 	define_word "init-flash-dict", visible_flag
@@ -778,6 +819,7 @@ _init_flash_dict:
 	ldr r0, =flash_latest
 	str tos, [r0]
 	pop {pc}
+	end_inlined
 	
 	@@ Initiatlize the dictionary
 	define_word "init-dict", visible_flag
@@ -789,6 +831,7 @@ _init_dict:
 	ldr r0, =ram_latest
 	str r1, [r0]
 	pop {pc}
+	end_inlined
 
 	@@ Find the last visible word
 	define_word "find-last-visible-word", visible_flag
@@ -802,6 +845,7 @@ _find_last_visible_word:
 	ldr tos, [tos, #4]
 	b 1b
 2:	bx lr
+	end_inlined
 
 	@@ Display a welcome message
 	define_word "welcome", visible_flag
@@ -812,6 +856,7 @@ _welcome:
 	string_ln "Welcome to zeptoforth ok"
 	bl _type
 	pop {pc}
+	end_inlined
 
 	.ltorg
 	
@@ -822,6 +867,7 @@ _welcome:
 _init:	movs r0, #0
 	msr BASEPRI, r0
 	bx lr
+	end_inlined
 	
  	@@ Run the initialization routine, if there is one
 	define_word "do-init", visible_flag
@@ -838,6 +884,7 @@ _do_init:
 	pop {pc}
 1:	pull_tos
 	pop {pc}
+	end_inlined
 	
 	@@ Set the currently-defined word to be immediate
 	define_word "[immediate]", visible_flag | immediate_flag | compiled_flag
@@ -848,6 +895,7 @@ _bracket_immediate:
 	orr r1, r2
 	str r1, [r0]
 	bx lr
+	end_inlined
 
 	@@ Set the currently-defined word to be compile-only
 	define_word "[compile-only]", visible_flag | immediate_flag | compiled_flag
@@ -858,6 +906,7 @@ _bracket_compile_only:
 	orr r1, r2
 	str r1, [r0]
 	bx lr
+	end_inlined
 
 	@@ Set the currently-defined word to be inlined
 	define_word "[inlined]", visible_flag | immediate_flag | compiled_flag
@@ -868,6 +917,7 @@ _bracket_inlined:
 	orr r1, r2
 	str r1, [r0]
 	bx lr
+	end_inlined
 
 	@@ Set the currently-defined word to be immediate
 	define_word "immediate", visible_flag
@@ -878,6 +928,7 @@ _immediate:
 	orr r1, r2
 	str r1, [r0]
 	bx lr
+	end_inlined
 
 	@@ Set the currently-defined word to be compile-only
 	define_word "compile-only", visible_flag
@@ -888,6 +939,7 @@ _compile_only:
 	orr r1, r2
 	str r1, [r0]
 	bx lr
+	end_inlined
 
 	@@ Set the currently-defined word to be inlined
 	define_word "inlined", visible_flag
@@ -898,6 +950,7 @@ _inlined:
 	orr r1, r2
 	str r1, [r0]
 	bx lr
+	end_inlined
 
 	@@ Set the currently-defined word to be visible
 	define_word "visible", visible_flag
@@ -908,6 +961,7 @@ _visible:
 	orr r1, r2
 	str r1, [r0]
 	bx lr
+	end_inlined
 
 	@@ Switch to interpretation mode
 	define_word "[", visible_flag | immediate_flag
@@ -916,6 +970,7 @@ _to_interpret:
 	movs r1, #0
 	str r1, [r0]
 	bx lr
+	end_inlined
 
 	@@ Switch to compilation state
 	define_word "]", visible_flag
@@ -924,6 +979,7 @@ _to_compile:
 	movs r1, #-1
 	str r1, [r0]
 	bx lr
+	end_inlined
 
 	@@ Set compilation to RAM
 	define_word "compile-to-ram", visible_flag
@@ -932,6 +988,7 @@ _compile_to_ram:
 	movs r1, #0
 	str r1, [r0]
 	bx lr
+	end_inlined
 
 	@@ Set compilation to flash
 	define_word "compile-to-flash", visible_flag
@@ -940,6 +997,7 @@ _compile_to_flash:
 	movs r1, #-1
 	str r1, [r0]
 	bx lr
+	end_inlined
 
 	@@ Get whether compilation is to flash
 	define_word "compiling-to-flash?", visible_flag
@@ -948,6 +1006,7 @@ _compiling_to_flash:
 	push_tos
 	ldr tos, [r0]
 	bx lr
+	end_inlined
 
 	@@ Get whether to compress code compiled to flash
 	define_word "compress-flash", visible_flag
@@ -956,6 +1015,7 @@ _compress_flash:
 	movs r1, #-1
 	str r1, [r0]
 	bx lr
+	end_inlined
 
 	@@ Get whether flash is being compressed
 	define_word "compressing-flash", visible_flag
@@ -964,6 +1024,7 @@ _compressing_flash:
 	push_tos
 	ldr tos, [r0]
 	bx lr
+	end_inlined
 
 	@@ Compile an xt
 	define_word "compile,", visible_flag
@@ -971,6 +1032,7 @@ _compile:
 	push {lr}
 	bl _asm_call
 	pop {pc}
+	end_inlined
 
 	@@ Get the word corresponding to a token
 	define_word "token-word", visible_flag
@@ -991,6 +1053,7 @@ _token_word:
 2:	ldr tos, =_unknown_word
 	bl _raise
 	pop {pc}
+	end_inlined
 
 	@@ Tick
 	define_word "'", visible_flag
@@ -998,6 +1061,7 @@ _tick:	push {lr}
 	bl _token_word
 	bl _to_xt
 	pop {pc}
+	end_inlined
 
 	@@ Compiled tick
 	define_word "[']", visible_flag | immediate_flag | compiled_flag
@@ -1011,6 +1075,7 @@ _compiled_tick:
 	movs tos, #6
 	bl _asm_literal
 	pop {pc}
+	end_inlined
 	
 	@@ Postpone a word
 	define_word "postpone", visible_flag | immediate_flag | compiled_flag
@@ -1046,6 +1111,7 @@ _postpone:
 2:	ldr tos, =_asm_inline
 	bl _compile
 	pop {pc}
+	end_inlined
 
 	@@ Compile a literal
 	define_word "lit,", visible_flag
@@ -1058,6 +1124,7 @@ _comma_lit:
 	movs tos, #6
 	bl _asm_literal
 	pop {pc}
+	end_inlined
 
 	@@ Compile a literal
 	define_word "literal", visible_flag | immediate_flag | compiled_flag
@@ -1065,6 +1132,7 @@ _literal:
 	push {lr}
 	bl _comma_lit
 	pop {pc}
+	end_inlined
 
 	@@ Recursively call a word
 	define_word "recurse", visible_flag | immediate_flag | compiled_flag
@@ -1076,6 +1144,7 @@ _recurse:
 	bl _to_xt
 	bl _asm_call
 	pop {pc}
+	end_inlined
 	
 	@@ Unknown word exception
 	define_word "unknown-word", visible_flag
@@ -1084,6 +1153,7 @@ _unknown_word:
 	string_ln " unknown word"
 	bl _type
 	pop {pc}
+	end_inlined
 	
 	@@ Store a byte
 	define_word "b!", visible_flag | inlined_flag
@@ -1124,6 +1194,7 @@ _store_8:
 	pull_tos
 	str tos, [r0, #4]
 	bx lr
+	end_inlined
 
 	@@ Get a byte
 	define_word "b@", visible_flag | inlined_flag
@@ -1150,6 +1221,7 @@ _get_8:	ldr r0, [tos]
 	push_tos
 	movs tos, r0
 	bx lr
+	end_inlined
 
 	@@ Store a byte at the RAM HERE location
 	define_word "bram,", visible_flag
@@ -1162,6 +1234,7 @@ _comma_1:
 	str r1, [r0]
 	pull_tos
 	bx lr
+	end_inlined
 
 	@@ Store a halfword at the RAM HERE location
 	define_word "hram,", visible_flag
@@ -1174,6 +1247,7 @@ _comma_2:
 	str r1, [r0]
 	pull_tos
 	bx lr
+	end_inlined
 
 	@@ Store a word at the RAM HERE location
 	define_word "ram,", visible_flag
@@ -1184,7 +1258,8 @@ _comma_4:
 	str r1, [r0]
 	pull_tos
 	bx lr
-
+	end_inlined
+	
 	@@ Store a doubleword at the RAM HERE location
 	define_word "2ram,", visible_flag
 _comma_8:
@@ -1195,6 +1270,7 @@ _comma_8:
 	str tos, [r1], #4
 	str r1, [r0]
 	bx lr
+	end_inlined
 
 	@@ Store a byte at the flash HERE location
 	define_word "bflash,", visible_flag
@@ -1209,6 +1285,7 @@ _flash_comma_1:
 	adds r1, #1
 	str r1, [r0]
 	pop {pc}
+	end_inlined
 
 	@@ Store a halfword at the flash HERE location
 	define_word "hflash,", visible_flag
@@ -1223,6 +1300,7 @@ _flash_comma_2:
 	adds r1, #2
 	str r1, [r0]
 	pop {pc}
+	end_inlined
 
 	@@ Store a word at the flash HERE location
 	define_word "flash,", visible_flag
@@ -1237,6 +1315,7 @@ _flash_comma_4:
 	adds r1, #4
 	str r1, [r0]
 	pop {pc}
+	end_inlined
 
 	@@ Store a doubleword at the flash HERE location
 	define_word "2flash,", visible_flag
@@ -1251,6 +1330,7 @@ _flash_comma_8:
 	adds r1, #8
 	str r1, [r0]
 	pop {pc}
+	end_inlined
 
 	@@ Store a byte to RAM or to flash
 	define_word "bcurrent!", visible_flag
@@ -1264,6 +1344,7 @@ _store_current_1:
 	pop {pc}
 1:	bl _store_flash_1
 	pop {pc}
+	end_inlined
 
 	@@ Store a halfword to RAM or to flash
 	define_word "hcurrent!", visible_flag
@@ -1277,6 +1358,7 @@ _store_current_2:
 	pop {pc}
 1:	bl _store_flash_2
 	pop {pc}
+	end_inlined
 
 	@@ Store a word to RAM or to flash
 	define_word "current!", visible_flag
@@ -1290,6 +1372,7 @@ _store_current_4:
 	pop {pc}
 1:	bl _store_flash_4
 	pop {pc}
+	end_inlined
 
 	@@ Store a doubleword to RAM or to flash
 	define_word "2current!", visible_flag
@@ -1303,6 +1386,7 @@ _store_current_8:
 	pop {pc}
 1:	bl _store_flash_8
 	pop {pc}
+	end_inlined
 
 	@@ Store a byte to the RAM or flash HERE location
 	define_word "b,", visible_flag
@@ -1316,6 +1400,7 @@ _current_comma_1:
 	pop {pc}
 1:	bl _flash_comma_1
 	pop {pc}
+	end_inlined
 
 	@@ Store a halfword to the RAM or flash HERE location
 	define_word "h,", visible_flag
@@ -1329,6 +1414,7 @@ _current_comma_2:
 	pop {pc}
 1:	bl _flash_comma_2
 	pop {pc}
+	end_inlined
 
 	@@ Store a word to the RAM or flash HERE location
 	define_word ",", visible_flag
@@ -1342,6 +1428,7 @@ _current_comma_4:
 	pop {pc}
 1:	bl _flash_comma_4
 	pop {pc}
+	end_inlined
 
 	@@ Store a doubleword to the RAM or flash HERE location
 	define_word "2,", visible_flag
@@ -1355,6 +1442,7 @@ _current_comma_8:
 	pop {pc}
 1:	bl _flash_comma_8
 	pop {pc}
+	end_inlined
 
 	@@ Reserve a byte at the RAM HERE location
 	define_word "bram-reserve", visible_flag
@@ -1366,6 +1454,7 @@ _reserve_1:
 	adds r1, #1
 	str r1, [r0]
 	bx lr
+	end_inlined
 
 	@@ Reserve a halfword at the RAM HERE location
 	define_word "hram-reserve", visible_flag
@@ -1377,6 +1466,7 @@ _reserve_2:
 	adds r1, #2
 	str r1, [r0]
 	bx lr
+	end_inlined
 
 	@@ Reserve a word at the RAM HERE location
 	define_word "ram-reserve", visible_flag
@@ -1388,6 +1478,7 @@ _reserve_4:
 	adds r1, #4
 	str r1, [r0]
 	bx lr
+	end_inlined
 
 	@@ Reserve a doubleword at the RAM HERE location
 	define_word "2ram-reserve", visible_flag
@@ -1399,6 +1490,7 @@ _reserve_8:
 	adds r1, #8
 	str r1, [r0]
 	bx lr
+	end_inlined
 
 	@@ Reserve a byte at the flash HERE location
 	define_word "bflash-reserve", visible_flag
@@ -1410,6 +1502,7 @@ _flash_reserve_1:
 	adds r1, #1
 	str r1, [r0]
 	bx lr
+	end_inlined
 
 	@@ Reserve a halfword at the flash HERE location
 	define_word "hflash-reserve", visible_flag
@@ -1421,6 +1514,7 @@ _flash_reserve_2:
 	adds r1, #2
 	str r1, [r0]
 	bx lr
+	end_inlined
 
 	@@ Reserve a word at the flash HERE location
 	define_word "flash-reserve", visible_flag
@@ -1432,6 +1526,7 @@ _flash_reserve_4:
 	adds r1, #4
 	str r1, [r0]
 	bx lr
+	end_inlined
 
 	@@ Reserve a doubleword at the flash HERE location
 	define_word "2flash-reserve", visible_flag
@@ -1443,6 +1538,7 @@ _flash_reserve_8:
 	adds r1, #8
 	str r1, [r0]
 	bx lr
+	end_inlined
 
 	@@ Reserve a byte at the RAM or flash HERE location
 	define_word "breserve", visible_flag
@@ -1456,6 +1552,7 @@ _current_reserve_1:
 	pop {pc}
 1:	bl _flash_reserve_1
 	pop {pc}
+	end_inlined
 
 	@@ Reserve a halfword at the RAM or flash HERE location
 	define_word "hreserve", visible_flag
@@ -1469,6 +1566,7 @@ _current_reserve_2:
 	pop {pc}
 1:	bl _flash_reserve_2
 	pop {pc}
+	end_inlined
 
 	@@ Reserve a word at the RAM or flash HERE location
 	define_word "reserve", visible_flag
@@ -1482,6 +1580,7 @@ _current_reserve_4:
 	pop {pc}
 1:	bl _flash_reserve_4
 	pop {pc}
+	end_inlined
 
 	@@ Reserve a doubleword at the RAM or flash HERE location
 	define_word "2reserve", visible_flag
@@ -1495,6 +1594,7 @@ _current_reserve_8:
 	pop {pc}
 1:	bl _flash_reserve_8
 	pop {pc}
+	end_inlined
 
 	@@ Align to a power of two
 	define_word "align,", visible_flag
@@ -1515,6 +1615,7 @@ _current_comma_align:
 	b 1b
 2:	pull_tos
 	pop {pc}
+	end_inlined
 
 	@@ Align to a power of two
 	define_word "flash-align,", visible_flag
@@ -1535,6 +1636,7 @@ _flash_comma_align:
 	b 1b
 2:	pull_tos
 	pop {pc}
+	end_inlined
 
 	@@ Align to a power of two
 	define_word "ram-align,", visible_flag
@@ -1554,6 +1656,7 @@ _comma_align:
 	pop {r0}
 	b 1b
 2:	pop {pc}
+	end_inlined
 
 	@@ Compile a c-string
 	define_word "cstring,", visible_flag
@@ -1579,7 +1682,8 @@ _current_comma_cstring:
 	subs r0, #1
 	adds r1, #1
 	b 2b
-1:	pop {pc}	
+1:	pop {pc}
+	end_inlined
 
 	@@ Push a value onto the return stack
 	define_word ">r", visible_flag | inlined_flag
@@ -1648,6 +1752,8 @@ _reboot:
 	ldr r0, =0xE000ED0C @ AIRCR
 	ldr r1, =0x05FA0004
 	str r1, [r0]
+	bx lr
+	end_inlined
 	
 	@@ Initialize the variables
 	define_word "init-variables", visible_flag
@@ -1735,6 +1841,7 @@ _init_variables:
 	ldr r1, =input_buffer
 	str r1, [r0] 
 	pop {pc}
+	end_inlined
 	
 	.ltorg
 	

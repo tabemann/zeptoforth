@@ -35,6 +35,7 @@ _if:	push {lr}
 	push_tos
 	movs tos, #-1
 	pop {pc}
+	end_inlined
 
 	@@ ELSE in an IF ELSE THEN block
 	define_word "else", visible_flag | immediate_flag | compiled_flag
@@ -57,6 +58,7 @@ _else:	push {lr}
 1:	ldr tos, =_not_following_if
 	bl _raise
 	pop {pc}
+	end_inlined
 	
 	@@ Not following an IF exception
 	define_word "not-following-if", visible_flag
@@ -65,6 +67,7 @@ _not_following_if:
 	string " not following if"
 	bl _type
 	pop {pc}
+	end_inlined
 	
 	@@ End an IF block
 	define_word "then", visible_flag | immediate_flag | compiled_flag
@@ -84,6 +87,7 @@ _then:	push {lr}
 	pop {pc}
 1:	bl _asm_branch_back
 	pop {pc}
+	end_inlined
 
 	@@ Start a BEGIN block
 	define_word "begin", visible_flag | immediate_flag | compiled_flag
@@ -111,6 +115,7 @@ _while:	push {lr}
 	bl _asm_cmp_imm
 	bl _asm_reserve_branch
 	pop {pc}
+	end_inlined
 
 	@@ End a BEGIN-WHILE-REPEAT block
 	define_word "repeat", visible_flag | immediate_flag | compiled_flag
@@ -126,6 +131,7 @@ _repeat:
 	movs tos, r0
 	bl _asm_branch_zero_back
 	pop {pc}
+	end_inlined
 
 	@@ End a BEGIN-UNTIL block
 	define_word "until", visible_flag | immediate_flag | compiled_flag
@@ -147,12 +153,14 @@ _until:	push {lr}
 	bl _asm_cmp_imm
 	bl _asm_branch_zero
 	pop {pc}
+	end_inlined
 
 	@@ End a BEGIN-AGAIN block
 	define_word "again", visible_flag | immediate_flag | compiled_flag
 _again:	push {lr}
 	bl _asm_branch
 	pop {pc}
+	end_inlined
 
 	.ltorg
 	

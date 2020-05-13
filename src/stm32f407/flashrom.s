@@ -91,8 +91,7 @@ _store_flash_1:
 	ldr r2, =FLASH_CR
 	ldr r3, =0x80000000
 	str r3, [r2]
-
-2:	bx lr
+	bx lr
 4:	push_tos
 	ldr tos, =_store_flash_already_written
 	bl _raise
@@ -102,7 +101,9 @@ _store_flash_1:
 6:	push_tos
 	ldr tos, =_attempted_to_write_past_flash_end
 	bl _raise
-
+2:	bx lr
+	end_inlined
+	
 	@@ Write a halfword to flash
 	define_word "hflash!", visible_flag
 _store_flash_2:
@@ -176,8 +177,7 @@ _store_flash_2:
 	ldr r2, =FLASH_CR
 	ldr r3, =0x80000000
 	str r3, [r2]
-
-2:	bx lr
+	bx lr
 3:	push {lr}
 	movs tos, r1
 	ands tos, #0xFF
@@ -202,6 +202,8 @@ _store_flash_2:
 6:	push_tos
 	ldr tos, =_attempted_to_write_past_flash_end
 	bl _raise
+2:	bx lr
+	end_inlined
 	
 	@@ Exception handler for unaligned flash writes
 	define_word "flash!-unaligned", visible_flag
@@ -210,6 +212,7 @@ _store_flash_unaligned:
 	string_ln " unaligned flash write"
 	bl _type
 	pop {pc}
+	end_inlined
 	
 	@@ Exception handler for flash writes where flash has already been
 	@@ written
@@ -219,6 +222,7 @@ _store_flash_already_written:
 	string_ln " flash already written"
 	bl _type
 	pop {pc}
+	end_inlined
 	
 	@@ Delete a sector of lash
 	define_word "erase-sector", visible_flag
@@ -257,6 +261,7 @@ _erase_sector:
 2:	pull_tos
 	
 	pop {pc}
+	end_inlined
 
 	@@ Exception handler for flash writes where flash has already been
 	@@ written
@@ -265,6 +270,7 @@ _attempted_to_write_core_flash:
 	string_ln " attempted to write to core flash"
 	bl _type
 	pop {pc}
+	end_inlined
 
 	@@ Exception handler for flash writes past the end of flash
 _attempted_to_write_past_flash_end:
@@ -272,6 +278,7 @@ _attempted_to_write_past_flash_end:
 	string_ln " attempted to write past flash end"
 	bl _type
 	pop {pc}
+	end_inlined
 
 	@@ Erase a particular address
 	define_word "erase-address", visible_flag
@@ -292,6 +299,7 @@ _erase_address:
 	pop {pc}
 1:	pull_tos
 	pop {pc}
+	end_inlined
 	
 	@@ Choose a sector to erase
 	define_word "choose-sector", visible_flag
@@ -377,6 +385,7 @@ _choose_sector:
 	ldr tos, =0x000E0000
 	bl _erase_address
 	pop {pc}
+	end_inlined
 
 	@@ Erase after a given address (including the sector the address is in)
 	define_word "erase-after", visible_flag
@@ -398,6 +407,7 @@ _erase_after:
 	b 1b
 3:	bl _reboot
 	pop {pc}
+	end_inlined
 	
 	@@ Erase all flash except for the zeptoforth runtime
 	define_word "erase-all", visible_flag
@@ -407,6 +417,7 @@ _erase_all:
 	ldr tos, =flash_dict_start
 	bl _erase_after
 	pop {pc}
+	end_inlined
 		
 	@@ Find the end of the flash dictionary
 	define_word "find-flash-end", visible_flag
@@ -430,6 +441,7 @@ _find_flash_end:
 	adds r0, #1
 	beq 1b
 2:	bx lr
+	end_inlined
 
 	@@ Find the next flash block
 	define_word "next-flash-block", visible_flag
@@ -437,6 +449,7 @@ _next_flash_block:
 	bics tos, #3
 	adds tos, #8
 	bx lr
+	end_inlined
 
 	@@ Find the start of the last flash word
 	define_word "find-last-flash-word", visible_flag
@@ -456,6 +469,7 @@ _find_last_flash_word:
 	beq 3b
 	ldr tos, [tos]
 2:	bx lr
+	end_inlined
 
 
 	@@ Write a word to an address in one or more flash_buffers
@@ -480,6 +494,7 @@ _store_flash_4:
 	adds tos, #2
 	bl _store_flash_2
 	pop {pc}
+	end_inlined
 
 	@@ Write a word to an address in one or more flash_buffers
 	define_word "2flash!", visible_flag
@@ -492,18 +507,21 @@ _store_flash_8:
 	adds tos, #4
 	bl _store_flash_4
 	pop {pc}
+	end_inlined
 
 	@@ Flush all the buffered flash
 	define_word "flush-all-flash", visible_flag
 _flush_all_flash:	
 	push {lr}
 	pop {pc}
+	end_inlined
 
 	@@ Fill flash until it is aligned to a block
 	define_word "flash-align,", visible_flag
 _flash_align:
 	push {lr}
 	pop {pc}
+	end_inlined
 
 	@@ Get the flash block size in bytes
 	define_word "flash-block-size", visible_flag | inlined_flag
@@ -517,6 +535,7 @@ _flash_block_size:
 	define_word "init-flash-buffers", visible_flag
 _init_flash_buffers:
 	bx lr
+	end_inlined
 
 	.ltorg
 	

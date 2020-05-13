@@ -25,6 +25,7 @@ _raise:	cmp tos, #0
 	pop {pc} @ #0
 1:	pull_tos
 	bx lr
+	end_inlined
 
 	@@ Try to see if an exception occurs
 	define_word "try", visible_flag
@@ -45,6 +46,7 @@ _try:	push {lr} @ #0
 	pop {r1}
 	push_const 0
 	pop {pc}
+	end_inlined
 	
 	.ltorg
 	
