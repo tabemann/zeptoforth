@@ -27,6 +27,7 @@ _ws_q:	cmp tos, #0x09
 	bx lr
 1:	movs tos, #-1
 	bx lr
+	end_inlined
 
 	@@ Test whether a character is a newline.
 	define_word "newline?", visible_flag
@@ -39,6 +40,7 @@ _newline_q:
 	bx lr
 1:	movs tos, #-1
 	bx lr
+	end_inlined
 
 	@@ Parse the input buffer for the start of a token
 	define_word "token-start", visible_flag
@@ -66,6 +68,7 @@ _token_start:
 	b 1b
 2:	movs tos, r1
 	pop {pc}
+	end_inlined
 
 	@@ Parse the input buffer for the end of a token
 	define_word "token-end", visible_flag
@@ -90,6 +93,7 @@ _token_end:
 	b 1b
 2:	movs tos, r1
 	pop {pc}
+	end_inlined
 
 	@@ Parse a token
 	define_word "token", visible_flag
@@ -109,6 +113,7 @@ _token:	push {lr}
 	ldr r0, [r0]
 	str r1, [r0]
 	pop {pc}
+	end_inlined
 
 	@@ Parse a line comment
 	define_word "\\", visible_flag | immediate_flag
@@ -139,6 +144,7 @@ _line_comment:
 	ldr r1, [r1]
 	str r0, [r1]
 	pop {pc}
+	end_inlined
 
 	@@ Parse a paren coment
 	define_word "(", visible_flag | immediate_flag
@@ -165,6 +171,7 @@ _paren_comment:
 	ldr r1, [r1]
 	str r0, [r1]
 	pop {pc}
+	end_inlined
 	
 	@@ Convert a character to being uppercase
 	define_word "to-upper-char", visible_flag
@@ -175,6 +182,7 @@ _to_upper_char:
 	bgt 1f
 	subs tos, #0x20
 1:	bx lr
+	end_inlined
 
 	@@ Compare whether two strings are equal
 	define_word "equal-case-strings?", visible_flag
@@ -213,6 +221,7 @@ _equal_case_strings:
 	pop {r4, pc}
 3:	movs tos, #0
 	pop {r4, pc}
+	end_inlined
 
 	@@ Find a word in a specific dictionary
 	@@ ( addr bytes mask dict -- addr|0 )
@@ -251,6 +260,7 @@ _find_dict:
 	pop {r4, pc}
 4:	movs tos, r0
 	pop {r4, pc}
+	end_inlined
 
 	@@ Find a word in the dictionary
 	@@ ( addr bytes mask -- addr|0 )
@@ -296,6 +306,7 @@ _find:	push {lr}
 	ldr tos, [r0]
 	bl _find_dict
 2:	pop {pc}
+	end_inlined
 
 	@@ Get an xt from a word
 	define_word ">xt", visible_flag
@@ -309,6 +320,7 @@ _to_xt:	push {lr}
 	pop {pc}
 1:	adds tos, #1
 	pop {pc}
+	end_inlined
 
 	@@ Evaluate a string
 	define_word "evaluate", visible_flag
@@ -349,6 +361,7 @@ _evaluate:
 	str r2, [r3]
 	bl _raise
 	pop {pc}
+	end_inlined
 	
 	@@ Abort
 	define_word "abort", visible_flag
@@ -358,6 +371,8 @@ _abort:	ldr r0, =stack_base
 	bl _bel
 	bl _nak
 	b _quit
+	bx lr
+	end_inlined
 
 	@@ The outer loop of Forth
 	define_word "quit", visible_flag
@@ -369,6 +384,8 @@ _quit:	ldr r0, =rstack_base
 	bl _try
 	bl _execute_nz
 	b _abort
+	bx lr
+	end_inlined
 
 	@@ The main functionality, within the main exception handler
 	define_word "main", visible_flag
@@ -414,9 +431,6 @@ _outer:	push {lr}
 6:	bl _to_xt
 	bl _execute
 	b 1b
-2:	pull_tos
-	pull_tos
-	pop {pc}
 3:	movs tos, r1
 	push_tos
 	movs tos, r0
@@ -438,7 +452,11 @@ _outer:	push {lr}
 7:	bl _to_xt
 	bl _asm_inline
 	b 1b
-
+2:	pull_tos
+	pull_tos
+	pop {pc}
+	end_inlined
+	
 	@@ Validate the current state
 	define_word "validate", visible_flag
 _validate:
@@ -472,6 +490,7 @@ _validate:
 	ldr tos, =_rstack_overflow
 	bl _raise
 1:	bx lr
+	end_inlined
 
 	@@ Stack overflow exception
 	define_word "stack-overflow", visible_flag
@@ -480,6 +499,7 @@ _stack_overflow:
 	string_ln " stack overflow"
 	bl _type
 	pop {pc}
+	end_inlined
 
 	@@ Stack underflow exception
 	define_word "stack-underflow", visible_flag
@@ -488,6 +508,7 @@ _stack_underflow:
 	string_ln " stack underflow"
 	bl _type
 	pop {pc}
+	end_inlined
 
 	@@ Return stack overflow exception
 	define_word "rstack-overflow", visible_flag
@@ -496,6 +517,7 @@ _rstack_overflow:
 	string_ln " return stack overflow"
 	bl _type
 	pop {pc}
+	end_inlined
 
 	@@ Return stack underflow exception
 	define_word "rstack-underflow", visible_flag
@@ -504,6 +526,7 @@ _rstack_underflow:
 	string_ln " return stack underflow"
 	bl _type
 	pop {pc}
+	end_inlined
 
 	@@ Display a prompt
 	define_word "do-prompt", visible_flag
@@ -512,6 +535,7 @@ _do_prompt:
 	string_ln " ok"
 	bl _type
 	pop {pc}
+	end_inlined
 
 	@@ Parse a literal word
 	define_word "parse-literal", visible_flag
@@ -564,6 +588,7 @@ _refill:
 	movs tos, r0
 	bl _execute
 1:	pop {pc}
+	end_inlined
 
 	@@ Send XON
 	define_word "xon", visible_flag
@@ -572,6 +597,7 @@ _xon:	push {lr}
 	movs tos, #0x11
 	bl _emit
 	pop {pc}
+	end_inlined
 
 	@@ Send XOFF
 	define_word "xoff", visible_flag
@@ -580,6 +606,7 @@ _xoff:	push {lr}
 	movs tos, #0x13
 	bl _emit
 	pop {pc}
+	end_inlined
 
 	@@ Send ACK
 	define_word "ack", visible_flag
@@ -588,6 +615,7 @@ _ack:	push {lr}
 	movs tos, #0x06
 	bl _emit
 	pop {pc}
+	end_inlined
 
 	@@ Send NAK
 	define_word "nak", visible_flag
@@ -596,6 +624,7 @@ _nak:	push {lr}
 	movs tos, #0x15
 	bl _emit
 	pop {pc}
+	end_inlined
 
 	@@ Send BEL
 	define_word "bel", visible_flag
@@ -604,6 +633,7 @@ _bel:	push {lr}
 	movs tos, #0x07
 	bl _emit
 	pop {pc}
+	end_inlined
 
 	@@ Implement the refill hook
 	define_word "do-refill", visible_flag
@@ -634,16 +664,6 @@ _do_refill:
 	bl _emit
 	pop {r0, r1, r2}
 	b 1b
-3:	pull_tos
-2:	ldr r2, =input_buffer
-	subs r0, r0, r2
-	ldr r2, =input_buffer_count
-	str r0, [r2]
-	movs r0, #0
-	ldr r2, =input_buffer_index
-	str r0, [r2]
-	bl _xoff
-	pop {pc}
 4:	ldr r2, =input_buffer
 	cmp r0, r2
 	beq 5f
@@ -661,6 +681,17 @@ _do_refill:
 	b 1b
 5:	pull_tos
 	b 1b
+3:	pull_tos
+2:	ldr r2, =input_buffer
+	subs r0, r0, r2
+	ldr r2, =input_buffer_count
+	str r0, [r2]
+	movs r0, #0
+	ldr r2, =input_buffer_index
+	str r0, [r2]
+	bl _xoff
+	pop {pc}
+	end_inlined
 	
 	@@ Implement the failed parse hook
 	define_word "do-failed-parse", visible_flag
@@ -674,12 +705,15 @@ _do_failed_parse:
 	push_tos
 	ldr tos, =_failed_parse
 	bl _raise
+	pop {pc}
+	end_inlined
 
 	@@ Failed parse exception
 	define_word "failed-parse", visible_flag
 _failed_parse:
 	push {lr}
 	pop {pc}
+	end_inlined
 	
 	@@ Implement the handle number hook
 	define_word "do-handle-number", visible_flag
@@ -709,6 +743,7 @@ _do_handle_number:
 2:	pull_tos
 	movs tos, #0
 	pop {pc}
+	end_inlined
 
 	@@ Parse an integer ( addr bytes -- n success )
 	define_word "parse-integer", visible_flag
@@ -717,6 +752,7 @@ _parse_integer:
 	bl _parse_base
 	bl _parse_integer_core
 	pop {pc}
+	end_inlined
 
 	@@ Parse an unsigned integer ( addr bytes -- u success )
 	define_word "parse-unsigned", visible_flag
@@ -725,6 +761,7 @@ _parse_unsigned:
 	bl _parse_base
 	bl _parse_unsigned_core
 	pop {pc}
+	end_inlined
 
 	@@ Actually parse an integer base ( addr bytes -- addr bytes base )
 	define_word "parse-base", visible_flag
@@ -763,6 +800,7 @@ _parse_base:
 	push_tos
 	movs tos, r1
 	bx lr
+	end_inlined
 
 	@@ Actually parse an integer ( addr bytes base -- n success )
 	define_word "parse-integer-core", visible_flag
@@ -802,6 +840,7 @@ _parse_integer_core:
 	push_tos
 	movs tos, #0
 	pop {pc}
+	end_inlined
 	
 	@@ Actually parse an unsigned integer ( addr bytes base  -- u success )
 	define_word "parse-unsigned-core", visible_flag
@@ -854,6 +893,7 @@ _parse_unsigned_core:
 	push_tos
 	movs tos, #-1
 	pop {pc}
+	end_inlined
 
 	@@ Parse a digit ( c base -- digit success )
 	define_word "parse-digit", visible_flag
@@ -884,6 +924,7 @@ _parse_digit:
 	push_tos
 	movs tos, #-1
 	pop {pc}
+	end_inlined
 	
 	@@ Start a colon definition
 	define_word ":", visible_flag
@@ -902,6 +943,7 @@ _colon:	push {lr}
 1:	ldr tos, =_token_expected
 	bl _raise
 	pop {pc}
+	end_inlined
 
 	@@ Start an anonymous colon definition
 	define_word ":noname", visible_flag
@@ -923,6 +965,7 @@ _colon_noname:
 	ldr tos, [tos]
 	bl _to_xt
 	pop {pc}
+	end_inlined
 
 	@@ End a colon definition
 	define_word ";", visible_flag | immediate_flag
@@ -939,6 +982,7 @@ _semi:	push {lr}
 	ldr tos, =_not_compiling
 	bl _raise
 	pop {pc}
+	end_inlined
 
 	@@ Create a constant
 	define_word "constant", visible_flag
@@ -962,6 +1006,7 @@ _constant_4:
 1:	ldr tos, =_token_expected
 	bl _raise
 	pop {pc}
+	end_inlined
 
 	@@ Create a constant with a specified name as a string
 	define_word "constant-with-name", visible_flag
@@ -979,6 +1024,7 @@ _constant_with_name_4:
 	bl _asm_literal
 	bl _asm_end
 	pop {pc}
+	end_inlined
 
 	@@ Create a 2-word constant
 	define_word "2constant", visible_flag
@@ -1008,6 +1054,7 @@ _constant_8:
 1:	ldr tos, =_token_expected
 	bl _raise
 	pop {pc}
+	end_inlined
 
 	@@ Create a 2-word constant with a name specified as a string
 	define_word "2constant-with-name", visible_flag
@@ -1031,6 +1078,7 @@ _constant_with_name_8:
 	bl _asm_literal
 	bl _asm_end
 	pop {pc}
+	end_inlined
 
 	@@ Token expected exception handler
 	define_word "token-expected", visible_flag
@@ -1039,6 +1087,7 @@ _token_expected:
 	string_ln " token expected"
 	bl _type
 	pop {pc}
+	end_inlined
 
 	@@ We are not currently compiling
 	define_word "not-compiling", visible_flag
@@ -1047,6 +1096,7 @@ _not_compiling:
 	string_ln " not compiling"
 	bl _type
 	pop {pc}
+	end_inlined
 
 	@@ We are currently compiling to flash
 	define_word "compile-to-ram-only", visible_flag
@@ -1055,6 +1105,7 @@ _compile_to_ram_only:
 	string_ln " compile to ram only"
 	bl _type
 	pop {pc}
+	end_inlined
 
 	.ltorg
 	

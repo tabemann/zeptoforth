@@ -24,6 +24,7 @@ _init_common_handlers:
 	ldr r1, =systick_handler_hook
 	str r0, [r1]
 	bx lr
+	end_inlined
 	
 	@@ The fault handler
 handle_fault:
@@ -34,6 +35,7 @@ handle_fault:
 	adds r0, #1
 	bx r0
 1:	bx lr
+	end_inlined
 
 	@@ The null handler
 handle_null:
@@ -44,6 +46,7 @@ handle_null:
 	adds r0, #1
 	bx r0
 1:	bx lr
+	end_inlined
 
 	@@ The systick handler
 handle_systick:
@@ -54,6 +57,7 @@ handle_systick:
 	adds r0, #1
 	bx r0
 1:	bx lr
+	end_inlined
 
 	.ltorg
 	

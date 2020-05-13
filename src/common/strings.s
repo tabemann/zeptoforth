@@ -23,6 +23,7 @@ _skip_to_token:
 	str tos, [r0]
 	pull_tos
 	pop {pc}
+	end_inlined
 	
 	@@ Parse to a character in the input stream
 	define_word "parse-to-char", visible_flag
@@ -73,6 +74,7 @@ _type_to_paren:
 	bl _parse_to_char
 	bl _type
 	pop {pc}
+	end_inlined
 
 	@@ Print a string immediately
 	define_word ".\"", visible_flag | immediate_flag | compiled_flag
@@ -83,6 +85,7 @@ _type_compiled:
 	ldr tos, =_type
 	bl _asm_call
 	pop {pc}
+	end_inlined
 	
 	@@ Compile a non-counted string
 	define_word "s\"", visible_flag | immediate_flag | compiled_flag
@@ -93,6 +96,7 @@ _compile_imm_string:
 	ldr tos, =_count
 	bl _asm_call
 	pop {pc}
+	end_inlined
 
 	@@ Compile a counted-string
 	define_word "c\"", visible_flag | immediate_flag | compiled_flag
@@ -104,6 +108,7 @@ _compile_imm_cstring:
 	bl _parse_to_char
 	bl _compile_cstring
 	pop {pc}
+	end_inlined
 
 	@@ Compile a counted-string
 	define_word "compile-cstring", visible_flag
@@ -148,6 +153,7 @@ _compile_cstring:
 	movs tos, #0
 	bl _current_comma_1
 	pop {pc}
+	end_inlined
 
 	@@ Parse a character and put it on the stack
 	define_word "char", visible_flag
@@ -158,6 +164,7 @@ _char:	push {lr}
 	pull_tos
 	ldrb tos, [tos]
 	pop {pc}
+	end_inlined
 
 	@@ Parse a character and compile it
 	define_word "[char]", visible_flag | immediate_flag | compiled_flag
@@ -171,6 +178,7 @@ _compile_char:
 	movs tos, #6
 	bl _asm_literal
 	pop {pc}
+	end_inlined
 
 	@@ Type an integer without a preceding space
 	define_word "(.)", visible_flag
@@ -193,6 +201,7 @@ _type_integer:
 	rsbs tos, r0, #0
 	bl _allot
 	pop {pc}
+	end_inlined
 
 	@@ Type an unsigned integer without a preceding space
 	define_word "(u.)", visible_flag
@@ -215,6 +224,7 @@ _type_unsigned:
 	rsbs tos, r0, #0
 	bl _allot
 	pop {pc}
+	end_inlined
 
 	@@ Type an unsigned hexadecimal integer safely without a preceding space
 	define_word "debugu.", visible_flag
@@ -243,6 +253,7 @@ _debug_unsigned:
 	ldr r0, =base
 	str r2, [r0]
 	pop {pc}
+	end_inlined
 
 	@@ Type an integer with a preceding space
 	define_word ".", visible_flag
@@ -251,6 +262,7 @@ _type_space_integer:
 	bl _space
 	bl _type_integer
 	pop {pc}
+	end_inlined
 
 	@@ Type an unsigned integer with a preceding space
 	define_word "u.", visible_flag
@@ -259,6 +271,7 @@ _type_space_unsigned:
 	bl _space
 	bl _type_unsigned
 	pop {pc}
+	end_inlined
 	
 	@@ Copy bytes from one buffer to another one (which may overlap)
 	define_word "move", visible_flag
@@ -271,6 +284,7 @@ _move:	push {lr}
 	pop {pc}
 1:	bl _move_from_low
 	pop {pc}
+	end_inlined
 
 	@@ Copy bytes starting at a high address
 	define_word "<move", visible_flag
@@ -368,6 +382,7 @@ _format_unsigned:
 	push_tos
 	movs tos, #1
 	pop {pc}
+	end_inlined
 	
 	@@ Format an integer as a string
 	define_word "format-integer", visible_flag
@@ -416,6 +431,7 @@ _format_integer:
 	push_tos
 	movs tos, #1
 	pop {pc}
+	end_inlined
 
 	@@ The inner portion of formatting an integer as a string
 	define_word "format-integer-inner", visible_flag
@@ -449,5 +465,6 @@ _format_integer_inner:
 	ldr r1, [r1]
 	subs tos, r0, r1
 	pop {pc}
+	end_inlined
 	
 	.ltorg

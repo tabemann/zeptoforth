@@ -73,6 +73,7 @@ _2tuck:	ldr r0, [dp]
 	str r1, [dp, #4]
 	str r2, [dp, #8]
 	bx lr
+	end_inlined
 
 	@@ Test for the equality of two double words
 	define_word "d=", visible_flag
@@ -83,6 +84,7 @@ _deq:	ldmia dp!, {r0, r1, r2}
 	subs tos, #1
 	sbcs tos, tos
 	bx lr
+	end_inlined
 
 	@@ Test for the inequality of two double words
 	define_word "d<>", visible_flag
@@ -94,6 +96,7 @@ _dne:	ldmia dp!, {r0, r1, r2}
 	sbcs tos, tos
 	mvns tos, tos
 	bx lr
+	end_inlined
 
 	@@ Unsigned double less than
 	define_word "du<", visible_flag | inlined_flag
@@ -144,6 +147,7 @@ _dlt:	ldmia dp!, {r0, r1, r2}
 1:	movs tos, #0
 	subs tos, #1
 	bx lr
+	end_inlined
 
 	@@ Signed double greater than
 	define_word "d>", visible_flag
@@ -156,6 +160,7 @@ _dgt:	ldmia dp!, {r0, r1, r2}
 1:	movs tos, #0
 	subs tos, #1
 	bx lr
+	end_inlined
 
 	@@ Signed double greater than or equal than
 	define_word "d>=", visible_flag
@@ -168,6 +173,7 @@ _dge:	ldmia dp!, {r0, r1, r2}
 	bx lr
 1:	movs tos, #0
 	bx lr
+	end_inlined
 
 	@@ Signed double less than or equal than
 	define_word "d<=", visible_flag
@@ -180,6 +186,7 @@ _dle:	ldmia dp!, {r0, r1, r2}
 	bx lr
 1:	movs tos, #0
 	bx lr
+	end_inlined
 	
 	@@ Double equals zero
 	define_word "d0=", visible_flag | inlined_flag
@@ -219,6 +226,7 @@ _d0gt:	ldmia dp!, {r0}
 	beq 1f
 	mvns tos, tos
 1:	bx lr
+	end_inlined
 	
 	@@ Double less than or equal to zero
 	define_word "d0<=", visible_flag
@@ -233,6 +241,7 @@ _d0le:	ldmia dp!, {r0}
 	beq 1f
 	movs tos, #0
 1:	bx lr
+	end_inlined
 
 	@@ Double greater than or equal to zero
 	define_word "d0>=", visible_flag | inlined_flag
@@ -336,6 +345,7 @@ _udmul:
         str r0, [dp]
 
         bx lr
+	end_inlined
 
 	@ ( n1 n2 n3 -- n1*n2/n3 ) With double length intermediate result
 	define_word "*/", visible_flag
@@ -349,6 +359,7 @@ _muldiv:
 	bl _mdivmod
 	bl _nip
 	pop {pc}
+	end_inlined
 	
 	@ ( u1 u2 u3 -- u1*u2/u3 ) With double length intermediate result
 	define_word "*/mod", visible_flag
@@ -361,6 +372,7 @@ _muldivmod:
 	pop {tos}
 	bl _mdivmod
 	pop {pc}
+	end_inlined
 	
 	@ ( u1 u2 u3 -- u1*u2/u3 ) With double length intermediate result
 	define_word "u*/", visible_flag
@@ -374,6 +386,7 @@ _umuldiv:
 	bl _umdivmod
 	bl _nip
 	pop {pc}
+	end_inlined
 	
 	@ ( u1 u2 u3 -- u1*u2/u3 ) With double length intermediate result
 	define_word "u*/mod", visible_flag
@@ -386,6 +399,7 @@ _umuldivmod:
 	pop {tos}
 	bl _umdivmod
 	pop {pc}
+	end_inlined
 
 	@@ Unsigned 64 / 32 = 32 remainder 32 division
 	define_word "um/mod", visible_flag
@@ -397,6 +411,7 @@ _umdivmod:
 	pull_tos
 	adds dp, #4
 	pop {pc}
+	end_inlined
 
 	@@ Signed 64 / 32 = 32 remainder 32 division
 	define_word "m/mod", visible_flag
@@ -408,6 +423,7 @@ _mdivmod:
 	pull_tos
 	adds dp, #4
 	bx lr
+	end_inlined
 	
         @@ Unsigned divide 64/64 = 64 remainder 64
         @@ ( ud1 ud2 -- ud ud)
@@ -469,6 +485,7 @@ _uddivmod:
 	
 	pop {r4, r5}
 	bx lr
+	end_inlined
 
 	@@ Signed divide 64 / 64 = 64 remainder 64
 	@@ ( d1 d2 -- d d )
@@ -513,6 +530,7 @@ _ddivmod:
 	bl _2swap
 	bl _uddivmod
 	pop {pc}
+	end_inlined
 
 	@@ Divide unsigned two double words and get a double word quotient
 	define_word "ud/", visible_flag
@@ -520,6 +538,7 @@ _uddiv:	push {lr}
 	bl _uddivmod
 	bl _2nip
 	pop {pc}
+	end_inlined
 	
 	@@ Divide signed two double words and get a double word quotient
 	define_word "d/", visible_flag
@@ -527,3 +546,4 @@ _ddiv:	push {lr}
 	bl _ddivmod
 	bl _2nip
 	pop {pc}
+	end_inlined
