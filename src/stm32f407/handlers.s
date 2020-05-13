@@ -40,6 +40,7 @@ _init_handlers:
 	ldr r1, =time_4_handler_hook
 	str r0, [r1]
 	pop {pc}
+	end_inlined
 	
 	@@ The EXTI 0 handler
 handle_exti_0:
@@ -50,6 +51,7 @@ handle_exti_0:
 	adds r0, #1
 	bx r0
 1:	bx lr
+	end_inlined
 
 	@@ The EXTI 1 handler
 handle_exti_1:
@@ -60,6 +62,7 @@ handle_exti_1:
 	adds r0, #1
 	bx r0
 1:	bx lr
+	end_inlined
 
 	@@ The EXTI 2 handler
 handle_exti_2:
@@ -70,6 +73,7 @@ handle_exti_2:
 	adds r0, #1
 	bx r0
 1:	bx lr
+	end_inlined
 
 	@@ The EXTI 3 handler
 handle_exti_3:
@@ -80,6 +84,7 @@ handle_exti_3:
 	adds r0, #1
 	bx r0
 1:	bx lr
+	end_inlined
 
 	@@ The EXTI 4 handler
 handle_exti_4:
@@ -90,6 +95,7 @@ handle_exti_4:
 	adds r0, #1
 	bx r0
 1:	bx lr
+	end_inlined
 
 	@@ The ADC handler
 handle_adc:
@@ -100,6 +106,7 @@ handle_adc:
 	adds r0, #1
 	bx r0
 1:	bx lr
+	end_inlined
 
 	@@ The timer 2 handler
 handle_time_2:
@@ -110,6 +117,7 @@ handle_time_2:
 	adds r0, #1
 	bx r0
 1:	bx lr
+	end_inlined
 
 	@@ The timer 3 handler
 handle_time_3:
@@ -120,6 +128,7 @@ handle_time_3:
 	adds r0, #1
 	bx r0
 1:	bx lr
+	end_inlined
 
 	@@ The timer 4 handler
 handle_time_4:
@@ -130,6 +139,7 @@ handle_time_4:
 	adds r0, #1
 	bx r0
 1:	bx lr
+	end_inlined
 
 	.ltorg
 	

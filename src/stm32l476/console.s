@@ -88,6 +88,7 @@ _uart_init:
 	ldr r0, =0x0D
 	str r0, [r1]
 	bx lr
+	end_inlined
 
 	@@ Change USART2 baudrate to 115200 baud for 48 MHz mode
 	define_word "serial-115200-48mhz", visible_flag
@@ -96,6 +97,7 @@ _serial_115200_48mhz:
 	ldr r1, =(48000000 + 115200 / 2) / 115200
 	str r1, [r0]
 	bx  lr
+	end_inlined
 
 	@@ Emit one character ( c -- )
 	define_word "serial-emit", visible_flag
@@ -109,6 +111,7 @@ _serial_emit:
 	strb tos, [r2]         @ Output the character
 	pull_tos
 	pop {pc}
+	end_inlined
 
 	@@ Receive one character ( -- c )
 	define_word "serial-key", visible_flag
@@ -122,6 +125,7 @@ _serial_key:
 	ldr r2, =USART2_RDR
 	ldrb tos, [r2]
 	pop {pc}
+	end_inlined
 
 	@@ Test whether a character may be emitted ( -- flag )
 	define_word "serial-emit?", visible_flag
@@ -137,6 +141,7 @@ _serial_emit_q:
 	beq 1f
 	movs tos, #-1
 1:	pop {pc}
+	end_inlined
 
 	@@ Test whether a character is ready be received ( -- flag )
 	define_word "serial-key?", visible_flag
@@ -152,6 +157,7 @@ _serial_key_q:
 	beq 1f
 	movs tos, #-1
 1:	pop {pc}
+	end_inlined
 
 	.ltorg
 	

@@ -1514,43 +1514,63 @@ create all-ops32
 \ Commit to flash
 commit-flash
 
-\ Disassemble instructions
-: disassemble ( start end -- )
-  cr
-  swap begin
-    2dup swap u<
-  while
-    dup h.8 space
-    all-ops16 begin
+\ The body of disassembly
+: disassemble-main ( addr -- addr )
+  dup h.8 space
+  all-ops16 begin
+    dup @ 0<> if
+      2dup disassemble16 if
+	drop 2+ true true
+      else
+	[ 2 cells ] literal + false
+      then
+    else
+      drop false true
+    then
+  until
+  not if
+    all-ops32 begin
       dup @ 0<> if
-	2dup disassemble16 if
-	  drop 2+ true true
+	2dup disassemble32 if
+	  drop 4+ true true
 	else
-	  [ 2 cells ] literal + false
+	  [ 3 cells ] literal + false
 	then
       else
 	drop false true
       then
     until
     not if
-      all-ops32 begin
-	dup @ 0<> if
-	  2dup disassemble32 if
-	    drop 4+ true true
-	  else
-	    [ 3 cells ] literal + false
-	  then
-	else
-	  drop false true
-	then
-      until
-      not if
-	dup h@ instr16. ." ????" 2+
-      then
+      dup h@ instr16. ." ????" 2+
     then
-    cr
-  repeat
-  2drop
+  then
+  cr
+;
+
+\ Get whether an instruction is the end token
+: see-end? ( addr -- flag )
+  dup h@ $003F <> if
+    drop false
+  else
+    2- h@ dup $FF00 and $BD00 = if
+      drop true
+    else
+      $FF80 and $4700 =
+    then
+  then
+;
+
+\ Commit to flash
+commit-flash
+
+\ Disassemble instructions
+: disassemble ( start end -- )
+  cr swap begin 2dup swap u< while disassemble-main repeat 2drop
+;
+
+\ SEE a word
+: see ( "name" -- )
+  token-word >xt cr begin dup see-end? not while disassemble-main repeat drop
 ;
 
 \ Finish compressing the code

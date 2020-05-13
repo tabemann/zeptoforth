@@ -111,6 +111,7 @@ _store_flash_16:
 	@@ Get the next value on the stack to put in the TOS
 	pull_tos
 	pop {pc}
+	end_inlined
 
 	@@ Wait for flash opeartions to complete
 wait_for_flash:
@@ -120,6 +121,7 @@ wait_for_flash:
 	ands r1, r2
 	bne 1b
 	bx lr
+	end_inlined
 	
 	@@ Exception handler for unaligned 16-byte flash writes
 	define_word "16flash!-unaligned", visible_flag
@@ -128,6 +130,7 @@ _store_flash_16_unaligned:
 	string_ln " unaligned 16-byte flash write"
 	bl _type
 	pop {pc}
+	end_inlined
 	
 	@@ Exception handler for flash writes where flash has already been
 	@@ written
@@ -137,6 +140,7 @@ _store_flash_16_already_written:
 	string_ln " flash already written"
 	bl _type
 	pop {pc}
+	end_inlined
 	
 	@@ Delete a 2K page of flash
 	define_word "erase-page", visible_flag
@@ -218,6 +222,7 @@ _erase_page:
 	str r1, [r2]
 
 2:	pop {pc}
+	end_inlined
 	
 	@@ Exception handler for flash writes where flash has already been
 	@@ written
@@ -226,6 +231,7 @@ _attempted_to_write_core_flash:
 	string_ln " attempted to write to core flash"
 	bl _type
 	pop {pc}
+	end_inlined
 
 	@@ Exception handler for flash writes past the end of flash
 _attempted_to_write_past_flash_end:
@@ -233,6 +239,7 @@ _attempted_to_write_past_flash_end:
 	string_ln " attempted to write past flash end"
 	bl _type
 	pop {pc}
+	end_inlined
 
 	@@ Erase flash after a given address
 	define_word "erase-after", visible_flag
@@ -256,6 +263,7 @@ _erase_after:
 	bne 1b
 	bl _reboot
 	pop {pc}
+	end_inlined
 
 	@@ Erase all flash except for the zeptoforth runtime
 	define_word "erase-all", visible_flag
@@ -265,6 +273,7 @@ _erase_all:
 	ldr tos, =flash_dict_start
 	bl _erase_after
 	pop {pc}
+	end_inlined
 	
 	@@ Find the end of the flash dictionary
 	define_word "find-flash-end", visible_flag
@@ -288,6 +297,7 @@ _find_flash_end:
 	adds r0, #1
 	beq 1b
 2:	bx lr
+	end_inlined
 
 	@@ Find the next flash block
 	define_word "next-flash-block", visible_flag
@@ -297,6 +307,7 @@ _next_flash_block:
 	movs r0, #0x10
 	adds tos, tos, r0
 	bx lr
+	end_inlined
 
 	@@ Find the start of the last flash word
 	define_word "find-last-flash-word", visible_flag
@@ -316,6 +327,7 @@ _find_last_flash_word:
 	beq 3b
 	ldr tos, [tos]
 2:	bx lr
+	end_inlined
 
 	@@ Initialize the flash buffers
 	define_word "init-flash-buffers", visible_flag
@@ -332,6 +344,7 @@ _init_flash_buffers:
 	cmp r0, r2
 	bne 1b
 	bx lr
+	end_inlined
 
 	@@ No flash buffers are free exception handler
 	define_word "no-flash-buffers-free", visible_flag
@@ -340,6 +353,7 @@ _no_flash_buffers_free:
 	string_ln " no flash buffers free"
 	bl _type
 	pop {pc}
+	end_inlined
 	
 	@@ Find a free flash buffer for an address
 	define_word "get-free-flash-buffer", visible_flag
@@ -368,6 +382,7 @@ _get_free_flash_buffer:
 	str r1, [r0], #4
 	str r2, [r0]
 	pop {pc}
+	end_inlined
 
 	@@ Find a flash buffer for an address
 	define_word "get-flash-buffer", visible_flag
@@ -387,6 +402,7 @@ _get_flash_buffer:
 	pop {pc}
 2:	movs tos, r0
 	pop {pc}
+	end_inlined
 
 	@@ Write a byte to an address in a flash buffer
 	define_word "bflash!", visible_flag
@@ -414,6 +430,7 @@ _store_flash_1:
 1:	movs tos, r2
 	bl _store_flash_buffer
 	pop {pc}
+	end_inlined
 	
 	@@ Write a halfword to an address in one or more flash_buffers
 	define_word "hflash!", visible_flag
@@ -437,6 +454,7 @@ _store_flash_2:
 	adds tos, #1
 	bl _store_flash_1
 	pop {pc}
+	end_inlined
 
 	@@ Write a word to an address in one or more flash_buffers
 	define_word "flash!", visible_flag
@@ -460,6 +478,7 @@ _store_flash_4:
 	adds tos, #2
 	bl _store_flash_2
 	pop {pc}
+	end_inlined
 
 	@@ Write a word to an address in one or more flash_buffers
 	define_word "2flash!", visible_flag
@@ -472,6 +491,7 @@ _store_flash_8:
 	adds tos, #4
 	bl _store_flash_4
 	pop {pc}
+	end_inlined
 
 	@@ Write out the current block of flash
 	define_word "store-flash-buffer", visible_flag
@@ -489,6 +509,7 @@ _store_flash_buffer:
 	ldr tos, [r0, #flash_buffer_addr]
 	bl _store_flash_16
 	pop {pc}
+	end_inlined
 
 	@@ Flush writing the flash
 	define_word "flush-flash", visible_flag
@@ -506,6 +527,7 @@ _flush_flash:
 	pop {pc}
 1:	pull_tos
 	pop {pc}
+	end_inlined
 
 	@@ Flush all the buffered flash
 	define_word "flush-all-flash", visible_flag
@@ -523,6 +545,7 @@ _flush_all_flash:
 	adds r0, #flash_buffer_size
 	b 1b
 2:	pop {pc}
+	end_inlined
 
 	@@ Fill flash until it is aligned to a 16-byte block
 	define_word "flash-align,", visible_flag
@@ -536,6 +559,7 @@ _flash_align:
 	b 1b
 2:	pull_tos
 	pop {pc}
+	end_inlined
 
 	@@ Get the flash block size in bytes
 	define_word "flash-block-size", visible_flag | inlined_flag

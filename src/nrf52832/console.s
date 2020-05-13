@@ -109,6 +109,7 @@ _uart_init:
 	str r0, [r1]
 	
 	bx lr
+	end_inlined
 
 
 	@@ Emit one character ( c -- )
@@ -126,6 +127,7 @@ _serial_emit:
 	strb tos, [r2]         @ Output the character
 	pull_tos
 	pop {pc}
+	end_inlined
 
 	@@ Receive one character ( -- c )
 	define_word "serial-key", visible_flag
@@ -142,6 +144,7 @@ _serial_key:
 	ldr r2, =UART_RXD
 	ldrb tos, [r2]
 	pop {pc}
+	end_inlined
 
 	@@ Test whether a character may be emitted ( -- flag )
 	define_word "serial-emit?", visible_flag
@@ -157,6 +160,7 @@ _serial_emit_q:
 	beq 1f
 	movs tos, #-1
 1:	pop {pc}
+	end_inlined
 
 	@@ Test whether a character is ready be received ( -- flag )
 	define_word "serial-key?", visible_flag
@@ -172,7 +176,7 @@ _serial_key_q:
 	beq 1f
 	movs tos, #-1
 1:	pop {pc}
-
+	end_inlined
 
 	@@ Time multiplier
 	define_word "time-multiplier", visible_flag
@@ -180,6 +184,7 @@ _time_multiplier:
 	push_tos
 	movs tos, #1
 	bx lr
+	end_inlined
 
 	@@ Time divisor
 	define_word "time-divisor", visible_flag
@@ -187,6 +192,7 @@ _time_divisor:
 	push_tos
 	movs tos, #1
 	bx lr
+	end_inlined
 
 	@@ Divisor to get ms from systicks
 	define_word "systick-divisor", visible_flag
@@ -194,6 +200,7 @@ _systick_divisor:
 	push_tos
 	movs tos, #10
 	bx lr
+	end_inlined
 	
 	.ltorg
 	

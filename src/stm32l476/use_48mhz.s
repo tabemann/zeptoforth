@@ -43,6 +43,7 @@ _use_48mhz:
 	bl _set_flash_latency_for_48mhz
 	bl _set_msi_48mhz
 	pop {pc}
+	end_inlined
 
 	define_word "set-pwr-for-48mhz", visible_flag
 _set_pwr_for_48mhz:	
@@ -61,6 +62,7 @@ _set_pwr_for_48mhz:
 	ands r1, r2
 	bne 1b
 	bx lr
+	end_inlined
 
 	@@ Set the flash latency and prefetch for 48Mhz MSI
 	define_word "set-flash-latency-for-48mhz", visible_flag
@@ -73,6 +75,7 @@ _set_flash_latency_for_48mhz:
 	orrs r1, r2
 	str r1, [r0]
 	bx lr
+	end_inlined
 
 	@@ Set 48Mhz clock mode
 	define_word "set-msi-48mhz", visible_flag
@@ -88,6 +91,7 @@ _set_msi_48mhz:
 	orrs r1, r2
 	str r1, [r0]
 	bx lr
+	end_inlined
 
 	@@ Time multiplier
 	define_word "time-multiplier", visible_flag
@@ -95,6 +99,7 @@ _time_multiplier:
 	push_tos
 	movs tos, #48
 	bx lr
+	end_inlined
 
 	@@ Time divisor
 	define_word "time-divisor", visible_flag
@@ -102,6 +107,7 @@ _time_divisor:
 	push_tos
 	movs tos, #8
 	bx lr
+	end_inlined
 
 	@@ Divisor to get ms from systicks
 	define_word "systick-divisor", visible_flag
@@ -109,5 +115,7 @@ _systick_divisor:
 	push_tos
 	movs tos, #10
 	bx lr
+	end_inlined
+	
 	.ltorg
 	
