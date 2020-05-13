@@ -154,11 +154,8 @@ commit-flash
 
 \ Rotate a 7-bit value encoded within a 12-bit value
 : rotate7-in-12 ( u -- u )
-  dup %1111111 and
-  2dup swap rshift
-  -rot
-  dup 7 rshift %11111 and 32 swap - lshift
-  or
+  dup %1111111 and %10000000 or
+  swap 7 rshift %11111 and 2dup rshift -rot 32 swap - lshift or
 ;
 
 \ Decode an imm12 constant
@@ -824,14 +821,13 @@ commit-flash
 
 \ Parse an LDR literal instruction
 : p-ldr-lit-1
-  ." LDR" size. csp. dup 8_3_bf reg.
-  ." , [PC, " 0_8_bf 2 lshift nrel4. ." ]"
+  ." LDR" size. csp. dup 8_3_bf reg-sep. 0_8_bf 2 lshift nrel4.
 ;
 
 \ Parse an LDR literal instruction
 : p-ldr-lit-2
-  ." LDR" size. c.w dup dup 12_4_bf reg. ." , [PC, "
-  0_12_bf swap 7 1 bitfield if negate then 12 rel. ." ]"
+  ." LDR" size. c.w dup dup 12_4_bf reg-sep.
+  0_12_bf swap 7 1 bitfield if negate then 12 rel.
 ;
 
 \ Parse an LDR register instruction
