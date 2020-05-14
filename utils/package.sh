@@ -27,7 +27,7 @@ rm -rf `find . -name 'screenlog.*'`
 make clean
 rm -rf `find . -name '*~'`
 rm -rf obj
-./build_html.sh
+utils/make_html.sh
 rm -rf docs
 mv html docs
 cd ..
