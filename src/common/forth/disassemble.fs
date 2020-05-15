@@ -19,6 +19,9 @@ compile-to-flash
 \ Begin compressing compiled code in flash
 compress-flash
 
+\ Disassemble for gas
+variable for-gas
+
 \ Find a word in a dictionary by address
 : find-dict-by-address ( addr dict -- word|0 )
   begin
@@ -86,7 +89,9 @@ commit-flash
 ;
 
 \ Type a value
-: val. ( u -- ) ." $" base @ >r hex (u.) r> base ! ;
+: val. ( u -- )
+  for-gas @ if ." 0x" else ." $" then base @ >r hex (u.) r> base !
+;
 
 \ Type a bit size
 : size. ( size -- ) ?dup if emit then ;
@@ -119,7 +124,7 @@ commit-flash
 \ Print out an absolute address
 : addr. ( addr -- )
   dup find-by-address ?dup if
-    word-name count type space ." <" val. ." >"
+    word-name count type for-gas @ if drop else space ." <" val. ." >" then
   else
     ." #" val.
   then
@@ -132,10 +137,12 @@ commit-flash
 : sep-imm. ( -- ) ."  , #" ;
 
 \ Type a 16-bit instruction in halfwords
-: instr16. ( h -- ) h.4 ." :      " ;
+: instr16. ( h -- ) for-gas @ if drop else h.4 ." :      " then ;
 
 \ Type a 32-bit instruction in halfwords
-: instr32. ( low high -- ) swap h.4 space h.4 ." : " ;
+: instr32. ( low high -- )
+  for-gas @ if 2drop else swap h.4 space h.4 ." : " then
+;
 
 \ Sign extend a value of a certain size in bits
 : extend ( u bits -- ) 32 swap - tuck lshift swap arshift ;
@@ -821,13 +828,15 @@ commit-flash
 
 \ Parse an LDR literal instruction
 : p-ldr-lit-1
-  ." LDR" size. csp. dup 8_3_bf reg-sep. 0_8_bf 2 lshift nrel4.
+  ." LDR" size. csp. dup 8_3_bf reg-sep. 0_8_bf 2 lshift
+  for-gas @ if ." [PC, #" (udec.) drop else nrel4. then
 ;
 
 \ Parse an LDR literal instruction
 : p-ldr-lit-2
   ." LDR" size. c.w dup dup 12_4_bf reg-sep.
-  0_12_bf swap 7 1 bitfield if negate then 12 rel.
+  0_12_bf swap 7 1 bitfield if negate then
+  for-gas @ if ." [PC, #" (dec.) drop else nrel4. then
 ;
 
 \ Parse an LDR register instruction
@@ -1512,7 +1521,7 @@ commit-flash
 
 \ The body of disassembly
 : disassemble-main ( addr -- addr )
-  dup h.8 space
+  for-gas @ not if dup h.8 space then
   all-ops16 begin
     dup @ 0<> if
       2dup disassemble16 if
@@ -1561,16 +1570,31 @@ commit-flash
 
 \ Disassemble instructions
 : disassemble ( start end -- )
+  false for-gas !
+  cr swap begin 2dup swap u< while disassemble-main repeat 2drop
+;
+
+\ Disassemble instructions for GAS
+: disassemble-for-gas ( start end -- )
+  true for-gas !
   cr swap begin 2dup swap u< while disassemble-main repeat 2drop
 ;
 
 \ SEE a word
 : see ( "name" -- )
+  false for-gas !
+  token-word >xt cr begin dup see-end? not while disassemble-main repeat drop
+;
+
+\ SEE a word for GAS
+: see-for-gas ( "name" -- )
+  true for-gas !
   token-word >xt cr begin dup see-end? not while disassemble-main repeat drop
 ;
 
 \ Finish compressing the code
 end-compress-flash
 
-\ Compile to RAM
-compile-to-ram
+\ Reboot
+reboot
+
