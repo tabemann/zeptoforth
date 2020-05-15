@@ -167,14 +167,17 @@ class ConnectSerial(Connection):
         if (re.search(' (OK|ok)\r\n$', sioResult)):
             return "ok"
         elif (re.search('reboot', sioResult)):
-            time.sleep(2)
-            self.port.flush()
-            self.port.reset_output_buffer()
-            self.port.reset_input_buffer()
+            self.refresh()
             return "ok"
         else:
             return sioResult
 
+    def refresh(self):
+        time.sleep(3)
+        self.port.flush()
+        self.port.reset_output_buffer()
+        self.port.reset_input_buffer()
+        
 # simple show-error-and-exit
 def error(message, line, path, lineNr):
     print('Error file %s line %d: %s' % (path, lineNr, message))
@@ -247,6 +250,8 @@ def readEfr(path):
 
 # uploader with resolution of #include, #require, and \res
 def upload(path):
+    CN.refresh()
+
     reSkipToEOF = re.compile("^\\\\\\\\")
 
     with open(path) as source:
