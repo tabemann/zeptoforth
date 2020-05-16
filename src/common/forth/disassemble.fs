@@ -45,6 +45,8 @@ commit-flash
 : find-by-address ( addr -- word|0 )
   dup ram-latest find-dict-by-address dup 0= if
     drop flash-latest find-dict-by-address
+  else
+    nip
   then
 ;
 
@@ -101,6 +103,16 @@ commit-flash
   <builds , , does> 2@ execute
 ;
 
+\ Type out a label, with two different display modes depending on whether the
+\ target is a user or an assembler
+: label-type ( b-addr u -- )
+  for-gas @ if
+    0 ?do dup i + b@ dup [char] - = if drop [char] _ then emit loop drop
+  else
+    type
+  then
+;
+
 \ Commit to flash
 commit-flash
 
@@ -124,9 +136,23 @@ commit-flash
 \ Print out an absolute address
 : addr. ( addr -- )
   dup find-by-address ?dup if
-    word-name count type for-gas @ if drop else space ." <" val. ." >" then
+    word-name count label-type
+    for-gas @ if drop else space ." <" val. ." >" then
   else
     ." #" val.
+  then
+;
+
+\ Print out a label
+: label. ( addr -- )
+  find-by-address ?dup if
+    for-gas @ if
+      word-name count tuck label-type ." :" 20 swap - 0 max 1 + 0 ?do space loop
+    else
+      word-name count 20 min tuck label-type ." :" 21 swap - 0 ?do space loop
+    then
+  else
+    22 0 ?do space loop
   then
 ;
 
@@ -829,14 +855,14 @@ commit-flash
 \ Parse an LDR literal instruction
 : p-ldr-lit-1
   ." LDR" size. csp. dup 8_3_bf reg-sep. 0_8_bf 2 lshift
-  for-gas @ if ." [PC, #" (udec.) drop else nrel4. then
+  for-gas @ if ." [PC, #" (udec.) ." ]" drop else nrel4. then
 ;
 
 \ Parse an LDR literal instruction
 : p-ldr-lit-2
   ." LDR" size. c.w dup dup 12_4_bf reg-sep.
   0_12_bf swap 7 1 bitfield if negate then
-  for-gas @ if ." [PC, #" (dec.) drop else nrel4. then
+  for-gas @ if ." [PC, #" (dec.) ." ]" drop else nrel4. then
 ;
 
 \ Parse an LDR register instruction
@@ -1496,7 +1522,8 @@ create all-ops32
 \ Disassemble a 16-bit instruction
 : disassemble16 ( op-addr handler-addr -- match )
   over h@ over cell+ h@ and over 6 + h@ = if
-    current-cond 2 pick h@ instr16. 2 pick h@ rot @ execute true
+    current-cond 2 pick h@ instr16.
+    2 pick label. 2 pick h@ rot @ execute true
   else
     2drop false
   then
@@ -1507,7 +1534,7 @@ create all-ops32
   over h@ over cell+ h@ and over 8 + h@ = if
     over 2+ h@ over 6 + h@ and over 10 + h@ = if
       current-cond 2 pick h@ 3 pick 2+ h@ instr32.
-      2 pick h@ 3 pick 2+ h@ 3 roll @ execute true
+      2 pick label. 2 pick h@ 3 pick 2+ h@ 3 roll @ execute true
     else
       2drop false
     then

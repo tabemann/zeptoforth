@@ -4,91 +4,91 @@ Scheduling in zeptoforth is not part of the zeptoforth kernel, but is provided b
 
 The scheduler involves repeatedly executing words based on the specified timing delays which may be enabled and disabled, just like tasks. However unlike tasks, these actions do not have their own dictionaries, data stacks, or return stacks. Rather they share those belonging to the scheduler itself. Uncaught exceptions within a task will be handled, with its message being displayed.
 
-#### current-action
+##### current-action
 ( -- action )
 
 The current *action*.
 
 To create a new scheduler, execute:
 
-#### create-schedule
+##### create-schedule
 ( -- scheduler )
 
 Disposing of a scheduler involves disabling any task it is executing in, and then de-alloting the space alloted for it in the dictionary space.
 
 To create a new action for a given scheduler, execute:
 
-#### add-action
+##### add-action
 ( xt scheduler -- action )
 
 where *xt* is the entry point of the action, *scheduler* is the scheduler to create the action for, and *action* is the newly created action. Actions are disposed of for entire schedulers by the means that schedulers are disposed by.
 
 New actions do not execute right away, rather to enable their execution, one executes:
 
-#### enable-action
+##### enable-action
 ( action -- )
 
 which increments the active counter for the *action* (which is initialized to zero); the action executes if this counter is greater than zero.
 
 To force a action to be enabled, one executes:
 
-#### force-enable-action
+##### force-enable-action
 ( action -- )
 
 which sets the active counter for the *action* to one if it is smaller than one.
 
 In turn a action can be disabled with:
 
-#### disable-action
+##### disable-action
 ( action -- )
 
 which decrements the active counter for the *action*.
 
 To force a action to be disabled, one executes:
 
-#### force-disable-action
+##### force-disable-action
 ( action -- )
 
 which sets the active counter for the *action* to zero if is greater than zero.
 
 The simplest case of delaying a action is simply to execute:
 
-#### start-action-delay
+##### start-action-delay
 ( 1/10ms-delay action -- )
 
 where *action* is the action to set the delay for, and *delay* is 10ths of milliseconds from the present.
 
 To advance the time for the next delay from the last one for a action, execute:
 
-#### advance-action-delay
+##### advance-action-delay
 ( 1/10ms-delay action -- )
 
 where *action* is the action to set the delay for, and *delay* is the new delay from the last delay for that action, in 10ths of milliseconds.
 
 To advance the time for the next delay from the last one, or if it changed, set a new delay starting at the present, for a action, execute:
 
-#### reset-action-delay
+##### reset-action-delay
 ( 1/10ms-delay action -- )
 
 where *action* is the action to set the delay for, and *delay* is the new delay from either the last delay for that action, or the present time, in 10ths of milliseconds.
 
 To absolutely set the current delay for a action, execute:
 
-#### set-action-delay
+##### set-action-delay
 ( 1/10ms-delay 1/10ms-start action -- )
 
 where *action* is the action to set the delay for, *start* is the time the delay is from and *delay* is the delay from that time, in 10ths of milliseconds.
 
 To absolutely get the current delay, execute:
 
-#### get-action-delay
+##### get-action-delay
 ( action --  1/10ms-delay 1/10ms-start )
 
 where *action* is the action to set the delay for, *start* is the time the delay is from and *delay* is the delay from that time, in 10ths of milliseconds.
 
 To cancel the delay for the current action, execute:
 
-#### cancel-action-delay
+##### cancel-action-delay
 ( action -- )
 
 where *action* is the action to cancel the delay for. It is recommended to execute this for a action after the action has ceased to delay, so it does not delay again when `systick-counter` wraps around.

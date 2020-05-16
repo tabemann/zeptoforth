@@ -1,21 +1,21 @@
 # STM32L476 LED Words
 
-#### led-red-on
+##### led-red-on
 ( -- )
 
 Turn the red LED on
 
-#### led-red-off
+##### led-red-off
 ( -- )
 
 Turn the red LED off
 
-#### led-green-on
+##### led-green-on
 ( -- )
 
 Turn the green LED on
 
-#### led-green-off
+##### led-green-off
 ( -- )
 
 Turn the green LED offd

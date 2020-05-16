@@ -37,7 +37,10 @@ $(ODIR)/zeptoforth.o: src/$(PLATFORM)/*.s src/common/*.s
 	mkdir -p obj
 	$(AS) $(ASFLAGS) -o $@ src/$(PLATFORM)/zeptoforth.s
 
-.PHONY: clean
+.PHONY: clean html
+
+html:
+	cd docs ; sphinx-build -b html . ../html
 
 clean:
 	rm -f $(ODIR)/*.o zeptoforth.map zeptoforth.list zeptoforth.elf zeptoforth.bin zeptoforth.ihex
