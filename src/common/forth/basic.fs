@@ -92,6 +92,15 @@ compress-flash
 \ Duplicate a cell if it is non-zero
 : ?dup ( x -- x | 0 ) dup 0<> if dup then ;
 
+\ Test for bits in a byte being set
+: bbit@ ( mask b-addr -- f ) b@ and 0<> ;
+
+\ Test for bits in a halfword being set
+: hbit@ ( mask h-addr -- f ) h@ and 0<> ;
+
+\ Test for bits in a cell being set
+: bit@ ( mask addr -- f ) @ and 0<> ;
+
 \ Get the depth of the stack, not including the cell pushed onto it by this
 \ word
 : depth ( -- u ) stack-base @ sp@ - cell / 1- ;

@@ -1,446 +1,471 @@
 # Basic Non-Kernel Words
 
-#### true
+##### true
 ( -- f )
 
-#### false
+##### false
 ( -- f )
 
-#### binary
+##### binary
 ( -- )
 
-#### octal
+##### octal
 ( -- )
 
-#### decimal
+##### decimal
 ( -- )
 
-#### hex
+##### hex
 ( -- )
 
-#### cell
+##### cell
 ( -- u )
 
-#### cells
+##### cells
 ( n -- n )
 
-#### tos
+##### tos
 ( -- u )
 
-#### visible-flag
+##### visible-flag
 ( -- u )
 
-#### immediate-flag
+##### immediate-flag
 ( -- u )
 
-#### compiled-flag
+##### compiled-flag
 ( -- u )
 
-#### inlined-flag
+##### inlined-flag
 ( -- u )
 
-#### nip
+##### nip
 ( x1 x2 -- x2 )
 
 Drop the cell under the top of the stack
 
-#### tuck
+##### tuck
 ( x1 x2 -- x2 x1 x2 )
 
 Tuck a cell under the cell at he top of the stack
 
-#### +!
+##### +!
 ( x addr -- )
 
 Add to a cell
 
-#### min
+##### min
 ( n1 n2 -- n3 )
 
 Get the minimum of two numbers
 
-#### max
+##### max
 ( n1 n2 -- n3 )
 
 Get the maximum of two numbers
 
-#### advance-here
+##### -rot
+( x1 x2 x3 -- x3 x1 x2 )
+
+Rotate three cells in reverse
+
+##### abs
+( n -- u )
+
+Get the absolute value of a number
+
+##### advance-here
 ( a -- )
 
 Fill memory with zeros up until a given address
 
-#### align
+##### align
 ( a power -- a )
 
 Align an address to a power of two
 
-#### ?dup
+##### ?dup
 ( x -- x | 0 )
 
 Duplicate a cell if it is non-zero
 
-#### depth
+##### bbit@
+( mask b-addr -- f )
+
+Test for bits in a byte being set
+
+##### hbit@
+( mask h-addr -- f )
+
+Test for bits in a halfword being set
+
+##### bit@
+( mask addr -- f )
+
+Test for bits in a cell being set
+
+##### depth
 ( -- u )
 
 Get the depth of the stack, not including the cell pushed onto it by this
 word
 
-#### .s
+##### .s
 ( -- )
 
 Dump the contents of the data stack
 
-#### averts
+##### averts
 ( f "name" -- )
 
 Assert that a value is true, otherwise raise a specified exception
 
-#### triggers
+##### triggers
 ( f "name" -- )
 
 Assert that a value is false, otherwise raise a specified exception
 
-#### suppress
+##### suppress
 ( exc|0 "name" -- exc|0 )
 
 Check whether an exception, typically returned by `try`, matches a specified
 exception and if it does, replace it with zero, marking no exception,
 otherwise passing the specified argument through.
 
-#### word-flags
+##### word-flags
 ( word -- flags )
 
 Get the flags for a word
 
-#### prev-word
+##### prev-word
 ( word1 -- word2 )
 
 Get the previous word for a word
 
-#### word-name
+##### word-name
 ( word -- b-addr )
 
 Get the name of a word (a counted word)
 
-#### hidden?
+##### hidden?
 ( word -- f )
 
 Get whether a word is hidden (note that this means whether a word is displayed by WORDS, not whether it will be found by `find` set to find visible words)
 
-#### words-dict
+##### words-dict
 ( dict -- )
 
 Display all the words in a dictionary
 
-#### words
+##### words
 ( -- )
 
 Display all the words
 
-#### bbis!
+##### bbis!
 ( bits addr -- )
 
 Set bits on a byte
 
-#### bbic!
+##### bbic!
 ( bits addr -- )
 
 Clear bits on a byte
 
-#### hbis!
+##### hbis!
 ( bits addr -- )
 
 Set bits on a halfword
 
-#### hbic!
+##### hbic!
 ( bits addr -- )
 
 Clear bits on a halfword
 
-#### bis!
+##### bis!
 ( bits addr -- )
 
 Set bits on a word
 
-#### bic!
+##### bic!
 ( bits addr -- )
 
 Clear bits on a word
 
-#### safe-type
+##### safe-type
 ( addr bytes -- )
 
 Safely type a string
 
-#### create
+##### create
 ( "name" -- )
 
 Create a word referring to memory after it
 
-#### <builds-with-name
+##### <builds-with-name
 ( addr bytes -- )
 
 Create a word that executes code specified by DOES>
 
-#### <builds
+##### <builds
 ( "name" -- )
 
 Create a word that executes code specified by DOES>
 
-#### flash-align,
+##### flash-align,
 Align to flash block if compiling to flash
 
-#### does>
+##### does>
 ( -- )
 
 Specify code for a word created wth <BUILDS
 
-#### begin-structure
+##### begin-structure
 ( "name" -- offset )
 
 Begin declaring a structure
 
-#### end
+##### end
 ( offset -- )
 
 Finish declaring a structure
 
-#### +field
+##### +field
 ( offset size "name" -- offset )
 
 Create an arbitrary-sized field
 
-#### bfield:
+##### bfield:
 ( offset "name" -- offset )
 
 Create a byte-sized field
 
-#### hfield:
+##### hfield:
 ( offset "name" -- offset )
 
 Create a halfword-sized field
 
-#### field:
+##### field:
 ( offset "name" -- offset )
 
 Create a cell-sized field
 
-#### 2field:
+##### 2field:
 ( offset "name" -- offset )
 
 Create a double cell-sized field
 
-#### equal-strings?
+##### equal-strings?
 ( b-addr1 u1 b-addr2 u2 -- f )
 
 Get whether two strings are equal
 
-#### case
+##### case
 ( -- )
 
 Start a CASE statement
 
-#### of
+##### of
 ( x -- )
 
 Start an OF clause
 
-#### endof
+##### endof
 ( -- )
 
 End an OF clause
 
-#### endcase
+##### endcase
 ( x -- )
 
 End a CASE statement
 
-#### ofstr
+##### ofstr
 ( x -- )
 
 Start an OFSTR clause
 
-#### ofstrcase
+##### ofstrcase
 ( x -- )
 
 Start an OFSTRCASE clause
 
-#### endcasestr
+##### endcasestr
 ( x -- )
 
 End a CASE statement comparing against a string
 
-#### next-ram-space
+##### next-ram-space
 ( -- addr )
 
 Look up next available RAM space
 
-#### set-next-ram-space
+##### set-next-ram-space
 ( addr -- )
 
 Specify next available RAM space
 
-#### buffer:
+##### buffer:
 ( # "name" -- )
 
 Specify a buffer of a given size
 
-#### aligned-buffer:
+##### aligned-buffer:
 ( # "name" -- )
 
 Specify a cell-aligned buffer of a given size
 
-#### bvariable
+##### bvariable
 ( "name" -- )
 
 Create a one-byte variable
 
-#### hvariable
+##### hvariable
 ( "name" -- )
 
 Create a two-byte variable
 
-#### variable
+##### variable
 ( "name" -- )
 
 Create a four-byte variable
 
-#### 2variable
+##### 2variable
 ( "name" -- )
 
 Create an eight-byte variable
 
-#### user-buffer:
+##### user-buffer:
 ( # "name" -- )
 
 Specify a user buffer of a given size
 
-#### user-aligned-buffer:
+##### user-aligned-buffer:
 ( # "name" -- )
 
 Specify a cell-aligned user buffer of a given size
 
-#### buser
+##### buser
 ( "name" -- )
 
 Create a one-byte user variable
 
-#### huser
+##### huser
 ( "name" -- )
 
 Create a two-byte user variable
 
-#### user
+##### user
 ( "name" -- )
 
 Create a four-byte user variable
 
-#### 2user
+##### 2user
 ( "name" -- )
 
 Create an eight-byte user variable
 
-#### do
+##### do
 ( end start -- ) ( R: -- leave start end ) ( compile: -- leave* loop )
 
 Begin a do loop
 
-#### ?do
+##### ?do
 ( end start -- ) ( R: -- leave start end ) ( compile: -- leave* loop )
 
 Begin a ?do loop
 
-#### loop
+##### loop
 ( R leave current end -- leave current end | )
 
 End a do loop
 
-#### +loop
+##### +loop
 ( increment -- ) ( R: leave current end -- leave current end | )
 
 End a do +loop
 
-#### i
+##### i
 ( R current end -- current end ) ( -- current )
 
 Get the loop index
 
-#### j
+##### j
 ( R cur1 end1 leave cur2 end2 -- cur1 end1 leave cur2 end2 ) ( -- cur1 )
 
 Get the loop index beneath the current loop
 
-#### leave
+##### leave
 ( R leave current end -- )
 
 Leave a do loop
 
-#### unloop
+##### unloop
 ( R: leave current end -- )
 
 Unloop from a do loop (to exit, e.g.)
 
-#### dump
+##### dump
 ( start-addr end-addr -- )
 
 Dump memory between two addresses
 
-#### skip-until
+##### skip-until
 ( xt -- )
 
 Skip characters in the evaluation buffer until a predicate is met
 
-#### [:
+##### [:
 ( -- )
 
 Begin lambda
 
-#### ;]
+##### ;]
 ( -- ) ( compiled: -- xt )
 
 End lambda
 
-#### defer
+##### defer
 ( "name" -- )
 
 Create a deferred word
 
-#### defer!
+##### defer!
 ( xt xt-deferred -- )
 
 Set a deferred word; note that a deferred word stored in flash can only have its implementation set once
 
-#### defer@
+##### defer@
 ( xt-deferred -- xt )
 
 Get the referred xt from a deferred word
 
-#### decode-mov16
+##### decode-mov16
 ( h-addr -- h )
 
 Decode the immediate field from a MOVW or MOVT instruction
 
-#### decode-literal
+##### decode-literal
 ( h-addr -- x )
 
 Decode the immediate field from a pair of a MOVW instruction followed by a MOVT instruction
 
-#### [else]
+##### [else]
 ( -- )
 
 Implement the [else] in [if]/[else]/[then] for conditional execution/compilation
 
-#### [if]
+##### [if]
 ( f -- )
 
 Start conditional execution/compilation
 
-#### [then]
+##### [then]
 ( -- )
 
 Finish conditional execution/compilation
 
-#### wait
+##### wait
 ( xt -- )
 
 Wait for a predicate to become true
