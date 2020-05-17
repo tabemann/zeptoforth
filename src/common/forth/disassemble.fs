@@ -16,11 +16,20 @@
 \ Compile this to flash
 compile-to-flash
 
-\ Begin compressing compiled code in flash
-compress-flash
-
 \ Disassemble for gas
 variable for-gas
+
+\ Local label count
+64 constant local-count
+
+\ Local label buffer
+local-count cells aligned-buffer: local-buffer
+
+\ Local label index
+variable local-index
+
+\ Begin compressing compiled code in flash
+compress-flash
 
 \ Find a word in a dictionary by address
 : find-dict-by-address ( addr dict -- word|0 )
@@ -36,6 +45,16 @@ variable for-gas
     then
   until
   nip
+;
+
+\ Look up a local label
+: lookup-local ( addr -- label|0 )
+  local-index @ 0 ?do
+    i cells local-buffer + @ over = if
+      drop i 1 + unloop exit
+    then
+  loop
+  drop 0
 ;
 
 \ Commit to flash
@@ -103,13 +122,69 @@ commit-flash
   <builds , , does> 2@ execute
 ;
 
+\ Does this follow an underscore
+variable prev-underscore
+
+\ Type a leading underscore
+: lead-underscore ( index char-count -- )
+  swap 0<> prev-underscore @ not and if ." _" 1+ then
+;
+
+\ Type a tailing underscore
+: tail-underscore ( count index char-count -- )
+  -rot 1 + <> if ." _" 1+ true prev-underscore ! then
+;
+
+\ Convert and type a character meant for an assembler
+: convert-type-char ( b count index -- len )
+  2 pick [char] - = 2 pick 1 = and over 0 = and if
+    ." minus" 2drop drop
+  else
+    rot case
+      [char] ` of dup 6 lead-underscore ." bquote" tail-underscore endof
+      [char] ~ of dup 5 lead-underscore ." tilde" tail-underscore endof
+      [char] ! of dup 5 lead-underscore ." store" tail-underscore endof
+      [char] @ of dup 5 lead-underscore ." fetch" tail-underscore endof
+      [char] # of dup 4 lead-underscore ." num" tail-underscore endof
+      [char] $ of dup 6 lead-underscore ." dollar" tail-underscore endof
+      [char] % of dup 7 lead-underscore ." percent" tail-underscore endof
+      [char] ^ of dup 5 lead-underscore ." caret" tail-underscore endof
+      [char] & of dup 3 lead-underscore ." amp" tail-underscore endof
+      [char] * of dup 4 lead-underscore ." star" tail-underscore endof
+      $28 of dup 5 lead-underscore ." paren" tail-underscore endof
+      [char] ) of dup 6 lead-underscore ." cparen" tail-underscore endof
+      [char] - of 2drop 1 ." _" endof
+      [char] = of dup 5 lead-underscore ." equal" tail-underscore endof
+      [char] + of dup 4 lead-underscore ." plus" tail-underscore endof
+      [char] [ of dup 7 lead-underscore ." bracket" tail-underscore endof
+      [char] { of dup 5 lead-underscore ." brace" tail-underscore endof
+      [char] ] of dup 8 lead-underscore ." cbracket" tail-underscore endof
+      [char] } of dup 6 lead-underscore ." cbrace" tail-underscore endof
+      $5C of dup 4 lead-underscore ." back" tail-underscore endof
+      [char] | of dup 4 lead-underscore ." pipe" tail-underscore endof
+      [char] ; of dup 4 lead-underscore ." semi" tail-underscore endof
+      [char] : of dup 5 lead-underscore ." colon" tail-underscore endof
+      [char] ' of dup 5 lead-underscore ." quote" tail-underscore endof
+      [char] " of dup 6 lead-underscore ." dquote" tail-underscore endof
+      [char] , of dup 5 lead-underscore ." comma" tail-underscore endof
+      [char] < of dup 2 lead-underscore ." lt" tail-underscore endof
+      [char] . of dup 3 lead-underscore ." dot" tail-underscore endof
+      [char] > of dup 2 lead-underscore ." gt" tail-underscore endof
+      [char] / of dup 5 lead-underscore ." slash" tail-underscore endof
+      [char] ? of dup 4 lead-underscore ." ques" tail-underscore endof
+      dup emit nip nip 1 swap false prev-underscore !
+    endcase
+  then
+;
+
 \ Type out a label, with two different display modes depending on whether the
 \ target is a user or an assembler
 : label-type ( b-addr u -- )
+  false prev-underscore !
   for-gas @ if
-    0 ?do dup i + b@ dup [char] - = if drop [char] _ then emit loop drop
+    dup 0 0 -rot ?do 2 pick i + b@ 2 pick i convert-type-char + loop nip nip
   else
-    type
+    tuck type
   then
 ;
 
@@ -134,25 +209,42 @@ commit-flash
 ;
 
 \ Print out an absolute address
-: addr. ( addr -- )
+: addr. ( op-addr ref-addr -- )
   dup find-by-address ?dup if
-    word-name count label-type
+    rot drop word-name count label-type
     for-gas @ if drop else space ." <" val. ." >" then
   else
-    ." #" val.
+    2dup <> if
+      dup lookup-local ?dup if
+	(udec.) tuck > if ." B" else ." F" then
+	for-gas @ if drop else space ." <" val. ." >" then
+      else
+	nip nip ." #" val.
+      then
+    else
+      ." ." for-gas @ if drop else space ." <" val. ." >" then drop
+    then
   then
 ;
 
 \ Print out a label
 : label. ( addr -- )
-  find-by-address ?dup if
-    for-gas @ if
-      word-name count tuck label-type ." :" 20 swap - 0 max 1 + 0 ?do space loop
+  dup find-by-address ?dup if
+    nip word-name count for-gas @ if
+      label-type ." :" 20 swap - 0 max 1 + 0 ?do space loop
     else
-      word-name count 20 min tuck label-type ." :" 21 swap - 0 ?do space loop
+      20 min label-type ." :" 21 swap - 0 ?do space loop
     then
   else
-    22 0 ?do space loop
+    lookup-local ?dup if
+      base @ >r 10 base ! 0 <# #s #> r> base ! for-gas @ if
+	tuck type ." :" 20 swap - 0 max 1 + 0 ?do space loop
+      else
+	20 min tuck type ." :" 21 swap - 0 ?do space loop
+      then
+    else
+      22 0 ?do space loop
+    then
   then
 ;
 
@@ -286,16 +378,18 @@ commit-flash
 : 4s?. ( low -- ) 4 1 bitfield if ." S" then ;
 
 \ Type a PC-relative address
-: rel. ( pc rel extend -- ) rot 4 + rot rot extend + addr. ;
+: rel. ( pc rel extend -- ) rot dup >r 4 + -rot extend + r> swap addr. ;
 
 \ Type a 4-aligned PC-relative address
-: rel4. ( pc rel extend -- ) rot 4 + 4 align rot rot extend + addr. ;
+: rel4. ( pc rel extend -- )
+  rot dup >r 4 + 4 align -rot extend + r> swap addr.
+;
 
 \ Type a non-sign-extended PC-relative address
-: nrel. ( pc rel -- ) swap 4 + swap + addr. ;
+: nrel. ( pc rel -- ) swap dup >r 4 + swap + r> swap addr. ;
 
 \ Type a non-sign-extended 4-aligned PC-relative address
-: nrel4. ( pc rel -- ) swap 4 + 4 align swap + addr. ;
+: nrel4. ( pc rel -- ) swap dup >r 4 + 4 align swap + r> swap addr. ;
 
 \ Type out .W
 : .w ( -- ) ." .W " ;
@@ -1543,9 +1637,106 @@ create all-ops32
   then
 ;
 
+\ Add a local label
+: add-local ( addr -- )
+  local-index @ local-count < if
+    local-index @ cells local-buffer + ! 1 local-index +!
+  else
+    drop
+  then
+;
+
+\ Parse a 16-bit instruction to find local labels
+: parse-local16 ( op-addr low -- )
+  dup %1111000000000000 and %1101000000000000 = if
+    0_8_bf 1 lshift swap 4+ swap 9 extend + add-local
+  else
+    dup %1111100000000000 and %1110000000000000 = if
+      0 11 bitfield 1 lshift swap 4+ swap 12 extend + add-local
+    else
+      2drop
+    then
+  then
+;
+
+\ Parse a 32-bit instruction to find local labels
+: parse-local32 ( op-addr low high -- )
+  over %1111100000000000 and %1111000000000000 = if
+    dup %1101000000000000 and %1000000000000000 = if
+      dup 0 11 bitfield 2 pick 0 6 bitfield 11 lshift or
+      over 13 1 bitfield 17 lshift or swap 11 1 bitfield 18 lshift or
+      swap 10_1_bf 19 lshift or 1 lshift swap 4+ swap 21 extend + add-local
+    else
+      dup %1101000000000000 and %1001000000000000 = if
+	dup 0 11 bitfield 2 pick 0 10 bitfield 11 lshift or
+	over 11 1 bitfield 3 pick 10_1_bf xor not 1 and 21 lshift or
+	swap 13 1 bitfield 2 pick 10_1_bf xor not 1 and 22 lshift or
+	swap 10_1_bf 23 lshift or 1 lshift swap 4+ swap 25 extend + add-local
+      else
+	2drop drop
+      then
+    then
+  else
+    2drop drop
+  then
+;
+
+\ Find a local label for a 16-bit instruction
+: find-local16 ( op-addr handler-addr -- match )
+  over h@ over cell+ h@ and over 6 + h@ = if
+    drop dup h@ parse-local16 true
+  else
+    2drop false
+  then
+;
+
+\ Find a local label for a 32-bit instruction
+: find-local32 ( op-addr handler-addr -- match )
+  over h@ over cell+ h@ and over 8 + h@ = if
+    over 2+ h@ over 6 + h@ and over 10 + h@ = if
+      drop dup h@ over 2+ h@ parse-local32 true
+    else
+      2drop false
+    then
+  else
+    2drop false
+  then
+;
+
 \ Commit to flash
 commit-flash
 
+\ The body of finding local labels
+: find-local ( addr -- addr )
+  all-ops16 begin
+    dup @ 0<> if
+      2dup find-local16 if
+	drop 2+ true true
+      else
+	[ 2 cells ] literal + false
+      then
+    else
+      drop false true
+    then
+  until
+  not if
+    all-ops32 begin
+      dup @ 0<> if
+	2dup find-local32 if
+	  drop 4+ true true
+	else
+	  [ 3 cells ] literal + false
+	then
+      else
+	drop false true
+      then
+    until
+    not if
+      2+
+    then
+  then
+;
+  
 \ The body of disassembly
 : disassemble-main ( addr -- addr )
   for-gas @ not if dup h.8 space then
@@ -1598,25 +1789,35 @@ commit-flash
 \ Disassemble instructions
 : disassemble ( start end -- )
   false for-gas !
+  0 local-index !
+  2dup swap begin 2dup swap u< while find-local repeat 2drop
   cr swap begin 2dup swap u< while disassemble-main repeat 2drop
 ;
 
 \ Disassemble instructions for GAS
 : disassemble-for-gas ( start end -- )
   true for-gas !
+  0 local-index !
+  2dup swap begin 2dup swap u< while find-local repeat 2drop
   cr swap begin 2dup swap u< while disassemble-main repeat 2drop
 ;
 
 \ SEE a word
 : see ( "name" -- )
   false for-gas !
-  token-word >xt cr begin dup see-end? not while disassemble-main repeat drop
+  0 local-index !
+  token-word >xt
+  dup begin dup see-end? not while find-local repeat drop
+  cr begin dup see-end? not while disassemble-main repeat drop
 ;
 
 \ SEE a word for GAS
 : see-for-gas ( "name" -- )
   true for-gas !
-  token-word >xt cr begin dup see-end? not while disassemble-main repeat drop
+  0 local-index !
+  token-word >xt
+  dup begin dup see-end? not while find-local repeat drop
+  cr begin dup see-end? not while disassemble-main repeat drop
 ;
 
 \ Finish compressing the code
