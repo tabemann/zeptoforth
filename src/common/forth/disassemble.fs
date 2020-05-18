@@ -211,7 +211,7 @@ commit-flash
 \ Print out an absolute address
 : addr. ( op-addr ref-addr -- )
   dup find-by-address ?dup if
-    rot drop word-name count label-type
+    rot drop word-name count label-type drop
     for-gas @ if drop else space ." <" val. ." >" then
   else
     2dup <> if
