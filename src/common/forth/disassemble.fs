@@ -219,7 +219,7 @@ commit-flash
 	(udec.) tuck > if ." B" else ." F" then
 	for-gas @ if drop else space ." <" val. ." >" then
       else
-	nip nip ." #" val.
+	nip ." #" val.
       then
     else
       ." ." for-gas @ if drop else space ." <" val. ." >" then drop
