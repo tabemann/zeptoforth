@@ -1640,6 +1640,11 @@ create all-ops32
 \ Add a local label
 : add-local ( addr -- )
   local-index @ local-count < if
+    local-index @ 0 ?do
+      i cells local-buffer + @ over = if
+	drop unloop exit
+      then
+    loop
     local-index @ cells local-buffer + ! 1 local-index +!
   else
     drop
