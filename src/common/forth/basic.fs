@@ -189,6 +189,40 @@ compress-flash
 \ Get the name of a word (a counted string)
 : word-name ( word -- b-addr ) 8 + [inlined] ;
 
+\ Get the length of a common prefix to two strings
+: common-prefix ( b-addr1 bytes1 b-addr2 bytes2 -- bytes3 )
+  0 begin
+    3 pick 0> 2 pick 0> and if
+      4 pick b@ 3 pick b@ = if
+	4 roll 1+ 4 roll 1- 4 roll 1+ 4 roll 1- 4 roll 1+ false
+      else
+	nip nip nip nip true
+      then
+    else
+      nip nip nip nip true
+    then
+  until
+;
+
+\ Get whether a string has a prefix
+: prefix? ( b-addr1 bytes1 b-addr2 bytes2 -- flag )
+  begin
+    2 pick 0> if
+      dup 0> if
+	3 pick b@ 2 pick b@ = if
+	  3 roll 1+ 3 roll 1- 3 roll 1+ 3 roll 1- false
+	else
+	  2drop 2drop false true
+	then
+      else
+	2drop 2drop false true
+      then
+    else
+      2drop 2drop true true
+    then
+  until
+;  
+
 \ Commit to flash
 commit-flash
 
@@ -245,6 +279,9 @@ commit-flash
   then
 ;
 
+\ Commit to flash
+commit-flash
+
 \ Display all the words in a dictionary starting at a given column, and
 \ returning the next column
 : words-dict ( dict column1 -- column2 )
@@ -259,8 +296,42 @@ commit-flash
   nip
 ;
 
+\ Display all the words in a dictionary starting at a given column and returning
+\ the next column
+: lookup-dict ( b-addr bytes dict column1 -- column2 )
+  begin over 0<> while
+    over hidden? not if
+      3 pick 3 pick 3 pick word-name count prefix? if
+	over word-name count rot words-column
+      then
+    then
+    swap prev-word @ swap
+  repeat
+  nip
+;
+
+\ Find the common prefix length to a word
+: find-prefix-len ( b-addr bytes dict -- prefix-bytes )
+  0 begin over 0<> while
+    over hidden? not if
+      3 pick 3 pick 3 pick word-name count common-prefix max
+    then
+    swap prev-word @ swap
+  repeat
+  nip nip nip
+;
+
 \ Commit code to flash
 commit-flash
+
+\ Lookup a word by its prefix
+: lookup ( "name" -- )
+  token
+  2dup ram-latest find-prefix-len
+  2 pick 2 pick flash-latest find-prefix-len
+  rot drop max
+  cr 2dup ram-latest 0 lookup-dict flash-latest swap lookup-dict drop cr
+;
 
 \ Display all the words are four columns
 : words ( -- )

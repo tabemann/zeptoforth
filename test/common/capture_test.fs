@@ -22,12 +22,11 @@ reboot
 \ Compile this to RAM
 compile-to-ram
 
-\ Display a basic message on failure - note that this is using serial-emit and
-\ serial type to avoid interfering with the capture functionality.
+\ Display a basic message on failure
 : do-fail ( -- ) [: ." *" ;] no-capture ;
 
 \ Register fail handler
-' do-fail fail-hook !
+' do-fail capture-fail-hook !
 
 \ A basic test of matching functionality
 : match-test-1
