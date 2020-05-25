@@ -13,9 +13,6 @@
 \ You should have received a copy of the GNU General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-\ Compile this to RAM
-compile-to-ram
-
 \ Capture test match
 0 constant capture-match
 
@@ -270,20 +267,37 @@ variable capture-enabled
   0 swap capture-off h!
 ;
 
-\ Initialize the emit capture buffer read index
-0 capture-read-index h!
+compiling-to-flash? not [if]
 
-\ Initialize the emit capture buffer write index
-0 capture-write-index h!
+  \ Initialize the emit capture buffer read index
+  0 capture-read-index h!
+  
+  \ Initialize the emit capture buffer write index
+  0 capture-write-index h!
+  
+  \ Save the emit hook
+  emit-hook @ saved-emit-hook !
+  
+  \ Set the fail hook to its default (null)
+  0 capture-fail-hook !
+  
+  \ Initialize emit capture enabled
+  0 capture-enabled !
 
-\ Save the emit hook
-emit-hook @ saved-emit-hook !
+  \ Set the emit hook
+  ' capture-emit emit-hook !
 
-\ Set the fail hook to its default (null)
-0 capture-fail-hook !
+[else]
 
-\ Initialize emit capture enabled
-0 capture-enabled !
+  \ Initialize
+  : init ( -- )
+    init
+    0 capture-read-index h!
+    0 capture-write-index h!
+    emit-hook @ saved-emit-hook !
+    0 capture-fail-hook !
+    0 capture-enabled !
+    ' capture-emit emit-hook !
+  ;
 
-\ Set the emit hook
-' capture-emit emit-hook !
+[then]
