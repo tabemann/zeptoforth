@@ -13,14 +13,15 @@
 \ You should have received a copy of the GNU General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-\ Compile this to RAM
-compile-to-ram
-
 \ The stack fail hook
 variable stack-fail-hook
 
-\ Initialize the stack fail hook
-0 stack-fail-hook !
+compiling-to-flash? not [if]
+
+  \ Initialize the stack fail hook
+  0 stack-fail-hook !
+
+[then]
 
 \ Stack fail exception
 : x-stack-fail ( -- ) space ." stack test failure" cr ;
@@ -48,3 +49,13 @@ variable stack-fail-hook
     repeat
   then
 ;
+
+compiling-to-flash? [if]
+
+  \ Initialize
+  : init ( -- )
+    init
+    0 stack-fail-hook !
+  ;
+
+[then]

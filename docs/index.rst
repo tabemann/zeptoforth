@@ -10,6 +10,7 @@ Zeptoforth Documentation
    guides/schedule_guide
    guides/systick_guide
    guides/dev_tools_guide
+   guides/test_guide
    words/kernel_words
    words/basic_words
    words/double_words
