@@ -63,7 +63,7 @@ aligned-buffer: capture-buffer
 variable saved-emit-hook
 
 \ The failed test hook
-variable fail-hook
+variable capture-fail-hook
 
 \ Is emit capture nabled
 variable capture-enabled
@@ -130,7 +130,8 @@ variable capture-enabled
 
 \ Fail an emit capture test
 : fail-capture ( capture -- )
-  capture-hook @ false swap ?execute dispose-capture fail-hook @ ?execute
+  capture-hook @ false swap ?execute dispose-capture
+  capture-fail-hook @ ?execute
 ;
 
 \ Get the current character from an emit capture test
@@ -279,7 +280,7 @@ variable capture-enabled
 emit-hook @ saved-emit-hook !
 
 \ Set the fail hook to its default (null)
-0 fail-hook !
+0 capture-fail-hook !
 
 \ Initialize emit capture enabled
 0 capture-enabled !
