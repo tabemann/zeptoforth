@@ -9,7 +9,7 @@ Zeptoforth Documentation
    guides/task_guide
    guides/schedule_guide
    guides/systick_guide
-   guides/disassemble_guide
+   guides/dev_tools_guide
    words/kernel_words
    words/basic_words
    words/double_words
