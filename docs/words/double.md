@@ -1,4 +1,4 @@
-# Double-cell Words
+# Double-Cell Words
 
 ##### `2drop`
 ( d -- )

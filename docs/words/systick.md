@@ -1,4 +1,4 @@
-# SysTick Guide
+# SysTick Words
 
 There is not much to SysTick, so this will be short. In zeptoforth SysTicks are at 10ths of milliseconds intervals, so:
 

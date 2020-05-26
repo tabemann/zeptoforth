@@ -1,4 +1,4 @@
-# Multitasking Guide
+# Multitasking Words
 
 Multitasking in zeptoforth is not part of the zeptoforth kernel, but is provided by `src/common/forth/task.fs`, which in turn relies upon `src/<platform>/forth/int_io.fs` and `src/common/forth/systick.fs`. It is cooperative, and for control to be exchanged between tasks it relies upon `PAUSE` being called, either directly, or by `MS`, `KEY`, or `EMIT` (which are in turn called by words such as `REFILL` or `TYPE`).
 
@@ -20,6 +20,11 @@ The current task.
 ( -- task )
 
 The main task.
+
+##### `pause-count`
+( -- count )
+
+Get the current pause count, an unsigned 32-bit value which rolls over.xs
 
 To create a task in zeptoforth, one should execute the following:
 
@@ -63,6 +68,16 @@ To force a task to be disabled, one executes:
 which sets the active counter for the *task* to zero if is greater than zero.
 
 The simplest case of delaying a task is simply to execute:
+
+##### `push-task-stack`
+( x task -- )
+
+Push a cell onto a task's stack; this is useful for configuring tasks upon startup.
+
+##### `push-task-rstack`
+( x task -- )
+
+Push a cell onto a task's return stack.
 
 ##### `ms`
 ( milliseconds -- )

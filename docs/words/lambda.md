@@ -1,4 +1,4 @@
-# Lambda Guide
+# Lambda Words
 
 In zeptoforth the user can define lightweight anonymous functions, known as lambdas, inline in other words with `[:` and `;]`, where `[:` starts compiling a lambda, and `;]` finishes it. compiling the `xt` for the lambda as a literal into the containing word. Multiple lambdas can be nested. Note that lambdas have no headers, making them lighter-weight than normal words. Provided that all words compiled into them are themselves inlined, they can be inlined into other words.
 
