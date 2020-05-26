@@ -1,4 +1,4 @@
-# Scheduling Guide
+# Scheduling Words
 
 Scheduling in zeptoforth is not part of the zeptoforth kernel, but is provided by `src/common/forth/schedule.fs`, which in turn relies upon `src/common/forth/systick.fs` and is normally combined with multitasking. It provides a lighter-weight means of asynchronous computing than multitasking, as each asynchronous action takes up far less RAM than a task does; however a scheduler comprising multiple asynchronous actions typically runs inside a task, so it can take advantage of automatic sleeping, and often that task is in addition to the main task, so the REPL can still be used while the scheduler operates.
 
@@ -92,3 +92,8 @@ To cancel the delay for the current action, execute:
 ( action -- )
 
 where *action* is the action to cancel the delay for. It is recommended to execute this for a action after the action has ceased to delay, so it does not delay again when `systick-counter` wraps around.
+
+##### `run-schedule`
+( schedule -- )
+
+Run *schedule* in the current task. This will not return except if an exception is raised.

@@ -319,7 +319,7 @@ end-structure
 
 \ Handle PAUSE
 : do-pause ( -- )
-  pause-count @ 1+ pause-count !
+  1 pause-count +!
   begin
     task-io
     current-task @ 0<>
@@ -423,6 +423,9 @@ end-structure
   ['] do-wait wait-hook !
   1 pause-enabled !
 ;
+
+\ Make pause-count read-only
+: pause-count ( -- u ) pause-count @ ;
 
 \ Make current-task read-only
 : current-task ( -- task ) current-task @ ;

@@ -1,4 +1,4 @@
-# Testing Guide
+# Testing Words
 
 ## Stack Testing
 
