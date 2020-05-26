@@ -1,697 +1,697 @@
 # Zeptoforth Kernel Words
 
-##### drop
+##### `drop`
 ( x -- )
 
-##### dup
+##### `dup`
 ( x1 -- x1 x1 )
 
-##### swap
+##### `swap`
 ( x1 x2 -- x2 x1 )
 
-##### over
+##### `over`
 ( x1 x2 -- x1 x2 x1 )
 
-##### rot
+##### `rot`
 ( x1 x2 x3 -- x2 x3 x1 )
 
-##### pick
+##### `pick`
 ( xi ... x0 i -- xi ... x0 xi )
 
-##### roll
+##### `roll`
 ( xi ... x0 i -- xi-1 ... x0 xi )
 
-##### lshift
+##### `lshift`
 ( x1 u -- x2 )
 
-##### rshift
+##### `rshift`
 ( x1 u -- x2 )
 
-##### arshift
+##### `arshift`
 ( x1 u -- x2 )
 
-##### and
+##### `and`
 ( x1 x2 -- x3 )
 
-##### or
+##### `or`
 ( x1 x2 -- x3 )
 
-##### xor
+##### `xor`
 ( x1 x2 -- x3 )
 
-##### not
+##### `not`
 ( x1 -- x2 )
 
-##### negate
+##### `negate`
 ( x1 -- x2 )
 
-##### +
+##### `+`
 ( x1 x2 -- x3 )
 
-##### -
+##### `-`
 ( x1 x2 -- x3 )
 
-##### *
+##### `*`
 ( x1 x2 -- x3 )
 
-##### /
+##### `/`
 ( n1 n2 -- n3 )
 
-##### u/
+##### `u/`
 ( u1 u2 -- u3 )
 
-##### mod
+##### `mod`
 ( n1 n2 -- n3 )
 
-##### umod
+##### `umod`
 ( u1 u2 -- u3 )
 
-##### =
+##### `=`
 ( x1 x2 -- f )
 
-##### <>
+##### `<>`
 ( x1 x2 -- f )
 
-##### <
+##### `<`
 ( n1 n2 -- f )
 
-##### >
+##### `>`
 ( n1 n2 -- f )
 
-##### <=
+##### `<=`
 ( n1 n2 -- f )
 
-##### >=
+##### `>=`
 ( n1 n2 -- f )
 
-##### 0=
+##### `0=`
 ( x -- f )
 
-##### 0<>
+##### `0<>`
 ( x -- f )
 
-##### 0<
+##### `0<`
 ( n -- f )
 
-##### 0>
+##### `0>`
 ( n -- f )
 
-##### 0<=
+##### `0<=`
 ( n -- f )
 
-##### 0>=
+##### `0>=`
 ( n -- f )
 
-##### u<
+##### `u<`
 ( u1 u2 -- f )
 
-##### u>
+##### `u>`
 ( u1 u2 -- f )
 
-##### u<=
+##### `u<=`
 ( u1 u2 -- f )
 
-##### u>=
+##### `u>=`
 ( u1 u2 -- f )
 
-##### b!
+##### `b!`
 ( b b-addr -- )
 
-##### h!
+##### `h!`
 ( h h-addr -- )
 
-##### !
+##### `!`
 ( x a-addr -- )
 
-##### 2!
+##### `2!`
 ( x1 x2 a-addr -- )
 
-##### bflash!
+##### `bflash!`
 ( b b-addr -- )
 
-##### hflash!
+##### `hflash!`
 ( h h-addr -- )
 
-##### flash!
+##### `flash!`
 ( x a-addr -- )
 
-##### 2flash!
+##### `2flash!`
 ( x1 x2 a-addr -- )
 
-##### bcurrent!
+##### `bcurrent!`
 ( b b-addr -- )
 
-##### hcurrent!
+##### `hcurrent!`
 ( h h-addr -- )
 
-##### current!
+##### `current!`
 ( x a-addr -- )
 
-##### 2current!
+##### `2current!`
 ( x1 x2 a-addr -- )
 
-##### b@
+##### `b@`
 ( b-addr -- b )
 
-##### h@
+##### `h@`
 ( h-addr -- h )
 
-##### @
+##### `@`
 ( a-addr -- x )
 
-##### 2@
+##### `2@`
 ( a-addr -- x1 x2 )
 
-##### bram,
+##### `bram,`
 ( b -- )
 
-##### hram,
+##### `hram,`
 ( h -- )
 
-##### ram,
+##### `ram,`
 ( x -- )
 
-##### 2ram,
+##### `2ram,`
 ( x1 x2 -- )
 
-##### bflash,
+##### `bflash,`
 ( b -- )
 
-##### hflash,
+##### `hflash,`
 ( h -- )
 
-##### flash,
+##### `flash,`
 ( x -- )
 
-##### 2flash,
+##### `2flash,`
 ( x1 x2 -- )
 
-##### b,
+##### `b,`
 ( b -- )
 
-##### h,
+##### `h,`
 ( h -- )
 
-##### ,
+##### `,`
 ( x -- )
 
-##### 2,
+##### `2,`
 ( x1 x2 -- )
 
-##### bram-reserve
+##### `bram-reserve`
 ( b -- )
 
-##### hram-reserve
+##### `hram-reserve`
 ( h -- )
 
-##### ram-reserve
+##### `ram-reserve`
 ( x -- )
 
-##### 2ram-reserve
+##### `2ram-reserve`
 ( x1 x2 -- )
 
-##### bflash-reserve
+##### `bflash-reserve`
 ( b -- )
 
-##### hflash-reserve
+##### `hflash-reserve`
 ( h -- )
 
-##### flash-reserve
+##### `flash-reserve`
 ( x -- )
 
-##### 2flash-reserve
+##### `2flash-reserve`
 ( x1 x2 -- )
 
-##### breserve
+##### `breserve`
 ( b -- )
 
-##### hreserve
+##### `hreserve`
 ( h -- )
 
-##### reserve
+##### `reserve`
 ( x -- )
 
-##### 2reserve
+##### `2reserve`
 ( x1 x2 -- )
 
-##### ram-here
+##### `ram-here`
 ( -- b-addr )
 
-##### pad
+##### `pad`
 ( -- b-addr )
 
-##### ram-allot
+##### `ram-allot`
 ( u -- )
 
-##### ram-here!
+##### `ram-here!`
 ( b-addr -- )
 
-##### flash-here
+##### `flash-here`
 ( -- b-addr )
 
-##### flash-allot
+##### `flash-allot`
 ( u -- )
 
-##### flash-here!
+##### `flash-here!`
 ( b-addr -- )
 
-##### latest
+##### `latest`
 ( -- word )
 
-##### ram-latest
+##### `ram-latest`
 ( -- word )
 
-##### flash-latest
+##### `flash-latest`
 ( -- word )
 
-##### latest!
+##### `latest!`
 ( word -- )
 
-##### ram-latest!
+##### `ram-latest!`
 ( word -- )
 
-##### flash-latest!
+##### `flash-latest!`
 ( word -- )
 
-##### here
+##### `here`
 ( -- b-addr )
 
-##### allot
+##### `allot`
 ( u -- )
 
-##### ram-align,
+##### `ram-align,`
 ( 2^power -- )
 
-##### flash-align,
+##### `flash-align,`
 ( 2^power -- )
 
-##### align,
+##### `align,`
 ( 2^power -- )
 
-##### cstring,
+##### `cstring,`
 ( b-addr u -- )
 
-##### >r
+##### `>r`
 ( x1 -- ) ( R: -- x1 )
 
-##### r>
+##### `r>`
 ( R: x1 -- ) ( -- x1 )
 
-##### r@
+##### `r@`
 ( R: x1 -- x1 ) ( -- x1 )
 
-##### rdrop
+##### `rdrop`
 ( R: x -- )
 
-##### rp@
+##### `rp@`
 ( -- a-addr )
 
-##### rp!
+##### `rp!`
 ( a-addr -- )
 
-##### sp@
+##### `sp@`
 ( -- a-addr )
 
-##### sp!
+##### `sp!`
 ( a-addr -- )
 
-##### emit
+##### `emit`
 ( b -- )
 
-##### emit?
+##### `emit?`
 ( -- f )
 
-##### space
+##### `space`
 ( -- )
 
-##### cr
+##### `cr`
 ( -- )
 
-##### type
+##### `type`
 ( b-addr u -- )
 
-##### count
+##### `count`
 ( b-addr1 -- b-addr2 u )
 
-##### key
+##### `key`
 ( -- b )
 
-##### key?
+##### `key?`
 ( -- f )
 
-##### enable-int
+##### `enable-int`
 ( -- )
 
 Enable interrupts
 
-##### disable-int
+##### `disable-int`
 ( -- )
 
 Disable interrupts
 
-##### sleep
+##### `sleep`
 ( -- )
 
 Enter sleep mode
 
-##### execute
+##### `execute`
 ( ??? xt -- ??? )
 
-##### ?execute
+##### `?execute`
 ( ??? xt -- ??? )
 
-##### try
+##### `try`
 ( ??? xt1 -- ??? xt2 | ??? 0 )
 
-##### ?raise
+##### `?raise`
 ( xt -- )
 
-##### pause
+##### `pause`
 ( -- )
 
-##### exit
+##### `exit`
 ( R: b-addr -- )
 
-##### ws?
+##### `ws?`
 ( b -- f )
 
-##### newline?
+##### `newline?`
 ( b -- f )
 
-##### token-start
+##### `token-start`
 ( -- i )
 
-##### token-end
+##### `token-end`
 ( i1 -- i2 )
 
-##### token
+##### `token`
 ( "token" -- b-addr u )
 
-##### \\
+##### `\\`
 ( "comment<NL>" -- )
 
-##### (
+##### `(`
 ( "comment)" -- )
 
-##### to-upper-char
+##### `to-upper-char`
 ( b -- b )
 
-##### equal-case-strings?
+##### `equal-case-strings?`
 ( b-addr1 u1 b-addr2 u2 -- f )
 
-##### find-dict
+##### `find-dict`
 ( b-addr u mask dict -- word | 0 )
 
-##### find
+##### `find`
 ( b-addr u mask -- word | 0 )
 
-##### >xt
+##### `>xt`
 ( word -- xt )
 
-##### evaluate
+##### `evaluate`
 ( ??? b-addr u -- ??? )
 
-##### abort
+##### `abort`
 ( -- <empty stack> ) ( R: -- <empty stack> )
 
-##### quit
+##### `quit`
 ( R: -- <empty stack> )
 
-##### main
+##### `main`
 ( -- )
 
-##### outer
+##### `outer`
 ( -- )
 
-##### refill
+##### `refill`
 ( -- )
 
-##### xon
+##### `xon`
 ( -- )
 
-##### xoff
+##### `xoff`
 ( -- )
 
-##### ack
+##### `ack`
 ( -- )
 
-##### nak
+##### `nak`
 ( -- )
 
-##### parse-integer
+##### `parse-integer`
 ( b-addr u -- n f )
 
-##### parse-unsigned
+##### `parse-unsigned`
 ( b-addr u -- u f )
 
-##### parse-digit
+##### `parse-digit`
 ( b base -- digit f )
 
-##### skip-to-token
+##### `skip-to-token`
 ( -- )
 
-##### parse-to-char
+##### `parse-to-char`
 ( b -- b-addr u )
 
-##### .(
+##### `.(`
 ( "text)" -- )
 
-##### ."
+##### `."`
 ( "text<quote>" -- )
 
-##### s"
+##### `s"`
 ( "text<quote>" -- b-addr u )
 
-##### c"
+##### `c"`
 ( "text<quote>" -- b-addr )
 
-##### compile-cstring
+##### `compile-cstring`
 ( b-addr u -- ) ( compiled: b-addr )
 
-##### char
+##### `char`
 ( "char" -- ) ( compiled: b )
 
-##### [char]
+##### `[char]`
 ( compiling: "char" -- ) ( compiled: b )
 
-##### (.)
+##### `(.)`
 ( n -- )
 
-##### (u.)
+##### `(u.)`
 ( u -- )
 
-##### .
+##### `.`
 ( n -- )
 
-##### u.
+##### `u.`
 ( u -- )
 
-##### move
+##### `move`
 ( b-addr1 b-addr2 u -- )
 
-##### <move
+##### `<move`
 ( b-addr1 b-addr2 u -- )
 
-##### move>
+##### `move>`
 ( b-addr1 b-addr2 u -- )
 
-##### reverse
+##### `reverse`
 ( b-addr u -- )
 
-##### format-unsigned
+##### `format-unsigned`
 ( b-addr u1 -- b-addr u2 )
 
-##### format-integer
+##### `format-integer`
 ( b-addr n -- b-addr u )
 
-##### :
+##### `:`
 ( "name" -- )
 
-##### :noname
+##### `:noname`
 ( -- xt )
 
-##### ;
+##### `;`
 ( -- )
 
-##### constant
+##### `constant`
 ( x "name" -- )
 
-##### constant-with-name
+##### `constant-with-name`
 ( x b-addr u -- )
 
-##### 2constant
+##### `2constant`
 ( x1 x2 "name" -- )
 
-##### 2constant-with-name
+##### `2constant-with-name`
 ( x1 x2 b-addr u -- )
 
-##### if
+##### `if`
 ( f -- )
 
-##### else
+##### `else`
 ( -- )
 
-##### then
+##### `then`
 ( -- )
 
-##### begin
+##### `begin`
 ( -- )
 
-##### until
+##### `until`
 ( f -- )
 
-##### while
+##### `while`
 ( f -- )
 
-##### repeat
+##### `repeat`
 ( -- )
 
-##### again
+##### `again`
 ( -- )
 
-##### init
+##### `init`
 ( -- )
 
-##### [immediate]
+##### `[immediate]`
 ( -- )
 
-##### [compile-only]
+##### `[compile-only]`
 ( -- )
 
-##### [inlined]
+##### `[inlined]`
 ( -- )
 
-##### immediate
+##### `immediate`
 ( -- )
 
-##### compile-only
+##### `compile-only`
 ( -- )
 
-##### inlined
+##### `inlined`
 ( -- )
 
-##### visible
+##### `visible`
 ( -- )
 
-##### [
+##### `[`
 ( -- )
 
-##### ]
+##### `]`
 ( -- )
 
-##### compile-to-ram
+##### `compile-to-ram`
 ( -- )
 
-##### compile-to-flash
+##### `compile-to-flash`
 ( -- )
 
-##### compiling-to-flash
+##### `compiling-to-flash`
 ( -- f )
 
-##### compile,
+##### `compile,`
 ( xt -- )
 
-##### token-word
+##### `token-word`
 ( "name" -- word )
 
-##### '
+##### `'`
 ( "name" -- xt )
 
-##### [']
+##### `[']`
 ( compiling: "name" -- ) ( compiled: -- xt )
 
-##### postpone
+##### `postpone`
 ( "name" -- )
 
-##### lit,
+##### `lit,`
 ( x1 -- ) ( compiled: -- x1 )
 
-##### literal
+##### `literal`
 ( compiling: x1 -- ) ( compiled: -- x1 )
 
-##### recurse
+##### `recurse`
 ( -- )
 
-##### reboot
+##### `reboot`
 ( -- )
 
-##### state
+##### `state`
 ( -- a-addr )
 
-##### base
+##### `base`
 ( -- a-addr )
 
-##### pause-enabled
+##### `pause-enabled`
 ( -- a-addr )
 
-##### stack-base
+##### `stack-base`
 ( -- a-addr )
 
-##### stack-end
+##### `stack-end`
 ( -- a-addr )
 
-##### rstack-base
+##### `rstack-base`
 ( -- a-addr )
 
-##### rstack-end
+##### `rstack-end`
 ( -- a-addr )
 
-##### handler
+##### `handler`
 ( -- a-addr )
 
-##### >parse
+##### `>parse`
 ( -- a-addr )
 
-##### source
+##### `source`
 ( -- b-addr u )
 
-##### build-target
+##### `build-target`
 ( -- a-addr )
 
-##### sys-ram-dict-base
+##### `sys-ram-dict-base`
 ( -- b-addr )
 
-##### >in
+##### `>in`
 ( -- a-addr )
 
-##### input#
+##### `input#`
 ( -- a-addr )
 
-##### input
+##### `input`
 ( -- b-addr )
 
-##### prompt-hook
+##### `prompt-hook`
 ( -- a-addr )
 
-##### handle-number-hook
+##### `handle-number-hook`
 ( -- a-addr )
 
-##### failed-parse-hook
+##### `failed-parse-hook`
 ( -- a-addr )
 
-##### emit-hook
+##### `emit-hook`
 ( -- a-addr )
 
-##### emit?-hook
+##### `emit?-hook`
 ( -- a-addr )
 
-##### key-hook
+##### `key-hook`
 ( -- a-addr )
 
-##### key?-hook
+##### `key?-hook`
 ( -- a-addr )
 
-##### refill-hook
+##### `refill-hook`
 ( -- a-addr )
 
-##### pause-hook
+##### `pause-hook`
 ( -- a-addr )
 
-##### fault-handler-hook
+##### `fault-handler-hook`
 ( -- a-addr )
 
-##### null-handler-hook
+##### `null-handler-hook`
 ( -- a-addr )
 
-##### systick-handler-hook
+##### `systick-handler-hook`
 ( -- a-addr )
