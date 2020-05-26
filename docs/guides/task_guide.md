@@ -6,24 +6,24 @@ Note that task in zeptoforth are a relatively heavy-weight asynchronous computin
 
 Multitasking is enabled by default once `sys/common/forth/task.fs` has been loaded and the MCU has been rebooted; afterwards each time the MCU is booted a new task is created for the REPL, the main task, and multitasking is initiated.
 
-##### pause
+##### `pause`
 ( -- )
 
 Pass off control to the next active task; if no tasks are active, put the MCU to sleep until an interrupt occurs (typically due to SysTick or USART activity).
 
-##### current-task
+##### `current-task`
 ( -- task )
 
 The current task.
 
-##### main-task
+##### `main-task`
 ( -- task )
 
 The main task.
 
 To create a task in zeptoforth, one should execute the following:
 
-##### spawn
+##### `spawn`
 ( xt dictionary-size stack-size rstack-size -- task )
 
 where *xt* is the entry point to the task, *dictionary-size* is the size of the dictionary for the spawned task in bytes, *stack-size* is the size of the data stack for the spawned task in bytes, *rstack-size* is the size of the return stack for the spawned task in bytes, and *task* is the header for the newly spawned task. *dictionary-size*, *stack-size*, and *rstack-size* must be multiples of four I have had good luck with values of 256 for each of these; I do not know how well smaller values will work out, especially in the case of *rstack-size*, where too small of a size will almost certainly result in a crash. This in turn returns a pointer to the task header on the stack, which can then be stored in a variable or constant.
@@ -36,35 +36,35 @@ Uncaught exceptions within a task will be handled, with the message for them bei
 
 New tasks do not execute right away, rather to enable their execution, one executes:
 
-##### enable-task
+##### `enable-task`
 ( task -- )
 
 which increments the active counter for the *task* (which is initialized to zero); the task executes if this counter is greater than zero.
 
 To force a task to be enabled, one executes:
 
-##### force-enable-task
+##### `force-enable-task`
 ( task -- )
 
 which sets the active counter for the *task* to one if it is smaller than one.
 
 In turn a task can be disabled with:
 
-##### disable-task
+##### `disable-task`
 ( task -- )
 
 which decrements the active counter for the *task*.
 
 To force a task to be disabled, one executes:
 
-##### force-disable-task
+##### `force-disable-task`
 ( task -- )
 
 which sets the active counter for the *task* to zero if is greater than zero.
 
 The simplest case of delaying a task is simply to execute:
 
-##### ms
+##### `ms`
 ( milliseconds -- )
 
 This transparently handles executing `PAUSE`.
@@ -75,42 +75,42 @@ Note that all the following words do not automatically execute `PAUSE` as, after
 
 To start a new delay, resetting the timer, for a task execute:
 
-##### start-task-delay
+##### `start-task-delay`
 ( 1/10ms-delay task -- )
 
 where *task* is the task to set the delay for, and *delay* is 10ths of milliseconds from the present.
 
 To advance the time for the next delay from the last one for a task, execute:
 
-##### advance-task-delay
+##### `advance-task-delay`
 ( 1/10ms-delay task -- )
 
 where *task* is the task to set the delay for, and *delay* is the new delay from the last delay for that task, in 10ths of milliseconds.
 
 To advance the time for the next delay from the last one, or if it changed, set a new delay starting at the present, for a task, execute:
 
-##### reset-task-delay
+##### `reset-task-delay`
 ( 1/10ms-delay task -- )
 
 where *task* is the task to set the delay for, and *delay* is the new delay from either the last delay for that task, or the present time, in 10ths of milliseconds.
 
 To absolutely set the current delay for a task, execute:
 
-##### set-task-delay
+##### `set-task-delay`
 ( 1/10ms-delay 1/10ms-start task -- )
 
 where *task* is the task to set the delay for, *start* is the time the delay is from and *delay* is the delay from that time, in 10ths of milliseconds.
 
 To absolutely get the current delay, execute:
 
-##### get-task-delay
+##### `get-task-delay`
 ( task --  1/10ms-delay 1/10ms-start )
 
 where *task* is the task to set the delay for, *start* is the time the delay is from and *delay* is the delay from that time, in 10ths of milliseconds.
 
 To cancel the delay for the current task, execute:
 
-##### cancel-task-delay
+##### `cancel-task-delay`
 ( task -- )
 
 where *task* is the task to cancel the delay for. It is recommended to execute this for a task after the task has ceased to delay, so it does not delay again when `systick-counter` wraps around.
