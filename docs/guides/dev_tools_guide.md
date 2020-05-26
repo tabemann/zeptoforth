@@ -47,4 +47,4 @@ This word simply lists every user-viewable word in RAM or in flash, organized as
 ##### `lookup`
 ( "name" -- )
 
-This word lists each word which has a prefix corresponding to the maximal prefix or the specified token which any word in RAM or in flash matches.
+This word lists each word which has a prefix corresponding to the maximal prefix or the specified token which any word in RAM or in flash matches, organized as four columns.
