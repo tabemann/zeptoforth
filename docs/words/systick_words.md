@@ -1,11 +1,11 @@
 # SysTick Words
 
-##### systick-counter
+##### `systick-counter`
 ( -- u )
 
 The SysTick counter
 
-##### ms
+##### `ms`
 ( u -- )
 
 Wait for n milliseconds

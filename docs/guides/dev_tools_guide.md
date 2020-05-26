@@ -8,22 +8,22 @@ A disassembler that covers (almost all of) the instructions utilized by zeptofor
 
 As a result there are four different words for invoking the disassembler:
 
-##### disassemble
+##### `disassemble`
 ( start-addr end-addr -- )
 
 This word disassembles instructions, for human consumption, starting from *start-addr* and ending at, non-inclusive, *end-addr*.
 
-##### disassemble-for-gas
+##### `disassemble-for-gas`
 ( start-addr end-addr -- )
 
 This word disassembles instructions, for feeding into an assembler, starting from *start-addr* and ending at, non-inclusive, *end-addr*.
 
-##### see
+##### `see`
 ( "name" -- )
 
 This word disassembles instructions, for human consumption, comprising the whole of the word whose name is specified afterwards.
 
-##### see-for-gas
+##### `see-for-gas`
 ( "name" -- )
 
 This word disassembles instructions, for feeding into an assembler, comprising the whole of the word whose name is specified afterwards.
@@ -32,19 +32,19 @@ This word disassembles instructions, for feeding into an assembler, comprising t
 
 Memory can be viewed with the following word:
 
-##### dump
+##### `dump`
 ( start-addr end-addr -- )
 
 This word dumps memory as hexdump as bytes, along with displaying each byte, if a valid ASCII character, starting from *start-addr* and ending at, non-inclusive, *end-addr*.
 
 ## Listing Words
 
-##### words
+##### `words`
 ( -- )
 
 This word simply lists every user-viewable word in RAM or in flash, organized as four columns.
 
-##### lookup
+##### `lookup`
 ( "name" -- )
 
 This word lists each word which has a prefix corresponding to the maximal prefix or the specified token which any word in RAM or in flash matches.
