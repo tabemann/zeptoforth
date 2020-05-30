@@ -13,6 +13,9 @@
 @ You should have received a copy of the GNU General Public License
 @ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+	@ Include the kernel info, needed for welcome
+	.include "src/common/kernel_info.s"
+	
 	@@ Drop the top of the data stack
 	define_word "drop", visible_flag | inlined_flag
 _drop:	pull_tos
@@ -853,7 +856,21 @@ _welcome:
 	push {lr}
 	string_ln ""
 	bl _type
-	string_ln "Welcome to zeptoforth ok"
+	string_ln "Welcome to zeptoforth"
+	bl _type
+	string "Built for "
+	bl _type
+	bl _kernel_platform
+	bl _type
+	string ", version "
+	bl _type
+	bl _kernel_version
+	bl _type
+	string ", on "
+	bl _type
+	bl _kernel_date
+	bl _type
+	string_ln " ok"
 	bl _type
 	pop {pc}
 	end_inlined

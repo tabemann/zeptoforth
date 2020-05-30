@@ -23,13 +23,14 @@ build_platform()
     PLATFORM=$1
     echo "Building platform $1..."
     make clean
-    make PLATFORM=$PLATFORM
+    make VERSION=$VERSION PLATFORM=$PLATFORM
     mkdir bin/$VERSION/$PLATFORM
     cp zeptoforth.bin bin/$VERSION/$PLATFORM/zeptoforth_kernel-$VERSION.bin
     cp zeptoforth.ihex bin/$VERSION/$PLATFORM/zeptoforth_kernel-$VERSION.ihex
     cp zeptoforth.elf bin/$VERSION/$PLATFORM/zeptoforth_kernel-$VERSION.elf
 }
 
+set_version
 mkdir bin/$VERSION
 build_platform stm32l476
 build_platform stm32f407

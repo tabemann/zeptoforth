@@ -21,13 +21,15 @@ DUMP=arm-none-eabi-objdump
 ASFLAGS=-mcpu=cortex-m4 -mthumb -g
 PREFIX=/usr/local
 PLATFORM=stm32l476
+VERSION=UNDEFINED
+DATE:=$(shell date)
 
 ODIR=obj
 
 _OBJ = zeptoforth.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
-zeptoforth.elf: $(OBJ)
+zeptoforth.elf: src/common/kernel_info.s $(OBJ)
 	$(LD) $(OBJ) -T src/$(PLATFORM)/zeptoforth.ld --cref -Map zeptoforth.map -nostartfiles -o $@
 	$(DUMP) -D $@ > zeptoforth.list
 	$(COPY) $@ zeptoforth.bin -O binary
@@ -37,10 +39,34 @@ $(ODIR)/zeptoforth.o: src/$(PLATFORM)/*.s src/common/*.s
 	mkdir -p obj
 	$(AS) $(ASFLAGS) -o $@ src/$(PLATFORM)/zeptoforth.s
 
+src/common/kernel_info.s:
+	echo '        define_word "kernel-platform", visible_flag' > src/common/kernel_info.s
+	echo '_kernel_platform:' >> src/common/kernel_info.s
+	echo '        push {lr}' >> src/common/kernel_info.s
+	echo '        string "'$(PLATFORM)'"' >> src/common/kernel_info.s
+	echo '        pop {pc}' >> src/common/kernel_info.s
+	echo '        end_inlined' >> src/common/kernel_info.s
+	echo >> src/common/kernel_info.s
+	echo '        define_word "kernel-version", visible_flag' >> src/common/kernel_info.s
+	echo '_kernel_version:' >> src/common/kernel_info.s
+	echo '        push {lr}' >> src/common/kernel_info.s
+	echo '        string "'$(VERSION)'"' >> src/common/kernel_info.s
+	echo '        pop {pc}' >> src/common/kernel_info.s
+	echo '        end_inlined' >> src/common/kernel_info.s
+	echo >> src/common/kernel_info.s
+	echo '        define_word "kernel-date", visible_flag' >> src/common/kernel_info.s
+	echo '_kernel_date:' >> src/common/kernel_info.s
+	echo '        push {lr}' >> src/common/kernel_info.s
+	echo '        string "'$(DATE)'"' >> src/common/kernel_info.s
+	echo '        pop {pc}' >> src/common/kernel_info.s
+	echo '        end_inlined' >> src/common/kernel_info.s
+	echo >> src/common/kernel_info.s
+
 .PHONY: clean html
 
 html:
 	cd docs ; sphinx-build -b html . ../html
 
 clean:
-	rm -f $(ODIR)/*.o zeptoforth.map zeptoforth.list zeptoforth.elf zeptoforth.bin zeptoforth.ihex
+	rm -f $(ODIR)/*.o zeptoforth.map zeptoforth.list zeptoforth.elf zeptoforth.bin zeptoforth.ihex src/common/kernel_info.s
+
