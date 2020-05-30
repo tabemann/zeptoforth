@@ -121,6 +121,9 @@
 	@@ The pause hook
 	allot pause_hook, 4
 
+	@@ The dictionary size validation hook
+	allot validate_dict_hook, 4
+	
 	@@ The fault handler hook
 	allot fault_handler_hook, 4
 

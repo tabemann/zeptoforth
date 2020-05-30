@@ -788,9 +788,9 @@ _pause:	push {lr}
 1:	pop {pc}
 	end_inlined
 	
-	@@ Default implementation of PAUSE, does nothing
-	define_word "do-pause", visible_flag
-_do_pause:
+	@@ Do nothing
+	define_word "do-nothing", visible_flag
+_do_nothing:
 	bx lr
 	end_inlined
 	
@@ -1801,7 +1801,10 @@ _init_variables:
 	ldr r1, =_do_refill
 	str r1, [r0]
 	ldr r0, =pause_hook
-	ldr r1, =_do_pause
+	ldr r1, =_do_nothing
+	str r1, [r0]
+	ldr r0, =validate_dict_hook
+	ldr r1, =_do_nothing
 	str r1, [r0]
 	ldr r0, =compiling_to_flash
 	movs r1, 0

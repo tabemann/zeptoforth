@@ -460,6 +460,7 @@ _outer:	push {lr}
 	@@ Validate the current state
 	define_word "validate", visible_flag
 _validate:
+	push {lr}
 	ldr r0, =stack_base
 	ldr r0, [r0]
 	cmp dp, r0
@@ -489,7 +490,11 @@ _validate:
 	push_tos
 	ldr tos, =_rstack_overflow
 	bl _raise
-1:	bx lr
+1:	ldr r0, =validate_dict_hook
+	push_tos
+	ldr tos, [r0]
+	bl _execute_nz
+	pop {pc}
 	end_inlined
 
 	@@ Stack overflow exception

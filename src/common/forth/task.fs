@@ -412,6 +412,27 @@ end-structure
 : do-wait ( -- )
   current-task @ wait-task
 ;
+
+\ RAM dictionary space warning has been displayed
+variable ram-dict-warned
+
+\ Saved dictionary space validator
+variable saved-validate-dict
+
+\ Get the actual current dictionary here for a task
+: actual-here ( task -- addr )
+  dup current-task @ = if drop ram-here else task-dict-current then
+;
+
+\ Validate the dictionary space
+: do-validate-dict ( -- )
+  main-task @ task-dict-end main-task @ actual-here - 1024 <
+  ram-dict-warned @ not and if
+    true ram-dict-warned !
+    space ." RAM dictionary space is running low (<1K left)" cr
+  then
+  saved-validate-dict @ ?execute
+; 
   
 \ Init
 : init ( -- )
@@ -421,6 +442,9 @@ end-structure
   0 pause-count !
   ['] do-pause pause-hook !
   ['] do-wait wait-hook !
+  validate-dict-hook @ saved-validate-dict !
+  false ram-dict-warned !
+  ['] do-validate-dict validate-dict-hook !
   1 pause-enabled !
 ;
 
@@ -432,6 +456,30 @@ end-structure
 
 \ Make main-task read-only
 : main-task ( -- task ) main-task @ ;
+
+\ Display space free for a given task
+: task-free ( task -- )
+  cr
+  ." dictionary free: "
+  dup task-dict-end over task-dict-current - 0 <# #s #> type cr
+  ." stack free:      "
+  dup task-stack-current over task-stack-end - 0 <# #s #> type cr
+  ." rstack free:     "
+  dup task-rstack-current swap task-rstack-end - 0 <# #s #> type
+;
+
+\ Display space free for the main task and for flash in general
+: free ( -- )
+  cr main-task
+  ." flash dictionary free:     "
+  flash-end flash-here - 0 <# #s #> type cr
+  ." main task dictionary free: "
+  dup task-dict-end over task-dict-current - 0 <# #s #> type cr
+  ." main task stack free:      "
+  dup task-stack-current over task-stack-end - 0 <# #s #> type cr
+  ." main task rstack free:     "
+  dup task-rstack-current swap task-rstack-end - 0 <# #s #> type
+;
 
 \ Reboot to initialize multitasking
 reboot
