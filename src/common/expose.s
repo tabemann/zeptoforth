@@ -248,6 +248,14 @@ _pause_hook:
 	bx lr
 	end_inlined
 
+	@@ The dictionary size validation hook
+	define_word "validate-dict-hook", visible_flag
+_validate_dict_hook:
+	push_tos
+	ldr tos, =validate_dict_hook
+	bx lr
+	end_inlined
+
 	@@ Get the FAULT-HANDLER-HOOK variable address
 	define_word "fault-handler-hook", visible_flag
 _fault_handler_hook:
