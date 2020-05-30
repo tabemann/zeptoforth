@@ -1328,12 +1328,28 @@ variable wait-hook
   drop
 ;
 
+\ Flash space warning has been displayed
+variable flash-dict-warned
+
+\ Commit to flash
+commit-flash
+
+\ Warn if flash space is running low
+: do-validate-dict ( -- )
+  flash-end flash-here - 1024 < flash-dict-warned @ not and if
+    true flash-dict-warned !
+    space ." flash dictionary space is running low (<1K left)" cr
+  then
+;
+
 \ Initialize the RAM variables
 : init ( -- )
   init
   next-ram-space dict-base !
   dict-base @ next-user-space + ram-here!
   0 wait-hook !
+  false flash-dict-warned !
+  ['] do-validate-dict validate-dict-hook !
 ;
 
 \ Finish compressing the code
