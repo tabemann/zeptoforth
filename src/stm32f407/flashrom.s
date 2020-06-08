@@ -229,7 +229,7 @@ _store_flash_already_written:
 _erase_sector:	
 	push {lr}
 
-	cmp tos, #1   @ Nicht den Kern in Sektor 0 löschen
+	cmp tos, #2   @ Nicht den Kern in Sektor 0 löschen
 	blo 2f
 	cmp tos, #12  @ Es gibt nur 12 Sektoren
 	bhs 2f

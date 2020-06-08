@@ -177,6 +177,7 @@ class ConnectSerial(Connection):
         self.port.flush()
         self.port.reset_output_buffer()
         self.port.reset_input_buffer()
+        time.sleep(1)
         self.port.flush()
         self.port.reset_output_buffer()
         self.port.reset_input_buffer()

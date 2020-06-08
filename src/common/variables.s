@@ -40,8 +40,11 @@
 	@@ The last word compiled to RAM
 	allot ram_latest, 4
 
-	@@ The last word compiled to Flash
+	@@ The last word compiled to flash
 	allot flash_latest, 4
+
+	@@ The compilation wordlist
+	allot wordlist, 4
 
 	@@ The current <BUILDS target address
 	allot build_target, 4
@@ -132,3 +135,10 @@
 
 	@@ The systick handler hook
 	allot systick_handler_hook, 4
+
+	@@ The wordlist count
+	allot order_count, 4
+
+	@@ The wordlist order
+	allot order, 2 * max_order_size
+	
