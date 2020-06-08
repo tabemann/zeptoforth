@@ -223,10 +223,150 @@ _equal_case_strings:
 	pop {r4, pc}
 	end_inlined
 
+	@@ Find a word in a specific wordlist
+	@@ ( addr bytes mask dict wid -- addr|0 )
+	define_word "find-in-wordlist", visible_flag
+_find_in_wordlist:
+	push {r4, r5, lr}
+	movs r5, tos
+	pull_tos
+	movs r0, tos
+	pull_tos
+	movs r1, tos
+	pull_tos
+	movs r2, tos
+	pull_tos
+	movs r3, tos
+1:	cmp r0, #0
+	beq 3f
+	ldrh r4, [r0]
+	tst r4, r1
+	beq 2f
+	ldrh r4, [r0, #2]
+	cmp r4, r5
+	bne 2f
+	ldrb r4, [r0, #8]
+	movs tos, r3
+	push_tos
+	movs tos, r2
+	push_tos
+	movs tos, r0
+	adds tos, #9
+	push_tos
+	movs tos, r4
+	push {r0, r1, r2, r3}
+	bl _equal_case_strings
+	pop {r0, r1, r2, r3}
+	cmp tos, #0
+	bne 4f
+2:	ldr r0, [r0, #4]
+	b 1b
+3:	movs tos, #0
+	pop {r4, r5, pc}
+4:	movs tos, r0
+	pop {r4, r5, pc}
+	end_inlined
+
 	@@ Find a word in a specific dictionary
-	@@ ( addr bytes mask dict -- addr|0 )
+	@@ ( addr bytes mask flash? -- addr|0 )
 	define_word "find-dict", visible_flag
 _find_dict:
+	push {lr}
+	movs r0, tos
+	pull_tos
+	cmp r0, #0
+	beq 1f
+	ldr r0, =flash_latest
+	ldr r0, [r0]
+	b 2f
+1:	ldr r0, =ram_latest
+	ldr r0, [r0]
+2:	ldr r1, =order_count
+	ldr r1, [r1]
+	ldr r2, =order
+3:	cmp r1, #0
+	beq 4f
+	push {r0, r1, r2}
+	bl _3dup
+	pop {r0, r1, r2}
+	push_tos
+	movs tos, r0
+	push_tos
+	ldrh tos, [r2]
+	push {r0, r1, r2}
+	bl _find_in_wordlist
+	pop {r0, r1, r2}
+	cmp tos, #0
+	bne 5f
+	subs r1, #1
+	adds r2, #2
+	pull_tos
+	b 3b
+4:	adds dp, #8
+	movs tos, #0
+	pop {pc}
+5:	adds dp, #12
+	pop {pc}
+	
+	@@ Duplicate three items on the stack
+	define_word "3dup", visible_flag
+_3dup:	push_tos
+	ldr tos, [dp, #8]
+	push_tos
+	ldr tos, [dp, #8]
+	push_tos
+	ldr tos, [dp, #8]
+	bx lr
+	end_inlined
+
+	@@ Find a word in the dictionary
+	@@ ( addr bytes mask -- addr|0 )
+	define_word "find", visible_flag
+_find:	push {lr}
+	ldr r0, =compiling_to_flash
+	ldr r0, [r0]
+	cmp r0, #0
+	bne 1f
+3:	movs r0, tos
+	pull_tos
+	movs r1, tos
+	pull_tos
+	movs r2, tos
+	push_tos
+	movs tos, r1
+	push_tos
+	movs tos, r0
+	push_tos
+	movs tos, #0
+	push {r0, r1, r2}
+	bl _find_dict
+	pop {r0, r1, r2}
+	cmp tos, #0
+	bne 2f
+	movs tos, r2
+	push_tos
+	movs tos, r1
+	push_tos
+	movs tos, r0
+	push_tos
+	movs tos, #-1
+	bl _find_dict
+	pop {pc}
+1:	ldr r0, =state
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 3b
+	push_tos
+	movs tos, #-1
+	bl _find_dict
+2:	pop {pc}
+	end_inlined
+	
+	@@ Find a word in a specific dictionary in any wordlist in order of
+	@@ definition
+	@@ ( addr bytes mask dict -- addr|0 )
+	define_word "find-all-dict", visible_flag
+_find_all_dict:
 	push {r4, lr}
 	movs r0, tos
 	pull_tos
@@ -237,7 +377,7 @@ _find_dict:
 	movs r3, tos
 1:	cmp r0, #0
 	beq 3f
-	ldr r4, [r0]
+	ldrh r4, [r0]
 	tst r4, r1
 	beq 2f
 	ldrb r4, [r0, #8]
@@ -262,10 +402,11 @@ _find_dict:
 	pop {r4, pc}
 	end_inlined
 
-	@@ Find a word in the dictionary
+	@@ Find a word in the dictionary in any wordlist in order of definition
 	@@ ( addr bytes mask -- addr|0 )
-	define_word "find", visible_flag
-_find:	push {lr}
+	define_word "find-all", visible_flag
+_find_all:
+	push {lr}
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
 	cmp r0, #0
@@ -283,7 +424,7 @@ _find:	push {lr}
 	ldr r3, =ram_latest
 	ldr tos, [r3]
 	push {r0, r1, r2}
-	bl _find_dict
+	bl _find_all_dict
 	pop {r0, r1, r2}
 	cmp tos, #0
 	bne 2f
@@ -295,7 +436,7 @@ _find:	push {lr}
 	push_tos
 	ldr r3, =flash_latest
 	ldr tos, [r3]
-	bl _find_dict
+	bl _find_all_dict
 	pop {pc}
 1:	ldr r0, =state
 	ldr r0, [r0]
@@ -304,7 +445,7 @@ _find:	push {lr}
 	push_tos
 	ldr r0, =flash_latest
 	ldr tos, [r0]
-	bl _find_dict
+	bl _find_all_dict
 2:	pop {pc}
 	end_inlined
 

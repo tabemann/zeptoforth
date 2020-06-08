@@ -25,6 +25,9 @@ compress-flash
 \ False constant
 0 constant false
 
+\ Forth wordlist constant
+0 constant forth-wordlist
+
 \ Base 2
 : binary 2 base ! ;
 
@@ -181,10 +184,13 @@ compress-flash
 ;
 
 \ Get the flags for a word
-: word-flags ( word -- flags ) [inlined] ;
+: word-flags ( word -- h-addr ) [inlined] ;
+
+\ Get the wordlist id for a word
+: wordlist-id ( word -- h-addr ) 2+ [inlined] ;
 
 \ Get the previous word for a word
-: prev-word ( word1 -- word2 ) 4+ [inlined] ;
+: prev-word ( word1 -- addr ) 4+ [inlined] ;
 
 \ Get the name of a word (a counted string)
 : word-name ( word -- b-addr ) 8 + [inlined] ;
@@ -228,7 +234,7 @@ commit-flash
 
 \ Get whether a word is hidden
 : hidden? ( word -- f )
-  dup word-flags @ visible-flag and if
+  dup word-flags h@ visible-flag and if
     word-name count dup 2 > if
       over b@ [char] * = if
 	+ 1- b@ [char] * =
@@ -284,30 +290,32 @@ commit-flash
 
 \ Display all the words in a dictionary starting at a given column, and
 \ returning the next column
-: words-dict ( dict column1 -- column2 )
+: words-dict ( dict wid column1 -- column2 )
+  swap >r
   begin
     over 0<>
   while
-    over hidden? not if
+    over hidden? not 2 pick wordlist-id h@ r@ = and if
       over word-name count rot words-column
     then
     swap prev-word @ swap
   repeat
-  nip
+  nip rdrop
 ;
 
 \ Display all the words in a dictionary starting at a given column and returning
 \ the next column
-: lookup-dict ( b-addr bytes dict column1 -- column2 )
+: lookup-dict ( b-addr bytes dict wid column1 -- column2 )
+  swap >r
   begin over 0<> while
-    over hidden? not if
+    over hidden? not 2 pick wordlist-id h@ r@ = and if
       3 pick 3 pick 3 pick word-name count prefix? if
 	over word-name count rot words-column
       then
     then
     swap prev-word @ swap
   repeat
-  nip
+  nip rdrop
 ;
 
 \ Find the common prefix length to a word
@@ -326,16 +334,39 @@ commit-flash
 
 \ Lookup a word by its prefix
 : lookup ( "name" -- )
-  token
+  cr token
   2dup ram-latest find-prefix-len
   2 pick 2 pick flash-latest find-prefix-len
   rot drop max
-  cr 2dup ram-latest 0 lookup-dict flash-latest swap lookup-dict drop cr
+  0 0 begin
+    dup order-count @ <
+  while
+    >r 2 pick 2 pick ram-latest order r@ 2* + h@ 4 roll lookup-dict r> 1+
+  repeat
+  drop
+  0 begin
+    dup order-count @ <
+  while
+    >r 2 pick 2 pick flash-latest order r@ 2* + h@ 4 roll lookup-dict r> 1+
+  repeat
+  2drop 2drop cr
 ;
 
 \ Display all the words are four columns
 : words ( -- )
-  cr ram-latest 0 words-dict flash-latest swap words-dict drop cr
+  cr
+  0 0 begin
+    dup order-count @ <
+  while
+    >r ram-latest order r@ 2* + h@ rot words-dict r> 1+
+  repeat
+  drop
+  0 begin
+    dup order-count @ <
+  while
+    >r flash-latest order r@ 2* + h@ rot words-dict r> 1+
+  repeat
+  2drop cr
 ;
 
 \ Set bits on a byte
@@ -625,10 +656,10 @@ commit-flash
 
 \ Look up next available user space
 : next-user-space ( -- offset )
-  s" *USER*" visible-flag flash-latest find-dict dup if
+  s" *USER*" visible-flag flash-latest find-all-dict dup if
     >xt execute
   else
-    0
+    drop 0
   then
 ;
 
@@ -637,7 +668,11 @@ commit-flash
   compiling-to-flash?
   swap
   compile-to-flash
+  get-current
+  swap
+  forth-wordlist set-current
   s" *USER*" constant-with-name
+  set-current
   not if
     compile-to-ram
   then
@@ -645,10 +680,10 @@ commit-flash
 
 \ Look up next available RAM space
 : next-ram-space ( -- addr )
-  s" *RAM*" visible-flag flash-latest find-dict dup if
+  s" *RAM*" visible-flag flash-latest find-all-dict dup if
     >xt execute
   else
-    0
+    drop 0
   then
   sys-ram-dict-base +
 ;
@@ -659,7 +694,11 @@ commit-flash
   compiling-to-flash?
   swap
   compile-to-flash
+  get-current
+  swap
+  forth-wordlist set-current
   s" *RAM*" constant-with-name
+  set-current
   not if
     compile-to-ram
   then
@@ -901,6 +940,64 @@ commit-flash
     ram-2variable
   else
     create 8 ram-allot
+  then
+;
+
+\ Specify current flash wordlist
+: set-current-flash-wordlist ( wid -- )
+  compiling-to-flash?
+  swap
+  compile-to-flash
+  get-current
+  swap
+  forth-wordlist set-current
+  s" *WORDLIST*" constant-with-name
+  set-current
+  not if
+    compile-to-ram
+  then
+;
+
+\ Look up the current flash wordlist
+: get-current-flash-wordlist ( -- wid )
+  s" *WORDLIST*" visible-flag flash-latest find-all-dict dup if
+    >xt execute
+  else
+    drop 0
+  then
+;
+
+\ Commit to flash
+commit-flash
+
+\ Create a flash wordlist
+: flash-wordlist ( -- wid )
+  get-current-flash-wordlist 1+ dup set-current-flash-wordlist
+;
+
+\ The minimum RAM wordlist
+32768 constant min-ram-wordlist
+
+\ The current RAM wordlist
+variable current-ram-wordlist
+
+\ Commit to flash
+commit-flash
+
+\ Create a RAM wordlist
+: ram-wordlist ( -- wid )
+  current-ram-wordlist @ 1 current-ram-wordlist +!
+;
+
+\ Commit to flash
+commit-flash
+
+\ Create a new wordlist
+: wordlist ( -- wid )
+  compiling-to-flash? if
+    flash-wordlist
+  else
+    ram-wordlist
   then
 ;
 
@@ -1345,6 +1442,7 @@ commit-flash
 \ Initialize the RAM variables
 : init ( -- )
   init
+  min-ram-wordlist current-ram-wordlist !
   next-ram-space dict-base !
   dict-base @ next-user-space + ram-here!
   0 wait-hook !

@@ -176,6 +176,21 @@ _input:	push_tos
 	bx lr
 	end_inlined
 
+	@@ The wordlist count
+	define_word "order-count", visible_flag
+_order_count:
+	push_tos
+	ldr tos, =order_count
+	bx lr
+	end_inlined
+
+	@@ The wordlist order
+	define_word "order", visible_flag
+_order: push_tos
+	ldr tos, =order
+	bx lr
+	end_inlined
+	
 	@@ The prompt hook
 	define_word "prompt-hook", visible_flag
 _prompt_hook:

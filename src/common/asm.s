@@ -29,8 +29,10 @@ _asm_start_no_push:
 	ldr r0, =current_flags
 	movs r1, #0
 	str r1, [r0]
-	movs tos, #4
+	movs tos, #2
 	bl _current_allot
+	bl _get_current
+	bl _current_comma_2
 	bl _asm_link
 	bl _current_comma_cstring
 	bl _current_here
@@ -90,7 +92,7 @@ _asm_finalize:
 	push_tos
 	ldr tos, =current_compile
 	ldr tos, [tos]
-	bl _store_current_4
+	bl _store_current_2
 1:	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
 	cmp r0, #0
@@ -141,7 +143,7 @@ _asm_finalize_no_align:
 	push_tos
 	ldr tos, =current_compile
 	ldr tos, [tos]
-	bl _store_current_4
+	bl _store_current_2
 1:	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
 	cmp r0, #0

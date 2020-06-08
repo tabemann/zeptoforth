@@ -38,6 +38,9 @@ dp 	.req r7
 	@@ Inlined word
 	.equ inlined_flag, 0x0008
 
+	@@ The maximum wordlist order size
+	.equ max_order_size, 16
+
 	@@ Initialize the current RAM pointer
 	.set ram_current, ram_start
 	
@@ -55,7 +58,8 @@ dp 	.req r7
 	@@ Word header macro
 	.macro define_word name, flags
 	.p2align 2
-	.word \flags
+	.hword \flags
+	.hword 0
 	.word 10b - 8
 10:	.byte 12f - 11f
 11:	.ascii "\name"
