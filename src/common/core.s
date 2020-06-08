@@ -893,7 +893,7 @@ _do_init:
 	string "init"
 	push_tos
 	movs tos, #visible_flag
-	bl _find
+	bl _find_all
 	cmp tos, #0
 	beq 1f
 	bl _to_xt
@@ -1762,6 +1762,62 @@ _store_sp:
 	bx lr
 	end_inlined
 
+	@@ Get the current compilation wordlist
+	define_word "get-current", visible_flag
+_get_current:
+	ldr r0, =wordlist
+	push_tos
+	ldr tos, [r0]
+	bx lr
+	end_inlined
+
+	@@ Set the current compilation wordlist
+	define_word "set-current", visible_flag
+_set_current:
+	ldr r0, =wordlist
+	str tos, [r0]
+	pull_tos
+	bx lr
+	end_inlined
+
+	@@ Get the current wordlist order
+	define_word "get-order", visible_flag
+_get_order:
+  	ldr r0, =order
+	ldr r1, =order_count
+  	ldr r1, [r1]
+	lsls r2, r1, #1
+	adds r0, r2
+3:	cmp r2, #0
+	beq 4f
+	subs r2, #2
+	subs r0, #2
+	push_tos
+	ldrh tos, [r0]
+	b 3b
+4:	push_tos
+	movs tos, r1
+	bx lr
+	end_inlined
+
+	@@ Set the current wordlist order
+	define_word "set-order", visible_flag
+_set_order:
+	ldr r0, =order
+	ldr r1, =order_count
+2:	str tos, [r1]
+	movs r1, tos
+	pull_tos
+3:	cmp r1, #0
+	beq 4f
+	subs r1, #1
+	strh tos, [r0]
+	pull_tos
+	adds r0, #2
+	b 3b
+4:	bx lr
+	end_inlined
+
 	@@ Reboot (note that this does not clear RAM, but it does clear the RAM
 	@@ dictionary
 	define_word "reboot", visible_flag
@@ -1834,6 +1890,8 @@ _init_variables:
 	str r1, [r0]
 	ldr r0, =flash_latest
 	str r1, [r0]
+	ldr r0, =wordlist
+	str r1, [r0]
 	ldr r0, =build_target
 	str r1, [r0]
 	ldr r0, =current_flags
@@ -1848,8 +1906,13 @@ _init_variables:
 	str r1, [r0]
 	ldr r0, =compress_flash_enabled
 	str r1, [r0]
+	ldr r0, =order
+	strh r1, [r0]
 	movs r1, #10
 	ldr r0, =base
+	str r1, [r0]
+	movs r1, #1
+	ldr r0, =order_count
 	str r1, [r0]
 	ldr r0, =eval_index_ptr
 	ldr r1, =input_buffer_index
@@ -1859,7 +1922,7 @@ _init_variables:
 	str r1, [r0]
 	ldr r0, =eval_ptr
 	ldr r1, =input_buffer
-	str r1, [r0] 
+	str r1, [r0]
 	pop {pc}
 	end_inlined
 	

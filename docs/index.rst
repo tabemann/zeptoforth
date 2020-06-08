@@ -6,6 +6,7 @@ Zeptoforth Documentation
    :caption: Contents:
 
    words/lambda
+   words/wordlist
    words/task
    words/schedule
    words/dev_tools
