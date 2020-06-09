@@ -794,7 +794,7 @@ _do_refill:
 	adds r1, r2
 1:	cmp r0, r1
 	beq 2f
-	push {r0, r1}
+6:	push {r0, r1}
 	bl _key
 	pop {r0, r1}
 	cmp tos, #0x0D
@@ -803,13 +803,19 @@ _do_refill:
 	beq 3f
 	cmp tos, #0x7F
 	beq 4f
-	strb tos, [r0]
+	cmp tos, #0x09
+	beq 8f
+	cmp tos, #0x20
+	blo 7f
+8:	strb tos, [r0]
 	adds r0, #1
 	movs r2, tos
 	push {r0, r1, r2}
 	bl _emit
 	pop {r0, r1, r2}
 	b 1b
+7:	pull_tos
+	b 6b
 4:	ldr r2, =input_buffer
 	cmp r0, r2
 	beq 5f
