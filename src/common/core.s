@@ -1827,6 +1827,12 @@ _reboot:
 	str r1, [r0]
 	bx lr
 	end_inlined
+
+	@@ Carry out a warm reboot
+	define_word "warm", visible_flag
+_warm:	ldr r0, =handle_reset+1
+	bx r0
+	end_inlined
 	
 	@@ Initialize the variables
 	define_word "init-variables", visible_flag

@@ -81,5 +81,5 @@ $18 GPIOD or     constant GPIOD_BSRR
   led-init
 ;
 
-\ Reboot
-reboot
+\ Warm reboot
+warm

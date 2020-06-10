@@ -172,4 +172,4 @@ end-structure
 : current-action ( -- action ) current-action @ ;
 
 \ Reboot
-reboot
+warm

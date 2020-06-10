@@ -66,5 +66,5 @@ $18 GPIOE or     constant GPIOE_BSRR
   led-init
 ;
 
-\ Reboot
-reboot
+\ Warm reboot
+warm

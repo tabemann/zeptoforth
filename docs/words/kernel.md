@@ -615,6 +615,13 @@ Enter sleep mode
 ##### `reboot`
 ( -- )
 
+Carry out a cold reboot (i.e. with resetting the hardware).
+
+##### `warm`
+( -- )
+
+Carry out a warm reboot (i.e. without resetting the hardware).
+
 ##### `state`
 ( -- a-addr )
 

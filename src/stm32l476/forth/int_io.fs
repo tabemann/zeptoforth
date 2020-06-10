@@ -231,5 +231,5 @@ $08 constant ORE
   enable-int
 ;
 
-\ Reboot
-reboot
+\ Warm reboot
+warm

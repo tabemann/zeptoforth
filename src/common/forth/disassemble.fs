@@ -1828,6 +1828,5 @@ commit-flash
 \ Finish compressing the code
 end-compress-flash
 
-\ Reboot
-reboot
-
+\ Compile to RAM
+compile-to-ram

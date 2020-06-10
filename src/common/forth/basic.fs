@@ -1456,5 +1456,5 @@ end-compress-flash
 \ Set compilation back to RAM
 compile-to-ram
 
-\ Reboot
-reboot
+\ Warm reboot
+warm
