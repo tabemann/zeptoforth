@@ -92,5 +92,5 @@ variable systick-counter
 \ Make systick-counter read-only
 : systick-counter ( -- u ) systick-counter @ ;
 
-\ Reboot
-reboot
+\ Warm reboot
+warm

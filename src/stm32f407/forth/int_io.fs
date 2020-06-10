@@ -234,5 +234,5 @@ $80 constant TXE
   enable-int
 ;
 
-\ Reboot
-reboot
+\ Warm reboot
+warm
