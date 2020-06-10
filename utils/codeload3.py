@@ -160,6 +160,8 @@ class ConnectSerial(Connection):
                     print('Error: TTY device %s invalid' % ttydev)
                     sys.exit(1)
                 return "ok"
+#            elif (re.search('warm', line)):
+#                time.sleep(2)
             else:
                 print('Error: TTY transmission failed')
                 sys.exit(1)
@@ -169,15 +171,21 @@ class ConnectSerial(Connection):
         elif (re.search('reboot', sioResult)):
             self.refresh()
             return "ok"
+        elif (re.search('warm', sioResult)):
+            time.sleep(2)
+            self.port.flush()
+            self.port.reset_output_buffer()
+            self.port.reset_input_buffer()
+            return "ok"
         else:
             return sioResult
 
     def refresh(self):
-        time.sleep(1)
+        time.sleep(2)
         self.port.flush()
         self.port.reset_output_buffer()
         self.port.reset_input_buffer()
-        time.sleep(1)
+        time.sleep(2)
         self.port.flush()
         self.port.reset_output_buffer()
         self.port.reset_input_buffer()
@@ -254,7 +262,6 @@ def readEfr(path):
 
 # uploader with resolution of #include, #require, and \res
 def upload(path):
-    CN.refresh()
 
     reSkipToEOF = re.compile("^\\\\\\\\")
 
@@ -377,6 +384,7 @@ if (args.method == "telnet"):
     CN = ConnectUcsim(args.port or 'localhost:10000')
 elif (args.method == "serial"):
     CN = ConnectSerial(args.port or '/dev/ttyUSB0', args.baud or 9600)
+    CN.refresh()
 else:
     CN = ConnectDryRun()
 

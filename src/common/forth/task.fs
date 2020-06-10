@@ -482,4 +482,4 @@ variable saved-validate-dict
 ;
 
 \ Reboot to initialize multitasking
-reboot
+warm
