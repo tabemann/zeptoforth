@@ -341,13 +341,8 @@ commit-flash
   0 0 begin
     dup order-count @ <
   while
-    >r 2 pick 2 pick ram-latest order r@ 2* + h@ 4 roll lookup-dict r> 1+
-  repeat
-  drop
-  0 begin
-    dup order-count @ <
-  while
-    >r 2 pick 2 pick flash-latest order r@ 2* + h@ 4 roll lookup-dict r> 1+
+    >r 2 pick 2 pick ram-latest order r@ 2* + h@ 4 roll lookup-dict
+    2 pick 2 pick flash-latest order r@ 2* + h@ 4 roll lookup-dict r> 1+
   repeat
   2drop 2drop cr
 ;
@@ -358,13 +353,9 @@ commit-flash
   0 0 begin
     dup order-count @ <
   while
-    >r ram-latest order r@ 2* + h@ rot words-dict r> 1+
-  repeat
-  drop
-  0 begin
-    dup order-count @ <
-  while
-    >r flash-latest order r@ 2* + h@ rot words-dict r> 1+
+    >r ram-latest order r@ 2* + h@ rot words-dict
+    flash-latest order r@ 2* + h@ rot words-dict
+    r> 1+
   repeat
   2drop cr
 ;
