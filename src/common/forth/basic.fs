@@ -242,10 +242,10 @@ commit-flash
 	2drop false
       then
     else
-      2drop true
+      2drop false
     then
   else
-    drop false
+    drop true
   then
 ;
 
