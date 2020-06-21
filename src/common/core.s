@@ -1213,6 +1213,42 @@ _store_8:
 	bx lr
 	end_inlined
 
+	@@ Read a byte from an address, add a value, and write it back
+	define_word "b+!", visible_flag | inlined_flag
+_add_store_1:
+	ldrb r0, [tos]
+	ldr r1, [dp]
+	adds r0, r1
+	strb r0, [tos]
+	ldr tos, [dp, #4]
+	adds dp, #8
+	bx lr
+	end_inlined
+
+	@@ Read a halfword from an address, add a value, and write it back
+	define_word "h+!", visible_flag | inlined_flag
+_add_store_2:	
+	ldrh r0, [tos]
+	ldr r1, [dp]
+	adds r0, r1
+	strh r0, [tos]
+	ldr tos, [dp, #4]
+	adds dp, #8
+	bx lr
+	end_inlined
+
+	@@ Read a word from an address, add a value, and write it back
+	define_word "+!", visible_flag | inlined_flag
+_add_store_4:	
+	ldr r0, [tos]
+	ldr r1, [dp]
+	adds r0, r1
+	str r0, [tos]
+	ldr tos, [dp, #4]
+	adds dp, #8
+	bx lr
+	end_inlined
+
 	@@ Get a byte
 	define_word "b@", visible_flag | inlined_flag
 _get_1: ldrb tos, [tos]
