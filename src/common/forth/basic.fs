@@ -65,7 +65,7 @@ compress-flash
 8 constant inlined-flag
 
 \ Add to a cell
-: +! ( x addr -- ) swap over @ + swap ! [inlined] ;
+\ : +! ( x addr -- ) swap over @ + swap ! [inlined] ;
 
 \ Get the minimum of two numbers
 : min ( n1 n2 -- n3 ) over - dup 0< and + ;
