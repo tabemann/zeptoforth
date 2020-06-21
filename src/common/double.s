@@ -397,6 +397,68 @@ _udmul:
         bx lr
 	end_inlined
 
+	@@ Unsigned multiply 64 * 64 = 124
+	@@ ( ud1 ud2 -- udl udh )
+_udmmul:
+	push {r4, lr}
+	movs r4, #0
+
+	@ ( d c b a )
+
+	push_tos
+	ldr tos, [dp, #4] @@ b
+	push_tos
+	ldr tos, [dp, #16] @@ d
+	bl _ummul
+	movs r1, tos @@ b*d-high
+	pull_tos
+	movs r0, tos @@ b*d-low
+
+	ldr tos, [dp, #0] @@ a
+	push_tos
+	ldr tos, [dp, #12] @@ c
+	push {r0, r1}
+	bl _ummul
+	pop {r0, r1}
+	movs r3, tos @@ a*c-high
+	pull_tos
+	movs r2, tos @@ a*c-low
+
+	ldr tos, [dp, #0] @@ a
+	push_tos
+	ldr tos, [dp, #16] @@ d
+	push {r0, r1, r2, r3}
+	bl _ummul
+	pop {r0, r1, r2, r3}
+	adds r2, tos @@ a*c-low + a*d-high
+	adcs r3, r4 @@ carry
+	pull_tos
+	adds r1, tos @@ a*d-low + b*d-high
+	adcs r2, r4 @@ carry
+	adcs r3, r4 @@ carry
+
+	ldr tos, [dp, #4] @@ b
+	push_tos
+	ldr tos, [dp, #12] @@ c
+	push {r0, r1, r2, r3}
+	bl _ummul
+	pop {r0, r1, r2, r3}
+	adds r2, tos @@ a*c-low + b*c-high + a*d-high
+	adcs r3, r4 @@ carry
+	pull_tos
+	adds r1, tos @@ b*c-low + a*d-low + b*d-high
+	adcs r2, r4 @@ carry
+	adcs r3, r4 @@ carry
+	pull_tos
+
+	movs tos, r3
+	str r2, [dp, #0]
+	str r1, [dp, #4]
+	str r0, [dp, #8]
+
+	pop {r4, pc}
+	end_inlined
+
 	@ ( n1 n2 n3 -- n1*n2/n3 ) With double length intermediate result
 	define_word "*/", visible_flag
 _muldiv:	
@@ -537,6 +599,61 @@ _uddivmod:
 	bx lr
 	end_inlined
 
+        @@ Unsigned divide 64/64 = 64 remainder 64
+        @@ ( ud1 ud2 -- ud ud)
+        @@ ( 1L 1H 2L tos: 2H -- Rem-L Rem-H Quot-L tos: Quot-H )
+	define_word "uf/mod", visible_flag
+_ufdivmod:
+	push {r4, r5}
+
+	movs r3, #0
+	ldr  r2, [dp, #4]
+	ldr  r1, [dp, #8]
+	movs r0, #0
+	
+	@ Divisor-High Divisor-Low
+	@          r5           r4
+
+	movs r5, tos
+	ldr  r4, [dp, #0]
+	
+	@ For this long division, we need 64 individual division steps.
+	movs tos, #64
+
+	@ Shift the long chain of four registers.
+3:	lsls r0, #1
+	adcs r1, r1
+	adcs r2, r2
+	adcs r3, r3
+	
+	@ Compare Divisor with top two registers
+	cmp r3, r5 @ Check high part first
+	bhi 1f
+	blo 2f
+	
+	cmp r2, r4 @ High part is identical. Low part decides.
+	blo 2f
+
+	@ Subtract Divisor from two top registers
+1:  	subs r2, r4 @ Subtract low part
+	sbcs r3, r5 @ Subtract high part with carry
+	
+	@ Insert a bit into Result which is inside LSB of the long register.
+	adds r0, #1
+
+2:	subs tos, #1
+	bne 3b
+
+	@ Now place all values to their destination.
+	movs tos, r1       @ Result-High
+	str  r0, [dp, #0] @ Result-Low
+	str  r3, [dp, #4] @ Remainder-High
+	str  r2, [dp, #8] @ Remainder-Low
+	
+	pop {r4, r5}
+	bx lr
+	end_inlined
+
 	@@ Signed divide 64 / 64 = 64 remainder 64
 	@@ ( d1 d2 -- d d )
 	@@ ( 1L 1H 2L tos: 2H -- Rem-L Rem-H Quot-L tos: Quot-H )
@@ -594,6 +711,80 @@ _uddiv:	push {lr}
 	define_word "d/", visible_flag
 _ddiv:	push {lr}
 	bl _ddivmod
+	bl _2nip
+	pop {pc}
+	end_inlined
+
+	@@ Signed multiply two s31.32 numbers, sign wrong in overflow
+	define_word "f*", visible_flag
+_fmul:  push {lr}
+	asr r0, tos, #31 @ Turn MSB into 0xffffffff or 0x00000000
+	beq 1f
+	@ - * ?
+	bl _dnegate
+	bl _2swap
+	asr r0, tos, #31 @ Turn MSB into 0xffffffff or 0x00000000
+	beq 2f @ - * +
+	
+	@ - * -
+	bl _dnegate
+	
+3:      @ + * +, - * -
+	bl _udmmul
+	@ ( LL L H HH )
+	pull_tos
+	ldmia dp!, {r0}
+	str r0, [dp]
+	@ ( L H )
+	pop {pc}
+	
+1:      @ + * ?
+	bl _2swap
+	asr r0, tos, #31 @ Turn MSB into 0xffffffff or 0x00000000
+	beq 3b @ + * +
+	
+	bl _dnegate
+	
+	@ - * + or + * -
+2:      bl _udmmul
+	@ ( LL L H HH )
+	pull_tos
+	ldmia dp!, {r0}
+	str r0, [dp]
+	@ ( L H )
+	bl _dnegate
+	pop {pc}
+	end_inlined
+	
+	@@ Signed divide for s31.32, sign wrong in overflow
+	define_word "f/", visible_flag
+_fdiv:	@ Take care of sign ! ( 1L 1H 2L 2H - EL EH )
+	push {lr}
+	asr r0, tos, #31 @ Turn MSB into 0xffffffff or 0x00000000
+	beq 2f
+	@ ? / -
+	bl _dnegate
+	bl _2swap
+	asr r0, tos, #31 @ Turn MSB into 0xffffffff or 0x00000000
+	beq 3f @ + / -
+	
+	@ - / -
+	bl _dnegate
+1:      bl _2swap @ - / - or + / +
+	bl _ufdivmod
+	bl _2nip
+	pop {pc}
+	
+2:      @ ? / +
+	bl _2swap
+	asr r0, tos, #31 @ Turn MSB into 0xffffffff or 0x00000000
+	beq 1b @ + / +
+	
+	@ - / +
+	bl _dnegate
+3:      bl _2swap @ - / + or + / -
+	bl _ufdivmod
+	bl _dnegate
 	bl _2nip
 	pop {pc}
 	end_inlined
