@@ -469,3 +469,8 @@ Finish conditional execution/compilation
 ( xt -- )
 
 Wait for a predicate to become true
+
+##### `forget-ram`
+( -- )
+
+Forget the contents of RAM except for RAM variables and buffers compiled from flash, user variables (which are compiled into flash), and kernel-level RAM variables. Note that this is actually implemented in `src/common/forth/task.fs` rather than `src/common/forth/basic.fs` because it relies upon code implemented for multitasking.
