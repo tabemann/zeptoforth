@@ -360,7 +360,7 @@ _mmul:	ldr r0, [dp]
 	end_inlined
 
 	@@ Unsigned multiply 64 * 64 = 64
-	define_word "ud*", visible_flag
+	define_word "udm*", visible_flag
 _udmul:
 	ldmia dp!, {r0, r1, r2}
 
@@ -458,7 +458,7 @@ _udmmul:
 
 	pop {r4, pc}
 	end_inlined
-
+		
 	@ ( n1 n2 n3 -- n1*n2/n3 ) With double length intermediate result
 	define_word "*/", visible_flag
 _muldiv:	
