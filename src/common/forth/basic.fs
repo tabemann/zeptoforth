@@ -1423,7 +1423,7 @@ variable flash-dict-warned
 commit-flash
 
 \ Warn if flash space is running low
-: do-validate-dict ( -- )
+: do-flash-validate-dict ( -- )
   flash-end flash-here - 1024 < flash-dict-warned @ not and if
     true flash-dict-warned !
     space ." flash dictionary space is running low (<1K left)" cr
@@ -1438,7 +1438,7 @@ commit-flash
   dict-base @ next-user-space + ram-here!
   0 wait-hook !
   false flash-dict-warned !
-  ['] do-validate-dict validate-dict-hook !
+  ['] do-flash-validate-dict validate-dict-hook !
 ;
 
 \ Finish compressing the code

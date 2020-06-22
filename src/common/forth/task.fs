@@ -448,6 +448,27 @@ variable saved-validate-dict
   1 pause-enabled !
 ;
 
+\ Forget RAM contents
+: forget-ram ( -- )
+  0 ram-latest!
+  latest $20000000 >= if 0 latest! then
+  0 pause-enabled !
+  min-ram-wordlist current-ram-wordlist !
+  next-ram-space dict-base !
+  dict-base @ next-user-space + ram-here!
+  0 wait-hook !
+  false flash-dict-warned !
+  ['] do-flash-validate-dict saved-validate-dict !
+  main-task @ task-stack-end free-end !
+  init-main-task
+  0 pause-count !
+  ['] do-pause pause-hook !
+  ['] do-wait wait-hook !
+  false ram-dict-warned !
+  ['] do-validate-dict validate-dict-hook !
+  1 pause-enabled !
+;
+
 \ Make pause-count read-only
 : pause-count ( -- u ) pause-count @ ;
 
