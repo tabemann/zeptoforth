@@ -194,3 +194,18 @@ Divide unsigned two double cells and get a double cell quotient
 ( nd1 nd2 -- nd3 )
 
 Divide signed two double cells and get a double cell quotient
+
+##### `f*`
+( d1 d2 -- d3 )
+
+Multiply two s31.32 fixed-point numbers. Note that overflow is possible, where then the sign will be wrong.
+
+##### `f/`
+( d1 d2 -- d3 )
+
+Divide two s31.32 fixed-point numbers. Note that overflow is possible, where then the sign will be wrong.
+
+##### `udm*`
+( d1 d2 -- dl dh )
+
+Multiply two 64-bit double-cell numbers into a single 128-bit quadruple-cell number.
