@@ -34,6 +34,8 @@
 	
 	@@ The entry point
 handle_reset:
+	@@ Initialize r11, relied upon by swdcom
+	mov r11, #0
 	@@ Initialize the top of stack register
 	ldr tos, =0xFEDCBA98
 	@@ Initialize the data stack pointer
