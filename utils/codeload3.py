@@ -147,7 +147,7 @@ class ConnectSerial(Connection):
         except:
             if (re.search('reboot', line)):
                 self.port.close();
-                time.sleep(2)
+                time.sleep(4)
                 try:
                     self.port = serial.Serial(
                         port     = self.ttydev,

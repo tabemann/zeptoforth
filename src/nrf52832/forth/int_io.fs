@@ -209,5 +209,6 @@ UART_Base $51C + constant UART_TXD
   enable-int
 ;
 
-\ Warm reboot
-warm
+\ Reboot
+reboot
+
