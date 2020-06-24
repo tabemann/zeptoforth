@@ -146,8 +146,8 @@ class ConnectSerial(Connection):
                 return "ok"
         except:
             if (re.search('reboot', line)):
-                self.port.close();
-                time.sleep(4)
+                self.port.close()
+                time.sleep(2)
                 try:
                     self.port = serial.Serial(
                         port     = self.ttydev,
@@ -156,6 +156,7 @@ class ConnectSerial(Connection):
                         stopbits = serial.STOPBITS_ONE,
                         bytesize = serial.EIGHTBITS,
                         timeout  = 5 )
+                    self.refresh()
                 except:
                     print('Error: TTY device %s invalid' % ttydev)
                     sys.exit(1)

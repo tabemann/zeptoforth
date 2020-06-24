@@ -28,6 +28,9 @@ local-count cells aligned-buffer: local-buffer
 \ Local label index
 variable local-index
 
+\ Does this follow an underscore
+variable prev-underscore
+
 \ Begin compressing compiled code in flash
 compress-flash
 
@@ -122,9 +125,6 @@ commit-flash
   <builds , , does> 2@ execute
 ;
 
-\ Does this follow an underscore
-variable prev-underscore
-
 \ Type a leading underscore
 : lead-underscore ( index char-count -- )
   swap 0<> prev-underscore @ not and if ." _" 1+ then
@@ -134,6 +134,9 @@ variable prev-underscore
 : tail-underscore ( count index char-count -- )
   -rot 1 + <> if ." _" 1+ true prev-underscore ! then
 ;
+
+\ Commit to flash
+commit-flash
 
 \ Convert and type a character meant for an assembler
 : convert-type-char ( b count index -- len )
@@ -991,7 +994,7 @@ commit-flash
 
 \ Parse an LSR immediate instruction
 : p-lsr-imm-1
-  ." LSR" cssp. = decode-asr-imm-16 drop
+  ." LSR" cssp. decode-asr-imm-16 drop
 ;
 
 \ Parse an LSR immediate instruction
@@ -1830,3 +1833,6 @@ end-compress-flash
 
 \ Compile to RAM
 compile-to-ram
+
+\ Warm reboot
+warm
