@@ -718,12 +718,12 @@ _ddiv:	push {lr}
 	@@ Signed multiply two s31.32 numbers, sign wrong in overflow
 	define_word "f*", visible_flag
 _fmul:  push {lr}
-	asr r0, tos, #31 @ Turn MSB into 0xffffffff or 0x00000000
+	asrs r0, tos, #31 @ Turn MSB into 0xffffffff or 0x00000000
 	beq 1f
 	@ - * ?
 	bl _dnegate
 	bl _2swap
-	asr r0, tos, #31 @ Turn MSB into 0xffffffff or 0x00000000
+	asrs r0, tos, #31 @ Turn MSB into 0xffffffff or 0x00000000
 	beq 2f @ - * +
 	
 	@ - * -
@@ -740,7 +740,7 @@ _fmul:  push {lr}
 	
 1:      @ + * ?
 	bl _2swap
-	asr r0, tos, #31 @ Turn MSB into 0xffffffff or 0x00000000
+	asrs r0, tos, #31 @ Turn MSB into 0xffffffff or 0x00000000
 	beq 3b @ + * +
 	
 	bl _dnegate
@@ -760,12 +760,12 @@ _fmul:  push {lr}
 	define_word "f/", visible_flag
 _fdiv:	@ Take care of sign ! ( 1L 1H 2L 2H - EL EH )
 	push {lr}
-	asr r0, tos, #31 @ Turn MSB into 0xffffffff or 0x00000000
+	asrs r0, tos, #31 @ Turn MSB into 0xffffffff or 0x00000000
 	beq 2f
 	@ ? / -
 	bl _dnegate
 	bl _2swap
-	asr r0, tos, #31 @ Turn MSB into 0xffffffff or 0x00000000
+	asrs r0, tos, #31 @ Turn MSB into 0xffffffff or 0x00000000
 	beq 3f @ + / -
 	
 	@ - / -
@@ -777,7 +777,7 @@ _fdiv:	@ Take care of sign ! ( 1L 1H 2L 2H - EL EH )
 	
 2:      @ ? / +
 	bl _2swap
-	asr r0, tos, #31 @ Turn MSB into 0xffffffff or 0x00000000
+	asrs r0, tos, #31 @ Turn MSB into 0xffffffff or 0x00000000
 	beq 1b @ + / +
 	
 	@ - / +

@@ -645,6 +645,11 @@ commit-flash
   dup 16 rshift h.4 h.4
 ;
 
+\ Output a hexadecimal 64 bit value, padded with zeros
+: h.16 ( ud -- )
+  h.8 h.8
+;
+
 \ Look up next available user space
 : next-user-space ( -- offset )
   s" *USER*" visible-flag flash-latest find-all-dict dup if
@@ -1400,6 +1405,52 @@ commit-flash
 \ Type an unsigned double-cell number with a leading space
 : ud. ( ud -- )
   space (ud.)
+;
+
+\ Format digits to the right of the decimal point
+: format-fraction ( u b-addr bytes -- b-addr bytes )
+  2dup swap >r >r + 0 >r >r dup 0<> if
+    begin
+      r> r> dup swap >r swap >r 64 = swap dup 0<> rot or if
+	base @ um* dup 10 < if
+	  [char] 0 +
+	else
+	  10 - [char] A +
+	then
+	r@ b! r> 1+ r> 1+ >r >r false
+      else
+	true
+      then
+    until
+    drop rdrop r> r> + r> swap
+  else
+    drop [char] 0 r@ b! rdrop r> r> + 1+ r> swap
+  then
+;
+
+\ Add a decimal point
+: add-decimal ( b-addr bytes -- b-addr bytes )
+  2dup + [char] , swap b! 1+
+;
+
+\ Format an s31.32 number
+: format-fixed ( b-addr f -- b-addr bytes )
+  2dup d0< if
+    dnegate 0 <# #s -1 sign #> add-decimal format-fraction
+  else
+    0 <# #s #> add-decimal format-fraction
+  then
+  dup >r rot dup >r swap move r> r>
+;
+
+\ Type a fixed-point number without a leading space
+: (f.) ( f -- )
+  ram-here -rot format-fixed dup >r dup ram-allot type r> negate ram-allot
+;
+
+\ Type a fixed-point number with a leading space
+: f. ( f -- )
+  space (f.)
 ;
 
 \ Wait hook variable
