@@ -1310,7 +1310,7 @@ commit-flash
 : [then] ( -- ) [immediate] ;
 
 \ Maximum pictured numeric output size
-128 constant picture-size
+65 constant picture-size
 
 \ Start of pictured numeric output
 variable picture-offset
@@ -1411,7 +1411,7 @@ commit-flash
 : format-fraction ( u b-addr bytes -- b-addr bytes )
   2dup swap >r >r + 0 >r >r dup 0<> if
     begin
-      r> r> dup swap >r swap >r 64 = swap dup 0<> rot or if
+      r> r> dup swap >r swap >r 32 = swap dup 0<> rot or if
 	base @ um* dup 10 < if
 	  [char] 0 +
 	else
