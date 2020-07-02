@@ -1407,11 +1407,25 @@ commit-flash
   space (ud.)
 ;
 
+\ Fraction size lookup table
+create fraction-size-table
+32 , 21 , 16 , 14 , 13 , 12 , 11 , 11 , 10 , 10 , 9 , 9 , 9 , 9 , 8 , 8 ,
+8 , 8 , 8 , 8 , 8 , 8 , 7 , 7 , 7 , 7 , 7 , 7 ,
+
+\ Commit to flash
+commit-flash
+
+\ Get current fraction size
+: fraction-size ( -- u ) base @ 2 - cells fraction-size-table + @ ;
+
+\ Commit to flash
+commit-flash
+
 \ Format digits to the right of the decimal point
 : format-fraction ( u b-addr bytes -- b-addr bytes )
   2dup swap >r >r + 0 >r >r dup 0<> if
     begin
-      r> r> dup swap >r swap >r 32 = swap dup 0<> rot or if
+      r> r> dup swap >r swap >r fraction-size <> swap dup 0<> rot and if
 	base @ um* dup 10 < if
 	  [char] 0 +
 	else
@@ -1433,6 +1447,9 @@ commit-flash
   2dup + [char] , swap b! 1+
 ;
 
+\ Commit to flash
+commit-flash
+
 \ Format an s31.32 number
 : format-fixed ( b-addr f -- b-addr bytes )
   2dup d0< if
@@ -1443,10 +1460,16 @@ commit-flash
   dup >r rot dup >r swap move r> r>
 ;
 
+\ Commit to flash
+commit-flash
+
 \ Type a fixed-point number without a leading space
 : (f.) ( f -- )
   ram-here -rot format-fixed dup >r dup ram-allot type r> negate ram-allot
 ;
+
+\ Commit to flash
+commit-flash
 
 \ Type a fixed-point number with a leading space
 : f. ( f -- )
