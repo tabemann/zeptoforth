@@ -360,7 +360,7 @@ _mmul:	ldr r0, [dp]
 	end_inlined
 
 	@@ Unsigned multiply 64 * 64 = 64
-	define_word "udm*", visible_flag
+	define_word "ud*", visible_flag
 _udmul:
 	ldmia dp!, {r0, r1, r2}
 
@@ -399,6 +399,7 @@ _udmul:
 
 	@@ Unsigned multiply 64 * 64 = 124
 	@@ ( ud1 ud2 -- udl udh )
+	define_word "udm*", visible_flag
 _udmmul:
 	push {r4, lr}
 	movs r4, #0
