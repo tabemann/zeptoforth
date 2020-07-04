@@ -327,7 +327,8 @@ _dadd:	ldmia dp!, {r0, r1, r2}
 	define_word "d-", visible_flag | inlined_flag
 _dsub:	ldmia dp!, {r0, r1, r2}
 	subs r2, r0
-	sbcs tos, r1
+	sbcs r1, tos
+	movs tos, r1
 	subs dp, #4
 	str r2, [dp]    
 	bx lr
