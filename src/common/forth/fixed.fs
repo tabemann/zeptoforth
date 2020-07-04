@@ -34,6 +34,23 @@ compile-to-ram
 \ Get the maximum of two double-cell numbers
 : dmax ( nd nd -- nd ) 4dup d< if 2swap 2drop else 2drop then ;
 
+\ Signed double-cell multiplication
+: d* ( nd1 nd2 -- nd3 )
+  2dup d0< if
+    dnegate 2swap 2dup d0< if
+      dnegate ud*
+    else
+      ud* dnegate
+    then
+  else
+    2swap 2dup d0< if
+      dnegate ud* dnegate
+    else
+      ud*
+    then
+  then
+;
+
 \ Get two cells from the return stack without changing it
 : 2r@ ( -- d ) ( R: d -- d )
   [immediate] postpone r> postpone r> postpone 2dup postpone >r postpone >r
@@ -97,3 +114,21 @@ compile-to-ram
 
 \ Execute e^x
 : exp ( f1 -- f2 ) expm1 0 1 d+ ;
+
+\ Calculate ln(x + 1)
+: lnp1 ( f1 -- f2 )
+  0 1 d+ >r >r 0 0 begin
+    2dup exp \ y exp(y)
+    2dup 2r@ 2swap d- \ y exp(y) x-exp(y)
+    2r@ 2rot d+ \ y x-exp(y) x+exp(y)
+    f/ \ y (x-exp(y))/(x+exp(y))
+    2 0 d* \ y 2*(x-exp(y))/(x+exp(y))
+    2over d+ \ y y+2*(x-exp(y))/(x+exp(y))
+    2dup 2rot d- \ y+2*(x-exp(y))/(x+exp(y)) 2*(x-exp(y))/(x+exp(y))
+    dabs 2 0 d<
+  until
+  rdrop rdrop
+;
+
+\ Calculate ln(x)
+: ln ( f1 -- f2 ) 0 1 d- lnp1 ;
