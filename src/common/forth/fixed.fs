@@ -17,7 +17,7 @@
 compile-to-ram
 
 \ Get the value of pi
-0 314159265 0 100000000 f/ constant pi
+0 314159265 0 100000000 f/ 2constant pi
 
 \ Duplicate four cells
 : 4dup ( d1 d2 -- d1 d2 d1 d2 ) 3 pick 3 pick 3 pick 3 pick ;
@@ -132,3 +132,112 @@ compile-to-ram
 
 \ Calculate ln(x)
 : ln ( f1 -- f2 ) 0 1 d- lnp1 ;
+
+\ Calculate sin(x)
+: sin ( f1 -- f2 )
+  2dup 2dup >r >r 1 0 begin
+    2swap 2r@ f* 2r@ f*
+    2over 2 0 d* d/
+    2over 2 0 d*
+    1 0 d+ d/
+    2dup dabs 2 0 d< >r
+    2rot
+    2over
+    7 pick 1 and if d- else d+ then
+    2swap
+    2rot
+    1 0 d+
+    r>
+  until
+  rdrop rdrop 2drop 2drop
+;
+
+\ Calculate cos(x)
+: cos ( f1 -- f2 ) pi 2 0 d/ 2swap d- sin ;
+
+\ Calculate tan(x)
+: tan ( f1 -- f2 ) 2dup sin 2swap cos f/ ;
+
+\ Calculate atan(x)
+: atan ( f1 -- f2 )
+  0 1 1 40 do
+    2over i 0 d* 2 fi** 2swap f/ i 2 * 1 - 0 swap d+
+  -1 +loop
+  f/
+;
+
+\ Calculate a angle for any pair of x and y coordinates
+: atan2 ( fy fx -- fangle )
+  2dup d0> if
+    f/ atan
+  else
+    4dup d0< rot rot d0>= and if
+      f/ atan pi d+
+    else
+      4dup d0< rot rot d0< and if
+	f/ atan pi d-
+      else
+	4dup d0= rot rot d0> and if
+	  2drop pi 2 0 d/
+	else
+	  4dup d0= rot rot d0< and if
+	    2drop pi 2 0 dnegate d/
+	  else
+	    2drop 0 0
+	  then
+	then
+      then
+    then
+  then
+;
+
+\ Calculate asin(x)
+: asin ( f1 -- f2 )
+  2dup 2 fi** 0 1 d< if
+    0 1 2over 2 fi** d- sqrt f/ atan
+  else
+    2dup d0> if
+      2drop pi 2 0 d/
+    else
+      2drop pi 2 0 negate d/
+    then
+  then
+;
+
+\ Calculate acos(x)
+: acos ( f1 -- f2 ) asin dnegate pi 2 0 d/ d+ ;
+
+\ Domain error exception
+: x-domain-error ( -- ) space ." domain error" cr ;
+
+\ Calculate a fixed point power b^x
+: f** ( fb fx -- fb^x )
+  2dup d0= 2 pick 2 pick d0= and triggers x-domain-error
+  over 0= if
+    dup 0>= if
+      nip fi**
+    else
+      nip negate fi** 0 1 2swap f/
+    then
+  else
+    2over d0>= averts x-domain-error 2swap ln f* exp
+  then
+;
+
+\ Calculate sinh(x)
+: sinh ( f1 -- f2 ) expm1 2dup 2dup 0 1 d+ f/ d+ 2 0 d/ ;
+
+\ Calculate cosh(x)
+: cosh ( f1 -- f2 ) expm1 2dup 2dup 0 1 d+ f/ d- 2 0 d/ 0 1 d+ ;
+
+\ Calculate tanh(x)
+: tanh ( f1 -- f2 ) 2dup sinh 2swap cosh f/ ;
+
+\ Calculate asinh(x)
+: asinh ( f1 -- f2 ) 2dup 2 fi** 0 1 d+ sqrt d+ ln ;
+
+\ Calculate acosh(x)
+: acosh ( f1 -- f2 ) 2dup 2 fi** 0 1 d- sqrt d+ ln ;
+
+\ Calculate atanh(x)
+: atanh ( f1 -- f2 ) 2dup 0 1 d+ 2swap dnegate 0 1 d+ f/ ln 2 0 d/ ;

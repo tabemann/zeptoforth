@@ -1176,12 +1176,16 @@ _constant_8:
 	push_tos
 	movs tos, #6
 	bl _asm_push
-	push_tos
+	movs r0, tos
 	movs tos, #6
+	push {r0}
 	bl _asm_literal
 	push_tos
 	movs tos, #6
 	bl _asm_push
+	pop {r0}
+	push_tos
+	movs tos, r0
 	push_tos
 	movs tos, #6
 	bl _asm_literal
