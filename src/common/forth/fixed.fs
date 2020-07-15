@@ -13,8 +13,8 @@
 \ You should have received a copy of the GNU General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-\ Compile this to RAM
-compile-to-ram
+\ Compile this to flash
+compile-to-flash
 
 \ Get the value of pi
 0 314159265 0 100000000 f/ 2constant pi
@@ -241,3 +241,6 @@ compile-to-ram
 
 \ Calculate atanh(x)
 : atanh ( f1 -- f2 ) 2dup 0 1 d+ 2swap dnegate 0 1 d+ f/ ln 2 0 d/ ;
+
+\ Compile to RAM
+compile-to-ram
