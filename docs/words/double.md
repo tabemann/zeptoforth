@@ -30,6 +30,21 @@ Double nip
 
 Double tuck
 
+##### `2rot`
+( d1 d2 d3 -- d2 d3 d1 )
+
+Double rot
+
+##### `4dup`
+( d1 d2 -- d1 d2 d1 d2 )
+
+Quadruple dup
+
+##### `2r@`
+( R: d1 -- d1 ) ( -- d1 )
+
+Read two cells from the top of the return stack.
+
 ##### `d=`
 ( d1 d2 -- f )
 
@@ -115,6 +130,21 @@ Double less than or equal to zero
 
 Negate a double cell
 
+##### `dabs`
+( nd -- ud )
+
+Double absolute value
+
+##### `dmin`
+( nd1 nd2 -- nd1|nd2 )
+
+Double minimum
+
+##### `dmax`
+( nd1 nd2 -- nd1|nd2 )
+
+Double maximum
+
 ##### `d+`
 ( d1 d2 -- d3 )
 
@@ -144,6 +174,11 @@ Multiply two signed 32-bit values to get a signed 64-bit value
 ( ud1 ud2 -- ud3 )
 
 Unsigned multiply 64 * 64 = 64
+
+##### `d*`
+( nd1 nd2 -- nd3 )
+
+Signed multiply 64 * 64 = 64
 
 ##### `*/`
 ( n1 n2 n3 -- n4 )
@@ -209,3 +244,103 @@ Divide two s31.32 fixed-point numbers. Note that overflow is possible, where the
 ( d1 d2 -- dl dh )
 
 Multiply two 64-bit double-cell numbers into a single 128-bit quadruple-cell number.
+
+##### `fi**`
+( f1 u -- f2 )
+
+Exponentiation of a fixed point number by an unsigned integer
+
+##### `sqrt`
+( f1 -- f2 )
+
+Square root of a fixed point number
+
+##### `expm1`
+( f1 -- f2 )
+
+Calculate (e^x)-1 where x is a fixed point number
+
+##### `exp`
+( f1 -- f2 )
+
+Calculate e^x where x is a fixed point number
+
+##### `lnp1`
+( f1 -- f2 )
+
+Calculate ln(x + 1) where x is a fixed point number
+
+##### `ln`
+( f1 -- f2 )
+
+Calculate ln(x) where x is a fixed point number
+
+##### `f**`
+( fb fx -- fb^x )
+
+Calculate b^x where b and x are fixed point numbers
+
+##### `sin`
+( f1 -- f2 )
+
+Calculate sin(x) where x is a fixed point number
+
+##### `cos`
+( f1 -- f2 )
+
+Calculate cos(x) where x is a fixed point number
+
+##### `tan`
+( f1 -- f2 )
+
+Calculate tan(x) where x is a fixed point number
+
+##### `asin`
+( f1 -- f2 )
+
+Calculate asin(x) where x is a fixed point number
+
+##### `acos`
+( f1 -- f2 )
+
+Calculate acos(x) where x is a fixed point number
+
+##### `atan`
+( f1 -- f2 )
+
+Calculate atan(x) where x is a fixed point number
+
+##### `atan2`
+( fy fx -- fangle )
+
+Calculate the angle of any pair of x and y coordinates where they are all fixed point numbers
+
+##### `sinh`
+( f1 -- f2 )
+
+Calculate sinh(x) where x is a fixed point number
+
+##### `cosh`
+( f1 -- f2 )
+
+Calculate cosh(x) where x is a fixed point number
+
+##### `tanh`
+( f1 -- f2 )
+
+Calculate tanh(x) where x is a fixed point number
+
+##### `asinh`
+( f1 -- f2 )
+
+Calculate asinh(x) where x is a fixed point number
+
+##### `acosh`
+( f1 -- f2 )
+
+Calculate acosh(x) where x is a fixed point number
+
+##### `atanh`
+( f1 -- f2 )
+
+Calculate atanh(x) where x is a fixed point number
