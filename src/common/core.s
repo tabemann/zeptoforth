@@ -144,6 +144,14 @@ _xor:	movs r0, tos
 	bx lr
 	end_inlined
 
+	@@ Bit clear
+	define_word "bic", visible_flag | inlined_flag
+_bic:	movs r0, tos
+	pull_tos
+	bics tos, r0
+	bx lr
+	end_inlined
+
 	@@ Binary not
 	define_word "not", visible_flag | inlined_flag
 _not:	mvns tos, tos
