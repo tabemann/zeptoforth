@@ -364,19 +364,19 @@ commit-flash
 : bbis! ( bits addr -- ) dup b@ rot or swap b! ;
 
 \ Clear bits on a byte
-: bbic! ( bits addr -- ) dup b@ rot not and swap b! ;
+: bbic! ( bits addr -- ) dup b@ rot bic swap b! ;
 
 \ Set bits on a halfword
 : hbis! ( bits addr -- ) dup h@ rot or swap h! ;
 
 \ Clear bits on a halfword
-: hbic! ( bits addr -- ) dup h@ rot not and swap h! ;
+: hbic! ( bits addr -- ) dup h@ rot bic swap h! ;
 
 \ Set bits on a word
 : bis! ( bits addr -- ) dup @ rot or swap ! ;
 
 \ Clear bits on a word
-: bic! ( bits addr -- ) dup @ rot not and swap ! ;
+: bic! ( bits addr -- ) dup @ rot bic swap ! ;
 
 \ Safely type a string
 : safe-type ( addr bytes -- )
