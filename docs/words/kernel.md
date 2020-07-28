@@ -405,7 +405,7 @@ Enter sleep mode
 ##### `find`
 ( b-addr u mask -- word | 0 )
 
-##### `>xt`
+##### `name>`
 ( word -- xt )
 
 ##### `evaluate`

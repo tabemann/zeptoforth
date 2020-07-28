@@ -38,7 +38,7 @@ compress-flash
 : find-dict-by-address ( addr dict -- word|0 )
   begin
     dup 0<> if
-      dup >xt 2 pick = if
+      dup name> 2 pick = if
 	true
       else
 	prev-word @ false
@@ -1814,7 +1814,7 @@ commit-flash
 : see ( "name" -- )
   false for-gas !
   0 local-index !
-  token-word >xt
+  token-word name>
   dup begin dup see-end? not while find-local repeat drop
   cr begin dup see-end? not while disassemble-main repeat drop
 ;
@@ -1823,7 +1823,7 @@ commit-flash
 : see-for-gas ( "name" -- )
   true for-gas !
   0 local-index !
-  token-word >xt
+  token-word name>
   dup begin dup see-end? not while find-local repeat drop
   cr begin dup see-end? not while disassemble-main repeat drop
 ;
