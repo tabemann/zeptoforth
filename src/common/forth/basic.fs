@@ -125,7 +125,7 @@ compress-flash
 : averts ( f "name" -- )
   [immediate]
   token-word
-  >xt
+  name>
   state @ if
     postpone 0=
     postpone if
@@ -145,7 +145,7 @@ compress-flash
 : triggers ( f "name" -- )
   [immediate]
   token-word
-  >xt
+  name>
   state @ if
     postpone 0<>
     postpone if
@@ -167,7 +167,7 @@ compress-flash
 : suppress ( exc|0 "name" -- exc|0 )
   [immediate]
   token-word
-  >xt
+  name>
   state @ if
     postpone dup
     lit,
@@ -478,7 +478,7 @@ commit-flash
 ;
 
 \ No word is being built exception
-: no-word-being-built ( -- ) space ." no word is being built" abort ;
+: no-word-being-built ( -- ) space ." no word is being built" ;
 
 \ Align to flash block if compiling to flash
 : flash-align,
@@ -491,7 +491,7 @@ commit-flash
 \ Specify code for a word created wth <BUILDS
 : does> ( -- )
   flash-align,
-  build-target @ 0= if ['] no-word-being-built ?raise then
+  build-target @ 0= triggers no-word-being-built
   r>
   0 build-target @ literal!
   0 build-target !
@@ -653,7 +653,7 @@ commit-flash
 \ Look up next available user space
 : next-user-space ( -- offset )
   s" *USER*" visible-flag flash-latest find-all-dict dup if
-    >xt execute
+    name> execute
   else
     drop 0
   then
@@ -677,7 +677,7 @@ commit-flash
 \ Look up next available RAM space
 : next-ram-space ( -- addr )
   s" *RAM*" visible-flag flash-latest find-all-dict dup if
-    >xt execute
+    name> execute
   else
     drop 0
   then
@@ -957,7 +957,7 @@ commit-flash
 \ Look up the current flash wordlist
 : get-current-flash-wordlist ( -- wid )
   s" *WORDLIST*" visible-flag flash-latest find-all-dict dup if
-    >xt execute
+    name> execute
   else
     drop 0
   then
@@ -1175,6 +1175,19 @@ commit-flash
 : ;] ( -- )
   [immediate]
   [compile-only]
+  $BD00 h,
+  here over branch-back!
+  4+ lit,
+;
+
+\ Create an anonymous word for an exception
+: x" ( <text>" -- )
+  [immediate]
+  [compile-only]
+  reserve-branch
+  $B500 h,
+  postpone space
+  postpone ."
   $BD00 h,
   here over branch-back!
   4+ lit,
