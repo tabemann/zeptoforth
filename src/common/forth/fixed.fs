@@ -242,5 +242,133 @@ compile-to-flash
 \ Calculate atanh(x)
 : atanh ( f1 -- f2 ) 2dup 0 1 d+ 2swap dnegate 0 1 d+ f/ ln 2 0 d/ ;
 
-\ Compile to RAM
-compile-to-ram
+\ Get the number of instances of a character in a string
+: char-count ( b-addr bytes b -- count )
+  >r
+  0 begin over 0<> while
+    rot dup b@ r@ = if
+      1+ -rot 1+
+    else
+      1+ -rot
+    then
+    swap 1- swap
+  repeat
+  nip nip rdrop
+;
+
+\ Handle double-cell integer numeric literals
+: handle-double ( b-addr bytes base -- flag )
+  >r over b@ [char] . <> if
+    0 0 begin 2 pick 0<> while
+      3 pick b@ r@ parse-digit if
+	rot rot r@ 0 ud* rot 0 d+
+      else
+	drop 3 pick b@ [char] . <> if
+	  2drop 2drop rdrop false exit
+	then
+      then
+      2swap 1- swap 1+ swap 2swap
+    repeat
+    2swap 2drop rdrop true
+  else
+    rdrop 2drop false
+  then
+;
+
+\ Handle the portion of a s31.32 fixed-point double-cell numeric literal to the
+\ right of the decimal point
+: handle-fraction ( b-addr bytes d base -- d -1 | 0 )
+  >r 0 1 begin 4 pick 0<> while
+    5 pick b@ r@ parse-digit if
+      0 2swap r@ 0 ud/ 2dup >r >r ud* d+
+      2swap 1- swap 1+ swap 2swap r> r>
+    else
+      drop 2drop 2drop 2drop rdrop false exit
+    then
+  repeat
+  2drop 2swap 2drop rdrop true
+;
+
+\ Handle s31.32 fixed-point double-cell numeric literals
+: handle-fixed ( b-addr bytes base -- flag )
+  >r over b@ [char] , <> if
+    2dup + 1- b@ [char] , <> if
+      0 begin over 0<> while
+	2 pick b@ r@ parse-digit if
+	  swap r@ * + rot 1+ rot 1- rot
+	else
+	  drop 2 pick b@ [char] , = if
+	    rot 1+ rot 1- rot 0 swap r> handle-fraction exit
+	  else
+	    drop 2drop rdrop false exit
+	  then
+	then
+      repeat
+      nip nip rdrop true
+    else
+      rdrop 2drop false
+    then
+  else
+    rdrop 2drop false
+  then
+;
+
+\ Handle an unsigned double-cell number
+: handle-unsigned-double ( b-addr bytes base -- d -1 | 0 )
+  >r 2dup [char] . char-count 1 = if
+    r> handle-double
+  else
+    2dup [char] , char-count 1 = if
+      r> handle-fixed
+    else
+      rdrop 2drop false
+    then
+  then
+;
+
+\ Handle numeric literals
+: do-handle-number ( b-addr bytes -- flag )
+  2dup do-handle-number if
+    state @ not if
+      rot rot
+    then
+    2drop true
+  else
+    parse-base >r
+    dup 0<> if
+      over b@ [char] - = if
+	1- swap 1+ swap
+	dup 0<> if
+	  r> handle-unsigned-double
+	else
+	  rdrop 2drop false
+	then
+	?dup if
+	  state @ if
+	    rot rot dnegate swap lit, lit,
+	  else
+	    rot rot dnegate rot
+	  then
+	then
+      else
+	r> handle-unsigned-double
+	?dup if
+	  state @ if
+	    rot lit, swap lit,
+	  then
+	then
+      then
+    else
+      rdrop 2drop false
+    then
+  then
+;
+
+\ Initialize
+: init ( -- )
+  init
+  ['] do-handle-number handle-number-hook !
+;
+
+\ Warm reboot
+warm
