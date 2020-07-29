@@ -343,7 +343,7 @@ compile-to-flash
 	else
 	  rdrop 2drop false
 	then
-	?dup if
+	dup if
 	  state @ if
 	    rot rot dnegate swap lit, lit,
 	  else
@@ -352,7 +352,7 @@ compile-to-flash
 	then
       else
 	r> handle-unsigned-double
-	?dup if
+	dup if
 	  state @ if
 	    rot lit, swap lit,
 	  then
