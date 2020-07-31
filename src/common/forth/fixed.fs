@@ -275,18 +275,39 @@ compile-to-flash
   then
 ;
 
+\ Determine the maximum number of fraction characters for a base
+: get-max-fraction-chars ( base -- chars )
+  >r 1 0 0 begin
+    -rot r@ 0 ud* 2dup 0 1 d> if
+      2drop rdrop true
+    else
+      rot 1+ false
+    then
+  until
+;
+
+\ Build max fraction characters table
+: build-max-fraction-chars ( -- )
+  37 2 ?do
+    i get-max-fraction-chars ,
+  loop
+;
+
+\ Create a lookup table of maximum number of fraction characters
+create max-fraction-chars build-max-fraction-chars
+
 \ Handle the portion of a s31.32 fixed-point double-cell numeric literal to the
 \ right of the decimal point
 : handle-fraction ( b-addr bytes d base -- d -1 | 0 )
-  >r 0 1 begin 4 pick 0<> while
-    5 pick b@ r@ parse-digit if
-      0 2swap r@ 0 ud/ 2dup >r >r ud* d+
-      2swap 1- swap 1+ swap 2swap r> r>
+  >r rot max-fraction-chars r@ 2 - cells + @ min -rot
+  2swap 0 0 0 begin 3 pick 0<> while
+    4 pick b@ r@ parse-digit if
+      2swap r@ 0 ud* rot 0 d+ rot 1+ >r >r >r 1- swap 1+ swap r> r> r>
     else
       drop 2drop 2drop 2drop rdrop false exit
     then
   repeat
-  2drop 2swap 2drop rdrop true
+  nip 0 -rot 0 r> rot 0 swap f** f/ 2swap 2drop d+ true
 ;
 
 \ Handle s31.32 fixed-point double-cell numeric literals
