@@ -360,6 +360,29 @@ commit-flash
   2drop cr
 ;
 
+\ Search for a word by its xt
+: search-by-xt ( dict xt -- name|0 flag )
+  begin over 0<> while
+    over name> over = if
+      drop true exit
+    then
+    swap prev-word @ swap
+  repeat
+  drop false
+;  
+
+\ Commit code to flash
+commit-flash
+
+\ Search the dictionary for a word by its xt
+: >name ( xt -- name )
+  ram-latest over search-by-xt if
+    nip exit
+  else
+    drop flash-latest over search-by-xt drop nip
+  then
+;
+
 \ Set bits on a byte
 : bbis! ( bits addr -- ) dup b@ rot or swap b! ;
 
