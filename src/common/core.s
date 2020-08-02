@@ -15,6 +15,9 @@
 
 	@ Include the kernel info, needed for welcome
 	.include "src/common/kernel_info.s"
+
+	@ Include the legal info
+	.include "src/common/legal.s"
 	
 	@@ Drop the top of the data stack
 	define_word "drop", visible_flag | inlined_flag
@@ -877,6 +880,13 @@ _welcome:
 	string ", on "
 	bl _type
 	bl _kernel_date
+	bl _type
+	bl _cr
+	string_ln "To see the copyright notice type `copyright'"
+	bl _type
+	string "zeptoforth comes with ABSOLUTELY NO WARRANTY: "
+	bl _type
+	string_ln "for details type `license'"
 	bl _type
 	string_ln " ok"
 	bl _type
