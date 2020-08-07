@@ -51,7 +51,7 @@ variable systick-counter
 
 \ SysTick handler
 : systick-handler ( -- )
-  SYST_CSR @ SYST_CSR_COUNTFLAG @ and if
+  SYST_CSR @ SYST_CSR_COUNTFLAG and if
     systick-counter @ 1+ systick-counter !
   then
 ;
