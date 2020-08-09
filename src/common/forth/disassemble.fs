@@ -38,7 +38,7 @@ compress-flash
 : find-dict-by-address ( addr dict -- word|0 )
   begin
     dup 0<> if
-      dup name> 2 pick = if
+      dup >body 2 pick = if
 	true
       else
 	prev-word @ false
@@ -1810,23 +1810,27 @@ commit-flash
   cr swap begin 2dup swap u< while disassemble-main repeat 2drop
 ;
 
-\ SEE a word
-: see ( "name" -- )
+\ Disassemble a word by its xt
+: see-xt ( xt -- )
   false for-gas !
   0 local-index !
-  token-word name>
   dup begin dup see-end? not while find-local repeat drop
   cr begin dup see-end? not while disassemble-main repeat drop
 ;
 
-\ SEE a word for GAS
-: see-for-gas ( "name" -- )
+\ Disassemble a word by its xt for GAS
+: see-xt-for-gas ( xt -- )
   true for-gas !
   0 local-index !
-  token-word name>
   dup begin dup see-end? not while find-local repeat drop
   cr begin dup see-end? not while disassemble-main repeat drop
 ;
+
+\ SEE a word
+: see ( "name" -- ) token-word >body see-xt ;
+
+\ SEE a word for GAS
+: see-for-gas ( "name" -- ) token-word >body see-xt-for-gas ;
 
 \ Finish compressing the code
 end-compress-flash

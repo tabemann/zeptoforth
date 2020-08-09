@@ -108,6 +108,31 @@ compress-flash
 \ word
 : depth ( -- u ) stack-base @ sp@ - cell / 1- ;
 
+\ Output a hexadecimal nibble
+: h.1 ( b -- )
+  $F and dup 10 < if [char] 0 + else 10 - [char] A + then emit
+;
+
+\ Output a hexadecimal 8 bit value, padded with zeros
+: h.2 ( b -- )
+  $FF and dup 4 rshift h.1 h.1
+;
+
+\ Output a hexadecimal 16 bit value, padded with zeros
+: h.4 ( h -- )
+  $FFFF and dup 8 rshift h.2 h.2
+;
+
+\ Output a hexadecimal 32 bit value, padded with zeros
+: h.8 ( x -- )
+  dup 16 rshift h.4 h.4
+;
+
+\ Output a hexadecimal 64 bit value, padded with zeros
+: h.16 ( ud -- )
+  h.8 h.8
+;
+
 \ Dump the contents of the data stack
 : .s ( -- )
   space ." ["
@@ -125,7 +150,7 @@ compress-flash
 : averts ( f "name" -- )
   [immediate]
   token-word
-  name>
+  >body
   state @ if
     postpone 0=
     postpone if
@@ -145,7 +170,7 @@ compress-flash
 : triggers ( f "name" -- )
   [immediate]
   token-word
-  name>
+  >body
   state @ if
     postpone 0<>
     postpone if
@@ -167,7 +192,7 @@ compress-flash
 : suppress ( exc|0 "name" -- exc|0 )
   [immediate]
   token-word
-  name>
+  >body
   state @ if
     postpone dup
     lit,
@@ -360,10 +385,36 @@ commit-flash
   2drop cr
 ;
 
+\ Search for all the words that go by a certain name in a given dictionary
+: search-word-info ( b-addr bytes dict -- )
+  begin dup 0<> while
+    >r 2dup r@ word-name count equal-case-strings? if
+      r@ ram-base >= r@ ram-end < and if
+	." ram   "
+      else
+	." flash "
+      then
+      r@ h.8 space
+      r@ >body h.8 space
+      r@ word-flags h@ h.4 space space
+      r@ wordlist-id h@ h.4 cr
+    then
+    r> prev-word @
+  repeat
+  drop 2drop
+;
+
+\ Dump all the words that go by a certain name
+: word-info ( "name" -- )
+  cr token  ." dict  name     xt       flags wordlist" cr
+  2dup ram-latest search-word-info
+  flash-latest search-word-info
+;
+
 \ Search for a word by its xt
 : search-by-xt ( dict xt -- name|0 flag )
   begin over 0<> while
-    over name> over = if
+    over >body over = if
       drop true exit
     then
     swap prev-word @ swap
@@ -648,35 +699,10 @@ commit-flash
   then
 ;
 
-\ Output a hexadecimal nibble
-: h.1 ( b -- )
-  $F and dup 10 < if [char] 0 + else 10 - [char] A + then emit
-;
-
-\ Output a hexadecimal 8 bit value, padded with zeros
-: h.2 ( b -- )
-  $FF and dup 4 rshift h.1 h.1
-;
-
-\ Output a hexadecimal 16 bit value, padded with zeros
-: h.4 ( h -- )
-  $FFFF and dup 8 rshift h.2 h.2
-;
-
-\ Output a hexadecimal 32 bit value, padded with zeros
-: h.8 ( x -- )
-  dup 16 rshift h.4 h.4
-;
-
-\ Output a hexadecimal 64 bit value, padded with zeros
-: h.16 ( ud -- )
-  h.8 h.8
-;
-
 \ Look up next available user space
 : next-user-space ( -- offset )
   s" *USER*" visible-flag flash-latest find-all-dict dup if
-    name> execute
+    >body execute
   else
     drop 0
   then
@@ -700,7 +726,7 @@ commit-flash
 \ Look up next available RAM space
 : next-ram-space ( -- addr )
   s" *RAM*" visible-flag flash-latest find-all-dict dup if
-    name> execute
+    >body execute
   else
     drop 0
   then
@@ -980,7 +1006,7 @@ commit-flash
 \ Look up the current flash wordlist
 : get-current-flash-wordlist ( -- wid )
   s" *WORDLIST*" visible-flag flash-latest find-all-dict dup if
-    name> execute
+    >body execute
   else
     drop 0
   then

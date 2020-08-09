@@ -434,7 +434,7 @@ _find_all:
 	end_inlined
 
 	@@ Get an xt from a word
-	define_word "name>", visible_flag
+	define_word ">body", visible_flag
 _to_xt:	push {lr}
 	ldrb r0, [tos, #8]
 	adds tos, #9
