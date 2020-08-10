@@ -133,6 +133,12 @@
 	@@ The null handler hook
 	allot null_handler_hook, 4
 
+	@@ The svcall handler hook
+	allot svcall_handler_hook, 4
+
+	@@ The pendsv handler hook
+	allot pendsv_handler_hook, 4
+
 	@@ The systick handler hook
 	allot systick_handler_hook, 4
 
