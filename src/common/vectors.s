@@ -1,5 +1,5 @@
 @ Copyright (c) 2013 Matthias Koch
-@ Copyright (c) 2019 Travis Bemann
+@ Copyright (c) 2019-2020 Travis Bemann
 @
 @ This program is free software: you can redistribute it and/or modify
 @ it under the terms of the GNU General Public License as published by
@@ -26,9 +26,9 @@ vectors:
 	.word 0               @ 8: reserved
 	.word 0               @ 9: reserved
 	.word 0               @ 10: reserved
-	.word handle_null+1   @ 11: SVCall handler
+	.word handle_svcall+1   @ 11: SVCall handler
 	.word handle_null+1   @ 12: debug handler
 	.word 0               @ 13: reserved
-	.word handle_null+1   @ 14: the PendSV handler
-	.word handle_systick+1   @ 15: the Systick handler
+	.word handle_pendsv+1   @ 14: the PendSV handler
+	.word handle_systick+1  @ 15: the Systick handler
 	

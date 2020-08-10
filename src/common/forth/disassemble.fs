@@ -761,9 +761,18 @@ commit-flash
   ." ASR" 4sc.w decode-asr-reg-32 drop
 ;
 
+\ Parse an SVC instruction
+: p-svc
+  ." SVC" csp. 0_8_bf ." #" val. drop
+;
+
 \ Parse a B instruction
 : p-b-1
-  ." B" nip dup 8_4_bf cond. space 0_8_bf 1 lshift 9 rel.
+  dup 8_4_bf $F = if
+    p-svc
+  else
+    ." B" nip dup 8_4_bf cond. space 0_8_bf 1 lshift 9 rel.
+  then
 ;
 
 \ Parse a B instruction
@@ -1339,6 +1348,7 @@ create all-ops16
 ' p-sub-imm-1 ,    %1111111000000000 h, %0001111000000000 h,
 ' p-sub-imm-2 ,    %1111100000000000 h, %0011100000000000 h,
 ' p-sub-reg-1 ,    %1111111000000000 h, %0001101000000000 h,
+' p-svc ,          %1111111100000000 h, %1101111100000000 h,
 ' p-tst-reg-1 ,    %1111111111000000 h, %0100001000000000 h,
 ' p-wfi-1 ,        %1111111111111111 h, %1011111100110000 h,
 0 ,

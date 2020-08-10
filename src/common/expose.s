@@ -287,6 +287,22 @@ _null_handler_hook:
 	bx lr
 	end_inlined
 
+	@@ Get the SVCALL-HANDLER-HOOK variable address
+	define_word "svcall-handler-hook", visible_flag
+_svcall_handler_hook:
+	push_tos
+	ldr tos, =svcall_handler_hook
+	bx lr
+	end_inlined
+
+	@@ Get the PENDSV-HANDLER-HOOK variable address
+	define_word "pendsv-handler-hook", visible_flag
+_pendsv_handler_hook:
+	push_tos
+	ldr tos, =pendsv_handler_hook
+	bx lr
+	end_inlined
+
 	@@ Get the SYSTICK-HANDLER-HOOK variable address
 	define_word "systick-handler-hook", visible_flag
 _systick_handler_hook:

@@ -23,6 +23,10 @@ _init_common_handlers:
 	str r0, [r1]
 	ldr r1, =systick_handler_hook
 	str r0, [r1]
+	ldr r1, =svcall_handler_hook
+	str r0, [r1]
+	ldr r1, =pendsv_handler_hook
+	str r0, [r1]
 	bx lr
 	end_inlined
 	
@@ -40,6 +44,28 @@ handle_fault:
 	@@ The null handler
 handle_null:
 	ldr r0, =null_handler_hook
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 1f
+	adds r0, #1
+	bx r0
+1:	bx lr
+	end_inlined
+
+	@@ The svcall handler
+handle_svcall:
+	ldr r0, =svcall_handler_hook
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 1f
+	adds r0, #1
+	bx r0
+1:	bx lr
+	end_inlined
+
+	@@ The pendsv handler
+handle_pendsv:
+	ldr r0, =pendsv_handler_hook
 	ldr r0, [r0]
 	cmp r0, #0
 	beq 1f
