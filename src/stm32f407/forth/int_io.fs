@@ -166,7 +166,7 @@ $80 constant TXE
   tx-empty? if
     USART2_CR1_TXEIE_Clear
   then
-  1 38 32 - lshift NVIC_ICPR1 bis!
+  38 NVIC_ICPR_CLRPEND!
   enable-int
 ;
 
@@ -214,8 +214,8 @@ $80 constant TXE
   ['] do-key? key?-hook !
   ['] do-emit? emit?-hook !
   RCC_APB1LPENR_USART2LPEN
-  1 38 32 - lshift NVIC_ISER1_SETENA
-  0 38 NVIC_IPR!
+  38 NVIC_ISER_SETENA!
+  0 38 NVIC_IPR_IP!
   USART2_CR1_RXNEIE
 ;
 
@@ -229,7 +229,7 @@ $80 constant TXE
   0 null-handler-hook !
   USART2_CR1_RXNEIE_Clear
   USART2_CR1_TXEIE_Clear
-  1 38 32 - lshift NVIC_ICER1_CLRENA
+  38 NVIC_ICER_CLRENA!
   RCC_APB1LPENR_USART2LPEN_Clear
   enable-int
 ;
