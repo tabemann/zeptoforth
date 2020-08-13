@@ -55,20 +55,6 @@ RCC_Base $60 + constant RCC_APB1LPENR ( RCC_APB1LPENR )
 : USART2_CR1_RXNEIE   %1 5 lshift USART2_CR1 bis! ;  \ USART2_CR1_RXNEIE    RXNE interrupt enable
 : USART2_CR1_TXEIE_Clear   %1 7 lshift USART2_CR1 bic! ;  \ USART2_CR1_TXEIE    interrupt disable
 : USART2_CR1_RXNEIE_Clear   %1 5 lshift USART2_CR1 bic! ;  \ USART2_CR1_RXNEIE    RXNE interrupt enable
-$E000E000 constant NVIC_Base ( Nested Vectored Interrupt  Controller )
-NVIC_Base $104 + constant NVIC_ISER1 ( Interrupt Set-Enable Register )
-: NVIC_ISER1_SETENA   ( %XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -- ) 0 lshift NVIC_ISER1 bis! ;  \ NVIC_ISER1_SETENA    SETENA
-NVIC_Base $184 + constant NVIC_ICER1 ( Interrupt Clear-Enable Register )
-: NVIC_ICER1_CLRENA   ( %XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -- ) 0 lshift NVIC_ICER1 bis! ;  \ NVIC_ICER1_CLRENA    CLRENA
-NVIC_Base $284 + constant NVIC_ICPR1 ( Interrupt Clear-Pending  Register )
-NVIC_Base $400 + constant NVIC_IPR0 ( Interrupt Priority Register )
-: NVIC_IPR@ dup 4 / NVIC_IPR0 + @ swap 4 mod 8 * rshift $FF and ;
-: NVIC_IPR_Mask 4 mod 8 * $FF swap lshift not ;
-: NVIC_IPR_Masked@ dup NVIC_IPR@ swap NVIC_IPR_Mask and ;
-: NVIC_IPR!
-  dup NVIC_IPR_Masked@ rot $FF and 2 pick 4 mod 8 * lshift or
-  swap 4 / NVIC_IPR0 + !
-;
 
 $20 constant RXNE
 $80 constant TXE
