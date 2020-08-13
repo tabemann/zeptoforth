@@ -56,12 +56,6 @@ RCC_Base $78 + constant RCC_APB1SMENR1 ( APB1SMENR1 )
 : USART2_CR1_RXNEIE   %1 5 lshift USART2_CR1 bis! ;  \ USART2_CR1_RXNEIE    RXNE interrupt enable
 : USART2_CR1_TXEIE_Clear   %1 7 lshift USART2_CR1 bic! ;  \ USART2_CR1_TXEIE    interrupt disable
 : USART2_CR1_RXNEIE_Clear   %1 5 lshift USART2_CR1 bic! ;  \ USART2_CR1_RXNEIE    RXNE interrupt enable
-$E000E000 constant NVIC_Base ( Nested Vectored Interrupt  Controller )
-NVIC_Base $104 + constant NVIC_ISER1 ( Interrupt Set-Enable Register )
-: NVIC_ISER1_SETENA   ( %XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -- ) 0 lshift NVIC_ISER1 bis! ;  \ NVIC_ISER1_SETENA    SETENA
-NVIC_Base $184 + constant NVIC_ICER1 ( Interrupt Clear-Enable Register )
-: NVIC_ICER1_CLRENA   ( %XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -- ) 0 lshift NVIC_ICER1 bis! ;  \ NVIC_ICER1_CLRENA    CLRENA
-NVIC_Base $284 + constant NVIC_ICPR1 ( Interrupt Clear-Pending  Register )
 USART2_Base $20 + constant USART2_ICR ( Interrupt flag clear register ) 
 : USART2_ICR_ORECF %1 3 lshift USART2_ICR bis! ; ( Overrun error clear flag )  
 
@@ -213,7 +207,6 @@ $08 constant ORE
   ['] do-emit? emit?-hook !
   RCC_APB1SMENR1_USART2SMEN
   38 NVIC_ISER_SETENA!
-  0 38 NVIC_IPR_IP!
   USART2_CR1_RXNEIE
 ;
 
