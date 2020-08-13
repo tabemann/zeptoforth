@@ -165,7 +165,7 @@ $08 constant ORE
   USART2_ISR @ ORE and if
     USART2_ICR_ORECF
   then
-  1 38 32 - lshift NVIC_ICPR1 bis!
+  38 NVIC_ICPR_CLRPEND!
   enable-int
 ;
 
@@ -212,7 +212,8 @@ $08 constant ORE
   ['] do-key? key?-hook !
   ['] do-emit? emit?-hook !
   RCC_APB1SMENR1_USART2SMEN
-  1 38 32 - lshift NVIC_ISER1_SETENA
+  38 NVIC_ISER_SETENA!
+  0 38 NVIC_IPR_IP!
   USART2_CR1_RXNEIE
 ;
 
@@ -226,7 +227,7 @@ $08 constant ORE
   0 null-handler-hook !
   USART2_CR1_RXNEIE_Clear
   USART2_CR1_TXEIE_Clear
-  1 38 32 - lshift NVIC_ICER1_CLRENA
+  38 NVIC_ICER_CLRENA!
   RCC_APB1SMENR1_USART2SMEN_Clear
   enable-int
 ;

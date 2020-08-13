@@ -122,68 +122,6 @@ compress-flash
 \ Clear bits on a word
 : bic! ( bits addr -- ) dup @ rot bic swap ! ;
 
-\ SHPRx registers
-$E000ED18 constant SHPR1
-$E000ED1C constant SHPR2
-$E000ED20 constant SHPR3
-
-\ Commit to flash
-commit-flash
-
-\ Set system fault handler priority field 4, for memory management fault
-: SHPR1_PRI_4! ( u -- ) $F and 4 lshift SHPR1 @ $F0 bic or SHPR1 ! ;
-
-\ Set system fault handler priority field 5, for bus fault
-: SHPR1_PRI_5! ( u -- ) $F and 12 lshift SHPR1 @ $F000 bic or SHPR1 ! ;
-
-\ Set system fault handler priority field 6, for usage fault
-: SHPR1_PRI_6! ( u -- ) $F and 20 lshift SHPR1 @ $F00000 bic or SHPR1 ! ;
-
-\ Set system fault handler priority field 11, for SVCall
-: SHPR2_PRI_11! ( u -- ) $F and 28 lshift SHPR2 @ $F0000000 bic or SHPR2 ! ;
-
-\ Set system fault handler priority field 14, for PendSV
-: SHPR3_PRI_14! ( u -- ) $F and 20 lshift SHPR3 @ $F00000 bic or SHPR3 ! ;
-
-\ Set system fault handler priority field 15, for SysTick
-: SHPR3_PRI_15! ( u -- ) $F and 28 lshift SHPR3 @ $F0000000 bic or SHPR3 !  ;
-
-\ Get system fault handler priority field 4, for memory management fault
-: SHPR1_PRI_4@ ( -- u ) SHPR1 @ 4 rshift $F and ;
-
-\ Get system fault handler priority field 5, for bus fault
-: SHPR1_PRI_5@ ( -- u ) SHPR1 @ 12 rshift $F and ;
-
-\ Get system fault handler priority field 6, for usage fault
-: SHPR1_PRI_6@ ( -- u ) SHPR1 @ 20 rshift $F and ;
-
-\ Get system fault handler priority field 11, for SVCall
-: SHPR2_PRI_11@ ( -- u ) SHPR2 @ 28 rshift $F and ;
-
-\ Get system fault handler priority field 14, for PendSV
-: SHPR3_PRI_14@ ( -- u ) SHPR3 @ 20 rshift $F and ;
-
-\ Get system fault handler priority field 15, for SysTick
-: SHPR3_PRI_15@ ( -- u ) SHPR3 @ 28 rshift $F and ;
-
-\ ICSR register
-$E000ED04 constant ICSR
-
-\ Commit to flash
-commit-flash
-
-\ Set PENDSVSET
-: ICSR_PENDSVSET_SET ( -- ) 1 28 lshift ICSR bis! ;
-
-\ Set PENDSVCLR
-: ICSR_PENDSVCLR_SET ( -- ) 1 27 lshift ICSR bis! ;
-
-\ Get PENDSVSET
-: ICSR_PENDSVSET@ ( -- bit ) 1 28 lshift ICSR bit@ ;
-
-\ Initiate an SVCall
-: svc ( -- ) [ $DF00 h, ] [inlined] ;
-
 \ Get the depth of the stack, not including the cell pushed onto it by this
 \ word
 : depth ( -- u ) stack-base @ sp@ - cell / 1- ;

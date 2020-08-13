@@ -18,6 +18,7 @@
 \ on an STM32L476 device.
 
 #include src/common/forth/basic.fs
+#include src/common/forth/interrupt.fs
 #include src/stm32l476/forth/erase.fs
 #include src/common/forth/lambda.fs
 #include src/common/forth/fixed.fs
