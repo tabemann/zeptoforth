@@ -225,7 +225,7 @@ _equal_case_strings:
 
 	@@ Find a word in a specific dictionary for a specific wordlist
 	@@ ( addr bytes mask dict wid -- addr|0 )
-	define_word "find-dict", visible_flag
+	define_internal_word "find-dict", visible_flag
 _find_dict:
 	push {r4, r5, lr}
 	movs r5, tos
@@ -280,7 +280,7 @@ _3dup:	push_tos
 
 	@@ Find a word in a specific wordlist
 	@@ ( addr bytes mask wid -- addr|0 )
-	define_word "find-in-wordlist", visible_flag
+	define_internal_word "find-in-wordlist", visible_flag
 _find_in_wordlist:
 	push {lr}
 	ldr r0, =compiling_to_flash
@@ -513,7 +513,7 @@ _quit:	ldr r0, =rstack_base
 	end_inlined
 
 	@@ The main functionality, within the main exception handler
-	define_word "main", visible_flag
+	define_internal_word "main", visible_flag
 _main:	push {lr}
 	bl _flush_all_flash
 	ldr r0, =state
@@ -530,7 +530,7 @@ _main:	push {lr}
 	b 1b
 	
 	@@ The actual outer loop of Forth
-	define_word "outer", visible_flag
+	define_internal_word "outer", visible_flag
 _outer:	push {lr}
 1:	bl _validate
 	bl _token
@@ -583,7 +583,7 @@ _outer:	push {lr}
 	end_inlined
 	
 	@@ Validate the current state
-	define_word "validate", visible_flag
+	define_internal_word "validate", visible_flag
 _validate:
 	push {lr}
 	ldr r0, =stack_base
@@ -659,7 +659,7 @@ _rstack_underflow:
 	end_inlined
 
 	@@ Display a prompt
-	define_word "do-prompt", visible_flag
+	define_internal_word "do-prompt", visible_flag
 _do_prompt:
 	push {lr}
 	string_ln " ok"
@@ -668,7 +668,7 @@ _do_prompt:
 	end_inlined
 
 	@@ Parse a literal word
-	define_word "parse-literal", visible_flag
+	define_internal_word "parse-literal", visible_flag
 _parse_literal:
 	push {lr}
 	movs r0, tos
@@ -766,7 +766,7 @@ _bel:	push {lr}
 	end_inlined
 
 	@@ Implement the refill hook
-	define_word "do-refill", visible_flag
+	define_internal_word "do-refill", visible_flag
 _do_refill:
 	push {lr}
 	bl _xon
@@ -830,7 +830,7 @@ _do_refill:
 	end_inlined
 	
 	@@ Implement the failed parse hook
-	define_word "do-failed-parse", visible_flag
+	define_internal_word "do-failed-parse", visible_flag
 _do_failed_parse:
 	push {lr}
 	string " unable to parse: "
@@ -852,7 +852,7 @@ _failed_parse:
 	end_inlined
 	
 	@@ Implement the handle number hook
-	define_word "do-handle-number", visible_flag
+	define_internal_word "do-handle-number", visible_flag
 _do_handle_number:
 	push {lr}
 	bl _parse_integer
@@ -939,7 +939,7 @@ _parse_base:
 	end_inlined
 
 	@@ Actually parse an integer ( addr bytes base -- n success )
-	define_word "parse-integer-core", visible_flag
+	define_internal_word "parse-integer-core", visible_flag
 _parse_integer_core:
 	push {lr}
 	movs r2, tos
@@ -979,7 +979,7 @@ _parse_integer_core:
 	end_inlined
 	
 	@@ Actually parse an unsigned integer ( addr bytes base  -- u success )
-	define_word "parse-unsigned-core", visible_flag
+	define_internal_word "parse-unsigned-core", visible_flag
 _parse_unsigned_core:
 	push {lr}
 	movs r0, tos

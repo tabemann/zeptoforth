@@ -1,5 +1,5 @@
 @ Copyright (c) 2013 Matthias Koch
-@ Copyright (c) 2019 Travis Bemann
+@ Copyright (c) 2019-2020 Travis Bemann
 @
 @ This program is free software: you can redistribute it and/or modify
 @ it under the terms of the GNU General Public License as published by
@@ -206,7 +206,7 @@ _store_flash_2:
 	end_inlined
 	
 	@@ Exception handler for unaligned flash writes
-	define_word "flash!-unaligned", visible_flag
+	define_internal_word "flash!-unaligned", visible_flag
 _store_flash_unaligned:
 	push {lr}
 	string_ln " unaligned flash write"
@@ -225,7 +225,7 @@ _store_flash_already_written:
 	end_inlined
 	
 	@@ Delete a sector of lash
-	define_word "erase-sector", visible_flag
+	define_internal_word "erase-sector", visible_flag
 _erase_sector:	
 	push {lr}
 
@@ -281,7 +281,7 @@ _attempted_to_write_past_flash_end:
 	end_inlined
 
 	@@ Erase a particular address
-	define_word "erase-address", visible_flag
+	define_internal_word "erase-address", visible_flag
 _erase_address:
 	push {lr}
 	movs r2, tos
@@ -302,7 +302,7 @@ _erase_address:
 	end_inlined
 	
 	@@ Choose a sector to erase
-	define_word "choose-sector", visible_flag
+	define_internal_word "choose-sector", visible_flag
 _choose_sector:
 	push {lr}
 	push_tos
@@ -388,7 +388,7 @@ _choose_sector:
 	end_inlined
 
 	@@ Erase after a given address (including the sector the address is in)
-	define_word "erase-after", visible_flag
+	define_internal_word "erase-after", visible_flag
 _erase_after:
 	push {lr}
 	cpsid i
@@ -420,7 +420,7 @@ _erase_all:
 	end_inlined
 		
 	@@ Find the end of the flash dictionary
-	define_word "find-flash-end", visible_flag
+	define_internal_word "find-flash-end", visible_flag
 _find_flash_end:
 	push_tos
 	ldr tos, =flash_dict_end
@@ -444,7 +444,7 @@ _find_flash_end:
 	end_inlined
 
 	@@ Find the next flash block
-	define_word "next-flash-block", visible_flag
+	define_internal_word "next-flash-block", visible_flag
 _next_flash_block:
 	bics tos, #3
 	adds tos, #8
@@ -452,7 +452,7 @@ _next_flash_block:
 	end_inlined
 
 	@@ Find the start of the last flash word
-	define_word "find-last-flash-word", visible_flag
+	define_internal_word "find-last-flash-word", visible_flag
 _find_last_flash_word:
 	ldr r1, =0xDEADBEEF
 1:	subs tos, #4
@@ -510,7 +510,7 @@ _store_flash_8:
 	end_inlined
 
 	@@ Flush all the buffered flash
-	define_word "flush-all-flash", visible_flag
+	define_internal_word "flush-all-flash", visible_flag
 _flush_all_flash:	
 	push {lr}
 	pop {pc}
@@ -532,7 +532,7 @@ _flash_block_size:
 	end_inlined
 
 	@@ Initialize the flash buffers
-	define_word "init-flash-buffers", visible_flag
+	define_internal_word "init-flash-buffers", visible_flag
 _init_flash_buffers:
 	bx lr
 	end_inlined

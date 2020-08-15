@@ -13,6 +13,13 @@
 \ Compile to flash
 compile-to-flash
 
+\ Set up the wordlist
+forth-wordlist 1 set-order
+forth-wordlist set-current
+wordlist constant systick-wordlist
+forth-wordlist internal-wordlist systick-wordlist 3 set-order
+systick-wordlist set-current
+
 \ RW SysTick Control and Status Register
 $E000E010 constant SYST_CSR
 
@@ -56,17 +63,6 @@ variable systick-counter
   then
 ;
 
-\ Wait for n milliseconds
-: ms ( u -- )
-  systick-divisor * systick-counter @
-  begin
-    dup systick-counter @ swap - 2 pick u<
-  while
-    pause
-  repeat
-  drop drop
-;
-
 \ Turn on systick
 : enable-systick ( -- )
   ['] systick-handler systick-handler-hook !
@@ -79,6 +75,12 @@ variable systick-counter
   0 systick-handler-hook !
 ;
 
+\ Make systick-counter read-only
+: systick-counter ( -- u ) systick-counter @ ;
+
+\ Reset current wordlist
+forth-wordlist set-current
+
 \ Init
 : init ( -- )
   init
@@ -89,8 +91,16 @@ variable systick-counter
   enable-systick
 ;
 
-\ Make systick-counter read-only
-: systick-counter ( -- u ) systick-counter @ ;
+\ Wait for n milliseconds
+: ms ( u -- )
+  systick-divisor * systick-counter @
+  begin
+    dup systick-counter @ swap - 2 pick u<
+  while
+    pause
+  repeat
+  drop drop
+;
 
 \ Warm reboot
 warm

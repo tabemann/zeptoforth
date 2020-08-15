@@ -38,6 +38,9 @@ dp 	.req r7
 	@@ Inlined word
 	.equ inlined_flag, 0x0008
 
+	@@ The internal wordlist
+	.equ internal, 1
+
 	@@ The maximum wordlist order size
 	.equ max_order_size, 16
 
@@ -65,7 +68,18 @@ dp 	.req r7
 11:	.ascii "\name"
 12:	.p2align 1
 	.endm
-	
+
+	@@ Internal word header macro
+	.macro define_internal_word name, flags
+	.p2align 2
+	.hword \flags
+	.hword internal
+	.word 10b - 8
+10:	.byte 12f - 11f
+11:	.ascii "\name"
+12:	.p2align 1
+	.endm
+
 	@@ Push the top of the stack onto the data stack
 	.macro push_tos
 	str tos, [dp, #-4]!

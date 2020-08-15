@@ -1,5 +1,5 @@
 @ Copyright (c) 2013 Matthias Koch
-@ Copyright (c) 2019 Travis Bemann
+@ Copyright (c) 2019-2020 Travis Bemann
 @
 @ This program is free software: you can redistribute it and/or modify
 @ it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@
 	.equ RCC_CR_MSIRANGE_48MHZ, 0xB0
 	
 	@@ Set system clock to 48 MHz MSI and set the flash latency accordingly
-	define_word "use-48mhz", visible_flag
+	define_internal_word "use-48mhz", visible_flag
 _use_48mhz:
 	push {lr}
 	bl _set_pwr_for_48mhz
@@ -45,7 +45,7 @@ _use_48mhz:
 	pop {pc}
 	end_inlined
 
-	define_word "set-pwr-for-48mhz", visible_flag
+	define_internal_word "set-pwr-for-48mhz", visible_flag
 _set_pwr_for_48mhz:	
 	@@ Set up the voltage scale
 	ldr r0, =PWR_CR1
@@ -65,7 +65,7 @@ _set_pwr_for_48mhz:
 	end_inlined
 
 	@@ Set the flash latency and prefetch for 48Mhz MSI
-	define_word "set-flash-latency-for-48mhz", visible_flag
+	define_internal_word "set-flash-latency-for-48mhz", visible_flag
 _set_flash_latency_for_48mhz:
 	ldr r0, =FLASH_ACR
 	ldr r1, [r0]
@@ -78,7 +78,7 @@ _set_flash_latency_for_48mhz:
 	end_inlined
 
 	@@ Set 48Mhz clock mode
-	define_word "set-msi-48mhz", visible_flag
+	define_internal_word "set-msi-48mhz", visible_flag
 _set_msi_48mhz:
 	ldr r0, =RCC_CR
 	ldr r1, [r0]
@@ -94,7 +94,7 @@ _set_msi_48mhz:
 	end_inlined
 
 	@@ Time multiplier
-	define_word "time-multiplier", visible_flag
+	define_internal_word "time-multiplier", visible_flag
 _time_multiplier:
 	push_tos
 	movs tos, #48
@@ -102,7 +102,7 @@ _time_multiplier:
 	end_inlined
 
 	@@ Time divisor
-	define_word "time-divisor", visible_flag
+	define_internal_word "time-divisor", visible_flag
 _time_divisor:
 	push_tos
 	movs tos, #8
@@ -110,7 +110,7 @@ _time_divisor:
 	end_inlined
 
 	@@ Divisor to get ms from systicks
-	define_word "systick-divisor", visible_flag
+	define_internal_word "systick-divisor", visible_flag
 _systick_divisor:
 	push_tos
 	movs tos, #10
