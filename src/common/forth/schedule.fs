@@ -16,6 +16,13 @@
 \ Compile this to flash
 compile-to-flash
 
+\ Set up the wordlist
+forth-wordlist 1 set-order
+forth-wordlist set-current
+wordlist constant schedule-wordlist
+forth-wordlist systick-wordlist task-wordlist schedule-wordlist 4 set-order
+schedule-wordlist set-current
+
 \ The current action
 variable current-action
 

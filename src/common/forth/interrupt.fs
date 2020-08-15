@@ -16,6 +16,13 @@
 \ Compile to flash
 compile-to-flash
 
+\ Set up the wordlist
+forth-wordlist 1 set-order
+forth-wordlist set-current
+wordlist constant interrupt-wordlist
+forth-wordlist interrupt-wordlist 2 set-order
+interrupt-wordlist set-current
+
 \ SHPRx registers
 $E000ED18 constant SHPR1
 $E000ED1C constant SHPR2

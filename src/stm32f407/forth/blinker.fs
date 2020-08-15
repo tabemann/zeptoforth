@@ -16,6 +16,10 @@
 \ Compile this to flash
 compile-to-flash
 
+\ Set up the wordlist order
+forth-wordlist task-wordlist led-wordlist 3 set-order
+forth-wordlist set-current
+
 \ The blinker delay time
 variable blinker-delay
 

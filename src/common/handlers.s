@@ -14,7 +14,7 @@
 @ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 	@@ Initialize the common handler hooks
-	define_word "init-common-handlers", visible_flag
+	define_internal_word "init-common-handlers", visible_flag
 _init_common_handlers:
 	movs r0, #0
 	ldr r1, =fault_handler_hook

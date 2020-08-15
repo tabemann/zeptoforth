@@ -16,6 +16,14 @@
 \ Compile this to flash
 compile-to-flash
 
+\ Set up the wordlist
+forth-wordlist 1 set-order
+forth-wordlist set-current
+wordlist constant task-wordlist
+forth-wordlist internal-wordlist systick-wordlist task-wordlist
+int-io-wordlist 5 set-order
+task-wordlist set-current
+
 \ Declare a RAM variable for the end of free RAM memory
 variable free-end
 
@@ -434,19 +442,17 @@ variable saved-validate-dict
   saved-validate-dict @ ?execute
 ; 
   
-\ Init
-: init ( -- )
-  init
-  stack-end @ free-end !
-  init-main-task
-  0 pause-count !
-  ['] do-pause pause-hook !
-  ['] do-wait wait-hook !
-  validate-dict-hook @ saved-validate-dict !
-  false ram-dict-warned !
-  ['] do-validate-dict validate-dict-hook !
-  1 pause-enabled !
-;
+\ Make pause-count read-only
+: pause-count ( -- u ) pause-count @ ;
+
+\ Make current-task read-only
+: current-task ( -- task ) current-task @ ;
+
+\ Make main-task read-only
+: main-task ( -- task ) main-task @ ;
+
+\ Reset current wordlist
+forth-wordlist set-current
 
 \ Forget RAM contents
 : forget-ram ( -- )
@@ -459,7 +465,7 @@ variable saved-validate-dict
   0 wait-hook !
   false flash-dict-warned !
   ['] do-flash-validate-dict saved-validate-dict !
-  main-task @ task-stack-end free-end !
+  main-task task-stack-end free-end !
   init-main-task
   0 pause-count !
   ['] do-pause pause-hook !
@@ -468,15 +474,6 @@ variable saved-validate-dict
   ['] do-validate-dict validate-dict-hook !
   1 pause-enabled !
 ;
-
-\ Make pause-count read-only
-: pause-count ( -- u ) pause-count @ ;
-
-\ Make current-task read-only
-: current-task ( -- task ) current-task @ ;
-
-\ Make main-task read-only
-: main-task ( -- task ) main-task @ ;
 
 \ Display space free for a given task
 : task-free ( task -- )
@@ -500,6 +497,20 @@ variable saved-validate-dict
   dup task-stack-current over task-stack-end - 0 <# #s #> type cr
   ." main task rstack free:     "
   dup task-rstack-current swap task-rstack-end - 0 <# #s #> type
+;
+
+\ Init
+: init ( -- )
+  init
+  stack-end @ free-end !
+  init-main-task
+  0 pause-count !
+  ['] do-pause pause-hook !
+  ['] do-wait wait-hook !
+  validate-dict-hook @ saved-validate-dict !
+  false ram-dict-warned !
+  ['] do-validate-dict validate-dict-hook !
+  1 pause-enabled !
 ;
 
 \ Reboot to initialize multitasking

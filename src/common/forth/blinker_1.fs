@@ -16,6 +16,10 @@
 \ Compile this to flash
 compile-to-flash
 
+\ Set up the wordlist order
+forth-wordlist task-wordlist schedule-wordlist led-wordlist 4 set-order
+forth-wordlist set-current
+
 \ The schedule
 variable my-schedule
 

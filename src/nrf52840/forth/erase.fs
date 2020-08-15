@@ -16,6 +16,10 @@
 \ Compile this to flash
 compile-to-flash
 
+\ Set up wordlist order
+forth-wordlist internal-wordlist 2 set-order
+internal-wordlist set-current
+
 \ Begin compressing compiled code in flash
 compress-flash
 
@@ -31,6 +35,9 @@ compress-flash
 : restore-flash ( flash-here -- )
   erase-after rdrop
 ;
+
+\ Set forth
+forth-wordlist set-current
 
 \ Commit flash
 commit-flash
@@ -54,12 +61,18 @@ commit-flash
   then
 ;
 
+\ Set internal
+internal-wordlist set-current
+
 \ Core of CORNERSTONE's DOES>
 : cornerstone-does> ( -- )
   does>
   $400 align
   erase-after
 ;
+
+\ Set forth
+forth-wordlist set-current
 
 \ Committing code in flash
 commit-flash
@@ -78,4 +91,7 @@ commit-flash
 
 \ Ending compiling code in flash
 end-compress-flash
-compile-to-ram
+
+\ Warm reboot
+warm
+

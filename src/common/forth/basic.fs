@@ -28,6 +28,16 @@ compress-flash
 \ Forth wordlist constant
 0 constant forth-wordlist
 
+\ Internal wordlist constant
+1 constant internal-wordlist
+
+\ Commit to flash
+commit-flash
+
+\ Set up wordlist order
+forth-wordlist internal-wordlist 2 set-order
+forth-wordlist set-current
+
 \ Base 2
 : binary 2 base ! ;
 
@@ -79,6 +89,9 @@ compress-flash
 \ Get the absolute value of a number
 : abs ( n -- u ) dup 0< if negate then ;
 
+\ Set internal
+internal-wordlist set-current
+
 \ Fill memory with zeros up until a given address
 : advance-here ( a -- )
   begin
@@ -88,6 +101,9 @@ compress-flash
   repeat
   drop
 ;
+
+\ Set forth
+forth-wordlist set-current
 
 \ Align an address to a power of two
 : align ( a power -- a ) swap 1- swap 1- or 1+ ;
@@ -225,6 +241,9 @@ compress-flash
     then
   then
 ;
+
+\ Set internal
+internal-wordlist set-current
 
 \ Get the flags for a word
 : word-flags ( word -- h-addr ) [inlined] ;
@@ -375,6 +394,9 @@ commit-flash
 \ Commit code to flash
 commit-flash
 
+\ Set forth
+forth-wordlist set-current
+
 \ Lookup a word by its prefix
 : lookup ( "name" -- )
   cr token
@@ -403,6 +425,9 @@ commit-flash
   2drop cr
 ;
 
+\ Set internal
+internal-wordlist set-current
+
 \ Search for all the words that go by a certain name in a given dictionary
 : search-word-info ( b-addr bytes dict -- )
   begin dup 0<> while
@@ -421,6 +446,9 @@ commit-flash
   repeat
   drop 2drop
 ;
+
+\ Set forth
+forth-wordlist set-current
 
 \ Dump all the words that go by a certain name
 : word-info ( "name" -- )
@@ -510,6 +538,9 @@ commit-flash
   advance-here
 ;
 
+\ Set internal
+internal-wordlist set-current
+
 \ In all cases:
 \
 \ 4 bytes for push,
@@ -541,6 +572,9 @@ commit-flash
   advance-here
 ;
 
+\ Set forth
+forth-wordlist set-current
+
 \ Commit changes to flash
 commit-flash
 
@@ -554,10 +588,16 @@ commit-flash
 \ No word is being built exception
 : no-word-being-built ( -- ) space ." no word is being built" ;
 
+\ Set internal
+internal-wordlist set-current
+
 \ Align to flash block if compiling to flash
 : flash-align,
   compiling-to-flash? if flash-here flash-block-size align advance-here then
 ;
+
+\ Set forth
+forth-wordlist set-current
 
 \ Commit changes to flash
 commit-flash
@@ -699,6 +739,9 @@ commit-flash
   then
 ;
 
+\ Set internal
+internal-wordlist set-current
+
 \ Look up next available user space
 : next-user-space ( -- offset )
   s" *USER*" visible-flag flash-latest find-all-dict dup if
@@ -715,7 +758,7 @@ commit-flash
   compile-to-flash
   get-current
   swap
-  forth-wordlist set-current
+  internal-wordlist set-current
   s" *USER*" constant-with-name
   set-current
   not if
@@ -741,7 +784,7 @@ commit-flash
   compile-to-flash
   get-current
   swap
-  forth-wordlist set-current
+  internal-wordlist set-current
   s" *RAM*" constant-with-name
   set-current
   not if
@@ -751,6 +794,9 @@ commit-flash
 
 \ Complete a USER variable word
 : user> ( -- ) does> @ dict-base @ + ;
+
+\ Set forth
+forth-wordlist set-current
 
 \ Commit changes to flash
 commit-flash
@@ -843,6 +889,9 @@ commit-flash
   set-next-user-space
 ;
 
+\ Set internal
+internal-wordlist set-current
+
 \ Allocate a byte variable in RAM
 : ram-bvariable ( "name" -- )
   next-ram-space
@@ -931,6 +980,9 @@ commit-flash
   set-next-ram-space
 ;
 
+\ Set forth
+forth-wordlist set-current
+
 \ Commit changes to flash
 commit-flash
 
@@ -988,6 +1040,9 @@ commit-flash
   then
 ;
 
+\ Set internal
+internal-wordlist set-current
+
 \ Specify current flash wordlist
 : set-current-flash-wordlist ( wid -- )
   compiling-to-flash?
@@ -995,7 +1050,7 @@ commit-flash
   compile-to-flash
   get-current
   swap
-  forth-wordlist set-current
+  internal-wordlist set-current
   s" *WORDLIST*" constant-with-name
   set-current
   not if
@@ -1008,9 +1063,12 @@ commit-flash
   s" *WORDLIST*" visible-flag flash-latest find-all-dict dup if
     >body execute
   else
-    drop 0
+    drop internal-wordlist
   then
 ;
+
+\ Set forth
+forth-wordlist set-current
 
 \ Commit to flash
 commit-flash
@@ -1020,11 +1078,17 @@ commit-flash
   get-current-flash-wordlist 1+ dup set-current-flash-wordlist
 ;
 
+\ Set internal
+internal-wordlist set-current
+
 \ The minimum RAM wordlist
 32768 constant min-ram-wordlist
 
 \ The current RAM wordlist
 variable current-ram-wordlist
+
+\ Set forth
+forth-wordlist set-current
 
 \ Commit to flash
 commit-flash
@@ -1287,6 +1351,9 @@ commit-flash
   dup ram-base < if defer-flash! else defer-ram! then
 ;
 
+\ Set internal
+internal-wordlist set-current
+
 \ Decode the immediate field from a MOVW or MOVT instruction
 : decode-mov16 ( h-addr -- h )
   dup h@ dup $F and 1 lshift swap 10 rshift $1 and or 11 lshift
@@ -1298,6 +1365,9 @@ commit-flash
 : decode-literal ( h-addr -- x )
   dup decode-mov16 swap 4+ decode-mov16 16 lshift or
 ;
+
+\ Set forth
+forth-wordlist set-current
 
 \ Get the referred xt from a deferred word in RAM
 : defer-ram@ ( xt-deferred -- xt )
@@ -1313,6 +1383,9 @@ commit-flash
 : defer@ ( xt-deferred -- xt )
   dup ram-base < if defer-flash@ else defer-ram@ then
 ;
+
+\ Set internal
+internal-wordlist set-current
 
 \ s" constant
 2 constant s"-length
@@ -1333,6 +1406,9 @@ commit-flash
 s"-data s"-length 2constant s"-constant
 ."-data ."-length 2constant ."-constant
 c"-data c"-length 2constant c"-constant
+
+\ Set forth
+forth-wordlist set-current
 
 \ Commit to flash
 commit-flash
@@ -1371,11 +1447,17 @@ commit-flash
 \ Finish conditional execution/compilation
 : [then] ( -- ) [immediate] ;
 
+\ Set internal
+internal-wordlist set-current
+
 \ Maximum pictured numeric output size
 65 constant picture-size
 
 \ Start of pictured numeric output
 variable picture-offset
+
+\ Set forth
+forth-wordlist set-current
 
 \ Commit to flash
 commit-flash
@@ -1469,6 +1551,9 @@ commit-flash
   space (ud.)
 ;
 
+\ Set internal
+internal-wordlist set-current
+
 \ Fraction size lookup table
 create fraction-size-table
 32 , 21 , 16 , 14 , 13 , 12 , 11 , 11 , 10 , 10 , 9 , 9 , 9 , 9 , 8 , 8 ,
@@ -1508,6 +1593,9 @@ commit-flash
 : add-decimal ( b-addr bytes -- b-addr bytes )
   2dup + [char] , swap b! 1+
 ;
+
+\ Set forth
+forth-wordlist set-current
 
 \ Commit to flash
 commit-flash
@@ -1552,6 +1640,9 @@ variable wait-hook
   drop
 ;
 
+\ Set internal
+internal-wordlist set-current
+
 \ Flash space warning has been displayed
 variable flash-dict-warned
 
@@ -1565,6 +1656,9 @@ commit-flash
     space ." flash dictionary space is running low (<1K left)" cr
   then
 ;
+
+\ Set forth
+forth-wordlist set-current
 
 \ Initialize the RAM variables
 : init ( -- )

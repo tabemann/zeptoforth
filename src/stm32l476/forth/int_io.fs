@@ -17,6 +17,13 @@
 \ Compile to flash
 compile-to-flash
 
+\ Set up the wordlist
+forth-wordlist 1 set-order
+forth-wordlist set-current
+wordlist constant int-io-wordlist
+forth-wordlist internal-wordlist interrupt-wordlist int-io-wordlist 4 set-order
+int-io-wordlist set-current
+
 \ RAM variable for rx buffer read-index
 bvariable rx-read-index
 
@@ -27,7 +34,7 @@ bvariable rx-write-index
 128 constant rx-buffer-size
 
 \ Rx buffer
-rx-buffer-size ram-buffer: rx-buffer
+rx-buffer-size buffer: rx-buffer
 
 \ RAM variable for tx buffer read-index
 bvariable tx-read-index
@@ -39,7 +46,7 @@ bvariable tx-write-index
 128 constant tx-buffer-size
 
 \ Tx buffer
-tx-buffer-size ram-buffer: tx-buffer
+tx-buffer-size buffer: tx-buffer
 
 \ USART2
 $40004400 constant USART2_Base
@@ -193,13 +200,8 @@ $08 constant ORE
   rx-empty? not
 ;
 
-\ Init
-: init ( -- )
-  init
-  0 rx-read-index b!
-  0 rx-write-index b!
-  0 tx-read-index b!
-  0 tx-write-index b!
+\ Enable interrupt-driven IO
+: enable-int-io ( -- )
   ['] null-handler null-handler-hook !
   ['] do-key key-hook !
   ['] do-emit emit-hook !
@@ -225,5 +227,17 @@ $08 constant ORE
   enable-int
 ;
 
+\ Reset current wordlist
+forth-wordlist set-current
+
+\ Init
+: init ( -- )
+  init
+  0 rx-read-index b!
+  0 rx-write-index b!
+  0 tx-read-index b!
+  0 tx-write-index b!
+  enable-int-io
+;
 \ Reboot
 reboot
