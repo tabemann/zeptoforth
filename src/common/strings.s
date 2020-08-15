@@ -14,7 +14,7 @@
 @ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 	@@ Skip to the start of a token
-	define_word "skip-to-token", visible_flag
+	define_internal_word "skip-to-token", visible_flag
 _skip_to_token:
 	push {lr}
 	bl _token_start
@@ -26,7 +26,7 @@ _skip_to_token:
 	end_inlined
 	
 	@@ Parse to a character in the input stream
-	define_word "parse-to-char", visible_flag
+	define_internal_word "parse-to-char", visible_flag
 _parse_to_char:
 	movs r0, tos
 	ldr r1, =eval_index_ptr
@@ -287,7 +287,7 @@ _move:	push {lr}
 	end_inlined
 
 	@@ Copy bytes starting at a high address
-	define_word "<move", visible_flag
+	define_internal_word "<move", visible_flag
 _move_from_high:
 	movs r0, tos
 	pull_tos
@@ -308,7 +308,7 @@ _move_from_high:
 2:	bx lr
 
 	@@ Copy bytes starting at a low address
-	define_word "move>", visible_flag
+	define_internal_word "move>", visible_flag
 _move_from_low:
 	movs r0, tos
 	pull_tos
@@ -434,7 +434,7 @@ _format_integer:
 	end_inlined
 
 	@@ The inner portion of formatting an integer as a string
-	define_word "format-integer-inner", visible_flag
+	define_internal_word "format-integer-inner", visible_flag
 _format_integer_inner:
 	push {lr}
 	ldr r0, =here

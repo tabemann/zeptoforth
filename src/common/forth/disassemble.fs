@@ -16,6 +16,13 @@
 \ Compile this to flash
 compile-to-flash
 
+\ Set up the wordlist
+forth-wordlist 1 set-order
+forth-wordlist set-current
+wordlist constant disassemble-wordlist
+forth-wordlist internal-wordlist disassemble-wordlist 3 set-order
+disassemble-wordlist set-current
+
 \ Disassemble for gas
 variable for-gas
 
@@ -1804,6 +1811,9 @@ commit-flash
 \ Commit to flash
 commit-flash
 
+\ Reset the current wordlist
+forth-wordlist set-current
+
 \ Disassemble instructions
 : disassemble ( start end -- )
   false for-gas !
@@ -1844,9 +1854,6 @@ commit-flash
 
 \ Finish compressing the code
 end-compress-flash
-
-\ Compile to RAM
-compile-to-ram
 
 \ Warm reboot
 warm

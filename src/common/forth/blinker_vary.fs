@@ -13,7 +13,12 @@
 \ You should have received a copy of the GNU General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+\ Compile this to flash
 compile-to-flash
+
+\ Set up the wordlist order
+forth-wordlist task-wordlist 2 set-order
+forth-wordlist set-current
 
 \ The blinker variation delay
 variable vary-delay

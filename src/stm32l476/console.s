@@ -56,7 +56,7 @@
         .equ TXE             ,   0x80
 
 	@@ Initialize UART
-	define_word "uart-init", visible_flag
+	define_internal_word "uart-init", visible_flag
 _uart_init:
 	@@ Enable all GPIO peripheral clocks
 	ldr r1, =RCC_AHB2ENR
@@ -91,7 +91,7 @@ _uart_init:
 	end_inlined
 
 	@@ Change USART2 baudrate to 115200 baud for 48 MHz mode
-	define_word "serial-115200-48mhz", visible_flag
+	define_internal_word "serial-115200-48mhz", visible_flag
 _serial_115200_48mhz:	
 	ldr r0, =USART2_BRR
 	ldr r1, =(48000000 + 115200 / 2) / 115200
@@ -100,7 +100,7 @@ _serial_115200_48mhz:
 	end_inlined
 
 	@@ Emit one character ( c -- )
-	define_word "serial-emit", visible_flag
+	define_internal_word "serial-emit", visible_flag
 _serial_emit:
 	push {lr}
 1:	bl _serial_emit_q
@@ -114,7 +114,7 @@ _serial_emit:
 	end_inlined
 
 	@@ Receive one character ( -- c )
-	define_word "serial-key", visible_flag
+	define_internal_word "serial-key", visible_flag
 _serial_key:
 	push {lr}
 1:	bl _serial_key_q
@@ -128,7 +128,7 @@ _serial_key:
 	end_inlined
 
 	@@ Test whether a character may be emitted ( -- flag )
-	define_word "serial-emit?", visible_flag
+	define_internal_word "serial-emit?", visible_flag
 _serial_emit_q:
 	push {lr}
 	bl _pause
@@ -144,7 +144,7 @@ _serial_emit_q:
 	end_inlined
 
 	@@ Test whether a character is ready be received ( -- flag )
-	define_word "serial-key?", visible_flag
+	define_internal_word "serial-key?", visible_flag
 _serial_key_q:
 	push {lr}
 	bl _pause

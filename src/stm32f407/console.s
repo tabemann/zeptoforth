@@ -60,7 +60,7 @@
 	.equ PLLSRC          ,   1 << 22
 	
 	@@ Initialize UART
-	define_word "uart-init", visible_flag
+	define_internal_word "uart-init", visible_flag
 _uart_init:
 	push {lr}
 	
@@ -127,7 +127,7 @@ _uart_init:
 	end_inlined
 
 	@@ Enable 120 MHz
-	define_word "use-120mhz", visible_flag
+	define_internal_word "use-120mhz", visible_flag
 _use_120mhz:
 	ldr r0, =FLASH_ACR
 	ldr r1, =0x103
@@ -154,7 +154,7 @@ _use_120mhz:
 	end_inlined
 
 	@@ Enable 168 MHz
-	define_word "use-168mhz", visible_flag
+	define_internal_word "use-168mhz", visible_flag
 _use_168mhz:
 	ldr r0, =FLASH_ACR
 	ldr r1, =0x103
@@ -181,7 +181,7 @@ _use_168mhz:
 	end_inlined
 
 	@@ Emit one character ( c -- )
-	define_word "serial-emit", visible_flag
+	define_internal_word "serial-emit", visible_flag
 _serial_emit:
 	push {lr}
 1:	bl _serial_emit_q
@@ -195,7 +195,7 @@ _serial_emit:
 	end_inlined
 
 	@@ Receive one character ( -- c )
-	define_word "serial-key", visible_flag
+	define_internal_word "serial-key", visible_flag
 _serial_key:
 	push {lr}
 1:	bl _serial_key_q
@@ -209,7 +209,7 @@ _serial_key:
 	end_inlined
 
 	@@ Test whether a character may be emitted ( -- flag )
-	define_word "serial-emit?", visible_flag
+	define_internal_word "serial-emit?", visible_flag
 _serial_emit_q:
 	push {lr}
 	bl _pause
@@ -225,7 +225,7 @@ _serial_emit_q:
 	end_inlined
 
 	@@ Test whether a character is ready be received ( -- flag )
-	define_word "serial-key?", visible_flag
+	define_internal_word "serial-key?", visible_flag
 _serial_key_q:
 	push {lr}
 	bl _pause
@@ -241,7 +241,7 @@ _serial_key_q:
 	end_inlined
 
 	@@ Time multiplier
-	define_word "time-multiplier", visible_flag
+	define_internal_word "time-multiplier", visible_flag
 _time_multiplier:
 	push_tos
 	movs tos, #15 @ 120 MHz
@@ -250,7 +250,7 @@ _time_multiplier:
 	end_inlined
 
 	@@ Time divisor
-	define_word "time-divisor", visible_flag
+	define_internal_word "time-divisor", visible_flag
 _time_divisor:
 	push_tos
 	movs tos, #1
@@ -258,7 +258,7 @@ _time_divisor:
 	end_inlined
 
 	@@ Divisor to get ms from systicks
-	define_word "systick-divisor", visible_flag
+	define_internal_word "systick-divisor", visible_flag
 _systick_divisor:
 	push_tos
 	movs tos, #10

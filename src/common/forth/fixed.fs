@@ -16,6 +16,10 @@
 \ Compile this to flash
 compile-to-flash
 
+\ Set up wordlist order
+forth-wordlist internal-wordlist 2 set-order
+forth-wordlist set-current
+
 \ Get the value of pi
 0 314159265 0 100000000 f/ 2constant pi
 
@@ -78,6 +82,9 @@ compile-to-flash
   then
 ;
 
+\ Set internal
+internal-wordlist set-current
+
 \ Calculate whether a square root is close enough
 : sqrt-close-enough ( f1 f2 -- flag )
   4dup d- 2rot dabs 2rot dabs dmax f/ dabs 2 0 d<
@@ -96,6 +103,9 @@ compile-to-flash
     then
   until
 ;
+
+\ Set forth
+forth-wordlist set-current
 
 \ Calculate a square root
 : sqrt ( f1 -- f2 ) 2dup 2 0 d/ sqrt-test ;
@@ -242,6 +252,9 @@ compile-to-flash
 \ Calculate atanh(x)
 : atanh ( f1 -- f2 ) 2dup 0 1 d+ 2swap dnegate 0 1 d+ f/ ln 2 0 d/ ;
 
+\ Set internal
+internal-wordlist set-current
+
 \ Get the number of instances of a character in a string
 : char-count ( b-addr bytes b -- count )
   >r
@@ -384,6 +397,9 @@ create max-fraction-chars build-max-fraction-chars
     then
   then
 ;
+
+\ Set forth
+forth-wordlist set-current
 
 \ Initialize
 : init ( -- )

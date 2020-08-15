@@ -14,7 +14,7 @@
 @ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 	@@ Compile the start of a word without the push {lr}
-	define_word "start-compile-no-push", visible_flag
+	define_internal_word "start-compile-no-push", visible_flag
 _asm_start_no_push:
 	push {lr}
 	movs r0, #0
@@ -47,7 +47,7 @@ _asm_start_no_push:
 	end_inlined
 	
 	@@ Compile the start of a word
-	define_word "start-compile", visible_flag
+	define_internal_word "start-compile", visible_flag
 _asm_start:
 	push {lr}
 	bl _asm_start_no_push
@@ -58,7 +58,7 @@ _asm_start:
 	end_inlined
 
 	@@ Compile a link field
-	define_word "current-link,", visible_flag
+	define_internal_word "current-link,", visible_flag
 _asm_link:
 	push {lr}
 	push_tos
@@ -75,7 +75,7 @@ _asm_link:
 	end_inlined
 
 	@@ Finalize the compilation of a word
-	define_word "finalize,", visible_flag
+	define_internal_word "finalize,", visible_flag
 _asm_finalize:
 	push {lr}
 	bl _asm_word_align
@@ -126,7 +126,7 @@ _asm_finalize:
 	end_inlined
 	
 	@@ Finalize the compilation of a word without aligning
-	define_word "finalize-no-align,", visible_flag
+	define_internal_word "finalize-no-align,", visible_flag
 _asm_finalize_no_align:
 	push {lr}
 	bl _asm_word_align
@@ -176,7 +176,7 @@ _asm_finalize_no_align:
 	end_inlined
 
 	@@ Compile the end of a word
-	define_word "end-compile,", visible_flag
+	define_internal_word "end-compile,", visible_flag
 _asm_end:
 	push {lr}
 	push_tos
@@ -225,7 +225,7 @@ _asm_commit_flash:
 	end_inlined
 
 	@@ Assemble a move immediate instruction
-	define_word "mov-imm,", visible_flag
+	define_internal_word "mov-imm,", visible_flag
 _asm_mov_imm:
 	push {lr}
 	movs r0, tos
@@ -243,7 +243,7 @@ _asm_mov_imm:
 	end_inlined
 
 	@@ Assemble an reverse subtract immediate from zero instruction
-	define_word "neg,", visible_flag
+	define_internal_word "neg,", visible_flag
 _asm_neg:
 	push {lr}
 	movs r0, tos
@@ -260,7 +260,7 @@ _asm_neg:
 	end_inlined
 
 	@@ Compile a blx (register) instruction
-	define_word "blx-reg,", visible_flag
+	define_internal_word "blx-reg,", visible_flag
 _asm_blx_reg:
 	push {lr}
 	movs r0, #0xF
@@ -273,7 +273,7 @@ _asm_blx_reg:
 	end_inlined
 	
 	@@ Compile an unconditional branch
-	define_word "branch,", visible_flag
+	define_internal_word "branch,", visible_flag
 _asm_branch:
 	push {lr}
 	bl _current_here
@@ -287,7 +287,7 @@ _asm_branch:
 	end_inlined
 
 	@@ Compile a branch on equal to zero
-	define_word "0branch,", visible_flag
+	define_internal_word "0branch,", visible_flag
 _asm_branch_zero:
 	push {lr}
 	bl _current_here
@@ -301,7 +301,7 @@ _asm_branch_zero:
 	end_inlined
 
 	@@ Compile a back-referenced unconditional branch
-	define_word "branch-back!", visible_flag
+	define_internal_word "branch-back!", visible_flag
 _asm_branch_back:
 	push {lr}
 	movs r0, tos
@@ -316,7 +316,7 @@ _asm_branch_back:
 	end_inlined
 
 	@@ Compile a back-referenced branch on equal to zero
-	define_word "0branch-back!", visible_flag
+	define_internal_word "0branch-back!", visible_flag
 _asm_branch_zero_back:
 	push {lr}
 	movs r0, tos
@@ -331,7 +331,7 @@ _asm_branch_zero_back:
 	end_inlined
 
 	@@ Inline a word
-	define_word "inline,", visible_flag
+	define_internal_word "inline,", visible_flag
 _asm_inline:
 	push {lr}
 	ldrh r0, [tos]
@@ -363,7 +363,7 @@ _asm_inline:
 	.ifdef thumb2
 
 	@@ Call a word at an address
-	define_word "call,", visible_flag
+	define_internal_word "call,", visible_flag
 _asm_call:	
 	push {lr}
 	movs r0, #-1
@@ -394,7 +394,7 @@ _asm_call:
 	end_inlined
 	
 	@@ Compile a bl instruction
-	define_word "bl,", visible_flag
+	define_internal_word "bl,", visible_flag
 _asm_bl:
 	push {lr}
 	subs tos, #4
@@ -439,7 +439,7 @@ _asm_bl:
 	end_inlined
 
 	@@ Compile a move 16-bit immediate instruction
-	define_word "mov-16-imm,", visible_flag
+	define_internal_word "mov-16-imm,", visible_flag
 _asm_mov_16_imm:
 	push {lr}
 	movs r0, tos
@@ -475,7 +475,7 @@ _asm_mov_16_imm:
 	end_inlined
 
 	@@ Compile a move 16-bit immediate instruction
-	define_word "mov-16-imm!", visible_flag
+	define_internal_word "mov-16-imm!", visible_flag
 _asm_store_mov_16_imm:
 	push {r4, lr}
 	movs r4, tos
@@ -518,7 +518,7 @@ _asm_store_mov_16_imm:
 	end_inlined
 
 	@@ Compile a move top 16-bit immediate instruction
-	define_word "movt-imm,", visible_flag
+	define_internal_word "movt-imm,", visible_flag
 _asm_movt_imm:
 	push {lr}
 	movs r0, tos
@@ -556,7 +556,7 @@ _asm_movt_imm:
 	end_inlined
 
 	@@ Compile a move top 16-bit immediate instruction
-	define_word "movt-imm!", visible_flag
+	define_internal_word "movt-imm!", visible_flag
 _asm_store_movt_imm:
 	push {r4, lr}
 	movs r4, tos
@@ -599,7 +599,7 @@ _asm_store_movt_imm:
 	end_inlined
 
 	@@ Assemble a literal
-	define_word "literal,", visible_flag
+	define_internal_word "literal,", visible_flag
 _asm_literal:
 	push {lr}
 	movs r0, tos
@@ -641,7 +641,7 @@ _asm_literal:
 	end_inlined
 
 	@@ Reserve space for a literal
-	define_word "reserve-literal", visible_flag
+	define_internal_word "reserve-literal", visible_flag
 _asm_reserve_literal:
 	push {lr}
 	bl _current_reserve_8
@@ -649,7 +649,7 @@ _asm_reserve_literal:
 	end_inlined
 
 	@@ Store a literal ( x reg addr -- )
-	define_word "literal!", visible_flag
+	define_internal_word "literal!", visible_flag
 _asm_store_literal:	
 	push {lr}
 	movs r0, tos
@@ -678,7 +678,7 @@ _asm_store_literal:
 	end_inlined
 	
 	@@ Assemble an unconditional branch
-	define_word "b,", visible_flag
+	define_internal_word "b,", visible_flag
 _asm_b:	push {lr}
 	ldr r0, =1023
 	cmp tos, r0
@@ -705,7 +705,7 @@ _asm_b:	push {lr}
 	end_inlined
 
 	@@ Assemble a branch on equal zero instruction
-	define_word "beq,", visible_flag
+	define_internal_word "beq,", visible_flag
 _asm_beq:
 	push {lr}
 	ldr r0, =127
@@ -733,7 +733,7 @@ _asm_beq:
 	end_inlined
 
 	@@ Assemble an unconditional branch
-	define_word "b-back!", visible_flag
+	define_internal_word "b-back!", visible_flag
 _asm_b_back:
 	push {lr}
 	movs r1, tos
@@ -757,7 +757,7 @@ _asm_b_back:
 	end_inlined
 
 	@@ Assemble a branch on equal zero instruction
-	define_word "beq-back!", visible_flag
+	define_internal_word "beq-back!", visible_flag
 _asm_beq_back:
 	push {lr}
 	movs r1, tos
@@ -781,7 +781,7 @@ _asm_beq_back:
 	end_inlined
 
 	@@ Assemble an unconditional branch
-	define_word "b-32,", visible_flag
+	define_internal_word "b-32,", visible_flag
 _asm_b_32:
 	push {lr}
 	movs r0, tos
@@ -822,7 +822,7 @@ _asm_b_32:
 	end_inlined
 
 	@@ Assemble a branch on equal zero instruction
-	define_word "beq-32,", visible_flag
+	define_internal_word "beq-32,", visible_flag
 _asm_beq_32:
 	push {lr}
 	movs r0, tos
@@ -859,7 +859,7 @@ _asm_beq_32:
 	end_inlined
 
 	@@ Assemble an unconditional branch
-	define_word "b-32-back!", visible_flag
+	define_internal_word "b-32-back!", visible_flag
 _asm_b_32_back:
 	push {r4, lr}
 	movs r3, tos
@@ -907,7 +907,7 @@ _asm_b_32_back:
 	end_inlined
 
 	@@ Assemble a branch on equal zero instruction
-	define_word "beq-32-back!", visible_flag
+	define_internal_word "beq-32-back!", visible_flag
 _asm_beq_32_back:
 	push {lr}
 	movs r3, tos
@@ -951,7 +951,7 @@ _asm_beq_32_back:
 	end_inlined
 
 	@@ Reserve space for a branch
-	define_word "reserve-branch", visible_flag
+	define_internal_word "reserve-branch", visible_flag
 _asm_reserve_branch:
 	push {lr}
 	bl _current_reserve_4
@@ -961,7 +961,7 @@ _asm_reserve_branch:
 	.else
 
 	@@ Call a word at an address
-	define_word "call,", visible_flag
+	define_internal_word "call,", visible_flag
 _asm_call:	
 	movs r0, #-1
 	ldr r1, =called
@@ -992,7 +992,7 @@ _asm_call:
 	end_inlined
 
 	@@ Compile a bl instruction
-	define_word "bl,", visible_flag
+	define_internal_word "bl,", visible_flag
 _asm_bl:
 	push {lr}
 	movs r0, tos
@@ -1016,7 +1016,7 @@ _asm_bl:
 	end_inlined
 
 	@@ Assemble a literal
-	define_word "literal,", visible_flag
+	define_internal_word "literal,", visible_flag
 _asm_literal:
 	push {lr}
 	movs r0, tos
@@ -1063,7 +1063,7 @@ _asm_literal:
 	end_inlined
 
 	@@ Assemble a long load register immediate pseudo-opcode
-	define_word "ldr-long-imm,", visible_flag
+	define_internal_word "ldr-long-imm,", visible_flag
 _asm_ldr_long_imm:
 	push {lr}
 	movs r0, tos
@@ -1179,7 +1179,7 @@ _asm_ldr_long_imm:
 	end_inlined
 
 	@@ Assemble a long load register immediate pseudo-opcode
-	define_word "ldr-long-imm-1st-zero,", visible_flag
+	define_internal_word "ldr-long-imm-1st-zero,", visible_flag
 _asm_ldr_long_imm_1st_zero:
 	push {lr}
 	movs r0, tos
@@ -1273,7 +1273,7 @@ _asm_ldr_long_imm_1st_zero:
 	end_inlined
 
 	@@ Assemble a long load register immediate pseudo-opcode
-	define_word "ldr-long-imm-2nd-zero,", visible_flag
+	define_internal_word "ldr-long-imm-2nd-zero,", visible_flag
 _asm_ldr_long_imm_2nd_zero:
 	push {lr}
 	movs r0, tos
@@ -1342,7 +1342,7 @@ _asm_ldr_long_imm_2nd_zero:
 	end_inlined
 
 	@@ Assemble a long load register immediate pseudo-opcode
-	define_word "ldr-long-imm-1st-2nd-zero,", visible_flag
+	define_internal_word "ldr-long-imm-1st-2nd-zero,", visible_flag
 _asm_ldr_long_imm_1st_2nd_zero:
 	push {lr}
 	movs r0, tos
@@ -1395,7 +1395,7 @@ _asm_ldr_long_imm_1st_2nd_zero:
 	end_inlined
 
 	@@ Assemble a long load register immediate pseudo-opcode
-	define_word "ldr-long-imm-1st-3rd-zero,", visible_flag
+	define_internal_word "ldr-long-imm-1st-3rd-zero,", visible_flag
 _asm_ldr_long_imm_3rd_zero:
 	push {lr}
 	movs r0, tos
@@ -1429,7 +1429,7 @@ _asm_ldr_long_imm_3rd_zero:
 	end_inlined
 
 	@@ Assemble a long load register immediate pseudo-opcode
-	define_word "ldr-long-imm-1st-3rd-zero,", visible_flag
+	define_internal_word "ldr-long-imm-1st-3rd-zero,", visible_flag
 _asm_ldr_long_imm_1st_3rd_zero:
 	push {lr}
 	movs r0, tos
@@ -1463,7 +1463,7 @@ _asm_ldr_long_imm_1st_3rd_zero:
 	end_inlined
 
 	@@ Assemble a long load register immediate pseudo-opcode
-	define_word "ldr-long-imm-2nd-3rd-zero,", visible_flag
+	define_internal_word "ldr-long-imm-2nd-3rd-zero,", visible_flag
 _asm_ldr_long_imm_2nd_3rd_zero:
 	push {lr}
 	movs r0, tos
@@ -1499,7 +1499,7 @@ _asm_ldr_long_imm_2nd_3rd_zero:
 	end_inlined
 
 	@@ Assemble an unconditional branch
-	define_word "b,", visible_flag
+	define_internal_word "b,", visible_flag
 _asm_b:	push {lr}
 	ldr r0, =1023
 	cmp tos, r0
@@ -1518,7 +1518,7 @@ _asm_b:	push {lr}
 	end_inlined
 
 	@@ Assemble a branch on equal zero instruction
-	define_word "beq,", visible_flag
+	define_internal_word "beq,", visible_flag
 _asm_beq:
 	push {lr}
 	ldr r0, =127
@@ -1538,7 +1538,7 @@ _asm_beq:
 	end_inlined
 
 	@@ Assemble an unconditional branch
-	define_word "b-back!", visible_flag
+	define_internal_word "b-back!", visible_flag
 _asm_b_back:
 	push {lr}
 	movs r1, tos
@@ -1562,7 +1562,7 @@ _asm_b_back:
 	end_inlined
 
 	@@ Assemble a branch on equal zero instruction
-	define_word "beq-back!", visible_flag
+	define_internal_word "beq-back!", visible_flag
 _asm_beq_back:
 	push {lr}
 	movs r1, tos
@@ -1586,7 +1586,7 @@ _asm_beq_back:
 	end_inlined
 
 	@@ Reserve space for a branch
-	define_word "reserve-branch", visible_flag
+	define_internal_word "reserve-branch", visible_flag
 _asm_reserve_branch:
 	push {lr}
 	bl _current_reserve_2
@@ -1596,7 +1596,7 @@ _asm_reserve_branch:
 	.endif
 
 	@@ Out of range branch exception
-	define_word "out-of-range-branch", visible_flag
+	define_internal_word "out-of-range-branch", visible_flag
 _out_of_range_branch:
 	push {lr}
 	string_ln " out of range branch"
@@ -1604,7 +1604,7 @@ _out_of_range_branch:
 	pop {pc}
 
 	@@ Already building exception
-	define_word "already-building", visible_flag
+	define_internal_word "already-building", visible_flag
 _already_building:
 	push {lr}
 	string_ln " already building"
@@ -1613,7 +1613,7 @@ _already_building:
 	end_inlined
 
 	@@ Not building exception
-	define_word "not-building", visible_flag
+	define_internal_word "not-building", visible_flag
 _not_building:
 	push {lr}
 	string_ln " not building"
@@ -1622,7 +1622,7 @@ _not_building:
 	end_inlined
 	
 	@@ Assemble an unconditional branch
-	define_word "b-16,", visible_flag
+	define_internal_word "b-16,", visible_flag
 _asm_b_16:
 	push {lr}
 	ldr r0, =0xE000
@@ -1634,7 +1634,7 @@ _asm_b_16:
 	end_inlined
 
 	@@ Assemble a branch on equal zero instruction
-	define_word "beq-16,", visible_flag
+	define_internal_word "beq-16,", visible_flag
 _asm_beq_16:
 	push {lr}
 	ldr r0, =0xD000
@@ -1646,7 +1646,7 @@ _asm_beq_16:
 	end_inlined
 
 	@@ Assemble an unconditional branch
-	define_word "b-16-back!", visible_flag
+	define_internal_word "b-16-back!", visible_flag
 _asm_b_16_back:
 	push {lr}
 	movs r2, tos
@@ -1662,7 +1662,7 @@ _asm_b_16_back:
 	end_inlined
 
 	@@ Assemble a branch on equal zero instruction
-	define_word "beq-16-back!", visible_flag
+	define_internal_word "beq-16-back!", visible_flag
 _asm_beq_16_back:
 	push {lr}
 	movs r2, tos
@@ -1678,7 +1678,7 @@ _asm_beq_16_back:
 	end_inlined
 
 	@@ Assemble a compare to immediate instruction
-	define_word "cmp-imm,", visible_flag
+	define_internal_word "cmp-imm,", visible_flag
 _asm_cmp_imm:
 	push {lr}
 	movs r0, tos
@@ -1696,7 +1696,7 @@ _asm_cmp_imm:
 	end_inlined
 
 	@@ Assemble a logical shift left immediate instruction
-	define_word "lsl-imm,", visible_flag
+	define_internal_word "lsl-imm,", visible_flag
 _asm_lsl_imm:
 	push {lr}
 	movs r0, tos
@@ -1716,7 +1716,7 @@ _asm_lsl_imm:
 	end_inlined
 
 	@@ Assemble an or instruction
-	define_word "orr,", visible_flag
+	define_internal_word "orr,", visible_flag
 _asm_orr:
 	push {lr}
 	movs r1, #7
@@ -1734,7 +1734,7 @@ _asm_orr:
 	end_inlined
 
 	@@ Assemble an str immediate instruction
-	define_word "ldr-imm,", visible_flag
+	define_internal_word "ldr-imm,", visible_flag
 _asm_ldr_imm:
 	push {lr}
 	movs r0, #7
@@ -1757,7 +1757,7 @@ _asm_ldr_imm:
 	end_inlined
 
 	@@ Assemble an str immediate instruction
-	define_word "str-imm,", visible_flag
+	define_internal_word "str-imm,", visible_flag
 _asm_str_imm:
 	push {lr}
 	movs r0, #7
@@ -1780,7 +1780,7 @@ _asm_str_imm:
 	end_inlined
 
 	@@ Assemble a subtract immediate instruction
-	define_word "add-imm,", visible_flag
+	define_internal_word "add-imm,", visible_flag
 _asm_add_imm:
 	push {lr}
 	movs r0, #7
@@ -1797,7 +1797,7 @@ _asm_add_imm:
 	end_inlined
 
 	@@ Assemble a subtract immediate instruction
-	define_word "sub-imm,", visible_flag
+	define_internal_word "sub-imm,", visible_flag
 _asm_sub_imm:
 	push {lr}
 	movs r0, #7
@@ -1814,7 +1814,7 @@ _asm_sub_imm:
 	end_inlined
 
 	@@ Assemble instructions to pull a value from the stack
-	define_word "pull,", visible_flag
+	define_internal_word "pull,", visible_flag
 _asm_pull:
 	push {lr}
 	movs r0, #1
@@ -1829,7 +1829,7 @@ _asm_pull:
 	end_inlined
 
 	@@ Assemble instructions to push a value onto the stack
-	define_word "push,", visible_flag
+	define_internal_word "push,", visible_flag
 _asm_push:
 	push {lr}
 	movs r0, tos
@@ -1869,7 +1869,7 @@ _asm_word_align:
 	end_inlined
 
 	@@ Assemble an instruction to generate a PC-relative address
-	define_word "adr,", visible_flag
+	define_internal_word "adr,", visible_flag
 _asm_adr:
 	push {lr}
 	bl _asm_word_align
@@ -1889,7 +1889,7 @@ _asm_adr:
 	end_inlined
 
 	@@ Assemble a BX instruction
-	define_word "bx,", visible_flag
+	define_internal_word "bx,", visible_flag
 _asm_bx:
 	push {lr}
 	movs r0, 0xF

@@ -803,7 +803,7 @@ _pause:	push {lr}
 	end_inlined
 	
 	@@ Do nothing
-	define_word "do-nothing", visible_flag
+	define_internal_word "do-nothing", visible_flag
 _do_nothing:
 	bx lr
 	end_inlined
@@ -814,7 +814,7 @@ _exit:	pop {pc}
 	end_inlined
 
 	@@ Initialize the flash dictionary
-	define_word "init-flash-dict", visible_flag
+	define_internal_word "init-flash-dict", visible_flag
 _init_flash_dict:
 	push {lr}
 	bl _find_flash_end
@@ -836,7 +836,7 @@ _init_flash_dict:
 	end_inlined
 	
 	@@ Initiatlize the dictionary
-	define_word "init-dict", visible_flag
+	define_internal_word "init-dict", visible_flag
 _init_dict:
 	push {lr}
 	bl _init_flash_dict
@@ -848,7 +848,7 @@ _init_dict:
 	end_inlined
 
 	@@ Find the last visible word
-	define_word "find-last-visible-word", visible_flag
+	define_internal_word "find-last-visible-word", visible_flag
 _find_last_visible_word:
 1:	cmp tos, #0
 	beq 2f
@@ -905,7 +905,7 @@ _init:	movs r0, #0
 	end_inlined
 	
  	@@ Run the initialization routine, if there is one
-	define_word "do-init", visible_flag
+	define_internal_word "do-init", visible_flag
 _do_init:
 	push {lr}
 	string "init"
@@ -1889,7 +1889,7 @@ _warm:	ldr r0, =handle_reset+1
 	end_inlined
 	
 	@@ Initialize the variables
-	define_word "init-variables", visible_flag
+	define_internal_word "init-variables", visible_flag
 _init_variables:
 	push {lr}
 	bl _init_handlers

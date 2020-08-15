@@ -17,6 +17,13 @@
 \ Compile to flash
 compile-to-flash
 
+\ Set up the wordlist
+forth-wordlist 1 set-order
+forth-wordlist set-current
+wordlist constant led-wordlist
+forth-wordlist led-wordlist 2 set-order
+led-wordlist set-current
+
 \ Registers
 $40021000        constant RCC_BASE
 $4C RCC_BASE or  constant RCC_AHB2ENR
