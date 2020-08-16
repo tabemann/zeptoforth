@@ -458,25 +458,23 @@ _evaluate:
 	ldr r2, =eval_ptr
 	ldr r2, [r2]
 	push {r0, r1, r2}
-	movs r0, #0
-	movs r1, tos
-	pull_tos
-	movs r2, tos
-	push {r0, r1, r2}
-	mov r3, sp
+	push_tos
+	movs tos, #0
+	push_tos
+	movs tos, #0
+	movs r3, dp
 	ldr r0, =eval_index_ptr
 	str r3, [r0]
-	mov r3, sp
+	movs r3, dp
 	adds r3, #4
 	ldr r0, =eval_count_ptr
 	str r3, [r0]
-	mov r3, sp
-	adds r3, #8
+	ldr r3, [dp, #8]
 	ldr r0, =eval_ptr
 	str r3, [r0]
 	ldr tos, =_outer
 	bl _try
-	pop {r0, r1, r2}
+	adds dp, #12
 	pop {r0, r1, r2}
 	ldr r3, =eval_index_ptr
 	str r0, [r3]
