@@ -19,9 +19,9 @@ compile-to-flash
 \ Set up the wordlist
 forth-wordlist 1 set-order
 forth-wordlist set-current
-wordlist constant disassemble-wordlist
-forth-wordlist internal-wordlist disassemble-wordlist 3 set-order
-disassemble-wordlist set-current
+wordlist constant disassemble-internal-wordlist
+forth-wordlist internal-wordlist disassemble-internal-wordlist 3 set-order
+disassemble-internal-wordlist set-current
 
 \ Disassemble for gas
 variable for-gas

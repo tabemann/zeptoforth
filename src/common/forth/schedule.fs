@@ -20,8 +20,10 @@ compile-to-flash
 forth-wordlist 1 set-order
 forth-wordlist set-current
 wordlist constant schedule-wordlist
-forth-wordlist systick-wordlist task-wordlist schedule-wordlist 4 set-order
-schedule-wordlist set-current
+wordlist constant schedule-internal-wordlist
+forth-wordlist systick-wordlist task-wordlist schedule-wordlist
+schedule-internal-wordlist 5 set-order
+schedule-internal-wordlist set-current
 
 \ The current action
 variable current-action
@@ -52,6 +54,9 @@ begin-structure action
   \ Action systick delay time
   field: action-systick-delay
 end-structure
+
+\ Set non-internal
+schedule-wordlist set-current
 
 \ Create a scheduler
 : create-schedule ( -- schedule )
