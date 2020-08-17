@@ -21,8 +21,10 @@ compile-to-flash
 forth-wordlist 1 set-order
 forth-wordlist set-current
 wordlist constant int-io-wordlist
-forth-wordlist internal-wordlist interrupt-wordlist int-io-wordlist 4 set-order
-int-io-wordlist set-current
+wordlist constant int-io-internal-wordlist
+forth-wordlist internal-wordlist interrupt-wordlist int-io-wordlist
+int-io-internal-wordlist 5 set-order
+int-io-internal-wordlist set-current
 
 \ RAM variable for rx buffer read-index
 bvariable rx-read-index
@@ -163,10 +165,6 @@ $80 constant TXE
   enable-int
 ;
 
-\ Handle IO for multitasking
-: task-io ( -- )
-;
-
 \ Null interrupt handler
 : null-handler ( -- )
   handle-io
@@ -192,6 +190,13 @@ $80 constant TXE
 
 : do-key? ( -- flag )
   rx-empty? not
+;
+
+\ Set non-internal
+int-io-wordlist set-current
+
+\ Handle IO for multitasking
+: task-io ( -- )
 ;
 
 \ Enable interrupt-driven IO

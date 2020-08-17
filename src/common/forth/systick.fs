@@ -17,8 +17,10 @@ compile-to-flash
 forth-wordlist 1 set-order
 forth-wordlist set-current
 wordlist constant systick-wordlist
-forth-wordlist internal-wordlist systick-wordlist 3 set-order
-systick-wordlist set-current
+wordlist constant systick-internal-wordlist
+forth-wordlist internal-wordlist systick-wordlist
+systick-internal-wordlist 4 set-order
+systick-internal-wordlist set-current
 
 \ RW SysTick Control and Status Register
 $E000E010 constant SYST_CSR
@@ -55,6 +57,9 @@ $00FFFFFF constant SYST_CALIB_TENMS
 
 \ SysTick counter
 variable systick-counter
+
+\ Set non-internal
+systick-wordlist set-current
 
 \ SysTick handler
 : systick-handler ( -- )

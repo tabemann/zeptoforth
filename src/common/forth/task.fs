@@ -20,18 +20,19 @@ compile-to-flash
 forth-wordlist 1 set-order
 forth-wordlist set-current
 wordlist constant task-wordlist
-forth-wordlist internal-wordlist systick-wordlist task-wordlist
-int-io-wordlist 5 set-order
-task-wordlist set-current
-
-\ Declare a RAM variable for the end of free RAM memory
-variable free-end
+wordlist constant task-internal-wordlist
+forth-wordlist internal-wordlist systick-wordlist int-io-wordlist
+task-wordlist task-internal-wordlist 6 set-order
+task-internal-wordlist set-current
 
 \ Main task
 variable main-task
 
 \ Current task
 variable current-task
+
+\ Declare a RAM variable for the end of free RAM memory
+variable free-end
 
 \ Starting task for a pause
 variable start-task
@@ -175,6 +176,9 @@ end-structure
   then
 ;
 
+\ Set non-internal
+task-wordlist set-current
+
 \ Enable a task
 : enable-task ( task -- )
   dup task-active @ 1+
@@ -212,6 +216,9 @@ end-structure
   true swap ['] task-wait for-task !
 ;
 
+\ Set internal
+task-internal-wordlist set-current
+
 \ Initialize the main task
 : init-main-task ( -- )
   free-end @ task -
@@ -243,6 +250,9 @@ end-structure
     pause
   again
 ;
+
+\ Set non-internal
+task-wordlist set-current
 
 \ Dump information on a task
 : dump-task-info ( task -- )
@@ -284,6 +294,9 @@ end-structure
   ['] task-entry 1+ over push-task-rstack
   tuck push-task-stack
 ;
+
+\ Set internal
+task-internal-wordlist set-current
 
 \ Go to the next task
 : go-to-next-task ( task -- task )
@@ -357,6 +370,9 @@ end-structure
   task-stack-current sp!
 ;
 
+\ Set non-internal
+task-wordlist set-current
+
 \ Start a delay from the present
 : start-task-delay ( 1/10m-delay task -- )
   dup systick-counter swap ['] task-systick-start for-task !
@@ -403,6 +419,9 @@ end-structure
   -1 swap ['] task-systick-delay for-task !
 ;
 
+\ Set forth
+forth-wordlist set-current
+
 \ Wait for n milliseconds with multitasking support
 : ms ( u -- )
   systick-divisor * systick-counter
@@ -415,6 +434,9 @@ end-structure
   drop drop
   current-task @ cancel-task-delay
 ;
+
+\ Set internal
+task-internal-wordlist set-current
 
 \ Wait the current thread
 : do-wait ( -- )
@@ -441,7 +463,10 @@ variable saved-validate-dict
   then
   saved-validate-dict @ ?execute
 ; 
-  
+
+\ Set non-internal
+task-wordlist set-current
+
 \ Make pause-count read-only
 : pause-count ( -- u ) pause-count @ ;
 
