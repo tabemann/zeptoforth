@@ -69,27 +69,6 @@ which sets the active counter for the *task* to zero if is greater than zero.
 
 The simplest case of delaying a task is simply to execute:
 
-##### `push-task-stack`
-( x task -- )
-
-Push a cell onto a task's stack; this is useful for configuring tasks upon startup.
-
-##### `push-task-rstack`
-( x task -- )
-
-Push a cell onto a task's return stack.
-
-##### `ms`
-( milliseconds -- )
-
-This transparently handles executing `PAUSE`.
-
-Otherwise delays are measured in 10ths of milliseconds, as this is the resolution at which the SysTick is set at to measure time.
-
-Note that all the following words do not automatically execute `PAUSE` as, after all, they can be executed for tasks other than the current task. So when executing them for the current task, this needs to be executed afterwards to have the desired effect.
-
-To start a new delay, resetting the timer, for a task execute:
-
 ##### `start-task-delay`
 ( 1/10ms-delay task -- )
 
