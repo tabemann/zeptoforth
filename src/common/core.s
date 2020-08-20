@@ -95,6 +95,7 @@ _tuck:	ldr r0, [dp]
 	subs dp, #4
 	str r0, [dp]
 	bx lr
+	end_inlined
 
 	@@ Logical shift left
 	define_word "lshift", visible_flag | inlined_flag

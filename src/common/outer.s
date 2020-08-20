@@ -1143,7 +1143,7 @@ _constant_4:
 	end_inlined
 
 	@@ Create a constant with a specified name as a string
-	define_word "constant-with-name", visible_flag
+	define_internal_word "constant-with-name", visible_flag
 _constant_with_name_4:
 	push {lr}
 	bl _asm_start
@@ -1195,7 +1195,7 @@ _constant_8:
 	end_inlined
 
 	@@ Create a 2-word constant with a name specified as a string
-	define_word "2constant-with-name", visible_flag
+	define_internal_word "2constant-with-name", visible_flag
 _constant_with_name_8:
 	push {lr}
 	bl _token

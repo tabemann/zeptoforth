@@ -245,10 +245,10 @@ forth-wordlist set-current
 \ Set internal
 internal-wordlist set-current
 
-\ Get the flags for a word
+\ Get the address of the flags for a word
 : word-flags ( word -- h-addr ) [inlined] ;
 
-\ Get the wordlist id for a word
+\ Get the address of the wordlist id for a word
 : wordlist-id ( word -- h-addr ) 2+ [inlined] ;
 
 \ Get the previous word for a word
@@ -272,7 +272,7 @@ internal-wordlist set-current
   until
 ;
 
-\ Get whether a string has a prefix
+\ Get whether a string has a prefix (the prefix is the first string)
 : prefix? ( b-addr1 bytes1 b-addr2 bytes2 -- flag )
   begin
     2 pick 0> if
@@ -339,7 +339,7 @@ commit-flash
 
 \ Print a string in one out of four columns, taking up more than one column
 \ if necessary
-: words-column ( b-addr bytes column1 -- column2 )
+: words-column-wrap ( b-addr bytes column1 -- column2 )
   4 over - 20 * 2 pick < if
     cr drop 0 words-column
   else
@@ -358,7 +358,7 @@ commit-flash
     over 0<>
   while
     over hidden? not 2 pick wordlist-id h@ r@ = and if
-      over word-name count rot words-column
+      over word-name count rot words-column-wrap
     then
     swap prev-word @ swap
   repeat
@@ -372,7 +372,7 @@ commit-flash
   begin over 0<> while
     over hidden? not 2 pick wordlist-id h@ r@ = and if
       3 pick 3 pick 3 pick word-name count prefix? if
-	over word-name count rot words-column
+	over word-name count rot words-column-wrap
       then
     then
     swap prev-word @ swap
@@ -412,7 +412,7 @@ forth-wordlist set-current
   2drop 2drop cr
 ;
 
-\ Display all the words are four columns
+\ Display all the words as four columns
 : words ( -- )
   cr
   0 0 begin
@@ -447,16 +447,6 @@ internal-wordlist set-current
   drop 2drop
 ;
 
-\ Set forth
-forth-wordlist set-current
-
-\ Dump all the words that go by a certain name
-: word-info ( "name" -- )
-  cr token  ." dict  name     xt       flags wordlist" cr
-  2dup ram-latest search-word-info
-  flash-latest search-word-info
-;
-
 \ Search for a word by its xt
 : search-by-xt ( dict xt -- name|0 flag )
   begin over 0<> while
@@ -467,6 +457,16 @@ forth-wordlist set-current
   repeat
   drop false
 ;  
+
+\ Set forth
+forth-wordlist set-current
+
+\ Dump all the words that go by a certain name
+: word-info ( "name" -- )
+  cr token  ." dict  name     xt       flags wordlist" cr
+  2dup ram-latest search-word-info
+  flash-latest search-word-info
+;
 
 \ Commit code to flash
 commit-flash
@@ -481,7 +481,7 @@ commit-flash
 ;
 
 \ Safely type a string
-: safe-type ( addr bytes -- )
+: safe-type ( b-addr bytes -- )
   pause-enabled @
   0 pause-enabled !
   -rot serial-type
@@ -498,7 +498,7 @@ commit-flash
 ;
 
 \ Safely type an unsigned integer
-: safe-type-unsigned ( n -- )
+: safe-type-unsigned ( u -- )
   ram-here swap format-unsigned dup ram-allot
   dup >r safe-type r> negate ram-allot
 ;
