@@ -1,5 +1,7 @@
 # Compilation-specific words
 
+These words are in `internal-wordlist`.
+
 ##### `start-compile-no-push`
 
 Compile the start of a word without the push {lr}

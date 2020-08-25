@@ -2,17 +2,21 @@
 
 There is not much to SysTick, so this will be short. In zeptoforth SysTicks are at 10ths of milliseconds intervals, so:
 
+The following word is in `forth-wordlist`.
+
+##### `ms`
+( u -- )
+
+where *u* is the number of milliseconds to wait. Note that this word is replaced with an outwardly equivalent word by `sys/common/forth/task.fs`; unlike that word this word does not take advantage of the timing capabilities provided by `sys/common/forth/task.fs`, even though it does call `PAUSE`.
+
+The following words are in `systick-wordlist`.
+
 ##### `systick-counter`
 ( -- u )
 
 returns the current SysTick count in 10ths of milliseconds. This value is an unsigned 32-bit value, and will wrap around.
 
 To wait a given number of milliseconds (not 10ths of milliseconds), one executes:
-
-##### `ms`
-( u -- )
-
-where *u* is the number of milliseconds to wait. Note that this word is replaced with an outwardly equivalent word by `sys/common/forth/task.fs`; unlike that word this word does not take advantage of the timing capabilities provided by `sys/common/forth/task.fs`, even though it does call `PAUSE`.
 
 To disable SysTicks, execute:
 

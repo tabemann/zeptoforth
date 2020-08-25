@@ -4,6 +4,8 @@
 
 Stack testing involves checking the stack pointer before and after the code being tested is executed, and testing for the change in the stack pointer as well as matching the values put on the stack by the code being tested against the values expected. By its very nature this code is applied a task-specific level but can be used in different tasks simultaneously. This code is not part of the prebuilt binaries, but rather is in `test/common/stack.fs` and may be used both compiled to flash and compiled to RAM.
 
+The following words are in `forth-wordlist`.
+
 ##### `stack-fail-hook`
 
 `stack-fail-hook` specifies an xt to be executed, if set to a value other than 0, when a stack test fails. By default this is set to 0.
@@ -26,6 +28,8 @@ This word checks that the current stack position is two times *u* cells greater 
 ## Emit Capture Testing
 
 Emit capture testing involves installing a hook into `emit` transparently, and using this to capture and test each byte emitted against specified rules without interfering with the operation of the system. This is done in a transparently multitasking-friendly manner, and can be used to test behavior spread across multiple tasks without any extra work being needed on the programmer's part. This code is not part of the prebuilt binaries, but rather is in `test/common/capture.fs` and may be used both compiled to flash and compiled to RAM.
+
+The following words are in `forth-wordlist`.
 
 ##### `capture-fail-hook`
 

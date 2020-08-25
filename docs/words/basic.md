@@ -1,4 +1,6 @@
-# Basic Non-Kernel Words
+# Basic Words
+
+These words are in `forth-wordlist`.
 
 ##### `drop`
 ( x -- )
@@ -799,26 +801,6 @@ Get the data stack pointer
 
 Set the data stack pointer
 
-##### `get-current`
-( -- wid )
-
-Get the current compilation wordlist
-
-##### `set-current`
-( wid -- )
-
-Set the current compilation wordlist
-
-##### `get-order`
-( -- widn ... wid1 u )
-
-Get the current wordlist order
-
-##### `set-order`
-( widn ... wid1 u -- )
-
-Set the current wordlist order
-
 ##### `reboot`
 ( -- )
 
@@ -834,16 +816,6 @@ Carry out a warm reboot
 
 ##### `false`
 ( -- f )
-
-##### `forth-wordlist`
-( -- wid )
-
-Forth wordlist constant
-
-##### `internal-wordlist`
-( -- wid )
-
-Internal wordlist constant
 
 ##### `binary`
 ( -- )
@@ -1032,21 +1004,6 @@ Assert that a value is false, otherwise raise a specified exception
 Check whether an exception, typically returned by `try`, matches a specified
 exception and if it does, replace it with zero, marking no exception,
 otherwise passing the specified argument through.
-
-##### `lookup`
-( "name" -- )
-
-Lookup a word by its prefix
-
-##### `words`
-( -- )
-
-Display all the words as four columns
-
-##### `word-info`
-( "name" -- )
-
-Dump all the words that go by a certain name
 
 ##### `>name`
 ( xt -- name )
@@ -1713,3 +1670,12 @@ Format an integer as a string
 
 Format an integer as a string
 
+##### `marker`
+( "name" -- )
+
+Create a marker word named *name* to erase flash/return the flash dictionary to its prior state; note that the marker word that is created is erased when it is executed
+
+##### `cornerstone`
+( "name" -- )
+
+Create a cornerstone word named *name* to erase flash/return the flash dictionary to its state immediately after `cornerstone` was executed; unlike `marker` the word created does not erase itself when executed and may be executed multiple times

@@ -1,5 +1,7 @@
 # Double-Cell Words
 
+These words are in `forth-wordlist`.
+
 ##### `2drop`
 ( d -- )
 
