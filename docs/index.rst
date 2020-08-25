@@ -5,15 +5,16 @@ Zeptoforth Documentation
    :maxdepth: 2
    :caption: Contents:
 
+   words/basic
    words/lambda
    words/wordlist
    words/task
    words/schedule
    words/dev_tools
-   words/test
-   words/kernel
-   words/basic
    words/double
-   words/erase
    words/systick
    words/led
+   words/test
+   words/internal
+   words/asm
+   words/expose

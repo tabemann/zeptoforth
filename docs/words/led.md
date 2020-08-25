@@ -2,6 +2,8 @@
 
 LEDs are initialized at boot time, and can be used as is afterwards.
 
+The following words are in `led-wordlist`.
+
 ## STM32L476 LED Words
 
 ##### `led-red-on`

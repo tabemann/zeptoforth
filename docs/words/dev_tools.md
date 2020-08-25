@@ -1,6 +1,8 @@
 # Development Tools Words
 
-There are a number of useful words provided with zeptoforthas development tools
+There are a number of useful words provided with zeptoforthas development tools.
+
+These words are in `forth-wordlist`.
 
 ## Disassembler
 
@@ -48,3 +50,8 @@ This word simply lists every user-viewable word in RAM or in flash, organized as
 ( "name" -- )
 
 This word lists each word which has a prefix corresponding to the maximal prefix or the specified token which any word in RAM or in flash matches, organized as four columns.
+
+##### `word-info`
+( "name" -- )
+
+Dump all the words that go by a certain name

@@ -1,5 +1,7 @@
 # Internal Words
 
+These words are in `internal-wordlist`.
+
 ##### `advance-here`
 ( a -- )
 

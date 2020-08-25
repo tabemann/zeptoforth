@@ -13,6 +13,11 @@
 \ You should have received a copy of the GNU General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+\ Set up the wordlist
+get-order get-current
+forth-wordlist 1 set-order
+forth-wordlist set-current
+
 \ The stack fail hook
 variable stack-fail-hook
 
@@ -59,3 +64,5 @@ compiling-to-flash? [if]
   ;
 
 [then]
+
+set-current set-order

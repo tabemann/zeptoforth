@@ -1,5 +1,7 @@
 # Exposed Kernel Variables
 
+Thes words are in `forth-wordlist`.
+
 ##### `state`
 
 Get the STATE variable address
