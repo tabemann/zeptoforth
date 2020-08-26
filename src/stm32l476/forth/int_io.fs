@@ -200,7 +200,7 @@ $08 constant ORE
 ;
 
 \ Set non-internal
-task-io-wordlist set-current
+int-io-wordlist set-current
 
 \ Handle IO for multitasking
 : task-io ( -- ) ;
