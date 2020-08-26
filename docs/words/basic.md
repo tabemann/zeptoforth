@@ -1025,6 +1025,11 @@ Safely type an integer
 
 Safely type an unsigned integer
 
+##### `fill`
+( b-addr u b -- )
+
+Fill memory with a byte
+
 ##### `create`
 ( "name" -- )
 
