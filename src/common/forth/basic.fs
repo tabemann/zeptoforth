@@ -506,6 +506,11 @@ commit-flash
 \ Commit code to flash
 commit-flash
 
+\ Fill memory with a byte
+: fill ( b-addr u b -- )
+  swap begin dup 0> while rot 2 pick over b! 1+ rot rot 1- repeat drop 2drop
+;
+
 \ In all cases:
 \
 \ 4 bytes for push,
