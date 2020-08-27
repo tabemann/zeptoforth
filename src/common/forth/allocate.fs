@@ -62,7 +62,7 @@ end-structure
 
 \ Convert a size in bytes to a size in multiples of 16 bytes
 : >size ( bytes -- 16-bytes )
-  dup 16 and 0> if 4 rshift 1 + else 4 rshift then ;
+  dup $F and 0<> if 4 rshift 1 + else 4 rshift then ;
 
 \ Convert a size in multiples of 16 bytes to a size in bytes
 : size> ( 16-bytes -- bytes ) 4 lshift ;
@@ -71,20 +71,20 @@ end-structure
 block-header-size >size constant block-header-size-16
 
 \ Get the log2 of a value
-: log2 ( u -- u ) 0 begin over 1 > while 1+ swap 1 rshift swap repeat nip ;
+: log2 ( u -- u ) 0 begin over 1 u> while 1+ swap 1 rshift swap repeat nip ;
 
 \ Get the pow2 of a value
 : pow2 ( u -- u ) 1 swap lshift ;
 
 \ Get the log2 with ceiling of a value
-: log2-ceiling ( u -- u ) dup dup log2 pow2 - 0> if log2 1+ else log2 then ;
+: log2-ceiling ( u -- u ) dup dup log2 pow2 - 0<> if log2 1+ else log2 then ;
 
 \ Get the pow2 of the log2 with ceiling of a value
 : ceiling2 ( u -- u ) log2-ceiling pow2 ;
 
 \ Get the index into the array of sized free lists for a block size
 : >index ( 16-bytes heap -- index )
-  dup high-block-size @ 2 pick ceiling2 < if
+  dup high-block-size @ 2 pick ceiling2 u< if
     nip high-block-size-log2 @
   else
     drop log2-ceiling
@@ -92,7 +92,7 @@ block-header-size >size constant block-header-size-16
 
 \ Get the index into the array of sized free lists for a block size
 : >index-fill ( 16-bytes heap -- index )
-  dup high-block-size @ 2 pick < if
+  dup high-block-size @ 2 pick u< if
     nip high-block-size-log2 @
   else
     drop log2
@@ -106,7 +106,7 @@ block-header-size >size constant block-header-size-16
 
 \ Get the previous block
 : prev-block ( block -- block )
-  dup prev-block-size h@ 0 > if
+  dup prev-block-size h@ 0<> if
     dup prev-block-size h@ size> - block-header-size -
   else
     drop 0
@@ -165,7 +165,7 @@ block-header-size >size constant block-header-size-16
 
 \ Merge with a succeeding block
 : merge-next-block ( block heap -- )
-  swap dup next-block block-flags @ in-use and 0 = if
+  swap dup next-block block-flags @ in-use and 0= if
     dup next-block rot unlink-block
     dup dup next-block block-size h@ block-header-size-16 +
     over block-size h@ + swap block-size h!
@@ -178,7 +178,7 @@ block-header-size >size constant block-header-size-16
 \ Find a suitable index for a new block
 : find-index ( 16-bytes heap -- index )
   tuck >index begin
-    dup 2 pick high-block-size-log2 @ <= if
+    dup 2 pick high-block-size-log2 @ u<= if
       dup cells 2 pick sized-blocks @ + @ if
 	nip true
       else
@@ -205,8 +205,8 @@ block-header-size >size constant block-header-size-16
 \ Search for a block that fits, or return 0 if none fit
 : search-blocks ( 16-bytes block -- block )
   begin
-    dup 0 <> if
-      2dup block-size h@ <= if nip true else next-sized-block @ false then
+    dup 0<> if
+      2dup block-size h@ u<= if nip true else next-sized-block @ false then
     else
       nip true
     then
@@ -214,10 +214,10 @@ block-header-size >size constant block-header-size-16
 
 \ Allocate a block
 : allocate-block ( allocate-size heap -- block )
-  swap >size dup 2 pick find-index dup -1 <> if
-    cells 2 pick sized-blocks @ + @ over swap search-blocks ?dup if     
+  swap >size dup 2 pick find-index dup -1 <> if 
+    cells 2 pick sized-blocks @ + @ over swap search-blocks ?dup if
       dup block-size h@ ( heap allocate-size block block-size )
-      2 pick block-header-size-16 2 * + >= if
+      2 pick block-header-size-16 2 * + u>= if
 	2dup 4 pick split-block
       else
 	dup 3 pick unlink-block
@@ -253,15 +253,15 @@ block-header-size >size constant block-header-size-16
 
 \ Resize a block
 : resize-block ( allocate-size block heap -- )
-  rot >size rot dup block-size h@ block-header-size-16 2 * - 2 pick >= if
+  rot >size rot dup block-size h@ block-header-size-16 2 * - 2 pick u>= if
     dup >r rot split-block r>
   else
-    dup block-size h@ 2 pick < if
-      dup next-block block-flags @ in-use and 0 = if
+    dup block-size h@ 2 pick u< if
+      dup next-block block-flags @ in-use and 0= if
 	dup next-block block-size h@ block-header-size-16 +
-	over block-size h@ + 2 pick >= if
+	over block-size h@ + 2 pick u>= if
 	  dup 3 pick merge-next-block
-	  dup block-size h@ 2 pick block-header-size-16 2 * + >= if
+	  dup block-size h@ 2 pick block-header-size-16 2 * + u>= if
 	    dup >r rot split-block r>
 	  else
 	    nip nip
@@ -278,9 +278,14 @@ block-header-size >size constant block-header-size-16
   then
 ;
 
+\ Align the dictionary
+: align-dict ( power -- )
+  ram-here swap align ram-here!
+;
+
 \ Create an initial block
 : init-block ( heap-size -- block )
-  >size ceiling2 4 align here over size> block-header-size 2 * + allot
+  >size ceiling2 4 align-dict ram-here over size> block-header-size 2 * + ram-allot
   tuck block-size h!
   0 over prev-block-size h!
   0 over block-flags !
@@ -298,20 +303,31 @@ allocate-wordlist set-current
 
 \ Create an heap with a specified heap size and a specified largest size
 \ in the array of sized free lists
-: init-heap ( high-block-size -- heap )
-  4 align here heap-size allot
+: init-heap-header ( high-block-size -- heap )
+  4 align-dict ram-here heap-size ram-allot
   swap >size ceiling2 over high-block-size !
   dup high-block-size @ log2 over high-block-size-log2 !
-  4 align here over high-block-size-log2 @ 1 + cells allot
+  4 align-dict ram-here over high-block-size-log2 @ 1+ cells ram-allot
   over sized-blocks !
   dup sized-blocks @ over high-block-size-log2 @ cells 0 fill
 ;
 
+\ Expand the heap
+: expand-heap ( block-size heap -- )
+  over init-block rot >size 2 pick >index-fill cells rot sized-blocks @ + !
+;
+
+allocate-internal-wordlist set-current
+
 \ Define a variable for the shared heap
 variable shared-heap
 
+allocate-wordlist set-current
+
 \ Initialize the shared heap
-: init-shared-heap ( high-block-size -- ) init-heap shared-heap ! ;
+: init-shared-heap ( heap-size high-block-size -- )
+  init-heap-header dup shared-heap ! expand-heap
+;
 
 \ No shared heap exists
 : x-no-shared-heap ( -- ) space ." no shared heap exists" cr ;
@@ -364,14 +380,16 @@ forth-wordlist set-current
 
 \ Memory management failure exception
 : x-memory-management-failure ( -- )
-  space ." failed to allocate/free memory" cr ;
+  space ." failed to allocate/free memory" cr
+;
 
 \ Allocate memory in the heap, raising an exception if allocation fails.
 : allocate! ( bytes -- addr ) allocate averts x-memory-management-failure ;
 
 \ Resize memory in the heap, raising an exception if allocation fails.
 : resize! ( addr new-bytes -- new-addr )
-  resize averts x-memory-management-failure ;
+  resize averts x-memory-management-failure
+;
 
 \ Free memory in the heap, raising an exception if freeing fails.
 : free! ( addr -- ) free averts x-memory-management-failure ;
