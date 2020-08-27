@@ -12,6 +12,7 @@ Zeptoforth Documentation
    words/schedule
    words/dev_tools
    words/double
+   words/allocate
    words/systick
    words/led
    words/test
