@@ -87,7 +87,7 @@ block-header-size >size constant block-header-size-16
   dup high-block-size @ 2 pick ceiling2 u< if
     nip high-block-size-log2 @
   else
-    drop log2-ceiling
+    drop log2 \ log2-ceiling
   then ;
 
 \ Get the index into the array of sized free lists for a block size
