@@ -88,7 +88,8 @@ block-header-size >size constant block-header-size-16
     nip high-block-size-log2 @
   else
     drop log2 \ log2-ceiling
-  then ;
+  then
+;
 
 \ Get the index into the array of sized free lists for a block size
 : >index-fill ( 16-bytes heap -- index )
@@ -96,7 +97,8 @@ block-header-size >size constant block-header-size-16
     nip high-block-size-log2 @
   else
     drop log2
-  then ;
+  then
+;
 
 \ Get the header of a block
 : block-header ( addr -- block ) block-header-size - ;
@@ -210,7 +212,8 @@ block-header-size >size constant block-header-size-16
     else
       nip true
     then
-  until ;
+  until
+;
 
 \ Allocate a block
 : allocate-block ( allocate-size heap -- block )
@@ -285,7 +288,8 @@ block-header-size >size constant block-header-size-16
 
 \ Create an initial block
 : init-block ( heap-size -- block )
-  >size ceiling2 4 align-dict ram-here over size> block-header-size 2 * + ram-allot
+  >size ceiling2 4 align-dict ram-here over size>
+  block-header-size 2 * + ram-allot
   tuck block-size h!
   0 over prev-block-size h!
   0 over block-flags !
@@ -346,7 +350,8 @@ allocate-wordlist set-current
 
 \ Free memory on a heap; returns -1 on success and 0 on failure
 : free-with-heap ( addr heap -- -1|0 )
-  swap ?dup if block-header swap free-block true else drop true then ;
+  swap ?dup if block-header swap free-block true else drop true then
+;
 
 \ Resize memory on a heap; returns -1 on success and 0 on failure
 : resize-with-heap ( addr new-bytes heap -- addr -1|0 )
