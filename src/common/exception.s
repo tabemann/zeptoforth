@@ -44,7 +44,8 @@ _try:	push {lr} @ #0
 	ldr r0, =handler
 	str r1, [r0]
 	pop {r1}
-	push_const 0
+	push_tos
+	ldr tos, #0
 	pop {pc}
 	end_inlined
 	
