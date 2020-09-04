@@ -85,10 +85,15 @@ dp 	.req r7
 	str tos, [dp, #-4]!
 	.endm
 
+	@@ Push a register onto the data stack
+	.macro push_reg reg
+	str \reg, [dp, #-4]!
+	.endm
+
 	@@ Push a constant onto the top of the stack
 	.macro push_const const
-	push_tos
 	ldr tos, =\const
+	str tos, [dp, #-4]!
 	.endm
 
 	@@ Pull the top of the stack into the TOS register
