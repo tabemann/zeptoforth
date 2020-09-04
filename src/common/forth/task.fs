@@ -22,7 +22,7 @@ forth-wordlist set-current
 wordlist constant task-wordlist
 wordlist constant task-internal-wordlist
 forth-wordlist internal-wordlist systick-wordlist int-io-wordlist
-task-wordlist task-internal-wordlist 6 set-order
+task-internal-wordlist task-wordlist 6 set-order
 task-internal-wordlist set-current
 
 \ Main task
