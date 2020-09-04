@@ -45,7 +45,7 @@ _try:	push {lr} @ #0
 	str r1, [r0]
 	pop {r1}
 	push_tos
-	ldr tos, #0
+	movs tos, #0
 	pop {pc}
 	end_inlined
 	
