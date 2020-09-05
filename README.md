@@ -17,7 +17,8 @@ This will build a zeptoforth.bin and a zeptoforth.elf file; the zeptoforth.elf f
 To load the zeptoforth image (whether just the kernel or an image including precompiled Forth code) onto an STM32L476 or STM32F407 DISCOVERY board, first install st-flash, then attach the DISCOVERY board to one's PC via USB and execute:
 
     $ st-flash erase
-    $ st-flash write <location of the zeptoforth image> 08000000
+    $ st-flash write <location of the zeptoforth image> 0x08000000
+    $ st-flash reset
 
 <Location of the zeptoforth image> is either a freshly built zeptoforth.bin file in the root directory of zeptoforth, or a prebuilt binary named `zeptoforth_kernel-<version>.bin` (without precompiled Forth code), `zeptoforth_full-<version>.bin` (with precompiled Forth code), or `zeptoforth_swdcom-<version>.bin` (with precompiled Forth code including a swdcom driver) in `bin/<version>/<platform>/`. Note that only the STM32L476 and STM32F407 DISCOVERY boards currently have prebuilt images including precompiled Forth code, since they require working setups with the boards in question to be created.
 
