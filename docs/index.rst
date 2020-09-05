@@ -14,6 +14,7 @@ Zeptoforth Documentation
    words/double
    words/allocate
    words/systick
+   words/swd
    words/led
    words/test
    words/internal

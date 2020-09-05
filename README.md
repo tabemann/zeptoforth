@@ -19,11 +19,13 @@ To load the zeptoforth image (whether just the kernel or an image including prec
     $ st-flash erase
     $ st-flash write <location of the zeptoforth image> 08000000
 
-<Location of the zeptoforth image> is either a freshly built zeptoforth.bin file in the root directory of zeptoforth, or a prebuilt binary named `zeptoforth_kernel-<version>.bin` (without precompiled Forth code) or `zeptoforth_full-<version>.bin` (with precompiled Forth code) in `bin/<version>/<platform>/`. Note that only the STM32L476 and STM32F407 DISCOVERY boards currently have prebuilt images including precompiled Forth code, since they require working setups with the boards in question to be created.
+<Location of the zeptoforth image> is either a freshly built zeptoforth.bin file in the root directory of zeptoforth, or a prebuilt binary named `zeptoforth_kernel-<version>.bin` (without precompiled Forth code), `zeptoforth_full-<version>.bin` (with precompiled Forth code), or `zeptoforth_swdcom-<version>.bin` (with precompiled Forth code including a swdcom driver) in `bin/<version>/<platform>/`. Note that only the STM32L476 and STM32F407 DISCOVERY boards currently have prebuilt images including precompiled Forth code, since they require working setups with the boards in question to be created.
 
 Note the address referred to above. This will also reboot the board.
 
-To use the board on Linux, download and install e4thcom. If one is using an STM32F407 DISCOVERY board, attach a USB-to-serial converter to your machine (make sure you have the proper permissions to access its device file) and attach the RXD pin on the converter to PA2 on the board and the TXD pin on the converter to PA3 on the board with jumper cables. Then, from the zeptoforth base directory execute:
+To use the board on Linux, download and install e4thcom or swdcom (at http://github.com/crest/swdcom).
+
+The following applies if one is using e4thcom: If one is using an STM32F407 DISCOVERY board, attach a USB-to-serial converter to your machine (make sure you have the proper permissions to access its device file) and attach the RXD pin on the converter to PA2 on the board and the TXD pin on the converter to PA3 on the board with jumper cables. Then, from the zeptoforth base directory execute:
 
     $ e4thcom -t noforth -b B115200 -d <device, typically one of ttyACM0 or ttyUSB0>
 
@@ -52,3 +54,9 @@ A better approach than using `slowpaste`, `readbuf`, and `paste` with screen is 
     $ ./utils/codeload3.py [-p <device>] -B 115200 serial <Forth source file>
 
 It has significantly better performance and functionality than screen with `slowpaste` and is the recommended method of code uploading if e4thcom is not available. Note that it requires Python 3 and pySerial, and it must be given executable permissions before it may be executed.
+
+If one is using swdcom (assuming one has already built it and installed `swd2` in some suitable location such as `/usr/local/bin` and that one has already written the `zeptoforth_swdcom-<version>.bin` binary to the board), simply execute `swd2`. This will provide a terminal session with zeptoforth. To upload Forth code to execute to the board, execute in the directory from which `swd2` was executed:
+
+    cat <path> > upload.fs && pkill -QUIT swd2
+
+This will simply upload the given file to the board as-is without any support for `#include` or `#require`, unlike e4thcom.
