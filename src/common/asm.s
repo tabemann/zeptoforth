@@ -17,6 +17,7 @@
 	define_internal_word "start-compile-no-push", visible_flag
 _asm_start_no_push:
 	push {lr}
+	bl _asm_undefer_lit
 	movs r0, #0
 	ldr r1, =called
 	str r0, [r1]
@@ -78,6 +79,7 @@ _asm_link:
 	define_internal_word "finalize,", visible_flag
 _asm_finalize:
 	push {lr}
+	bl _asm_undefer_lit
 	bl _asm_word_align
 	push_tos
 	ldr tos, =current_flags
@@ -129,6 +131,7 @@ _asm_finalize:
 	define_internal_word "finalize-no-align,", visible_flag
 _asm_finalize_no_align:
 	push {lr}
+	bl _asm_undefer_lit
 	bl _asm_word_align
 	push_tos
 	ldr tos, =current_flags
@@ -179,6 +182,7 @@ _asm_finalize_no_align:
 	define_internal_word "end-compile,", visible_flag
 _asm_end:
 	push {lr}
+	bl _asm_undefer_lit
 	push_tos
 	ldr tos, =0xBD00	@@ pop {pc}
 	bl _current_comma_2
@@ -193,6 +197,7 @@ _asm_end:
 	define_word "end-compress-flash", visible_flag
 _asm_end_compress_flash:
 	push {lr}
+	bl _asm_undefer_lit
 	ldr r0, =compress_flash_enabled
 	ldr r1, [r0]
 	cmp r1, #0
@@ -215,6 +220,7 @@ _asm_end_compress_flash:
 	define_word "commit-flash", visible_flag
 _asm_commit_flash:
 	push {lr}
+	bl _asm_undefer_lit
 	ldr r0, =compress_flash_enabled
 	ldr r1, [r0]
 	cmp r1, #0
@@ -330,9 +336,440 @@ _asm_branch_zero_back:
 	pop {pc}
 	end_inlined
 
+	@@ Extract the value of a constant
+	define_internal_word "extract-constant", visible_flag
+_asm_extract_constant:
+	push {lr}
+	ldrh r0, [tos]
+	ldr r1, =0xB500
+	cmp r0, r1
+	beq 1f
+3:	movs tos, #0
+	push_tos
+	pop {pc}
+1:	adds tos, #2
+	ldrh r0, [tos]
+	ldr r1, =0x603E
+	cmp r0, r1
+	beq 1f
+	movs tos, #0
+	push_tos
+	pop {pc}
+1:	adds tos, #2
+	ldrh r0, [tos]
+	ldr r1, =0xFF00
+	movs r2, r0
+	ands r2, r1
+	ldr r1, =0x2600
+	cmp r2, r1
+	beq 2f
+	ldr r1, =0xFBF0
+	movs r2, r0
+	ands r2, r1
+	ldr r1, =0xF240
+	cmp r2, r1
+	bne 3b
+	movs r2, r0
+	movs r1, #0xF
+	ands r2, r1
+	lsls r0, r0, #10
+	movs r1, #1
+	ands r0, r1
+	adds tos, #2
+	ldrh r3, [tos]
+	ldr r1, =0x8F00
+	movs r4, r3
+	ands r4, r1
+	ldr r1, =0x0600
+	cmp r4, r1
+	bne 3b
+	lsls r2, r2, #12
+	lsls r0, r0, #11
+	orrs r2, r0
+	ldr r1, =0x7000
+	movs r4, r3
+	ands r4, r1
+	lsls r4, r4, #8
+	orrs r2, r4
+	ldr r1, =0x00FF
+	movs r4, r3
+	ands r4, r1
+	orrs r4, r2
+	adds tos, #2
+	ldrh r0, [tos]
+	beq 2f
+	ldr r1, =0xFBF0
+	movs r2, r0
+	ands r2, r1
+	ldr r1, =0xF2C0
+	cmp r2, r1
+	bne 3b
+	movs r2, r0
+	movs r1, #0xF
+	ands r2, r1
+	lsls r0, r0, #10
+	movs r1, #1
+	ands r0, r1
+	adds tos, #2
+	ldrh r3, [tos]
+	ldr r1, =0x8F00
+	movs r5, r3
+	ands r5, r1
+	ldr r1, =0x0600
+	cmp r5, r1
+	bne 3b
+	lsls r2, r2, #12
+	lsls r0, r0, #11
+	orrs r2, r0
+	ldr r1, =0x7000
+	movs r5, r3
+	ands r5, r1
+	lsls r5, r5, #8
+	orrs r2, r5
+	ldr r1, =0x00FF
+	movs r5, r3
+	ands r5, r1
+	orrs r5, r2
+	lsls r0, r5, #16
+	orrs r0, r4
+	b 4f
+2:	ldr r1, =0x00FF
+	ands r0, r1
+4:	adds tos, #2
+	ldrh r2, [tos]
+	ldr r1, =0xBD00
+	cmp r2, r1
+	bne 3b
+	movs tos, r0
+	push_tos
+	ldr tos, =-1
+	pop {pc}
+	
 	@@ Inline a word
 	define_internal_word "inline,", visible_flag
 _asm_inline:
+	push {lr}
+	push_tos
+	bl _asm_extract_constant
+	cmp tos, #0
+	beq 1f
+	pull_tos
+	bl _asm_undefer_lit
+	ldr r0, =-1
+	ldr r1, =literal_deferred_q
+	str r0, [r1]
+	ldr r1, =deferred_literal
+	str tos, [r1]
+	pull_tos
+	pop {pc}	
+1:	adds dp, #4
+	pull_tos
+	ldr r1, =literal_deferred_q
+	ldr r0, [r1]
+	cmp r0, #0
+	bne 1f
+	bl _asm_do_inline
+	pop {pc}
+1:	ldr r0, =_add
+	cmp tos, r0
+	bne 1f
+	pull_tos
+	bl _asm_fold_add
+	pop {pc}
+1:	ldr r0, =_sub
+	cmp tos, r0
+	bne 1f
+	pull_tos
+	bl _asm_fold_sub
+	pop {pc}
+1:	ldr r0, =_and
+	cmp tos, r0
+	bne 1f
+	pull_tos
+	bl _asm_fold_and
+	pop {pc}
+1:	ldr r0, =_or
+	cmp tos, r0
+	bne 1f
+	pull_tos
+	bl _asm_fold_or
+	pop {pc}
+1:	ldr r0, =_xor
+	cmp tos, r0
+	bne 1f
+	pull_tos
+	bl _asm_fold_xor
+	pop {pc}
+1:	ldr r0, =_lshift
+	cmp tos, r0
+	bne 1f
+	pull_tos
+	bl _asm_fold_lshift
+	pop {pc}
+1:	ldr r0, =_rshift
+	cmp tos, r0
+	bne 1f
+	pull_tos
+	bl _asm_fold_rshift
+	pop {pc}
+1:	ldr r0, =_arshift
+	cmp tos, r0
+	bne 1f
+	pull_tos
+	bl _asm_fold_arshift
+	pop {pc}
+1:	bl _asm_do_inline
+	pop {pc}
+	end_inlined
+
+	@@ Constant fold +
+	define_internal_word "fold+", visible_flag
+_asm_fold_add:
+	push {lr}
+	ldr r0, =deferred_literal
+	ldr r1, [r0]
+	ldr r2, =255
+	cmp r1, r2
+	bgt 2f
+	cmp r1, #0
+	blt 1f
+	push_tos
+	movs tos, r1
+	push_tos
+	movs tos, #6
+	bl _asm_add_imm
+	ldr r1, =literal_deferred_q
+	movs r2, #0
+	str r2, [r1]
+	pop {pc}
+1:	mvns r3, r1
+	adds r3, #1
+	cmp r3, r2
+	bhi 2f
+	push_tos
+	movs tos, r3
+	push_tos
+	movs tos, #6
+	bl _asm_sub_imm
+	ldr r1, =literal_deferred_q
+	movs r2, #0
+	str r2, [r1]
+	pop {pc}
+2:	bl _asm_undefer_lit
+	push_tos
+	ldr tos, =_add
+	bl _asm_do_inline
+	pop {pc}
+	end_inlined
+
+	@@ Constant fold -
+	define_internal_word "fold-", visible_flag
+_asm_fold_sub:
+	push {lr}
+	ldr r0, =deferred_literal
+	ldr r1, [r0]
+	ldr r2, =255
+	cmp r1, r2
+	bgt 2f
+	cmp r1, #0
+	blt 1f
+	push_tos
+	movs tos, r1
+	push_tos
+	movs tos, #6
+	bl _asm_sub_imm
+	ldr r1, =literal_deferred_q
+	movs r2, #0
+	str r2, [r1]
+	pop {pc}
+1:	mvns r3, r1
+	adds r3, #1
+	cmp r3, r2
+	bhi 2f
+	push_tos
+	movs tos, r3
+	push_tos
+	movs tos, #6
+	bl _asm_add_imm
+	ldr r1, =literal_deferred_q
+	movs r2, #0
+	str r2, [r1]
+	pop {pc}
+2:	bl _asm_undefer_lit
+	push_tos
+	ldr tos, =_sub
+	bl _asm_do_inline
+	pop {pc}
+	end_inlined
+
+	@@ Constant fold AND
+	define_internal_word "fold-and", visible_flag
+_asm_fold_and:
+	push {lr}
+	ldr r0, =deferred_literal
+	ldr r1, [r0]
+	ldr r2, =255
+	cmp r1, r2
+	bhi 1f
+	push_tos
+	ldr tos, =0xF006
+	push {r1}
+	bl _comma_2
+	pop {r1}
+	push_tos
+	ldr tos, =0x0600
+	orrs tos, r1
+	bl _comma_2
+	ldr r1, =literal_deferred_q
+	movs r2, #0
+	str r2, [r1]
+	pop {pc}
+1:	bl _asm_undefer_lit
+	push_tos
+	ldr tos, =_and
+	bl _asm_do_inline
+	pop {pc}
+	end_inlined
+
+	@@ Constant fold OR
+	define_internal_word "fold-or", visible_flag
+_asm_fold_or:
+	push {lr}
+	ldr r0, =deferred_literal
+	ldr r1, [r0]
+	ldr r2, =255
+	cmp r1, r2
+	bhi 1f
+	push_tos
+	ldr tos, =0xF046
+	push {r1}
+	bl _comma_2
+	pop {r1}
+	push_tos
+	ldr tos, =0x0600
+	orrs tos, r1
+	bl _comma_2
+	ldr r1, =literal_deferred_q
+	movs r2, #0
+	str r2, [r1]
+	pop {pc}
+1:	bl _asm_undefer_lit
+	push_tos
+	ldr tos, =_or
+	bl _asm_do_inline
+	pop {pc}
+	end_inlined
+
+	@@ Constant fold OR
+	define_internal_word "fold-xor", visible_flag
+_asm_fold_xor:
+	push {lr}
+	ldr r0, =deferred_literal
+	ldr r1, [r0]
+	ldr r2, =255
+	cmp r1, r2
+	bhi 1f
+	push_tos
+	ldr tos, =0xF086
+	push {r1}
+	bl _comma_2
+	pop {r1}
+	push_tos
+	ldr tos, =0x0600
+	orrs tos, r1
+	bl _comma_2
+	ldr r1, =literal_deferred_q
+	movs r2, #0
+	str r2, [r1]
+	pop {pc}
+1:	bl _asm_undefer_lit
+	push_tos
+	ldr tos, =_xor
+	bl _asm_do_inline
+	pop {pc}
+	end_inlined
+
+	@@ Constant fold LSHIFT
+	define_internal_word "fold-lshift", visible_flag
+_asm_fold_lshift:
+	push {lr}
+	ldr r0, =deferred_literal
+	ldr r1, [r0]
+	ldr r2, =31
+	cmp r1, r2
+	bhi 1f
+	push_tos
+	ldr tos, =0x0036
+	lsl r1, #6
+	orrs tos, r1
+	bl _comma_2
+	ldr r1, =literal_deferred_q
+	movs r2, #0
+	str r2, [r1]
+	pop {pc}
+1:	push_tos
+	movs tos, #0
+	push_tos
+	movs tos, #6
+	bl _asm_mov_imm
+	ldr r1, =literal_deferred_q
+	movs r2, #0
+	str r2, [r1]
+	pop {pc}
+	end_inlined
+
+	@@ Constant fold RSHIFT
+	define_internal_word "fold-rshift", visible_flag
+_asm_fold_rshift:
+	push {lr}
+	ldr r0, =deferred_literal
+	ldr r1, [r0]
+	ldr r2, =31
+	cmp r1, r2
+	bhi 1f
+	push_tos
+	ldr tos, =0x0836
+	lsl r1, #6
+	orrs tos, r1
+	bl _comma_2
+	ldr r1, =literal_deferred_q
+	movs r2, #0
+	str r2, [r1]
+	pop {pc}
+1:	push_tos
+	movs tos, #0
+	push_tos
+	movs tos, #6
+	bl _asm_mov_imm
+	ldr r1, =literal_deferred_q
+	movs r2, #0
+	str r2, [r1]
+	pop {pc}
+	end_inlined
+
+	@@ Constant fold ARSHIFT
+	define_internal_word "fold-arshift", visible_flag
+_asm_fold_arshift:
+	push {lr}
+	ldr r0, =deferred_literal
+	ldr r1, [r0]
+	ldr r2, =32
+	cmp r1, r2
+	blo 1f
+	movs r1, #31
+1:	push_tos
+	ldr tos, =0x1036
+	lsl r1, #6
+	orrs tos, r1
+	bl _comma_2
+	ldr r1, =literal_deferred_q
+	movs r2, #0
+	str r2, [r1]
+	pop {pc}
+
+	@@ Actually inline a word
+	define_internal_word "do-inline,", visible_flag
+_asm_do_inline:
 	push {lr}
 	ldrh r0, [tos]
 	ldr r1, =0xB500
@@ -359,13 +796,17 @@ _asm_inline:
 	pull_tos
 	pop {pc}
 	end_inlined
+
 	
+	.ltorg
+
 	.ifdef thumb2
 
 	@@ Call a word at an address
 	define_internal_word "call,", visible_flag
 _asm_call:	
 	push {lr}
+	bl _asm_undefer_lit
 	movs r0, #-1
 	ldr r1, =called
 	str r0, [r1]
@@ -638,6 +1079,28 @@ _asm_literal:
 	movs tos, r0
 	bl _asm_movt_imm
 	pop {pc}
+	end_inlined
+
+	@@ Undefer a literal
+	define_word "undefer-lit", visible_flag
+_asm_undefer_lit:
+	push {lr}
+	ldr r1, =literal_deferred_q
+	ldr r0, [r1]
+	cmp r0, #0
+	beq 1f
+	push_tos
+	movs tos, #6
+	bl _asm_push
+	push_tos
+	ldr r0, =deferred_literal
+	ldr tos, [r0]
+	push_tos
+	movs tos, #6
+	bl _asm_literal
+	movs r0, #0
+	str r0, [r1]
+1:	pop {pc}
 	end_inlined
 
 	@@ Reserve space for a literal

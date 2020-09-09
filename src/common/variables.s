@@ -33,6 +33,12 @@
 
 	@@ The word being currently compiled
 	allot current_compile, 4
+
+	@@ The current deferred literal
+	allot deferred_literal, 4
+
+	@@ Whether there is a deferred literal
+	allot literal_deferred_q, 4
 	
 	@@ The last word compiled
 	allot latest, 4

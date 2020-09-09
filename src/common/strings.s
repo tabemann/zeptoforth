@@ -114,6 +114,7 @@ _compile_imm_cstring:
 	define_word "compile-cstring", visible_flag
 _compile_cstring:
 	push {lr}
+	bl _asm_undefer_lit
 	push_tos
 	movs tos, #6
 	bl _asm_push
@@ -171,12 +172,7 @@ _char:	push {lr}
 _compile_char:
 	push {lr}
 	bl _char
-	push_tos
-	movs tos, #6
-	bl _asm_push
-	push_tos
-	movs tos, #6
-	bl _asm_literal
+	bl _comma_lit
 	pop {pc}
 	end_inlined
 
