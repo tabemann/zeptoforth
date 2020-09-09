@@ -1020,19 +1020,23 @@ _to_compile:
 	@@ Set compilation to RAM
 	define_word "compile-to-ram", visible_flag
 _compile_to_ram:
+	push {lr}
+	bl _asm_undefer_lit
 	ldr r0, =compiling_to_flash
 	movs r1, #0
 	str r1, [r0]
-	bx lr
+	pop {pc}
 	end_inlined
 
 	@@ Set compilation to flash
 	define_word "compile-to-flash", visible_flag
 _compile_to_flash:
+	push {lr}
+	bl _asm_undefer_lit
 	ldr r0, =compiling_to_flash
 	movs r1, #-1
 	str r1, [r0]
-	bx lr
+	pop {pc}
 	end_inlined
 
 	@@ Get whether compilation is to flash
@@ -1151,14 +1155,18 @@ _postpone:
 
 	@@ Compile a literal
 	define_word "lit,", visible_flag
-_comma_lit:	
+_comma_lit:
 	push {lr}
-	push_tos
-	movs tos, #6
-	bl _asm_push
-	push_tos
-	movs tos, #6
-	bl _asm_literal
+	ldr r1, =literal_deferred_q
+	ldr r0, [r1]
+	cmp r0, #0
+	beq 1f
+	bl _asm_undefer_lit
+1:	ldr r2, =deferred_literal
+	str tos, [r2]
+	ldr r0, =-1
+	str r0, [r1]
+	pull_tos
 	pop {pc}
 	end_inlined
 
@@ -1944,6 +1952,10 @@ _init_variables:
 	movs r1, 0
 	str r1, [r0]
 	ldr r0, =current_compile
+	str r1, [r0]
+	ldr r0, =deferred_literal
+	str r1, [r0]
+	ldr r0, =literal_deferred_q
 	str r1, [r0]
 	ldr r0, =latest
 	str r1, [r0]

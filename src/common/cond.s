@@ -16,6 +16,7 @@
 	@@ Start an IF block
 	define_word "if", visible_flag | immediate_flag | compiled_flag
 _if:	push {lr}
+	bl _asm_undefer_lit
 	push_tos
 	movs tos, #0
 	push_tos
@@ -40,6 +41,7 @@ _if:	push {lr}
 	@@ ELSE in an IF ELSE THEN block
 	define_word "else", visible_flag | immediate_flag | compiled_flag
 _else:	push {lr}
+	bl _asm_undefer_lit
 	cmp tos, #0
 	beq 1f
 	pull_tos
@@ -72,6 +74,7 @@ _not_following_if:
 	@@ End an IF block
 	define_word "then", visible_flag | immediate_flag | compiled_flag
 _then:	push {lr}
+	bl _asm_undefer_lit
 	movs r1, tos
 	pull_tos
 	movs r0, tos
@@ -92,12 +95,14 @@ _then:	push {lr}
 	@@ Start a BEGIN block
 	define_word "begin", visible_flag | immediate_flag | compiled_flag
 _begin:	push {lr}
+	bl _asm_undefer_lit
 	bl _current_here
 	pop {pc}
 
 	@@ Start a WHILE block
 	define_word "while", visible_flag | immediate_flag | compiled_flag
 _while:	push {lr}
+	bl _asm_undefer_lit
 	push_tos
 	movs tos, #0
 	push_tos
@@ -121,6 +126,7 @@ _while:	push {lr}
 	define_word "repeat", visible_flag | immediate_flag | compiled_flag
 _repeat:
 	push {lr}
+	bl _asm_undefer_lit
 	movs r0, tos
 	pull_tos
 	push {r0}
@@ -136,6 +142,7 @@ _repeat:
 	@@ End a BEGIN-UNTIL block
 	define_word "until", visible_flag | immediate_flag | compiled_flag
 _until:	push {lr}
+	bl _asm_undefer_lit
 	push_tos
 	movs tos, #0
 	push_tos
@@ -158,6 +165,7 @@ _until:	push {lr}
 	@@ End a BEGIN-AGAIN block
 	define_word "again", visible_flag | immediate_flag | compiled_flag
 _again:	push {lr}
+	bl _asm_undefer_lit
 	bl _asm_branch
 	pop {pc}
 	end_inlined
