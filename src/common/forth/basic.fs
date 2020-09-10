@@ -1119,6 +1119,7 @@ commit-flash
 : do ( end start -- ) ( R: -- leave start end ) ( compile: -- leave* loop )
   [immediate]
   [compile-only]
+  undefer-lit
   6 push,
   reserve-literal
   postpone >r
@@ -1131,6 +1132,7 @@ commit-flash
 : ?do ( end start -- ) ( R: -- leave start end ) ( compile: -- leave* loop )
   [immediate]
   [compile-only]
+  undefer-lit
   6 push,
   reserve-literal
   postpone >r
@@ -1159,6 +1161,7 @@ commit-flash
   postpone >r
   postpone swap
   postpone >r
+  undefer-lit
   0 6 0 lsl-imm,
   6 pull,
   0 0 cmp-imm,
@@ -1192,6 +1195,7 @@ commit-flash
   postpone >r
   postpone swap
   postpone >r
+  undefer-lit
   0 6 0 lsl-imm,
   6 pull,
   0 0 cmp-imm,
