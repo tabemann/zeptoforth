@@ -518,7 +518,8 @@ _asm_inline:
 	pull_tos
 	bl _asm_fold_arshift
 	pop {pc}
-1:	bl _asm_do_inline
+1:	bl _asm_undefer_lit
+	bl _asm_do_inline
 	pop {pc}
 	end_inlined
 
@@ -1091,6 +1092,7 @@ _asm_undefer_lit:
 	beq 1f
 	push_tos
 	movs tos, #6
+	push {r1}
 	bl _asm_push
 	push_tos
 	ldr r0, =deferred_literal
@@ -1098,6 +1100,7 @@ _asm_undefer_lit:
 	push_tos
 	movs tos, #6
 	bl _asm_literal
+	pop {r1}
 	movs r0, #0
 	str r0, [r1]
 1:	pop {pc}

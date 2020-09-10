@@ -861,16 +861,7 @@ _do_handle_number:
 	ldr r0, [r0]
 	cmp r0, #0
 	beq 1f
-	movs r1, tos
-	movs tos, #6
-	push {r1}
-	bl _asm_push
-	pop {r1}
-	push_tos
-	movs tos, r1
-	push_tos
-	movs tos, #6
-	bl _asm_literal
+	bl _comma_lit
 1:	push_tos
 	movs tos, #-1
 	pop {pc}
