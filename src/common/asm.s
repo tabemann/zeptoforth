@@ -468,6 +468,7 @@ _asm_inline:
 	str r0, [r1]
 	ldr r1, =deferred_literal
 	str tos, [r1]
+	adds dp, #4
 	pull_tos
 	pop {pc}	
 1:	adds dp, #4
