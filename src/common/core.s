@@ -1108,12 +1108,7 @@ _tick:	push {lr}
 _compiled_tick:
 	push {lr}
 	bl _tick
-	push_tos
-	movs tos, #6
-	bl _asm_push
-	push_tos
-	movs tos, #6
-	bl _asm_literal
+	bl _comma_lit
 	pop {pc}
 	end_inlined
 	

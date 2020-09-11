@@ -349,13 +349,15 @@ _asm_extract_constant:
 	pop {pc}
 1:	adds tos, #2
 	ldrh r0, [tos]
+	ldr r1, =0x3F04
+	cmp r0, r1
+	bne 3b
+	adds tos, #2
+	ldrh r0, [tos]
 	ldr r1, =0x603E
 	cmp r0, r1
-	beq 1f
-	movs tos, #0
-	push_tos
-	pop {pc}
-1:	adds tos, #2
+	bne 3b
+	adds tos, #2
 	ldrh r0, [tos]
 	ldr r1, =0xFF00
 	movs r2, r0
@@ -372,7 +374,7 @@ _asm_extract_constant:
 	movs r2, r0
 	movs r1, #0xF
 	ands r2, r1
-	lsls r0, r0, #10
+	lsrs r0, r0, #10
 	movs r1, #1
 	ands r0, r1
 	adds tos, #2
@@ -389,7 +391,7 @@ _asm_extract_constant:
 	ldr r1, =0x7000
 	movs r4, r3
 	ands r4, r1
-	lsls r4, r4, #8
+	lsrs r4, r4, #4
 	orrs r2, r4
 	ldr r1, =0x00FF
 	movs r4, r3
@@ -397,7 +399,9 @@ _asm_extract_constant:
 	orrs r4, r2
 	adds tos, #2
 	ldrh r0, [tos]
-	beq 2f
+	ldr r1, =0xBD00
+	cmp r0, r1
+	beq 5f
 	ldr r1, =0xFBF0
 	movs r2, r0
 	ands r2, r1
@@ -407,7 +411,7 @@ _asm_extract_constant:
 	movs r2, r0
 	movs r1, #0xF
 	ands r2, r1
-	lsls r0, r0, #10
+	lsrs r0, r0, #10
 	movs r1, #1
 	ands r0, r1
 	adds tos, #2
@@ -424,7 +428,7 @@ _asm_extract_constant:
 	ldr r1, =0x7000
 	movs r5, r3
 	ands r5, r1
-	lsls r5, r5, #8
+	lsrs r5, r5, #4
 	orrs r2, r5
 	ldr r1, =0x00FF
 	movs r5, r3
@@ -441,6 +445,10 @@ _asm_extract_constant:
 	cmp r2, r1
 	bne 3b
 	movs tos, r0
+	push_tos
+	ldr tos, =-1
+	pop {pc}
+5:	movs tos, r4
 	push_tos
 	ldr tos, =-1
 	pop {pc}
@@ -517,6 +525,24 @@ _asm_inline:
 	bne 1f
 	pull_tos
 	bl _asm_fold_arshift
+	pop {pc}
+1:	ldr r0, =_store_1
+	cmp tos, r0
+	bne 1f
+	pull_tos
+	bl _asm_fold_store_1
+	pop {pc}
+1:	ldr r0, =_store_2
+	cmp tos, r0
+	bne 1f
+	pull_tos
+	bl _asm_fold_store_2
+	pop {pc}
+1:	ldr r0, =_store_4
+	cmp tos, r0
+	bne 1f
+	pull_tos
+	bl _asm_fold_store_4
 	pop {pc}
 1:	bl _asm_undefer_lit
 	bl _asm_do_inline
@@ -701,7 +727,7 @@ _asm_fold_lshift:
 	bhi 1f
 	push_tos
 	ldr tos, =0x0036
-	lsl r1, #6
+	lsls r1, #6
 	orrs tos, r1
 	bl _comma_2
 	ldr r1, =literal_deferred_q
@@ -730,7 +756,7 @@ _asm_fold_rshift:
 	bhi 1f
 	push_tos
 	ldr tos, =0x0836
-	lsl r1, #6
+	lsls r1, #6
 	orrs tos, r1
 	bl _comma_2
 	ldr r1, =literal_deferred_q
@@ -760,9 +786,72 @@ _asm_fold_arshift:
 	movs r1, #31
 1:	push_tos
 	ldr tos, =0x1036
-	lsl r1, #6
+	lsls r1, #6
 	orrs tos, r1
 	bl _comma_2
+	ldr r1, =literal_deferred_q
+	movs r2, #0
+	str r2, [r1]
+	pop {pc}
+
+	@@ Constant fold B!
+	define_internal_word "fold-b!", visible_flag
+_asm_fold_store_1:
+	push {lr}
+	push_tos
+	ldr r0, =deferred_literal
+	ldr tos, [r0]
+	push_tos
+	movs tos, #0
+	bl _asm_literal
+	push_tos
+	ldr tos, =0x7006
+	bl _comma_2
+	push_tos
+	movs tos, #6
+	bl _asm_pull
+	ldr r1, =literal_deferred_q
+	movs r2, #0
+	str r2, [r1]
+	pop {pc}
+
+	@@ Constant fold H!
+	define_internal_word "fold-h!", visible_flag
+_asm_fold_store_2:
+	push {lr}
+	push_tos
+	ldr r0, =deferred_literal
+	ldr tos, [r0]
+	push_tos
+	movs tos, #0
+	bl _asm_literal
+	push_tos
+	ldr tos, =0x8006
+	bl _comma_2
+	push_tos
+	movs tos, #6
+	bl _asm_pull
+	ldr r1, =literal_deferred_q
+	movs r2, #0
+	str r2, [r1]
+	pop {pc}
+
+	@@ Constant fold !
+	define_internal_word "fold-!", visible_flag
+_asm_fold_store_4:
+	push {lr}
+	push_tos
+	ldr r0, =deferred_literal
+	ldr tos, [r0]
+	push_tos
+	movs tos, #0
+	bl _asm_literal
+	push_tos
+	ldr tos, =0x6006
+	bl _comma_2
+	push_tos
+	movs tos, #6
+	bl _asm_pull
 	ldr r1, =literal_deferred_q
 	movs r2, #0
 	str r2, [r1]
