@@ -492,6 +492,24 @@ _asm_inline:
 	pull_tos
 	bl _asm_fold_sub
 	pop {pc}
+1:	ldr r0, =_mul
+	cmp tos, r0
+	bne 1f
+	pull_tos
+	bl _asm_fold_mul
+	pop {pc}
+1:	ldr r0, =_div
+	cmp tos, r0
+	bne 1f
+	pull_tos
+	bl _asm_fold_div
+	pop {pc}
+1:	ldr r0, =_udiv
+	cmp tos, r0
+	bne 1f
+	pull_tos
+	bl _asm_fold_udiv
+	pop {pc}
 1:	ldr r0, =_and
 	cmp tos, r0
 	bne 1f
@@ -631,6 +649,69 @@ _asm_fold_sub:
 	pop {pc}
 	end_inlined
 
+	@@ Constant fold *
+	define_internal_word "fold*", visible_flag
+_asm_fold_mul:
+	push {lr}
+	push_tos
+	ldr r0, =deferred_literal
+	ldr tos, [r0]
+	push_tos
+	movs tos, #0
+	bl _asm_literal
+	push_tos
+	ldr tos, =0x4346
+	bl _current_comma_2
+	ldr r1, =literal_deferred_q
+	movs r2, #0
+	str r2, [r1]
+	pop {pc}
+	end_inlined
+
+	@@ Constant fold /
+	define_internal_word "fold/", visible_flag
+_asm_fold_div:
+	push {lr}
+	push_tos
+	ldr r0, =deferred_literal
+	ldr tos, [r0]
+	push_tos
+	movs tos, #0
+	bl _asm_literal
+	push_tos
+	ldr tos, =0xFB96
+	bl _current_comma_2
+	push_tos
+	ldr tos, =0xF6F0
+	bl _current_comma_2
+	ldr r1, =literal_deferred_q
+	movs r2, #0
+	str r2, [r1]
+	pop {pc}
+	end_inlined
+
+	@@ Constant fold u/
+	define_internal_word "foldu/", visible_flag
+_asm_fold_udiv:
+	push {lr}
+	push_tos
+	ldr r0, =deferred_literal
+	ldr tos, [r0]
+	push_tos
+	movs tos, #0
+	bl _asm_literal
+	push_tos
+	ldr tos, =0xFBB6
+	bl _current_comma_2
+	push_tos
+	ldr tos, =0xF6F0
+	bl _current_comma_2
+	ldr r1, =literal_deferred_q
+	movs r2, #0
+	str r2, [r1]
+	pop {pc}
+	end_inlined
+
 	@@ Constant fold AND
 	define_internal_word "fold-and", visible_flag
 _asm_fold_and:
@@ -689,7 +770,7 @@ _asm_fold_or:
 	pop {pc}
 	end_inlined
 
-	@@ Constant fold OR
+	@@ Constant fold XOR
 	define_internal_word "fold-xor", visible_flag
 _asm_fold_xor:
 	push {lr}
