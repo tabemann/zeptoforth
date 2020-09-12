@@ -602,10 +602,17 @@ _asm_fold_add:
 	movs r2, #0
 	str r2, [r1]
 	pop {pc}
-2:	bl _asm_undefer_lit
+2:	push_tos
+	movs tos, r1
 	push_tos
-	ldr tos, =_add
-	bl _asm_do_inline
+	movs tos, #0
+	bl _asm_literal
+	push_tos
+	ldr tos, =0x1836
+	bl _current_comma_2
+	ldr r1, =literal_deferred_q
+	movs r2, #0
+	str r2, [r1]
 	pop {pc}
 	end_inlined
 
@@ -642,10 +649,17 @@ _asm_fold_sub:
 	movs r2, #0
 	str r2, [r1]
 	pop {pc}
-2:	bl _asm_undefer_lit
+2:	push_tos
+	movs tos, r1
 	push_tos
-	ldr tos, =_sub
-	bl _asm_do_inline
+	movs tos, #0
+	bl _asm_literal
+	push_tos
+	ldr tos, =0x1A36
+	bl _current_comma_2
+	ldr r1, =literal_deferred_q
+	movs r2, #0
+	str r2, [r1]
 	pop {pc}
 	end_inlined
 
@@ -734,10 +748,17 @@ _asm_fold_and:
 	movs r2, #0
 	str r2, [r1]
 	pop {pc}
-1:	bl _asm_undefer_lit
+1:	push_tos
+	movs tos, r1
 	push_tos
-	ldr tos, =_and
-	bl _asm_do_inline
+	movs tos, #0
+	bl _asm_literal
+	push_tos
+	ldr tos, =0x4006
+	bl _current_comma_2
+	ldr r1, =literal_deferred_q
+	movs r2, #0
+	str r2, [r1]
 	pop {pc}
 	end_inlined
 
@@ -763,10 +784,17 @@ _asm_fold_or:
 	movs r2, #0
 	str r2, [r1]
 	pop {pc}
-1:	bl _asm_undefer_lit
+1:	push_tos
+	movs tos, r1
 	push_tos
-	ldr tos, =_or
-	bl _asm_do_inline
+	movs tos, #0
+	bl _asm_literal
+	push_tos
+	ldr tos, =0x4306
+	bl _current_comma_2
+	ldr r1, =literal_deferred_q
+	movs r2, #0
+	str r2, [r1]
 	pop {pc}
 	end_inlined
 
@@ -792,10 +820,17 @@ _asm_fold_xor:
 	movs r2, #0
 	str r2, [r1]
 	pop {pc}
-1:	bl _asm_undefer_lit
+1:	push_tos
+	movs tos, r1
 	push_tos
-	ldr tos, =_xor
-	bl _asm_do_inline
+	movs tos, #0
+	bl _asm_literal
+	push_tos
+	ldr tos, =0x4046
+	bl _current_comma_2
+	ldr r1, =literal_deferred_q
+	movs r2, #0
+	str r2, [r1]
 	pop {pc}
 	end_inlined
 
