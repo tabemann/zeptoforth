@@ -452,6 +452,7 @@ _asm_extract_constant:
 	push_tos
 	ldr tos, =-1
 	pop {pc}
+	end_inlined
 	
 	@@ Inline a word
 	define_internal_word "inline,", visible_flag
@@ -642,12 +643,12 @@ _asm_fold_and:
 	push_tos
 	ldr tos, =0xF006
 	push {r1}
-	bl _comma_2
+	bl _current_comma_2
 	pop {r1}
 	push_tos
 	ldr tos, =0x0600
 	orrs tos, r1
-	bl _comma_2
+	bl _current_comma_2
 	ldr r1, =literal_deferred_q
 	movs r2, #0
 	str r2, [r1]
@@ -671,12 +672,12 @@ _asm_fold_or:
 	push_tos
 	ldr tos, =0xF046
 	push {r1}
-	bl _comma_2
+	bl _current_comma_2
 	pop {r1}
 	push_tos
 	ldr tos, =0x0600
 	orrs tos, r1
-	bl _comma_2
+	bl _current_comma_2
 	ldr r1, =literal_deferred_q
 	movs r2, #0
 	str r2, [r1]
@@ -700,12 +701,12 @@ _asm_fold_xor:
 	push_tos
 	ldr tos, =0xF086
 	push {r1}
-	bl _comma_2
+	bl _current_comma_2
 	pop {r1}
 	push_tos
 	ldr tos, =0x0600
 	orrs tos, r1
-	bl _comma_2
+	bl _current_comma_2
 	ldr r1, =literal_deferred_q
 	movs r2, #0
 	str r2, [r1]
@@ -730,7 +731,7 @@ _asm_fold_lshift:
 	ldr tos, =0x0036
 	lsls r1, #6
 	orrs tos, r1
-	bl _comma_2
+	bl _current_comma_2
 	ldr r1, =literal_deferred_q
 	movs r2, #0
 	str r2, [r1]
@@ -759,7 +760,7 @@ _asm_fold_rshift:
 	ldr tos, =0x0836
 	lsls r1, #6
 	orrs tos, r1
-	bl _comma_2
+	bl _current_comma_2
 	ldr r1, =literal_deferred_q
 	movs r2, #0
 	str r2, [r1]
@@ -789,11 +790,12 @@ _asm_fold_arshift:
 	ldr tos, =0x1036
 	lsls r1, #6
 	orrs tos, r1
-	bl _comma_2
+	bl _current_comma_2
 	ldr r1, =literal_deferred_q
 	movs r2, #0
 	str r2, [r1]
 	pop {pc}
+	end_inlined
 
 	@@ Constant fold B!
 	define_internal_word "fold-b!", visible_flag
@@ -807,7 +809,7 @@ _asm_fold_store_1:
 	bl _asm_literal
 	push_tos
 	ldr tos, =0x7006
-	bl _comma_2
+	bl _current_comma_2
 	push_tos
 	movs tos, #6
 	bl _asm_pull
@@ -815,6 +817,7 @@ _asm_fold_store_1:
 	movs r2, #0
 	str r2, [r1]
 	pop {pc}
+	end_inlined
 
 	@@ Constant fold H!
 	define_internal_word "fold-h!", visible_flag
@@ -828,7 +831,7 @@ _asm_fold_store_2:
 	bl _asm_literal
 	push_tos
 	ldr tos, =0x8006
-	bl _comma_2
+	bl _current_comma_2
 	push_tos
 	movs tos, #6
 	bl _asm_pull
@@ -836,6 +839,7 @@ _asm_fold_store_2:
 	movs r2, #0
 	str r2, [r1]
 	pop {pc}
+	end_inlined
 
 	@@ Constant fold !
 	define_internal_word "fold-!", visible_flag
@@ -849,7 +853,7 @@ _asm_fold_store_4:
 	bl _asm_literal
 	push_tos
 	ldr tos, =0x6006
-	bl _comma_2
+	bl _current_comma_2
 	push_tos
 	movs tos, #6
 	bl _asm_pull
@@ -857,6 +861,7 @@ _asm_fold_store_4:
 	movs r2, #0
 	str r2, [r1]
 	pop {pc}
+	end_inlined
 
 	@@ Actually inline a word
 	define_internal_word "do-inline,", visible_flag
