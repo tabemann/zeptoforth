@@ -242,6 +242,9 @@ forth-wordlist set-current
   then
 ;
 
+\ Get whether a word is defined
+: defined? ( "word" -- flag ) token visible-flag find-all 0<> ;
+
 \ Set internal
 internal-wordlist set-current
 
