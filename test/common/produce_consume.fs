@@ -11,6 +11,7 @@
 \ GNU General Public License for more details.
 
 \ Set up the wordlist order
+\ forth-wordlist task-wordlist chan-wordlist 3 set-order
 forth-wordlist task-wordlist chan-wordlist 3 set-order
 forth-wordlist set-current
 
@@ -27,7 +28,7 @@ my-chan my-chan-size init-chan
 : producer ( -- )
   begin
     [char] Z 1+ [char] A ?do
-      i my-chan send-chan-byte
+      i my-chan send-chan-byte pause
     loop
   again
 ;
@@ -35,7 +36,7 @@ my-chan my-chan-size init-chan
 \ My consumer
 : consumer ( -- )
   begin
-    my-chan recv-chan-byte emit
+    my-chan recv-chan-byte emit pause
   again
 ;
 

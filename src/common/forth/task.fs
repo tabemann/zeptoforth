@@ -159,8 +159,8 @@ end-structure
 
 \ Find the previous task
 : prev-task ( task1 -- task2 )
-  dup
-  begin dup task-next @ 2 pick <> while task-next @ repeat
+  dup task-next @
+  begin dup 2 pick <> while task-next @ repeat
   tuck = if drop 0 then
 ;
 
@@ -172,7 +172,7 @@ end-structure
     then
     swap task-next @ swap task-next !
   else
-    0 current-task !
+    drop 0 current-task !
   then
 ;
 
@@ -183,13 +183,15 @@ task-wordlist set-current
 : enable-task ( task -- )
   dup task-active @ 1+
   dup 1 = if over link-task then
-  swap task-active ! ;
+  swap task-active !
+;
 
 \ Disable a task
 : disable-task ( task -- )
   dup task-active @ 1-
   dup 0 = if over unlink-task then
-  swap task-active ! ;
+  swap task-active !
+;
 
 \ Force-enable a task
 : force-enable-task ( task -- )

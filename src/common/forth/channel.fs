@@ -11,8 +11,7 @@
 \ GNU General Public License for more details.
 
 \ Check whether this is already defined
-\ defined? chan-wordlist not [if]
-true [if]
+defined? chan-wordlist not [if]
 
   \ Set up the wordlist
   forth-wordlist 1 set-order
@@ -132,7 +131,7 @@ true [if]
     0 over chan-recv-index !
     0 over chan-send-index !
     0 over chan-recv-task !
-    0 over chan-send-task !
+    0 swap chan-send-task !
   ;
 
   \ Send a byte to a channel
@@ -146,7 +145,7 @@ true [if]
   : recv-chan-byte ( chan -- b )
     dup wait-recv-chan
     dup recv-chan-addr b@
-    over advance-recv-chan
+    swap advance-recv-chan
   ;
 
   \ Send bytes to a channel
