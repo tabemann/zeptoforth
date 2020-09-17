@@ -34,9 +34,6 @@ variable current-task
 \ Declare a RAM variable for the end of free RAM memory
 variable free-end
 
-\ Starting task for a pause
-variable start-task
-
 \ Pause count
 variable pause-count
 
@@ -159,8 +156,7 @@ end-structure
 
 \ Find the previous task
 : prev-task ( task1 -- task2 )
-  dup task-next @
-  begin dup 2 pick <> while task-next @ repeat
+  dup begin dup task-next @ 2 pick <> while task-next @ repeat
   tuck = if drop 0 then
 ;
 
@@ -237,7 +233,6 @@ task-internal-wordlist set-current
   base @ task-base !
   dup dup task-next !
   dup main-task !
-  dup start-task !
   current-task !
   free-end @ task - free-end !
 ;
@@ -300,44 +295,46 @@ task-wordlist set-current
 \ Set internal
 task-internal-wordlist set-current
 
-\ Go to the next task
-: go-to-next-task ( task -- task )
-  task-next @
-  begin
-    dup ['] task-wait for-task @
-    over ['] task-systick-delay for-task @ -1 <>
-    systick-counter 3 pick ['] task-systick-start for-task @ -
-    3 pick ['] task-systick-delay for-task @ u< and or
-    over start-task @ <> and
-  while
-    task-next @
-  repeat
-;
-
 \ Reset waits
-: reset-waiting-tasks ( -- )
-  main-task @ begin
+: reset-waiting-tasks ( task -- )
+  dup >r
+  begin
     false over ['] task-wait for-task !
     task-next @
-    dup main-task @ =
+    dup r@ =
   until
-  drop
+  drop rdrop
 ;
 
-\ Handle all tasks are waiting
+\ Wake tasks
+: do-wake ( -- ) current-task @ reset-waiting-tasks ;
+
+\ Get whether a task is waiting
+: waiting-task? ( task -- )
+  >r
+  r@ ['] task-wait for-task @
+  r@ ['] task-systick-delay for-task @ -1 <>
+  systick-counter r@ ['] task-systick-start for-task @ -
+  r@ ['] task-systick-delay for-task @ u< and or
+  rdrop
+;
+
+\ Handle waiting tasks
 : handle-waiting-tasks ( task -- )
-  dup start-task @ = if
-    dup ['] task-wait for-task @
-    over ['] task-systick-delay for-task @ -1 <>
-    systick-counter 3 pick ['] task-systick-start for-task @ -
-    3 roll ['] task-systick-delay for-task @ u< and or
-    if
-      sleep
-      reset-waiting-tasks
-    then
+  dup waiting-task? if
+    sleep
+    reset-waiting-tasks
   else
     drop
   then
+;
+
+\ Go to the next task
+: go-to-next-task ( task -- task )
+  dup >r
+  begin task-next @ dup waiting-task? not over r@ = or until
+  dup r@ = if dup handle-waiting-tasks then
+  rdrop
 ;
 
 \ Handle PAUSE
@@ -351,14 +348,20 @@ task-internal-wordlist set-current
     then
   until
   current-task @
+
+  \ main-task @ task-next @ main-task @ <> if
+  \   0 pause-enabled !
+  \   ." X " dup h.8 space
+  \   1 pause-enabled !
+  \ then
+
+  
   rp@ over task-rstack-current!
   >r sp@ r> tuck task-stack-current!
   ram-here over task-dict-current!
   handler @ task-handler !
   base @ task-base !
-  dup start-task !
   go-to-next-task
-  dup handle-waiting-tasks
   dup current-task !
   task-base @ base !
   task-handler @ handler !
@@ -534,6 +537,7 @@ forth-wordlist set-current
   0 pause-count !
   ['] do-pause pause-hook !
   ['] do-wait wait-hook !
+  ['] do-wake wake-hook !
   validate-dict-hook @ saved-validate-dict !
   false ram-dict-warned !
   ['] do-validate-dict validate-dict-hook !
