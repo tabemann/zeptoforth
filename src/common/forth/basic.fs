@@ -1652,6 +1652,12 @@ variable wait-hook
   drop
 ;
 
+\ Wake hook variable
+variable wake-hook
+
+\ Wake all waiting tasks
+: wake ( -- ) wake-hook @ ?execute ;
+
 \ Set internal
 internal-wordlist set-current
 
@@ -1679,6 +1685,7 @@ forth-wordlist set-current
   next-ram-space dict-base !
   dict-base @ next-user-space + ram-here!
   0 wait-hook !
+  0 wake-hook !
   false flash-dict-warned !
   ['] do-flash-validate-dict validate-dict-hook !
 ;

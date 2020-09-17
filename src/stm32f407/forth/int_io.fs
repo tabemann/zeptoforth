@@ -163,6 +163,7 @@ $80 constant TXE
   then
   38 NVIC_ICPR_CLRPEND!
   enable-int
+  wake
 ;
 
 \ Null interrupt handler

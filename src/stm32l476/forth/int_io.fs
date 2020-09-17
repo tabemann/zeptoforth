@@ -170,6 +170,7 @@ $08 constant ORE
   then
   38 NVIC_ICPR_CLRPEND!
   enable-int
+  wake
 ;
 
 \ Null interrupt handler
