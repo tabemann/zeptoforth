@@ -79,7 +79,7 @@ defined? chan-wordlist not [if]
     begin dup chan-full? while
       current-task over chan-send-task !
       current-task disable-task
-      wake-recv-chan
+      dup wake-recv-chan
     repeat
     0 swap chan-send-task !
   ;
@@ -94,7 +94,7 @@ defined? chan-wordlist not [if]
     begin dup chan-empty? while
       current-task over chan-recv-task !
       current-task disable-task
-      wake-send-chan
+      dup wake-send-chan
     repeat
     0 swap chan-recv-task !
   ;
