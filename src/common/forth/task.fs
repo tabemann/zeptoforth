@@ -1,17 +1,22 @@
 \ Copyright (c) 2020 Travis Bemann
-\
-\ This program is free software: you can redistribute it and/or modify
-\ it under the terms of the GNU General Public License as published by
-\ the Free Software Foundation, either version 3 of the License, or
-\ (at your option) any later version.
-\
-\ This program is distributed in the hope that it will be useful,
-\ but WITHOUT ANY WARRANTY; without even the implied warranty of
-\ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-\ GNU General Public License for more details.
-\
-\ You should have received a copy of the GNU General Public License
-\ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+\ 
+\ Permission is hereby granted, free of charge, to any person obtaining a copy
+\ of this software and associated documentation files (the "Software"), to deal
+\ in the Software without restriction, including without limitation the rights
+\ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+\ copies of the Software, and to permit persons to whom the Software is
+\ furnished to do so, subject to the following conditions:
+\ 
+\ The above copyright notice and this permission notice shall be included in
+\ all copies or substantial portions of the Software.
+\ 
+\ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+\ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+\ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+\ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+\ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+\ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+\ SOFTWARE.
 
 \ Compile this to flash
 compile-to-flash
@@ -31,11 +36,17 @@ variable main-task
 \ Current task
 variable current-task
 
+\ Last task
+variable last-task
+
 \ Declare a RAM variable for the end of free RAM memory
 variable free-end
 
 \ Pause count
 variable pause-count
+
+\ Don't wake any tasks
+variable dont-wake
 
 \ The current task handler
 user task-handler
@@ -148,28 +159,121 @@ end-structure
   execute dict-base @ - swap task-dict-base +
 ;
 
-\ Link a task into the main loop
-: link-task ( task -- )
-  current-task @ task-next @ over task-next !
-  current-task @ task-next !
-;
-
 \ Find the previous task
 : prev-task ( task1 -- task2 )
   dup begin dup task-next @ 2 pick <> while task-next @ repeat
-  tuck = if drop 0 then
+  tuck = if
+    0 pause-enabled ! [char] x emit 1 pause-enabled !
+    drop 0
+  then
+;
+
+
+\ Display a task cycle
+: show-cycle ( task always? -- )
+  0 pause-enabled !
+  swap dup dup task-next @ <> rot or if
+    dup h.8 dup ['] task-wait for-task @ if [char] * emit then
+    dup task-next @ begin dup 2 pick <> while
+      space ." -> "
+      dup h.8
+      dup ['] task-wait for-task @ if [char] * emit then
+      task-next @
+    repeat
+    2drop
+    cr
+  else
+    drop
+  then
+  1 pause-enabled !
+;
+
+\ Link a task into the main loop
+: link-task ( task -- )
+  true dont-wake !
+
+  current-task @ if
+
+    \ 0 pause-enabled !
+    \ cr [char] # emit
+    \ 1 pause-enabled !
+    \ current-task @ true show-cycle
+    \ 0 pause-enabled !
+    \ space
+    \ 1 pause-enabled !
+
+    current-task @ prev-task ?dup if
+      
+      \ 0 pause-enabled !
+      \ [char] y emit
+      \ dup h.8 space
+      \ current-task @ h.8 space
+      \ over h.8 space
+      \ 1 pause-enabled !
+      
+      over swap task-next !
+    else
+      
+      \ 0 pause-enabled ! [char] z emit 1 pause-enabled !
+      
+      dup current-task @ task-next !
+    then
+    
+    \ 0 pause-enabled !
+    \ current-task @ h.8 space
+    \ dup h.8 space
+    \ 1 pause-enabled !
+    
+    current-task @ swap task-next !
+    
+  else
+    dup dup task-next !
+    current-task !
+  then
+
+  \ 0 pause-enabled !
+  \ cr [char] & emit
+  \ 1 pause-enabled !
+  \ current-task @ true show-cycle
+  \ 0 pause-enabled !
+  \ space
+  \ 1 pause-enabled !
+
+  false dont-wake !
 ;
 
 \ Unlink a task from the main loop
 : unlink-task ( task -- )
+  true dont-wake !
+
+  \ 0 pause-enabled !
+  \ cr [char] $ emit
+  \ 1 pause-enabled !
+  \ dup true show-cycle
+  \ 0 pause-enabled !
+  \ space
+  \ 1 pause-enabled !
+  
   dup prev-task ?dup if
     over current-task @ = if
       over task-next @ current-task !
     then
     swap task-next @ swap task-next !
   else
-    drop 0 current-task !
+    drop 0 current-task ! 0 last-task !
   then
+
+  \ current-task @ if
+  \   0 pause-enabled !
+  \   cr [char] | emit
+  \   1 pause-enabled !
+  \   current-task @ true show-cycle
+  \   0 pause-enabled !
+  \   space
+  \   1 pause-enabled !
+  \ then
+
+  false dont-wake !
 ;
 
 \ Set non-internal
@@ -233,6 +337,7 @@ task-internal-wordlist set-current
   base @ task-base !
   dup dup task-next !
   dup main-task !
+  dup last-task !
   current-task !
   free-end @ task - free-end !
 ;
@@ -307,7 +412,9 @@ task-internal-wordlist set-current
 ;
 
 \ Wake tasks
-: do-wake ( -- ) current-task @ reset-waiting-tasks ;
+: do-wake ( -- )
+  dont-wake @ not if current-task @ reset-waiting-tasks then
+;
 
 \ Get whether a task is waiting
 : waiting-task? ( task -- )
@@ -339,6 +446,7 @@ task-internal-wordlist set-current
 
 \ Handle PAUSE
 : do-pause ( -- )
+  true dont-wake !
   1 pause-count +!
   begin
     task-io
@@ -347,22 +455,30 @@ task-internal-wordlist set-current
       sleep
     then
   until
-  current-task @
+  last-task @ if
+    rp@ last-task @ task-rstack-current!
+    sp@ last-task @ task-stack-current!
+    ram-here last-task @ task-dict-current!
+    handler @ last-task @ ['] task-handler for-task !
+    base @ last-task @ ['] task-base for-task !
+  then
 
-  \ main-task @ task-next @ main-task @ <> if
+  \ current-task @ task-next @ current-task @ <> if
   \   0 pause-enabled !
-  \   ." X " dup h.8 space
+  \   cr [char] ^ emit
+  \   1 pause-enabled !
+  \   current-task @ false show-cycle
+  \   0 pause-enabled !
+  \   space
   \   1 pause-enabled !
   \ then
-
   
-  rp@ over task-rstack-current!
-  >r sp@ r> tuck task-stack-current!
-  ram-here over task-dict-current!
-  handler @ task-handler !
-  base @ task-base !
-  go-to-next-task
+  current-task @ go-to-next-task
+
+  \ dup false show-cycle
+
   dup current-task !
+  dup last-task !
   task-base @ base !
   task-handler @ handler !
   dup task-stack-base stack-base !
@@ -373,6 +489,7 @@ task-internal-wordlist set-current
   dup task-dict-current ram-here!
   dup task-dict-base dict-base !
   task-stack-current sp!
+  false dont-wake !
 ;
 
 \ Set non-internal
@@ -445,7 +562,9 @@ task-internal-wordlist set-current
 
 \ Wait the current thread
 : do-wait ( -- )
-  current-task @ wait-task
+  pause-enabled @ 0> if
+    current-task @ wait-task
+  then
 ;
 
 \ RAM dictionary space warning has been displayed
@@ -502,6 +621,7 @@ forth-wordlist set-current
   ['] do-wait wait-hook !
   false ram-dict-warned !
   ['] do-validate-dict validate-dict-hook !
+  false dont-wake !
   1 pause-enabled !
 ;
 

@@ -1,17 +1,22 @@
 \ Copyright (c) 2020 Travis Bemann
-\
-\ This program is free software: you can redistribute it and/or modify
-\ it under the terms of the GNU General Public License as published by
-\ the Free Software Foundation, either version 3 of the License, or
-\ (at your option) any later version.
-\
-\ This program is distributed in the hope that it will be useful,
-\ but WITHOUT ANY WARRANTY; without even the implied warranty of
-\ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-\ GNU General Public License for more details.
-\
-\ You should have received a copy of the GNU General Public License
-\ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+\ 
+\ Permission is hereby granted, free of charge, to any person obtaining a copy
+\ of this software and associated documentation files (the "Software"), to deal
+\ in the Software without restriction, including without limitation the rights
+\ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+\ copies of the Software, and to permit persons to whom the Software is
+\ furnished to do so, subject to the following conditions:
+\ 
+\ The above copyright notice and this permission notice shall be included in
+\ all copies or substantial portions of the Software.
+\ 
+\ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+\ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+\ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+\ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+\ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+\ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+\ SOFTWARE.
 
 \ Compile this to flash
 compile-to-flash
@@ -481,6 +486,14 @@ commit-flash
   else
     drop flash-latest over search-by-xt drop nip
   then
+;
+
+\ Safely emit a character
+: safe-emit ( b -- )
+  pause-enabled @
+  0 pause-enabled !
+  swap serial-emit
+  pause-enabled !
 ;
 
 \ Safely type a string
@@ -1661,6 +1674,9 @@ variable wake-hook
 \ Set internal
 internal-wordlist set-current
 
+\ Flush console hook variable
+variable flush-console-hook
+
 \ Flash space warning has been displayed
 variable flash-dict-warned
 
@@ -1678,6 +1694,9 @@ commit-flash
 \ Set forth
 forth-wordlist set-current
 
+\ Flush the console
+: flush-console ( -- ) flush-console-hook @ ?execute ;
+
 \ Initialize the RAM variables
 : init ( -- )
   init
@@ -1686,6 +1705,7 @@ forth-wordlist set-current
   dict-base @ next-user-space + ram-here!
   0 wait-hook !
   0 wake-hook !
+  0 flush-console-hook !
   false flash-dict-warned !
   ['] do-flash-validate-dict validate-dict-hook !
 ;

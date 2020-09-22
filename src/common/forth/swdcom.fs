@@ -5,8 +5,8 @@ forth-wordlist set-current
 wordlist constant swd-wordlist
 wordlist constant swd-internal-wordlist
 
-forth-wordlist int-io-internal-wordlist swd-internal-wordlist swd-wordlist
-4 set-order
+forth-wordlist internal-wordlist int-io-internal-wordlist
+swd-internal-wordlist swd-wordlist 5 set-order
 swd-internal-wordlist set-current
 
 here 256 2* cell+ buffer: swd
@@ -35,6 +35,8 @@ variable use-sleep
 : swd-emit? ( -- flag ) swd-tx-w h@ dup 8 rshift swap $ff and 1+ $ff and <> ;
 : swd-emit ( char -- ) [: swd-emit? ;] pause-until swd-tx swd-tx-w b@ + b! inc-tx-w ;
 
+: swd-flush-console ( -- ) [: swd-tx-w h@ dup 8 rshift swap $FF and = ;] wait ;
+
 : >r11 ( x -- ) [ $46b3 h, ] drop ; \ $46b3 = mov r11, r6
 : swd-init ( -- ) true use-sleep ! 0 swd ! swd >r11  ;
 
@@ -45,6 +47,7 @@ swd-wordlist set-current
   ['] swd-key key-hook !
   ['] swd-emit? emit?-hook !
   ['] swd-emit emit-hook !
+  ['] swd-flush-console flush-console-hook !
 ;
 
 : serial-console ( -- )
@@ -52,6 +55,7 @@ swd-wordlist set-current
   ['] do-key key-hook !
   ['] do-emit? emit?-hook !
   ['] do-emit emit-hook !
+  ['] do-flush-console flush-console-hook !
 ;
 
 : enable-sleep ( -- ) true use-sleep ! ;

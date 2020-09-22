@@ -1,14 +1,22 @@
 \ Copyright (c) 2020 Travis Bemann
 \
-\ This program is free software: you can redistribute it and/or modify
-\ it under the terms of the GNU General Public License as published by
-\ the Free Software Foundation, either version 3 of the License, or
-\ (at your option) any later version.
-\
-\ This program is distributed in the hope that it will be useful,
-\ but WITHOUT ANY WARRANTY; without even the implied warranty of
-\ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-\ GNU General Public License for more details.
+\ Permission is hereby granted, free of charge, to any person obtaining a copy
+\ of this software and associated documentation files (the "Software"), to deal
+\ in the Software without restriction, including without limitation the rights
+\ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+\ copies of the Software, and to permit persons to whom the Software is
+\ furnished to do so, subject to the following conditions:
+\ 
+\ The above copyright notice and this permission notice shall be included in
+\ all copies or substantial portions of the Software.
+\ 
+\ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+\ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+\ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+\ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+\ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+\ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+\ SOFTWARE.
 
 \ Check whether this is already defined
 defined? chan-wordlist not [if]
@@ -59,16 +67,6 @@ defined? chan-wordlist not [if]
   \ Define internal words
   chan-internal-wordlist set-current
   
-  \ Wake task waiting to send
-  : wake-send-chan ( chan -- )
-    chan-send-task @ ?dup if enable-task then pause
-  ;
-
-  \ Wake task waiting to receive
-  : wake-recv-chan ( chan -- )
-    chan-recv-task @ ?dup if enable-task then pause
-  ;
-
   \ Wait to send on a channel
   : wait-send-chan ( chan -- )
     begin
@@ -78,8 +76,10 @@ defined? chan-wordlist not [if]
     repeat
     begin dup chan-full? while
       current-task over chan-send-task !
+\      begin dup chan-recv-task @ 0= while pause repeat
+      dup chan-recv-task @ ?dup if enable-task then
       current-task disable-task
-      dup wake-recv-chan
+      pause
     repeat
     0 swap chan-send-task !
   ;
@@ -93,8 +93,15 @@ defined? chan-wordlist not [if]
     repeat
     begin dup chan-empty? while
       current-task over chan-recv-task !
+      \      begin dup chan-send-task @ 0= while pause repeat
+
+      \ 0 pause-enabled !
+      \ flush-console
+      \ 1 pause-enabled !
+      
+      dup chan-send-task @ ?dup if enable-task then
       current-task disable-task
-      dup wake-send-chan
+      pause
     repeat
     0 swap chan-recv-task !
   ;
