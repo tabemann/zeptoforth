@@ -1,17 +1,22 @@
 @ Copyright (c) 2019-2020 Travis Bemann
 @
-@ This program is free software: you can redistribute it and/or modify
-@ it under the terms of the GNU General Public License as published by
-@ the Free Software Foundation, either version 3 of the License, or
-@ (at your option) any later version.
-@
-@ This program is distributed in the hope that it will be useful,
-@ but WITHOUT ANY WARRANTY; without even the implied warranty of
-@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-@ GNU General Public License for more details.
-@
-@ You should have received a copy of the GNU General Public License
-@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+@ Permission is hereby granted, free of charge, to any person obtaining a copy
+@ of this software and associated documentation files (the "Software"), to deal
+@ in the Software without restriction, including without limitation the rights
+@ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+@ copies of the Software, and to permit persons to whom the Software is
+@ furnished to do so, subject to the following conditions:
+@ 
+@ The above copyright notice and this permission notice shall be included in
+@ all copies or substantial portions of the Software.
+@ 
+@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+@ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+@ SOFTWARE.
 
 	@@ Display the copyright notices
 	define_word "copyright", visible_flag
@@ -28,29 +33,41 @@ _copyright:
 	define_word "license", visible_flag
 _license:
 	push {lr}
+
 	bl _cr
-	string_ln "This program is free software; you can redistribute it and/or modify"
+	string_ln "Permission is hereby granted, free of charge, to any person obtaining a copy"
 	bl _type
-	string_ln "it under the terms of the GNU General Public License as published by"
+	string_ln "of this software and associated documentation files (the \"Software\"), to deal"
 	bl _type
-	string_ln "the Free Software Foundation; either version 3 of the License, or"
+	string_ln "in the Software without restriction, including without limitation the rights"
 	bl _type
-	string_ln "(at your option) any later version."
+	string_ln "to use, copy, modify, merge, publish, distribute, sublicense, and/or sell"
 	bl _type
-	bl _cr
-	string_ln "This program is distributed in the hope that it will be useful,"
+	string_ln "copies of the Software, and to permit persons to whom the Software is"
 	bl _type
-	string_ln "but WITHOUT ANY WARRANTY; without even the implied warranty of"
-	bl _type
-	string_ln "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the"
-	bl _type
-	string_ln "GNU General Public License for more details."
+	string_ln "furnished to do so, subject to the following conditions:"
 	bl _type
 	bl _cr
-	string_ln "You should have received a copy of the GNU General Public License"
+	string_ln "The above copyright notice and this permission notice shall be included in"
 	bl _type
-	string_ln "along with this program. If not, see http://www.gnu.org/licenses/."
+	string_ln "all copies or substantial portions of the Software."
 	bl _type
+	bl _cr
+	string_ln "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR"
+	bl _type
+	string_ln "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,"
+	bl _type
+	string_ln "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE"
+	bl _type
+	string_ln "AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER"
+	bl _type
+	string_ln "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,"
+	bl _type
+	string_ln "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE"
+	bl _type
+	string_ln "SOFTWARE."
+	bl _type
+
 	pop {pc}
 
 	.ltorg
