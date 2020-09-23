@@ -4,74 +4,74 @@ The allocator in zeptoforth enables the user to create any number of heaps (but 
 
 The following words are in `forth-wordlist`:
 
-##### allocate
+##### `allocate`
 ( bytes -- addr -1|0 )
 
 Allocate memory on the current heap; returns -1 on success and 0 on failure
 
-##### free
+##### `free`
 ( addr -- -1|0 )
 
 Free memory on the current heap; returns -1 on success and 0 on failure
 
-##### resize
+##### `resize`
 ( addr new-bytes -- addr -1|0 )
 
 Resize memory on the current heap; returns -1 on success and 0 on failure
 
-##### allocate!
+##### `allocate!`
 ( bytes -- addr )
 
 Allocate memory in the heap, raising an exception if allocation fails.
 
-##### resize!
+##### `resize!`
 ( addr new-bytes -- new-addr )
 
 Resize memory in the heap, raising an exception if allocation fails.
 
-##### free!
+##### `free!`
 ( addr -- )
 
 Free memory in the heap, raising an exception if freeing fails.
 
-##### x-memory-management-failure
+##### `x-memory-management-failure`
 ( -- )
 
 Memory management failure exception
 
 The following words are in `allocate-wordlist`:
 
-##### init-heap-header
+##### `init-heap-header`
 ( high-block-size -- heap )
 
 Create an heap with a specified heap size and a specified largest size in the array of sized free lists
 
-##### expand-heap
+##### `expand-heap`
 ( block-size heap -- )
 
 Expand the heap
 
-##### init-shared-heap
+##### `init-shared-heap`
 ( heap-size high-block-size -- )
 
 Initialize the shared heap
 
-##### x-no-shared-heap
+##### `x-no-shared-heap`
 ( -- )
 
 No shared heap exists
 
-##### allocate-with-heap
+##### `allocate-with-heap`
 ( bytes heap -- addr -1|0 )
 
 Allocate memory on a heap; returns -1 on success and 0 on failure
 
-##### free-with-heap
+##### `free-with-heap`
 ( addr heap -- -1|0 )
 
 Free memory on a heap; returns -1 on success and 0 on failure
 
-##### resize-with-heap
+##### `resize-with-heap`
 ( addr new-bytes heap -- addr -1|0 )
 
 Resize memory on a heap; returns -1 on success and 0 on failure
