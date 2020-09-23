@@ -13,6 +13,7 @@ Zeptoforth Documentation
    words/dev_tools
    words/double
    words/allocate
+   words/channel
    words/systick
    words/swd
    words/led

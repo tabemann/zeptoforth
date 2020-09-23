@@ -18,6 +18,10 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
+\ Set up the wordlist
+forth-wordlist 1 set-order
+forth-wordlist set-current
+
 \ Check whether this is already defined
 defined? chan-wordlist not [if]
 
@@ -130,7 +134,7 @@ defined? chan-wordlist not [if]
   chan-wordlist set-current
   
   \ Get channel size for a channel with a specified buffer size in bytes
-  : chan-size ( bytes -- ) 4 align chan-header-size + ;
+  : chan-size ( bytes -- total-bytes ) 4 align chan-header-size + ;
 
   \ Initialize a channel for a channel with a specified buffer size in bytes
   : init-chan ( addr bytes -- )
