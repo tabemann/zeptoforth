@@ -81,7 +81,8 @@ defined? fchan-wordlist not [if]
       pause
     repeat
     dup fchan-send-task @ enable-task
-    0 over fchan-recv-task @ !
+    0 over fchan-send-task !
+    0 over fchan-recv-task !
     dup fchan-send-addr @
     swap fchan-send-count @
   ;
