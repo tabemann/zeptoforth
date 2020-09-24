@@ -163,7 +163,6 @@ end-structure
 : prev-task ( task1 -- task2 )
   dup begin dup task-next @ 2 pick <> while task-next @ repeat
   tuck = if
-    0 pause-enabled ! [char] x emit 1 pause-enabled !
     drop 0
   then
 ;
