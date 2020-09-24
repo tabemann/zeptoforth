@@ -75,7 +75,7 @@ defined? fchan-wordlist not [if]
     begin dup fchan-recv-task @ 0<> while
       pause
     repeat
-    begin dup fchan-send-task @ 0<> while
+    begin dup fchan-send-task @ 0= while
       current-task over fchan-recv-task !
       current-task disable-task
       pause
