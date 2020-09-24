@@ -149,14 +149,16 @@ defined? chan-wordlist not [if]
   : send-chan-byte ( b chan -- )
     dup wait-send-chan
     tuck send-chan-addr b!
-    advance-send-chan
+    dup advance-send-chan
+    chan-recv-task @ ?dup if enable-task then
   ;
 
   \ Receive a byte from a channel
   : recv-chan-byte ( chan -- b )
     dup wait-recv-chan
     dup recv-chan-addr b@
-    swap advance-recv-chan
+    over advance-recv-chan
+    swap chan-send-task @ ?dup if enable-task then
   ;
 
   \ Send bytes to a channel
