@@ -26,8 +26,6 @@ forth-wordlist set-current
 defined? chan-wordlist not [if]
 
   \ Set up the wordlist
-  forth-wordlist 1 set-order
-  forth-wordlist set-current
   wordlist constant chan-wordlist
   wordlist constant chan-internal-wordlist
   forth-wordlist task-wordlist chan-internal-wordlist chan-wordlist
