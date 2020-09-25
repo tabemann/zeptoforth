@@ -241,6 +241,25 @@ end-structure
   false dont-wake !
 ;
 
+\ Link a task into the head of the main loop
+: link-first-task ( task -- )
+  true dont-wake !
+  
+  current-task @ 0<> if
+    dup current-task @ <> if
+      current-task @ task-next @ over task-next !
+      current-task @ task-next !
+    else
+      drop
+    then
+  else
+    dup current-task !
+    dup dup task-next !
+  then
+
+  false dont-wake !
+;
+
 \ Unlink a task from the main loop
 : unlink-task ( task -- )
   true dont-wake !
@@ -282,6 +301,19 @@ task-wordlist set-current
 : enable-task ( task -- )
   dup task-active @ 1+
   dup 1 = if over link-task then
+  swap task-active !
+;
+
+\ Activate a task (i.e. enable it and move it to the head of the queue)
+: activate-task ( task -- )
+  dup task-active @ 1+
+  dup 1 = if
+    over link-first-task
+  else
+    dup 1 > if
+      over unlink-task over link-first-task
+    then
+  then
   swap task-active !
 ;
 
