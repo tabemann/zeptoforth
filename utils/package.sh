@@ -32,6 +32,7 @@ rm -rf `find . -name 'screenlog.*'`
 make clean
 rm -rf `find . -name '*~'`
 rm -rf obj
+rm -rf upload.fs
 make html
 rm -rf docs
 mv html docs
