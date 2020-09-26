@@ -25,15 +25,13 @@ forth-wordlist set-current
 \ Allot the channel
 fchan-size buffer: my-fchan
 
-\ Initialize the channel
-my-fchan init-fchan
-
 \ The inner loop of the consumer
 : consumer ( -- )
+  0 pause-enabled ! cr ." Consumer: " current-task h.8 1 pause-enabled !
   begin
     my-fchan recv-fchan
-    cr ." Received: " type
-    100 ms
+    0 pause-enabled ! cr ." Received: " type 1 pause-enabled !
+\    100 ms
     pause
   again
 ;
@@ -43,10 +41,13 @@ my-fchan init-fchan
 
 \ The inner loop of a producer
 : do-producer ( -- )
-  does> begin
-    cr ." Sending: " dup @ execute type
-    dup @ execute my-fchan send-fchan
-    cr ." Done sending: " dup @ execute type
+  does> @ execute
+  0 pause-enabled ! cr ." Producer: " 2dup type
+  ." : " current-task h.8 1 pause-enabled !
+  begin
+    0 pause-enabled ! cr ." Sending: " 2dup type 1 pause-enabled !
+    2dup my-fchan send-fchan
+    0 pause-enabled ! cr ." Done sending: " 2dup type 1 pause-enabled !
   again
 ;
 
@@ -62,6 +63,7 @@ my-fchan init-fchan
 
 \ Initiate the test
 : init-test ( -- )
+  my-fchan init-fchan
   consumer-task enable-task
   producer-a-task enable-task
   producer-b-task enable-task
