@@ -36,6 +36,9 @@ variable main-task
 \ Current task
 variable current-task
 
+\ Has current task changed
+variable current-task-changed?
+
 \ Last task
 variable last-task
 
@@ -192,51 +195,17 @@ end-structure
   true dont-wake !
 
   current-task @ if
-
-    \ 0 pause-enabled !
-    \ cr [char] # emit
-    \ 1 pause-enabled !
-    \ current-task @ true show-cycle
-    \ 0 pause-enabled !
-    \ space
-    \ 1 pause-enabled !
-
     current-task @ prev-task ?dup if
-      
-      \ 0 pause-enabled !
-      \ [char] y emit
-      \ dup h.8 space
-      \ current-task @ h.8 space
-      \ over h.8 space
-      \ 1 pause-enabled !
-      
       over swap task-next !
     else
-      
-      \ 0 pause-enabled ! [char] z emit 1 pause-enabled !
-      
       dup current-task @ task-next !
     then
-    
-    \ 0 pause-enabled !
-    \ current-task @ h.8 space
-    \ dup h.8 space
-    \ 1 pause-enabled !
-    
     current-task @ swap task-next !
-    
   else
     dup dup task-next !
     current-task !
+    true current-task-changed? !
   then
-
-  \ 0 pause-enabled !
-  \ cr [char] & emit
-  \ 1 pause-enabled !
-  \ current-task @ true show-cycle
-  \ 0 pause-enabled !
-  \ space
-  \ 1 pause-enabled !
 
   false dont-wake !
 ;
@@ -255,6 +224,8 @@ end-structure
   else
     dup current-task !
     dup dup task-next !
+    true current-task-changed? !
+    0 pause-enabled ! cr ." YYY" 1 pause-enabled !
   then
 
   false dont-wake !
@@ -264,32 +235,15 @@ end-structure
 : unlink-task ( task -- )
   true dont-wake !
 
-  \ 0 pause-enabled !
-  \ cr [char] $ emit
-  \ 1 pause-enabled !
-  \ dup true show-cycle
-  \ 0 pause-enabled !
-  \ space
-  \ 1 pause-enabled !
-  
   dup prev-task ?dup if
     over current-task @ = if
       over task-next @ current-task !
+      true current-task-changed? !
     then
     swap task-next @ swap task-next !
   else
     drop 0 current-task ! 0 last-task !
   then
-
-  \ current-task @ if
-  \   0 pause-enabled !
-  \   cr [char] | emit
-  \   1 pause-enabled !
-  \   current-task @ true show-cycle
-  \   0 pause-enabled !
-  \   space
-  \   1 pause-enabled !
-  \ then
 
   false dont-wake !
 ;
@@ -301,7 +255,7 @@ task-wordlist set-current
 : enable-task ( task -- )
   dup task-active @ 1+
   dup 1 = if over link-task then
-  swap task-active !
+  1 min swap task-active !
 ;
 
 \ Activate a task (i.e. enable it and move it to the head of the queue)
@@ -314,14 +268,14 @@ task-wordlist set-current
       over unlink-task over link-first-task
     then
   then
-  swap task-active !
+  1 min swap task-active !
 ;
 
 \ Disable a task
 : disable-task ( task -- )
   dup task-active @ 1-
   dup 0 = if over unlink-task then
-  swap task-active !
+  0 max swap task-active !
 ;
 
 \ Force-enable a task
@@ -503,13 +457,18 @@ task-internal-wordlist set-current
   \   space
   \   1 pause-enabled !
   \ then
+
+  current-task @
   
-  current-task @ go-to-next-task
+  current-task-changed? @ not if
+    go-to-next-task
+  then
 
   \ dup false show-cycle
 
   dup current-task !
   dup last-task !
+  false current-task-changed? !
   task-base @ base !
   task-handler @ handler !
   dup task-stack-base stack-base !
@@ -686,6 +645,7 @@ forth-wordlist set-current
   stack-end @ free-end !
   init-main-task
   0 pause-count !
+  false current-task-changed? !
   ['] do-pause pause-hook !
   ['] do-wait wait-hook !
   ['] do-wake wake-hook !
