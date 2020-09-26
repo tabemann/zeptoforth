@@ -28,8 +28,8 @@ defined? fchan-wordlist not [if]
   \ Setup the wordlist
   wordlist constant fchan-wordlist
   wordlist constant fchan-internal-wordlist
-  forth-wordlist task-wordlist fchan-internal-wordlist fchan-wordlist
-  4 set-order
+  forth-wordlist task-internal-wordlist task-wordlist fchan-internal-wordlist fchan-wordlist
+  5 set-order
   fchan-wordlist set-current
 
   \ Fast channel header structure
@@ -65,51 +65,37 @@ defined? fchan-wordlist not [if]
 
   \ Send data on an fast channel
   : send-fchan ( addr bytes fchan -- )
-    0 pause-enabled ! cr ." @A" 1 pause-enabled !
     begin dup fchan-send-task @ 0<> while
       pause
-      0 pause-enabled ! cr ." @B" 1 pause-enabled !
     repeat
-    0 pause-enabled ! cr ." @C" 1 pause-enabled !
     current-task over fchan-send-task !
     tuck fchan-send-count !
     tuck fchan-send-addr !
     dup fchan-recv-task @ 0<> if
-      0 pause-enabled ! cr ." @D" 1 pause-enabled !
-      fchan-recv-task @ activate-task
+      dup fchan-recv-task @ activate-task
     then
-    0 pause-enabled ! cr ." @E" 1 pause-enabled !
+    drop
     current-task disable-task
-    0 pause-enabled ! cr ." @F" 1 pause-enabled !
     pause
-    0 pause-enabled ! cr ." @G" 1 pause-enabled !
   ;
 
   \ Receive data on an fast channel
   : recv-fchan ( fchan -- addr bytes )
-    0 pause-enabled ! cr dup h.8 1 pause-enabled !
-    0 pause-enabled ! cr ." *A" 1 pause-enabled !
-    begin dup fchan-recv-task @ 0<> while
-      0 pause-enabled ! cr ." *AA" 1 pause-enabled !
+    begin
+      dup fchan-recv-task @ 0<> over fchan-recv-task @ current-task <> and
+    while
       pause
-      0 pause-enabled ! cr ." *B" 1 pause-enabled !
     repeat
-    0 pause-enabled ! cr ." *BB" 1 pause-enabled !
     begin dup fchan-send-task @ 0= while
-      0 pause-enabled ! cr ." *C" 1 pause-enabled !
       current-task over fchan-recv-task !
       current-task disable-task
-      0 pause-enabled ! cr ." *D" 1 pause-enabled !
       pause
-      0 pause-enabled ! cr ." *E" 1 pause-enabled !
     repeat
-    0 pause-enabled ! cr ." *F" 1 pause-enabled !
     dup fchan-send-task @ enable-task
     0 over fchan-send-task !
     0 over fchan-recv-task !
     dup fchan-send-addr @
     swap fchan-send-count @
-    0 pause-enabled ! cr ." *G" 1 pause-enabled !
   ;
 
   \ Send a cell on an fast channel
