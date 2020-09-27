@@ -72,6 +72,9 @@ $18 GPIOE or     constant GPIOE_BSRR
   1 8 16 + lshift GPIOE_BSRR !
 ;
 
+\ Use the Forth wordlist
+forth-wordlist set-current
+
 \ Init
 : init ( -- )
   init
