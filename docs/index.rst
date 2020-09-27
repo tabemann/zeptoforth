@@ -14,6 +14,7 @@ Zeptoforth Documentation
    words/double
    words/allocate
    words/channel
+   words/fchannel
    words/systick
    words/swd
    words/led
