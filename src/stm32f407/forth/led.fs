@@ -87,6 +87,9 @@ $18 GPIOD or     constant GPIOD_BSRR
   1 15 16 + lshift GPIOD_BSRR !
 ;
 
+\ Use the Forth wordlist
+forth-wordlist set-current
+
 \ Init
 : init ( -- )
   init
