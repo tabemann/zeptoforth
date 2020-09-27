@@ -448,29 +448,15 @@ task-internal-wordlist set-current
     base @ last-task @ ['] task-base for-task !
   then
 
-  \ current-task @ task-next @ current-task @ <> if
-  \   0 pause-enabled !
-  \   cr [char] ^ emit
-  \   1 pause-enabled !
-  \   current-task @ false show-cycle
-  \   0 pause-enabled !
-  \   space
-  \   1 pause-enabled !
-  \ then
-
   current-task @
   
   current-task-changed? @ not if
     go-to-next-task
   then
 
-  \ dup false show-cycle
-
   dup current-task !
   dup last-task !
   false current-task-changed? !
-  task-base @ base !
-  task-handler @ handler !
   dup task-stack-base stack-base !
   dup task-stack-end stack-end !
   dup task-rstack-base rstack-base !
@@ -478,6 +464,8 @@ task-internal-wordlist set-current
   dup task-rstack-current rp!
   dup task-dict-current ram-here!
   dup task-dict-base dict-base !
+  task-base @ base !
+  task-handler @ handler !
   task-stack-current sp!
   false dont-wake !
 ;
