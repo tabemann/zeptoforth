@@ -81,9 +81,7 @@ defined? fchan-wordlist not [if]
 
   \ Receive data on an fast channel
   : recv-fchan ( fchan -- addr bytes )
-    begin
-      dup fchan-recv-task @ 0<> over fchan-recv-task @ current-task <> and
-    while
+    begin dup fchan-recv-task @ 0<> while
       pause
     repeat
     begin dup fchan-send-task @ 0= while
