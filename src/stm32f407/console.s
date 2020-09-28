@@ -162,7 +162,7 @@ _use_120mhz:
 	define_internal_word "use-168mhz", visible_flag
 _use_168mhz:
 	ldr r0, =FLASH_ACR
-	ldr r1, =0x105
+	ldr r1, =0x705
 	str r1, [r0]
 	ldr r0, =RCC_PLLCRGR
 	ldr r1, =PLLSRC | 8 | (336 << 6) | (7 << 24)
