@@ -238,7 +238,14 @@ _erase_sector:
 	blo 2f
 	cmp tos, #12  @ Es gibt nur 12 Sektoren
 	bhs 2f
-	
+
+	@ Disable the flash caches
+	ldr r0, =FLASH_ACR
+	ldr r3, [r0]
+	ldr r2, =0x1F00
+	bics r3, r2
+	str r3, [r0]
+
 	ldr r2, =FLASH_KEYR
 	ldr r3, =0x45670123
 	str r3, [r2]
@@ -262,6 +269,22 @@ _erase_sector:
 	ldr r2, =FLASH_CR
 	ldr r3, =0x80000000
 	str r3, [r2]
+
+	@ Reset the flash caches
+	ldr r0, =FLASH_ACR
+	ldr r3, [r0]
+	ldr r2, =0x1800
+	orrs r3, r2
+	str r3, [r0]
+
+	@ Enable the flash caches
+	ldr r0, =FLASH_ACR
+	ldr r3, [r0]
+	ldr r2, =0x1800
+	bics r3, r2
+	ldr r2, =0x0700
+	orrs r3, r2
+	str r3, [r0]
 	
 2:	pull_tos
 	
