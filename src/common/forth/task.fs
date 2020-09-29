@@ -331,7 +331,7 @@ task-internal-wordlist set-current
 : task-entry ( -- )
   r> drop
   try
-  ?dup if execute then
+  ?dup if display-red execute display-normal then
   current-task @ force-disable-task
   begin
     pause
