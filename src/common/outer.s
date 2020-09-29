@@ -510,11 +510,37 @@ _quit:	ldr r0, =rstack_base
 	push_tos
 	ldr tos, =_main
 	bl _try
+	bl _display_red
 	bl _execute_nz
+	bl _display_normal
 	b _abort
 	bx lr
 	end_inlined
 
+	@@ Display red text
+	define_word "display-red", visible_flag
+_display_red:
+	push {lr}
+	push_tos
+	movs tos, #0x1B
+	bl _emit
+	string "[31;1m"
+	bl _type
+	pop {pc}
+
+	@@ Display normal text
+	define_word "display-normal", visible_flag
+_display_normal:
+	push {lr}
+	push_tos
+	movs tos, #0x1B
+	bl _emit
+	string "[0m"
+	bl _type
+	pop {pc}
+
+	.ltorg
+	
 	@@ The main functionality, within the main exception handler
 	define_internal_word "main", visible_flag
 _main:	push {lr}
@@ -836,11 +862,13 @@ _do_refill:
 	define_internal_word "do-failed-parse", visible_flag
 _do_failed_parse:
 	push {lr}
+	bl _display_red
 	string " unable to parse: "
 	bl _type
 	bl _type
 	string_ln ""
 	bl _type
+	bl _display_normal
 	push_tos
 	ldr tos, =_failed_parse
 	bl _raise
