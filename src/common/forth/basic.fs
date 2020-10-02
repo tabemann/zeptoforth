@@ -259,8 +259,8 @@ internal-wordlist set-current
 \ Get the address of the wordlist id for a word
 : wordlist-id ( word -- h-addr ) 2+ [inlined] ;
 
-\ Get the previous word for a word
-: prev-word ( word1 -- addr ) 4+ [inlined] ;
+\ Get the next word for a word
+: next-word ( word1 -- addr ) 4+ [inlined] ;
 
 \ Get the name of a word (a counted string)
 : word-name ( word -- b-addr ) 8 + [inlined] ;
@@ -368,7 +368,7 @@ commit-flash
     over hidden? not 2 pick wordlist-id h@ r@ = and if
       over word-name count rot words-column-wrap
     then
-    swap prev-word @ swap
+    swap next-word @ swap
   repeat
   nip rdrop
 ;
@@ -383,7 +383,7 @@ commit-flash
 	over word-name count rot words-column-wrap
       then
     then
-    swap prev-word @ swap
+    swap next-word @ swap
   repeat
   nip rdrop
 ;
@@ -394,7 +394,7 @@ commit-flash
     over hidden? not if
       3 pick 3 pick 3 pick word-name count common-prefix max
     then
-    swap prev-word @ swap
+    swap next-word @ swap
   repeat
   nip nip nip
 ;
@@ -450,7 +450,7 @@ internal-wordlist set-current
       r@ word-flags h@ h.4 space space
       r@ wordlist-id h@ h.4 cr
     then
-    r> prev-word @
+    r> next-word @
   repeat
   drop 2drop
 ;
@@ -461,7 +461,7 @@ internal-wordlist set-current
     over >body over = if
       drop true exit
     then
-    swap prev-word @ swap
+    swap next-word @ swap
   repeat
   drop false
 ;  

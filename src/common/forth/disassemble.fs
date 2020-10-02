@@ -53,7 +53,7 @@ compress-flash
       dup >body 2 pick = if
 	true
       else
-	prev-word @ false
+	next-word @ false
       then
     else
       true
