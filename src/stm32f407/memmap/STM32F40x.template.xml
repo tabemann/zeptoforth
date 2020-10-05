@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--STM32F40x svdcutter template.xml creator for Mecrisp-Stellaris Forth by Matthias Koch -->
+<!--By Terry Porter "terry@tjporter.com.au"-->
+<!--COMMENT-OUT UNWANTED REGISTERS LIKE THIS-->
+
+<peripherals>
+  <name>RNG</name>
+  <name>DCMI</name>
+  <name>FSMC</name>
+  <name>DBG</name>
+  <name>DMA2</name>
+  <name>DMA1</name>
+  <name>RCC</name>
+  <name>GPIOI</name>
+  <name>GPIOH</name>
+  <name>GPIOG</name>
+  <name>GPIOF</name>
+  <name>GPIOE</name>
+  <name>GPIOD</name>
+  <name>GPIOC</name>
+  <name>GPIOB</name>
+  <name>GPIOA</name>
+  <name>SYSCFG</name>
+  <name>SPI1</name>
+  <name>SPI2</name>
+  <name>SPI3</name>
+  <name>I2S2ext</name>
+  <name>I2S3ext</name>
+  <name>SDIO</name>
+  <name>ADC1</name>
+  <name>ADC2</name>
+  <name>ADC3</name>
+  <name>USART6</name>
+  <name>USART1</name>
+  <name>USART2</name>
+  <name>USART3</name>
+  <name>DAC</name>
+  <name>PWR</name>
+  <name>I2C3</name>
+  <name>I2C2</name>
+  <name>I2C1</name>
+  <name>IWDG</name>
+  <name>WWDG</name>
+  <name>RTC</name>
+  <name>UART4</name>
+  <name>UART5</name>
+  <name>C_ADC</name>
+  <name>TIM1</name>
+  <name>TIM8</name>
+  <name>TIM2</name>
+  <name>TIM3</name>
+  <name>TIM4</name>
+  <name>TIM5</name>
+  <name>TIM9</name>
+  <name>TIM12</name>
+  <name>TIM10</name>
+  <name>TIM13</name>
+  <name>TIM14</name>
+  <name>TIM11</name>
+  <name>TIM6</name>
+  <name>TIM7</name>
+  <name>Ethernet_MAC</name>
+  <name>Ethernet_MMC</name>
+  <name>Ethernet_PTP</name>
+  <name>Ethernet_DMA</name>
+  <name>CRC</name>
+  <name>OTG_FS_GLOBAL</name>
+  <name>OTG_FS_HOST</name>
+  <name>OTG_FS_DEVICE</name>
+  <name>OTG_FS_PWRCLK</name>
+  <name>CAN1</name>
+  <name>CAN2</name>
+  <name>FLASH</name>
+  <name>EXTI</name>
+  <name>OTG_HS_GLOBAL</name>
+  <name>OTG_HS_HOST</name>
+  <name>OTG_HS_DEVICE</name>
+  <name>OTG_HS_PWRCLK</name>
+  <name>NVIC</name>
+</peripherals>  
+
