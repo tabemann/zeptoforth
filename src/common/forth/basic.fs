@@ -116,6 +116,9 @@ forth-wordlist set-current
 \ Duplicate a cell if it is non-zero
 : ?dup ( x -- x | 0 ) dup 0<> if dup then ;
 
+\ Generate a mask for a single bit
+: bit ( u -- x ) 1 swap lshift [inlined] ;
+
 \ Test for bits in a byte being set
 : bbit@ ( mask b-addr -- f ) b@ and 0<> ;
 
