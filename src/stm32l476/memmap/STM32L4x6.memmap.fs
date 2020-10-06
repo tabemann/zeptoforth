@@ -1,10 +1,33 @@
-\ TEMPLATE FILE for STM32L4x6
-\ created by svdcutter for Mecrisp-Stellaris Forth by Matthias Koch
-\ sdvcutter  takes a CMSIS-SVD file plus a hand edited config.xml file as input 
-\ By Terry Porter "terry@tjporter.com.au", released under the GPL V2 Licence
-\ Available forth template words as selected by config.xm 
+\ Copyright (c) 2020 Terry Porter <terry@tjporter.com.au>
+\ Copyright (c) 2020 Travis Bemann
+\ 
+\ Permission is hereby granted, free of charge, to any person obtaining a copy
+\ of this software and associated documentation files (the "Software"), to deal
+\ in the Software without restriction, including without limitation the rights
+\ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+\ copies of the Software, and to permit persons to whom the Software is
+\ furnished to do so, subject to the following conditions:
+\ 
+\ The above copyright notice and this permission notice shall be included in
+\ all copies or substantial portions of the Software.
+\ 
+\ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+\ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+\ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+\ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+\ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+\ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+\ SOFTWARE.
 
 compile-to-flash
+
+forth-wordlist 1 set-order
+forth-wordlist set-current
+defined? memmap-wordlist not [if]
+wordlist constant memmap-wordlist
+[then]
+forth-wordlist memmap-wordlist 2 set-order
+memmap-wordlist set-current
 
 defined? use-DAC defined? DAC not and [if]
 $40007400 constant DAC ( Digital-to-analog converter ) 
@@ -981,5 +1004,8 @@ NVIC $448 + constant NVIC_IPR18 ( read-write )  \ Interrupt Priority Register
 NVIC $44C + constant NVIC_IPR19 ( read-write )  \ Interrupt Priority Register
 NVIC $450 + constant NVIC_IPR20 ( read-write )  \ Interrupt Priority Register
 [then]
+
+forth-wordlist 1 set-order
+forth-wordlist set-current
 
 compile-to-ram
