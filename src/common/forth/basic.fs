@@ -253,6 +253,11 @@ forth-wordlist set-current
 \ Get whether a word is defined
 : defined? ( "word" -- flag ) token visible-flag find-all 0<> ;
 
+\ Get whether a word is defined, and if it is, execute it
+: execute-defined? ( "word" -- x )
+  token visible-flag find-all ?dup if >body execute else 0 then
+;
+
 \ Set internal
 internal-wordlist set-current
 
