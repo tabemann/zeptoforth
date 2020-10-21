@@ -496,37 +496,6 @@ commit-flash
   then
 ;
 
-\ Safely emit a character
-: safe-emit ( b -- )
-  pause-enabled @
-  0 pause-enabled !
-  swap serial-emit
-  pause-enabled !
-;
-
-\ Safely type a string
-: safe-type ( b-addr bytes -- )
-  pause-enabled @
-  0 pause-enabled !
-  -rot serial-type
-  pause-enabled !
-;
-
-\ Commit code to flash
-commit-flash
-
-\ Safely type an integer
-: safe-type-integer ( n -- )
-  ram-here swap format-integer dup ram-allot
-  dup >r safe-type r> negate ram-allot
-;
-
-\ Safely type an unsigned integer
-: safe-type-unsigned ( u -- )
-  ram-here swap format-unsigned dup ram-allot
-  dup >r safe-type r> negate ram-allot
-;
-
 \ Commit code to flash
 commit-flash
 
@@ -1067,6 +1036,70 @@ commit-flash
   else
     create 8 ram-allot
   then
+;
+
+\ Commit to flash
+commit-flash
+
+\ Set the internal wordlist
+internal-wordlist set-current
+
+\ There is a deferred context switch
+variable deferred-context-switch
+
+\ Critical section state
+variable in-critical
+
+\ Commit to flash
+commit-flash
+
+\ Set the forth wordlist
+forth-wordlist set-current
+
+\ Begin a critical section
+: begin-critical ( -- )
+  true in-critical !
+;
+
+\ End a critical section
+: end-critical ( -- )
+  deferred-context-switch @
+  false in-critical !
+  deferred-context-switch @ or
+  false deferred-context-switch !
+  if pause then
+;
+
+\ Commit to flash
+commit-flash
+
+\ Safely emit a character
+: safe-emit ( b -- )
+  begin-critical
+  swap serial-emit
+  end-critical
+;
+
+\ Safely type a string
+: safe-type ( b-addr bytes -- )
+  begin-critical
+  -rot serial-type
+  end-critical
+;
+
+\ Commit code to flash
+commit-flash
+
+\ Safely type an integer
+: safe-type-integer ( n -- )
+  ram-here swap format-integer dup ram-allot
+  dup >r safe-type r> negate ram-allot
+;
+
+\ Safely type an unsigned integer
+: safe-type-unsigned ( u -- )
+  ram-here swap format-unsigned dup ram-allot
+  dup >r safe-type r> negate ram-allot
 ;
 
 \ Set internal
@@ -1711,6 +1744,8 @@ forth-wordlist set-current
   min-ram-wordlist current-ram-wordlist !
   next-ram-space dict-base !
   dict-base @ next-user-space + ram-here!
+  false deferred-context-switch !
+  false in-critical !
   0 wait-hook !
   0 wake-hook !
   0 flush-console-hook !

@@ -64,6 +64,8 @@ _store_flash_1:
 	bne 4f
 	
 	@ Okay, alle Proben bestanden. 
+
+	cpsid i
 	
 	@ Im STM32F4 ist der Flash-Speicher gespiegelt, die wirkliche Adresse liegt weiter hinten !
 	adds r0, #0x08000000
@@ -96,6 +98,9 @@ _store_flash_1:
 	ldr r2, =FLASH_CR
 	ldr r3, =0x80000000
 	str r3, [r2]
+
+	cpsie i
+	
 	bx lr
 4:	push_tos
 	ldr tos, =_store_flash_already_written
@@ -150,6 +155,8 @@ _store_flash_2:
 	bne 4f
 	
 	@ Okay, alle Proben bestanden. 
+
+	cpsid i
 	
 	@ Im STM32F4 ist der Flash-Speicher gespiegelt, die wirkliche Adresse liegt weiter hinten !
 	adds r0, #0x08000000
@@ -182,6 +189,9 @@ _store_flash_2:
 	ldr r2, =FLASH_CR
 	ldr r3, =0x80000000
 	str r3, [r2]
+
+	cpsie i
+	
 	bx lr
 3:	push {lr}
 	movs tos, r1

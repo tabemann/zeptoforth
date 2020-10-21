@@ -77,6 +77,7 @@ _store_flash_16:
 @	str r1, [r0]
 1:	ldr r0, =0x08000000
 	adds tos, tos, r0
+	cpsid i
 	@@ Flash needs to be unlocked
 	ldr r0, =FLASH_KEYR
 	ldr r1, =0x45670123
@@ -115,6 +116,7 @@ _store_flash_16:
 	str r1, [r0]
 	@@ Get the next value on the stack to put in the TOS
 	pull_tos
+	cpsie i
 	pop {pc}
 	end_inlined
 

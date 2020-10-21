@@ -755,6 +755,8 @@ _enable_int:
 	define_word "disable-int", visible_flag
 _disable_int:
 	cpsid i
+@	dsb
+@	isb
 	bx lr
 	end_inlined
 
@@ -1881,6 +1883,55 @@ _set_order:
 4:	bx lr
 	end_inlined
 
+	@@ Context switch ( ctx -- old-ctx )
+	define_internal_word "context-switch", visible_flag
+_context_switch:
+	movs r0, tos
+	pull_tos
+	push {r4, r5, r6, r7, r8, r9, r10}
+	mov r1, sp
+	mov sp, r0
+	pop {r4, r5, r6, r7, r8, r9, r10}
+	push_tos
+	movs tos, r1
+	bx lr
+	end_inlined
+
+	@@ Initialize a context ( ctx dp xt -- ctx )
+	@@ This needs to be called by execute called as an SVCall handler.
+	define_internal_word "init-context", visible_flag
+_init_context:
+	movs r0, tos
+	adds r0, #1
+ 	ldmia dp!, {r1, r2}
+	mov r3, sp
+	push {r4, r5, r7, r8, r9}
+	movs r4, r2
+	ands r4, #7
+	beq 1f
+	movs r4, #0
+	stmdb r2!, {r4}
+1:	ldr r4, [r3, #0]
+	ldr r5, [r3, #4]
+	ldr r6, [r3, #8]
+	ldr r7, [r3, #12]
+	ldr r8, [r3, #16]
+	ldr r9, [r3, #20]
+	ldr r3, [r3, #28]
+	stmdb r2!, {r0, r3}
+	stmdb r2!, {r4, r5, r6, r7, r8, r9}
+	pop {r4, r5, r7, r8, r9}
+	movs r0, r7
+	movs r7, r1
+@	movs r3, r6
+	ldr r6, =0xFEDCBA98
+	stmdb r2!, {r4, r5, r6, r7, r8, r9, r10}
+	movs r7, r0
+@	movs r6, r3
+	movs tos, r2
+	bx lr
+	end_inlined
+
 	@@ Reboot (note that this does not clear RAM, but it does clear the RAM
 	@@ dictionary
 	define_word "reboot", visible_flag
@@ -1888,13 +1939,32 @@ _reboot:
 	ldr r0, =0xE000ED0C @ AIRCR
 	ldr r1, =0x05FA0004
 	str r1, [r0]
+	dsb
+	isb
 	bx lr
 	end_inlined
 
 	@@ Carry out a warm reboot
 	define_word "warm", visible_flag
-_warm:	ldr r0, =handle_reset+1
+_warm:	cpsid i
+	dsb
+	isb
+	bl _init_handlers
+	cpsie i
+	ldr r0, =handle_reset+1
 	bx r0
+	end_inlined
+
+	@@ Carry out DSB instruction
+	define_word "dsb", visible_flag | inlined_flag
+_dsb:	dsb
+	bx lr
+	end_inlined
+
+	@@ Carry out ISB instruction
+	define_word "isb", visible_flag | inlined_flag
+_isb:	isb
+	bx lr
 	end_inlined
 	
 	@@ Initialize the variables
