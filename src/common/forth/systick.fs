@@ -78,14 +78,12 @@ systick-wordlist set-current
 
 \ Turn on systick
 : enable-systick ( -- )
-  ['] systick-handler systick-handler-hook !
-  SYST_CSR_TICKINT SYST_CSR_ENABLE or SYST_CSR bis!
+  SYST_CSR_TICKINT SYST_CSR_ENABLE or SYST_CSR bis! dsb isb
 ;  
 
 \ Turn off systick
 : disable-systick ( -- )
-  SYST_CSR_TICKINT SYST_CSR_ENABLE or SYST_CSR bic!
-  0 systick-handler-hook !
+  SYST_CSR_TICKINT SYST_CSR_ENABLE or SYST_CSR bic! dsb isb
 ;
 
 \ Make systick-counter read-only
@@ -97,6 +95,7 @@ forth-wordlist set-current
 \ Init
 : init ( -- )
   init
+  ['] systick-handler systick-handler-hook !
   SYST_CALIB @ SYST_CALIB_TENMS and
   10 / systick-divisor / time-multiplier * time-divisor / SYST_RVR !
   0 SYST_CVR !
