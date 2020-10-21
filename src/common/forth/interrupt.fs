@@ -34,22 +34,22 @@ $E000ED1C constant SHPR2
 $E000ED20 constant SHPR3
 
 \ Set system fault handler priority field 4, for memory management fault
-: SHPR1_PRI_4! ( u -- ) $FF and 0 lshift SHPR1 @ $F0 bic or SHPR1 ! ;
+: SHPR1_PRI_4! ( u -- ) $F0 and 0 lshift SHPR1 @ $FF bic or SHPR1 ! ;
 
 \ Set system fault handler priority field 5, for bus fault
-: SHPR1_PRI_5! ( u -- ) $FF and 8 lshift SHPR1 @ $F000 bic or SHPR1 ! ;
+: SHPR1_PRI_5! ( u -- ) $F0 and 8 lshift SHPR1 @ $FF00 bic or SHPR1 ! ;
 
 \ Set system fault handler priority field 6, for usage fault
-: SHPR1_PRI_6! ( u -- ) $FF and 16 lshift SHPR1 @ $F00000 bic or SHPR1 ! ;
+: SHPR1_PRI_6! ( u -- ) $F0 and 16 lshift SHPR1 @ $FF0000 bic or SHPR1 ! ;
 
 \ Set system fault handler priority field 11, for SVCall
-: SHPR2_PRI_11! ( u -- ) $FF and 24 lshift SHPR2 @ $F0000000 bic or SHPR2 ! ;
+: SHPR2_PRI_11! ( u -- ) $F0 and 24 lshift SHPR2 @ $FF000000 bic or SHPR2 ! ;
 
 \ Set system fault handler priority field 14, for PendSV
-: SHPR3_PRI_14! ( u -- ) $FF and 16 lshift SHPR3 @ $F00000 bic or SHPR3 ! ;
+: SHPR3_PRI_14! ( u -- ) $F0 and 16 lshift SHPR3 @ $FF0000 bic or SHPR3 ! ;
 
 \ Set system fault handler priority field 15, for SysTick
-: SHPR3_PRI_15! ( u -- ) $FF and 24 lshift SHPR3 @ $F0000000 bic or SHPR3 !  ;
+: SHPR3_PRI_15! ( u -- ) $F0 and 24 lshift SHPR3 @ $FF000000 bic or SHPR3 !  ;
 
 \ Get system fault handler priority field 4, for memory management fault
 : SHPR1_PRI_4@ ( -- u ) SHPR1 @ 0 rshift $FF and ;

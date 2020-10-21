@@ -225,6 +225,7 @@ int-io-wordlist set-current
 
 \ Disable interrupt-driven IO
 : disable-int-io ( -- )
+  begin-critical
   disable-int
   ['] serial-key key-hook !
   ['] serial-emit emit-hook !
@@ -237,6 +238,7 @@ int-io-wordlist set-current
   38 NVIC_ICER_CLRENA!
   RCC_APB1LPENR_USART2LPEN_Clear
   enable-int
+  end-critical
 ;
 
 \ Reset current wordlist

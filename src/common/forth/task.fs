@@ -27,7 +27,7 @@ forth-wordlist set-current
 wordlist constant task-wordlist
 wordlist constant task-internal-wordlist
 forth-wordlist internal-wordlist systick-wordlist int-io-wordlist
-task-internal-wordlist task-wordlist 6 set-order
+interrupt-wordlist task-internal-wordlist task-wordlist 7 set-order
 task-internal-wordlist set-current
 
 \ Main task
@@ -51,6 +51,18 @@ variable pause-count
 \ Don't wake any tasks
 variable dont-wake
 
+\ The original SysTIck handler
+variable orig-systick-handler
+
+\ The multitasker SysTick counter
+variable task-systick-counter
+
+\ The default context switch delay
+100 constant default-context-switch-delay
+
+\ The context switch delay
+variable context-switch-delay
+
 \ The current task handler
 user task-handler
 
@@ -60,7 +72,7 @@ user task-wait
 \ Task systick start time
 user task-systick-start
 
-\ Task systick delay time
+\ Task systick delay
 user task-systick-delay
 
 \ The current base for a task
@@ -77,11 +89,8 @@ begin-structure task
   \ Dictionary size
   field: task-dict-size
 
-  \ Current return stack offset
-  hfield: task-rstack-offset
-
-  \ Current data stack offset
-  hfield: task-stack-offset
+  \ Current return stack adress
+  field: task-rstack-current
 
   \ Current dictionary offset
   field: task-dict-offset
@@ -117,14 +126,9 @@ end-structure
 \ Get task dictionary end
 : task-dict-end ( task -- addr ) ;
 
-\ Get task current return stack address
-: task-rstack-current ( task -- addr )
-  dup task-rstack-base swap task-rstack-offset h@ -
-;
-
 \ Get task current stack address
 : task-stack-current ( task -- addr )
-  dup task-stack-base swap task-stack-offset h@ -
+  dup last-task @ = if drop sp@ else task-rstack-current @ 12 + @ then
 ;
 
 \ Get task current dictionary address
@@ -132,14 +136,9 @@ end-structure
   dup task-dict-base swap task-dict-offset @ +
 ;
 
-\ Set task current return stack address
-: task-rstack-current! ( addr task -- )
-  dup task-rstack-base rot - swap task-rstack-offset h!
-;
-
 \ Set task current stack address
 : task-stack-current! ( addr task -- )
-  dup task-stack-base rot - swap task-stack-offset h!
+  dup last-task @ = if drop sp! else task-rstack-current @ 12 + ! then
 ;
 
 \ Set task current dictionary address
@@ -149,12 +148,14 @@ end-structure
 
 \ Push data onto a task's stack
 : push-task-stack ( x task -- )
-  dup task-stack-current cell - tuck swap task-stack-current! !
+  dup task-rstack-current @ 8 + @
+  over dup task-stack-current cell - tuck swap task-stack-current! !
+  task-rstack-current @ 8 + !
 ;
 
 \ Push data onto a task's return stack
 : push-task-rstack ( x task -- )
-  dup task-rstack-current cell - tuck swap task-rstack-current! !
+  dup task-rstack-current @ cell - tuck swap task-rstack-current !
 ;
 
 \ Access a given user variable for a given task
@@ -242,7 +243,8 @@ end-structure
     then
     swap task-next @ swap task-next !
   else
-    drop 0 current-task ! 0 last-task !
+    drop 0 current-task !
+    true current-task-changed? !
   then
 
   false dont-wake !
@@ -253,13 +255,16 @@ task-wordlist set-current
 
 \ Enable a task
 : enable-task ( task -- )
+  begin-critical
   dup task-active @ 1+
   dup 1 = if over link-task then
   1 min swap task-active !
+  end-critical
 ;
 
 \ Activate a task (i.e. enable it and move it to the head of the queue)
 : activate-task ( task -- )
+  begin-critical
   dup task-active @ 1+
   dup 1 = if
     over link-first-task
@@ -269,33 +274,40 @@ task-wordlist set-current
     then
   then
   1 min swap task-active !
+  end-critical
 ;
 
 \ Disable a task
 : disable-task ( task -- )
+  begin-critical
   dup task-active @ 1-
   dup 0 = if over unlink-task then
   0 max swap task-active !
+  end-critical
 ;
 
 \ Force-enable a task
 : force-enable-task ( task -- )
+  begin-critical
   dup task-active @ 1 < if
     dup link-task
     1 swap task-active !
   else
     drop
   then
+  end-critical
 ;
 
 \ Force-disable a task
 : force-disable-task ( task -- )
+  begin-critical
   dup task-active @ 0> if
     dup unlink-task
     0 swap task-active !
   else
     drop
   then
+  end-critical
 ;
 
 \ Mark a task as waiting
@@ -312,8 +324,7 @@ task-internal-wordlist set-current
   rstack-base @ rstack-end @ - over task-rstack-size h!
   stack-base @ stack-end @ - over task-stack-size h!
   free-end @ task - next-ram-space - over task-dict-size !
-  rstack-base @ rp@ - over task-rstack-offset h!
-  stack-base @ sp@ - over task-stack-offset h!
+  rp@ over task-rstack-current !
   ram-here next-ram-space - over task-dict-offset !
   1 over task-active !
   false task-wait !
@@ -329,7 +340,7 @@ task-internal-wordlist set-current
 
 \ Task entry point
 : task-entry ( -- )
-  r> drop
+  rdrop
   try
   ?dup if display-red execute display-normal then
   current-task @ force-disable-task
@@ -346,18 +357,16 @@ task-wordlist set-current
   cr ." task-rstack-size:    " dup task-rstack-size h@ .
   cr ." task-stack-size:     " dup task-stack-size h@ .
   cr ." task-dict-size:      " dup task-dict-size @ .
-  cr ." task-rstack-offset:  " dup task-rstack-offset h@ .
-  cr ." task-stack-offset:   " dup task-stack-offset h@ .
   cr ." task-dict-offset:    " dup task-dict-offset @ .
-  cr ." task-rstack-end:     " dup task-rstack-end .
-  cr ." task-stack-end:      " dup task-stack-end .
-  cr ." task-dict-end:       " dup task-dict-end .
-  cr ." task-rstack-base:    " dup task-rstack-base .
-  cr ." task-stack-base:     " dup task-stack-base .
-  cr ." task-dict-base:      " dup task-dict-base .
-  cr ." task-rstack-current: " dup task-rstack-current .
-  cr ." task-stack-current:  " dup task-stack-current .
-  cr ." task-dict-current:   " task-dict-current .
+  cr ." task-rstack-end:     " dup task-rstack-end space h.8
+  cr ." task-stack-end:      " dup task-stack-end space h.8
+  cr ." task-dict-end:       " dup task-dict-end space  h.8
+  cr ." task-rstack-base:    " dup task-rstack-base space h.8
+  cr ." task-stack-base:     " dup task-stack-base space h.8
+  cr ." task-dict-base:      " dup task-dict-base space h.8
+  cr ." task-rstack-current: " dup task-rstack-current @ space h.8
+  cr ." task-stack-current:  " dup task-stack-current space h.8
+  cr ." task-dict-current:   " task-dict-current space h.8
 ;
   
 \ Spawn a non-main task
@@ -374,11 +383,10 @@ task-wordlist set-current
   0 over ['] task-systick-start for-task !
   -1 over ['] task-systick-delay for-task !
   dup dup task-dict-size @ - free-end !
-  0 over task-rstack-offset h!
-  0 over task-stack-offset h!
+  dup task-rstack-base over task-stack-base ['] task-entry
+  ['] init-context svc over task-rstack-current !
   next-user-space over task-dict-offset !
   0 over task-next !
-  ['] task-entry 1+ over push-task-rstack
   tuck push-task-stack
 ;
 
@@ -398,7 +406,11 @@ task-internal-wordlist set-current
 
 \ Wake tasks
 : do-wake ( -- )
-  dont-wake @ not if current-task @ reset-waiting-tasks then
+  dont-wake @ not if
+    begin-critical
+    current-task @ reset-waiting-tasks
+    end-critical
+  then
 ;
 
 \ Get whether a task is waiting
@@ -414,7 +426,9 @@ task-internal-wordlist set-current
 \ Handle waiting tasks
 : handle-waiting-tasks ( task -- )
   dup waiting-task? if
+    false dont-wake !
     sleep
+    true dont-wake !
     reset-waiting-tasks
   else
     drop
@@ -429,64 +443,107 @@ task-internal-wordlist set-current
   rdrop
 ;
 
-\ Handle PAUSE
-: do-pause ( -- )
-  true dont-wake !
-  1 pause-count +!
-  begin
-    task-io
-    current-task @ 0<>
-    dup not if
-      sleep
-    then
-  until
-  last-task @ if
-    rp@ last-task @ task-rstack-current!
-    sp@ last-task @ task-stack-current!
-    ram-here last-task @ task-dict-current!
-    handler @ last-task @ ['] task-handler for-task !
-    base @ last-task @ ['] task-base for-task !
-  then
+\ PendSV return value
+variable pendsv-return
 
-  current-task @
+\ The PendSV handler
+: pendsv-handler ( -- )
+  r> pendsv-return !
+
+  current-task @ main-task @ <> if
+    fault-handler-hook drop
+\    0 pause-enabled ! [char] * emit 1 pause-enabled !
+  then
   
-  current-task-changed? @ not if
-    go-to-next-task
-  then
+  true dont-wake !
+  in-critical @ not if
+    0 task-systick-counter !
+    1 pause-count +!
+    begin
+      task-io
+      current-task @ 0<>
+      dup not if
+	false dont-wake !
+	sleep
+	true dont-wake !
+      then
+    until
 
-  dup current-task !
-  dup last-task !
-  false current-task-changed? !
-  dup task-stack-base stack-base !
-  dup task-stack-end stack-end !
-  dup task-rstack-base rstack-base !
-  dup task-rstack-end rstack-end !
-  dup task-rstack-current rp!
-  dup task-dict-current ram-here!
-  dup task-dict-base dict-base !
-  task-base @ base !
-  task-handler @ handler !
-  task-stack-current sp!
+    last-task @ if
+      ram-here last-task @ task-dict-current!
+      handler @ last-task @ ['] task-handler for-task !
+      base @ last-task @ ['] task-base for-task !
+    then
+
+    disable-int
+    
+    current-task-changed? @ not if
+      current-task @ go-to-next-task current-task !
+    then
+
+    enable-int
+
+    current-task @ last-task @ <> if
+      current-task @ task-rstack-current @ context-switch
+      last-task @ if last-task @ task-rstack-current ! else drop then
+    then
+
+    disable-int
+
+    current-task @ dup last-task !
+    false current-task-changed? !
+    dup task-stack-base stack-base !
+    dup task-stack-end stack-end !
+    dup task-rstack-base rstack-base !
+    dup task-rstack-end rstack-end !
+    dup task-dict-current ram-here!
+    task-dict-base dict-base !
+    task-base @ base !
+    task-handler @ handler !
+
+    enable-int
+  else
+    true deferred-context-switch !
+  then
   false dont-wake !
+
+  pendsv-return @ >r
 ;
+
+\ Multitasker systick handler
+: task-systick-handler ( -- )
+  systick-handler
+  1 task-systick-counter +!
+  task-systick-counter @ context-switch-delay @ > if
+    pause
+  then
+;
+
+\ Handle PAUSE
+: do-pause ( -- ) ICSR_PENDSVSET! dsb isb ;
 
 \ Set non-internal
 task-wordlist set-current
 
 \ Start a delay from the present
 : start-task-delay ( 1/10m-delay task -- )
+  begin-critical
   dup systick-counter swap ['] task-systick-start for-task !
   ['] task-systick-delay for-task !
+  end-critical
 ;
 
 \ Set a delay for a task
 : set-task-delay ( 1/10ms-delay 1/10ms-start task -- )
+  begin-critical
   tuck ['] task-systick-start for-task !
   ['] task-systick-delay for-task !
+  end-critical
 ;
 
 \ Advance a delay for a task by a given amount of time
 : advance-task-delay ( 1/10ms-offset task -- )
+  begin-critical
   systick-counter over ['] task-systick-start for-task @ -
   over ['] task-systick-delay for-task @ < if
     ['] task-systick-delay for-task +!
@@ -495,28 +552,35 @@ task-wordlist set-current
     over ['] task-systick-start for-task +!
     ['] task-systick-delay for-task !
   then
+  end-critical
 ;
 
 \ Advance of start a delay from the present, depending on whether the delay
 \ length has changed
 : reset-task-delay ( 1/10ms-delay task -- )
+  begin-critical
   dup ['] task-systick-delay for-task @ 2 pick = if
     advance-task-delay
   else
     start-task-delay
   then
+  end-critical
 ;
 
 \ Get a delay for a task
 : get-task-delay ( task -- 1/10ms-delay 1/10ms-start )
+  begin-critical
   dup ['] task-systick-delay for-task @
   over ['] task-systick-start for-task @
+  end-critical
 ;
 
 \ Cancel a delay for a task
 : cancel-task-delay ( task -- )
+  begin-critical
   0 over ['] task-systick-start for-task !
   -1 swap ['] task-systick-delay for-task !
+  end-critical
 ;
 
 \ Set forth
@@ -630,6 +694,13 @@ forth-wordlist set-current
 \ Init
 : init ( -- )
   init
+  disable-int
+  0 pause-enabled !
+  $7F SHPR3_PRI_15!
+  $FF SHPR2_PRI_11!
+  $FF SHPR3_PRI_14!
+  0 task-systick-counter !
+  default-context-switch-delay context-switch-delay !
   stack-end @ free-end !
   init-main-task
   0 pause-count !
@@ -640,7 +711,11 @@ forth-wordlist set-current
   validate-dict-hook @ saved-validate-dict !
   false ram-dict-warned !
   ['] do-validate-dict validate-dict-hook !
+  ['] execute svcall-handler-hook !
+  ['] pendsv-handler pendsv-handler-hook !
+  ['] task-systick-handler systick-handler-hook !
   1 pause-enabled !
+  enable-int
 ;
 
 \ Reboot to initialize multitasking

@@ -18,11 +18,8 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Compile this to flash
-compile-to-flash
-
 \ Set up the wordlist order
-forth-wordlist task-wordlist led-wordlist 3 set-order
+forth-wordlist task-wordlist systick-wordlist led-wordlist 4 set-order
 forth-wordlist set-current
 
 \ The blinker delay time
@@ -30,14 +27,17 @@ variable blinker-delay
 
 \ The blinker
 : blinker ( -- )
+\  disable-int
   led-red-on
   begin
-    pause
+\    pause
     blinker-delay @ ms
+\    1000000 0 ?do loop
     led-red-off
     led-green-on
-    pause
+\    pause
     blinker-delay @ ms
+\    1000000 0 ?do loop
     led-green-off
     led-red-on
   again
@@ -46,13 +46,9 @@ variable blinker-delay
 \ The blinker task
 variable blinker-task
 
-\ Init
-: init ( -- )
-  init
+\ Init blinker
+: init-blinker ( -- )
   500 blinker-delay !
-  ['] blinker 256 256 256 spawn blinker-task !
-  blinker-task @ enable-task
+  ['] blinker 256 256 512 spawn blinker-task !
+\  blinker-task @ enable-task
 ;
-
-\ Reboot to initialize
-reboot
