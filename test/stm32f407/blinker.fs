@@ -19,7 +19,7 @@
 \ SOFTWARE.
 
 \ Set up the wordlist order
-forth-wordlist task-wordlist systick-wordlist led-wordlist 4 set-order
+forth-wordlist task-wordlist led-wordlist 3 set-order
 forth-wordlist set-current
 
 \ The blinker delay time
@@ -27,28 +27,38 @@ variable blinker-delay
 
 \ The blinker
 : blinker ( -- )
-\  disable-int
   led-red-on
   begin
 \    pause
     blinker-delay @ ms
-\    1000000 0 ?do loop
     led-red-off
+    led-orange-on
+\    pause
+    blinker-delay @ ms
+    led-orange-off
     led-green-on
 \    pause
     blinker-delay @ ms
-\    1000000 0 ?do loop
     led-green-off
+    led-blue-on
+\    pause
+    blinker-delay @ ms
+    led-blue-off
     led-red-on
   again
 ;
+
 
 \ The blinker task
 variable blinker-task
 
 \ Init blinker
 : init-blinker ( -- )
+  led-red-off
+  led-orange-off
+  led-green-off
+  led-blue-off
   500 blinker-delay !
-  ['] blinker 256 256 512 spawn blinker-task !
-\  blinker-task @ enable-task
+  ['] blinker 256 256 256 spawn blinker-task !
+  blinker-task @ enable-task
 ;

@@ -476,6 +476,16 @@ Set compilation to flash
 
 Get whether compilation is to flash
 
+##### `begin-critical`
+( -- )
+
+Begin a critical section, within which context switches will not take place; note that critical sections do not nest.
+
+##### `end-critical`
+( -- )
+
+End a critical section; if a context switch would have occurred within the critical section, it is initiated immediately upon executing this word.
+
 ##### `compress-flash`
 ( -- )
 

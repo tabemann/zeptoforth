@@ -52,18 +52,28 @@ defined? chan-wordlist not [if]
 
   end-structure
 
+  \ Core of getting whether a channel is full
+  : chan-full-unsafe? ( chan -- flag )
+    dup chan-send-index @ 1+ over chan-count @ umod
+    swap chan-recv-index @ =
+  ;
+
+  \ Core of getting whether a channel is empty
+  : chan-empty-unsafe? ( chan -- flag )
+    dup chan-send-index @ swap chan-recv-index @ =
+  ;
+  
   \ Define public words
   chan-wordlist set-current
 
   \ Get whether a channel is full
   : chan-full? ( chan -- flag )
-    dup chan-send-index @ 1+ over chan-count @ umod
-    swap chan-recv-index @ =
+    begin-critical chan-full-unsafe? end-critical
   ;
 
   \ Get whether a channel is empty
   : chan-empty? ( chan -- flag )
-    dup chan-send-index @ swap chan-recv-index @ =
+    begin-critical chan-empty-unsafe? end-critical
   ;
 
   \ Define internal words
@@ -74,14 +84,18 @@ defined? chan-wordlist not [if]
     begin
       dup chan-send-task @ 0<> over chan-send-task @ current-task <> and
     while
+      end-critical
       pause
+      begin-critical
     repeat
-    begin dup chan-full? while
+    begin dup chan-full-unsafe? while
       current-task over chan-send-task !
 \      begin dup chan-recv-task @ 0= while pause repeat
       dup chan-recv-task @ ?dup if enable-task then
       current-task disable-task
+      end-critical
       pause
+      begin-critical
     repeat
     0 swap chan-send-task !
   ;
@@ -91,19 +105,17 @@ defined? chan-wordlist not [if]
     begin
       dup chan-recv-task @ 0<> over chan-recv-task @ current-task <> and
     while
+      end-critical
       pause
+      begin-critical
     repeat
-    begin dup chan-empty? while
+    begin dup chan-empty-unsafe? while
       current-task over chan-recv-task !
-      \      begin dup chan-send-task @ 0= while pause repeat
-
-      \ 0 pause-enabled !
-      \ flush-console
-      \ 1 pause-enabled !
-      
       dup chan-send-task @ ?dup if enable-task then
       current-task disable-task
+      end-critical
       pause
+      begin-critical
     repeat
     0 swap chan-recv-task !
   ;
@@ -145,18 +157,22 @@ defined? chan-wordlist not [if]
 
   \ Send a byte to a channel
   : send-chan-byte ( b chan -- )
+    begin-critical
     dup wait-send-chan
     tuck send-chan-addr b!
     dup advance-send-chan
     chan-recv-task @ ?dup if enable-task then
+    end-critical
   ;
 
   \ Receive a byte from a channel
   : recv-chan-byte ( chan -- b )
+    begin-critical
     dup wait-recv-chan
     dup recv-chan-addr b@
     over advance-recv-chan
     swap chan-send-task @ ?dup if enable-task then
+    end-critical
   ;
 
   \ Send bytes to a channel

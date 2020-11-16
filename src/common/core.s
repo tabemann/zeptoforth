@@ -1902,24 +1902,24 @@ _context_switch:
 	define_internal_word "init-context", visible_flag
 _init_context:
 	movs r0, tos
-	adds r0, #1
+@	adds r0, #1
  	ldmia dp!, {r1, r2}
-	mov r3, sp
+	mov r6, sp
 	push {r4, r5, r7, r8, r9}
+	movs r5, #0
+	ldr r3, =0x21000000
 	movs r4, r2
 	ands r4, #7
 	beq 1f
-	movs r4, #0
-	stmdb r2!, {r4}
-1:	ldr r4, [r3, #0]
-	ldr r5, [r3, #4]
-	ldr r6, [r3, #8]
-	ldr r7, [r3, #12]
-	ldr r8, [r3, #16]
-	ldr r9, [r3, #20]
-	ldr r3, [r3, #28]
+	stmdb r2!, {r5}
+	ldr r3, =0x21000200
+1:	movs r7, #0
+	movs r8, #0
+	ldr r9, [r6, #20]
 	stmdb r2!, {r0, r3}
-	stmdb r2!, {r4, r5, r6, r7, r8, r9}
+	stmdb r2!, {r5, r7, r8, r9}
+	stmdb r2!, {r5}
+	stmdb r2!, {r5}
 	pop {r4, r5, r7, r8, r9}
 	movs r0, r7
 	movs r7, r1

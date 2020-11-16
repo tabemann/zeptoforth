@@ -18,18 +18,37 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-#include src/common/forth/basic.fs
-#include src/common/forth/interrupt.fs
-#include src/stm32l476/forth/erase.fs
-#include src/common/forth/lambda.fs
-#include src/common/forth/fixed.fs
-#include src/common/forth/systick.fs
-#include src/stm32l476/forth/int_io.fs
-#include src/common/forth/task.fs
-#include src/common/forth/schedule.fs
-#include src/stm32l476/forth/led.fs
-#include src/common/forth/disassemble.fs
+\ Set up the wordlist order
+forth-wordlist task-wordlist systick-wordlist led-wordlist 4 set-order
+forth-wordlist set-current
 
-\ Set a cornerstone to enable deleting everything compiled after this code
-cornerstone restore-state
+\ The blinker delay time
+variable blinker-delay
 
+\ The blinker
+: blinker ( -- )
+\  disable-int
+  led-red-on
+  begin
+\    pause
+    blinker-delay @ ms
+\    1000000 0 ?do loop
+    led-red-off
+    led-green-on
+\    pause
+    blinker-delay @ ms
+\    1000000 0 ?do loop
+    led-green-off
+    led-red-on
+  again
+;
+
+\ The blinker task
+variable blinker-task
+
+\ Init blinker
+: init-blinker ( -- )
+  500 blinker-delay !
+  ['] blinker 256 256 256 spawn blinker-task !
+\  blinker-task @ enable-task
+;

@@ -346,20 +346,25 @@ allocate-wordlist set-current
 
 \ Allocate memory on a heap; returns -1 on success and 0 on failure
 : allocate-with-heap ( bytes heap -- addr -1|0 )
+  begin-critical
   swap ?dup if
     swap allocate-block ?dup if block-data true else 0 false then
   else
     drop 0 true
   then
+  end-critical
 ;
 
 \ Free memory on a heap; returns -1 on success and 0 on failure
 : free-with-heap ( addr heap -- -1|0 )
+  begin-critical
   swap ?dup if block-header swap free-block true else drop true then
+  end-critical
 ;
 
 \ Resize memory on a heap; returns -1 on success and 0 on failure
 : resize-with-heap ( addr new-bytes heap -- addr -1|0 )
+  begin-critical
   >r swap ?dup if
     over if
       block-header r@ resize-block ?dup if
@@ -373,7 +378,8 @@ allocate-wordlist set-current
   else
     r@ allocate-with-heap
   then
-  r> drop
+  rdrop
+  end-critical
 ;
 
 \ Switch over to FORTH-WORDLIST for public-facing words

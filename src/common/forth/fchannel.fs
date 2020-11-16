@@ -65,8 +65,11 @@ defined? fchan-wordlist not [if]
 
   \ Send data on an fast channel
   : send-fchan ( addr bytes fchan -- )
+    begin-critical
     begin dup fchan-send-task @ 0<> while
+      end-critical
       pause
+      begin-critical
     repeat
     current-task over fchan-send-task !
     tuck fchan-send-count !
@@ -76,24 +79,31 @@ defined? fchan-wordlist not [if]
     then
     drop
     current-task disable-task
+    end-critical
     pause
   ;
 
   \ Receive data on an fast channel
   : recv-fchan ( fchan -- addr bytes )
+    begin-critical
     begin dup fchan-recv-task @ 0<> while
+      end-critical
       pause
+      begin-critical
     repeat
     begin dup fchan-send-task @ 0= while
       current-task over fchan-recv-task !
       current-task disable-task
+      end-critical
       pause
+      begin-critical
     repeat
     dup fchan-send-task @ enable-task
     0 over fchan-send-task !
     0 over fchan-recv-task !
     dup fchan-send-addr @
     swap fchan-send-count @
+    end-critical
   ;
 
   \ Send a cell on an fast channel
