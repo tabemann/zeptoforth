@@ -1,5 +1,5 @@
 \ Copyright (c) 2020 Travis Bemann
-\
+\ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
 \ in the Software without restriction, including without limitation the rights
@@ -18,54 +18,17 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Compile this to flash
-compile-to-flash
+\ Compile this to RAM
+compile-to-ram
 
 \ Set up the wordlist order
-forth-wordlist task-wordlist led-wordlist 3 set-order
-forth-wordlist set-current
+forth-wordlist task-wordlist 2 set-order
 
-\ The blinker delay time
-variable blinker-delay
+\ The stars task
+variable stars-task
 
-\ The blinker
-: blinker ( -- )
-  led-red-on
-  begin
-    pause
-    blinker-delay @ ms
-    led-red-off
-    led-orange-on
-    pause
-    blinker-delay @ ms
-    led-orange-off
-    led-green-on
-    pause
-    blinker-delay @ ms
-    led-green-off
-    led-blue-on
-    pause
-    blinker-delay @ ms
-    led-blue-off
-    led-red-on
-  again
-;
+\ The stars loop
+: stars ( -- ) begin ." *" 500000 0 ?do loop again ;
 
-
-\ The blinker task
-variable blinker-task
-
-\ Init
-: init ( -- )
-  init
-  led-red-off
-  led-orange-off
-  led-green-off
-  led-blue-off
-  500 blinker-delay !
-  ['] blinker 256 256 256 spawn blinker-task !
-  blinker-task @ enable-task
-;
-
-\ Reboot to initialize
-reboot
+\ Initialize the stars task
+: init-stars ( -- ) ['] stars 256 256 256 spawn stars-task ! ;

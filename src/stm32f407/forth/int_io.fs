@@ -211,6 +211,7 @@ int-io-wordlist set-current
 
 \ Enable interrupt-driven IO
 : enable-int-io ( -- )
+  0 38 NVIC_IPR_IP!
   ['] null-handler null-handler-hook !
   ['] do-key key-hook !
   ['] do-emit emit-hook !
@@ -219,7 +220,6 @@ int-io-wordlist set-current
   ['] do-flush-console flush-console-hook !
   RCC_APB1LPENR_USART2LPEN
   38 NVIC_ISER_SETENA!
-  0 38 NVIC_IPR_IP!
   USART2_CR1_RXNEIE
 ;
 

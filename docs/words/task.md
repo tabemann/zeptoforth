@@ -1,6 +1,6 @@
 # Multitasking Words
 
-Multitasking in zeptoforth is not part of the zeptoforth kernel, but is provided by `src/common/forth/task.fs`, which in turn relies upon `src/<platform>/forth/int_io.fs` and `src/common/forth/systick.fs`. It is cooperative, and for control to be exchanged between tasks it relies upon `PAUSE` being called, either directly, or by `MS`, `KEY`, or `EMIT` (which are in turn called by words such as `REFILL` or `TYPE`).
+Multitasking in zeptoforth is not part of the zeptoforth kernel, but is provided by `src/common/forth/task.fs`, which in turn relies upon `src/<platform>/forth/int_io.fs` and `src/common/forth/systick.fs`. It is preemptivee, but `PAUSE` may be called to explicitly relinquish control of the processor (which is highly recommended when possible); note that some words do this implicitly, such as `MS`, `KEY`, or `EMIT` (which are in turn called by words such as `REFILL` or `TYPE`).
 
 Note that task in zeptoforth are a relatively heavy-weight asynchronous computing means. For lighter-weight asynchronous computing, consider creating a single task for running a scheduler within (so the main task can be devoted to the REPL), and then put all asynchronous actions within that.
 
@@ -110,3 +110,33 @@ To cancel the delay for the current task, execute:
 ( task -- )
 
 where *task* is the task to cancel the delay for. It is recommended to execute this for a task after the task has ceased to delay, so it does not delay again when `systick-counter` wraps around.
+
+##### `task-checksum`
+( task -- checksum )
+
+Calculate a checksum for a given task.
+
+##### `dump-task-info`
+( task -- )
+
+Print out information describing a task.
+
+##### `dump-task-stack`
+( task -- )
+
+Print a hex dump of the contents of a task's stack, excluding the top of the stack.
+
+##### `dump-task-rstack`
+( task -- )
+
+Print a hex dump of the contents of a task's return stack.
+
+##### `dump-task-dict`
+( task -- )
+
+Print a hex dump of the contents of a task's dictionary
+
+##### `dump-task-regs`
+( task -- )
+
+Print out the saved registers for a task; note that the task must not be the current task. Note that R6 contains the top of the stack, and R7 contains the current stack pointer.

@@ -151,16 +151,10 @@ NVIC_Base $200 + constant NVIC_IABR_Base
 NVIC_Base $300 + constant NVIC_IPR_Base
 
 \ Set NVIC interrupt priority register field
-: NVIC_IPR_IP! ( priority u -- )
-  dup 4 / cells NVIC_IPR_Base + @ $FF 2 pick 4 mod 8 * lshift bic
-  rot $FF and 2 pick 4 mod 8 + lshift or
-  swap 4 / cells NVIC_IPR_Base + !
-;
+: NVIC_IPR_IP! ( priority u -- ) NVIC_IPR_Base + b! ;
 
 \ Get NVIC interrupt priority register field
-: NVIC_IPR_IP@ ( u -- priority )
-  dup 4 / cells NVIC_IPR_Base + @ swap 4 mod 8 * rshift $FF and
-;
+: NVIC_IPR_IP@ ( u -- priority ) NVIC_IPR_Base + b@ ;
 
 \ Warm reboot
 warm

@@ -48,9 +48,6 @@ variable free-end
 \ Pause count
 variable pause-count
 
-\ Don't wake any tasks
-variable dont-wake
-
 \ The original SysTIck handler
 variable orig-systick-handler
 
@@ -171,7 +168,6 @@ end-structure
   then
 ;
 
-
 \ Display a task cycle
 : show-cycle ( task always? -- )
   0 pause-enabled !
@@ -193,7 +189,7 @@ end-structure
 
 \ Link a task into the main loop
 : link-task ( task -- )
-  true dont-wake !
+  disable-int
 
   current-task @ if
     current-task @ prev-task ?dup if
@@ -208,12 +204,12 @@ end-structure
     true current-task-changed? !
   then
 
-  false dont-wake !
+  enable-int
 ;
 
 \ Link a task into the head of the main loop
 : link-first-task ( task -- )
-  true dont-wake !
+  disable-int
   
   current-task @ 0<> if
     dup current-task @ <> if
@@ -229,12 +225,12 @@ end-structure
     0 pause-enabled ! cr ." YYY" 1 pause-enabled !
   then
 
-  false dont-wake !
+  enable-int
 ;
 
 \ Unlink a task from the main loop
 : unlink-task ( task -- )
-  true dont-wake !
+  disable-int
 
   dup prev-task ?dup if
     over current-task @ = if
@@ -247,7 +243,7 @@ end-structure
     true current-task-changed? !
   then
 
-  false dont-wake !
+  enable-int
 ;
 
 \ Set non-internal
@@ -352,8 +348,46 @@ task-internal-wordlist set-current
 \ Set non-internal
 task-wordlist set-current
 
+\ Checksum some bytes
+: checksum-bytes ( u start-addr end-addr -- u )
+  2dup < if
+    swap ?do i b@ xor dup 7 lshift swap 25 rshift or loop
+  else
+    2drop
+  then
+;
+
+\ Task checksum
+: task-checksum ( task -- u )
+  dup task-rstack-size h@ 16 lshift
+  over task-stack-size h@ xor dup 7 lshift swap 25 rshift or
+  over task-dict-size @ xor dup 7 lshift swap 25 rshift or
+  over task-dict-offset @ xor dup 7 lshift swap 25 rshift or
+  over task-rstack-end xor dup 7 lshift swap 25 rshift or
+  over task-stack-end xor dup 7 lshift swap 25 rshift or
+  over task-dict-end xor dup 7 lshift swap 25 rshift or
+  over task-rstack-base xor dup 7 lshift swap 25 rshift or
+  over task-stack-base xor dup 7 lshift swap 25 rshift or
+  over task-dict-base xor dup 7 lshift swap 25 rshift or
+  over task-rstack-current @ xor dup 7 lshift swap 25 rshift or
+  over task-stack-current xor dup 7 lshift swap 25 rshift or
+  over task-dict-current xor dup 7 lshift swap 25 rshift or
+  over task-rstack-current @ 2 pick task-rstack-base checksum-bytes
+  over task-stack-current 2 pick task-stack-base checksum-bytes
+  over task-dict-base rot task-dict-current checksum-bytes
+;
+
 \ Dump information on a task
 : dump-task-info ( task -- )
+  cr ." task-checksum:       " dup task-checksum space h.8
+  cr ." task-rstack-checksum:"
+  dup task-rstack-current @ over task-rstack-base
+  0 -rot checksum-bytes space h.8
+  cr ." task-stack-checksum: "
+  dup task-stack-current over task-stack-base
+  0 -rot checksum-bytes space h.8
+  cr ." task-dict-checksum:  "
+  dup task-dict-base over task-dict-current 0 -rot checksum-bytes space h.8
   cr ." task-rstack-size:    " dup task-rstack-size h@ .
   cr ." task-stack-size:     " dup task-stack-size h@ .
   cr ." task-dict-size:      " dup task-dict-size @ .
@@ -368,7 +402,42 @@ task-wordlist set-current
   cr ." task-stack-current:  " dup task-stack-current space h.8
   cr ." task-dict-current:   " task-dict-current space h.8
 ;
-  
+
+\ Dump a task's stack
+: dump-task-stack ( task -- )
+  dup task-stack-current swap task-stack-base dump
+;
+
+\ Dump a task's rstack
+: dump-task-rstack ( task -- )
+  dup task-rstack-current @ swap task-rstack-base dump
+;
+
+\ Dump a task's dictionary
+: dump-task-dict ( task -- )
+  dup task-dict-base swap task-dict-current dump
+;
+
+\ Dump a task's registers
+: dump-task-regs ( task -- )
+  task-rstack-current @
+  cr ." R0:   " dup 28 + @ h.8
+  cr ." R1:   " dup 32 + @ h.8
+  cr ." R2:   " dup 36 + @ h.8
+  cr ." R3:   " dup 40 + @ h.8
+  cr ." R4:   " dup 0 + @ h.8
+  cr ." R5:   " dup 4 + @ h.8
+  cr ." R6:   " dup 8 + @ h.8
+  cr ." R7:   " dup 12 + @ h.8
+  cr ." R8:   " dup 16 + @ h.8
+  cr ." R9:   " dup 20 + @ h.8
+  cr ." R10:  " dup 24 + @ h.8
+  cr ." R12:  " dup 44 + @ h.8
+  cr ." LR:   " dup 48 + @ h.8
+  cr ." PC:   " dup 52 + @ h.8
+  cr ." xPSR: " 56 + @ h.8
+;
+
 \ Spawn a non-main task
 : spawn ( xt dict-size stack-size rstack-size -- task )
   2dup + task +
@@ -406,10 +475,8 @@ task-internal-wordlist set-current
 
 \ Wake tasks
 : do-wake ( -- )
-  dont-wake @ not if
-    begin-critical
+  current-task @ if
     current-task @ reset-waiting-tasks
-    end-critical
   then
 ;
 
@@ -426,9 +493,9 @@ task-internal-wordlist set-current
 \ Handle waiting tasks
 : handle-waiting-tasks ( task -- )
   dup waiting-task? if
-    false dont-wake !
+    enable-int
     sleep
-    true dont-wake !
+    disable-int
     reset-waiting-tasks
   else
     drop
@@ -450,12 +517,8 @@ variable pendsv-return
 : pendsv-handler ( -- )
   r> pendsv-return !
 
-  current-task @ main-task @ <> if
-    fault-handler-hook drop
-\    0 pause-enabled ! [char] * emit 1 pause-enabled !
-  then
+  disable-int
   
-  true dont-wake !
   in-critical @ not if
     0 task-systick-counter !
     1 pause-count +!
@@ -463,9 +526,9 @@ variable pendsv-return
       task-io
       current-task @ 0<>
       dup not if
-	false dont-wake !
+	enable-int
 	sleep
-	true dont-wake !
+	disable-int
       then
     until
 
@@ -475,20 +538,14 @@ variable pendsv-return
       base @ last-task @ ['] task-base for-task !
     then
 
-    disable-int
-    
     current-task-changed? @ not if
       current-task @ go-to-next-task current-task !
     then
-
-    enable-int
 
     current-task @ last-task @ <> if
       current-task @ task-rstack-current @ context-switch
       last-task @ if last-task @ task-rstack-current ! else drop then
     then
-
-    disable-int
 
     current-task @ dup last-task !
     false current-task-changed? !
@@ -501,12 +558,12 @@ variable pendsv-return
     task-base @ base !
     task-handler @ handler !
 
-    enable-int
   else
     true deferred-context-switch !
   then
-  false dont-wake !
 
+  enable-int
+  
   pendsv-return @ >r
 ;
 
@@ -663,7 +720,6 @@ forth-wordlist set-current
   ['] do-wait wait-hook !
   false ram-dict-warned !
   ['] do-validate-dict validate-dict-hook !
-  false dont-wake !
   1 pause-enabled !
 ;
 
