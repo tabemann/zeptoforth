@@ -18,9 +18,6 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Compile this to flash
-compile-to-flash
-
 \ Set up the wordlist order
 forth-wordlist task-wordlist schedule-wordlist led-wordlist 4 set-order
 forth-wordlist set-current
@@ -91,9 +88,8 @@ variable blink-delay
   blink-delay @ blue-blink-off-action @ start-action-delay
 ;
 
-\ Init
-: init ( -- )
-  init
+\ Init blinker
+: init-blinker-1 ( -- )
   4000 blink-delay !
   create-schedule my-schedule !
   ['] red-blink-on my-schedule @ add-action red-blink-on-action !
@@ -117,6 +113,3 @@ variable blink-delay
   schedule-task @ enable-task
   pause
 ;
-
-\ Reboot
-reboot

@@ -18,9 +18,6 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Compile this to flash
-compile-to-flash
-
 \ Set up the wordlist order
 forth-wordlist task-wordlist 2 set-order
 forth-wordlist set-current
@@ -61,8 +58,7 @@ variable vary-step
 variable vary-task
 
 \ Init
-: init ( -- )
-  init
+: init-vary ( -- )
   100 vary-delay !
   50 vary-min !
   500 vary-max !
@@ -70,6 +66,3 @@ variable vary-task
   ['] vary 256 256 256 spawn vary-task !
   vary-task @ enable-task
 ;
-
-\ Reboot
-reboot

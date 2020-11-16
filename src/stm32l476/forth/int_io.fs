@@ -217,6 +217,7 @@ int-io-wordlist set-current
 
 \ Enable interrupt-driven IO
 : enable-int-io ( -- )
+  0 38 NVIC_IPR_IP!
   ['] null-handler null-handler-hook !
   ['] do-key key-hook !
   ['] do-emit emit-hook !

@@ -18,9 +18,6 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Compile this to flash
-compile-to-flash
-
 \ Set up the wordlist order
 forth-wordlist task-wordlist schedule-wordlist led-wordlist 4 set-order
 forth-wordlist set-current
@@ -77,8 +74,7 @@ variable green-blinker-delay
 ;
 
 \ Init
-: init ( -- )
-  init
+: init-blinker-1 ( -- )
   false red-led-state !
   false green-led-state !
   create-schedule my-schedule !
@@ -94,6 +90,3 @@ variable green-blinker-delay
   schedule-task @ enable-task
   pause
 ;
-
-\ Reboot
-reboot
