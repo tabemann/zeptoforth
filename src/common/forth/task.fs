@@ -55,7 +55,7 @@ variable orig-systick-handler
 variable task-systick-counter
 
 \ The default context switch delay
-100 constant default-context-switch-delay
+10 constant default-context-switch-delay
 
 \ The context switch delay
 variable context-switch-delay
