@@ -92,8 +92,11 @@ begin-structure task
   \ Current dictionary offset
   field: task-dict-offset
 
+  \ Task priority
+  hfield: task-priority
+  
   \ Task active state ( > 0 active, <= 0 inactive )
-  field: task-active
+  hfield: task-active
 
   \ Next task
   field: task-next
@@ -249,19 +252,39 @@ end-structure
 \ Set non-internal
 task-wordlist set-current
 
+\ Get task active sate
+: get-task-active ( task -- active )
+  task-active h@ 16 lshift 16 arshift
+;
+
+\ Get task priority
+: get-task-priority ( task -- priority )
+  task-priority h@ 16 lshift 16 arshift
+;
+
+\ Out of range task priority exception
+: x-out-of-range-priority ( -- ) space ." out of range priority" cr ;
+
+\ Set task priority
+: set-task-priority ( priority task -- )
+  over -32768 < triggers x-out-of-range-priority
+  over 32767 > triggers x-out-of-range-priority
+  task-priority h!
+;
+
 \ Enable a task
 : enable-task ( task -- )
   begin-critical
-  dup task-active @ 1+
+  dup get-task-active 1+
   dup 1 = if over link-task then
-  1 min swap task-active !
+  1 min swap task-active h!
   end-critical
 ;
 
 \ Activate a task (i.e. enable it and move it to the head of the queue)
 : activate-task ( task -- )
   begin-critical
-  dup task-active @ 1+
+  dup get-task-active 1+
   dup 1 = if
     over link-first-task
   else
@@ -269,25 +292,25 @@ task-wordlist set-current
       over unlink-task over link-first-task
     then
   then
-  1 min swap task-active !
+  1 min swap task-active h!
   end-critical
 ;
 
 \ Disable a task
 : disable-task ( task -- )
   begin-critical
-  dup task-active @ 1-
+  dup get-task-active 1-
   dup 0 = if over unlink-task then
-  0 max swap task-active !
+  0 max swap task-active h!
   end-critical
 ;
 
 \ Force-enable a task
 : force-enable-task ( task -- )
   begin-critical
-  dup task-active @ 1 < if
+  dup get-task-active 1 < if
     dup link-task
-    1 swap task-active !
+    1 swap task-active h!
   else
     drop
   then
@@ -297,9 +320,9 @@ task-wordlist set-current
 \ Force-disable a task
 : force-disable-task ( task -- )
   begin-critical
-  dup task-active @ 0> if
+  dup get-task-active 0> if
     dup unlink-task
-    0 swap task-active !
+    0 swap task-active h!
   else
     drop
   then
@@ -322,7 +345,8 @@ task-internal-wordlist set-current
   free-end @ task - next-ram-space - over task-dict-size !
   rp@ over task-rstack-current !
   ram-here next-ram-space - over task-dict-offset !
-  1 over task-active !
+  0 over task-priority h!
+  1 over task-active h!
   false task-wait !
   0 task-systick-start !
   -1 task-systick-delay !
@@ -446,7 +470,8 @@ task-wordlist set-current
   tuck task-stack-size h!
   tuck task-dict-size !
   0 over ['] task-handler for-task !
-  0 over task-active !
+  0 over task-priority h!
+  0 over task-active h!
   base @ over ['] task-base for-task !
   false over ['] task-wait for-task !
   0 over ['] task-systick-start for-task !
@@ -502,11 +527,28 @@ task-internal-wordlist set-current
   then
 ;
 
+\ Get the highest task priority
+: get-highest-priority ( -- priority )
+  -32768 current-task @ begin
+    dup waiting-task? not if
+      dup get-task-priority rot max swap
+    then
+    task-next @ dup current-task @ =
+  until
+  drop
+;
+
 \ Go to the next task
 : go-to-next-task ( task -- task )
-  dup >r
-  begin task-next @ dup waiting-task? not over r@ = or until
-  dup r@ = if dup handle-waiting-tasks then
+  dup >r get-highest-priority swap
+  begin
+    task-next @ dup get-task-priority 2 pick = if
+      dup waiting-task? not over r@ = or
+    else
+      dup r@ =
+    then
+  until
+  nip dup r@ = if dup handle-waiting-tasks then
   rdrop
 ;
 
