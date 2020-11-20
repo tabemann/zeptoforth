@@ -39,6 +39,8 @@ Note that it is not recommended to execute this while compiling to flash; rather
 
 Note that tasks may be enabled or disabled but once created exist until the MCU is rebooted.
 
+New task default to a priority of zero; to change this use `set-task-priority`.
+
 Uncaught exceptions within a task will be handled, with the message for them being displayed, but they will result in said task being disabled. Note that reenabling such a task will result in a crash.
 
 New tasks do not execute right away, rather to enable their execution, one executes:
@@ -68,6 +70,26 @@ To force a task to be disabled, one executes:
 ( task -- )
 
 which sets the active counter for the *task* to zero if is greater than zero.
+
+##### `set-task-priority`
+( priority task -- )
+
+Set the priority of a task, from -32768 to 32767, with higher numbers being greater task priorities.
+
+##### `get-task-priority`
+( task -- priority )
+
+Get the priority of a task.
+
+##### `x-out-of-range-priority`
+( -- )
+
+The exception raised when setting an out-of-range task priority
+
+##### `get-task-active`
+( task -- level )
+
+Get the activation level of a task, with values 0 and lower indicating that a task is inactive, and values 1 and greater indicating that a task is active.
 
 The simplest case of delaying a task is simply to execute:
 
