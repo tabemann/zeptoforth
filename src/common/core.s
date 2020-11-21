@@ -1737,7 +1737,8 @@ _comma_align:
 	bl _comma_1
 	pop {r0}
 	b 1b
-2:	pop {pc}
+2:	pull_tos
+	pop {pc}
 	end_inlined
 
 	@@ Compile a c-string
