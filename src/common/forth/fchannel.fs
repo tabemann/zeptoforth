@@ -22,14 +22,20 @@
 forth-wordlist 1 set-order
 forth-wordlist set-current
 
+\ Make sure tqueue-wordlist exists
+defined? tqueue-wordlist not [if]
+  :noname space ." tqueue is not installed" cr ; ?raise
+[then]
+
 \ Check whether this is already defined
 defined? fchan-wordlist not [if]
 
   \ Setup the wordlist
   wordlist constant fchan-wordlist
   wordlist constant fchan-internal-wordlist
-  forth-wordlist task-internal-wordlist task-wordlist fchan-internal-wordlist fchan-wordlist
-  5 set-order
+  forth-wordlist task-internal-wordlist task-wordlist tqueue-wordlist
+  fchan-internal-wordlist fchan-wordlist
+  6 set-order
   fchan-wordlist set-current
 
   \ Fast channel header structure
@@ -38,47 +44,52 @@ defined? fchan-wordlist not [if]
     \ Switch the current wordlist
     fchan-internal-wordlist set-current
 
-    \ Fast channel receive task
-    field: fchan-recv-task
+    \ Fast channel receive ready
+    field: fchan-recv-ready
 
-    \ Fast channel send task
-    field: fchan-send-task
+    \ Fast channel send ready
+    field: fchan-send-ready
 
     \ Fast channel sent data address
     field: fchan-send-addr
 
     \ Fast channel sent data count
     field: fchan-send-count
-    
-  end-structure
 
+    \ Fast channel send task queue
+    tqueue-size +field fchan-send-tqueue
+
+    \ Fast channel receive task queue
+    tqueue-size +field fchan-recv-tqueue
+
+    \ Fast channel response task queue
+    tqueue-size +field fchan-resp-tqueue
+
+  end-structure
+  
   \ Switch the current wordlist
   fchan-wordlist set-current
 
   \ Initialize an fast channel
   : init-fchan ( addr -- )
-    0 over fchan-recv-task !
-    0 over fchan-send-task ! 
+    0 over fchan-recv-ready !
+    0 over fchan-send-ready !
     0 over fchan-send-addr !
-    0 swap fchan-send-count !
+    0 over fchan-send-count !
+    dup fchan-send-tqueue init-tqueue
+    dup fchan-recv-tqueue init-tqueue
+    fchan-resp-tqueue init-tqueue
   ;
 
   \ Send data on an fast channel
   : send-fchan ( addr bytes fchan -- )
     begin-critical
-    begin dup fchan-send-task @ 0<> while
-      end-critical
-      pause
-      begin-critical
-    repeat
-    current-task over fchan-send-task !
+    dup fchan-send-ready @ if dup fchan-send-tqueue wait-tqueue then
+    1 over fchan-send-ready +!
     tuck fchan-send-count !
     tuck fchan-send-addr !
-    dup fchan-recv-task @ 0<> if
-      dup fchan-recv-task @ activate-task
-    then
-    drop
-    current-task disable-task
+    dup fchan-recv-ready @ if dup fchan-recv-tqueue wake-tqueue then
+    fchan-resp-tqueue wait-tqueue
     end-critical
     pause
   ;
@@ -86,23 +97,14 @@ defined? fchan-wordlist not [if]
   \ Receive data on an fast channel
   : recv-fchan ( fchan -- addr bytes )
     begin-critical
-    begin dup fchan-recv-task @ 0<> while
-      end-critical
-      pause
-      begin-critical
-    repeat
-    begin dup fchan-send-task @ 0= while
-      current-task over fchan-recv-task !
-      current-task disable-task
-      end-critical
-      pause
-      begin-critical
-    repeat
-    dup fchan-send-task @ enable-task
-    0 over fchan-send-task !
-    0 over fchan-recv-task !
+    1 over fchan-recv-ready +!
+    dup fchan-send-ready @ if dup fchan-send-tqueue wake-tqueue then
+    dup fchan-recv-tqueue wait-tqueue
+    -1 over fchan-send-ready +!
+    -1 over fchan-recv-ready +!
     dup fchan-send-addr @
-    swap fchan-send-count @
+    over fchan-send-count @
+    rot fchan-resp-tqueue wake-tqueue
     end-critical
   ;
 
