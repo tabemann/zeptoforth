@@ -75,6 +75,15 @@ user task-systick-delay
 \ The current base for a task
 user task-base
 
+\ Set the public task wordlist
+task-wordlist set-current
+
+\ The currently waited-for lock
+user current-lock
+
+\ Set the internal task wordlist
+task-internal-wordlist set-current
+
 \ The task structure
 begin-structure task
   \ Return stack size
@@ -158,10 +167,16 @@ end-structure
   dup task-rstack-current @ cell - tuck swap task-rstack-current !
 ;
 
+\ Set the public task wordlist
+task-wordlist set-current
+
 \ Access a given user variable for a given task
 : for-task ( task xt -- addr )
   execute dict-base @ - swap task-dict-base +
 ;
+
+\ Set the internal task wordlist
+task-internal-wordlist set-current
 
 \ Find the previous task
 : prev-task ( task1 -- task2 )
@@ -351,6 +366,7 @@ task-internal-wordlist set-current
   0 task-systick-start !
   -1 task-systick-delay !
   base @ task-base !
+  0 current-lock !
   dup dup task-next !
   dup main-task !
   dup last-task !
@@ -473,6 +489,7 @@ task-wordlist set-current
   0 over task-priority h!
   0 over task-active h!
   base @ over ['] task-base for-task !
+  0 over ['] current-lock for-task !
   false over ['] task-wait for-task !
   0 over ['] task-systick-start for-task !
   -1 over ['] task-systick-delay for-task !

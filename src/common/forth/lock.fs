@@ -84,14 +84,33 @@ defined? lock-wordlist not [if]
     drop
   ;
 
+  \ Create a deferred name for adjust-lock-holder-priority
+  defer _adjust-lock-holder-priority
+
   \ Shift holder priority
   : shift-lock-holder-priority ( priority lock -- )
     dup lock-current-holder-priority @
     over lock-holder-task @ get-task-priority swap -
     over lock-orig-holder-priority +!
     2dup lock-holder-task @ set-task-priority
-    lock-current-holder-priority !
+    tuck lock-current-holder-priority !
+    lock-holder-task @ ['] current-lock for-task @ ?dup if
+      _adjust-lock-holder-priority
+    then
   ;
+
+  \ Add a lock wait record
+  : add-lock-wait ( wait lock -- )
+    dup lock-first-wait @ if
+      2dup lock-last-wait @ lock-wait-next !
+    else
+      2dup lock-first-wait !
+    then
+    lock-last-wait !
+  ;
+
+  \ Switch the current wordlist
+  lock-wordlist set-current
 
   \ Adjust holder priority
   : adjust-lock-holder-priority ( lock -- )
@@ -112,18 +131,8 @@ defined? lock-wordlist not [if]
     then
   ;
 
-  \ Add a lock wait record
-  : add-lock-wait ( wait lock -- )
-    dup lock-first-wait @ if
-      2dup lock-last-wait @ lock-wait-next !
-    else
-      2dup lock-first-wait !
-    then
-    lock-last-wait !
-  ;
-
-  \ Switch the current wordlist
-  lock-wordlist set-current
+  \ Set the deferred name for adjust-lock-holder-priority
+  ' adjust-lock-holder-priority ' _adjust-lock-holder-priority defer!
 
   \ Initialize a lock
   : init-lock ( addr -- )
@@ -138,6 +147,7 @@ defined? lock-wordlist not [if]
   : lock ( lock -- )
     begin-critical
     dup lock-holder-task @ if
+      dup current-task ['] current-lock for-task !
       init-lock-wait
       2dup swap add-lock-wait
       swap adjust-lock-holder-priority
@@ -178,7 +188,8 @@ defined? lock-wordlist not [if]
       dup enable-task
       dup get-task-priority 2 pick lock-orig-holder-priority !
       over lock-orig-holder-priority @ 2 pick lock-current-holder-priority !
-      over lock-holder-task !
+      2dup swap lock-holder-task !
+      0 swap ['] current-lock for-task !
       adjust-lock-holder-priority
     else
       0 swap lock-holder-task !      
