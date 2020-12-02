@@ -590,7 +590,7 @@ commit-flash
 internal-wordlist set-current
 
 \ Align to flash block if compiling to flash
-: flash-align,
+: block-align,
   compiling-to-flash? if flash-here flash-block-size align advance-here then
 ;
 
@@ -602,7 +602,7 @@ commit-flash
 
 \ Specify code for a word created wth <BUILDS
 : does> ( -- )
-  flash-align,
+  block-align,
   build-target @ 0= triggers no-word-being-built
   r>
   0 build-target @ literal!
@@ -611,7 +611,7 @@ commit-flash
 
 \ Begin declaring a structure
 : begin-structure ( "name" -- offset )
-  <builds here 0 4 allot flash-align, does> @
+  <builds here 0 4 allot does> @
 ;
 
 \ Finish declaring a structure
@@ -619,27 +619,27 @@ commit-flash
 
 \ Create an arbitrary-sized field
 : +field ( offset size "name" -- offset )
-  <builds over , flash-align, + does> @ +
+  <builds over , + does> @ +
 ;
 
 \ Create a byte-sized field
 : bfield: ( offset "name" -- offset )
-  <builds dup , flash-align, 1+ does> @ +
+  <builds dup , 1+ does> @ +
 ;
 
 \ Create a halfword-sized field
 : hfield: ( offset "name" -- offset )
-  <builds 2 align dup , flash-align, 2+ does> @ +
+  <builds 2 align dup , 2+ does> @ +
 ;
 
 \ Create a cell-sized field
 : field: ( offset "name" -- offset )
-  <builds cell align dup , flash-align, cell + does> @ +
+  <builds cell align dup , cell + does> @ +
 ;
 
 \ Create a double cell-sized field
 : 2field: ( offset "name" -- offset )
-  <builds 2 cells align dup , flash-align, 2 cells + does> @ +
+  <builds 2 cells align dup , 2 cells + does> @ +
 ;
 
 \ Get whether two strings are equal
@@ -1379,7 +1379,7 @@ commit-flash
   start-compile-no-push
   visible
   compiling-to-flash? if
-    flash-align,
+    block-align,
   then
   reserve-literal drop
   0 bx,
