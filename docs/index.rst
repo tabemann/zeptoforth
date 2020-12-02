@@ -13,8 +13,10 @@ Zeptoforth Documentation
    words/dev_tools
    words/double
    words/allocate
+   words/lock
    words/channel
    words/fchannel
+   words/tqueue
    words/systick
    words/swd
    words/led
