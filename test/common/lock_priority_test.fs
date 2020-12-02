@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Set up the wordlist
+\ Set up the wordlist order
 forth-wordlist task-wordlist lock-wordlist 3 set-order
 forth-wordlist set-current
 

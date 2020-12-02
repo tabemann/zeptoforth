@@ -81,6 +81,9 @@ task-wordlist set-current
 \ The currently waited-for lock
 user current-lock
 
+\ The latest lock currently held by a tack
+user current-lock-held
+
 \ Set the internal task wordlist
 task-internal-wordlist set-current
 
@@ -106,6 +109,9 @@ begin-structure task
   
   \ Task active state ( > 0 active, <= 0 inactive )
   hfield: task-active
+
+  \ Task saved priority
+  field: task-saved-priority
 
   \ Next task
   field: task-next
@@ -277,27 +283,43 @@ task-wordlist set-current
   task-priority h@ 16 lshift 16 arshift
 ;
 
+\ Get saved task priority
+: get-task-saved-priority ( task -- priority )
+  task-saved-priority @
+;
+
 \ Out of range task priority exception
 : x-out-of-range-priority ( -- ) space ." out of range priority" cr ;
 
 \ Set task priority
 : set-task-priority ( priority task -- )
+  space ." set-task-priority: " dup h.8 space over .
   over -32768 < triggers x-out-of-range-priority
   over 32767 > triggers x-out-of-range-priority
   task-priority h!
 ;
 
+\ Set task saved priority
+: set-task-saved-priority ( priority task -- )
+  space ." set-task-saved-priority: " dup h.8 over . space
+  over -32768 < triggers x-out-of-range-priority
+  over 32767 > triggers x-out-of-range-priority
+  task-saved-priority !
+;
+
 \ Enable a task
 : enable-task ( task -- )
+  space ." enable-task: " dup h.8 space
   begin-critical
   dup get-task-active 1+
   dup 1 = if over link-task then
-  1 min swap task-active h!
+  swap task-active h!
   end-critical
 ;
 
 \ Activate a task (i.e. enable it and move it to the head of the queue)
 : activate-task ( task -- )
+  space ." activate-task: " dup h.8 space
   begin-critical
   dup get-task-active 1+
   dup 1 = if
@@ -307,16 +329,17 @@ task-wordlist set-current
       over unlink-task over link-first-task
     then
   then
-  1 min swap task-active h!
+  swap task-active h!
   end-critical
 ;
 
 \ Disable a task
 : disable-task ( task -- )
+  space ." disable-task: " dup h.8 space
   begin-critical
   dup get-task-active 1-
   dup 0 = if over unlink-task then
-  0 max swap task-active h!
+  swap task-active h!
   end-critical
 ;
 
@@ -361,12 +384,14 @@ task-internal-wordlist set-current
   rp@ over task-rstack-current !
   ram-here next-ram-space - over task-dict-offset !
   0 over task-priority h!
+  0 over task-saved-priority !
   1 over task-active h!
   false task-wait !
   0 task-systick-start !
   -1 task-systick-delay !
   base @ task-base !
   0 current-lock !
+  0 current-lock-held !
   dup dup task-next !
   dup main-task !
   dup last-task !
@@ -487,9 +512,11 @@ task-wordlist set-current
   tuck task-dict-size !
   0 over ['] task-handler for-task !
   0 over task-priority h!
+  0 over task-saved-priority !
   0 over task-active h!
-  base @ over ['] task-base for-task !
+  base @ over ['] task-base for-task h!
   0 over ['] current-lock for-task !
+  0 over ['] current-lock-held for-task !
   false over ['] task-wait for-task !
   0 over ['] task-systick-start for-task !
   -1 over ['] task-systick-delay for-task !
