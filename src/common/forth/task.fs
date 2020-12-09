@@ -213,8 +213,6 @@ task-internal-wordlist set-current
 
 \ Link a task into the main loop
 : link-task ( task -- )
-  disable-int
-
   current-task @ if
     current-task @ prev-task ?dup if
       over swap task-next !
@@ -227,14 +225,10 @@ task-internal-wordlist set-current
     current-task !
     true current-task-changed? !
   then
-
-  enable-int
 ;
 
 \ Link a task into the head of the main loop
 : link-first-task ( task -- )
-  disable-int
-  
   current-task @ 0<> if
     dup current-task @ <> if
       current-task @ task-next @ over task-next !
@@ -248,14 +242,10 @@ task-internal-wordlist set-current
     true current-task-changed? !
     0 pause-enabled ! cr ." YYY" 1 pause-enabled !
   then
-
-  enable-int
 ;
 
 \ Unlink a task from the main loop
 : unlink-task ( task -- )
-  disable-int
-
   dup prev-task ?dup if
     over current-task @ = if
       over task-next @ current-task !
@@ -266,8 +256,6 @@ task-internal-wordlist set-current
     drop 0 current-task !
     true current-task-changed? !
   then
-
-  enable-int
 ;
 
 \ Set non-internal
@@ -293,7 +281,6 @@ task-wordlist set-current
 
 \ Set task priority
 : set-task-priority ( priority task -- )
-  space ." set-task-priority: " dup h.8 space over .
   over -32768 < triggers x-out-of-range-priority
   over 32767 > triggers x-out-of-range-priority
   task-priority h!
@@ -301,7 +288,6 @@ task-wordlist set-current
 
 \ Set task saved priority
 : set-task-saved-priority ( priority task -- )
-  space ." set-task-saved-priority: " dup h.8 over . space
   over -32768 < triggers x-out-of-range-priority
   over 32767 > triggers x-out-of-range-priority
   task-saved-priority !
@@ -309,18 +295,16 @@ task-wordlist set-current
 
 \ Enable a task
 : enable-task ( task -- )
-  space ." enable-task: " dup h.8 space
-  begin-critical
+  disable-int
   dup get-task-active 1+
   dup 1 = if over link-task then
   swap task-active h!
-  end-critical
+  enable-int
 ;
 
 \ Activate a task (i.e. enable it and move it to the head of the queue)
 : activate-task ( task -- )
-  space ." activate-task: " dup h.8 space
-  begin-critical
+  disable-int
   dup get-task-active 1+
   dup 1 = if
     over link-first-task
@@ -330,41 +314,40 @@ task-wordlist set-current
     then
   then
   swap task-active h!
-  end-critical
+  enable-int
 ;
 
 \ Disable a task
 : disable-task ( task -- )
-  space ." disable-task: " dup h.8 space
-  begin-critical
+  disable-int
   dup get-task-active 1-
   dup 0 = if over unlink-task then
   swap task-active h!
-  end-critical
+  enable-int
 ;
 
 \ Force-enable a task
 : force-enable-task ( task -- )
-  begin-critical
+  disable-int
   dup get-task-active 1 < if
     dup link-task
     1 swap task-active h!
   else
     drop
   then
-  end-critical
+  enable-int
 ;
 
 \ Force-disable a task
 : force-disable-task ( task -- )
-  begin-critical
+  disable-int
   dup get-task-active 0> if
     dup unlink-task
     0 swap task-active h!
   else
     drop
   then
-  end-critical
+  enable-int
 ;
 
 \ Mark a task as waiting

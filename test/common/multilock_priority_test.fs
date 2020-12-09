@@ -31,15 +31,16 @@ lock-size buffer: lock-c
 : locker ( priority ms lock "name" -- )
   <builds , , , does>
   dup @ swap cell + dup @ ms cell + @ current-task set-task-priority
-  dup lock unlock
+  dup lock unlock begin 1000 ms again
   current-task disable-task
+  pause
 ;
 
 \ Monitor priority
 : monitor-priority ( tests interval -- )
   swap 0 ?do
     dup ms
-    current-task get-task-priority . current-task get-task-active .
+    current-task get-task-priority .
   loop
   drop
 ;
@@ -49,14 +50,15 @@ lock-size buffer: lock-c
   lock-a lock
   lock-b lock
   lock-c lock
-  40 100 monitor-priority ." A"
+  40 100 monitor-priority space ." A"
   lock-a unlock
-  20 100 monitor-priority ." B"
+  20 100 monitor-priority space ." B"
   lock-b unlock
-  20 100 monitor-priority ." C"
+  20 100 monitor-priority space ." C"
   lock-c unlock
-  20 100 monitor-priority ." D"
+  20 100 monitor-priority space ." D"
   current-task disable-task
+  pause
 ;
 
 \ Create our locking task words
