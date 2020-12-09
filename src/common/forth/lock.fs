@@ -66,7 +66,7 @@ defined? lock-wordlist not [if]
   end-structure
 
   \ Set up a lock wait record
-  : init-lock-wait ( -- wait ) space ." init-lock-wait "
+  : init-lock-wait ( -- wait )
     ram-here 4 ram-align, ram-here lock-wait-size ram-allot
     tuck lock-wait-orig-here !
     0 over lock-wait-next !
@@ -74,7 +74,7 @@ defined? lock-wordlist not [if]
   ;
 
   \ Get maximum lock wait priority
-  : max-lock-wait-priority ( lock -- priority ) space ." max-lock-wait-priority "
+  : max-lock-wait-priority ( lock -- priority )
     -32768 swap lock-first-wait @ begin dup while
       dup lock-wait-task @ get-task-priority rot max swap lock-wait-next @
     repeat
@@ -82,7 +82,7 @@ defined? lock-wordlist not [if]
   ;
 
   \ Get group maximum lock wait priority
-  : group-max-lock-wait-priority ( lock -- priority ) space ." group-max-lock-wait-priority "
+  : group-max-lock-wait-priority ( lock -- priority )
     -32768 >r
     dup lock-next-held @ if
       dup begin
@@ -101,7 +101,7 @@ defined? lock-wordlist not [if]
   ;
 
   \ Add a lock wait record
-  : add-lock-wait ( wait lock -- ) space ." add-lock-wait "
+  : add-lock-wait ( wait lock -- )
     dup lock-first-wait @ if
       2dup lock-last-wait @ lock-wait-next !
     else
@@ -111,7 +111,7 @@ defined? lock-wordlist not [if]
   ;
 
   \ Get the last lock held in a loop
-  : get-last-lock ( lock -- ) space ." get-last-lock "
+  : get-last-lock ( lock -- )
     dup lock-next-held @ if
       dup begin
 	dup lock-next-held @ 2 pick <> if
@@ -125,7 +125,7 @@ defined? lock-wordlist not [if]
   ;
 
   \ Add a holder to a lock loop
-  : add-lock ( lock task -- ) space ." add-lock "
+  : add-lock ( lock task -- )
     swap over ['] current-lock-held for-task @ ?dup if
       over 3 roll ['] current-lock-held for-task !
       dup get-last-lock
@@ -139,7 +139,7 @@ defined? lock-wordlist not [if]
   ;
 
   \ Remove a lock from a lock loop
-  : remove-lock ( lock -- ) space ." remove-lock "
+  : remove-lock ( lock -- )
     dup lock-next-held @ if
       dup get-last-lock dup 2 pick <> if
 	over lock-next-held @ swap lock-next-held !
@@ -154,7 +154,7 @@ defined? lock-wordlist not [if]
   ;
 
   \ Resolve task priority on holding a lock
-  : update-hold-priority ( lock -- ) space ." update-hold-priority "
+  : update-hold-priority ( lock -- )
     dup lock-next-held @ if
       dup group-max-lock-wait-priority
       over lock-holder-task @ get-task-saved-priority max
@@ -166,7 +166,7 @@ defined? lock-wordlist not [if]
   ;
 
   \ Resolve task priority on releasing a lock
-  : update-release-priority ( lock -- ) space ." update-release-priority "
+  : update-release-priority ( lock -- )
     dup lock-next-held @ if
       dup get-last-lock over <> if
 	dup lock-next-held @ swap remove-lock
@@ -187,7 +187,7 @@ defined? lock-wordlist not [if]
   lock-wordlist set-current
 
   \ Initialize a lock
-  : init-lock ( addr -- ) space ." init-lock "
+  : init-lock ( addr -- )
     0 over lock-holder-task !
     0 over lock-first-wait !
     0 over lock-last-wait !
@@ -195,7 +195,7 @@ defined? lock-wordlist not [if]
   ;
 
   \ Lock a lock
-  : lock ( lock -- ) space ." lock "
+  : lock ( lock -- )
     begin-critical
     dup lock-holder-task @ if
       dup current-task ['] current-lock for-task !
@@ -219,7 +219,7 @@ defined? lock-wordlist not [if]
   : x-not-currently-owned ( -- ) space ." lock not owned by current task" cr ;
 
   \ Unlock a lock
-  : unlock ( lock -- ) space ." unlock "
+  : unlock ( lock -- )
     begin-critical
     dup lock-holder-task @ current-task <> if
       end-critical ['] x-not-currently-owned ?raise
@@ -233,10 +233,10 @@ defined? lock-wordlist not [if]
       then
       lock-wait-task @
       2dup add-lock
-      dup enable-task
       2dup swap lock-holder-task !
-      0 swap ['] current-lock for-task !
-      update-hold-priority
+      0 over ['] current-lock for-task !
+      swap update-hold-priority
+      enable-task
     else
       0 swap lock-holder-task !      
     then
@@ -244,7 +244,7 @@ defined? lock-wordlist not [if]
   ;
 
   \ Update the priorities of tasks holding locks
-  : update-lock-priority ( lock -- ) space ." update-lock-priority "
+  : update-lock-priority ( lock -- )
     begin-critical
     update-hold-priority
     end-critical
