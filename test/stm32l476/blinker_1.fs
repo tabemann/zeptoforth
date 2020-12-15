@@ -23,16 +23,16 @@ forth-wordlist task-wordlist schedule-wordlist led-wordlist 4 set-order
 forth-wordlist set-current
 
 \ The schedule
-variable my-schedule
+schedule-size buffer: my-schedule
 
 \ The schedule task
 variable schedule-task
 
 \ The red LED blinker action
-variable red-blinker-action
+action-size buffer: red-blinker-action
 
 \ The green LED blinker action
-variable green-blinker-action
+action-size buffer: green-blinker-action
 
 \ The red LED state variable
 variable red-led-state
@@ -68,25 +68,20 @@ variable green-blinker-delay
   green-blinker-delay @ current-action reset-action-delay
 ;
 
-\ Run the schedule
-: do-schedule ( -- )
-  my-schedule @ run-schedule
-;
-
 \ Init
 : init-blinker-1 ( -- )
   false red-led-state !
   false green-led-state !
-  create-schedule my-schedule !
+  my-schedule init-schedule
   3333 red-blinker-delay !
-  ['] red-blinker my-schedule @ add-action red-blinker-action !
+  ['] red-blinker red-blinker-action my-schedule add-action
   red-blinker-delay @ red-blinker-action @ start-action-delay
   red-blinker-action @ enable-action
   5000 green-blinker-delay !
-  ['] green-blinker my-schedule @ add-action green-blinker-action !
+  ['] green-blinker green-blinker-action my-schedule add-action
   green-blinker-delay @ green-blinker-action @ start-action-delay
   green-blinker-action @ enable-action
-  ['] do-schedule 256 256 256 spawn schedule-task !
+  [: my-schedule run-schedule ;] 256 256 256 spawn schedule-task !
   schedule-task @ enable-task
   pause
 ;
