@@ -263,9 +263,9 @@ defined? schedule-wordlist not [if]
     again
   ;
 
-  \ Suspend the execution of the remainder of the current action; note that this
+  \ Yield the execution of the remainder of the current action; note that this
   \ must be executed from the outside word of the action.
-  : suspend ( -- )
+  : yield ( -- )
     r> 1 bic current-action @ action-xt !
   ;
 
