@@ -31,7 +31,8 @@ defined? schedule-wordlist not [if]
 [then]
 
 \ Set up the wordlist order
-forth-wordlist task-wordlist schedule-wordlist led-wordlist 4 set-order
+forth-wordlist task-wordlist schedule-wordlist systick-wordlist led-wordlist
+5 set-order
 
 \ Our task
 variable schedule-task
@@ -49,34 +50,94 @@ variable orange-delay
 variable green-delay
 variable blue-delay
 
+\ Red-green systick start
+variable red-green-start
+
+\ Orange-blue systick start
+variable orange-blue-start
+
 \ Red-green action word
 : do-red-green ( -- )
+  systick-counter red-green-start !
   begin
     led-red-on led-green-off
-    red-delay @ current-action reset-action-delay
-    suspend
+    red-green-start @ red-delay @ + red-green-start !
+    begin
+      systick-counter red-green-start @ - red-delay @ < if
+	50 current-action start-action-delay
+	yield
+	led-green-on
+	2 current-action start-action-delay
+	yield
+	led-green-off
+	false
+      else
+	true
+      then
+    until
+    yield
     led-green-on led-red-off
-    green-delay @ current-action reset-action-delay
-    suspend
+    red-green-start @ green-delay @ + red-green-start !
+    begin
+      systick-counter red-green-start @ - green-delay @ < if
+	50 current-action start-action-delay
+	yield
+	led-red-on
+	2 current-action start-action-delay
+	yield
+	led-red-off
+	false
+      else
+	true
+      then
+    until
+    yield
   again
 ;
 
 \ Orange-blue action word
 : do-orange-blue ( -- )
+  systick-counter orange-blue-start !
   begin
     led-orange-on led-blue-off
-    orange-delay @ current-action reset-action-delay
-    suspend
+    orange-blue-start @ orange-delay @ + orange-blue-start !
+    begin
+      systick-counter orange-blue-start @ - orange-delay @ < if
+	50 current-action start-action-delay
+	yield
+	led-blue-on
+	2 current-action start-action-delay
+	yield
+	led-blue-off
+	false
+      else
+	true
+      then
+    until
+    yield
     led-blue-on led-orange-off
-    blue-delay @ current-action reset-action-delay
-    suspend
+    orange-blue-start @ blue-delay @ + orange-blue-start !
+    begin
+      systick-counter orange-blue-start @ - blue-delay @ < if
+	50 current-action start-action-delay
+	yield
+	led-orange-on
+	2 current-action start-action-delay
+	yield
+	led-orange-off
+	false
+      else
+	true
+      then
+    until
+    yield
   again
 ;
 
 \ Initialize the test
 : init-test ( -- )
   3333 red-delay !
-  3333 orange-delay !
+  3333 blue-delay !
   3333 green-delay !
   3333 blue-delay !
   my-schedule init-schedule
