@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -139,7 +139,7 @@ variable orange-blue-start
   3333 red-delay !
   3333 blue-delay !
   3333 green-delay !
-  3333 blue-delay !
+  3333 orange-delay !
   my-schedule init-schedule
   ['] do-red-green red-green-action my-schedule add-action
   ['] do-orange-blue orange-blue-action my-schedule add-action
