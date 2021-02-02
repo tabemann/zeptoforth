@@ -269,6 +269,17 @@ defined? schedule-wordlist not [if]
     r> 1 bic current-action @ action-xt !
   ;
 
+  \ Yield until a condition is true
+  : yield-until ( -- )
+    postpone if
+    postpone true
+    postpone else
+    postpone yield
+    postpone false
+    postpone then
+    postpone until
+  ;
+
   \ Make current-action read-only
   : current-action ( -- action ) current-action @ ;
 
