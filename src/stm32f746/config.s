@@ -1,4 +1,4 @@
-@ Copyright (c) 2019-2020 Travis Bemann
+@ Copyright (c) 2019-2021 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,7 @@
 
 	.equ thumb2, 1
 	.equ ram_start, 0x20000000
-	.equ ram_end, 0x2004FFFF
+	.equ ram_end, 0x20050000
 	.equ rstack_size, 0x0200
 	.equ rstack_top, ram_end
 	.equ stack_size, 0x0200
