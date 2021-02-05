@@ -72,8 +72,10 @@
 	.equ RCC_CFGR_SWS_MASK,  3 << 2
 	.equ RCC_CFGR_SWS_PLL,   2 << 2
 
-	.equ PWR_CR1         ,   POWER_CONTROL_Base + 0x00
-	.equ PWR_CSR1        ,   POWER_CONTROL_Base + 0x04
+	.equ PWR_Base        ,   0x40007000
+	
+	.equ PWR_CR1         ,   PWR_Base + 0x00
+	.equ PWR_CSR1        ,   PWR_Base + 0x04
 	
 	.equ PWR_CR1_VOS_MASK,   3 << 14
 	.equ PWR_CR1_ODEN    ,   1 << 16
@@ -93,7 +95,7 @@ _use_216mhz:
 	str r1, [r0]
 	ldr r2, =RCC_CR_HSIRDY
 1:	ldr r1, [r0]
-	ands r1, r2
+	tst r1, r2
 	beq 1b
 	
 	ldr r0, =RCC_CFGR
@@ -145,7 +147,7 @@ _use_216mhz:
 
 	ldr r0, =PWR_CSR1
 	ldr r2, =PWR_CSR1_ODSWRDY
-1:	ldr r1, r0
+1:	ldr r1, [r0]
 	tst r1, r2
 	beq 1b
 
@@ -173,14 +175,14 @@ _use_216mhz:
 	orrs r1, r2
 	str r1, [r0]
 
-	ldr r0, =RCC_PLL
+	ldr r0, =RCC_CR
 	ldr r1, [r0]
 	ldr r2, =RCC_CR_PLLON
 	bics r1, r2
 	str r1, [r0]
 
 	ldr r0, =RCC_PLLCFGR
-	ldr r1, =RCC_PLLCFGR_PLLSRC | (16 << RCC_PLLCFGR_PLLM) | (SET_PLLN << RCC_PLLCFGR_PLLN) | (((SET_PLLP >> 1) - 1) << RCC_PLLCFGR_PLLP) | (SET_PLLQ << RCC_PLLCFGR_PLLQ)
+	ldr r1, =RCC_PLLCFGR_PLLSRC | (25 << RCC_PLLCFGR_PLLM) | (SET_PLLN << RCC_PLLCFGR_PLLN) | (((SET_PLLP >> 1) - 1) << RCC_PLLCFGR_PLLP) | (SET_PLLQ << RCC_PLLCFGR_PLLQ)
 	str r1, [r0]
 	
 	ldr r0, =RCC_CR
@@ -224,7 +226,7 @@ _use_216mhz:
 	bne 1b
 
 	ldr r0, =CONSOLE_BRR
-	ldr r1, =0x753 @ 216 MHz / 115200 bps
+	ldr r1, =0x753 @ (216000000 + 115200 / 2) / 115200
 	str r1, [r0]
 	bx lr
 	end_inlined

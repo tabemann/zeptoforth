@@ -52,7 +52,7 @@
         
 	.equ CONSOLE_CR1     ,   CONSOLE_Base + 0x00
 	.equ CONSOLE_CR2     ,   CONSOLE_Base + 0x04
-	.equ CONSOLE_CR3     ,   CONSOLE_BASE + 0x08
+	.equ CONSOLE_CR3     ,   CONSOLE_Base + 0x08
 	.equ CONSOLE_BRR     ,   CONSOLE_Base + 0x0C
 	.equ CONSOLE_GTPR    ,   CONSOLE_Base + 0x10
 	.equ CONSOLE_RTOR    ,   CONSOLE_Base + 0x14
@@ -60,7 +60,7 @@
 	.equ CONSOLE_ISR     ,   CONSOLE_Base + 0x1C
 	.equ CONSOLE_ICR     ,   CONSOLE_Base + 0x20
 	.equ CONSOLE_RDR     ,   CONSOLE_Base + 0x24
-	.equ CONSOLE_TDR     ,   CONSOLE_BASE + 0x28
+	.equ CONSOLE_TDR     ,   CONSOLE_Base + 0x28
 
 	.equ CONSOLE_CR1_UE  ,   0x01
 	.equ CONSOLE_CR1_RE  ,   0x04
@@ -80,25 +80,25 @@ _uart_init:
         @ Set PORTA pins in alternate function mode
         ldr r1, =GPIOA_MODER
         ldr r0, [r1]
-	and r0, #0xFFF3FFFF # PA9
-        orrs r0, #0x00080000 # AF mode
+	and r0, #0xFFF3FFFF @ PA9
+        orrs r0, #0x00080000 @ AF mode
         str r0, [r1]
 
 	@ Set PORTB ports in alternate function mode
 	ldr r1, =GPIOB_MODER
 	ldr r0, [r1]
-	and r0, #0xFFFF3FFF # PB7
-	orrs r0, #0x00008000 # AF mode
+	and r0, #0xFFFF3FFF @ PB7
+	orrs r0, #0x00008000 @ AF mode
 	str r0, [r1]
 
         @ Set alternate function 7 to enable USART1 pins on Port A
-        ldr r1, =GPIOA_AFRL
+        ldr r1, =GPIOA_AFRH
 	and r0, #0xFFFFFF0F
         orrs r0, #0x70              @ Alternate function 7 for TX and RX pins of CONSOLE on PORTA 
         str r0, [r1]
 
         @ Set alternate function 7 to enable USART1 pins on Port B
-        ldr r1, =GPIOA_AFRL
+        ldr r1, =GPIOB_AFRL
         and r0, #0x0FFFFFFF
         orrs r0, #0x70000000        @ Alternate function 7 for TX and RX pins of CONSOLE on PORTA
         str r0, [r1]
@@ -111,7 +111,7 @@ _uart_init:
 
 	@ Configure BRR by deviding the bus clock with the baud rate
 	ldr r1, =CONSOLE_BRR
-	ldr r0, =0x753  @ 216 MHz / 115200 bps
+	ldr r0, =0x753  @ (216000000 + 115200 / 2) / 115200
 	str r0, [r1]
 
 	@ Disable USART overrun detection before UE enable
