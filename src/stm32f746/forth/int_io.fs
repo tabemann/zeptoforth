@@ -59,6 +59,7 @@ tx-buffer-size buffer: tx-buffer
 $40001100 constant USART1_Base
 USART1_Base $00 + constant USART1_CR1
 USART1_Base $1C + constant USART1_ISR
+USART1_Base $20 + constant USART1_ICR ( Interrupt flag clear register ) 
 USART1_Base $24 + constant USART1_RDR
 USART1_Base $28 + constant USART1_TDR
 
@@ -70,9 +71,11 @@ RCC_Base $64 + constant RCC_APB2LPENR ( RCC_APB2LPENR )
 : USART1_CR1_RXNEIE   %1 5 lshift USART1_CR1 bis! ;  \ USART1_CR1_RXNEIE    RXNE interrupt enable
 : USART1_CR1_TXEIE_Clear   %1 7 lshift USART1_CR1 bic! ;  \ USART1_CR1_TXEIE    interrupt disable
 : USART1_CR1_RXNEIE_Clear   %1 5 lshift USART1_CR1 bic! ;  \ USART1_CR1_RXNEIE    RXNE interrupt enable
+: USART1_ICR_ORECF %1 3 lshift USART1_ICR bis! ; ( Overrun error clear flag )  
 
 $20 constant RXNE
 $80 constant TXE
+$08 constant ORE
 
 \ Get whether the rx buffer is full
 : rx-full? ( -- f )
@@ -141,8 +144,8 @@ $80 constant TXE
   disable-int
   begin
     rx-full? not if
-      USART1_SR @ RXNE and if
-	USART1_DR b@ write-rx false
+      USART1_ISR @ RXNE and if
+	USART1_RDR @ $FF and write-rx false
       else
 	true
       then
@@ -155,8 +158,8 @@ $80 constant TXE
   then
   begin
     tx-empty? not if
-      USART1_SR @ TXE and if
-  	read-tx USART1_DR b! false
+      USART1_ISR @ TXE and if
+  	read-tx USART1_TDR ! false
       else
   	true
        then
@@ -167,7 +170,10 @@ $80 constant TXE
   tx-empty? if
     USART1_CR1_TXEIE_Clear
   then
-  38 NVIC_ICPR_CLRPEND!
+  USART1_ISR @ ORE and if
+    USART1_ICR_ORECF
+  then
+  37 NVIC_ICPR_CLRPEND!
   enable-int
   wake
 ;

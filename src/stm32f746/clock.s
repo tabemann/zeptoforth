@@ -226,7 +226,7 @@ _use_216mhz:
 	bne 1b
 
 	ldr r0, =CONSOLE_BRR
-	ldr r1, =0x753 @ (216000000 + 115200 / 2) / 115200
+	ldr r1, =0x3AA @ (108000000 + 115200 / 2) / 115200
 	str r1, [r0]
 	bx lr
 	end_inlined

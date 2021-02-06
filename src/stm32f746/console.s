@@ -77,6 +77,18 @@
 _uart_init:
 	push {lr}
 
+	@ Enable all GPIO peripheral clocks
+	ldr r1, =RCC_AHB1ENR
+	ldr r0, [r1]
+	ldr r2, =0x7FF
+	orrs r0, r2
+	str r0, [r1]
+  
+	@ shutdown display illumination for now
+	ldr r1, =GPIOK_MODER
+	ldr r0, =0x80
+	str r0, [r1]  
+
         @ Set PORTA pins in alternate function mode
         ldr r1, =GPIOA_MODER
         ldr r0, [r1]
@@ -93,12 +105,14 @@ _uart_init:
 
         @ Set alternate function 7 to enable USART1 pins on Port A
         ldr r1, =GPIOA_AFRH
+	ldr r0, [r1]
 	and r0, #0xFFFFFF0F
         orrs r0, #0x70              @ Alternate function 7 for TX and RX pins of CONSOLE on PORTA 
         str r0, [r1]
 
         @ Set alternate function 7 to enable USART1 pins on Port B
         ldr r1, =GPIOB_AFRL
+	ldr r0, [r1]
         and r0, #0x0FFFFFFF
         orrs r0, #0x70000000        @ Alternate function 7 for TX and RX pins of CONSOLE on PORTA
         str r0, [r1]
@@ -111,7 +125,7 @@ _uart_init:
 
 	@ Configure BRR by deviding the bus clock with the baud rate
 	ldr r1, =CONSOLE_BRR
-	ldr r0, =0x753  @ (216000000 + 115200 / 2) / 115200
+	ldr r0, =0x3AA  @ (108000000 + 115200 / 2) / 115200
 	str r0, [r1]
 
 	@ Disable USART overrun detection before UE enable
