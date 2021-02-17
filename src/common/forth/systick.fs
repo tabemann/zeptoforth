@@ -114,5 +114,5 @@ forth-wordlist set-current
   drop drop
 ;
 
-\ Warm reboot
-warm
+\ Reboot
+reboot

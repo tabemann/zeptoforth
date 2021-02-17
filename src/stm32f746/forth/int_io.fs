@@ -55,8 +55,8 @@ bvariable tx-write-index
 \ Tx buffer
 tx-buffer-size buffer: tx-buffer
 
-\ USART2
-$40001100 constant USART1_Base
+\ USART1
+$40011000 constant USART1_Base
 USART1_Base $00 + constant USART1_CR1
 USART1_Base $1C + constant USART1_ISR
 USART1_Base $20 + constant USART1_ICR ( Interrupt flag clear register ) 
@@ -145,7 +145,7 @@ $08 constant ORE
   begin
     rx-full? not if
       USART1_ISR @ RXNE and if
-	USART1_RDR @ $FF and write-rx false
+	USART1_RDR b@ write-rx false
       else
 	true
       then
@@ -159,7 +159,7 @@ $08 constant ORE
   begin
     tx-empty? not if
       USART1_ISR @ TXE and if
-  	read-tx USART1_TDR ! false
+  	read-tx USART1_TDR b! false
       else
   	true
        then
