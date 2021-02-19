@@ -759,9 +759,6 @@ variable saved-validate-dict
 \ Set non-internal
 task-wordlist set-current
 
-\ Make pause-count read-only
-: pause-count ( -- u ) pause-count @ ;
-
 \ Make current-task read-only
 : current-task ( -- task ) current-task @ ;
 
@@ -819,7 +816,7 @@ forth-wordlist set-current
 \ Init
 : init ( -- )
   init
-\  disable-int
+  disable-int
   0 pause-enabled !
   $7F SHPR3_PRI_15!
   $FF SHPR2_PRI_11!
@@ -840,8 +837,14 @@ forth-wordlist set-current
   ['] pendsv-handler pendsv-handler-hook !
   ['] task-systick-handler systick-handler-hook !
   1 pause-enabled !
-\  enable-int
+  enable-int
 ;
+
+\ Set the current wordlist
+task-wordlist set-current
+
+\ Make pause-count read-only
+: pause-count ( -- u ) pause-count @ ;
 
 \ Reboot to initialize multitasking
 warm
