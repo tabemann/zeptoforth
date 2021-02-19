@@ -29,5 +29,4 @@
 #include src/common/forth/systick.fs
 #include src/stm32f746/forth/int_io.fs
 #include src/common/forth/task.fs
-#include src/stm32f746/forth/led.fs
 #include src/common/forth/swdcom.fs
