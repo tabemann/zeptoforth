@@ -29,13 +29,25 @@ variable use-sleep
   use-sleep @ if wait else begin dup execute not while pause repeat drop then
 ;
 
-: swd-key? ( -- flag ) swd h@ dup 8 rshift swap $ff and <> ;
-: swd-key ( -- char ) [: swd-key? ;] pause-until swd-rx swd-rx-r b@ + b@ inc-rx-r ;
+: swd-key? ( -- flag )
+  disable-int swd h@ dup 8 rshift swap $ff and <> enable-int
+;
+: swd-key ( -- char )
+  [: swd-key? ;] pause-until
+  disable-int swd-rx swd-rx-r b@ + b@ inc-rx-r enable-int
+;
 
-: swd-emit? ( -- flag ) swd-tx-w h@ dup 8 rshift swap $ff and 1+ $ff and <> ;
-: swd-emit ( char -- ) [: swd-emit? ;] pause-until swd-tx swd-tx-w b@ + b! inc-tx-w ;
+: swd-emit? ( -- flag )
+  disable-int swd-tx-w h@ dup 8 rshift swap $ff and 1+ $ff and <> enable-int
+;
+: swd-emit ( char -- )
+  [: swd-emit? ;] pause-until
+  disable-int swd-tx swd-tx-w b@ + b! inc-tx-w enable-int
+;
 
-: swd-flush-console ( -- ) [: swd-tx-w h@ dup 8 rshift swap $FF and = ;] wait ;
+: swd-flush-console ( -- )
+  [: disable-int swd-tx-w h@ dup 8 rshift swap $FF and = enable-int ;] wait
+;
 
 : >r11 ( x -- ) [ $46b3 h, ] drop ; \ $46b3 = mov r11, r6
 : swd-init ( -- ) true use-sleep ! 0 swd ! swd >r11  ;
