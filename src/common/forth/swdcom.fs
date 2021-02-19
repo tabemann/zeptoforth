@@ -50,7 +50,7 @@ variable use-sleep
 ;
 
 : >r11 ( x -- ) [ $46b3 h, ] drop ; \ $46b3 = mov r11, r6
-: swd-init ( -- ) true use-sleep ! 0 swd ! swd >r11  ;
+: swd-init ( -- ) false use-sleep ! 0 swd ! swd >r11  ;
 
 swd-wordlist set-current
 
