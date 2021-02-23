@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -60,6 +60,9 @@ variable task-systick-counter
 \ The context switch delay
 variable context-switch-delay
 
+\ Sleep is enabled
+variable sleep-enabled?
+
 \ The current task handler
 user task-handler
 
@@ -83,6 +86,9 @@ user current-lock
 
 \ The latest lock currently held by a tack
 user current-lock-held
+
+\ Sleep
+: sleep ( -- ) sleep-enabled? @ if sleep then ;
 
 \ Set the internal task wordlist
 task-internal-wordlist set-current
@@ -589,7 +595,9 @@ variable pendsv-return
   disable-int
   
   in-critical @ not if
-    0 task-systick-counter !
+    task-systick-counter @
+    dup context-switch-delay @ negate <= if drop 0 then
+    context-switch-delay @ + task-systick-counter !
     1 pause-count +!
     begin
       task-io
@@ -639,8 +647,8 @@ variable pendsv-return
 \ Multitasker systick handler
 : task-systick-handler ( -- )
   systick-handler
-  1 task-systick-counter +!
-  task-systick-counter @ context-switch-delay @ > if
+  -1 task-systick-counter +!
+  task-systick-counter @ 0 <= if
     pause
   then
 ;
@@ -818,6 +826,7 @@ forth-wordlist set-current
   init
   disable-int
   0 pause-enabled !
+  false sleep-enabled? !
   $7F SHPR3_PRI_15!
   $FF SHPR2_PRI_11!
   $FF SHPR3_PRI_14!
@@ -845,6 +854,15 @@ task-wordlist set-current
 
 \ Make pause-count read-only
 : pause-count ( -- u ) pause-count @ ;
+
+\ Enable sleep
+: enable-sleep ( -- ) true sleep-enabled? ! ;
+
+\ Disable sleep
+: disable-sleep ( -- ) false sleep-enabled? ! ;
+
+\ Get whether sleep is enabled
+: sleep-enabled? ( -- flag ) sleep-enabled? @ ;
 
 \ Reboot to initialize multitasking
 warm
