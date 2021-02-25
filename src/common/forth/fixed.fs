@@ -367,39 +367,43 @@ create max-fraction-chars build-max-fraction-chars
 
 \ Handle numeric literals
 : do-handle-number ( b-addr bytes -- flag )
-  2dup do-handle-number if
-    state @ not if
-      rot rot
-    then
-    2drop true
-  else
-    parse-base >r
-    dup 0<> if
-      over b@ [char] - = if
-	1- swap 1+ swap
-	dup 0<> if
-	  r> handle-unsigned-double
-	else
-	  rdrop 2drop false
-	then
-	dup if
-	  state @ if
-	    rot rot dnegate swap lit, lit,
+  base @ 2 >= base @ 16 <= and if
+    2dup do-handle-number if
+      state @ not if
+	rot rot
+      then
+      2drop true
+    else
+      parse-base >r
+      dup 0<> if
+	over b@ [char] - = if
+	  1- swap 1+ swap
+	  dup 0<> if
+	    r> handle-unsigned-double
 	  else
-	    rot rot dnegate rot
+	    rdrop 2drop false
+	  then
+	  dup if
+	    state @ if
+	      rot rot dnegate swap lit, lit,
+	    else
+	      rot rot dnegate rot
+	    then
+	  then
+	else
+	  r> handle-unsigned-double
+	  dup if
+	    state @ if
+	      rot lit, swap lit,
+	    then
 	  then
 	then
       else
-	r> handle-unsigned-double
-	dup if
-	  state @ if
-	    rot lit, swap lit,
-	  then
-	then
+	rdrop 2drop false
       then
-    else
-      rdrop 2drop false
     then
+  else
+    2drop true
   then
 ;
 

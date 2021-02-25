@@ -1668,12 +1668,16 @@ commit-flash
 
 \ Format an s31.32 number
 : format-fixed ( b-addr f -- b-addr bytes )
-  2dup d0< if
-    dnegate 0 <# #s -1 sign #> add-decimal format-fraction
+  base @ 2 >= base @ 16 <= and if
+    2dup d0< if
+      dnegate 0 <# #s -1 sign #> add-decimal format-fraction
+    else
+      0 <# #s #> add-decimal format-fraction
+    then
+    dup >r rot dup >r swap move r> r>
   else
-    0 <# #s #> add-decimal format-fraction
+    drop 0
   then
-  dup >r rot dup >r swap move r> r>
 ;
 
 \ Commit to flash
