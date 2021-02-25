@@ -597,6 +597,7 @@ variable pendsv-return
   in-critical @ not if
     task-systick-counter @
     dup context-switch-delay @ negate <= if drop 0 then
+    dup context-switch-delay @ >= if drop 0 then
     context-switch-delay @ + task-systick-counter !
     1 pause-count +!
     begin

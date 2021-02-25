@@ -53,8 +53,8 @@ variable start-systick
     send-count @ send-count-limit > if
       0 send-count !
       systick-counter dup start-systick @ -
-      0 pause-enabled ! cr ." Sends per second: " 0 swap 0 send-count-limit f/
-      10000,0 f/ 1,0 2swap f/ f. 1 pause-enabled !
+      cr ." Sends per second: " 0 swap 0 send-count-limit f/
+      10000,0 f/ 1,0 2swap f/ f.
       start-systick !
     then
   again
