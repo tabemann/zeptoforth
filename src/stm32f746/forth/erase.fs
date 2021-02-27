@@ -51,19 +51,13 @@ compress-flash
 
 \ Align an address for a following flash sector
 : erase-align ( addr -- addr )
-  >r $100000
-  r@ swap $000000 $003FFF check-flash-sector-for-addr
-  r@ swap $004000 $007FFF check-flash-sector-for-addr
-  r@ swap $008000 $00BFFF check-flash-sector-for-addr
-  r@ swap $00C000 $00FFFF check-flash-sector-for-addr
-  r@ swap $010000 $01FFFF check-flash-sector-for-addr
-  r@ swap $020000 $03FFFF check-flash-sector-for-addr
-  r@ swap $040000 $05FFFF check-flash-sector-for-addr
-  r@ swap $060000 $07FFFF check-flash-sector-for-addr
-  r@ swap $080000 $08FFFF check-flash-sector-for-addr
-  r@ swap $0A0000 $0BFFFF check-flash-sector-for-addr
-  r@ swap $0C0000 $0DFFFF check-flash-sector-for-addr
-  r> swap $0E0000 $0FFFFF check-flash-sector-for-addr
+  >r $300000
+  r@ swap $208000 $20FFFF check-flash-sector-for-addr
+  r@ swap $210000 $21FFFF check-flash-sector-for-addr
+  r@ swap $228000 $23FFFF check-flash-sector-for-addr
+  r@ swap $24C000 $27FFFF check-flash-sector-for-addr
+  r@ swap $280000 $2BFFFF check-flash-sector-for-addr
+  r> swap $2C0000 $2FFFFF check-flash-sector-for-addr
 ;
 
 \ Pad flash to a sector boundary
