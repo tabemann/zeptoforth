@@ -558,6 +558,9 @@ $03 constant QUADSPI_WRAP_CONTINUOUS
 10 QUADSPI_DUMMY_CYCLE_Pos lshift QUADSPI_XIP_DISABLE or
 QUADSPI_WRAP_CONTINUOUS or constant QUADSPI_VOLATILE_CFG_REG_SETTING
 
+\ Quad SPI flash size
+1024 1024 * 16 * constant QUADSPI_SIZE
+
 \ Wait for Quad SPI to not be busy
 : wait-qspi-busy ( -- ) begin QUADSPI_SR_BUSY@ not until ;
 
@@ -994,6 +997,9 @@ qspi-wordlist set-current
 
 \ Get base Quad SPI address
 : qspi-base ( -- addr ) QUADSPI_Map_Base ;
+
+\ Get Quad SPI flash size
+: qspi-size ( -- size ) QUADSPI_SIZE ;
 
 forth-wordlist set-current
 
