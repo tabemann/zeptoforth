@@ -512,8 +512,11 @@ $EB constant QUADSPI_OP_QUAD_INPUT_OUTPUT_FAST_READ
 \ Set Quad input fast program
 $32 constant QUADSPI_OP_QUAD_INPUT_FAST_PROGRAM
 
-\ Subsector erase
-$20 constant QUADSPI_OP_SUBSECTOR_ERASE
+\ 4K subsector erase
+$20 constant QUADSPI_OP_4K_SUBSECTOR_ERASE
+
+\ 32K subsector erase
+$52 constant QUADSPI_OP_32K_SUBSECTOR_ERASE
 
 \ Sector erase
 $D8 constant QUADSPI_OP_SECTOR_ERASE
@@ -554,6 +557,12 @@ $03 constant QUADSPI_WRAP_CONTINUOUS
 \ Volatile configuration register setting
 10 QUADSPI_DUMMY_CYCLE_Pos lshift QUADSPI_XIP_DISABLE or
 QUADSPI_WRAP_CONTINUOUS or constant QUADSPI_VOLATILE_CFG_REG_SETTING
+
+\ Sector size
+1024 64 * constant QUADSPI_SECTOR_SIZE
+
+\ Subsector size
+
 
 \ Wait for Quad SPI to not be busy
 : wait-qspi-busy ( -- ) begin QUADSPI_SR_BUSY@ not until ;
@@ -940,12 +949,23 @@ qspi-wordlist set-current
   enable-int
 ;
 
-\ Erase a subsector on the Quad SPI flash
-: erase-qspi-subsector ( addr -- )
+\ Erase a 4K subsector on the Quad SPI flash
+: erase-qspi-4k-subsector ( addr -- )
   QUADSPI_Map_Base -
   disable-int
   enable-qspi-write
-  QUADSPI_OP_SUBSECTOR_ERASE send-qspi-op-addr
+  QUADSPI_OP_4K_SUBSECTOR_ERASE send-qspi-op-addr
+  wait-qspi-write-in-progress
+  map-qspi-enabled? @ if map-qspi then
+  enable-int
+;
+
+\ Erase a 32K subsector on the Quad SPI flash
+: erase-qspi-32k-subsector ( addr -- )
+  QUADSPI_Map_Base -
+  disable-int
+  enable-qspi-write
+  QUADSPI_OP_32K_SUBSECTOR_ERASE send-qspi-op-addr
   wait-qspi-write-in-progress
   map-qspi-enabled? @ if map-qspi then
   enable-int
