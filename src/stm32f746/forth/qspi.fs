@@ -755,8 +755,8 @@ QUADSPI_WRAP_CONTINUOUS or constant QUADSPI_VOLATILE_CFG_REG_SETTING
 : reg-assert-fail ( -- ) space ." register assertion failure" ;
 
 \ Test bits
-: bit-assert ( tested mask bitshift value -- flag )
-  swap >r over and r@ lshift swap r> lshift rot and averts reg-assert-fail
+: bit-assert ( tested mask bitshift value -- )
+  swap >r over and r@ lshift swap r> lshift rot and = averts reg-assert-fail
 ;
 
 \ Initialize GPIO settings
