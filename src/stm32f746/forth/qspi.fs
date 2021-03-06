@@ -558,12 +558,6 @@ $03 constant QUADSPI_WRAP_CONTINUOUS
 10 QUADSPI_DUMMY_CYCLE_Pos lshift QUADSPI_XIP_DISABLE or
 QUADSPI_WRAP_CONTINUOUS or constant QUADSPI_VOLATILE_CFG_REG_SETTING
 
-\ Sector size
-1024 64 * constant QUADSPI_SECTOR_SIZE
-
-\ Subsector size
-
-
 \ Wait for Quad SPI to not be busy
 : wait-qspi-busy ( -- ) begin QUADSPI_SR_BUSY@ not until ;
 
