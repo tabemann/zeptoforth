@@ -135,10 +135,10 @@ defined? block-wordlist not [if]
 
   \ Reuse a sector
   : reuse-sector ( erase-count index -- )
-    dup sector-old-map + swap 0 b!
-    dup sector-free-map + swap sector-block-count b!
+    dup sector-old-map + 0 swap b!
+    dup sector-free-map + sector-block-count swap b!
     sector-addr dup erase-qspi-sector
-    sector-erase-count-offset qspi!
+    sector-erase-count-offset + qspi!
   ;
 
   \ Find a completely old sector, or return -1 if no sectors are completely old
@@ -286,10 +286,14 @@ defined? block-wordlist not [if]
   ;
 
   \ Set the public block wordlist
-  \ block-wordlist set-current
+  block-wordlist set-current
+
+  \ Invalid block id exception
+  : x-invalid-block-id space ." invalid block id" ;
 
   \ Find a block by id, or return 0 if no block can be found
   : find-block ( id -- addr|0 )
+    dup unwritten <> averts x-invalid-block-id
     begin-critical
     find-block
     end-critical
@@ -304,6 +308,7 @@ defined? block-wordlist not [if]
   \ Write to a block (the data written must be of size block-size),
   \ returns whether writing was successful
   : block! ( addr id -- success )
+    dup unwritten <> averts x-invalid-block-id
     begin-critical
     block! averts x-block-write-fail
     end-critical
