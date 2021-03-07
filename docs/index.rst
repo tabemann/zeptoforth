@@ -18,6 +18,8 @@ Zeptoforth Documentation
    words/fchannel
    words/tqueue
    words/systick
+   words/qspi
+   words/block
    words/swd
    words/led
    words/test

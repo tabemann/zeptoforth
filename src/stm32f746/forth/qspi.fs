@@ -960,10 +960,26 @@ defined? qspi-wordlist not [if]
   \ Set current wordlist to the QSPI wordlist
   qspi-wordlist set-current
 
+  \ Quad SPI address validation exception
+  : x-invalid-qspi-addr ( -- ) space ." invalid qspi address" ;
+
+  \ Set the current wordlist to the QSPI internal wordlist
+  qspi-internal-wordlist set-current
+
+  \ Validate a QSPI address
+  : validate-qspi-addr ( addr -- )
+    dup QUADSPI_Map_Base u>= averts x-invalid-qspi-addr
+    QUADSPI_Map_Base QUADSPI_SIZE + u< averts x-invalid-qspi-addr
+  ;
+  
+  \ Set current wordlist to the QSPI wordlist
+  qspi-wordlist set-current
+
   \ Write a word to Quad SPI flash
   : qspi! ( x addr -- )
+    dup validate-qspi-addr
     QUADSPI_Map_Base -
-    disable-int
+    disable-int dsb isb
     enable-qspi-write
     QUADSPI_OP_QUAD_INPUT_FAST_PROGRAM send-qspi-op-addr-data-32
     wait-qspi-write-in-progress
@@ -973,8 +989,9 @@ defined? qspi-wordlist not [if]
 
   \ Write a halfword to Quad SPI flash
   : hqspi! ( h addr -- )
+    dup validate-qspi-addr
     QUADSPI_Map_Base -
-    disable-int
+    disable-int dsb isb
     enable-qspi-write
     QUADSPI_OP_QUAD_INPUT_FAST_PROGRAM send-qspi-op-addr-data-16
     wait-qspi-write-in-progress
@@ -984,8 +1001,9 @@ defined? qspi-wordlist not [if]
 
   \ Write a byte to Quad SPI flash
   : bqspi! ( b addr -- )
+    dup validate-qspi-addr
     QUADSPI_Map_Base -
-    disable-int
+    disable-int dsb isb
     enable-qspi-write
     QUADSPI_OP_QUAD_INPUT_FAST_PROGRAM send-qspi-op-addr-data-8
     wait-qspi-write-in-progress
@@ -994,9 +1012,10 @@ defined? qspi-wordlist not [if]
   ;
 
   \ Write a buffer to Quad SPI flash
-  : mass-qspi! ( data-addr count addr -- )
+  : mass-qspi! ( data-addr bytes addr -- )
+    dup validate-qspi-addr
     QUADSPI_Map_Base -
-    disable-int
+    disable-int dsb isb
     begin over 0 > while
       2 pick 2 pick 2 pick dup QUADSPI_PAGE_SIZE align swap -
       dup 0= if QUADSPI_PAGE_SIZE + then
@@ -1013,8 +1032,9 @@ defined? qspi-wordlist not [if]
 
   \ Erase a 4K subsector on the Quad SPI flash
   : erase-qspi-4k-subsector ( addr -- )
+    dup validate-qspi-addr
     QUADSPI_Map_Base -
-    disable-int
+    disable-int dsb isb
     enable-qspi-write
     QUADSPI_OP_4K_SUBSECTOR_ERASE send-qspi-op-addr
     wait-qspi-write-in-progress
@@ -1024,8 +1044,9 @@ defined? qspi-wordlist not [if]
 
   \ Erase a 32K subsector on the Quad SPI flash
   : erase-qspi-32k-subsector ( addr -- )
+    dup validate-qspi-addr
     QUADSPI_Map_Base -
-    disable-int
+    disable-int dsb isb
     enable-qspi-write
     QUADSPI_OP_32K_SUBSECTOR_ERASE send-qspi-op-addr
     wait-qspi-write-in-progress
@@ -1035,8 +1056,9 @@ defined? qspi-wordlist not [if]
 
   \ Erase a sector on the Quad SPI flash
   : erase-qspi-sector ( addr -- )
+    dup validate-qspi-addr
     QUADSPI_Map_Base -
-    disable-int
+    disable-int dsb isb
     enable-qspi-write
     QUADSPI_OP_SECTOR_ERASE send-qspi-op-addr
     wait-qspi-write-in-progress
@@ -1046,7 +1068,7 @@ defined? qspi-wordlist not [if]
 
   \ Bulk erase a Quad SPI flash
   : erase-qspi-bulk ( -- )
-    disable-int
+    disable-int dsb isb
     enable-qspi-write
     QUADSPI_OP_BULK_ERASE send-qspi-op
     wait-qspi-write-in-progress
@@ -1064,7 +1086,7 @@ defined? qspi-wordlist not [if]
   : qspi-base ( -- addr ) QUADSPI_Map_Base ;
 
   \ Get Quad SPI flash size
-  : qspi-size ( -- size ) QUADSPI_SIZE ;
+  : qspi-size ( -- bytes ) QUADSPI_SIZE ;
 
 [then]
 
