@@ -292,7 +292,7 @@ defined? block-wordlist not [if]
   : x-invalid-block-id space ." invalid block id" ;
 
   \ Find a block by id, or return 0 if no block can be found
-  : find-block ( id -- addr|0 )
+  : find-block ( id -- addr | 0 )
     dup unwritten <> averts x-invalid-block-id
     begin-critical
     find-block
