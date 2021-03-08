@@ -56,7 +56,7 @@
 
  : clone ( -- )
    cr      \ Dumps a bootable Flash Image (core + all words)
-   flash-end 0 do   
+   flash-end flash-base do   
      i erased?
      if
        i insert.04ea?  
