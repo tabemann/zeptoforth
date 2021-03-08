@@ -1,4 +1,4 @@
-@ Copyright (c) 2019-2020 Travis Bemann
+@ Copyright (c) 2019-2021 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -32,6 +32,7 @@
 	.equ flash_buffer_space, 0
 	.equ flash_buffer_addr, 0
 	.equ flash_min_address, 0x00008000
+	.equ flash_start, 0x00000000
 	.equ flash_dict_start, 0x00008000
 	.equ flash_dict_end, 0x00100000
 	.equ input_buffer_size, 255

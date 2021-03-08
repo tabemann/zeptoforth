@@ -68,7 +68,7 @@ _ram_end:
 	define_word "flash-base", visible_flag
 _flash_base:
 	push_tos
-	ldr tos, =0x00000000
+	ldr tos, =flash_start
 	bx lr
 	end_inlined
 

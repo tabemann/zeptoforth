@@ -1,6 +1,6 @@
 # zeptoforth
 
-zeptoforth is a Cortex-M Forth, currently targeted at the STM32L476 and STM32F407 DISCOVERY boards even though the intention is to target more boards and MCUs soon (but do not expect Cortex-M0 MCUs to be supported any time soon, due to their using Thumb-1 rather than Thumb-2).
+zeptoforth is a Cortex-M Forth, currently targeted at the STM32L476, STM32F407, and STM32F746 DISCOVERY boards even though the intention is to target more boards and MCUs soon (but do not expect Cortex-M0 MCUs to be supported any time soon, due to their using Thumb-1 rather than Thumb-2).
 
 Its kernel is written in Thumb-2 assembly, and a body of other core code that is loaded after it is loaded is written in Forth.
 
@@ -14,7 +14,7 @@ or:
 
 This will build a zeptoforth.bin and a zeptoforth.elf file; the zeptoforth.elf file is of use if one wishes to do source debugging with gdb of the zeptoforth kernel, otherwise disregard it. The same workflow is to be followed if one is assembling and linking zeptoforth for the STM32F407.
 
-To load the zeptoforth image (whether just the kernel or an image including precompiled Forth code) onto an STM32L476 or STM32F407 DISCOVERY board, first install st-flash, then attach the DISCOVERY board to one's PC via USB and execute:
+To load the zeptoforth image (whether just the kernel or an image including precompiled Forth code) onto an STM32L476, STM32F407, or STM32F746 DISCOVERY board, first install st-flash, then attach the DISCOVERY board to one's PC via USB and execute:
 
     $ st-flash erase
     $ st-flash write <location of the zeptoforth image> 0x08000000
@@ -32,12 +32,12 @@ where \<type> is one of:
 * `full_swdcom` (full functionality compiled in including swdcom support)
 * `mini` (limited functionality compiled in, i.e. without fixed number, allocator, scheduler, or disassembler support, without swdcom support)
 * `mini_swdcom` (limited functionality compiled in, i.e. without fixed number, allocator, scheduler, or disassembler support, including swdcom support)
-* `mini_no_corner` (STM32F407 only to get around limitations of its flash controller; limited functionality compiled in, i.e. without fixed number, allocator, scheduler, or disassembler support, without swdcom support, and without a cornerstone so as to not waste flash space, at the expense of not being able to reset the MCU back to its "factory" state)
-* `mini_swdcom_no_corner` (STMF407 only to get around the limitations of its flash controller; limited functionality compiled in, i.e. without fixed number, allocator, scheduler, or disassembler support, including swdcom support, and without a cornerstone so as to not waste flash space, at the expense of not being able to reset the MCU back to its "factory" state)
+* `mini_no_corner` (STM32F407 and STM32F746 only to get around limitations of its flash controller; limited functionality compiled in, i.e. without fixed number, allocator, scheduler, or disassembler support, without swdcom support, and without a cornerstone so as to not waste flash space, at the expense of not being able to reset the MCU back to its "factory" state)
+* `mini_swdcom_no_corner` (STMF407 and STM32F746 only to get around the limitations of its flash controller; limited functionality compiled in, i.e. without fixed number, allocator, scheduler, or disassembler support, including swdcom support, and without a cornerstone so as to not waste flash space, at the expense of not being able to reset the MCU back to its "factory" state)
 
 Prebuilt binaries are in `bin/<version>/<platform>/`.
 
-Note that only the STM32L476 and STM32F407 DISCOVERY boards currently have prebuilt images including precompiled Forth code, since they require working setups with the boards in question to be created.
+Note that support has been dropped for platforms other than the STM32L476, STM32F407, and STM32F746 DISCOVERY boards as of version 0.14.1.
 
 Note the address referred to above. This will also reboot the board.
 
@@ -54,6 +54,10 @@ Once e4thcom comes up, execute (including the leading '#'), for the STM32L476:
 or, for the STM32F407:
 
     #include src/stm32f407/forth/setup_<type>.fs
+
+or, for the STM32F746:
+
+    #include src/stm32f746/forth/setup_<type>.fs
 
 where \<type> is one of `full`, `full_swdcom`, `mini`, or `mini_swdcom`, with the meanings given above.
 
