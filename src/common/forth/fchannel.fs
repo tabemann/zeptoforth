@@ -22,6 +22,11 @@
 forth-wordlist 1 set-order
 forth-wordlist set-current
 
+\ Make sure task-wordlist exist
+defined? task-wordlist not [if]
+  :noname space ." task is not installed" cr ; ?raise
+[then]
+
 \ Make sure tqueue-wordlist exists
 defined? tqueue-wordlist not [if]
   :noname space ." tqueue is not installed" cr ; ?raise

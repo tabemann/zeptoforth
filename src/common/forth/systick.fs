@@ -18,101 +18,107 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Compile to flash
-compile-to-flash
-
 \ Set up the wordlist
 forth-wordlist 1 set-order
 forth-wordlist set-current
-wordlist constant systick-wordlist
-wordlist constant systick-internal-wordlist
-forth-wordlist internal-wordlist systick-wordlist
-systick-internal-wordlist 4 set-order
-systick-internal-wordlist set-current
 
-\ RW SysTick Control and Status Register
-$E000E010 constant SYST_CSR
+\ Test to make sure this has not already been compiled
+defined? systick-wordlist not [if]
 
-\ SysTick count flag mask
-1 16 lshift constant SYST_CSR_COUNTFLAG
+  \ Compile to flash
+  compile-to-flash
 
-\ SysTick clock source flag mask
-1 2 lshift constant SYST_CSR_CLKSOURCE
+  wordlist constant systick-wordlist
+  wordlist constant systick-internal-wordlist
+  forth-wordlist internal-wordlist systick-wordlist
+  systick-internal-wordlist 4 set-order
+  systick-internal-wordlist set-current
 
-\ SysTick tick interrupt flag mask
-1 1 lshift constant SYST_CSR_TICKINT
+  \ RW SysTick Control and Status Register
+  $E000E010 constant SYST_CSR
 
-\ SysTick tick enable flag mask
-1 0 lshift constant SYST_CSR_ENABLE
+  \ SysTick count flag mask
+  1 16 lshift constant SYST_CSR_COUNTFLAG
 
-\ RW SysTick Reload Value Register (24 bit)
-$E000E014 constant SYST_RVR
+  \ SysTick clock source flag mask
+  1 2 lshift constant SYST_CSR_CLKSOURCE
 
-\ RW SysTick Current Value Register (24 bit)
-$E000E018 constant SYST_CVR
+  \ SysTick tick interrupt flag mask
+  1 1 lshift constant SYST_CSR_TICKINT
 
-\ RO SysTick Calibration Register
-$E000E01C constant SYST_CALIB
+  \ SysTick tick enable flag mask
+  1 0 lshift constant SYST_CSR_ENABLE
 
-\ SysTick no reference counter flag mask
-1 31 lshift constant SYST_CALIB_NOREF
+  \ RW SysTick Reload Value Register (24 bit)
+  $E000E014 constant SYST_RVR
 
-\ SysTick TENMS field is inexact flag mask
-1 30 lshift constant SYST_CALIB_SKEW
+  \ RW SysTick Current Value Register (24 bit)
+  $E000E018 constant SYST_CVR
 
-\ SysTick value for 10 ms (100 Hz) timing, subject to skew errors mask
-$00FFFFFF constant SYST_CALIB_TENMS
+  \ RO SysTick Calibration Register
+  $E000E01C constant SYST_CALIB
 
-\ SysTick counter
-variable systick-counter
+  \ SysTick no reference counter flag mask
+  1 31 lshift constant SYST_CALIB_NOREF
 
-\ Set non-internal
-systick-wordlist set-current
+  \ SysTick TENMS field is inexact flag mask
+  1 30 lshift constant SYST_CALIB_SKEW
 
-\ SysTick handler
-: systick-handler ( -- )
-  SYST_CSR @ SYST_CSR_COUNTFLAG and if
-    systick-counter @ 1+ systick-counter ! wake
-  then
-;
+  \ SysTick value for 10 ms (100 Hz) timing, subject to skew errors mask
+  $00FFFFFF constant SYST_CALIB_TENMS
 
-\ Turn on systick
-: enable-systick ( -- )
-  SYST_CSR_TICKINT SYST_CSR_ENABLE or SYST_CSR bis! dsb isb
-;  
+  \ SysTick counter
+  variable systick-counter
 
-\ Turn off systick
-: disable-systick ( -- )
-  SYST_CSR_TICKINT SYST_CSR_ENABLE or SYST_CSR bic! dsb isb
-;
+  \ Set non-internal
+  systick-wordlist set-current
 
-\ Make systick-counter read-only
-: systick-counter ( -- u ) systick-counter @ ;
+  \ SysTick handler
+  : systick-handler ( -- )
+    SYST_CSR @ SYST_CSR_COUNTFLAG and if
+      systick-counter @ 1+ systick-counter ! wake
+    then
+  ;
 
-\ Reset current wordlist
-forth-wordlist set-current
+  \ Turn on systick
+  : enable-systick ( -- )
+    SYST_CSR_TICKINT SYST_CSR_ENABLE or SYST_CSR bis! dsb isb
+  ;  
 
-\ Init
-: init ( -- )
-  init
-  ['] systick-handler systick-handler-hook !
-  SYST_CALIB @ SYST_CALIB_TENMS and
-  10 / systick-divisor / time-multiplier * time-divisor / SYST_RVR !
-  0 SYST_CVR !
-  0 systick-counter !
-  enable-systick
-;
+  \ Turn off systick
+  : disable-systick ( -- )
+    SYST_CSR_TICKINT SYST_CSR_ENABLE or SYST_CSR bic! dsb isb
+  ;
 
-\ Wait for n milliseconds
-: ms ( u -- )
-  systick-divisor * systick-counter @
-  begin
-    dup systick-counter @ swap - 2 pick u<
-  while
-    pause
-  repeat
-  drop drop
-;
+  \ Make systick-counter read-only
+  : systick-counter ( -- u ) systick-counter @ ;
+
+  \ Reset current wordlist
+  forth-wordlist set-current
+
+  \ Init
+  : init ( -- )
+    init
+    ['] systick-handler systick-handler-hook !
+    SYST_CALIB @ SYST_CALIB_TENMS and
+    10 / systick-divisor / time-multiplier * time-divisor / SYST_RVR !
+    0 SYST_CVR !
+    0 systick-counter !
+    enable-systick
+  ;
+
+  \ Wait for n milliseconds
+  : ms ( u -- )
+    systick-divisor * systick-counter @
+    begin
+      dup systick-counter @ swap - 2 pick u<
+    while
+      pause
+    repeat
+    drop drop
+  ;
+
+[then]
 
 \ Reboot
 reboot
