@@ -18,15 +18,25 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Compile to flash
-compile-to-flash
-
 \ Set up the wordlist order
 forth-wordlist 1 set-order
 forth-wordlist set-current
 
+\ Make sure systick-wordlist exists
+defined? systick-wordlist not [if]
+  :noname space ." systick is not installed" cr ; ?raise
+[then]
+
+\ Make sure task-wordlist exists
+defined? task-wordlist not [if]
+  :noname space ." task is not installed" cr ; ?raise
+[then]
+
 \ Test to see if this has already been loaded
 defined? schedule-wordlist not [if]
+
+  \ Compile to flash
+  compile-to-flash
 
   \ Set up the wordlist
   wordlist constant schedule-wordlist
