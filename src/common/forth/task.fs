@@ -556,9 +556,9 @@ defined? task-wordlist not [if]
   : spawn ( xt dict-size stack-size rstack-size -- task )
     2dup + task +
     free-end @ swap -
-    tuck task-rstack-size h!
-    tuck task-stack-size h!
-    tuck task-dict-size !
+    swap 4 align swap tuck task-rstack-size h!
+    swap 4 align swap tuck task-stack-size h!
+    swap 4 align swap tuck task-dict-size !
     dup dup task-dict-size @ - free-end !
     tuck init-task
   ;

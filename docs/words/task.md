@@ -41,7 +41,14 @@ Note that tasks may be enabled or disabled but once created exist until the MCU 
 
 New task default to a priority of zero; to change this use `set-task-priority`.
 
-Uncaught exceptions within a task will be handled, with the message for them being displayed, but they will result in said task being disabled. Note that reenabling such a task will result in a crash.
+Uncaught exceptions within a task will be handled, with the message for them being displayed, but they will result in said task being terminated.
+
+To reinitialize existing tasks, one executes:
+
+##### `init-task`
+( xt task -- )
+
+These tasks may be in any state, including being terminated.
 
 New tasks do not execute right away, rather to enable their execution, one executes:
 
@@ -70,6 +77,27 @@ To force a task to be disabled, one executes:
 ( task -- )
 
 which sets the active counter for the *task* to zero if is greater than zero.
+
+To terminate a task, one executes:
+
+##### `kill`
+( task -- )
+
+which immediately halts that task's executing, including if it is the current task, and puts it in a terminated state.
+
+To get whether a task is terminated, one executes:
+
+##### `terminated?`
+( task -- terminated )
+
+which returns the terminated state of a task.
+
+If one attempts to execute a word against a task, aside from `init-task` or `terminated?`, the following exception is raised:
+
+##### `x-terminated`
+( -- )
+
+This exception when executed displays the task terminated error message.
 
 ##### `set-task-priority`
 ( priority task -- )
