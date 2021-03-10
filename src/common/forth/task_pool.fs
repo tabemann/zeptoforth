@@ -28,10 +28,10 @@ defined? task-wordlist not [if]
 [then]
 
 \ Test to make sure this has not already been compiled
-defined? task-wordlist not [if]
+defined? task-pool-wordlist not [if]
 
   \ Compile this to flash
-  compile-to-flash
+  \ compile-to-flash
 
   \ Set up the actual wordlist
   wordlist constant task-pool-wordlist
@@ -60,9 +60,6 @@ defined? task-wordlist not [if]
     task-pool-size + swap cells + @
   ;
 
-  \ Do nothing
-  : nothing ( -- ) ;
-
   \ Switch wordlists
   task-pool-wordlist set-current
   
@@ -73,8 +70,8 @@ defined? task-wordlist not [if]
   : spawn-from-task-pool ( xt task-pool -- task )
     begin-critical
     dup task-pool-count @ 0 ?do
-      i over get-task dup terminated? not if
-	i swap get-task tuck init-task unloop exit
+      i over get-task terminated? if
+	i swap get-task tuck init-task end-critical unloop exit
       then
     loop
     2drop 0 end-critical
@@ -87,7 +84,7 @@ defined? task-wordlist not [if]
     tuck task-pool-stack-size h!
     tuck task-pool-dict-size !
     dup task-pool-count @ 0 ?do
-      ['] nothing
+      [: ;]
       over dup task-pool-dict-size @
       swap dup task-pool-stack-size h@
       swap task-pool-rstack-size h@ spawn
@@ -98,3 +95,10 @@ defined? task-wordlist not [if]
   ;
 
 [then]
+
+\ Set up the wordlist
+forth-wordlist 1 set-order
+forth-wordlist set-current
+
+\ Set compile to RAM
+compile-to-ram
