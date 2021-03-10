@@ -12,6 +12,7 @@ Zeptoforth Documentation
    words/schedule
    words/dev_tools
    words/double
+   words/task_pool
    words/allocate
    words/lock
    words/channel
