@@ -31,7 +31,7 @@ defined? task-wordlist not [if]
 defined? task-pool-wordlist not [if]
 
   \ Compile this to flash
-  \ compile-to-flash
+  compile-to-flash
 
   \ Set up the actual wordlist
   wordlist constant task-pool-wordlist
@@ -62,6 +62,9 @@ defined? task-pool-wordlist not [if]
 
   \ Switch wordlists
   task-pool-wordlist set-current
+
+  \ No tasks are available
+  : x-no-task-available ( -- ) spawn ." no task is available" ;
   
   \ Spawn a task from a task pool
   : spawn-from-task-pool ( xt task-pool -- task )
@@ -71,7 +74,7 @@ defined? task-pool-wordlist not [if]
 	i swap task@ tuck init-task end-critical unloop exit
       then
     loop
-    2drop 0 end-critical
+    2drop end-critical ['] x-no-task-available ?raise
   ;
 
   \ Get task pool free count
@@ -86,9 +89,9 @@ defined? task-pool-wordlist not [if]
   \ Initialize a task pool
   : init-task-pool ( dict-size stack-size rstack-size count addr -- )
     tuck task-pool-count !
-    tuck task-pool-rstack-size h!
-    tuck task-pool-stack-size h!
-    tuck task-pool-dict-size !
+    tuck swap 4 align swap task-pool-rstack-size h!
+    tuck swap 4 align swap task-pool-stack-size h!
+    tuck swap 4 align swap task-pool-dict-size !
     dup task-pool-count @ 0 ?do
       [: ;]
       over dup task-pool-dict-size @
