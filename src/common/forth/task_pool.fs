@@ -56,25 +56,31 @@ defined? task-pool-wordlist not [if]
   end-structure
 
   \ Get a task in a task pool
-  : get-task ( index task-pool -- task )
+  : task@ ( index task-pool -- task )
     task-pool-size + swap cells + @
   ;
 
   \ Switch wordlists
   task-pool-wordlist set-current
   
-  \ Get the size of a task pool of a given size
-  : get-task-pool-size ( count -- bytes ) cells task-pool-size + ;
-
   \ Spawn a task from a task pool
   : spawn-from-task-pool ( xt task-pool -- task )
     begin-critical
     dup task-pool-count @ 0 ?do
-      i over get-task terminated? if
-	i swap get-task tuck init-task end-critical unloop exit
+      i over task@ terminated? if
+	i swap task@ tuck init-task end-critical unloop exit
       then
     loop
     2drop 0 end-critical
+  ;
+
+  \ Get task pool free count
+  : task-pool-free ( task-pool -- count )
+    begin-critical
+    0 swap dup task-pool-count @ 0 ?do
+      i over task@ terminated? if swap 1+ swap then
+    loop
+    drop end-critical
   ;
   
   \ Initialize a task pool
@@ -93,6 +99,9 @@ defined? task-pool-wordlist not [if]
     loop
     drop
   ;
+
+  \ Get the size of a task pool of a given size
+  : task-pool-size ( count -- bytes ) cells task-pool-size + ;
 
 [then]
 
