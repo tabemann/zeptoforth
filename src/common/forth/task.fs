@@ -317,7 +317,7 @@ defined? task-wordlist not [if]
 
   \ Validate task is not terminated
   : validate-not-terminated ( task -- )
-    dup task-active h@ terminated <> averts x-terminated
+    task-active h@ terminated <> averts x-terminated
   ;
 
   \ Enable a task
@@ -363,7 +363,7 @@ defined? task-wordlist not [if]
     dup get-task-active 1-
     0= if dup unlink-task then
     terminated over task-active h!
-    dup current-task @ = swap next-task @ = or if
+    dup current-task @ = swap last-task @ = or if
       enable-int begin pause again
     else
       enable-int
@@ -708,8 +708,8 @@ defined? task-wordlist not [if]
 
   \ Start a delay from the present
   : start-task-delay ( 1/10m-delay task -- )
-    begin-critical
     dup validate-not-terminated
+    begin-critical
     dup systick-counter swap ['] task-systick-start for-task !
     ['] task-systick-delay for-task !
     end-critical
@@ -717,8 +717,8 @@ defined? task-wordlist not [if]
 
   \ Set a delay for a task
   : set-task-delay ( 1/10ms-delay 1/10ms-start task -- )
-    begin-critical
     dup validate-not-terminated
+    begin-critical
     tuck ['] task-systick-start for-task !
     ['] task-systick-delay for-task !
     end-critical
@@ -726,8 +726,8 @@ defined? task-wordlist not [if]
 
   \ Advance a delay for a task by a given amount of time
   : advance-task-delay ( 1/10ms-offset task -- )
-    begin-critical
     dup validate-not-terminated
+    begin-critical
     systick-counter over ['] task-systick-start for-task @ -
     over ['] task-systick-delay for-task @ < if
       ['] task-systick-delay for-task +!
@@ -742,8 +742,8 @@ defined? task-wordlist not [if]
   \ Advance of start a delay from the present, depending on whether the delay
   \ length has changed
   : reset-task-delay ( 1/10ms-delay task -- )
-    begin-critical
     dup validate-not-terminated
+    begin-critical
     dup ['] task-systick-delay for-task @ 2 pick = if
       advance-task-delay
     else
@@ -754,8 +754,8 @@ defined? task-wordlist not [if]
 
   \ Get a delay for a task
   : get-task-delay ( task -- 1/10ms-delay 1/10ms-start )
-    begin-critical
     dup validate-not-terminated
+    begin-critical
     dup ['] task-systick-delay for-task @
     over ['] task-systick-start for-task @
     end-critical
@@ -763,8 +763,8 @@ defined? task-wordlist not [if]
 
   \ Cancel a delay for a task
   : cancel-task-delay ( task -- )
-    begin-critical
     dup validate-not-terminated
+    begin-critical
     0 over ['] task-systick-start for-task !
     -1 swap ['] task-systick-delay for-task !
     end-critical
