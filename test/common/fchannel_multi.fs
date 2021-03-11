@@ -64,9 +64,9 @@ fchan-size buffer: my-fchan
 \ Initiate the test
 : init-test ( -- )
   my-fchan init-fchan
-  consumer-task enable-task
-  producer-a-task enable-task
-  producer-b-task enable-task
-  producer-c-task enable-task
+  consumer-task run
+  producer-a-task run
+  producer-b-task run
+  producer-c-task run
   pause
 ;

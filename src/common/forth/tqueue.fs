@@ -106,7 +106,7 @@ defined? tqueue-wordlist not [if]
     then
     init-wait
     dup rot add-wait
-    current-task disable-task
+    current-task stop
     end-critical
     pause
     begin-critical

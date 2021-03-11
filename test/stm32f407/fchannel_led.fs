@@ -80,10 +80,10 @@ red-fchan orange-fchan ' led-red-on ' led-red-off 100 make-led red-task
 
 \ Initialize the blinky
 : init-blinky ( -- )
-  orange-task enable-task
-  green-task enable-task
-  blue-task enable-task
-  red-task enable-task
+  orange-task run
+  green-task run
+  blue-task run
+  red-task run
   pause
   0 orange-fchan send-fchan-cell
   pause

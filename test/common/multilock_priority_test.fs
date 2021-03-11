@@ -32,8 +32,7 @@ lock-size buffer: lock-c
   <builds , , , does>
   dup @ swap cell + dup @ ms cell + @ current-task set-task-priority
   dup lock unlock begin 1000 ms again
-  current-task disable-task
-  pause
+  current-task kill
 ;
 
 \ Monitor priority
@@ -57,8 +56,7 @@ lock-size buffer: lock-c
   20 100 monitor-priority space ." C"
   lock-c unlock
   20 100 monitor-priority space ." D"
-  current-task disable-task
-  pause
+  current-task kill
 ;
 
 \ Create our locking task words
@@ -82,9 +80,9 @@ variable task-lock-c
   ['] do-lock-b 256 256 256 spawn task-lock-b !
   ['] do-lock-c 256 256 256 spawn task-lock-c !
   begin-critical
-  task-lock-all @ enable-task
-  task-lock-a @ enable-task
-  task-lock-b @ enable-task
-  task-lock-c @ enable-task
+  task-lock-all @ run
+  task-lock-a @ run
+  task-lock-b @ run
+  task-lock-c @ run
   end-critical
 ;

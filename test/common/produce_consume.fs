@@ -61,10 +61,10 @@ variable consumer-task
 ' consumer 256 256 256 spawn consumer-task !
 
 \ Enable my consumer task
-consumer-task @ enable-task
+consumer-task @ run
 
 \ Enable my producer task
-producer-task @ enable-task
+producer-task @ run
 
 \ Initiate execution
 pause

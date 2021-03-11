@@ -320,8 +320,8 @@ defined? task-wordlist not [if]
     task-active h@ terminated <> averts x-terminated
   ;
 
-  \ Enable a task
-  : enable-task ( task -- )
+  \ Start a task's execution
+  : run ( task -- )
     disable-int
     dup validate-not-terminated
     dup get-task-active 1+
@@ -331,7 +331,7 @@ defined? task-wordlist not [if]
   ;
 
   \ Activate a task (i.e. enable it and move it to the head of the queue)
-  : activate-task ( task -- )
+  : activate ( task -- )
     disable-int
     dup validate-not-terminated
     dup get-task-active 1+
@@ -346,8 +346,8 @@ defined? task-wordlist not [if]
     enable-int
   ;
 
-  \ Disable a task
-  : disable-task ( task -- )
+  \ Stop a task's execution
+  : stop ( task -- )
     disable-int
     dup validate-not-terminated
     dup get-task-active 1-
@@ -370,32 +370,6 @@ defined? task-wordlist not [if]
     then
   ;
   
-  \ Force-enable a task
-  : force-enable-task ( task -- )
-    disable-int
-    dup validate-not-terminated
-    dup get-task-active 1 < if
-      dup link-task
-      1 swap task-active h!
-    else
-      drop
-    then
-    enable-int
-  ;
-
-  \ Force-disable a task
-  : force-disable-task ( task -- )
-    disable-int
-    dup validate-not-terminated
-    dup get-task-active 0> if
-      dup unlink-task
-      0 swap task-active h!
-    else
-      drop
-    then
-    enable-int
-  ;
-
   \ Mark a task as waiting
   : wait-task ( task -- )
     dup validate-not-terminated

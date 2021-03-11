@@ -68,7 +68,7 @@ variable start-systick
   0 send-count !
   systick-counter start-systick !
   my-fchan init-fchan
-  consumer-task enable-task
-  producer-task enable-task
+  consumer-task run
+  producer-task run
   pause
 ;
