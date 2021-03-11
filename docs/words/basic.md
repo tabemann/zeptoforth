@@ -479,7 +479,7 @@ Get whether compilation is to flash
 ##### `begin-critical`
 ( -- )
 
-Begin a critical section, within which context switches will not take place; note that critical sections do not nest.
+Begin a critical section, within which context switches will not take place; note that critical sections do nest.
 
 ##### `end-critical`
 ( -- )
