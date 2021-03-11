@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -1058,16 +1058,21 @@ forth-wordlist set-current
 
 \ Begin a critical section
 : begin-critical ( -- )
-  true in-critical !
+  disable-int
+  1 in-critical +!
+  enable-int
 ;
 
 \ End a critical section
 : end-critical ( -- )
-  deferred-context-switch @
-  false in-critical !
-  deferred-context-switch @ or
-  false deferred-context-switch !
-  if pause then
+  disable-int
+  in-critical @ 1 - 0 max dup in-critical !
+  enable-int
+  0= if
+    deferred-context-switch @
+    false deferred-context-switch !
+    if pause then
+  then
 ;
 
 \ Commit to flash
@@ -1749,7 +1754,7 @@ forth-wordlist set-current
   next-ram-space dict-base !
   dict-base @ next-user-space + ram-here!
   false deferred-context-switch !
-  false in-critical !
+  0 in-critical !
   0 wait-hook !
   0 wake-hook !
   0 flush-console-hook !
