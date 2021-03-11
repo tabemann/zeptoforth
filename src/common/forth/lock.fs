@@ -202,7 +202,7 @@ defined? lock-wordlist not [if]
       init-lock-wait
       2dup swap add-lock-wait
       swap update-hold-priority
-      current-task disable-task
+      current-task stop
       end-critical
       pause
       begin-critical
@@ -236,7 +236,7 @@ defined? lock-wordlist not [if]
       2dup swap lock-holder-task !
       0 over ['] current-lock for-task !
       swap update-hold-priority
-      enable-task
+      run
     else
       0 swap lock-holder-task !      
     then

@@ -29,7 +29,7 @@ forth-wordlist
 ' test 256 256 256 spawn constant test-task
 
 \ Start the loop task
-test-task enable-task
+test-task run
 
 \ Wait half a second
 500 ms

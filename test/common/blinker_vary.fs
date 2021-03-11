@@ -64,5 +64,5 @@ variable vary-task
   500 vary-max !
   25 vary-step !
   ['] vary 256 256 256 spawn vary-task !
-  vary-task @ enable-task
+  vary-task @ run
 ;

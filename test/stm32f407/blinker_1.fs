@@ -105,6 +105,6 @@ variable blink-delay
   green-blink-off-action enable-action
   blue-blink-off-action enable-action
   [: my-schedule run-schedule ;] 256 256 256 spawn schedule-task !
-  schedule-task @ enable-task
+  schedule-task @ run
   pause
 ;

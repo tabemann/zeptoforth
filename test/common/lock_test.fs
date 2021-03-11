@@ -57,8 +57,8 @@ variable my-task-2
   ['] loop-1 256 256 256 spawn my-task-1 !
   ['] loop-2 256 256 256 spawn my-task-2 !
   begin-critical
-  my-task-0 @ enable-task
-  my-task-1 @ enable-task
-  my-task-2 @ enable-task
+  my-task-0 @ run
+  my-task-1 @ run
+  my-task-2 @ run
   end-critical
 ;

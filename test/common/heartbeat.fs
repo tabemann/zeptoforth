@@ -45,7 +45,7 @@ defined? init-heartbeat not [if]
   \ Initialize the heartbeat
   : init-heartbeat ( -- )
     ['] heartbeat 256 256 256 spawn heartbeat-task !
-    heartbeat-task @ enable-task
+    heartbeat-task @ run
   ;
   
 [then]

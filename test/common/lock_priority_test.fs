@@ -57,7 +57,7 @@ variable high-task
   ['] low 256 256 256 spawn low-task !
   ['] high 256 256 256 spawn high-task !
   1 high-task @ set-task-priority
-  low-task @ enable-task
+  low-task @ run
   500000 0 ?do loop
-  high-task @ enable-task
+  high-task @ run
 ;
