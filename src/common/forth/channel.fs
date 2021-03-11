@@ -96,8 +96,8 @@ defined? chan-wordlist not [if]
     begin dup chan-full-unsafe? while
       current-task over chan-send-task !
 \      begin dup chan-recv-task @ 0= while pause repeat
-      dup chan-recv-task @ ?dup if enable-task then
-      current-task disable-task
+      dup chan-recv-task @ ?dup if run then
+      current-task stop
       end-critical
       pause
       begin-critical
@@ -116,8 +116,8 @@ defined? chan-wordlist not [if]
     repeat
     begin dup chan-empty-unsafe? while
       current-task over chan-recv-task !
-      dup chan-send-task @ ?dup if enable-task then
-      current-task disable-task
+      dup chan-send-task @ ?dup if run then
+      current-task stop
       end-critical
       pause
       begin-critical
@@ -166,7 +166,7 @@ defined? chan-wordlist not [if]
     dup wait-send-chan
     tuck send-chan-addr b!
     dup advance-send-chan
-    chan-recv-task @ ?dup if enable-task then
+    chan-recv-task @ ?dup if run then
     end-critical
   ;
 
@@ -176,7 +176,7 @@ defined? chan-wordlist not [if]
     dup wait-recv-chan
     dup recv-chan-addr b@
     over advance-recv-chan
-    swap chan-send-task @ ?dup if enable-task then
+    swap chan-send-task @ ?dup if run then
     end-critical
   ;
 

@@ -45,8 +45,8 @@ variable lowest-task
   0 middle-task @ set-task-priority
   1 highest-task @ set-task-priority
   begin-critical
-  lowest-task @ enable-task
-  middle-task @ enable-task
-  highest-task @ enable-task
+  lowest-task @ run
+  middle-task @ run
+  highest-task @ run
   end-critical
 ;

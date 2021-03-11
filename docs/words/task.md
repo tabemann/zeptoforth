@@ -52,31 +52,17 @@ These tasks may be in any state, including being terminated.
 
 New tasks do not execute right away, rather to enable their execution, one executes:
 
-##### `enable-task`
+##### `run`
 ( task -- )
 
 which increments the active counter for the *task* (which is initialized to zero); the task executes if this counter is greater than zero.
 
-To force a task to be enabled, one executes:
-
-##### `force-enable-task`
-( task -- )
-
-which sets the active counter for the *task* to one if it is smaller than one.
-
 In turn a task can be disabled with:
 
-##### `disable-task`
+##### `stop`
 ( task -- )
 
 which decrements the active counter for the *task*.
-
-To force a task to be disabled, one executes:
-
-##### `force-disable-task`
-( task -- )
-
-which sets the active counter for the *task* to zero if is greater than zero.
 
 To terminate a task, one executes:
 
@@ -92,7 +78,7 @@ To get whether a task is terminated, one executes:
 
 which returns the terminated state of a task.
 
-If one attempts to execute a word against a task, aside from `init-task` or `terminated?`, the following exception is raised:
+If one attempts to execute a word against a terminated task, aside from `init-task` or `terminated?`, the following exception is raised:
 
 ##### `x-terminated`
 ( -- )

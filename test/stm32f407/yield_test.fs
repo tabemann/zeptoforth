@@ -147,6 +147,6 @@ variable orange-blue-start
   1666 orange-blue-action start-action-delay
   red-green-action enable-action
   orange-blue-action enable-action
-  schedule-task @ enable-task
+  schedule-task @ run
   pause
 ;

@@ -50,5 +50,5 @@ variable blinker-task
 : init-blinker ( -- )
   500 blinker-delay !
   ['] blinker 256 256 256 spawn blinker-task !
-\  blinker-task @ enable-task
+\  blinker-task @ run
 ;
