@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,9 @@ forth-wordlist set-current
 \ Check whether this is already defined
 defined? lock-wordlist not [if]
 
+  \ Compile to flash
+  compile-to-flash
+  
   \ Setup the wordlist
   wordlist constant lock-wordlist
   wordlist constant lock-internal-wordlist
@@ -252,3 +255,5 @@ defined? lock-wordlist not [if]
 
 [then]
     
+\ Warm reboot
+warm

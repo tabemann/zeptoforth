@@ -11,6 +11,7 @@ Zeptoforth Documentation
    words/task
    words/schedule
    words/dev_tools
+   words/line
    words/double
    words/task_pool
    words/allocate

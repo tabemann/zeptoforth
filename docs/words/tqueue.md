@@ -2,7 +2,7 @@
 
 A task queue is a queue of waiting tasks, which then can be woken up, in the order of their joining the task queue, by another task. Note that tasks can wake up any given number of tasks *before* they join the task queue, upon which they will not actually deschedule themselves but rather increment the count of waiting tasks (which was negative in this case).
 
-Task queues are not included in the default builds; the user must load `src/common/forth/tqueue.fs` for them to be available. Note that logic is in place to ensure that it is not loaded multiple times. Also note that they by default are compiled into RAM; the user must specify `compile-to-flash` in order to compile them to flash. Note that task queues do not need global initialization in order to be used.
+Task queues are not included in the default builds; the user must load `src/common/forth/tqueue.fs` or a big build for them to be available. Note that logic is in place to ensure that it is not loaded multiple times. Note that it is compiled into flash when it is loaded.
 
 The following words are in `tqueue-wordlist`:
 

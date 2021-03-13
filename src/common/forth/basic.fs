@@ -681,6 +681,7 @@ commit-flash
 : endof ( -- )
   [immediate]
   [compile-only]
+  undefer-lit
   rot ?dup if
     here swap branch-back!
   then
@@ -692,6 +693,7 @@ commit-flash
 : endcase ( x -- )
   [immediate]
   [compile-only]
+  undefer-lit
   postpone drop
   ?dup if
     here swap branch-back!
@@ -731,6 +733,7 @@ commit-flash
 : endcasestr ( x -- )
   [immediate]
   [compile-only]
+  undefer-lit
   postpone 2drop
   ?dup if
     here swap branch-back!
