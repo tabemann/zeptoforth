@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,9 @@ defined? task-wordlist not [if]
 
 \ Check whether this is already defined
 defined? chan-wordlist not [if]
+
+  \ Compile to flash
+  compile-to-flash
 
   \ Set up the wordlist
   wordlist constant chan-wordlist
@@ -207,3 +210,6 @@ defined? chan-wordlist not [if]
   ;
   
 [then]
+
+\ Warm reboot
+warm

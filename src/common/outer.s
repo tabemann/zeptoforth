@@ -829,11 +829,7 @@ _do_refill:
 	b 1b
 7:	pull_tos
 	b 6b
-4:	ldr r2, =input_buffer
-	cmp r0, r2
-	beq 5f
-	subs r0, #1
-	push {r0, r1, r2}
+4:	push {r0, r1}
 	movs tos, #0x08
 	bl _emit
 	push_tos
@@ -842,13 +838,26 @@ _do_refill:
 	push_tos
 	movs tos, #0x08
 	bl _emit
-	pop {r0, r1, r2}
-	b 1b
-5:	pull_tos
+	pop {r0, r1}
+4:	ldr r2, =input_buffer
+	cmp r0, r2
+	beq 1b
+	subs r0, #1
+	ldrb r2, [r0]
+	tst r2, #0x80
+	beq 1b
+	movs r3, r0
+	subs r3, #1
+	ldr r2, =input_buffer
+	cmp r3, r2
+	beq 1b
+	ldrb r2, [r3]
+	tst r2, #0x80
+	bne 4b
 	b 1b
 3:	pull_tos
 2:	ldr r2, =input_buffer
-	subs r0, r0, r2
+	subs r0, r2
 	ldr r2, =input_buffer_count
 	str r0, [r2]
 	movs r0, #0
@@ -917,7 +926,14 @@ _parse_integer:
 _parse_unsigned:
 	push {lr}
 	bl _parse_base
+	ldr r0, [dp]
+	cmp r0, #0
+	beq 1f
 	bl _parse_unsigned_core
+	pop {pc}
+1:	pull_tos
+	movs tos, #0
+	str tos, [dp]
 	pop {pc}
 	end_inlined
 

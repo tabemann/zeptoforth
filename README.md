@@ -30,6 +30,8 @@ where \<type> is one of:
 
 * `full` (full functionality compiled in except for swdcom support)
 * `full_swdcom` (full functionality compiled in including swdcom support)
+* `big` (the kitchen sink, including functionality not normally included, except for swdcom support)
+* `big_swdcom` (the kitchen sink, including functionality not normally included, including swdcom support)
 * `mini` (limited functionality compiled in, i.e. without fixed number, allocator, scheduler, or disassembler support, without swdcom support)
 * `mini_swdcom` (limited functionality compiled in, i.e. without fixed number, allocator, scheduler, or disassembler support, including swdcom support)
 * `mini_no_corner` (STM32F407 and STM32F746 only to get around limitations of its flash controller; limited functionality compiled in, i.e. without fixed number, allocator, scheduler, or disassembler support, without swdcom support, and without a cornerstone so as to not waste flash space, at the expense of not being able to reset the MCU back to its "factory" state)

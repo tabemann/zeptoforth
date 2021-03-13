@@ -181,6 +181,14 @@ _input:	push_tos
 	bx lr
 	end_inlined
 
+	@@ The input buffer size
+	define_word "input-size", visible_flag
+_input_size:
+	push_tos
+	ldr tos, =input_buffer_size
+	bx lr
+	end_inlined
+
 	@@ The wordlist count
 	define_word "order-count", visible_flag
 _order_count:
