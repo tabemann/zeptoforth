@@ -6,7 +6,7 @@ Note that the internal usable size of a channel is the specified byte count minu
 
 Channels can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put into alloted memory in the dictionary or into allocated memory in the heap.
 
-Channels are not included in the default builds; the user must load `src/common/forth/channel.fs` for them to be available. Note that logic is in place to ensure that it is not to be loaded multiple times. Also note that they by default are compiled into RAM; the user must specify `compile-to-flash` in order to compile it to flash. Note that channels do not need global initialization in order to be used.
+Channels are not included in the default builds; the user must load `src/common/forth/channel.fs` or a big build for them to be available. Note that logic is in place to ensure that it is not to be loaded multiple times. Note that it is compiled into flash when it is loaded.
 
 The following words are in `chan-wordlist`:
 

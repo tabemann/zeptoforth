@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -34,7 +34,10 @@ defined? tqueue-wordlist not [if]
 
 \ Check whether this is already defined
 defined? fchan-wordlist not [if]
-
+  
+  \ Compile to flash
+  compile-to-flash
+  
   \ Setup the wordlist
   wordlist constant fchan-wordlist
   wordlist constant fchan-internal-wordlist
@@ -121,3 +124,5 @@ defined? fchan-wordlist not [if]
 
 [then]
     
+\ Warm reboot
+warm
