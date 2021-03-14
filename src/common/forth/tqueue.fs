@@ -130,7 +130,7 @@ defined? tqueue-wordlist not [if]
       else
 	nip
       then
-      wait-task @ activate-task
+      wait-task @ activate
     else
       drop
     then

@@ -25,6 +25,9 @@ forth-wordlist set-current
 \ Check whether this is already defined
 defined? pool-wordlist not [if]
 
+  \ Compile to flash
+  compile-to-flash
+  
   \ Setup the wordlist
   wordlist constant pool-wordlist
   wordlist constant pool-internal-wordlist
@@ -124,3 +127,6 @@ defined? pool-wordlist not [if]
   : pool-total-count ( pool -- u ) pool-total-count @ ;
 
 [then]
+
+\ Warm reboot
+warm
