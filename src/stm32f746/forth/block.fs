@@ -277,6 +277,25 @@ defined? block-wordlist not [if]
     loop
   ;
 
+
+  \ Truncate a string to its first invalid character
+  : truncate-invalid ( b-addr u -- b-addr u )
+    swap tuck swap
+    begin
+      dup 0> if
+	over b@
+	dup $20 >= swap $7F <> and if
+	  1- swap 1+ swap false
+	else
+	  true
+	then
+      else
+	true
+      then
+    until
+    drop over -
+  ;
+
   \ Set the public block wordlist
   block-wordlist set-current
 
@@ -324,6 +343,9 @@ defined? block-wordlist not [if]
   \ Block size
   : block-size ( -- bytes ) block-size ;
 
+  \ Block not found
+  : x-block-not-found ( -- ) space ." block not found"  ;
+  
   \ Set the forth wordlist
   forth-wordlist set-current
 
@@ -331,6 +353,23 @@ defined? block-wordlist not [if]
   : init ( -- )
     init
     init-block
+  ;
+  
+  \ Load a block
+  : load ( id -- )
+    dup block? averts x-block-not-found
+    find-block dup block-size + swap ?do
+      i 64 truncate-invalid evaluate
+    block-size 64 / +loop
+  ;
+
+  \ List a block
+  : list ( id -- )
+    dup block? averts x-block-not-found
+    find-block dup block-size + swap ?do
+      cr i 64 truncate-invalid type
+    block-size 64 / +loop
+    cr
   ;
 
 [then]

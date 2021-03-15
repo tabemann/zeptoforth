@@ -28,7 +28,7 @@ PROJECT=zeptoforth
 DELAY=35
 
 if [ $IMAGE = 'big' ];
-then 
+then
     DELAY=65
 fi
 
