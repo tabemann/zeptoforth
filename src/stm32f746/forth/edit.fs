@@ -185,9 +185,9 @@ defined? edit-wordlist not [if]
   ;
 
   \ Actually draw a row of the block editor
-  : draw-row ( row -- )
+  : draw-row ( -- )
     [:
-      dup edit-state @ edit-start-row @ + 1 go-to-coord
+      current-row-index@ dup edit-state @ edit-start-row @ + 1 go-to-coord
       get-row 0 swap buffer-width over + swap ?do
 	i b@ dup $20 >= over $7F <> and over unicode? not and if
 	  1+ emit
