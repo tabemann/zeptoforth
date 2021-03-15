@@ -22,7 +22,7 @@
 forth-wordlist 1 set-order
 forth-wordlist set-current
 
-\ Make sure task-wordlist exist
+\ Make sure task-wordlist exists
 defined? task-wordlist not [if]
   :noname space ." task is not installed" cr ; ?raise
 [then]
