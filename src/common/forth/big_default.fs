@@ -27,5 +27,6 @@
 #include src/common/forth/fchannel.fs
 #include src/common/forth/channel.fs
 #include src/common/forth/lock.fs
+#include src/common/forth/ansi_term.fs
 #include src/common/forth/line.fs
 #include src/common/forth/task_pool.fs

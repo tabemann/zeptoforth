@@ -22,6 +22,11 @@
 forth-wordlist 1 set-order
 forth-wordlist set-current
 
+\ Make sure ansi-term-wordlist exists
+defined? ansi-term-wordlist not [if]
+  :noname space ." ansi-term is not installed" cr ; ?raise
+[then]
+
 \ Test to make sure this has not already been compiled
 defined? line-wordlist not [if]
 
@@ -31,8 +36,8 @@ defined? line-wordlist not [if]
   \ Set up the actual wordlist
   wordlist constant line-wordlist
   wordlist constant line-internal-wordlist
-  forth-wordlist internal-wordlist line-internal-wordlist line-wordlist
-  4 set-order
+  forth-wordlist internal-wordlist ansi-term-wordlist line-internal-wordlist
+  line-wordlist 5 set-order
   line-internal-wordlist set-current
 
   \ Line structure
@@ -41,21 +46,18 @@ defined? line-wordlist not [if]
     field: line-start-column
     field: line-terminal-rows
     field: line-terminal-columns
-    field: line-show-cursor-count
     field: line-index-ptr
     field: line-count-ptr
     field: line-buffer-ptr
     field: line-buffer-size
-    field: line-saved-key
     field: line-offset
     field: line-count
   end-structure
   
   \ Line structure for current task
   user line
-  
+
   \ Character constants
-  $1B constant escape
   $09 constant tab
   $7F constant delete
   $0A constant newline
@@ -76,8 +78,6 @@ defined? line-wordlist not [if]
     0 over line-start-column !
     0 over line-terminal-rows !
     0 over line-terminal-columns !
-    0 over line-show-cursor-count !
-    0 over line-saved-key !
     0 over line-offset !
     0 over line-count !
     line !
@@ -91,158 +91,6 @@ defined? line-wordlist not [if]
 
   \ Get whether a byte is part of a unicode code point greater than 127
   : unicode? ( b -- flag ) $80 and 0<> ;
-  
-  \ Type a decimal integer
-  : (dec.) ( n -- ) base @ 10 base ! swap (.) base ! ;
-
-  \ Type the CSI sequence
-  : csi ( -- )
-    begin-critical escape emit [char] [ emit end-critical
-  ;
-
-  \ Show the cursor
-  : show-cursor ( -- )
-    begin-critical csi [char] ? emit 25 (dec.) [char] h emit end-critical
-  ;
-
-  \ Hide the cursor
-  : hide-cursor ( -- )
-    begin-critical csi [char] ? emit 25 (dec.) [char] l emit end-critical
-  ;
-
-  \ Save the cursor position
-  : save-cursor ( -- ) begin-critical csi [char] s emit end-critical ;
-
-  \ Restore the cursor position
-  : restore-cursor ( -- ) begin-critical csi [char] u emit end-critical ;
-
-  \ Scroll up screen by one line
-  : scroll-up ( lines -- )
-    begin-critical csi (dec.) [char] S emit end-critical
-  ;
-
-  \ Move the cursor to specified row and column coordinates
-  : go-to-coord ( row column -- )
-    begin-critical
-    swap csi 1+ (dec.) [char] ; emit 1+ (dec.) [char] f emit
-    end-critical
-  ;
-
-  \ Erase from the cursor to the end of the line
-  : erase-end-of-line ( -- ) begin-critical csi [char] K emit end-critical ;
-
-  \ Erase the lines below the current line
-  : erase-down ( -- ) begin-critical csi [char] J emit end-critical ;
-
-  \ Query for the cursor position
-  : query-cursor-position ( -- )
-    begin-critical csi [char] 6 emit [char] n emit end-critical
-  ;
-
-  \ Show the cursor with a show/hide counter
-  : show-cursor ( -- )
-    1 line @ line-show-cursor-count +!
-    line @ line-show-cursor-count @ 0 = if show-cursor then
-  ;
-
-  \ Hide the cursor with a show/hide counter
-  : hide-cursor ( -- )
-    -1 line @ line-show-cursor-count +!
-    line @ line-show-cursor-count @ -1 = if hide-cursor then
-  ;
-
-  \ Execute code with a hidden cursor
-  : execute-hide-cursor ( xt -- ) hide-cursor try show-cursor ?raise ;
-
-  \ Execute code while preserving cursor position
-  : execute-preserve-cursor ( xt -- ) save-cursor try restore-cursor ?raise ;
-
-  \ Clear a saved key
-  : clear-key ( -- ) 0 line @ line-saved-key ! ;
-
-  \ Get a key
-  : get-key ( -- b )
-    line @ line-saved-key @ ?dup if clear-key else key then
-  ;
-  
-  \ Save a key
-  : set-key ( b -- ) line @ line-saved-key ! ;
-  
-  \ Wait for a number
-  : wait-number ( -- n matches )
-    ram-here >r get-key dup [char] - = if
-      ram-here b! 1 ram-allot
-    else
-      set-key
-    then
-    0 begin
-      dup 10 < if
-	get-key dup [char] 0 >= over [char] 9 <= and if
-	  ram-here b! 1 ram-allot 1+ false
-	else
-	  set-key true
-	then
-      else
-	true
-      then
-    until
-    drop base @ 10 base ! r@ ram-here r@ - parse-unsigned
-    rot base ! r> ram-here!
-  ;
-  
-  \ Wait for a character
-  : wait-char ( b -- ) begin dup get-key = until drop ;
-
-  \ Confirm that a character is what is expected
-  : expect-char ( b -- flag )
-    get-key dup rot = if drop true else set-key false then
-  ;
-
-  \ Get the cursor position
-  : get-cursor-position ( -- row column )
-    begin
-      clear-key query-cursor-position escape wait-char
-      [char] [ expect-char if
-	wait-number if
-	  1 - [char] ; expect-char if
-	    wait-number if
-	      [char] R expect-char if
-		1 - true
-	      else
-		2drop false
-	      then
-	    else
-	      drop false
-	    then
-	  else
-	    drop false
-	  then
-	else
-	  drop false
-	then
-      else
-	false
-      then
-    until
-  ;
-
-  \ Get the cursor position with a hidden cursor
-  : get-cursor-position ( -- row column )
-    ['] get-cursor-position execute-hide-cursor
-  ;
-
-  \ Actually get the terminal size
-  : get-terminal-size
-    get-cursor-position
-    1000 1000 go-to-coord
-    get-cursor-position swap 1+ swap 1+
-    2swap go-to-coord
-  ;
-
-  \ Get the terminal size
-  : get-terminal-size ( -- row column )
-    ['] get-terminal-size execute-hide-cursor
-  ;
 
   \ Update the start position
   : update-start-position ( -- )
@@ -325,7 +173,7 @@ defined? line-wordlist not [if]
   
   \ Reset the line editor state for a new line of input
   : reset-line ( -- )
-    clear-key
+    reset-ansi-term
     0 line @ line-show-cursor-count !
     0 line @ line-index-ptr @ ! 0 line @ line-count-ptr @ !
     0 line @ line-offset ! 0 line @ line-count !
