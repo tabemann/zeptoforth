@@ -174,7 +174,6 @@ defined? line-wordlist not [if]
   \ Reset the line editor state for a new line of input
   : reset-line ( -- )
     reset-ansi-term
-    0 line @ line-show-cursor-count !
     0 line @ line-index-ptr @ ! 0 line @ line-count-ptr @ !
     0 line @ line-offset ! 0 line @ line-count !
     update-start-position update-terminal-size
