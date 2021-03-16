@@ -31,7 +31,7 @@ defined? ansi-term-wordlist not [if]
   \ Set up the actual wordlist
   wordlist constant ansi-term-wordlist
   wordlist constant ansi-term-internal-wordlist
-  forth-wordlist ansi-term-internal-wordlist ansi-term-wordlist 2 set-order
+  forth-wordlist ansi-term-internal-wordlist ansi-term-wordlist 3 set-order
   ansi-term-internal-wordlist set-current
 
   \ Saved entered byte
@@ -182,7 +182,7 @@ defined? ansi-term-wordlist not [if]
 
   \ Execute code while preserving cursor position
   : execute-preserve-cursor ( xt -- )
-    1 preserve-cursor-count +1
+    1 preserve-cursor-count +!
     preserve-cursor-count @ 1 = if
       save-cursor try restore-cursor
     else

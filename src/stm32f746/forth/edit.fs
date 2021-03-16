@@ -41,8 +41,8 @@ defined? edit-wordlist not [if]
   \ Set up the actual wordlist
   wordlist constant edit-wordlist
   wordlist constant edit-internal-wordlist
-  forth-wordlist block-wordlist edit-internal-wordlist edit-wordlist
-  4 set-order
+  forth-wordlist block-wordlist ansi-term-wordlist edit-internal-wordlist
+  edit-wordlist 5 set-order
   edit-internal-wordlist set-current
 
   \ Edit buffer count (must be <= 32)
@@ -58,7 +58,7 @@ defined? edit-wordlist not [if]
   block-size buffer-width / constant buffer-height
 
   \ Tab size
-  2 tab-size \ small to save space in the blocks
+  2 constant tab-size \ small to save space in the blocks
 
   \ Edit structure
   begin-structure edit-size
@@ -115,12 +115,12 @@ defined? edit-wordlist not [if]
 
   \ Set the current row index
   : current-row-index! ( row -- )
-    edit-state @ edit-start-row @ + edit-state @ edit-current-row !
+    edit-state @ edit-start-row @ + edit-state @ edit-cursor-row !
   ;
 
   \ Set the current column index
   : current-column-index! ( column -- )
-    edit-state @ edit-start-column @ + edit-state @ edit-current-column !
+    edit-state @ edit-start-column @ + edit-state @ edit-cursor-column !
   ;
 
   \ Get the current row in the buffer
@@ -129,7 +129,7 @@ defined? edit-wordlist not [if]
   ;
 
   \ Get whether a buffer is dirty
-  : dirty? ( index -- dirty ) edit-state @ edit-dirty bit? ;
+  : dirty? ( index -- dirty ) edit-state @ edit-dirty bit@ ;
 
   \ Set whether a buffer is dirty
   : dirty! ( dirty index -- )
@@ -181,13 +181,14 @@ defined? edit-wordlist not [if]
     buffer-height 0 ?do
       cr [char] | emit buffer-width 0 ?do space loop [char] | emit
     loop
-    [char] + emit buffer-width 0 ?do [char] - emit loop [char] + emit
+    cr [char] + emit buffer-width 0 ?do [char] - emit loop [char] + emit
   ;
 
   \ Actually draw a row of the block editor
   : draw-row ( -- )
     [:
-      current-row-index@ dup edit-state @ edit-start-row @ + 1 go-to-coord
+      current-row-index@ dup edit-state @ edit-start-row @ +
+      edit-state @ edit-start-column @ go-to-coord
       get-row 0 swap buffer-width over + swap ?do
 	i b@ dup $20 >= over $7F <> and over unicode? not and if
 	  1+ emit
@@ -212,7 +213,8 @@ defined? edit-wordlist not [if]
   \ Draw header
   : draw-header ( -- )
     [:
-      edit-state @ edit-start-row @ edit-state @ edit-start-column @ go-to-coord
+      edit-state @ edit-start-row @ 1-
+      edit-state @ edit-start-column @ 1- go-to-coord
       ." +-[ "
       edit-state @ edit-current @ id@ (.)
       edit-state @ edit-current @ dirty? if
@@ -222,6 +224,7 @@ defined? edit-wordlist not [if]
       get-cursor-position nip
       buffer-width 1+ swap - 0 ?do [char] - emit loop
     ;] execute-hide-cursor
+  ;
 
   \ Update the current row
   : update-row ( row -- )
@@ -238,6 +241,11 @@ defined? edit-wordlist not [if]
     [: draw-all-rows draw-header ;] execute-preserve-cursor
   ;
 
+  \ Update header
+  : update-header
+    [: draw-header ;] execute-preserve-cursor
+  ;
+
   \ Initialize buffer
   : init-buffer ( index -- )
     get-buffer block-size $20 fill ;
@@ -249,7 +257,7 @@ defined? edit-wordlist not [if]
 
   \ Get the highest buffer id
   : highest-id ( -- id )
-    0 buffer-count 0 ?do dup id id@ u< if drop i id@ then loop
+    0 buffer-count 0 ?do dup i id@ u< if drop i id@ then loop
   ;
   
   \ Load a buffer
@@ -415,7 +423,7 @@ defined? edit-wordlist not [if]
 
   \ Go to the current coordinate
   : go-to-current-coord ( -- )
-    current-row-index@ current-column-index @ go-to-coord
+    edit-state @ edit-cursor-row @ edit-state @ edit-cursor-column @ go-to-coord
   ;
 
   \ Dirty the current buffer
@@ -494,9 +502,10 @@ defined? edit-wordlist not [if]
   : use-saved-cursor-column ( -- )
     edit-state @ edit-saved-cursor-column @ edit-state @ edit-start-column @ -
     dup max-columns <= if
-      edit-state @ edit-saved-cursor-column @ edit @ edit-cursor-column !
+      edit-state @ edit-saved-cursor-column @ edit-state @ edit-cursor-column !
     else
-      max-columns edit-state @ edit-start-column @ + edit @ edit-cursor-column !
+      max-columns edit-state @ edit-start-column @ +
+      edit-state @ edit-cursor-column !
     then
   ;
 
@@ -585,6 +594,7 @@ defined? edit-wordlist not [if]
   \ Configure the block editor
   : config-edit ( id -- )
     ram-here edit-size ram-allot edit-state !
+    reset-ansi-term
     draw-empty
     get-cursor-position
     buffer-width 1+ - 0 max edit-state @ edit-start-column !
@@ -593,6 +603,13 @@ defined? edit-wordlist not [if]
     edit-state @ edit-terminal-columns ! edit-state @ edit-terminal-rows !
     edit-state @ edit-start-row @ edit-state @ edit-cursor-row !
     edit-state @ edit-start-column @ edit-state @ edit-cursor-column !
+    go-to-current-coord
+    save-current-column
+    0 edit-state @ edit-current !
+    0 edit-state @ edit-dirty !
+    buffer-count 0 ?do i edit-state @ edit-ids i cells + ! loop
+    load-all-buffers
+    update-all
   ;
 
   \ Leave the editor
@@ -635,7 +652,7 @@ defined? edit-wordlist not [if]
     dup $FFFFFFFF <> averts x-invalid-block-id
     config-edit
     begin
-      get-key
+      get-key dup . go-to-current-coord
       dup $20 u< if
 	case
 	  return of handle-newline false endof
@@ -664,3 +681,8 @@ defined? edit-wordlist not [if]
     save-all-buffers
     leave-edit
   ;
+
+[then]
+
+\ Warm reboot
+\ warm
