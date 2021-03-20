@@ -313,7 +313,7 @@ defined? task-wordlist not [if]
   ;
 
   \ Attempted to use a terminated task
-  : x-terminated ( -- ) space ." task has been terminated" ;
+  : x-terminated ( -- ) space ." task has been terminated" cr ;
 
   \ Validate task is not terminated
   : validate-not-terminated ( task -- )

@@ -64,7 +64,7 @@ defined? task-pool-wordlist not [if]
   task-pool-wordlist set-current
 
   \ No tasks are available
-  : x-no-task-available ( -- ) spawn ." no task is available" ;
+  : x-no-task-available ( -- ) spawn ." no task is available" cr ;
   
   \ Spawn a task from a task pool
   : spawn-from-task-pool ( xt task-pool -- task )

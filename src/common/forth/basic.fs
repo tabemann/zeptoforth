@@ -584,7 +584,7 @@ commit-flash
 ;
 
 \ No word is being built exception
-: no-word-being-built ( -- ) space ." no word is being built" ;
+: no-word-being-built ( -- ) space ." no word is being built" cr ;
 
 \ Set internal
 internal-wordlist set-current
@@ -1354,6 +1354,7 @@ commit-flash
 : [: ( -- )
   [immediate]
   [compile-only]
+  undefer-lit
   reserve-branch
   $B500 h,
 ;
@@ -1362,6 +1363,7 @@ commit-flash
 : ;] ( -- )
   [immediate]
   [compile-only]
+  undefer-lit
   $BD00 h,
   here over branch-back!
   4+ lit,
@@ -1371,6 +1373,7 @@ commit-flash
 : x" ( <text>" -- )
   [immediate]
   [compile-only]
+  undefer-lit
   reserve-branch
   $B500 h,
   postpone space
