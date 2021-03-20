@@ -202,7 +202,7 @@ defined? ansi-term-wordlist not [if]
   ;
 
   \ Reset terminal state
-  : reset-ansi-term ( -- ) 0 show-cursor-count @ 0 saved-key ! ;
+  : reset-ansi-term ( -- ) 0 show-cursor-count ! 0 saved-key ! ;
 
 [then]
 
