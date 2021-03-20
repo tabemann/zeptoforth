@@ -36,7 +36,7 @@ defined? block-wordlist not [if]
 defined? edit-wordlist not [if]
 
   \ Compile this to flash
-  \ compile-to-flash
+  compile-to-flash
 
   \ Set up the actual wordlist
   wordlist constant edit-wordlist
@@ -751,4 +751,4 @@ defined? edit-wordlist not [if]
 [then]
 
 \ Warm reboot
-\ warm
+warm
