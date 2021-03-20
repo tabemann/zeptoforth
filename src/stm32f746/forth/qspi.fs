@@ -1090,5 +1090,5 @@ defined? qspi-wordlist not [if]
 
 [then]
 
-\ Reboot
-reboot
+\ Warm reboot
+warm

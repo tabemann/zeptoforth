@@ -389,5 +389,5 @@ defined? block-wordlist not [if]
 
 [then]
 
-\ Reboot
-reboot
+\ Warm reboot
+warm
