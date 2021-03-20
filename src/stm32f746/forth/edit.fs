@@ -41,8 +41,8 @@ defined? edit-wordlist not [if]
   \ Set up the actual wordlist
   wordlist constant edit-wordlist
   wordlist constant edit-internal-wordlist
-  forth-wordlist block-wordlist ansi-term-wordlist edit-internal-wordlist
-  edit-wordlist 5 set-order
+  forth-wordlist systick-wordlist block-wordlist ansi-term-wordlist
+  edit-internal-wordlist edit-wordlist 6 set-order
   edit-internal-wordlist set-current
 
   \ Edit buffer count (must be <= 32)
@@ -70,9 +70,10 @@ defined? edit-wordlist not [if]
     field: edit-cursor-column
     field: edit-saved-cursor-column
     field: edit-current
+    field: edit-unicode-entered
     field: edit-dirty \ one bit per dirty flag, starting from bit 0
     buffer-count cells +field edit-ids
-    buffer-count block-size * cells +field edit-buffers
+    buffer-count block-size * +field edit-buffers
   end-structure
 
   \ The line editor
@@ -129,7 +130,7 @@ defined? edit-wordlist not [if]
   ;
 
   \ Get whether a buffer is dirty
-  : dirty? ( index -- dirty ) edit-state @ edit-dirty bit@ ;
+  : dirty? ( index -- dirty ) bit edit-state @ edit-dirty bit@ ;
 
   \ Set whether a buffer is dirty
   : dirty! ( dirty index -- )
@@ -148,10 +149,15 @@ defined? edit-wordlist not [if]
 
   \ Get the current buffer's id
   : current-id ( -- id ) edit-state @ edit-current @ id@ ;
+
+  \ Buffer not found exception
+  : x-buffer-not-found ( -- ) space ." buffer not found" cr ;
   
   \ Get a buffer's index by id
   : buffer-of-id ( id -- index )
-    buffer-count 0 ?do i id@ over = if drop i unloop exit then loop -1
+    buffer-count 0 ?do i id@ over = if drop i unloop exit then loop
+    drop -1
+\    ['] x-buffer-not-found ?raise
   ;
 
   \ Set the current buffer by id
@@ -161,11 +167,12 @@ defined? edit-wordlist not [if]
   
   \ Get the length of a row in the buffer
   : row-len ( row -- u )
-    get-row 0 over buffer-width + rot ?do
-      i b@ dup $20 >= swap $7F <> and if
-	drop i get-row -
+    get-row 0 buffer-width 0 ?do
+      over i + b@ dup $20 > swap $7F <> and if
+	drop i 1+
       then
     loop
+    nip
   ;
 
   \ Get whether a byte is the start of a unicode code point greater than 127
@@ -185,13 +192,13 @@ defined? edit-wordlist not [if]
   ;
 
   \ Actually draw a row of the block editor
-  : draw-row ( -- )
+  : draw-row ( row -- )
     [:
-      current-row-index@ dup edit-state @ edit-start-row @ +
+      dup edit-state @ edit-start-row @ +
       edit-state @ edit-start-column @ go-to-coord
-      get-row 0 swap buffer-width over + swap ?do
+      0 swap get-row dup buffer-width + swap ?do
 	i b@ dup $20 >= over $7F <> and over unicode? not and if
-	  1+ emit
+	  emit 1+
 	else
 	  dup unicode? if
 	    dup emit
@@ -207,7 +214,7 @@ defined? edit-wordlist not [if]
 
   \ Draw all rows
   : draw-all-rows ( -- )
-    [: buffer-height 0 ?do draw-row loop ;] execute-hide-cursor
+    [: buffer-height 0 ?do i draw-row loop ;] execute-hide-cursor
   ;
 
   \ Draw header
@@ -246,9 +253,13 @@ defined? edit-wordlist not [if]
     [: draw-header ;] execute-preserve-cursor
   ;
 
+  \ Update current row
+  : update-current-row ( -- ) current-row-index@ update-row ;
+
   \ Initialize buffer
   : init-buffer ( index -- )
-    get-buffer block-size $20 fill ;
+    get-buffer block-size $20 fill
+  ;
   
   \ Get the lowest buffer id
   : lowest-id ( -- id )
@@ -271,27 +282,23 @@ defined? edit-wordlist not [if]
     then
   ;
 
-  \ For a given block to edit, get the number of blocks to load less than it
-  : blocks-less ( id -- count ) half-buffer-count min ;
-
-  \ For a given block to edit, get the number of blocks to load greater it
-  : blocks-greater ( id -- count )
-    -1 over - half-buffer-count u< if -1 over - else half-buffer-count then
-  ;
-
   \ Get the starting block to load
   : blocks-first ( id -- id )
-    half-buffer-count over blocks-less u> if
-      blocks-less -
+    dup half-buffer-count u< if
+      drop 0
     else
-      half-buffer-count over blocks-greater - half-buffer-count + -
+      dup -1 half-buffer-count - u>= if
+	drop -1 buffer-count -
+      else
+	half-buffer-count -
+      then
     then
   ;
 
   \ Load all of the buffers
   : load-all-buffers ( id -- )
-    0 over blocks-first dup buffer-count + swap ?do
-      i over load-buffer 1+
+    dup blocks-first buffer-count 0 ?do
+      dup i load-buffer 1+
     loop
     drop current-by-id!
   ;
@@ -301,6 +308,8 @@ defined? edit-wordlist not [if]
     dup buffer-of-id dirty? if
       false over buffer-of-id dirty!
       dup buffer-of-id get-buffer swap block!
+    else
+      drop
     then
   ;
 
@@ -314,12 +323,13 @@ defined? edit-wordlist not [if]
   \ Change buffers
   : change-buffer ( id -- )
     dup dup highest-id u> if
-      lowest-id dup save-buffer
-      buffer-of-id load-buffer
+      lowest-id save-buffer
+      dup lowest-id buffer-of-id load-buffer
     else
       dup lowest-id u< if
-	highest-id dup save-buffer
-	buffer-of-id load-buffer
+	highest-id save-buffer
+	dup highest-id buffer-of-id load-buffer
+      else
       then
     then
     current-by-id!
@@ -354,20 +364,22 @@ defined? edit-wordlist not [if]
 	drop 0
       then
     repeat
+    drop
   ;
 
   \ Get the maximum number of columns in a row
   : max-columns ( -- columns )
-    0 buffer-width 0 ?do
-      i current-row + b@
-      dup $20 >= over $80 < if
-	drop 1+
-      else
-	dup unicode? swap unicode-start? and if
-	  1+
-	then
-      then
-    loop
+    current-row-index@ row-len
+    \ 0 buffer-width 0 ?do
+    \   i current-row + b@
+    \   dup $20 >= over $80 < and if
+    \ 	drop 1+
+    \   else
+    \ 	dup unicode? swap unicode-start? and if
+    \ 	  1+
+    \ 	then
+    \   then
+    \ loop
   ;
 
   \ Get the number of bytes of the character to the left of the cursor
@@ -430,23 +442,73 @@ defined? edit-wordlist not [if]
   : dirty ( -- )
     edit-state @ edit-current @ dirty?
     true edit-state @ edit-current @ dirty!
-    not if update-header true
+    not if update-header then
+  ;
+
+  \ Finish unicode insertion
+  : finish-insert ( -- )
+    save-current-column
+    update-current-row
+    go-to-current-coord
+    dirty
+    false edit-state @ edit-unicode-entered !
+  ;
+  
+  \ Resolve unicode entered
+  : resolve-unicode-entered ( -- )
+    edit-state @ edit-unicode-entered @ if
+      systick-counter
+      begin
+	systick-counter over - 100 u< if
+	  key? not if
+	    pause
+	  else
+	    get-key dup unicode? over unicode-start? not and if
+	      current-row-index@ row-len buffer-width u< if
+		current-row current-column-bytes +
+		current-row current-column-bytes 1+ +
+		buffer-width current-column-bytes - 1- move
+		dup current-row current-column-bytes + b!
+	      else
+		drop
+	      then
+	      false
+	    else
+	      set-key finish-insert
+	      true
+	    then
+	  then
+	else
+	  finish-insert
+	  true
+	then
+      until
+      drop
+    then
   ;
   
   \ Handle insertion
   : handle-insert ( b -- )
-    current-row row-len buffer-width u< if
+    current-row-index@ row-len buffer-width u< if
       current-row current-column-bytes +
       current-row current-column-bytes 1+ +
       buffer-width current-column-bytes - 1- move
-      dup current-row current-column-index@ + b!
-      dup $20 >= over $80 < and swap unicode-start? or if
+      dup current-row current-column-bytes + b!
+      dup $20 >= over $80 < and if
+	drop
 	1 edit-state @ edit-cursor-column +!
+	save-current-column
+	update-current-row
+	go-to-current-coord
+	dirty
+      else
+	unicode-start? if
+	  1 edit-state @ edit-cursor-column +!
+	  true edit-state @ edit-unicode-entered !
+	then
       then
-      save-current-column
-      update-row
-      go-to-current-coord
-      dirty
+    else
+      drop
     then
   ;
 
@@ -460,7 +522,7 @@ defined? edit-wordlist not [if]
       current-row buffer-width + over - swap $20 fill
       -1 edit-state @ edit-cursor-column +!
       save-current-column
-      update-row
+      update-current-row
       go-to-current-coord
       dirty
     then
@@ -475,7 +537,7 @@ defined? edit-wordlist not [if]
       buffer-width current-column-bytes - 3 pick - move
       current-row buffer-width + over - swap $20 fill
       save-current-column
-      update-row
+      update-current-row
       dirty
     then
   ;
@@ -501,7 +563,7 @@ defined? edit-wordlist not [if]
   \ Handle the saved cursor column
   : use-saved-cursor-column ( -- )
     edit-state @ edit-saved-cursor-column @ edit-state @ edit-start-column @ -
-    dup max-columns <= if
+    max-columns < if
       edit-state @ edit-saved-cursor-column @ edit-state @ edit-cursor-column !
     else
       max-columns edit-state @ edit-start-column @ +
@@ -529,9 +591,9 @@ defined? edit-wordlist not [if]
       -1 edit-state @ edit-cursor-row +!
       use-saved-cursor-column
       go-to-current-coord
-    else
-      buffer-height 1- current-row-index!
-      handle-prev
+    \ else
+    \   buffer-height 1- current-row-index!
+    \   handle-prev
     then
   ;
 
@@ -541,9 +603,9 @@ defined? edit-wordlist not [if]
       1 edit-state @ edit-cursor-row +!
       use-saved-cursor-column
       go-to-current-coord
-    else
-      0 current-row-index!
-      handle-next
+    \ else
+    \   0 current-row-index!
+    \   handle-next
     then
   ;
 
@@ -555,6 +617,7 @@ defined? edit-wordlist not [if]
       1 edit-state @ edit-cursor-row +!
       go-to-current-coord
     else
+      0 current-row-index!
       handle-next
     then
   ;
@@ -597,6 +660,7 @@ defined? edit-wordlist not [if]
     reset-ansi-term
     draw-empty
     get-cursor-position
+    false edit-state @ edit-unicode-entered !
     buffer-width 1+ - 0 max edit-state @ edit-start-column !
     buffer-height - 0 max edit-state @ edit-start-row !
     get-terminal-size
@@ -652,7 +716,8 @@ defined? edit-wordlist not [if]
     dup $FFFFFFFF <> averts x-invalid-block-id
     config-edit
     begin
-      get-key dup . go-to-current-coord
+      resolve-unicode-entered
+      get-key
       dup $20 u< if
 	case
 	  return of handle-newline false endof
@@ -667,6 +732,7 @@ defined? edit-wordlist not [if]
 	  ctrl-v of true endof
 	  ctrl-w of handle-write false endof
 	  ctrl-x of handle-revert false endof
+	  escape of handle-escape false endof
 	  swap false swap
 	endcase
       else

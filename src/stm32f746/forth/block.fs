@@ -169,7 +169,7 @@ defined? block-wordlist not [if]
   ;
 
   \ This should never happen
-  : x-should-never-happen ( -- ) space ." this should never happen!" ;
+  : x-should-never-happen ( -- ) space ." this should never happen!" cr ;
 
   \ Find a free block, or return -1 -1 if no free block can be allocated
   : find-free-block ( -- block-index sector-index | -1 -1 )
@@ -277,7 +277,6 @@ defined? block-wordlist not [if]
     loop
   ;
 
-
   \ Truncate a string to its first invalid character
   : truncate-invalid ( b-addr u -- b-addr u )
     swap tuck swap
@@ -307,8 +306,24 @@ defined? block-wordlist not [if]
   \ Set the public block wordlist
   block-wordlist set-current
 
+  \ Block not found exception
+  : x-block-not-found ( -- ) space ." block not found" cr ;
+
   \ Invalid block id exception
-  : x-invalid-block-id space ." invalid block id" ;
+  : x-invalid-block-id ( -- ) space ." invalid block id" cr ;
+
+  \ Delete a block
+  : delete-block ( id -- )
+    dup unwritten <> averts x-invalid-block-id
+    begin-critical
+    find-block ?dup if
+      block-index 2dup set-block-old qspi-base block-size + -rot newer-ptr!
+      end-critical
+    else
+      end-critical
+      ['] x-block-not-found ?raise
+    then
+  ;
 
   \ Find a block by id, or return 0 if no block can be found
   : find-block ( id -- addr | 0 )
@@ -322,7 +337,7 @@ defined? block-wordlist not [if]
   : block? ( id -- flag ) find-block 0<> ;
 
   \ Write failure exception
-  : x-block-write-fail ( -- ) space ." unable to write block" ;
+  : x-block-write-fail ( -- ) space ." unable to write block" cr ;
 
   \ Write to a block (the data written must be of size block-size),
   \ returns whether writing was successful
@@ -344,7 +359,7 @@ defined? block-wordlist not [if]
   : block-size ( -- bytes ) block-size ;
 
   \ Block not found
-  : x-block-not-found ( -- ) space ." block not found"  ;
+  : x-block-not-found ( -- ) space ." block not found" cr ;
   
   \ Set the forth wordlist
   forth-wordlist set-current
@@ -360,7 +375,7 @@ defined? block-wordlist not [if]
     dup block? averts x-block-not-found
     find-block dup block-size + swap ?do
       i 64 truncate-invalid evaluate
-    block-size 64 / +loop
+    64 +loop
   ;
 
   \ List a block
@@ -368,7 +383,7 @@ defined? block-wordlist not [if]
     dup block? averts x-block-not-found
     find-block dup block-size + swap ?do
       cr i 64 truncate-invalid type
-    block-size 64 / +loop
+    64 +loop
     cr
   ;
 

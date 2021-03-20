@@ -799,11 +799,11 @@ defined? qspi-wordlist not [if]
   ;
 
   \ Register assertion failure exception
-  : reg-assert-fail ( -- ) space ." register assertion failure" ;
+  : x-reg-assert-fail ( -- ) space ." register assertion failure" cr ;
 
   \ Test bits
   : bit-assert ( tested mask bitshift value -- )
-    swap >r over and r@ lshift swap r> lshift rot and = averts reg-assert-fail
+    swap >r over and r@ lshift swap r> lshift rot and = averts x-reg-assert-fail
   ;
 
   \ Initialize GPIO settings
@@ -961,7 +961,7 @@ defined? qspi-wordlist not [if]
   qspi-wordlist set-current
 
   \ Quad SPI address validation exception
-  : x-invalid-qspi-addr ( -- ) space ." invalid qspi address" ;
+  : x-invalid-qspi-addr ( -- ) space ." invalid qspi address" cr ;
 
   \ Set the current wordlist to the QSPI internal wordlist
   qspi-internal-wordlist set-current
