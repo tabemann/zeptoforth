@@ -22,6 +22,7 @@ Zeptoforth Documentation
    words/systick
    words/qspi
    words/block
+   words/edit
    words/swd
    words/led
    words/test

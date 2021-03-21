@@ -8,7 +8,7 @@ Note that if multiple tasks attempt to send on a fast channel, they are queued s
 
 Fast channels can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put into alloted memory in the dictionary or into allocated memory in the heap.
 
-Fast channels are not included in the default builds; the user must load `src/common/forth/fchannel.fs` or a big build for them to be available, after loading `src/common/forth/tqueue.fs`. Note that logic is in place to ensure that they are not loaded multiple times. Note that it is compiled into flash when it is loaded.
+Fast channels are not included in the default builds; the user must load `src/common/forth/fchannel.fs` or use a big build for them to be available, after loading `src/common/forth/tqueue.fs`. Note that logic is in place to ensure that they are not loaded multiple times. Note that it is compiled into flash when it is loaded.
 
 The following words are in `fchan-wordlist`:
 
