@@ -316,7 +316,7 @@ defined? edit-wordlist not [if]
   \ Save all the buffers
   : save-all-buffers ( -- )
     buffer-count 0 ?do
-      i cells edit-state @ edit-ids @ + @ save-buffer
+      i cells edit-state @ edit-ids + @ save-buffer
     loop
   ;
 
