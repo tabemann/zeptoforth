@@ -5,13 +5,13 @@ The line editor provides a simple interface for allowing the user to edit input 
 * Backspace: delete the character to the left of the cursor
 * Delete: delete the character under the cursor
 * Left / Control-B: move the cursor one character to the left
-* Right / ControlF: move the cursor one character to the right
+* Right / Control-F: move the cursor one character to the right
 * Control-A: move the cursor to the start of the input
 * Control-E: move the cursor to the end of the input
 
 Note that tabs and characters of code points greater than 127 are handled correctly. History and autocomplete are not supported (this is a microcontroller after all). Also note that it is not compatible with non-terminal operation, i.e. with loading code automatically via serial or swdcom; before this is done it must be disabled.
 
-The line editor is not included in the default builds; the user must load `src/common/forth/line.fs` for it to be available. Note that logic is in place to ensure that it is not loaded multiple times.  Note that it is compiled into flash when it is loaded. After a reboot, it is initialized for the main task only, and if, when enabled, `refill` is used for a different task, it needs to have already been initialized for that task.
+The line editor is not included in the default builds; the user must load `src/common/forth/line.fs` or use a big build for it to be available. Note that logic is in place to ensure that it is not loaded multiple times.  Note that it is compiled into flash when it is loaded. After a reboot, it is initialized for the main task only, and if, when enabled, `refill` is used for a different task, it needs to have already been initialized for that task.
 
 The following words are in `line-wordlist`:
 
