@@ -387,6 +387,33 @@ defined? block-wordlist not [if]
     cr
   ;
 
+  \ Load a range of blocks, ignoring nonexistent blocks
+  : load-range ( start-id end-id -- )
+    1+ swap ?do
+      i find-block dup if
+	dup block-size + swap ?do
+	  i 64 truncate-invalid evaluate
+	64 +loop
+      else
+	drop
+      then
+    loop
+  ;
+
+  \ List a range of blocks, ignoring nonexistent blocks
+  : list-range ( start-id end-id -- )
+    1+ swap ?do
+      i find-block dup if
+	dup block-size + swap ?do
+	  cr i 64 truncate-invalid type
+	64 +loop
+      else
+	drop
+      then
+    loop
+    cr
+  ;
+
 [then]
 
 \ Warm reboot
