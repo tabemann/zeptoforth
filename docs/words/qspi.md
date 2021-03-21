@@ -2,7 +2,7 @@
 
 The Quad SPI interface is written for the STM32F746 DISCOVERY board. It maps Quad SPI flash to the addressing space at `qspi-base`. It also provides means for writing bytes, halfwords, words, and arbitrary buffers containing bytes to flash and erasing 4K and 32K subsectors, 64K sectors, and the entire flash. Note that even though internally they require turning off memory-mapped Quad SPI mode, it is automatically turned back on when they are complete, and they are hidden from all other tasks (however they significantly impact realtime performance due to being slow while requiring interrupts to be turned off).
 
-The Quad SPI interface is not included in the default builds; the user must load `src/stm32f746/forth/qspi.fs` for it to be available. Note that logic is in place to ensure that it is not loaded multiple times. When it is loaded it reboots the MCU to carry out initialization.
+The Quad SPI interface is not included in the default builds; the user must load `src/stm32f746/forth/qspi.fs` or use an STM32F746 big build for it to be available. Note that logic is in place to ensure that it is not loaded multiple times. When it is loaded it reboots the MCU to carry out initialization.
 
 The following words are in `qspi-wordlist`:
 
