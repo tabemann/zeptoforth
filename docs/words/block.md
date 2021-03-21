@@ -11,10 +11,20 @@ The following words are in `forth-wordlist`:
 
 Evaluate each 64-byte line in a block with the given id from first to last; if the block does not exist `x-block-not-found` is raised.
 
+##### `load-range`
+( start-id end-id -- )
+
+Evaluate each 64-byte line from first to last in each block, if it exists, in the range from `start-id` to `end-id`.
+
 ##### `list`
 ( id -- )
 
 Display each 64-byte line in a block with the given id from first to last; if the block does not exist `x-block-not-found` is raised.
+
+##### `list-range`
+( start-id end-id -- )
+
+Display each 64-byte line from first to last in each block, if it exists, in the range from `start-id` to `end-id`.
 
 The following words are in `block-wordlist`:
 
