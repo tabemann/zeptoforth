@@ -73,7 +73,7 @@ defined? ansi-term-wordlist not [if]
   \ Restore the cursor position
   : restore-cursor ( -- ) begin-critical csi [char] u emit end-critical ;
 
-  \ Scroll up screen by one line
+  \ Scroll up screen by a number of lines
   : scroll-up ( lines -- )
     begin-critical csi (dec.) [char] S emit end-critical
   ;
