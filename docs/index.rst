@@ -20,6 +20,7 @@ Zeptoforth Documentation
    words/fchannel
    words/tqueue
    words/systick
+   words/ansi_term
    words/qspi
    words/block
    words/edit
