@@ -26,7 +26,7 @@ forth-wordlist set-current
 defined? esc-string-wordlist not [if]
 
   \ Compile this to flash
-  \ compile-to-flash
+  compile-to-flash
 
   \ Set up the wordlist
   wordlist constant esc-string-wordlist
@@ -243,4 +243,4 @@ defined? esc-string-wordlist not [if]
 [then]
 
 \ Warm reboot
-\ warm
+warm
