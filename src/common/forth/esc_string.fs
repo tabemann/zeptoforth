@@ -26,7 +26,7 @@ forth-wordlist set-current
 defined? esc-string-wordlist not [if]
 
   \ Compile this to flash
-  compile-to-flash
+  \ compile-to-flash
 
   \ Set up the wordlist
   wordlist constant esc-string-wordlist
@@ -102,13 +102,13 @@ defined? esc-string-wordlist not [if]
   \ Parse an octal escape
   : escape-octal ( -- )
     octal-len
-    dup >r base @ >r 10 base !
+    dup >r base @ >r 8 base !
     >in @ input + swap parse-unsigned if
       r> base !
       dup 256 u< if
 	b, r> advance-bytes
       else
-	rdrop
+	drop rdrop
       then
     else
       r> base ! rdrop
@@ -156,7 +156,7 @@ defined? esc-string-wordlist not [if]
 	  dup b,
 	endcase
       else
-	1 revert-bytes escape-octal
+	drop 1 revert-bytes escape-octal
       then
     else
       drop
@@ -243,4 +243,4 @@ defined? esc-string-wordlist not [if]
 [then]
 
 \ Warm reboot
-warm
+\ warm
