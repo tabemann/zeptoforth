@@ -192,6 +192,7 @@ defined? esc-string-wordlist not [if]
     here swap parse-esc-string
     here swap -
     over bcurrent!
+    here %1 and if 0 b, then
     swap here swap branch-back!
     lit,
     1 advance-bytes
