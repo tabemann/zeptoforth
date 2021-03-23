@@ -1320,7 +1320,7 @@ Parse the input buffer for the end of a token
 
 Parse a token
 
-##### `\\`
+##### `\`
 ( "comment<NL>" -- )
 
 Parse a line comment
@@ -1610,20 +1610,45 @@ Display the copyright notices
 
 Display the license notice
 
-##### `.\"`
+##### `."`
 ( "text<quote>" -- )
 
-Print a string immediately
+Compile a string to be printed.
 	
-##### `s\"`
+##### `s"`
 ( "text<quote>" -- ) ( compiled: -- b-addr u )
 
 Compile a non-counted string
 
-##### `c\"`
+##### `c"`
 ( "text<quote>" -- ) ( compiled: -- b-addr )
 
 Compile a counted-string
+
+##### `.(`
+( "text<close-paren>" -- )
+
+Immediately print a string.
+
+##### `.\"`
+( "text<quote>" -- )
+
+Compile an escaped string to be printed.
+	
+##### `s\"`
+( "text<quote>" -- ) ( compiled: -- b-addr u )
+
+Compile an escaped non-counted string
+
+##### `c\"`
+( "text<quote>" -- ) ( compiled: -- b-addr )
+
+Compile an escaped counted-string
+
+##### `.\(`
+( "text<close-paren>" -- )
+
+Immediately print an escaped string.
 
 ##### `compile-cstring`
 ( b-addr u -- ) ( compiled: -- b-addr )
