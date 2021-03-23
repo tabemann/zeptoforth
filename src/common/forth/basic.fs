@@ -1461,28 +1461,300 @@ forth-wordlist set-current
   dup ram-base < if defer-flash@ else defer-ram@ then
 ;
 
-\ Set internal
-internal-wordlist set-current
+\ Set up the wordlist
+wordlist constant esc-string-wordlist
+commit-flash
+internal-wordlist forth-wordlist esc-string-wordlist 3 set-order
+esc-string-wordlist set-current
 
-\ s" constant
-2 constant s"-length
-create s"-data char s b, char " b,
+\ Character constants
+$07 constant alert
+$08 constant backspace
+$1B constant escape
+$0C constant form-feed
+$0D constant return
+$0A constant line-feed
+$09 constant horizontal-tab
+$0B constant vertical-tab
 
-\ ." constant
-2 constant ."-length
-create ."-data char c b, char " b,
+\ Get an input byte, and return whether a byte was successfully gotten
+: get-byte ( -- b success )
+  >parse @ parse# < if
+    parse-buffer >parse @ + b@
+    1 >parse +!
+    true
+  else
+    0 false
+  then
+;
 
-\ c" constant
-2 constant c"-length
-create c"-data char c b, char " b,
+\ Advance n bytes
+: advance-bytes ( bytes -- )
+  >parse @ + 0 max parse# min >parse !
+;
+
+\ Revert n bytes
+: revert-bytes ( bytes -- ) negate advance-bytes ;
 
 \ Commit to flash
 commit-flash
 
-\ The constants themselves
-s"-data s"-length 2constant s"-constant
-."-data ."-length 2constant ."-constant
-c"-data c"-length 2constant c"-constant
+\ Get the octal length
+: octal-len ( -- bytes )
+  3 begin dup 0> while
+    get-byte if
+      dup [char] 0 < swap [char] 9 > or if
+	3 swap - dup 1+ revert-bytes exit
+      else
+	1-
+      then
+    else
+      drop 3 swap - dup revert-bytes exit
+    then
+  repeat
+  drop 3 dup revert-bytes
+;
+
+\ Get the hexadecimal length
+: hex-len ( max-bytes -- bytes )
+  dup >r begin dup 0> while
+    get-byte if
+      dup [char] 0 < over [char] 9 > or
+      over [char] A < 2 pick [char] F > or and
+      over [char] a < rot [char] f > or and if
+	r> swap - dup 1+ revert-bytes exit
+      else
+	1-
+      then
+    else
+      drop r> swap - dup revert-bytes exit
+    then
+  repeat
+  drop r> dup revert-bytes
+;
+
+\ Commit to flash
+commit-flash
+
+\ Parse an octal escape
+: escape-octal ( -- )
+  octal-len
+  dup >r base @ >r 8 base !
+  >parse @ input + swap parse-unsigned if
+    r> base !
+    dup 256 u< if
+      b, r> advance-bytes
+    else
+      drop rdrop
+    then
+  else
+    r> base ! rdrop
+  then
+;
+
+\ Skip an octal escape
+: skip-escape-octal ( -- )
+  octal-len
+  dup >r base @ >r 8 base !
+  >parse @ input + swap parse-unsigned if
+    r> base !
+    256 u< if
+      r> advance-bytes
+    else
+      rdrop
+    then
+  else
+    r> base ! rdrop
+  then
+;
+
+\ Commit to flash
+commit-flash
+
+\ Parse a hexadecimal escape
+: escape-hex ( -- )
+  2 hex-len
+  dup >r base @ >r 16 base !
+  >parse @ input + swap parse-unsigned if
+    r> base ! b, r> advance-bytes
+  else
+    r> base ! rdrop
+  then
+;
+
+\ Skip a hexadecimal escape
+: skip-escape-hex ( -- )
+  2 hex-len
+  dup >r base @ >r 16 base !
+  >parse @ input + swap parse-unsigned if
+    drop r> base ! r> advance-bytes
+  else
+    r> base ! rdrop
+  then
+;
+
+\ Commit to flash
+commit-flash
+
+\ Parse an escape
+: parse-escape ( -- )
+  get-byte if
+    dup [char] 0 < over [char] 9 > or if
+      case
+	[char] a of alert b, endof
+	[char] A of alert b, endof
+	[char] b of backspace b, endof
+	[char] B of backspace b, endof
+	[char] e of escape b, endof
+	[char] E of escape b, endof
+	[char] f of form-feed b, endof
+	[char] F of form-feed b, endof
+	[char] m of return b, line-feed b, endof
+	[char] M of return b, line-feed b, endof
+	[char] n of line-feed b, endof
+	[char] N of line-feed b, endof
+	[char] q of [char] " b, endof
+	[char] Q of [char] " b, endof
+	[char] r of return b, endof
+	[char] R of return b, endof
+	[char] t of horizontal-tab b, endof
+	[char] T of horizontal-tab b, endof
+	[char] v of vertical-tab b, endof
+	[char] V of vertical-tab b, endof
+	[char] x of escape-hex endof
+	[char] X of escape-hex endof
+	dup b,
+      endcase
+    else
+      drop 1 revert-bytes escape-octal
+    then
+  else
+    drop
+  then
+;
+
+\ Skip an escape
+: skip-escape ( -- )
+  get-byte if
+    dup [char] 0 < over [char] 9 > or if
+      case
+	[char] x of skip-escape-hex endof
+	[char] X of skip-escape-hex endof
+      endcase
+    else
+      drop 1 revert-bytes skip-escape-octal
+    then
+  else
+    drop
+  then
+;
+
+\ Commit to flash
+commit-flash
+
+\ Parse an escaped string
+: parse-esc-string ( end-byte -- )
+  >r begin
+    get-byte if
+      dup $5C = if
+	drop parse-escape false
+      else
+	dup r@ = if
+	  drop true
+	else
+	  b, false
+	then
+      then
+    else
+      drop true
+    then
+  until
+  rdrop
+;
+
+\ Skip an escaped string
+: skip-esc-string ( end-byte -- )
+  >r begin
+    get-byte if
+      dup $5C = if
+	drop skip-escape false
+      else
+	dup r@ = if
+	  drop true
+	else
+	  1 advance-bytes false
+	then
+      then
+    else
+      drop true
+    then
+  until
+  rdrop
+;
+
+\ Commit to flash
+commit-flash
+
+\ Actually compile an escaped counted string
+: compile-esc-cstring ( end-byte -- )
+  undefer-lit
+  reserve-branch swap
+  here dup 1+
+  compiling-to-flash? if flash-here! else ram-here! then swap
+  here swap parse-esc-string
+  here swap -
+  over bcurrent!
+  here %1 and if 0 b, then
+  swap here swap branch-back!
+  lit,
+  1 advance-bytes
+;
+
+\ Commit to flash
+commit-flash
+
+\ Change wordlists
+forth-wordlist set-current
+
+\ Compile an escaped counted string
+: c\" ( -- )
+  [immediate]
+  [compile-only]
+  skip-to-token
+  [char] " compile-esc-cstring
+;
+
+\ Compile an escaped string
+: s\" ( -- )
+  [immediate]
+  [compile-only]
+  skip-to-token
+  [char] " compile-esc-cstring
+  postpone count
+;
+
+\ Compile typing an escaped string
+: .\" ( -- )
+  [immediate]
+  [compile-only]
+  skip-to-token
+  [char] " compile-esc-cstring
+  postpone count
+  postpone type
+;
+
+\ Immediately type an escaped string
+: .\( ( -- )
+  [immediate]
+  skip-to-token
+  compiling-to-flash? dup if
+    compile-to-ram
+  then
+  here [char] ) parse-esc-string
+  dup dup here swap - type
+  swap if compile-to-flash flash-here! else ram-here! then
+  1 advance-bytes
+;
 
 \ Set forth
 forth-wordlist set-current
@@ -1502,10 +1774,14 @@ commit-flash
         s" [then]" ofstrcase 1- endof
 	s" \" ofstrcase ['] newline? skip-until	endof
 	s" (" ofstrcase [: [char] ) = ;] skip-until endof
-	s"-constant ofstrcase [: [char] " = ;] skip-until endof
-	c"-constant ofstrcase [: [char] " = ;] skip-until endof
-	."-constant ofstrcase [: [char] " = ;] skip-until endof
+	s\" s\"" ofstrcase [: [char] " = ;] skip-until endof
+	s\" c\"" ofstrcase [: [char] " = ;] skip-until endof
+	s\" .\"" ofstrcase [: [char] " = ;] skip-until endof
 	s" .(" ofstrcase [: [char] ) = ;] skip-until endof
+	s\" s\\\"" ofstrcase [char] " skip-esc-string endof
+	s\" c\\\"" ofstrcase [char] " skip-esc-string endof
+	s\" .\\\"" ofstrcase [char] " skip-esc-string endof
+	s" .\(" ofstrcase [char] ) skip-esc-string endof
 	s" char" ofstrcase state @ not if token 2drop then endof
 	s" [char]" ofstrcase token 2drop endof
 	s" '" ofstrcase state @ not if token 2drop then endof
