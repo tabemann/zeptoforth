@@ -129,6 +129,25 @@ _to_parse:
 	bx lr
 	end_inlined
 
+	@@ THe parse count
+	define_word "parse#", visible_flag
+_parse_count:	
+	push_tos
+	ldr tos, =eval_count_ptr
+	ldr tos, [tos]
+	ldr tos, [tos]
+	bx lr
+	end_inlined
+
+	@@ The source info
+	define_word "parse-buffer", visible_flag
+_parse_buffer:
+	push_tos
+	ldr tos, =eval_ptr
+	ldr tos, [tos]
+	bx lr
+	end_inlined
+	
 	@@ The source info
 	define_word "source", visible_flag
 _source:
