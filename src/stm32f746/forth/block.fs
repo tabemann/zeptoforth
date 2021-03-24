@@ -295,9 +295,6 @@ defined? block-wordlist not [if]
     drop over -
   ;
 
-  \ Set the public block wordlist
-  block-wordlist set-current
-
   \ Initialize blocks
   : init-block ( -- )
     discover-free-count discover-old-count
@@ -325,6 +322,14 @@ defined? block-wordlist not [if]
     then
   ;
 
+  \ Get whether a block exists
+  : block? ( id -- flag ) find-block 0<> ;
+
+  \ Delete blocks
+  : delete-blocks ( start-id count -- )
+    over + swap ?do i block? if i delete-block then loop
+  ;
+
   \ Find a block by id, or return 0 if no block can be found
   : find-block ( id -- addr | 0 )
     dup unwritten <> averts x-invalid-block-id
@@ -332,9 +337,6 @@ defined? block-wordlist not [if]
     find-block
     end-critical
   ;
-
-  \ Get whether a block exists
-  : block? ( id -- flag ) find-block 0<> ;
 
   \ Write failure exception
   : x-block-write-fail ( -- ) space ." unable to write block" cr ;
@@ -360,6 +362,79 @@ defined? block-wordlist not [if]
 
   \ Block not found
   : x-block-not-found ( -- ) space ." block not found" cr ;
+
+  \ Copy a single block
+  : copy-block ( src-id dest-id -- )
+    over block? if
+      ram-here >r block-size ram-allot
+      over find-block r@ block-size move
+      r> over block!
+      block-size negate ram-allot
+    else
+      dup block? if
+	dup delete-block
+      then
+    then
+    2drop
+  ;
+
+  \ Change the current wordlist
+  block-internal-wordlist set-current
+  
+  \ Copy blocks from the start
+  : copy-blocks-from-start ( src-id dest-id count -- )
+    0 ?do 2dup copy-block 1+ swap 1+ swap loop 2drop
+  ;
+
+  \ Copy blocks from the end
+  : copy-blocks-from-end ( src-id dest-id count -- )
+    >r r@ + swap r@ + swap r> 0 ?do 1- swap 1- swap 2dup copy-block loop 2drop
+  ;
+
+  \ Find the address after a given number of empty blocks
+  : find-empty-block-seq ( start-id empty-count -- end-id )
+    begin dup 0<> while
+      over block? not if
+	1-
+      then
+      swap 1+ swap
+    repeat
+    drop
+  ;
+
+  \ Get the total number of extant blocks in a range
+  : get-extant-block-count ( start-id end-id -- count )
+    0 rot rot swap ?do i block? if 1+ then loop
+  ;
+
+  \ Copy blocks without deleting blocks, from end to start
+  : copy-blocks-no-delete-from-end ( end-id count -- )
+    swap 1- dup rot begin dup 0<> while
+      >r
+      over block? if
+	2dup copy-block 1- swap 1- swap r> 1-
+      else
+	swap 1- swap r>
+      then
+    repeat
+    drop 2drop
+  ;
+
+  \ Change the current wordlist
+  block-wordlist set-current
+  
+  \ Copy blocks
+  : copy-blocks ( src-id dest-id count -- )
+    -rot 2dup < if rot copy-blocks-from-end else rot copy-blocks-from-start then
+  ;
+
+  \ Insert blocks, pushing extant blocks to higher indices
+  : insert-blocks ( start-id count -- )
+    dup >r 2dup find-empty-block-seq nip
+    2dup get-extant-block-count
+    copy-blocks-no-delete-from-end
+    r> delete-blocks
+  ;
   
   \ Set the forth wordlist
   forth-wordlist set-current
