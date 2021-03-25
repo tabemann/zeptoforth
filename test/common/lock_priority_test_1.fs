@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -71,9 +71,9 @@ variable high-task
 : init-test ( -- )
   lock-a init-lock
   lock-b init-lock
-  ['] low 256 256 256 spawn low-task !
-  ['] middle 256 256 256 spawn middle-task !
-  ['] high 256 256 256 spawn high-task !
+  0 ['] low 256 256 256 spawn low-task !
+  0 ['] middle 256 256 256 spawn middle-task !
+  0 ['] high 256 256 256 spawn high-task !
   2 high-task @ set-task-priority
   1 middle-task @ set-task-priority
   0 low-task @ set-task-priority

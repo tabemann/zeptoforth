@@ -143,7 +143,7 @@ variable orange-blue-start
   my-schedule init-schedule
   ['] do-red-green red-green-action my-schedule add-action
   ['] do-orange-blue orange-blue-action my-schedule add-action
-  [: my-schedule run-schedule ;] 256 256 256 spawn schedule-task !
+  0 [: my-schedule run-schedule ;] 256 256 256 spawn schedule-task !
   1666 orange-blue-action start-action-delay
   red-green-action enable-action
   orange-blue-action enable-action

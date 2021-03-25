@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -44,7 +44,7 @@ defined? init-heartbeat not [if]
 
   \ Initialize the heartbeat
   : init-heartbeat ( -- )
-    ['] heartbeat 256 256 256 spawn heartbeat-task !
+    0 ['] heartbeat 256 256 256 spawn heartbeat-task !
     heartbeat-task @ run
   ;
   

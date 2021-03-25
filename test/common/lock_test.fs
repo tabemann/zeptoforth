@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -53,9 +53,9 @@ variable my-task-2
 \ Initialize the test
 : init-test ( -- )
   my-lock init-lock
-  ['] loop-0 256 256 256 spawn my-task-0 !
-  ['] loop-1 256 256 256 spawn my-task-1 !
-  ['] loop-2 256 256 256 spawn my-task-2 !
+  0 ['] loop-0 256 256 256 spawn my-task-0 !
+  0 ['] loop-1 256 256 256 spawn my-task-1 !
+  0 ['] loop-2 256 256 256 spawn my-task-2 !
   begin-critical
   my-task-0 @ run
   my-task-1 @ run

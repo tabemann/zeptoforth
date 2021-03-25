@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -38,9 +38,9 @@ variable lowest-task
 
 \ Initialize the test
 : init-test ( -- )
-  ['] highest 256 256 256 spawn highest-task !
-  ['] middle 256 256 256 spawn middle-task !
-  ['] lowest 256 256 256 spawn lowest-task !
+  0 ['] highest 256 256 256 spawn highest-task !
+  0 ['] middle 256 256 256 spawn middle-task !
+  0 ['] lowest 256 256 256 spawn lowest-task !
   -1 lowest-task @ set-task-priority
   0 middle-task @ set-task-priority
   1 highest-task @ set-task-priority

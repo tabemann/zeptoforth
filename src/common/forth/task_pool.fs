@@ -67,11 +67,11 @@ defined? task-pool-wordlist not [if]
   : x-no-task-available ( -- ) spawn ." no task is available" cr ;
   
   \ Spawn a task from a task pool
-  : spawn-from-task-pool ( xt task-pool -- task )
+  : spawn-from-task-pool ( xn...x0 count xt task-pool -- task )
     begin-critical
     dup task-pool-count @ 0 ?do
       i over task@ terminated? if
-	i swap task@ tuck init-task end-critical unloop exit
+	i swap task@ dup >r init-task r> end-critical unloop exit
       then
     loop
     2drop end-critical ['] x-no-task-available ?raise
@@ -93,8 +93,8 @@ defined? task-pool-wordlist not [if]
     tuck swap 4 align swap task-pool-stack-size h!
     tuck swap 4 align swap task-pool-dict-size !
     dup task-pool-count @ 0 ?do
-      [: ;]
-      over dup task-pool-dict-size @
+      0 [: ;]
+      2 pick dup task-pool-dict-size @
       swap dup task-pool-stack-size h@
       swap task-pool-rstack-size h@ spawn
       dup kill

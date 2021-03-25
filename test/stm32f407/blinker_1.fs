@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -104,7 +104,7 @@ variable blink-delay
   orange-blink-off-action enable-action
   green-blink-off-action enable-action
   blue-blink-off-action enable-action
-  [: my-schedule run-schedule ;] 256 256 256 spawn schedule-task !
+  0 [: my-schedule run-schedule ;] 256 256 256 spawn schedule-task !
   schedule-task @ run
   pause
 ;

@@ -426,89 +426,8 @@ defined? task-wordlist not [if]
     then
   ;
 
-  \ Task checksum
-  : task-checksum ( task -- u )
-    dup task-rstack-size h@ 16 lshift
-    over task-stack-size h@ xor dup 7 lshift swap 25 rshift or
-    over task-dict-size @ xor dup 7 lshift swap 25 rshift or
-    over task-dict-offset @ xor dup 7 lshift swap 25 rshift or
-    over task-rstack-end xor dup 7 lshift swap 25 rshift or
-    over task-stack-end xor dup 7 lshift swap 25 rshift or
-    over task-dict-end xor dup 7 lshift swap 25 rshift or
-    over task-rstack-base xor dup 7 lshift swap 25 rshift or
-    over task-stack-base xor dup 7 lshift swap 25 rshift or
-    over task-dict-base xor dup 7 lshift swap 25 rshift or
-    over task-rstack-current @ xor dup 7 lshift swap 25 rshift or
-    over task-stack-current xor dup 7 lshift swap 25 rshift or
-    over task-dict-current xor dup 7 lshift swap 25 rshift or
-    over task-rstack-current @ 2 pick task-rstack-base checksum-bytes
-    over task-stack-current 2 pick task-stack-base checksum-bytes
-    over task-dict-base rot task-dict-current checksum-bytes
-  ;
-
-  \ Dump information on a task
-  : dump-task-info ( task -- )
-    cr ." task-checksum:       " dup task-checksum space h.8
-    cr ." task-rstack-checksum:"
-    dup task-rstack-current @ over task-rstack-base
-    0 -rot checksum-bytes space h.8
-    cr ." task-stack-checksum: "
-    dup task-stack-current over task-stack-base
-    0 -rot checksum-bytes space h.8
-    cr ." task-dict-checksum:  "
-    dup task-dict-base over task-dict-current 0 -rot checksum-bytes space h.8
-    cr ." task-rstack-size:    " dup task-rstack-size h@ .
-    cr ." task-stack-size:     " dup task-stack-size h@ .
-    cr ." task-dict-size:      " dup task-dict-size @ .
-    cr ." task-dict-offset:    " dup task-dict-offset @ .
-    cr ." task-rstack-end:     " dup task-rstack-end space h.8
-    cr ." task-stack-end:      " dup task-stack-end space h.8
-    cr ." task-dict-end:       " dup task-dict-end space  h.8
-    cr ." task-rstack-base:    " dup task-rstack-base space h.8
-    cr ." task-stack-base:     " dup task-stack-base space h.8
-    cr ." task-dict-base:      " dup task-dict-base space h.8
-    cr ." task-rstack-current: " dup task-rstack-current @ space h.8
-    cr ." task-stack-current:  " dup task-stack-current space h.8
-    cr ." task-dict-current:   " task-dict-current space h.8
-  ;
-
-  \ Dump a task's stack
-  : dump-task-stack ( task -- )
-    dup task-stack-current swap task-stack-base dump
-  ;
-
-  \ Dump a task's rstack
-  : dump-task-rstack ( task -- )
-    dup task-rstack-current @ swap task-rstack-base dump
-  ;
-
-  \ Dump a task's dictionary
-  : dump-task-dict ( task -- )
-    dup task-dict-base swap task-dict-current dump
-  ;
-
-  \ Dump a task's registers
-  : dump-task-regs ( task -- )
-    task-rstack-current @
-    cr ." R0:   " dup 28 + @ h.8
-    cr ." R1:   " dup 32 + @ h.8
-    cr ." R2:   " dup 36 + @ h.8
-    cr ." R3:   " dup 40 + @ h.8
-    cr ." R4:   " dup 0 + @ h.8
-    cr ." R5:   " dup 4 + @ h.8
-    cr ." R6:   " dup 8 + @ h.8
-    cr ." R7:   " dup 12 + @ h.8
-    cr ." R8:   " dup 16 + @ h.8
-    cr ." R9:   " dup 20 + @ h.8
-    cr ." R10:  " dup 24 + @ h.8
-    cr ." R12:  " dup 44 + @ h.8
-    cr ." LR:   " dup 48 + @ h.8
-    cr ." PC:   " dup 52 + @ h.8
-    cr ." xPSR: " 56 + @ h.8
-  ;
-
   \ Initialize a task
-  : init-task ( xt task -- )
+  : init-task ( xn...x0 count xt task -- )
     0 over ['] task-handler for-task !
     0 over task-priority h!
     0 over task-saved-priority !
@@ -523,18 +442,22 @@ defined? task-wordlist not [if]
     ['] init-context svc over task-rstack-current !
     next-user-space over task-dict-offset !
     0 over task-next !
-    push-task-stack
+    swap >r >r
+    begin dup 0<> while
+      dup roll r@ push-task-stack 1-
+    repeat
+    drop r> r> swap push-task-stack
   ;
 
   \ Spawn a non-main task
-  : spawn ( xt dict-size stack-size rstack-size -- task )
+  : spawn ( xn...x0 count xt dict-size stack-size rstack-size -- task )
     2dup + task +
     free-end @ swap -
     swap 4 align swap tuck task-rstack-size h!
     swap 4 align swap tuck task-stack-size h!
     swap 4 align swap tuck task-dict-size !
     dup dup task-dict-size @ - free-end !
-    tuck init-task
+    dup >r init-task r>
   ;
 
   \ Set internal

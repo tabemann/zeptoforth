@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -68,7 +68,7 @@ end-structure
 \ Create an led task
 : make-led ( before-fchan after-fchan on-xt off-xt delay "name" -- )
   s" " <builds-with-name 4 roll , 3 roll , rot , swap , , do-led
-  latest >body 256 256 256 spawn constant
+  0 latest >body 256 256 256 spawn constant
 ;
 
 \ Create the led tasks
