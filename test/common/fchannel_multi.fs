@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -37,7 +37,7 @@ fchan-size buffer: my-fchan
 ;
 
 \ The consumer task
-' consumer 256 256 256 spawn constant consumer-task
+0 ' consumer 256 256 256 spawn constant consumer-task
 
 \ The inner loop of a producer
 : do-producer ( -- )
@@ -53,7 +53,7 @@ fchan-size buffer: my-fchan
 
 \ Create a producer task
 : make-producer ( xt "name" -- )
-  s" " <builds-with-name , do-producer latest >body 256 256 256 spawn constant
+  0 s" " <builds-with-name , do-producer latest >body 256 256 256 spawn constant
 ;
 
 \ Create the producers

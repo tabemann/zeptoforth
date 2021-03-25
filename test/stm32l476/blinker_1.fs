@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -81,7 +81,7 @@ variable green-blinker-delay
   ['] green-blinker green-blinker-action my-schedule add-action
   green-blinker-delay @ green-blinker-action @ start-action-delay
   green-blinker-action @ enable-action
-  [: my-schedule run-schedule ;] 256 256 256 spawn schedule-task !
+  0 [: my-schedule run-schedule ;] 256 256 256 spawn schedule-task !
   schedule-task @ run
   pause
 ;

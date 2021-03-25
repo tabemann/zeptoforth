@@ -31,9 +31,9 @@ Get the current pause count, an unsigned 32-bit value which rolls over.xs
 To create a task in zeptoforth, one should execute the following:
 
 ##### `spawn`
-( xt dictionary-size stack-size rstack-size -- task )
+( xn...x0 count xt dictionary-size stack-size rstack-size -- task )
 
-where *xt* is the entry point to the task, *dictionary-size* is the size of the dictionary for the spawned task in bytes, *stack-size* is the size of the data stack for the spawned task in bytes, *rstack-size* is the size of the return stack for the spawned task in bytes, and *task* is the header for the newly spawned task. *dictionary-size*, *stack-size*, and *rstack-size* must be multiples of four I have had good luck with values of 256 for each of these; I do not know how well smaller values will work out, especially in the case of *rstack-size*, where too small of a size will almost certainly result in a crash. This in turn returns a pointer to the task header on the stack, which can then be stored in a variable or constant.
+where *xn* through *x0* are parameters to pass to the *xt* when executed, *count* is the number of such parameters, *xt* is the entry point to the task, *dictionary-size* is the size of the dictionary for the spawned task in bytes, *stack-size* is the size of the data stack for the spawned task in bytes, *rstack-size* is the size of the return stack for the spawned task in bytes, and *task* is the header for the newly spawned task. *dictionary-size*, *stack-size*, and *rstack-size* must be multiples of four I have had good luck with values of 256 for each of these; I do not know how well smaller values will work out, especially in the case of *rstack-size*, where too small of a size will almost certainly result in a crash. This in turn returns a pointer to the task header on the stack, which can then be stored in a variable or constant.
 
 Note that it is not recommended to execute this while compiling to flash; rather, it should be put in the `init` routine and then the result should be stored to a variable in RAM.
 
@@ -48,7 +48,7 @@ To reinitialize existing tasks, one executes:
 ##### `init-task`
 ( xt task -- )
 
-These tasks may be in any state, including being terminated.
+These tasks may be in any state, including being terminated. *xn* through *x0* are parameters to pass to the *xt* when executed.
 
 New tasks do not execute right away, rather to enable their execution, one executes:
 

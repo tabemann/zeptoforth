@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2021 Travis Bemann
+\ Copyright (c) 2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -19,56 +19,39 @@
 \ SOFTWARE.
 
 \ Set up the wordlist order
-forth-wordlist task-wordlist systick-wordlist fchan-wordlist 4 set-order
+forth-wordlist task-wordlist task-pool-wordlist fchan-wordlist 4 set-order
 forth-wordlist set-current
 
-\ Allot the channel
-fchan-size buffer: my-fchan
+\ Allot the channels
+fchan-size buffer: signal-0-fchan
+fchan-size buffer: signal-1-fchan
+fchan-size buffer: signal-2-fchan
+fchan-size buffer: signal-3-fchan
 
-\ The inner loop of the consumer
-: consumer ( -- )
-  begin
-    my-fchan recv-fchan-cell drop
-    pause
-  again
+\ The task pool
+3 task-pool-size buffer: my-task-pool
+
+\ Wait on an fchannel, display a number of numbers and send on the fchannel
+\ provided
+: action ( out-fchannel xn...x0 count in-channel -- )
+  recv-fchan-cell drop
+  begin dup 0> while 1- swap . repeat drop
+  0 swap send-fchan-cell
 ;
 
-\ The consumer task
-0 ' consumer 256 256 256 spawn constant consumer-task
-
-\ The send count
-variable send-count
-
-\ The starting systick
-variable start-systick
-
-\ The send count limit
-10000 constant send-count-limit
-
-\ The inner loop of a producer
-: producer ( -- )
-  begin
-    0 my-fchan send-fchan-cell
-    1 send-count +!
-    send-count @ send-count-limit > if
-      0 send-count !
-      systick-counter dup start-systick @ -
-      cr ." Sends per second: " 0 swap 0 send-count-limit f/
-      10000,0 f/ 1,0 2swap f/ f.
-      start-systick !
-    then
-  again
-;
-
-\ The producer task
-0 ' producer 256 256 256 spawn constant producer-task
-
-\ Initiate the test
+\ Initialize the test
 : init-test ( -- )
-  0 send-count !
-  systick-counter start-systick !
-  my-fchan init-fchan
-  consumer-task run
-  producer-task run
-  pause
+  signal-0-fchan init-fchan
+  signal-1-fchan init-fchan
+  signal-2-fchan init-fchan
+  signal-3-fchan init-fchan
+  256 256 256 3 my-task-pool init-task-pool
+  signal-1-fchan 2 1 0 3 signal-0-fchan 6
+  ['] action my-task-pool spawn-from-task-pool run
+  signal-2-fchan 12 11 10 3 signal-1-fchan 6
+  ['] action my-task-pool spawn-from-task-pool run
+  signal-3-fchan 22 21 20 3 signal-2-fchan 6
+  ['] action my-task-pool spawn-from-task-pool run
+  0 signal-0-fchan send-fchan-cell
+  signal-3-fchan recv-fchan-cell drop
 ;

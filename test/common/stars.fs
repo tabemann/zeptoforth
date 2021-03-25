@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -31,4 +31,4 @@ variable stars-task
 : stars ( -- ) begin ." *" 500000 0 ?do loop again ;
 
 \ Initialize the stars task
-: init-stars ( -- ) ['] stars 256 256 256 spawn stars-task ! ;
+: init-stars ( -- ) 0 ['] stars 256 256 256 spawn stars-task ! ;
