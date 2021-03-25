@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -55,10 +55,10 @@ variable producer-task
 variable consumer-task
 
 \ Spawn my producer task
-' producer 256 256 256 spawn producer-task !
+0 ' producer 256 256 256 spawn producer-task !
 
 \ Spawn my consumer task
-' consumer 256 256 256 spawn consumer-task !
+0 ' consumer 256 256 256 spawn consumer-task !
 
 \ Enable my consumer task
 consumer-task @ run

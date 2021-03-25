@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@ forth-wordlist
 : test ( -- ) begin 1000 ms again ;
 
 \ The loop task
-' test 256 256 256 spawn constant test-task
+0 ' test 256 256 256 spawn constant test-task
 
 \ Start the loop task
 test-task run

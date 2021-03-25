@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -75,10 +75,10 @@ variable task-lock-c
   lock-a init-lock
   lock-b init-lock
   lock-c init-lock
-  ['] do-lock-all 256 256 256 spawn task-lock-all !
-  ['] do-lock-a 256 256 256 spawn task-lock-a !
-  ['] do-lock-b 256 256 256 spawn task-lock-b !
-  ['] do-lock-c 256 256 256 spawn task-lock-c !
+  0 ['] do-lock-all 256 256 256 spawn task-lock-all !
+  0 ['] do-lock-a 256 256 256 spawn task-lock-a !
+  0 ['] do-lock-b 256 256 256 spawn task-lock-b !
+  0 ['] do-lock-c 256 256 256 spawn task-lock-c !
   begin-critical
   task-lock-all @ run
   task-lock-a @ run

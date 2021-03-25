@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -54,8 +54,8 @@ variable high-task
 \ Initialize the test
 : init-test ( -- )
   my-lock init-lock
-  ['] low 256 256 256 spawn low-task !
-  ['] high 256 256 256 spawn high-task !
+  0 ['] low 256 256 256 spawn low-task !
+  0 ['] high 256 256 256 spawn high-task !
   1 high-task @ set-task-priority
   low-task @ run
   500000 0 ?do loop

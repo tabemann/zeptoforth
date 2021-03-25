@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -63,6 +63,6 @@ variable vary-task
   50 vary-min !
   500 vary-max !
   25 vary-step !
-  ['] vary 256 256 256 spawn vary-task !
+  0 ['] vary 256 256 256 spawn vary-task !
   vary-task @ run
 ;
