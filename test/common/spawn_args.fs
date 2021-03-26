@@ -35,8 +35,9 @@ fchan-size buffer: signal-3-fchan
 \ provided
 : action ( out-fchannel xn...x0 count in-channel -- )
   recv-fchan-cell drop
-  begin dup 0> while 1- swap . repeat drop
+  begin dup 0> while 1- swap . repeat drop pause
   0 swap send-fchan-cell
+  begin pause again
 ;
 
 \ Initialize the test
