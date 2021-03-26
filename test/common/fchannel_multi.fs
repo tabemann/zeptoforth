@@ -27,12 +27,12 @@ fchan-size buffer: my-fchan
 
 \ The inner loop of the consumer
 : consumer ( -- )
-  0 pause-enabled ! cr ." Consumer: " current-task h.8 1 pause-enabled !
+  begin-critical cr ." Consumer: " current-task h.8 end-critical
   begin
     my-fchan recv-fchan
-    0 pause-enabled ! cr ." Received: " type 1 pause-enabled !
+    begin-critical cr ." Received: " type end-critical
 \    100 ms
-    pause
+\    pause
   again
 ;
 
@@ -42,18 +42,18 @@ fchan-size buffer: my-fchan
 \ The inner loop of a producer
 : do-producer ( -- )
   does> @ execute
-  0 pause-enabled ! cr ." Producer: " 2dup type
-  ." : " current-task h.8 1 pause-enabled !
+  begin-critical cr ." Producer: " 2dup type
+  ." : " current-task h.8 end-critical
   begin
-    0 pause-enabled ! cr ." Sending: " 2dup type 1 pause-enabled !
+    begin-critical cr ." Sending: " 2dup type end-critical
     2dup my-fchan send-fchan
-    0 pause-enabled ! cr ." Done sending: " 2dup type 1 pause-enabled !
+    begin-critical cr ." Done sending: " 2dup type end-critical
   again
 ;
 
 \ Create a producer task
 : make-producer ( xt "name" -- )
-  0 s" " <builds-with-name , do-producer latest >body 256 256 256 spawn constant
+  s" " <builds-with-name , do-producer 0 latest >body 256 256 256 spawn constant
 ;
 
 \ Create the producers

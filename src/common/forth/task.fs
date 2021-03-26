@@ -360,8 +360,7 @@ defined? task-wordlist not [if]
   : kill ( task -- )
     disable-int
     dup validate-not-terminated
-    dup get-task-active 1-
-    0= if dup unlink-task then
+    dup get-task-active 0> if dup unlink-task then
     terminated over task-active h!
     dup current-task @ = swap last-task @ = or if
       enable-int begin pause again
@@ -432,7 +431,7 @@ defined? task-wordlist not [if]
     0 over task-priority h!
     0 over task-saved-priority !
     0 over task-active h!
-    base @ over ['] task-base for-task h!
+    base @ over ['] task-base for-task !
     0 over ['] current-lock for-task !
     0 over ['] current-lock-held for-task !
     false over ['] task-wait for-task !
@@ -537,7 +536,7 @@ defined? task-wordlist not [if]
 
     disable-int
     
-    in-critical @ not if
+    in-critical @ 0= if
       task-systick-counter @
       dup context-switch-delay @ negate <= if drop 0 then
       dup context-switch-delay @ >= if drop 0 then
