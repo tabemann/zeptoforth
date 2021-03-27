@@ -107,7 +107,7 @@ internal-wordlist set-current
   swap 1+ set-order
   module-stack-index @ 0<> averts x-module-stack-underflow
   module-stack@
-  1 over module-wordlist-count b+!
+  1 swap module-wordlist-count b+!
 ;
 
 \ Switch wordlists
@@ -156,10 +156,10 @@ forth-wordlist set-current
 ;
 
 \ Initialize
-: init ( -- )
-  init
+\ : init ( -- )
+\   init
   0 module-stack-index !
-;
+\ ;
 
 \ Warm reboot
-warm
+\ warm
