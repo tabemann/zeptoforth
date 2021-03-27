@@ -108,11 +108,11 @@ defined? fchan-wordlist not [if]
     1 over fchan-recv-ready +!
     dup fchan-send-ready @ if dup fchan-send-tqueue wake-tqueue then
     dup fchan-recv-tqueue wait-tqueue
-    -1 over fchan-send-ready +!
-    -1 over fchan-recv-ready +!
     dup fchan-send-addr @
     over fchan-send-count @
     rot fchan-resp-tqueue wake-tqueue
+    -1 over fchan-send-ready +!
+    -1 over fchan-recv-ready +!
     end-critical
   ;
 
