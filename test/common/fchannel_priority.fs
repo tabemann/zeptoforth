@@ -59,9 +59,10 @@ variable low-task
   my-in-fchan init-fchan
   0 ['] high 256 256 256 spawn high-task !
   0 ['] low 256 256 256 spawn low-task !
-  0 high-task @ set-task-priority
-  -1 low-task @ set-task-priority
+  1 high-task @ set-task-priority
+  0 low-task @ set-task-priority
   begin-critical
   high-task @ run
   low-task @ run
+  end-critical
 ;
