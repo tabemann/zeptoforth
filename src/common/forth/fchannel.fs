@@ -96,7 +96,7 @@ defined? fchan-wordlist not [if]
     1 over fchan-send-ready +!
     tuck fchan-send-count !
     tuck fchan-send-addr !
-    dup fchan-recv-ready @ if dup fchan-recv-tqueue wake-tqueue then
+    dup fchan-recv-tqueue wake-tqueue
     fchan-resp-tqueue wait-tqueue
     end-critical
     pause
