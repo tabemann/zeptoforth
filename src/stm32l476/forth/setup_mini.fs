@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -23,13 +23,12 @@
 \ on an STM32L476 device.
 
 #include src/common/forth/basic.fs
+#include src/common/forth/module.fs
 #include src/common/forth/interrupt.fs
 #include src/stm32l476/forth/erase.fs
-#include src/common/forth/lambda.fs
 #include src/common/forth/systick.fs
 #include src/stm32l476/forth/int_io.fs
 #include src/common/forth/task.fs
-#include src/stm32l476/forth/led.fs
 
 \ Set a cornerstone to enable deleting everything compiled after this code
 cornerstone restore-state

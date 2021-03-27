@@ -19,6 +19,7 @@
 \ SOFTWARE.
 
 #include src/common/forth/basic.fs
+#include src/common/forth/module.fs
 #include src/common/forth/interrupt.fs
 #include src/stm32l476/forth/erase.fs
 #include src/common/forth/lambda.fs
@@ -28,7 +29,6 @@
 #include src/common/forth/task.fs
 #include src/common/forth/schedule.fs
 #include src/stm32l476/forth/led.fs
-#include src/common/forth/disassemble.fs
 #include src/common/forth/big_default.fs
 
 \ Set a cornerstone to enable deleting everything compiled after this code
