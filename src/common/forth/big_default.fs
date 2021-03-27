@@ -21,6 +21,7 @@
 \ This is not actual Forth code, but rather setup directives for e4thcom to be
 \ executed to load a "big" configuration
 
+#include src/common/forth/disassemble.fs
 #include src/common/forth/pool.fs
 #include src/common/forth/allocate.fs
 #include src/common/forth/tqueue.fs
