@@ -259,7 +259,6 @@ defined? task-wordlist not [if]
       dup current-task !
       dup dup task-next !
       true current-task-changed? !
-      0 pause-enabled ! cr ." YYY" 1 pause-enabled !
     then
   ;
 
