@@ -6,6 +6,7 @@ Zeptoforth Documentation
    :caption: Contents:
 
    words/basic
+   words/module
    words/lambda
    words/wordlist
    words/task

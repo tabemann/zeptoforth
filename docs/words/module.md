@@ -8,6 +8,8 @@ When modules are defined, they automatically add their wordlist definition as a 
 
 Within a given module, the user may import and unimport modules/wordlists, which pushes them on the wordlist order and removes them from that module's portion of the wordlist's order respectively. Note that all the wordlists imported with a module definition are automatically unimported when that module definition is ended. Note that imported and unimported modules must already exist by the name specified, or else `x-module-not-found` is raised.
 
+Note that it is recommended that once `src/common/forth/module.fs` is loaded, the user should not manually use `set-order` or `set-current`, as the module system will not know about this and thus unexpected results may occur.
+
 The following words are defined in `forth-wordlist`:
 
 ##### `x-module-already-defined`
