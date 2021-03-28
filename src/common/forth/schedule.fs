@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -22,83 +22,59 @@
 forth-wordlist 1 set-order
 forth-wordlist set-current
 
-\ Make sure systick-wordlist exists
-defined? systick-wordlist not [if]
-  :noname space ." systick is not installed" cr ; ?raise
-[then]
+\ Compile to flash
+compile-to-flash
 
-\ Make sure task-wordlist exists
-defined? task-wordlist not [if]
-  :noname space ." task is not installed" cr ; ?raise
-[then]
+begin-module schedule-wordlist
 
-\ Test to see if this has already been loaded
-defined? schedule-wordlist not [if]
+  import systick-wordlist
+  import task-wordlist
 
-  \ Compile to flash
-  compile-to-flash
+  begin-import-module schedule-internal-wordlist
 
-  \ Set up the wordlist
-  wordlist constant schedule-wordlist
-  wordlist constant schedule-internal-wordlist
-  forth-wordlist systick-wordlist task-wordlist schedule-wordlist
-  schedule-internal-wordlist 5 set-order
-  schedule-internal-wordlist set-current
+    \ The current action
+    user current-action
 
-  \ The current action
-  user current-action
+    \ The scheduler structure
+    begin-structure schedule-size    
+      \ Current action
+      field: schedule-current
 
-  \ Set the current wordlist
-  schedule-wordlist set-current
+      \ Last action executed
+      field: schedule-last
+    end-structure
 
-  \ The scheduler structure
-  begin-structure schedule-size
-    
-    \ Set the current wordlist
-    schedule-internal-wordlist set-current
-    
-    \ Current action
-    field: schedule-current
+    \ The action structure
+    begin-structure action-size
+      \ The action xt
+      field: action-xt
 
-    \ Last action executed
-    field: schedule-last
-  end-structure
+      \ Next action
+      field: action-next
 
-  \ Set the current wordlist
-  schedule-wordlist set-current
+      \ Whether the action is active (> 0 means active)
+      field: action-active
 
-  \ The action structure
-  begin-structure action-size
+      \ Action systick start time
+      field: action-systick-start
+      
+      \ Action systick delay time
+      field: action-systick-delay
+    end-structure
 
-    \ Set the current wordlist
-    schedule-internal-wordlist set-current
-    
-    \ The action xt
-    field: action-xt
+    \ Find the previous action
+    : prev-action ( action1 -- action2 )
+      dup begin dup action-next @ 2 pick <> while action-next @ repeat
+      tuck = if
+	drop 0
+      then
+    ;
 
-    \ Next action
-    field: action-next
+  end-module
 
-    \ Whether the action is active (> 0 means active)
-    field: action-active
-
-    \ Action systick start time
-    field: action-systick-start
-    
-    \ Action systick delay time
-    field: action-systick-delay
-  end-structure
-
-  \ Find the previous action
-  : prev-action ( action1 -- action2 )
-    dup begin dup action-next @ 2 pick <> while action-next @ repeat
-    tuck = if
-      drop 0
-    then
-  ;
-
-  \ Set non-internal
-  schedule-wordlist set-current
+  \ Export these constants
+  schedule-size constant schedule-size
+  action-size constant action-size
 
   \ Initalize a scheduler
   : init-schedule ( schedule -- )
@@ -293,7 +269,7 @@ defined? schedule-wordlist not [if]
   \ Make current-action read-only
   : current-action ( -- action ) current-action @ ;
 
-[then]
+end-module
 
 \ Warm reboot
 warm

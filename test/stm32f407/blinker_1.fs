@@ -18,93 +18,97 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Set up the wordlist order
-forth-wordlist task-wordlist schedule-wordlist led-wordlist 4 set-order
-forth-wordlist set-current
+begin-module forth-wordlist
 
-\ The schedule
-schedule-size buffer: my-schedule
+  import task-wordlist
+  import schedule-wordlist
+  import led-wordlist
 
-\ The schedule task
-variable schedule-task
+  \ The schedule
+  schedule-size buffer: my-schedule
 
-\ The red LED blink on action
-action-size buffer: red-blink-on-action
+  \ The schedule task
+  variable schedule-task
 
-\ The orange LED blink on action
-action-size buffer: orange-blink-on-action
+  \ The red LED blink on action
+  action-size buffer: red-blink-on-action
 
-\ The green LED blink on action
-action-size buffer: green-blink-on-action
+  \ The orange LED blink on action
+  action-size buffer: orange-blink-on-action
 
-\ The blue LED blink on action
-action-size buffer: blue-blink-on-action
+  \ The green LED blink on action
+  action-size buffer: green-blink-on-action
 
-\ The red LED blink off action
-action-size buffer: red-blink-off-action
+  \ The blue LED blink on action
+  action-size buffer: blue-blink-on-action
 
-\ The orange LED blink off action
-action-size buffer: orange-blink-off-action
+  \ The red LED blink off action
+  action-size buffer: red-blink-off-action
 
-\ The green LED blink off action
-action-size buffer: green-blink-off-action
+  \ The orange LED blink off action
+  action-size buffer: orange-blink-off-action
 
-\ The blue LED blink off action
-action-size buffer: blue-blink-off-action
+  \ The green LED blink off action
+  action-size buffer: green-blink-off-action
 
-\ Delay
-variable blink-delay
+  \ The blue LED blink off action
+  action-size buffer: blue-blink-off-action
 
-\ Create a blink word
-: blink ( xt "name" -- )
-  <builds , does>
-  @ execute blink-delay @ current-action reset-action-delay
-;
+  \ Delay
+  variable blink-delay
 
-\ Create the blink words
-' led-red-on blink red-blink-on
-' led-orange-on blink orange-blink-on
-' led-green-on blink green-blink-on
-' led-blue-on blink blue-blink-on
-' led-red-off blink red-blink-off
-' led-orange-off blink orange-blink-off
-' led-green-off blink green-blink-off
-' led-blue-off blink blue-blink-off
+  \ Create a blink word
+  : blink ( xt "name" -- )
+    <builds , does>
+    @ execute blink-delay @ current-action reset-action-delay
+  ;
 
-\ Adjust blink timing
-: reset-blinking ( -- )
-  0 red-blink-on-action start-action-delay
-  blink-delay @ 4/ orange-blink-on-action start-action-delay
-  blink-delay @ 2/ green-blink-on-action start-action-delay
-  blink-delay @ 4/ 3 * blue-blink-on-action start-action-delay
-  blink-delay @ 4/ red-blink-off-action start-action-delay
-  blink-delay @ 2/ orange-blink-off-action start-action-delay
-  blink-delay @ 4/ 3 * green-blink-off-action start-action-delay
-  blink-delay @ blue-blink-off-action start-action-delay
-;
+  \ Create the blink words
+  ' led-red-on blink red-blink-on
+  ' led-orange-on blink orange-blink-on
+  ' led-green-on blink green-blink-on
+  ' led-blue-on blink blue-blink-on
+  ' led-red-off blink red-blink-off
+  ' led-orange-off blink orange-blink-off
+  ' led-green-off blink green-blink-off
+  ' led-blue-off blink blue-blink-off
 
-\ Init blinker
-: init-blinker-1 ( -- )
-  4000 blink-delay !
-  my-schedule init-schedule
-  ['] red-blink-on red-blink-on-action my-schedule add-action
-  ['] orange-blink-on orange-blink-on-action my-schedule add-action
-  ['] green-blink-on green-blink-on-action my-schedule add-action
-  ['] blue-blink-on blue-blink-on-action my-schedule add-action
-  ['] red-blink-off red-blink-off-action my-schedule add-action
-  ['] orange-blink-off orange-blink-off-action my-schedule add-action
-  ['] green-blink-off green-blink-off-action my-schedule add-action
-  ['] blue-blink-off blue-blink-off-action my-schedule add-action
-  reset-blinking
-  red-blink-on-action enable-action
-  orange-blink-on-action enable-action
-  green-blink-on-action enable-action
-  blue-blink-on-action enable-action
-  red-blink-off-action enable-action
-  orange-blink-off-action enable-action
-  green-blink-off-action enable-action
-  blue-blink-off-action enable-action
-  0 [: my-schedule run-schedule ;] 256 256 256 spawn schedule-task !
-  schedule-task @ run
-  pause
-;
+  \ Adjust blink timing
+  : reset-blinking ( -- )
+    0 red-blink-on-action start-action-delay
+    blink-delay @ 4/ orange-blink-on-action start-action-delay
+    blink-delay @ 2/ green-blink-on-action start-action-delay
+    blink-delay @ 4/ 3 * blue-blink-on-action start-action-delay
+    blink-delay @ 4/ red-blink-off-action start-action-delay
+    blink-delay @ 2/ orange-blink-off-action start-action-delay
+    blink-delay @ 4/ 3 * green-blink-off-action start-action-delay
+    blink-delay @ blue-blink-off-action start-action-delay
+  ;
+
+  \ Init blinker
+  : init-blinker-1 ( -- )
+    4000 blink-delay !
+    my-schedule init-schedule
+    ['] red-blink-on red-blink-on-action my-schedule add-action
+    ['] orange-blink-on orange-blink-on-action my-schedule add-action
+    ['] green-blink-on green-blink-on-action my-schedule add-action
+    ['] blue-blink-on blue-blink-on-action my-schedule add-action
+    ['] red-blink-off red-blink-off-action my-schedule add-action
+    ['] orange-blink-off orange-blink-off-action my-schedule add-action
+    ['] green-blink-off green-blink-off-action my-schedule add-action
+    ['] blue-blink-off blue-blink-off-action my-schedule add-action
+    reset-blinking
+    red-blink-on-action enable-action
+    orange-blink-on-action enable-action
+    green-blink-on-action enable-action
+    blue-blink-on-action enable-action
+    red-blink-off-action enable-action
+    orange-blink-off-action enable-action
+    green-blink-off-action enable-action
+    blue-blink-off-action enable-action
+    0 [: my-schedule run-schedule ;] 256 256 256 spawn schedule-task !
+    schedule-task @ run
+    pause
+  ;
+
+end-module

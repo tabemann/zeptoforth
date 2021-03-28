@@ -18,55 +18,60 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Set up the wordlist order
-forth-wordlist internal-wordlist task-wordlist fchan-wordlist 4 set-order
-forth-wordlist set-current
+begin-module forth-wordlist
 
-\ Allot the channel
-fchan-size buffer: my-fchan
+  import internal-wordlist
+  import task-wordlist
+  import fchan-wordlist
 
-\ The inner loop of the consumer
-: consumer ( -- )
-  begin-critical cr ." Consumer: " current-task h.8 end-critical
-  begin
-    my-fchan recv-fchan
-    begin-critical cr ." Received: " type end-critical
-\    100 ms
-\    pause
-  again
-;
+  \ Allot the channel
+  fchan-size buffer: my-fchan
 
-\ The consumer task
-0 ' consumer 256 256 256 spawn constant consumer-task
+  \ The inner loop of the consumer
+  : consumer ( -- )
+    begin-critical cr ." Consumer: " current-task h.8 end-critical
+    begin
+      my-fchan recv-fchan
+      begin-critical cr ." Received: " type end-critical
+      \    100 ms
+      \    pause
+    again
+  ;
 
-\ The inner loop of a producer
-: do-producer ( -- )
-  does> @ execute
-  begin-critical cr ." Producer: " 2dup type
-  ." : " current-task h.8 end-critical
-  begin
-    begin-critical cr ." Sending: " 2dup type end-critical
-    2dup my-fchan send-fchan
-    begin-critical cr ." Done sending: " 2dup type end-critical
-  again
-;
+  \ The consumer task
+  0 ' consumer 256 256 256 spawn constant consumer-task
 
-\ Create a producer task
-: make-producer ( xt "name" -- )
-  s" " <builds-with-name , do-producer 0 latest >body 256 256 256 spawn constant
-;
+  \ The inner loop of a producer
+  : do-producer ( -- )
+    does> @ execute
+    begin-critical cr ." Producer: " 2dup type
+    ." : " current-task h.8 end-critical
+    begin
+      begin-critical cr ." Sending: " 2dup type end-critical
+      2dup my-fchan send-fchan
+      begin-critical cr ." Done sending: " 2dup type end-critical
+    again
+  ;
 
-\ Create the producers
-:noname s" A" ; make-producer producer-a-task
-:noname s" B" ; make-producer producer-b-task
-:noname s" C" ; make-producer producer-c-task
+  \ Create a producer task
+  : make-producer ( xt "name" -- )
+    s" " <builds-with-name , do-producer 0 latest >body 256 256 256 spawn
+    constant
+  ;
 
-\ Initiate the test
-: init-test ( -- )
-  my-fchan init-fchan
-  consumer-task run
-  producer-a-task run
-  producer-b-task run
-  producer-c-task run
-  pause
-;
+  \ Create the producers
+  :noname s" A" ; make-producer producer-a-task
+  :noname s" B" ; make-producer producer-b-task
+  :noname s" C" ; make-producer producer-c-task
+
+  \ Initiate the test
+  : init-test ( -- )
+    my-fchan init-fchan
+    consumer-task run
+    producer-a-task run
+    producer-b-task run
+    producer-c-task run
+    pause
+  ;
+
+end-module

@@ -18,35 +18,37 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Set up the wordlist order
-forth-wordlist task-wordlist 2 set-order
-forth-wordlist set-current
+begin-module forth-wordlist
 
-\ The highest-priority task's loop
-: highest ( -- ) begin 25 0 ?do 100000 0 ?do loop ." *" loop 1000 ms again ;
+  import task-wordlist
 
-\ The middle-priority task's loop
-: middle ( -- ) begin 100 0 ?do 10000 0 ?do loop ." x" loop 500 ms again ;
+  \ The highest-priority task's loop
+  : highest ( -- ) begin 25 0 ?do 100000 0 ?do loop ." *" loop 1000 ms again ;
 
-\ The lowest-priority task's loop
-: lowest ( -- ) begin 10000 0 ?do loop ." ." again ;
+  \ The middle-priority task's loop
+  : middle ( -- ) begin 100 0 ?do 10000 0 ?do loop ." x" loop 500 ms again ;
 
-\ The tasks
-variable highest-task
-variable middle-task
-variable lowest-task
+  \ The lowest-priority task's loop
+  : lowest ( -- ) begin 10000 0 ?do loop ." ." again ;
 
-\ Initialize the test
-: init-test ( -- )
-  0 ['] highest 256 256 256 spawn highest-task !
-  0 ['] middle 256 256 256 spawn middle-task !
-  0 ['] lowest 256 256 256 spawn lowest-task !
-  -1 lowest-task @ set-task-priority
-  0 middle-task @ set-task-priority
-  1 highest-task @ set-task-priority
-  begin-critical
-  lowest-task @ run
-  middle-task @ run
-  highest-task @ run
-  end-critical
-;
+  \ The tasks
+  variable highest-task
+  variable middle-task
+  variable lowest-task
+
+  \ Initialize the test
+  : init-test ( -- )
+    0 ['] highest 256 256 256 spawn highest-task !
+    0 ['] middle 256 256 256 spawn middle-task !
+    0 ['] lowest 256 256 256 spawn lowest-task !
+    -1 lowest-task @ set-task-priority
+    0 middle-task @ set-task-priority
+    1 highest-task @ set-task-priority
+    begin-critical
+    lowest-task @ run
+    middle-task @ run
+    highest-task @ run
+    end-critical
+  ;
+
+end-module

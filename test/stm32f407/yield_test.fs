@@ -18,135 +18,128 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Compile this to RAM
-compile-to-ram
+begin-module forth-wordlist
 
-\ Set up the wordlist order
-forth-wordlist 1 set-order
-forth-wordlist set-current
+  import systick-wordlist
+  import task-wordlist
+  import schedule-wordlist
+  import led-wordlist
+  
+  \ Our task
+  variable schedule-task
 
-\ Test whether the event scheduler has been compiled
-defined? schedule-wordlist not [if]
-  :noname space ." event scheduler not loaded" cr ; ?raise
-[then]
+  \ Our schedule
+  schedule-size buffer: my-schedule
 
-\ Set up the wordlist order
-forth-wordlist task-wordlist schedule-wordlist systick-wordlist led-wordlist
-5 set-order
+  \ Our actions
+  action-size buffer: red-green-action
+  action-size buffer: orange-blue-action
 
-\ Our task
-variable schedule-task
+  \ Our delays
+  variable red-delay
+  variable orange-delay
+  variable green-delay
+  variable blue-delay
 
-\ Our schedule
-schedule-size buffer: my-schedule
+  \ Red-green systick start
+  variable red-green-start
 
-\ Our actions
-action-size buffer: red-green-action
-action-size buffer: orange-blue-action
+  \ Orange-blue systick start
+  variable orange-blue-start
 
-\ Our delays
-variable red-delay
-variable orange-delay
-variable green-delay
-variable blue-delay
-
-\ Red-green systick start
-variable red-green-start
-
-\ Orange-blue systick start
-variable orange-blue-start
-
-\ Red-green action word
-: do-red-green ( -- )
-  systick-counter red-green-start !
-  begin
-    led-red-on led-green-off
-    red-green-start @ red-delay @ + red-green-start !
+  \ Red-green action word
+  : do-red-green ( -- )
+    systick-counter red-green-start !
     begin
-      systick-counter red-green-start @ - red-delay @ < if
-	50 current-action start-action-delay
-	yield
-	led-green-on
-	2 current-action start-action-delay
-	yield
-	led-green-off
-	false
-      else
-	true
-      then
-    until
-    yield
-    led-green-on led-red-off
-    red-green-start @ green-delay @ + red-green-start !
-    begin
-      systick-counter red-green-start @ - green-delay @ < if
-	50 current-action start-action-delay
-	yield
-	led-red-on
-	2 current-action start-action-delay
-	yield
-	led-red-off
-	false
-      else
-	true
-      then
-    until
-    yield
-  again
-;
+      led-red-on led-green-off
+      red-green-start @ red-delay @ + red-green-start !
+      begin
+	systick-counter red-green-start @ - red-delay @ < if
+	  50 current-action start-action-delay
+	  yield
+	  led-green-on
+	  2 current-action start-action-delay
+	  yield
+	  led-green-off
+	  false
+	else
+	  true
+	then
+      until
+      yield
+      led-green-on led-red-off
+      red-green-start @ green-delay @ + red-green-start !
+      begin
+	systick-counter red-green-start @ - green-delay @ < if
+	  50 current-action start-action-delay
+	  yield
+	  led-red-on
+	  2 current-action start-action-delay
+	  yield
+	  led-red-off
+	  false
+	else
+	  true
+	then
+      until
+      yield
+    again
+  ;
 
-\ Orange-blue action word
-: do-orange-blue ( -- )
-  systick-counter orange-blue-start !
-  begin
-    led-orange-on led-blue-off
-    orange-blue-start @ orange-delay @ + orange-blue-start !
+  \ Orange-blue action word
+  : do-orange-blue ( -- )
+    systick-counter orange-blue-start !
     begin
-      systick-counter orange-blue-start @ - orange-delay @ < if
-	50 current-action start-action-delay
-	yield
-	led-blue-on
-	2 current-action start-action-delay
-	yield
-	led-blue-off
-	false
-      else
-	true
-      then
-    until
-    yield
-    led-blue-on led-orange-off
-    orange-blue-start @ blue-delay @ + orange-blue-start !
-    begin
-      systick-counter orange-blue-start @ - blue-delay @ < if
-	50 current-action start-action-delay
-	yield
-	led-orange-on
-	2 current-action start-action-delay
-	yield
-	led-orange-off
-	false
-      else
-	true
-      then
-    until
-    yield
-  again
-;
+      led-orange-on led-blue-off
+      orange-blue-start @ orange-delay @ + orange-blue-start !
+      begin
+	systick-counter orange-blue-start @ - orange-delay @ < if
+	  50 current-action start-action-delay
+	  yield
+	  led-blue-on
+	  2 current-action start-action-delay
+	  yield
+	  led-blue-off
+	  false
+	else
+	  true
+	then
+      until
+      yield
+      led-blue-on led-orange-off
+      orange-blue-start @ blue-delay @ + orange-blue-start !
+      begin
+	systick-counter orange-blue-start @ - blue-delay @ < if
+	  50 current-action start-action-delay
+	  yield
+	  led-orange-on
+	  2 current-action start-action-delay
+	  yield
+	  led-orange-off
+	  false
+	else
+	  true
+	then
+      until
+      yield
+    again
+  ;
 
-\ Initialize the test
-: init-test ( -- )
-  3333 red-delay !
-  3333 blue-delay !
-  3333 green-delay !
-  3333 orange-delay !
-  my-schedule init-schedule
-  ['] do-red-green red-green-action my-schedule add-action
-  ['] do-orange-blue orange-blue-action my-schedule add-action
-  0 [: my-schedule run-schedule ;] 256 256 256 spawn schedule-task !
-  1666 orange-blue-action start-action-delay
-  red-green-action enable-action
-  orange-blue-action enable-action
-  schedule-task @ run
-  pause
-;
+  \ Initialize the test
+  : init-test ( -- )
+    3333 red-delay !
+    3333 blue-delay !
+    3333 green-delay !
+    3333 orange-delay !
+    my-schedule init-schedule
+    ['] do-red-green red-green-action my-schedule add-action
+    ['] do-orange-blue orange-blue-action my-schedule add-action
+    0 [: my-schedule run-schedule ;] 256 256 256 spawn schedule-task !
+    1666 orange-blue-action start-action-delay
+    red-green-action enable-action
+    orange-blue-action enable-action
+    schedule-task @ run
+    pause
+  ;
+
+end-module

@@ -18,32 +18,14 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Set up the wordlist
-forth-wordlist 1 set-order
-forth-wordlist set-current
+\ Compile this to flash
+compile-to-flash
 
-\ Make sure ansi-term-wordlist exists
-defined? ansi-term-wordlist not [if]
-  :noname space ." ansi-term is not installed" cr ; ?raise
-[then]
+begin-import-module-once edit-internal-wordlist
 
-\ Make sure block-wordlist exists
-defined? block-wordlist not [if]
-  :noname space ." block is not installed" cr ; ?raise
-[then]
-
-\ Test to make sure this has not already been compiled
-defined? edit-wordlist not [if]
-
-  \ Compile this to flash
-  compile-to-flash
-
-  \ Set up the actual wordlist
-  wordlist constant edit-wordlist
-  wordlist constant edit-internal-wordlist
-  forth-wordlist systick-wordlist block-wordlist ansi-term-wordlist
-  edit-internal-wordlist edit-wordlist 6 set-order
-  edit-internal-wordlist set-current
+  import systick-wordlist
+  import block-wordlist
+  import ansi-term-wordlist
 
   \ Edit buffer count (must be <= 32)
   9 constant buffer-count
@@ -708,9 +690,6 @@ defined? edit-wordlist not [if]
     endcase
   ;
   
-  \ Switch wordlists
-  forth-wordlist set-current
-
   \ Edit a block
   : edit ( id -- )
     dup $FFFFFFFF <> averts x-invalid-block-id
@@ -748,7 +727,12 @@ defined? edit-wordlist not [if]
     leave-edit
   ;
 
-[then]
+end-module
+
+\ Edit a block
+: edit ( id -- ) edit ;
+
+unimport edit-internal-wordlist
 
 \ Warm reboot
 warm

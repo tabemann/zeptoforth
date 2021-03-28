@@ -18,47 +18,50 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Set up the wordlist order
-forth-wordlist task-wordlist led-wordlist 3 set-order
-forth-wordlist set-current
+begin-module forth-wordlist
 
-\ The blinker delay time
-variable blinker-delay
+  import task-wordlist
+  import led-wordlist
 
-\ The blinker
-: blinker ( -- )
-  led-red-on
-  begin
-\    pause
-    blinker-delay @ ms
-    led-red-off
-    led-orange-on
-\    pause
-    blinker-delay @ ms
-    led-orange-off
-    led-green-on
-\    pause
-    blinker-delay @ ms
-    led-green-off
-    led-blue-on
-\    pause
-    blinker-delay @ ms
-    led-blue-off
+  \ The blinker delay time
+  variable blinker-delay
+
+  \ The blinker
+  : blinker ( -- )
     led-red-on
-  again
-;
+    begin
+      \    pause
+      blinker-delay @ ms
+      led-red-off
+      led-orange-on
+      \    pause
+      blinker-delay @ ms
+      led-orange-off
+      led-green-on
+      \    pause
+      blinker-delay @ ms
+      led-green-off
+      led-blue-on
+      \    pause
+      blinker-delay @ ms
+      led-blue-off
+      led-red-on
+    again
+  ;
 
 
-\ The blinker task
-variable blinker-task
+  \ The blinker task
+  variable blinker-task
 
-\ Init blinker
-: init-blinker ( -- )
-  led-red-off
-  led-orange-off
-  led-green-off
-  led-blue-off
-  500 blinker-delay !
-  0 ['] blinker 256 256 256 spawn blinker-task !
-  blinker-task @ run
-;
+  \ Init blinker
+  : init-blinker ( -- )
+    led-red-off
+    led-orange-off
+    led-green-off
+    led-blue-off
+    500 blinker-delay !
+    0 ['] blinker 256 256 256 spawn blinker-task !
+    blinker-task @ run
+  ;
+
+end-module

@@ -22,245 +22,250 @@
 \ Compile to flash
 compile-to-flash
 
-\ Set up the wordlist
-forth-wordlist 1 set-order
-forth-wordlist set-current
-wordlist constant int-io-wordlist
-wordlist constant int-io-internal-wordlist
-forth-wordlist internal-wordlist interrupt-wordlist int-io-wordlist
-int-io-internal-wordlist 5 set-order
-int-io-internal-wordlist set-current
+begin-import-module-once int-io-wordlist
 
-\ RAM variable for rx buffer read-index
-bvariable rx-read-index
+  import internal-wordlist
+  import interrupt-wordlist
 
-\ RAM variable for rx buffer write-index
-bvariable rx-write-index
+  begin-import-module int-io-internal-wordlist
+    
+    \ RAM variable for rx buffer read-index
+    bvariable rx-read-index
 
-\ Constant for number of bytes to buffer
-128 constant rx-buffer-size
+    \ RAM variable for rx buffer write-index
+    bvariable rx-write-index
 
-\ Rx buffer
-rx-buffer-size buffer: rx-buffer
+    \ Constant for number of bytes to buffer
+    128 constant rx-buffer-size
 
-\ RAM variable for tx buffer read-index
-bvariable tx-read-index
+    \ Rx buffer
+    rx-buffer-size buffer: rx-buffer
 
-\ RAM variable for tx buffer write-index
-bvariable tx-write-index
+    \ RAM variable for tx buffer read-index
+    bvariable tx-read-index
 
-\ Constant for number of bytes to buffer
-128 constant tx-buffer-size
+    \ RAM variable for tx buffer write-index
+    bvariable tx-write-index
 
-\ Tx buffer
-tx-buffer-size buffer: tx-buffer
+    \ Constant for number of bytes to buffer
+    128 constant tx-buffer-size
 
-\ USART1
-$40011000 constant USART1_Base
-USART1_Base $00 + constant USART1_CR1
-USART1_Base $1C + constant USART1_ISR
-USART1_Base $20 + constant USART1_ICR ( Interrupt flag clear register ) 
-USART1_Base $24 + constant USART1_RDR
-USART1_Base $28 + constant USART1_TDR
+    \ Tx buffer
+    tx-buffer-size buffer: tx-buffer
 
-$40023800 constant RCC_Base
-RCC_Base $64 + constant RCC_APB2LPENR ( RCC_APB2LPENR )
-: RCC_APB2LPENR_USART1LPEN   %1 4 lshift RCC_APB2LPENR bis! ;  \ RCC_APB2LPENR_USART1LPEN    USART1 clocks enable during Sleep modes
-: RCC_APB2LPENR_USART1LPEN_Clear   %1 4 lshift RCC_APB2LPENR bic! ;  \ RCC_APB2LPENR_USART1LPEN    USART1 clocks enable during Sleep modes
-: USART1_CR1_TXEIE   %1 7 lshift USART1_CR1 bis! ;  \ USART1_CR1_TXEIE    interrupt enable
-: USART1_CR1_RXNEIE   %1 5 lshift USART1_CR1 bis! ;  \ USART1_CR1_RXNEIE    RXNE interrupt enable
-: USART1_CR1_TXEIE_Clear   %1 7 lshift USART1_CR1 bic! ;  \ USART1_CR1_TXEIE    interrupt disable
-: USART1_CR1_RXNEIE_Clear   %1 5 lshift USART1_CR1 bic! ;  \ USART1_CR1_RXNEIE    RXNE interrupt enable
-: USART1_ICR_ORECF %1 3 lshift USART1_ICR bis! ; ( Overrun error clear flag )  
+    \ USART1
+    $40011000 constant USART1_Base
+    USART1_Base $00 + constant USART1_CR1
+    USART1_Base $1C + constant USART1_ISR
+    USART1_Base $20 + constant USART1_ICR ( Interrupt flag clear register ) 
+    USART1_Base $24 + constant USART1_RDR
+    USART1_Base $28 + constant USART1_TDR
 
-$20 constant RXNE
-$80 constant TXE
-$08 constant ORE
+    $40023800 constant RCC_Base
+    RCC_Base $64 + constant RCC_APB2LPENR ( RCC_APB2LPENR )
+    : RCC_APB2LPENR_USART1LPEN   %1 4 lshift RCC_APB2LPENR bis! ;  \ RCC_APB2LPENR_USART1LPEN    USART1 clocks enable during Sleep modes
+    : RCC_APB2LPENR_USART1LPEN_Clear   %1 4 lshift RCC_APB2LPENR bic! ;  \ RCC_APB2LPENR_USART1LPEN    USART1 clocks enable during Sleep modes
+    : USART1_CR1_TXEIE   %1 7 lshift USART1_CR1 bis! ;  \ USART1_CR1_TXEIE    interrupt enable
+    : USART1_CR1_RXNEIE   %1 5 lshift USART1_CR1 bis! ;  \ USART1_CR1_RXNEIE    RXNE interrupt enable
+    : USART1_CR1_TXEIE_Clear   %1 7 lshift USART1_CR1 bic! ;  \ USART1_CR1_TXEIE    interrupt disable
+    : USART1_CR1_RXNEIE_Clear   %1 5 lshift USART1_CR1 bic! ;  \ USART1_CR1_RXNEIE    RXNE interrupt enable
+    : USART1_ICR_ORECF %1 3 lshift USART1_ICR bis! ; ( Overrun error clear flag )  
 
-\ Get whether the rx buffer is full
-: rx-full? ( -- f )
-  rx-write-index b@ rx-read-index b@
-  rx-buffer-size 1- + rx-buffer-size umod =
-;
+    $20 constant RXNE
+    $80 constant TXE
+    $08 constant ORE
 
-\ Get whether the rx buffer is empty
-: rx-empty? ( -- f )
-  rx-read-index b@ rx-write-index b@ =
-;
+    \ Get whether the rx buffer is full
+    : rx-full? ( -- f )
+      rx-write-index b@ rx-read-index b@
+      rx-buffer-size 1- + rx-buffer-size umod =
+    ;
 
-\ Write a byte to the rx buffer
-: write-rx ( c -- )
-  rx-full? not if
-    rx-write-index b@ rx-buffer + b!
-    rx-write-index b@ 1+ rx-buffer-size mod rx-write-index b!
-  else
-    drop
-  then
-;
+    \ Get whether the rx buffer is empty
+    : rx-empty? ( -- f )
+      rx-read-index b@ rx-write-index b@ =
+    ;
 
-\ Read a byte from the rx buffer
-: read-rx ( -- c )
-  rx-empty? not if
-    rx-read-index b@ rx-buffer + b@
-    rx-read-index b@ 1+ rx-buffer-size mod rx-read-index b!
-  else
-    0
-  then
-;
-
-\ Get whether the tx buffer is full
-: tx-full? ( -- f )
-  tx-write-index b@ tx-read-index b@
-  tx-buffer-size 1- + tx-buffer-size umod =
-;
-
-\ Get whether the tx buffer is empty
-: tx-empty? ( -- f )
-   tx-read-index b@ tx-write-index b@ =
-;
-
-\ Write a byte to the tx buffer
-: write-tx ( c -- )
-  tx-full? not if
-    tx-write-index b@ tx-buffer + b!
-    tx-write-index b@ 1+ tx-buffer-size mod tx-write-index b!
-  else
-    drop
-  then
-;
-
-\ Read a byte from the tx buffer
-: read-tx ( -- c )
-  tx-empty? not if
-    tx-read-index b@ tx-buffer + b@
-    tx-read-index b@ 1+ tx-buffer-size mod tx-read-index b!
-  else
-    0
-  then
-;
-
-\ Handle IO
-: handle-io ( -- )
-  disable-int
-  begin
-    rx-full? not if
-      USART1_ISR @ RXNE and if
-	USART1_RDR b@ write-rx false
+    \ Write a byte to the rx buffer
+    : write-rx ( c -- )
+      rx-full? not if
+	rx-write-index b@ rx-buffer + b!
+	rx-write-index b@ 1+ rx-buffer-size mod rx-write-index b!
       else
-	true
+	drop
       then
-    else
-      true
-    then
-  until
-  rx-full? if
-    USART1_CR1_RXNEIE_Clear
-  then
-  begin
-    tx-empty? not if
-      USART1_ISR @ TXE and if
-  	read-tx USART1_TDR b! false
+    ;
+
+    \ Read a byte from the rx buffer
+    : read-rx ( -- c )
+      rx-empty? not if
+	rx-read-index b@ rx-buffer + b@
+	rx-read-index b@ 1+ rx-buffer-size mod rx-read-index b!
       else
-  	true
-       then
-    else
-      true
-    then
-  until
-  tx-empty? if
+	0
+      then
+    ;
+
+    \ Get whether the tx buffer is full
+    : tx-full? ( -- f )
+      tx-write-index b@ tx-read-index b@
+      tx-buffer-size 1- + tx-buffer-size umod =
+    ;
+
+    \ Get whether the tx buffer is empty
+    : tx-empty? ( -- f )
+      tx-read-index b@ tx-write-index b@ =
+    ;
+
+    \ Write a byte to the tx buffer
+    : write-tx ( c -- )
+      tx-full? not if
+	tx-write-index b@ tx-buffer + b!
+	tx-write-index b@ 1+ tx-buffer-size mod tx-write-index b!
+      else
+	drop
+      then
+    ;
+
+    \ Read a byte from the tx buffer
+    : read-tx ( -- c )
+      tx-empty? not if
+	tx-read-index b@ tx-buffer + b@
+	tx-read-index b@ 1+ tx-buffer-size mod tx-read-index b!
+      else
+	0
+      then
+    ;
+
+    \ Handle IO
+    : handle-io ( -- )
+      disable-int
+      begin
+	rx-full? not if
+	  USART1_ISR @ RXNE and if
+	    USART1_RDR b@ write-rx false
+	  else
+	    true
+	  then
+	else
+	  true
+	then
+      until
+      rx-full? if
+	USART1_CR1_RXNEIE_Clear
+      then
+      begin
+	tx-empty? not if
+	  USART1_ISR @ TXE and if
+	    read-tx USART1_TDR b! false
+	  else
+	    true
+	  then
+	else
+	  true
+	then
+      until
+      tx-empty? if
+	USART1_CR1_TXEIE_Clear
+      then
+      USART1_ISR @ ORE and if
+	USART1_ICR_ORECF
+      then
+      37 NVIC_ICPR_CLRPEND!
+      enable-int
+      wake
+    ;
+
+    \ Null interrupt handler
+    : null-handler ( -- )
+      handle-io
+    ;
+
+    \ Interrupt-driven IO hooks
+
+    : do-emit ( c -- )
+      [: tx-full? not ;] wait
+      write-tx
+      USART1_CR1_TXEIE
+    ; 
+
+    : do-key ( -- c )
+      USART1_CR1_RXNEIE
+      [: rx-empty? not ;] wait
+      read-rx
+    ;
+
+    : do-emit? ( -- flag )
+      tx-full? not
+    ;
+
+    : do-key? ( -- flag )
+      rx-empty? not
+    ;
+
+    : do-flush-console ( -- )
+      [: tx-empty? not ;] wait
+    ;
+
+  end-module
+
+  \ Handle IO for multitasking
+  : task-io ( -- )
+  ;
+
+  \ Enable interrupt-driven IO
+  : enable-int-io ( -- )
+    0 37 NVIC_IPR_IP!
+    ['] null-handler null-handler-hook !
+    ['] do-key key-hook !
+    ['] do-emit emit-hook !
+    ['] do-key? key?-hook !
+    ['] do-emit? emit?-hook !
+    ['] do-flush-console flush-console-hook !
+    RCC_APB2LPENR_USART1LPEN
+    37 NVIC_ISER_SETENA!
+    USART1_CR1_RXNEIE
+  ;
+
+  \ Disable interrupt-driven IO
+  : disable-int-io ( -- )
+    begin-critical
+    disable-int
+    ['] serial-key key-hook !
+    ['] serial-emit emit-hook !
+    ['] serial-key? key?-hook !
+    ['] serial-emit? emit?-hook !
+    0 flush-console-hook !
+    0 null-handler-hook !
+    USART1_CR1_RXNEIE_Clear
     USART1_CR1_TXEIE_Clear
-  then
-  USART1_ISR @ ORE and if
-    USART1_ICR_ORECF
-  then
-  37 NVIC_ICPR_CLRPEND!
-  enable-int
-  wake
-;
+    37 NVIC_ICER_CLRENA!
+    RCC_APB2LPENR_USART1LPEN_Clear
+    enable-int
+    end-critical
+  ;
 
-\ Null interrupt handler
-: null-handler ( -- )
-  handle-io
-;
 
-\ Interrupt-driven IO hooks
-
-: do-emit ( c -- )
-  [: tx-full? not ;] wait
-  write-tx
-  USART1_CR1_TXEIE
-; 
-
-: do-key ( -- c )
-  USART1_CR1_RXNEIE
-  [: rx-empty? not ;] wait
-  read-rx
-;
-
-: do-emit? ( -- flag )
-  tx-full? not
-;
-
-: do-key? ( -- flag )
-  rx-empty? not
-;
-
-: do-flush-console ( -- )
-  [: tx-empty? not ;] wait
-;
-
-\ Set non-internal
-int-io-wordlist set-current
-
-\ Handle IO for multitasking
-: task-io ( -- )
-;
-
-\ Enable interrupt-driven IO
-: enable-int-io ( -- )
-  0 37 NVIC_IPR_IP!
-  ['] null-handler null-handler-hook !
-  ['] do-key key-hook !
-  ['] do-emit emit-hook !
-  ['] do-key? key?-hook !
-  ['] do-emit? emit?-hook !
-  ['] do-flush-console flush-console-hook !
-  RCC_APB2LPENR_USART1LPEN
-  37 NVIC_ISER_SETENA!
-  USART1_CR1_RXNEIE
-;
-
-\ Disable interrupt-driven IO
-: disable-int-io ( -- )
-  begin-critical
-  disable-int
-  ['] serial-key key-hook !
-  ['] serial-emit emit-hook !
-  ['] serial-key? key?-hook !
-  ['] serial-emit? emit?-hook !
-  0 flush-console-hook !
-  0 null-handler-hook !
-  USART1_CR1_RXNEIE_Clear
-  USART1_CR1_TXEIE_Clear
-  37 NVIC_ICER_CLRENA!
-  RCC_APB2LPENR_USART1LPEN_Clear
-  enable-int
-  end-critical
-;
-
-\ Reset current wordlist
-forth-wordlist set-current
+  \ Initialize interrupt-driven IO
+  : init-int-io ( -- )
+    0 rx-read-index b!
+    0 rx-write-index b!
+    0 tx-read-index b!
+    0 tx-write-index b!
+    enable-int-io
+  ;
+  
+end-module
 
 \ Init
 : init ( -- )
   init
-  0 rx-read-index b!
-  0 rx-write-index b!
-  0 tx-read-index b!
-  0 tx-write-index b!
-  enable-int-io
+  init-int-io
 ;
 
-\ Reboot
-reboot
+unimport int-io-wordlist
+
+\ Warm reboot
+warm
+
 

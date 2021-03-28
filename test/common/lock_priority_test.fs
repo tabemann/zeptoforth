@@ -18,46 +18,49 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Set up the wordlist order
-forth-wordlist task-wordlist lock-wordlist 3 set-order
-forth-wordlist set-current
+begin-module forth-wordlist
 
-\ Our lock
-lock-size buffer: my-lock
+  import task-wordlist
+  import lock-wordlist
 
-\ Our tasks
-variable low-task
-variable high-task
+  \ Our lock
+  lock-size buffer: my-lock
 
-\ Our higher-priority task loop
-: high ( -- )
-  begin
+  \ Our tasks
+  variable low-task
+  variable high-task
+
+  \ Our higher-priority task loop
+  : high ( -- )
+    begin
+      500000 0 ?do loop
+      my-lock lock
+      500000 0 ?do loop
+      [: my-lock unlock ;] try if space ." A " then
+    again
+  ;
+
+  \ Our lower-priority task loop
+  : low ( -- )
+    begin
+      my-lock lock
+      10 0 ?do
+	50000 0 ?do loop
+	current-task get-task-priority . space
+      loop
+      [: my-lock unlock ;] try if space ." B " then
+    again
+  ;
+
+  \ Initialize the test
+  : init-test ( -- )
+    my-lock init-lock
+    0 ['] low 256 256 256 spawn low-task !
+    0 ['] high 256 256 256 spawn high-task !
+    1 high-task @ set-task-priority
+    low-task @ run
     500000 0 ?do loop
-    my-lock lock
-    500000 0 ?do loop
-    [: my-lock unlock ;] try if space ." A " then
-  again
-;
+    high-task @ run
+  ;
 
-\ Our lower-priority task loop
-: low ( -- )
-  begin
-    my-lock lock
-    10 0 ?do
-      50000 0 ?do loop
-      current-task get-task-priority . space
-    loop
-    [: my-lock unlock ;] try if space ." B " then
-  again
-;
-
-\ Initialize the test
-: init-test ( -- )
-  my-lock init-lock
-  0 ['] low 256 256 256 spawn low-task !
-  0 ['] high 256 256 256 spawn high-task !
-  1 high-task @ set-task-priority
-  low-task @ run
-  500000 0 ?do loop
-  high-task @ run
-;
+end-module

@@ -21,61 +21,58 @@
 \ Compile this to flash
 compile-to-flash
 
-\ Set up the wordlist order
-forth-wordlist internal-wordlist 2 set-order
-internal-wordlist set-current
+begin-import-module internal-wordlist
 
-\ Begin compressing compiled code in flash
-compress-flash
+  \ Begin compressing compiled code in flash
+  compress-flash
 
-\ Test for next flash sector
-: check-flash-sector ( addr start end -- addr )
-  dup >r flash-here >= swap flash-here <= and if drop r> 1+ else rdrop then
-;
+  \ Test for next flash sector
+  : check-flash-sector ( addr start end -- addr )
+    dup >r flash-here >= swap flash-here <= and if drop r> 1+ else rdrop then
+  ;
 
-\ Get the start of the next flash sector
-: next-flash-sector ( -- addr )
-  $300000
-  $208000 $20FFFF check-flash-sector
-  $210000 $21FFFF check-flash-sector
-  $228000 $23FFFF check-flash-sector
-  $24C000 $27FFFF check-flash-sector
-  $280000 $2BFFFF check-flash-sector
-  $2C0000 $2FFFFF check-flash-sector
-;
+  \ Get the start of the next flash sector
+  : next-flash-sector ( -- addr )
+    $300000
+    $208000 $20FFFF check-flash-sector
+    $210000 $21FFFF check-flash-sector
+    $228000 $23FFFF check-flash-sector
+    $24C000 $27FFFF check-flash-sector
+    $280000 $2BFFFF check-flash-sector
+    $2C0000 $2FFFFF check-flash-sector
+  ;
 
-\ Test for next flash sector
-: check-flash-sector-for-addr ( flash-addr addr start end -- addr )
-  dup >r 3 pick >= swap 3 roll <= and if drop r> 1+ else rdrop then
-;
+  \ Test for next flash sector
+  : check-flash-sector-for-addr ( flash-addr addr start end -- addr )
+    dup >r 3 pick >= swap 3 roll <= and if drop r> 1+ else rdrop then
+  ;
 
-\ Align an address for a following flash sector
-: erase-align ( addr -- addr )
-  >r $300000
-  r@ swap $208000 $20FFFF check-flash-sector-for-addr
-  r@ swap $210000 $21FFFF check-flash-sector-for-addr
-  r@ swap $228000 $23FFFF check-flash-sector-for-addr
-  r@ swap $24C000 $27FFFF check-flash-sector-for-addr
-  r@ swap $280000 $2BFFFF check-flash-sector-for-addr
-  r> swap $2C0000 $2FFFFF check-flash-sector-for-addr
-;
+  \ Align an address for a following flash sector
+  : erase-align ( addr -- addr )
+    >r $300000
+    r@ swap $208000 $20FFFF check-flash-sector-for-addr
+    r@ swap $210000 $21FFFF check-flash-sector-for-addr
+    r@ swap $228000 $23FFFF check-flash-sector-for-addr
+    r@ swap $24C000 $27FFFF check-flash-sector-for-addr
+    r@ swap $280000 $2BFFFF check-flash-sector-for-addr
+    r> swap $2C0000 $2FFFFF check-flash-sector-for-addr
+  ;
 
-\ Pad flash to a sector boundary
-: pad-flash-erase-block ( -- )
-  next-flash-sector
-  begin flash-here over < while
-    0 bflash,
-  repeat
-  drop
-;
+  \ Pad flash to a sector boundary
+  : pad-flash-erase-block ( -- )
+    next-flash-sector
+    begin flash-here over < while
+      0 bflash,
+    repeat
+    drop
+  ;
 
-\ Restore flash to a preexisting state
-: restore-flash ( flash-here -- )
-  erase-after rdrop
-;
+  \ Restore flash to a preexisting state
+  : restore-flash ( flash-here -- )
+    erase-after rdrop
+  ;
 
-\ Set forth
-forth-wordlist set-current
+end-module
 
 \ Commit flash
 commit-flash
@@ -99,18 +96,16 @@ commit-flash
   then
 ;
 
-\ Set internal
-internal-wordlist set-current
-
-\ Core of CORNERSTONE's DOES>
-: cornerstone-does> ( -- )
-  does>
-  erase-align
-  erase-after
-;
-
-\ Set forth
-forth-wordlist set-current
+begin-module internal-wordlist
+  
+  \ Core of CORNERSTONE's DOES>
+  : cornerstone-does> ( -- )
+    does>
+    erase-align
+    erase-after
+  ;
+  
+end-module
 
 \ Committing code in flash
 commit-flash
@@ -129,6 +124,8 @@ commit-flash
 
 \ Ending compiling code in flash
 end-compress-flash
+
+unimport internal-wordlist
 
 \ Warm reboot
 warm

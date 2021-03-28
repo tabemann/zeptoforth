@@ -18,51 +18,37 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Set up the wordlist
-forth-wordlist 1 set-order
-forth-wordlist set-current
+\ Compile this to flash
+compile-to-flash
 
-\ Make sure task-wordlist exists
-defined? task-wordlist not [if]
-  :noname space ." task is not installed" cr ; ?raise
-[then]
+begin-module task-pool-wordlist
 
-\ Test to make sure this has not already been compiled
-defined? task-pool-wordlist not [if]
+  import task-wordlist
 
-  \ Compile this to flash
-  compile-to-flash
+  begin-import-module task-pool-internal-wordlist
 
-  \ Set up the actual wordlist
-  wordlist constant task-pool-wordlist
-  wordlist constant task-pool-internal-wordlist
-  forth-wordlist task-wordlist task-pool-internal-wordlist task-pool-wordlist
-  4 set-order
-  task-pool-internal-wordlist set-current
+    \ Task pool structure
+    begin-structure task-pool-size
+      \ Task pool count
+      field: task-pool-count
 
-  \ Task pool structure
-  begin-structure task-pool-size
-    \ Task pool count
-    field: task-pool-count
+      \ Task stack size
+      hfield: task-pool-stack-size
 
-    \ Task stack size
-    hfield: task-pool-stack-size
+      \ Task rstack size
+      hfield: task-pool-rstack-size
 
-    \ Task rstack size
-    hfield: task-pool-rstack-size
+      \ Task dictionary size
+      field: task-pool-dict-size
+    end-structure
 
-    \ Task dictionary size
-    field: task-pool-dict-size
-  end-structure
+    \ Get a task in a task pool
+    : task@ ( index task-pool -- task )
+      task-pool-size + swap cells + @
+    ;
 
-  \ Get a task in a task pool
-  : task@ ( index task-pool -- task )
-    task-pool-size + swap cells + @
-  ;
-
-  \ Switch wordlists
-  task-pool-wordlist set-current
-
+  end-module
+  
   \ No tasks are available
   : x-no-task-available ( -- ) spawn ." no task is available" cr ;
   
@@ -106,11 +92,5 @@ defined? task-pool-wordlist not [if]
   \ Get the size of a task pool of a given size
   : task-pool-size ( count -- bytes ) cells task-pool-size + ;
 
-[then]
+end-module
 
-\ Set up the wordlist
-forth-wordlist 1 set-order
-forth-wordlist set-current
-
-\ Set compile to RAM
-compile-to-ram

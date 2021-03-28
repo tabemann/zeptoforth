@@ -18,66 +18,46 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Set up the wordlist
-forth-wordlist 1 set-order
-forth-wordlist set-current
+\ Compile to flash
+compile-to-flash
 
-\ Make sure task-wordlist exists
-defined? task-wordlist not [if]
-  :noname space ." task is not installed" cr ; ?raise
-[then]
+begin-module-once fchan-wordlist
 
-\ Make sure tqueue-wordlist exists
-defined? tqueue-wordlist not [if]
-  :noname space ." tqueue is not installed" cr ; ?raise
-[then]
+  import task-wordlist
+  import task-internal-wordlist
+  import tqueue-wordlist
 
-\ Check whether this is already defined
-defined? fchan-wordlist not [if]
+  begin-import-module fchan-internal-wordlist
+
+    \ Fast channel header structure
+    begin-structure fchan-size
+      \ Fast channel receive ready
+      field: fchan-recv-ready
+
+      \ Fast channel send ready
+      field: fchan-send-ready
+
+      \ Fast channel sent data address
+      field: fchan-send-addr
+
+      \ Fast channel sent data count
+      field: fchan-send-count
+
+      \ Fast channel send task queue
+      tqueue-size +field fchan-send-tqueue
+
+      \ Fast channel receive task queue
+      tqueue-size +field fchan-recv-tqueue
+
+      \ Fast channel response task queue
+      tqueue-size +field fchan-resp-tqueue
+    end-structure
+
+  end-module
+
+  \ Export fchan-size
+  fchan-size constant fchan-size
   
-  \ Compile to flash
-  compile-to-flash
-  
-  \ Setup the wordlist
-  wordlist constant fchan-wordlist
-  wordlist constant fchan-internal-wordlist
-  forth-wordlist task-internal-wordlist task-wordlist tqueue-wordlist
-  fchan-internal-wordlist fchan-wordlist
-  6 set-order
-  fchan-wordlist set-current
-
-  \ Fast channel header structure
-  begin-structure fchan-size
-
-    \ Switch the current wordlist
-    fchan-internal-wordlist set-current
-
-    \ Fast channel receive ready
-    field: fchan-recv-ready
-
-    \ Fast channel send ready
-    field: fchan-send-ready
-
-    \ Fast channel sent data address
-    field: fchan-send-addr
-
-    \ Fast channel sent data count
-    field: fchan-send-count
-
-    \ Fast channel send task queue
-    tqueue-size +field fchan-send-tqueue
-
-    \ Fast channel receive task queue
-    tqueue-size +field fchan-recv-tqueue
-
-    \ Fast channel response task queue
-    tqueue-size +field fchan-resp-tqueue
-
-  end-structure
-  
-  \ Switch the current wordlist
-  fchan-wordlist set-current
-
   \ Initialize an fast channel
   : init-fchan ( addr -- )
     0 over fchan-recv-ready !
@@ -122,7 +102,7 @@ defined? fchan-wordlist not [if]
   \ Receive a cell from an fast channel
   : recv-fchan-cell ( fchan -- x ) recv-fchan drop ;
 
-[then]
+end-module
     
 \ Warm reboot
 warm

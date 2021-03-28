@@ -18,33 +18,23 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Set up the wordlist
-forth-wordlist 1 set-order
-forth-wordlist set-current
+\ Compile this to flash
+compile-to-flash
 
-\ Test to make sure this has not already been compiled
-defined? ansi-term-wordlist not [if]
+begin-module-once ansi-term-wordlist
 
-  \ Compile this to flash
-  compile-to-flash
+  begin-import-module ansi-term-internal-wordlist
 
-  \ Set up the actual wordlist
-  wordlist constant ansi-term-wordlist
-  wordlist constant ansi-term-internal-wordlist
-  forth-wordlist ansi-term-internal-wordlist ansi-term-wordlist 3 set-order
-  ansi-term-internal-wordlist set-current
+    \ Saved entered byte
+    user saved-key
 
-  \ Saved entered byte
-  user saved-key
+    \ Show cursor count
+    user show-cursor-count
 
-  \ Show cursor count
-  user show-cursor-count
-
-  \ Preserve cursor count
-  user preserve-cursor-count
-
-  \ Switch wordlists
-  ansi-term-wordlist set-current
+    \ Preserve cursor count
+    user preserve-cursor-count
+    
+  end-module
   
   \ Character constants
   $1B constant escape
@@ -204,7 +194,7 @@ defined? ansi-term-wordlist not [if]
   \ Reset terminal state
   : reset-ansi-term ( -- ) 0 show-cursor-count ! 0 saved-key ! ;
 
-[then]
+end-module
 
 \ Warm reboot
 warm

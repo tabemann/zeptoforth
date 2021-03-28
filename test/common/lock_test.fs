@@ -18,47 +18,50 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Set up the wordlist
-forth-wordlist task-wordlist lock-wordlist 3 set-order
-forth-wordlist set-current
+begin-module forth-wordlist
 
-\ Our lock
-lock-size buffer: my-lock
+  import task-wordlist
+  import lock-wordlist
 
-\ Our tasks
-variable my-task-0
-variable my-task-1
-variable my-task-2
+  \ Our lock
+  lock-size buffer: my-lock
 
-\ Create my loop
-: make-loop ( u "name" -- )
-  <builds , does>
-  @ begin
-    50000 0 ?do loop
-    my-lock lock
-    ." ["
-    25000 0 ?do loop
-    dup . space
-    25000 0 ?do loop
-    ." ] "
-    my-lock unlock
-  again
-;
+  \ Our tasks
+  variable my-task-0
+  variable my-task-1
+  variable my-task-2
 
-\ My loops
-0 make-loop loop-0
-1 make-loop loop-1
-2 make-loop loop-2
+  \ Create my loop
+  : make-loop ( u "name" -- )
+    <builds , does>
+    @ begin
+      50000 0 ?do loop
+      my-lock lock
+      ." ["
+      25000 0 ?do loop
+      dup . space
+      25000 0 ?do loop
+      ." ] "
+      my-lock unlock
+    again
+  ;
 
-\ Initialize the test
-: init-test ( -- )
-  my-lock init-lock
-  0 ['] loop-0 256 256 256 spawn my-task-0 !
-  0 ['] loop-1 256 256 256 spawn my-task-1 !
-  0 ['] loop-2 256 256 256 spawn my-task-2 !
-  begin-critical
-  my-task-0 @ run
-  my-task-1 @ run
-  my-task-2 @ run
-  end-critical
-;
+  \ My loops
+  0 make-loop loop-0
+  1 make-loop loop-1
+  2 make-loop loop-2
+
+  \ Initialize the test
+  : init-test ( -- )
+    my-lock init-lock
+    0 ['] loop-0 256 256 256 spawn my-task-0 !
+    0 ['] loop-1 256 256 256 spawn my-task-1 !
+    0 ['] loop-2 256 256 256 spawn my-task-2 !
+    begin-critical
+    my-task-0 @ run
+    my-task-1 @ run
+    my-task-2 @ run
+    end-critical
+  ;
+
+end-module
