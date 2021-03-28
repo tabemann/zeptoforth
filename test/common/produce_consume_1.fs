@@ -18,50 +18,53 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Set up the wordlist order
-forth-wordlist task-wordlist chan-wordlist 3 set-order
-forth-wordlist set-current
+begin-module forth-wordlist
 
-\ My channel size
-16 cells 1+ constant my-chan-size
+  import task-wordlist
+  import chan-wordlist
 
-\ My channel
-my-chan-size chan-size buffer: my-chan
+  \ My channel size
+  16 cells 1+ constant my-chan-size
 
-\ Initialize my channel
-my-chan my-chan-size init-chan
+  \ My channel
+  my-chan-size chan-size buffer: my-chan
 
-\ My producer
-: producer ( -- )
-  0 begin
-    dup my-chan send-chan-cell 1+
-  again
-;
+  \ Initialize my channel
+  my-chan my-chan-size init-chan
 
-\ My consumer
-: consumer ( -- )
-  begin
-    my-chan recv-chan-cell h.8 space
-  again
-;
+  \ My producer
+  : producer ( -- )
+    0 begin
+      dup my-chan send-chan-cell 1+
+    again
+  ;
 
-\ My producer task
-variable producer-task
+  \ My consumer
+  : consumer ( -- )
+    begin
+      my-chan recv-chan-cell h.8 space
+    again
+  ;
 
-\ My consumer task
-variable consumer-task
+  \ My producer task
+  variable producer-task
 
-\ Spawn my producer task
-0 ' producer 256 256 256 spawn producer-task !
+  \ My consumer task
+  variable consumer-task
 
-\ Spawn my consumer task
-0 ' consumer 256 256 256 spawn consumer-task !
+  \ Spawn my producer task
+  0 ' producer 256 256 256 spawn producer-task !
 
-\ Enable my producer task
-producer-task @ run
+  \ Spawn my consumer task
+  0 ' consumer 256 256 256 spawn consumer-task !
 
-\ Enable my consumer task
-consumer-task @ run
+  \ Enable my producer task
+  producer-task @ run
 
-\ Initiate execution
-pause
+  \ Enable my consumer task
+  consumer-task @ run
+
+  \ Initiate execution
+  pause
+
+end-module

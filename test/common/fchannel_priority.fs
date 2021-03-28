@@ -18,51 +18,54 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Set up the wordlist order
-forth-wordlist task-wordlist fchan-wordlist 3 set-order
-forth-wordlist set-current
+begin-module forth-wordlist
 
-\ Allot the outgoing channel
-fchan-size buffer: my-out-fchan
+  import task-wordlist
+  import fchan-wordlist
 
-\ Allot the incoming channel
-fchan-size buffer: my-in-fchan
+  \ Allot the outgoing channel
+  fchan-size buffer: my-out-fchan
 
-\ The higher-priority task
-variable high-task
+  \ Allot the incoming channel
+  fchan-size buffer: my-in-fchan
 
-\ The lower-priority task
-variable low-task
+  \ The higher-priority task
+  variable high-task
 
-\ The loop of the higher-priority task
-: high ( -- )
-  begin
-    ." < " 100000 0 ?do loop
-    0 0 my-out-fchan send-fchan
-    my-in-fchan recv-fchan 2drop
-    ." > "
-  again
-;
+  \ The lower-priority task
+  variable low-task
 
-\ The loop of the lower-priority task
-: low ( -- )
-  begin
-    my-out-fchan recv-fchan 2drop
-    ." [ " 10000 0 ?do loop ." ] "
-    0 0 my-in-fchan send-fchan
-  again
-;
+  \ The loop of the higher-priority task
+  : high ( -- )
+    begin
+      ." < " 100000 0 ?do loop
+      0 0 my-out-fchan send-fchan
+      my-in-fchan recv-fchan 2drop
+      ." > "
+    again
+  ;
 
-\ Initialize the test
-: init-test ( -- )
-  my-out-fchan init-fchan
-  my-in-fchan init-fchan
-  0 ['] high 256 256 256 spawn high-task !
-  0 ['] low 256 256 256 spawn low-task !
-  1 high-task @ set-task-priority
-  0 low-task @ set-task-priority
-  begin-critical
-  high-task @ run
-  low-task @ run
-  end-critical
-;
+  \ The loop of the lower-priority task
+  : low ( -- )
+    begin
+      my-out-fchan recv-fchan 2drop
+      ." [ " 10000 0 ?do loop ." ] "
+      0 0 my-in-fchan send-fchan
+    again
+  ;
+
+  \ Initialize the test
+  : init-test ( -- )
+    my-out-fchan init-fchan
+    my-in-fchan init-fchan
+    0 ['] high 256 256 256 spawn high-task !
+    0 ['] low 256 256 256 spawn low-task !
+    1 high-task @ set-task-priority
+    0 low-task @ set-task-priority
+    begin-critical
+    high-task @ run
+    low-task @ run
+    end-critical
+  ;
+
+end-module

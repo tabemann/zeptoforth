@@ -22,262 +22,251 @@
 forth-wordlist 1 set-order
 forth-wordlist set-current
 
-\ Make sure systick-wordlist exists
-defined? systick-wordlist not [if]
-  :noname space ." systick is not installed" cr ; ?raise
-[then]
+\ Compile this to flash
+compile-to-flash
 
-\ Test to make sure this has not already been compiled
-defined? task-wordlist not [if]
+begin-import-module-once task-wordlist
 
-  \ Compile this to flash
-  compile-to-flash
+  import internal-wordlist
+  import interrupt-wordlist
+  import systick-wordlist
+  import int-io-wordlist
 
-  \ Set up the actual wordlist
-  wordlist constant task-wordlist
-  wordlist constant task-internal-wordlist
-  forth-wordlist internal-wordlist systick-wordlist int-io-wordlist
-  interrupt-wordlist task-internal-wordlist task-wordlist 7 set-order
-  task-internal-wordlist set-current
+  begin-import-module task-internal-wordlist
+  
+    \ Main task
+    variable main-task
+    
+    \ Current task
+    variable current-task
+    
+    \ Has current task changed
+    variable current-task-changed?
+    
+    \ Last task
+    variable last-task
 
-  \ Main task
-  variable main-task
+    \ Declare a RAM variable for the end of free RAM memory
+    variable free-end
 
-  \ Current task
-  variable current-task
+    \ Pause count
+    variable pause-count
 
-  \ Has current task changed
-  variable current-task-changed?
+    \ The original SysTIck handler
+    variable orig-systick-handler
 
-  \ Last task
-  variable last-task
+    \ The multitasker SysTick counter
+    variable task-systick-counter
 
-  \ Declare a RAM variable for the end of free RAM memory
-  variable free-end
+    \ The default context switch delay
+    10 constant default-context-switch-delay
 
-  \ Pause count
-  variable pause-count
+    \ The context switch delay
+    variable context-switch-delay
 
-  \ The original SysTIck handler
-  variable orig-systick-handler
+    \ Sleep is enabled
+    variable sleep-enabled?
 
-  \ The multitasker SysTick counter
-  variable task-systick-counter
+    \ The current task handler
+    user task-handler
 
-  \ The default context switch delay
-  10 constant default-context-switch-delay
+    \ Whether a task is waiting
+    user task-wait
 
-  \ The context switch delay
-  variable context-switch-delay
+    \ Task systick start time
+    user task-systick-start
 
-  \ Sleep is enabled
-  variable sleep-enabled?
+    \ Task systick delay
+    user task-systick-delay
 
-  \ The current task handler
-  user task-handler
+    \ The current base for a task
+    user task-base
 
-  \ Whether a task is waiting
-  user task-wait
-
-  \ Task systick start time
-  user task-systick-start
-
-  \ Task systick delay
-  user task-systick-delay
-
-  \ The current base for a task
-  user task-base
-
-  \ Set the public task wordlist
-  task-wordlist set-current
+  end-module
 
   \ The currently waited-for lock
   user current-lock
-
+  
   \ The latest lock currently held by a tack
   user current-lock-held
 
   \ Sleep
   : sleep ( -- ) sleep-enabled? @ if sleep then ;
 
-  \ Set the internal task wordlist
-  task-internal-wordlist set-current
+  begin-module task-internal-wordlist
 
-  \ Terminated task
-  $8000 constant terminated
-
-  \ The task structure
-  begin-structure task
-    \ Return stack size
-    hfield: task-rstack-size
-
-    \ Data stack size
-    hfield: task-stack-size
-
-    \ Dictionary size
-    field: task-dict-size
-
-    \ Current return stack adress
-    field: task-rstack-current
-
-    \ Current dictionary offset
-    field: task-dict-offset
-
-    \ Task priority
-    hfield: task-priority
+    \ Terminated task
+    $8000 constant terminated
     
-    \ Task active state ( > 0 active, <= 0 inactive, $8000 terminated )
-    hfield: task-active
+    \ The task structure
+    begin-structure task
+      \ Return stack size
+      hfield: task-rstack-size
+      
+      \ Data stack size
+      hfield: task-stack-size
 
-    \ Task saved priority
-    field: task-saved-priority
+      \ Dictionary size
+      field: task-dict-size
 
-    \ Next task
-    field: task-next
-  end-structure
+      \ Current return stack adress
+      field: task-rstack-current
 
-  \ Get task stack base
-  : task-stack-base ( task -- addr )
-    dup task + swap task-stack-size h@ +
-  ;
+      \ Current dictionary offset
+      field: task-dict-offset
 
-  \ Get task stack end
-  : task-stack-end ( task -- addr )
-    task +
-  ;
+      \ Task priority
+      hfield: task-priority
+      
+      \ Task active state ( > 0 active, <= 0 inactive, $8000 terminated )
+      hfield: task-active
 
-  \ Get task return stack base
-  : task-rstack-base ( task -- addr )
-    dup task + over task-stack-size h@ + swap task-rstack-size h@ +
-  ;
+      \ Task saved priority
+      field: task-saved-priority
 
-  \ Get task return stack end
-  : task-rstack-end ( task -- addr ) task-stack-base ;
+      \ Next task
+      field: task-next
+    end-structure
 
-  \ Get task dictionary base
-  : task-dict-base ( task -- addr ) dup task-dict-size @ - ;
+    \ Get task stack base
+    : task-stack-base ( task -- addr )
+      dup task + swap task-stack-size h@ +
+    ;
 
-  \ Get task dictionary end
-  : task-dict-end ( task -- addr ) ;
+    \ Get task stack end
+    : task-stack-end ( task -- addr )
+      task +
+    ;
 
-  \ Get task current stack address
-  : task-stack-current ( task -- addr )
-    dup last-task @ = if drop sp@ else task-rstack-current @ 12 + @ then
-  ;
+    \ Get task return stack base
+    : task-rstack-base ( task -- addr )
+      dup task + over task-stack-size h@ + swap task-rstack-size h@ +
+    ;
 
-  \ Get task current dictionary address
-  : task-dict-current ( task -- addr )
-    dup task-dict-base swap task-dict-offset @ +
-  ;
+    \ Get task return stack end
+    : task-rstack-end ( task -- addr ) task-stack-base ;
 
-  \ Set task current stack address
-  : task-stack-current! ( addr task -- )
-    dup last-task @ = if drop sp! else task-rstack-current @ 12 + ! then
-  ;
+    \ Get task dictionary base
+    : task-dict-base ( task -- addr ) dup task-dict-size @ - ;
 
-  \ Set task current dictionary address
-  : task-dict-current! ( addr task -- )
-    dup task-dict-base rot swap - swap task-dict-offset !
-  ;
+    \ Get task dictionary end
+    : task-dict-end ( task -- addr ) ;
 
-  \ Push data onto a task's stack
-  : push-task-stack ( x task -- )
-    dup task-rstack-current @ 8 + @
-    over dup task-stack-current cell - tuck swap task-stack-current! !
-    task-rstack-current @ 8 + !
-  ;
+    \ Get task current stack address
+    : task-stack-current ( task -- addr )
+      dup last-task @ = if drop sp@ else task-rstack-current @ 12 + @ then
+    ;
 
-  \ Push data onto a task's return stack
-  : push-task-rstack ( x task -- )
-    dup task-rstack-current @ cell - tuck swap task-rstack-current !
-  ;
+    \ Get task current dictionary address
+    : task-dict-current ( task -- addr )
+      dup task-dict-base swap task-dict-offset @ +
+    ;
 
-  \ Set the public task wordlist
-  task-wordlist set-current
+    \ Set task current stack address
+    : task-stack-current! ( addr task -- )
+      dup last-task @ = if drop sp! else task-rstack-current @ 12 + ! then
+    ;
 
+    \ Set task current dictionary address
+    : task-dict-current! ( addr task -- )
+      dup task-dict-base rot swap - swap task-dict-offset !
+    ;
+
+    \ Push data onto a task's stack
+    : push-task-stack ( x task -- )
+      dup task-rstack-current @ 8 + @
+      over dup task-stack-current cell - tuck swap task-stack-current! !
+      task-rstack-current @ 8 + !
+    ;
+
+    \ Push data onto a task's return stack
+    : push-task-rstack ( x task -- )
+      dup task-rstack-current @ cell - tuck swap task-rstack-current !
+    ;
+
+  end-module
+  
   \ Access a given user variable for a given task
   : for-task ( task xt -- addr )
     execute dict-base @ - swap task-dict-base +
   ;
 
-  \ Set the internal task wordlist
-  task-internal-wordlist set-current
+  begin-module task-internal-wordlist
 
-  \ Find the previous task
-  : prev-task ( task1 -- task2 )
-    dup begin dup task-next @ 2 pick <> while task-next @ repeat
-    tuck = if
-      drop 0
-    then
-  ;
-
-  \ Display a task cycle
-  : show-cycle ( task always? -- )
-    0 pause-enabled !
-    swap dup dup task-next @ <> rot or if
-      dup h.8 dup ['] task-wait for-task @ if [char] * emit then
-      dup task-next @ begin dup 2 pick <> while
-	space ." -> "
-	dup h.8
-	dup ['] task-wait for-task @ if [char] * emit then
-	task-next @
-      repeat
-      2drop
-      cr
-    else
-      drop
-    then
-    1 pause-enabled !
-  ;
-
-  \ Link a task into the main loop
-  : link-task ( task -- )
-    current-task @ if
-      current-task @ prev-task ?dup if
-	over swap task-next !
-      else
-	dup current-task @ task-next !
+    \ Find the previous task
+    : prev-task ( task1 -- task2 )
+      dup begin dup task-next @ 2 pick <> while task-next @ repeat
+      tuck = if
+	drop 0
       then
-      current-task @ swap task-next !
-    else
-      dup dup task-next !
-      current-task !
-      true current-task-changed? !
-    then
-  ;
+    ;
 
-  \ Link a task into the head of the main loop
-  : link-first-task ( task -- )
-    current-task @ 0<> if
-      dup current-task @ <> if
-	current-task @ task-next @ over task-next !
-	current-task @ task-next !
+    \ Display a task cycle
+    : show-cycle ( task always? -- )
+      0 pause-enabled !
+      swap dup dup task-next @ <> rot or if
+	dup h.8 dup ['] task-wait for-task @ if [char] * emit then
+	dup task-next @ begin dup 2 pick <> while
+	  space ." -> "
+	  dup h.8
+	  dup ['] task-wait for-task @ if [char] * emit then
+	  task-next @
+	repeat
+	2drop
+	cr
       else
 	drop
       then
-    else
-      dup current-task !
-      dup dup task-next !
-      true current-task-changed? !
-    then
-  ;
+      1 pause-enabled !
+    ;
 
-  \ Unlink a task from the main loop
-  : unlink-task ( task -- )
-    dup prev-task ?dup if
-      over current-task @ = if
-	over task-next @ current-task !
+    \ Link a task into the main loop
+    : link-task ( task -- )
+      current-task @ if
+	current-task @ prev-task ?dup if
+	  over swap task-next !
+	else
+	  dup current-task @ task-next !
+	then
+	current-task @ swap task-next !
+      else
+	dup dup task-next !
+	current-task !
 	true current-task-changed? !
       then
-      swap task-next @ swap task-next !
-    else
-      drop 0 current-task !
-      true current-task-changed? !
-    then
-  ;
+    ;
 
-  \ Set non-internal
-  task-wordlist set-current
+    \ Link a task into the head of the main loop
+    : link-first-task ( task -- )
+      current-task @ 0<> if
+	dup current-task @ <> if
+	  current-task @ task-next @ over task-next !
+	  current-task @ task-next !
+	else
+	  drop
+	then
+      else
+	dup current-task !
+	dup dup task-next !
+	true current-task-changed? !
+      then
+    ;
+
+    \ Unlink a task from the main loop
+    : unlink-task ( task -- )
+      dup prev-task ?dup if
+	over current-task @ = if
+	  over task-next @ current-task !
+	  true current-task-changed? !
+	then
+	swap task-next @ swap task-next !
+      else
+	drop 0 current-task !
+	true current-task-changed? !
+      then
+    ;
+    
+  end-module
 
   \ Get task active sate
   : get-task-active ( task -- active )
@@ -377,52 +366,41 @@ defined? task-wordlist not [if]
   \ Get whether a task has terminated
   : terminated? ( task -- terminated ) task-active h@ terminated = ;
 
-  \ Set internal
-  task-internal-wordlist set-current
+  begin-module task-internal-wordlist
+    
+    \ Initialize the main task
+    : init-main-task ( -- )
+      free-end @ task -
+      rstack-base @ rstack-end @ - over task-rstack-size h!
+      stack-base @ stack-end @ - over task-stack-size h!
+      free-end @ task - next-ram-space - over task-dict-size !
+      rp@ over task-rstack-current !
+      ram-here next-ram-space - over task-dict-offset !
+      0 over task-priority h!
+      0 over task-saved-priority !
+      1 over task-active h!
+      false task-wait !
+      0 task-systick-start !
+      -1 task-systick-delay !
+      base @ task-base !
+      0 current-lock !
+      0 current-lock-held !
+      dup dup task-next !
+      dup main-task !
+      dup last-task !
+      current-task !
+      free-end @ task - free-end !
+    ;
 
-  \ Initialize the main task
-  : init-main-task ( -- )
-    free-end @ task -
-    rstack-base @ rstack-end @ - over task-rstack-size h!
-    stack-base @ stack-end @ - over task-stack-size h!
-    free-end @ task - next-ram-space - over task-dict-size !
-    rp@ over task-rstack-current !
-    ram-here next-ram-space - over task-dict-offset !
-    0 over task-priority h!
-    0 over task-saved-priority !
-    1 over task-active h!
-    false task-wait !
-    0 task-systick-start !
-    -1 task-systick-delay !
-    base @ task-base !
-    0 current-lock !
-    0 current-lock-held !
-    dup dup task-next !
-    dup main-task !
-    dup last-task !
-    current-task !
-    free-end @ task - free-end !
-  ;
+    \ Task entry point
+    : task-entry ( -- )
+      rdrop
+      try
+      ?dup if display-red execute display-normal then
+      current-task @ kill
+    ;
 
-  \ Task entry point
-  : task-entry ( -- )
-    rdrop
-    try
-    ?dup if display-red execute display-normal then
-    current-task @ kill
-  ;
-
-  \ Set non-internal
-  task-wordlist set-current
-
-  \ Checksum some bytes
-  : checksum-bytes ( u start-addr end-addr -- u )
-    2dup < if
-      swap ?do i b@ xor dup 7 lshift swap 25 rshift or loop
-    else
-      2drop
-    then
-  ;
+  end-module
 
   \ Initialize a task
   : init-task ( xn...x0 count xt task -- )
@@ -458,148 +436,146 @@ defined? task-wordlist not [if]
     dup >r init-task r>
   ;
 
-  \ Set internal
-  task-internal-wordlist set-current
-
-  \ Reset waits
-  : reset-waiting-tasks ( task -- )
-    dup >r
-    begin
-      false over ['] task-wait for-task !
-      task-next @
-      dup r@ =
-    until
-    drop rdrop
-  ;
-
-  \ Wake tasks
-  : do-wake ( -- )
-    current-task @ if
-      current-task @ reset-waiting-tasks
-    then
-  ;
-
-  \ Get whether a task is waiting
-  : waiting-task? ( task -- )
-    >r
-    r@ ['] task-wait for-task @
-    r@ ['] task-systick-delay for-task @ -1 <>
-    systick-counter r@ ['] task-systick-start for-task @ -
-    r@ ['] task-systick-delay for-task @ u< and or
-    rdrop
-  ;
-
-  \ Handle waiting tasks
-  : handle-waiting-tasks ( task -- )
-    dup waiting-task? if
-      enable-int
-      sleep
-      disable-int
-      reset-waiting-tasks
-    else
-      drop
-    then
-  ;
-
-  \ Get the highest task priority
-  : get-highest-priority ( -- priority )
-    -32768 current-task @ begin
-      dup waiting-task? not if
-	dup get-task-priority rot max swap
-      then
-      task-next @ dup current-task @ =
-    until
-    drop
-  ;
-
-  \ Go to the next task
-  : go-to-next-task ( task -- task )
-    dup >r get-highest-priority swap
-    begin
-      task-next @ dup get-task-priority 2 pick = if
-	dup waiting-task? not over r@ = or
-      else
-	dup r@ =
-      then
-    until
-    nip dup r@ = if dup handle-waiting-tasks then
-    rdrop
-  ;
-
-  \ PendSV return value
-  variable pendsv-return
-
-  \ The PendSV handler
-  : pendsv-handler ( -- )
-    r> pendsv-return !
-
-    disable-int
+  begin-module task-internal-wordlist
     
-    in-critical @ 0= if
-      task-systick-counter @
-      dup context-switch-delay @ negate <= if drop 0 then
-      dup context-switch-delay @ >= if drop 0 then
-      context-switch-delay @ + task-systick-counter !
-      1 pause-count +!
+    \ Reset waits
+    : reset-waiting-tasks ( task -- )
+      dup >r
       begin
-	task-io
-	current-task @ 0<>
-	dup not if
-	  enable-int
-	  sleep
-	  disable-int
+	false over ['] task-wait for-task !
+	task-next @
+	dup r@ =
+      until
+      drop rdrop
+    ;
+
+    \ Wake tasks
+    : do-wake ( -- )
+      current-task @ if
+	current-task @ reset-waiting-tasks
+      then
+    ;
+
+    \ Get whether a task is waiting
+    : waiting-task? ( task -- )
+      >r
+      r@ ['] task-wait for-task @
+      r@ ['] task-systick-delay for-task @ -1 <>
+      systick-counter r@ ['] task-systick-start for-task @ -
+      r@ ['] task-systick-delay for-task @ u< and or
+      rdrop
+    ;
+
+    \ Handle waiting tasks
+    : handle-waiting-tasks ( task -- )
+      dup waiting-task? if
+	enable-int
+	sleep
+	disable-int
+	reset-waiting-tasks
+      else
+	drop
+      then
+    ;
+
+    \ Get the highest task priority
+    : get-highest-priority ( -- priority )
+      -32768 current-task @ begin
+	dup waiting-task? not if
+	  dup get-task-priority rot max swap
+	then
+	task-next @ dup current-task @ =
+      until
+      drop
+    ;
+
+    \ Go to the next task
+    : go-to-next-task ( task -- task )
+      dup >r get-highest-priority swap
+      begin
+	task-next @ dup get-task-priority 2 pick = if
+	  dup waiting-task? not over r@ = or
+	else
+	  dup r@ =
 	then
       until
+      nip dup r@ = if dup handle-waiting-tasks then
+      rdrop
+    ;
 
-      last-task @ if
-	ram-here last-task @ task-dict-current!
-	handler @ last-task @ ['] task-handler for-task !
-	base @ last-task @ ['] task-base for-task !
+    \ PendSV return value
+    variable pendsv-return
+
+    \ The PendSV handler
+    : pendsv-handler ( -- )
+      r> pendsv-return !
+
+      disable-int
+      
+      in-critical @ 0= if
+	task-systick-counter @
+	dup context-switch-delay @ negate <= if drop 0 then
+	dup context-switch-delay @ >= if drop 0 then
+	context-switch-delay @ + task-systick-counter !
+	1 pause-count +!
+	begin
+	  task-io
+	  current-task @ 0<>
+	  dup not if
+	    enable-int
+	    sleep
+	    disable-int
+	  then
+	until
+
+	last-task @ if
+	  ram-here last-task @ task-dict-current!
+	  handler @ last-task @ ['] task-handler for-task !
+	  base @ last-task @ ['] task-base for-task !
+	then
+
+	current-task-changed? @ not if
+	  current-task @ go-to-next-task current-task !
+	then
+
+	current-task @ last-task @ <> if
+	  current-task @ task-rstack-current @ context-switch
+	  last-task @ if last-task @ task-rstack-current ! else drop then
+	then
+
+	current-task @ dup last-task !
+	false current-task-changed? !
+	dup task-stack-base stack-base !
+	dup task-stack-end stack-end !
+	dup task-rstack-base rstack-base !
+	dup task-rstack-end rstack-end !
+	dup task-dict-current ram-here!
+	task-dict-base dict-base !
+	task-base @ base !
+	task-handler @ handler !
+
+      else
+	true deferred-context-switch !
       then
 
-      current-task-changed? @ not if
-	current-task @ go-to-next-task current-task !
+      enable-int
+      
+      pendsv-return @ >r
+    ;
+
+    \ Multitasker systick handler
+    : task-systick-handler ( -- )
+      systick-handler
+      -1 task-systick-counter +!
+      task-systick-counter @ 0 <= if
+	pause
       then
+    ;
 
-      current-task @ last-task @ <> if
-	current-task @ task-rstack-current @ context-switch
-	last-task @ if last-task @ task-rstack-current ! else drop then
-      then
+    \ Handle PAUSE
+    : do-pause ( -- ) ICSR_PENDSVSET! dsb isb ;
 
-      current-task @ dup last-task !
-      false current-task-changed? !
-      dup task-stack-base stack-base !
-      dup task-stack-end stack-end !
-      dup task-rstack-base rstack-base !
-      dup task-rstack-end rstack-end !
-      dup task-dict-current ram-here!
-      task-dict-base dict-base !
-      task-base @ base !
-      task-handler @ handler !
-
-    else
-      true deferred-context-switch !
-    then
-
-    enable-int
-    
-    pendsv-return @ >r
-  ;
-
-  \ Multitasker systick handler
-  : task-systick-handler ( -- )
-    systick-handler
-    -1 task-systick-counter +!
-    task-systick-counter @ 0 <= if
-      pause
-    then
-  ;
-
-  \ Handle PAUSE
-  : do-pause ( -- ) ICSR_PENDSVSET! dsb isb ;
-
-  \ Set non-internal
-  task-wordlist set-current
+  end-module
 
   \ Start a delay from the present
   : start-task-delay ( 1/10m-delay task -- )
@@ -665,9 +641,6 @@ defined? task-wordlist not [if]
     end-critical
   ;
 
-  \ Set forth
-  forth-wordlist set-current
-
   \ Wait for n milliseconds with multitasking support
   : ms ( u -- )
     systick-divisor * systick-counter
@@ -681,49 +654,71 @@ defined? task-wordlist not [if]
     current-task @ cancel-task-delay
   ;
 
-  \ Set internal
-  task-internal-wordlist set-current
+  begin-import-module task-internal-wordlist
 
-  \ Wait the current thread
-  : do-wait ( -- )
-    pause-enabled @ 0> if
-      current-task @ wait-task
-    then
-  ;
+    \ Wait the current thread
+    : do-wait ( -- )
+      pause-enabled @ 0> if
+	current-task @ wait-task
+      then
+    ;
 
-  \ RAM dictionary space warning has been displayed
-  variable ram-dict-warned
+    \ RAM dictionary space warning has been displayed
+    variable ram-dict-warned
 
-  \ Saved dictionary space validator
-  variable saved-validate-dict
+    \ Saved dictionary space validator
+    variable saved-validate-dict
 
-  \ Get the actual current dictionary here for a task
-  : actual-here ( task -- addr )
-    dup current-task @ = if drop ram-here else task-dict-current then
-  ;
+    \ Get the actual current dictionary here for a task
+    : actual-here ( task -- addr )
+      dup current-task @ = if drop ram-here else task-dict-current then
+    ;
 
-  \ Validate the dictionary space
-  : do-validate-dict ( -- )
-    main-task @ task-dict-end main-task @ actual-here - 1024 <
-    ram-dict-warned @ not and if
-      true ram-dict-warned !
-      space ." RAM dictionary space is running low (<1K left)" cr
-    then
-    saved-validate-dict @ ?execute
-  ; 
+    \ Validate the dictionary space
+    : do-validate-dict ( -- )
+      main-task @ task-dict-end main-task @ actual-here - 1024 <
+      ram-dict-warned @ not and if
+	true ram-dict-warned !
+	space ." RAM dictionary space is running low (<1K left)" cr
+      then
+      saved-validate-dict @ ?execute
+    ; 
 
-  \ Set non-internal
-  task-wordlist set-current
+  end-module
 
   \ Make current-task read-only
   : current-task ( -- task ) current-task @ ;
-
+  
   \ Make main-task read-only
   : main-task ( -- task ) main-task @ ;
-
-  \ Reset current wordlist
-  forth-wordlist set-current
-
+  
+  \ Initialize multitasking
+  : init-tasker ( -- )
+    disable-int
+    0 pause-enabled !
+    false sleep-enabled? !
+    $7F SHPR3_PRI_15!
+    $FF SHPR2_PRI_11!
+    $FF SHPR3_PRI_14!
+    0 task-systick-counter !
+    default-context-switch-delay context-switch-delay !
+    stack-end @ free-end !
+    init-main-task
+    0 pause-count !
+    false current-task-changed? !
+    ['] do-pause pause-hook !
+    ['] do-wait wait-hook !
+    ['] do-wake wake-hook !
+    validate-dict-hook @ saved-validate-dict !
+    false ram-dict-warned !
+    ['] do-validate-dict validate-dict-hook !
+    ['] execute svcall-handler-hook !
+    ['] pendsv-handler pendsv-handler-hook !
+    ['] task-systick-handler systick-handler-hook !
+    1 pause-enabled !
+    enable-int
+  ;
+  
   \ Forget RAM contents
   : forget-ram ( -- )
     0 ram-latest!
@@ -755,7 +750,7 @@ defined? task-wordlist not [if]
     ." rstack free:     "
     dup task-rstack-current swap task-rstack-end - 0 <# #s #> type
   ;
-
+  
   \ Display space free for the main task and for flash in general
   : free ( -- )
     cr main-task
@@ -769,37 +764,30 @@ defined? task-wordlist not [if]
     dup task-rstack-current swap task-rstack-end - 0 <# #s #> type
   ;
 
-  \ Init
-  : init ( -- )
-    init
-    disable-int
-    0 pause-enabled !
-    false sleep-enabled? !
-    $7F SHPR3_PRI_15!
-    $FF SHPR2_PRI_11!
-    $FF SHPR3_PRI_14!
-    0 task-systick-counter !
-    default-context-switch-delay context-switch-delay !
-    stack-end @ free-end !
-    init-main-task
-    0 pause-count !
-    false current-task-changed? !
-    ['] do-pause pause-hook !
-    ['] do-wait wait-hook !
-    ['] do-wake wake-hook !
-    validate-dict-hook @ saved-validate-dict !
-    false ram-dict-warned !
-    ['] do-validate-dict validate-dict-hook !
-    ['] execute svcall-handler-hook !
-    ['] pendsv-handler pendsv-handler-hook !
-    ['] task-systick-handler systick-handler-hook !
-    1 pause-enabled !
-    enable-int
-  ;
+end-module
 
-  \ Set the current wordlist
-  task-wordlist set-current
+\ Forget RAM contents
+: forget-ram ( -- ) forget-ram ;
 
+\ Display space free for a given task
+: task-free ( task -- ) task-free ;
+
+\ Display space free for the main task and for flash in general
+: free ( -- ) free ;
+
+\ Wait for n milliseconds with multitasking support
+: ms ( u -- ) ms ;
+
+\ Init
+: init ( -- )
+  init
+  init-tasker
+;
+
+begin-module task-wordlist
+  
+  import task-internal-wordlist
+  
   \ Make pause-count read-only
   : pause-count ( -- u ) pause-count @ ;
 
@@ -815,7 +803,9 @@ defined? task-wordlist not [if]
   \ Allot memory from the end of RAM
   : allot-end ( u -- addr ) negate free-end +! free-end @ ;
 
-[then]
+end-module
+
+unimport task-wordlist
 
 \ Reboot to initialize multitasking
 warm

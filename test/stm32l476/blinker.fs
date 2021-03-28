@@ -18,37 +18,41 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Set up the wordlist order
-forth-wordlist task-wordlist systick-wordlist led-wordlist 4 set-order
-forth-wordlist set-current
+begin-module forth-wordlist
 
-\ The blinker delay time
-variable blinker-delay
+  import systick-wordlist
+  import task-wordlist
+  import led-wordlist
 
-\ The blinker
-: blinker ( -- )
-\  disable-int
-  led-red-on
-  begin
-\    pause
-    blinker-delay @ ms
-\    1000000 0 ?do loop
-    led-red-off
-    led-green-on
-\    pause
-    blinker-delay @ ms
-\    1000000 0 ?do loop
-    led-green-off
+  \ The blinker delay time
+  variable blinker-delay
+
+  \ The blinker
+  : blinker ( -- )
+    \  disable-int
     led-red-on
-  again
-;
+    begin
+      \    pause
+      blinker-delay @ ms
+      \    1000000 0 ?do loop
+      led-red-off
+      led-green-on
+      \    pause
+      blinker-delay @ ms
+      \    1000000 0 ?do loop
+      led-green-off
+      led-red-on
+    again
+  ;
 
-\ The blinker task
-variable blinker-task
+  \ The blinker task
+  variable blinker-task
 
-\ Init blinker
-: init-blinker ( -- )
-  500 blinker-delay !
-  0 ['] blinker 256 256 256 spawn blinker-task !
-\  blinker-task @ run
-;
+  \ Init blinker
+  : init-blinker ( -- )
+    500 blinker-delay !
+    0 ['] blinker 256 256 256 spawn blinker-task !
+    \  blinker-task @ run
+  ;
+
+end-module

@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -18,47 +18,50 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Set up the wordlist
-forth-wordlist internal-wordlist systick-wordlist 3 set-order
-forth-wordlist set-current
+begin-module forth-wordlist
 
-\ Start line time
-variable start-line-time
+  import internal-module
+  import systick-module
 
-\ Last line time
-variable last-line-time
+  \ Start line time
+  variable start-line-time
 
-\ Line count
-variable line-count
+  \ Last line time
+  variable last-line-time
 
-\ Maximum line time difference
-2500 constant maximum-last-line-diff
+  \ Line count
+  variable line-count
 
-\ Line interval
-25 constant line-interval
+  \ Maximum line time difference
+  2500 constant maximum-last-line-diff
 
-\ Handle line
-: handle-line ( -- )
-  systick-counter
-  dup last-line-time @ - maximum-last-line-diff <= if
-    last-line-time !
-    1 line-count +!
-    line-count @ line-interval = if
-      space ." lines/s:"
-      0 line-interval 0 last-line-time @ start-line-time @ - 10000,0 f/ f/ f.
-      last-line-time @ start-line-time ! 0 line-count !
+  \ Line interval
+  25 constant line-interval
+
+  \ Handle line
+  : handle-line ( -- )
+    systick-counter
+    dup last-line-time @ - maximum-last-line-diff <= if
+      last-line-time !
+      1 line-count +!
+      line-count @ line-interval = if
+	space ." lines/s:"
+	0 line-interval 0 last-line-time @ start-line-time @ - 10000,0 f/ f/ f.
+	last-line-time @ start-line-time ! 0 line-count !
+      then
+    else
+      dup last-line-time ! start-line-time ! 0 line-count !
     then
-  else
-    dup last-line-time ! start-line-time ! 0 line-count !
-  then
-  do-prompt
-;
+    do-prompt
+  ;
 
-\ Enable input speed
-: enable-input-speed ( -- )
-  systick-counter dup start-line-time ! last-line-time ! 0 line-count !
-  ['] handle-line prompt-hook !
-;
+  \ Enable input speed
+  : enable-input-speed ( -- )
+    systick-counter dup start-line-time ! last-line-time ! 0 line-count !
+    ['] handle-line prompt-hook !
+  ;
 
-\ Disable input speed
-: disable-input-speed ( -- ) ['] do-prompt prompt-hook ! ;
+  \ Disable input speed
+  : disable-input-speed ( -- ) ['] do-prompt prompt-hook ! ;
+
+end-module

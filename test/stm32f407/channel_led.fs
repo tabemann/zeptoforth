@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -18,75 +18,80 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Set up the wordlist order
-forth-wordlist internal-wordlist task-wordlist chan-wordlist led-wordlist
-5 set-order
-forth-wordlist set-current
+begin-module forth-wordlist
 
-\ My channel size
-2 constant my-chan-size
+  import internal-wordlist
+  import task-wordlist
+  import chan-wordlist
+  import led-worlist
 
-\ Allot the channels
-my-chan-size chan-size buffer: orange-chan
-my-chan-size chan-size buffer: green-chan
-my-chan-size chan-size buffer: blue-chan
-my-chan-size chan-size buffer: red-chan
+  \ My channel size
+  2 constant my-chan-size
 
-\ Initialize the channels
-orange-chan my-chan-size init-chan
-green-chan my-chan-size init-chan
-blue-chan my-chan-size init-chan
-red-chan my-chan-size init-chan
+  \ Allot the channels
+  my-chan-size chan-size buffer: orange-chan
+  my-chan-size chan-size buffer: green-chan
+  my-chan-size chan-size buffer: blue-chan
+  my-chan-size chan-size buffer: red-chan
 
-\ The led structure
-begin-structure led-header-size
-  \ The before channel
-  field: before-chan
+  \ Initialize the channels
+  orange-chan my-chan-size init-chan
+  green-chan my-chan-size init-chan
+  blue-chan my-chan-size init-chan
+  red-chan my-chan-size init-chan
 
-  \ The after channel
-  field: after-chan
+  \ The led structure
+  begin-structure led-header-size
+    \ The before channel
+    field: before-chan
 
-  \ The on xt
-  field: on-xt
+    \ The after channel
+    field: after-chan
 
-  \ The off xt
-  field: off-xt
+    \ The on xt
+    field: on-xt
 
-  \ The delay
-  field: delay
-end-structure
+    \ The off xt
+    field: off-xt
 
-\ The inner loop of an led handler
-: do-led ( -- )
-  does> begin
-    dup before-chan @ recv-chan-byte drop
-    dup on-xt @ execute
-    dup delay @ ms
-    dup off-xt @ execute
-    dup after-chan @ 0 swap send-chan-byte
+    \ The delay
+    field: delay
+  end-structure
+
+  \ The inner loop of an led handler
+  : do-led ( -- )
+    does> begin
+      dup before-chan @ recv-chan-byte drop
+      dup on-xt @ execute
+      dup delay @ ms
+      dup off-xt @ execute
+      dup after-chan @ 0 swap send-chan-byte
+      pause
+    again
+  ;
+
+  \ Create an led task
+  : make-led ( before-chan after-chan on-xt off-xt delay "name" -- )
+    s" " <builds-with-name 4 roll , 3 roll , rot , swap , , do-led
+    latest >body 256 256 256 spawn constant
+  ;
+
+  \ Create the led tasks
+  orange-chan green-chan ' led-orange-on ' led-orange-off 100
+  make-led orange-task
+  green-chan blue-chan ' led-green-on ' led-green-off 100 make-led green-task
+  blue-chan red-chan ' led-blue-on ' led-blue-off 100 make-led blue-task
+  red-chan orange-chan ' led-red-on ' led-red-off 100 make-led red-task
+
+  \ Initialize the blinky
+  : init-blinky ( -- )
+    orange-task run
+    green-task run
+    blue-task run
+    red-task run
     pause
-  again
-;
+    0 orange-chan send-chan-byte
+    pause
+  ;
 
-\ Create an led task
-: make-led ( before-chan after-chan on-xt off-xt delay "name" -- )
-  s" " <builds-with-name 4 roll , 3 roll , rot , swap , , do-led
-  latest >body 256 256 256 spawn constant
-;
-
-\ Create the led tasks
-orange-chan green-chan ' led-orange-on ' led-orange-off 100 make-led orange-task
-green-chan blue-chan ' led-green-on ' led-green-off 100 make-led green-task
-blue-chan red-chan ' led-blue-on ' led-blue-off 100 make-led blue-task
-red-chan orange-chan ' led-red-on ' led-red-off 100 make-led red-task
-
-\ Initialize the blinky
-: init-blinky ( -- )
-  orange-task run
-  green-task run
-  blue-task run
-  red-task run
-  pause
-  0 orange-chan send-chan-byte
-  pause
-;
+end-module

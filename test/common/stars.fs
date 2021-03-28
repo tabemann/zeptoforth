@@ -21,14 +21,17 @@
 \ Compile this to RAM
 compile-to-ram
 
-\ Set up the wordlist order
-forth-wordlist task-wordlist 2 set-order
+begin-module forth-wordlist
 
-\ The stars task
-variable stars-task
+  import task-wordlist
+  
+  \ The stars task
+  variable stars-task
+  
+  \ The stars loop
+  : stars ( -- ) begin ." *" 500000 0 ?do loop again ;
+  
+  \ Initialize the stars task
+  : init-stars ( -- ) 0 ['] stars 256 256 256 spawn stars-task ! ;
 
-\ The stars loop
-: stars ( -- ) begin ." *" 500000 0 ?do loop again ;
-
-\ Initialize the stars task
-: init-stars ( -- ) 0 ['] stars 256 256 256 spawn stars-task ! ;
+end-module
