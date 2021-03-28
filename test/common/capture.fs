@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -17,11 +17,6 @@
 \ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
-
-\ Set up the wordlist
-get-order get-current
-forth-wordlist 1 set-order
-forth-wordlist set-current
 
 \ Capture test match
 0 constant capture-match
@@ -311,5 +306,3 @@ compiling-to-flash? not [if]
   ;
 
 [then]
-
-set-current set-order

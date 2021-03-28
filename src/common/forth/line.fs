@@ -18,27 +18,12 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Set up the wordlist
-forth-wordlist 1 set-order
-forth-wordlist set-current
+\ Compile this to flash
+compile-to-flash
 
-\ Make sure ansi-term-wordlist exists
-defined? ansi-term-wordlist not [if]
-  :noname space ." ansi-term is not installed" cr ; ?raise
-[then]
+begin-import-module-once line-internal-wordlist
 
-\ Test to make sure this has not already been compiled
-defined? line-wordlist not [if]
-
-  \ Compile this to flash
-  compile-to-flash
-
-  \ Set up the actual wordlist
-  wordlist constant line-wordlist
-  wordlist constant line-internal-wordlist
-  forth-wordlist internal-wordlist ansi-term-wordlist line-internal-wordlist
-  line-wordlist 5 set-order
-  line-internal-wordlist set-current
+  import ansi-term-wordlist
 
   \ Line structure
   begin-structure line-size
@@ -99,7 +84,8 @@ defined? line-wordlist not [if]
 
   \ Update the terminal size
   : update-terminal-size ( -- )
-    get-terminal-size line @ line-terminal-columns ! line @ line-terminal-rows !
+    get-terminal-size line @ line-terminal-columns ! line @
+    line-terminal-rows !
     line @ line-start-column @ line @ line-terminal-columns @ >= if
       0 line @ line-start-column ! 1 line @ line-start-row +!
       line @ line-start-row @ line @ line-terminal-rows @ >= if
@@ -429,25 +415,27 @@ defined? line-wordlist not [if]
     xoff
   ;
 
-  \ Switch to forth-wordlist
-  forth-wordlist set-current
-  
-  \ Initialize
-  : init ( -- )
-    init
-    init-line-refill
-  ;
+end-module
 
-  \ Enable line editor
-  : enable-line ( -- ) ['] line-edit refill-hook ! ;
+import internal-wordlist
 
-  \ Disable line editor
-  : disable-line ( -- ) ['] do-refill refill-hook ! ;
+\ Initialize
+: init ( -- )
+  init
+  init-line-refill
+;
 
-  \ Get whether the line editor is enabled
-  : line-enabled? ( -- ) refill-hook @ ['] line-edit = ;
-  
-[then]
+\ Enable line editor
+: enable-line ( -- ) ['] line-edit refill-hook ! ;
+
+\ Disable line editor
+: disable-line ( -- ) ['] do-refill refill-hook ! ;
+
+\ Get whether the line editor is enabled
+: line-enabled? ( -- ) refill-hook @ ['] line-edit = ;
+
+unimport internal-wordlist
+unimport line-internal-wordlist
 
 \ Warm reboot
 warm

@@ -18,70 +18,74 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Set up the wordlist order
-forth-wordlist task-wordlist schedule-wordlist led-wordlist 4 set-order
-forth-wordlist set-current
+begin-module forth-wordlist
 
-\ The schedule
-schedule-size buffer: my-schedule
+  import task-wordlist
+  import schedule-wordlist
+  import led-wordlist
 
-\ The schedule task
-variable schedule-task
+  \ The schedule
+  schedule-size buffer: my-schedule
 
-\ The red LED blinker action
-action-size buffer: red-blinker-action
+  \ The schedule task
+  variable schedule-task
 
-\ The green LED blinker action
-action-size buffer: green-blinker-action
+  \ The red LED blinker action
+  action-size buffer: red-blinker-action
 
-\ The red LED state variable
-variable red-led-state
+  \ The green LED blinker action
+  action-size buffer: green-blinker-action
 
-\ The green LED state variable
-variable green-led-state
+  \ The red LED state variable
+  variable red-led-state
 
-\ The red LED blinker delay variable
-variable red-blinker-delay
+  \ The green LED state variable
+  variable green-led-state
 
-\ The green LED blinker delay variable
-variable green-blinker-delay
+  \ The red LED blinker delay variable
+  variable red-blinker-delay
 
-\ Blink the red LED
-: red-blinker ( -- )
-  red-led-state @ if
-    led-red-off
-  else
-    led-red-on
-  then
-  red-led-state @ not red-led-state !
-  red-blinker-delay @ current-action reset-action-delay
-;
+  \ The green LED blinker delay variable
+  variable green-blinker-delay
 
-\ Blink the green LED
-: green-blinker ( -- )
-  green-led-state @ if
-    led-green-off
-  else
-    led-green-on
-  then
-  green-led-state @ not green-led-state !
-  green-blinker-delay @ current-action reset-action-delay
-;
+  \ Blink the red LED
+  : red-blinker ( -- )
+    red-led-state @ if
+      led-red-off
+    else
+      led-red-on
+    then
+    red-led-state @ not red-led-state !
+    red-blinker-delay @ current-action reset-action-delay
+  ;
 
-\ Init
-: init-blinker-1 ( -- )
-  false red-led-state !
-  false green-led-state !
-  my-schedule init-schedule
-  3333 red-blinker-delay !
-  ['] red-blinker red-blinker-action my-schedule add-action
-  red-blinker-delay @ red-blinker-action @ start-action-delay
-  red-blinker-action @ enable-action
-  5000 green-blinker-delay !
-  ['] green-blinker green-blinker-action my-schedule add-action
-  green-blinker-delay @ green-blinker-action @ start-action-delay
-  green-blinker-action @ enable-action
-  0 [: my-schedule run-schedule ;] 256 256 256 spawn schedule-task !
-  schedule-task @ run
-  pause
-;
+  \ Blink the green LED
+  : green-blinker ( -- )
+    green-led-state @ if
+      led-green-off
+    else
+      led-green-on
+    then
+    green-led-state @ not green-led-state !
+    green-blinker-delay @ current-action reset-action-delay
+  ;
+
+  \ Init
+  : init-blinker-1 ( -- )
+    false red-led-state !
+    false green-led-state !
+    my-schedule init-schedule
+    3333 red-blinker-delay !
+    ['] red-blinker red-blinker-action my-schedule add-action
+    red-blinker-delay @ red-blinker-action @ start-action-delay
+    red-blinker-action @ enable-action
+    5000 green-blinker-delay !
+    ['] green-blinker green-blinker-action my-schedule add-action
+    green-blinker-delay @ green-blinker-action @ start-action-delay
+    green-blinker-action @ enable-action
+    0 [: my-schedule run-schedule ;] 256 256 256 spawn schedule-task !
+    schedule-task @ run
+    pause
+  ;
+
+end-module

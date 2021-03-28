@@ -18,41 +18,45 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Set up the wordlist order
-forth-wordlist task-wordlist task-pool-wordlist fchan-wordlist 4 set-order
-forth-wordlist set-current
+begin-module forth-wordlist
 
-\ Allot the channels
-fchan-size buffer: signal-0-fchan
-fchan-size buffer: signal-1-fchan
-fchan-size buffer: signal-2-fchan
-fchan-size buffer: signal-3-fchan
+  import task-wordlist
+  import task-pool-wordlist
+  import fchan-wordlist
 
-\ The task pool
-3 task-pool-size buffer: my-task-pool
+  \ Allot the channels
+  fchan-size buffer: signal-0-fchan
+  fchan-size buffer: signal-1-fchan
+  fchan-size buffer: signal-2-fchan
+  fchan-size buffer: signal-3-fchan
 
-\ Wait on an fchannel, display a number of numbers and send on the fchannel
-\ provided
-: action ( out-fchannel xn...x0 count in-channel -- )
-  recv-fchan-cell drop
-  begin dup 0> while 1- swap . repeat drop pause
-  0 swap send-fchan-cell
-  begin pause again
-;
+  \ The task pool
+  3 task-pool-size buffer: my-task-pool
 
-\ Initialize the test
-: init-test ( -- )
-  signal-0-fchan init-fchan
-  signal-1-fchan init-fchan
-  signal-2-fchan init-fchan
-  signal-3-fchan init-fchan
-  256 256 256 3 my-task-pool init-task-pool
-  signal-1-fchan 2 1 0 3 signal-0-fchan 6
-  ['] action my-task-pool spawn-from-task-pool run
-  signal-2-fchan 12 11 10 3 signal-1-fchan 6
-  ['] action my-task-pool spawn-from-task-pool run
-  signal-3-fchan 22 21 20 3 signal-2-fchan 6
-  ['] action my-task-pool spawn-from-task-pool run
-  0 signal-0-fchan send-fchan-cell
-  signal-3-fchan recv-fchan-cell drop
-;
+  \ Wait on an fchannel, display a number of numbers and send on the fchannel
+  \ provided
+  : action ( out-fchannel xn...x0 count in-channel -- )
+    recv-fchan-cell drop
+    begin dup 0> while 1- swap . repeat drop pause
+    0 swap send-fchan-cell
+    begin pause again
+  ;
+
+  \ Initialize the test
+  : init-test ( -- )
+    signal-0-fchan init-fchan
+    signal-1-fchan init-fchan
+    signal-2-fchan init-fchan
+    signal-3-fchan init-fchan
+    256 256 256 3 my-task-pool init-task-pool
+    signal-1-fchan 2 1 0 3 signal-0-fchan 6
+    ['] action my-task-pool spawn-from-task-pool run
+    signal-2-fchan 12 11 10 3 signal-1-fchan 6
+    ['] action my-task-pool spawn-from-task-pool run
+    signal-3-fchan 22 21 20 3 signal-2-fchan 6
+    ['] action my-task-pool spawn-from-task-pool run
+    0 signal-0-fchan send-fchan-cell
+    signal-3-fchan recv-fchan-cell drop
+  ;
+
+end-module

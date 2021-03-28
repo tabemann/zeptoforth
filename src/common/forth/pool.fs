@@ -18,55 +18,47 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Set up the wordlist
-forth-wordlist 1 set-order
-forth-wordlist set-current
-
-\ Check whether this is already defined
-defined? pool-wordlist not [if]
-
-  \ Compile to flash
-  compile-to-flash
+\ Compile to flash
+compile-to-flash
   
-  \ Setup the wordlist
-  wordlist constant pool-wordlist
-  wordlist constant pool-internal-wordlist
-  forth-wordlist task-wordlist pool-internal-wordlist pool-wordlist 4 set-order
-  pool-wordlist set-current
+begin-module-once pool-wordlist
 
-  \ Pool header structure
-  begin-structure pool-size
+  import task-wordlist
 
-    \ Switch the current wordlist
-    pool-internal-wordlist set-current
+  begin-import-module pool-internal-wordlist
 
-    \ First free block header
-    field: pool-first-free
+    \ Pool header structure
+    begin-structure pool-size
 
-    \ Last free block header
-    field: pool-last-free
+      \ First free block header
+      field: pool-first-free
 
-    \ Block size
-    field: pool-block-size
+      \ Last free block header
+      field: pool-last-free
 
-    \ Free block count
-    field: pool-free-count
+      \ Block size
+      field: pool-block-size
 
-    \ Total block-count
-    field: pool-total-count
+      \ Free block count
+      field: pool-free-count
 
-  end-structure
+      \ Total block-count
+      field: pool-total-count
 
-  \ Pool block header structure
-  begin-structure pool-header-size
+    end-structure
 
-    \ Next free block header
-    field: pool-next-free
+    \ Pool block header structure
+    begin-structure pool-header-size
 
-  end-structure
+      \ Next free block header
+      field: pool-next-free
 
-  \ Switch the current wordlist
-  pool-wordlist set-current
+    end-structure
+
+  end-module
+
+  \ Export pool-size
+  pool-size constant pool-size
 
   \ Initialize a pool header
   : init-pool ( block-size addr -- )
@@ -126,7 +118,7 @@ defined? pool-wordlist not [if]
   \ Get the pool total count
   : pool-total-count ( pool -- u ) pool-total-count @ ;
 
-[then]
+end-module
 
 \ Warm reboot
 warm

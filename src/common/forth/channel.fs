@@ -18,58 +18,47 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Set up the wordlist
-forth-wordlist 1 set-order
-forth-wordlist set-current
+\ Compile to flash
+compile-to-flash
 
-\ Make sure task-wordlist exist
-defined? task-wordlist not [if]
-  :noname space ." task is not installed" cr ; ?raise
-[then]
+begin-module-once chan-wordlist
+  
+  import task-wordlist
+  
+  begin-import-module chan-internal-wordlist
 
-\ Check whether this is already defined
-defined? chan-wordlist not [if]
+    \ Channel header structure
+    begin-structure chan-header-size
+      
+      \ Channel byte count
+      field: chan-count
 
-  \ Compile to flash
-  compile-to-flash
+      \ Channel receive index
+      field: chan-recv-index
 
-  \ Set up the wordlist
-  wordlist constant chan-wordlist
-  wordlist constant chan-internal-wordlist
-  forth-wordlist task-wordlist chan-internal-wordlist chan-wordlist
-  4 set-order
-  chan-internal-wordlist set-current
+      \ Channel send index
+      field: chan-send-index
 
-  \ Channel header structure
-  begin-structure chan-header-size
-    
-    \ Channel byte count
-    field: chan-count
+      \ Channel receive task
+      field: chan-recv-task
 
-    \ Channel receive index
-    field: chan-recv-index
+      \ Channel send task
+      field: chan-send-task
 
-    \ Channel send index
-    field: chan-send-index
+    end-structure
 
-    \ Channel receive task
-    field: chan-recv-task
+    \ Core of getting whether a channel is full
+    : chan-full-unsafe? ( chan -- flag )
+      dup chan-send-index @ 1+ over chan-count @ umod
+      swap chan-recv-index @ =
+    ;
 
-    \ Channel send task
-    field: chan-send-task
+    \ Core of getting whether a channel is empty
+    : chan-empty-unsafe? ( chan -- flag )
+      dup chan-send-index @ swap chan-recv-index @ =
+    ;
 
-  end-structure
-
-  \ Core of getting whether a channel is full
-  : chan-full-unsafe? ( chan -- flag )
-    dup chan-send-index @ 1+ over chan-count @ umod
-    swap chan-recv-index @ =
-  ;
-
-  \ Core of getting whether a channel is empty
-  : chan-empty-unsafe? ( chan -- flag )
-    dup chan-send-index @ swap chan-recv-index @ =
-  ;
+  end-module
   
   \ Define public words
   chan-wordlist set-current
@@ -84,72 +73,70 @@ defined? chan-wordlist not [if]
     begin-critical chan-empty-unsafe? end-critical
   ;
 
-  \ Define internal words
-  chan-internal-wordlist set-current
-  
-  \ Wait to send on a channel
-  : wait-send-chan ( chan -- )
-    begin
-      dup chan-send-task @ 0<> over chan-send-task @ current-task <> and
-    while
-      end-critical
-      pause
-      begin-critical
-    repeat
-    begin dup chan-full-unsafe? while
-      current-task over chan-send-task !
-\      begin dup chan-recv-task @ 0= while pause repeat
-      dup chan-recv-task @ ?dup if run then
-      current-task stop
-      end-critical
-      pause
-      begin-critical
-    repeat
-    0 swap chan-send-task !
-  ;
+  begin-module chan-internal-wordlist
+    
+    \ Wait to send on a channel
+    : wait-send-chan ( chan -- )
+      begin
+	dup chan-send-task @ 0<> over chan-send-task @ current-task <> and
+      while
+	end-critical
+	pause
+	begin-critical
+      repeat
+      begin dup chan-full-unsafe? while
+	current-task over chan-send-task !
+	\      begin dup chan-recv-task @ 0= while pause repeat
+	dup chan-recv-task @ ?dup if run then
+	current-task stop
+	end-critical
+	pause
+	begin-critical
+      repeat
+      0 swap chan-send-task !
+    ;
 
-  \ Wait to receive on a channel
-  : wait-recv-chan ( chan -- )
-    begin
-      dup chan-recv-task @ 0<> over chan-recv-task @ current-task <> and
-    while
-      end-critical
-      pause
-      begin-critical
-    repeat
-    begin dup chan-empty-unsafe? while
-      current-task over chan-recv-task !
-      dup chan-send-task @ ?dup if run then
-      current-task stop
-      end-critical
-      pause
-      begin-critical
-    repeat
-    0 swap chan-recv-task !
-  ;
+    \ Wait to receive on a channel
+    : wait-recv-chan ( chan -- )
+      begin
+	dup chan-recv-task @ 0<> over chan-recv-task @ current-task <> and
+      while
+	end-critical
+	pause
+	begin-critical
+      repeat
+      begin dup chan-empty-unsafe? while
+	current-task over chan-recv-task !
+	dup chan-send-task @ ?dup if run then
+	current-task stop
+	end-critical
+	pause
+	begin-critical
+      repeat
+      0 swap chan-recv-task !
+    ;
 
-  \ Get the channel send address
-  : send-chan-addr ( chan -- b-addr )
-    dup chan-send-index @ chan-header-size + +
-  ;
+    \ Get the channel send address
+    : send-chan-addr ( chan -- b-addr )
+      dup chan-send-index @ chan-header-size + +
+    ;
 
-  \ Get the channel receive address
-  : recv-chan-addr ( chan -- b-addr )
-    dup chan-recv-index @ chan-header-size + +
-  ;
+    \ Get the channel receive address
+    : recv-chan-addr ( chan -- b-addr )
+      dup chan-recv-index @ chan-header-size + +
+    ;
 
-  \ Advance the channel send index
-  : advance-send-chan ( chan -- )
-    dup chan-send-index @ 1+ over chan-count @ umod swap chan-send-index !
-  ;
+    \ Advance the channel send index
+    : advance-send-chan ( chan -- )
+      dup chan-send-index @ 1+ over chan-count @ umod swap chan-send-index !
+    ;
 
-  \ Advance the channel receive index
-  : advance-recv-chan ( chan -- )
-    dup chan-recv-index @ 1+ over chan-count @ umod swap chan-recv-index !
-  ;
+    \ Advance the channel receive index
+    : advance-recv-chan ( chan -- )
+      dup chan-recv-index @ 1+ over chan-count @ umod swap chan-recv-index !
+    ;
 
-  \ Define public words
-  chan-wordlist set-current
+  end-module
   
   \ Get channel size for a channel with a specified buffer size in bytes
   : chan-size ( bytes -- total-bytes ) 4 align chan-header-size + ;
@@ -209,7 +196,7 @@ defined? chan-wordlist not [if]
     pad 4 rot recv-chan pad @
   ;
   
-[then]
+end-module
 
 \ Warm reboot
 warm

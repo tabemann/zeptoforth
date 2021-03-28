@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -21,9 +21,7 @@
 \ Compile this to flash
 compile-to-flash
 
-\ Set up wordlist order
-forth-wordlist internal-wordlist 2 set-order
-forth-wordlist set-current
+import internal-wordlist
 
 \ Get the value of pi
 0 314159265 0 100000000 f/ 2constant pi
@@ -87,30 +85,29 @@ forth-wordlist set-current
   then
 ;
 
-\ Set internal
-internal-wordlist set-current
 
-\ Calculate whether a square root is close enough
-: sqrt-close-enough ( f1 f2 -- flag )
-  4dup d- 2rot dabs 2rot dabs dmax f/ dabs 2 0 d<
-;
+begin-module internal-wordlist
+  
+  \ Calculate whether a square root is close enough
+  : sqrt-close-enough ( f1 f2 -- flag )
+    4dup d- 2rot dabs 2rot dabs dmax f/ dabs 2 0 d<
+  ;
+  
+  \ Calculate a better square root guess
+  : sqrt-better-guess ( f1 f2 -- f3 ) 2dup 2rot 2rot f/ d+ 2 0 d/ ;
 
-\ Calculate a better square root guess
-: sqrt-better-guess ( f1 f2 -- f3 ) 2dup 2rot 2rot f/ d+ 2 0 d/ ;
+  \ The main loop of calculating a square root
+  : sqrt-test ( f1 f2 -- f3 )
+    begin
+      4dup f/ 2over sqrt-close-enough if
+	2nip true
+      else
+	4dup sqrt-better-guess 2nip false
+      then
+    until
+  ;
 
-\ The main loop of calculating a square root
-: sqrt-test ( f1 f2 -- f3 )
-  begin
-    4dup f/ 2over sqrt-close-enough if
-      2nip true
-    else
-      4dup sqrt-better-guess 2nip false
-    then
-  until
-;
-
-\ Set forth
-forth-wordlist set-current
+end-module
 
 \ Calculate a square root
 : sqrt ( f1 -- f2 ) 2dup 2 0 d/ sqrt-test ;
@@ -257,164 +254,164 @@ forth-wordlist set-current
 \ Calculate atanh(x)
 : atanh ( f1 -- f2 ) 2dup 0 1 d+ 2swap dnegate 0 1 d+ f/ ln 2 0 d/ ;
 
-\ Set internal
-internal-wordlist set-current
-
-\ Get the number of instances of a character in a string
-: char-count ( b-addr bytes b -- count )
-  >r
-  0 begin over 0<> while
-    rot dup b@ r@ = if
-      1+ -rot 1+
-    else
-      1+ -rot
-    then
-    swap 1- swap
-  repeat
-  nip nip rdrop
-;
-
-\ Handle double-cell integer numeric literals
-: handle-double ( b-addr bytes base -- flag )
-  >r over b@ [char] . <> if
-    0 0 begin 2 pick 0<> while
-      3 pick b@ r@ parse-digit if
-	rot rot r@ 0 ud* rot 0 d+
+begin-module internal-wordlist
+  
+  \ Get the number of instances of a character in a string
+  : char-count ( b-addr bytes b -- count )
+    >r
+    0 begin over 0<> while
+      rot dup b@ r@ = if
+	1+ -rot 1+
       else
-	drop 3 pick b@ [char] . <> if
-	  2drop 2drop rdrop false exit
-	then
+	1+ -rot
       then
-      2swap 1- swap 1+ swap 2swap
+      swap 1- swap
     repeat
-    2swap 2drop rdrop true
-  else
-    rdrop 2drop false
-  then
-;
-
-\ Determine the maximum number of fraction characters for a base
-: get-max-fraction-chars ( base -- chars )
-  >r 1 0 0 begin
-    -rot r@ 0 ud* 2dup 0 1 d> if
-      2drop rdrop true
-    else
-      rot 1+ false
-    then
-  until
-;
-
-\ Build max fraction characters table
-: build-max-fraction-chars ( -- )
-  37 2 ?do
-    i get-max-fraction-chars ,
-  loop
-;
-
-\ Create a lookup table of maximum number of fraction characters
-create max-fraction-chars build-max-fraction-chars
-
-\ Handle the portion of a s31.32 fixed-point double-cell numeric literal to the
-\ right of the decimal point
-: handle-fraction ( b-addr bytes d base -- d -1 | 0 )
-  >r rot max-fraction-chars r@ 2 - cells + @ min -rot
-  2swap 0 0 0 begin 3 pick 0<> while
-    4 pick b@ r@ parse-digit if
-      2swap r@ 0 ud* rot 0 d+ rot 1+ >r >r >r 1- swap 1+ swap r> r> r>
-    else
-      drop 2drop 2drop 2drop rdrop false exit
-    then
-  repeat
-  nip 0 -rot 0 r> rot 0 swap f** f/ 2swap 2drop d+ true
-;
-
-\ Handle s31.32 fixed-point double-cell numeric literals
-: handle-fixed ( b-addr bytes base -- flag )
-  >r over b@ [char] , <> if
-    2dup + 1- b@ [char] , <> if
-      0 begin over 0<> while
-	2 pick b@ r@ parse-digit if
-	  swap r@ * + rot 1+ rot 1- rot
+    nip nip rdrop
+  ;
+  
+  \ Handle double-cell integer numeric literals
+  : handle-double ( b-addr bytes base -- flag )
+    >r over b@ [char] . <> if
+      0 0 begin 2 pick 0<> while
+	3 pick b@ r@ parse-digit if
+	  rot rot r@ 0 ud* rot 0 d+
 	else
-	  drop 2 pick b@ [char] , = if
-	    rot 1+ rot 1- rot 0 swap r> handle-fraction exit
-	  else
-	    drop 2drop rdrop false exit
+	  drop 3 pick b@ [char] . <> if
+	    2drop 2drop rdrop false exit
 	  then
 	then
+	2swap 1- swap 1+ swap 2swap
       repeat
-      nip nip rdrop true
+      2swap 2drop rdrop true
     else
       rdrop 2drop false
     then
-  else
-    rdrop 2drop false
-  then
-;
+  ;
 
-\ Handle an unsigned double-cell number
-: handle-unsigned-double ( b-addr bytes base -- d -1 | 0 )
-  >r 2dup [char] . char-count 1 = if
-    r> handle-double
-  else
-    2dup [char] , char-count 1 = if
-      r> handle-fixed
-    else
-      rdrop 2drop false
-    then
-  then
-;
-
-\ Handle numeric literals
-: do-handle-number ( b-addr bytes -- flag )
-  base @ 2 >= base @ 16 <= and if
-    2dup do-handle-number if
-      state @ not if
-	rot rot
+  \ Determine the maximum number of fraction characters for a base
+  : get-max-fraction-chars ( base -- chars )
+    >r 1 0 0 begin
+      -rot r@ 0 ud* 2dup 0 1 d> if
+	2drop rdrop true
+      else
+	rot 1+ false
       then
-      2drop true
-    else
-      parse-base >r
-      dup 0<> if
-	over b@ [char] - = if
-	  1- swap 1+ swap
-	  dup 0<> if
-	    r> handle-unsigned-double
+    until
+  ;
+
+  \ Build max fraction characters table
+  : build-max-fraction-chars ( -- )
+    37 2 ?do
+      i get-max-fraction-chars ,
+    loop
+  ;
+
+  \ Create a lookup table of maximum number of fraction characters
+  create max-fraction-chars build-max-fraction-chars
+
+  \ Handle the portion of a s31.32 fixed-point double-cell numeric literal to the
+  \ right of the decimal point
+  : handle-fraction ( b-addr bytes d base -- d -1 | 0 )
+    >r rot max-fraction-chars r@ 2 - cells + @ min -rot
+    2swap 0 0 0 begin 3 pick 0<> while
+      4 pick b@ r@ parse-digit if
+	2swap r@ 0 ud* rot 0 d+ rot 1+ >r >r >r 1- swap 1+ swap r> r> r>
+      else
+	drop 2drop 2drop 2drop rdrop false exit
+      then
+    repeat
+    nip 0 -rot 0 r> rot 0 swap f** f/ 2swap 2drop d+ true
+  ;
+
+  \ Handle s31.32 fixed-point double-cell numeric literals
+  : handle-fixed ( b-addr bytes base -- flag )
+    >r over b@ [char] , <> if
+      2dup + 1- b@ [char] , <> if
+	0 begin over 0<> while
+	  2 pick b@ r@ parse-digit if
+	    swap r@ * + rot 1+ rot 1- rot
 	  else
-	    rdrop 2drop false
-	  then
-	  dup if
-	    state @ if
-	      rot rot dnegate swap lit, lit,
+	    drop 2 pick b@ [char] , = if
+	      rot 1+ rot 1- rot 0 swap r> handle-fraction exit
 	    else
-	      rot rot dnegate rot
+	      drop 2drop rdrop false exit
 	    then
 	  then
-	else
-	  r> handle-unsigned-double
-	  dup if
-	    state @ if
-	      rot lit, swap lit,
-	    then
-	  then
-	then
+	repeat
+	nip nip rdrop true
+      else
+	rdrop 2drop false
+      then
+    else
+      rdrop 2drop false
+    then
+  ;
+
+  \ Handle an unsigned double-cell number
+  : handle-unsigned-double ( b-addr bytes base -- d -1 | 0 )
+    >r 2dup [char] . char-count 1 = if
+      r> handle-double
+    else
+      2dup [char] , char-count 1 = if
+	r> handle-fixed
       else
 	rdrop 2drop false
       then
     then
-  else
-    2drop true
-  then
-;
+  ;
 
-\ Set forth
-forth-wordlist set-current
+  \ Handle numeric literals
+  : do-handle-number ( b-addr bytes -- flag )
+    base @ 2 >= base @ 16 <= and if
+      2dup do-handle-number if
+	state @ not if
+	  rot rot
+	then
+	2drop true
+      else
+	parse-base >r
+	dup 0<> if
+	  over b@ [char] - = if
+	    1- swap 1+ swap
+	    dup 0<> if
+	      r> handle-unsigned-double
+	    else
+	      rdrop 2drop false
+	    then
+	    dup if
+	      state @ if
+		rot rot dnegate swap lit, lit,
+	      else
+		rot rot dnegate rot
+	      then
+	    then
+	  else
+	    r> handle-unsigned-double
+	    dup if
+	      state @ if
+		rot lit, swap lit,
+	      then
+	    then
+	  then
+	else
+	  rdrop 2drop false
+	then
+      then
+    else
+      2drop true
+    then
+  ;
+
+end-module
 
 \ Initialize
 : init ( -- )
   init
   ['] do-handle-number handle-number-hook !
 ;
+
+unimport internal-wordlist
 
 \ Warm reboot
 warm

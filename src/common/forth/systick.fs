@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -18,61 +18,53 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Set up the wordlist
-forth-wordlist 1 set-order
-forth-wordlist set-current
+\ Compile to flash
+compile-to-flash
 
-\ Test to make sure this has not already been compiled
-defined? systick-wordlist not [if]
+begin-import-module-once systick-wordlist
 
-  \ Compile to flash
-  compile-to-flash
+  import internal-wordlist
 
-  wordlist constant systick-wordlist
-  wordlist constant systick-internal-wordlist
-  forth-wordlist internal-wordlist systick-wordlist
-  systick-internal-wordlist 4 set-order
-  systick-internal-wordlist set-current
+  begin-import-module systick-internal-wordlist
 
-  \ RW SysTick Control and Status Register
-  $E000E010 constant SYST_CSR
+    \ RW SysTick Control and Status Register
+    $E000E010 constant SYST_CSR
+    
+    \ SysTick count flag mask
+    1 16 lshift constant SYST_CSR_COUNTFLAG
+    
+    \ SysTick clock source flag mask
+    1 2 lshift constant SYST_CSR_CLKSOURCE
+    
+    \ SysTick tick interrupt flag mask
+    1 1 lshift constant SYST_CSR_TICKINT
+    
+    \ SysTick tick enable flag mask
+    1 0 lshift constant SYST_CSR_ENABLE
+    
+    \ RW SysTick Reload Value Register (24 bit)
+    $E000E014 constant SYST_RVR
 
-  \ SysTick count flag mask
-  1 16 lshift constant SYST_CSR_COUNTFLAG
+    \ RW SysTick Current Value Register (24 bit)
+    $E000E018 constant SYST_CVR
 
-  \ SysTick clock source flag mask
-  1 2 lshift constant SYST_CSR_CLKSOURCE
+    \ RO SysTick Calibration Register
+    $E000E01C constant SYST_CALIB
+    
+    \ SysTick no reference counter flag mask
+    1 31 lshift constant SYST_CALIB_NOREF
 
-  \ SysTick tick interrupt flag mask
-  1 1 lshift constant SYST_CSR_TICKINT
+    \ SysTick TENMS field is inexact flag mask
+    1 30 lshift constant SYST_CALIB_SKEW
+    
+    \ SysTick value for 10 ms (100 Hz) timing, subject to skew errors mask
+    $00FFFFFF constant SYST_CALIB_TENMS
+    
+    \ SysTick counter
+    variable systick-counter
 
-  \ SysTick tick enable flag mask
-  1 0 lshift constant SYST_CSR_ENABLE
-
-  \ RW SysTick Reload Value Register (24 bit)
-  $E000E014 constant SYST_RVR
-
-  \ RW SysTick Current Value Register (24 bit)
-  $E000E018 constant SYST_CVR
-
-  \ RO SysTick Calibration Register
-  $E000E01C constant SYST_CALIB
-
-  \ SysTick no reference counter flag mask
-  1 31 lshift constant SYST_CALIB_NOREF
-
-  \ SysTick TENMS field is inexact flag mask
-  1 30 lshift constant SYST_CALIB_SKEW
-
-  \ SysTick value for 10 ms (100 Hz) timing, subject to skew errors mask
-  $00FFFFFF constant SYST_CALIB_TENMS
-
-  \ SysTick counter
-  variable systick-counter
-
-  \ Set non-internal
-  systick-wordlist set-current
-
+  end-module
+  
   \ SysTick handler
   : systick-handler ( -- )
     SYST_CSR @ SYST_CSR_COUNTFLAG and if
@@ -93,12 +85,8 @@ defined? systick-wordlist not [if]
   \ Make systick-counter read-only
   : systick-counter ( -- u ) systick-counter @ ;
 
-  \ Reset current wordlist
-  forth-wordlist set-current
-
-  \ Init
-  : init ( -- )
-    init
+  \ Initialize SysTick
+  : init-systick
     ['] systick-handler systick-handler-hook !
     SYST_CALIB @ SYST_CALIB_TENMS and
     10 / systick-divisor / time-multiplier * time-divisor / SYST_RVR !
@@ -107,18 +95,30 @@ defined? systick-wordlist not [if]
     enable-systick
   ;
 
-  \ Wait for n milliseconds
-  : ms ( u -- )
-    systick-divisor * systick-counter @
-    begin
-      dup systick-counter @ swap - 2 pick u<
-    while
-      pause
-    repeat
-    drop drop
-  ;
+  \ Systick divisor
+  : systick-divisor ( -- ) systick-divisor ;
+  
+end-module
 
-[then]
+\ Init
+: init ( -- )
+  init
+  init-systick
+;
 
-\ Reboot
-reboot
+\ Wait for n milliseconds
+: ms ( u -- )
+  systick-divisor * systick-counter @
+  begin
+    dup systick-counter @ swap - 2 pick u<
+  while
+    pause
+  repeat
+  drop drop
+;
+
+unimport systick-wordlist
+
+\ Warm reboot
+warm
+

@@ -18,51 +18,53 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Set up the wordlist order
-forth-wordlist task-wordlist 2 set-order
-forth-wordlist set-current
+begin-module forth-wordlist
 
-\ The blinker variation delay
-variable vary-delay
+  import task-wordlist
 
-\ The blinker variation minimum blinker delay
-variable vary-min
+  \ The blinker variation delay
+  variable vary-delay
 
-\ The blinker variation maximum blinker delay
-variable vary-max
+  \ The blinker variation minimum blinker delay
+  variable vary-min
 
-\ The blinker variation blinker delay step
-variable vary-step
+  \ The blinker variation maximum blinker delay
+  variable vary-max
 
-\ The blinker variation routine
-: vary ( -- )
-  begin
-    vary-min @ blinker-delay !
+  \ The blinker variation blinker delay step
+  variable vary-step
+
+  \ The blinker variation routine
+  : vary ( -- )
     begin
-      blinker-delay @ vary-max @ <
-    while
-      vary-delay @ ms
-      blinker-delay @ vary-step @ + blinker-delay !
-    repeat
-    vary-max @ blinker-delay !
-    begin
-      blinker-delay @ vary-min @ >
-    while
-      vary-delay @ ms
-      blinker-delay @ vary-step @ - blinker-delay !
-    repeat
-  again
-;
+      vary-min @ blinker-delay !
+      begin
+	blinker-delay @ vary-max @ <
+      while
+	vary-delay @ ms
+	blinker-delay @ vary-step @ + blinker-delay !
+      repeat
+      vary-max @ blinker-delay !
+      begin
+	blinker-delay @ vary-min @ >
+      while
+	vary-delay @ ms
+	blinker-delay @ vary-step @ - blinker-delay !
+      repeat
+    again
+  ;
 
-\ The blinker variation task
-variable vary-task
+  \ The blinker variation task
+  variable vary-task
 
-\ Init
-: init-vary ( -- )
-  100 vary-delay !
-  50 vary-min !
-  500 vary-max !
-  25 vary-step !
-  0 ['] vary 256 256 256 spawn vary-task !
-  vary-task @ run
-;
+  \ Init
+  : init-vary ( -- )
+    100 vary-delay !
+    50 vary-min !
+    500 vary-max !
+    25 vary-step !
+    0 ['] vary 256 256 256 spawn vary-task !
+    vary-task @ run
+  ;
+
+end-module

@@ -18,16 +18,10 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Set up the wordlist
-forth-wordlist 1 set-order
-forth-wordlist set-current
-
-\ Check whether this is already defined
-defined? init-heartbeat not [if]
-
-  \ Set up the wordlist
-  forth-wordlist task-wordlist led-wordlist 3 set-order
-  forth-wordlist set-current
+begin-module-once heartbeat-wordlist
+  
+  import task-wordlist
+  import led-wordlist
 
   \ Display a heartbeat
   : heartbeat ( -- )
@@ -48,4 +42,4 @@ defined? init-heartbeat not [if]
     heartbeat-task @ run
   ;
   
-[then]
+end-module

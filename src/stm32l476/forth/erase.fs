@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -21,27 +21,24 @@
 \ Compile this to flash
 compile-to-flash
 
-\ Set up the wordlist order
-forth-wordlist internal-wordlist 2 set-order
-internal-wordlist set-current
+begin-import-module internal-wordlist
 
-\ Begin compressing compiled code in flash
-compress-flash
+  \ Begin compressing compiled code in flash
+  compress-flash
 
-\ Pad flash to a 2048 byte boundary
-: pad-flash-erase-block ( -- )
-  begin flash-here $7FF and while
-    0 bflash,
-  repeat
-;
+  \ Pad flash to a 2048 byte boundary
+  : pad-flash-erase-block ( -- )
+    begin flash-here $7FF and while
+      0 bflash,
+    repeat
+  ;
 
-\ Restore flash to a preexisting state
-: restore-flash ( flash-here -- )
-  erase-after rdrop
-;
+  \ Restore flash to a preexisting state
+  : restore-flash ( flash-here -- )
+    erase-after rdrop
+  ;
 
-\ Set forth
-forth-wordlist set-current
+end-module
 
 \ Commit flash
 commit-flash
@@ -65,18 +62,16 @@ commit-flash
   then
 ;
 
-\ Set internal
-internal-wordlist set-current
+begin-module internal-wordlist
+  
+  \ Core of CORNERSTONE's DOES>
+  : cornerstone-does> ( -- )
+    does>
+    $800 align
+    erase-after
+  ;
 
-\ Core of CORNERSTONE's DOES>
-: cornerstone-does> ( -- )
-  does>
-  $800 align
-  erase-after
-;
-
-\ Set forth
-forth-wordlist set-current
+end-module
 
 \ Committing code in flash
 commit-flash
@@ -95,6 +90,8 @@ commit-flash
 
 \ Ending compiling code in flash
 end-compress-flash
+
+unimport internal-wordlist
 
 \ Warm reboot
 warm

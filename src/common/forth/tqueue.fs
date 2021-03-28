@@ -18,80 +18,66 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Set up the wordlist
-forth-wordlist 1 set-order
-forth-wordlist set-current
+\ Compile to flash
+compile-to-flash
 
-\ Make sure task-wordlist exist
-defined? task-wordlist not [if]
-  :noname space ." task is not installed" cr ; ?raise
-[then]
+begin-module-once tqueue-wordlist
 
-\ Check whether this is already defined
-defined? tqueue-wordlist not [if]
+  import task-wordlist
 
-  \ Compile to flash
-  compile-to-flash
+  begin-import-module tqueue-internal-wordlist
 
-  \ Setup the wordlist
-  wordlist constant tqueue-wordlist
-  wordlist constant tqueue-internal-wordlist
-  forth-wordlist task-wordlist tqueue-internal-wordlist tqueue-wordlist
-  4 set-order
-  tqueue-wordlist set-current
+    \ Task queue header structure
+    begin-structure tqueue-size
 
-  \ Task queue header structure
-  begin-structure tqueue-size
+      \ First fast channel send task queue
+      field: first-wait
 
-    \ Switch the current wordlist
-    tqueue-internal-wordlist set-current
+      \ First fast channel receive task queue
+      field: last-wait
 
-    \ First fast channel send task queue
-    field: first-wait
+      \ Wait counter
+      field: wait-counter
 
-    \ First fast channel receive task queue
-    field: last-wait
+    end-structure
 
-    \ Wait counter
-    field: wait-counter
+    \ Wait structure
+    begin-structure wait-size
 
-  end-structure
+      \ Fast channel wait next record
+      field: wait-next
 
-  \ Wait structure
-  begin-structure wait-size
+      \ Fast channel wait task
+      field: wait-task
 
-    \ Fast channel wait next record
-    field: wait-next
+      \ Original here position
+      field: wait-orig-here
 
-    \ Fast channel wait task
-    field: wait-task
+    end-structure
 
-    \ Original here position
-    field: wait-orig-here
+    \ Set up a wait record
+    : init-wait ( -- wait )
+      ram-here 4 ram-align, ram-here wait-size ram-allot
+      tuck wait-orig-here !
+      0 over wait-next !
+      current-task over wait-task !
+    ;
 
-  end-structure
+    \ Add a wait record
+    : add-wait ( wait tqueue -- )
+      dup first-wait @ if
+	2dup last-wait @ wait-next !
+      else
+	2dup first-wait !
+      then
+      last-wait !
+    ;
 
-  \ Set up a wait record
-  : init-wait ( -- wait )
-    ram-here 4 ram-align, ram-here wait-size ram-allot
-    tuck wait-orig-here !
-    0 over wait-next !
-    current-task over wait-task !
-  ;
+  end-module
 
-  \ Add a wait record
-  : add-wait ( wait tqueue -- )
-    dup first-wait @ if
-      2dup last-wait @ wait-next !
-    else
-      2dup first-wait !
-    then
-    last-wait !
-  ;
-
-  \ Switch wordlists
-  tqueue-wordlist set-current
-
+  \ Export tqueue-size
+  tqueue-size constant tqueue-size
+  
   \ Initialize a task queue
   : init-tqueue ( addr -- )
     0 over wait-counter !
@@ -137,7 +123,7 @@ defined? tqueue-wordlist not [if]
 \    end-critical
   ;
 
-[then]
+end-module
 
 \ Warm reboot
 warm

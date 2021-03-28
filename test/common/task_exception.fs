@@ -18,24 +18,26 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Set up the wordlist order
-forth-wordlist task-wordlist 2 set-order
-forth-wordlist
+begin-module forth-module
 
-\ The loop
-: test ( -- ) begin 1000 ms again ;
+  import task-wordlist
+  
+  \ The loop
+  : test ( -- ) begin 1000 ms again ;
+  
+  \ The loop task
+  0 ' test 256 256 256 spawn constant test-task
+  
+  \ Start the loop task
+  test-task run
+  
+  \ Wait half a second
+  500 ms
 
-\ The loop task
-0 ' test 256 256 256 spawn constant test-task
+  \ My exception
+  : exc ( -- ) space ." exc" cr ;
+  
+  \ Raise my exception
+  ' exc ?raise
 
-\ Start the loop task
-test-task run
-
-\ Wait half a second
-500 ms
-
-\ My exception
-: exc ( -- ) space ." exc" cr ;
-
-\ Raise my exception
-' exc ?raise
+end-module
