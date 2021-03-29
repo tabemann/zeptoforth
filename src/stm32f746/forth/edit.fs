@@ -21,11 +21,11 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-import-module-once edit-internal-wordlist
+begin-import-module-once edit-internal-module
 
-  import systick-wordlist
-  import block-wordlist
-  import ansi-term-wordlist
+  import systick-module
+  import block-module
+  import ansi-term-module
 
   \ Edit buffer count (must be <= 32)
   9 constant buffer-count
@@ -732,7 +732,7 @@ end-module
 \ Edit a block
 : edit ( id -- ) edit ;
 
-unimport edit-internal-wordlist
+unimport edit-internal-module
 
 \ Warm reboot
 warm

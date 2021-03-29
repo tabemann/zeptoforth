@@ -21,11 +21,11 @@
 \ Compile to flash
 compile-to-flash
 
-begin-module-once tqueue-wordlist
+begin-module-once tqueue-module
 
-  import task-wordlist
+  import task-module
 
-  begin-import-module tqueue-internal-wordlist
+  begin-import-module tqueue-internal-module
 
     \ Task queue header structure
     begin-structure tqueue-size

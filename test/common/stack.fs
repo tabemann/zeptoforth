@@ -20,8 +20,8 @@
 
 \ Set up the wordlist
 get-order get-current
-forth-wordlist 1 set-order
-forth-wordlist set-current
+forth-module 1 set-order
+forth-module set-current
 
 \ The stack fail hook
 variable stack-fail-hook

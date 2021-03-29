@@ -21,13 +21,13 @@
 
 compile-to-flash
 
-forth-wordlist 1 set-order
-forth-wordlist set-current
-defined? memmap-wordlist not [if]
-wordlist constant memmap-wordlist
+forth-module 1 set-order
+forth-module set-current
+defined? memmap-module not [if]
+wordlist constant memmap-module
 [then]
-forth-wordlist memmap-wordlist 2 set-order
-memmap-wordlist set-current
+forth-module memmap-module 2 set-order
+memmap-module set-current
 
 execute-defined? use-RNG defined? RNG_CR_IE not and [if]
 \ RNG_CR (read-write) Reset:0x00000000
@@ -16176,7 +16176,7 @@ execute-defined? use-NVIC defined? NVIC_IPR19_IPR_N0 not and [if]
 : NVIC_IPR19_IPR_N3 ( %bbbbbbbb -- x addr ) 24 lshift NVIC_IPR19 ; \ NVIC_IPR19_IPR_N3, IPR_N3
 [then]
 
-forth-wordlist 1 set-order
-forth-wordlist set-current
+forth-module 1 set-order
+forth-module set-current
 
 compile-to-ram

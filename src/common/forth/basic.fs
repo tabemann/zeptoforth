@@ -30,18 +30,18 @@ compress-flash
 \ False constant
 0 constant false
 
-\ Forth wordlist constant
-0 constant forth-wordlist
+\ Forth module constant
+0 constant forth-module
 
-\ Internal wordlist constant
-1 constant internal-wordlist
+\ Internal module constant
+1 constant internal-module
 
 \ Commit to flash
 commit-flash
 
 \ Set up wordlist order
-forth-wordlist internal-wordlist 2 set-order
-forth-wordlist set-current
+forth-module internal-module 2 set-order
+forth-module set-current
 
 \ Base 2
 : binary 2 base ! ;
@@ -95,7 +95,7 @@ forth-wordlist set-current
 : abs ( n -- u ) dup 0< if negate then ;
 
 \ Set internal
-internal-wordlist set-current
+internal-module set-current
 
 \ Fill memory with zeros up until a given address
 : advance-here ( a -- )
@@ -108,7 +108,7 @@ internal-wordlist set-current
 ;
 
 \ Set forth
-forth-wordlist set-current
+forth-module set-current
 
 \ Align an address to a power of two
 : align ( a power -- a ) swap 1- swap 1- or 1+ ;
@@ -259,7 +259,7 @@ forth-wordlist set-current
 ;
 
 \ Set internal
-internal-wordlist set-current
+internal-module set-current
 
 \ Get the address of the flags for a word
 : word-flags ( word -- h-addr ) [inlined] ;
@@ -411,7 +411,7 @@ commit-flash
 commit-flash
 
 \ Set forth
-forth-wordlist set-current
+forth-module set-current
 
 \ Lookup a word by its prefix
 : lookup ( "name" -- )
@@ -442,7 +442,7 @@ forth-wordlist set-current
 ;
 
 \ Set internal
-internal-wordlist set-current
+internal-module set-current
 
 \ Search for all the words that go by a certain name in a given dictionary
 : search-word-info ( b-addr bytes dict -- )
@@ -475,7 +475,7 @@ internal-wordlist set-current
 ;  
 
 \ Set forth
-forth-wordlist set-current
+forth-module set-current
 
 \ Dump all the words that go by a certain name
 : word-info ( "name" -- )
@@ -537,7 +537,7 @@ commit-flash
 ;
 
 \ Set internal
-internal-wordlist set-current
+internal-module set-current
 
 \ In all cases:
 \
@@ -571,7 +571,7 @@ internal-wordlist set-current
 ;
 
 \ Set forth
-forth-wordlist set-current
+forth-module set-current
 
 \ Commit changes to flash
 commit-flash
@@ -587,7 +587,7 @@ commit-flash
 : no-word-being-built ( -- ) space ." no word is being built" cr ;
 
 \ Set internal
-internal-wordlist set-current
+internal-module set-current
 
 \ Align to flash block if compiling to flash
 : block-align,
@@ -595,7 +595,7 @@ internal-wordlist set-current
 ;
 
 \ Set forth
-forth-wordlist set-current
+forth-module set-current
 
 \ Commit changes to flash
 commit-flash
@@ -741,7 +741,7 @@ commit-flash
 ;
 
 \ Set internal
-internal-wordlist set-current
+internal-module set-current
 
 \ Look up next available user space
 : next-user-space ( -- offset )
@@ -759,7 +759,7 @@ internal-wordlist set-current
   compile-to-flash
   get-current
   swap
-  internal-wordlist set-current
+  internal-module set-current
   s" *USER*" constant-with-name
   set-current
   not if
@@ -785,7 +785,7 @@ internal-wordlist set-current
   compile-to-flash
   get-current
   swap
-  internal-wordlist set-current
+  internal-module set-current
   s" *RAM*" constant-with-name
   set-current
   not if
@@ -797,7 +797,7 @@ internal-wordlist set-current
 : user> ( -- ) does> @ dict-base @ + ;
 
 \ Set forth
-forth-wordlist set-current
+forth-module set-current
 
 \ Commit changes to flash
 commit-flash
@@ -891,7 +891,7 @@ commit-flash
 ;
 
 \ Set internal
-internal-wordlist set-current
+internal-module set-current
 
 \ Allocate a byte variable in RAM
 : ram-bvariable ( "name" -- )
@@ -982,7 +982,7 @@ internal-wordlist set-current
 ;
 
 \ Set forth
-forth-wordlist set-current
+forth-module set-current
 
 \ Commit changes to flash
 commit-flash
@@ -1045,7 +1045,7 @@ commit-flash
 commit-flash
 
 \ Set the internal wordlist
-internal-wordlist set-current
+internal-module set-current
 
 \ There is a deferred context switch
 variable deferred-context-switch
@@ -1057,7 +1057,7 @@ variable in-critical
 commit-flash
 
 \ Set the forth wordlist
-forth-wordlist set-current
+forth-module set-current
 
 \ Begin a critical section
 : begin-critical ( -- )
@@ -1111,16 +1111,16 @@ commit-flash
 ;
 
 \ Set internal
-internal-wordlist set-current
+internal-module set-current
 
 \ Specify current flash wordlist
-: set-current-flash-wordlist ( wid -- )
+: set-current-flash-module ( wid -- )
   compiling-to-flash?
   swap
   compile-to-flash
   get-current
   swap
-  internal-wordlist set-current
+  internal-module set-current
   s" *WORDLIST*" constant-with-name
   set-current
   not if
@@ -1129,43 +1129,43 @@ internal-wordlist set-current
 ;
 
 \ Look up the current flash wordlist
-: get-current-flash-wordlist ( -- wid )
+: get-current-flash-module ( -- wid )
   s" *WORDLIST*" visible-flag flash-latest find-all-dict dup if
     >body execute
   else
-    drop internal-wordlist
+    drop internal-module
   then
 ;
 
 \ Set forth
-forth-wordlist set-current
+forth-module set-current
 
 \ Commit to flash
 commit-flash
 
 \ Create a flash wordlist
-: flash-wordlist ( -- wid )
-  get-current-flash-wordlist 1+ dup set-current-flash-wordlist
+: flash-module ( -- wid )
+  get-current-flash-module 1+ dup set-current-flash-module
 ;
 
 \ Set internal
-internal-wordlist set-current
+internal-module set-current
 
 \ The minimum RAM wordlist
-32768 constant min-ram-wordlist
+32768 constant min-ram-module
 
 \ The current RAM wordlist
-variable current-ram-wordlist
+variable current-ram-module
 
 \ Set forth
-forth-wordlist set-current
+forth-module set-current
 
 \ Commit to flash
 commit-flash
 
 \ Create a RAM wordlist
-: ram-wordlist ( -- wid )
-  current-ram-wordlist @ 1 current-ram-wordlist +!
+: ram-module ( -- wid )
+  current-ram-module @ 1 current-ram-module +!
 ;
 
 \ Commit to flash
@@ -1174,9 +1174,9 @@ commit-flash
 \ Create a new wordlist
 : wordlist ( -- wid )
   compiling-to-flash? if
-    flash-wordlist
+    flash-module
   else
-    ram-wordlist
+    ram-module
   then
 ;
 
@@ -1429,7 +1429,7 @@ commit-flash
 ;
 
 \ Set internal
-internal-wordlist set-current
+internal-module set-current
 
 \ Decode the immediate field from a MOVW or MOVT instruction
 : decode-mov16 ( h-addr -- h )
@@ -1444,7 +1444,7 @@ internal-wordlist set-current
 ;
 
 \ Set forth
-forth-wordlist set-current
+forth-module set-current
 
 \ Get the referred xt from a deferred word in RAM
 : defer-ram@ ( xt-deferred -- xt )
@@ -1462,10 +1462,10 @@ forth-wordlist set-current
 ;
 
 \ Set up the wordlist
-wordlist constant esc-string-wordlist
+wordlist constant esc-string-module
 commit-flash
-internal-wordlist forth-wordlist esc-string-wordlist 3 set-order
-esc-string-wordlist set-current
+internal-module forth-module esc-string-module 3 set-order
+esc-string-module set-current
 
 \ Character constants
 $07 constant alert
@@ -1714,7 +1714,7 @@ commit-flash
 commit-flash
 
 \ Change wordlists
-forth-wordlist set-current
+forth-module set-current
 
 \ Compile an escaped counted string
 : c\" ( -- )
@@ -1757,7 +1757,7 @@ forth-wordlist set-current
 ;
 
 \ Set forth
-forth-wordlist set-current
+forth-module set-current
 
 \ Commit to flash
 commit-flash
@@ -1801,7 +1801,7 @@ commit-flash
 : [then] ( -- ) [immediate] ;
 
 \ Set internal
-internal-wordlist set-current
+internal-module set-current
 
 \ Maximum pictured numeric output size
 65 constant picture-size
@@ -1810,7 +1810,7 @@ internal-wordlist set-current
 variable picture-offset
 
 \ Set forth
-forth-wordlist set-current
+forth-module set-current
 
 \ Commit to flash
 commit-flash
@@ -1905,7 +1905,7 @@ commit-flash
 ;
 
 \ Set internal
-internal-wordlist set-current
+internal-module set-current
 
 \ Fraction size lookup table
 create fraction-size-table
@@ -1948,7 +1948,7 @@ commit-flash
 ;
 
 \ Set forth
-forth-wordlist set-current
+forth-module set-current
 
 \ Commit to flash
 commit-flash
@@ -2004,7 +2004,7 @@ variable wake-hook
 : wake ( -- ) wake-hook @ ?execute ;
 
 \ Set internal
-internal-wordlist set-current
+internal-module set-current
 
 \ Flush console hook variable
 variable flush-console-hook
@@ -2024,7 +2024,7 @@ commit-flash
 ;
 
 \ Set forth
-forth-wordlist set-current
+forth-module set-current
 
 \ Flush the console
 : flush-console ( -- ) flush-console-hook @ ?execute ;
@@ -2032,7 +2032,7 @@ forth-wordlist set-current
 \ Initialize the RAM variables
 : init ( -- )
   init
-  min-ram-wordlist current-ram-wordlist !
+  min-ram-module current-ram-module !
   next-ram-space dict-base !
   dict-base @ next-user-space + ram-here!
   false deferred-context-switch !

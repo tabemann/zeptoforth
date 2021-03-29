@@ -21,11 +21,11 @@
 \ Compile to flash
 compile-to-flash
 
-begin-module-once lock-wordlist
+begin-module-once lock-module
 
-  import task-wordlist
+  import task-module
 
-  begin-import-module lock-internal-wordlist
+  begin-import-module lock-internal-module
 
     \ Lock header structure
     begin-structure lock-size

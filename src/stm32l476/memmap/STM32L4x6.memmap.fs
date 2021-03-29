@@ -21,13 +21,13 @@
 
 compile-to-flash
 
-forth-wordlist 1 set-order
-forth-wordlist set-current
-defined? memmap-wordlist not [if]
-wordlist constant memmap-wordlist
+forth-module 1 set-order
+forth-module set-current
+defined? memmap-module not [if]
+wordlist constant memmap-module
 [then]
-forth-wordlist memmap-wordlist 2 set-order
-memmap-wordlist set-current
+forth-module memmap-module 2 set-order
+memmap-module set-current
 
 execute-defined? use-DAC defined? DAC not and [if]
 $40007400 constant DAC ( Digital-to-analog converter ) 
@@ -1005,7 +1005,7 @@ NVIC $44C + constant NVIC_IPR19 ( read-write )  \ Interrupt Priority Register
 NVIC $450 + constant NVIC_IPR20 ( read-write )  \ Interrupt Priority Register
 [then]
 
-forth-wordlist 1 set-order
-forth-wordlist set-current
+forth-module 1 set-order
+forth-module set-current
 
 compile-to-ram

@@ -22,12 +22,12 @@
 \ Compile to flash
 compile-to-flash
 
-begin-import-module-once int-io-wordlist
+begin-import-module-once int-io-module
 
-  import internal-wordlist
-  import interrupt-wordlist
+  import internal-module
+  import interrupt-module
 
-  begin-import-module int-io-internal-wordlist
+  begin-import-module int-io-internal-module
     
     \ RAM variable for rx buffer read-index
     bvariable rx-read-index
@@ -208,7 +208,7 @@ begin-import-module-once int-io-wordlist
     ;
 
     \ Set non-internal
-    int-io-wordlist set-current
+    int-io-module set-current
 
   end-module
   
@@ -264,7 +264,7 @@ end-module
   init-int-io
 ;
 
-unimport int-io-wordlist
+unimport int-io-module
 
 \ Warm reboot
 warm

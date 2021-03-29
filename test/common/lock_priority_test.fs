@@ -18,10 +18,10 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module forth-wordlist
+begin-module forth-module
 
-  import task-wordlist
-  import lock-wordlist
+  import task-module
+  import lock-module
 
   \ Our lock
   lock-size buffer: my-lock

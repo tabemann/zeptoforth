@@ -21,11 +21,11 @@
 \ Compile to flash
 compile-to-flash
 
-begin-import-module-once systick-wordlist
+begin-import-module-once systick-module
 
-  import internal-wordlist
+  import internal-module
 
-  begin-import-module systick-internal-wordlist
+  begin-import-module systick-internal-module
 
     \ RW SysTick Control and Status Register
     $E000E010 constant SYST_CSR
@@ -117,7 +117,7 @@ end-module
   drop drop
 ;
 
-unimport systick-wordlist
+unimport systick-module
 
 \ Warm reboot
 warm

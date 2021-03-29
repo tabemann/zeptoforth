@@ -21,9 +21,9 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-import-module-once line-internal-wordlist
+begin-import-module-once line-internal-module
 
-  import ansi-term-wordlist
+  import ansi-term-module
 
   \ Line structure
   begin-structure line-size
@@ -417,7 +417,7 @@ begin-import-module-once line-internal-wordlist
 
 end-module
 
-import internal-wordlist
+import internal-module
 
 \ Initialize
 : init ( -- )
@@ -434,8 +434,8 @@ import internal-wordlist
 \ Get whether the line editor is enabled
 : line-enabled? ( -- ) refill-hook @ ['] line-edit = ;
 
-unimport internal-wordlist
-unimport line-internal-wordlist
+unimport internal-module
+unimport line-internal-module
 
 \ Warm reboot
 warm
