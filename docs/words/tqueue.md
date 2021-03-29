@@ -4,7 +4,7 @@ A task queue is a queue of waiting tasks, which then can be woken up, in the ord
 
 Task queues are not included in the default builds; the user must load `src/common/forth/tqueue.fs` or use a big build for them to be available. Note that logic is in place to ensure that it is not loaded multiple times. Note that it is compiled into flash when it is loaded.
 
-The following words are in `tqueue-wordlist`:
+The following words are in `tqueue-module`:
 
 ##### `tqueue-size`
 ( -- bytes )

@@ -10,7 +10,7 @@ Fast channels can be created anywhere in memory; they are not dependent upon any
 
 Fast channels are not included in the default builds; the user must load `src/common/forth/fchannel.fs` or use a big build for them to be available, after loading `src/common/forth/tqueue.fs`. Note that logic is in place to ensure that they are not loaded multiple times. Note that it is compiled into flash when it is loaded.
 
-The following words are in `fchan-wordlist`:
+The following words are in `fchan-module`:
 
 ##### `fchan-size`
 ( -- bytes )

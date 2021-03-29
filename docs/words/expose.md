@@ -1,6 +1,6 @@
 # Exposed Kernel Variables
 
-Thes words are in `forth-wordlist`.
+Thes words are in `forth-module`.
 
 ##### `state`
 

@@ -1,6 +1,6 @@
 # Basic Words
 
-These words are in `forth-wordlist`.
+These words are in `forth-module`.
 
 ##### `drop`
 ( x -- )

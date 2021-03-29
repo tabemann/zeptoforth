@@ -1,6 +1,6 @@
 # Internal Words
 
-These words are in `internal-wordlist`.
+These words are in `internal-module`.
 
 ##### `advance-here`
 ( a -- )

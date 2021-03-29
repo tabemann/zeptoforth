@@ -13,14 +13,14 @@ Note that tabs and characters of code points greater than 127 are handled correc
 
 The line editor is not included in the default builds; the user must load `src/common/forth/line.fs` or use a big build for it to be available. Note that logic is in place to ensure that it is not loaded multiple times.  Note that it is compiled into flash when it is loaded. After a reboot, it is initialized for the main task only, and if, when enabled, `refill` is used for a different task, it needs to have already been initialized for that task.
 
-The following words are in `line-wordlist`:
+The following words are in `line-module`:
 
 ##### `init-line`
 ( index-ptr count-ptr buffer-ptr buffer-size -- )
 
 Enable the line editor for the current task, with a pointer to the index variable, a poiner to the count variable, a pointer to the input buffer, and a size of the input buffer provided. Note that it allots memory in the current task's dictionary.
 
-The following words are in `forth-wordlist`:
+The following words are in `forth-module`:
 
 ##### `enable-line`
 ( -- )

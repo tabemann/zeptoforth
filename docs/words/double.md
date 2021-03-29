@@ -1,6 +1,6 @@
 # Double-Cell Words
 
-These words are in `forth-wordlist`.
+These words are in `forth-module`.
 
 ##### `2drop`
 ( d -- )
