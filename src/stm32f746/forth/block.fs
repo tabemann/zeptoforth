@@ -21,16 +21,16 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-import-module-once block-wordlist
+begin-import-module-once block-module
 
-  import internal-wordlist
-  import task-wordlist
-  import qspi-wordlist
+  import internal-module
+  import task-module
+  import qspi-module
 
   \ Block size
   1024 constant block-size
 
-  begin-import-module block-internal-wordlist
+  begin-import-module block-internal-module
 
     \ Sector size
     1024 64 * constant sector-size
@@ -364,7 +364,7 @@ begin-import-module-once block-wordlist
     2drop
   ;
 
-  begin-module block-internal-wordlist
+  begin-module block-internal-module
   
     \ Copy blocks from the start
     : copy-blocks-from-start ( src-id dest-id count -- )
@@ -484,7 +484,7 @@ end-module
 \ List a range of blocks, ignoring nonexistent blocks
 : list-range ( start-id end-id -- ) list-range ;
 
-unimport block-wordlist
+unimport block-module
 
 \ Warm reboot
 warm

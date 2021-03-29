@@ -23,13 +23,13 @@
 compile-to-flash
 
 \ Set up the wordlist
-forth-wordlist 1 set-order
-forth-wordlist set-current
-wordlist constant int-io-wordlist
-wordlist constant int-io-internal-wordlist
-forth-wordlist internal-wordlist interrupt-wordlist int-io-wordlist
-int-io-internal-wordlist 5 set-order
-int-io-internal-wordlist set-current
+forth-module 1 set-order
+forth-module set-current
+wordlist constant int-io-module
+wordlist constant int-io-internal-module
+forth-module internal-module interrupt-module int-io-module
+int-io-internal-module 5 set-order
+int-io-internal-module set-current
 
 \ RAM variable for rx buffer read-index
 bvariable rx-read-index
@@ -193,7 +193,7 @@ UART_Base $51C + constant UART_TXD
 ;
 
 \ Set non-internal
-int-io-wordlist set-current
+int-io-module set-current
 
 \ Handle IO for multitasking
 : task-io ( -- ) ;
@@ -222,7 +222,7 @@ int-io-wordlist set-current
 ;
 
 \ Reset current wordlist
-forth-wordlist set-current
+forth-module set-current
 
 \ Init
 : init ( -- )

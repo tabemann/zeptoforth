@@ -19,18 +19,18 @@
 \ SOFTWARE.
 
 \ Set up the wordlist order
-forth-wordlist 1 set-order
-forth-wordlist set-current
+forth-module 1 set-order
+forth-module set-current
 
 \ Compile to flash
 compile-to-flash
 
-begin-module schedule-wordlist
+begin-module schedule-module
 
-  import systick-wordlist
-  import task-wordlist
+  import systick-module
+  import task-module
 
-  begin-import-module schedule-internal-wordlist
+  begin-import-module schedule-internal-module
 
     \ The current action
     user current-action

@@ -22,18 +22,18 @@
 compile-to-flash
 
 \ Set up the wordlist
-forth-wordlist 1 set-order
-forth-wordlist set-current
+forth-module 1 set-order
+forth-module set-current
 
 \ Actually set up the wordlist
-internal-wordlist forth-wordlist 2 set-order
-internal-wordlist set-current
+internal-module forth-module 2 set-order
+internal-module set-current
 
 \ The module stack's size in entries
 5 constant module-stack-count
 
 \ The maximum wordlist order
-16 constant max-wordlist-order
+16 constant max-module-order
 
 \ The current module stack index
 variable module-stack-index
@@ -41,13 +41,13 @@ variable module-stack-index
 \ The module stack entry
 begin-structure module-entry-size
   \ The module stack wordlist count
-  hfield: module-wordlist-count
+  hfield: module-module-count
 
   \ The module stack saved base
   hfield: module-base
 
   \ The module's wordlist
-  field: module-wordlist
+  field: module-module
 end-structure
 
 \ The module stack
@@ -63,7 +63,7 @@ module-entry-size module-stack-count * buffer: module-stack
 ;
 
 \ Switch wordlists
-forth-wordlist set-current
+forth-module set-current
 
 \ Module stack overflow exception
 : x-module-stack-overflow ( -- ) space ." module stack overflow" cr ;
@@ -75,16 +75,16 @@ forth-wordlist set-current
 : x-order-overflow ( -- ) space ." wordlist order overflow" cr ;
 
 \ Switch wordlists
-internal-wordlist set-current
+internal-module set-current
 
 \ Push a module stack entry
 : push-module-stack ( wid -- )
   module-stack-index @ module-stack-count < averts x-module-stack-overflow
   1 module-stack-index +!
   module-stack@
-  0 over module-wordlist-count h!
+  0 over module-module-count h!
   base @ over module-base h!
-  module-wordlist !
+  module-module !
 ;
 
 \ Pop a module stack entry
@@ -92,35 +92,35 @@ internal-wordlist set-current
   module-stack-index @ 1 > averts x-module-stack-underflow
   module-stack@
   module-base h@ base !
-  get-order module-stack@ module-wordlist-count h@ begin dup 0<> while
+  get-order module-stack@ module-module-count h@ begin dup 0<> while
     1- swap 1- swap rot drop
   repeat
   drop
   set-order
   -1 module-stack-index +!
   module-stack-index @ 0<> if
-    module-stack@ module-wordlist @ set-current
+    module-stack@ module-module @ set-current
   else
-    forth-wordlist set-current
+    forth-module set-current
   then
 ;
 
 \ Add a wordlist to the order
-: add-wordlist ( wid -- )
-  >r get-order dup max-wordlist-order < r> swap averts x-order-overflow
+: add-module ( wid -- )
+  >r get-order dup max-module-order < r> swap averts x-order-overflow
   swap 1+ set-order
   module-stack-index @ 0<> averts x-module-stack-underflow
   module-stack@
-  1 swap module-wordlist-count h+!
+  1 swap module-module-count h+!
 ;
 
 \ Remove a wordlist from the order
-: remove-wordlist ( wid -- )
+: remove-module ( wid -- )
   module-stack-index @ 0 > averts x-module-stack-underflow
-  >r get-order module-stack@ module-wordlist-count h@ begin dup 0<> while
+  >r get-order module-stack@ module-module-count h@ begin dup 0<> while
     dup 1+ pick r@ = if
       dup 1+ roll drop
-      -1 module-stack@ module-wordlist-count h+!
+      -1 module-stack@ module-module-count h+!
       swap 1- swap
     then
     1-
@@ -129,7 +129,7 @@ internal-wordlist set-current
 ;
 
 \ Switch wordlists
-forth-wordlist set-current
+forth-module set-current
 
 \ Module already defined exception
 : x-module-already-defined ( -- ) space ." module already defined" cr ;
@@ -145,7 +145,7 @@ forth-wordlist set-current
     wordlist dup >r -rot constant-with-name r>
   then
   dup push-module-stack
-  dup add-wordlist
+  dup add-module
   set-current
 ;
 
@@ -157,7 +157,7 @@ forth-wordlist set-current
     wordlist dup >r -rot constant-with-name r>
   then
   dup push-module-stack
-  dup add-wordlist
+  dup add-module
   set-current
 ;
 
@@ -168,7 +168,7 @@ forth-wordlist set-current
   else
     wordlist dup >r -rot constant-with-name r>
   then
-  dup add-wordlist
+  dup add-module
   dup push-module-stack
   set-current
 ;
@@ -180,7 +180,7 @@ forth-wordlist set-current
   else
     wordlist dup >r -rot constant-with-name r>
   then
-  dup add-wordlist
+  dup add-module
   dup push-module-stack
   set-current
 ;
@@ -191,7 +191,7 @@ forth-wordlist set-current
 \ Import a module
 : import ( "name" -- )
   token visible-flag find-all ?dup if
-    >body execute add-wordlist
+    >body execute add-module
   else
     ['] x-module-not-found ?raise
   then
@@ -200,7 +200,7 @@ forth-wordlist set-current
 \ Unimport a module
 : unimport ( "name" -- )
   token visible-flag find-all ?dup if
-    >body execute remove-wordlist
+    >body execute remove-module
   else
     ['] x-module-not-found ?raise
   then
@@ -210,11 +210,11 @@ forth-wordlist set-current
 : init ( -- )
   init
   0 module-stack-index !
-  forth-wordlist push-module-stack
+  forth-module push-module-stack
 ;
 
-forth-wordlist 1 set-order
-forth-wordlist set-current
+forth-module 1 set-order
+forth-module set-current
 
 \ Warm reboot
 warm

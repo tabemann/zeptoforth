@@ -18,9 +18,9 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module forth-wordlist
+begin-module forth-module
 
-  import task-wordlist
+  import task-module
 
   \ The highest-priority task's loop
   : highest ( -- ) begin 25 0 ?do 100000 0 ?do loop ." *" loop 1000 ms again ;

@@ -21,7 +21,7 @@
 \ Compile to flash
 compile-to-flash
 
-begin-module-once interrupt-wordlist
+begin-module-once interrupt-module
   
   \ SHPRx registers
   $E000ED18 constant SHPR1

@@ -19,20 +19,20 @@
 \ SOFTWARE.
 
 \ Set up the wordlist
-forth-wordlist 1 set-order
-forth-wordlist set-current
+forth-module 1 set-order
+forth-module set-current
 
 \ Compile this to flash
 compile-to-flash
 
-begin-import-module-once task-wordlist
+begin-import-module-once task-module
 
-  import internal-wordlist
-  import interrupt-wordlist
-  import systick-wordlist
-  import int-io-wordlist
+  import internal-module
+  import interrupt-module
+  import systick-module
+  import int-io-module
 
-  begin-import-module task-internal-wordlist
+  begin-import-module task-internal-module
   
     \ Main task
     variable main-task
@@ -93,7 +93,7 @@ begin-import-module-once task-wordlist
   \ Sleep
   : sleep ( -- ) sleep-enabled? @ if sleep then ;
 
-  begin-module task-internal-wordlist
+  begin-module task-internal-module
 
     \ Terminated task
     $8000 constant terminated
@@ -191,7 +191,7 @@ begin-import-module-once task-wordlist
     execute dict-base @ - swap task-dict-base +
   ;
 
-  begin-module task-internal-wordlist
+  begin-module task-internal-module
 
     \ Find the previous task
     : prev-task ( task1 -- task2 )
@@ -366,7 +366,7 @@ begin-import-module-once task-wordlist
   \ Get whether a task has terminated
   : terminated? ( task -- terminated ) task-active h@ terminated = ;
 
-  begin-module task-internal-wordlist
+  begin-module task-internal-module
     
     \ Initialize the main task
     : init-main-task ( -- )
@@ -436,7 +436,7 @@ begin-import-module-once task-wordlist
     dup >r init-task r>
   ;
 
-  begin-module task-internal-wordlist
+  begin-module task-internal-module
     
     \ Reset waits
     : reset-waiting-tasks ( task -- )
@@ -654,7 +654,7 @@ begin-import-module-once task-wordlist
     current-task @ cancel-task-delay
   ;
 
-  begin-import-module task-internal-wordlist
+  begin-import-module task-internal-module
 
     \ Wait the current thread
     : do-wait ( -- )
@@ -724,7 +724,7 @@ begin-import-module-once task-wordlist
     0 ram-latest!
     latest $20000000 >= if 0 latest! then
     0 pause-enabled !
-    min-ram-wordlist current-ram-wordlist !
+    min-ram-module current-ram-module !
     next-ram-space dict-base !
     dict-base @ next-user-space + ram-here!
     0 wait-hook !
@@ -784,9 +784,9 @@ end-module
   init-tasker
 ;
 
-begin-module task-wordlist
+begin-module task-module
   
-  import task-internal-wordlist
+  import task-internal-module
   
   \ Make pause-count read-only
   : pause-count ( -- u ) pause-count @ ;
@@ -805,7 +805,7 @@ begin-module task-wordlist
 
 end-module
 
-unimport task-wordlist
+unimport task-module
 
 \ Reboot to initialize multitasking
 warm

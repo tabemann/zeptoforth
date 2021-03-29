@@ -21,7 +21,7 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-import-module internal-wordlist
+begin-import-module internal-module
 
   \ Begin compressing compiled code in flash
   compress-flash
@@ -96,7 +96,7 @@ commit-flash
   then
 ;
 
-begin-module internal-wordlist
+begin-module internal-module
   
   \ Core of CORNERSTONE's DOES>
   : cornerstone-does> ( -- )
@@ -125,7 +125,7 @@ commit-flash
 \ Ending compiling code in flash
 end-compress-flash
 
-unimport internal-wordlist
+unimport internal-module
 
 \ Warm reboot
 warm

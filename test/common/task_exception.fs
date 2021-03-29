@@ -20,7 +20,7 @@
 
 begin-module forth-module
 
-  import task-wordlist
+  import task-module
   
   \ The loop
   : test ( -- ) begin 1000 ms again ;

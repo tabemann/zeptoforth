@@ -21,12 +21,12 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-import-module-once allocate-wordlist
+begin-import-module-once allocate-module
   
   \ Define a variable for the shared heap
   variable shared-heap
   
-  begin-import-module allocate-internal-wordlist
+  begin-import-module allocate-internal-module
     
     \ The block header structure
     begin-structure block-header-size
@@ -407,7 +407,7 @@ end-module
 \ Init
 : init ( -- ) init 0 shared-heap ! ;
 
-unimport allocate-wordlist
+unimport allocate-module
 
 \ Warm reboot
 warm

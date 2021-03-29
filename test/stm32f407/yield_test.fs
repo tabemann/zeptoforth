@@ -18,12 +18,12 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module forth-wordlist
+begin-module forth-module
 
-  import systick-wordlist
-  import task-wordlist
-  import schedule-wordlist
-  import led-wordlist
+  import systick-module
+  import task-module
+  import schedule-module
+  import led-module
   
   \ Our task
   variable schedule-task

@@ -1,12 +1,12 @@
 compile-to-flash
 
-begin-import-module-once swd-wordlist
+begin-import-module-once swd-module
 
-  import internal-wordlist
-  import int-io-wordlist
-  import int-io-internal-wordlist
+  import internal-module
+  import int-io-module
+  import int-io-internal-module
 
-  begin-import-module swd-internal-wordlist
+  begin-import-module swd-internal-module
 
     here 256 2* cell+ buffer: swd
     swd 0 + constant swd-rx-w
@@ -89,7 +89,7 @@ end-module
   swd-console
 ;
 
-unimport swd-wordlist
+unimport swd-module
 
 compile-to-ram
 

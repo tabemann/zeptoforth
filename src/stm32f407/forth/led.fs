@@ -22,7 +22,7 @@
 \ Compile to flash
 compile-to-flash
 
-begin-import-module-once led-wordlist
+begin-import-module-once led-module
 
   \ Registers
   $40023800 constant RCC_Base
@@ -90,7 +90,7 @@ end-module
   led-init
 ;
 
-unimport led-wordlist
+unimport led-module
 
 \ Warm reboot
 warm
