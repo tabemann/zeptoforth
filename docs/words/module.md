@@ -2,7 +2,7 @@
 
 Modules in zeptoforth are built on top of wordlists, and form a user-friendly means of controlling word namespaces instead of manually manipulating wordlists. Modules and wordlists are one and the same, but by convention they are named with `*-module`.
 
-At any given time once `src/forth/common/module.fs` is loaded there is a module stack which controls how module words manipulate the wordlist order. Initially there is one entry on the module stack, corresponding to the `forth-wordlist` wordlist. When new entries are pushed onto the module stack, they save the state of `base` prior to their creation, and restore it once they are popped. Also, module stack entries specify the current wordlist for them, and when module stack entries immediately above them on the stack are popped, their wordlist is restored as the current wordlist.
+At any given time once `src/forth/common/module.fs` is loaded there is a module stack which controls how module words manipulate the wordlist order. Initially there is one entry on the module stack, corresponding to the `forth-module` wordlist. When new entries are pushed onto the module stack, they save the state of `base` prior to their creation, and restore it once they are popped. Also, module stack entries specify the current wordlist for them, and when module stack entries immediately above them on the stack are popped, their wordlist is restored as the current wordlist.
 
 When modules are defined, they automatically add their wordlist definition as a constant to the containing module. Also, if so specified by using `begin-import-module` or `begin-import-module-once`, the modules may be imported in the containing module. Note that modules may be defined multiple times, each time adding onto the existing definition, unless the module is defined with `begin-module-once` or `begin-import-module-once`, where then it is checked such that the module already exists by the name specified, and if it does exist, `x-module-already-defined` is raised.
 
@@ -10,7 +10,7 @@ Within a given module, the user may import and unimport modules/wordlists, which
 
 Note that it is recommended that once `src/common/forth/module.fs` is loaded, the user should not manually use `set-order` or `set-current`, as the module system will not know about this and thus unexpected results may occur.
 
-The following words are defined in `forth-wordlist`:
+The following words are defined in `forth-module`:
 
 ##### `x-module-already-defined`
 ( -- )

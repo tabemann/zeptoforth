@@ -4,7 +4,7 @@ A lock enforces mutual exclusion, typically with regard to control of a resource
 
 Locks are not included in the default builds; the user must load `src/common/forth/lock.fs` or use a big build for them to be available. Note that logic is in place to ensure that they are not loaded multiple times. Note that it is compiled into flash when it is loaded.
 
-The following words are in `lock-wordlist`:
+The following words are in `lock-module`:
 
 ##### `lock-size`
 ( -- bytes )

@@ -1,13 +1,13 @@
 # Wordlist Words
 
-These words are in `forth-wordlist`.
+These words are in `forth-module`.
 
-##### `forth-wordlist`
+##### `forth-module`
 ( -- wid )
 
 Get the default wordlist, which is both a flash and a RAM wordlist.
 
-##### `internal-wordlist`
+##### `internal-module`
 ( -- wid )
 
 Get the internal wordlist, which includes both words defined in the kernel and words define outside the kernel

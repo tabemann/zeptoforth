@@ -1,6 +1,6 @@
 # Compilation-specific words
 
-These words are in `internal-wordlist`.
+These words are in `internal-module`.
 
 ##### `start-compile-no-push`
 

@@ -8,7 +8,7 @@ Channels can be created anywhere in memory; they are not dependent upon any allo
 
 Channels are not included in the default builds; the user must load `src/common/forth/channel.fs` or use a big build for them to be available. Note that logic is in place to ensure that it is not to be loaded multiple times. Note that it is compiled into flash when it is loaded.
 
-The following words are in `chan-wordlist`:
+The following words are in `chan-module`:
 
 ##### `chan-full?`
 ( chan -- flag )

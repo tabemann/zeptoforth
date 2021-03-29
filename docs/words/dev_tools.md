@@ -2,7 +2,7 @@
 
 There are a number of useful words provided with zeptoforthas development tools.
 
-These words are in `forth-wordlist`.
+These words are in `forth-module`.
 
 ## Disassembler
 
