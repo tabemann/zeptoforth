@@ -21,7 +21,7 @@
 \ Compile this to flash
 compile-to-flash
 
-import internal-wordlist
+import internal-module
 
 \ Get the value of pi
 0 314159265 0 100000000 f/ 2constant pi
@@ -86,7 +86,7 @@ import internal-wordlist
 ;
 
 
-begin-module internal-wordlist
+begin-module internal-module
   
   \ Calculate whether a square root is close enough
   : sqrt-close-enough ( f1 f2 -- flag )
@@ -254,7 +254,7 @@ end-module
 \ Calculate atanh(x)
 : atanh ( f1 -- f2 ) 2dup 0 1 d+ 2swap dnegate 0 1 d+ f/ ln 2 0 d/ ;
 
-begin-module internal-wordlist
+begin-module internal-module
   
   \ Get the number of instances of a character in a string
   : char-count ( b-addr bytes b -- count )
@@ -411,7 +411,7 @@ end-module
   ['] do-handle-number handle-number-hook !
 ;
 
-unimport internal-wordlist
+unimport internal-module
 
 \ Warm reboot
 warm

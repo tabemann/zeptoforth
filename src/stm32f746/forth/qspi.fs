@@ -21,14 +21,14 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-import-module-once qspi-wordlist
+begin-import-module-once qspi-module
 
-  import internal-wordlist
+  import internal-module
 
   \ Quad SPI address validation exception
   : x-invalid-qspi-addr ( -- ) space ." invalid qspi address" cr ;
 
-  begin-import-module qspi-internal-wordlist
+  begin-import-module qspi-internal-module
 
     \ Is mapping QSPI enabled
     variable map-qspi-enabled?
@@ -1074,7 +1074,7 @@ end-module
   init-qspi
 ;
 
-unimport qspi-wordlist
+unimport qspi-module
 
 \ Warm reboot
 warm

@@ -18,11 +18,11 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module forth-wordlist
+begin-module forth-module
 
-  import task-wordlist
-  import schedule-wordlist
-  import led-wordlist
+  import task-module
+  import schedule-module
+  import led-module
 
   \ The schedule
   schedule-size buffer: my-schedule

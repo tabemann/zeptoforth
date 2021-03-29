@@ -21,11 +21,11 @@
 \ Compile to flash
 compile-to-flash
 
-begin-module-once chan-wordlist
+begin-module-once chan-module
   
-  import task-wordlist
+  import task-module
   
-  begin-import-module chan-internal-wordlist
+  begin-import-module chan-internal-module
 
     \ Channel header structure
     begin-structure chan-header-size
@@ -61,7 +61,7 @@ begin-module-once chan-wordlist
   end-module
   
   \ Define public words
-  chan-wordlist set-current
+  chan-module set-current
 
   \ Get whether a channel is full
   : chan-full? ( chan -- flag )
@@ -73,7 +73,7 @@ begin-module-once chan-wordlist
     begin-critical chan-empty-unsafe? end-critical
   ;
 
-  begin-module chan-internal-wordlist
+  begin-module chan-internal-module
     
     \ Wait to send on a channel
     : wait-send-chan ( chan -- )

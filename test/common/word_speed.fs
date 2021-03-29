@@ -18,10 +18,10 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module forth-wordlist
+begin-module forth-module
 
-  import internal-wordlist
-  import systick-wordlist
+  import internal-module
+  import systick-module
   
   \ Start line time
   variable start-line-time

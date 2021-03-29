@@ -1,6 +1,6 @@
 # Module Words
 
-Modules in zeptoforth are built on top of wordlists, and form a user-friendly means of controlling word namespaces instead of manually manipulating wordlists. Modules and wordlists are one and the same, indicated by how the modules that come with zeptoforth have the name `*-wordlist`.
+Modules in zeptoforth are built on top of wordlists, and form a user-friendly means of controlling word namespaces instead of manually manipulating wordlists. Modules and wordlists are one and the same, but by convention they are named with `*-module`.
 
 At any given time once `src/forth/common/module.fs` is loaded there is a module stack which controls how module words manipulate the wordlist order. Initially there is one entry on the module stack, corresponding to the `forth-wordlist` wordlist. When new entries are pushed onto the module stack, they save the state of `base` prior to their creation, and restore it once they are popped. Also, module stack entries specify the current wordlist for them, and when module stack entries immediately above them on the stack are popped, their wordlist is restored as the current wordlist.
 

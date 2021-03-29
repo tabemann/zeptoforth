@@ -21,9 +21,9 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-module-once ansi-term-wordlist
+begin-module-once ansi-term-module
 
-  begin-import-module ansi-term-internal-wordlist
+  begin-import-module ansi-term-internal-module
 
     \ Saved entered byte
     user saved-key

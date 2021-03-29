@@ -21,9 +21,9 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-import-module disassemble-internal-wordlist
+begin-import-module disassemble-internal-module
 
-  import internal-wordlist
+  import internal-module
 
   \ Disassemble for gas
   variable for-gas
@@ -1856,7 +1856,7 @@ end-module
 \ Finish compressing the code
 end-compress-flash
 
-unimport disassemble-internal-wordlist
+unimport disassemble-internal-module
 
 \ Warm reboot
 warm

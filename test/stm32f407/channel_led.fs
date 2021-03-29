@@ -18,11 +18,11 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module forth-wordlist
+begin-module forth-module
 
-  import internal-wordlist
-  import task-wordlist
-  import chan-wordlist
+  import internal-module
+  import task-module
+  import chan-module
   import led-worlist
 
   \ My channel size

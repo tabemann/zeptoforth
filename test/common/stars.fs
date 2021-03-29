@@ -21,9 +21,9 @@
 \ Compile this to RAM
 compile-to-ram
 
-begin-module forth-wordlist
+begin-module forth-module
 
-  import task-wordlist
+  import task-module
   
   \ The stars task
   variable stars-task

@@ -21,13 +21,13 @@
 \ Compile to flash
 compile-to-flash
 
-begin-module-once fchan-wordlist
+begin-module-once fchan-module
 
-  import task-wordlist
-  import task-internal-wordlist
-  import tqueue-wordlist
+  import task-module
+  import task-internal-module
+  import tqueue-module
 
-  begin-import-module fchan-internal-wordlist
+  begin-import-module fchan-internal-module
 
     \ Fast channel header structure
     begin-structure fchan-size
