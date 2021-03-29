@@ -4,7 +4,7 @@ These are a number of word used to manage interaction with ANSI terminals. Note 
 
 The ANSI termiinal interface is not included in the default builds; the user must load `src/common/forth/ansi_term.fs` or use a big build for it to be available. Note that logic is in place to ensure that it is not loaded multiple times. Note that it reboots the MCU when it is loaded due to needing to create user varibles.
 
-The following words are in `ansi-term-wordlist`:
+The following words are in `ansi-term-module`:
 
 ##### `escape`
 ( -- b )

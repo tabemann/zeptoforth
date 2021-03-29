@@ -1114,7 +1114,7 @@ commit-flash
 internal-module set-current
 
 \ Specify current flash wordlist
-: set-current-flash-module ( wid -- )
+: set-current-flash-wordlist ( wid -- )
   compiling-to-flash?
   swap
   compile-to-flash
@@ -1129,7 +1129,7 @@ internal-module set-current
 ;
 
 \ Look up the current flash wordlist
-: get-current-flash-module ( -- wid )
+: get-current-flash-wordlist ( -- wid )
   s" *WORDLIST*" visible-flag flash-latest find-all-dict dup if
     >body execute
   else
@@ -1144,18 +1144,18 @@ forth-module set-current
 commit-flash
 
 \ Create a flash wordlist
-: flash-module ( -- wid )
-  get-current-flash-module 1+ dup set-current-flash-module
+: flash-wordlist ( -- wid )
+  get-current-flash-wordlist 1+ dup set-current-flash-wordlist
 ;
 
 \ Set internal
 internal-module set-current
 
 \ The minimum RAM wordlist
-32768 constant min-ram-module
+32768 constant min-ram-wordlist
 
 \ The current RAM wordlist
-variable current-ram-module
+variable current-ram-wordlist
 
 \ Set forth
 forth-module set-current
@@ -1164,8 +1164,8 @@ forth-module set-current
 commit-flash
 
 \ Create a RAM wordlist
-: ram-module ( -- wid )
-  current-ram-module @ 1 current-ram-module +!
+: ram-wordlist ( -- wid )
+  current-ram-wordlist @ 1 current-ram-wordlist +!
 ;
 
 \ Commit to flash
@@ -1174,9 +1174,9 @@ commit-flash
 \ Create a new wordlist
 : wordlist ( -- wid )
   compiling-to-flash? if
-    flash-module
+    flash-wordlist
   else
-    ram-module
+    ram-wordlist
   then
 ;
 
@@ -2032,7 +2032,7 @@ forth-module set-current
 \ Initialize the RAM variables
 : init ( -- )
   init
-  min-ram-module current-ram-module !
+  min-ram-wordlist current-ram-wordlist !
   next-ram-space dict-base !
   dict-base @ next-user-space + ram-here!
   false deferred-context-switch !

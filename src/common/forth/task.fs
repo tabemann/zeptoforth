@@ -724,7 +724,7 @@ begin-import-module-once task-module
     0 ram-latest!
     latest $20000000 >= if 0 latest! then
     0 pause-enabled !
-    min-ram-module current-ram-module !
+    min-ram-wordlist current-ram-wordlist !
     next-ram-space dict-base !
     dict-base @ next-user-space + ram-here!
     0 wait-hook !

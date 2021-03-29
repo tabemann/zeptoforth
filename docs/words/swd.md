@@ -1,6 +1,6 @@
 # `swdcom` Words
 
-These words are in `swd-wordlist`.
+These words are in `swd-module`.
 
 ##### `swd-console`
 ( -- )

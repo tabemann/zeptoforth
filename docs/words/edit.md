@@ -22,7 +22,7 @@ Note that tabs (which are treated as being of two spaces wide due to the limited
 
 The block editor is not included in the default builds; the user must load `src/common/stm32f746/edit.fs` or use an STM32F746 big build for it to be available. Note that logic is in place to ensure that it is not loaded multiple times. It also requires `src/stm32f746/forth/qspi.fs` and `src/stm32f746/forth/block.fs` to be loaded before it is loaded.  Note that it is compiled into flash and reboots the MCU when it is loaded.
 
-The following words are in `forth-wordlist`:
+The following words are in `forth-module`:
 
 ##### `edit`
 ( id -- )

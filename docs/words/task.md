@@ -6,7 +6,7 @@ Note that task in zeptoforth are a relatively heavy-weight asynchronous computin
 
 Multitasking is enabled by default once `sys/common/forth/task.fs` has been loaded and the MCU has been rebooted; afterwards each time the MCU is booted a new task is created for the REPL, the main task, and multitasking is initiated.
 
-These words are in `task-wordlist`.
+These words are in `task-module`.
 
 ##### `pause`
 ( -- )
