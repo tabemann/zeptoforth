@@ -25,7 +25,7 @@ forth-module set-current
 \ Compile to flash
 compile-to-flash
 
-begin-module schedule-module
+begin-module-once schedule-module
 
   import systick-module
   import task-module
