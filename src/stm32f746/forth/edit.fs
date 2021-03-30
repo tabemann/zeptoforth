@@ -70,8 +70,10 @@ begin-import-module-once edit-internal-module
   $02 constant ctrl-b
   $05 constant ctrl-e
   $06 constant ctrl-f
+  $0B constant ctrl-k
   $0E constant ctrl-n
   $10 constant ctrl-p
+  $15 constant ctrl-u
   $16 constant ctrl-v
   $17 constant ctrl-w
   $18 constant ctrl-x
@@ -524,6 +526,42 @@ begin-import-module-once edit-internal-module
     then
   ;
 
+  \ Handle inserting a row
+  : handle-insert-row ( -- )
+    current-row-index@ buffer-height 1- < if
+      buffer-height 1- row-len 0= if
+	current-row current-row buffer-width +
+	buffer-height current-row-index@ - 1- buffer-width * move
+	current-row buffer-width $20 fill
+	0 current-column-index!
+	save-current-column
+	update-all
+	dirty
+      then
+    then
+  ;
+
+  \ Handle deleting a row
+  : handle-delete-row ( -- )
+    current-row-index@ row-len 0> if
+      current-row buffer-width $20 fill
+      0 current-column-index!
+      save-current-column
+      update-all
+      dirty
+    else
+      current-row-index@ buffer-height 1- < if
+	current-row buffer-width + current-row
+	buffer-height current-row-index@ - 1- buffer-width * move
+	buffer-height 1- get-row buffer-width $20 fill
+	0 current-column-index!
+	save-current-column
+	update-all
+	dirty
+      then
+    then
+  ;
+  
   \ Handle going forward
   : handle-forward ( -- )
     current-column-bytes buffer-width < if
@@ -711,6 +749,8 @@ begin-import-module-once edit-internal-module
 	  ctrl-v of true endof
 	  ctrl-w of handle-write false endof
 	  ctrl-x of handle-revert false endof
+	  ctrl-u of handle-insert-row false endof
+	  ctrl-k of handle-delete-row false endof
 	  escape of handle-escape false endof
 	  swap false swap
 	endcase
