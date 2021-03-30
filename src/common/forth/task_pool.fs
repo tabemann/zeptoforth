@@ -21,11 +21,11 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-module task-pool-module
+begin-module-once task-pool-wordlist
 
-  import task-module
+  import task-wordlist
 
-  begin-import-module task-pool-internal-module
+  begin-import-module task-pool-internal-wordlist
 
     \ Task pool structure
     begin-structure task-pool-size
