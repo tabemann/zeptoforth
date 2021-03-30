@@ -21,7 +21,7 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-import-module disassemble-internal-module
+begin-import-module-once disassemble-internal-module
 
   import internal-module
 
