@@ -14,6 +14,8 @@ The block editor provides a simple interface for allowing the user to edit block
 * Control-E: move the cursor to the end of the input
 * Control-N: change to the next block
 * Control-P: change to the previous block
+* Control-U: insert a line above the current line
+* Control-K: if the current line is empty, delete it, else delete the current line's contents
 * Control-W: save the current block
 * Control-X: revert the current block
 * Control-V: exit the editor, saving all modified blocks
