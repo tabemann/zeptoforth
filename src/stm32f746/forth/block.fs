@@ -52,10 +52,25 @@ begin-import-module-once block-module
 
     \ Block erase count offset
     sector-block-count 2 * cells constant sector-erase-count-offset
-
+    
     \ Unwritten flash
     $FFFFFFFF constant unwritten
+    
+    \ Maximum saved block count
+    8 constant max-saved-block-count
 
+    \ Saved block data
+    variable saved-block-data
+
+    \ Saved block count
+    : saved-block-count ( -- addr ) saved-block-data ;
+
+    \ Saved block id array
+    : saved-block-ids ( -- addr ) saved-block-data cell+ ;
+
+    \ Saved block array
+    : saved-blocks ( -- addr ) saved-block-ids saved-block-count @ cells + ;
+    
     \ Allot a buffer storing the count of free blocks in sectors
     sector-count buffer: sector-free-map
 
@@ -80,7 +95,8 @@ begin-import-module-once block-module
 
     \ Get the new count for a sector
     : new-count ( index -- count )
-      dup sector-free-map + b@ swap sector-old-map + b@ + sector-block-count swap -
+      dup sector-free-map + b@ swap sector-old-map + b@ +
+      sector-block-count swap -
     ;
 
     \ Find the next sector containing new sectors, or -1 if none can be found
@@ -128,8 +144,9 @@ begin-import-module-once block-module
       sector-erase-count-offset + qspi!
     ;
 
-    \ Find a completely old sector, or return -1 if no sectors are completely old
-    : find-old-sector ( -- index|-1 )
+    \ Find a completely old sector, or return -1 if no sectors are completely
+    \ old
+    : find-old-sector ( -- erase-count index|-1 )
       $FFFFFFFF -1
       sector-count 0 ?do
 	i sector-old-map + b@ sector-block-count = if
@@ -140,7 +157,20 @@ begin-import-module-once block-module
       loop
     ;
 
-    \ Find a sector with a free block, or return -1 if no sectors have free blocks
+    \ Find an almost old sector, conditional on the threshold
+    : find-partial-sector ( -- erase-count index|-1 )
+      $FFFFFFFF -1
+      sector-count 0 ?do
+	i new-count max-saved-block-count <= if
+	  i sector-addr sector-erase-count-offset + @ 1+ >r over r> u> if
+	    2drop i sector-addr sector-erase-count-offset + @ 1+ i
+	  then
+	then
+      loop
+    ;
+
+    \ Find a sector with a free block, or return -1 if no sectors have free
+    \ blocks
     : find-sector-with-free-block ( -- index|-1 )
       sector-count 0 ?do i sector-free-map + b@ 0> if i unloop exit then loop -1
     ;
@@ -161,7 +191,8 @@ begin-import-module-once block-module
     \ Find a free block, or return -1 -1 if no free block can be allocated
     : find-free-block ( -- block-index sector-index | -1 -1 )
       find-sector-with-free-block dup -1 <> if
-	dup find-free-block-in-sector dup -1 <> averts x-should-never-happen swap
+	dup find-free-block-in-sector dup -1 <>
+	averts x-should-never-happen swap
       else
 	drop find-old-sector dup -1 <> if
 	  tuck reuse-sector dup find-free-block-in-sector dup -1 <> if
@@ -198,6 +229,41 @@ begin-import-module-once block-module
     \ Write block data
     : data! ( data-addr block-addr -- )
       1024 swap mass-qspi!
+    ;
+
+    \ Write to a block (the data written must be of size block-size),
+    \ assumes it will succeed
+    : basic-block! ( addr id -- )
+      find-free-block dup -1 <> if
+	2dup set-block-new
+	2dup r> rot rot block-id!
+	block-addr data!
+      then
+    ;
+
+    \ Reuse a partial sector
+    : reuse-partial ( sector-index -- )
+      ram-here saved-block-data !
+      dup >r new-count dup saved-block-count !
+      dup 1+ cells swap block-size * + ram-allot
+      0 sector-block-count 0 ?do
+	r@ sector-addr sector-newer-ptr-map-offset + i cells + @ $FFFFFFFF =
+	r@ sector-addr sector-block-id-map-offset + i cells + @ $FFFFFFFF <> and
+	if
+	  r@ sector-addr sector-block-id-map-offset + i cells + @
+	  over cells saved-block-ids + !
+	  i r@ block-addr over cells saved-blocks + block-size move
+	  1+
+	then
+      loop
+      drop
+      r@ sector-addr sector-erase-count-offset + @ 1+
+      r@ reuse-sector
+      saved-block-count 0 ?do
+	i cells saved-blocks + i basic-block!
+      loop
+      rdrop
+      saved-block-data@ ram-here!
     ;
 
     \ Write to a block (the data written must be of size block-size),
@@ -243,7 +309,8 @@ begin-import-module-once block-module
     \ Get the old block count for a sector
     : discover-sector-old-count ( index -- )
       >r 0 begin dup sector-block-count < while
-	dup cells r@ sector-addr sector-newer-ptr-map-offset + + @ unwritten <> if
+	dup cells r@ sector-addr sector-newer-ptr-map-offset + + @ unwritten <>
+	if
 	  1 sector-old-map r@ + b+!
 	then 1+
       repeat
