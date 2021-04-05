@@ -30,6 +30,9 @@ begin-import-module-once block-module
   \ Block size
   1024 constant block-size
 
+  \ Write failure exception
+  : x-block-write-fail ( -- ) space ." unable to write block" cr ;
+
   begin-import-module block-internal-module
 
     \ Sector size
@@ -39,7 +42,7 @@ begin-import-module-once block-module
     qspi-size sector-size / constant sector-count
 
     \ Block count within a sector
-    sector-size block-size / 1 - constant sector-block-count
+    sector-size block-size / 1- constant sector-block-count
 
     \ Block count
     sector-block-count sector-count * constant block-count
@@ -48,7 +51,7 @@ begin-import-module-once block-module
     0 constant sector-block-id-map-offset
 
     \ Newer block pointer offset
-    sector-block-count cells constant sector-newer-ptr-map-offset
+    sector-block-count cells constant sector-old-flag-map-offset
 
     \ Block erase count offset
     sector-block-count 2 * cells constant sector-erase-count-offset
@@ -56,27 +59,15 @@ begin-import-module-once block-module
     \ Unwritten flash
     $FFFFFFFF constant unwritten
     
-    \ Maximum saved block count
-    8 constant max-saved-block-count
-
-    \ Saved block data
-    variable saved-block-data
-
-    \ Saved block count
-    : saved-block-count ( -- addr ) saved-block-data ;
-
-    \ Saved block id array
-    : saved-block-ids ( -- addr ) saved-block-data cell+ ;
-
-    \ Saved block array
-    : saved-blocks ( -- addr ) saved-block-ids saved-block-count @ cells + ;
-    
     \ Allot a buffer storing the count of free blocks in sectors
     sector-count buffer: sector-free-map
 
     \ Allot a buffer storing the count of old blocks in sectors
     sector-count buffer: sector-old-map
-
+    
+    \ Saved sector for relocation
+    variable saved-sector
+    
     \ Get the sector index of an address
     : sector-index ( addr -- index ) qspi-base - sector-size / ;
 
@@ -93,17 +84,53 @@ begin-import-module-once block-module
       sector-addr swap 1 + block-size * +
     ;
 
+    \ Get a block's id
+    : block-id@ ( block-index sector-index -- id )
+      sector-addr sector-block-id-map-offset + swap cells + @
+    ;
+
+    \ Get whether a block is old
+    : old-flag@ ( block-index sector-index -- flag )
+      sector-addr sector-old-flag-map-offset + swap cells + @ unwritten <>
+    ;
+
+    \ Get the erase count for a sector
+    : erase-count@ ( sector-index -- count )
+      sector-addr sector-erase-count-offset + @
+    ;
+
+    \ Get the free count for a sector
+    : free-count@ ( index -- count ) sector-free-map + b@ ;
+
+    \ Get the old count for a sector
+    : old-count@ ( index -- count ) sector-old-map + b@ ;
+
     \ Get the new count for a sector
     : new-count ( index -- count )
-      dup sector-free-map + b@ swap sector-old-map + b@ +
-      sector-block-count swap -
+      dup free-count@ swap old-count@ + sector-block-count swap -
     ;
+
+    \ Set the free count for a sector
+    : free-count! ( count index -- ) sector-free-map + b! ;
+
+    \ Set the old count for a sector
+    : old-count! ( count index -- ) sector-old-map + b! ;
+
+    \ Add to the free count for a sector
+    : free-count+! ( change index -- ) sector-free-map + b+! ;
+
+    \ Add to the old count for a sector
+    : old-count+! ( change index -- ) sector-old-map + b+! ;
 
     \ Find the next sector containing new sectors, or -1 if none can be found
     : next-new-sector ( index -- index|-1 )
       begin
 	dup sector-count < if
-	  dup new-count 0 = if 1+ false else true then
+	  dup saved-sector @ <> if
+	    dup new-count 0= if 1+ false else true then
+	  else
+	    1+ false
+	  then
 	else
 	  drop -1 true
 	then
@@ -112,11 +139,10 @@ begin-import-module-once block-module
 
     \ Find a block in a sector, or return 0 if none is found
     : find-sector-block ( id sector-index -- addr|0 )
-      sector-addr
       sector-block-count 0 ?do
-	i cells over sector-block-id-map-offset + + @ 2 pick = if
-	  i cells over sector-newer-ptr-map-offset + + @ unwritten = if
-	    i 1 + block-size * + nip unloop exit
+	i over block-id@ 2 pick = if
+	  i over old-flag@ not if
+	    i swap block-addr nip unloop exit
 	  then
 	then
       loop
@@ -138,51 +164,71 @@ begin-import-module-once block-module
 
     \ Reuse a sector
     : reuse-sector ( erase-count index -- )
-      dup sector-old-map + 0 swap b!
-      dup sector-free-map + sector-block-count swap b!
+      0 over old-count!
+      sector-block-count over free-count!
       sector-addr dup erase-qspi-sector
       sector-erase-count-offset + qspi!
     ;
 
-    \ Find a completely old sector, or return -1 if no sectors are completely
-    \ old
+    \ Find a completely old sector other than the saved sector, or return -1
+    \ if no sectors are completel old
     : find-old-sector ( -- erase-count index|-1 )
       $FFFFFFFF -1
       sector-count 0 ?do
-	i sector-old-map + b@ sector-block-count = if
-	  i sector-addr sector-erase-count-offset + @ 1+ >r over r> u> if
-	    2drop i sector-addr sector-erase-count-offset + @ 1+ i
+	i old-count@ sector-block-count = if
+	  i saved-sector @ <> if
+	    i erase-count@ 1+ >r over r> u> if
+	      2drop i erase-count@ 1+ i
+	    then
 	  then
 	then
       loop
     ;
 
-    \ Find an almost old sector, conditional on the threshold
-    : find-partial-sector ( -- erase-count index|-1 )
+    \ Find a completely old or free sector, or return -1 if no sectors are
+    \ completely old or free
+    : find-saved-sector ( -- index|-1 )
       $FFFFFFFF -1
       sector-count 0 ?do
-	i new-count max-saved-block-count <= if
-	  i sector-addr sector-erase-count-offset + @ 1+ >r over r> u> if
-	    2drop i sector-addr sector-erase-count-offset + @ 1+ i
+	i old-count@ sector-block-count =
+	i free-count@ sector-block-count = or if
+	  i erase-count@ 1+ >r over r> u> if
+	    2drop i erase-count@ 1+ i
 	  then
 	then
       loop
+      nip
+    ;
+    
+    \ Find a sector to reorganize
+    : find-reorganize-sector ( -- index|-1 )
+      -1 -1
+      sector-count 0 ?do
+	i saved-sector @ <> if
+	  i new-count over u< i new-count sector-block-count u< and if
+	    2drop i dup new-count
+	  then
+	then
+      loop
+      drop
     ;
 
     \ Find a sector with a free block, or return -1 if no sectors have free
     \ blocks
     : find-sector-with-free-block ( -- index|-1 )
-      sector-count 0 ?do i sector-free-map + b@ 0> if i unloop exit then loop -1
+      sector-count 0 ?do
+	i saved-sector @ <> i free-count@ 0> and if i unloop exit then
+      loop
+      -1
     ;
 
     \ Find a free block within a sector, or return 0 if there are no free blocks
     \ within the sector
     : find-free-block-in-sector ( sector-index -- block-index|-1 )
-      sector-addr sector-block-id-map-offset +
       sector-block-count 0 ?do
-	i cells over + @ unwritten = if i nip unloop exit then
+	i over block-id@ unwritten = if i nip unloop exit then
       loop
-      -1
+      drop -1
     ;
 
     \ This should never happen
@@ -206,19 +252,16 @@ begin-import-module-once block-module
       then
     ;
 
-    \ Set a block as old
-    : set-block-old ( block-index sector-index -- )
-      sector-old-map + 1 swap b+! drop
+    \ Find a free block in the saved sector
+    : find-saved-block ( -- block-index sector-index )
+      saved-sector @ find-free-block-in-sector dup -1 <>
+      averts x-should-never-happen
+      saved-sector @
     ;
-
-    \ Set a block as new
-    : set-block-new ( block-index sector-index -- )
-      sector-free-map + -1 swap b+! drop
-    ;
-
+    
     \ Write a newer pointer for a block
-    : newer-ptr! ( addr block-index sector-index -- )
-      sector-addr sector-newer-ptr-map-offset + swap cells + qspi!
+    : old-flag! ( block-index sector-index -- )
+      0 -rot sector-addr sector-old-flag-map-offset + swap cells + qspi!
     ;
 
     \ Write a block id for a block
@@ -232,60 +275,82 @@ begin-import-module-once block-module
     ;
 
     \ Write to a block (the data written must be of size block-size),
-    \ assumes it will succeed
-    : basic-block! ( addr id -- )
-      find-free-block dup -1 <> if
-	2dup set-block-new
-	2dup r> rot rot block-id!
-	block-addr data!
-      then
-    ;
-
-    \ Reuse a partial sector
-    : reuse-partial ( sector-index -- )
-      ram-here saved-block-data !
-      dup >r new-count dup saved-block-count !
-      dup 1+ cells swap block-size * + ram-allot
-      0 sector-block-count 0 ?do
-	r@ sector-addr sector-newer-ptr-map-offset + i cells + @ $FFFFFFFF =
-	r@ sector-addr sector-block-id-map-offset + i cells + @ $FFFFFFFF <> and
-	if
-	  r@ sector-addr sector-block-id-map-offset + i cells + @
-	  over cells saved-block-ids + !
-	  i r@ block-addr over cells saved-blocks + block-size move
-	  1+
+    \ Copy blocks into the saved sector
+    : copy-blocks-into-saved-sector ( sector-index -- )
+      sector-block-count 0 ?do
+	i over old-flag@ not if
+	  find-saved-block
+	  -1 over free-count+!
+	  2dup i 5 pick block-id@
+	  -rot block-id!
+	  i 3 pick block-addr ram-here block-size move
+	  ram-here -rot block-addr data!
 	then
       loop
       drop
-      r@ sector-addr sector-erase-count-offset + @ 1+
-      r@ reuse-sector
-      saved-block-count 0 ?do
-	i cells saved-blocks + i basic-block!
-      loop
-      rdrop
-      saved-block-data@ ram-here!
     ;
 
-    \ Write to a block (the data written must be of size block-size),
-    \ returns whether writing was successful
-    : block! ( addr id -- success )
+    \ Mark all blocks in a sector as old
+    : mark-all-old ( sector-index -- )
+      sector-block-count 0 ?do
+	i over old-flag@ not if
+	  dup i swap old-flag!
+	then
+      loop
+      sector-block-count over old-count!
+      0 swap free-count!
+    ;
+
+    \ Reorganize a sector
+    : reorganize-sector ( -- )
+      saved-sector @ erase-count@ 1+
+      saved-sector @ reuse-sector
+      find-reorganize-sector dup -1 <> averts x-block-write-fail
+      dup copy-blocks-into-saved-sector
+      dup mark-all-old
+      saved-sector !
+    ;
+
+    \ Check whether blocks are available
+    : blocks-available? ( -- flag )
+      sector-count 0 ?do
+	i saved-sector @ <> if
+	  i new-count sector-block-count <> if
+	    true unloop exit
+	  then
+	then
+      loop
+      false
+    ;
+
+    \ Reorganize a sector and write to a block
+    : reorganize-block! ( addr id -- )
+      >r reorganize-sector
+      find-free-block dup -1 <> averts x-block-write-fail
+      -1 over free-count+!
+      2dup r> -rot block-id!
+      block-addr data!
+    ;
+    
+    \ Write to a block (the data written must be of size block-size)
+    : block! ( addr id -- )
+      blocks-available? averts x-block-write-fail
       dup >r find-block ?dup if
-	block-index 2dup set-block-old >r >r
+	block-index 1 over old-count+! old-flag!
 	find-free-block dup -1 <> if
-	  2dup set-block-new
-	  2dup block-addr r> r> newer-ptr!
-	  2dup r> rot rot block-id!
-	  block-addr data! true
+	  -1 over free-count+!
+	  2dup r> -rot block-id!
+	  block-addr data!
 	else
-	  rdrop rdrop rdrop 2drop false
+	  2drop r> reorganize-block!
 	then
       else
 	find-free-block dup -1 <> if
-	  2dup set-block-new
-	  2dup r> rot rot block-id!
-	  block-addr data! true
+	  -1 over free-count+!
+	  2dup r> -rot block-id!
+	  block-addr data!
 	else
-	  rdrop drop 2drop false
+	  2drop r> reorganize-block!
 	then
       then
     ;
@@ -294,7 +359,7 @@ begin-import-module-once block-module
     : discover-sector-free-count ( index -- )
       >r 0 begin dup sector-block-count < while
 	dup cells r@ sector-addr sector-block-id-map-offset + + @ unwritten = if
-	  1 sector-free-map r@ + b+!
+	  1 r@ free-count+!
 	then 1+
       repeat
       drop rdrop
@@ -309,9 +374,9 @@ begin-import-module-once block-module
     \ Get the old block count for a sector
     : discover-sector-old-count ( index -- )
       >r 0 begin dup sector-block-count < while
-	dup cells r@ sector-addr sector-newer-ptr-map-offset + + @ unwritten <>
+	dup cells r@ sector-addr sector-old-flag-map-offset + + @ unwritten <>
 	if
-	  1 sector-old-map r@ + b+!
+	  1 r@ old-count+!
 	then 1+
       repeat
       drop rdrop
@@ -323,11 +388,23 @@ begin-import-module-once block-module
       sector-count 0 ?do i discover-sector-old-count loop
     ;
 
+    \ Unable to find saved sector
+    : x-unable-to-find-saved-sector ( -- )
+      space ." unable to find saved sector" cr
+    ;
+    
+    \ Find a saved sector
+    : find-saved-sector ( -- )
+      0 saved-sector !
+      find-saved-sector dup -1 <> averts x-unable-to-find-saved-sector
+      saved-sector !
+    ;
+      
     \ Erase all blocks
     : erase-all-blocks ( -- )
       erase-qspi-bulk
       sector-count 0 ?do
-	0 i sector-old-map + b! sector-block-count i sector-free-map + b!
+	0 i old-count! sector-block-count i free-count!
       loop
     ;
 
@@ -353,7 +430,7 @@ begin-import-module-once block-module
   
   \ Initialize blocks
   : init-block ( -- )
-    discover-free-count discover-old-count
+    discover-free-count discover-old-count find-saved-sector
   ;
 
   \ Block not found exception
@@ -367,7 +444,7 @@ begin-import-module-once block-module
     dup unwritten <> averts x-invalid-block-id
     begin-critical
     find-block ?dup if
-      block-index 2dup set-block-old qspi-base block-size + -rot newer-ptr!
+      block-index 1 over old-count+! qspi-base block-size + -rot old-flag!
       end-critical
     else
       end-critical
@@ -391,15 +468,11 @@ begin-import-module-once block-module
     end-critical
   ;
 
-  \ Write failure exception
-  : x-block-write-fail ( -- ) space ." unable to write block" cr ;
-
   \ Write to a block (the data written must be of size block-size),
   \ returns whether writing was successful
   : block! ( addr id -- success )
-    dup unwritten <> averts x-invalid-block-id
     begin-critical
-    block! averts x-block-write-fail
+    block!
     end-critical
   ;
 
