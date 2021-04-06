@@ -24,6 +24,7 @@ compile-to-flash
 begin-import-module-once qspi-module
 
   import internal-module
+  import gpio-module
 
   \ Quad SPI address validation exception
   : x-invalid-qspi-addr ( -- ) space ." invalid qspi address" cr ;
@@ -35,144 +36,6 @@ begin-import-module-once qspi-module
 
     \ Is QSPI initialized
     variable qspi-inited?
-
-    \ GPIO base
-    $40020000 constant GPIO_Base
-
-    \ GPIOB base
-    GPIO_Base $400 + constant GPIOB_Base
-
-    \ GPIOD base
-    GPIO_Base $400 3 * + constant GPIOD_Base
-
-    \ GPIOE base
-    GPIO_Base $400 4 * + constant GPIOE_Base
-
-    \ GPIOB mode register
-    GPIOB_Base $00 + constant GPIOB_MODER
-
-    \ GPIOB output speed register
-    GPIOB_Base $08 + constant GPIOB_OSPEEDR
-
-    \ GPIOB pull-up/pull-down register
-    GPIOB_Base $0C + constant GPIOB_PUPDR
-
-    \ GPIOB lower alternate function register
-    GPIOB_Base $20 + constant GPIOB_AFRL
-
-    \ GPIOB higher alternate function register
-    \ GPIOB_Base $24 + constant GPIOB_AFRH
-
-    \ GPIOD mode register
-    GPIOD_Base $00 + constant GPIOD_MODER
-
-    \ GPIOD output speed register
-    GPIOD_Base $08 + constant GPIOD_OSPEEDR
-
-    \ GPIOD lower alternate function register
-    \ GPIOD_Base $20 + constant GPIOD_AFRL
-
-    \ GPIOD higher alternate function register
-    GPIOD_Base $24 + constant GPIOD_AFRH
-
-    \ GPIOE mode register
-    GPIOE_Base $00 + constant GPIOE_MODER
-
-    \ GPIOE output speed register
-    GPIOE_Base $08 + constant GPIOE_OSPEEDR
-
-    \ GPIOE lower alternate function register
-    GPIOE_Base $20 + constant GPIOE_AFRL
-
-    \ GPIOE higher alternate function register
-    \ GPIOE_Base $24 + constant GPIOE_AFRH
-
-    \ Alternate function
-    %10 constant ALTERNATE_FUNCTION
-
-    \ Pull up
-    %01 constant PULL_UP
-
-    \ Very high speech
-    %11 constant VERY_HIGH_SPEED
-
-    \ Set GPIOB_MODER field
-    : GPIOB_MODER! ( mode pin -- )
-      GPIOB_MODER @ over %11 swap 1 lshift lshift bic
-      rot %11 and rot 1 lshift lshift or GPIOB_MODER !
-    ;
-
-    \ Set GPIOB_OSPEEDR field
-    : GPIOB_OSPEEDR! ( ospeed pin -- )
-      GPIOB_OSPEEDR @ over %11 swap 1 lshift lshift bic
-      rot %11 and rot 1 lshift lshift or GPIOB_OSPEEDR !
-    ;
-
-    \ Set GPIOB_PUPDR field
-    : GPIOB_PUPDR! ( pupd pin -- )
-      GPIOB_PUPDR @ over %11 swap 1 lshift lshift bic
-      rot %11 and rot 1 lshift lshift or GPIOB_PUPDR !
-    ;
-
-    \ Set GPIOB_AFRL field
-    : GPIOB_AFRL! ( af pin -- )
-      GPIOB_AFRL @ over %1111 swap 2 lshift lshift bic
-      rot %1111 and rot 2 lshift lshift or GPIOB_AFRL !
-    ;
-
-    \ Set GPIOB_AFRH field
-    \ : GPIOB_AFRH! ( af pin -- )
-    \   8 - GPIOB_AFRH @ over %1111 swap 2 lshift lshift bic
-    \   rot %1111 and rot 2 lshift lshift or GPIOB_AFRH !
-    \ ;
-
-    \ Set GPIOD_MODER field
-    : GPIOD_MODER! ( mode pin -- )
-      GPIOD_MODER @ over %11 swap 1 lshift lshift bic
-      rot %11 and rot 1 lshift lshift or GPIOD_MODER !
-    ;
-
-    \ Set GPIOD_OSPEEDR field
-    : GPIOD_OSPEEDR! ( ospeed pin -- )
-      GPIOD_OSPEEDR @ over %11 swap 1 lshift lshift bic
-      rot %11 and rot 1 lshift lshift or GPIOD_OSPEEDR !
-    ;
-
-    \ Set GPIOD_AFRL field
-    \ : GPIOD_AFRL! ( af pin -- )
-    \   GPIOD_AFRL @ over %1111 swap 2 lshift lshift bic
-    \   rot %1111 and rot 2 lshift lshift or GPIOD_AFRL !
-    \ ;
-
-    \ Set GPIOD_AFRH field
-    : GPIOD_AFRH! ( af pin -- )
-      8 - GPIOD_AFRH @ over %1111 swap 2 lshift lshift bic
-      rot %1111 and rot 2 lshift lshift or GPIOD_AFRH !
-    ;
-
-    \ Set GPIOE_MODER field
-    : GPIOE_MODER! ( mode pin -- )
-      GPIOE_MODER @ over %11 swap 1 lshift lshift bic
-      rot %11 and rot 1 lshift lshift or GPIOE_MODER !
-    ;
-
-    \ Set GPIOE_OSPEEDR field
-    : GPIOE_OSPEEDR! ( ospeed pin -- )
-      GPIOE_OSPEEDR @ over %11 swap 1 lshift lshift bic
-      rot %11 and rot 1 lshift lshift or GPIOE_OSPEEDR !
-    ;
-
-    \ Set GPIOE_AFRL field
-    : GPIOE_AFRL! ( af pin -- )
-      GPIOE_AFRL @ over %1111 swap 2 lshift lshift bic
-      rot %1111 and rot 2 lshift lshift or GPIOE_AFRL !
-    ;
-
-    \ Set GPIOE_AFRH field
-    \ : GPIOE_AFRH! ( af pin -- )
-    \   8 - GPIOE_AFRH @ over %1111 swap 2 lshift lshift bic
-    \   rot %1111 and rot 2 lshift lshift or GPIOE_AFRH !
-    \ ;
 
     \ Quad SPI base
     $A0001000 constant QUADSPI_Base
@@ -221,12 +84,6 @@ begin-import-module-once qspi-module
 
     \ RCC base
     $40023800 constant RCC_Base
-
-    \ RCC AHB1 peripheral clock enable register
-    RCC_Base $30 + constant RCC_AHB1ENR
-
-    \ RCC AHB1 peripheral clock enable in low-power mode register
-    RCC_Base $50 + constant RCC_AHB1LPENR
 
     \ RCC AHB3 peripheral clock enable register
     RCC_Base $38 + constant RCC_AHB3ENR
@@ -441,36 +298,6 @@ begin-import-module-once qspi-module
     \ Send instruction to external Quad SPI device
     : QUADSPI_CCR_INSTRUCTION! ( instruction -- )
       QUADSPI_CCR @ $FF bic swap $FF and or QUADSPI_CCR !
-    ;
-
-    \ Enable GPIOB clock
-    : RCC_AHB1ENR_GPIOBEN! ( enable -- )
-      RCC_AHB1ENR @ 1 bit bic swap 0<> %1 and 1 lshift or RCC_AHB1ENR !
-    ;
-
-    \ Enable GPIOD clock
-    : RCC_AHB1ENR_GPIODEN! ( enable -- )
-      RCC_AHB1ENR @ 3 bit bic swap 0<> %1 and 3 lshift or RCC_AHB1ENR !
-    ;
-
-    \ Enable GPIOE clock
-    : RCC_AHB1ENR_GPIOEEN! ( enable -- )
-      RCC_AHB1ENR @ 4 bit bic swap 0<> %1 and 4 lshift or RCC_AHB1ENR !
-    ;
-
-    \ Enable GPIOB low power clock
-    : RCC_AHB1LPENR_GPIOBLPEN! ( enable -- )
-      RCC_AHB1LPENR @ 1 bit bic swap 0<> %1 and 1 lshift or RCC_AHB1LPENR !
-    ;
-
-    \ Enable GPIOD low power clock
-    : RCC_AHB1LPENR_GPIODLPEN! ( enable -- )
-      RCC_AHB1LPENR @ 3 bit bic swap 0<> %1 and 3 lshift or RCC_AHB1LPENR !
-    ;
-
-    \ Enable GPIOE low power clock
-    : RCC_AHB1LPENR_GPIOELPEN! ( enable -- )
-      RCC_AHB1LPENR @ 4 bit bic swap 0<> %1 and 4 lshift or RCC_AHB1LPENR !
     ;
 
     \ Enable Quad SPI clock
@@ -791,14 +618,6 @@ begin-import-module-once qspi-module
       wait-qspi-reg-1-line
     ;
 
-    \ Register assertion failure exception
-    : x-reg-assert-fail ( -- ) space ." register assertion failure" cr ;
-
-    \ Test bits
-    : bit-assert ( tested mask bitshift value -- )
-      swap >r over and r@ lshift swap r> lshift rot and = averts x-reg-assert-fail
-    ;
-
     \ Initialize GPIO settings
     : init-qspi-gpio ( -- )
       \ QUADSPI_CLK PB2 AF9 *
@@ -822,60 +641,33 @@ begin-import-module-once qspi-module
       \ QUADSPI_BK2_IO3 PG14 AF9
       \ QUADSPI_BK2_IO0 PH2 AF9
       \ QUADSPI_BK2_IO1 PH3 AF9
-      true RCC_AHB1ENR_GPIOBEN!
-      RCC_AHB1ENR @ %1 1 %1 bit-assert
-      true RCC_AHB1ENR_GPIODEN!
-      RCC_AHB1ENR @ %1 3 %1 bit-assert
-      true RCC_AHB1ENR_GPIOEEN!
-      RCC_AHB1ENR @ %1 4 %1 bit-assert
-      true RCC_AHB1LPENR_GPIOBLPEN!
-      RCC_AHB1LPENR @ %1 1 %1 bit-assert
-      true RCC_AHB1LPENR_GPIODLPEN!
-      RCC_AHB1LPENR @ %1 3 %1 bit-assert
-      true RCC_AHB1LPENR_GPIOELPEN!
-      RCC_AHB1LPENR @ %1 4 %1 bit-assert
+      GPIOB gpio-clock-enable
+      GPIOD gpio-clock-enable
+      GPIOE gpio-clock-enable
+      GPIOB gpio-lp-clock-enable
+      GPIOD gpio-lp-clock-enable
+      GPIOE gpio-lp-clock-enable
       true RCC_AHB3ENR_QSPIEN!
-      RCC_AHB3ENR @ %1 1 %1 bit-assert
       true RCC_AHB3LPENR_QSPILPEN!
-      RCC_AHB3LPENR @ %1 1 %1 bit-assert
-      ALTERNATE_FUNCTION 2 GPIOB_MODER!
-      GPIOB_MODER @ %11 2 2 * ALTERNATE_FUNCTION bit-assert
-      9 2 GPIOB_AFRL!
-      GPIOB_AFRL @ %1111 4 2 * 9 bit-assert
-      VERY_HIGH_SPEED 2 GPIOB_OSPEEDR!
-      GPIOB_OSPEEDR @ %11 2 2 * VERY_HIGH_SPEED bit-assert
-      ALTERNATE_FUNCTION 6 GPIOB_MODER!
-      GPIOB_MODER @ %11 2 6 * ALTERNATE_FUNCTION bit-assert
-      10 6 GPIOB_AFRL!
-      GPIOB_AFRL @ %1111 4 6 * 10 bit-assert
-      PULL_UP 6 GPIOB_PUPDR!
-      GPIOB_PUPDR @ %11 2 6 * PULL_UP bit-assert
-      VERY_HIGH_SPEED 6 GPIOB_OSPEEDR!
-      GPIOB_OSPEEDR @ %11 2 6 * VERY_HIGH_SPEED bit-assert
-      ALTERNATE_FUNCTION 11 GPIOD_MODER!
-      GPIOD_MODER @ %11 2 11 * ALTERNATE_FUNCTION bit-assert
-      9 11 GPIOD_AFRH!
-      GPIOD_AFRH @ %1111 4 3 * 9 bit-assert
-      VERY_HIGH_SPEED 11 GPIOD_OSPEEDR!
-      GPIOD_OSPEEDR @ %11 2 11 * VERY_HIGH_SPEED bit-assert
-      ALTERNATE_FUNCTION 12 GPIOD_MODER!
-      GPIOD_MODER @ %11 2 12 * ALTERNATE_FUNCTION bit-assert
-      9 12 GPIOD_AFRH!
-      GPIOD_AFRH @ %1111 4 4 * 9 bit-assert
-      VERY_HIGH_SPEED 12 GPIOD_OSPEEDR!
-      GPIOD_OSPEEDR @ %11 2 12 * VERY_HIGH_SPEED bit-assert
-      ALTERNATE_FUNCTION 13 GPIOD_MODER!
-      GPIOD_MODER @ %11 2 13 * ALTERNATE_FUNCTION bit-assert
-      9 13 GPIOD_AFRH!
-      GPIOD_AFRH @ %1111 4 5 * 9 bit-assert
-      VERY_HIGH_SPEED 13 GPIOD_OSPEEDR!
-      GPIOD_OSPEEDR @ %11 2 13 * VERY_HIGH_SPEED bit-assert
-      ALTERNATE_FUNCTION 2 GPIOE_MODER!
-      GPIOE_MODER @ %11 2 2 * ALTERNATE_FUNCTION bit-assert
-      9 2 GPIOE_AFRL!
-      GPIOE_AFRL @ %1111 4 2 * 9 bit-assert
-      VERY_HIGH_SPEED 2 GPIOE_OSPEEDR!
-      GPIOE_OSPEEDR @ %11 2 2 * VERY_HIGH_SPEED bit-assert
+      ALTERNATE_MODE 2 GPIOB MODER!
+      9 2 GPIOB AFR!
+      VERY_HIGH_SPEED 2 GPIOB OSPEEDR!
+      ALTERNATE_MODE 6 GPIOB MODER!
+      10 6 GPIOB AFR!
+      PULL_UP 6 GPIOB PUPDR!
+      VERY_HIGH_SPEED 6 GPIOB OSPEEDR!
+      ALTERNATE_MODE 11 GPIOD MODER!
+      9 11 GPIOD AFR!
+      VERY_HIGH_SPEED 11 GPIOD OSPEEDR!
+      ALTERNATE_MODE 12 GPIOD MODER!
+      9 12 GPIOD AFR!
+      VERY_HIGH_SPEED 12 GPIOD OSPEEDR!
+      ALTERNATE_MODE 13 GPIOD MODER!
+      9 13 GPIOD AFR!
+      VERY_HIGH_SPEED 13 GPIOD OSPEEDR!
+      ALTERNATE_MODE 2 GPIOE MODER!
+      9 2 GPIOE AFR!
+      VERY_HIGH_SPEED 2 GPIOE OSPEEDR!
     ;
 
     \ Initialize basic SPI settings
