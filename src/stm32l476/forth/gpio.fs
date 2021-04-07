@@ -24,7 +24,7 @@ compile-to-flash
 begin-module-once gpio-module
 
   \ GPIO base
-  $40020000 constant GPIO_Base
+  $48000000 constant GPIO_Base
 
   \ GPIO index base
   : GPIO_Index ( index "name" -- )
@@ -41,8 +41,6 @@ begin-module-once gpio-module
   6 GPIO_Index GPIOG
   7 GPIO_Index GPIOH
   8 GPIO_Index GPIOI
-  9 GPIO_Index GPIOJ
-  10 GPIO_Index GPIOK
   
   \ A GPIO field
   : GPIO_Field ( offset "name" -- )
@@ -83,32 +81,32 @@ begin-module-once gpio-module
   %10 constant PULL_DOWN
 
   \ RCC base
-  $40023800 constant RCC_Base
+  $40021000 constant RCC_Base
 
   \ RCC AHB1 peripheral clock enable register
-  RCC_Base $30 + constant RCC_AHB1ENR
+  RCC_Base $4C + constant RCC_AHB2ENR
   
   \ RCC AHB1 peripheral clock enable in low-power mode register
-  RCC_Base $50 + constant RCC_AHB1LPENR
+  RCC_Base $6C + constant RCC_AHB2SMENR
 
   \ Enable a GPIO peripheral clock
   : gpio-clock-enable ( gpio -- )
-    GPIO_Base - $400 / 1 swap lshift RCC_AHB1ENR bis!
+    GPIO_Base - $400 / 1 swap lshift RCC_AHB2ENR bis!
   ;
 
   \ Enable a low-power GPIO peripheral clock
   : gpio-lp-clock-enable ( gpio -- )
-    GPIO_Base - $400 / 1 swap lshift RCC_AHB1LPENR bis!
+    GPIO_Base - $400 / 1 swap lshift RCC_AHB2SMENR bis!
   ;
 
   \ Enable a GPIO peripheral clock
   : gpio-clock-disable ( gpio -- )
-    GPIO_Base - $400 / 1 swap lshift RCC_AHB1ENR bic!
+    GPIO_Base - $400 / 1 swap lshift RCC_AHB2ENR bic!
   ;
 
   \ Enable a low-power GPIO peripheral clock
   : gpio-lp-clock-disable ( gpio -- )
-    GPIO_Base - $400 / 1 swap lshift RCC_AHB1LPENR bic!
+    GPIO_Base - $400 / 1 swap lshift RCC_AHB2SMENR bic!
   ;
 
   \ Set a GPIOx_MODER field
