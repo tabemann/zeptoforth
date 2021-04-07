@@ -41,9 +41,7 @@ begin-module-once gpio-module
   6 GPIO_Index GPIOG
   7 GPIO_Index GPIOH
   8 GPIO_Index GPIOI
-  9 GPIO_Index GPIOJ
-  10 GPIO_Index GPIOK
-  
+
   \ A GPIO field
   : GPIO_Field ( offset "name" -- )
     <builds , does> @ +
