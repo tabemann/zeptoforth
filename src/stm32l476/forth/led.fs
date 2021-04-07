@@ -24,47 +24,34 @@ compile-to-flash
 
 begin-import-module-once led-module
 
-  \ Registers
-  $40021000        constant RCC_BASE
-  $4C RCC_BASE or  constant RCC_AHB2ENR
-  $48000000        constant GPIOA
-  : gpio-port  ( n -- a ) #10 lshift GPIOA or ;
-  GPIOA   0 or     constant GPIOA_MODER
-  GPIOA $10 or     constant GPIOA_IDR
-  GPIOA  $C or     constant GPIOA_PUPD
-  1 gpio-port      constant GPIOB
-  4 gpio-port      constant GPIOE
-  $18 GPIOB or     constant GPIOB_BSRR
-  $18 GPIOE or     constant GPIOE_BSRR
-
+  import gpio-module
+  
   \ Initialize the LEDs
-  : led-init  ( -- )                           \ initialize the leds
-    1 1 lshift RCC_AHB2ENR bis!                \ enable clock on gpio port B
-    1 4 lshift RCC_AHB2ENR bis!                \ enable clock on gpio port E
-    3 4 lshift GPIOB bic!                      \ PB2 output
-    1 4 lshift GPIOB bis!                      \ PB2 output
-    3 16 lshift GPIOE bic!                     \ PE8 output
-    1 16 lshift GPIOE bis!                     \ PE8 output
+  : led-init  ( -- )
+    GPIOB gpio-clock-enable
+    GPIOE gpio-clock-enable
+    OUTPUT_MODE 2 GPIOB MODER!
+    OUTPUT_MODE 8 GPIOE MODER!
   ;
 
   \ Turn the red LED on
   : led-red-on  ( -- )
-    1 2 lshift GPIOB_BSRR !
+    true 2 GPIOB BSRR!
   ;
 
   \ Turn the red LED off
   : led-red-off  ( -- )
-    1 2 16 + lshift GPIOB_BSRR !
+    false 2 GPIOB BSRR!
   ;
 
   \ Turn the green LED on
   : led-green-on  ( -- )
-    1 8 lshift GPIOE_BSRR !
+    true 8 GPIOE BSRR!
   ;
 
   \ Turn the green LED offd
   : led-green-off  ( -- )
-    1 8 16 + lshift GPIOE_BSRR !
+    false 8 GPIOE BSRR!
   ;
 
 end-module
