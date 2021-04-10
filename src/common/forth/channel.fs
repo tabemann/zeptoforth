@@ -223,6 +223,9 @@ begin-module-once chan-module
 
   \ Get whether a channel is closed
   : chan-closed? ( chan -- closed ) chan-closed @ ;
+
+  \ Reopen a channel
+  : reopen-chan ( chan -- ) false swap chan-closed ! ;
   
 end-module
 

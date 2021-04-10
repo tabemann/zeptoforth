@@ -40,6 +40,11 @@ Initialize a channel starting at the specified address with the specified buffer
 
 Close a channel. Raise `x-chan-closed` for all pending sending tasks or for all pending receiving tasks if the channel is empty.
 
+##### `reopen-chan`
+( chan -- )
+
+Reopen a channel.
+
 ##### `chan-closed?`
 ( chan -- closed )
 
