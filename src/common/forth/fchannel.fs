@@ -91,6 +91,9 @@ begin-module-once fchan-module
     tuck fchan-send-addr !
     dup fchan-recv-tqueue wake-tqueue
     fchan-resp-tqueue wait-tqueue
+    dup fchan-closed @ if
+      end-critical ['] x-fchan-closed ?raise
+    then
     end-critical
     pause
   ;
@@ -133,6 +136,9 @@ begin-module-once fchan-module
 
   \ Get whether a fast channel is closed
   : fchan-closed? ( fchan -- closed ) fchan-closed @ ;
+
+  \ Reopen a fast channel
+  : reopen-fchan ( fchan -- ) false swap fchan-closed ! ;
 
 end-module
     
