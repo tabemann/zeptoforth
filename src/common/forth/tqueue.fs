@@ -103,7 +103,7 @@ begin-module-once tqueue-module
 \    end-critical
   ;
 
-  \ Wake up a task in a task quee
+  \ Wake up a task in a task queue
   \ Note that this must be called within a critical section
   : wake-tqueue ( tqueue -- )
     \    begin-critical
@@ -123,6 +123,16 @@ begin-module-once tqueue-module
 \    end-critical
   ;
 
+  \ Wake up all tasks in a task queue
+  : wake-tqueue-all ( tqueue -- )
+    \ begin-critical
+    begin dup wait-counter @ 0> while
+      dup wake-tqueue
+    repeat
+    drop
+    \ end-critical
+  ;
+  
 end-module
 
 \ Warm reboot

@@ -45,6 +45,9 @@ begin-module-once chan-module
       \ Channel send task
       field: chan-send-task
 
+      \ Channel is closed
+      field: chan-closed
+
     end-structure
 
     \ Core of getting whether a channel is full
@@ -60,9 +63,9 @@ begin-module-once chan-module
 
   end-module
   
-  \ Define public words
-  chan-module set-current
-
+  \ Channel is closed exception
+  : x-chan-closed ( -- ) space ." channel is closed" cr ;
+  
   \ Get whether a channel is full
   : chan-full? ( chan -- flag )
     begin-critical chan-full-unsafe? end-critical
@@ -84,6 +87,9 @@ begin-module-once chan-module
 	pause
 	begin-critical
       repeat
+      dup chan-closed @ if
+	end-critical ['] x-chan-closed ?raise
+      then
       begin dup chan-full-unsafe? while
 	current-task over chan-send-task !
 	\      begin dup chan-recv-task @ 0= while pause repeat
@@ -92,6 +98,9 @@ begin-module-once chan-module
 	end-critical
 	pause
 	begin-critical
+	dup chan-closed @ if
+	  end-critical ['] x-chan-closed ?raise
+	then
       repeat
       0 swap chan-send-task !
     ;
@@ -106,6 +115,9 @@ begin-module-once chan-module
 	begin-critical
       repeat
       begin dup chan-empty-unsafe? while
+	dup chan-closed @ if
+	  end-critical ['] x-chan-closed ?raise
+	then
 	current-task over chan-recv-task !
 	dup chan-send-task @ ?dup if run then
 	current-task stop
@@ -147,12 +159,16 @@ begin-module-once chan-module
     0 over chan-recv-index !
     0 over chan-send-index !
     0 over chan-recv-task !
-    0 swap chan-send-task !
+    0 over chan-send-task !
+    false swap chan-closed !
   ;
 
   \ Send a byte to a channel
   : send-chan-byte ( b chan -- )
     begin-critical
+    dup chan-closed @ if
+      end-critical ['] x-chan-closed ?raise
+    then
     dup wait-send-chan
     tuck send-chan-addr b!
     dup advance-send-chan
@@ -195,6 +211,18 @@ begin-module-once chan-module
   : recv-chan-cell ( chan -- x )
     pad 4 rot recv-chan pad @
   ;
+
+  \ Close a channel
+  : close-chan ( chan -- )
+    begin-critical
+    true over chan-closed !
+    dup chan-send-task @ ?dup if run then
+    chan-recv-task @ ?dup if run then
+    end-critical
+  ;
+
+  \ Get whether a channel is closed
+  : chan-closed? ( chan -- closed ) chan-closed @ ;
   
 end-module
 
