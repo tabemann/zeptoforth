@@ -32,6 +32,11 @@ Initialize a fast channel starting at the specified address. Note that it must h
 
 Close a fast channel. Pending sends and receives will be aborted with the exception `x-fchan-closed`.
 
+##### `reopen-fchan`
+( fchan -- )
+
+Reopen a fast channel.
+
 ##### `fchan-closed?`
 ( fchan -- closed )
 
