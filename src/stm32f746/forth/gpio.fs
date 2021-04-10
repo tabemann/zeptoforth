@@ -167,7 +167,7 @@ begin-module-once gpio-module
   ;
 
   \ Set or reset a single bit on a GPIO port
-  : BSRR! ( bit port gpio -- )
+  : BSRR! ( output port gpio -- )
     rot if BS! else BR! then
   ;
 

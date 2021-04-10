@@ -43,6 +43,9 @@ begin-module-once fchan-module
       \ Fast channel sent data count
       field: fchan-send-count
 
+      \ Fast channel is closed
+      field: fchan-closed
+      
       \ Fast channel send task queue
       tqueue-size +field fchan-send-tqueue
 
@@ -64,15 +67,25 @@ begin-module-once fchan-module
     0 over fchan-send-ready !
     0 over fchan-send-addr !
     0 over fchan-send-count !
+    false over fchan-closed !
     dup fchan-send-tqueue init-tqueue
     dup fchan-recv-tqueue init-tqueue
     fchan-resp-tqueue init-tqueue
   ;
 
+  \ Fast channel is closed exception
+  : x-fchan-closed ( -- ) space ." fchannel is closed" cr ;
+
   \ Send data on an fast channel
   : send-fchan ( addr bytes fchan -- )
     begin-critical
+    dup fchan-closed @ if
+      end-critical ['] x-fchan-closed ?raise
+    then
     dup fchan-send-ready @ if dup fchan-send-tqueue wait-tqueue then
+    dup fchan-closed @ if
+      end-critical ['] x-fchan-closed ?raise
+    then
     1 over fchan-send-ready +!
     tuck fchan-send-count !
     tuck fchan-send-addr !
@@ -85,9 +98,15 @@ begin-module-once fchan-module
   \ Receive data on an fast channel
   : recv-fchan ( fchan -- addr bytes )
     begin-critical
+    dup fchan-closed @ if
+      end-critical ['] x-fchan-closed ?raise
+    then
     1 over fchan-recv-ready +!
     dup fchan-send-ready @ if dup fchan-send-tqueue wake-tqueue then
     dup fchan-recv-tqueue wait-tqueue
+    dup fchan-closed @ if
+      end-critical ['] x-fchan-closed ?raise
+    then
     dup fchan-send-addr @
     over fchan-send-count @
     rot fchan-resp-tqueue wake-tqueue
@@ -101,6 +120,19 @@ begin-module-once fchan-module
 
   \ Receive a cell from an fast channel
   : recv-fchan-cell ( fchan -- x ) recv-fchan drop ;
+
+  \ Close a fast channel
+  : close-fchan ( fchan -- )
+    begin-critical
+    true over fchan-closed !
+    dup fchan-send-tqueue wake-tqueue-all
+    dup fchan-recv-tqueue wake-tqueue-all
+    fchan-resp-tqueue wake-tqueue-all
+    end-critical
+  ;
+
+  \ Get whether a fast channel is closed
+  : fchan-closed? ( fchan -- closed ) fchan-closed @ ;
 
 end-module
     
