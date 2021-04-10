@@ -4,7 +4,7 @@ Multitasking in zeptoforth is not part of the zeptoforth kernel, but is provided
 
 Note that task in zeptoforth are a relatively heavy-weight asynchronous computing means. For lighter-weight asynchronous computing, consider creating a single task for running a scheduler within (so the main task can be devoted to the REPL), and then put all asynchronous actions within that.
 
-Multitasking is enabled by default once `sys/common/forth/task.fs` has been loaded and the MCU has been rebooted; afterwards each time the MCU is booted a new task is created for the REPL, the main task, and multitasking is initiated.
+Multitasking is enabled by default once `src/common/forth/task.fs` has been loaded and the MCU has been rebooted; afterwards each time the MCU is booted a new task is created for the REPL, the main task, and multitasking is initiated.
 
 These words are in `task-module`.
 
