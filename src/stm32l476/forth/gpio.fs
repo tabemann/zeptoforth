@@ -22,14 +22,32 @@
 compile-to-flash
 
 begin-module-once gpio-module
+  
+  begin-import-module gpio-internal-module
+    
+    \ GPIO base
+    $48000000 constant GPIO_Base
+    
+    \ GPIO index base
+    : GPIO_Index ( index "name" -- )
+      $400 * GPIO_Base + constant \
+    ;
+    
+    \ A GPIO field
+    : GPIO_Field ( offset "name" -- )
+      <builds , does> @ +
+    ;
+    
+    \ RCC base
+    $40021000 constant RCC_Base
+    
+    \ RCC AHB1 peripheral clock enable register
+    RCC_Base $4C + constant RCC_AHB2ENR
+    
+    \ RCC AHB1 peripheral clock enable in low-power mode register
+    RCC_Base $6C + constant RCC_AHB2SMENR
 
-  \ GPIO base
-  $48000000 constant GPIO_Base
-
-  \ GPIO index base
-  : GPIO_Index ( index "name" -- )
-    $400 * GPIO_Base + constant \
-  ;
+  end-module
 
   \ The GPIOs
   0 GPIO_Index GPIOA
@@ -41,11 +59,6 @@ begin-module-once gpio-module
   6 GPIO_Index GPIOG
   7 GPIO_Index GPIOH
   8 GPIO_Index GPIOI
-  
-  \ A GPIO field
-  : GPIO_Field ( offset "name" -- )
-    <builds , does> @ +
-  ;
   
   \ The GPIO fields
   $00 GPIO_Field MODER
@@ -79,15 +92,6 @@ begin-module-once gpio-module
   %00 constant NO_PULL_UP_PULL_DOWN
   %01 constant PULL_UP
   %10 constant PULL_DOWN
-
-  \ RCC base
-  $40021000 constant RCC_Base
-
-  \ RCC AHB1 peripheral clock enable register
-  RCC_Base $4C + constant RCC_AHB2ENR
-  
-  \ RCC AHB1 peripheral clock enable in low-power mode register
-  RCC_Base $6C + constant RCC_AHB2SMENR
 
   \ Enable a GPIO peripheral clock
   : gpio-clock-enable ( gpio -- )

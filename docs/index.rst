@@ -11,6 +11,7 @@ Zeptoforth Documentation
    words/wordlist
    words/task
    words/schedule
+   words/gpio
    words/dev_tools
    words/line
    words/double
