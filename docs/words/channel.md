@@ -10,6 +10,11 @@ Channels are not included in the default builds; the user must load `src/common/
 
 The following words are in `chan-module`:
 
+##### `x-chan-closed`
+( -- )
+
+Channel closed exception. Raised on attempting to send to a closed channel or when trying to receive on an empty closed channel.
+
 ##### `chan-full?`
 ( chan -- flag )
 
@@ -29,6 +34,16 @@ Get the size in memory for a channel with a specified buffer size in bytes.
 ( addr bytes -- )
 
 Initialize a channel starting at the specified address with the specified buffer size in bytes. The size should be the same size passed to `chan-size` when alloting or allocating the memory whose starting address is passed in.
+
+##### `close-chan`
+( chan -- )
+
+Close a channel. Raise `x-chan-closed` for all pending sending tasks or for all pending receiving tasks if the channel is empty.
+
+##### `chan-closed?`
+( chan -- closed )
+
+Get whether a channel is closed.
 
 ##### `send-chan-byte`
 ( b chan -- )

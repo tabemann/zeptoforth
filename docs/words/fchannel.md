@@ -12,6 +12,11 @@ Fast channels are not included in the default builds; the user must load `src/co
 
 The following words are in `fchan-module`:
 
+##### `x-fchan-closed`
+( -- )
+
+The fast channel closed exception.
+
 ##### `fchan-size`
 ( -- bytes )
 
@@ -21,6 +26,16 @@ Get the size of an fast channel in memory.
 ( addr -- )
 
 Initialize a fast channel starting at the specified address. Note that it must have the size `fchan-size`.
+
+##### `close-fchan`
+( fchan -- )
+
+Close a fast channel. Pending sends and receives will be aborted with the exception `x-fchan-closed`.
+
+##### `fchan-closed?`
+( fchan -- closed )
+
+Get whether a fast channel is closed.
 
 ##### `send-fchan`
 ( addr bytes fchan -- )
