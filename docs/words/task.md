@@ -46,7 +46,7 @@ Uncaught exceptions within a task will be handled, with the message for them bei
 To reinitialize existing tasks, one executes:
 
 ##### `init-task`
-( xt task -- )
+( xn...x0 count xt task -- )
 
 These tasks may be in any state, including being terminated. *xn* through *x0* are parameters to pass to the *xt* when executed.
 
@@ -99,6 +99,36 @@ Get the priority of a task.
 ( -- )
 
 The exception raised when setting an out-of-range task priority
+
+##### `set-task-saved-priority`
+( priority task -- )
+
+Set the saved priority of a task, from -32768 to 32767, with higher numbers being greater task priorities.
+
+##### `get-task-saved-priority`
+( task -- priority )
+
+Get the saved priority of a task.
+
+##### `set-task-timeslice`
+( timeslice task -- )
+
+Set the timeslice, in 100 us increments, of a task, indicating the minimum amount of time a task will run before being preempted. Note that the default setting for this for a newly initialized task is 10.
+
+##### `get-task-timeslice`
+( task -- timeslice )
+
+Get the timeslice, in 100 us increments, of a task.
+
+##### `set-task-max-timeslice`
+( timeslice task -- )
+
+Set the maximum timeslice, in 100 us increments of a task, indicating the maximum amount of time a task will run before being preempted; note that if the timeslice of a task is larger than this amount, the maximum timeslice of the task will be treated as being the same as the task's timeslice. Also note that the default setting for this for a newly initialized task is 20.
+
+##### `get-task-max-timeslice`
+( task -- timeslice )
+
+Get the maximum timeslice, in 100 us increments, of a task.
 
 ##### `get-task-active`
 ( task -- level )
