@@ -90,8 +90,8 @@ begin-module-once fchan-module
     tuck fchan-send-count !
     tuck fchan-send-addr !
     dup fchan-recv-tqueue wake-tqueue
-    fchan-resp-tqueue wait-tqueue
-    dup fchan-closed @ if
+    dup fchan-resp-tqueue wait-tqueue
+    fchan-closed @ if
       end-critical ['] x-fchan-closed ?raise
     then
     end-critical
