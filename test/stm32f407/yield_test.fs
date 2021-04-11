@@ -132,8 +132,8 @@ begin-module forth-module
     3333 green-delay !
     3333 orange-delay !
     my-schedule init-schedule
-    ['] do-red-green red-green-action my-schedule add-action
-    ['] do-orange-blue orange-blue-action my-schedule add-action
+    ['] do-red-green red-green-action my-schedule init-action
+    ['] do-orange-blue orange-blue-action my-schedule init-action
     0 [: my-schedule run-schedule ;] 256 256 256 spawn schedule-task !
     1666 orange-blue-action start-action-delay
     red-green-action enable-action

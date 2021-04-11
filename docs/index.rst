@@ -16,6 +16,7 @@ Zeptoforth Documentation
    words/line
    words/double
    words/task_pool
+   words/action_pool
    words/allocate
    words/lock
    words/channel
