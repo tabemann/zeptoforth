@@ -55,6 +55,9 @@ begin-module-once schedule-module
       \ Whether the action is active (> 0 means active)
       field: action-active
 
+      \ Action scheduler
+      field: action-schedule
+
       \ Action systick start time
       field: action-systick-start
       
@@ -82,10 +85,20 @@ begin-module-once schedule-module
     0 swap schedule-last !
   ;
 
-  \ Add an action to a scheduler
-  : add-action ( xt action schedule -- )
+  \ Reset an action
+  : reset-action ( xt action -- )
+    tuck action-xt ! 0 over action-active !
+    0 over action-systick-start ! -1 swap action-systick-delay !
+  ;
+
+  \ Set an action's xt
+  : set-action-xt ( xt action -- ) action-xt ! ;
+
+  \ Initialize an action for a scheduler
+  : init-action ( xt action schedule -- )
     begin-critical
     swap
+    2dup action-schedule !
     2 roll over action-xt !
     0 over action-active !
     0 over action-systick-start !
@@ -105,8 +118,10 @@ begin-module-once schedule-module
   ;
 
   \ Dispose of an action
-  : dispose-action ( action schedule -- )
+  : dispose-action ( action -- )
     begin-critical
+    dup action-schedule @
+    over -1 swap action-schedule !
     dup schedule-current @ 2 pick = if
       over action-next @ 2 pick <> if
 	swap action-next @ swap 2dup schedule-last @ action-next !
@@ -124,6 +139,9 @@ begin-module-once schedule-module
     then
     end-critical
   ;
+
+  \ Get whether an action has been disposed
+  : action-disposed? ( action -- disposed ) action-schedule @ -1 = ;
 
   \ Enable an action
   : enable-action ( action -- )
