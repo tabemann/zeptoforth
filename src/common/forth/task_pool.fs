@@ -50,7 +50,7 @@ begin-module-once task-pool-module
   end-module
   
   \ No tasks are available
-  : x-no-task-available ( -- ) spawn ." no task is available" cr ;
+  : x-no-task-available ( -- ) space ." no task is available" cr ;
   
   \ Spawn a task from a task pool
   : spawn-from-task-pool ( xn...x0 count xt task-pool -- task )
@@ -60,7 +60,7 @@ begin-module-once task-pool-module
 	i swap task@ dup >r init-task r> end-critical unloop exit
       then
     loop
-    2drop end-critical ['] x-no-task-available ?raise
+    end-critical ['] x-no-task-available ?raise
   ;
 
   \ Get task pool free count

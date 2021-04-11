@@ -76,11 +76,11 @@ begin-module forth-module
     false green-led-state !
     my-schedule init-schedule
     3333 red-blinker-delay !
-    ['] red-blinker red-blinker-action my-schedule add-action
+    ['] red-blinker red-blinker-action my-schedule init-action
     red-blinker-delay @ red-blinker-action @ start-action-delay
     red-blinker-action @ enable-action
     5000 green-blinker-delay !
-    ['] green-blinker green-blinker-action my-schedule add-action
+    ['] green-blinker green-blinker-action my-schedule init-action
     green-blinker-delay @ green-blinker-action @ start-action-delay
     green-blinker-action @ enable-action
     0 [: my-schedule run-schedule ;] 256 256 256 spawn schedule-task !

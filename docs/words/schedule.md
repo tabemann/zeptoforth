@@ -18,14 +18,34 @@ To create a new scheduler, execute:
 
 Disposing of a scheduler involves disabling any task it is executing in, and then de-alloting the space alloted for it in the dictionary space.
 
-To create a new action for a given scheduler, execute:
+To initialize an action for a given scheduler, execute:
 
-##### `add-action`
-( xt scheduler -- action )
+##### `init-action`
+( xt action scheduler -- )
 
-where *xt* is the entry point of the action, *scheduler* is the scheduler to create the action for, and *action* is the newly created action. Actions are disposed of for entire schedulers by the means that schedulers are disposed by.
+where *xt* is the entry point of the action, *action* is the action to initialize, and *scheduler* is the scheduler to create the action for. Actions are disposed of for entire schedulers by the means that schedulers are disposed by.
 
 New actions do not execute right away, rather to enable their execution, one executes:
+
+##### `dispose-action`
+( action -- )
+
+which disposes of an action.
+
+##### `action-disposed?`
+( action -- disposed )
+
+Returns whether *action* has been disposed.
+
+##### `reset-action`
+( xt action -- )
+
+*action* is an action whose state is reset with the entry point *xt*.
+
+##### `set-action-xt`
+( xt action -- )
+
+*action* is an action whose state is set to *xt*.
 
 ##### `enable-action`
 ( action -- )
