@@ -108,11 +108,7 @@ internal-module set-current
 \ Add a wordlist to the order
 : add-module ( wid -- )
   >r get-order dup max-module-order < r> swap averts x-order-overflow
-  module-stack@ module-module-count h@ 0<> if
-    rot drop swap module-stack@ module-module @ swap 1+ set-order
-  else
-    swap 1+ set-order
-  then
+  swap 1+ set-order
   module-stack-index @ 0<> averts x-module-stack-underflow
   module-stack@
   1 swap module-module-count h+!
@@ -174,7 +170,6 @@ forth-module set-current
   then
   dup add-module
   dup push-module-stack
-  dup add-module
   set-current
 ;
 
@@ -187,7 +182,6 @@ forth-module set-current
   then
   dup add-module
   dup push-module-stack
-  dup add-module
   set-current
 ;
 
@@ -216,11 +210,11 @@ forth-module set-current
 : init ( -- )
   init
   0 module-stack-index !
-  0 set-order
-  forth-module set-current
   forth-module push-module-stack
-  forth-module add-module
 ;
+
+forth-module 1 set-order
+forth-module set-current
 
 \ Warm reboot
 warm
