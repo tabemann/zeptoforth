@@ -772,7 +772,7 @@ begin-import-module-once task-module
     0 wait-hook !
     false flash-dict-warned !
     ['] do-flash-validate-dict saved-validate-dict !
-    main-task task-stack-end free-end !
+    main-task @ task-stack-end free-end !
     init-main-task
     0 pause-count !
     ['] do-pause pause-hook !
@@ -783,19 +783,19 @@ begin-import-module-once task-module
   ;
 
   \ Display space free for a given task
-  : task-free ( task -- )
+  : task-unused ( task -- )
     cr
     ." dictionary free: "
     dup task-dict-end over task-dict-current - 0 <# #s #> type cr
     ." stack free:      "
     dup task-stack-current over task-stack-end - 0 <# #s #> type cr
     ." rstack free:     "
-    dup task-rstack-current swap task-rstack-end - 0 <# #s #> type
+    dup task-rstack-current @ swap task-rstack-end - 0 <# #s #> type
   ;
   
   \ Display space free for the main task and for flash in general
-  : free ( -- )
-    cr main-task
+  : unused ( -- )
+    cr main-task @
     ." flash dictionary free:     "
     flash-end flash-here - 0 <# #s #> type cr
     ." main task dictionary free: "
@@ -803,7 +803,7 @@ begin-import-module-once task-module
     ." main task stack free:      "
     dup task-stack-current over task-stack-end - 0 <# #s #> type cr
     ." main task rstack free:     "
-    dup task-rstack-current swap task-rstack-end - 0 <# #s #> type
+    dup task-rstack-current @ swap task-rstack-end - 0 <# #s #> type
   ;
 
 end-module
@@ -812,10 +812,10 @@ end-module
 : forget-ram ( -- ) forget-ram ;
 
 \ Display space free for a given task
-: task-free ( task -- ) task-free ;
+: task-unused ( task -- ) task-unused ;
 
 \ Display space free for the main task and for flash in general
-: free ( -- ) free ;
+: unused ( -- ) unused ;
 
 \ Wait for n milliseconds with multitasking support
 : ms ( u -- ) ms ;
