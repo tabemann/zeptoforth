@@ -100,6 +100,8 @@ begin-import-module-once systick-module
   
 end-module
 
+import internal-module
+
 \ Init
 : init ( -- )
   init
@@ -108,15 +110,16 @@ end-module
 
 \ Wait for n milliseconds
 : ms ( u -- )
-  systick-divisor * systick-counter @
+  systick-divisor * systick-counter
   begin
-    dup systick-counter @ swap - 2 pick u<
+    dup systick-counter swap - 2 pick u<
   while
     pause
   repeat
   drop drop
 ;
 
+unimport internal-module
 unimport systick-module
 
 \ Warm reboot
