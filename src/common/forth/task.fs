@@ -58,15 +58,15 @@ begin-import-module-once task-module
     \ The multitasker SysTick counter
     variable task-systick-counter
 
-    \ The default timeslice
-    10 constant default-timeslice
+    \ The default context switch delay
+    10 constant default-context-switch-delay
 
-    \ The default maximum timeslice
-    20 constant default-max-timeslice
-    
+    \ The context switch delay
+    variable context-switch-delay
+
     \ Sleep is enabled
     variable sleep-enabled?
-    
+
     \ The current task handler
     user task-handler
 
@@ -81,12 +81,6 @@ begin-import-module-once task-module
 
     \ The current base for a task
     user task-base
-
-    \ A task's timeslice
-    user task-timeslice
-
-    \ A task's maximum timeslice
-    user task-max-timeslice
 
   end-module
 
@@ -236,7 +230,6 @@ begin-import-module-once task-module
 	then
 	current-task @ swap task-next !
       else
-	0 task-systick-counter !
 	dup dup task-next !
 	current-task !
 	true current-task-changed? !
@@ -253,7 +246,6 @@ begin-import-module-once task-module
 	  drop
 	then
       else
-	0 task-systick-counter !
 	dup current-task !
 	dup dup task-next !
 	true current-task-changed? !
@@ -313,39 +305,9 @@ begin-import-module-once task-module
 
   \ Validate task is not terminated
   : validate-not-terminated ( task -- )
-    task-active h@ terminated = if enable-int ['] x-terminated ?raise then
+    task-active h@ terminated <> averts x-terminated
   ;
 
-  \ Set task timeslice
-  : set-task-timeslice ( timeslice task -- )
-    disable-int
-    dup validate-not-terminated
-    dup current-task @ = if
-      2dup ['] task-timeslice for-task @ - task-systick-counter @ + 0 max
-      task-systick-counter !
-    then
-    swap 0 max swap ['] task-timeslice for-task !
-    enable-int
-  ;
-
-  \ Get task timeslice
-  : get-task-timeslice ( task -- timeslice )
-    dup validate-not-terminated
-    ['] task-timeslice for-task @
-  ;
-
-  \ Set task maximum timeslice
-  : set-task-max-timeslice ( max-timeslice task -- )
-    dup validate-not-terminated
-    ['] task-max-timeslice for-task !
-  ;
-
-  \ Get task maximum timeslice
-  : get-task-max-timeslice ( task -- max-timeslice )
-    dup validate-not-terminated
-    ['] task-max-timeslice for-task @
-  ;
-  
   \ Start a task's execution
   : run ( task -- )
     disable-int
@@ -421,8 +383,6 @@ begin-import-module-once task-module
       0 task-systick-start !
       -1 task-systick-delay !
       base @ task-base !
-      default-timeslice task-timeslice !
-      default-max-timeslice task-max-timeslice !
       0 current-lock !
       0 current-lock-held !
       dup dup task-next !
@@ -454,8 +414,6 @@ begin-import-module-once task-module
     false over ['] task-wait for-task !
     0 over ['] task-systick-start for-task !
     -1 over ['] task-systick-delay for-task !
-    default-timeslice over ['] task-timeslice for-task !
-    default-max-timeslice over ['] task-max-timeslice for-task !
     dup task-rstack-base over task-stack-base ['] task-entry
     ['] init-context svc over task-rstack-current !
     next-user-space over task-dict-offset !
@@ -555,7 +513,10 @@ begin-import-module-once task-module
       disable-int
       
       in-critical @ 0= if
-	  
+	task-systick-counter @
+	dup context-switch-delay @ negate <= if drop 0 then
+	dup context-switch-delay @ >= if drop 0 then
+	context-switch-delay @ + task-systick-counter !
 	1 pause-count +!
 	begin
 	  task-io
@@ -564,7 +525,6 @@ begin-import-module-once task-module
 	    enable-int
 	    sleep
 	    disable-int
-	    0 task-systick-counter !
 	  then
 	until
 
@@ -593,10 +553,7 @@ begin-import-module-once task-module
 	task-dict-base dict-base !
 	task-base @ base !
 	task-handler @ handler !
-	
-	task-systick-counter @ 0 min task-timeslice @ +
-	task-max-timeslice @ task-timeslice @ max min task-systick-counter !
-	
+
       else
 	true deferred-context-switch !
       then
@@ -744,6 +701,7 @@ begin-import-module-once task-module
     $FF SHPR2_PRI_11!
     $FF SHPR3_PRI_14!
     0 task-systick-counter !
+    default-context-switch-delay context-switch-delay !
     stack-end @ free-end !
     init-main-task
     0 pause-count !
