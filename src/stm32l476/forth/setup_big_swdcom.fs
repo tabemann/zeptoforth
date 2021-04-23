@@ -22,6 +22,7 @@
 \ executed from the root of the zeptoforth directory to initialize zeptoforth
 \ on an STM32L476 device.
 
+#include src/stm32l476/forth/clock.fs
 #include src/common/forth/basic.fs
 #include src/common/forth/module.fs
 #include src/common/forth/interrupt.fs

@@ -18,6 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
+#include src/stm32l476/forth/clock.fs
 #include src/common/forth/basic.fs
 #include src/common/forth/module.fs
 #include src/common/forth/interrupt.fs

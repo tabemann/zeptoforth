@@ -1,4 +1,4 @@
-@ Copyright (c) 2019-2020 Travis Bemann
+@ Copyright (c) 2019-2021 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -1275,6 +1275,125 @@ _add_store_4:
 	str r0, [tos]
 	ldr tos, [dp, #4]
 	adds dp, #8
+	bx lr
+	end_inlined
+
+	@@ Specify a bit
+	define_word "bit", visible_flag | inlined_flag
+_bit:	movs r0, tos
+	movs tos, #1
+	lsls tos, r0
+	bx lr
+	end_inlined
+
+	@@ Bit set a byte
+	define_word "bbis!", visible_flag | inlined_flag
+_bit_set_1:
+	movs r0, tos
+	pull_tos
+	ldrb r1, [r0]
+	orrs r1, tos
+	strb r1, [r0]
+	pull_tos
+	bx lr
+	end_inlined
+
+	@@ Bit set a halfword
+	define_word "hbis!", visible_flag | inlined_flag
+_bit_set_2:
+	movs r0, tos
+	pull_tos
+	ldrh r1, [r0]
+	orrs r1, tos
+	strh r1, [r0]
+	pull_tos
+	bx lr
+	end_inlined
+	
+	@@ Bit set a word
+	define_word "bis!", visible_flag | inlined_flag
+_bit_set_4:
+	movs r0, tos
+	pull_tos
+	ldr r1, [r0]
+	orrs r1, tos
+	str r1, [r0]
+	pull_tos
+	bx lr
+	end_inlined
+
+	@@ Bit clear a byte
+	define_word "bbic!", visible_flag | inlined_flag
+_bit_clear_1:
+	movs r0, tos
+	pull_tos
+	ldrb r1, [r0]
+	bics r1, tos
+	strb r1, [r0]
+	pull_tos
+	bx lr
+	end_inlined
+
+	@@ Bit clear a halfword
+	define_word "hbic!", visible_flag | inlined_flag
+_bit_clear_2:
+	movs r0, tos
+	pull_tos
+	ldrh r1, [r0]
+	bics r1, tos
+	strh r1, [r0]
+	pull_tos
+	bx lr
+	end_inlined
+	
+	@@ Bit clear a word
+	define_word "bic!", visible_flag | inlined_flag
+_bit_clear_4:
+	movs r0, tos
+	pull_tos
+	ldr r1, [r0]
+	bics r1, tos
+	str r1, [r0]
+	pull_tos
+	bx lr
+	end_inlined
+
+	@ Test for bits in a byte
+	define_word "bbit@", visible_flag | inlined_flag
+_bit_test_1:
+	movs r0, tos
+	pull_tos
+	ldrb r0, [r0]
+	ands tos, r0
+	subs tos, #1
+	sbc tos, tos
+	mvns tos, tos
+	bx lr
+	end_inlined
+
+	@ Test for bits in a halfword
+	define_word "hbit@", visible_flag | inlined_flag
+_bit_test_2:
+	movs r0, tos
+	pull_tos
+	ldrh r0, [r0]
+	ands tos, r0
+	subs tos, #1
+	sbc tos, tos
+	mvns tos, tos
+	bx lr
+	end_inlined
+
+	@ Test for bits in a word
+	define_word "bit@", visible_flag | inlined_flag
+_bit_test_4:
+	movs r0, tos
+	pull_tos
+	ldrh r0, [r0]
+	ands tos, r0
+	subs tos, #1
+	sbc tos, tos
+	mvns tos, tos
 	bx lr
 	end_inlined
 
