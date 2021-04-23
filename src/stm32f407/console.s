@@ -71,8 +71,7 @@ _uart_init:
         ldr r1, = RCC_CR
         mov r0, HSEON
         str r0, [r1]            @ turn on the external clock
-1:	awaitHSE:
-        ldr r0, [r1]
+1:	ldr r0, [r1]
         ands r0, #HSERDY
         beq 1b            @ hang here until external clock is stable
 
@@ -121,7 +120,7 @@ _uart_init:
 
 	@ Enable 168 MHz
 @	bl _use_120mhz
-	bl _use_168mhz
+@	bl _use_168mhz
 	
 	@ Enable the USART, TX, and RX circuit
 	ldr r1, =CONSOLE_CR1
@@ -131,59 +130,59 @@ _uart_init:
 	pop {pc}
 	end_inlined
 
-	@@ Enable 120 MHz
-	define_internal_word "use-120mhz", visible_flag
-_use_120mhz:
-	ldr r0, =FLASH_ACR
-	ldr r1, =0x103
-	str r1, [r0]
-	ldr r0, =RCC_PLLCRGR
-	ldr r1, =PLLSRC | 8 | (240 << 6) | (8 << 24)
-	str r1, [r0]
-	ldr r0, =RCC_CR
-	ldr r1, [r0]
-	ldr r2, =PLLON
-	orrs r1, r2
-	str r1, [r0]
-	ldr r2, =PLLRDY
-1:	ldr r1, [r0]
-	tst r1, r2
-	beq 1b
-	ldr r0, =RCC_CFGR
-	ldr r1, =2 | (5 << 10) | (5 << 13)
-	str r1, [r0]
-	ldr r0, =CONSOLE_BRR
-	ldr r1, =0x104
-	str r1, [r0]
-	bx lr
-	end_inlined
-
-	@@ Enable 168 MHz
-	define_internal_word "use-168mhz", visible_flag
-_use_168mhz:
-	ldr r0, =FLASH_ACR
-	ldr r1, =0x705
-	str r1, [r0]
-	ldr r0, =RCC_PLLCRGR
-	ldr r1, =PLLSRC | 8 | (336 << 6) | (7 << 24)
-	str r1, [r0]
-	ldr r0, =RCC_CR
-	ldr r1, [r0]
-	ldr r2, =PLLON
-	orrs r1, r2
-	str r1, [r0]
-	ldr r2, =PLLRDY
-1:	ldr r1, [r0]
-	tst r1, r2
-	beq 1b
-	ldr r0, =RCC_CFGR
-	ldr r1, =2 | (5 << 10) | (4 << 13)
-	str r1, [r0]
-	ldr r0, =CONSOLE_BRR
-	ldr r1, =0x16D
-	str r1, [r0]
-	bx lr
-	end_inlined
+@	@@ Enable 120 MHz
+@	define_internal_word "use-120mhz", visible_flag
+@_use_120mhz:
+@	ldr r0, =FLASH_ACR
+@	ldr r1, =0x103
+@	str r1, [r0]
+@	ldr r0, =RCC_PLLCRGR
+@	ldr r1, =PLLSRC | 8 | (240 << 6) | (8 << 24)
+@	str r1, [r0]
+@	ldr r0, =RCC_CR
+@	ldr r1, [r0]
+@	ldr r2, =PLLON
+@	orrs r1, r2
+@	str r1, [r0]
+@	ldr r2, =PLLRDY
+@1:	ldr r1, [r0]
+@	tst r1, r2
+@	beq 1b
+@	ldr r0, =RCC_CFGR
+@	ldr r1, =2 | (5 << 10) | (5 << 13)
+@	str r1, [r0]
+@	ldr r0, =CONSOLE_BRR
+@	ldr r1, =0x104
+@	str r1, [r0]
+@	bx lr
+@	end_inlined
+@
+@	@@ Enable 168 MHz
+@	define_internal_word "use-168mhz", visible_flag
+@_use_168mhz:
+@	ldr r0, =FLASH_ACR
+@	ldr r1, =0x705
+@	str r1, [r0]
+@	ldr r0, =RCC_PLLCRGR
+@	ldr r1, =PLLSRC | 8 | (336 << 6) | (7 << 24)
+@	str r1, [r0]
+@	ldr r0, =RCC_CR
+@	ldr r1, [r0]
+@	ldr r2, =PLLON
+@	orrs r1, r2
+@	str r1, [r0]
+@	ldr r2, =PLLRDY
+@1:	ldr r1, [r0]
+@	tst r1, r2
+@	beq 1b
+@	ldr r0, =RCC_CFGR
+@	ldr r1, =2 | (5 << 10) | (4 << 13)
+@	str r1, [r0]
+@	ldr r0, =CONSOLE_BRR
+@	ldr r1, =0x16D
+@	str r1, [r0]
+@	bx lr
+@	end_inlined
 
 	@@ Emit one character ( c -- )
 	define_internal_word "serial-emit", visible_flag
@@ -245,30 +244,30 @@ _serial_key_q:
 1:	pop {pc}
 	end_inlined
 
-	@@ Time multiplier
-	define_internal_word "time-multiplier", visible_flag
-_time_multiplier:
-	push_tos
-@	movs tos, #15 @ 120 MHz
-	movs tos, #21 @ 168 MHz
-	bx lr
-	end_inlined
-
-	@@ Time divisor
-	define_internal_word "time-divisor", visible_flag
-_time_divisor:
-	push_tos
-	movs tos, #1
-	bx lr
-	end_inlined
-
-	@@ Divisor to get ms from systicks
-	define_internal_word "systick-divisor", visible_flag
-_systick_divisor:
-	push_tos
-	movs tos, #10
-	bx lr
-	end_inlined
+@	@@ Time multiplier
+@	define_internal_word "time-multiplier", visible_flag
+@_time_multiplier:
+@	push_tos
+@@	movs tos, #15 @ 120 MHz
+@	movs tos, #21 @ 168 MHz
+@	bx lr
+@	end_inlined
+@
+@	@@ Time divisor
+@	define_internal_word "time-divisor", visible_flag
+@_time_divisor:
+@	push_tos
+@	movs tos, #1
+@	bx lr
+@	end_inlined
+@
+@	@@ Divisor to get ms from systicks
+@	define_internal_word "systick-divisor", visible_flag
+@_systick_divisor:
+@	push_tos
+@	movs tos, #10
+@	bx lr
+@	end_inlined
 	
 	.ltorg
 	

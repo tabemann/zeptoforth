@@ -71,8 +71,8 @@ outer_exc_handled:
 	bl _init_variables
 	bl _init_dict
 	bl _uart_init
-	bl _use_48mhz
-	bl _serial_115200_48mhz
+@	bl _use_48mhz
+@	bl _serial_115200_48mhz
 	bl _init_flash_buffers
 	bl _do_init
 	bl _welcome
@@ -80,7 +80,7 @@ outer_exc_handled:
 
 	.ltorg
 	
-	.include "src/stm32l476/use_48mhz.s"
+@	.include "src/stm32l476/use_48mhz.s"
 	.include "src/stm32l476/flashrom.s"
 	.include "src/stm32l476/console.s"
 	.include "src/stm32l476/handlers.s"

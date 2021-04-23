@@ -94,14 +94,13 @@ _uart_init:
 	bx lr
 	end_inlined
 
-	@@ Change USART2 baudrate to 115200 baud for 48 MHz mode
-	define_internal_word "serial-115200-48mhz", visible_flag
-_serial_115200_48mhz:	
-	ldr r0, =USART2_BRR
-	ldr r1, =(48000000 + 115200 / 2) / 115200
-	str r1, [r0]
-	bx  lr
-	end_inlined
+@	define_internal_word "serial-115200-48mhz", visible_flag
+@_serial_115200_48mhz:	
+@	ldr r0, =USART2_BRR
+@	ldr r1, =(48000000 + 115200 / 2) / 115200
+@	str r1, [r0]
+@	bx  lr
+@	end_inlined
 
 	@@ Emit one character ( c -- )
 	define_internal_word "serial-emit", visible_flag
