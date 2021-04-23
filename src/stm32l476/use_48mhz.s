@@ -36,9 +36,21 @@
 	@@ RCC registers
 	.equ RCC_BASE, 0x40021000
 	.equ RCC_CR, RCC_BASE + 0x00
+	.equ RCC_PLLCFGR, RCC_BASE + 0x0C
+
+	.equ RCC_PLLCFGR_PLLR_Value, 0 << 25 @ PLLR = 2
+	.equ RCC_PLLCFGR_PLLREN_Value, 1 << 24
+	.equ RCC_PLLCFGR_PLLQ_Value, 0 << 21 @ PLLQ = 2
+	.equ RCC_PLLCFGR_PLLQEN_Value, 1 << 20
+	.equ RCC_PLLCFGR_PLLN_Value, 16 << 8 @ PLLN = 16
+	.equ RCC_PLLCFGR_PLLM_Value, 7 << 8 @ PLLM = 8
+	.equ RCC_PLLCFGR_PLLSRC_Value, 1 << 0 @ MSI
+	
 	.equ RCC_CR_MSIRGSEL, 0x08
 	.equ RCC_CR_MSIRANGE, 0xF0
 	.equ RCC_CR_MSIRANGE_48MHZ, 0xB0
+	.equ RCC_CR_PLLRDY, 1 << 25
+	.equ RCC_CR_PLLON, 1 << 24
 	
 	@@ Set system clock to 48 MHz MSI and set the flash latency accordingly
 	define_internal_word "use-48mhz", visible_flag
@@ -47,6 +59,7 @@ _use_48mhz:
 	bl _set_pwr_for_48mhz
 	bl _set_flash_latency_for_48mhz
 	bl _set_msi_48mhz
+@	bl _enable_pll
 	pop {pc}
 	end_inlined
 
@@ -98,6 +111,29 @@ _set_msi_48mhz:
 	bx lr
 	end_inlined
 
+@	@@ Enable the PLL
+@	define_internal_word "enable-pll", visible_flag
+@_enable_pll:
+@	ldr r0, =RCC_CR
+@	ldr r1, =RCC_CR_PLLON
+@	ldr r2, [r0]
+@	bics r2, r1
+@	str r2, [r0]
+@	ldr r0, =RCC_PLLCFGR
+@	ldr r1, =(RCC_PLLCFGR_PLLQ_Value | RCC_PLLCFGR_PLLQEN_Value | RCC_PLLCFGR_PLLN_Value | RCC_PLLCFGR_PLLM_Value | RCC_PLLCFGR_PLLSRC_Value)
+@	str r1, [r0]
+@	ldr r0, =RCC_CR
+@	ldr r1, =RCC_CR_PLLON
+@	ldr r2, [r0]
+@	orrs r2, r1
+@	str r2, [r0]
+@	ldr r1, =RCC_CR_PLLRDY
+@1:	ldr r2, [r0]
+@	tst r2, r1
+@	beq 1b
+@	bx lr
+@	end_inlined
+	
 	@@ Time multiplier
 	define_internal_word "time-multiplier", visible_flag
 _time_multiplier:

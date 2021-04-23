@@ -71,7 +71,11 @@
         .equ RXNE            ,   0x20
         .equ TC              ,   0x40
         .equ TXE             ,   0x80
-	
+
+	.equ RCC_Base        ,   0x40023800
+	.equ RCC_AHB1ENR     ,   RCC_Base + 0x30
+	.equ RCC_APB2ENR     ,   RCC_Base + 0x44
+
 	@@ Initialize UART
 	define_internal_word "uart-init", visible_flag
 _uart_init:
@@ -123,9 +127,9 @@ _uart_init:
         orrs r0, #0x10
         str r0, [r1]
 
-	@ Configure BRR by deviding the bus clock with the baud rate
+	@ Configure BRR by dividing the bus clock with the baud rate
 	ldr r1, =CONSOLE_BRR
-	ldr r0, =0x3AA  @ (108000000 + 115200 / 2) / 115200
+	ldr r0, =(16000000 + (115200 / 2)) / 115200
 	str r0, [r1]
 
 	@ Disable USART overrun detection before UE enable

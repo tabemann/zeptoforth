@@ -594,7 +594,7 @@ begin-import-module-once task-module
 	task-base @ base !
 	task-handler @ handler !
 	
-	task-systick-counter @ 0 min task-timeslice @ +
+	task-timeslice @
 	task-max-timeslice @ task-timeslice @ max min task-systick-counter !
 	
       else

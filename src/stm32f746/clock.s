@@ -236,7 +236,7 @@ _use_216mhz:
 _time_multiplier:
 	push_tos
 @	movs tos, #15 @ 120 MHz
-	movs tos, #21 @ 168 MHz
+	movs tos, #13 @ 216 MHz
 	bx lr
 	end_inlined
 

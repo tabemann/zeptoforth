@@ -117,34 +117,34 @@ forth-module set-current
 : ?dup ( x -- x | 0 ) dup 0<> if dup then ;
 
 \ Generate a mask for a single bit
-: bit ( u -- x ) 1 swap lshift [inlined] ;
+\ : bit ( u -- x ) 1 swap lshift [inlined] ;
 
 \ Test for bits in a byte being set
-: bbit@ ( mask b-addr -- f ) b@ and 0<> ;
+\ : bbit@ ( mask b-addr -- f ) b@ and 0<> ;
 
 \ Test for bits in a halfword being set
-: hbit@ ( mask h-addr -- f ) h@ and 0<> ;
+\ : hbit@ ( mask h-addr -- f ) h@ and 0<> ;
 
 \ Test for bits in a cell being set
-: bit@ ( mask addr -- f ) @ and 0<> ;
+\ : bit@ ( mask addr -- f ) @ and 0<> ;
 
 \ Set bits on a byte
-: bbis! ( bits addr -- ) dup b@ rot or swap b! ;
+\ : bbis! ( bits addr -- ) dup b@ rot or swap b! ;
 
 \ Clear bits on a byte
-: bbic! ( bits addr -- ) dup b@ rot bic swap b! ;
+\ : bbic! ( bits addr -- ) dup b@ rot bic swap b! ;
 
 \ Set bits on a halfword
-: hbis! ( bits addr -- ) dup h@ rot or swap h! ;
+\ : hbis! ( bits addr -- ) dup h@ rot or swap h! ;
 
 \ Clear bits on a halfword
-: hbic! ( bits addr -- ) dup h@ rot bic swap h! ;
+\ : hbic! ( bits addr -- ) dup h@ rot bic swap h! ;
 
 \ Set bits on a word
-: bis! ( bits addr -- ) dup @ rot or swap ! ;
+\ : bis! ( bits addr -- ) dup @ rot or swap ! ;
 
 \ Clear bits on a word
-: bic! ( bits addr -- ) dup @ rot bic swap ! ;
+\ : bic! ( bits addr -- ) dup @ rot bic swap ! ;
 
 \ Get the depth of the stack, not including the cell pushed onto it by this
 \ word

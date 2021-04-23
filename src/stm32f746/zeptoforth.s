@@ -70,7 +70,7 @@ handle_reset:
 outer_exc_handled:
 	bl _init_variables
 	bl _init_dict
-	bl _use_216mhz
+@	bl _use_216mhz
 	bl _uart_init
 	bl _init_flash_buffers
 	bl _do_init
@@ -79,7 +79,7 @@ outer_exc_handled:
 
 	.ltorg
 	
-	.include "src/stm32f746/clock.s"
+@	.include "src/stm32f746/clock.s"
 	.include "src/stm32f746/flashrom.s"
 	.include "src/stm32f746/console.s"
 	.include "src/stm32f746/handlers.s"
