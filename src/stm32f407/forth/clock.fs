@@ -70,6 +70,8 @@ USART2_Base $0C + constant USART2_CR1
 
 \ USART2 register bits
 13 bit constant USART2_CR1_UE
+2 bit constant USART2_CR1_RE
+3 bit constant USART2_CR1_TE
 
 \ Enable HSI
 : enable-hsi ( -- )
@@ -96,12 +98,12 @@ USART2_Base $0C + constant USART2_CR1
 
 \ Enable USART2
 : enable-usart2 ( -- )
-  USART2_CR1_UE USART2_CR1 bis!
+  [ USART2_CR1_UE USART2_CR1_RE or USART2_CR1_TE or ] literal USART2_CR1 bis!
 ;
 
 \ Disable USART2
 : disable-usart2 ( -- )
-  USART2_CR1_UE USART2_CR1 bic!
+  [ USART2_CR1_UE USART2_CR1_RE or USART2_CR1_TE or ] literal USART2_CR1 bic!
 ;
 
 \ Enable clock for 168 MHz

@@ -90,7 +90,9 @@ USART1_Base $00 + constant USART1_CR1
 USART1_Base $0C + constant USART1_BRR
 
 \ USART1 register bits
-10 bit constant USART1_CR1_UE
+0 bit constant USART1_CR1_UE
+2 bit constant USART1_CR1_RE
+3 bit constant USART1_CR1_TE
 
 \ Enable HSI
 : enable-hsi ( -- )
@@ -151,12 +153,12 @@ USART1_Base $0C + constant USART1_BRR
 
 \ Enable USART1
 : enable-usart1 ( -- )
-  USART1_CR1_UE USART1_CR1 bis!
+  [ USART1_CR1_UE USART1_CR1_RE or USART1_CR1_TE or ] literal USART1_CR1 bis!
 ;
 
 \ Disable USART1
 : disable-usart1 ( -- )
-  USART1_CR1_UE USART1_CR1 bic!
+  [ USART1_CR1_UE USART1_CR1_RE or USART1_CR1_TE or ] literal USART1_CR1 bic!
 ;
 
 \ Set the BRR for 216 MHz

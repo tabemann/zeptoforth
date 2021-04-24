@@ -61,6 +61,8 @@ USART2_Base $0C + constant USART2_BRR
 
 \ USART2 register bits
 0 bit constant USART2_CR1_UE
+2 bit constant USART2_CR1_RE
+3 bit constant USART2_CR1_TE
 
 \ RW SysTick Control and Status Register
 $E000E010 constant SYST_CSR
@@ -91,12 +93,12 @@ $E000E010 constant SYST_CSR
 
 \ Enable USART2
 : enable-usart2 ( -- )
-  USART2_CR1_UE USART2_CR1 bis!
+  [ USART2_CR1_UE USART2_CR1_RE or USART2_CR1_TE or ] literal USART2_CR1 bis!
 ;
 
 \ Disable USART2
 : disable-usart2 ( -- )
-  USART2_CR1_UE USART2_CR1 bic!
+  [ USART2_CR1_UE USART2_CR1_RE or USART2_CR1_TE or ] literal USART2_CR1 bic!
 ;
 
 \ Set the BRR for 48 MHz
