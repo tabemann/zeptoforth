@@ -1389,7 +1389,7 @@ _bit_test_2:
 _bit_test_4:
 	movs r0, tos
 	pull_tos
-	ldrh r0, [r0]
+	ldr r0, [r0]
 	ands tos, r0
 	subs tos, #1
 	sbc tos, tos
