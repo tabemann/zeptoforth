@@ -3,8 +3,6 @@ compile-to-flash
 begin-import-module-once swd-module
 
   import internal-module
-  import int-io-module
-  import int-io-internal-module
 
   begin-import-module swd-internal-module
 
@@ -68,14 +66,6 @@ begin-import-module-once swd-module
     ['] swd-emit? emit?-hook !
     ['] swd-emit emit-hook !
     ['] swd-flush-console flush-console-hook !
-  ;
-
-  : serial-console ( -- )
-    ['] do-key? key?-hook !
-    ['] do-key key-hook !
-    ['] do-emit? emit?-hook !
-    ['] do-emit emit-hook !
-    ['] do-flush-console flush-console-hook !
   ;
 
   : enable-sleep ( -- ) true use-sleep ! ;

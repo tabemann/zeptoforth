@@ -35,6 +35,7 @@
 #include src/common/forth/task.fs
 #include src/common/forth/schedule.fs
 #include src/common/forth/big_default.fs
+#include src/stm32f746/forth/rng.fs
 #include src/stm32f746/forth/qspi.fs
 #include src/stm32f746/forth/block.fs
 #include src/stm32f746/forth/edit.fs
