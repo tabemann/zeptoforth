@@ -163,7 +163,7 @@ USART1_Base $0C + constant USART1_BRR
 
 \ Set the BRR for 216 MHz
 : set-brr-108mhz
-  108000000 115200 2 / + 115200 / USART1_BRR !
+  [ 108000000 115200 2 / + 115200 / ] literal USART1_BRR !
 ;
 
 \ Use 216 MHz

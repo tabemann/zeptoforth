@@ -213,15 +213,20 @@ begin-import-module-once int-io-module
   : task-io ( -- )
   ;
 
-  \ Enable interrupt-driven IO
-  : enable-int-io ( -- )
-    0 37 NVIC_IPR_IP!
-    ['] null-handler null-handler-hook !
+  \ Set up the serial console
+  : serial-console ( -- )
     ['] do-key key-hook !
     ['] do-emit emit-hook !
     ['] do-key? key?-hook !
     ['] do-emit? emit?-hook !
     ['] do-flush-console flush-console-hook !
+  ;
+  
+  \ Enable interrupt-driven IO
+  : enable-int-io ( -- )
+    0 37 NVIC_IPR_IP!
+    ['] null-handler null-handler-hook !
+    serial-console
     RCC_APB2LPENR_USART1LPEN
     37 NVIC_ISER_SETENA!
     USART1_CR1_RXNEIE
@@ -267,5 +272,3 @@ unimport int-io-module
 
 \ Warm reboot
 warm
-
-
