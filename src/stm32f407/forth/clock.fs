@@ -120,7 +120,7 @@ USART2_Base $0C + constant USART2_CR1
 
 \ Set the BRR for 168 MHz
 : set-brr-168mhz
-  42000000 115200 2 / + 115200 / USART2_BRR !
+  [ 42000000 115200 2 / + 115200 / ] literal USART2_BRR !
 ;
 
 \ Use 168 MHz
