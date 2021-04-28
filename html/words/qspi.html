@@ -1,0 +1,207 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quad SPI words &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Block words" href="block.html" />
+    <link rel="prev" title="ANSI Terminal words" href="ansi_term.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="quad-spi-words">
+<h1>Quad SPI words<a class="headerlink" href="#quad-spi-words" title="Permalink to this headline">¶</a></h1>
+<p>The Quad SPI interface is written for the STM32F746 DISCOVERY board. It maps Quad SPI flash to the addressing space at <code class="docutils literal notranslate"><span class="pre">qspi-base</span></code>. It also provides means for writing bytes, halfwords, words, and arbitrary buffers containing bytes to flash and erasing 4K and 32K subsectors, 64K sectors, and the entire flash. Note that even though internally they require turning off memory-mapped Quad SPI mode, it is automatically turned back on when they are complete, and they are hidden from all other tasks (however they significantly impact realtime performance due to being slow while requiring interrupts to be turned off).</p>
+<p>The Quad SPI interface is not included in the default builds; the user must load <code class="docutils literal notranslate"><span class="pre">src/stm32f746/forth/qspi.fs</span></code> or use an STM32F746 big build for it to be available. Note that logic is in place to ensure that it is not loaded multiple times. When it is loaded it reboots the MCU to carry out initialization.</p>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">qspi-module</span></code>:</p>
+<div class="section" id="qspi-base">
+<h2><code class="docutils literal notranslate"><span class="pre">qspi-base</span></code><a class="headerlink" href="#qspi-base" title="Permalink to this headline">¶</a></h2>
+<p>( – addr )</p>
+<p>Returns the base address of the Quad SPI memory mapped space.</p>
+</div>
+<div class="section" id="qspi-size">
+<h2><code class="docutils literal notranslate"><span class="pre">qspi-size</span></code><a class="headerlink" href="#qspi-size" title="Permalink to this headline">¶</a></h2>
+<p>( – bytes )</p>
+<p>Returns the size of the Quad SPI flash space in bytes.</p>
+</div>
+<div class="section" id="qspi-inited">
+<h2><code class="docutils literal notranslate"><span class="pre">qspi-inited?</span></code><a class="headerlink" href="#qspi-inited" title="Permalink to this headline">¶</a></h2>
+<p>( – flag )</p>
+<p>Returns whether Quad SPI is initialized - should always be true after system initialization.</p>
+</div>
+<div class="section" id="map-qspi-enabled">
+<h2><code class="docutils literal notranslate"><span class="pre">map-qspi-enabled?</span></code><a class="headerlink" href="#map-qspi-enabled" title="Permalink to this headline">¶</a></h2>
+<p>( – flag )</p>
+<p>Returns whether mapping Quad SPI to memory is enabled - should always be true after system initialization.</p>
+</div>
+<div class="section" id="x-invalid-qspi-addr">
+<h2><code class="docutils literal notranslate"><span class="pre">x-invalid-qspi-addr</span></code><a class="headerlink" href="#x-invalid-qspi-addr" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>Invalid Quad SPI address exception.</p>
+</div>
+<div class="section" id="qspi">
+<h2><code class="docutils literal notranslate"><span class="pre">qspi!</span></code><a class="headerlink" href="#qspi" title="Permalink to this headline">¶</a></h2>
+<p>( x addr – )</p>
+<p>Writes a 32-bit value in little-endian order to Quad SPI flash at the address corresponding to the specified address in memory-mapped Quad SPI space; note that it has to be 32-bit aligned.</p>
+</div>
+<div class="section" id="hqspi">
+<h2><code class="docutils literal notranslate"><span class="pre">hqspi!</span></code><a class="headerlink" href="#hqspi" title="Permalink to this headline">¶</a></h2>
+<p>( h addr – )</p>
+<p>Writes a 16-bit value in little-endian order to Quad SPI flash at the address corresponding to the specified address in memory-mapped Quad SPI space; note that it has to be 16-bit aligned.</p>
+</div>
+<div class="section" id="bqspi">
+<h2><code class="docutils literal notranslate"><span class="pre">bqspi!</span></code><a class="headerlink" href="#bqspi" title="Permalink to this headline">¶</a></h2>
+<p>( b addr – )</p>
+<p>Writes a 8-bit value to Quad SPI flash at the address corresponding to the specified address in memory-mapped Quad SPI space; note that it has to be 16-bit aligned.</p>
+</div>
+<div class="section" id="mass-qspi">
+<h2><code class="docutils literal notranslate"><span class="pre">mass-qspi!</span></code><a class="headerlink" href="#mass-qspi" title="Permalink to this headline">¶</a></h2>
+<p>( data-addr bytes addr – )</p>
+<p>Writes an arbitrary number of bytes in the provided buffer to Quad SPIs starting at the specified address in memory-mapped Quad SPI space; note the data can be larger than a write page (and can therefore cross write page boundaries) despite the underlying hardware not allowing this due to this case being handled in sofotware.</p>
+</div>
+<div class="section" id="erase-qspi-4k-subsector">
+<h2><code class="docutils literal notranslate"><span class="pre">erase-qspi-4k-subsector</span></code><a class="headerlink" href="#erase-qspi-4k-subsector" title="Permalink to this headline">¶</a></h2>
+<p>( addr – )</p>
+<p>Erase a 4K flash subsector containing the specified address in memory-mapped Quad SPI space.</p>
+</div>
+<div class="section" id="erase-qspi-32k-subsector">
+<h2><code class="docutils literal notranslate"><span class="pre">erase-qspi-32k-subsector</span></code><a class="headerlink" href="#erase-qspi-32k-subsector" title="Permalink to this headline">¶</a></h2>
+<p>( addr – )</p>
+<p>Erase a 32K flash subsector containing the specified address in memory-mapped Quad SPI space.</p>
+</div>
+<div class="section" id="erase-qspi-sector">
+<h2><code class="docutils literal notranslate"><span class="pre">erase-qspi-sector</span></code><a class="headerlink" href="#erase-qspi-sector" title="Permalink to this headline">¶</a></h2>
+<p>( addr – )</p>
+<p>Erase a 64K flash sector containing the specified address in memory-mapped Quad SPI space.</p>
+</div>
+<div class="section" id="erase-qspi-bulk">
+<h2><code class="docutils literal notranslate"><span class="pre">erase-qspi-bulk</span></code><a class="headerlink" href="#erase-qspi-bulk" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>Erase the entire contents of Quad SPI flash.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schedule.html">Scheduling Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="allocate.html">Allocator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Quad SPI words</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#qspi-base"><code class="docutils literal notranslate"><span class="pre">qspi-base</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qspi-size"><code class="docutils literal notranslate"><span class="pre">qspi-size</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qspi-inited"><code class="docutils literal notranslate"><span class="pre">qspi-inited?</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#map-qspi-enabled"><code class="docutils literal notranslate"><span class="pre">map-qspi-enabled?</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#x-invalid-qspi-addr"><code class="docutils literal notranslate"><span class="pre">x-invalid-qspi-addr</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qspi"><code class="docutils literal notranslate"><span class="pre">qspi!</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hqspi"><code class="docutils literal notranslate"><span class="pre">hqspi!</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bqspi"><code class="docutils literal notranslate"><span class="pre">bqspi!</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mass-qspi"><code class="docutils literal notranslate"><span class="pre">mass-qspi!</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#erase-qspi-4k-subsector"><code class="docutils literal notranslate"><span class="pre">erase-qspi-4k-subsector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#erase-qspi-32k-subsector"><code class="docutils literal notranslate"><span class="pre">erase-qspi-32k-subsector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#erase-qspi-sector"><code class="docutils literal notranslate"><span class="pre">erase-qspi-sector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#erase-qspi-bulk"><code class="docutils literal notranslate"><span class="pre">erase-qspi-bulk</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="edit.html">Block Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="swd.html"><code class="docutils literal notranslate"><span class="pre">swdcom</span></code> Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="led.html">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test.html">Testing Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="ansi_term.html" title="previous chapter">ANSI Terminal words</a></li>
+      <li>Next: <a href="block.html" title="next chapter">Block words</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Travis Bemann.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="../_sources/words/qspi.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

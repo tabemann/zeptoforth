@@ -1,0 +1,157 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Line Editor &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Double-Cell Words" href="double.html" />
+    <link rel="prev" title="Development Tools Words" href="dev_tools.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="line-editor">
+<h1>Line Editor<a class="headerlink" href="#line-editor" title="Permalink to this headline">¶</a></h1>
+<p>The line editor provides a simple interface for allowing the user to edit input without the limitations in the normal <code class="docutils literal notranslate"><span class="pre">refill</span></code> mechanism. When enabled, the following keys can be used to control editing:</p>
+<ul class="simple">
+<li><p>Backspace: delete the character to the left of the cursor</p></li>
+<li><p>Delete: delete the character under the cursor</p></li>
+<li><p>Left / Control-B: move the cursor one character to the left</p></li>
+<li><p>Right / Control-F: move the cursor one character to the right</p></li>
+<li><p>Control-A: move the cursor to the start of the input</p></li>
+<li><p>Control-E: move the cursor to the end of the input</p></li>
+</ul>
+<p>Note that tabs and characters of code points greater than 127 are handled correctly. History and autocomplete are not supported (this is a microcontroller after all). Also note that it is not compatible with non-terminal operation, i.e. with loading code automatically via serial or swdcom; before this is done it must be disabled.</p>
+<p>The line editor is not included in the default builds; the user must load <code class="docutils literal notranslate"><span class="pre">src/common/forth/line.fs</span></code> or use a big build for it to be available. Note that logic is in place to ensure that it is not loaded multiple times.  Note that it is compiled into flash when it is loaded. After a reboot, it is initialized for the main task only, and if, when enabled, <code class="docutils literal notranslate"><span class="pre">refill</span></code> is used for a different task, it needs to have already been initialized for that task.</p>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">line-module</span></code>:</p>
+<div class="section" id="init-line">
+<h2><code class="docutils literal notranslate"><span class="pre">init-line</span></code><a class="headerlink" href="#init-line" title="Permalink to this headline">¶</a></h2>
+<p>( index-ptr count-ptr buffer-ptr buffer-size – )</p>
+<p>Enable the line editor for the current task, with a pointer to the index variable, a poiner to the count variable, a pointer to the input buffer, and a size of the input buffer provided. Note that it allots memory in the current task’s dictionary.</p>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">forth-module</span></code>:</p>
+</div>
+<div class="section" id="enable-line">
+<h2><code class="docutils literal notranslate"><span class="pre">enable-line</span></code><a class="headerlink" href="#enable-line" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>Enable the line editor.</p>
+</div>
+<div class="section" id="disable-line">
+<h2><code class="docutils literal notranslate"><span class="pre">disable-line</span></code><a class="headerlink" href="#disable-line" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>Disable the line editor. This must be done before loading code automatically.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schedule.html">Scheduling Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Line Editor</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#init-line"><code class="docutils literal notranslate"><span class="pre">init-line</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#enable-line"><code class="docutils literal notranslate"><span class="pre">enable-line</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#disable-line"><code class="docutils literal notranslate"><span class="pre">disable-line</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="allocate.html">Allocator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="edit.html">Block Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="swd.html"><code class="docutils literal notranslate"><span class="pre">swdcom</span></code> Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="led.html">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test.html">Testing Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="dev_tools.html" title="previous chapter">Development Tools Words</a></li>
+      <li>Next: <a href="double.html" title="next chapter">Double-Cell Words</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Travis Bemann.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="../_sources/words/line.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
