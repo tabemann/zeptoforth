@@ -1,0 +1,345 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Multitasking Words &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Scheduling Words" href="schedule.html" />
+    <link rel="prev" title="Wordlist Words" href="wordlist.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="multitasking-words">
+<h1>Multitasking Words<a class="headerlink" href="#multitasking-words" title="Permalink to this headline">¶</a></h1>
+<p>Multitasking in zeptoforth is not part of the zeptoforth kernel, but is provided by <code class="docutils literal notranslate"><span class="pre">src/common/forth/task.fs</span></code>, which in turn relies upon <code class="docutils literal notranslate"><span class="pre">src/&lt;platform&gt;/forth/int_io.fs</span></code> and <code class="docutils literal notranslate"><span class="pre">src/common/forth/systick.fs</span></code>. It is preemptivee, but <code class="docutils literal notranslate"><span class="pre">PAUSE</span></code> may be called to explicitly relinquish control of the processor (which is highly recommended when possible); note that some words do this implicitly, such as <code class="docutils literal notranslate"><span class="pre">MS</span></code>, <code class="docutils literal notranslate"><span class="pre">KEY</span></code>, or <code class="docutils literal notranslate"><span class="pre">EMIT</span></code> (which are in turn called by words such as <code class="docutils literal notranslate"><span class="pre">REFILL</span></code> or <code class="docutils literal notranslate"><span class="pre">TYPE</span></code>).</p>
+<p>Note that task in zeptoforth are a relatively heavy-weight asynchronous computing means. For lighter-weight asynchronous computing, consider creating a single task for running a scheduler within (so the main task can be devoted to the REPL), and then put all asynchronous actions within that.</p>
+<p>Multitasking is enabled by default once <code class="docutils literal notranslate"><span class="pre">src/common/forth/task.fs</span></code> has been loaded and the MCU has been rebooted; afterwards each time the MCU is booted a new task is created for the REPL, the main task, and multitasking is initiated.</p>
+<p>These words are in <code class="docutils literal notranslate"><span class="pre">task-module</span></code>.</p>
+<div class="section" id="pause">
+<h2><code class="docutils literal notranslate"><span class="pre">pause</span></code><a class="headerlink" href="#pause" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>Pass off control to the next active task; if no tasks are active, put the MCU to sleep until an interrupt occurs (typically due to SysTick or USART activity).</p>
+</div>
+<div class="section" id="current-task">
+<h2><code class="docutils literal notranslate"><span class="pre">current-task</span></code><a class="headerlink" href="#current-task" title="Permalink to this headline">¶</a></h2>
+<p>( – task )</p>
+<p>The current task.</p>
+</div>
+<div class="section" id="main-task">
+<h2><code class="docutils literal notranslate"><span class="pre">main-task</span></code><a class="headerlink" href="#main-task" title="Permalink to this headline">¶</a></h2>
+<p>( – task )</p>
+<p>The main task.</p>
+</div>
+<div class="section" id="pause-count">
+<h2><code class="docutils literal notranslate"><span class="pre">pause-count</span></code><a class="headerlink" href="#pause-count" title="Permalink to this headline">¶</a></h2>
+<p>( – count )</p>
+<p>Get the current pause count, an unsigned 32-bit value which rolls over.xs</p>
+<p>To create a task in zeptoforth, one should execute the following:</p>
+</div>
+<div class="section" id="spawn">
+<h2><code class="docutils literal notranslate"><span class="pre">spawn</span></code><a class="headerlink" href="#spawn" title="Permalink to this headline">¶</a></h2>
+<p>( xn…x0 count xt dictionary-size stack-size rstack-size – task )</p>
+<p>where <em>xn</em> through <em>x0</em> are parameters to pass to the <em>xt</em> when executed, <em>count</em> is the number of such parameters, <em>xt</em> is the entry point to the task, <em>dictionary-size</em> is the size of the dictionary for the spawned task in bytes, <em>stack-size</em> is the size of the data stack for the spawned task in bytes, <em>rstack-size</em> is the size of the return stack for the spawned task in bytes, and <em>task</em> is the header for the newly spawned task. <em>dictionary-size</em>, <em>stack-size</em>, and <em>rstack-size</em> must be multiples of four I have had good luck with values of 256 for each of these; I do not know how well smaller values will work out, especially in the case of <em>rstack-size</em>, where too small of a size will almost certainly result in a crash. This in turn returns a pointer to the task header on the stack, which can then be stored in a variable or constant.</p>
+<p>Note that it is not recommended to execute this while compiling to flash; rather, it should be put in the <code class="docutils literal notranslate"><span class="pre">init</span></code> routine and then the result should be stored to a variable in RAM.</p>
+<p>Note that tasks may be enabled or disabled but once created exist until the MCU is rebooted.</p>
+<p>New task default to a priority of zero; to change this use <code class="docutils literal notranslate"><span class="pre">set-task-priority</span></code>.</p>
+<p>Uncaught exceptions within a task will be handled, with the message for them being displayed, but they will result in said task being terminated.</p>
+<p>To reinitialize existing tasks, one executes:</p>
+</div>
+<div class="section" id="init-task">
+<h2><code class="docutils literal notranslate"><span class="pre">init-task</span></code><a class="headerlink" href="#init-task" title="Permalink to this headline">¶</a></h2>
+<p>( xn…x0 count xt task – )</p>
+<p>These tasks may be in any state, including being terminated. <em>xn</em> through <em>x0</em> are parameters to pass to the <em>xt</em> when executed.</p>
+<p>New tasks do not execute right away, rather to enable their execution, one executes:</p>
+</div>
+<div class="section" id="run">
+<h2><code class="docutils literal notranslate"><span class="pre">run</span></code><a class="headerlink" href="#run" title="Permalink to this headline">¶</a></h2>
+<p>( task – )</p>
+<p>which increments the active counter for the <em>task</em> (which is initialized to zero); the task executes if this counter is greater than zero.</p>
+<p>In turn a task can be disabled with:</p>
+</div>
+<div class="section" id="stop">
+<h2><code class="docutils literal notranslate"><span class="pre">stop</span></code><a class="headerlink" href="#stop" title="Permalink to this headline">¶</a></h2>
+<p>( task – )</p>
+<p>which decrements the active counter for the <em>task</em>.</p>
+<p>To terminate a task, one executes:</p>
+</div>
+<div class="section" id="kill">
+<h2><code class="docutils literal notranslate"><span class="pre">kill</span></code><a class="headerlink" href="#kill" title="Permalink to this headline">¶</a></h2>
+<p>( task – )</p>
+<p>which immediately halts that task’s executing, including if it is the current task, and puts it in a terminated state.</p>
+<p>To get whether a task is terminated, one executes:</p>
+</div>
+<div class="section" id="terminated">
+<h2><code class="docutils literal notranslate"><span class="pre">terminated?</span></code><a class="headerlink" href="#terminated" title="Permalink to this headline">¶</a></h2>
+<p>( task – terminated )</p>
+<p>which returns the terminated state of a task.</p>
+<p>If one attempts to execute a word against a terminated task, aside from <code class="docutils literal notranslate"><span class="pre">init-task</span></code> or <code class="docutils literal notranslate"><span class="pre">terminated?</span></code>, the following exception is raised:</p>
+</div>
+<div class="section" id="x-terminated">
+<h2><code class="docutils literal notranslate"><span class="pre">x-terminated</span></code><a class="headerlink" href="#x-terminated" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>This exception when executed displays the task terminated error message.</p>
+</div>
+<div class="section" id="set-task-priority">
+<h2><code class="docutils literal notranslate"><span class="pre">set-task-priority</span></code><a class="headerlink" href="#set-task-priority" title="Permalink to this headline">¶</a></h2>
+<p>( priority task – )</p>
+<p>Set the priority of a task, from -32768 to 32767, with higher numbers being greater task priorities.</p>
+</div>
+<div class="section" id="get-task-priority">
+<h2><code class="docutils literal notranslate"><span class="pre">get-task-priority</span></code><a class="headerlink" href="#get-task-priority" title="Permalink to this headline">¶</a></h2>
+<p>( task – priority )</p>
+<p>Get the priority of a task.</p>
+</div>
+<div class="section" id="x-out-of-range-priority">
+<h2><code class="docutils literal notranslate"><span class="pre">x-out-of-range-priority</span></code><a class="headerlink" href="#x-out-of-range-priority" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>The exception raised when setting an out-of-range task priority</p>
+</div>
+<div class="section" id="set-task-saved-priority">
+<h2><code class="docutils literal notranslate"><span class="pre">set-task-saved-priority</span></code><a class="headerlink" href="#set-task-saved-priority" title="Permalink to this headline">¶</a></h2>
+<p>( priority task – )</p>
+<p>Set the saved priority of a task, from -32768 to 32767, with higher numbers being greater task priorities.</p>
+</div>
+<div class="section" id="get-task-saved-priority">
+<h2><code class="docutils literal notranslate"><span class="pre">get-task-saved-priority</span></code><a class="headerlink" href="#get-task-saved-priority" title="Permalink to this headline">¶</a></h2>
+<p>( task – priority )</p>
+<p>Get the saved priority of a task.</p>
+</div>
+<div class="section" id="set-task-timeslice">
+<h2><code class="docutils literal notranslate"><span class="pre">set-task-timeslice</span></code><a class="headerlink" href="#set-task-timeslice" title="Permalink to this headline">¶</a></h2>
+<p>( timeslice task – )</p>
+<p>Set the timeslice, in 100 us increments, of a task, indicating the minimum amount of time a task will run before being preempted. Note that the default setting for this for a newly initialized task is 10.</p>
+</div>
+<div class="section" id="get-task-timeslice">
+<h2><code class="docutils literal notranslate"><span class="pre">get-task-timeslice</span></code><a class="headerlink" href="#get-task-timeslice" title="Permalink to this headline">¶</a></h2>
+<p>( task – timeslice )</p>
+<p>Get the timeslice, in 100 us increments, of a task.</p>
+</div>
+<div class="section" id="set-task-max-timeslice">
+<h2><code class="docutils literal notranslate"><span class="pre">set-task-max-timeslice</span></code><a class="headerlink" href="#set-task-max-timeslice" title="Permalink to this headline">¶</a></h2>
+<p>( timeslice task – )</p>
+<p>Set the maximum timeslice, in 100 us increments of a task, indicating the maximum amount of time a task will run before being preempted; note that if the timeslice of a task is larger than this amount, the maximum timeslice of the task will be treated as being the same as the task’s timeslice. Also note that the default setting for this for a newly initialized task is 20.</p>
+</div>
+<div class="section" id="get-task-max-timeslice">
+<h2><code class="docutils literal notranslate"><span class="pre">get-task-max-timeslice</span></code><a class="headerlink" href="#get-task-max-timeslice" title="Permalink to this headline">¶</a></h2>
+<p>( task – timeslice )</p>
+<p>Get the maximum timeslice, in 100 us increments, of a task.</p>
+</div>
+<div class="section" id="get-task-active">
+<h2><code class="docutils literal notranslate"><span class="pre">get-task-active</span></code><a class="headerlink" href="#get-task-active" title="Permalink to this headline">¶</a></h2>
+<p>( task – level )</p>
+<p>Get the activation level of a task, with values 0 and lower indicating that a task is inactive, and values 1 and greater indicating that a task is active.</p>
+<p>The simplest case of delaying a task is simply to execute:</p>
+</div>
+<div class="section" id="start-task-delay">
+<h2><code class="docutils literal notranslate"><span class="pre">start-task-delay</span></code><a class="headerlink" href="#start-task-delay" title="Permalink to this headline">¶</a></h2>
+<p>( 1/10ms-delay task – )</p>
+<p>where <em>task</em> is the task to set the delay for, and <em>delay</em> is 10ths of milliseconds from the present.</p>
+<p>To advance the time for the next delay from the last one for a task, execute:</p>
+</div>
+<div class="section" id="advance-task-delay">
+<h2><code class="docutils literal notranslate"><span class="pre">advance-task-delay</span></code><a class="headerlink" href="#advance-task-delay" title="Permalink to this headline">¶</a></h2>
+<p>( 1/10ms-delay task – )</p>
+<p>where <em>task</em> is the task to set the delay for, and <em>delay</em> is the new delay from the last delay for that task, in 10ths of milliseconds.</p>
+<p>To advance the time for the next delay from the last one, or if it changed, set a new delay starting at the present, for a task, execute:</p>
+</div>
+<div class="section" id="reset-task-delay">
+<h2><code class="docutils literal notranslate"><span class="pre">reset-task-delay</span></code><a class="headerlink" href="#reset-task-delay" title="Permalink to this headline">¶</a></h2>
+<p>( 1/10ms-delay task – )</p>
+<p>where <em>task</em> is the task to set the delay for, and <em>delay</em> is the new delay from either the last delay for that task, or the present time, in 10ths of milliseconds.</p>
+<p>To absolutely set the current delay for a task, execute:</p>
+</div>
+<div class="section" id="set-task-delay">
+<h2><code class="docutils literal notranslate"><span class="pre">set-task-delay</span></code><a class="headerlink" href="#set-task-delay" title="Permalink to this headline">¶</a></h2>
+<p>( 1/10ms-delay 1/10ms-start task – )</p>
+<p>where <em>task</em> is the task to set the delay for, <em>start</em> is the time the delay is from and <em>delay</em> is the delay from that time, in 10ths of milliseconds.</p>
+<p>To absolutely get the current delay, execute:</p>
+</div>
+<div class="section" id="get-task-delay">
+<h2><code class="docutils literal notranslate"><span class="pre">get-task-delay</span></code><a class="headerlink" href="#get-task-delay" title="Permalink to this headline">¶</a></h2>
+<p>( task –  1/10ms-delay 1/10ms-start )</p>
+<p>where <em>task</em> is the task to set the delay for, <em>start</em> is the time the delay is from and <em>delay</em> is the delay from that time, in 10ths of milliseconds.</p>
+<p>To cancel the delay for the current task, execute:</p>
+</div>
+<div class="section" id="cancel-task-delay">
+<h2><code class="docutils literal notranslate"><span class="pre">cancel-task-delay</span></code><a class="headerlink" href="#cancel-task-delay" title="Permalink to this headline">¶</a></h2>
+<p>( task – )</p>
+<p>where <em>task</em> is the task to cancel the delay for. It is recommended to execute this for a task after the task has ceased to delay, so it does not delay again when <code class="docutils literal notranslate"><span class="pre">systick-counter</span></code> wraps around.</p>
+</div>
+<div class="section" id="task-checksum">
+<h2><code class="docutils literal notranslate"><span class="pre">task-checksum</span></code><a class="headerlink" href="#task-checksum" title="Permalink to this headline">¶</a></h2>
+<p>( task – checksum )</p>
+<p>Calculate a checksum for a given task.</p>
+</div>
+<div class="section" id="dump-task-info">
+<h2><code class="docutils literal notranslate"><span class="pre">dump-task-info</span></code><a class="headerlink" href="#dump-task-info" title="Permalink to this headline">¶</a></h2>
+<p>( task – )</p>
+<p>Print out information describing a task.</p>
+</div>
+<div class="section" id="dump-task-stack">
+<h2><code class="docutils literal notranslate"><span class="pre">dump-task-stack</span></code><a class="headerlink" href="#dump-task-stack" title="Permalink to this headline">¶</a></h2>
+<p>( task – )</p>
+<p>Print a hex dump of the contents of a task’s stack, excluding the top of the stack.</p>
+</div>
+<div class="section" id="dump-task-rstack">
+<h2><code class="docutils literal notranslate"><span class="pre">dump-task-rstack</span></code><a class="headerlink" href="#dump-task-rstack" title="Permalink to this headline">¶</a></h2>
+<p>( task – )</p>
+<p>Print a hex dump of the contents of a task’s return stack.</p>
+</div>
+<div class="section" id="dump-task-dict">
+<h2><code class="docutils literal notranslate"><span class="pre">dump-task-dict</span></code><a class="headerlink" href="#dump-task-dict" title="Permalink to this headline">¶</a></h2>
+<p>( task – )</p>
+<p>Print a hex dump of the contents of a task’s dictionary</p>
+</div>
+<div class="section" id="dump-task-regs">
+<h2><code class="docutils literal notranslate"><span class="pre">dump-task-regs</span></code><a class="headerlink" href="#dump-task-regs" title="Permalink to this headline">¶</a></h2>
+<p>( task – )</p>
+<p>Print out the saved registers for a task; note that the task must not be the current task. Note that R6 contains the top of the stack, and R7 contains the current stack pointer.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Multitasking Words</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pause"><code class="docutils literal notranslate"><span class="pre">pause</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#current-task"><code class="docutils literal notranslate"><span class="pre">current-task</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#main-task"><code class="docutils literal notranslate"><span class="pre">main-task</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pause-count"><code class="docutils literal notranslate"><span class="pre">pause-count</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#spawn"><code class="docutils literal notranslate"><span class="pre">spawn</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#init-task"><code class="docutils literal notranslate"><span class="pre">init-task</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#run"><code class="docutils literal notranslate"><span class="pre">run</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#stop"><code class="docutils literal notranslate"><span class="pre">stop</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#kill"><code class="docutils literal notranslate"><span class="pre">kill</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#terminated"><code class="docutils literal notranslate"><span class="pre">terminated?</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#x-terminated"><code class="docutils literal notranslate"><span class="pre">x-terminated</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#set-task-priority"><code class="docutils literal notranslate"><span class="pre">set-task-priority</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#get-task-priority"><code class="docutils literal notranslate"><span class="pre">get-task-priority</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#x-out-of-range-priority"><code class="docutils literal notranslate"><span class="pre">x-out-of-range-priority</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#set-task-saved-priority"><code class="docutils literal notranslate"><span class="pre">set-task-saved-priority</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#get-task-saved-priority"><code class="docutils literal notranslate"><span class="pre">get-task-saved-priority</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#set-task-timeslice"><code class="docutils literal notranslate"><span class="pre">set-task-timeslice</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#get-task-timeslice"><code class="docutils literal notranslate"><span class="pre">get-task-timeslice</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#set-task-max-timeslice"><code class="docutils literal notranslate"><span class="pre">set-task-max-timeslice</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#get-task-max-timeslice"><code class="docutils literal notranslate"><span class="pre">get-task-max-timeslice</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#get-task-active"><code class="docutils literal notranslate"><span class="pre">get-task-active</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#start-task-delay"><code class="docutils literal notranslate"><span class="pre">start-task-delay</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#advance-task-delay"><code class="docutils literal notranslate"><span class="pre">advance-task-delay</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reset-task-delay"><code class="docutils literal notranslate"><span class="pre">reset-task-delay</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#set-task-delay"><code class="docutils literal notranslate"><span class="pre">set-task-delay</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#get-task-delay"><code class="docutils literal notranslate"><span class="pre">get-task-delay</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cancel-task-delay"><code class="docutils literal notranslate"><span class="pre">cancel-task-delay</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#task-checksum"><code class="docutils literal notranslate"><span class="pre">task-checksum</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dump-task-info"><code class="docutils literal notranslate"><span class="pre">dump-task-info</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dump-task-stack"><code class="docutils literal notranslate"><span class="pre">dump-task-stack</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dump-task-rstack"><code class="docutils literal notranslate"><span class="pre">dump-task-rstack</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dump-task-dict"><code class="docutils literal notranslate"><span class="pre">dump-task-dict</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dump-task-regs"><code class="docutils literal notranslate"><span class="pre">dump-task-regs</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="schedule.html">Scheduling Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="allocate.html">Allocator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="edit.html">Block Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="swd.html"><code class="docutils literal notranslate"><span class="pre">swdcom</span></code> Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="led.html">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test.html">Testing Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="wordlist.html" title="previous chapter">Wordlist Words</a></li>
+      <li>Next: <a href="schedule.html" title="next chapter">Scheduling Words</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Travis Bemann.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="../_sources/words/task.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

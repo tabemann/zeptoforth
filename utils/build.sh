@@ -29,9 +29,9 @@ build_platform()
     make clean
     make VERSION=$VERSION PLATFORM=$PLATFORM
     mkdir bin/$VERSION/$PLATFORM
-    cp zeptoforth.bin bin/$VERSION/$PLATFORM/zeptoforth_kernel-$VERSION.bin
-    cp zeptoforth.ihex bin/$VERSION/$PLATFORM/zeptoforth_kernel-$VERSION.ihex
-    cp zeptoforth.elf bin/$VERSION/$PLATFORM/zeptoforth_kernel-$VERSION.elf
+    cp zeptoforth.$PLATFORM.bin bin/$VERSION/$PLATFORM/zeptoforth_kernel-$VERSION.bin
+    cp zeptoforth.$PLATFORM.ihex bin/$VERSION/$PLATFORM/zeptoforth_kernel-$VERSION.ihex
+    cp zeptoforth.$PLATFORM.elf bin/$VERSION/$PLATFORM/zeptoforth_kernel-$VERSION.elf
 }
 
 set_version
