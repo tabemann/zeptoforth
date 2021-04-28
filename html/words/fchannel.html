@@ -1,0 +1,192 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fast Channel Words &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Task Queue Words" href="tqueue.html" />
+    <link rel="prev" title="Channel Words" href="channel.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="fast-channel-words">
+<h1>Fast Channel Words<a class="headerlink" href="#fast-channel-words" title="Permalink to this headline">¶</a></h1>
+<p>A fast channel is a monodirectional means of communicating data, as either the address and length of buffers (which is not copied) or as single cells, between two different tasks. Fast channels are not buffered queues; provided another task is listening to a fast channel, sending on a fast channel immediately transfers control to the receiving task and sends the sending task to the end of the scheduling ring.</p>
+<p>If no task is listening to a fast channel, if no other tasks are attempting to send on the fast channel the data for the fast channel is recorded in the fast channel, and the sending task is descheduled, to be rescheduled at the back of the scheduling ring when a task then receives on the fast channel. If no task is listening to a fast channel, and if other tasks are already attempting to send on the fast channel, another task attempting to send on the fast channel waits until no more tasks are ahead of it, and then records its data, deschedules itself, immediately transfers control if a listening task is ready to receive a message, and once a listening task has received the message is rescheduled.</p>
+<p>Note that if multiple tasks attempt to send on a fast channel, they are queued so that they send their data in the order in which they attempted to send their data. Likewise, if multiple tasks attempt to receive on a fast channel, they are queued so that they receive data in the order in which they attempted to receive dat.</p>
+<p>Fast channels can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put into alloted memory in the dictionary or into allocated memory in the heap.</p>
+<p>Fast channels are not included in the default builds; the user must load <code class="docutils literal notranslate"><span class="pre">src/common/forth/fchannel.fs</span></code> or use a big build for them to be available, after loading <code class="docutils literal notranslate"><span class="pre">src/common/forth/tqueue.fs</span></code>. Note that logic is in place to ensure that they are not loaded multiple times. Note that it is compiled into flash when it is loaded.</p>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">fchan-module</span></code>:</p>
+<div class="section" id="x-fchan-closed">
+<h2><code class="docutils literal notranslate"><span class="pre">x-fchan-closed</span></code><a class="headerlink" href="#x-fchan-closed" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>The fast channel closed exception.</p>
+</div>
+<div class="section" id="fchan-size">
+<h2><code class="docutils literal notranslate"><span class="pre">fchan-size</span></code><a class="headerlink" href="#fchan-size" title="Permalink to this headline">¶</a></h2>
+<p>( – bytes )</p>
+<p>Get the size of an fast channel in memory.</p>
+</div>
+<div class="section" id="init-fchan">
+<h2><code class="docutils literal notranslate"><span class="pre">init-fchan</span></code><a class="headerlink" href="#init-fchan" title="Permalink to this headline">¶</a></h2>
+<p>( addr – )</p>
+<p>Initialize a fast channel starting at the specified address. Note that it must have the size <code class="docutils literal notranslate"><span class="pre">fchan-size</span></code>.</p>
+</div>
+<div class="section" id="close-fchan">
+<h2><code class="docutils literal notranslate"><span class="pre">close-fchan</span></code><a class="headerlink" href="#close-fchan" title="Permalink to this headline">¶</a></h2>
+<p>( fchan – )</p>
+<p>Close a fast channel. Pending sends and receives will be aborted with the exception <code class="docutils literal notranslate"><span class="pre">x-fchan-closed</span></code>.</p>
+</div>
+<div class="section" id="reopen-fchan">
+<h2><code class="docutils literal notranslate"><span class="pre">reopen-fchan</span></code><a class="headerlink" href="#reopen-fchan" title="Permalink to this headline">¶</a></h2>
+<p>( fchan – )</p>
+<p>Reopen a fast channel.</p>
+</div>
+<div class="section" id="fchan-closed">
+<h2><code class="docutils literal notranslate"><span class="pre">fchan-closed?</span></code><a class="headerlink" href="#fchan-closed" title="Permalink to this headline">¶</a></h2>
+<p>( fchan – closed )</p>
+<p>Get whether a fast channel is closed.</p>
+</div>
+<div class="section" id="send-fchan">
+<h2><code class="docutils literal notranslate"><span class="pre">send-fchan</span></code><a class="headerlink" href="#send-fchan" title="Permalink to this headline">¶</a></h2>
+<p>( addr bytes fchan – )</p>
+<p>Send message with a buffer as a payload over a fast channel. Block until another task receives the message; if a task is already waiting for a message, transfer control to it. Note that the buffer is not copied. Note that this must not be called within a critical section.</p>
+</div>
+<div class="section" id="recv-fchan">
+<h2><code class="docutils literal notranslate"><span class="pre">recv-fchan</span></code><a class="headerlink" href="#recv-fchan" title="Permalink to this headline">¶</a></h2>
+<p>( fchan – addr bytes )</p>
+<p>Receive message with a buffer as a payload over a fast channel. Block until another task sends a message. Note that the buffer is not copied. Note that this must not be called within a critical section.</p>
+</div>
+<div class="section" id="send-fchan-cell">
+<h2><code class="docutils literal notranslate"><span class="pre">send-fchan-cell</span></code><a class="headerlink" href="#send-fchan-cell" title="Permalink to this headline">¶</a></h2>
+<p>( x fchan – )</p>
+<p>Send message with a cell as a payload over a fast channel. Block until another task receives the message; if a task is already waiting for a message, transfer control to it. Note that this must not be called within a critical section.</p>
+</div>
+<div class="section" id="recv-fchan-cell">
+<h2><code class="docutils literal notranslate"><span class="pre">recv-fchan-cell</span></code><a class="headerlink" href="#recv-fchan-cell" title="Permalink to this headline">¶</a></h2>
+<p>( fchan – x )</p>
+<p>Receive message with a cell as a payload over a fast channel. Block until another task sends a message. Note that this must not be called within a critical section.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schedule.html">Scheduling Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="allocate.html">Allocator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Fast Channel Words</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#x-fchan-closed"><code class="docutils literal notranslate"><span class="pre">x-fchan-closed</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fchan-size"><code class="docutils literal notranslate"><span class="pre">fchan-size</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#init-fchan"><code class="docutils literal notranslate"><span class="pre">init-fchan</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#close-fchan"><code class="docutils literal notranslate"><span class="pre">close-fchan</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reopen-fchan"><code class="docutils literal notranslate"><span class="pre">reopen-fchan</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fchan-closed"><code class="docutils literal notranslate"><span class="pre">fchan-closed?</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#send-fchan"><code class="docutils literal notranslate"><span class="pre">send-fchan</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#recv-fchan"><code class="docutils literal notranslate"><span class="pre">recv-fchan</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#send-fchan-cell"><code class="docutils literal notranslate"><span class="pre">send-fchan-cell</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#recv-fchan-cell"><code class="docutils literal notranslate"><span class="pre">recv-fchan-cell</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="edit.html">Block Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="swd.html"><code class="docutils literal notranslate"><span class="pre">swdcom</span></code> Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="led.html">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test.html">Testing Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="channel.html" title="previous chapter">Channel Words</a></li>
+      <li>Next: <a href="tqueue.html" title="next chapter">Task Queue Words</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Travis Bemann.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="../_sources/words/fchannel.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

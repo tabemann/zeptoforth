@@ -34,11 +34,11 @@ ODIR=obj
 _OBJ = zeptoforth.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
-zeptoforth.elf: src/common/kernel_info.s $(OBJ)
-	$(LD) $(OBJ) -T src/$(PLATFORM)/zeptoforth.ld --cref -Map zeptoforth.map -nostartfiles -o $@
-	$(DUMP) -D $@ > zeptoforth.list
-	$(COPY) $@ zeptoforth.bin -O binary
-	$(COPY) $@ zeptoforth.ihex -O ihex
+zeptoforth.${PLATFORM}.elf: src/common/kernel_info.s $(OBJ)
+	$(LD) $(OBJ) -T src/$(PLATFORM)/zeptoforth.ld --cref -Map zeptoforth.${PLATFORM}.map -nostartfiles -o $@
+	$(DUMP) -D $@ > zeptoforth.${PLATFORM}.list
+	$(COPY) $@ zeptoforth.${PLATFORM}.bin -O binary
+	$(COPY) $@ zeptoforth.${PLATFORM}.ihex -O ihex
 
 $(ODIR)/zeptoforth.o: src/$(PLATFORM)/*.s src/common/*.s
 	mkdir -p obj
@@ -73,5 +73,5 @@ html:
 	cd docs ; sphinx-build -b html . ../html
 
 clean:
-	rm -f $(ODIR)/*.o zeptoforth.map zeptoforth.list zeptoforth.elf zeptoforth.bin zeptoforth.ihex src/common/kernel_info.s
+	rm -f $(ODIR)/*.o zeptoforth.*.map zeptoforth.*.list zeptoforth.*.elf zeptoforth.*.bin zeptoforth.*.ihex src/common/kernel_info.s
 
