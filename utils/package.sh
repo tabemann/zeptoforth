@@ -34,7 +34,5 @@ rm -rf `find . -name '*~'`
 rm -rf obj
 rm -rf upload.fs
 make html
-rm -rf docs
-mv html docs
 cd ..
 tar cfz zeptoforth-$VERSION.tar.gz zeptoforth-$VERSION
