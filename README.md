@@ -4,21 +4,13 @@ zeptoforth is a Cortex-M Forth, currently targeted at the STM32L476, STM32F407, 
 
 Its kernel is written in Thumb-2 assembly, and a body of other core code that is loaded after it is loaded is written in Forth.
 
-To build the kernel, one first needs to install the gas and binutils arm-none-eabi toolchain, and then execute (for STM32L476):
-
-    $ make
-
-or:
-
-    $ make PLATFORM=stm32l476
-
-This will build a zeptoforth.bin and a zeptoforth.elf file; the zeptoforth.elf file is of use if one wishes to do source debugging with gdb of the zeptoforth kernel, otherwise disregard it. The same workflow is to be followed if one is assembling and linking zeptoforth for the STM32F407.
-
 To load the zeptoforth image (whether just the kernel or an image including precompiled Forth code) onto an STM32L476, STM32F407, or STM32F746 DISCOVERY board, first install st-flash, then attach the DISCOVERY board to one's PC via USB and execute:
 
     $ st-flash erase
     $ st-flash write <location of the zeptoforth image> 0x08000000
     $ st-flash reset
+
+Prebuilt binaries are in `bin/<version>/<platform>/`.
 
 \<Location of the zeptoforth image> is either:
 
@@ -37,7 +29,15 @@ where \<type> is one of:
 * `mini_no_corner` (STM32F407 and STM32F746 only to get around limitations of its flash controller; limited functionality compiled in, i.e. without fixed number, allocator, scheduler, or disassembler support, without swdcom support, and without a cornerstone so as to not waste flash space, at the expense of not being able to reset the MCU back to its "factory" state)
 * `mini_swdcom_no_corner` (STMF407 and STM32F746 only to get around the limitations of its flash controller; limited functionality compiled in, i.e. without fixed number, allocator, scheduler, or disassembler support, including swdcom support, and without a cornerstone so as to not waste flash space, at the expense of not being able to reset the MCU back to its "factory" state)
 
-Prebuilt binaries are in `bin/<version>/<platform>/`.
+To build the kernel, one first needs to install the gas and binutils arm-none-eabi toolchain, and then execute (for STM32L476):
+
+    $ make
+
+or:
+
+    $ make PLATFORM=stm32l476
+
+This will build a zeptoforth.<platform>.bin and a zeptoforth.<platform>.elf file; the zeptoforth.<platform>.elf file is of use if one wishes to do source debugging with gdb of the zeptoforth kernel, otherwise disregard it. The same workflow is to be followed if one is assembling and linking zeptoforth for the STM32F407.
 
 Note that support has been dropped for platforms other than the STM32L476, STM32F407, and STM32F746 DISCOVERY boards as of version 0.14.1.
 
