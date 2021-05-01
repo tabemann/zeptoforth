@@ -67,7 +67,7 @@ This will load the auxiliary Forth routines that would be useful to have onto th
 
     restore-state
 
-erases everyting compiled to Flash afterwards and then does a warm restart.
+erases everyting compiled to Flash afterwards and then does a restart.
 
 To do a restart by itself (which now does a full reset of the hardware), execute the following:
 
