@@ -37,7 +37,7 @@ begin-module forth-module
   ;
 
   \ Generate statistics
-  : generate-stats ( count -- )
+  : stats ( count -- )
     ram-here bit-count 2 * cells ram-allot dup init-stats
     over 0 ?do
       random
