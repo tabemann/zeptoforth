@@ -1239,6 +1239,7 @@ _store_8:
 	str tos, [r0]
 	pull_tos
 	str tos, [r0, #4]
+	pull_tos
 	bx lr
 	end_inlined
 
