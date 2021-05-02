@@ -26,10 +26,10 @@ begin-module forth-module
   32 constant bit-count
 
   \ Initialize statistics
-  : init-stats ( stats-addr -- ) bit-count cells 0 fill ;
+  : init-rng-stats ( stats-addr -- ) bit-count cells 0 fill ;
 
   \ Print statistics
-  : stats. ( stats-addr count -- )
+  : rng-stats. ( stats-addr count -- )
     bit-count 0 ?do
       cr ." Bit" i . ." :" over i cells + @ over 0 -rot 0 swap f/ f.
     loop
@@ -37,8 +37,8 @@ begin-module forth-module
   ;
 
   \ Generate statistics
-  : stats ( count -- )
-    ram-here bit-count 2 * cells ram-allot dup init-stats
+  : rng-stats ( count -- )
+    ram-here bit-count 2 * cells ram-allot dup init-rng-stats
     over 0 ?do
       random
       bit-count 0 ?do
@@ -48,7 +48,7 @@ begin-module forth-module
       loop
       drop
     loop
-    tuck swap stats. ram-here!
+    tuck swap rng-stats. ram-here!
   ;
 
 end-module
