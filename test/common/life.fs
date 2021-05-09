@@ -39,10 +39,13 @@ begin-module-once life-module
 
   \ Life display height
   variable life-display-height
-  
-  \ Current life buffer
-  variable life-current
 
+  \ Life display x end coordinate
+  variable life-display-x-end
+
+  \ Life display y end coordinate
+  variable life-display-y-end
+  
   \ Life buffer 0
   variable life-buffer-0
 
@@ -52,31 +55,27 @@ begin-module-once life-module
   \ Life line buffer
   variable life-line-buffer
 
-  \ Get the current life buffer
-  : current-buffer ( -- addr )
-    life-current @ 0= if life-buffer-0 @ else life-buffer-1 @ then
-  ;
+  \ Current buffer
+  variable current-buffer
 
-  \ Get the new life buffer
-  : new-buffer ( -- addr )
-    life-current @ 0<> if life-buffer-0 @ else life-buffer-1 @ then
-  ;
+  \ New buffer
+  variable new-buffer
   
   \ Get whether a life cell is alive
   : alive? ( x y -- alive? )
-    life-width @ 3 rshift * over 3 rshift + current-buffer + b@
+    life-width @ 3 rshift * over 3 rshift + current-buffer @ + b@
     swap 7 and rshift 1 and 0<>
   ;
 
   \ Set a life cell to be dead
   : set-dead ( x y -- )
-    life-width @ 3 rshift * over 3 rshift + current-buffer + dup >r b@
+    life-width @ 3 rshift * over 3 rshift + current-buffer @ + dup >r b@
     swap 7 and 1 swap lshift bic r> b!
   ;
 
   \ Set a life cell to be alive
   : set-alive ( x y -- )
-    life-width @ 3 rshift * over 3 rshift + current-buffer + dup >r b@
+    life-width @ 3 rshift * over 3 rshift + current-buffer @ + dup >r b@
     swap 7 and 1 swap lshift or r> b!
   ;
 
@@ -85,19 +84,19 @@ begin-module-once life-module
 
   \ Get whether a new life cell is alive
   : new-alive? ( x y -- alive? )
-    life-width @ 3 rshift * over 3 rshift + new-buffer + b@
+    life-width @ 3 rshift * over 3 rshift + new-buffer @ + b@
     swap 7 and rshift 1 and 0<>
   ;
 
   \ Set a new life cell to be dead
   : set-new-dead ( x y -- )
-    life-width @ 3 rshift * over 3 rshift + new-buffer + dup >r b@
+    life-width @ 3 rshift * over 3 rshift + new-buffer @ + dup >r b@
     swap 7 and 1 swap lshift bic r> b!
   ;
 
   \ Set a new life cell to be alive
   : set-new-alive ( x y -- )
-    life-width @ 3 rshift * over 3 rshift + new-buffer + dup >r b@
+    life-width @ 3 rshift * over 3 rshift + new-buffer @ + dup >r b@
     swap 7 and 1 swap lshift or r> b!
   ;
 
@@ -172,35 +171,42 @@ begin-module-once life-module
 
   \ Switch new buffer with old buffer
   : switch-buffers ( -- )
-    life-current @ 0= if 1 life-current ! else 0 life-current ! then
+    current-buffer @ new-buffer @ current-buffer ! new-buffer !
   ;
   
   \ Execute a life cycle
   : cycle-life ( -- )
-    life-height @ 0 ?do
-      0 i cycle-border-cell
-      life-width @ 1- i cycle-border-cell
-    loop
-    life-width @ 1- 1 ?do
-      i 0 cycle-border-cell
-      i life-height @ 1- cycle-border-cell
-    loop
-    life-width @ 1- 1 ?do
-      life-height @ 1- 1 ?do
-	j i cycle-cell
-      loop
-    loop
+    0 begin dup life-height @ < while
+      0 over cycle-border-cell
+      life-width @ 1- over cycle-border-cell
+      1+
+    repeat
+    drop
+    0 begin dup life-width @ < while
+      dup 0 cycle-border-cell
+      dup life-height @ 1- cycle-border-cell
+      1+
+    repeat
+    drop
+    1 begin dup life-width @ 1- < while
+      1 begin dup life-height @ 1- < while
+	2dup cycle-cell 1+
+      repeat
+      drop 1+
+    repeat
+    drop
     switch-buffers
   ;
 
   \ Display the life viewport
   : display-life ( -- )
     hide-cursor 0 0 go-to-coord
-    life-display-height @ life-display-y @ + life-display-y @ ?do
-      life-display-width @ life-display-x @ + life-display-x @ ?do
-	i j alive? if ." x" else space then
-      loop cr
-    loop
+    life-display-y @ begin dup life-display-y-end @ < while
+      life-display-x @ begin dup life-display-x-end @ < while
+	2dup swap alive? if ." x" else space then 1+
+      repeat
+      drop 1+ cr
+    repeat
     show-cursor
   ;
 
@@ -267,55 +273,64 @@ begin-module-once life-module
   \ Display the life viewport using sixels
   : display-life-sixel ( -- )
     hide-cursor 0 0 go-to-coord init-sixel
-    life-display-height @ life-display-y @ + 6 / life-display-y @ 6 / ?do
+    life-display-y @ 6 / 6 * begin dup life-display-y-end @ 6 / 6 * < while
       ." #1" init-sixel-rle
-      life-display-width @ life-display-x @ + life-display-x @ ?do
-	0
-	i j 6 * alive? 1 and or
-	i j 6 * 1 + alive? 2 and or
-	i j 6 * 2 + alive? 4 and or
-	i j 6 * 3 + alive? 8 and or
-	i j 6 * 4 + alive? 16 and or
-	i j 6 * 5 + alive? 32 and or
-	dup life-line-buffer @ i + b!
+      life-display-x @ begin dup life-display-x-end @ < while
+	swap 0 >r
+	2dup alive? 1 and r> or >r
+	2dup 1 + alive? 2 and r> or >r
+	2dup 2 + alive? 4 and r> or >r
+	2dup 3 + alive? 8 and r> or >r
+	2dup 4 + alive? 16 and r> or >r
+	2dup 5 + alive? 32 and r> or >r
+	swap dup life-line-buffer @ + r@ swap b!
+	r> [char] ? + add-sixel-rle
+	1+
+      repeat
+      drop force-sixel-rle-out ." $#0" init-sixel-rle
+      life-display-x @ begin dup life-display-x-end @ < while
+	dup life-line-buffer @ + b@ 63 swap bic
 	[char] ? + add-sixel-rle
-      loop
-      force-sixel-rle-out ." $#0" init-sixel-rle
-      life-display-width @ life-display-x @ + life-display-x @ ?do
-	63 life-line-buffer @ i + b@ bic
-	[char] ? + add-sixel-rle
-      loop
+	1+
+      repeat
+      drop
       force-sixel-rle-out ." -"
-    loop
+      6 +
+    repeat
+    drop
     ." #1" init-sixel-rle
-    life-display-width @ life-display-x @ + life-display-x @ ?do
-      0
-      life-display-height @ 6 / 6 * life-height @ < if
-	i life-display-height @ 6 / 6 * alive? 1 and or
+    life-display-x @ begin dup life-display-x-end @ < while
+      0 >r
+      life-display-y-end @ 6 / 6 * life-height @ < if
+	dup life-display-y-end @ 6 / 6 * alive? 1 and r> or >r
       then
-      life-display-height @ 6 / 6 * 1 + life-height @ < if
-	i life-display-height @ 6 / 6 * 1 + alive? 2 and or
+      life-display-y-end @ 6 / 6 * 1 + life-height @ < if
+	dup life-display-y-end @ 6 / 6 * 1 + alive? 2 and r> or >r
       then
-      life-display-height @ 6 / 6 * 2 + life-height @ < if
-	i life-display-height @ 6 / 6 * 2 + alive? 4 and or
+      life-display-y-end @ 6 / 6 * 2 + life-height @ < if
+	dup life-display-y-end @ 6 / 6 * 2 + alive? 4 and r> or >r
       then
-      life-display-height @ 6 / 6 * 3 + life-height @ < if
-	i life-display-height @ 6 / 6 * 3 + alive? 8 and or
+      life-display-y-end @ 6 / 6 * 3 + life-height @ < if
+	dup life-display-y-end @ 6 / 6 * 3 + alive? 8 and r> or >r
       then
-      life-display-height @ 6 / 6 * 4 + life-height @ < if
-	i life-display-height @ 6 / 6 * 4 + alive? 16 and or
+      life-display-y-end @ 6 / 6 * 4 + life-height @ < if
+	dup life-display-y-end @ 6 / 6 * 4 + alive? 16 and r> or >r
       then
-      life-display-height @ 6 / 6 * 5 + life-height @ < if
-	i life-display-height @ 6 / 6 * 5 + alive? 32 and or
+      life-display-y-end @ 6 / 6 * 5 + life-height @ < if
+	dup life-display-y-end @ 6 / 6 * 5 + alive? 32 and r> or >r
       then
-      dup life-line-buffer @ i + b!
-      [char] ? + add-sixel-rle
-    loop
+      dup life-line-buffer @ + r@ swap b!
+      r> [char] ? + add-sixel-rle
+      1+
+    repeat
+    drop
     force-sixel-rle-out ." $#0" init-sixel-rle
-    life-display-width @ life-display-x @ + life-display-x @ ?do
-      63 life-line-buffer i + b@ bic
+    life-display-x @ begin dup life-display-x-end @ < while
+      dup life-line-buffer @ + b@ 63 swap bic
       [char] ? + add-sixel-rle
-    loop
+      1+
+    repeat
+    drop
     force-sixel-rle-out ." -"
     escape emit $5C emit show-cursor
   ;
@@ -323,43 +338,52 @@ begin-module-once life-module
   \ Display the life viewport using 2x2 sixels
   : display-life-sixel2 ( -- )
     hide-cursor 0 0 go-to-coord init-sixel
-    life-display-height @ life-display-y @ + 3 / life-display-y @ 3 / ?do
+    life-display-y @ 3 / 3 * begin dup life-display-y-end @ 3 / 3 * < while
       ." #1" init-sixel-rle
-      life-display-width @ life-display-x @ + life-display-x @ ?do
-	0
-	i j 3 * alive? 3 and or
-	i j 3 * 1 + alive? 12 and or
-	i j 3 * 2 + alive? 48 and or
-	dup life-line-buffer @ i + b!
+      life-display-x @ begin dup life-display-x-end @ < while
+	swap 0 >r
+	2dup alive? 3 and r> or >r
+	2dup 1 + alive? 12 and r> or >r
+	2dup 2 + alive? 48 and r> or >r
+	swap dup life-line-buffer @ + r@ swap b!
+	r> [char] ? + add-sixel-rle2
+	1+
+      repeat
+      drop force-sixel-rle-out ." $#0" init-sixel-rle
+      life-display-x @ begin dup life-display-x-end @ < while
+	dup life-line-buffer @ + b@ 63 swap bic
 	[char] ? + add-sixel-rle2
-      loop
-      force-sixel-rle-out ." $#0" init-sixel-rle
-      life-display-width @ life-display-x @ + life-display-x @ ?do
-	63 life-line-buffer @ i + b@ bic
-	[char] ? + add-sixel-rle2
-      loop
+	1+
+      repeat
+      drop
       force-sixel-rle-out ." -"
-    loop
+      3 +
+    repeat
+    drop
     ." #1" init-sixel-rle
-    life-display-width @ life-display-x @ + life-display-x @ ?do
-      0
-      life-display-height @ 3 / 3 * life-height @ < if
-	i life-display-height @ 3 / 3 * alive? 3 and or
+    life-display-x @ begin dup life-display-x-end @ < while
+      0 >r
+      life-display-y-end @ 3 / 3 * life-height @ < if
+	dup life-display-y-end @ 3 / 3 * alive? 3 and r> or >r
       then
-      life-display-height @ 3 / 3 * 1 + life-height @ < if
-	i life-display-height @ 3 / 3 * 1 + alive? 12 and or
+      life-display-y-end @ 3 / 3 * 1 + life-height @ < if
+	dup life-display-y-end @ 3 / 3 * 1 + alive? 12 and r> or >r
       then
-      life-display-height @ 3 / 3 * 2 + life-height @ < if
-	i life-display-height @ 3 / 3 * 2 + alive? 48 and or
+      life-display-y-end @ 3 / 3 * 2 + life-height @ < if
+	dup life-display-y-end @ 3 / 3 * 2 + alive? 48 and r> or >r
       then
-      dup life-line-buffer @ i + b!
-      [char] ? + add-sixel-rle2
-    loop
+      dup life-line-buffer @ + r@ swap b!
+      r> [char] ? + add-sixel-rle2
+      1+
+    repeat
+    drop
     force-sixel-rle-out ." $#0" init-sixel-rle
-    life-display-width @ life-display-x @ + life-display-x @ ?do
-      63 life-line-buffer @ i + b@ bic
+    life-display-x @ begin dup life-display-x-end @ < while
+      dup life-line-buffer @ + b@ 63 swap bic
       [char] ? + add-sixel-rle2
-    loop
+      1+
+    repeat
+    drop
     force-sixel-rle-out ." -"
     escape emit $5C emit show-cursor
   ;
@@ -448,11 +472,13 @@ begin-module-once life-module
     else
       drop 0 life-display-x !
     then
+    life-display-x @ life-display-width @ + life-display-x-end !
+    life-display-y @ life-display-height @ + life-display-y-end !
   ;
 
   \ Clear life
   : clear-life ( -- )
-    current-buffer life-width @ life-height @ * 3 rshift 0 fill
+    current-buffer @ life-width @ life-height @ * 3 rshift 0 fill
   ;
   
   \ Initialize life
@@ -462,12 +488,13 @@ begin-module-once life-module
     0 life-display-x ! 0 life-display-y !
     2dup life-height ! life-width !
     2dup life-display-height ! life-display-width !
-    0 life-current !
-    ram-here life-buffer-0 !
+    ram-here dup life-buffer-0 ! current-buffer !
     * 8 / dup ram-allot
-    ram-here life-buffer-1 !
+    ram-here dup life-buffer-1 ! new-buffer !
     ram-allot
     clear-life
+    life-display-x @ life-display-width @ + life-display-x-end !
+    life-display-y @ life-display-height @ + life-display-y-end !
   ;
 
   \ Get the next non-space character from a string, or null for end of string
@@ -567,6 +594,14 @@ begin-module-once life-module
   
   \ Add a block to the world
   : block ( x y -- ) s" ** / **" 2swap set-multiple ;
+
+  \ Add a tub to the world
+  : tub ( x y -- ) s" _*_ / *_* / _*_" 2swap set-multiple ;
+
+  \ Add a boat to the world
+  : boat ( orientation x y -- )
+    s" _*_ / *_* / _**" 2over set-multiple rot 3 3 rot flip-2d
+  ;
 
   \ Add a blinker to the world (2 phases)
   : blinker ( phase x y -- )
