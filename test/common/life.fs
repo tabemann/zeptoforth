@@ -49,6 +49,9 @@ begin-module-once life-module
   \ Life buffer 1
   variable life-buffer-1
 
+  \ Life line buffer
+  variable life-line-buffer
+
   \ Get the current life buffer
   : current-buffer ( -- addr )
     life-current @ 0= if life-buffer-0 @ else life-buffer-1 @ then
@@ -79,6 +82,12 @@ begin-module-once life-module
 
   \ Set whether a life cell is alive
   : alive! ( alive? x y -- ) rot if set-alive else set-dead then ;
+
+  \ Get whether a new life cell is alive
+  : new-alive? ( x y -- alive? )
+    life-width @ 3 rshift * over 3 rshift + new-buffer + b@
+    swap 7 and rshift 1 and 0<>
+  ;
 
   \ Set a new life cell to be dead
   : set-new-dead ( x y -- )
@@ -194,12 +203,199 @@ begin-module-once life-module
     loop
     show-cursor
   ;
+
+  \ Initialize sixel display
+  : init-sixel ( -- )
+    escape emit ." Pq#0;2;0;0;0#1;2;100;100;100"
+  ;
+
+  \ Sixel RLE count
+  variable sixel-rle-count
+
+  \ Sixel RLE value
+  variable sixel-rle-value
+
+  \ Initialize sixel RLE
+  : init-sixel-rle ( -- ) 0 sixel-rle-count ! 0 sixel-rle-value ! ;
   
-  \ Run life until a key is pressed
+  \ Add sixel RLE value
+  : add-sixel-rle ( b -- )
+    sixel-rle-count @ 0= if
+      1 sixel-rle-count !
+      sixel-rle-value !
+    else
+      dup sixel-rle-value @ <> if
+	sixel-rle-count @ 1 > if
+	  ." !" sixel-rle-count @ (dec.)
+	then
+	sixel-rle-value @ emit
+	0 sixel-rle-count !
+      then
+      sixel-rle-value !
+      1 sixel-rle-count +!
+    then
+  ;
+
+  \ Add two sixel RLE value
+  : add-sixel-rle2 ( b -- )
+    sixel-rle-count @ 0= if
+      2 sixel-rle-count !
+      sixel-rle-value !
+    else
+      dup sixel-rle-value @ <> if
+	sixel-rle-count @ 1 > if
+	  ." !" sixel-rle-count @ (dec.)
+	then
+	sixel-rle-value @ emit
+	0 sixel-rle-count !
+      then
+      sixel-rle-value !
+      2 sixel-rle-count +!
+    then
+  ;
+  
+  \ Force sixel RLE output
+  : force-sixel-rle-out ( -- )
+    sixel-rle-count @ 0<> if
+      sixel-rle-count @ 1 > if
+	." !" sixel-rle-count @ (dec.)
+      then
+      sixel-rle-value @ emit
+    then
+  ;
+
+  \ Display the life viewport using sixels
+  : display-life-sixel ( -- )
+    hide-cursor 0 0 go-to-coord init-sixel
+    life-display-height @ life-display-y @ + 6 / life-display-y @ 6 / ?do
+      ." #1" init-sixel-rle
+      life-display-width @ life-display-x @ + life-display-x @ ?do
+	0
+	i j 6 * alive? 1 and or
+	i j 6 * 1 + alive? 2 and or
+	i j 6 * 2 + alive? 4 and or
+	i j 6 * 3 + alive? 8 and or
+	i j 6 * 4 + alive? 16 and or
+	i j 6 * 5 + alive? 32 and or
+	dup life-line-buffer @ i + b!
+	[char] ? + add-sixel-rle
+      loop
+      force-sixel-rle-out ." $#0" init-sixel-rle
+      life-display-width @ life-display-x @ + life-display-x @ ?do
+	63 life-line-buffer @ i + b@ bic
+	[char] ? + add-sixel-rle
+      loop
+      force-sixel-rle-out ." -"
+    loop
+    ." #1" init-sixel-rle
+    life-display-width @ life-display-x @ + life-display-x @ ?do
+      0
+      life-display-height @ 6 / 6 * life-height @ < if
+	i life-display-height @ 6 / 6 * alive? 1 and or
+      then
+      life-display-height @ 6 / 6 * 1 + life-height @ < if
+	i life-display-height @ 6 / 6 * 1 + alive? 2 and or
+      then
+      life-display-height @ 6 / 6 * 2 + life-height @ < if
+	i life-display-height @ 6 / 6 * 2 + alive? 4 and or
+      then
+      life-display-height @ 6 / 6 * 3 + life-height @ < if
+	i life-display-height @ 6 / 6 * 3 + alive? 8 and or
+      then
+      life-display-height @ 6 / 6 * 4 + life-height @ < if
+	i life-display-height @ 6 / 6 * 4 + alive? 16 and or
+      then
+      life-display-height @ 6 / 6 * 5 + life-height @ < if
+	i life-display-height @ 6 / 6 * 5 + alive? 32 and or
+      then
+      dup life-line-buffer @ i + b!
+      [char] ? + add-sixel-rle
+    loop
+    force-sixel-rle-out ." $#0" init-sixel-rle
+    life-display-width @ life-display-x @ + life-display-x @ ?do
+      63 life-line-buffer i + b@ bic
+      [char] ? + add-sixel-rle
+    loop
+    force-sixel-rle-out ." -"
+    escape emit $5C emit show-cursor
+  ;
+
+  \ Display the life viewport using 2x2 sixels
+  : display-life-sixel2 ( -- )
+    hide-cursor 0 0 go-to-coord init-sixel
+    life-display-height @ life-display-y @ + 3 / life-display-y @ 3 / ?do
+      ." #1" init-sixel-rle
+      life-display-width @ life-display-x @ + life-display-x @ ?do
+	0
+	i j 3 * alive? 3 and or
+	i j 3 * 1 + alive? 12 and or
+	i j 3 * 2 + alive? 48 and or
+	dup life-line-buffer @ i + b!
+	[char] ? + add-sixel-rle2
+      loop
+      force-sixel-rle-out ." $#0" init-sixel-rle
+      life-display-width @ life-display-x @ + life-display-x @ ?do
+	63 life-line-buffer @ i + b@ bic
+	[char] ? + add-sixel-rle2
+      loop
+      force-sixel-rle-out ." -"
+    loop
+    ." #1" init-sixel-rle
+    life-display-width @ life-display-x @ + life-display-x @ ?do
+      0
+      life-display-height @ 3 / 3 * life-height @ < if
+	i life-display-height @ 3 / 3 * alive? 3 and or
+      then
+      life-display-height @ 3 / 3 * 1 + life-height @ < if
+	i life-display-height @ 3 / 3 * 1 + alive? 12 and or
+      then
+      life-display-height @ 3 / 3 * 2 + life-height @ < if
+	i life-display-height @ 3 / 3 * 2 + alive? 48 and or
+      then
+      dup life-line-buffer @ i + b!
+      [char] ? + add-sixel-rle2
+    loop
+    force-sixel-rle-out ." $#0" init-sixel-rle
+    life-display-width @ life-display-x @ + life-display-x @ ?do
+      63 life-line-buffer @ i + b@ bic
+      [char] ? + add-sixel-rle2
+    loop
+    force-sixel-rle-out ." -"
+    escape emit $5C emit show-cursor
+  ;
+
+  \ Run life without displaying it until a key is pressed
   : run-life ( -- )
+    cr reset-ansi-term hide-cursor get-cursor-position drop 0
+    begin
+      cycle-life over 0 go-to-coord 1+ ." Cycle:" dup . erase-end-of-line key?
+    until
+    key show-cursor 2drop
+  ;
+  
+  \ Run life on the terminal until a key is pressed
+  : run-life-term ( -- )
     reset-ansi-term hide-cursor 0 0 go-to-coord erase-end-of-line erase-down
     begin
       cycle-life display-life key?
+    until
+    key show-cursor drop
+  ;
+
+  \ Run life as sixels until a key is pressed
+  : run-life-sixel ( -- )
+    reset-ansi-term hide-cursor 0 0 go-to-coord erase-end-of-line erase-down
+    begin
+      cycle-life display-life-sixel key?
+    until
+    key show-cursor drop
+  ;
+
+  \ Run life as 2x2 sixels until a key is pressed
+  : run-life-sixel2 ( -- )
+    reset-ansi-term hide-cursor 0 0 go-to-coord erase-end-of-line erase-down
+    begin
+      cycle-life display-life-sixel2 key?
     until
     key show-cursor drop
   ;
@@ -208,6 +404,18 @@ begin-module-once life-module
   : step-life ( -- )
     reset-ansi-term 0 0 go-to-coord erase-end-of-line erase-down
     cycle-life display-life
+  ;
+
+  \ Step life one cycle as sixels
+  : step-life-sixel ( -- )
+    reset-ansi-term 0 0 go-to-coord erase-end-of-line erase-down
+    cycle-life display-life-sixel
+  ;
+
+  \ Step life one cycle as 2x2 sixels
+  : step-life-sixel2 ( -- )
+    reset-ansi-term 0 0 go-to-coord erase-end-of-line erase-down
+    cycle-life display-life-sixel2
   ;
 
   \ Set the life viewport
@@ -249,6 +457,8 @@ begin-module-once life-module
   
   \ Initialize life
   : init-life ( width height -- )
+    ram-here life-line-buffer !
+    over ram-allot
     0 life-display-x ! 0 life-display-y !
     2dup life-height ! life-width !
     2dup life-display-height ! life-display-width !
@@ -260,13 +470,127 @@ begin-module-once life-module
     clear-life
   ;
 
-  \ Glider
-  : glider ( x y -- )
-    2dup true -rot swap 1+ swap wrap-coord alive!
-    2dup true -rot 1+ swap 2 + swap wrap-coord alive!
-    2dup true -rot 2 + wrap-coord alive!
-    2dup true -rot 2 + swap 1+ swap wrap-coord alive!
-    true -rot 2 + swap 2 + swap wrap-coord alive!
+  \ Get the next non-space character from a string, or null for end of string
+  : get-char ( addr1 bytes1 -- addr2 bytes2 c )
+    begin
+      dup 0 > if
+	over b@ dup $20 <> if
+	  rot 1 + rot 1 - rot true
+	else
+	  drop 1 - swap 1 + swap false
+	then
+      else
+	0 true
+      then
+    until
+  ;
+
+  \ Set multiple cells with a string with the format "_" for an dead cell,
+  \ "*" for a live cell, and a "/" for a newline
+  : set-multiple ( addr bytes x y -- )
+    over >r 2swap begin get-char dup 0 <> while
+      case
+	[char] _ of 2swap 2dup set-dead swap 1 + swap 2swap endof
+	[char] * of 2swap 2dup set-alive swap 1 + swap 2swap endof
+	[char] / of 2swap 1 + nip r@ swap 2swap endof
+      endcase
+    repeat
+    drop 2drop 2drop r> drop
+  ;
+
+\ Flip part of a coordinate
+  : flip-coord-part ( n1 n-center -- n2 ) tuck - - ;
+  
+  \ Get the center of part of a coordinate
+  : coord-part-center ( n1 n-span -- ) 2 / + ;
+  
+  \ Copy cells from the next world back to the current world
+  : copy-next-to-current ( x y width height )
+    3 pick begin dup 5 pick 4 pick + < while
+      3 pick begin dup 5 pick 4 pick + < while
+	2dup new-alive? 2 pick 2 pick alive! 1 +
+      repeat
+      drop 1 +
+    repeat
+    drop 2drop 2drop
+  ;
+  
+  \ Actually flip a region horizontally
+  : do-flip-horizontal ( x y width height -- )
+    3 pick 2 pick coord-part-center
+    4 pick begin dup 6 pick 5 pick + < while
+      4 pick begin dup 6 pick 5 pick + < while
+	2dup alive? 2 pick 4 pick flip-coord-part 2 pick new-alive! 1 +
+      repeat
+      drop 1 +
+    repeat
+    2drop 2drop 2drop
+  ;
+  
+  \ Actually flip a region vertically
+  : do-flip-vertical ( x y width height -- )
+    2 pick over coord-part-center
+    4 pick begin dup 6 pick 5 pick + < while
+      4 pick begin dup 6 pick 5 pick + < while
+	2dup alive? 2 pick 2 pick 5 pick flip-coord-part new-alive! 1 +
+      repeat
+      drop 1 +
+    repeat
+    2drop 2drop 2drop
+  ;
+  
+  \ Flip a region horizontally
+  : flip-horizontal ( x y width height -- )
+    3 pick 3 pick 3 pick 3 pick do-flip-horizontal copy-next-to-current
+  ;
+  
+  \ Flip a region vertically
+  : flip-vertical ( x y width height -- )
+    3 pick 3 pick 3 pick 3 pick do-flip-vertical copy-next-to-current
+  ;
+
+  \ Motion directions
+  0 constant ne
+  1 constant se
+  2 constant sw
+  3 constant nw
+
+  \ Flip a region in two dimensions
+  : flip-2d ( x y width height dir -- )
+    case
+      se of 2drop 2drop endof
+      sw of flip-horizontal endof
+      nw of 2over 2over flip-horizontal flip-vertical endof
+      ne of flip-vertical endof
+    endcase
+  ;
+  
+  \ Add a block to the world
+  : block ( x y -- ) s" ** / **" 2swap set-multiple ;
+
+  \ Add a blinker to the world (2 phases)
+  : blinker ( phase x y -- )
+    rot case
+      0 of s" _*_ / _*_ / _*_" endof
+      1 of s" ___ / *** / ___" endof
+    endcase
+    2swap set-multiple
+  ;
+  
+  \ Add a glider to the world (4 phases)
+  : glider ( motion phase x y -- )
+    rot case
+      0 of s" _*_ / __* / ***" endof
+      1 of s" *_* / _** / _*_" endof
+      2 of s" __* / *_* / _**" endof
+      3 of s" *__ / _** / **_" endof
+    endcase
+    2over set-multiple rot 3 3 rot flip-2d
+  ;
+  
+  \ Add an R-pentomino to the world
+  : r-pentomino ( dir x y -- )
+    s" _** / **_ / _*_" 2over set-multiple rot 3 3 rot flip-2d
   ;
 
 end-module
