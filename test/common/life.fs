@@ -231,8 +231,15 @@ begin-module-once life-module
       sixel-rle-value !
     else
       dup sixel-rle-value @ <> if
-	sixel-rle-count @ 1 > if
+	sixel-rle-count @ 3 > if
 	  ." !" sixel-rle-count @ (dec.)
+	else
+	  sixel-rle-count @ 2 > if
+	    sixel-rle-value @ emit
+	  then
+	  sixel-rle-count @ 2 = if
+	    sixel-rle-value @ emit
+	  then
 	then
 	sixel-rle-value @ emit
 	0 sixel-rle-count !
@@ -249,8 +256,15 @@ begin-module-once life-module
       sixel-rle-value !
     else
       dup sixel-rle-value @ <> if
-	sixel-rle-count @ 1 > if
+	sixel-rle-count @ 3 > if
 	  ." !" sixel-rle-count @ (dec.)
+	else
+	  sixel-rle-count @ 2 > if
+	    sixel-rle-value @ emit
+	  then
+	  sixel-rle-count @ 2 = if
+	    sixel-rle-value @ emit
+	  then
 	then
 	sixel-rle-value @ emit
 	0 sixel-rle-count !
@@ -263,8 +277,15 @@ begin-module-once life-module
   \ Force sixel RLE output
   : force-sixel-rle-out ( -- )
     sixel-rle-count @ 0<> if
-      sixel-rle-count @ 1 > if
+      sixel-rle-count @ 3 > if
 	." !" sixel-rle-count @ (dec.)
+      else
+	sixel-rle-count @ 2 > if
+	  sixel-rle-value @ emit
+	then
+	sixel-rle-count @ 2 = if
+	  sixel-rle-value @ emit
+	then
       then
       sixel-rle-value @ emit
     then
