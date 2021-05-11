@@ -237,7 +237,7 @@ begin-module-once life-module
 	  sixel-rle-count @ 2 > if
 	    sixel-rle-value @ emit
 	  then
-	  sixel-rle-count @ 2 = if
+	  sixel-rle-count @ 1 > if
 	    sixel-rle-value @ emit
 	  then
 	then
@@ -262,7 +262,7 @@ begin-module-once life-module
 	  sixel-rle-count @ 2 > if
 	    sixel-rle-value @ emit
 	  then
-	  sixel-rle-count @ 2 = if
+	  sixel-rle-count @ 1 > if
 	    sixel-rle-value @ emit
 	  then
 	then
@@ -283,7 +283,7 @@ begin-module-once life-module
 	sixel-rle-count @ 2 > if
 	  sixel-rle-value @ emit
 	then
-	sixel-rle-count @ 2 = if
+	sixel-rle-count @ 1 > if
 	  sixel-rle-value @ emit
 	then
       then
