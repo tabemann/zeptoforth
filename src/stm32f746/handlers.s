@@ -44,6 +44,10 @@ _init_handlers:
 	str r0, [r1]
 	ldr r1, =time_4_handler_hook
 	str r0, [r1]
+	ldr r1, =exti_9_5_handler_hook
+	str r0, [r1]
+	ldr r1, =exti_15_10_handler_hook
+	str r0, [r1]
 	pop {pc}
 	end_inlined
 	
@@ -138,6 +142,28 @@ handle_time_3:
 	@@ The timer 4 handler
 handle_time_4:
 	ldr r0, =time_4_handler_hook
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 1f
+	adds r0, #1
+	bx r0
+1:	bx lr
+	end_inlined
+
+	@@ The EXTI 9-5 handler
+handle_exti_9_5:
+	ldr r0, =exti_9_5_handler_hook
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 1f
+	adds r0, #1
+	bx r0
+1:	bx lr
+	end_inlined
+
+	@@ The EXTI 15-10 handler
+handle_exti_15_10:
+	ldr r0, =exti_15_10_handler_hook
 	ldr r0, [r0]
 	cmp r0, #0
 	beq 1f

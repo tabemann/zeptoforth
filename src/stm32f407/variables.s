@@ -47,4 +47,9 @@
 	@@ The timer 4 handler hook
 	allot time_4_handler_hook, 4
 
+	@@ The EXTI 9-5 handler hook
+	allot exti_9_5_handler_hook, 4
+
+	@@ the EXTI 15-10 handler hook
+	allot exti_15_10_handler_hook, 4
 	
