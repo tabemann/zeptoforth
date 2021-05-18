@@ -92,5 +92,21 @@ _time_4_handler_hook:
 	bx lr
 	end_inlined
 
+	@@ Get the EXTI-9-5-HANDLER-HOOK variable address
+	define_word "exti-9-5-handler-hook", visible_flag
+_exti_9_5_handler_hook:
+	push_tos
+	ldr tos, =exti_9_5_handler_hook
+	bx lr
+	end_inlined
+	
+	@@ Get the EXTI-15-10-HANDLER-HOOK variable address
+	define_word "exti-15-10-handler-hook", visible_flag
+_exti_15_10_handler_hook:
+	push_tos
+	ldr tos, =exti_15_10_handler_hook
+	bx lr
+	end_inlined
+
 	.ltorg
 	

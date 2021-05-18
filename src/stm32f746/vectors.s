@@ -43,7 +43,7 @@
 	.word handle_null+1 @ 36:
 	.word handle_null+1 @ 37:
 	.word handle_null+1 @ 38:
-	.word handle_null+1 @ 39:
+	.word handle_exti_9_5+1 @ 39: EXTI9_5
 	.word handle_null+1 @ 40:
 	.word handle_null+1 @ 41:
 	.word handle_null+1 @ 42:
@@ -60,7 +60,7 @@
 	.word handle_null+1 @ 53:
 	.word handle_null+1 @ 54:
 	.word handle_null+1 @ 55:
-	.word handle_null+1 @ 56:
+	.word handle_exti_15_10+1 @ 56: EXTI15_10
 	.word handle_null+1 @ 57:
 	.word handle_null+1 @ 58:
 	.word handle_null+1 @ 59:

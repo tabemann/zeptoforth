@@ -103,12 +103,12 @@ begin-module-once gpio-module
     GPIO_Base - $400 / 1 swap lshift RCC_AHB2SMENR bis!
   ;
 
-  \ Enable a GPIO peripheral clock
+  \ Disable a GPIO peripheral clock
   : gpio-clock-disable ( gpio -- )
     GPIO_Base - $400 / 1 swap lshift RCC_AHB2ENR bic!
   ;
 
-  \ Enable a low-power GPIO peripheral clock
+  \ Disable a low-power GPIO peripheral clock
   : gpio-lp-clock-disable ( gpio -- )
     GPIO_Base - $400 / 1 swap lshift RCC_AHB2SMENR bic!
   ;
