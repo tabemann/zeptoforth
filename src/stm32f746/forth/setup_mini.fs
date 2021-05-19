@@ -30,6 +30,7 @@
 #include src/common/forth/systick.fs
 #include src/stm32f746/forth/int_io.fs
 #include src/stm32f746/forth/gpio.fs
+#include src/stm32f746/forth/exti.fs
 #include src/common/forth/task.fs
 
 \ Set a cornerstone to enable deleting everything compiled after this code
