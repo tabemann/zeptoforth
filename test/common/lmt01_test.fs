@@ -24,6 +24,7 @@ begin-module-once temp-module
   import gpio-module
   import exti-module
   import task-module
+  import systick-module
 
   \ The temperature
   variable temp
@@ -41,17 +42,17 @@ begin-module-once temp-module
   variable temp-task
 
   \ The EXTI 2 handler
-  : handle-exti-2 ( -- )
-    2 EXTI_PR@ if 1 temp-count +! 2 EXTI_PR! then
-  ;
+  : handle-exti-2 ( -- ) 2 EXTI_PR! 1 temp-count +! ;
 
   \ The temperature tracker
   : temp-tracker ( -- )
     begin
       0 temp-count !
+      true 2 EXTI_IMR!
       true 3 GPIOE BSRR!
-      104 ms
+      104 systick-divisor * systick-counter current-task set-task-delay pause
       false 3 GPIOE BSRR!
+      false 2 EXTI_IMR!
       temp-count @ dup temp ! 0<> if
 	true temp-read? !
 	false temp-error? !
@@ -59,7 +60,7 @@ begin-module-once temp-module
 	false temp-read? !
 	true temp-error? !
       then
-      10 ms
+      104 systick-divisor * systick-counter current-task set-task-delay pause
     again
   ;
 
@@ -67,10 +68,20 @@ begin-module-once temp-module
   : x-temp-error space ." temperature error" cr ;
   
   \ Read the current temperature
-  : read-temp ( -- )
+  : read-temp ( -- u )
     [: temp-read? @ temp-error? @ or ;] wait
     temp-error? @ triggers x-temp-error
     temp @
+  ;
+
+  \ Read the current temperature in degrees Celsius
+  : read-temp-c ( -- f )
+    read-temp 0 swap 4096,0 f/ 256,0 f* 50,0 d-
+  ;
+
+  \ Read the current temperature in degrees Fahrenheit
+  : read-temp-f ( -- f )
+    read-temp-c 1,8 f* 32,0 d+
   ;
   
   \ Initialize the temperature sensor
@@ -80,17 +91,18 @@ begin-module-once temp-module
     false temp-read? !
     false temp-error? !
     false 2 EXTI_IMR!
+    false 2 EXTI_EMR!
     EXTI_2 NVIC_ICER_CLRENA!
     syscfg-clock-enable
     INPUT_MODE 2 GPIOE MODER!
+    PULL_UP 2 GPIOE PUPDR!
+    VERY_HIGH_SPEED 2 GPIOE OSPEEDR!
     OUTPUT_MODE 3 GPIOE MODER!
     false 3 GPIOE BSRR!
     PE 2 SYSCFG_EXTICRx!
     ['] handle-exti-2 exti-2-handler-hook !
+    0 EXTI_2 NVIC_IPR_IP!
     EXTI_2 NVIC_ISER_SETENA!
-    true 2 EXTI_IMR!
-    true 2 EXTI_EMR!
-    false 2 EXTI_RTSR!
     true 2 EXTI_FTSR!
     0 ['] temp-tracker 256 256 256 spawn temp-task !
     1 temp-task @ set-task-priority
