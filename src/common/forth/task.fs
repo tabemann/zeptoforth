@@ -747,9 +747,9 @@ begin-import-module-once task-module
   \ Call block if not in multitasker, and return whether in multitasker
   : exclude-multitasker ( xt -- flag )
     disable-int in-multitasker? @ dup not if
-      swap execute
+      >r execute r>
     else
-      drop
+      nip
     then
     enable-int
   ;
