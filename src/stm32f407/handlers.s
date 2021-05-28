@@ -20,6 +20,12 @@
 
 	.include "src/common/handlers.s"
 
+	@@ EXTI base address
+	.equ EXTI_Base, 0x40013C00
+
+	@@ EXTI pending register
+	.equ EXTI_PR, EXTI_Base + 0x14
+
 	@@ Initialize the handler hooks
 	define_word "init-handlers", visible_flag
 _init_handlers:
@@ -75,12 +81,13 @@ handle_exti_1:
 
 	@@ The EXTI 2 handler
 handle_exti_2:
-	ldr r0, =exti_2_handler_hook
-	ldr r0, [r0]
-	cmp r0, #0
-	beq 1f
-	adds r0, #1
-	bx r0
+	ldr r0, =EXTI_PR
+	movs r1, #4
+	str r1, [r0]
+	ldr r0, =exti_2_count
+	ldr r1, [r0]
+	adds r1, #1
+	str r1, [r0]
 1:	bx lr
 	end_inlined
 

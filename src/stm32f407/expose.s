@@ -108,5 +108,13 @@ _exti_15_10_handler_hook:
 	bx lr
 	end_inlined
 
+	@@ Get the EXTI-2-COUNT variable address
+	define_word "exti-2-count", visible_flag
+_exti_2_count:
+	push_tos
+	ldr tos, =exti_2_count
+	bx lr
+	end_inlined
+	
 	.ltorg
 	
