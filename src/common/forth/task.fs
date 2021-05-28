@@ -52,6 +52,9 @@ begin-import-module-once task-module
     \ Pause count
     variable pause-count
 
+    \ Currently in multitasker
+    variable in-multitasker?
+
     \ The original SysTIck handler
     variable orig-systick-handler
 
@@ -552,7 +555,7 @@ begin-import-module-once task-module
     : pendsv-handler ( -- )
       r> pendsv-return !
 
-      disable-int
+\      disable-int
       
       in-critical @ 0= if
 	  
@@ -561,9 +564,9 @@ begin-import-module-once task-module
 	  task-io
 	  current-task @ 0<>
 	  dup not if
-	    enable-int
+\	    enable-int
 	    sleep
-	    disable-int
+\	    disable-int
 	    0 task-systick-counter !
 	  then
 	until
@@ -578,6 +581,8 @@ begin-import-module-once task-module
 	  current-task @ go-to-next-task current-task !
 	then
 
+	disable-int
+	
 	current-task @ last-task @ <> if
 	  current-task @ task-rstack-current @ context-switch
 	  last-task @ if last-task @ task-rstack-current ! else drop then
@@ -593,6 +598,8 @@ begin-import-module-once task-module
 	task-dict-base dict-base !
 	task-base @ base !
 	task-handler @ handler !
+
+	enable-int
 	
 	task-timeslice @
 	task-max-timeslice @ task-timeslice @ max min task-systick-counter !
@@ -601,9 +608,11 @@ begin-import-module-once task-module
 	true deferred-context-switch !
       then
 
-      enable-int
+\      enable-int
       
       pendsv-return @ >r
+
+      false in-multitasker? !
     ;
 
     \ Multitasker systick handler
@@ -616,7 +625,7 @@ begin-import-module-once task-module
     ;
 
     \ Handle PAUSE
-    : do-pause ( -- ) ICSR_PENDSVSET! dsb isb ;
+    : do-pause ( -- ) true in-multitasker? ! ICSR_PENDSVSET! dsb isb ;
 
   end-module
 
@@ -735,9 +744,20 @@ begin-import-module-once task-module
   \ Make main-task read-only
   : main-task ( -- task ) main-task @ ;
   
+  \ Call block if not in multitasker, and return whether in multitasker
+  : exclude-multitasker ( xt -- flag )
+    disable-int in-multitasker? @ dup not if
+      swap execute
+    else
+      drop
+    then
+    enable-int
+  ;
+  
   \ Initialize multitasking
   : init-tasker ( -- )
     disable-int
+    false in-multitasker? !
     0 pause-enabled !
     false sleep-enabled? !
     $7F SHPR3_PRI_15!
