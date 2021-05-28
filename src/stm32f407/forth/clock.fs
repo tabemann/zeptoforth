@@ -137,10 +137,10 @@ USART2_Base $0C + constant USART2_CR1
 ;
     
 \ Time multiplier
-21 constant time-multiplier
+168 constant time-multiplier
 
 \ Time divisor
-1 constant time-divisor
+16 constant time-divisor
 
 \ Divisor to get ms from systicks
 10 constant systick-divisor
