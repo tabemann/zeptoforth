@@ -130,7 +130,7 @@ begin-module-once exti-module
 
   \ Get whether the low-power SYSCFG peripheral clock is enabled
   : syscfg-lp-clock-enable? ( -- enable )
-    RCC_APB2SMENR_SYSCFGLPEN RCC_APB2SMENR bit@
+    RCC_APB2SMENR_SYSCFGSMEN RCC_APB2SMENR bit@
   ;
   
     \ Set port for EXTI input
