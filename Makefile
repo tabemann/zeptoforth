@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2020 Travis Bemann
+# Copyright (c) 2019-2021 Travis Bemann
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@ DUMP=arm-none-eabi-objdump
 ASFLAGS=-mcpu=cortex-m4 -mthumb -g
 PREFIX=/usr/local
 PLATFORM=stm32l476
-VERSION=UNDEFINED
+VERSION=0.16.2.Dev
 DATE:=$(shell date)
 
 ODIR=obj
