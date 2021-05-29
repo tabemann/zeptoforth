@@ -15,7 +15,7 @@
     <script src="../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Development Tools Words" href="dev_tools.html" />
+    <link rel="next" title="EXTI WOrds" href="exti.html" />
     <link rel="prev" title="Scheduling Words" href="schedule.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -162,94 +162,104 @@
 <p>Disable the low-power clock for the specified GPIO.</p>
 </div>
 <div class="section" id="id1">
-<h2><code class="docutils literal notranslate"><span class="pre">MODER!</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-<p>( mode port gpio-addr – )</p>
-<p>Set the specified mode for the specified port on the specified GPIO.</p>
+<h2><code class="docutils literal notranslate"><span class="pre">gpio-clock-enable?</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>( gpio-addr – enable )</p>
+<p>Get whether the clock for the specified GPIO is enabled.</p>
 </div>
 <div class="section" id="id2">
-<h2><code class="docutils literal notranslate"><span class="pre">OTYPER!</span></code><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
-<p>( otype port gpio-addr – )</p>
-<p>Set the specified output type for the specified port on the specified GPIO.</p>
+<h2><code class="docutils literal notranslate"><span class="pre">gpio-lp-clock-enable?</span></code><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p>( gpio-addr – enable )</p>
+<p>Get whether the low-power clock for the specified GPIO is enabled.</p>
 </div>
 <div class="section" id="id3">
-<h2><code class="docutils literal notranslate"><span class="pre">OSPEEDR!</span></code><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
-<p>( ospeed port gpio-addr – )</p>
-<p>Set the specified output speed for the specified port on the specified GPIO.</p>
+<h2><code class="docutils literal notranslate"><span class="pre">MODER!</span></code><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<p>( mode pin gpio-addr – )</p>
+<p>Set the specified mode for the specified pin (from 0 to 15) on the specified GPIO.</p>
 </div>
 <div class="section" id="id4">
-<h2><code class="docutils literal notranslate"><span class="pre">PUPDR!</span></code><a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
-<p>( pupd port gpio-addr – )</p>
-<p>Set the specified pull up/pull down setting for the specified port on the specified GPIO.</p>
+<h2><code class="docutils literal notranslate"><span class="pre">OTYPER!</span></code><a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<p>( otype pin gpio-addr – )</p>
+<p>Set the specified output type for the specified pin (from 0 to 15) on the specified GPIO.</p>
 </div>
 <div class="section" id="id5">
-<h2><code class="docutils literal notranslate"><span class="pre">AFRL!</span></code><a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
-<p>( af port gpio-addr – )</p>
-<p>Set the specified alternate function for the specified port (&lt; 8) on the specified GPIO.</p>
+<h2><code class="docutils literal notranslate"><span class="pre">OSPEEDR!</span></code><a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<p>( ospeed pin gpio-addr – )</p>
+<p>Set the specified output speed for the specified pin (from 0 to 15) on the specified GPIO.</p>
 </div>
 <div class="section" id="id6">
-<h2><code class="docutils literal notranslate"><span class="pre">AFRH!</span></code><a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
-<p>( af port gpio-addr – )</p>
-<p>Set the specified alternate function for the specified port (&gt;= 8) on the specified GPIO.</p>
+<h2><code class="docutils literal notranslate"><span class="pre">PUPDR!</span></code><a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<p>( pupd pin gpio-addr – )</p>
+<p>Set the specified pull up/pull down setting for the specified pin (from 0 to 15) on the specified GPIO.</p>
+</div>
+<div class="section" id="id7">
+<h2><code class="docutils literal notranslate"><span class="pre">AFRL!</span></code><a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
+<p>( af pin gpio-addr – )</p>
+<p>Set the specified alternate function for the specified pin (from 0 to 7) on the specified GPIO.</p>
+</div>
+<div class="section" id="id8">
+<h2><code class="docutils literal notranslate"><span class="pre">AFRH!</span></code><a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<p>( af pin gpio-addr – )</p>
+<p>Set the specified alternate function for the specified pin (from 8 to 15) on the specified GPIO.</p>
 </div>
 <div class="section" id="afr">
 <h2><code class="docutils literal notranslate"><span class="pre">AFR!</span></code><a class="headerlink" href="#afr" title="Permalink to this headline">¶</a></h2>
-<p>( af port gpio-addr – )</p>
-<p>Set the specified alternate function for the specified port (any) on the specified GPIO.</p>
+<p>( af pin gpio-addr – )</p>
+<p>Set the specified alternate function for the specified pin (from 0 to 15) on the specified GPIO.</p>
 </div>
 <div class="section" id="bs">
 <h2><code class="docutils literal notranslate"><span class="pre">BS!</span></code><a class="headerlink" href="#bs" title="Permalink to this headline">¶</a></h2>
-<p>( port gpio-addr – )</p>
-<p>Set the output for the specified port on the specified GPIO to on.</p>
+<p>( pin gpio-addr – )</p>
+<p>Set the output for the specified pin (from 0 to 15) on the specified GPIO to on.</p>
 </div>
 <div class="section" id="br">
 <h2><code class="docutils literal notranslate"><span class="pre">BR!</span></code><a class="headerlink" href="#br" title="Permalink to this headline">¶</a></h2>
-<p>( port gpio-addr – )</p>
-<p>Set the output for the specified port on the specified GPIO to off.</p>
-</div>
-<div class="section" id="id7">
-<h2><code class="docutils literal notranslate"><span class="pre">BSRR!</span></code><a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
-<p>( output port gpio-addr – )</p>
-<p>Set the output for the specified port on the specified GPIO to on or off.</p>
-</div>
-<div class="section" id="id8">
-<h2><code class="docutils literal notranslate"><span class="pre">MODER&#64;</span></code><a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
-<p>( port gpio-addr – mode )</p>
-<p>Get the mode of the specified port on the specified GPIO.</p>
+<p>( pin gpio-addr – )</p>
+<p>Set the output for the specified pin (from 0 to 15) on the specified GPIO to off.</p>
 </div>
 <div class="section" id="id9">
-<h2><code class="docutils literal notranslate"><span class="pre">OTYPER&#64;</span></code><a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
-<p>( port gpio-addr – otype )</p>
-<p>Get the output type of the specified port on the specified GPIO.</p>
+<h2><code class="docutils literal notranslate"><span class="pre">BSRR!</span></code><a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
+<p>( output pin gpio-addr – )</p>
+<p>Set the output for the specified pin (from 0 to 15) on the specified GPIO to on or off.</p>
 </div>
 <div class="section" id="id10">
-<h2><code class="docutils literal notranslate"><span class="pre">OSPEEDR&#64;</span></code><a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h2>
-<p>( port gpio-addr – ospeed )</p>
-<p>Get the output speed of the specified port on the specified GPIO.</p>
+<h2><code class="docutils literal notranslate"><span class="pre">MODER&#64;</span></code><a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h2>
+<p>( pin gpio-addr – mode )</p>
+<p>Get the mode of the specified pin (from 0 to 15) on the specified GPIO.</p>
 </div>
 <div class="section" id="id11">
-<h2><code class="docutils literal notranslate"><span class="pre">PUPDR&#64;</span></code><a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h2>
-<p>( port gpio-addr – pupd )</p>
-<p>Get the pull up/pull down setting of the specified port on the specified GPIO.</p>
+<h2><code class="docutils literal notranslate"><span class="pre">OTYPER&#64;</span></code><a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h2>
+<p>( pin gpio-addr – otype )</p>
+<p>Get the output type of the specified pin (from 0 to 15) on the specified GPIO.</p>
 </div>
 <div class="section" id="id12">
-<h2><code class="docutils literal notranslate"><span class="pre">AFRL&#64;</span></code><a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h2>
-<p>( port gpio-addr – af )</p>
-<p>Get the alternate function for the specified port (&lt; 8) on the specified GPIO.</p>
+<h2><code class="docutils literal notranslate"><span class="pre">OSPEEDR&#64;</span></code><a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h2>
+<p>( pin gpio-addr – ospeed )</p>
+<p>Get the output speed of the specified pin (from 0 to 15) on the specified GPIO.</p>
 </div>
 <div class="section" id="id13">
-<h2><code class="docutils literal notranslate"><span class="pre">AFRH&#64;</span></code><a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h2>
-<p>( port gpio-addr – af )</p>
-<p>Get the alternate function for the specified port (&gt;= 8) on the specified GPIO.</p>
+<h2><code class="docutils literal notranslate"><span class="pre">PUPDR&#64;</span></code><a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h2>
+<p>( pin gpio-addr – pupd )</p>
+<p>Get the pull up/pull down setting of the specified pin (from 0 to 15) on the specified GPIO.</p>
 </div>
 <div class="section" id="id14">
-<h2><code class="docutils literal notranslate"><span class="pre">AFR&#64;</span></code><a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h2>
-<p>( port gpio-addr – af )</p>
-<p>Get the alternate function for the specified port (any) on the specified GPIO.</p>
+<h2><code class="docutils literal notranslate"><span class="pre">AFRL&#64;</span></code><a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h2>
+<p>( pin gpio-addr – af )</p>
+<p>Get the alternate function for the specified pin (from 0 to 7) on the specified GPIO.</p>
 </div>
 <div class="section" id="id15">
-<h2><code class="docutils literal notranslate"><span class="pre">IDR&#64;</span></code><a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h2>
-<p>( port gpio-addr – input )</p>
-<p>Get the input for the specified port on the specified GPIO.</p>
+<h2><code class="docutils literal notranslate"><span class="pre">AFRH&#64;</span></code><a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h2>
+<p>( pin gpio-addr – af )</p>
+<p>Get the alternate function for the specified pin (from 8 to 15) on the specified GPIO.</p>
+</div>
+<div class="section" id="id16">
+<h2><code class="docutils literal notranslate"><span class="pre">AFR&#64;</span></code><a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h2>
+<p>( pin gpio-addr – af )</p>
+<p>Get the alternate function for the specified pin (from 0 to 15) on the specified GPIO.</p>
+</div>
+<div class="section" id="id17">
+<h2><code class="docutils literal notranslate"><span class="pre">IDR&#64;</span></code><a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h2>
+<p>( pin gpio-addr – input )</p>
+<p>Get the input for the specified pin (from 0 to 15) on the specified GPIO.</p>
 </div>
 </div>
 
@@ -306,26 +316,29 @@
 <li class="toctree-l2"><a class="reference internal" href="#gpio-lp-clock-enable"><code class="docutils literal notranslate"><span class="pre">gpio-lp-clock-enable</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#gpio-clock-disable"><code class="docutils literal notranslate"><span class="pre">gpio-clock-disable</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#gpio-lp-clock-disable"><code class="docutils literal notranslate"><span class="pre">gpio-lp-clock-disable</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">MODER!</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">OTYPER!</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id3"><code class="docutils literal notranslate"><span class="pre">OSPEEDR!</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id4"><code class="docutils literal notranslate"><span class="pre">PUPDR!</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id5"><code class="docutils literal notranslate"><span class="pre">AFRL!</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id6"><code class="docutils literal notranslate"><span class="pre">AFRH!</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">gpio-clock-enable?</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">gpio-lp-clock-enable?</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3"><code class="docutils literal notranslate"><span class="pre">MODER!</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4"><code class="docutils literal notranslate"><span class="pre">OTYPER!</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5"><code class="docutils literal notranslate"><span class="pre">OSPEEDR!</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id6"><code class="docutils literal notranslate"><span class="pre">PUPDR!</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id7"><code class="docutils literal notranslate"><span class="pre">AFRL!</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id8"><code class="docutils literal notranslate"><span class="pre">AFRH!</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#afr"><code class="docutils literal notranslate"><span class="pre">AFR!</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#bs"><code class="docutils literal notranslate"><span class="pre">BS!</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#br"><code class="docutils literal notranslate"><span class="pre">BR!</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id7"><code class="docutils literal notranslate"><span class="pre">BSRR!</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id8"><code class="docutils literal notranslate"><span class="pre">MODER&#64;</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id9"><code class="docutils literal notranslate"><span class="pre">OTYPER&#64;</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id10"><code class="docutils literal notranslate"><span class="pre">OSPEEDR&#64;</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id11"><code class="docutils literal notranslate"><span class="pre">PUPDR&#64;</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id12"><code class="docutils literal notranslate"><span class="pre">AFRL&#64;</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id13"><code class="docutils literal notranslate"><span class="pre">AFRH&#64;</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id14"><code class="docutils literal notranslate"><span class="pre">AFR&#64;</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id15"><code class="docutils literal notranslate"><span class="pre">IDR&#64;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id9"><code class="docutils literal notranslate"><span class="pre">BSRR!</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id10"><code class="docutils literal notranslate"><span class="pre">MODER&#64;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id11"><code class="docutils literal notranslate"><span class="pre">OTYPER&#64;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id12"><code class="docutils literal notranslate"><span class="pre">OSPEEDR&#64;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id13"><code class="docutils literal notranslate"><span class="pre">PUPDR&#64;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id14"><code class="docutils literal notranslate"><span class="pre">AFRL&#64;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id15"><code class="docutils literal notranslate"><span class="pre">AFRH&#64;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id16"><code class="docutils literal notranslate"><span class="pre">AFR&#64;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id17"><code class="docutils literal notranslate"><span class="pre">IDR&#64;</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI WOrds</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
@@ -354,7 +367,7 @@
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
       <li>Previous: <a href="schedule.html" title="previous chapter">Scheduling Words</a></li>
-      <li>Next: <a href="dev_tools.html" title="next chapter">Development Tools Words</a></li>
+      <li>Next: <a href="exti.html" title="next chapter">EXTI WOrds</a></li>
   </ul></li>
 </ul>
 </div>
