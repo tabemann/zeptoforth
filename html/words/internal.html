@@ -1,0 +1,456 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Internal Words &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Compilation-specific words" href="asm.html" />
+    <link rel="prev" title="Testing Words" href="test.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="internal-words">
+<h1>Internal Words<a class="headerlink" href="#internal-words" title="Permalink to this headline">¶</a></h1>
+<p>These words are in <code class="docutils literal notranslate"><span class="pre">internal-module</span></code>.</p>
+<div class="section" id="advance-here">
+<h2><code class="docutils literal notranslate"><span class="pre">advance-here</span></code><a class="headerlink" href="#advance-here" title="Permalink to this headline">¶</a></h2>
+<p>( a – )</p>
+<p>Fill memory with zeros up until a given address</p>
+</div>
+<div class="section" id="word-flags">
+<h2><code class="docutils literal notranslate"><span class="pre">word-flags</span></code><a class="headerlink" href="#word-flags" title="Permalink to this headline">¶</a></h2>
+<p>( word – h-addr )</p>
+<p>Get the address of the flags for a word</p>
+</div>
+<div class="section" id="wordlist-id">
+<h2><code class="docutils literal notranslate"><span class="pre">wordlist-id</span></code><a class="headerlink" href="#wordlist-id" title="Permalink to this headline">¶</a></h2>
+<p>( word – h-addr )</p>
+<p>Get the address of the wordlist ID for a word</p>
+</div>
+<div class="section" id="prev-word">
+<h2><code class="docutils literal notranslate"><span class="pre">prev-word</span></code><a class="headerlink" href="#prev-word" title="Permalink to this headline">¶</a></h2>
+<p>( word – h-addr )</p>
+<p>Get the address of the previous word for a word</p>
+</div>
+<div class="section" id="word-name">
+<h2><code class="docutils literal notranslate"><span class="pre">word-name</span></code><a class="headerlink" href="#word-name" title="Permalink to this headline">¶</a></h2>
+<p>( word – b-addr )</p>
+<p>Get the name of a word (a counted word)</p>
+</div>
+<div class="section" id="common-prefix">
+<h2><code class="docutils literal notranslate"><span class="pre">common-prefix</span></code><a class="headerlink" href="#common-prefix" title="Permalink to this headline">¶</a></h2>
+<p>( b-addr1 bytes1 b-addr2 bytes2 – bytes3 )</p>
+<p>Get the length of a common prefix to two strings</p>
+</div>
+<div class="section" id="prefix">
+<h2><code class="docutils literal notranslate"><span class="pre">prefix?</span></code><a class="headerlink" href="#prefix" title="Permalink to this headline">¶</a></h2>
+<p>( b-addr1 bytes1 b-addr2 bytes2 – flag )</p>
+<p>Get whether a string has a prefix (the prefix is the first string)</p>
+</div>
+<div class="section" id="hidden">
+<h2><code class="docutils literal notranslate"><span class="pre">hidden?</span></code><a class="headerlink" href="#hidden" title="Permalink to this headline">¶</a></h2>
+<p>( word – f )</p>
+<p>Get whether a word is hidden (note that this means whether a word is displayed by WORDS, not whether it will be found by <code class="docutils literal notranslate"><span class="pre">find</span></code> set to find visible words)</p>
+</div>
+<div class="section" id="words-column">
+<h2><code class="docutils literal notranslate"><span class="pre">words-column</span></code><a class="headerlink" href="#words-column" title="Permalink to this headline">¶</a></h2>
+<p>( b-addr bytes column1 – column2 )</p>
+<p>Actually print a string in one out of four columns, taking up more than one
+column if necessary</p>
+</div>
+<div class="section" id="words-column-wrap">
+<h2><code class="docutils literal notranslate"><span class="pre">words-column-wrap</span></code><a class="headerlink" href="#words-column-wrap" title="Permalink to this headline">¶</a></h2>
+<p>( b-addr bytes column1 – column2 )</p>
+<p>Print a string in one out of four columns, taking up more than one column
+if necessary</p>
+</div>
+<div class="section" id="words-dict">
+<h2><code class="docutils literal notranslate"><span class="pre">words-dict</span></code><a class="headerlink" href="#words-dict" title="Permalink to this headline">¶</a></h2>
+<p>( dict wid column1 – column2 )</p>
+<p>Display all the words in a dictionary starting at a given column, and
+returning the next column</p>
+</div>
+<div class="section" id="lookup-dict">
+<h2><code class="docutils literal notranslate"><span class="pre">lookup-dict</span></code><a class="headerlink" href="#lookup-dict" title="Permalink to this headline">¶</a></h2>
+<p>( b-addr bytes dict wid column1 – column2 )</p>
+<p>Display all the words in a dictionary starting at a given column and returning
+the next column</p>
+</div>
+<div class="section" id="find-prefix-len">
+<h2><code class="docutils literal notranslate"><span class="pre">find-prefix-len</span></code><a class="headerlink" href="#find-prefix-len" title="Permalink to this headline">¶</a></h2>
+<p>( b-addr bytes dict – prefix-bytes )</p>
+<p>Find the common prefix length to a word</p>
+</div>
+<div class="section" id="search-word-info">
+<h2><code class="docutils literal notranslate"><span class="pre">search-word-info</span></code><a class="headerlink" href="#search-word-info" title="Permalink to this headline">¶</a></h2>
+<p>( b-addr bytes dict – )</p>
+<p>Search for all the words that go by a certain name in a given dictionary</p>
+</div>
+<div class="section" id="search-by-xt">
+<h2><code class="docutils literal notranslate"><span class="pre">search-by-xt</span></code><a class="headerlink" href="#search-by-xt" title="Permalink to this headline">¶</a></h2>
+<p>( dict xt – name|0 flag )</p>
+<p>Search for a word by its xt</p>
+</div>
+<div class="section" id="builds-with-name">
+<h2><code class="docutils literal notranslate"><span class="pre">&lt;builds-with-name</span></code><a class="headerlink" href="#builds-with-name" title="Permalink to this headline">¶</a></h2>
+<p>( addr bytes – )</p>
+<p>Create a word that executes code specified by DOES&gt;</p>
+</div>
+<div class="section" id="flash-align">
+<h2><code class="docutils literal notranslate"><span class="pre">flash-align,</span></code><a class="headerlink" href="#flash-align" title="Permalink to this headline">¶</a></h2>
+<p>Align to flash block if compiling to flash</p>
+</div>
+<div class="section" id="next-user-space">
+<h2><code class="docutils literal notranslate"><span class="pre">next-user-space</span></code><a class="headerlink" href="#next-user-space" title="Permalink to this headline">¶</a></h2>
+<p>( – addr )</p>
+<p>Look up next available user space</p>
+</div>
+<div class="section" id="set-next-user-space">
+<h2><code class="docutils literal notranslate"><span class="pre">set-next-user-space</span></code><a class="headerlink" href="#set-next-user-space" title="Permalink to this headline">¶</a></h2>
+<p>( addr – )</p>
+<p>Specify next available user space</p>
+</div>
+<div class="section" id="next-ram-space">
+<h2><code class="docutils literal notranslate"><span class="pre">next-ram-space</span></code><a class="headerlink" href="#next-ram-space" title="Permalink to this headline">¶</a></h2>
+<p>( – addr )</p>
+<p>Look up next available RAM space</p>
+</div>
+<div class="section" id="set-next-ram-space">
+<h2><code class="docutils literal notranslate"><span class="pre">set-next-ram-space</span></code><a class="headerlink" href="#set-next-ram-space" title="Permalink to this headline">¶</a></h2>
+<p>( addr – )</p>
+<p>Specify next available RAM space</p>
+</div>
+<div class="section" id="user">
+<h2><code class="docutils literal notranslate"><span class="pre">user&gt;</span></code><a class="headerlink" href="#user" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>Complete a USER variable word</p>
+</div>
+<div class="section" id="ram-bvariable">
+<h2><code class="docutils literal notranslate"><span class="pre">ram-bvariable</span></code><a class="headerlink" href="#ram-bvariable" title="Permalink to this headline">¶</a></h2>
+<p>( “name” – )</p>
+<p>Allocate a byte variable in RAM</p>
+</div>
+<div class="section" id="ram-hvariable">
+<h2><code class="docutils literal notranslate"><span class="pre">ram-hvariable</span></code><a class="headerlink" href="#ram-hvariable" title="Permalink to this headline">¶</a></h2>
+<p>( “name” – )</p>
+<p>Allocate a halfword variable in RAM</p>
+</div>
+<div class="section" id="ram-variable">
+<h2><code class="docutils literal notranslate"><span class="pre">ram-variable</span></code><a class="headerlink" href="#ram-variable" title="Permalink to this headline">¶</a></h2>
+<p>( “name” – )</p>
+<p>Allocate a variable in RAM</p>
+</div>
+<div class="section" id="ram-2variable">
+<h2><code class="docutils literal notranslate"><span class="pre">ram-2variable</span></code><a class="headerlink" href="#ram-2variable" title="Permalink to this headline">¶</a></h2>
+<p>( “name” – )</p>
+<p>Allocate a doubleword variable in RAM</p>
+</div>
+<div class="section" id="ram-buffer">
+<h2><code class="docutils literal notranslate"><span class="pre">ram-buffer:</span></code><a class="headerlink" href="#ram-buffer" title="Permalink to this headline">¶</a></h2>
+<p>( bytes “name” – )</p>
+<p>Allocate a buffer in RAM</p>
+</div>
+<div class="section" id="ram-aligned-buffer">
+<h2><code class="docutils literal notranslate"><span class="pre">ram-aligned-buffer:</span></code><a class="headerlink" href="#ram-aligned-buffer" title="Permalink to this headline">¶</a></h2>
+<p>( bytes “name” – )</p>
+<p>Allocate a cell-aligned buffer in RAM</p>
+</div>
+<div class="section" id="set-current-flash-wordlist">
+<h2><code class="docutils literal notranslate"><span class="pre">set-current-flash-wordlist</span></code><a class="headerlink" href="#set-current-flash-wordlist" title="Permalink to this headline">¶</a></h2>
+<p>( wid – )</p>
+<p>Specify current flash wordlist</p>
+</div>
+<div class="section" id="get-current-flash-wordlist">
+<h2><code class="docutils literal notranslate"><span class="pre">get-current-flash-wordlist</span></code><a class="headerlink" href="#get-current-flash-wordlist" title="Permalink to this headline">¶</a></h2>
+<p>( – wid )</p>
+<p>Look up the current flash wordlist</p>
+</div>
+<div class="section" id="decode-mov16">
+<h2><code class="docutils literal notranslate"><span class="pre">decode-mov16</span></code><a class="headerlink" href="#decode-mov16" title="Permalink to this headline">¶</a></h2>
+<p>( h-addr – h )</p>
+<p>Decode the immediate field from a MOVW or MOVT instruction</p>
+</div>
+<div class="section" id="decode-literal">
+<h2><code class="docutils literal notranslate"><span class="pre">decode-literal</span></code><a class="headerlink" href="#decode-literal" title="Permalink to this headline">¶</a></h2>
+<p>( h-addr – x )</p>
+<p>Decode the immediate field from a pair of a MOVW instruction followed by a MOVT instruction</p>
+</div>
+<div class="section" id="defer-ram">
+<h2><code class="docutils literal notranslate"><span class="pre">defer-ram&#64;</span></code><a class="headerlink" href="#defer-ram" title="Permalink to this headline">¶</a></h2>
+<p>( xt-deferred – xt )</p>
+<p>Get the referred xt from a deferred word in RAM</p>
+</div>
+<div class="section" id="defer-flash">
+<h2><code class="docutils literal notranslate"><span class="pre">defer-flash&#64;</span></code><a class="headerlink" href="#defer-flash" title="Permalink to this headline">¶</a></h2>
+<p>( xt-deferred – xt )</p>
+<p>Get the referred xt from a deferred word in flash</p>
+</div>
+<div class="section" id="fraction-size">
+<h2><code class="docutils literal notranslate"><span class="pre">fraction-size</span></code><a class="headerlink" href="#fraction-size" title="Permalink to this headline">¶</a></h2>
+<p>( – u )</p>
+<p>Get current fraction size</p>
+</div>
+<div class="section" id="format-fraction">
+<h2><code class="docutils literal notranslate"><span class="pre">format-fraction</span></code><a class="headerlink" href="#format-fraction" title="Permalink to this headline">¶</a></h2>
+<p>( u b-addr bytes – b-addr bytes )</p>
+<p>Format digits to the right of the decimal point</p>
+</div>
+<div class="section" id="add-decimal">
+<h2><code class="docutils literal notranslate"><span class="pre">add-decimal</span></code><a class="headerlink" href="#add-decimal" title="Permalink to this headline">¶</a></h2>
+<p>( b-addr bytes – b-addr bytes )</p>
+<p>Add a decimal point</p>
+</div>
+<div class="section" id="do-nothing">
+<h2><code class="docutils literal notranslate"><span class="pre">do-nothing</span></code><a class="headerlink" href="#do-nothing" title="Permalink to this headline">¶</a></h2>
+<p>Do nothing</p>
+</div>
+<div class="section" id="init-flash-dict">
+<h2><code class="docutils literal notranslate"><span class="pre">init-flash-dict</span></code><a class="headerlink" href="#init-flash-dict" title="Permalink to this headline">¶</a></h2>
+<p>Initialize the flash dictionary</p>
+</div>
+<div class="section" id="init-dict">
+<h2><code class="docutils literal notranslate"><span class="pre">init-dict</span></code><a class="headerlink" href="#init-dict" title="Permalink to this headline">¶</a></h2>
+<p>Initiatlize the dictionary</p>
+</div>
+<div class="section" id="find-last-visible-word">
+<h2><code class="docutils literal notranslate"><span class="pre">find-last-visible-word</span></code><a class="headerlink" href="#find-last-visible-word" title="Permalink to this headline">¶</a></h2>
+<p>Find the last visible word</p>
+</div>
+<div class="section" id="do-init">
+<h2><code class="docutils literal notranslate"><span class="pre">do-init</span></code><a class="headerlink" href="#do-init" title="Permalink to this headline">¶</a></h2>
+<p>Run the initialization routine, if there is one</p>
+</div>
+<div class="section" id="init-variables">
+<h2><code class="docutils literal notranslate"><span class="pre">init-variables</span></code><a class="headerlink" href="#init-variables" title="Permalink to this headline">¶</a></h2>
+<p>Initialize the variables</p>
+</div>
+<div class="section" id="find-dict">
+<h2><code class="docutils literal notranslate"><span class="pre">find-dict</span></code><a class="headerlink" href="#find-dict" title="Permalink to this headline">¶</a></h2>
+<p>Find a word in a specific dictionary for a specific wordlist
+( addr bytes mask dict wid – addr|0 )</p>
+</div>
+<div class="section" id="find-in-wordlist">
+<h2><code class="docutils literal notranslate"><span class="pre">find-in-wordlist</span></code><a class="headerlink" href="#find-in-wordlist" title="Permalink to this headline">¶</a></h2>
+<p>Find a word in a specific wordlist
+( addr bytes mask wid – addr|0 )</p>
+</div>
+<div class="section" id="main">
+<h2><code class="docutils literal notranslate"><span class="pre">main</span></code><a class="headerlink" href="#main" title="Permalink to this headline">¶</a></h2>
+<p>The main functionality, within the main exception handler</p>
+</div>
+<div class="section" id="validate">
+<h2><code class="docutils literal notranslate"><span class="pre">validate</span></code><a class="headerlink" href="#validate" title="Permalink to this headline">¶</a></h2>
+<p>Validate the current state</p>
+</div>
+<div class="section" id="do-prompt">
+<h2><code class="docutils literal notranslate"><span class="pre">do-prompt</span></code><a class="headerlink" href="#do-prompt" title="Permalink to this headline">¶</a></h2>
+<p>Display a prompt</p>
+</div>
+<div class="section" id="do-refill">
+<h2><code class="docutils literal notranslate"><span class="pre">do-refill</span></code><a class="headerlink" href="#do-refill" title="Permalink to this headline">¶</a></h2>
+<p>Implement the refill hook</p>
+</div>
+<div class="section" id="do-failed-parse">
+<h2><code class="docutils literal notranslate"><span class="pre">do-failed-parse</span></code><a class="headerlink" href="#do-failed-parse" title="Permalink to this headline">¶</a></h2>
+<p>Implement the failed parse hook</p>
+</div>
+<div class="section" id="do-handle-number">
+<h2><code class="docutils literal notranslate"><span class="pre">do-handle-number</span></code><a class="headerlink" href="#do-handle-number" title="Permalink to this headline">¶</a></h2>
+<p>Implement the handle number hook</p>
+</div>
+<div class="section" id="parse-integer-core">
+<h2><code class="docutils literal notranslate"><span class="pre">parse-integer-core</span></code><a class="headerlink" href="#parse-integer-core" title="Permalink to this headline">¶</a></h2>
+<p>( b-addr u base – n success )</p>
+<p>Actually parse an integer</p>
+</div>
+<div class="section" id="parse-unsigned-core">
+<h2><code class="docutils literal notranslate"><span class="pre">parse-unsigned-core</span></code><a class="headerlink" href="#parse-unsigned-core" title="Permalink to this headline">¶</a></h2>
+<p>( b-addr u base – u success )</p>
+<p>Actually parse an unsigned integer</p>
+</div>
+<div class="section" id="constant-with-name">
+<h2><code class="docutils literal notranslate"><span class="pre">constant-with-name</span></code><a class="headerlink" href="#constant-with-name" title="Permalink to this headline">¶</a></h2>
+<p>Create a constant with a specified name as a string</p>
+</div>
+<div class="section" id="id1">
+<h2><code class="docutils literal notranslate"><span class="pre">2constant-with-name</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>Create a 2-word constant with a name specified as a string</p>
+</div>
+<div class="section" id="skip-to-token">
+<h2><code class="docutils literal notranslate"><span class="pre">skip-to-token</span></code><a class="headerlink" href="#skip-to-token" title="Permalink to this headline">¶</a></h2>
+<p>Skip to the start of a token</p>
+</div>
+<div class="section" id="format-integer-inner">
+<h2><code class="docutils literal notranslate"><span class="pre">format-integer-inner</span></code><a class="headerlink" href="#format-integer-inner" title="Permalink to this headline">¶</a></h2>
+<p>The inner portion of formatting an integer as a string</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schedule.html">Scheduling Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="allocate.html">Allocator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="edit.html">Block Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="swd.html"><code class="docutils literal notranslate"><span class="pre">swdcom</span></code> Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="led.html">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test.html">Testing Words</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Internal Words</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#advance-here"><code class="docutils literal notranslate"><span class="pre">advance-here</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#word-flags"><code class="docutils literal notranslate"><span class="pre">word-flags</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#wordlist-id"><code class="docutils literal notranslate"><span class="pre">wordlist-id</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prev-word"><code class="docutils literal notranslate"><span class="pre">prev-word</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#word-name"><code class="docutils literal notranslate"><span class="pre">word-name</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#common-prefix"><code class="docutils literal notranslate"><span class="pre">common-prefix</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prefix"><code class="docutils literal notranslate"><span class="pre">prefix?</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hidden"><code class="docutils literal notranslate"><span class="pre">hidden?</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#words-column"><code class="docutils literal notranslate"><span class="pre">words-column</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#words-column-wrap"><code class="docutils literal notranslate"><span class="pre">words-column-wrap</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#words-dict"><code class="docutils literal notranslate"><span class="pre">words-dict</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lookup-dict"><code class="docutils literal notranslate"><span class="pre">lookup-dict</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#find-prefix-len"><code class="docutils literal notranslate"><span class="pre">find-prefix-len</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#search-word-info"><code class="docutils literal notranslate"><span class="pre">search-word-info</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#search-by-xt"><code class="docutils literal notranslate"><span class="pre">search-by-xt</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#builds-with-name"><code class="docutils literal notranslate"><span class="pre">&lt;builds-with-name</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#flash-align"><code class="docutils literal notranslate"><span class="pre">flash-align,</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#next-user-space"><code class="docutils literal notranslate"><span class="pre">next-user-space</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#set-next-user-space"><code class="docutils literal notranslate"><span class="pre">set-next-user-space</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#next-ram-space"><code class="docutils literal notranslate"><span class="pre">next-ram-space</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#set-next-ram-space"><code class="docutils literal notranslate"><span class="pre">set-next-ram-space</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#user"><code class="docutils literal notranslate"><span class="pre">user&gt;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ram-bvariable"><code class="docutils literal notranslate"><span class="pre">ram-bvariable</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ram-hvariable"><code class="docutils literal notranslate"><span class="pre">ram-hvariable</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ram-variable"><code class="docutils literal notranslate"><span class="pre">ram-variable</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ram-2variable"><code class="docutils literal notranslate"><span class="pre">ram-2variable</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ram-buffer"><code class="docutils literal notranslate"><span class="pre">ram-buffer:</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ram-aligned-buffer"><code class="docutils literal notranslate"><span class="pre">ram-aligned-buffer:</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#set-current-flash-wordlist"><code class="docutils literal notranslate"><span class="pre">set-current-flash-wordlist</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#get-current-flash-wordlist"><code class="docutils literal notranslate"><span class="pre">get-current-flash-wordlist</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#decode-mov16"><code class="docutils literal notranslate"><span class="pre">decode-mov16</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#decode-literal"><code class="docutils literal notranslate"><span class="pre">decode-literal</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#defer-ram"><code class="docutils literal notranslate"><span class="pre">defer-ram&#64;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#defer-flash"><code class="docutils literal notranslate"><span class="pre">defer-flash&#64;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fraction-size"><code class="docutils literal notranslate"><span class="pre">fraction-size</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#format-fraction"><code class="docutils literal notranslate"><span class="pre">format-fraction</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#add-decimal"><code class="docutils literal notranslate"><span class="pre">add-decimal</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#do-nothing"><code class="docutils literal notranslate"><span class="pre">do-nothing</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#init-flash-dict"><code class="docutils literal notranslate"><span class="pre">init-flash-dict</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#init-dict"><code class="docutils literal notranslate"><span class="pre">init-dict</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#find-last-visible-word"><code class="docutils literal notranslate"><span class="pre">find-last-visible-word</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#do-init"><code class="docutils literal notranslate"><span class="pre">do-init</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#init-variables"><code class="docutils literal notranslate"><span class="pre">init-variables</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#find-dict"><code class="docutils literal notranslate"><span class="pre">find-dict</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#find-in-wordlist"><code class="docutils literal notranslate"><span class="pre">find-in-wordlist</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#main"><code class="docutils literal notranslate"><span class="pre">main</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#validate"><code class="docutils literal notranslate"><span class="pre">validate</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#do-prompt"><code class="docutils literal notranslate"><span class="pre">do-prompt</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#do-refill"><code class="docutils literal notranslate"><span class="pre">do-refill</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#do-failed-parse"><code class="docutils literal notranslate"><span class="pre">do-failed-parse</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#do-handle-number"><code class="docutils literal notranslate"><span class="pre">do-handle-number</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#parse-integer-core"><code class="docutils literal notranslate"><span class="pre">parse-integer-core</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#parse-unsigned-core"><code class="docutils literal notranslate"><span class="pre">parse-unsigned-core</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#constant-with-name"><code class="docutils literal notranslate"><span class="pre">constant-with-name</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">2constant-with-name</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#skip-to-token"><code class="docutils literal notranslate"><span class="pre">skip-to-token</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#format-integer-inner"><code class="docutils literal notranslate"><span class="pre">format-integer-inner</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="test.html" title="previous chapter">Testing Words</a></li>
+      <li>Next: <a href="asm.html" title="next chapter">Compilation-specific words</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Travis Bemann.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.4.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="../_sources/words/internal.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

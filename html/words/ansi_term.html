@@ -1,0 +1,266 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ANSI Terminal words &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Quad SPI words" href="qspi.html" />
+    <link rel="prev" title="SysTick Words" href="systick.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="ansi-terminal-words">
+<h1>ANSI Terminal words<a class="headerlink" href="#ansi-terminal-words" title="Permalink to this headline">¶</a></h1>
+<p>These are a number of word used to manage interaction with ANSI terminals. Note that no other terminals are supported.</p>
+<p>The ANSI termiinal interface is not included in the default builds; the user must load <code class="docutils literal notranslate"><span class="pre">src/common/forth/ansi_term.fs</span></code> or use a big build for it to be available. Note that logic is in place to ensure that it is not loaded multiple times. Note that it reboots the MCU when it is loaded due to needing to create user varibles.</p>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">ansi-term-module</span></code>:</p>
+<div class="section" id="escape">
+<h2><code class="docutils literal notranslate"><span class="pre">escape</span></code><a class="headerlink" href="#escape" title="Permalink to this headline">¶</a></h2>
+<p>( – b )</p>
+<p>The escape character.</p>
+</div>
+<div class="section" id="dec">
+<h2><code class="docutils literal notranslate"><span class="pre">(dec.)</span></code><a class="headerlink" href="#dec" title="Permalink to this headline">¶</a></h2>
+<p>( n – )</p>
+<p>Output a decimal number without any padding.</p>
+</div>
+<div class="section" id="csi">
+<h2><code class="docutils literal notranslate"><span class="pre">csi</span></code><a class="headerlink" href="#csi" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>Output the CSI sequence.</p>
+</div>
+<div class="section" id="show-cursor">
+<h2><code class="docutils literal notranslate"><span class="pre">show-cursor</span></code><a class="headerlink" href="#show-cursor" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>Show the cursor. Note that multiple <code class="docutils literal notranslate"><span class="pre">show-cursor</span></code> and <code class="docutils literal notranslate"><span class="pre">hide-cursor</span></code> pairs can be nested.</p>
+</div>
+<div class="section" id="hide-cursor">
+<h2><code class="docutils literal notranslate"><span class="pre">hide-cursor</span></code><a class="headerlink" href="#hide-cursor" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>Show the cursor. Note that multiple <code class="docutils literal notranslate"><span class="pre">show-cursor</span></code> and <code class="docutils literal notranslate"><span class="pre">hide-cursor</span></code> pairs can be nested.</p>
+</div>
+<div class="section" id="save-cursor">
+<h2><code class="docutils literal notranslate"><span class="pre">save-cursor</span></code><a class="headerlink" href="#save-cursor" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>Save the cursor position. Note that <code class="docutils literal notranslate"><span class="pre">save-cursor</span></code> / <code class="docutils literal notranslate"><span class="pre">restore-cursor</span></code> pairs <em>cannot</em> be nested.</p>
+</div>
+<div class="section" id="restore-cursor">
+<h2><code class="docutils literal notranslate"><span class="pre">restore-cursor</span></code><a class="headerlink" href="#restore-cursor" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>Restore the cursor position. Note that <code class="docutils literal notranslate"><span class="pre">save-cursor</span></code> / <code class="docutils literal notranslate"><span class="pre">restore-cursor</span></code> pairs <em>cannot</em> be nested.</p>
+</div>
+<div class="section" id="scroll-up">
+<h2><code class="docutils literal notranslate"><span class="pre">scroll-up</span></code><a class="headerlink" href="#scroll-up" title="Permalink to this headline">¶</a></h2>
+<p>( lines – )</p>
+<p>Scroll up the screen by a given number of lines.</p>
+</div>
+<div class="section" id="go-to-coord">
+<h2><code class="docutils literal notranslate"><span class="pre">go-to-coord</span></code><a class="headerlink" href="#go-to-coord" title="Permalink to this headline">¶</a></h2>
+<p>( row column – )</p>
+<p>Go to the specified row and column (each starting from zero).</p>
+</div>
+<div class="section" id="erase-end-of-line">
+<h2><code class="docutils literal notranslate"><span class="pre">erase-end-of-line</span></code><a class="headerlink" href="#erase-end-of-line" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>Erase from the cursor to the end of the current line.</p>
+</div>
+<div class="section" id="erase-down">
+<h2><code class="docutils literal notranslate"><span class="pre">erase-down</span></code><a class="headerlink" href="#erase-down" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>Erase the lines below the current line.</p>
+</div>
+<div class="section" id="query-cursor-position">
+<h2><code class="docutils literal notranslate"><span class="pre">query-cursor-position</span></code><a class="headerlink" href="#query-cursor-position" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>Output the sequence to query the cursor position. Note that this is used by <code class="docutils literal notranslate"><span class="pre">get-cursor-position</span></code> and is not intended for use by the user.</p>
+</div>
+<div class="section" id="execute-hide-cursor">
+<h2><code class="docutils literal notranslate"><span class="pre">execute-hide-cursor</span></code><a class="headerlink" href="#execute-hide-cursor" title="Permalink to this headline">¶</a></h2>
+<p>( xt – )</p>
+<p>Hide the cursor, execute the given xt, then show the cursor. Note that calls to this can be nested. Also note that exceptions that occur within the xt will cause the cursor to be shown, if appropriate, again before the exceptions are re-raised.</p>
+</div>
+<div class="section" id="clear-key">
+<h2><code class="docutils literal notranslate"><span class="pre">clear-key</span></code><a class="headerlink" href="#clear-key" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>Clear the saved input byte.</p>
+</div>
+<div class="section" id="get-key">
+<h2><code class="docutils literal notranslate"><span class="pre">get-key</span></code><a class="headerlink" href="#get-key" title="Permalink to this headline">¶</a></h2>
+<p>( – b )</p>
+<p>If there is a saved input byte, return it, clearing it in the process, otherwise get an input byte from the console.</p>
+</div>
+<div class="section" id="set-key">
+<h2><code class="docutils literal notranslate"><span class="pre">set-key</span></code><a class="headerlink" href="#set-key" title="Permalink to this headline">¶</a></h2>
+<p>( b – )</p>
+<p>Save an input byte, overwriting any which has already been saved.</p>
+</div>
+<div class="section" id="wait-number">
+<h2><code class="docutils literal notranslate"><span class="pre">wait-number</span></code><a class="headerlink" href="#wait-number" title="Permalink to this headline">¶</a></h2>
+<p>( – n matches )</p>
+<p>Attempt to read a number from the console, returning it and true if a parseable number is found, otherwise returning 0 and false.</p>
+</div>
+<div class="section" id="wait-char">
+<h2><code class="docutils literal notranslate"><span class="pre">wait-char</span></code><a class="headerlink" href="#wait-char" title="Permalink to this headline">¶</a></h2>
+<p>( b – )</p>
+<p>Wait for the given byte to be inputted from the console.</p>
+</div>
+<div class="section" id="expect-char">
+<h2><code class="docutils literal notranslate"><span class="pre">expect-char</span></code><a class="headerlink" href="#expect-char" title="Permalink to this headline">¶</a></h2>
+<p>( b – flag )</p>
+<p>Wait for a byte to be inputted from the console; if it is the given byte, drop it and return true, else save it and return false.</p>
+</div>
+<div class="section" id="get-cursor-position">
+<h2><code class="docutils literal notranslate"><span class="pre">get-cursor-position</span></code><a class="headerlink" href="#get-cursor-position" title="Permalink to this headline">¶</a></h2>
+<p>( – row column  )</p>
+<p>Get the current cursor position.</p>
+</div>
+<div class="section" id="execute-preserve-cursor">
+<h2><code class="docutils literal notranslate"><span class="pre">execute-preserve-cursor</span></code><a class="headerlink" href="#execute-preserve-cursor" title="Permalink to this headline">¶</a></h2>
+<p>( xt – )</p>
+<p>Save the cursor position, execute the given xt, then restore the cursor position. Note that calls to this can be nested. Also note that exceptions that occur within the xt will cause the cursor position to be restored before the exceptions are re-raised.</p>
+</div>
+<div class="section" id="get-terminal-size">
+<h2><code class="docutils literal notranslate"><span class="pre">get-terminal-size</span></code><a class="headerlink" href="#get-terminal-size" title="Permalink to this headline">¶</a></h2>
+<p>( – rows columns )</p>
+<p>Get the terminal size in rows and columns.</p>
+</div>
+<div class="section" id="reset-ansi-term">
+<h2><code class="docutils literal notranslate"><span class="pre">reset-ansi-term</span></code><a class="headerlink" href="#reset-ansi-term" title="Permalink to this headline">¶</a></h2>
+<p>Reset the state of the ANSI terminal. Note that if the cursor is currently hidden, it will not show it automatically.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schedule.html">Scheduling Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="allocate.html">Allocator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ANSI Terminal words</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#escape"><code class="docutils literal notranslate"><span class="pre">escape</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dec"><code class="docutils literal notranslate"><span class="pre">(dec.)</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#csi"><code class="docutils literal notranslate"><span class="pre">csi</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#show-cursor"><code class="docutils literal notranslate"><span class="pre">show-cursor</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hide-cursor"><code class="docutils literal notranslate"><span class="pre">hide-cursor</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#save-cursor"><code class="docutils literal notranslate"><span class="pre">save-cursor</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#restore-cursor"><code class="docutils literal notranslate"><span class="pre">restore-cursor</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scroll-up"><code class="docutils literal notranslate"><span class="pre">scroll-up</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#go-to-coord"><code class="docutils literal notranslate"><span class="pre">go-to-coord</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#erase-end-of-line"><code class="docutils literal notranslate"><span class="pre">erase-end-of-line</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#erase-down"><code class="docutils literal notranslate"><span class="pre">erase-down</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#query-cursor-position"><code class="docutils literal notranslate"><span class="pre">query-cursor-position</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#execute-hide-cursor"><code class="docutils literal notranslate"><span class="pre">execute-hide-cursor</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#clear-key"><code class="docutils literal notranslate"><span class="pre">clear-key</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#get-key"><code class="docutils literal notranslate"><span class="pre">get-key</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#set-key"><code class="docutils literal notranslate"><span class="pre">set-key</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#wait-number"><code class="docutils literal notranslate"><span class="pre">wait-number</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#wait-char"><code class="docutils literal notranslate"><span class="pre">wait-char</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#expect-char"><code class="docutils literal notranslate"><span class="pre">expect-char</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#get-cursor-position"><code class="docutils literal notranslate"><span class="pre">get-cursor-position</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#execute-preserve-cursor"><code class="docutils literal notranslate"><span class="pre">execute-preserve-cursor</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#get-terminal-size"><code class="docutils literal notranslate"><span class="pre">get-terminal-size</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reset-ansi-term"><code class="docutils literal notranslate"><span class="pre">reset-ansi-term</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="edit.html">Block Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="swd.html"><code class="docutils literal notranslate"><span class="pre">swdcom</span></code> Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="led.html">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test.html">Testing Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="systick.html" title="previous chapter">SysTick Words</a></li>
+      <li>Next: <a href="qspi.html" title="next chapter">Quad SPI words</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Travis Bemann.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.4.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="../_sources/words/ansi_term.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
