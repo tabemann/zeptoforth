@@ -72,140 +72,150 @@ begin-module-once gpio-module
   $20 GPIO_Field AFRL
   $24 GPIO_Field AFRH
 
-  \ The GPIO port modes
+  \ The GPIO pin modes
   %00 constant INPUT_MODE
   %01 constant OUTPUT_MODE
   %10 constant ALTERNATE_MODE
   %11 constant ANALOG_MODE
 
-  \ The GPIO port output types
+  \ The GPIO pin output types
   %0 constant PUSH_PULL
   %1 constant OPEN_DRAIN
 
-  \ The GPIO port output speeds
+  \ The GPIO pin output speeds
   %00 constant LOW_SPEED
   %01 constant MEDIUM_SPEED
   %10 constant HIGH_SPEED
   %11 constant VERY_HIGH_SPEED
 
-  \ The GPIO port pull-up/pull-down settings
+  \ The GPIO pin pull-up/pull-down settings
   %00 constant NO_PULL_UP_PULL_DOWN
   %01 constant PULL_UP
   %10 constant PULL_DOWN
 
   \ Enable a GPIO peripheral clock
   : gpio-clock-enable ( gpio -- )
-    GPIO_Base - $400 / 1 swap lshift RCC_AHB1ENR bis!
+    GPIO_Base - $400 / bit RCC_AHB1ENR bis!
   ;
 
   \ Enable a low-power GPIO peripheral clock
   : gpio-lp-clock-enable ( gpio -- )
-    GPIO_Base - $400 / 1 swap lshift RCC_AHB1LPENR bis!
+    GPIO_Base - $400 / bit RCC_AHB1LPENR bis!
   ;
 
   \ Disable a GPIO peripheral clock
   : gpio-clock-disable ( gpio -- )
-    GPIO_Base - $400 / 1 swap lshift RCC_AHB1ENR bic!
+    GPIO_Base - $400 / bit RCC_AHB1ENR bic!
   ;
 
   \ Disable a low-power GPIO peripheral clock
   : gpio-lp-clock-disable ( gpio -- )
-    GPIO_Base - $400 / 1 swap lshift RCC_AHB1LPENR bic!
+    GPIO_Base - $400 / bit RCC_AHB1LPENR bic!
+  ;
+
+  \ Get whether a GPIO peripheral clock is enabled
+  : gpio-clock-enable? ( gpio -- enable )
+    GPIO_Base - $400 / bit RCC_AHB1ENR bit@
+  ;
+
+  \ Get whether a low-power GPIO peripheral clock is enabled
+  : gpio-lp-clock-enable? ( gpio -- enable )
+    GPIO_Base - $400 / bit RCC_AHB1LPENR bit@
   ;
 
   \ Set a GPIOx_MODER field
-  : MODER! ( mode port gpio -- )
+  : MODER! ( mode pin gpio -- )
     MODER dup >r @ over %11 swap 1 lshift lshift bic
     rot %11 and rot 1 lshift lshift or r> !
   ;
 
   \ Set a GPIOx_OTYPER field
-  : OTYPER! ( otype port gpio -- )
-    OTYPER dup >r @ over %1 swap lshift bic
+  : OTYPER! ( otype pin gpio -- )
+    OTYPER dup >r @ over bit bic
     rot %1 and rot lshift or r> !
   ;
 
   \ Set a GPIOx_OSPEEDR field
-  : OSPEEDR! ( ospeed port gpio -- )
+  : OSPEEDR! ( ospeed pin gpio -- )
     OSPEEDR dup >r @ over %11 swap 1 lshift lshift bic
     rot %11 and rot 1 lshift lshift or r> !
   ;
 
   \ Set a GPIOx_PUPDR field
-  : PUPDR! ( pupd port gpio -- )
+  : PUPDR! ( pupd pin gpio -- )
     PUPDR dup >r @ over %11 swap 1 lshift lshift bic
     rot %11 and rot 1 lshift lshift or r> !
   ;
 
   \ Set a GPIOx_AFRL field
-  : AFRL! ( af port gpio -- )
+  : AFRL! ( af pin gpio -- )
     AFRL dup >r @ over %1111 swap 2 lshift lshift bic
     rot %1111 and rot 2 lshift lshift or r> !
   ;
 
   \ Set a GPIOx_AFRH field
-  : AFRH! ( af port gpio -- )
+  : AFRH! ( af pin gpio -- )
     swap 8 - swap AFRH dup >r @ over %1111 swap 2 lshift lshift bic
     rot %1111 and rot 2 lshift lshift or r> !
   ;
 
   \ Set either a GPIOx_AFRL field or a GPIOx_AFRH field
-  : AFR! ( af port gpio -- )
+  : AFR! ( af pin gpio -- )
     over 8 >= if AFRH! else AFRL! then
   ;
 
-  \ Set a single bit on a GPIO port
-  : BS! ( port gpio -- )
+  \ Set a single bit on a GPIO pin
+  : BS! ( pin gpio -- )
     BSRR 1 rot lshift swap !
   ;
 
-  \ Reset a single bit on a GPIO port
-  : BR! ( port gpio -- )
+  \ Reset a single bit on a GPIO pin
+  : BR! ( pin gpio -- )
     BSRR 1 rot 16 + lshift swap !
   ;
 
-  \ Set or reset a single bit on a GPIO port
-  : BSRR! ( output port gpio -- )
+  \ Set or reset a single bit on a GPIO pin
+  : BSRR! ( output pin gpio -- )
     rot if BS! else BR! then
   ;
 
   \ Get a GPIOx_MODER field
-  : MODER@ ( port gpio -- mode )
+  : MODER@ ( pin gpio -- mode )
     MODER @ swap 1 lshift rshift %11 and
   ;
 
   \ Get a GPIOx_OTYPER field
-  : OTYPER@ ( port gpio -- otype )
+  : OTYPER@ ( pin gpio -- otype )
     OTYPER @ swap rshift %1 and
   ;
 
   \ Get a GPIOx_OSPEEDR field
-  : OSPEEDR@ ( port gpio -- ospeed )
+  : OSPEEDR@ ( pin gpio -- ospeed )
     OSPEEDR @ swap 1 lshift rshift %11 and
   ;
 
   \ Get a GPIOx_OSPEEDR field
-  : PUPDR@ ( port gpio -- pupd )
+  : PUPDR@ ( pin gpio -- pupd )
     PUPDR @ swap 1 lshift rshift %11 and
   ;
 
   \ Get a GPIOx_AFRL field
-  : AFRL@ ( port gpio -- af )
+  : AFRL@ ( pin gpio -- af )
     AFRL @ swap 2 lshift rshift %1111 and
   ;
 
   \ Get a GPIOx_AFRH field
-  : AFRH@ ( port gpio -- af )
+  : AFRH@ ( pin gpio -- af )
     AFRH @ swap 8 - 2 lshift rshift %1111 and
   ;
 
   \ Get either a GPIOx_AFRL field or a GPIOx_AFRH field
-  : AFR@ ( port gpio -- af )
+  : AFR@ ( pin gpio -- af )
     over 8 >= if AFRH@ else AFRL@ then
   ;
 
-  \ Get an input for an GPIO port
-  : IDR@ ( port gpio -- input )
+  \ Get an input for an GPIO pin
+  : IDR@ ( pin gpio -- input )
     IDR @ swap rshift %1 and 0<>
   ;
 

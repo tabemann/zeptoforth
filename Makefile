@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-IDIR =src/include
+IDIR=src/include
 AS=arm-none-eabi-as
 LD=arm-none-eabi-ld
 COPY=arm-none-eabi-objcopy

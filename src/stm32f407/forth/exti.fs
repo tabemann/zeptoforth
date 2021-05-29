@@ -105,6 +105,16 @@ begin-module-once exti-module
     RCC_APB2LPENR_SYSCFGLPEN RCC_APB2LPENR bic!
   ;
 
+  \ Get whether the SYSCFG peripheral clock is enabled
+  : syscfg-clock-enable? ( -- enable )
+    RCC_APB2ENR_SYSCFGEN RCC_APB2ENR bit@
+  ;
+
+  \ Get whether the low-power SYSCFG peripheral clock is enabled
+  : syscfg-lp-clock-enable? ( -- enable )
+    RCC_APB2LPENR_SYSCFGLPEN RCC_APB2LPENR bit@
+  ;
+
   \ Set port for EXTI input
   : SYSCFG_EXTICRx! ( port exti -- )
     swap >r dup SYSCFG_EXTICRx
