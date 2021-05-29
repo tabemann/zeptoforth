@@ -76,7 +76,7 @@ begin-module-once temp-module
 
   \ Read the current temperature in degrees Celsius
   : read-temp-c ( -- f )
-    read-temp 0 swap 4096,0 f/ 256,0 f* 50,0 d-
+    read-temp 0 swap 16,0 f/ 50,0 d-
   ;
 
   \ Read the current temperature in degrees Fahrenheit
