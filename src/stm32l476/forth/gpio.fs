@@ -115,7 +115,7 @@ begin-module-once gpio-module
 
   \ Get whether a GPIO peripheral clock is enabled
   : gpio-clock-enable? ( gpio -- enable )
-    GPIO_Base - $400 / bit RCC_AHB1ENR bit@
+    GPIO_Base - $400 / bit RCC_AHB2ENR bit@
   ;
 
   \ Get whether a low-power GPIO peripheral clock is enabled
