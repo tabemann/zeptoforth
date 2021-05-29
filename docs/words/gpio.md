@@ -132,92 +132,102 @@ Disable the clock for the specified GPIO.
 
 Disable the low-power clock for the specified GPIO.
 
-##### `MODER!`
-( mode port gpio-addr -- )
+##### `gpio-clock-enable?`
+( gpio-addr -- enable )
 
-Set the specified mode for the specified port on the specified GPIO.
+Get whether the clock for the specified GPIO is enabled.
+
+##### `gpio-lp-clock-enable?`
+( gpio-addr -- enable )
+
+Get whether the low-power clock for the specified GPIO is enabled.
+
+##### `MODER!`
+( mode pin gpio-addr -- )
+
+Set the specified mode for the specified pin (from 0 to 15) on the specified GPIO.
 
 ##### `OTYPER!`
-( otype port gpio-addr -- )
+( otype pin gpio-addr -- )
 
-Set the specified output type for the specified port on the specified GPIO.
+Set the specified output type for the specified pin (from 0 to 15) on the specified GPIO.
 
 ##### `OSPEEDR!`
-( ospeed port gpio-addr -- )
+( ospeed pin gpio-addr -- )
 
-Set the specified output speed for the specified port on the specified GPIO.
+Set the specified output speed for the specified pin (from 0 to 15) on the specified GPIO.
 
 ##### `PUPDR!`
-( pupd port gpio-addr -- )
+( pupd pin gpio-addr -- )
 
-Set the specified pull up/pull down setting for the specified port on the specified GPIO.
+Set the specified pull up/pull down setting for the specified pin (from 0 to 15) on the specified GPIO.
 
 ##### `AFRL!`
-( af port gpio-addr -- )
+( af pin gpio-addr -- )
 
-Set the specified alternate function for the specified port (< 8) on the specified GPIO.
+Set the specified alternate function for the specified pin (from 0 to 7) on the specified GPIO.
 
 ##### `AFRH!`
-( af port gpio-addr -- )
+( af pin gpio-addr -- )
 
-Set the specified alternate function for the specified port (>= 8) on the specified GPIO.
+Set the specified alternate function for the specified pin (from 8 to 15) on the specified GPIO.
 
 ##### `AFR!`
-( af port gpio-addr -- )
+( af pin gpio-addr -- )
 
-Set the specified alternate function for the specified port (any) on the specified GPIO.
+Set the specified alternate function for the specified pin (from 0 to 15) on the specified GPIO.
 
 ##### `BS!`
-( port gpio-addr -- )
+( pin gpio-addr -- )
 
-Set the output for the specified port on the specified GPIO to on.
+Set the output for the specified pin (from 0 to 15) on the specified GPIO to on.
 
 ##### `BR!`
-( port gpio-addr -- )
+( pin gpio-addr -- )
 
-Set the output for the specified port on the specified GPIO to off.
+Set the output for the specified pin (from 0 to 15) on the specified GPIO to off.
 
 ##### `BSRR!`
-( output port gpio-addr -- )
+( output pin gpio-addr -- )
 
-Set the output for the specified port on the specified GPIO to on or off.
+Set the output for the specified pin (from 0 to 15) on the specified GPIO to on or off.
 
 ##### `MODER@`
-( port gpio-addr -- mode )
+( pin gpio-addr -- mode )
 
-Get the mode of the specified port on the specified GPIO.
+Get the mode of the specified pin (from 0 to 15) on the specified GPIO.
 
 ##### `OTYPER@`
-( port gpio-addr -- otype )
+( pin gpio-addr -- otype )
 
-Get the output type of the specified port on the specified GPIO.
+Get the output type of the specified pin (from 0 to 15) on the specified GPIO.
 
 ##### `OSPEEDR@`
-( port gpio-addr -- ospeed )
+( pin gpio-addr -- ospeed )
 
-Get the output speed of the specified port on the specified GPIO.
+Get the output speed of the specified pin (from 0 to 15) on the specified GPIO.
 
 ##### `PUPDR@`
-( port gpio-addr -- pupd )
+( pin gpio-addr -- pupd )
 
-Get the pull up/pull down setting of the specified port on the specified GPIO.
+Get the pull up/pull down setting of the specified pin (from 0 to 15) on the specified GPIO.
 
 ##### `AFRL@`
-( port gpio-addr -- af )
+( pin gpio-addr -- af )
 
-Get the alternate function for the specified port (< 8) on the specified GPIO.
+Get the alternate function for the specified pin (from 0 to 7) on the specified GPIO.
 
 ##### `AFRH@`
-( port gpio-addr -- af )
+( pin gpio-addr -- af )
 
-Get the alternate function for the specified port (>= 8) on the specified GPIO.
+Get the alternate function for the specified pin (from 8 to 15) on the specified GPIO.
 
 ##### `AFR@`
-( port gpio-addr -- af )
+( pin gpio-addr -- af )
 
-Get the alternate function for the specified port (any) on the specified GPIO.
+Get the alternate function for the specified pin (from 0 to 15) on the specified GPIO.
 
 ##### `IDR@`
-( port gpio-addr -- input )
+( pin gpio-addr -- input )
 
-Get the input for the specified port on the specified GPIO.
+Get the input for the specified pin (from 0 to 15) on the specified GPIO.
