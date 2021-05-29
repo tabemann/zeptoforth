@@ -1,0 +1,155 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Block Editor &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="swdcom Words" href="swd.html" />
+    <link rel="prev" title="Block words" href="block.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="block-editor">
+<h1>Block Editor<a class="headerlink" href="#block-editor" title="Permalink to this headline">¶</a></h1>
+<p>The block editor provides a simple interface for allowing the user to edit blocks stored in the Quad SPI flash on supported devices, currently the STM32F746 DISCOVERY board. When in use, the following keys can be used to control editing:</p>
+<ul class="simple">
+<li><p>Backspace: delete the character to the left of the cursor</p></li>
+<li><p>Delete: delete the character under the cursor</p></li>
+<li><p>Tab: insert one or two spaces, depending on whether the cursor is on an odd or an even column (starting from column 0)</p></li>
+<li><p>Up: move the cursor one line up</p></li>
+<li><p>Down: move the cursor one line down</p></li>
+<li><p>Newline: move the cursor to the start of the next line, or if the cursor was at the last line, change to the next block and move the cursor to the start of the first line</p></li>
+<li><p>Left / Control-B: move the cursor one character to the left</p></li>
+<li><p>Right / ControlF: move the cursor one character to the right</p></li>
+<li><p>Control-A: move the cursor to the start of the input</p></li>
+<li><p>Control-E: move the cursor to the end of the input</p></li>
+<li><p>Control-N: change to the next block</p></li>
+<li><p>Control-P: change to the previous block</p></li>
+<li><p>Control-U: insert a line above the current line</p></li>
+<li><p>Control-K: if the current line is empty, delete it, else delete the current line’s contents</p></li>
+<li><p>Control-W: save the current block</p></li>
+<li><p>Control-X: revert the current block</p></li>
+<li><p>Control-V: exit the editor, saving all modified blocks</p></li>
+</ul>
+<p>Note that tabs (which are treated as being of two spaces wide due to the limited space available in blocks) and characters of code points greater than 127 are handled correctly. Also note that only nine blocks (currently) are stored in memory, and if a modified block is removed from memory it is automatically saved.</p>
+<p>The block editor is not included in the default builds; the user must load <code class="docutils literal notranslate"><span class="pre">src/common/stm32f746/edit.fs</span></code> or use an STM32F746 big build for it to be available. Note that logic is in place to ensure that it is not loaded multiple times. It also requires <code class="docutils literal notranslate"><span class="pre">src/stm32f746/forth/qspi.fs</span></code> and <code class="docutils literal notranslate"><span class="pre">src/stm32f746/forth/block.fs</span></code> to be loaded before it is loaded.  Note that it is compiled into flash and reboots the MCU when it is loaded.</p>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">forth-module</span></code>:</p>
+<div class="section" id="edit">
+<h2><code class="docutils literal notranslate"><span class="pre">edit</span></code><a class="headerlink" href="#edit" title="Permalink to this headline">¶</a></h2>
+<p>( id – )</p>
+<p>Open the block editor for the given block; note that adjacent blocks are also automatically loaded into memory</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schedule.html">Scheduling Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="allocate.html">Allocator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Block Editor</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#edit"><code class="docutils literal notranslate"><span class="pre">edit</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="swd.html"><code class="docutils literal notranslate"><span class="pre">swdcom</span></code> Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="led.html">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test.html">Testing Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="block.html" title="previous chapter">Block words</a></li>
+      <li>Next: <a href="swd.html" title="next chapter"><code class="docutils literal notranslate"><span class="pre">swdcom</span></code> Words</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Travis Bemann.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.4.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="../_sources/words/edit.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

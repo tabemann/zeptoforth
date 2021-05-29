@@ -1,0 +1,311 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Exposed Kernel Variables &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Compilation-specific words" href="asm.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="exposed-kernel-variables">
+<h1>Exposed Kernel Variables<a class="headerlink" href="#exposed-kernel-variables" title="Permalink to this headline">¶</a></h1>
+<p>Thes words are in <code class="docutils literal notranslate"><span class="pre">forth-module</span></code>.</p>
+<div class="section" id="state">
+<h2><code class="docutils literal notranslate"><span class="pre">state</span></code><a class="headerlink" href="#state" title="Permalink to this headline">¶</a></h2>
+<p>Get the STATE variable address</p>
+</div>
+<div class="section" id="base">
+<h2><code class="docutils literal notranslate"><span class="pre">base</span></code><a class="headerlink" href="#base" title="Permalink to this headline">¶</a></h2>
+<p>Get the BASE variable address</p>
+</div>
+<div class="section" id="pause-enabled">
+<h2><code class="docutils literal notranslate"><span class="pre">pause-enabled</span></code><a class="headerlink" href="#pause-enabled" title="Permalink to this headline">¶</a></h2>
+<p>Get the PAUSE enabled variable address</p>
+</div>
+<div class="section" id="dict-base">
+<h2><code class="docutils literal notranslate"><span class="pre">dict-base</span></code><a class="headerlink" href="#dict-base" title="Permalink to this headline">¶</a></h2>
+<p>Get the RAM dictionary base variable address</p>
+</div>
+<div class="section" id="ram-base">
+<h2><code class="docutils literal notranslate"><span class="pre">ram-base</span></code><a class="headerlink" href="#ram-base" title="Permalink to this headline">¶</a></h2>
+<p>Get the RAM base</p>
+</div>
+<div class="section" id="ram-end">
+<h2><code class="docutils literal notranslate"><span class="pre">ram-end</span></code><a class="headerlink" href="#ram-end" title="Permalink to this headline">¶</a></h2>
+<p>Get the RAM end</p>
+</div>
+<div class="section" id="flash-base">
+<h2><code class="docutils literal notranslate"><span class="pre">flash-base</span></code><a class="headerlink" href="#flash-base" title="Permalink to this headline">¶</a></h2>
+<p>Get the flash base</p>
+</div>
+<div class="section" id="flash-end">
+<h2><code class="docutils literal notranslate"><span class="pre">flash-end</span></code><a class="headerlink" href="#flash-end" title="Permalink to this headline">¶</a></h2>
+<p>Get the flash end</p>
+</div>
+<div class="section" id="stack-base">
+<h2><code class="docutils literal notranslate"><span class="pre">stack-base</span></code><a class="headerlink" href="#stack-base" title="Permalink to this headline">¶</a></h2>
+<p>Get the current stack base variable address</p>
+</div>
+<div class="section" id="stack-end">
+<h2><code class="docutils literal notranslate"><span class="pre">stack-end</span></code><a class="headerlink" href="#stack-end" title="Permalink to this headline">¶</a></h2>
+<p>Get the current stack end variable address</p>
+</div>
+<div class="section" id="rstack-base">
+<h2><code class="docutils literal notranslate"><span class="pre">rstack-base</span></code><a class="headerlink" href="#rstack-base" title="Permalink to this headline">¶</a></h2>
+<p>Get the current return stack base variable address</p>
+</div>
+<div class="section" id="rstack-end">
+<h2><code class="docutils literal notranslate"><span class="pre">rstack-end</span></code><a class="headerlink" href="#rstack-end" title="Permalink to this headline">¶</a></h2>
+<p>Get the current returns stack end variable address</p>
+</div>
+<div class="section" id="handler">
+<h2><code class="docutils literal notranslate"><span class="pre">handler</span></code><a class="headerlink" href="#handler" title="Permalink to this headline">¶</a></h2>
+<p>Get the current exception handler variable address</p>
+</div>
+<div class="section" id="parse">
+<h2><code class="docutils literal notranslate"><span class="pre">&gt;parse</span></code><a class="headerlink" href="#parse" title="Permalink to this headline">¶</a></h2>
+<p>The parse index</p>
+</div>
+<div class="section" id="source">
+<h2><code class="docutils literal notranslate"><span class="pre">source</span></code><a class="headerlink" href="#source" title="Permalink to this headline">¶</a></h2>
+<p>The source info</p>
+</div>
+<div class="section" id="build-target">
+<h2><code class="docutils literal notranslate"><span class="pre">build-target</span></code><a class="headerlink" href="#build-target" title="Permalink to this headline">¶</a></h2>
+<p>Get the address to store a literal in for the word currently being
+built</p>
+</div>
+<div class="section" id="sys-ram-dict-base">
+<h2><code class="docutils literal notranslate"><span class="pre">sys-ram-dict-base</span></code><a class="headerlink" href="#sys-ram-dict-base" title="Permalink to this headline">¶</a></h2>
+<p>Get the base of the system RAM dictionary space</p>
+</div>
+<div class="section" id="in">
+<h2><code class="docutils literal notranslate"><span class="pre">&gt;in</span></code><a class="headerlink" href="#in" title="Permalink to this headline">¶</a></h2>
+<p>The input buffer index</p>
+</div>
+<div class="section" id="input">
+<h2><code class="docutils literal notranslate"><span class="pre">input#</span></code><a class="headerlink" href="#input" title="Permalink to this headline">¶</a></h2>
+<p>The input buffer count</p>
+</div>
+<div class="section" id="id1">
+<h2><code class="docutils literal notranslate"><span class="pre">input</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>The input buffer</p>
+</div>
+<div class="section" id="order-count">
+<h2><code class="docutils literal notranslate"><span class="pre">order-count</span></code><a class="headerlink" href="#order-count" title="Permalink to this headline">¶</a></h2>
+<p>The wordlist count</p>
+</div>
+<div class="section" id="order">
+<h2><code class="docutils literal notranslate"><span class="pre">order</span></code><a class="headerlink" href="#order" title="Permalink to this headline">¶</a></h2>
+<p>The wordlist order</p>
+</div>
+<div class="section" id="prompt-hook">
+<h2><code class="docutils literal notranslate"><span class="pre">prompt-hook</span></code><a class="headerlink" href="#prompt-hook" title="Permalink to this headline">¶</a></h2>
+<p>The prompt hook</p>
+</div>
+<div class="section" id="handle-number-hook">
+<h2><code class="docutils literal notranslate"><span class="pre">handle-number-hook</span></code><a class="headerlink" href="#handle-number-hook" title="Permalink to this headline">¶</a></h2>
+<p>The handle number hook</p>
+</div>
+<div class="section" id="failed-parse-hook">
+<h2><code class="docutils literal notranslate"><span class="pre">failed-parse-hook</span></code><a class="headerlink" href="#failed-parse-hook" title="Permalink to this headline">¶</a></h2>
+<p>The failed parse hook</p>
+</div>
+<div class="section" id="emit-hook">
+<h2><code class="docutils literal notranslate"><span class="pre">emit-hook</span></code><a class="headerlink" href="#emit-hook" title="Permalink to this headline">¶</a></h2>
+<p>The emit hook</p>
+</div>
+<div class="section" id="id2">
+<h2><code class="docutils literal notranslate"><span class="pre">emit?-hook</span></code><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p>The emit? hook</p>
+</div>
+<div class="section" id="key-hook">
+<h2><code class="docutils literal notranslate"><span class="pre">key-hook</span></code><a class="headerlink" href="#key-hook" title="Permalink to this headline">¶</a></h2>
+<p>The key hook</p>
+</div>
+<div class="section" id="id3">
+<h2><code class="docutils literal notranslate"><span class="pre">key?-hook</span></code><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<p>The key? hook</p>
+</div>
+<div class="section" id="refill-hook">
+<h2><code class="docutils literal notranslate"><span class="pre">refill-hook</span></code><a class="headerlink" href="#refill-hook" title="Permalink to this headline">¶</a></h2>
+<p>The refill hook</p>
+</div>
+<div class="section" id="pause-hook">
+<h2><code class="docutils literal notranslate"><span class="pre">pause-hook</span></code><a class="headerlink" href="#pause-hook" title="Permalink to this headline">¶</a></h2>
+<p>The pause hook</p>
+</div>
+<div class="section" id="validate-dict-hook">
+<h2><code class="docutils literal notranslate"><span class="pre">validate-dict-hook</span></code><a class="headerlink" href="#validate-dict-hook" title="Permalink to this headline">¶</a></h2>
+<p>The dictionary size validation hook</p>
+</div>
+<div class="section" id="fault-handler-hook">
+<h2><code class="docutils literal notranslate"><span class="pre">fault-handler-hook</span></code><a class="headerlink" href="#fault-handler-hook" title="Permalink to this headline">¶</a></h2>
+<p>Get the FAULT-HANDLER-HOOK variable address</p>
+</div>
+<div class="section" id="null-handler-hook">
+<h2><code class="docutils literal notranslate"><span class="pre">null-handler-hook</span></code><a class="headerlink" href="#null-handler-hook" title="Permalink to this headline">¶</a></h2>
+<p>Get the NULL-HANDLER-HOOK variable address</p>
+</div>
+<div class="section" id="svcall-handler-hook">
+<h2><code class="docutils literal notranslate"><span class="pre">svcall-handler-hook</span></code><a class="headerlink" href="#svcall-handler-hook" title="Permalink to this headline">¶</a></h2>
+<p>Get the SVCALL-HANDLER-HOOK variable address</p>
+</div>
+<div class="section" id="pendsv-handler-hook">
+<h2><code class="docutils literal notranslate"><span class="pre">pendsv-handler-hook</span></code><a class="headerlink" href="#pendsv-handler-hook" title="Permalink to this headline">¶</a></h2>
+<p>Get the PENDSV-HANDLER-HOOK variable address</p>
+</div>
+<div class="section" id="systick-handler-hook">
+<h2><code class="docutils literal notranslate"><span class="pre">systick-handler-hook</span></code><a class="headerlink" href="#systick-handler-hook" title="Permalink to this headline">¶</a></h2>
+<p>Get the SYSTICK-HANDLER-HOOK variable address</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schedule.html">Scheduling Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="allocate.html">Allocator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="edit.html">Block Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="swd.html"><code class="docutils literal notranslate"><span class="pre">swdcom</span></code> Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="led.html">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test.html">Testing Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Exposed Kernel Variables</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#state"><code class="docutils literal notranslate"><span class="pre">state</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#base"><code class="docutils literal notranslate"><span class="pre">base</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pause-enabled"><code class="docutils literal notranslate"><span class="pre">pause-enabled</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dict-base"><code class="docutils literal notranslate"><span class="pre">dict-base</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ram-base"><code class="docutils literal notranslate"><span class="pre">ram-base</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ram-end"><code class="docutils literal notranslate"><span class="pre">ram-end</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#flash-base"><code class="docutils literal notranslate"><span class="pre">flash-base</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#flash-end"><code class="docutils literal notranslate"><span class="pre">flash-end</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#stack-base"><code class="docutils literal notranslate"><span class="pre">stack-base</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#stack-end"><code class="docutils literal notranslate"><span class="pre">stack-end</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rstack-base"><code class="docutils literal notranslate"><span class="pre">rstack-base</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rstack-end"><code class="docutils literal notranslate"><span class="pre">rstack-end</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#handler"><code class="docutils literal notranslate"><span class="pre">handler</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#parse"><code class="docutils literal notranslate"><span class="pre">&gt;parse</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#source"><code class="docutils literal notranslate"><span class="pre">source</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#build-target"><code class="docutils literal notranslate"><span class="pre">build-target</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sys-ram-dict-base"><code class="docutils literal notranslate"><span class="pre">sys-ram-dict-base</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#in"><code class="docutils literal notranslate"><span class="pre">&gt;in</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#input"><code class="docutils literal notranslate"><span class="pre">input#</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">input</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#order-count"><code class="docutils literal notranslate"><span class="pre">order-count</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#order"><code class="docutils literal notranslate"><span class="pre">order</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prompt-hook"><code class="docutils literal notranslate"><span class="pre">prompt-hook</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#handle-number-hook"><code class="docutils literal notranslate"><span class="pre">handle-number-hook</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#failed-parse-hook"><code class="docutils literal notranslate"><span class="pre">failed-parse-hook</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#emit-hook"><code class="docutils literal notranslate"><span class="pre">emit-hook</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">emit?-hook</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#key-hook"><code class="docutils literal notranslate"><span class="pre">key-hook</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3"><code class="docutils literal notranslate"><span class="pre">key?-hook</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#refill-hook"><code class="docutils literal notranslate"><span class="pre">refill-hook</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pause-hook"><code class="docutils literal notranslate"><span class="pre">pause-hook</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#validate-dict-hook"><code class="docutils literal notranslate"><span class="pre">validate-dict-hook</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fault-handler-hook"><code class="docutils literal notranslate"><span class="pre">fault-handler-hook</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#null-handler-hook"><code class="docutils literal notranslate"><span class="pre">null-handler-hook</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#svcall-handler-hook"><code class="docutils literal notranslate"><span class="pre">svcall-handler-hook</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pendsv-handler-hook"><code class="docutils literal notranslate"><span class="pre">pendsv-handler-hook</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#systick-handler-hook"><code class="docutils literal notranslate"><span class="pre">systick-handler-hook</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="asm.html" title="previous chapter">Compilation-specific words</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Travis Bemann.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.4.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="../_sources/words/expose.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

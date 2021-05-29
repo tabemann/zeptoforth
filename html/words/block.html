@@ -1,0 +1,230 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Block words &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Block Editor" href="edit.html" />
+    <link rel="prev" title="Quad SPI words" href="qspi.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="block-words">
+<h1>Block words<a class="headerlink" href="#block-words" title="Permalink to this headline">¶</a></h1>
+<p>The block interface is written for the STM32F746 DISCOVERY board. It provides a convenient interface for turning the Quad SPI flash functionality into a map of block id’s to 1K blocks of memory.</p>
+<p>The block interface is not included in the default builds; the user must load <code class="docutils literal notranslate"><span class="pre">src/stm32f746/forth/block.fs</span></code> or use an STM32F746 big build for it to be available. Note that logic is in place to ensure that it is not loaded multiple times. It also requires <code class="docutils literal notranslate"><span class="pre">src/stm32f746/forth/qspi.fs</span></code> to be loaded before it is loaded. When it is loaded it reboots the MCU to carry out initialization.</p>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">forth-module</span></code>:</p>
+<div class="section" id="load">
+<h2><code class="docutils literal notranslate"><span class="pre">load</span></code><a class="headerlink" href="#load" title="Permalink to this headline">¶</a></h2>
+<p>( id – )</p>
+<p>Evaluate each 64-byte line in a block with the given id from first to last; if the block does not exist <code class="docutils literal notranslate"><span class="pre">x-block-not-found</span></code> is raised.</p>
+</div>
+<div class="section" id="load-range">
+<h2><code class="docutils literal notranslate"><span class="pre">load-range</span></code><a class="headerlink" href="#load-range" title="Permalink to this headline">¶</a></h2>
+<p>( start-id end-id – )</p>
+<p>Evaluate each 64-byte line from first to last in each block, if it exists, in the range from <code class="docutils literal notranslate"><span class="pre">start-id</span></code> to <code class="docutils literal notranslate"><span class="pre">end-id</span></code>.</p>
+</div>
+<div class="section" id="list">
+<h2><code class="docutils literal notranslate"><span class="pre">list</span></code><a class="headerlink" href="#list" title="Permalink to this headline">¶</a></h2>
+<p>( id – )</p>
+<p>Display each 64-byte line in a block with the given id from first to last; if the block does not exist <code class="docutils literal notranslate"><span class="pre">x-block-not-found</span></code> is raised.</p>
+</div>
+<div class="section" id="list-range">
+<h2><code class="docutils literal notranslate"><span class="pre">list-range</span></code><a class="headerlink" href="#list-range" title="Permalink to this headline">¶</a></h2>
+<p>( start-id end-id – )</p>
+<p>Display each 64-byte line from first to last in each block, if it exists, in the range from <code class="docutils literal notranslate"><span class="pre">start-id</span></code> to <code class="docutils literal notranslate"><span class="pre">end-id</span></code>.</p>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">block-module</span></code>:</p>
+</div>
+<div class="section" id="block-size">
+<h2><code class="docutils literal notranslate"><span class="pre">block-size</span></code><a class="headerlink" href="#block-size" title="Permalink to this headline">¶</a></h2>
+<p>( –  bytes )</p>
+<p>The block size in bytes, currently 1024 bytes.</p>
+</div>
+<div class="section" id="x-invalid-block-id">
+<h2><code class="docutils literal notranslate"><span class="pre">x-invalid-block-id</span></code><a class="headerlink" href="#x-invalid-block-id" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>Exception raised when an invalid block id (presently only $FFFFFFFF) is used.</p>
+</div>
+<div class="section" id="x-block-write-fail">
+<h2><code class="docutils literal notranslate"><span class="pre">x-block-write-fail</span></code><a class="headerlink" href="#x-block-write-fail" title="Permalink to this headline">¶</a></h2>
+<p>Exception when <code class="docutils literal notranslate"><span class="pre">block!</span></code> is unable to write a given block, due to no free space being available and not being unable to free up space due to no completely used sectors existing.</p>
+</div>
+<div class="section" id="x-block-not-found">
+<h2><code class="docutils literal notranslate"><span class="pre">x-block-not-found</span></code><a class="headerlink" href="#x-block-not-found" title="Permalink to this headline">¶</a></h2>
+<p>Exception when attempting to delete, load, or list a nonexistent block.</p>
+</div>
+<div class="section" id="find-block">
+<h2><code class="docutils literal notranslate"><span class="pre">find-block</span></code><a class="headerlink" href="#find-block" title="Permalink to this headline">¶</a></h2>
+<p>( id – addr | 0 )</p>
+<p>Find a block in the memory-mapped Quad SPI flash space by id, or return 0 if no such block can be found.</p>
+</div>
+<div class="section" id="block">
+<h2><code class="docutils literal notranslate"><span class="pre">block?</span></code><a class="headerlink" href="#block" title="Permalink to this headline">¶</a></h2>
+<p>( id – flag )</p>
+<p>Return whether a block by a given id exists.</p>
+</div>
+<div class="section" id="id1">
+<h2><code class="docutils literal notranslate"><span class="pre">block!</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>( addr id – )</p>
+<p>Attempt to write a the 1K buffer at the specified address to a block with a given id; this may fail and raise <code class="docutils literal notranslate"><span class="pre">x-block-write-fail</span></code>. Note that this is not friendly to realtime performance, especially when it has to reclaim existing used sectors</p>
+</div>
+<div class="section" id="copy-block">
+<h2><code class="docutils literal notranslate"><span class="pre">copy-block</span></code><a class="headerlink" href="#copy-block" title="Permalink to this headline">¶</a></h2>
+<p>( src-id dest-id – )</p>
+<p>Copy the block with id <code class="docutils literal notranslate"><span class="pre">src-id</span></code> to <code class="docutils literal notranslate"><span class="pre">dest-id</span></code>; if the block does not exist, delete <code class="docutils literal notranslate"><span class="pre">dest-id</span></code></p>
+</div>
+<div class="section" id="copy-blocks">
+<h2><code class="docutils literal notranslate"><span class="pre">copy-blocks</span></code><a class="headerlink" href="#copy-blocks" title="Permalink to this headline">¶</a></h2>
+<p>( src-id dest-id count – )</p>
+<p>Copy <code class="docutils literal notranslate"><span class="pre">count-blocks</span></code> from the sequence of blocks starting with id <code class="docutils literal notranslate"><span class="pre">src-id</span></code> to the sequence of blocks starting with id <code class="docutils literal notranslate"><span class="pre">dest-id</span></code>; note that nonexistent blocks in the first range resulting in the corresponding blocks in the second range being deleted, and overlapping ranges of blocks are treated correctly.</p>
+</div>
+<div class="section" id="insert-blocks">
+<h2><code class="docutils literal notranslate"><span class="pre">insert-blocks</span></code><a class="headerlink" href="#insert-blocks" title="Permalink to this headline">¶</a></h2>
+<p>( start-id count – )</p>
+<p>Insert <code class="docutils literal notranslate"><span class="pre">count</span></code> nonexistent blocks starting at id <code class="docutils literal notranslate"><span class="pre">start-id</span></code>, displacing any extant blocks in that range to higher ids (note that nonexistent blocks are ignored and may be eliminated in the process).</p>
+</div>
+<div class="section" id="delete-block">
+<h2><code class="docutils literal notranslate"><span class="pre">delete-block</span></code><a class="headerlink" href="#delete-block" title="Permalink to this headline">¶</a></h2>
+<p>( id – )</p>
+<p>Attempt to delete a block with the given id; if the block does not exist, <code class="docutils literal notranslate"><span class="pre">x-block-not-found</span></code> is raised.</p>
+</div>
+<div class="section" id="delete-blocks">
+<h2><code class="docutils literal notranslate"><span class="pre">delete-blocks</span></code><a class="headerlink" href="#delete-blocks" title="Permalink to this headline">¶</a></h2>
+<p>( start-id count – )</p>
+<p>Delete <code class="docutils literal notranslate"><span class="pre">count</span></code> blocks starting with id <code class="docutils literal notranslate"><span class="pre">start-id</span></code> ascending; note that non-existent blocks are ignored.</p>
+</div>
+<div class="section" id="erase-all-blocks">
+<h2><code class="docutils literal notranslate"><span class="pre">erase-all-blocks</span></code><a class="headerlink" href="#erase-all-blocks" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>Erase all blocks. Note that this is not friendly to realtime performance.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schedule.html">Scheduling Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="allocate.html">Allocator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Block words</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#load"><code class="docutils literal notranslate"><span class="pre">load</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#load-range"><code class="docutils literal notranslate"><span class="pre">load-range</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#list"><code class="docutils literal notranslate"><span class="pre">list</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#list-range"><code class="docutils literal notranslate"><span class="pre">list-range</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#block-size"><code class="docutils literal notranslate"><span class="pre">block-size</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#x-invalid-block-id"><code class="docutils literal notranslate"><span class="pre">x-invalid-block-id</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#x-block-write-fail"><code class="docutils literal notranslate"><span class="pre">x-block-write-fail</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#x-block-not-found"><code class="docutils literal notranslate"><span class="pre">x-block-not-found</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#find-block"><code class="docutils literal notranslate"><span class="pre">find-block</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#block"><code class="docutils literal notranslate"><span class="pre">block?</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">block!</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#copy-block"><code class="docutils literal notranslate"><span class="pre">copy-block</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#copy-blocks"><code class="docutils literal notranslate"><span class="pre">copy-blocks</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#insert-blocks"><code class="docutils literal notranslate"><span class="pre">insert-blocks</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#delete-block"><code class="docutils literal notranslate"><span class="pre">delete-block</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#delete-blocks"><code class="docutils literal notranslate"><span class="pre">delete-blocks</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#erase-all-blocks"><code class="docutils literal notranslate"><span class="pre">erase-all-blocks</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="edit.html">Block Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="swd.html"><code class="docutils literal notranslate"><span class="pre">swdcom</span></code> Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="led.html">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test.html">Testing Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="qspi.html" title="previous chapter">Quad SPI words</a></li>
+      <li>Next: <a href="edit.html" title="next chapter">Block Editor</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Travis Bemann.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.4.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="../_sources/words/block.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
