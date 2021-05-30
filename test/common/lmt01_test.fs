@@ -26,70 +26,101 @@ begin-module-once temp-module
   import task-module
   import systick-module
 
-  \ The temperature
-  variable temp
+  \ A sensor structure
+  begin-structure sensor-size
+    \ The sensor GPIO
+    field: sensor-gpio
 
-  \ Whether the temperature has been read
-  variable temp-read?
+    \ The sensor pin
+    field: sensor-pin
+    
+    \ The temperature
+    field: temp
 
-  \ Whether there is a temperature-reading error
-  variable temp-error?
+    \ Whether the temperature has been re ad
+    field: temp-read?
+
+    \ Whether there is a temperature-reading error
+    field: temp-error?
+  end-structure
+  
+  \ The sensor count
+  3 constant sensor-count
+
+  \ The sensors
+  sensor-count sensor-size * buffer: sensors
   
   \ The temperature counter
   variable temp-count
-
+  
   \ The temperature task
   variable temp-task
 
   \ The EXTI 2 handler
   : handle-exti-2 ( -- ) 2 EXTI_PR! 1 temp-count +! ;
 
+  \ Get the sensor for an index
+  : sensor ( sensor -- addr ) sensor-size * sensors + ;
+  
   \ The temperature tracker
   : temp-tracker ( -- )
     begin
-      0 temp-count !
-      true 2 EXTI_IMR!
-      true 3 GPIOE BSRR!
-      104 systick-divisor * systick-counter current-task set-task-delay pause
-      false 3 GPIOE BSRR!
-      false 2 EXTI_IMR!
-      temp-count @ dup temp ! 0<> if
-	true temp-read? !
-	false temp-error? !
-      else
-	false temp-read? !
-	true temp-error? !
-      then
-      104 systick-divisor * systick-counter current-task set-task-delay pause
+      sensor-count 0 ?do
+	0 temp-count !
+	true 2 EXTI_IMR!
+	OUTPUT_MODE i sensor sensor-pin @ i sensor sensor-gpio @ MODER!
+	true i sensor sensor-pin @ i sensor sensor-gpio @ BSRR!
+	104 systick-divisor * systick-counter current-task set-task-delay pause
+	false i sensor sensor-pin @ i sensor sensor-gpio @ BSRR!
+	INPUT_MODE i sensor sensor-pin @ i sensor sensor-gpio @ MODER!
+	false 2 EXTI_IMR!
+	temp-count @ dup i sensor temp ! 0<> if
+	  true i sensor temp-read? !
+	  false i sensor temp-error? !
+	else
+	  false i sensor temp-read? !
+	  true i sensor temp-error? !
+	then
+\	104 systick-divisor * systick-counter current-task set-task-delay pause
+      loop
     again
   ;
 
   \ Temperature error exception
   : x-temp-error space ." temperature error" cr ;
+
+  \ Bad temperature sensor index exception
+  : x-sensor-out-of-range space ." out of range sensor index" cr ;
   
   \ Read the current temperature
-  : read-temp ( -- u )
-    [: temp-read? @ temp-error? @ or ;] wait
-    temp-error? @ triggers x-temp-error
+  : read-temp ( sensor -- u )
+    dup sensor-count u>= triggers x-sensor-out-of-range
+    sensor
+    begin dup temp-read? @ over temp-error? @ or not while pause repeat
+    dup temp-error? @ triggers x-temp-error
     temp @
   ;
 
   \ Read the current temperature in degrees Celsius
-  : read-temp-c ( -- f )
-    read-temp 0 swap 16,0 f/ 50,0 d-
-  ;
+  : read-temp-c ( sensor -- f ) read-temp 0 swap 16,0 f/ 50,0 d- ;
 
   \ Read the current temperature in degrees Fahrenheit
-  : read-temp-f ( -- f )
-    read-temp-c 1,8 f* 32,0 d+
+  : read-temp-f ( sensor -- f ) read-temp-c 1,8 f* 32,0 d+ ;
+
+  \ Set a sensor's GPIO and pin
+  : sensor! ( pin gpio sensor -- ) sensor rot over sensor-pin ! sensor-gpio ! ;
+
+  \ Initialize the sensors
+  : init-sensors ( -- )
+    sensor-count 0 ?do
+      0 i sensor temp !
+      false i sensor temp-read? !
+      false i sensor temp-error? !
+    loop
   ;
   
   \ Initialize the temperature sensor
   : init-temp ( -- )
-    0 temp !
-    0 temp-count !
-    false temp-read? !
-    false temp-error? !
     false 2 EXTI_IMR!
     false 2 EXTI_EMR!
     EXTI_2 NVIC_ICER_CLRENA!
@@ -97,8 +128,10 @@ begin-module-once temp-module
     INPUT_MODE 2 GPIOE MODER!
     PULL_UP 2 GPIOE PUPDR!
     VERY_HIGH_SPEED 2 GPIOE OSPEEDR!
-    OUTPUT_MODE 3 GPIOE MODER!
-    false 3 GPIOE BSRR!
+    3 GPIOE 0 sensor!
+    4 GPIOE 1 sensor!
+    5 GPIOE 2 sensor!
+    init-sensors
     PE 2 SYSCFG_EXTICRx!
     ['] handle-exti-2 exti-2-handler-hook !
     0 EXTI_2 NVIC_IPR_IP!
