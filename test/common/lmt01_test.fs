@@ -142,4 +142,26 @@ begin-module-once temp-module
     temp-task @ run
   ;
 
+  \ Display temperatures repeatedly
+  : display-temps ( -- )
+    begin
+      3 0 ?do
+	i read-temp-c i read-temp-f i read-temp
+	cr ." Temperature" i . ." :" . space ." pulses"
+	f. space ." °C" f. space ." °F"
+      loop
+      1000 ms
+    again
+  ;
+
+  \ Display temperatures repeatedly task
+  variable display-temps-task
+
+  \ Start displaying temperatures repeatedly
+  : start-display-temps ( -- )
+    0 ['] display-temps 256 256 256 spawn display-temps-task !
+    0 display-temps-task @ set-task-priority
+    display-temps-task @ run
+  ;
+
 end-module
