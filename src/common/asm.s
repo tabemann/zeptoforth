@@ -569,6 +569,12 @@ _asm_inline:
 	pull_tos
 	bl _asm_fold_store_4
 	pop {pc}
+1:	ldr r0, =_pick
+	cmp tos, r0
+	bne 1f
+	pull_tos
+	bl _asm_fold_pick
+	pop {pc}
 1:	bl _asm_undefer_lit
 	bl _asm_do_inline
 	pop {pc}
@@ -984,6 +990,39 @@ _asm_fold_store_4:
 	pop {pc}
 	end_inlined
 
+	@@ Constant fold PICK
+	define_internal_word "fold-pick", visible_flag
+_asm_fold_pick:
+	push {lr}
+	ldr r0, =deferred_literal
+	ldr r0, [r0]
+	cmp r0, #0x1F
+	bhi 1f
+	push_tos
+	movs tos, #6
+	push {r0}
+	bl _asm_push
+	pop {r0}
+	cmp r0, #0
+	beq 2f
+	push_tos
+	lsls tos, r0, #2
+	push_tos
+	movs tos, #7
+	push_tos
+	movs tos, #6
+	bl _asm_ldr_imm
+2:	ldr r1, =literal_deferred_q
+	movs r2, #0
+	str r2, [r1]
+	pop {pc}
+1:	bl _asm_undefer_lit
+	push_tos
+	ldr tos, =_pick
+	bl _asm_do_inline
+	pop {pc}
+	end_inlined
+	
 	@@ Actually inline a word
 	define_internal_word "do-inline,", visible_flag
 _asm_do_inline:
