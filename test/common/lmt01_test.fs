@@ -146,7 +146,7 @@ begin-module-once temp-module
   : display-temps ( -- )
     begin
       3 0 ?do
-	i read-temp-c i read-temp-f i read-temp
+	i read-temp-f i read-temp-c i read-temp
 	cr ." Temperature" i . ." :" . space ." pulses"
 	f. space ." °C" f. space ." °F"
       loop
