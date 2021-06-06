@@ -142,24 +142,27 @@ begin-module-once temp-module
     temp-task @ run
   ;
 
+  \ Display temperatures for a number of sensors
+  : display-temp ( sensor -- )
+    dup sensor-count u>= triggers x-sensor-out-of-range
+    >r r@ read-temp-f r@ read-temp-c r@ read-temp
+    cr ." Temperature" r> . ." :" . space ." pulses"
+    f. space ." °C" f. space ." °F"
+  ;
+
   \ Display temperatures repeatedly
-  : display-temps ( -- )
-    begin
-      3 0 ?do
-	i read-temp-f i read-temp-c i read-temp
-	cr ." Temperature" i . ." :" . space ." pulses"
-	f. space ." °C" f. space ." °F"
-      loop
-      1000 ms
-    again
+  : display-temps ( count -- )
+    dup sensor-count u> triggers x-sensor-out-of-range
+    begin dup 0 ?do i display-temp loop 1000 ms again
   ;
 
   \ Display temperatures repeatedly task
   variable display-temps-task
 
   \ Start displaying temperatures repeatedly
-  : start-display-temps ( -- )
-    0 ['] display-temps 256 256 256 spawn display-temps-task !
+  : start-display-temps ( count -- )
+    dup sensor-count u> triggers x-sensor-out-of-range
+    1 ['] display-temps 256 256 256 spawn display-temps-task !
     0 display-temps-task @ set-task-priority
     display-temps-task @ run
   ;
