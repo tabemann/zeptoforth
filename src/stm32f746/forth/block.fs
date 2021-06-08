@@ -100,10 +100,10 @@ begin-import-module-once block-module
     ;
 
     \ Get the free count for a sector
-    : free-count@ ( index -- count ) sector-free-map + b@ ;
+    : free-count@ ( index -- count ) sector-free-map + c@ ;
 
     \ Get the old count for a sector
-    : old-count@ ( index -- count ) sector-old-map + b@ ;
+    : old-count@ ( index -- count ) sector-old-map + c@ ;
 
     \ Get the new count for a sector
     : new-count ( index -- count )
@@ -111,16 +111,16 @@ begin-import-module-once block-module
     ;
 
     \ Set the free count for a sector
-    : free-count! ( count index -- ) sector-free-map + b! ;
+    : free-count! ( count index -- ) sector-free-map + c! ;
 
     \ Set the old count for a sector
-    : old-count! ( count index -- ) sector-old-map + b! ;
+    : old-count! ( count index -- ) sector-old-map + c! ;
 
     \ Add to the free count for a sector
-    : free-count+! ( change index -- ) sector-free-map + b+! ;
+    : free-count+! ( change index -- ) sector-free-map + c+! ;
 
     \ Add to the old count for a sector
-    : old-count+! ( change index -- ) sector-old-map + b+! ;
+    : old-count+! ( change index -- ) sector-old-map + c+! ;
 
     \ Find the next sector containing new sectors, or -1 if none can be found
     : next-new-sector ( index -- index|-1 )
@@ -413,7 +413,7 @@ begin-import-module-once block-module
       swap tuck swap
       begin
 	dup 0> if
-	  over b@
+	  over c@
 	  dup $20 >= swap $7F <> and if
 	    1- swap 1+ swap false
 	  else

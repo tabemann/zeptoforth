@@ -194,7 +194,7 @@ begin-import-module-once disassemble-internal-module
   : label-type ( b-addr u -- )
     false prev-underscore !
     for-gas @ if
-      dup 0 0 -rot ?do 2 pick i + b@ 2 pick i convert-type-char + loop nip nip
+      dup 0 0 -rot ?do 2 pick i + c@ 2 pick i convert-type-char + loop nip nip
     else
       tuck type
     then

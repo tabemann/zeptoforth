@@ -1202,7 +1202,7 @@ _unknown_word:
 	end_inlined
 	
 	@@ Store a byte
-	define_word "b!", visible_flag | inlined_flag
+	define_word "c!", visible_flag | inlined_flag
 _store_1:
 	ldr r0, [dp]
 	strb r0, [tos]
@@ -1244,7 +1244,7 @@ _store_8:
 	end_inlined
 
 	@@ Read a byte from an address, add a value, and write it back
-	define_word "b+!", visible_flag | inlined_flag
+	define_word "c+!", visible_flag | inlined_flag
 _add_store_1:
 	ldrb r0, [tos]
 	ldr r1, [dp]
@@ -1288,7 +1288,7 @@ _bit:	movs r0, tos
 	end_inlined
 
 	@@ Bit set a byte
-	define_word "bbis!", visible_flag | inlined_flag
+	define_word "cbis!", visible_flag | inlined_flag
 _bit_set_1:
 	movs r0, tos
 	pull_tos
@@ -1324,7 +1324,7 @@ _bit_set_4:
 	end_inlined
 
 	@@ Bit clear a byte
-	define_word "bbic!", visible_flag | inlined_flag
+	define_word "cbic!", visible_flag | inlined_flag
 _bit_clear_1:
 	movs r0, tos
 	pull_tos
@@ -1360,7 +1360,7 @@ _bit_clear_4:
 	end_inlined
 
 	@ Test for bits in a byte
-	define_word "bbit@", visible_flag | inlined_flag
+	define_word "cbit@", visible_flag | inlined_flag
 _bit_test_1:
 	movs r0, tos
 	pull_tos
@@ -1399,7 +1399,7 @@ _bit_test_4:
 	end_inlined
 
 	@@ Get a byte
-	define_word "b@", visible_flag | inlined_flag
+	define_word "c@", visible_flag | inlined_flag
 _get_1: ldrb tos, [tos]
 	bx lr
 	end_inlined
@@ -1426,7 +1426,7 @@ _get_8:	ldr r0, [tos]
 	end_inlined
 
 	@@ Store a byte at the RAM HERE location
-	define_word "bram,", visible_flag
+	define_word "cram,", visible_flag
 _comma_1:
 	ldr r0, =here
 	ldr r1, [r0]
@@ -1475,7 +1475,7 @@ _comma_8:
 	end_inlined
 
 	@@ Store a byte at the flash HERE location
-	define_word "bflash,", visible_flag
+	define_word "cflash,", visible_flag
 _flash_comma_1:
 	push {lr}
 	ldr r0, =flash_here
@@ -1535,7 +1535,7 @@ _flash_comma_8:
 	end_inlined
 
 	@@ Store a byte to RAM or to flash
-	define_word "bcurrent!", visible_flag
+	define_word "ccurrent!", visible_flag
 _store_current_1:
 	push {lr}
 	ldr r0, =compiling_to_flash
@@ -1591,7 +1591,7 @@ _store_current_8:
 	end_inlined
 
 	@@ Store a byte to the RAM or flash HERE location
-	define_word "b,", visible_flag
+	define_word "c,", visible_flag
 _current_comma_1:
 	push {lr}
 	ldr r0, =compiling_to_flash
@@ -1647,7 +1647,7 @@ _current_comma_8:
 	end_inlined
 
 	@@ Reserve a byte at the RAM HERE location
-	define_word "bram-reserve", visible_flag
+	define_word "cram-reserve", visible_flag
 _reserve_1:
 	ldr r0, =here
 	ldr r1, [r0]
@@ -1695,7 +1695,7 @@ _reserve_8:
 	end_inlined
 
 	@@ Reserve a byte at the flash HERE location
-	define_word "bflash-reserve", visible_flag
+	define_word "cflash-reserve", visible_flag
 _flash_reserve_1:
 	ldr r0, =flash_here
 	ldr r1, [r0]
@@ -1743,7 +1743,7 @@ _flash_reserve_8:
 	end_inlined
 
 	@@ Reserve a byte at the RAM or flash HERE location
-	define_word "breserve", visible_flag
+	define_word "creserve", visible_flag
 _current_reserve_1:
 	push {lr}
 	ldr r0, =compiling_to_flash

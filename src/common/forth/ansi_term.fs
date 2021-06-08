@@ -113,14 +113,14 @@ begin-module-once ansi-term-module
   \ Wait for a number
   : wait-number ( -- n matches )
     ram-here >r get-key dup [char] - = if
-      ram-here b! 1 ram-allot
+      ram-here c! 1 ram-allot
     else
       set-key
     then
     0 begin
       dup 10 < if
 	get-key dup [char] 0 >= over [char] 9 <= and if
-	  ram-here b! 1 ram-allot 1+ false
+	  ram-here c! 1 ram-allot 1+ false
 	else
 	  set-key true
 	then

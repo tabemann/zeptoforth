@@ -152,7 +152,7 @@ begin-import-module-once edit-internal-module
   \ Get the length of a row in the buffer
   : row-len ( row -- u )
     get-row 0 buffer-width 0 ?do
-      over i + b@ dup $20 > swap $7F <> and if
+      over i + c@ dup $20 > swap $7F <> and if
 	drop i 1+
       then
     loop
@@ -181,7 +181,7 @@ begin-import-module-once edit-internal-module
       dup edit-state @ edit-start-row @ +
       edit-state @ edit-start-column @ go-to-coord
       0 swap get-row dup buffer-width + swap ?do
-	i b@ dup $20 >= over $7F <> and over unicode? not and if
+	i c@ dup $20 >= over $7F <> and over unicode? not and if
 	  emit 1+
 	else
 	  dup unicode? if
@@ -324,7 +324,7 @@ begin-import-module-once edit-internal-module
   : current-column-bytes ( -- offset )
     0 current-column-index@ begin dup 0> while
       over buffer-width < if
-	swap 1+ swap over current-row + b@
+	swap 1+ swap over current-row + c@
 	dup $20 >= over $80 < and if
 	  drop 1-
 	else
@@ -332,7 +332,7 @@ begin-import-module-once edit-internal-module
 	    1-
 	    begin
 	      over buffer-width < if
-		over current-row + b@
+		over current-row + c@
 		dup unicode? swap unicode-start? not and if
 		  swap 1+ swap false
 		else
@@ -355,7 +355,7 @@ begin-import-module-once edit-internal-module
   : max-columns ( -- columns )
     current-row-index@ row-len
     \ 0 buffer-width 0 ?do
-    \   i current-row + b@
+    \   i current-row + c@
     \   dup $20 >= over $80 < and if
     \ 	drop 1+
     \   else
@@ -370,7 +370,7 @@ begin-import-module-once edit-internal-module
   : left-bytes ( -- count )
     0 current-column-bytes begin
       dup 0> if
-	swap 1+ swap 1- dup current-row + b@
+	swap 1+ swap 1- dup current-row + c@
 	dup unicode-start? if
 	  drop true
 	else
@@ -386,13 +386,13 @@ begin-import-module-once edit-internal-module
   \ Get the number of bytes of the character to the right of the cursor
   : right-bytes ( -- count )
     current-column-bytes buffer-width < if
-      current-row current-column-bytes + b@
+      current-row current-column-bytes + c@
       dup $80 u< if
 	drop 1
       else
 	1 current-column-bytes 1+ begin
 	  dup buffer-width u< if
-	    dup current-row + b@
+	    dup current-row + c@
 	    dup unicode-start? if
 	      drop drop true
 	    else
@@ -452,7 +452,7 @@ begin-import-module-once edit-internal-module
 		current-row current-column-bytes +
 		current-row current-column-bytes 1+ +
 		buffer-width current-column-bytes - 1- move
-		dup current-row current-column-bytes + b!
+		dup current-row current-column-bytes + c!
 	      else
 		drop
 	      then
@@ -477,7 +477,7 @@ begin-import-module-once edit-internal-module
       current-row current-column-bytes +
       current-row current-column-bytes 1+ +
       buffer-width current-column-bytes - 1- move
-      dup current-row current-column-bytes + b!
+      dup current-row current-column-bytes + c!
       dup $20 >= over $80 < and if
 	drop
 	1 edit-state @ edit-cursor-column +!

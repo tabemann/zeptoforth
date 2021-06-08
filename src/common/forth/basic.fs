@@ -102,7 +102,7 @@ internal-module set-current
   begin
     dup here >
   while
-    0 b,
+    0 c,
   repeat
   drop
 ;
@@ -115,36 +115,6 @@ forth-module set-current
 
 \ Duplicate a cell if it is non-zero
 : ?dup ( x -- x | 0 ) dup 0<> if dup then ;
-
-\ Generate a mask for a single bit
-\ : bit ( u -- x ) 1 swap lshift [inlined] ;
-
-\ Test for bits in a byte being set
-\ : bbit@ ( mask b-addr -- f ) b@ and 0<> ;
-
-\ Test for bits in a halfword being set
-\ : hbit@ ( mask h-addr -- f ) h@ and 0<> ;
-
-\ Test for bits in a cell being set
-\ : bit@ ( mask addr -- f ) @ and 0<> ;
-
-\ Set bits on a byte
-\ : bbis! ( bits addr -- ) dup b@ rot or swap b! ;
-
-\ Clear bits on a byte
-\ : bbic! ( bits addr -- ) dup b@ rot bic swap b! ;
-
-\ Set bits on a halfword
-\ : hbis! ( bits addr -- ) dup h@ rot or swap h! ;
-
-\ Clear bits on a halfword
-\ : hbic! ( bits addr -- ) dup h@ rot bic swap h! ;
-
-\ Set bits on a word
-\ : bis! ( bits addr -- ) dup @ rot or swap ! ;
-
-\ Clear bits on a word
-\ : bic! ( bits addr -- ) dup @ rot bic swap ! ;
 
 \ Get the depth of the stack, not including the cell pushed onto it by this
 \ word
@@ -277,7 +247,7 @@ internal-module set-current
 : common-prefix ( b-addr1 bytes1 b-addr2 bytes2 -- bytes3 )
   0 begin
     3 pick 0> 2 pick 0> and if
-      4 pick b@ 3 pick b@ = if
+      4 pick c@ 3 pick c@ = if
 	4 roll 1+ 4 roll 1- 4 roll 1+ 4 roll 1- 4 roll 1+ false
       else
 	nip nip nip nip true
@@ -293,7 +263,7 @@ internal-module set-current
   begin
     2 pick 0> if
       dup 0> if
-	3 pick b@ 2 pick b@ = if
+	3 pick c@ 2 pick c@ = if
 	  3 roll 1+ 3 roll 1- 3 roll 1+ 3 roll 1- false
 	else
 	  2drop 2drop false true
@@ -314,8 +284,8 @@ commit-flash
 : hidden? ( word -- f )
   dup word-flags h@ visible-flag and if
     word-name count dup 2 > if
-      over b@ [char] * = if
-	+ 1- b@ [char] * =
+      over c@ [char] * = if
+	+ 1- c@ [char] * =
       else
 	2drop false
       then
@@ -501,7 +471,7 @@ commit-flash
 
 \ Fill memory with a byte
 : fill ( b-addr u b -- )
-  swap begin dup 0> while rot 2 pick over b! 1+ rot rot 1- repeat drop 2drop
+  swap begin dup 0> while rot 2 pick over c! 1+ rot rot 1- repeat drop 2drop
 ;
 
 \ In all cases:
@@ -623,7 +593,7 @@ commit-flash
 ;
 
 \ Create a byte-sized field
-: bfield: ( offset "name" -- offset )
+: cfield: ( offset "name" -- offset )
   <builds dup , 1+ does> @ +
 ;
 
@@ -648,7 +618,7 @@ commit-flash
     begin
       r@ 0>
     while
-      dup b@ 2 pick b@ = if
+      dup c@ 2 pick c@ = if
 	1+ swap 1+ r> 1- >r
       else
 	2drop rdrop false exit
@@ -803,7 +773,7 @@ forth-module set-current
 commit-flash
 
 \ Allocate a byte user variable
-: buser ( "name" -- )
+: cuser ( "name" -- )
   next-user-space
   compiling-to-flash?
   over
@@ -894,7 +864,7 @@ commit-flash
 internal-module set-current
 
 \ Allocate a byte variable in RAM
-: ram-bvariable ( "name" -- )
+: ram-cvariable ( "name" -- )
   next-ram-space
   compiling-to-flash?
   over
@@ -1006,9 +976,9 @@ commit-flash
 ;
 
 \ Create a one-byte variable
-: bvariable ( "name" -- )
+: cvariable ( "name" -- )
   compiling-to-flash? if
-    ram-bvariable
+    ram-cvariable
   else
     create 1 ram-allot
   then
@@ -1331,11 +1301,11 @@ commit-flash
   swap ?do
     i h.8
     16 0 ?do
-      space j i + b@ h.2
+      space j i + c@ h.2
     loop
     space [char] ' emit
     16 0 ?do
-      j i + b@ dup $20 >= over $7F < and if emit else drop [char] . emit then
+      j i + c@ dup $20 >= over $7F < and if emit else drop [char] . emit then
     loop
     [char] ' emit cr
   16 +loop
@@ -1345,7 +1315,7 @@ commit-flash
 : skip-until ( xt -- )
   >r
   begin
-    source >parse @ > if >parse @ + b@ r@ execute 1 >parse +! else drop true then
+    source >parse @ > if >parse @ + c@ r@ execute 1 >parse +! else drop true then
   until
   rdrop
 ;
@@ -1480,7 +1450,7 @@ $0B constant vertical-tab
 \ Get an input byte, and return whether a byte was successfully gotten
 : get-byte ( -- b success )
   >parse @ parse# < if
-    parse-buffer >parse @ + b@
+    parse-buffer >parse @ + c@
     1 >parse +!
     true
   else
@@ -1543,7 +1513,7 @@ commit-flash
   >parse @ input + swap parse-unsigned if
     r> base !
     dup 256 u< if
-      b, r> advance-bytes
+      c, r> advance-bytes
     else
       drop rdrop
     then
@@ -1576,7 +1546,7 @@ commit-flash
   2 hex-len
   dup >r base @ >r 16 base !
   >parse @ input + swap parse-unsigned if
-    r> base ! b, r> advance-bytes
+    r> base ! c, r> advance-bytes
   else
     r> base ! rdrop
   then
@@ -1601,29 +1571,29 @@ commit-flash
   get-byte if
     dup [char] 0 < over [char] 9 > or if
       case
-	[char] a of alert b, endof
-	[char] A of alert b, endof
-	[char] b of backspace b, endof
-	[char] B of backspace b, endof
-	[char] e of escape b, endof
-	[char] E of escape b, endof
-	[char] f of form-feed b, endof
-	[char] F of form-feed b, endof
-	[char] m of return b, line-feed b, endof
-	[char] M of return b, line-feed b, endof
-	[char] n of line-feed b, endof
-	[char] N of line-feed b, endof
-	[char] q of [char] " b, endof
-	[char] Q of [char] " b, endof
-	[char] r of return b, endof
-	[char] R of return b, endof
-	[char] t of horizontal-tab b, endof
-	[char] T of horizontal-tab b, endof
-	[char] v of vertical-tab b, endof
-	[char] V of vertical-tab b, endof
+	[char] a of alert c, endof
+	[char] A of alert c, endof
+	[char] b of backspace c, endof
+	[char] B of backspace c, endof
+	[char] e of escape c, endof
+	[char] E of escape c, endof
+	[char] f of form-feed c, endof
+	[char] F of form-feed c, endof
+	[char] m of return c, line-feed c, endof
+	[char] M of return c, line-feed c, endof
+	[char] n of line-feed c, endof
+	[char] N of line-feed c, endof
+	[char] q of [char] " c, endof
+	[char] Q of [char] " c, endof
+	[char] r of return c, endof
+	[char] R of return c, endof
+	[char] t of horizontal-tab c, endof
+	[char] T of horizontal-tab c, endof
+	[char] v of vertical-tab c, endof
+	[char] V of vertical-tab c, endof
 	[char] x of escape-hex endof
 	[char] X of escape-hex endof
-	dup b,
+	dup c,
       endcase
     else
       drop 1 revert-bytes escape-octal
@@ -1662,7 +1632,7 @@ commit-flash
 	dup r@ = if
 	  drop true
 	else
-	  b, false
+	  c, false
 	then
       then
     else
@@ -1703,8 +1673,8 @@ commit-flash
   compiling-to-flash? if flash-here! else ram-here! then swap
   here swap parse-esc-string
   here swap -
-  over bcurrent!
-  here %1 and if 0 b, then
+  over ccurrent!
+  here %1 and if 0 c, then
   swap here swap branch-back!
   lit,
   1 advance-bytes
@@ -1818,7 +1788,7 @@ commit-flash
 \ Add a character to pictured numeric output
 : hold ( b -- )
   -1 picture-offset +!
-  pad picture-size + picture-offset @ + b!
+  pad picture-size + picture-offset @ + c!
 ;
 
 \ Commit to flash
@@ -1931,20 +1901,20 @@ commit-flash
 	else
 	  10 - [char] A +
 	then
-	r@ b! r> 1+ r> 1+ >r >r false
+	r@ c! r> 1+ r> 1+ >r >r false
       else
 	true
       then
     until
     drop rdrop r> r> + r> swap
   else
-    drop [char] 0 r@ b! rdrop r> r> + 1+ r> swap
+    drop [char] 0 r@ c! rdrop r> r> + 1+ r> swap
   then
 ;
 
 \ Add a decimal point
 : add-decimal ( b-addr bytes -- b-addr bytes )
-  2dup + [char] , swap b! 1+
+  2dup + [char] , swap c! 1+
 ;
 
 \ Set forth

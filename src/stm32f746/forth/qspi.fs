@@ -483,7 +483,7 @@ begin-import-module-once qspi-module
 	repeat
 	begin dup 0 > while
 	  QUADSPI_SR_FTF@ if
-	    1 - swap dup b@ QUADSPI_DR b! 1+ swap
+	    1 - swap dup c@ QUADSPI_DR c! 1+ swap
 	  then
 	repeat
 	2drop
@@ -544,7 +544,7 @@ begin-import-module-once qspi-module
       true QUADSPI_CR_EN!
       QUADSPI_CCR_INSTRUCTION!
       QUADSPI_AR !
-      QUADSPI_DR b!
+      QUADSPI_DR c!
       wait-qspi-busy
       false QUADSPI_CR_EN!
     ;
@@ -606,7 +606,7 @@ begin-import-module-once qspi-module
       0 QUADSPI_DLR ! \ 1 byte
       true QUADSPI_CR_EN!
       QUADSPI_CCR_INSTRUCTION!
-      QUADSPI_DR b!
+      QUADSPI_DR c!
       wait-qspi-busy
       false QUADSPI_CR_EN!
     ;

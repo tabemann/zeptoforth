@@ -132,7 +132,7 @@ begin-import-module-once line-internal-module
   : type-line ( -- )
     0 line @ line-buffer-ptr @ line @ line-count-ptr @ @ +
     line @ line-buffer-ptr @ ?do
-      i b@
+      i c@
       dup tab <> if
 	dup emit
 	dup unicode-start? swap $80 u< or if
@@ -169,7 +169,7 @@ begin-import-module-once line-internal-module
   : get-spaces-to-index ( index -- spaces )
     line @ line-count-ptr @ @ min
     0 swap 0 ?do
-      line @ line-buffer-ptr @ i + b@ dup tab = if
+      line @ line-buffer-ptr @ i + c@ dup tab = if
 	drop 7 bic 8 +
       else
 	dup unicode-start? if
@@ -207,7 +207,7 @@ begin-import-module-once line-internal-module
     line @ line-count-ptr @ @ line @ line-buffer-size @ < if
       line @ line-buffer-ptr @ line @ line-index-ptr @ @ + dup 1+
       line @ line-count-ptr @ @ line @ line-index-ptr @ @ - move
-      line @ line-buffer-ptr @ line @ line-index-ptr @ @ + b!
+      line @ line-buffer-ptr @ line @ line-index-ptr @ @ + c!
       1 line @ line-index-ptr @ +!
       1 line @ line-count-ptr @ +!
       true
@@ -219,7 +219,7 @@ begin-import-module-once line-internal-module
   \ Append a byte
   : append-byte ( b -- success)
     line @ line-count-ptr @ @ line @ line-buffer-size @ < if
-      line @ line-buffer-ptr @ line @ line-index-ptr @ @ + b!
+      line @ line-buffer-ptr @ line @ line-index-ptr @ @ + c!
       1 line @ line-index-ptr @ +!
       1 line @ line-count-ptr @ +!
       true
@@ -232,7 +232,7 @@ begin-import-module-once line-internal-module
   : left-bytes ( -- count )
     0 line @ line-index-ptr @ @ begin
       dup 0> if
-	swap 1+ swap 1- dup line @ line-buffer-ptr @ + b@
+	swap 1+ swap 1- dup line @ line-buffer-ptr @ + c@
 	dup unicode-start? if
 	  drop true
 	else
@@ -248,13 +248,13 @@ begin-import-module-once line-internal-module
   \ Get the number of bytes of the character to the right of the cursor
   : right-bytes ( -- count )
     line @ line-index-ptr @ @ line @ line-count-ptr @ @ < if
-      line @ line-buffer-ptr @ line @ line-index-ptr @ @ + b@
+      line @ line-buffer-ptr @ line @ line-index-ptr @ @ + c@
       dup $80 u< if
 	drop 1
       else
 	1 line @ line-index-ptr @ @ 1+ begin
 	  dup line @ line-count-ptr @ @ u< if
-	    dup line @ line-buffer-ptr @ + b@
+	    dup line @ line-buffer-ptr @ + c@
 	    dup unicode-start? if
 	      drop drop true
 	    else
@@ -312,7 +312,7 @@ begin-import-module-once line-internal-module
 	append-byte if
 	  line @ line-index-ptr @ @ get-spaces-to-index swap -
 	  dup line @ line-offset +! line @ line-count +!
-	  line @ line-buffer-ptr @ line @ line-index-ptr @ @ + 1- b@ emit
+	  line @ line-buffer-ptr @ line @ line-index-ptr @ @ + 1- c@ emit
 	then
       else
 	append-byte if

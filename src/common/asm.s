@@ -925,7 +925,7 @@ _asm_fold_arshift:
 	end_inlined
 
 	@@ Constant fold B!
-	define_internal_word "fold-b!", visible_flag
+	define_internal_word "fold-c!", visible_flag
 _asm_fold_store_1:
 	push {lr}
 	push_tos
