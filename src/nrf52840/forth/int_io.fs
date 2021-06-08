@@ -1,5 +1,5 @@
 \ Copyright (c) 2013? Matthias Koch
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -32,10 +32,10 @@ int-io-internal-module 5 set-order
 int-io-internal-module set-current
 
 \ RAM variable for rx buffer read-index
-bvariable rx-read-index
+cvariable rx-read-index
 
 \ RAM variable for rx buffer write-index
-bvariable rx-write-index
+cvariable rx-write-index
 
 \ Constant for number of bytes to buffer
 128 constant rx-buffer-size
@@ -44,10 +44,10 @@ bvariable rx-write-index
 rx-buffer-size buffer: rx-buffer
 
 \ RAM variable for tx buffer read-index
-bvariable tx-read-index
+cvariable tx-read-index
 
 \ RAM variable for tx buffer write-index
-bvariable tx-write-index
+cvariable tx-write-index
 
 \ Constant for number of bytes to buffer
 128 constant tx-buffer-size
@@ -70,20 +70,20 @@ UART_Base $51C + constant UART_TXD
 
 \ Get whether the rx buffer is full
 : rx-full? ( -- f )
-  rx-write-index b@ rx-read-index b@
+  rx-write-index c@ rx-read-index c@
   rx-buffer-size 1- + rx-buffer-size umod =
 ;
 
 \ Get whether the rx buffer is empty
 : rx-empty? ( -- f )
-  rx-read-index b@ rx-write-index b@ =
+  rx-read-index c@ rx-write-index c@ =
 ;
 
 \ Write a byte to the rx buffer
 : write-rx ( c -- )
   rx-full? not if
-    rx-write-index b@ rx-buffer + b!
-    rx-write-index b@ 1+ rx-buffer-size mod rx-write-index b!
+    rx-write-index c@ rx-buffer + c!
+    rx-write-index c@ 1+ rx-buffer-size mod rx-write-index c!
   else
     drop
   then
@@ -92,8 +92,8 @@ UART_Base $51C + constant UART_TXD
 \ Read a byte from the rx buffer
 : read-rx ( -- c )
   rx-empty? not if
-    rx-read-index b@ rx-buffer + b@
-    rx-read-index b@ 1+ rx-buffer-size mod rx-read-index b!
+    rx-read-index c@ rx-buffer + c@
+    rx-read-index c@ 1+ rx-buffer-size mod rx-read-index c!
   else
     0
   then
@@ -101,20 +101,20 @@ UART_Base $51C + constant UART_TXD
 
 \ Get whether the tx buffer is full
 : tx-full? ( -- f )
-  tx-write-index b@ tx-read-index b@
+  tx-write-index c@ tx-read-index c@
   tx-buffer-size 1- + tx-buffer-size umod =
 ;
 
 \ Get whether the tx buffer is empty
 : tx-empty? ( -- f )
-  tx-read-index b@ tx-write-index b@ =
+  tx-read-index c@ tx-write-index c@ =
 ;
 
 \ Write a byte to the tx buffer
 : write-tx ( c -- )
   tx-full? not if
-    tx-write-index b@ tx-buffer + b!
-    tx-write-index b@ 1+ tx-buffer-size mod tx-write-index b!
+    tx-write-index c@ tx-buffer + c!
+    tx-write-index c@ 1+ tx-buffer-size mod tx-write-index c!
   else
     drop
   then
@@ -123,8 +123,8 @@ UART_Base $51C + constant UART_TXD
 \ Read a byte from the tx buffer
 : read-tx ( -- c )
   tx-empty? not if
-    tx-read-index b@ tx-buffer + b@
-    tx-read-index b@ 1+ tx-buffer-size mod tx-read-index b!
+    tx-read-index c@ tx-buffer + c@
+    tx-read-index c@ 1+ tx-buffer-size mod tx-read-index c!
   else
     0
   then
@@ -137,7 +137,7 @@ UART_Base $51C + constant UART_TXD
     rx-full? not if
       UART_EVENT_RXDRDY @ if
 	0 UART_EVENT_RXDRDY !
-	UART_RXD b@ write-rx false
+	UART_RXD c@ write-rx false
       else
 	true
       then
@@ -152,7 +152,7 @@ UART_Base $51C + constant UART_TXD
     tx-empty? not if
       UART_EVENT_TXDRDY @ if
 	0 UART_EVENT_TXDRDY !
-	read-tx UART_TXD b! false
+	read-tx UART_TXD c! false
       else
 	true
       then
@@ -228,10 +228,10 @@ forth-module set-current
 \ Init
 : init ( -- )
   init
-  0 rx-read-index b!
-  0 rx-write-index b!
-  0 tx-read-index b!
-  0 tx-write-index b!
+  0 rx-read-index c!
+  0 rx-write-index c!
+  0 tx-read-index c!
+  0 tx-write-index c!
   enable-int-io
 ;
 

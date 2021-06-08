@@ -146,10 +146,10 @@ begin-module-once interrupt-module
   NVIC_Base $300 + constant NVIC_IPR_Base
 
   \ Set NVIC interrupt priority register field
-  : NVIC_IPR_IP! ( priority u -- ) NVIC_IPR_Base + b! ;
+  : NVIC_IPR_IP! ( priority u -- ) NVIC_IPR_Base + c! ;
 
   \ Get NVIC interrupt priority register field
-  : NVIC_IPR_IP@ ( u -- priority ) NVIC_IPR_Base + b@ ;
+  : NVIC_IPR_IP@ ( u -- priority ) NVIC_IPR_Base + c@ ;
 
 end-module
 

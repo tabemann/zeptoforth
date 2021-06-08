@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -25,18 +25,18 @@ compile-to-flash
 compress-flash
 
 \ Execute an xt based on whether a condition is true
-: option ( f true-xt -- ) ( true-xt: ??? -- ??? )
+: qif ( f true-xt -- ) ( true-xt: ??? -- ??? )
   swap if execute else drop then
 ;
 
 \ Execute one of two different xts based on whether a condition is true or false
-: choose ( f true-xt false-xt -- )
+: qifelse ( f true-xt false-xt -- )
   ( true-xt: ??? -- ??? ) ( false-xt: ??? -- ??? )
   rot if drop execute else nip execute then
 ;
 
 \ Execute an until loop with an xt
-: loop-until ( ??? xt -- ??? ) ( xt: ??? -- ??? f )
+: quntil ( ??? xt -- ??? ) ( xt: ??? -- ??? f )
   >r
   begin
     r@ execute
@@ -45,7 +45,7 @@ compress-flash
 ;
 
 \ Execute a while loop with a while-xt and a body-xt
-: while-loop ( ??? while-xt body-xt -- ??? )
+: qwhile ( ??? while-xt body-xt -- ??? )
   ( while-xt: ??? -- ??? f ) ( body-xt: ??? -- ??? )
   >r >r
   begin
@@ -58,7 +58,7 @@ compress-flash
 ;
 
 \ Execute a counted loop with an xt
-: count-loop ( ??? limit init xt -- ??? ) ( xt: ??? i -- ??? )
+: qcount ( ??? limit init xt -- ??? ) ( xt: ??? i -- ??? )
   rot rot ?do
     i swap dup >r execute r>
   loop
@@ -66,7 +66,7 @@ compress-flash
 ;
 
 \ Execute a counted loop with an arbitrary increment with an xt
-: count+loop ( ??? limit init xt -- ??? ) ( xt: ??? i -- ???? increment )
+: qcount+ ( ??? limit init xt -- ??? ) ( xt: ??? i -- ???? increment )
   rot rot ?do
     i swap dup >r execute r> swap
   +loop
@@ -74,7 +74,7 @@ compress-flash
 ;
 
 \ Iterate executing an xt over a byte array
-: biter ( ??? addr count xt -- ??? ) ( xt: ??? b -- ??? )
+: citer ( ??? addr count xt -- ??? ) ( xt: ??? b -- ??? )
   begin
     over 0>
   while
@@ -132,9 +132,9 @@ compress-flash
 ;
 
 \ Find the index of a value in a byte array with a predicate
-: bfind-index ( ??? b-addr count xt -- ??? i|-1 ) ( xt: ??? x -- ??? f )
+: cfind-index ( ??? b-addr count xt -- ??? i|-1 ) ( xt: ??? x -- ??? f )
   swap 0 ?do
-    dup >r swap dup >r b@ swap execute if
+    dup >r swap dup >r c@ swap execute if
       rdrop rdrop i unloop exit
     else
       r> 1+ r>
@@ -206,12 +206,12 @@ compress-flash
 ;
 
 \ Find a value in a byte array with a predicate
-: bfind-value ( ??? a-addr count xt -- ??? x|0 f ) ( xt: ??? x -- ??? f )
+: cfind-value ( ??? a-addr count xt -- ??? x|0 f ) ( xt: ??? x -- ??? f )
   begin
     over 0>
   while
-    dup >r swap >r swap dup >r b@ swap execute if
-      r> b@ rdrop rdrop true exit
+    dup >r swap >r swap dup >r c@ swap execute if
+      r> c@ rdrop rdrop true exit
     else
       r> 1+ r> 1- r>
     then

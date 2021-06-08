@@ -260,7 +260,7 @@ begin-module internal-module
   : char-count ( b-addr bytes b -- count )
     >r
     0 begin over 0<> while
-      rot dup b@ r@ = if
+      rot dup c@ r@ = if
 	1+ -rot 1+
       else
 	1+ -rot
@@ -272,12 +272,12 @@ begin-module internal-module
   
   \ Handle double-cell integer numeric literals
   : handle-double ( b-addr bytes base -- flag )
-    >r over b@ [char] . <> if
+    >r over c@ [char] . <> if
       0 0 begin 2 pick 0<> while
-	3 pick b@ r@ parse-digit if
+	3 pick c@ r@ parse-digit if
 	  rot rot r@ 0 ud* rot 0 d+
 	else
-	  drop 3 pick b@ [char] . <> if
+	  drop 3 pick c@ [char] . <> if
 	    2drop 2drop rdrop false exit
 	  then
 	then
@@ -315,7 +315,7 @@ begin-module internal-module
   : handle-fraction ( b-addr bytes d base -- d -1 | 0 )
     >r rot max-fraction-chars r@ 2 - cells + @ min -rot
     2swap 0 0 0 begin 3 pick 0<> while
-      4 pick b@ r@ parse-digit if
+      4 pick c@ r@ parse-digit if
 	2swap r@ 0 ud* rot 0 d+ rot 1+ >r >r >r 1- swap 1+ swap r> r> r>
       else
 	drop 2drop 2drop 2drop rdrop false exit
@@ -326,13 +326,13 @@ begin-module internal-module
 
   \ Handle s31.32 fixed-point double-cell numeric literals
   : handle-fixed ( b-addr bytes base -- flag )
-    >r over b@ [char] , <> if
-      2dup + 1- b@ [char] , <> if
+    >r over c@ [char] , <> if
+      2dup + 1- c@ [char] , <> if
 	0 begin over 0<> while
-	  2 pick b@ r@ parse-digit if
+	  2 pick c@ r@ parse-digit if
 	    swap r@ * + rot 1+ rot 1- rot
 	  else
-	    drop 2 pick b@ [char] , = if
+	    drop 2 pick c@ [char] , = if
 	      rot 1+ rot 1- rot 0 swap r> handle-fraction exit
 	    else
 	      drop 2drop rdrop false exit
@@ -372,7 +372,7 @@ begin-module internal-module
       else
 	parse-base >r
 	dup 0<> if
-	  over b@ [char] - = if
+	  over c@ [char] - = if
 	    1- swap 1+ swap
 	    dup 0<> if
 	      r> handle-unsigned-double

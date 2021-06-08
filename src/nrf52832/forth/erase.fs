@@ -31,7 +31,7 @@ compress-flash
 \ Pad flash to a 1024 byte boundary
 : pad-flash-erase-block ( -- )
   begin flash-here $3FF and while
-    0 bflash,
+    0 cflash,
   repeat
   drop
 ;

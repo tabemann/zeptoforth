@@ -74,7 +74,7 @@ begin-import-module internal-module
   : pad-flash-erase-block ( -- )
     next-flash-sector
     begin flash-here over < while
-      0 bflash,
+      0 cflash,
     repeat
     drop
   ;

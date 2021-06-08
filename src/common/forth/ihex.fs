@@ -30,7 +30,7 @@
  : erased? ( b-addr -- ) \ Check Flash bytes NOT erased.
    0                     \ Flag of 0 = erased byte, ignore data afterwards
    over 16 + rot do      \ Scan data
-      i b@ $FF <> or     \ Set flag if there is a non-$FF byte. Some chips have Flash = $00 as erased.
+      i c@ $FF <> or     \ Set flag if there is a non-$FF byte. Some chips have Flash = $00 as erased.
    loop
  ; 
 
@@ -65,8 +65,8 @@
        i          $FF and +      \ Sum the address bytes 
        i 8 rshift $FF and +       \ separately into the checksum
        i 16 + i do                 \ EOL               
-	 i b@ h.2                  \ Print data with 2 digits
-	 i b@ +                     \ Sum it up for Checksum
+	 i c@ h.2                  \ Print data with 2 digits
+	 i c@ +                     \ Sum it up for Checksum
        loop                  
        negate h.2                      \ Write Checksum
        cr                         

@@ -14,11 +14,11 @@ begin-import-module-once swd-module
     swd cell+ dup constant swd-rx
     256 + constant swd-tx
 
-    : b-inc ( c-addr -- ) 1 swap b+! [inlined] ;
-    : inc-rx-w ( -- ) swd-rx-w b-inc ;
-    : inc-rx-r ( -- ) swd-rx-r b-inc ;
-    : inc-tx-w ( -- ) swd-tx-w b-inc ;
-    : inc-tx-r ( -- ) swd-tx-r b-inc ;
+    : c-inc ( c-addr -- ) 1 swap c+! [inlined] ;
+    : inc-rx-w ( -- ) swd-rx-w c-inc ;
+    : inc-rx-r ( -- ) swd-rx-r c-inc ;
+    : inc-tx-w ( -- ) swd-tx-w c-inc ;
+    : inc-tx-r ( -- ) swd-tx-r c-inc ;
 
     variable use-sleep
 
@@ -36,7 +36,7 @@ begin-import-module-once swd-module
     ;
     : swd-key ( -- char )
       [: swd-key? ;] pause-until
-      disable-int swd-rx swd-rx-r b@ + b@ inc-rx-r enable-int
+      disable-int swd-rx swd-rx-r c@ + c@ inc-rx-r enable-int
     ;
 
     : swd-emit? ( -- flag )
@@ -44,7 +44,7 @@ begin-import-module-once swd-module
     ;
     : swd-emit ( char -- )
       [: swd-emit? ;] pause-until
-      disable-int swd-tx swd-tx-w b@ + b! inc-tx-w enable-int
+      disable-int swd-tx swd-tx-w c@ + c! inc-tx-w enable-int
     ;
 
     : swd-flush-console ( -- )

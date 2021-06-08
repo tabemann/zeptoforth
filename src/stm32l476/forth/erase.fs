@@ -29,7 +29,7 @@ begin-import-module internal-module
   \ Pad flash to a 2048 byte boundary
   : pad-flash-erase-block ( -- )
     begin flash-here $7FF and while
-      0 bflash,
+      0 cflash,
     repeat
   ;
 
