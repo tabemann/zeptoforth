@@ -8,14 +8,14 @@ These words are in `forth-module`.
 
 There are two simple conditional combinators, namely:
 
-##### `option`
+##### `qif`
 ( ??? f true-xt -- ??? )
 
 which takes *f* and *true-xt*, which is executed when *f* is non-zero; *true-xt* has the following signature:
 
 ( ??? -- ??? )
 
-##### `choose`
+##### `qifelse`
 ( ??? f true-xt false-xt -- ??? )
 
 which takes *f*, *true-xt*, and *false-xt*; *true-xt* is executed when *f* is non-zero and *false-xt* is executed when *f* is zero. These have the following signature:
@@ -24,14 +24,14 @@ which takes *f*, *true-xt*, and *false-xt*; *true-xt* is executed when *f* is no
 
 There are two simple looping combinators:
 
-##### `loop-until`
+##### `quntil`
 ( ??? xt -- ??? )
 
 which takes *xt* and executes it repeatedly until it returns a non-zero value; *xt* has the following signature:
 
 ( ??? -- ??? f )
 
-##### `while-loop`
+##### `qwhile`
 ( ??? while-xt body-xt -- ??? )
 
 which in a loop first executes *while-xt* and, if it returns a non-zero value, then it executes *body-xt* and continues looping, else it exits the loop; *while-xt* has the signature:
@@ -44,14 +44,14 @@ and *body-xt* has the signature:
 
 There are two counted looping combinators:
 
-##### `count-loop`
+##### `qcount`
 ( ??? limit init xt -- ??? )
 
 which counts up with an increment of one from *init* until it reaches *limit*, not including it, executing *xt* at each step, passing it the current count; *xt* has the signature:
 
 ( ??? i -- ??? )
 
-##### `count+loop`
+##### `qcount+`
 ( ??? limit init xt -- ??? )
 
 which counts up or down with a variable increment from *init* until it reaches *limit*, not including it for counting up but including it for counting down, executing *xt* at each step, passing it the current count and receiving the increment/decrement for the next step; *xt* has the signature:
@@ -60,7 +60,7 @@ which counts up or down with a variable increment from *init* until it reaches *
 
 There are the following combinators for iterating over arrays with with different-sized members:
 
-##### `biter`
+##### `citer`
 ( ??? b-addr count xt -- ??? )
 
 which iterates over the byte array specified by *b-addr* and *count*, passing each byte from the lowest address to the highest to *xt*, which has the signature:
@@ -114,7 +114,7 @@ and *xt* has the signature:
 
 There are the following combinators for finding indices of values in arrays:
 
-##### `bfind-index`
+##### `cfind-index`
 ( ??? b-addr count xt -- ??? i|-1 )
 
 which iterates over the byte array specified by *b-addr* and *count*, passing each byte from the lowest address to the highest to *xt*, until it either reaches a value for which it returns a non-zero value, where then it returns the index of that byte, or if it reaches the end of the array, where then it returns -1; *xt* as the signature:
@@ -168,7 +168,7 @@ and *pred-xt* has the signature:
 
 There are the following combinators for finding values in arrays:
 
-##### `bfind-value`
+##### `cfind-value`
 ( ??? b-addr count xt -- ??? b|0 f )
 
 which iterates over the byte array specified by *b-addr* and *count*, passing each byte from the lowest address to the highest to *xt*, until it either reaches a value for which it returns a non-zero value, where then it returns the value of that byte and true, or if it reaches the end of the array, where then it returns 0 and false; *xt* as the signature:

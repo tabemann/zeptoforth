@@ -170,7 +170,7 @@ begin-module-once chan-module
       end-critical ['] x-chan-closed ?raise
     then
     dup wait-send-chan
-    tuck send-chan-addr b!
+    tuck send-chan-addr c!
     dup advance-send-chan
     chan-recv-task @ ?dup if run then
     end-critical
@@ -180,7 +180,7 @@ begin-module-once chan-module
   : recv-chan-byte ( chan -- b )
     begin-critical
     dup wait-recv-chan
-    dup recv-chan-addr b@
+    dup recv-chan-addr c@
     over advance-recv-chan
     swap chan-send-task @ ?dup if run then
     end-critical
@@ -189,7 +189,7 @@ begin-module-once chan-module
   \ Send bytes to a channel
   : send-chan ( addr bytes chan -- )
     >r begin dup 0> while
-      swap dup b@ r@ send-chan-byte 1+ swap 1-
+      swap dup c@ r@ send-chan-byte 1+ swap 1-
     repeat
     2drop rdrop
   ;
@@ -197,7 +197,7 @@ begin-module-once chan-module
   \ Receive bytes from a channel
   : recv-chan ( addr bytes chan -- )
     >r begin dup 0> while
-      r@ recv-chan-byte 2 pick b! 1- swap 1+ swap
+      r@ recv-chan-byte 2 pick c! 1- swap 1+ swap
     repeat
     2drop rdrop
   ;
