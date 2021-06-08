@@ -63,20 +63,20 @@ begin-module-once life-module
   
   \ Get whether a life cell is alive
   : alive? ( x y -- alive? )
-    life-width @ 3 rshift * over 3 rshift + current-buffer @ + b@
+    life-width @ 3 rshift * over 3 rshift + current-buffer @ + c@
     swap 7 and rshift 1 and 0<>
   ;
 
   \ Set a life cell to be dead
   : set-dead ( x y -- )
-    life-width @ 3 rshift * over 3 rshift + current-buffer @ + dup >r b@
-    swap 7 and 1 swap lshift bic r> b!
+    life-width @ 3 rshift * over 3 rshift + current-buffer @ + dup >r c@
+    swap 7 and 1 swap lshift bic r> c!
   ;
 
   \ Set a life cell to be alive
   : set-alive ( x y -- )
-    life-width @ 3 rshift * over 3 rshift + current-buffer @ + dup >r b@
-    swap 7 and 1 swap lshift or r> b!
+    life-width @ 3 rshift * over 3 rshift + current-buffer @ + dup >r c@
+    swap 7 and 1 swap lshift or r> c!
   ;
 
   \ Set whether a life cell is alive
@@ -84,20 +84,20 @@ begin-module-once life-module
 
   \ Get whether a new life cell is alive
   : new-alive? ( x y -- alive? )
-    life-width @ 3 rshift * over 3 rshift + new-buffer @ + b@
+    life-width @ 3 rshift * over 3 rshift + new-buffer @ + c@
     swap 7 and rshift 1 and 0<>
   ;
 
   \ Set a new life cell to be dead
   : set-new-dead ( x y -- )
-    life-width @ 3 rshift * over 3 rshift + new-buffer @ + dup >r b@
-    swap 7 and 1 swap lshift bic r> b!
+    life-width @ 3 rshift * over 3 rshift + new-buffer @ + dup >r c@
+    swap 7 and 1 swap lshift bic r> c!
   ;
 
   \ Set a new life cell to be alive
   : set-new-alive ( x y -- )
-    life-width @ 3 rshift * over 3 rshift + new-buffer @ + dup >r b@
-    swap 7 and 1 swap lshift or r> b!
+    life-width @ 3 rshift * over 3 rshift + new-buffer @ + dup >r c@
+    swap 7 and 1 swap lshift or r> c!
   ;
 
   \ Set whether a new life cell is alive
@@ -304,13 +304,13 @@ begin-module-once life-module
 	2dup 3 + alive? 8 and r> or >r
 	2dup 4 + alive? 16 and r> or >r
 	2dup 5 + alive? 32 and r> or >r
-	swap dup life-line-buffer @ + r@ swap b!
+	swap dup life-line-buffer @ + r@ swap c!
 	r> [char] ? + add-sixel-rle
 	1+
       repeat
       drop force-sixel-rle-out ." $#0" init-sixel-rle
       life-display-x @ begin dup life-display-x-end @ < while
-	dup life-line-buffer @ + b@ 63 swap bic
+	dup life-line-buffer @ + c@ 63 swap bic
 	[char] ? + add-sixel-rle
 	1+
       repeat
@@ -340,14 +340,14 @@ begin-module-once life-module
       life-display-y-end @ 6 / 6 * 5 + life-height @ < if
 	dup life-display-y-end @ 6 / 6 * 5 + alive? 32 and r> or >r
       then
-      dup life-line-buffer @ + r@ swap b!
+      dup life-line-buffer @ + r@ swap c!
       r> [char] ? + add-sixel-rle
       1+
     repeat
     drop
     force-sixel-rle-out ." $#0" init-sixel-rle
     life-display-x @ begin dup life-display-x-end @ < while
-      dup life-line-buffer @ + b@ 63 swap bic
+      dup life-line-buffer @ + c@ 63 swap bic
       [char] ? + add-sixel-rle
       1+
     repeat
@@ -366,13 +366,13 @@ begin-module-once life-module
 	2dup alive? 3 and r> or >r
 	2dup 1 + alive? 12 and r> or >r
 	2dup 2 + alive? 48 and r> or >r
-	swap dup life-line-buffer @ + r@ swap b!
+	swap dup life-line-buffer @ + r@ swap c!
 	r> [char] ? + add-sixel-rle2
 	1+
       repeat
       drop force-sixel-rle-out ." $#0" init-sixel-rle
       life-display-x @ begin dup life-display-x-end @ < while
-	dup life-line-buffer @ + b@ 63 swap bic
+	dup life-line-buffer @ + c@ 63 swap bic
 	[char] ? + add-sixel-rle2
 	1+
       repeat
@@ -393,14 +393,14 @@ begin-module-once life-module
       life-display-y-end @ 3 / 3 * 2 + life-height @ < if
 	dup life-display-y-end @ 3 / 3 * 2 + alive? 48 and r> or >r
       then
-      dup life-line-buffer @ + r@ swap b!
+      dup life-line-buffer @ + r@ swap c!
       r> [char] ? + add-sixel-rle2
       1+
     repeat
     drop
     force-sixel-rle-out ." $#0" init-sixel-rle
     life-display-x @ begin dup life-display-x-end @ < while
-      dup life-line-buffer @ + b@ 63 swap bic
+      dup life-line-buffer @ + c@ 63 swap bic
       [char] ? + add-sixel-rle2
       1+
     repeat
@@ -522,7 +522,7 @@ begin-module-once life-module
   : get-char ( addr1 bytes1 -- addr2 bytes2 c )
     begin
       dup 0 > if
-	over b@ dup $20 <> if
+	over c@ dup $20 <> if
 	  rot 1 + rot 1 - rot true
 	else
 	  drop 1 - swap 1 + swap false

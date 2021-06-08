@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -114,8 +114,8 @@ compile-to-ram
       i $FFFF and 0= if
 	cr ." Verifying: " i h.8
       then
-      i b@ over <> if
-	cr ." Error at: " i h.8 space ." found: " i b@ h.2
+      i c@ over <> if
+	cr ." Error at: " i h.8 space ." found: " i c@ h.2
       then
     loop
     drop
