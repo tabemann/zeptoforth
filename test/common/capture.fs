@@ -138,7 +138,7 @@ variable capture-enabled
 
 \ Get the current character from an emit capture test
 : capture-current ( capture -- b )
-  dup capture-off h@ swap capture-addr @ + b@
+  dup capture-off h@ swap capture-addr @ + c@
 ;
 
 \ Advance an emit capture test
@@ -174,7 +174,7 @@ variable capture-enabled
 : handle-capture-ignore-last ( b capture -- complete )
   dup capture-type h@ capture-ignore = if
     dup capture-off h@ dup 0= 2 pick capture-len h@ rot = or if
-      dup capture-addr @ b@ rot = if
+      dup capture-addr @ c@ rot = if
 	1 over capture-off h!
 	dup capture-limit h@ 1- dup 0>= if
 	  over capture-limit h! false

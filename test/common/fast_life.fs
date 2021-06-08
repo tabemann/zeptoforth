@@ -70,13 +70,13 @@ begin-module-once life-module
   ;
 
   \ Get whether a life cell is alive
-  : alive? ( x y -- alive? ) life-width @ * + current-buffer @ + b@ 16 >= ;
+  : alive? ( x y -- alive? ) life-width @ * + current-buffer @ + c@ 16 >= ;
 
   \ Add alive neighbor
-  : +alive ( x y -- ) life-width @ * + current-buffer @ + 1 swap b+! ;
+  : +alive ( x y -- ) life-width @ * + current-buffer @ + 1 swap c+! ;
 
   \ Remove alive neighbor
-  : -alive ( x y -- ) life-width @ * + current-buffer @ + -1 swap b+! ;
+  : -alive ( x y -- ) life-width @ * + current-buffer @ + -1 swap c+! ;
 
   \ Set a life cell to be dead
   : set-dead ( x y -- )
@@ -114,13 +114,13 @@ begin-module-once life-module
   ;
 
   \ Get whether a new life cell is alive
-  : new-alive? ( x y -- alive? ) life-width @ * + new-buffer @ + b@ 16 >= ;
+  : new-alive? ( x y -- alive? ) life-width @ * + new-buffer @ + c@ 16 >= ;
 
   \ Add new alive neighbor
-  : +new-alive ( x y -- ) life-width @ * + new-buffer @ + 1 swap b+! ;
+  : +new-alive ( x y -- ) life-width @ * + new-buffer @ + 1 swap c+! ;
 
   \ Remove new alive neighbor
-  : -new-alive ( x y -- ) life-width @ * + new-buffer @ + -1 swap b+! ;
+  : -new-alive ( x y -- ) life-width @ * + new-buffer @ + -1 swap c+! ;
 
   \ Set a new life cell to be dead
   : set-new-dead ( x y -- )
@@ -215,7 +215,7 @@ begin-module-once life-module
 
   \ Cycle a non-border life cell
   : cycle-cell ( x y -- )
-    2dup life-width @ * + current-buffer @ + b@ 2 lshift
+    2dup life-width @ * + current-buffer @ + c@ 2 lshift
     nonborder-state-table + @ execute
   ;
 
@@ -355,13 +355,13 @@ begin-module-once life-module
 	2dup 3 + alive? 8 and r> or >r
 	2dup 4 + alive? 16 and r> or >r
 	2dup 5 + alive? 32 and r> or >r
-	swap dup life-line-buffer @ + r@ swap b!
+	swap dup life-line-buffer @ + r@ swap c!
 	r> [char] ? + add-sixel-rle
 	1+
       repeat
       drop force-sixel-rle-out ." $#0" init-sixel-rle
       life-display-x @ begin dup life-display-x-end @ < while
-	dup life-line-buffer @ + b@ 63 swap bic
+	dup life-line-buffer @ + c@ 63 swap bic
 	[char] ? + add-sixel-rle
 	1+
       repeat
@@ -391,14 +391,14 @@ begin-module-once life-module
       life-display-y-end @ 6 / 6 * 5 + life-height @ < if
 	dup life-display-y-end @ 6 / 6 * 5 + alive? 32 and r> or >r
       then
-      dup life-line-buffer @ + r@ swap b!
+      dup life-line-buffer @ + r@ swap c!
       r> [char] ? + add-sixel-rle
       1+
     repeat
     drop
     force-sixel-rle-out ." $#0" init-sixel-rle
     life-display-x @ begin dup life-display-x-end @ < while
-      dup life-line-buffer @ + b@ 63 swap bic
+      dup life-line-buffer @ + c@ 63 swap bic
       [char] ? + add-sixel-rle
       1+
     repeat
@@ -417,13 +417,13 @@ begin-module-once life-module
 	2dup alive? 3 and r> or >r
 	2dup 1 + alive? 12 and r> or >r
 	2dup 2 + alive? 48 and r> or >r
-	swap dup life-line-buffer @ + r@ swap b!
+	swap dup life-line-buffer @ + r@ swap c!
 	r> [char] ? + add-sixel-rle2
 	1+
       repeat
       drop force-sixel-rle-out ." $#0" init-sixel-rle
       life-display-x @ begin dup life-display-x-end @ < while
-	dup life-line-buffer @ + b@ 63 swap bic
+	dup life-line-buffer @ + c@ 63 swap bic
 	[char] ? + add-sixel-rle2
 	1+
       repeat
@@ -444,14 +444,14 @@ begin-module-once life-module
       life-display-y-end @ 3 / 3 * 2 + life-height @ < if
 	dup life-display-y-end @ 3 / 3 * 2 + alive? 48 and r> or >r
       then
-      dup life-line-buffer @ + r@ swap b!
+      dup life-line-buffer @ + r@ swap c!
       r> [char] ? + add-sixel-rle2
       1+
     repeat
     drop
     force-sixel-rle-out ." $#0" init-sixel-rle
     life-display-x @ begin dup life-display-x-end @ < while
-      dup life-line-buffer @ + b@ 63 swap bic
+      dup life-line-buffer @ + c@ 63 swap bic
       [char] ? + add-sixel-rle2
       1+
     repeat
@@ -573,7 +573,7 @@ begin-module-once life-module
   : get-char ( addr1 bytes1 -- addr2 bytes2 c )
     begin
       dup 0 > if
-	over b@ dup $20 <> if
+	over c@ dup $20 <> if
 	  rot 1 + rot 1 - rot true
 	else
 	  drop 1 - swap 1 + swap false
