@@ -556,7 +556,7 @@ Recursively call a word
 
 Unknown word exception
 	
-##### `b!`
+##### `c!`
 ( b b-addr -- )
 
 Store a byte
@@ -576,7 +576,7 @@ Store a word
 
 Store a doubleword
 
-##### `b+!`
+##### `c+!`
 ( x b-addr -- )
 
 Read a byte from an address, add a value, and write it back
@@ -591,7 +591,7 @@ Read a halfword from an address, add a value, and write it back
 
 Read a word from an address, add a value, and write it back
 
-##### `b@`
+##### `c@`
 ( b-addr -- b )
 
 Get a byte
@@ -611,7 +611,7 @@ Get a word
 
 Get a doubleword
 
-##### `bram,`
+##### `cram,`
 ( b -- )
 
 Store a byte at the RAM HERE location
@@ -631,7 +631,7 @@ Store a word at the RAM HERE location
 
 Store a doubleword at the RAM HERE location
 
-##### `bflash,`
+##### `cflash,`
 ( b -- )
 
 Store a byte at the flash HERE location
@@ -651,7 +651,7 @@ Store a word at the flash HERE location
 
 Store a doubleword at the flash HERE location
 
-##### `bcurrent!`
+##### `ccurrent!`
 ( b b-addr -- )
 
 Store a byte to RAM or to flash
@@ -671,7 +671,7 @@ Store a word to RAM or to flash
 
 Store a doubleword to RAM or to flash
 
-##### `b,`
+##### `c,`
 ( b -- )
 
 Store a byte to the RAM or flash HERE location
@@ -691,7 +691,7 @@ Store a word to the RAM or flash HERE location
 
 Store a doubleword to the RAM or flash HERE location
 
-##### `bram-reserve`
+##### `cram-reserve`
 ( -- addr )
 
 Reserve a byte at the RAM HERE location
@@ -711,7 +711,7 @@ Reserve a word at the RAM HERE location
 
 Reserve a doubleword at the RAM HERE location
 
-##### `bflash-reserve`
+##### `cflash-reserve`
 ( -- addr )
 
 Reserve a byte at the flash HERE location
@@ -731,7 +731,7 @@ Reserve a word at the flash HERE location
 
 Reserve a doubleword at the flash HERE location
 
-##### `breserve`
+##### `creserve`
 ( -- addr )
 
 Reserve a byte at the RAM or flash HERE location
@@ -905,7 +905,7 @@ Align an address to a power of two
 
 Duplicate a cell if it is non-zero
 
-##### `bbit@`
+##### `cbit@`
 ( mask b-addr -- f )
 
 Test for bits in a byte being set
@@ -920,12 +920,12 @@ Test for bits in a halfword being set
 
 Test for bits in a cell being set
 
-##### `bbis!`
+##### `cbis!`
 ( bits addr -- )
 
 Set bits on a byte
 
-##### `bbic!`
+##### `cbic!`
 ( bits addr -- )
 
 Clear bits on a byte
@@ -1070,7 +1070,7 @@ Finish declaring a structure
 
 Create an arbitrary-sized field
 
-##### `bfield:`
+##### `cfield:`
 ( offset "name" -- offset )
 
 Create a byte-sized field
@@ -1130,7 +1130,7 @@ Start an OFSTRCASE clause
 
 End a CASE statement comparing against a string
 
-##### `buser`
+##### `cuser`
 ( "name" -- )
 
 Allocate a byte user variable
@@ -1160,7 +1160,7 @@ Allocate a user buffer
 
 Allocate a cell-aligned user buffer
 
-##### `bvariable`
+##### `cvariable`
 ( "name" -- )
 
 Create a one-byte variable
