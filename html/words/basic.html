@@ -586,8 +586,8 @@ available, so as to enable any source file to call a preceding init</p>
 <p>( – )</p>
 <p>Unknown word exception</p>
 </div>
-<div class="section" id="b">
-<h2><code class="docutils literal notranslate"><span class="pre">b!</span></code><a class="headerlink" href="#b" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="c">
+<h2><code class="docutils literal notranslate"><span class="pre">c!</span></code><a class="headerlink" href="#c" title="Permalink to this headline">¶</a></h2>
 <p>( b b-addr – )</p>
 <p>Store a byte</p>
 </div>
@@ -607,7 +607,7 @@ available, so as to enable any source file to call a preceding init</p>
 <p>Store a doubleword</p>
 </div>
 <div class="section" id="id47">
-<h2><code class="docutils literal notranslate"><span class="pre">b+!</span></code><a class="headerlink" href="#id47" title="Permalink to this headline">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">c+!</span></code><a class="headerlink" href="#id47" title="Permalink to this headline">¶</a></h2>
 <p>( x b-addr – )</p>
 <p>Read a byte from an address, add a value, and write it back</p>
 </div>
@@ -622,7 +622,7 @@ available, so as to enable any source file to call a preceding init</p>
 <p>Read a word from an address, add a value, and write it back</p>
 </div>
 <div class="section" id="id50">
-<h2><code class="docutils literal notranslate"><span class="pre">b&#64;</span></code><a class="headerlink" href="#id50" title="Permalink to this headline">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">c&#64;</span></code><a class="headerlink" href="#id50" title="Permalink to this headline">¶</a></h2>
 <p>( b-addr – b )</p>
 <p>Get a byte</p>
 </div>
@@ -641,8 +641,8 @@ available, so as to enable any source file to call a preceding init</p>
 <p>( a-addr – d )</p>
 <p>Get a doubleword</p>
 </div>
-<div class="section" id="bram">
-<h2><code class="docutils literal notranslate"><span class="pre">bram,</span></code><a class="headerlink" href="#bram" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="cram">
+<h2><code class="docutils literal notranslate"><span class="pre">cram,</span></code><a class="headerlink" href="#cram" title="Permalink to this headline">¶</a></h2>
 <p>( b – )</p>
 <p>Store a byte at the RAM HERE location</p>
 </div>
@@ -661,8 +661,8 @@ available, so as to enable any source file to call a preceding init</p>
 <p>( d – )</p>
 <p>Store a doubleword at the RAM HERE location</p>
 </div>
-<div class="section" id="bflash">
-<h2><code class="docutils literal notranslate"><span class="pre">bflash,</span></code><a class="headerlink" href="#bflash" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="cflash">
+<h2><code class="docutils literal notranslate"><span class="pre">cflash,</span></code><a class="headerlink" href="#cflash" title="Permalink to this headline">¶</a></h2>
 <p>( b – )</p>
 <p>Store a byte at the flash HERE location</p>
 </div>
@@ -681,8 +681,8 @@ available, so as to enable any source file to call a preceding init</p>
 <p>( d – )</p>
 <p>Store a doubleword at the flash HERE location</p>
 </div>
-<div class="section" id="bcurrent">
-<h2><code class="docutils literal notranslate"><span class="pre">bcurrent!</span></code><a class="headerlink" href="#bcurrent" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="ccurrent">
+<h2><code class="docutils literal notranslate"><span class="pre">ccurrent!</span></code><a class="headerlink" href="#ccurrent" title="Permalink to this headline">¶</a></h2>
 <p>( b b-addr – )</p>
 <p>Store a byte to RAM or to flash</p>
 </div>
@@ -702,7 +702,7 @@ available, so as to enable any source file to call a preceding init</p>
 <p>Store a doubleword to RAM or to flash</p>
 </div>
 <div class="section" id="id57">
-<h2><code class="docutils literal notranslate"><span class="pre">b,</span></code><a class="headerlink" href="#id57" title="Permalink to this headline">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">c,</span></code><a class="headerlink" href="#id57" title="Permalink to this headline">¶</a></h2>
 <p>( b – )</p>
 <p>Store a byte to the RAM or flash HERE location</p>
 </div>
@@ -721,8 +721,8 @@ available, so as to enable any source file to call a preceding init</p>
 <p>( d – )</p>
 <p>Store a doubleword to the RAM or flash HERE location</p>
 </div>
-<div class="section" id="bram-reserve">
-<h2><code class="docutils literal notranslate"><span class="pre">bram-reserve</span></code><a class="headerlink" href="#bram-reserve" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="cram-reserve">
+<h2><code class="docutils literal notranslate"><span class="pre">cram-reserve</span></code><a class="headerlink" href="#cram-reserve" title="Permalink to this headline">¶</a></h2>
 <p>( – addr )</p>
 <p>Reserve a byte at the RAM HERE location</p>
 </div>
@@ -741,8 +741,8 @@ available, so as to enable any source file to call a preceding init</p>
 <p>( – addr )</p>
 <p>Reserve a doubleword at the RAM HERE location</p>
 </div>
-<div class="section" id="bflash-reserve">
-<h2><code class="docutils literal notranslate"><span class="pre">bflash-reserve</span></code><a class="headerlink" href="#bflash-reserve" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="cflash-reserve">
+<h2><code class="docutils literal notranslate"><span class="pre">cflash-reserve</span></code><a class="headerlink" href="#cflash-reserve" title="Permalink to this headline">¶</a></h2>
 <p>( – addr )</p>
 <p>Reserve a byte at the flash HERE location</p>
 </div>
@@ -761,8 +761,8 @@ available, so as to enable any source file to call a preceding init</p>
 <p>( – addr )</p>
 <p>Reserve a doubleword at the flash HERE location</p>
 </div>
-<div class="section" id="breserve">
-<h2><code class="docutils literal notranslate"><span class="pre">breserve</span></code><a class="headerlink" href="#breserve" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="creserve">
+<h2><code class="docutils literal notranslate"><span class="pre">creserve</span></code><a class="headerlink" href="#creserve" title="Permalink to this headline">¶</a></h2>
 <p>( – addr )</p>
 <p>Reserve a byte at the RAM or flash HERE location</p>
 </div>
@@ -948,8 +948,8 @@ available, so as to enable any source file to call a preceding init</p>
 <p>( x – x | 0 )</p>
 <p>Duplicate a cell if it is non-zero</p>
 </div>
-<div class="section" id="bbit">
-<h2><code class="docutils literal notranslate"><span class="pre">bbit&#64;</span></code><a class="headerlink" href="#bbit" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="cbit">
+<h2><code class="docutils literal notranslate"><span class="pre">cbit&#64;</span></code><a class="headerlink" href="#cbit" title="Permalink to this headline">¶</a></h2>
 <p>( mask b-addr – f )</p>
 <p>Test for bits in a byte being set</p>
 </div>
@@ -963,13 +963,13 @@ available, so as to enable any source file to call a preceding init</p>
 <p>( mask addr – f )</p>
 <p>Test for bits in a cell being set</p>
 </div>
-<div class="section" id="bbis">
-<h2><code class="docutils literal notranslate"><span class="pre">bbis!</span></code><a class="headerlink" href="#bbis" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="cbis">
+<h2><code class="docutils literal notranslate"><span class="pre">cbis!</span></code><a class="headerlink" href="#cbis" title="Permalink to this headline">¶</a></h2>
 <p>( bits addr – )</p>
 <p>Set bits on a byte</p>
 </div>
-<div class="section" id="bbic">
-<h2><code class="docutils literal notranslate"><span class="pre">bbic!</span></code><a class="headerlink" href="#bbic" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="cbic">
+<h2><code class="docutils literal notranslate"><span class="pre">cbic!</span></code><a class="headerlink" href="#cbic" title="Permalink to this headline">¶</a></h2>
 <p>( bits addr – )</p>
 <p>Clear bits on a byte</p>
 </div>
@@ -1111,8 +1111,8 @@ otherwise passing the specified argument through.</p>
 <p>( offset size “name” – offset )</p>
 <p>Create an arbitrary-sized field</p>
 </div>
-<div class="section" id="bfield">
-<h2><code class="docutils literal notranslate"><span class="pre">bfield:</span></code><a class="headerlink" href="#bfield" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="cfield">
+<h2><code class="docutils literal notranslate"><span class="pre">cfield:</span></code><a class="headerlink" href="#cfield" title="Permalink to this headline">¶</a></h2>
 <p>( offset “name” – offset )</p>
 <p>Create a byte-sized field</p>
 </div>
@@ -1171,8 +1171,8 @@ otherwise passing the specified argument through.</p>
 <p>( x – )</p>
 <p>End a CASE statement comparing against a string</p>
 </div>
-<div class="section" id="buser">
-<h2><code class="docutils literal notranslate"><span class="pre">buser</span></code><a class="headerlink" href="#buser" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="cuser">
+<h2><code class="docutils literal notranslate"><span class="pre">cuser</span></code><a class="headerlink" href="#cuser" title="Permalink to this headline">¶</a></h2>
 <p>( “name” – )</p>
 <p>Allocate a byte user variable</p>
 </div>
@@ -1201,8 +1201,8 @@ otherwise passing the specified argument through.</p>
 <p>( bytes “name” – )</p>
 <p>Allocate a cell-aligned user buffer</p>
 </div>
-<div class="section" id="bvariable">
-<h2><code class="docutils literal notranslate"><span class="pre">bvariable</span></code><a class="headerlink" href="#bvariable" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="cvariable">
+<h2><code class="docutils literal notranslate"><span class="pre">cvariable</span></code><a class="headerlink" href="#cvariable" title="Permalink to this headline">¶</a></h2>
 <p>( “name” – )</p>
 <p>Create a one-byte variable</p>
 </div>
@@ -1661,33 +1661,33 @@ otherwise passing the specified argument through.</p>
 <p>( “text<quote>” – ) ( compiled: – b-addr u )</p>
 <p>Compile a non-counted string</p>
 </div>
-<div class="section" id="c">
-<h2><code class="docutils literal notranslate"><span class="pre">c&quot;</span></code><a class="headerlink" href="#c" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id100">
+<h2><code class="docutils literal notranslate"><span class="pre">c&quot;</span></code><a class="headerlink" href="#id100" title="Permalink to this headline">¶</a></h2>
 <p>( “text<quote>” – ) ( compiled: – b-addr )</p>
 <p>Compile a counted-string</p>
 </div>
-<div class="section" id="id100">
-<h2><code class="docutils literal notranslate"><span class="pre">.(</span></code><a class="headerlink" href="#id100" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id101">
+<h2><code class="docutils literal notranslate"><span class="pre">.(</span></code><a class="headerlink" href="#id101" title="Permalink to this headline">¶</a></h2>
 <p>( “text<close-paren>” – )</p>
 <p>Immediately print a string.</p>
 </div>
-<div class="section" id="id101">
-<h2><code class="docutils literal notranslate"><span class="pre">.\&quot;</span></code><a class="headerlink" href="#id101" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id102">
+<h2><code class="docutils literal notranslate"><span class="pre">.\&quot;</span></code><a class="headerlink" href="#id102" title="Permalink to this headline">¶</a></h2>
 <p>( “text<quote>” – )</p>
 <p>Compile an escaped string to be printed.</p>
 </div>
-<div class="section" id="id102">
-<h2><code class="docutils literal notranslate"><span class="pre">s\&quot;</span></code><a class="headerlink" href="#id102" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id103">
+<h2><code class="docutils literal notranslate"><span class="pre">s\&quot;</span></code><a class="headerlink" href="#id103" title="Permalink to this headline">¶</a></h2>
 <p>( “text<quote>” – ) ( compiled: – b-addr u )</p>
 <p>Compile an escaped non-counted string</p>
 </div>
-<div class="section" id="id103">
-<h2><code class="docutils literal notranslate"><span class="pre">c\&quot;</span></code><a class="headerlink" href="#id103" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id104">
+<h2><code class="docutils literal notranslate"><span class="pre">c\&quot;</span></code><a class="headerlink" href="#id104" title="Permalink to this headline">¶</a></h2>
 <p>( “text<quote>” – ) ( compiled: – b-addr )</p>
 <p>Compile an escaped counted-string</p>
 </div>
-<div class="section" id="id104">
-<h2><code class="docutils literal notranslate"><span class="pre">.\(</span></code><a class="headerlink" href="#id104" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id105">
+<h2><code class="docutils literal notranslate"><span class="pre">.\(</span></code><a class="headerlink" href="#id105" title="Permalink to this headline">¶</a></h2>
 <p>( “text<close-paren>” – )</p>
 <p>Immediately print an escaped string.</p>
 </div>
@@ -1701,18 +1701,18 @@ otherwise passing the specified argument through.</p>
 <p>( “char” – b )</p>
 <p>Parse a character and put it on the stack</p>
 </div>
-<div class="section" id="id105">
-<h2><code class="docutils literal notranslate"><span class="pre">[char]</span></code><a class="headerlink" href="#id105" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id106">
+<h2><code class="docutils literal notranslate"><span class="pre">[char]</span></code><a class="headerlink" href="#id106" title="Permalink to this headline">¶</a></h2>
 <p>( “char” – ) ( compiled: – b )</p>
 <p>Parse a character and compile it</p>
 </div>
-<div class="section" id="id106">
-<h2><code class="docutils literal notranslate"><span class="pre">(.)</span></code><a class="headerlink" href="#id106" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id107">
+<h2><code class="docutils literal notranslate"><span class="pre">(.)</span></code><a class="headerlink" href="#id107" title="Permalink to this headline">¶</a></h2>
 <p>( n – )</p>
 <p>Type an integer without a preceding space</p>
 </div>
-<div class="section" id="id107">
-<h2><code class="docutils literal notranslate"><span class="pre">(u.)</span></code><a class="headerlink" href="#id107" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id108">
+<h2><code class="docutils literal notranslate"><span class="pre">(u.)</span></code><a class="headerlink" href="#id108" title="Permalink to this headline">¶</a></h2>
 <p>( u – )</p>
 <p>Type an unsigned integer without a preceding space</p>
 </div>
@@ -1721,13 +1721,13 @@ otherwise passing the specified argument through.</p>
 <p>( u – )</p>
 <p>Type an unsigned hexadecimal integer safely without a preceding space</p>
 </div>
-<div class="section" id="id108">
-<h2><code class="docutils literal notranslate"><span class="pre">.</span></code><a class="headerlink" href="#id108" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id109">
+<h2><code class="docutils literal notranslate"><span class="pre">.</span></code><a class="headerlink" href="#id109" title="Permalink to this headline">¶</a></h2>
 <p>( n – )</p>
 <p>Type an integer with a preceding space</p>
 </div>
-<div class="section" id="id109">
-<h2><code class="docutils literal notranslate"><span class="pre">u.</span></code><a class="headerlink" href="#id109" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id110">
+<h2><code class="docutils literal notranslate"><span class="pre">u.</span></code><a class="headerlink" href="#id110" title="Permalink to this headline">¶</a></h2>
 <p>( u – )</p>
 <p>Type an unsigned integer with a preceding space</p>
 </div>
@@ -1892,42 +1892,42 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l2"><a class="reference internal" href="#literal"><code class="docutils literal notranslate"><span class="pre">literal</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#recurse"><code class="docutils literal notranslate"><span class="pre">recurse</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#unknown-word"><code class="docutils literal notranslate"><span class="pre">unknown-word</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#b"><code class="docutils literal notranslate"><span class="pre">b!</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#c"><code class="docutils literal notranslate"><span class="pre">c!</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#h"><code class="docutils literal notranslate"><span class="pre">h!</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id45"><code class="docutils literal notranslate"><span class="pre">!</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id46"><code class="docutils literal notranslate"><span class="pre">2!</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id47"><code class="docutils literal notranslate"><span class="pre">b+!</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id47"><code class="docutils literal notranslate"><span class="pre">c+!</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id48"><code class="docutils literal notranslate"><span class="pre">h+!</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id49"><code class="docutils literal notranslate"><span class="pre">+!</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id50"><code class="docutils literal notranslate"><span class="pre">b&#64;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id50"><code class="docutils literal notranslate"><span class="pre">c&#64;</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id51"><code class="docutils literal notranslate"><span class="pre">h&#64;</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id52"><code class="docutils literal notranslate"><span class="pre">&#64;</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id53"><code class="docutils literal notranslate"><span class="pre">2&#64;</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#bram"><code class="docutils literal notranslate"><span class="pre">bram,</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cram"><code class="docutils literal notranslate"><span class="pre">cram,</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#hram"><code class="docutils literal notranslate"><span class="pre">hram,</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ram"><code class="docutils literal notranslate"><span class="pre">ram,</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id54"><code class="docutils literal notranslate"><span class="pre">2ram,</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#bflash"><code class="docutils literal notranslate"><span class="pre">bflash,</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cflash"><code class="docutils literal notranslate"><span class="pre">cflash,</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#hflash"><code class="docutils literal notranslate"><span class="pre">hflash,</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#flash"><code class="docutils literal notranslate"><span class="pre">flash,</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id55"><code class="docutils literal notranslate"><span class="pre">2flash,</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#bcurrent"><code class="docutils literal notranslate"><span class="pre">bcurrent!</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ccurrent"><code class="docutils literal notranslate"><span class="pre">ccurrent!</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#hcurrent"><code class="docutils literal notranslate"><span class="pre">hcurrent!</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#current"><code class="docutils literal notranslate"><span class="pre">current!</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id56"><code class="docutils literal notranslate"><span class="pre">2current!</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id57"><code class="docutils literal notranslate"><span class="pre">b,</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id57"><code class="docutils literal notranslate"><span class="pre">c,</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id58"><code class="docutils literal notranslate"><span class="pre">h,</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id59"><code class="docutils literal notranslate"><span class="pre">,</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id60"><code class="docutils literal notranslate"><span class="pre">2,</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#bram-reserve"><code class="docutils literal notranslate"><span class="pre">bram-reserve</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cram-reserve"><code class="docutils literal notranslate"><span class="pre">cram-reserve</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#hram-reserve"><code class="docutils literal notranslate"><span class="pre">hram-reserve</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ram-reserve"><code class="docutils literal notranslate"><span class="pre">ram-reserve</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id61"><code class="docutils literal notranslate"><span class="pre">2ram-reserve</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#bflash-reserve"><code class="docutils literal notranslate"><span class="pre">bflash-reserve</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cflash-reserve"><code class="docutils literal notranslate"><span class="pre">cflash-reserve</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#hflash-reserve"><code class="docutils literal notranslate"><span class="pre">hflash-reserve</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#flash-reserve"><code class="docutils literal notranslate"><span class="pre">flash-reserve</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id62"><code class="docutils literal notranslate"><span class="pre">2flash-reserve</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#breserve"><code class="docutils literal notranslate"><span class="pre">breserve</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#creserve"><code class="docutils literal notranslate"><span class="pre">creserve</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#hreserve"><code class="docutils literal notranslate"><span class="pre">hreserve</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#reserve"><code class="docutils literal notranslate"><span class="pre">reserve</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id63"><code class="docutils literal notranslate"><span class="pre">2reserve</span></code></a></li>
@@ -1967,11 +1967,11 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l2"><a class="reference internal" href="#abs"><code class="docutils literal notranslate"><span class="pre">abs</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id72"><code class="docutils literal notranslate"><span class="pre">align</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id73"><code class="docutils literal notranslate"><span class="pre">?dup</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#bbit"><code class="docutils literal notranslate"><span class="pre">bbit&#64;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cbit"><code class="docutils literal notranslate"><span class="pre">cbit&#64;</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#hbit"><code class="docutils literal notranslate"><span class="pre">hbit&#64;</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#bit"><code class="docutils literal notranslate"><span class="pre">bit&#64;</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#bbis"><code class="docutils literal notranslate"><span class="pre">bbis!</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#bbic"><code class="docutils literal notranslate"><span class="pre">bbic!</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cbis"><code class="docutils literal notranslate"><span class="pre">cbis!</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cbic"><code class="docutils literal notranslate"><span class="pre">cbic!</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#hbis"><code class="docutils literal notranslate"><span class="pre">hbis!</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#hbic"><code class="docutils literal notranslate"><span class="pre">hbic!</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#bis"><code class="docutils literal notranslate"><span class="pre">bis!</span></code></a></li>
@@ -1999,7 +1999,7 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l2"><a class="reference internal" href="#begin-structure"><code class="docutils literal notranslate"><span class="pre">begin-structure</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#end"><code class="docutils literal notranslate"><span class="pre">end</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#field"><code class="docutils literal notranslate"><span class="pre">+field</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#bfield"><code class="docutils literal notranslate"><span class="pre">bfield:</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cfield"><code class="docutils literal notranslate"><span class="pre">cfield:</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#hfield"><code class="docutils literal notranslate"><span class="pre">hfield:</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id75"><code class="docutils literal notranslate"><span class="pre">field:</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id76"><code class="docutils literal notranslate"><span class="pre">2field:</span></code></a></li>
@@ -2011,13 +2011,13 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l2"><a class="reference internal" href="#ofstr"><code class="docutils literal notranslate"><span class="pre">ofstr</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ofstrcase"><code class="docutils literal notranslate"><span class="pre">ofstrcase</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#endcasestr"><code class="docutils literal notranslate"><span class="pre">endcasestr</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#buser"><code class="docutils literal notranslate"><span class="pre">buser</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cuser"><code class="docutils literal notranslate"><span class="pre">cuser</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#huser"><code class="docutils literal notranslate"><span class="pre">huser</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#user"><code class="docutils literal notranslate"><span class="pre">user</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id77"><code class="docutils literal notranslate"><span class="pre">2user</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#user-buffer"><code class="docutils literal notranslate"><span class="pre">user-buffer:</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#user-aligned-buffer"><code class="docutils literal notranslate"><span class="pre">user-aligned-buffer:</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#bvariable"><code class="docutils literal notranslate"><span class="pre">bvariable</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cvariable"><code class="docutils literal notranslate"><span class="pre">cvariable</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#hvariable"><code class="docutils literal notranslate"><span class="pre">hvariable</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#variable"><code class="docutils literal notranslate"><span class="pre">variable</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id78"><code class="docutils literal notranslate"><span class="pre">2variable</span></code></a></li>
@@ -2109,20 +2109,20 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l2"><a class="reference internal" href="#license"><code class="docutils literal notranslate"><span class="pre">license</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id98"><code class="docutils literal notranslate"><span class="pre">.&quot;</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id99"><code class="docutils literal notranslate"><span class="pre">s&quot;</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#c"><code class="docutils literal notranslate"><span class="pre">c&quot;</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id100"><code class="docutils literal notranslate"><span class="pre">.(</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id101"><code class="docutils literal notranslate"><span class="pre">.\&quot;</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id102"><code class="docutils literal notranslate"><span class="pre">s\&quot;</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id103"><code class="docutils literal notranslate"><span class="pre">c\&quot;</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id104"><code class="docutils literal notranslate"><span class="pre">.\(</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id100"><code class="docutils literal notranslate"><span class="pre">c&quot;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id101"><code class="docutils literal notranslate"><span class="pre">.(</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id102"><code class="docutils literal notranslate"><span class="pre">.\&quot;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id103"><code class="docutils literal notranslate"><span class="pre">s\&quot;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id104"><code class="docutils literal notranslate"><span class="pre">c\&quot;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id105"><code class="docutils literal notranslate"><span class="pre">.\(</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#compile-cstring"><code class="docutils literal notranslate"><span class="pre">compile-cstring</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#char"><code class="docutils literal notranslate"><span class="pre">char</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id105"><code class="docutils literal notranslate"><span class="pre">[char]</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id106"><code class="docutils literal notranslate"><span class="pre">(.)</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id107"><code class="docutils literal notranslate"><span class="pre">(u.)</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id106"><code class="docutils literal notranslate"><span class="pre">[char]</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id107"><code class="docutils literal notranslate"><span class="pre">(.)</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id108"><code class="docutils literal notranslate"><span class="pre">(u.)</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#debugu"><code class="docutils literal notranslate"><span class="pre">debugu.</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id108"><code class="docutils literal notranslate"><span class="pre">.</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id109"><code class="docutils literal notranslate"><span class="pre">u.</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id109"><code class="docutils literal notranslate"><span class="pre">.</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id110"><code class="docutils literal notranslate"><span class="pre">u.</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#move"><code class="docutils literal notranslate"><span class="pre">move</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#reverse"><code class="docutils literal notranslate"><span class="pre">reverse</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#format-unsigned"><code class="docutils literal notranslate"><span class="pre">format-unsigned</span></code></a></li>
