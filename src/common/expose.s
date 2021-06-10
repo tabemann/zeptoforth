@@ -1,4 +1,4 @@
-@ Copyright (c) 2020 Travis Bemann
+@ Copyright (c) 2020-2021 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -303,45 +303,21 @@ _validate_dict_hook:
 	bx lr
 	end_inlined
 
-	@@ Get the FAULT-HANDLER-HOOK variable address
-	define_word "fault-handler-hook", visible_flag
-_fault_handler_hook:
+	@@ The vector table address
+	define_word "vector-table", visible_flag
+_vector_table:
 	push_tos
-	ldr tos, =fault_handler_hook
+	ldr tos, =vector_table
 	bx lr
 	end_inlined
 
-	@@ Get the NULL-HANDLER-HOOK variable address
-	define_word "null-handler-hook", visible_flag
-_null_handler_hook:
+	@@ The vector count
+	define_word "vector-count", visible_flag
+_vector_count:
 	push_tos
-	ldr tos, =null_handler_hook
+	ldr tos, =vector_count
 	bx lr
 	end_inlined
-
-	@@ Get the SVCALL-HANDLER-HOOK variable address
-	define_word "svcall-handler-hook", visible_flag
-_svcall_handler_hook:
-	push_tos
-	ldr tos, =svcall_handler_hook
-	bx lr
-	end_inlined
-
-	@@ Get the PENDSV-HANDLER-HOOK variable address
-	define_word "pendsv-handler-hook", visible_flag
-_pendsv_handler_hook:
-	push_tos
-	ldr tos, =pendsv_handler_hook
-	bx lr
-	end_inlined
-
-	@@ Get the SYSTICK-HANDLER-HOOK variable address
-	define_word "systick-handler-hook", visible_flag
-_systick_handler_hook:
-	push_tos
-	ldr tos, =systick_handler_hook
-	bx lr
-	end_inlined
-
+	
 	.ltorg
 	

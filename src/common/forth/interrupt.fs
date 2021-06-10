@@ -22,6 +22,21 @@
 compile-to-flash
 
 begin-module-once interrupt-module
+
+  \ Invalid interrupt vector index exception
+  : x-invalid-vector ( -- ) space ." invalid vector" cr ;
+  
+  \ Set an interrupt vector
+  : vector! ( xt vector-index -- )
+    dup 0 > over vector-count < or averts x-invalid-vector
+    swap 1+ swap cells vector-table + !
+  ;
+
+  \ Get an interrupt vector
+  : vector@ ( vector-index -- xt )
+    dup 0 > over vector-count < or averts x-invalid-vector
+    cells vector-table + @ 1-
+  ;
   
   \ SHPRx registers
   $E000ED18 constant SHPR1

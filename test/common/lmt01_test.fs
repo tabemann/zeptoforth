@@ -133,7 +133,7 @@ begin-module-once temp-module
     5 GPIOE 2 sensor!
     init-sensors
     PE 2 SYSCFG_EXTICRx!
-    ['] handle-exti-2 exti-2-handler-hook !
+    ['] handle-exti-2 EXTI_2 16 + vector!
     0 EXTI_2 NVIC_IPR_IP!
     EXTI_2 NVIC_ISER_SETENA!
     true 2 EXTI_FTSR!

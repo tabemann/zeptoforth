@@ -38,7 +38,7 @@
 	.p2align 2
 	
 	@@ The entry point
-handle_reset:
+_handle_reset:
 	@@ Initialize r11, relied upon by swdcom
 	mov r11, #0
 	@@ Initialize the top of stack register
@@ -58,12 +58,14 @@ handle_reset:
 	ldr r0, =here
 	ldr r1, =ram_current
 	str r1, [r0]
+	@@ Initialize the in-RAM vector table
+	bl _init_vector_table
 	@@ Call the rest of the runtime in an exception handler
 	push_tos
 	ldr tos, =outer_exc_handled
 	bl _try
 	@@ If the inner loop returns, reboot
-	b handle_reset
+	b _handle_reset
 
 	@@ The outermost exception handling - if an exception happens here the
 	@@ system will reboot
@@ -82,7 +84,6 @@ outer_exc_handled:
 @	.include "src/stm32f746/clock.s"
 	.include "src/stm32f746/flashrom.s"
 	.include "src/stm32f746/console.s"
-	.include "src/stm32f746/handlers.s"
 	.include "src/stm32f746/expose.s"
 	.include "src/common/core.s"
 	.include "src/common/outer.s"

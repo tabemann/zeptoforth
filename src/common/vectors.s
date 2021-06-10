@@ -21,19 +21,19 @@
 
 vectors:
 	.word rstack_top
-	.word handle_reset+1 	@ 1: the reset handler
-	.word handle_fault+1	@ 2: the NMI handler
-	.word handle_fault+1    @ 3: the hard fault handler
-	.word handle_fault+1  @ 4: the MPU fault handler
-	.word handle_fault+1  @ 5: the bus fault handler
-	.word handle_fault+1  @ 6: the usage fault handler
+	.word _handle_reset+1 	@ 1: the reset handler
+	.word _handle_null+1	@ 2: the NMI handler
+	.word _handle_null+1    @ 3: the hard fault handler
+	.word _handle_null+1  @ 4: the MPU fault handler
+	.word _handle_null+1  @ 5: the bus fault handler
+	.word _handle_null+1  @ 6: the usage fault handler
 	.word 0               @ 7: reserved
 	.word 0               @ 8: reserved
 	.word 0               @ 9: reserved
 	.word 0               @ 10: reserved
-	.word handle_svcall+1   @ 11: SVCall handler
-	.word handle_null+1   @ 12: debug handler
+	.word _handle_null+1   @ 11: SVCall handler
+	.word _handle_null+1   @ 12: debug handler
 	.word 0               @ 13: reserved
-	.word handle_pendsv+1   @ 14: the PendSV handler
-	.word handle_systick+1  @ 15: the Systick handler
+	.word _handle_null+1   @ 14: the PendSV handler
+	.word _handle_null+1  @ 15: the Systick handler
 	
