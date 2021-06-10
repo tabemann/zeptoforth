@@ -61,6 +61,9 @@ begin-import-module-once int-io-module
     USART1_Base $24 + constant USART1_RDR
     USART1_Base $28 + constant USART1_TDR
 
+    \ USART1 vector index
+    53 constant usart1-vector
+
     $40023800 constant RCC_Base
     RCC_Base $64 + constant RCC_APB2LPENR ( RCC_APB2LPENR )
     : RCC_APB2LPENR_USART1LPEN   %1 4 lshift RCC_APB2LPENR bis! ;  \ RCC_APB2LPENR_USART1LPEN    USART1 clocks enable during Sleep modes
@@ -176,11 +179,6 @@ begin-import-module-once int-io-module
       wake
     ;
 
-    \ Null interrupt handler
-    : null-handler ( -- )
-      handle-io
-    ;
-
     \ Interrupt-driven IO hooks
 
     : do-emit ( c -- )
@@ -225,7 +223,7 @@ begin-import-module-once int-io-module
   \ Enable interrupt-driven IO
   : enable-int-io ( -- )
     0 37 NVIC_IPR_IP!
-    ['] null-handler null-handler-hook !
+    ['] handle-io usart1-vector vector!
     serial-console
     RCC_APB2LPENR_USART1LPEN
     37 NVIC_ISER_SETENA!
@@ -241,7 +239,7 @@ begin-import-module-once int-io-module
     ['] serial-key? key?-hook !
     ['] serial-emit? emit?-hook !
     0 flush-console-hook !
-    0 null-handler-hook !
+    ['] handle-null usart1-vector vector!
     USART1_CR1_RXNEIE_Clear
     USART1_CR1_TXEIE_Clear
     37 NVIC_ICER_CLRENA!
