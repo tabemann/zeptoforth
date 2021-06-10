@@ -1,4 +1,4 @@
-@ Copyright (c) 2020 Travis Bemann
+@ Copyright (c) 2020-2021 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -19,37 +19,3 @@
 @ SOFTWARE.
 
 	.include "src/common/variables.s"
-
-	@@ The EXTI 0 handler hook
-	allot exti_0_handler_hook, 4
-
-	@@ The EXTI 1 handler hook
-	allot exti_1_handler_hook, 4
-
-	@@ The EXTI 2 handler hook
-	allot exti_2_handler_hook, 4
-
-	@@ The EXTI 3 handler hook
-	allot exti_3_handler_hook, 4
-
-	@@ The EXTI 4 handler hook
-	allot exti_4_handler_hook, 4
-
-	@@ The ADC handler hook
-	allot adc_handler_hook, 4
-
-	@@ The timer 2 handler hook
-	allot time_2_handler_hook, 4
-
-	@@ The timer 3 handler hook
-	allot time_3_handler_hook, 4
-
-	@@ The timer 4 handler hook
-	allot time_4_handler_hook, 4
-
-	@@ The EXTI 9-5 handler hook
-	allot exti_9_5_handler_hook, 4
-
-	@@ the EXTI 15-10 handler hook
-	allot exti_15_10_handler_hook, 4
-	

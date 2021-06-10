@@ -91,6 +91,12 @@ begin-import-module-once task-module
     \ A task's maximum timeslice
     user task-max-timeslice
 
+    \ SVCall vector index
+    11 constant svcall-vector
+
+    \ PendSV vector index
+    14 constant pendsv-vector
+    
   end-module
 
   \ The currently waited-for lock
@@ -774,9 +780,9 @@ begin-import-module-once task-module
     validate-dict-hook @ saved-validate-dict !
     false ram-dict-warned !
     ['] do-validate-dict validate-dict-hook !
-    ['] execute svcall-handler-hook !
-    ['] pendsv-handler pendsv-handler-hook !
-    ['] task-systick-handler systick-handler-hook !
+    ['] execute svcall-vector vector!
+    ['] pendsv-handler pendsv-vector vector!
+    ['] task-systick-handler systick-vector vector!
     1 pause-enabled !
     enable-int
   ;

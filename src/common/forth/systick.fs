@@ -24,7 +24,8 @@ compile-to-flash
 begin-import-module-once systick-module
 
   import internal-module
-
+  import interrupt-module
+  
   begin-import-module systick-internal-module
 
     \ RW SysTick Control and Status Register
@@ -65,6 +66,9 @@ begin-import-module-once systick-module
 
   end-module
   
+  \ SysTick vector index
+  15 constant systick-vector
+    
   \ SysTick handler
   : systick-handler ( -- )
     SYST_CSR @ SYST_CSR_COUNTFLAG and if
@@ -87,7 +91,7 @@ begin-import-module-once systick-module
 
   \ Initialize SysTick
   : init-systick
-    ['] systick-handler systick-handler-hook !
+    ['] systick-handler systick-vector vector!
     SYST_CALIB @ SYST_CALIB_TENMS and
     10 / systick-divisor / time-multiplier * time-divisor / SYST_RVR !
     0 SYST_CVR !

@@ -1,4 +1,4 @@
-@ Copyright (c) 2019-2020 Travis Bemann
+@ Copyright (c) 2019-2021 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -18,6 +18,9 @@
 @ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 @ SOFTWARE.
 
+	@@ Vector table in RAM
+	allot vector_table, vector_table_size
+	
 	@@ Pointer to the current HERE location
 	allot here, 4
 
@@ -137,21 +140,6 @@
 
 	@@ The dictionary size validation hook
 	allot validate_dict_hook, 4
-	
-	@@ The fault handler hook
-	allot fault_handler_hook, 4
-
-	@@ The null handler hook
-	allot null_handler_hook, 4
-
-	@@ The svcall handler hook
-	allot svcall_handler_hook, 4
-
-	@@ The pendsv handler hook
-	allot pendsv_handler_hook, 4
-
-	@@ The systick handler hook
-	allot systick_handler_hook, 4
 
 	@@ The wordlist count
 	allot order_count, 4

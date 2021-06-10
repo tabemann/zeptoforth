@@ -2070,12 +2070,20 @@ _reboot:
 _warm:	cpsid i
 	dsb
 	isb
-	bl _init_handlers
+	ldr r0, =VTOR
+	movs r1, #0
+	str r1, [r0]
 	cpsie i
-	ldr r0, =handle_reset+1
+	ldr r0, =_handle_reset+1
 	bx r0
 	end_inlined
 
+	@@ Null exception handler
+	define_word "handle-null", visible_flag
+_handle_null:
+	bx lr
+	end_inlined
+	
 	@@ Carry out DSB instruction
 	define_word "dsb", visible_flag | inlined_flag
 _dsb:	dsb
@@ -2092,7 +2100,6 @@ _isb:	isb
 	define_internal_word "init-variables", visible_flag
 _init_variables:
 	push {lr}
-	bl _init_handlers
 	ldr r0, =here
 	ldr r0, [r0]
 	ldr r1, =dict_base
@@ -2189,6 +2196,23 @@ _init_variables:
 	str r1, [r0]
 	pop {pc}
 	end_inlined
+
+	@@ Initialize the in-RAM vector table
+_init_vector_table:
+	ldr r0, =vectors
+	ldr r1, =vectors + vector_table_size
+	ldr r2, =vector_table
+1:	cmp r0, r1
+	beq 2f
+	ldr r3, [r0]
+	adds r0, #4
+	str r3, [r2]
+	adds r2, #4
+	b 1b
+2:	ldr r0, =VTOR
+	ldr r1, =VTOR_value
+	str r1, [r0]
+	bx lr
 	
 	.ltorg
 	
