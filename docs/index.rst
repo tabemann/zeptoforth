@@ -13,6 +13,7 @@ Zeptoforth Documentation
    words/schedule
    words/gpio
    words/exti
+   words/interrupt
    words/dev_tools
    words/line
    words/double
