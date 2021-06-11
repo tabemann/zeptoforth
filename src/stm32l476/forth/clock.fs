@@ -218,7 +218,7 @@ $E000E010 constant SYST_CSR
 72 constant time-multiplier
 
 \ Time divisor
-4 constant time-divisor
+8 constant time-divisor
 
 \ Divisor to get ms from systicks
 10 constant systick-divisor
