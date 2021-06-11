@@ -1719,3 +1719,13 @@ Create a marker word named *name* to erase flash/return the flash dictionary to 
 ( "name" -- )
 
 Create a cornerstone word named *name* to erase flash/return the flash dictionary to its state immediately after `cornerstone` was executed; unlike `marker` the word created does not erase itself when executed and may be executed multiple times
+
+##### `vector-count`
+( -- count )
+
+Get the number of interrupt vectors.
+
+##### `vector-table`
+( -- addr )
+
+Get the interrupt vector table address.
