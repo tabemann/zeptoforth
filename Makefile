@@ -26,7 +26,7 @@ DUMP=arm-none-eabi-objdump
 ASFLAGS=-mcpu=cortex-m4 -mthumb -g
 PREFIX=/usr/local
 PLATFORM=stm32l476
-VERSION=0.17.1.Dev
+VERSION=0.18.1.Dev
 DATE:=$(shell date)
 
 ODIR=obj
