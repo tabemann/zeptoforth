@@ -58,8 +58,8 @@ begin-module forth-module
   : init-test ( -- )
     my-out-fchan init-fchan
     my-in-fchan init-fchan
-    0 ['] high 256 256 256 spawn high-task !
-    0 ['] low 256 256 256 spawn low-task !
+    0 ['] high 512 256 256 spawn high-task !
+    0 ['] low 512 256 256 spawn low-task !
     1 high-task @ set-task-priority
     0 low-task @ set-task-priority
     begin-critical
