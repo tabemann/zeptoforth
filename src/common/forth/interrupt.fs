@@ -37,6 +37,12 @@ begin-module-once interrupt-module
     dup 0 > over vector-count < or averts x-invalid-vector
     cells vector-table + @ 1-
   ;
+
+  \ ICSR register
+  $E000ED04 constant ICSR
+
+  \ Get the active interrupt
+  : ICSR_VECTACTIVE@ ( -- interrupt ) ICSR @ $1FF and ;
   
   \ SHPRx registers
   $E000ED18 constant SHPR1
