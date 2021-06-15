@@ -33,15 +33,24 @@ begin-import-module-once task-module
   import int-io-module
 
   begin-import-module task-internal-module
-  
+
+    \ In task change
+    variable in-task-change
+
+    \ Wake tasks flag
+    variable wake-tasks
+    
     \ Main task
     variable main-task
     
     \ Current task
     variable current-task
-    
-    \ Has current task changed
-    variable current-task-changed?
+
+    \ Previous task
+    variable prev-task
+
+    \ First task
+    variable first-task
     
     \ Last task
     variable last-task
@@ -139,6 +148,9 @@ begin-import-module-once task-module
       \ Task saved priority
       field: task-saved-priority
 
+      \ Prev task
+      field: task-prev
+      
       \ Next task
       field: task-next
     end-structure
@@ -206,93 +218,122 @@ begin-import-module-once task-module
     execute dict-base @ - swap task-dict-base +
   ;
 
+  \ Get task priority
+  : get-task-priority ( task -- priority )
+    task-priority h@ 16 lshift 16 arshift
+  ;
+
+  \ Attempted to use a terminated task
+  : x-terminated ( -- ) space ." task has been terminated" cr ;
+
+  \ Validate task is not terminated
+  : validate-not-terminated ( task -- )
+    task-active h@ terminated = triggers x-terminated
+  ;
+
+  \ Attempted to task change while changing tasks during interrupt
+  : x-in-task-change ( -- ) space ." in task change" cr ;
+
   begin-module task-internal-module
-
-    \ Find the previous task
-    : prev-task ( task1 -- task2 )
-      dup begin dup task-next @ 2 pick <> while task-next @ repeat
-      tuck = if
-	drop 0
-      then
-    ;
-
-    \ Display a task cycle
-    : show-cycle ( task always? -- )
-      0 pause-enabled !
-      swap dup dup task-next @ <> rot or if
-	dup h.8 dup ['] task-wait for-task @ if [char] * emit then
-	dup task-next @ begin dup 2 pick <> while
-	  space ." -> "
-	  dup h.8
-	  dup ['] task-wait for-task @ if [char] * emit then
-	  task-next @
-	repeat
-	2drop
-	cr
-      else
-	drop
-      then
-      1 pause-enabled !
-    ;
-
-    \ Link a task into the main loop
-    : link-task ( task -- )
-      current-task @ if
-	current-task @ prev-task ?dup if
-	  over swap task-next !
+    
+    \ Find the next task with a higher priority; 0 returned indicates no task
+    \ exists with a higher priority.
+    : find-higher-priority ( task -- higher-task )
+      get-task-priority >r
+      last-task @ begin
+	dup 0<> if
+	  dup get-task-priority r@ < if task-next @ false else true then
 	else
-	  dup current-task @ task-next !
+	  true
 	then
-	current-task @ swap task-next !
-      else
-	0 task-systick-counter !
-	dup dup task-next !
-	current-task !
-	true current-task-changed? !
-      then
+      until
+      rdrop
     ;
 
-    \ Link a task into the head of the main loop
-    : link-first-task ( task -- )
-      current-task @ 0<> if
-	dup current-task @ <> if
-	  current-task @ task-next @ over task-next !
-	  current-task @ task-next !
-	else
-	  drop
-	then
+    \ Insert a task before another task
+    : insert-task-before ( task after-task -- )
+      dup task-prev @ 0<> if
+	2dup task-prev @ task-next !
+	2dup task-prev @ swap task-prev !
       else
-	0 task-systick-counter !
-	dup current-task !
-	dup dup task-next !
-	true current-task-changed? !
+	0 2 pick task-prev !
+	over last-task !
       then
+      2dup task-prev !
+      swap task-next !
     ;
 
-    \ Unlink a task from the main loop
-    : unlink-task ( task -- )
-      dup prev-task ?dup if
-	over current-task @ = if
-	  over task-next @ current-task !
-	  true current-task-changed? !
-	then
-	swap task-next @ swap task-next !
+    \ Insert a task into first position
+    : insert-task-first ( task -- )
+      first-task @ 0<> if
+	dup first-task @ task-next !
+	first-task @ over task-prev !
       else
-	drop 0 current-task !
-	true current-task-changed? !
+	dup last-task !
+	0 over task-prev !
       then
+      dup first-task !
+      0 swap task-next !
     ;
     
+    \ Insert a task
+    : insert-task ( task -- )
+      dup find-higher-priority ?dup if
+	insert-task-before
+      else
+	insert-task-first
+      then
+    ;
+
+    \ Remove a task
+    : remove-task ( task -- )
+      dup task-next @ ?dup if
+	over task-prev @ swap task-prev !
+      else
+	dup task-prev @ first-task !
+      then
+      dup task-prev @ ?dup if
+	over task-next @ swap task-next !
+      else
+	dup task-next @ last-task !
+      then
+      0 over task-prev !
+      0 swap task-next !
+    ;
+
+    \ Remove a task if it is scheduled
+    : test-remove-task ( task -- )
+      dup task-prev @ 0<> over task-next @ 0<> or if remove-task else drop then
+    ;
+
+    \ Set task change
+    : start-task-change ( -- )
+      disable-int
+      begin in-task-change @ while
+	ICSR_VECTACTIVE@ 0 = if
+	  enable-int
+	  pause
+	  disable-int
+	else
+	  enable-int
+	  ['] x-in-task-change ?raise
+	then
+      repeat
+      true in-task-change !
+      enable-int
+    ;
+
+    \ Start a task change
+    : start-validate-task-change ( task -- )
+      start-task-change
+      ['] validate-not-terminated try ?dup if false in-task-change ! ?raise then
+    ;
+  
   end-module
 
   \ Get task active sate
   : get-task-active ( task -- active )
     task-active h@ 16 lshift 16 arshift
-  ;
-
-  \ Get task priority
-  : get-task-priority ( task -- priority )
-    task-priority h@ 16 lshift 16 arshift
   ;
 
   \ Get saved task priority
@@ -315,14 +356,6 @@ begin-import-module-once task-module
     over -32768 < triggers x-out-of-range-priority
     over 32767 > triggers x-out-of-range-priority
     task-saved-priority !
-  ;
-
-  \ Attempted to use a terminated task
-  : x-terminated ( -- ) space ." task has been terminated" cr ;
-
-  \ Validate task is not terminated
-  : validate-not-terminated ( task -- )
-    task-active h@ terminated = if enable-int ['] x-terminated ?raise then
   ;
 
   \ Set task timeslice
@@ -357,50 +390,40 @@ begin-import-module-once task-module
   
   \ Start a task's execution
   : run ( task -- )
-    disable-int
-    dup validate-not-terminated
+    dup start-validate-task-change
     dup get-task-active 1+
-    dup 1 = if over link-task then
+    dup 1 = if over test-remove-task over insert-task then
     swap task-active h!
-    enable-int
+    false in-task-change !
   ;
 
   \ Activate a task (i.e. enable it and move it to the head of the queue)
   : activate ( task -- )
-    disable-int
-    dup validate-not-terminated
+    dup start-validate-task-change
     dup get-task-active 1+
-    dup 1 = if
-      over link-first-task
-    else
-      dup 1 > if
-	over unlink-task over link-first-task
-      then
+    dup 1 >= if
+      over test-remove-task over insert-task-first
     then
     swap task-active h!
-    enable-int
+    false in-task-change !
   ;
 
   \ Stop a task's execution
   : stop ( task -- )
-    disable-int
-    dup validate-not-terminated
+    dup start-validate-task-change
     dup get-task-active 1-
-    dup 0= if over unlink-task then
     swap task-active h!
-    enable-int
+    false in-task-change !
   ;
 
   \ Kill a task
   : kill ( task -- )
-    disable-int
-    dup validate-not-terminated
-    dup get-task-active 0> if dup unlink-task then
+    dup start-validate-task-change
     terminated over task-active h!
     dup current-task @ = swap last-task @ = or if
-      enable-int begin pause again
+      false in-task-change ! begin pause again
     else
-      enable-int
+      false in-task-change !
     then
   ;
   
@@ -434,9 +457,12 @@ begin-import-module-once task-module
       default-max-timeslice task-max-timeslice !
       0 current-lock !
       0 current-lock-held !
-      dup dup task-next !
+      0 over task-next !
+      0 over task-prev !
       dup main-task !
+      dup first-task !
       dup last-task !
+      dup prev-task !
       current-task !
       free-end @ task - free-end !
     ;
@@ -469,6 +495,7 @@ begin-import-module-once task-module
     ['] init-context svc over task-rstack-current !
     next-user-space over task-dict-offset !
     0 over task-next !
+    0 over task-prev !
     swap >r >r
     begin dup 0<> while
       dup roll r@ push-task-stack 1-
@@ -488,24 +515,9 @@ begin-import-module-once task-module
   ;
 
   begin-module task-internal-module
-    
-    \ Reset waits
-    : reset-waiting-tasks ( task -- )
-      dup >r
-      begin
-	false over ['] task-wait for-task !
-	task-next @
-	dup r@ =
-      until
-      drop rdrop
-    ;
 
     \ Wake tasks
-    : do-wake ( -- )
-      current-task @ if
-	current-task @ reset-waiting-tasks
-      then
-    ;
+    : do-wake ( -- ) true wake-tasks ! ;
 
     \ Get whether a task is waiting
     : waiting-task? ( task -- )
@@ -513,100 +525,108 @@ begin-import-module-once task-module
       r@ ['] task-wait for-task @
       r@ ['] task-systick-delay for-task @ -1 <>
       systick-counter r@ ['] task-systick-start for-task @ -
-      r@ ['] task-systick-delay for-task @ u< and or
-      rdrop
+      r> ['] task-systick-delay for-task @ u< and or
     ;
 
-    \ Handle waiting tasks
-    : handle-waiting-tasks ( task -- )
-      dup waiting-task? if
-	enable-int
-	sleep
-	disable-int
-	reset-waiting-tasks
-      else
-	drop
-      then
-    ;
-
-    \ Get the highest task priority
-    : get-highest-priority ( -- priority )
-      -32768 current-task @ begin
-	dup waiting-task? not if
-	  dup get-task-priority rot max swap
-	then
-	task-next @ dup current-task @ =
-      until
-      drop
-    ;
-
-    \ Go to the next task
-    : go-to-next-task ( task -- task )
-      dup >r get-highest-priority swap
-      begin
-	task-next @ dup get-task-priority 2 pick = if
-	  dup waiting-task? not over r@ = or
+    \ Find next task
+    : find-next-task ( -- task )
+      first-task @ begin
+	dup 0<> if
+	  dup waiting-task? if
+	    task-prev @ false
+	  else
+	    true
+	  then
 	else
-	  dup r@ =
+	  true
 	then
       until
-      nip dup r@ = if dup handle-waiting-tasks then
-      rdrop
     ;
 
     \ PendSV return value
     variable pendsv-return
 
+    \ \ Type an unsigned integer to serial
+    \ : serial-unsigned ( u -- )
+    \   swap ram-here swap format-unsigned dup ram-allot
+    \   dup >r serial-type r> negate ram-allot
+    \ ;
+    
+    \ \ Type an unsigned integer to serial
+    \ : serial-hex ( u -- )
+    \   base @ 16 base ! serial-unsigned base !
+    \ ;
+
+    \ Save task state
+    : save-task-state ( task -- )
+      ram-here over task-dict-current!
+      handler @ over ['] task-handler for-task !
+      base @ swap ['] task-base for-task !
+    ;
+
+    \ Restore task state
+    : restore-task-state ( task -- )
+      dup task-stack-base stack-base !
+      dup task-stack-end stack-end !
+      dup task-rstack-base rstack-base !
+      dup task-rstack-end rstack-end !
+      dup task-dict-current ram-here!
+      task-dict-base dict-base !
+      task-base @ base !
+      task-handler @ handler !
+    ;
+
+    \ Reschedule previous task
+    : reschedule-task ( task -- )
+      true in-task-change !
+      dup remove-task
+      dup get-task-active 0> if insert-task else drop then
+      false in-task-change !
+    ;
+
+    \ \ Type prev-task and current-type
+    \ : serial-type-tasks ( -- )
+    \   s" prev-task: " serial-type prev-task @ serial-hex $20 serial-emit
+    \   s" current-task: " serial-type current-task @ serial-hex $20 serial-emit
+    \   s" prev-timeslice: " serial-type
+    \   prev-task @ ['] task-timeslice for-task @ serial-unsigned $20 serial-emit
+    \   s" current-timeslice: " serial-type
+    \   current-task @ ['] task-timeslice for-task @ serial-unsigned $20 serial-emit
+    \ ;
+
+    \ Actually wake tasks
+    : actually-wake-tasks ( -- )
+      first-task @ begin ?dup while
+	false over ['] task-wait for-task ! task-prev @
+      repeat
+    ;
+    
     \ The PendSV handler
     : pendsv-handler ( -- )
       r> pendsv-return !
 
-\      disable-int
-      
-      in-critical @ 0= if
-	  
-	1 pause-count +!
+      in-critical @ 0= in-task-change @ 0= and if
+
+	current-task @ dup prev-task !
+	
+	?dup if dup save-task-state reschedule-task then
+
 	begin
-	  task-io
-	  current-task @ 0<>
-	  dup not if
-\	    enable-int
-	    sleep
-\	    disable-int
-	    0 task-systick-counter !
-	  then
+	  true in-task-change !
+	  wake-tasks @ if actually-wake-tasks false wake-tasks ! then
+	  find-next-task current-task !
+	  false in-task-change !
+	  current-task @ if true else sleep false then
 	until
 
-	last-task @ if
-	  ram-here last-task @ task-dict-current!
-	  handler @ last-task @ ['] task-handler for-task !
-	  base @ last-task @ ['] task-base for-task !
-	then
-
-	current-task-changed? @ not if
-	  current-task @ go-to-next-task current-task !
-	then
-
-	disable-int
-	
-	current-task @ last-task @ <> if
+	prev-task @ current-task @ <> if
+	  disable-int
 	  current-task @ task-rstack-current @ context-switch
-	  last-task @ if last-task @ task-rstack-current ! else drop then
+	  prev-task @ if prev-task @ task-rstack-current ! else drop then
+	  current-task @ restore-task-state
+	  enable-int
 	then
 
-	current-task @ dup last-task !
-	false current-task-changed? !
-	dup task-stack-base stack-base !
-	dup task-stack-end stack-end !
-	dup task-rstack-base rstack-base !
-	dup task-rstack-end rstack-end !
-	dup task-dict-current ram-here!
-	task-dict-base dict-base !
-	task-base @ base !
-	task-handler @ handler !
-
-	enable-int
-	
 	task-timeslice @
 	task-max-timeslice @ task-timeslice @ max min task-systick-counter !
 	
@@ -614,8 +634,6 @@ begin-import-module-once task-module
 	true deferred-context-switch !
       then
 
-\      enable-int
-      
       pendsv-return @ >r
 
       false in-multitasker? !
@@ -766,6 +784,8 @@ begin-import-module-once task-module
     false in-multitasker? !
     0 pause-enabled !
     false sleep-enabled? !
+    false in-task-change !
+    false wake-tasks !
     $7F SHPR3_PRI_15!
     $FF SHPR2_PRI_11!
     $FF SHPR3_PRI_14!
@@ -773,7 +793,6 @@ begin-import-module-once task-module
     stack-end @ free-end !
     init-main-task
     0 pause-count !
-    false current-task-changed? !
     ['] do-pause pause-hook !
     ['] do-wait wait-hook !
     ['] do-wake wake-hook !

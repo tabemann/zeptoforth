@@ -51,7 +51,7 @@ begin-module forth-module
   
   \ Initialize the test
   : init-test ( -- )
-    256 256 256 my-task-count my-task-pool init-task-pool
+    512 256 256 my-task-count my-task-pool init-task-pool
     my-fchan init-fchan
     0 ['] consumer my-task-pool spawn-from-task-pool consumer-task !
     0 ['] closer my-task-pool spawn-from-task-pool closer-task !

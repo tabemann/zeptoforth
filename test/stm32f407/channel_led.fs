@@ -73,7 +73,7 @@ begin-module forth-module
   \ Create an led task
   : make-led ( before-chan after-chan on-xt off-xt delay "name" -- )
     s" " <builds-with-name 4 roll , 3 roll , rot , swap , , do-led
-    latest >body 256 256 256 spawn constant
+    latest >body 512 256 256 spawn constant
   ;
 
   \ Create the led tasks
