@@ -83,7 +83,7 @@ begin-module forth-module
     ['] green-blinker green-blinker-action my-schedule init-action
     green-blinker-delay @ green-blinker-action @ start-action-delay
     green-blinker-action @ enable-action
-    0 [: my-schedule run-schedule ;] 256 256 256 spawn schedule-task !
+    0 [: my-schedule run-schedule ;] 512 256 256 spawn schedule-task !
     schedule-task @ run
     pause
   ;
