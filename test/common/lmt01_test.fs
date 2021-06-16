@@ -70,7 +70,7 @@ begin-module-once temp-module
 	true 2 EXTI_IMR!
 	OUTPUT_MODE i sensor sensor-pin @ i sensor sensor-gpio @ MODER!
 	true i sensor sensor-pin @ i sensor sensor-gpio @ BSRR!
-	104 systick-divisor * systick-counter current-task set-task-delay pause
+	104 ms
 	false i sensor sensor-pin @ i sensor sensor-gpio @ BSRR!
 	INPUT_MODE i sensor sensor-pin @ i sensor sensor-gpio @ MODER!
 	false 2 EXTI_IMR!
@@ -81,7 +81,7 @@ begin-module-once temp-module
 	  false i sensor temp-read? !
 	  true i sensor temp-error? !
 	then
-\	104 systick-divisor * systick-counter current-task set-task-delay pause
+\	104 ms
       loop
     again
   ;
