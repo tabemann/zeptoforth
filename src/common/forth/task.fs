@@ -614,7 +614,14 @@ begin-import-module-once task-module
 	begin
 	  true in-task-change !
 	  wake-tasks @ if actually-wake-tasks false wake-tasks ! then
-	  find-next-task current-task !
+	  begin
+	    find-next-task dup 0<> if
+	      dup get-task-active 1 < if remove-task false else true then
+	    else
+	      true
+	    then
+	  until
+	  current-task !
 	  false in-task-change !
 	  current-task @ if true else sleep false then
 	until
