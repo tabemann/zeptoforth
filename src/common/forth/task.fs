@@ -18,10 +18,6 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Set up the wordlist
-forth-module 1 set-order
-forth-module set-current
-
 \ Compile this to flash
 compile-to-flash
 
