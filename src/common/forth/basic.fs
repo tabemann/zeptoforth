@@ -1157,9 +1157,7 @@ commit-flash
   undefer-lit
   6 push,
   reserve-literal
-  postpone >r
-  postpone >r
-  postpone >r
+  postpone (do)
   here
 ;
 
@@ -1170,16 +1168,7 @@ commit-flash
   undefer-lit
   6 push,
   reserve-literal
-  postpone >r
-  postpone 2dup
-  postpone <>
-  postpone if
-  postpone >r
-  postpone >r
-  postpone else
-  postpone 2drop
-  postpone exit
-  postpone then
+  postpone (?do)
   here
 ;
 
@@ -1187,23 +1176,7 @@ commit-flash
 : loop ( R: leave current end -- leave current end | )
   [immediate]
   [compile-only]
-  postpone r>
-  postpone r>
-  1 lit, postpone +
-  postpone 2dup
-  postpone =
-  postpone swap
-  postpone >r
-  postpone swap
-  postpone >r
-  undefer-lit
-  0 6 0 lsl-imm,
-  6 pull,
-  0 0 cmp-imm,
-  0branch,
-  postpone rdrop
-  postpone rdrop
-  postpone rdrop
+  1+ lit, postpone (loop)
   here 1+ 6 rot literal!
 ;
 
@@ -1211,85 +1184,8 @@ commit-flash
 : +loop ( increment -- ) ( R: leave current end -- leave current end | )
   [immediate]
   [compile-only]
-  postpone r>
-  postpone r>
-  postpone rot
-  postpone dup
-  0 lit,
-  postpone >=
-  postpone if
-  postpone +
-  postpone 2dup
-  postpone <=
-  postpone else
-  postpone +
-  postpone 2dup
-  postpone >
-  postpone then
-  postpone swap
-  postpone >r
-  postpone swap
-  postpone >r
-  undefer-lit
-  0 6 0 lsl-imm,
-  6 pull,
-  0 0 cmp-imm,
-  0branch,
-  postpone rdrop
-  postpone rdrop
-  postpone rdrop
+  1+ lit, postpone (+loop)
   here 1+ 6 rot literal!
-;
-
-\ Get the loop index
-: i ( R: current end -- current end ) ( -- current )
-  [immediate]
-  [compile-only]
-  postpone r>
-  postpone r>
-  postpone dup
-  postpone >r
-  postpone swap
-  postpone >r
-;
-
-\ Get the loop index beneath the current loop
-: j ( R: cur1 end1 leave cur2 end2 -- cur1 end1 leave cur2 end2 ) ( -- cur1 )
-  [immediate]
-  [compile-only]
-  postpone r>
-  postpone r>
-  postpone r>
-  postpone r>
-  postpone r>
-  postpone dup
-  postpone >r
-  postpone swap
-  postpone >r
-  postpone swap
-  postpone >r
-  postpone swap
-  postpone >r
-  postpone swap
-  postpone >r
-;
-
-\ Leave a do loop
-: leave ( R: leave current end -- )
-  [immediate]
-  [compile-only]
-  postpone rdrop
-  postpone rdrop
-  postpone exit
-;
-
-\ Unloop from a do loop (to exit, e.g.)
-: unloop ( R: leave current end -- )
-  [immediate]
-  [compile-only]
-  postpone rdrop
-  postpone rdrop
-  postpone rdrop
 ;
 
 \ Commit to flash
