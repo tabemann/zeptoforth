@@ -890,8 +890,6 @@ _welcome:
 	bl _kernel_date
 	bl _type
 	bl _cr
-	string_ln "To see the copyright notice type `copyright'"
-	bl _type
 	string "zeptoforth comes with ABSOLUTELY NO WARRANTY: "
 	bl _type
 	string_ln "for details type `license'"
