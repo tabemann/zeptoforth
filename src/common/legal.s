@@ -18,22 +18,15 @@
 @ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 @ SOFTWARE.
 
-	@@ Display the copyright notices
-	define_word "copyright", visible_flag
-_copyright:
+	@@ Display the license notice
+	define_word "license", visible_flag
+_license:
 	push {lr}
 	bl _cr
 	string_ln "Copyright (c) 2019-2021 Travis Bemann"
 	bl _type
 	string_ln "Copyright (c) 2013 Matthias Koch"
 	bl _type
-	pop {pc}
-
-	@@ Display the license notice
-	define_word "license", visible_flag
-_license:
-	push {lr}
-
 	bl _cr
 	string_ln "Permission is hereby granted, free of charge, to any person obtaining a copy"
 	bl _type
