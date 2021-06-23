@@ -215,17 +215,18 @@ begin-import-module-once int-io-module
   
   \ Enable interrupt-driven IO
   : enable-int-io ( -- )
+    disable-int
     0 38 NVIC_IPR_IP!
     ['] handle-io usart2-vector vector!
     serial-console
     RCC_APB1LPENR_USART2LPEN
     38 NVIC_ISER_SETENA!
     USART2_CR1_RXNEIE
+    enable-int
   ;
 
   \ Disable interrupt-driven IO
   : disable-int-io ( -- )
-    begin-critical
     disable-int
     ['] serial-key key-hook !
     ['] serial-emit emit-hook !
@@ -238,7 +239,6 @@ begin-import-module-once int-io-module
     38 NVIC_ICER_CLRENA!
     RCC_APB1LPENR_USART2LPEN_Clear
     enable-int
-    end-critical
   ;
 
   \ Initialize interrupt-driven IO
