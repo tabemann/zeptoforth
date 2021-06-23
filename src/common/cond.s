@@ -229,6 +229,7 @@ _xploop:
 	bge 2f
 	str r0, [sp, #4]
 	movs r0, tos
+	adds dp, #4
 	pull_tos
 	bx r0
 1:	adds r0, r2
@@ -236,9 +237,11 @@ _xploop:
 	blt 2f
 	str r0, [sp, #4]
 	movs r0, tos
+	adds dp, #4
 	pull_tos
 	bx r0
-2:	pull_tos
+2:	adds dp, #4
+	pull_tos
 	adds sp, #12
 	bx lr
 	end_inlined
