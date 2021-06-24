@@ -584,7 +584,7 @@ begin-import-module-once disassemble-internal-module
 
   \ Decode an LDR immediate instruction
   : decode-ldr-imm-2
-    dup 8_3_bf reg-sep. ." [SP"
+    dup 8_4_bf reg-sep. ." [SP"
     0_8_bf 2 lshift ?dup if
       sep-imm. val.
     then
