@@ -315,6 +315,7 @@ _find_in_wordlist:
 	pop {pc}
 1:	ldr r0, =state
 	ldr r0, [r0]
+	cmp r0, #0
 	beq 3b
 	movs r0, tos
 	b 4b
