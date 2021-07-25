@@ -804,9 +804,8 @@ _pause:	push {lr}
 	ldr r0, [r0]
 	cmp r0, #0
 	beq 1f
-	push_tos
-	movs tos, r0
-	bl _execute
+	adds r0, #1
+	blx r0
 1:	pop {pc}
 	end_inlined
 	
@@ -2071,6 +2070,9 @@ _warm:	cpsid i
 	ldr r0, =VTOR
 	movs r1, #0
 	str r1, [r0]
+	dmb
+	dsb
+	isb
 	cpsie i
 	ldr r0, =_handle_reset+1
 	bx r0
@@ -2081,19 +2083,7 @@ _warm:	cpsid i
 _handle_null:
 	bx lr
 	end_inlined
-	
-	@@ Carry out DSB instruction
-	define_word "dsb", visible_flag | inlined_flag
-_dsb:	dsb
-	bx lr
-	end_inlined
 
-	@@ Carry out ISB instruction
-	define_word "isb", visible_flag | inlined_flag
-_isb:	isb
-	bx lr
-	end_inlined
-	
 	@@ Initialize the variables
 	define_internal_word "init-variables", visible_flag
 _init_variables:
@@ -2210,6 +2200,9 @@ _init_vector_table:
 2:	ldr r0, =VTOR
 	ldr r1, =VTOR_value
 	str r1, [r0]
+	dmb
+	dsb
+	isb
 	bx lr
 	
 	.ltorg

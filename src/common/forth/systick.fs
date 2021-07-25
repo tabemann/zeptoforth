@@ -71,9 +71,11 @@ begin-import-module-once systick-module
     
   \ SysTick handler
   : systick-handler ( -- )
+    dmb dsb isb
     SYST_CSR @ SYST_CSR_COUNTFLAG and if
       systick-counter @ 1+ systick-counter ! wake
     then
+    dmb dsb isb
   ;
 
   \ Turn on systick
