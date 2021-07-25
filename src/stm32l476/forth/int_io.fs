@@ -142,6 +142,7 @@ begin-import-module-once int-io-module
 
     \ Handle IO
     : handle-io ( -- )
+      dmb dsb isb
       disable-int
       begin
 	rx-full? not if
@@ -177,6 +178,7 @@ begin-import-module-once int-io-module
       38 NVIC_ICPR_CLRPEND!
       enable-int
       wake
+      dmb dsb isb
     ;
 
     \ Interrupt-driven IO hooks

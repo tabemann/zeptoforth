@@ -79,6 +79,15 @@ forth-module set-current
 \ Inlined flag
 8 constant inlined-flag
 
+\ DMB instruction
+: dmb ( -- ) [inlined] [ $F3BF h, $8F5F h, ] ;
+
+\ DSB instruction
+: dsb ( -- ) [inlined] [ $F3BF h, $8F4F h, ] ;
+
+\ ISB instruction
+: isb ( -- ) [inlined] [ $F3BF h, $8F6F h, ] ;
+
 \ Add to a cell
 \ : +! ( x addr -- ) swap over @ + swap ! [inlined] ;
 
@@ -1291,6 +1300,44 @@ commit-flash
   postpone rdrop
   postpone rdrop
 ;
+
+\ \ Begin a do loop
+\ : do ( end start -- ) ( R: -- leave start end ) ( compile: -- leave* loop )
+\   [immediate]
+\   [compile-only]
+\   undefer-lit
+\   6 push,
+\   reserve-literal
+\   postpone (do)
+\   here
+\ ;
+
+\ \ Begin a ?do loop
+\ : ?do ( end start -- ) ( R: -- leave start end ) ( compile: -- leave* loop )
+\   [immediate]
+\   [compile-only]
+\   undefer-lit
+\   6 push,
+\   reserve-literal
+\   postpone (?do)
+\   here
+\ ;
+
+\ \ End a do loop
+\ : loop ( R: leave current end -- leave current end | )
+\   [immediate]
+\   [compile-only]
+\   1+ lit, postpone (loop)
+\   here 1+ 6 rot literal!
+\ ;
+
+\ \ End a do +loop
+\ : +loop ( increment -- ) ( R: leave current end -- leave current end | )
+\   [immediate]
+\   [compile-only]
+\   1+ lit, postpone (+loop)
+\   here 1+ 6 rot literal!
+\ ;
 
 \ Commit to flash
 commit-flash
