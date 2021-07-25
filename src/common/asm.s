@@ -2553,20 +2553,13 @@ _asm_pull:
 	define_internal_word "push,", visible_flag
 _asm_push:
 	push {lr}
-	movs r0, tos
-	movs tos, #4
 	push_tos
-	movs tos, #7
-	push {r0}
-	bl _asm_sub_imm
-	pop {r0}
-	push_tos
-	movs tos, #0
-	push_tos
-	movs tos, #7
-	push_tos
-	movs tos, r0
-	bl _asm_str_imm
+	ldr tos, =0xF847
+	bl _current_comma_2
+	lsls tos, tos, #12
+	ldr r0, =0x0D04
+	orrs tos, r0
+	bl _current_comma_2
 	pop {pc}
 	end_inlined
 

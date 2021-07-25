@@ -87,17 +87,20 @@ dp 	.req r7
 
 	@@ Push the top of the stack onto the data stack
 	.macro push_tos
+@	stmdb dp!, {tos}
 	str tos, [dp, #-4]!
 	.endm
 
 	@@ Push a register onto the data stack
 	.macro push_reg reg
+@	stmdb dp!, {\reg}
 	str \reg, [dp, #-4]!
 	.endm
 
 	@@ Push a constant onto the top of the stack
 	.macro push_const const
 	ldr tos, =\const
+@	stmdb dp!, {tos}
 	str tos, [dp, #-4]!
 	.endm
 
