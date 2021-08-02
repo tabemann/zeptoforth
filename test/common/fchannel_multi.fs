@@ -25,14 +25,14 @@ begin-module forth-module
   import fchan-module
 
   \ Allot the channel
-  fchan-size buffer: my-fchan
+  2 cells fchan-size buffer: my-fchan
 
   \ The inner loop of the consumer
   : consumer ( -- )
-    begin-critical cr ." Consumer: " current-task h.8 end-critical
+    cr ." Consumer: " current-task h.8
     begin
-      my-fchan recv-fchan
-      begin-critical cr ." Received: " type end-critical
+      my-fchan recv-fchan-2cell
+      cr ." Received: " type
       \    100 ms
       \    pause
     again
@@ -44,12 +44,12 @@ begin-module forth-module
   \ The inner loop of a producer
   : do-producer ( -- )
     does> @ execute
-    begin-critical cr ." Producer: " 2dup type
-    ." : " current-task h.8 end-critical
+    cr ." Producer: " 2dup type
+    ." : " current-task h.8
     begin
-      begin-critical cr ." Sending: " 2dup type end-critical
-      2dup my-fchan send-fchan
-      begin-critical cr ." Done sending: " 2dup type end-critical
+      cr ." Sending: " 2dup type
+      2dup my-fchan send-fchan-2cell
+      cr ." Done sending: " 2dup type
     again
   ;
 
@@ -66,7 +66,7 @@ begin-module forth-module
 
   \ Initiate the test
   : init-test ( -- )
-    my-fchan init-fchan
+    2 cells my-fchan init-fchan
     consumer-task run
     producer-a-task run
     producer-b-task run

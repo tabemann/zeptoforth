@@ -26,6 +26,11 @@ Attempt to acquire a lock; if the lock is already held, put the current task in 
 
 Attempt to release a lock; if the current task is not the holder of the lock, raise `x-not-currently-owned`. If releasing the lock is successful, restore the priority of the current task to what it would be had its priority not been updated in order to avoid priority inversion; afterwards, carry out all the functionality that `lock` would carry out had it been called by the task at the head of the queue if there is one. Note that this must not be called within a critical section.
 
+##### `with-lock`
+( lock xt -- )
+
+Execute an xt with a given lock locked while it executes, unlocking it afterwards. Exceptions are handled properly with unlocking occurring of it occurs within the xt.
+
 ##### `x-not-currently-owned`
 
 Exception raised if a task attempts to unlock a lock it is not the holder of.

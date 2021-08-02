@@ -44,8 +44,8 @@ begin-module-once tqueue-module
     \ Wait structure
     begin-structure wait-size
 
-      \ Fast channel wait next record
-      field: wait-next
+      \ Fast channel wait previous record
+      field: wait-prev
 
       \ Fast channel wait task
       field: wait-task
@@ -59,14 +59,14 @@ begin-module-once tqueue-module
     : init-wait ( -- wait )
       ram-here 4 ram-align, ram-here wait-size ram-allot
       tuck wait-orig-here !
-      0 over wait-next !
+      0 over wait-prev !
       current-task over wait-task !
     ;
 
     \ Add a wait record
     : add-wait ( wait tqueue -- )
       dup first-wait @ if
-	2dup last-wait @ wait-next !
+	2dup last-wait @ wait-prev !
       else
 	2dup first-wait !
       then
@@ -95,9 +95,11 @@ begin-module-once tqueue-module
     then
     init-wait
     dup rot add-wait
-    current-task stop
+    current-task block
     end-critical
-    pause
+    [: current-task validate-timeout ;] try ?dup if
+      swap wait-orig-here @ ram-here! ?raise
+    then
     begin-critical
     wait-orig-here @ ram-here!
 \    end-critical
@@ -108,15 +110,14 @@ begin-module-once tqueue-module
   : wake-tqueue ( tqueue -- )
     \    begin-critical
     -1 over wait-counter +!
-    dup first-wait @ if
-      dup first-wait @
-      dup wait-next @ 2 pick first-wait !
+    dup first-wait @ ?dup if
+      dup wait-prev @ 2 pick first-wait !
       over first-wait @ 0= if
 	0 rot last-wait !
       else
 	nip
       then
-      wait-task @ activate
+      wait-task @ ready
     else
       drop
     then

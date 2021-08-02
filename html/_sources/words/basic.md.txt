@@ -486,6 +486,16 @@ Begin a critical section, within which context switches will not take place; not
 
 End a critical section; if a context switch would have occurred within the critical section, it is initiated immediately upon executing this word.
 
+##### `critical`
+( xt -- )
+
+Execute code within a critical section, properly handling exceptions.
+
+##### `with-allot`
+( bytes xt -- ) ( xt: addr -- )
+
+Allot RAM temporarily and clean it up afterwards, even if an exception occurs.
+
 ##### `compress-flash`
 ( -- )
 
