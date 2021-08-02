@@ -25,11 +25,11 @@ begin-module forth-module
   import led-module
 
   \ Our fchannels
-  fchan-size buffer: request-fchan
-  fchan-size buffer: red-response-fchan
-  fchan-size buffer: orange-response-fchan
-  fchan-size buffer: green-response-fchan
-  fchan-size buffer: blue-response-fchan
+  1 cells fchan-size buffer: request-fchan
+  1 cells fchan-size buffer: red-response-fchan
+  1 cells fchan-size buffer: orange-response-fchan
+  1 cells fchan-size buffer: green-response-fchan
+  1 cells fchan-size buffer: blue-response-fchan
 
   \ Our tasks
   variable handle-led-task
@@ -94,11 +94,11 @@ begin-module forth-module
   \ Initialize the test
   : init-test ( -- )
     50 blinker-delay !
-    request-fchan init-fchan
-    red-response-fchan init-fchan
-    orange-response-fchan init-fchan
-    green-response-fchan init-fchan
-    blue-response-fchan init-fchan
+    1 cells request-fchan init-fchan
+    1 cells red-response-fchan init-fchan
+    1 cells orange-response-fchan init-fchan
+    1 cells green-response-fchan init-fchan
+    1 cells blue-response-fchan init-fchan
     0 ['] handle-led 512 256 256 spawn handle-led-task !
     0 ['] request-red 512 256 256 spawn request-red-task !
     0 ['] request-orange 512 256 256 spawn request-orange-task !

@@ -1,4 +1,4 @@
-\ Copyright (c) 2021 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -22,42 +22,21 @@ begin-module forth-module
 
   import task-module
   import fchan-module
-  import task-pool-module
 
-  \ Task count
-  2 constant my-task-count
+  variable test-0-task
+  variable test-1-task
 
-  \ The task pool
-  my-task-count task-pool-size buffer: my-task-pool
-
-  \ The fchannel
-  1 cells fchan-size buffer: my-fchan
-
-  \ The consumer
-  : consumer ( -- )
-    begin my-fchan recv-fchan-cell cr ." RECV: " . again
+  \ Output a count
+  : test ( -- )
+    0 begin [: cr ." Count:" over . ." :" dup . ;] critical 1+ again
   ;
 
-  \ The closer
-  : closer ( -- )
-    2000 ms my-fchan close-fchan
-  ;
-  
-  \ The consumer task
-  variable consumer-task
-
-  \ The closer task
-  variable closer-task
-  
   \ Initialize the test
   : init-test ( -- )
-    512 256 256 my-task-count my-task-pool init-task-pool
-    1 cells my-fchan init-fchan
-    0 ['] consumer my-task-pool spawn-from-task-pool consumer-task !
-    0 ['] closer my-task-pool spawn-from-task-pool closer-task !
-    consumer-task @ run
-    closer-task @ run
-    pause
+    0 1 ['] test 512 256 256 spawn test-0-task !
+    1 1 ['] test 512 256 256 spawn test-1-task !
+    test-0-task @ run
+    test-1-task @ run
   ;
-    
+
 end-module

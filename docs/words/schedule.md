@@ -73,40 +73,17 @@ To force a action to be disabled, one executes:
 
 which sets the active counter for the *action* to zero if is greater than zero.
 
-The simplest case of delaying a action is simply to execute:
+##### `action-delay`
+( delay start action -- )
 
-##### `start-action-delay`
-( 1/10ms-delay action -- )
-
-where *action* is the action to set the delay for, and *delay* is 10ths of milliseconds from the present.
-
-To advance the time for the next delay from the last one for a action, execute:
-
-##### `advance-action-delay`
-( 1/10ms-delay action -- )
-
-where *action* is the action to set the delay for, and *delay* is the new delay from the last delay for that action, in 10ths of milliseconds.
-
-To advance the time for the next delay from the last one, or if it changed, set a new delay starting at the present, for a action, execute:
-
-##### `reset-action-delay`
-( 1/10ms-delay action -- )
-
-where *action* is the action to set the delay for, and *delay* is the new delay from either the last delay for that action, or the present time, in 10ths of milliseconds.
-
-To absolutely set the current delay for a action, execute:
-
-##### `set-action-delay`
-( 1/10ms-delay 1/10ms-start action -- )
-
-where *action* is the action to set the delay for, *start* is the time the delay is from and *delay* is the delay from that time, in 10ths of milliseconds.
+where *action* is the action to set the delay for, *start* ticks is the time the delay is from and *delay* ticks is the delay from that time.
 
 To absolutely get the current delay, execute:
 
-##### `get-action-delay`
-( action --  1/10ms-delay 1/10ms-start )
+##### `action-delay-latest`
+( action -- delay start )
 
-where *action* is the action to set the delay for, *start* is the time the delay is from and *delay* is the delay from that time, in 10ths of milliseconds.
+where *action* is the action to set the delay for, *start* ticks is the time the delay is from and *delay* ticks is the delay from that time.
 
 To cancel the delay for the current action, execute:
 

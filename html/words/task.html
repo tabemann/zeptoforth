@@ -101,6 +101,86 @@
 <p>( – )</p>
 <p>This exception when executed displays the task terminated error message.</p>
 </div>
+<div class="section" id="timeout">
+<h2><code class="docutils literal notranslate"><span class="pre">timeout</span></code><a class="headerlink" href="#timeout" title="Permalink to this headline">¶</a></h2>
+<p>( – addr )</p>
+<p>A user variable used for storing a timeout value in ticks for various operations.</p>
+</div>
+<div class="section" id="no-timeout">
+<h2><code class="docutils literal notranslate"><span class="pre">no-timeout</span></code><a class="headerlink" href="#no-timeout" title="Permalink to this headline">¶</a></h2>
+<p>( – n )</p>
+<p>A constant representing no timeout</p>
+</div>
+<div class="section" id="last-delay">
+<h2><code class="docutils literal notranslate"><span class="pre">last-delay</span></code><a class="headerlink" href="#last-delay" title="Permalink to this headline">¶</a></h2>
+<p>( task – ticks-delay ticks-start )</p>
+<p>Get the last delay setting, from calling <code class="docutils literal notranslate"><span class="pre">delay</span></code> or <code class="docutils literal notranslate"><span class="pre">block-timeout</span></code>, for a task.</p>
+</div>
+<div class="section" id="delay">
+<h2><code class="docutils literal notranslate"><span class="pre">delay</span></code><a class="headerlink" href="#delay" title="Permalink to this headline">¶</a></h2>
+<p>( delay start task – )</p>
+<p>Delay a task until <em>delay</em> ticks after the time represented by <em>start</em> ticks.</p>
+</div>
+<div class="section" id="block-timeout">
+<h2><code class="docutils literal notranslate"><span class="pre">block-timeout</span></code><a class="headerlink" href="#block-timeout" title="Permalink to this headline">¶</a></h2>
+<p>( delay start task – )</p>
+<p>Block a task until <em>delay</em> ticks after the time represented by <em>start</em> ticks, and signal timed out if this time is reached without the task being readied first.</p>
+</div>
+<div class="section" id="block-wait">
+<h2><code class="docutils literal notranslate"><span class="pre">block-wait</span></code><a class="headerlink" href="#block-wait" title="Permalink to this headline">¶</a></h2>
+<p>( task – )</p>
+<p>Block a task until all waiting task are woken with <code class="docutils literal notranslate"><span class="pre">wake</span></code>.</p>
+</div>
+<div class="section" id="block-indefinite">
+<h2><code class="docutils literal notranslate"><span class="pre">block-indefinite</span></code><a class="headerlink" href="#block-indefinite" title="Permalink to this headline">¶</a></h2>
+<p>( task – )</p>
+<p>Block a task indefinitely until the task is readied.</p>
+</div>
+<div class="section" id="ready">
+<h2><code class="docutils literal notranslate"><span class="pre">ready</span></code><a class="headerlink" href="#ready" title="Permalink to this headline">¶</a></h2>
+<p>( task – )</p>
+<p>Ready a blocked or delayed task.</p>
+</div>
+<div class="section" id="block">
+<h2><code class="docutils literal notranslate"><span class="pre">block</span></code><a class="headerlink" href="#block" title="Permalink to this headline">¶</a></h2>
+<p>( task – )</p>
+<p>Block a task for which blocking has been prepared.</p>
+</div>
+<div class="section" id="id1">
+<h2><code class="docutils literal notranslate"><span class="pre">timeout</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>( – ticks )</p>
+<p>The default timeout in ticks.</p>
+</div>
+<div class="section" id="timeout-systick-start">
+<h2><code class="docutils literal notranslate"><span class="pre">timeout-systick-start</span></code><a class="headerlink" href="#timeout-systick-start" title="Permalink to this headline">¶</a></h2>
+<p>( – addr )</p>
+<p>The current timeout start time in ticks.</p>
+</div>
+<div class="section" id="timeout-systick-delay">
+<h2><code class="docutils literal notranslate"><span class="pre">timeout-systick-delay</span></code><a class="headerlink" href="#timeout-systick-delay" title="Permalink to this headline">¶</a></h2>
+<p>( – addr )</p>
+<p>The current timeout delay in ticks.</p>
+</div>
+<div class="section" id="prepare-block">
+<h2><code class="docutils literal notranslate"><span class="pre">prepare-block</span></code><a class="headerlink" href="#prepare-block" title="Permalink to this headline">¶</a></h2>
+<p>( task – )</p>
+<p>Prepare blocking timeouts for a given task.</p>
+</div>
+<div class="section" id="timed-out">
+<h2><code class="docutils literal notranslate"><span class="pre">timed-out?</span></code><a class="headerlink" href="#timed-out" title="Permalink to this headline">¶</a></h2>
+<p>( task – timed-out )</p>
+<p>Get whether a task has timed out.</p>
+</div>
+<div class="section" id="x-timed-out">
+<h2><code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code><a class="headerlink" href="#x-timed-out" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>An exception raised when timeout validation fails.</p>
+</div>
+<div class="section" id="validate-timeout">
+<h2><code class="docutils literal notranslate"><span class="pre">validate-timeout</span></code><a class="headerlink" href="#validate-timeout" title="Permalink to this headline">¶</a></h2>
+<p>( task – )</p>
+<p>Validate whether a task has timed out, raising <code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code> if it has.</p>
+</div>
 <div class="section" id="set-task-priority">
 <h2><code class="docutils literal notranslate"><span class="pre">set-task-priority</span></code><a class="headerlink" href="#set-task-priority" title="Permalink to this headline">¶</a></h2>
 <p>( priority task – )</p>
@@ -151,41 +231,6 @@
 <p>( task – level )</p>
 <p>Get the activation level of a task, with values 0 and lower indicating that a task is inactive, and values 1 and greater indicating that a task is active.</p>
 <p>The simplest case of delaying a task is simply to execute:</p>
-</div>
-<div class="section" id="start-task-delay">
-<h2><code class="docutils literal notranslate"><span class="pre">start-task-delay</span></code><a class="headerlink" href="#start-task-delay" title="Permalink to this headline">¶</a></h2>
-<p>( 1/10ms-delay task – )</p>
-<p>where <em>task</em> is the task to set the delay for, and <em>delay</em> is 10ths of milliseconds from the present.</p>
-<p>To advance the time for the next delay from the last one for a task, execute:</p>
-</div>
-<div class="section" id="advance-task-delay">
-<h2><code class="docutils literal notranslate"><span class="pre">advance-task-delay</span></code><a class="headerlink" href="#advance-task-delay" title="Permalink to this headline">¶</a></h2>
-<p>( 1/10ms-delay task – )</p>
-<p>where <em>task</em> is the task to set the delay for, and <em>delay</em> is the new delay from the last delay for that task, in 10ths of milliseconds.</p>
-<p>To advance the time for the next delay from the last one, or if it changed, set a new delay starting at the present, for a task, execute:</p>
-</div>
-<div class="section" id="reset-task-delay">
-<h2><code class="docutils literal notranslate"><span class="pre">reset-task-delay</span></code><a class="headerlink" href="#reset-task-delay" title="Permalink to this headline">¶</a></h2>
-<p>( 1/10ms-delay task – )</p>
-<p>where <em>task</em> is the task to set the delay for, and <em>delay</em> is the new delay from either the last delay for that task, or the present time, in 10ths of milliseconds.</p>
-<p>To absolutely set the current delay for a task, execute:</p>
-</div>
-<div class="section" id="set-task-delay">
-<h2><code class="docutils literal notranslate"><span class="pre">set-task-delay</span></code><a class="headerlink" href="#set-task-delay" title="Permalink to this headline">¶</a></h2>
-<p>( 1/10ms-delay 1/10ms-start task – )</p>
-<p>where <em>task</em> is the task to set the delay for, <em>start</em> is the time the delay is from and <em>delay</em> is the delay from that time, in 10ths of milliseconds.</p>
-<p>To absolutely get the current delay, execute:</p>
-</div>
-<div class="section" id="get-task-delay">
-<h2><code class="docutils literal notranslate"><span class="pre">get-task-delay</span></code><a class="headerlink" href="#get-task-delay" title="Permalink to this headline">¶</a></h2>
-<p>( task –  1/10ms-delay 1/10ms-start )</p>
-<p>where <em>task</em> is the task to set the delay for, <em>start</em> is the time the delay is from and <em>delay</em> is the delay from that time, in 10ths of milliseconds.</p>
-<p>To cancel the delay for the current task, execute:</p>
-</div>
-<div class="section" id="cancel-task-delay">
-<h2><code class="docutils literal notranslate"><span class="pre">cancel-task-delay</span></code><a class="headerlink" href="#cancel-task-delay" title="Permalink to this headline">¶</a></h2>
-<p>( task – )</p>
-<p>where <em>task</em> is the task to cancel the delay for. It is recommended to execute this for a task after the task has ceased to delay, so it does not delay again when <code class="docutils literal notranslate"><span class="pre">systick-counter</span></code> wraps around.</p>
 </div>
 <div class="section" id="task-checksum">
 <h2><code class="docutils literal notranslate"><span class="pre">task-checksum</span></code><a class="headerlink" href="#task-checksum" title="Permalink to this headline">¶</a></h2>
@@ -253,6 +298,22 @@
 <li class="toctree-l2"><a class="reference internal" href="#kill"><code class="docutils literal notranslate"><span class="pre">kill</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#terminated"><code class="docutils literal notranslate"><span class="pre">terminated?</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#x-terminated"><code class="docutils literal notranslate"><span class="pre">x-terminated</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#timeout"><code class="docutils literal notranslate"><span class="pre">timeout</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#no-timeout"><code class="docutils literal notranslate"><span class="pre">no-timeout</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#last-delay"><code class="docutils literal notranslate"><span class="pre">last-delay</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#delay"><code class="docutils literal notranslate"><span class="pre">delay</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#block-timeout"><code class="docutils literal notranslate"><span class="pre">block-timeout</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#block-wait"><code class="docutils literal notranslate"><span class="pre">block-wait</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#block-indefinite"><code class="docutils literal notranslate"><span class="pre">block-indefinite</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ready"><code class="docutils literal notranslate"><span class="pre">ready</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#block"><code class="docutils literal notranslate"><span class="pre">block</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">timeout</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#timeout-systick-start"><code class="docutils literal notranslate"><span class="pre">timeout-systick-start</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#timeout-systick-delay"><code class="docutils literal notranslate"><span class="pre">timeout-systick-delay</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prepare-block"><code class="docutils literal notranslate"><span class="pre">prepare-block</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#timed-out"><code class="docutils literal notranslate"><span class="pre">timed-out?</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#x-timed-out"><code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#validate-timeout"><code class="docutils literal notranslate"><span class="pre">validate-timeout</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#set-task-priority"><code class="docutils literal notranslate"><span class="pre">set-task-priority</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#get-task-priority"><code class="docutils literal notranslate"><span class="pre">get-task-priority</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#x-out-of-range-priority"><code class="docutils literal notranslate"><span class="pre">x-out-of-range-priority</span></code></a></li>
@@ -263,12 +324,6 @@
 <li class="toctree-l2"><a class="reference internal" href="#set-task-max-timeslice"><code class="docutils literal notranslate"><span class="pre">set-task-max-timeslice</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#get-task-max-timeslice"><code class="docutils literal notranslate"><span class="pre">get-task-max-timeslice</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#get-task-active"><code class="docutils literal notranslate"><span class="pre">get-task-active</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#start-task-delay"><code class="docutils literal notranslate"><span class="pre">start-task-delay</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#advance-task-delay"><code class="docutils literal notranslate"><span class="pre">advance-task-delay</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#reset-task-delay"><code class="docutils literal notranslate"><span class="pre">reset-task-delay</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#set-task-delay"><code class="docutils literal notranslate"><span class="pre">set-task-delay</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#get-task-delay"><code class="docutils literal notranslate"><span class="pre">get-task-delay</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#cancel-task-delay"><code class="docutils literal notranslate"><span class="pre">cancel-task-delay</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#task-checksum"><code class="docutils literal notranslate"><span class="pre">task-checksum</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#dump-task-info"><code class="docutils literal notranslate"><span class="pre">dump-task-info</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#dump-task-stack"><code class="docutils literal notranslate"><span class="pre">dump-task-stack</span></code></a></li>
@@ -280,6 +335,7 @@
 <li class="toctree-l1"><a class="reference internal" href="schedule.html">Scheduling Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>

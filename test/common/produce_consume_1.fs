@@ -24,13 +24,13 @@ begin-module forth-module
   import chan-module
 
   \ My channel size
-  16 cells 1+ constant my-chan-size
+  16 constant my-chan-count
 
   \ My channel
-  my-chan-size chan-size buffer: my-chan
+  1 cells my-chan-count chan-size buffer: my-chan
 
   \ Initialize my channel
-  my-chan my-chan-size init-chan
+  1 cells my-chan-count my-chan init-chan
 
   \ My producer
   : producer ( -- )
