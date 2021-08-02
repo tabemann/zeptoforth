@@ -29,16 +29,16 @@ begin-module forth-module
   2 constant my-chan-size
 
   \ Allot the channels
-  my-chan-size chan-size buffer: orange-chan
-  my-chan-size chan-size buffer: green-chan
-  my-chan-size chan-size buffer: blue-chan
-  my-chan-size chan-size buffer: red-chan
+  1 my-chan-size chan-size buffer: orange-chan
+  1 my-chan-size chan-size buffer: green-chan
+  1 my-chan-size chan-size buffer: blue-chan
+  1 my-chan-size chan-size buffer: red-chan
 
   \ Initialize the channels
-  orange-chan my-chan-size init-chan
-  green-chan my-chan-size init-chan
-  blue-chan my-chan-size init-chan
-  red-chan my-chan-size init-chan
+  1 my-chan-size orange-chan init-chan
+  1 my-chan-size green-chan init-chan
+  1 my-chan-size blue-chan init-chan
+  1 my-chan-size red-chan init-chan
 
   \ The led structure
   begin-structure led-header-size

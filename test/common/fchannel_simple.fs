@@ -22,42 +22,35 @@ begin-module forth-module
 
   import task-module
   import fchan-module
-  import task-pool-module
 
-  \ Task count
-  2 constant my-task-count
-
-  \ The task pool
-  my-task-count task-pool-size buffer: my-task-pool
-
-  \ The fchannel
+  \ The channel
   1 cells fchan-size buffer: my-fchan
+
+  \ The task
+  variable consumer-task
+  variable producer-task
 
   \ The consumer
   : consumer ( -- )
-    begin my-fchan recv-fchan-cell cr ." RECV: " . again
+    begin
+      my-fchan recv-fchan-cell cr ." Received:" .
+    again
   ;
 
-  \ The closer
-  : closer ( -- )
-    2000 ms my-fchan close-fchan
+  \ The producer
+  : producer ( -- )
+    0 begin
+      dup my-fchan send-fchan-cell cr ." Sent:" dup . 1+
+    again
   ;
-  
-  \ The consumer task
-  variable consumer-task
-
-  \ The closer task
-  variable closer-task
   
   \ Initialize the test
   : init-test ( -- )
-    512 256 256 my-task-count my-task-pool init-task-pool
     1 cells my-fchan init-fchan
-    0 ['] consumer my-task-pool spawn-from-task-pool consumer-task !
-    0 ['] closer my-task-pool spawn-from-task-pool closer-task !
+    0 ['] consumer 512 256 256 spawn consumer-task !
+    0 ['] producer 512 256 256 spawn producer-task !
     consumer-task @ run
-    closer-task @ run
-    pause
+    producer-task @ run
   ;
-    
+
 end-module

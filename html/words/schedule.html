@@ -94,36 +94,17 @@
 <h2><code class="docutils literal notranslate"><span class="pre">force-disable-action</span></code><a class="headerlink" href="#force-disable-action" title="Permalink to this headline">¶</a></h2>
 <p>( action – )</p>
 <p>which sets the active counter for the <em>action</em> to zero if is greater than zero.</p>
-<p>The simplest case of delaying a action is simply to execute:</p>
 </div>
-<div class="section" id="start-action-delay">
-<h2><code class="docutils literal notranslate"><span class="pre">start-action-delay</span></code><a class="headerlink" href="#start-action-delay" title="Permalink to this headline">¶</a></h2>
-<p>( 1/10ms-delay action – )</p>
-<p>where <em>action</em> is the action to set the delay for, and <em>delay</em> is 10ths of milliseconds from the present.</p>
-<p>To advance the time for the next delay from the last one for a action, execute:</p>
-</div>
-<div class="section" id="advance-action-delay">
-<h2><code class="docutils literal notranslate"><span class="pre">advance-action-delay</span></code><a class="headerlink" href="#advance-action-delay" title="Permalink to this headline">¶</a></h2>
-<p>( 1/10ms-delay action – )</p>
-<p>where <em>action</em> is the action to set the delay for, and <em>delay</em> is the new delay from the last delay for that action, in 10ths of milliseconds.</p>
-<p>To advance the time for the next delay from the last one, or if it changed, set a new delay starting at the present, for a action, execute:</p>
-</div>
-<div class="section" id="reset-action-delay">
-<h2><code class="docutils literal notranslate"><span class="pre">reset-action-delay</span></code><a class="headerlink" href="#reset-action-delay" title="Permalink to this headline">¶</a></h2>
-<p>( 1/10ms-delay action – )</p>
-<p>where <em>action</em> is the action to set the delay for, and <em>delay</em> is the new delay from either the last delay for that action, or the present time, in 10ths of milliseconds.</p>
-<p>To absolutely set the current delay for a action, execute:</p>
-</div>
-<div class="section" id="set-action-delay">
-<h2><code class="docutils literal notranslate"><span class="pre">set-action-delay</span></code><a class="headerlink" href="#set-action-delay" title="Permalink to this headline">¶</a></h2>
-<p>( 1/10ms-delay 1/10ms-start action – )</p>
-<p>where <em>action</em> is the action to set the delay for, <em>start</em> is the time the delay is from and <em>delay</em> is the delay from that time, in 10ths of milliseconds.</p>
+<div class="section" id="action-delay">
+<h2><code class="docutils literal notranslate"><span class="pre">action-delay</span></code><a class="headerlink" href="#action-delay" title="Permalink to this headline">¶</a></h2>
+<p>( delay start action – )</p>
+<p>where <em>action</em> is the action to set the delay for, <em>start</em> ticks is the time the delay is from and <em>delay</em> ticks is the delay from that time.</p>
 <p>To absolutely get the current delay, execute:</p>
 </div>
-<div class="section" id="get-action-delay">
-<h2><code class="docutils literal notranslate"><span class="pre">get-action-delay</span></code><a class="headerlink" href="#get-action-delay" title="Permalink to this headline">¶</a></h2>
-<p>( action –  1/10ms-delay 1/10ms-start )</p>
-<p>where <em>action</em> is the action to set the delay for, <em>start</em> is the time the delay is from and <em>delay</em> is the delay from that time, in 10ths of milliseconds.</p>
+<div class="section" id="action-delay-latest">
+<h2><code class="docutils literal notranslate"><span class="pre">action-delay-latest</span></code><a class="headerlink" href="#action-delay-latest" title="Permalink to this headline">¶</a></h2>
+<p>( action – delay start )</p>
+<p>where <em>action</em> is the action to set the delay for, <em>start</em> ticks is the time the delay is from and <em>delay</em> ticks is the delay from that time.</p>
 <p>To cancel the delay for the current action, execute:</p>
 </div>
 <div class="section" id="cancel-action-delay">
@@ -173,17 +154,15 @@
 <li class="toctree-l2"><a class="reference internal" href="#force-enable-action"><code class="docutils literal notranslate"><span class="pre">force-enable-action</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#disable-action"><code class="docutils literal notranslate"><span class="pre">disable-action</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#force-disable-action"><code class="docutils literal notranslate"><span class="pre">force-disable-action</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#start-action-delay"><code class="docutils literal notranslate"><span class="pre">start-action-delay</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#advance-action-delay"><code class="docutils literal notranslate"><span class="pre">advance-action-delay</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#reset-action-delay"><code class="docutils literal notranslate"><span class="pre">reset-action-delay</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#set-action-delay"><code class="docutils literal notranslate"><span class="pre">set-action-delay</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#get-action-delay"><code class="docutils literal notranslate"><span class="pre">get-action-delay</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#action-delay"><code class="docutils literal notranslate"><span class="pre">action-delay</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#action-delay-latest"><code class="docutils literal notranslate"><span class="pre">action-delay-latest</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#cancel-action-delay"><code class="docutils literal notranslate"><span class="pre">cancel-action-delay</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#run-schedule"><code class="docutils literal notranslate"><span class="pre">run-schedule</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>

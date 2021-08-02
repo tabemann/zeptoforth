@@ -21,43 +21,27 @@
 begin-module forth-module
 
   import task-module
-  import fchan-module
-  import task-pool-module
+  import systick-module
 
-  \ Task count
-  2 constant my-task-count
-
-  \ The task pool
-  my-task-count task-pool-size buffer: my-task-pool
-
-  \ The fchannel
-  1 cells fchan-size buffer: my-fchan
-
-  \ The consumer
-  : consumer ( -- )
-    begin my-fchan recv-fchan-cell cr ." RECV: " . again
+  \ Our two tasks
+  variable task1
+  variable task2
+  
+  \ Run the task
+  : run-task ( c delay -- )
+    systick-divisor * systick-counter
+    begin
+      over + 2dup current-task delay
+      2 pick emit
+    again
   ;
 
-  \ The closer
-  : closer ( -- )
-    2000 ms my-fchan close-fchan
-  ;
-  
-  \ The consumer task
-  variable consumer-task
-
-  \ The closer task
-  variable closer-task
-  
   \ Initialize the test
   : init-test ( -- )
-    512 256 256 my-task-count my-task-pool init-task-pool
-    1 cells my-fchan init-fchan
-    0 ['] consumer my-task-pool spawn-from-task-pool consumer-task !
-    0 ['] closer my-task-pool spawn-from-task-pool closer-task !
-    consumer-task @ run
-    closer-task @ run
-    pause
+    [char] * 250 2 ['] run-task 512 256 256 spawn task1 !
+    [char] x 1000 2 ['] run-task 512 256 256 spawn task2 !
+    task1 @ run
+    task2 @ run
   ;
-    
+
 end-module

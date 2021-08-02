@@ -192,14 +192,17 @@ begin-module-once lock-module
   \ Lock a lock
   : lock ( lock -- )
     begin-critical
+    current-task prepare-block
     dup lock-holder-task @ if
       dup current-task ['] current-lock for-task !
       init-lock-wait
       2dup swap add-lock-wait
       swap update-hold-priority
-      current-task stop
+      current-task block
       end-critical
-      pause
+      [: current-task validate-timeout ;] try ?dup if
+	lock-wait-orig-here @ ram-here! ?raise
+      then
       begin-critical
       lock-wait-orig-here @ ram-here!
     else
@@ -220,8 +223,7 @@ begin-module-once lock-module
       end-critical ['] x-not-currently-owned ?raise
     then
     dup update-release-priority
-    dup lock-first-wait @ if
-      dup lock-first-wait @
+    dup lock-first-wait @ ?dup if
       dup lock-wait-next @ 2 pick lock-first-wait !
       over lock-first-wait @ 0= if
 	0 2 pick lock-last-wait !
@@ -231,7 +233,7 @@ begin-module-once lock-module
       2dup swap lock-holder-task !
       0 over ['] current-lock for-task !
       swap update-hold-priority
-      run
+      ready
     else
       0 swap lock-holder-task !      
     then
@@ -244,6 +246,9 @@ begin-module-once lock-module
     update-hold-priority
     end-critical
   ;
+
+  \ Execute a block of code with a lock
+  : with-lock ( lock xt -- ) swap dup >r lock try r> unlock ?raise ;
 
 end-module
     
