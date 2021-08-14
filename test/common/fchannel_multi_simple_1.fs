@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2021 Travis Bemann
+\ Copyright (c) 2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -30,42 +30,36 @@ begin-module forth-module
   \ Our output lock
   lock-size buffer: my-lock
 
-  \ Our tasks
-  variable consumer-task
-  variable producer-a-task
-  variable producer-b-task
-  variable producer-c-task
-
-  \ The inner loop of the consumer
+  \ The loop of the consumer
   : consumer ( -- )
     begin
-      my-fchan recv-fchan-cell
-      [: cr ." Received:" . ;] my-lock with-lock
+      1000 timeout ! my-fchan recv-fchan-cell
+      [: space ." out:" . ;] my-lock with-lock
     again
   ;
 
-  \ The inner loop of a producer
-  : producer ( -- )
-    begin
-      [: cr ." Sending: " dup . ;] my-lock with-lock
-      dup my-fchan send-fchan-cell
-\      [: cr ." Done sending: " dup . ;] my-lock with-lock
+  \ The loop of a producer
+  : producer ( c -- )
+    0 begin
+      [: space ." in: " over emit ." :" dup . ;] my-lock with-lock
+      1000 timeout ! dup my-fchan send-fchan-cell
+      [: space ." done: " over emit ." :" dup . ;] my-lock with-lock
+      1+
     again
   ;
 
-  \ Initiate the test
-  : init-test ( -- )
-    1 cells my-fchan init-fchan
-    my-lock init-lock
-    0 ['] consumer 512 256 256 spawn consumer-task !
-    0 1 ['] producer 512 256 256 spawn producer-a-task !
-    1 1 ['] producer 512 256 256 spawn producer-b-task !
-    2 1 ['] producer 512 256 256 spawn producer-c-task !
-    consumer-task @ run
-    producer-a-task @ run
-    producer-b-task @ run
-    producer-c-task @ run
-    pause
-  ;
+  \ Initialize
+  1 cells my-fchan init-fchan
+  my-lock init-lock
+  0 ' consumer 512 256 256 spawn constant my-consumer-task
+  char A 1 ' producer 512 256 256 spawn constant my-producer-a-task
+  char B 1 ' producer 512 256 256 spawn constant my-producer-b-task
+  char C 1 ' producer 512 256 256 spawn constant my-producer-c-task
+  char D 1 ' producer 512 256 256 spawn constant my-producer-d-task
+  my-consumer-task run
+  my-producer-a-task run
+  my-producer-b-task run
+  my-producer-c-task run
+  my-producer-d-task run
 
 end-module

@@ -538,7 +538,7 @@ begin-import-module-once task-module
   ;
 
   \ Timed out exception
-  : x-timed-out ( -- ) space ." block timed out" ;
+  : x-timed-out ( -- ) space ." block timed out" cr ;
 
   \ Validate not timing out
   : validate-timeout ( task -- ) timed-out? triggers x-timed-out ;
