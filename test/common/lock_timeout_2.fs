@@ -29,24 +29,26 @@ begin-module forth-module
   \ Our tasks
   variable my-task-1
   variable my-task-2
+  variable my-task-3
 
   \ Run the first task
   : do-task-1 ( -- )
     no-timeout timeout !
-    [: cr ." Start wait 1" 50 ms cr ." End wait 1" ;] my-lock with-lock
-    [: cr ." Start wait 3" 100 ms cr ." End wait 3" ;] my-lock with-lock
-    [: cr ." Start wait 5" 300 ms cr ." End wait 5" ;] my-lock with-lock
-    [: cr ." Start wait 7" 600 ms cr ." End wait 7" ;] my-lock with-lock
+    [: cr ." Start wait 1" 1000 ms cr ." End wait 1" ;] my-lock with-lock
   ;
 
   \ Run the second task
   : do-task-2 ( -- )
-    4500 timeout !
+    no-timeout timeout !
     25 ms
-    [: cr ." Start wait 2" 100 ms cr ." End wait 2" ;] my-lock with-lock
-    [: cr ." Start wait 4" 100 ms cr ." End wait 4" ;] my-lock with-lock
-    [: cr ." Start wait 6" 100 ms cr ." End wait 6" ;] my-lock with-lock
-    [: cr ." Start wait 8" 100 ms cr ." End wait 8" ;] my-lock with-lock
+    [: cr ." Start wait 2" 1000 ms cr ." End wait 2" ;] my-lock with-lock
+  ;
+
+  \ Run the third task
+  : do-task-3 ( -- )
+    5000 timeout !
+    50 ms
+    [: cr ." Start wait 3" 1000 ms cr ." End wait 3" ;] my-lock with-lock
   ;
 
   \ Initialize our test
@@ -54,8 +56,10 @@ begin-module forth-module
     my-lock init-lock
     0 ['] do-task-1 512 256 256 spawn my-task-1 !
     0 ['] do-task-2 512 256 256 spawn my-task-2 !
+    0 ['] do-task-3 512 256 256 spawn my-task-3 !
     my-task-1 @ run
     my-task-2 @ run
+    my-task-3 @ run
   ;
   
 end-module

@@ -105,37 +105,24 @@ begin-module-once lock-module
 
     \ Remove a lock wait record
     : remove-lock-wait ( wait lock -- )
-      dup lock-last-wait @
-      ?dup if
-	2 pick = if
-	  2dup lock-last-wait @ = if
-	    swap lock-wait-next @
-	    swap 2dup lock-last-wait !
-	    lock-first-wait !
-	  else
-	    swap lock-wait-next @ swap lock-last-wait !
-	  then
-	else
-	  dup lock-last-wait @ begin
-	    dup if
-	      dup lock-wait-next @ 3 pick = if
-		dup lock-wait-next @ 2 pick lock-first-wait @ = if
-		  0 over lock-wait-next ! swap lock-first-wait ! drop true
-		else
-		  dup lock-wait-next @ lock-wait-next @ swap lock-wait-next !
-		  nip nip true
-		then
+      dup lock-first-wait @ 2 pick = if
+	swap lock-wait-next @ swap lock-first-wait !
+      else
+	dup lock-first-wait @ begin
+	  dup if
+	    dup lock-wait-next @ 3 pick = if
+	      over lock-last-wait @ 3 pick = if
+		0 over lock-wait-next ! swap lock-last-wait ! drop true
 	      else
-		lock-wait-next @ false
+		rot lock-wait-next @ swap lock-wait-next ! drop true
 	      then
 	    else
-	      true
+	      lock-wait-next @ false
 	    then
-	  until
-	  2drop drop
-	then
-      else
-	2drop
+	  else
+	    2drop drop true
+	  then
+	until
       then
     ;
 
