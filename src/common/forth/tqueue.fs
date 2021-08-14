@@ -73,6 +73,32 @@ begin-module-once tqueue-module
       last-wait !
     ;
 
+    \ Remove a wait record
+    : remove-wait ( wait tqueue -- )
+      dup first-wait @ 2 pick = if
+	dup last-wait @ 2 pick = if
+	  0 over last-wait !
+	then
+	swap wait-prev @ swap first-wait !
+      else
+	dup first-wait @ begin
+	  dup if
+	    dup wait-prev @ 3 pick = if
+	      over last-wait @ 3 pick = if
+		0 over wait-prev ! swap last-wait ! drop true
+	      else
+		rot wait-prev @ swap wait-prev ! drop true
+	      then
+	    else
+	      wait-prev @ false
+	    then
+	  else
+	    2drop drop true
+	  then
+	until
+      then
+    ;
+
   end-module
 
   \ Export tqueue-size
@@ -94,14 +120,15 @@ begin-module-once tqueue-module
       drop exit
     then
     init-wait
-    dup rot add-wait
+    2dup swap add-wait
     current-task block
     end-critical
     [: current-task validate-timeout ;] try ?dup if
-      swap wait-orig-here @ ram-here! ?raise
+      >r tuck swap remove-wait wait-orig-here @ ram-here! r> ?raise
     then
     begin-critical
     wait-orig-here @ ram-here!
+    drop
 \    end-critical
   ;
 
