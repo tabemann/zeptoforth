@@ -1068,6 +1068,13 @@ commit-flash
   ram-here rot ram-allot dup >r swap try r> ram-here! ?raise
 ;
 
+\ Allot aligned RAM temporarily and clean it up afterwards, even after an
+\ exception
+: with-aligned-allot ( bytes xt -- ) ( xt: a-addr -- )
+  ram-here >r 4 ram-align, ram-here rot ram-allot
+  swap try r> ram-here! ?raise
+;
+
 \ Commit to flash
 commit-flash
 
