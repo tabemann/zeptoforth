@@ -24,7 +24,6 @@ compile-to-flash
 begin-module-once fchan-module
 
   import task-module
-  import task-internal-module
   import tqueue-module
 
   begin-import-module fchan-internal-module
@@ -116,24 +115,24 @@ begin-module-once fchan-module
   
   \ Send a double cell on a fast channel
   : send-fchan-2cell ( xd fchan -- )
-    2 cells [: >r -rot r@ 2! r> 2 cells rot send-fchan ;] with-allot
+    2 cells [: >r -rot r@ 2! r> 2 cells rot send-fchan ;] with-aligned-allot
   ;
 
   \ Receive a double cell from a fast channel
   : recv-fchan-2cell ( fchan -- xd )
     2 cells [: 2 cells rot recv-fchan 2 cells >= if 2@ else drop 0 0 then ;]
-    with-allot
+    with-aligned-allot
   ;
 
   \ Send a cell on a fast channel
   : send-fchan-cell ( x fchan -- )
-    1 cells [: >r swap r@ ! r> 1 cells rot send-fchan ;] with-allot
+    1 cells [: >r swap r@ ! r> 1 cells rot send-fchan ;] with-aligned-allot
   ;
 
   \ Receive a cell from a fast channel
   : recv-fchan-cell ( fchan -- x )
     1 cells [: 1 cells rot recv-fchan 1 cells >= if @ else drop 0 then ;]
-    with-allot
+    with-aligned-allot
   ;
 
   \ Close a fast channel

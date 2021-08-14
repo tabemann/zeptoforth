@@ -166,90 +166,88 @@ begin-module-once chan-module
 
   \ Send data to a channel
   : send-chan ( addr bytes chan -- )
-    begin-critical
-    dup chan-closed @ if
-      end-critical ['] x-chan-closed ?raise
-    then
-    current-task prepare-block
-    dup wait-send-chan
-    dup send-chan-addr over chan-data-size @ 0 fill
-    dup >r chan-data-size @ min r@ send-chan-addr swap move
-    dup advance-send-chan
-    dup chan-recv-ready @ 0> if
-      chan-recv-tqueue wake-tqueue
-    else
-      drop
-    then
-    end-critical
+    [:
+      dup chan-closed @ if
+	end-critical ['] x-chan-closed ?raise
+      then
+      current-task prepare-block
+      dup wait-send-chan
+      dup send-chan-addr over chan-data-size @ 0 fill
+      dup >r chan-data-size @ min r@ send-chan-addr swap move r>
+      dup advance-send-chan
+      dup chan-recv-ready @ 0> if
+	chan-recv-tqueue wake-tqueue
+      else
+	drop
+      then
+    ;] critical
   ;
 
   \ Receive data from a channel
   : recv-chan ( addr bytes chan -- addr recv-bytes )
-    begin-critical
-    current-task prepare-block
-    dup wait-recv-chan
-    >r 2dup 0 fill
-    r@ chan-data-size @ min r@ recv-chan-addr -rot 2dup 2>r move 2r> r>
-    dup advance-recv-chan
-    dup chan-send-ready @ 0> if
-      chan-send-tqueue wake-tqueue
-    else
-      drop
-    then
-    end-critical
+    [:
+      current-task prepare-block
+      dup wait-recv-chan
+      >r 2dup 0 fill
+      r@ chan-data-size @ min r@ recv-chan-addr -rot 2dup 2>r move 2r> r>
+      dup advance-recv-chan
+      dup chan-send-ready @ 0> if
+	chan-send-tqueue wake-tqueue
+      else
+	drop
+      then
+    ;] critical
   ;
 
   \ Send a double cell on a channel
   : send-chan-2cell ( xd chan -- )
-    2 cells [: >r -rot r@ 2! r> 2 cells rot send-chan ;] with-allot
+    2 cells [: >r -rot r@ 2! r> 2 cells rot send-chan ;] with-aligned-allot
   ;
 
   \ Receive a double cell from a channel
   : recv-chan-2cell ( chan -- xd )
     2 cells [: 2 cells rot recv-chan 2 cells >= if 2@ else drop 0 0 then ;]
-    with-allot
+    with-aligned-allot
   ;
 
   \ Send a cell on a channel
   : send-chan-cell ( x chan -- )
-    1 cells [: >r swap r@ ! r> 1 cells rot send-chan ;] with-allot
+    1 cells [: >r swap r@ ! r> 1 cells rot send-chan ;] with-aligned-allot
   ;
 
   \ Receive a cell from a channel
   : recv-chan-cell ( chan -- x )
     1 cells [: 1 cells rot recv-chan 1 cells >= if @ else drop 0 then ;]
-    with-allot
+    with-aligned-allot
   ;
 
   \ Send a halfword on a channel
   : send-chan-half ( h chan -- )
-    2 [: >r swap r@ ! r> 2 rot send-chan ;] with-allot
+    2 [: >r swap r@ ! r> 2 rot send-chan ;] with-aligned-allot
   ;
 
   \ Receive a halfword from a channel
   : recv-chan-half ( chan -- h )
-    2 [: 2 rot recv-chan 2 >= if @ else drop 0 then ;]
-    with-allot
+    2 [: 2 rot recv-chan 2 >= if h@ else drop 0 then ;] with-aligned-allot
   ;
 
   \ Send a byte on a channel
-  : send-chan-byte ( h chan -- )
-    1 [: >r swap r@ ! r> 1 rot send-chan ;] with-allot
+  : send-chan-byte ( c chan -- )
+    1 [: >r swap r@ c! r> 1 rot send-chan ;] with-aligned-allot
   ;
 
   \ Receive a byte from a channel
-  : recv-chan-byte ( chan -- h )
-    1 [: 1 rot recv-chan 1 >= if @ else drop 0 then ;]
-    with-allot
+  : recv-chan-byte ( chan -- c )
+    1 [: 1 rot recv-chan 1 >= if c@ else drop 0 then ;] with-aligned-allot
   ;
 
   \ Close a channel
   : close-chan ( chan -- )
-    begin-critical
-    true over chan-closed !
-    dup chan-send-task @ ?dup if run then
-    chan-recv-task @ ?dup if run then
-    end-critical
+    [:
+      true over chan-closed !
+      dup chan-send-tqueue wake-tqueue-all
+      chan-recv-tqueue wake-tqueue-all
+    ;] critical
   ;
 
   \ Get whether a channel is closed

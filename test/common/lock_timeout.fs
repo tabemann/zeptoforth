@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2021 Travis Bemann
+\ Copyright (c) 2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -21,51 +21,40 @@
 begin-module forth-module
 
   import task-module
-  import fchan-module
   import lock-module
 
-  \ Our channel
-  1 cells fchan-size buffer: my-fchan
-
-  \ Our output lock
+  \ Our lock
   lock-size buffer: my-lock
-
+  
   \ Our tasks
-  variable consumer-task
-  variable producer-a-task
-  variable producer-b-task
-  variable producer-c-task
+  variable my-task-1
+  variable my-task-2
 
-  \ The inner loop of the consumer
-  : consumer ( -- )
-    begin
-      my-fchan recv-fchan-cell
-      [: cr ." Received:" . ;] my-lock with-lock
-    again
+  \ Run the first task
+  : do-task-1 ( -- )
+    no-timeout timeout !
+    [: cr ." Start wait 1" 10 ms cr ." End wait 1" ;] my-lock with-lock
+    [: cr ." Start wait 3" 100 ms cr ." End wait 3" ;] my-lock with-lock
+    [: cr ." Start wait 5" 300 ms cr ." End wait 5" ;] my-lock with-lock
+    [: cr ." Start wait 7" 600 ms cr ." End wait 7" ;] my-lock with-lock
   ;
 
-  \ The inner loop of a producer
-  : producer ( -- )
-    begin
-      [: cr ." Sending: " dup . ;] my-lock with-lock
-      dup my-fchan send-fchan-cell
-\      [: cr ." Done sending: " dup . ;] my-lock with-lock
-    again
+  \ Run the second task
+  : do-task-2 ( -- )
+    4500 timeout !
+    [: cr ." Start wait 2" 100 ms cr ." End wait 2" ;] my-lock with-lock
+    [: cr ." Start wait 4" 100 ms cr ." End wait 4" ;] my-lock with-lock
+    [: cr ." Start wait 6" 100 ms cr ." End wait 6" ;] my-lock with-lock
+    [: cr ." Start wait 8" 100 ms cr ." End wait 8" ;] my-lock with-lock
   ;
 
-  \ Initiate the test
+  \ Initialize our test
   : init-test ( -- )
-    1 cells my-fchan init-fchan
     my-lock init-lock
-    0 ['] consumer 512 256 256 spawn consumer-task !
-    0 1 ['] producer 512 256 256 spawn producer-a-task !
-    1 1 ['] producer 512 256 256 spawn producer-b-task !
-    2 1 ['] producer 512 256 256 spawn producer-c-task !
-    consumer-task @ run
-    producer-a-task @ run
-    producer-b-task @ run
-    producer-c-task @ run
-    pause
+    0 ['] do-task-1 512 256 256 spawn my-task-1 !
+    0 ['] do-task-2 512 256 256 spawn my-task-2 !
+    my-task-1 @ run
+    my-task-2 @ run
   ;
-
+  
 end-module
