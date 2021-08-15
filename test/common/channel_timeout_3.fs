@@ -21,10 +21,10 @@
 begin-module forth-module
 
   import task-module
-  import fchan-module
+  import chan-module
 
-  \ Our fchannel
-  1 cells fchan-size buffer: my-fchan
+  \ Our channel
+  1 cells 1 chan-size buffer: my-chan
   
   \ Our tasks
   variable my-task-1
@@ -36,9 +36,9 @@ begin-module forth-module
   : do-task-1 ( -- )
     no-timeout timeout !
     cr ." Start wait 1" 1000 ms cr ." End wait 1"
-    my-fchan recv-fchan-cell drop
+    0 my-chan send-chan-cell
     cr ." Start wait 2" 1000 ms cr ." End wait 2"
-    my-fchan recv-fchan-cell drop
+    1 my-chan send-chan-cell
     cr ." Done"
   ;
 
@@ -46,29 +46,29 @@ begin-module forth-module
   : do-task-2 ( -- )
     no-timeout timeout !
     25 ms
-    0 my-fchan send-fchan-cell
-    cr ." Sent 1"
+    my-chan recv-chan-cell
+    cr ." Received 1:" .
   ;
 
   \ Run the third task
   : do-task-3 ( -- )
     5000 timeout !
     50 ms
-    0 my-fchan send-fchan-cell
-    cr ." Sent 2"
+    my-chan recv-chan-cell
+    cr ." Received 2:" .
   ;
 
   \ Run the fourth task
   : do-task-4 ( -- )
     no-timeout timeout !
     75 ms
-    0 my-fchan send-fchan-cell
-    cr ." Sent 3"
+    my-chan recv-chan-cell
+    cr ." Received 3:" .
   ;
 
   \ Initialize our test
   : init-test ( -- )
-    1 cells my-fchan init-fchan
+    1 cells 1 my-chan init-chan
     0 ['] do-task-1 512 256 256 spawn my-task-1 !
     0 ['] do-task-2 512 256 256 spawn my-task-2 !
     0 ['] do-task-3 512 256 256 spawn my-task-3 !

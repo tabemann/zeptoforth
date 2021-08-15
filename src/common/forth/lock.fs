@@ -217,22 +217,26 @@ begin-module-once lock-module
     0 swap lock-next-held !
   ;
 
+  \ Double locking exception
+  : x-double-lock ( -- ) space ." double locked" cr ;
+
   \ Lock a lock
   : lock ( lock -- )
     [:
+      dup lock-holder-task @ current-task = triggers x-double-lock
       current-task prepare-block
       dup lock-holder-task @ if
 	dup current-task ['] current-lock for-task !
 	init-lock-wait
 	2dup swap add-lock-wait
 	over update-hold-priority
-	current-task block
+	current-task block-critical
 	end-critical
 	[: current-task validate-timeout ;] try ?dup if
-	  >r dup rot remove-lock-wait
-	  lock-wait-orig-here @ ram-here! r> ?raise
+	  >r [:
+	    dup rot remove-lock-wait lock-wait-orig-here @ ram-here!
+	  ;] critical r> ?raise
 	then
-	begin-critical
 	lock-wait-orig-here @ ram-here!
 	drop
       else
@@ -249,9 +253,7 @@ begin-module-once lock-module
   \ Unlock a lock
   : unlock ( lock -- )
     [:
-      dup lock-holder-task @ current-task <> if
-	end-critical ['] x-not-currently-owned ?raise
-      then
+      dup lock-holder-task @ current-task = averts x-not-currently-owned
       dup update-release-priority
       dup lock-first-wait @ ?dup if
 	dup lock-wait-next @ 2 pick lock-first-wait !

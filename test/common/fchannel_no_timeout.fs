@@ -23,7 +23,7 @@ begin-module forth-module
   import task-module
   import fchan-module
 
-  \ Our fchannel
+  \ Our lock
   1 cells fchan-size buffer: my-fchan
   
   \ Our tasks
@@ -39,6 +39,8 @@ begin-module forth-module
     my-fchan recv-fchan-cell drop
     cr ." Start wait 2" 1000 ms cr ." End wait 2"
     my-fchan recv-fchan-cell drop
+    cr ." Start wait 3" 1000 ms cr ." End wait 3"
+    my-fchan recv-fchan-cell drop
     cr ." Done"
   ;
 
@@ -52,7 +54,7 @@ begin-module forth-module
 
   \ Run the third task
   : do-task-3 ( -- )
-    5000 timeout !
+    no-timeout timeout !
     50 ms
     0 my-fchan send-fchan-cell
     cr ." Sent 2"

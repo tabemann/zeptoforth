@@ -36,9 +36,9 @@ begin-module forth-module
   : do-task-1 ( -- )
     no-timeout timeout !
     cr ." Start wait 1" 1000 ms cr ." End wait 1"
-    my-fchan recv-fchan-cell drop
+    0 my-fchan send-fchan-cell
     cr ." Start wait 2" 1000 ms cr ." End wait 2"
-    my-fchan recv-fchan-cell drop
+    1 my-fchan send-fchan-cell
     cr ." Done"
   ;
 
@@ -46,24 +46,24 @@ begin-module forth-module
   : do-task-2 ( -- )
     no-timeout timeout !
     25 ms
-    0 my-fchan send-fchan-cell
-    cr ." Sent 1"
+    my-fchan recv-fchan-cell
+    cr ." Received 1:" .
   ;
 
   \ Run the third task
   : do-task-3 ( -- )
     5000 timeout !
     50 ms
-    0 my-fchan send-fchan-cell
-    cr ." Sent 2"
+    my-fchan recv-fchan-cell
+    cr ." Received 2:" .
   ;
 
   \ Run the fourth task
   : do-task-4 ( -- )
     no-timeout timeout !
     75 ms
-    0 my-fchan send-fchan-cell
-    cr ." Sent 3"
+    my-fchan recv-fchan-cell
+    cr ." Received 3:" .
   ;
 
   \ Initialize our test
