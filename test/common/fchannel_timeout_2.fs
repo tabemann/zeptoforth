@@ -18,17 +18,53 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ This is not actual Forth code, but rather setup directives for e4thcom to be
-\ executed to load a "big" configuration
+begin-module forth-module
 
-#include src/common/forth/disassemble.fs
-#include src/common/forth/pool.fs
-#include src/common/forth/allocate.fs
-#include src/common/forth/tqueue.fs
-#include src/common/forth/lock.fs
-#include src/common/forth/fchannel.fs
-#include src/common/forth/channel.fs
-#include src/common/forth/ansi_term.fs
-#include src/common/forth/line.fs
-#include src/common/forth/task_pool.fs
-#include src/common/forth/action_pool.fs
+  import task-module
+  import fchan-module
+
+  \ Our fchannel
+  1 cells fchan-size buffer: my-fchan
+  
+  \ Our tasks
+  variable my-task-1
+  variable my-task-2
+  variable my-task-3
+  variable my-task-4
+
+  \ Run the first task
+  : do-task-1 ( -- )
+    no-timeout timeout !
+    cr ." Start wait 1" 1000 ms cr ." End wait 1"
+    my-fchan recv-fchan-cell drop
+    cr ." Done"
+  ;
+
+  \ Run the second task
+  : do-task-2 ( -- )
+    no-timeout timeout !
+    25 ms
+    0 my-fchan send-fchan-cell
+    cr ." Sent 1"
+  ;
+
+  \ Run the third task
+  : do-task-3 ( -- )
+    5000 timeout !
+    50 ms
+    0 my-fchan send-fchan-cell
+    cr ." Sent 2"
+  ;
+
+  \ Initialize our test
+  : init-test ( -- )
+    1 cells my-fchan init-fchan
+    0 ['] do-task-1 512 256 256 spawn my-task-1 !
+    0 ['] do-task-2 512 256 256 spawn my-task-2 !
+    0 ['] do-task-3 512 256 256 spawn my-task-3 !
+    my-task-1 @ run
+    my-task-2 @ run
+    my-task-3 @ run
+  ;
+  
+end-module

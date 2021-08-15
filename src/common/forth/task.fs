@@ -47,6 +47,12 @@ begin-import-module-once task-module
 
     \ Task block timed out
     5 constant block-timed-out
+
+    \ Schedule into critical section bit
+    $8000 constant schedule-critical
+
+    \ Schedule into critical section mask
+    $7FFF constant schedule-critical-mask
     
     \ In task change
     variable in-task-change
@@ -473,6 +479,17 @@ begin-import-module-once task-module
     pause
   ;
 
+  \ Delay a task and schedule as critcal once done
+  : delay-critical ( ticks-delay ticks-start task -- )
+    [:
+      dup validate-not-terminated
+      tuck ['] task-systick-start for-task !
+      tuck ['] task-systick-delay for-task !
+      [ delayed schedule-critical or ] literal swap task-state h!
+    ;] critical
+    pause
+  ;
+
   \ Mark a task as blocked until a timeout
   : block-timeout ( ticks-delay ticks-start task -- )
     [:
@@ -484,10 +501,28 @@ begin-import-module-once task-module
     pause
   ;
 
+  \ Mark a task as blocked until a timeout and schedule as critical once done
+  : block-timeout-critical ( ticks-delay ticks-start task -- )
+    [:
+      dup validate-not-terminated
+      tuck ['] task-systick-start for-task !
+      tuck ['] task-systick-delay for-task !
+      [ blocked-timeout schedule-critical or ] literal swap task-state h!
+    ;] critical
+    pause
+  ;
+
   \ Mark a task as waiting
   : block-wait ( task -- )
     dup validate-not-terminated
     blocked-wait swap task-state h!
+    pause
+  ;
+  
+  \ Mark a task as waiting
+  : block-wait-critical ( task -- )
+    dup validate-not-terminated
+    [ blocked-wait schedule-critical or ] literal swap task-state h!
     pause
   ;
 
@@ -495,6 +530,13 @@ begin-import-module-once task-module
   : block-indefinite ( task -- )
     dup validate-not-terminated
     blocked-indefinite swap task-state h!
+    pause
+  ;
+
+  \ Mark a task as blocked indefinitely and schedule as critical when done
+  : block-indefinite-critical ( task -- )
+    dup validate-not-terminated
+    [ blocked-indefinite schedule-critical or ] literal swap task-state h!
     pause
   ;
 
@@ -519,6 +561,21 @@ begin-import-module-once task-module
     ;] critical
   ;
 
+  \ Block a task for the specified initialized timeout and schedule as critical
+  \ once done
+  : block-critical ( task -- )
+    [:
+      dup validate-not-terminated
+      dup ['] timeout for-task @ no-timeout <> if
+	dup ['] timeout-systick-delay for-task @
+	over ['] timeout-systick-start for-task @
+	rot block-timeout-critical
+      else
+	block-indefinite-critical
+      then
+    ;] critical
+  ;
+
   \ Prepare blocking for a task
   : prepare-block ( task -- )
     [:
@@ -534,7 +591,8 @@ begin-import-module-once task-module
 
   \ Get whether a task has timed out
   : timed-out? ( task -- timed-out )
-    dup validate-not-terminated task-state h@ block-timed-out =
+    dup validate-not-terminated task-state h@ schedule-critical-mask and
+    block-timed-out =
   ;
 
   \ Timed out exception
@@ -643,7 +701,7 @@ begin-import-module-once task-module
 
     \ Get whether a task is waiting
     : waiting-task? ( task -- )
-      dup task-state h@
+      dup task-state h@ schedule-critical-mask and
       dup blocked-wait = over blocked-indefinite = or
       over delayed = rot blocked-timeout = or
       rot delayed? and or
@@ -666,17 +724,6 @@ begin-import-module-once task-module
 
     \ PendSV return value
     variable pendsv-return
-
-    \ \ Type an unsigned integer to serial
-    \ : serial-unsigned ( u -- )
-    \   swap ram-here swap format-unsigned dup ram-allot
-    \   dup >r serial-type r> negate ram-allot
-    \ ;
-    
-    \ \ Type an unsigned integer to serial
-    \ : serial-hex ( u -- )
-    \   base @ 16 base ! serial-unsigned base !
-    \ ;
 
     \ Save task state
     : save-task-state ( task -- )
@@ -705,16 +752,6 @@ begin-import-module-once task-module
       false in-task-change !
     ;
 
-    \ \ Type prev-task and current-type
-    \ : serial-type-tasks ( -- )
-    \   s" prev-task: " serial-type prev-task @ serial-hex $20 serial-emit
-    \   s" current-task: " serial-type current-task @ serial-hex $20 serial-emit
-    \   s" prev-timeslice: " serial-type
-    \   prev-task @ ['] task-timeslice for-task @ serial-unsigned $20 serial-emit
-    \   s" current-timeslice: " serial-type
-    \   current-task @ ['] task-timeslice for-task @ serial-unsigned $20 serial-emit
-    \ ;
-
     \ Actually wake tasks
     : actually-wake-tasks ( -- )
       first-task @ begin ?dup while
@@ -741,16 +778,24 @@ begin-import-module-once task-module
 	  wake-tasks @ if actually-wake-tasks false wake-tasks ! then
 	  begin
 	    find-next-task dup 0<> if
-	      dup get-task-active 1 < if remove-task false else true then
+	      dup get-task-active 1 < if
+		remove-task false
+	      else
+		dup task-state h@ schedule-critical and if
+		  1 in-critical !
+		then
+		dup task-state h@ schedule-critical-mask and
+		blocked-timeout = if
+		  block-timed-out over task-state h!
+		else
+		  readied over task-state h!
+		then
+		true
+	      then
 	    else
 	      true
 	    then
 	  until
-	  dup task-state h@ blocked-timeout = if
-	    block-timed-out over task-state h!
-	  else
-	    readied over task-state h!
-	  then
 	  current-task !
 	  false in-task-change !
 	  current-task @ if true else sleep false then
