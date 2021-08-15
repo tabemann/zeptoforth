@@ -43,6 +43,9 @@ begin-module-once chan-module
       \ Channel send index
       field: chan-send-index
 
+      \ Channel current count
+      field: chan-current-count
+
       \ Channel is closed
       field: chan-closed
       
@@ -62,13 +65,12 @@ begin-module-once chan-module
 
     \ Core of getting whether a channel is full
     : chan-full-unsafe? ( chan -- flag )
-      dup chan-send-index @ 1+ over chan-count @ umod
-      swap chan-recv-index @ =
+      dup chan-current-count @ swap chan-count @ =
     ;
 
     \ Core of getting whether a channel is empty
     : chan-empty-unsafe? ( chan -- flag )
-      dup chan-send-index @ swap chan-recv-index @ =
+      chan-current-count @ 0=
     ;
 
   end-module
@@ -134,11 +136,13 @@ begin-module-once chan-module
 
     \ Advance the channel send index
     : advance-send-chan ( chan -- )
+      1 over chan-current-count +!
       dup chan-send-index @ 1+ over chan-count @ umod swap chan-send-index !
     ;
 
     \ Advance the channel receive index
     : advance-recv-chan ( chan -- )
+      -1 over chan-current-count +!
       dup chan-recv-index @ 1+ over chan-count @ umod swap chan-recv-index !
     ;
 
@@ -155,6 +159,7 @@ begin-module-once chan-module
   : init-chan ( element-bytes element-count addr -- )
     tuck chan-count !
     tuck chan-data-size !
+    0 over chan-current-count !
     0 over chan-recv-index !
     0 over chan-send-index !
     0 over chan-recv-ready !

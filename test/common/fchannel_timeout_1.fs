@@ -23,7 +23,7 @@ begin-module forth-module
   import task-module
   import fchan-module
 
-  \ Our lock
+  \ Our fchannel
   1 cells fchan-size buffer: my-fchan
   
   \ Our tasks

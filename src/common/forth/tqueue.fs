@@ -110,7 +110,7 @@ begin-module-once tqueue-module
     0 over first-wait !
     0 swap last-wait !
   ;
-  
+
   \ Wait on a task queue
   \ Note that this must be called within a critical section
   : wait-tqueue ( tqueue -- )
@@ -121,12 +121,13 @@ begin-module-once tqueue-module
     then
     init-wait
     2dup swap add-wait
-    current-task block
+    current-task block-critical
     end-critical
     [: current-task validate-timeout ;] try ?dup if
-      >r tuck swap remove-wait wait-orig-here @ ram-here! r> ?raise
+      >r [:
+	-1 over wait-counter +! tuck swap remove-wait wait-orig-here @ ram-here!
+      ;] critical r> ?raise
     then
-    begin-critical
     wait-orig-here @ ram-here!
     drop
 \    end-critical
@@ -149,6 +150,11 @@ begin-module-once tqueue-module
       drop
     then
 \    end-critical
+  ;
+
+  \ Un-wake a task queue
+  : unwake-tqueue ( tqueue -- )
+    1 swap wait-counter +!
   ;
 
   \ Wake up all tasks in a task queue

@@ -25,31 +25,26 @@ begin-module-once fchan-module
 
   import task-module
   import tqueue-module
+  import lock-module
 
   begin-import-module fchan-internal-module
 
     \ Fast channel header structure
     begin-structure fchan-size
-      \ Fast channel receive ready
-      field: fchan-recv-ready
-
-      \ Fast channel send ready
-      field: fchan-send-ready
-      
       \ Fast channel data size
       field: fchan-data-size
 
       \ Fast channel is closed
       field: fchan-closed
+
+      \ Fast channel receive lock
+      lock-size +field fchan-recv-lock
       
       \ Fast channel send task queue
       tqueue-size +field fchan-send-tqueue
 
       \ Fast channel receive task queue
       tqueue-size +field fchan-recv-tqueue
-
-      \ Fast channel response task queue
-      tqueue-size +field fchan-resp-tqueue
     end-structure
 
     \ Get fast channel data
@@ -66,12 +61,10 @@ begin-module-once fchan-module
   \ Initialize a fast channel
   : init-fchan ( data-bytes addr -- )
     swap 4 align over fchan-data-size !
-    0 over fchan-recv-ready !
-    0 over fchan-send-ready !
     false over fchan-closed !
+    dup fchan-recv-lock init-lock
     dup fchan-send-tqueue init-tqueue
-    dup fchan-recv-tqueue init-tqueue
-    fchan-resp-tqueue init-tqueue
+    fchan-recv-tqueue init-tqueue
   ;
 
   \ Fast channel is closed exception
@@ -82,35 +75,32 @@ begin-module-once fchan-module
     [:
       dup fchan-closed @ triggers x-fchan-closed
       current-task prepare-block
-      dup fchan-send-ready @ if dup fchan-send-tqueue wait-tqueue then
+      dup fchan-send-tqueue wait-tqueue
       dup fchan-closed @ triggers x-fchan-closed
-      1 over fchan-send-ready +!
       dup fchan-data over fchan-data-size @ 0 fill
       >r r@ fchan-data-size @ min r@ fchan-data swap move r>
       dup fchan-recv-tqueue wake-tqueue
-      dup fchan-resp-tqueue wait-tqueue
       fchan-closed @ triggers x-fchan-closed
     ;] critical
   ;
 
   \ Receive data on a fast channel
   : recv-fchan ( addr bytes fchan -- addr recv-bytes )
+    dup fchan-closed @ triggers x-fchan-closed
     [:
-      dup fchan-closed @ triggers x-fchan-closed
-      current-task prepare-block
-      1 over fchan-recv-ready +!
-      dup fchan-send-ready @ if dup fchan-send-tqueue wake-tqueue then
-      dup fchan-recv-tqueue wait-tqueue
-      dup fchan-closed @ triggers x-fchan-closed
-      >r
-      2dup 0 fill
-      r@ fchan-data-size @ min
-      r@ fchan-data -rot
-      2dup 2>r move 2r> r>
-      dup fchan-resp-tqueue wake-tqueue
-      -1 over fchan-send-ready +!
-      -1 swap fchan-recv-ready +!
-    ;] critical
+      [:
+	dup fchan-send-tqueue wake-tqueue
+	[: dup fchan-recv-tqueue wait-tqueue ;] try ?dup if
+	  swap fchan-send-tqueue unwake-tqueue ?raise
+	then
+	dup fchan-closed @ triggers x-fchan-closed
+	>r
+	2dup 0 fill
+	r@ fchan-data-size @ min
+	r> fchan-data -rot
+	2dup 2>r move 2r>
+      ;] critical
+    ;] over fchan-recv-lock with-lock
   ;
   
   \ Send a double cell on a fast channel
@@ -140,8 +130,7 @@ begin-module-once fchan-module
     [:
       true over fchan-closed !
       dup fchan-send-tqueue wake-tqueue-all
-      dup fchan-recv-tqueue wake-tqueue-all
-      fchan-resp-tqueue wake-tqueue-all
+      fchan-recv-tqueue wake-tqueue-all
     ;] critical
   ;
 

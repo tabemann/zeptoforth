@@ -21,62 +21,57 @@
 begin-module forth-module
 
   import task-module
-  import fchan-module
+  import chan-module
+  import lock-module
 
-  \ Our fchannel
-  1 cells fchan-size buffer: my-fchan
+  \ Our channel count
+  16 constant my-chan-count
   
+  \ Our channel
+  1 cells my-chan-count chan-size buffer: my-chan
+
+  \ Our lock
+  lock-size buffer: my-lock
+
   \ Our tasks
-  variable my-task-1
-  variable my-task-2
-  variable my-task-3
-  variable my-task-4
+  variable producer-task
+  variable consumer-1-task
+  variable consumer-2-task
+  variable consumer-3-task
+  variable consumer-4-task
 
-  \ Run the first task
-  : do-task-1 ( -- )
+  \ Run the producer
+  : do-producer ( -- )
     no-timeout timeout !
-    cr ." Start wait 1" 1000 ms cr ." End wait 1"
-    my-fchan recv-fchan-cell drop
-    cr ." Start wait 2" 1000 ms cr ." End wait 2"
-    my-fchan recv-fchan-cell drop
-    cr ." Done"
+    0 begin
+      [: cr ." Producer:" dup . space ;] my-lock with-lock
+      dup my-chan send-chan-cell 1+
+    again
   ;
 
-  \ Run the second task
-  : do-task-2 ( -- )
+  \ Run a consumer
+  : do-consumer ( n -- )
     no-timeout timeout !
-    25 ms
-    0 my-fchan send-fchan-cell
-    cr ." Sent 1"
-  ;
-
-  \ Run the third task
-  : do-task-3 ( -- )
-    5000 timeout !
-    50 ms
-    0 my-fchan send-fchan-cell
-    cr ." Sent 2"
-  ;
-
-  \ Run the fourth task
-  : do-task-4 ( -- )
-    no-timeout timeout !
-    75 ms
-    0 my-fchan send-fchan-cell
-    cr ." Sent 3"
+    begin
+      my-chan recv-chan-cell
+      [: cr ." Consumer" over . ." :" . space ;] my-lock with-lock
+    again
   ;
 
   \ Initialize our test
   : init-test ( -- )
-    1 cells my-fchan init-fchan
-    0 ['] do-task-1 512 256 256 spawn my-task-1 !
-    0 ['] do-task-2 512 256 256 spawn my-task-2 !
-    0 ['] do-task-3 512 256 256 spawn my-task-3 !
-    0 ['] do-task-4 512 256 256 spawn my-task-4 !
-    my-task-1 @ run
-    my-task-2 @ run
-    my-task-3 @ run
-    my-task-4 @ run
+    1 cells my-chan-count my-chan init-chan
+    my-lock init-lock
+    0 ['] do-producer 512 256 256 spawn producer-task !
+    1 1 ['] do-consumer 512 256 256 spawn consumer-1-task !
+    2 1 ['] do-consumer 512 256 256 spawn consumer-2-task !
+    3 1 ['] do-consumer 512 256 256 spawn consumer-3-task !
+    4 1 ['] do-consumer 512 256 256 spawn consumer-4-task !
+    producer-task @ run
+    consumer-1-task @ run
+    consumer-2-task @ run
+    consumer-3-task @ run
+    consumer-4-task @ run
   ;
-  
+
 end-module
