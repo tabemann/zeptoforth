@@ -25,3 +25,8 @@ Increment the task queue's internal wait counter. If it is positive, disable the
 ( tqueue -- )
 
 Decrement the task queue's internal wait counter. If there is a task in the task queue, enable the task added to it earliest and place it at the head of the schedule. Note that this must be called from within a critical section.
+
+##### `unwake-tqueue`
+( tqueue -- )
+
+Increment the task queue's internal wait counter.
