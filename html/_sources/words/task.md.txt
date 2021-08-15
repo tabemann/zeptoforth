@@ -105,20 +105,40 @@ Get the last delay setting, from calling `delay` or `block-timeout`, for a task.
 
 Delay a task until *delay* ticks after the time represented by *start* ticks.
 
+##### `delay-critical`
+( delay start task -- )
+
+Delay a task until *delay* ticks after the time represented by *start* ticks, and afterwards immediately start a critical section.
+
 ##### `block-timeout`
 ( delay start task -- )
 
 Block a task until *delay* ticks after the time represented by *start* ticks, and signal timed out if this time is reached without the task being readied first.
+
+##### `block-timeout-critical`
+( delay start task -- )
+
+Block a task until *delay* ticks after the time represented by *start* ticks, and signal timed out if this time is reached without the task being readied first; after blocking finishes, immediately start a critical section.
 
 ##### `block-wait`
 ( task -- )
 
 Block a task until all waiting task are woken with `wake`.
 
+##### `block-wait-critical`
+( task -- )
+
+Block a task until all waiting task are woken with `wake`, and then immediately start a critical section.
+
 ##### `block-indefinite`
 ( task -- )
 
 Block a task indefinitely until the task is readied.
+
+##### `block-indefinite-critical`
+( task -- )
+
+Block a task indefinitely until the task is readied, and then immediately start a critical section.
 
 ##### `ready`
 ( task -- )
@@ -129,6 +149,11 @@ Ready a blocked or delayed task.
 ( task -- )
 
 Block a task for which blocking has been prepared.
+
+##### `block-critical`
+( task -- )
+
+Block a task for which blocking has been prepared, and immediately start a new critical section once it finishes blocking.
 
 ##### `timeout`
 ( -- ticks )
