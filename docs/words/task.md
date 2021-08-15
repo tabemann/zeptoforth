@@ -85,6 +85,111 @@ If one attempts to execute a word against a terminated task, aside from `init-ta
 
 This exception when executed displays the task terminated error message.
 
+##### `timeout`
+( -- addr )
+
+A user variable used for storing a timeout value in ticks for various operations.
+
+##### `no-timeout`
+( -- n )
+
+A constant representing no timeout
+
+##### `last-delay`
+( task -- ticks-delay ticks-start )
+
+Get the last delay setting, from calling `delay` or `block-timeout`, for a task.
+
+##### `delay`
+( delay start task -- )
+
+Delay a task until *delay* ticks after the time represented by *start* ticks.
+
+##### `delay-critical`
+( delay start task -- )
+
+Delay a task until *delay* ticks after the time represented by *start* ticks, and afterwards immediately start a critical section.
+
+##### `block-timeout`
+( delay start task -- )
+
+Block a task until *delay* ticks after the time represented by *start* ticks, and signal timed out if this time is reached without the task being readied first.
+
+##### `block-timeout-critical`
+( delay start task -- )
+
+Block a task until *delay* ticks after the time represented by *start* ticks, and signal timed out if this time is reached without the task being readied first; after blocking finishes, immediately start a critical section.
+
+##### `block-wait`
+( task -- )
+
+Block a task until all waiting task are woken with `wake`.
+
+##### `block-wait-critical`
+( task -- )
+
+Block a task until all waiting task are woken with `wake`, and then immediately start a critical section.
+
+##### `block-indefinite`
+( task -- )
+
+Block a task indefinitely until the task is readied.
+
+##### `block-indefinite-critical`
+( task -- )
+
+Block a task indefinitely until the task is readied, and then immediately start a critical section.
+
+##### `ready`
+( task -- )
+
+Ready a blocked or delayed task.
+
+##### `block`
+( task -- )
+
+Block a task for which blocking has been prepared.
+
+##### `block-critical`
+( task -- )
+
+Block a task for which blocking has been prepared, and immediately start a new critical section once it finishes blocking.
+
+##### `timeout`
+( -- ticks )
+
+The default timeout in ticks.
+
+##### `timeout-systick-start`
+( -- addr )
+
+The current timeout start time in ticks.
+
+##### `timeout-systick-delay`
+( -- addr )
+
+The current timeout delay in ticks.
+
+##### `prepare-block`
+( task -- )
+
+Prepare blocking timeouts for a given task.
+
+##### `timed-out?`
+( task -- timed-out )
+
+Get whether a task has timed out.
+
+##### `x-timed-out`
+( -- )
+
+An exception raised when timeout validation fails.
+
+##### `validate-timeout`
+( task -- )
+
+Validate whether a task has timed out, raising `x-timed-out` if it has.
+
 ##### `set-task-priority`
 ( priority task -- )
 
@@ -136,46 +241,6 @@ Get the maximum timeslice, in 100 us increments, of a task.
 Get the activation level of a task, with values 0 and lower indicating that a task is inactive, and values 1 and greater indicating that a task is active.
 
 The simplest case of delaying a task is simply to execute:
-
-##### `start-task-delay`
-( 1/10ms-delay task -- )
-
-where *task* is the task to set the delay for, and *delay* is 10ths of milliseconds from the present.
-
-To advance the time for the next delay from the last one for a task, execute:
-
-##### `advance-task-delay`
-( 1/10ms-delay task -- )
-
-where *task* is the task to set the delay for, and *delay* is the new delay from the last delay for that task, in 10ths of milliseconds.
-
-To advance the time for the next delay from the last one, or if it changed, set a new delay starting at the present, for a task, execute:
-
-##### `reset-task-delay`
-( 1/10ms-delay task -- )
-
-where *task* is the task to set the delay for, and *delay* is the new delay from either the last delay for that task, or the present time, in 10ths of milliseconds.
-
-To absolutely set the current delay for a task, execute:
-
-##### `set-task-delay`
-( 1/10ms-delay 1/10ms-start task -- )
-
-where *task* is the task to set the delay for, *start* is the time the delay is from and *delay* is the delay from that time, in 10ths of milliseconds.
-
-To absolutely get the current delay, execute:
-
-##### `get-task-delay`
-( task --  1/10ms-delay 1/10ms-start )
-
-where *task* is the task to set the delay for, *start* is the time the delay is from and *delay* is the delay from that time, in 10ths of milliseconds.
-
-To cancel the delay for the current task, execute:
-
-##### `cancel-task-delay`
-( task -- )
-
-where *task* is the task to cancel the delay for. It is recommended to execute this for a task after the task has ceased to delay, so it does not delay again when `systick-counter` wraps around.
 
 ##### `task-checksum`
 ( task -- checksum )

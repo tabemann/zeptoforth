@@ -516,6 +516,16 @@ available, so as to enable any source file to call a preceding init</p>
 <p>( – )</p>
 <p>End a critical section; if a context switch would have occurred within the critical section, it is initiated immediately upon executing this word.</p>
 </div>
+<div class="section" id="critical">
+<h2><code class="docutils literal notranslate"><span class="pre">critical</span></code><a class="headerlink" href="#critical" title="Permalink to this headline">¶</a></h2>
+<p>( xt – )</p>
+<p>Execute code within a critical section, properly handling exceptions.</p>
+</div>
+<div class="section" id="with-allot">
+<h2><code class="docutils literal notranslate"><span class="pre">with-allot</span></code><a class="headerlink" href="#with-allot" title="Permalink to this headline">¶</a></h2>
+<p>( bytes xt – ) ( xt: addr – )</p>
+<p>Allot RAM temporarily and clean it up afterwards, even if an exception occurs.</p>
+</div>
 <div class="section" id="compress-flash">
 <h2><code class="docutils literal notranslate"><span class="pre">compress-flash</span></code><a class="headerlink" href="#compress-flash" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
@@ -1888,6 +1898,8 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l2"><a class="reference internal" href="#compiling-to-flash"><code class="docutils literal notranslate"><span class="pre">compiling-to-flash?</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#begin-critical"><code class="docutils literal notranslate"><span class="pre">begin-critical</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#end-critical"><code class="docutils literal notranslate"><span class="pre">end-critical</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#critical"><code class="docutils literal notranslate"><span class="pre">critical</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#with-allot"><code class="docutils literal notranslate"><span class="pre">with-allot</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#compress-flash"><code class="docutils literal notranslate"><span class="pre">compress-flash</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#end-compress-flash"><code class="docutils literal notranslate"><span class="pre">end-compress-flash</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#commit-flash"><code class="docutils literal notranslate"><span class="pre">commit-flash</span></code></a></li>

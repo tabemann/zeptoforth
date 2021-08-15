@@ -24,14 +24,18 @@ compile-to-flash
 begin-module-once chan-module
   
   import task-module
+  import tqueue-module
   
   begin-import-module chan-internal-module
 
     \ Channel header structure
     begin-structure chan-header-size
       
-      \ Channel byte count
+      \ Channel element count
       field: chan-count
+
+      \ Channel data size
+      field: chan-data-size
 
       \ Channel receive index
       field: chan-recv-index
@@ -39,32 +43,46 @@ begin-module-once chan-module
       \ Channel send index
       field: chan-send-index
 
-      \ Channel receive task
-      field: chan-recv-task
-
-      \ Channel send task
-      field: chan-send-task
+      \ Channel current count
+      field: chan-current-count
 
       \ Channel is closed
       field: chan-closed
+      
+      \ Channel send ready
+      field: chan-send-ready
+
+      \ Channel receive ready
+      field: chan-recv-ready
+
+      \ Channel send task queue
+      tqueue-size +field chan-send-tqueue
+      
+      \ Channel receive task queue
+      tqueue-size +field chan-recv-tqueue
 
     end-structure
 
     \ Core of getting whether a channel is full
     : chan-full-unsafe? ( chan -- flag )
-      dup chan-send-index @ 1+ over chan-count @ umod
-      swap chan-recv-index @ =
+      dup chan-current-count @ swap chan-count @ =
     ;
 
     \ Core of getting whether a channel is empty
     : chan-empty-unsafe? ( chan -- flag )
-      dup chan-send-index @ swap chan-recv-index @ =
+      chan-current-count @ 0=
     ;
 
   end-module
   
   \ Channel is closed exception
   : x-chan-closed ( -- ) space ." channel is closed" cr ;
+
+  \ Get the channel element data size
+  : chan-data-size ( chan -- element-bytes ) chan-data-size @ ;
+
+  \ Get the channel element count
+  : chan-count ( chan -- element-count ) chan-count ;
   
   \ Get whether a channel is full
   : chan-full? ( chan -- flag )
@@ -80,145 +98,161 @@ begin-module-once chan-module
     
     \ Wait to send on a channel
     : wait-send-chan ( chan -- )
-      begin
-	dup chan-send-task @ 0<> over chan-send-task @ current-task <> and
-      while
-	end-critical
-	pause
-	begin-critical
-      repeat
-      dup chan-closed @ if
+      dup chan-full-unsafe? if
+	1 over chan-send-ready +!
+	dup chan-send-tqueue ['] wait-tqueue try
+	-1 2 pick chan-send-ready +!
+	?raise
+      then
+      chan-closed @ if
 	end-critical ['] x-chan-closed ?raise
       then
-      begin dup chan-full-unsafe? while
-	current-task over chan-send-task !
-	\      begin dup chan-recv-task @ 0= while pause repeat
-	dup chan-recv-task @ ?dup if run then
-	current-task stop
-	end-critical
-	pause
-	begin-critical
-	dup chan-closed @ if
-	  end-critical ['] x-chan-closed ?raise
-	then
-      repeat
-      0 swap chan-send-task !
     ;
 
     \ Wait to receive on a channel
     : wait-recv-chan ( chan -- )
-      begin
-	dup chan-recv-task @ 0<> over chan-recv-task @ current-task <> and
-      while
-	end-critical
-	pause
-	begin-critical
-      repeat
-      begin dup chan-empty-unsafe? while
+      dup chan-empty-unsafe? if
 	dup chan-closed @ if
 	  end-critical ['] x-chan-closed ?raise
 	then
-	current-task over chan-recv-task !
-	dup chan-send-task @ ?dup if run then
-	current-task stop
-	end-critical
-	pause
-	begin-critical
-      repeat
-      0 swap chan-recv-task !
+	1 over chan-recv-ready +!
+	dup chan-recv-tqueue ['] wait-tqueue try
+	-1 rot chan-recv-ready +!
+	?raise
+      else
+	drop
+      then
     ;
 
     \ Get the channel send address
     : send-chan-addr ( chan -- b-addr )
-      dup chan-send-index @ chan-header-size + +
+      dup chan-send-index @ over chan-data-size @ * chan-header-size + +
     ;
 
     \ Get the channel receive address
     : recv-chan-addr ( chan -- b-addr )
-      dup chan-recv-index @ chan-header-size + +
+      dup chan-recv-index @ over chan-data-size @ * chan-header-size + +
     ;
 
     \ Advance the channel send index
     : advance-send-chan ( chan -- )
+      1 over chan-current-count +!
       dup chan-send-index @ 1+ over chan-count @ umod swap chan-send-index !
     ;
 
     \ Advance the channel receive index
     : advance-recv-chan ( chan -- )
+      -1 over chan-current-count +!
       dup chan-recv-index @ 1+ over chan-count @ umod swap chan-recv-index !
     ;
 
   end-module
   
-  \ Get channel size for a channel with a specified buffer size in bytes
-  : chan-size ( bytes -- total-bytes ) 4 align chan-header-size + ;
+  \ Get channel size for a channel with a specified element size in bytes
+  \ and element count
+  : chan-size ( element-bytes element-count -- total-bytes )
+    * chan-header-size + 4 align
+  ;
 
-  \ Initialize a channel for a channel with a specified buffer size in bytes
-  : init-chan ( addr bytes -- )
-    over chan-count !
+  \ Initialize a channel for a channel with a specified element size in bytes
+  \ and element count at a specified address
+  : init-chan ( element-bytes element-count addr -- )
+    tuck chan-count !
+    tuck chan-data-size !
+    0 over chan-current-count !
     0 over chan-recv-index !
     0 over chan-send-index !
-    0 over chan-recv-task !
-    0 over chan-send-task !
+    0 over chan-recv-ready !
+    0 over chan-send-ready !
+    dup chan-recv-tqueue init-tqueue
+    dup chan-send-tqueue init-tqueue
     false swap chan-closed !
   ;
 
-  \ Send a byte to a channel
-  : send-chan-byte ( b chan -- )
-    begin-critical
-    dup chan-closed @ if
-      end-critical ['] x-chan-closed ?raise
-    then
-    dup wait-send-chan
-    tuck send-chan-addr c!
-    dup advance-send-chan
-    chan-recv-task @ ?dup if run then
-    end-critical
-  ;
-
-  \ Receive a byte from a channel
-  : recv-chan-byte ( chan -- b )
-    begin-critical
-    dup wait-recv-chan
-    dup recv-chan-addr c@
-    over advance-recv-chan
-    swap chan-send-task @ ?dup if run then
-    end-critical
-  ;
-
-  \ Send bytes to a channel
+  \ Send data to a channel
   : send-chan ( addr bytes chan -- )
-    >r begin dup 0> while
-      swap dup c@ r@ send-chan-byte 1+ swap 1-
-    repeat
-    2drop rdrop
+    [:
+      dup chan-closed @ if
+	end-critical ['] x-chan-closed ?raise
+      then
+      current-task prepare-block
+      dup wait-send-chan
+      dup send-chan-addr over chan-data-size @ 0 fill
+      dup >r chan-data-size @ min r@ send-chan-addr swap move r>
+      dup advance-send-chan
+      dup chan-recv-ready @ 0> if
+	chan-recv-tqueue wake-tqueue
+      else
+	drop
+      then
+    ;] critical
   ;
 
-  \ Receive bytes from a channel
-  : recv-chan ( addr bytes chan -- )
-    >r begin dup 0> while
-      r@ recv-chan-byte 2 pick c! 1- swap 1+ swap
-    repeat
-    2drop rdrop
+  \ Receive data from a channel
+  : recv-chan ( addr bytes chan -- addr recv-bytes )
+    [:
+      current-task prepare-block
+      dup wait-recv-chan
+      >r 2dup 0 fill
+      r@ chan-data-size @ min r@ recv-chan-addr -rot 2dup 2>r move 2r> r>
+      dup advance-recv-chan
+      dup chan-send-ready @ 0> if
+	chan-send-tqueue wake-tqueue
+      else
+	drop
+      then
+    ;] critical
   ;
 
-  \ Send a cell to a channel
+  \ Send a double cell on a channel
+  : send-chan-2cell ( xd chan -- )
+    2 cells [: >r -rot r@ 2! r> 2 cells rot send-chan ;] with-aligned-allot
+  ;
+
+  \ Receive a double cell from a channel
+  : recv-chan-2cell ( chan -- xd )
+    2 cells [: 2 cells rot recv-chan 2 cells >= if 2@ else drop 0 0 then ;]
+    with-aligned-allot
+  ;
+
+  \ Send a cell on a channel
   : send-chan-cell ( x chan -- )
-    swap pad ! pad 4 rot send-chan
+    1 cells [: >r swap r@ ! r> 1 cells rot send-chan ;] with-aligned-allot
   ;
 
   \ Receive a cell from a channel
   : recv-chan-cell ( chan -- x )
-    pad 4 rot recv-chan pad @
+    1 cells [: 1 cells rot recv-chan 1 cells >= if @ else drop 0 then ;]
+    with-aligned-allot
+  ;
+
+  \ Send a halfword on a channel
+  : send-chan-half ( h chan -- )
+    2 [: >r swap r@ ! r> 2 rot send-chan ;] with-aligned-allot
+  ;
+
+  \ Receive a halfword from a channel
+  : recv-chan-half ( chan -- h )
+    2 [: 2 rot recv-chan 2 >= if h@ else drop 0 then ;] with-aligned-allot
+  ;
+
+  \ Send a byte on a channel
+  : send-chan-byte ( c chan -- )
+    1 [: >r swap r@ c! r> 1 rot send-chan ;] with-aligned-allot
+  ;
+
+  \ Receive a byte from a channel
+  : recv-chan-byte ( chan -- c )
+    1 [: 1 rot recv-chan 1 >= if c@ else drop 0 then ;] with-aligned-allot
   ;
 
   \ Close a channel
   : close-chan ( chan -- )
-    begin-critical
-    true over chan-closed !
-    dup chan-send-task @ ?dup if run then
-    chan-recv-task @ ?dup if run then
-    end-critical
+    [:
+      true over chan-closed !
+      dup chan-send-tqueue wake-tqueue-all
+      chan-recv-tqueue wake-tqueue-all
+    ;] critical
   ;
 
   \ Get whether a channel is closed

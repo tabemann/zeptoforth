@@ -1,0 +1,47 @@
+\ Copyright (c) 2021 Travis Bemann
+\
+\ Permission is hereby granted, free of charge, to any person obtaining a copy
+\ of this software and associated documentation files (the "Software"), to deal
+\ in the Software without restriction, including without limitation the rights
+\ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+\ copies of the Software, and to permit persons to whom the Software is
+\ furnished to do so, subject to the following conditions:
+\ 
+\ The above copyright notice and this permission notice shall be included in
+\ all copies or substantial portions of the Software.
+\ 
+\ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+\ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+\ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+\ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+\ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+\ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+\ SOFTWARE.
+
+begin-module forth-module
+
+  import task-module
+  import systick-module
+
+  \ Our two tasks
+  variable task1
+  variable task2
+  
+  \ Run the task
+  : run-task ( c delay -- )
+    systick-divisor * systick-counter
+    begin
+      over + 2dup current-task delay
+      2 pick emit
+    again
+  ;
+
+  \ Initialize the test
+  : init-test ( -- )
+    [char] * 250 2 ['] run-task 512 256 256 spawn task1 !
+    [char] x 1000 2 ['] run-task 512 256 256 spawn task2 !
+    task1 @ run
+    task2 @ run
+  ;
+
+end-module

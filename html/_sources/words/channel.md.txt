@@ -26,14 +26,14 @@ Get whether a channel is full.
 Get whether a channel is empty.
 
 ##### `chan-size`
-( bytes -- total-bytes )
+( element-bytes element-count -- total-bytes )
 
-Get the size in memory for a channel with a specified buffer size in bytes.
+Get the size in memory for a channel with a specified element size in bytes and element count.
 
 ##### `init-chan`
-( addr bytes -- )
+( element-bytes element-count addr -- )
 
-Initialize a channel starting at the specified address with the specified buffer size in bytes. The size should be the same size passed to `chan-size` when alloting or allocating the memory whose starting address is passed in.
+Initialize a channel starting at the specified address with the specified buffer size in bytes. The *element-bytes* and *element-count* should be the same as when they were passed to `chan-size` when alloting or allocating the memory whose starting address is passed in.
 
 ##### `close-chan`
 ( chan -- )
@@ -50,32 +50,52 @@ Reopen a channel.
 
 Get whether a channel is closed.
 
-##### `send-chan-byte`
-( b chan -- )
-
-Send a byte to a channel. Block if the channel is full.
-
-##### `recv-chan-byte`
-( chan -- b )
-
-Receive a byte from a channel. Block if the channel is empty.
-
 ##### `send-chan`
 ( addr bytes chan -- )
 
-Send bytes from a buffer to a channel. Block if the channel is full or becomes full midway through.
+Send message with a buffer as a payload over a channel. Block until another task receives the message if the channel is full. Note that the buffer is copied, and will be truncated if the buffer size of the channel is smaller than the data provided, and padded with zeros if it is larger. Note that this must not be called within a critical section.
 
 ##### `recv-chan`
-( addr bytes chan -- )
+( addr bytes chan -- addr recv-bytes )
 
-Receive bytes from a channel into a buffer. Block if the channel is empty or becomes empty midway through.
+Receive message with a buffer as a payload over a channel. Block until another task sends a message if the channel is empty. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the bufer size of the channel; the passed in buffer and the number of bytes copied into it are returned. Note that this must not be called within a critical section.
+
+##### `send-chan-2cell`
+( xd chan -- )
+
+Send message with a double cell as a payload over a channel. Block until another task receives the message if the channel is full. Note that this must not be called within a critical section.
+
+##### `recv-chan-2cell`
+( chan -- xd )
+
+Receive message with a double cell as a payload over a channel. Block until another sends a message if the channel is empty. Note that this must not be called within a critical section.
 
 ##### `send-chan-cell`
 ( x chan -- )
 
-Send a cell to a channel. Block if the channel is full or becomes full midway through.
+Send message with a cell as a payload over a channel. Block until another task receives a message if the channel is full. Note that this must not be called within a critical section.
 
 ##### `recv-chan-cell`
 ( chan -- x )
 
-Receive a cell from a channel. Block if the channel is empty or becomes empty midway through.
+Receive message with a cell as a payload over a channel. Block until another task sends a message if the channel is empty. Note that this must not be called within a critical section.
+
+##### `send-chan-half`
+( h chan -- )
+
+Send message with a halfword as a payload over a channel. Block until another task receives a message if the channel is full. Note that this must not be called within a critical section.
+
+##### `recv-chan-half`
+( chan -- h )
+
+Receive message with a halfword as a payload over a channel. Block until another task sends a message if the channel is empty. Note that this must not be called within a critical section.
+
+##### `send-chan-byte`
+( b chan -- )
+
+Send message with a byte as a payload over a channel. Block until another task receives a message if the channel is full. Note that this must not be called within a critical section.
+
+##### `recv-chan-byte`
+( chan -- b )
+
+Receive message with a byte as a payload over a channel. Block until another task sends a message if the channel is empty. Note that this must not be called within a critical section.

@@ -44,8 +44,8 @@ begin-module-once tqueue-module
     \ Wait structure
     begin-structure wait-size
 
-      \ Fast channel wait next record
-      field: wait-next
+      \ Fast channel wait previous record
+      field: wait-prev
 
       \ Fast channel wait task
       field: wait-task
@@ -59,18 +59,44 @@ begin-module-once tqueue-module
     : init-wait ( -- wait )
       ram-here 4 ram-align, ram-here wait-size ram-allot
       tuck wait-orig-here !
-      0 over wait-next !
+      0 over wait-prev !
       current-task over wait-task !
     ;
 
     \ Add a wait record
     : add-wait ( wait tqueue -- )
       dup first-wait @ if
-	2dup last-wait @ wait-next !
+	2dup last-wait @ wait-prev !
       else
 	2dup first-wait !
       then
       last-wait !
+    ;
+
+    \ Remove a wait record
+    : remove-wait ( wait tqueue -- )
+      dup first-wait @ 2 pick = if
+	dup last-wait @ 2 pick = if
+	  0 over last-wait !
+	then
+	swap wait-prev @ swap first-wait !
+      else
+	dup first-wait @ begin
+	  dup if
+	    dup wait-prev @ 3 pick = if
+	      over last-wait @ 3 pick = if
+		0 over wait-prev ! swap last-wait ! drop true
+	      else
+		rot wait-prev @ swap wait-prev ! drop true
+	      then
+	    else
+	      wait-prev @ false
+	    then
+	  else
+	    2drop drop true
+	  then
+	until
+      then
     ;
 
   end-module
@@ -84,7 +110,7 @@ begin-module-once tqueue-module
     0 over first-wait !
     0 swap last-wait !
   ;
-  
+
   \ Wait on a task queue
   \ Note that this must be called within a critical section
   : wait-tqueue ( tqueue -- )
@@ -94,12 +120,16 @@ begin-module-once tqueue-module
       drop exit
     then
     init-wait
-    dup rot add-wait
-    current-task stop
+    2dup swap add-wait
+    current-task block-critical
     end-critical
-    pause
-    begin-critical
+    [: current-task validate-timeout ;] try ?dup if
+      >r [:
+	-1 over wait-counter +! tuck swap remove-wait wait-orig-here @ ram-here!
+      ;] critical r> ?raise
+    then
     wait-orig-here @ ram-here!
+    drop
 \    end-critical
   ;
 
@@ -108,19 +138,23 @@ begin-module-once tqueue-module
   : wake-tqueue ( tqueue -- )
     \    begin-critical
     -1 over wait-counter +!
-    dup first-wait @ if
-      dup first-wait @
-      dup wait-next @ 2 pick first-wait !
+    dup first-wait @ ?dup if
+      dup wait-prev @ 2 pick first-wait !
       over first-wait @ 0= if
 	0 rot last-wait !
       else
 	nip
       then
-      wait-task @ activate
+      wait-task @ ready
     else
       drop
     then
 \    end-critical
+  ;
+
+  \ Un-wake a task queue
+  : unwake-tqueue ( tqueue -- )
+    1 swap wait-counter +!
   ;
 
   \ Wake up all tasks in a task queue

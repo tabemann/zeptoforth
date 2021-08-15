@@ -30,6 +30,30 @@ begin-import-module-once task-module
 
   begin-import-module task-internal-module
 
+    \ Task readied state
+    0 constant readied
+
+    \ Task delayed state
+    1 constant delayed
+    
+    \ Task blocked with timeout
+    2 constant blocked-timeout
+
+    \ Task blocked until waking
+    3 constant blocked-wait
+
+    \ Task blocked indefinitely
+    4 constant blocked-indefinite
+
+    \ Task block timed out
+    5 constant block-timed-out
+
+    \ Schedule into critical section bit
+    $8000 constant schedule-critical
+
+    \ Schedule into critical section mask
+    $7FFF constant schedule-critical-mask
+    
     \ In task change
     variable in-task-change
 
@@ -78,9 +102,6 @@ begin-import-module-once task-module
     \ The current task handler
     user task-handler
 
-    \ Whether a task is waiting
-    user task-wait
-
     \ Task systick start time
     user task-systick-start
 
@@ -109,6 +130,18 @@ begin-import-module-once task-module
   
   \ The latest lock currently held by a tack
   user current-lock-held
+
+  \ The default timeout
+  user timeout
+
+  \ The current timeout start time in ticks
+  user timeout-systick-start
+
+  \ The current timeout delay time in ticks
+  user timeout-systick-delay
+  
+  \ No timeout
+  -1 constant no-timeout
 
   \ Sleep
   : sleep ( -- ) sleep-enabled? @ if sleep then ;
@@ -141,8 +174,11 @@ begin-import-module-once task-module
       \ Task active state ( > 0 active, <= 0 inactive, $8000 terminated )
       hfield: task-active
 
+      \ Whether a task is waiting
+      hfield: task-state
+
       \ Task saved priority
-      field: task-saved-priority
+      hfield: task-saved-priority
 
       \ Prev task
       field: task-prev
@@ -334,7 +370,7 @@ begin-import-module-once task-module
 
   \ Get saved task priority
   : get-task-saved-priority ( task -- priority )
-    task-saved-priority @
+    task-saved-priority h@
   ;
 
   \ Out of range task priority exception
@@ -351,7 +387,7 @@ begin-import-module-once task-module
   : set-task-saved-priority ( priority task -- )
     over -32768 < triggers x-out-of-range-priority
     over 32767 > triggers x-out-of-range-priority
-    task-saved-priority !
+    task-saved-priority h!
   ;
 
   \ Set task timeslice
@@ -422,12 +458,148 @@ begin-import-module-once task-module
       false in-task-change !
     then
   ;
+
+  \ Get the last delay time
+  : last-delay ( task -- ticks-delay ticks-start )
+    [:
+      dup validate-not-terminated
+      dup ['] task-systick-delay for-task @
+      swap ['] task-systick-start for-task @
+    ;] critical
+  ;
+
+  \ Delay a task
+  : delay ( ticks-delay ticks-start task -- )
+    [:
+      dup validate-not-terminated
+      tuck ['] task-systick-start for-task !
+      tuck ['] task-systick-delay for-task !
+      delayed swap task-state h!
+    ;] critical
+    pause
+  ;
+
+  \ Delay a task and schedule as critcal once done
+  : delay-critical ( ticks-delay ticks-start task -- )
+    [:
+      dup validate-not-terminated
+      tuck ['] task-systick-start for-task !
+      tuck ['] task-systick-delay for-task !
+      [ delayed schedule-critical or ] literal swap task-state h!
+    ;] critical
+    pause
+  ;
+
+  \ Mark a task as blocked until a timeout
+  : block-timeout ( ticks-delay ticks-start task -- )
+    [:
+      dup validate-not-terminated
+      tuck ['] task-systick-start for-task !
+      tuck ['] task-systick-delay for-task !
+      blocked-timeout swap task-state h!
+    ;] critical
+    pause
+  ;
+
+  \ Mark a task as blocked until a timeout and schedule as critical once done
+  : block-timeout-critical ( ticks-delay ticks-start task -- )
+    [:
+      dup validate-not-terminated
+      tuck ['] task-systick-start for-task !
+      tuck ['] task-systick-delay for-task !
+      [ blocked-timeout schedule-critical or ] literal swap task-state h!
+    ;] critical
+    pause
+  ;
+
+  \ Mark a task as waiting
+  : block-wait ( task -- )
+    dup validate-not-terminated
+    blocked-wait swap task-state h!
+    pause
+  ;
   
   \ Mark a task as waiting
-  : wait-task ( task -- )
+  : block-wait-critical ( task -- )
     dup validate-not-terminated
-    true swap ['] task-wait for-task !
+    [ blocked-wait schedule-critical or ] literal swap task-state h!
+    pause
   ;
+
+  \ Mark a task as blocked indefinitely
+  : block-indefinite ( task -- )
+    dup validate-not-terminated
+    blocked-indefinite swap task-state h!
+    pause
+  ;
+
+  \ Mark a task as blocked indefinitely and schedule as critical when done
+  : block-indefinite-critical ( task -- )
+    dup validate-not-terminated
+    [ blocked-indefinite schedule-critical or ] literal swap task-state h!
+    pause
+  ;
+
+  \ Ready a task
+  : ready ( task -- )
+    dup validate-not-terminated
+    readied swap task-state h!
+    pause
+  ;
+
+  \ Block a task for the specified initialized timeout
+  : block ( task -- )
+    [:
+      dup validate-not-terminated
+      dup ['] timeout for-task @ no-timeout <> if
+	dup ['] timeout-systick-delay for-task @
+	over ['] timeout-systick-start for-task @
+	rot block-timeout
+      else
+	block-indefinite
+      then
+    ;] critical
+  ;
+
+  \ Block a task for the specified initialized timeout and schedule as critical
+  \ once done
+  : block-critical ( task -- )
+    [:
+      dup validate-not-terminated
+      dup ['] timeout for-task @ no-timeout <> if
+	dup ['] timeout-systick-delay for-task @
+	over ['] timeout-systick-start for-task @
+	rot block-timeout-critical
+      else
+	block-indefinite-critical
+      then
+    ;] critical
+  ;
+
+  \ Prepare blocking for a task
+  : prepare-block ( task -- )
+    [:
+      dup validate-not-terminated
+      dup ['] timeout for-task @ no-timeout <> if
+	systick-counter over ['] timeout-systick-start for-task !
+	dup ['] timeout for-task @ swap ['] timeout-systick-delay for-task !
+      else
+	drop
+      then
+    ;] critical
+  ;
+
+  \ Get whether a task has timed out
+  : timed-out? ( task -- timed-out )
+    dup validate-not-terminated task-state h@ schedule-critical-mask and
+    block-timed-out =
+  ;
+
+  \ Timed out exception
+  : x-timed-out ( -- ) space ." block timed out" cr ;
+
+  \ Validate not timing out
+  : validate-timeout ( task -- ) timed-out? triggers x-timed-out ;
 
   \ Get whether a task has terminated
   : terminated? ( task -- terminated ) task-active h@ terminated = ;
@@ -445,7 +617,10 @@ begin-import-module-once task-module
       0 over task-priority h!
       0 over task-saved-priority !
       1 over task-active h!
-      false task-wait !
+      readied over task-state h!
+      no-timeout timeout !
+      0 timeout-systick-start !
+      0 timeout-systick-delay !
       0 task-systick-start !
       -1 task-systick-delay !
       base @ task-base !
@@ -482,7 +657,10 @@ begin-import-module-once task-module
     base @ over ['] task-base for-task !
     0 over ['] current-lock for-task !
     0 over ['] current-lock-held for-task !
-    false over ['] task-wait for-task !
+    readied over task-state h!
+    no-timeout over ['] timeout for-task !
+    0 over ['] timeout-systick-start for-task !
+    0 over ['] timeout-systick-delay for-task !
     0 over ['] task-systick-start for-task !
     -1 over ['] task-systick-delay for-task !
     default-timeslice over ['] task-timeslice for-task !
@@ -515,13 +693,18 @@ begin-import-module-once task-module
     \ Wake tasks
     : do-wake ( -- ) true wake-tasks ! ;
 
+    \ Get whether a task is finished with a delay or timeout
+    : delayed? ( task -- )
+      systick-counter over ['] task-systick-start for-task @ -
+      swap ['] task-systick-delay for-task @ <
+    ;
+
     \ Get whether a task is waiting
     : waiting-task? ( task -- )
-      >r
-      r@ ['] task-wait for-task @
-      r@ ['] task-systick-delay for-task @ -1 <>
-      systick-counter r@ ['] task-systick-start for-task @ -
-      r> ['] task-systick-delay for-task @ u< and or
+      dup task-state h@ schedule-critical-mask and
+      dup blocked-wait = over blocked-indefinite = or
+      over delayed = rot blocked-timeout = or
+      rot delayed? and or
     ;
 
     \ Find next task
@@ -541,17 +724,6 @@ begin-import-module-once task-module
 
     \ PendSV return value
     variable pendsv-return
-
-    \ \ Type an unsigned integer to serial
-    \ : serial-unsigned ( u -- )
-    \   swap ram-here swap format-unsigned dup ram-allot
-    \   dup >r serial-type r> negate ram-allot
-    \ ;
-    
-    \ \ Type an unsigned integer to serial
-    \ : serial-hex ( u -- )
-    \   base @ 16 base ! serial-unsigned base !
-    \ ;
 
     \ Save task state
     : save-task-state ( task -- )
@@ -580,20 +752,13 @@ begin-import-module-once task-module
       false in-task-change !
     ;
 
-    \ \ Type prev-task and current-type
-    \ : serial-type-tasks ( -- )
-    \   s" prev-task: " serial-type prev-task @ serial-hex $20 serial-emit
-    \   s" current-task: " serial-type current-task @ serial-hex $20 serial-emit
-    \   s" prev-timeslice: " serial-type
-    \   prev-task @ ['] task-timeslice for-task @ serial-unsigned $20 serial-emit
-    \   s" current-timeslice: " serial-type
-    \   current-task @ ['] task-timeslice for-task @ serial-unsigned $20 serial-emit
-    \ ;
-
     \ Actually wake tasks
     : actually-wake-tasks ( -- )
       first-task @ begin ?dup while
-	false over ['] task-wait for-task ! task-prev @
+	dup task-state h@ blocked-wait = if
+	  readied over task-state h!
+	then
+	task-prev @
       repeat
     ;
     
@@ -613,7 +778,20 @@ begin-import-module-once task-module
 	  wake-tasks @ if actually-wake-tasks false wake-tasks ! then
 	  begin
 	    find-next-task dup 0<> if
-	      dup get-task-active 1 < if remove-task false else true then
+	      dup get-task-active 1 < if
+		remove-task false
+	      else
+		dup task-state h@ schedule-critical and if
+		  1 in-critical !
+		then
+		dup task-state h@ schedule-critical-mask and
+		blocked-timeout = if
+		  block-timed-out over task-state h!
+		else
+		  readied over task-state h!
+		then
+		true
+	      then
 	    else
 	      true
 	    then
@@ -660,81 +838,16 @@ begin-import-module-once task-module
 
   end-module
 
-  \ Start a delay from the present
-  : start-task-delay ( 1/10m-delay task -- )
-    dup validate-not-terminated
-    begin-critical
-    dup systick-counter swap ['] task-systick-start for-task !
-    ['] task-systick-delay for-task !
-    end-critical
-  ;
-
-  \ Set a delay for a task
-  : set-task-delay ( 1/10ms-delay 1/10ms-start task -- )
-    dup validate-not-terminated
-    begin-critical
-    tuck ['] task-systick-start for-task !
-    ['] task-systick-delay for-task !
-    end-critical
-  ;
-
-  \ Advance a delay for a task by a given amount of time
-  : advance-task-delay ( 1/10ms-offset task -- )
-    dup validate-not-terminated
-    begin-critical
-    systick-counter over ['] task-systick-start for-task @ -
-    over ['] task-systick-delay for-task @ < if
-      ['] task-systick-delay for-task +!
-    else
-      dup ['] task-systick-delay for-task @
-      over ['] task-systick-start for-task +!
-      ['] task-systick-delay for-task !
-    then
-    end-critical
-  ;
-
-  \ Advance of start a delay from the present, depending on whether the delay
-  \ length has changed
-  : reset-task-delay ( 1/10ms-delay task -- )
-    dup validate-not-terminated
-    begin-critical
-    dup ['] task-systick-delay for-task @ 2 pick = if
-      advance-task-delay
-    else
-      start-task-delay
-    then
-    end-critical
-  ;
-
-  \ Get a delay for a task
-  : get-task-delay ( task -- 1/10ms-delay 1/10ms-start )
-    dup validate-not-terminated
-    begin-critical
-    dup ['] task-systick-delay for-task @
-    over ['] task-systick-start for-task @
-    end-critical
-  ;
-
-  \ Cancel a delay for a task
-  : cancel-task-delay ( task -- )
-    dup validate-not-terminated
-    begin-critical
-    0 over ['] task-systick-start for-task !
-    -1 swap ['] task-systick-delay for-task !
-    end-critical
-  ;
-
   \ Wait for n milliseconds with multitasking support
   : ms ( u -- )
     systick-divisor * systick-counter
-    2dup current-task @ set-task-delay
+    2dup current-task @ delay
     begin
       dup systick-counter swap - 2 pick u<
     while
       pause
     repeat
     drop drop
-    current-task @ cancel-task-delay
   ;
 
   begin-import-module task-internal-module
@@ -742,7 +855,7 @@ begin-import-module-once task-module
     \ Wait the current thread
     : do-wait ( -- )
       pause-enabled @ 0> if
-	current-task @ wait-task
+	current-task @ block-wait
       then
     ;
 

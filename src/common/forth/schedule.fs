@@ -175,49 +175,16 @@ begin-module-once schedule-module
     end-critical
   ;
 
-  \ Start a delay from the present
-  : start-action-delay ( 1/10m-delay action -- )
-    begin-critical
-    dup systick-counter swap action-systick-start !
-    action-systick-delay !
-    end-critical
-  ;
-
-  \ Set a delay for an action
-  : set-action-delay ( 1/10ms-delay 1/10ms-start action -- )
+  \ Delay an action
+  : action-delay ( ticks-delay ticks-start action -- )
     begin-critical
     tuck action-systick-start !
     action-systick-delay !
     end-critical
   ;
 
-  \ Advance a delay for an action by a given amount of time
-  : advance-action-delay ( 1/10ms-offset action -- )
-    begin-critical
-    systick-counter over action-systick-start @ - over
-    action-systick-delay @ < if
-      action-systick-delay +!
-    else
-      dup action-systick-delay @ over action-systick-start +!
-      action-systick-delay !
-    then
-    end-critical
-  ;
-
-  \ Advance of start a delay from the present, depending on whether the delay
-  \ length has changed
-  : reset-action-delay ( 1/10ms-delay action -- )
-    begin-critical
-    dup action-systick-delay @ 2 pick = if
-      advance-action-delay
-    else
-      start-action-delay
-    then
-    end-critical
-  ;
-
-  \ Get a delay for an action
-  : get-action-delay ( action -- 1/10ms-delay 1/10ms-start )
+  \ Get the latest delay for an action
+  : action-delay-latest ( action -- ticks-delay ticks-start )
     begin-critical
     dup action-systick-delay @
     over action-systick-start @

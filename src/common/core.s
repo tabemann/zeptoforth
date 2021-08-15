@@ -1915,6 +1915,42 @@ _rdrop:	adds sp, #4
 	bx lr
 	end_inlined
 
+	@@ Push two values onto the return stack
+	define_word "2>r", visible_flag | inlined_flag
+_push_2r:
+	ldmia dp!, {r0, r1}
+	push {tos}
+	push {r0}
+	movs tos, r1
+	bx lr
+	end_inlined
+
+	@@ Pop two values off the return stack
+	define_word "2r>", visible_flag | inlined_flag
+_pop_2r:
+	push_tos
+	pop {r0, tos}
+	stmdb dp!, {r0}
+	bx lr
+	end_inlined
+
+	@@ Get two values off the return stack without popping it
+	define_word "2r@", visible_flag | inlined_flag
+_get_2r:
+	push_tos
+	ldr tos, [sp, #4]
+	ldr r0, [sp, #0]
+	stmdb dp!, {r0}
+	bx lr
+	end_inlined
+	
+	@@ Drop two values from the return stack
+	define_word "2rdrop", visible_flag | inlined_flag
+_2rdrop:
+	adds sp, #8
+	bx lr
+	end_inlined
+
 	@@ Get the return stack pointer
 	define_word "rp@", visible_flag | inlined_flag
 _get_rp:

@@ -27,10 +27,10 @@ begin-module forth-module
   16 constant my-chan-size
 
   \ My channel
-  my-chan-size chan-size buffer: my-chan
+  1 my-chan-size chan-size buffer: my-chan
 
   \ Initialize my channel
-  my-chan my-chan-size init-chan
+  1 my-chan-size my-chan init-chan
 
   \ My producer
   : producer ( -- )

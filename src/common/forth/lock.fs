@@ -103,6 +103,32 @@ begin-module-once lock-module
       lock-last-wait !
     ;
 
+    \ Remove a lock wait record
+    : remove-lock-wait ( wait lock -- )
+      dup lock-first-wait @ 2 pick = if
+	dup lock-last-wait @ 2 pick = if
+	  0 over lock-last-wait !
+	then
+	swap lock-wait-next @ swap lock-first-wait !
+      else
+	dup lock-first-wait @ begin
+	  dup if
+	    dup lock-wait-next @ 3 pick = if
+	      over lock-last-wait @ 3 pick = if
+		0 over lock-wait-next ! swap lock-last-wait ! drop true
+	      else
+		rot lock-wait-next @ swap lock-wait-next ! drop true
+	      then
+	    else
+	      lock-wait-next @ false
+	    then
+	  else
+	    2drop drop true
+	  then
+	until
+      then
+    ;
+
     \ Get the last lock held in a loop
     : get-last-lock ( lock -- )
       dup lock-next-held @ if
@@ -119,13 +145,13 @@ begin-module-once lock-module
 
     \ Add a holder to a lock loop
     : add-lock ( lock task -- )
+      dup get-task-priority over set-task-saved-priority
       swap over ['] current-lock-held for-task @ ?dup if
 	over 3 roll ['] current-lock-held for-task !
 	dup get-last-lock
 	2 pick swap lock-next-held !
 	swap lock-next-held !
       else
-	over get-task-priority 2 pick set-task-saved-priority
 	tuck swap ['] current-lock-held for-task !
 	dup lock-next-held !
       then
@@ -155,6 +181,8 @@ begin-module-once lock-module
 	lock-holder-task @ ['] current-lock for-task @ ?dup if
 	  recurse
 	then
+      else
+	drop
       then
     ;
 
@@ -189,25 +217,34 @@ begin-module-once lock-module
     0 swap lock-next-held !
   ;
 
+  \ Double locking exception
+  : x-double-lock ( -- ) space ." double locked" cr ;
+
   \ Lock a lock
   : lock ( lock -- )
-    begin-critical
-    dup lock-holder-task @ if
-      dup current-task ['] current-lock for-task !
-      init-lock-wait
-      2dup swap add-lock-wait
-      swap update-hold-priority
-      current-task stop
-      end-critical
-      pause
-      begin-critical
-      lock-wait-orig-here @ ram-here!
-    else
-      dup current-task add-lock
-      current-task over lock-holder-task !
-      update-hold-priority
-    then
-    end-critical
+    [:
+      dup lock-holder-task @ current-task = triggers x-double-lock
+      current-task prepare-block
+      dup lock-holder-task @ if
+	dup current-task ['] current-lock for-task !
+	init-lock-wait
+	2dup swap add-lock-wait
+	over update-hold-priority
+	current-task block-critical
+	end-critical
+	[: current-task validate-timeout ;] try ?dup if
+	  >r [:
+	    dup rot remove-lock-wait lock-wait-orig-here @ ram-here!
+	  ;] critical r> ?raise
+	then
+	lock-wait-orig-here @ ram-here!
+	drop
+      else
+	dup current-task add-lock
+	current-task over lock-holder-task !
+	update-hold-priority
+      then
+    ;] critical
   ;
 
   \ Attempted to unlock a lock not owned by the current task
@@ -215,27 +252,24 @@ begin-module-once lock-module
 
   \ Unlock a lock
   : unlock ( lock -- )
-    begin-critical
-    dup lock-holder-task @ current-task <> if
-      end-critical ['] x-not-currently-owned ?raise
-    then
-    dup update-release-priority
-    dup lock-first-wait @ if
-      dup lock-first-wait @
-      dup lock-wait-next @ 2 pick lock-first-wait !
-      over lock-first-wait @ 0= if
-	0 2 pick lock-last-wait !
+    [:
+      dup lock-holder-task @ current-task = averts x-not-currently-owned
+      dup update-release-priority
+      dup lock-first-wait @ ?dup if
+	dup lock-wait-next @ 2 pick lock-first-wait !
+	over lock-first-wait @ 0= if
+	  0 2 pick lock-last-wait !
+	then
+	lock-wait-task @
+	2dup add-lock
+	2dup swap lock-holder-task !
+	0 over ['] current-lock for-task !
+	swap update-hold-priority
+	ready
+      else
+	0 swap lock-holder-task !      
       then
-      lock-wait-task @
-      2dup add-lock
-      2dup swap lock-holder-task !
-      0 over ['] current-lock for-task !
-      swap update-hold-priority
-      run
-    else
-      0 swap lock-holder-task !      
-    then
-    end-critical
+    ;] critical
   ;
 
   \ Update the priorities of tasks holding locks
@@ -244,6 +278,9 @@ begin-module-once lock-module
     update-hold-priority
     end-critical
   ;
+
+  \ Execute a block of code with a lock
+  : with-lock ( lock xt -- ) dup >r lock try r> unlock ?raise ;
 
 end-module
     

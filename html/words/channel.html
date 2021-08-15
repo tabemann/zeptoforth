@@ -53,13 +53,13 @@
 </div>
 <div class="section" id="chan-size">
 <h2><code class="docutils literal notranslate"><span class="pre">chan-size</span></code><a class="headerlink" href="#chan-size" title="Permalink to this headline">¶</a></h2>
-<p>( bytes – total-bytes )</p>
-<p>Get the size in memory for a channel with a specified buffer size in bytes.</p>
+<p>( element-bytes element-count – total-bytes )</p>
+<p>Get the size in memory for a channel with a specified element size in bytes and element count.</p>
 </div>
 <div class="section" id="init-chan">
 <h2><code class="docutils literal notranslate"><span class="pre">init-chan</span></code><a class="headerlink" href="#init-chan" title="Permalink to this headline">¶</a></h2>
-<p>( addr bytes – )</p>
-<p>Initialize a channel starting at the specified address with the specified buffer size in bytes. The size should be the same size passed to <code class="docutils literal notranslate"><span class="pre">chan-size</span></code> when alloting or allocating the memory whose starting address is passed in.</p>
+<p>( element-bytes element-count addr – )</p>
+<p>Initialize a channel starting at the specified address with the specified buffer size in bytes. The <em>element-bytes</em> and <em>element-count</em> should be the same as when they were passed to <code class="docutils literal notranslate"><span class="pre">chan-size</span></code> when alloting or allocating the memory whose starting address is passed in.</p>
 </div>
 <div class="section" id="close-chan">
 <h2><code class="docutils literal notranslate"><span class="pre">close-chan</span></code><a class="headerlink" href="#close-chan" title="Permalink to this headline">¶</a></h2>
@@ -76,35 +76,55 @@
 <p>( chan – closed )</p>
 <p>Get whether a channel is closed.</p>
 </div>
-<div class="section" id="send-chan-byte">
-<h2><code class="docutils literal notranslate"><span class="pre">send-chan-byte</span></code><a class="headerlink" href="#send-chan-byte" title="Permalink to this headline">¶</a></h2>
-<p>( b chan – )</p>
-<p>Send a byte to a channel. Block if the channel is full.</p>
-</div>
-<div class="section" id="recv-chan-byte">
-<h2><code class="docutils literal notranslate"><span class="pre">recv-chan-byte</span></code><a class="headerlink" href="#recv-chan-byte" title="Permalink to this headline">¶</a></h2>
-<p>( chan – b )</p>
-<p>Receive a byte from a channel. Block if the channel is empty.</p>
-</div>
 <div class="section" id="send-chan">
 <h2><code class="docutils literal notranslate"><span class="pre">send-chan</span></code><a class="headerlink" href="#send-chan" title="Permalink to this headline">¶</a></h2>
 <p>( addr bytes chan – )</p>
-<p>Send bytes from a buffer to a channel. Block if the channel is full or becomes full midway through.</p>
+<p>Send message with a buffer as a payload over a channel. Block until another task receives the message if the channel is full. Note that the buffer is copied, and will be truncated if the buffer size of the channel is smaller than the data provided, and padded with zeros if it is larger. Note that this must not be called within a critical section.</p>
 </div>
 <div class="section" id="recv-chan">
 <h2><code class="docutils literal notranslate"><span class="pre">recv-chan</span></code><a class="headerlink" href="#recv-chan" title="Permalink to this headline">¶</a></h2>
-<p>( addr bytes chan – )</p>
-<p>Receive bytes from a channel into a buffer. Block if the channel is empty or becomes empty midway through.</p>
+<p>( addr bytes chan – addr recv-bytes )</p>
+<p>Receive message with a buffer as a payload over a channel. Block until another task sends a message if the channel is empty. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the bufer size of the channel; the passed in buffer and the number of bytes copied into it are returned. Note that this must not be called within a critical section.</p>
+</div>
+<div class="section" id="send-chan-2cell">
+<h2><code class="docutils literal notranslate"><span class="pre">send-chan-2cell</span></code><a class="headerlink" href="#send-chan-2cell" title="Permalink to this headline">¶</a></h2>
+<p>( xd chan – )</p>
+<p>Send message with a double cell as a payload over a channel. Block until another task receives the message if the channel is full. Note that this must not be called within a critical section.</p>
+</div>
+<div class="section" id="recv-chan-2cell">
+<h2><code class="docutils literal notranslate"><span class="pre">recv-chan-2cell</span></code><a class="headerlink" href="#recv-chan-2cell" title="Permalink to this headline">¶</a></h2>
+<p>( chan – xd )</p>
+<p>Receive message with a double cell as a payload over a channel. Block until another sends a message if the channel is empty. Note that this must not be called within a critical section.</p>
 </div>
 <div class="section" id="send-chan-cell">
 <h2><code class="docutils literal notranslate"><span class="pre">send-chan-cell</span></code><a class="headerlink" href="#send-chan-cell" title="Permalink to this headline">¶</a></h2>
 <p>( x chan – )</p>
-<p>Send a cell to a channel. Block if the channel is full or becomes full midway through.</p>
+<p>Send message with a cell as a payload over a channel. Block until another task receives a message if the channel is full. Note that this must not be called within a critical section.</p>
 </div>
 <div class="section" id="recv-chan-cell">
 <h2><code class="docutils literal notranslate"><span class="pre">recv-chan-cell</span></code><a class="headerlink" href="#recv-chan-cell" title="Permalink to this headline">¶</a></h2>
 <p>( chan – x )</p>
-<p>Receive a cell from a channel. Block if the channel is empty or becomes empty midway through.</p>
+<p>Receive message with a cell as a payload over a channel. Block until another task sends a message if the channel is empty. Note that this must not be called within a critical section.</p>
+</div>
+<div class="section" id="send-chan-half">
+<h2><code class="docutils literal notranslate"><span class="pre">send-chan-half</span></code><a class="headerlink" href="#send-chan-half" title="Permalink to this headline">¶</a></h2>
+<p>( h chan – )</p>
+<p>Send message with a halfword as a payload over a channel. Block until another task receives a message if the channel is full. Note that this must not be called within a critical section.</p>
+</div>
+<div class="section" id="recv-chan-half">
+<h2><code class="docutils literal notranslate"><span class="pre">recv-chan-half</span></code><a class="headerlink" href="#recv-chan-half" title="Permalink to this headline">¶</a></h2>
+<p>( chan – h )</p>
+<p>Receive message with a halfword as a payload over a channel. Block until another task sends a message if the channel is empty. Note that this must not be called within a critical section.</p>
+</div>
+<div class="section" id="send-chan-byte">
+<h2><code class="docutils literal notranslate"><span class="pre">send-chan-byte</span></code><a class="headerlink" href="#send-chan-byte" title="Permalink to this headline">¶</a></h2>
+<p>( b chan – )</p>
+<p>Send message with a byte as a payload over a channel. Block until another task receives a message if the channel is full. Note that this must not be called within a critical section.</p>
+</div>
+<div class="section" id="recv-chan-byte">
+<h2><code class="docutils literal notranslate"><span class="pre">recv-chan-byte</span></code><a class="headerlink" href="#recv-chan-byte" title="Permalink to this headline">¶</a></h2>
+<p>( chan – b )</p>
+<p>Receive message with a byte as a payload over a channel. Block until another task sends a message if the channel is empty. Note that this must not be called within a critical section.</p>
 </div>
 </div>
 
@@ -134,6 +154,7 @@
 <li class="toctree-l1"><a class="reference internal" href="schedule.html">Scheduling Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
@@ -150,12 +171,16 @@
 <li class="toctree-l2"><a class="reference internal" href="#close-chan"><code class="docutils literal notranslate"><span class="pre">close-chan</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#reopen-chan"><code class="docutils literal notranslate"><span class="pre">reopen-chan</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#chan-closed"><code class="docutils literal notranslate"><span class="pre">chan-closed?</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#send-chan-byte"><code class="docutils literal notranslate"><span class="pre">send-chan-byte</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#recv-chan-byte"><code class="docutils literal notranslate"><span class="pre">recv-chan-byte</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#send-chan"><code class="docutils literal notranslate"><span class="pre">send-chan</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#recv-chan"><code class="docutils literal notranslate"><span class="pre">recv-chan</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#send-chan-2cell"><code class="docutils literal notranslate"><span class="pre">send-chan-2cell</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#recv-chan-2cell"><code class="docutils literal notranslate"><span class="pre">recv-chan-2cell</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#send-chan-cell"><code class="docutils literal notranslate"><span class="pre">send-chan-cell</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#recv-chan-cell"><code class="docutils literal notranslate"><span class="pre">recv-chan-cell</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#send-chan-half"><code class="docutils literal notranslate"><span class="pre">send-chan-half</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#recv-chan-half"><code class="docutils literal notranslate"><span class="pre">recv-chan-half</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#send-chan-byte"><code class="docutils literal notranslate"><span class="pre">send-chan-byte</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#recv-chan-byte"><code class="docutils literal notranslate"><span class="pre">recv-chan-byte</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
