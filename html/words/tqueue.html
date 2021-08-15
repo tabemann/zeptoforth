@@ -55,6 +55,11 @@ Initialize a task queue starting at the specified address; note that it must be 
 <p>( tqueue – )</p>
 <p>Decrement the task queue’s internal wait counter. If there is a task in the task queue, enable the task added to it earliest and place it at the head of the schedule. Note that this must be called from within a critical section.</p>
 </div>
+<div class="section" id="unwake-tqueue">
+<h2><code class="docutils literal notranslate"><span class="pre">unwake-tqueue</span></code><a class="headerlink" href="#unwake-tqueue" title="Permalink to this headline">¶</a></h2>
+<p>( tqueue – )</p>
+<p>Increment the task queue’s internal wait counter.</p>
+</div>
 </div>
 
 
@@ -83,6 +88,7 @@ Initialize a task queue starting at the specified address; note that it must be 
 <li class="toctree-l1"><a class="reference internal" href="schedule.html">Scheduling Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
@@ -97,6 +103,7 @@ Initialize a task queue starting at the specified address; note that it must be 
 <li class="toctree-l2"><a class="reference internal" href="#init-tqueue"><code class="docutils literal notranslate"><span class="pre">init-tqueue</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#wait-tqueue"><code class="docutils literal notranslate"><span class="pre">wait-tqueue</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#wake-tqueue"><code class="docutils literal notranslate"><span class="pre">wake-tqueue</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#unwake-tqueue"><code class="docutils literal notranslate"><span class="pre">unwake-tqueue</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>

@@ -121,20 +121,40 @@
 <p>( delay start task – )</p>
 <p>Delay a task until <em>delay</em> ticks after the time represented by <em>start</em> ticks.</p>
 </div>
+<div class="section" id="delay-critical">
+<h2><code class="docutils literal notranslate"><span class="pre">delay-critical</span></code><a class="headerlink" href="#delay-critical" title="Permalink to this headline">¶</a></h2>
+<p>( delay start task – )</p>
+<p>Delay a task until <em>delay</em> ticks after the time represented by <em>start</em> ticks, and afterwards immediately start a critical section.</p>
+</div>
 <div class="section" id="block-timeout">
 <h2><code class="docutils literal notranslate"><span class="pre">block-timeout</span></code><a class="headerlink" href="#block-timeout" title="Permalink to this headline">¶</a></h2>
 <p>( delay start task – )</p>
 <p>Block a task until <em>delay</em> ticks after the time represented by <em>start</em> ticks, and signal timed out if this time is reached without the task being readied first.</p>
+</div>
+<div class="section" id="block-timeout-critical">
+<h2><code class="docutils literal notranslate"><span class="pre">block-timeout-critical</span></code><a class="headerlink" href="#block-timeout-critical" title="Permalink to this headline">¶</a></h2>
+<p>( delay start task – )</p>
+<p>Block a task until <em>delay</em> ticks after the time represented by <em>start</em> ticks, and signal timed out if this time is reached without the task being readied first; after blocking finishes, immediately start a critical section.</p>
 </div>
 <div class="section" id="block-wait">
 <h2><code class="docutils literal notranslate"><span class="pre">block-wait</span></code><a class="headerlink" href="#block-wait" title="Permalink to this headline">¶</a></h2>
 <p>( task – )</p>
 <p>Block a task until all waiting task are woken with <code class="docutils literal notranslate"><span class="pre">wake</span></code>.</p>
 </div>
+<div class="section" id="block-wait-critical">
+<h2><code class="docutils literal notranslate"><span class="pre">block-wait-critical</span></code><a class="headerlink" href="#block-wait-critical" title="Permalink to this headline">¶</a></h2>
+<p>( task – )</p>
+<p>Block a task until all waiting task are woken with <code class="docutils literal notranslate"><span class="pre">wake</span></code>, and then immediately start a critical section.</p>
+</div>
 <div class="section" id="block-indefinite">
 <h2><code class="docutils literal notranslate"><span class="pre">block-indefinite</span></code><a class="headerlink" href="#block-indefinite" title="Permalink to this headline">¶</a></h2>
 <p>( task – )</p>
 <p>Block a task indefinitely until the task is readied.</p>
+</div>
+<div class="section" id="block-indefinite-critical">
+<h2><code class="docutils literal notranslate"><span class="pre">block-indefinite-critical</span></code><a class="headerlink" href="#block-indefinite-critical" title="Permalink to this headline">¶</a></h2>
+<p>( task – )</p>
+<p>Block a task indefinitely until the task is readied, and then immediately start a critical section.</p>
 </div>
 <div class="section" id="ready">
 <h2><code class="docutils literal notranslate"><span class="pre">ready</span></code><a class="headerlink" href="#ready" title="Permalink to this headline">¶</a></h2>
@@ -145,6 +165,11 @@
 <h2><code class="docutils literal notranslate"><span class="pre">block</span></code><a class="headerlink" href="#block" title="Permalink to this headline">¶</a></h2>
 <p>( task – )</p>
 <p>Block a task for which blocking has been prepared.</p>
+</div>
+<div class="section" id="block-critical">
+<h2><code class="docutils literal notranslate"><span class="pre">block-critical</span></code><a class="headerlink" href="#block-critical" title="Permalink to this headline">¶</a></h2>
+<p>( task – )</p>
+<p>Block a task for which blocking has been prepared, and immediately start a new critical section once it finishes blocking.</p>
 </div>
 <div class="section" id="id1">
 <h2><code class="docutils literal notranslate"><span class="pre">timeout</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
@@ -302,11 +327,16 @@
 <li class="toctree-l2"><a class="reference internal" href="#no-timeout"><code class="docutils literal notranslate"><span class="pre">no-timeout</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#last-delay"><code class="docutils literal notranslate"><span class="pre">last-delay</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#delay"><code class="docutils literal notranslate"><span class="pre">delay</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#delay-critical"><code class="docutils literal notranslate"><span class="pre">delay-critical</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#block-timeout"><code class="docutils literal notranslate"><span class="pre">block-timeout</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#block-timeout-critical"><code class="docutils literal notranslate"><span class="pre">block-timeout-critical</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#block-wait"><code class="docutils literal notranslate"><span class="pre">block-wait</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#block-wait-critical"><code class="docutils literal notranslate"><span class="pre">block-wait-critical</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#block-indefinite"><code class="docutils literal notranslate"><span class="pre">block-indefinite</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#block-indefinite-critical"><code class="docutils literal notranslate"><span class="pre">block-indefinite-critical</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ready"><code class="docutils literal notranslate"><span class="pre">ready</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#block"><code class="docutils literal notranslate"><span class="pre">block</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#block-critical"><code class="docutils literal notranslate"><span class="pre">block-critical</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">timeout</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#timeout-systick-start"><code class="docutils literal notranslate"><span class="pre">timeout-systick-start</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#timeout-systick-delay"><code class="docutils literal notranslate"><span class="pre">timeout-systick-delay</span></code></a></li>
