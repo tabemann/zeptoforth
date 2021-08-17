@@ -23,7 +23,7 @@ begin-module forth-module
   import internal-module
   import task-module
   import chan-module
-  import led-worlist
+  import led-module
 
   \ My channel size
   2 constant my-chan-size
@@ -55,7 +55,7 @@ begin-module forth-module
     field: off-xt
 
     \ The delay
-    field: delay
+    field: delay-ms
   end-structure
 
   \ The inner loop of an led handler
@@ -63,7 +63,7 @@ begin-module forth-module
     does> begin
       dup before-chan @ recv-chan-byte drop
       dup on-xt @ execute
-      dup delay @ ms
+      dup delay-ms @ ms
       dup off-xt @ execute
       dup after-chan @ 0 swap send-chan-byte
       pause
