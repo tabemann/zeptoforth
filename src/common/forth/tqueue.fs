@@ -140,7 +140,7 @@ begin-module-once tqueue-module
     end-critical
     [: current-task validate-timeout ;] try ?dup if
       >r [:
-	-1 over wait-counter +! tuck swap remove-wait wait-orig-here @ ram-here!
+	1 over wait-counter +! tuck swap remove-wait wait-orig-here @ ram-here!
       ;] critical r> ?raise
     then
     wait-orig-here @ ram-here!
