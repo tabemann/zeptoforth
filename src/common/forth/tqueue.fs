@@ -38,7 +38,10 @@ begin-module-once tqueue-module
 
       \ Wait counter
       field: wait-counter
-
+      
+      \ Wait limit
+      field: wait-limit
+      
     end-structure
 
     \ Wait structure
@@ -103,10 +106,22 @@ begin-module-once tqueue-module
 
   \ Export tqueue-size
   tqueue-size constant tqueue-size
+
+  \ Value indicating no task queue limti
+  -1 constant no-tqueue-limit
   
   \ Initialize a task queue
   : init-tqueue ( addr -- )
     0 over wait-counter !
+    -1 over wait-limit !
+    0 over first-wait !
+    0 swap last-wait !
+  ;
+
+  \ Initialize a task queue with a limit and initial counter
+  : init-tqueue-full ( limit counter addr -- )
+    tuck wait-counter !
+    tuck wait-limit !
     0 over first-wait !
     0 swap last-wait !
   ;
@@ -115,8 +130,8 @@ begin-module-once tqueue-module
   \ Note that this must be called within a critical section
   : wait-tqueue ( tqueue -- )
     \    begin-critical
-    1 over wait-counter +!
-    dup wait-counter @ 0 <= if
+    -1 over wait-counter +!
+    dup wait-counter @ 0>= if
       drop exit
     then
     init-wait
@@ -137,7 +152,11 @@ begin-module-once tqueue-module
   \ Note that this must be called within a critical section
   : wake-tqueue ( tqueue -- )
     \    begin-critical
-    -1 over wait-counter +!
+    dup wait-limit @ 0> if
+      dup wait-counter @ 1+ over wait-limit @ min over wait-counter !
+    else
+      1 over wait-counter +!
+    then
     dup first-wait @ ?dup if
       dup wait-prev @ 2 pick first-wait !
       over first-wait @ 0= if
@@ -154,7 +173,7 @@ begin-module-once tqueue-module
 
   \ Un-wake a task queue
   : unwake-tqueue ( tqueue -- )
-    1 swap wait-counter +!
+    -1 swap wait-counter +!
   ;
 
   \ Wake up all tasks in a task queue
