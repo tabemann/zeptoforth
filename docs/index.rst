@@ -23,6 +23,7 @@ Zeptoforth Documentation
    words/lock
    words/channel
    words/fchannel
+   words/semaphore
    words/tqueue
    words/systick
    words/ansi_term
