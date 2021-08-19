@@ -15,6 +15,11 @@ The following words are in `chan-module`:
 
 Channel closed exception. Raised on attempting to send to a closed channel or when trying to receive on an empty closed channel.
 
+##### `x-would-block`
+( -- )
+
+Operation would block exception. Raised on attempting to carry out a non-blocking operation when blocking would normally be necessary for the equivalent blocking operation.
+
 ##### `chan-full?`
 ( chan -- flag )
 
@@ -53,49 +58,149 @@ Get whether a channel is closed.
 ##### `send-chan`
 ( addr bytes chan -- )
 
-Send message with a buffer as a payload over a channel. Block until another task receives the message if the channel is full. Note that the buffer is copied, and will be truncated if the buffer size of the channel is smaller than the data provided, and padded with zeros if it is larger. Note that this must not be called within a critical section.
+Send message with a buffer as a payload over a channel. Block until another task receives the message if the channel is full. Note that the buffer is copied, and will be truncated if the buffer size of the channel is smaller than the data provided, and padded with zeros if it is larger. This is not safe to call within an interrupt service routine or a critical section.
 
 ##### `recv-chan`
 ( addr bytes chan -- addr recv-bytes )
 
-Receive message with a buffer as a payload over a channel. Block until another task sends a message if the channel is empty. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the bufer size of the channel; the passed in buffer and the number of bytes copied into it are returned. Note that this must not be called within a critical section.
+Receive message into a buffer from a channel. Block until another task sends a message if the channel is empty. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the passed in buffer and the number of bytes copied into it are returned. This is not safe to call within an interrupt service routine or a critical section.
+
+##### `peek-chan`
+( addr bytes chan -- addr peek-bytes )
+
+Peek the oldest message into a buffer from a channel, without popping it from the channel's queue. Block until another task sends a message if the channel is empty. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the passed in buffer and the number of bytes copied into it are returned. This is not safe to call within an interrupt service routine or a critical section.
+
+##### `send-chan-no-block`
+( addr bytes chan -- )
+
+Send message with a buffer as a payload over a channel. If the channel is full, `x-would-block` is raised. Note that the buffer is copied, and will be truncated if the buffer size of the channel is smaller than the data provided, and padded with zeros if it is larger. This is safe to call within an interrupt service routine or a critical section.
+
+##### `recv-chan-no-block`
+( addr bytes chan -- addr recv-bytes )
+
+Receive message into a buffer from a channel. If the channel is empty, `x-would-block` is raised. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the passed in buffer and the number of bytes copied into it are returned. This is safe to call within an interrupt service routine or a critical section.
+
+##### `peek-chan-no-block`
+( addr bytes chan -- addr peek-bytes )
+
+Peek the oldest message into a buffer from a channel, without popping it from the channel's queue. If the channel is empty, `x-would-block` is raised.. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the passed in buffer and the number of bytes copied into it are returned. This is safe to call within an interrupt service routine or a critical section.
 
 ##### `send-chan-2cell`
 ( xd chan -- )
 
-Send message with a double cell as a payload over a channel. Block until another task receives the message if the channel is full. Note that this must not be called within a critical section.
+Send message with a double cell as a payload over a channel. Block until another task receives the message if the channel is full. This is not safe to call within an interrupt service routine or a critical section.
 
 ##### `recv-chan-2cell`
 ( chan -- xd )
 
-Receive message with a double cell as a payload over a channel. Block until another sends a message if the channel is empty. Note that this must not be called within a critical section.
+Receive message with a double cell as a payload from a channel. Block until another task sends a message if the channel is empty. This is not safe to call within an interrupt service routine or a critical section.
+
+##### `peek-chan-2cell`
+( chan -- xd )
+
+Peek a message with a double cell as a payload from a channel without popping it from the channel's queue. Block until another task sends a message if the channel is empty. This is not safe to call within an interrupt service routine or a critical section.
 
 ##### `send-chan-cell`
 ( x chan -- )
 
-Send message with a cell as a payload over a channel. Block until another task receives a message if the channel is full. Note that this must not be called within a critical section.
+Send message with a cell as a payload over a channel. Block until another task receives a message if the channel is full. This is not safe to call within an interrupt service routine or a critical section.
 
 ##### `recv-chan-cell`
 ( chan -- x )
 
-Receive message with a cell as a payload over a channel. Block until another task sends a message if the channel is empty. Note that this must not be called within a critical section.
+Receive message with a cell as a payload from a channel. Block until another task sends a message if the channel is empty. This is not safe to call within an interrupt service routine or a critical section.
+
+##### `peek-chan-cell`
+( chan -- x )
+
+Peek a message with a cell as a payload from a channel without popping it from the channel's queue. Block until another task sends a message if the channel is empty. This is not safe to call within an interrupt service routine or a critical section.
 
 ##### `send-chan-half`
 ( h chan -- )
 
-Send message with a halfword as a payload over a channel. Block until another task receives a message if the channel is full. Note that this must not be called within a critical section.
+Send message with a halfword as a payload over a channel. Block until another task receives a message if the channel is full. This is not safe to call within an interrupt service routine or a critical section.
 
 ##### `recv-chan-half`
 ( chan -- h )
 
-Receive message with a halfword as a payload over a channel. Block until another task sends a message if the channel is empty. Note that this must not be called within a critical section.
+Receive message with a halfword as a payload from a channel. Block until another task sends a message if the channel is empty. This is not safe to call within an interrupt service routine or a critical section.
+
+##### `peek-chan-half`
+( chan -- h )
+
+Peek a message with a halfword as a payload from a channel without popping it from the channel's queue. Block until another task sends a message if the channel is empty. This is not safe to call within an interrupt service routine or a critical section.
 
 ##### `send-chan-byte`
 ( b chan -- )
 
-Send message with a byte as a payload over a channel. Block until another task receives a message if the channel is full. Note that this must not be called within a critical section.
+Send message with a byte as a payload over a channel. Block until another task receives a message if the channel is full. This is not safe to call within an interrupt service routine or a critical section.
 
 ##### `recv-chan-byte`
 ( chan -- b )
 
-Receive message with a byte as a payload over a channel. Block until another task sends a message if the channel is empty. Note that this must not be called within a critical section.
+Receive message with a byte as a payload from a channel. Block until another task sends a message if the channel is empty. This is not safe to call within an interrupt service routine or a critical section.
+
+##### `peek-chan-byte`
+( chan -- b )
+
+Peek a message with a byte as a payload from a channel without popping it from the channel's queue. Block until another task sends a message if the channel is empty. This is not safe to call within an interrupt service routine or a critical section.
+
+##### `send-chan-no-block-2cell`
+( xd chan -- )
+
+Send message with a double cell as a payload over a channel. If the channel is full, raise `x-would-block`. This is safe to call within an interrupt service routine or a critical section.
+
+##### `recv-chan-no-block-2cell`
+( chan -- xd )
+
+Receive message with a double cell as a payload from a channel. If the channel is empty, raise `x-would-block`. This is safe to call within an interrupt service routine or a critical section.
+
+##### `peek-chan-no-block-2cell`
+( chan -- xd )
+
+Peek a message with a double cell as a payload from a channel without popping it from the channel's queue. If the channel is empty, raise `x-would-block`. This is safe to call within an interrupt service routine or a critical section.
+
+##### `send-chan-no-block-cell`
+( x chan -- )
+
+Send message with a cell as a payload over a channel. If the channel is full, raise `x-would-block`. This is safe to call within an interrupt service routine or a critical section.
+
+##### `recv-chan-no-block-cell`
+( chan -- x )
+
+Receive message with a cell as a payload from a channel. If the channel is empty, raise `x-would-block`. This is safe to call within an interrupt service routine or a critical section.
+
+##### `peek-chan-no-block-cell`
+( chan -- x )
+
+Peek a message with a cell as a payload from a channel without popping it from the channel's queue. If the channel is empty, raise `x-would-block`. This is safe to call within an interrupt service routine or a critical section.
+
+##### `send-chan-no-block-half`
+( h chan -- )
+
+Send message with a halfword as a payload over a channel. If the channel is full, raise `x-would-block`. This is safe to call within an interrupt service routine or a critical section.
+
+##### `recv-chan-no-block-half`
+( chan -- h )
+
+Receive message with a halfword as a payload from a channel. If the channel is empty, raise `x-would-block`. This is safe to call within an interrupt service routine or a critical section.
+
+##### `peek-chan-no-block-half`
+( chan -- h )
+
+Peek a message with a halfword as a payload from a channel without popping it from the channel's queue. If the channel is empty, raise `x-would-block`. This is safe to call within an interrupt service routine or a critical section.
+
+##### `send-chan-no-block-byte`
+( b chan -- )
+
+Send message with a byte as a payload over a channel. If the channel is full, raise `x-would-block`. This is safe to call within an interrupt service routine or a critical section.
+
+##### `recv-chan-no-block-byte`
+( chan -- b )
+
+Receive message with a byte as a payload from a channel. If the channel is empty, raise `x-would-block`. This is safe to call within an interrupt service routine or a critical section.
+
+##### `peek-chan-no-block-byte`
+( chan -- b )
+
+Peek a message with a byte as a payload from a channel without popping it from the channel's queue. If the channel is empty, raise `x-would-block`. This is safe to call within an interrupt service routine or a critical section.

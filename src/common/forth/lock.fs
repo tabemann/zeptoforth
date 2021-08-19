@@ -274,9 +274,7 @@ begin-module-once lock-module
 
   \ Update the priorities of tasks holding locks
   : update-lock-priority ( lock -- )
-    begin-critical
-    update-hold-priority
-    end-critical
+    ['] update-hold-priority critical
   ;
 
   \ Execute a block of code with a lock
