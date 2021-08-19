@@ -117,6 +117,12 @@ begin-import-module-once task-module
     \ A task's maximum timeslice
     user task-max-timeslice
 
+    \ The current timeout start time in ticks
+    user timeout-systick-start
+    
+    \ The current timeout delay time in ticks
+    user timeout-systick-delay
+  
     \ SVCall vector index
     11 constant svcall-vector
 
@@ -134,12 +140,6 @@ begin-import-module-once task-module
   \ The default timeout
   user timeout
 
-  \ The current timeout start time in ticks
-  user timeout-systick-start
-
-  \ The current timeout delay time in ticks
-  user timeout-systick-delay
-  
   \ No timeout
   -1 constant no-timeout
 

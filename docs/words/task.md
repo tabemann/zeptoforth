@@ -155,21 +155,6 @@ Block a task for which blocking has been prepared.
 
 Block a task for which blocking has been prepared, and immediately start a new critical section once it finishes blocking.
 
-##### `timeout`
-( -- ticks )
-
-The default timeout in ticks.
-
-##### `timeout-systick-start`
-( -- addr )
-
-The current timeout start time in ticks.
-
-##### `timeout-systick-delay`
-( -- addr )
-
-The current timeout delay in ticks.
-
 ##### `prepare-block`
 ( task -- )
 
