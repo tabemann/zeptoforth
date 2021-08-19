@@ -147,6 +147,9 @@ begin-module-once chan-module
     ;
 
   end-module
+
+  \ Would block exception
+  : x-would-block ( -- ) space ." operation would block" cr ;
   
   \ Get channel size for a channel with a specified element size in bytes
   \ and element count
@@ -204,6 +207,61 @@ begin-module-once chan-module
     ;] critical
   ;
 
+  \ Peek data from a channel
+  : peek-chan ( addr bytes chan -- addr peek-bytes )
+    [:
+      current-task prepare-block
+      dup wait-recv-chan
+      >r 2dup 0 fill
+      r@ chan-data-size @ min r> recv-chan-addr -rot 2dup 2>r move 2r>
+    ;] critical
+  ;
+
+  \ Send data to a channel without blocking (raise x-would-block if blocking
+  \ would normally occur)
+  : send-chan-no-block ( addr bytes chan -- )
+    [:
+      dup chan-closed @ if
+	end-critical ['] x-chan-closed ?raise
+      then
+      dup chan-full-unsafe? triggers x-would-block
+      dup send-chan-addr over chan-data-size @ 0 fill
+      dup >r chan-data-size @ min r@ send-chan-addr swap move r>
+      dup advance-send-chan
+      dup chan-recv-ready @ 0> if
+	chan-recv-tqueue wake-tqueue
+      else
+	drop
+      then
+    ;] critical
+  ;
+
+  \ Receive data from a channel without blocking (raise x-would-block if
+  \ blocking would normally occur)
+  : recv-chan-no-block ( addr bytes chan -- addr recv-bytes )
+    [:
+      dup chan-empty-unsafe? triggers x-would-block
+      >r 2dup 0 fill
+      r@ chan-data-size @ min r@ recv-chan-addr -rot 2dup 2>r move 2r> r>
+      dup advance-recv-chan
+      dup chan-send-ready @ 0> if
+	chan-send-tqueue wake-tqueue
+      else
+	drop
+      then
+    ;] critical
+  ;
+
+  \ Peek data from a channel without blocking (raise x-would-block if blocking
+  \ would normally occur)
+  : peek-chan-no-block ( addr bytes chan -- addr peek-bytes )
+    [:
+      dup chan-empty-unsafe? triggers x-would-block
+      >r 2dup 0 fill
+      r@ chan-data-size @ min r> recv-chan-addr -rot 2dup 2>r move 2r>
+    ;] critical
+  ;
+
   \ Send a double cell on a channel
   : send-chan-2cell ( xd chan -- )
     2 cells [: >r -rot r@ 2! r> 2 cells rot send-chan ;] with-aligned-allot
@@ -212,6 +270,12 @@ begin-module-once chan-module
   \ Receive a double cell from a channel
   : recv-chan-2cell ( chan -- xd )
     2 cells [: 2 cells rot recv-chan 2 cells >= if 2@ else drop 0 0 then ;]
+    with-aligned-allot
+  ;
+
+  \ Peek a double cell from a channel
+  : peek-chan-2cell ( chan -- xd )
+    2 cells [: 2 cells rot peek-chan 2 cells >= if 2@ else drop 0 0 then ;]
     with-aligned-allot
   ;
 
@@ -225,6 +289,12 @@ begin-module-once chan-module
     1 cells [: 1 cells rot recv-chan 1 cells >= if @ else drop 0 then ;]
     with-aligned-allot
   ;
+  
+  \ Peek a cell from a channel
+  : peek-chan-cell ( chan -- x )
+    1 cells [: 1 cells rot peek-chan 1 cells >= if @ else drop 0 then ;]
+    with-aligned-allot
+  ;
 
   \ Send a halfword on a channel
   : send-chan-half ( h chan -- )
@@ -236,6 +306,11 @@ begin-module-once chan-module
     2 [: 2 rot recv-chan 2 >= if h@ else drop 0 then ;] with-aligned-allot
   ;
 
+  \ Peek a halfword from a channel
+  : peek-chan-half ( chan -- h )
+    2 [: 2 rot peek-chan 2 >= if h@ else drop 0 then ;] with-aligned-allot
+  ;
+
   \ Send a byte on a channel
   : send-chan-byte ( c chan -- )
     1 [: >r swap r@ c! r> 1 rot send-chan ;] with-aligned-allot
@@ -244,6 +319,107 @@ begin-module-once chan-module
   \ Receive a byte from a channel
   : recv-chan-byte ( chan -- c )
     1 [: 1 rot recv-chan 1 >= if c@ else drop 0 then ;] with-aligned-allot
+  ;
+  
+  \ Receive a byte from a channel
+  : peek-chan-byte ( chan -- c )
+    1 [: 1 rot peek-chan 1 >= if c@ else drop 0 then ;] with-aligned-allot
+  ;
+
+  \ Send a double cell on a channel (raise x-would-block if blocking would
+  \ normally occur)
+  : send-chan-no-block-2cell ( xd chan -- )
+    2 cells [:
+      >r -rot r@ 2! r> 2 cells rot send-chan-no-block
+    ;] with-aligned-allot
+  ;
+
+  \ Receive a double cell from a channel (raise x-would-block if blocking would
+  \ normally occur)
+  : recv-chan-no-block-2cell ( chan -- xd )
+    2 cells [:
+      2 cells rot recv-chan-no-block 2 cells >= if 2@ else drop 0 0 then
+    ;] with-aligned-allot
+  ;
+
+  \ Peek a double cell from a channel (raise x-would-block if blocking would
+  \ normally occur)
+  : peek-chan-no-block-2cell ( chan -- xd )
+    2 cells [:
+      2 cells rot peek-chan-no-block 2 cells >= if 2@ else drop 0 0 then
+    ;] with-aligned-allot
+  ;
+
+  \ Send a cell on a channel (raise x-would-block if blocking would normally
+  \ occur)
+  : send-chan-no-block-cell ( x chan -- )
+    1 cells [:
+      >r swap r@ ! r> 1 cells rot send-chan-no-block
+    ;] with-aligned-allot
+  ;
+
+  \ Receive a cell from a channel (raise x-would-block if blocking would
+  \ normally occur)
+  : recv-chan-no-block-cell ( chan -- x )
+    1 cells [:
+      1 cells rot recv-chan-no-block 1 cells >= if @ else drop 0 then
+    ;] with-aligned-allot
+  ;
+  
+  \ Peek a cell from a channel (raise x-would-block if blocking would normally
+  \ occur)
+  : peek-chan-no-block-cell ( chan -- x )
+    1 cells [:
+      1 cells rot peek-chan-no-block 1 cells >= if @ else drop 0 then
+    ;] with-aligned-allot
+  ;
+
+  \ Send a halfword on a channel (raise x-would-block if blocking would
+  \ normally occur)
+  : send-chan-no-block-half ( h chan -- )
+    2 [:
+      >r swap r@ ! r> 2 rot send-chan-no-block
+    ;] with-aligned-allot
+  ;
+
+  \ Receive a halfword from a channel (raise x-would-block if blocking would
+  \ normally occur)
+  : recv-chan-no-block-half ( chan -- h )
+    2 [:
+      2 rot recv-chan-no-block 2 >= if h@ else drop 0 then
+    ;] with-aligned-allot
+  ;
+
+  \ Peek a halfword from a channel (raise x-would-block if blocking would
+  \ normally occur)
+  : peek-chan-no-block-half ( chan -- h )
+    2 [:
+      2 rot peek-chan-no-block 2 >= if h@ else drop 0 then
+    ;] with-aligned-allot
+  ;
+
+  \ Send a byte on a channel (raise x-would-block if blocking would normally
+  \ occur)
+  : send-chan-no-block-byte ( c chan -- )
+    1 [:
+      >r swap r@ c! r> 1 rot send-chan-no-block
+    ;] with-aligned-allot
+  ;
+
+  \ Receive a byte from a channel (raise x-would-block if blocking would
+  \ normally occur)
+  : recv-chan-no-block-byte ( chan -- c )
+    1 [:
+      1 rot recv-chan-no-block 1 >= if c@ else drop 0 then
+    ;] with-aligned-allot
+  ;
+  
+  \ Receive a byte from a channel (raise x-would-block if blocking would
+  \ normally occur)
+  : peek-chan-no-block-byte ( chan -- c )
+    1 [:
+      1 rot peek-chan-no-block 1 >= if c@ else drop 0 then
+    ;] with-aligned-allot
   ;
 
   \ Close a channel
