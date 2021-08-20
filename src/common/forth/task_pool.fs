@@ -53,7 +53,7 @@ begin-module-once task-pool-module
   : x-no-task-available ( -- ) space ." no task is available" cr ;
   
   \ Spawn a task from a task pool
-  : spawn-from-task-pool ( xn...x0 count xt task-pool -- task )
+  : spawn-from-task-pool ( xn ... x0 count xt task-pool -- task )
     begin-critical
     dup task-pool-count @ 0 ?do
       i over task@ terminated? if
