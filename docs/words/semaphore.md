@@ -24,19 +24,19 @@ Initialize a semaphore at the specified address *addr*, which must have size `se
 ##### `take`
 ( semaphore -- )
 
-Decrement the counter of a semaphore, blocking the current task if the counter after decrementing is negative; if a timeout is specified via the user variable `timeout` and the current task is not readied before the timeout is reached, the exception `x-timed-out` is raised (both `timeout` and `x-timed-out` are defined in `task-module`).
+Decrement the counter of a semaphore, blocking the current task if the counter after decrementing is negative; if a timeout is specified via the user variable `timeout` and the current task is not readied before the timeout is reached, the exception `x-timed-out` is raised (both `timeout` and `x-timed-out` are defined in `task-module`). This is not safe to call within an interrupt service routine or critical section.
 
 ##### `give`
 ( semaphore -- )
 
-Increment the counter of a semaphore, up to the counter limit if one is set; if one or more tasks are blocked on the semaphore, the one that has been blocked the longest is readied.
+Increment the counter of a semaphore, up to the counter limit if one is set; if one or more tasks are blocked on the semaphore, the one that has been blocked the longest is readied. This is safe to call within an interrupt service routine or critical section.
 
 ##### `ungive`
 ( semaphore -- )
 
-Decrement the counter of a semaphore without blocking the current task.
+Decrement the counter of a semaphore without blocking the current task. This is safe to call within an interrupt service routine or critical section.
 
 ##### `broadcast`
 ( semaphore -- )
 
-*Give* all of the tasks blocked on a semaphore.
+*Give* all of the tasks blocked on a semaphore. This is safe to call within an interrupt service routine or critical section.
