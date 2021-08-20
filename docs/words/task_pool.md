@@ -12,9 +12,9 @@ The following words are in `task-pool-module`:
 Exception raised if one attempts to spawn a task from a task pool and no tasks are available.
 
 ##### `spawn-from-task-pool`
-( xt...x0 count xt task-pool --  task )
+( xn ... x0 count xt task-pool --  task )
 
-Spawn a task from a task pool, if a task is available, or raise `x-no-task-available` if no tasks are available. *xt* through *x0* are parameters to pass to the *xt* when executed, and *count* is the number of such parameters.
+Spawn a task from a task pool, if a task is available, or raise `x-no-task-available` if no tasks are available. *xn* through *x0* are parameters to pass to the *xt* when executed, and *count* is the number of such parameters.
 
 ##### `task-pool-free`
 ( task-pool -- count )
