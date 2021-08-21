@@ -131,7 +131,7 @@ begin-module-once stream-module
 	dup stream-closed @ triggers x-stream-closed
 	1 over stream-recv-ready +!
 	dup stream-recv-tqueue ['] wait-tqueue try
-	-1 over stream-recv-ready +!
+	-1 rot stream-recv-ready +!
 	?raise
       else
 	drop
@@ -199,7 +199,25 @@ begin-module-once stream-module
     stream-recv-tqueue init-tqueue
   ;
 
-  \ Send data to a stream
+  \ \ Output debugging information for streams
+  \ : debug-stream ( stream c-addr u xt -- )
+  \   2 pick 2 pick cr type ." : "
+  \   3 pick stream-send-index @ ." before stream-send-index:" .
+  \   2 pick 2 pick cr type ." : "
+  \   3 pick stream-recv-index @ ." before stream-recv-index:" .
+  \   2 pick 2 pick cr type ." : "
+  \   3 pick stream-current-count @ ." before stream-current-count:" .
+  \   swap >r swap >r over >r execute
+  \   r> r> r>
+  \   2dup cr type ." : "
+  \   2 pick stream-send-index @ ." after stream-send-index:" .
+  \   2dup cr type ." : "
+  \   2 pick stream-recv-index @ ." after stream-recv-index:" .
+  \   cr type ." : "
+  \   stream-current-count @ ." after stream-current-count:" .
+  \ ;
+
+    \ Send data to a stream
   : send-stream ( addr bytes stream -- )
     [:
       dup stream-closed @ triggers x-stream-closed
