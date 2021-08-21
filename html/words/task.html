@@ -171,21 +171,6 @@
 <p>( task – )</p>
 <p>Block a task for which blocking has been prepared, and immediately start a new critical section once it finishes blocking.</p>
 </div>
-<div class="section" id="id1">
-<h2><code class="docutils literal notranslate"><span class="pre">timeout</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-<p>( – ticks )</p>
-<p>The default timeout in ticks.</p>
-</div>
-<div class="section" id="timeout-systick-start">
-<h2><code class="docutils literal notranslate"><span class="pre">timeout-systick-start</span></code><a class="headerlink" href="#timeout-systick-start" title="Permalink to this headline">¶</a></h2>
-<p>( – addr )</p>
-<p>The current timeout start time in ticks.</p>
-</div>
-<div class="section" id="timeout-systick-delay">
-<h2><code class="docutils literal notranslate"><span class="pre">timeout-systick-delay</span></code><a class="headerlink" href="#timeout-systick-delay" title="Permalink to this headline">¶</a></h2>
-<p>( – addr )</p>
-<p>The current timeout delay in ticks.</p>
-</div>
 <div class="section" id="prepare-block">
 <h2><code class="docutils literal notranslate"><span class="pre">prepare-block</span></code><a class="headerlink" href="#prepare-block" title="Permalink to this headline">¶</a></h2>
 <p>( task – )</p>
@@ -205,6 +190,11 @@
 <h2><code class="docutils literal notranslate"><span class="pre">validate-timeout</span></code><a class="headerlink" href="#validate-timeout" title="Permalink to this headline">¶</a></h2>
 <p>( task – )</p>
 <p>Validate whether a task has timed out, raising <code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code> if it has.</p>
+</div>
+<div class="section" id="x-would-block">
+<h2><code class="docutils literal notranslate"><span class="pre">x-would-block</span></code><a class="headerlink" href="#x-would-block" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>Operation would block exception. Raised on attempting to carry out a non-blocking operation when blocking would normally be necessary for the equivalent blocking operation.</p>
 </div>
 <div class="section" id="set-task-priority">
 <h2><code class="docutils literal notranslate"><span class="pre">set-task-priority</span></code><a class="headerlink" href="#set-task-priority" title="Permalink to this headline">¶</a></h2>
@@ -337,13 +327,11 @@
 <li class="toctree-l2"><a class="reference internal" href="#ready"><code class="docutils literal notranslate"><span class="pre">ready</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#block"><code class="docutils literal notranslate"><span class="pre">block</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#block-critical"><code class="docutils literal notranslate"><span class="pre">block-critical</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">timeout</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#timeout-systick-start"><code class="docutils literal notranslate"><span class="pre">timeout-systick-start</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#timeout-systick-delay"><code class="docutils literal notranslate"><span class="pre">timeout-systick-delay</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#prepare-block"><code class="docutils literal notranslate"><span class="pre">prepare-block</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#timed-out"><code class="docutils literal notranslate"><span class="pre">timed-out?</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#x-timed-out"><code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#validate-timeout"><code class="docutils literal notranslate"><span class="pre">validate-timeout</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#x-would-block"><code class="docutils literal notranslate"><span class="pre">x-would-block</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#set-task-priority"><code class="docutils literal notranslate"><span class="pre">set-task-priority</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#get-task-priority"><code class="docutils literal notranslate"><span class="pre">get-task-priority</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#x-out-of-range-priority"><code class="docutils literal notranslate"><span class="pre">x-out-of-range-priority</span></code></a></li>
@@ -375,6 +363,8 @@
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>

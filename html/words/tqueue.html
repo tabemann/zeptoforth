@@ -15,7 +15,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="SysTick Words" href="systick.html" />
-    <link rel="prev" title="Fast Channel Words" href="fchannel.html" />
+    <link rel="prev" title="Stream Words" href="stream.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -39,26 +39,40 @@
 <p>( – bytes )</p>
 <p>Get the size of a task queue in memory.</p>
 </div>
+<div class="section" id="no-tqueue-limit">
+<h2><code class="docutils literal notranslate"><span class="pre">no-tqueue-limit</span></code><a class="headerlink" href="#no-tqueue-limit" title="Permalink to this headline">¶</a></h2>
+<p>( – n )</p>
+<p>Magic value indicating no task queue counter limit.</p>
+</div>
 <div class="section" id="init-tqueue">
 <h2><code class="docutils literal notranslate"><span class="pre">init-tqueue</span></code><a class="headerlink" href="#init-tqueue" title="Permalink to this headline">¶</a></h2>
-<p>( addr – )
-a
-Initialize a task queue starting at the specified address; note that it must be <code class="docutils literal notranslate"><span class="pre">tqueue-size</span></code> bytes in size.</p>
+<p>( addr – )</p>
+<p>Initialize a task queue starting at the specified address; note that it must be <code class="docutils literal notranslate"><span class="pre">tqueue-size</span></code> bytes in size. It will have no counter limit, and its counter will be initialized to zero.</p>
+</div>
+<div class="section" id="init-tqueue-full">
+<h2><code class="docutils literal notranslate"><span class="pre">init-tqueue-full</span></code><a class="headerlink" href="#init-tqueue-full" title="Permalink to this headline">¶</a></h2>
+<p>( limit counter addr – )</p>
+<p>Initialize a task queue starting at the specified address; note that it must be <code class="docutils literal notranslate"><span class="pre">tqueue-size</span></code> bytes in size. Its counter limit will be initialized to <em>limit</em> and its counter will be initialized to <em>counter</em>.</p>
 </div>
 <div class="section" id="wait-tqueue">
 <h2><code class="docutils literal notranslate"><span class="pre">wait-tqueue</span></code><a class="headerlink" href="#wait-tqueue" title="Permalink to this headline">¶</a></h2>
 <p>( tqueue – )</p>
-<p>Increment the task queue’s internal wait counter. If it is positive, disable the current task and place it at the end of the task queue. Note that this must be called from within a critical section, which it will leave when it disables the current task, and then start a new critical section after the current task is reenabled.</p>
+<p>Decrement the task queue’s internal wait counter. If it is negative, block the current task and place it at the end of the task queue. Note that this must be called from within a critical section, which it will leave when it block the current task, and then start a new critical section after the current task is readied.</p>
 </div>
 <div class="section" id="wake-tqueue">
 <h2><code class="docutils literal notranslate"><span class="pre">wake-tqueue</span></code><a class="headerlink" href="#wake-tqueue" title="Permalink to this headline">¶</a></h2>
 <p>( tqueue – )</p>
-<p>Decrement the task queue’s internal wait counter. If there is a task in the task queue, enable the task added to it earliest and place it at the head of the schedule. Note that this must be called from within a critical section.</p>
+<p>Increment the task queue’s internal wait counter. If a counter limit is set, the internal wait counter will not increase beyond it. If there is a task in the task queue, enable the task added to it earliest and place it at the head of the schedule. Note that this must be called from within a critical section.</p>
 </div>
 <div class="section" id="unwake-tqueue">
 <h2><code class="docutils literal notranslate"><span class="pre">unwake-tqueue</span></code><a class="headerlink" href="#unwake-tqueue" title="Permalink to this headline">¶</a></h2>
 <p>( tqueue – )</p>
-<p>Increment the task queue’s internal wait counter.</p>
+<p>Decrement the task queue’s internal wait counter.</p>
+</div>
+<div class="section" id="wake-tqueue-all">
+<h2><code class="docutils literal notranslate"><span class="pre">wake-tqueue-all</span></code><a class="headerlink" href="#wake-tqueue-all" title="Permalink to this headline">¶</a></h2>
+<p>( tqueue – )</p>
+<p>Wake all the tasks waiting on a task queue.</p>
 </div>
 </div>
 
@@ -98,12 +112,17 @@ Initialize a task queue starting at the specified address; note that it must be 
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Task Queue Words</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#tqueue-size"><code class="docutils literal notranslate"><span class="pre">tqueue-size</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#no-tqueue-limit"><code class="docutils literal notranslate"><span class="pre">no-tqueue-limit</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#init-tqueue"><code class="docutils literal notranslate"><span class="pre">init-tqueue</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#init-tqueue-full"><code class="docutils literal notranslate"><span class="pre">init-tqueue-full</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#wait-tqueue"><code class="docutils literal notranslate"><span class="pre">wait-tqueue</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#wake-tqueue"><code class="docutils literal notranslate"><span class="pre">wake-tqueue</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#unwake-tqueue"><code class="docutils literal notranslate"><span class="pre">unwake-tqueue</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#wake-tqueue-all"><code class="docutils literal notranslate"><span class="pre">wake-tqueue-all</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
@@ -123,7 +142,7 @@ Initialize a task queue starting at the specified address; note that it must be 
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="fchannel.html" title="previous chapter">Fast Channel Words</a></li>
+      <li>Previous: <a href="stream.html" title="previous chapter">Stream Words</a></li>
       <li>Next: <a href="systick.html" title="next chapter">SysTick Words</a></li>
   </ul></li>
 </ul>

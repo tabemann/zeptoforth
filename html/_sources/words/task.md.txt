@@ -155,21 +155,6 @@ Block a task for which blocking has been prepared.
 
 Block a task for which blocking has been prepared, and immediately start a new critical section once it finishes blocking.
 
-##### `timeout`
-( -- ticks )
-
-The default timeout in ticks.
-
-##### `timeout-systick-start`
-( -- addr )
-
-The current timeout start time in ticks.
-
-##### `timeout-systick-delay`
-( -- addr )
-
-The current timeout delay in ticks.
-
 ##### `prepare-block`
 ( task -- )
 
@@ -189,6 +174,11 @@ An exception raised when timeout validation fails.
 ( task -- )
 
 Validate whether a task has timed out, raising `x-timed-out` if it has.
+
+##### `x-would-block`
+( -- )
+
+Operation would block exception. Raised on attempting to carry out a non-blocking operation when blocking would normally be necessary for the equivalent blocking operation.
 
 ##### `set-task-priority`
 ( priority task -- )
