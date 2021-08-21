@@ -89,13 +89,13 @@ begin-module-once interrupt-module
   $E000ED04 constant ICSR
 
   \ Set PENDSVSET
-  : ICSR_PENDSVSET! ( -- ) 1 28 lshift ICSR bis! ;
+  : ICSR_PENDSVSET! ( -- ) [ 1 28 lshift ] literal ICSR bis! ;
 
   \ Set PENDSVCLR
-  : ICSR_PENDSVCLR! ( -- ) 1 27 lshift ICSR bis! ;
+  : ICSR_PENDSVCLR! ( -- ) [ 1 27 lshift ] literal ICSR bis! ;
 
   \ Get PENDSVSET
-  : ICSR_PENDSVSET@ ( -- bit ) 1 28 lshift ICSR bit@ ;
+  : ICSR_PENDSVSET@ ( -- bit ) [ 1 28 lshift ] literal ICSR bit@ ;
 
   \ Initiate an SVCall
   : svc ( -- ) [ $DF00 h, ] [inlined] ;
