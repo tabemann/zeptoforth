@@ -263,6 +263,9 @@ begin-import-module-once task-module
     task-active h@ terminated = triggers x-terminated
   ;
 
+  \ Would block exception
+  : x-would-block ( -- ) space ." operation would block" cr ;
+  
   \ Attempted to task change while changing tasks during interrupt
   : x-in-task-change ( -- ) space ." in task change" cr ;
 

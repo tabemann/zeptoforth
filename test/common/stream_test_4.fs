@@ -1,5 +1,5 @@
 \ Copyright (c) 2021 Travis Bemann
-\
+\ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
 \ in the Software without restriction, including without limitation the rights
@@ -18,19 +18,45 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ This is not actual Forth code, but rather setup directives for e4thcom to be
-\ executed to load a "big" configuration
+begin-module forth-module
 
-#include src/common/forth/disassemble.fs
-#include src/common/forth/pool.fs
-#include src/common/forth/allocate.fs
-#include src/common/forth/tqueue.fs
-#include src/common/forth/lock.fs
-#include src/common/forth/semaphore.fs
-#include src/common/forth/fchannel.fs
-#include src/common/forth/channel.fs
-#include src/common/forth/stream.fs
-#include src/common/forth/ansi_term.fs
-#include src/common/forth/line.fs
-#include src/common/forth/task_pool.fs
-#include src/common/forth/action_pool.fs
+  import task-module
+  import stream-module
+
+  \ Our byte count
+  256 constant my-count
+
+  \ Our byte receive count
+  16 constant my-recv-count
+  
+  \ Our stream
+  my-count stream-size buffer: my-stream
+
+  \ Our tasks
+  variable producer-task
+  variable consumer-task
+  
+  \ Our producer
+  : producer ( -- )
+    begin s" ABCDEFGHIJKLMNOPQRSTUVWXYZ" my-stream send-stream again
+  ;
+
+  \ Our consumer
+  : consumer ( -- )
+    begin
+      my-recv-count [:
+	my-recv-count my-stream peek-stream tuck type
+	my-stream skip-stream drop
+      ;] with-allot
+    again
+  ;
+  
+  \ Initialize our test
+  : init-test ( -- )
+    my-count my-stream init-stream
+    0 ['] producer 512 256 256 spawn producer-task !
+    0 ['] consumer 512 256 256 spawn consumer-task !
+    producer-task @ run consumer-task @ run
+  ;
+  
+end-module
