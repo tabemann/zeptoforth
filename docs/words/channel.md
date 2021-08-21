@@ -1,12 +1,10 @@
 # Channel Words
 
-A channel is a monodirectional means of communicating data, as bytes or as cells, between two different tasks. Channels form a queue onto which data is sent on one end and data is received on the other. Channels have a fixed size, and any task which attempts to send data on a full channel, or receive data on an empty channel, will be suspended until either data is received from the channel, or data is sent to the channel, respectively.
+A channel is a monodirectional means of communicating data, as arbitrary-sized blocks of data, between two or more different tasks. Channels form a fixed-size queue onto which data is sent on one end and data is received on the other. Any task which attempts to send data on a full channel, or receive data on an empty channel, will be suspended until either data is received from the channel, or data is sent to the channel, respectively, unless non-blocking operations are used, where then `x-would-block` (declared in `task-module`) is raised instead of blocking.
 
-Note that the internal usable size of a channel is the specified byte count minus one, so in order to be able to queue 16 bytes one must specify a byte count of 17. Internally the byte count is rounded up to the nearest cell but the extra bytes are not used.
+Channels can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put into alloted memory in the dictionary or into allocated memory in the heap. Note that the size of a channel for a given element size and element count may be calculated with `chan-size`.
 
-Channels can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put into alloted memory in the dictionary or into allocated memory in the heap.
-
-Channels are not included in the default builds; the user must load `src/common/forth/channel.fs` or use a big build for them to be available. Note that logic is in place to ensure that it is not to be loaded multiple times. Note that it is compiled into flash when it is loaded.
+Channels are not included in the default builds; the user must load `src/common/forth/channel.fs` or use a big build for them to be available. Note that logic is in place to ensure that it is not loaded multiple times. Note that it is compiled into flash when it is loaded.
 
 The following words are in `chan-module`:
 
@@ -14,11 +12,6 @@ The following words are in `chan-module`:
 ( -- )
 
 Channel closed exception. Raised on attempting to send to a closed channel or when trying to receive on an empty closed channel.
-
-##### `x-would-block`
-( -- )
-
-Operation would block exception. Raised on attempting to carry out a non-blocking operation when blocking would normally be necessary for the equivalent blocking operation.
 
 ##### `chan-full?`
 ( chan -- flag )
@@ -38,7 +31,7 @@ Get the size in memory for a channel with a specified element size in bytes and 
 ##### `init-chan`
 ( element-bytes element-count addr -- )
 
-Initialize a channel starting at the specified address with the specified buffer size in bytes. The *element-bytes* and *element-count* should be the same as when they were passed to `chan-size` when alloting or allocating the memory whose starting address is passed in.
+Initialize a channel starting at the specified address with the element size and element count. The *element-bytes* and *element-count* should be the same as when they were passed to `chan-size` when alloting or allocating the memory whose starting address is passed in.
 
 ##### `close-chan`
 ( chan -- )
@@ -70,6 +63,11 @@ Receive message into a buffer from a channel. Block until another task sends a m
 
 Peek the oldest message into a buffer from a channel, without popping it from the channel's queue. Block until another task sends a message if the channel is empty. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the passed in buffer and the number of bytes copied into it are returned. This is not safe to call within an interrupt service routine or a critical section.
 
+##### `skip-chan`
+( chan -- )
+
+Skip the most oldest message in a channel. Block until another task sends a message if the channel is empty. Note that no copying takes place, making this faster than receiving a message. This is not safe to call within an interrupt service routine or a critical section.
+
 ##### `send-chan-no-block`
 ( addr bytes chan -- )
 
@@ -83,7 +81,12 @@ Receive message into a buffer from a channel. If the channel is empty, `x-would-
 ##### `peek-chan-no-block`
 ( addr bytes chan -- addr peek-bytes )
 
-Peek the oldest message into a buffer from a channel, without popping it from the channel's queue. If the channel is empty, `x-would-block` is raised.. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the passed in buffer and the number of bytes copied into it are returned. This is safe to call within an interrupt service routine or a critical section.
+Peek the oldest message into a buffer from a channel, without popping it from the channel's queue. If the channel is empty, `x-would-block` is raised. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the passed in buffer and the number of bytes copied into it are returned. This is safe to call within an interrupt service routine or a critical section.
+
+##### `skip-chan-no-block`
+( chan -- )
+
+Skip the most oldest message in a channel. If the channel is empty, `x-would-block` is raised. Note that no copying takes place, making this faster than receiving a message. This is safe to call within an interrupt service routine or a critical section.
 
 ##### `send-chan-2cell`
 ( xd chan -- )

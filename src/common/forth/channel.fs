@@ -82,17 +82,13 @@ begin-module-once chan-module
   : chan-data-size ( chan -- element-bytes ) chan-data-size @ ;
 
   \ Get the channel element count
-  : chan-count ( chan -- element-count ) chan-count ;
+  : chan-count ( chan -- element-count ) chan-count @ ;
   
   \ Get whether a channel is full
-  : chan-full? ( chan -- flag )
-    begin-critical chan-full-unsafe? end-critical
-  ;
+  : chan-full? ( chan -- flag ) [: chan-full-unsafe? ;] critical ;
 
   \ Get whether a channel is empty
-  : chan-empty? ( chan -- flag )
-    begin-critical chan-empty-unsafe? end-critical
-  ;
+  : chan-empty? ( chan -- flag ) chan-empty-unsafe? ;
 
   begin-module chan-internal-module
     
@@ -104,17 +100,13 @@ begin-module-once chan-module
 	-1 2 pick chan-send-ready +!
 	?raise
       then
-      chan-closed @ if
-	end-critical ['] x-chan-closed ?raise
-      then
+      chan-closed @ triggers x-chan-closed
     ;
 
     \ Wait to receive on a channel
     : wait-recv-chan ( chan -- )
       dup chan-empty-unsafe? if
-	dup chan-closed @ if
-	  end-critical ['] x-chan-closed ?raise
-	then
+	dup chan-closed @ triggers x-chan-closed
 	1 over chan-recv-ready +!
 	dup chan-recv-tqueue ['] wait-tqueue try
 	-1 rot chan-recv-ready +!
@@ -148,9 +140,6 @@ begin-module-once chan-module
 
   end-module
 
-  \ Would block exception
-  : x-would-block ( -- ) space ." operation would block" cr ;
-  
   \ Get channel size for a channel with a specified element size in bytes
   \ and element count
   : chan-size ( element-bytes element-count -- total-bytes )
@@ -175,9 +164,7 @@ begin-module-once chan-module
   \ Send data to a channel
   : send-chan ( addr bytes chan -- )
     [:
-      dup chan-closed @ if
-	end-critical ['] x-chan-closed ?raise
-      then
+      dup chan-closed @ triggers x-chan-closed
       current-task prepare-block
       dup wait-send-chan
       dup send-chan-addr over chan-data-size @ 0 fill
@@ -217,13 +204,25 @@ begin-module-once chan-module
     ;] critical
   ;
 
+  \ Skip data on a channel
+  : skip-chan ( chan -- )
+    [:
+      current-task prepare-block
+      dup wait-recv-chan
+      dup advance-recv-chan
+      dup chan-send-ready @ 0> if
+	chan-send-tqueue wake-tqueue
+      else
+	drop
+      then
+    ;] critical
+  ;
+
   \ Send data to a channel without blocking (raise x-would-block if blocking
   \ would normally occur)
   : send-chan-no-block ( addr bytes chan -- )
     [:
-      dup chan-closed @ if
-	end-critical ['] x-chan-closed ?raise
-      then
+      dup chan-closed @ triggers x-chan-closed
       dup chan-full-unsafe? triggers x-would-block
       dup send-chan-addr over chan-data-size @ 0 fill
       dup >r chan-data-size @ min r@ send-chan-addr swap move r>
@@ -259,6 +258,20 @@ begin-module-once chan-module
       dup chan-empty-unsafe? triggers x-would-block
       >r 2dup 0 fill
       r@ chan-data-size @ min r> recv-chan-addr -rot 2dup 2>r move 2r>
+    ;] critical
+  ;
+
+  \ Skip data on a channel without blocking (raise x-would-block if blocking
+  \ would normally occur)
+  : skip-chan-no-block ( chan -- )
+    [:
+      dup chan-empty-unsafe? triggers x-would-block
+      dup advance-recv-chan
+      dup chan-send-ready @ 0> if
+	chan-send-tqueue wake-tqueue
+      else
+	drop
+      then
     ;] critical
   ;
 

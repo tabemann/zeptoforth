@@ -175,6 +175,11 @@ An exception raised when timeout validation fails.
 
 Validate whether a task has timed out, raising `x-timed-out` if it has.
 
+##### `x-would-block`
+( -- )
+
+Operation would block exception. Raised on attempting to carry out a non-blocking operation when blocking would normally be necessary for the equivalent blocking operation.
+
 ##### `set-task-priority`
 ( priority task -- )
 
