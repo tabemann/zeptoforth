@@ -11,22 +11,37 @@ The following words are in `tqueue-module`:
 
 Get the size of a task queue in memory.
 
+##### `no-tqueue-limit`
+( -- n )
+
+Magic value indicating no task queue counter limit.
+
 ##### `init-tqueue`
 ( addr -- )
-a
-Initialize a task queue starting at the specified address; note that it must be `tqueue-size` bytes in size.
+
+Initialize a task queue starting at the specified address; note that it must be `tqueue-size` bytes in size. It will have no counter limit, and its counter will be initialized to zero.
+
+##### `init-tqueue-full`
+( limit counter addr -- )
+
+Initialize a task queue starting at the specified address; note that it must be `tqueue-size` bytes in size. Its counter limit will be initialized to *limit* and its counter will be initialized to *counter*.
 
 ##### `wait-tqueue`
 ( tqueue -- )
 
-Increment the task queue's internal wait counter. If it is positive, disable the current task and place it at the end of the task queue. Note that this must be called from within a critical section, which it will leave when it disables the current task, and then start a new critical section after the current task is reenabled.
+Decrement the task queue's internal wait counter. If it is negative, block the current task and place it at the end of the task queue. Note that this must be called from within a critical section, which it will leave when it block the current task, and then start a new critical section after the current task is readied.
 
 ##### `wake-tqueue`
 ( tqueue -- )
 
-Decrement the task queue's internal wait counter. If there is a task in the task queue, enable the task added to it earliest and place it at the head of the schedule. Note that this must be called from within a critical section.
+Increment the task queue's internal wait counter. If a counter limit is set, the internal wait counter will not increase beyond it. If there is a task in the task queue, enable the task added to it earliest and place it at the head of the schedule. Note that this must be called from within a critical section.
 
 ##### `unwake-tqueue`
 ( tqueue -- )
 
-Increment the task queue's internal wait counter.
+Decrement the task queue's internal wait counter.
+
+##### `wake-tqueue-all`
+( tqueue -- )
+
+Wake all the tasks waiting on a task queue.

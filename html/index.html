@@ -464,13 +464,11 @@
 <li class="toctree-l2"><a class="reference internal" href="words/task.html#ready"><code class="docutils literal notranslate"><span class="pre">ready</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/task.html#block"><code class="docutils literal notranslate"><span class="pre">block</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/task.html#block-critical"><code class="docutils literal notranslate"><span class="pre">block-critical</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="words/task.html#id1"><code class="docutils literal notranslate"><span class="pre">timeout</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="words/task.html#timeout-systick-start"><code class="docutils literal notranslate"><span class="pre">timeout-systick-start</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="words/task.html#timeout-systick-delay"><code class="docutils literal notranslate"><span class="pre">timeout-systick-delay</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/task.html#prepare-block"><code class="docutils literal notranslate"><span class="pre">prepare-block</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/task.html#timed-out"><code class="docutils literal notranslate"><span class="pre">timed-out?</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/task.html#x-timed-out"><code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/task.html#validate-timeout"><code class="docutils literal notranslate"><span class="pre">validate-timeout</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/task.html#x-would-block"><code class="docutils literal notranslate"><span class="pre">x-would-block</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/task.html#set-task-priority"><code class="docutils literal notranslate"><span class="pre">set-task-priority</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/task.html#get-task-priority"><code class="docutils literal notranslate"><span class="pre">get-task-priority</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/task.html#x-out-of-range-priority"><code class="docutils literal notranslate"><span class="pre">x-out-of-range-priority</span></code></a></li>
@@ -756,14 +754,36 @@
 <li class="toctree-l2"><a class="reference internal" href="words/channel.html#chan-closed"><code class="docutils literal notranslate"><span class="pre">chan-closed?</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/channel.html#send-chan"><code class="docutils literal notranslate"><span class="pre">send-chan</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/channel.html#recv-chan"><code class="docutils literal notranslate"><span class="pre">recv-chan</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/channel.html#peek-chan"><code class="docutils literal notranslate"><span class="pre">peek-chan</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/channel.html#skip-chan"><code class="docutils literal notranslate"><span class="pre">skip-chan</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/channel.html#send-chan-no-block"><code class="docutils literal notranslate"><span class="pre">send-chan-no-block</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/channel.html#recv-chan-no-block"><code class="docutils literal notranslate"><span class="pre">recv-chan-no-block</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/channel.html#peek-chan-no-block"><code class="docutils literal notranslate"><span class="pre">peek-chan-no-block</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/channel.html#skip-chan-no-block"><code class="docutils literal notranslate"><span class="pre">skip-chan-no-block</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/channel.html#send-chan-2cell"><code class="docutils literal notranslate"><span class="pre">send-chan-2cell</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/channel.html#recv-chan-2cell"><code class="docutils literal notranslate"><span class="pre">recv-chan-2cell</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/channel.html#peek-chan-2cell"><code class="docutils literal notranslate"><span class="pre">peek-chan-2cell</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/channel.html#send-chan-cell"><code class="docutils literal notranslate"><span class="pre">send-chan-cell</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/channel.html#recv-chan-cell"><code class="docutils literal notranslate"><span class="pre">recv-chan-cell</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/channel.html#peek-chan-cell"><code class="docutils literal notranslate"><span class="pre">peek-chan-cell</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/channel.html#send-chan-half"><code class="docutils literal notranslate"><span class="pre">send-chan-half</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/channel.html#recv-chan-half"><code class="docutils literal notranslate"><span class="pre">recv-chan-half</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/channel.html#peek-chan-half"><code class="docutils literal notranslate"><span class="pre">peek-chan-half</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/channel.html#send-chan-byte"><code class="docutils literal notranslate"><span class="pre">send-chan-byte</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/channel.html#recv-chan-byte"><code class="docutils literal notranslate"><span class="pre">recv-chan-byte</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/channel.html#peek-chan-byte"><code class="docutils literal notranslate"><span class="pre">peek-chan-byte</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/channel.html#send-chan-no-block-2cell"><code class="docutils literal notranslate"><span class="pre">send-chan-no-block-2cell</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/channel.html#recv-chan-no-block-2cell"><code class="docutils literal notranslate"><span class="pre">recv-chan-no-block-2cell</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/channel.html#peek-chan-no-block-2cell"><code class="docutils literal notranslate"><span class="pre">peek-chan-no-block-2cell</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/channel.html#send-chan-no-block-cell"><code class="docutils literal notranslate"><span class="pre">send-chan-no-block-cell</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/channel.html#recv-chan-no-block-cell"><code class="docutils literal notranslate"><span class="pre">recv-chan-no-block-cell</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/channel.html#peek-chan-no-block-cell"><code class="docutils literal notranslate"><span class="pre">peek-chan-no-block-cell</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/channel.html#send-chan-no-block-half"><code class="docutils literal notranslate"><span class="pre">send-chan-no-block-half</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/channel.html#recv-chan-no-block-half"><code class="docutils literal notranslate"><span class="pre">recv-chan-no-block-half</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/channel.html#peek-chan-no-block-half"><code class="docutils literal notranslate"><span class="pre">peek-chan-no-block-half</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/channel.html#send-chan-no-block-byte"><code class="docutils literal notranslate"><span class="pre">send-chan-no-block-byte</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/channel.html#recv-chan-no-block-byte"><code class="docutils literal notranslate"><span class="pre">recv-chan-no-block-byte</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/channel.html#peek-chan-no-block-byte"><code class="docutils literal notranslate"><span class="pre">peek-chan-no-block-byte</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="words/fchannel.html">Fast Channel Words</a><ul>
@@ -781,12 +801,46 @@
 <li class="toctree-l2"><a class="reference internal" href="words/fchannel.html#recv-fchan-cell"><code class="docutils literal notranslate"><span class="pre">recv-fchan-cell</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="words/semaphore.html">Semaphore Words</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="words/semaphore.html#sema-size"><code class="docutils literal notranslate"><span class="pre">sema-size</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/semaphore.html#no-sema-limit"><code class="docutils literal notranslate"><span class="pre">no-sema-limit</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/semaphore.html#init-sema"><code class="docutils literal notranslate"><span class="pre">init-sema</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/semaphore.html#take"><code class="docutils literal notranslate"><span class="pre">take</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/semaphore.html#give"><code class="docutils literal notranslate"><span class="pre">give</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/semaphore.html#ungive"><code class="docutils literal notranslate"><span class="pre">ungive</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/semaphore.html#broadcast"><code class="docutils literal notranslate"><span class="pre">broadcast</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="words/stream.html">Stream Words</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="words/stream.html#x-stream-closed">`x-stream-closed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/stream.html#stream-full"><code class="docutils literal notranslate"><span class="pre">stream-full?</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/stream.html#stream-empty"><code class="docutils literal notranslate"><span class="pre">stream-empty?</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/stream.html#stream-size"><code class="docutils literal notranslate"><span class="pre">stream-size</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/stream.html#init-stream"><code class="docutils literal notranslate"><span class="pre">init-stream</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/stream.html#close-stream"><code class="docutils literal notranslate"><span class="pre">close-stream</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/stream.html#reopen-stream"><code class="docutils literal notranslate"><span class="pre">reopen-stream</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/stream.html#stream-closed"><code class="docutils literal notranslate"><span class="pre">stream-closed?</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/stream.html#send-stream"><code class="docutils literal notranslate"><span class="pre">send-stream</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/stream.html#send-stream-parts"><code class="docutils literal notranslate"><span class="pre">send-stream-parts</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/stream.html#recv-stream"><code class="docutils literal notranslate"><span class="pre">recv-stream</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/stream.html#peek-stream"><code class="docutils literal notranslate"><span class="pre">peek-stream</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/stream.html#skip-stream"><code class="docutils literal notranslate"><span class="pre">skip-stream</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/stream.html#send-stream-no-block"><code class="docutils literal notranslate"><span class="pre">send-stream-no-block</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/stream.html#send-stream-partial-no-block"><code class="docutils literal notranslate"><span class="pre">send-stream-partial-no-block</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/stream.html#recv-stream-no-block"><code class="docutils literal notranslate"><span class="pre">recv-stream-no-block</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/stream.html#peek-stream-no-block"><code class="docutils literal notranslate"><span class="pre">peek-stream-no-block</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/stream.html#skip-stream-no-block"><code class="docutils literal notranslate"><span class="pre">skip-stream-no-block</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="words/tqueue.html">Task Queue Words</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="words/tqueue.html#tqueue-size"><code class="docutils literal notranslate"><span class="pre">tqueue-size</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/tqueue.html#no-tqueue-limit"><code class="docutils literal notranslate"><span class="pre">no-tqueue-limit</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/tqueue.html#init-tqueue"><code class="docutils literal notranslate"><span class="pre">init-tqueue</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/tqueue.html#init-tqueue-full"><code class="docutils literal notranslate"><span class="pre">init-tqueue-full</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/tqueue.html#wait-tqueue"><code class="docutils literal notranslate"><span class="pre">wait-tqueue</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/tqueue.html#wake-tqueue"><code class="docutils literal notranslate"><span class="pre">wake-tqueue</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/tqueue.html#unwake-tqueue"><code class="docutils literal notranslate"><span class="pre">unwake-tqueue</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/tqueue.html#wake-tqueue-all"><code class="docutils literal notranslate"><span class="pre">wake-tqueue-all</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="words/systick.html">SysTick Words</a><ul>
@@ -1072,6 +1126,8 @@
 <li class="toctree-l1"><a class="reference internal" href="words/lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="words/channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="words/fchannel.html">Fast Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="words/semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="words/stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="words/tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="words/systick.html">SysTick Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="words/ansi_term.html">ANSI Terminal words</a></li>
