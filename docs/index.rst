@@ -24,6 +24,7 @@ Zeptoforth Documentation
    words/channel
    words/fchannel
    words/semaphore
+   words/stream
    words/tqueue
    words/systick
    words/ansi_term
