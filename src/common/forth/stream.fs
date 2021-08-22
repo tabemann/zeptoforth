@@ -19,7 +19,7 @@
 \ SOFTWARE.
 
 \ Compile to flash
-\ compile-to-flash
+compile-to-flash
 
 begin-module-once stream-module
 
@@ -454,4 +454,4 @@ begin-module-once stream-module
 end-module
 
 \ Warm reboot
-\ warm
+warm
