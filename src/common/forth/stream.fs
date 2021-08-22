@@ -19,7 +19,7 @@
 \ SOFTWARE.
 
 \ Compile to flash
-compile-to-flash
+\ compile-to-flash
 
 begin-module-once stream-module
 
@@ -138,6 +138,18 @@ begin-module-once stream-module
       then
     ;
 
+    \ Wait to receive a minimum number of bytes on a stream
+    : wait-recv-stream-min ( min-bytes stream -- )
+      begin 2dup stream-current-count @ > while
+	dup stream-closed @ triggers x-stream-closed
+	1 over stream-recv-ready +!
+	dup stream-recv-tqueue ['] wait-tqueue try
+	-1 2 pick stream-recv-ready +!
+	?raise
+      repeat
+      2drop
+    ;
+    
     \ Get the stream send address
     : send-stream-addr ( stream -- b-addr )
       dup stream-send-index @ stream-size + +
@@ -199,25 +211,7 @@ begin-module-once stream-module
     stream-recv-tqueue init-tqueue
   ;
 
-  \ \ Output debugging information for streams
-  \ : debug-stream ( stream c-addr u xt -- )
-  \   2 pick 2 pick cr type ." : "
-  \   3 pick stream-send-index @ ." before stream-send-index:" .
-  \   2 pick 2 pick cr type ." : "
-  \   3 pick stream-recv-index @ ." before stream-recv-index:" .
-  \   2 pick 2 pick cr type ." : "
-  \   3 pick stream-current-count @ ." before stream-current-count:" .
-  \   swap >r swap >r over >r execute
-  \   r> r> r>
-  \   2dup cr type ." : "
-  \   2 pick stream-send-index @ ." after stream-send-index:" .
-  \   2dup cr type ." : "
-  \   2 pick stream-recv-index @ ." after stream-recv-index:" .
-  \   cr type ." : "
-  \   stream-current-count @ ." after stream-current-count:" .
-  \ ;
-
-    \ Send data to a stream
+  \ Send data to a stream
   : send-stream ( addr bytes stream -- )
     [:
       dup stream-closed @ triggers x-stream-closed
@@ -270,6 +264,22 @@ begin-module-once stream-module
     ;] critical
   ;
 
+  \ Receive data at least a minimum number of bytes from a stream
+  : recv-stream-min ( addr bytes min-bytes stream -- addr recv-bytes )
+    [:
+      current-task prepare-block
+      tuck wait-recv-stream-min
+      dup stream-current-count @ rot min swap
+      2 pick 2 pick 2 pick read-stream
+      2dup advance-recv-stream
+      dup stream-send-ready @ 0> if
+	stream-send-tqueue wake-tqueue
+      else
+	drop
+      then
+    ;] critical
+  ;
+
   \ Peek data from a stream
   : peek-stream ( addr bytes stream -- addr peek-bytes )
     [:
@@ -280,11 +290,36 @@ begin-module-once stream-module
     ;] critical
   ;
 
+  \ Peek data at least a minimum number of bytes from a stream
+  : peek-stream-min ( addr bytes min-bytes stream -- addr peek-bytes )
+    [:
+      current-task prepare-block
+      tuck wait-recv-stream-min
+      dup stream-current-count @ rot min swap
+      2 pick 2 pick rot read-stream
+    ;] critical
+  ;
+
   \ Skip data on a stream
   : skip-stream ( bytes stream -- skip-bytes )
     [:
       current-task prepare-block
       dup wait-recv-stream
+      dup stream-current-count @ rot min swap
+      2dup advance-recv-stream
+      dup stream-send-ready @ 0> if
+	stream-send-tqueue wake-tqueue
+      else
+	drop
+      then
+    ;] critical
+  ;
+
+  \ Skip at least a minimum number of bytes on a stream
+  : skip-stream-min ( bytes min-bytes stream -- skip-bytes )
+    [:
+      current-task prepare-block
+      tuck wait-recv-stream-min
       dup stream-current-count @ rot min swap
       2dup advance-recv-stream
       dup stream-send-ready @ 0> if
@@ -342,6 +377,25 @@ begin-module-once stream-module
     ;] critical
   ;
 
+  \ Receive at least a minimum number of bytes from a stream without blocking
+  \ (note that no exception is raised, rather a count of 0 is returned)
+  : recv-stream-min-no-block ( addr bytes min-bytes stream -- addr recv-bytes )
+    [:
+      tuck stream-current-count @ <= if
+	dup stream-current-count @ rot min swap
+	2 pick 2 pick 2 pick read-stream
+	2dup advance-recv-stream
+	dup stream-send-ready @ 0> if
+	  stream-send-tqueue wake-tqueue
+	else
+	  drop
+	then
+      else
+	2drop 0
+      then
+    ;] critical
+  ;
+
   \ Peek data from a stream without blocking (note that no exception is raised,
   \ rather a count of 0 is returned)
   : peek-stream-no-block ( addr bytes stream -- addr peek-bytes )
@@ -351,16 +405,33 @@ begin-module-once stream-module
     ;] critical
   ;
 
-  \ Skip data on a stream without blocking (note that no exception is raised,
-  \ rather a count of 0 is returned)
-  : skip-stream-no-block ( bytes stream -- skip-bytes )
+  \ Peek at least a minimum number of bytes from a stream without blocking
+  \ (note that no exception is raised, rather a count of 0 is returned)
+  : peek-stream-min-no-block ( addr bytes min-bytes stream -- addr peek-bytes )
     [:
-      dup stream-current-count @ rot min swap
-      2dup advance-recv-stream
-      dup stream-send-ready @ 0> if
-	stream-send-tqueue wake-tqueue
+      tuck stream-current-count @ <= if
+	dup stream-current-count @ rot min swap
+	2 pick 2 pick rot read-stream
       else
-	drop
+	2drop 0
+      then
+    ;] critical
+  ;
+
+  \ Skip at least a minimum number of bytes on a stream without blocking (note
+  \ that no exception is raised, rather a count of 0 is returned)
+  : skip-stream-min-no-block ( bytes min-bytes stream -- skip-bytes )
+    [:
+      tuck stream-current-count @ <= if
+	dup stream-current-count @ rot min swap
+	2dup advance-recv-stream
+	dup stream-send-ready @ 0> if
+	  stream-send-tqueue wake-tqueue
+	else
+	  drop
+	then
+      else
+	2drop 0
       then
     ;] critical
   ;
@@ -383,4 +454,4 @@ begin-module-once stream-module
 end-module
 
 \ Warm reboot
-warm
+\ warm

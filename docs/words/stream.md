@@ -63,15 +63,30 @@ Send data with a buffer to a stream. Block until there is all the data is sent, 
 
 Receive data into a buffer from a stream. Block until data becomes available in the stream. Note that only as much data is available is copied, and the returned byte count may be lower than the byte count passed in. This is not safe to call within an interrupt service routine or a critical section.
 
+##### `recv-stream-min`
+( addr bytes min-bytes stream -- addr recv-bytes )
+
+Receive at least a minimum number of bytes into a buffer from a stream. Block until the minimum number of bytes become available. Note that only as much data is available is copied, and the returned byte count may be lower than the buffer size passed in, even though it will always be equal to or greater than the minimum byte count. This is not safe to call within an interrupt service routine or a critical section.
+
 ##### `peek-stream`
 ( addr bytes stream -- addr peek-bytes )
 
 Peek data into a buffer from a stream, without removing it from the stream. Block until data becomes available in the stream. Note that only as much data is available is copied, and the returned byte count may be lower than the byte count passed in. This is not safe to call within an interrupt service routine or a critical section.
 
+##### `peek-stream-min`
+( addr bytes min-bytes tream -- addr peek-bytes )
+
+Peek at least a minimum number of bytes into a buffer from a stream, without removing them from the stream. Block until the minimum number of bytes become available. Note that only as much data is available is copied, and the returned byte count may be lower than the buffer size passed in, even though it will always be equal to or greater than the minimum byte count. This is not safe to call within an interrupt service routine or a critical section.
+
 ##### `skip-stream`
 ( bytes stream -- skip-bytes )
 
-Skip data in a stream, removing it from the stream without copying it. Block until data becomes availabe in the stream. Note that less data may be skipped than the byte count provided, and the returned byte count is the number of bytes actually skipped. This is not safe to call within an interrupt service routine or a critical section.
+Skip data in a stream, removing it from the stream without copying it. Block until data becomes available in the stream. Note that less data may be skipped than the byte count provided, and the returned byte count is the number of bytes actually skipped. This is not safe to call within an interrupt service routine or a critical section.
+
+##### `skip-stream-min`
+( bytes min-bytes stream -- skip bytes )
+
+Skip at least a minimum number of bytes in a stream, removing them from the stream without copying them. Block until the minimum number of bytes become available. Note that less data may be skipped than the byte count *bytes*, even though it will always be equal or greater than the minimum byte count *min-bytes*; the returned byte count is the number of bytes actually skipped. This is not safe to call within an interrupt service routine or a critical section.
 
 ##### `send-stream-no-block`
 ( addr bytes stream -- )
@@ -86,14 +101,29 @@ Send data with a buffer to a stream. Only as much data as there is space for int
 ##### `recv-stream-no-block`
 ( addr bytes stream -- addr recv-bytes )
 
-Receive data into a buffer from a stream. If no data is available, return a byte count of zero. Note that only as much data is available is copied, and the returned byte count may be lower than the byte count passed in. This is not safe to call within an interrupt service routine or a critical section.
+Receive data into a buffer from a stream. If no data is available, return a byte count of zero. Note that only as much data is available is copied, and the returned byte count may be lower than the byte count passed in. This is safe to call within an interrupt service routine or a critical section.
+
+##### `recv-stream-min-no-block`
+( addr bytes min-bytes stream -- addr recv-bytes )
+
+Receive at least a minimum number of bytes from a stream. If the minimum number of bytes is not available, receive no bytes and return a byte count of zero. Note that only as much data is available is copied, and the returned byte count may be lower than the byte count *bytes* passed in. This is safe to call within an interrupt service routine or a critical section.
 
 ##### `peek-stream-no-block`
 ( addr bytes stream -- addr peek-bytes )
 
-Peek data into a buffer from a stream, without removing it from the stream. if no data is available, return a byte count of zero. Note that only as much data is available is copied, and the returned byte count may be lower than the byte count passed in. This is not safe to call within an interrupt service routine or a critical section.
+Peek data into a buffer from a stream, without removing it from the stream. if no data is available, return a byte count of zero. Note that only as much data is available is copied, and the returned byte count may be lower than the byte count passed in. This is safe to call within an interrupt service routine or a critical section.
+
+##### `peek-stream-min-no-block`
+( addr bytes min-bytes stream -- addr peek-bytes )
+
+Peek at least a minimum number of bytes from a stream, without removing them from the stream. If the minimum number of bytes is not available, peek no bytes and return a byte count of zero. Note that only as much data is available is copied, and the returned byte count may be lower th an the byte count *bytes* passed in. This is safe to call within an interrupt service routine or a critical section.
 
 ##### `skip-stream-no-block`
 ( bytes stream -- skip-bytes )
 
-Skip data in a stream, removing it from the stream without copying it. If no data is available, return a byte count of zero. Note that less data may be skipped than the byte count provided, and the returned byte count is the number of bytes actually skipped. This is not safe to call within an interrupt service routine or a critical section.
+Skip data in a stream, removing it from the stream without copying it. If no data is available, return a byte count of zero. Note that less data may be skipped than the byte count provided, and the returned byte count is the number of bytes actually skipped. This is safe to call within an interrupt service routine or a critical section.
+
+##### `skip-stream-min-no-block`
+( bytes min-bytes stream -- skip-bytes )
+
+Skip at least a minimum number of bytes in a stream, removing them from the stream without copying them. If the minimum number of bytes is not available, skip no bytes and return a byte count of zero. Note that less data may be skipped by thane byte count *bytes* provided, and the returned byte count is the number of bytes actually skipped. This is safe to call within an interrupt service routine or a critical section.
