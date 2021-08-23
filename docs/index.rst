@@ -17,6 +17,7 @@ Zeptoforth Documentation
    words/dev_tools
    words/line
    words/double
+   words/temp
    words/task_pool
    words/action_pool
    words/allocate
