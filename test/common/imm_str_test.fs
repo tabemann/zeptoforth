@@ -1,5 +1,5 @@
 \ Copyright (c) 2021 Travis Bemann
-\
+\ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
 \ in the Software without restriction, including without limitation the rights
@@ -18,21 +18,21 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ This is not actual Forth code, but rather setup directives for e4thcom to be
-\ executed to load a "big" configuration
+begin-module forth-module
 
-#include src/common/forth/temp.fs
-#include src/common/forth/temp_str.fs
-#include src/common/forth/disassemble.fs
-#include src/common/forth/pool.fs
-#include src/common/forth/allocate.fs
-#include src/common/forth/tqueue.fs
-#include src/common/forth/lock.fs
-#include src/common/forth/semaphore.fs
-#include src/common/forth/fchannel.fs
-#include src/common/forth/channel.fs
-#include src/common/forth/stream.fs
-#include src/common/forth/ansi_term.fs
-#include src/common/forth/line.fs
-#include src/common/forth/task_pool.fs
-#include src/common/forth/action_pool.fs
+  \ Words to exercise compiled-strings
+  : test1 cr s" foo" type ;
+  : test2 cr c" bar" count type ;
+  : test3 cr s\" foo\nbar" type ;
+  : test4 cr c\" foo\nbar" count type ;
+
+  \ Execute the words above
+  test1 test2 test3 test4
+
+  \ Exercise immediate strings
+  cr s" foo" type
+  cr c" bar" count type
+  cr s\" foo\nbar" type
+  cr c\" foo\nbar" count type
+  
+end-module

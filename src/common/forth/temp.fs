@@ -1,5 +1,5 @@
 \ Copyright (c) 2021 Travis Bemann
-\
+\ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
 \ in the Software without restriction, including without limitation the rights
@@ -18,21 +18,45 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ This is not actual Forth code, but rather setup directives for e4thcom to be
-\ executed to load a "big" configuration
+\ Compile to flash
+compile-to-flash
 
-#include src/common/forth/temp.fs
-#include src/common/forth/temp_str.fs
-#include src/common/forth/disassemble.fs
-#include src/common/forth/pool.fs
-#include src/common/forth/allocate.fs
-#include src/common/forth/tqueue.fs
-#include src/common/forth/lock.fs
-#include src/common/forth/semaphore.fs
-#include src/common/forth/fchannel.fs
-#include src/common/forth/channel.fs
-#include src/common/forth/stream.fs
-#include src/common/forth/ansi_term.fs
-#include src/common/forth/line.fs
-#include src/common/forth/task_pool.fs
-#include src/common/forth/action_pool.fs
+begin-module-once temp-module
+
+  begin-import-module temp-internal-module
+
+    \ Temporary buffer structure
+    begin-structure temp-size
+
+      \ Temporary buffer data size
+      field: temp-data-size
+
+      \ Temporary buffer index
+      field: temp-index
+      
+    end-structure
+
+  end-module
+
+  \ Data size is larger than temporary buffer size exception
+  : x-data-too-big ( -- ) space ." data too big" cr ;
+
+  \ Get the size of a temporary buffer with a given data size
+  : temp-size ( data-bytes -- bytes ) [inlined] temp-size + ;
+
+  \ Initialize a temporary buffer of the given data size
+  : init-temp ( data-bytes addr -- ) tuck temp-data-size ! 0 swap temp-index ! ;
+  
+  \ Allocate a temporary block of data
+  : allocate-temp ( bytes temp -- addr )
+    2dup temp-data-size @ > triggers x-data-too-big
+    2dup dup temp-data-size @ swap temp-index @ - > if
+      0 over temp-index !
+    then
+    dup temp-index @ over + temp-size + -rot temp-index +!
+  ;
+
+end-module
+
+\ Warm reboot
+warm
