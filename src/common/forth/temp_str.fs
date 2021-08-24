@@ -78,19 +78,15 @@ begin-module forth-module
     state @ if
       postpone c\"
     else
-      skip-to-token
-      compiling-to-flash? dup if
-	compile-to-ram
-      then
-      here [char] " parse-esc-string
-      here over - dup 1+ temp-str ['] allocate-temp critical
-      2dup c!
-      2 pick over 1+ 3 roll move
-      swap ram-here!
-      swap if
-	compile-to-flash
-      then
-      1 advance-bytes
+      [:
+	skip-to-token
+	here [char] " parse-esc-string
+	here over - dup 1+ temp-str ['] allocate-temp critical
+	2dup c!
+	2 pick over 1+ 3 roll move
+	swap ram-here!
+	1 advance-bytes
+      ;] with-ram
     then
   ;
 
@@ -100,18 +96,14 @@ begin-module forth-module
     state @ if
       postpone s\"
     else
-      skip-to-token
-      compiling-to-flash? dup if
-	compile-to-ram
-      then
-      here [char] " parse-esc-string
-      here over - dup temp-str ['] allocate-temp critical
-      2 pick over 3 pick move
-      rot ram-here! swap
-      rot if
-	compile-to-flash
-      then
-      1 advance-bytes
+      [:
+	skip-to-token
+	here [char] " parse-esc-string
+	here over - dup temp-str ['] allocate-temp critical
+	2 pick over 3 pick move
+	rot ram-here! swap
+	1 advance-bytes
+      ;] with-ram
     then
   ;
 

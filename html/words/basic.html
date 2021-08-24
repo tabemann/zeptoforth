@@ -526,6 +526,11 @@ available, so as to enable any source file to call a preceding init</p>
 <p>( bytes xt – ) ( xt: addr – )</p>
 <p>Allot RAM temporarily and clean it up afterwards, even if an exception occurs.</p>
 </div>
+<div class="section" id="with-ram">
+<h2><code class="docutils literal notranslate"><span class="pre">with-ram</span></code><a class="headerlink" href="#with-ram" title="Permalink to this headline">¶</a></h2>
+<p>( xt – ) ( xt: – )</p>
+<p>Switch to compile to RAM mode, and afterwards restore the compilation state, even if an exception occurs.</p>
+</div>
 <div class="section" id="compress-flash">
 <h2><code class="docutils literal notranslate"><span class="pre">compress-flash</span></code><a class="headerlink" href="#compress-flash" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
@@ -1751,6 +1756,11 @@ otherwise passing the specified argument through.</p>
 <p>( b-addr u – )</p>
 <p>Reverse bytes in place</p>
 </div>
+<div class="section" id="spaces">
+<h2><code class="docutils literal notranslate"><span class="pre">spaces</span></code><a class="headerlink" href="#spaces" title="Permalink to this headline">¶</a></h2>
+<p>( u – )</p>
+<p>Emit a number of spaces.</p>
+</div>
 <div class="section" id="format-unsigned">
 <h2><code class="docutils literal notranslate"><span class="pre">format-unsigned</span></code><a class="headerlink" href="#format-unsigned" title="Permalink to this headline">¶</a></h2>
 <p>( b-addr u1 – b-addr u2 )</p>
@@ -1760,6 +1770,16 @@ otherwise passing the specified argument through.</p>
 <h2><code class="docutils literal notranslate"><span class="pre">format-integer</span></code><a class="headerlink" href="#format-integer" title="Permalink to this headline">¶</a></h2>
 <p>( b-addr n – b-addr u )</p>
 <p>Format an integer as a string</p>
+</div>
+<div class="section" id="fix">
+<h2><code class="docutils literal notranslate"><span class="pre">fix</span></code><a class="headerlink" href="#fix" title="Permalink to this headline">¶</a></h2>
+<p>( b-addr bytes – b-addr bytes )</p>
+<p>Store a string in the RAM dictionary.</p>
+</div>
+<div class="section" id="cfix">
+<h2><code class="docutils literal notranslate"><span class="pre">cfix</span></code><a class="headerlink" href="#cfix" title="Permalink to this headline">¶</a></h2>
+<p>( b-addr bytes – b-addr )</p>
+<p>Store a string as counted string in the RAM dictionary.</p>
 </div>
 <div class="section" id="marker">
 <h2><code class="docutils literal notranslate"><span class="pre">marker</span></code><a class="headerlink" href="#marker" title="Permalink to this headline">¶</a></h2>
@@ -1900,6 +1920,7 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l2"><a class="reference internal" href="#end-critical"><code class="docutils literal notranslate"><span class="pre">end-critical</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#critical"><code class="docutils literal notranslate"><span class="pre">critical</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#with-allot"><code class="docutils literal notranslate"><span class="pre">with-allot</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#with-ram"><code class="docutils literal notranslate"><span class="pre">with-ram</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#compress-flash"><code class="docutils literal notranslate"><span class="pre">compress-flash</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#end-compress-flash"><code class="docutils literal notranslate"><span class="pre">end-compress-flash</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#commit-flash"><code class="docutils literal notranslate"><span class="pre">commit-flash</span></code></a></li>
@@ -2147,8 +2168,11 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l2"><a class="reference internal" href="#id110"><code class="docutils literal notranslate"><span class="pre">u.</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#move"><code class="docutils literal notranslate"><span class="pre">move</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#reverse"><code class="docutils literal notranslate"><span class="pre">reverse</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#spaces"><code class="docutils literal notranslate"><span class="pre">spaces</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#format-unsigned"><code class="docutils literal notranslate"><span class="pre">format-unsigned</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#format-integer"><code class="docutils literal notranslate"><span class="pre">format-integer</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fix"><code class="docutils literal notranslate"><span class="pre">fix</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cfix"><code class="docutils literal notranslate"><span class="pre">cfix</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#marker"><code class="docutils literal notranslate"><span class="pre">marker</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#cornerstone"><code class="docutils literal notranslate"><span class="pre">cornerstone</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#vector-count"><code class="docutils literal notranslate"><span class="pre">vector-count</span></code></a></li>
@@ -2166,12 +2190,15 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="allocate.html">Allocator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>

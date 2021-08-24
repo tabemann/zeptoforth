@@ -232,32 +232,17 @@ Get the activation level of a task, with values 0 and lower indicating that a ta
 
 The simplest case of delaying a task is simply to execute:
 
-##### `task-checksum`
-( task -- checksum )
+##### `get-task-name`
+( task -- addr )
 
-Calculate a checksum for a given task.
+Get the name of a task as a counted string; an address of zero indicates no name is set.
 
-##### `dump-task-info`
-( task -- )
+##### `set-task-name`
+( addr task -- )
 
-Print out information describing a task.
+Set the name of a task as a counted string; an address of zero indicates to set no name.
 
-##### `dump-task-stack`
-( task -- )
+##### `dump-tasks`
+( -- )
 
-Print a hex dump of the contents of a task's stack, excluding the top of the stack.
-
-##### `dump-task-rstack`
-( task -- )
-
-Print a hex dump of the contents of a task's return stack.
-
-##### `dump-task-dict`
-( task -- )
-
-Print a hex dump of the contents of a task's dictionary
-
-##### `dump-task-regs`
-( task -- )
-
-Print out the saved registers for a task; note that the task must not be the current task. Note that R6 contains the top of the stack, and R7 contains the current stack pointer.
+Dump information for each task that is in the schedule.
