@@ -123,6 +123,9 @@ begin-import-module-once task-module
     \ The current timeout delay time in ticks
     user timeout-systick-delay
   
+    \ The task's name as a counted string
+    user task-name
+  
     \ SVCall vector index
     11 constant svcall-vector
 
@@ -142,7 +145,7 @@ begin-import-module-once task-module
 
   \ No timeout
   -1 constant no-timeout
-
+  
   \ Sleep
   : sleep ( -- ) sleep-enabled? @ if sleep then ;
 
@@ -407,20 +410,29 @@ begin-import-module-once task-module
 
   \ Get task timeslice
   : get-task-timeslice ( task -- timeslice )
-    dup validate-not-terminated
-    ['] task-timeslice for-task @
+    dup validate-not-terminated ['] task-timeslice for-task @
   ;
 
   \ Set task maximum timeslice
   : set-task-max-timeslice ( max-timeslice task -- )
-    dup validate-not-terminated
-    ['] task-max-timeslice for-task !
+    dup validate-not-terminated ['] task-max-timeslice for-task !
   ;
 
   \ Get task maximum timeslice
   : get-task-max-timeslice ( task -- max-timeslice )
-    dup validate-not-terminated
-    ['] task-max-timeslice for-task @
+    dup validate-not-terminated ['] task-max-timeslice for-task @
+  ;
+
+  \ Get a task's name as a counted string; an address of zero indicates no name
+  \ is set.
+  : get-task-name ( task -- addr )
+    dup validate-not-terminated ['] task-name for-task @
+  ;
+
+  \ Set a task's name as a counted string; an address of zero indicates to set
+  \ no name.
+  : set-task-name ( addr -- task )
+    dup validate-not-terminated ['] task-name for-task !
   ;
   
   \ Start a task's execution
@@ -626,6 +638,7 @@ begin-import-module-once task-module
       0 timeout-systick-delay !
       0 task-systick-start !
       -1 task-systick-delay !
+      c" main" task-name !
       base @ task-base !
       default-timeslice task-timeslice !
       default-max-timeslice task-max-timeslice !
@@ -665,6 +678,7 @@ begin-import-module-once task-module
     0 over ['] timeout-systick-start for-task !
     0 over ['] timeout-systick-delay for-task !
     0 over ['] task-systick-start for-task !
+    0 over ['] task-name for-task !
     -1 over ['] task-systick-delay for-task !
     default-timeslice over ['] task-timeslice for-task !
     default-max-timeslice over ['] task-max-timeslice for-task !
@@ -839,7 +853,74 @@ begin-import-module-once task-module
     \ Handle PAUSE
     : do-pause ( -- ) true in-multitasker? ! ICSR_PENDSVSET! dmb dsb isb ;
 
+    \ Dump task name
+    : dump-task-name ( task -- )
+      get-task-name ?dup if count tuck type 16 swap - 0 max else 16 then spaces
+    ;
+    
+    \ Dump task state
+    : dump-task-state ( task -- )
+      dup current-task @ = if
+	s" running"
+      else
+	dup task-state h@ schedule-critical-mask and case
+	  readied of            s" ready" endof
+	  delayed of            s" delayed" endof
+	  blocked-timeout of    s" timeout" endof
+	  blocked-wait of       s" wait" endof
+	  blocked-indefinite of s" indefinite" endof
+	  block-timed-out of    s" timed-out" endof
+	endcase
+      then
+      tuck type 11 swap - spaces
+      task-state h@ schedule-critical and if ." yes     " else ." no      " then
+    ;
+    
+    \ Dump task priority
+    : dump-task-priority ( task -- )
+      get-task-priority here swap format-integer dup 8 swap - spaces type
+    ;
+    
+    \ Dump task until time
+    : dump-task-until ( task -- )
+      dup task-state h@ schedule-critical-mask and case
+	delayed of true endof
+	blocked-timeout of true endof
+	false swap
+      endcase
+      if
+	last-delay + dup here swap format-unsigned
+	dup 10 swap - spaces type space
+	systick-counter - here swap format-integer dup 11 swap - spaces type
+      else
+	drop 22 spaces
+      then
+    ;
+    
+    \ Dump task ehader
+    : dump-task-header ( -- )
+      cr ." task     name             priority state      critical "
+      ." until      delay"
+    ;
+  
+    \ Dump task information for a single task
+    : dump-task ( task -- )
+      cr dup h.8 space dup dump-task-name space dup dump-task-priority space
+      dup dump-task-state space dump-task-until
+    ;
+    
   end-module
+  
+  \ Dump task information for all tasks
+  : dump-tasks ( -- )
+    dump-task-header
+    [:
+      first-task @ begin dup 0<> while
+	dup dump-task task-prev @
+      repeat
+      drop
+    ;] critical
+  ;
 
   \ Wait for n milliseconds with multitasking support
   : ms ( u -- )

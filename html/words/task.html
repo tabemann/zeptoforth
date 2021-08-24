@@ -247,35 +247,20 @@
 <p>Get the activation level of a task, with values 0 and lower indicating that a task is inactive, and values 1 and greater indicating that a task is active.</p>
 <p>The simplest case of delaying a task is simply to execute:</p>
 </div>
-<div class="section" id="task-checksum">
-<h2><code class="docutils literal notranslate"><span class="pre">task-checksum</span></code><a class="headerlink" href="#task-checksum" title="Permalink to this headline">¶</a></h2>
-<p>( task – checksum )</p>
-<p>Calculate a checksum for a given task.</p>
+<div class="section" id="get-task-name">
+<h2><code class="docutils literal notranslate"><span class="pre">get-task-name</span></code><a class="headerlink" href="#get-task-name" title="Permalink to this headline">¶</a></h2>
+<p>( task – addr )</p>
+<p>Get the name of a task as a counted string; an address of zero indicates no name is set.</p>
 </div>
-<div class="section" id="dump-task-info">
-<h2><code class="docutils literal notranslate"><span class="pre">dump-task-info</span></code><a class="headerlink" href="#dump-task-info" title="Permalink to this headline">¶</a></h2>
-<p>( task – )</p>
-<p>Print out information describing a task.</p>
+<div class="section" id="set-task-name">
+<h2><code class="docutils literal notranslate"><span class="pre">set-task-name</span></code><a class="headerlink" href="#set-task-name" title="Permalink to this headline">¶</a></h2>
+<p>( addr task – )</p>
+<p>Set the name of a task as a counted string; an address of zero indicates to set no name.</p>
 </div>
-<div class="section" id="dump-task-stack">
-<h2><code class="docutils literal notranslate"><span class="pre">dump-task-stack</span></code><a class="headerlink" href="#dump-task-stack" title="Permalink to this headline">¶</a></h2>
-<p>( task – )</p>
-<p>Print a hex dump of the contents of a task’s stack, excluding the top of the stack.</p>
-</div>
-<div class="section" id="dump-task-rstack">
-<h2><code class="docutils literal notranslate"><span class="pre">dump-task-rstack</span></code><a class="headerlink" href="#dump-task-rstack" title="Permalink to this headline">¶</a></h2>
-<p>( task – )</p>
-<p>Print a hex dump of the contents of a task’s return stack.</p>
-</div>
-<div class="section" id="dump-task-dict">
-<h2><code class="docutils literal notranslate"><span class="pre">dump-task-dict</span></code><a class="headerlink" href="#dump-task-dict" title="Permalink to this headline">¶</a></h2>
-<p>( task – )</p>
-<p>Print a hex dump of the contents of a task’s dictionary</p>
-</div>
-<div class="section" id="dump-task-regs">
-<h2><code class="docutils literal notranslate"><span class="pre">dump-task-regs</span></code><a class="headerlink" href="#dump-task-regs" title="Permalink to this headline">¶</a></h2>
-<p>( task – )</p>
-<p>Print out the saved registers for a task; note that the task must not be the current task. Note that R6 contains the top of the stack, and R7 contains the current stack pointer.</p>
+<div class="section" id="dump-tasks">
+<h2><code class="docutils literal notranslate"><span class="pre">dump-tasks</span></code><a class="headerlink" href="#dump-tasks" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>Dump information for each task that is in the schedule.</p>
 </div>
 </div>
 
@@ -342,12 +327,9 @@
 <li class="toctree-l2"><a class="reference internal" href="#set-task-max-timeslice"><code class="docutils literal notranslate"><span class="pre">set-task-max-timeslice</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#get-task-max-timeslice"><code class="docutils literal notranslate"><span class="pre">get-task-max-timeslice</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#get-task-active"><code class="docutils literal notranslate"><span class="pre">get-task-active</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#task-checksum"><code class="docutils literal notranslate"><span class="pre">task-checksum</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dump-task-info"><code class="docutils literal notranslate"><span class="pre">dump-task-info</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dump-task-stack"><code class="docutils literal notranslate"><span class="pre">dump-task-stack</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dump-task-rstack"><code class="docutils literal notranslate"><span class="pre">dump-task-rstack</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dump-task-dict"><code class="docutils literal notranslate"><span class="pre">dump-task-dict</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dump-task-regs"><code class="docutils literal notranslate"><span class="pre">dump-task-regs</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#get-task-name"><code class="docutils literal notranslate"><span class="pre">get-task-name</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#set-task-name"><code class="docutils literal notranslate"><span class="pre">set-task-name</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dump-tasks"><code class="docutils literal notranslate"><span class="pre">dump-tasks</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="schedule.html">Scheduling Words</a></li>
@@ -357,6 +339,7 @@
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="allocate.html">Allocator Words</a></li>
