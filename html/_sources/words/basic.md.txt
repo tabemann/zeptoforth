@@ -496,6 +496,11 @@ Execute code within a critical section, properly handling exceptions.
 
 Allot RAM temporarily and clean it up afterwards, even if an exception occurs.
 
+##### `with-ram`
+( xt -- ) ( xt: -- )
+
+Switch to compile to RAM mode, and afterwards restore the compilation state, even if an exception occurs.
+
 ##### `compress-flash`
 ( -- )
 
@@ -1710,6 +1715,11 @@ Copy bytes from one buffer to another one (which may overlap)
 
 Reverse bytes in place
 
+##### `spaces`
+( u -- )
+
+Emit a number of spaces.
+
 ##### `format-unsigned`
 ( b-addr u1 -- b-addr u2 )
 
@@ -1719,6 +1729,16 @@ Format an integer as a string
 ( b-addr n -- b-addr u )
 
 Format an integer as a string
+
+##### `fix`
+( b-addr bytes -- b-addr bytes )
+
+Store a string in the RAM dictionary.
+
+##### `cfix`
+( b-addr bytes -- b-addr )
+
+Store a string as counted string in the RAM dictionary.
 
 ##### `marker`
 ( "name" -- )

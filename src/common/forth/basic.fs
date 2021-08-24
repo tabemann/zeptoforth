@@ -1068,6 +1068,13 @@ commit-flash
   ram-here rot ram-allot dup >r swap try r> ram-here! ?raise
 ;
 
+\ Switch to compile to RAM mode, and afterwards restore the compilation state,
+\ even if an exception occurs
+: with-ram ( xt -- ) ( xt: -- )
+  compiling-to-flash? dup if compile-to-ram then >r
+  try r> if compile-to-flash then ?raise
+;
+
 \ Allot aligned RAM temporarily and clean it up afterwards, even after an
 \ exception
 : with-aligned-allot ( bytes xt -- ) ( xt: a-addr -- )
@@ -1403,6 +1410,9 @@ commit-flash
   here over branch-back!
   4+ lit,
 ;
+
+\ Print out multiple spaces
+: spaces ( u -- ) begin dup 0> while space 1- repeat drop ;
 
 \ Create an anonymous word for an exception
 : x" ( <text>" -- )
@@ -1896,6 +1906,16 @@ commit-flash
 : #> ( xd -- c-addr bytes )
   2drop
   pad picture-size + picture-offset @ + picture-offset @ negate
+;
+
+\ Store a string in the RAM dictionary
+: fix ( b-addr bytes -- b-addr bytes )
+  [: here 2dup 2>r swap move 2r> swap dup allot ;] with-ram
+;
+
+\ Store a string as a counted string in the RAM dictionary
+: cfix ( b-addr bytes > b-addr )
+  [: here dup >r 2dup c! 1+ swap dup 1+ allot move r> ;] with-ram
 ;
 
 \ Commit to flash
