@@ -2,8 +2,6 @@
 
 Action pools provide a means of managing multiple schedule actions and dynamically creating and destroying them. Note that the total number of actions that may exist at any one time is fixed, but the number of executing actions may be of any number less than or equal to that at any point in time. Also note that action pools are associated with particular schedules when they are initialized.
 
-The action pool interface is not included in the default builds; the user must load `src/common/forth/action_pool.fs` or use a big build for it to be available. Note that logic is in place to ensure that it is not loaded multiple times. It also requires `src/common/forth/schedule.fs` to be loaded before it is loaded. Note that it does not reboot the MCU when loaded, as it has no need for initialization to be carried out.
-
 The following words are in `action-pool-module`:
 
 ##### `x-no-action-available`

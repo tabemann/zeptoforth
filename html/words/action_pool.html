@@ -32,7 +32,6 @@
   <div class="section" id="action-pool-words">
 <h1>Action Pool words<a class="headerlink" href="#action-pool-words" title="Permalink to this headline">¶</a></h1>
 <p>Action pools provide a means of managing multiple schedule actions and dynamically creating and destroying them. Note that the total number of actions that may exist at any one time is fixed, but the number of executing actions may be of any number less than or equal to that at any point in time. Also note that action pools are associated with particular schedules when they are initialized.</p>
-<p>The action pool interface is not included in the default builds; the user must load <code class="docutils literal notranslate"><span class="pre">src/common/forth/action_pool.fs</span></code> or use a big build for it to be available. Note that logic is in place to ensure that it is not loaded multiple times. It also requires <code class="docutils literal notranslate"><span class="pre">src/common/forth/schedule.fs</span></code> to be loaded before it is loaded. Note that it does not reboot the MCU when loaded, as it has no need for initialization to be carried out.</p>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">action-pool-module</span></code>:</p>
 <div class="section" id="x-no-action-available">
 <h2><code class="docutils literal notranslate"><span class="pre">x-no-action-available</span></code><a class="headerlink" href="#x-no-action-available" title="Permalink to this headline">¶</a></h2>
@@ -87,9 +86,11 @@
 <li class="toctree-l1"><a class="reference internal" href="schedule.html">Scheduling Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Action Pool words</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#x-no-action-available"><code class="docutils literal notranslate"><span class="pre">x-no-action-available</span></code></a></li>
@@ -103,6 +104,8 @@
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
