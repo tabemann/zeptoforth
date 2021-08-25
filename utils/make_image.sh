@@ -27,12 +27,12 @@ IMAGE=$4
 PROJECT=zeptoforth
 DELAY=35
 
-if [ $IMAGE = 'big' ];
+if [ $IMAGE = 'full' ];
 then
     DELAY=65
 fi
 
-if [ $IMAGE = 'big_swdcom' ];
+if [ $IMAGE = 'full_swdcom' ];
 then
     DELAY=65
 fi

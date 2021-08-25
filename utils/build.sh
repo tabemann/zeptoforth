@@ -39,6 +39,4 @@ mkdir bin/$VERSION
 build_platform stm32l476
 build_platform stm32f407
 build_platform stm32f746
-# build_platform nrf52832
-# build_platform nrf52840
 make clean

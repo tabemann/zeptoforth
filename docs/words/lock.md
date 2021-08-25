@@ -2,8 +2,6 @@
 
 A lock enforces mutual exclusion, typically with regard to control of a resource, between multiple tasks. It also serves as a queue for multiple tasks waiting on the lock which is held by another task. Furthermore, it provides a mechanism to avoid priority inversion, by temporarily elevating each task holding a lock's priority to the maximum priority of all the tasks waiting for it; this applies even when chaining together multiple locks held by tasks holding some locks and waiting on others.
 
-Locks are not included in the default builds; the user must load `src/common/forth/lock.fs` or use a big build for them to be available. Note that logic is in place to ensure that they are not loaded multiple times. Note that it is compiled into flash when it is loaded.
-
 The following words are in `lock-module`:
 
 ##### `lock-size`

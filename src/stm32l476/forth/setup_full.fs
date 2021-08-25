@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2021 Travis Bemann
+\ Copyright (c) 2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -28,10 +28,12 @@
 #include src/common/forth/systick.fs
 #include src/stm32l476/forth/int_io.fs
 #include src/stm32l476/forth/gpio.fs
+#include src/stm32l476/forth/exti.fs
 #include src/common/forth/task.fs
 #include src/common/forth/schedule.fs
 #include src/stm32l476/forth/led.fs
-
+#include src/common/forth/big_default.fs
+#include src/stm32l476/forth/rng.fs
 
 \ Set a cornerstone to enable deleting everything compiled after this code
 cornerstone restore-state
