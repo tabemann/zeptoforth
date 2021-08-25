@@ -32,7 +32,6 @@
   <div class="section" id="quad-spi-words">
 <h1>Quad SPI words<a class="headerlink" href="#quad-spi-words" title="Permalink to this headline">¶</a></h1>
 <p>The Quad SPI interface is written for the STM32F746 DISCOVERY board. It maps Quad SPI flash to the addressing space at <code class="docutils literal notranslate"><span class="pre">qspi-base</span></code>. It also provides means for writing bytes, halfwords, words, and arbitrary buffers containing bytes to flash and erasing 4K and 32K subsectors, 64K sectors, and the entire flash. Note that even though internally they require turning off memory-mapped Quad SPI mode, it is automatically turned back on when they are complete, and they are hidden from all other tasks (however they significantly impact realtime performance due to being slow while requiring interrupts to be turned off).</p>
-<p>The Quad SPI interface is not included in the default builds; the user must load <code class="docutils literal notranslate"><span class="pre">src/stm32f746/forth/qspi.fs</span></code> or use an STM32F746 big build for it to be available. Note that logic is in place to ensure that it is not loaded multiple times. When it is loaded it reboots the MCU to carry out initialization.</p>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">qspi-module</span></code>:</p>
 <div class="section" id="qspi-base">
 <h2><code class="docutils literal notranslate"><span class="pre">qspi-base</span></code><a class="headerlink" href="#qspi-base" title="Permalink to this headline">¶</a></h2>
@@ -127,15 +126,19 @@
 <li class="toctree-l1"><a class="reference internal" href="schedule.html">Scheduling Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="allocate.html">Allocator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>

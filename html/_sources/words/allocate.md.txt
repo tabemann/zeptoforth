@@ -2,8 +2,6 @@
 
 The allocator in zeptoforth enables the user to create any number of heaps (but in the general use case allows creating a shared heap used implicitly by `allocate`, `resize`, `free`, `allocate!`, `resize!`, and `free!`). Heaps are allocated in the dictionary space, and the shared heap must be manually allocated with `init-shared-heap` before it may be used.
 
-The allocator is not included in the default builds; the user must load `src/common/forth/allocate.fs` or use a big build for it to be available. Note that logic is in place to ensure that it is not loaded multiple times. Note that it is compiled into flash when it is loaded.
-
 The following words are in `forth-module`:
 
 ##### `allocate`

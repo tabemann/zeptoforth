@@ -2,8 +2,6 @@
 
 Temporary buffers are circular buffers for allocating temporary data. Temporarily allocated space should not be relied upon to store data indefinitely, because they reallocate space allocated to old buffers when no more space for continguous blocks of memory are available.
 
-Temporary buffers are not included in the default builds, the user must load `src/common/forth/temp.fs` or use a big build for them to be available. Note that logic is in place to ensure that it is not loaded multiple times. Note that it is compiled into flash when it is loaded.
-
 The following words are in `temp-module`.
 
 ##### `x-data-too-big`

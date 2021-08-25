@@ -41,7 +41,7 @@
 <li><p>Control-E: move the cursor to the end of the input</p></li>
 </ul>
 <p>Note that tabs and characters of code points greater than 127 are handled correctly. History and autocomplete are not supported (this is a microcontroller after all). Also note that it is not compatible with non-terminal operation, i.e. with loading code automatically via serial or swdcom; before this is done it must be disabled.</p>
-<p>The line editor is not included in the default builds; the user must load <code class="docutils literal notranslate"><span class="pre">src/common/forth/line.fs</span></code> or use a big build for it to be available. Note that logic is in place to ensure that it is not loaded multiple times.  Note that it is compiled into flash when it is loaded. After a reboot, it is initialized for the main task only, and if, when enabled, <code class="docutils literal notranslate"><span class="pre">refill</span></code> is used for a different task, it needs to have already been initialized for that task.</p>
+<p>After a reboot, it is initialized for the main task only, and if, when enabled, <code class="docutils literal notranslate"><span class="pre">refill</span></code> is used for a different task, it needs to have already been initialized for that task.</p>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">line-module</span></code>:</p>
 <div class="section" id="init-line">
 <h2><code class="docutils literal notranslate"><span class="pre">init-line</span></code><a class="headerlink" href="#init-line" title="Permalink to this headline">¶</a></h2>
@@ -87,6 +87,7 @@
 <li class="toctree-l1"><a class="reference internal" href="schedule.html">Scheduling Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Line Editor</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#init-line"><code class="docutils literal notranslate"><span class="pre">init-line</span></code></a></li>
@@ -95,12 +96,15 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="allocate.html">Allocator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>

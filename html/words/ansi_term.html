@@ -32,7 +32,6 @@
   <div class="section" id="ansi-terminal-words">
 <h1>ANSI Terminal words<a class="headerlink" href="#ansi-terminal-words" title="Permalink to this headline">¶</a></h1>
 <p>These are a number of word used to manage interaction with ANSI terminals. Note that no other terminals are supported.</p>
-<p>The ANSI termiinal interface is not included in the default builds; the user must load <code class="docutils literal notranslate"><span class="pre">src/common/forth/ansi_term.fs</span></code> or use a big build for it to be available. Note that logic is in place to ensure that it is not loaded multiple times. Note that it reboots the MCU when it is loaded due to needing to create user varibles.</p>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">ansi-term-module</span></code>:</p>
 <div class="section" id="escape">
 <h2><code class="docutils literal notranslate"><span class="pre">escape</span></code><a class="headerlink" href="#escape" title="Permalink to this headline">¶</a></h2>
@@ -176,15 +175,19 @@
 <li class="toctree-l1"><a class="reference internal" href="schedule.html">Scheduling Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="allocate.html">Allocator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">ANSI Terminal words</a><ul>

@@ -32,7 +32,6 @@
   <div class="section" id="gpio-words">
 <h1>GPIO Words<a class="headerlink" href="#gpio-words" title="Permalink to this headline">¶</a></h1>
 <p>A GPIO API is provided for STM32 microcontrollers, with slight variations between individual microcontrollers (primarily in the number of supported GPIO’s, along with internal differences in the registers used by the API). It provides a thin layer over the hardware registers that control GPIO’s, so as to make them more user-friendly while not limiting the programmer’s capabilities.</p>
-<p>The GPIO API is defined in <code class="docutils literal notranslate"><span class="pre">src/*/forth/gpio.fs</span></code>, where <code class="docutils literal notranslate"><span class="pre">*</span></code> is any platform. Note that it is included in all the prebuilt non-kernel-only images.</p>
 <p>These words are in <code class="docutils literal notranslate"><span class="pre">gpio-module</span></code>.</p>
 <div class="section" id="gpioa-through-gpiok">
 <h2><code class="docutils literal notranslate"><span class="pre">GPIOA</span></code> through <code class="docutils literal notranslate"><span class="pre">GPIOK</span></code><a class="headerlink" href="#gpioa-through-gpiok" title="Permalink to this headline">¶</a></h2>
@@ -338,15 +337,19 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="allocate.html">Allocator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
