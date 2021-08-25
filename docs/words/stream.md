@@ -4,8 +4,6 @@ A stream is a monodirectional means of communicating data, as a fixed-size queue
 
 Streams can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put in alloted memory in the dictionary or into allocated memory in the heap. Note that the size of a stream for a given data size may be calculated with `stream-size`.
 
-Streams are not included in the default builds; the user must load `src/common/forth/stream.fs` or use a big build for them to be available. Note that logic is in place to ensure that it is not loaded multiple times. Note that it is compiled into flash when it is loaded.
-
 The following words are in `stream-module`:
 
 ##### `x-stream-closed

@@ -32,6 +32,3 @@
 #include src/stm32f746/forth/gpio.fs
 #include src/common/forth/task.fs
 #include src/common/forth/swdcom.fs
-
-\ Set a cornerstone to enable deleting everything compiled after this code
-cornerstone restore-state

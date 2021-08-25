@@ -25,7 +25,7 @@ COPY=arm-none-eabi-objcopy
 DUMP=arm-none-eabi-objdump
 ASFLAGS=-mcpu=cortex-m4 -mthumb -g
 PREFIX=/usr/local
-PLATFORM=stm32l476
+PLATFORM=stm32f407
 VERSION=0.19.1.Dev
 DATE:=$(shell date)
 

@@ -32,6 +32,4 @@
 #include src/stm32l476/forth/gpio.fs
 #include src/common/forth/task.fs
 
-\ Set a cornerstone to enable deleting everything compiled after this code
-cornerstone restore-state
 
