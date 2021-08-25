@@ -35,9 +35,14 @@
 <p>Streams can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put in alloted memory in the dictionary or into allocated memory in the heap. Note that the size of a stream for a given data size may be calculated with <code class="docutils literal notranslate"><span class="pre">stream-size</span></code>.</p>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">stream-module</span></code>:</p>
 <div class="section" id="x-stream-closed">
-<h2>`x-stream-closed<a class="headerlink" href="#x-stream-closed" title="Permalink to this headline">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">x-stream-closed</span></code><a class="headerlink" href="#x-stream-closed" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Stream closed exception. Raised on attempting to send to a closed stream or when trying to receive on an empty closed stream.</p>
+</div>
+<div class="section" id="x-stream-data-too-big">
+<h2><code class="docutils literal notranslate"><span class="pre">x-stream-data-too-big</span></code><a class="headerlink" href="#x-stream-data-too-big" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>Data being sent on a stream with <code class="docutils literal notranslate"><span class="pre">send-stream</span></code> is larger than the size of the stream exception.</p>
 </div>
 <div class="section" id="stream-full">
 <h2><code class="docutils literal notranslate"><span class="pre">stream-full?</span></code><a class="headerlink" href="#stream-full" title="Permalink to this headline">¶</a></h2>
@@ -77,7 +82,7 @@
 <div class="section" id="send-stream">
 <h2><code class="docutils literal notranslate"><span class="pre">send-stream</span></code><a class="headerlink" href="#send-stream" title="Permalink to this headline">¶</a></h2>
 <p>( addr bytes stream – )</p>
-<p>Send data with a buffer to a stream. Block until there is enough space available in the stream to add the entire buffer of data. Note that the data is copied. This is not safe to call within an interrupt service routine or a critical section.</p>
+<p>Send data with a buffer to a stream. Block until there is enough space available in the stream to add the entire buffer of data. Note that the data is copied. <code class="docutils literal notranslate"><span class="pre">x-stream-data-too-big</span></code> is raised if <em>bytes</em> is greater than the data size of the stream.  This is not safe to call within an interrupt service routine or a critical section.</p>
 </div>
 <div class="section" id="send-stream-parts">
 <h2><code class="docutils literal notranslate"><span class="pre">send-stream-parts</span></code><a class="headerlink" href="#send-stream-parts" title="Permalink to this headline">¶</a></h2>
@@ -195,7 +200,8 @@
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Stream Words</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#x-stream-closed">`x-stream-closed</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#x-stream-closed"><code class="docutils literal notranslate"><span class="pre">x-stream-closed</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#x-stream-data-too-big"><code class="docutils literal notranslate"><span class="pre">x-stream-data-too-big</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#stream-full"><code class="docutils literal notranslate"><span class="pre">stream-full?</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#stream-empty"><code class="docutils literal notranslate"><span class="pre">stream-empty?</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#stream-size"><code class="docutils literal notranslate"><span class="pre">stream-size</span></code></a></li>
