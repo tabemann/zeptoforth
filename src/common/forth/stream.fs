@@ -83,6 +83,9 @@ begin-module-once stream-module
   \ Stream is closed exception
   : x-stream-closed ( -- ) space ." stream is closed" cr ;
 
+  \ Attempting to send data larger than the stream exception
+  : x-stream-data-too-big ( -- ) space ." data is larger than stream" cr  ;
+
   \ Get the size of a stream for a given data size
   : stream-size ( data-bytes -- bytes ) [inlined] stream-size + ;
 
@@ -213,6 +216,7 @@ begin-module-once stream-module
 
   \ Send data to a stream
   : send-stream ( addr bytes stream -- )
+    2dup stream-data-size @ > triggers x-stream-data-too-big
     [:
       dup stream-closed @ triggers x-stream-closed
       current-task prepare-block

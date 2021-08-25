@@ -6,10 +6,15 @@ Streams can be created anywhere in memory; they are not dependent upon any alloc
 
 The following words are in `stream-module`:
 
-##### `x-stream-closed
+##### `x-stream-closed`
 ( -- )
 
 Stream closed exception. Raised on attempting to send to a closed stream or when trying to receive on an empty closed stream.
+
+##### `x-stream-data-too-big`
+( -- )
+
+Data being sent on a stream with `send-stream` is larger than the size of the stream exception.
 
 ##### `stream-full?`
 ( stream -- flag )
@@ -49,7 +54,7 @@ Get whether a stream is closed.
 ##### `send-stream`
 ( addr bytes stream -- )
 
-Send data with a buffer to a stream. Block until there is enough space available in the stream to add the entire buffer of data. Note that the data is copied. This is not safe to call within an interrupt service routine or a critical section.
+Send data with a buffer to a stream. Block until there is enough space available in the stream to add the entire buffer of data. Note that the data is copied. `x-stream-data-too-big` is raised if *bytes* is greater than the data size of the stream.  This is not safe to call within an interrupt service routine or a critical section.
 
 ##### `send-stream-parts`
 ( addr bytes stream -- )
