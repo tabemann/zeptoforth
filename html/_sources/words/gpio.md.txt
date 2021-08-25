@@ -2,8 +2,6 @@
 
 A GPIO API is provided for STM32 microcontrollers, with slight variations between individual microcontrollers (primarily in the number of supported GPIO's, along with internal differences in the registers used by the API). It provides a thin layer over the hardware registers that control GPIO's, so as to make them more user-friendly while not limiting the programmer's capabilities.
 
-The GPIO API is defined in `src/*/forth/gpio.fs`, where `*` is any platform. Note that it is included in all the prebuilt non-kernel-only images.
-
 These words are in `gpio-module`.
 
 ##### `GPIOA` through `GPIOK`

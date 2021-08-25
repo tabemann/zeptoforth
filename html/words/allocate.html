@@ -32,7 +32,6 @@
   <div class="section" id="allocator-words">
 <h1>Allocator Words<a class="headerlink" href="#allocator-words" title="Permalink to this headline">¶</a></h1>
 <p>The allocator in zeptoforth enables the user to create any number of heaps (but in the general use case allows creating a shared heap used implicitly by <code class="docutils literal notranslate"><span class="pre">allocate</span></code>, <code class="docutils literal notranslate"><span class="pre">resize</span></code>, <code class="docutils literal notranslate"><span class="pre">free</span></code>, <code class="docutils literal notranslate"><span class="pre">allocate!</span></code>, <code class="docutils literal notranslate"><span class="pre">resize!</span></code>, and <code class="docutils literal notranslate"><span class="pre">free!</span></code>). Heaps are allocated in the dictionary space, and the shared heap must be manually allocated with <code class="docutils literal notranslate"><span class="pre">init-shared-heap</span></code> before it may be used.</p>
-<p>The allocator is not included in the default builds; the user must load <code class="docutils literal notranslate"><span class="pre">src/common/forth/allocate.fs</span></code> or use a big build for it to be available. Note that logic is in place to ensure that it is not loaded multiple times. Note that it is compiled into flash when it is loaded.</p>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">forth-module</span></code>:</p>
 <div class="section" id="allocate">
 <h2><code class="docutils literal notranslate"><span class="pre">allocate</span></code><a class="headerlink" href="#allocate" title="Permalink to this headline">¶</a></h2>
@@ -133,9 +132,11 @@
 <li class="toctree-l1"><a class="reference internal" href="schedule.html">Scheduling Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Allocator Words</a><ul>
@@ -158,6 +159,8 @@
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>

@@ -4,8 +4,6 @@ A channel is a monodirectional means of communicating data, as arbitrary-sized b
 
 Channels can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put into alloted memory in the dictionary or into allocated memory in the heap. Note that the size of a channel for a given element size and element count may be calculated with `chan-size`.
 
-Channels are not included in the default builds; the user must load `src/common/forth/channel.fs` or use a big build for them to be available. Note that logic is in place to ensure that it is not loaded multiple times. Note that it is compiled into flash when it is loaded.
-
 The following words are in `chan-module`:
 
 ##### `x-chan-closed`

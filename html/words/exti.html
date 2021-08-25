@@ -14,7 +14,7 @@
     <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Development Tools Words" href="dev_tools.html" />
+    <link rel="next" title="Interrupt Words" href="interrupt.html" />
     <link rel="prev" title="GPIO Words" href="gpio.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -32,7 +32,6 @@
   <div class="section" id="exti-words">
 <h1>EXTI Words<a class="headerlink" href="#exti-words" title="Permalink to this headline">¶</a></h1>
 <p>An EXTI API is provided for STM32 microcontrollers, with slight variations between individual microcontrollers (primarily in the number of supported GPIO’s, along with internal differences in the registers used by the API). It provides a thin layer over the hardware registers that control EXTI, so as to make them more user-friendly while not limiting the programmer’s capabilities.</p>
-<p>The EXTI API is defined in <code class="docutils literal notranslate"><span class="pre">src/*/forth/exti.fs</span></code> where <code class="docutils literal notranslate"><span class="pre">*</span></code> is any platform. Note that it is included only in <code class="docutils literal notranslate"><span class="pre">big</span></code> and <code class="docutils literal notranslate"><span class="pre">big_swdcom</span></code> prebuilt images.</p>
 <p>These words are in <code class="docutils literal notranslate"><span class="pre">exti-module</span></code>.</p>
 <div class="section" id="exti-0-through-exti-4">
 <h2><code class="docutils literal notranslate"><span class="pre">EXTI_0</span></code> through <code class="docutils literal notranslate"><span class="pre">EXTI_4</span></code><a class="headerlink" href="#exti-0-through-exti-4" title="Permalink to this headline">¶</a></h2>
@@ -204,15 +203,19 @@
 <li class="toctree-l2"><a class="reference internal" href="#id9"><code class="docutils literal notranslate"><span class="pre">EXTI_PR&#64;</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="allocate.html">Allocator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
@@ -232,7 +235,7 @@
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
       <li>Previous: <a href="gpio.html" title="previous chapter">GPIO Words</a></li>
-      <li>Next: <a href="dev_tools.html" title="next chapter">Development Tools Words</a></li>
+      <li>Next: <a href="interrupt.html" title="next chapter">Interrupt Words</a></li>
   </ul></li>
 </ul>
 </div>

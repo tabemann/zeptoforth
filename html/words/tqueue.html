@@ -32,7 +32,6 @@
   <div class="section" id="task-queue-words">
 <h1>Task Queue Words<a class="headerlink" href="#task-queue-words" title="Permalink to this headline">¶</a></h1>
 <p>A task queue is a queue of waiting tasks, which then can be woken up, in the order of their joining the task queue, by another task. Note that tasks can wake up any given number of tasks <em>before</em> they join the task queue, upon which they will not actually deschedule themselves but rather increment the count of waiting tasks (which was negative in this case).</p>
-<p>Task queues are not included in the default builds; the user must load <code class="docutils literal notranslate"><span class="pre">src/common/forth/tqueue.fs</span></code> or use a big build for them to be available. Note that logic is in place to ensure that it is not loaded multiple times. Note that it is compiled into flash when it is loaded.</p>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">tqueue-module</span></code>:</p>
 <div class="section" id="tqueue-size">
 <h2><code class="docutils literal notranslate"><span class="pre">tqueue-size</span></code><a class="headerlink" href="#tqueue-size" title="Permalink to this headline">¶</a></h2>
@@ -106,6 +105,7 @@
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="allocate.html">Allocator Words</a></li>
