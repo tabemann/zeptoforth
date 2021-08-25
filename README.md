@@ -14,28 +14,30 @@ Prebuilt binaries are in `bin/<version>/<platform>/`.
 
 \<Location of the zeptoforth image> is either:
 
-* a freshly built zeptoforth.bin file in the root directory of zeptoforth
+* a freshly built zeptoforth.<platform>.bin file in the root directory of zeptoforth
 * `zeptoforth_kernel-<version>.bin` (without precompiled Forth code)
 * `zeptoforth_<type>-<version>.bin` (with full precompiled Forth code)
 
 where \<type> is one of:
 
-* `full` (full functionality compiled in except for swdcom support)
-* `full_swdcom` (full functionality compiled in including swdcom support)
-* `big` (the kitchen sink, including functionality not normally included, except for swdcom support)
-* `big_swdcom` (the kitchen sink, including functionality not normally included, including swdcom support)
-* `mini` (STM32L476 only; limited functionality compiled in, i.e. without fixed number, allocator, scheduler, or disassembler support, without swdcom support)
-* `mini_swdcom` (STM32L476 only; limited functionality compiled in, i.e. without fixed number, allocator, scheduler, or disassembler support, including swdcom support)
-* `mini_no_corner` (STM32F407 and STM32F746 only to get around limitations of its flash controller; limited functionality compiled in, i.e. without fixed number, allocator, scheduler, or disassembler support, without swdcom support, and without a cornerstone so as to not waste flash space, at the expense of not being able to reset the MCU back to its "factory" state)
-* `mini_swdcom_no_corner` (STMF407 and STM32F746 only to get around the limitations of its flash controller; limited functionality compiled in, i.e. without fixed number, allocator, scheduler, or disassembler support, including swdcom support, and without a cornerstone so as to not waste flash space, at the expense of not being able to reset the MCU back to its "factory" state)
+* `full` (full functionality compiled in except for swdcom support with a cornerstone to enable resetting functionality back to "factory" settings)
+* `full_swdcom` (full functionality compiled in including swdcom support with a cornerstone to enable resetting functionality back to "factory" settings)
+* `mini` (i.e. without fixed number, allocator, scheduler, or disassembler support, without swdcom support)
+* `mini_swdcom` (i.e. without fixed number, allocator, scheduler, or disassembler support, including swdcom support)
 
-To build the kernel, one first needs to install the gas and binutils arm-none-eabi toolchain, and then execute (for STM32L476):
+and where \<platform> is one of
+
+* `stm32f407`
+* `stm32f746`
+* `stm32l476`
+
+To build the kernel, one first needs to install the gas and binutils arm-none-eabi toolchain, and then execute (for STM32F407):
 
     $ make
 
 or:
 
-    $ make PLATFORM=stm32l476
+    $ make PLATFORM=stm32f407
 
 This will build a zeptoforth.<platform>.bin and a zeptoforth.<platform>.elf file; the zeptoforth.<platform>.elf file is of use if one wishes to do source debugging with gdb of the zeptoforth kernel, otherwise disregard it. The same workflow is to be followed if one is assembling and linking zeptoforth for the STM32F407.
 
@@ -63,7 +65,7 @@ or, for the STM32F746:
 
 where \<type> is one of the types given above, with the meanings given above.
 
-This will load the auxiliary Forth routines that would be useful to have onto the MCU. This code is that is included in the `zeptoforth_<type>-<version>.bin` images along with the kernel itself. The last thing that is included is a "cornerstone" named `restore-state` which, when executed, as follows:
+This will load the auxiliary Forth routines that would be useful to have onto the MCU. This code is that is included in the `zeptoforth_<type>-<version>.bin` images along with the kernel itself. The last thing that is included for full builds is a "cornerstone" named `restore-state` which, when executed, as follows:
 
     restore-state
 

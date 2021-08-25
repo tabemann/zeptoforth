@@ -1,6 +1,6 @@
 # Development Tools Words
 
-There are a number of useful words provided with zeptoforthas development tools.
+There are a number of useful words provided with zeptoforth's development tools.
 
 These words are in `forth-module`.
 
