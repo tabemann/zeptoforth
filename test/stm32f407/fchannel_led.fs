@@ -26,16 +26,16 @@ begin-module forth-module
   import led-module
 
   \ Allot the channels
-  1 cells fchan-size buffer: orange-fchan
-  1 cells fchan-size buffer: green-fchan
-  1 cells fchan-size buffer: blue-fchan
-  1 cells fchan-size buffer: red-fchan
+  fchan-size buffer: orange-fchan
+  fchan-size buffer: green-fchan
+  fchan-size buffer: blue-fchan
+  fchan-size buffer: red-fchan
 
   \ Initialize the channels
-  1 cells orange-fchan init-fchan
-  1 cells green-fchan init-fchan
-  1 cells blue-fchan init-fchan
-  1 cells red-fchan init-fchan
+  orange-fchan init-fchan
+  green-fchan init-fchan
+  blue-fchan init-fchan
+  red-fchan init-fchan
 
   \ The led structure
   begin-structure led-header-size

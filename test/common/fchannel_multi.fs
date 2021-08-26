@@ -25,7 +25,7 @@ begin-module forth-module
   import fchan-module
 
   \ Allot the channel
-  2 cells fchan-size buffer: my-fchan
+  fchan-size buffer: my-fchan
 
   \ The inner loop of the consumer
   : consumer ( -- )
@@ -66,7 +66,7 @@ begin-module forth-module
 
   \ Initiate the test
   : init-test ( -- )
-    2 cells my-fchan init-fchan
+    my-fchan init-fchan
     consumer-task run
     producer-a-task run
     producer-b-task run

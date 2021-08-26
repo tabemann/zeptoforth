@@ -31,7 +31,7 @@
             
   <div class="section" id="fast-channel-words">
 <h1>Fast Channel Words<a class="headerlink" href="#fast-channel-words" title="Permalink to this headline">¶</a></h1>
-<p>A fast channel is a monodirectional means of communicating data between two different tasks. Fast channels are not buffered queues; provided another task is listening to a fast channel, sending on a fast channel immediately transfers control to the receiving task and sends the sending task to the end of the scheduling ring.</p>
+<p>A fast channel is a monodirectional means of communicating data between two different tasks. Fast channels are not buffered queues; provided another task is listening to a fast channel, sending on a fast channel immediately transfers control to the receiving task and sends the sending task to the end of the scheduling ring. Only a single copy is done when transferring data from the sending task to the receiving task.</p>
 <p>If no task is listening to a fast channel, if no other tasks are attempting to send on the fast channel the data for the fast channel is recorded in the fast channel, and the sending task is descheduled, to be rescheduled at the back of the scheduling ring when a task then receives on the fast channel. If no task is listening to a fast channel, and if other tasks are already attempting to send on the fast channel, another task attempting to send on the fast channel waits until no more tasks are ahead of it, and then records its data, deschedules itself, immediately transfers control if a listening task is ready to receive a message, and once a listening task has received the message is rescheduled.</p>
 <p>Note that if multiple tasks attempt to send on a fast channel, they are queued so that they send their data in the order in which they attempted to send their data. Likewise, if multiple tasks attempt to receive on a fast channel, they are queued so that they receive data in the order in which they attempted to receive dat.</p>
 <p>Fast channels can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put into alloted memory in the dictionary or into allocated memory in the heap.</p>
@@ -43,13 +43,13 @@
 </div>
 <div class="section" id="fchan-size">
 <h2><code class="docutils literal notranslate"><span class="pre">fchan-size</span></code><a class="headerlink" href="#fchan-size" title="Permalink to this headline">¶</a></h2>
-<p>( data-bytes – bytes )</p>
-<p>Get the size of an fast channel with the given number of data bytes in memory.</p>
+<p>( – bytes )</p>
+<p>Get the size of an fast channel in bytes.</p>
 </div>
 <div class="section" id="init-fchan">
 <h2><code class="docutils literal notranslate"><span class="pre">init-fchan</span></code><a class="headerlink" href="#init-fchan" title="Permalink to this headline">¶</a></h2>
-<p>( data-bytes addr – )</p>
-<p>Initialize a fast channel starting at the specified address with the given number of data bytes.</p>
+<p>( addr – )</p>
+<p>Initialize a fast channel starting at the specified address.</p>
 </div>
 <div class="section" id="close-fchan">
 <h2><code class="docutils literal notranslate"><span class="pre">close-fchan</span></code><a class="headerlink" href="#close-fchan" title="Permalink to this headline">¶</a></h2>
