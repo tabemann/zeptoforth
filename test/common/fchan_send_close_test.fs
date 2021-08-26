@@ -31,7 +31,7 @@ begin-module forth-module
   my-task-count task-pool-size buffer: my-task-pool
 
   \ The fchannel
-  1 cells fchan-size buffer: my-fchan
+  fchan-size buffer: my-fchan
 
   \ The producer
   : producer ( -- )
@@ -54,7 +54,7 @@ begin-module forth-module
   \ Initialize the test
   : init-test ( -- )
     512 256 256 my-task-count my-task-pool init-task-pool
-    1 cells my-fchan init-fchan
+    my-fchan init-fchan
     0 ['] producer my-task-pool spawn-from-task-pool producer-task !
     0 ['] closer my-task-pool spawn-from-task-pool closer-task !
     producer-task @ run

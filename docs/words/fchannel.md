@@ -1,6 +1,6 @@
 # Fast Channel Words
 
-A fast channel is a monodirectional means of communicating data between two different tasks. Fast channels are not buffered queues; provided another task is listening to a fast channel, sending on a fast channel immediately transfers control to the receiving task and sends the sending task to the end of the scheduling ring.
+A fast channel is a monodirectional means of communicating data between two different tasks. Fast channels are not buffered queues; provided another task is listening to a fast channel, sending on a fast channel immediately transfers control to the receiving task and sends the sending task to the end of the scheduling ring. Only a single copy is done when transferring data from the sending task to the receiving task.
 
 If no task is listening to a fast channel, if no other tasks are attempting to send on the fast channel the data for the fast channel is recorded in the fast channel, and the sending task is descheduled, to be rescheduled at the back of the scheduling ring when a task then receives on the fast channel. If no task is listening to a fast channel, and if other tasks are already attempting to send on the fast channel, another task attempting to send on the fast channel waits until no more tasks are ahead of it, and then records its data, deschedules itself, immediately transfers control if a listening task is ready to receive a message, and once a listening task has received the message is rescheduled.
 
@@ -16,14 +16,14 @@ The following words are in `fchan-module`:
 The fast channel closed exception.
 
 ##### `fchan-size`
-( data-bytes -- bytes )
+( -- bytes )
 
-Get the size of an fast channel with the given number of data bytes in memory.
+Get the size of an fast channel in bytes.
 
 ##### `init-fchan`
-( data-bytes addr -- )
+( addr -- )
 
-Initialize a fast channel starting at the specified address with the given number of data bytes.
+Initialize a fast channel starting at the specified address.
 
 ##### `close-fchan`
 ( fchan -- )

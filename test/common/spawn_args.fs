@@ -25,10 +25,10 @@ begin-module forth-module
   import fchan-module
 
   \ Allot the channels
-  1 cells fchan-size buffer: signal-0-fchan
-  1 cells fchan-size buffer: signal-1-fchan
-  1 cells fchan-size buffer: signal-2-fchan
-  1 cells fchan-size buffer: signal-3-fchan
+  fchan-size buffer: signal-0-fchan
+  fchan-size buffer: signal-1-fchan
+  fchan-size buffer: signal-2-fchan
+  fchan-size buffer: signal-3-fchan
 
   \ The task pool
   3 task-pool-size buffer: my-task-pool
@@ -44,10 +44,10 @@ begin-module forth-module
 
   \ Initialize the test
   : init-test ( -- )
-    1 cells signal-0-fchan init-fchan
-    1 cells signal-1-fchan init-fchan
-    1 cells signal-2-fchan init-fchan
-    1 cells signal-3-fchan init-fchan
+    signal-0-fchan init-fchan
+    signal-1-fchan init-fchan
+    signal-2-fchan init-fchan
+    signal-3-fchan init-fchan
     512 256 256 3 my-task-pool init-task-pool
     signal-1-fchan 2 1 0 3 signal-0-fchan 6
     ['] action my-task-pool spawn-from-task-pool run

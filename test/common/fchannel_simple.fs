@@ -24,7 +24,7 @@ begin-module forth-module
   import fchan-module
 
   \ The channel
-  1 cells fchan-size buffer: my-fchan
+  fchan-size buffer: my-fchan
 
   \ The task
   variable consumer-task
@@ -46,7 +46,7 @@ begin-module forth-module
   
   \ Initialize the test
   : init-test ( -- )
-    1 cells my-fchan init-fchan
+    my-fchan init-fchan
     0 ['] consumer 512 256 256 spawn consumer-task !
     0 ['] producer 512 256 256 spawn producer-task !
     consumer-task @ run

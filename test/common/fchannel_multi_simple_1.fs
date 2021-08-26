@@ -25,7 +25,7 @@ begin-module forth-module
   import lock-module
 
   \ Our channel
-  1 cells fchan-size buffer: my-fchan
+  fchan-size buffer: my-fchan
 
   \ Our output lock
   lock-size buffer: my-lock
@@ -49,7 +49,7 @@ begin-module forth-module
   ;
 
   \ Initialize
-  1 cells my-fchan init-fchan
+  my-fchan init-fchan
   my-lock init-lock
   0 ' consumer 512 256 256 spawn constant my-consumer-task
   char A 1 ' producer 512 256 256 spawn constant my-producer-a-task

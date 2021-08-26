@@ -31,9 +31,12 @@ begin-module-once fchan-module
 
     \ Fast channel header structure
     begin-structure fchan-size
+      \ Fast channel data address
+      field: fchan-data-addr
+
       \ Fast channel data size
       field: fchan-data-size
-
+      
       \ Fast channel is closed
       field: fchan-closed
 
@@ -45,26 +48,25 @@ begin-module-once fchan-module
 
       \ Fast channel receive task queue
       tqueue-size +field fchan-recv-tqueue
-    end-structure
 
-    \ Get fast channel data
-    : fchan-data ( addr -- data-addr ) [inlined] fchan-size + ;
+      \ Fast channel response task queue
+      tqueue-size +field fchan-resp-tqueue
+    end-structure
 
   end-module
 
   \ Get the fast channel size
-  : fchan-size ( data-bytes -- bytes ) 4 align fchan-size + ;
-
-  \ Get the fast channel data size
-  : fchan-data-size ( fchan -- data-bytes ) fchan-data-size @ ;
+  fchan-size constant fchan-size
 
   \ Initialize a fast channel
-  : init-fchan ( data-bytes addr -- )
-    swap 4 align over fchan-data-size !
+  : init-fchan ( addr -- )
+    0 over fchan-data-addr !
+    0 over fchan-data-size !
     false over fchan-closed !
     dup fchan-recv-lock init-lock
     dup fchan-send-tqueue init-tqueue
-    fchan-recv-tqueue init-tqueue
+    dup fchan-recv-tqueue init-tqueue
+    fchan-resp-tqueue init-tqueue
   ;
 
   \ Fast channel is closed exception
@@ -77,9 +79,12 @@ begin-module-once fchan-module
       current-task prepare-block
       dup fchan-send-tqueue wait-tqueue
       dup fchan-closed @ triggers x-fchan-closed
-      dup fchan-data over fchan-data-size @ 0 fill
-      >r r@ fchan-data-size @ min r@ fchan-data swap move r>
+      tuck fchan-data-size !
+      tuck fchan-data-addr !
       dup fchan-recv-tqueue wake-tqueue
+      [: dup fchan-resp-tqueue wait-tqueue ;] try ?dup if
+	0 swap fchan-data-addr ! ?raise
+      then
       fchan-closed @ triggers x-fchan-closed
     ;] critical
   ;
@@ -97,8 +102,12 @@ begin-module-once fchan-module
 	>r
 	2dup 0 fill
 	r@ fchan-data-size @ min
-	r> fchan-data -rot
-	2dup 2>r move 2r>
+	r@ fchan-data-addr @ ?dup if -rot
+	  2dup 2>r move 2r>
+	else
+	  rot drop drop 0
+	then
+	r> fchan-resp-tqueue wake-tqueue
       ;] critical
     ;] over fchan-recv-lock with-lock
   ;
