@@ -200,5 +200,5 @@ USART1_Base $0C + constant USART1_BRR
   use-216mhz
 ;
 
-\ Warm reboot
-warm
+\ Reboot
+reboot

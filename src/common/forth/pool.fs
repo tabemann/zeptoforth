@@ -120,5 +120,5 @@ begin-module-once pool-module
 
 end-module
 
-\ Warm reboot
-warm
+\ Reboot
+reboot

@@ -252,5 +252,5 @@ begin-module-once schedule-module
 
 end-module
 
-\ Warm reboot
-warm
+\ Reboot
+reboot

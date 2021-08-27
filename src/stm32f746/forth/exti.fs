@@ -175,5 +175,5 @@ begin-module-once exti-module
 
 end-module
 
-\ Warm reboot
-warm
+\ Reboot
+reboot

@@ -139,5 +139,5 @@ end-module
   init-rng
 ;
 
-\ Warm reboot
-warm
+\ Reboot
+reboot

@@ -276,5 +276,5 @@ end-module
 
 unimport int-io-module
 
-\ Warm reboot
-warm
+\ Reboot
+reboot

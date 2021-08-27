@@ -151,5 +151,5 @@ begin-module-once fchan-module
 
 end-module
     
-\ Warm reboot
-warm
+\ Reboot
+reboot

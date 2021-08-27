@@ -188,5 +188,5 @@ begin-module-once tqueue-module
   
 end-module
 
-\ Warm reboot
-warm
+\ Reboot
+reboot

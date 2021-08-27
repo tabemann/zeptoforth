@@ -182,11 +182,11 @@ class ConnectSerial(Connection):
             return sioResult
 
     def refresh(self):
-        time.sleep(2)
+        time.sleep(1)
         self.port.flush()
         self.port.reset_output_buffer()
         self.port.reset_input_buffer()
-        time.sleep(2)
+        time.sleep(1)
         self.port.flush()
         self.port.reset_output_buffer()
         self.port.reset_input_buffer()

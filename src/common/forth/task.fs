@@ -1099,4 +1099,4 @@ end-module
 unimport task-module
 
 \ Reboot to initialize multitasking
-warm
+reboot
