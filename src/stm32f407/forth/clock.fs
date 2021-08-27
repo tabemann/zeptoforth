@@ -154,5 +154,5 @@ USART2_Base $0C + constant USART2_CR1
   use-168mhz
 ;
 
-\ Warm reboot
-warm
+\ Reboot
+reboot

@@ -112,5 +112,5 @@ begin-module forth-module
 
 end-module
 
-\ Warm reboot
-warm
+\ Reboot
+reboot

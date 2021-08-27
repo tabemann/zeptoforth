@@ -58,5 +58,5 @@ begin-module-once temp-module
 
 end-module
 
-\ Warm reboot
-warm
+\ Reboot
+reboot

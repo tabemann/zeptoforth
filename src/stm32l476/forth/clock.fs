@@ -232,5 +232,5 @@ $E000E010 constant SYST_CSR
   use-72mhz
 ;
 
-\ Warm reboot
-warm
+\ Reboot
+reboot

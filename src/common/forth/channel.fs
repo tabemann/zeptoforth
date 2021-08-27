@@ -452,5 +452,5 @@ begin-module-once chan-module
   
 end-module
 
-\ Warm reboot
-warm
+\ Reboot
+reboot

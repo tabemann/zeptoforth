@@ -183,5 +183,5 @@ import interrupt-module
 
 unimport interrupt-module
 
-\ Warm reboot
-warm
+\ Reboot
+reboot

@@ -457,5 +457,5 @@ begin-module-once stream-module
 
 end-module
 
-\ Warm reboot
-warm
+\ Reboot
+reboot

@@ -282,5 +282,5 @@ begin-module-once lock-module
 
 end-module
     
-\ Warm reboot
-warm
+\ Reboot
+reboot

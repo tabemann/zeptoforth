@@ -128,6 +128,6 @@ import internal-module
 unimport internal-module
 unimport systick-module
 
-\ Warm reboot
-warm
+\ Reboot
+reboot
 

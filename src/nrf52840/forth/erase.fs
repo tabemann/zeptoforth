@@ -97,6 +97,6 @@ commit-flash
 \ Ending compiling code in flash
 end-compress-flash
 
-\ Warm reboot
-warm
+\ Reboot
+reboot
 

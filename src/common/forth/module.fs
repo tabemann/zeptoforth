@@ -216,5 +216,5 @@ forth-module set-current
 forth-module 1 set-order
 forth-module set-current
 
-\ Warm reboot
-warm
+\ Reboot
+reboot
