@@ -409,5 +409,5 @@ end-module
 
 unimport allocate-module
 
-\ Warm reboot
-warm
+\ Reboot
+reboot

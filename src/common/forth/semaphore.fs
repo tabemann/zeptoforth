@@ -63,5 +63,5 @@ begin-module-once sema-module
 
 end-module
 
-\ Warm reboot
-warm
+\ Reboot
+reboot

@@ -437,5 +437,5 @@ import internal-module
 unimport internal-module
 unimport line-internal-module
 
-\ Warm reboot
-warm
+\ Reboot
+reboot

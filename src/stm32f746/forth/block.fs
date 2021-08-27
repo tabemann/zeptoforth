@@ -626,5 +626,5 @@ end-module
 
 unimport block-module
 
-\ Warm reboot
-warm
+\ Reboot
+reboot

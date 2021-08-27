@@ -196,5 +196,5 @@ begin-module-once ansi-term-module
 
 end-module
 
-\ Warm reboot
-warm
+\ Reboot
+reboot

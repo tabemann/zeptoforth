@@ -64,5 +64,5 @@ end-module
 
 unimport led-module
 
-\ Warm reboot
-warm
+\ Reboot
+reboot

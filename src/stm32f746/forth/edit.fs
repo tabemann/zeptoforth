@@ -774,5 +774,5 @@ end-module
 
 unimport edit-internal-module
 
-\ Warm reboot
-warm
+\ Reboot
+reboot

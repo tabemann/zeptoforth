@@ -868,5 +868,5 @@ end-module
 
 unimport qspi-module
 
-\ Warm reboot
-warm
+\ Reboot
+reboot

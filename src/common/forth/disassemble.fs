@@ -1858,5 +1858,5 @@ end-compress-flash
 
 unimport disassemble-internal-module
 
-\ Warm reboot
-warm
+\ Reboot
+reboot
