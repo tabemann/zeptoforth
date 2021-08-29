@@ -629,7 +629,7 @@ begin-module-once life-module
   ;
   
   \ Add an R-pentomino to the world
-  : r-pentomino ( dir x y -- )
+  : r-pentomino ( x y -- )
     s" _** / **_ / _*_" 2swap set-multiple
   ;
 
