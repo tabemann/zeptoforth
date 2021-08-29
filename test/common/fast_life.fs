@@ -132,7 +132,7 @@ begin-module-once life-module
     2dup 1- swap 1+ swap wrap-coord -new-alive
     2dup 1- swap 1- swap wrap-coord -new-alive
     2dup swap 1- swap wrap-coord -new-alive
-    life-width @ * + new-buffer @ + 16 swap bbic!
+    life-width @ * + new-buffer @ + 16 swap cbic!
   ;
 
   \ Set a new life cell to be dead
@@ -145,7 +145,7 @@ begin-module-once life-module
     2dup 1- swap 1+ swap wrap-coord +new-alive
     2dup 1- swap 1- swap wrap-coord +new-alive
     2dup swap 1- swap wrap-coord +new-alive
-    life-width @ * + new-buffer @ + 16 swap bbis!
+    life-width @ * + new-buffer @ + 16 swap cbis!
   ;
 
   \ Set whether a life cell is alive
@@ -167,7 +167,7 @@ begin-module-once life-module
     2dup 1- swap 1+ swap -new-alive
     2dup 1- swap 1- swap -new-alive
     2dup swap 1- swap -new-alive
-    life-width @ * + new-buffer @ + 16 swap bbic!
+    life-width @ * + new-buffer @ + 16 swap cbic!
   ;
 
   \ Set a new non-border life cell to be dead
@@ -180,7 +180,7 @@ begin-module-once life-module
     2dup 1- swap 1+ swap +new-alive
     2dup 1- swap 1- swap +new-alive
     2dup swap 1- swap +new-alive
-    life-width @ * + new-buffer @ + 16 swap bbis!
+    life-width @ * + new-buffer @ + 16 swap cbis!
   ;
 
   \ Non-border cell sate table
