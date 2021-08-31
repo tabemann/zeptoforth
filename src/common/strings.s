@@ -70,7 +70,7 @@ _parse_to_char:
 3:	bx lr
 
 	@@ Immediately type a string in the input stream
-	define_word ".(", visible_flag
+	define_word ".(", visible_flag | immediate_flag
 _type_to_paren:
 	push {lr}
 	bl _skip_to_token

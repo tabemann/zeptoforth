@@ -37,7 +37,22 @@ Memory can be viewed with the following word:
 ##### `dump`
 ( start-addr end-addr -- )
 
-This word dumps memory as hexdump as bytes, along with displaying each byte, if a valid ASCII character, starting from *start-addr* and ending at, non-inclusive, *end-addr*.
+This word dumps memory as sequences of 16 bytes in hexadecimal, along with displaying each byte, if a valid ASCII character, starting from *start-addr* and ending at, non-inclusive, *end-addr*.
+
+##### `dump-halfs`
+( start-addr end-addr -- )
+
+This word dumps memory as sequences of 8 16-bit halfwords in hexadecimal, along with displaying each byte, if a valid ASCII character, starting from *start-addr* and ending at, non-inclusive, *end-addr*.
+
+##### `dump-cells`
+( start-addr end-addr -- )
+
+This word dumps memory as sequences of 4 32-bit cells in hexadecimal, along with displaying each byte, if a valid ASCII character, starting from *start-addr* and ending at, non-inclusive, *end-addr*.
+
+##### `dump-ascii`
+( start-addr end-addr -- )
+
+This word dumps memory as sequences of 64 ASCII characters, starting from *start-addr* and ending at, non-inclusing *end-addr*.
 
 ## Listing Words
 
