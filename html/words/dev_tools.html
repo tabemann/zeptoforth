@@ -64,7 +64,22 @@
 <div class="section" id="dump">
 <h3><code class="docutils literal notranslate"><span class="pre">dump</span></code><a class="headerlink" href="#dump" title="Permalink to this headline">¶</a></h3>
 <p>( start-addr end-addr – )</p>
-<p>This word dumps memory as hexdump as bytes, along with displaying each byte, if a valid ASCII character, starting from <em>start-addr</em> and ending at, non-inclusive, <em>end-addr</em>.</p>
+<p>This word dumps memory as sequences of 16 bytes in hexadecimal, along with displaying each byte, if a valid ASCII character, starting from <em>start-addr</em> and ending at, non-inclusive, <em>end-addr</em>.</p>
+</div>
+<div class="section" id="dump-halfs">
+<h3><code class="docutils literal notranslate"><span class="pre">dump-halfs</span></code><a class="headerlink" href="#dump-halfs" title="Permalink to this headline">¶</a></h3>
+<p>( start-addr end-addr – )</p>
+<p>This word dumps memory as sequences of 8 16-bit halfwords in hexadecimal, along with displaying each byte, if a valid ASCII character, starting from <em>start-addr</em> and ending at, non-inclusive, <em>end-addr</em>.</p>
+</div>
+<div class="section" id="dump-cells">
+<h3><code class="docutils literal notranslate"><span class="pre">dump-cells</span></code><a class="headerlink" href="#dump-cells" title="Permalink to this headline">¶</a></h3>
+<p>( start-addr end-addr – )</p>
+<p>This word dumps memory as sequences of 4 32-bit cells in hexadecimal, along with displaying each byte, if a valid ASCII character, starting from <em>start-addr</em> and ending at, non-inclusive, <em>end-addr</em>.</p>
+</div>
+<div class="section" id="dump-ascii">
+<h3><code class="docutils literal notranslate"><span class="pre">dump-ascii</span></code><a class="headerlink" href="#dump-ascii" title="Permalink to this headline">¶</a></h3>
+<p>( start-addr end-addr – )</p>
+<p>This word dumps memory as sequences of 64 ASCII characters, starting from <em>start-addr</em> and ending at, non-inclusing <em>end-addr</em>.</p>
 </div>
 </div>
 <div class="section" id="listing-words">

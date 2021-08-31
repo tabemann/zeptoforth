@@ -1367,27 +1367,98 @@ commit-flash
 \ Commit to flash
 commit-flash
 
-\ Dump memory between two addresses
+\ Set the internal module
+internal-module set-current
+
+\ Dump 16 bytes of ASCII
+: dump-ascii-16 ( start-addr -- )
+  [char] ' emit
+  16 0 do
+    dup i + c@ dup $20 >= over $7F < and if emit else drop [char] . emit then
+  loop
+  [char] ' emit drop
+;
+
+\ Set the forth module
+forth-module set-current
+
+\ Commit to flash
+commit-flash
+
+\ Dump memory as ASCII between two addresses
+: dump-ascii ( start-addr end-addr -- )
+  cr
+  2dup < if
+    swap do
+      i h.8
+      space [char] ' emit
+      64 0 do
+	j i + c@ dup $20 >= over $7F < and if emit else drop [char] . emit then
+      loop
+      [char] ' emit cr
+    64 +loop
+  else
+    2drop
+  then
+;
+
+\ Dump memory as bytes and ASCII between two addresses
 : dump ( start-addr end-addr -- )
   cr
-  swap ?do
-    i h.8
-    16 0 ?do
-      space j i + c@ h.2
-    loop
-    space [char] ' emit
-    16 0 ?do
-      j i + c@ dup $20 >= over $7F < and if emit else drop [char] . emit then
-    loop
-    [char] ' emit cr
-  16 +loop
+  2dup < if
+    swap do
+      i h.8
+      16 0 do
+	space j i + c@ h.2
+      loop
+      space i dump-ascii-16 cr
+    16 +loop
+  else
+    2drop
+  then
+;
+
+\ Dump memory as 16-bit values and ASCII between two addresses
+: dump-halfs ( start-addr end-addr -- )
+  cr
+  2dup < if
+    swap do
+      i h.8
+      16 0 do
+	space j i + h@ h.4
+      2 +loop
+      space i dump-ascii-16 cr
+    16 +loop
+  else
+    2drop
+  then
+;
+
+\ Dump memory as 32-bit cells and ASCII between two addresses
+: dump-cells ( start-addr end-addr -- )
+  cr
+  2dup < if
+    swap do
+      i h.8
+      16 0 do
+	space j i + @ h.8
+      4 +loop
+      space i dump-ascii-16 cr
+    16 +loop
+  else
+    2drop
+  then
 ;
 
 \ Skip characters in the evaluation buffer until a predicate is met
 : skip-until ( xt -- )
   >r
   begin
-    source >parse @ > if >parse @ + c@ r@ execute 1 >parse +! else drop true then
+    source >parse @ > if
+      >parse @ + c@ r@ execute 1 >parse +!
+    else
+      drop true
+    then
   until
   rdrop
 ;
