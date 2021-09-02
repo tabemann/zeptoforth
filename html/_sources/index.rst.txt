@@ -20,7 +20,7 @@ Zeptoforth Documentation
    words/temp
    words/task_pool
    words/action_pool
-   words/allocate
+   words/heap
    words/lock
    words/channel
    words/fchannel
