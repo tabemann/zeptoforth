@@ -25,7 +25,7 @@
 #include src/common/forth/temp_str.fs
 #include src/common/forth/disassemble.fs
 #include src/common/forth/pool.fs
-#include src/common/forth/allocate.fs
+#include src/common/forth/heap.fs
 #include src/common/forth/tqueue.fs
 #include src/common/forth/lock.fs
 #include src/common/forth/semaphore.fs
