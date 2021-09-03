@@ -24,6 +24,13 @@ compile-to-flash
 begin-import-module-once line-internal-module
 
   import ansi-term-module
+  import heap-module
+
+  \ History block count
+  128 constant history-block-count
+
+  \ History block size
+  16 constant history-block-size
 
   \ Line structure
   begin-structure line-size
@@ -37,6 +44,9 @@ begin-import-module-once line-internal-module
     field: line-buffer-size
     field: line-offset
     field: line-count
+    field: line-history-first
+    field: line-history-current
+    history-block-size history-block-count heap-size +field line-history-heap
   end-structure
   
   \ Line structure for current task
@@ -65,7 +75,89 @@ begin-import-module-once line-internal-module
     0 over line-terminal-columns !
     0 over line-offset !
     0 over line-count !
+    0 over line-history-first !
+    0 over line-history-current !
+    history-block-size history-block-count 2 pick line-history-heap init-heap
     line !
+  ;
+
+  \ Get next history item
+  : history-next ( history -- next-history ) @ ;
+
+  \ Get history string
+  : history-string ( history -- c-string ) cell+ ;
+
+  \ Get first history item
+  : history-first ( -- first-history ) line @ line-history-first @ ;
+
+  \ Get previous history item
+  : history-prev ( history -- prev-history )
+    history-first 2dup <> if
+      begin dup history-next 2 pick <> while history-next repeat nip
+    else
+      2drop 0
+    then
+  ;
+
+  \ Get last history item
+  : history-last ( -- last-history )
+    history-first begin dup history-next while history-next repeat
+  ;
+
+  \ Evict history
+  : history-evict ( -- )
+    history-last
+    dup history-first = if
+      line @ line-history-heap free 0 line @ line-history-first !
+    else
+      dup history-prev 0 swap ! line @ line-history-heap free
+    then
+  ;
+
+  \ Allocate a string in the history
+  : history-allocate ( length -- )
+    5 +
+    begin
+      [: dup line @ line-history-heap allocate ;] try
+      dup ['] x-allocate-failed = if
+	drop history-evict false
+      else
+	?raise nip true
+      then
+    until
+  ;
+
+  \ Add a string in the history
+  : history-add ( c-addr bytes -- )
+    dup history-allocate
+    history-first over !
+    dup line @ line-history-first !
+    2dup cell+ c!
+    5 + swap move
+  ;
+
+  \ Move a history item to the head of the history
+  : history-front ( history -- )
+    dup history-prev ?dup if
+      over @ swap !
+      history-first over !
+      line @ line-history-first !
+    else
+      drop
+    then
+  ;
+
+  \ Get the current history
+  : history-current ( -- history ) line @ line-history-current @ ;
+
+  \ Is the current history the same as what is in the buffer
+  : history-changed? ( -- changed? )
+    history-current ?dup if
+      cell+ count
+      line @ line-buffer-ptr @ line @ line-count-ptr @ @ equal-strings? not
+    else
+      true
+    then
   ;
 
   \ Initialize for refill
@@ -217,7 +309,7 @@ begin-import-module-once line-internal-module
   ;
 
   \ Append a byte
-  : append-byte ( b -- success)
+  : append-byte ( b -- success )
     line @ line-count-ptr @ @ line @ line-buffer-size @ < if
       line @ line-buffer-ptr @ line @ line-index-ptr @ @ + c!
       1 line @ line-index-ptr @ +!
@@ -361,9 +453,51 @@ begin-import-module-once line-internal-module
     update-line
   ;
 
+  \ Write history to the buffer
+  : set-buffer-for-history ( history -- )
+    cell+ dup c@ dup line @ line-index-ptr @ ! dup line @ line-count-ptr @ !
+    dup get-spaces-to-index dup line @ line-offset ! line @ line-count !
+    swap 1+ line @ line-buffer-ptr @ rot move
+    update-line
+  ;
+
+  \ Clear buffer
+  : clear-buffer ( -- )
+    0 line @ line-offset ! 0 line @ line-count !
+    0 line @ line-index-ptr @ ! 0 line @ line-count-ptr @ !
+    update-line
+  ;
+
+  \ Handle going to the next history item
+  : handle-history-next ( -- )
+    history-current if
+      history-current history-next ?dup if
+	dup line @ line-history-current ! set-buffer-for-history
+      then
+    else
+      history-first if
+	history-first dup line @ line-history-current ! set-buffer-for-history
+      then
+    then
+  ;
+
+  \ Handle going to the next history item
+  : handle-history-prev ( -- )
+    history-current if
+      history-current history-first <> if
+	history-current history-prev dup line @ line-history-current !
+	set-buffer-for-history
+      else
+	0 line @ line-history-current ! clear-buffer
+      then
+    then
+  ;
+
   \ Handle a special key
   : handle-special ( -- )
     get-key case
+      [char] A of handle-history-next endof
+      [char] B of handle-history-prev endof
       [char] C of handle-forward endof
       [char] D of handle-backward endof
       [char] 3 of
@@ -410,6 +544,14 @@ begin-import-module-once line-internal-module
 	false
       then
     until
+    history-changed? if
+      line @ line-count-ptr @ @ if
+	line @ line-buffer-ptr @ line @ line-count-ptr @ @ history-add
+      then
+    else
+      history-current history-front
+    then
+    0 line @ line-history-current !
     end-position go-to-coord
     0 line @ line-index-ptr @ !
     xoff
