@@ -71,11 +71,10 @@ begin-module-once heap-module
 	heap-bitmap
 	over 5 rshift cells + dup >r rot >r
 	@ over $1F and rshift
-	32 2 pick $1F and - r@ min
-	32 swap - $FFFFFFFF swap rshift and if
+	32 r@ 32 min - $FFFFFFFF swap rshift and if
 	  rdrop rdrop drop false exit
 	then
-	r> swap $1F and - r> cell+
+	r> swap $1F and 32 swap - - 0 max r> cell+
 	begin over while
 	  over 32 min 32 swap - $FFFFFFFF swap rshift over @ and if
 	    2drop false exit
