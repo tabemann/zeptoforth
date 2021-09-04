@@ -1191,8 +1191,7 @@ commit-flash
   undefer-lit
   6 push,
   reserve-literal
-  postpone >r
-  postpone >r
+  postpone 2>r
   postpone >r
   here
 ;
@@ -1208,8 +1207,7 @@ commit-flash
   postpone 2dup
   postpone <>
   postpone if
-  postpone >r
-  postpone >r
+  postpone 2>r
   postpone else
   postpone 2drop
   postpone exit
@@ -1221,8 +1219,7 @@ commit-flash
 : loop ( R: leave current end -- leave current end | )
   [immediate]
   [compile-only]
-  postpone r>
-  postpone r>
+  postpone 2r>
   1 lit, postpone +
   postpone 2dup
   postpone =
@@ -1245,8 +1242,7 @@ commit-flash
 : +loop ( increment -- ) ( R: leave current end -- leave current end | )
   [immediate]
   [compile-only]
-  postpone r>
-  postpone r>
+  postpone 2r>
   postpone rot
   postpone dup
   0 lit,
