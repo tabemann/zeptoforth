@@ -179,7 +179,7 @@ begin-import-module-once line-internal-module
     get-terminal-size line @ line-terminal-columns h! line @
     line-terminal-rows h!
     line @ line-start-column h@ line @ line-terminal-columns h@ >= if
-      0 line @ line-start-column h! 1 line @ line-start-row +!
+      0 line @ line-start-column h! 1 line @ line-start-row h+!
       line @ line-start-row h@ line @ line-terminal-rows h@ >= if
 	line @ line-terminal-rows h@ 1- line @ line-start-row h!
       then
@@ -214,7 +214,7 @@ begin-import-module-once line-internal-module
   : adjust-start-row ( -- )
     line @ line-terminal-rows h@ 1- total-lines
     line @ line-start-row h@ + - dup 0< if
-      dup line @ line-start-row +! scroll-up
+      dup line @ line-start-row h+! scroll-up
     else
       drop
     then
