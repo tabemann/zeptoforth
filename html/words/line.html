@@ -37,10 +37,12 @@
 <li><p>Delete: delete the character under the cursor</p></li>
 <li><p>Left / Control-B: move the cursor one character to the left</p></li>
 <li><p>Right / Control-F: move the cursor one character to the right</p></li>
+<li><p>Up: switch to the previous line in the history</p></li>
+<li><p>Down: switch to the next line in the history</p></li>
 <li><p>Control-A: move the cursor to the start of the input</p></li>
 <li><p>Control-E: move the cursor to the end of the input</p></li>
 </ul>
-<p>Note that tabs and characters of code points greater than 127 are handled correctly. History and autocomplete are not supported (this is a microcontroller after all). Also note that it is not compatible with non-terminal operation, i.e. with loading code automatically via serial or swdcom; before this is done it must be disabled.</p>
+<p>Note that tabs and characters of code points greater than 127 are handled correctly. Also note that it is not compatible with non-terminal operation, i.e. with loading code automatically via serial or swdcom; before this is done it must be disabled.</p>
 <p>After a reboot, it is initialized for the main task only, and if, when enabled, <code class="docutils literal notranslate"><span class="pre">refill</span></code> is used for a different task, it needs to have already been initialized for that task.</p>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">line-module</span></code>:</p>
 <div class="section" id="init-line">
@@ -99,7 +101,7 @@
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="allocate.html">Allocator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
