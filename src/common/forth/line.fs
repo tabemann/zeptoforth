@@ -34,16 +34,16 @@ begin-import-module-once line-internal-module
 
   \ Line structure
   begin-structure line-size
-    field: line-start-row
-    field: line-start-column
-    field: line-terminal-rows
-    field: line-terminal-columns
+    hfield: line-start-row
+    hfield: line-start-column
+    hfield: line-terminal-rows
+    hfield: line-terminal-columns
     field: line-index-ptr
     field: line-count-ptr
     field: line-buffer-ptr
     field: line-buffer-size
-    field: line-offset
-    field: line-count
+    hfield: line-offset
+    hfield: line-count
     field: line-history-first
     field: line-history-current
     history-block-size history-block-count heap-size +field line-history-heap
@@ -64,17 +64,17 @@ begin-import-module-once line-internal-module
 
   \ Initialize line editing for the current task
   : init-line ( index-ptr count-ptr buffer-ptr buffer-size -- )
-    here line-size allot
-    tuck line-buffer-size !
+    4 align, here line-size allot
+    swap 255 min swap tuck line-buffer-size !
     tuck line-buffer-ptr !
     tuck line-count-ptr !
     tuck line-index-ptr !
-    0 over line-start-row !
-    0 over line-start-column !
-    0 over line-terminal-rows !
-    0 over line-terminal-columns !
-    0 over line-offset !
-    0 over line-count !
+    0 over line-start-row h!
+    0 over line-start-column h!
+    0 over line-terminal-rows h!
+    0 over line-terminal-columns h!
+    0 over line-offset h!
+    0 over line-count h!
     0 over line-history-first !
     0 over line-history-current !
     history-block-size history-block-count 2 pick line-history-heap init-heap
@@ -171,49 +171,49 @@ begin-import-module-once line-internal-module
 
   \ Update the start position
   : update-start-position ( -- )
-    get-cursor-position line @ line-start-column ! line @ line-start-row !
+    get-cursor-position line @ line-start-column h! line @ line-start-row h!
   ;
 
   \ Update the terminal size
   : update-terminal-size ( -- )
-    get-terminal-size line @ line-terminal-columns ! line @
-    line-terminal-rows !
-    line @ line-start-column @ line @ line-terminal-columns @ >= if
-      0 line @ line-start-column ! 1 line @ line-start-row +!
-      line @ line-start-row @ line @ line-terminal-rows @ >= if
-	line @ line-terminal-rows @ 1- line @ line-start-row !
+    get-terminal-size line @ line-terminal-columns h! line @
+    line-terminal-rows h!
+    line @ line-start-column h@ line @ line-terminal-columns h@ >= if
+      0 line @ line-start-column h! 1 line @ line-start-row +!
+      line @ line-start-row h@ line @ line-terminal-rows h@ >= if
+	line @ line-terminal-rows h@ 1- line @ line-start-row h!
       then
     then
   ;
 
   \ Get the start position
   : start-position ( -- row column )
-    line @ line-start-row @ line @ line-start-column @
+    line @ line-start-row h@ line @ line-start-column h@
   ;
 
   \ Get the position at a character offset
   : offset-position ( offset -- row column )
-    line @ line-start-column @ +
-    dup line @ line-terminal-columns @ / line @ line-start-row @ +
-    swap line @ line-terminal-columns @ mod
+    line @ line-start-column h@ +
+    dup line @ line-terminal-columns h@ / line @ line-start-row h@ +
+    swap line @ line-terminal-columns h@ mod
   ;
 
   \ Get the cursor position
-  : cursor-position ( -- row column ) line @ line-offset @ offset-position ;
+  : cursor-position ( -- row column ) line @ line-offset h@ offset-position ;
 
   \ Get the end position
-  : end-position ( -- row column ) line @ line-count @ offset-position ;
+  : end-position ( -- row column ) line @ line-count h@ offset-position ;
 
   \ Calculate number of lines text will take up
   : total-lines ( -- lines )
-    line @ line-count @ line @ line-start-column @ +
-    line @ line-terminal-columns @ /
+    line @ line-count h@ line @ line-start-column h@ +
+    line @ line-terminal-columns h@ /
   ;
 
   \ Adjust start row
   : adjust-start-row ( -- )
-    line @ line-terminal-rows @ 1- total-lines
-    line @ line-start-row @ + - dup 0< if
+    line @ line-terminal-rows h@ 1- total-lines
+    line @ line-start-row h@ + - dup 0< if
       dup line @ line-start-row +! scroll-up
     else
       drop
@@ -253,7 +253,7 @@ begin-import-module-once line-internal-module
   : reset-line ( -- )
     reset-ansi-term
     0 line @ line-index-ptr @ ! 0 line @ line-count-ptr @ !
-    0 line @ line-offset ! 0 line @ line-count !
+    0 line @ line-offset h! 0 line @ line-count h!
     update-start-position update-terminal-size
   ;
 
@@ -368,11 +368,11 @@ begin-import-module-once line-internal-module
   
   \ Handle delete
   : handle-delete ( -- )
-    line @ line-offset @ 0> if
+    line @ line-offset h@ 0> if
       left-bytes
       line @ line-index-ptr @ @ over - get-spaces-to-index
       line @ line-index-ptr @ @ get-spaces-to-index -
-      dup line @ line-offset +! line @ line-count +!
+      dup line @ line-offset h+! line @ line-count h+!
       0 ?do delete-byte loop
       update-line
     then
@@ -380,9 +380,9 @@ begin-import-module-once line-internal-module
 
   \ Handle delete forward
   : handle-delete-forward ( -- )
-    line @ line-offset @ line @ line-count @ < if
+    line @ line-offset h@ line @ line-count h@ < if
       right-bytes 0 ?do delete-byte-forward loop
-      line @ line-count-ptr @ @ get-spaces-to-index line @ line-count !
+      line @ line-count-ptr @ @ get-spaces-to-index line @ line-count h!
       update-line
     then
   ;
@@ -393,7 +393,7 @@ begin-import-module-once line-internal-module
       line @ line-index-ptr @ @ get-spaces-to-index swap
       insert-byte if
 	line @ line-index-ptr @ @ get-spaces-to-index swap -
-	dup line @ line-offset +! line @ line-count +!
+	dup line @ line-offset h+! line @ line-count h+!
 	update-line
       else
 	drop
@@ -403,13 +403,13 @@ begin-import-module-once line-internal-module
       dup tab <> if
 	append-byte if
 	  line @ line-index-ptr @ @ get-spaces-to-index swap -
-	  dup line @ line-offset +! line @ line-count +!
+	  dup line @ line-offset h+! line @ line-count h+!
 	  line @ line-buffer-ptr @ line @ line-index-ptr @ @ + 1- c@ emit
 	then
       else
 	append-byte if
 	  line @ line-index-ptr @ @ get-spaces-to-index swap - 0 ?do
-	    1 line @ line-offset +! 1 line @ line-count +!
+	    1 line @ line-offset h+! 1 line @ line-count h+!
 	    $20 emit
 	  loop
 	then
@@ -423,7 +423,7 @@ begin-import-module-once line-internal-module
       line @ line-index-ptr @ @ get-spaces-to-index
       right-bytes line @ line-index-ptr @ +!
       line @ line-index-ptr @ @ get-spaces-to-index swap -
-      line @ line-offset +!
+      line @ line-offset h+!
       update-line
     then
   ;
@@ -434,7 +434,7 @@ begin-import-module-once line-internal-module
       line @ line-index-ptr @ @ get-spaces-to-index
       left-bytes negate line @ line-index-ptr @ +!
       line @ line-index-ptr @ @ get-spaces-to-index swap -
-      line @ line-offset +!
+      line @ line-offset h+!
       update-line
     then
   ;
@@ -442,28 +442,28 @@ begin-import-module-once line-internal-module
   \ Handle going to the start
   : handle-start ( -- )
     0 line @ line-index-ptr @ !
-    0 line @ line-offset !
+    0 line @ line-offset h!
     update-line
   ;
 
   \ Handle going to the end
   : handle-end ( -- )
     line @ line-count-ptr @ @ line @ line-index-ptr @ !
-    line @ line-count @ line @ line-offset !
+    line @ line-count h@ line @ line-offset h!
     update-line
   ;
 
   \ Write history to the buffer
   : set-buffer-for-history ( history -- )
     cell+ dup c@ dup line @ line-index-ptr @ ! dup line @ line-count-ptr @ !
-    dup get-spaces-to-index dup line @ line-offset ! line @ line-count !
+    dup get-spaces-to-index dup line @ line-offset h! line @ line-count h!
     swap 1+ line @ line-buffer-ptr @ rot move
     update-line
   ;
 
   \ Clear buffer
   : clear-buffer ( -- )
-    0 line @ line-offset ! 0 line @ line-count !
+    0 line @ line-offset h! 0 line @ line-count h!
     0 line @ line-index-ptr @ ! 0 line @ line-count-ptr @ !
     update-line
   ;
