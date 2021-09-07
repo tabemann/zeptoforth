@@ -21,6 +21,8 @@
 \ Compile to flash
 compile-to-flash
 
+compress-flash
+
 begin-import-module-once systick-module
 
   import internal-module
@@ -68,7 +70,9 @@ begin-import-module-once systick-module
   
   \ SysTick vector index
   15 constant systick-vector
-    
+
+  compress-flash
+  
   \ SysTick handler
   : systick-handler ( -- )
     dmb dsb isb
@@ -108,6 +112,8 @@ end-module
 
 import internal-module
 
+commit-flash
+
 \ Init
 : init ( -- )
   init
@@ -127,6 +133,8 @@ import internal-module
 
 unimport internal-module
 unimport systick-module
+
+end-compress-flash
 
 \ Reboot
 reboot

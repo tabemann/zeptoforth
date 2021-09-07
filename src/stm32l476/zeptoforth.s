@@ -23,7 +23,7 @@
 	.thumb
 
 	.include "src/stm32l476/config.s"
-	.include "src/common/macro.s"
+	.include "src/m4_m7/macro.s"
 	.include "src/stm32l476/variables.s"
 	
 	.text
@@ -82,15 +82,15 @@ outer_exc_handled:
 
 	.ltorg
 	
-@	.include "src/stm32l476/use_48mhz.s"
 	.include "src/stm32l476/flashrom.s"
 	.include "src/stm32l476/console.s"
 	.include "src/stm32l476/expose.s"
-	.include "src/common/core.s"
+	.include "src/m4_m7/core.s"
+	.include "src/m4_m7/divide.s"
 	.include "src/common/outer.s"
 	.include "src/common/cond.s"
-	.include "src/common/asm.s"
+	.include "src/m4_m7/asm.s"
 	.include "src/common/strings.s"
-	.include "src/common/double.s"
-	.include "src/common/exception.s"
+	.include "src/m4_m7/double.s"
+	.include "src/m4_m7/exception.s"
 	.include "src/common/final.s"

@@ -21,6 +21,8 @@
 \ Compile to flash
 compile-to-flash
 
+compress-flash
+
 begin-module-once tqueue-module
 
   import task-module
@@ -58,6 +60,8 @@ begin-module-once tqueue-module
 
     end-structure
 
+    commit-flash
+    
     \ Set up a wait record
     : init-wait ( -- wait )
       ram-here 4 ram-align, ram-here wait-size ram-allot
@@ -126,6 +130,8 @@ begin-module-once tqueue-module
     0 swap last-wait !
   ;
 
+  commit-flash
+  
   \ Wait on a task queue
   \ Note that this must be called within a critical section
   : wait-tqueue ( tqueue -- )
@@ -176,6 +182,8 @@ begin-module-once tqueue-module
     -1 swap wait-counter +!
   ;
 
+  commit-flash
+
   \ Wake up all tasks in a task queue
   : wake-tqueue-all ( tqueue -- )
     \ begin-critical
@@ -187,6 +195,8 @@ begin-module-once tqueue-module
   ;
   
 end-module
+
+end-compress-flash
 
 \ Reboot
 reboot

@@ -199,40 +199,6 @@ _mul:	movs r0, tos
 	bx lr
 	end_inlined
 
-	@@ Signed division of two two's complement integers
-	define_word "/", visible_flag | inlined_flag
-_div:	movs r0, tos
-	pull_tos
-	sdiv tos, tos, r0
-	bx lr
-	end_inlined
-
-	@@ Unsigned division of two integers
-	define_word "u/", visible_flag | inlined_flag
-_udiv:	movs r0, tos
-	pull_tos
-	udiv tos, tos, r0
-	bx lr
-	end_inlined
-
-	@@ Signed modulus of two two's complement integers
-	define_word "mod", visible_flag | inlined_flag
-_mod:	movs r0, tos
-	pull_tos
-	sdiv r1, tos, r0
-	mls tos, r1, r0, tos
-	bx lr
-	end_inlined
-
-	@@ Unsigned modulus of two unsigned integers
-	define_word "umod", visible_flag | inlined_flag
-_umod:	movs r0, tos
-	pull_tos
-	udiv r1, tos, r0
-	mls tos, r1, r0, tos
-	bx lr
-	end_inlined
-
 	@@ Add 1 to an integer
 	define_word "1+", visible_flag | inlined_flag
 _1add:	adds tos, #1
@@ -367,14 +333,14 @@ _ge:	movs r0, tos
 	@@ Equals zero
 	define_word "0=", visible_flag | inlined_flag
 _0eq:	subs tos, #1
-	sbc tos, tos
+	sbcs tos, tos
 	bx lr
 	end_inlined
 
 	@@ Not equal to zero
 	define_word "0<>", visible_flag | inlined_flag
 _0ne:	subs tos, #1
-	sbc tos, tos
+	sbcs tos, tos
 	mvns tos, tos
 	bx lr
 	end_inlined
@@ -932,7 +898,7 @@ _bracket_immediate:
 	ldr r0, =current_flags
 	ldr r1, [r0]
 	movs r2, #immediate_flag
-	orr r1, r2
+	orrs r1, r2
 	str r1, [r0]
 	bx lr
 	end_inlined
@@ -943,7 +909,7 @@ _bracket_compile_only:
 	ldr r0, =current_flags
 	ldr r1, [r0]
 	movs r2, #compiled_flag
-	orr r1, r2
+	orrs r1, r2
 	str r1, [r0]
 	bx lr
 	end_inlined
@@ -954,7 +920,7 @@ _bracket_inlined:
 	ldr r0, =current_flags
 	ldr r1, [r0]
 	movs r2, #inlined_flag
-	orr r1, r2
+	orrs r1, r2
 	str r1, [r0]
 	bx lr
 	end_inlined
@@ -965,7 +931,7 @@ _immediate:
 	ldr r0, =current_flags
 	ldr r1, [r0]
 	movs r2, #immediate_flag
-	orr r1, r2
+	orrs r1, r2
 	str r1, [r0]
 	bx lr
 	end_inlined
@@ -976,7 +942,7 @@ _compile_only:
 	ldr r0, =current_flags
 	ldr r1, [r0]
 	movs r2, #compiled_flag
-	orr r1, r2
+	orrs r1, r2
 	str r1, [r0]
 	bx lr
 	end_inlined
@@ -987,7 +953,7 @@ _inlined:
 	ldr r0, =current_flags
 	ldr r1, [r0]
 	movs r2, #inlined_flag
-	orr r1, r2
+	orrs r1, r2
 	str r1, [r0]
 	bx lr
 	end_inlined
@@ -998,7 +964,7 @@ _visible:
 	ldr r0, =current_flags
 	ldr r1, [r0]
 	movs r2, #visible_flag
-	orr r1, r2
+	orrs r1, r2
 	str r1, [r0]
 	bx lr
 	end_inlined
@@ -1364,7 +1330,7 @@ _bit_test_1:
 	ldrb r0, [r0]
 	ands tos, r0
 	subs tos, #1
-	sbc tos, tos
+	sbcs tos, tos
 	mvns tos, tos
 	bx lr
 	end_inlined
@@ -1377,7 +1343,7 @@ _bit_test_2:
 	ldrh r0, [r0]
 	ands tos, r0
 	subs tos, #1
-	sbc tos, tos
+	sbcs tos, tos
 	mvns tos, tos
 	bx lr
 	end_inlined
@@ -1390,7 +1356,7 @@ _bit_test_4:
 	ldr r0, [r0]
 	ands tos, r0
 	subs tos, #1
-	sbc tos, tos
+	sbcs tos, tos
 	mvns tos, tos
 	bx lr
 	end_inlined

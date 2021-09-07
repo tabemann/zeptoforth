@@ -21,7 +21,12 @@
 \ Compile to flash
 compile-to-flash
 
+compress-flash
+
 begin-module-once temp-module
+
+  \ Data size is larger than temporary buffer size exception
+  : x-data-too-big ( -- ) space ." data too big" cr ;
 
   begin-import-module temp-internal-module
 
@@ -38,9 +43,8 @@ begin-module-once temp-module
 
   end-module
 
-  \ Data size is larger than temporary buffer size exception
-  : x-data-too-big ( -- ) space ." data too big" cr ;
-
+  commit-flash
+  
   \ Get the size of a temporary buffer with a given data size
   : temp-size ( data-bytes -- bytes ) [inlined] temp-size + ;
 
@@ -57,6 +61,8 @@ begin-module-once temp-module
   ;
 
 end-module
+
+end-compress-flash
 
 \ Reboot
 reboot

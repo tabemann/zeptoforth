@@ -20,7 +20,9 @@
 
 \ Compile to flash
 compile-to-flash
-  
+
+compress-flash
+
 begin-module-once pool-module
 
   import task-module
@@ -56,6 +58,8 @@ begin-module-once pool-module
     end-structure
 
   end-module
+
+  commit-flash
 
   \ Export pool-size
   pool-size constant pool-size
@@ -119,6 +123,8 @@ begin-module-once pool-module
   : pool-total-count ( pool -- u ) pool-total-count @ ;
 
 end-module
+
+end-compress-flash
 
 \ Reboot
 reboot

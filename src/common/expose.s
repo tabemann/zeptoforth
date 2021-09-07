@@ -147,6 +147,8 @@ _parse_buffer:
 	ldr tos, [tos]
 	bx lr
 	end_inlined
+
+	.ltorg
 	
 	@@ The source info
 	define_word "source", visible_flag

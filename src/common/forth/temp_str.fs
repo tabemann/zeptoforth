@@ -21,17 +21,18 @@
 \ Compile to flash
 compile-to-flash
 
+compress-flash
+
 begin-module forth-module
 
   import temp-module
   import internal-module
   import esc-string-module
   
-  \ Our temporary buffer size
-  256 constant temp-str-size
-
   \ Our temporary buffer
-  temp-str-size temp-size buffer: temp-str
+  256 temp-size buffer: temp-str
+
+  commit-flash
   
   \ Interpret or compile a counted string
   : c" ( -- )
@@ -111,6 +112,8 @@ begin-module forth-module
   : init ( -- ) init temp-str-size temp-str init-temp ;
 
 end-module
+
+end-compress-flash
 
 \ Reboot
 reboot

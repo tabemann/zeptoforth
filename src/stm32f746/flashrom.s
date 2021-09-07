@@ -29,7 +29,7 @@
 .equ FLASH_OPTCR,   FLASH_Base + 0x14 @ Flash Option Control Register
 
 	@@ Write a byte to flash
-	define_word "bflash!", visible_flag
+	define_word "cflash!", visible_flag
 _store_flash_1:
 	movs r0, tos
 	pull_tos
