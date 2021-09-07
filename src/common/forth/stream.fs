@@ -21,6 +21,8 @@
 \ Compile to flash
 compile-to-flash
 
+compress-flash
+
 begin-module-once stream-module
 
   import task-module
@@ -60,6 +62,8 @@ begin-module-once stream-module
 
     end-structure
 
+    commit-flash
+    
     \ Stream data address
     : stream-data ( stream -- addr ) [inlined] stream-size + ;
 
@@ -91,6 +95,8 @@ begin-module-once stream-module
 
   \ Get the stream data size
   : stream-data-size ( stream -- data-bytes ) stream-data-size @ ;
+
+  commit-flash
 
   \ Get whether a stream is full
   : stream-full? ( stream -- flag ) [: stream-full-unsafe? ;] critical ;
@@ -177,6 +183,8 @@ begin-module-once stream-module
       swap stream-recv-index !
     ;
 
+    commit-flash
+
     \ Write bytes to a stream
     : write-stream ( addr bytes stream -- )
       dup stream-send-index @ 2 pick + over stream-data-size @ > if
@@ -213,6 +221,8 @@ begin-module-once stream-module
     dup stream-send-tqueue init-tqueue
     stream-recv-tqueue init-tqueue
   ;
+
+  commit-flash
 
   \ Send data to a stream
   : send-stream ( addr bytes stream -- )
@@ -456,6 +466,8 @@ begin-module-once stream-module
   : reopen-stream ( stream -- ) false swap stream-closed ! ;
 
 end-module
+
+end-compress-flash
 
 \ Reboot
 reboot

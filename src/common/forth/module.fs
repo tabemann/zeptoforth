@@ -21,6 +21,8 @@
 \ Compile to flash
 compile-to-flash
 
+compress-flash
+
 \ Set up the wordlist
 forth-module 1 set-order
 forth-module set-current
@@ -50,17 +52,10 @@ begin-structure module-entry-size
   field: module-module
 end-structure
 
+commit-flash
+
 \ The module stack
 module-entry-size module-stack-count * buffer: module-stack
-
-\ Get the current module stack entry
-: module-stack@ ( -- frame | 0 )
-  module-stack-index @ 0<> if
-    module-stack module-stack-index @ 1- module-entry-size * +
-  else
-    0
-  then
-;
 
 \ Switch wordlists
 forth-module set-current
@@ -76,6 +71,19 @@ forth-module set-current
 
 \ Switch wordlists
 internal-module set-current
+
+commit-flash
+
+\ Get the current module stack entry
+: module-stack@ ( -- frame | 0 )
+  module-stack-index @ 0<> if
+    module-stack module-stack-index @ 1- module-entry-size * +
+  else
+    0
+  then
+;
+
+commit-flash
 
 \ Push a module stack entry
 : push-module-stack ( wid -- )
@@ -136,6 +144,8 @@ forth-module set-current
 
 \ Module does not exist
 : x-module-not-found ( -- ) space ." module not found" cr ;
+
+commit-flash
 
 \ Begin a module definition
 : begin-module ( "name" -- )
@@ -215,6 +225,8 @@ forth-module set-current
 
 forth-module 1 set-order
 forth-module set-current
+
+end-compress-flash
 
 \ Reboot
 reboot

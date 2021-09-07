@@ -23,7 +23,7 @@ AS=arm-none-eabi-as
 LD=arm-none-eabi-ld
 COPY=arm-none-eabi-objcopy
 DUMP=arm-none-eabi-objdump
-ASFLAGS=-mcpu=cortex-m4 -mthumb -g
+ASFLAGS=-g
 PREFIX=/usr/local
 PLATFORM=stm32f407
 VERSION=0.20.3.Dev

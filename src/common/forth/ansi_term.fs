@@ -21,6 +21,8 @@
 \ Compile this to flash
 compile-to-flash
 
+compress-flash
+
 begin-module-once ansi-term-module
 
   begin-import-module ansi-term-internal-module
@@ -44,8 +46,10 @@ begin-module-once ansi-term-module
 
   \ Type the CSI sequence
   : csi ( -- )
-    begin-critical escape emit [char] [ emit end-critical
+    begin-critical $1B emit [char] [ emit end-critical
   ;
+
+  commit-flash
 
   \ Show the cursor
   : show-cursor ( -- )
@@ -86,6 +90,8 @@ begin-module-once ansi-term-module
     begin-critical csi [char] 6 emit [char] n emit end-critical
   ;
 
+  commit-flash
+  
   \ Show the cursor with a show/hide counter
   : show-cursor ( -- )
     1 show-cursor-count +! show-cursor-count @ 0 = if show-cursor then
@@ -96,6 +102,8 @@ begin-module-once ansi-term-module
     -1 show-cursor-count +! show-cursor-count @ -1 = if hide-cursor then
   ;
 
+  commit-flash
+
   \ Execute code with a hidden cursor
   : execute-hide-cursor ( xt -- ) hide-cursor try show-cursor ?raise ;
 
@@ -104,11 +112,13 @@ begin-module-once ansi-term-module
 
   \ Get a key
   : get-key ( -- b )
-    saved-key @ ?dup if clear-key else key then
+    saved-key @ ?dup if 0 saved-key ! else key then
   ;
   
   \ Save a key
   : set-key ( b -- ) saved-key ! ;
+
+  commit-flash
   
   \ Wait for a number
   : wait-number ( -- n matches )
@@ -140,6 +150,8 @@ begin-module-once ansi-term-module
     get-key dup rot = if drop true else set-key false then
   ;
 
+  commit-flash
+  
   \ Get the cursor position
   : get-cursor-position ( -- row column )
     [:
@@ -170,6 +182,8 @@ begin-module-once ansi-term-module
     ;] execute-hide-cursor
   ;
 
+  commit-flash
+
   \ Execute code while preserving cursor position
   : execute-preserve-cursor ( xt -- )
     1 preserve-cursor-count +!
@@ -195,6 +209,8 @@ begin-module-once ansi-term-module
   : reset-ansi-term ( -- ) 0 show-cursor-count ! 0 saved-key ! ;
 
 end-module
+
+end-compress-flash
 
 \ Reboot
 reboot
