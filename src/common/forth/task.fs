@@ -21,6 +21,8 @@
 \ Compile this to flash
 compile-to-flash
 
+compress-flash
+
 begin-import-module-once task-module
 
   import internal-module
@@ -132,25 +134,6 @@ begin-import-module-once task-module
     \ PendSV vector index
     14 constant pendsv-vector
     
-  end-module
-
-  \ The currently waited-for lock
-  user current-lock
-  
-  \ The latest lock currently held by a tack
-  user current-lock-held
-
-  \ The default timeout
-  user timeout
-
-  \ No timeout
-  -1 constant no-timeout
-  
-  \ Sleep
-  : sleep ( -- ) sleep-enabled? @ if sleep then ;
-
-  begin-module task-internal-module
-
     \ Terminated task
     $8000 constant terminated
     
@@ -190,6 +173,42 @@ begin-import-module-once task-module
       field: task-next
     end-structure
 
+  end-module
+
+  \ The currently waited-for lock
+  user current-lock
+  
+  \ The latest lock currently held by a tack
+  user current-lock-held
+
+  \ The default timeout
+  user timeout
+
+  \ No timeout
+  -1 constant no-timeout
+  
+  \ Attempted to use a terminated task
+  : x-terminated ( -- ) space ." task has been terminated" cr ;
+
+  \ Would block exception
+  : x-would-block ( -- ) space ." operation would block" cr ;
+  
+  \ Attempted to task change while changing tasks during interrupt
+  : x-in-task-change ( -- ) space ." in task change" cr ;
+
+  \ Out of range task priority exception
+  : x-out-of-range-priority ( -- ) space ." out of range priority" cr ;
+
+  \ Timed out exception
+  : x-timed-out ( -- ) space ." block timed out" cr ;
+
+  commit-flash
+  
+  \ Sleep
+  : sleep ( -- ) sleep-enabled? @ if sleep then ;
+
+  begin-module task-internal-module
+
     \ Get task stack base
     : task-stack-base ( task -- addr )
       dup task + swap task-stack-size h@ +
@@ -204,9 +223,6 @@ begin-import-module-once task-module
     : task-rstack-base ( task -- addr )
       dup task + over task-stack-size h@ + swap task-rstack-size h@ +
     ;
-
-    \ Get task return stack end
-    : task-rstack-end ( task -- addr ) task-stack-base ;
 
     \ Get task dictionary base
     : task-dict-base ( task -- addr ) dup task-dict-size @ - ;
@@ -228,6 +244,11 @@ begin-import-module-once task-module
     : task-stack-current! ( addr task -- )
       dup last-task @ = if drop sp! else task-rstack-current @ 12 + ! then
     ;
+
+    commit-flash
+    
+    \ Get task return stack end
+    : task-rstack-end ( task -- addr ) task-stack-base ;
 
     \ Set task current dictionary address
     : task-dict-current! ( addr task -- )
@@ -258,19 +279,10 @@ begin-import-module-once task-module
     task-priority h@ 16 lshift 16 arshift
   ;
 
-  \ Attempted to use a terminated task
-  : x-terminated ( -- ) space ." task has been terminated" cr ;
-
   \ Validate task is not terminated
   : validate-not-terminated ( task -- )
     task-active h@ terminated = triggers x-terminated
   ;
-
-  \ Would block exception
-  : x-would-block ( -- ) space ." operation would block" cr ;
-  
-  \ Attempted to task change while changing tasks during interrupt
-  : x-in-task-change ( -- ) space ." in task change" cr ;
 
   begin-module task-internal-module
     
@@ -313,6 +325,8 @@ begin-import-module-once task-module
       dup first-task !
       0 swap task-next !
     ;
+
+    commit-flash
     
     \ Insert a task
     : insert-task ( task -- )
@@ -339,6 +353,8 @@ begin-import-module-once task-module
       0 swap task-next !
     ;
 
+    commit-flash
+
     \ Remove a task if it is scheduled
     : test-remove-task ( task -- )
       dup task-prev @ 0<> over task-next @ 0<> or if remove-task else drop then
@@ -361,6 +377,8 @@ begin-import-module-once task-module
       enable-int
     ;
 
+    commit-flash
+
     \ Start a task change
     : start-validate-task-change ( task -- )
       start-task-change
@@ -378,9 +396,6 @@ begin-import-module-once task-module
   : get-task-saved-priority ( task -- priority )
     task-saved-priority h@
   ;
-
-  \ Out of range task priority exception
-  : x-out-of-range-priority ( -- ) space ." out of range priority" cr ;
 
   \ Set task priority
   : set-task-priority ( priority task -- )
@@ -434,23 +449,14 @@ begin-import-module-once task-module
   : set-task-name ( addr -- task )
     dup validate-not-terminated ['] task-name for-task !
   ;
+
+  commit-flash
   
   \ Start a task's execution
   : run ( task -- )
     dup start-validate-task-change
     dup get-task-active 1+
     dup 1 = if over test-remove-task over insert-task then
-    swap task-active h!
-    false in-task-change !
-  ;
-
-  \ Activate a task (i.e. enable it and move it to the head of the queue)
-  : activate ( task -- )
-    dup start-validate-task-change
-    dup get-task-active 1+
-    dup 1 >= if
-      over test-remove-task over insert-task-first
-    then
     swap task-active h!
     false in-task-change !
   ;
@@ -562,6 +568,8 @@ begin-import-module-once task-module
     pause
   ;
 
+  commit-flash
+
   \ Block a task for the specified initialized timeout
   : block ( task -- )
     [:
@@ -609,9 +617,6 @@ begin-import-module-once task-module
     dup validate-not-terminated task-state h@ schedule-critical-mask and
     block-timed-out =
   ;
-
-  \ Timed out exception
-  : x-timed-out ( -- ) space ." block timed out" cr ;
 
   \ Validate not timing out
   : validate-timeout ( task -- ) timed-out? triggers x-timed-out ;
@@ -662,6 +667,12 @@ begin-import-module-once task-module
       current-task @ kill
     ;
 
+    \ Get whether a task is finished with a delay or timeout
+    : delayed? ( task -- )
+      systick-counter over ['] task-systick-start for-task @ -
+      swap ['] task-systick-delay for-task @ <
+    ;
+
   end-module
 
   \ Initialize a task
@@ -694,6 +705,8 @@ begin-import-module-once task-module
     drop r> r> swap push-task-stack
   ;
 
+  commit-flash
+
   \ Spawn a non-main task
   : spawn ( xn...x0 count xt dict-size stack-size rstack-size -- task )
     2dup + task +
@@ -710,12 +723,6 @@ begin-import-module-once task-module
     \ Wake tasks
     : do-wake ( -- ) true wake-tasks ! ;
 
-    \ Get whether a task is finished with a delay or timeout
-    : delayed? ( task -- )
-      systick-counter over ['] task-systick-start for-task @ -
-      swap ['] task-systick-delay for-task @ <
-    ;
-
     \ Get whether a task is waiting
     : waiting-task? ( task -- )
       dup task-state h@ schedule-critical-mask and
@@ -723,6 +730,8 @@ begin-import-module-once task-module
       over delayed = rot blocked-timeout = or
       rot delayed? and or
     ;
+
+    commit-flash
 
     \ Find next task
     : find-next-task ( -- task )
@@ -778,9 +787,11 @@ begin-import-module-once task-module
 	task-prev @
       repeat
     ;
+
+    commit-flash
     
-    \ The PendSV handler
-    : pendsv-handler ( -- )
+    \ Handle task-switching
+    : switch-tasks ( -- )
       dmb dsb isb
       r> pendsv-return !
 
@@ -850,9 +861,22 @@ begin-import-module-once task-module
       dmb dsb isb
     ;
 
-    \ Handle PAUSE
-    : do-pause ( -- ) true in-multitasker? ! ICSR_PENDSVSET! dmb dsb isb ;
+    commit-flash
+    
+    \ If this is not a Cortex-M0(+) MCU
 
+    m0-architecture [if]
+    
+      \ Handle PAUSE
+      : do-pause ( -- ) true in-multitasker? ! ICSR_PENDSVSET! dmb dsb isb ;
+
+    [else]
+
+      \ Handle Pause
+      : do-pause ( -- ) true in-multitasker? ! ['] switch-tasks svc
+      
+    [then]
+    
     \ Dump task name
     : dump-task-name ( task -- )
       get-task-name ?dup if count tuck type 16 swap - 0 max else 16 then spaces
@@ -902,12 +926,8 @@ begin-import-module-once task-module
       cr ." task     name             priority state      critical "
       ." until      delay"
     ;
-  
-    \ Dump task information for a single task
-    : dump-task ( task -- )
-      cr dup h.8 space dup dump-task-name space dup dump-task-priority space
-      dup dump-task-state space dump-task-until
-    ;
+
+    commit-flash
     
   end-module
   
@@ -916,7 +936,10 @@ begin-import-module-once task-module
     dump-task-header
     [:
       first-task @ begin dup 0<> while
-	dup dump-task task-prev @
+	dup
+	cr dup h.8 space dup dump-task-name space dup dump-task-priority space
+	dup dump-task-state space dump-task-until
+	task-prev @
       repeat
       drop
     ;] critical
@@ -981,6 +1004,8 @@ begin-import-module-once task-module
     then
     enable-int
   ;
+
+  commit-flash
   
   \ Initialize multitasking
   : init-tasker ( -- )
@@ -1004,31 +1029,10 @@ begin-import-module-once task-module
     false ram-dict-warned !
     ['] do-validate-dict validate-dict-hook !
     ['] execute svcall-vector vector!
-    ['] pendsv-handler pendsv-vector vector!
+    [ m0-architecture ] [if] ['] switch-tasks pendsv-vector vector! [then]
     ['] task-systick-handler systick-vector vector!
     1 pause-enabled !
     enable-int
-  ;
-  
-  \ Forget RAM contents
-  : forget-ram ( -- )
-    0 ram-latest!
-    latest $20000000 >= if 0 latest! then
-    0 pause-enabled !
-    min-ram-wordlist current-ram-wordlist !
-    next-ram-space dict-base !
-    dict-base @ next-user-space + ram-here!
-    0 wait-hook !
-    false flash-dict-warned !
-    ['] do-flash-validate-dict saved-validate-dict !
-    main-task @ task-stack-end free-end !
-    init-main-task
-    0 pause-count !
-    ['] do-pause pause-hook !
-    ['] do-wait wait-hook !
-    false ram-dict-warned !
-    ['] do-validate-dict validate-dict-hook !
-    1 pause-enabled !
   ;
 
   \ Display space free for a given task
@@ -1057,8 +1061,7 @@ begin-import-module-once task-module
 
 end-module
 
-\ Forget RAM contents
-: forget-ram ( -- ) forget-ram ;
+commit-flash
 
 \ Display space free for a given task
 : task-unused ( task -- ) task-unused ;
@@ -1097,6 +1100,8 @@ begin-module task-module
 end-module
 
 unimport task-module
+
+end-compress-flash
 
 \ Reboot to initialize multitasking
 reboot

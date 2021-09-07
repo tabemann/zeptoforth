@@ -21,6 +21,8 @@
 \ Compile to flash
 compile-to-flash
 
+compress-flash
+
 begin-module-once chan-module
   
   import task-module
@@ -63,6 +65,8 @@ begin-module-once chan-module
 
     end-structure
 
+    commit-flash
+    
     \ Core of getting whether a channel is full
     : chan-full-unsafe? ( chan -- flag )
       dup chan-current-count @ swap chan-count @ =
@@ -83,6 +87,8 @@ begin-module-once chan-module
 
   \ Get the channel element count
   : chan-count ( chan -- element-count ) chan-count @ ;
+
+  commit-flash
   
   \ Get whether a channel is full
   : chan-full? ( chan -- flag ) [: chan-full-unsafe? ;] critical ;
@@ -160,6 +166,8 @@ begin-module-once chan-module
     dup chan-send-tqueue init-tqueue
     false swap chan-closed !
   ;
+
+  commit-flash
 
   \ Send data to a channel
   : send-chan ( addr bytes chan -- )
@@ -274,6 +282,8 @@ begin-module-once chan-module
       then
     ;] critical
   ;
+
+  commit-flash
 
   \ Send a double cell on a channel
   : send-chan-2cell ( xd chan -- )
@@ -451,6 +461,8 @@ begin-module-once chan-module
   : reopen-chan ( chan -- ) false swap chan-closed ! ;
   
 end-module
+
+end-compress-flash
 
 \ Reboot
 reboot

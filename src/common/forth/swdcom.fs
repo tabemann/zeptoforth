@@ -1,5 +1,7 @@
 compile-to-flash
 
+compress-flash
+
 begin-import-module-once swd-module
 
   import internal-module
@@ -14,6 +16,8 @@ begin-import-module-once swd-module
     swd cell+ dup constant swd-rx
     256 + constant swd-tx
 
+    commit-flash
+
     : c-inc ( c-addr -- ) 1 swap c+! [inlined] ;
     : inc-rx-w ( -- ) swd-rx-w c-inc ;
     : inc-rx-r ( -- ) swd-rx-r c-inc ;
@@ -22,6 +26,8 @@ begin-import-module-once swd-module
 
     variable use-sleep
 
+    commit-flash
+    
     : pause-until ( xt -- )
       use-sleep @ if
 	wait
@@ -30,6 +36,8 @@ begin-import-module-once swd-module
 	drop
       then
     ;
+
+    commit-flash
 
     : swd-key? ( -- flag )
       disable-int swd h@ dup 8 rshift swap $ff and <> enable-int
@@ -55,6 +63,8 @@ begin-import-module-once swd-module
 
   end-module
 
+  commit-flash
+
   : swd-init ( -- )
     false use-sleep ! 0 swd ! swd >r11
     ." The swd buffer address is: " swd h.8 cr
@@ -73,6 +83,8 @@ begin-import-module-once swd-module
 
 end-module
 
+commit-flash
+
 : init ( -- )
   init
   swd-init
@@ -80,6 +92,8 @@ end-module
 ;
 
 unimport swd-module
+
+end-compress-flash
 
 compile-to-ram
 

@@ -19,10 +19,12 @@
 @ SOFTWARE.
 
 	.p2align 2
+last_kernel_word:	
 	.word 0
 	.word 10b - 8
 10:	.byte 12f - 11f
 11:	.ascii ""
 12:	.p2align 2
-	.word 10b - 8
+	.word last_kernel_word
+kernel_end:
 	.word 0xDEADBEEF
