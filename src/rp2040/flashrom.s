@@ -19,6 +19,78 @@
 @ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 @ SOFTWARE.
 
+	.equ XIP_SSI_BASE 0x18000000
+	.equ SSI_CTRLR0_OFFSET 0x00
+	.equ SSI_CTRLR1_OFFSET 0x04
+	.equ SSI_SSIENR_OFFSET 0x08
+	.equ SSI_BAUDR_OFFSET 0x14
+	.equ SSI_SR_OFFSET 0x28
+	.equ SSI_SPI_CTRLR0_OFFSET 0xF4
+
+	@ Standard 1-bit SPI serial frames (0 << 21)
+	@ 32 clocks per data frame (31 << 16)
+	@ Send instruction and address, receive data (3 << 8)
+	.equ CTRLR0_INIT_XIP ((0 << 21) | (31 << 16) | (3 << 8))
+
+	@ Execute a read instruction (CMD_READ << 24)
+	@ 8 bit command prefix (2 << 8)
+	@ 24 address and mode bits (6 << 2 )
+	@ Command and address are both serial (0 << 0)
+	.equ SPI_CTRLR0_INIT_XIP ((CMD_READ << 24) | (2 << 8) | (6 << 2) | (0 << 0))
+
+	@ Continuation code
+	.equ CMD_CONTINUE 0xA0
+
+	@ Put the board into continuation state (CMD_CONTINUE << 24)
+	@ Command appended to the end (0 << 8)
+	@ 32 address and mode bits (8 << 2)
+	@ Command and address are both serial (0 << 0)
+	.equ SPI_CTRLR0_CONTINUE ((CMD_CONTINUE << 24) | (0 << 8) | (8 << 2) | (0 << 0)
+
+	@ Enable SSI
+	define_word "enable-ssi", visible_flag
+_enable_ssi:
+	ldr r0, =XIP_SSI_BASE
+	movs r1, #1
+	str r1, [r0, #SSI_SSIENR_OFFSET]
+	bx lr
+	end_inlined
+
+	@ Disable SSI
+	define_word "disable-ssi", visible_flag
+_disable_ssi:
+	ldr r0, =XIP_SSI_BASE
+	movs r1, #0
+	str r1, [r0, #SSI_SSIENR_OFFSET]
+	bx lr
+	end_inlined
+
+	@ Wait for busy to clear
+	define_word "wait-ssi-busy", visible_flag
+_wait_ssi_busy:
+	ldr r0, =XIP_SSI_BASE + SSI_SR_OFFSET
+	movs r1, #1
+1:	ldr r2, [r0]
+	tst r2, r1
+	bne 1b
+	bx lr
+	end_inlined
+	
+	@ Issue an SSI instruction ( c -- )
+	define_word "issue-ssi", visible_flag
+_issue_ssi:
+	push {lr}
+	bl _disable_ssi
+	ldr r0, =XIP_SSI_BASE + SSI_SPI_CTRLR0_OFFSET
+	ldr r1, #2 << 8 @ 8 bit command prefix
+	lsls tos, tos, #24
+	orrs tos, r1
+	str tos, [r0]
+	pull_tos
+	bl _enable_ssi
+	bx lr
+	end_inlined
+
 	@@ Call a ROM routine with zero parameters
 	define_word "call-rom-0", visible_flag
 _call_rom_0:
@@ -73,74 +145,11 @@ _call_rom_4:
 	movs tos, r5
 	pop {r4, r5, pc}
 	end_inlined
-
-	@@ Write 256 bytes starting at a 256-bit-aligned address in flash
-	define_internal_word "256flash!", visible_flag
-_store_flash_256:
-	push {lr}
-	ldr r0, =flash_min_address
-	cmp tos, r0
-	bge 1f
-	ldr tos, =_attempted_to_write_core_flash
-	bl _raise
-1:	ldr r0, =flash_dict_end
-	cmp tos, r0
-	blt 1f
-	ldr tos, =_attempted_to_write_past_flash_end
-	bl _raise
-1:	tst tos, #0xf
-	beq 1f
-	ldr tos, =_store_flash_256_unaligned
-	bl _raise
-	ldr r1, #256
-2:	subs r1, #4
-	cmp r1, #0
-	blt 1f
-	ldr r0, [tos, r1]
-	adds r0, #1
-	beq 2b
-	ldr tos, =_store_flash_256_already_written
-	bl _raise
-1:	cpsid i
-	bl _connect_qspi
-	bl _exit_xip
-	ldmia dp!, {r0}
-	ldr r2, =flash_base
-	subs tos, r2
-	push_tos
-	movs tos, r0
-	push_tos
-	ldr tos, =256
-	bl _program_flash
-	bl _flush_flash_cache
-	bl _enter_xip
-	cpsie i
-	pop {pc}
-	end_inlined
-
-	@@ Wait for flash opeartions to complete
-wait_for_flash:
-1:	ldr r0, =FLASH_SR+2
-	ldrh r1, [r0]
-	movs r2, #0x01
-	ands r1, r2
-	bne 1b
-	bx lr
-	end_inlined
-	
-	@@ Exception handler for unaligned 256-byte flash writes
-	define_internal_word "256flash!-unaligned", visible_flag
-_store_flash_256_unaligned:
-	push {lr}
-	string_ln " unaligned 16-byte flash write"
-	bl _type
-	pop {pc}
-	end_inlined
 	
 	@@ Exception handler for flash writes where flash has already been
 	@@ written
-	define_word "256flash!-already-written", visible_flag
-_store_flash_256_already_written:
+	define_word "flash-already-written", visible_flag
+_store_flash_already_written:
 	push {lr}
 	string_ln " flash already written"
 	bl _type
@@ -308,27 +317,6 @@ _find_last_flash_word:
 	define_word "cflash!", visible_flag
 _store_flash_1:
 	push {lr}
-	push_tos
-	bl _get_flash_buffer
-	movs r0, tos
-	pull_tos
-	movs r2, #0xFF
-	ands tos, r2
-	ldr r1, [r0, #flash_buffer_space]
-	subs r1, #1
-	str r1, [r0, #flash_buffer_space]
-	movs r2, r0
-	adds r0, r0, tos
-	pull_tos
-	movs r3, #0xFF
-	ands tos, r3
-	strb tos, [r0]
-	cmp r1, #0
-	beq 1f
-	pull_tos
-	pop {pc}
-1:	movs tos, r2
-	bl _store_flash_buffer
 	pop {pc}
 	end_inlined
 	
@@ -336,23 +324,6 @@ _store_flash_1:
 	define_word "hflash!", visible_flag
 _store_flash_2:
 	push {lr}
-	movs r0, tos
-	pull_tos
-	push {r0, tos}
-	movs r1, #0xFF
-	ands tos, r1
-	push_tos
-	movs tos, r0
-	bl _store_flash_1
-	push_tos
-	pop {r0, tos}
-	lsrs tos, tos, #8
-	movs r1, #0xFF
-	ands tos, r1
-	push_tos
-	movs tos, r0
-	adds tos, #1
-	bl _store_flash_1
 	pop {pc}
 	end_inlined
 
@@ -360,23 +331,6 @@ _store_flash_2:
 	define_word "flash!", visible_flag
 _store_flash_4:
 	push {lr}
-	movs r0, tos
-	pull_tos
-	push {r0, tos}
-	ldr r1, =0xFFFF
-	ands tos, r1
-	push_tos
-	movs tos, r0
-	bl _store_flash_2
-	push_tos
-	pop {r0, tos}
-	lsrs tos, tos, #16
-	ldr r1, =0xFFFF
-	ands tos, r1
-	push_tos
-	movs tos, r0
-	adds tos, #2
-	bl _store_flash_2
 	pop {pc}
 	end_inlined
 
@@ -393,66 +347,16 @@ _store_flash_8:
 	pop {pc}
 	end_inlined
 
-	@@ Write out the current block of flash
-	define_internal_word "store-flash-buffer", visible_flag
-_store_flash_buffer:
-	push {lr}
-	push_tos
-	ldr tos, [tos, #flash_buffer_addr]
-	bl _store_flash_256
-	pop {pc}
-	end_inlined
-
-	@@ Flush writing the flash
-	define_internal_word "flush-flash", visible_flag
-_flush_flash:
-	push {lr}
-	bl _get_flash_buffer
-	ldr r0, [tos, #flash_buffer_space]
-	ldr r1, =256
-	cmp r0, r1
-	beq 1f
-	cmp r0, #0
-	beq 1f
-	movs r0, #0
-	str r0, [tos, #flash_buffer_space]
-	bl _store_flash_buffer
-	pop {pc}
-1:	pull_tos
-	pop {pc}
-	end_inlined
-
 	@@ Flush all the buffered flash
 	define_internal_word "flush-all-flash", visible_flag
 _flush_all_flash:	
-	push {lr}
-	ldr r0, =flash_buffers_start
-	ldr r1, =flash_buffers_start + (flash_buffer_size * flash_buffer_count)
-1:	cmp r0, r1
-	bge 2f
-	push_tos
-	movs tos, r0
-	push {r0, r1}
-	bl _flush_flash
-	pop {r0, r1}
-	ldr r2, =flash_buffer_size
-	adds r0, r2
-	b 1b
-2:	pop {pc}
+	bx lr
 	end_inlined
 
 	@@ Fill flash until it is aligned to a block
 	define_word "flash-align,", visible_flag
 _flash_align:
-	push {lr}
-1:	bl _flash_here
-	movs r0, #0xFF
-	tst tos, r0
-	beq 2f
-	movs tos, #0
-	bl _flash_comma_1
-2:	pull_tos
-	pop {pc}
+	bx lr
 	end_inlined
 
 	@@ Get the flash block size in bytes
@@ -466,13 +370,6 @@ _flash_block_size:
 	@@ Initialize the flash buffers
 	define_internal_word "init-flash-buffers", visible_flag
 _init_flash_buffers:
-	ldr r0, =flash_buffers_start
-	movs r1, #0
-	ldr r2, =flash_buffers_start + (flash_buffer_size * flash_buffer_count)
-1:	str r1, [r0]
-	adds r0, #4
-	cmp r0, r2
-	bne 1b
 	bx lr
 	end_inlined
 
