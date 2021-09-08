@@ -59,6 +59,8 @@ _handle_reset:
 	ldr r0, =here
 	ldr r1, =ram_current
 	str r1, [r0]
+	@@ Initialize faster XIP flash access
+	bl _init_flash
 	@@ Call the rest of the runtime in an exception handler
 	push_tos
 	ldr tos, =outer_exc_handled
