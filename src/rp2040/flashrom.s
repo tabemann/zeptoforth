@@ -19,24 +19,31 @@
 @ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 @ SOFTWARE.
 
+	.equ XIP_CTRL_BASE 0x14000000
+	.equ XIP_CTRL_OFFSET 0x00
+	.equ XIP_FLUSH_OFFSET 0x04
+	.equ XIP_STAT_OFFSET 0x08
+
 	.equ XIP_SSI_BASE 0x18000000
 	.equ SSI_CTRLR0_OFFSET 0x00
 	.equ SSI_CTRLR1_OFFSET 0x04
 	.equ SSI_SSIENR_OFFSET 0x08
 	.equ SSI_BAUDR_OFFSET 0x14
 	.equ SSI_SR_OFFSET 0x28
+	.equ SSI_DR0_OFFSET 0x60 @ 36 words
 	.equ SSI_SPI_CTRLR0_OFFSET 0xF4
 
-	@ Standard 1-bit SPI serial frames (0 << 21)
+	@ Quad SPI mode (2 << 21)
 	@ 32 clocks per data frame (31 << 16)
 	@ Send instruction and address, receive data (3 << 8)
-	.equ CTRLR0_INIT_XIP ((0 << 21) | (31 << 16) | (3 << 8))
+	.equ CTRLR0_INIT_XIP ((2 << 21) | (31 << 16) | (3 << 8))
 
-	@ Execute a read instruction (CMD_READ << 24)
+	@ Execute a Fast Read Quad I/O instruction (0xEB << 24)
+	@ wait cycles (4 << 11)
 	@ 8 bit command prefix (2 << 8)
-	@ 24 address and mode bits (6 << 2 )
-	@ Command and address are both serial (0 << 0)
-	.equ SPI_CTRLR0_INIT_XIP ((CMD_READ << 24) | (2 << 8) | (6 << 2) | (0 << 0))
+	@ 24 address and mode bits (6 << 2)
+	@ Command is SPI, address is QSPI (1 << 0)
+	.equ SPI_CTRLR0_INIT_XIP ((0xEB << 24) | (4 << 11) | (2 << 8) | (6 << 2) | (0 << 1))
 
 	@ Continuation code
 	.equ CMD_CONTINUE 0xA0
@@ -65,13 +72,40 @@ _disable_ssi:
 	bx lr
 	end_inlined
 
+	@ Disable the XIP cache
+	define_word "disable-xip-cache", visible_flag
+_disable_xip_cache:
+	ldr r0, =XIP_CTRL_BASE
+	movs r1, 0x1
+	ldr r2, [r0, #XIP_CTRL_OFFSET]
+	bics r2, r1
+	str r2, [r0, #XIP_CTRL_OFFSET]
+	bx lr
+	end_inlined
+
+	@ Enable and flush the XIP cahe
+	define_word "enable-flush-xip-cache", visible_flag
+_enable_flush_xip_cache:
+	ldr r0, =XIP_CTRL_BASE
+	movs r1, 0x1
+	str r1, [r0, #XIP_FLUSH_OFFSET]
+	ldr r2, [r0, #XIP_FLUSH_OFFSET] @ Wait until flushing completes
+	ldr r2, [r0, #XIP_CTRL_OFFSET]
+	orrs r2, r1
+	str r2, [r0, #XIP_CTRL_OFFSET]
+	bx lr
+	end_inlined
+
 	@ Wait for busy to clear
 	define_word "wait-ssi-busy", visible_flag
 _wait_ssi_busy:
 	ldr r0, =XIP_SSI_BASE + SSI_SR_OFFSET
-	movs r1, #1
-1:	ldr r2, [r0]
-	tst r2, r1
+	movs r1, #1 @ BUSY
+	movs r2, #4 @ TX FIFO empty
+1:	ldr r3, [r0]
+	tst r3, r2
+	beq 1b
+	tst r3, r1
 	bne 1b
 	bx lr
 	end_inlined
