@@ -496,6 +496,8 @@ _program_flash:
 	define_internal_word "erase-range", visible_flag
 _erase_range:
 	push {lr}
+	cpsid i
+	bl _exit_xip
 	ldr r0, =0xFFF
 	movs r1, tos
 	bics r1, r0
@@ -538,13 +540,30 @@ _erase_range:
 	ldr r0, =0x1000
 	adds r1, r0
 	b 1b
-2:	pop {pc}
+2:	bl _enable_flush_xip_cache
+	bl _enter_xip
+	cpsie i
+	pop {pc}
 	end_inlined
 	
+	@ Erase after a given address (including the sector the address is in)
+	@ and reboot.
+	define_internal_word "erase-after", visible_flag
+_erase_after:
+	push {lr}
+	bl _erase_range
+	bl _reboot
+	pop {pc}
+	end_inlined
+
 	@ Erase all flash except for the zeptoforth runtime
 	define_word "erase-all", visible_flag
 _erase_all:
-	bx lr
+	push {pc}
+	push_tos
+	ldr tos, =flash_min_address - flash_start
+	bl _erase_after
+	end {pc}
 	end_inlined
 		
 	@ Find the end of the flash dictionary
