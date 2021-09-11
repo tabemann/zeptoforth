@@ -220,7 +220,7 @@ begin-module-once heap-module
     2dup swap r@ -rot blocks-free? if
       r@ 3 pick 4 - ! r> -rot swap mark-allocated nip
     else
-      drop 2 pick over ['] allocate try
+      drop [: 2 pick over allocate ;] try
       dup ['] x-allocate-failed = if
 	rdrop drop over 4 - @ rot 2 pick block-addr>index rot mark-allocated
 	['] x-allocate-failed ?raise
