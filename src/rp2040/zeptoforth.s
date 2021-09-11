@@ -74,6 +74,7 @@ outer_exc_handled:
 	bl _init_variables
 	bl _init_dict
 	bl _uart_init
+	bl _gpio_init
 	bl _init_flash_buffers
 	bl _do_init
 	bl _welcome
@@ -83,6 +84,7 @@ outer_exc_handled:
 	
 	.include "src/rp2040/flashrom.s"
 	.include "src/rp2040/console.s"
+	.include "src/rp2040/hardware.s"
 	.include "src/rp2040/expose.s"
 	.include "src/m0/core.s"
 	.include "src/m0/divide.s"
