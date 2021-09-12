@@ -43,6 +43,9 @@ dp 	.req r7
 	@@ Inlined word
 	.equ inlined_flag, 0x0008
 
+	@@ Folded word
+	.equ fold_flag, 0x0010
+	
 	@@ The internal wordlist
 	.equ internal, 1
 

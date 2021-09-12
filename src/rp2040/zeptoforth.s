@@ -42,6 +42,8 @@ _handle_reset:
 	@@ Initialize r11, relied upon by swdcom
 	movs r0, #0
 	mov r11, r0
+	@@ Initalize r5, relied upon to provide a pointer to RAM
+	ldr r5, =ram_real_start
 	@@ Initialize the top of stack register
 	ldr tos, =0xFEDCBA98
 	@@ Initialize the data stack pointer
@@ -87,10 +89,11 @@ outer_exc_handled:
 	.include "src/rp2040/hardware.s"
 	.include "src/rp2040/expose.s"
 	.include "src/m0/core.s"
-	.include "src/m0/divide.s"
+	.include "src/rp2040/divide.s"
 	.include "src/common/outer.s"
 	.include "src/common/cond.s"
 	.include "src/m0/asm.s"
 	.include "src/common/strings.s"
+	.include "src/m0/double.s"
 	.include "src/m0/exception.s"
 	.include "src/common/final.s"

@@ -19,84 +19,84 @@
 @ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 @ SOFTWARE.
 
-	.equ MAX_ERASE_ADDR 0x00100000
+	.equ MAX_ERASE_ADDR, 0x00100000
+	.equ FLASH_CODA_ADDR, 0x100FFF00
 	
-	.equ XIP_CTRL_BASE 0x14000000
-	.equ XIP_CTRL_OFFSET 0x00
-	.equ XIP_FLUSH_OFFSET 0x04
-	.equ XIP_STAT_OFFSET 0x08
+	.equ XIP_CTRL_BASE, 0x14000000
+	.equ XIP_CTRL_OFFSET, 0x00
+	.equ XIP_FLUSH_OFFSET, 0x04
+	.equ XIP_STAT_OFFSET, 0x08
 
-	.equ XIP_SSI_BASE 0x18000000
+	.equ XIP_SSI_BASE, 0x18000000
 
-	.equ RAM_BASE 0x20000000
-	.equ FLASH_IMAGE_BASE 0x10001000
-	.equ IMAGE_SIZE 0x8000
-	.equ IO_QSPI_BASE 0x40018000
-	.equ PADS_QSPI_BASE 0x40020000
-	.equ XIP_SSI_BASE 0x18000000
-	.equ SSI_CTRLR0_OFFSET 0x00
-	.equ SSI_CTRLR1_OFFSET 0x04
-	.equ SSI_SSIENR_OFFSET 0x08
-	.equ SSI_BAUDR_OFFSET 0x14
-	.equ SSI_SR_OFFSET 0x28
-	.equ SSI_DR0_OFFSET 0x60 @ 36 words
-	.equ SSI_SPI_CTRLR0_OFFSET 0xF4
-	.equ VTOR 0xE0000ED08
+	.equ RAM_BASE, 0x20000000
+	.equ FLASH_IMAGE_BASE, 0x10001000
+	.equ IMAGE_SIZE, 0x8000
+	.equ IO_QSPI_BASE, 0x40018000
+	.equ PADS_QSPI_BASE, 0x40020000
+	.equ XIP_SSI_BASE, 0x18000000
+	.equ SSI_CTRLR0_OFFSET, 0x00
+	.equ SSI_CTRLR1_OFFSET, 0x04
+	.equ SSI_SSIENR_OFFSET, 0x08
+	.equ SSI_BAUDR_OFFSET, 0x14
+	.equ SSI_SR_OFFSET, 0x28
+	.equ SSI_DR0_OFFSET, 0x60 @ 36 words
+	.equ SSI_SPI_CTRLR0_OFFSET, 0xF4
 
 	@ Commands
-	.equ CMD_WRITE_STATUS 0x01
-	.equ CMD_READ_DATA_FAST_QUAD_IO 0xEB @
-	.equ CMD_READ_STATUS 0x05
-	.equ CMD_WRITE_ENABLE 0x06
-	.equ CMD_READ_STATUS_2 0x35
-	.equ CMD_CONT_READ 0xA0
-	.equ CMD_SECTOR_ERASE 0x20
-	.equ CMD_BLOCK_ERASE_32K 0x52
-	.equ CMD_BLOCK_ERASE_64K 0xD8
-	.equ CMD_PAGE_PROGRAM 0x02
+	.equ CMD_WRITE_STATUS, 0x01
+	.equ CMD_READ_DATA_FAST_QUAD_IO, 0xEB @
+	.equ CMD_READ_STATUS, 0x05
+	.equ CMD_WRITE_ENABLE, 0x06
+	.equ CMD_READ_STATUS_2, 0x35
+	.equ CMD_CONT_READ, 0xA0
+	.equ CMD_SECTOR_ERASE, 0x20
+	.equ CMD_BLOCK_ERASE_32K, 0x52
+	.equ CMD_BLOCK_ERASE_64K, 0xD8
+	.equ CMD_PAGE_PROGRAM, 0x02
 
 	@ QSPI Enable state
-	.equ QSPI_ENABLE_STATE 0x02
+	.equ QSPI_ENABLE_STATE, 0x02
 
 	@ Write busy state
-	.equ WRITE_BUSY_STATE 0x01
+	.equ WRITE_BUSY_STATE, 0x01
 
 	@ Wait cycles
-	.equ WAIT_CYCLES 4
+	.equ WAIT_CYCLES, 4
 
 	@ Pad control constants
-	.equ PADS_QSPI_GPIO_QSPI_SCLK_DRIVE_LSB 4
-	.equ PADS_QSPI_GPIO_QSPI_SCLK_SLEWFAST_BITS 0x01
-	.equ PADS_QSPI_GPIO_QSPI_SCLK_OFFSET 0x04
-	.equ PADS_QSPI_GPIO_QSPI_SD0_OFFSET 0x08
-	.equ PADS_QSPI_GPIO_QSPI_SD1_OFFSET 0x0C
-	.equ PADS_QSPI_GPIO_QSPI_SD2_OFFSET 0x10
-	.equ PADS_QSPI_GPIO_QSPI_SD3_OFFSET 0x14
-	.equ PADS_QSPI_GPIO_QSPI_SD0_SCHMITT_BITS 0x02
+	.equ PADS_QSPI_GPIO_QSPI_SCLK_DRIVE_LSB, 4
+	.equ PADS_QSPI_GPIO_QSPI_SCLK_SLEWFAST_BITS, 0x01
+	.equ PADS_QSPI_GPIO_QSPI_SCLK_OFFSET, 0x04
+	.equ PADS_QSPI_GPIO_QSPI_SD0_OFFSET, 0x08
+	.equ PADS_QSPI_GPIO_QSPI_SD1_OFFSET, 0x0C
+	.equ PADS_QSPI_GPIO_QSPI_SD2_OFFSET, 0x10
+	.equ PADS_QSPI_GPIO_QSPI_SD3_OFFSET, 0x14
+	.equ PADS_QSPI_GPIO_QSPI_SD0_SCHMITT_BITS, 0x02
 
-	.equ IO_QSPI_GPIO_QSPI_SS_CTRL_OFFSET 0x0C
-	.equ IO_QSPI_GPIO_QSPI_SS_CTRL_OUTOVER_MASK 0x300
-	.equ IO_QSPI_GPIO_QSPI_SS_CTRL_OUTOVER_NORMAL 0x000
-	.equ IO_QSPI_GPIO_QSPI_SS_CTRL_OUTOVER_INVERT 0x100
-	.equ IO_QSPI_GPIO_QSPI_SS_CTRL_OUTOVER_LOW 0x200
-	.equ IO_QSPI_GPIO_QSPI_SS_CTRL_OUTOVER_HIGH 0x300
+	.equ IO_QSPI_GPIO_QSPI_SS_CTRL_OFFSET, 0x0C
+	.equ IO_QSPI_GPIO_QSPI_SS_CTRL_OUTOVER_MASK, 0x300
+	.equ IO_QSPI_GPIO_QSPI_SS_CTRL_OUTOVER_NORMAL, 0x000
+	.equ IO_QSPI_GPIO_QSPI_SS_CTRL_OUTOVER_INVERT, 0x100
+	.equ IO_QSPI_GPIO_QSPI_SS_CTRL_OUTOVER_LOW, 0x200
+	.equ IO_QSPI_GPIO_QSPI_SS_CTRL_OUTOVER_HIGH, 0x300
 	
 	@ Mode to send commands
 	@ Standard SPI mode (0 << 21)
 	@ 8 clocks per data frame (7 << 16)
 	@ Tx and Rx (0 << 8)
-	.equ CTRLR0_SEND_CMD ((0 << 21) | (7 << 16) | (0 << 8))
+	.equ CTRLR0_SEND_CMD, ((0 << 21) | (7 << 16) | (0 << 8))
 	
 	@ Quad SPI mode (2 << 21)
 	@ 32 clocks per data frame (31 << 16)
 	@ Send instruction and address, receive data (3 << 8)
-	.equ CTRLR0_INIT_XIP ((2 << 21) | (31 << 16) | (3 << 8))
+	.equ CTRLR0_INIT_XIP, ((2 << 21) | (31 << 16) | (3 << 8))
 
 	@ 4 wait cycles (WAIT_CYCLES << 11)
 	@ 8 bit command prefix (2 << 8)
 	@ 32 address and mode bits (8 << 2)
 	@ Command is SPI, address is QSPI (1 << 0)
-	.equ SPI_CTRLR0_INIT_XIP ((WAIT_CYCLES << 11) | (2 << 8) | (8 << 2) | (1 << 0))
+	.equ SPI_CTRLR0_INIT_XIP, ((WAIT_CYCLES << 11) | (2 << 8) | (8 << 2) | (1 << 0))
 
 	@ Continually send reads
 	@ Send CMD_CONT_READ (CMD_CONT_READ << 24)
@@ -104,14 +104,31 @@
 	@ 0 bit command prefix (0 << 8)
 	@ 32 address and mode bits (8 << 2)
 	@ Command is QSPI, address is QSPI (2 << 0)
-	.equ SPI_CTRLR0_CONT_XIP ((CMD_CONT_READ << 24) | (WAIT_CYCLES << 11) | (0 << 8) | (9 << 2) | (2 << 0))
+	.equ SPI_CTRLR0_CONT_XIP, ((CMD_CONT_READ << 24) | (WAIT_CYCLES << 11) | (0 << 8) | (9 << 2) | (2 << 0))
 
 	@ 0 wait cycles (0 << 11)
 	@ 8 bit command prefix (2 << 8)
 	@ 24 address and mode bits (6 << 2)
 	@ Command and address are SPI (0 << 0)
-	.equ SPI_CTRLR0_ERASE ((0 << 11) | (2 << 8) | (6 << 2) | (0 << 0))
+	.equ SPI_CTRLR0_ERASE, ((0 << 11) | (2 << 8) | (6 << 2) | (0 << 0))
 
+	@ Erase flash up to a specified address if needed
+	define_internal_word "init-flash", visible_flag
+_init_flash:
+	push {lr}
+	ldr r0, =FLASH_CODA_ADDR
+	ldr r1, =0xFFFFFFFF
+	ldr r0, [r0]
+	cmp r0, r1
+	beq 1f
+	push_tos
+	ldr r1, =flash_start
+	adds r0, r1
+	movs tos, r0
+	bl _erase_range
+1:	pop {pc}
+	end_inlined
+	
 	@ Force the CS pin
 	define_word "force-flash-cs", visible_flag
 _force_flash_cs:
@@ -156,21 +173,23 @@ _flash_address_cmd:
 	define_word "write-flash-address", visible_flag
 _write_flash_address:
 	ldr r0, =XIP_SSI_BASE
-	str tos, [r0, =SSI_DR0_OFFSET]
+	str tos, [r0, #SSI_DR0_OFFSET]
 	pull_tos
 	lsrs r1, tos, 16
 	movs r2, #0xFF
 	ands r1, r2
-	str r1, [r0, =SSI_DR0_OFFSET]
+	str r1, [r0, #SSI_DR0_OFFSET]
 	lsrs r1, tos, 8
 	ands r1, r2
-	str r1, [r0, =SSI_DR0_OFFSET]
+	str r1, [r0, #SSI_DR0_OFFSET]
 	ands tos, r2
-	str tos, [r0, =SSI_DR0_OFFSET]
+	str tos, [r0, #SSI_DR0_OFFSET]
 	pull_tos
 	bx lr
 	end_inlined
 
+.ltorg
+	
 	@ Erase flash ( addr cmd -- )
 	define_word "erase-flash", visible_flag
 _erase_flash:
@@ -182,10 +201,10 @@ _erase_flash:
 	ldr tos, =IO_QSPI_GPIO_QSPI_SS_CTRL_OUTOVER_HIGH
 	bl _force_flash_cs
 	ldr r0, =XIP_SSI_BASE
-	ldr r1, [r0, =SSI_DR0_OFFSET]
-	ldr r1, [r0, =SSI_DR0_OFFSET]
-	ldr r1, [r0, =SSI_DR0_OFFSET]
-	ldr r1, [r0, =SSI_DR0_OFFSET]
+	ldr r1, [r0, #SSI_DR0_OFFSET]
+	ldr r1, [r0, #SSI_DR0_OFFSET]
+	ldr r1, [r0, #SSI_DR0_OFFSET]
+	ldr r1, [r0, #SSI_DR0_OFFSET]
 	bl _wait_ssi_busy
 	bl _wait_flash_write_busy
 	pop {pc}
@@ -195,6 +214,7 @@ _erase_flash:
 	define_word "enable-flash-write", visible_flag
 _enable_flash_write:
 	push {lr}
+	ldr r0, =XIP_SSI_BASE
 	movs r1, #CMD_WRITE_ENABLE
 	str r1, [r0, #SSI_DR0_OFFSET]
 	bl _wait_ssi_busy
@@ -206,7 +226,7 @@ _enable_flash_write:
 	define_word "read-flash-status", visible_flag
 _read_flash_status:
 	push {lr}
-	ldr r0, #XIP_SSI_BASE
+	ldr r0, =XIP_SSI_BASE
 	str tos, [r0, #SSI_DR0_OFFSET]
 	str tos, [r0, #SSI_DR0_OFFSET]
 	bl _wait_ssi_busy
@@ -482,6 +502,8 @@ _erase_range:
 	cpsie i
 	pop {pc}
 	end_inlined
+
+.ltorg
 	
 	@ Erase after a given address (including the sector the address is in)
 	@ and reboot.
@@ -498,11 +520,11 @@ _erase_after:
 	@ Erase all flash except for the zeptoforth runtime
 	define_word "erase-all", visible_flag
 _erase_all:
-	push {pc}
+	push {lr}
 	push_tos
 	ldr tos, =flash_min_address
 	bl _erase_after
-	end {pc}
+	pop {pc}
 	end_inlined
 		
 	@ Find the end of the flash dictionary
@@ -535,7 +557,7 @@ _find_flash_end:
 	@ Find the next flash block
 	define_internal_word "next-flash-block", visible_flag
 _next_flash_block:
-	movs r0, #FF
+	movs r0, #0xFF
 	bics tos, r0
 	ldr r0, =256
 	adds tos, r0
@@ -586,23 +608,42 @@ _init_flash_write:
 	define_word "cflash!", visible_flag
 _store_flash_1:
 	push {lr}
+	ldrb r0, [tos]
+	movs r1, 0xFF
+	cmp r0, r1
+	bne 1f
+	ldr r0, =flash_end - 1
+	cmp tos, r0
+	bhi 2f
+	ldr r0, =flash_dict_start
+	cmp tos, r0
+	blo 3f
+	ldr r0, =flash_start
+	subs tos, r0
 	bl _init_flash_write
 	ldr r0, =XIP_SSI_BASE
 	movs r1, #0xFF
 	ands tos, r1
-	str tos, [r0, =SSI_DR0_OFFSET]
+	str tos, [r0, #SSI_DR0_OFFSET]
 	push_tos
 	ldr tos, =IO_QSPI_GPIO_QSPI_SS_CTRL_OUTOVER_HIGH
 	bl _force_flash_cs
 	ldr r0, =XIP_SSI_BASE
-	ldr r1, [r0, =SSI_DR0_OFFSET]
-	ldr r1, [r0, =SSI_DR0_OFFSET]
-	ldr r1, [r0, =SSI_DR0_OFFSET]
-	ldr r1, [r0, =SSI_DR0_OFFSET]
-	ldr r1, [r0, =SSI_DR0_OFFSET]
+	ldr r1, [r0, #SSI_DR0_OFFSET]
+	ldr r1, [r0, #SSI_DR0_OFFSET]
+	ldr r1, [r0, #SSI_DR0_OFFSET]
+	ldr r1, [r0, #SSI_DR0_OFFSET]
+	ldr r1, [r0, #SSI_DR0_OFFSET]
 	bl _enable_flush_xip_cache
 	bl _enter_xip
 	cpsie i
+	pop {pc}
+1:	ldr tos, =_store_flash_already_written
+	bl _raise
+2:	ldr tos, =_attempted_to_write_past_flash_end
+	bl _raise
+3:	ldr tos, =_attempted_to_write_core_flash
+	bl _raise
 	pop {pc}
 	end_inlined
 	
@@ -615,28 +656,40 @@ _store_flash_2:
 	ands r2, r1
 	cmp r2, r1
 	beq 1f
+	ldrh r0, [tos]
+	ldr r1, =0xFFFF
+	cmp r0, r1
+	bne 2f
+	ldr r0, =flash_end - 2
+	cmp tos, r0
+	bhi 3f
+	ldr r0, =flash_dict_start
+	cmp tos, r0
+	blo 4f
+	ldr r0, =flash_start
+	subs tos, r0
 	bl _init_flash_write
 	ldr r0, =XIP_SSI_BASE
 	movs r1, #0xFF
 	movs r2, tos
 	ands r2, r1
-	str r2, [r0, =SSI_DR0_OFFSET]
+	str r2, [r0, #SSI_DR0_OFFSET]
 	lsrs r2, tos, #8
 	ands r2, r1
-	str r2, [r0, =SSI_DR0_OFFSET]
+	str r2, [r0, #SSI_DR0_OFFSET]
 	ldr tos, =IO_QSPI_GPIO_QSPI_SS_CTRL_OUTOVER_HIGH
 	bl _force_flash_cs
 	ldr r0, =XIP_SSI_BASE
-	ldr r1, [r0, =SSI_DR0_OFFSET]
-	ldr r1, [r0, =SSI_DR0_OFFSET]
-	ldr r1, [r0, =SSI_DR0_OFFSET]
-	ldr r1, [r0, =SSI_DR0_OFFSET]
-	ldr r1, [r0, =SSI_DR0_OFFSET]
-	ldr r1, [r0, =SSI_DR0_OFFSET]	
+	ldr r1, [r0, #SSI_DR0_OFFSET]
+	ldr r1, [r0, #SSI_DR0_OFFSET]
+	ldr r1, [r0, #SSI_DR0_OFFSET]
+	ldr r1, [r0, #SSI_DR0_OFFSET]
+	ldr r1, [r0, #SSI_DR0_OFFSET]
+	ldr r1, [r0, #SSI_DR0_OFFSET]	
 	pop {pc}
 1:	ldr r1, [dp]
 	movs r3, tos
-	ldr r2, #0xFF
+	movs r2, #0xFF
 	movs r0, r1
 	ands r0, r2
 	str r0, [dp]
@@ -651,6 +704,13 @@ _store_flash_2:
 	adds r3, #1
 	bl _store_flash_1
 	pop {pc}
+2:	ldr tos, =_store_flash_already_written
+	bl _raise
+3:	ldr tos, =_attempted_to_write_past_flash_end
+	bl _raise
+4:	ldr tos, =_attempted_to_write_core_flash
+	bl _raise
+	pop {pc}
 	end_inlined
 
 	@ Write a word to an address in one or more flash_buffers
@@ -663,31 +723,43 @@ _store_flash_4:
 	movs r1, #0xFC
 	cmp r2, r1
 	bhi 1f
+	ldr r0, [tos]
+	ldr r1, =0xFFFFFFFF
+	cmp r0, r1
+	bne 2f
+	ldr r0, =flash_end - 4
+	cmp tos, r0
+	bhi 3f
+	ldr r0, =flash_dict_start
+	cmp tos, r0
+	blo 4f
+	ldr r0, =flash_start
+	subs tos, r0
 	bl _init_flash_write
 	ldr r0, =XIP_SSI_BASE
 	movs r1, #0xFF
 	movs r2, tos
 	ands r2, r1
-	str r2, [r0, =SSI_DR0_OFFSET]
+	str r2, [r0, #SSI_DR0_OFFSET]
 	lsrs r2, tos, #8
 	ands r2, r1
-	str r2, [r0, =SSI_DR0_OFFSET]
+	str r2, [r0, #SSI_DR0_OFFSET]
 	lsrs r2, tos, #16
 	ands r2, r1
-	str r2, [r0, =SSI_DR0_OFFSET]
+	str r2, [r0, #SSI_DR0_OFFSET]
 	lsrs r2, tos, #24
-	str r2, [r0, =SSI_DR0_OFFSET]
+	str r2, [r0, #SSI_DR0_OFFSET]
 	ldr tos, =IO_QSPI_GPIO_QSPI_SS_CTRL_OUTOVER_HIGH
 	bl _force_flash_cs
 	ldr r0, =XIP_SSI_BASE
-	ldr r1, [r0, =SSI_DR0_OFFSET]
-	ldr r1, [r0, =SSI_DR0_OFFSET]
-	ldr r1, [r0, =SSI_DR0_OFFSET]
-	ldr r1, [r0, =SSI_DR0_OFFSET]
-	ldr r1, [r0, =SSI_DR0_OFFSET]
-	ldr r1, [r0, =SSI_DR0_OFFSET]	
-	ldr r1, [r0, =SSI_DR0_OFFSET]
-	ldr r1, [r0, =SSI_DR0_OFFSET]	
+	ldr r1, [r0, #SSI_DR0_OFFSET]
+	ldr r1, [r0, #SSI_DR0_OFFSET]
+	ldr r1, [r0, #SSI_DR0_OFFSET]
+	ldr r1, [r0, #SSI_DR0_OFFSET]
+	ldr r1, [r0, #SSI_DR0_OFFSET]
+	ldr r1, [r0, #SSI_DR0_OFFSET]	
+	ldr r1, [r0, #SSI_DR0_OFFSET]
+	ldr r1, [r0, #SSI_DR0_OFFSET]	
 	pop {pc}
 1:	ldr r1, [dp]
 	movs r3, tos
@@ -705,6 +777,13 @@ _store_flash_4:
 	movs tos, r3
 	adds r3, #1
 	bl _store_flash_2
+	pop {pc}
+2:	ldr tos, =_store_flash_already_written
+	bl _raise
+3:	ldr tos, =_attempted_to_write_past_flash_end
+	bl _raise
+4:	ldr tos, =_attempted_to_write_core_flash
+	bl _raise
 	pop {pc}
 	end_inlined
 

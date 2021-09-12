@@ -1,5 +1,4 @@
 @ Copyright (c) 2021 Travis Bemann
-@ Copyright (c) 2013 Matthias Koch
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -18,6 +17,13 @@
 @ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 @ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 @ SOFTWARE.
+
+	.equ SIO_DIV_UDIVIDEND_OFFSET, 0x60
+	.equ SIO_DIV_UDIVISOR_OFFSET, 0x64
+	.equ SIO_DIV_SDIVIDEND_OFFSET, 0x68
+	.equ SIO_DIV_SDIVISOR_OFFSET, 0x6C
+	.equ SIO_DIV_QUOTIENT_OFFSET, 0x70
+	.equ SIO_DIV_REMAINDER_OFFSET, 0x74
 
 	@@ Signed division of two two's complement integers
 	define_word "/", visible_flag
@@ -54,97 +60,41 @@ _umod:	push {lr}
 	@@ Unsigned division with modulus ( u1 u2 -- remainder quotient )
 	define_word "u/mod", visible_flag
 _udivmod:
-	movs r1, tos
-	pull_tos
-	@ Catch divide by zero.
-	cmp r1, #0
-	bne 1f
-	push_tos
-	movs tos, #0
-	bx lr    
-1:
-	@ Shift left the denominator until it is greater than the numerator
-	movs r2, #1    @ Zähler
-	movs r3, #0    @ Ergebnis
-	cmp tos, r1
-	bls 3f
-	adds r1, #0    @ Don't shift if denominator would overflow
-	bmi 3f
-        
-2:	lsls r2, r2, #1
-	lsls r1, r1,  #1
-	bmi 3f
-	cmp tos, r1
-	bhi 2b
-	
-3:	cmp tos, r1
-	bcc 4f         @ if (num>denom)
-	subs tos, r1     @ numerator -= denom
-	orrs r3, r2      @ result(r3) |= bitmask(r2)
-	
-4:	lsrs r1, r1, #1    @ denom(r1) >>= 1
-	lsrs r2, r2, #1    @ bitmask(r2) >>= 1
-	bne 3b
-
-	push_tos
-	movs tos, r3
+	ldr r0, =SIO_BASE
+	cpsid i
+	ldr r1, [dp]
+	str r1, [r0, #SIO_DIV_UDIVIDEND_OFFSET]
+	str tos, [r0, #SIO_DIV_UDIVISOR_OFFSET]
+	@@ Wait eight cycles
+	b 1f
+1:	b 1f
+1:	b 1f
+1:	b 1f
+1:	ldr r1, [r0, #SIO_DIV_REMAINDER_OFFSET]
+	ldr tos, [r0, #SIO_DIV_QUOTIENT_OFFSET]
+	str r1, [dp]
+	cpsie i
 	bx lr
 	end_inlined
 
 	@@ Signed division with modulus ( u1 u2 -- remainder quotient )
 	define_word "/mod", visible_flag
-_divmod:	
-	push {lr}
-	movs r0, tos @ Divisor
-	pull_tos @     TOS: Dividend
-	
-	cmp tos, #0
-	bge.n _divmod_plus
-	rsbs tos, tos, #0
-	
-_divmod_minus:
-	cmp r0, #0
-	bge.n _divmod_minus_plus
-	
-_divmod_minus_minus:
-	rsbs r0, r0, #0
-	push_tos
-	movs tos, r0
-	bl udivmod
-	movs r0, tos
-	pull_tos
-	rsbs tos, tos, #0
-	push_tos
-	movs tos, r0
-	pop {pc}
-	
-_divmod_minus_plus:
-	push_tos
-	movs tos, r0
-	bl udivmod
-	movs r0, tos
-	pull_tos
-	rsbs r0, r0, #0
-	rsbs tos, tos, #0
-	push_tos
-	movs tos, r0
-	pop {pc}
-	
-_divmod_plus:
-	cmp r0, #0
-	bge.n _divmod_plus_plus
-	
-_divmod_plus_minus:
-	rsbs r0, r0, #0
-	push_tos
-	movs tos, r0
-	bl udivmod
-	rsbs tos, tos, #0
-	pop {pc}
-	
-_divmod_plus_plus:
-	push_tos
-	movs tos, r0
-	bl udivmod
-	pop {pc}
+_divmod:
+	cpsid i
+	ldr r1, [dp]
+	str r1, [r0, #SIO_DIV_SDIVIDEND_OFFSET]
+	str tos, [r0, #SIO_DIV_SDIVISOR_OFFSET]
+	@@ Wait eight cycles
+	b 1f
+1:	b 1f
+1:	b 1f
+1:	b 1f
+1:	ldr r1, [r0, #SIO_DIV_REMAINDER_OFFSET]
+	ldr tos, [r0, #SIO_DIV_QUOTIENT_OFFSET]
+	str r1, [dp]
+	cpsie i
+	bx lr
 	end_inlined
+
+	.ltorg
+	
