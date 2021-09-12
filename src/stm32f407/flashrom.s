@@ -124,7 +124,7 @@ _store_flash_2:
 
 	ldr r2, =flash_min_address
 	cmp r0, r2
-	blo/ 5f
+	blo 5f
 
 	ldr r3, =flash_dict_end
 	cmp r0, r3
