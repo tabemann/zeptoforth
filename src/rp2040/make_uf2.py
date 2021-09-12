@@ -53,7 +53,7 @@ def pack_image(buf, image, total_count, pad_count):
 
 # Write the coda (specifying the image size) to the output image
 def pack_coda(buf, total_count):
-    end_addr = ((total_count - 2) | 4095) + 1
+    end_addr = (total_count - 1) * 4096
     coda = struct.pack('<I', end_addr)
     pack_block(buf, total_count - 1, total_count, CODA_ADDR, coda, 0, 4)
     
