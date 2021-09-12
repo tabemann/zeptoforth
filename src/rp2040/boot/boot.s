@@ -22,63 +22,66 @@
 	.cpu cortex-m0plus
 	.thumb
 
-	.equ RAM_BASE 0x20000000
-	.equ FLASH_IMAGE_BASE 0x10001000
-	.equ IMAGE_SIZE 0x8000
-	.equ PADS_QSPI_BASE 0x40020000
-	.equ XIP_SSI_BASE 0x18000000
-	.equ SSI_CTRLR0_OFFSET 0x00
-	.equ SSI_CTRLR1_OFFSET 0x04
-	.equ SSI_SSIENR_OFFSET 0x08
-	.equ SSI_BAUDR_OFFSET 0x14
-	.equ SSI_SR_OFFSET 0x28
-	.equ SSI_DR0_OFFSET 0x60 @ 36 words
-	.equ SSI_SPI_CTRLR0_OFFSET 0xF4
-	.equ VTOR 0xE0000ED08
+	.equ RAM_BASE, 0x20000000
+	.equ FLASH_IMAGE_BASE, 0x10001000
+	.equ IMAGE_SIZE, 0x8000
+	.equ PADS_QSPI_BASE, 0x40020000
+	.equ XIP_SSI_BASE, 0x18000000
+	.equ SSI_CTRLR0_OFFSET, 0x00
+	.equ SSI_CTRLR1_OFFSET, 0x04
+	.equ SSI_SSIENR_OFFSET, 0x08
+	.equ SSI_BAUDR_OFFSET, 0x14
+	.equ SSI_SR_OFFSET, 0x28
+	.equ SSI_DR0_OFFSET, 0x60 @ 36 words
+	.equ SSI_SPI_CTRLR0_OFFSET, 0xF4
+	.equ VTOR, 0xE000ED08
 
 	@ Commands
-	.equ CMD_WRITE_STATUS 0x01
-	.equ CMD_READ_DATA_FAST_QUAD_IO 0xEB @
-	.equ CMD_READ_STATUS 0x05
-	.equ CMD_WRITE_ENABLE 0x06
-	.equ CMD_READ_STATUS_2 0x35
-	.equ CMD_CONT_READ 0xA0
+	.equ CMD_WRITE_STATUS, 0x01
+	.equ CMD_READ_DATA_FAST_QUAD_IO, 0xEB @
+	.equ CMD_READ_STATUS, 0x05
+	.equ CMD_WRITE_ENABLE, 0x06
+	.equ CMD_READ_STATUS_2, 0x35
+	.equ CMD_CONT_READ, 0xA0
 
 	@ QSPI Enable state
-	.equ QSPI_ENABLE_STATE 0x02
+	.equ QSPI_ENABLE_STATE, 0x02
 
 	@ Write busy state
-	.equ WRITE_BUSY_STATE 0x01
+	.equ WRITE_BUSY_STATE, 0x01
 
 	@ Wait cycles
-	.equ WAIT_CYCLES 4
+	.equ WAIT_CYCLES, 4
+
+	@ SPI clock divider
+	.equ PICO_FLASH_SPI_CLKDIV, 4
 
 	@ Pad control constants
-	.equ PADS_QSPI_GPIO_QSPI_SCLK_DRIVE_LSB 4
-	.equ PADS_QSPI_GPIO_QSPI_SCLK_SLEWFAST_BITS 0x01
-	.equ PADS_QSPI_GPIO_QSPI_SCLK_OFFSET 0x04
-	.equ PADS_QSPI_GPIO_QSPI_SD0_OFFSET 0x08
-	.equ PADS_QSPI_GPIO_QSPI_SD1_OFFSET 0x0C
-	.equ PADS_QSPI_GPIO_QSPI_SD2_OFFSET 0x10
-	.equ PADS_QSPI_GPIO_QSPI_SD3_OFFSET 0x14
-	.equ PADS_QSPI_GPIO_QSPI_SD0_SCHMITT_BITS 0x02
+	.equ PADS_QSPI_GPIO_QSPI_SCLK_DRIVE_LSB, 4
+	.equ PADS_QSPI_GPIO_QSPI_SCLK_SLEWFAST_BITS, 0x01
+	.equ PADS_QSPI_GPIO_QSPI_SCLK_OFFSET, 0x04
+	.equ PADS_QSPI_GPIO_QSPI_SD0_OFFSET, 0x08
+	.equ PADS_QSPI_GPIO_QSPI_SD1_OFFSET, 0x0C
+	.equ PADS_QSPI_GPIO_QSPI_SD2_OFFSET, 0x10
+	.equ PADS_QSPI_GPIO_QSPI_SD3_OFFSET, 0x14
+	.equ PADS_QSPI_GPIO_QSPI_SD0_SCHMITT_BITS, 0x02
 
 	@ Mode to send commands
 	@ Standard SPI mode (0 << 21)
 	@ 8 clocks per data frame (7 << 16)
 	@ Tx and Rx (0 << 8)
-	.equ CTRLR0_SEND_CMD ((0 << 21) | (7 << 16) | (0 << 8))
+	.equ CTRLR0_SEND_CMD, ((0 << 21) | (7 << 16) | (0 << 8))
 	
 	@ Quad SPI mode (2 << 21)
 	@ 32 clocks per data frame (31 << 16)
 	@ Send instruction and address, receive data (3 << 8)
-	.equ CTRLR0_INIT_XIP ((2 << 21) | (31 << 16) | (3 << 8))
+	.equ CTRLR0_INIT_XIP, ((2 << 21) | (31 << 16) | (3 << 8))
 
 	@ 4 wait cycles (WAIT_CYCLES << 11)
 	@ 8 bit command prefix (2 << 8)
 	@ 32 address and mode bits (8 << 2)
 	@ Command is SPI, address is QSPI (1 << 0)
-	.equ SPI_CTRLR0_INIT_XIP ((WAIT_CYCLES << 11) | (2 << 8) | (8 << 2) | (1 << 0))
+	.equ SPI_CTRLR0_INIT_XIP, ((WAIT_CYCLES << 11) | (2 << 8) | (8 << 2) | (1 << 0))
 
 	@ Continually send reads
 	@ Send CMD_CONT_READ (CMD_CONT_READ << 24)
@@ -86,7 +89,7 @@
 	@ 0 bit command prefix (0 << 8)
 	@ 32 address and mode bits (8 << 2)
 	@ Command is QSPI, address is QSPI (2 << 0)
-	.equ SPI_CTRLR0_CONT_XIP ((CMD_CONT_READ << 24) | (WAIT_CYCLES << 11) | (0 << 8) | (9 << 2) | (2 << 0))
+	.equ SPI_CTRLR0_CONT_XIP, ((CMD_CONT_READ << 24) | (WAIT_CYCLES << 11) | (0 << 8) | (9 << 2) | (2 << 0))
 
 	.text
 

@@ -27,14 +27,14 @@ FLAGS = 0x00000000
 # Get the block count
 def block_count(image_size):
     image_size = ((image_size - 1) | (BLOCK_SIZE - 1)) + 1
-    return (image_size / BLOCK_SIZE) + 1
+    return (image_size // BLOCK_SIZE) + 1
 
 # Pack a block
 def pack_block(buf, index, total_count, addr, data, data_off, data_len):
     if data_off + data_len > len(data):
         data_len = len(data) - data_off
     padded_data = data[data_off:data_off + data_len].ljust(476, b'\x00')
-    struct.pack_into('I<I<I<I<I<I<I<I<sI<', buf, index * UF2_BLOCK_SIZE,
+    struct.pack_into('<IIIIIIII476sI', buf, index * UF2_BLOCK_SIZE,
                      MAGIC_0, MAGIC_1, FLAGS, addr, BLOCK_SIZE,
                      index, total_count, 0, padded_data, MAGIC_2);
 
@@ -48,13 +48,13 @@ def pack_boot_block(buf, boot_block, total_count):
 # Write the image to the output image
 def pack_image(buf, image, total_count, pad_count):
     for i in range(0, total_count - (1 + pad_count)):
-        pack_block(output_image, i + pad_count, total_count,
+        pack_block(buf, i + pad_count, total_count,
                    (i + pad_count) * BLOCK_SIZE, image, i * BLOCK_SIZE, 256)
 
 # Write the coda (specifying the image size) to the output image
 def pack_coda(buf, total_count):
     end_addr = ((total_count - 2) | 4095) + 1
-    coda = struct.pack('I<', end_addr)
+    coda = struct.pack('<I', end_addr)
     pack_block(buf, total_count - 1, total_count, CODA_ADDR, coda, 0, 4)
     
 # The main body of the code
@@ -62,15 +62,27 @@ def main():
     if len(sys.argv) == 3 or len(sys.argv) == 4:
         boot_block = None
         if len(sys.argv) == 4:
-            boot_block_file = open(sys.argv[1], 'rb')
+            try:
+                boot_block_file = open(sys.argv[1], 'rb')
+            except:
+                sys.exit('%s: %s: could not open file'
+                         % (sys.argv[0], sys.argv[1]))
             boot_block = boot_block_file.read()
             boot_block_file.close()
             if len(boot_block) != 256:
                 sys.exit('Boot block is not 256 bytes in size')
-        image_file = open(sys.argv[len(sys.argv) - 2], 'rb')
+        try:
+            image_file = open(sys.argv[len(sys.argv) - 2], 'rb')
+        except:
+            sys.exit('%s: %s: could not open file'
+                     % (sys.argv[0], sys.argv[len(sys.argv) - 2]))
         image = image_file.read()
         image_file.close()
-        output = open(sys.argv[len(sys.argv) - 1], 'wb')
+        try:
+            output_file = open(sys.argv[len(sys.argv) - 1], 'wb')
+        except:
+            sys.exit('%s: %s: could not open file'
+                     % (sys.argv[0], sys.argv[len(sys.argv) - 1]))
         pad_count = 0
         if boot_block != None:
             total_count = block_count(1024 + len(image))
@@ -81,9 +93,9 @@ def main():
         if boot_block != None:
             pack_boot_block(output_image, boot_block, total_count)
         pack_image(output_image, image, total_count, pad_count)
-        pack_coda(output_image. total_count)
-        output.write(output_image)
-        output.close()
+        pack_coda(output_image, total_count)
+        output_file.write(output_image)
+        output_file.close()
     else:
         sys.exit('%s: [boot-block] image output' % sys.argv[0])
 
