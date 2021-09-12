@@ -1,4 +1,5 @@
 @ Copyright (c) 2021 Travis Bemann
+@ Copyright (c) 2021 Jan Bramkamp
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -48,15 +49,15 @@ _uart_init:
 	@@ Configure the console UART
 	ldr r0, =UART_CONSOLE_BASE
 	movs r1, #UARTIBRD_VALUE
-	str r1, [r0, =UARTIBRD_OFFSET]
+	str r1, [r0, #UARTIBRD_OFFSET]
 	movs r1, #UARTFBRD_VALUE
-	str r1, [r0, =UARTFBRD_OFFSET]
+	str r1, [r0, #UARTFBRD_OFFSET]
 	movs r1, #UARTLCR_H_VALUE
-	str r1, [r0, =UARTLCR_H_OFFSET]
+	str r1, [r0, #UARTLCR_H_OFFSET]
 	
 	@@ Enable the console UART
 	ldr r1, =UART_ENABLE
-	str r1, [r0, =UARTCR_OFFSET]
+	str r1, [r0, #UARTCR_OFFSET]
 
 	ldr r0, =IO_BANK0_BASE
 	movs r1, #2

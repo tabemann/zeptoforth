@@ -27,7 +27,7 @@ _2drop:	ldr tos, [dp, #4]
 	end_inlined
 
 	@@ Double swap
-	define_word "2swap", visible_flag | inlined_flag
+	define_word "2swap", visible_flag
 _2swap:	ldr r0, [dp]
 	ldr r1, [dp, #4]
 	ldr r2, [dp, #8]
@@ -39,7 +39,7 @@ _2swap:	ldr r0, [dp]
 	end_inlined
 
 	@@ Double over
-	define_word "2over", visible_flag | inlined_flag
+	define_word "2over", visible_flag
 _2over:	ldr r0, [dp, #4]
 	ldr r1, [dp, #8]
 	subs dp, #8
@@ -196,17 +196,19 @@ _dle:	ldmia dp!, {r0, r1, r2}
 	@@ Double equals zero
 	define_word "d0=", visible_flag | inlined_flag
 _d0eq:	ldmia dp!, {r0}
+	movs r1, #0
 	subs r0, #1
-	sbcs tos, #0
+	sbcs tos, r1
 	sbcs tos, tos
 	bx lr
 	end_inlined
 
 	@@ Double not equals zero
-	define_word "d0<>", visible_flag | inlined_flag
+	define_word "d0<>", visible_flag
 _d0ne:	ldmia dp!, {r0}
+	movs r1, #0
 	subs r0, #1
-	sbcs tos, #0
+	sbcs tos, r1
 	sbcs tos, tos
 	mvns tos, tos
 	bx lr
@@ -260,60 +262,82 @@ _d0ge:	adds dp, #4
 	define_word "2lshift", visible_flag
 _dlshift:	
 	ldm dp!, {r0, r1}  @ r0 high, r1 low
-	lsls r2, r1, r6
-	str r2, [dp, #-4]!
-	lsls r2, r0, r6
-	rsbs r3, r6, #32
-	lsrs r3, r1, r3
-	orrs r2, r3
-	subs r6, #32
-	lsls r6, r1, r6
-	orrs r6, r2
+	movs r2, r1
+	lsls r2, tos
+	subs dp, #4
+	str r2, [dp]
+	movs r2, r0
+	lsls r2, tos
+	rsbs r3, tos, #0
+	adds r3, #32
+	movs r0, r1
+	lsrs r0, r3
+	orrs r2, r0
+	subs tos, #32
+	lsls r1, tos
+	movs tos, r1
+	orrs tos, r2
 	bx lr
 	end_inlined
 
 	@@ Double right shift
 	define_word "2rshift", visible_flag
 _drshift:
+	push {r4, lr}
 	ldm dp!, {r0, r1}  @ r0 high, r1 low
-	lsrs r2, r1, r6
-	rsbs r3, r6, #32
-	lsls r3, r0, r3
+	movs r2, r1
+	lsrs r2, tos
+	rsbs r3, tos, #0
+	adds r3, #32
+	movs r4, r0
+	lsls r4, r3
+	movs r3, r4
 	orrs r2, r3
-	subs r3, r6, #32
-	lsrs r3, r0, r3
-	orrs r2, r3
-	str r2, [dp, #-4]!
-	lsrs r6, r0, r6
-	bx lr
+	movs r3, tos
+	subs r3, #32
+	movs r1, r0
+	lsrs r1, r3
+	orrs r2, r1
+	subs dp, #4
+	str r2, [dp]
+	lsrs r0, tos
+	movs tos, r0
+	pop {r4, pc}
 	end_inlined
 
 	@@ Double arithmetic right shift
 	define_word "2arshift", visible_flag
 _darshift:
 	ldm dp!, {r0, r1}  @ r0 high, r1 low
-	cmp r6, #32
+	cmp tos, #32
 	blo 1f
-	subs r3, r6, #32
-	asrs r2, r0, r3
+	movs r3, tos
+	subs r3, #32
+	movs r2, r0
+	asrs r2, r3
 	b 2f
-1:      lsrs r2, r1, r6
-	rsbs r3, r6, #32
-	lsls r3, r0, r3
-	orrs r2, r3
-2:      str r2, [dp, #-4]! 
-	asrs r6, r0, r6
+1:      lsrs r1, r6
+	rsbs r3, r6, #0
+	adds r3, #32
+	movs r2, r0
+	lsls r2, r3
+	orrs r1, r2
+2:      subs dp, #4
+	str r1, [dp]
+	asrs r0, tos
+	movs tos, r0
 	bx lr
 	end_inlined
 	
 	@@ Negate a double word
-	define_word "dnegate", visible_flag | inlined_flag
+	define_word "dnegate", visible_flag
 _dnegate:
 	ldr r0, [dp]
 	mvns r0, r0
 	mvns tos, tos
+	movs r1, #0
 	adds r0, #1
-	adcs tos, #0
+	adcs tos, r1
 	str r0, [dp]
 	bx lr
 	end_inlined
@@ -340,28 +364,33 @@ _dsub:	ldmia dp!, {r0, r1, r2}
 	end_inlined
 	
 	@@ Add with carry
-	define_word "um+", visible_flag | inlined_flag
+	define_word "um+", visible_flag
 _umadd:	movs r0, tos
 	pull_tos
-	adds tos, r0
-	push_tos
-	adcs tos, #0
+	movs r1, tos
+	pull_tos
+	movs r2, #0
+	adds r1, r0
+	adcs tos, r2
 	bx lr
 	end_inlined
 
 	@@ Multiply two unsigned 32-bit values to get an unsigned 64-bit value
-	define_word "um*", visible_flag | inlined_flag
-_ummul:	ldr r0, [dp]
-	umull r0, tos, r0, tos
-	str r0, [dp]
+	define_word "um*", visible_flag
+_ummul: ldmia dp!, {r0}
+	movs r2, tos
+	movs tos, #0
+	b _ud_star_late_entry
 	bx lr
 	end_inlined
 
 	@@ Multiply two signed 32-bit values to get a signed 64-bit value
 	define_word "m*", visible_flag | inlined_flag
-_mmul:	ldr r0, [dp]
-	smull r0, tos, r0, tos
-	str r0, [dp]
+_mmul:	movs r0, tos
+	asrs tos, tos, #31
+	ldmia dp!, {r2}
+	asrs r1, r2, #31
+	b _ud_star_registers
 	bx lr
 	end_inlined
 
@@ -370,10 +399,14 @@ _mmul:	ldr r0, [dp]
 _udmul:
 	ldmia dp!, {r0, r1, r2}
 
+_ud_star_registers:	
+	
 	muls	tos, r2        @ High-1 * Low-2 --> tos
 	muls	r1, r0         @ High-2 * Low-1 --> r1
 	adds	tos, r1        @                    Sum into tos
 
+_ud_star_late_entry:
+	
 	lsrs	r1, r0, #16
 	lsrs	r3, r2, #16
 	muls	r1, r3

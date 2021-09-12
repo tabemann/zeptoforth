@@ -2126,6 +2126,7 @@ _init_context:
 	ldr r6, =0xFEDCBA98
 	str r6, [r2]
 	subs r2, #4
+	ldr r5, =ram_real_start @ This should be right
 	str r5, [r2]
 	subs r2, #4
 	str r4, [r2]

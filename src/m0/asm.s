@@ -1214,16 +1214,115 @@ _asm_literal:
 	push {lr}
 	movs r0, tos
 	pull_tos
-	movs r1, #0xFF
+	movs r1, #255
 	cmp tos, r1
 	bgt 2f
+	ldr r1, =-256
+	cmp tos, r1
+	blt 2f
+	cmp tos, #0
+	blt 3f
 	push_tos
 	movs tos, r0
 	bl _asm_mov_imm
 	pop {pc}
-2:	push_tos
+2:	ldr r1, =65535
+	cmp tos, r1
+	bgt 4f
+	ldr r1, =-65536
+	cmp tos, r1
+	blt 4f
+	cmp tos, #0
+	blt 5f
+	push_tos
+	movs tos, r0
+	bl _asm_literal_16
+	pop {pc}
+4:	ldr r1, =ram_real_start
+	cmp tos, r1
+	blo 6f
+	ldr r2, =ram_real_start + 65535
+	cmp tos, r2
+	bhi 6f
+	subs tos, r1
+	push_tos
+	movs tos, r0
+	push {r0}
+	bl _asm_literal_16
+	pop {r0}
+	push_tos
+	movs tos, #5
+	push_tos
+	movs tos, r0
+	push_tos
+	movs tos, r0
+	bl _asm_add
+	pop {pc}
+6:	push_tos
 	movs tos, r0
 	bl _asm_long_literal
+	pop {pc}
+3:	mvns tos, tos
+	push_tos
+	movs tos, r0
+	push {r0}
+	bl _asm_mov_imm
+	pop {r0}
+	push_tos
+	movs tos, r0
+	push_tos
+	movs tos, r0
+	bl _asm_mvn
+	pop {pc}
+5:	mvns tos, tos
+	push_tos
+	movs tos, r0
+	push {r0}
+	bl _asm_literal_16
+	pop {r0}
+	push_tos
+	movs tos, r0
+	push_tos
+	movs tos, r0
+	bl _asm_mvn
+	pop {pc}
+	end_inlined
+
+	@@ Assemble a 16-bit literal
+	define_internal_word "literal-16,", visible_flag
+_asm_literal_16:
+	push {lr}
+	movs r0, tos
+	pull_tos
+	movs r1, tos
+	lsrs tos, r1, #8
+	movs r3, #0xFF
+	ands tos, r3
+	push {r0, r1}
+	push_tos
+	movs tos, #3
+	bl _asm_mov_imm
+	push_tos
+	movs tos, #8
+	push_tos
+	movs tos, #3
+	push_tos
+	bl _asm_lsl_imm
+	pop {r0, r1}
+	movs r3, #0xFF
+	ands r1, r3
+	push_tos
+	movs tos, r1
+	push_tos
+	movs tos, r0
+	push {r0}
+	bl _asm_mov_imm
+	pop {r0}
+	push_tos
+	movs tos, #3
+	push_tos
+	movs tos, r0
+	bl _asm_orr
 	pop {pc}
 	end_inlined
 	
@@ -1476,7 +1575,28 @@ _asm_str_imm:
 	pop {pc}
 	end_inlined
 
-	@@ Assemble a subtract immediate instruction
+	@@ Assemble an add register instruction
+	define_internal_word "add,", visible_flag
+_asm_add:
+	push {lr}
+	movs r0, #7
+	ands tos, r0
+	movs r1, tos
+	pull_tos
+	ands tos, r0
+	lsls r2, tos, #3
+	pull_tos
+	ands tos, r0
+	lsls tos, tos, #6
+	orrs tos, r1
+	orrs tos, r2
+	ldr r0, =0x1800
+	orrs tos, r0
+	bl _current_comma_2
+	pop {pc}
+	end_inlined
+	
+	@@ Assemble an add immediate instruction
 	define_internal_word "add-imm,", visible_flag
 _asm_add_imm:
 	push {lr}
@@ -1506,6 +1626,23 @@ _asm_sub_imm:
 	orrs tos, r1
 	ldr r0, =0x3800
 	orrs tos, r0
+	bl _current_comma_2
+	pop {pc}
+	end_inlined
+
+	@@ Assemble a MVNS instruction
+	define_internal_word "mvn,", visible_flag
+_asm_mvn:
+	push {lr}
+	movs r0, #7
+	movs r1, tos
+	ands r1, r0
+	pull_tos
+	ands tos, r0
+	lsls tos, tos, #3
+	orrs tos, r1
+	ldr r1, =0x43C0
+	orrs tos, r1
 	bl _current_comma_2
 	pop {pc}
 	end_inlined

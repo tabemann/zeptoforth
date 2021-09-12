@@ -19,6 +19,7 @@
 @ SOFTWARE.
 
 	.equ thumb2, 0
+	.equ ram_real_start, 0x20000000
 	.equ ram_start, 0x20008000
 	.equ ram_end, 0x20042000
 	.equ rstack_size, 0x0200
@@ -38,6 +39,7 @@
 	.equ flash_min_address, 0x10009000
 	.equ flash_start, 0x10000000
 	.equ flash_dict_start, 0x10009000
-	.equ flash_dict_end, 0x10200000
+	.equ flash_dict_end, 0x10100000
+	.equ flash_end, 0x10200000
 	.equ input_buffer_size, 255
 	.equ pad_offset, 128
