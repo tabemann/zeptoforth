@@ -49,11 +49,12 @@ def pack_boot_block(buf, boot_block, total_count):
 def pack_image(buf, image, total_count, pad_count):
     for i in range(0, total_count - (1 + pad_count)):
         pack_block(buf, i + pad_count, total_count,
-                   (i + pad_count) * BLOCK_SIZE, image, i * BLOCK_SIZE, 256)
+                   (i + pad_count) * BLOCK_SIZE, image, i * BLOCK_SIZE,
+                   BLOCK_SIZE)
 
 # Write the coda (specifying the image size) to the output image
 def pack_coda(buf, total_count):
-    end_addr = (total_count - 1) * 4096
+    end_addr = ((((total_count - 1) * BLOCK_SIZE) - 1) | 4095) + 1
     coda = struct.pack('<I', end_addr)
     pack_block(buf, total_count - 1, total_count, CODA_ADDR, coda, 0, 4)
     
