@@ -54,25 +54,38 @@ begin-import-module-once int-io-module
     tx-buffer-size buffer: tx-buffer
 
     \ USART2
-    $40004400 constant USART2_Base
-    USART2_Base $00 + constant USART2_SR
-    USART2_Base $04 + constant USART2_DR
-    USART2_Base $0C + constant USART2_CR1
+    $40003400 constant UART0_Base
+    UART0_Base $00 + constant UART0_UARTDR
+    UART0_Base $18 + constant UART0_UARTFR
+    UART0_Base $34 + constant UART0_UARTIFLS
+    UART0_Base $38 + constant UART0_UARTIMSC
 
-    \ USART2 vector index
-    54 constant usart2-vector
+    \ UART0 IRQ number
+    20 constant uart0-irq
 
-    $40023800 constant RCC_Base
-    RCC_Base $60 + constant RCC_APB1LPENR ( RCC_APB1LPENR )
-    : RCC_APB1LPENR_USART2LPEN   %1 17 lshift RCC_APB1LPENR bis! ;  \ RCC_APB1LPENR_USART2LPEN    USART2 clocks enable during Sleep modes
-    : RCC_APB1LPENR_USART2LPEN_Clear   %1 17 lshift RCC_APB1LPENR bic! ;  \ RCC_APB1LPENR_USART2LPEN    USART2 clocks enable during Sleep modes
-    : USART2_CR1_TXEIE   %1 7 lshift USART2_CR1 bis! ;  \ USART2_CR1_TXEIE    interrupt enable
-    : USART2_CR1_RXNEIE   %1 5 lshift USART2_CR1 bis! ;  \ USART2_CR1_RXNEIE    RXNE interrupt enable
-    : USART2_CR1_TXEIE_Clear   %1 7 lshift USART2_CR1 bic! ;  \ USART2_CR1_TXEIE    interrupt disable
-    : USART2_CR1_RXNEIE_Clear   %1 5 lshift USART2_CR1 bic! ;  \ USART2_CR1_RXNEIE    RXNE interrupt enable
+    \ UART0 vector index
+    uart0-irq constant uart0-vector
 
-    $20 constant RXNE
-    $80 constant TXE
+    : UART0_UARTDR_DATA! $FF and UART_UARTDR c! ; \ Transmit data
+    : UART0_UARTDR_DATA@ UART_UARTDR c@ ; \ Receive data
+    : UART0_UARTFR_TXFF@ 5 bit UART0_UARTFR bit@ ; \ Transmit FIFO full
+    : UART0_UARTFR_RXFE@ 4 bit UART0_UARTFR bit@ ; \ Receive FIFO empty
+    : UART0_UARTIMSC_RTIM! 6 bit UART0_UARTIMSC bis! ; \ Receive timeout interrupt mask
+    : UART0_UARTIMSC_TXIM! 5 bit UART0_UARTIMSC bis! ; \ Transmit interrupt mask
+    : UART0_UARTIMSC_RXIM! 4 bit UART0_UARTIMSC bis! ; \ Receive interrupt mask
+    : UART0_UARTIMSC_RTIM_Clear 6 bit UART0_UARTIMSC bic! ; \ Receive timeout interrupt mask
+    : UART0_UARTIMSC_TXIM_Clear 5 bit UART0_UARTIMSC bic! ; \ Transmit interrupt mask
+    : UART0_UARTIMSC_RXIM_Clear 4 bit UART0_UARTIMSC bic! ; \ Receive interrupt mask
+    
+    \ Receive interrupt FIFO level select
+    : UART0_UARTIFLS_RXIFLSEL! ( rxiflsel -- )
+      UART0_UARTIFLS @ $38 bic swap $7 and 3 lshift or UART0_UARTIFLS !
+    ;
+
+    \ Transmit interrupt FIFO level select
+    : UART0_UARTIFLS_TXIFLSEL! ( txiflsel -- )
+      UART0_UARTIFLS @ $07 bic swap $7 and or UART0_UARTIFLS !
+    ;
 
     \ Get whether the rx buffer is full
     : rx-full? ( -- f )
@@ -142,8 +155,8 @@ begin-import-module-once int-io-module
       disable-int
       begin
 	rx-full? not if
-	  USART2_SR @ RXNE and if
-	    USART2_DR c@ write-rx false
+	  UART0_UARTFR_RXFE@ not if
+	    UART0_UARTDR_DATA@ write-rx false
 	  else
 	    true
 	  then
@@ -152,12 +165,13 @@ begin-import-module-once int-io-module
 	then
       until
       rx-full? if
-	USART2_CR1_RXNEIE_Clear
+	UART0_UARTIMSC_RTIM_Clear
+	UART0_UARTIMSC_RXIM_Clear
       then
       begin
 	tx-empty? not if
-	  USART2_SR @ TXE and if
-	    read-tx USART2_DR c! false
+	  UART0_UARTFR_TXFF@ not if
+	    read-tx UART0_UARTDR_DATA! false
 	  else
 	    true
 	  then
@@ -166,9 +180,9 @@ begin-import-module-once int-io-module
 	then
       until
       tx-empty? if
-	USART2_CR1_TXEIE_Clear
+	UART0_UARTIMSC_TXIM_Clear
       then
-      38 NVIC_ICPR_CLRPEND!
+      uart0-irq NVIC_ICPR_CLRPEND!
       enable-int
       wake
       dmb dsb isb
@@ -179,11 +193,12 @@ begin-import-module-once int-io-module
     : do-emit ( c -- )
       [: tx-full? not ;] wait
       write-tx
-      USART2_CR1_TXEIE
+      UART0_UARTIMSC_TXIM!
     ; 
 
     : do-key ( -- c )
-      USART2_CR1_RXNEIE
+      UART0_UARTIMSC_RTIM!
+      UART0_UARTIMSC_RXIM!
       [: rx-empty? not ;] wait
       read-rx
     ;
@@ -218,12 +233,14 @@ begin-import-module-once int-io-module
   \ Enable interrupt-driven IO
   : enable-int-io ( -- )
     disable-int
-    0 38 NVIC_IPR_IP!
+    0 UART0_UARTIFLS_RXIFLSEL! \ Interrupt on receive FIFO >= 1/8 full
+    0 UART0_UARTIFLS_TXIFLSEL! \ Interrupt on transmit FIFO <= 1/8 full
+    0 uart0-irq NVIC_IPR_IP!
     ['] handle-io usart2-vector vector!
     serial-console
-    RCC_APB1LPENR_USART2LPEN
-    38 NVIC_ISER_SETENA!
-    USART2_CR1_RXNEIE
+    uart0-irq NVIC_ISER_SETENA!
+    UART0_UARTIMSC_RTIM!
+    UART0_UARTIMSC_RXIM!
     enable-int
   ;
 
@@ -236,10 +253,10 @@ begin-import-module-once int-io-module
     ['] serial-emit? emit?-hook !
     0 flush-console-hook !
     ['] handle-null usart2-vector vector!
-    USART2_CR1_RXNEIE_Clear
-    USART2_CR1_TXEIE_Clear
-    38 NVIC_ICER_CLRENA!
-    RCC_APB1LPENR_USART2LPEN_Clear
+    UART0_UARTIMSC_RTIM_Clear
+    UART0_UARTIMSC_RXIM_Clear
+    UART0_UARTIMSC_TXIM_Clear
+    uart0-irq NVIC_ICER_CLRENA!
     enable-int
   ;
 

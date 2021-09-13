@@ -60,8 +60,11 @@ begin-import-module-once int-io-module
     USART2_Base $24 + constant USART2_RDR
     USART2_Base $28 + constant USART2_TDR
 
+    \ USART2 IRQ number
+    38 constant usart2-irq
+
     \ USART2 vector index
-    54 constant usart2-vector
+    usart2-irq 16 + constant usart2-vector
 
     $40021000 constant RCC_Base
     RCC_Base $78 + constant RCC_APB1SMENR1 ( APB1SMENR1 )
@@ -175,7 +178,7 @@ begin-import-module-once int-io-module
       USART2_ISR @ ORE and if
 	USART2_ICR_ORECF
       then
-      38 NVIC_ICPR_CLRPEND!
+      usart2-irq NVIC_ICPR_CLRPEND!
       enable-int
       wake
       dmb dsb isb
@@ -227,11 +230,11 @@ begin-import-module-once int-io-module
   \ Enable interrupt-driven IO
   : enable-int-io ( -- )
     disable-int
-    0 38 NVIC_IPR_IP!
+    0 usart2-irq NVIC_IPR_IP!
     ['] handle-io usart2-vector vector!
     serial-console
     RCC_APB1SMENR1_USART2SMEN
-    38 NVIC_ISER_SETENA!
+    usart2-irq NVIC_ISER_SETENA!
     USART2_CR1_RXNEIE
     enable-int
   ;
@@ -247,7 +250,7 @@ begin-import-module-once int-io-module
     ['] handle-null usart2-vector vector!
     USART2_CR1_RXNEIE_Clear
     USART2_CR1_TXEIE_Clear
-    38 NVIC_ICER_CLRENA!
+    usart2-irq NVIC_ICER_CLRENA!
     RCC_APB1SMENR1_USART2SMEN_Clear
     enable-int
   ;

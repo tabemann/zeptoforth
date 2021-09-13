@@ -371,79 +371,7 @@ _asm_extract_constant:
 	ands r2, r1
 	ldr r1, =0x2600
 	cmp r2, r1
-	beq 2f
-	ldr r1, =0xFBF0
-	movs r2, r0
-	ands r2, r1
-	ldr r1, =0xF240
-	cmp r2, r1
 	bne 3b
-	movs r2, r0
-	movs r1, #0xF
-	ands r2, r1
-	lsrs r0, r0, #10
-	movs r1, #1
-	ands r0, r1
-	adds tos, #2
-	ldrh r3, [tos]
-	ldr r1, =0x8F00
-	movs r4, r3
-	ands r4, r1
-	ldr r1, =0x0600
-	cmp r4, r1
-	bne 3b
-	lsls r2, r2, #12
-	lsls r0, r0, #11
-	orrs r2, r0
-	ldr r1, =0x7000
-	movs r4, r3
-	ands r4, r1
-	lsrs r4, r4, #4
-	orrs r2, r4
-	ldr r1, =0x00FF
-	movs r4, r3
-	ands r4, r1
-	orrs r4, r2
-	adds tos, #2
-	ldrh r0, [tos]
-	ldr r1, =0xBD00
-	cmp r0, r1
-	beq 5f
-	ldr r1, =0xFBF0
-	movs r2, r0
-	ands r2, r1
-	ldr r1, =0xF2C0
-	cmp r2, r1
-	bne 3b
-	movs r2, r0
-	movs r1, #0xF
-	ands r2, r1
-	lsrs r0, r0, #10
-	movs r1, #1
-	ands r0, r1
-	adds tos, #2
-	ldrh r3, [tos]
-	ldr r1, =0x8F00
-	movs r5, r3
-	ands r5, r1
-	ldr r1, =0x0600
-	cmp r5, r1
-	bne 3b
-	lsls r2, r2, #12
-	lsls r0, r0, #11
-	orrs r2, r0
-	ldr r1, =0x7000
-	movs r5, r3
-	ands r5, r1
-	lsrs r5, r5, #4
-	orrs r2, r5
-	ldr r1, =0x00FF
-	movs r5, r3
-	ands r5, r1
-	orrs r5, r2
-	lsls r0, r5, #16
-	orrs r0, r4
-	b 4f
 2:	ldr r1, =0x00FF
 	ands r0, r1
 4:	adds tos, #2
@@ -452,10 +380,6 @@ _asm_extract_constant:
 	cmp r2, r1
 	bne 3b
 	movs tos, r0
-	push_tos
-	ldr tos, =-1
-	pop {pc}
-5:	movs tos, r4
 	push_tos
 	ldr tos, =-1
 	pop {pc}

@@ -354,12 +354,12 @@ _asm_extract_constant:
 	pop {pc}
 1:	adds tos, #2
 	ldrh r0, [tos]
-	ldr r1, =0x3F04
+	ldr r1, =0xF847
 	cmp r0, r1
 	bne 3b
 	adds tos, #2
 	ldrh r0, [tos]
-	ldr r1, =0x603E
+	ldr r1, =0x6D04
 	cmp r0, r1
 	bne 3b
 	adds tos, #2
