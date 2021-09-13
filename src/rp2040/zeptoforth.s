@@ -75,8 +75,8 @@ _handle_reset:
 outer_exc_handled:
 	bl _init_variables
 	bl _init_dict
-	bl _uart_init
-	bl _gpio_init
+	bl _init_uart
+	bl _init_gpios
 	bl _init_flash_buffers
 	bl _do_init
 	bl _welcome
