@@ -12,13 +12,13 @@ def pad_boot_block(boot_block):
     return boot_block.ljust(MAX_BOOT_BLOCK_LEN, b'\x00')
 
 # Bit reversal
-def bitrev(x, width):
+def reverse_bits(x, width):
     return int("{:0{w}b}".format(x, w=width)[::-1], 2)
 
 # Carry out the checksum
 def get_checksum(data, seed):
-    data = bytes(bitrev(byte, 8) for byte in data)
-    return bitrev((binascii.crc32(data, seed ^ 0xFFFFFFFF) ^ 0xFFFFFFFF)
+    data = bytes(reverse_bits(byte, 8) for byte in data)
+    return reverse_bits((binascii.crc32(data, seed ^ 0xFFFFFFFF) ^ 0xFFFFFFFF)
                   & 0xFFFFFFFF, 32)
 
 # The main body of the code
