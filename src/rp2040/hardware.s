@@ -497,3 +497,27 @@ _init_gpios:
 	bne 1b
 	bx lr
 	end_inlined
+
+	@@ Time multiplier
+	define_word "time-multiplier", visible_flag
+_time_multiplier:
+	push_tos
+	movs tos, #1
+	bx lr
+	end_inlined
+
+	@@ Time divisor
+	define_word "time-divisor", visible_flag
+_time_divisor:
+	push_tos
+	movs tos, #1
+	bx lr
+	end_inlined
+
+	@@ Systick divisor
+	define_word "systick-divisor", visible_flag
+_systick_divisor:
+	push_tos
+	movs tos, #10
+	bx lr
+	end_inlined
