@@ -44,8 +44,8 @@
 	.equ UART_ENABLE, 0x301
 
 	@@ Initialize UART
-	define_internal_word "uart-init", visible_flag
-_uart_init:
+	define_internal_word "init-uart", visible_flag
+_init_uart:
 	@@ Configure the console UART
 	ldr r0, =UART_CONSOLE_BASE
 	movs r1, #UARTIBRD_VALUE
