@@ -18,33 +18,33 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-PLATFORM=rp2040
-BASEDIR=../../..
-ODIR=$(BASEDIR)/obj
-OBJ=$(ODIR)/boot.$(PLATFORM).o
-ELF=$(BASEDIR)/boot.$(PLATFORM).elf
-BIN_WITH_CHECKSUM=$(BASEDIR)/boot_with_checksum.$(PLATFORM).bin
-BIN=$(BASEDIR)/boot.$(PLATFORM).bin
-IHEX=$(BASEDIR)/boot.$(PLATFORM).ihex
-LIST=$(BASEDIR)/boot.$(PLATFORM).list
-MAP=$(BASEDIR)/boot.$(PLATFORM).map
-BOOT_WITH_CHECKSUM=./boot_with_checksum.py
+DATE:=$(shell date)
 
-all: $(BIN_WITH_CHECKSUM)
+kernel_info:
+	rm -f kernel_info.s
+	echo '        define_word "kernel-platform", visible_flag' > kernel_info.s
+	echo '_kernel_platform:' >> kernel_info.s
+	echo '        push {lr}' >> kernel_info.s
+	echo '        string "'$(PLATFORM)'"' >> kernel_info.s
+	echo '        pop {pc}' >> kernel_info.s
+	echo '        end_inlined' >> kernel_info.s
+	echo >> kernel_info.s
+	echo '        define_word "kernel-version", visible_flag' >> kernel_info.s
+	echo '_kernel_version:' >> kernel_info.s
+	echo '        push {lr}' >> kernel_info.s
+	echo '        string "'$(VERSION)'"' >> kernel_info.s
+	echo '        pop {pc}' >> kernel_info.s
+	echo '        end_inlined' >> kernel_info.s
+	echo >> kernel_info.s
+	echo '        define_word "kernel-date", visible_flag' >> kernel_info.s
+	echo '_kernel_date:' >> kernel_info.s
+	echo '        push {lr}' >> kernel_info.s
+	echo '        string "'$(DATE)'"' >> kernel_info.s
+	echo '        pop {pc}' >> kernel_info.s
+	echo '        end_inlined' >> kernel_info.s
+	echo >> kernel_info.s
 
-$(BIN_WITH_CHECKSUM): $(BIN)
-	$(BOOT_WITH_CHECKSUM) $(BIN) $(BIN_WITH_CHECKSUM)
-
-$(BIN): $(OBJ)
-	$(LD) $(OBJ) -T boot.ld --cref -Map $(MAP) -nostartfiles -o $(ELF)
-	$(DUMP) -D $(ELF) > $(LIST)
-	$(COPY) $(ELF) $@ -O binary
-	$(COPY) $(ELF) $(IHEX) -O ihex
-
-$(OBJ): boot.s
-	$(AS) $(ASFLAGS) -o $@ boot.s
-
-.PHONY: clean
+.PHONY: kernel_info
 
 clean:
-	rm -f $(OBJ) $(MAP) $(LIST) $(ELF) $(BIN) $(BIN_WITH_CHECKSUM) $(IHEX)
+	rm -f kernel_info.s
