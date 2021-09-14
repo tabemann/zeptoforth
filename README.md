@@ -30,18 +30,19 @@ and where \<platform> is one of
 * `stm32f407`
 * `stm32f746`
 * `stm32l476`
+* `rp2040`
 
-To build the kernel, one first needs to install the gas and binutils arm-none-eabi toolchain, and then execute (for STM32F407):
+Note that for the `rp2040` platform, to load code with the bootloader onto the Raspberry Pi Pico one needs a `.uf2` file rather than a `.bin` file, which will be located in the same location. Note that these files contain a boot block with a CRC32 checksum.
+
+To build the kernel for each of the supported platforms, one first needs to install the gas and binutils arm-none-eabi toolchain along with Python 3.9, and then execute:
 
     $ make
 
-or:
+to use the default version:
 
-    $ make PLATFORM=stm32f407
+    $ make VERSION=<version>
 
-This will build a zeptoforth.<platform>.bin and a zeptoforth.<platform>.elf file; the zeptoforth.<platform>.elf file is of use if one wishes to do source debugging with gdb of the zeptoforth kernel, otherwise disregard it. The same workflow is to be followed if one is assembling and linking zeptoforth for the STM32F407.
-
-Note that support has been dropped for platforms other than the STM32L476, STM32F407, and STM32F746 DISCOVERY boards as of version 0.14.1.
+This build a `zeptoforth.<platform>.bin`, a `zeptoforth.<platform>.ihex`, and a `zeptoforth.<platform>.elf` file for each supported platform. Additionally a zeptoforth.rp2040.uf2 file will be built for the rp2040 platform. The zeptoforth.<platform>.elf file is of use if one wishes to do source debugging with gdb of the zeptoforth kernel, otherwise disregard it. The same workflow is to be followed if one is assembling and linking zeptoforth for the STM32F407.
 
 Note the address referred to above. This will also reboot the board.
 
