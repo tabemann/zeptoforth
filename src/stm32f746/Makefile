@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2021 Travis Bemann
+# Copyright (c) 2021 Travis Bemann
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -18,47 +18,39 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-export IDIR=src/include
-export AS=arm-none-eabi-as
-export LD=arm-none-eabi-ld
-export COPY=arm-none-eabi-objcopy
-export DUMP=arm-none-eabi-objdump
-export ASFLAGS=-g
-export PREFIX=/usr/local
-export PLATFORM=stm32f407
-export VERSION=0.20.3.Dev
+export PLATFORM=stm32f746
+BASEDIR=../..
+ODIR=$(BASEDIR)/obj
+IDIR=$(BASEDIR)/bin/$(VERSION)/$(PLATFORM)
+OBJ=$(ODIR)/zeptoforth.$(PLATFORM).o
+ELF=$(BASEDIR)/zeptoforth.$(PLATFORM).elf
+BIN=$(BASEDIR)/zeptoforth.$(PLATFORM).bin
+IHEX=$(BASEDIR)/zeptoforth.$(PLATFORM).ihex
+LIST=$(BASEDIR)/zeptoforth.$(PLATFORM).list
+MAP=$(BASEDIR)/zeptoforth.$(PLATFORM).map
 
-KERNEL_INFO=src/common/kernel_info.s
-
-all: stm32f407 stm32l476 stm32f746 rp2040
+all: kernel_info $(BIN)
 
 install:
-	$(MAKE) -C src/stm32f407 install
-	$(MAKE) -C src/stm32l476 install
-	$(MAKE) -C src/stm32f746 install
-	$(MAKE) -C src/rp2040 install
+	mkdir -p $(IDIR)
+	cp $(BIN) $(IDIR)/zeptoforth_kernel-$(VERSION).bin
+	cp $(IHEX) $(IDIR)/zeptoforth_kernel-$(VERSION).ihex
+	cp $(ELF) $(IDIR)/zeptoforth_kernel-$(VERSION).elf
 
-stm32f407:
-	$(MAKE) -C src/stm32f407
+kernel_info:
+	$(MAKE) -C ../common kernel_info
 
-stm32l476:
-	$(MAKE) -C src/stm32l476
+$(BIN): $(OBJ)
+	$(LD) $(OBJ) -T zeptoforth.ld --cref -Map $(MAP) -nostartfiles -o $(ELF)
+	$(DUMP) -D $(ELF) > $(LIST)
+	$(COPY) $(ELF) $@ -O binary
+	$(COPY) $(ELF) $(IHEX) -O ihex
 
-stm32f746:
-	$(MAKE) -C src/stm32f746
+$(OBJ): *.s ../common/*.s ../m4_m7/*.s
+	mkdir -p $(ODIR)
+	$(AS) $(ASFLAGS) -o $@ zeptoforth.s
 
-rp2040:
-	$(MAKE) -C src/rp2040
-
-.PHONY: all install stm32f407 stm32l746 stm32f746 clean html
-
-html:
-	cd docs ; sphinx-build -b html . ../html
+.PHONY: all install kernel_info clean
 
 clean:
-	$(MAKE) -C src/stm32f407 clean
-	$(MAKE) -C src/stm32l476 clean
-	$(MAKE) -C src/stm32f746 clean
-	$(MAKE) -C src/rp2040 clean
-	$(MAKE) -C src/common clean
-
+	rm -f $(OBJ) $(ELF) $(BIN) $(IHEX) $(LIST) $(MAP)

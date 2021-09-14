@@ -19,7 +19,7 @@
 @ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 @ SOFTWARE.
 
-	.include "src/common/vectors.s"
+	.include "../common/vectors.s"
 	.word _handle_null+1 @ 16: window watchdog
 	.word _handle_null+1 @ 17: PVD
 	.word _handle_null+1 @ 18: tamper and timestamp

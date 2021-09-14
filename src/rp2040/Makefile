@@ -18,33 +18,48 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-PLATFORM=rp2040
-BASEDIR=../../..
+export PLATFORM=rp2040
+BASEDIR=../..
 ODIR=$(BASEDIR)/obj
-OBJ=$(ODIR)/boot.$(PLATFORM).o
-ELF=$(BASEDIR)/boot.$(PLATFORM).elf
-BIN_WITH_CHECKSUM=$(BASEDIR)/boot_with_checksum.$(PLATFORM).bin
-BIN=$(BASEDIR)/boot.$(PLATFORM).bin
-IHEX=$(BASEDIR)/boot.$(PLATFORM).ihex
-LIST=$(BASEDIR)/boot.$(PLATFORM).list
-MAP=$(BASEDIR)/boot.$(PLATFORM).map
-BOOT_WITH_CHECKSUM=./boot_with_checksum.py
+IDIR=$(BASEDIR)/bin/$(VERSION)/$(PLATFORM)
+OBJ=$(ODIR)/zeptoforth.$(PLATFORM).o
+BOOT_BIN_WITH_CHECKSUM=$(BASEDIR)/boot_with_checksum.$(PLATFORM).bin
+ELF=$(BASEDIR)/zeptoforth.$(PLATFORM).elf
+BIN=$(BASEDIR)/zeptoforth.$(PLATFORM).bin
+UF2=$(BASEDIR)/zeptoforth.$(PLATFORM).uf2
+IHEX=$(BASEDIR)/zeptoforth.$(PLATFORM).ihex
+LIST=$(BASEDIR)/zeptoforth.$(PLATFORM).list
+MAP=$(BASEDIR)/zeptoforth.$(PLATFORM).map
+MAKE_UF2=./make_uf2.py
 
-all: $(BIN_WITH_CHECKSUM)
+all: kernel_info $(UF2)
 
-$(BIN_WITH_CHECKSUM): $(BIN)
-	$(BOOT_WITH_CHECKSUM) $(BIN) $(BIN_WITH_CHECKSUM)
+install:
+	mkdir -p $(IDIR)
+	cp $(UF2) $(IDIR)/zeptoforth_kernel-$(VERSION).uf2
+	cp $(BIN) $(IDIR)/zeptoforth_kernel-$(VERSION).bin
+	cp $(IHEX) $(IDIR)/zeptoforth_kernel-$(VERSION).ihex
+	cp $(ELF) $(IDIR)/zeptoforth_kernel-$(VERSION).elf
+
+kernel_info:
+	$(MAKE) -C ../common kernel_info
+
+$(UF2): $(BIN)
+	$(MAKE) -C boot
+	$(MAKE_UF2) $(BOOT_BIN_WITH_CHECKSUM) $(BIN) $(UF2)
 
 $(BIN): $(OBJ)
-	$(LD) $(OBJ) -T boot.ld --cref -Map $(MAP) -nostartfiles -o $(ELF)
+	$(LD) $(OBJ) -T zeptoforth.ld --cref -Map $(MAP) -nostartfiles -o $(ELF)
 	$(DUMP) -D $(ELF) > $(LIST)
 	$(COPY) $(ELF) $@ -O binary
 	$(COPY) $(ELF) $(IHEX) -O ihex
 
-$(OBJ): boot.s
-	$(AS) $(ASFLAGS) -o $@ boot.s
+$(OBJ): *.s ../common/*.s ../m0/*.s
+	mkdir -p $(ODIR)
+	$(AS) $(ASFLAGS) -o $@ zeptoforth.s
 
-.PHONY: clean
+.PHONY: all install kernel_info clean
 
 clean:
-	rm -f $(OBJ) $(MAP) $(LIST) $(ELF) $(BIN) $(BIN_WITH_CHECKSUM) $(IHEX)
+	make -C boot clean
+	rm -f $(OBJ) $(ELF) $(BIN) $(UF2) $(IHEX) $(LIST) $(MAP)
