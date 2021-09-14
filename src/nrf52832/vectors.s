@@ -19,7 +19,7 @@
 @ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 @ SOFTWARE.
 
-	.include "src/common/vectors.s"
+	.include "../common/vectors.s"
 	.word handle_null+1 @ 16:
 	.word handle_null+1 @ 17:
 	.word handle_null+1 @ 18:

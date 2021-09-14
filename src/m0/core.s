@@ -19,10 +19,10 @@
 @ SOFTWARE.
 
 	@ Include the kernel info, needed for welcome
-	.include "src/common/kernel_info.s"
+	.include "../common/kernel_info.s"
 
 	@ Include the legal info
-	.include "src/common/legal.s"
+	.include "../common/legal.s"
 	
 	@@ Drop the top of the data stack
 	define_word "drop", visible_flag | inlined_flag

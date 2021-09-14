@@ -22,13 +22,13 @@
 	.cpu cortex-m0
 	.thumb
 
-	.include "src/rp2040/config.s"
-	.include "src/m0/macro.s"
-	.include "src/rp2040/variables.s"
+	.include "config.s"
+	.include "../m0/macro.s"
+	.include "variables.s"
 	
 	.text
 
-	.include "src/rp2040/vectors.s"
+	.include "vectors.s"
 	
 	@@ The first (null) dictionary entry
 	.p2align 2
@@ -84,16 +84,16 @@ outer_exc_handled:
 
 	.ltorg
 	
-	.include "src/rp2040/flashrom.s"
-	.include "src/rp2040/console.s"
-	.include "src/rp2040/hardware.s"
-	.include "src/rp2040/expose.s"
-	.include "src/m0/core.s"
-	.include "src/rp2040/divide.s"
-	.include "src/common/outer.s"
-	.include "src/common/cond.s"
-	.include "src/m0/asm.s"
-	.include "src/common/strings.s"
-	.include "src/m0/double.s"
-	.include "src/m0/exception.s"
-	.include "src/common/final.s"
+	.include "flashrom.s"
+	.include "console.s"
+	.include "hardware.s"
+	.include "expose.s"
+	.include "../m0/core.s"
+	.include "divide.s"
+	.include "../common/outer.s"
+	.include "../common/cond.s"
+	.include "../m0/asm.s"
+	.include "../common/strings.s"
+	.include "../m0/double.s"
+	.include "../m0/exception.s"
+	.include "../common/final.s"
