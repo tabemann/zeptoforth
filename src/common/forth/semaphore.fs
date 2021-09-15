@@ -21,6 +21,8 @@
 \ Compile to flash
 compile-to-flash
 
+compress-flash
+
 begin-module-once sema-module
 
   import task-module
@@ -38,12 +40,14 @@ begin-module-once sema-module
 
   end-module
 
-  \ Export the semaphore size
-  : sema-size ( -- bytes ) [inlined] sema-size ;
-
   \ Value indicating no counter limit
   no-tqueue-limit constant no-sema-limit
   
+  commit-flash
+
+  \ Export the semaphore size
+  : sema-size ( -- bytes ) [inlined] sema-size ;
+
   \ Initialize a semaphore with the given counter limit and initial counter
   : init-sema ( limit counter addr -- ) sema-tqueue init-tqueue-full ;
 
@@ -62,6 +66,8 @@ begin-module-once sema-module
   : broadcast ( semaphore -- ) [: sema-tqueue wake-tqueue-all ;] critical ;
 
 end-module
+
+end-compress-flash
 
 \ Reboot
 reboot

@@ -1,4 +1,4 @@
-@ Copyright (c) 2019-2020 Travis Bemann
+@ Copyright (c) 2019-2021 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,7 @@ _ws_q:	cmp tos, #0x09
 	beq 1f
 	movs tos, #0
 	bx lr
-1:	movs tos, #-1
+1:	ldr tos, =-1
 	bx lr
 	end_inlined
 
@@ -43,7 +43,7 @@ _newline_q:
 	beq 1f
 	movs tos, #0
 	bx lr
-1:	movs tos, #-1
+1:	ldr tos, =-1
 	bx lr
 	end_inlined
 
@@ -120,6 +120,8 @@ _token:	push {lr}
 	pop {pc}
 	end_inlined
 
+	.ltorg
+	
 	@@ Parse a line comment
 	define_word "\\", visible_flag | immediate_flag
 _line_comment:
@@ -222,7 +224,7 @@ _equal_case_strings:
 	beq 1b
 	movs tos, #0
 	pop {r4, pc}
-2:	movs tos, #-1
+2:	ldr tos, =-1
 	pop {r4, pc}
 3:	movs tos, #0
 	pop {r4, pc}
@@ -272,6 +274,8 @@ _find_dict:
 	pop {r4, r5, pc}
 	end_inlined
 
+	.ltorg
+	
 	@@ Duplicate three items on the stack
 	define_word "3dup", visible_flag
 _3dup:	push_tos
@@ -392,6 +396,8 @@ _find_all_dict:
 	pop {r4, pc}
 	end_inlined
 
+	.ltorg
+	
 	@@ Find a word in the dictionary in any wordlist in order of definition
 	@@ ( addr bytes mask -- addr|0 )
 	define_word "find-all", visible_flag
@@ -465,12 +471,16 @@ _evaluate:
 	ldr r2, [r2]
 	push {r0, r1, r2}
 	movs r0, #0
-	adds sp, #-4
+	mov r3, sp
+	subs r3, #4
+	mov sp, r3
 	mov r1, sp
 	str r0, [r1]
 	ldr r2, =eval_index_ptr
 	str r1, [r2]
-	adds sp, #-4
+	mov r3, sp
+	subs r3, #4
+	mov sp, r3
 	mov r1, sp
 	str tos, [r1]
 	ldr r2, =eval_count_ptr
@@ -480,7 +490,9 @@ _evaluate:
 	str tos, [r2]
 	ldr tos, =_outer
 	bl _try
-	adds sp, #8
+	mov r3, sp
+	adds r3, #8
+	mov sp, r3
 	pop {r0, r1, r2}
 	ldr r3, =eval_index_ptr
 	str r0, [r3]
@@ -518,6 +530,8 @@ _quit:	ldr r0, =rstack_base
 	bx lr
 	end_inlined
 
+	.ltorg
+	
 	@@ Display red text
 	define_word "display-red", visible_flag
 _display_red:
@@ -598,6 +612,9 @@ _outer:	push {lr}
 	movs r1, #inlined_flag
 	tst r0, r1
 	bne 7f
+	movs r1, #fold_flag
+	tst r0, r1
+	bne 8f
 	bl _to_xt
 	bl _asm_call
 	b 1b
@@ -606,6 +623,9 @@ _outer:	push {lr}
 	b 1b
 7:	bl _to_xt
 	bl _asm_inline
+	b 1b
+8:	bl _to_xt
+	bl _asm_fold
 	b 1b
 2:	pull_tos
 	pull_tos
@@ -652,6 +672,8 @@ _validate:
 	pop {pc}
 	end_inlined
 
+	.ltorg
+	
 	@@ Stack overflow exception
 	define_word "stack-overflow", visible_flag
 _stack_overflow:
@@ -750,6 +772,8 @@ _refill:
 1:	pop {pc}
 	end_inlined
 
+	.ltorg
+	
 	@@ Send XON
 	define_word "xon", visible_flag
 _xon:	push {lr}
@@ -845,7 +869,8 @@ _do_refill:
 	beq 1b
 	subs r0, #1
 	ldrb r2, [r0]
-	tst r2, #0x80
+	movs r3, #0x80
+	tst r2, r3
 	beq 1b
 	movs r3, r0
 	subs r3, #1
@@ -853,7 +878,8 @@ _do_refill:
 	cmp r3, r2
 	beq 1b
 	ldrb r2, [r3]
-	tst r2, #0x80
+	movs r3, #0x80
+	tst r2, r3
 	bne 4b
 	b 1b
 3:	pull_tos
@@ -906,7 +932,7 @@ _do_handle_number:
 	beq 1f
 	bl _comma_lit
 1:	push_tos
-	movs tos, #-1
+	ldr tos, =-1
 	pop {pc}
 2:	pull_tos
 	movs tos, #0
@@ -937,6 +963,8 @@ _parse_unsigned:
 	str tos, [dp]
 	pop {pc}
 	end_inlined
+
+	.ltorg
 
 	@@ Actually parse an integer base ( addr bytes -- addr bytes base )
 	define_word "parse-base", visible_flag
@@ -1008,7 +1036,7 @@ _parse_integer_core:
 	pull_tos
 	rsbs tos, tos, #0
 	push_tos
-	movs tos, #-1
+	ldr tos, =-1
 	pop {pc}
 3:	pull_tos
 	movs tos, #0
@@ -1066,10 +1094,12 @@ _parse_unsigned_core:
 3:	push_tos
 	movs tos, r3
 	push_tos
-	movs tos, #-1
+	ldr tos, =-1
 	pop {pc}
 	end_inlined
 
+	.ltorg
+	
 	@@ Parse a digit ( c base -- digit success )
 	define_word "parse-digit", visible_flag
 _parse_digit:
@@ -1097,7 +1127,7 @@ _parse_digit:
 3:	cmp tos, r0
 	bge 1b
 	push_tos
-	movs tos, #-1
+	ldr tos, =-1
 	pop {pc}
 	end_inlined
 	
@@ -1108,7 +1138,7 @@ _colon:	push {lr}
 	cmp tos, #0
 	beq 1f
 	ldr r0, =state
-	movs r1, #-1
+	ldr r1, =-1
 	str r1, [r0]
 	bl _asm_start
 	ldr r0, =current_flags
@@ -1129,7 +1159,7 @@ _colon_noname:
 	push_tos
 	movs tos, #0
 	ldr r0, =state
-	movs r1, #-1
+	ldr r1, =-1
 	str r1, [r0]
 	bl _asm_start
 	ldr r0, =current_flags
@@ -1183,6 +1213,8 @@ _constant_4:
 	pop {pc}
 	end_inlined
 
+	.ltorg
+	
 	@@ Create a constant with a specified name as a string
 	define_internal_word "constant-with-name", visible_flag
 _constant_with_name_4:
@@ -1256,6 +1288,9 @@ _constant_with_name_8:
 	movs tos, #6
 	bl _asm_literal
 	bl _asm_end
+	pop {pc}
+1:	ldr tos, =_token_expected
+	bl _raise
 	pop {pc}
 	end_inlined
 

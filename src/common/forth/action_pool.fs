@@ -21,6 +21,9 @@
 \ Compile this to flash
 compile-to-flash
 
+\ Begin compressing flash
+compress-flash
+
 begin-module-once action-pool-module
 
   import schedule-module
@@ -36,6 +39,8 @@ begin-module-once action-pool-module
       field: action-pool-schedule
     end-structure
 
+    commit-flash
+    
     \ Get a action in a action pool
     : action@ ( index action-pool -- action )
       action-pool-size + swap action-size * +
@@ -46,18 +51,6 @@ begin-module-once action-pool-module
   \ No actions are available
   : x-no-action-available ( -- ) space ." no action is available" cr ;
   
-  \ Initialize an action from a action pool
-  : init-from-action-pool ( xt action-pool -- action )
-    begin-critical
-    dup action-pool-count @ 0 ?do
-      i over action@ action-disposed? if
-	i over action@ dup >r swap action-pool-schedule @
-	init-action r> end-critical unloop exit
-      then
-    loop
-    end-critical ['] x-no-action-available ?raise
-  ;
-
   \ Get action pool free count
   : action-pool-free ( action-pool -- count )
     begin-critical
@@ -80,5 +73,21 @@ begin-module-once action-pool-module
   \ Get the size of a action pool of a given size
   : action-pool-size ( count -- bytes ) action-size * action-pool-size + ;
 
+  commit-flash
+  
+  \ Initialize an action from a action pool
+  : init-from-action-pool ( xt action-pool -- action )
+    begin-critical
+    dup action-pool-count @ 0 ?do
+      i over action@ action-disposed? if
+	i over action@ dup >r swap action-pool-schedule @
+	init-action r> end-critical unloop exit
+      then
+    loop
+    end-critical ['] x-no-action-available ?raise
+  ;
+
 end-module
 
+end-compress-flash
+  

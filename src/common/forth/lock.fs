@@ -21,6 +21,8 @@
 \ Compile to flash
 compile-to-flash
 
+compress-flash
+
 begin-module-once lock-module
 
   import task-module
@@ -57,6 +59,8 @@ begin-module-once lock-module
       field: lock-wait-orig-here
 
     end-structure
+
+    commit-flash
     
     \ Set up a lock wait record
     : init-lock-wait ( -- wait )
@@ -72,25 +76,6 @@ begin-module-once lock-module
 	dup lock-wait-task @ get-task-priority rot max swap lock-wait-next @
       repeat
       drop
-    ;
-
-    \ Get group maximum lock wait priority
-    : group-max-lock-wait-priority ( lock -- priority )
-      -32768 >r
-      dup lock-next-held @ if
-	dup begin
-	  r> over max-lock-wait-priority max >r
-	  dup lock-next-held @ 2 pick <> if
-	    lock-next-held @ false
-	  else
-	    true
-	  then
-	until
-	2drop
-      else
-	max-lock-wait-priority >r
-      then
-      r>
     ;
 
     \ Add a lock wait record
@@ -172,6 +157,29 @@ begin-module-once lock-module
       then
     ;
 
+    commit-flash
+
+    \ Get group maximum lock wait priority
+    : group-max-lock-wait-priority ( lock -- priority )
+      -32768 >r
+      dup lock-next-held @ if
+	dup begin
+	  r> over max-lock-wait-priority max >r
+	  dup lock-next-held @ 2 pick <> if
+	    lock-next-held @ false
+	  else
+	    true
+	  then
+	until
+	2drop
+      else
+	max-lock-wait-priority >r
+      then
+      r>
+    ;
+
+    commit-flash
+    
     \ Resolve task priority on holding a lock
     : update-hold-priority ( lock -- )
       dup lock-next-held @ if
@@ -220,6 +228,11 @@ begin-module-once lock-module
   \ Double locking exception
   : x-double-lock ( -- ) space ." double locked" cr ;
 
+  \ Attempted to unlock a lock not owned by the current task
+  : x-not-currently-owned ( -- ) space ." lock not owned by current task" cr ;
+
+  commit-flash
+  
   \ Lock a lock
   : lock ( lock -- )
     [:
@@ -246,9 +259,6 @@ begin-module-once lock-module
       then
     ;] critical
   ;
-
-  \ Attempted to unlock a lock not owned by the current task
-  : x-not-currently-owned ( -- ) space ." lock not owned by current task" cr ;
 
   \ Unlock a lock
   : unlock ( lock -- )
@@ -277,10 +287,14 @@ begin-module-once lock-module
     ['] update-hold-priority critical
   ;
 
+  commit-flash
+  
   \ Execute a block of code with a lock
   : with-lock ( lock xt -- ) dup >r lock try r> unlock ?raise ;
 
 end-module
+
+end-compress-flash
     
 \ Reboot
 reboot

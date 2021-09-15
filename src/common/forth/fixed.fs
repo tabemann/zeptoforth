@@ -21,10 +21,15 @@
 \ Compile this to flash
 compile-to-flash
 
+compress-flash
+
 import internal-module
 
 \ Get the value of pi
 0 314159265 0 100000000 f/ 2constant pi
+
+\ Domain error exception
+: x-domain-error ( -- ) space ." domain error" cr ;
 
 \ Duplicate four cells
 : 4dup ( d1 d2 -- d1 d2 d1 d2 ) 3 pick 3 pick 3 pick 3 pick ;
@@ -34,6 +39,8 @@ import internal-module
 
 \ Get the absolute value of a double-cell number
 : dabs ( nd -- ud ) dup 31 arshift 0<> if dnegate then ;
+
+commit-flash
 
 \ Get the minimum of two double-cell numbers
 : dmin ( nd nd -- nd ) 4dup d< if 2drop else 2swap 2drop then ;
@@ -85,7 +92,6 @@ import internal-module
   then
 ;
 
-
 begin-module internal-module
   
   \ Calculate whether a square root is close enough
@@ -96,21 +102,21 @@ begin-module internal-module
   \ Calculate a better square root guess
   : sqrt-better-guess ( f1 f2 -- f3 ) 2dup 2rot 2rot f/ d+ 2 0 d/ ;
 
-  \ The main loop of calculating a square root
-  : sqrt-test ( f1 f2 -- f3 )
-    begin
-      4dup f/ 2over sqrt-close-enough if
-	2nip true
-      else
-	4dup sqrt-better-guess 2nip false
-      then
-    until
-  ;
-
+  commit-flash
+  
 end-module
 
 \ Calculate a square root
-: sqrt ( f1 -- f2 ) 2dup 2 0 d/ sqrt-test ;
+: sqrt ( f1 -- f2 )
+  2dup 2 0 d/
+  begin
+    4dup f/ 2over sqrt-close-enough if
+      2nip true
+    else
+      4dup sqrt-better-guess 2nip false
+    then
+  until
+;
 
 \ Calculate a factorial
 : factorial ( u -- ud ) 1 0 rot 1 + 1 ?do i 0 ud* loop ;
@@ -123,6 +129,8 @@ end-module
   until
   rdrop rdrop 2drop 2drop
 ;
+
+commit-flash
 
 \ Execute e^x
 : exp ( f1 -- f2 ) expm1 0 1 d+ ;
@@ -141,6 +149,8 @@ end-module
   until
   rdrop rdrop
 ;
+
+commit-flash
 
 \ Calculate ln(x)
 : ln ( f1 -- f2 ) 0 1 d- lnp1 ;
@@ -167,6 +177,8 @@ end-module
 \ Calculate cos(x)
 : cos ( f1 -- f2 ) pi 2 0 d/ 2swap d- sin ;
 
+commit-flash
+
 \ Calculate tan(x)
 : tan ( f1 -- f2 ) 2dup sin 2swap cos f/ ;
 
@@ -177,6 +189,8 @@ end-module
   -1 +loop
   f/
 ;
+
+commit-flash
 
 \ Calculate a angle for any pair of x and y coordinates
 : atan2 ( fy fx -- fangle )
@@ -216,11 +230,10 @@ end-module
   then
 ;
 
+commit-flash
+
 \ Calculate acos(x)
 : acos ( f1 -- f2 ) asin dnegate pi 2 0 d/ d+ ;
-
-\ Domain error exception
-: x-domain-error ( -- ) space ." domain error" cr ;
 
 \ Calculate a fixed point power b^x
 : f** ( fb fx -- fb^x )
@@ -241,6 +254,8 @@ end-module
 
 \ Calculate cosh(x)
 : cosh ( f1 -- f2 ) expm1 2dup 2dup 0 1 d+ f/ d- 2 0 d/ 0 1 d+ ;
+
+commit-flash
 
 \ Calculate tanh(x)
 : tanh ( f1 -- f2 ) 2dup sinh 2swap cosh f/ ;
@@ -300,6 +315,8 @@ begin-module internal-module
     until
   ;
 
+  commit-flash
+
   \ Build max fraction characters table
   : build-max-fraction-chars ( -- )
     37 2 ?do
@@ -307,9 +324,13 @@ begin-module internal-module
     loop
   ;
 
+  commit-flash
+
   \ Create a lookup table of maximum number of fraction characters
   create max-fraction-chars build-max-fraction-chars
 
+  commit-flash
+  
   \ Handle the portion of a s31.32 fixed-point double-cell numeric literal to the
   \ right of the decimal point
   : handle-fraction ( b-addr bytes d base -- d -1 | 0 )
@@ -323,6 +344,8 @@ begin-module internal-module
     repeat
     nip 0 -rot 0 r> rot 0 swap f** f/ 2swap 2drop d+ true
   ;
+
+  commit-flash
 
   \ Handle s31.32 fixed-point double-cell numeric literals
   : handle-fixed ( b-addr bytes base -- flag )
@@ -348,6 +371,8 @@ begin-module internal-module
     then
   ;
 
+  commit-flash
+
   \ Handle an unsigned double-cell number
   : handle-unsigned-double ( b-addr bytes base -- d -1 | 0 )
     >r 2dup [char] . char-count 1 = if
@@ -360,6 +385,8 @@ begin-module internal-module
       then
     then
   ;
+
+  commit-flash
 
   \ Handle numeric literals
   : do-handle-number ( b-addr bytes -- flag )
@@ -405,6 +432,8 @@ begin-module internal-module
 
 end-module
 
+commit-flash
+
 \ Initialize
 : init ( -- )
   init
@@ -412,6 +441,8 @@ end-module
 ;
 
 unimport internal-module
+
+end-compress-flash
 
 \ Reboot
 reboot

@@ -1,5 +1,5 @@
 @ Copyright (c) 2013 Matthias Koch
-@ Copyright (c) 2019-2020 Travis Bemann
+@ Copyright (c) 2019-2021 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,7 @@
 .equ FLASH_OPTCR,   FLASH_Base + 0x14 @ Flash Option Control Register
 
 	@@ Write a byte to flash
-	define_word "bflash!", visible_flag
+	define_word "cflash!", visible_flag
 _store_flash_1:
 	movs r0, tos
 	pull_tos
@@ -124,7 +124,7 @@ _store_flash_2:
 
 	ldr r2, =flash_min_address
 	cmp r0, r2
-	blt 5f
+	blo 5f
 
 	ldr r3, =flash_dict_end
 	cmp r0, r3

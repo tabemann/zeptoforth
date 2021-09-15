@@ -43,6 +43,9 @@ dp 	.req r7
 	@@ Inlined word
 	.equ inlined_flag, 0x0008
 
+	@@ Fold-only word
+	.equ fold_flag, 0x0010
+
 	@@ The internal wordlist
 	.equ internal, 1
 
@@ -87,21 +90,21 @@ dp 	.req r7
 
 	@@ Push the top of the stack onto the data stack
 	.macro push_tos
-@	stmdb dp!, {tos}
-	str tos, [dp, #-4]!
+	subs dp, #4
+	str tos, [dp]
 	.endm
 
 	@@ Push a register onto the data stack
 	.macro push_reg reg
-@	stmdb dp!, {\reg}
-	str \reg, [dp, #-4]!
+	subs dp, #4
+	str \reg, [dp]
 	.endm
 
 	@@ Push a constant onto the top of the stack
 	.macro push_const const
 	ldr tos, =\const
-@	stmdb dp!, {tos}
-	str tos, [dp, #-4]!
+	subs dp, #4
+	str \tos, [dp]
 	.endm
 
 	@@ Pull the top of the stack into the TOS register
@@ -113,6 +116,7 @@ dp 	.req r7
 	.macro cstring text, dest
 	adr \dest, 11f
 	b 14f
+	.p2align 2
 11:	.byte 13f - 12f
 12:	.ascii "\text"
 13:	.p2align 1
@@ -123,6 +127,7 @@ dp 	.req r7
 	.macro cstring_ln text, dest
 	adr \dest, 11f
 	b 14f
+	.p2align 2
 11:	.byte 13f - 12f
 12:	.ascii "\text\r\n"
 13:	.p2align 1

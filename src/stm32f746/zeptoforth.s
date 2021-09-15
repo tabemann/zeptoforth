@@ -22,13 +22,13 @@
 	.cpu cortex-m7
 	.thumb
 
-	.include "src/stm32f746/config.s"
-	.include "src/common/macro.s"
-	.include "src/stm32f746/variables.s"
+	.include "config.s"
+	.include "../m4_m7/macro.s"
+	.include "variables.s"
 	
 	.text
 
-	.include "src/stm32f746/vectors.s"
+	.include "vectors.s"
 	
 	@@ The first (null) dictionary entry
 	.p2align 2
@@ -81,15 +81,16 @@ outer_exc_handled:
 
 	.ltorg
 	
-@	.include "src/stm32f746/clock.s"
-	.include "src/stm32f746/flashrom.s"
-	.include "src/stm32f746/console.s"
-	.include "src/stm32f746/expose.s"
-	.include "src/common/core.s"
-	.include "src/common/outer.s"
-	.include "src/common/cond.s"
-	.include "src/common/asm.s"
-	.include "src/common/strings.s"
-	.include "src/common/double.s"
-	.include "src/common/exception.s"
-	.include "src/common/final.s"
+@	.include "clock.s"
+	.include "flashrom.s"
+	.include "console.s"
+	.include "expose.s"
+	.include "../m4_m7/core.s"
+	.include "../m4_m7/divide.s"
+	.include "../common/outer.s"
+	.include "../common/cond.s"
+	.include "../m4_m7/asm.s"
+	.include "../common/strings.s"
+	.include "../m4_m7/double.s"
+	.include "../m4_m7/exception.s"
+	.include "../common/final.s"

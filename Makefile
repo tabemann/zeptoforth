@@ -18,60 +18,47 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-IDIR=src/include
-AS=arm-none-eabi-as
-LD=arm-none-eabi-ld
-COPY=arm-none-eabi-objcopy
-DUMP=arm-none-eabi-objdump
-ASFLAGS=-mcpu=cortex-m4 -mthumb -g
-PREFIX=/usr/local
-PLATFORM=stm32f407
-VERSION=0.20.3.Dev
-DATE:=$(shell date)
+export IDIR=src/include
+export AS=arm-none-eabi-as
+export LD=arm-none-eabi-ld
+export COPY=arm-none-eabi-objcopy
+export DUMP=arm-none-eabi-objdump
+export ASFLAGS=-g
+export PREFIX=/usr/local
+export PLATFORM=stm32f407
+export VERSION=0.20.3.Dev
 
-ODIR=obj
+KERNEL_INFO=src/common/kernel_info.s
 
-_OBJ = zeptoforth.o
-OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
+all: stm32f407 stm32l476 stm32f746 rp2040
 
-zeptoforth.${PLATFORM}.elf: src/common/kernel_info.s $(OBJ)
-	$(LD) $(OBJ) -T src/$(PLATFORM)/zeptoforth.ld --cref -Map zeptoforth.${PLATFORM}.map -nostartfiles -o $@
-	$(DUMP) -D $@ > zeptoforth.${PLATFORM}.list
-	$(COPY) $@ zeptoforth.${PLATFORM}.bin -O binary
-	$(COPY) $@ zeptoforth.${PLATFORM}.ihex -O ihex
+install:
+	$(MAKE) -C src/stm32f407 install
+	$(MAKE) -C src/stm32l476 install
+	$(MAKE) -C src/stm32f746 install
+	$(MAKE) -C src/rp2040 install
 
-$(ODIR)/zeptoforth.o: src/$(PLATFORM)/*.s src/common/*.s
-	mkdir -p obj
-	$(AS) $(ASFLAGS) -o $@ src/$(PLATFORM)/zeptoforth.s
+stm32f407:
+	$(MAKE) -C src/stm32f407
 
-src/common/kernel_info.s:
-	echo '        define_word "kernel-platform", visible_flag' > src/common/kernel_info.s
-	echo '_kernel_platform:' >> src/common/kernel_info.s
-	echo '        push {lr}' >> src/common/kernel_info.s
-	echo '        string "'$(PLATFORM)'"' >> src/common/kernel_info.s
-	echo '        pop {pc}' >> src/common/kernel_info.s
-	echo '        end_inlined' >> src/common/kernel_info.s
-	echo >> src/common/kernel_info.s
-	echo '        define_word "kernel-version", visible_flag' >> src/common/kernel_info.s
-	echo '_kernel_version:' >> src/common/kernel_info.s
-	echo '        push {lr}' >> src/common/kernel_info.s
-	echo '        string "'$(VERSION)'"' >> src/common/kernel_info.s
-	echo '        pop {pc}' >> src/common/kernel_info.s
-	echo '        end_inlined' >> src/common/kernel_info.s
-	echo >> src/common/kernel_info.s
-	echo '        define_word "kernel-date", visible_flag' >> src/common/kernel_info.s
-	echo '_kernel_date:' >> src/common/kernel_info.s
-	echo '        push {lr}' >> src/common/kernel_info.s
-	echo '        string "'$(DATE)'"' >> src/common/kernel_info.s
-	echo '        pop {pc}' >> src/common/kernel_info.s
-	echo '        end_inlined' >> src/common/kernel_info.s
-	echo >> src/common/kernel_info.s
+stm32l476:
+	$(MAKE) -C src/stm32l476
 
-.PHONY: clean html
+stm32f746:
+	$(MAKE) -C src/stm32f746
+
+rp2040:
+	$(MAKE) -C src/rp2040
+
+.PHONY: all install stm32f407 stm32l746 stm32f746 clean html
 
 html:
 	cd docs ; sphinx-build -b html . ../html
 
 clean:
-	rm -f $(ODIR)/*.o zeptoforth.*.map zeptoforth.*.list zeptoforth.*.elf zeptoforth.*.bin zeptoforth.*.ihex src/common/kernel_info.s
+	$(MAKE) -C src/stm32f407 clean
+	$(MAKE) -C src/stm32l476 clean
+	$(MAKE) -C src/stm32f746 clean
+	$(MAKE) -C src/rp2040 clean
+	$(MAKE) -C src/common clean
 

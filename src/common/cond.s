@@ -39,7 +39,7 @@ _if:	push {lr}
 	bl _asm_cmp_imm
 	bl _asm_reserve_branch
 	push_tos
-	movs tos, #-1
+	ldr tos, =-1
 	pop {pc}
 	end_inlined
 

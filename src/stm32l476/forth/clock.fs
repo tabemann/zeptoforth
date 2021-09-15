@@ -226,6 +226,9 @@ $E000E010 constant SYST_CSR
 \ Change the current wordlist
 0 set-current
 
+\ Not Cortex-M0 architecture
+0 constant m0-architecture
+
 \ Initialize
 : init ( -- )
   init

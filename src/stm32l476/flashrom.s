@@ -412,7 +412,7 @@ _get_flash_buffer:
 	end_inlined
 
 	@@ Write a byte to an address in a flash buffer
-	define_word "bflash!", visible_flag
+	define_word "cflash!", visible_flag
 _store_flash_1:
 	push {lr}
 	push_tos
