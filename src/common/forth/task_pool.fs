@@ -21,12 +21,17 @@
 \ Compile this to flash
 compile-to-flash
 
+compress-flash
+
 begin-module-once task-pool-module
 
   import task-module
 
   begin-import-module task-pool-internal-module
 
+  \ No tasks are available
+  : x-no-task-available ( -- ) space ." no task is available" cr ;
+  
     \ Task pool structure
     begin-structure task-pool-size
       \ Task pool count
@@ -42,15 +47,16 @@ begin-module-once task-pool-module
       field: task-pool-dict-size
     end-structure
 
+    commit-flash
+    
     \ Get a task in a task pool
     : task@ ( index task-pool -- task )
       task-pool-size + swap cells + @
     ;
 
   end-module
-  
-  \ No tasks are available
-  : x-no-task-available ( -- ) space ." no task is available" cr ;
+
+  commit-flash
   
   \ Spawn a task from a task pool
   : spawn-from-task-pool ( xn ... x0 count xt task-pool -- task )
@@ -94,3 +100,6 @@ begin-module-once task-pool-module
 
 end-module
 
+end-compress-flash
+
+reboot

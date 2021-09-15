@@ -21,6 +21,8 @@
 \ Compile to flash
 compile-to-flash
 
+compress-flash
+
 begin-module-once heap-module
 
   \ No blocks free exception
@@ -42,13 +44,17 @@ begin-module-once heap-module
       
     end-structure
 
+    commit-flash
+    
     \ Get the heap bitmap
     : heap-bitmap ( heap -- bitmap ) [inlined] heap-size + ;
 
     \ Get the heap blocks
     : heap-blocks ( heap -- blocks )
-      [inlined] dup heap-bitmap swap heap-block-count @ 5 rshift cells +
+      [inlined] dup heap-size + swap heap-block-count @ 5 rshift cells +
     ;
+
+    commit-flash
 
     \ Get a block in a heap
     : heap-block ( index heap -- block )
@@ -64,6 +70,8 @@ begin-module-once heap-module
     : in-heap? ( count index heap -- in-heap? )
       -rot + swap heap-block-count @ <=
     ;
+
+    commit-flash
 
     \ Get whether a sequences of blocks is free
     : blocks-free? ( count index heap -- free? )
@@ -109,6 +117,8 @@ begin-module-once heap-module
       again
     ;
 
+    commit-flash
+
     \ Find the first free space of a given size in the heap
     : find-space ( count index heap -- index )
       >r
@@ -138,6 +148,13 @@ begin-module-once heap-module
       then
     ;
 
+    \ Update next free index on free
+    : update-next-free-on-free ( index heap -- )
+      dup heap-next-free @ rot min swap heap-next-free !
+    ;
+    
+    commit-flash
+
     \ Mark space as allocated
     : mark-allocated ( count index heap -- )
       2 pick 2 pick 2 pick update-next-free-on-allocate
@@ -151,11 +168,6 @@ begin-module-once heap-module
       rdrop 2drop
     ;
 
-    \ Update next free index on free
-    : update-next-free-on-free ( index heap -- )
-      dup heap-next-free @ rot min swap heap-next-free !
-    ;
-    
     \ Mark space as freed
     : mark-free ( count index heap -- )
       2dup update-next-free-on-free
@@ -190,6 +202,8 @@ begin-module-once heap-module
     tuck * swap 32 align 5 rshift cells + heap-size +
   ;
 
+  commit-flash
+  
   \ Initialize a heap at a given address with a given block size and block count
   : init-heap ( block-size block-count addr -- )
     tuck swap 32 align swap heap-block-count !
@@ -212,6 +226,8 @@ begin-module-once heap-module
     over 4 - @ over >r -rot block-addr>index r> mark-free
   ;
 
+  commit-flash
+
   \ Resize space on a heap
   : resize ( size addr heap -- new-addr )
     2dup free
@@ -233,6 +249,8 @@ begin-module-once heap-module
   ;
   
 end-module
+
+end-compress-flash
 
 \ Reboot
 reboot

@@ -21,6 +21,8 @@
 \ Compile this to flash
 compile-to-flash
 
+compress-flash
+
 begin-import-module-once line-internal-module
 
   import ansi-term-module
@@ -62,6 +64,8 @@ begin-import-module-once line-internal-module
   $05 constant ctrl-e
   $06 constant ctrl-f
 
+  commit-flash
+  
   \ Initialize line editing for the current task
   : init-line ( index-ptr count-ptr buffer-ptr buffer-size -- )
     4 align, here line-size allot
@@ -90,6 +94,8 @@ begin-import-module-once line-internal-module
   \ Get first history item
   : history-first ( -- first-history ) line @ line-history-first @ ;
 
+  commit-flash
+  
   \ Get previous history item
   : history-prev ( history -- prev-history )
     history-first 2dup <> if
@@ -104,6 +110,8 @@ begin-import-module-once line-internal-module
     history-first begin dup history-next while history-next repeat
   ;
 
+  commit-flash
+
   \ Evict history
   : history-evict ( -- )
     history-last
@@ -113,6 +121,8 @@ begin-import-module-once line-internal-module
       dup history-prev 0 swap ! line @ line-history-heap free
     then
   ;
+
+  commit-flash
 
   \ Allocate a string in the history
   : history-allocate ( length -- )
@@ -125,15 +135,6 @@ begin-import-module-once line-internal-module
 	?raise nip true
       then
     until
-  ;
-
-  \ Add a string in the history
-  : history-add ( c-addr bytes -- )
-    dup history-allocate
-    history-first over !
-    dup line @ line-history-first !
-    2dup cell+ c!
-    5 + swap move
   ;
 
   \ Move a history item to the head of the history
@@ -158,6 +159,17 @@ begin-import-module-once line-internal-module
     else
       true
     then
+  ;
+
+  commit-flash
+
+  \ Add a string in the history
+  : history-add ( c-addr bytes -- )
+    dup history-allocate
+    history-first over !
+    dup line @ line-history-first !
+    2dup cell+ c!
+    5 + swap move
   ;
 
   \ Initialize for refill
@@ -220,6 +232,8 @@ begin-import-module-once line-internal-module
     then
   ;
 
+  commit-flash
+  
   \ Type line
   : type-line ( -- )
     0 line @ line-buffer-ptr @ line @ line-count-ptr @ @ +
@@ -237,17 +251,18 @@ begin-import-module-once line-internal-module
     drop
   ;
 
+  commit-flash
+
   \ Actually update the line editor
   : update-line ( -- )
-    adjust-start-row
-    start-position go-to-coord
-    type-line
-    end-position go-to-coord erase-down erase-end-of-line
-    cursor-position go-to-coord
+    [:
+      adjust-start-row
+      start-position go-to-coord
+      type-line
+      end-position go-to-coord erase-down erase-end-of-line
+      cursor-position go-to-coord
+    ;] execute-hide-cursor
   ;
-
-  \ Update the line editor
-  : update-line ( -- ) ['] update-line execute-hide-cursor ;
   
   \ Reset the line editor state for a new line of input
   : reset-line ( -- )
@@ -365,6 +380,8 @@ begin-import-module-once line-internal-module
       0
     then
   ;
+
+  commit-flash
   
   \ Handle delete
   : handle-delete ( -- )
@@ -493,16 +510,23 @@ begin-import-module-once line-internal-module
     then
   ;
 
-  \ Handle a special key
-  : handle-special ( -- )
+  commit-flash
+
+  \ Handle the escape key
+  : handle-escape ( -- )
     get-key case
-      [char] A of handle-history-next endof
-      [char] B of handle-history-prev endof
-      [char] C of handle-forward endof
-      [char] D of handle-backward endof
-      [char] 3 of
+      [char] [ of
 	get-key case
-	  [char] ~ of handle-delete-forward endof
+	  [char] A of handle-history-next endof
+	  [char] B of handle-history-prev endof
+	  [char] C of handle-forward endof
+	  [char] D of handle-backward endof
+	  [char] 3 of
+	    get-key case
+	      [char] ~ of handle-delete-forward endof
+	      dup set-key
+	    endcase
+	  endof
 	  dup set-key
 	endcase
       endof
@@ -510,13 +534,7 @@ begin-import-module-once line-internal-module
     endcase
   ;
 
-  \ Handle the escape key
-  : handle-escape ( -- )
-    get-key case
-      [char] [ of handle-special endof
-      dup set-key
-    endcase
-  ;
+  commit-flash
   
   \ The line editor
   : line-edit ( -- )
@@ -567,6 +585,8 @@ import internal-module
   init-line-refill
 ;
 
+commit-flash
+
 \ Enable line editor
 : enable-line ( -- ) ['] line-edit refill-hook ! ;
 
@@ -578,6 +598,8 @@ import internal-module
 
 unimport internal-module
 unimport line-internal-module
+
+end-compress-flash
 
 \ Reboot
 reboot

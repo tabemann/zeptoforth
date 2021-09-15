@@ -18,7 +18,7 @@
 @ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 @ SOFTWARE.
 
-	.include "src/common/handlers.s"
+	.include "../common/handlers.s"
 
 	@@ Initialize the handler hooks
 	define_word "init-handlers", visible_flag

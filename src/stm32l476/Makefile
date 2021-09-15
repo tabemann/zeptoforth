@@ -1,6 +1,4 @@
-#!/bin/sh
-
-# Copyright (c) 2020 Travis Bemann
+# Copyright (c) 2021 Travis Bemann
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,23 +18,39 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-VERSION=$1
+export PLATFORM=stm32l476
+BASEDIR=../..
+ODIR=$(BASEDIR)/obj
+IDIR=$(BASEDIR)/bin/$(VERSION)/$(PLATFORM)
+OBJ=$(ODIR)/zeptoforth.$(PLATFORM).o
+ELF=$(BASEDIR)/zeptoforth.$(PLATFORM).elf
+BIN=$(BASEDIR)/zeptoforth.$(PLATFORM).bin
+IHEX=$(BASEDIR)/zeptoforth.$(PLATFORM).ihex
+LIST=$(BASEDIR)/zeptoforth.$(PLATFORM).list
+MAP=$(BASEDIR)/zeptoforth.$(PLATFORM).map
 
-build_platform()
-{
-    PLATFORM=$1
-    echo "Building platform $1..."
-    make clean
-    make VERSION=$VERSION PLATFORM=$PLATFORM
-    mkdir bin/$VERSION/$PLATFORM
-    cp zeptoforth.$PLATFORM.bin bin/$VERSION/$PLATFORM/zeptoforth_kernel-$VERSION.bin
-    cp zeptoforth.$PLATFORM.ihex bin/$VERSION/$PLATFORM/zeptoforth_kernel-$VERSION.ihex
-    cp zeptoforth.$PLATFORM.elf bin/$VERSION/$PLATFORM/zeptoforth_kernel-$VERSION.elf
-}
+all: kernel_info $(BIN)
 
-set_version
-mkdir bin/$VERSION
-build_platform stm32l476
-build_platform stm32f407
-build_platform stm32f746
-make clean
+install:
+	mkdir -p $(IDIR)
+	cp $(BIN) $(IDIR)/zeptoforth_kernel-$(VERSION).bin
+	cp $(IHEX) $(IDIR)/zeptoforth_kernel-$(VERSION).ihex
+	cp $(ELF) $(IDIR)/zeptoforth_kernel-$(VERSION).elf
+
+kernel_info:
+	$(MAKE) -C ../common kernel_info
+
+$(BIN): $(OBJ)
+	$(LD) $(OBJ) -T zeptoforth.ld --cref -Map $(MAP) -nostartfiles -o $(ELF)
+	$(DUMP) -D $(ELF) > $(LIST)
+	$(COPY) $(ELF) $@ -O binary
+	$(COPY) $(ELF) $(IHEX) -O ihex
+
+$(OBJ): *.s ../common/*.s ../m4_m7/*.s
+	mkdir -p $(ODIR)
+	$(AS) $(ASFLAGS) -o $@ zeptoforth.s
+
+.PHONY: all install kernel_info clean
+
+clean:
+	rm -f $(OBJ) $(ELF) $(BIN) $(IHEX) $(LIST) $(MAP)

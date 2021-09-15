@@ -21,6 +21,8 @@
 \ Compile to flash
 compile-to-flash
 
+compress-flash
+
 begin-module-once schedule-module
 
   import systick-module
@@ -60,6 +62,8 @@ begin-module-once schedule-module
       \ Action systick delay time
       field: action-systick-delay
     end-structure
+
+    commit-flash
 
     \ Find the previous action
     : prev-action ( action1 -- action2 )
@@ -112,6 +116,8 @@ begin-module-once schedule-module
     then
     end-critical
   ;
+
+  commit-flash
 
   \ Dispose of an action
   : dispose-action ( action -- )
@@ -251,6 +257,8 @@ begin-module-once schedule-module
   : current-action ( -- action ) current-action @ ;
 
 end-module
+
+end-compress-flash
 
 \ Reboot
 reboot
