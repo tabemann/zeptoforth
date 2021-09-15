@@ -1,7 +1,5 @@
 compile-to-flash
 
-compress-flash
-
 begin-import-module-once swd-module
 
   import internal-module
@@ -26,7 +24,7 @@ begin-import-module-once swd-module
 
     variable use-sleep
 
-    commit-flash
+    compress-flash
     
     : pause-until ( xt -- )
       use-sleep @ if

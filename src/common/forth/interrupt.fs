@@ -39,10 +39,10 @@ begin-module-once interrupt-module
   \ NVIC base address
   $E000E100 constant NVIC_Base
 
+  commit-flash
+  
   \ NVIC interrupt set-enable register base address
   NVIC_Base constant NVIC_ISER_Base
-
-  commit-flash
 
   \ NVIC interrupt clear-enable register base address
   NVIC_Base $80 + constant NVIC_ICER_Base

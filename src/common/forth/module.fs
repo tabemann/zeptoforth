@@ -21,8 +21,6 @@
 \ Compile to flash
 compile-to-flash
 
-compress-flash
-
 \ Set up the wordlist
 forth-module 1 set-order
 forth-module set-current
@@ -39,6 +37,8 @@ internal-module set-current
 
 \ The current module stack index
 variable module-stack-index
+
+compress-flash
 
 \ The module stack entry
 begin-structure module-entry-size

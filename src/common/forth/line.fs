@@ -21,12 +21,15 @@
 \ Compile this to flash
 compile-to-flash
 
-compress-flash
-
 begin-import-module-once line-internal-module
 
   import ansi-term-module
   import heap-module
+
+  \ Line structure for current task
+  user line
+
+  compress-flash
 
   \ History block count
   128 constant history-block-count
@@ -51,9 +54,6 @@ begin-import-module-once line-internal-module
     history-block-size history-block-count heap-size +field line-history-heap
   end-structure
   
-  \ Line structure for current task
-  user line
-
   \ Character constants
   $09 constant tab
   $7F constant delete
