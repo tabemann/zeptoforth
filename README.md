@@ -10,13 +10,15 @@ To load the zeptoforth image (whether just the kernel or an image including prec
     $ st-flash write <location of the zeptoforth image> 0x08000000
     $ st-flash reset
 
+To load the zeptoforth image (whether just the kernel or an image including precompiled Forth code) onto a Raspberry Pi Pico board, hold down the BOOTSEL button while connecting the Raspberry Pi Pico to one's computer via USB. This will result in a USB Mass Storage device appearing in one's `/dev` directory, and if supported by one's system, automatically mounted. Then one can copy the appropriate UF2 file to the USB Mass Storage device, which will automatically cause it to be loaded into flash and then executed.
+
 Prebuilt binaries are in `bin/<version>/<platform>/`.
 
 \<Location of the zeptoforth image> is either:
 
-* a freshly built zeptoforth.<platform>.bin file in the root directory of zeptoforth
-* `zeptoforth_kernel-<version>.bin` (without precompiled Forth code)
-* `zeptoforth_<type>-<version>.bin` (with full precompiled Forth code)
+* a freshly built `zeptoforth.<platform>.{bin, uf2}` file in the root directory of zeptoforth
+* `zeptoforth_kernel-<version>.{bin, uf2}` (without precompiled Forth code)
+* `zeptoforth_<type>-<version>.{bin, uf2}` (with full precompiled Forth code)
 
 where \<type> is one of:
 
@@ -32,7 +34,7 @@ and where \<platform> is one of
 * `stm32l476`
 * `rp2040`
 
-Note that for the `rp2040` platform, to load code with the bootloader onto the Raspberry Pi Pico one needs a `.uf2` file rather than a `.bin` file, which will be located in the same location. Note that these files contain a boot block with a CRC32 checksum.
+Note that for the `rp2040` platform, to load code with the bootloader onto the Raspberry Pi Pico one needs a `.uf2` file rather than a `.bin` file, unlike the other platforms, which will be located in the same location. Note that these files contain a boot block with a CRC32 checksum.
 
 To build the kernel for each of the supported platforms, one first needs to install the gas and binutils arm-none-eabi toolchain along with Python 3.9, and then execute:
 
