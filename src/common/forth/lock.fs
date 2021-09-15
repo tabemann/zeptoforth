@@ -21,7 +21,7 @@
 \ Compile to flash
 compile-to-flash
 
-begin-compress-flash
+compress-flash
 
 begin-module-once lock-module
 
