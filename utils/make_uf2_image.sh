@@ -60,5 +60,5 @@ sed 's/:00000001FF clone_end/:00000001FF/' inter > inter.1
 mv inter.1 bin/$VERSION/$PLATFORM/zeptoforth_$IMAGE-$VERSION.ihex
 arm-none-eabi-objcopy -I ihex -O binary bin/$VERSION/$PLATFORM/zeptoforth_$IMAGE-$VERSION.ihex bin/$VERSION/$PLATFORM/zeptoforth_$IMAGE-$VERSION.bin
 src/rp2040/make_uf2.py bin/$VERSION/$PLATFORM/zeptoforth_$IMAGE-$VERSION.bin bin/$VERSION/$PLATFORM/zeptoforth_$IMAGE-$VERSION.uf2
-rm screenlog.0
+ rm screenlog.0
 rm inter

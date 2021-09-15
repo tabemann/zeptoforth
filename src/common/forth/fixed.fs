@@ -108,7 +108,7 @@ end-module
 
 \ Calculate a square root
 : sqrt ( f1 -- f2 )
-  2dup 2 0 d/ sqrt-test
+  2dup 2 0 d/
   begin
     4dup f/ 2over sqrt-close-enough if
       2nip true
