@@ -21,6 +21,8 @@
 \ Compile to flash
 compile-to-flash
 
+compress-flash
+
 begin-module-once fchan-module
 
   import task-module
@@ -58,6 +60,11 @@ begin-module-once fchan-module
   \ Get the fast channel size
   fchan-size constant fchan-size
 
+  \ Fast channel is closed exception
+  : x-fchan-closed ( -- ) space ." fchannel is closed" cr ;
+  
+  commit-flash
+  
   \ Initialize a fast channel
   : init-fchan ( addr -- )
     0 over fchan-data-addr !
@@ -69,9 +76,6 @@ begin-module-once fchan-module
     fchan-resp-tqueue init-tqueue
   ;
 
-  \ Fast channel is closed exception
-  : x-fchan-closed ( -- ) space ." fchannel is closed" cr ;
-  
   \ Send data on a fast channel
   : send-fchan ( addr bytes fchan -- )
     [:
@@ -111,6 +115,8 @@ begin-module-once fchan-module
       ;] critical
     ;] over fchan-recv-lock with-lock
   ;
+
+  commit-flash
   
   \ Send a double cell on a fast channel
   : send-fchan-2cell ( xd fchan -- )
@@ -150,6 +156,8 @@ begin-module-once fchan-module
   : reopen-fchan ( fchan -- ) false swap fchan-closed ! ;
 
 end-module
-    
+
+end-compress-flash
+
 \ Reboot
 reboot

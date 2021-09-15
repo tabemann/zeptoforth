@@ -21,10 +21,45 @@
 \ Compile to flash
 compile-to-flash
 
+compress-flash
+
 begin-module-once interrupt-module
 
   \ Invalid interrupt vector index exception
   : x-invalid-vector ( -- ) space ." invalid vector" cr ;
+
+  \ ICSR register
+  $E000ED04 constant ICSR
+
+  \ SHPRx registers
+  $E000ED18 constant SHPR1
+  $E000ED1C constant SHPR2
+  $E000ED20 constant SHPR3
+
+  \ NVIC base address
+  $E000E100 constant NVIC_Base
+
+  \ NVIC interrupt set-enable register base address
+  NVIC_Base constant NVIC_ISER_Base
+
+  commit-flash
+
+  \ NVIC interrupt clear-enable register base address
+  NVIC_Base $80 + constant NVIC_ICER_Base
+
+  \ NVIC interrupt set-pending register base address
+  NVIC_Base $100 + constant NVIC_ISPR_Base
+
+  \ NVIC interrupt clear-pending register base address
+  NVIC_Base $180 + constant NVIC_ICPR_Base
+
+  \ NVIC interrupt active bit register base address
+  NVIC_Base $200 + constant NVIC_IABR_Base
+
+  \ NVIC interrupt priority register base register
+  NVIC_Base $300 + constant NVIC_IPR_Base
+
+  commit-flash
   
   \ Set an interrupt vector
   : vector! ( xt vector-index -- )
@@ -38,17 +73,9 @@ begin-module-once interrupt-module
     cells vector-table + @ 1-
   ;
 
-  \ ICSR register
-  $E000ED04 constant ICSR
-
   \ Get the active interrupt
   : ICSR_VECTACTIVE@ ( -- interrupt ) ICSR @ $1FF and ;
   
-  \ SHPRx registers
-  $E000ED18 constant SHPR1
-  $E000ED1C constant SHPR2
-  $E000ED20 constant SHPR3
-
   \ Set system fault handler priority field 4, for memory management fault
   : SHPR1_PRI_4! ( u -- ) $F0 and 0 lshift SHPR1 @ $FF bic or SHPR1 ! ;
 
@@ -85,9 +112,6 @@ begin-module-once interrupt-module
   \ Get system fault handler priority field 15, for SysTick
   : SHPR3_PRI_15@ ( -- u ) SHPR3 @ 24 rshift $FF and ;
 
-  \ ICSR register
-  $E000ED04 constant ICSR
-
   \ Set PENDSVSET
   : ICSR_PENDSVSET! ( -- ) [ 1 28 lshift ] literal ICSR bis! ;
 
@@ -100,12 +124,6 @@ begin-module-once interrupt-module
   \ Initiate an SVCall
   : svc ( -- ) [ $DF00 h, ] [inlined] ;
 
-  \ NVIC base address
-  $E000E100 constant NVIC_Base
-
-  \ NVIC interrupt set-enable register base address
-  NVIC_Base constant NVIC_ISER_Base
-
   \ Set NVIC interrupt set-enable
   : NVIC_ISER_SETENA! ( u -- )
     dup 32 / cells NVIC_ISER_Base + swap 32 mod 1 swap lshift swap bis!
@@ -115,9 +133,6 @@ begin-module-once interrupt-module
   : NVIC_ISER_SETENA@ ( u -- bit )
     dup 32 / cells NVIC_ISER_Base + @ swap 32 mod 1 swap lshift swap bit@
   ;
-
-  \ NVIC interrupt clear-enable register base address
-  NVIC_Base $80 + constant NVIC_ICER_Base
 
   \ Set NVIC interrupt clear-enable
   : NVIC_ICER_CLRENA! ( u -- )
@@ -129,9 +144,6 @@ begin-module-once interrupt-module
     dup 32 / cells NVIC_ICER_Base + @ swap 32 mod 1 swap lshift swap bit@
   ;
 
-  \ NVIC interrupt set-pending register base address
-  NVIC_Base $100 + constant NVIC_ISPR_Base
-
   \ Set NVIC interrupt set-pending
   : NVIC_ISPR_SETPEND! ( u -- )
     dup 32 / cells NVIC_ISPR_Base + swap 32 mod 1 swap lshift swap bis!
@@ -141,9 +153,6 @@ begin-module-once interrupt-module
   : NVIC_ISPR_SETPEND@ ( u -- bit )
     dup 32 / cells NVIC_ISPR_Base + @ swap 32 mod 1 swap lshift swap bit@
   ;
-
-  \ NVIC interrupt clear-pending register base address
-  NVIC_Base $180 + constant NVIC_ICPR_Base
 
   \ Set NVIC interrupt clear-pending
   : NVIC_ICPR_CLRPEND! ( u -- )
@@ -155,16 +164,10 @@ begin-module-once interrupt-module
     dup 32 / cells NVIC_ICPR_Base + @ swap 32 mod 1 swap lshift swap bit@
   ;
 
-  \ NVIC interrupt active bit register base address
-  NVIC_Base $200 + constant NVIC_IABR_Base
-
   \ Get NVIC interrupt active bit
   : NVIC_IABR_ACTIVE@ ( u -- bit )
     dup 32 / cells NVIC_IABR_Base + @ swap 32 mod 1 swap lshift swap bit@
   ;
-
-  \ NVIC interrupt priority register base register
-  NVIC_Base $300 + constant NVIC_IPR_Base
 
   \ Set NVIC interrupt priority register field
   : NVIC_IPR_IP! ( priority u -- ) NVIC_IPR_Base + c! ;
@@ -182,6 +185,8 @@ import interrupt-module
 ;
 
 unimport interrupt-module
+
+end-compress-flash
 
 \ Reboot
 reboot

@@ -1,4 +1,4 @@
-@ Copyright (c) 2020 Travis Bemann
+@ Copyright (c) 2020-2021 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -135,7 +135,8 @@ _compile_cstring:
 	pop {r0, r1}  
 	adds tos, tos, r0
 	adds tos, #3
-	tst tos, #1
+	movs r2, #1
+	tst tos, r2
 	bne 1f
 	push {r0, r1}
 	bl _asm_branch
@@ -161,12 +162,12 @@ _compile_cstring:
 	pop {pc}
 	end_inlined
 
+	.ltorg
+	
 	@@ Parse a character and put it on the stack
 	define_word "char", visible_flag
 _char:	push {lr}
 	bl _token
-	cmp tos, #0
-	beq 1f
 	pull_tos
 	ldrb tos, [tos]
 	pop {pc}
@@ -451,7 +452,15 @@ _format_integer_inner:
 	push {r0, r1, r2}
 	bl _umod
 	pop {r0, r1, r2}
-	udiv r2, r2, r1
+	push {r0}
+	push_tos
+	movs tos, r2
+	push_tos
+	movs tos, r1
+	bl _udiv
+	pop {r0}
+	movs r2, tos
+	pull_tos
 	cmp tos, #10
 	bge 2f
 	adds tos, #0x30

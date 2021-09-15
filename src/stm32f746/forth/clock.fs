@@ -194,6 +194,9 @@ USART1_Base $0C + constant USART1_BRR
 \ Change the current wordlist
 0 set-current
 
+\ Not Cortex-M0 architecture
+0 constant m0-architecture
+
 \ Initialize
 : init ( -- )
   init
