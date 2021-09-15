@@ -21,8 +21,6 @@
 \ Compile this to flash
 compile-to-flash
 
-compress-flash
-
 begin-module-once ansi-term-module
 
   begin-import-module ansi-term-internal-module
@@ -38,6 +36,8 @@ begin-module-once ansi-term-module
     
   end-module
   
+  compress-flash
+
   \ Character constants
   $1B constant escape
     

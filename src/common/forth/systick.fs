@@ -21,8 +21,6 @@
 \ Compile to flash
 compile-to-flash
 
-compress-flash
-
 begin-import-module-once systick-module
 
   import internal-module
@@ -65,6 +63,8 @@ begin-import-module-once systick-module
     
     \ SysTick counter
     variable systick-counter
+
+    compress-flash
 
   end-module
   
