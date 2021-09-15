@@ -28,9 +28,14 @@ begin-module forth-module
   import temp-module
   import internal-module
   import esc-string-module
+
+  \ Our temporary buffer size
+  256 constant temp-str-size
+
+  commit-flash
   
   \ Our temporary buffer
-  256 temp-size buffer: temp-str
+  temp-str-size temp-size buffer: temp-str
 
   commit-flash
   

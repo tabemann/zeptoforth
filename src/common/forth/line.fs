@@ -515,7 +515,7 @@ begin-import-module-once line-internal-module
   \ Handle the escape key
   : handle-escape ( -- )
     get-key case
-      [char] [ of handle-special
+      [char] [ of
 	get-key case
 	  [char] A of handle-history-next endof
 	  [char] B of handle-history-prev endof

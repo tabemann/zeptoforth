@@ -865,7 +865,7 @@ begin-import-module-once task-module
     
     \ If this is not a Cortex-M0(+) MCU
 
-    m0-architecture [if]
+    m0-architecture not [if]
     
       \ Handle PAUSE
       : do-pause ( -- ) true in-multitasker? ! ICSR_PENDSVSET! dmb dsb isb ;
@@ -873,7 +873,7 @@ begin-import-module-once task-module
     [else]
 
       \ Handle Pause
-      : do-pause ( -- ) true in-multitasker? ! ['] switch-tasks svc
+      : do-pause ( -- ) true in-multitasker? ! ['] switch-tasks svc ;
       
     [then]
     
