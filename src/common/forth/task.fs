@@ -21,8 +21,6 @@
 \ Compile this to flash
 compile-to-flash
 
-compress-flash
-
 begin-import-module-once task-module
 
   import internal-module
@@ -202,8 +200,6 @@ begin-import-module-once task-module
   \ Timed out exception
   : x-timed-out ( -- ) space ." block timed out" cr ;
 
-  commit-flash
-  
   \ Sleep
   : sleep ( -- ) sleep-enabled? @ if sleep then ;
 
@@ -245,8 +241,6 @@ begin-import-module-once task-module
       dup last-task @ = if drop sp! else task-rstack-current @ 12 + ! then
     ;
 
-    commit-flash
-    
     \ Get task return stack end
     : task-rstack-end ( task -- addr ) task-stack-base ;
 
@@ -326,8 +320,6 @@ begin-import-module-once task-module
       0 swap task-next !
     ;
 
-    commit-flash
-    
     \ Insert a task
     : insert-task ( task -- )
       dup find-higher-priority ?dup if
@@ -353,8 +345,6 @@ begin-import-module-once task-module
       0 swap task-next !
     ;
 
-    commit-flash
-
     \ Remove a task if it is scheduled
     : test-remove-task ( task -- )
       dup task-prev @ 0<> over task-next @ 0<> or if remove-task else drop then
@@ -376,8 +366,6 @@ begin-import-module-once task-module
       true in-task-change !
       enable-int
     ;
-
-    commit-flash
 
     \ Start a task change
     : start-validate-task-change ( task -- )
@@ -450,8 +438,6 @@ begin-import-module-once task-module
     dup validate-not-terminated ['] task-name for-task !
   ;
 
-  commit-flash
-  
   \ Start a task's execution
   : run ( task -- )
     dup start-validate-task-change
@@ -567,8 +553,6 @@ begin-import-module-once task-module
     readied swap task-state h!
     pause
   ;
-
-  commit-flash
 
   \ Block a task for the specified initialized timeout
   : block ( task -- )
@@ -705,8 +689,6 @@ begin-import-module-once task-module
     drop r> r> swap push-task-stack
   ;
 
-  commit-flash
-
   \ Spawn a non-main task
   : spawn ( xn...x0 count xt dict-size stack-size rstack-size -- task )
     2dup + task +
@@ -730,8 +712,6 @@ begin-import-module-once task-module
       over delayed = rot blocked-timeout = or
       rot delayed? and or
     ;
-
-    commit-flash
 
     \ Find next task
     : find-next-task ( -- task )
@@ -788,8 +768,6 @@ begin-import-module-once task-module
       repeat
     ;
 
-    commit-flash
-    
     \ Handle task-switching
     : switch-tasks ( -- )
       dmb dsb isb
@@ -861,8 +839,6 @@ begin-import-module-once task-module
       dmb dsb isb
     ;
 
-    commit-flash
-    
     \ If this is not a Cortex-M0(+) MCU
 
     m0-architecture not [if]
@@ -927,8 +903,6 @@ begin-import-module-once task-module
       ." until      delay"
     ;
 
-    commit-flash
-    
   end-module
   
   \ Dump task information for all tasks
@@ -1005,8 +979,6 @@ begin-import-module-once task-module
     enable-int
   ;
 
-  commit-flash
-  
   \ Initialize multitasking
   : init-tasker ( -- )
     disable-int
@@ -1061,8 +1033,6 @@ begin-import-module-once task-module
 
 end-module
 
-commit-flash
-
 \ Display space free for a given task
 : task-unused ( task -- ) task-unused ;
 
@@ -1100,8 +1070,6 @@ begin-module task-module
 end-module
 
 unimport task-module
-
-end-compress-flash
 
 \ Reboot to initialize multitasking
 reboot

@@ -21,8 +21,6 @@
 \ Compile to flash
 compile-to-flash
 
-compress-flash
-
 begin-module-once schedule-module
 
   import systick-module
@@ -32,6 +30,8 @@ begin-module-once schedule-module
 
     \ The current action
     user current-action
+
+    compress-flash
 
     \ The scheduler structure
     begin-structure schedule-size    
