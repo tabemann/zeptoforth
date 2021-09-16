@@ -1001,7 +1001,7 @@ begin-import-module-once task-module
     false ram-dict-warned !
     ['] do-validate-dict validate-dict-hook !
     ['] execute svcall-vector vector!
-    [ m0-architecture ] [if] ['] switch-tasks pendsv-vector vector! [then]
+    [ m0-architecture not ] [if] ['] switch-tasks pendsv-vector vector! [then]
     ['] task-systick-handler systick-vector vector!
     1 pause-enabled !
     enable-int
