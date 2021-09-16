@@ -37,6 +37,9 @@ begin-import-module-once line-internal-module
   \ History block size
   16 constant history-block-size
 
+  \ Line editor is in upload mode
+  0 bit constant line-upload-mode
+  
   \ Line structure
   begin-structure line-size
     hfield: line-start-row
@@ -51,10 +54,12 @@ begin-import-module-once line-internal-module
     hfield: line-count
     field: line-history-first
     field: line-history-current
+    field: line-flags
     history-block-size history-block-count heap-size +field line-history-heap
   end-structure
   
   \ Character constants
+  $08 constant backspace
   $09 constant tab
   $7F constant delete
   $0A constant newline
@@ -64,6 +69,9 @@ begin-import-module-once line-internal-module
   $05 constant ctrl-e
   $06 constant ctrl-f
 
+  \ Deferred line editing handler
+  defer deferred-line-edit
+  
   commit-flash
   
   \ Initialize line editing for the current task
@@ -81,6 +89,7 @@ begin-import-module-once line-internal-module
     0 over line-count h!
     0 over line-history-first !
     0 over line-history-current !
+    0 over line-flags !
     history-block-size history-block-count 2 pick line-history-heap init-heap
     line !
   ;
@@ -267,6 +276,7 @@ begin-import-module-once line-internal-module
   \ Reset the line editor state for a new line of input
   : reset-line ( -- )
     reset-ansi-term
+    line-upload-mode line @ line-flags bic!
     0 line @ line-index-ptr @ ! 0 line @ line-count-ptr @ !
     0 line @ line-offset h! 0 line @ line-count h!
     update-start-position update-terminal-size
@@ -510,27 +520,120 @@ begin-import-module-once line-internal-module
     then
   ;
 
+  \ Check whether to leave upload mode
+  : continue-upload? ( -- continue )
+    get-key
+    dup escape = if
+      drop get-key
+      dup [char] O = if
+	drop get-key dup [char] Q = if false else set-key true then \ F2
+      else
+	set-key true
+      then
+    else
+      set-key true
+    then
+  ;
+
+  \ Handle uploading a byte
+  : handle-upload-byte ( c -- )
+    line @ line-count-ptr @ @ line @ line-buffer-size @ < if
+      dup emit
+      line @ line-buffer-ptr @ line @ line-index-ptr @ @ + c!
+      1 line @ line-index-ptr @ +!
+      1 line @ line-count-ptr @ +!
+    else
+      drop
+    then
+  ;
+
+  \ Handle deleting a byte in upload mode
+  : handle-upload-delete-byte ( -- )
+    line @ line-index-ptr @ @ 0> if
+      -1 line @ line-index-ptr @ +!
+      -1 line @ line-count-ptr @ +!
+      backspace emit space backspace emit
+    then
+  ;
+
+  \ Reset upload mode
+  : reset-upload ( -- )
+    0 line @ line-index-ptr @ ! 0 line @ line-count-ptr @ !
+  ;
+
+  commit-flash
+
+  \ Handle upload mode
+  : handle-upload ( -- )
+    reset-upload xon ack
+    continue-upload? if
+      begin
+	get-key
+	dup $20 u< if 
+	  case
+	    return of true endof
+	    newline of true endof
+	    tab of tab handle-upload-byte false endof
+	    swap false swap
+	  endcase 
+	else
+	  dup delete = if
+	    drop handle-upload-delete-byte
+	  else
+	    handle-upload-byte
+	  then
+	  false
+	then
+      until
+      0 line @ line-index-ptr @ !
+      xoff
+    else
+      cr ." leaving upload mode"
+      ['] deferred-line-edit refill-hook !
+      line-upload-mode line @ line-flags bic!
+    then
+  ;
+    
+  commit-flash
+
+  \ Set upload mode
+  : handle-set-upload ( -- )
+    0 line @ line-index-ptr @ ! 0 line @ line-count-ptr @ !
+    0 line @ line-offset ! 0 line @ line-count !
+    update-line
+    s" entering upload mode " tuck type
+    offset-position go-to-coord
+    ['] handle-upload refill-hook !
+    line-upload-mode line @ line-flags bis!
+  ;
+  
   commit-flash
 
   \ Handle the escape key
-  : handle-escape ( -- )
+  : handle-escape ( -- exit-line-editor )
     get-key case
       [char] [ of
 	get-key case
-	  [char] A of handle-history-next endof
-	  [char] B of handle-history-prev endof
-	  [char] C of handle-forward endof
-	  [char] D of handle-backward endof
+	  [char] A of handle-history-next false endof \ Up arrow
+	  [char] B of handle-history-prev false endof \ Down arrow
+	  [char] C of handle-forward false endof \ Forward
+	  [char] D of handle-backward false endof \ Backward
 	  [char] 3 of
 	    get-key case
-	      [char] ~ of handle-delete-forward endof
-	      dup set-key
+	      [char] ~ of handle-delete-forward false endof \ Delete
+	      dup set-key swap false swap
 	    endcase
 	  endof
-	  dup set-key
+	  dup set-key swap false swap
 	endcase
       endof
-      dup set-key
+      [char] O of
+	get-key case
+	  [char] P of handle-set-upload true endof \ F1
+	  dup set-key swap false swap
+	endcase
+      endof
+      dup set-key swap false swap
     endcase
   ;
 
@@ -550,7 +653,7 @@ begin-import-module-once line-internal-module
 	  ctrl-e of handle-end false endof
 	  ctrl-f of handle-forward false endof
 	  ctrl-b of handle-backward false endof
-	  escape of handle-escape false endof
+	  escape of handle-escape endof
 	  swap false swap
 	endcase 
       else
@@ -562,15 +665,17 @@ begin-import-module-once line-internal-module
 	false
       then
     until
-    history-changed? if
-      line @ line-count-ptr @ @ if
-	line @ line-buffer-ptr @ line @ line-count-ptr @ @ history-add
+    line @ line-flags @ line-upload-mode and 0= if
+      history-changed? if
+	line @ line-count-ptr @ @ if
+	  line @ line-buffer-ptr @ line @ line-count-ptr @ @ history-add
+	then
+      else
+	history-current history-front
       then
-    else
-      history-current history-front
+      end-position go-to-coord
     then
     0 line @ line-history-current !
-    end-position go-to-coord
     0 line @ line-index-ptr @ !
     xoff
   ;
@@ -586,6 +691,9 @@ import internal-module
 ;
 
 commit-flash
+
+\ Set the deferred line edit handler
+' line-edit ' deferred-line-edit defer!
 
 \ Enable line editor
 : enable-line ( -- ) ['] line-edit refill-hook ! ;
