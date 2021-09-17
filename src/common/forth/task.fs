@@ -96,8 +96,8 @@ begin-import-module-once task-module
     \ The default timeslice
     10 constant default-timeslice
 
-    \ The default maximum timeslice
-    20 constant default-max-timeslice
+    \ The default minimum timeslice
+    0 constant default-min-timeslice
     
     \ Sleep is enabled
     variable sleep-enabled?
@@ -117,8 +117,8 @@ begin-import-module-once task-module
     \ A task's timeslice
     user task-timeslice
 
-    \ A task's maximum timeslice
-    user task-max-timeslice
+    \ A task's minimum timeslice
+    user task-min-timeslice
 
     \ The current timeout start time in ticks
     user timeout-systick-start
@@ -407,7 +407,7 @@ begin-import-module-once task-module
     disable-int
     dup validate-not-terminated
     dup current-task @ = if
-      2dup ['] task-timeslice for-task @ - task-systick-counter @ + 0 max
+      2dup ['] task-timeslice for-task @ - task-systick-counter @ +
       task-systick-counter !
     then
     swap 0 max swap ['] task-timeslice for-task !
@@ -419,14 +419,14 @@ begin-import-module-once task-module
     dup validate-not-terminated ['] task-timeslice for-task @
   ;
 
-  \ Set task maximum timeslice
-  : set-task-max-timeslice ( max-timeslice task -- )
-    dup validate-not-terminated ['] task-max-timeslice for-task !
+  \ Set task minimum timeslice
+  : set-task-min-timeslice ( min-timeslice task -- )
+    dup validate-not-terminated ['] task-min-timeslice for-task !
   ;
 
-  \ Get task maximum timeslice
-  : get-task-max-timeslice ( task -- max-timeslice )
-    dup validate-not-terminated ['] task-max-timeslice for-task @
+  \ Get task minimum timeslice
+  : get-task-min-timeslice ( task -- min-timeslice )
+    dup validate-not-terminated ['] task-min-timeslice for-task @
   ;
 
   \ Get a task's name as a counted string; an address of zero indicates no name
@@ -633,7 +633,7 @@ begin-import-module-once task-module
       c" main" task-name !
       base @ task-base !
       default-timeslice task-timeslice !
-      default-max-timeslice task-max-timeslice !
+      default-min-timeslice task-min-timeslice !
       default-timeslice task-saved-systick-counter !
       0 current-lock !
       0 current-lock-held !
@@ -680,7 +680,7 @@ begin-import-module-once task-module
     0 over ['] task-name for-task !
     -1 over ['] task-systick-delay for-task !
     default-timeslice over ['] task-timeslice for-task !
-    default-max-timeslice over ['] task-max-timeslice for-task !
+    default-min-timeslice over ['] task-min-timeslice for-task !
     default-timeslice over ['] task-saved-systick-counter for-task !
     dup task-rstack-base over task-stack-base ['] task-entry
     ['] init-context svc over task-rstack-current !
@@ -822,7 +822,8 @@ begin-import-module-once task-module
 	then
 
 	task-saved-systick-counter @ 0<= if
-	  task-saved-systick-counter @ task-timeslice @ + 0 max
+	  task-saved-systick-counter @ task-timeslice @ +
+	  task-min-timeslice @ max
 	  task-systick-counter !
 	else
 	  task-saved-systick-counter @ task-systick-counter !
