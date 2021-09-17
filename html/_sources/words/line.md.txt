@@ -10,8 +10,10 @@ The line editor provides a simple interface for allowing the user to edit input 
 * Down: switch to the next line in the history
 * Control-A: move the cursor to the start of the input
 * Control-E: move the cursor to the end of the input
+* F1: enter upload mode, where line editing features are turned off
+* F2: leave upload mode and re-enable line editing features; this must be entered as the first key entered on a line
 
-Note that tabs and characters of code points greater than 127 are handled correctly. Also note that it is not compatible with non-terminal operation, i.e. with loading code automatically via serial or swdcom; before this is done it must be disabled.
+Note that tabs and characters of code points greater than 127 are handled correctly. Also note that it is not compatible with non-terminal operation except when in upload mode, i.e. with loading code automatically via serial or swdcom; before this is done one must be in upload mode or it must be disabled.
 
 After a reboot, it is initialized for the main task only, and if, when enabled, `refill` is used for a different task, it needs to have already been initialized for that task.
 
