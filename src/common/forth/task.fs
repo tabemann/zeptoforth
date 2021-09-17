@@ -839,19 +839,8 @@ begin-import-module-once task-module
       dmb dsb isb
     ;
 
-    \ If this is not a Cortex-M0(+) MCU
-
-    m0-architecture not [if]
-    
-      \ Handle PAUSE
-      : do-pause ( -- ) true in-multitasker? ! ICSR_PENDSVSET! dmb dsb isb ;
-
-    [else]
-
-      \ Handle Pause
-      : do-pause ( -- ) true in-multitasker? ! ['] switch-tasks svc ;
-      
-    [then]
+    \ Handle PAUSE
+    : do-pause ( -- ) true in-multitasker? ! ICSR_PENDSVSET! dmb dsb isb ;
     
     \ Dump task name
     : dump-task-name ( task -- )
@@ -1001,7 +990,7 @@ begin-import-module-once task-module
     false ram-dict-warned !
     ['] do-validate-dict validate-dict-hook !
     ['] execute svcall-vector vector!
-    [ m0-architecture not ] [if] ['] switch-tasks pendsv-vector vector! [then]
+    ['] switch-tasks pendsv-vector vector!
     ['] task-systick-handler systick-vector vector!
     1 pause-enabled !
     enable-int
