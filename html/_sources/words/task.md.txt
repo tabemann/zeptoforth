@@ -208,22 +208,22 @@ Get the saved priority of a task.
 ##### `set-task-timeslice`
 ( timeslice task -- )
 
-Set the timeslice, in 100 us increments, of a task, indicating the minimum amount of time a task will run before being preempted. Note that the default setting for this for a newly initialized task is 10.
+Set the timeslice, in ticks (usually 100 us increments), of a task, indicating the minimum amount of time a task will run before being preempted. If a task does not use up all of its timeslice before it gives up control of the processor, it will start off with the remainder of its timeslice next time it has control of the processor, unless it exhausted its timeslice, where then the timeslice value is added onto the tick counter (which may be negative) to yield the new timeslice (but which may not be less than the task's minimum timeslice). Note that the default setting for this for a newly initialized task is 10.
 
 ##### `get-task-timeslice`
 ( task -- timeslice )
 
-Get the timeslice, in 100 us increments, of a task.
+Get the timeslice, in ticks (usually 100 us increments), of a task.
 
-##### `set-task-max-timeslice`
+##### `set-task-min-timeslice`
 ( timeslice task -- )
 
-Set the maximum timeslice, in 100 us increments of a task, indicating the maximum amount of time a task will run before being preempted; note that if the timeslice of a task is larger than this amount, the maximum timeslice of the task will be treated as being the same as the task's timeslice. Also note that the default setting for this for a newly initialized task is 20.
+Set the minimum timeslice, in ticks (usually 100 us increments), that a task will be guaranteed to run when scheduled, regardless of how many ticks the task executed for the last time it was scheduled. For instance, to ensure that each time a task will run for at least 10 ticks each time it is scheduled, this should be set to 10. By default, this value is set to 0 for each task, such that a given task is not guaranteed to not be descheduled immediately on a SysTick if it had already used up both its timeslice and also the next timeslice (through, e.g., spending time in critical sections).
 
 ##### `get-task-max-timeslice`
 ( task -- timeslice )
 
-Get the maximum timeslice, in 100 us increments, of a task.
+Getet the minimum timeslice, in ticks (usually 100 us increments), that a task will be guaranteed to run when scheduled, regardless of how many ticks the task executed for the last time it was scheduled.
 
 ##### `get-task-active`
 ( task -- level )
