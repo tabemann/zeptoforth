@@ -39,8 +39,8 @@ begin-module forth-module
   : high ( -- )
     begin
       ." < " 100000 0 ?do loop
-      0 0 my-out-fchan send-fchan
-      my-in-fchan recv-fchan 2drop
+      0 my-out-fchan send-fchan-cell
+      my-in-fchan recv-fchan-cell drop
       ." > "
     again
   ;
@@ -48,9 +48,9 @@ begin-module forth-module
   \ The loop of the lower-priority task
   : low ( -- )
     begin
-      my-out-fchan recv-fchan 2drop
+      my-out-fchan recv-fchan-cell drop
       ." [ " 10000 0 ?do loop ." ] "
-      0 0 my-in-fchan send-fchan
+      0 my-in-fchan send-fchan-cell
     again
   ;
 
