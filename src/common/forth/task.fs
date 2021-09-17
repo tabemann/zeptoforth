@@ -90,6 +90,9 @@ begin-import-module-once task-module
     \ The multitasker SysTick counter
     variable task-systick-counter
 
+    \ The saved multitasker SysTick counter
+    user task-saved-systick-counter
+    
     \ The default timeslice
     10 constant default-timeslice
 
@@ -631,6 +634,7 @@ begin-import-module-once task-module
       base @ task-base !
       default-timeslice task-timeslice !
       default-max-timeslice task-max-timeslice !
+      default-timeslice task-saved-systick-counter !
       0 current-lock !
       0 current-lock-held !
       0 over task-next !
@@ -677,6 +681,7 @@ begin-import-module-once task-module
     -1 over ['] task-systick-delay for-task !
     default-timeslice over ['] task-timeslice for-task !
     default-max-timeslice over ['] task-max-timeslice for-task !
+    default-timeslice over ['] task-saved-systick-counter for-task !
     dup task-rstack-base over task-stack-base ['] task-entry
     ['] init-context svc over task-rstack-current !
     next-user-space over task-dict-offset !
@@ -734,6 +739,7 @@ begin-import-module-once task-module
     \ Save task state
     : save-task-state ( task -- )
       ram-here over task-dict-current!
+      task-systick-counter @ over ['] task-saved-systick-counter for-task !
       handler @ over ['] task-handler for-task !
       base @ swap ['] task-base for-task !
     ;
@@ -815,8 +821,12 @@ begin-import-module-once task-module
 	  enable-int
 	then
 
-	task-timeslice @
-	task-max-timeslice @ task-timeslice @ max min task-systick-counter !
+	task-saved-systick-counter @ 0<= if
+	  task-saved-systick-counter @ task-timeslice @ + 0 max
+	  task-systick-counter !
+	else
+	  task-saved-systick-counter @ task-systick-counter !
+	then
 	
       else
 	true deferred-context-switch !
