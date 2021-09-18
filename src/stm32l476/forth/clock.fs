@@ -214,6 +214,9 @@ $E000E010 constant SYST_CSR
   enable-int
 ;
 
+\ Fix an LDMIA interrupt issue
+: fix-ldmia-issue ( -- ) 1 $E000E008 ! ;
+
 \ Time multiplier
 72 constant time-multiplier
 
@@ -232,6 +235,7 @@ $E000E010 constant SYST_CSR
 \ Initialize
 : init ( -- )
   init
+  fix-ldmia-issue
   use-72mhz
 ;
 
