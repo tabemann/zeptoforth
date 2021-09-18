@@ -123,6 +123,9 @@ USART2_Base $0C + constant USART2_CR1
   [ 42000000 115200 2 / + 115200 / ] literal USART2_BRR !
 ;
 
+\ Fix an LDMIA interrupt issue
+: fix-ldmia-issue ( -- ) 1 $E000E008 ! ;
+
 \ Use 168 MHz
 : use-168mhz ( -- )
   disable-int
@@ -154,6 +157,7 @@ USART2_Base $0C + constant USART2_CR1
 \ Initialize
 : init ( -- )
   init
+  fix-ldmia-issue
   use-168mhz
 ;
 
