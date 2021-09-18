@@ -2128,8 +2128,12 @@ variable wake-hook
 \ Set internal
 internal-module set-current
 
+commit-flash
+
 \ Flush console hook variable
 variable flush-console-hook
+
+commit-flash
 
 \ Flash space warning has been displayed
 variable flash-dict-warned
