@@ -776,7 +776,6 @@ begin-import-module-once task-module
 
     \ Handle task-switching
     : switch-tasks ( -- )
-      dmb dsb isb
       r> pendsv-return !
 
       in-critical @ 0= in-task-change @ 0= and if
@@ -836,18 +835,15 @@ begin-import-module-once task-module
       pendsv-return @ >r
 
       false in-multitasker? !
-      dmb dsb isb
     ;
 
     \ Multitasker systick handler
     : task-systick-handler ( -- )
-      dmb dsb isb
       systick-handler
       -1 task-systick-counter +!
       task-systick-counter @ 0 <= if
 	pause
       then
-      dmb dsb isb
     ;
 
     \ Handle PAUSE
