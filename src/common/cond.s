@@ -177,7 +177,15 @@ _again:	push {lr}
 
 	@@ Implement the core of DO
 	define_internal_word "(do)", visible_flag
-_xdo:	ldmia dp!, {r0, r1, r2}
+_xdo:
+	.ifdef cortex_m7
+	ldr r0, [dp], #4
+	ldr r1, [dp], #4
+	ldr r2, [dp], #4
+	.else
+	ldmia dp!, {r0, r1, r2}
+	.endif
+	
 	push {tos}
 	push {r0}
 	push {r1}
@@ -187,7 +195,15 @@ _xdo:	ldmia dp!, {r0, r1, r2}
 
 	@@ Implement the core of ?DO
 	define_internal_word "(?do)", visible_flag
-_xqdo:	ldmia dp!, {r0, r1, r2}
+_xqdo:
+	.ifdef cortex_m7
+	ldr r0, [dp], #4
+	ldr r1, [dp], #4
+	ldr r2, [dp], #4
+	.else
+	ldmia dp!, {r0, r1, r2}
+	.endif
+	
 	cmp r0, r1
 	beq 1f
 	push {tos}
