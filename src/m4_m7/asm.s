@@ -2544,16 +2544,20 @@ _asm_sub_imm:
 	@@ Assemble instructions to pull a value from the stack
 	define_internal_word "pull,", visible_flag
 _asm_pull:
-@	push {lr}
-@	push_tos
-@	ldr tos, =0xF857
-@	bl _current_comma_2
-@	lsls tos, tos, #12
-@	ldr r0, =0x0B04
-@	orrs tos, r0
-@	bl _current_comma_2
-@	pop {pc}
-@	end_inlined
+	.ifdef cortex_m7
+
+	push {lr}
+	push_tos
+	ldr tos, =0xF857
+	bl _current_comma_2
+	lsls tos, tos, #12
+	ldr r0, =0x0B04
+	orrs tos, r0
+	bl _current_comma_2
+	pop {pc}
+	end_inlined
+
+	.else
 	
 	push {lr}
 	movs r0, #1
@@ -2567,6 +2571,8 @@ _asm_pull:
 	pop {pc}
 	end_inlined
 
+	.endif
+	
 	@@ Assemble instructions to push a value onto the stack
 	define_internal_word "push,", visible_flag
 _asm_push:

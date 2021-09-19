@@ -82,7 +82,15 @@ _2tuck:	ldr r0, [dp]
 
 	@@ Test for the equality of two double words
 	define_word "d=", visible_flag
-_deq:	ldmia dp!, {r0, r1, r2}
+_deq:
+	.ifdef cortex_m7
+	ldr r0, [dp], #4
+	ldr r1, [dp], #4
+	ldr r2, [dp], #4
+	.else
+	ldmia dp!, {r0, r1, r2}
+	.endif
+	
 	eors r0, r2
 	eors tos, r1
 	orrs tos, r0
@@ -93,7 +101,15 @@ _deq:	ldmia dp!, {r0, r1, r2}
 
 	@@ Test for the inequality of two double words
 	define_word "d<>", visible_flag
-_dne:	ldmia dp!, {r0, r1, r2}
+_dne:
+	.ifdef cortex_m7
+	ldr r0, [dp], #4
+	ldr r1, [dp], #4
+	ldr r2, [dp], #4
+	.else
+	ldmia dp!, {r0, r1, r2}
+	.endif
+	
 	eors r0, r2
 	eors tos, r1
 	orrs tos, r0
@@ -105,7 +121,15 @@ _dne:	ldmia dp!, {r0, r1, r2}
 
 	@@ Unsigned double less than
 	define_word "du<", visible_flag | inlined_flag
-_dult:	ldmia dp!, {r0, r1, r2}
+_dult:
+	.ifdef cortex_m7
+	ldr r0, [dp], #4
+	ldr r1, [dp], #4
+	ldr r2, [dp], #4
+	.else
+	ldmia dp!, {r0, r1, r2}
+	.endif
+	
 	subs r2, r0
 	sbcs r1, tos
 	sbcs tos, tos
@@ -114,7 +138,15 @@ _dult:	ldmia dp!, {r0, r1, r2}
 
 	@@ Unsigned double greater than
 	define_word "du>", visible_flag | inlined_flag
-_dugt:	ldmia dp!, {r0, r1, r2}
+_dugt:
+	.ifdef cortex_m7
+	ldr r0, [dp], #4
+	ldr r1, [dp], #4
+	ldr r2, [dp], #4
+	.else
+	ldmia dp!, {r0, r1, r2}
+	.endif
+	
 	subs r0, r2
 	sbcs tos, r1
 	sbcs tos, tos
@@ -123,7 +155,15 @@ _dugt:	ldmia dp!, {r0, r1, r2}
 
 	@@ Unsigned double greater than or equal
 	define_word "du>=", visible_flag | inlined_flag
-_duge:	ldmia dp!, {r0, r1, r2}
+_duge:
+	.ifdef cortex_m7
+	ldr r0, [dp], #4
+	ldr r1, [dp], #4
+	ldr r2, [dp], #4
+	.else
+	ldmia dp!, {r0, r1, r2}
+	.endif
+	
 	subs r2, r0
 	sbcs r1, tos
 	sbcs tos, tos
@@ -133,7 +173,15 @@ _duge:	ldmia dp!, {r0, r1, r2}
 
 	@@ Unsigned double less than or equal
 	define_word "du<=", visible_flag | inlined_flag
-_dule:	ldmia dp!, {r0, r1, r2}
+_dule:
+	.ifdef cortex_m7
+	ldr r0, [dp], #4
+	ldr r1, [dp], #4
+	ldr r2, [dp], #4
+	.else
+	ldmia dp!, {r0, r1, r2}
+	.endif
+	
 	subs r0, r2
 	sbcs tos, r1
 	sbcs tos, tos
@@ -143,7 +191,15 @@ _dule:	ldmia dp!, {r0, r1, r2}
 
 	@@ Signed double less than
 	define_word "d<", visible_flag
-_dlt:	ldmia dp!, {r0, r1, r2}
+_dlt:
+	.ifdef cortex_m7
+	ldr r0, [dp], #4
+	ldr r1, [dp], #4
+	ldr r2, [dp], #4
+	.else
+	ldmia dp!, {r0, r1, r2}
+	.endif
+	
 	subs r2, r0
 	sbcs r1, tos
 	blt 1f
@@ -156,7 +212,15 @@ _dlt:	ldmia dp!, {r0, r1, r2}
 
 	@@ Signed double greater than
 	define_word "d>", visible_flag
-_dgt:	ldmia dp!, {r0, r1, r2}
+_dgt:
+	.ifdef cortex_m7
+	ldr r0, [dp], #4
+	ldr r1, [dp], #4
+	ldr r2, [dp], #4
+	.else
+	ldmia dp!, {r0, r1, r2}
+	.endif
+	
 	subs r0, r2
 	sbcs tos, r1
 	blt 1f
@@ -169,7 +233,15 @@ _dgt:	ldmia dp!, {r0, r1, r2}
 
 	@@ Signed double greater than or equal than
 	define_word "d>=", visible_flag
-_dge:	ldmia dp!, {r0, r1, r2}
+_dge:
+	.ifdef cortex_m7
+	ldr r0, [dp], #4
+	ldr r1, [dp], #4
+	ldr r2, [dp], #4
+	.else
+	ldmia dp!, {r0, r1, r2}
+	.endif
+	
 	subs r2, r0
 	sbcs r1, tos
 	blt 1f
@@ -182,7 +254,15 @@ _dge:	ldmia dp!, {r0, r1, r2}
 
 	@@ Signed double less than or equal than
 	define_word "d<=", visible_flag
-_dle:	ldmia dp!, {r0, r1, r2}
+_dle:
+	.ifdef cortex_m7
+	ldr r0, [dp], #4
+	ldr r1, [dp], #4
+	ldr r2, [dp], #4
+	.else
+	ldmia dp!, {r0, r1, r2}
+	.endif
+	
 	subs r0, r2
 	sbcs tos, r1
 	blt 1f
@@ -320,7 +400,15 @@ _dnegate:
 	
 	@@ Add two double words
 	define_word "d+", visible_flag | inlined_flag
-_dadd:	ldmia dp!, {r0, r1, r2}
+_dadd:
+	.ifdef cortex_m7
+	ldr r0, [dp], #4
+	ldr r1, [dp], #4
+	ldr r2, [dp], #4
+	.else
+	ldmia dp!, {r0, r1, r2}
+	.endif
+	
 	adds r2, r0
 	adcs tos, r1
 	subs dp, #4
@@ -330,7 +418,15 @@ _dadd:	ldmia dp!, {r0, r1, r2}
 
 	@@ Subtract two double words
 	define_word "d-", visible_flag | inlined_flag
-_dsub:	ldmia dp!, {r0, r1, r2}
+_dsub:
+	.ifdef cortex_m7
+	ldr r0, [dp], #4
+	ldr r1, [dp], #4
+	ldr r2, [dp], #4
+	.else
+	ldmia dp!, {r0, r1, r2}
+	.endif
+	
 	subs r2, r0
 	sbcs r1, tos
 	movs tos, r1
@@ -368,7 +464,15 @@ _mmul:	ldr r0, [dp]
 	@@ Unsigned multiply 64 * 64 = 64
 	define_word "ud*", visible_flag
 _udmul:
+
+	.ifdef cortex_m7
+	ldr r0, [dp], #4
+	ldr r1, [dp], #4
+	ldr r2, [dp], #4
+	.else
 	ldmia dp!, {r0, r1, r2}
+	.endif
+	
 
 	muls	tos, r2        @ High-1 * Low-2 --> tos
 	muls	r1, r0         @ High-2 * Low-1 --> r1
