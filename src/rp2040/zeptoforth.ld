@@ -1,11 +1,11 @@
 MEMORY
 {
-	flash : org = 0x00000000, len = 1024k
-	ram : org = 0x20000000, len = 128k
+	ram : org = 0x20000000, len = 264k
 }
 
 SECTIONS
 {
-	.text : { *(.text*) } > flash
+	. = ORIGIN(ram);
+	.text : { *(.text*) } > ram
 	.bss : { *(.bss*) } > ram
 }

@@ -19,7 +19,7 @@ def reverse_bits(x, width):
 def get_checksum(data, seed):
     data = bytes(reverse_bits(byte, 8) for byte in data)
     return reverse_bits((binascii.crc32(data, seed ^ 0xFFFFFFFF) ^ 0xFFFFFFFF)
-                  & 0xFFFFFFFF, 32)
+                        & 0xFFFFFFFF, 32)
 
 # The main body of the code
 def main():
@@ -40,7 +40,7 @@ def main():
             sys.exit('%s: %s: could not open file'
                      % (sys.argv[0], sys.argv[2]))
         boot_block = pad_boot_block(boot_block)
-        checksum = get_checksum(boot_block, 0)
+        checksum = get_checksum(boot_block, -1)
         output_file.write(struct.pack('<252sI', boot_block, checksum))
         output_file.close()
     else:

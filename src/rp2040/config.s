@@ -19,6 +19,7 @@
 @ SOFTWARE.
 
 	.equ thumb2, 0
+	.equ rp2040, 1
 	.equ ram_real_start, 0x20000000
 	.equ ram_start, 0x20008000
 	.equ ram_end, 0x20042000

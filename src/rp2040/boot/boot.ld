@@ -5,5 +5,6 @@ MEMORY
 
 SECTIONS
 {
+	. = ORIGIN(ram);
 	.text : { *(.text*) } > ram
 }

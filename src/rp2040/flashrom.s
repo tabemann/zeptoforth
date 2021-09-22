@@ -104,7 +104,7 @@
 	@ 0 bit command prefix (0 << 8)
 	@ 32 address and mode bits (8 << 2)
 	@ Command is QSPI, address is QSPI (2 << 0)
-	.equ SPI_CTRLR0_CONT_XIP, ((CMD_CONT_READ << 24) | (WAIT_CYCLES << 11) | (0 << 8) | (9 << 2) | (2 << 0))
+	.equ SPI_CTRLR0_CONT_XIP, ((CMD_CONT_READ << 24) | (WAIT_CYCLES << 11) | (0 << 8) | (8 << 2) | (2 << 0))
 
 	@ 0 wait cycles (0 << 11)
 	@ 8 bit command prefix (2 << 8)
