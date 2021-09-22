@@ -29,6 +29,8 @@
 	.text
 
 	.include "vectors.s"
+
+	.include "blinky.s"
 	
 	@@ The first (null) dictionary entry
 	.p2align 2
@@ -38,7 +40,7 @@
 	.p2align 2
 	
 	@@ The entry point
-_handle_reset:
+@ _handle_reset:
 	@@ Initialize r11, relied upon by swdcom
 	movs r0, #0
 	mov r11, r0
@@ -61,6 +63,7 @@ _handle_reset:
 	ldr r0, =here
 	ldr r1, =ram_current
 	str r1, [r0]
+	bl _init_hardware
 	@@ Initialize faster XIP flash access
 	bl _init_flash
 	@@ Call the rest of the runtime in an exception handler

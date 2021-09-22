@@ -89,9 +89,13 @@
 	@ 0 bit command prefix (0 << 8)
 	@ 32 address and mode bits (8 << 2)
 	@ Command is QSPI, address is QSPI (2 << 0)
-	.equ SPI_CTRLR0_CONT_XIP, ((CMD_CONT_READ << 24) | (WAIT_CYCLES << 11) | (0 << 8) | (9 << 2) | (2 << 0))
+	.equ SPI_CTRLR0_CONT_XIP, ((CMD_CONT_READ << 24) | (WAIT_CYCLES << 11) | (0 << 8) | (8 << 2) | (2 << 0))
 
 	.text
+
+	@ Set stack pointer to the end of SRAM5 temporarily
+	ldr r3, =0x20041F00
+	mov sp, r3
 
 	@ Set up QSPI pads
 	ldr r3, =PADS_QSPI_BASE
@@ -106,10 +110,11 @@
 	str r0, [r3, #PADS_QSPI_GPIO_QSPI_SD3_OFFSET]
 
 	ldr r0, =XIP_SSI_BASE
+	movs r4, #0
+	movs r5, #1
 
 	@@ Disable SSI
-	movs r1, #0
-	str r1, [r0, #SSI_SSIENR_OFFSET]
+	str r4, [r0, #SSI_SSIENR_OFFSET]
 
 	@@ Set the clock divider
 	movs r1, #PICO_FLASH_SPI_CLKDIV
@@ -120,8 +125,7 @@
 	str r1, [r0, #SSI_CTRLR0_OFFSET]
 
 	@@ Enable SSI
-	movs r1, #1
-	str r1, [r0, #SSI_SSIENR_OFFSET]
+	str r5, [r0, #SSI_SSIENR_OFFSET]
 
 	@@ Read the status register
 	movs r1, #CMD_READ_STATUS_2
@@ -137,16 +141,14 @@
 	beq 1f
 
 	@@ Enable writing
-	movs r1, #CMD_WRITE_ENABLE
-	str r1, [r0, #SSI_DR0_OFFSET]
+	str r5, [r0, #SSI_DR0_OFFSET] @ CMD_WRITE_ENABLE
 	bl _wait_ssi_busy
 	ldr r1, [r0, #SSI_DR0_OFFSET]
 
 	@@ Enable QSPI
 	movs r1, #CMD_WRITE_STATUS
 	str r1, [r0, #SSI_DR0_OFFSET]
-	movs r3, #0
-	str r3, [r0, #SSI_DR0_OFFSET]
+	str r4, [r0, #SSI_DR0_OFFSET]
 	str r2, [r0, #SSI_DR0_OFFSET]
 	bl _wait_ssi_busy
 	ldr r3, [r0, #SSI_DR0_OFFSET]
@@ -160,27 +162,23 @@
 	bl _wait_ssi_busy
 	ldr r1, [r0, #SSI_DR0_OFFSET]
 	ldr r1, [r0, #SSI_DR0_OFFSET]
-	movs r2, #WRITE_BUSY_STATE
-	tst r1, r2
+	tst r1, r5 @ WRITE_BUSY_STATE
 	bne 2b
 
 	@@ Actually set up XIP
 	@@ First disable the SSI
-1:	movs r1, #0
-	str r1, [r0, #SSI_SSIENR_OFFSET]
+1:	str r4, [r0, #SSI_SSIENR_OFFSET]
 	
 	@@ Set up the registers
 	ldr r1, =CTRLR0_INIT_XIP
 	str r1, [r0, #SSI_CTRLR0_OFFSET]
-	movs r1, #0
-	str r1, [r0, #SSI_CTRLR1_OFFSET]
+	str r4, [r0, #SSI_CTRLR1_OFFSET]
 	ldr r1, =SPI_CTRLR0_INIT_XIP
 	ldr r2, =XIP_SSI_BASE + SSI_SPI_CTRLR0_OFFSET
 	str r1, [r2]
 
 	@@ Enable SSI
-	movs r1, #1
-	str r1, [r0, #SSI_SSIENR_OFFSET]
+	str r5, [r0, #SSI_SSIENR_OFFSET]
 
 	@@ Prime XIP
 	movs r1, #CMD_READ_DATA_FAST_QUAD_IO
@@ -190,8 +188,7 @@
 	bl _wait_ssi_busy
 
 	@@ Disable SSI
-	movs r1, #0
-	str r1, [r0, #SSI_SSIENR_OFFSET]
+	str r4, [r0, #SSI_SSIENR_OFFSET]
 
 	@@ Set up continuing XIP automatically
 	ldr r1, =SPI_CTRLR0_CONT_XIP
@@ -199,8 +196,7 @@
 	str r1, [r2]
 
 	@@ Enable SSI
-	movs r1, #1
-	str r1, [r0, #SSI_SSIENR_OFFSET]
+	str r5, [r0, #SSI_SSIENR_OFFSET]
 
 	@@ Copy the image from flash into RAM
 	ldr r0, =RAM_BASE
@@ -227,11 +223,10 @@
 _wait_ssi_busy:
 	push {r0, r1, r2, r3, lr}
 	ldr r0, =XIP_SSI_BASE + SSI_SR_OFFSET
-	movs r1, #1 @ BUSY
 	movs r2, #4 @ TX FIFO empty
 1:	ldr r3, [r0]
 	tst r3, r2
 	beq 1b
-	tst r3, r1
+	tst r3, r5 @ BUSY
 	bne 1b
 	pop {r0, r1, r2, r3, pc}
