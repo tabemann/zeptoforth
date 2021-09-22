@@ -18,8 +18,16 @@
 @ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 @ SOFTWARE.
 
+	.ifndef rp2040
+
 	@@ Vector table in RAM
 	allot vector_table, vector_table_size
+
+	.else
+
+	.equ vector_table, ram_real_start
+
+	.endif
 	
 	@@ Pointer to the current HERE location
 	allot here, 4
