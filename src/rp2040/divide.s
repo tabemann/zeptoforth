@@ -80,6 +80,7 @@ _udivmod:
 	@@ Signed division with modulus ( u1 u2 -- remainder quotient )
 	define_word "/mod", visible_flag
 _divmod:
+	ldr r0, =SIO_BASE
 	cpsid i
 	ldr r1, [dp]
 	str r1, [r0, #SIO_DIV_SDIVIDEND_OFFSET]

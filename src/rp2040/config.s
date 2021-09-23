@@ -28,7 +28,7 @@
 	.equ stack_size, 0x0200
 	.equ vector_count, 112
 	.equ vector_table_size, vector_count * 4 @ in bytes
-	.equ VTOR_value, vector_table | (1 << 29)
+	.equ VTOR_value, vector_table
 	.equ VTOR, 0xE000ED08
 	.equ stack_top, ram_end - rstack_size
 	.equ flash_buffers_top, stack_top - stack_size

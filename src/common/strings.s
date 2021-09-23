@@ -452,13 +452,13 @@ _format_integer_inner:
 	push {r0, r1, r2}
 	bl _umod
 	pop {r0, r1, r2}
-	push {r0}
 	push_tos
 	movs tos, r2
 	push_tos
 	movs tos, r1
+	push {r0, r1, r2}
 	bl _udiv
-	pop {r0}
+	pop {r0, r1, r2}
 	movs r2, tos
 	pull_tos
 	cmp tos, #10
