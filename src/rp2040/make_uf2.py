@@ -43,10 +43,10 @@ def pack_block(buf, index, total_count, addr, data, data_off, data_len):
     if data_off + data_len > len(data):
         data_len = len(data) - data_off
     padded_data = data[data_off:data_off + data_len].ljust(476, b'\x00')
-    print(("MAGIC_0: %x MAGIC_1: %x FLAGS: %x addr: %x BLOCK_SIZE: %d "
-           "index: %d total_count: %d MAGIC_2: %x")
-          % (MAGIC_0, MAGIC_1, FLAGS, BASE_ADDR + addr, BLOCK_SIZE, index,
-             total_count, MAGIC_2))
+#    print(("MAGIC_0: %x MAGIC_1: %x FLAGS: %x addr: %x BLOCK_SIZE: %d "
+#           "index: %d total_count: %d MAGIC_2: %x")
+#          % (MAGIC_0, MAGIC_1, FLAGS, BASE_ADDR + addr, BLOCK_SIZE, index,
+#             total_count, MAGIC_2))
     struct.pack_into('<IIIIIIII476sI', buf, index * UF2_BLOCK_SIZE,
                      MAGIC_0, MAGIC_1, FLAGS, BASE_ADDR + addr, BLOCK_SIZE,
                      index, total_count, RP2040_FAMILY_ID, padded_data,

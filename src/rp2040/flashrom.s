@@ -197,6 +197,7 @@ _erase_flash:
 	bl _enable_flash_cmd
 	bl _enable_flash_write
 	bl _flash_address_cmd
+	bl _write_flash_address
 	push_tos
 	ldr tos, =IO_QSPI_GPIO_QSPI_SS_CTRL_OUTOVER_HIGH
 	bl _force_flash_cs
@@ -218,6 +219,7 @@ _enable_flash_write:
 	movs r1, #CMD_WRITE_ENABLE
 	str r1, [r0, #SSI_DR0_OFFSET]
 	bl _wait_ssi_busy
+	ldr r0, =XIP_SSI_BASE
 	ldr r1, [r0, #SSI_DR0_OFFSET]
 	pop {pc}
 	end_inlined
@@ -230,6 +232,7 @@ _read_flash_status:
 	str tos, [r0, #SSI_DR0_OFFSET]
 	str tos, [r0, #SSI_DR0_OFFSET]
 	bl _wait_ssi_busy
+	ldr r0, =XIP_SSI_BASE
 	ldr tos, [r0, #SSI_DR0_OFFSET]
 	ldr tos, [r0, #SSI_DR0_OFFSET]
 	pop {pc}
@@ -239,6 +242,7 @@ _read_flash_status:
 	define_word "wait-flash-write-busy" visible_flag
 _wait_flash_write_busy:
 	push {lr}
+	bl _enable_flash_cmd
 	ldr r0, =XIP_SSI_BASE
 1:	movs r1, #CMD_READ_STATUS
 	str r1, [r0, #SSI_DR0_OFFSET]
@@ -265,6 +269,7 @@ _enable_flash_qspi:
 	ldr r0, =XIP_SSI_BASE
 	str r1, [r0, #SSI_DR0_OFFSET]
 	movs r3, #0
+	movs r2, #QSPI_ENABLE_STATE
 	str r3, [r0, #SSI_DR0_OFFSET]
 	str r2, [r0, #SSI_DR0_OFFSET]
 	bl _wait_ssi_busy
@@ -457,6 +462,7 @@ _erase_range:
 	bl _exit_xip
 	ldr r0, =0xFFF
 	movs r1, tos
+	pull_tos
 	bics r1, r0
 1:	ldr r0, =MAX_ERASE_ADDR
 	cmp r1, r0
@@ -583,8 +589,7 @@ _find_last_flash_word:
 	beq 3b
 	ldr tos, [tos]
 	bx lr
-2:	ldr tos, =kernel_end
-	b 3b
+2:	ldr tos, =last_kernel_word
 	bx lr
 	end_inlined
 
@@ -601,6 +606,7 @@ _init_flash_write:
 	push_tos
 	ldr tos, =CMD_PAGE_PROGRAM
 	bl _flash_address_cmd
+	bl _write_flash_address
 	pop {pc}
 	end_inlined
 
@@ -618,8 +624,6 @@ _store_flash_1:
 	ldr r0, =flash_dict_start
 	cmp tos, r0
 	blo 3f
-	ldr r0, =flash_start
-	subs tos, r0
 	bl _init_flash_write
 	ldr r0, =XIP_SSI_BASE
 	movs r1, #0xFF
@@ -666,8 +670,6 @@ _store_flash_2:
 	ldr r0, =flash_dict_start
 	cmp tos, r0
 	blo 4f
-	ldr r0, =flash_start
-	subs tos, r0
 	bl _init_flash_write
 	ldr r0, =XIP_SSI_BASE
 	movs r1, #0xFF
@@ -733,8 +735,6 @@ _store_flash_4:
 	ldr r0, =flash_dict_start
 	cmp tos, r0
 	blo 4f
-	ldr r0, =flash_start
-	subs tos, r0
 	bl _init_flash_write
 	ldr r0, =XIP_SSI_BASE
 	movs r1, #0xFF

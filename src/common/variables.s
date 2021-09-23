@@ -105,7 +105,7 @@
 	allot input_buffer_count, 4
 
 	@@ The input buffer
-	allot input_buffer, input_buffer_size
+	allot input_buffer, input_buffer_size + 1
 
 	@@ The current numeric base
 	allot base, 4
