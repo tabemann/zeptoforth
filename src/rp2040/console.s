@@ -19,53 +19,18 @@
 @ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 @ SOFTWARE.
 
-	.equ UART0_BASE, 0x40034000
-	.equ UART1_BASE, 0x40038000
-	.equ UART_CONSOLE_BASE, UART0_BASE
-	.equ UARTDR_OFFSET, 0x00
-	.equ UARTRSR_OFFSET, 0x04
-	.equ UARTFR_OFFSET, 0x18
-	.equ UARTILPR_OFFSET, 0x20
-	.equ UARTIBRD_OFFSET, 0x24 @ Set this to the integer baud rate
-	.equ UARTFBRD_OFFSET, 0x28 @ Set this to the fractional baud rate
-	.equ UARTLCR_H_OFFSET, 0x2C
-	.equ UARTCR_OFFSET, 0x30
-	.equ UARTIFLS_OFFSET, 0x34
-	.equ UARTIMSC_OFFSET, 0x38
-	.equ UARTRIS_OFFSET, 0x3C
-	.equ UARTMIS_OFFSET, 0x40
-	.equ UARTICR_OFFSET, 0x44
-	.equ UARTDMACR_OFFSET, 0x48
 	.equ UARTFR_TX_FIFO_FULL, 5
 	.equ UARTFR_RX_FIFO_EMPTY, 4
-	.equ UARTIBRD_VALUE, 67
-	.equ UARTFBRD_VALUE, 52
-	.equ UARTLCR_H_VALUE, 0x70
-	.equ UART_ENABLE, 0x301
 
-	@@ Initialize UART
-	define_internal_word "init-uart", visible_flag
-_init_uart:
-	@@ Configure the console UART
-	ldr r0, =UART_CONSOLE_BASE
-	movs r1, #UARTIBRD_VALUE
-	str r1, [r0, #UARTIBRD_OFFSET]
-	movs r1, #UARTFBRD_VALUE
-	str r1, [r0, #UARTFBRD_OFFSET]
-	movs r1, #UARTLCR_H_VALUE
-	str r1, [r0, #UARTLCR_H_OFFSET]
-	
-	@@ Enable the console UART
-	ldr r1, =UART_ENABLE
-	str r1, [r0, #UARTCR_OFFSET]
-
-	ldr r0, =IO_BANK0_BASE
-	movs r1, #2
-	str r1, [r0, #4]
-	str r1, [r0, #12]
-	
-	bx lr
-	end_inlined
+_uart_test:
+	ldr r0, =UART0_BASE
+	movs r2, #0x21
+	movs r3, #1 << UARTFR_TX_FIFO_FULL
+1:	ldr r1, [r0, #UARTFR]
+	tst r1, r3
+	bne 1b
+	strb r2, [r0, #UARTDR]
+	b _uart_test
 
 	@@ Emit one character ( c -- )
 	define_internal_word "serial-emit", visible_flag
@@ -76,8 +41,8 @@ _serial_emit:
 	pull_tos
 	cmp r0, #0
 	beq 1b
-	ldr r0, =UART_CONSOLE_BASE
-	strb tos, [r0, #UARTDR_OFFSET]
+	ldr r0, =UART0_BASE
+	strb tos, [r0, #UARTDR]
 	pull_tos
 	pop {pc}
 	end_inlined
@@ -92,8 +57,8 @@ _serial_key:
 	cmp r0, #0
 	beq 1b
 	push_tos
-	ldr r0, =UART_CONSOLE_BASE
-	ldrb tos, [r0, #UARTDR_OFFSET]
+	ldr r0, =UART0_BASE
+	ldrb tos, [r0, #UARTDR]
 	pop {pc}
 	end_inlined
 
@@ -102,8 +67,8 @@ _serial_key:
 _serial_emit_q:
 	push {lr}
 	bl _pause
-	ldr r0, =UART_CONSOLE_BASE
-	ldr r0, [r0, #UARTFR_OFFSET]
+	ldr r0, =UART0_BASE
+	ldr r0, [r0, #UARTFR]
 	lsls r0, r0, #(31 - UARTFR_TX_FIFO_FULL)
 	asrs r0, r0, #31
 	push_tos
@@ -116,8 +81,8 @@ _serial_emit_q:
 _serial_key_q:
 	push {lr}
 	bl _pause
-	ldr r0, =UART_CONSOLE_BASE
-	ldr r0, [r0, #UARTFR_OFFSET]
+	ldr r0, =UART0_BASE
+	ldr r0, [r0, #UARTFR]
 	lsls r0, r0, #(31 - UARTFR_RX_FIFO_EMPTY)
 	asrs r0, r0, #31
 	push_tos
