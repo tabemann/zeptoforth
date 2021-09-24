@@ -1269,7 +1269,7 @@ _asm_long_literal:
 	movs tos, r0
 	bl _asm_ldr_imm
 	bl _current_here
-	adds tos, #6
+	adds tos, #8
 	bl _asm_branch
 	push_tos
 	movs tos, #0
