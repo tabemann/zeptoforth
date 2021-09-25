@@ -30,8 +30,6 @@
 
 	.include "vectors.s"
 
-@	.include "blinky.s"
-	
 	@@ The first (null) dictionary entry
 	.p2align 2
 	.word invisible_flag
