@@ -122,11 +122,39 @@ _init_flash:
 	cmp r0, r1
 	beq 1f
 	push_tos
-	ldr r1, =flash_start
-	adds r0, r1
 	movs tos, r0
 	bl _erase_range
 1:	pop {pc}
+	end_inlined
+
+	@ Force the CS pin HIGH
+	define_word "force-flash-cs-high", visible_flag
+_force_flash_cs_high:
+	push {lr}
+	push_tos
+	ldr tos, =IO_QSPI_GPIO_QSPI_SS_CTRL_OUTOVER_HIGH
+	bl _force_flash_cs
+	pop {pc}
+	end_inlined
+
+	@ Force the CS pin LOW
+	define_word "force-flash-cs-low", visible_flag
+_force_flash_cs_low:
+	push {lr}
+	push_tos
+	ldr tos, =IO_QSPI_GPIO_QSPI_SS_CTRL_OUTOVER_LOW
+	bl _force_flash_cs
+	pop {pc}
+	end_inlined
+
+	@ Force the CS pin NORMAL
+	define_word "force-flash-cs-normal", visible_flag
+_force_flash_cs_normal:
+	push {lr}
+	push_tos
+	ldr tos, =IO_QSPI_GPIO_QSPI_SS_CTRL_OUTOVER_NORMAL
+	bl _force_flash_cs
+	pop {pc}
 	end_inlined
 	
 	@ Force the CS pin
@@ -138,6 +166,7 @@ _force_flash_cs:
 	bics r1, r2
 	orrs r1, tos
 	str r1, [r0]
+	ldr r1, [r0]
 	pull_tos
 	bx lr
 	end_inlined
@@ -154,24 +183,11 @@ _enable_flash_cmd:
 	pop {pc}
 	end_inlined
 
-	@ Enable sending erase commands
-	define_word "flash-address-cmd", visible_flag
-_flash_address_cmd:
-	push {lr}
-	bl _disable_ssi
-	ldr r0, =XIP_SSI_BASE
-	ldr r1, =CTRLR0_SEND_CMD
-	str r1, [r0, #SSI_CTRLR0_OFFSET]
-	ldr r0, =XIP_SSI_BASE + SSI_SPI_CTRLR0_OFFSET
-	ldr r1, =SPI_CTRLR0_ERASE
-	str r1, [r0]
-	bl _enable_ssi
-	pop {pc}
-	end_inlined
-
 	@ Write an address to flash ( addr cmd -- )
 	define_word "write-flash-address", visible_flag
 _write_flash_address:
+	push {lr}
+	bl _force_flash_cs_low
 	ldr r0, =XIP_SSI_BASE
 	str tos, [r0, #SSI_DR0_OFFSET]
 	pull_tos
@@ -185,42 +201,41 @@ _write_flash_address:
 	ands tos, r2
 	str tos, [r0, #SSI_DR0_OFFSET]
 	pull_tos
-	bx lr
+	pop {pc}
 	end_inlined
 
-.ltorg
-	
 	@ Erase flash ( addr cmd -- )
 	define_word "erase-flash", visible_flag
 _erase_flash:
 	push {lr}
 	bl _enable_flash_cmd
 	bl _enable_flash_write
-	bl _flash_address_cmd
 	bl _write_flash_address
-	push_tos
-	ldr tos, =IO_QSPI_GPIO_QSPI_SS_CTRL_OUTOVER_HIGH
-	bl _force_flash_cs
+	bl _wait_ssi_busy
 	ldr r0, =XIP_SSI_BASE
 	ldr r1, [r0, #SSI_DR0_OFFSET]
 	ldr r1, [r0, #SSI_DR0_OFFSET]
 	ldr r1, [r0, #SSI_DR0_OFFSET]
 	ldr r1, [r0, #SSI_DR0_OFFSET]
-	bl _wait_ssi_busy
+	bl _force_flash_cs_high
 	bl _wait_flash_write_busy
 	pop {pc}
 	end_inlined
+
+.ltorg
 
 	@ Enable writing
 	define_word "enable-flash-write", visible_flag
 _enable_flash_write:
 	push {lr}
+	bl _force_flash_cs_low
 	ldr r0, =XIP_SSI_BASE
 	movs r1, #CMD_WRITE_ENABLE
 	str r1, [r0, #SSI_DR0_OFFSET]
 	bl _wait_ssi_busy
 	ldr r0, =XIP_SSI_BASE
 	ldr r1, [r0, #SSI_DR0_OFFSET]
+	bl _force_flash_cs_high
 	pop {pc}
 	end_inlined
 	
@@ -228,6 +243,7 @@ _enable_flash_write:
 	define_word "read-flash-status", visible_flag
 _read_flash_status:
 	push {lr}
+	bl _force_flash_cs_low
 	ldr r0, =XIP_SSI_BASE
 	str tos, [r0, #SSI_DR0_OFFSET]
 	str tos, [r0, #SSI_DR0_OFFSET]
@@ -235,6 +251,7 @@ _read_flash_status:
 	ldr r0, =XIP_SSI_BASE
 	ldr tos, [r0, #SSI_DR0_OFFSET]
 	ldr tos, [r0, #SSI_DR0_OFFSET]
+	bl _force_flash_cs_high
 	pop {pc}
 	end_inlined
 
@@ -242,15 +259,18 @@ _read_flash_status:
 	define_word "wait-flash-write-busy" visible_flag
 _wait_flash_write_busy:
 	push {lr}
-	bl _enable_flash_cmd
+1:	bl _force_flash_cs_low
 	ldr r0, =XIP_SSI_BASE
-1:	movs r1, #CMD_READ_STATUS
+	movs r1, #CMD_READ_STATUS
 	str r1, [r0, #SSI_DR0_OFFSET]
 	str r1, [r0, #SSI_DR0_OFFSET]
 	bl _wait_ssi_busy
 	ldr r0, =XIP_SSI_BASE
 	ldr r1, [r0, #SSI_DR0_OFFSET]
 	ldr r1, [r0, #SSI_DR0_OFFSET]
+	push {r1}
+	bl _force_flash_cs_high
+	pop {r1}
 	movs r2, #WRITE_BUSY_STATE
 	tst r1, r2
 	bne 1b
@@ -265,6 +285,7 @@ _enable_flash_qspi:
 	bl _enable_flash_write
 
 	@ Enable QSPI
+	bl _force_flash_cs_low
 	movs r1, #CMD_WRITE_STATUS
 	ldr r0, =XIP_SSI_BASE
 	str r1, [r0, #SSI_DR0_OFFSET]
@@ -277,6 +298,7 @@ _enable_flash_qspi:
 	ldr r3, [r0, #SSI_DR0_OFFSET]
 	ldr r3, [r0, #SSI_DR0_OFFSET]
 	ldr r3, [r0, #SSI_DR0_OFFSET]
+	bl _force_flash_cs_high
 
 	@ Wait for writing to finish
 	bl _wait_flash_write_busy
@@ -306,10 +328,12 @@ _enter_xip:
 
 	@ Enable QSPI
 	bl _enable_flash_qspi
-
+	
 	@ Actually set up XIP
+1:	bl _force_flash_cs_normal
+
 	@ First disable the SSI
-1:	bl _disable_ssi
+	bl _disable_ssi
 	
 	@ Set up the registers
 	ldr r0, =XIP_SSI_BASE
@@ -378,6 +402,7 @@ _disable_xip_cache:
 	@ Enable and flush the XIP cahe
 	define_word "enable-flush-xip-cache", visible_flag
 _enable_flush_xip_cache:
+	push {lr}
 	ldr r0, =XIP_CTRL_BASE
 	movs r1, 0x1
 	str r1, [r0, #XIP_FLUSH_OFFSET]
@@ -385,7 +410,8 @@ _enable_flush_xip_cache:
 	ldr r2, [r0, #XIP_CTRL_OFFSET]
 	orrs r2, r1
 	str r2, [r0, #XIP_CTRL_OFFSET]
-	bx lr
+	bl _force_flash_cs_normal
+	pop {pc}
 	end_inlined
 
 	@ Wait for busy to clear
@@ -605,11 +631,21 @@ _init_flash_write:
 	subs tos, r1
 	push_tos
 	ldr tos, =CMD_PAGE_PROGRAM
-	bl _flash_address_cmd
 	bl _write_flash_address
 	pop {pc}
 	end_inlined
 
+	@ Wait until the TX FIFO is empty
+_wait_tx_empty:
+	ldr r0, =XIP_SSI_BASE + SSI_SR_OFFSET
+	movs r2, #4 @ TX FIFO empty
+1:	ldr r3, [r0]
+	tst r3, r2
+	beq 1b
+	bx lr
+	end_inlined
+
+	
 	@ Write a byte to an address in a flash buffer
 	define_word "cflash!", visible_flag
 _store_flash_1:
@@ -629,15 +665,16 @@ _store_flash_1:
 	movs r1, #0xFF
 	ands tos, r1
 	str tos, [r0, #SSI_DR0_OFFSET]
-	push_tos
-	ldr tos, =IO_QSPI_GPIO_QSPI_SS_CTRL_OUTOVER_HIGH
-	bl _force_flash_cs
+	pull_tos
+	bl _wait_ssi_busy
 	ldr r0, =XIP_SSI_BASE
 	ldr r1, [r0, #SSI_DR0_OFFSET]
 	ldr r1, [r0, #SSI_DR0_OFFSET]
 	ldr r1, [r0, #SSI_DR0_OFFSET]
 	ldr r1, [r0, #SSI_DR0_OFFSET]
 	ldr r1, [r0, #SSI_DR0_OFFSET]
+	bl _force_flash_cs_high
+	bl _wait_flash_write_busy
 	bl _enable_flush_xip_cache
 	bl _enter_xip
 	cpsie i
@@ -679,8 +716,8 @@ _store_flash_2:
 	lsrs r2, tos, #8
 	ands r2, r1
 	str r2, [r0, #SSI_DR0_OFFSET]
-	ldr tos, =IO_QSPI_GPIO_QSPI_SS_CTRL_OUTOVER_HIGH
-	bl _force_flash_cs
+	pull_tos
+	bl _wait_ssi_busy
 	ldr r0, =XIP_SSI_BASE
 	ldr r1, [r0, #SSI_DR0_OFFSET]
 	ldr r1, [r0, #SSI_DR0_OFFSET]
@@ -688,6 +725,11 @@ _store_flash_2:
 	ldr r1, [r0, #SSI_DR0_OFFSET]
 	ldr r1, [r0, #SSI_DR0_OFFSET]
 	ldr r1, [r0, #SSI_DR0_OFFSET]	
+	bl _force_flash_cs_high
+	bl _wait_flash_write_busy
+	bl _enable_flush_xip_cache
+	bl _enter_xip
+	cpsie i
 	pop {pc}
 1:	ldr r1, [dp]
 	movs r3, tos
@@ -749,8 +791,8 @@ _store_flash_4:
 	str r2, [r0, #SSI_DR0_OFFSET]
 	lsrs r2, tos, #24
 	str r2, [r0, #SSI_DR0_OFFSET]
-	ldr tos, =IO_QSPI_GPIO_QSPI_SS_CTRL_OUTOVER_HIGH
-	bl _force_flash_cs
+	pull_tos
+	bl _wait_ssi_busy
 	ldr r0, =XIP_SSI_BASE
 	ldr r1, [r0, #SSI_DR0_OFFSET]
 	ldr r1, [r0, #SSI_DR0_OFFSET]
@@ -760,6 +802,11 @@ _store_flash_4:
 	ldr r1, [r0, #SSI_DR0_OFFSET]	
 	ldr r1, [r0, #SSI_DR0_OFFSET]
 	ldr r1, [r0, #SSI_DR0_OFFSET]	
+	bl _force_flash_cs_high
+	bl _wait_flash_write_busy
+	bl _enable_flush_xip_cache
+	bl _enter_xip
+	cpsie i
 	pop {pc}
 1:	ldr r1, [dp]
 	movs r3, tos

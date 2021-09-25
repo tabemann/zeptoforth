@@ -25,7 +25,9 @@ _license:
 	bl _cr
 	string_ln "Copyright (c) 2019-2021 Travis Bemann"
 	bl _type
-	string_ln "Copyright (c) 2013 Matthias Koch"
+	string_ln "Copyright (c) 2013, 2021 Matthias Koch"
+	bl _type
+	string_ln "Copyright (c) 2021 Jan Bramkamp"
 	bl _type
 	bl _cr
 	string_ln "Permission is hereby granted, free of charge, to any person obtaining a copy"
