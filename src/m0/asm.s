@@ -313,6 +313,20 @@ _asm_branch_zero:
 	pop {pc}
 	end_inlined
 
+	@@ Compile a branch on not equal to zero
+	define_internal_word "n0branch,", visible_flag
+_asm_branch_not_zero:
+	push {lr}
+	bl _current_here
+	movs r0, tos
+	pull_tos
+	subs tos, tos, r0
+	asrs tos, tos, #1
+	subs tos, #2
+	bl _asm_bne
+	pop {pc}
+	end_inlined
+
 	@@ Compile a back-referenced unconditional branch
 	define_internal_word "branch-back!", visible_flag
 _asm_branch_back:
@@ -391,22 +405,6 @@ _asm_extract_constant:
 	define_internal_word "fold,", visible_flag
 _asm_fold:
 	push {lr}
-	push_tos
-	bl _asm_extract_constant
-	cmp tos, #0
-	beq 1f
-	pull_tos
-	bl _asm_undefer_lit
-	ldr r0, =-1
-	ldr r1, =literal_deferred_q
-	str r0, [r1]
-	ldr r1, =deferred_literal
-	str tos, [r1]
-	adds dp, #4
-	pull_tos
-	pop {pc}	
-1:	adds dp, #4
-	pull_tos
 	ldr r1, =literal_deferred_q
 	ldr r0, [r1]
 	cmp r0, #0
@@ -853,6 +851,23 @@ _asm_fold_pick:
 	define_internal_word "inline,", visible_flag
 _asm_inline:
 	push {lr}
+	push_tos
+	bl _asm_extract_constant
+	cmp tos, #0
+	beq 1f
+	pull_tos
+	bl _asm_undefer_lit
+	ldr r0, =-1
+	ldr r1, =literal_deferred_q
+	str r0, [r1]
+	ldr r1, =deferred_literal
+	str tos, [r1]
+	adds dp, #4
+	pull_tos
+	pop {pc}	
+1:	adds dp, #4
+	pull_tos
+	bl _asm_undefer_lit
 	ldrh r0, [tos]
 	ldr r1, =0xB500
 	cmp r0, r1
@@ -988,7 +1003,18 @@ _asm_undefer_lit:
 _asm_reserve_literal:
 	push {lr}
 	bl _asm_word_align
-	bl _current_reserve_2
+	ldr r0, =compiling_to_flash
+	ldr r0, [r0]
+	cmp r0, #0
+	bne 1f
+	ldr r0, =here
+	b 2f
+1:	ldr r0, =flash_here
+2:	ldr r1, [r0]
+	push_tos
+	movs tos, r1
+	adds r1, #12
+	str r1, [r0]
 	pop {pc}
 	end_inlined
 
@@ -1017,11 +1043,11 @@ _asm_store_literal:
 	movs tos, r1
 	adds tos, #2
 	push {r1}
-	bl _asm_ldr_imm
+	bl _asm_store_ldr_imm
 	pop {r1}
 	push_tos
 	movs tos, r1
-	adds tos, #6
+	adds tos, #12
 	push_tos
 	movs tos, r1
 	adds tos, #4
@@ -1035,7 +1061,7 @@ _asm_store_literal:
 	adds tos, #6
 	push {r1}
 	bl _store_current_2
-	push {r1}
+	pop {r1}
 	push_tos
 	movs tos, r1
 	adds tos, #8
@@ -1079,6 +1105,26 @@ _asm_beq:
 	bl _raise
 	pop {pc}
 3:	bl _asm_beq_16
+	pop {pc}
+	end_inlined
+
+	@@ Assemble a branch on not equal zero instruction
+	define_internal_word "bne,", visible_flag
+_asm_bne:
+	push {lr}
+	ldr r0, =127
+	cmp tos, r0
+	ble 1f
+	ldr tos, =_out_of_range_branch
+	bl _raise
+	pop {pc}
+1:	ldr r0, =-128
+	cmp tos, r0
+	bge 3f
+	ldr tos, =_out_of_range_branch
+	bl _raise
+	pop {pc}
+3:	bl _asm_bne_16
 	pop {pc}
 	end_inlined
 
@@ -1212,6 +1258,8 @@ _asm_literal:
 	pop {pc}
 	end_inlined
 
+	.ltorg
+	
 	@@ Assemble a 16-bit literal
 	define_internal_word "literal-16,", visible_flag
 _asm_literal_16:
@@ -1329,6 +1377,18 @@ _asm_b_16:
 _asm_beq_16:
 	push {lr}
 	ldr r0, =0xD000
+	movs r1, #0xFF
+	ands tos, r1
+	orrs tos, r0
+	bl _current_comma_2
+	pop {pc}
+	end_inlined
+
+	@@ Assemble a branch on not equal zero instruction
+	define_internal_word "bne-16,", visible_flag
+_asm_bne_16:
+	push {lr}
+	ldr r0, =0xD100
 	movs r1, #0xFF
 	ands tos, r1
 	orrs tos, r0
@@ -1574,6 +1634,22 @@ _asm_mvn:
 	@@ Assemble instructions to pull a value from the stack
 	define_internal_word "pull,", visible_flag
 _asm_pull:
+@	push {lr}
+@	movs r0, tos
+@	movs tos, #0
+@	push_tos
+@	movs tos, #7
+@	push_tos
+@	movs tos, r0
+@	bl _asm_ldr_imm
+@	push_tos
+@	movs tos, #4
+@	push_tos
+@	movs tos, #7
+@	bl _asm_add_imm
+@	pop {pc}
+@	end_inlined
+	
 	push {lr}
 	movs r0, #1
 	lsls r0, r0, tos

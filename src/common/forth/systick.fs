@@ -28,6 +28,12 @@ begin-import-module-once systick-module
   
   begin-import-module systick-internal-module
 
+    \ Interrupt Control and Status Register
+    $E000ED04 constant ICSR
+
+    \ Pending SysTick Clear bit
+    25 bit constant ICSR_PENDSTCLR
+    
     \ RW SysTick Control and Status Register
     $E000E010 constant SYST_CSR
     
@@ -71,8 +77,6 @@ begin-import-module-once systick-module
   \ SysTick vector index
   15 constant systick-vector
 
-  compress-flash
-  
   \ SysTick handler
   : systick-handler ( -- )
     SYST_CSR @ SYST_CSR_COUNTFLAG and if
@@ -80,14 +84,16 @@ begin-import-module-once systick-module
     then
   ;
 
+  commit-flash
+
   \ Turn on systick
   : enable-systick ( -- )
-    SYST_CSR_TICKINT SYST_CSR_ENABLE or SYST_CSR bis! dsb isb
+    SYST_CSR_TICKINT SYST_CSR_ENABLE or SYST_CSR bis! dmb dsb isb
   ;  
 
   \ Turn off systick
   : disable-systick ( -- )
-    SYST_CSR_TICKINT SYST_CSR_ENABLE or SYST_CSR bic! dsb isb
+    SYST_CSR_TICKINT SYST_CSR_ENABLE or SYST_CSR bic! dmb dsb isb
   ;
 
   \ Make systick-counter read-only
@@ -100,7 +106,7 @@ begin-import-module-once systick-module
     10 / systick-divisor / time-multiplier * time-divisor / SYST_RVR !
     0 SYST_CVR !
     0 systick-counter !
-    enable-systick
+\    enable-systick
   ;
 
   \ Systick divisor

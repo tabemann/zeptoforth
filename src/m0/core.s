@@ -287,6 +287,8 @@ _ne:	movs r0, tos
 	bx lr
 	end_inlined
 
+	.ltorg
+	
 	@@ Less than
 	define_word "<", visible_flag
 _lt:	movs r0, tos
@@ -1227,7 +1229,7 @@ _store_8:
 	end_inlined
 
 	@@ Read a byte from an address, add a value, and write it back
-	define_word "c+!", visible_flag | fold_flag
+	define_word "c+!", visible_flag
 _add_store_1:
 	ldrb r0, [tos]
 	ldr r1, [dp]
@@ -1239,7 +1241,7 @@ _add_store_1:
 	end_inlined
 
 	@@ Read a halfword from an address, add a value, and write it back
-	define_word "h+!", visible_flag | fold_flag
+	define_word "h+!", visible_flag
 _add_store_2:	
 	ldrh r0, [tos]
 	ldr r1, [dp]
@@ -1251,7 +1253,7 @@ _add_store_2:
 	end_inlined
 
 	@@ Read a word from an address, add a value, and write it back
-	define_word "+!", visible_flag | fold_flag
+	define_word "+!", visible_flag
 _add_store_4:	
 	ldr r0, [tos]
 	ldr r1, [dp]
@@ -1263,7 +1265,7 @@ _add_store_4:
 	end_inlined
 
 	@@ Specify a bit
-	define_word "bit", visible_flag | fold_flag
+	define_word "bit", visible_flag
 _bit:	movs r0, tos
 	movs tos, #1
 	lsls tos, r0
@@ -1271,7 +1273,7 @@ _bit:	movs r0, tos
 	end_inlined
 
 	@@ Bit set a byte
-	define_word "cbis!", visible_flag | fold_flag
+	define_word "cbis!", visible_flag
 _bit_set_1:
 	movs r0, tos
 	pull_tos
@@ -1283,7 +1285,7 @@ _bit_set_1:
 	end_inlined
 
 	@@ Bit set a halfword
-	define_word "hbis!", visible_flag | fold_flag
+	define_word "hbis!", visible_flag
 _bit_set_2:
 	movs r0, tos
 	pull_tos
@@ -1295,7 +1297,7 @@ _bit_set_2:
 	end_inlined
 	
 	@@ Bit set a word
-	define_word "bis!", visible_flag | fold_flag
+	define_word "bis!", visible_flag
 _bit_set_4:
 	movs r0, tos
 	pull_tos
@@ -1345,7 +1347,7 @@ _bit_clear_4:
 	end_inlined
 
 	@ Test for bits in a byte
-	define_word "cbit@", visible_flag | fold_flag
+	define_word "cbit@", visible_flag
 _bit_test_1:
 	movs r0, tos
 	pull_tos
@@ -1358,7 +1360,7 @@ _bit_test_1:
 	end_inlined
 
 	@ Test for bits in a halfword
-	define_word "hbit@", visible_flag | fold_flag
+	define_word "hbit@", visible_flag
 _bit_test_2:
 	movs r0, tos
 	pull_tos
@@ -1371,7 +1373,7 @@ _bit_test_2:
 	end_inlined
 
 	@ Test for bits in a word
-	define_word "bit@", visible_flag | fold_flag
+	define_word "bit@", visible_flag
 _bit_test_4:
 	movs r0, tos
 	pull_tos
@@ -1883,7 +1885,7 @@ _current_comma_cstring:
 	end_inlined
 
 	@@ Push a value onto the return stack
-	define_word ">r", visible_flag
+	define_word ">r", visible_flag | inlined_flag
 _push_r:
 	push {tos}
 	pull_tos
@@ -1891,14 +1893,14 @@ _push_r:
 	end_inlined
 
 	@@ Pop a value off the return stack
-	define_word "r>", visible_flag
+	define_word "r>", visible_flag | inlined_flag
 _pop_r:	push_tos
 	pop {tos}
 	bx lr
 	end_inlined
 
 	@@ Get a value off the return stack without popping it
-	define_word "r@", visible_flag
+	define_word "r@", visible_flag | inlined_flag
 _get_r:	push_tos
 	ldr tos, [sp]
 	bx lr
@@ -1911,7 +1913,7 @@ _rdrop:	pop {r0}
 	end_inlined
 
 	@@ Push two values onto the return stack
-	define_word "2>r", visible_flag
+	define_word "2>r", visible_flag | inlined_flag
 _push_2r:
 	ldmia dp!, {r0, r1}
 	push {tos}
@@ -1921,7 +1923,7 @@ _push_2r:
 	end_inlined
 
 	@@ Pop two values off the return stack
-	define_word "2r>", visible_flag
+	define_word "2r>", visible_flag | inlined_flag
 _pop_2r:
 	push_tos
 	pop {r0, tos}
@@ -1931,7 +1933,7 @@ _pop_2r:
 	end_inlined
 
 	@@ Get two values off the return stack without popping it
-	define_word "2r@", visible_flag
+	define_word "2r@", visible_flag | inlined_flag
 _get_2r:
 	push_tos
 	ldr tos, [sp, #4]
