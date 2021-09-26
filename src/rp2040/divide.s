@@ -62,7 +62,17 @@ _umod:	push {lr}
 _udivmod:
 	ldr r0, =SIO_BASE
 	cpsid i
+@	dmb
+@	dsb
+@	isb
 	ldr r1, [dp]
+	@@ Wait eight cycles
+	b 1f
+1:	b 1f
+1:	b 1f
+1:	b 1f
+1:	ldr r3, [r0, #SIO_DIV_REMAINDER_OFFSET]
+	ldr r2, [r0, #SIO_DIV_QUOTIENT_OFFSET]
 	str r1, [r0, #SIO_DIV_UDIVIDEND_OFFSET]
 	str tos, [r0, #SIO_DIV_UDIVISOR_OFFSET]
 	@@ Wait eight cycles
@@ -72,7 +82,12 @@ _udivmod:
 1:	b 1f
 1:	ldr r1, [r0, #SIO_DIV_REMAINDER_OFFSET]
 	ldr tos, [r0, #SIO_DIV_QUOTIENT_OFFSET]
+	str r3, [r0, #SIO_DIV_REMAINDER_OFFSET]
+	str r2, [r0, #SIO_DIV_QUOTIENT_OFFSET]
 	str r1, [dp]
+@	dmb
+@	dsb
+@	isb
 	cpsie i
 	bx lr
 	end_inlined
@@ -82,7 +97,17 @@ _udivmod:
 _divmod:
 	ldr r0, =SIO_BASE
 	cpsid i
+@	dmb
+@	dsb
+@	isb
 	ldr r1, [dp]
+	@@ Wait eight cycles
+	b 1f
+1:	b 1f
+1:	b 1f
+1:	b 1f
+1:	ldr r3, [r0, #SIO_DIV_REMAINDER_OFFSET]
+	ldr r2, [r0, #SIO_DIV_QUOTIENT_OFFSET]
 	str r1, [r0, #SIO_DIV_SDIVIDEND_OFFSET]
 	str tos, [r0, #SIO_DIV_SDIVISOR_OFFSET]
 	@@ Wait eight cycles
@@ -92,7 +117,12 @@ _divmod:
 1:	b 1f
 1:	ldr r1, [r0, #SIO_DIV_REMAINDER_OFFSET]
 	ldr tos, [r0, #SIO_DIV_QUOTIENT_OFFSET]
+	str r3, [r0, #SIO_DIV_REMAINDER_OFFSET]
+	str r2, [r0, #SIO_DIV_QUOTIENT_OFFSET]
 	str r1, [dp]
+@	dmb
+@	dsb
+@	isb
 	cpsie i
 	bx lr
 	end_inlined
