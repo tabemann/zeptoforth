@@ -110,7 +110,7 @@ _divmod_minus_minus:
 	rsbs r0, r0, #0
 	push_tos
 	movs tos, r0
-	bl udivmod
+	bl _udivmod
 	movs r0, tos
 	pull_tos
 	rsbs tos, tos, #0
@@ -121,7 +121,7 @@ _divmod_minus_minus:
 _divmod_minus_plus:
 	push_tos
 	movs tos, r0
-	bl udivmod
+	bl _udivmod
 	movs r0, tos
 	pull_tos
 	rsbs r0, r0, #0
@@ -138,13 +138,13 @@ _divmod_plus_minus:
 	rsbs r0, r0, #0
 	push_tos
 	movs tos, r0
-	bl udivmod
+	bl _udivmod
 	rsbs tos, tos, #0
 	pop {pc}
 	
 _divmod_plus_plus:
 	push_tos
 	movs tos, r0
-	bl udivmod
+	bl _udivmod
 	pop {pc}
 	end_inlined

@@ -37,9 +37,12 @@ _if:	push {lr}
 	push_tos
 	movs tos, #0
 	bl _asm_cmp_imm
+	bl _current_here
+	adds tos, #4
+	bl _asm_branch_not_zero
 	bl _asm_reserve_branch
 	push_tos
-	movs tos, #-1
+	ldr tos, =-1
 	pop {pc}
 	end_inlined
 
@@ -58,7 +61,7 @@ _else:	push {lr}
 	pop {r0}
 	push_tos
 	movs tos, r0
-	bl _asm_branch_zero_back
+	bl _asm_branch_back
 	push_tos
 	movs tos, #0
 	pop {pc}
@@ -91,7 +94,7 @@ _then:	push {lr}
 	movs tos, r0
 	cmp r1, #0
 	beq 1f
-	bl _asm_branch_zero_back
+	bl _asm_branch_back
 	pop {pc}
 1:	bl _asm_branch_back
 	pop {pc}
@@ -123,6 +126,9 @@ _while:	push {lr}
 	push_tos
 	movs tos, #0
 	bl _asm_cmp_imm
+	bl _current_here
+	adds tos, #4
+	bl _asm_branch_not_zero
 	bl _asm_reserve_branch
 	pop {pc}
 	end_inlined
@@ -140,7 +146,7 @@ _repeat:
 	pop {r0}
 	push_tos
 	movs tos, r0
-	bl _asm_branch_zero_back
+	bl _asm_branch_back
 	pop {pc}
 	end_inlined
 
@@ -163,7 +169,10 @@ _until:	push {lr}
 	push_tos
 	movs tos, #0
 	bl _asm_cmp_imm
-	bl _asm_branch_zero
+	bl _current_here
+	adds tos, #4
+	bl _asm_branch_not_zero
+	bl _asm_branch
 	pop {pc}
 	end_inlined
 
@@ -175,103 +184,127 @@ _again:	push {lr}
 	pop {pc}
 	end_inlined
 
-@	@@ Implement the core of DO
-@	define_internal_word "(do)", visible_flag
-@_xdo:	ldmia dp!, {r0, r1, r2}
-@	push {tos}
-@	push {r0}
-@	push {r1}
-@	movs tos, r2
-@	bx lr
-@	end_inlined
-@
-@	@@ Implement the core of ?DO
-@	define_internal_word "(?do)", visible_flag
-@_xqdo:	ldmia dp!, {r0, r1, r2}
-@	cmp r0, r1
-@	beq 1f
-@	push {tos}
-@	push {r0}
-@	push {r1}
-@	movs tos, r2
-@	bx lr
-@1:	movs r0, tos
-@	movs tos, r2
-@	bx r0
-@	end_inlined
-@
-@	@@ Implement the core of LOOP
-@	define_internal_word "(loop)", visible_flag
-@_xloop:	ldr r0, [sp, #4]
-@	ldr r1, [sp, #0]
-@	adds r0, #1
-@	cmp r0, r1
-@	beq 1f
-@	str r0, [sp, #4]
-@	movs r0, tos
-@	pull_tos
-@	bx r0
-@1:	pull_tos
-@	adds sp, #12
-@	bx lr
-@	end_inlined
-@
-@	@@ Implement the core of +LOOP
-@	define_internal_word "(+loop)", visible_flag
-@_xploop:
-@	ldr r0, [sp, #4]
-@	ldr r1, [sp, #0]
-@	ldr r2, [dp, #0]
-@	cmp r2, #0
-@	blt 1f
-@	adds r0, r2
-@	cmp r0, r1
-@	bge 2f
-@	str r0, [sp, #4]
-@	movs r0, tos
-@	adds dp, #4
-@	pull_tos
-@	bx r0
-@1:	adds r0, r2
-@	cmp r0, r1
-@	blt 2f
-@	str r0, [sp, #4]
-@	movs r0, tos
-@	adds dp, #4
-@	pull_tos
-@	bx r0
-@2:	adds dp, #4
-@	pull_tos
-@	adds sp, #12
-@	bx lr
-@	end_inlined
-@
-@	@@ Get the outermost loop index
-@	define_word "i", visible_flag | inlined_flag
-@_i:	push_tos
-@	ldr tos, [sp, #4]
-@	bx lr
-@	end_inlined
-@
-@	@@ Get the first inner loop index
-@	define_word "j", visible_flag | inlined_flag
-@_j:	push_tos
-@	ldr tos, [sp, #16]
-@	bx lr
-@	end_inlined
-@
-@	@@ Leave a do loop
-@	define_word "leave", visible_flag
-@_leave:	adds sp, #8
-@	pop {pc}
-@	end_inlined
-@
-@	@@ Unloop a do loop
-@	define_word "unloop", visible_flag | inlined_flag
-@_unloop:
-@	adds sp, #12
-@	bx lr
-@	end_inlined
+	@@ Implement the core of DO
+	define_internal_word "(do)", visible_flag
+_xdo:
+	.ifdef cortex_m7
+	ldr r0, [dp], #4
+	ldr r1, [dp], #4
+	ldr r2, [dp], #4
+	.else
+	ldmia dp!, {r0, r1, r2}
+	.endif
+	
+	push {tos}
+	push {r0}
+	push {r1}
+	movs tos, r2
+	bx lr
+	end_inlined
+
+	@@ Implement the core of ?DO
+	define_internal_word "(?do)", visible_flag
+_xqdo:
+	.ifdef cortex_m7
+	ldr r0, [dp], #4
+	ldr r1, [dp], #4
+	ldr r2, [dp], #4
+	.else
+	ldmia dp!, {r0, r1, r2}
+	.endif
+	
+	cmp r0, r1
+	beq 1f
+	push {tos}
+	push {r0}
+	push {r1}
+	movs tos, r2
+	bx lr
+1:	movs r0, tos
+	movs tos, r2
+	bx r0
+	end_inlined
+
+	@@ Implement the core of LOOP
+	define_internal_word "(loop)", visible_flag
+_xloop:	ldr r0, [sp, #4]
+	ldr r1, [sp, #0]
+	adds r0, #1
+	cmp r0, r1
+	beq 1f
+	str r0, [sp, #4]
+	movs r0, tos
+	pull_tos
+	bx r0
+1:	pull_tos
+	mov r0, sp
+	adds r0, #12
+	mov sp, r0
+	bx lr
+	end_inlined
+
+	@@ Implement the core of +LOOP
+	define_internal_word "(+loop)", visible_flag
+_xploop:
+	ldr r0, [sp, #4]
+	ldr r1, [sp, #0]
+	ldr r2, [dp, #0]
+	cmp r2, #0
+	blt 1f
+	adds r0, r2
+	cmp r0, r1
+	bge 2f
+	str r0, [sp, #4]
+	movs r0, tos
+	adds dp, #4
+	pull_tos
+	bx r0
+1:	adds r0, r2
+	cmp r0, r1
+	blt 2f
+	str r0, [sp, #4]
+	movs r0, tos
+	adds dp, #4
+	pull_tos
+	bx r0
+2:	adds dp, #4
+	pull_tos
+	mov r0, sp
+	adds r0, #12
+	mov sp, r0
+	bx lr
+	end_inlined
+
+	@@ Get the outermost loop index
+	define_word "i", visible_flag | inlined_flag
+_i:	push_tos
+	ldr tos, [sp, #4]
+	bx lr
+	end_inlined
+
+	@@ Get the first inner loop index
+	define_word "j", visible_flag | inlined_flag
+_j:	push_tos
+	ldr tos, [sp, #16]
+	bx lr
+	end_inlined
+
+	@@ Leave a do loop
+	define_word "leave", visible_flag
+_leave:	mov r0, sp
+	adds r0, #8
+	mov sp, r0
+	pop {pc}
+	end_inlined
+
+	@@ Unloop a do loop
+	define_word "unloop", visible_flag | inlined_flag
+_unloop:
+	mov r0, sp
+	adds r0, #12
+	mov sp, r0
+	bx lr
+	end_inlined
 	
 	.ltorg
 	

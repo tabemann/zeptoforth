@@ -500,19 +500,15 @@ commit-flash
   token
   dup 0= triggers token-expected
   start-compile-no-push
-  compiling-to-flash? if
-    here 28 + ( 28 bytes ) flash-block-size align
-  else
-    here 16 + ( 16 bytes ) 4 align
-  then
-  tos push,
-  dup tos literal,
+  6 push,
+  reserve-literal
   14 bx,
   $003F h,
   visible
   inlined
   finalize-no-align,
-  advance-here
+\  advance-here
+  here 6 rot literal!
 ;
 
 \ Set internal
@@ -534,19 +530,15 @@ internal-module set-current
 \ Create a word that executes code specified by DOES>
 : <builds-with-name ( addr bytes -- )
   start-compile
-  compiling-to-flash? if
-    here 32 + ( 32 bytes ) 4 align
-  else
-    here 24 + ( 24 bytes ) 4 align
-  then
   tos push,
-  dup tos literal,
+  reserve-literal
   reserve-literal build-target !
   0 bx,
   $003F h,
   visible
   finalize-no-align,
-  advance-here
+\  advance-here
+  here 6 rot literal!
 ;
 
 \ Set forth
@@ -581,7 +573,7 @@ commit-flash
 
 \ Specify code for a word created wth <BUILDS
 : does> ( -- )
-  block-align,
+\  block-align,
   build-target @ 0= triggers no-word-being-built
   r>
   0 build-target @ literal!
@@ -1871,6 +1863,30 @@ forth-module set-current
 \ Set forth
 forth-module set-current
 
+\ Inner case of [else]
+: [else]-case ( -- )
+  case
+    s" [if]" ofstrcase 1+ endof
+    s" [else]" ofstrcase 1- dup if 1+ then endof
+    s" [then]" ofstrcase 1- endof
+    s" \" ofstrcase ['] newline? skip-until	endof
+    s" (" ofstrcase [: [char] ) = ;] skip-until endof
+    s\" s\"" ofstrcase [: [char] " = ;] skip-until endof
+    s\" c\"" ofstrcase [: [char] " = ;] skip-until endof
+    s\" .\"" ofstrcase [: [char] " = ;] skip-until endof
+    s" .(" ofstrcase [: [char] ) = ;] skip-until endof
+    s\" s\\\"" ofstrcase [char] " skip-esc-string endof
+    s\" c\\\"" ofstrcase [char] " skip-esc-string endof
+    s\" .\\\"" ofstrcase [char] " skip-esc-string endof
+    s" .\(" ofstrcase [char] ) skip-esc-string endof
+    s" char" ofstrcase state @ not if token 2drop then endof
+    s" [char]" ofstrcase token 2drop endof
+    s" '" ofstrcase state @ not if token 2drop then endof
+    s" [']" ofstrcase token 2drop endof
+    s" postpone" ofstrcase token 2drop endof
+  endcasestr
+;
+    
 \ Commit to flash
 commit-flash
 
@@ -1880,26 +1896,7 @@ commit-flash
   [immediate]
   1 begin
     begin token dup while
-      case
-	s" [if]" ofstrcase 1+ endof
-        s" [else]" ofstrcase 1- dup if 1+ then endof
-        s" [then]" ofstrcase 1- endof
-	s" \" ofstrcase ['] newline? skip-until	endof
-	s" (" ofstrcase [: [char] ) = ;] skip-until endof
-	s\" s\"" ofstrcase [: [char] " = ;] skip-until endof
-	s\" c\"" ofstrcase [: [char] " = ;] skip-until endof
-	s\" .\"" ofstrcase [: [char] " = ;] skip-until endof
-	s" .(" ofstrcase [: [char] ) = ;] skip-until endof
-	s\" s\\\"" ofstrcase [char] " skip-esc-string endof
-	s\" c\\\"" ofstrcase [char] " skip-esc-string endof
-	s\" .\\\"" ofstrcase [char] " skip-esc-string endof
-	s" .\(" ofstrcase [char] ) skip-esc-string endof
-	s" char" ofstrcase state @ not if token 2drop then endof
-	s" [char]" ofstrcase token 2drop endof
-	s" '" ofstrcase state @ not if token 2drop then endof
-	s" [']" ofstrcase token 2drop endof
-	s" postpone" ofstrcase token 2drop endof
-      endcasestr
+      [else]-case
       dup 0= if drop exit then
     repeat 2drop
     prompt-hook @ ?execute refill
