@@ -124,6 +124,7 @@ _init_flash:
 	push_tos
 	movs tos, r0
 	bl _erase_range
+	cpsie i
 1:	pop {pc}
 	end_inlined
 
@@ -531,7 +532,7 @@ _erase_range:
 	b 1b
 2:	bl _enable_flush_xip_cache
 	bl _enter_xip
-	cpsie i
+@	cpsie i
 	pop {pc}
 	end_inlined
 

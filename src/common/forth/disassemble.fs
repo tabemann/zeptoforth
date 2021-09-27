@@ -21,6 +21,8 @@
 \ Compile this to flash
 compile-to-flash
 
+0 [if]
+
 begin-import-module-once disassemble-internal-module
 
   import internal-module
@@ -147,45 +149,50 @@ begin-import-module-once disassemble-internal-module
   \ Commit to flash
   commit-flash
 
+  \ Convert type character case
+  : convert-type-char-case
+    case
+      [char] ` of dup 6 lead-underscore ." bquote" tail-underscore endof
+      [char] ~ of dup 5 lead-underscore ." tilde" tail-underscore endof
+      [char] ! of dup 5 lead-underscore ." store" tail-underscore endof
+      [char] @ of dup 5 lead-underscore ." fetch" tail-underscore endof
+      [char] # of dup 4 lead-underscore ." num" tail-underscore endof
+      [char] $ of dup 6 lead-underscore ." dollar" tail-underscore endof
+      [char] % of dup 7 lead-underscore ." percent" tail-underscore endof
+      [char] ^ of dup 5 lead-underscore ." caret" tail-underscore endof
+      [char] & of dup 3 lead-underscore ." amp" tail-underscore endof
+      [char] * of dup 4 lead-underscore ." star" tail-underscore endof
+      $28 of dup 5 lead-underscore ." paren" tail-underscore endof
+      [char] ) of dup 6 lead-underscore ." cparen" tail-underscore endof
+      [char] - of 2drop 1 ." _" endof
+      [char] = of dup 5 lead-underscore ." equal" tail-underscore endof
+      [char] + of dup 4 lead-underscore ." plus" tail-underscore endof
+      [char] [ of dup 7 lead-underscore ." bracket" tail-underscore endof
+      [char] { of dup 5 lead-underscore ." brace" tail-underscore endof
+      [char] ] of dup 8 lead-underscore ." cbracket" tail-underscore endof
+      [char] } of dup 6 lead-underscore ." cbrace" tail-underscore endof
+      $5C of dup 4 lead-underscore ." back" tail-underscore endof
+      [char] | of dup 4 lead-underscore ." pipe" tail-underscore endof
+      [char] ; of dup 4 lead-underscore ." semi" tail-underscore endof
+      [char] : of dup 5 lead-underscore ." colon" tail-underscore endof
+      [char] ' of dup 5 lead-underscore ." quote" tail-underscore endof
+      [char] " of dup 6 lead-underscore ." dquote" tail-underscore endof
+      [char] , of dup 5 lead-underscore ." comma" tail-underscore endof
+      [char] < of dup 2 lead-underscore ." lt" tail-underscore endof
+      [char] . of dup 3 lead-underscore ." dot" tail-underscore endof
+      [char] > of dup 2 lead-underscore ." gt" tail-underscore endof
+      [char] / of dup 5 lead-underscore ." slash" tail-underscore endof
+      [char] ? of dup 4 lead-underscore ." ques" tail-underscore endof
+      dup emit nip nip 1 swap false prev-underscore !
+    endcase
+  ;
+  
   \ Convert and type a character meant for an assembler
   : convert-type-char ( b count index -- len )
     2 pick [char] - = 2 pick 1 = and over 0 = and if
       ." minus" 2drop drop
     else
-      rot case
-	[char] ` of dup 6 lead-underscore ." bquote" tail-underscore endof
-	[char] ~ of dup 5 lead-underscore ." tilde" tail-underscore endof
-	[char] ! of dup 5 lead-underscore ." store" tail-underscore endof
-	[char] @ of dup 5 lead-underscore ." fetch" tail-underscore endof
-	[char] # of dup 4 lead-underscore ." num" tail-underscore endof
-	[char] $ of dup 6 lead-underscore ." dollar" tail-underscore endof
-	[char] % of dup 7 lead-underscore ." percent" tail-underscore endof
-	[char] ^ of dup 5 lead-underscore ." caret" tail-underscore endof
-	[char] & of dup 3 lead-underscore ." amp" tail-underscore endof
-	[char] * of dup 4 lead-underscore ." star" tail-underscore endof
-	$28 of dup 5 lead-underscore ." paren" tail-underscore endof
-	[char] ) of dup 6 lead-underscore ." cparen" tail-underscore endof
-	[char] - of 2drop 1 ." _" endof
-	[char] = of dup 5 lead-underscore ." equal" tail-underscore endof
-	[char] + of dup 4 lead-underscore ." plus" tail-underscore endof
-	[char] [ of dup 7 lead-underscore ." bracket" tail-underscore endof
-	[char] { of dup 5 lead-underscore ." brace" tail-underscore endof
-	[char] ] of dup 8 lead-underscore ." cbracket" tail-underscore endof
-	[char] } of dup 6 lead-underscore ." cbrace" tail-underscore endof
-	$5C of dup 4 lead-underscore ." back" tail-underscore endof
-	[char] | of dup 4 lead-underscore ." pipe" tail-underscore endof
-	[char] ; of dup 4 lead-underscore ." semi" tail-underscore endof
-	[char] : of dup 5 lead-underscore ." colon" tail-underscore endof
-	[char] ' of dup 5 lead-underscore ." quote" tail-underscore endof
-	[char] " of dup 6 lead-underscore ." dquote" tail-underscore endof
-	[char] , of dup 5 lead-underscore ." comma" tail-underscore endof
-	[char] < of dup 2 lead-underscore ." lt" tail-underscore endof
-	[char] . of dup 3 lead-underscore ." dot" tail-underscore endof
-	[char] > of dup 2 lead-underscore ." gt" tail-underscore endof
-	[char] / of dup 5 lead-underscore ." slash" tail-underscore endof
-	[char] ? of dup 4 lead-underscore ." ques" tail-underscore endof
-	dup emit nip nip 1 swap false prev-underscore !
-      endcase
+      rot convert-type-char-case
     then
   ;
 
@@ -1857,6 +1864,8 @@ end-module
 end-compress-flash
 
 unimport disassemble-internal-module
+
+[then]
 
 \ Reboot
 reboot

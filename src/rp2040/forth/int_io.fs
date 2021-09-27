@@ -54,7 +54,7 @@ begin-import-module-once int-io-module
     tx-buffer-size buffer: tx-buffer
 
     \ USART2
-    $40003400 constant UART0_Base
+    $40034000 constant UART0_Base
     UART0_Base $00 + constant UART0_UARTDR
     UART0_Base $18 + constant UART0_UARTFR
     UART0_Base $34 + constant UART0_UARTIFLS
@@ -64,10 +64,11 @@ begin-import-module-once int-io-module
     20 constant uart0-irq
 
     \ UART0 vector index
-    uart0-irq constant uart0-vector
+    uart0-irq 16 + constant uart0-vector
 
-    : UART0_UARTDR_DATA! $FF and UART_UARTDR c! ; \ Transmit data
-    : UART0_UARTDR_DATA@ UART_UARTDR c@ ; \ Receive data
+    : UART0_UARTDR_DATA! $FF and UART0_UARTDR c! ; \ Transmit data
+    : UART0_UARTDR_DATA@ UART0_UARTDR c@ ; \ Receive data
+    : UART0_UARTFR_TXFE@ 7 bit UART0_UARTFR bit@ ; \ Transmit FIFO empty
     : UART0_UARTFR_TXFF@ 5 bit UART0_UARTFR bit@ ; \ Transmit FIFO full
     : UART0_UARTFR_RXFE@ 4 bit UART0_UARTFR bit@ ; \ Receive FIFO empty
     : UART0_UARTIMSC_RTIM! 6 bit UART0_UARTIMSC bis! ; \ Receive timeout interrupt mask
@@ -90,7 +91,7 @@ begin-import-module-once int-io-module
     \ Get whether the rx buffer is full
     : rx-full? ( -- f )
       rx-write-index c@ rx-read-index c@
-      rx-buffer-size 1- + rx-buffer-size umod =
+      rx-buffer-size 1- + $7F and =
     ;
 
     \ Get whether the rx buffer is empty
@@ -102,7 +103,7 @@ begin-import-module-once int-io-module
     : write-rx ( c -- )
       rx-full? not if
 	rx-write-index c@ rx-buffer + c!
-	rx-write-index c@ 1+ rx-buffer-size mod rx-write-index c!
+	rx-write-index c@ 1+ $7F and rx-write-index c!
       else
 	drop
       then
@@ -112,7 +113,7 @@ begin-import-module-once int-io-module
     : read-rx ( -- c )
       rx-empty? not if
 	rx-read-index c@ rx-buffer + c@
-	rx-read-index c@ 1+ rx-buffer-size mod rx-read-index c!
+	rx-read-index c@ 1+ $7F and rx-read-index c!
       else
 	0
       then
@@ -121,7 +122,7 @@ begin-import-module-once int-io-module
     \ Get whether the tx buffer is full
     : tx-full? ( -- f )
       tx-write-index c@ tx-read-index c@
-      tx-buffer-size 1- + tx-buffer-size umod =
+      tx-buffer-size 1- + $7F and =
     ;
 
     \ Get whether the tx buffer is empty
@@ -133,7 +134,7 @@ begin-import-module-once int-io-module
     : write-tx ( c -- )
       tx-full? not if
 	tx-write-index c@ tx-buffer + c!
-	tx-write-index c@ 1+ tx-buffer-size mod tx-write-index c!
+	tx-write-index c@ 1+ $7F and tx-write-index c!
       else
 	drop
       then
@@ -143,7 +144,7 @@ begin-import-module-once int-io-module
     : read-tx ( -- c )
       tx-empty? not if
 	tx-read-index c@ tx-buffer + c@
-	tx-read-index c@ 1+ tx-buffer-size mod tx-read-index c!
+	tx-read-index c@ 1+ $7F and tx-read-index c!
       else
 	0
       then
@@ -151,8 +152,6 @@ begin-import-module-once int-io-module
 
     \ Handle IO
     : handle-io ( -- )
-      dmb dsb isb
-      disable-int
       begin
 	rx-full? not if
 	  UART0_UARTFR_RXFE@ not if
@@ -183,17 +182,18 @@ begin-import-module-once int-io-module
 	UART0_UARTIMSC_TXIM_Clear
       then
       uart0-irq NVIC_ICPR_CLRPEND!
-      enable-int
-      wake
-      dmb dsb isb
     ;
 
     \ Interrupt-driven IO hooks
 
     : do-emit ( c -- )
-      [: tx-full? not ;] wait
-      write-tx
       UART0_UARTIMSC_TXIM!
+      tx-empty? UART0_UARTFR_TXFF@ not and if
+	UART0_UARTDR_DATA!
+      else
+	[: tx-full? not ;] wait
+	write-tx
+      then
     ; 
 
     : do-key ( -- c )
@@ -236,7 +236,7 @@ begin-import-module-once int-io-module
     0 UART0_UARTIFLS_RXIFLSEL! \ Interrupt on receive FIFO >= 1/8 full
     0 UART0_UARTIFLS_TXIFLSEL! \ Interrupt on transmit FIFO <= 1/8 full
     0 uart0-irq NVIC_IPR_IP!
-    ['] handle-io usart2-vector vector!
+    ['] handle-io uart0-vector vector!
     serial-console
     uart0-irq NVIC_ISER_SETENA!
     UART0_UARTIMSC_RTIM!
@@ -252,7 +252,7 @@ begin-import-module-once int-io-module
     ['] serial-key? key?-hook !
     ['] serial-emit? emit?-hook !
     0 flush-console-hook !
-    ['] handle-null usart2-vector vector!
+    ['] handle-null uart0-vector vector!
     UART0_UARTIMSC_RTIM_Clear
     UART0_UARTIMSC_RXIM_Clear
     UART0_UARTIMSC_TXIM_Clear
