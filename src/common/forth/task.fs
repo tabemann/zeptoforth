@@ -622,7 +622,7 @@ begin-import-module-once task-module
       rp@ over task-rstack-current !
       ram-here next-ram-space - over task-dict-offset !
       0 over task-priority h!
-      0 over task-saved-priority !
+      0 over task-saved-priority h!
       1 over task-active h!
       readied over task-state h!
       no-timeout timeout !
@@ -667,7 +667,7 @@ begin-import-module-once task-module
   : init-task ( xn...x0 count xt task -- )
     0 over ['] task-handler for-task !
     0 over task-priority h!
-    0 over task-saved-priority !
+    0 over task-saved-priority h!
     0 over task-active h!
     base @ over ['] task-base for-task !
     0 over ['] current-lock for-task !
