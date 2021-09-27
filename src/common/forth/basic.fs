@@ -1457,6 +1457,7 @@ commit-flash
   [compile-only]
   undefer-lit
   reserve-branch
+  here
   $B500 h,
 ;
 
@@ -1466,8 +1467,8 @@ commit-flash
   [compile-only]
   undefer-lit
   $BD00 h,
-  here over branch-back!
-  4+ lit,
+  here rot branch-back!
+  lit,
 ;
 
 \ Print out multiple spaces
@@ -1479,12 +1480,13 @@ commit-flash
   [compile-only]
   undefer-lit
   reserve-branch
+  here
   $B500 h,
   postpone space
   postpone ."
   $BD00 h,
-  here over branch-back!
-  4+ lit,
+  here rot branch-back!
+  lit,
 ;
 
 \ Create a deferred word

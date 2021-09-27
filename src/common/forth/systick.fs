@@ -106,7 +106,7 @@ begin-import-module-once systick-module
     10 / systick-divisor / time-multiplier * time-divisor / SYST_RVR !
     0 SYST_CVR !
     0 systick-counter !
-\    enable-systick
+    enable-systick
   ;
 
   \ Systick divisor
