@@ -1208,26 +1208,27 @@ _asm_literal:
 	movs tos, r0
 	bl _asm_literal_16
 	pop {pc}
-4:	ldr r1, =ram_real_start
-	cmp tos, r1
-	blo 6f
-	ldr r2, =ram_real_start + 65535
-	cmp tos, r2
-	bhi 6f
-	subs tos, r1
-	push_tos
-	movs tos, r0
-	push {r0}
-	bl _asm_literal_16
-	pop {r0}
-	push_tos
-	movs tos, #5
-	push_tos
-	movs tos, r0
-	push_tos
-	movs tos, r0
-	bl _asm_add
-	pop {pc}
+4:
+@	ldr r1, =ram_real_start
+@	cmp tos, r1
+@	blo 6f
+@	ldr r2, =ram_real_start + 65535
+@	cmp tos, r2
+@	bhi 6f
+@	subs tos, r1
+@	push_tos
+@	movs tos, r0
+@	push {r0}
+@	bl _asm_literal_16
+@	pop {r0}
+@	push_tos
+@	movs tos, #5
+@	push_tos
+@	movs tos, r0
+@	push_tos
+@	movs tos, r0
+@	bl _asm_add
+@	pop {pc}
 6:	push_tos
 	movs tos, r0
 	bl _asm_long_literal
