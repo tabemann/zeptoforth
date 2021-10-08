@@ -2145,7 +2145,11 @@ _init_variables:
 	ldr r1, =_do_nothing
 	str r1, [r0]
 	ldr r0, =validate_dict_hook
-	ldr r1, =_do_nothing
+	str r1, [r0]
+	ldr r0, =finalize_hook
+	str r1, [r0]
+	ldr r0, =find_hook
+	ldr r1, =_do_find
 	str r1, [r0]
 	ldr r0, =compiling_to_flash
 	movs r1, 0

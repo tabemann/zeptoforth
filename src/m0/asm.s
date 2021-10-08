@@ -129,6 +129,10 @@ _asm_finalize:
 	str r1, [r2]
 	movs r1, #0
 	str r1, [r0]
+	push_tos
+	ldr tos, =finalize_hook
+	ldr tos, [tos]
+	bl _execute_nz
 	pop {pc}
 	end_inlined
 	
@@ -180,6 +184,10 @@ _asm_finalize_no_align:
 	str r1, [r2]
 	movs r1, #0
 	str r1, [r0]
+	push_tos
+	ldr tos, =finalize_hook
+	ldr tos, [tos]
+	bl _execute_nz
 	pop {pc}
 	end_inlined
 

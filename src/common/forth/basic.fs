@@ -498,7 +498,7 @@ commit-flash
 \ Create a word referring to memory after it
 : create ( "name" -- )
   token
-  dup 0= triggers token-expected
+  dup 0= triggers x-token-expected
   start-compile-no-push
   6 push,
   reserve-literal
@@ -550,12 +550,12 @@ commit-flash
 \ Create a word that executes code specified by DOES>
 : <builds ( "name" -- )
   token
-  dup 0= triggers token-expected
+  dup 0= triggers x-token-expected
   <builds-with-name
 ;
 
 \ No word is being built exception
-: no-word-being-built ( -- ) space ." no word is being built" cr ;
+: x-no-word-being-built ( -- ) space ." no word is being built" cr ;
 
 \ Set internal
 internal-module set-current
@@ -574,7 +574,7 @@ commit-flash
 \ Specify code for a word created wth <BUILDS
 : does> ( -- )
 \  block-align,
-  build-target @ 0= triggers no-word-being-built
+  build-target @ 0= triggers x-no-word-being-built
   r>
   0 build-target @ literal!
   0 build-target !
@@ -1492,7 +1492,7 @@ commit-flash
 \ Create a deferred word
 : defer ( "name" -- )
   token
-  dup 0= triggers token-expected
+  dup 0= triggers x-token-expected
   start-compile-no-push
   visible
   compiling-to-flash? if
@@ -2148,6 +2148,129 @@ commit-flash
   then
 ;
 
+\ Create a variable to store the end of the flash mini-dictionary
+flash-mini-dict-size [if]
+
+  variable flash-mini-dict-end
+
+  \ Hash a counted string
+  : hash-string ( b-addr bytes -- hash )
+    2dup + rot ?do dup 7 lshift swap 25 rshift or i c@ to-upper-char xor loop
+  ;
+
+  \ Commit to flash
+  commit-flash
+
+  \ Hash an identifier by wordlist
+  : hash-string-and-wid ( b-addr bytes wid -- hash )
+    -rot hash-string xor
+  ;
+  
+  \ Commit to flash
+  commit-flash
+  
+  \ Hash a dictionary entry
+  : hash-word ( word -- hash )
+    dup word-name count rot wordlist-id h@ hash-string-and-wid
+  ;
+  
+  \ Commit to flash
+  commit-flash
+  
+  \ Initialize the flash mini-dictionary
+  : init-flash-mini-dict ( -- )
+    flash-latest
+    begin dup 0<> flash-mini-dict-end @ flash-mini-dict u> and while
+      -2 cells flash-mini-dict-end +!
+      dup hash-word flash-mini-dict-end @ !
+      dup flash-mini-dict-end @ cell+ !
+      next-word @
+    repeat
+    drop
+    flash-mini-dict-end @ flash-mini-dict u>= if
+      flash-mini-dict-end @ flash-mini-dict
+      flash-mini-dict-size flash-mini-dict + flash-mini-dict-end @ - move
+      flash-mini-dict-size flash-mini-dict + flash-mini-dict-end @ -
+      flash-mini-dict + flash-mini-dict-end !
+    else
+      -1 flash-mini-dict-end !
+    then
+  ;
+
+  \ Add a word to the flash mini-dictionary
+  : add-flash-mini-dict ( -- )
+    compiling-to-flash? if
+      flash-mini-dict-end @ dup -1 <> if
+	[ flash-mini-dict flash-mini-dict-size + ] literal u< if
+	  flash-latest hash-word flash-mini-dict-end @ !
+	  flash-latest flash-mini-dict-end @ cell+ !
+	  8 flash-mini-dict-end +!
+	else
+	  -1 flash-mini-dict-end !
+	then
+      else
+	drop
+      then
+    then
+  ;
+
+  \ Find a word in the flash mini-dictionary
+  : find-flash-mini-dict ( b-addr bytes mask wid -- addr|0 )
+    swap >r 3dup hash-string-and-wid flash-mini-dict-end @ 
+    begin dup flash-mini-dict u> while
+      2 cells -
+      2dup @ = if
+	dup cell+ @ wordlist-id h@ 2 pick = if
+	  dup cell+ @ word-flags h@ r@ and if
+	    4 pick 4 pick 2 pick word-name count equal-case-strings? if
+	      rdrop cell+ @ nip nip nip nip exit
+	    then
+	  then
+	then
+      then
+    repeat
+    rdrop 2drop 2drop drop 0
+  ;
+
+  \ Commit to flash
+  commit-flash
+
+  \ Find a word in a particular dictionary, while making use of the flash
+  \ mini-dictionary
+  : find-optimized-wid ( b-addr bytes mask wid -- addr|0 )
+    compiling-to-flash? if
+      find-flash-mini-dict
+    else
+      2over 2over ram-latest swap find-dict ?dup if
+	nip nip nip nip
+      else
+	find-flash-mini-dict
+      then
+    then
+  ;
+
+  \ Commit to flash
+  commit-flash
+
+  \ Find a word using the flash mini-dictionary for optimization
+  : find-optimized ( b-addr bytes mask -- addr|0 )
+    flash-mini-dict-end @ -1 <> if
+      order-count @ 1 lshift order + order ?do
+	3dup i h@ find-optimized-wid ?dup if
+	  nip nip nip unloop exit
+	then
+      2 +loop
+      drop 2drop 0
+    else
+      do-find
+    then
+  ;
+
+[then]
+
+\ Commit to flash
+commit-flash
+
 \ Set forth
 forth-module set-current
 
@@ -2167,6 +2290,12 @@ forth-module set-current
   0 flush-console-hook !
   false flash-dict-warned !
   ['] do-flash-validate-dict validate-dict-hook !
+  [ flash-mini-dict-size ] [if]
+    flash-mini-dict flash-mini-dict-size + flash-mini-dict-end !
+    init-flash-mini-dict
+    ['] add-flash-mini-dict finalize-hook !
+    ['] find-optimized find-hook !
+  [then]
 ;
 
 \ Finish compressing the code
