@@ -152,6 +152,15 @@
 	@@ The wordlist count
 	allot order_count, 4
 
+	@@ The find hook
+	allot find_hook, 4
+
+	@@ The finalize hook
+	allot finalize_hook, 4
+	
 	@@ The wordlist order
 	allot order, 2 * max_order_size
+	
+	@@ The flash mini-dictionary
+	allot flash_mini_dict, flash_mini_dict_size
 	

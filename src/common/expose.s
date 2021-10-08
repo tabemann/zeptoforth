@@ -305,6 +305,22 @@ _validate_dict_hook:
 	bx lr
 	end_inlined
 
+	@@ The find hook
+	define_word "find-hook", visible_flag
+_find_hook:
+	push_tos
+	ldr tos, =find_hook
+	bx lr
+	end_inlined
+
+	@@ The finalize hook
+	define_word "finalize-hook", visible_flag
+_finalize_hook:
+	push_tos
+	ldr tos, =finalize_hook
+	bx lr
+	end_inlined
+
 	@@ The vector table address
 	define_word "vector-table", visible_flag
 _vector_table:
@@ -318,6 +334,22 @@ _vector_table:
 _vector_count:
 	push_tos
 	ldr tos, =vector_count
+	bx lr
+	end_inlined
+
+	@@ The flash mini-dictionary base address
+	define_internal_word "flash-mini-dict", visible_flag
+_flash_mini_dict:
+	push_tos
+	ldr tos, =flash_mini_dict
+	bx lr
+	end_inlined
+
+	@@ The flash mini-dictionary size
+	define_internal_word "flash-mini-dict-size", visible_flag
+_flash_mini_dict_size:
+	push_tos
+	ldr tos, =flash_mini_dict_size
 	bx lr
 	end_inlined
 	

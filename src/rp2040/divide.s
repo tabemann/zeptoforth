@@ -61,7 +61,7 @@ _umod:	push {lr}
 	define_word "u/mod", visible_flag
 _udivmod:
 	ldr r0, =SIO_BASE
-	cpsid i
+@	cpsid i
 @	dmb
 @	dsb
 @	isb
@@ -88,7 +88,7 @@ _udivmod:
 @	dmb
 @	dsb
 @	isb
-	cpsie i
+@	cpsie i
 	bx lr
 	end_inlined
 
@@ -96,7 +96,7 @@ _udivmod:
 	define_word "/mod", visible_flag
 _divmod:
 	ldr r0, =SIO_BASE
-	cpsid i
+@	cpsid i
 @	dmb
 @	dsb
 @	isb
@@ -123,7 +123,7 @@ _divmod:
 @	dmb
 @	dsb
 @	isb
-	cpsie i
+@	cpsie i
 	bx lr
 	end_inlined
 
