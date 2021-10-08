@@ -329,8 +329,9 @@ _find_in_wordlist:
 	
 	@@ Find a word in the dictionary according to the word order list
 	@@ ( addr bytes mask -- addr|0 )
-	define_word "find", visible_flag
-_find:  push {lr}
+	define_word "do-find", visible_flag
+_do_find:
+	push {lr}
 	ldr r0, =order_count
 	ldr r0, [r0]
 	ldr r1, =order
@@ -354,6 +355,28 @@ _find:  push {lr}
 	movs tos, #0
 	pop {pc}
 3:	adds dp, #12
+	pop {pc}
+
+	@@ Invoke the find hook
+	@@ ( b-addr bytes mask -- addr|0 )
+	define_word "find", visible_flag
+_find:	ldr r0, =find_hook
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 1f
+	mov pc, r0
+1:	push_tos
+	ldr tos, =_hook_needed
+	bl _raise
+	bx lr
+	end_inlined
+
+	@@ Hook needed exception handler
+	define_word "x-hook-needed", visible_flag
+_hook_needed:
+	push {lr}
+	string_ln " hook needed"
+	bl _type
 	pop {pc}
 	
 	@@ Find a word in a specific dictionary in any wordlist in order of
@@ -618,7 +641,8 @@ _outer:	push {lr}
 	bl _to_xt
 	bl _asm_call
 	b 1b
-5:	ldr tos, =_not_compiling
+5:	push_tos
+	ldr tos, =_not_compiling
 	bl _raise
 	b 1b
 7:	bl _to_xt
@@ -912,7 +936,7 @@ _do_failed_parse:
 	end_inlined
 
 	@@ Failed parse exception
-	define_word "failed-parse", visible_flag
+	define_word "x-failed-parse", visible_flag
 _failed_parse:
 	push {lr}
 	pop {pc}
@@ -1145,7 +1169,8 @@ _colon:	push {lr}
 	movs r1, #visible_flag
 	str r1, [r0]
 	pop {pc}
-1:	ldr tos, =_token_expected
+1:	push_tos
+	ldr tos, =_token_expected
 	bl _raise
 	pop {pc}
 	end_inlined
@@ -1216,7 +1241,8 @@ _constant_4:
 	bl _asm_literal
 	bl _asm_end
 	pop {pc}
-3:	ldr tos, =_token_expected
+3:	push_tos
+	ldr tos, =_token_expected
 	bl _raise
 	pop {pc}
 	end_inlined
@@ -1278,7 +1304,8 @@ _constant_8:
 	bl _asm_literal
 	bl _asm_end
 	pop {pc}
-1:	ldr tos, =_token_expected
+1:	push_tos
+	ldr tos, =_token_expected
 	bl _raise
 	pop {pc}
 	end_inlined
@@ -1305,13 +1332,14 @@ _constant_with_name_8:
 	bl _asm_literal
 	bl _asm_end
 	pop {pc}
-1:	ldr tos, =_token_expected
+1:	push_tos
+	ldr tos, =_token_expected
 	bl _raise
 	pop {pc}
 	end_inlined
 
 	@@ Token expected exception handler
-	define_word "token-expected", visible_flag
+	define_word "x-token-expected", visible_flag
 _token_expected:
 	push {lr}
 	string_ln " token expected"
@@ -1320,7 +1348,7 @@ _token_expected:
 	end_inlined
 
 	@@ We are not currently compiling
-	define_word "not-compiling", visible_flag
+	define_word "x-not-compiling", visible_flag
 _not_compiling:
 	push {lr}
 	string_ln " not compiling"
@@ -1329,7 +1357,7 @@ _not_compiling:
 	end_inlined
 
 	@@ We are currently compiling to flash
-	define_word "compile-to-ram-only", visible_flag
+	define_word "x-compile-to-ram-only", visible_flag
 _compile_to_ram_only:
 	push {lr}
 	string_ln " compile to ram only"

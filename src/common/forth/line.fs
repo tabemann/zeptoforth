@@ -55,6 +55,7 @@ begin-import-module-once line-internal-module
     field: line-history-first
     field: line-history-current
     field: line-flags
+    field: line-edit-deferred
     history-block-size history-block-count heap-size +field line-history-heap
   end-structure
   
@@ -69,31 +70,8 @@ begin-import-module-once line-internal-module
   $05 constant ctrl-e
   $06 constant ctrl-f
 
-  \ Deferred line editing handler
-  defer deferred-line-edit
-  
   commit-flash
   
-  \ Initialize line editing for the current task
-  : init-line ( index-ptr count-ptr buffer-ptr buffer-size -- )
-    4 align, here line-size allot
-    swap 255 min swap tuck line-buffer-size !
-    tuck line-buffer-ptr !
-    tuck line-count-ptr !
-    tuck line-index-ptr !
-    0 over line-start-row h!
-    0 over line-start-column h!
-    0 over line-terminal-rows h!
-    0 over line-terminal-columns h!
-    0 over line-offset h!
-    0 over line-count h!
-    0 over line-history-first !
-    0 over line-history-current !
-    0 over line-flags !
-    history-block-size history-block-count 2 pick line-history-heap init-heap
-    line !
-  ;
-
   \ Get next history item
   : history-next ( history -- next-history ) @ ;
 
@@ -180,9 +158,6 @@ begin-import-module-once line-internal-module
     2dup cell+ c!
     5 + swap move
   ;
-
-  \ Initialize for refill
-  : init-line-refill ( -- ) >in input# input input-size init-line ;
 
   \ Get whether a byte is the start of a unicode code point greater than 127
   : unicode-start? ( b -- flag ) $C0 and $C0 = ;
@@ -589,7 +564,7 @@ begin-import-module-once line-internal-module
       xoff
     else
       cr ." leaving upload mode"
-      ['] deferred-line-edit refill-hook !
+      line @ line-edit-deferred @ refill-hook !
       line-upload-mode line @ line-flags bic!
     then
   ;
@@ -680,6 +655,30 @@ begin-import-module-once line-internal-module
     xoff
   ;
 
+  \ Initialize line editing for the current task
+  : init-line ( index-ptr count-ptr buffer-ptr buffer-size -- )
+    4 align, here line-size allot
+    swap 255 min swap tuck line-buffer-size !
+    tuck line-buffer-ptr !
+    tuck line-count-ptr !
+    tuck line-index-ptr !
+    0 over line-start-row h!
+    0 over line-start-column h!
+    0 over line-terminal-rows h!
+    0 over line-terminal-columns h!
+    0 over line-offset h!
+    0 over line-count h!
+    0 over line-history-first !
+    0 over line-history-current !
+    0 over line-flags !
+    ['] line-edit over line-edit-deferred !
+    history-block-size history-block-count 2 pick line-history-heap init-heap
+    line !
+  ;
+  
+  \ Initialize for refill
+  : init-line-refill ( -- ) >in input# input input-size init-line ;
+
 end-module
 
 import internal-module
@@ -691,9 +690,6 @@ import internal-module
 ;
 
 commit-flash
-
-\ Set the deferred line edit handler
-' line-edit ' deferred-line-edit defer!
 
 \ Enable line editor
 : enable-line ( -- ) ['] line-edit refill-hook ! ;
