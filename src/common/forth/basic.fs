@@ -505,8 +505,8 @@ commit-flash
   14 bx,
   $003F h,
   visible
-  inlined
-  finalize-no-align,
+\  inlined
+  finalize,
 \  advance-here
   here 6 rot literal!
 ;
@@ -536,7 +536,7 @@ internal-module set-current
   0 bx,
   $003F h,
   visible
-  finalize-no-align,
+  finalize,
 \  advance-here
   here 6 rot literal!
 ;
