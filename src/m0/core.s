@@ -2079,8 +2079,8 @@ _init_context:
 	movs r4, r2
 	movs r5, #7
 	ands r4, r5
-	movs r5, #0
 	beq 1f
+	movs r5, #0
 	subs r2, #4
 	str r5, [r2]
 	ldr r3, =0x21000200
