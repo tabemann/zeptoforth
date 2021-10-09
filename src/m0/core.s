@@ -2075,15 +2075,15 @@ _init_context:
 	mov r3, r8
 	push {r3}
 	push {r4, r5, r7}
-	ldr r3, =0x21000000
-	movs r4, r2
+	ldr r3, =0x01000000
 	movs r5, #7
-	ands r4, r5
+	tst r2, r5
 	beq 1f
+	bics r2, r5
+	subs r2, #8
 	movs r5, #0
-	subs r2, #4
 	str r5, [r2]
-	ldr r3, =0x21000200
+	ldr r3, =0x01000200
 1:	ldr r7, [r6, #20]
 	mov r9, r7
 	movs r7, #0
