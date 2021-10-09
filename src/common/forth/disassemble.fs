@@ -21,8 +21,6 @@
 \ Compile this to flash
 compile-to-flash
 
-0 [if]
-
 begin-import-module-once disassemble-internal-module
 
   import internal-module
@@ -630,20 +628,28 @@ begin-import-module-once disassemble-internal-module
     0_3_bf reg. 4_2_bf ?dup if ." , LSL #" (udec.) then ." ]"
   ;
 
+  thumb-2 [if]
+    
   \ Parse an ADC immediate instruction
-  : p-adc-imm
-    ." ADC" 4sc.sp decode-add-imm-3 drop
-  ;
+    : p-adc-imm
+      ." ADC" 4sc.sp decode-add-imm-3 drop
+    ;
+
+  [then]
 
   \ Parse an ADC register instruction
   : p-adc-reg-1
     ." ADC" cssp. decode-and-reg-16 drop
   ;
 
-  \ Parse an ADC register instruction
-  : p-adc-reg-2
-    ." ADC" 4sc.w decode-add-reg-32 drop
-  ;
+  thumb-2 [if]
+    
+    \ Parse an ADC register instruction
+    : p-adc-reg-2
+      ." ADC" 4sc.w decode-add-reg-32 drop
+    ;
+
+  [then]
 
   \ Parse an ADD immediate instruction
   : p-add-imm-1
@@ -655,15 +661,19 @@ begin-import-module-once disassemble-internal-module
     ." ADD" cssp. decode-add-imm-2 drop
   ;
 
-  \ Parse an ADD immediate instruction
-  : p-add-imm-3
-    ." ADD" 4sc.w decode-add-imm-3 drop
-  ;
+  thumb-2 [if]
+    
+    \ Parse an ADD immediate instruction
+    : p-add-imm-3
+      ." ADD" 4sc.w decode-add-imm-3 drop
+    ;
+    
+    \ Parse an ADD immediate instruction
+    : p-add-imm-4
+      ." ADDW" c.sp decode-add-imm-4 drop
+    ;
 
-  \ Parse an ADD immediate instruction
-  : p-add-imm-4
-    ." ADDW" c.sp decode-add-imm-4 drop
-  ;
+  [then]
 
   \ Parse an ADD register instruction
   : p-add-reg-1
@@ -676,10 +686,14 @@ begin-import-module-once disassemble-internal-module
     dup 0_3_bf over 7 1 bitfield 3 lshift or reg-sep. 3_4_bf reg. drop
   ;
 
-  \ Parse an ADD register instruction
-  : p-add-reg-3
-    ." ADD" 4sc.w decode-add-reg-32 drop
-  ;
+  thumb-2 [if]
+
+    \ Parse an ADD register instruction
+    : p-add-reg-3
+      ." ADD" 4sc.w decode-add-reg-32 drop
+    ;
+
+  [then]
 
   \ \ Parse an ADD SP to immediate instruction
   \ : p-add-sp-imm
@@ -728,54 +742,70 @@ begin-import-module-once disassemble-internal-module
     0_8_bf 2 lshift val. drop
   ;
 
-  \ Parse an ADR instruction
-  : p-adr-2
-    ." SUB" c.sp dup 8_4_bf reg. ." , PC, #"
-    dup 0_8_bf swap 12_3_bf 8 lshift or swap 10_1_bf 12 lshift or val. drop
-  ;
+  thumb-2 [if]  
 
-  \ Parse an ADR instruction
-  : p-adr-3
-    ." ADD" c.sp dup 8_4_bf reg. ." , PC, #"
-    dup 0_8_bf swap 12_3_bf 8 lshift or swap 10_1_bf 12 lshift or val. drop
-  ;
+    \ Parse an ADR instruction
+    : p-adr-2
+      ." SUB" c.sp dup 8_4_bf reg. ." , PC, #"
+      dup 0_8_bf swap 12_3_bf 8 lshift or swap 10_1_bf 12 lshift or val. drop
+    ;
+    
+    \ Parse an ADR instruction
+    : p-adr-3
+      ." ADD" c.sp dup 8_4_bf reg. ." , PC, #"
+      dup 0_8_bf swap 12_3_bf 8 lshift or swap 10_1_bf 12 lshift or val. drop
+    ;
+    
+    \ Parse an AND immediate instruction
+    : p-and-imm
+      ." AND" 4sc.sp dup 8_4_bf reg-sep.
+      over 0_4_bf reg-sep-imm. dup 0_8_bf swap 12_3_bf 8 lshift or
+      swap 10_1_bf 12 lshift or decode-const12 drop
+    ;
 
-  \ Parse an AND immediate instruction
-  : p-and-imm
-    ." AND" 4sc.sp dup 8_4_bf reg-sep.
-    over 0_4_bf reg-sep-imm. dup 0_8_bf swap 12_3_bf 8 lshift or
-    swap 10_1_bf 12 lshift or decode-const12 drop
-  ;
+  [then]
 
   \ Parse an AND register instruction
   : p-and-reg-1
     ." AND" cssp. decode-and-reg-16 drop
   ;
 
-  \ Parse an AND register instruction
-  : p-and-reg-2
-    ." AND" 4sc.w decode-and-reg-32 drop
-  ;
+  thumb-2 [if]
+    
+    \ Parse an AND register instruction
+    : p-and-reg-2
+      ." AND" 4sc.w decode-and-reg-32 drop
+    ;
+
+  [then]
 
   \ Parse an ASR immediate instruction
   : p-asr-imm-1
     ." ASR" cssp. decode-asr-imm-16 drop
   ;
   
-  \ Parse an ASR immediate instruction
-  : p-asr-imm-2
-    ." ASR" swap 4s?. swap cond. .w decode-asr-imm-32 drop
-  ;
+  thumb-2 [if]
+    
+    \ Parse an ASR immediate instruction
+    : p-asr-imm-2
+      ." ASR" swap 4s?. swap cond. .w decode-asr-imm-32 drop
+    ;
+
+  [then]
 
   \ Parse an ASR register instruction
   : p-asr-reg-1
     ." ASR" cssp. decode-and-reg-16 drop
   ;
 
-  \ Parse an ASR register instruction
-  : p-asr-reg-2
-    ." ASR" 4sc.w decode-asr-reg-32 drop
-  ;
+  thumb-2 [if]
+    
+    \ Parse an ASR register instruction
+    : p-asr-reg-2
+      ." ASR" 4sc.w decode-asr-reg-32 drop
+    ;
+
+  [then]
 
   \ Parse an SVC instruction
   : p-svc
@@ -795,52 +825,61 @@ begin-import-module-once disassemble-internal-module
   : p-b-2
     ." B" csp. 0 11 bitfield 1 lshift 12 rel.
   ;
+  
+  thumb-2 [if]
+    
+    \ Parse a B instruction
+    : p-b-3
+      ." B" rot drop over 6 4 bitfield cond. .w
+      dup 0 11 bitfield 2 pick 0 6 bitfield 11 lshift or
+      over 13 1 bitfield 17 lshift or swap 11 1 bitfield 18 lshift or
+      swap 10_1_bf 19 lshift or 1 lshift 21 rel.
+    ;
+    
+    \ Parse a B instruction
+    : p-b-4
+      ." B" c.w
+      dup 0 11 bitfield 2 pick 0 10 bitfield 11 lshift or
+      over 11 1 bitfield 3 pick 10_1_bf xor not 1 and 21 lshift or
+      swap 13 1 bitfield 2 pick 10_1_bf xor not 1 and 22 lshift or
+      swap 10_1_bf 23 lshift or 1 lshift 25 rel.
+    ;
+    
+    
+    \ Parse a BFC instruction
+    : p-bfc
+      ." BFC" c.sp nip 8_4_bf reg-sep-imm.
+      dup 6_2_bf over 12_3_bf 2 lshift or dup val. sep-imm.
+      over 0 5 bitfield 1+ swap - val. drop
+    ;
+    
+    \ Parse a BFI instruction
+    : p-bfi
+      ." BFI" c.sp dup 8_4_bf reg-sep. swap 0_4_bf reg-sep-imm.
+      dup 6_2_bf over 12_3_bf 2 lshift or dup val. sep-imm.
+      over 0 5 bitfield 1+ swap - val. drop
+    ;
 
-  \ Parse a B instruction
-  : p-b-3
-    ." B" rot drop over 6 4 bitfield cond. .w
-    dup 0 11 bitfield 2 pick 0 6 bitfield 11 lshift or
-    over 13 1 bitfield 17 lshift or swap 11 1 bitfield 18 lshift or
-    swap 10_1_bf 19 lshift or 1 lshift 21 rel.
-  ;
+    \ Parse a BIC immediate instruction
+    : p-bic-imm
+      ." BIC" over 4s?. space decode-add-imm-3 drop
+    ;
 
-  \ Parse a B instruction
-  : p-b-4
-    ." B" c.w
-    dup 0 11 bitfield 2 pick 0 10 bitfield 11 lshift or
-    over 11 1 bitfield 3 pick 10_1_bf xor not 1 and 21 lshift or
-    swap 13 1 bitfield 2 pick 10_1_bf xor not 1 and 22 lshift or
-    swap 10_1_bf 23 lshift or 1 lshift 25 rel.
-  ;
-
-  \ Parse a BFC instruction
-  : p-bfc
-    ." BFC" c.sp nip 8_4_bf reg-sep-imm.
-    dup 6_2_bf over 12_3_bf 2 lshift or dup val. sep-imm.
-    over 0 5 bitfield 1+ swap - val. drop
-  ;
-
-  \ Parse a BFI instruction
-  : p-bfi
-    ." BFI" c.sp dup 8_4_bf reg-sep. swap 0_4_bf reg-sep-imm.
-    dup 6_2_bf over 12_3_bf 2 lshift or dup val. sep-imm.
-    over 0 5 bitfield 1+ swap - val. drop
-  ;
-
-  \ Parse a BIC immediate instruction
-  : p-bic-imm
-    ." BIC" over 4s?. space decode-add-imm-3 drop
-  ;
+  [then]
 
   \ Parse a BIC register instruction
   : p-bic-reg-1
     ." BIC" cssp. decode-and-reg-16 drop
   ;
 
-  \ Parse a BIC register instruction
-  : p-bic-reg-2
-    ." BIC" 4sc.w decode-add-reg-32 drop
-  ;
+  thumb-2 [if]
+    
+    \ Parse a BIC register instruction
+    : p-bic-reg-2
+      ." BIC" 4sc.w decode-add-reg-32 drop
+    ;
+
+  [then]
 
   \ Parse a BKPT instruction
   : p-bkpt
@@ -873,30 +912,42 @@ begin-import-module-once disassemble-internal-module
   \ Parse a CBZ instruction
   : p-cbz ." CBZ" decode-cbz ;
 
-  \ Parse a CMN immediate instruction
-  : p-cmn-imm
-    ." CMN" csp. decode-cmn-imm-32 drop
-  ;
+  thumb-2 [if]
+    
+    \ Parse a CMN immediate instruction
+    : p-cmn-imm
+      ." CMN" csp. decode-cmn-imm-32 drop
+    ;
+
+  [then]
 
   \ Parse a CMN register instruction
   : p-cmn-reg-1
     ." CMN" csp. decode-and-reg-16 drop
   ;
 
-  \ Parse a CMN register instruction
-  : p-cmn-reg-2
-    ." CMN" swap cond. .w decode-cmn-reg-32
-  ;
+  thumb-2 [if]
+    
+    \ Parse a CMN register instruction
+    : p-cmn-reg-2
+      ." CMN" swap cond. .w decode-cmn-reg-32
+    ;
+
+  [then]
 
   \ Parse an CMP immediate instruction
   : p-cmp-imm-1
     ." CMP " nip decode-add-imm-2 drop
   ;
 
-  \ Parse a CMP immediate instruction
-  : p-cmp-imm-2
-    ." CMP" c.w decode-cmn-imm-32 drop
-  ;
+  thumb-2 [if]
+    
+    \ Parse a CMP immediate instruction
+    : p-cmp-imm-2
+      ." CMP" c.w decode-cmn-imm-32 drop
+    ;
+
+  [then]
 
   \ Parse a CMP register instruction
   : p-cmp-reg-1
@@ -909,10 +960,14 @@ begin-import-module-once disassemble-internal-module
     3_4_bf reg. drop
   ;
 
-  \ Parse a CMP register instruction
-  : p-cmp-reg-3
-    ." CMP" c.w decode-cmn-reg-32 drop
-  ;
+  thumb-2 [if]
+    
+    \ Parse a CMP register instruction
+    : p-cmp-reg-3
+      ." CMP" c.w decode-cmn-reg-32 drop
+    ;
+
+  [then]
 
   \ Parse a CPS instruction
   : p-cps-1
@@ -922,31 +977,39 @@ begin-import-module-once disassemble-internal-module
     0 1 bitfield if [char] F emit then drop
   ;
 
-  \ Parse a DSB instruction
-  : p-dsb
-    ." DSB" nip 0_4_bf case
-      \ %1111 of endof
-      %0111 of space ." UN" endof
-      %1110 of space ." ST" endof
-      %0110 of space ." UNST" endof
-    endcase
-    drop
-  ;
+  thumb-2 [if]
+    
+    \ Parse a DSB instruction
+    : p-dsb
+      ." DSB" nip 0_4_bf case
+	\ %1111 of endof
+	%0111 of space ." UN" endof
+	%1110 of space ." ST" endof
+	%0110 of space ." UNST" endof
+      endcase
+      drop
+    ;
 
-  \ Parse an EOR immediate instruction
-  : p-eor-imm
-    ." EOR" rot drop over 4s?. decode-add-imm-3 drop
-  ;
+    \ Parse an EOR immediate instruction
+    : p-eor-imm
+      ." EOR" rot drop over 4s?. decode-add-imm-3 drop
+    ;
+
+  [then]
 
   \ Parse an EOR register instruction
   : p-eor-reg-1
     ." EOR" cssp. decode-and-reg-16 drop
   ;
 
-  \ Parse an EOR register instruction
-  : p-eor-reg-2
-    ." EOR" 4sc.w decode-add-reg-32 drop
-  ;
+  thumb-2 [if]
+    
+    \ Parse an EOR register instruction
+    : p-eor-reg-2
+      ." EOR" 4sc.w decode-add-reg-32 drop
+    ;
+
+  [then]
 
   \ Parse an LDMIA instruction
   : p-ldmia-1
@@ -964,15 +1027,19 @@ begin-import-module-once disassemble-internal-module
     ." LDR" size. csp. decode-ldr-imm-2 drop
   ;
 
-  \ Parse an LDR immediate instruction
-  : p-ldr-imm-3
-    ." LDR" size. c.w decode-ldr-imm-3 drop
-  ;
+  thumb-2 [if]
+    
+    \ Parse an LDR immediate instruction
+    : p-ldr-imm-3
+      ." LDR" size. c.w decode-ldr-imm-3 drop
+    ;
+    
+    \ Parse an LDR immediate instruction
+    : p-ldr-imm-4
+      ." LDR" size. c.sp decode-ldr-imm-4 drop
+    ;
 
-  \ Parse an LDR immediate instruction
-  : p-ldr-imm-4
-    ." LDR" size. c.sp decode-ldr-imm-4 drop
-  ;
+  [then]
 
   \ Parse an LDR literal instruction
   : p-ldr-lit-1
@@ -980,62 +1047,86 @@ begin-import-module-once disassemble-internal-module
     for-gas @ if ." [PC, #" (udec.) ." ]" drop else nrel4. then
   ;
 
-  \ Parse an LDR literal instruction
-  : p-ldr-lit-2
-    ." LDR" size. c.w dup dup 12_4_bf reg-sep.
-    0_12_bf swap 7 1 bitfield if negate then
-    for-gas @ if ." [PC, #" (dec.) ." ]" drop else nrel4. then
-  ;
+  thumb-2 [if]
+    
+    \ Parse an LDR literal instruction
+    : p-ldr-lit-2
+      ." LDR" size. c.w dup dup 12_4_bf reg-sep.
+      0_12_bf swap 7 1 bitfield if negate then
+      for-gas @ if ." [PC, #" (dec.) ." ]" drop else nrel4. then
+    ;
 
+  [then]
+  
   \ Parse an LDR register instruction
   : p-ldr-reg-1
     ." LDR" size. csp. decode-ldr-reg-1 drop
   ;
 
-  \ Parse an LDR register instruction
-  : p-ldr-reg-2
-    ." LDR" size. c.w decode-ldr-reg-2 drop
-  ;
+  thumb-2 [if]
+    
+    \ Parse an LDR register instruction
+    : p-ldr-reg-2
+      ." LDR" size. c.w decode-ldr-reg-2 drop
+    ;
+
+  [then]
 
   \ Parse an LSL immediate instruction
   : p-lsl-imm-1
     ." LSL" cssp. decode-asr-imm-16 drop
   ;
 
-  \ Parse an LSL immediate instruction
-  : p-lsl-imm-2
-    ." LSL" 4sc.w decode-asr-imm-32 drop
-  ;
+  thumb-2 [if]
+    
+    \ Parse an LSL immediate instruction
+    : p-lsl-imm-2
+      ." LSL" 4sc.w decode-asr-imm-32 drop
+    ;
+
+  [then]
 
   \ Parse an LSL register instruction
   : p-lsl-reg-1
     ." LSL" cssp. decode-and-reg-16 drop
   ;
 
-  \ Parse an LSL register instruction
-  : p-lsl-reg-2
-    ." LSL" 4sc.w decode-asr-reg-32 drop
-  ;
+  thumb-2 [if]
+    
+    \ Parse an LSL register instruction
+    : p-lsl-reg-2
+      ." LSL" 4sc.w decode-asr-reg-32 drop
+    ;
 
+  [then]
+  
   \ Parse an LSR immediate instruction
   : p-lsr-imm-1
     ." LSR" cssp. decode-asr-imm-16 drop
   ;
 
-  \ Parse an LSR immediate instruction
-  : p-lsr-imm-2
-    ." LSR" 4sc.w decode-asr-imm-32 drop
-  ;
+  thumb-2 [if]
+    
+    \ Parse an LSR immediate instruction
+    : p-lsr-imm-2
+      ." LSR" 4sc.w decode-asr-imm-32 drop
+    ;
+
+  [then]
 
   \ Parse an LSR register instruction
   : p-lsr-reg-1
     ." LSR" cssp. decode-and-reg-16 drop
   ;
 
-  \ Parse an LSR register instruction
-  : p-lsr-reg-2
-    ." LSR" 4sc.w decode-asr-reg-32 drop
-  ;
+  thumb-2 [if]
+    
+    \ Parse an LSR register instruction
+    : p-lsr-reg-2
+      ." LSR" 4sc.w decode-asr-reg-32 drop
+    ;
+
+  [then]
 
   \ Parse an MLS instruction
   : p-mls
@@ -1048,17 +1139,21 @@ begin-import-module-once disassemble-internal-module
     ." MOV" cssp. decode-add-imm-2 drop
   ;
 
-  \ Parse a MOV immediate instruction
-  : p-mov-imm-2
-    ." MOV" 4sc.w dup 8_4_bf reg-sep-imm.
-    dup 0_8_bf swap 12_3_bf 8 lshift or
-    swap 10_1_bf 11 lshift or decode-const12 drop
-  ;
+  thumb-2 [if]
+    
+    \ Parse a MOV immediate instruction
+    : p-mov-imm-2
+      ." MOV" 4sc.w dup 8_4_bf reg-sep-imm.
+      dup 0_8_bf swap 12_3_bf 8 lshift or
+      swap 10_1_bf 11 lshift or decode-const12 drop
+    ;
+    
+    \ Parse a MOV immediate instruction
+    : p-mov-imm-3
+      ." MOVW" c.sp decode-mov-imm-32 drop
+    ;
 
-  \ Parse a MOV immediate instruction
-  : p-mov-imm-3
-    ." MOVW" c.sp decode-mov-imm-32 drop
-  ;
+  [then]
 
   \ Parse a MOV register instruction
   : p-mov-reg-1
@@ -1070,26 +1165,34 @@ begin-import-module-once disassemble-internal-module
     ." MOVS" space nip decode-and-reg-16 drop
   ;
 
-  \ Parse a MOV register instruction
-  : p-mov-reg-3
-    ." MOV" 4sc.w nip dup 8_4_bf reg-sep. 0_4_bf reg. drop
-  ;
+  thumb-2 [if]
+    
+    \ Parse a MOV register instruction
+    : p-mov-reg-3
+      ." MOV" 4sc.w nip dup 8_4_bf reg-sep. 0_4_bf reg. drop
+    ;
 
-  \ Parse a MOVT instruction
-  : p-movt
-    ." MOVT" c.sp decode-mov-imm-32 drop
-  ;
+    \ Parse a MOVT instruction
+    : p-movt
+      ." MOVT" c.sp decode-mov-imm-32 drop
+    ;
 
+  [then]
+  
   \ Parse a MUL instruction
   : p-mul-1
     ." MUL" cssp. decode-and-reg-16 drop
   ;
+  
+  thumb-2 [if]
+    
+    \ Parse a MUL instruction
+    : p-mul-2
+      ." MUL" over 4s?. space decode-asr-reg-32 drop
+    ;
 
-  \ Parse a MUL instruction
-  : p-mul-2
-    ." MUL" over 4s?. space decode-asr-reg-32 drop
-  ;
-
+  [then]
+    
   \ Parse an MVN register instruction
   : p-mvn-reg-1
     ." MVN" cssp. decode-and-reg-16 drop
@@ -1100,70 +1203,96 @@ begin-import-module-once disassemble-internal-module
     ." NOP" drop cond. drop
   ;
 
-  \ Parse an ORR immediate instruction
-  : p-orr-imm
-    ." ORR" 4sc.sp decode-add-imm-3 drop
-  ;
+  thumb-2 [if]
+    
+    \ Parse an ORR immediate instruction
+    : p-orr-imm
+      ." ORR" 4sc.sp decode-add-imm-3 drop
+    ;
+
+  [then]
 
   \ Parse an ORR register instruction
   : p-orr-reg-1
     ." ORR" cssp. decode-and-reg-16 drop
   ;
 
-  \ Parse an ORR register instruction
-  : p-orr-reg-2
-    ." ORR" 4sc.w decode-and-reg-32 drop
-  ;
+  thumb-2 [if]
+    
+    \ Parse an ORR register instruction
+    : p-orr-reg-2
+      ." ORR" 4sc.w decode-and-reg-32 drop
+    ;
+
+  [then]
 
   \ Parse a POP instruction
   : p-pop-1
     ." POP" csp. dup 0_8_bf swap 8 1 bitfield 15 lshift or 16 reglist. drop
   ;
 
-  \ Parse a POP instruction
-  : p-pop-2
-    ." POP" c.w nip dup 0_12_bf swap 14 2 bitfield 14 lshift or 16 reglist. drop
-  ;
+  thumb-2 [if]
+    
+    \ Parse a POP instruction
+    : p-pop-2
+      ." POP" c.w nip dup 0_12_bf swap 14 2 bitfield 14 lshift or 16 reglist.
+      drop
+    ;
+
+  [then]
 
   \ Parse a PUSH instruction
   : p-push-1
     ." PUSH" csp. dup 0_8_bf swap 8 1 bitfield 14 lshift or 16 reglist. drop
   ;
 
-  \ Parse a PUSH instruction
-  : p-push-2
-    ." PUSH" c.w nip dup 0_12_bf swap 14 1 bitfield 14 lshift or 16 reglist. drop
-  ;
+  thumb-2 [if]  
+
+    \ Parse a PUSH instruction
+    : p-push-2
+      ." PUSH" c.w nip dup 0_12_bf swap 14 1 bitfield 14 lshift or 16 reglist.
+      drop
+    ;
+
+  [then]
 
   \ Parse an RSB immediate instruction
   : p-rsb-imm-1
     ." RSB " cssp. decode-and-reg-16 ." , #0" drop
   ;
 
-  \ Parse an SBC immediate instruction
-  : p-sbc-imm
-    ." SBC" 4sc.sp decode-add-imm-3 drop
-  ;
+  thumb-2 [if]
+    
+    \ Parse an SBC immediate instruction
+    : p-sbc-imm
+      ." SBC" 4sc.sp decode-add-imm-3 drop
+    ;
+
+  [then]
 
   \ Parse an SBC register instruction
   : p-sbc-reg-1
     ." SBC" cssp. decode-and-reg-16 drop
   ;
 
-  \ Parse an SBC register instruction
-  : p-sbc-reg-2
-    ." SBC" 4sc.w decode-and-reg-32 drop
-  ;
+  thumb-2 [if]
+    
+    \ Parse an SBC register instruction
+    : p-sbc-reg-2
+      ." SBC" 4sc.w decode-and-reg-32 drop
+    ;
 
-  \ Parse an SDIV register instruction
-  : p-sdiv
-    ." SDIV" c.sp decode-asr-reg-32 drop
-  ;
+    \ Parse an SDIV register instruction
+    : p-sdiv
+      ." SDIV" c.sp decode-asr-reg-32 drop
+    ;
+    
+    \ Parse an SMULL instruction
+    : p-smull
+      ." SMULL" c.sp decode-smull drop
+    ;
 
-  \ Parse an SMULL instruction
-  : p-smull
-    ." SMULL" c.sp decode-smull drop
-  ;
+  [then]
 
   \ Parse an STR immediate instruction
   : p-str-imm-1
@@ -1175,26 +1304,34 @@ begin-import-module-once disassemble-internal-module
     ." STR" size. csp. decode-ldr-imm-2 drop
   ;
 
-  \ Parse an STR immediate instruction
-  : p-str-imm-3
-    ." STR" size. c.w decode-ldr-imm-3 drop
-  ;
+  thumb-2 [if]
 
-  \ Parse an STR immediate instruction
-  : p-str-imm-4
-    ." STR" size. c.sp decode-ldr-imm-4 drop
-  ;
+    \ Parse an STR immediate instruction
+    : p-str-imm-3
+      ." STR" size. c.w decode-ldr-imm-3 drop
+    ;
+    
+    \ Parse an STR immediate instruction
+    : p-str-imm-4
+      ." STR" size. c.sp decode-ldr-imm-4 drop
+    ;
+
+  [then]
 
   \ Parse an STR register instruction
   : p-str-reg-1
     ." STR" size. csp. decode-ldr-reg-1 drop
   ;
 
-  \ Parse an STR register instruction
-  : p-str-reg-2
-    ." STR" size. c.w decode-ldr-reg-2 drop
-  ;
+  thumb-2 [if]
 
+    \ Parse an STR register instruction
+    : p-str-reg-2
+      ." STR" size. c.w decode-ldr-reg-2 drop
+    ;
+
+  [then]
+    
   \ Parse an SUB immediate instruction
   : p-sub-imm-1
     ." SUB" cssp. decode-add-imm-1 drop
@@ -1205,50 +1342,62 @@ begin-import-module-once disassemble-internal-module
     ." SUB" cssp. decode-add-imm-2 drop
   ;
 
-  \ Parse an SUB immediate instruction
-  : p-sub-imm-3
-    ." SUB" 4sc.w decode-add-imm-3 drop
-  ;
+  thumb-2 [if]
 
-  \ Parse an SUB immediate instruction
-  : p-sub-imm-4
-    ." SUBW" c.sp decode-add-imm-4 drop
-  ;
+    \ Parse an SUB immediate instruction
+    : p-sub-imm-3
+      ." SUB" 4sc.w decode-add-imm-3 drop
+    ;
+    
+    \ Parse an SUB immediate instruction
+    : p-sub-imm-4
+      ." SUBW" c.sp decode-add-imm-4 drop
+    ;
+
+  [then]
 
   \ Parse an SUB register instruction
   : p-sub-reg-1
     ." SUB" cssp. decode-add-reg-16 drop
   ;
 
-  \ Parse an SUB register instruction
-  : p-sub-reg-2
-    ." SUB" 4sc.w decode-add-reg-32 drop
-  ;
+  thumb-2 [if]
 
-  \ Parse a TST immediate instruction
-  : p-tst-imm
-    ." TST" csp. decode-cmn-imm-32 drop
-  ;
+    \ Parse an SUB register instruction
+    : p-sub-reg-2
+      ." SUB" 4sc.w decode-add-reg-32 drop
+    ;
+    
+    \ Parse a TST immediate instruction
+    : p-tst-imm
+      ." TST" csp. decode-cmn-imm-32 drop
+    ;
+
+  [then]
 
   \ Parse a TST register instruction
   : p-tst-reg-1
     ." TST" csp. decode-and-reg-16 drop
   ;
 
-  \ Parse a CMP register instruction
-  : p-tst-reg-2
-    ." CMP" c.w decode-cmn-reg-32 drop
-  ;
+  thumb-2 [if]
 
-  \ Parse an UDIV register instruction
-  : p-udiv
-    ." UDIV" c.sp decode-asr-reg-32 drop
-  ;
+    \ Parse a CMP register instruction
+    : p-tst-reg-2
+      ." CMP" c.w decode-cmn-reg-32 drop
+    ;
+    
+    \ Parse an UDIV register instruction
+    : p-udiv
+      ." UDIV" c.sp decode-asr-reg-32 drop
+    ;
+    
+    \ Parse an UMULL instruction
+    : p-umull
+      ." UMULL" c.sp decode-smull drop
+    ;
 
-  \ Parse an UMULL instruction
-  : p-umull
-    ." UMULL" c.sp decode-smull drop
-  ;
+  [then]
 
   \ Parse an WFI instruction
   : p-wfi-1
@@ -1260,40 +1409,121 @@ begin-import-module-once disassemble-internal-module
 
   0 ' p-ldr-imm-1 w-size p-ldr-imm-1-w
   0 ' p-ldr-imm-2 w-size p-ldr-imm-2-w
-  0 ' p-ldr-imm-3 w-size p-ldr-imm-3-w
-  0 ' p-ldr-imm-4 w-size p-ldr-imm-4-w
+
+  thumb-2 [if]
+  
+    0 ' p-ldr-imm-3 w-size p-ldr-imm-3-w
+    0 ' p-ldr-imm-4 w-size p-ldr-imm-4-w
+
+  [then]
+  
   0 ' p-ldr-lit-1 w-size p-ldr-lit-1-w
-  0 ' p-ldr-lit-2 w-size p-ldr-lit-2-w
+
+  thumb-2 [if]
+
+    0 ' p-ldr-lit-2 w-size p-ldr-lit-2-w
+
+  [then]
+  
   0 ' p-ldr-reg-1 w-size p-ldr-reg-1-w
-  0 ' p-ldr-reg-2 w-size p-ldr-reg-2-w
+
+  thumb-2 [if]
+
+    0 ' p-ldr-reg-2 w-size p-ldr-reg-2-w
+
+  [then]
+  
   char B ' p-ldr-imm-1 w-size p-ldr-imm-1-b
-  char B ' p-ldr-imm-3 w-size p-ldr-imm-3-b
-  char B ' p-ldr-imm-4 w-size p-ldr-imm-4-b
-  char B ' p-ldr-lit-2 w-size p-ldr-lit-2-b
+
+  thumb-2 [if]
+
+    char B ' p-ldr-imm-3 w-size p-ldr-imm-3-b
+    char B ' p-ldr-imm-4 w-size p-ldr-imm-4-b
+  [then]
+  
+  thumb-2 [if]
+    
+    char B ' p-ldr-lit-2 w-size p-ldr-lit-2-b
+
+  [then]
+  
   char B ' p-ldr-reg-1 w-size p-ldr-reg-1-b
-  char B ' p-ldr-reg-2 w-size p-ldr-reg-2-b
+
+  thumb-2 [if]
+
+    char B ' p-ldr-reg-2 w-size p-ldr-reg-2-b
+
+  [then]
+  
   char H ' p-ldr-imm-1 w-size p-ldr-imm-1-h
-  char H ' p-ldr-imm-3 w-size p-ldr-imm-3-h
-  char H ' p-ldr-imm-4 w-size p-ldr-imm-4-h
-  char H ' p-ldr-lit-2 w-size p-ldr-lit-2-h
+
+  thumb-2 [if]
+
+    char H ' p-ldr-imm-3 w-size p-ldr-imm-3-h
+    char H ' p-ldr-imm-4 w-size p-ldr-imm-4-h
+    char H ' p-ldr-lit-2 w-size p-ldr-lit-2-h
+
+  [then]
+  
   char H ' p-ldr-reg-1 w-size p-ldr-reg-1-h
-  char H ' p-ldr-reg-2 w-size p-ldr-reg-2-h
+
+  thumb-2 [if]
+
+    char H ' p-ldr-reg-2 w-size p-ldr-reg-2-h
+
+  [then]
+  
   0 ' p-str-imm-1 w-size p-str-imm-1-w
   0 ' p-str-imm-2 w-size p-str-imm-2-w
-  0 ' p-str-imm-3 w-size p-str-imm-3-w
-  0 ' p-str-imm-4 w-size p-str-imm-4-w
+
+  thumb-2 [if]
+
+    0 ' p-str-imm-3 w-size p-str-imm-3-w
+    0 ' p-str-imm-4 w-size p-str-imm-4-w
+
+  [then]
+  
   0 ' p-str-reg-1 w-size p-str-reg-1-w
-  0 ' p-str-reg-2 w-size p-str-reg-2-w
+
+  thumb-2 [if]
+
+    0 ' p-str-reg-2 w-size p-str-reg-2-w
+
+  [then]
+  
   char B ' p-str-imm-1 w-size p-str-imm-1-b
-  char B ' p-str-imm-3 w-size p-str-imm-3-b
-  char B ' p-str-imm-4 w-size p-str-imm-4-b
+
+  thumb-2 [if]
+
+    char B ' p-str-imm-3 w-size p-str-imm-3-b
+    char B ' p-str-imm-4 w-size p-str-imm-4-b
+
+  [then]
+  
   char B ' p-str-reg-1 w-size p-str-reg-1-b
-  char B ' p-str-reg-2 w-size p-str-reg-2-b
+
+  thumb-2 [if]
+  
+    char B ' p-str-reg-2 w-size p-str-reg-2-b
+
+  [then]
+  
   char H ' p-str-imm-1 w-size p-str-imm-1-h
-  char H ' p-str-imm-3 w-size p-str-imm-3-h
-  char H ' p-str-imm-4 w-size p-str-imm-4-h
+
+  thumb-2 [if]
+  
+    char H ' p-str-imm-3 w-size p-str-imm-3-h
+    char H ' p-str-imm-4 w-size p-str-imm-4-h
+
+  [then]
+  
   char H ' p-str-reg-1 w-size p-str-reg-1-h
-  char H ' p-str-reg-2 w-size p-str-reg-2-h
+
+  thumb-2 [if]
+
+    char H ' p-str-reg-2 w-size p-str-reg-2-h
+
+  [then]
 
   \ Highest bit mask
   %1000000000000000 constant highest
@@ -1371,273 +1601,288 @@ begin-import-module-once disassemble-internal-module
 
   \ All the 32-bit ops
   create all-ops32
-  ' p-adc-imm , %1111101111100000 h, highest h, %1111000101000000 h, 0 h,
-  ' p-adc-reg-2 , %1111111111100000 h, 0 h, %1110101101000000 h, 0 h,
-  ' p-add-imm-3 , %1111101111100000 h, highest h, %1111000100000000 h, 0 h,
-  ' p-add-imm-4 , %1111101111110000 h, highest h, %1111001000000000 h, 0 h,
-  ' p-add-reg-3 , %1111111111100000 h, 0 h, %1110101100000000 h, 0 h,
-  \ ' p-add-sp-imm-3 , %1111101111101111 h, highest h, %1111000100001101 h, 0 h,
-  \ ' p-add-sp-imm-4 , %1111101111111111 h, highest h, %1111001000001101 h, 0 h,
-  \ ' p-add-sp-reg-3 , %1111111111101111 h, highest h, %1110101100001101 h, 0 h,
-  ' p-adr-2 , %1111101111111111 h, highest h, %1111001010101111 h, 0 h,
-  ' p-adr-3 , %1111101111111111 h, highest h, %1111001000001111 h, 0 h,
-  ' p-and-imm , %1111101111100000 h, highest h, %1111000000000000 h, 0 h,
-  ' p-and-reg-2 , %1111111111100000 h, 0 h, %1110101000000000 h, 0 h,
-  ' p-asr-imm-2 , %1111111111101111 h, %0000000000110000 h,
-  %1110101001001111 h, %0000000000100000 h,
-  ' p-asr-reg-2 , %1111111111100000 h, %1111000011110000 h,
-  %1111101001000000 h, %1111000000000000 h,
-  ' p-b-3 , %1111100000000000 h, %1101000000000000 h,
-  %1111000000000000 h, %1000000000000000 h,
-  ' p-b-4 , %1111100000000000 h, %1101000000000000 h,
-  %1111000000000000 h, %1001000000000000 h,
-  ' p-bfc , %1111101111111111 h, highest h, %1111001101101111 h, 0 h,
-  ' p-bfi , %1111101111110000 h, highest h, %1111001101100000 h, 0 h,
-  ' p-bic-imm , %11111000111100000 h, highest h, %1111000000100000 h, 0 h,
-  ' p-bic-reg-2 , %1111111111100000 h, 0 h, %1110101000100000 h, 0 h,
+
+  thumb-2 [if]
+    
+    ' p-adc-imm , %1111101111100000 h, highest h, %1111000101000000 h, 0 h,
+    ' p-adc-reg-2 , %1111111111100000 h, 0 h, %1110101101000000 h, 0 h,
+    ' p-add-imm-3 , %1111101111100000 h, highest h, %1111000100000000 h, 0 h,
+    ' p-add-imm-4 , %1111101111110000 h, highest h, %1111001000000000 h, 0 h,
+    ' p-add-reg-3 , %1111111111100000 h, 0 h, %1110101100000000 h, 0 h,
+    \ ' p-add-sp-imm-3 , %1111101111101111 h, highest h, %1111000100001101 h, 0 h,
+    \ ' p-add-sp-imm-4 , %1111101111111111 h, highest h, %1111001000001101 h, 0 h,
+    \ ' p-add-sp-reg-3 , %1111111111101111 h, highest h, %1110101100001101 h, 0 h,
+    ' p-adr-2 , %1111101111111111 h, highest h, %1111001010101111 h, 0 h,
+    ' p-adr-3 , %1111101111111111 h, highest h, %1111001000001111 h, 0 h,
+    ' p-and-imm , %1111101111100000 h, highest h, %1111000000000000 h, 0 h,
+    ' p-and-reg-2 , %1111111111100000 h, 0 h, %1110101000000000 h, 0 h,
+    ' p-asr-imm-2 , %1111111111101111 h, %0000000000110000 h,
+    %1110101001001111 h, %0000000000100000 h,
+    ' p-asr-reg-2 , %1111111111100000 h, %1111000011110000 h,
+    %1111101001000000 h, %1111000000000000 h,
+    ' p-b-3 , %1111100000000000 h, %1101000000000000 h,
+    %1111000000000000 h, %1000000000000000 h,
+    ' p-b-4 , %1111100000000000 h, %1101000000000000 h,
+    %1111000000000000 h, %1001000000000000 h,
+    ' p-bfc , %1111101111111111 h, highest h, %1111001101101111 h, 0 h,
+    ' p-bfi , %1111101111110000 h, highest h, %1111001101100000 h, 0 h,
+    ' p-bic-imm , %11111000111100000 h, highest h, %1111000000100000 h, 0 h,
+    ' p-bic-reg-2 , %1111111111100000 h, 0 h, %1110101000100000 h, 0 h,
+
+  [then]
+    
   ' p-bl-imm , %1111100000000000 h, %1101000000000000 h,
   %1111000000000000 h, %1101000000000000 h,
-  \ ' p-cdp ,
-  \ ' p-cdp2 ,
-  \ ' p-clrex ,
-  \ ' p-clz ,
-  ' p-cmn-imm , %1111101111110000 h, %1000111100000000 h,
-  %1111000100010000 h, %0000111100000000 h,
-  ' p-cmn-reg-2 , %1111111111110000 h, %0000111100000000 h,
-  %1110101100010000 h, %0000111100000000 h,
-  ' p-cmp-imm-2 , %1111101111110000 h, %1000111100000000 h,
-  %1111000110110000 h, %0000111100000000 h,
-  ' p-cmp-reg-3 , %1111111111110000 h, %0000111100000000 h,
-  %1110101110110000 h, %0000111100000000 h,
-  \ ' p-cps-2 ,
-  \ ' p-dbg ,
-  \ ' p-dmb ,
-  ' p-dsb , %1111111111110000 h, %1101000011110000 h,
-  %1111001110110000 h, %1001000001000000 h,
-  ' p-eor-imm , %1111101111100000 h, highest h, %1111000010000000 h, 0 h,
-  ' p-eor-reg-2 , %1111111111100000 h, 0 h, %1110101010000000 h, 0 h,
-  \ ' p-isb ,
-  \ ' p-it ,
-  \ ' p-ldc ,
-  \ ' p-ldmdb ,
-  \ ' p-ldmia-2 , %1111111111010000 h, 0 h, %1110100010010000 h, 0 h,
-  ' p-ldr-imm-3-w , %1111111111110000 h, 0 h, %1111100011010000 h, 0 h,
-  ' p-ldr-imm-4-w , %1111111111110000 h, %0000100000000000 h,
-  %1111100001010000 h, %0000100000000000 h,
-  ' p-ldr-lit-2-w , %1111111101111111 h, 0 h, %1111100001011111 h, 0 h,
-  ' p-ldr-reg-2-w , %1111111111110000 h, %0000111111000000 h,
-  %1111100001010000 h, 0 h,
-  ' p-ldr-imm-3-b , %1111111111110000 h, 0 h, %1111100010010000 h, 0 h,
-  ' p-ldr-imm-4-b , %1111111111110000 h, %0000100000000000 h,
-  %1111100000010000 h, %0000100000000000 h,
-  ' p-ldr-lit-2-b , %1111111101111111 h, 0 h, %1111100000011111 h, 0 h,
-  ' p-ldr-reg-2-b , %1111111111110000 h, %0000111111000000 h,
-  %1111100001010000 h, 0 h,
-  \ ' p-ldrbt ,
-  \ ' p-ldrd ,
-  \ ' p-ldrex ,
-  \ ' p-ldrexb ,
-  \ ' p-ldrexd ,
-  \ ' p-ldrexh ,
-  ' p-ldr-imm-3-h , %1111111111110000 h, 0 h, %1111100010110000 h, 0 h,
-  ' p-ldr-imm-4-h , %1111111111110000 h, %0000100000000000 h,
-  %1111100000110000 h, %0000100000000000 h,
-  ' p-ldr-lit-2-h , %1111111101111111 h, 0 h, %1111100000111111 h, 0 h,
-  ' p-ldr-reg-2-h , %1111111111110000 h, %0000111111000000 h,
-  %1111100000110000 h, 0 h,
-  \ ' p-ldrht ,
-  \ ' p-ldrsb ,
-  \ ' p-ldrsbt ,
-  \ ' p-ldrsh ,
-  \ ' p-ldrsht ,
-  \ ' p-ldrt ,
-  ' p-lsl-imm-2 , %1111111111101111 h, %0000000000110000 h,
-  %1110101001001111 h, 0 h,
-  ' p-lsl-reg-2 , %1111111111100000 h, %1111000011110000 h,
-  %1111101000000000 h, %1111000000000000 h,
-  ' p-lsr-imm-2 , %1111111111101111 h, %0000000000110000 h,
-  %1110101001001111 h, %0000000000010000 h,
-  ' p-lsr-reg-2 , %1111111111100000 h, %1111000011110000 h,
-  %1111101000100000 h, %1111000000000000 h,
-  \ ' p-mcr ,
-  \ ' p-mcrr ,
-  \ ' p-mla ,
-  ' p-mls , %1111111111110000 h, %0000000011110000 h,
-  %1111101100000000 h, %0000000000010000 h,
-  ' p-mov-imm-2 , %1111101111101111 h, highest h,
-  %1111000001001111 h, 0 h,
-  ' p-mov-imm-3 , %1111101111110000 h, highest h,
-  %1111001001000000 h, 0 h,
-  ' p-mov-reg-3 , %1111111111101111 h, %0111000011110000 h,
-  %1110101001001111 h, 0 h,
-  ' p-movt , %1111101111110000 h, highest h,
-  %1111001011000000 h, 0 h,
-  \ ' p-mrc ,
-  \ ' p-mrrc ,
-  \ ' p-mrs ,
-  \ ' p-msr ,
-  ' p-mul-2 , %1111111111110000 h, %1111000011110000 h,
-  %1111101100000000 h, %1111000000000000 h,
 
-  \ ' p-mvn-imm ,
-  \ ' p-mvn-reg-2 , %1111111111101111 h, 0 h, %1110101001101111 h, 0 h,
-  \ ' p-nop-3 ,
-  \ ' p-orn-imm ,
-  \ ' p-orn-reg ,
-  ' p-orr-imm , %1111101111100000 h, highest h,
-  %1111000001000000 h, 0 h,
-  ' p-orr-reg-2 , %1111111111100000 h, 0 h, %1110101001000000 h, 0 h,
-  \ ' p-pkh ,
-  \ ' p-pld-imm ,
-  \ ' p-pld-reg ,
-  \ ' p-pli-imm ,
-  \ ' p-pli-reg ,
-  ' p-pop-2 , %1111111111111111 h, 0 h, %1110100010111101 h, 0 h,
-  ' p-push-2 , %1111111111111111 h, 0 h, %1110100100101101 h, 0 h,
-  \ ' p-qadd ,
-  \ ' p-qadd16 ,
-  \ ' p-qadd8 ,
-  \ ' p-qasx ,
-  \ ' p-qdadd ,
-  \ ' p-qdsub ,
-  \ ' p-qsax ,
-  \ ' p-qsub ,
-  \ ' p-qsub16 ,
-  \ ' p-qsub8 ,
-  \ ' p-rbit
-  \ ' p-rev ,
-  \ ' p-rev16 ,
-  \ ' p-revsh
-  \ ' p-rfe ,
-  \ ' p-ror-imm ,
-  \ ' p-ror-reg ,
-  \ ' p-rrx ,
-  \ ' p-rsb-imm-2 ,
-  \ ' p-rsb-reg ,
-  \ ' p-sadd16 ,
-  \ ' p-sadd8 ,
-  \ ' p-sasx .
-  ' p-sbc-imm , %1111101111100000 h, highest h, %1111000101100000 h, 0 h,
-  ' p-sbc-reg-2 , %1111111111100000 h, 0 h, %1110101101100000 h, 0 h,
-  \ ' p-sbfx ,
-  ' p-sdiv , %1111111111110000 h, %0000000011110000 h,
-  %1111101110010000 h, %0000000011110000 h,
-  \ ' p-sel ,
-  \ ' p-setend ,
-  \ ' p-sev ,
-  \ ' p-shadd16 ,
-  \ ' p-shadd8 ,
-  \ ' p-shasx ,
-  \ ' p-shsax ,
-  \ ' p-shsub16 ,
-  \ ' p-shsub8 ,
-  \ ' p-smi ,
-  \ ' p-smla* ,
-  \ ' p-smlal* ,
-  \ ' p-smlaw* ,
-  \ ' p-smlsd ,
-  \ ' p-smlsld ,
-  \ ' p-smmla ,
-  \ ' p-smmls ,
-  \ ' p-smmul ,
-  \ ' p-smuad ,
-  \ ' p-smul* ,
-  ' p-smull , %1111111111110000 h, %0000000011110000 h,
-  %1111101110000000 h, 0 h,
-  \ ' p-smulw* ,
-  \ ' p-smusd ,
-  \ ' p-srs* ,
-  \ ' p-ssat ,
-  \ ' p-ssat16 ,
-  \ ' p-ssax ,
-  \ ' p-ssub16 ,
-  \ ' p-ssub8 ,
-  \ ' p-stc ,
-  \ ' p-stmdb ,
-  \ ' p-stmia ,
-  ' p-str-imm-3-w , %1111111111110000 h, 0 h, %1111100011000000 h, 0 h,
-  ' p-str-imm-4-w , %1111111111110000 h, %0000100000000000 h,
-  %1111100001000000 h, %0000100000000000 h,
-  ' p-str-reg-2-w , %1111111111110000 h, %0000111111000000 h,
-  %1111100001000000 h, 0 h,
-  ' p-str-imm-3-b , %1111111111110000 h, 0 h, %1111100010000000 h, 0 h,
-  ' p-str-imm-4-b , %1111111111110000 h, %0000100000000000 h,
-  %1111100000000000 h, %0000100000000000 h,
-  ' p-str-reg-2-b , %1111111111110000 h, %0000111111000000 h,
-  %1111100000000000 h, 0 h,
-  \ ' p-strbt ,
-  \ ' p-strd ,
-  \ ' p-strex ,
-  \ ' p-strexb ,
-  \ ' p-strexd ,
-  \ ' p-strexh ,
-  ' p-str-imm-3-h , %1111111111110000 h, 0 h, %1111100010100000 h, 0 h,
-  ' p-str-imm-4-h , %1111111111110000 h, %0000100000000000 h,
-  %1111100000100000 h, %0000100000000000 h,
-  ' p-str-reg-2-h , %1111111111110000 h, %0000111111000000 h,
-  %1111100000100000 h, 0 h,
-  \ ' p-strht ,
-  \ ' p-strt ,
-  ' p-sub-imm-3 , %1111101111100000 h, highest h, %1111000110100000 0 h,
-  ' p-sub-imm-4 , %1111101111110000 h, highest h, %1111001010100000 0 h,
-  ' p-sub-reg-2 , %1111111111100000 h, 0 h, %1110101110100000 h, 0 h,
-  \ ' p-sub-sp-imm ,
-  \ ' p-sub-sp-reg ,
-  \ ' p-sub-pc-lr ,
-  \ ' p-svc ,
-  \ ' p-sxtab ,
-  \ ' p-sxtab16 ,
-  \ ' p-sxtah ,
-  \ ' p-sxtb ,
-  \ ' p-sxtb16 ,
-  \ ' p-sxth ,
-  \ ' p-tbb ,
-  \ ' p-tbh ,
-  \ ' p-teq ,
-  \ ' p-teqh ,
-  ' p-tst-imm , %1111101111110000 h, %10001111000000 h,
-  %1111000000010000 h, %00001111000000 h,
-  ' p-tst-reg-2 , %1111111111110000 h, %0000111100000000 h,
-  %1110101000010000 h, %0000111100000000 h,
-  \ ' p-uadd16 ,
-  \ ' p-uadd8 ,
-  \ ' p-uasx ,
-  \ ' p-ubfx ,
-  ' p-udiv , %1111111111110000 h, %0000000011110000 h,
-  %1111101110110000 h, %0000000011110000 h,
-  \ ' p-uhadd16 ,
-  \ ' p-uhadd8 ,
-  \ ' p-uhasx ,
-  \ ' p-uhsax ,
-  \ ' p-uhsub16 ,
-  \ ' p-uhsub8 ,
-  \ ' p-umaal ,
-  \ ' p-umlal ,
-  ' p-umull , %1111111111110000 h, %0000000011110000 h,
-  %1111101110100000 h, 0 h,
-  \ ' p-uqadd16 ,
-  \ ' p-uqadd8 ,
-  \ ' p-uqasx ,
-  \ ' p-uqsax ,
-  \ ' p-uqsub16 ,
-  \ ' p-uqsub8 ,
-  \ ' p-usad8 ,
-  \ ' p-usasa8 ,
-  \ ' p-usat ,
-  \ ' p-usat16 ,
-  \ ' p-usax ,
-  \ ' p-usub16 ,
-  \ ' p-usub8 ,
-  \ ' p-uxtab ,
-  \ ' p-uxtab16
-  \ ' p-uxtah ,
-  \ ' p-uxtb ,
-  \ ' p-uxtb16 ,
-  \ ' p-uxth ,
-  \ ' p-wfe ,
-  \ ' p-wfi-2 ,
-  \ ' p-yield ,
+  thumb-2 [if]
+    
+    \ ' p-cdp ,
+    \ ' p-cdp2 ,
+    \ ' p-clrex ,
+    \ ' p-clz ,
+    ' p-cmn-imm , %1111101111110000 h, %1000111100000000 h,
+    %1111000100010000 h, %0000111100000000 h,
+    ' p-cmn-reg-2 , %1111111111110000 h, %0000111100000000 h,
+    %1110101100010000 h, %0000111100000000 h,
+    ' p-cmp-imm-2 , %1111101111110000 h, %1000111100000000 h,
+    %1111000110110000 h, %0000111100000000 h,
+    ' p-cmp-reg-3 , %1111111111110000 h, %0000111100000000 h,
+    %1110101110110000 h, %0000111100000000 h,
+    \ ' p-cps-2 ,
+    \ ' p-dbg ,
+    \ ' p-dmb ,
+    ' p-dsb , %1111111111110000 h, %1101000011110000 h,
+    %1111001110110000 h, %1001000001000000 h,
+    ' p-eor-imm , %1111101111100000 h, highest h, %1111000010000000 h, 0 h,
+    ' p-eor-reg-2 , %1111111111100000 h, 0 h, %1110101010000000 h, 0 h,
+    \ ' p-isb ,
+    \ ' p-it ,
+    \ ' p-ldc ,
+    \ ' p-ldmdb ,
+    \ ' p-ldmia-2 , %1111111111010000 h, 0 h, %1110100010010000 h, 0 h,
+    ' p-ldr-imm-3-w , %1111111111110000 h, 0 h, %1111100011010000 h, 0 h,
+    ' p-ldr-imm-4-w , %1111111111110000 h, %0000100000000000 h,
+    %1111100001010000 h, %0000100000000000 h,
+    ' p-ldr-lit-2-w , %1111111101111111 h, 0 h, %1111100001011111 h, 0 h,
+    ' p-ldr-reg-2-w , %1111111111110000 h, %0000111111000000 h,
+    %1111100001010000 h, 0 h,
+    ' p-ldr-imm-3-b , %1111111111110000 h, 0 h, %1111100010010000 h, 0 h,
+    ' p-ldr-imm-4-b , %1111111111110000 h, %0000100000000000 h,
+    %1111100000010000 h, %0000100000000000 h,
+    ' p-ldr-lit-2-b , %1111111101111111 h, 0 h, %1111100000011111 h, 0 h,
+    ' p-ldr-reg-2-b , %1111111111110000 h, %0000111111000000 h,
+    %1111100001010000 h, 0 h,
+    \ ' p-ldrbt ,
+    \ ' p-ldrd ,
+    \ ' p-ldrex ,
+    \ ' p-ldrexb ,
+    \ ' p-ldrexd ,
+    \ ' p-ldrexh ,
+    ' p-ldr-imm-3-h , %1111111111110000 h, 0 h, %1111100010110000 h, 0 h,
+    ' p-ldr-imm-4-h , %1111111111110000 h, %0000100000000000 h,
+    %1111100000110000 h, %0000100000000000 h,
+    ' p-ldr-lit-2-h , %1111111101111111 h, 0 h, %1111100000111111 h, 0 h,
+    ' p-ldr-reg-2-h , %1111111111110000 h, %0000111111000000 h,
+    %1111100000110000 h, 0 h,
+    \ ' p-ldrht ,
+    \ ' p-ldrsb ,
+    \ ' p-ldrsbt ,
+    \ ' p-ldrsh ,
+    \ ' p-ldrsht ,
+    \ ' p-ldrt ,
+    ' p-lsl-imm-2 , %1111111111101111 h, %0000000000110000 h,
+    %1110101001001111 h, 0 h,
+    ' p-lsl-reg-2 , %1111111111100000 h, %1111000011110000 h,
+    %1111101000000000 h, %1111000000000000 h,
+    ' p-lsr-imm-2 , %1111111111101111 h, %0000000000110000 h,
+    %1110101001001111 h, %0000000000010000 h,
+    ' p-lsr-reg-2 , %1111111111100000 h, %1111000011110000 h,
+    %1111101000100000 h, %1111000000000000 h,
+    \ ' p-mcr ,
+    \ ' p-mcrr ,
+    \ ' p-mla ,
+    ' p-mls , %1111111111110000 h, %0000000011110000 h,
+    %1111101100000000 h, %0000000000010000 h,
+    ' p-mov-imm-2 , %1111101111101111 h, highest h,
+    %1111000001001111 h, 0 h,
+    ' p-mov-imm-3 , %1111101111110000 h, highest h,
+    %1111001001000000 h, 0 h,
+    ' p-mov-reg-3 , %1111111111101111 h, %0111000011110000 h,
+    %1110101001001111 h, 0 h,
+    ' p-movt , %1111101111110000 h, highest h,
+    %1111001011000000 h, 0 h,
+    \ ' p-mrc ,
+    \ ' p-mrrc ,
+    \ ' p-mrs ,
+    \ ' p-msr ,
+    ' p-mul-2 , %1111111111110000 h, %1111000011110000 h,
+    %1111101100000000 h, %1111000000000000 h,
+
+    \ ' p-mvn-imm ,
+    \ ' p-mvn-reg-2 , %1111111111101111 h, 0 h, %1110101001101111 h, 0 h,
+    \ ' p-nop-3 ,
+    \ ' p-orn-imm ,
+    \ ' p-orn-reg ,
+    ' p-orr-imm , %1111101111100000 h, highest h,
+    %1111000001000000 h, 0 h,
+    ' p-orr-reg-2 , %1111111111100000 h, 0 h, %1110101001000000 h, 0 h,
+    \ ' p-pkh ,
+    \ ' p-pld-imm ,
+    \ ' p-pld-reg ,
+    \ ' p-pli-imm ,
+    \ ' p-pli-reg ,
+    ' p-pop-2 , %1111111111111111 h, 0 h, %1110100010111101 h, 0 h,
+    ' p-push-2 , %1111111111111111 h, 0 h, %1110100100101101 h, 0 h,
+    \ ' p-qadd ,
+    \ ' p-qadd16 ,
+    \ ' p-qadd8 ,
+    \ ' p-qasx ,
+    \ ' p-qdadd ,
+    \ ' p-qdsub ,
+    \ ' p-qsax ,
+    \ ' p-qsub ,
+    \ ' p-qsub16 ,
+    \ ' p-qsub8 ,
+    \ ' p-rbit
+    \ ' p-rev ,
+    \ ' p-rev16 ,
+    \ ' p-revsh
+    \ ' p-rfe ,
+    \ ' p-ror-imm ,
+    \ ' p-ror-reg ,
+    \ ' p-rrx ,
+    \ ' p-rsb-imm-2 ,
+    \ ' p-rsb-reg ,
+    \ ' p-sadd16 ,
+    \ ' p-sadd8 ,
+    \ ' p-sasx .
+    ' p-sbc-imm , %1111101111100000 h, highest h, %1111000101100000 h, 0 h,
+    ' p-sbc-reg-2 , %1111111111100000 h, 0 h, %1110101101100000 h, 0 h,
+    \ ' p-sbfx ,
+    ' p-sdiv , %1111111111110000 h, %0000000011110000 h,
+    %1111101110010000 h, %0000000011110000 h,
+    \ ' p-sel ,
+    \ ' p-setend ,
+    \ ' p-sev ,
+    \ ' p-shadd16 ,
+    \ ' p-shadd8 ,
+    \ ' p-shasx ,
+    \ ' p-shsax ,
+    \ ' p-shsub16 ,
+    \ ' p-shsub8 ,
+    \ ' p-smi ,
+    \ ' p-smla* ,
+    \ ' p-smlal* ,
+    \ ' p-smlaw* ,
+    \ ' p-smlsd ,
+    \ ' p-smlsld ,
+    \ ' p-smmla ,
+    \ ' p-smmls ,
+    \ ' p-smmul ,
+    \ ' p-smuad ,
+    \ ' p-smul* ,
+    ' p-smull , %1111111111110000 h, %0000000011110000 h,
+    %1111101110000000 h, 0 h,
+    \ ' p-smulw* ,
+    \ ' p-smusd ,
+    \ ' p-srs* ,
+    \ ' p-ssat ,
+    \ ' p-ssat16 ,
+    \ ' p-ssax ,
+    \ ' p-ssub16 ,
+    \ ' p-ssub8 ,
+    \ ' p-stc ,
+    \ ' p-stmdb ,
+    \ ' p-stmia ,
+    ' p-str-imm-3-w , %1111111111110000 h, 0 h, %1111100011000000 h, 0 h,
+    ' p-str-imm-4-w , %1111111111110000 h, %0000100000000000 h,
+    %1111100001000000 h, %0000100000000000 h,
+    ' p-str-reg-2-w , %1111111111110000 h, %0000111111000000 h,
+    %1111100001000000 h, 0 h,
+    ' p-str-imm-3-b , %1111111111110000 h, 0 h, %1111100010000000 h, 0 h,
+    ' p-str-imm-4-b , %1111111111110000 h, %0000100000000000 h,
+    %1111100000000000 h, %0000100000000000 h,
+    ' p-str-reg-2-b , %1111111111110000 h, %0000111111000000 h,
+    %1111100000000000 h, 0 h,
+    \ ' p-strbt ,
+    \ ' p-strd ,
+    \ ' p-strex ,
+    \ ' p-strexb ,
+    \ ' p-strexd ,
+    \ ' p-strexh ,
+    ' p-str-imm-3-h , %1111111111110000 h, 0 h, %1111100010100000 h, 0 h,
+    ' p-str-imm-4-h , %1111111111110000 h, %0000100000000000 h,
+    %1111100000100000 h, %0000100000000000 h,
+    ' p-str-reg-2-h , %1111111111110000 h, %0000111111000000 h,
+    %1111100000100000 h, 0 h,
+    \ ' p-strht ,
+    \ ' p-strt ,
+    ' p-sub-imm-3 , %1111101111100000 h, highest h, %1111000110100000 0 h,
+    ' p-sub-imm-4 , %1111101111110000 h, highest h, %1111001010100000 0 h,
+    ' p-sub-reg-2 , %1111111111100000 h, 0 h, %1110101110100000 h, 0 h,
+    \ ' p-sub-sp-imm ,
+    \ ' p-sub-sp-reg ,
+    \ ' p-sub-pc-lr ,
+    \ ' p-svc ,
+    \ ' p-sxtab ,
+    \ ' p-sxtab16 ,
+    \ ' p-sxtah ,
+    \ ' p-sxtb ,
+    \ ' p-sxtb16 ,
+    \ ' p-sxth ,
+    \ ' p-tbb ,
+    \ ' p-tbh ,
+    \ ' p-teq ,
+    \ ' p-teqh ,
+    ' p-tst-imm , %1111101111110000 h, %10001111000000 h,
+    %1111000000010000 h, %00001111000000 h,
+    ' p-tst-reg-2 , %1111111111110000 h, %0000111100000000 h,
+    %1110101000010000 h, %0000111100000000 h,
+    \ ' p-uadd16 ,
+    \ ' p-uadd8 ,
+    \ ' p-uasx ,
+    \ ' p-ubfx ,
+    ' p-udiv , %1111111111110000 h, %0000000011110000 h,
+    %1111101110110000 h, %0000000011110000 h,
+    \ ' p-uhadd16 ,
+    \ ' p-uhadd8 ,
+    \ ' p-uhasx ,
+    \ ' p-uhsax ,
+    \ ' p-uhsub16 ,
+    \ ' p-uhsub8 ,
+    \ ' p-umaal ,
+    \ ' p-umlal ,
+    ' p-umull , %1111111111110000 h, %0000000011110000 h,
+    %1111101110100000 h, 0 h,
+    \ ' p-uqadd16 ,
+    \ ' p-uqadd8 ,
+    \ ' p-uqasx ,
+    \ ' p-uqsax ,
+    \ ' p-uqsub16 ,
+    \ ' p-uqsub8 ,
+    \ ' p-usad8 ,
+    \ ' p-usasa8 ,
+    \ ' p-usat ,
+    \ ' p-usat16 ,
+    \ ' p-usax ,
+    \ ' p-usub16 ,
+    \ ' p-usub8 ,
+    \ ' p-uxtab ,
+    \ ' p-uxtab16
+    \ ' p-uxtah ,
+    \ ' p-uxtb ,
+    \ ' p-uxtb16 ,
+    \ ' p-uxth ,
+    \ ' p-wfe ,
+    \ ' p-wfi-2 ,
+    \ ' p-yield ,
+
+  [then]
+
   0 ,
+
+  \ Commit to flash
+  commit-flash
 
   \ Get condition
   : current-cond ( -- cond ) -1 ;
@@ -1864,8 +2109,6 @@ end-module
 end-compress-flash
 
 unimport disassemble-internal-module
-
-[then]
 
 \ Reboot
 reboot
