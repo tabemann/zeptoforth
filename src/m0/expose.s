@@ -320,4 +320,3 @@ _vector_count:
 	end_inlined
 	
 	.ltorg
-	

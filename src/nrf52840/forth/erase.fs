@@ -51,7 +51,7 @@ commit-flash
 : marker ( "name" -- )
   compiling-to-flash?
   token
-  dup 0= triggers token-expected
+  dup 0= triggers x-token-expected
   compile-to-flash
   pad-flash-erase-block
   flash-here

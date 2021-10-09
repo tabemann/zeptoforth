@@ -352,6 +352,18 @@ _flash_mini_dict_size:
 	ldr tos, =flash_mini_dict_size
 	bx lr
 	end_inlined
+
+	@@ Whether Thumb-2 is supported
+	define_word "thumb-2", visible_flag
+_thumb_2:
+	push_tos
+	.if thumb2
+	ldr tos, =-1
+	.else
+	ldr tos, =0
+	.endif
+	bx lr
+	end_inlined
 	
 	.ltorg
 	
