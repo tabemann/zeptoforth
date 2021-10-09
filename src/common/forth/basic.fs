@@ -2189,9 +2189,10 @@ flash-mini-dict-size [if]
     drop
     flash-mini-dict-end @ flash-mini-dict u>= if
       flash-mini-dict-end @ flash-mini-dict
-      flash-mini-dict-size flash-mini-dict + flash-mini-dict-end @ - move
-      flash-mini-dict-size flash-mini-dict + flash-mini-dict-end @ -
-      flash-mini-dict + flash-mini-dict-end !
+      [ flash-mini-dict-size flash-mini-dict + ] literal
+      flash-mini-dict-end @ - move
+      [ flash-mini-dict-size flash-mini-dict + ] literal
+      flash-mini-dict-end @ - flash-mini-dict + flash-mini-dict-end !
     else
       -1 flash-mini-dict-end !
     then
@@ -2219,10 +2220,10 @@ flash-mini-dict-size [if]
     swap >r 3dup hash-string-and-wid flash-mini-dict-end @ 
     begin dup flash-mini-dict u> while
       2 cells -
-      2dup @ = if
-	dup cell+ @ wordlist-id h@ 2 pick = if
-	  dup cell+ @ word-flags h@ r@ and if
-	    4 pick 4 pick 2 pick word-name count equal-case-strings? if
+      2dup @ = if space
+	dup cell+ @ wordlist-id h@ 3 pick = if space
+	  dup cell+ @ word-flags h@ r@ and if space
+	    4 pick 4 pick 2 pick cell+ @ word-name count equal-case-strings? if
 	      rdrop cell+ @ nip nip nip nip exit
 	    then
 	  then
