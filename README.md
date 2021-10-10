@@ -40,7 +40,7 @@ To build the kernel for each of the supported platforms, one first needs to inst
 
     $ make
 
-to use the default version:
+to use the default version or:
 
     $ make VERSION=<version>
 
