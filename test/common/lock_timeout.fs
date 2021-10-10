@@ -52,8 +52,8 @@ begin-module forth-module
   \ Initialize our test
   : init-test ( -- )
     my-lock init-lock
-    0 ['] do-task-1 512 256 256 spawn my-task-1 !
-    0 ['] do-task-2 512 256 256 spawn my-task-2 !
+    0 ['] do-task-1 256 128 512 spawn my-task-1 !
+    0 ['] do-task-2 256 128 512 spawn my-task-2 !
     my-task-1 @ run
     my-task-2 @ run
   ;

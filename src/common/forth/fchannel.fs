@@ -79,6 +79,7 @@ begin-module-once fchan-module
   \ Send data on a fast channel
   : send-fchan ( addr bytes fchan -- )
     [:
+      s" BEGIN SEND-FCHAN" trace
       dup fchan-closed @ triggers x-fchan-closed
       current-task prepare-block
       dup fchan-send-tqueue wait-tqueue
@@ -90,6 +91,7 @@ begin-module-once fchan-module
 	0 swap fchan-data-addr ! ?raise
       then
       fchan-closed @ triggers x-fchan-closed
+      s" END SEND-FCHAN" trace
     ;] critical
   ;
 
@@ -98,6 +100,7 @@ begin-module-once fchan-module
     dup fchan-closed @ triggers x-fchan-closed
     [:
       [:
+	s" BEGIN RECV-CHAN" trace
 	dup fchan-send-tqueue wake-tqueue
 	[: dup fchan-recv-tqueue wait-tqueue ;] try ?dup if
 	  swap fchan-send-tqueue unwake-tqueue ?raise
@@ -112,6 +115,7 @@ begin-module-once fchan-module
 	  rot drop drop 0
 	then
 	r> fchan-resp-tqueue wake-tqueue
+	s" END RECV-FCHAN" trace
       ;] critical
     ;] over fchan-recv-lock with-lock
   ;

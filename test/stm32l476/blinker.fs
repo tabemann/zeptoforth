@@ -51,7 +51,7 @@ begin-module forth-module
   \ Init blinker
   : init-blinker ( -- )
     500 blinker-delay !
-    0 ['] blinker 512 256 256 spawn blinker-task !
+    0 ['] blinker 256 128 512 spawn blinker-task !
     blinker-task @ run
   ;
 
