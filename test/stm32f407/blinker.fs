@@ -60,7 +60,7 @@ begin-module forth-module
     led-green-off
     led-blue-off
     500 blinker-delay !
-    0 ['] blinker 512 256 256 spawn blinker-task !
+    0 ['] blinker 256 128 512 spawn blinker-task !
     blinker-task @ run
   ;
 

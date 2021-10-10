@@ -101,6 +101,9 @@ begin-import-module-once task-module
     
     \ Sleep is enabled
     variable sleep-enabled?
+
+    \ Tracing is enabled
+    variable trace-enabled?
     
     \ The current task handler
     user task-handler
@@ -553,7 +556,7 @@ begin-import-module-once task-module
   \ Ready a task
   : ready ( task -- )
     dup validate-not-terminated
-    readied swap task-state h!
+    dup task-state h@ schedule-critical and readied or swap task-state h!
     pause
   ;
 
@@ -915,6 +918,17 @@ begin-import-module-once task-module
     ;] critical
   ;
 
+  \ Display tracing information
+  : trace ( c-addr u -- )
+    trace-enabled? @ if
+      [:
+	cr type space ." critical:" in-critical @ 1- . .s dump-tasks
+      ;] critical
+    else
+      2drop
+    then
+  ;
+
   \ Wait for n milliseconds with multitasking support
   : ms ( u -- )
     systick-divisor * systick-counter
@@ -981,6 +995,7 @@ begin-import-module-once task-module
     false in-multitasker? !
     0 pause-enabled !
     false sleep-enabled? !
+    false trace-enabled? !
     false in-task-change !
     false wake-tasks !
     $7F SHPR3_PRI_15!
@@ -1059,6 +1074,15 @@ begin-module task-module
 
   \ Get whether sleep is enabled
   : sleep-enabled? ( -- flag ) sleep-enabled? @ ;
+
+  \ Enable tracing
+  : enable-trace ( -- ) true trace-enabled? ! ;
+
+  \ Disable tracing
+  : disable-trace ( -- ) false trace-enabled? ! ;
+
+  \ Get whether tracing is enabled
+  : trace-enable? ( -- flag ) trace-enabled? @ ;
 
   \ Allot memory from the end of RAM
   : allot-end ( u -- addr ) negate free-end +! free-end @ ;

@@ -1534,38 +1534,38 @@ commit-flash
   dup ram-base < if defer-flash! else defer-ram! then
 ;
 
-\ Set internal
-internal-module set-current
+\ \ Set internal
+\ internal-module set-current
 
-\ Decode the immediate field from a MOVW or MOVT instruction
-: decode-mov16 ( h-addr -- h )
-  dup h@ dup $F and 1 lshift swap 10 rshift $1 and or 11 lshift
-  swap 2+ h@ dup $FF and swap 4 rshift $700 and or or
-;
+\ \ Decode the immediate field from a MOVW or MOVT instruction
+\ : decode-mov16 ( h-addr -- h )
+\   dup h@ dup $F and 1 lshift swap 10 rshift $1 and or 11 lshift
+\   swap 2+ h@ dup $FF and swap 4 rshift $700 and or or
+\ ;
 
-\ Decode the immediate field from a pair of a MOVW instruction followed by a
-\ MOVT instruction
-: decode-literal ( h-addr -- x )
-  dup decode-mov16 swap 4+ decode-mov16 16 lshift or
-;
+\ \ Decode the immediate field from a pair of a MOVW instruction followed by a
+\ \ MOVT instruction
+\ : decode-literal ( h-addr -- x )
+\   dup decode-mov16 swap 4+ decode-mov16 16 lshift or
+\ ;
 
-\ Set forth
-forth-module set-current
+\ \ Set forth
+\ forth-module set-current
 
-\ Get the referred xt from a deferred word in RAM
-: defer-ram@ ( xt-deferred -- xt )
-  decode-literal 1 -
-;
+\ \ Get the referred xt from a deferred word in RAM
+\ : defer-ram@ ( xt-deferred -- xt )
+\   decode-literal 1 -
+\ ;
 
-\ Get the referred xt from a deferred word in flash
-: defer-flash@ ( xt-deferred -- xt )
-  flash-block-size align decode-literal 1 -
-;
+\ \ Get the referred xt from a deferred word in flash
+\ : defer-flash@ ( xt-deferred -- xt )
+\   flash-block-size align decode-literal 1 -
+\ ;
 
-\ Get the referred xt from a deferred word
-: defer@ ( xt-deferred -- xt )
-  dup ram-base < if defer-flash@ else defer-ram@ then
-;
+\ \ Get the referred xt from a deferred word
+\ : defer@ ( xt-deferred -- xt )
+\   dup ram-base < if defer-flash@ else defer-ram@ then
+\ ;
 
 \ Set up the wordlist
 wordlist constant esc-string-module
@@ -2112,8 +2112,10 @@ variable wait-hook
   begin
     dup execute not
   while
-    wait-hook @ ?execute
-    pause
+    in-critical @ 0= if
+      wait-hook @ ?execute
+      pause
+    then
   repeat
   drop
 ;

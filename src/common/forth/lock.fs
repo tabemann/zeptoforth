@@ -236,6 +236,7 @@ begin-module-once lock-module
   \ Lock a lock
   : lock ( lock -- )
     [:
+      s" BEGIN LOCK" trace
       dup lock-holder-task @ current-task = triggers x-double-lock
       current-task prepare-block
       dup lock-holder-task @ if
@@ -257,12 +258,14 @@ begin-module-once lock-module
 	current-task over lock-holder-task !
 	update-hold-priority
       then
+      s" END LOCK" trace
     ;] critical
   ;
 
   \ Unlock a lock
   : unlock ( lock -- )
     [:
+      s" BEGIN UNLOCK" trace
       dup lock-holder-task @ current-task = averts x-not-currently-owned
       dup update-release-priority
       dup lock-first-wait @ ?dup if
@@ -279,6 +282,7 @@ begin-module-once lock-module
       else
 	0 swap lock-holder-task !      
       then
+      s" END UNLOCK" trace
     ;] critical
   ;
 
