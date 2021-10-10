@@ -573,7 +573,9 @@ commit-flash
 
 \ Specify code for a word created wth <BUILDS
 : does> ( -- )
-\  block-align,
+  thumb-2 if
+    block-align,
+  then
   build-target @ 0= triggers x-no-word-being-built
   r>
   0 build-target @ literal!
