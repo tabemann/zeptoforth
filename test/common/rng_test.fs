@@ -42,7 +42,7 @@ begin-module forth-module
 
   \ Initialize the test
   : rng-test-task ( -- )
-    0 ['] rng-test 512 256 256 spawn rng-test-task !
+    0 ['] rng-test 256 128 512 spawn rng-test-task !
     rng-test-task @ run
   ;
 

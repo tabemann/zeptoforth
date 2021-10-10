@@ -137,7 +137,7 @@ begin-module-once temp-module
     0 EXTI_2 NVIC_IPR_IP!
     EXTI_2 NVIC_ISER_SETENA!
     true 2 EXTI_FTSR!
-    0 ['] temp-tracker 512 256 256 spawn temp-task !
+    0 ['] temp-tracker 256 128 512 spawn temp-task !
     1 temp-task @ set-task-priority
     temp-task @ run
   ;
@@ -162,7 +162,7 @@ begin-module-once temp-module
   \ Start displaying temperatures repeatedly
   : start-display-temps ( count -- )
     dup sensor-count u> triggers x-sensor-out-of-range
-    1 ['] display-temps 512 256 256 spawn display-temps-task !
+    1 ['] display-temps 256 128 512 spawn display-temps-task !
     0 display-temps-task @ set-task-priority
     display-temps-task @ run
   ;

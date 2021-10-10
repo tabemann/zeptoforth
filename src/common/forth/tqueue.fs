@@ -136,6 +136,7 @@ begin-module-once tqueue-module
   \ Note that this must be called within a critical section
   : wait-tqueue ( tqueue -- )
     \    begin-critical
+    s" BEGIN WAIT-TQUEUE" trace
     -1 over wait-counter +!
     dup wait-counter @ 0>= if
       drop exit
@@ -151,6 +152,7 @@ begin-module-once tqueue-module
     then
     wait-orig-here @ ram-here!
     drop
+    s" END WAIT-TQUEUE" trace
 \    end-critical
   ;
 
@@ -158,6 +160,7 @@ begin-module-once tqueue-module
   \ Note that this must be called within a critical section
   : wake-tqueue ( tqueue -- )
     \    begin-critical
+    s" BEGIN WAKE-TQUEUE" trace
     dup wait-limit @ 0> if
       dup wait-counter @ 1+ over wait-limit @ min over wait-counter !
     else
@@ -174,6 +177,7 @@ begin-module-once tqueue-module
     else
       drop
     then
+    s" END WAKE-TQUEUE" trace
 \    end-critical
   ;
 

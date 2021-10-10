@@ -38,9 +38,9 @@ begin-module forth-module
 
   \ Initialize the test
   : init-test ( -- )
-    0 ['] highest 512 256 256 spawn highest-task !
-    0 ['] middle 512 256 256 spawn middle-task !
-    0 ['] lowest 512 256 256 spawn lowest-task !
+    0 ['] highest 256 128 512 spawn highest-task !
+    0 ['] middle 256 128 512 spawn middle-task !
+    0 ['] lowest 256 128 512 spawn lowest-task !
     -1 lowest-task @ set-task-priority
     0 middle-task @ set-task-priority
     1 highest-task @ set-task-priority

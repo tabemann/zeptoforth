@@ -39,30 +39,30 @@ begin-module forth-module
   ;
 
   \ The consumer task
-  0 ' consumer 512 256 256 spawn constant consumer-task
+  0 ' consumer 256 128 512 spawn constant consumer-task
 
   \ The inner loop of a producer
   : do-producer ( -- )
-    does> @ execute
-    cr ." Producer: " 2dup type
+    does> @ execute dup current-task set-task-name
+    cr ." Producer: " dup count type
     ." : " current-task h.8
     begin
-      cr ." Sending: " 2dup type
-      2dup my-fchan send-fchan-2cell
-      cr ." Done sending: " 2dup type
+      cr ." Sending: " dup count type
+      dup count my-fchan send-fchan-2cell
+      cr ." Done sending: " dup count type
     again
   ;
 
   \ Create a producer task
   : make-producer ( xt "name" -- )
-    s" " <builds-with-name , do-producer 0 latest >body 512 256 256 spawn
+    s" " <builds-with-name , do-producer 0 latest >body 256 128 512 spawn
     constant
   ;
 
   \ Create the producers
-  :noname s" A" ; make-producer producer-a-task
-  :noname s" B" ; make-producer producer-b-task
-  :noname s" C" ; make-producer producer-c-task
+  :noname c" A" ; make-producer producer-a-task
+  :noname c" B" ; make-producer producer-b-task
+  :noname c" C" ; make-producer producer-c-task
 
   \ Initiate the test
   : init-test ( -- )

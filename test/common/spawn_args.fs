@@ -48,7 +48,7 @@ begin-module forth-module
     signal-1-fchan init-fchan
     signal-2-fchan init-fchan
     signal-3-fchan init-fchan
-    512 256 256 3 my-task-pool init-task-pool
+    256 128 512 3 my-task-pool init-task-pool
     signal-1-fchan 2 1 0 3 signal-0-fchan 6
     ['] action my-task-pool spawn-from-task-pool run
     signal-2-fchan 12 11 10 3 signal-1-fchan 6
