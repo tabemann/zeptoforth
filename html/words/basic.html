@@ -1346,11 +1346,6 @@ otherwise passing the specified argument through.</p>
 <p>( xt xt-deferred – )</p>
 <p>Set a deferred word; note that a deferred word stored in flash can only have its implementation set once</p>
 </div>
-<div class="section" id="id84">
-<h2><code class="docutils literal notranslate"><span class="pre">defer&#64;</span></code><a class="headerlink" href="#id84" title="Permalink to this headline">¶</a></h2>
-<p>( xt-deferred – xt )</p>
-<p>Get the referred xt from a deferred word</p>
-</div>
 <div class="section" id="ws">
 <h2><code class="docutils literal notranslate"><span class="pre">ws?</span></code><a class="headerlink" href="#ws" title="Permalink to this headline">¶</a></h2>
 <p>( b – flag )</p>
@@ -1376,13 +1371,13 @@ otherwise passing the specified argument through.</p>
 <p>( “token” – b-addr u )</p>
 <p>Parse a token</p>
 </div>
-<div class="section" id="id85">
-<h2><code class="docutils literal notranslate"><span class="pre">\</span></code><a class="headerlink" href="#id85" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id84">
+<h2><code class="docutils literal notranslate"><span class="pre">\</span></code><a class="headerlink" href="#id84" title="Permalink to this headline">¶</a></h2>
 <p>( “comment<NL>” – )</p>
 <p>Parse a line comment</p>
 </div>
-<div class="section" id="id86">
-<h2><code class="docutils literal notranslate"><span class="pre">(</span></code><a class="headerlink" href="#id86" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id85">
+<h2><code class="docutils literal notranslate"><span class="pre">(</span></code><a class="headerlink" href="#id85" title="Permalink to this headline">¶</a></h2>
 <p>( “comment)” – )</p>
 <p>Parse a paren coment</p>
 </div>
@@ -1396,8 +1391,8 @@ otherwise passing the specified argument through.</p>
 <p>( b-addr1 u1 b-addr2 u2 – flag )</p>
 <p>Compare whether two strings are equal</p>
 </div>
-<div class="section" id="id87">
-<h2><code class="docutils literal notranslate"><span class="pre">3dup</span></code><a class="headerlink" href="#id87" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id86">
+<h2><code class="docutils literal notranslate"><span class="pre">3dup</span></code><a class="headerlink" href="#id86" title="Permalink to this headline">¶</a></h2>
 <p>( x1 x2 x3 – x1 x2 x3 x1 x2 x3 )</p>
 <p>Duplicate three items on the stack</p>
 </div>
@@ -1501,8 +1496,8 @@ otherwise passing the specified argument through.</p>
 <p>( b base – u success  )</p>
 <p>Parse a digit</p>
 </div>
-<div class="section" id="id88">
-<h2><code class="docutils literal notranslate"><span class="pre">:</span></code><a class="headerlink" href="#id88" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id87">
+<h2><code class="docutils literal notranslate"><span class="pre">:</span></code><a class="headerlink" href="#id87" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Start a colon definition</p>
 </div>
@@ -1511,8 +1506,8 @@ otherwise passing the specified argument through.</p>
 <p>( – xt )</p>
 <p>Start an anonymous colon definition</p>
 </div>
-<div class="section" id="id89">
-<h2><code class="docutils literal notranslate"><span class="pre">;</span></code><a class="headerlink" href="#id89" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id88">
+<h2><code class="docutils literal notranslate"><span class="pre">;</span></code><a class="headerlink" href="#id88" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>End a colon definition</p>
 </div>
@@ -1521,8 +1516,8 @@ otherwise passing the specified argument through.</p>
 <p>( x “name” – )</p>
 <p>Create a constant</p>
 </div>
-<div class="section" id="id90">
-<h2><code class="docutils literal notranslate"><span class="pre">2constant</span></code><a class="headerlink" href="#id90" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id89">
+<h2><code class="docutils literal notranslate"><span class="pre">2constant</span></code><a class="headerlink" href="#id89" title="Permalink to this headline">¶</a></h2>
 <p>( d “name” – )</p>
 <p>Create a 2-word constant</p>
 </div>
@@ -1561,18 +1556,18 @@ otherwise passing the specified argument through.</p>
 <p>( b – )</p>
 <p>Add a character to pictured numeric output</p>
 </div>
-<div class="section" id="id91">
-<h2><code class="docutils literal notranslate"><span class="pre">&lt;#</span></code><a class="headerlink" href="#id91" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id90">
+<h2><code class="docutils literal notranslate"><span class="pre">&lt;#</span></code><a class="headerlink" href="#id90" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Start pictured numeric output</p>
 </div>
-<div class="section" id="id92">
-<h2><code class="docutils literal notranslate"><span class="pre">#</span></code><a class="headerlink" href="#id92" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id91">
+<h2><code class="docutils literal notranslate"><span class="pre">#</span></code><a class="headerlink" href="#id91" title="Permalink to this headline">¶</a></h2>
 <p>( ud1 – ud2 )</p>
 <p>Add a digit to the pictured numeric output</p>
 </div>
-<div class="section" id="id93">
-<h2><code class="docutils literal notranslate"><span class="pre">#s</span></code><a class="headerlink" href="#id93" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id92">
+<h2><code class="docutils literal notranslate"><span class="pre">#s</span></code><a class="headerlink" href="#id92" title="Permalink to this headline">¶</a></h2>
 <p>( ud – 0 0 )</p>
 <p>Add one or more digits to the pictured numeric output</p>
 </div>
@@ -1581,8 +1576,8 @@ otherwise passing the specified argument through.</p>
 <p>( n – )</p>
 <p>If n (a single number) is negative, append ‘-‘ to the pictured numeric output</p>
 </div>
-<div class="section" id="id94">
-<h2><code class="docutils literal notranslate"><span class="pre">#&gt;</span></code><a class="headerlink" href="#id94" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id93">
+<h2><code class="docutils literal notranslate"><span class="pre">#&gt;</span></code><a class="headerlink" href="#id93" title="Permalink to this headline">¶</a></h2>
 <p>( xd – c-addr bytes )</p>
 <p>Finish pictured numeric output</p>
 </div>
@@ -1606,13 +1601,13 @@ otherwise passing the specified argument through.</p>
 <p>( ud – )</p>
 <p>Type an unsigned double-cell number without a leading space</p>
 </div>
-<div class="section" id="id95">
-<h2><code class="docutils literal notranslate"><span class="pre">d.</span></code><a class="headerlink" href="#id95" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id94">
+<h2><code class="docutils literal notranslate"><span class="pre">d.</span></code><a class="headerlink" href="#id94" title="Permalink to this headline">¶</a></h2>
 <p>( nd – )</p>
 <p>Type a signed double-cell number with a leading space</p>
 </div>
-<div class="section" id="id96">
-<h2><code class="docutils literal notranslate"><span class="pre">ud.</span></code><a class="headerlink" href="#id96" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id95">
+<h2><code class="docutils literal notranslate"><span class="pre">ud.</span></code><a class="headerlink" href="#id95" title="Permalink to this headline">¶</a></h2>
 <p>( ud – )</p>
 <p>Type an unsigned double-cell number with a leading space</p>
 </div>
@@ -1626,8 +1621,8 @@ otherwise passing the specified argument through.</p>
 <p>( f – )</p>
 <p>Type a fixed-point number without a leading space</p>
 </div>
-<div class="section" id="id97">
-<h2><code class="docutils literal notranslate"><span class="pre">f.</span></code><a class="headerlink" href="#id97" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id96">
+<h2><code class="docutils literal notranslate"><span class="pre">f.</span></code><a class="headerlink" href="#id96" title="Permalink to this headline">¶</a></h2>
 <p>( f – )</p>
 <p>Type a fixed-point number with a leading space</p>
 </div>
@@ -1666,43 +1661,43 @@ otherwise passing the specified argument through.</p>
 <p>( – )</p>
 <p>Display the license notice</p>
 </div>
-<div class="section" id="id98">
-<h2><code class="docutils literal notranslate"><span class="pre">.&quot;</span></code><a class="headerlink" href="#id98" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id97">
+<h2><code class="docutils literal notranslate"><span class="pre">.&quot;</span></code><a class="headerlink" href="#id97" title="Permalink to this headline">¶</a></h2>
 <p>( “text<quote>” – )</p>
 <p>Compile a string to be printed.</p>
 </div>
-<div class="section" id="id99">
-<h2><code class="docutils literal notranslate"><span class="pre">s&quot;</span></code><a class="headerlink" href="#id99" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id98">
+<h2><code class="docutils literal notranslate"><span class="pre">s&quot;</span></code><a class="headerlink" href="#id98" title="Permalink to this headline">¶</a></h2>
 <p>( “text<quote>” – ) ( compiled: – b-addr u )</p>
 <p>Compile a non-counted string</p>
 </div>
-<div class="section" id="id100">
-<h2><code class="docutils literal notranslate"><span class="pre">c&quot;</span></code><a class="headerlink" href="#id100" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id99">
+<h2><code class="docutils literal notranslate"><span class="pre">c&quot;</span></code><a class="headerlink" href="#id99" title="Permalink to this headline">¶</a></h2>
 <p>( “text<quote>” – ) ( compiled: – b-addr )</p>
 <p>Compile a counted-string</p>
 </div>
-<div class="section" id="id101">
-<h2><code class="docutils literal notranslate"><span class="pre">.(</span></code><a class="headerlink" href="#id101" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id100">
+<h2><code class="docutils literal notranslate"><span class="pre">.(</span></code><a class="headerlink" href="#id100" title="Permalink to this headline">¶</a></h2>
 <p>( “text<close-paren>” – )</p>
 <p>Immediately print a string.</p>
 </div>
-<div class="section" id="id102">
-<h2><code class="docutils literal notranslate"><span class="pre">.\&quot;</span></code><a class="headerlink" href="#id102" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id101">
+<h2><code class="docutils literal notranslate"><span class="pre">.\&quot;</span></code><a class="headerlink" href="#id101" title="Permalink to this headline">¶</a></h2>
 <p>( “text<quote>” – )</p>
 <p>Compile an escaped string to be printed.</p>
 </div>
-<div class="section" id="id103">
-<h2><code class="docutils literal notranslate"><span class="pre">s\&quot;</span></code><a class="headerlink" href="#id103" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id102">
+<h2><code class="docutils literal notranslate"><span class="pre">s\&quot;</span></code><a class="headerlink" href="#id102" title="Permalink to this headline">¶</a></h2>
 <p>( “text<quote>” – ) ( compiled: – b-addr u )</p>
 <p>Compile an escaped non-counted string</p>
 </div>
-<div class="section" id="id104">
-<h2><code class="docutils literal notranslate"><span class="pre">c\&quot;</span></code><a class="headerlink" href="#id104" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id103">
+<h2><code class="docutils literal notranslate"><span class="pre">c\&quot;</span></code><a class="headerlink" href="#id103" title="Permalink to this headline">¶</a></h2>
 <p>( “text<quote>” – ) ( compiled: – b-addr )</p>
 <p>Compile an escaped counted-string</p>
 </div>
-<div class="section" id="id105">
-<h2><code class="docutils literal notranslate"><span class="pre">.\(</span></code><a class="headerlink" href="#id105" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id104">
+<h2><code class="docutils literal notranslate"><span class="pre">.\(</span></code><a class="headerlink" href="#id104" title="Permalink to this headline">¶</a></h2>
 <p>( “text<close-paren>” – )</p>
 <p>Immediately print an escaped string.</p>
 </div>
@@ -1716,18 +1711,18 @@ otherwise passing the specified argument through.</p>
 <p>( “char” – b )</p>
 <p>Parse a character and put it on the stack</p>
 </div>
-<div class="section" id="id106">
-<h2><code class="docutils literal notranslate"><span class="pre">[char]</span></code><a class="headerlink" href="#id106" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id105">
+<h2><code class="docutils literal notranslate"><span class="pre">[char]</span></code><a class="headerlink" href="#id105" title="Permalink to this headline">¶</a></h2>
 <p>( “char” – ) ( compiled: – b )</p>
 <p>Parse a character and compile it</p>
 </div>
-<div class="section" id="id107">
-<h2><code class="docutils literal notranslate"><span class="pre">(.)</span></code><a class="headerlink" href="#id107" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id106">
+<h2><code class="docutils literal notranslate"><span class="pre">(.)</span></code><a class="headerlink" href="#id106" title="Permalink to this headline">¶</a></h2>
 <p>( n – )</p>
 <p>Type an integer without a preceding space</p>
 </div>
-<div class="section" id="id108">
-<h2><code class="docutils literal notranslate"><span class="pre">(u.)</span></code><a class="headerlink" href="#id108" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id107">
+<h2><code class="docutils literal notranslate"><span class="pre">(u.)</span></code><a class="headerlink" href="#id107" title="Permalink to this headline">¶</a></h2>
 <p>( u – )</p>
 <p>Type an unsigned integer without a preceding space</p>
 </div>
@@ -1736,13 +1731,13 @@ otherwise passing the specified argument through.</p>
 <p>( u – )</p>
 <p>Type an unsigned hexadecimal integer safely without a preceding space</p>
 </div>
-<div class="section" id="id109">
-<h2><code class="docutils literal notranslate"><span class="pre">.</span></code><a class="headerlink" href="#id109" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id108">
+<h2><code class="docutils literal notranslate"><span class="pre">.</span></code><a class="headerlink" href="#id108" title="Permalink to this headline">¶</a></h2>
 <p>( n – )</p>
 <p>Type an integer with a preceding space</p>
 </div>
-<div class="section" id="id110">
-<h2><code class="docutils literal notranslate"><span class="pre">u.</span></code><a class="headerlink" href="#id110" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id109">
+<h2><code class="docutils literal notranslate"><span class="pre">u.</span></code><a class="headerlink" href="#id109" title="Permalink to this headline">¶</a></h2>
 <p>( u – )</p>
 <p>Type an unsigned integer with a preceding space</p>
 </div>
@@ -2086,17 +2081,16 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l2"><a class="reference internal" href="#defer-ram"><code class="docutils literal notranslate"><span class="pre">defer-ram!</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#defer-flash"><code class="docutils literal notranslate"><span class="pre">defer-flash!</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id83"><code class="docutils literal notranslate"><span class="pre">defer!</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id84"><code class="docutils literal notranslate"><span class="pre">defer&#64;</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ws"><code class="docutils literal notranslate"><span class="pre">ws?</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#newline"><code class="docutils literal notranslate"><span class="pre">newline?</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#token-start"><code class="docutils literal notranslate"><span class="pre">token-start</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#token-end"><code class="docutils literal notranslate"><span class="pre">token-end</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#token"><code class="docutils literal notranslate"><span class="pre">token</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id85"><code class="docutils literal notranslate"><span class="pre">\</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id86"><code class="docutils literal notranslate"><span class="pre">(</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id84"><code class="docutils literal notranslate"><span class="pre">\</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id85"><code class="docutils literal notranslate"><span class="pre">(</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#to-upper-char"><code class="docutils literal notranslate"><span class="pre">to-upper-char</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#equal-case-strings"><code class="docutils literal notranslate"><span class="pre">equal-case-strings?</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id87"><code class="docutils literal notranslate"><span class="pre">3dup</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id86"><code class="docutils literal notranslate"><span class="pre">3dup</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#find"><code class="docutils literal notranslate"><span class="pre">find</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#find-all"><code class="docutils literal notranslate"><span class="pre">find-all</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#body"><code class="docutils literal notranslate"><span class="pre">&gt;body</span></code></a></li>
@@ -2117,11 +2111,11 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l2"><a class="reference internal" href="#parse-unsigned"><code class="docutils literal notranslate"><span class="pre">parse-unsigned</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#parse-base"><code class="docutils literal notranslate"><span class="pre">parse-base</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#parse-digit"><code class="docutils literal notranslate"><span class="pre">parse-digit</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id88"><code class="docutils literal notranslate"><span class="pre">:</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id87"><code class="docutils literal notranslate"><span class="pre">:</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#noname"><code class="docutils literal notranslate"><span class="pre">:noname</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id89"><code class="docutils literal notranslate"><span class="pre">;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id88"><code class="docutils literal notranslate"><span class="pre">;</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#constant"><code class="docutils literal notranslate"><span class="pre">constant</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id90"><code class="docutils literal notranslate"><span class="pre">2constant</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id89"><code class="docutils literal notranslate"><span class="pre">2constant</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#token-expected"><code class="docutils literal notranslate"><span class="pre">token-expected</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#not-compiling"><code class="docutils literal notranslate"><span class="pre">not-compiling</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#compile-to-ram-only"><code class="docutils literal notranslate"><span class="pre">compile-to-ram-only</span></code></a></li>
@@ -2129,20 +2123,20 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l2"><a class="reference internal" href="#if"><code class="docutils literal notranslate"><span class="pre">[if]</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#then"><code class="docutils literal notranslate"><span class="pre">[then]</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#hold"><code class="docutils literal notranslate"><span class="pre">hold</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id91"><code class="docutils literal notranslate"><span class="pre">&lt;#</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id92"><code class="docutils literal notranslate"><span class="pre">#</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id93"><code class="docutils literal notranslate"><span class="pre">#s</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id90"><code class="docutils literal notranslate"><span class="pre">&lt;#</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id91"><code class="docutils literal notranslate"><span class="pre">#</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id92"><code class="docutils literal notranslate"><span class="pre">#s</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#sign"><code class="docutils literal notranslate"><span class="pre">sign</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id94"><code class="docutils literal notranslate"><span class="pre">#&gt;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id93"><code class="docutils literal notranslate"><span class="pre">#&gt;</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#format-double"><code class="docutils literal notranslate"><span class="pre">format-double</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#format-double-unsigned"><code class="docutils literal notranslate"><span class="pre">format-double-unsigned</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#d"><code class="docutils literal notranslate"><span class="pre">(d.)</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ud"><code class="docutils literal notranslate"><span class="pre">(ud.)</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id95"><code class="docutils literal notranslate"><span class="pre">d.</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id96"><code class="docutils literal notranslate"><span class="pre">ud.</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id94"><code class="docutils literal notranslate"><span class="pre">d.</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id95"><code class="docutils literal notranslate"><span class="pre">ud.</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#format-fixed"><code class="docutils literal notranslate"><span class="pre">format-fixed</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#f"><code class="docutils literal notranslate"><span class="pre">(f.)</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id97"><code class="docutils literal notranslate"><span class="pre">f.</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id96"><code class="docutils literal notranslate"><span class="pre">f.</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#wait"><code class="docutils literal notranslate"><span class="pre">wait</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ms"><code class="docutils literal notranslate"><span class="pre">ms</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#forget-ram"><code class="docutils literal notranslate"><span class="pre">forget-ram</span></code></a></li>
@@ -2150,22 +2144,22 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l2"><a class="reference internal" href="#free"><code class="docutils literal notranslate"><span class="pre">free</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#copyright"><code class="docutils literal notranslate"><span class="pre">copyright</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#license"><code class="docutils literal notranslate"><span class="pre">license</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id98"><code class="docutils literal notranslate"><span class="pre">.&quot;</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id99"><code class="docutils literal notranslate"><span class="pre">s&quot;</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id100"><code class="docutils literal notranslate"><span class="pre">c&quot;</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id101"><code class="docutils literal notranslate"><span class="pre">.(</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id102"><code class="docutils literal notranslate"><span class="pre">.\&quot;</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id103"><code class="docutils literal notranslate"><span class="pre">s\&quot;</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id104"><code class="docutils literal notranslate"><span class="pre">c\&quot;</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id105"><code class="docutils literal notranslate"><span class="pre">.\(</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id97"><code class="docutils literal notranslate"><span class="pre">.&quot;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id98"><code class="docutils literal notranslate"><span class="pre">s&quot;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id99"><code class="docutils literal notranslate"><span class="pre">c&quot;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id100"><code class="docutils literal notranslate"><span class="pre">.(</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id101"><code class="docutils literal notranslate"><span class="pre">.\&quot;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id102"><code class="docutils literal notranslate"><span class="pre">s\&quot;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id103"><code class="docutils literal notranslate"><span class="pre">c\&quot;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id104"><code class="docutils literal notranslate"><span class="pre">.\(</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#compile-cstring"><code class="docutils literal notranslate"><span class="pre">compile-cstring</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#char"><code class="docutils literal notranslate"><span class="pre">char</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id106"><code class="docutils literal notranslate"><span class="pre">[char]</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id107"><code class="docutils literal notranslate"><span class="pre">(.)</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id108"><code class="docutils literal notranslate"><span class="pre">(u.)</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id105"><code class="docutils literal notranslate"><span class="pre">[char]</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id106"><code class="docutils literal notranslate"><span class="pre">(.)</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id107"><code class="docutils literal notranslate"><span class="pre">(u.)</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#debugu"><code class="docutils literal notranslate"><span class="pre">debugu.</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id109"><code class="docutils literal notranslate"><span class="pre">.</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id110"><code class="docutils literal notranslate"><span class="pre">u.</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id108"><code class="docutils literal notranslate"><span class="pre">.</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id109"><code class="docutils literal notranslate"><span class="pre">u.</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#move"><code class="docutils literal notranslate"><span class="pre">move</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#reverse"><code class="docutils literal notranslate"><span class="pre">reverse</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#spaces"><code class="docutils literal notranslate"><span class="pre">spaces</span></code></a></li>
@@ -2193,7 +2187,7 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="allocate.html">Allocator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>

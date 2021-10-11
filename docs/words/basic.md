@@ -1305,11 +1305,6 @@ Set a deferred word in flash
 
 Set a deferred word; note that a deferred word stored in flash can only have its implementation set once
 
-##### `defer@`
-( xt-deferred -- xt )
-
-Get the referred xt from a deferred word
-
 ##### `ws?`
 ( b -- flag )
 

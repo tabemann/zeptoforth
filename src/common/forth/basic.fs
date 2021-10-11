@@ -592,27 +592,35 @@ commit-flash
 
 \ Create an arbitrary-sized field
 : +field ( offset size "name" -- offset )
-  : inlined over lit, postpone + postpone ; +
+  : over 65536 u< thumb-2 or if inlined then
+    over lit, postpone + postpone ; +
 ;
 
 \ Create a byte-sized field
 : cfield: ( offset "name" -- offset )
-  : inlined dup lit, postpone + postpone ; 1+
+  : dup 65536 u< thumb-2 or if inlined then
+    dup lit, postpone + postpone ; 1+
 ;
 
 \ Create a halfword-sized field
 : hfield: ( offset "name" -- offset )
-  : inlined 2 align dup lit, postpone + postpone ; 2+
+  : 2 align
+    dup 65536 u< thumb-2 or if inlined then
+    dup lit, postpone + postpone ; 2+
 ;
 
 \ Create a cell-sized field
 : field: ( offset "name" -- offset )
-  : inlined cell align dup lit, postpone + postpone ; cell+
+  : cell align
+    dup 65536 u< thumb-2 or if inlined then
+    dup lit, postpone + postpone ; cell+
 ;
 
 \ Create a double cell-sized field
 : 2field: ( offset "name" -- offset )
-  : inlined 2 cells align dup lit, postpone + postpone ; 2 cells +
+  : cell align
+    dup 65536 u< thumb-2 or if inlined then
+    dup lit, postpone + postpone ; 2 cells +
 ;
 
 \ Get whether two strings are equal

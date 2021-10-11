@@ -246,3 +246,23 @@ Set the name of a task as a counted string; an address of zero indicates to set 
 ( -- )
 
 Dump information for each task that is in the schedule.
+
+##### `enable-trace`
+( -- )
+
+Enable dumping trace information when trace points are reached, i.e. the associated name of the trace point, the data stack of the task that hit the trace point, the critical depth at that time, and the states of all the tasks at at that point in time.
+
+##### `disable-trace`
+( -- )
+
+Disable dumping trace information.
+
+##### `trace-enable?`
+( -- flag )
+
+Get whether dumping trace information is enabled.
+
+##### `trace`
+( c-addr bytes -- )
+
+Specify a trace point with the given name which is displayed when the trace point is reached.
