@@ -1,5 +1,4 @@
-\ Copyright (c) 2013? Matthias Koch
-\ Copyright (c) 2020-2021 Travis Bemann
+\ Copyright (c) 2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -27,53 +26,16 @@ begin-import-module-once led-module
   import gpio-module
 
   \ Initialize the LEDs
-  : led-init  ( -- )
-    GPIOD gpio-clock-enable
-    OUTPUT_MODE 12 GPIOD MODER!
-    OUTPUT_MODE 13 GPIOD MODER!
-    OUTPUT_MODE 14 GPIOD MODER!
-    OUTPUT_MODE 15 GPIOD MODER!
-  ;
+  : led-init ( -- ) 1 25 lshift GPIO_OE_SET ! ;
 
-  \ Turn the orange LED on
-  : led-orange-on ( -- )
-    true 13 GPIOD BSRR!
-  ;
+  \ Turn the LED on
+  : led-on ( -- ) 1 25 lshift GPIO_OUT_SET ! ;
 
-  \ Turn the orange LED off
-  : led-orange-off ( -- )
-    false 13 GPIOD BSRR!
-  ;
+  \ Turn the LED off
+  : led-off ( -- ) 1 25 lshift GPIO_OUT_CLR ! ;
 
-  \ Turn the green LED on
-  : led-green-on  ( -- )
-    true 12 GPIOD BSRR!
-  ;
-
-  \ Turn the green LED off
-  : led-green-off  ( -- )
-    false 12 GPIOD BSRR!
-  ;
-
-  \ Turn the red LED on
-  : led-red-on  ( -- )
-    true 14 GPIOD BSRR!
-  ;
-
-  \ Turn the red LED off
-  : led-red-off  ( -- )
-    false 14 GPIOD BSRR!
-  ;
-
-  \ Turn the blue LED on
-  : led-blue-on  ( -- )
-    true 15 GPIOD BSRR!
-  ;
-
-  \ Turn the blue LED off
-  : led-blue-off  ( -- )
-    false 15 GPIOD BSRR!
-  ;
+  \ Toggle the LED
+  : led-toggle ( -- ) 1 25 lshift GPIO_OUT_XOR ! ;
 
 end-module
 
