@@ -25,198 +25,377 @@ begin-module-once gpio-module
   
   begin-import-module gpio-internal-module
   
-    \ GPIO base
-    $40020000 constant GPIO_Base
+    \ IO bank 0 base
+    $40014000 constant IO_BANK0_BASE
 
-    \ GPIO index base
-    : GPIO_Index ( index "name" -- )
-      $400 * GPIO_Base + constant \
-    ;
+    \ PADS bank 0 base
+    $4001C000 constant PADS_BANK0_BASE
 
-    \ A GPIO field
-    : GPIO_Field ( offset "name" -- )
-      <builds , does> @ +
-    ;
-  
-    \ RCC base
-    $40023800 constant RCC_Base
+    \ SIO base
+    $D0000000 constant SIO_BASE
+
+    \ GPIO status registers
+    : GPIO_STATUS ( index -- addr ) 3 lshift IO_BANK0_BASE + ;
+
+    \ GPIO control registers
+    : GPIO_CTRL ( index -- addr ) 3 lshift [ IO_BANK0_BASE 4 + ] literal + ;
+
+    \ Pads registers
+    : PAD ( index -- addr ) 2 lshift [ PADS_BANK0_BASE 4 + ] literal + ;
+
+    \ GPIO raw interrupt registers
+    IO_BANK0_BASE $0F0 + constant INTR0
     
-    \ RCC AHB1 peripheral clock enable register
-    RCC_Base $30 + constant RCC_AHB1ENR
-    
-    \ RCC AHB1 peripheral clock enable in low-power mode register
-    RCC_Base $50 + constant RCC_AHB1LPENR
+    \ GPIO processor 0 interrupt enable registers
+    IO_BANK0_BASE $100 + constant PROC0_INTE0
+
+    \ GPIO processor 0 interrupt force registers
+    IO_BANK0_BASE $110 + constant PROC0_INTF0
+
+    \ GPIO processor 0 interrupt status registers
+    IO_BANK0_BASE $120 + constant PROC0_INTS0
+
+    \ Pads bank 0 voltage select register
+    PADS_BANK0_BASE $00 + constant PADS_BANK0_VOLTAGE_SELECT
 
   end-module
 
-  \ The GPIOs
-  0 GPIO_Index GPIOA
-  1 GPIO_Index GPIOB
-  2 GPIO_Index GPIOC
-  3 GPIO_Index GPIOD
-  4 GPIO_Index GPIOE
-  5 GPIO_Index GPIOF
-  6 GPIO_Index GPIOG
-  7 GPIO_Index GPIOH
-  8 GPIO_Index GPIOI
+  \ Normal control
+  0 constant CTRL_NORMAL
 
-  \ The GPIO fields
-  $00 GPIO_Field MODER
-  $04 GPIO_Field OTYPER
-  $08 GPIO_Field OSPEEDR
-  $0C GPIO_Field PUPDR
-  $10 GPIO_Field IDR
-  $14 GPIO_Field ODR
-  $18 GPIO_Field BSRR
-  $1C GPIO_Field LCKR
-  $20 GPIO_Field AFRL
-  $24 GPIO_Field AFRH
+  \ Invert control
+  1 constant CTRL_INVERT
 
-  \ The GPIO pin modes
-  %00 constant INPUT_MODE
-  %01 constant OUTPUT_MODE
-  %10 constant ALTERNATE_MODE
-  %11 constant ANALOG_MODE
+  \ Force low / disable control
+  2 constant CTRL_FORCE_LOW
 
-  \ The GPIO pin output types
-  %0 constant PUSH_PULL
-  %1 constant OPEN_DRAIN
+  \ Force high / enable control
+  3 constant CTRL_FORCE_HIGH
 
-  \ The GPIO pin output speeds
-  %00 constant LOW_SPEED
-  %01 constant MEDIUM_SPEED
-  %10 constant HIGH_SPEED
-  %11 constant VERY_HIGH_SPEED
+  \ Voltage set to 3.3V
+  0 constant VOLTAGE_3.3V
 
-  \ The GPIO pin pull-up/pull-down settings
-  %00 constant NO_PULL_UP_PULL_DOWN
-  %01 constant PULL_UP
-  %10 constant PULL_DOWN
+  \ Voltage set to 1.8V
+  1 constant VOLTAGE_1.8V
 
-  \ Enable a GPIO peripheral clock
-  : gpio-clock-enable ( gpio -- )
-    GPIO_Base - $400 / bit RCC_AHB1ENR bis!
+  \ Drive strength set to 2mA
+  0 constant DRIVE_2MA
+
+  \ Drive strength set to 4mA
+  1 constant DRIVE_4MA
+
+  \ Drive strength set to 8mA
+  2 constant DRIVE_8MA
+
+  \ Drive strength set to 12mA
+  3 constant DRIVE_12MA
+
+  \ SWCLK index
+  30 constant PAD_SWCLK
+
+  \ SWD index
+  31 constant PAD_SWD
+
+  \ GPIO input register
+  SIO_BASE $004 + constant GPIO_IN
+  
+  \ GPIO output register
+  SIO_BASE $010 + constant GPIO_OUT
+
+  \ GPIO output atomic bit-set register
+  SIO_BASE $014 + constant GPIO_OUT_SET
+  
+  \ GPIO output atomic bit-clear register
+  SIO_BASE $018 + constant GPIO_OUT_CLR
+
+  \ GPIO output atomic bit-xor register
+  SIO_BASE $01C + constant GPIO_OUT_XOR
+    
+  \ GPIO output enable register
+  SIO_BASE $020 + constant GPIO_OE
+
+  \ GPIO output enable atomic bit-set register
+  SIO_BASE $024 + constant GPIO_OE_SET
+  
+  \ GPIO output enable atomic bit-clear register
+  SIO_BASE $028 + constant GPIO_OE_CLR
+  
+  \ GPIO output enable atomic bit-xor register
+  SIO_BASE $02C + constant GPIO_OE_XOR
+
+  \ Get interrupt to processors, after override is applied
+  : GPIO_STATUS_IRQTOPROC@ ( index -- flag )
+    26 bit swap GPIO_STATUS bit@
   ;
 
-  \ Enable a low-power GPIO peripheral clock
-  : gpio-lp-clock-enable ( gpio -- )
-    GPIO_Base - $400 / bit RCC_AHB1LPENR bis!
+  \ Get interrupt from pad, before override is applied
+  : GPIO_STATUS_IRQFROMPAD@ ( index -- flag )
+    24 bit swap GPIO_STATUS bit@
   ;
 
-  \ Disable a GPIO peripheral clock
-  : gpio-clock-disable ( gpio -- )
-    GPIO_Base - $400 / bit RCC_AHB1ENR bic!
+  \ Get input signal to peripheral, after override is applied
+  : GPIO_STATUS_INTOPERI@ ( index -- flag )
+    19 bit swap GPIO_STATUS bit@
   ;
 
-  \ Disable a low-power GPIO peripheral clock
-  : gpio-lp-clock-disable ( gpio -- )
-    GPIO_Base - $400 / bit RCC_AHB1LPENR bic!
+  \ Get input signal from pad, before override is applied
+  : GPIO_STATUS_INFROMPAD@ ( index -- flag )
+    17 bit swap GPIO_STATUS bit@
   ;
 
-  \ Get whether a GPIO peripheral clock is enabled
-  : gpio-clock-enable? ( gpio -- enable )
-    GPIO_Base - $400 / bit RCC_AHB1ENR bit@
+  \ Get output enable to pad, after register override is applied
+  : GPIO_STATUS_OETOPAD@ ( index -- flag )
+    13 bit swap GPIO_STATUS bit@
   ;
 
-  \ Get whether a low-power GPIO peripheral clock is enabled
-  : gpio-lp-clock-enable? ( gpio -- enable )
-    GPIO_Base - $400 / bit RCC_AHB1LPENR bit@
+  \ Get output enable from selected peripheral, before register override is
+  \ applied
+  : GPIO_STATUS_OEFROMPERI@ ( index -- flag )
+    12 bit swap GPIO_STATUS bit@
   ;
 
-  \ Set a GPIOx_MODER field
-  : MODER! ( mode pin gpio -- )
-    MODER dup >r @ over %11 swap 1 lshift lshift bic
-    rot %11 and rot 1 lshift lshift or r> !
+  \ Get output signal to pad, after register override is applied
+  : GPIO_STATUS_OUTTOPAD@ ( index -- flag )
+    9 bit swap GPIO_STATUS bit@
   ;
 
-  \ Set a GPIOx_OTYPER field
-  : OTYPER! ( otype pin gpio -- )
-    OTYPER dup >r @ over bit bic
-    rot %1 and rot lshift or r> !
+  \ Get output signal from selected peripheral, before register override is
+  \ applied
+  : GPIO_STATUS_OUTFROMPERI@ ( index -- flag )
+    8 bit swap GPIO_STATUS bit@
   ;
 
-  \ Set a GPIOx_OSPEEDR field
-  : OSPEEDR! ( ospeed pin gpio -- )
-    OSPEEDR dup >r @ over %11 swap 1 lshift lshift bic
-    rot %11 and rot 1 lshift lshift or r> !
+  \ Set interrupt state for GPIO
+  : GPIO_CTRL_IRQOVER! ( control index -- )
+    GPIO_CTRL dup @ [ 3 28 lshift ] literal bic rot 3 and 28 lshift or swap !
   ;
 
-  \ Set a GPIOx_PUPDR field
-  : PUPDR! ( pupd pin gpio -- )
-    PUPDR dup >r @ over %11 swap 1 lshift lshift bic
-    rot %11 and rot 1 lshift lshift or r> !
+  \ Set peripheral input state for GPIO
+  : GPIO_CTRL_INOVER! ( control index -- )
+    GPIO_CTRL dup @ [ 3 16 lshift ] literal bic rot 3 and 16 lshift or swap !
   ;
 
-  \ Set a GPIOx_AFRL field
-  : AFRL! ( af pin gpio -- )
-    AFRL dup >r @ over %1111 swap 2 lshift lshift bic
-    rot %1111 and rot 2 lshift lshift or r> !
+  \ Set output enable state for GPIO
+  : GPIO_CTRL_OEOVER! ( control index -- )
+    GPIO_CTRL dup @ [ 3 12 lshift ] literal bic rot 3 and 12 lshift or swap !
   ;
 
-  \ Set a GPIOx_AFRH field
-  : AFRH! ( af pin gpio -- )
-    swap 8 - swap AFRH dup >r @ over %1111 swap 2 lshift lshift bic
-    rot %1111 and rot 2 lshift lshift or r> !
+  \ Set output state for GPIO
+  : GPIO_CTRL_OUTOVER! ( control index -- )
+    GPIO_CTRL dup @ [ 3 8 lshift ] literal bic rot 3 and 8 lshift or swap !
   ;
 
-  \ Set either a GPIOx_AFRL field or a GPIOx_AFRH field
-  : AFR! ( af pin gpio -- )
-    over 8 >= if AFRH! else AFRL! then
+  \ Set the function select for GPIO
+  : GPIO_CTRL_FUNCSEL! ( function index -- )
+    GPIO_CTRL dup @ $1F bic rot $1F and or swap !
   ;
 
-  \ Set a single bit on a GPIO pin
-  : BS! ( pin gpio -- )
-    BSRR 1 rot lshift swap !
+  \ Get interrupt state for GPIO
+  : GPIO_CTRL_IRQOVER@ ( index -- control )
+    GPIO_CTRL @ 28 rshift 3 and
   ;
 
-  \ Reset a single bit on a GPIO pin
-  : BR! ( pin gpio -- )
-    BSRR 1 rot 16 + lshift swap !
+  \ Get peripheral input state for GPIO
+  : GPIO_CTRL_INOVER@ ( index -- control )
+    GPIO_CTRL @ 16 rshift 3 and
   ;
 
-  \ Set or reset a single bit on a GPIO pin
-  : BSRR! ( output pin gpio -- )
-    rot if BS! else BR! then
+  \ Get output enable state for GPIO
+  : GPIO_CTRL_OEOVER@ ( index -- control )
+    GPIO_CTRL @ 12 rshift 3 and
   ;
 
-  \ Get a GPIOx_MODER field
-  : MODER@ ( pin gpio -- mode )
-    MODER @ swap 1 lshift rshift %11 and
+  \ Get output state for GPIO
+  : GPIO_CTRL_OUTOVER@ ( index -- control )
+    GPIO_CTRL @ 8 rshift 3 and
   ;
 
-  \ Get a GPIOx_OTYPER field
-  : OTYPER@ ( pin gpio -- otype )
-    OTYPER @ swap rshift %1 and
+  \ Set the function select for GPIO
+  : GPIO_CTRL_FUNCSEL@ ( index -- function )
+    GPIO_CTRL @ $1F and
   ;
 
-  \ Get a GPIOx_OSPEEDR field
-  : OSPEEDR@ ( pin gpio -- ospeed )
-    OSPEEDR @ swap 1 lshift rshift %11 and
+  \ Clear a raw edge low interrupt
+  : INTR_GPIO_EDGE_LOW! ( index -- )
+    dup 1 and 2 lshift 2 + bit swap 1 rshift INTR0 + bis!
   ;
 
-  \ Get a GPIOx_OSPEEDR field
-  : PUPDR@ ( pin gpio -- pupd )
-    PUPDR @ swap 1 lshift rshift %11 and
+  \ Clear a raw edge high interrupt
+  : INTR_GPIO_EDGE_HIGH! ( index -- )
+    dup 1 and 2 lshift 3 + bit swap 1 rshift INTR0 + bis!
+  ;
+  
+  \ Get a level low raw interrupt state
+  : INTR_GPIO_LEVEL_LOW@ ( index -- state )
+    dup 1 and 2 lshift bit swap 1 rshift INTR0 + bit@
   ;
 
-  \ Get a GPIOx_AFRL field
-  : AFRL@ ( pin gpio -- af )
-    AFRL @ swap 2 lshift rshift %1111 and
+  \ Get a level high raw interrupt state
+  : INTR_GPIO_LEVEL_HIGH@ ( index -- state )
+    dup 1 and 2 lshift 1 + bit swap 1 rshift INTR0 + bit@
   ;
 
-  \ Get a GPIOx_AFRH field
-  : AFRH@ ( pin gpio -- af )
-    AFRH @ swap 8 - 2 lshift rshift %1111 and
+  \ Get an edge low raw interrupt state
+  : INTR_GPIO_EDGE_LOW@ ( index -- state )
+    dup 1 and 2 lshift 2 + bit swap 1 rshift INTR0 + bit@
   ;
 
-  \ Get either a GPIOx_AFRL field or a GPIOx_AFRH field
-  : AFR@ ( pin gpio -- af )
-    over 8 >= if AFRH@ else AFRL@ then
+  \ Get an edge high raw interrupt state
+  : INTR_GPIO_EDGE_HIGH@ ( index -- state )
+    dup 1 and 2 lshift 3 + bit swap 1 rshift INTR0 + bit@
+  ;
+  
+  \ Set a level low interrupt enable for processor 0
+  : PROC0_INTE_GPIO_LEVEL_LOW! ( enable index -- )
+    dup 1 and 2 lshift bit swap 1 rshift PROC0_INTE0 +
+    rot if bis! else bic! then
   ;
 
-  \ Get an input for an GPIO pin
-  : IDR@ ( pin gpio -- input )
-    IDR @ swap rshift %1 and 0<>
+  \ Set a level high interrupt enable for processor 0
+  : PROC0_INTE_GPIO_LEVEL_HIGH! ( enable index -- )
+    dup 1 and 2 lshift 1 + bit swap 1 rshift PROC0_INTE0 +
+    rot if bis! else bic! then
   ;
+
+  \ Set an edge low interrupt enable for processor 0
+  : PROC0_INTE_GPIO_EDGE_LOW! ( enable index -- )
+    dup 1 and 2 lshift 2 + bit swap 1 rshift PROC0_INTE0 +
+    rot if bis! else bic! then
+  ;
+
+  \ Set an edge high interrupt enable for processor 0
+  : PROC0_INTE_GPIO_EDGE_HIGH! ( enable index -- )
+    dup 1 and 2 lshift 3 + bit swap 1 rshift PROC0_INTE0 +
+    rot if bis! else bic! then
+  ;
+  
+  \ Get a level low interrupt enable for processor 0
+  : PROC0_INTE_GPIO_LEVEL_LOW@ ( index -- enable )
+    dup 1 and 2 lshift bit swap 1 rshift PROC0_INTE0 + bit@
+  ;
+
+  \ Get a level high interrupt enable for processor 0
+  : PROC0_INTE_GPIO_LEVEL_HIGH@ ( index -- enable )
+    dup 1 and 2 lshift 1 + bit swap 1 rshift PROC0_INTE0 + bit@
+  ;
+
+  \ Get an edge low interrupt enable for processor 0
+  : PROC0_INTE_GPIO_EDGE_LOW@ ( index -- enable )
+    dup 1 and 2 lshift 2 + bit swap 1 rshift PROC0_INTE0 + bit@
+  ;
+
+  \ Get an edge high interrupt enable for processor 0
+  : PROC0_INTE_GPIO_EDGE_HIGH@ ( index -- enable )
+    dup 1 and 2 lshift 3 + bit swap 1 rshift PROC0_INTE0 + bit@
+  ;
+
+  \ Set a level low interrupt force for processor 0
+  : PROC0_INTF_GPIO_LEVEL_LOW! ( force index -- )
+    dup 1 and 2 lshift bit swap 1 rshift PROC0_INTF0 +
+    rot if bis! else bic! then
+  ;
+
+  \ Set a level high interrupt force for processor 0
+  : PROC0_INTF_GPIO_LEVEL_HIGH! ( force index -- )
+    dup 1 and 2 lshift 1 + bit swap 1 rshift PROC0_INTF0 +
+    rot if bis! else bic! then
+  ;
+
+  \ Set an edge low interrupt force for processor 0
+  : PROC0_INTF_GPIO_EDGE_LOW! ( force index -- )
+    dup 1 and 2 lshift 2 + bit swap 1 rshift PROC0_INTF0 +
+    rot if bis! else bic! then
+  ;
+
+  \ Set an edge high interrupt force for processor 0
+  : PROC0_INTF_GPIO_EDGE_HIGH! ( force index -- )
+    dup 1 and 2 lshift 3 + bit swap 1 rshift PROC0_INTF0 +
+    rot if bis! else bic! then
+  ;
+  
+  \ Get a level low interrupt force for processor 0
+  : PROC0_INTF_GPIO_LEVEL_LOW@ ( index -- force )
+    dup 1 and 2 lshift bit swap 1 rshift PROC0_INTF0 + bit@
+  ;
+
+  \ Get a level high interrupt force for processor 0
+  : PROC0_INTF_GPIO_LEVEL_HIGH@ ( index -- force )
+    dup 1 and 2 lshift 1 + bit swap 1 rshift PROC0_INTF0 + bit@
+  ;
+
+  \ Get an edge low interrupt force for processor 0
+  : PROC0_INTF_GPIO_EDGE_LOW@ ( index -- force )
+    dup 1 and 2 lshift 2 + bit swap 1 rshift PROC0_INTF0 + bit@
+  ;
+
+  \ Get an edge high interrupt force for processor 0
+  : PROC0_INTF_GPIO_EDGE_HIGH@ ( index -- force )
+    dup 1 and 2 lshift 3 + bit swap 1 rshift PROC0_INTF0 + bit@
+  ;
+
+  \ Get a level low interrupt status for processor 0
+  : PROC0_INTS_GPIO_LEVEL_LOW@ ( index -- enable )
+    dup 1 and 2 lshift bit swap 1 rshift PROC0_INTS0 + bit@
+  ;
+
+  \ Get a level high interrupt status for processor 0
+  : PROC0_INTS_GPIO_LEVEL_HIGH@ ( index -- enable )
+    dup 1 and 2 lshift 1 + bit swap 1 rshift PROC0_INTS0 + bit@
+  ;
+
+  \ Get an edge low interrupt status for processor 0
+  : PROC0_INTS_GPIO_EDGE_LOW@ ( index -- enable )
+    dup 1 and 2 lshift 2 + bit swap 1 rshift PROC0_INTS0 + bit@
+  ;
+
+  \ Get an edge high interrupt status for processor 0
+  : PROC0_INTS_GPIO_EDGE_HIGH@ ( index -- enable )
+    dup 1 and 2 lshift 3 + bit swap 1 rshift PROC0_INTS0 + bit@
+  ;
+
+  \ Select voltage for pads
+  : PADS_BANK0_VOLTAGE_SELECT! ( voltage -- )
+    1 and PADS_BANK0_VOLTAGE_SELECT !
+  ;
+
+  \ Get voltage for pads
+  : PADS_BANK0_VOLTAGE_SELECT@ ( -- voltage )
+    PADS_BANK0_VOLTAGE_SELECT @ 1 and
+  ;
+
+  \ Set output disable
+  : PADS_BANK0_OD! ( disable index -- )
+    7 bit swap PAD rot if bis! else bic! then
+  ;
+
+  \ Set input enable
+  : PADS_BANK0_IE! ( enable index -- )
+    6 bit swap PAD rot if bis! else bic! then
+  ;
+
+  \ Set drive strength
+  : PADS_BANK0_DRIVE! ( strength index -- )
+    PAD dup @ [ 3 4 lshift ] literal bic rot 3 and 4 lshift or swap !
+  ;
+
+  \ Set pull up enable
+  : PADS_BANK0_PUE! ( enable index -- )
+    3 bit swap PAD rot if bis! else bic! then
+  ;
+
+  \ Set pull down enable
+  : PADS_BANK0_PDE! ( enable index -- )
+    2 bit swap PAD rot if bis! else bic! then
+  ;
+
+  \ Set schmitt trigger
+  : PADS_BANK0_SCHMITT! ( enable index -- )
+    1 bit swap PAD rot if bis! else bic! then
+  ;
+
+  \ Set slew rate control
+  : PADS_BANK0_SLEWFAST ( fast index -- )
+    0 bit swap PAD rot if bis! else bic! then
+  ;  
 
 end-module

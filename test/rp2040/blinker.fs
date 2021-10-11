@@ -1,5 +1,5 @@
-\ Copyright (c) 2020-2021 Travis Bemann
-\
+\ Copyright (c) 2021 Travis Bemann
+\ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
 \ in the Software without restriction, including without limitation the rights
@@ -18,17 +18,30 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ This is not actual Forth code, but rather setup directives for e4thcom to be
-\ executed from the root of the zeptoforth directory to initialize zeptoforth
-\ on an RP2040 device.
+begin-module forth-module
 
-\ #include src/rp2040/forth/clock.fs
-#include src/common/forth/basic.fs
-#include src/common/forth/module.fs
-#include src/common/forth/interrupt.fs
-#include src/rp2040/forth/erase.fs
-#include src/common/forth/systick.fs
-#include src/rp2040/forth/int_io.fs
-#include src/rp2040/forth/gpio.fs
-#include src/common/forth/task.fs
-#include src/common/forth/swdcom.fs
+  import task-module
+  import led-module
+
+  \ The blinker delay time
+  variable blinker-delay
+
+  \ The blinker
+  : blinker ( -- )
+    begin
+      led-toggle
+      blinker-delay @ ms
+    again
+  ;
+
+  \ The blinker task
+  variable blinker-task
+
+  \ Init blinker
+  : init-blinker ( -- )
+    500 blinker-delay !
+    0 ['] blinker 256 128 512 spawn blinker-task !
+    blinker-task @ run
+  ;
+
+end-module
