@@ -29,6 +29,6 @@
 #include src/rp2040/forth/erase.fs
 #include src/common/forth/systick.fs
 #include src/rp2040/forth/int_io.fs
-\ #include src/rp2040/forth/gpio.fs
+#include src/rp2040/forth/gpio.fs
 #include src/common/forth/task.fs
 
