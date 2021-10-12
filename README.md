@@ -44,27 +44,31 @@ to use the default version or:
 
     $ make VERSION=<version>
 
-This build a `zeptoforth.<platform>.bin`, a `zeptoforth.<platform>.ihex`, and a `zeptoforth.<platform>.elf` file for each supported platform. Additionally a zeptoforth.rp2040.uf2 file will be built for the rp2040 platform. The zeptoforth.<platform>.elf file is of use if one wishes to do source debugging with gdb of the zeptoforth kernel, otherwise disregard it. The same workflow is to be followed if one is assembling and linking zeptoforth for the STM32F407.
+This build a `zeptoforth.<platform>.bin`, a `zeptoforth.<platform>.ihex`, and a `zeptoforth.<platform>.elf` file for each supported platform. Additionally a `zeptoforth.rp2040.uf2` file will be built for the rp2040 platform. The `zeptoforth.<platform>.elf` file is of use if one wishes to do source debugging with gdb of the zeptoforth kernel, otherwise disregard it.
 
 Note the address referred to above. This will also reboot the board.
 
 To use the board on Linux, download and install e4thcom (at https://wiki.forth-ev.de/doku.php/en:projects:e4thcom), swdcom (at http://github.com/crest/swdcom), GNU Screen (at https://www.gnu.org/software/screen/), or picocom (at https://github.com/npat-efault/picocom).
 
-The following applies if one is using e4thcom: If one is using an STM32F407 DISCOVERY board, attach a USB-to-serial converter to your machine (make sure you have the proper permissions to access its device file) and attach the RXD pin on the converter to PA2 on the board and the TXD pin on the converter to PA3 on the board with jumper cables. Then, from the zeptoforth base directory execute:
+The following applies if one is using e4thcom: If one is using an STM32F407 DISCOVERY or Raspberry Pi Pico board, attach a USB-to-serial converter to your machine (make sure you have the proper permissions to access its device file) and, for the STM32F407 DISCOVERY board, attach the RXD pin on the converter to PA2 on the board and the TXD pin on the converter to PA3 on the board or, for the Raspberry Pico, attach the RXD pin on the converter to GPIO0 on the board and the TXD pin on the converter to GPIO1 on the board with jumper cables. Then, from the zeptoforth base directory execute:
 
     $ e4thcom -t noforth -b B115200 -d <device, typically one of ttyACM0 or ttyUSB0>
 
-Once e4thcom comes up, execute (including the leading '#'), for the STM32L476:
+Once e4thcom comes up, execute (including the leading '#'), for the STM32L476 DISCOVERY:
 
     #include src/stm32l476/forth/setup_<type>.fs
 
-or, for the STM32F407:
+or, for the STM32F407 DISCOVERY:
 
     #include src/stm32f407/forth/setup_<type>.fs
 
-or, for the STM32F746:
+or, for the STM32F746 DISCOVERY:
 
     #include src/stm32f746/forth/setup_<type>.fs
+
+or, for the Raspberry Pi Pico:
+
+    #include src/rp2040/forth/setup_<type>.fs
 
 where \<type> is one of the types given above, with the meanings given above.
 
