@@ -2,7 +2,11 @@
 
 A GPIO API is provided for STM32 microcontrollers, with slight variations between individual microcontrollers (primarily in the number of supported GPIO's, along with internal differences in the registers used by the API). It provides a thin layer over the hardware registers that control GPIO's, so as to make them more user-friendly while not limiting the programmer's capabilities.
 
+A GPIO API is also provided for the RP2040; note that this API differs considerably from the GPIO API for STM32 microcontrollers and has no compatiblity with it. It exposes registers for manipulating GPIO input and output and for controlling GPIO interrupts.
+
 These words are in `gpio-module`.
+
+## STM32 Words
 
 ##### `GPIOA` through `GPIOK`
 
@@ -229,3 +233,356 @@ Get the alternate function for the specified pin (from 0 to 15) on the specified
 ( pin gpio-addr -- input )
 
 Get the input for the specified pin (from 0 to 15) on the specified GPIO.
+
+## RP2040 Words
+
+##### `CTRL_NORMAL`
+
+Normal control state for GPIO control
+
+##### `CTRL_INVERT`
+
+Inverse control state for GPIO control
+
+##### `CTRL_FORCE_LOW`
+
+Force low / disable control state for GPIO control
+
+##### `CTRL_FORCE_HIGH`
+
+Force high / enable control state for GPIO control
+
+##### `VOLTAGE_3.3V`
+
+Voltage set to 3.3V
+
+##### `VOLTAGE_1.8V`
+
+Voltage set to 1.8V
+
+##### `DRIVE_2MA`
+
+Drive strength set to 2mA
+
+##### `DRIVE_4MA`
+
+Drive strength set to 4mA
+
+##### `DRIVE_8MA`
+
+Drive strength set to 8mA
+
+##### `DRIVE_12MA`
+
+Drive strength set to 12mA
+
+##### `PAD_SWCLK`
+
+Pad index for SWCLK
+
+##### `PAD_SWD`
+
+Pad index for SWD
+
+##### `GPIO_IN`
+
+GPIO input register; each bit corresponds to the GPIO with an index equal to its position
+
+##### `GPIO_OUT`
+
+GPIO output register; each bit corresponds to the GPIO with an index equal to its position
+
+##### `GPIO_OUT_SET`
+
+GPIO output atomic bit-set register; each bit corresponds to the GPIO with an index equal to its position
+
+##### `GPIO_OUT_CLR`
+
+GPIO output atomic bit-clear register; each bit corresponds to the GPIO with an index equal to its position
+
+##### `GPIO_OUT_XOR`
+
+GPIO output atomic bit-xor register; each bit corresponds to the GPIO with an index equal to its position
+
+##### `GPIO_OE`
+
+GPIO output enable register; each bit corresponds to the GPIO with an index equal to its position
+
+##### `GPIO_OE_SET`
+
+GPIO output enable atomic bit-set register; each bit corresponds to the GPIO with an index equal to its position
+
+##### `GPIO_OE_CLR`
+
+GPIO output enable atomic bit-clear register; each bit corresponds to the GPIO with an index equal to its position
+
+##### `GPIO_OE_XOR`
+
+GPIO output enable atomic bit-xor register; each bit corresponds to the GPIO with an index equal to its position
+
+##### `GPIO_STATUS_IRQTOPROC@`
+( index -- flag )
+
+Get interrupt to processors, after override is applied
+
+##### `GPIO_STATUS_IRQFROMPAD@`
+( index -- flag )
+
+Get interrupt from pad, before override is applied
+
+##### `GPIO_STATUS_INTOPERI@`
+( index -- flag )
+
+Get input signal to peripheral, after override is applied
+
+##### `GPIO_STATUS_INFROMPAD@`
+( index -- flag )
+
+Get input signal from pad, before override is applied
+
+##### `GPIO_STATUS_OETOPAD@`
+( index -- flag )
+
+Get output enable to pad, after register override is applied
+
+  \ applied
+##### `GPIO_STATUS_OEFROMPERI@`
+( index -- flag )
+
+Get output enable from selected peripheral, before register override is
+
+##### `GPIO_STATUS_OUTTOPAD@`
+( index -- flag )
+
+Get output signal to pad, after register override is applied
+
+  \ applied
+##### `GPIO_STATUS_OUTFROMPERI@`
+( index -- flag )
+
+Get output signal from selected peripheral, before register override is
+
+##### `GPIO_CTRL_IRQOVER!`
+( control index -- )
+
+Set interrupt state for GPIO
+
+##### `GPIO_CTRL_INOVER!`
+( control index -- )
+
+Set peripheral input state for GPIO
+
+##### `GPIO_CTRL_OEOVER!`
+( control index -- )
+
+Set output enable state for GPIO
+
+##### `GPIO_CTRL_OUTOVER!`
+( control index -- )
+
+Set output state for GPIO
+
+##### `GPIO_CTRL_FUNCSEL!`
+( function index -- )
+
+Set the function select for GPIO
+
+##### `GPIO_CTRL_IRQOVER@`
+( index -- control )
+
+Get interrupt state for GPIO
+
+##### `GPIO_CTRL_INOVER@`
+( index -- control )
+
+Get peripheral input state for GPIO
+
+##### `GPIO_CTRL_OEOVER@`
+( index -- control )
+
+Get output enable state for GPIO
+
+##### `GPIO_CTRL_OUTOVER@`
+( index -- control )
+
+Get output state for GPIO
+
+##### `GPIO_CTRL_FUNCSEL@`
+( index -- function )
+
+Set the function select for GPIO
+
+##### `INTR_GPIO_EDGE_LOW!`
+( index -- )
+
+Clear a raw edge low interrupt
+
+##### `INTR_GPIO_EDGE_HIGH!`
+( index -- )
+
+Clear a raw edge high interrupt
+  
+##### `INTR_GPIO_LEVEL_LOW@`
+( index -- state )
+
+Get a level low raw interrupt state
+
+##### `INTR_GPIO_LEVEL_HIGH@`
+( index -- state )
+
+Get a level high raw interrupt state
+
+##### `INTR_GPIO_EDGE_LOW@`
+( index -- state )
+
+Get an edge low raw interrupt state
+
+##### `INTR_GPIO_EDGE_HIGH@`
+( index -- state )
+
+Get an edge high raw interrupt state
+  
+##### `PROC0_INTE_GPIO_LEVEL_LOW!`
+( enable index -- )
+
+Set a level low interrupt enable for processor 0
+
+##### `PROC0_INTE_GPIO_LEVEL_HIGH!`
+( enable index -- )
+
+Set a level high interrupt enable for processor 0
+
+##### `PROC0_INTE_GPIO_EDGE_LOW!`
+( enable index -- )
+
+Set an edge low interrupt enable for processor 0
+
+##### `PROC0_INTE_GPIO_EDGE_HIGH!`
+( enable index -- )
+
+Set an edge high interrupt enable for processor 0
+  
+##### `PROC0_INTE_GPIO_LEVEL_LOW@`
+( index -- enable )
+
+Get a level low interrupt enable for processor 0
+
+##### `PROC0_INTE_GPIO_LEVEL_HIGH@`
+( index -- enable )
+
+Get a level high interrupt enable for processor 0
+
+##### `PROC0_INTE_GPIO_EDGE_LOW@`
+( index -- enable )
+
+Get an edge low interrupt enable for processor 0
+
+##### `PROC0_INTE_GPIO_EDGE_HIGH@`
+( index -- enable )
+
+Get an edge high interrupt enable for processor 0
+
+##### `PROC0_INTF_GPIO_LEVEL_LOW!`
+( force index -- )
+
+Set a level low interrupt force for processor 0
+
+##### `PROC0_INTF_GPIO_LEVEL_HIGH!`
+( force index -- )
+
+Set a level high interrupt force for processor 0
+
+##### `PROC0_INTF_GPIO_EDGE_LOW!`
+( force index -- )
+
+Set an edge low interrupt force for processor 0
+
+##### `PROC0_INTF_GPIO_EDGE_HIGH!`
+( force index -- )
+
+Set an edge high interrupt force for processor 0
+  
+##### `PROC0_INTF_GPIO_LEVEL_LOW@`
+( index -- force )
+
+Get a level low interrupt force for processor 0
+
+##### `PROC0_INTF_GPIO_LEVEL_HIGH@`
+( index -- force )
+
+Get a level high interrupt force for processor 0
+
+##### `PROC0_INTF_GPIO_EDGE_LOW@`
+( index -- force )
+
+Get an edge low interrupt force for processor 0
+
+##### `PROC0_INTF_GPIO_EDGE_HIGH@`
+( index -- force )
+
+Get an edge high interrupt force for processor 0
+
+##### `PROC0_INTS_GPIO_LEVEL_LOW@`
+( index -- enable )
+
+Get a level low interrupt status for processor 0
+
+##### `PROC0_INTS_GPIO_LEVEL_HIGH@`
+( index -- enable )
+
+Get a level high interrupt status for processor 0
+
+##### `PROC0_INTS_GPIO_EDGE_LOW@`
+( index -- enable )
+
+Get an edge low interrupt status for processor 0
+
+##### `PROC0_INTS_GPIO_EDGE_HIGH@`
+( index -- enable )
+
+Get an edge high interrupt status for processor 0
+
+##### `PADS_BANK0_VOLTAGE_SELECT!`
+( voltage -- )
+
+Select voltage for pads
+
+##### `PADS_BANK0_VOLTAGE_SELECT@`
+( -- voltage )
+
+Get voltage for pads
+
+##### `PADS_BANK0_OD!`
+( disable index -- )
+
+Set output disable
+
+##### `PADS_BANK0_IE!`
+( enable index -- )
+
+Set input enable
+
+##### `PADS_BANK0_DRIVE!`
+( strength index -- )
+
+Set drive strength
+
+##### `PADS_BANK0_PUE!`
+( enable index -- )
+
+Set pull up enable
+
+##### `PADS_BANK0_PDE!`
+( enable index -- )
+
+Set pull down enable
+
+##### `PADS_BANK0_SCHMITT!`
+( enable index -- )
+
+Set schmitt trigger
+
+##### `PADS_BANK0_SLEWFAST`
+( fast index -- )
+
+Set slew rate control  
