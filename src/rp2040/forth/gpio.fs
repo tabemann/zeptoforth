@@ -394,7 +394,7 @@ begin-module-once gpio-module
   ;
 
   \ Set slew rate control
-  : PADS_BANK0_SLEWFAST ( fast index -- )
+  : PADS_BANK0_SLEWFAST! ( fast index -- )
     0 bit swap PAD rot if bis! else bic! then
   ;  
 
