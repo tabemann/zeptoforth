@@ -67,3 +67,20 @@ Turn the blue LED on
 ( -- )
 
 Turn the blue LED off
+
+## Raspberry Pi Pico LED Words
+
+##### `led-on`
+( -- )
+
+Turn the LED on
+
+##### `led-off`
+( -- )
+
+Turn the LED off
+
+##### `led-toggle`
+( -- )
+
+Toggle the state of the LED
