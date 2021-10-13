@@ -24,7 +24,7 @@ _asm_start_no_push:
 	push {lr}
 	bl _asm_undefer_lit
 	movs r0, #0
-	ldr r1, =called
+	ldr r1, =suppress_inline
 	str r0, [r1]
 	push_tos
 	movs tos, #4
@@ -89,7 +89,7 @@ _asm_finalize:
 	push_tos
 	ldr tos, =current_flags
 	ldr tos, [tos]
-	ldr r0, =called
+	ldr r0, =suppress_inline
 	ldr r0, [r0]
 	ldr r1, =inlined_flag
 	ands r0, r1
@@ -141,7 +141,7 @@ _asm_finalize_no_align:
 	push_tos
 	ldr tos, =current_flags
 	ldr tos, [tos]
-	ldr r0, =called
+	ldr r0, =suppress_inline
 	ldr r0, [r0]
 	ldr r1, =inlined_flag
 	ands r0, r1
@@ -1071,7 +1071,7 @@ _asm_call:
 	push {lr}
 	bl _asm_undefer_lit
 	movs r0, #-1
-	ldr r1, =called
+	ldr r1, =suppress_inline
 	str r0, [r1]
 	bl _current_here
 	movs r0, tos
@@ -1692,7 +1692,7 @@ _asm_reserve_branch:
 	define_internal_word "call,", visible_flag
 _asm_call:	
 	movs r0, #-1
-	ldr r1, =called
+	ldr r1, =suppress_inline
 	str r0, [r1]
 	push {lr}
 	bl _current_here

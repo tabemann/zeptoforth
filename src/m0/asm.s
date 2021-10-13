@@ -24,7 +24,7 @@ _asm_start_no_push:
 	push {lr}
 	bl _asm_undefer_lit
 	movs r0, #0
-	ldr r1, =called
+	ldr r1, =suppress_inline
 	str r0, [r1]
 	push_tos
 	movs tos, #4
@@ -89,7 +89,7 @@ _asm_finalize:
 	push_tos
 	ldr tos, =current_flags
 	ldr tos, [tos]
-	ldr r0, =called
+	ldr r0, =suppress_inline
 	ldr r0, [r0]
 	ldr r1, =inlined_flag
 	ands r0, r1
@@ -145,7 +145,7 @@ _asm_finalize_no_align:
 	push_tos
 	ldr tos, =current_flags
 	ldr tos, [tos]
-	ldr r0, =called
+	ldr r0, =suppress_inline
 	ldr r0, [r0]
 	ldr r1, =inlined_flag
 	ands r0, r1
@@ -911,7 +911,7 @@ _asm_call:
 	push {lr}
 	bl _asm_undefer_lit
 	ldr r0, =-1
-	ldr r1, =called
+	ldr r1, =suppress_inline
 	str r0, [r1]
 	bl _current_here
 	movs r0, tos
@@ -1010,6 +1010,9 @@ _asm_undefer_lit:
 	define_internal_word "reserve-literal", visible_flag
 _asm_reserve_literal:
 	push {lr}
+	ldr r0, =suppress_inline
+	ldr r1, =-1
+	str r1, [r0]
 	bl _asm_word_align
 	ldr r0, =compiling_to_flash
 	ldr r0, [r0]
@@ -1311,6 +1314,9 @@ _asm_literal_16:
 	define_internal_word "long-literal,", visible_flag
 _asm_long_literal:
 	push {lr}
+	ldr r0, =suppress_inline
+	ldr r1, =-1
+	str r1, [r0]
 	movs r0, tos
 	movs tos, #8
 	push_tos
