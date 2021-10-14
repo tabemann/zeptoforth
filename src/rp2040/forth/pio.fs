@@ -19,7 +19,7 @@
 \ SOFTWARE.
 
 \ Compile this to flash
-compile-to-flash
+\ compile-to-flash
 
 begin-module-once pio-module
   
@@ -174,12 +174,113 @@ begin-module-once pio-module
   \ Clock divisor register for state machines
   : SM_CLKDIV ( state-machine pio -- addr ) [inlined] swap $18 * + $0C8 + ;
 
+  \ LSB of integer portion of the clock divisor; 0 is treated as 65536, if 0
+  \ then FRAC must also be 0
+  16 constant SM_CLKDIV_INT_LSB
+
+  \ Mask of integer portion of the clock divisor; 0 is treated as 65536, if 0
+  \ then FRAC must also be 0
+  $FFFF 16 lshift constant SM_CLKDIV_INT_MASK
+
+  \ LSB of the fractional portion of the clock divisor, i.e. divided by 256
+  8 constant SM_CLKDIV_FRAC_LSB
+
+  \ Mask of the fractional portion of the clock divisor, i.e. divided by 256
+  $FF 8 lshift constant SM_CLKDIV_FRAC_MASK
+  
   \ Execution/behavioral settings for state machines
   : SM_EXECCTRL ( state-machine pio -- addr ) [inlined] swap $18 * + $0CC + ;
+
+  \ State machine is stalled bit
+  31 bit constant SM_EXECCTRL_EXEC_STALLED
+
+  \ MSB of delay/side-set instruction field is used as side-set enable bit
+  30 bit constant SM_EXECCTRL_SIDE_EN
+
+  \ Side-set data is asserted to pin directions bit
+  29 bit constant SM_EXECCTRL_SIDE_PINDIR
+
+  \ LSB of GPIO number to use as condition for JMP PIN
+  24 constant SM_EXECCTRL_JMP_PIN_LSB
+
+  \ Mask of GPIO number to use as condition for JMP PIN
+  $1F 24 lshift constant SM_EXECCTRL_JMP_PIN_MASK
+
+  \ LSB of data bit to use for inline OUT enable
+  19 constant SM_EXECCTRL_OUT_EN_SEL_LSB
+
+  \ Mask of data bit to use for the inline OUT enable
+  $1F 19 lshift constant SM_EXECCTRL_OUT_EN_SEL_MASK
+
+  \ Use a bit of OUT data as an auxiliary write enable bit
+  18 bit constant SM_EXECCTRL_INLINE_OUT_EN
+
+  \ Continuously assert the most recent OUT/SET to the pins
+  17 bit constant SM_EXECCTRL_OUT_STICKY
+
+  \ LSB of address reached to wrap execution to WRAP_BOTTOM; if a jump and
+  \ condition is true, jump takes priority
+  12 constant SM_EXECCTRL_WRAP_TOP_LSB
+
+  \ Mask of address reached to wrap execution to WRAP_BOTTOM; if a jump and
+  \ condition is true, jump takes priority
+  $1F 12 lshift constant SM_EXECCTRL_WRAP_TOP_MASK
+
+  \ LSB of address execution is wrapped to
+  7 constant SM_EXECCTRL_WRAP_BOTTOM_LSB
+
+  \ Mask of address execution is wrapped to
+  $1F 7 lshift constant SM_EXECCTRL_WRAP_BOTTOM_MASK
+
+  \ MOV x, STATUS comparison; 0 is all ones if TX FIFO level < N else all zeros
+  \ 1 is all ones if RX FIFO level < N else all zeros
+  4 bit constant SM_EXECCTRL_STATUS_SEL
+
+  \ LSB of comparison level for MOV x, STATUS
+  0 constant SM_EXECCTRL_STATUS_N_LSB
+
+  \ Mask of comparison level for MOV x, STATUS
+  $F 0 lshift constant SM_EXECCTRL_STATUS_N_MASK
 
   \ Control behavior of the input/output shift registers for state machines
   : SM_SHIFTCTRL ( state-machine pio -- addr ) [inlined] swap $18 * + $0D0 + ;
 
+  \ RX FIFO steals the TX FIFO's storage and becomes twice as deep; FIFO's are
+  \ flushed when set
+  31 bit constant SM_SHIFTCTRL_FJOIN_RX
+
+  \ TX FIFO steals the RX FIFO's storage and becomes twice as deep; FIFO's are
+  \ flushed when set
+  30 bit constant SM_SHIFTCTRL_FJOIN_TX
+
+  \ LSB of number of bits shifted out of OSR before autopull or conditional
+  \ pull will take place; 0 means 32
+  25 constant SM_SHIFTCTRL_PULL_THRESH_LSB
+
+  \ Mask of number of bits shifted out of OSR before autopull or conditional
+  \ pull will take place; 0 means 32
+  $1F 25 lshift constant SM_SHIFTCTRL_PULL_THRES_MASK
+
+  \ LSB of number of bits shifted into ISR before autopush or conditional
+  \ push will take place; 0 means 32
+  20 constant SM_SHIFTCTRL_PUSH_THRESH_LSB
+
+  \ Mask of number of bits shifted into ISR before autopush or conditional
+  \ push will take place; 0 means 32
+  $1F 20 lshift constant SM_SHIFTCTRL_PUSH_THRES_MASK
+
+  \ 1 = shift out of output shift register to right; 0 = to left
+  19 bit constant SM_SHIFTCTRL_OUT_SHIFTDIR
+
+  \ 1 = shift input shift register to right (data enters from left); 0 = to left
+  18 bit constant SM_SHIFTCTRL_IN_SHIFTDIR
+
+  \ Pull automatically when the output shift register is emptied
+  17 bit constant SM_SHIFTCTRL_AUTOPULL
+
+  \ Push automatically when the input shift register is filled
+  16 bit constant SM_SHIFTCTRL_AUTOPUSH
+  
   \ Current instruction address of state machines
   : SM_ADDR ( state-machine pio -- addr ) [inlined] swap $18 * + $0D4 + ;
 
