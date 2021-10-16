@@ -69,7 +69,7 @@ begin-module forth-module
     7 SM_EXECCTRL_WRAP_TOP_MASK SM_EXECCTRL_WRAP_TOP_LSB
     0 PIO0 SM_EXECCTRL field!
     SM_EXECCTRL_OUT_STICKY 0 PIO0 SM_EXECCTRL bis!
-    3 0 ?do pio-init i 2 * + h@ 0 PIO0 SM_INSTR ! loop
+    2 0 ?do pio-init i 2 * + h@ 0 PIO0 SM_INSTR ! loop
     8 0 ?do pio-code i 2 * + h@ i PIO0 INSTR_MEM ! loop
     0 0 PIO0 SM_ADDR !
     blinker-vary @ 0 PIO0 TXF !
