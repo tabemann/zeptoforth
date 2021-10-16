@@ -19,7 +19,7 @@
 \ SOFTWARE.
 
 \ Compile this to flash
-\ compile-to-flash
+compile-to-flash
 
 begin-module-once pio-module
   
@@ -29,18 +29,30 @@ begin-module-once pio-module
   \ PIO1 base register
   $50300000 constant PIO1
 
+  \ PIO0 IRQ0 index
+  7 constant PIO0_IRQ0
+
+  \ PIO0 IRQ1 index
+  8 constant PIO0_IRQ1
+  
+  \ PIO1 IRQ0 index
+  9 constant PIO1_IRQ0
+
+  \ PIO1 IRQ1 index
+  10 constant PIO1_IRQ1
+
   \ PIO control register
   : CTRL ( pio -- addr ) [inlined] $000 + ;
   
   \ Restart state machines' clock dividers LSB
   8 constant CTRL_CLKDIV_RESTART_LSB
-
+  
   \ Restart state machines' clock dividers mask
   $F 8 lshift constant CTRL_CLKDIV_RESTART_MASK
-
+  
   \ Clear state machine internal state LSB
   4 constant CTRL_SM_RESTART_LSB
-
+  
   \ Clear state machine internal state mask
   $F 4 lshift constant CTRL_SM_RESTART_MASK
 
@@ -169,7 +181,7 @@ begin-module-once pio-module
   $3F 0 lshift constant DBG_CFGINFO_FIFO_DEPTH_MASK
   
   \ Write only instruction memory (32 words in all)
-  : INSTR_MEM ( index pio -- addr ) [inlined] $048 + + ;
+  : INSTR_MEM ( index pio -- addr ) [inlined] $048 + swap cells + ;
 
   \ Clock divisor register for state machines
   : SM_CLKDIV ( state-machine pio -- addr ) [inlined] swap $18 * + $0C8 + ;
@@ -291,14 +303,62 @@ begin-module-once pio-module
   \ State machine pin control
   : SM_PINCTRL ( state-machine pio -- addr ) [inlined] swap $18 * + $0DC + ;
 
+  \ LSB of side-set bit count, minimum of 0, maximum of 5
+  29 constant SM_PINCTRL_SIDESET_COUNT_LSB
+
+  \ Mask of side-set-bit count, minimum of 0, maximum of 5
+  7 29 lshift constant SM_PINCTRL_SIDESET_COUNT_MASK
+
+  \ LSB of SET pin count, minimum of 0, maximum of 5
+  26 constant SM_PINCTRL_SET_COUNT_LSB
+
+  \ Mask of SET pin count, minimum of 0, maximum of 5
+  7 26 lshift constant SM_PINCTRL_SET_COUNT_MASK
+
+  \ LSB of OUT PINS, OUT PINDIRS, or MOV PINS pin count, minimum of 0, maximum
+  \ of 32 (inclusive)
+  20 constant SM_PINCTRL_OUT_COUNT_LSB
+  
+  \ Mask of OUT PINS, OUT PINDIRS, or MOV PINS pin count, minimum of 0, maximum
+  \ of 32 (inclusive)
+  $3F 20 lshift constant SM_PINCTRL_OUT_COUNT_MASK
+
+  \ LSB of pin mapped to the least-significant bit of a state machine's IN
+  \ data bus; higher pins are mapped to more signifcant data bits, modulo 32
+  15 constant SM_PINCTRL_IN_BASE_LSB
+
+  \ Mask of pin mapped to the least-significant bit of a state machine's IN
+  \ data bus; higher pins are mapped to more signifcant data bits, modulo 32
+  $1F 15 lshift constant SM_PINCTRL_IN_BASE_MASK
+
+  \ LSB of lowest-number pin affected by side-set operation
+  10 constant SM_PINCTRL_SIDESET_BASE_LSB
+
+  \ Mask of lowest-number pin affected by side-set operation
+  $1F 10 lshift constant SM_PINCTRL_SIDESET_BASE_MASK
+
+  \ LSB of lowest-number pin affected by SET PINS or SET PINDIRS operation
+  5 constant SM_PINCTRL_SET_BASE_LSB
+
+  \ Mask of lowest-number pin affected by SET PINS or SET PINDIRS operation
+  $1F 5 lshift constant SM_PINCTRL_SET_BASE_MASK
+
+  \ LSB of lowest-number pin affected by OUT PINS, OUT PINDIRS, or MOV PINS
+  \ operation
+  0 constant SM_PINCTRL_OUT_BASE_LSB
+
+  \ Mask of lowest-number pin affected by OUT PINS, OUT PINDIRS, or MOV PINS
+  \ operation
+  $1F 0 lshift constant SM_PINCTRL_OUT_BASE_MASK
+
   \ Interrupt indices
-  : INT_SM ( state-machine -- index ) [inlined] 8 + ;
+  : INT_SM ( state-machine -- index ) [inlined] 8 + bit ;
 
-  \ TXN full interupt indices
-  : INT_SM_TXNFULL ( state-machine -- index ) [inlined] 4 + ;
+  \ TXN not full interupt indices
+  : INT_SM_TXNFULL ( state-machine -- index ) [inlined] 4 + bit ;
 
-  \ RXN full interrupt indices
-  : INT_SM_RXNFULL ( state-machine -- index ) [inlined] ;
+  \ RXN not empty interrupt indices
+  : INT_SM_RXNEMPTY ( state-machine -- index ) [inlined] bit ;
 
   \ IRQ0
   0 constant IRQ0
@@ -439,7 +499,7 @@ begin-module-once pio-module
   \ Move to ISR (input shift counter is reset to 0, i.e. empty)
   %110 constant MOV_DEST_ISR
 
-  \ Move to OSR (input shift counter is reset to 0, i.e. full)
+  \ Move to OSR (output shift counter is reset to 0, i.e. full)
   %111 constant MOV_DEST_OSR
 
   \ Move operation none
@@ -505,12 +565,12 @@ begin-module-once pio-module
 
   \ PIO IN instruction
   : in, ( bit-count source -- )
-    $07 and 5 lshift swap $1F and or $4000 or h,
+    $07 and 5 lshift swap 1- $1F and or $4000 or h,
   ;
 
   \ PIO OUT instruction
   : out, ( bit-count destination -- )
-    $07 and 5 lshift swap $1F and or $6000 or h,
+    $07 and 5 lshift swap 1- $1F and or $6000 or h,
   ;
 
   \ PIO PUSH instruction
@@ -535,7 +595,7 @@ begin-module-once pio-module
 
   \ PIO SET instruction
   : set, ( data destination -- )
-    $03 and 5 lshift swap $1F and or $E000 or h,
+    $07 and 5 lshift swap $1F and or $E000 or h,
   ;
 
   \ PIO JMP instruction with delay or side-set
@@ -551,12 +611,12 @@ begin-module-once pio-module
 
   \ PIO IN instruction with delay or side-set
   : in+, ( bit-count delay/side-set source -- )
-    $07 and 5 lshift swap $1F and 8 lshift or swap $1F and or $4000 or h,
+    $07 and 5 lshift swap $1F and 8 lshift or swap 1- $1F and or $4000 or h,
   ;
 
   \ PIO OUT instruction with delay or side-set
   : out+, ( bit-count delay/side-set destination -- )
-    $07 and 5 lshift swap $1F and 8 lshift or swap $1F and or $6000 or h,
+    $07 and 5 lshift swap $1F and 8 lshift or swap 1- $1F and or $6000 or h,
   ;
 
   \ PIO PUSH instruction with delay or side-set
@@ -584,7 +644,10 @@ begin-module-once pio-module
 
   \ PIO SET instruction with delay or side-set
   : set+, ( data delay/side-set destination -- )
-    $03 and 5 lshift swap $1F and 8 lshift or swap $1F and or $E000 or h,
+    $07 and 5 lshift swap $1F and 8 lshift or swap $1F and or $E000 or h,
   ;
 
 end-module
+
+\ Reboot
+reboot
