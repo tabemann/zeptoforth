@@ -399,3 +399,6 @@ begin-module-once gpio-module
   ;  
 
 end-module
+
+\ Reboot
+reboot
