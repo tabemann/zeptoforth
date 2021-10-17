@@ -351,13 +351,13 @@ begin-module-once pio-module
   \ operation
   $1F 0 lshift constant SM_PINCTRL_OUT_BASE_MASK
 
-  \ Interrupt indices
+  \ Interrupt bits
   : INT_SM ( state-machine -- index ) [inlined] 8 + bit ;
 
-  \ TXN not full interupt indices
+  \ TXN not full interupt bits
   : INT_SM_TXNFULL ( state-machine -- index ) [inlined] 4 + bit ;
 
-  \ RXN not empty interrupt indices
+  \ RXN not empty interrupt bits
   : INT_SM_RXNEMPTY ( state-machine -- index ) [inlined] bit ;
 
   \ IRQ0
