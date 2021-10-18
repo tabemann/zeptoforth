@@ -80,13 +80,13 @@ forth-module set-current
 8 constant inlined-flag
 
 \ DMB instruction
-: dmb ( -- ) [inlined] [ $F3BF h, $8F5F h, ] ;
+: dmb ( -- ) [inlined] [ undefer-lit $F3BF h, $8F5F h, ] ;
 
 \ DSB instruction
-: dsb ( -- ) [inlined] [ $F3BF h, $8F4F h, ] ;
+: dsb ( -- ) [inlined] [ undefer-lit $F3BF h, $8F4F h, ] ;
 
 \ ISB instruction
-: isb ( -- ) [inlined] [ $F3BF h, $8F6F h, ] ;
+: isb ( -- ) [inlined] [ undefer-lit $F3BF h, $8F6F h, ] ;
 
 \ Add to a cell
 \ : +! ( x addr -- ) swap over @ + swap ! [inlined] ;

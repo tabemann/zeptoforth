@@ -976,20 +976,26 @@ begin-import-module-once disassemble-internal-module
     dup 1 1 bitfield if [char] I emit then
     0 1 bitfield if [char] F emit then drop
   ;
+  
+  \ Parse a DMB instruction
+  : p-dmb ." DMB" 2drop 2drop ;
+
+  \ Parse a DSB instruction
+  : p-dsb
+    ." DSB" nip 0_4_bf case
+      \ %1111 of endof
+      %0111 of space ." UN" endof
+      %1110 of space ." ST" endof
+      %0110 of space ." UNST" endof
+    endcase
+    2drop
+  ;
+
+  \ Parse an ISB instruction
+  : p-isb ." ISB" 2drop 2drop ;
 
   thumb-2 [if]
     
-    \ Parse a DSB instruction
-    : p-dsb
-      ." DSB" nip 0_4_bf case
-	\ %1111 of endof
-	%0111 of space ." UN" endof
-	%1110 of space ." ST" endof
-	%0110 of space ." UNST" endof
-      endcase
-      drop
-    ;
-
     \ Parse an EOR immediate instruction
     : p-eor-imm
       ." EOR" rot drop over 4s?. decode-add-imm-3 drop
@@ -1650,12 +1656,26 @@ begin-import-module-once disassemble-internal-module
     %1110101110110000 h, %0000111100000000 h,
     \ ' p-cps-2 ,
     \ ' p-dbg ,
-    \ ' p-dmb ,
-    ' p-dsb , %1111111111110000 h, %1101000011110000 h,
-    %1111001110110000 h, %1001000001000000 h,
+
+  [then]
+  
+  ' p-dmb , %1111111111110000 h, %1101000011110000 h,
+  %1111001110110000 h, %1000000001010000 h,
+  ' p-dsb , %1111111111110000 h, %1101000011110000 h,
+  %1111001110110000 h, %1000000001000000 h,
+
+  thumb-2 [if]
+    
     ' p-eor-imm , %1111101111100000 h, highest h, %1111000010000000 h, 0 h,
     ' p-eor-reg-2 , %1111111111100000 h, 0 h, %1110101010000000 h, 0 h,
-    \ ' p-isb ,
+
+  [then]
+  
+  ' p-isb , %1111111111110000 h, %1101000011110000 h,
+  %1111001110110000 h, %1000000001100000 h,
+
+  thumb-2 [if]
+    
     \ ' p-it ,
     \ ' p-ldc ,
     \ ' p-ldmdb ,

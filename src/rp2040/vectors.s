@@ -53,53 +53,5 @@
 	.word _handle_null+1 @ 46: timer 4
 	.word _handle_null+1 @ 47:
 	.word _handle_null+1 @ 48:
-	.word _handle_null+1 @ 49:
-	.word _handle_null+1 @ 50:
-	.word _handle_null+1 @ 51:
-	.word _handle_null+1 @ 52:
-	.word _handle_null+1 @ 53:
-	.word _handle_null+1 @ 54:
-	.word _handle_null+1 @ 55:
-	.word _handle_null+1 @ 56: EXTI15_10
-	.word _handle_null+1 @ 57:
-	.word _handle_null+1 @ 58:
-	.word _handle_null+1 @ 59:
-	.word _handle_null+1 @ 60:
-	.word _handle_null+1 @ 61:
-	.word _handle_null+1 @ 62:
-	.word _handle_null+1 @ 63:
-	.word _handle_null+1 @ 64:
-	.word _handle_null+1 @ 65:
-	.word _handle_null+1 @ 66:
-	.word _handle_null+1 @ 67:
-	.word _handle_null+1 @ 68:
-	.word _handle_null+1 @ 69:
-	.word _handle_null+1 @ 70:
-	.word _handle_null+1 @ 71:
-	.word _handle_null+1 @ 72:
-	.word _handle_null+1 @ 73:
-	.word _handle_null+1 @ 74:
-	.word _handle_null+1 @ 75:
-	.word _handle_null+1 @ 76:
-	.word _handle_null+1 @ 77:
-	.word _handle_null+1 @ 78:
-	.word _handle_null+1 @ 79:
-	.word _handle_null+1 @ 80:
-	.word _handle_null+1 @ 81:
-	.word _handle_null+1 @ 97:
-	.word _handle_null+1 @ 98:
-	.word _handle_null+1 @ 99:
-	.word _handle_null+1 @ 100:
-	.word _handle_null+1 @ 101:
-	.word _handle_null+1 @ 102:
-	.word _handle_null+1 @ 103:
-	.word _handle_null+1 @ 104:
-	.word _handle_null+1 @ 105:
-	.word _handle_null+1 @ 106:
-	.word _handle_null+1 @ 107:
-	.word _handle_null+1 @ 108:
-	.word _handle_null+1 @ 109:
-	.word _handle_null+1 @ 110:
-	.word _handle_null+1 @ 111:
-	.word _handle_null+1 @ 112:
+
 	
