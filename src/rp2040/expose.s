@@ -19,5 +19,14 @@
 @ SOFTWARE.
 
 	.include "../common/expose.s"
-
 	
+	@@ Get the CPU index
+	define_word "cpu-index", visible_flag
+_cpu_index:
+	push_tos
+	ldr tos, =SIO_BASE + 0x000 @ CPUID (not the ARM CPUID)
+	ldr tos, [tos]
+	bx lr
+	end_inlined
+	
+	.ltorg

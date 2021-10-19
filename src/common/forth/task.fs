@@ -55,40 +55,40 @@ begin-import-module-once task-module
     $7FFF constant schedule-critical-mask
     
     \ In task change
-    variable in-task-change
+    cpu-variable cpu-in-task-change in-task-change
 
     \ Wake tasks flag
-    variable wake-tasks
+    cpu-variable cpu-wake-tasks wake-tasks
     
     \ Main task
-    variable main-task
+    cpu-variable cpu-main-task main-task
     
     \ Current task
-    variable current-task
+    cpu-variable cpu-current-task current-task
 
     \ Previous task
-    variable prev-task
+    cpu-variable cpu-prev-task prev-task
 
     \ First task
-    variable first-task
+    cpu-variable cpu-first-task first-task
     
     \ Last task
-    variable last-task
+    cpu-variable cpu-last-task last-task
 
     \ Declare a RAM variable for the end of free RAM memory
     variable free-end
 
     \ Pause count
-    variable pause-count
+    cpu-variable cpu-pause-count last-task
 
     \ Currently in multitasker
-    variable in-multitasker?
+    cpu-variable cpu-in-multitasker? in-multitasker?
 
     \ The original SysTIck handler
-    variable orig-systick-handler
+    cpu-variable cpu-orig-systick-handler orig-systick-handler
 
     \ The multitasker SysTick counter
-    variable task-systick-counter
+    cpu-variable cpu-task-systick-counter task-systick-counter
 
     \ The saved multitasker SysTick counter
     user task-saved-systick-counter
@@ -100,10 +100,10 @@ begin-import-module-once task-module
     0 constant default-min-timeslice
     
     \ Sleep is enabled
-    variable sleep-enabled?
+    cpu-variable cpu-sleep-enabled? sleep-enabled?
 
     \ Tracing is enabled
-    variable trace-enabled?
+    cpu-variable cpu-trace-enabled? trace-enabled?
     
     \ The current task handler
     user task-handler
@@ -992,28 +992,34 @@ begin-import-module-once task-module
   \ Initialize multitasking
   : init-tasker ( -- )
     disable-int
-    false in-multitasker? !
-    0 pause-enabled !
-    false sleep-enabled? !
-    false trace-enabled? !
-    false in-task-change !
-    false wake-tasks !
-    $7F SHPR3_PRI_15!
-    $FF SHPR2_PRI_11!
-    $FF SHPR3_PRI_14!
-    0 task-systick-counter !
-    stack-end @ free-end !
-    init-main-task
-    0 pause-count !
-    ['] do-pause pause-hook !
-    ['] do-wait wait-hook !
-    ['] do-wake wake-hook !
-    validate-dict-hook @ saved-validate-dict !
-    false ram-dict-warned !
-    ['] do-validate-dict validate-dict-hook !
-    ['] execute svcall-vector vector!
-    ['] switch-tasks pendsv-vector vector!
-    ['] task-systick-handler systick-vector vector!
+    cpu-count 0 ?do
+      false i cpu-in-multitasker? !
+      0 i cpu-pause-enabled !
+      false i cpu-sleep-enabled? !
+      false i cpu-trace-enabled? !
+      false i cpu-in-task-change !
+      false i cpu-wake-tasks !
+      $7F SHPR3_PRI_15!
+      $FF SHPR2_PRI_11!
+      $FF SHPR3_PRI_14!
+      0 i cpu-task-systick-counter !
+      stack-end @ free-end !
+      i 0= if
+	init-main-task
+      else
+	i init-aux-main-task
+      then
+      0 i cpu-pause-count !
+      ['] do-pause pause-hook !
+      ['] do-wait wait-hook !
+      ['] do-wake wake-hook !
+      validate-dict-hook @ saved-validate-dict !
+      false ram-dict-warned !
+      ['] do-validate-dict validate-dict-hook !
+      ['] execute svcall-vector i cpu-vector!
+      ['] switch-tasks pendsv-vector i cpu-vector!
+      ['] task-systick-handler systick-vector i cpu-vector!
+    loop
     1 pause-enabled !
     enable-int
   ;
