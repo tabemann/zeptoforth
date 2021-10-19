@@ -22,7 +22,10 @@
 	define_word "?raise", visible_flag
 _raise:	cmp tos, #0
 	beq 1f
+	bl _cpu_offset
 	ldr r0, =handler
+	adds r0, tos
+	pull_tos
 	ldr r1, [r0]
 	mov sp, r1
 	pop {r1}
@@ -35,25 +38,33 @@ _raise:	cmp tos, #0
 	@@ Try to see if an exception occurs
 	define_word "try", visible_flag
 _try:	push {lr} @ #0
+	bl _cpu_offset
+	movs r2, tos
+	ldr r0, =handler
+	adds r2, r0
+	pull_tos
 	mov r1, sp
 	subs r1, #4
 	mov sp, r1
 	str dp, [r1]
-	ldr r0, =handler
+	movs r0, r2
 	ldr r0, [r0]
 	mov r1, sp
 	subs r1, #4
 	mov sp, r1
 	str r0, [r1]
-	ldr r0, =handler
+	movs r0, r2
 	mov r2, sp
 	str r2, [r0]
 	mov r0, tos
 	adds r0, #1 @ Commented out to deal with an issue with Cutter @@@
 	pull_tos
 	blx r0
-	pop {r1}
+	bl _cpu_offset
 	ldr r0, =handler
+	adds r0, tos
+	pull_tos	
+	pop {r1}
 	str r1, [r0]
 	pop {r1}
 	push_tos

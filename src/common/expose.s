@@ -27,17 +27,21 @@ _state:	push_tos
 
 	@@ Get the BASE variable address
 	define_word "base", visible_flag
-_base:	push_tos
-	ldr tos, =base
-	bx lr
+_base:	push {lr}
+	bl _cpu_offset
+	ldr r0, =base
+	adds tos, r0
+	pop {pc}
 	end_inlined
 
 	@@ Get the PAUSE enabled variable address
 	define_word "pause-enabled", visible_flag
 _pause_enabled:
-	push_tos
-	ldr tos, =pause_enabled
-	bx lr
+	push {lr}
+	bl _cpu_offset
+	ldr r0, =pause_enabled
+	adds tos, r0
+	pop {pc}
 	end_inlined
 
 	@@ Get the RAM dictionary base variable address
@@ -83,41 +87,51 @@ _flash_end:
 	@@ Get the current stack base variable address
 	define_word "stack-base", visible_flag
 _stack_base:
-	push_tos
-	ldr tos, =stack_base
-	bx lr
+	push {lr}
+	bl _cpu_offset
+	ldr r0, =stack_base
+	adds tos, r0
+	pop {pc}
 	end_inlined
 
 	@@ Get the current stack end variable address
 	define_word "stack-end", visible_flag
 _stack_end:
-	push_tos
-	ldr tos, =stack_end
-	bx lr
+	push {lr}
+	bl _cpu_offset
+	ldr r0, =stack_end
+	adds tos, r0
+	pop {pc}
 	end_inlined
 
 	@@ Get the current return stack base variable address
 	define_word "rstack-base", visible_flag
 _rstack_base:
-	push_tos
-	ldr tos, =rstack_base
-	bx lr
+	push {lr}
+	bl _cpu_offset
+	ldr r0, =rstack_base
+	adds tos, r0
+	pop {pc}
 	end_inlined
 
 	@@ Get the current returns stack end variable address
 	define_word "rstack-end", visible_flag
 _rstack_end:
-	push_tos
-	ldr tos, =rstack_end
-	bx lr
+	push {lr}
+	bl _cpu_offset
+	ldr r0, =rstack_end
+	adds tos, r0
+	pop {pc}
 	end_inlined
 
 	@@ Get the current exception handler variable address
 	define_word "handler", visible_flag
 _handler:
-	push_tos
-	ldr tos, =handler
-	bx lr
+	push {lr}
+	bl _cpu_offset
+	ldr r0, =handler
+	adds tos, r0
+	pop {pc}
 	end_inlined
 
 	@@ The parse index
@@ -329,6 +343,14 @@ _vector_table:
 	bx lr
 	end_inlined
 
+	@@ The extra vector tables address
+	define_word "extra-vector-tables", visible_flag
+_extra_vector_tables:
+	push_tos
+	ldr tos, =extra_vector_table
+	bx lr
+	end_inlined
+
 	@@ The vector count
 	define_word "vector-count", visible_flag
 _vector_count:
@@ -363,6 +385,23 @@ _thumb_2:
 	ldr tos, =0
 	.endif
 	bx lr
+	end_inlined
+
+	@@ Get the CPU count
+	define_word "cpu-count", visible_flag
+_cpu_count:
+	push_tos
+	ldr tos, =cpu_count
+	bx lr
+	end_inlined
+
+	@@ Get the CPU offset for a word value
+	define_word "cpu-offset", visible_flag
+_cpu_offset:
+	push {lr}
+	bl _cpu_index
+	lsls tos, tos, #2
+	pop {pc}
 	end_inlined
 	
 	.ltorg

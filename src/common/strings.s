@@ -232,7 +232,9 @@ _type_unsigned:
 	define_word "debugu.", visible_flag
 _debug_unsigned:
 	push {lr}
-	ldr r0, =base
+	bl _base
+	movs r0, tos
+	pull_tos
 	ldr r2, [r0]
 	movs r1, #16
 	str r1, [r0]
@@ -252,8 +254,11 @@ _debug_unsigned:
 	push_tos
 	rsbs tos, r0, #0
 	bl _allot
-	ldr r0, =base
-	str r2, [r0]
+	push {r2}
+	bl _base
+	pop {r2}
+	str r2, [tos]
+	pull_tos
 	pop {pc}
 	end_inlined
 
@@ -439,10 +444,11 @@ _format_integer:
 	define_internal_word "format-integer-inner", visible_flag
 _format_integer_inner:
 	push {lr}
+	bl _base
+	movs r1, tos
+	pull_tos
 	ldr r0, =here
 	ldr r0, [r0]
-	ldr r1, =base
-	ldr r1, [r1]
 	movs r2, tos
 1:	cmp r2, #0
 	beq 3f
