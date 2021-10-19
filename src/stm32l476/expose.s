@@ -19,3 +19,13 @@
 @ SOFTWARE.
 
 	.include "../common/expose.s"
+	
+	@@ Get the CPU index
+	define_word "cpu-index", visible_flag
+_cpu_index:
+	push_tos
+	movs tos, #0
+	bx lr
+	end_inlined
+	
+	.ltorg

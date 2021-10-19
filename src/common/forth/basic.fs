@@ -1022,17 +1022,42 @@ commit-flash
   then
 ;
 
+\ Make the global portion of a CPU variable
+: global-cpu-variable ( addr "global-name" -- ) <builds , does> @ swap cells + ;
+
+\ Commit to flash
+commit-flash
+
+\ Make a variable which is CPU-dependent
+: cpu-variable ( "global-name" "cpu-name" -- )
+  next-ram-space
+  dup global-cpu-variable
+  dup cpu-count cells + set-next-ram-space
+  <builds , does> @ cpu-offset +
+;
+
 \ Commit to flash
 commit-flash
 
 \ Set the internal wordlist
 internal-module set-current
 
-\ There is a deferred context switch
-variable deferred-context-switch
+\ Is there a deferred context switch for a give CPU
+cpu-count cells buffer: cpus-deferred-context-switch
 
-\ Critical section state
-variable in-critical
+\ Critical section state for a given CPU
+cpu-count cells buffer: cpus-in-critical
+
+\ Commit to flash
+commit-flash
+
+\ Is there a deferred context switch for the current CPU
+: deferred-context-switch ( -- addr )
+  cpus-deferred-context-switch cpu-offset +
+;
+
+\ Critical section state for the current CPU
+: in-critical ( -- addr ) cpus-in-critical cpu-offset + ;
 
 \ Commit to flash
 commit-flash

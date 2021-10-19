@@ -28,9 +28,12 @@
 	.equ vector_table, ram_real_start
 
 	.endif
+
+	@@ Vector tables for extra CPU's
+	allot extra_vector_tables, vector_table_size * (cpu_count - 1)
 	
 	@@ Pointer to the current HERE location
-	allot here, 4
+	allot here, 4 * cpu_count
 
 	@@ Pointer to the current Flash HERE location
 	allot flash_here, 4
@@ -45,7 +48,7 @@
 	allot flash_buffers_start, flash_buffer_size * flash_buffer_count	
 
 	@@ The current exception handler
-	allot handler, 4
+	allot handler, 4 * cpu_count
 
 	@@ The word being currently compiled
 	allot current_compile, 4
@@ -72,16 +75,16 @@
 	allot build_target, 4
 
 	@@ The stack base (highest point in memory)
-	allot stack_base, 4
+	allot stack_base, 4 * cpu_count
 
 	@@ The return stack base (highest point in memory)
-	allot rstack_base, 4
+	allot rstack_base, 4 * cpu_count
 
 	@@ The stack end (lowest point in memory)
-	allot stack_end, 4
+	allot stack_end, 4 * cpu_count
 
 	@@ The return stack end (lowest point in memory)
-	allot rstack_end, 4
+	allot rstack_end, 4 * cpu_count
 
 	@@ The flags for the word being currently compiled
 	allot current_flags, 4
@@ -108,13 +111,13 @@
 	allot input_buffer, input_buffer_size + 1
 
 	@@ The current numeric base
-	allot base, 4
+	allot base, 4 * cpu_count
 	
 	@@ Are we in compilation state
 	allot state, 4
 
 	@@ Is PAUSE enabled (enabled > 0)
-	allot pause_enabled, 4
+	allot pause_enabled, 4 * cpu_count
 
 	@@ Is compress flash enabled
 	allot compress_flash_enabled, 4
