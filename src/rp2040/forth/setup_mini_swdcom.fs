@@ -26,6 +26,7 @@
 #include src/common/forth/basic.fs
 #include src/common/forth/module.fs
 #include src/common/forth/interrupt.fs
+#include src/rp2040/forth/multicore.fs
 #include src/rp2040/forth/erase.fs
 #include src/common/forth/systick.fs
 #include src/rp2040/forth/int_io.fs

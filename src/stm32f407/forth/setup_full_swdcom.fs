@@ -26,6 +26,7 @@
 #include src/common/forth/basic.fs
 #include src/common/forth/module.fs
 #include src/common/forth/interrupt.fs
+#include src/common/forth/multicore.fs
 #include src/stm32f407/forth/erase.fs
 #include src/common/forth/lambda.fs
 #include src/common/forth/fixed.fs

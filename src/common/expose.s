@@ -47,9 +47,11 @@ _pause_enabled:
 	@@ Get the RAM dictionary base variable address
 	define_word "dict-base", visible_flag
 _dict_base:
-	push_tos
-	ldr tos, =dict_base
-	bx lr
+	push {lr}
+	bl _cpu_offset
+	ldr r0, =dict_base
+	adds tos, r0
+	pop {pc}
 	end_inlined
 	
 	@@ Get the RAM base
@@ -347,7 +349,7 @@ _vector_table:
 	define_word "extra-vector-tables", visible_flag
 _extra_vector_tables:
 	push_tos
-	ldr tos, =extra_vector_table
+	ldr tos, =extra_vector_tables
 	bx lr
 	end_inlined
 

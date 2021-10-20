@@ -934,6 +934,8 @@ _bracket_inlined:
 	bx lr
 	end_inlined
 
+	.ltorg
+	
 	@@ Set the currently-defined word to be immediate
 	define_word "immediate", visible_flag
 _immediate:
@@ -1695,7 +1697,7 @@ _reserve_8:
 	movs tos, r1
 	adds r1, #8
 	str r1, [r0]
-	po {pc}
+	pop {pc}
 	end_inlined
 
 	@@ Reserve a byte at the flash HERE location
@@ -2142,15 +2144,14 @@ _handle_null:
 	define_internal_word "init-variables", visible_flag
 _init_variables:
 	push {lr}
-	ldr r0, =here
-	ldr r1, =dict_base
-	str r0, [r1]
-	ldr r2, cpu_count * 4
+	ldr r2, =cpu_count * 4
 1:	cmp r2, #0
 	beq 2f
 	subs r2, #4
 	ldr r0, =here
 	ldr r0, [r0, r2]
+	ldr r1, =dict_base
+	str r0, [r1, r2]
 	ldr r0, =stack_base
 	ldr r1, =stack_top
 	str r1, [r0, r2]
@@ -2166,8 +2167,11 @@ _init_variables:
 	movs r1, #10
 	ldr r0, =base
 	str r1, [r0, r2]
+	movs r1, #0
+	ldr r0, =pause_enabled
+	str r1, [r0, r2]
 	b 1b
-2:	ldr r2, cpu_count * 4
+2:	ldr r2, =cpu_count * 4
 3:	cmp r2, #4
 	beq 4f
 	subs r2, #4
@@ -2236,8 +2240,6 @@ _init_variables:
 	str r1, [r0]
 	ldr r0, =state
 	str r1, [r0]
-	ldr r0, =pause_enabled
-	str r1, [r0]
 	ldr r0, =compress_flash_enabled
 	str r1, [r0]
 	ldr r0, =order
@@ -2256,7 +2258,7 @@ _init_variables:
 	str r1, [r0]
 	pop {pc}
 	end_inlined
-
+	
 	@@ Initialize the in-RAM vector table
 _init_vector_table:
 	ldr r0, =vectors
