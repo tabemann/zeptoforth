@@ -25,6 +25,7 @@ begin-import-module-once task-module
 
   import internal-module
   import interrupt-module
+  import multicore-module
   import systick-module
   import int-io-module
 
@@ -79,13 +80,10 @@ begin-import-module-once task-module
     variable free-end
 
     \ Pause count
-    cpu-variable cpu-pause-count last-task
+    cpu-variable cpu-pause-count pause-task
 
     \ Currently in multitasker
     cpu-variable cpu-in-multitasker? in-multitasker?
-
-    \ The original SysTIck handler
-    cpu-variable cpu-orig-systick-handler orig-systick-handler
 
     \ The multitasker SysTick counter
     cpu-variable cpu-task-systick-counter task-systick-counter
@@ -104,6 +102,10 @@ begin-import-module-once task-module
 
     \ Tracing is enabled
     cpu-variable cpu-trace-enabled? trace-enabled?
+
+    \ CPU is active
+    cpu-count cells buffer: cpu-active?
+    : cpu-active? ( index -- addr ) cells cpu-active? + ;
     
     \ The current task handler
     user task-handler
@@ -176,6 +178,15 @@ begin-import-module-once task-module
       \ Next task
       field: task-next
     end-structure
+
+    \ Auxiliary main task dictionary size in bytes
+    256 constant aux-main-task-dict-size
+
+    \ Auxiliary main task data stack size in bytes
+    128 constant aux-main-task-stack-size
+
+    \ Auxiliary main task return stack size in bytes
+    512 constant aux-main-task-rstack-size
 
   end-module
 
@@ -266,6 +277,22 @@ begin-import-module-once task-module
     : push-task-rstack ( x task -- )
       dup task-rstack-current @ cell - tuck swap task-rstack-current !
     ;
+
+    \ Claim the task spinlock if spinlocks are supported
+    spinlock-count 0> [if]
+      : claim-task-spinlock ( -- )
+	disable-int task-spinlock claim-spinlock enable-int
+      ;
+    [else]
+      : claim-task-spinlock ( -- ) ;
+    [then]
+
+    \ Release the task spinlock if spinlocks are supported
+    spinlock-count 0> [if]
+      : release-task-spinlock ( -- ) task-spinlock release-spinlock ;
+    [else]
+      : release-task-spinlock ( -- ) ;
+    [then]
 
   end-module
   
@@ -618,6 +645,7 @@ begin-import-module-once task-module
     
     \ Initialize the main task
     : init-main-task ( -- )
+      claim-task-spinlock
       free-end @ task -
       rstack-base @ rstack-end @ - over task-rstack-size h!
       stack-base @ stack-end @ - over task-stack-size h!
@@ -648,6 +676,7 @@ begin-import-module-once task-module
       dup prev-task !
       current-task !
       free-end @ task - free-end !
+      release-task-spinlock
     ;
 
     \ Task entry point
@@ -697,15 +726,21 @@ begin-import-module-once task-module
     drop r> r> swap push-task-stack
   ;
 
-  \ Spawn a non-main task
-  : spawn ( xn...x0 count xt dict-size stack-size rstack-size -- task )
+  \ Allot space for a task
+  : task-allot ( dict-size stack-size rstack-size -- task )
+    claim-task-spinlock
     2dup + task +
     free-end @ swap -
     swap 4 align swap tuck task-rstack-size h!
     swap 4 align swap tuck task-stack-size h!
     swap 4 align swap tuck task-dict-size !
     dup dup task-dict-size @ - free-end !
-    dup >r init-task r>
+    release-task-spinlock
+  ;
+  
+  \ Spawn a non-main task
+  : spawn ( xn...x0 count xt dict-size stack-size rstack-size -- task )
+    task-allot dup >r init-task r>
   ;
 
   begin-module task-internal-module
@@ -969,7 +1004,23 @@ begin-import-module-once task-module
 	space ." RAM dictionary space is running low (<1K left)" cr
       then
       saved-validate-dict @ ?execute
-    ; 
+    ;
+
+    cpu-count 1 > [if]
+      
+      \ Initialize an auxiliary core's main task
+      : init-aux-main-task ( -- )
+	0 fifo-pop-blocking >r \ task
+	0 fifo-pop-blocking >r \ xt
+	0 fifo-pop-blocking >r \ count
+	r@ 0 ?do 0 fifo-pop-blocking loop \ xn ... x0
+	r> r> r@
+	init-task
+	run
+	begin pause again
+      ;
+      
+    [then]
 
   end-module
 
@@ -989,6 +1040,47 @@ begin-import-module-once task-module
     enable-int
   ;
 
+  \ Core already has a main task spawned exception
+  : x-main-already-launched ( -- )
+    space ." core already has main task" cr
+  ;
+
+  \ Auxiliary cores can only be launched from core 0
+  : x-core-can-only-be-launched-from-core-0 ( -- )
+    space ." core can only be launched from core 0" cr
+  ;
+
+  \ Launch an auxiliary core with a task
+  : spawn-aux-main
+    ( xn ... x0 count xt dict-size stack-size rstack-size core -- )
+    [ cpu-count 1 > ] [if]
+      cpu-index 0= averts x-core-can-only-be-launched-from-core-0
+      claim-task-spinlock
+      dup cpu-active? @ if
+	release-task-spinlock
+	['] x-main-already-launched ?raise
+      else
+	true over cpu-active? !
+      then
+      release-task-spinlock
+      >r task-allot
+      r@ 1- vector-count cells * extra-vector-table +
+      over task-rstack-base
+      ['] aux-core-entry
+      r@ launch-aux-core
+      dup task-stack-base r@ fifo-push-blocking \ stack base
+      dup task-dict-base r@ fifo-push-blocking \ dictionary base
+      ['] init-aux-main-task 1+ r@ fifo-push-blocking \ second entry point
+      r@ fifo-push-blocking \ task
+      r@ fifo-push-blocking \ xt
+      dup r@ fifo-push-blocking \ count
+      begin ?dup while dup roll r@ fifo-push-blocking 1- repeat
+      rdrop
+    [else]
+      ['] x-core-out-of-range ?raise
+    [then]
+  ;
+
   \ Initialize multitasking
   : init-tasker ( -- )
     disable-int
@@ -1005,9 +1097,15 @@ begin-import-module-once task-module
       0 i cpu-task-systick-counter !
       stack-end @ free-end !
       i 0= if
+	true i cpu-active? !
 	init-main-task
       else
-	i init-aux-main-task
+	false i cpu-active? !
+	0 i cpu-main-task !
+	0 i cpu-current-task !
+	0 i cpu-prev-task !
+	0 i cpu-first-task !
+	0 i cpu-last-task !
       then
       0 i cpu-pause-count !
       ['] do-pause pause-hook !
@@ -1091,7 +1189,9 @@ begin-module task-module
   : trace-enable? ( -- flag ) trace-enabled? @ ;
 
   \ Allot memory from the end of RAM
-  : allot-end ( u -- addr ) negate free-end +! free-end @ ;
+  : allot-end ( u -- addr )
+    claim-task-spinlock negate free-end +! free-end @ release-task-spinlock
+  ;
 
 end-module
 

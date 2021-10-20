@@ -780,8 +780,9 @@ _execute_nz:
 	@@ Execute a PAUSE word, if one is set
 	define_word "pause", visible_flag
 _pause:	push {lr}
-	ldr r0, =pause_enabled
-	ldr r0, [r0]
+	bl _pause_enabled
+	movs r0, tos
+	pull_tos
 	cmp r0, #0
 	ble 1f
 	ldr r0, =pause_hook
@@ -2216,15 +2217,14 @@ _handle_null:
 	define_internal_word "init-variables", visible_flag
 _init_variables:
 	push {lr}
-	ldr r0, =here
-	ldr r1, =dict_base
-	str r0, [r1]
-	ldr r2, cpu_count * 4
+	ldr r2, =cpu_count * 4
 1:	cmp r2, #0
 	beq 2f
 	subs r2, #4
 	ldr r0, =here
 	ldr r0, [r0, r2]
+	ldr r1, =dict_base
+	str r0, [r1, r2]
 	ldr r0, =stack_base
 	ldr r1, =stack_top
 	str r1, [r0, r2]
@@ -2240,8 +2240,11 @@ _init_variables:
 	movs r1, #10
 	ldr r0, =base
 	str r1, [r0, r2]
+	movs r1, #0
+	ldr r0, =pause_enabled
+	str r1, [r0, r2]
 	b 1b
-2:	ldr r2, cpu_count * 4
+2:	ldr r2, =cpu_count * 4
 3:	cmp r2, #4
 	beq 4f
 	subs r2, #4
@@ -2309,8 +2312,6 @@ _init_variables:
 	ldr r0, =input_buffer_count
 	str r1, [r0]
 	ldr r0, =state
-	str r1, [r0]
-	ldr r0, =pause_enabled
 	str r1, [r0]
 	ldr r0, =compress_flash_enabled
 	str r1, [r0]

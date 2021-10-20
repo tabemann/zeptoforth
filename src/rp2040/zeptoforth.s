@@ -104,4 +104,5 @@ outer_exc_handled:
 	.include "../common/strings.s"
 	.include "../m0/double.s"
 	.include "../m0/exception.s"
+	.include "multicore.s"
 	.include "../common/final.s"

@@ -39,7 +39,7 @@
 	allot flash_here, 4
 
 	@@ Pointer to the base of HERE space
-	allot dict_base, 4
+	allot dict_base, 4 * cpu_count
 
 	@@ Flag to determine whether compilation is going to Flash
 	allot compiling_to_flash, 4
