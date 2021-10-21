@@ -233,7 +233,7 @@ _type_unsigned:
 _debug_unsigned:
 	push {lr}
 	bl _base
-	movs r0, tos
+	ldr r0, [tos]
 	pull_tos
 	ldr r2, [r0]
 	movs r1, #16
@@ -445,7 +445,7 @@ _format_integer:
 _format_integer_inner:
 	push {lr}
 	bl _base
-	movs r1, tos
+	ldr r1, [tos]
 	pull_tos
 	ldr r0, =here
 	ldr r0, [r0]
