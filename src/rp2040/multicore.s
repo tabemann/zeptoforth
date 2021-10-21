@@ -36,9 +36,29 @@
 	@@ Read access to this core's RX FIFO
 	.equ FIFO_RD, SIO_BASE + 0x058
 
+	@@ Synchronization spinlock index
+	.equ SYNC_SPINLOCK_INDEX, 30
+
+	@@ Spinlock 30, which we will use for synchronizing between
+	.equ SYNC_SPINLOCK, SIO_BASE + 0x100 + (SYNC_SPINLOCK_INDEX * 4)
+
+	@@ Synchronization value
+	.equ SYNC_VALUE, 0x7FFFFFFF
+
+	@@ Blocking FIFO push - reads value from R0
+_core_fifo_push:
+	ldr r1, =FIFO_ST
+	movs r2, #FIFO_ST_RDY
+1:	ldr r3, [r1]
+	tst r3, r2
+	beq 1b
+	ldr r1, =FIFO_WR
+	str r0, [r1]
+	sev
+	bx lr
+	
 	@@ Blocking FIFO pop - reads value into R0
-_aux_fifo_pop:
-	push {lr}
+_core_fifo_pop:
 	ldr r0, =FIFO_ST
 	movs r1, #FIFO_ST_VLD
 1:	ldr r2, [r0]
@@ -46,22 +66,74 @@ _aux_fifo_pop:
 	beq 1b
 	ldr r0, =FIFO_RD
 	ldr r0, [r0]
-	pop {pc}
+	bx lr
 
 	@@ Auxiliary core entry
 	define_internal_word "aux-core-entry", visible_flag
 _aux_core_entry:
 	ldr tos, =0xFEDCBA98
-	bl _aux_fifo_pop
+	bl _core_fifo_pop
 	movs dp, r0
-	bl _aux_fifo_pop
+	bl _core_fifo_pop
 	push_tos
 	movs tos, r0
 	bl _store_here
-	bl _aux_fifo_pop
+	bl _core_fifo_pop
 	adds r0, #1
-	blx r0
+	bx r0
 	bx lr
+	end_inlined
+
+	@@ Force the other core to wait
+	define_internal_word "force-core-wait", visible_flag
+_force_core_wait:
+	push {lr}
+	ldr r0, =SYNC_SPINLOCK
+1:	ldr r1, [r0]
+	cmp r1, #0
+	beq 1b
+	ldr r0, =FIFO_ST
+	movs r1, #FIFO_ST_RDY
+	ldr r0, [r0]
+	tst r0, r1
+	beq 2f
+	ldr r0, =SYNC_VALUE
+	bl _core_fifo_push
+2:	pop {pc}
+	end_inlined
+
+	@@ Release the other core
+	define_internal_word "release-core", visible_flag
+_release_core:	
+	ldr r0, =SYNC_SPINLOCK
+	movs r1, #1
+	str r1, [r0]
+	bx lr
+	end_inlined
+
+	@@ FIFO read handler
+	define_internal_word "handle-sio", visible_flag
+_handle_sio:	
+	push {lr}
+	ldr r0, =SYNC_SPINLOCK
+1:	ldr r1, [r0]
+	cmp r1, #0
+	beq 1b
+	movs r1, #1
+	str r1, [r0]
+	bl _core_fifo_pop
+	push {r0}
+	bl _sio_hook
+	pop {r0}
+	movs r1, tos
+	pull_tos
+	cmp r1, #0
+	beq 2f
+	push_tos
+	movs tos, r0
+	adds r1, #1
+	blx r1
+2:	pop {pc}
 	end_inlined
 
 	.ltorg

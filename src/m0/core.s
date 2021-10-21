@@ -781,7 +781,7 @@ _execute_nz:
 	define_word "pause", visible_flag
 _pause:	push {lr}
 	bl _pause_enabled
-	movs r0, tos
+	ldr r0, [tos]
 	pull_tos
 	cmp r0, #0
 	ble 1f
@@ -2251,7 +2251,7 @@ _init_variables:
 	ldr r1, =0xF0E1C2D3
 	ldr r0, =handler
 	str r1, [r0, r2]
-	b 2b
+	b 3b
 4:	ldr r0, =prompt_hook
 	ldr r1, =_do_prompt
 	str r1, [r0]

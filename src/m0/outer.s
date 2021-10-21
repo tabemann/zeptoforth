@@ -540,6 +540,7 @@ _abort:	bl _stack_base
 	@@ The outer loop of Forth
 	define_word "quit", visible_flag
 _quit:	bl _rstack_base
+	ldr tos, [tos]
 	mov sp, tos
 	ldr tos, =_main
 	bl _try
@@ -596,7 +597,7 @@ _main:	push {lr}
 	@@ The actual outer loop of Forth
 	define_internal_word "outer", visible_flag
 _outer:	push {lr}
-1:	bl _validate
+1:	@ bl _validate
 	bl _token
 	cmp tos, #0
 	beq 2f
@@ -658,7 +659,7 @@ _outer:	push {lr}
 _validate:
 	push {lr}
 	bl _stack_base
-	movs r0, tos
+	ldr r0, [tos]
 	pull_tos
 	cmp dp, r0
 	ble 1f
@@ -666,7 +667,7 @@ _validate:
 	ldr tos, =_stack_underflow
 	bl _raise
 1:	bl _stack_end
-	movs r0, tos
+	ldr r0, [tos]
 	pull_tos
 	cmp dp, r0
 	bge 1f
@@ -677,7 +678,7 @@ _validate:
 	push {r1}
 	bl _rstack_base
 	pop {r1}
-	movs r0, tos
+	ldr r0, [tos]
 	pull_tos
 	cmp r1, r0
 	ble 1f
@@ -687,7 +688,7 @@ _validate:
 1:	push {r1}
 	bl _rstack_end
 	pop {r1}
-	movs r0, tos
+	ldr r0, [tos]
 	pull_tos
 	cmp r1, r0
 	bge 1f
@@ -1023,6 +1024,7 @@ _parse_base:
 4:	push_tos
 	movs tos, r0
 5:	bl _base
+	ldr tos, [tos]
 	pop {pc}
 6:	adds tos, #1
 	push_tos

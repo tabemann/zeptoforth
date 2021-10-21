@@ -56,11 +56,13 @@
 	@@ Put a deliberate garbage value in handler
 	ldr r0, =0xF0E1C2D3
 	ldr r1, =handler
-	str r0, [r1]
+	str r0, [r1, #0]
+	str r0, [r1, #4]
 	@@ Initialize HERE
 	ldr r0, =here
 	ldr r1, =ram_current
-	str r1, [r0]
+	str r1, [r0, #0]
+	str r1, [r0, #4]
 	@@ Initialize the second vector table
 	ldr r0, =extra_vector_tables
 	ldr r1, =vector_table
@@ -81,6 +83,7 @@
 	@@ The outermost exception handling - if an exception happens here the
 	@@ system will reboot
 outer_exc_handled:
+	bl _init_platform_variables
 	bl _init_variables
 	bl _init_hardware
 	bl _init_flash
@@ -89,6 +92,13 @@ outer_exc_handled:
 	bl _do_init
 	bl _welcome
 	bl _quit
+
+_init_platform_variables:
+	movs r0, #0
+	ldr r1, =sio_hook
+	str r0, [r1, #0]
+	str r0, [r1, #4]
+	bx lr
 
 	.ltorg
 	
