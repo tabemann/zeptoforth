@@ -771,8 +771,9 @@ _execute_nz:
 	@@ Execute a PAUSE word, if one is set
 	define_word "pause", visible_flag
 _pause:	push {lr}
-	ldr r0, =pause_enabled
-	ldr r0, [r0]
+	bl _pause_enabled
+	ldr r0, [tos]
+	pull_tos
 	cmp r0, #0
 	ble 1f
 	ldr r0, =pause_hook
@@ -2178,7 +2179,7 @@ _init_variables:
 	ldr r1, =0xF0E1C2D3
 	ldr r0, =handler
 	str r1, [r0, r2]
-	b 2b
+	b 3b
 4:	ldr r0, =prompt_hook
 	ldr r1, =_do_prompt
 	str r1, [r0]

@@ -19,3 +19,6 @@
 @ SOFTWARE.
 
 	.include "../common/variables.s"
+
+	allot sio_hook, 4 * cpu_count
+	

@@ -28,5 +28,14 @@ _cpu_index:
 	ldr tos, [tos]
 	bx lr
 	end_inlined
+
+	@@ Get the SIO hook
+	define_word "sio-hook", visible_flag
+_sio_hook:
+	push {lr}
+	bl _cpu_offset
+	ldr r0, =sio_hook
+	adds tos, r0
+	pop {pc}
 	
 	.ltorg
