@@ -29,7 +29,7 @@ _cpu_index:
 	bx lr
 	end_inlined
 
-	@@ Get the SIO hook
+	@@ Get the SIO hook address
 	define_word "sio-hook", visible_flag
 _sio_hook:
 	push {lr}
@@ -37,5 +37,6 @@ _sio_hook:
 	ldr r0, =sio_hook
 	adds tos, r0
 	pop {pc}
+	end_inlined
 	
 	.ltorg

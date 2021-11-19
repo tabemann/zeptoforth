@@ -29,9 +29,6 @@
 
 	.endif
 
-	@@ Vector tables for extra CPU's
-	allot extra_vector_tables, vector_table_size * (cpu_count - 1)
-	
 	@@ Pointer to the current HERE location
 	allot here, 4 * cpu_count
 

@@ -40,10 +40,13 @@ begin-module-once multicore-module
   16 constant SIO_IRQ_PROC1
 
   \ Signal an event to the other core
-  : sev ( -- ) [: undefer-lit %1011111101000000 h, ;] ;
+  : sev ( -- ) [inlined] [ undefer-lit %1011111101000000 h, ] ;
 
   \ Wait for an event
-  : wfe ( -- ) [: undefer-lit %1011111100100000 h, ;] ;
+  : wfe ( -- ) [inlined] [ undefer-lit %1011111100100000 h, ] ;
+
+  \ Trampoline
+  : trampoline ( --  ) [ $BCC3 h, $468E h, $4687 h, ] ; \ POP {R0, R1, R6, R7}; MOV LR, R1: MOV PC, R0
 
   \ CPUID register (contains 0 for core 0, 1 for core 1)
   SIO_BASE $000 + constant CPUID
@@ -87,7 +90,7 @@ begin-module-once multicore-module
 
   \ Hardware spinlocks; reading will return 0 if already locked, or
   \ 1 lock-number lshift on success; writing any value will release the spinlock
-  : SPINLOCK ( index -- addr ) SIO_BASE $100 swap cells + ;
+  : SPINLOCK ( index -- addr ) SIO_BASE $100 + swap cells + ;
 
   \ Spinlock out of range exception
   : x-spinlock-out-of-range ( -- ) space ." spinlock out of range" cr ;
@@ -123,41 +126,52 @@ begin-module-once multicore-module
   ;
   
   \ Blocking FIFO push
-  : fifo-push-blocking ( core -- )
+  : fifo-push-blocking ( x core -- )
     validate-addressable-core
     begin FIFO_ST_RDY FIFO_ST bit@ until FIFO_WR ! sev
   ;
   
   \ Blocking FIFO pop
-  : fifo-pop-blocking ( core -- )
+  : fifo-pop-blocking ( core -- x )
     validate-addressable-core
-    begin FIFO_ST_VLD FIFO_ST bit@ until FIFO_RD @
-  ;
-
-  \ Blocking FIFO pop, sleeping the current core in the process
-  : fifo-pop-blocking-sleep ( core -- )
-    validate-addressable-core
-    begin FIFO_ST_VLD FIFO_ST bit@ not while wfe repeat FIFO_RD @
+    begin FIFO_ST_VLD FIFO_ST bit@ until FIFO_RD @ sev
   ;
 
   \ Keep on sending data on the FIFO until a positive response is received
-  : fifo-push-confirm ( x core -- )
-    validate-addressable-core
-    begin dup fifo-push-blocking fifo-pop-blocking until
-    drop
+  : fifo-push-confirm ( x core -- confirmed? )
+    dup validate-addressable-core
+    2dup fifo-push-blocking fifo-pop-blocking =
+  ;
+
+  \ Prepare the return stack for an auxiliary core
+  : prepare-aux-rstack ( xt stack-ptr rstack-ptr -- new-rstack-ptr )
+    over @ over 2 cells - !
+    tuck swap cell + swap cell - !
+    ['] reboot 1 or over 3 cells - !
+    swap 1 or swap 4 cells - tuck !
   ;
   
   \ Launch an auxiliary core
-  : launch-aux-core ( vector-table stack-pointer core -- )
+  : launch-aux-core ( xt stack-ptr rstack-ptr core -- )
     1 = averts x-core-out-of-range
-    SIO_IRQ_PROC0 NVIC_ISER_SETENA@ >r
+    prepare-aux-rstack
     SIO_IRQ_PROC0 NVIC_ICER_CLRENA!
-    fifo-drain 0 1 fifo-push-confirm
-    fifo-drain 0 1 fifo-push-confirm
-    rot 1 fifo-push-confirm
-    swap 1 fifo-push-confirm
-    ['] aux-core-entry 1 fifo-push-confirm
-    >r if SIO_IRQ_PROC0 NVIC_ISER_SETENV! then
+    6 0 do
+      i case
+	0 of 1 fifo-drain 0 endof
+	1 of 1 fifo-drain 0 endof
+	2 of 1 endof
+	3 of vector-table endof
+	4 of dup endof
+	5 of ['] trampoline 3 + endof \ Bypass the initial PUSH {LR}
+      endcase
+      1 fifo-push-confirm if
+	1
+      else
+	i negate
+      then
+    +loop
+    drop
   ;
 
   \ Force core 1 off
@@ -169,7 +183,7 @@ begin-module-once multicore-module
   \ Restore core 1
   : restore-core-1 ( -- )
     PSM_FRCE_OFF_PROC1 PSM_FRCE_OFF bic!
-    fifo-pop-blocking drop
+    1 fifo-pop-blocking drop
   ;
 
   \ Reset core 1

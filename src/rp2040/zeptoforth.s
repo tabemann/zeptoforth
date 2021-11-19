@@ -63,16 +63,6 @@
 	ldr r1, =ram_current
 	str r1, [r0, #0]
 	str r1, [r0, #4]
-	@@ Initialize the second vector table
-	ldr r0, =extra_vector_tables
-	ldr r1, =vector_table
-	ldr r2, =vector_table_size
-1:	cmp r2, #0
-	beq 2f
-	subs r2, #4
-	ldr r3, [r1, r2]
-	str r3, [r0, r2]
-	b 1b
 	@@ Call the rest of the runtime in an exception handler
 2:	push_tos
 	ldr tos, =outer_exc_handled
@@ -98,6 +88,8 @@ _init_platform_variables:
 	ldr r1, =sio_hook
 	str r0, [r1, #0]
 	str r0, [r1, #4]
+	ldr r1, =core_1_launched
+	str r0, [r1]
 	bx lr
 
 	.ltorg

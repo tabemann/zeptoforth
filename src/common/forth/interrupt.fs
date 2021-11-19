@@ -25,9 +25,6 @@ compress-flash
 
 begin-module-once interrupt-module
 
-  \ Invalid CPU index exception
-  : x-invalid-cpu ( -- ) space ." invalid cpu index" cr ;
-  
   \ Invalid interrupt vector index exception
   : x-invalid-vector ( -- ) space ." invalid vector" cr ;
 
@@ -64,36 +61,17 @@ begin-module-once interrupt-module
 
   commit-flash
   
-  \ Get the vector table for a CPU
-  : cpu-vector-table ( cpu-index -- addr )
-    ?dup if
-      1- vector-count * cells + extra-vector-tables +
-    else
-      vector-table
-    then
-  ;
-
-  \ Validate a vector index and CPU index
-  : validate-cpu-vector ( vector-index cpu-index -- )
-    dup 0=> swap cpu-count < or averts x-invalid-cpu
-    dup 0> swap vector-count < or averts x-invalid-vector
-  ;
-  
-  \ Set an interrupt vector for an arbitrary CPU
-  : cpu-vector! ( xt vector-index cpu-index -- )
-    2dup validate-cpu-vector rot 1+ rot cells rot cpu-vector-table + !
-  ;
-
-  \ Get an interrupt vector for an arbitrary CPU
-  : cpu-vector@ ( vector-index cpu-index -- xt )
-    2dup validate-cpu-vector cpu-vector-table swap cells + @ 1-
-  ;
-
   \ Set an interrupt vector
-  : vector! ( xt vector-index -- ) 0 cpu-vector! ;
+  : vector! ( xt vector-index -- )
+    dup 0 > over vector-count < or averts x-invalid-vector
+    swap 1+ swap cells vector-table + !
+  ;
 
   \ Get an interrupt vector
-  : vector@ ( vector-index -- xt ) 0 cpu-vector@ ;
+  : vector@ ( vector-index -- xt )
+    dup 0 > over vector-count < or averts x-invalid-vector
+    cells vector-table + @ 1-
+  ;
 
   \ Get the active interrupt
   : ICSR_VECTACTIVE@ ( -- interrupt ) ICSR @ $1FF and ;

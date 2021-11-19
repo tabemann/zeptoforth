@@ -80,7 +80,7 @@ begin-import-module-once task-module
     variable free-end
 
     \ Pause count
-    cpu-variable cpu-pause-count pause-task
+    cpu-variable cpu-pause-count pause-count
 
     \ Currently in multitasker
     cpu-variable cpu-in-multitasker? in-multitasker?
@@ -280,9 +280,7 @@ begin-import-module-once task-module
 
     \ Claim the task spinlock if spinlocks are supported
     spinlock-count 0> [if]
-      : claim-task-spinlock ( -- )
-	disable-int task-spinlock claim-spinlock enable-int
-      ;
+      : claim-task-spinlock ( -- ) task-spinlock claim-spinlock ;
     [else]
       : claim-task-spinlock ( -- ) ;
     [then]
@@ -693,6 +691,49 @@ begin-import-module-once task-module
       swap ['] task-systick-delay for-task @ <
     ;
 
+    cpu-count 1 > [if]
+      
+      \ Populate an auxiliary task's stack
+      : init-aux-task-stack ( xn...x0 count xt task -- sp )
+	task-stack-base
+	swap >r >r
+	$FEDCBA98 r> cell - tuck ! >r
+	begin dup 0<> while
+	  dup roll r> cell - tuck ! >r
+	repeat
+	drop
+	r> r> swap cell - tuck !
+      ;
+      
+      \ Initialize an auxiliary task
+      : init-aux-task ( xn...x0 count xt task -- )
+	0 over ['] task-handler for-task !
+	0 over task-priority h!
+	0 over task-saved-priority h!
+	0 over task-active h!
+	base @ over ['] task-base for-task !
+	0 over ['] current-lock for-task !
+	0 over ['] current-lock-held for-task !
+	readied over task-state h!
+	no-timeout over ['] timeout for-task !
+	0 over ['] timeout-systick-start for-task !
+	0 over ['] timeout-systick-delay for-task !
+	0 over ['] task-systick-start for-task !
+	0 over ['] task-name for-task !
+	-1 over ['] task-systick-delay for-task !
+	default-timeslice over ['] task-timeslice for-task !
+	default-min-timeslice over ['] task-min-timeslice for-task !
+	default-timeslice over ['] task-saved-systick-counter for-task !
+	dup task-rstack-base over task-rstack-current !
+	next-user-space over task-dict-offset !
+	0 over task-next !
+	0 over task-prev !
+	dup >r init-aux-task-stack
+	r> task-rstack-base
+      ;
+
+    [then]
+
   end-module
 
   \ Initialize a task
@@ -1010,14 +1051,7 @@ begin-import-module-once task-module
       
       \ Initialize an auxiliary core's main task
       : init-aux-main-task ( -- )
-	0 fifo-pop-blocking >r \ task
-	0 fifo-pop-blocking >r \ xt
-	0 fifo-pop-blocking >r \ count
-	r@ 0 ?do 0 fifo-pop-blocking loop \ xn ... x0
-	r> r> r@
-	init-task
-	run
-	begin pause again
+	current-task @ task-dict-current ram-here! execute
       ;
       
     [then]
@@ -1055,7 +1089,9 @@ begin-import-module-once task-module
     ( xn ... x0 count xt dict-size stack-size rstack-size core -- )
     [ cpu-count 1 > ] [if]
       cpu-index 0= averts x-core-can-only-be-launched-from-core-0
+      disable-int
       claim-task-spinlock
+      enable-int
       dup cpu-active? @ if
 	release-task-spinlock
 	['] x-main-already-launched ?raise
@@ -1063,19 +1099,15 @@ begin-import-module-once task-module
 	true over cpu-active? !
       then
       release-task-spinlock
-      >r task-allot
-      r@ 1- vector-count cells * extra-vector-table +
-      over task-rstack-base
-      ['] aux-core-entry
-      r@ launch-aux-core
-      dup task-stack-base r@ fifo-push-blocking \ stack base
-      dup task-dict-base r@ fifo-push-blocking \ dictionary base
-      ['] init-aux-main-task 1+ r@ fifo-push-blocking \ second entry point
-      r@ fifo-push-blocking \ task
-      r@ fifo-push-blocking \ xt
-      dup r@ fifo-push-blocking \ count
-      begin ?dup while dup roll r@ fifo-push-blocking 1- repeat
-      rdrop
+      >r task-allot >r
+      2r@ cpu-current-task !
+      2r@ cpu-main-task !
+      2r@ cpu-first-task !
+      2r@ cpu-last-task !
+      2r@ cpu-prev-task !
+      r> init-aux-task
+      ['] init-aux-main-task -rot
+      r> launch-aux-core
     [else]
       ['] x-core-out-of-range ?raise
     [then]
@@ -1084,18 +1116,24 @@ begin-import-module-once task-module
   \ Initialize multitasking
   : init-tasker ( -- )
     disable-int
+    0 pause-enabled !
+    $7F SHPR3_PRI_15!
+    $FF SHPR2_PRI_11!
+    $FF SHPR3_PRI_14!
+    stack-end @ free-end !
+    validate-dict-hook @ saved-validate-dict !
+    false ram-dict-warned !
+    ['] do-pause pause-hook !
+    ['] do-wait wait-hook !
+    ['] do-wake wake-hook !
+    ['] do-validate-dict validate-dict-hook !
     cpu-count 0 ?do
       false i cpu-in-multitasker? !
-      0 i cpu-pause-enabled !
       false i cpu-sleep-enabled? !
       false i cpu-trace-enabled? !
       false i cpu-in-task-change !
       false i cpu-wake-tasks !
-      $7F SHPR3_PRI_15!
-      $FF SHPR2_PRI_11!
-      $FF SHPR3_PRI_14!
       0 i cpu-task-systick-counter !
-      stack-end @ free-end !
       i 0= if
 	true i cpu-active? !
 	init-main-task
@@ -1108,16 +1146,10 @@ begin-import-module-once task-module
 	0 i cpu-last-task !
       then
       0 i cpu-pause-count !
-      ['] do-pause pause-hook !
-      ['] do-wait wait-hook !
-      ['] do-wake wake-hook !
-      validate-dict-hook @ saved-validate-dict !
-      false ram-dict-warned !
-      ['] do-validate-dict validate-dict-hook !
-      ['] execute svcall-vector i cpu-vector!
-      ['] switch-tasks pendsv-vector i cpu-vector!
-      ['] task-systick-handler systick-vector i cpu-vector!
     loop
+    ['] execute svcall-vector vector!
+    ['] switch-tasks pendsv-vector vector!
+    ['] task-systick-handler systick-vector vector!
     1 pause-enabled !
     enable-int
   ;
