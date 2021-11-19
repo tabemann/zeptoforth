@@ -68,72 +68,39 @@ _core_fifo_pop:
 	ldr r0, [r0]
 	bx lr
 
-	@@ Auxiliary core entry
-	define_internal_word "aux-core-entry", visible_flag
-_aux_core_entry:
-	ldr tos, =0xFEDCBA98
-	bl _core_fifo_pop
-	movs dp, r0
-	bl _core_fifo_pop
-	push_tos
-	movs tos, r0
-	bl _store_here
-	bl _core_fifo_pop
-	adds r0, #1
-	bx r0
-	bx lr
-	end_inlined
-
 	@@ Force the other core to wait
 	define_internal_word "force-core-wait", visible_flag
 _force_core_wait:
 	push {lr}
-	ldr r0, =SYNC_SPINLOCK
-1:	ldr r1, [r0]
-	cmp r1, #0
-	beq 1b
-	ldr r0, =FIFO_ST
-	movs r1, #FIFO_ST_RDY
-	ldr r0, [r0]
-	tst r0, r1
-	beq 2f
-	ldr r0, =SYNC_VALUE
-	bl _core_fifo_push
+@	ldr r0, =core_1_launched
+@	ldr r0, [r0]
+@	cmp r0, #0
+@	beq 2f
+@	ldr r0, =SYNC_SPINLOCK
+@1:	ldr r1, [r0]
+@	cmp r1, #0
+@	beq 1b
+@	ldr r0, =FIFO_ST
+@	movs r1, #FIFO_ST_RDY
+@	ldr r0, [r0]
+@	tst r0, r1
+@	beq 2f
+@	ldr r0, =SYNC_VALUE
+@	bl _core_fifo_push
 2:	pop {pc}
 	end_inlined
 
 	@@ Release the other core
 	define_internal_word "release-core", visible_flag
 _release_core:	
-	ldr r0, =SYNC_SPINLOCK
-	movs r1, #1
-	str r1, [r0]
-	bx lr
-	end_inlined
-
-	@@ FIFO read handler
-	define_internal_word "handle-sio", visible_flag
-_handle_sio:	
-	push {lr}
-	ldr r0, =SYNC_SPINLOCK
-1:	ldr r1, [r0]
-	cmp r1, #0
-	beq 1b
-	movs r1, #1
-	str r1, [r0]
-	bl _core_fifo_pop
-	push {r0}
-	bl _sio_hook
-	pop {r0}
-	movs r1, tos
-	pull_tos
-	cmp r1, #0
-	beq 2f
-	push_tos
-	movs tos, r0
-	adds r1, #1
-	blx r1
-2:	pop {pc}
+@	ldr r0, =core_1_launched
+@	ldr r0, [r0]
+@	cmp r0, #0
+@	beq 1f
+@	ldr r0, =SYNC_SPINLOCK
+@	movs r1, #1
+@	str r1, [r0]
+1:	bx lr
 	end_inlined
 
 	.ltorg

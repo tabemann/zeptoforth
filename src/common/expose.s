@@ -345,14 +345,6 @@ _vector_table:
 	bx lr
 	end_inlined
 
-	@@ The extra vector tables address
-	define_word "extra-vector-tables", visible_flag
-_extra_vector_tables:
-	push_tos
-	ldr tos, =extra_vector_tables
-	bx lr
-	end_inlined
-
 	@@ The vector count
 	define_word "vector-count", visible_flag
 _vector_count:

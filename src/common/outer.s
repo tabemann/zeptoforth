@@ -530,7 +530,7 @@ _evaluate:
 	@@ Abort
 	define_word "abort", visible_flag
 _abort:	bl _stack_base
-	mov dp, tos
+	ldr dp, [tos]
 	bl _bel
 	bl _nak
 	b _quit
