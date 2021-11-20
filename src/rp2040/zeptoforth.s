@@ -92,6 +92,21 @@ _init_platform_variables:
 	str r0, [r1]
 	bx lr
 
+	@ Reboot the RP2040 in BOOTSEL mode
+	define_word "bootsel", visible_flag
+_bootsel:
+	movs r2, #0
+	ldr r1, ='U | ('B << 8)
+	ldrh r0, [r2, #0x14]
+	ldrh r3, [r2, #0x18]
+	blx r3
+	movs r3, r0
+	movs r0, #0
+	movs r1, #0
+	blx r3
+	bx lr
+	end_inlined
+
 	.ltorg
 	
 	.include "hardware.s"

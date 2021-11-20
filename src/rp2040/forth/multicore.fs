@@ -174,22 +174,26 @@ begin-module-once multicore-module
     drop
   ;
 
-  \ Force core 1 off
-  : force-core-1-off ( -- )
+  \ Reset an auxiliary core
+  : reset-aux-core ( core -- )
+    1 = averts x-core-out-of-range
     PSM_FRCE_OFF_PROC1 PSM_FRCE_OFF bis!
     begin PSM_FRCE_OFF_PROC1 PSM_FRCE_OFF bit@ until
-  ;
-
-  \ Restore core 1
-  : restore-core-1 ( -- )
     PSM_FRCE_OFF_PROC1 PSM_FRCE_OFF bic!
     1 fifo-pop-blocking drop
   ;
 
-  \ Reset core 1
-  : reset-core-1 ( -- )
-    force-core-1-off
-    restore-core-1
-  ;
-
 end-module
+
+import multicore-module
+
+\ Set up reboot to reset the second core
+: reboot ( -- ) cpu-index 1 <> if 1 reset-aux-core then reboot ;
+
+\ Set up warm to reset the second core
+: warm ( -- ) cpu-index 1 <> if 1 reset-aux-core then warm ;
+
+unimport multicore-module
+
+\ Reboot
+reboot
