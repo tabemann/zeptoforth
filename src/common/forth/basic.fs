@@ -2192,7 +2192,7 @@ forth-module set-current
   next-ram-space dict-base !
   dict-base @ next-user-space + ram-here!
   false deferred-context-switch !
-  0 in-critical !
+  cpu-count 0 ?do 0 cpus-in-critical i cells + ! loop
   0 wait-hook !
   0 wake-hook !
   0 flush-console-hook !

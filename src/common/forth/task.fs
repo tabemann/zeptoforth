@@ -699,7 +699,7 @@ begin-import-module-once task-module
 	swap >r >r
 	$FEDCBA98 r> cell - tuck ! >r
 	begin dup 0<> while
-	  dup roll r> cell - tuck ! >r
+	  dup roll r> cell - tuck ! >r 1-
 	repeat
 	drop
 	r> r> swap cell - tuck !
@@ -710,7 +710,7 @@ begin-import-module-once task-module
 	0 over ['] task-handler for-task !
 	0 over task-priority h!
 	0 over task-saved-priority h!
-	0 over task-active h!
+	1 over task-active h!
 	base @ over ['] task-base for-task !
 	0 over ['] current-lock for-task !
 	0 over ['] current-lock-held for-task !
@@ -721,6 +721,7 @@ begin-import-module-once task-module
 	0 over ['] task-systick-start for-task !
 	0 over ['] task-name for-task !
 	-1 over ['] task-systick-delay for-task !
+	c" aux-main" over ['] task-name for-task !
 	default-timeslice over ['] task-timeslice for-task !
 	default-min-timeslice over ['] task-min-timeslice for-task !
 	default-timeslice over ['] task-saved-systick-counter for-task !
@@ -1051,7 +1052,15 @@ begin-import-module-once task-module
       
       \ Initialize an auxiliary core's main task
       : init-aux-main-task ( -- )
-	current-task @ task-dict-current ram-here! execute
+	current-task @ task-dict-current ram-here!
+	current-task @ task-stack-base stack-base !
+	current-task @ task-rstack-base rstack-base !
+	$7F SHPR3_PRI_15!
+	$FF SHPR2_PRI_11!
+	$FF SHPR3_PRI_14!
+	1 pause-enabled !
+	init-systick-aux-core
+	execute
       ;
       
     [then]
