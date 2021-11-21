@@ -68,7 +68,7 @@ begin-import-module-once systick-module
     $00FFFFFF constant SYST_CALIB_TENMS
     
     \ SysTick counter
-    variable systick-counter
+    cpu-variable cpu-systick-counter systick-counter
 
     compress-flash
 
@@ -100,8 +100,17 @@ begin-import-module-once systick-module
   : systick-counter ( -- u ) systick-counter @ ;
 
   \ Initialize SysTick
-  : init-systick
+  : init-systick ( -- )
     ['] systick-handler systick-vector vector!
+    SYST_CALIB @ SYST_CALIB_TENMS and
+    10 / systick-divisor / time-multiplier * time-divisor / SYST_RVR !
+    0 SYST_CVR !
+    0 systick-counter !
+    enable-systick
+  ;
+
+  \ Initialize SysTick for an auxiliary core
+  : init-systick-aux-core ( -- )
     SYST_CALIB @ SYST_CALIB_TENMS and
     10 / systick-divisor / time-multiplier * time-divisor / SYST_RVR !
     0 SYST_CVR !
