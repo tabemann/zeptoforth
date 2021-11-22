@@ -4,20 +4,22 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>Interrupt Words &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Development Tools Words" href="dev_tools.html" />
+    <link rel="next" title="Multicore Words" href="multicore.html" />
     <link rel="prev" title="EXTI Words" href="exti.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
@@ -27,165 +29,168 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
-  <div class="section" id="interrupt-words">
+  <section id="interrupt-words">
 <h1>Interrupt Words<a class="headerlink" href="#interrupt-words" title="Permalink to this headline">¶</a></h1>
 <p>These words are in <code class="docutils literal notranslate"><span class="pre">interrupt-module</span></code>.</p>
-<div class="section" id="x-invalid-vector">
+<section id="x-invalid-vector">
 <h2><code class="docutils literal notranslate"><span class="pre">x-invalid-vector</span></code><a class="headerlink" href="#x-invalid-vector" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Invalid interrupt vector index exception</p>
-</div>
-<div class="section" id="vector">
+</section>
+<section id="vector">
 <h2><code class="docutils literal notranslate"><span class="pre">vector!</span></code><a class="headerlink" href="#vector" title="Permalink to this headline">¶</a></h2>
 <p>( xt vector-index – )</p>
 <p>Set an interrupt vector</p>
-</div>
-<div class="section" id="id1">
+</section>
+<section id="id1">
 <h2><code class="docutils literal notranslate"><span class="pre">vector&#64;</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <p>( vector-index – xt )</p>
 <p>Get an interrupt vector</p>
-</div>
-<div class="section" id="shpr1-pri-4">
+</section>
+<section id="shpr1-pri-4">
 <h2><code class="docutils literal notranslate"><span class="pre">SHPR1_PRI_4!</span></code><a class="headerlink" href="#shpr1-pri-4" title="Permalink to this headline">¶</a></h2>
 <p>( u – )</p>
 <p>Set system fault handler priority field 4, for memory management fault</p>
-</div>
-<div class="section" id="shpr1-pri-5">
+</section>
+<section id="shpr1-pri-5">
 <h2><code class="docutils literal notranslate"><span class="pre">SHPR1_PRI_5!</span></code><a class="headerlink" href="#shpr1-pri-5" title="Permalink to this headline">¶</a></h2>
 <p>( u – )</p>
 <p>Set system fault handler priority field 5, for bus fault</p>
-</div>
-<div class="section" id="shpr1-pri-6">
+</section>
+<section id="shpr1-pri-6">
 <h2><code class="docutils literal notranslate"><span class="pre">SHPR1_PRI_6!</span></code><a class="headerlink" href="#shpr1-pri-6" title="Permalink to this headline">¶</a></h2>
 <p>( u – )</p>
 <p>Set system fault handler priority field 6, for usage fault</p>
-</div>
-<div class="section" id="shpr2-pri-11">
+</section>
+<section id="shpr2-pri-11">
 <h2><code class="docutils literal notranslate"><span class="pre">SHPR2_PRI_11!</span></code><a class="headerlink" href="#shpr2-pri-11" title="Permalink to this headline">¶</a></h2>
 <p>( u – )</p>
 <p>Set system fault handler priority field 11, for SVCall</p>
-</div>
-<div class="section" id="shpr3-pri-14">
+</section>
+<section id="shpr3-pri-14">
 <h2><code class="docutils literal notranslate"><span class="pre">SHPR3_PRI_14!</span></code><a class="headerlink" href="#shpr3-pri-14" title="Permalink to this headline">¶</a></h2>
 <p>( u – )</p>
 <p>Set system fault handler priority field 14, for PendSV</p>
-</div>
-<div class="section" id="shpr3-pri-15">
+</section>
+<section id="shpr3-pri-15">
 <h2><code class="docutils literal notranslate"><span class="pre">SHPR3_PRI_15!</span></code><a class="headerlink" href="#shpr3-pri-15" title="Permalink to this headline">¶</a></h2>
 <p>( u – )</p>
 <p>Set system fault handler priority field 15, for SysTick</p>
-</div>
-<div class="section" id="id2">
+</section>
+<section id="id2">
 <h2><code class="docutils literal notranslate"><span class="pre">SHPR1_PRI_4&#64;</span></code><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
 <p>( – u )</p>
 <p>Get system fault handler priority field 4, for memory management fault</p>
-</div>
-<div class="section" id="id3">
+</section>
+<section id="id3">
 <h2><code class="docutils literal notranslate"><span class="pre">SHPR1_PRI_5&#64;</span></code><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
 <p>( – u )</p>
 <p>Get system fault handler priority field 5, for bus fault</p>
-</div>
-<div class="section" id="id4">
+</section>
+<section id="id4">
 <h2><code class="docutils literal notranslate"><span class="pre">SHPR1_PRI_6&#64;</span></code><a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
 <p>( – u )</p>
 <p>Get system fault handler priority field 6, for usage fault</p>
-</div>
-<div class="section" id="id5">
+</section>
+<section id="id5">
 <h2><code class="docutils literal notranslate"><span class="pre">SHPR2_PRI_11&#64;</span></code><a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
 <p>( – u )</p>
 <p>Get system fault handler priority field 11, for SVCall</p>
-</div>
-<div class="section" id="id6">
+</section>
+<section id="id6">
 <h2><code class="docutils literal notranslate"><span class="pre">SHPR3_PRI_14&#64;</span></code><a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
 <p>( – u )</p>
 <p>Get system fault handler priority field 14, for PendSV</p>
-</div>
-<div class="section" id="id7">
+</section>
+<section id="id7">
 <h2><code class="docutils literal notranslate"><span class="pre">SHPR3_PRI_15&#64;</span></code><a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
 <p>( – u )</p>
 <p>Get system fault handler priority field 15, for SysTick</p>
-</div>
-<div class="section" id="icsr-pendsvset">
+</section>
+<section id="icsr-pendsvset">
 <h2><code class="docutils literal notranslate"><span class="pre">ICSR_PENDSVSET!</span></code><a class="headerlink" href="#icsr-pendsvset" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Set PENDSVSET</p>
-</div>
-<div class="section" id="icsr-pendsvclr">
+</section>
+<section id="icsr-pendsvclr">
 <h2><code class="docutils literal notranslate"><span class="pre">ICSR_PENDSVCLR!</span></code><a class="headerlink" href="#icsr-pendsvclr" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Set PENDSVCLR</p>
-</div>
-<div class="section" id="id8">
+</section>
+<section id="id8">
 <h2><code class="docutils literal notranslate"><span class="pre">ICSR_PENDSVSET&#64;</span></code><a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
 <p>( – bit )</p>
 <p>Get PENDSVSET</p>
-</div>
-<div class="section" id="svc">
+</section>
+<section id="svc">
 <h2><code class="docutils literal notranslate"><span class="pre">svc</span></code><a class="headerlink" href="#svc" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Initiate an SVCall</p>
-</div>
-<div class="section" id="nvic-iser-setena">
+</section>
+<section id="nvic-iser-setena">
 <h2><code class="docutils literal notranslate"><span class="pre">NVIC_ISER_SETENA!</span></code><a class="headerlink" href="#nvic-iser-setena" title="Permalink to this headline">¶</a></h2>
 <p>( u – )</p>
 <p>Set NVIC interrupt set-enable</p>
-</div>
-<div class="section" id="id9">
+</section>
+<section id="id9">
 <h2><code class="docutils literal notranslate"><span class="pre">NVIC_ISER_SETENA&#64;</span></code><a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
 <p>( u – bit )</p>
 <p>Get NVIC interrupt set-enable</p>
-</div>
-<div class="section" id="nvic-icer-clrena">
+</section>
+<section id="nvic-icer-clrena">
 <h2><code class="docutils literal notranslate"><span class="pre">NVIC_ICER_CLRENA!</span></code><a class="headerlink" href="#nvic-icer-clrena" title="Permalink to this headline">¶</a></h2>
 <p>( u – )</p>
 <p>Set NVIC interrupt clear-enable</p>
-</div>
-<div class="section" id="id10">
+</section>
+<section id="id10">
 <h2><code class="docutils literal notranslate"><span class="pre">NVIC_ICER_CLRENA&#64;</span></code><a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h2>
 <p>( u – bit )</p>
 <p>Get NVIC interrupt clear-enable</p>
-</div>
-<div class="section" id="nvic-ispr-setpend">
+</section>
+<section id="nvic-ispr-setpend">
 <h2><code class="docutils literal notranslate"><span class="pre">NVIC_ISPR_SETPEND!</span></code><a class="headerlink" href="#nvic-ispr-setpend" title="Permalink to this headline">¶</a></h2>
 <p>( u – )</p>
 <p>Set NVIC interrupt set-pending</p>
-</div>
-<div class="section" id="id11">
+</section>
+<section id="id11">
 <h2><code class="docutils literal notranslate"><span class="pre">NVIC_ISPR_SETPEND&#64;</span></code><a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h2>
 <p>( u – bit )</p>
 <p>Get NVIC interrupt set-pending</p>
-</div>
-<div class="section" id="nvic-icpr-clrpend">
+</section>
+<section id="nvic-icpr-clrpend">
 <h2><code class="docutils literal notranslate"><span class="pre">NVIC_ICPR_CLRPEND!</span></code><a class="headerlink" href="#nvic-icpr-clrpend" title="Permalink to this headline">¶</a></h2>
 <p>( u – )</p>
 <p>Set NVIC interrupt clear-pending</p>
-</div>
-<div class="section" id="id12">
+</section>
+<section id="id12">
 <h2><code class="docutils literal notranslate"><span class="pre">NVIC_ICPR_CLRPEND&#64;</span></code><a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h2>
 <p>( u – bit )</p>
 <p>Get NVIC interrupt clear-pending</p>
-</div>
-<div class="section" id="nvic-iabr-active">
+</section>
+<section id="nvic-iabr-active">
 <h2><code class="docutils literal notranslate"><span class="pre">NVIC_IABR_ACTIVE&#64;</span></code><a class="headerlink" href="#nvic-iabr-active" title="Permalink to this headline">¶</a></h2>
 <p>( u – bit )</p>
 <p>Get NVIC interrupt active bit</p>
-</div>
-<div class="section" id="nvic-ipr-ip">
+</section>
+<section id="nvic-ipr-ip">
 <h2><code class="docutils literal notranslate"><span class="pre">NVIC_IPR_IP!</span></code><a class="headerlink" href="#nvic-ipr-ip" title="Permalink to this headline">¶</a></h2>
 <p>( priority u – )</p>
 <p>Set NVIC interrupt priority register field</p>
-</div>
-<div class="section" id="id13">
+</section>
+<section id="id13">
 <h2><code class="docutils literal notranslate"><span class="pre">NVIC_IPR_IP&#64;</span></code><a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h2>
 <p>( u – priority )</p>
 <p>Get NVIC interrupt priority register field</p>
-</div>
-</div>
+</section>
+</section>
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -200,7 +205,7 @@
 
 
 <h3>Navigation</h3>
-<p class="caption"><span class="caption-text">Contents:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
@@ -243,15 +248,19 @@
 <li class="toctree-l2"><a class="reference internal" href="#id13"><code class="docutils literal notranslate"><span class="pre">NVIC_IPR_IP&#64;</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="allocate.html">Allocator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
@@ -271,7 +280,7 @@
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
       <li>Previous: <a href="exti.html" title="previous chapter">EXTI Words</a></li>
-      <li>Next: <a href="dev_tools.html" title="next chapter">Development Tools Words</a></li>
+      <li>Next: <a href="multicore.html" title="next chapter">Multicore Words</a></li>
   </ul></li>
 </ul>
 </div>
@@ -279,12 +288,20 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
 <script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -293,8 +310,8 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.4.3</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="../_sources/words/interrupt.md.txt"

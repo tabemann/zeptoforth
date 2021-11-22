@@ -39,30 +39,30 @@ begin-module-once multicore-module
   : x-core-not-addressable ( -- ) space ." core not addressable" cr ;
 
   \ Claim a spinlock - note that this will always fail
-  : claim-spinlock ( index -- ) drop ['] x-spinlocks-out-of-range ?raise ;
+  : claim-spinlock ( index -- ) ['] x-spinlock-out-of-range ?raise ;
 
   \ Release a spinlock - note that this will always fail
-  : release-spinlock ( index -- ) drop ['] x-spinlocks-out-of-range ?raise ;
+  : release-spinlock ( index -- ) ['] x-spinlock-out-of-range ?raise ;
     
   \ Drain a multicore FIFO
   : fifo-drain ( core -- ) ['] x-core-out-of-range ?raise ;
   
   \ Blocking FIFO push
-  : fifo-push-blocking ( core -- ) ['] x-core-out-of-range ?raise ;
+  : fifo-push-blocking ( x core -- ) ['] x-core-out-of-range ?raise ;
   
   \ Blocking FIFO pop
-  : fifo-pop-blocking ( core -- ) ['] x-core-out-of-range ?raise ;
+  : fifo-pop-blocking ( core -- x ) ['] x-core-out-of-range ?raise ;
 
-  \ Blocking FIFO pop, sleeping the current core in the process
-  : fifo-pop-blocking-sleep ( core -- ) ['] x-core-out-of-range ?raise ;
-
-  \ Keep on sending data on the FIFO until a positive response is received
-  : fifo-push-confirm ( x core -- ) ['] x-core-out-of-range ?raise ;
+  \ Attempt to send data on a FIFO and confirm that the same data is sent back.
+  : fifo-push-confirm ( x core -- confirmed? ) ['] x-core-out-of-range ?raise ;
   
   \ Launch an auxiliary core
-  : launch-aux-core ( vector-table stack-pointer entry-xt core -- )
+  : launch-aux-core ( xt stack-ptr rstack-ptr core -- )
     ['] x-core-out-of-range ?raise
   ;
+
+  \ Reset an auxiliary core
+  : reset-aux-core ( core -- ) ['] x-core-out-of-range ?raise ;
 
 end-module
 

@@ -26,30 +26,59 @@ begin-module-once multicore-module
   import internal-module
   import interrupt-module
 
+  \ Spinlock out of range exception
+  : x-spinlock-out-of-range ( -- ) space ." spinlock out of range" cr ;
+  
+  \ Core out of range exception
+  : x-core-out-of-range ( -- ) space ." core out of range" cr ;
+
+  \ Core not addressable exception
+  : x-core-not-addressable ( -- ) space ." core not addressable" cr ;
+
   begin-import-module multicore-internal-module
       
     \ SIO base
     $D0000000 constant SIO_BASE
+    
+    \ Prepare the return stack for an auxiliary core
+    : prepare-aux-rstack ( xt stack-ptr rstack-ptr -- new-rstack-ptr )
+      over @ over 2 cells - !
+      tuck swap cell + swap cell - !
+      ['] reboot 1 or over 3 cells - !
+      swap 1 or swap 4 cells - tuck !
+    ;
+  
+    \ Trampoline
+    : trampoline ( --  ) [ $BCC3 h, $468E h, $4687 h, ] ; \ POP {R0, R1, R6, R7}; MOV LR, R1: MOV PC, R0
+    
+    \ Power-on state machine base
+    $40010000 constant PSM_BASE
+    
+    \ Force off register
+    PSM_BASE $4 + constant PSM_FRCE_OFF
+    
+    \ Force power-off processor 1 bit
+    16 bit constant PSM_FRCE_OFF_PROC1
 
+    \ Check whether a core is addressable
+    : validate-addressable-core ( core -- )
+      dup cpu-count u< averts x-core-out-of-range
+      cpu-index <> averts x-core-not-addressable
+    ;
+  
   end-module
+
+  \ Signal an event to the other core
+  : sev ( -- ) [inlined] [ undefer-lit %1011111101000000 h, ] ;
+  
+  \ Wait for an event
+  : wfe ( -- ) [inlined] [ undefer-lit %1011111100100000 h, ] ;
 
   \ SIO processor 0 IRQ
   15 constant SIO_IRQ_PROC0
 
   \ SIO processor 1 RIQ
   16 constant SIO_IRQ_PROC1
-
-  \ Signal an event to the other core
-  : sev ( -- ) [inlined] [ undefer-lit %1011111101000000 h, ] ;
-
-  \ Wait for an event
-  : wfe ( -- ) [inlined] [ undefer-lit %1011111100100000 h, ] ;
-
-  \ Trampoline
-  : trampoline ( --  ) [ $BCC3 h, $468E h, $4687 h, ] ; \ POP {R0, R1, R6, R7}; MOV LR, R1: MOV PC, R0
-
-  \ CPUID register (contains 0 for core 0, 1 for core 1)
-  SIO_BASE $000 + constant CPUID
 
   \ FIFO status register; note that core 0 can see the read side of the 1 -> 0
   \ FIFO and the write side of the 0 -> 1 FIFO; the converse is true of core 1
@@ -73,15 +102,6 @@ begin-module-once multicore-module
   \ Read access to this core's RX FIFO
   SIO_BASE $058 + constant FIFO_RD
 
-  \ Power-on state machine base
-  $40010000 constant PSM_BASE
-
-  \ Force off register
-  PSM_BASE $4 + constant PSM_FRCE_OFF
-  
-  \ Force power-off processor 1 bit
-  16 bit constant PSM_FRCE_OFF_PROC1
-
   \ Spinlock count
   32 constant spinlock-count
 
@@ -92,21 +112,6 @@ begin-module-once multicore-module
   \ 1 lock-number lshift on success; writing any value will release the spinlock
   : SPINLOCK ( index -- addr ) SIO_BASE $100 + swap cells + ;
 
-  \ Spinlock out of range exception
-  : x-spinlock-out-of-range ( -- ) space ." spinlock out of range" cr ;
-  
-  \ Core out of range exception
-  : x-core-out-of-range ( -- ) space ." core out of range" cr ;
-
-  \ Core not addressable exception
-  : x-core-not-addressable ( -- ) space ." core not addressable" cr ;
-
-  \ Check whether a core is addressable
-  : validate-addressable-core ( core -- )
-    dup cpu-count u< averts x-core-out-of-range
-    cpu-index <> averts x-core-not-addressable
-  ;
-  
   \ Claim a spinlock
   : claim-spinlock ( index -- )
     dup spinlock-count u< averts x-spinlock-out-of-range
@@ -137,20 +142,12 @@ begin-module-once multicore-module
     begin FIFO_ST_VLD FIFO_ST bit@ until FIFO_RD @ sev
   ;
 
-  \ Keep on sending data on the FIFO until a positive response is received
+  \ Attempt to send data on a FIFO and confirm that the same data is sent back.
   : fifo-push-confirm ( x core -- confirmed? )
     dup validate-addressable-core
     2dup fifo-push-blocking fifo-pop-blocking =
   ;
 
-  \ Prepare the return stack for an auxiliary core
-  : prepare-aux-rstack ( xt stack-ptr rstack-ptr -- new-rstack-ptr )
-    over @ over 2 cells - !
-    tuck swap cell + swap cell - !
-    ['] reboot 1 or over 3 cells - !
-    swap 1 or swap 4 cells - tuck !
-  ;
-  
   \ Launch an auxiliary core
   : launch-aux-core ( xt stack-ptr rstack-ptr core -- )
     1 = averts x-core-out-of-range

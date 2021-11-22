@@ -49,7 +49,7 @@ $(UF2): $(BIN)
 	$(MAKE_UF2) $(BOOT_BIN_WITH_CHECKSUM) $(BIN) $(UF2)
 
 $(BIN): $(OBJ)
-	$(LD) $(OBJ) -T zeptoforth.ld --cref -Map $(MAP) -nostartfiles -o $(ELF)
+	$(LD) $(OBJ) -T zeptoforth.ld --cref -Map $(MAP) -o $(ELF)
 	$(DUMP) -D $(ELF) > $(LIST)
 	$(COPY) $(ELF) $@ -O binary
 	$(COPY) $(ELF) $(IHEX) -O ihex
