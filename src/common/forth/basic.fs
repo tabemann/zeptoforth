@@ -1022,11 +1022,17 @@ commit-flash
   then
 ;
 
+\ Set the internal wordlist
+internal-module set-current
+
 \ Make the global portion of a CPU variable
 : global-cpu-variable ( addr "global-name" -- ) <builds , does> @ swap cells + ;
 
 \ Commit to flash
 commit-flash
+
+\ Set the forth wordlist
+forth-module set-current
 
 \ Make a variable which is CPU-dependent
 : cpu-variable ( "global-name" "cpu-name" -- )

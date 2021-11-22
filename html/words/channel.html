@@ -4,11 +4,12 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>Channel Words &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
@@ -19,6 +20,7 @@
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
+  
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head><body>
@@ -27,217 +29,220 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
-  <div class="section" id="channel-words">
+  <section id="channel-words">
 <h1>Channel Words<a class="headerlink" href="#channel-words" title="Permalink to this headline">¶</a></h1>
 <p>A channel is a monodirectional means of communicating data, as arbitrary-sized blocks of data, between two or more different tasks. Channels form a fixed-size queue onto which data is sent on one end and data is received on the other. Any task which attempts to send data on a full channel, or receive data on an empty channel, will be suspended until either data is received from the channel, or data is sent to the channel, respectively, unless non-blocking operations are used, where then <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> (declared in <code class="docutils literal notranslate"><span class="pre">task-module</span></code>) is raised instead of blocking.</p>
 <p>Channels can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put into alloted memory in the dictionary or into allocated memory in the heap. Note that the size of a channel for a given element size and element count may be calculated with <code class="docutils literal notranslate"><span class="pre">chan-size</span></code>.</p>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">chan-module</span></code>:</p>
-<div class="section" id="x-chan-closed">
+<section id="x-chan-closed">
 <h2><code class="docutils literal notranslate"><span class="pre">x-chan-closed</span></code><a class="headerlink" href="#x-chan-closed" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Channel closed exception. Raised on attempting to send to a closed channel or when trying to receive on an empty closed channel.</p>
-</div>
-<div class="section" id="chan-full">
+</section>
+<section id="chan-full">
 <h2><code class="docutils literal notranslate"><span class="pre">chan-full?</span></code><a class="headerlink" href="#chan-full" title="Permalink to this headline">¶</a></h2>
 <p>( chan – flag )</p>
 <p>Get whether a channel is full.</p>
-</div>
-<div class="section" id="chan-empty">
+</section>
+<section id="chan-empty">
 <h2><code class="docutils literal notranslate"><span class="pre">chan-empty?</span></code><a class="headerlink" href="#chan-empty" title="Permalink to this headline">¶</a></h2>
 <p>( chan – flag )</p>
 <p>Get whether a channel is empty.</p>
-</div>
-<div class="section" id="chan-size">
+</section>
+<section id="chan-size">
 <h2><code class="docutils literal notranslate"><span class="pre">chan-size</span></code><a class="headerlink" href="#chan-size" title="Permalink to this headline">¶</a></h2>
 <p>( element-bytes element-count – total-bytes )</p>
 <p>Get the size in memory for a channel with a specified element size in bytes and element count.</p>
-</div>
-<div class="section" id="init-chan">
+</section>
+<section id="init-chan">
 <h2><code class="docutils literal notranslate"><span class="pre">init-chan</span></code><a class="headerlink" href="#init-chan" title="Permalink to this headline">¶</a></h2>
 <p>( element-bytes element-count addr – )</p>
 <p>Initialize a channel starting at the specified address with the element size and element count. The <em>element-bytes</em> and <em>element-count</em> should be the same as when they were passed to <code class="docutils literal notranslate"><span class="pre">chan-size</span></code> when alloting or allocating the memory whose starting address is passed in.</p>
-</div>
-<div class="section" id="close-chan">
+</section>
+<section id="close-chan">
 <h2><code class="docutils literal notranslate"><span class="pre">close-chan</span></code><a class="headerlink" href="#close-chan" title="Permalink to this headline">¶</a></h2>
 <p>( chan – )</p>
 <p>Close a channel. Raise <code class="docutils literal notranslate"><span class="pre">x-chan-closed</span></code> for all pending sending tasks or for all pending receiving tasks if the channel is empty.</p>
-</div>
-<div class="section" id="reopen-chan">
+</section>
+<section id="reopen-chan">
 <h2><code class="docutils literal notranslate"><span class="pre">reopen-chan</span></code><a class="headerlink" href="#reopen-chan" title="Permalink to this headline">¶</a></h2>
 <p>( chan – )</p>
 <p>Reopen a channel.</p>
-</div>
-<div class="section" id="chan-closed">
+</section>
+<section id="chan-closed">
 <h2><code class="docutils literal notranslate"><span class="pre">chan-closed?</span></code><a class="headerlink" href="#chan-closed" title="Permalink to this headline">¶</a></h2>
 <p>( chan – closed )</p>
 <p>Get whether a channel is closed.</p>
-</div>
-<div class="section" id="send-chan">
+</section>
+<section id="send-chan">
 <h2><code class="docutils literal notranslate"><span class="pre">send-chan</span></code><a class="headerlink" href="#send-chan" title="Permalink to this headline">¶</a></h2>
 <p>( addr bytes chan – )</p>
 <p>Send message with a buffer as a payload over a channel. Block until another task receives the message if the channel is full. Note that the buffer is copied, and will be truncated if the buffer size of the channel is smaller than the data provided, and padded with zeros if it is larger. This is not safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="recv-chan">
+</section>
+<section id="recv-chan">
 <h2><code class="docutils literal notranslate"><span class="pre">recv-chan</span></code><a class="headerlink" href="#recv-chan" title="Permalink to this headline">¶</a></h2>
 <p>( addr bytes chan – addr recv-bytes )</p>
 <p>Receive message into a buffer from a channel. Block until another task sends a message if the channel is empty. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the passed in buffer and the number of bytes copied into it are returned. This is not safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="peek-chan">
+</section>
+<section id="peek-chan">
 <h2><code class="docutils literal notranslate"><span class="pre">peek-chan</span></code><a class="headerlink" href="#peek-chan" title="Permalink to this headline">¶</a></h2>
 <p>( addr bytes chan – addr peek-bytes )</p>
 <p>Peek the oldest message into a buffer from a channel, without popping it from the channel’s queue. Block until another task sends a message if the channel is empty. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the passed in buffer and the number of bytes copied into it are returned. This is not safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="skip-chan">
+</section>
+<section id="skip-chan">
 <h2><code class="docutils literal notranslate"><span class="pre">skip-chan</span></code><a class="headerlink" href="#skip-chan" title="Permalink to this headline">¶</a></h2>
 <p>( chan – )</p>
 <p>Skip the most oldest message in a channel. Block until another task sends a message if the channel is empty. Note that no copying takes place, making this faster than receiving a message. This is not safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="send-chan-no-block">
+</section>
+<section id="send-chan-no-block">
 <h2><code class="docutils literal notranslate"><span class="pre">send-chan-no-block</span></code><a class="headerlink" href="#send-chan-no-block" title="Permalink to this headline">¶</a></h2>
 <p>( addr bytes chan – )</p>
 <p>Send message with a buffer as a payload over a channel. If the channel is full, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. Note that the buffer is copied, and will be truncated if the buffer size of the channel is smaller than the data provided, and padded with zeros if it is larger. This is safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="recv-chan-no-block">
+</section>
+<section id="recv-chan-no-block">
 <h2><code class="docutils literal notranslate"><span class="pre">recv-chan-no-block</span></code><a class="headerlink" href="#recv-chan-no-block" title="Permalink to this headline">¶</a></h2>
 <p>( addr bytes chan – addr recv-bytes )</p>
 <p>Receive message into a buffer from a channel. If the channel is empty, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the passed in buffer and the number of bytes copied into it are returned. This is safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="peek-chan-no-block">
+</section>
+<section id="peek-chan-no-block">
 <h2><code class="docutils literal notranslate"><span class="pre">peek-chan-no-block</span></code><a class="headerlink" href="#peek-chan-no-block" title="Permalink to this headline">¶</a></h2>
 <p>( addr bytes chan – addr peek-bytes )</p>
 <p>Peek the oldest message into a buffer from a channel, without popping it from the channel’s queue. If the channel is empty, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the passed in buffer and the number of bytes copied into it are returned. This is safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="skip-chan-no-block">
+</section>
+<section id="skip-chan-no-block">
 <h2><code class="docutils literal notranslate"><span class="pre">skip-chan-no-block</span></code><a class="headerlink" href="#skip-chan-no-block" title="Permalink to this headline">¶</a></h2>
 <p>( chan – )</p>
 <p>Skip the most oldest message in a channel. If the channel is empty, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. Note that no copying takes place, making this faster than receiving a message. This is safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="send-chan-2cell">
+</section>
+<section id="send-chan-2cell">
 <h2><code class="docutils literal notranslate"><span class="pre">send-chan-2cell</span></code><a class="headerlink" href="#send-chan-2cell" title="Permalink to this headline">¶</a></h2>
 <p>( xd chan – )</p>
 <p>Send message with a double cell as a payload over a channel. Block until another task receives the message if the channel is full. This is not safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="recv-chan-2cell">
+</section>
+<section id="recv-chan-2cell">
 <h2><code class="docutils literal notranslate"><span class="pre">recv-chan-2cell</span></code><a class="headerlink" href="#recv-chan-2cell" title="Permalink to this headline">¶</a></h2>
 <p>( chan – xd )</p>
 <p>Receive message with a double cell as a payload from a channel. Block until another task sends a message if the channel is empty. This is not safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="peek-chan-2cell">
+</section>
+<section id="peek-chan-2cell">
 <h2><code class="docutils literal notranslate"><span class="pre">peek-chan-2cell</span></code><a class="headerlink" href="#peek-chan-2cell" title="Permalink to this headline">¶</a></h2>
 <p>( chan – xd )</p>
 <p>Peek a message with a double cell as a payload from a channel without popping it from the channel’s queue. Block until another task sends a message if the channel is empty. This is not safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="send-chan-cell">
+</section>
+<section id="send-chan-cell">
 <h2><code class="docutils literal notranslate"><span class="pre">send-chan-cell</span></code><a class="headerlink" href="#send-chan-cell" title="Permalink to this headline">¶</a></h2>
 <p>( x chan – )</p>
 <p>Send message with a cell as a payload over a channel. Block until another task receives a message if the channel is full. This is not safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="recv-chan-cell">
+</section>
+<section id="recv-chan-cell">
 <h2><code class="docutils literal notranslate"><span class="pre">recv-chan-cell</span></code><a class="headerlink" href="#recv-chan-cell" title="Permalink to this headline">¶</a></h2>
 <p>( chan – x )</p>
 <p>Receive message with a cell as a payload from a channel. Block until another task sends a message if the channel is empty. This is not safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="peek-chan-cell">
+</section>
+<section id="peek-chan-cell">
 <h2><code class="docutils literal notranslate"><span class="pre">peek-chan-cell</span></code><a class="headerlink" href="#peek-chan-cell" title="Permalink to this headline">¶</a></h2>
 <p>( chan – x )</p>
 <p>Peek a message with a cell as a payload from a channel without popping it from the channel’s queue. Block until another task sends a message if the channel is empty. This is not safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="send-chan-half">
+</section>
+<section id="send-chan-half">
 <h2><code class="docutils literal notranslate"><span class="pre">send-chan-half</span></code><a class="headerlink" href="#send-chan-half" title="Permalink to this headline">¶</a></h2>
 <p>( h chan – )</p>
 <p>Send message with a halfword as a payload over a channel. Block until another task receives a message if the channel is full. This is not safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="recv-chan-half">
+</section>
+<section id="recv-chan-half">
 <h2><code class="docutils literal notranslate"><span class="pre">recv-chan-half</span></code><a class="headerlink" href="#recv-chan-half" title="Permalink to this headline">¶</a></h2>
 <p>( chan – h )</p>
 <p>Receive message with a halfword as a payload from a channel. Block until another task sends a message if the channel is empty. This is not safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="peek-chan-half">
+</section>
+<section id="peek-chan-half">
 <h2><code class="docutils literal notranslate"><span class="pre">peek-chan-half</span></code><a class="headerlink" href="#peek-chan-half" title="Permalink to this headline">¶</a></h2>
 <p>( chan – h )</p>
 <p>Peek a message with a halfword as a payload from a channel without popping it from the channel’s queue. Block until another task sends a message if the channel is empty. This is not safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="send-chan-byte">
+</section>
+<section id="send-chan-byte">
 <h2><code class="docutils literal notranslate"><span class="pre">send-chan-byte</span></code><a class="headerlink" href="#send-chan-byte" title="Permalink to this headline">¶</a></h2>
 <p>( b chan – )</p>
 <p>Send message with a byte as a payload over a channel. Block until another task receives a message if the channel is full. This is not safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="recv-chan-byte">
+</section>
+<section id="recv-chan-byte">
 <h2><code class="docutils literal notranslate"><span class="pre">recv-chan-byte</span></code><a class="headerlink" href="#recv-chan-byte" title="Permalink to this headline">¶</a></h2>
 <p>( chan – b )</p>
 <p>Receive message with a byte as a payload from a channel. Block until another task sends a message if the channel is empty. This is not safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="peek-chan-byte">
+</section>
+<section id="peek-chan-byte">
 <h2><code class="docutils literal notranslate"><span class="pre">peek-chan-byte</span></code><a class="headerlink" href="#peek-chan-byte" title="Permalink to this headline">¶</a></h2>
 <p>( chan – b )</p>
 <p>Peek a message with a byte as a payload from a channel without popping it from the channel’s queue. Block until another task sends a message if the channel is empty. This is not safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="send-chan-no-block-2cell">
+</section>
+<section id="send-chan-no-block-2cell">
 <h2><code class="docutils literal notranslate"><span class="pre">send-chan-no-block-2cell</span></code><a class="headerlink" href="#send-chan-no-block-2cell" title="Permalink to this headline">¶</a></h2>
 <p>( xd chan – )</p>
 <p>Send message with a double cell as a payload over a channel. If the channel is full, raise <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code>. This is safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="recv-chan-no-block-2cell">
+</section>
+<section id="recv-chan-no-block-2cell">
 <h2><code class="docutils literal notranslate"><span class="pre">recv-chan-no-block-2cell</span></code><a class="headerlink" href="#recv-chan-no-block-2cell" title="Permalink to this headline">¶</a></h2>
 <p>( chan – xd )</p>
 <p>Receive message with a double cell as a payload from a channel. If the channel is empty, raise <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code>. This is safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="peek-chan-no-block-2cell">
+</section>
+<section id="peek-chan-no-block-2cell">
 <h2><code class="docutils literal notranslate"><span class="pre">peek-chan-no-block-2cell</span></code><a class="headerlink" href="#peek-chan-no-block-2cell" title="Permalink to this headline">¶</a></h2>
 <p>( chan – xd )</p>
 <p>Peek a message with a double cell as a payload from a channel without popping it from the channel’s queue. If the channel is empty, raise <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code>. This is safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="send-chan-no-block-cell">
+</section>
+<section id="send-chan-no-block-cell">
 <h2><code class="docutils literal notranslate"><span class="pre">send-chan-no-block-cell</span></code><a class="headerlink" href="#send-chan-no-block-cell" title="Permalink to this headline">¶</a></h2>
 <p>( x chan – )</p>
 <p>Send message with a cell as a payload over a channel. If the channel is full, raise <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code>. This is safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="recv-chan-no-block-cell">
+</section>
+<section id="recv-chan-no-block-cell">
 <h2><code class="docutils literal notranslate"><span class="pre">recv-chan-no-block-cell</span></code><a class="headerlink" href="#recv-chan-no-block-cell" title="Permalink to this headline">¶</a></h2>
 <p>( chan – x )</p>
 <p>Receive message with a cell as a payload from a channel. If the channel is empty, raise <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code>. This is safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="peek-chan-no-block-cell">
+</section>
+<section id="peek-chan-no-block-cell">
 <h2><code class="docutils literal notranslate"><span class="pre">peek-chan-no-block-cell</span></code><a class="headerlink" href="#peek-chan-no-block-cell" title="Permalink to this headline">¶</a></h2>
 <p>( chan – x )</p>
 <p>Peek a message with a cell as a payload from a channel without popping it from the channel’s queue. If the channel is empty, raise <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code>. This is safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="send-chan-no-block-half">
+</section>
+<section id="send-chan-no-block-half">
 <h2><code class="docutils literal notranslate"><span class="pre">send-chan-no-block-half</span></code><a class="headerlink" href="#send-chan-no-block-half" title="Permalink to this headline">¶</a></h2>
 <p>( h chan – )</p>
 <p>Send message with a halfword as a payload over a channel. If the channel is full, raise <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code>. This is safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="recv-chan-no-block-half">
+</section>
+<section id="recv-chan-no-block-half">
 <h2><code class="docutils literal notranslate"><span class="pre">recv-chan-no-block-half</span></code><a class="headerlink" href="#recv-chan-no-block-half" title="Permalink to this headline">¶</a></h2>
 <p>( chan – h )</p>
 <p>Receive message with a halfword as a payload from a channel. If the channel is empty, raise <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code>. This is safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="peek-chan-no-block-half">
+</section>
+<section id="peek-chan-no-block-half">
 <h2><code class="docutils literal notranslate"><span class="pre">peek-chan-no-block-half</span></code><a class="headerlink" href="#peek-chan-no-block-half" title="Permalink to this headline">¶</a></h2>
 <p>( chan – h )</p>
 <p>Peek a message with a halfword as a payload from a channel without popping it from the channel’s queue. If the channel is empty, raise <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code>. This is safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="send-chan-no-block-byte">
+</section>
+<section id="send-chan-no-block-byte">
 <h2><code class="docutils literal notranslate"><span class="pre">send-chan-no-block-byte</span></code><a class="headerlink" href="#send-chan-no-block-byte" title="Permalink to this headline">¶</a></h2>
 <p>( b chan – )</p>
 <p>Send message with a byte as a payload over a channel. If the channel is full, raise <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code>. This is safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="recv-chan-no-block-byte">
+</section>
+<section id="recv-chan-no-block-byte">
 <h2><code class="docutils literal notranslate"><span class="pre">recv-chan-no-block-byte</span></code><a class="headerlink" href="#recv-chan-no-block-byte" title="Permalink to this headline">¶</a></h2>
 <p>( chan – b )</p>
 <p>Receive message with a byte as a payload from a channel. If the channel is empty, raise <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code>. This is safe to call within an interrupt service routine or a critical section.</p>
-</div>
-<div class="section" id="peek-chan-no-block-byte">
+</section>
+<section id="peek-chan-no-block-byte">
 <h2><code class="docutils literal notranslate"><span class="pre">peek-chan-no-block-byte</span></code><a class="headerlink" href="#peek-chan-no-block-byte" title="Permalink to this headline">¶</a></h2>
 <p>( chan – b )</p>
 <p>Peek a message with a byte as a payload from a channel without popping it from the channel’s queue. If the channel is empty, raise <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code>. This is safe to call within an interrupt service routine or a critical section.</p>
-</div>
-</div>
+</section>
+</section>
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -252,7 +257,7 @@
 
 
 <h3>Navigation</h3>
-<p class="caption"><span class="caption-text">Contents:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
@@ -263,13 +268,14 @@
 <li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="allocate.html">Allocator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Channel Words</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#x-chan-closed"><code class="docutils literal notranslate"><span class="pre">x-chan-closed</span></code></a></li>
@@ -344,12 +350,20 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
 <script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -358,8 +372,8 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.4.3</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="../_sources/words/channel.md.txt"

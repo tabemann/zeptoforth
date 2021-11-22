@@ -14,6 +14,7 @@ Zeptoforth Documentation
    words/gpio
    words/exti
    words/interrupt
+   words/multicore
    words/dev_tools
    words/line
    words/double

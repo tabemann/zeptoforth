@@ -1098,6 +1098,7 @@ begin-import-module-once task-module
     ( xn ... x0 count xt dict-size stack-size rstack-size core -- )
     [ cpu-count 1 > ] [if]
       cpu-index 0= averts x-core-can-only-be-launched-from-core-0
+      dup 1 = averts x-core-out-of-range
       disable-int
       claim-task-spinlock
       enable-int

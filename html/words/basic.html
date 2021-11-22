@@ -4,11 +4,12 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>Basic Words &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
@@ -19,6 +20,7 @@
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
+  
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head><body>
@@ -27,1779 +29,1782 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
-  <div class="section" id="basic-words">
+  <section id="basic-words">
 <h1>Basic Words<a class="headerlink" href="#basic-words" title="Permalink to this headline">¶</a></h1>
 <p>These words are in <code class="docutils literal notranslate"><span class="pre">forth-module</span></code>.</p>
-<div class="section" id="drop">
+<section id="drop">
 <h2><code class="docutils literal notranslate"><span class="pre">drop</span></code><a class="headerlink" href="#drop" title="Permalink to this headline">¶</a></h2>
 <p>( x – )</p>
 <p>Drop the top of the data stack</p>
-</div>
-<div class="section" id="dup">
+</section>
+<section id="dup">
 <h2><code class="docutils literal notranslate"><span class="pre">dup</span></code><a class="headerlink" href="#dup" title="Permalink to this headline">¶</a></h2>
 <p>( x1 – x1 x1 )</p>
 <p>Duplicate the top of the data stack</p>
-</div>
-<div class="section" id="swap">
+</section>
+<section id="swap">
 <h2><code class="docutils literal notranslate"><span class="pre">swap</span></code><a class="headerlink" href="#swap" title="Permalink to this headline">¶</a></h2>
 <p>( x1 x2 – x2 x1 )</p>
 <p>Swap the top two places on the data stack</p>
-</div>
-<div class="section" id="over">
+</section>
+<section id="over">
 <h2><code class="docutils literal notranslate"><span class="pre">over</span></code><a class="headerlink" href="#over" title="Permalink to this headline">¶</a></h2>
 <p>( x1 x2 – x1 x2 x1 )</p>
 <p>Copy the second place on the data stack onto the top of the stack,
 pushing the top of the data stack to the second place</p>
-</div>
-<div class="section" id="rot">
+</section>
+<section id="rot">
 <h2><code class="docutils literal notranslate"><span class="pre">rot</span></code><a class="headerlink" href="#rot" title="Permalink to this headline">¶</a></h2>
 <p>( x1 x2 x3 – x2 x3 x1 )</p>
 <p>Rotate the top three places on the data stack, so the third place
 moves to the first place</p>
-</div>
-<div class="section" id="pick">
+</section>
+<section id="pick">
 <h2><code class="docutils literal notranslate"><span class="pre">pick</span></code><a class="headerlink" href="#pick" title="Permalink to this headline">¶</a></h2>
 <p>( xi … x0 i – xi … x0 xi )</p>
 <p>Pick a value at a specified depth on the stack</p>
-</div>
-<div class="section" id="roll">
+</section>
+<section id="roll">
 <h2><code class="docutils literal notranslate"><span class="pre">roll</span></code><a class="headerlink" href="#roll" title="Permalink to this headline">¶</a></h2>
 <p>( xi … x0 i – xi-1 … x0 xi )</p>
 <p>Rotate a value at a given deph to the top of the stackk</p>
-</div>
-<div class="section" id="nip">
+</section>
+<section id="nip">
 <h2><code class="docutils literal notranslate"><span class="pre">nip</span></code><a class="headerlink" href="#nip" title="Permalink to this headline">¶</a></h2>
 <p>( x1 x2 – x2 )</p>
 <p>Remove the cell under that on the top of the stack</p>
-</div>
-<div class="section" id="tuck">
+</section>
+<section id="tuck">
 <h2><code class="docutils literal notranslate"><span class="pre">tuck</span></code><a class="headerlink" href="#tuck" title="Permalink to this headline">¶</a></h2>
 <p>( x1 x2 – x2 x1 x2 )</p>
 <p>Push the cell on top of the stack under the item beneath it</p>
-</div>
-<div class="section" id="lshift">
+</section>
+<section id="lshift">
 <h2><code class="docutils literal notranslate"><span class="pre">lshift</span></code><a class="headerlink" href="#lshift" title="Permalink to this headline">¶</a></h2>
 <p>( x1 u – x2 )</p>
 <p>Logical shift left</p>
-</div>
-<div class="section" id="rshift">
+</section>
+<section id="rshift">
 <h2><code class="docutils literal notranslate"><span class="pre">rshift</span></code><a class="headerlink" href="#rshift" title="Permalink to this headline">¶</a></h2>
 <p>( x1 u – x2 )</p>
 <p>Logical shift right</p>
-</div>
-<div class="section" id="arshift">
+</section>
+<section id="arshift">
 <h2><code class="docutils literal notranslate"><span class="pre">arshift</span></code><a class="headerlink" href="#arshift" title="Permalink to this headline">¶</a></h2>
 <p>( x1 u – x2 )</p>
 <p>Arithmetic shift right</p>
-</div>
-<div class="section" id="and">
+</section>
+<section id="and">
 <h2><code class="docutils literal notranslate"><span class="pre">and</span></code><a class="headerlink" href="#and" title="Permalink to this headline">¶</a></h2>
 <p>( x1 x2 – x3 )</p>
 <p>Binary and</p>
-</div>
-<div class="section" id="or">
+</section>
+<section id="or">
 <h2><code class="docutils literal notranslate"><span class="pre">or</span></code><a class="headerlink" href="#or" title="Permalink to this headline">¶</a></h2>
 <p>( x1 x2 – x3 )</p>
 <p>Binary or</p>
-</div>
-<div class="section" id="xor">
+</section>
+<section id="xor">
 <h2><code class="docutils literal notranslate"><span class="pre">xor</span></code><a class="headerlink" href="#xor" title="Permalink to this headline">¶</a></h2>
 <p>( x1 x2 – x3 )</p>
 <p>Binary xor</p>
-</div>
-<div class="section" id="bic">
+</section>
+<section id="bic">
 <h2><code class="docutils literal notranslate"><span class="pre">bic</span></code><a class="headerlink" href="#bic" title="Permalink to this headline">¶</a></h2>
 <p>( x1 x2 – x3 )</p>
 <p>Bit clear</p>
-</div>
-<div class="section" id="not">
+</section>
+<section id="not">
 <h2><code class="docutils literal notranslate"><span class="pre">not</span></code><a class="headerlink" href="#not" title="Permalink to this headline">¶</a></h2>
 <p>( x1 – x2 )</p>
 <p>Binary not</p>
-</div>
-<div class="section" id="negate">
+</section>
+<section id="negate">
 <h2><code class="docutils literal notranslate"><span class="pre">negate</span></code><a class="headerlink" href="#negate" title="Permalink to this headline">¶</a></h2>
 <p>( n1 – n2 )</p>
 <p>Negation</p>
-</div>
-<div class="section" id="id1">
+</section>
+<section id="id1">
 <h2><code class="docutils literal notranslate"><span class="pre">+</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <p>( x1 x2 – x3 )</p>
 <p>Addition of two integers</p>
-</div>
-<div class="section" id="id2">
+</section>
+<section id="id2">
 <h2><code class="docutils literal notranslate"><span class="pre">-</span></code><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
 <p>( x1 x2 – x3 )</p>
 <p>Substraction of two integers</p>
-</div>
-<div class="section" id="id3">
+</section>
+<section id="id3">
 <h2><code class="docutils literal notranslate"><span class="pre">*</span></code><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
 <p>( x1 x2 – x3 )</p>
 <p>Multiplication of two integers</p>
-</div>
-<div class="section" id="id4">
+</section>
+<section id="id4">
 <h2><code class="docutils literal notranslate"><span class="pre">/</span></code><a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
 <p>( n1 n2 – n3 )</p>
 <p>Signed division of two two’s complement integers</p>
-</div>
-<div class="section" id="u">
+</section>
+<section id="u">
 <h2><code class="docutils literal notranslate"><span class="pre">u/</span></code><a class="headerlink" href="#u" title="Permalink to this headline">¶</a></h2>
 <p>( u1 u2 – u3 )</p>
 <p>Unsigned division of two integers</p>
-</div>
-<div class="section" id="mod">
+</section>
+<section id="mod">
 <h2><code class="docutils literal notranslate"><span class="pre">mod</span></code><a class="headerlink" href="#mod" title="Permalink to this headline">¶</a></h2>
 <p>( n1 n2 – n3 )</p>
 <p>Signed modulus of two two’s complement integers</p>
-</div>
-<div class="section" id="umod">
+</section>
+<section id="umod">
 <h2><code class="docutils literal notranslate"><span class="pre">umod</span></code><a class="headerlink" href="#umod" title="Permalink to this headline">¶</a></h2>
 <p>( u1 u2 – u3 )</p>
 <p>Unsigned modulus of two unsigned integers</p>
-</div>
-<div class="section" id="id5">
+</section>
+<section id="id5">
 <h2><code class="docutils literal notranslate"><span class="pre">1+</span></code><a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
 <p>( x1 – x2 )</p>
 <p>Add 1 to an integer</p>
-</div>
-<div class="section" id="id6">
+</section>
+<section id="id6">
 <h2><code class="docutils literal notranslate"><span class="pre">2+</span></code><a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
 <p>( x1 – x2 )</p>
 <p>Add 2 to an integer</p>
-</div>
-<div class="section" id="id7">
+</section>
+<section id="id7">
 <h2><code class="docutils literal notranslate"><span class="pre">4+</span></code><a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
 <p>( x1 – x2 )</p>
 <p>Add 4 to an integer</p>
-</div>
-<div class="section" id="id8">
+</section>
+<section id="id8">
 <h2><code class="docutils literal notranslate"><span class="pre">1-</span></code><a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
 <p>( x1 – x2 )</p>
 <p>Subtract 1 from an integer</p>
-</div>
-<div class="section" id="id9">
+</section>
+<section id="id9">
 <h2><code class="docutils literal notranslate"><span class="pre">2-</span></code><a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
 <p>( x1 – x2 )</p>
 <p>Subtract 2 from an integer</p>
-</div>
-<div class="section" id="id10">
+</section>
+<section id="id10">
 <h2><code class="docutils literal notranslate"><span class="pre">4-</span></code><a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h2>
 <p>( x1 – x2 )</p>
 <p>Subtract 4 from an integer</p>
-</div>
-<div class="section" id="id11">
+</section>
+<section id="id11">
 <h2><code class="docutils literal notranslate"><span class="pre">2*</span></code><a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h2>
 <p>( x1 – x2 )</p>
 <p>Multiply a value by 2</p>
-</div>
-<div class="section" id="id12">
+</section>
+<section id="id12">
 <h2><code class="docutils literal notranslate"><span class="pre">4*</span></code><a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h2>
 <p>( x1 – x2 )</p>
 <p>Multiply a value by 4</p>
-</div>
-<div class="section" id="id13">
+</section>
+<section id="id13">
 <h2><code class="docutils literal notranslate"><span class="pre">2/</span></code><a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h2>
 <p>( u1 – u2 )</p>
 <p>Divide a value by 2</p>
-</div>
-<div class="section" id="id14">
+</section>
+<section id="id14">
 <h2><code class="docutils literal notranslate"><span class="pre">4/</span></code><a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h2>
 <p>( u1 – u2 )</p>
 <p>Divide a value by 4</p>
-</div>
-<div class="section" id="id15">
+</section>
+<section id="id15">
 <h2><code class="docutils literal notranslate"><span class="pre">=</span></code><a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h2>
 <p>( x1 x2 – flag )</p>
 <p>Equals</p>
-</div>
-<div class="section" id="id16">
+</section>
+<section id="id16">
 <h2><code class="docutils literal notranslate"><span class="pre">&lt;&gt;</span></code><a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h2>
 <p>( x1 x2 – flag )</p>
 <p>Not equal</p>
-</div>
-<div class="section" id="id17">
+</section>
+<section id="id17">
 <h2><code class="docutils literal notranslate"><span class="pre">&lt;</span></code><a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h2>
 <p>( n1 n2 – flag )</p>
 <p>Less than</p>
-</div>
-<div class="section" id="id18">
+</section>
+<section id="id18">
 <h2><code class="docutils literal notranslate"><span class="pre">&gt;</span></code><a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h2>
 <p>( n1 n2 – flag )</p>
 <p>Greater than</p>
-</div>
-<div class="section" id="id19">
+</section>
+<section id="id19">
 <h2><code class="docutils literal notranslate"><span class="pre">&lt;=</span></code><a class="headerlink" href="#id19" title="Permalink to this headline">¶</a></h2>
 <p>( n1 n2 – flag )</p>
 <p>Less than or equal</p>
-</div>
-<div class="section" id="id20">
+</section>
+<section id="id20">
 <h2><code class="docutils literal notranslate"><span class="pre">0=</span></code><a class="headerlink" href="#id20" title="Permalink to this headline">¶</a></h2>
 <p>( x – flag )</p>
 <p>Equals zero</p>
-</div>
-<div class="section" id="id21">
+</section>
+<section id="id21">
 <h2><code class="docutils literal notranslate"><span class="pre">0&lt;&gt;</span></code><a class="headerlink" href="#id21" title="Permalink to this headline">¶</a></h2>
 <p>( x – flag )</p>
 <p>Not equal to zero</p>
-</div>
-<div class="section" id="id22">
+</section>
+<section id="id22">
 <h2><code class="docutils literal notranslate"><span class="pre">0&lt;</span></code><a class="headerlink" href="#id22" title="Permalink to this headline">¶</a></h2>
 <p>( n – flag )</p>
 <p>Less than zero</p>
-</div>
-<div class="section" id="id23">
+</section>
+<section id="id23">
 <h2><code class="docutils literal notranslate"><span class="pre">0&gt;</span></code><a class="headerlink" href="#id23" title="Permalink to this headline">¶</a></h2>
 <p>( n – flag )</p>
 <p>Greater than zero</p>
-</div>
-<div class="section" id="id24">
+</section>
+<section id="id24">
 <h2><code class="docutils literal notranslate"><span class="pre">0&lt;=</span></code><a class="headerlink" href="#id24" title="Permalink to this headline">¶</a></h2>
 <p>( n – flag )</p>
 <p>Less than or equal to zero</p>
-</div>
-<div class="section" id="id25">
+</section>
+<section id="id25">
 <h2><code class="docutils literal notranslate"><span class="pre">0&gt;=</span></code><a class="headerlink" href="#id25" title="Permalink to this headline">¶</a></h2>
 <p>( n – flag )</p>
 <p>Greater than or equal to zero</p>
-</div>
-<div class="section" id="id26">
+</section>
+<section id="id26">
 <h2><code class="docutils literal notranslate"><span class="pre">u&lt;</span></code><a class="headerlink" href="#id26" title="Permalink to this headline">¶</a></h2>
 <p>( u – flag )</p>
 <p>Unsigned less than</p>
-</div>
-<div class="section" id="id27">
+</section>
+<section id="id27">
 <h2><code class="docutils literal notranslate"><span class="pre">u&gt;</span></code><a class="headerlink" href="#id27" title="Permalink to this headline">¶</a></h2>
 <p>( u – flag )</p>
 <p>Unsigned greater than</p>
-</div>
-<div class="section" id="id28">
+</section>
+<section id="id28">
 <h2><code class="docutils literal notranslate"><span class="pre">u&lt;=</span></code><a class="headerlink" href="#id28" title="Permalink to this headline">¶</a></h2>
 <p>( u – flag )</p>
 <p>Unsigned less than or equal</p>
-</div>
-<div class="section" id="id29">
+</section>
+<section id="id29">
 <h2><code class="docutils literal notranslate"><span class="pre">u&gt;=</span></code><a class="headerlink" href="#id29" title="Permalink to this headline">¶</a></h2>
 <p>( u – flag )</p>
 <p>Unsigned greater than or equal</p>
-</div>
-<div class="section" id="ram-here">
+</section>
+<section id="ram-here">
 <h2><code class="docutils literal notranslate"><span class="pre">ram-here</span></code><a class="headerlink" href="#ram-here" title="Permalink to this headline">¶</a></h2>
 <p>( – addr )</p>
 <p>Get the RAM HERE pointer</p>
-</div>
-<div class="section" id="pad">
+</section>
+<section id="pad">
 <h2><code class="docutils literal notranslate"><span class="pre">pad</span></code><a class="headerlink" href="#pad" title="Permalink to this headline">¶</a></h2>
 <p>( – addr )</p>
 <p>Get the PAD pointer</p>
-</div>
-<div class="section" id="ram-allot">
+</section>
+<section id="ram-allot">
 <h2><code class="docutils literal notranslate"><span class="pre">ram-allot</span></code><a class="headerlink" href="#ram-allot" title="Permalink to this headline">¶</a></h2>
 <p>( u – )</p>
 <p>Allot space in RAM</p>
-</div>
-<div class="section" id="id30">
+</section>
+<section id="id30">
 <h2><code class="docutils literal notranslate"><span class="pre">ram-here!</span></code><a class="headerlink" href="#id30" title="Permalink to this headline">¶</a></h2>
 <p>( addr – )</p>
 <p>Set the RAM flash pointer</p>
-</div>
-<div class="section" id="flash-here">
+</section>
+<section id="flash-here">
 <h2><code class="docutils literal notranslate"><span class="pre">flash-here</span></code><a class="headerlink" href="#flash-here" title="Permalink to this headline">¶</a></h2>
 <p>( – addr )</p>
 <p>Get the flash HERE pointer</p>
-</div>
-<div class="section" id="flash-allot">
+</section>
+<section id="flash-allot">
 <h2><code class="docutils literal notranslate"><span class="pre">flash-allot</span></code><a class="headerlink" href="#flash-allot" title="Permalink to this headline">¶</a></h2>
 <p>( u – )</p>
 <p>Allot space in flash</p>
-</div>
-<div class="section" id="id31">
+</section>
+<section id="id31">
 <h2><code class="docutils literal notranslate"><span class="pre">flash-here!</span></code><a class="headerlink" href="#id31" title="Permalink to this headline">¶</a></h2>
 <p>( addr – )</p>
 <p>Set the flash HERE pointer</p>
-</div>
-<div class="section" id="latest">
+</section>
+<section id="latest">
 <h2><code class="docutils literal notranslate"><span class="pre">latest</span></code><a class="headerlink" href="#latest" title="Permalink to this headline">¶</a></h2>
 <p>( – word )</p>
 <p>Get the base address of the latest word</p>
-</div>
-<div class="section" id="ram-latest">
+</section>
+<section id="ram-latest">
 <h2><code class="docutils literal notranslate"><span class="pre">ram-latest</span></code><a class="headerlink" href="#ram-latest" title="Permalink to this headline">¶</a></h2>
 <p>( – word )</p>
 <p>Get the base address of the latest RAM word</p>
-</div>
-<div class="section" id="flash-latest">
+</section>
+<section id="flash-latest">
 <h2><code class="docutils literal notranslate"><span class="pre">flash-latest</span></code><a class="headerlink" href="#flash-latest" title="Permalink to this headline">¶</a></h2>
 <p>( – word )</p>
 <p>Get the base address of the latest flash word</p>
-</div>
-<div class="section" id="id32">
+</section>
+<section id="id32">
 <h2><code class="docutils literal notranslate"><span class="pre">latest!</span></code><a class="headerlink" href="#id32" title="Permalink to this headline">¶</a></h2>
 <p>( word – )</p>
 <p>Set the base address of the latest word</p>
-</div>
-<div class="section" id="id33">
+</section>
+<section id="id33">
 <h2><code class="docutils literal notranslate"><span class="pre">ram-latest!</span></code><a class="headerlink" href="#id33" title="Permalink to this headline">¶</a></h2>
 <p>( word – )</p>
 <p>Set the base address of the latest RAM word</p>
-</div>
-<div class="section" id="id34">
+</section>
+<section id="id34">
 <h2><code class="docutils literal notranslate"><span class="pre">flash-latest!</span></code><a class="headerlink" href="#id34" title="Permalink to this headline">¶</a></h2>
 <p>( word – )</p>
 <p>Set the base address of the latest flash word</p>
-</div>
-<div class="section" id="here">
+</section>
+<section id="here">
 <h2><code class="docutils literal notranslate"><span class="pre">here</span></code><a class="headerlink" href="#here" title="Permalink to this headline">¶</a></h2>
 <p>( – addr )</p>
 <p>Get either the HERE pointer or the flash HERE pointer, depending on
 compilation mode</p>
-</div>
-<div class="section" id="allot">
+</section>
+<section id="allot">
 <h2><code class="docutils literal notranslate"><span class="pre">allot</span></code><a class="headerlink" href="#allot" title="Permalink to this headline">¶</a></h2>
 <p>( u – )</p>
 <p>Allot space in RAM or in flash, depending on the compilation mode</p>
-</div>
-<div class="section" id="emit">
+</section>
+<section id="emit">
 <h2><code class="docutils literal notranslate"><span class="pre">emit</span></code><a class="headerlink" href="#emit" title="Permalink to this headline">¶</a></h2>
 <p>( b – )</p>
 <p>Emit a character</p>
-</div>
-<div class="section" id="id35">
+</section>
+<section id="id35">
 <h2><code class="docutils literal notranslate"><span class="pre">emit?</span></code><a class="headerlink" href="#id35" title="Permalink to this headline">¶</a></h2>
 <p>( – flag )</p>
 <p>Test for whether the system is ready to receive a character</p>
-</div>
-<div class="section" id="space">
+</section>
+<section id="space">
 <h2><code class="docutils literal notranslate"><span class="pre">space</span></code><a class="headerlink" href="#space" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Emit a space</p>
-</div>
-<div class="section" id="cr">
+</section>
+<section id="cr">
 <h2><code class="docutils literal notranslate"><span class="pre">cr</span></code><a class="headerlink" href="#cr" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Emit a newline</p>
-</div>
-<div class="section" id="type">
+</section>
+<section id="type">
 <h2><code class="docutils literal notranslate"><span class="pre">type</span></code><a class="headerlink" href="#type" title="Permalink to this headline">¶</a></h2>
 <p>( b-addr u – )</p>
 <p>Type a string</p>
-</div>
-<div class="section" id="serial-type">
+</section>
+<section id="serial-type">
 <h2><code class="docutils literal notranslate"><span class="pre">serial-type</span></code><a class="headerlink" href="#serial-type" title="Permalink to this headline">¶</a></h2>
 <p>( b-addr u – )</p>
 <p>Type a string using the native serial driver</p>
-</div>
-<div class="section" id="count">
+</section>
+<section id="count">
 <h2><code class="docutils literal notranslate"><span class="pre">count</span></code><a class="headerlink" href="#count" title="Permalink to this headline">¶</a></h2>
 <p>( b-addr1 – b-addr2 u )</p>
 <p>Convert a cstring to a string</p>
-</div>
-<div class="section" id="key">
+</section>
+<section id="key">
 <h2><code class="docutils literal notranslate"><span class="pre">key</span></code><a class="headerlink" href="#key" title="Permalink to this headline">¶</a></h2>
 <p>( – b )</p>
 <p>Receive a character</p>
-</div>
-<div class="section" id="id36">
+</section>
+<section id="id36">
 <h2><code class="docutils literal notranslate"><span class="pre">key?</span></code><a class="headerlink" href="#id36" title="Permalink to this headline">¶</a></h2>
 <p>( – flag )</p>
 <p>Test for whether the system is ready to receive a character</p>
-</div>
-<div class="section" id="enable-int">
+</section>
+<section id="enable-int">
 <h2><code class="docutils literal notranslate"><span class="pre">enable-int</span></code><a class="headerlink" href="#enable-int" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Enable interrupts</p>
-</div>
-<div class="section" id="disable-int">
+</section>
+<section id="disable-int">
 <h2><code class="docutils literal notranslate"><span class="pre">disable-int</span></code><a class="headerlink" href="#disable-int" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Disable interrupts</p>
-</div>
-<div class="section" id="sleep">
+</section>
+<section id="sleep">
 <h2><code class="docutils literal notranslate"><span class="pre">sleep</span></code><a class="headerlink" href="#sleep" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Enter sleep mode</p>
-</div>
-<div class="section" id="execute">
+</section>
+<section id="execute">
 <h2><code class="docutils literal notranslate"><span class="pre">execute</span></code><a class="headerlink" href="#execute" title="Permalink to this headline">¶</a></h2>
 <p>( xt – )</p>
 <p>Execute an xt</p>
-</div>
-<div class="section" id="id37">
+</section>
+<section id="id37">
 <h2><code class="docutils literal notranslate"><span class="pre">?execute</span></code><a class="headerlink" href="#id37" title="Permalink to this headline">¶</a></h2>
 <p>( xt|0 – )</p>
 <p>Execute an xt if it is non-zero</p>
-</div>
-<div class="section" id="pause">
+</section>
+<section id="pause">
 <h2><code class="docutils literal notranslate"><span class="pre">pause</span></code><a class="headerlink" href="#pause" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Execute a PAUSE word, if one is set</p>
-</div>
-<div class="section" id="exit">
+</section>
+<section id="exit">
 <h2><code class="docutils literal notranslate"><span class="pre">exit</span></code><a class="headerlink" href="#exit" title="Permalink to this headline">¶</a></h2>
 <p>( R: addr – )</p>
 <p>Exit a word</p>
-</div>
-<div class="section" id="init">
+</section>
+<section id="init">
 <h2><code class="docutils literal notranslate"><span class="pre">init</span></code><a class="headerlink" href="#init" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>An empty init routine, to call if no other init routines are
 available, so as to enable any source file to call a preceding init</p>
-</div>
-<div class="section" id="immediate">
+</section>
+<section id="immediate">
 <h2><code class="docutils literal notranslate"><span class="pre">[immediate]</span></code><a class="headerlink" href="#immediate" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Set the currently-defined word to be immediate</p>
-</div>
-<div class="section" id="compile-only">
+</section>
+<section id="compile-only">
 <h2><code class="docutils literal notranslate"><span class="pre">[compile-only]</span></code><a class="headerlink" href="#compile-only" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Set the currently-defined word to be compile-only</p>
-</div>
-<div class="section" id="inlined">
+</section>
+<section id="inlined">
 <h2><code class="docutils literal notranslate"><span class="pre">[inlined]</span></code><a class="headerlink" href="#inlined" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Set the currently-defined word to be inlined</p>
-</div>
-<div class="section" id="id38">
+</section>
+<section id="id38">
 <h2><code class="docutils literal notranslate"><span class="pre">immediate</span></code><a class="headerlink" href="#id38" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Set the currently-defined word to be immediate</p>
-</div>
-<div class="section" id="id39">
+</section>
+<section id="id39">
 <h2><code class="docutils literal notranslate"><span class="pre">compile-only</span></code><a class="headerlink" href="#id39" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Set the currently-defined word to be compile-only</p>
-</div>
-<div class="section" id="id40">
+</section>
+<section id="id40">
 <h2><code class="docutils literal notranslate"><span class="pre">inlined</span></code><a class="headerlink" href="#id40" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Set the currently-defined word to be inlined</p>
-</div>
-<div class="section" id="visible">
+</section>
+<section id="visible">
 <h2><code class="docutils literal notranslate"><span class="pre">visible</span></code><a class="headerlink" href="#visible" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Set the currently-defined word to be visible</p>
-</div>
-<div class="section" id="id41">
+</section>
+<section id="id41">
 <h2><code class="docutils literal notranslate"><span class="pre">[</span></code><a class="headerlink" href="#id41" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Switch to interpretation mode</p>
-</div>
-<div class="section" id="id42">
+</section>
+<section id="id42">
 <h2><code class="docutils literal notranslate"><span class="pre">]</span></code><a class="headerlink" href="#id42" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Switch to compilation state</p>
-</div>
-<div class="section" id="compile-to-ram">
+</section>
+<section id="compile-to-ram">
 <h2><code class="docutils literal notranslate"><span class="pre">compile-to-ram</span></code><a class="headerlink" href="#compile-to-ram" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Set compilation to RAM</p>
-</div>
-<div class="section" id="compile-to-flash">
+</section>
+<section id="compile-to-flash">
 <h2><code class="docutils literal notranslate"><span class="pre">compile-to-flash</span></code><a class="headerlink" href="#compile-to-flash" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Set compilation to flash</p>
-</div>
-<div class="section" id="compiling-to-flash">
+</section>
+<section id="compiling-to-flash">
 <h2><code class="docutils literal notranslate"><span class="pre">compiling-to-flash?</span></code><a class="headerlink" href="#compiling-to-flash" title="Permalink to this headline">¶</a></h2>
 <p>( – flag )</p>
 <p>Get whether compilation is to flash</p>
-</div>
-<div class="section" id="begin-critical">
+</section>
+<section id="begin-critical">
 <h2><code class="docutils literal notranslate"><span class="pre">begin-critical</span></code><a class="headerlink" href="#begin-critical" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Begin a critical section, within which context switches will not take place; note that critical sections do nest.</p>
-</div>
-<div class="section" id="end-critical">
+</section>
+<section id="end-critical">
 <h2><code class="docutils literal notranslate"><span class="pre">end-critical</span></code><a class="headerlink" href="#end-critical" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>End a critical section; if a context switch would have occurred within the critical section, it is initiated immediately upon executing this word.</p>
-</div>
-<div class="section" id="critical">
+</section>
+<section id="critical">
 <h2><code class="docutils literal notranslate"><span class="pre">critical</span></code><a class="headerlink" href="#critical" title="Permalink to this headline">¶</a></h2>
 <p>( xt – )</p>
 <p>Execute code within a critical section, properly handling exceptions.</p>
-</div>
-<div class="section" id="with-allot">
+</section>
+<section id="with-allot">
 <h2><code class="docutils literal notranslate"><span class="pre">with-allot</span></code><a class="headerlink" href="#with-allot" title="Permalink to this headline">¶</a></h2>
 <p>( bytes xt – ) ( xt: addr – )</p>
 <p>Allot RAM temporarily and clean it up afterwards, even if an exception occurs.</p>
-</div>
-<div class="section" id="with-ram">
+</section>
+<section id="with-ram">
 <h2><code class="docutils literal notranslate"><span class="pre">with-ram</span></code><a class="headerlink" href="#with-ram" title="Permalink to this headline">¶</a></h2>
 <p>( xt – ) ( xt: – )</p>
 <p>Switch to compile to RAM mode, and afterwards restore the compilation state, even if an exception occurs.</p>
-</div>
-<div class="section" id="compress-flash">
+</section>
+<section id="compress-flash">
 <h2><code class="docutils literal notranslate"><span class="pre">compress-flash</span></code><a class="headerlink" href="#compress-flash" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Get whether to compress code compiled to flash</p>
-</div>
-<div class="section" id="end-compress-flash">
+</section>
+<section id="end-compress-flash">
 <h2><code class="docutils literal notranslate"><span class="pre">end-compress-flash</span></code><a class="headerlink" href="#end-compress-flash" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>End flash compression</p>
-</div>
-<div class="section" id="commit-flash">
+</section>
+<section id="commit-flash">
 <h2><code class="docutils literal notranslate"><span class="pre">commit-flash</span></code><a class="headerlink" href="#commit-flash" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Commit code to flash without finishing compressing it</p>
-</div>
-<div class="section" id="compressing-flash">
+</section>
+<section id="compressing-flash">
 <h2><code class="docutils literal notranslate"><span class="pre">compressing-flash</span></code><a class="headerlink" href="#compressing-flash" title="Permalink to this headline">¶</a></h2>
 <p>( – flag )</p>
 <p>Get whether flash is being compressed</p>
-</div>
-<div class="section" id="word-align">
+</section>
+<section id="word-align">
 <h2><code class="docutils literal notranslate"><span class="pre">word-align</span></code><a class="headerlink" href="#word-align" title="Permalink to this headline">¶</a></h2>
 <p>( addr – a-addr )</p>
 <p>Word-align an address</p>
-</div>
-<div class="section" id="compile">
+</section>
+<section id="compile">
 <h2><code class="docutils literal notranslate"><span class="pre">compile,</span></code><a class="headerlink" href="#compile" title="Permalink to this headline">¶</a></h2>
 <p>( xt – )</p>
 <p>Compile an xt</p>
-</div>
-<div class="section" id="token-word">
+</section>
+<section id="token-word">
 <h2><code class="docutils literal notranslate"><span class="pre">token-word</span></code><a class="headerlink" href="#token-word" title="Permalink to this headline">¶</a></h2>
 <p>( “name” – name )</p>
 <p>Get the word corresponding to a token</p>
-</div>
-<div class="section" id="id43">
+</section>
+<section id="id43">
 <h2><code class="docutils literal notranslate"><span class="pre">'</span></code><a class="headerlink" href="#id43" title="Permalink to this headline">¶</a></h2>
 <p>( “name” – xt )</p>
 <p>Tick</p>
-</div>
-<div class="section" id="id44">
+</section>
+<section id="id44">
 <h2><code class="docutils literal notranslate"><span class="pre">[']</span></code><a class="headerlink" href="#id44" title="Permalink to this headline">¶</a></h2>
 <p>( compile-time: “name” – ) ( run-time: – xt )</p>
 <p>Compiled tick</p>
-</div>
-<div class="section" id="postpone">
+</section>
+<section id="postpone">
 <h2><code class="docutils literal notranslate"><span class="pre">postpone</span></code><a class="headerlink" href="#postpone" title="Permalink to this headline">¶</a></h2>
 <p>( compile-time: “name” – )</p>
 <p>Postpone a word</p>
-</div>
-<div class="section" id="lit">
+</section>
+<section id="lit">
 <h2><code class="docutils literal notranslate"><span class="pre">lit,</span></code><a class="headerlink" href="#lit" title="Permalink to this headline">¶</a></h2>
 <p>( x – )</p>
 <p>Compile a literal</p>
-</div>
-<div class="section" id="literal">
+</section>
+<section id="literal">
 <h2><code class="docutils literal notranslate"><span class="pre">literal</span></code><a class="headerlink" href="#literal" title="Permalink to this headline">¶</a></h2>
 <p>( compile-time: x – )</p>
 <p>Compile a literal</p>
-</div>
-<div class="section" id="recurse">
+</section>
+<section id="recurse">
 <h2><code class="docutils literal notranslate"><span class="pre">recurse</span></code><a class="headerlink" href="#recurse" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Recursively call a word</p>
-</div>
-<div class="section" id="unknown-word">
+</section>
+<section id="unknown-word">
 <h2><code class="docutils literal notranslate"><span class="pre">unknown-word</span></code><a class="headerlink" href="#unknown-word" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Unknown word exception</p>
-</div>
-<div class="section" id="c">
+</section>
+<section id="c">
 <h2><code class="docutils literal notranslate"><span class="pre">c!</span></code><a class="headerlink" href="#c" title="Permalink to this headline">¶</a></h2>
 <p>( b b-addr – )</p>
 <p>Store a byte</p>
-</div>
-<div class="section" id="h">
+</section>
+<section id="h">
 <h2><code class="docutils literal notranslate"><span class="pre">h!</span></code><a class="headerlink" href="#h" title="Permalink to this headline">¶</a></h2>
 <p>( h h-addr – )</p>
 <p>Store a halfword</p>
-</div>
-<div class="section" id="id45">
+</section>
+<section id="id45">
 <h2><code class="docutils literal notranslate"><span class="pre">!</span></code><a class="headerlink" href="#id45" title="Permalink to this headline">¶</a></h2>
 <p>( x a-addr – )</p>
 <p>Store a word</p>
-</div>
-<div class="section" id="id46">
+</section>
+<section id="id46">
 <h2><code class="docutils literal notranslate"><span class="pre">2!</span></code><a class="headerlink" href="#id46" title="Permalink to this headline">¶</a></h2>
 <p>( d a-addr – )</p>
 <p>Store a doubleword</p>
-</div>
-<div class="section" id="id47">
+</section>
+<section id="id47">
 <h2><code class="docutils literal notranslate"><span class="pre">c+!</span></code><a class="headerlink" href="#id47" title="Permalink to this headline">¶</a></h2>
 <p>( x b-addr – )</p>
 <p>Read a byte from an address, add a value, and write it back</p>
-</div>
-<div class="section" id="id48">
+</section>
+<section id="id48">
 <h2><code class="docutils literal notranslate"><span class="pre">h+!</span></code><a class="headerlink" href="#id48" title="Permalink to this headline">¶</a></h2>
 <p>( x h-addr – )</p>
 <p>Read a halfword from an address, add a value, and write it back</p>
-</div>
-<div class="section" id="id49">
+</section>
+<section id="id49">
 <h2><code class="docutils literal notranslate"><span class="pre">+!</span></code><a class="headerlink" href="#id49" title="Permalink to this headline">¶</a></h2>
 <p>( x a-addr – )</p>
 <p>Read a word from an address, add a value, and write it back</p>
-</div>
-<div class="section" id="id50">
+</section>
+<section id="id50">
 <h2><code class="docutils literal notranslate"><span class="pre">c&#64;</span></code><a class="headerlink" href="#id50" title="Permalink to this headline">¶</a></h2>
 <p>( b-addr – b )</p>
 <p>Get a byte</p>
-</div>
-<div class="section" id="id51">
+</section>
+<section id="id51">
 <h2><code class="docutils literal notranslate"><span class="pre">h&#64;</span></code><a class="headerlink" href="#id51" title="Permalink to this headline">¶</a></h2>
 <p>( h-addr – h )</p>
 <p>Get a halfword</p>
-</div>
-<div class="section" id="id52">
+</section>
+<section id="id52">
 <h2><code class="docutils literal notranslate"><span class="pre">&#64;</span></code><a class="headerlink" href="#id52" title="Permalink to this headline">¶</a></h2>
 <p>( a-addr – x )</p>
 <p>Get a word</p>
-</div>
-<div class="section" id="id53">
+</section>
+<section id="id53">
 <h2><code class="docutils literal notranslate"><span class="pre">2&#64;</span></code><a class="headerlink" href="#id53" title="Permalink to this headline">¶</a></h2>
 <p>( a-addr – d )</p>
 <p>Get a doubleword</p>
-</div>
-<div class="section" id="cram">
+</section>
+<section id="cram">
 <h2><code class="docutils literal notranslate"><span class="pre">cram,</span></code><a class="headerlink" href="#cram" title="Permalink to this headline">¶</a></h2>
 <p>( b – )</p>
 <p>Store a byte at the RAM HERE location</p>
-</div>
-<div class="section" id="hram">
+</section>
+<section id="hram">
 <h2><code class="docutils literal notranslate"><span class="pre">hram,</span></code><a class="headerlink" href="#hram" title="Permalink to this headline">¶</a></h2>
 <p>( h – )</p>
 <p>Store a halfword at the RAM HERE location</p>
-</div>
-<div class="section" id="ram">
+</section>
+<section id="ram">
 <h2><code class="docutils literal notranslate"><span class="pre">ram,</span></code><a class="headerlink" href="#ram" title="Permalink to this headline">¶</a></h2>
 <p>( x – )</p>
 <p>Store a word at the RAM HERE location</p>
-</div>
-<div class="section" id="id54">
+</section>
+<section id="id54">
 <h2><code class="docutils literal notranslate"><span class="pre">2ram,</span></code><a class="headerlink" href="#id54" title="Permalink to this headline">¶</a></h2>
 <p>( d – )</p>
 <p>Store a doubleword at the RAM HERE location</p>
-</div>
-<div class="section" id="cflash">
+</section>
+<section id="cflash">
 <h2><code class="docutils literal notranslate"><span class="pre">cflash,</span></code><a class="headerlink" href="#cflash" title="Permalink to this headline">¶</a></h2>
 <p>( b – )</p>
 <p>Store a byte at the flash HERE location</p>
-</div>
-<div class="section" id="hflash">
+</section>
+<section id="hflash">
 <h2><code class="docutils literal notranslate"><span class="pre">hflash,</span></code><a class="headerlink" href="#hflash" title="Permalink to this headline">¶</a></h2>
 <p>( h – )</p>
 <p>Store a halfword at the flash HERE location</p>
-</div>
-<div class="section" id="flash">
+</section>
+<section id="flash">
 <h2><code class="docutils literal notranslate"><span class="pre">flash,</span></code><a class="headerlink" href="#flash" title="Permalink to this headline">¶</a></h2>
 <p>( x – )</p>
 <p>Store a word at the flash HERE location</p>
-</div>
-<div class="section" id="id55">
+</section>
+<section id="id55">
 <h2><code class="docutils literal notranslate"><span class="pre">2flash,</span></code><a class="headerlink" href="#id55" title="Permalink to this headline">¶</a></h2>
 <p>( d – )</p>
 <p>Store a doubleword at the flash HERE location</p>
-</div>
-<div class="section" id="ccurrent">
+</section>
+<section id="ccurrent">
 <h2><code class="docutils literal notranslate"><span class="pre">ccurrent!</span></code><a class="headerlink" href="#ccurrent" title="Permalink to this headline">¶</a></h2>
 <p>( b b-addr – )</p>
 <p>Store a byte to RAM or to flash</p>
-</div>
-<div class="section" id="hcurrent">
+</section>
+<section id="hcurrent">
 <h2><code class="docutils literal notranslate"><span class="pre">hcurrent!</span></code><a class="headerlink" href="#hcurrent" title="Permalink to this headline">¶</a></h2>
 <p>( h h-addr – )</p>
 <p>Store a halfword to RAM or to flash</p>
-</div>
-<div class="section" id="current">
+</section>
+<section id="current">
 <h2><code class="docutils literal notranslate"><span class="pre">current!</span></code><a class="headerlink" href="#current" title="Permalink to this headline">¶</a></h2>
 <p>( x a-addr – )</p>
 <p>Store a word to RAM or to flash</p>
-</div>
-<div class="section" id="id56">
+</section>
+<section id="id56">
 <h2><code class="docutils literal notranslate"><span class="pre">2current!</span></code><a class="headerlink" href="#id56" title="Permalink to this headline">¶</a></h2>
 <p>( d a-addr – )</p>
 <p>Store a doubleword to RAM or to flash</p>
-</div>
-<div class="section" id="id57">
+</section>
+<section id="id57">
 <h2><code class="docutils literal notranslate"><span class="pre">c,</span></code><a class="headerlink" href="#id57" title="Permalink to this headline">¶</a></h2>
 <p>( b – )</p>
 <p>Store a byte to the RAM or flash HERE location</p>
-</div>
-<div class="section" id="id58">
+</section>
+<section id="id58">
 <h2><code class="docutils literal notranslate"><span class="pre">h,</span></code><a class="headerlink" href="#id58" title="Permalink to this headline">¶</a></h2>
 <p>( h – )</p>
 <p>Store a halfword to the RAM or flash HERE location</p>
-</div>
-<div class="section" id="id59">
+</section>
+<section id="id59">
 <h2><code class="docutils literal notranslate"><span class="pre">,</span></code><a class="headerlink" href="#id59" title="Permalink to this headline">¶</a></h2>
 <p>( x – )</p>
 <p>Store a word to the RAM or flash HERE location</p>
-</div>
-<div class="section" id="id60">
+</section>
+<section id="id60">
 <h2><code class="docutils literal notranslate"><span class="pre">2,</span></code><a class="headerlink" href="#id60" title="Permalink to this headline">¶</a></h2>
 <p>( d – )</p>
 <p>Store a doubleword to the RAM or flash HERE location</p>
-</div>
-<div class="section" id="cram-reserve">
+</section>
+<section id="cram-reserve">
 <h2><code class="docutils literal notranslate"><span class="pre">cram-reserve</span></code><a class="headerlink" href="#cram-reserve" title="Permalink to this headline">¶</a></h2>
 <p>( – addr )</p>
 <p>Reserve a byte at the RAM HERE location</p>
-</div>
-<div class="section" id="hram-reserve">
+</section>
+<section id="hram-reserve">
 <h2><code class="docutils literal notranslate"><span class="pre">hram-reserve</span></code><a class="headerlink" href="#hram-reserve" title="Permalink to this headline">¶</a></h2>
 <p>( – addr )</p>
 <p>Reserve a halfword at the RAM HERE location</p>
-</div>
-<div class="section" id="ram-reserve">
+</section>
+<section id="ram-reserve">
 <h2><code class="docutils literal notranslate"><span class="pre">ram-reserve</span></code><a class="headerlink" href="#ram-reserve" title="Permalink to this headline">¶</a></h2>
 <p>( – addr )</p>
 <p>Reserve a word at the RAM HERE location</p>
-</div>
-<div class="section" id="id61">
+</section>
+<section id="id61">
 <h2><code class="docutils literal notranslate"><span class="pre">2ram-reserve</span></code><a class="headerlink" href="#id61" title="Permalink to this headline">¶</a></h2>
 <p>( – addr )</p>
 <p>Reserve a doubleword at the RAM HERE location</p>
-</div>
-<div class="section" id="cflash-reserve">
+</section>
+<section id="cflash-reserve">
 <h2><code class="docutils literal notranslate"><span class="pre">cflash-reserve</span></code><a class="headerlink" href="#cflash-reserve" title="Permalink to this headline">¶</a></h2>
 <p>( – addr )</p>
 <p>Reserve a byte at the flash HERE location</p>
-</div>
-<div class="section" id="hflash-reserve">
+</section>
+<section id="hflash-reserve">
 <h2><code class="docutils literal notranslate"><span class="pre">hflash-reserve</span></code><a class="headerlink" href="#hflash-reserve" title="Permalink to this headline">¶</a></h2>
 <p>( – addr )</p>
 <p>Reserve a halfword at the flash HERE location</p>
-</div>
-<div class="section" id="flash-reserve">
+</section>
+<section id="flash-reserve">
 <h2><code class="docutils literal notranslate"><span class="pre">flash-reserve</span></code><a class="headerlink" href="#flash-reserve" title="Permalink to this headline">¶</a></h2>
 <p>( – addr )</p>
 <p>Reserve a word at the flash HERE location</p>
-</div>
-<div class="section" id="id62">
+</section>
+<section id="id62">
 <h2><code class="docutils literal notranslate"><span class="pre">2flash-reserve</span></code><a class="headerlink" href="#id62" title="Permalink to this headline">¶</a></h2>
 <p>( – addr )</p>
 <p>Reserve a doubleword at the flash HERE location</p>
-</div>
-<div class="section" id="creserve">
+</section>
+<section id="creserve">
 <h2><code class="docutils literal notranslate"><span class="pre">creserve</span></code><a class="headerlink" href="#creserve" title="Permalink to this headline">¶</a></h2>
 <p>( – addr )</p>
 <p>Reserve a byte at the RAM or flash HERE location</p>
-</div>
-<div class="section" id="hreserve">
+</section>
+<section id="hreserve">
 <h2><code class="docutils literal notranslate"><span class="pre">hreserve</span></code><a class="headerlink" href="#hreserve" title="Permalink to this headline">¶</a></h2>
 <p>( – addr )</p>
 <p>Reserve a halfword at the RAM or flash HERE location</p>
-</div>
-<div class="section" id="reserve">
+</section>
+<section id="reserve">
 <h2><code class="docutils literal notranslate"><span class="pre">reserve</span></code><a class="headerlink" href="#reserve" title="Permalink to this headline">¶</a></h2>
 <p>( – addr )</p>
 <p>Reserve a word at the RAM or flash HERE location</p>
-</div>
-<div class="section" id="id63">
+</section>
+<section id="id63">
 <h2><code class="docutils literal notranslate"><span class="pre">2reserve</span></code><a class="headerlink" href="#id63" title="Permalink to this headline">¶</a></h2>
 <p>( – addr )</p>
 <p>Reserve a doubleword at the RAM or flash HERE location</p>
-</div>
-<div class="section" id="align">
+</section>
+<section id="align">
 <h2><code class="docutils literal notranslate"><span class="pre">align,</span></code><a class="headerlink" href="#align" title="Permalink to this headline">¶</a></h2>
 <p>( u – )</p>
 <p>Align to a power of two</p>
-</div>
-<div class="section" id="flash-align">
+</section>
+<section id="flash-align">
 <h2><code class="docutils literal notranslate"><span class="pre">flash-align,</span></code><a class="headerlink" href="#flash-align" title="Permalink to this headline">¶</a></h2>
 <p>( u – )</p>
 <p>Align to a power of two</p>
-</div>
-<div class="section" id="ram-align">
+</section>
+<section id="ram-align">
 <h2><code class="docutils literal notranslate"><span class="pre">ram-align,</span></code><a class="headerlink" href="#ram-align" title="Permalink to this headline">¶</a></h2>
 <p>( u – )</p>
 <p>Align to a power of two</p>
-</div>
-<div class="section" id="cstring">
+</section>
+<section id="cstring">
 <h2><code class="docutils literal notranslate"><span class="pre">cstring,</span></code><a class="headerlink" href="#cstring" title="Permalink to this headline">¶</a></h2>
 <p>( b-addr u – )</p>
 <p>Compile a c-string</p>
-</div>
-<div class="section" id="r">
+</section>
+<section id="r">
 <h2><code class="docutils literal notranslate"><span class="pre">&gt;r</span></code><a class="headerlink" href="#r" title="Permalink to this headline">¶</a></h2>
 <p>( x1 – ) ( R: – x1 )</p>
 <p>Push a value onto the return stack</p>
-</div>
-<div class="section" id="id64">
+</section>
+<section id="id64">
 <h2><code class="docutils literal notranslate"><span class="pre">r&gt;</span></code><a class="headerlink" href="#id64" title="Permalink to this headline">¶</a></h2>
 <p>( R: x1 – ) ( – x1 )</p>
 <p>Pop a value off the return stack</p>
-</div>
-<div class="section" id="id65">
+</section>
+<section id="id65">
 <h2><code class="docutils literal notranslate"><span class="pre">r&#64;</span></code><a class="headerlink" href="#id65" title="Permalink to this headline">¶</a></h2>
 <p>( R: x1 – x1 ) ( – x1 )</p>
 <p>Get a value off the return stack without popping it</p>
-</div>
-<div class="section" id="rdrop">
+</section>
+<section id="rdrop">
 <h2><code class="docutils literal notranslate"><span class="pre">rdrop</span></code><a class="headerlink" href="#rdrop" title="Permalink to this headline">¶</a></h2>
 <p>( R: x – )</p>
 <p>Drop a value from the return stack</p>
-</div>
-<div class="section" id="rp">
+</section>
+<section id="rp">
 <h2><code class="docutils literal notranslate"><span class="pre">rp&#64;</span></code><a class="headerlink" href="#rp" title="Permalink to this headline">¶</a></h2>
 <p>( – a-addr )</p>
 <p>Get the return stack pointer</p>
-</div>
-<div class="section" id="id66">
+</section>
+<section id="id66">
 <h2><code class="docutils literal notranslate"><span class="pre">rp!</span></code><a class="headerlink" href="#id66" title="Permalink to this headline">¶</a></h2>
 <p>( a-addr – )</p>
 <p>Set the return stack pointer</p>
-</div>
-<div class="section" id="sp">
+</section>
+<section id="sp">
 <h2><code class="docutils literal notranslate"><span class="pre">sp&#64;</span></code><a class="headerlink" href="#sp" title="Permalink to this headline">¶</a></h2>
 <p>( – a-addr )</p>
 <p>Get the data stack pointer</p>
-</div>
-<div class="section" id="id67">
+</section>
+<section id="id67">
 <h2><code class="docutils literal notranslate"><span class="pre">sp!</span></code><a class="headerlink" href="#id67" title="Permalink to this headline">¶</a></h2>
 <p>( a-addr – )</p>
 <p>Set the data stack pointer</p>
-</div>
-<div class="section" id="reboot">
+</section>
+<section id="reboot">
 <h2><code class="docutils literal notranslate"><span class="pre">reboot</span></code><a class="headerlink" href="#reboot" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Reboot</p>
-</div>
-<div class="section" id="warm">
+</section>
+<section id="warm">
 <h2><code class="docutils literal notranslate"><span class="pre">warm</span></code><a class="headerlink" href="#warm" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Carry out a warm reboot</p>
-</div>
-<div class="section" id="true">
+</section>
+<section id="true">
 <h2><code class="docutils literal notranslate"><span class="pre">true</span></code><a class="headerlink" href="#true" title="Permalink to this headline">¶</a></h2>
 <p>( – f )</p>
-</div>
-<div class="section" id="false">
+</section>
+<section id="false">
 <h2><code class="docutils literal notranslate"><span class="pre">false</span></code><a class="headerlink" href="#false" title="Permalink to this headline">¶</a></h2>
 <p>( – f )</p>
-</div>
-<div class="section" id="binary">
+</section>
+<section id="binary">
 <h2><code class="docutils literal notranslate"><span class="pre">binary</span></code><a class="headerlink" href="#binary" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
-</div>
-<div class="section" id="octal">
+</section>
+<section id="octal">
 <h2><code class="docutils literal notranslate"><span class="pre">octal</span></code><a class="headerlink" href="#octal" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
-</div>
-<div class="section" id="decimal">
+</section>
+<section id="decimal">
 <h2><code class="docutils literal notranslate"><span class="pre">decimal</span></code><a class="headerlink" href="#decimal" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
-</div>
-<div class="section" id="hex">
+</section>
+<section id="hex">
 <h2><code class="docutils literal notranslate"><span class="pre">hex</span></code><a class="headerlink" href="#hex" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
-</div>
-<div class="section" id="cell">
+</section>
+<section id="cell">
 <h2><code class="docutils literal notranslate"><span class="pre">cell</span></code><a class="headerlink" href="#cell" title="Permalink to this headline">¶</a></h2>
 <p>( – u )</p>
-</div>
-<div class="section" id="cells">
+</section>
+<section id="cells">
 <h2><code class="docutils literal notranslate"><span class="pre">cells</span></code><a class="headerlink" href="#cells" title="Permalink to this headline">¶</a></h2>
 <p>( n – n )</p>
-</div>
-<div class="section" id="id68">
+</section>
+<section id="id68">
 <h2><code class="docutils literal notranslate"><span class="pre">cell+</span></code><a class="headerlink" href="#id68" title="Permalink to this headline">¶</a></h2>
 <p>( n – n )</p>
 <p>Add a cell to a value</p>
-</div>
-<div class="section" id="tos">
+</section>
+<section id="tos">
 <h2><code class="docutils literal notranslate"><span class="pre">tos</span></code><a class="headerlink" href="#tos" title="Permalink to this headline">¶</a></h2>
 <p>( – u )</p>
-</div>
-<div class="section" id="visible-flag">
+</section>
+<section id="visible-flag">
 <h2><code class="docutils literal notranslate"><span class="pre">visible-flag</span></code><a class="headerlink" href="#visible-flag" title="Permalink to this headline">¶</a></h2>
 <p>( – u )</p>
-</div>
-<div class="section" id="immediate-flag">
+</section>
+<section id="immediate-flag">
 <h2><code class="docutils literal notranslate"><span class="pre">immediate-flag</span></code><a class="headerlink" href="#immediate-flag" title="Permalink to this headline">¶</a></h2>
 <p>( – u )</p>
-</div>
-<div class="section" id="compiled-flag">
+</section>
+<section id="compiled-flag">
 <h2><code class="docutils literal notranslate"><span class="pre">compiled-flag</span></code><a class="headerlink" href="#compiled-flag" title="Permalink to this headline">¶</a></h2>
 <p>( – u )</p>
-</div>
-<div class="section" id="inlined-flag">
+</section>
+<section id="inlined-flag">
 <h2><code class="docutils literal notranslate"><span class="pre">inlined-flag</span></code><a class="headerlink" href="#inlined-flag" title="Permalink to this headline">¶</a></h2>
 <p>( – u )</p>
-</div>
-<div class="section" id="id69">
+</section>
+<section id="id69">
 <h2><code class="docutils literal notranslate"><span class="pre">nip</span></code><a class="headerlink" href="#id69" title="Permalink to this headline">¶</a></h2>
 <p>( x1 x2 – x2 )</p>
 <p>Drop the cell under the top of the stack</p>
-</div>
-<div class="section" id="id70">
+</section>
+<section id="id70">
 <h2><code class="docutils literal notranslate"><span class="pre">tuck</span></code><a class="headerlink" href="#id70" title="Permalink to this headline">¶</a></h2>
 <p>( x1 x2 – x2 x1 x2 )</p>
 <p>Tuck a cell under the cell at he top of the stack</p>
-</div>
-<div class="section" id="min">
+</section>
+<section id="min">
 <h2><code class="docutils literal notranslate"><span class="pre">min</span></code><a class="headerlink" href="#min" title="Permalink to this headline">¶</a></h2>
 <p>( n1 n2 – n3 )</p>
 <p>Get the minimum of two numbers</p>
-</div>
-<div class="section" id="max">
+</section>
+<section id="max">
 <h2><code class="docutils literal notranslate"><span class="pre">max</span></code><a class="headerlink" href="#max" title="Permalink to this headline">¶</a></h2>
 <p>( n1 n2 – n3 )</p>
 <p>Get the maximum of two numbers</p>
-</div>
-<div class="section" id="id71">
+</section>
+<section id="id71">
 <h2><code class="docutils literal notranslate"><span class="pre">-rot</span></code><a class="headerlink" href="#id71" title="Permalink to this headline">¶</a></h2>
 <p>( x1 x2 x3 – x3 x1 x2 )</p>
 <p>Rotate three cells in reverse</p>
-</div>
-<div class="section" id="abs">
+</section>
+<section id="abs">
 <h2><code class="docutils literal notranslate"><span class="pre">abs</span></code><a class="headerlink" href="#abs" title="Permalink to this headline">¶</a></h2>
 <p>( n – u )</p>
 <p>Get the absolute value of a number</p>
-</div>
-<div class="section" id="id72">
+</section>
+<section id="id72">
 <h2><code class="docutils literal notranslate"><span class="pre">align</span></code><a class="headerlink" href="#id72" title="Permalink to this headline">¶</a></h2>
 <p>( a power – a )</p>
 <p>Align an address to a power of two</p>
-</div>
-<div class="section" id="id73">
+</section>
+<section id="id73">
 <h2><code class="docutils literal notranslate"><span class="pre">?dup</span></code><a class="headerlink" href="#id73" title="Permalink to this headline">¶</a></h2>
 <p>( x – x | 0 )</p>
 <p>Duplicate a cell if it is non-zero</p>
-</div>
-<div class="section" id="cbit">
+</section>
+<section id="cbit">
 <h2><code class="docutils literal notranslate"><span class="pre">cbit&#64;</span></code><a class="headerlink" href="#cbit" title="Permalink to this headline">¶</a></h2>
 <p>( mask b-addr – f )</p>
 <p>Test for bits in a byte being set</p>
-</div>
-<div class="section" id="hbit">
+</section>
+<section id="hbit">
 <h2><code class="docutils literal notranslate"><span class="pre">hbit&#64;</span></code><a class="headerlink" href="#hbit" title="Permalink to this headline">¶</a></h2>
 <p>( mask h-addr – f )</p>
 <p>Test for bits in a halfword being set</p>
-</div>
-<div class="section" id="bit">
+</section>
+<section id="bit">
 <h2><code class="docutils literal notranslate"><span class="pre">bit&#64;</span></code><a class="headerlink" href="#bit" title="Permalink to this headline">¶</a></h2>
 <p>( mask addr – f )</p>
 <p>Test for bits in a cell being set</p>
-</div>
-<div class="section" id="cbis">
+</section>
+<section id="cbis">
 <h2><code class="docutils literal notranslate"><span class="pre">cbis!</span></code><a class="headerlink" href="#cbis" title="Permalink to this headline">¶</a></h2>
 <p>( bits addr – )</p>
 <p>Set bits on a byte</p>
-</div>
-<div class="section" id="cbic">
+</section>
+<section id="cbic">
 <h2><code class="docutils literal notranslate"><span class="pre">cbic!</span></code><a class="headerlink" href="#cbic" title="Permalink to this headline">¶</a></h2>
 <p>( bits addr – )</p>
 <p>Clear bits on a byte</p>
-</div>
-<div class="section" id="hbis">
+</section>
+<section id="hbis">
 <h2><code class="docutils literal notranslate"><span class="pre">hbis!</span></code><a class="headerlink" href="#hbis" title="Permalink to this headline">¶</a></h2>
 <p>( bits addr – )</p>
 <p>Set bits on a halfword</p>
-</div>
-<div class="section" id="hbic">
+</section>
+<section id="hbic">
 <h2><code class="docutils literal notranslate"><span class="pre">hbic!</span></code><a class="headerlink" href="#hbic" title="Permalink to this headline">¶</a></h2>
 <p>( bits addr – )</p>
 <p>Clear bits on a halfword</p>
-</div>
-<div class="section" id="bis">
+</section>
+<section id="bis">
 <h2><code class="docutils literal notranslate"><span class="pre">bis!</span></code><a class="headerlink" href="#bis" title="Permalink to this headline">¶</a></h2>
 <p>( bits addr – )</p>
 <p>Set bits on a word</p>
-</div>
-<div class="section" id="id74">
+</section>
+<section id="id74">
 <h2><code class="docutils literal notranslate"><span class="pre">bic!</span></code><a class="headerlink" href="#id74" title="Permalink to this headline">¶</a></h2>
 <p>( bits addr – )</p>
 <p>Clear bits on a word</p>
-</div>
-<div class="section" id="depth">
+</section>
+<section id="depth">
 <h2><code class="docutils literal notranslate"><span class="pre">depth</span></code><a class="headerlink" href="#depth" title="Permalink to this headline">¶</a></h2>
 <p>( – u )</p>
 <p>Get the depth of the stack, not including the cell pushed onto it by this
 word</p>
-</div>
-<div class="section" id="h-1">
+</section>
+<section id="h-1">
 <h2><code class="docutils literal notranslate"><span class="pre">h.1</span></code><a class="headerlink" href="#h-1" title="Permalink to this headline">¶</a></h2>
 <p>( b – )</p>
 <p>Output a hexadecimal nibble</p>
-</div>
-<div class="section" id="h-2">
+</section>
+<section id="h-2">
 <h2><code class="docutils literal notranslate"><span class="pre">h.2</span></code><a class="headerlink" href="#h-2" title="Permalink to this headline">¶</a></h2>
 <p>( b – )</p>
 <p>Output a hexadecimal 8 bit value, padded with zeros</p>
-</div>
-<div class="section" id="h-4">
+</section>
+<section id="h-4">
 <h2><code class="docutils literal notranslate"><span class="pre">h.4</span></code><a class="headerlink" href="#h-4" title="Permalink to this headline">¶</a></h2>
 <p>( h – )</p>
 <p>Output a hexadecimal 16 bit value, padded with zeros</p>
-</div>
-<div class="section" id="h-8">
+</section>
+<section id="h-8">
 <h2><code class="docutils literal notranslate"><span class="pre">h.8</span></code><a class="headerlink" href="#h-8" title="Permalink to this headline">¶</a></h2>
 <p>( x – )</p>
 <p>Output a hexadecimal 32 bit value, padded with zeros</p>
-</div>
-<div class="section" id="h-16">
+</section>
+<section id="h-16">
 <h2><code class="docutils literal notranslate"><span class="pre">h.16</span></code><a class="headerlink" href="#h-16" title="Permalink to this headline">¶</a></h2>
 <p>( ud – )</p>
 <p>Output a hexadecimal 64 bit value, padded with zeros</p>
-</div>
-<div class="section" id="s">
+</section>
+<section id="s">
 <h2><code class="docutils literal notranslate"><span class="pre">.s</span></code><a class="headerlink" href="#s" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Dump the contents of the data stack</p>
-</div>
-<div class="section" id="raise">
+</section>
+<section id="raise">
 <h2><code class="docutils literal notranslate"><span class="pre">?raise</span></code><a class="headerlink" href="#raise" title="Permalink to this headline">¶</a></h2>
 <p>( xt|0 – | 0 )</p>
 <p>Raise an exception with the exception type in the TOS register</p>
-</div>
-<div class="section" id="try">
+</section>
+<section id="try">
 <h2><code class="docutils literal notranslate"><span class="pre">try</span></code><a class="headerlink" href="#try" title="Permalink to this headline">¶</a></h2>
 <p>( xt1 – xt2|0 )</p>
 <p>Try to see if an exception occurs</p>
-</div>
-<div class="section" id="averts">
+</section>
+<section id="averts">
 <h2><code class="docutils literal notranslate"><span class="pre">averts</span></code><a class="headerlink" href="#averts" title="Permalink to this headline">¶</a></h2>
 <p>( f “name” – )</p>
 <p>Assert that a value is true, otherwise raise a specified exception</p>
-</div>
-<div class="section" id="triggers">
+</section>
+<section id="triggers">
 <h2><code class="docutils literal notranslate"><span class="pre">triggers</span></code><a class="headerlink" href="#triggers" title="Permalink to this headline">¶</a></h2>
 <p>( f “name” – )</p>
 <p>Assert that a value is false, otherwise raise a specified exception</p>
-</div>
-<div class="section" id="suppress">
+</section>
+<section id="suppress">
 <h2><code class="docutils literal notranslate"><span class="pre">suppress</span></code><a class="headerlink" href="#suppress" title="Permalink to this headline">¶</a></h2>
 <p>( exc|0 “name” – exc|0 )</p>
 <p>Check whether an exception, typically returned by <code class="docutils literal notranslate"><span class="pre">try</span></code>, matches a specified
 exception and if it does, replace it with zero, marking no exception,
 otherwise passing the specified argument through.</p>
-</div>
-<div class="section" id="name">
+</section>
+<section id="name">
 <h2><code class="docutils literal notranslate"><span class="pre">&gt;name</span></code><a class="headerlink" href="#name" title="Permalink to this headline">¶</a></h2>
 <p>( xt – name )</p>
 <p>Search the dictionary for a word by its xt</p>
-</div>
-<div class="section" id="safe-type">
+</section>
+<section id="safe-type">
 <h2><code class="docutils literal notranslate"><span class="pre">safe-type</span></code><a class="headerlink" href="#safe-type" title="Permalink to this headline">¶</a></h2>
 <p>( b-addr bytes – )</p>
 <p>Safely type a string</p>
-</div>
-<div class="section" id="safe-type-integer">
+</section>
+<section id="safe-type-integer">
 <h2><code class="docutils literal notranslate"><span class="pre">safe-type-integer</span></code><a class="headerlink" href="#safe-type-integer" title="Permalink to this headline">¶</a></h2>
 <p>( n – )</p>
 <p>Safely type an integer</p>
-</div>
-<div class="section" id="safe-type-unsigned">
+</section>
+<section id="safe-type-unsigned">
 <h2><code class="docutils literal notranslate"><span class="pre">safe-type-unsigned</span></code><a class="headerlink" href="#safe-type-unsigned" title="Permalink to this headline">¶</a></h2>
 <p>( u – )</p>
 <p>Safely type an unsigned integer</p>
-</div>
-<div class="section" id="fill">
+</section>
+<section id="fill">
 <h2><code class="docutils literal notranslate"><span class="pre">fill</span></code><a class="headerlink" href="#fill" title="Permalink to this headline">¶</a></h2>
 <p>( b-addr u b – )</p>
 <p>Fill memory with a byte</p>
-</div>
-<div class="section" id="create">
+</section>
+<section id="create">
 <h2><code class="docutils literal notranslate"><span class="pre">create</span></code><a class="headerlink" href="#create" title="Permalink to this headline">¶</a></h2>
 <p>( “name” – )</p>
 <p>Create a word referring to memory after it</p>
-</div>
-<div class="section" id="builds">
+</section>
+<section id="builds">
 <h2><code class="docutils literal notranslate"><span class="pre">&lt;builds</span></code><a class="headerlink" href="#builds" title="Permalink to this headline">¶</a></h2>
 <p>( “name” – )</p>
 <p>Create a word that executes code specified by DOES&gt;</p>
-</div>
-<div class="section" id="does">
+</section>
+<section id="does">
 <h2><code class="docutils literal notranslate"><span class="pre">does&gt;</span></code><a class="headerlink" href="#does" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Specify code for a word created wth &lt;BUILDS</p>
-</div>
-<div class="section" id="begin-structure">
+</section>
+<section id="begin-structure">
 <h2><code class="docutils literal notranslate"><span class="pre">begin-structure</span></code><a class="headerlink" href="#begin-structure" title="Permalink to this headline">¶</a></h2>
 <p>( “name” – offset )</p>
 <p>Begin declaring a structure</p>
-</div>
-<div class="section" id="end">
+</section>
+<section id="end">
 <h2><code class="docutils literal notranslate"><span class="pre">end</span></code><a class="headerlink" href="#end" title="Permalink to this headline">¶</a></h2>
 <p>( offset – )</p>
 <p>Finish declaring a structure</p>
-</div>
-<div class="section" id="field">
+</section>
+<section id="field">
 <h2><code class="docutils literal notranslate"><span class="pre">+field</span></code><a class="headerlink" href="#field" title="Permalink to this headline">¶</a></h2>
 <p>( offset size “name” – offset )</p>
 <p>Create an arbitrary-sized field</p>
-</div>
-<div class="section" id="cfield">
+</section>
+<section id="cfield">
 <h2><code class="docutils literal notranslate"><span class="pre">cfield:</span></code><a class="headerlink" href="#cfield" title="Permalink to this headline">¶</a></h2>
 <p>( offset “name” – offset )</p>
 <p>Create a byte-sized field</p>
-</div>
-<div class="section" id="hfield">
+</section>
+<section id="hfield">
 <h2><code class="docutils literal notranslate"><span class="pre">hfield:</span></code><a class="headerlink" href="#hfield" title="Permalink to this headline">¶</a></h2>
 <p>( offset “name” – offset )</p>
 <p>Create a halfword-sized field</p>
-</div>
-<div class="section" id="id75">
+</section>
+<section id="id75">
 <h2><code class="docutils literal notranslate"><span class="pre">field:</span></code><a class="headerlink" href="#id75" title="Permalink to this headline">¶</a></h2>
 <p>( offset “name” – offset )</p>
 <p>Create a cell-sized field</p>
-</div>
-<div class="section" id="id76">
+</section>
+<section id="id76">
 <h2><code class="docutils literal notranslate"><span class="pre">2field:</span></code><a class="headerlink" href="#id76" title="Permalink to this headline">¶</a></h2>
 <p>( offset “name” – offset )</p>
 <p>Create a double cell-sized field</p>
-</div>
-<div class="section" id="equal-strings">
+</section>
+<section id="equal-strings">
 <h2><code class="docutils literal notranslate"><span class="pre">equal-strings?</span></code><a class="headerlink" href="#equal-strings" title="Permalink to this headline">¶</a></h2>
 <p>( b-addr1 u1 b-addr2 u2 – f )</p>
 <p>Get whether two strings are equal</p>
-</div>
-<div class="section" id="case">
+</section>
+<section id="case">
 <h2><code class="docutils literal notranslate"><span class="pre">case</span></code><a class="headerlink" href="#case" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Start a CASE statement</p>
-</div>
-<div class="section" id="of">
+</section>
+<section id="of">
 <h2><code class="docutils literal notranslate"><span class="pre">of</span></code><a class="headerlink" href="#of" title="Permalink to this headline">¶</a></h2>
 <p>( x – )</p>
 <p>Start an OF clause</p>
-</div>
-<div class="section" id="endof">
+</section>
+<section id="endof">
 <h2><code class="docutils literal notranslate"><span class="pre">endof</span></code><a class="headerlink" href="#endof" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>End an OF clause</p>
-</div>
-<div class="section" id="endcase">
+</section>
+<section id="endcase">
 <h2><code class="docutils literal notranslate"><span class="pre">endcase</span></code><a class="headerlink" href="#endcase" title="Permalink to this headline">¶</a></h2>
 <p>( x – )</p>
 <p>End a CASE statement</p>
-</div>
-<div class="section" id="ofstr">
+</section>
+<section id="ofstr">
 <h2><code class="docutils literal notranslate"><span class="pre">ofstr</span></code><a class="headerlink" href="#ofstr" title="Permalink to this headline">¶</a></h2>
 <p>( x – )</p>
 <p>Start an OFSTR clause</p>
-</div>
-<div class="section" id="ofstrcase">
+</section>
+<section id="ofstrcase">
 <h2><code class="docutils literal notranslate"><span class="pre">ofstrcase</span></code><a class="headerlink" href="#ofstrcase" title="Permalink to this headline">¶</a></h2>
 <p>( x – )</p>
 <p>Start an OFSTRCASE clause</p>
-</div>
-<div class="section" id="endcasestr">
+</section>
+<section id="endcasestr">
 <h2><code class="docutils literal notranslate"><span class="pre">endcasestr</span></code><a class="headerlink" href="#endcasestr" title="Permalink to this headline">¶</a></h2>
 <p>( x – )</p>
 <p>End a CASE statement comparing against a string</p>
-</div>
-<div class="section" id="cuser">
+</section>
+<section id="cuser">
 <h2><code class="docutils literal notranslate"><span class="pre">cuser</span></code><a class="headerlink" href="#cuser" title="Permalink to this headline">¶</a></h2>
 <p>( “name” – )</p>
 <p>Allocate a byte user variable</p>
-</div>
-<div class="section" id="huser">
+</section>
+<section id="huser">
 <h2><code class="docutils literal notranslate"><span class="pre">huser</span></code><a class="headerlink" href="#huser" title="Permalink to this headline">¶</a></h2>
 <p>( “name” – )</p>
 <p>Allocate a halfword variable in RAM</p>
-</div>
-<div class="section" id="user">
+</section>
+<section id="user">
 <h2><code class="docutils literal notranslate"><span class="pre">user</span></code><a class="headerlink" href="#user" title="Permalink to this headline">¶</a></h2>
 <p>( “name” – )</p>
 <p>Allocate a user variable</p>
-</div>
-<div class="section" id="id77">
+</section>
+<section id="id77">
 <h2><code class="docutils literal notranslate"><span class="pre">2user</span></code><a class="headerlink" href="#id77" title="Permalink to this headline">¶</a></h2>
 <p>( “name” – )</p>
 <p>Allocate a doubleword user variable</p>
-</div>
-<div class="section" id="user-buffer">
+</section>
+<section id="user-buffer">
 <h2><code class="docutils literal notranslate"><span class="pre">user-buffer:</span></code><a class="headerlink" href="#user-buffer" title="Permalink to this headline">¶</a></h2>
 <p>( bytes “name” – )</p>
 <p>Allocate a user buffer</p>
-</div>
-<div class="section" id="user-aligned-buffer">
+</section>
+<section id="user-aligned-buffer">
 <h2><code class="docutils literal notranslate"><span class="pre">user-aligned-buffer:</span></code><a class="headerlink" href="#user-aligned-buffer" title="Permalink to this headline">¶</a></h2>
 <p>( bytes “name” – )</p>
 <p>Allocate a cell-aligned user buffer</p>
-</div>
-<div class="section" id="cvariable">
+</section>
+<section id="cvariable">
 <h2><code class="docutils literal notranslate"><span class="pre">cvariable</span></code><a class="headerlink" href="#cvariable" title="Permalink to this headline">¶</a></h2>
 <p>( “name” – )</p>
 <p>Create a one-byte variable</p>
-</div>
-<div class="section" id="hvariable">
+</section>
+<section id="hvariable">
 <h2><code class="docutils literal notranslate"><span class="pre">hvariable</span></code><a class="headerlink" href="#hvariable" title="Permalink to this headline">¶</a></h2>
 <p>( “name” – )</p>
 <p>Create a two-byte variable</p>
-</div>
-<div class="section" id="variable">
+</section>
+<section id="variable">
 <h2><code class="docutils literal notranslate"><span class="pre">variable</span></code><a class="headerlink" href="#variable" title="Permalink to this headline">¶</a></h2>
 <p>( “name” – )</p>
 <p>Create a four-byte variable</p>
-</div>
-<div class="section" id="id78">
+</section>
+<section id="id78">
 <h2><code class="docutils literal notranslate"><span class="pre">2variable</span></code><a class="headerlink" href="#id78" title="Permalink to this headline">¶</a></h2>
 <p>( “name” – )</p>
 <p>Create an eight-byte variable</p>
-</div>
-<div class="section" id="buffer">
+</section>
+<section id="buffer">
 <h2><code class="docutils literal notranslate"><span class="pre">buffer:</span></code><a class="headerlink" href="#buffer" title="Permalink to this headline">¶</a></h2>
 <p>( # “name” – )</p>
 <p>Specify a buffer of a given size</p>
-</div>
-<div class="section" id="aligned-buffer">
+</section>
+<section id="aligned-buffer">
 <h2><code class="docutils literal notranslate"><span class="pre">aligned-buffer:</span></code><a class="headerlink" href="#aligned-buffer" title="Permalink to this headline">¶</a></h2>
 <p>( # “name” – )</p>
 <p>Specify a cell-aligned buffer of a given size</p>
-</div>
-<div class="section" id="flash-wordlist">
+</section>
+<section id="flash-wordlist">
 <h2><code class="docutils literal notranslate"><span class="pre">flash-wordlist</span></code><a class="headerlink" href="#flash-wordlist" title="Permalink to this headline">¶</a></h2>
 <p>( – wid )</p>
 <p>Create a flash wordlist</p>
-</div>
-<div class="section" id="ram-wordlist">
+</section>
+<section id="ram-wordlist">
 <h2><code class="docutils literal notranslate"><span class="pre">ram-wordlist</span></code><a class="headerlink" href="#ram-wordlist" title="Permalink to this headline">¶</a></h2>
 <p>( – wid )</p>
 <p>Create a RAM wordlist</p>
-</div>
-<div class="section" id="wordlist">
+</section>
+<section id="wordlist">
 <h2><code class="docutils literal notranslate"><span class="pre">wordlist</span></code><a class="headerlink" href="#wordlist" title="Permalink to this headline">¶</a></h2>
 <p>( – wid )</p>
 <p>Create a new wordlist</p>
-</div>
-<div class="section" id="do">
+</section>
+<section id="do">
 <h2><code class="docutils literal notranslate"><span class="pre">do</span></code><a class="headerlink" href="#do" title="Permalink to this headline">¶</a></h2>
 <p>( end start – ) ( R: – leave start end ) ( compile: – leave* loop )</p>
 <p>Begin a do loop</p>
-</div>
-<div class="section" id="id79">
+</section>
+<section id="id79">
 <h2><code class="docutils literal notranslate"><span class="pre">?do</span></code><a class="headerlink" href="#id79" title="Permalink to this headline">¶</a></h2>
 <p>( end start – ) ( R: – leave start end ) ( compile: – leave* loop )</p>
 <p>Begin a ?do loop</p>
-</div>
-<div class="section" id="loop">
+</section>
+<section id="loop">
 <h2><code class="docutils literal notranslate"><span class="pre">loop</span></code><a class="headerlink" href="#loop" title="Permalink to this headline">¶</a></h2>
 <p>( R leave current end – leave current end | )</p>
 <p>End a do loop</p>
-</div>
-<div class="section" id="id80">
+</section>
+<section id="id80">
 <h2><code class="docutils literal notranslate"><span class="pre">+loop</span></code><a class="headerlink" href="#id80" title="Permalink to this headline">¶</a></h2>
 <p>( increment – ) ( R: leave current end – leave current end | )</p>
 <p>End a do +loop</p>
-</div>
-<div class="section" id="i">
+</section>
+<section id="i">
 <h2><code class="docutils literal notranslate"><span class="pre">i</span></code><a class="headerlink" href="#i" title="Permalink to this headline">¶</a></h2>
 <p>( R current end – current end ) ( – current )</p>
 <p>Get the loop index</p>
-</div>
-<div class="section" id="j">
+</section>
+<section id="j">
 <h2><code class="docutils literal notranslate"><span class="pre">j</span></code><a class="headerlink" href="#j" title="Permalink to this headline">¶</a></h2>
 <p>( R cur1 end1 leave cur2 end2 – cur1 end1 leave cur2 end2 ) ( – cur1 )</p>
 <p>Get the loop index beneath the current loop</p>
-</div>
-<div class="section" id="leave">
+</section>
+<section id="leave">
 <h2><code class="docutils literal notranslate"><span class="pre">leave</span></code><a class="headerlink" href="#leave" title="Permalink to this headline">¶</a></h2>
 <p>( R leave current end – )</p>
 <p>Leave a do loop</p>
-</div>
-<div class="section" id="unloop">
+</section>
+<section id="unloop">
 <h2><code class="docutils literal notranslate"><span class="pre">unloop</span></code><a class="headerlink" href="#unloop" title="Permalink to this headline">¶</a></h2>
 <p>( R: leave current end – )</p>
 <p>Unloop from a do loop (to exit, e.g.)</p>
-</div>
-<div class="section" id="dump">
+</section>
+<section id="dump">
 <h2><code class="docutils literal notranslate"><span class="pre">dump</span></code><a class="headerlink" href="#dump" title="Permalink to this headline">¶</a></h2>
 <p>( start-addr end-addr – )</p>
 <p>Dump memory between two addresses</p>
-</div>
-<div class="section" id="skip-until">
+</section>
+<section id="skip-until">
 <h2><code class="docutils literal notranslate"><span class="pre">skip-until</span></code><a class="headerlink" href="#skip-until" title="Permalink to this headline">¶</a></h2>
 <p>( xt – )</p>
 <p>Skip characters in the evaluation buffer until a predicate is met</p>
-</div>
-<div class="section" id="id81">
+</section>
+<section id="id81">
 <h2><code class="docutils literal notranslate"><span class="pre">[:</span></code><a class="headerlink" href="#id81" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Begin lambda</p>
-</div>
-<div class="section" id="id82">
+</section>
+<section id="id82">
 <h2><code class="docutils literal notranslate"><span class="pre">;]</span></code><a class="headerlink" href="#id82" title="Permalink to this headline">¶</a></h2>
 <p>( – ) ( compiled: – xt )</p>
 <p>End lambda</p>
-</div>
-<div class="section" id="x">
+</section>
+<section id="x">
 <h2><code class="docutils literal notranslate"><span class="pre">x&quot;</span></code><a class="headerlink" href="#x" title="Permalink to this headline">¶</a></h2>
 <p>( <text>” – )</p>
 <p>Create an anonymous word for an exception</p>
-</div>
-<div class="section" id="defer">
+</section>
+<section id="defer">
 <h2><code class="docutils literal notranslate"><span class="pre">defer</span></code><a class="headerlink" href="#defer" title="Permalink to this headline">¶</a></h2>
 <p>( “name” – )</p>
 <p>Create a deferred word</p>
-</div>
-<div class="section" id="defer-ram">
+</section>
+<section id="defer-ram">
 <h2><code class="docutils literal notranslate"><span class="pre">defer-ram!</span></code><a class="headerlink" href="#defer-ram" title="Permalink to this headline">¶</a></h2>
 <p>( xt xt-deferred – )</p>
 <p>Set a deferred word in RAM</p>
-</div>
-<div class="section" id="defer-flash">
+</section>
+<section id="defer-flash">
 <h2><code class="docutils literal notranslate"><span class="pre">defer-flash!</span></code><a class="headerlink" href="#defer-flash" title="Permalink to this headline">¶</a></h2>
 <p>( xt xt-deferred – )</p>
 <p>Set a deferred word in flash</p>
-</div>
-<div class="section" id="id83">
+</section>
+<section id="id83">
 <h2><code class="docutils literal notranslate"><span class="pre">defer!</span></code><a class="headerlink" href="#id83" title="Permalink to this headline">¶</a></h2>
 <p>( xt xt-deferred – )</p>
 <p>Set a deferred word; note that a deferred word stored in flash can only have its implementation set once</p>
-</div>
-<div class="section" id="ws">
+</section>
+<section id="ws">
 <h2><code class="docutils literal notranslate"><span class="pre">ws?</span></code><a class="headerlink" href="#ws" title="Permalink to this headline">¶</a></h2>
 <p>( b – flag )</p>
 <p>Test whether a character is whitespace.</p>
-</div>
-<div class="section" id="newline">
+</section>
+<section id="newline">
 <h2><code class="docutils literal notranslate"><span class="pre">newline?</span></code><a class="headerlink" href="#newline" title="Permalink to this headline">¶</a></h2>
 <p>( b – flag )</p>
 <p>Test whether a character is a newline.</p>
-</div>
-<div class="section" id="token-start">
+</section>
+<section id="token-start">
 <h2><code class="docutils literal notranslate"><span class="pre">token-start</span></code><a class="headerlink" href="#token-start" title="Permalink to this headline">¶</a></h2>
 <p>( – i )</p>
 <p>Parse the input buffer for the start of a token</p>
-</div>
-<div class="section" id="token-end">
+</section>
+<section id="token-end">
 <h2><code class="docutils literal notranslate"><span class="pre">token-end</span></code><a class="headerlink" href="#token-end" title="Permalink to this headline">¶</a></h2>
 <p>( i1 – i2 )</p>
 <p>Parse the input buffer for the end of a token</p>
-</div>
-<div class="section" id="token">
+</section>
+<section id="token">
 <h2><code class="docutils literal notranslate"><span class="pre">token</span></code><a class="headerlink" href="#token" title="Permalink to this headline">¶</a></h2>
 <p>( “token” – b-addr u )</p>
 <p>Parse a token</p>
-</div>
-<div class="section" id="id84">
+</section>
+<section id="id84">
 <h2><code class="docutils literal notranslate"><span class="pre">\</span></code><a class="headerlink" href="#id84" title="Permalink to this headline">¶</a></h2>
 <p>( “comment<NL>” – )</p>
 <p>Parse a line comment</p>
-</div>
-<div class="section" id="id85">
+</section>
+<section id="id85">
 <h2><code class="docutils literal notranslate"><span class="pre">(</span></code><a class="headerlink" href="#id85" title="Permalink to this headline">¶</a></h2>
 <p>( “comment)” – )</p>
 <p>Parse a paren coment</p>
-</div>
-<div class="section" id="to-upper-char">
+</section>
+<section id="to-upper-char">
 <h2><code class="docutils literal notranslate"><span class="pre">to-upper-char</span></code><a class="headerlink" href="#to-upper-char" title="Permalink to this headline">¶</a></h2>
 <p>( b – b )</p>
 <p>Convert a character to being uppercase</p>
-</div>
-<div class="section" id="equal-case-strings">
+</section>
+<section id="equal-case-strings">
 <h2><code class="docutils literal notranslate"><span class="pre">equal-case-strings?</span></code><a class="headerlink" href="#equal-case-strings" title="Permalink to this headline">¶</a></h2>
 <p>( b-addr1 u1 b-addr2 u2 – flag )</p>
 <p>Compare whether two strings are equal</p>
-</div>
-<div class="section" id="id86">
+</section>
+<section id="id86">
 <h2><code class="docutils literal notranslate"><span class="pre">3dup</span></code><a class="headerlink" href="#id86" title="Permalink to this headline">¶</a></h2>
 <p>( x1 x2 x3 – x1 x2 x3 x1 x2 x3 )</p>
 <p>Duplicate three items on the stack</p>
-</div>
-<div class="section" id="find">
+</section>
+<section id="find">
 <h2><code class="docutils literal notranslate"><span class="pre">find</span></code><a class="headerlink" href="#find" title="Permalink to this headline">¶</a></h2>
 <p>( b-addr u mask – addr|0 )</p>
 <p>Find a word in the dictionary according to the word order list</p>
-</div>
-<div class="section" id="find-all">
+</section>
+<section id="find-all">
 <h2><code class="docutils literal notranslate"><span class="pre">find-all</span></code><a class="headerlink" href="#find-all" title="Permalink to this headline">¶</a></h2>
 <p>( b-addr u mask – addr|0 )</p>
 <p>Find a word in the dictionary in any wordlist in order of definition</p>
-</div>
-<div class="section" id="body">
+</section>
+<section id="body">
 <h2><code class="docutils literal notranslate"><span class="pre">&gt;body</span></code><a class="headerlink" href="#body" title="Permalink to this headline">¶</a></h2>
 <p>( name – xt )</p>
 <p>Get an xt from a word</p>
-</div>
-<div class="section" id="evaluate">
+</section>
+<section id="evaluate">
 <h2><code class="docutils literal notranslate"><span class="pre">evaluate</span></code><a class="headerlink" href="#evaluate" title="Permalink to this headline">¶</a></h2>
 <p>( b-addr u – )</p>
 <p>Evaluate a string</p>
-</div>
-<div class="section" id="abort">
+</section>
+<section id="abort">
 <h2><code class="docutils literal notranslate"><span class="pre">abort</span></code><a class="headerlink" href="#abort" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Abort</p>
-</div>
-<div class="section" id="quit">
+</section>
+<section id="quit">
 <h2><code class="docutils literal notranslate"><span class="pre">quit</span></code><a class="headerlink" href="#quit" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>The outer loop of Forth</p>
-</div>
-<div class="section" id="stack-overflow">
+</section>
+<section id="stack-overflow">
 <h2><code class="docutils literal notranslate"><span class="pre">stack-overflow</span></code><a class="headerlink" href="#stack-overflow" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Stack overflow exception</p>
-</div>
-<div class="section" id="stack-underflow">
+</section>
+<section id="stack-underflow">
 <h2><code class="docutils literal notranslate"><span class="pre">stack-underflow</span></code><a class="headerlink" href="#stack-underflow" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Stack underflow exception</p>
-</div>
-<div class="section" id="rstack-overflow">
+</section>
+<section id="rstack-overflow">
 <h2><code class="docutils literal notranslate"><span class="pre">rstack-overflow</span></code><a class="headerlink" href="#rstack-overflow" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Return stack overflow exception</p>
-</div>
-<div class="section" id="rstack-underflow">
+</section>
+<section id="rstack-underflow">
 <h2><code class="docutils literal notranslate"><span class="pre">rstack-underflow</span></code><a class="headerlink" href="#rstack-underflow" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Return stack underflow exception</p>
-</div>
-<div class="section" id="xon">
+</section>
+<section id="xon">
 <h2><code class="docutils literal notranslate"><span class="pre">xon</span></code><a class="headerlink" href="#xon" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Send XON</p>
-</div>
-<div class="section" id="xoff">
+</section>
+<section id="xoff">
 <h2><code class="docutils literal notranslate"><span class="pre">xoff</span></code><a class="headerlink" href="#xoff" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Send XOFF</p>
-</div>
-<div class="section" id="ack">
+</section>
+<section id="ack">
 <h2><code class="docutils literal notranslate"><span class="pre">ack</span></code><a class="headerlink" href="#ack" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Send ACK</p>
-</div>
-<div class="section" id="nak">
+</section>
+<section id="nak">
 <h2><code class="docutils literal notranslate"><span class="pre">nak</span></code><a class="headerlink" href="#nak" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Send NAK</p>
-</div>
-<div class="section" id="bel">
+</section>
+<section id="bel">
 <h2><code class="docutils literal notranslate"><span class="pre">bel</span></code><a class="headerlink" href="#bel" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Send BEL</p>
-</div>
-<div class="section" id="failed-parse">
+</section>
+<section id="failed-parse">
 <h2><code class="docutils literal notranslate"><span class="pre">failed-parse</span></code><a class="headerlink" href="#failed-parse" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Failed parse exception</p>
-</div>
-<div class="section" id="parse-integer">
+</section>
+<section id="parse-integer">
 <h2><code class="docutils literal notranslate"><span class="pre">parse-integer</span></code><a class="headerlink" href="#parse-integer" title="Permalink to this headline">¶</a></h2>
 <p>( b-addr u –  n success )</p>
 <p>Parse an integer</p>
-</div>
-<div class="section" id="parse-unsigned">
+</section>
+<section id="parse-unsigned">
 <h2><code class="docutils literal notranslate"><span class="pre">parse-unsigned</span></code><a class="headerlink" href="#parse-unsigned" title="Permalink to this headline">¶</a></h2>
 <p>( b-addr u1 – u2 success )</p>
 <p>Parse an unsigned integer</p>
-</div>
-<div class="section" id="parse-base">
+</section>
+<section id="parse-base">
 <h2><code class="docutils literal notranslate"><span class="pre">parse-base</span></code><a class="headerlink" href="#parse-base" title="Permalink to this headline">¶</a></h2>
 <p>( b-addr1 u1 – b-addr2 u2 base )</p>
 <p>Actually parse an integer base</p>
-</div>
-<div class="section" id="parse-digit">
+</section>
+<section id="parse-digit">
 <h2><code class="docutils literal notranslate"><span class="pre">parse-digit</span></code><a class="headerlink" href="#parse-digit" title="Permalink to this headline">¶</a></h2>
 <p>( b base – u success  )</p>
 <p>Parse a digit</p>
-</div>
-<div class="section" id="id87">
+</section>
+<section id="id87">
 <h2><code class="docutils literal notranslate"><span class="pre">:</span></code><a class="headerlink" href="#id87" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Start a colon definition</p>
-</div>
-<div class="section" id="noname">
+</section>
+<section id="noname">
 <h2><code class="docutils literal notranslate"><span class="pre">:noname</span></code><a class="headerlink" href="#noname" title="Permalink to this headline">¶</a></h2>
 <p>( – xt )</p>
 <p>Start an anonymous colon definition</p>
-</div>
-<div class="section" id="id88">
+</section>
+<section id="id88">
 <h2><code class="docutils literal notranslate"><span class="pre">;</span></code><a class="headerlink" href="#id88" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>End a colon definition</p>
-</div>
-<div class="section" id="constant">
+</section>
+<section id="constant">
 <h2><code class="docutils literal notranslate"><span class="pre">constant</span></code><a class="headerlink" href="#constant" title="Permalink to this headline">¶</a></h2>
 <p>( x “name” – )</p>
 <p>Create a constant</p>
-</div>
-<div class="section" id="id89">
+</section>
+<section id="id89">
 <h2><code class="docutils literal notranslate"><span class="pre">2constant</span></code><a class="headerlink" href="#id89" title="Permalink to this headline">¶</a></h2>
 <p>( d “name” – )</p>
 <p>Create a 2-word constant</p>
-</div>
-<div class="section" id="token-expected">
+</section>
+<section id="token-expected">
 <h2><code class="docutils literal notranslate"><span class="pre">token-expected</span></code><a class="headerlink" href="#token-expected" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Token expected exception handler</p>
-</div>
-<div class="section" id="not-compiling">
+</section>
+<section id="not-compiling">
 <h2><code class="docutils literal notranslate"><span class="pre">not-compiling</span></code><a class="headerlink" href="#not-compiling" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>We are not currently compiling</p>
-</div>
-<div class="section" id="compile-to-ram-only">
+</section>
+<section id="compile-to-ram-only">
 <h2><code class="docutils literal notranslate"><span class="pre">compile-to-ram-only</span></code><a class="headerlink" href="#compile-to-ram-only" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>We are currently compiling to flash</p>
-</div>
-<div class="section" id="else">
+</section>
+<section id="else">
 <h2><code class="docutils literal notranslate"><span class="pre">[else]</span></code><a class="headerlink" href="#else" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Implement the [else] in [if]/[else]/[then] for conditional execution/compilation</p>
-</div>
-<div class="section" id="if">
+</section>
+<section id="if">
 <h2><code class="docutils literal notranslate"><span class="pre">[if]</span></code><a class="headerlink" href="#if" title="Permalink to this headline">¶</a></h2>
 <p>( f – )</p>
 <p>Start conditional execution/compilation</p>
-</div>
-<div class="section" id="then">
+</section>
+<section id="then">
 <h2><code class="docutils literal notranslate"><span class="pre">[then]</span></code><a class="headerlink" href="#then" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Finish conditional execution/compilation</p>
-</div>
-<div class="section" id="hold">
+</section>
+<section id="hold">
 <h2><code class="docutils literal notranslate"><span class="pre">hold</span></code><a class="headerlink" href="#hold" title="Permalink to this headline">¶</a></h2>
 <p>( b – )</p>
 <p>Add a character to pictured numeric output</p>
-</div>
-<div class="section" id="id90">
+</section>
+<section id="id90">
 <h2><code class="docutils literal notranslate"><span class="pre">&lt;#</span></code><a class="headerlink" href="#id90" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Start pictured numeric output</p>
-</div>
-<div class="section" id="id91">
+</section>
+<section id="id91">
 <h2><code class="docutils literal notranslate"><span class="pre">#</span></code><a class="headerlink" href="#id91" title="Permalink to this headline">¶</a></h2>
 <p>( ud1 – ud2 )</p>
 <p>Add a digit to the pictured numeric output</p>
-</div>
-<div class="section" id="id92">
+</section>
+<section id="id92">
 <h2><code class="docutils literal notranslate"><span class="pre">#s</span></code><a class="headerlink" href="#id92" title="Permalink to this headline">¶</a></h2>
 <p>( ud – 0 0 )</p>
 <p>Add one or more digits to the pictured numeric output</p>
-</div>
-<div class="section" id="sign">
+</section>
+<section id="sign">
 <h2><code class="docutils literal notranslate"><span class="pre">sign</span></code><a class="headerlink" href="#sign" title="Permalink to this headline">¶</a></h2>
 <p>( n – )</p>
-<p>If n (a single number) is negative, append ‘-‘ to the pictured numeric output</p>
-</div>
-<div class="section" id="id93">
+<p>If n (a single number) is negative, append ‘-’ to the pictured numeric output</p>
+</section>
+<section id="id93">
 <h2><code class="docutils literal notranslate"><span class="pre">#&gt;</span></code><a class="headerlink" href="#id93" title="Permalink to this headline">¶</a></h2>
 <p>( xd – c-addr bytes )</p>
 <p>Finish pictured numeric output</p>
-</div>
-<div class="section" id="format-double">
+</section>
+<section id="format-double">
 <h2><code class="docutils literal notranslate"><span class="pre">format-double</span></code><a class="headerlink" href="#format-double" title="Permalink to this headline">¶</a></h2>
 <p>( b-addr nd – b-addr bytes )</p>
 <p>Format a signed double-cell number</p>
-</div>
-<div class="section" id="format-double-unsigned">
+</section>
+<section id="format-double-unsigned">
 <h2><code class="docutils literal notranslate"><span class="pre">format-double-unsigned</span></code><a class="headerlink" href="#format-double-unsigned" title="Permalink to this headline">¶</a></h2>
 <p>( b-addr ud – b-addr bytes )</p>
 <p>Format an unsigned double-cell number</p>
-</div>
-<div class="section" id="d">
+</section>
+<section id="d">
 <h2><code class="docutils literal notranslate"><span class="pre">(d.)</span></code><a class="headerlink" href="#d" title="Permalink to this headline">¶</a></h2>
 <p>( nd – )</p>
 <p>Type a signed double-cell number without a leading space</p>
-</div>
-<div class="section" id="ud">
+</section>
+<section id="ud">
 <h2><code class="docutils literal notranslate"><span class="pre">(ud.)</span></code><a class="headerlink" href="#ud" title="Permalink to this headline">¶</a></h2>
 <p>( ud – )</p>
 <p>Type an unsigned double-cell number without a leading space</p>
-</div>
-<div class="section" id="id94">
+</section>
+<section id="id94">
 <h2><code class="docutils literal notranslate"><span class="pre">d.</span></code><a class="headerlink" href="#id94" title="Permalink to this headline">¶</a></h2>
 <p>( nd – )</p>
 <p>Type a signed double-cell number with a leading space</p>
-</div>
-<div class="section" id="id95">
+</section>
+<section id="id95">
 <h2><code class="docutils literal notranslate"><span class="pre">ud.</span></code><a class="headerlink" href="#id95" title="Permalink to this headline">¶</a></h2>
 <p>( ud – )</p>
 <p>Type an unsigned double-cell number with a leading space</p>
-</div>
-<div class="section" id="format-fixed">
+</section>
+<section id="format-fixed">
 <h2><code class="docutils literal notranslate"><span class="pre">format-fixed</span></code><a class="headerlink" href="#format-fixed" title="Permalink to this headline">¶</a></h2>
 <p>( b-addr f – b-addr bytes )</p>
 <p>Format an s31.32 number</p>
-</div>
-<div class="section" id="f">
+</section>
+<section id="f">
 <h2><code class="docutils literal notranslate"><span class="pre">(f.)</span></code><a class="headerlink" href="#f" title="Permalink to this headline">¶</a></h2>
 <p>( f – )</p>
 <p>Type a fixed-point number without a leading space</p>
-</div>
-<div class="section" id="id96">
+</section>
+<section id="id96">
 <h2><code class="docutils literal notranslate"><span class="pre">f.</span></code><a class="headerlink" href="#id96" title="Permalink to this headline">¶</a></h2>
 <p>( f – )</p>
 <p>Type a fixed-point number with a leading space</p>
-</div>
-<div class="section" id="wait">
+</section>
+<section id="wait">
 <h2><code class="docutils literal notranslate"><span class="pre">wait</span></code><a class="headerlink" href="#wait" title="Permalink to this headline">¶</a></h2>
 <p>( xt – )</p>
 <p>Wait for a predicate to become true</p>
-</div>
-<div class="section" id="ms">
+</section>
+<section id="ms">
 <h2><code class="docutils literal notranslate"><span class="pre">ms</span></code><a class="headerlink" href="#ms" title="Permalink to this headline">¶</a></h2>
 <p>( u – )</p>
 <p>Wait for u milliseconds. Note that when multitasking is in use this automatically calls PAUSE. Also note that times are normally measured in 10ths of milliseconds, unlike this word.</p>
-</div>
-<div class="section" id="forget-ram">
+</section>
+<section id="forget-ram">
 <h2><code class="docutils literal notranslate"><span class="pre">forget-ram</span></code><a class="headerlink" href="#forget-ram" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Forget the contents of RAM except for RAM variables and buffers compiled from flash, user variables (which are compiled into flash), and kernel-level RAM variables. Note that this is actually implemented in <code class="docutils literal notranslate"><span class="pre">src/common/forth/task.fs</span></code> rather than <code class="docutils literal notranslate"><span class="pre">src/common/forth/basic.fs</span></code> because it relies upon code implemented for multitasking.</p>
-</div>
-<div class="section" id="task-free">
+</section>
+<section id="task-free">
 <h2><code class="docutils literal notranslate"><span class="pre">task-free</span></code><a class="headerlink" href="#task-free" title="Permalink to this headline">¶</a></h2>
 <p>( task – )</p>
 <p>Display space free for a given task</p>
-</div>
-<div class="section" id="free">
+</section>
+<section id="free">
 <h2><code class="docutils literal notranslate"><span class="pre">free</span></code><a class="headerlink" href="#free" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Display space free for the main task and for flash in general</p>
-</div>
-<div class="section" id="copyright">
+</section>
+<section id="copyright">
 <h2><code class="docutils literal notranslate"><span class="pre">copyright</span></code><a class="headerlink" href="#copyright" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Display the copyright notices</p>
-</div>
-<div class="section" id="license">
+</section>
+<section id="license">
 <h2><code class="docutils literal notranslate"><span class="pre">license</span></code><a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Display the license notice</p>
-</div>
-<div class="section" id="id97">
+</section>
+<section id="id97">
 <h2><code class="docutils literal notranslate"><span class="pre">.&quot;</span></code><a class="headerlink" href="#id97" title="Permalink to this headline">¶</a></h2>
 <p>( “text<quote>” – )</p>
 <p>Compile a string to be printed.</p>
-</div>
-<div class="section" id="id98">
+</section>
+<section id="id98">
 <h2><code class="docutils literal notranslate"><span class="pre">s&quot;</span></code><a class="headerlink" href="#id98" title="Permalink to this headline">¶</a></h2>
 <p>( “text<quote>” – ) ( compiled: – b-addr u )</p>
 <p>Compile a non-counted string</p>
-</div>
-<div class="section" id="id99">
+</section>
+<section id="id99">
 <h2><code class="docutils literal notranslate"><span class="pre">c&quot;</span></code><a class="headerlink" href="#id99" title="Permalink to this headline">¶</a></h2>
 <p>( “text<quote>” – ) ( compiled: – b-addr )</p>
 <p>Compile a counted-string</p>
-</div>
-<div class="section" id="id100">
+</section>
+<section id="id100">
 <h2><code class="docutils literal notranslate"><span class="pre">.(</span></code><a class="headerlink" href="#id100" title="Permalink to this headline">¶</a></h2>
 <p>( “text<close-paren>” – )</p>
 <p>Immediately print a string.</p>
-</div>
-<div class="section" id="id101">
+</section>
+<section id="id101">
 <h2><code class="docutils literal notranslate"><span class="pre">.\&quot;</span></code><a class="headerlink" href="#id101" title="Permalink to this headline">¶</a></h2>
 <p>( “text<quote>” – )</p>
 <p>Compile an escaped string to be printed.</p>
-</div>
-<div class="section" id="id102">
+</section>
+<section id="id102">
 <h2><code class="docutils literal notranslate"><span class="pre">s\&quot;</span></code><a class="headerlink" href="#id102" title="Permalink to this headline">¶</a></h2>
 <p>( “text<quote>” – ) ( compiled: – b-addr u )</p>
 <p>Compile an escaped non-counted string</p>
-</div>
-<div class="section" id="id103">
+</section>
+<section id="id103">
 <h2><code class="docutils literal notranslate"><span class="pre">c\&quot;</span></code><a class="headerlink" href="#id103" title="Permalink to this headline">¶</a></h2>
 <p>( “text<quote>” – ) ( compiled: – b-addr )</p>
 <p>Compile an escaped counted-string</p>
-</div>
-<div class="section" id="id104">
+</section>
+<section id="id104">
 <h2><code class="docutils literal notranslate"><span class="pre">.\(</span></code><a class="headerlink" href="#id104" title="Permalink to this headline">¶</a></h2>
 <p>( “text<close-paren>” – )</p>
 <p>Immediately print an escaped string.</p>
-</div>
-<div class="section" id="compile-cstring">
+</section>
+<section id="compile-cstring">
 <h2><code class="docutils literal notranslate"><span class="pre">compile-cstring</span></code><a class="headerlink" href="#compile-cstring" title="Permalink to this headline">¶</a></h2>
 <p>( b-addr u – ) ( compiled: – b-addr )</p>
 <p>Compile a counted-string</p>
-</div>
-<div class="section" id="char">
+</section>
+<section id="char">
 <h2><code class="docutils literal notranslate"><span class="pre">char</span></code><a class="headerlink" href="#char" title="Permalink to this headline">¶</a></h2>
 <p>( “char” – b )</p>
 <p>Parse a character and put it on the stack</p>
-</div>
-<div class="section" id="id105">
+</section>
+<section id="id105">
 <h2><code class="docutils literal notranslate"><span class="pre">[char]</span></code><a class="headerlink" href="#id105" title="Permalink to this headline">¶</a></h2>
 <p>( “char” – ) ( compiled: – b )</p>
 <p>Parse a character and compile it</p>
-</div>
-<div class="section" id="id106">
+</section>
+<section id="id106">
 <h2><code class="docutils literal notranslate"><span class="pre">(.)</span></code><a class="headerlink" href="#id106" title="Permalink to this headline">¶</a></h2>
 <p>( n – )</p>
 <p>Type an integer without a preceding space</p>
-</div>
-<div class="section" id="id107">
+</section>
+<section id="id107">
 <h2><code class="docutils literal notranslate"><span class="pre">(u.)</span></code><a class="headerlink" href="#id107" title="Permalink to this headline">¶</a></h2>
 <p>( u – )</p>
 <p>Type an unsigned integer without a preceding space</p>
-</div>
-<div class="section" id="debugu">
+</section>
+<section id="debugu">
 <h2><code class="docutils literal notranslate"><span class="pre">debugu.</span></code><a class="headerlink" href="#debugu" title="Permalink to this headline">¶</a></h2>
 <p>( u – )</p>
 <p>Type an unsigned hexadecimal integer safely without a preceding space</p>
-</div>
-<div class="section" id="id108">
+</section>
+<section id="id108">
 <h2><code class="docutils literal notranslate"><span class="pre">.</span></code><a class="headerlink" href="#id108" title="Permalink to this headline">¶</a></h2>
 <p>( n – )</p>
 <p>Type an integer with a preceding space</p>
-</div>
-<div class="section" id="id109">
+</section>
+<section id="id109">
 <h2><code class="docutils literal notranslate"><span class="pre">u.</span></code><a class="headerlink" href="#id109" title="Permalink to this headline">¶</a></h2>
 <p>( u – )</p>
 <p>Type an unsigned integer with a preceding space</p>
-</div>
-<div class="section" id="move">
+</section>
+<section id="move">
 <h2><code class="docutils literal notranslate"><span class="pre">move</span></code><a class="headerlink" href="#move" title="Permalink to this headline">¶</a></h2>
 <p>( b-addr1 b-addr2 u – )</p>
 <p>Copy bytes from one buffer to another one (which may overlap)</p>
-</div>
-<div class="section" id="reverse">
+</section>
+<section id="reverse">
 <h2><code class="docutils literal notranslate"><span class="pre">reverse</span></code><a class="headerlink" href="#reverse" title="Permalink to this headline">¶</a></h2>
 <p>( b-addr u – )</p>
 <p>Reverse bytes in place</p>
-</div>
-<div class="section" id="spaces">
+</section>
+<section id="spaces">
 <h2><code class="docutils literal notranslate"><span class="pre">spaces</span></code><a class="headerlink" href="#spaces" title="Permalink to this headline">¶</a></h2>
 <p>( u – )</p>
 <p>Emit a number of spaces.</p>
-</div>
-<div class="section" id="format-unsigned">
+</section>
+<section id="format-unsigned">
 <h2><code class="docutils literal notranslate"><span class="pre">format-unsigned</span></code><a class="headerlink" href="#format-unsigned" title="Permalink to this headline">¶</a></h2>
 <p>( b-addr u1 – b-addr u2 )</p>
 <p>Format an integer as a string</p>
-</div>
-<div class="section" id="format-integer">
+</section>
+<section id="format-integer">
 <h2><code class="docutils literal notranslate"><span class="pre">format-integer</span></code><a class="headerlink" href="#format-integer" title="Permalink to this headline">¶</a></h2>
 <p>( b-addr n – b-addr u )</p>
 <p>Format an integer as a string</p>
-</div>
-<div class="section" id="fix">
+</section>
+<section id="fix">
 <h2><code class="docutils literal notranslate"><span class="pre">fix</span></code><a class="headerlink" href="#fix" title="Permalink to this headline">¶</a></h2>
 <p>( b-addr bytes – b-addr bytes )</p>
 <p>Store a string in the RAM dictionary.</p>
-</div>
-<div class="section" id="cfix">
+</section>
+<section id="cfix">
 <h2><code class="docutils literal notranslate"><span class="pre">cfix</span></code><a class="headerlink" href="#cfix" title="Permalink to this headline">¶</a></h2>
 <p>( b-addr bytes – b-addr )</p>
 <p>Store a string as counted string in the RAM dictionary.</p>
-</div>
-<div class="section" id="marker">
+</section>
+<section id="marker">
 <h2><code class="docutils literal notranslate"><span class="pre">marker</span></code><a class="headerlink" href="#marker" title="Permalink to this headline">¶</a></h2>
 <p>( “name” – )</p>
 <p>Create a marker word named <em>name</em> to erase flash/return the flash dictionary to its prior state; note that the marker word that is created is erased when it is executed</p>
-</div>
-<div class="section" id="cornerstone">
+</section>
+<section id="cornerstone">
 <h2><code class="docutils literal notranslate"><span class="pre">cornerstone</span></code><a class="headerlink" href="#cornerstone" title="Permalink to this headline">¶</a></h2>
 <p>( “name” – )</p>
 <p>Create a cornerstone word named <em>name</em> to erase flash/return the flash dictionary to its state immediately after <code class="docutils literal notranslate"><span class="pre">cornerstone</span></code> was executed; unlike <code class="docutils literal notranslate"><span class="pre">marker</span></code> the word created does not erase itself when executed and may be executed multiple times</p>
-</div>
-<div class="section" id="vector-count">
+</section>
+<section id="vector-count">
 <h2><code class="docutils literal notranslate"><span class="pre">vector-count</span></code><a class="headerlink" href="#vector-count" title="Permalink to this headline">¶</a></h2>
 <p>( – count )</p>
 <p>Get the number of interrupt vectors.</p>
-</div>
-<div class="section" id="vector-table">
+</section>
+<section id="vector-table">
 <h2><code class="docutils literal notranslate"><span class="pre">vector-table</span></code><a class="headerlink" href="#vector-table" title="Permalink to this headline">¶</a></h2>
 <p>( – addr )</p>
 <p>Get the interrupt vector table address.</p>
-</div>
-</div>
+</section>
+</section>
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -1814,7 +1819,7 @@ otherwise passing the specified argument through.</p>
 
 
 <h3>Navigation</h3>
-<p class="caption"><span class="caption-text">Contents:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Basic Words</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#drop"><code class="docutils literal notranslate"><span class="pre">drop</span></code></a></li>
@@ -2181,6 +2186,7 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
@@ -2220,12 +2226,20 @@ otherwise passing the specified argument through.</p>
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
 <script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -2234,8 +2248,8 @@ otherwise passing the specified argument through.</p>
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.4.3</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="../_sources/words/basic.md.txt"

@@ -4,11 +4,12 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>Multitasking Words &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
@@ -19,6 +20,7 @@
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
+  
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head><body>
@@ -27,36 +29,38 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
-  <div class="section" id="multitasking-words">
+  <section id="multitasking-words">
 <h1>Multitasking Words<a class="headerlink" href="#multitasking-words" title="Permalink to this headline">¶</a></h1>
 <p>Multitasking in zeptoforth is not part of the zeptoforth kernel, but is provided by <code class="docutils literal notranslate"><span class="pre">src/common/forth/task.fs</span></code>, which in turn relies upon <code class="docutils literal notranslate"><span class="pre">src/&lt;platform&gt;/forth/int_io.fs</span></code> and <code class="docutils literal notranslate"><span class="pre">src/common/forth/systick.fs</span></code>. It is preemptivee, but <code class="docutils literal notranslate"><span class="pre">PAUSE</span></code> may be called to explicitly relinquish control of the processor (which is highly recommended when possible); note that some words do this implicitly, such as <code class="docutils literal notranslate"><span class="pre">MS</span></code>, <code class="docutils literal notranslate"><span class="pre">KEY</span></code>, or <code class="docutils literal notranslate"><span class="pre">EMIT</span></code> (which are in turn called by words such as <code class="docutils literal notranslate"><span class="pre">REFILL</span></code> or <code class="docutils literal notranslate"><span class="pre">TYPE</span></code>).</p>
-<p>Note that task in zeptoforth are a relatively heavy-weight asynchronous computing means. For lighter-weight asynchronous computing, consider creating a single task for running a scheduler within (so the main task can be devoted to the REPL), and then put all asynchronous actions within that.</p>
+<p>Note that tasks in zeptoforth are a relatively heavy-weight asynchronous computing means. For lighter-weight asynchronous computing, consider creating a single task for running a scheduler within (so the main task can be devoted to the REPL), and then put all asynchronous actions within that.</p>
 <p>Multitasking is enabled by default once <code class="docutils literal notranslate"><span class="pre">src/common/forth/task.fs</span></code> has been loaded and the MCU has been rebooted; afterwards each time the MCU is booted a new task is created for the REPL, the main task, and multitasking is initiated.</p>
 <p>These words are in <code class="docutils literal notranslate"><span class="pre">task-module</span></code>.</p>
-<div class="section" id="pause">
+<section id="pause">
 <h2><code class="docutils literal notranslate"><span class="pre">pause</span></code><a class="headerlink" href="#pause" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Pass off control to the next active task; if no tasks are active, put the MCU to sleep until an interrupt occurs (typically due to SysTick or USART activity).</p>
-</div>
-<div class="section" id="current-task">
+</section>
+<section id="current-task">
 <h2><code class="docutils literal notranslate"><span class="pre">current-task</span></code><a class="headerlink" href="#current-task" title="Permalink to this headline">¶</a></h2>
 <p>( – task )</p>
 <p>The current task.</p>
-</div>
-<div class="section" id="main-task">
+</section>
+<section id="main-task">
 <h2><code class="docutils literal notranslate"><span class="pre">main-task</span></code><a class="headerlink" href="#main-task" title="Permalink to this headline">¶</a></h2>
 <p>( – task )</p>
 <p>The main task.</p>
-</div>
-<div class="section" id="pause-count">
+</section>
+<section id="pause-count">
 <h2><code class="docutils literal notranslate"><span class="pre">pause-count</span></code><a class="headerlink" href="#pause-count" title="Permalink to this headline">¶</a></h2>
 <p>( – count )</p>
 <p>Get the current pause count, an unsigned 32-bit value which rolls over.xs</p>
 <p>To create a task in zeptoforth, one should execute the following:</p>
-</div>
-<div class="section" id="spawn">
+</section>
+<section id="spawn">
 <h2><code class="docutils literal notranslate"><span class="pre">spawn</span></code><a class="headerlink" href="#spawn" title="Permalink to this headline">¶</a></h2>
 <p>( xn…x0 count xt dictionary-size stack-size rstack-size – task )</p>
 <p>where <em>xn</em> through <em>x0</em> are parameters to pass to the <em>xt</em> when executed, <em>count</em> is the number of such parameters, <em>xt</em> is the entry point to the task, <em>dictionary-size</em> is the size of the dictionary for the spawned task in bytes, <em>stack-size</em> is the size of the data stack for the spawned task in bytes, <em>rstack-size</em> is the size of the return stack for the spawned task in bytes, and <em>task</em> is the header for the newly spawned task. <em>dictionary-size</em>, <em>stack-size</em>, and <em>rstack-size</em> must be multiples of four I have had good luck with values of 256 for each of these; I do not know how well smaller values will work out, especially in the case of <em>rstack-size</em>, where too small of a size will almost certainly result in a crash. This in turn returns a pointer to the task header on the stack, which can then be stored in a variable or constant.</p>
@@ -65,227 +69,228 @@
 <p>New task default to a priority of zero; to change this use <code class="docutils literal notranslate"><span class="pre">set-task-priority</span></code>.</p>
 <p>Uncaught exceptions within a task will be handled, with the message for them being displayed, but they will result in said task being terminated.</p>
 <p>To reinitialize existing tasks, one executes:</p>
-</div>
-<div class="section" id="init-task">
+</section>
+<section id="init-task">
 <h2><code class="docutils literal notranslate"><span class="pre">init-task</span></code><a class="headerlink" href="#init-task" title="Permalink to this headline">¶</a></h2>
 <p>( xn…x0 count xt task – )</p>
 <p>These tasks may be in any state, including being terminated. <em>xn</em> through <em>x0</em> are parameters to pass to the <em>xt</em> when executed.</p>
 <p>New tasks do not execute right away, rather to enable their execution, one executes:</p>
-</div>
-<div class="section" id="run">
+</section>
+<section id="run">
 <h2><code class="docutils literal notranslate"><span class="pre">run</span></code><a class="headerlink" href="#run" title="Permalink to this headline">¶</a></h2>
 <p>( task – )</p>
 <p>which increments the active counter for the <em>task</em> (which is initialized to zero); the task executes if this counter is greater than zero.</p>
 <p>In turn a task can be disabled with:</p>
-</div>
-<div class="section" id="stop">
+</section>
+<section id="stop">
 <h2><code class="docutils literal notranslate"><span class="pre">stop</span></code><a class="headerlink" href="#stop" title="Permalink to this headline">¶</a></h2>
 <p>( task – )</p>
 <p>which decrements the active counter for the <em>task</em>.</p>
 <p>To terminate a task, one executes:</p>
-</div>
-<div class="section" id="kill">
+</section>
+<section id="kill">
 <h2><code class="docutils literal notranslate"><span class="pre">kill</span></code><a class="headerlink" href="#kill" title="Permalink to this headline">¶</a></h2>
 <p>( task – )</p>
 <p>which immediately halts that task’s executing, including if it is the current task, and puts it in a terminated state.</p>
 <p>To get whether a task is terminated, one executes:</p>
-</div>
-<div class="section" id="terminated">
+</section>
+<section id="terminated">
 <h2><code class="docutils literal notranslate"><span class="pre">terminated?</span></code><a class="headerlink" href="#terminated" title="Permalink to this headline">¶</a></h2>
 <p>( task – terminated )</p>
 <p>which returns the terminated state of a task.</p>
 <p>If one attempts to execute a word against a terminated task, aside from <code class="docutils literal notranslate"><span class="pre">init-task</span></code> or <code class="docutils literal notranslate"><span class="pre">terminated?</span></code>, the following exception is raised:</p>
-</div>
-<div class="section" id="x-terminated">
+</section>
+<section id="x-terminated">
 <h2><code class="docutils literal notranslate"><span class="pre">x-terminated</span></code><a class="headerlink" href="#x-terminated" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>This exception when executed displays the task terminated error message.</p>
-</div>
-<div class="section" id="timeout">
+</section>
+<section id="timeout">
 <h2><code class="docutils literal notranslate"><span class="pre">timeout</span></code><a class="headerlink" href="#timeout" title="Permalink to this headline">¶</a></h2>
 <p>( – addr )</p>
 <p>A user variable used for storing a timeout value in ticks for various operations.</p>
-</div>
-<div class="section" id="no-timeout">
+</section>
+<section id="no-timeout">
 <h2><code class="docutils literal notranslate"><span class="pre">no-timeout</span></code><a class="headerlink" href="#no-timeout" title="Permalink to this headline">¶</a></h2>
 <p>( – n )</p>
 <p>A constant representing no timeout</p>
-</div>
-<div class="section" id="last-delay">
+</section>
+<section id="last-delay">
 <h2><code class="docutils literal notranslate"><span class="pre">last-delay</span></code><a class="headerlink" href="#last-delay" title="Permalink to this headline">¶</a></h2>
 <p>( task – ticks-delay ticks-start )</p>
 <p>Get the last delay setting, from calling <code class="docutils literal notranslate"><span class="pre">delay</span></code> or <code class="docutils literal notranslate"><span class="pre">block-timeout</span></code>, for a task.</p>
-</div>
-<div class="section" id="delay">
+</section>
+<section id="delay">
 <h2><code class="docutils literal notranslate"><span class="pre">delay</span></code><a class="headerlink" href="#delay" title="Permalink to this headline">¶</a></h2>
 <p>( delay start task – )</p>
 <p>Delay a task until <em>delay</em> ticks after the time represented by <em>start</em> ticks.</p>
-</div>
-<div class="section" id="delay-critical">
+</section>
+<section id="delay-critical">
 <h2><code class="docutils literal notranslate"><span class="pre">delay-critical</span></code><a class="headerlink" href="#delay-critical" title="Permalink to this headline">¶</a></h2>
 <p>( delay start task – )</p>
 <p>Delay a task until <em>delay</em> ticks after the time represented by <em>start</em> ticks, and afterwards immediately start a critical section.</p>
-</div>
-<div class="section" id="block-timeout">
+</section>
+<section id="block-timeout">
 <h2><code class="docutils literal notranslate"><span class="pre">block-timeout</span></code><a class="headerlink" href="#block-timeout" title="Permalink to this headline">¶</a></h2>
 <p>( delay start task – )</p>
 <p>Block a task until <em>delay</em> ticks after the time represented by <em>start</em> ticks, and signal timed out if this time is reached without the task being readied first.</p>
-</div>
-<div class="section" id="block-timeout-critical">
+</section>
+<section id="block-timeout-critical">
 <h2><code class="docutils literal notranslate"><span class="pre">block-timeout-critical</span></code><a class="headerlink" href="#block-timeout-critical" title="Permalink to this headline">¶</a></h2>
 <p>( delay start task – )</p>
 <p>Block a task until <em>delay</em> ticks after the time represented by <em>start</em> ticks, and signal timed out if this time is reached without the task being readied first; after blocking finishes, immediately start a critical section.</p>
-</div>
-<div class="section" id="block-wait">
+</section>
+<section id="block-wait">
 <h2><code class="docutils literal notranslate"><span class="pre">block-wait</span></code><a class="headerlink" href="#block-wait" title="Permalink to this headline">¶</a></h2>
 <p>( task – )</p>
 <p>Block a task until all waiting task are woken with <code class="docutils literal notranslate"><span class="pre">wake</span></code>.</p>
-</div>
-<div class="section" id="block-wait-critical">
+</section>
+<section id="block-wait-critical">
 <h2><code class="docutils literal notranslate"><span class="pre">block-wait-critical</span></code><a class="headerlink" href="#block-wait-critical" title="Permalink to this headline">¶</a></h2>
 <p>( task – )</p>
 <p>Block a task until all waiting task are woken with <code class="docutils literal notranslate"><span class="pre">wake</span></code>, and then immediately start a critical section.</p>
-</div>
-<div class="section" id="block-indefinite">
+</section>
+<section id="block-indefinite">
 <h2><code class="docutils literal notranslate"><span class="pre">block-indefinite</span></code><a class="headerlink" href="#block-indefinite" title="Permalink to this headline">¶</a></h2>
 <p>( task – )</p>
 <p>Block a task indefinitely until the task is readied.</p>
-</div>
-<div class="section" id="block-indefinite-critical">
+</section>
+<section id="block-indefinite-critical">
 <h2><code class="docutils literal notranslate"><span class="pre">block-indefinite-critical</span></code><a class="headerlink" href="#block-indefinite-critical" title="Permalink to this headline">¶</a></h2>
 <p>( task – )</p>
 <p>Block a task indefinitely until the task is readied, and then immediately start a critical section.</p>
-</div>
-<div class="section" id="ready">
+</section>
+<section id="ready">
 <h2><code class="docutils literal notranslate"><span class="pre">ready</span></code><a class="headerlink" href="#ready" title="Permalink to this headline">¶</a></h2>
 <p>( task – )</p>
 <p>Ready a blocked or delayed task.</p>
-</div>
-<div class="section" id="block">
+</section>
+<section id="block">
 <h2><code class="docutils literal notranslate"><span class="pre">block</span></code><a class="headerlink" href="#block" title="Permalink to this headline">¶</a></h2>
 <p>( task – )</p>
 <p>Block a task for which blocking has been prepared.</p>
-</div>
-<div class="section" id="block-critical">
+</section>
+<section id="block-critical">
 <h2><code class="docutils literal notranslate"><span class="pre">block-critical</span></code><a class="headerlink" href="#block-critical" title="Permalink to this headline">¶</a></h2>
 <p>( task – )</p>
 <p>Block a task for which blocking has been prepared, and immediately start a new critical section once it finishes blocking.</p>
-</div>
-<div class="section" id="prepare-block">
+</section>
+<section id="prepare-block">
 <h2><code class="docutils literal notranslate"><span class="pre">prepare-block</span></code><a class="headerlink" href="#prepare-block" title="Permalink to this headline">¶</a></h2>
 <p>( task – )</p>
 <p>Prepare blocking timeouts for a given task.</p>
-</div>
-<div class="section" id="timed-out">
+</section>
+<section id="timed-out">
 <h2><code class="docutils literal notranslate"><span class="pre">timed-out?</span></code><a class="headerlink" href="#timed-out" title="Permalink to this headline">¶</a></h2>
 <p>( task – timed-out )</p>
 <p>Get whether a task has timed out.</p>
-</div>
-<div class="section" id="x-timed-out">
+</section>
+<section id="x-timed-out">
 <h2><code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code><a class="headerlink" href="#x-timed-out" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>An exception raised when timeout validation fails.</p>
-</div>
-<div class="section" id="validate-timeout">
+</section>
+<section id="validate-timeout">
 <h2><code class="docutils literal notranslate"><span class="pre">validate-timeout</span></code><a class="headerlink" href="#validate-timeout" title="Permalink to this headline">¶</a></h2>
 <p>( task – )</p>
 <p>Validate whether a task has timed out, raising <code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code> if it has.</p>
-</div>
-<div class="section" id="x-would-block">
+</section>
+<section id="x-would-block">
 <h2><code class="docutils literal notranslate"><span class="pre">x-would-block</span></code><a class="headerlink" href="#x-would-block" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Operation would block exception. Raised on attempting to carry out a non-blocking operation when blocking would normally be necessary for the equivalent blocking operation.</p>
-</div>
-<div class="section" id="set-task-priority">
+</section>
+<section id="set-task-priority">
 <h2><code class="docutils literal notranslate"><span class="pre">set-task-priority</span></code><a class="headerlink" href="#set-task-priority" title="Permalink to this headline">¶</a></h2>
 <p>( priority task – )</p>
 <p>Set the priority of a task, from -32768 to 32767, with higher numbers being greater task priorities.</p>
-</div>
-<div class="section" id="get-task-priority">
+</section>
+<section id="get-task-priority">
 <h2><code class="docutils literal notranslate"><span class="pre">get-task-priority</span></code><a class="headerlink" href="#get-task-priority" title="Permalink to this headline">¶</a></h2>
 <p>( task – priority )</p>
 <p>Get the priority of a task.</p>
-</div>
-<div class="section" id="x-out-of-range-priority">
+</section>
+<section id="x-out-of-range-priority">
 <h2><code class="docutils literal notranslate"><span class="pre">x-out-of-range-priority</span></code><a class="headerlink" href="#x-out-of-range-priority" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>The exception raised when setting an out-of-range task priority</p>
-</div>
-<div class="section" id="set-task-saved-priority">
+</section>
+<section id="set-task-saved-priority">
 <h2><code class="docutils literal notranslate"><span class="pre">set-task-saved-priority</span></code><a class="headerlink" href="#set-task-saved-priority" title="Permalink to this headline">¶</a></h2>
 <p>( priority task – )</p>
 <p>Set the saved priority of a task, from -32768 to 32767, with higher numbers being greater task priorities.</p>
-</div>
-<div class="section" id="get-task-saved-priority">
+</section>
+<section id="get-task-saved-priority">
 <h2><code class="docutils literal notranslate"><span class="pre">get-task-saved-priority</span></code><a class="headerlink" href="#get-task-saved-priority" title="Permalink to this headline">¶</a></h2>
 <p>( task – priority )</p>
 <p>Get the saved priority of a task.</p>
-</div>
-<div class="section" id="set-task-timeslice">
+</section>
+<section id="set-task-timeslice">
 <h2><code class="docutils literal notranslate"><span class="pre">set-task-timeslice</span></code><a class="headerlink" href="#set-task-timeslice" title="Permalink to this headline">¶</a></h2>
 <p>( timeslice task – )</p>
 <p>Set the timeslice, in ticks (usually 100 us increments), of a task, indicating the minimum amount of time a task will run before being preempted. If a task does not use up all of its timeslice before it gives up control of the processor, it will start off with the remainder of its timeslice next time it has control of the processor, unless it exhausted its timeslice, where then the timeslice value is added onto the tick counter (which may be negative) to yield the new timeslice (but which may not be less than the task’s minimum timeslice). Note that the default setting for this for a newly initialized task is 10.</p>
-</div>
-<div class="section" id="get-task-timeslice">
+</section>
+<section id="get-task-timeslice">
 <h2><code class="docutils literal notranslate"><span class="pre">get-task-timeslice</span></code><a class="headerlink" href="#get-task-timeslice" title="Permalink to this headline">¶</a></h2>
 <p>( task – timeslice )</p>
 <p>Get the timeslice, in ticks (usually 100 us increments), of a task.</p>
-</div>
-<div class="section" id="set-task-min-timeslice">
+</section>
+<section id="set-task-min-timeslice">
 <h2><code class="docutils literal notranslate"><span class="pre">set-task-min-timeslice</span></code><a class="headerlink" href="#set-task-min-timeslice" title="Permalink to this headline">¶</a></h2>
 <p>( timeslice task – )</p>
 <p>Set the minimum timeslice, in ticks (usually 100 us increments), that a task will be guaranteed to run when scheduled, regardless of how many ticks the task executed for the last time it was scheduled. For instance, to ensure that each time a task will run for at least 10 ticks each time it is scheduled, this should be set to 10. By default, this value is set to 0 for each task, such that a given task is not guaranteed to not be descheduled immediately on a SysTick if it had already used up both its timeslice and also the next timeslice (through, e.g., spending time in critical sections).</p>
-</div>
-<div class="section" id="get-task-max-timeslice">
+</section>
+<section id="get-task-max-timeslice">
 <h2><code class="docutils literal notranslate"><span class="pre">get-task-max-timeslice</span></code><a class="headerlink" href="#get-task-max-timeslice" title="Permalink to this headline">¶</a></h2>
 <p>( task – timeslice )</p>
 <p>Getet the minimum timeslice, in ticks (usually 100 us increments), that a task will be guaranteed to run when scheduled, regardless of how many ticks the task executed for the last time it was scheduled.</p>
-</div>
-<div class="section" id="get-task-active">
+</section>
+<section id="get-task-active">
 <h2><code class="docutils literal notranslate"><span class="pre">get-task-active</span></code><a class="headerlink" href="#get-task-active" title="Permalink to this headline">¶</a></h2>
 <p>( task – level )</p>
 <p>Get the activation level of a task, with values 0 and lower indicating that a task is inactive, and values 1 and greater indicating that a task is active.</p>
 <p>The simplest case of delaying a task is simply to execute:</p>
-</div>
-<div class="section" id="get-task-name">
+</section>
+<section id="get-task-name">
 <h2><code class="docutils literal notranslate"><span class="pre">get-task-name</span></code><a class="headerlink" href="#get-task-name" title="Permalink to this headline">¶</a></h2>
 <p>( task – addr )</p>
 <p>Get the name of a task as a counted string; an address of zero indicates no name is set.</p>
-</div>
-<div class="section" id="set-task-name">
+</section>
+<section id="set-task-name">
 <h2><code class="docutils literal notranslate"><span class="pre">set-task-name</span></code><a class="headerlink" href="#set-task-name" title="Permalink to this headline">¶</a></h2>
 <p>( addr task – )</p>
 <p>Set the name of a task as a counted string; an address of zero indicates to set no name.</p>
-</div>
-<div class="section" id="dump-tasks">
+</section>
+<section id="dump-tasks">
 <h2><code class="docutils literal notranslate"><span class="pre">dump-tasks</span></code><a class="headerlink" href="#dump-tasks" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Dump information for each task that is in the schedule.</p>
-</div>
-<div class="section" id="enable-trace">
+</section>
+<section id="enable-trace">
 <h2><code class="docutils literal notranslate"><span class="pre">enable-trace</span></code><a class="headerlink" href="#enable-trace" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Enable dumping trace information when trace points are reached, i.e. the associated name of the trace point, the data stack of the task that hit the trace point, the critical depth at that time, and the states of all the tasks at at that point in time.</p>
-</div>
-<div class="section" id="disable-trace">
+</section>
+<section id="disable-trace">
 <h2><code class="docutils literal notranslate"><span class="pre">disable-trace</span></code><a class="headerlink" href="#disable-trace" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Disable dumping trace information.</p>
-</div>
-<div class="section" id="trace-enable">
+</section>
+<section id="trace-enable">
 <h2><code class="docutils literal notranslate"><span class="pre">trace-enable?</span></code><a class="headerlink" href="#trace-enable" title="Permalink to this headline">¶</a></h2>
 <p>( – flag )</p>
 <p>Get whether dumping trace information is enabled.</p>
-</div>
-<div class="section" id="trace">
+</section>
+<section id="trace">
 <h2><code class="docutils literal notranslate"><span class="pre">trace</span></code><a class="headerlink" href="#trace" title="Permalink to this headline">¶</a></h2>
 <p>( c-addr bytes – )</p>
 <p>Specify a trace point with the given name which is displayed when the trace point is reached.</p>
-</div>
-</div>
+</section>
+</section>
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -300,7 +305,7 @@
 
 
 <h3>Navigation</h3>
-<p class="caption"><span class="caption-text">Contents:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
@@ -360,6 +365,7 @@
 <li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
@@ -399,12 +405,20 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
 <script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -413,8 +427,8 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.4.3</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="../_sources/words/task.md.txt"

@@ -1024,6 +1024,7 @@ _parse_base:
 4:	push_tos
 	movs tos, r0
 5:	bl _base
+	ldr tos, [tos]
 	pop {pc}
 6:	adds tos, #1
 	push_tos
