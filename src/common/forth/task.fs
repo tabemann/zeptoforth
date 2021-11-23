@@ -1060,7 +1060,8 @@ begin-import-module-once task-module
 	$FF SHPR3_PRI_14!
 	1 pause-enabled !
 	init-systick-aux-core
-	execute
+	try ?dup if display-red execute display-normal then
+	current-task @ kill
       ;
       
     [then]
