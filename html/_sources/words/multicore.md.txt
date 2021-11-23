@@ -25,7 +25,7 @@ Get the index of the core from which `cpu-index` was called.
 
 Return 4 times `cpu-index`.
 
-In `src/common/forth/basic.fs` exists:
+In `src/common/forth/basic.fs`, in `forth-module`, exists:
 
 ##### `cpu-variable`
 
@@ -33,7 +33,7 @@ In `src/common/forth/basic.fs` exists:
 
 Compile a one-cell-per-core variable into flash that has two words referring to it, a *global-name* which takes a core index when called and outputs the address for that core, and a *cpu-name* which returns its address for the current core.
 
-In `src/common/forth/task.fs` exists:
+In `src/common/forth/task.fs`, in `task-module`, exists:
 
 ##### `spawn-aux-main`
 ( xn ... x0 count xt dict-size stack-size rstack-size core -- )
@@ -50,7 +50,7 @@ Exception raised if one calls `spawn-aux-main` for a core which has already been
 
 Exception raised if one attempts to call `spawn-aux-main` from a core other than core 0.
 
-In both `src/rp2040/forth/multicore.fs` and `src/common/forth/multicore.fs` exists:
+In both `src/rp2040/forth/multicore.fs` and `src/common/forth/multicore.fs`, in `multicore-module` on all platforms, exists:
 
 ##### `x-spinlock-out-of-range`
 ( -- )
@@ -67,8 +67,7 @@ Core out of range exception, i.e. core index not in range 0 \<= core \< cpu-coun
 
 Core not addressable exception, i.e. invalid core for an operation carried out ont the current core.
 
-
-In `src/rp2040/forth/multicore.fs` exists:
+In `src/rp2040/forth/multicore.fs`, in `multicore-module` on the `rp2040` platform, exists:
 
 ##### `sev`
 ( -- )
@@ -171,7 +170,7 @@ Do a blocking push onto a FIFO for inter-core communication; if *core* is outsid
 
 Launch an auxiliary core, i.e. a core *core* other than core 0 and execute *entry-xt* on it with the return stack pointer *rstack-ptr*, the data stack pointer *stack-ptr*, and the vector table base *vector-table*. Note that it is not recommended that this be used by the user, rather the user should use `spawn-aux-main` in `src/common/forth/task.fs`.
 
-In `src/common/forth/multicore.fs` (i.e. for all platforms other than rp2040) exist:
+In `src/common/forth/multicore.fs`, in `multicore-module` for all platforms other than rp2040, exists:
 
 ##### `spinlock-count`
 ( -- count )

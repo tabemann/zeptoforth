@@ -54,13 +54,13 @@
 <h2><code class="docutils literal notranslate"><span class="pre">cpu-offset</span></code><a class="headerlink" href="#cpu-offset" title="Permalink to this headline">¶</a></h2>
 <p>( – offset )</p>
 <p>Return 4 times <code class="docutils literal notranslate"><span class="pre">cpu-index</span></code>.</p>
-<p>In <code class="docutils literal notranslate"><span class="pre">src/common/forth/basic.fs</span></code> exists:</p>
+<p>In <code class="docutils literal notranslate"><span class="pre">src/common/forth/basic.fs</span></code>, in <code class="docutils literal notranslate"><span class="pre">forth-module</span></code>, exists:</p>
 </section>
 <section id="cpu-variable">
 <h2><code class="docutils literal notranslate"><span class="pre">cpu-variable</span></code><a class="headerlink" href="#cpu-variable" title="Permalink to this headline">¶</a></h2>
 <p>( “global-name” “cpu-name” – )</p>
 <p>Compile a one-cell-per-core variable into flash that has two words referring to it, a <em>global-name</em> which takes a core index when called and outputs the address for that core, and a <em>cpu-name</em> which returns its address for the current core.</p>
-<p>In <code class="docutils literal notranslate"><span class="pre">src/common/forth/task.fs</span></code> exists:</p>
+<p>In <code class="docutils literal notranslate"><span class="pre">src/common/forth/task.fs</span></code>, in <code class="docutils literal notranslate"><span class="pre">task-module</span></code>, exists:</p>
 </section>
 <section id="spawn-aux-main">
 <h2><code class="docutils literal notranslate"><span class="pre">spawn-aux-main</span></code><a class="headerlink" href="#spawn-aux-main" title="Permalink to this headline">¶</a></h2>
@@ -76,7 +76,7 @@
 <h2><code class="docutils literal notranslate"><span class="pre">x-core-can-only-be-launched-from-core-0</span></code><a class="headerlink" href="#x-core-can-only-be-launched-from-core-0" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Exception raised if one attempts to call <code class="docutils literal notranslate"><span class="pre">spawn-aux-main</span></code> from a core other than core 0.</p>
-<p>In both <code class="docutils literal notranslate"><span class="pre">src/rp2040/forth/multicore.fs</span></code> and <code class="docutils literal notranslate"><span class="pre">src/common/forth/multicore.fs</span></code> exists:</p>
+<p>In both <code class="docutils literal notranslate"><span class="pre">src/rp2040/forth/multicore.fs</span></code> and <code class="docutils literal notranslate"><span class="pre">src/common/forth/multicore.fs</span></code>, in <code class="docutils literal notranslate"><span class="pre">multicore-module</span></code> on all platforms, exists:</p>
 </section>
 <section id="x-spinlock-out-of-range">
 <h2><code class="docutils literal notranslate"><span class="pre">x-spinlock-out-of-range</span></code><a class="headerlink" href="#x-spinlock-out-of-range" title="Permalink to this headline">¶</a></h2>
@@ -92,7 +92,7 @@
 <h2><code class="docutils literal notranslate"><span class="pre">x-core-not-addressable</span></code><a class="headerlink" href="#x-core-not-addressable" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Core not addressable exception, i.e. invalid core for an operation carried out ont the current core.</p>
-<p>In <code class="docutils literal notranslate"><span class="pre">src/rp2040/forth/multicore.fs</span></code> exists:</p>
+<p>In <code class="docutils literal notranslate"><span class="pre">src/rp2040/forth/multicore.fs</span></code>, in <code class="docutils literal notranslate"><span class="pre">multicore-module</span></code> on the <code class="docutils literal notranslate"><span class="pre">rp2040</span></code> platform, exists:</p>
 </section>
 <section id="sev">
 <h2><code class="docutils literal notranslate"><span class="pre">sev</span></code><a class="headerlink" href="#sev" title="Permalink to this headline">¶</a></h2>
@@ -194,7 +194,7 @@ FIFO and the write side of the 0 -&gt; 1 FIFO; the converse is true of core 1</p
 <h2><code class="docutils literal notranslate"><span class="pre">launch-aux-core</span></code><a class="headerlink" href="#launch-aux-core" title="Permalink to this headline">¶</a></h2>
 <p>( vector-table stack-ptr rstack-ptr entry-xt core – )</p>
 <p>Launch an auxiliary core, i.e. a core <em>core</em> other than core 0 and execute <em>entry-xt</em> on it with the return stack pointer <em>rstack-ptr</em>, the data stack pointer <em>stack-ptr</em>, and the vector table base <em>vector-table</em>. Note that it is not recommended that this be used by the user, rather the user should use <code class="docutils literal notranslate"><span class="pre">spawn-aux-main</span></code> in <code class="docutils literal notranslate"><span class="pre">src/common/forth/task.fs</span></code>.</p>
-<p>In <code class="docutils literal notranslate"><span class="pre">src/common/forth/multicore.fs</span></code> (i.e. for all platforms other than rp2040) exist:</p>
+<p>In <code class="docutils literal notranslate"><span class="pre">src/common/forth/multicore.fs</span></code>, in <code class="docutils literal notranslate"><span class="pre">multicore-module</span></code> for all platforms other than rp2040, exists:</p>
 </section>
 <section id="id1">
 <h2><code class="docutils literal notranslate"><span class="pre">spinlock-count</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
