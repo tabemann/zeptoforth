@@ -57,10 +57,10 @@ begin-module forth-module
   : init-test ( -- )
     my-fchan init-fchan
     my-lock init-lock
-    0 ['] consumer 256 128 512 spawn consumer-task !
-    0 1 ['] producer 256 128 512 spawn producer-a-task !
-    1 1 ['] producer 256 128 512 spawn producer-b-task !
-    2 1 ['] producer 256 128 512 spawn producer-c-task !
+    0 ['] consumer 320 128 512 spawn consumer-task !
+    0 1 ['] producer 320 128 512 spawn producer-a-task !
+    1 1 ['] producer 320 128 512 spawn producer-b-task !
+    2 1 ['] producer 320 128 512 spawn producer-c-task !
     consumer-task @ run
     producer-a-task @ run
     producer-b-task @ run

@@ -61,7 +61,7 @@ begin-module forth-module
   
   \ Initialize our test
   : init-test ( -- )
-    256 128 512 my-task-count my-task-pool init-task-pool
+    320 128 512 my-task-count my-task-pool init-task-pool
     my-lock init-lock
     no-sema-limit init-sema-counter my-sema init-sema
     0 ['] do-init-tasks my-task-pool spawn-from-task-pool run

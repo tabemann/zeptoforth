@@ -72,9 +72,9 @@ begin-module forth-module
   : init-test ( -- )
     lock-a init-lock
     lock-b init-lock
-    0 ['] low 256 128 512 spawn low-task !
-    0 ['] middle 256 128 512 spawn middle-task !
-    0 ['] high 256 128 512 spawn high-task !
+    0 ['] low 320 128 512 spawn low-task !
+    0 ['] middle 320 128 512 spawn middle-task !
+    0 ['] high 320 128 512 spawn high-task !
     2 high-task @ set-task-priority
     1 middle-task @ set-task-priority
     0 low-task @ set-task-priority
