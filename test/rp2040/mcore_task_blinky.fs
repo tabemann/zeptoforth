@@ -32,16 +32,16 @@ begin-module forth-module
 
   \ Second core main task
   : core-1-main ( star-ms led-ms -- )
-    1 ['] led-loop 256 128 512 spawn run
-    1 ['] star-loop 256 128 512 spawn run
+    1 ['] led-loop 320 128 512 spawn run
+    1 ['] star-loop 320 128 512 spawn run
     current-task kill
   ;
 
   \ Initialize the test
   : init-test ( -- )
     disable-int-io
-    1000 500 2 ['] core-1-main 256 128 512 1 spawn-aux-main
-    250 ms 750 1 ['] led-loop 256 128 512 spawn run
+    1000 500 2 ['] core-1-main 320 128 512 1 spawn-aux-main
+    250 ms 750 1 ['] led-loop 320 128 512 spawn run
   ;
   
 end-module

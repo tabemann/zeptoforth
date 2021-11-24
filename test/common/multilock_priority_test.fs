@@ -76,10 +76,10 @@ begin-module forth-module
     lock-a init-lock
     lock-b init-lock
     lock-c init-lock
-    0 ['] do-lock-all 256 128 512 spawn task-lock-all !
-    0 ['] do-lock-a 256 128 512 spawn task-lock-a !
-    0 ['] do-lock-b 256 128 512 spawn task-lock-b !
-    0 ['] do-lock-c 256 128 512 spawn task-lock-c !
+    0 ['] do-lock-all 320 128 512 spawn task-lock-all !
+    0 ['] do-lock-a 320 128 512 spawn task-lock-a !
+    0 ['] do-lock-b 320 128 512 spawn task-lock-b !
+    0 ['] do-lock-c 320 128 512 spawn task-lock-c !
     begin-critical
     task-lock-all @ run
     task-lock-a @ run
