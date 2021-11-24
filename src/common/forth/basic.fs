@@ -1829,7 +1829,7 @@ internal-module set-current
 65 constant picture-size
 
 \ Start of pictured numeric output
-variable picture-offset
+user picture-offset
 
 \ Set forth
 forth-module set-current
