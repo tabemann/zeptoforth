@@ -66,3 +66,5 @@ begin-module forth-module
     no-sema-limit init-sema-counter my-sema init-sema
     0 ['] do-init-tasks my-task-pool spawn-from-task-pool run
   ;
+
+end-module
