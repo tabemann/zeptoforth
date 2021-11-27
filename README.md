@@ -4,6 +4,35 @@ zeptoforth is a Cortex-M Forth, currently targeted at the Raspberry Pi Pico (but
 
 Its kernel has versions written in Thumb-1 assembly, for the Raspberry Pi Pico, and Thumb-2 assembly, for the STM32L476, STM32F407, and STM32F746 DISCOVERY boards. and there is a body of other core code that is loaded after it is loaded which is written in Forth.
 
+The library of code included along with the zeptoforth kernel, which is present in its full form in `full` and `full_swdcom` builds, includes the following:
+
+* A priority-scheduled preemptive multitasker
+* Semaphores
+* Locks, with priority inversion handling
+* Message-oriented queue channels
+* Message-oriented rendezvous channels, aka "fchannels"
+* Byte-oriented streams
+* Event/coroutine scheduler support
+* Multicore support (on the RP2040 in the 0.22.0b0 release / in the devel branch)
+* Double cell and fixed point numeric support
+* Lambda expressions
+* A disassembler
+* SysTick support
+* User-reconfigurable processor exception vector support
+* Interrupt-driven serial IO
+* GPIO support (including EXTI support on STM32 microcontrollers)
+* Heap allocators
+* Memory pool allocators
+* Task pool allocators
+* Event/coroutine pool allocators
+* Temporary storage allocators (used to provide immediate string constants)
+* A line editor
+* LED drivers
+* Quad SPI flash storage support (on the STM32F746 DISCOVERY board)
+* A block editor (on the STM32F746 DISCOVERY board)
+* Random number generator support (except on the RP2040)
+* Optional swdcom support
+
 To load the zeptoforth image (whether just the kernel or an image including precompiled Forth code) onto an STM32L476, STM32F407, or STM32F746 DISCOVERY board, first install st-flash, then attach the DISCOVERY board to one's PC via USB and execute:
 
     $ st-flash erase
