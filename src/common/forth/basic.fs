@@ -1271,11 +1271,11 @@ internal-module set-current
 
 \ Dump 16 bytes of ASCII
 : dump-ascii-16 ( start-addr -- )
-  [char] ' emit
+  [char] | emit
   16 0 do
     dup i + c@ dup $20 >= over $7F < and if emit else drop [char] . emit then
   loop
-  [char] ' emit drop
+  [char] | emit drop
 ;
 
 \ Set the forth module
@@ -1290,11 +1290,11 @@ commit-flash
   2dup < if
     swap do
       i h.8
-      space [char] ' emit
+      space [char] | emit
       64 0 do
 	j i + c@ dup $20 >= over $7F < and if emit else drop [char] . emit then
       loop
-      [char] ' emit cr
+      [char] | emit cr
     64 +loop
   else
     2drop
@@ -1307,10 +1307,23 @@ commit-flash
   2dup < if
     swap do
       i h.8
-      16 0 do
+      space
+      4 0 do
 	space j i + c@ h.2
       loop
-      space i dump-ascii-16 cr
+      space
+      8 4 do
+	space j i + c@ h.2
+      loop
+      space
+      12 8 do
+	space j i + c@ h.2
+      loop
+      space
+      16 12 do
+	space j i + c@ h.2
+      loop
+      space space i dump-ascii-16 cr
     16 +loop
   else
     2drop
@@ -1319,14 +1332,28 @@ commit-flash
 
 \ Dump memory as 16-bit values and ASCII between two addresses
 : dump-halfs ( start-addr end-addr -- )
+  2 align swap 2 align swap
   cr
   2dup < if
     swap do
       i h.8
-      16 0 do
+      space
+      4 0 do
 	space j i + h@ h.4
       2 +loop
-      space i dump-ascii-16 cr
+      space
+      8 4 do
+	space j i + h@ h.4
+      2 +loop
+      space
+      12 8 do
+	space j i + h@ h.4
+      2 +loop
+      space
+      16 12 do
+	space j i + h@ h.4
+      2 +loop
+      space space i dump-ascii-16 cr
     16 +loop
   else
     2drop
@@ -1335,14 +1362,15 @@ commit-flash
 
 \ Dump memory as 32-bit cells and ASCII between two addresses
 : dump-cells ( start-addr end-addr -- )
+  4 align swap 4 align swap
   cr
   2dup < if
     swap do
       i h.8
       16 0 do
-	space j i + @ h.8
+	space space j i + @ h.8
       4 +loop
-      space i dump-ascii-16 cr
+      space space i dump-ascii-16 cr
     16 +loop
   else
     2drop
