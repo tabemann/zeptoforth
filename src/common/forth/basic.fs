@@ -1290,7 +1290,7 @@ commit-flash
   2dup < if
     swap do
       i h.8
-      space [char] | emit
+      space space [char] | emit
       64 0 do
 	j i + c@ dup $20 >= over $7F < and if emit else drop [char] . emit then
       loop
