@@ -36,7 +36,7 @@ begin-import-module-once task-module
 
     \ Task delayed state
     1 constant delayed
-    
+
     \ Task blocked with timeout
     2 constant blocked-timeout
 
@@ -49,11 +49,17 @@ begin-import-module-once task-module
     \ Task block timed out
     5 constant block-timed-out
 
+    \ Notified bit
+    $2000 constant notified
+
+    \ Awaiting notification bit
+    $4000 constant waiting-notify
+    
     \ Schedule into critical section bit
     $8000 constant schedule-critical
 
-    \ Schedule into critical section mask
-    $7FFF constant schedule-critical-mask
+    \ Task state mask
+    $1FFF constant task-state-mask
     
     \ In task change
     cpu-variable cpu-in-task-change in-task-change
@@ -222,6 +228,11 @@ begin-import-module-once task-module
 
   begin-module task-internal-module
 
+    \ Set the task state without affecting the notified flag
+    : task-state! ( state task -- )
+      [: dup task-state h@ notified and rot or swap task-state h! ;] critical
+    ;
+    
     \ Get task stack base
     : task-stack-base ( task -- addr )
       dup task + swap task-stack-size h@ +
@@ -406,7 +417,7 @@ begin-import-module-once task-module
   
   end-module
 
-  \ Get task active sate
+  \ Get task active state
   : get-task-active ( task -- active )
     task-active h@ 16 lshift 16 arshift
   ;
@@ -512,7 +523,7 @@ begin-import-module-once task-module
       dup validate-not-terminated
       tuck ['] task-systick-start for-task !
       tuck ['] task-systick-delay for-task !
-      delayed swap task-state h!
+      delayed swap task-state!
     ;] critical
     pause
   ;
@@ -523,7 +534,7 @@ begin-import-module-once task-module
       dup validate-not-terminated
       tuck ['] task-systick-start for-task !
       tuck ['] task-systick-delay for-task !
-      [ delayed schedule-critical or ] literal swap task-state h!
+      [ delayed schedule-critical or ] literal swap task-state!
     ;] critical
     pause
   ;
@@ -534,7 +545,7 @@ begin-import-module-once task-module
       dup validate-not-terminated
       tuck ['] task-systick-start for-task !
       tuck ['] task-systick-delay for-task !
-      blocked-timeout swap task-state h!
+      blocked-timeout swap task-state!
     ;] critical
     pause
   ;
@@ -545,7 +556,39 @@ begin-import-module-once task-module
       dup validate-not-terminated
       tuck ['] task-systick-start for-task !
       tuck ['] task-systick-delay for-task !
-      [ blocked-timeout schedule-critical or ] literal swap task-state h!
+      [ blocked-timeout schedule-critical or ] literal swap task-state!
+    ;] critical
+    pause
+  ;
+
+  \ Mark a task as awaiting a notification until a timeout
+  : wait-notify-timeout ( ticks-delay ticks-start task -- )
+    [:
+      dup validate-not-terminated
+      notified over task-state hbit@ not if
+	tuck ['] task-systick-start for-task !
+	tuck ['] task-systick-delay for-task !
+	[ blocked-timeout waiting-notify or ] literal swap task-state!
+      else
+	notified swap task-state hbic! 2drop
+      then
+    ;] critical
+    pause
+  ;
+
+  \ Mark a task as awaiting a notification until a timeout and schedule as
+  \ critical once done
+  : wait-notify-timeout-critical ( ticks-delay ticks-start task -- )
+    [:
+      dup validate-not-terminated
+      notified over task-state hbit@ not if
+	tuck ['] task-systick-start for-task !
+	tuck ['] task-systick-delay for-task !
+	[ blocked-timeout schedule-critical or waiting-notify or ] literal
+	swap task-state!
+      else
+	notified swap task-state hbic! 2drop
+      then
     ;] critical
     pause
   ;
@@ -553,35 +596,82 @@ begin-import-module-once task-module
   \ Mark a task as waiting
   : block-wait ( task -- )
     dup validate-not-terminated
-    blocked-wait swap task-state h!
+    blocked-wait swap task-state!
     pause
   ;
   
   \ Mark a task as waiting
   : block-wait-critical ( task -- )
     dup validate-not-terminated
-    [ blocked-wait schedule-critical or ] literal swap task-state h!
+    [ blocked-wait schedule-critical or ] literal swap task-state!
     pause
   ;
 
   \ Mark a task as blocked indefinitely
   : block-indefinite ( task -- )
     dup validate-not-terminated
-    blocked-indefinite swap task-state h!
+    blocked-indefinite swap task-state!
     pause
   ;
 
   \ Mark a task as blocked indefinitely and schedule as critical when done
   : block-indefinite-critical ( task -- )
     dup validate-not-terminated
-    [ blocked-indefinite schedule-critical or ] literal swap task-state h!
+    [ blocked-indefinite schedule-critical or ] literal swap task-state!
     pause
+  ;
+
+  \ Mark a task as awaiting notification indefinitely
+  : wait-notify-indefinite ( task -- )
+    [:
+      dup validate-not-terminated
+      notified over task-state hbit@ not if
+	[ blocked-indefinite waiting-notify or ] literal swap task-state!
+	pause
+      else
+	notified swap task-state hbic!
+      then
+    ;] critical
+  ;
+
+  \ Mark a task as awaitng notification indefinitely and schedule as critical
+  \ when done
+  : wait-notify-indefinite-critical ( task -- )
+    [:
+      dup validate-not-terminated
+      notified over task-state hbit@ not if
+	[ blocked-indefinite schedule-critical or waiting-notify or ] literal
+	swap task-state!
+	pause
+      else
+	notified swap task-state hbic!
+      then
+    ;] critical
   ;
 
   \ Ready a task
   : ready ( task -- )
-    dup validate-not-terminated
-    dup task-state h@ schedule-critical and readied or swap task-state h!
+    [:
+      dup validate-not-terminated
+      dup task-state h@ dup waiting-notify and 0= if
+	schedule-critical and readied or swap task-state! pause
+      else
+	2drop
+      then
+    ;] critical
+  ;
+
+  \ Notify a task
+  : notify ( task -- )
+    [:
+      dup validate-not-terminated
+      dup task-state h@ dup waiting-notify and if
+	schedule-critical and [ readied notified or ] literal or
+	swap task-state h!
+      else
+	notified or swap task-state h!
+      then
+    ;] critical
     pause
   ;
 
@@ -614,6 +704,35 @@ begin-import-module-once task-module
     ;] critical
   ;
 
+  \ Wait for a notification with a specified initialized timeout
+  : wait-notify ( task -- )
+    [:
+      dup validate-not-terminated
+      dup ['] timeout for-task @ no-timeout <> if
+	dup ['] timeout-systick-delay for-task @
+	over ['] timeout-systick-start for-task @
+	rot wait-notify-timeout
+      else
+	wait-notify-indefinite
+      then
+    ;] critical
+  ;
+
+  \ Wait for a notification with a specified initialized timeout and schedule
+  \ as critical once done
+  : wait-notify-critical ( task -- )
+    [:
+      dup validate-not-terminated
+      dup ['] timeout for-task @ no-timeout <> if
+	dup ['] timeout-systick-delay for-task @
+	over ['] timeout-systick-start for-task @
+	rot wait-notify-timeout-critical
+      else
+	wait-notify-indefinite-critical
+      then
+    ;] critical
+  ;
+
   \ Prepare blocking for a task
   : prepare-block ( task -- )
     [:
@@ -629,7 +748,7 @@ begin-import-module-once task-module
 
   \ Get whether a task has timed out
   : timed-out? ( task -- timed-out )
-    dup validate-not-terminated task-state h@ schedule-critical-mask and
+    dup validate-not-terminated task-state h@ task-state-mask and
     block-timed-out =
   ;
 
@@ -792,7 +911,7 @@ begin-import-module-once task-module
 
     \ Get whether a task is waiting
     : waiting-task? ( task -- )
-      dup task-state h@ schedule-critical-mask and
+      dup task-state h@ task-state-mask and
       dup blocked-wait = over blocked-indefinite = or
       over delayed = rot blocked-timeout = or
       rot delayed? and or
@@ -847,8 +966,8 @@ begin-import-module-once task-module
     \ Actually wake tasks
     : actually-wake-tasks ( -- )
       first-task @ begin ?dup while
-	dup task-state h@ blocked-wait = if
-	  readied over task-state h!
+	dup task-state h@ task-state-mask and blocked-wait = if
+	  dup task-state h@ notified and readied or over task-state h!
 	then
 	task-prev @
       repeat
@@ -875,11 +994,11 @@ begin-import-module-once task-module
 		dup task-state h@ schedule-critical and if
 		  1 in-critical !
 		then
-		dup task-state h@ schedule-critical-mask and
+		dup task-state h@ dup notified and swap task-state-mask and
 		blocked-timeout = if
-		  block-timed-out over task-state h!
+		  block-timed-out or over task-state h!
 		else
-		  readied over task-state h!
+		  readied or over task-state h!
 		then
 		true
 	      then
@@ -939,7 +1058,7 @@ begin-import-module-once task-module
       dup current-task @ = if
 	s" running"
       else
-	dup task-state h@ schedule-critical-mask and case
+	dup task-state h@ task-state-mask and case
 	  readied of            s" ready" endof
 	  delayed of            s" delayed" endof
 	  blocked-timeout of    s" timeout" endof
@@ -959,7 +1078,7 @@ begin-import-module-once task-module
     
     \ Dump task until time
     : dump-task-until ( task -- )
-      dup task-state h@ schedule-critical-mask and case
+      dup task-state h@ task-state-mask and case
 	delayed of true endof
 	blocked-timeout of true endof
 	false swap
