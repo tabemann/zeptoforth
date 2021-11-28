@@ -20,6 +20,7 @@
 
 begin-module forth-module
 
+  import systick-module
   import task-module
 
   \ The two tasks
@@ -34,7 +35,7 @@ begin-module forth-module
   : consumer ( -- )
     0 wait-notify-indefinite drop
     begin
-      0 wait-notify-indefinite .
+      10000 systick-counter 0 wait-notify-timeout .
       0 producer-task @ notify
     again
   ;
@@ -45,10 +46,10 @@ begin-module forth-module
   \ The inner loop of a producer
   : producer ( -- )
     0 wait-notify-indefinite drop
-    begin
+    10 0 ?do
       ['] 1+ 0 consumer-task @ notify-update
       0 wait-notify-indefinite drop
-    again
+    loop
   ;
 
   \ The producer task

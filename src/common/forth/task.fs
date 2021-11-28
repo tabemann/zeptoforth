@@ -589,13 +589,13 @@ begin-import-module-once task-module
   : wait-notify-timeout ( ticks-delay ticks-start notify-index -- x )
     [:
       dup current-task @ validate-notify
-      tuck task-systick-start !
-      tuck task-systick-delay !
+      swap task-systick-start !
+      swap task-systick-delay !
       begin dup bit task-notified-bitmap bit@ not while
 	dup task-current-notify !
 	[ blocked-timeout schedule-critical or ] literal
 	current-task @ task-state h! end-critical pause
-	validate-timeout
+	current-task @ validate-timeout
       repeat
       task-notify-area @ over cells + @
       swap bit task-notified-bitmap bic!
@@ -612,13 +612,13 @@ begin-import-module-once task-module
     begin-critical
     [:
       dup current-task @ validate-notify
-      tuck task-systick-start !
-      tuck task-systick-delay !
+      swap task-systick-start !
+      swap task-systick-delay !
       begin dup bit task-notified-bitmap bit@ not while
 	dup task-current-notify !
 	[ blocked-timeout schedule-critical or ] literal
 	current-task @ task-state h! end-critical pause
-	validate-timeout
+	current-task @ validate-timeout
       repeat
       task-notify-area @ over cells + @
       swap bit task-notified-bitmap bic!
