@@ -1,8 +1,12 @@
 # Multitasking Words
 
-Multitasking in zeptoforth is not part of the zeptoforth kernel, but is provided by `src/common/forth/task.fs`, which in turn relies upon `src/<platform>/forth/int_io.fs` and `src/common/forth/systick.fs`. It is preemptivee, but `PAUSE` may be called to explicitly relinquish control of the processor (which is highly recommended when possible); note that some words do this implicitly, such as `MS`, `KEY`, or `EMIT` (which are in turn called by words such as `REFILL` or `TYPE`).
+Multitasking in zeptoforth is not part of the zeptoforth kernel, but is provided by `src/common/forth/task.fs`, which in turn relies upon `src/<platform>/forth/int_io.fs` and `src/common/forth/systick.fs`. It is preemptive and priority-scheduled, but `PAUSE` may be called to explicitly relinquish control of the processor (which is highly recommended when possible); note that some words do this implicitly, such as `MS`, `KEY`, or `EMIT` (which are in turn called by words such as `REFILL` or `TYPE`).
 
 Note that tasks in zeptoforth are a relatively heavy-weight asynchronous computing means. For lighter-weight asynchronous computing, consider creating a single task for running a scheduler within (so the main task can be devoted to the REPL), and then put all asynchronous actions within that.
+
+There are a number of intertask communication and synchronization constructs available in full builds, including semaphores, locks, message-oriented queue channels, message-oriented rendezvous channels, byte-oriented streams, and last but not least, task notifications. All of these except for task notifications are discussed in other documentation pages.
+
+Task notifications are the lightest-weight of all these mechanisms; simple synchronization between two tasks using task notifications take roughly 1/4 the time of using rendezvous channels, and task notifications have no extra memory overhead other than the mailboxes allocated by the user for each task, at one cell per mailbox whereas rendezvous channels take a minimum of 76 bytes of RAM. Mailboxes may only contain one cell each, and a task may have a maximum of 32 mailboxes for notifications. Notifications may set them to fixed values, update them with provided execution tokens, or leave them as-is. Note that improperly-written code using notifications may be subject to race conditions and data loss because no mechanism exists built-in to prevent a notification sent to a task in close succession after another notification from overwriting the contents of the mailbox in question.
 
 Multitasking is enabled by default once `src/common/forth/task.fs` has been loaded and the MCU has been rebooted; afterwards each time the MCU is booted a new task is created for the REPL, the main task, and multitasking is initiated.
 
@@ -41,7 +45,14 @@ Note that tasks may be enabled or disabled but once created exist until the MCU 
 
 New task default to a priority of zero; to change this use `set-task-priority`.
 
+Tasks default to having no support for notifications; notifications must be configured for tasks with `config-notify`.
+
 Uncaught exceptions within a task will be handled, with the message for them being displayed, but they will result in said task being terminated.
+
+##### `config-notify`
+( notify-area-addr notify-count task -- )
+
+Configure notification for a task, with *notify-count* being the number of supported notifications, from 0 to 32, and *notify-area-addr* being the address to an area of memory that may contain *notify-count* cells.
 
 To reinitialize existing tasks, one executes:
 
@@ -83,7 +94,12 @@ If one attempts to execute a word against a terminated task, aside from `init-ta
 ##### `x-terminated`
 ( -- )
 
-This exception when executed displays the task terminated error message.
+This exception is raised when executed displays the task terminated error message.
+
+##### `x-out-of-range-notify`
+( -- )
+
+This exception is raised when an out of range notification mailbox index or count is specified.
 
 ##### `timeout`
 ( -- addr )
@@ -140,25 +156,25 @@ Block a task indefinitely until the task is readied.
 
 Block a task indefinitely until the task is readied, and then immediately start a critical section.
 
-##### `xswait-notify-timeout`
-( delay start task -- )
+##### `wait-notify-timeout`
+( delay start notify-index -- x )
 
-If a task has not been notified, set the task in an awaiting notification state until *delay* ticks after the time represented by *start* ticks, and signal timed out if this time is reached without the task being notified first. If the task has already been notified, clear its notified state.
+If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until *delay* ticks after the time represented by *start* ticks, and raise `x-timed-out` if this time is reached without the task being notified for that notification first. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.
 
 ##### `wait-notify-timeout-critical`
-( delay start task -- )
+( delay start notify-index -- x )
 
-If a task has not been notified, set the task in an awaiting notification state until *delay* ticks after the time represented by *start* ticks, and signal timed out if this time is reached without the task being notified first; after blocking finishes, immediately start a critical section. If the task has already been notified, clear its notified state.
+If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until *delay* ticks after the time represented by *start* ticks, and raise `x-timed-out` if this time is reached without the task being notified for that notification first; after blocking finishes, immediately start a critical section unless an exception has been raised. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.
 
 ##### `wait-notify-indefinite`
-( task -- )
+( notify-index -- x )
 
-If a task has not been notified, set the task in an awaitng notification state until the task is notified. If the task has already been notified, clear its notified state.
+If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until the task is notified for that notification. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.
 
 ##### `wait-notify-indefinite-critical`
-( task -- )
+( notify-index -- x )
 
-If a task has not been notified, set the task in an awaiting notification state indefinitely until the task is notified, and then immediately start a critical section. If the task has already been notified, clear its notified state.
+If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until the task is notified for that notification; after blocking finishes, immediately start a critical section unless an exception has been raised. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.
 
 ##### `ready`
 ( task -- )
@@ -166,9 +182,19 @@ If a task has not been notified, set the task in an awaiting notification state 
 Ready a blocked or delayed task.
 
 ##### `notify`
-( task -- )
+( notify-index task -- )
 
-Set the notified state of a task, and if the task is awaiting notification, ready it.
+Notify a task on a specified notification index *notify-index* without changing the value of the notification mailbox at *notify-index*, readying the task if it is currently waiting on that notification.
+
+##### `notify-set`
+( x notify-index task -- )
+
+Notify a task on a specified notification index *notify-index*, setting the value of its notification mailbox at *notify-index* to *x*, readying the task if it is currently waiting on that notification.
+
+##### `notify-update`
+( xt notify-index task -- )
+
+Notify a task on a specified notification index *notify-index*, updating the value of its notification mailbox at *notify-index* by applying the execution token *xt* with the signature ( x0 -- x1 ) to it, readying the task if it is currently waiting on that notification.
 
 ##### `block`
 ( task -- )
@@ -179,6 +205,16 @@ Block a task for which blocking has been prepared.
 ( task -- )
 
 Block a task for which blocking has been prepared, and immediately start a new critical section once it finishes blocking.
+
+##### `wait-notify`
+( notify-index -- x )
+
+If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification that may be blockign or indefinite depending on how blocking has been prepared. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.
+
+##### `wait-notify-critical`
+( notify-index -- x )
+
+If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification that may be blockign or indefinite depending on how blocking has been prepared; after blocking finishes, immediately start a critical section unless an exception has been raised. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.
 
 ##### `wait-notify`
 ( task -- )

@@ -35,8 +35,10 @@
             
   <section id="multitasking-words">
 <h1>Multitasking Words<a class="headerlink" href="#multitasking-words" title="Permalink to this headline">¶</a></h1>
-<p>Multitasking in zeptoforth is not part of the zeptoforth kernel, but is provided by <code class="docutils literal notranslate"><span class="pre">src/common/forth/task.fs</span></code>, which in turn relies upon <code class="docutils literal notranslate"><span class="pre">src/&lt;platform&gt;/forth/int_io.fs</span></code> and <code class="docutils literal notranslate"><span class="pre">src/common/forth/systick.fs</span></code>. It is preemptivee, but <code class="docutils literal notranslate"><span class="pre">PAUSE</span></code> may be called to explicitly relinquish control of the processor (which is highly recommended when possible); note that some words do this implicitly, such as <code class="docutils literal notranslate"><span class="pre">MS</span></code>, <code class="docutils literal notranslate"><span class="pre">KEY</span></code>, or <code class="docutils literal notranslate"><span class="pre">EMIT</span></code> (which are in turn called by words such as <code class="docutils literal notranslate"><span class="pre">REFILL</span></code> or <code class="docutils literal notranslate"><span class="pre">TYPE</span></code>).</p>
+<p>Multitasking in zeptoforth is not part of the zeptoforth kernel, but is provided by <code class="docutils literal notranslate"><span class="pre">src/common/forth/task.fs</span></code>, which in turn relies upon <code class="docutils literal notranslate"><span class="pre">src/&lt;platform&gt;/forth/int_io.fs</span></code> and <code class="docutils literal notranslate"><span class="pre">src/common/forth/systick.fs</span></code>. It is preemptive and priority-scheduled, but <code class="docutils literal notranslate"><span class="pre">PAUSE</span></code> may be called to explicitly relinquish control of the processor (which is highly recommended when possible); note that some words do this implicitly, such as <code class="docutils literal notranslate"><span class="pre">MS</span></code>, <code class="docutils literal notranslate"><span class="pre">KEY</span></code>, or <code class="docutils literal notranslate"><span class="pre">EMIT</span></code> (which are in turn called by words such as <code class="docutils literal notranslate"><span class="pre">REFILL</span></code> or <code class="docutils literal notranslate"><span class="pre">TYPE</span></code>).</p>
 <p>Note that tasks in zeptoforth are a relatively heavy-weight asynchronous computing means. For lighter-weight asynchronous computing, consider creating a single task for running a scheduler within (so the main task can be devoted to the REPL), and then put all asynchronous actions within that.</p>
+<p>There are a number of intertask communication and synchronization constructs available in full builds, including semaphores, locks, message-oriented queue channels, message-oriented rendezvous channels, byte-oriented streams, and last but not least, task notifications. All of these except for task notifications are discussed in other documentation pages.</p>
+<p>Task notifications are the lightest-weight of all these mechanisms; simple synchronization between two tasks using task notifications take roughly 1/4 the time of using rendezvous channels, and task notifications have no extra memory overhead other than the mailboxes allocated by the user for each task, at one cell per mailbox whereas rendezvous channels take a minimum of 76 bytes of RAM. Mailboxes may only contain one cell each, and a task may have a maximum of 32 mailboxes for notifications. Notifications may set them to fixed values, update them with provided execution tokens, or leave them as-is. Note that improperly-written code using notifications may be subject to race conditions and data loss because no mechanism exists built-in to prevent a notification sent to a task in close succession after another notification from overwriting the contents of the mailbox in question.</p>
 <p>Multitasking is enabled by default once <code class="docutils literal notranslate"><span class="pre">src/common/forth/task.fs</span></code> has been loaded and the MCU has been rebooted; afterwards each time the MCU is booted a new task is created for the REPL, the main task, and multitasking is initiated.</p>
 <p>These words are in <code class="docutils literal notranslate"><span class="pre">task-module</span></code>.</p>
 <section id="pause">
@@ -67,7 +69,13 @@
 <p>Note that it is not recommended to execute this while compiling to flash; rather, it should be put in the <code class="docutils literal notranslate"><span class="pre">init</span></code> routine and then the result should be stored to a variable in RAM.</p>
 <p>Note that tasks may be enabled or disabled but once created exist until the MCU is rebooted.</p>
 <p>New task default to a priority of zero; to change this use <code class="docutils literal notranslate"><span class="pre">set-task-priority</span></code>.</p>
+<p>Tasks default to having no support for notifications; notifications must be configured for tasks with <code class="docutils literal notranslate"><span class="pre">config-notify</span></code>.</p>
 <p>Uncaught exceptions within a task will be handled, with the message for them being displayed, but they will result in said task being terminated.</p>
+</section>
+<section id="config-notify">
+<h2><code class="docutils literal notranslate"><span class="pre">config-notify</span></code><a class="headerlink" href="#config-notify" title="Permalink to this headline">¶</a></h2>
+<p>( notify-area-addr notify-count task – )</p>
+<p>Configure notification for a task, with <em>notify-count</em> being the number of supported notifications, from 0 to 32, and <em>notify-area-addr</em> being the address to an area of memory that may contain <em>notify-count</em> cells.</p>
 <p>To reinitialize existing tasks, one executes:</p>
 </section>
 <section id="init-task">
@@ -103,7 +111,12 @@
 <section id="x-terminated">
 <h2><code class="docutils literal notranslate"><span class="pre">x-terminated</span></code><a class="headerlink" href="#x-terminated" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
-<p>This exception when executed displays the task terminated error message.</p>
+<p>This exception is raised when executed displays the task terminated error message.</p>
+</section>
+<section id="x-out-of-range-notify">
+<h2><code class="docutils literal notranslate"><span class="pre">x-out-of-range-notify</span></code><a class="headerlink" href="#x-out-of-range-notify" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>This exception is raised when an out of range notification mailbox index or count is specified.</p>
 </section>
 <section id="timeout">
 <h2><code class="docutils literal notranslate"><span class="pre">timeout</span></code><a class="headerlink" href="#timeout" title="Permalink to this headline">¶</a></h2>
@@ -160,25 +173,25 @@
 <p>( task – )</p>
 <p>Block a task indefinitely until the task is readied, and then immediately start a critical section.</p>
 </section>
-<section id="xswait-notify-timeout">
-<h2><code class="docutils literal notranslate"><span class="pre">xswait-notify-timeout</span></code><a class="headerlink" href="#xswait-notify-timeout" title="Permalink to this headline">¶</a></h2>
-<p>( delay start task – )</p>
-<p>If a task has not been notified, set the task in an awaiting notification state until <em>delay</em> ticks after the time represented by <em>start</em> ticks, and signal timed out if this time is reached without the task being notified first. If the task has already been notified, clear its notified state.</p>
+<section id="wait-notify-timeout">
+<h2><code class="docutils literal notranslate"><span class="pre">wait-notify-timeout</span></code><a class="headerlink" href="#wait-notify-timeout" title="Permalink to this headline">¶</a></h2>
+<p>( delay start notify-index – x )</p>
+<p>If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until <em>delay</em> ticks after the time represented by <em>start</em> ticks, and raise <code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code> if this time is reached without the task being notified for that notification first. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.</p>
 </section>
 <section id="wait-notify-timeout-critical">
 <h2><code class="docutils literal notranslate"><span class="pre">wait-notify-timeout-critical</span></code><a class="headerlink" href="#wait-notify-timeout-critical" title="Permalink to this headline">¶</a></h2>
-<p>( delay start task – )</p>
-<p>If a task has not been notified, set the task in an awaiting notification state until <em>delay</em> ticks after the time represented by <em>start</em> ticks, and signal timed out if this time is reached without the task being notified first; after blocking finishes, immediately start a critical section. If the task has already been notified, clear its notified state.</p>
+<p>( delay start notify-index – x )</p>
+<p>If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until <em>delay</em> ticks after the time represented by <em>start</em> ticks, and raise <code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code> if this time is reached without the task being notified for that notification first; after blocking finishes, immediately start a critical section unless an exception has been raised. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.</p>
 </section>
 <section id="wait-notify-indefinite">
 <h2><code class="docutils literal notranslate"><span class="pre">wait-notify-indefinite</span></code><a class="headerlink" href="#wait-notify-indefinite" title="Permalink to this headline">¶</a></h2>
-<p>( task – )</p>
-<p>If a task has not been notified, set the task in an awaitng notification state until the task is notified. If the task has already been notified, clear its notified state.</p>
+<p>( notify-index – x )</p>
+<p>If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until the task is notified for that notification. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.</p>
 </section>
 <section id="wait-notify-indefinite-critical">
 <h2><code class="docutils literal notranslate"><span class="pre">wait-notify-indefinite-critical</span></code><a class="headerlink" href="#wait-notify-indefinite-critical" title="Permalink to this headline">¶</a></h2>
-<p>( task – )</p>
-<p>If a task has not been notified, set the task in an awaiting notification state indefinitely until the task is notified, and then immediately start a critical section. If the task has already been notified, clear its notified state.</p>
+<p>( notify-index – x )</p>
+<p>If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until the task is notified for that notification; after blocking finishes, immediately start a critical section unless an exception has been raised. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.</p>
 </section>
 <section id="ready">
 <h2><code class="docutils literal notranslate"><span class="pre">ready</span></code><a class="headerlink" href="#ready" title="Permalink to this headline">¶</a></h2>
@@ -187,8 +200,18 @@
 </section>
 <section id="notify">
 <h2><code class="docutils literal notranslate"><span class="pre">notify</span></code><a class="headerlink" href="#notify" title="Permalink to this headline">¶</a></h2>
-<p>( task – )</p>
-<p>Set the notified state of a task, and if the task is awaiting notification, ready it.</p>
+<p>( notify-index task – )</p>
+<p>Notify a task on a specified notification index <em>notify-index</em> without changing the value of the notification mailbox at <em>notify-index</em>, readying the task if it is currently waiting on that notification.</p>
+</section>
+<section id="notify-set">
+<h2><code class="docutils literal notranslate"><span class="pre">notify-set</span></code><a class="headerlink" href="#notify-set" title="Permalink to this headline">¶</a></h2>
+<p>( x notify-index task – )</p>
+<p>Notify a task on a specified notification index <em>notify-index</em>, setting the value of its notification mailbox at <em>notify-index</em> to <em>x</em>, readying the task if it is currently waiting on that notification.</p>
+</section>
+<section id="notify-update">
+<h2><code class="docutils literal notranslate"><span class="pre">notify-update</span></code><a class="headerlink" href="#notify-update" title="Permalink to this headline">¶</a></h2>
+<p>( xt notify-index task – )</p>
+<p>Notify a task on a specified notification index <em>notify-index</em>, updating the value of its notification mailbox at <em>notify-index</em> by applying the execution token <em>xt</em> with the signature ( x0 – x1 ) to it, readying the task if it is currently waiting on that notification.</p>
 </section>
 <section id="block">
 <h2><code class="docutils literal notranslate"><span class="pre">block</span></code><a class="headerlink" href="#block" title="Permalink to this headline">¶</a></h2>
@@ -202,11 +225,21 @@
 </section>
 <section id="wait-notify">
 <h2><code class="docutils literal notranslate"><span class="pre">wait-notify</span></code><a class="headerlink" href="#wait-notify" title="Permalink to this headline">¶</a></h2>
-<p>( task – )</p>
-<p>If a task has not been notified, set the task in an awaiting notification state for which blocking has been prepared. If the task has already been notified, clear its notification state.</p>
+<p>( notify-index – x )</p>
+<p>If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification that may be blockign or indefinite depending on how blocking has been prepared. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.</p>
 </section>
 <section id="wait-notify-critical">
 <h2><code class="docutils literal notranslate"><span class="pre">wait-notify-critical</span></code><a class="headerlink" href="#wait-notify-critical" title="Permalink to this headline">¶</a></h2>
+<p>( notify-index – x )</p>
+<p>If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification that may be blockign or indefinite depending on how blocking has been prepared; after blocking finishes, immediately start a critical section unless an exception has been raised. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.</p>
+</section>
+<section id="id1">
+<h2><code class="docutils literal notranslate"><span class="pre">wait-notify</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>( task – )</p>
+<p>If a task has not been notified, set the task in an awaiting notification state for which blocking has been prepared. If the task has already been notified, clear its notification state.</p>
+</section>
+<section id="id2">
+<h2><code class="docutils literal notranslate"><span class="pre">wait-notify-critical</span></code><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
 <p>( task – )</p>
 <p>If a task has not been notified, set the task in an awaiting notification state for blocking has been prepared, and immediately start a new critical section once it finishes blocking. If the task has already been notified, clear its notification state.</p>
 </section>
@@ -352,12 +385,14 @@
 <li class="toctree-l2"><a class="reference internal" href="#main-task"><code class="docutils literal notranslate"><span class="pre">main-task</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pause-count"><code class="docutils literal notranslate"><span class="pre">pause-count</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#spawn"><code class="docutils literal notranslate"><span class="pre">spawn</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#config-notify"><code class="docutils literal notranslate"><span class="pre">config-notify</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#init-task"><code class="docutils literal notranslate"><span class="pre">init-task</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#run"><code class="docutils literal notranslate"><span class="pre">run</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#stop"><code class="docutils literal notranslate"><span class="pre">stop</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#kill"><code class="docutils literal notranslate"><span class="pre">kill</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#terminated"><code class="docutils literal notranslate"><span class="pre">terminated?</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#x-terminated"><code class="docutils literal notranslate"><span class="pre">x-terminated</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#x-out-of-range-notify"><code class="docutils literal notranslate"><span class="pre">x-out-of-range-notify</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#timeout"><code class="docutils literal notranslate"><span class="pre">timeout</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#no-timeout"><code class="docutils literal notranslate"><span class="pre">no-timeout</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#last-delay"><code class="docutils literal notranslate"><span class="pre">last-delay</span></code></a></li>
@@ -369,16 +404,20 @@
 <li class="toctree-l2"><a class="reference internal" href="#block-wait-critical"><code class="docutils literal notranslate"><span class="pre">block-wait-critical</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#block-indefinite"><code class="docutils literal notranslate"><span class="pre">block-indefinite</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#block-indefinite-critical"><code class="docutils literal notranslate"><span class="pre">block-indefinite-critical</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#xswait-notify-timeout"><code class="docutils literal notranslate"><span class="pre">xswait-notify-timeout</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#wait-notify-timeout"><code class="docutils literal notranslate"><span class="pre">wait-notify-timeout</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#wait-notify-timeout-critical"><code class="docutils literal notranslate"><span class="pre">wait-notify-timeout-critical</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#wait-notify-indefinite"><code class="docutils literal notranslate"><span class="pre">wait-notify-indefinite</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#wait-notify-indefinite-critical"><code class="docutils literal notranslate"><span class="pre">wait-notify-indefinite-critical</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ready"><code class="docutils literal notranslate"><span class="pre">ready</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#notify"><code class="docutils literal notranslate"><span class="pre">notify</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#notify-set"><code class="docutils literal notranslate"><span class="pre">notify-set</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#notify-update"><code class="docutils literal notranslate"><span class="pre">notify-update</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#block"><code class="docutils literal notranslate"><span class="pre">block</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#block-critical"><code class="docutils literal notranslate"><span class="pre">block-critical</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#wait-notify"><code class="docutils literal notranslate"><span class="pre">wait-notify</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#wait-notify-critical"><code class="docutils literal notranslate"><span class="pre">wait-notify-critical</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">wait-notify</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">wait-notify-critical</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#prepare-block"><code class="docutils literal notranslate"><span class="pre">prepare-block</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#timed-out"><code class="docutils literal notranslate"><span class="pre">timed-out?</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#x-timed-out"><code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code></a></li>
