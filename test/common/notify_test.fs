@@ -20,7 +20,6 @@
 
 begin-module forth-module
 
-  import systick-module
   import task-module
 
   \ The two tasks
@@ -43,15 +42,6 @@ begin-module forth-module
   \ The consumer task
   0 ' consumer 320 128 512 spawn consumer-task !
 
-  \ The send count
-  variable send-count
-
-  \ The starting systick
-  variable start-systick
-
-  \ The send count limit
-  10000 constant send-count-limit
-
   \ The inner loop of a producer
   : producer ( -- )
     0 wait-notify-indefinite drop
@@ -66,8 +56,6 @@ begin-module forth-module
 
   \ Initiate the test
   : init-test ( -- )
-    0 send-count !
-    systick-counter start-systick !
     consumer-mailboxes 1 consumer-task @ config-notify
     producer-mailboxes 1 producer-task @ config-notify
     consumer-task @ run
