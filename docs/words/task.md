@@ -140,10 +140,35 @@ Block a task indefinitely until the task is readied.
 
 Block a task indefinitely until the task is readied, and then immediately start a critical section.
 
+##### `xswait-notify-timeout`
+( delay start task -- )
+
+If a task has not been notified, set the task in an awaiting notification state until *delay* ticks after the time represented by *start* ticks, and signal timed out if this time is reached without the task being notified first. If the task has already been notified, clear its notified state.
+
+##### `wait-notify-timeout-critical`
+( delay start task -- )
+
+If a task has not been notified, set the task in an awaiting notification state until *delay* ticks after the time represented by *start* ticks, and signal timed out if this time is reached without the task being notified first; after blocking finishes, immediately start a critical section. If the task has already been notified, clear its notified state.
+
+##### `wait-notify-indefinite`
+( task -- )
+
+If a task has not been notified, set the task in an awaitng notification state until the task is notified. If the task has already been notified, clear its notified state.
+
+##### `wait-notify-indefinite-critical`
+( task -- )
+
+If a task has not been notified, set the task in an awaiting notification state indefinitely until the task is notified, and then immediately start a critical section. If the task has already been notified, clear its notified state.
+
 ##### `ready`
 ( task -- )
 
 Ready a blocked or delayed task.
+
+##### `notify`
+( task -- )
+
+Set the notified state of a task, and if the task is awaiting notification, ready it.
 
 ##### `block`
 ( task -- )
@@ -154,6 +179,16 @@ Block a task for which blocking has been prepared.
 ( task -- )
 
 Block a task for which blocking has been prepared, and immediately start a new critical section once it finishes blocking.
+
+##### `wait-notify`
+( task -- )
+
+If a task has not been notified, set the task in an awaiting notification state for which blocking has been prepared. If the task has already been notified, clear its notification state.
+
+##### `wait-notify-critical`
+( task -- )
+
+If a task has not been notified, set the task in an awaiting notification state for blocking has been prepared, and immediately start a new critical section once it finishes blocking. If the task has already been notified, clear its notification state.
 
 ##### `prepare-block`
 ( task -- )

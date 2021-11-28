@@ -160,10 +160,35 @@
 <p>( task – )</p>
 <p>Block a task indefinitely until the task is readied, and then immediately start a critical section.</p>
 </section>
+<section id="xswait-notify-timeout">
+<h2><code class="docutils literal notranslate"><span class="pre">xswait-notify-timeout</span></code><a class="headerlink" href="#xswait-notify-timeout" title="Permalink to this headline">¶</a></h2>
+<p>( delay start task – )</p>
+<p>If a task has not been notified, set the task in an awaiting notification state until <em>delay</em> ticks after the time represented by <em>start</em> ticks, and signal timed out if this time is reached without the task being notified first. If the task has already been notified, clear its notified state.</p>
+</section>
+<section id="wait-notify-timeout-critical">
+<h2><code class="docutils literal notranslate"><span class="pre">wait-notify-timeout-critical</span></code><a class="headerlink" href="#wait-notify-timeout-critical" title="Permalink to this headline">¶</a></h2>
+<p>( delay start task – )</p>
+<p>If a task has not been notified, set the task in an awaiting notification state until <em>delay</em> ticks after the time represented by <em>start</em> ticks, and signal timed out if this time is reached without the task being notified first; after blocking finishes, immediately start a critical section. If the task has already been notified, clear its notified state.</p>
+</section>
+<section id="wait-notify-indefinite">
+<h2><code class="docutils literal notranslate"><span class="pre">wait-notify-indefinite</span></code><a class="headerlink" href="#wait-notify-indefinite" title="Permalink to this headline">¶</a></h2>
+<p>( task – )</p>
+<p>If a task has not been notified, set the task in an awaitng notification state until the task is notified. If the task has already been notified, clear its notified state.</p>
+</section>
+<section id="wait-notify-indefinite-critical">
+<h2><code class="docutils literal notranslate"><span class="pre">wait-notify-indefinite-critical</span></code><a class="headerlink" href="#wait-notify-indefinite-critical" title="Permalink to this headline">¶</a></h2>
+<p>( task – )</p>
+<p>If a task has not been notified, set the task in an awaiting notification state indefinitely until the task is notified, and then immediately start a critical section. If the task has already been notified, clear its notified state.</p>
+</section>
 <section id="ready">
 <h2><code class="docutils literal notranslate"><span class="pre">ready</span></code><a class="headerlink" href="#ready" title="Permalink to this headline">¶</a></h2>
 <p>( task – )</p>
 <p>Ready a blocked or delayed task.</p>
+</section>
+<section id="notify">
+<h2><code class="docutils literal notranslate"><span class="pre">notify</span></code><a class="headerlink" href="#notify" title="Permalink to this headline">¶</a></h2>
+<p>( task – )</p>
+<p>Set the notified state of a task, and if the task is awaiting notification, ready it.</p>
 </section>
 <section id="block">
 <h2><code class="docutils literal notranslate"><span class="pre">block</span></code><a class="headerlink" href="#block" title="Permalink to this headline">¶</a></h2>
@@ -174,6 +199,16 @@
 <h2><code class="docutils literal notranslate"><span class="pre">block-critical</span></code><a class="headerlink" href="#block-critical" title="Permalink to this headline">¶</a></h2>
 <p>( task – )</p>
 <p>Block a task for which blocking has been prepared, and immediately start a new critical section once it finishes blocking.</p>
+</section>
+<section id="wait-notify">
+<h2><code class="docutils literal notranslate"><span class="pre">wait-notify</span></code><a class="headerlink" href="#wait-notify" title="Permalink to this headline">¶</a></h2>
+<p>( task – )</p>
+<p>If a task has not been notified, set the task in an awaiting notification state for which blocking has been prepared. If the task has already been notified, clear its notification state.</p>
+</section>
+<section id="wait-notify-critical">
+<h2><code class="docutils literal notranslate"><span class="pre">wait-notify-critical</span></code><a class="headerlink" href="#wait-notify-critical" title="Permalink to this headline">¶</a></h2>
+<p>( task – )</p>
+<p>If a task has not been notified, set the task in an awaiting notification state for blocking has been prepared, and immediately start a new critical section once it finishes blocking. If the task has already been notified, clear its notification state.</p>
 </section>
 <section id="prepare-block">
 <h2><code class="docutils literal notranslate"><span class="pre">prepare-block</span></code><a class="headerlink" href="#prepare-block" title="Permalink to this headline">¶</a></h2>
@@ -334,9 +369,16 @@
 <li class="toctree-l2"><a class="reference internal" href="#block-wait-critical"><code class="docutils literal notranslate"><span class="pre">block-wait-critical</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#block-indefinite"><code class="docutils literal notranslate"><span class="pre">block-indefinite</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#block-indefinite-critical"><code class="docutils literal notranslate"><span class="pre">block-indefinite-critical</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#xswait-notify-timeout"><code class="docutils literal notranslate"><span class="pre">xswait-notify-timeout</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#wait-notify-timeout-critical"><code class="docutils literal notranslate"><span class="pre">wait-notify-timeout-critical</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#wait-notify-indefinite"><code class="docutils literal notranslate"><span class="pre">wait-notify-indefinite</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#wait-notify-indefinite-critical"><code class="docutils literal notranslate"><span class="pre">wait-notify-indefinite-critical</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ready"><code class="docutils literal notranslate"><span class="pre">ready</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#notify"><code class="docutils literal notranslate"><span class="pre">notify</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#block"><code class="docutils literal notranslate"><span class="pre">block</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#block-critical"><code class="docutils literal notranslate"><span class="pre">block-critical</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#wait-notify"><code class="docutils literal notranslate"><span class="pre">wait-notify</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#wait-notify-critical"><code class="docutils literal notranslate"><span class="pre">wait-notify-critical</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#prepare-block"><code class="docutils literal notranslate"><span class="pre">prepare-block</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#timed-out"><code class="docutils literal notranslate"><span class="pre">timed-out?</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#x-timed-out"><code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code></a></li>
