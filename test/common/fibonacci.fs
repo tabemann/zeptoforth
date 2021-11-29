@@ -29,7 +29,7 @@ begin-module forth-module
   ;
 
   \ Test the timing of multiple computations of the fibonacci sequence
-  : fibonacci-speed ( iterations times -- f )
+  : fibonacci-time ( iterations times -- f )
     systick-counter
     over 0 ?do 2 pick fibonacci 2drop loop
     0 swap systick-counter 0 swap 2swap d- rot 0 swap f/ rot drop
