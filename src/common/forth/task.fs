@@ -712,12 +712,12 @@ begin-import-module-once task-module
       2dup validate-notify
       2dup swap bit swap ['] task-notified-bitmap for-task bis!
       dup ['] task-current-notify for-task @ rot = if
-	[ schedule-critical readied or ] literal swap task-state h!
+	[ schedule-critical readied or ] literal swap task-state h! true
       else
-	drop
+	drop false
       then
     ;] critical
-    pause
+    if pause then
   ;
 
   \ Notify a task for a specified notification index, setting the notification
@@ -729,12 +729,12 @@ begin-import-module-once task-module
       dup ['] task-notify-area for-task @ 2 pick cells + >r rot r> !
       2dup swap bit swap ['] task-notified-bitmap for-task bis!
       dup ['] task-current-notify for-task @ rot = if
-	[ schedule-critical readied or ] literal swap task-state h!
+	[ schedule-critical readied or ] literal swap task-state h! true
       else
-	drop
+	drop false
       then
     ;] critical
-    pause
+    if pause then
   ;
 
   \ Notify a task for a specified notification index, updating the notification
@@ -748,12 +748,12 @@ begin-import-module-once task-module
       dup @ r> execute swap !
       2dup swap bit swap ['] task-notified-bitmap for-task bis!
       dup ['] task-current-notify for-task @ rot = if
-	[ schedule-critical readied or ] literal swap task-state h!
+	[ schedule-critical readied or ] literal swap task-state h! true
       else
-	drop
+	drop false
       then
     ;] critical
-    pause
+    if pause then
   ;
 
   \ Block a task for the specified initialized timeout
