@@ -49,11 +49,14 @@ begin-import-module-once task-module
     \ Task block timed out
     5 constant block-timed-out
 
+    \ User schedule into critical section bit
+    $4000 constant schedule-user-critical
+    
     \ Schedule into critical section bit
     $8000 constant schedule-critical
 
     \ Task state mask
-    $7FFF constant task-state-mask
+    $3FFF constant task-state-mask
     
     \ In task change
     cpu-variable cpu-in-task-change in-task-change
@@ -555,7 +558,8 @@ begin-import-module-once task-module
       dup validate-not-terminated
       tuck ['] task-systick-start for-task !
       tuck ['] task-systick-delay for-task !
-      [ delayed schedule-critical or ] literal swap task-state h!
+      [ delayed schedule-critical or schedule-user-critical or ] literal
+      swap task-state h!
     ;] critical
     pause
   ;
@@ -577,7 +581,8 @@ begin-import-module-once task-module
       dup validate-not-terminated
       tuck ['] task-systick-start for-task !
       tuck ['] task-systick-delay for-task !
-      [ blocked-timeout schedule-critical or ] literal swap task-state h!
+      [ blocked-timeout schedule-critical or schedule-user-critical or ] literal
+      swap task-state h!
     ;] critical
     pause
   ;
@@ -616,7 +621,8 @@ begin-import-module-once task-module
       swap task-systick-delay !
       begin dup bit task-notified-bitmap bit@ not while
 	dup task-current-notify !
-	[ blocked-timeout schedule-critical or ] literal
+	[ blocked-timeout schedule-critical or schedule-user-critical or ]
+	literal
 	current-task @ task-state h! end-critical pause
 	current-task @ validate-timeout
       repeat
@@ -636,7 +642,8 @@ begin-import-module-once task-module
   \ Mark a task as waiting
   : block-wait-critical ( task -- )
     dup validate-not-terminated
-    [ blocked-wait schedule-critical or ] literal swap task-state h!
+    [ blocked-wait schedule-critical or schedule-user-critical or ] literal
+    swap task-state h!
     pause
   ;
 
@@ -650,7 +657,8 @@ begin-import-module-once task-module
   \ Mark a task as blocked indefinitely and schedule as critical when done
   : block-indefinite-critical ( task -- )
     dup validate-not-terminated
-    [ blocked-indefinite schedule-critical or ] literal swap task-state h!
+    [ blocked-indefinite schedule-critical or schedule-user-critical or ]
+    literal swap task-state h!
     pause
   ;
 
@@ -683,8 +691,8 @@ begin-import-module-once task-module
       dup current-task @ validate-notify
       begin dup bit task-notified-bitmap bit@ not while
 	dup task-current-notify !
-	[ blocked-indefinite schedule-critical or ] literal
-	current-task @ task-state h! end-critical pause
+	[ blocked-indefinite schedule-critical or schedule-user-critical or ]
+	literal	current-task @ task-state h! end-critical pause
       repeat
       task-notify-area @ over cells + @
       swap bit task-notified-bitmap bic!
@@ -697,7 +705,8 @@ begin-import-module-once task-module
     [:
       dup validate-not-terminated
       dup ['] task-current-notify for-task @ -1 = if
-	dup task-state h@ schedule-critical and readied or swap task-state h!
+	dup task-state h@ [ schedule-critical schedule-user-critical or ]
+	literal and readied or swap task-state h!
       else
 	drop
       then
@@ -712,7 +721,8 @@ begin-import-module-once task-module
       2dup validate-notify
       2dup swap bit swap ['] task-notified-bitmap for-task bis!
       dup ['] task-current-notify for-task @ rot = if
-	[ schedule-critical readied or ] literal swap task-state h! true
+	dup task-state h@ schedule-user-critical and
+	[ schedule-critical readied or ] literal or swap task-state h! true
       else
 	drop false
       then
@@ -729,7 +739,8 @@ begin-import-module-once task-module
       dup ['] task-notify-area for-task @ 2 pick cells + >r rot r> !
       2dup swap bit swap ['] task-notified-bitmap for-task bis!
       dup ['] task-current-notify for-task @ rot = if
-	[ schedule-critical readied or ] literal swap task-state h! true
+	dup task-state h@ schedule-user-critical and
+	[ schedule-critical readied or ] literal or swap task-state h! true
       else
 	drop false
       then
@@ -748,7 +759,8 @@ begin-import-module-once task-module
       dup @ r> execute swap !
       2dup swap bit swap ['] task-notified-bitmap for-task bis!
       dup ['] task-current-notify for-task @ rot = if
-	[ schedule-critical readied or ] literal swap task-state h! true
+	dup task-state h@ schedule-user-critical and
+	[ schedule-critical readied or ] literal or swap task-state h! true
       else
 	drop false
       then
@@ -1153,17 +1165,25 @@ begin-import-module-once task-module
       dup current-task @ = if
 	s" running"
       else
-	dup task-state h@ task-state-mask and case
-	  readied of            s" ready" endof
-	  delayed of            s" delayed" endof
-	  blocked-timeout of    s" timeout" endof
-	  blocked-wait of       s" wait" endof
-	  blocked-indefinite of s" indefinite" endof
-	  block-timed-out of    s" timed-out" endof
-	endcase
+	dup ['] task-current-notify for-task @ -1 <> if
+	  s" to-notify"
+	else
+	  dup task-state h@ task-state-mask and case
+	    readied of            s" ready" endof
+	    delayed of            s" delayed" endof
+	    blocked-timeout of    s" timeout" endof
+	    blocked-wait of       s" wait" endof
+	    blocked-indefinite of s" indefinite" endof
+	    block-timed-out of    s" timed-out" endof
+	  endcase
+	then
       then
       tuck type 11 swap - spaces
-      task-state h@ schedule-critical and if ." yes     " else ." no      " then
+      task-state h@ schedule-user-critical and if
+	." yes     "
+      else
+	." no      "
+      then
     ;
     
     \ Dump task priority
