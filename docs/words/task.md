@@ -43,7 +43,7 @@ Note that it is not recommended to execute this while compiling to flash; rather
 
 Note that tasks may be enabled or disabled but once created exist until the MCU is rebooted.
 
-New task default to a priority of zero; to change this use `set-task-priority`.
+New task default to a priority of zero; to change this use `task-priority!`.
 
 Tasks default to having no support for notifications; notifications must be configured for tasks with `config-notify`.
 
@@ -251,12 +251,12 @@ Validate whether a task has timed out, raising `x-timed-out` if it has.
 
 Operation would block exception. Raised on attempting to carry out a non-blocking operation when blocking would normally be necessary for the equivalent blocking operation.
 
-##### `set-task-priority`
+##### `task-priority!`
 ( priority task -- )
 
 Set the priority of a task, from -32768 to 32767, with higher numbers being greater task priorities.
 
-##### `get-task-priority`
+##### `task-priority@`
 ( task -- priority )
 
 Get the priority of a task.
@@ -266,27 +266,27 @@ Get the priority of a task.
 
 The exception raised when setting an out-of-range task priority
 
-##### `set-task-saved-priority`
+##### `task-saved-priority!`
 ( priority task -- )
 
 Set the saved priority of a task, from -32768 to 32767, with higher numbers being greater task priorities.
 
-##### `get-task-saved-priority`
+##### `task-saved-priority@`
 ( task -- priority )
 
 Get the saved priority of a task.
 
-##### `set-task-timeslice`
+##### `task-timeslice!`
 ( timeslice task -- )
 
 Set the timeslice, in ticks (usually 100 us increments), of a task, indicating the minimum amount of time a task will run before being preempted. If a task does not use up all of its timeslice before it gives up control of the processor, it will start off with the remainder of its timeslice next time it has control of the processor, unless it exhausted its timeslice, where then the timeslice value is added onto the tick counter (which may be negative) to yield the new timeslice (but which may not be less than the task's minimum timeslice). Note that the default setting for this for a newly initialized task is 10.
 
-##### `get-task-timeslice`
+##### `task-timeslice@`
 ( task -- timeslice )
 
 Get the timeslice, in ticks (usually 100 us increments), of a task.
 
-##### `set-task-min-timeslice`
+##### `task-min-timeslice!`
 ( timeslice task -- )
 
 Set the minimum timeslice, in ticks (usually 100 us increments), that a task will be guaranteed to run when scheduled, regardless of how many ticks the task executed for the last time it was scheduled. For instance, to ensure that each time a task will run for at least 10 ticks each time it is scheduled, this should be set to 10. By default, this value is set to 0 for each task, such that a given task is not guaranteed to not be descheduled immediately on a SysTick if it had already used up both its timeslice and also the next timeslice (through, e.g., spending time in critical sections).
@@ -296,19 +296,19 @@ Set the minimum timeslice, in ticks (usually 100 us increments), that a task wil
 
 Getet the minimum timeslice, in ticks (usually 100 us increments), that a task will be guaranteed to run when scheduled, regardless of how many ticks the task executed for the last time it was scheduled.
 
-##### `get-task-active`
+##### `task-active@`
 ( task -- level )
 
 Get the activation level of a task, with values 0 and lower indicating that a task is inactive, and values 1 and greater indicating that a task is active.
 
 The simplest case of delaying a task is simply to execute:
 
-##### `get-task-name`
+##### `task-name@`
 ( task -- addr )
 
 Get the name of a task as a counted string; an address of zero indicates no name is set.
 
-##### `set-task-name`
+##### `task-name!`
 ( addr task -- )
 
 Set the name of a task as a counted string; an address of zero indicates to set no name.

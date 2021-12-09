@@ -321,7 +321,7 @@ begin-import-module-once task-module
   ;
 
   \ Get task priority
-  : get-task-priority ( task -- priority )
+  : task-priority@ ( task -- priority )
     task-priority h@ 16 lshift 16 arshift
   ;
 
@@ -340,10 +340,10 @@ begin-import-module-once task-module
     \ Find the next task with a higher priority; 0 returned indicates no task
     \ exists with a higher priority.
     : find-higher-priority ( task -- higher-task )
-      get-task-priority >r
+      task-priority@ >r
       last-task @ begin
 	dup 0<> if
-	  dup get-task-priority r@ < if task-next @ false else true then
+	  dup task-priority@ r@ < if task-next @ false else true then
 	else
 	  true
 	then
@@ -442,31 +442,31 @@ begin-import-module-once task-module
   : validate-timeout ( task -- ) timed-out? triggers x-timed-out ;
 
   \ Get task active state
-  : get-task-active ( task -- active )
+  : task-active@ ( task -- active )
     task-active h@ 16 lshift 16 arshift
   ;
 
   \ Get saved task priority
-  : get-task-saved-priority ( task -- priority )
+  : task-saved-priority@ ( task -- priority )
     task-saved-priority h@
   ;
 
   \ Set task priority
-  : set-task-priority ( priority task -- )
+  : task-priority! ( priority task -- )
     over -32768 < triggers x-out-of-range-priority
     over 32767 > triggers x-out-of-range-priority
     task-priority h!
   ;
 
   \ Set task saved priority
-  : set-task-saved-priority ( priority task -- )
+  : task-saved-priority! ( priority task -- )
     over -32768 < triggers x-out-of-range-priority
     over 32767 > triggers x-out-of-range-priority
     task-saved-priority h!
   ;
 
   \ Set task timeslice
-  : set-task-timeslice ( timeslice task -- )
+  : task-timeslice! ( timeslice task -- )
     disable-int
     dup validate-not-terminated
     dup current-task @ = if
@@ -478,36 +478,36 @@ begin-import-module-once task-module
   ;
 
   \ Get task timeslice
-  : get-task-timeslice ( task -- timeslice )
+  : task-timeslice@ ( task -- timeslice )
     dup validate-not-terminated ['] task-timeslice for-task @
   ;
 
   \ Set task minimum timeslice
-  : set-task-min-timeslice ( min-timeslice task -- )
+  : task-min-timeslice! ( min-timeslice task -- )
     dup validate-not-terminated ['] task-min-timeslice for-task !
   ;
 
   \ Get task minimum timeslice
-  : get-task-min-timeslice ( task -- min-timeslice )
+  : task-min-timeslice@ ( task -- min-timeslice )
     dup validate-not-terminated ['] task-min-timeslice for-task @
   ;
 
   \ Get a task's name as a counted string; an address of zero indicates no name
   \ is set.
-  : get-task-name ( task -- addr )
+  : task-name@ ( task -- addr )
     dup validate-not-terminated ['] task-name for-task @
   ;
 
   \ Set a task's name as a counted string; an address of zero indicates to set
   \ no name.
-  : set-task-name ( addr -- task )
+  : task-name! ( addr -- task )
     dup validate-not-terminated ['] task-name for-task !
   ;
 
   \ Start a task's execution
   : run ( task -- )
     dup start-validate-task-change
-    dup get-task-active 1+
+    dup task-active@ 1+
     dup 1 = if over test-remove-task over insert-task then
     swap task-active h!
     false in-task-change !
@@ -516,7 +516,7 @@ begin-import-module-once task-module
   \ Stop a task's execution
   : stop ( task -- )
     dup start-validate-task-change
-    dup get-task-active 1-
+    dup task-active@ 1-
     swap task-active h!
     false in-task-change !
   ;
@@ -766,6 +766,24 @@ begin-import-module-once task-module
       then
     ;] critical
     if pause then
+  ;
+
+  \ Get the contents of a notification mailbox without waiting on it
+  : mailbox@ ( notify-index task -- x )
+    [:
+      dup validate-not-terminated
+      2dup validate-notify
+      ['] task-notify-area for-task @ swap cells + @
+    ;] critical
+  ;
+
+  \ Set the contents of a notification mailbox without notifying a task
+  : mailbox! ( x notify-index task -- )
+    [:
+      dup validate-not-terminated
+      2dup validate-notify
+      ['] task-notify-area for-task @ swap cells + !
+    ;] critical
   ;
 
   \ Block a task for the specified initialized timeout
@@ -1067,7 +1085,7 @@ begin-import-module-once task-module
     : reschedule-task ( task -- )
       true in-task-change !
       dup remove-task
-      dup get-task-active 0> if insert-task else drop then
+      dup task-active@ 0> if insert-task else drop then
       false in-task-change !
     ;
 
@@ -1096,7 +1114,7 @@ begin-import-module-once task-module
 	  wake-tasks @ if actually-wake-tasks false wake-tasks ! then
 	  begin
 	    find-next-task dup 0<> if
-	      dup get-task-active 1 < if
+	      dup task-active@ 1 < if
 		remove-task false
 	      else
 		dup task-state h@ schedule-critical and if
@@ -1157,7 +1175,7 @@ begin-import-module-once task-module
     
     \ Dump task name
     : dump-task-name ( task -- )
-      get-task-name ?dup if count tuck type 16 swap - 0 max else 16 then spaces
+      task-name@ ?dup if count tuck type 16 swap - 0 max else 16 then spaces
     ;
     
     \ Dump task state
@@ -1188,7 +1206,7 @@ begin-import-module-once task-module
     
     \ Dump task priority
     : dump-task-priority ( task -- )
-      get-task-priority here swap format-integer dup 8 swap - spaces type
+      task-priority@ here swap format-integer dup 8 swap - spaces type
     ;
     
     \ Dump task until time
