@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2021 Travis Bemann
+\ Copyright (c) 2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -21,46 +21,20 @@
 begin-module forth-module
 
   import task-module
-  import lock-module
+  
+  \ The test task
+  variable test-task
 
-  \ Our lock
-  lock-size buffer: my-lock
+  \ The test mailboxes
+  1 cells buffer: test-mailboxes
 
-  \ Our tasks
-  variable low-task
-  variable high-task
-
-  \ Our higher-priority task loop
-  : high ( -- )
-    begin
-      500000 0 ?do loop
-      my-lock lock
-      500000 0 ?do loop
-      [: my-lock unlock ;] try if space ." A " then
-    again
-  ;
-
-  \ Our lower-priority task loop
-  : low ( -- )
-    begin
-      my-lock lock
-      10 0 ?do
-	50000 0 ?do loop
-	current-task task-priority@ . space
-      loop
-      [: my-lock unlock ;] try if space ." B " then
-    again
-  ;
-
-  \ Initialize the test
+  \ Initiate the test
   : init-test ( -- )
-    my-lock init-lock
-    0 ['] low 320 128 512 spawn low-task !
-    0 ['] high 320 128 512 spawn high-task !
-    1 high-task @ task-priority!
-    low-task @ run
-    500000 0 ?do loop
-    high-task @ run
+    0 [: begin again ;] 320 128 512 spawn test-task !
+    c" test" test-task @ task-name!
+    test-mailboxes 1 test-task @ config-notify
+    255 0 test-task @ mailbox!
+    0 test-task @ mailbox@ .
   ;
-
+  
 end-module

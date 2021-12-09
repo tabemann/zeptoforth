@@ -57,8 +57,8 @@ begin-module forth-module
 
   \ Initiate the test
   : init-test ( -- )
-    c" consumer" consumer-task @ set-task-name
-    c" producer" producer-task @ set-task-name
+    c" consumer" consumer-task @ task-name!
+    c" producer" producer-task @ task-name!
     consumer-mailboxes 1 consumer-task @ config-notify
     producer-mailboxes 1 producer-task @ config-notify
     consumer-task @ run

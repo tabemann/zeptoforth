@@ -60,8 +60,8 @@ begin-module forth-module
     my-in-fchan init-fchan
     0 ['] high 320 128 512 spawn high-task !
     0 ['] low 320 128 512 spawn low-task !
-    1 high-task @ set-task-priority
-    0 low-task @ set-task-priority
+    1 high-task @ task-priority!
+    0 low-task @ task-priority!
     begin-critical
     high-task @ run
     low-task @ run

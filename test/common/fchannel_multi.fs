@@ -43,7 +43,7 @@ begin-module forth-module
 
   \ The inner loop of a producer
   : do-producer ( -- )
-    does> @ execute dup current-task set-task-name
+    does> @ execute dup current-task task-name!
     cr ." Producer: " dup count type
     ." : " current-task h.8
     begin

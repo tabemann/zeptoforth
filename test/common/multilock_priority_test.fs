@@ -31,7 +31,7 @@ begin-module forth-module
   \ Create a locking task word
   : locker ( priority ms lock "name" -- )
     <builds , , , does>
-    dup @ swap cell + dup @ ms cell + @ current-task set-task-priority
+    dup @ swap cell + dup @ ms cell + @ current-task task-priority!
     dup lock unlock begin 1000 ms again
     current-task kill
   ;
@@ -40,7 +40,7 @@ begin-module forth-module
   : monitor-priority ( tests interval -- )
     swap 0 ?do
       dup ms
-      current-task get-task-priority .
+      current-task task-priority@ .
     loop
     drop
   ;

@@ -41,9 +41,9 @@ begin-module forth-module
     0 ['] highest 320 128 512 spawn highest-task !
     0 ['] middle 320 128 512 spawn middle-task !
     0 ['] lowest 320 128 512 spawn lowest-task !
-    -1 lowest-task @ set-task-priority
-    0 middle-task @ set-task-priority
-    1 highest-task @ set-task-priority
+    -1 lowest-task @ task-priority!
+    0 middle-task @ task-priority!
+    1 highest-task @ task-priority!
     begin-critical
     lowest-task @ run
     middle-task @ run
