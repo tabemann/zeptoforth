@@ -49,8 +49,8 @@ begin-module forth-module
     my-fchan init-fchan
     0 ['] consumer 320 128 512 spawn consumer-task !
     0 ['] producer 320 128 512 spawn producer-task !
-    c" consumer" consumer-task @ set-task-name
-    c" producer" producer-task @ set-task-name
+    c" consumer" consumer-task @ task-name!
+    c" producer" producer-task @ task-name!
     consumer-task @ run
     producer-task @ run
   ;

@@ -138,7 +138,7 @@ begin-module-once temp-module
     EXTI_2 NVIC_ISER_SETENA!
     true 2 EXTI_FTSR!
     0 ['] temp-tracker 320 128 512 spawn temp-task !
-    1 temp-task @ set-task-priority
+    1 temp-task @ task-priority!
     temp-task @ run
   ;
 
@@ -163,7 +163,7 @@ begin-module-once temp-module
   : start-display-temps ( count -- )
     dup sensor-count u> triggers x-sensor-out-of-range
     1 ['] display-temps 320 128 512 spawn display-temps-task !
-    0 display-temps-task @ set-task-priority
+    0 display-temps-task @ task-priority!
     display-temps-task @ run
   ;
 

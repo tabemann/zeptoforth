@@ -76,8 +76,8 @@ begin-module forth-module
   : init-test ( -- )
     0 send-count !
     systick-counter start-systick !
-    c" target" target-task @ set-task-name
-    c" source" source-task @ set-task-name
+    c" target" target-task @ task-name!
+    c" source" source-task @ task-name!
     target-mailboxes 1 target-task @ config-notify
     source-mailboxes 1 source-task @ config-notify
     target-task @ run

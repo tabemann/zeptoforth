@@ -62,7 +62,7 @@ begin-module forth-module
       lock-b lock
       10 0 ?do
 	1000 ms
-	current-task get-task-priority . space
+	current-task task-priority@ . space
       loop
       lock-b unlock
     again
@@ -75,9 +75,9 @@ begin-module forth-module
     0 ['] low 320 128 512 spawn low-task !
     0 ['] middle 320 128 512 spawn middle-task !
     0 ['] high 320 128 512 spawn high-task !
-    2 high-task @ set-task-priority
-    1 middle-task @ set-task-priority
-    0 low-task @ set-task-priority
+    2 high-task @ task-priority!
+    1 middle-task @ task-priority!
+    0 low-task @ task-priority!
     begin-critical
     low-task @ run
     middle-task @ run
