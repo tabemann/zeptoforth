@@ -1168,7 +1168,7 @@ _recurse:
 	end_inlined
 	
 	@@ Unknown word exception
-	define_word "unknown-word", visible_flag
+	define_word "x-unknown-word", visible_flag
 _unknown_word:
 	push {lr}
 	string_ln " unknown word"
