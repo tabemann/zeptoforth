@@ -51,6 +51,11 @@
 <p>( – )</p>
 <p>Module not found exception.</p>
 </section>
+<section id="id1">
+<h2><code class="docutils literal notranslate"><span class="pre">^</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>( ? “module-name-0” … “module-name-x” “::” “word-name” – ? )</p>
+<p>Reference word <em>word-name</em> in a specified module <em>module-name-x</em>, which may be nested within any number of containing modules, where the first module referenced <em>module-name-0</em> must be within the current order, and apply it to the current compilation/interpretation state. <code class="docutils literal notranslate"><span class="pre">::</span></code> separates the innermost module <em>module-name-x</em>, from <em>word-name</em>. This is an immediate word, and the referenced word will be folded or inlined as if it were compiled normally.</p>
+</section>
 <section id="begin-module">
 <h2><code class="docutils literal notranslate"><span class="pre">begin-module</span></code><a class="headerlink" href="#begin-module" title="Permalink to this headline">¶</a></h2>
 <p>( “name” – )</p>
@@ -111,6 +116,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Module Words</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#x-module-already-defined"><code class="docutils literal notranslate"><span class="pre">x-module-already-defined</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#x-module-not-found"><code class="docutils literal notranslate"><span class="pre">x-module-not-found</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">^</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#begin-module"><code class="docutils literal notranslate"><span class="pre">begin-module</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#begin-module-once"><code class="docutils literal notranslate"><span class="pre">begin-module-once</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#begin-import-module"><code class="docutils literal notranslate"><span class="pre">begin-import-module</span></code></a></li>

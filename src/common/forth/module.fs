@@ -149,7 +149,7 @@ commit-flash
 
 \ Begin a module definition
 : begin-module ( "name" -- )
-  token 2dup visible-flag find-all ?dup if
+  token 2dup visible-flag find ?dup if
     nip nip >body execute
   else
     wordlist dup >r -rot constant-with-name r>
@@ -161,7 +161,7 @@ commit-flash
 
 \ Begin a once-defined module definition
 : begin-module-once ( "name" -- )
-  token 2dup visible-flag find-all ?dup if
+  token 2dup visible-flag find ?dup if
     ['] x-module-already-defined ?raise
   else
     wordlist dup >r -rot constant-with-name r>
@@ -173,7 +173,7 @@ commit-flash
 
 \ Begin a module definition and import it
 : begin-import-module ( "name" -- )
-  token 2dup visible-flag find-all ?dup if
+  token 2dup visible-flag find ?dup if
     nip nip >body execute
   else
     wordlist dup >r -rot constant-with-name r>
@@ -185,7 +185,7 @@ commit-flash
 
 \ Begin a once-defined module definition and import it
 : begin-import-module-once ( "name" -- )
-  token 2dup visible-flag find-all ?dup if
+  token 2dup visible-flag find ?dup if
     ['] x-module-already-defined ?raise
   else
     wordlist dup >r -rot constant-with-name r>
@@ -200,7 +200,7 @@ commit-flash
 
 \ Import a module
 : import ( "name" -- )
-  token visible-flag find-all ?dup if
+  token visible-flag find ?dup if
     >body execute add-module
   else
     ['] x-module-not-found ?raise
@@ -209,11 +209,31 @@ commit-flash
 
 \ Unimport a module
 : unimport ( "name" -- )
-  token visible-flag find-all ?dup if
+  token visible-flag find ?dup if
     >body execute remove-module
   else
     ['] x-module-not-found ?raise
   then
+;
+
+\ Execute or compile a particular word in a provided module
+: ^ ( "module-name" "word-name" -- )
+  [immediate]
+  get-order dup begin ?dup while 1- rot >r repeat >r
+  [:
+    begin
+      token 2dup s" ::" equal-strings? not if
+	visible-flag find ?dup if
+	  >body execute 1 set-order
+	else
+	  ['] x-module-not-found ?raise
+	then
+	false
+      else
+	2drop token-word true
+      then
+    until
+  ;] try r> dup begin ?dup while 1- r> -rot repeat set-order ?raise apply
 ;
 
 \ Initialize

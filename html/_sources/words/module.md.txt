@@ -22,6 +22,11 @@ Module already defined exception.
 
 Module not found exception.
 
+##### `^`
+( ? "module-name-0" ... "module-name-x" "::" "word-name" -- ? )
+
+Reference word *word-name* in a specified module *module-name-x*, which may be nested within any number of containing modules, where the first module referenced *module-name-0* must be within the current order, and apply it to the current compilation/interpretation state. `::` separates the innermost module *module-name-x*, from *word-name*. This is an immediate word, and the referenced word will be folded or inlined as if it were compiled normally.
+
 ##### `begin-module`
 ( "name" -- )
 
