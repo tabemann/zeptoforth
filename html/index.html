@@ -315,6 +315,7 @@
 <li class="toctree-l2"><a class="reference internal" href="words/basic.html#find"><code class="docutils literal notranslate"><span class="pre">find</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/basic.html#find-all"><code class="docutils literal notranslate"><span class="pre">find-all</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/basic.html#body"><code class="docutils literal notranslate"><span class="pre">&gt;body</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/basic.html#apply"><code class="docutils literal notranslate"><span class="pre">apply</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/basic.html#evaluate"><code class="docutils literal notranslate"><span class="pre">evaluate</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/basic.html#abort"><code class="docutils literal notranslate"><span class="pre">abort</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/basic.html#quit"><code class="docutils literal notranslate"><span class="pre">quit</span></code></a></li>
@@ -397,6 +398,7 @@
 <li class="toctree-l1"><a class="reference internal" href="words/module.html">Module Words</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="words/module.html#x-module-already-defined"><code class="docutils literal notranslate"><span class="pre">x-module-already-defined</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/module.html#x-module-not-found"><code class="docutils literal notranslate"><span class="pre">x-module-not-found</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/module.html#id1"><code class="docutils literal notranslate"><span class="pre">^</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/module.html#begin-module"><code class="docutils literal notranslate"><span class="pre">begin-module</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/module.html#begin-module-once"><code class="docutils literal notranslate"><span class="pre">begin-module-once</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/module.html#begin-import-module"><code class="docutils literal notranslate"><span class="pre">begin-import-module</span></code></a></li>
@@ -489,18 +491,18 @@
 <li class="toctree-l2"><a class="reference internal" href="words/task.html#x-timed-out"><code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/task.html#validate-timeout"><code class="docutils literal notranslate"><span class="pre">validate-timeout</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/task.html#x-would-block"><code class="docutils literal notranslate"><span class="pre">x-would-block</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="words/task.html#set-task-priority"><code class="docutils literal notranslate"><span class="pre">set-task-priority</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="words/task.html#get-task-priority"><code class="docutils literal notranslate"><span class="pre">get-task-priority</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/task.html#task-priority"><code class="docutils literal notranslate"><span class="pre">task-priority!</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/task.html#id3"><code class="docutils literal notranslate"><span class="pre">task-priority&#64;</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/task.html#x-out-of-range-priority"><code class="docutils literal notranslate"><span class="pre">x-out-of-range-priority</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="words/task.html#set-task-saved-priority"><code class="docutils literal notranslate"><span class="pre">set-task-saved-priority</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="words/task.html#get-task-saved-priority"><code class="docutils literal notranslate"><span class="pre">get-task-saved-priority</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="words/task.html#set-task-timeslice"><code class="docutils literal notranslate"><span class="pre">set-task-timeslice</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="words/task.html#get-task-timeslice"><code class="docutils literal notranslate"><span class="pre">get-task-timeslice</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="words/task.html#set-task-min-timeslice"><code class="docutils literal notranslate"><span class="pre">set-task-min-timeslice</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/task.html#task-saved-priority"><code class="docutils literal notranslate"><span class="pre">task-saved-priority!</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/task.html#id4"><code class="docutils literal notranslate"><span class="pre">task-saved-priority&#64;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/task.html#task-timeslice"><code class="docutils literal notranslate"><span class="pre">task-timeslice!</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/task.html#id5"><code class="docutils literal notranslate"><span class="pre">task-timeslice&#64;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/task.html#task-min-timeslice"><code class="docutils literal notranslate"><span class="pre">task-min-timeslice!</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/task.html#get-task-max-timeslice"><code class="docutils literal notranslate"><span class="pre">get-task-max-timeslice</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="words/task.html#get-task-active"><code class="docutils literal notranslate"><span class="pre">get-task-active</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="words/task.html#get-task-name"><code class="docutils literal notranslate"><span class="pre">get-task-name</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="words/task.html#set-task-name"><code class="docutils literal notranslate"><span class="pre">set-task-name</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/task.html#task-active"><code class="docutils literal notranslate"><span class="pre">task-active&#64;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/task.html#task-name"><code class="docutils literal notranslate"><span class="pre">task-name&#64;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="words/task.html#id6"><code class="docutils literal notranslate"><span class="pre">task-name!</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/task.html#dump-tasks"><code class="docutils literal notranslate"><span class="pre">dump-tasks</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/task.html#enable-trace"><code class="docutils literal notranslate"><span class="pre">enable-trace</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="words/task.html#disable-trace"><code class="docutils literal notranslate"><span class="pre">disable-trace</span></code></a></li>

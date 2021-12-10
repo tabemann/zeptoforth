@@ -79,6 +79,9 @@ forth-module set-current
 \ Inlined flag
 8 constant inlined-flag
 
+\ Folded flag
+16 constant fold-flag
+
 \ DMB instruction
 : dmb ( -- ) [inlined] [ undefer-lit $F3BF h, $8F5F h, ] ;
 
@@ -391,6 +394,29 @@ commit-flash
 
 \ Set forth
 forth-module set-current
+
+\ Express the semantics of a word in the present compilation/interpretation
+\ state
+: apply ( ? word -- ? )
+  state @ if
+    dup word-flags h@ dup immediate-flag and if
+      drop >body execute
+    else
+      dup inlined-flag and if
+	drop >body inline,
+      else
+	fold-flag and if
+	  >body fold,
+	else
+	  >body compile,
+	then
+      then
+    then
+  else
+    dup word-flags h@ compiled-flag and triggers x-not-compiling
+    >body execute
+  then
+;
 
 \ Lookup a word by its prefix
 : lookup ( "name" -- )

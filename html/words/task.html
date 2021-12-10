@@ -68,7 +68,7 @@
 <p>where <em>xn</em> through <em>x0</em> are parameters to pass to the <em>xt</em> when executed, <em>count</em> is the number of such parameters, <em>xt</em> is the entry point to the task, <em>dictionary-size</em> is the size of the dictionary for the spawned task in bytes, <em>stack-size</em> is the size of the data stack for the spawned task in bytes, <em>rstack-size</em> is the size of the return stack for the spawned task in bytes, and <em>task</em> is the header for the newly spawned task. <em>dictionary-size</em>, <em>stack-size</em>, and <em>rstack-size</em> must be multiples of four I have had good luck with values of 256 for each of these; I do not know how well smaller values will work out, especially in the case of <em>rstack-size</em>, where too small of a size will almost certainly result in a crash. This in turn returns a pointer to the task header on the stack, which can then be stored in a variable or constant.</p>
 <p>Note that it is not recommended to execute this while compiling to flash; rather, it should be put in the <code class="docutils literal notranslate"><span class="pre">init</span></code> routine and then the result should be stored to a variable in RAM.</p>
 <p>Note that tasks may be enabled or disabled but once created exist until the MCU is rebooted.</p>
-<p>New task default to a priority of zero; to change this use <code class="docutils literal notranslate"><span class="pre">set-task-priority</span></code>.</p>
+<p>New task default to a priority of zero; to change this use <code class="docutils literal notranslate"><span class="pre">task-priority!</span></code>.</p>
 <p>Tasks default to having no support for notifications; notifications must be configured for tasks with <code class="docutils literal notranslate"><span class="pre">config-notify</span></code>.</p>
 <p>Uncaught exceptions within a task will be handled, with the message for them being displayed, but they will result in said task being terminated.</p>
 </section>
@@ -268,13 +268,13 @@
 <p>( – )</p>
 <p>Operation would block exception. Raised on attempting to carry out a non-blocking operation when blocking would normally be necessary for the equivalent blocking operation.</p>
 </section>
-<section id="set-task-priority">
-<h2><code class="docutils literal notranslate"><span class="pre">set-task-priority</span></code><a class="headerlink" href="#set-task-priority" title="Permalink to this headline">¶</a></h2>
+<section id="task-priority">
+<h2><code class="docutils literal notranslate"><span class="pre">task-priority!</span></code><a class="headerlink" href="#task-priority" title="Permalink to this headline">¶</a></h2>
 <p>( priority task – )</p>
 <p>Set the priority of a task, from -32768 to 32767, with higher numbers being greater task priorities.</p>
 </section>
-<section id="get-task-priority">
-<h2><code class="docutils literal notranslate"><span class="pre">get-task-priority</span></code><a class="headerlink" href="#get-task-priority" title="Permalink to this headline">¶</a></h2>
+<section id="id3">
+<h2><code class="docutils literal notranslate"><span class="pre">task-priority&#64;</span></code><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
 <p>( task – priority )</p>
 <p>Get the priority of a task.</p>
 </section>
@@ -283,28 +283,28 @@
 <p>( – )</p>
 <p>The exception raised when setting an out-of-range task priority</p>
 </section>
-<section id="set-task-saved-priority">
-<h2><code class="docutils literal notranslate"><span class="pre">set-task-saved-priority</span></code><a class="headerlink" href="#set-task-saved-priority" title="Permalink to this headline">¶</a></h2>
+<section id="task-saved-priority">
+<h2><code class="docutils literal notranslate"><span class="pre">task-saved-priority!</span></code><a class="headerlink" href="#task-saved-priority" title="Permalink to this headline">¶</a></h2>
 <p>( priority task – )</p>
 <p>Set the saved priority of a task, from -32768 to 32767, with higher numbers being greater task priorities.</p>
 </section>
-<section id="get-task-saved-priority">
-<h2><code class="docutils literal notranslate"><span class="pre">get-task-saved-priority</span></code><a class="headerlink" href="#get-task-saved-priority" title="Permalink to this headline">¶</a></h2>
+<section id="id4">
+<h2><code class="docutils literal notranslate"><span class="pre">task-saved-priority&#64;</span></code><a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
 <p>( task – priority )</p>
 <p>Get the saved priority of a task.</p>
 </section>
-<section id="set-task-timeslice">
-<h2><code class="docutils literal notranslate"><span class="pre">set-task-timeslice</span></code><a class="headerlink" href="#set-task-timeslice" title="Permalink to this headline">¶</a></h2>
+<section id="task-timeslice">
+<h2><code class="docutils literal notranslate"><span class="pre">task-timeslice!</span></code><a class="headerlink" href="#task-timeslice" title="Permalink to this headline">¶</a></h2>
 <p>( timeslice task – )</p>
 <p>Set the timeslice, in ticks (usually 100 us increments), of a task, indicating the minimum amount of time a task will run before being preempted. If a task does not use up all of its timeslice before it gives up control of the processor, it will start off with the remainder of its timeslice next time it has control of the processor, unless it exhausted its timeslice, where then the timeslice value is added onto the tick counter (which may be negative) to yield the new timeslice (but which may not be less than the task’s minimum timeslice). Note that the default setting for this for a newly initialized task is 10.</p>
 </section>
-<section id="get-task-timeslice">
-<h2><code class="docutils literal notranslate"><span class="pre">get-task-timeslice</span></code><a class="headerlink" href="#get-task-timeslice" title="Permalink to this headline">¶</a></h2>
+<section id="id5">
+<h2><code class="docutils literal notranslate"><span class="pre">task-timeslice&#64;</span></code><a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
 <p>( task – timeslice )</p>
 <p>Get the timeslice, in ticks (usually 100 us increments), of a task.</p>
 </section>
-<section id="set-task-min-timeslice">
-<h2><code class="docutils literal notranslate"><span class="pre">set-task-min-timeslice</span></code><a class="headerlink" href="#set-task-min-timeslice" title="Permalink to this headline">¶</a></h2>
+<section id="task-min-timeslice">
+<h2><code class="docutils literal notranslate"><span class="pre">task-min-timeslice!</span></code><a class="headerlink" href="#task-min-timeslice" title="Permalink to this headline">¶</a></h2>
 <p>( timeslice task – )</p>
 <p>Set the minimum timeslice, in ticks (usually 100 us increments), that a task will be guaranteed to run when scheduled, regardless of how many ticks the task executed for the last time it was scheduled. For instance, to ensure that each time a task will run for at least 10 ticks each time it is scheduled, this should be set to 10. By default, this value is set to 0 for each task, such that a given task is not guaranteed to not be descheduled immediately on a SysTick if it had already used up both its timeslice and also the next timeslice (through, e.g., spending time in critical sections).</p>
 </section>
@@ -313,19 +313,19 @@
 <p>( task – timeslice )</p>
 <p>Getet the minimum timeslice, in ticks (usually 100 us increments), that a task will be guaranteed to run when scheduled, regardless of how many ticks the task executed for the last time it was scheduled.</p>
 </section>
-<section id="get-task-active">
-<h2><code class="docutils literal notranslate"><span class="pre">get-task-active</span></code><a class="headerlink" href="#get-task-active" title="Permalink to this headline">¶</a></h2>
+<section id="task-active">
+<h2><code class="docutils literal notranslate"><span class="pre">task-active&#64;</span></code><a class="headerlink" href="#task-active" title="Permalink to this headline">¶</a></h2>
 <p>( task – level )</p>
 <p>Get the activation level of a task, with values 0 and lower indicating that a task is inactive, and values 1 and greater indicating that a task is active.</p>
 <p>The simplest case of delaying a task is simply to execute:</p>
 </section>
-<section id="get-task-name">
-<h2><code class="docutils literal notranslate"><span class="pre">get-task-name</span></code><a class="headerlink" href="#get-task-name" title="Permalink to this headline">¶</a></h2>
+<section id="task-name">
+<h2><code class="docutils literal notranslate"><span class="pre">task-name&#64;</span></code><a class="headerlink" href="#task-name" title="Permalink to this headline">¶</a></h2>
 <p>( task – addr )</p>
 <p>Get the name of a task as a counted string; an address of zero indicates no name is set.</p>
 </section>
-<section id="set-task-name">
-<h2><code class="docutils literal notranslate"><span class="pre">set-task-name</span></code><a class="headerlink" href="#set-task-name" title="Permalink to this headline">¶</a></h2>
+<section id="id6">
+<h2><code class="docutils literal notranslate"><span class="pre">task-name!</span></code><a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
 <p>( addr task – )</p>
 <p>Set the name of a task as a counted string; an address of zero indicates to set no name.</p>
 </section>
@@ -423,18 +423,18 @@
 <li class="toctree-l2"><a class="reference internal" href="#x-timed-out"><code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#validate-timeout"><code class="docutils literal notranslate"><span class="pre">validate-timeout</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#x-would-block"><code class="docutils literal notranslate"><span class="pre">x-would-block</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#set-task-priority"><code class="docutils literal notranslate"><span class="pre">set-task-priority</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#get-task-priority"><code class="docutils literal notranslate"><span class="pre">get-task-priority</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#task-priority"><code class="docutils literal notranslate"><span class="pre">task-priority!</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3"><code class="docutils literal notranslate"><span class="pre">task-priority&#64;</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#x-out-of-range-priority"><code class="docutils literal notranslate"><span class="pre">x-out-of-range-priority</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#set-task-saved-priority"><code class="docutils literal notranslate"><span class="pre">set-task-saved-priority</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#get-task-saved-priority"><code class="docutils literal notranslate"><span class="pre">get-task-saved-priority</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#set-task-timeslice"><code class="docutils literal notranslate"><span class="pre">set-task-timeslice</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#get-task-timeslice"><code class="docutils literal notranslate"><span class="pre">get-task-timeslice</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#set-task-min-timeslice"><code class="docutils literal notranslate"><span class="pre">set-task-min-timeslice</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#task-saved-priority"><code class="docutils literal notranslate"><span class="pre">task-saved-priority!</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4"><code class="docutils literal notranslate"><span class="pre">task-saved-priority&#64;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#task-timeslice"><code class="docutils literal notranslate"><span class="pre">task-timeslice!</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5"><code class="docutils literal notranslate"><span class="pre">task-timeslice&#64;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#task-min-timeslice"><code class="docutils literal notranslate"><span class="pre">task-min-timeslice!</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#get-task-max-timeslice"><code class="docutils literal notranslate"><span class="pre">get-task-max-timeslice</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#get-task-active"><code class="docutils literal notranslate"><span class="pre">get-task-active</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#get-task-name"><code class="docutils literal notranslate"><span class="pre">get-task-name</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#set-task-name"><code class="docutils literal notranslate"><span class="pre">set-task-name</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#task-active"><code class="docutils literal notranslate"><span class="pre">task-active&#64;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#task-name"><code class="docutils literal notranslate"><span class="pre">task-name&#64;</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id6"><code class="docutils literal notranslate"><span class="pre">task-name!</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#dump-tasks"><code class="docutils literal notranslate"><span class="pre">dump-tasks</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#enable-trace"><code class="docutils literal notranslate"><span class="pre">enable-trace</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#disable-trace"><code class="docutils literal notranslate"><span class="pre">disable-trace</span></code></a></li>
