@@ -23,7 +23,7 @@ compile-to-flash
 
 compress-flash
 
-begin-module-once fchan-module
+begin-module fchan-module
 
   import task-module
   import tqueue-module
@@ -56,9 +56,6 @@ begin-module-once fchan-module
     end-structure
 
   end-module
-
-  \ Get the fast channel size
-  fchan-size constant fchan-size
 
   \ Fast channel is closed exception
   : x-fchan-closed ( -- ) space ." fchannel is closed" cr ;
@@ -158,6 +155,9 @@ begin-module-once fchan-module
 
   \ Reopen a fast channel
   : reopen-fchan ( fchan -- ) false swap fchan-closed ! ;
+
+  \ Export the fchannel size
+  export fchan-size
 
 end-module
 

@@ -23,7 +23,7 @@ compile-to-flash
 
 compress-flash
 
-begin-module-once temp-module
+begin-module temp-module
 
   \ Data size is larger than temporary buffer size exception
   : x-data-too-big ( -- ) space ." data too big" cr ;
@@ -45,9 +45,6 @@ begin-module-once temp-module
 
   commit-flash
   
-  \ Get the size of a temporary buffer with a given data size
-  : temp-size ( data-bytes -- bytes ) [inlined] temp-size + ;
-
   \ Initialize a temporary buffer of the given data size
   : init-temp ( data-bytes addr -- ) tuck temp-data-size ! 0 swap temp-index ! ;
   
@@ -59,6 +56,9 @@ begin-module-once temp-module
     then
     dup temp-index @ over + temp-size + -rot temp-index +!
   ;
+
+  \ Get the size of a temporary buffer with a given data size
+  : temp-size ( data-bytes -- bytes ) [inlined] temp-size + ;
 
 end-module
 

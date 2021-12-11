@@ -21,7 +21,7 @@
 \ Compile this to RAM
 compile-to-ram
 
-begin-module forth-module
+continue-module forth-module
 
   import task-module
   

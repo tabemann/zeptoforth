@@ -21,7 +21,7 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-import-module-once task-module
+begin-import-module task-module
 
   import internal-module
   import interrupt-module
@@ -241,7 +241,7 @@ begin-import-module-once task-module
   \ Sleep
   : sleep ( -- ) sleep-enabled? @ if sleep then ;
 
-  begin-module task-internal-module
+  continue-module task-internal-module
 
     \ Get task stack base
     : task-stack-base ( task -- addr )
@@ -330,7 +330,7 @@ begin-import-module-once task-module
     task-active h@ terminated = triggers x-terminated
   ;
 
-  begin-module task-internal-module
+  continue-module task-internal-module
 
     \ Validate a notification index
     : validate-notify ( notify-index task -- )
@@ -856,7 +856,7 @@ begin-import-module-once task-module
   \ Get whether a task has terminated
   : terminated? ( task -- terminated ) task-active h@ terminated = ;
 
-  begin-module task-internal-module
+  continue-module task-internal-module
     
     \ Initialize the main task
     : init-main-task ( -- )
@@ -1030,7 +1030,7 @@ begin-import-module-once task-module
     ;] critical
   ;
 
-  begin-module task-internal-module
+  continue-module task-internal-module
 
     \ Wake tasks
     : do-wake ( -- ) true wake-tasks ! ;
@@ -1270,7 +1270,7 @@ begin-import-module-once task-module
     drop drop
   ;
 
-  begin-import-module task-internal-module
+  continue-module task-internal-module
 
     \ Wait the current thread
     : do-wait ( -- )
@@ -1458,7 +1458,7 @@ end-module
   init-tasker
 ;
 
-begin-module task-module
+continue-module task-module
   
   import task-internal-module
   
