@@ -22,7 +22,7 @@
 \ Compile to flash
 compile-to-flash
 
-begin-import-module-once int-io-module
+begin-import-module int-io-module
 
   import internal-module
   import interrupt-module

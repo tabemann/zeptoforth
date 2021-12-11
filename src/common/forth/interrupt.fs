@@ -23,7 +23,7 @@ compile-to-flash
 
 compress-flash
 
-begin-module-once interrupt-module
+begin-module interrupt-module
 
   \ Invalid interrupt vector index exception
   : x-invalid-vector ( -- ) space ." invalid vector" cr ;

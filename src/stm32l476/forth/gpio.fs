@@ -21,7 +21,7 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-module-once gpio-module
+begin-module gpio-module
   
   begin-import-module gpio-internal-module
     

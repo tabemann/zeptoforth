@@ -23,7 +23,7 @@ compile-to-flash
 
 compress-flash
 
-begin-module-once stream-module
+begin-module stream-module
 
   import task-module
   import tqueue-module
@@ -90,9 +90,6 @@ begin-module-once stream-module
   \ Attempting to send data larger than the stream exception
   : x-stream-data-too-big ( -- ) space ." data is larger than stream" cr  ;
 
-  \ Get the size of a stream for a given data size
-  : stream-size ( data-bytes -- bytes ) [inlined] stream-size + ;
-
   \ Get the stream data size
   : stream-data-size ( stream -- data-bytes ) stream-data-size @ ;
 
@@ -107,7 +104,7 @@ begin-module-once stream-module
   \ Get the number of free bytes
   : stream-free ( stream -- bytes ) [: stream-free-unsafe ;] critical ;
   
-  begin-module stream-internal-module
+  continue-module stream-internal-module
 
     \ Wait to send on a stream
     : wait-send-stream ( bytes stream -- )
@@ -494,6 +491,9 @@ begin-module-once stream-module
 
   \ Reopen a stream
   : reopen-stream ( stream -- ) false swap stream-closed ! ;
+
+  \ Get the size of a stream for a given data size
+  : stream-size ( data-bytes -- bytes ) [inlined] stream-size + ;
 
 end-module
 

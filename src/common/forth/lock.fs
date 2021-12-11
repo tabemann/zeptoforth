@@ -23,7 +23,7 @@ compile-to-flash
 
 compress-flash
 
-begin-module-once lock-module
+begin-module lock-module
 
   import task-module
 
@@ -214,9 +214,6 @@ begin-module-once lock-module
 
   end-module
 
-  \ Export lock-size
-  lock-size constant lock-size
-
   \ Initialize a lock
   : init-lock ( addr -- )
     0 over lock-holder-task !
@@ -295,6 +292,9 @@ begin-module-once lock-module
   
   \ Execute a block of code with a lock
   : with-lock ( lock xt -- ) dup >r lock try r> unlock ?raise ;
+
+  \ Export lock-size
+  export lock-size
 
 end-module
 

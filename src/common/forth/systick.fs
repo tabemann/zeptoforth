@@ -21,7 +21,7 @@
 \ Compile to flash
 compile-to-flash
 
-begin-import-module-once systick-module
+begin-import-module systick-module
 
   import internal-module
   import interrupt-module
@@ -96,9 +96,6 @@ begin-import-module-once systick-module
     SYST_CSR_TICKINT SYST_CSR_ENABLE or SYST_CSR bic! dmb dsb isb
   ;
 
-  \ Make systick-counter read-only
-  : systick-counter ( -- u ) systick-counter @ ;
-
   \ Initialize SysTick
   : init-systick ( -- )
     ['] systick-handler systick-vector vector!
@@ -121,6 +118,9 @@ begin-import-module-once systick-module
   \ Systick divisor
   : systick-divisor ( -- ) systick-divisor ;
   
+  \ Make systick-counter read-only
+  : systick-counter ( -- u ) systick-counter @ ;
+
 end-module
 
 import internal-module

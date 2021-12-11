@@ -21,7 +21,7 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-import-module-once rng-module
+begin-import-module rng-module
 
   begin-import-module rng-internal-module
 

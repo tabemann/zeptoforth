@@ -22,7 +22,7 @@
 \ executed from the root of the zeptoforth directory to initialize zeptoforth
 \ on an STM32F746 device.
 
-begin-module forth-module
+continue-module forth-module
 
   import block-module
   
