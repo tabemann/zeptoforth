@@ -59,22 +59,22 @@
 <section id="begin-module">
 <h2><code class="docutils literal notranslate"><span class="pre">begin-module</span></code><a class="headerlink" href="#begin-module" title="Permalink to this headline">¶</a></h2>
 <p>( “name” – )</p>
-<p>Begin the definition of module <em>name</em> without importing its contents into the containing module or checking whether the module already exists.</p>
-</section>
-<section id="begin-module-once">
-<h2><code class="docutils literal notranslate"><span class="pre">begin-module-once</span></code><a class="headerlink" href="#begin-module-once" title="Permalink to this headline">¶</a></h2>
-<p>( “name” – )</p>
-<p>Begin the definition of module <em>name</em> without importing its contents into the containing module, but with checking whether the module already exists.</p>
+<p>Begin the definition of module <em>name</em> without importing its contents into the containing module; module <em>name</em> must not already exist or <code class="docutils literal notranslate"><span class="pre">x-module-already-defined</span></code> will be raised.</p>
 </section>
 <section id="begin-import-module">
 <h2><code class="docutils literal notranslate"><span class="pre">begin-import-module</span></code><a class="headerlink" href="#begin-import-module" title="Permalink to this headline">¶</a></h2>
 <p>( “name” – )</p>
-<p>Begin the definition of module <em>name</em> with importing its contents into the containing module, but without checking whether the module already exists.</p>
+<p>Begin the definition of module <em>name</em> with importing its contents into the containing module; module <em>name</em> must not already exist or <code class="docutils literal notranslate"><span class="pre">x-module-already-defined</span></code> will be raised.</p>
 </section>
-<section id="begin-import-module-once">
-<h2><code class="docutils literal notranslate"><span class="pre">begin-import-module-once</span></code><a class="headerlink" href="#begin-import-module-once" title="Permalink to this headline">¶</a></h2>
+<section id="continue-module">
+<h2><code class="docutils literal notranslate"><span class="pre">continue-module</span></code><a class="headerlink" href="#continue-module" title="Permalink to this headline">¶</a></h2>
 <p>( “name” – )</p>
-<p>Begin the definition of module <em>name</em> with importing its contents into the containing module and with checking whether the module already exists.</p>
+<p>Continue the definition of a preexisting module <em>name</em> without importing its contents into the containing module; if module <em>name</em> does not exist <code class="docutils literal notranslate"><span class="pre">x-module-not-found</span></code> will be raised.</p>
+</section>
+<section id="continue-import-module">
+<h2><code class="docutils literal notranslate"><span class="pre">continue-import-module</span></code><a class="headerlink" href="#continue-import-module" title="Permalink to this headline">¶</a></h2>
+<p>( “name” – )</p>
+<p>Continue the definition of a preexisting module <em>name</em>, importing its contents into the containing module; if module <em>name</em> does not exist <code class="docutils literal notranslate"><span class="pre">x-module-not-found</span></code> will be raised.</p>
 </section>
 <section id="end-module">
 <h2><code class="docutils literal notranslate"><span class="pre">end-module</span></code><a class="headerlink" href="#end-module" title="Permalink to this headline">¶</a></h2>
@@ -84,12 +84,17 @@
 <section id="import">
 <h2><code class="docutils literal notranslate"><span class="pre">import</span></code><a class="headerlink" href="#import" title="Permalink to this headline">¶</a></h2>
 <p>( “name” – )</p>
-<p>Import a module by the specified name into the current module’s wordlist order</p>
+<p>Import a module by the specified name into the current module’s wordlist order; if the module does not exist <code class="docutils literal notranslate"><span class="pre">x-module-not-found</span></code> is raised.</p>
 </section>
 <section id="unimport">
 <h2><code class="docutils literal notranslate"><span class="pre">unimport</span></code><a class="headerlink" href="#unimport" title="Permalink to this headline">¶</a></h2>
 <p>( “name” – )</p>
-<p>Remove a module by the specified name from the current module’s wordlist order; note that it does not remove it from parent modules’ wordlist orders, so if it  had been imported within them they are still searchable.</p>
+<p>Remove a module by the specified name from the current module’s wordlist order; note that it does not remove it from parent modules’ wordlist orders, so if it  had been imported within them they are still searchable. If the module does not exist <code class="docutils literal notranslate"><span class="pre">x-module-not-found</span></code> is raised.</p>
+</section>
+<section id="export">
+<h2><code class="docutils literal notranslate"><span class="pre">export</span></code><a class="headerlink" href="#export" title="Permalink to this headline">¶</a></h2>
+<p>( “name” | “^” “module-name-0” … “module-name-x” “::” “name” – )</p>
+<p>Export a name in the current namespace or referred to by itself or by its path, from the current module.</p>
 </section>
 </section>
 
@@ -118,12 +123,13 @@
 <li class="toctree-l2"><a class="reference internal" href="#x-module-not-found"><code class="docutils literal notranslate"><span class="pre">x-module-not-found</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">^</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#begin-module"><code class="docutils literal notranslate"><span class="pre">begin-module</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#begin-module-once"><code class="docutils literal notranslate"><span class="pre">begin-module-once</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#begin-import-module"><code class="docutils literal notranslate"><span class="pre">begin-import-module</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#begin-import-module-once"><code class="docutils literal notranslate"><span class="pre">begin-import-module-once</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#continue-module"><code class="docutils literal notranslate"><span class="pre">continue-module</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#continue-import-module"><code class="docutils literal notranslate"><span class="pre">continue-import-module</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#end-module"><code class="docutils literal notranslate"><span class="pre">end-module</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#import"><code class="docutils literal notranslate"><span class="pre">import</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#unimport"><code class="docutils literal notranslate"><span class="pre">unimport</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#export"><code class="docutils literal notranslate"><span class="pre">export</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="lambda.html">Lambda Words</a></li>

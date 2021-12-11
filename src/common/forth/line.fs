@@ -21,7 +21,7 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-import-module-once line-internal-module
+begin-import-module line-internal-module
 
   import ansi-term-module
   import heap-module

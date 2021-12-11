@@ -21,7 +21,7 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-module-once multicore-module
+begin-module multicore-module
 
   import internal-module
   import interrupt-module

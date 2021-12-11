@@ -1142,10 +1142,16 @@ _postpone:
 	ldr r1, =inlined_flag
 	tst r0, r1
 	bne 2f
+	ldr r1, =fold_flag
+	tst r0, r1
+	bne 3f
 	ldr tos, =_compile
 	bl _compile
 	pop {pc}
 2:	ldr tos, =_asm_inline
+	bl _compile
+	pop {pc}
+3:	ldr tos, =_asm_fold
 	bl _compile
 	pop {pc}
 	end_inlined

@@ -21,7 +21,7 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-import-module-once edit-internal-module
+begin-import-module edit-internal-module
 
   import systick-module
   import block-module

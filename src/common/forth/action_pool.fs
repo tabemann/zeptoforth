@@ -24,7 +24,7 @@ compile-to-flash
 \ Begin compressing flash
 compress-flash
 
-begin-module-once action-pool-module
+begin-module action-pool-module
 
   import schedule-module
 
@@ -70,9 +70,6 @@ begin-module-once action-pool-module
     drop
   ;
 
-  \ Get the size of a action pool of a given size
-  : action-pool-size ( count -- bytes ) action-size * action-pool-size + ;
-
   commit-flash
   
   \ Initialize an action from a action pool
@@ -86,6 +83,9 @@ begin-module-once action-pool-module
     loop
     end-critical ['] x-no-action-available ?raise
   ;
+
+  \ Get the size of a action pool of a given size
+  : action-pool-size ( count -- bytes ) action-size * action-pool-size + ;
 
 end-module
 

@@ -23,7 +23,7 @@ compile-to-flash
 
 compress-flash
 
-begin-module forth-module
+continue-module forth-module
 
   import temp-module
   import internal-module
