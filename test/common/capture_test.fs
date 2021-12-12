@@ -18,8 +18,8 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ Warm reboot
-warm
+\ Reboot
+reboot
 
 \ Load the capture functionality to be tested
 #include test/common/capture.fs
