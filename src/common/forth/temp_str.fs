@@ -45,7 +45,7 @@ continue-module forth-module
     state @ if
       postpone c"
     else
-      skip-to-token
+      advance-once
       compiling-to-flash? dup if
 	compile-to-ram
       then
@@ -65,7 +65,7 @@ continue-module forth-module
     state @ if
       postpone s"
     else
-      skip-to-token
+      advance-once
       compiling-to-flash? dup if
 	compile-to-ram
       then
@@ -85,7 +85,7 @@ continue-module forth-module
       postpone c\"
     else
       [:
-	skip-to-token
+	advance-once
 	here [char] " parse-esc-string
 	here over - dup 1+ temp-str ['] allocate-temp critical
 	2dup c!
@@ -103,7 +103,7 @@ continue-module forth-module
       postpone s\"
     else
       [:
-	skip-to-token
+	advance-once
 	here [char] " parse-esc-string
 	here over - dup temp-str ['] allocate-temp critical
 	2 pick over 3 pick move
