@@ -36,10 +36,16 @@ continue-import-module internal-module
   ;
 
   \ Erase all flash
-  : erase-all ( -- ) 1 reset-aux-core erase-all ;
+  : erase-all ( -- )
+    cpu-index 0 = averts x-core-0-only
+    1 reset-aux-core erase-all
+  ;
 
   \ Erase after an address
-  : erase-after ( addr -- ) 1 reset-aux-core erase-after ;
+  : erase-after ( addr -- )
+    cpu-index 0 = averts x-core-0-only
+    1 reset-aux-core erase-after
+  ;
 
   \ Commit to flash
   commit-flash

@@ -248,7 +248,7 @@ commit-flash
   else
     2dup visible-flag find dup 0= triggers x-unknown-word
   then
-  -rot start-compile visible immediate lit, postpone apply end-compile,
+  -rot start-compile visible >body compile, end-compile,
 ;
 
 \ Execute or compile a particular word in a provided module
