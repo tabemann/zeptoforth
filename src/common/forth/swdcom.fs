@@ -95,5 +95,4 @@ end-compress-flash
 
 compile-to-ram
 
-\ warm
-
+\ Do not reboot

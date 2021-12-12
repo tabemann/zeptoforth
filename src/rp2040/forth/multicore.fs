@@ -26,6 +26,9 @@ begin-module multicore-module
   import internal-module
   import interrupt-module
 
+  \ Must be carried out from core 0 only
+  : x-core-0-only ( -- ) space ." core 0 only" cr ;
+  
   \ Spinlock out of range exception
   : x-spinlock-out-of-range ( -- ) space ." spinlock out of range" cr ;
   
@@ -153,6 +156,7 @@ begin-module multicore-module
     1 = averts x-core-out-of-range
     prepare-aux-rstack
     SIO_IRQ_PROC0 NVIC_ICER_CLRENA!
+    PSM_FRCE_OFF_PROC1 PSM_FRCE_OFF bic!
     6 0 do
       i case
 	0 of 1 fifo-drain 0 endof
@@ -185,10 +189,11 @@ end-module
 import multicore-module
 
 \ Set up reboot to reset the second core
-: reboot ( -- ) cpu-index 1 <> if 1 reset-aux-core then reboot ;
-
-\ Set up warm to reset the second core
-: warm ( -- ) cpu-index 1 <> if 1 reset-aux-core then warm ;
+: reboot ( -- )
+  cpu-index 0 = averts x-core-0-only
+  1 reset-aux-core
+  reboot
+;
 
 unimport multicore-module
 

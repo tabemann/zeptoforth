@@ -2119,22 +2119,6 @@ _reboot:
 	bx lr
 	end_inlined
 
-	@@ Carry out a warm reboot
-	define_word "warm", visible_flag
-_warm:	cpsid i
-	dsb
-	isb
-	ldr r0, =VTOR
-	movs r1, #0
-	str r1, [r0]
-	dmb
-	dsb
-	isb
-	cpsie i
-	ldr r0, =_handle_reset+1
-	bx r0
-	end_inlined
-
 	@@ Null exception handler
 	define_word "handle-null", visible_flag
 _handle_null:
