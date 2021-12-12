@@ -2190,9 +2190,6 @@ _init_context:
 	define_word "reboot", visible_flag
 _reboot:
 	push {lr}
-	.if rp2040
-	bl _disable_xip_cache
-	.endif
 	ldr r0, =0xE000ED0C @ AIRCR
 	ldr r1, =0x05FA0004
 	str r1, [r0]
