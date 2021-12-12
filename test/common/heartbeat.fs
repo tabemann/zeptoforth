@@ -38,7 +38,7 @@ begin-module-once heartbeat-module
 
   \ Initialize the heartbeat
   : init-heartbeat ( -- )
-    0 ['] heartbeat 256 128 512 spawn heartbeat-task !
+    0 ['] heartbeat 320 128 512 spawn heartbeat-task !
     heartbeat-task @ run
   ;
   

@@ -582,7 +582,7 @@ Set pull down enable
 
 Set schmitt trigger
 
-##### `PADS_BANK0_SLEWFAST`
+##### `PADS_BANK0_SLEWFAST!`
 ( fast index -- )
 
 Set slew rate control  

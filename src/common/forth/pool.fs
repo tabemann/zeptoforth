@@ -23,7 +23,7 @@ compile-to-flash
 
 compress-flash
 
-begin-module-once pool-module
+begin-module pool-module
 
   import task-module
 
@@ -60,9 +60,6 @@ begin-module-once pool-module
   end-module
 
   commit-flash
-
-  \ Export pool-size
-  pool-size constant pool-size
 
   \ Initialize a pool header
   : init-pool ( block-size addr -- )
@@ -121,6 +118,9 @@ begin-module-once pool-module
 
   \ Get the pool total count
   : pool-total-count ( pool -- u ) pool-total-count @ ;
+
+  \ Export pool-size
+  export pool-size
 
 end-module
 

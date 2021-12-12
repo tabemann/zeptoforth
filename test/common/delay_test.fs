@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module forth-module
+continue-module forth-module
 
   import task-module
   import systick-module
@@ -38,8 +38,8 @@ begin-module forth-module
 
   \ Initialize the test
   : init-test ( -- )
-    [char] * 250 2 ['] run-task 256 128 512 spawn task1 !
-    [char] x 1000 2 ['] run-task 256 128 512 spawn task2 !
+    [char] * 250 2 ['] run-task 320 128 512 spawn task1 !
+    [char] x 1000 2 ['] run-task 320 128 512 spawn task2 !
     task1 @ run
     task2 @ run
   ;

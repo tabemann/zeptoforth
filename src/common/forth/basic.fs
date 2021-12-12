@@ -79,6 +79,9 @@ forth-module set-current
 \ Inlined flag
 8 constant inlined-flag
 
+\ Folded flag
+16 constant fold-flag
+
 \ DMB instruction
 : dmb ( -- ) [inlined] [ undefer-lit $F3BF h, $8F5F h, ] ;
 
@@ -391,6 +394,29 @@ commit-flash
 
 \ Set forth
 forth-module set-current
+
+\ Express the semantics of a word in the present compilation/interpretation
+\ state
+: apply ( ? word -- ? )
+  state @ if
+    dup word-flags h@ dup immediate-flag and if
+      drop >body execute
+    else
+      dup inlined-flag and if
+	drop >body inline,
+      else
+	fold-flag and if
+	  >body fold,
+	else
+	  >body compile,
+	then
+      then
+    then
+  else
+    dup word-flags h@ compiled-flag and triggers x-not-compiling
+    >body execute
+  then
+;
 
 \ Lookup a word by its prefix
 : lookup ( "name" -- )
@@ -1022,17 +1048,48 @@ commit-flash
   then
 ;
 
+\ Set the internal wordlist
+internal-module set-current
+
+\ Make the global portion of a CPU variable
+: global-cpu-variable ( addr "global-name" -- ) <builds , does> @ swap cells + ;
+
+\ Commit to flash
+commit-flash
+
+\ Set the forth wordlist
+forth-module set-current
+
+\ Make a variable which is CPU-dependent
+: cpu-variable ( "global-name" "cpu-name" -- )
+  next-ram-space
+  dup global-cpu-variable
+  dup cpu-count cells + set-next-ram-space
+  <builds , does> @ cpu-offset +
+;
+
 \ Commit to flash
 commit-flash
 
 \ Set the internal wordlist
 internal-module set-current
 
-\ There is a deferred context switch
-variable deferred-context-switch
+\ Is there a deferred context switch for a give CPU
+cpu-count cells buffer: cpus-deferred-context-switch
 
-\ Critical section state
-variable in-critical
+\ Critical section state for a given CPU
+cpu-count cells buffer: cpus-in-critical
+
+\ Commit to flash
+commit-flash
+
+\ Is there a deferred context switch for the current CPU
+: deferred-context-switch ( -- addr )
+  cpus-deferred-context-switch cpu-offset +
+;
+
+\ Critical section state for the current CPU
+: in-critical ( -- addr ) cpus-in-critical cpu-offset + ;
 
 \ Commit to flash
 commit-flash
@@ -1240,11 +1297,11 @@ internal-module set-current
 
 \ Dump 16 bytes of ASCII
 : dump-ascii-16 ( start-addr -- )
-  [char] ' emit
+  [char] | emit
   16 0 do
     dup i + c@ dup $20 >= over $7F < and if emit else drop [char] . emit then
   loop
-  [char] ' emit drop
+  [char] | emit drop
 ;
 
 \ Set the forth module
@@ -1259,11 +1316,11 @@ commit-flash
   2dup < if
     swap do
       i h.8
-      space [char] ' emit
+      space space [char] | emit
       64 0 do
 	j i + c@ dup $20 >= over $7F < and if emit else drop [char] . emit then
       loop
-      [char] ' emit cr
+      [char] | emit cr
     64 +loop
   else
     2drop
@@ -1276,10 +1333,23 @@ commit-flash
   2dup < if
     swap do
       i h.8
-      16 0 do
+      space
+      4 0 do
 	space j i + c@ h.2
       loop
-      space i dump-ascii-16 cr
+      space
+      8 4 do
+	space j i + c@ h.2
+      loop
+      space
+      12 8 do
+	space j i + c@ h.2
+      loop
+      space
+      16 12 do
+	space j i + c@ h.2
+      loop
+      space space i dump-ascii-16 cr
     16 +loop
   else
     2drop
@@ -1288,14 +1358,28 @@ commit-flash
 
 \ Dump memory as 16-bit values and ASCII between two addresses
 : dump-halfs ( start-addr end-addr -- )
+  2 align swap 2 align swap
   cr
   2dup < if
     swap do
       i h.8
-      16 0 do
+      space
+      4 0 do
 	space j i + h@ h.4
       2 +loop
-      space i dump-ascii-16 cr
+      space
+      8 4 do
+	space j i + h@ h.4
+      2 +loop
+      space
+      12 8 do
+	space j i + h@ h.4
+      2 +loop
+      space
+      16 12 do
+	space j i + h@ h.4
+      2 +loop
+      space space i dump-ascii-16 cr
     16 +loop
   else
     2drop
@@ -1304,14 +1388,15 @@ commit-flash
 
 \ Dump memory as 32-bit cells and ASCII between two addresses
 : dump-cells ( start-addr end-addr -- )
+  4 align swap 4 align swap
   cr
   2dup < if
     swap do
       i h.8
       16 0 do
-	space j i + @ h.8
+	space space j i + @ h.8
       4 +loop
-      space i dump-ascii-16 cr
+      space space i dump-ascii-16 cr
     16 +loop
   else
     2drop
@@ -1706,7 +1791,7 @@ forth-module set-current
 : c\" ( -- )
   [immediate]
   [compile-only]
-  skip-to-token
+  advance-once
   [char] " compile-esc-cstring
 ;
 
@@ -1714,7 +1799,7 @@ forth-module set-current
 : s\" ( -- )
   [immediate]
   [compile-only]
-  skip-to-token
+  advance-once
   [char] " compile-esc-cstring
   postpone count
 ;
@@ -1723,7 +1808,7 @@ forth-module set-current
 : .\" ( -- )
   [immediate]
   [compile-only]
-  skip-to-token
+  advance-once
   [char] " compile-esc-cstring
   postpone count
   postpone type
@@ -1732,13 +1817,13 @@ forth-module set-current
 \ Immediately type an escaped string
 : .\( ( -- )
   [immediate]
-  skip-to-token
+  advance-once
   compiling-to-flash? dup if
     compile-to-ram
   then
   here [char] ) parse-esc-string
   dup dup here swap - type
-  swap if compile-to-flash flash-here! else ram-here! then
+  ram-here! swap if compile-to-flash then
   1 advance-bytes
 ;
 
@@ -1798,7 +1883,7 @@ internal-module set-current
 65 constant picture-size
 
 \ Start of pictured numeric output
-variable picture-offset
+user picture-offset
 
 \ Set forth
 forth-module set-current
@@ -2167,7 +2252,7 @@ forth-module set-current
   next-ram-space dict-base !
   dict-base @ next-user-space + ram-here!
   false deferred-context-switch !
-  0 in-critical !
+  cpu-count 0 ?do 0 cpus-in-critical i cells + ! loop
   0 wait-hook !
   0 wake-hook !
   0 flush-console-hook !

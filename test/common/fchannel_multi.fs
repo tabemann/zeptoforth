@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module forth-module
+continue-module forth-module
 
   import internal-module
   import task-module
@@ -39,11 +39,11 @@ begin-module forth-module
   ;
 
   \ The consumer task
-  0 ' consumer 256 128 512 spawn constant consumer-task
+  0 ' consumer 320 128 512 spawn constant consumer-task
 
   \ The inner loop of a producer
   : do-producer ( -- )
-    does> @ execute dup current-task set-task-name
+    does> @ execute dup current-task task-name!
     cr ." Producer: " dup count type
     ." : " current-task h.8
     begin
@@ -55,7 +55,7 @@ begin-module forth-module
 
   \ Create a producer task
   : make-producer ( xt "name" -- )
-    s" " <builds-with-name , do-producer 0 latest >body 256 128 512 spawn
+    s" " <builds-with-name , do-producer 0 latest >body 320 128 512 spawn
     constant
   ;
 

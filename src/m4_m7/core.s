@@ -428,39 +428,48 @@ _uge:	movs r0, tos
 	
 	@@ Get the RAM HERE pointer
 	define_word "ram-here", visible_flag
-_here:	ldr r0, =here
-	push_tos
+_here:	push {lr}
+	bl _cpu_offset
+	ldr r0, =here
+	adds tos, r0
 	ldr tos, [r0]
-	bx lr
+	pop {pc}
 	end_inlined
 
 	@@ Get the PAD pointer
 	define_word "pad", visible_flag
-_pad:	ldr r0, =here
+_pad:	push {lr}
+	bl _here
 	ldr r1, =pad_offset
-	push_tos
-	ldr tos, [r0]
 	adds tos, tos, r1
-	bx lr
+	pop {pc}
 	end_inlined
 
 	@@ Allot space in RAM
 	define_word "ram-allot", visible_flag
-_allot:	ldr r0, =here
+_allot:	push {lr}
+	bl _cpu_offset
+	ldr r0, =here
+	adds r0, tos
+	pull_tos
 	ldr r1, [r0]
 	adds r1, tos
 	str r1, [r0]
 	pull_tos
-	bx lr
+	pop {pc}
 	end_inlined
 
 	@@ Set the RAM flash pointer
 	define_word "ram-here!", visible_flag
 _store_here:
+	push {lr}
+	bl _cpu_offset
 	ldr r0, =here
+	adds r0, tos
+	pull_tos
 	str tos, [r0]
 	pull_tos
-	bx lr
+	pop {pc}
 	end_inlined
 
 	@@ Get the flash HERE pointer
@@ -762,8 +771,9 @@ _execute_nz:
 	@@ Execute a PAUSE word, if one is set
 	define_word "pause", visible_flag
 _pause:	push {lr}
-	ldr r0, =pause_enabled
-	ldr r0, [r0]
+	bl _pause_enabled
+	ldr r0, [tos]
+	pull_tos
 	cmp r0, #0
 	ble 1f
 	ldr r0, =pause_hook
@@ -925,6 +935,8 @@ _bracket_inlined:
 	bx lr
 	end_inlined
 
+	.ltorg
+	
 	@@ Set the currently-defined word to be immediate
 	define_word "immediate", visible_flag
 _immediate:
@@ -1156,7 +1168,7 @@ _recurse:
 	end_inlined
 	
 	@@ Unknown word exception
-	define_word "unknown-word", visible_flag
+	define_word "x-unknown-word", visible_flag
 _unknown_word:
 	push {lr}
 	string_ln " unknown word"
@@ -1391,50 +1403,66 @@ _get_8:	ldr r0, [tos]
 	@@ Store a byte at the RAM HERE location
 	define_word "cram,", visible_flag
 _comma_1:
+	push {lr}
+	bl _cpu_offset
 	ldr r0, =here
+	adds r0, tos
+	pull_tos
 	ldr r1, [r0]
 	movs r2, #0xFF
 	ands tos, r2
 	strb tos, [r1], #1
 	str r1, [r0]
 	pull_tos
-	bx lr
+	pop {pc}
 	end_inlined
 
 	@@ Store a halfword at the RAM HERE location
 	define_word "hram,", visible_flag
 _comma_2:
+	push {lr}
+	bl _cpu_offset
 	ldr r0, =here
+	adds r0, tos
+	pull_tos
 	ldr r1, [r0]
 	ldr r2, =0xFFFF
 	ands tos, r2
 	strh tos, [r1], #2
 	str r1, [r0]
 	pull_tos
-	bx lr
+	pop {pc}
 	end_inlined
 
 	@@ Store a word at the RAM HERE location
 	define_word "ram,", visible_flag
 _comma_4:
+	push {lr}
+	bl _cpu_offset
 	ldr r0, =here
+	adds r0, tos
+	pull_tos
 	ldr r1, [r0]
 	str tos, [r1], #4
 	str r1, [r0]
 	pull_tos
-	bx lr
+	pop {pc}
 	end_inlined
 	
 	@@ Store a doubleword at the RAM HERE location
 	define_word "2ram,", visible_flag
 _comma_8:
+	push {lr}
+	bl _cpu_offset
 	ldr r0, =here
+	adds r0, tos
+	pull_tos
 	ldr r1, [r0]
 	str tos, [r1], #4
 	pull_tos
 	str tos, [r1], #4
 	str r1, [r0]
-	bx lr
+	pop {pc}
 	end_inlined
 
 	@@ Store a byte at the flash HERE location
@@ -1612,49 +1640,65 @@ _current_comma_8:
 	@@ Reserve a byte at the RAM HERE location
 	define_word "cram-reserve", visible_flag
 _reserve_1:
+	push {lr}
+	bl _cpu_offset
 	ldr r0, =here
+	adds r0, tos
+	pull_tos
 	ldr r1, [r0]
 	push_tos
 	movs tos, r1
 	adds r1, #1
 	str r1, [r0]
-	bx lr
+	pop {pc}
 	end_inlined
 
 	@@ Reserve a halfword at the RAM HERE location
 	define_word "hram-reserve", visible_flag
 _reserve_2:
+	push {lr}
+	bl _cpu_offset
 	ldr r0, =here
+	adds r0, tos
+	pull_tos
 	ldr r1, [r0]
 	push_tos
 	movs tos, r1
 	adds r1, #2
 	str r1, [r0]
-	bx lr
+	pop {pc}
 	end_inlined
 
 	@@ Reserve a word at the RAM HERE location
 	define_word "ram-reserve", visible_flag
 _reserve_4:
+	push {lr}
+	bl _cpu_offset
 	ldr r0, =here
+	adds r0, tos
+	pull_tos
 	ldr r1, [r0]
 	push_tos
 	movs tos, r1
 	adds r1, #4
 	str r1, [r0]
-	bx lr
+	pop {pc}
 	end_inlined
 
 	@@ Reserve a doubleword at the RAM HERE location
 	define_word "2ram-reserve", visible_flag
 _reserve_8:
+	push {lr}
+	bl _cpu_offset
 	ldr r0, =here
+	adds r0, tos
+	pull_tos
 	ldr r1, [r0]
 	push_tos
 	movs tos, r1
 	adds r1, #8
 	str r1, [r0]
-	bx lr
+	pop {pc}
 	end_inlined
 
 	@@ Reserve a byte at the flash HERE location
@@ -2075,22 +2119,6 @@ _reboot:
 	bx lr
 	end_inlined
 
-	@@ Carry out a warm reboot
-	define_word "warm", visible_flag
-_warm:	cpsid i
-	dsb
-	isb
-	ldr r0, =VTOR
-	movs r1, #0
-	str r1, [r0]
-	dmb
-	dsb
-	isb
-	cpsie i
-	ldr r0, =_handle_reset+1
-	bx r0
-	end_inlined
-
 	@@ Null exception handler
 	define_word "handle-null", visible_flag
 _handle_null:
@@ -2101,23 +2129,42 @@ _handle_null:
 	define_internal_word "init-variables", visible_flag
 _init_variables:
 	push {lr}
+	ldr r2, =cpu_count * 4
+1:	cmp r2, #0
+	beq 2f
+	subs r2, #4
 	ldr r0, =here
-	ldr r0, [r0]
+	ldr r0, [r0, r2]
 	ldr r1, =dict_base
-	str r0, [r1]
+	str r0, [r1, r2]
 	ldr r0, =stack_base
 	ldr r1, =stack_top
-	str r1, [r0]
+	str r1, [r0, r2]
 	ldr r0, =stack_end
 	ldr r1, =stack_top - stack_size
-	str r1, [r0]
+	str r1, [r0, r2]
 	ldr r0, =rstack_base
 	ldr r1, =rstack_top
-	str r1, [r0]
+	str r1, [r0, r2]
 	ldr r0, =rstack_end
 	ldr r1, =rstack_top - rstack_size
-	str r1, [r0]
-	ldr r0, =prompt_hook
+	str r1, [r0, r2]
+	movs r1, #10
+	ldr r0, =base
+	str r1, [r0, r2]
+	movs r1, #0
+	ldr r0, =pause_enabled
+	str r1, [r0, r2]
+	b 1b
+2:	ldr r2, =cpu_count * 4
+3:	cmp r2, #4
+	beq 4f
+	subs r2, #4
+	ldr r1, =0xF0E1C2D3
+	ldr r0, =handler
+	str r1, [r0, r2]
+	b 3b
+4:	ldr r0, =prompt_hook
 	ldr r1, =_do_prompt
 	str r1, [r0]
 	ldr r0, =handle_number_hook
@@ -2178,15 +2225,10 @@ _init_variables:
 	str r1, [r0]
 	ldr r0, =state
 	str r1, [r0]
-	ldr r0, =pause_enabled
-	str r1, [r0]
 	ldr r0, =compress_flash_enabled
 	str r1, [r0]
 	ldr r0, =order
 	strh r1, [r0]
-	movs r1, #10
-	ldr r0, =base
-	str r1, [r0]
 	movs r1, #1
 	ldr r0, =order_count
 	str r1, [r0]
@@ -2201,7 +2243,7 @@ _init_variables:
 	str r1, [r0]
 	pop {pc}
 	end_inlined
-
+	
 	@@ Initialize the in-RAM vector table
 _init_vector_table:
 	ldr r0, =vectors

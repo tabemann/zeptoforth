@@ -20,7 +20,7 @@
 
 compile-to-flash
 
-begin-module-once exti-module
+begin-module exti-module
 
   begin-import-module exti-internal-module
 

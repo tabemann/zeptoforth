@@ -36,7 +36,7 @@ $(BIN_WITH_CHECKSUM): $(BIN)
 	$(BOOT_WITH_CHECKSUM) $(BIN) $(BIN_WITH_CHECKSUM)
 
 $(BIN): $(OBJ)
-	$(LD) $(OBJ) -T boot.ld --cref -Map $(MAP) -nostartfiles -o $(ELF)
+	$(LD) $(OBJ) -T boot.ld --cref -Map $(MAP) -o $(ELF)
 	$(DUMP) -D $(ELF) > $(LIST)
 	$(COPY) $(ELF) $@ -O binary
 	$(COPY) $(ELF) $(IHEX) -O ihex

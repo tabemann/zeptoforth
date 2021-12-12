@@ -22,7 +22,7 @@
 \ Compile to flash
 compile-to-flash
 
-begin-import-module-once led-module
+begin-import-module led-module
 
   import gpio-module
 

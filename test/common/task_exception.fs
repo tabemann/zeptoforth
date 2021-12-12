@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module forth-module
+continue-module forth-module
 
   import task-module
   
@@ -26,7 +26,7 @@ begin-module forth-module
   : test ( -- ) begin 1000 ms again ;
   
   \ The loop task
-  0 ' test 256 128 512 spawn constant test-task
+  0 ' test 320 128 512 spawn constant test-task
   
   \ Start the loop task
   test-task run

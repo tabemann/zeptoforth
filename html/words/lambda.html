@@ -4,11 +4,12 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>Lambda Words &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
@@ -19,6 +20,7 @@
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
+  
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head><body>
@@ -27,34 +29,36 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
-  <div class="section" id="lambda-words">
+  <section id="lambda-words">
 <h1>Lambda Words<a class="headerlink" href="#lambda-words" title="Permalink to this headline">¶</a></h1>
 <p>In zeptoforth the user can define lightweight anonymous functions, known as lambdas, inline in other words with <code class="docutils literal notranslate"><span class="pre">[:</span></code> and <code class="docutils literal notranslate"><span class="pre">;]</span></code>, where <code class="docutils literal notranslate"><span class="pre">[:</span></code> starts compiling a lambda, and <code class="docutils literal notranslate"><span class="pre">;]</span></code> finishes it. compiling the <code class="docutils literal notranslate"><span class="pre">xt</span></code> for the lambda as a literal into the containing word. Multiple lambdas can be nested. Note that lambdas have no headers, making them lighter-weight than normal words. Provided that all words compiled into them are themselves inlined, they can be inlined into other words.</p>
 <p><code class="docutils literal notranslate"><span class="pre">[:</span></code> and <code class="docutils literal notranslate"><span class="pre">;]</span></code> are defined in <code class="docutils literal notranslate"><span class="pre">src/common/forth/basic.fs</span></code>, but the other words discussed here are defined in <code class="docutils literal notranslate"><span class="pre">src/common/forth/lambda.fs</span></code>.</p>
 <p>These words are in <code class="docutils literal notranslate"><span class="pre">forth-module</span></code>.</p>
 <p>There are two simple conditional combinators, namely:</p>
-<div class="section" id="qif">
+<section id="qif">
 <h2><code class="docutils literal notranslate"><span class="pre">qif</span></code><a class="headerlink" href="#qif" title="Permalink to this headline">¶</a></h2>
 <p>( ??? f true-xt – ??? )</p>
 <p>which takes <em>f</em> and <em>true-xt</em>, which is executed when <em>f</em> is non-zero; <em>true-xt</em> has the following signature:</p>
 <p>( ??? – ??? )</p>
-</div>
-<div class="section" id="qifelse">
+</section>
+<section id="qifelse">
 <h2><code class="docutils literal notranslate"><span class="pre">qifelse</span></code><a class="headerlink" href="#qifelse" title="Permalink to this headline">¶</a></h2>
 <p>( ??? f true-xt false-xt – ??? )</p>
 <p>which takes <em>f</em>, <em>true-xt</em>, and <em>false-xt</em>; <em>true-xt</em> is executed when <em>f</em> is non-zero and <em>false-xt</em> is executed when <em>f</em> is zero. These have the following signature:</p>
 <p>( ??? – ??? )</p>
 <p>There are two simple looping combinators:</p>
-</div>
-<div class="section" id="quntil">
+</section>
+<section id="quntil">
 <h2><code class="docutils literal notranslate"><span class="pre">quntil</span></code><a class="headerlink" href="#quntil" title="Permalink to this headline">¶</a></h2>
 <p>( ??? xt – ??? )</p>
 <p>which takes <em>xt</em> and executes it repeatedly until it returns a non-zero value; <em>xt</em> has the following signature:</p>
 <p>( ??? – ??? f )</p>
-</div>
-<div class="section" id="qwhile">
+</section>
+<section id="qwhile">
 <h2><code class="docutils literal notranslate"><span class="pre">qwhile</span></code><a class="headerlink" href="#qwhile" title="Permalink to this headline">¶</a></h2>
 <p>( ??? while-xt body-xt – ??? )</p>
 <p>which in a loop first executes <em>while-xt</em> and, if it returns a non-zero value, then it executes <em>body-xt</em> and continues looping, else it exits the loop; <em>while-xt</em> has the signature:</p>
@@ -62,54 +66,54 @@
 <p>and <em>body-xt</em> has the signature:</p>
 <p>( ??? – ??? )</p>
 <p>There are two counted looping combinators:</p>
-</div>
-<div class="section" id="qcount">
+</section>
+<section id="qcount">
 <h2><code class="docutils literal notranslate"><span class="pre">qcount</span></code><a class="headerlink" href="#qcount" title="Permalink to this headline">¶</a></h2>
 <p>( ??? limit init xt – ??? )</p>
 <p>which counts up with an increment of one from <em>init</em> until it reaches <em>limit</em>, not including it, executing <em>xt</em> at each step, passing it the current count; <em>xt</em> has the signature:</p>
 <p>( ??? i – ??? )</p>
-</div>
-<div class="section" id="id1">
+</section>
+<section id="id1">
 <h2><code class="docutils literal notranslate"><span class="pre">qcount+</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <p>( ??? limit init xt – ??? )</p>
 <p>which counts up or down with a variable increment from <em>init</em> until it reaches <em>limit</em>, not including it for counting up but including it for counting down, executing <em>xt</em> at each step, passing it the current count and receiving the increment/decrement for the next step; <em>xt</em> has the signature:</p>
 <p>( ??? i – ??? increment )</p>
 <p>There are the following combinators for iterating over arrays with with different-sized members:</p>
-</div>
-<div class="section" id="citer">
+</section>
+<section id="citer">
 <h2><code class="docutils literal notranslate"><span class="pre">citer</span></code><a class="headerlink" href="#citer" title="Permalink to this headline">¶</a></h2>
 <p>( ??? b-addr count xt – ??? )</p>
 <p>which iterates over the byte array specified by <em>b-addr</em> and <em>count</em>, passing each byte from the lowest address to the highest to <em>xt</em>, which has the signature:</p>
 <p>( ??? b – ??? )</p>
-</div>
-<div class="section" id="hiter">
+</section>
+<section id="hiter">
 <h2><code class="docutils literal notranslate"><span class="pre">hiter</span></code><a class="headerlink" href="#hiter" title="Permalink to this headline">¶</a></h2>
 <p>( ??? h-addr count xt – ??? )</p>
 <p>which iterates over the halfword array specified by <em>h-addr</em> and <em>count</em>, passing each halfword from the lowest address to the highest to <em>xt</em>, which has the signature:</p>
 <p>( ??? h – ??? )</p>
-</div>
-<div class="section" id="iter">
+</section>
+<section id="iter">
 <h2><code class="docutils literal notranslate"><span class="pre">iter</span></code><a class="headerlink" href="#iter" title="Permalink to this headline">¶</a></h2>
 <p>( ??? addr count xt – ??? )</p>
 <p>which iterates over the cell array specified by <em>addr</em> and <em>count</em>, passing each cell from the lowest address to the highest to <em>xt</em>, which as the signature:</p>
 <p>( ??? x – ??? )</p>
-</div>
-<div class="section" id="id2">
+</section>
+<section id="id2">
 <h2><code class="docutils literal notranslate"><span class="pre">2iter</span></code><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
 <p>( ??? addr count xt – ??? )</p>
 <p>which iterates over the double-cell array specified by <em>addr</em> and <em>count</em>, passing each double cell from the lowest address to the highest to <em>xt</em>, which as the signature:</p>
 <p>( ??? d – ??? )</p>
 <p>There are the following combinators for iterating over values from getters:</p>
-</div>
-<div class="section" id="iter-get">
+</section>
+<section id="iter-get">
 <h2><code class="docutils literal notranslate"><span class="pre">iter-get</span></code><a class="headerlink" href="#iter-get" title="Permalink to this headline">¶</a></h2>
 <p>( ??? get-xt count iter-xt – ??? )</p>
 <p>which iterates over the cell values returned by <em>get-xt</em> when passed an index starting from 0 up to but not including <em>count</em>, passing them to <em>xt</em>; <em>get-xt</em> has the signature:</p>
 <p>( ??? i – ??? x )</p>
 <p>and <em>xt</em> has the signature:</p>
 <p>( ??? x – ??? )</p>
-</div>
-<div class="section" id="id3">
+</section>
+<section id="id3">
 <h2><code class="docutils literal notranslate"><span class="pre">2iter-get</span></code><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
 <p>( ??? get-xt count iter-xt – ??? )</p>
 <p>which iterates over the double-cell values returned by <em>get-xt</em> when passed an index starting from 0 up to but not including <em>count</em>, passing them to <em>xt</em>; <em>get-xt</em> has the signature:</p>
@@ -117,41 +121,41 @@
 <p>and <em>xt</em> has the signature:</p>
 <p>( ??? d – ??? )</p>
 <p>There are the following combinators for finding indices of values in arrays:</p>
-</div>
-<div class="section" id="cfind-index">
+</section>
+<section id="cfind-index">
 <h2><code class="docutils literal notranslate"><span class="pre">cfind-index</span></code><a class="headerlink" href="#cfind-index" title="Permalink to this headline">¶</a></h2>
 <p>( ??? b-addr count xt – ??? i|-1 )</p>
 <p>which iterates over the byte array specified by <em>b-addr</em> and <em>count</em>, passing each byte from the lowest address to the highest to <em>xt</em>, until it either reaches a value for which it returns a non-zero value, where then it returns the index of that byte, or if it reaches the end of the array, where then it returns -1; <em>xt</em> as the signature:</p>
 <p>( ??? b – ??? f )</p>
-</div>
-<div class="section" id="hfind-index">
+</section>
+<section id="hfind-index">
 <h2><code class="docutils literal notranslate"><span class="pre">hfind-index</span></code><a class="headerlink" href="#hfind-index" title="Permalink to this headline">¶</a></h2>
 <p>( ??? h-addr count xt – ??? i|-1 )</p>
 <p>which iterates over the halfword array specified by <em>h-addr</em> and <em>count</em>, passing each halfword from the lowest address to the highest to <em>xt</em>, until it either reaches a value for which it returns a non-zero value, where then it returns the index of that halfword, or if it reaches the end of the array, where then it returns -1; <em>xt</em> has the signature:</p>
 <p>( ??? h – ??? f )</p>
-</div>
-<div class="section" id="find-index">
+</section>
+<section id="find-index">
 <h2><code class="docutils literal notranslate"><span class="pre">find-index</span></code><a class="headerlink" href="#find-index" title="Permalink to this headline">¶</a></h2>
 <p>( ??? addr count xt – ??? i|-1 )</p>
 <p>which iterates over the cell array specified by <em>addr</em> and <em>count</em>, passing each cell from the lowest address to the highest to <em>xt</em>, until it either reaches a value for which it returns a non-zero value, where then it returns the index of that cell, or if it reaches the end of the array, where then it returns -1; <em>xt</em> has the signature:</p>
 <p>( ??? x – ??? f )</p>
-</div>
-<div class="section" id="id4">
+</section>
+<section id="id4">
 <h2><code class="docutils literal notranslate"><span class="pre">2find-index</span></code><a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
 <p>( ??? addr count xt – ??? i|-1 )</p>
 <p>which iterates over the double-cell array specified by <em>addr</em> and <em>count</em>, passing each double cell from the lowest address to the highest to <em>xt</em>, until it either reaches a value for which it returns a non-zero value, where then it returns the index of that double cell, or if it reaches the end of the array, where then it returns -1; <em>xt</em> has the signature:</p>
 <p>( ??? d – ??? f )</p>
 <p>There are the following combinators for finding indices of values from getters:</p>
-</div>
-<div class="section" id="find-get-index">
+</section>
+<section id="find-get-index">
 <h2><code class="docutils literal notranslate"><span class="pre">find-get-index</span></code><a class="headerlink" href="#find-get-index" title="Permalink to this headline">¶</a></h2>
 <p>( ??? get-xt count pred-xt – ??? i|-1 )</p>
 <p>which iterates over the cell values returned by <em>get-xt</em> when passed indices starting from zero up to but not including <em>count</em>, passing each cell to <em>xt</em>, until it either reaches a value for which it returns a non-zero value, where then it returns the index of that cell, or if it reaches <em>count</em>, where then it returns -1; <em>get-xt</em> has the signature:</p>
 <p>( ??? i – ??? x )</p>
 <p>and <em>pred-xt</em> has the signature:</p>
 <p>( ??? x – ??? f )</p>
-</div>
-<div class="section" id="id5">
+</section>
+<section id="id5">
 <h2><code class="docutils literal notranslate"><span class="pre">2find-get-index</span></code><a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
 <p>( ??? get-xt count pred-xt – ??? i|-1 )</p>
 <p>which iterates over the double-cell values returned by <em>get-xt</em> when passed indices starting from zero up to but not including <em>count</em>, passing each double cell to <em>xt</em>, until it either reaches a value for which it returns a non-zero value, where then it returns the index of that double cell, or if it reaches <em>count</em>, where then it returns -1; <em>get-xt</em> has the signature:</p>
@@ -159,52 +163,53 @@
 <p>and <em>pred-xt</em> has the signature:</p>
 <p>( ??? d – ??? f )</p>
 <p>There are the following combinators for finding values in arrays:</p>
-</div>
-<div class="section" id="cfind-value">
+</section>
+<section id="cfind-value">
 <h2><code class="docutils literal notranslate"><span class="pre">cfind-value</span></code><a class="headerlink" href="#cfind-value" title="Permalink to this headline">¶</a></h2>
 <p>( ??? b-addr count xt – ??? b|0 f )</p>
 <p>which iterates over the byte array specified by <em>b-addr</em> and <em>count</em>, passing each byte from the lowest address to the highest to <em>xt</em>, until it either reaches a value for which it returns a non-zero value, where then it returns the value of that byte and true, or if it reaches the end of the array, where then it returns 0 and false; <em>xt</em> as the signature:</p>
 <p>( ??? b – ??? f )</p>
-</div>
-<div class="section" id="hfind-value">
+</section>
+<section id="hfind-value">
 <h2><code class="docutils literal notranslate"><span class="pre">hfind-value</span></code><a class="headerlink" href="#hfind-value" title="Permalink to this headline">¶</a></h2>
 <p>( ??? h-addr count xt – ??? h|0 f )</p>
 <p>which iterates over the halfword array specified by <em>h-addr</em> and <em>count</em>, passing each halfword from the lowest address to the highest to <em>xt</em>, until it either reaches a value for which it returns a non-zero value, where then it returns the value of that halfword and true, or if it reaches the end of the array, where then it returns 0 and false; <em>xt</em> has the signature:</p>
 <p>( ??? h – ??? f )</p>
-</div>
-<div class="section" id="find-value">
+</section>
+<section id="find-value">
 <h2><code class="docutils literal notranslate"><span class="pre">find-value</span></code><a class="headerlink" href="#find-value" title="Permalink to this headline">¶</a></h2>
 <p>( ??? addr count xt – ??? x|0 f )</p>
 <p>which iterates over the cell array specified by <em>addr</em> and <em>count</em>, passing each cell from the lowest address to the highest to <em>xt</em>, until it either reaches a value for which it returns a non-zero value, where then it returns the value of that cell and true, or if it reaches the end of the array, where then it returns 0 and false; <em>xt</em> has the signature:</p>
 <p>( ??? x – ??? f )</p>
-</div>
-<div class="section" id="id6">
+</section>
+<section id="id6">
 <h2><code class="docutils literal notranslate"><span class="pre">2find-value</span></code><a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
 <p>( ??? addr count xt – ??? d|0 f )</p>
 <p>which iterates over the double-cell array specified by <em>addr</em> and <em>count</em>, passing each double cell from the lowest address to the highest to <em>xt</em>, until it either reaches a value for which it returns a non-zero value, where then it returns the value of that double cell and true, or if it reaches the end of the array, where then it returns 0 and false; <em>xt</em> has the signature:</p>
 <p>( ??? d – ??? f )</p>
 <p>There are the following combinators for finding values from getters:</p>
-</div>
-<div class="section" id="find-get-value">
+</section>
+<section id="find-get-value">
 <h2><code class="docutils literal notranslate"><span class="pre">find-get-value</span></code><a class="headerlink" href="#find-get-value" title="Permalink to this headline">¶</a></h2>
 <p>( ??? get-xt count pred-xt – ??? x|0 f )</p>
 <p>which iterates over the cell values returned by <em>get-xt</em> when passed indices starting from zero up to but not including <em>count</em>, passing each cell to <em>xt</em>, until it either reaches a value for which it returns a non-zero value, where then it returns the value of that cell and true, or if it reaches <em>count</em>, where then it returns 0 and false; <em>get-xt</em> has the signature:</p>
 <p>( ??? i – ??? x )</p>
 <p>and <em>pred-xt</em> has the signature:</p>
 <p>( ??? x – ??? f )</p>
-</div>
-<div class="section" id="id7">
+</section>
+<section id="id7">
 <h2><code class="docutils literal notranslate"><span class="pre">2find-get-value</span></code><a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
 <p>( ??? get-xt count pred-xt – ??? d|0 f )</p>
 <p>which iterates over the double-cell values returned by <em>get-xt</em> when passed indices starting from zero up to but not including <em>count</em>, passing each double cell to <em>xt</em>, until it either reaches a value for which it returns a non-zero value, where then it returns the value of that double cell and true, or if it reaches <em>count</em>, where then it returns 0 and false; <em>get-xt</em> has the signature:</p>
 <p>( ??? i – ??? d )</p>
 <p>and <em>pred-xt</em> has the signature:</p>
 <p>( ??? d – ??? f )</p>
-</div>
-</div>
+</section>
+</section>
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -219,7 +224,7 @@
 
 
 <h3>Navigation</h3>
-<p class="caption"><span class="caption-text">Contents:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
@@ -255,15 +260,20 @@
 <li class="toctree-l1"><a class="reference internal" href="schedule.html">Scheduling Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="allocate.html">Allocator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
@@ -291,12 +301,20 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
 <script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -305,8 +323,8 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.4.3</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="../_sources/words/lambda.md.txt"

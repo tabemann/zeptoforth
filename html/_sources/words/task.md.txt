@@ -1,8 +1,12 @@
 # Multitasking Words
 
-Multitasking in zeptoforth is not part of the zeptoforth kernel, but is provided by `src/common/forth/task.fs`, which in turn relies upon `src/<platform>/forth/int_io.fs` and `src/common/forth/systick.fs`. It is preemptivee, but `PAUSE` may be called to explicitly relinquish control of the processor (which is highly recommended when possible); note that some words do this implicitly, such as `MS`, `KEY`, or `EMIT` (which are in turn called by words such as `REFILL` or `TYPE`).
+Multitasking in zeptoforth is not part of the zeptoforth kernel, but is provided by `src/common/forth/task.fs`, which in turn relies upon `src/<platform>/forth/int_io.fs` and `src/common/forth/systick.fs`. It is preemptive and priority-scheduled, but `PAUSE` may be called to explicitly relinquish control of the processor (which is highly recommended when possible); note that some words do this implicitly, such as `MS`, `KEY`, or `EMIT` (which are in turn called by words such as `REFILL` or `TYPE`).
 
-Note that task in zeptoforth are a relatively heavy-weight asynchronous computing means. For lighter-weight asynchronous computing, consider creating a single task for running a scheduler within (so the main task can be devoted to the REPL), and then put all asynchronous actions within that.
+Note that tasks in zeptoforth are a relatively heavy-weight asynchronous computing means. For lighter-weight asynchronous computing, consider creating a single task for running a scheduler within (so the main task can be devoted to the REPL), and then put all asynchronous actions within that.
+
+There are a number of intertask communication and synchronization constructs available in full builds, including semaphores, locks, message-oriented queue channels, message-oriented rendezvous channels, byte-oriented streams, and last but not least, task notifications. All of these except for task notifications are discussed in other documentation pages.
+
+Task notifications are the lightest-weight of all these mechanisms; simple synchronization between two tasks using task notifications take roughly 1/4 the time of using rendezvous channels, and task notifications have no extra memory overhead other than the mailboxes allocated by the user for each task, at one cell per mailbox whereas rendezvous channels take a minimum of 76 bytes of RAM. Mailboxes may only contain one cell each, and a task may have a maximum of 32 mailboxes for notifications. Notifications may set them to fixed values, update them with provided execution tokens, or leave them as-is. Note that improperly-written code using notifications may be subject to race conditions and data loss because no mechanism exists built-in to prevent a notification sent to a task in close succession after another notification from overwriting the contents of the mailbox in question. Also note that task notifications must be configured for a task `config-notify` before they may be used; the user must provide a pointer to a buffer containing a number of cells equal to the specified number of notification mailboxes.
 
 Multitasking is enabled by default once `src/common/forth/task.fs` has been loaded and the MCU has been rebooted; afterwards each time the MCU is booted a new task is created for the REPL, the main task, and multitasking is initiated.
 
@@ -39,9 +43,16 @@ Note that it is not recommended to execute this while compiling to flash; rather
 
 Note that tasks may be enabled or disabled but once created exist until the MCU is rebooted.
 
-New task default to a priority of zero; to change this use `set-task-priority`.
+New task default to a priority of zero; to change this use `task-priority!`.
+
+Tasks default to having no support for notifications; notifications must be configured for tasks with `config-notify`.
 
 Uncaught exceptions within a task will be handled, with the message for them being displayed, but they will result in said task being terminated.
+
+##### `config-notify`
+( notify-area-addr notify-count task -- )
+
+Configure notification for a task, with *notify-count* being the number of supported notifications, from 0 to 32, and *notify-area-addr* being the address to an area of memory that may contain *notify-count* cells.
 
 To reinitialize existing tasks, one executes:
 
@@ -83,7 +94,12 @@ If one attempts to execute a word against a terminated task, aside from `init-ta
 ##### `x-terminated`
 ( -- )
 
-This exception when executed displays the task terminated error message.
+This exception is raised when executed displays the task terminated error message.
+
+##### `x-out-of-range-notify`
+( -- )
+
+This exception is raised when an out of range notification mailbox index or count is specified.
 
 ##### `timeout`
 ( -- addr )
@@ -140,10 +156,45 @@ Block a task indefinitely until the task is readied.
 
 Block a task indefinitely until the task is readied, and then immediately start a critical section.
 
+##### `wait-notify-timeout`
+( delay start notify-index -- x )
+
+If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until *delay* ticks after the time represented by *start* ticks, and raise `x-timed-out` if this time is reached without the task being notified for that notification first. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.
+
+##### `wait-notify-timeout-critical`
+( delay start notify-index -- x )
+
+If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until *delay* ticks after the time represented by *start* ticks, and raise `x-timed-out` if this time is reached without the task being notified for that notification first; after blocking finishes, immediately start a critical section unless an exception has been raised. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.
+
+##### `wait-notify-indefinite`
+( notify-index -- x )
+
+If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until the task is notified for that notification. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.
+
+##### `wait-notify-indefinite-critical`
+( notify-index -- x )
+
+If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until the task is notified for that notification; after blocking finishes, immediately start a critical section unless an exception has been raised. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.
+
 ##### `ready`
 ( task -- )
 
 Ready a blocked or delayed task.
+
+##### `notify`
+( notify-index task -- )
+
+Notify a task on a specified notification index *notify-index* without changing the value of the notification mailbox at *notify-index*, readying the task if it is currently waiting on that notification.
+
+##### `notify-set`
+( x notify-index task -- )
+
+Notify a task on a specified notification index *notify-index*, setting the value of its notification mailbox at *notify-index* to *x*, readying the task if it is currently waiting on that notification.
+
+##### `notify-update`
+( xt notify-index task -- )
+
+Notify a task on a specified notification index *notify-index*, updating the value of its notification mailbox at *notify-index* by applying the execution token *xt* with the signature ( x0 -- x1 ) to it, readying the task if it is currently waiting on that notification.
 
 ##### `block`
 ( task -- )
@@ -154,6 +205,26 @@ Block a task for which blocking has been prepared.
 ( task -- )
 
 Block a task for which blocking has been prepared, and immediately start a new critical section once it finishes blocking.
+
+##### `wait-notify`
+( notify-index -- x )
+
+If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification that may be blockign or indefinite depending on how blocking has been prepared. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.
+
+##### `wait-notify-critical`
+( notify-index -- x )
+
+If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification that may be blockign or indefinite depending on how blocking has been prepared; after blocking finishes, immediately start a critical section unless an exception has been raised. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.
+
+##### `wait-notify`
+( task -- )
+
+If a task has not been notified, set the task in an awaiting notification state for which blocking has been prepared. If the task has already been notified, clear its notification state.
+
+##### `wait-notify-critical`
+( task -- )
+
+If a task has not been notified, set the task in an awaiting notification state for blocking has been prepared, and immediately start a new critical section once it finishes blocking. If the task has already been notified, clear its notification state.
 
 ##### `prepare-block`
 ( task -- )
@@ -180,12 +251,12 @@ Validate whether a task has timed out, raising `x-timed-out` if it has.
 
 Operation would block exception. Raised on attempting to carry out a non-blocking operation when blocking would normally be necessary for the equivalent blocking operation.
 
-##### `set-task-priority`
+##### `task-priority!`
 ( priority task -- )
 
 Set the priority of a task, from -32768 to 32767, with higher numbers being greater task priorities.
 
-##### `get-task-priority`
+##### `task-priority@`
 ( task -- priority )
 
 Get the priority of a task.
@@ -195,27 +266,27 @@ Get the priority of a task.
 
 The exception raised when setting an out-of-range task priority
 
-##### `set-task-saved-priority`
+##### `task-saved-priority!`
 ( priority task -- )
 
 Set the saved priority of a task, from -32768 to 32767, with higher numbers being greater task priorities.
 
-##### `get-task-saved-priority`
+##### `task-saved-priority@`
 ( task -- priority )
 
 Get the saved priority of a task.
 
-##### `set-task-timeslice`
+##### `task-timeslice!`
 ( timeslice task -- )
 
 Set the timeslice, in ticks (usually 100 us increments), of a task, indicating the minimum amount of time a task will run before being preempted. If a task does not use up all of its timeslice before it gives up control of the processor, it will start off with the remainder of its timeslice next time it has control of the processor, unless it exhausted its timeslice, where then the timeslice value is added onto the tick counter (which may be negative) to yield the new timeslice (but which may not be less than the task's minimum timeslice). Note that the default setting for this for a newly initialized task is 10.
 
-##### `get-task-timeslice`
+##### `task-timeslice@`
 ( task -- timeslice )
 
 Get the timeslice, in ticks (usually 100 us increments), of a task.
 
-##### `set-task-min-timeslice`
+##### `task-min-timeslice!`
 ( timeslice task -- )
 
 Set the minimum timeslice, in ticks (usually 100 us increments), that a task will be guaranteed to run when scheduled, regardless of how many ticks the task executed for the last time it was scheduled. For instance, to ensure that each time a task will run for at least 10 ticks each time it is scheduled, this should be set to 10. By default, this value is set to 0 for each task, such that a given task is not guaranteed to not be descheduled immediately on a SysTick if it had already used up both its timeslice and also the next timeslice (through, e.g., spending time in critical sections).
@@ -225,19 +296,19 @@ Set the minimum timeslice, in ticks (usually 100 us increments), that a task wil
 
 Getet the minimum timeslice, in ticks (usually 100 us increments), that a task will be guaranteed to run when scheduled, regardless of how many ticks the task executed for the last time it was scheduled.
 
-##### `get-task-active`
+##### `task-active@`
 ( task -- level )
 
 Get the activation level of a task, with values 0 and lower indicating that a task is inactive, and values 1 and greater indicating that a task is active.
 
 The simplest case of delaying a task is simply to execute:
 
-##### `get-task-name`
+##### `task-name@`
 ( task -- addr )
 
 Get the name of a task as a counted string; an address of zero indicates no name is set.
 
-##### `set-task-name`
+##### `task-name!`
 ( addr task -- )
 
 Set the name of a task as a counted string; an address of zero indicates to set no name.

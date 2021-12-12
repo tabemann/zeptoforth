@@ -1,6 +1,6 @@
 compile-to-flash
 
-begin-import-module-once swd-module
+begin-import-module swd-module
 
   import internal-module
 
@@ -95,5 +95,4 @@ end-compress-flash
 
 compile-to-ram
 
-\ warm
-
+\ Do not reboot

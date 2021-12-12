@@ -21,10 +21,11 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-import-module-once task-module
+begin-import-module task-module
 
   import internal-module
   import interrupt-module
+  import multicore-module
   import systick-module
   import int-io-module
 
@@ -35,7 +36,7 @@ begin-import-module-once task-module
 
     \ Task delayed state
     1 constant delayed
-    
+
     \ Task blocked with timeout
     2 constant blocked-timeout
 
@@ -48,47 +49,47 @@ begin-import-module-once task-module
     \ Task block timed out
     5 constant block-timed-out
 
+    \ User schedule into critical section bit
+    $4000 constant schedule-user-critical
+    
     \ Schedule into critical section bit
     $8000 constant schedule-critical
 
-    \ Schedule into critical section mask
-    $7FFF constant schedule-critical-mask
+    \ Task state mask
+    $3FFF constant task-state-mask
     
     \ In task change
-    variable in-task-change
+    cpu-variable cpu-in-task-change in-task-change
 
     \ Wake tasks flag
-    variable wake-tasks
+    cpu-variable cpu-wake-tasks wake-tasks
     
     \ Main task
-    variable main-task
+    cpu-variable cpu-main-task main-task
     
     \ Current task
-    variable current-task
+    cpu-variable cpu-current-task current-task
 
     \ Previous task
-    variable prev-task
+    cpu-variable cpu-prev-task prev-task
 
     \ First task
-    variable first-task
+    cpu-variable cpu-first-task first-task
     
     \ Last task
-    variable last-task
+    cpu-variable cpu-last-task last-task
 
     \ Declare a RAM variable for the end of free RAM memory
     variable free-end
 
     \ Pause count
-    variable pause-count
+    cpu-variable cpu-pause-count pause-count
 
     \ Currently in multitasker
-    variable in-multitasker?
-
-    \ The original SysTIck handler
-    variable orig-systick-handler
+    cpu-variable cpu-in-multitasker? in-multitasker?
 
     \ The multitasker SysTick counter
-    variable task-systick-counter
+    cpu-variable cpu-task-systick-counter task-systick-counter
 
     \ The saved multitasker SysTick counter
     user task-saved-systick-counter
@@ -100,10 +101,14 @@ begin-import-module-once task-module
     0 constant default-min-timeslice
     
     \ Sleep is enabled
-    variable sleep-enabled?
+    cpu-variable cpu-sleep-enabled? sleep-enabled?
 
     \ Tracing is enabled
-    variable trace-enabled?
+    cpu-variable cpu-trace-enabled? trace-enabled?
+
+    \ CPU is active
+    cpu-count cells buffer: cpu-active?
+    : cpu-active? ( index -- addr ) cells cpu-active? + ;
     
     \ The current task handler
     user task-handler
@@ -131,6 +136,18 @@ begin-import-module-once task-module
   
     \ The task's name as a counted string
     user task-name
+
+    \ The notification being waited on
+    user task-current-notify
+
+    \ The notified bitmap
+    user task-notified-bitmap
+
+    \ The current notification count
+    user task-notify-count
+
+    \ The current notification area pointer
+    user task-notify-area
   
     \ SVCall vector index
     11 constant svcall-vector
@@ -177,6 +194,15 @@ begin-import-module-once task-module
       field: task-next
     end-structure
 
+    \ Auxiliary main task dictionary size in bytes
+    256 constant aux-main-task-dict-size
+
+    \ Auxiliary main task data stack size in bytes
+    128 constant aux-main-task-stack-size
+
+    \ Auxiliary main task return stack size in bytes
+    512 constant aux-main-task-rstack-size
+
   end-module
 
   \ The currently waited-for lock
@@ -206,10 +232,16 @@ begin-import-module-once task-module
   \ Timed out exception
   : x-timed-out ( -- ) space ." block timed out" cr ;
 
+  \ Out of range notification index
+  : x-out-of-range-notify ( -- ) space ." out of range notification" cr ;
+
+  \ Currently waiting on notification that would be removed
+  : x-current-wait-notify ( -- ) space ." currently await notification" cr ;
+
   \ Sleep
   : sleep ( -- ) sleep-enabled? @ if sleep then ;
 
-  begin-module task-internal-module
+  continue-module task-internal-module
 
     \ Get task stack base
     : task-stack-base ( task -- addr )
@@ -267,6 +299,20 @@ begin-import-module-once task-module
       dup task-rstack-current @ cell - tuck swap task-rstack-current !
     ;
 
+    \ Claim the task spinlock if spinlocks are supported
+    spinlock-count 0> [if]
+      : claim-task-spinlock ( -- ) task-spinlock claim-spinlock ;
+    [else]
+      : claim-task-spinlock ( -- ) ;
+    [then]
+
+    \ Release the task spinlock if spinlocks are supported
+    spinlock-count 0> [if]
+      : release-task-spinlock ( -- ) task-spinlock release-spinlock ;
+    [else]
+      : release-task-spinlock ( -- ) ;
+    [then]
+
   end-module
   
   \ Access a given user variable for a given task
@@ -275,7 +321,7 @@ begin-import-module-once task-module
   ;
 
   \ Get task priority
-  : get-task-priority ( task -- priority )
+  : task-priority@ ( task -- priority )
     task-priority h@ 16 lshift 16 arshift
   ;
 
@@ -284,15 +330,20 @@ begin-import-module-once task-module
     task-active h@ terminated = triggers x-terminated
   ;
 
-  begin-module task-internal-module
+  continue-module task-internal-module
+
+    \ Validate a notification index
+    : validate-notify ( notify-index task -- )
+      ['] task-notify-count for-task @ u< averts x-out-of-range-notify
+    ;
     
     \ Find the next task with a higher priority; 0 returned indicates no task
     \ exists with a higher priority.
     : find-higher-priority ( task -- higher-task )
-      get-task-priority >r
+      task-priority@ >r
       last-task @ begin
 	dup 0<> if
-	  dup get-task-priority r@ < if task-next @ false else true then
+	  dup task-priority@ r@ < if task-next @ false else true then
 	else
 	  true
 	then
@@ -381,32 +432,41 @@ begin-import-module-once task-module
   
   end-module
 
-  \ Get task active sate
-  : get-task-active ( task -- active )
+  \ Get whether a task has timed out
+  : timed-out? ( task -- timed-out )
+    dup validate-not-terminated task-state h@ task-state-mask and
+    block-timed-out =
+  ;
+
+  \ Validate not timing out
+  : validate-timeout ( task -- ) timed-out? triggers x-timed-out ;
+
+  \ Get task active state
+  : task-active@ ( task -- active )
     task-active h@ 16 lshift 16 arshift
   ;
 
   \ Get saved task priority
-  : get-task-saved-priority ( task -- priority )
+  : task-saved-priority@ ( task -- priority )
     task-saved-priority h@
   ;
 
   \ Set task priority
-  : set-task-priority ( priority task -- )
+  : task-priority! ( priority task -- )
     over -32768 < triggers x-out-of-range-priority
     over 32767 > triggers x-out-of-range-priority
     task-priority h!
   ;
 
   \ Set task saved priority
-  : set-task-saved-priority ( priority task -- )
+  : task-saved-priority! ( priority task -- )
     over -32768 < triggers x-out-of-range-priority
     over 32767 > triggers x-out-of-range-priority
     task-saved-priority h!
   ;
 
   \ Set task timeslice
-  : set-task-timeslice ( timeslice task -- )
+  : task-timeslice! ( timeslice task -- )
     disable-int
     dup validate-not-terminated
     dup current-task @ = if
@@ -418,36 +478,36 @@ begin-import-module-once task-module
   ;
 
   \ Get task timeslice
-  : get-task-timeslice ( task -- timeslice )
+  : task-timeslice@ ( task -- timeslice )
     dup validate-not-terminated ['] task-timeslice for-task @
   ;
 
   \ Set task minimum timeslice
-  : set-task-min-timeslice ( min-timeslice task -- )
+  : task-min-timeslice! ( min-timeslice task -- )
     dup validate-not-terminated ['] task-min-timeslice for-task !
   ;
 
   \ Get task minimum timeslice
-  : get-task-min-timeslice ( task -- min-timeslice )
+  : task-min-timeslice@ ( task -- min-timeslice )
     dup validate-not-terminated ['] task-min-timeslice for-task @
   ;
 
   \ Get a task's name as a counted string; an address of zero indicates no name
   \ is set.
-  : get-task-name ( task -- addr )
+  : task-name@ ( task -- addr )
     dup validate-not-terminated ['] task-name for-task @
   ;
 
   \ Set a task's name as a counted string; an address of zero indicates to set
   \ no name.
-  : set-task-name ( addr -- task )
+  : task-name! ( addr -- task )
     dup validate-not-terminated ['] task-name for-task !
   ;
 
   \ Start a task's execution
   : run ( task -- )
     dup start-validate-task-change
-    dup get-task-active 1+
+    dup task-active@ 1+
     dup 1 = if over test-remove-task over insert-task then
     swap task-active h!
     false in-task-change !
@@ -456,7 +516,7 @@ begin-import-module-once task-module
   \ Stop a task's execution
   : stop ( task -- )
     dup start-validate-task-change
-    dup get-task-active 1-
+    dup task-active@ 1-
     swap task-active h!
     false in-task-change !
   ;
@@ -498,7 +558,8 @@ begin-import-module-once task-module
       dup validate-not-terminated
       tuck ['] task-systick-start for-task !
       tuck ['] task-systick-delay for-task !
-      [ delayed schedule-critical or ] literal swap task-state h!
+      [ delayed schedule-critical or schedule-user-critical or ] literal
+      swap task-state h!
     ;] critical
     pause
   ;
@@ -520,9 +581,55 @@ begin-import-module-once task-module
       dup validate-not-terminated
       tuck ['] task-systick-start for-task !
       tuck ['] task-systick-delay for-task !
-      [ blocked-timeout schedule-critical or ] literal swap task-state h!
+      [ blocked-timeout schedule-critical or schedule-user-critical or ] literal
+      swap task-state h!
     ;] critical
     pause
+  ;
+
+  \ Wait until a timeout on the specified notification index and return the
+  \ value for that notification index once notified, unless already notified,
+  \ where then that value will be returned and the notified state will be
+  \ cleared immediately. x-timed-out is raised if the timeout is reached.
+  : wait-notify-timeout ( ticks-delay ticks-start notify-index -- x )
+    [:
+      dup current-task @ validate-notify
+      swap task-systick-start !
+      swap task-systick-delay !
+      begin dup bit task-notified-bitmap bit@ not while
+	dup task-current-notify !
+	[ blocked-timeout schedule-critical or ] literal
+	current-task @ task-state h! end-critical pause
+	current-task @ validate-timeout
+      repeat
+      task-notify-area @ over cells + @
+      swap bit task-notified-bitmap bic!
+      -1 task-current-notify !
+    ;] critical
+  ;
+
+  \ Wait until a timeout on the specified notification index and return the
+  \ value for that notification index once notified, unless already notified,
+  \ where then that value will be returned and the notified state will be
+  \ cleared immediately. x-timed-outo is raised if the timeout is reached.
+  \ This word will leave the system in a critical section once completed.
+  : wait-notify-timeout-critical ( ticks-delay ticks-start notify-index -- x )
+    begin-critical
+    [:
+      dup current-task @ validate-notify
+      swap task-systick-start !
+      swap task-systick-delay !
+      begin dup bit task-notified-bitmap bit@ not while
+	dup task-current-notify !
+	[ blocked-timeout schedule-critical or schedule-user-critical or ]
+	literal
+	current-task @ task-state h! end-critical pause
+	current-task @ validate-timeout
+      repeat
+      task-notify-area @ over cells + @
+      swap bit task-notified-bitmap bic!
+      -1 task-current-notify !
+    ;] try ?dup if end-critical ?raise then
   ;
 
   \ Mark a task as waiting
@@ -535,7 +642,8 @@ begin-import-module-once task-module
   \ Mark a task as waiting
   : block-wait-critical ( task -- )
     dup validate-not-terminated
-    [ blocked-wait schedule-critical or ] literal swap task-state h!
+    [ blocked-wait schedule-critical or schedule-user-critical or ] literal
+    swap task-state h!
     pause
   ;
 
@@ -549,15 +657,133 @@ begin-import-module-once task-module
   \ Mark a task as blocked indefinitely and schedule as critical when done
   : block-indefinite-critical ( task -- )
     dup validate-not-terminated
-    [ blocked-indefinite schedule-critical or ] literal swap task-state h!
+    [ blocked-indefinite schedule-critical or schedule-user-critical or ]
+    literal swap task-state h!
     pause
+  ;
+
+  \ Wait indefinitely on the specified notification index and return the value
+  \ for that notification index once notified, unless already notified, where
+  \ then that value will be returned and the notified state will be cleared
+  \ immediately.
+  : wait-notify-indefinite ( notify-index -- x )
+    [:
+      dup current-task @ validate-notify
+      begin dup bit task-notified-bitmap bit@ not while
+	dup task-current-notify !
+	[ blocked-indefinite schedule-critical or ] literal
+	current-task @ task-state h! end-critical pause
+      repeat
+      task-notify-area @ over cells + @
+      swap bit task-notified-bitmap bic!
+      -1 task-current-notify !
+    ;] critical
+  ;
+
+  \ Wait indefinitely on the specified notification index and return the value
+  \ for that notification index once notified, unless already notified, where
+  \ then that value will be returned and the notified state will be cleared
+  \ immediately. This word will leave the system in a critical section once
+  \ completed.
+  : wait-notify-indefinite-critical ( notify-index -- x )
+    begin-critical
+    [:
+      dup current-task @ validate-notify
+      begin dup bit task-notified-bitmap bit@ not while
+	dup task-current-notify !
+	[ blocked-indefinite schedule-critical or schedule-user-critical or ]
+	literal	current-task @ task-state h! end-critical pause
+      repeat
+      task-notify-area @ over cells + @
+      swap bit task-notified-bitmap bic!
+      -1 task-current-notify !
+    ;] try ?dup if end-critical ?raise then
   ;
 
   \ Ready a task
   : ready ( task -- )
-    dup validate-not-terminated
-    dup task-state h@ schedule-critical and readied or swap task-state h!
+    [:
+      dup validate-not-terminated
+      dup ['] task-current-notify for-task @ -1 = if
+	dup task-state h@ [ schedule-critical schedule-user-critical or ]
+	literal and readied or swap task-state h!
+      else
+	drop
+      then
+    ;] critical
     pause
+  ;
+
+  \ Notify a task for a specified notification index
+  : notify ( notify-index task -- )
+    [:
+      dup validate-not-terminated
+      2dup validate-notify
+      2dup swap bit swap ['] task-notified-bitmap for-task bis!
+      dup ['] task-current-notify for-task @ rot = if
+	dup task-state h@ schedule-user-critical and
+	[ schedule-critical readied or ] literal or swap task-state h! true
+      else
+	drop false
+      then
+    ;] critical
+    if pause then
+  ;
+
+  \ Notify a task for a specified notification index, setting the notification
+  \ value to a set value
+  : notify-set ( x notify-index task -- )
+    [:
+      dup validate-not-terminated
+      2dup validate-notify
+      dup ['] task-notify-area for-task @ 2 pick cells + >r rot r> !
+      2dup swap bit swap ['] task-notified-bitmap for-task bis!
+      dup ['] task-current-notify for-task @ rot = if
+	dup task-state h@ schedule-user-critical and
+	[ schedule-critical readied or ] literal or swap task-state h! true
+      else
+	drop false
+      then
+    ;] critical
+    if pause then
+  ;
+
+  \ Notify a task for a specified notification index, updating the notification
+  \ value with an xt with the signature ( x0 -- x1 )
+  : notify-update ( xt notify-index task -- )
+    [:
+      dup validate-not-terminated
+      2dup validate-notify
+      rot >r
+      dup ['] task-notify-area for-task @ 2 pick cells +
+      dup @ r> execute swap !
+      2dup swap bit swap ['] task-notified-bitmap for-task bis!
+      dup ['] task-current-notify for-task @ rot = if
+	dup task-state h@ schedule-user-critical and
+	[ schedule-critical readied or ] literal or swap task-state h! true
+      else
+	drop false
+      then
+    ;] critical
+    if pause then
+  ;
+
+  \ Get the contents of a notification mailbox without waiting on it
+  : mailbox@ ( notify-index task -- x )
+    [:
+      dup validate-not-terminated
+      2dup validate-notify
+      ['] task-notify-area for-task @ swap cells + @
+    ;] critical
+  ;
+
+  \ Set the contents of a notification mailbox without notifying a task
+  : mailbox! ( x notify-index task -- )
+    [:
+      dup validate-not-terminated
+      2dup validate-notify
+      ['] task-notify-area for-task @ swap cells + !
+    ;] critical
   ;
 
   \ Block a task for the specified initialized timeout
@@ -589,6 +815,31 @@ begin-import-module-once task-module
     ;] critical
   ;
 
+  \ Wait for a notification at a specified notification index with a specified
+  \ initialized timeout and return the notification value
+  : wait-notify ( notify-index -- x )
+    begin-critical
+    timeout @ no-timeout <> if
+      timeout-systick-delay @ timeout-systick-start @ rot
+      end-critical wait-notify-timeout
+    else
+      end-critical wait-notify-indefinite
+    then
+  ;
+
+  \ Wait for a notification at a specified notification index with a specified
+  \ initialized timeout and return the notification value and schedule as
+  \ critical once done
+  : wait-notify-critical ( task -- )
+    begin-critical
+    timeout @ no-timeout <> if
+      timeout-systick-delay @ timeout-systick-start @ rot
+      end-critical wait-notify-timeout-critical
+    else
+      end-critical wait-notify-indefinite-critical
+    then
+  ;
+
   \ Prepare blocking for a task
   : prepare-block ( task -- )
     [:
@@ -602,22 +853,14 @@ begin-import-module-once task-module
     ;] critical
   ;
 
-  \ Get whether a task has timed out
-  : timed-out? ( task -- timed-out )
-    dup validate-not-terminated task-state h@ schedule-critical-mask and
-    block-timed-out =
-  ;
-
-  \ Validate not timing out
-  : validate-timeout ( task -- ) timed-out? triggers x-timed-out ;
-
   \ Get whether a task has terminated
   : terminated? ( task -- terminated ) task-active h@ terminated = ;
 
-  begin-module task-internal-module
+  continue-module task-internal-module
     
     \ Initialize the main task
     : init-main-task ( -- )
+      claim-task-spinlock
       free-end @ task -
       rstack-base @ rstack-end @ - over task-rstack-size h!
       stack-base @ stack-end @ - over task-stack-size h!
@@ -634,6 +877,10 @@ begin-import-module-once task-module
       0 task-systick-start !
       -1 task-systick-delay !
       c" main" task-name !
+      -1 task-current-notify !
+      0 task-notified-bitmap !
+      0 task-notify-count !
+      0 task-notify-area !
       base @ task-base !
       default-timeslice task-timeslice !
       default-min-timeslice task-min-timeslice !
@@ -648,6 +895,7 @@ begin-import-module-once task-module
       dup prev-task !
       current-task !
       free-end @ task - free-end !
+      release-task-spinlock
     ;
 
     \ Task entry point
@@ -663,6 +911,54 @@ begin-import-module-once task-module
       systick-counter over ['] task-systick-start for-task @ -
       swap ['] task-systick-delay for-task @ <
     ;
+
+    cpu-count 1 > [if]
+      
+      \ Populate an auxiliary task's stack
+      : init-aux-task-stack ( xn...x0 count xt task -- sp )
+	task-stack-base
+	swap >r >r
+	$FEDCBA98 r> cell - tuck ! >r
+	begin dup 0<> while
+	  dup roll r> cell - tuck ! >r 1-
+	repeat
+	drop
+	r> r> swap cell - tuck !
+      ;
+      
+      \ Initialize an auxiliary task
+      : init-aux-task ( xn...x0 count xt task -- )
+	0 over ['] task-handler for-task !
+	0 over task-priority h!
+	0 over task-saved-priority h!
+	1 over task-active h!
+	base @ over ['] task-base for-task !
+	0 over ['] current-lock for-task !
+	0 over ['] current-lock-held for-task !
+	readied over task-state h!
+	no-timeout over ['] timeout for-task !
+	0 over ['] timeout-systick-start for-task !
+	0 over ['] timeout-systick-delay for-task !
+	0 over ['] task-systick-start for-task !
+	0 over ['] task-name for-task !
+	-1 over ['] task-current-notify for-task !
+	0 over ['] task-notified-bitmap for-task !
+	0 over ['] task-notify-count for-task !
+	0 over ['] task-notify-area for-task !
+	-1 over ['] task-systick-delay for-task !
+	c" aux-main" over ['] task-name for-task !
+	default-timeslice over ['] task-timeslice for-task !
+	default-min-timeslice over ['] task-min-timeslice for-task !
+	default-timeslice over ['] task-saved-systick-counter for-task !
+	dup task-rstack-base over task-rstack-current !
+	next-user-space over task-dict-offset !
+	0 over task-next !
+	0 over task-prev !
+	dup >r init-aux-task-stack
+	r> task-rstack-base
+      ;
+
+    [then]
 
   end-module
 
@@ -681,6 +977,10 @@ begin-import-module-once task-module
     0 over ['] timeout-systick-delay for-task !
     0 over ['] task-systick-start for-task !
     0 over ['] task-name for-task !
+    -1 over ['] task-current-notify for-task !
+    0 over ['] task-notified-bitmap for-task !
+    0 over ['] task-notify-count for-task !
+    0 over ['] task-notify-area for-task !
     -1 over ['] task-systick-delay for-task !
     default-timeslice over ['] task-timeslice for-task !
     default-min-timeslice over ['] task-min-timeslice for-task !
@@ -697,25 +997,47 @@ begin-import-module-once task-module
     drop r> r> swap push-task-stack
   ;
 
-  \ Spawn a non-main task
-  : spawn ( xn...x0 count xt dict-size stack-size rstack-size -- task )
+  \ Allot space for a task
+  : task-allot ( dict-size stack-size rstack-size -- task )
+    claim-task-spinlock
     2dup + task +
     free-end @ swap -
     swap 4 align swap tuck task-rstack-size h!
     swap 4 align swap tuck task-stack-size h!
     swap 4 align swap tuck task-dict-size !
     dup dup task-dict-size @ - free-end !
-    dup >r init-task r>
+    release-task-spinlock
+  ;
+  
+  \ Spawn a non-main task
+  : spawn ( xn...x0 count xt dict-size stack-size rstack-size -- task )
+    task-allot dup >r init-task r>
   ;
 
-  begin-module task-internal-module
+  \ Configure notification for a task; notify-count may be from 0 to 32, and
+  \ notify-area-addr is the address of an area of memory that contains that
+  \ number of cells.
+  : config-notify ( notify-area-addr notify-count task -- )
+    [:
+      over 32 u<= averts x-out-of-range-notify
+      2dup ['] task-current-notify for-task @ > averts x-current-wait-notify
+      2dup swap $FFFFFFFF 32 rot - rshift
+      over ['] task-notified-bitmap for-task @
+      and swap ['] task-notified-bitmap for-task !
+      2dup ['] task-notify-count for-task !
+      2 pick rot cells 0 fill
+      ['] task-notify-area for-task !
+    ;] critical
+  ;
+
+  continue-module task-internal-module
 
     \ Wake tasks
     : do-wake ( -- ) true wake-tasks ! ;
 
     \ Get whether a task is waiting
     : waiting-task? ( task -- )
-      dup task-state h@ schedule-critical-mask and
+      dup task-state h@ task-state-mask and
       dup blocked-wait = over blocked-indefinite = or
       over delayed = rot blocked-timeout = or
       rot delayed? and or
@@ -763,14 +1085,14 @@ begin-import-module-once task-module
     : reschedule-task ( task -- )
       true in-task-change !
       dup remove-task
-      dup get-task-active 0> if insert-task else drop then
+      dup task-active@ 0> if insert-task else drop then
       false in-task-change !
     ;
 
     \ Actually wake tasks
     : actually-wake-tasks ( -- )
       first-task @ begin ?dup while
-	dup task-state h@ blocked-wait = if
+	dup task-state h@ task-state-mask and blocked-wait = if
 	  readied over task-state h!
 	then
 	task-prev @
@@ -792,14 +1114,13 @@ begin-import-module-once task-module
 	  wake-tasks @ if actually-wake-tasks false wake-tasks ! then
 	  begin
 	    find-next-task dup 0<> if
-	      dup get-task-active 1 < if
+	      dup task-active@ 1 < if
 		remove-task false
 	      else
 		dup task-state h@ schedule-critical and if
 		  1 in-critical !
 		then
-		dup task-state h@ schedule-critical-mask and
-		blocked-timeout = if
+		dup task-state h@ task-state-mask and blocked-timeout = if
 		  block-timed-out over task-state h!
 		else
 		  readied over task-state h!
@@ -854,7 +1175,7 @@ begin-import-module-once task-module
     
     \ Dump task name
     : dump-task-name ( task -- )
-      get-task-name ?dup if count tuck type 16 swap - 0 max else 16 then spaces
+      task-name@ ?dup if count tuck type 16 swap - 0 max else 16 then spaces
     ;
     
     \ Dump task state
@@ -862,27 +1183,35 @@ begin-import-module-once task-module
       dup current-task @ = if
 	s" running"
       else
-	dup task-state h@ schedule-critical-mask and case
-	  readied of            s" ready" endof
-	  delayed of            s" delayed" endof
-	  blocked-timeout of    s" timeout" endof
-	  blocked-wait of       s" wait" endof
-	  blocked-indefinite of s" indefinite" endof
-	  block-timed-out of    s" timed-out" endof
-	endcase
+	dup ['] task-current-notify for-task @ -1 <> if
+	  s" to-notify"
+	else
+	  dup task-state h@ task-state-mask and case
+	    readied of            s" ready" endof
+	    delayed of            s" delayed" endof
+	    blocked-timeout of    s" timeout" endof
+	    blocked-wait of       s" wait" endof
+	    blocked-indefinite of s" indefinite" endof
+	    block-timed-out of    s" timed-out" endof
+	  endcase
+	then
       then
       tuck type 11 swap - spaces
-      task-state h@ schedule-critical and if ." yes     " else ." no      " then
+      task-state h@ schedule-user-critical and if
+	." yes     "
+      else
+	." no      "
+      then
     ;
     
     \ Dump task priority
     : dump-task-priority ( task -- )
-      get-task-priority here swap format-integer dup 8 swap - spaces type
+      task-priority@ here swap format-integer dup 8 swap - spaces type
     ;
     
     \ Dump task until time
     : dump-task-until ( task -- )
-      dup task-state h@ schedule-critical-mask and case
+      dup task-state h@ task-state-mask and case
 	delayed of true endof
 	blocked-timeout of true endof
 	false swap
@@ -941,7 +1270,7 @@ begin-import-module-once task-module
     drop drop
   ;
 
-  begin-import-module task-internal-module
+  continue-module task-internal-module
 
     \ Wait the current thread
     : do-wait ( -- )
@@ -969,7 +1298,25 @@ begin-import-module-once task-module
 	space ." RAM dictionary space is running low (<1K left)" cr
       then
       saved-validate-dict @ ?execute
-    ; 
+    ;
+
+    cpu-count 1 > [if]
+      
+      \ Initialize an auxiliary core's main task
+      : init-aux-main-task ( -- )
+	current-task @ task-dict-current ram-here!
+	current-task @ task-stack-base stack-base !
+	current-task @ task-rstack-base rstack-base !
+	$7F SHPR3_PRI_15!
+	$FF SHPR2_PRI_11!
+	$FF SHPR3_PRI_14!
+	1 pause-enabled !
+	init-systick-aux-core
+	try ?dup if display-red execute display-normal then
+	current-task @ kill
+      ;
+      
+    [then]
 
   end-module
 
@@ -989,28 +1336,80 @@ begin-import-module-once task-module
     enable-int
   ;
 
+  \ Core already has a main task spawned exception
+  : x-main-already-launched ( -- )
+    space ." core already has main task" cr
+  ;
+
+  \ Auxiliary cores can only be launched from core 0
+  : x-core-can-only-be-launched-from-core-0 ( -- )
+    space ." core can only be launched from core 0" cr
+  ;
+
+  \ Launch an auxiliary core with a task
+  : spawn-aux-main
+    ( xn ... x0 count xt dict-size stack-size rstack-size core -- )
+    [ cpu-count 1 > ] [if]
+      cpu-index 0= averts x-core-can-only-be-launched-from-core-0
+      dup 1 = averts x-core-out-of-range
+      disable-int
+      claim-task-spinlock
+      enable-int
+      dup cpu-active? @ if
+	release-task-spinlock
+	['] x-main-already-launched ?raise
+      else
+	true over cpu-active? !
+      then
+      release-task-spinlock
+      >r task-allot >r
+      2r@ cpu-current-task !
+      2r@ cpu-main-task !
+      2r@ cpu-first-task !
+      2r@ cpu-last-task !
+      2r@ cpu-prev-task !
+      r> init-aux-task
+      ['] init-aux-main-task -rot
+      r> launch-aux-core
+    [else]
+      ['] x-core-out-of-range ?raise
+    [then]
+  ;
+
   \ Initialize multitasking
   : init-tasker ( -- )
     disable-int
-    false in-multitasker? !
     0 pause-enabled !
-    false sleep-enabled? !
-    false trace-enabled? !
-    false in-task-change !
-    false wake-tasks !
     $7F SHPR3_PRI_15!
     $FF SHPR2_PRI_11!
     $FF SHPR3_PRI_14!
-    0 task-systick-counter !
     stack-end @ free-end !
-    init-main-task
-    0 pause-count !
+    validate-dict-hook @ saved-validate-dict !
+    false ram-dict-warned !
     ['] do-pause pause-hook !
     ['] do-wait wait-hook !
     ['] do-wake wake-hook !
-    validate-dict-hook @ saved-validate-dict !
-    false ram-dict-warned !
     ['] do-validate-dict validate-dict-hook !
+    cpu-count 0 ?do
+      false i cpu-in-multitasker? !
+      false i cpu-sleep-enabled? !
+      false i cpu-trace-enabled? !
+      false i cpu-in-task-change !
+      false i cpu-wake-tasks !
+      0 i cpu-task-systick-counter !
+      i 0= if
+	true i cpu-active? !
+	init-main-task
+      else
+	false i cpu-active? !
+	0 i cpu-main-task !
+	0 i cpu-current-task !
+	0 i cpu-prev-task !
+	0 i cpu-first-task !
+	0 i cpu-last-task !
+      then
+      0 i cpu-pause-count !
+    loop
     ['] execute svcall-vector vector!
     ['] switch-tasks pendsv-vector vector!
     ['] task-systick-handler systick-vector vector!
@@ -1059,7 +1458,7 @@ end-module
   init-tasker
 ;
 
-begin-module task-module
+continue-module task-module
   
   import task-internal-module
   
@@ -1085,7 +1484,9 @@ begin-module task-module
   : trace-enable? ( -- flag ) trace-enabled? @ ;
 
   \ Allot memory from the end of RAM
-  : allot-end ( u -- addr ) negate free-end +! free-end @ ;
+  : allot-end ( u -- addr )
+    claim-task-spinlock negate free-end +! free-end @ release-task-spinlock
+  ;
 
 end-module
 

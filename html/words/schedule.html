@@ -4,11 +4,12 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>Scheduling Words &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
@@ -19,6 +20,7 @@
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
+  
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head><body>
@@ -27,100 +29,103 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
-  <div class="section" id="scheduling-words">
+  <section id="scheduling-words">
 <h1>Scheduling Words<a class="headerlink" href="#scheduling-words" title="Permalink to this headline">¶</a></h1>
 <p>Scheduling in zeptoforth is not part of the zeptoforth kernel, but is provided by <code class="docutils literal notranslate"><span class="pre">src/common/forth/schedule.fs</span></code>, which in turn relies upon <code class="docutils literal notranslate"><span class="pre">src/common/forth/systick.fs</span></code> and is normally combined with multitasking. It provides a lighter-weight means of asynchronous computing than multitasking, as each asynchronous action takes up far less RAM than a task does; however a scheduler comprising multiple asynchronous actions typically runs inside a task, so it can take advantage of automatic sleeping, and often that task is in addition to the main task, so the REPL can still be used while the scheduler operates.</p>
 <p>The scheduler involves repeatedly executing words based on the specified timing delays which may be enabled and disabled, just like tasks. However unlike tasks, these actions do not have their own dictionaries, data stacks, or return stacks. Rather they share those belonging to the scheduler itself. Uncaught exceptions within a task will be handled, with its message being displayed.</p>
 <p>These words are in <code class="docutils literal notranslate"><span class="pre">schedule-module</span></code>.</p>
-<div class="section" id="current-action">
+<section id="current-action">
 <h2><code class="docutils literal notranslate"><span class="pre">current-action</span></code><a class="headerlink" href="#current-action" title="Permalink to this headline">¶</a></h2>
 <p>( – action )</p>
 <p>The current <em>action</em>.</p>
 <p>To create a new scheduler, execute:</p>
-</div>
-<div class="section" id="create-schedule">
+</section>
+<section id="create-schedule">
 <h2><code class="docutils literal notranslate"><span class="pre">create-schedule</span></code><a class="headerlink" href="#create-schedule" title="Permalink to this headline">¶</a></h2>
 <p>( – scheduler )</p>
 <p>Disposing of a scheduler involves disabling any task it is executing in, and then de-alloting the space alloted for it in the dictionary space.</p>
 <p>To initialize an action for a given scheduler, execute:</p>
-</div>
-<div class="section" id="init-action">
+</section>
+<section id="init-action">
 <h2><code class="docutils literal notranslate"><span class="pre">init-action</span></code><a class="headerlink" href="#init-action" title="Permalink to this headline">¶</a></h2>
 <p>( xt action scheduler – )</p>
 <p>where <em>xt</em> is the entry point of the action, <em>action</em> is the action to initialize, and <em>scheduler</em> is the scheduler to create the action for. Actions are disposed of for entire schedulers by the means that schedulers are disposed by.</p>
 <p>New actions do not execute right away, rather to enable their execution, one executes:</p>
-</div>
-<div class="section" id="dispose-action">
+</section>
+<section id="dispose-action">
 <h2><code class="docutils literal notranslate"><span class="pre">dispose-action</span></code><a class="headerlink" href="#dispose-action" title="Permalink to this headline">¶</a></h2>
 <p>( action – )</p>
 <p>which disposes of an action.</p>
-</div>
-<div class="section" id="action-disposed">
+</section>
+<section id="action-disposed">
 <h2><code class="docutils literal notranslate"><span class="pre">action-disposed?</span></code><a class="headerlink" href="#action-disposed" title="Permalink to this headline">¶</a></h2>
 <p>( action – disposed )</p>
 <p>Returns whether <em>action</em> has been disposed.</p>
-</div>
-<div class="section" id="reset-action">
+</section>
+<section id="reset-action">
 <h2><code class="docutils literal notranslate"><span class="pre">reset-action</span></code><a class="headerlink" href="#reset-action" title="Permalink to this headline">¶</a></h2>
 <p>( xt action – )</p>
 <p><em>action</em> is an action whose state is reset with the entry point <em>xt</em>.</p>
-</div>
-<div class="section" id="set-action-xt">
+</section>
+<section id="set-action-xt">
 <h2><code class="docutils literal notranslate"><span class="pre">set-action-xt</span></code><a class="headerlink" href="#set-action-xt" title="Permalink to this headline">¶</a></h2>
 <p>( xt action – )</p>
 <p><em>action</em> is an action whose state is set to <em>xt</em>.</p>
-</div>
-<div class="section" id="enable-action">
+</section>
+<section id="enable-action">
 <h2><code class="docutils literal notranslate"><span class="pre">enable-action</span></code><a class="headerlink" href="#enable-action" title="Permalink to this headline">¶</a></h2>
 <p>( action – )</p>
 <p>which increments the active counter for the <em>action</em> (which is initialized to zero); the action executes if this counter is greater than zero.</p>
 <p>To force a action to be enabled, one executes:</p>
-</div>
-<div class="section" id="force-enable-action">
+</section>
+<section id="force-enable-action">
 <h2><code class="docutils literal notranslate"><span class="pre">force-enable-action</span></code><a class="headerlink" href="#force-enable-action" title="Permalink to this headline">¶</a></h2>
 <p>( action – )</p>
 <p>which sets the active counter for the <em>action</em> to one if it is smaller than one.</p>
 <p>In turn a action can be disabled with:</p>
-</div>
-<div class="section" id="disable-action">
+</section>
+<section id="disable-action">
 <h2><code class="docutils literal notranslate"><span class="pre">disable-action</span></code><a class="headerlink" href="#disable-action" title="Permalink to this headline">¶</a></h2>
 <p>( action – )</p>
 <p>which decrements the active counter for the <em>action</em>.</p>
 <p>To force a action to be disabled, one executes:</p>
-</div>
-<div class="section" id="force-disable-action">
+</section>
+<section id="force-disable-action">
 <h2><code class="docutils literal notranslate"><span class="pre">force-disable-action</span></code><a class="headerlink" href="#force-disable-action" title="Permalink to this headline">¶</a></h2>
 <p>( action – )</p>
 <p>which sets the active counter for the <em>action</em> to zero if is greater than zero.</p>
-</div>
-<div class="section" id="action-delay">
+</section>
+<section id="action-delay">
 <h2><code class="docutils literal notranslate"><span class="pre">action-delay</span></code><a class="headerlink" href="#action-delay" title="Permalink to this headline">¶</a></h2>
 <p>( delay start action – )</p>
 <p>where <em>action</em> is the action to set the delay for, <em>start</em> ticks is the time the delay is from and <em>delay</em> ticks is the delay from that time.</p>
 <p>To absolutely get the current delay, execute:</p>
-</div>
-<div class="section" id="action-delay-latest">
+</section>
+<section id="action-delay-latest">
 <h2><code class="docutils literal notranslate"><span class="pre">action-delay-latest</span></code><a class="headerlink" href="#action-delay-latest" title="Permalink to this headline">¶</a></h2>
 <p>( action – delay start )</p>
 <p>where <em>action</em> is the action to set the delay for, <em>start</em> ticks is the time the delay is from and <em>delay</em> ticks is the delay from that time.</p>
 <p>To cancel the delay for the current action, execute:</p>
-</div>
-<div class="section" id="cancel-action-delay">
+</section>
+<section id="cancel-action-delay">
 <h2><code class="docutils literal notranslate"><span class="pre">cancel-action-delay</span></code><a class="headerlink" href="#cancel-action-delay" title="Permalink to this headline">¶</a></h2>
 <p>( action – )</p>
 <p>where <em>action</em> is the action to cancel the delay for. It is recommended to execute this for a action after the action has ceased to delay, so it does not delay again when <code class="docutils literal notranslate"><span class="pre">systick-counter</span></code> wraps around.</p>
-</div>
-<div class="section" id="run-schedule">
+</section>
+<section id="run-schedule">
 <h2><code class="docutils literal notranslate"><span class="pre">run-schedule</span></code><a class="headerlink" href="#run-schedule" title="Permalink to this headline">¶</a></h2>
 <p>( schedule – )</p>
 <p>Run <em>schedule</em> in the current task. This will not return except if an exception is raised.</p>
-</div>
-</div>
+</section>
+</section>
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -135,7 +140,7 @@
 
 
 <h3>Navigation</h3>
-<p class="caption"><span class="caption-text">Contents:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
@@ -163,15 +168,19 @@
 <li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="allocate.html">Allocator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
@@ -199,12 +208,20 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
 <script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -213,8 +230,8 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.4.3</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="../_sources/words/schedule.md.txt"

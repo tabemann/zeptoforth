@@ -4,11 +4,12 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>Temporary Buffer Words &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
@@ -19,6 +20,7 @@
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
+  
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head><body>
@@ -27,36 +29,39 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
-  <div class="section" id="temporary-buffer-words">
+  <section id="temporary-buffer-words">
 <h1>Temporary Buffer Words<a class="headerlink" href="#temporary-buffer-words" title="Permalink to this headline">¶</a></h1>
 <p>Temporary buffers are circular buffers for allocating temporary data. Temporarily allocated space should not be relied upon to store data indefinitely, because they reallocate space allocated to old buffers when no more space for continguous blocks of memory are available.</p>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">temp-module</span></code>.</p>
-<div class="section" id="x-data-too-big">
+<section id="x-data-too-big">
 <h2><code class="docutils literal notranslate"><span class="pre">x-data-too-big</span></code><a class="headerlink" href="#x-data-too-big" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>An exception raised when the size of the data requested to be allocated is larger than the size of the temporary buffer’s total space.</p>
-</div>
-<div class="section" id="temp-size">
+</section>
+<section id="temp-size">
 <h2><code class="docutils literal notranslate"><span class="pre">temp-size</span></code><a class="headerlink" href="#temp-size" title="Permalink to this headline">¶</a></h2>
 <p>( data-bytes – bytes )</p>
 <p>Get the size of a temporary buffer with a given data size.</p>
-</div>
-<div class="section" id="init-temp">
+</section>
+<section id="init-temp">
 <h2><code class="docutils literal notranslate"><span class="pre">init-temp</span></code><a class="headerlink" href="#init-temp" title="Permalink to this headline">¶</a></h2>
 <p>( data-bytes addr – )</p>
 <p>Initialize a temporary buffer with a given data size at the specified address. Note that the amount of space returned by <code class="docutils literal notranslate"><span class="pre">temp-size</span></code> for the given data size should be alloted or allocated for the temporary buffer.</p>
-</div>
-<div class="section" id="allocate-temp">
+</section>
+<section id="allocate-temp">
 <h2><code class="docutils literal notranslate"><span class="pre">allocate-temp</span></code><a class="headerlink" href="#allocate-temp" title="Permalink to this headline">¶</a></h2>
 <p>( bytes temp – addr )</p>
 <p>Allocate temporary space of a given data size for a given temporary buffer. If the data size is larger than the temporary buffer’s total data size, <code class="docutils literal notranslate"><span class="pre">x-data-too-big</span></code> is raised.</p>
-</div>
-</div>
+</section>
+</section>
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -71,7 +76,7 @@
 
 
 <h3>Navigation</h3>
-<p class="caption"><span class="caption-text">Contents:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
@@ -82,6 +87,7 @@
 <li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
@@ -94,7 +100,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="allocate.html">Allocator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
@@ -127,12 +133,20 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
 <script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -141,8 +155,8 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.4.3</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="../_sources/words/temp.md.txt"

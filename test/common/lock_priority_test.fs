@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module forth-module
+continue-module forth-module
 
   import task-module
   import lock-module
@@ -46,7 +46,7 @@ begin-module forth-module
       my-lock lock
       10 0 ?do
 	50000 0 ?do loop
-	current-task get-task-priority . space
+	current-task task-priority@ . space
       loop
       [: my-lock unlock ;] try if space ." B " then
     again
@@ -55,9 +55,9 @@ begin-module forth-module
   \ Initialize the test
   : init-test ( -- )
     my-lock init-lock
-    0 ['] low 256 128 512 spawn low-task !
-    0 ['] high 256 128 512 spawn high-task !
-    1 high-task @ set-task-priority
+    0 ['] low 320 128 512 spawn low-task !
+    0 ['] high 320 128 512 spawn high-task !
+    1 high-task @ task-priority!
     low-task @ run
     500000 0 ?do loop
     high-task @ run

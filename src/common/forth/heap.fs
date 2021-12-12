@@ -23,7 +23,7 @@ compile-to-flash
 
 compress-flash
 
-begin-module-once heap-module
+begin-module heap-module
 
   \ No blocks free exception
   : x-allocate-failed ( -- ) space ." allocate failed" cr ;
@@ -197,11 +197,6 @@ begin-module-once heap-module
 
   end-module
 
-  \ Get the size of a heap with a given block size and block count
-  : heap-size ( block-size block-count -- heap-bytes )
-    tuck * swap 32 align 5 rshift cells + heap-size +
-  ;
-
   commit-flash
   
   \ Initialize a heap at a given address with a given block size and block count
@@ -248,6 +243,11 @@ begin-module-once heap-module
     then
   ;
   
+  \ Get the size of a heap with a given block size and block count
+  : heap-size ( block-size block-count -- heap-bytes )
+    tuck * swap 32 align 5 rshift cells + heap-size +
+  ;
+
 end-module
 
 end-compress-flash
