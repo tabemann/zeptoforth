@@ -492,23 +492,6 @@ Unreset_All:
 	ldr  r1, =RESETS_BASE
 	str  r3, [r1, #RESET]
 
-Force_Off_Proc1:
-	ldr  r1, =PSM_FRCE_OFF
-	ldr  r2, =PSM_FRCE_OFF_PROC1
-	ldr  r3, [r1]
-	orrs r3, r2
-	str  r3, [r1]
-
-Wait_Off_Proc1:
-	ldr  r3, [r1]
-	tst  r3, r2
-	beq  Wait_Off_Proc1
-	
-Force_On_Proc1:
-	ldr  r3, [r1]
-	bics r3, r2
-	str  r3, [r1]
-
 UART_Baudrate:
 	ldr  r0, =UART0_BASE
 	movs r1, #UART0_IBAUD

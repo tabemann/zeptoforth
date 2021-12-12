@@ -156,7 +156,7 @@ begin-module multicore-module
     1 = averts x-core-out-of-range
     prepare-aux-rstack
     SIO_IRQ_PROC0 NVIC_ICER_CLRENA!
-    PSM_FRCE_OFF_PROC1 PSM_FRCE_OFF bic!
+\    PSM_FRCE_OFF_PROC1 PSM_FRCE_OFF bic!
     6 0 do
       i case
 	0 of 1 fifo-drain 0 endof
