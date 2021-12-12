@@ -1791,7 +1791,7 @@ forth-module set-current
 : c\" ( -- )
   [immediate]
   [compile-only]
-  skip-to-token
+  advance-once
   [char] " compile-esc-cstring
 ;
 
@@ -1799,7 +1799,7 @@ forth-module set-current
 : s\" ( -- )
   [immediate]
   [compile-only]
-  skip-to-token
+  advance-once
   [char] " compile-esc-cstring
   postpone count
 ;
@@ -1808,7 +1808,7 @@ forth-module set-current
 : .\" ( -- )
   [immediate]
   [compile-only]
-  skip-to-token
+  advance-once
   [char] " compile-esc-cstring
   postpone count
   postpone type
@@ -1817,13 +1817,13 @@ forth-module set-current
 \ Immediately type an escaped string
 : .\( ( -- )
   [immediate]
-  skip-to-token
+  advance-once
   compiling-to-flash? dup if
     compile-to-ram
   then
   here [char] ) parse-esc-string
   dup dup here swap - type
-  swap if compile-to-flash flash-here! else ram-here! then
+  ram-here! swap if compile-to-flash then
   1 advance-bytes
 ;
 
