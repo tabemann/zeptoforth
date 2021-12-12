@@ -177,15 +177,6 @@ begin-module interrupt-module
 
 end-module
 
-import interrupt-module
-
-\ Add clearing of registers to warm
-: warm ( -- )
-  8 0 ?do $FF NVIC_ICER_Base i cells + ! loop warm
-;
-
-unimport interrupt-module
-
 end-compress-flash
 
 \ Reboot

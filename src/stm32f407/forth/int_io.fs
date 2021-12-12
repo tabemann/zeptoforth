@@ -257,12 +257,6 @@ begin-import-module int-io-module
   
 end-module
 
-\ Warm
-: warm ( -- )
-  disable-int-io
-  warm
-;
-
 \ Init
 : init ( -- )
   init

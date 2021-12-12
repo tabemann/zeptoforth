@@ -2189,28 +2189,16 @@ _init_context:
 	@@ dictionary
 	define_word "reboot", visible_flag
 _reboot:
+	push {lr}
+	.if rp2040
+	bl _disable_xip_cache
+	.endif
 	ldr r0, =0xE000ED0C @ AIRCR
 	ldr r1, =0x05FA0004
 	str r1, [r0]
 	dsb
 	isb
-	bx lr
-	end_inlined
-
-	@@ Carry out a warm reboot
-	define_word "warm", visible_flag
-_warm:	cpsid i
-	dsb
-	isb
-	ldr r0, =VTOR
-	movs r1, #0
-	str r1, [r0]
-	dmb
-	dsb
-	isb
-	cpsie i
-	ldr r0, =_handle_reset+1
-	bx r0
+	pop {pc}
 	end_inlined
 
 	@@ Null exception handler
