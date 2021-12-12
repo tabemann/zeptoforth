@@ -23,7 +23,7 @@ compile-to-flash
 
 compress-flash
 
-begin-module-once interrupt-module
+begin-module interrupt-module
 
   \ Invalid interrupt vector index exception
   : x-invalid-vector ( -- ) space ." invalid vector" cr ;
@@ -176,15 +176,6 @@ begin-module-once interrupt-module
   : NVIC_IPR_IP@ ( u -- priority ) NVIC_IPR_Base + c@ ;
 
 end-module
-
-import interrupt-module
-
-\ Add clearing of registers to warm
-: warm ( -- )
-  8 0 ?do $FF NVIC_ICER_Base i cells + ! loop warm
-;
-
-unimport interrupt-module
 
 end-compress-flash
 

@@ -56,13 +56,15 @@
 	@@ Put a deliberate garbage value in handler
 	ldr r0, =0xF0E1C2D3
 	ldr r1, =handler
-	str r0, [r1]
+	str r0, [r1, #0]
+	str r0, [r1, #4]
 	@@ Initialize HERE
 	ldr r0, =here
 	ldr r1, =ram_current
-	str r1, [r0]
+	str r1, [r0, #0]
+	str r1, [r0, #4]
 	@@ Call the rest of the runtime in an exception handler
-	push_tos
+2:	push_tos
 	ldr tos, =outer_exc_handled
 	bl _try
 	@@ If the inner loop returns, reboot
@@ -71,6 +73,7 @@
 	@@ The outermost exception handling - if an exception happens here the
 	@@ system will reboot
 outer_exc_handled:
+	bl _init_platform_variables
 	bl _init_variables
 	bl _init_hardware
 	bl _init_flash
@@ -79,6 +82,30 @@ outer_exc_handled:
 	bl _do_init
 	bl _welcome
 	bl _quit
+
+_init_platform_variables:
+	movs r0, #0
+	ldr r1, =sio_hook
+	str r0, [r1, #0]
+	str r0, [r1, #4]
+	ldr r1, =core_1_launched
+	str r0, [r1]
+	bx lr
+
+	@ Reboot the RP2040 in BOOTSEL mode
+	define_word "bootsel", visible_flag
+_bootsel:
+	movs r2, #0
+	ldr r1, ='U | ('B << 8)
+	ldrh r0, [r2, #0x14]
+	ldrh r3, [r2, #0x18]
+	blx r3
+	movs r3, r0
+	movs r0, #0
+	movs r1, #0
+	blx r3
+	bx lr
+	end_inlined
 
 	.ltorg
 	
@@ -94,4 +121,5 @@ outer_exc_handled:
 	.include "../common/strings.s"
 	.include "../m0/double.s"
 	.include "../m0/exception.s"
+	.include "multicore.s"
 	.include "../common/final.s"

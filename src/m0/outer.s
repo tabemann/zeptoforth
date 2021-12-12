@@ -529,9 +529,8 @@ _evaluate:
 	
 	@@ Abort
 	define_word "abort", visible_flag
-_abort:	ldr r0, =stack_base
-	ldr r0, [r0]
-	mov dp, r0
+_abort:	bl _stack_base
+	ldr dp, [tos]
 	bl _bel
 	bl _nak
 	b _quit
@@ -540,10 +539,9 @@ _abort:	ldr r0, =stack_base
 
 	@@ The outer loop of Forth
 	define_word "quit", visible_flag
-_quit:	ldr r0, =rstack_base
-	ldr r0, [r0]
-	mov sp, r0
-	push_tos
+_quit:	bl _rstack_base
+	ldr tos, [tos]
+	mov sp, tos
 	ldr tos, =_main
 	bl _try
 	bl _display_red
@@ -599,7 +597,7 @@ _main:	push {lr}
 	@@ The actual outer loop of Forth
 	define_internal_word "outer", visible_flag
 _outer:	push {lr}
-1:	bl _validate
+1:	@ bl _validate
 	bl _token
 	cmp tos, #0
 	beq 2f
@@ -660,30 +658,38 @@ _outer:	push {lr}
 	define_internal_word "validate", visible_flag
 _validate:
 	push {lr}
-	ldr r0, =stack_base
-	ldr r0, [r0]
+	bl _stack_base
+	ldr r0, [tos]
+	pull_tos
 	cmp dp, r0
 	ble 1f
 	push_tos
 	ldr tos, =_stack_underflow
 	bl _raise
-1:	ldr r0, =stack_end
-	ldr r0, [r0]
+1:	bl _stack_end
+	ldr r0, [tos]
+	pull_tos
 	cmp dp, r0
 	bge 1f
 	push_tos
 	ldr tos, =_stack_overflow
 	bl _raise
 1:	mov r1, sp
-	ldr r0, =rstack_base
-	ldr r0, [r0]
+	push {r1}
+	bl _rstack_base
+	pop {r1}
+	ldr r0, [tos]
+	pull_tos
 	cmp r1, r0
 	ble 1f
 	push_tos
 	ldr tos, =_rstack_underflow
 	bl _raise
-1:	ldr r0, =rstack_end
-	ldr r0, [r0]
+1:	push {r1}
+	bl _rstack_end
+	pop {r1}
+	ldr r0, [tos]
+	pull_tos
 	cmp r1, r0
 	bge 1f
 	push_tos
@@ -993,6 +999,7 @@ _parse_unsigned:
 	@@ Actually parse an integer base ( addr bytes -- addr bytes base )
 	define_word "parse-base", visible_flag
 _parse_base:
+	push {lr}
 	cmp tos, #0
 	beq 5f
 	movs r0, tos
@@ -1016,17 +1023,16 @@ _parse_base:
 	b 6f
 4:	push_tos
 	movs tos, r0
-5:	push_tos
-	ldr r0, =base
-	ldr tos, [r0]
-	bx lr
+5:	bl _base
+	ldr tos, [tos]
+	pop {pc}
 6:	adds tos, #1
 	push_tos
 	subs r0, #1
 	movs tos, r0
 	push_tos
 	movs tos, r1
-	bx lr
+	pop {pc}
 	end_inlined
 
 	@@ Actually parse an integer ( addr bytes base -- n success )

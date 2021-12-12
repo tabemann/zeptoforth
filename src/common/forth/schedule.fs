@@ -21,7 +21,7 @@
 \ Compile to flash
 compile-to-flash
 
-begin-module-once schedule-module
+begin-module schedule-module
 
   import systick-module
   import task-module
@@ -74,10 +74,6 @@ begin-module-once schedule-module
     ;
 
   end-module
-
-  \ Export these constants
-  schedule-size constant schedule-size
-  action-size constant action-size
 
   \ Initalize a scheduler
   : init-schedule ( schedule -- )
@@ -255,6 +251,10 @@ begin-module-once schedule-module
 
   \ Make current-action read-only
   : current-action ( -- action ) current-action @ ;
+
+  \ Export these constants
+  export schedule-size
+  export action-size
 
 end-module
 

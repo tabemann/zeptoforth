@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module forth-module
+continue-module forth-module
 
   import task-module
 
@@ -63,7 +63,7 @@ begin-module forth-module
     50 vary-min !
     500 vary-max !
     25 vary-step !
-    0 ['] vary 256 128 512 spawn vary-task !
+    0 ['] vary 320 128 512 spawn vary-task !
     vary-task @ run
   ;
 

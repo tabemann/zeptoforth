@@ -125,6 +125,7 @@ _init_flash:
 	movs tos, r0
 	bl _erase_range
 	cpsie i
+	bl _release_core
 1:	pop {pc}
 	end_inlined
 
@@ -485,6 +486,7 @@ _exit_xip:
 	define_internal_word "erase-range", visible_flag
 _erase_range:
 	push {lr}
+	bl _force_core_wait
 	cpsid i
 	bl _exit_xip
 	ldr r0, =0xFFF
@@ -624,6 +626,7 @@ _find_last_flash_word:
 	define_word "init-flash-write", visible_flag
 _init_flash_write:
 	push {lr}
+	bl _force_core_wait
 	cpsid i
 	bl _exit_xip
 	bl _enable_flash_cmd
@@ -679,6 +682,7 @@ _store_flash_1:
 	bl _enable_flush_xip_cache
 	bl _enter_xip
 	cpsie i
+	bl _release_core
 	pop {pc}
 1:	ldr tos, =_store_flash_already_written
 	bl _raise
@@ -731,6 +735,7 @@ _store_flash_2:
 	bl _enable_flush_xip_cache
 	bl _enter_xip
 	cpsie i
+	bl _release_core
 	pop {pc}
 1:	ldr r1, [dp]
 	movs r3, tos
@@ -808,6 +813,7 @@ _store_flash_4:
 	bl _enable_flush_xip_cache
 	bl _enter_xip
 	cpsie i
+	bl _release_core
 	pop {pc}
 1:	ldr r1, [dp]
 	movs r3, tos

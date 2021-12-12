@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module forth-module
+continue-module forth-module
 
   import task-module
   import stream-module
@@ -57,8 +57,8 @@ begin-module forth-module
   \ Initialize our test
   : init-test ( -- )
     my-count my-stream init-stream
-    0 ['] producer 256 128 512 spawn producer-task !
-    0 ['] consumer 256 128 512 spawn consumer-task !
+    0 ['] producer 320 128 512 spawn producer-task !
+    0 ['] consumer 320 128 512 spawn consumer-task !
     producer-task @ run consumer-task @ run
   ;
   

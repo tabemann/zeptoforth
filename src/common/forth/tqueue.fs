@@ -23,7 +23,7 @@ compile-to-flash
 
 compress-flash
 
-begin-module-once tqueue-module
+begin-module tqueue-module
 
   import task-module
 
@@ -107,9 +107,6 @@ begin-module-once tqueue-module
     ;
 
   end-module
-
-  \ Export tqueue-size
-  tqueue-size constant tqueue-size
 
   \ Value indicating no task queue limti
   -1 constant no-tqueue-limit
@@ -198,6 +195,9 @@ begin-module-once tqueue-module
     \ end-critical
   ;
   
+  \ Export tqueue-size
+  export tqueue-size
+
 end-module
 
 end-compress-flash

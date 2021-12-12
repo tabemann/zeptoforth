@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module forth-module
+continue-module forth-module
 
   import internal-module
   import systick-module
@@ -42,7 +42,7 @@ begin-module forth-module
 
   \ Initialize the test
   : rng-test-task ( -- )
-    0 ['] rng-test 256 128 512 spawn rng-test-task !
+    0 ['] rng-test 320 128 512 spawn rng-test-task !
     rng-test-task @ run
   ;
 

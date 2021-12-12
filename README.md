@@ -12,9 +12,9 @@ The library of code included along with the zeptoforth kernel, which is present 
 * Message-oriented queue channels
 * Message-oriented rendezvous channels, aka "fchannels"
 * Byte-oriented streams
-* Task notifications (as of the 0.22.0b1 release / in the devel branch)
+* Task notifications
 * Event/coroutine scheduler support
-* Multicore support (on the RP2040 in the 0.22.0b0 release / in the devel branch)
+* Multicore support (on the RP2040)
 * Double cell and fixed point numeric support
 * Lambda expressions
 * A disassembler

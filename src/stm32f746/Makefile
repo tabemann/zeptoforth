@@ -41,7 +41,7 @@ kernel_info:
 	$(MAKE) -C ../common kernel_info
 
 $(BIN): $(OBJ)
-	$(LD) $(OBJ) -T zeptoforth.ld --cref -Map $(MAP) -nostartfiles -o $(ELF)
+	$(LD) $(OBJ) -T zeptoforth.ld --cref -Map $(MAP) -o $(ELF)
 	$(DUMP) -D $(ELF) > $(LIST)
 	$(COPY) $(ELF) $@ -O binary
 	$(COPY) $(ELF) $(IHEX) -O ihex

@@ -23,7 +23,7 @@ compile-to-flash
 
 compress-flash
 
-begin-module-once chan-module
+begin-module chan-module
   
   import task-module
   import tqueue-module
@@ -85,9 +85,6 @@ begin-module-once chan-module
   \ Get the channel element data size
   : chan-data-size ( chan -- element-bytes ) chan-data-size @ ;
 
-  \ Get the channel element count
-  : chan-count ( chan -- element-count ) chan-count @ ;
-
   commit-flash
   
   \ Get whether a channel is full
@@ -96,7 +93,7 @@ begin-module-once chan-module
   \ Get whether a channel is empty
   : chan-empty? ( chan -- flag ) chan-empty-unsafe? ;
 
-  begin-module chan-internal-module
+  continue-module chan-internal-module
     
     \ Wait to send on a channel
     : wait-send-chan ( chan -- )
@@ -476,6 +473,9 @@ begin-module-once chan-module
   \ Reopen a channel
   : reopen-chan ( chan -- ) false swap chan-closed ! ;
   
+  \ Get the channel element count
+  : chan-count ( chan -- element-count ) chan-count @ ;
+
 end-module
 
 end-compress-flash

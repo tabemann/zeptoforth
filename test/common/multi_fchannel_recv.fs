@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module forth-module
+continue-module forth-module
 
   import task-module
   import fchan-module
@@ -59,11 +59,11 @@ begin-module forth-module
   : init-test ( -- )
     my-fchan init-fchan
     my-lock init-lock
-    0 ['] do-producer 256 128 512 spawn producer-task !
-    1 1 ['] do-consumer 256 128 512 spawn consumer-1-task !
-    2 1 ['] do-consumer 256 128 512 spawn consumer-2-task !
-    3 1 ['] do-consumer 256 128 512 spawn consumer-3-task !
-    4 1 ['] do-consumer 256 128 512 spawn consumer-4-task !
+    0 ['] do-producer 320 128 512 spawn producer-task !
+    1 1 ['] do-consumer 320 128 512 spawn consumer-1-task !
+    2 1 ['] do-consumer 320 128 512 spawn consumer-2-task !
+    3 1 ['] do-consumer 320 128 512 spawn consumer-3-task !
+    4 1 ['] do-consumer 320 128 512 spawn consumer-4-task !
     producer-task @ run
     consumer-1-task @ run
     consumer-2-task @ run

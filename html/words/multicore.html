@@ -1,0 +1,389 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Multicore Words &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Development Tools Words" href="dev_tools.html" />
+    <link rel="prev" title="Interrupt Words" href="interrupt.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="multicore-words">
+<h1>Multicore Words<a class="headerlink" href="#multicore-words" title="Permalink to this headline">¶</a></h1>
+<p>Multiprocessing via multicore execution in zeptoforth is handled separtely from multitasking; separate multitasking environments exist on each core after a second core has been booted. Once a second core has been booted, any attempt to directly control the multitasking environment of another core will result in undefined behavior.</p>
+<p>Currently the only platform on which multicore execution is supported is the RP2040. On this platform cores communicate and synchronize via hardware spinlocks and hardware FIFO’s (i.e. mailboxes). On platforms other than the RP2040 multicore words exist in the dictionary but are merely stubs which will always raise exceptions when called.</p>
+<p>Note that there are currently some rough edges to multicore on the RP2040, specifically that once the second core is booted, no writes to flash may be made, even across reboots, until the MCU is power-cycled, and that <code class="docutils literal notranslate"><span class="pre">disable-int-io</span></code> in <code class="docutils literal notranslate"><span class="pre">int-io-module</span></code> must be called prior to calling <code class="docutils literal notranslate"><span class="pre">spawn-aux-main</span></code>.</p>
+<p>Multicore support in zeptoforth is largely implemented outside the zeptoforth kernel and is split between <code class="docutils literal notranslate"><span class="pre">src/rp2040/forth/multicore.fs</span></code> (on platforms other than RP2040 stubbed out in <code class="docutils literal notranslate"><span class="pre">src/common/forth/multicore.fs</span></code>) and <code class="docutils literal notranslate"><span class="pre">src/common/forth/task.fs</span></code>, with a bit of supporting functionality also in <code class="docutils literal notranslate"><span class="pre">src/common/forth/systick.fs</span></code> and <code class="docutils literal notranslate"><span class="pre">src/rp2040/forth/erase.fs</span></code>.</p>
+<p>Built into the kernel exists:</p>
+<section id="cpu-count">
+<h2><code class="docutils literal notranslate"><span class="pre">cpu-count</span></code><a class="headerlink" href="#cpu-count" title="Permalink to this headline">¶</a></h2>
+<p>( – count )</p>
+<p>Get the core count.</p>
+</section>
+<section id="cpu-index">
+<h2><code class="docutils literal notranslate"><span class="pre">cpu-index</span></code><a class="headerlink" href="#cpu-index" title="Permalink to this headline">¶</a></h2>
+<p>( – index )</p>
+<p>Get the index of the core from which <code class="docutils literal notranslate"><span class="pre">cpu-index</span></code> was called.</p>
+</section>
+<section id="cpu-offset">
+<h2><code class="docutils literal notranslate"><span class="pre">cpu-offset</span></code><a class="headerlink" href="#cpu-offset" title="Permalink to this headline">¶</a></h2>
+<p>( – offset )</p>
+<p>Return 4 times <code class="docutils literal notranslate"><span class="pre">cpu-index</span></code>.</p>
+<p>In <code class="docutils literal notranslate"><span class="pre">src/common/forth/basic.fs</span></code>, in <code class="docutils literal notranslate"><span class="pre">forth-module</span></code>, exists:</p>
+</section>
+<section id="cpu-variable">
+<h2><code class="docutils literal notranslate"><span class="pre">cpu-variable</span></code><a class="headerlink" href="#cpu-variable" title="Permalink to this headline">¶</a></h2>
+<p>( “global-name” “cpu-name” – )</p>
+<p>Compile a one-cell-per-core variable into flash that has two words referring to it, a <em>global-name</em> which takes a core index when called and outputs the address for that core, and a <em>cpu-name</em> which returns its address for the current core.</p>
+<p>In <code class="docutils literal notranslate"><span class="pre">src/common/forth/task.fs</span></code>, in <code class="docutils literal notranslate"><span class="pre">task-module</span></code>, exists:</p>
+</section>
+<section id="spawn-aux-main">
+<h2><code class="docutils literal notranslate"><span class="pre">spawn-aux-main</span></code><a class="headerlink" href="#spawn-aux-main" title="Permalink to this headline">¶</a></h2>
+<p>( xn … x0 count xt dict-size stack-size rstack-size core – )</p>
+<p>Allocate the space for a main task (with <em>rstack-size</em> bytes of return stack space, <em>stack-size</em> bytes of data stack space, and <em>dict-size</em> bytes of dictionary space), place <em>count</em> cells on its data stack (<em>xn</em> through <em>x0</em>, with <em>x0</em> on the top of the data stack), and boot core <em>core</em> (which currently must be 1, otherwise <code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code> is raised) with it, executing <em>xt</em> on it. In the process the Systick is initiated on the booted core and the booted core is initialized for multitasking. Note that this can only be called from core 0 (i.e. the core executing on initial boot), otherwise <code class="docutils literal notranslate"><span class="pre">x-core-can-only-be-launched-from-core-0</span></code> is raised. Once booted the core in question cannot be booted again until the RP2040 as a whole is rebooted, or else <code class="docutils literal notranslate"><span class="pre">x-main-already-launched</span></code> is raised. Note that once a main task is created on a core it behaves like a normal task for multitasking purposes on that core; it can be killed, for instance.</p>
+</section>
+<section id="x-main-already-launched">
+<h2><code class="docutils literal notranslate"><span class="pre">x-main-already-launched</span></code><a class="headerlink" href="#x-main-already-launched" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>Exception raised if one calls <code class="docutils literal notranslate"><span class="pre">spawn-aux-main</span></code> for a core which has already been booted.</p>
+</section>
+<section id="x-core-can-only-be-launched-from-core-0">
+<h2><code class="docutils literal notranslate"><span class="pre">x-core-can-only-be-launched-from-core-0</span></code><a class="headerlink" href="#x-core-can-only-be-launched-from-core-0" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>Exception raised if one attempts to call <code class="docutils literal notranslate"><span class="pre">spawn-aux-main</span></code> from a core other than core 0.</p>
+<p>In both <code class="docutils literal notranslate"><span class="pre">src/rp2040/forth/multicore.fs</span></code> and <code class="docutils literal notranslate"><span class="pre">src/common/forth/multicore.fs</span></code>, in <code class="docutils literal notranslate"><span class="pre">multicore-module</span></code> on all platforms, exists:</p>
+</section>
+<section id="x-spinlock-out-of-range">
+<h2><code class="docutils literal notranslate"><span class="pre">x-spinlock-out-of-range</span></code><a class="headerlink" href="#x-spinlock-out-of-range" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>Spinlock out of range exception.</p>
+</section>
+<section id="x-core-out-of-range">
+<h2><code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code><a class="headerlink" href="#x-core-out-of-range" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>Core out of range exception, i.e. core index not in range 0 &lt;= core &lt; cpu-count.</p>
+</section>
+<section id="x-core-not-addressable">
+<h2><code class="docutils literal notranslate"><span class="pre">x-core-not-addressable</span></code><a class="headerlink" href="#x-core-not-addressable" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>Core not addressable exception, i.e. invalid core for an operation carried out ont the current core.</p>
+<p>In <code class="docutils literal notranslate"><span class="pre">src/rp2040/forth/multicore.fs</span></code>, in <code class="docutils literal notranslate"><span class="pre">multicore-module</span></code> on the <code class="docutils literal notranslate"><span class="pre">rp2040</span></code> platform, exists:</p>
+</section>
+<section id="sev">
+<h2><code class="docutils literal notranslate"><span class="pre">sev</span></code><a class="headerlink" href="#sev" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>Signal an event to the other core.</p>
+</section>
+<section id="wfe">
+<h2><code class="docutils literal notranslate"><span class="pre">wfe</span></code><a class="headerlink" href="#wfe" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>Wait for an event.</p>
+</section>
+<section id="sio-irq-proc0">
+<h2><code class="docutils literal notranslate"><span class="pre">SIO_IRQ_PROC0</span></code><a class="headerlink" href="#sio-irq-proc0" title="Permalink to this headline">¶</a></h2>
+<p>( – irq )</p>
+<p>SIO processor 0 IRQ index, i.e. 15.</p>
+</section>
+<section id="sio-irq-proc1">
+<h2><code class="docutils literal notranslate"><span class="pre">SIO_IRQ_PROC1</span></code><a class="headerlink" href="#sio-irq-proc1" title="Permalink to this headline">¶</a></h2>
+<p>( – irq )</p>
+<p>SIO processor 1 RIQ index, i.e. 16.</p>
+</section>
+<section id="fifo-st">
+<h2><code class="docutils literal notranslate"><span class="pre">FIFO_ST</span></code><a class="headerlink" href="#fifo-st" title="Permalink to this headline">¶</a></h2>
+<p>( – addr )</p>
+<p>FIFO status register; note that core 0 can see the read side of the 1 -&gt; 0
+FIFO and the write side of the 0 -&gt; 1 FIFO; the converse is true of core 1</p>
+</section>
+<section id="fifo-st-roe">
+<h2><code class="docutils literal notranslate"><span class="pre">FIFO_ST_ROE</span></code><a class="headerlink" href="#fifo-st-roe" title="Permalink to this headline">¶</a></h2>
+<p>( – bit )</p>
+<p>Sticky flag indicating the RX FIFO was read when empty; write to clear.</p>
+</section>
+<section id="fifo-st-wof">
+<h2><code class="docutils literal notranslate"><span class="pre">FIFO_ST_WOF</span></code><a class="headerlink" href="#fifo-st-wof" title="Permalink to this headline">¶</a></h2>
+<p>( – bit )</p>
+<p>Sticky flag indicating the TX FIFO was written when full; write to clear.</p>
+</section>
+<section id="fifo-st-vld">
+<h2><code class="docutils literal notranslate"><span class="pre">FIFO_ST_VLD</span></code><a class="headerlink" href="#fifo-st-vld" title="Permalink to this headline">¶</a></h2>
+<p>( – bit )</p>
+<p>Set if this core’s RX FIFO is not empty.</p>
+</section>
+<section id="fifo-wr">
+<h2><code class="docutils literal notranslate"><span class="pre">FIFO_WR</span></code><a class="headerlink" href="#fifo-wr" title="Permalink to this headline">¶</a></h2>
+<p>( – bit )</p>
+<p>Write access from this core’s TX FIFO.</p>
+</section>
+<section id="fifo-rd">
+<h2><code class="docutils literal notranslate"><span class="pre">FIFO_RD</span></code><a class="headerlink" href="#fifo-rd" title="Permalink to this headline">¶</a></h2>
+<p>( – bit )</p>
+<p>Read access to this core’s RX FIFO.</p>
+</section>
+<section id="spinlock">
+<h2><code class="docutils literal notranslate"><span class="pre">SPINLOCK</span></code><a class="headerlink" href="#spinlock" title="Permalink to this headline">¶</a></h2>
+<p>( index – addr )</p>
+<p>Returns the address of a spinlock with a given index. Note that reading from an spinlock claims it if a value other than 0 is read (which will be the index of the spinlock), with a value of 0 indicating that the spinlock is already held, and writing to a spinlock releases it.</p>
+</section>
+<section id="spinlock-count">
+<h2><code class="docutils literal notranslate"><span class="pre">spinlock-count</span></code><a class="headerlink" href="#spinlock-count" title="Permalink to this headline">¶</a></h2>
+<p>( – count )</p>
+<p>Returns the spinlock count, i.e. 32.</p>
+</section>
+<section id="task-spinlock">
+<h2><code class="docutils literal notranslate"><span class="pre">task-spinlock</span></code><a class="headerlink" href="#task-spinlock" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>The index of the multitasking spinlock, i.e. 31.</p>
+</section>
+<section id="claim-spinlock">
+<h2><code class="docutils literal notranslate"><span class="pre">claim-spinlock</span></code><a class="headerlink" href="#claim-spinlock" title="Permalink to this headline">¶</a></h2>
+<p>( spinlock-index – )</p>
+<p>Claim a spinlock; if <em>spinlock-index</em> is outside the range 0 &lt;= x &lt; 32 <code class="docutils literal notranslate"><span class="pre">x-spinlock-out-of-range</span></code> is raised.</p>
+</section>
+<section id="release-spinlock">
+<h2><code class="docutils literal notranslate"><span class="pre">release-spinlock</span></code><a class="headerlink" href="#release-spinlock" title="Permalink to this headline">¶</a></h2>
+<p>( spinlock-index – )</p>
+<p>Release a spinlock; if <em>spinlock-index</em> is outside the range 0 &lt;= x &lt; 32 <code class="docutils literal notranslate"><span class="pre">x-spinlock-out-of-range</span></code> is raised.</p>
+</section>
+<section id="fifo-drain">
+<h2><code class="docutils literal notranslate"><span class="pre">fifo-drain</span></code><a class="headerlink" href="#fifo-drain" title="Permalink to this headline">¶</a></h2>
+<p>( core – )</p>
+<p>Drain a FIFO for inter-core communication; if <em>core</em> is outside the range 0 &lt;= x &lt; 2 <code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code> is raised; if <em>core</em> is equal to <code class="docutils literal notranslate"><span class="pre">cpu-index</span></code> <code class="docutils literal notranslate"><span class="pre">x-core-not-addressable</span></code> is raised.</p>
+</section>
+<section id="fifo-push-blocking">
+<h2><code class="docutils literal notranslate"><span class="pre">fifo-push-blocking</span></code><a class="headerlink" href="#fifo-push-blocking" title="Permalink to this headline">¶</a></h2>
+<p>( x core – )</p>
+<p>Do a blocking push onto a FIFO for inter-core communication; if <em>core</em> is outside the range 0 &lt;= x &lt; 2 <code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code> is raised; if <em>core</em> is equal to <code class="docutils literal notranslate"><span class="pre">cpu-index</span></code> <code class="docutils literal notranslate"><span class="pre">x-core-not-addressable</span></code> is raised.</p>
+</section>
+<section id="fifo-pop-blocking">
+<h2><code class="docutils literal notranslate"><span class="pre">fifo-pop-blocking</span></code><a class="headerlink" href="#fifo-pop-blocking" title="Permalink to this headline">¶</a></h2>
+<p>( core – x )</p>
+<p>Do a blocking pop from a FIFO for inter-core communication; if <em>core</em> is outside the range 0 &lt;= x &lt; 2 <code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code> is raised; if <em>core</em> is equal to <code class="docutils literal notranslate"><span class="pre">cpu-index</span></code> <code class="docutils literal notranslate"><span class="pre">x-core-not-addressable</span></code> is raised.</p>
+</section>
+<section id="fifo-push-confirm">
+<h2><code class="docutils literal notranslate"><span class="pre">fifo-push-confirm</span></code><a class="headerlink" href="#fifo-push-confirm" title="Permalink to this headline">¶</a></h2>
+<p>( x core – confirmed? )</p>
+<p>Do a blocking push onto a FIFO for inter-core communication; if <em>core</em> is outside the range 0 &lt;= x &lt; 2 <code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code> is raised; if <em>core</em> is equal to <code class="docutils literal notranslate"><span class="pre">cpu-index</span></code> <code class="docutils literal notranslate"><span class="pre">x-core-not-addressable</span></code> is raised. Afterwards do a blocking pop from the FIFO for receiving fromt he same core and return whether the value pushed is the same as the value popped.</p>
+</section>
+<section id="launch-aux-core">
+<h2><code class="docutils literal notranslate"><span class="pre">launch-aux-core</span></code><a class="headerlink" href="#launch-aux-core" title="Permalink to this headline">¶</a></h2>
+<p>( vector-table stack-ptr rstack-ptr entry-xt core – )</p>
+<p>Launch an auxiliary core, i.e. a core <em>core</em> other than core 0 and execute <em>entry-xt</em> on it with the return stack pointer <em>rstack-ptr</em>, the data stack pointer <em>stack-ptr</em>, and the vector table base <em>vector-table</em>. Note that it is not recommended that this be used by the user, rather the user should use <code class="docutils literal notranslate"><span class="pre">spawn-aux-main</span></code> in <code class="docutils literal notranslate"><span class="pre">src/common/forth/task.fs</span></code>.</p>
+<p>In <code class="docutils literal notranslate"><span class="pre">src/common/forth/multicore.fs</span></code>, in <code class="docutils literal notranslate"><span class="pre">multicore-module</span></code> for all platforms other than rp2040, exists:</p>
+</section>
+<section id="id1">
+<h2><code class="docutils literal notranslate"><span class="pre">spinlock-count</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>( – count )</p>
+<p>Returns the spinlock count, i.e. 0.</p>
+</section>
+<section id="id2">
+<h2><code class="docutils literal notranslate"><span class="pre">task-spinlock</span></code><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>Returns -1 as there is no multitasking spinlock.</p>
+</section>
+<section id="id3">
+<h2><code class="docutils literal notranslate"><span class="pre">claim-spinlock</span></code><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<p>( spinlock-index – )</p>
+<p>Placeholder for claiming a spinlock; this will always raise <code class="docutils literal notranslate"><span class="pre">x-spinlock-out-of-range</span></code>.</p>
+</section>
+<section id="id4">
+<h2><code class="docutils literal notranslate"><span class="pre">release-spinlock</span></code><a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<p>( spinlock-index – )</p>
+<p>Placeholder for releasing a spinlock; this will always raise <code class="docutils literal notranslate"><span class="pre">x-spinlock-out-of-range</span></code>.</p>
+</section>
+<section id="id5">
+<h2><code class="docutils literal notranslate"><span class="pre">fifo-drain</span></code><a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<p>( core – )</p>
+<p>Placeholder for draining a FIFO for inter-core communication; this will always raise <code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code>.</p>
+</section>
+<section id="id6">
+<h2><code class="docutils literal notranslate"><span class="pre">fifo-push-blocking</span></code><a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<p>( x core – )</p>
+<p>Placeholder for doing a blocking push onto a FIFO for inter-core communication; this will always raise <code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code>.</p>
+</section>
+<section id="id7">
+<h2><code class="docutils literal notranslate"><span class="pre">fifo-pop-blocking</span></code><a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
+<p>( core – x )</p>
+<p>Placeholder for doing a blocking pop from a FIFO for inter-core communication; this will always raise <code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code>.</p>
+</section>
+<section id="id8">
+<h2><code class="docutils literal notranslate"><span class="pre">fifo-push-confirm</span></code><a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<p>( x core – confirmed? )</p>
+<p>Placeholder for attempting to send data on a FIFO and confirming that the same data is sent back; this will always raise <code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code>.</p>
+</section>
+<section id="id9">
+<h2><code class="docutils literal notranslate"><span class="pre">launch-aux-core</span></code><a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
+<p>( xt stack-ptr rstack-ptr core – )</p>
+<p>Placeholder for attempting to launch an auxiliary core; this will always raise <code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code>.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schedule.html">Scheduling Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Multicore Words</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#cpu-count"><code class="docutils literal notranslate"><span class="pre">cpu-count</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cpu-index"><code class="docutils literal notranslate"><span class="pre">cpu-index</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cpu-offset"><code class="docutils literal notranslate"><span class="pre">cpu-offset</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cpu-variable"><code class="docutils literal notranslate"><span class="pre">cpu-variable</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#spawn-aux-main"><code class="docutils literal notranslate"><span class="pre">spawn-aux-main</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#x-main-already-launched"><code class="docutils literal notranslate"><span class="pre">x-main-already-launched</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#x-core-can-only-be-launched-from-core-0"><code class="docutils literal notranslate"><span class="pre">x-core-can-only-be-launched-from-core-0</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#x-spinlock-out-of-range"><code class="docutils literal notranslate"><span class="pre">x-spinlock-out-of-range</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#x-core-out-of-range"><code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#x-core-not-addressable"><code class="docutils literal notranslate"><span class="pre">x-core-not-addressable</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sev"><code class="docutils literal notranslate"><span class="pre">sev</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#wfe"><code class="docutils literal notranslate"><span class="pre">wfe</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sio-irq-proc0"><code class="docutils literal notranslate"><span class="pre">SIO_IRQ_PROC0</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sio-irq-proc1"><code class="docutils literal notranslate"><span class="pre">SIO_IRQ_PROC1</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fifo-st"><code class="docutils literal notranslate"><span class="pre">FIFO_ST</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fifo-st-roe"><code class="docutils literal notranslate"><span class="pre">FIFO_ST_ROE</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fifo-st-wof"><code class="docutils literal notranslate"><span class="pre">FIFO_ST_WOF</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fifo-st-vld"><code class="docutils literal notranslate"><span class="pre">FIFO_ST_VLD</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fifo-wr"><code class="docutils literal notranslate"><span class="pre">FIFO_WR</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fifo-rd"><code class="docutils literal notranslate"><span class="pre">FIFO_RD</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#spinlock"><code class="docutils literal notranslate"><span class="pre">SPINLOCK</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#spinlock-count"><code class="docutils literal notranslate"><span class="pre">spinlock-count</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#task-spinlock"><code class="docutils literal notranslate"><span class="pre">task-spinlock</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#claim-spinlock"><code class="docutils literal notranslate"><span class="pre">claim-spinlock</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#release-spinlock"><code class="docutils literal notranslate"><span class="pre">release-spinlock</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fifo-drain"><code class="docutils literal notranslate"><span class="pre">fifo-drain</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fifo-push-blocking"><code class="docutils literal notranslate"><span class="pre">fifo-push-blocking</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fifo-pop-blocking"><code class="docutils literal notranslate"><span class="pre">fifo-pop-blocking</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fifo-push-confirm"><code class="docutils literal notranslate"><span class="pre">fifo-push-confirm</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#launch-aux-core"><code class="docutils literal notranslate"><span class="pre">launch-aux-core</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">spinlock-count</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">task-spinlock</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3"><code class="docutils literal notranslate"><span class="pre">claim-spinlock</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4"><code class="docutils literal notranslate"><span class="pre">release-spinlock</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5"><code class="docutils literal notranslate"><span class="pre">fifo-drain</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id6"><code class="docutils literal notranslate"><span class="pre">fifo-push-blocking</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id7"><code class="docutils literal notranslate"><span class="pre">fifo-pop-blocking</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id8"><code class="docutils literal notranslate"><span class="pre">fifo-push-confirm</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id9"><code class="docutils literal notranslate"><span class="pre">launch-aux-core</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="edit.html">Block Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="swd.html"><code class="docutils literal notranslate"><span class="pre">swdcom</span></code> Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="led.html">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test.html">Testing Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="interrupt.html" title="previous chapter">Interrupt Words</a></li>
+      <li>Next: <a href="dev_tools.html" title="next chapter">Development Tools Words</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Travis Bemann.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/words/multicore.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module forth-module
+continue-module forth-module
 
   import systick-module
   import task-module
@@ -134,7 +134,7 @@ begin-module forth-module
     my-schedule init-schedule
     ['] do-red-green red-green-action my-schedule init-action
     ['] do-orange-blue orange-blue-action my-schedule init-action
-    0 [: my-schedule run-schedule ;] 256 128 512 spawn schedule-task !
+    0 [: my-schedule run-schedule ;] 320 128 512 spawn schedule-task !
     1666 orange-blue-action start-action-delay
     red-green-action enable-action
     orange-blue-action enable-action

@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module forth-module
+continue-module forth-module
 
   import internal-module
   import task-module
@@ -70,7 +70,7 @@ begin-module forth-module
   \ Create an led task
   : make-led ( before-fchan after-fchan on-xt off-xt delay "name" -- )
     s" " <builds-with-name 4 roll , 3 roll , rot , swap , , do-led
-    0 latest >body 256 128 512 spawn dup 1 swap set-task-priority constant
+    0 latest >body 320 128 512 spawn dup 1 swap task-priority! constant
   ;
 
   \ Create the led tasks

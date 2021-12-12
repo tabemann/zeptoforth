@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module forth-module
+continue-module forth-module
 
   import task-module
   import chan-module
@@ -70,10 +70,10 @@ begin-module forth-module
   : init-test ( -- )
     1 cells 1 my-chan init-chan
     0 my-chan send-chan-cell
-    0 ['] do-task-1 256 128 512 spawn my-task-1 !
-    0 ['] do-task-2 256 128 512 spawn my-task-2 !
-    0 ['] do-task-3 256 128 512 spawn my-task-3 !
-    0 ['] do-task-4 256 128 512 spawn my-task-4 !
+    0 ['] do-task-1 320 128 512 spawn my-task-1 !
+    0 ['] do-task-2 320 128 512 spawn my-task-2 !
+    0 ['] do-task-3 320 128 512 spawn my-task-3 !
+    0 ['] do-task-4 320 128 512 spawn my-task-4 !
     my-task-1 @ run
     my-task-2 @ run
     my-task-3 @ run

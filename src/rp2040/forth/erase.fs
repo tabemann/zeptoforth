@@ -21,8 +21,10 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-import-module internal-module
+continue-import-module internal-module
 
+  import multicore-module
+  
   \ Begin compressing compiled code in flash
   compress-flash
 
@@ -33,6 +35,21 @@ begin-import-module internal-module
     repeat
   ;
 
+  \ Erase all flash
+  : erase-all ( -- )
+    cpu-index 0 = averts x-core-0-only
+    1 reset-aux-core erase-all
+  ;
+
+  \ Erase after an address
+  : erase-after ( addr -- )
+    cpu-index 0 = averts x-core-0-only
+    1 reset-aux-core erase-after
+  ;
+
+  \ Commit to flash
+  commit-flash
+  
   \ Restore flash to a preexisting state
   : restore-flash ( flash-here -- )
     erase-after rdrop
@@ -62,8 +79,8 @@ commit-flash
   then
 ;
 
-begin-module internal-module
-  
+continue-module internal-module
+
   \ Core of CORNERSTONE's DOES>
   : cornerstone-does> ( -- )
     does>

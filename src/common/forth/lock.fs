@@ -23,7 +23,7 @@ compile-to-flash
 
 compress-flash
 
-begin-module-once lock-module
+begin-module lock-module
 
   import task-module
 
@@ -73,7 +73,7 @@ begin-module-once lock-module
     \ Get maximum lock wait priority
     : max-lock-wait-priority ( lock -- priority )
       -32768 swap lock-first-wait @ begin dup while
-	dup lock-wait-task @ get-task-priority rot max swap lock-wait-next @
+	dup lock-wait-task @ task-priority@ rot max swap lock-wait-next @
       repeat
       drop
     ;
@@ -130,7 +130,7 @@ begin-module-once lock-module
 
     \ Add a holder to a lock loop
     : add-lock ( lock task -- )
-      dup get-task-priority over set-task-saved-priority
+      dup task-priority@ over task-saved-priority!
       swap over ['] current-lock-held for-task @ ?dup if
 	over 3 roll ['] current-lock-held for-task !
 	dup get-last-lock
@@ -184,8 +184,8 @@ begin-module-once lock-module
     : update-hold-priority ( lock -- )
       dup lock-next-held @ if
 	dup group-max-lock-wait-priority
-	over lock-holder-task @ get-task-saved-priority max
-	over lock-holder-task @ set-task-priority
+	over lock-holder-task @ task-saved-priority@ max
+	over lock-holder-task @ task-priority!
 	lock-holder-task @ ['] current-lock for-task @ ?dup if
 	  recurse
 	then
@@ -200,22 +200,19 @@ begin-module-once lock-module
 	dup get-last-lock over <> if
 	  dup lock-next-held @ swap remove-lock
 	  dup group-max-lock-wait-priority
-	  over lock-holder-task @ get-task-saved-priority max
-	  swap lock-holder-task @ set-task-priority
+	  over lock-holder-task @ task-saved-priority@ max
+	  swap lock-holder-task @ task-priority!
 	else
-	  dup remove-lock lock-holder-task @ dup get-task-saved-priority
-	  swap set-task-priority
+	  dup remove-lock lock-holder-task @ dup task-saved-priority@
+	  swap task-priority!
 	then
       else
-	lock-holder-task @ dup get-task-saved-priority
-	swap set-task-priority
+	lock-holder-task @ dup task-saved-priority@
+	swap task-priority!
       then
     ;
 
   end-module
-
-  \ Export lock-size
-  lock-size constant lock-size
 
   \ Initialize a lock
   : init-lock ( addr -- )
@@ -295,6 +292,9 @@ begin-module-once lock-module
   
   \ Execute a block of code with a lock
   : with-lock ( lock xt -- ) dup >r lock try r> unlock ?raise ;
+
+  \ Export lock-size
+  export lock-size
 
 end-module
 

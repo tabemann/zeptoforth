@@ -21,7 +21,7 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-import-module-once block-module
+begin-import-module block-module
 
   import internal-module
   import task-module
@@ -504,7 +504,7 @@ begin-import-module-once block-module
     2drop
   ;
 
-  begin-module block-internal-module
+  continue-module block-internal-module
   
     \ Copy blocks from the start
     : copy-blocks-from-start ( src-id dest-id count -- )

@@ -21,7 +21,7 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-import-module-once disassemble-internal-module
+begin-import-module disassemble-internal-module
 
   import internal-module
 
@@ -982,13 +982,13 @@ begin-import-module-once disassemble-internal-module
 
   \ Parse a DSB instruction
   : p-dsb
-    ." DSB" nip 0_4_bf case
+    ." DSB" nip drop 0_4_bf case
       \ %1111 of endof
       %0111 of space ." UN" endof
       %1110 of space ." ST" endof
       %0110 of space ." UNST" endof
     endcase
-    2drop
+    drop
   ;
 
   \ Parse an ISB instruction
