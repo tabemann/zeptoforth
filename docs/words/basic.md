@@ -831,11 +831,6 @@ Set the data stack pointer
 
 Reboot
 
-##### `warm`
-( -- )
-
-Carry out a warm reboot
-
 ##### `true`
 ( -- f )
 
