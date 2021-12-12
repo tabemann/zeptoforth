@@ -92,7 +92,7 @@ commit-flash
   then
 ;
 
-begin-module internal-module
+continue-module internal-module
   
   \ Calculate whether a square root is close enough
   : sqrt-close-enough ( f1 f2 -- flag )
@@ -269,7 +269,7 @@ commit-flash
 \ Calculate atanh(x)
 : atanh ( f1 -- f2 ) 2dup 0 1 d+ 2swap dnegate 0 1 d+ f/ ln 2 0 d/ ;
 
-begin-module internal-module
+continue-module internal-module
   
   \ Get the number of instances of a character in a string
   : char-count ( b-addr bytes b -- count )

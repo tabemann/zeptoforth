@@ -21,7 +21,7 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-import-module-once qspi-module
+begin-import-module qspi-module
 
   import internal-module
   import gpio-module

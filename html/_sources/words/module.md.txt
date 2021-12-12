@@ -22,25 +22,30 @@ Module already defined exception.
 
 Module not found exception.
 
+##### `^`
+( ? "module-name-0" ... "module-name-x" "::" "word-name" -- ? )
+
+Reference word *word-name* in a specified module *module-name-x*, which may be nested within any number of containing modules, where the first module referenced *module-name-0* must be within the current order, and apply it to the current compilation/interpretation state. `::` separates the innermost module *module-name-x*, from *word-name*. This is an immediate word, and the referenced word will be folded or inlined as if it were compiled normally.
+
 ##### `begin-module`
 ( "name" -- )
 
-Begin the definition of module *name* without importing its contents into the containing module or checking whether the module already exists.
-
-##### `begin-module-once`
-( "name" -- )
-
-Begin the definition of module *name* without importing its contents into the containing module, but with checking whether the module already exists.
+Begin the definition of module *name* without importing its contents into the containing module; module *name* must not already exist or `x-module-already-defined` will be raised.
 
 ##### `begin-import-module`
 ( "name" -- )
 
-Begin the definition of module *name* with importing its contents into the containing module, but without checking whether the module already exists.
+Begin the definition of module *name* with importing its contents into the containing module; module *name* must not already exist or `x-module-already-defined` will be raised.
 
-##### `begin-import-module-once`
+##### `continue-module`
 ( "name" -- )
 
-Begin the definition of module *name* with importing its contents into the containing module and with checking whether the module already exists.
+Continue the definition of a preexisting module *name* without importing its contents into the containing module; if module *name* does not exist `x-module-not-found` will be raised.
+
+##### `continue-import-module`
+( "name" -- )
+
+Continue the definition of a preexisting module *name*, importing its contents into the containing module; if module *name* does not exist `x-module-not-found` will be raised.
 
 ##### `end-module`
 ( -- )
@@ -50,9 +55,14 @@ End the definition of the module at the top of the module stack, removing each w
 ##### `import`
 ( "name" -- )
 
-Import a module by the specified name into the current module's wordlist order
+Import a module by the specified name into the current module's wordlist order; if the module does not exist `x-module-not-found` is raised.
 
 ##### `unimport`
 ( "name" -- )
 
-Remove a module by the specified name from the current module's wordlist order; note that it does not remove it from parent modules' wordlist orders, so if it  had been imported within them they are still searchable.
+Remove a module by the specified name from the current module's wordlist order; note that it does not remove it from parent modules' wordlist orders, so if it  had been imported within them they are still searchable. If the module does not exist `x-module-not-found` is raised.
+
+##### `export`
+( "name" | "^" "module-name-0" ... "module-name-x" "::" "name" -- )
+
+Export a name in the current namespace or referred to by itself or by its path, from the current module.

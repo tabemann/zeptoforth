@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module forth-module
+continue-module forth-module
 
   import task-module
   import fchan-module
@@ -33,8 +33,8 @@ begin-module forth-module
 
   \ Initialize the test
   : init-test ( -- )
-    0 1 ['] test 256 128 512 spawn test-0-task !
-    1 1 ['] test 256 128 512 spawn test-1-task !
+    0 1 ['] test 320 128 512 spawn test-0-task !
+    1 1 ['] test 320 128 512 spawn test-1-task !
     test-0-task @ run
     test-1-task @ run
   ;

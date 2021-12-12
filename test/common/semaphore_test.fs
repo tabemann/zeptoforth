@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module forth-module
+continue-module forth-module
 
   import task-module
   import task-pool-module
@@ -61,8 +61,10 @@ begin-module forth-module
   
   \ Initialize our test
   : init-test ( -- )
-    256 128 512 my-task-count my-task-pool init-task-pool
+    320 128 512 my-task-count my-task-pool init-task-pool
     my-lock init-lock
     no-sema-limit init-sema-counter my-sema init-sema
     0 ['] do-init-tasks my-task-pool spawn-from-task-pool run
   ;
+
+end-module

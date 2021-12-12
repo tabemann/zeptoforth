@@ -18,6 +18,22 @@
 @ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 @ SOFTWARE.
 
+	@@ Advance one character if possible
+	define_word "advance-once", visible_flag
+_advance_once:
+	ldr r0, =eval_index_ptr
+	ldr r0, [r0]
+	ldr r1, [r0]
+	ldr r2, =eval_count_ptr
+	ldr r2, [r2]
+	ldr r3, [r2]
+	cmp r1, r3
+	beq 1f
+	adds r1, #1
+	str r1, [r0]
+1:	bx lr
+	end_inlined
+	
 	@@ Skip to the start of a token
 	define_internal_word "skip-to-token", visible_flag
 _skip_to_token:
@@ -73,7 +89,7 @@ _parse_to_char:
 	define_word ".(", visible_flag | immediate_flag
 _type_to_paren:
 	push {lr}
-	bl _skip_to_token
+	bl _advance_once
 	push_tos
 	movs tos, #0x29
 	bl _parse_to_char
@@ -107,7 +123,7 @@ _compile_imm_string:
 	define_word "c\"", visible_flag | immediate_flag | compiled_flag
 _compile_imm_cstring:
 	push {lr}
-	bl _skip_to_token
+	bl _advance_once
 	push_tos
 	movs tos, #0x22
 	bl _parse_to_char
@@ -232,7 +248,9 @@ _type_unsigned:
 	define_word "debugu.", visible_flag
 _debug_unsigned:
 	push {lr}
-	ldr r0, =base
+	bl _base
+	ldr r0, [tos]
+	pull_tos
 	ldr r2, [r0]
 	movs r1, #16
 	str r1, [r0]
@@ -252,8 +270,11 @@ _debug_unsigned:
 	push_tos
 	rsbs tos, r0, #0
 	bl _allot
-	ldr r0, =base
-	str r2, [r0]
+	push {r2}
+	bl _base
+	pop {r2}
+	str r2, [tos]
+	pull_tos
 	pop {pc}
 	end_inlined
 
@@ -439,10 +460,11 @@ _format_integer:
 	define_internal_word "format-integer-inner", visible_flag
 _format_integer_inner:
 	push {lr}
+	bl _base
+	ldr r1, [tos]
+	pull_tos
 	ldr r0, =here
 	ldr r0, [r0]
-	ldr r1, =base
-	ldr r1, [r1]
 	movs r2, tos
 1:	cmp r2, #0
 	beq 3f

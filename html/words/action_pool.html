@@ -4,20 +4,22 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>Action Pool words &#8212; zeptoforth  documentation</title>
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Allocator Words" href="allocate.html" />
+    <link rel="next" title="Heap Words" href="heap.html" />
     <link rel="prev" title="Task Pool words" href="task_pool.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
@@ -27,41 +29,44 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
-  <div class="section" id="action-pool-words">
+  <section id="action-pool-words">
 <h1>Action Pool words<a class="headerlink" href="#action-pool-words" title="Permalink to this headline">¶</a></h1>
 <p>Action pools provide a means of managing multiple schedule actions and dynamically creating and destroying them. Note that the total number of actions that may exist at any one time is fixed, but the number of executing actions may be of any number less than or equal to that at any point in time. Also note that action pools are associated with particular schedules when they are initialized.</p>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">action-pool-module</span></code>:</p>
-<div class="section" id="x-no-action-available">
+<section id="x-no-action-available">
 <h2><code class="docutils literal notranslate"><span class="pre">x-no-action-available</span></code><a class="headerlink" href="#x-no-action-available" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
 <p>Exception raised if one attempts to spawn a action from a action pool and no actions are available.</p>
-</div>
-<div class="section" id="init-from-action-pool">
+</section>
+<section id="init-from-action-pool">
 <h2><code class="docutils literal notranslate"><span class="pre">init-from-action-pool</span></code><a class="headerlink" href="#init-from-action-pool" title="Permalink to this headline">¶</a></h2>
 <p>( xt action-pool –  action )</p>
 <p>Initalize a action from a action pool, if a action is available, or raise <code class="docutils literal notranslate"><span class="pre">x-no-action-available</span></code> if no actions are available. The action is initialized for the schedule associated with the action pool.</p>
-</div>
-<div class="section" id="action-pool-free">
+</section>
+<section id="action-pool-free">
 <h2><code class="docutils literal notranslate"><span class="pre">action-pool-free</span></code><a class="headerlink" href="#action-pool-free" title="Permalink to this headline">¶</a></h2>
 <p>( action-pool – count )</p>
 <p>Get the number of free actions in a action pool.</p>
-</div>
-<div class="section" id="init-action-pool">
+</section>
+<section id="init-action-pool">
 <h2><code class="docutils literal notranslate"><span class="pre">init-action-pool</span></code><a class="headerlink" href="#init-action-pool" title="Permalink to this headline">¶</a></h2>
 <p>( schedule count addr – )</p>
 <p>Initialize a action pool at <em>addr</em>, with <em>count</em> actions, for schedule <em>schedule</em>. These actions are not initialized initially, and are free to be initialized as needed.</p>
-</div>
-<div class="section" id="action-pool-size">
+</section>
+<section id="action-pool-size">
 <h2><code class="docutils literal notranslate"><span class="pre">action-pool-size</span></code><a class="headerlink" href="#action-pool-size" title="Permalink to this headline">¶</a></h2>
 <p>( count – bytes )</p>
 <p>Get the size taken up by a action pool with <em>count</em> actions; this size should be used for alloting the block of memory to be passed to <code class="docutils literal notranslate"><span class="pre">init-action-pool</span></code></p>
-</div>
-</div>
+</section>
+</section>
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -76,7 +81,7 @@
 
 
 <h3>Navigation</h3>
-<p class="caption"><span class="caption-text">Contents:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
@@ -87,6 +92,7 @@
 <li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
@@ -100,7 +106,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#action-pool-size"><code class="docutils literal notranslate"><span class="pre">action-pool-size</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="allocate.html">Allocator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
@@ -125,7 +131,7 @@
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
       <li>Previous: <a href="task_pool.html" title="previous chapter">Task Pool words</a></li>
-      <li>Next: <a href="allocate.html" title="next chapter">Allocator Words</a></li>
+      <li>Next: <a href="heap.html" title="next chapter">Heap Words</a></li>
   </ul></li>
 </ul>
 </div>
@@ -133,12 +139,20 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
 <script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -147,8 +161,8 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.4.3</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="../_sources/words/action_pool.md.txt"

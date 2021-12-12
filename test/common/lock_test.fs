@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module forth-module
+continue-module forth-module
 
   import task-module
   import lock-module
@@ -54,9 +54,9 @@ begin-module forth-module
   \ Initialize the test
   : init-test ( -- )
     my-lock init-lock
-    0 ['] loop-0 256 128 512 spawn my-task-0 !
-    0 ['] loop-1 256 128 512 spawn my-task-1 !
-    0 ['] loop-2 256 128 512 spawn my-task-2 !
+    0 ['] loop-0 320 128 512 spawn my-task-0 !
+    0 ['] loop-1 320 128 512 spawn my-task-1 !
+    0 ['] loop-2 320 128 512 spawn my-task-2 !
     begin-critical
     my-task-0 @ run
     my-task-1 @ run

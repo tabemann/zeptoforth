@@ -20,38 +20,38 @@
 @ SOFTWARE.
 
 	.include "../common/vectors.s"
-	.word _handle_null+1 @ 16: window watchdog
-	.word _handle_null+1 @ 17: PVD
-	.word _handle_null+1 @ 18: tamper and timestamp
-	.word _handle_null+1 @ 19: RTC
-	.word _handle_null+1 @ 20: flash
-	.word _handle_null+1 @ 21: RCC
-	.word _handle_null+1 @ 22: EXTI 0
-	.word _handle_null+1 @ 23: EXTI 1
-	.word _handle_null+1 @ 24: EXTI 2
-	.word _handle_null+1 @ 25: EXTI 3
-	.word _handle_null+1 @ 26: EXTI 4
-	.word _handle_null+1 @ 27: DMA1 0
-	.word _handle_null+1 @ 28: DMA1 1
-	.word _handle_null+1 @ 29: DMA1 2
-	.word _handle_null+1 @ 30: DMA1 3
-	.word _handle_null+1 @ 31: DMA1 4
-	.word _handle_null+1 @ 32: DMA1 5
-	.word _handle_null+1 @ 33: DMA1 6
-	.word _handle_null+1 @ 34: ADC
-	.word _handle_null+1 @ 35:
-	.word _handle_null+1 @ 36:
-	.word _handle_null+1 @ 37:
-	.word _handle_null+1 @ 38:
-	.word _handle_null+1 @ 39: EXTI9_5
-	.word _handle_null+1 @ 40:
-	.word _handle_null+1 @ 41:
-	.word _handle_null+1 @ 42:
-	.word _handle_null+1 @ 43:
-	.word _handle_null+1 @ 44: timer 2
-	.word _handle_null+1 @ 45: timer 3
-	.word _handle_null+1 @ 46: timer 4
-	.word _handle_null+1 @ 47:
-	.word _handle_null+1 @ 48:
+	.word _handle_null+1 @ 16
+	.word _handle_null+1 @ 17
+	.word _handle_null+1 @ 18
+	.word _handle_null+1 @ 19
+	.word _handle_null+1 @ 20
+	.word _handle_null+1 @ 21
+	.word _handle_null+1 @ 22
+	.word _handle_null+1 @ 23
+	.word _handle_null+1 @ 24
+	.word _handle_null+1 @ 25
+	.word _handle_null+1 @ 26
+	.word _handle_null+1 @ 27
+	.word _handle_null+1 @ 28
+	.word _handle_null+1 @ 29
+	.word _handle_null+1 @ 30
+	.word _handle_null+1 @ _handle_sio+1 @ 31
+	.word _handle_null+1 @ _handle_sio+1 @ 32
+	.word _handle_null+1 @ 33
+	.word _handle_null+1 @ 34
+	.word _handle_null+1 @ 35
+	.word _handle_null+1 @ 36
+	.word _handle_null+1 @ 37
+	.word _handle_null+1 @ 38
+	.word _handle_null+1 @ 39
+	.word _handle_null+1 @ 40
+	.word _handle_null+1 @ 41
+	.word _handle_null+1 @ 42
+	.word _handle_null+1 @ 43
+	.word _handle_null+1 @ 44
+	.word _handle_null+1 @ 45
+	.word _handle_null+1 @ 46
+	.word _handle_null+1 @ 47
+	.word _handle_null+1 @ 48
 
 	

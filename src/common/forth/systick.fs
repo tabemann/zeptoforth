@@ -21,7 +21,7 @@
 \ Compile to flash
 compile-to-flash
 
-begin-import-module-once systick-module
+begin-import-module systick-module
 
   import internal-module
   import interrupt-module
@@ -68,7 +68,7 @@ begin-import-module-once systick-module
     $00FFFFFF constant SYST_CALIB_TENMS
     
     \ SysTick counter
-    variable systick-counter
+    cpu-variable cpu-systick-counter systick-counter
 
     compress-flash
 
@@ -96,12 +96,18 @@ begin-import-module-once systick-module
     SYST_CSR_TICKINT SYST_CSR_ENABLE or SYST_CSR bic! dmb dsb isb
   ;
 
-  \ Make systick-counter read-only
-  : systick-counter ( -- u ) systick-counter @ ;
-
   \ Initialize SysTick
-  : init-systick
+  : init-systick ( -- )
     ['] systick-handler systick-vector vector!
+    SYST_CALIB @ SYST_CALIB_TENMS and
+    10 / systick-divisor / time-multiplier * time-divisor / SYST_RVR !
+    0 SYST_CVR !
+    0 systick-counter !
+    enable-systick
+  ;
+
+  \ Initialize SysTick for an auxiliary core
+  : init-systick-aux-core ( -- )
     SYST_CALIB @ SYST_CALIB_TENMS and
     10 / systick-divisor / time-multiplier * time-divisor / SYST_RVR !
     0 SYST_CVR !
@@ -112,6 +118,9 @@ begin-import-module-once systick-module
   \ Systick divisor
   : systick-divisor ( -- ) systick-divisor ;
   
+  \ Make systick-counter read-only
+  : systick-counter ( -- u ) systick-counter @ ;
+
 end-module
 
 import internal-module

@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module forth-module
+continue-module forth-module
 
   import task-module
   import lock-module
@@ -31,7 +31,7 @@ begin-module forth-module
   \ Create a locking task word
   : locker ( priority ms lock "name" -- )
     <builds , , , does>
-    dup @ swap cell + dup @ ms cell + @ current-task set-task-priority
+    dup @ swap cell + dup @ ms cell + @ current-task task-priority!
     dup lock unlock begin 1000 ms again
     current-task kill
   ;
@@ -40,7 +40,7 @@ begin-module forth-module
   : monitor-priority ( tests interval -- )
     swap 0 ?do
       dup ms
-      current-task get-task-priority .
+      current-task task-priority@ .
     loop
     drop
   ;
@@ -76,10 +76,10 @@ begin-module forth-module
     lock-a init-lock
     lock-b init-lock
     lock-c init-lock
-    0 ['] do-lock-all 256 128 512 spawn task-lock-all !
-    0 ['] do-lock-a 256 128 512 spawn task-lock-a !
-    0 ['] do-lock-b 256 128 512 spawn task-lock-b !
-    0 ['] do-lock-c 256 128 512 spawn task-lock-c !
+    0 ['] do-lock-all 320 128 512 spawn task-lock-all !
+    0 ['] do-lock-a 320 128 512 spawn task-lock-a !
+    0 ['] do-lock-b 320 128 512 spawn task-lock-b !
+    0 ['] do-lock-c 320 128 512 spawn task-lock-c !
     begin-critical
     task-lock-all @ run
     task-lock-a @ run

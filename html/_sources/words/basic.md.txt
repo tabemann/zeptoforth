@@ -831,11 +831,6 @@ Set the data stack pointer
 
 Reboot
 
-##### `warm`
-( -- )
-
-Carry out a warm reboot
-
 ##### `true`
 ( -- f )
 
@@ -1366,9 +1361,14 @@ Find a word in the dictionary according to the word order list
 Find a word in the dictionary in any wordlist in order of definition
 
 ##### `>body`
-( name -- xt )
+( word -- xt )
 
 Get an xt from a word
+
+##### `apply`
+( ? word -- ? )
+
+Evaluate a word in the current interpretation/compilation context.
 
 ##### `evaluate`
 ( b-addr u -- )

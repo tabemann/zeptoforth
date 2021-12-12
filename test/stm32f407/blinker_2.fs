@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module forth-module
+continue-module forth-module
 
   import task-module
   import schedule-module
@@ -100,7 +100,7 @@ begin-module forth-module
     orange-blink-off-action @ enable-action
     green-blink-off-action @ enable-action
     blue-blink-off-action @ enable-action
-    0 [: my-schedule run-schedule ;] 256 128 512 spawn schedule-task !
+    0 [: my-schedule run-schedule ;] 320 128 512 spawn schedule-task !
     schedule-task @ run
     pause
   ;

@@ -19,5 +19,24 @@
 @ SOFTWARE.
 
 	.include "../common/expose.s"
-
 	
+	@@ Get the CPU index
+	define_word "cpu-index", visible_flag
+_cpu_index:
+	push_tos
+	ldr tos, =SIO_BASE + 0x000 @ CPUID (not the ARM CPUID)
+	ldr tos, [tos]
+	bx lr
+	end_inlined
+
+	@@ Get the SIO hook address
+	define_word "sio-hook", visible_flag
+_sio_hook:
+	push {lr}
+	bl _cpu_offset
+	ldr r0, =sio_hook
+	adds tos, r0
+	pop {pc}
+	end_inlined
+	
+	.ltorg

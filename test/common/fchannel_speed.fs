@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module forth-module
+continue-module forth-module
 
   import systick-module
   import task-module
@@ -36,7 +36,7 @@ begin-module forth-module
   ;
 
   \ The consumer task
-  0 ' consumer 256 128 512 spawn constant consumer-task
+  0 ' consumer 320 128 512 spawn constant consumer-task
 
   \ The send count
   variable send-count
@@ -63,7 +63,7 @@ begin-module forth-module
   ;
 
   \ The producer task
-  0 ' producer 256 128 512 spawn constant producer-task
+  0 ' producer 320 128 512 spawn constant producer-task
 
   \ Initiate the test
   : init-test ( -- )

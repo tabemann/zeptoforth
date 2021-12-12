@@ -21,7 +21,7 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-module-once ansi-term-module
+begin-module ansi-term-module
 
   begin-import-module ansi-term-internal-module
 
