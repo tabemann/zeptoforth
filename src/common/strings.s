@@ -18,6 +18,22 @@
 @ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 @ SOFTWARE.
 
+	@@ Advance one character if possible
+	define_word "advance-once", visible_flag
+_advance_once:
+	ldr r0, =eval_index_ptr
+	ldr r0, [r0]
+	ldr r1, [r0]
+	ldr r2, =eval_count_ptr
+	ldr r2, [r2]
+	ldr r3, [r2]
+	cmp r1, r3
+	beq 1f
+	adds r1, #1
+	str r1, [r0]
+1:	bx lr
+	end_inlined
+	
 	@@ Skip to the start of a token
 	define_internal_word "skip-to-token", visible_flag
 _skip_to_token:
@@ -73,7 +89,7 @@ _parse_to_char:
 	define_word ".(", visible_flag | immediate_flag
 _type_to_paren:
 	push {lr}
-	bl _skip_to_token
+	bl _advance_once
 	push_tos
 	movs tos, #0x29
 	bl _parse_to_char
@@ -107,7 +123,7 @@ _compile_imm_string:
 	define_word "c\"", visible_flag | immediate_flag | compiled_flag
 _compile_imm_cstring:
 	push {lr}
-	bl _skip_to_token
+	bl _advance_once
 	push_tos
 	movs tos, #0x22
 	bl _parse_to_char
