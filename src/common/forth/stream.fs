@@ -90,9 +90,6 @@ begin-module stream-module
   \ Attempting to send data larger than the stream exception
   : x-stream-data-too-big ( -- ) space ." data is larger than stream" cr  ;
 
-  \ Get the stream data size
-  : stream-data-size ( stream -- data-bytes ) stream-data-size @ ;
-
   commit-flash
 
   \ Get whether a stream is full
@@ -494,6 +491,9 @@ begin-module stream-module
 
   \ Get the size of a stream for a given data size
   : stream-size ( data-bytes -- bytes ) [inlined] stream-size + ;
+
+  \ Get the stream data size
+  : stream-data-size ( stream -- data-bytes ) stream-data-size @ ;
 
 end-module
 

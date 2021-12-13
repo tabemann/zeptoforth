@@ -82,9 +82,6 @@ begin-module chan-module
   \ Channel is closed exception
   : x-chan-closed ( -- ) space ." channel is closed" cr ;
 
-  \ Get the channel element data size
-  : chan-data-size ( chan -- element-bytes ) chan-data-size @ ;
-
   commit-flash
   
   \ Get whether a channel is full
@@ -475,6 +472,9 @@ begin-module chan-module
   
   \ Get the channel element count
   : chan-count ( chan -- element-count ) chan-count @ ;
+
+  \ Get the channel element data size
+  : chan-data-size ( chan -- element-bytes ) chan-data-size @ ;
 
 end-module
 
