@@ -50,9 +50,6 @@ begin-module fchan-module
 
       \ Fast channel receive task queue
       tqueue-size +field fchan-recv-tqueue
-
-      \ Fast channel response task queue
-      tqueue-size +field fchan-resp-tqueue
     end-structure
 
   end-module
@@ -69,8 +66,7 @@ begin-module fchan-module
     false over fchan-closed !
     dup fchan-recv-lock init-lock
     dup fchan-send-tqueue init-tqueue
-    dup fchan-recv-tqueue init-tqueue
-    fchan-resp-tqueue init-tqueue
+    fchan-recv-tqueue init-tqueue
   ;
 
   \ Send data on a fast channel
@@ -84,9 +80,6 @@ begin-module fchan-module
       tuck fchan-data-size !
       tuck fchan-data-addr !
       dup fchan-recv-tqueue wake-tqueue
-      [: dup fchan-resp-tqueue wait-tqueue ;] try ?dup if
-	0 swap fchan-data-addr ! ?raise
-      then
       fchan-closed @ triggers x-fchan-closed
       s" END SEND-FCHAN" trace
     ;] critical
@@ -111,7 +104,7 @@ begin-module fchan-module
 	else
 	  rot drop drop 0
 	then
-	r> fchan-resp-tqueue wake-tqueue
+	rdrop
 	s" END RECV-FCHAN" trace
       ;] critical
     ;] over fchan-recv-lock with-lock

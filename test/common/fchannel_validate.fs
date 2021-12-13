@@ -29,8 +29,13 @@ continue-module forth-module
 
   \ The inner loop of the consumer
   : consumer ( -- )
-    begin
-      my-fchan recv-fchan-cell drop
+    0 begin
+      my-fchan recv-fchan-cell 2dup <> if
+	cr ." Validation failed: Got:" . ."  Expected:" dup .
+      else
+	drop
+      then
+      1+ pause
     again
   ;
 
@@ -48,8 +53,8 @@ continue-module forth-module
 
   \ The inner loop of a producer
   : producer ( -- )
-    begin
-      0 my-fchan send-fchan-cell
+    0 begin
+      dup my-fchan send-fchan-cell 1+
       1 send-count +!
       send-count @ send-count-limit > if
 	0 send-count !
