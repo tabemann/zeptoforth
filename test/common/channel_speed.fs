@@ -22,15 +22,21 @@ continue-module forth-module
 
   import systick-module
   import task-module
-  import fchan-module
+  import chan-module
+
+  \ Element size
+  cell constant element-size
+
+  \ Element count
+  32 constant element-count
 
   \ Allot the channel
-  fchan-size buffer: my-fchan
+  element-size element-count chan-size buffer: my-chan
 
   \ The inner loop of the consumer
   : consumer ( -- )
     begin
-      my-fchan recv-fchan-cell drop
+      my-chan recv-chan-cell drop
     again
   ;
 
@@ -49,7 +55,7 @@ continue-module forth-module
   \ The inner loop of a producer
   : producer ( -- )
     begin
-      0 my-fchan send-fchan-cell
+      0 my-chan send-chan-cell
       1 send-count +!
       send-count @ send-count-limit > if
 	0 send-count !
@@ -68,7 +74,7 @@ continue-module forth-module
   : init-test ( -- )
     0 send-count !
     systick-counter start-systick !
-    my-fchan init-fchan
+    element-size element-count my-chan init-chan
     consumer-task run
     producer-task run
     pause
