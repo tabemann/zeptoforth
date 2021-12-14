@@ -547,9 +547,9 @@ begin-import-module task-module
       dup validate-not-terminated
       tuck ['] task-systick-start for-task !
       tuck ['] task-systick-delay for-task !
-      delayed swap task-state h!
+      delayed over task-state h!
     ;] critical
-    pause
+    current-task @ = if pause then
   ;
 
   \ Delay a task and schedule as critcal once done
@@ -559,9 +559,9 @@ begin-import-module task-module
       tuck ['] task-systick-start for-task !
       tuck ['] task-systick-delay for-task !
       [ delayed schedule-critical or schedule-user-critical or ] literal
-      swap task-state h!
+      over task-state h!
     ;] critical
-    pause
+    current-task @ = if pause then
   ;
 
   \ Mark a task as blocked until a timeout
@@ -570,9 +570,9 @@ begin-import-module task-module
       dup validate-not-terminated
       tuck ['] task-systick-start for-task !
       tuck ['] task-systick-delay for-task !
-      blocked-timeout swap task-state h!
+      blocked-timeout over task-state h!
     ;] critical
-    pause
+    current-task @ = if pause then
   ;
 
   \ Mark a task as blocked until a timeout and schedule as critical once done
@@ -582,9 +582,9 @@ begin-import-module task-module
       tuck ['] task-systick-start for-task !
       tuck ['] task-systick-delay for-task !
       [ blocked-timeout schedule-critical or schedule-user-critical or ] literal
-      swap task-state h!
+      over task-state h!
     ;] critical
-    pause
+    current-task @ = if pause then
   ;
 
   \ Wait until a timeout on the specified notification index and return the
@@ -635,31 +635,31 @@ begin-import-module task-module
   \ Mark a task as waiting
   : block-wait ( task -- )
     dup validate-not-terminated
-    blocked-wait swap task-state h!
-    pause
+    blocked-wait over task-state h!
+    current-task @ = if pause then
   ;
   
   \ Mark a task as waiting
   : block-wait-critical ( task -- )
     dup validate-not-terminated
     [ blocked-wait schedule-critical or schedule-user-critical or ] literal
-    swap task-state h!
-    pause
+    over task-state h!
+    current-task @ = if pause then
   ;
 
   \ Mark a task as blocked indefinitely
   : block-indefinite ( task -- )
     dup validate-not-terminated
-    blocked-indefinite swap task-state h!
-    pause
+    blocked-indefinite over task-state h!
+    current-task @ = if pause then
   ;
 
   \ Mark a task as blocked indefinitely and schedule as critical when done
   : block-indefinite-critical ( task -- )
     dup validate-not-terminated
     [ blocked-indefinite schedule-critical or schedule-user-critical or ]
-    literal swap task-state h!
-    pause
+    literal over task-state h!
+    current-task @ = if pause then
   ;
 
   \ Wait indefinitely on the specified notification index and return the value
@@ -711,7 +711,6 @@ begin-import-module task-module
 	drop
       then
     ;] critical
-    pause
   ;
 
   \ Notify a task for a specified notification index
