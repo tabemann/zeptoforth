@@ -36,11 +36,11 @@ continue-module forth-module
   : do-task-1 ( -- )
     no-timeout timeout !
     cr ." Start wait 1" 1000 ms cr ." End wait 1"
-    my-fchan recv-fchan-cell drop
+    [: my-fchan recv-fchan ;] extract-allot-cell drop
     cr ." Start wait 2" 1000 ms cr ." End wait 2"
-    my-fchan recv-fchan-cell drop
+    [: my-fchan recv-fchan ;] extract-allot-cell drop
     cr ." Start wait 3" 1000 ms cr ." End wait 3"
-    my-fchan recv-fchan-cell drop
+    [: my-fchan recv-fchan ;] extract-allot-cell drop
     cr ." Done"
   ;
 
@@ -48,7 +48,7 @@ continue-module forth-module
   : do-task-2 ( -- )
     no-timeout timeout !
     25 ms
-    0 my-fchan send-fchan-cell
+    0 [: my-fchan send-fchan ;] provide-allot-cell
     cr ." Sent 1"
   ;
 
@@ -56,7 +56,7 @@ continue-module forth-module
   : do-task-3 ( -- )
     no-timeout timeout !
     50 ms
-    0 my-fchan send-fchan-cell
+    0 [: my-fchan send-fchan ;] provide-allot-cell
     cr ." Sent 2"
   ;
 
@@ -64,7 +64,7 @@ continue-module forth-module
   : do-task-4 ( -- )
     no-timeout timeout !
     75 ms
-    0 my-fchan send-fchan-cell
+    0 [: my-fchan send-fchan ;] provide-allot-cell
     cr ." Sent 3"
   ;
 

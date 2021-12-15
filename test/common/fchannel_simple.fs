@@ -33,14 +33,14 @@ continue-module forth-module
   \ The consumer
   : consumer ( -- )
     begin
-      my-fchan recv-fchan-cell cr ." Received:" .
+      [: my-fchan recv-fchan ;] extract-allot-cell cr ." Received:" .
     again
   ;
 
   \ The producer
   : producer ( -- )
     0 begin
-      dup my-fchan send-fchan-cell cr ." Sent:" dup . 1+
+      dup [: my-fchan send-fchan ;] provide-allot-cell cr ." Sent:" dup . 1+
     again
   ;
   

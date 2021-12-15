@@ -64,14 +64,14 @@ continue-module forth-module
   \ Handle LED requests
   : handle-led ( -- )
     begin
-      request-fchan recv-fchan-cell
+      [: request-fchan recv-fchan ;] extract-allot-cell
       dup case
 	red-response-fchan of select-red endof
 	orange-response-fchan of select-orange endof
 	green-response-fchan of select-green endof
 	blue-response-fchan of select-blue endof
       endcase
-      0 swap send-fchan-cell
+      0 [: rot send-fchan ;] provide-allot-cell
     again
   ;
 
@@ -79,9 +79,9 @@ continue-module forth-module
   : make-request ( fchannel "name" -- )
     <builds , does> @
     begin
-      dup request-fchan send-fchan-cell
+      dup [: request-fchan send-fchan ;] provide-allot-cell
       blinker-delay @ ms
-      dup recv-fchan-cell drop
+      [: 2 pick recv-fchan ;] extract-allot-cell drop
     again
   ;
 

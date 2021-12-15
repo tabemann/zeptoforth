@@ -36,7 +36,7 @@ continue-module forth-module
   : producer ( -- )
     begin
       [char] Z 1+ [char] A ?do
-	i my-chan send-chan-byte pause
+	i [: my-chan send-chan ;] provide-allot-byte pause
       loop
     again
   ;
@@ -44,7 +44,7 @@ continue-module forth-module
   \ My consumer
   : consumer ( -- )
     begin
-      my-chan recv-chan-byte emit pause
+      [: my-chan recv-chan ;] extract-allot-byte emit pause
     again
   ;
 

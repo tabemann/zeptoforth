@@ -30,7 +30,7 @@ continue-module forth-module
   \ The inner loop of the consumer
   : consumer ( -- )
     begin
-      my-fchan recv-fchan-cell drop
+      [: my-fchan recv-fchan ;] extract-allot-cell drop
     again
   ;
 
@@ -49,7 +49,7 @@ continue-module forth-module
   \ The inner loop of a producer
   : producer ( -- )
     begin
-      0 my-fchan send-fchan-cell
+      0 [: my-fchan send-fchan ;] provide-allot-cell
       1 send-count +!
       send-count @ send-count-limit > if
 	0 send-count !

@@ -49,23 +49,3 @@ Send message with a buffer as a payload over a fast channel. Block until another
 ( addr bytes fchan -- addr recv-bytes )
 
 Receive message with a buffer as a payload over a fast channel. Block until another task sends a message. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the bufer size of the fast channel; the passed in buffer and the number of bytes copied into it are returned. Note that this must not be called within a critical section.
-
-##### `send-fchan-2cell`
-( xd fchan -- )
-
-Send message with a double cell as a payload over a fast channel. Block until another task receives the message; if a task is already waiting for a message, transfer control to it. Note that this must not be called within a critical section.
-
-##### `recv-fchan-2cell`
-( fchan -- xd )
-
-Receive message with a double cell as a payload over a fast channel. Block until another sends a message. Note that this must not be called within a critical section.
-
-##### `send-fchan-cell`
-( x fchan -- )
-
-Send message with a cell as a payload over a fast channel. Block until another task receives the message; if a task is already waiting for a message, transfer control to it. Note that this must not be called within a critical section.
-
-##### `recv-fchan-cell`
-( fchan -- x )
-
-Receive message with a cell as a payload over a fast channel. Block until another task sends a message. Note that this must not be called within a critical section.

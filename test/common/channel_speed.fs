@@ -36,7 +36,7 @@ continue-module forth-module
   \ The inner loop of the consumer
   : consumer ( -- )
     begin
-      my-chan recv-chan-cell drop
+      [: my-chan recv-chan ;] extract-allot-cell drop
     again
   ;
 
@@ -55,7 +55,7 @@ continue-module forth-module
   \ The inner loop of a producer
   : producer ( -- )
     begin
-      0 my-chan send-chan-cell
+      0 [: my-chan send-chan ;] provide-allot-cell
       1 send-count +!
       send-count @ send-count-limit > if
 	0 send-count !
