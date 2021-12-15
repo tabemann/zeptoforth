@@ -40,14 +40,16 @@ continue-module forth-module
   : producer ( -- )
     0 begin
       dup $FF and dup cr ." SEND: " .
-      my-chan send-chan-byte 1+ 500 ms
+      [: my-chan send-chan ;] provide-allot-byte 1+ 500 ms
     again
   ;
 
   \ The consumer
   : consumer ( -- )
     4000 ms
-    begin my-chan recv-chan-byte cr ." RECV: " . 500 ms again
+    begin
+      [: my-chan recv-chan ;] extract-allot-byte cr ." RECV: " . 500 ms
+    again
   ;
 
   \ The closer

@@ -35,14 +35,14 @@ continue-module forth-module
   \ My producer
   : producer ( -- )
     0 begin
-      dup my-chan send-chan-cell 1+
+      dup [: my-chan send-chan ;] provide-allot-cell 1+
     again
   ;
 
   \ My consumer
   : consumer ( -- )
     begin
-      my-chan recv-chan-cell h.8 space
+      [: my-chan recv-chan ;] extract-allot-cell h.8 space
     again
   ;
 

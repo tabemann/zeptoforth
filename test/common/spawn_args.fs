@@ -36,9 +36,9 @@ continue-module forth-module
   \ Wait on an fchannel, display a number of numbers and send on the fchannel
   \ provided
   : action ( out-fchannel xn...x0 count in-channel -- )
-    recv-fchan-cell drop
+    [: rot recv-fchan ;] extract-allot-cell drop
     begin dup 0> while 1- swap . repeat drop pause
-    0 swap send-fchan-cell
+    0 [: rot send-fchan ;] provide-allot-cell
     begin pause again
   ;
 
@@ -55,8 +55,8 @@ continue-module forth-module
     ['] action my-task-pool spawn-from-task-pool run
     signal-3-fchan 22 21 20 3 signal-2-fchan 6
     ['] action my-task-pool spawn-from-task-pool run
-    0 signal-0-fchan send-fchan-cell
-    signal-3-fchan recv-fchan-cell drop
+    0 [: signal-0-fchan send-fchan ;] provide-allot-cell
+    [: signal-3-fchan recv-fchan ;] extract-allot-cell drop
   ;
 
 end-module
