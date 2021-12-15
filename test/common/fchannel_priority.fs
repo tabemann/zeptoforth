@@ -39,8 +39,8 @@ continue-module forth-module
   : high ( -- )
     begin
       ." < " 100000 0 ?do loop
-      0 my-out-fchan send-fchan-cell
-      my-in-fchan recv-fchan-cell drop
+      0 [: my-out-fchan send-fchan ;] provide-allot-cell
+      [: my-in-fchan recv-fchan ;] extract-allot-cell drop
       ." > "
     again
   ;
@@ -48,9 +48,9 @@ continue-module forth-module
   \ The loop of the lower-priority task
   : low ( -- )
     begin
-      my-out-fchan recv-fchan-cell drop
+      [: my-out-fchan recv-fchan ;] extract-allot-cell drop
       ." [ " 10000 0 ?do loop ." ] "
-      0 my-in-fchan send-fchan-cell
+      0 [: my-in-fchan send-fchan ;] provide-allot-cell
     again
   ;
 

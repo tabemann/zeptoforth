@@ -42,7 +42,7 @@ continue-module forth-module
     no-timeout timeout !
     0 begin
       [: cr ." Producer:" dup . space ;] my-lock with-lock
-      dup my-fchan send-fchan-cell 1+
+      dup [: my-fchan send-fchan ;] provide-allot-cell 1+
     again
   ;
 
@@ -50,7 +50,7 @@ continue-module forth-module
   : do-consumer ( n -- )
     no-timeout timeout !
     begin
-      my-fchan recv-fchan-cell
+      [: my-fchan recv-fchan ;] extract-allot-cell
       [: cr ." Consumer" over . ." :" . space ;] my-lock with-lock
     again
   ;

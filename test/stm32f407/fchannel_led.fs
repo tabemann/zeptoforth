@@ -58,11 +58,11 @@ continue-module forth-module
   \ The inner loop of an led handler
   : do-led ( -- )
     does> begin
-      dup before-fchan @ recv-fchan-cell drop
+      [: 2 pick before-fchan @ recv-fchan ;] extract-allot-cell drop
       dup on-xt @ execute
       dup delay-ms @ ms
       dup off-xt @ execute
-      dup after-fchan @ 0 swap send-fchan-cell
+      0 [: 2 pick after-fchan @ send-fchan ;] provide-allot-cell
       pause
     again
   ;
@@ -87,7 +87,7 @@ continue-module forth-module
     blue-task run
     red-task run
     pause
-    0 orange-fchan send-fchan-cell
+    0 [: orange-fchan send-fchan ;] provide-allot-cell
     pause
   ;
 

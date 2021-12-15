@@ -35,7 +35,7 @@ continue-module forth-module
 
   \ The consumer
   : consumer ( -- )
-    begin my-fchan recv-fchan-cell cr ." RECV: " . again
+    begin [: my-fchan recv-fchan ;] extract-allot-cell cr ." RECV: " . again
   ;
 
   \ The closer

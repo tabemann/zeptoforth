@@ -1141,6 +1141,9 @@ commit-flash
   swap try r> ram-here! ?raise
 ;
 
+\ Insufficient data exception
+: x-insufficient-data ( -- ) space ." insufficient data" cr ;
+
 \ Commit to flash
 commit-flash
 
@@ -2241,6 +2244,50 @@ commit-flash
 
 \ Set forth
 forth-module set-current
+
+\ Provide a double cell as a buffer.
+: provide-allot-2cell ( xd xt -- ) ( xt: addr bytes -- )
+  2 cells [: swap 2>r r@ 2! r> 2 cells r> execute ;] with-aligned-allot
+;
+
+\ Provide a cell as a buffer.
+: provide-allot-cell ( x xt -- ) ( xt: addr bytes -- )
+  cell [: swap 2>r r@ ! r> cell r> execute ;] with-aligned-allot
+;
+
+\ Provide a halfword as a buffer.
+: provide-allot-half ( h xt -- ) ( xt: addr bytes -- )
+  cell [: swap 2>r r@ h! r> 2 r> execute ;] with-aligned-allot
+;
+
+\ Provide a byte as a buffer.
+: provide-allot-byte ( c xt -- ) ( xt: addr bytes -- )
+  cell [: swap 2>r r@ c! r> 1 r> execute ;] with-aligned-allot
+;
+
+\ Extract a double cell from a buffer.
+: extract-allot-2cell ( xt -- xd ) ( xt: addr bytes -- addr' bytes' )
+  2 cells [: 2 cells rot execute 2 cells >= averts x-insufficient-data 2@ ;]
+  with-aligned-allot
+;
+
+\ Extract a cell from a buffer.
+: extract-allot-cell ( xt -- x ) ( xt: addr bytes -- addr' bytes' )
+  cell [: cell rot execute cell >= averts x-insufficient-data @ ;]
+  with-aligned-allot
+;
+
+\ Extract a halfword from a buffer.
+: extract-allot-half ( xt -- h ) ( xt: addr bytes -- addr' bytes' )
+  cell [: 2 rot execute 2 >= averts x-insufficient-data h@ ;]
+  with-aligned-allot
+;
+
+\ Extract a byte from a buffer
+: extract-allot-byte ( xt -- c ) ( xt: addr bytes -- addr' bytes' )
+  cell [: 1 rot execute 1 >= averts x-insufficient-data c@ ;]
+  with-aligned-allot
+;
 
 \ Flush the console
 : flush-console ( -- ) flush-console-hook @ ?execute ;
