@@ -18,22 +18,44 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ This is not actual Forth code, but rather setup directives for e4thcom to be
-\ executed to load a "big" configuration
+continue-module forth-module
 
-#include src/common/forth/temp.fs
-#include src/common/forth/temp_str.fs
-#include src/common/forth/disassemble.fs
-#include src/common/forth/pool.fs
-#include src/common/forth/heap.fs
-#include src/common/forth/tqueue.fs
-#include src/common/forth/lock.fs
-#include src/common/forth/semaphore.fs
-#include src/common/forth/fchannel.fs
-#include src/common/forth/channel.fs
-#include src/common/forth/rchannel.fs
-#include src/common/forth/stream.fs
-#include src/common/forth/ansi_term.fs
-#include src/common/forth/line.fs
-#include src/common/forth/task_pool.fs
-#include src/common/forth/action_pool.fs
+  import task-module
+  import rchan-module
+
+  \ The sender task
+  variable send-task
+
+  \ The replying task
+  variable reply-task
+
+  \ The reply channel
+  rchan-size buffer: my-rchan
+  
+  \ The sender loop
+  : send-loop ( -- )
+    0 begin
+      dup [: [: my-rchan send-rchan ;] extract-allot-cell ;] provide-allot-cell
+      over cr ." Sent:" . ."  Got reply:" . 1+
+    again
+  ;
+
+  \ The repling loop
+  : reply-loop ( -- )
+    0 begin
+      [: my-rchan recv-rchan ;] extract-allot-cell
+      cr ." Received:" .
+      dup [: my-rchan reply-rchan ;] provide-allot-cell 1+
+    again
+  ;
+
+  \ Initialize the test
+  : init-test ( -- )
+    my-rchan init-rchan
+    0 ['] send-loop 320 128 512 spawn send-task !
+    0 ['] reply-loop 320 128 512 spawn reply-task !
+    send-task @ run
+    reply-task @ run
+  ;
+  
+end-module
