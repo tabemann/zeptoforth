@@ -36,7 +36,7 @@ continue-module forth-module
   \ The producer
   : producer ( -- )
     0 begin
-      dup cr ." SEND: " . dup my-fchan send-fchan-cell 1+ 500 ms
+      dup cr ." SEND: " . dup [: my-fchan send-fchan ;] provide-allot-cell 1+ 500 ms
     again
   ;
 

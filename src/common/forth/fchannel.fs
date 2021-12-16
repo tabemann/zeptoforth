@@ -31,38 +31,38 @@ begin-module fchan-module
 
   begin-import-module fchan-internal-module
 
-    \ Fast channel header structure
+    \ Rendezvous channel header structure
     begin-structure fchan-size
-      \ Fast channel data address
+      \ Rendezvous channel data address
       field: fchan-data-addr
 
-      \ Fast channel data size
+      \ Rendezvous channel data size
       field: fchan-data-size
       
-      \ Fast channel is closed
+      \ Rendezvous channel is closed
       field: fchan-closed
 
-      \ Fast channel receive lock
+      \ Rendezvous channel receive lock
       lock-size +field fchan-recv-lock
       
-      \ Fast channel send task queue
+      \ Rendezvous channel send task queue
       tqueue-size +field fchan-send-tqueue
 
-      \ Fast channel receive task queue
+      \ Rendezvous channel receive task queue
       tqueue-size +field fchan-recv-tqueue
 
-      \ Fast channel response task queue
+      \ Rendezvous channel response task queue
       tqueue-size +field fchan-resp-tqueue
     end-structure
 
   end-module
 
-  \ Fast channel is closed exception
+  \ Rendezvous channel is closed exception
   : x-fchan-closed ( -- ) space ." fchannel is closed" cr ;
   
   commit-flash
   
-  \ Initialize a fast channel
+  \ Initialize a rendezvous channel
   : init-fchan ( addr -- )
     0 over fchan-data-addr !
     0 over fchan-data-size !
@@ -73,7 +73,7 @@ begin-module fchan-module
     fchan-resp-tqueue init-tqueue
   ;
 
-  \ Send data on a fast channel
+  \ Send data on a rendezvous channel
   : send-fchan ( addr bytes fchan -- )
     [:
       s" BEGIN SEND-FCHAN" trace
@@ -92,12 +92,12 @@ begin-module fchan-module
     ;] critical
   ;
 
-  \ Receive data on a fast channel
+  \ Receive data on a rendezvous channel
   : recv-fchan ( addr bytes fchan -- addr recv-bytes )
     dup fchan-closed @ triggers x-fchan-closed
     [:
       [:
-	s" BEGIN RECV-CHAN" trace
+	s" BEGIN RECV-FCHAN" trace
 	dup fchan-send-tqueue wake-tqueue
 	[: dup fchan-recv-tqueue wait-tqueue ;] try ?dup if
 	  swap fchan-send-tqueue unwake-tqueue ?raise
@@ -118,30 +118,8 @@ begin-module fchan-module
   ;
 
   commit-flash
-  
-  \ Send a double cell on a fast channel
-  : send-fchan-2cell ( xd fchan -- )
-    2 cells [: >r -rot r@ 2! r> 2 cells rot send-fchan ;] with-aligned-allot
-  ;
 
-  \ Receive a double cell from a fast channel
-  : recv-fchan-2cell ( fchan -- xd )
-    2 cells [: 2 cells rot recv-fchan 2 cells >= if 2@ else drop 0 0 then ;]
-    with-aligned-allot
-  ;
-
-  \ Send a cell on a fast channel
-  : send-fchan-cell ( x fchan -- )
-    1 cells [: >r swap r@ ! r> 1 cells rot send-fchan ;] with-aligned-allot
-  ;
-
-  \ Receive a cell from a fast channel
-  : recv-fchan-cell ( fchan -- x )
-    1 cells [: 1 cells rot recv-fchan 1 cells >= if @ else drop 0 then ;]
-    with-aligned-allot
-  ;
-
-  \ Close a fast channel
+  \ Close a rendezvous channel
   : close-fchan ( fchan -- )
     [:
       true over fchan-closed !
@@ -150,10 +128,10 @@ begin-module fchan-module
     ;] critical
   ;
 
-  \ Get whether a fast channel is closed
+  \ Get whether a rendezvous channel is closed
   : fchan-closed? ( fchan -- closed ) fchan-closed @ ;
 
-  \ Reopen a fast channel
+  \ Reopen a rendezvous channel
   : reopen-fchan ( fchan -- ) false swap fchan-closed ! ;
 
   \ Export the fchannel size

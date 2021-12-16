@@ -30,7 +30,7 @@ continue-module forth-module
   \ The inner loop of the consumer
   : consumer ( -- )
     0 begin
-      my-fchan recv-fchan-cell 2dup <> if
+      [: my-fchan recv-fchan ;] extract-allot-cell 2dup <> if
 	cr ." Validation failed: Got:" . ."  Expected:" dup .
       else
 	drop
@@ -54,7 +54,7 @@ continue-module forth-module
   \ The inner loop of a producer
   : producer ( -- )
     0 begin
-      dup my-fchan send-fchan-cell 1+
+      dup [: my-fchan send-fchan ;] provide-allot-cell 1+
       1 send-count +!
       send-count @ send-count-limit > if
 	0 send-count !

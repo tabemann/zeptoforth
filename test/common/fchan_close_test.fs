@@ -36,13 +36,13 @@ continue-module forth-module
   \ The producer
   : producer ( -- )
     0 begin
-      dup cr ." SEND: " . dup my-fchan send-fchan-cell 1+ 500 ms
+      dup cr ." SEND: " . dup [: my-fchan send-fchan ;] provide-allot-cell 1+ 500 ms
     again
   ;
 
   \ The consumer
   : consumer ( -- )
-    begin my-fchan recv-fchan-cell cr ." RECV: " . again
+    begin [: my-fchan recv-fchan ;] extract-allot-cell cr ." RECV: " . again
   ;
 
   \ The closer

@@ -31,7 +31,7 @@ continue-module forth-module
   : consumer ( -- )
     cr ." Consumer: " current-task h.8
     begin
-      my-fchan recv-fchan-2cell
+      [: my-fchan recv-fchan ;] extract-allot-2cell
       cr ." Received: " type
       \    100 ms
       \    pause
@@ -48,7 +48,7 @@ continue-module forth-module
     ." : " current-task h.8
     begin
       cr ." Sending: " dup count type
-      dup count my-fchan send-fchan-2cell
+      dup count [: my-fchan send-fchan ;] provide-allot-2cell
       cr ." Done sending: " dup count type
     again
   ;
