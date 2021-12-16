@@ -1,4 +1,4 @@
-\ Copyright (c) 2021 Travis Bemann
+\ Copyright (c) 2020-2021 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -20,46 +20,60 @@
 
 continue-module forth-module
 
+  import systick-module
   import task-module
-  import fchan-module
-  import lock-module
+  import rchan-module
 
-  \ Our channel
-  fchan-size buffer: my-fchan
+  \ Allot the channel
+  rchan-size buffer: my-rchan
 
-  \ Our output lock
-  lock-size buffer: my-lock
-
-  \ The loop of the consumer
+  \ The inner loop of the consumer
   : consumer ( -- )
     begin
-      1000 timeout ! [: my-fchan recv-fchan ;] extract-allot-cell
-      [: space ." out:" . ;] my-lock with-lock
+      [: my-rchan recv-rchan ;] extract-allot-cell drop
+      0 [: my-rchan reply-rchan ;] provide-allot-cell
     again
   ;
 
-  \ The loop of a producer
-  : producer ( c -- )
-    0 begin
-      [: space ." in: " over emit ." :" dup . ;] my-lock with-lock
-      1000 timeout ! dup [: my-fchan send-fchan ;] provide-allot-cell
-      [: space ." done: " over emit ." :" dup . ;] my-lock with-lock
-      1+
+  \ The consumer task
+  0 ' consumer 320 128 512 spawn constant consumer-task
+
+  \ The send count
+  variable send-count
+
+  \ The starting systick
+  variable start-systick
+
+  \ The send count limit
+  10000 constant send-count-limit
+
+  \ The inner loop of a producer
+  : producer ( -- )
+    begin
+      0 [: [: my-rchan send-rchan ;] extract-allot-cell ;] provide-allot-cell
+      drop
+      1 send-count +!
+      send-count @ send-count-limit > if
+	0 send-count !
+	systick-counter dup start-systick @ -
+	cr ." Sends per second: " 0 swap 0 send-count-limit f/
+	10000,0 f/ 1,0 2swap f/ f.
+	start-systick !
+      then
     again
   ;
 
-  \ Initialize
-  my-fchan init-fchan
-  my-lock init-lock
-  0 ' consumer 320 128 512 spawn constant my-consumer-task
-  char A 1 ' producer 320 128 512 spawn constant my-producer-a-task
-  char B 1 ' producer 320 128 512 spawn constant my-producer-b-task
-  char C 1 ' producer 320 128 512 spawn constant my-producer-c-task
-  char D 1 ' producer 320 128 512 spawn constant my-producer-d-task
-  my-consumer-task run
-  my-producer-a-task run
-  my-producer-b-task run
-  my-producer-c-task run
-  my-producer-d-task run
+  \ The producer task
+  0 ' producer 320 128 512 spawn constant producer-task
+
+  \ Initiate the test
+  : init-test ( -- )
+    0 send-count !
+    systick-counter start-systick !
+    my-rchan init-rchan
+    consumer-task run
+    producer-task run
+    pause
+  ;
 
 end-module
