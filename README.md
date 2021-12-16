@@ -11,6 +11,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 * Locks, with priority inversion handling
 * Message-oriented queue channels
 * Message-oriented rendezvous channels, aka "fchannels"
+* Message-oriented bidirectional synchronous reply channels, aka "rchannels" (currently available in git only)
 * Byte-oriented streams
 * Task notifications
 * Event/coroutine scheduler support
