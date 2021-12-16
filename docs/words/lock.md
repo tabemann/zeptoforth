@@ -4,6 +4,16 @@ A lock enforces mutual exclusion, typically with regard to control of a resource
 
 The following words are in `lock-module`:
 
+##### `x-not-currently-owned`
+( -- )
+
+Exception raised if a task attempts to unlock a lock it is not the holder of.
+
+##### `x-double-lock`
+( -- )
+
+Exception raised if a task attempts to lock a lock it has already locked.
+
 ##### `lock-size`
 ( -- bytes )
 
@@ -17,7 +27,7 @@ Initialize a lock starting at the specified address; note that it must be `lock-
 ##### `lock`
 ( lock -- )
 
-Attempt to acquire a lock; if the lock is already held, put the current task in a queue and disable it. In that case, update the priority of the holder of a lock, and any subsequent holders of any locks waited for by the holder of this lock, in order to avoid priority inversion. Note that this must not be called within a critical section.
+Attempt to acquire a lock; if the lock is already held, put the current task in a queue and disable it. In that case, update the priority of the holder of a lock, and any subsequent holders of any locks waited for by the holder of this lock, in order to avoid priority inversion. Note that this must not be called within a critical section. If a task attempts to lock a lock it has already locked, `x-double-lock` is raised.
 
 ##### `unlock`
 ( lock -- )
@@ -28,10 +38,6 @@ Attempt to release a lock; if the current task is not the holder of the lock, ra
 ( xt lock -- )
 
 Execute an xt with a given lock locked while it executes, unlocking it afterwards. Exceptions are handled properly with unlocking occurring of it occurs within the xt.
-
-##### `x-not-currently-owned`
-
-Exception raised if a task attempts to unlock a lock it is not the holder of.
 
 ##### `update-lock-priority`
 ( lock -- )

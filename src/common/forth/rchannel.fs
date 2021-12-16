@@ -79,6 +79,12 @@ begin-module rchan-module
   : x-rchan-not-wait-reply ( -- )
     space ." rchannel is not waiting for reply from current task" cr
   ;
+
+  \ Attempted to receive from a reply channel awaiting a reply from the current
+  \ task
+  : x-rchan-wait-reply ( -- )
+    space ." rchannel is waiting for reply from current task" cr
+  ;
   
   \ Get whether a reply channel is waiting for a reply
   : rchan-wait-reply? ( rchan -- wait-reply? )
@@ -130,6 +136,7 @@ begin-module rchan-module
   \ Receive data on a reply channel
   : recv-rchan ( addr bytes rchan -- addr recv-bytes )
     dup rchan-closed? triggers x-rchan-closed
+    dup rchan-reply-task @ current-task <> averts x-rchan-wait-reply
     dup rchan-recv-lock lock
     dup >r [:
       [:
