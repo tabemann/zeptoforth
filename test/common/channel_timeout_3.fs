@@ -36,9 +36,9 @@ continue-module forth-module
   : do-task-1 ( -- )
     no-timeout timeout !
     cr ." Start wait 1" 1000 ms cr ." End wait 1"
-    0 my-chan send-chan-cell
+    0 [: my-chan send-chan ;] provide-allot-cell
     cr ." Start wait 2" 1000 ms cr ." End wait 2"
-    1 my-chan send-chan-cell
+    1 [: my-chan send-chan ;] provide-allot-cell
     cr ." Done"
   ;
 
@@ -46,7 +46,7 @@ continue-module forth-module
   : do-task-2 ( -- )
     no-timeout timeout !
     25 ms
-    my-chan recv-chan-cell
+    [: my-chan recv-chan ;] extract-allot-cell
     cr ." Received 1:" .
   ;
 
@@ -54,7 +54,7 @@ continue-module forth-module
   : do-task-3 ( -- )
     5000 timeout !
     50 ms
-    my-chan recv-chan-cell
+    [: my-chan recv-chan ;] extract-allot-cell
     cr ." Received 2:" .
   ;
 
@@ -62,7 +62,7 @@ continue-module forth-module
   : do-task-4 ( -- )
     no-timeout timeout !
     75 ms
-    my-chan recv-chan-cell
+    [: my-chan recv-chan ;] extract-allot-cell
     cr ." Received 3:" .
   ;
 

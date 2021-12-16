@@ -21,62 +21,63 @@
 continue-module forth-module
 
   import task-module
-  import chan-module
-  import task-pool-module
+  import rchan-module
 
-  \ Task count
-  3 constant my-task-count
+  \ The sender task
+  variable send-task
 
-  \ Channel size
-  16 constant my-chan-size
+  \ The middle task
+  variable middle-task
   
-  \ The task pool
-  create my-task-pool my-task-count task-pool-size allot
+  \ The replying task
+  variable reply-task
 
-  \ The channel
-  create my-chan my-chan-size chan-size allot
+  \ The first reply channel
+  rchan-size buffer: my-rchan-0
 
-  \ The producer
-  : producer ( -- )
+  \ The second reply channel
+  rchan-size buffer: my-rchan-1
+  
+  \ The sender loop
+  : send-loop ( -- )
     0 begin
-      dup $FF and dup cr ." SEND: " .
-      [: my-chan send-chan ;] provide-allot-byte 1+ 500 ms
+      dup cr ." Sending:" .
+      dup [: [: my-rchan-0 send-rchan ;] extract-allot-cell ;]
+      provide-allot-cell
+      cr ." Got reply:" . 1+
     again
   ;
 
-  \ The consumer
-  : consumer ( -- )
-    4000 ms
+  \ The middle loop
+  : middle-loop ( -- )
     begin
-      [: my-chan recv-chan ;] extract-allot-byte cr ." RECV: " . 500 ms
+      [: my-rchan-0 recv-rchan ;] extract-allot-cell
+      dup cr ." Passing on:" .
+      [: [: my-rchan-1 send-rchan ;] extract-allot-cell ;] provide-allot-cell
+      dup cr ." Passing back:" .
+      [: my-rchan-0 reply-rchan ;] provide-allot-cell
     again
   ;
 
-  \ The closer
-  : closer ( -- )
-    8000 ms my-chan close-chan
+  \ The replying loop
+  : reply-loop ( -- )
+    0 begin
+      [: my-rchan-1 recv-rchan ;] extract-allot-cell
+      cr ." Received:" .
+      dup [: my-rchan-1 reply-rchan ;] provide-allot-cell 1+
+    again
   ;
 
-  \ The producer task
-  variable producer-task
-
-  \ The consumer task
-  variable consumer-task
-
-  \ The closer task
-  variable closer-task
-  
   \ Initialize the test
   : init-test ( -- )
-    320 128 512 my-task-count my-task-pool init-task-pool
-    my-chan my-chan-size init-chan
-    0 ['] producer my-task-pool spawn-from-task-pool producer-task !
-    0 ['] consumer my-task-pool spawn-from-task-pool consumer-task !
-    0 ['] closer my-task-pool spawn-from-task-pool closer-task !
-    producer-task @ run
-    consumer-task @ run
-    closer-task @ run
-    pause
+    my-rchan-0 init-rchan
+    my-rchan-1 init-rchan
+    0 ['] send-loop 320 128 512 spawn send-task !
+    0 ['] middle-loop 320 128 512 spawn middle-task !
+    0 ['] reply-loop 320 128 512 spawn reply-task !
+    send-task @ run
+    middle-task @ run
+    reply-task @ run
   ;
-    
+  
 end-module

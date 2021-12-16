@@ -535,6 +535,56 @@ available, so as to enable any source file to call a preceding init</p>
 <p>( xt – ) ( xt: – )</p>
 <p>Switch to compile to RAM mode, and afterwards restore the compilation state, even if an exception occurs.</p>
 </section>
+<section id="with-aligned-allot">
+<h2><code class="docutils literal notranslate"><span class="pre">with-aligned-allot</span></code><a class="headerlink" href="#with-aligned-allot" title="Permalink to this headline">¶</a></h2>
+<p>( bytes xt – ) ( xt: addr – )</p>
+<p>Allot cell-aligned RAM temporarily and clean it up afterwards, even if an exception occurs.</p>
+</section>
+<section id="provide-allot-2cell">
+<h2><code class="docutils literal notranslate"><span class="pre">provide-allot-2cell</span></code><a class="headerlink" href="#provide-allot-2cell" title="Permalink to this headline">¶</a></h2>
+<p>( xd xt – ) ( xt: addr bytes – )</p>
+<p>Allot double cell-sized cell-aligned RAM temporarily and write a double cell into it before executing the provided <em>xt</em> with the buffer’s address and size in bytes.</p>
+</section>
+<section id="provide-allot-cell">
+<h2><code class="docutils literal notranslate"><span class="pre">provide-allot-cell</span></code><a class="headerlink" href="#provide-allot-cell" title="Permalink to this headline">¶</a></h2>
+<p>( x xt – ) ( xt: addr bytes – )</p>
+<p>Allot cell-sized cell-aligned RAM temporarily and write a cell into it before executing the provided <em>xt</em> with the buffer’s address and size in bytes.</p>
+</section>
+<section id="provide-allot-half">
+<h2><code class="docutils literal notranslate"><span class="pre">provide-allot-half</span></code><a class="headerlink" href="#provide-allot-half" title="Permalink to this headline">¶</a></h2>
+<p>( h xt – ) ( xt: addr bytes – )</p>
+<p>Allot halfword-sized cell-aligned RAM temporarily and write a halfword into it before executing the provided <em>xt</em> with the buffer’s address and size in bytes.</p>
+</section>
+<section id="provide-allot-byte">
+<h2><code class="docutils literal notranslate"><span class="pre">provide-allot-byte</span></code><a class="headerlink" href="#provide-allot-byte" title="Permalink to this headline">¶</a></h2>
+<p>( c xt – ) ( xt: addr bytes – )</p>
+<p>Allot byte-sized cell-aligned RAM temporarily and write a byte into it before executing the provided <em>xt</em> with the buffer’s address and size in bytes.</p>
+</section>
+<section id="x-insufficient-data">
+<h2><code class="docutils literal notranslate"><span class="pre">x-insufficient-data</span></code><a class="headerlink" href="#x-insufficient-data" title="Permalink to this headline">¶</a></h2>
+<p>( – )</p>
+<p>This is an exception raised by the <code class="docutils literal notranslate"><span class="pre">extract-allot-*</span></code> words if they do not receive a sufficient-sized buffer of data.</p>
+</section>
+<section id="extract-allot-2cell">
+<h2><code class="docutils literal notranslate"><span class="pre">extract-allot-2cell</span></code><a class="headerlink" href="#extract-allot-2cell" title="Permalink to this headline">¶</a></h2>
+<p>( xt – xd ) ( xt: addr bytes – addr’ bytes’ )</p>
+<p>Allot double cell-sized cell-aligned RAM temporarily and provide its address and size in bytes to the <em>xt</em> that is executed, then read a double cell out of the buffer that is returned, unless the buffer length returned is shorter than a double cell, where then <code class="docutils literal notranslate"><span class="pre">x-insufficient-data</span></code> is raised.</p>
+</section>
+<section id="extract-allot-cell">
+<h2><code class="docutils literal notranslate"><span class="pre">extract-allot-cell</span></code><a class="headerlink" href="#extract-allot-cell" title="Permalink to this headline">¶</a></h2>
+<p>( xt – x ) ( xt: addr bytes – addr’ bytes’ )</p>
+<p>Allot cell-sized cell-aligned RAM temporarily and provide its address and size in bytes to the <em>xt</em> that is executed, then read a cell out of the buffer that is returned, unless the buffer length returned is shorter than a cell, where then <code class="docutils literal notranslate"><span class="pre">x-insufficient-data</span></code> is raised.</p>
+</section>
+<section id="extract-allot-half">
+<h2><code class="docutils literal notranslate"><span class="pre">extract-allot-half</span></code><a class="headerlink" href="#extract-allot-half" title="Permalink to this headline">¶</a></h2>
+<p>( xt – h ) ( xt: addr bytes – addr’ bytes’ )</p>
+<p>Allot halfword-sized cell-aligned RAM temporarily and provide its address and size in bytes to the <em>xt</em> that is executed, then read a halfword out of the buffer that is returned, unless the buffer length returned is shorter than a halfword, where then <code class="docutils literal notranslate"><span class="pre">x-insufficient-data</span></code> is raised.</p>
+</section>
+<section id="extract-allot-byte">
+<h2><code class="docutils literal notranslate"><span class="pre">extract-allot-byte</span></code><a class="headerlink" href="#extract-allot-byte" title="Permalink to this headline">¶</a></h2>
+<p>( xt – c ) ( xt: addr bytes – addr’ bytes’ )</p>
+<p>Allot byte-sized cell-aligned RAM temporarily and provide its address and size in bytes to the <em>xt</em> that is executed, then read a byte out of the buffer that is returned, unless the buffer length returned is shorter than a byte, where then <code class="docutils literal notranslate"><span class="pre">x-insufficient-data</span></code> is raised.</p>
+</section>
 <section id="compress-flash">
 <h2><code class="docutils literal notranslate"><span class="pre">compress-flash</span></code><a class="headerlink" href="#compress-flash" title="Permalink to this headline">¶</a></h2>
 <p>( – )</p>
@@ -1921,6 +1971,16 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l2"><a class="reference internal" href="#critical"><code class="docutils literal notranslate"><span class="pre">critical</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#with-allot"><code class="docutils literal notranslate"><span class="pre">with-allot</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#with-ram"><code class="docutils literal notranslate"><span class="pre">with-ram</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#with-aligned-allot"><code class="docutils literal notranslate"><span class="pre">with-aligned-allot</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#provide-allot-2cell"><code class="docutils literal notranslate"><span class="pre">provide-allot-2cell</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#provide-allot-cell"><code class="docutils literal notranslate"><span class="pre">provide-allot-cell</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#provide-allot-half"><code class="docutils literal notranslate"><span class="pre">provide-allot-half</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#provide-allot-byte"><code class="docutils literal notranslate"><span class="pre">provide-allot-byte</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#x-insufficient-data"><code class="docutils literal notranslate"><span class="pre">x-insufficient-data</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#extract-allot-2cell"><code class="docutils literal notranslate"><span class="pre">extract-allot-2cell</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#extract-allot-cell"><code class="docutils literal notranslate"><span class="pre">extract-allot-cell</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#extract-allot-half"><code class="docutils literal notranslate"><span class="pre">extract-allot-half</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#extract-allot-byte"><code class="docutils literal notranslate"><span class="pre">extract-allot-byte</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#compress-flash"><code class="docutils literal notranslate"><span class="pre">compress-flash</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#end-compress-flash"><code class="docutils literal notranslate"><span class="pre">end-compress-flash</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#commit-flash"><code class="docutils literal notranslate"><span class="pre">commit-flash</span></code></a></li>

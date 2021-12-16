@@ -39,7 +39,7 @@ continue-module forth-module
   \ The inner loop of the consumer
   : consumer ( -- )
     begin
-      my-fchan recv-fchan-cell
+      [: my-fchan recv-fchan ;] extract-allot-cell
       [: cr ." Received:" . ;] my-lock with-lock
     again
   ;
@@ -48,7 +48,7 @@ continue-module forth-module
   : producer ( -- )
     begin
       [: cr ." Sending: " dup . ;] my-lock with-lock
-      dup my-fchan send-fchan-cell
+      dup [: my-fchan send-fchan ;] provide-allot-cell
 \      [: cr ." Done sending: " dup . ;] my-lock with-lock
     again
   ;
