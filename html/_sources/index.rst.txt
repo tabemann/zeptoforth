@@ -25,6 +25,7 @@ Zeptoforth Documentation
    words/lock
    words/channel
    words/fchannel
+   words/rchannel
    words/semaphore
    words/stream
    words/tqueue
