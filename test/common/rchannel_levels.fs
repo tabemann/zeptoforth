@@ -26,36 +26,57 @@ continue-module forth-module
   \ The sender task
   variable send-task
 
+  \ The middle task
+  variable middle-task
+  
   \ The replying task
   variable reply-task
 
-  \ The reply channel
-  rchan-size buffer: my-rchan
+  \ The first reply channel
+  rchan-size buffer: my-rchan-0
+
+  \ The second reply channel
+  rchan-size buffer: my-rchan-1
   
   \ The sender loop
   : send-loop ( -- )
     0 begin
       dup cr ." Sending:" .
-      dup [: [: my-rchan send-rchan ;] extract-allot-cell ;] provide-allot-cell
+      dup [: [: my-rchan-0 send-rchan ;] extract-allot-cell ;]
+      provide-allot-cell
       cr ." Got reply:" . 1+
+    again
+  ;
+
+  \ The middle loop
+  : middle-loop ( -- )
+    begin
+      [: my-rchan-0 recv-rchan ;] extract-allot-cell
+      dup cr ." Passing on:" .
+      [: [: my-rchan-1 send-rchan ;] extract-allot-cell ;] provide-allot-cell
+      dup cr ." Passing back:" .
+      [: my-rchan-0 reply-rchan ;] provide-allot-cell
     again
   ;
 
   \ The replying loop
   : reply-loop ( -- )
     0 begin
-      [: my-rchan recv-rchan ;] extract-allot-cell
+      [: my-rchan-1 recv-rchan ;] extract-allot-cell
       cr ." Received:" .
-      dup [: my-rchan reply-rchan ;] provide-allot-cell 1+
+      dup [: my-rchan-1 reply-rchan ;] provide-allot-cell 1+
     again
   ;
 
   \ Initialize the test
   : init-test ( -- )
-    my-rchan init-rchan
+    my-rchan-0 init-rchan
+    my-rchan-1 init-rchan
     0 ['] send-loop 320 128 512 spawn send-task !
+    0 ['] middle-loop 320 128 512 spawn middle-task !
     0 ['] reply-loop 320 128 512 spawn reply-task !
     send-task @ run
+    middle-task @ run
     reply-task @ run
   ;
   
