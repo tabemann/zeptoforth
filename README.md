@@ -1,6 +1,6 @@
 # zeptoforth
 
-zeptoforth is a Cortex-M Forth, currently targeted at the Raspberry Pi Pico (but it should also work with other RP2040 boards using compatible Quad SPI flash) and the STM32L476, STM32F407, and STM32F746 DISCOVERY boards. Ports to more platforms are on hold due to the current chip shortage (aside from a possible port to an STM32H7 board I have lying around somewhere).
+zeptoforth is a Cortex-M Forth, currently targeted at the Raspberry Pi Pico (but it should also work with other RP2040 boards using compatible Winbond Quad SPI flash) and the STM32L476, STM32F407, and STM32F746 DISCOVERY boards. Ports to more platforms are on hold due to the current chip shortage (aside from a possible port to an STM32H7 board I have lying around somewhere).
 
 Its kernel has versions written in Thumb-1 assembly, for the Raspberry Pi Pico, and Thumb-2 assembly, for the STM32L476, STM32F407, and STM32F746 DISCOVERY boards. and there is a body of other core code that is loaded after it is loaded which is written in Forth.
 
