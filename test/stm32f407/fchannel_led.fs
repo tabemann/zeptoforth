@@ -20,10 +20,10 @@
 
 continue-module forth-module
 
-  import internal-module
-  import task-module
-  import fchan-module
-  import led-module
+  internal-module import
+  task-module import
+  fchan-module import
+  led-module import
 
   \ Allot the channels
   fchan-size buffer: orange-fchan

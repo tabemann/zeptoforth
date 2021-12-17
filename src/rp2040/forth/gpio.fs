@@ -23,7 +23,7 @@ compile-to-flash
 
 begin-module gpio-module
   
-  begin-import-module gpio-internal-module
+  begin-module gpio-internal-module
   
     \ IO bank 0 base
     $40014000 constant IO_BANK0_BASE
@@ -58,7 +58,7 @@ begin-module gpio-module
     \ Pads bank 0 voltage select register
     PADS_BANK0_BASE $00 + constant PADS_BANK0_VOLTAGE_SELECT
 
-  end-module
+  end-module> import
 
   \ Normal control
   0 constant CTRL_NORMAL

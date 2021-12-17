@@ -20,8 +20,8 @@
 
 continue-module forth-module
 
-  import systick-module
-  import task-module
+  systick-module import
+  task-module import
 
   \ The two tasks
   variable target-task

@@ -20,10 +20,10 @@
 
 continue-module forth-module
 
-  import internal-module
-  import task-module
-  import chan-module
-  import led-module
+  internal-module import
+  task-module import
+  chan-module import
+  led-module import
 
   \ My channel size
   2 constant my-chan-size

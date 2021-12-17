@@ -20,9 +20,9 @@
 
 continue-module forth-module
 
-  import task-module
-  import fchan-module
-  import lock-module
+  task-module import
+  fchan-module import
+  lock-module import
 
   \ Our fchannel
   fchan-size buffer: my-fchan

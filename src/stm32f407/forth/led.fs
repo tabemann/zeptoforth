@@ -22,9 +22,9 @@
 \ Compile to flash
 compile-to-flash
 
-begin-import-module led-module
+begin-module led-module
 
-  import gpio-module
+  gpio-module import
 
   \ Initialize the LEDs
   : led-init  ( -- )
@@ -75,15 +75,13 @@ begin-import-module led-module
     false 15 GPIOD BSRR!
   ;
 
-end-module
+end-module> import
 
 \ Init
 : init ( -- )
   init
   led-init
 ;
-
-unimport led-module
 
 \ Reboot
 reboot

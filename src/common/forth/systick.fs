@@ -21,12 +21,12 @@
 \ Compile to flash
 compile-to-flash
 
-begin-import-module systick-module
+begin-module systick-module
 
-  import internal-module
-  import interrupt-module
+  internal-module import
+  interrupt-module import
   
-  begin-import-module systick-internal-module
+  begin-module systick-internal-module
 
     \ Interrupt Control and Status Register
     $E000ED04 constant ICSR
@@ -72,7 +72,7 @@ begin-import-module systick-module
 
     compress-flash
 
-  end-module
+  end-module> import
   
   \ SysTick vector index
   15 constant systick-vector
@@ -121,9 +121,9 @@ begin-import-module systick-module
   \ Make systick-counter read-only
   : systick-counter ( -- u ) systick-counter @ ;
 
-end-module
+end-module> import
 
-import internal-module
+internal-module import
 
 commit-flash
 
@@ -143,9 +143,6 @@ commit-flash
   repeat
   drop drop
 ;
-
-unimport internal-module
-unimport systick-module
 
 end-compress-flash
 

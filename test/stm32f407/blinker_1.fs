@@ -20,9 +20,9 @@
 
 continue-module forth-module
 
-  import task-module
-  import schedule-module
-  import led-module
+  task-module import
+  schedule-module import
+  led-module import
 
   \ The schedule
   schedule-size buffer: my-schedule

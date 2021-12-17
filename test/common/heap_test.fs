@@ -20,7 +20,7 @@
 
 continue-module forth-module
 
-  import heap-module
+  heap-module import
 
   \ My block count
   64 constant my-block-count

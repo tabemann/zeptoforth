@@ -25,10 +25,10 @@ compress-flash
 
 begin-module sema-module
 
-  import task-module
-  import tqueue-module
+  task-module import
+  tqueue-module import
 
-  begin-import-module sema-internal-module
+  begin-module sema-internal-module
 
     \ Semaphore header structure
     begin-structure sema-size
@@ -38,7 +38,7 @@ begin-module sema-module
 
     end-structure
 
-  end-module
+  end-module> import
 
   \ Value indicating no counter limit
   no-tqueue-limit constant no-sema-limit

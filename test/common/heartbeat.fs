@@ -20,8 +20,8 @@
 
 begin-module-once heartbeat-module
   
-  import task-module
-  import led-module
+  task-module import
+  led-module import
 
   \ Display a heartbeat
   : heartbeat ( -- )

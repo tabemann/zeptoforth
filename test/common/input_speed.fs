@@ -20,8 +20,8 @@
 
 continue-module forth-module
 
-  import internal-module
-  import systick-module
+  internal-module import
+  systick-module import
 
   \ Start line time
   variable start-line-time

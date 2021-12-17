@@ -20,7 +20,7 @@
 
 continue-module forth-module
 
-  import rng-module
+  rng-module import
 
   \ Number of bits in a random number
   32 constant bit-count

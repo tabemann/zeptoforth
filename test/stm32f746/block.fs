@@ -24,7 +24,7 @@
 
 continue-module forth-module
 
-  import block-module
+  block-module import
   
   \ Print block selected
   : block... ( addr id -- ) dup . block! ." ... " ;
