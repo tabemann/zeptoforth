@@ -20,9 +20,9 @@
 
 continue-module forth-module
 
-  import task-module
-  import task-pool-module
-  import fchan-module
+  task-module import
+  task-pool-module import
+  fchan-module import
 
   \ Allot the channels
   fchan-size buffer: signal-0-fchan

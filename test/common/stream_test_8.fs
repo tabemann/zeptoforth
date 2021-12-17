@@ -20,8 +20,8 @@
 
 continue-module forth-module
 
-  import task-module
-  import stream-module
+  task-module import
+  stream-module import
 
   \ Our byte count
   256 constant my-count

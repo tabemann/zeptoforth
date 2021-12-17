@@ -20,8 +20,8 @@
 
 continue-module forth-module
 
-  import task-module
-  import chan-module
+  task-module import
+  chan-module import
 
   \ My channel size
   16 constant my-chan-size

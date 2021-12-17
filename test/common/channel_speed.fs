@@ -20,9 +20,9 @@
 
 continue-module forth-module
 
-  import systick-module
-  import task-module
-  import chan-module
+  systick-module import
+  task-module import
+  chan-module import
 
   \ Element size
   cell constant element-size

@@ -22,12 +22,12 @@
 \ Compile to flash
 compile-to-flash
 
-begin-import-module int-io-module
+begin-module int-io-module
 
-  import internal-module
-  import interrupt-module
+  internal-module import
+  interrupt-module import
 
-  begin-import-module int-io-internal-module
+  begin-module int-io-internal-module
 
     \ RAM variable for rx buffer read-index
     cvariable rx-read-index
@@ -215,7 +215,7 @@ begin-import-module int-io-module
       [: tx-empty? not ;] wait
     ;
 
-  end-module
+  end-module> import
 
   \ Handle IO for multitasking
   : task-io ( -- )
@@ -269,15 +269,13 @@ begin-import-module int-io-module
     enable-int-io
   ;
   
-end-module
+end-module> import
 
 \ Init
 : init ( -- )
   init
   init-int-io
 ;
-
-unimport int-io-module
 
 \ Reboot
 reboot

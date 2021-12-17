@@ -25,9 +25,9 @@ compress-flash
 
 begin-module tqueue-module
 
-  import task-module
+  task-module import
 
-  begin-import-module tqueue-internal-module
+  begin-module tqueue-internal-module
 
     \ Task queue header structure
     begin-structure tqueue-size
@@ -106,7 +106,7 @@ begin-module tqueue-module
       then
     ;
 
-  end-module
+  end-module> import
 
   \ Value indicating no task queue limti
   -1 constant no-tqueue-limit

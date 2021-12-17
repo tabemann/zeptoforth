@@ -25,11 +25,11 @@ compress-flash
 
 begin-module rchan-module
 
-  import task-module
-  import tqueue-module
-  import lock-module
+  task-module import
+  tqueue-module import
+  lock-module import
 
-  begin-import-module rchan-internal-module
+  begin-module rchan-internal-module
 
     \ Reply channel header structure
     begin-structure rchan-size
@@ -64,7 +64,7 @@ begin-module rchan-module
       tqueue-size +field rchan-resp-tqueue
     end-structure
 
-  end-module
+  end-module> import
 
   \ Commit to flash
   commit-flash

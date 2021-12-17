@@ -23,7 +23,7 @@ compile-to-flash
 
 begin-module gpio-module
   
-  begin-import-module gpio-internal-module
+  begin-module gpio-internal-module
     
     \ GPIO base
     $48000000 constant GPIO_Base
@@ -47,7 +47,7 @@ begin-module gpio-module
     \ RCC AHB1 peripheral clock enable in low-power mode register
     RCC_Base $6C + constant RCC_AHB2SMENR
 
-  end-module
+  end-module> import
 
   \ The GPIOs
   0 GPIO_Index GPIOA

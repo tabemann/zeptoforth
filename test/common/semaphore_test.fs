@@ -20,10 +20,10 @@
 
 continue-module forth-module
 
-  import task-module
-  import task-pool-module
-  import lock-module
-  import sema-module
+  task-module import
+  task-pool-module import
+  lock-module import
+  sema-module import
 
   \ Our task pool count
   9 constant my-task-count

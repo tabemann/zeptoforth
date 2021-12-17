@@ -20,9 +20,9 @@
 
 continue-module forth-module
 
-  import task-module
-  import led-module
-  import int-io-module
+  task-module import
+  led-module import
+  int-io-module import
 
   \ LED test loop task
   : led-loop ( ms -- ) begin led-toggle dup ms again ;

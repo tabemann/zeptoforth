@@ -20,11 +20,11 @@
 
 begin-module-once temp-module
 
-  import interrupt-module
-  import gpio-module
-  import exti-module
-  import task-module
-  import systick-module
+  interrupt-module import
+  gpio-module import
+  exti-module import
+  task-module import
+  systick-module import
 
   \ A sensor structure
   begin-structure sensor-size

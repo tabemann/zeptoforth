@@ -20,8 +20,8 @@
 
 continue-module forth-module
 
-  import task-module
-  import rchan-module
+  task-module import
+  rchan-module import
 
   \ The sender task
   variable send-task

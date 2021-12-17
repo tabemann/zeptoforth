@@ -20,9 +20,9 @@
 
 continue-module forth-module
 
-  import task-module
-  import chan-module
-  import lock-module
+  task-module import
+  chan-module import
+  lock-module import
 
   \ Our channel count
   16 constant my-chan-count

@@ -20,9 +20,9 @@
 
 continue-module forth-module
 
-  import interrupt-module
-  import gpio-module
-  import pio-module
+  interrupt-module import
+  gpio-module import
+  pio-module import
 
   \ The initial setup
   create pio-init

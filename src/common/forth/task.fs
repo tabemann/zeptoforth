@@ -21,15 +21,15 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-import-module task-module
+begin-module task-module
 
-  import internal-module
-  import interrupt-module
-  import multicore-module
-  import systick-module
-  import int-io-module
+  internal-module import
+  interrupt-module import
+  multicore-module import
+  systick-module import
+  int-io-module import
 
-  begin-import-module task-internal-module
+  begin-module task-internal-module
 
     \ Task readied state
     0 constant readied
@@ -203,7 +203,7 @@ begin-import-module task-module
     \ Auxiliary main task return stack size in bytes
     512 constant aux-main-task-rstack-size
 
-  end-module
+  end-module> import
 
   \ The currently waited-for lock
   user current-lock
@@ -1440,7 +1440,7 @@ begin-import-module task-module
     dup task-rstack-current @ swap task-rstack-end - 0 <# #s #> type
   ;
 
-end-module
+end-module> import
 
 \ Display space free for a given task
 : task-unused ( task -- ) task-unused ;
@@ -1459,7 +1459,7 @@ end-module
 
 continue-module task-module
   
-  import task-internal-module
+  task-internal-module import
   
   \ Make pause-count read-only
   : pause-count ( -- u ) pause-count @ ;
@@ -1488,8 +1488,6 @@ continue-module task-module
   ;
 
 end-module
-
-unimport task-module
 
 \ Reboot to initialize multitasking
 reboot

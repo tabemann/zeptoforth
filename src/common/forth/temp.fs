@@ -28,7 +28,7 @@ begin-module temp-module
   \ Data size is larger than temporary buffer size exception
   : x-data-too-big ( -- ) space ." data too big" cr ;
 
-  begin-import-module temp-internal-module
+  begin-module temp-internal-module
 
     \ Temporary buffer structure
     begin-structure temp-size
@@ -41,7 +41,7 @@ begin-module temp-module
       
     end-structure
 
-  end-module
+  end-module> import
 
   commit-flash
   
