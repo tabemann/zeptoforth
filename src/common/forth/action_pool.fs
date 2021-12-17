@@ -26,9 +26,9 @@ compress-flash
 
 begin-module action-pool-module
 
-  import schedule-module
+  schedule-module import
 
-  begin-import-module action-pool-internal-module
+  begin-module action-pool-internal-module
 
     \ Action pool structure
     begin-structure action-pool-size
@@ -46,7 +46,7 @@ begin-module action-pool-module
       action-pool-size + swap action-size * +
     ;
 
-  end-module
+  end-module> import
   
   \ No actions are available
   : x-no-action-available ( -- ) space ." no action is available" cr ;

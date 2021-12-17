@@ -20,8 +20,8 @@
 
 continue-module forth-module
 
-  import task-module
-  import fchan-module
+  task-module import
+  fchan-module import
 
   variable test-0-task
   variable test-1-task

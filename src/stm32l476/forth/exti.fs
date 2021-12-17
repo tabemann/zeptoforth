@@ -22,7 +22,7 @@ compile-to-flash
 
 begin-module exti-module
 
-  begin-import-module exti-internal-module
+  begin-module exti-internal-module
 
     \ RCC registers
     $40021000 constant RCC_Base
@@ -81,7 +81,7 @@ begin-module exti-module
     \ EXTI pending register 2
     EXTI_Base $14 + constant EXTI_PR2
 
-  end-module
+  end-module> import
   
   \ EXTI interrupts
   6 constant EXTI_0

@@ -25,9 +25,9 @@ compress-flash
 
 begin-module lock-module
 
-  import task-module
+  task-module import
 
-  begin-import-module lock-internal-module
+  begin-module lock-internal-module
 
     \ Lock header structure
     begin-structure lock-size
@@ -212,7 +212,7 @@ begin-module lock-module
       then
     ;
 
-  end-module
+  end-module> import
 
   \ Initialize a lock
   : init-lock ( addr -- )

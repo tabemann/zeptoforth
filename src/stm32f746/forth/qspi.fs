@@ -21,15 +21,15 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-import-module qspi-module
+begin-module qspi-module
 
-  import internal-module
-  import gpio-module
+  internal-module import
+  gpio-module import
 
   \ Quad SPI address validation exception
   : x-invalid-qspi-addr ( -- ) space ." invalid qspi address" cr ;
 
-  begin-import-module qspi-internal-module
+  begin-module qspi-internal-module
 
     \ Is mapping QSPI enabled
     variable map-qspi-enabled?
@@ -737,7 +737,7 @@ begin-import-module qspi-module
       QUADSPI_Map_Base QUADSPI_SIZE + u< averts x-invalid-qspi-addr
     ;
     
-  end-module
+  end-module> import
 
   : init-qspi ( -- )
     false qspi-inited? !
@@ -859,14 +859,12 @@ begin-import-module qspi-module
   \ Get Quad SPI flash size
   : qspi-size ( -- bytes ) QUADSPI_SIZE ;
 
-end-module
+end-module> import
 
 : init ( -- )
   init
   init-qspi
 ;
-
-unimport qspi-module
 
 \ Reboot
 reboot

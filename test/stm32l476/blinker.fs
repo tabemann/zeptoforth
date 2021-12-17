@@ -20,9 +20,9 @@
 
 continue-module forth-module
 
-  import systick-module
-  import task-module
-  import led-module
+  systick-module import
+  task-module import
+  led-module import
 
   \ The blinker delay time
   variable blinker-delay

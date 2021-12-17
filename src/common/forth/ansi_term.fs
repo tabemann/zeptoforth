@@ -23,7 +23,7 @@ compile-to-flash
 
 begin-module ansi-term-module
 
-  begin-import-module ansi-term-internal-module
+  begin-module ansi-term-internal-module
 
     \ Saved entered byte
     user saved-key
@@ -34,7 +34,7 @@ begin-module ansi-term-module
     \ Preserve cursor count
     user preserve-cursor-count
     
-  end-module
+  end-module> import
   
   compress-flash
 

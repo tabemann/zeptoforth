@@ -20,9 +20,9 @@
 
 continue-module forth-module
 
-  import task-module
-  import fchan-module
-  import led-module
+  task-module import
+  fchan-module import
+  led-module import
 
   \ Our fchannels
   fchan-size buffer: request-fchan

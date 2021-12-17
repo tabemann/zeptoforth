@@ -20,7 +20,7 @@
 
 continue-module forth-module
 
-  import task-module
+  task-module import
   
   \ The loop
   : test ( -- ) begin 1000 ms again ;

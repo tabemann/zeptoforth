@@ -194,52 +194,21 @@ commit-flash
   set-current
 ;
 
-\ Begin a module definition and import it
-: begin-import-module ( "name" -- )
-  token 2dup visible-flag find ?dup if
-    ['] x-module-already-defined ?raise
-  else
-    wordlist dup >r -rot constant-with-name r>
-  then
-  dup add-module
-  dup push-module-stack
-  dup add-module
-  set-current
-;
-
-\ Continue an existing module definition and import it
-: continue-import-module ( "name" -- )
-  token 2dup visible-flag find ?dup if
-    nip nip >body execute
-  else
-    ['] x-module-not-found ?raise
-  then
-  dup add-module
-  dup push-module-stack
-  dup add-module
-  set-current
-;
-
 \ End a module definition
 : end-module ( -- ) pop-module-stack ;
 
-\ Import a module
-: import ( "name" -- )
-  token visible-flag find ?dup if
-    >body execute add-module
-  else
-    ['] x-module-not-found ?raise
-  then
+\ End a module definition and place the module on the stack
+: end-module> ( -- module )
+  module-stack-index @ 1 > averts x-module-stack-underflow
+  module-stack@ module-module @
+  pop-module-stack
 ;
 
-\ Unimport a module
-: unimport ( "name" -- )
-  token visible-flag find ?dup if
-    >body execute remove-module
-  else
-    ['] x-module-not-found ?raise
-  then
-;
+\ Import a module
+: import ( module -- ) add-module ;
+
+\ Una module import
+: unimport ( module -- ) remove-module ;
 
 \ Export a word from the current module
 : export ( "name" -- )

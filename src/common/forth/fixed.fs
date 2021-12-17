@@ -23,7 +23,7 @@ compile-to-flash
 
 compress-flash
 
-import internal-module
+internal-module import
 
 \ Get the value of pi
 0 314159265 0 100000000 f/ 2constant pi
@@ -439,8 +439,6 @@ commit-flash
   init
   ['] do-handle-number handle-number-hook !
 ;
-
-unimport internal-module
 
 end-compress-flash
 

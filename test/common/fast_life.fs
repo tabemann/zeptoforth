@@ -20,7 +20,7 @@
 
 begin-module-once life-module
 
-  import ansi-term-module
+  ansi-term-module import
   
   \ Life width
   variable life-width

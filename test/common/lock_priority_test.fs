@@ -20,8 +20,8 @@
 
 continue-module forth-module
 
-  import task-module
-  import lock-module
+  task-module import
+  lock-module import
 
   \ Our lock
   lock-size buffer: my-lock

@@ -1,10 +1,10 @@
 compile-to-flash
 
-begin-import-module swd-module
+begin-module swd-module
 
-  import internal-module
+  internal-module import
 
-  begin-import-module swd-internal-module
+  begin-module swd-internal-module
 
     here 256 2* cell+ buffer: swd
     swd 0 + constant swd-rx-w
@@ -59,7 +59,7 @@ begin-import-module swd-module
 
     : >r11 ( x -- ) [ $46b3 h, ] drop ; \ $46b3 = mov r11, r6
 
-  end-module
+  end-module> import
 
   commit-flash
 
@@ -79,7 +79,7 @@ begin-import-module swd-module
   : enable-sleep ( -- ) true use-sleep ! ;
   : disable-sleep ( -- ) false use-sleep ! ;
 
-end-module
+end-module> import
 
 commit-flash
 
@@ -89,7 +89,7 @@ commit-flash
   swd-console
 ;
 
-unimport swd-module
+swd-module unimport
 
 end-compress-flash
 

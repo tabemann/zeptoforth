@@ -21,11 +21,11 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-import-module edit-internal-module
+begin-module edit-internal-module
 
-  import systick-module
-  import block-module
-  import ansi-term-module
+  systick-module import
+  block-module import
+  ansi-term-module import
 
   \ Edit buffer count (must be <= 32)
   9 constant buffer-count
@@ -767,12 +767,10 @@ begin-import-module edit-internal-module
     leave-edit
   ;
 
-end-module
+end-module> import
 
 \ Edit a block
 : edit ( id -- ) edit ;
-
-unimport edit-internal-module
 
 \ Reboot
 reboot

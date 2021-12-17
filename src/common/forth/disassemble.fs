@@ -21,9 +21,9 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-import-module disassemble-internal-module
+begin-module disassemble-internal-module
 
-  import internal-module
+  internal-module import
 
   \ Disassemble for gas
   variable for-gas
@@ -2085,7 +2085,7 @@ begin-import-module disassemble-internal-module
   \ Commit to flash
   commit-flash
   
-end-module
+end-module> import
   
 \ Disassemble instructions
 : disassemble ( start end -- )
@@ -2127,8 +2127,6 @@ end-module
 
 \ Finish compressing the code
 end-compress-flash
-
-unimport disassemble-internal-module
 
 \ Reboot
 reboot
