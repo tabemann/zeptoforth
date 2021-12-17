@@ -21,9 +21,9 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-import-module rng-module
+begin-module rng-module
 
-  begin-import-module rng-internal-module
+  begin-module rng-internal-module
 
     \ RCC base
     $40023800 constant RCC_Base
@@ -114,7 +114,7 @@ begin-import-module rng-module
       RNG_DR @
     ;
 
-  end-module
+  end-module> import
 
   \ Initialize the random number generator
   : init-rng ( -- )
@@ -135,7 +135,7 @@ begin-import-module rng-module
     until
   ;
 
-end-module
+end-module> import
 
 \ Initialize
 : init ( -- )

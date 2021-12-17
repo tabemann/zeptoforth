@@ -23,8 +23,8 @@ compile-to-flash
 
 begin-module multicore-module
 
-  import internal-module
-  import interrupt-module
+  internal-module import
+  interrupt-module import
 
   \ Must be carried out from core 0 only
   : x-core-0-only ( -- ) space ." core 0 only" cr ;
@@ -38,7 +38,7 @@ begin-module multicore-module
   \ Core not addressable exception
   : x-core-not-addressable ( -- ) space ." core not addressable" cr ;
 
-  begin-import-module multicore-internal-module
+  begin-module multicore-internal-module
       
     \ SIO base
     $D0000000 constant SIO_BASE
@@ -69,7 +69,7 @@ begin-module multicore-module
       cpu-index <> averts x-core-not-addressable
     ;
   
-  end-module
+  end-module> import
 
   \ Signal an event to the other core
   : sev ( -- ) [inlined] [ undefer-lit %1011111101000000 h, ] ;
@@ -184,9 +184,7 @@ begin-module multicore-module
     1 fifo-pop-blocking drop
   ;
 
-end-module
-
-import multicore-module
+end-module> import
 
 \ Set up reboot to reset the second core
 : reboot ( -- )
@@ -194,8 +192,6 @@ import multicore-module
   1 reset-aux-core
   reboot
 ;
-
-unimport multicore-module
 
 \ Reboot
 reboot

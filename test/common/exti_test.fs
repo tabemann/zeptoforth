@@ -20,10 +20,10 @@
 
 continue-module forth-module
 
-  import interrupt-module
-  import gpio-module
-  import exti-module
-  import task-module
+  interrupt-module import
+  gpio-module import
+  exti-module import
+  task-module import
 
   \ Total count
   variable total-count

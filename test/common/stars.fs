@@ -23,7 +23,7 @@ compile-to-ram
 
 continue-module forth-module
 
-  import task-module
+  task-module import
   
   \ The stars task
   variable stars-task

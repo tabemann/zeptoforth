@@ -21,10 +21,10 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-import-module line-internal-module
+begin-module line-internal-module
 
-  import ansi-term-module
-  import heap-module
+  ansi-term-module import
+  heap-module import
 
   \ Line structure for current task
   user line
@@ -679,9 +679,9 @@ begin-import-module line-internal-module
   \ Initialize for refill
   : init-line-refill ( -- ) >in input# input input-size init-line ;
 
-end-module
+end-module> import
 
-import internal-module
+internal-module import
 
 \ Initialize
 : init ( -- )
@@ -699,9 +699,6 @@ commit-flash
 
 \ Get whether the line editor is enabled
 : line-enabled? ( -- ) refill-hook @ ['] line-edit = ;
-
-unimport internal-module
-unimport line-internal-module
 
 end-compress-flash
 

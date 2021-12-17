@@ -25,9 +25,9 @@ compress-flash
 
 begin-module pool-module
 
-  import task-module
+  task-module import
 
-  begin-import-module pool-internal-module
+  begin-module pool-internal-module
 
     \ Pool header structure
     begin-structure pool-size
@@ -57,7 +57,7 @@ begin-module pool-module
 
     end-structure
 
-  end-module
+  end-module> import
 
   commit-flash
 

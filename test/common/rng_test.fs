@@ -20,10 +20,10 @@
 
 continue-module forth-module
 
-  import internal-module
-  import systick-module
-  import task-module
-  import rng-module
+  internal-module import
+  systick-module import
+  task-module import
+  rng-module import
 
   \ Our task
   variable rng-test-task

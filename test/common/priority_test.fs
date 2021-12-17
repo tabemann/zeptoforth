@@ -20,7 +20,7 @@
 
 continue-module forth-module
 
-  import task-module
+  task-module import
 
   \ The highest-priority task's loop
   : highest ( -- ) begin 25 0 ?do 100000 0 ?do loop ." *" loop 1000 ms again ;

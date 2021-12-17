@@ -23,10 +23,10 @@ compile-to-flash
 
 begin-module schedule-module
 
-  import systick-module
-  import task-module
+  systick-module import
+  task-module import
 
-  begin-import-module schedule-internal-module
+  begin-module schedule-internal-module
 
     \ The current action
     user current-action
@@ -73,7 +73,7 @@ begin-module schedule-module
       then
     ;
 
-  end-module
+  end-module> import
 
   \ Initalize a scheduler
   : init-schedule ( schedule -- )
