@@ -25,12 +25,12 @@ compress-flash
 
 begin-module task-pool-module
 
-  import task-module
+  task-module import
 
   \ No tasks are available
   : x-no-task-available ( -- ) space ." no task is available" cr ;
   
-  begin-import-module task-pool-internal-module
+  begin-module task-pool-internal-module
 
     \ Task pool structure
     begin-structure task-pool-size
@@ -54,7 +54,7 @@ begin-module task-pool-module
       task-pool-size + swap cells + @
     ;
 
-  end-module
+  end-module> import
 
   commit-flash
   

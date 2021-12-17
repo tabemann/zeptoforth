@@ -20,8 +20,8 @@
 
 continue-module forth-module
 
-  import task-module
-  import fchan-module
+  task-module import
+  fchan-module import
 
   \ Allot the outgoing channel
   fchan-size buffer: my-out-fchan

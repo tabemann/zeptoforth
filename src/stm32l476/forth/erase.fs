@@ -21,7 +21,7 @@
 \ Compile this to flash
 compile-to-flash
 
-continue-import-module internal-module
+continue-module internal-module
 
   \ Begin compressing compiled code in flash
   compress-flash
@@ -38,7 +38,7 @@ continue-import-module internal-module
     erase-after rdrop
   ;
 
-end-module
+end-module> import
 
 \ Commit flash
 commit-flash
@@ -90,8 +90,6 @@ commit-flash
 
 \ Ending compiling code in flash
 end-compress-flash
-
-unimport internal-module
 
 \ Reboot
 reboot

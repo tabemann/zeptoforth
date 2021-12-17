@@ -20,9 +20,9 @@
 
 continue-module forth-module
 
-  import systick-module
-  import task-module
-  import rchan-module
+  systick-module import
+  task-module import
+  rchan-module import
 
   \ Allot the channel
   rchan-size buffer: my-rchan

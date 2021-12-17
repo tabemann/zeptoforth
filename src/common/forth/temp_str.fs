@@ -25,9 +25,9 @@ compress-flash
 
 continue-module forth-module
 
-  import temp-module
-  import internal-module
-  import esc-string-module
+  temp-module import
+  internal-module import
+  esc-string-module import
 
   \ Our temporary buffer size
   256 constant temp-str-size

@@ -20,7 +20,7 @@
 
 continue-module forth-module
 
-  import systick-module
+  systick-module import
   
   \ Calculate a single fibonacci sequence with the specified number of
   \ iterations, returning the values

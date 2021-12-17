@@ -21,11 +21,11 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-import-module block-module
+begin-module block-module
 
-  import internal-module
-  import task-module
-  import qspi-module
+  internal-module import
+  task-module import
+  qspi-module import
 
   \ Block size
   1024 constant block-size
@@ -33,7 +33,7 @@ begin-import-module block-module
   \ Write failure exception
   : x-block-write-fail ( -- ) space ." unable to write block" cr ;
 
-  begin-import-module block-internal-module
+  begin-module block-internal-module
 
     \ Sector size
     1024 64 * constant sector-size
@@ -426,7 +426,7 @@ begin-import-module block-module
       drop over -
     ;
 
-  end-module
+  end-module> import
   
   \ Initialize blocks
   : init-block ( -- )
@@ -604,7 +604,7 @@ begin-import-module block-module
     cr
   ;
 
-end-module
+end-module> import
 
 \ Initialize
 : init ( -- )
@@ -623,8 +623,6 @@ end-module
 
 \ List a range of blocks, ignoring nonexistent blocks
 : list-range ( start-id end-id -- ) list-range ;
-
-unimport block-module
 
 \ Reboot
 reboot

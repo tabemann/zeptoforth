@@ -20,10 +20,10 @@
 
 continue-module forth-module
 
-  import systick-module
-  import task-module
-  import schedule-module
-  import led-module
+  systick-module import
+  task-module import
+  schedule-module import
+  led-module import
   
   \ Our task
   variable schedule-task

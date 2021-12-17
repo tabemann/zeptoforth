@@ -25,10 +25,10 @@ compress-flash
 
 begin-module chan-module
   
-  import task-module
-  import tqueue-module
+  task-module import
+  tqueue-module import
   
-  begin-import-module chan-internal-module
+  begin-module chan-internal-module
 
     \ Channel header structure
     begin-structure chan-header-size
@@ -77,7 +77,7 @@ begin-module chan-module
       chan-current-count @ 0=
     ;
 
-  end-module
+  end-module> import
   
   \ Channel is closed exception
   : x-chan-closed ( -- ) space ." channel is closed" cr ;

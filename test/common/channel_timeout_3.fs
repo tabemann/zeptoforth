@@ -20,8 +20,8 @@
 
 continue-module forth-module
 
-  import task-module
-  import chan-module
+  task-module import
+  chan-module import
 
   \ Our channel
   1 cells 1 chan-size buffer: my-chan
