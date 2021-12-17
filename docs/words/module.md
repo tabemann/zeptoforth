@@ -6,7 +6,7 @@ At any given time once `src/forth/common/module.fs` is loaded there is a module 
 
 When modules are defined, they automatically add their wordlist definition as a constant to the containing module. Also, if so specified by using `begin-import-module` or `begin-import-module-once`, the modules may be imported in the containing module. Note that modules may be defined multiple times, each time adding onto the existing definition, unless the module is defined with `begin-module-once` or `begin-import-module-once`, where then it is checked such that the module already exists by the name specified, and if it does exist, `x-module-already-defined` is raised.
 
-Within a given module, the user may import and unimport modules/wordlists, which pushes them on the wordlist order and removes them from that module's portion of the wordlist's order respectively. Note that all the wordlists imported with a module definition are automatically unimported when that module definition is ended. Note that imported and unimported modules must already exist by the name specified, or else `x-module-not-found` is raised.
+Within a given module, the user may import and unimport modules/wordlists, which pushes them on the wordlist order and removes them from that module's portion of the wordlist's order respectively. Note that all the wordlists imported with a module definition are automatically unimported when that module definition is ended.
 
 Note that it is recommended that once `src/common/forth/module.fs` is loaded, the user should not manually use `set-order` or `set-current`, as the module system will not know about this and thus unexpected results may occur.
 
@@ -30,37 +30,32 @@ Reference word *word-name* in a specified module *module-name-x*, which may be n
 ##### `begin-module`
 ( "name" -- )
 
-Begin the definition of module *name* without importing its contents into the containing module; module *name* must not already exist or `x-module-already-defined` will be raised.
-
-##### `begin-import-module`
-( "name" -- )
-
-Begin the definition of module *name* with importing its contents into the containing module; module *name* must not already exist or `x-module-already-defined` will be raised.
+Begin the definition of module *name*; module *name* must not already exist or `x-module-already-defined` will be raised.
 
 ##### `continue-module`
 ( "name" -- )
 
-Continue the definition of a preexisting module *name* without importing its contents into the containing module; if module *name* does not exist `x-module-not-found` will be raised.
-
-##### `continue-import-module`
-( "name" -- )
-
-Continue the definition of a preexisting module *name*, importing its contents into the containing module; if module *name* does not exist `x-module-not-found` will be raised.
+Continue the definition of a preexisting module *name*; if module *name* does not exist `x-module-not-found` will be raised.
 
 ##### `end-module`
 ( -- )
 
 End the definition of the module at the top of the module stack, removing each wordlist for each module imported within it from the wordlist order.
 
-##### `import`
-( "name" -- )
+##### `end-module>`
+( --  module )
 
-Import a module by the specified name into the current module's wordlist order; if the module does not exist `x-module-not-found` is raised.
+End the definition of the module at the top of the module stack, removing each wordlist for each module imported within it from th e wordlist order, and then push the module whose definition had ended onto the data stack.
+
+##### `import`
+( module -- )
+
+Import a specified module into the current module's wordlist order; if the module does not exist `x-module-not-found` is raised.
 
 ##### `unimport`
-( "name" -- )
+( module -- )
 
-Remove a module by the specified name from the current module's wordlist order; note that it does not remove it from parent modules' wordlist orders, so if it  had been imported within them they are still searchable. If the module does not exist `x-module-not-found` is raised.
+Remove a specified module from the current module's wordlist order; note that it does not remove it from parent modules' wordlist orders, so if it  had been imported within them they are still searchable.
 
 ##### `export`
 ( "name" | "^" "module-name-0" ... "module-name-x" "::" "name" -- )

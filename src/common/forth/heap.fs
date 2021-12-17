@@ -28,7 +28,7 @@ begin-module heap-module
   \ No blocks free exception
   : x-allocate-failed ( -- ) space ." allocate failed" cr ;
   
-  begin-import-module heap-internal-module
+  begin-module heap-internal-module
     
     \ The heap structure
     begin-structure heap-size
@@ -195,7 +195,7 @@ begin-module heap-module
       dup heap-bitmap swap heap-block-count @ 3 rshift 0 fill
     ;
 
-  end-module
+  end-module> import
 
   commit-flash
   

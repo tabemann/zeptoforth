@@ -20,7 +20,7 @@
 
 begin-module-once benchmark-module
 
-  import systick-module
+  systick-module import
 
   \ Measure the time of the execution of an xt, averaged over a specified
   \ number of cycles. The returned time is a fixed point number.

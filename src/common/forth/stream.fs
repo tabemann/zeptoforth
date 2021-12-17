@@ -25,10 +25,10 @@ compress-flash
 
 begin-module stream-module
 
-  import task-module
-  import tqueue-module
+  task-module import
+  tqueue-module import
   
-  begin-import-module stream-internal-module
+  begin-module stream-internal-module
 
     \ Stream structure
     begin-structure stream-size
@@ -82,7 +82,7 @@ begin-module stream-module
       dup stream-data-size @ swap stream-current-count @ -
     ;
 
-  end-module
+  end-module> import
 
   \ Stream is closed exception
   : x-stream-closed ( -- ) space ." stream is closed" cr ;

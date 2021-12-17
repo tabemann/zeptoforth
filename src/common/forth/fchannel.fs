@@ -25,11 +25,11 @@ compress-flash
 
 begin-module fchan-module
 
-  import task-module
-  import tqueue-module
-  import lock-module
+  task-module import
+  tqueue-module import
+  lock-module import
 
-  begin-import-module fchan-internal-module
+  begin-module fchan-internal-module
 
     \ Rendezvous channel header structure
     begin-structure fchan-size
@@ -55,7 +55,7 @@ begin-module fchan-module
       tqueue-size +field fchan-resp-tqueue
     end-structure
 
-  end-module
+  end-module> import
 
   \ Rendezvous channel is closed exception
   : x-fchan-closed ( -- ) space ." fchannel is closed" cr ;

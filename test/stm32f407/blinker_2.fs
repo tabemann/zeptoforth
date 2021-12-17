@@ -20,10 +20,10 @@
 
 continue-module forth-module
 
-  import task-module
-  import schedule-module
-  import action-pool-module
-  import led-module
+  task-module import
+  schedule-module import
+  action-pool-module import
+  led-module import
 
   \ The action count
   8 constant action-count

@@ -21,9 +21,9 @@
 \ Compile to flash
 compile-to-flash
 
-begin-import-module led-module
+begin-module led-module
 
-  import gpio-module
+  gpio-module import
 
   \ Initialize the LEDs
   : led-init ( -- ) 1 25 lshift GPIO_OE_SET ! ;
@@ -37,15 +37,13 @@ begin-import-module led-module
   \ Toggle the LED
   : led-toggle ( -- ) 1 25 lshift GPIO_OUT_XOR ! ;
 
-end-module
+end-module> import
 
 \ Init
 : init ( -- )
   init
   led-init
 ;
-
-unimport led-module
 
 \ Reboot
 reboot

@@ -20,9 +20,9 @@
 
 continue-module forth-module
 
-  import task-module
-  import fchan-module
-  import task-pool-module
+  task-module import
+  fchan-module import
+  task-pool-module import
 
   \ Task count
   2 constant my-task-count
