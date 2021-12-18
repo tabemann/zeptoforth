@@ -193,6 +193,9 @@ commit-flash
   add-module
 ;
 
+\ Start a private module definition
+: private-module ( -- ) wordlist dup push-module-stack add-module ;
+
 \ End a module definition
 : end-module ( -- ) drop-module-stack ;
 
