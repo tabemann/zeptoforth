@@ -50,6 +50,9 @@ begin-structure module-entry-size
 
   \ The module's wordlist
   field: module-module
+
+  \ The previous module's old current wordlist
+  field: module-old-current
 end-structure
 
 commit-flash
@@ -98,13 +101,16 @@ commit-flash
   module-stack@
   0 over module-module-count h!
   base @ over module-base h!
+  get-current over module-old-current !
+  over set-current
   module-module !
 ;
 
-\ Pop a module stack entry
-: pop-module-stack ( -- )
+\ Drop a module stack entry
+: drop-module-stack ( -- )
   module-stack-index @ 1 > averts x-module-stack-underflow
   module-stack@
+  dup module-old-current @ set-current
   module-base h@ base !
   get-order module-stack@ module-module-count h@ begin dup 0<> while
     1- swap 1- swap rot drop
@@ -112,11 +118,6 @@ commit-flash
   drop
   set-order
   -1 module-stack-index +!
-  module-stack-index @ 0<> if
-    module-stack@ module-module @ set-current
-  else
-    forth-module set-current
-  then
 ;
 
 \ Add a wordlist to the order
@@ -178,8 +179,7 @@ commit-flash
     wordlist dup >r -rot constant-with-name r>
   then
   dup push-module-stack
-  dup add-module
-  set-current
+  add-module
 ;
 
 \ Continue an existing module definition
@@ -190,18 +190,17 @@ commit-flash
     ['] x-module-not-found ?raise
   then
   dup push-module-stack
-  dup add-module
-  set-current
+  add-module
 ;
 
 \ End a module definition
-: end-module ( -- ) pop-module-stack ;
+: end-module ( -- ) drop-module-stack ;
 
 \ End a module definition and place the module on the stack
 : end-module> ( -- module )
   module-stack-index @ 1 > averts x-module-stack-underflow
   module-stack@ module-module @
-  pop-module-stack
+  drop-module-stack
 ;
 
 \ Import a module
