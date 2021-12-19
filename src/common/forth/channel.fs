@@ -183,13 +183,13 @@ begin-module chan-module
   ;
 
   \ Receive data from a channel
-  : recv-chan ( addr bytes chan -- addr recv-bytes )
+  : recv-chan ( addr bytes chan -- recv-bytes )
     [:
       s" BEGIN RECV-CHAN" trace
       current-task prepare-block
       dup wait-recv-chan
       >r 2dup 0 fill
-      r@ chan-data-size @ min r@ recv-chan-addr -rot 2dup 2>r move 2r> r>
+      r@ chan-data-size @ min r@ recv-chan-addr -rot dup >r move 2r>
       dup advance-recv-chan
       dup chan-send-ready @ 0> if
 	chan-send-tqueue wake-tqueue
@@ -207,7 +207,7 @@ begin-module chan-module
       current-task prepare-block
       dup wait-recv-chan
       >r 2dup 0 fill
-      r@ chan-data-size @ min r> recv-chan-addr -rot 2dup 2>r move 2r>
+      r@ chan-data-size @ min r> recv-chan-addr -rot dup >r move r>
       s" END PEEK-CHAN" trace
     ;] critical
   ;
@@ -254,7 +254,7 @@ begin-module chan-module
       s" BEGIN RECV-CHAN-NO-BLOCK" trace
       dup chan-empty-unsafe? triggers x-would-block
       >r 2dup 0 fill
-      r@ chan-data-size @ min r@ recv-chan-addr -rot 2dup 2>r move 2r> r>
+      r@ chan-data-size @ min r@ recv-chan-addr -rot dup >r move 2r>
       dup advance-recv-chan
       dup chan-send-ready @ 0> if
 	chan-send-tqueue wake-tqueue
@@ -272,7 +272,7 @@ begin-module chan-module
       s" BEGIN PEEK-CHAN-NO-BLOCK" trace
       dup chan-empty-unsafe? triggers x-would-block
       >r 2dup 0 fill
-      r@ chan-data-size @ min r> recv-chan-addr -rot 2dup 2>r move 2r>
+      r@ chan-data-size @ min r> recv-chan-addr -rot dup >r move r>
       s" END PEEK-CHAN-NO-BLOCK" trace
     ;] critical
   ;
