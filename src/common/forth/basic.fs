@@ -2266,26 +2266,27 @@ forth-module set-current
 ;
 
 \ Extract a double cell from a buffer.
-: extract-allot-2cell ( xt -- xd ) ( xt: addr bytes -- addr' bytes' )
-  2 cells [: 2 cells rot execute 2 cells >= averts x-insufficient-data 2@ ;]
+: extract-allot-2cell ( xt -- xd ) ( xt: addr bytes -- bytes' )
+  2 cells
+  [: dup >r 2 cells rot execute 2 cells >= averts x-insufficient-data r> 2@ ;]
   with-aligned-allot
 ;
 
 \ Extract a cell from a buffer.
-: extract-allot-cell ( xt -- x ) ( xt: addr bytes -- addr' bytes' )
-  cell [: cell rot execute cell >= averts x-insufficient-data @ ;]
+: extract-allot-cell ( xt -- x ) ( xt: addr bytes -- bytes' )
+  cell [: dup >r cell rot execute cell >= averts x-insufficient-data r> @ ;]
   with-aligned-allot
 ;
 
 \ Extract a halfword from a buffer.
-: extract-allot-half ( xt -- h ) ( xt: addr bytes -- addr' bytes' )
-  cell [: 2 rot execute 2 >= averts x-insufficient-data h@ ;]
+: extract-allot-half ( xt -- h ) ( xt: addr bytes -- bytes' )
+  cell [: dup 2 rot execute 2 >= averts x-insufficient-data r> h@ ;]
   with-aligned-allot
 ;
 
 \ Extract a byte from a buffer
-: extract-allot-byte ( xt -- c ) ( xt: addr bytes -- addr' bytes' )
-  cell [: 1 rot execute 1 >= averts x-insufficient-data c@ ;]
+: extract-allot-byte ( xt -- c ) ( xt: addr bytes -- bytes' )
+  cell [: dup 1 rot execute 1 >= averts x-insufficient-data r> c@ ;]
   with-aligned-allot
 ;
 
