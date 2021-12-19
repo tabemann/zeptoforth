@@ -46,6 +46,6 @@ Get whether a rendezvous channel is closed.
 Send message with a buffer as a payload over a rendezvous channel. Block until another task receives the message; if a task is already waiting for a message, transfer control to it. Note that the buffer is copied, and will be truncated if the buffer size of the rendezvous channel is smaller than the data provided, and padded with zeros if it is larger. Note that this must not be called within a critical section.
 
 ##### `recv-fchan`
-( addr bytes fchan -- addr recv-bytes )
+( addr bytes fchan -- recv-bytes )
 
-Receive message with a buffer as a payload over a rendezvous channel. Block until another task sends a message. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the bufer size of the rendezvous channel; the passed in buffer and the number of bytes copied into it are returned. Note that this must not be called within a critical section.
+Receive message with a buffer as a payload over a rendezvous channel. Block until another task sends a message. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the rendezvous channel; the number of bytes copied is returned. Note that this must not be called within a critical section.

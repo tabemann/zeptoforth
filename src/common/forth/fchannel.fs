@@ -93,7 +93,7 @@ begin-module fchan-module
   ;
 
   \ Receive data on a rendezvous channel
-  : recv-fchan ( addr bytes fchan -- addr recv-bytes )
+  : recv-fchan ( addr bytes fchan -- recv-bytes )
     dup fchan-closed @ triggers x-fchan-closed
     [:
       [:
@@ -107,9 +107,9 @@ begin-module fchan-module
 	2dup 0 fill
 	r@ fchan-data-size @ min
 	r@ fchan-data-addr @ ?dup if -rot
-	  2dup 2>r move 2r>
+	  dup >r move r>
 	else
-	  rot drop drop 0
+	  2drop 0
 	then
 	r> fchan-resp-tqueue wake-tqueue
 	s" END RECV-FCHAN" trace

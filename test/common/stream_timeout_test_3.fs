@@ -47,7 +47,9 @@ continue-module forth-module
   : consumer ( -- )
     5000 timeout !
     begin
-      my-recv-count [: my-recv-count my-stream recv-stream type ;] with-allot
+      my-recv-count [:
+	dup my-recv-count my-stream recv-stream type
+      ;] with-allot
     again
   ;
   

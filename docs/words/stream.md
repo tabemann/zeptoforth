@@ -62,22 +62,22 @@ Send data with a buffer to a stream. Block until there is enough space available
 Send data with a buffer to a stream. Block until there is all the data is sent, adding the data incrementally as space becomes available in the stream. Note that if sending times out, the data may be left partially sent. Note that the data is copied. This is not safe to call within an interrupt service routine or a critcal section.
 
 ##### `recv-stream`
-( addr bytes stream -- addr recv-bytes )
+( addr bytes stream -- recv-bytes )
 
 Receive data into a buffer from a stream. Block until data becomes available in the stream. Note that only as much data is available is copied, and the returned byte count may be lower than the byte count passed in. This is not safe to call within an interrupt service routine or a critical section.
 
 ##### `recv-stream-min`
-( addr bytes min-bytes stream -- addr recv-bytes )
+( addr bytes min-bytes stream -- recv-bytes )
 
 Receive at least a minimum number of bytes into a buffer from a stream. Block until the minimum number of bytes become available. Note that only as much data is available is copied, and the returned byte count may be lower than the buffer size passed in, even though it will always be equal to or greater than the minimum byte count. This is not safe to call within an interrupt service routine or a critical section.
 
 ##### `peek-stream`
-( addr bytes stream -- addr peek-bytes )
+( addr bytes stream -- peek-bytes )
 
 Peek data into a buffer from a stream, without removing it from the stream. Block until data becomes available in the stream. Note that only as much data is available is copied, and the returned byte count may be lower than the byte count passed in. This is not safe to call within an interrupt service routine or a critical section.
 
 ##### `peek-stream-min`
-( addr bytes min-bytes tream -- addr peek-bytes )
+( addr bytes min-bytes tream -- peek-bytes )
 
 Peek at least a minimum number of bytes into a buffer from a stream, without removing them from the stream. Block until the minimum number of bytes become available. Note that only as much data is available is copied, and the returned byte count may be lower than the buffer size passed in, even though it will always be equal to or greater than the minimum byte count. This is not safe to call within an interrupt service routine or a critical section.
 
@@ -102,22 +102,22 @@ Send data with a buffer to a stream. If there is insufficient space available in
 Send data with a buffer to a stream. Only as much data as there is space for inthe stream is sent; the remaining data is omitted. The actual number of bytes sent is returned. This is safe to call within an interrupt service routine or a critical section.
 
 ##### `recv-stream-no-block`
-( addr bytes stream -- addr recv-bytes )
+( addr bytes stream -- recv-bytes )
 
 Receive data into a buffer from a stream. If no data is available, return a byte count of zero. Note that only as much data is available is copied, and the returned byte count may be lower than the byte count passed in. This is safe to call within an interrupt service routine or a critical section.
 
 ##### `recv-stream-min-no-block`
-( addr bytes min-bytes stream -- addr recv-bytes )
+( addr bytes min-bytes stream -- recv-bytes )
 
 Receive at least a minimum number of bytes from a stream. If the minimum number of bytes is not available, receive no bytes and return a byte count of zero. Note that only as much data is available is copied, and the returned byte count may be lower than the byte count *bytes* passed in. This is safe to call within an interrupt service routine or a critical section.
 
 ##### `peek-stream-no-block`
-( addr bytes stream -- addr peek-bytes )
+( addr bytes stream -- peek-bytes )
 
 Peek data into a buffer from a stream, without removing it from the stream. if no data is available, return a byte count of zero. Note that only as much data is available is copied, and the returned byte count may be lower than the byte count passed in. This is safe to call within an interrupt service routine or a critical section.
 
 ##### `peek-stream-min-no-block`
-( addr bytes min-bytes stream -- addr peek-bytes )
+( addr bytes min-bytes stream -- peek-bytes )
 
 Peek at least a minimum number of bytes from a stream, without removing them from the stream. If the minimum number of bytes is not available, peek no bytes and return a byte count of zero. Note that only as much data is available is copied, and the returned byte count may be lower th an the byte count *bytes* passed in. This is safe to call within an interrupt service routine or a critical section.
 

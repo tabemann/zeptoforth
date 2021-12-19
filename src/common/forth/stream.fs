@@ -261,13 +261,13 @@ begin-module stream-module
   ;
 
   \ Receive data from a stream
-  : recv-stream ( addr bytes stream -- addr recv-bytes )
+  : recv-stream ( addr bytes stream -- recv-bytes )
     [:
       s" BEGIN RECV-STREAM" trace
       current-task prepare-block
       dup wait-recv-stream
       dup stream-current-count @ rot min swap
-      2 pick 2 pick 2 pick read-stream
+      rot 2 pick 2 pick read-stream
       2dup advance-recv-stream
       dup stream-send-ready @ 0> if
 	stream-send-tqueue wake-tqueue
@@ -279,13 +279,13 @@ begin-module stream-module
   ;
 
   \ Receive data at least a minimum number of bytes from a stream
-  : recv-stream-min ( addr bytes min-bytes stream -- addr recv-bytes )
+  : recv-stream-min ( addr bytes min-bytes stream -- recv-bytes )
     [:
       s" BEGIN RECV-STREAM-MIN" trace
       current-task prepare-block
       tuck wait-recv-stream-min
       dup stream-current-count @ rot min swap
-      2 pick 2 pick 2 pick read-stream
+      rot 2 pick 2 pick read-stream
       2dup advance-recv-stream
       dup stream-send-ready @ 0> if
 	stream-send-tqueue wake-tqueue
@@ -297,25 +297,25 @@ begin-module stream-module
   ;
 
   \ Peek data from a stream
-  : peek-stream ( addr bytes stream -- addr peek-bytes )
+  : peek-stream ( addr bytes stream -- peek-bytes )
     [:
       s" BEGIN PEEK-STREAM" trace
       current-task prepare-block
       dup wait-recv-stream
       dup stream-current-count @ rot min swap
-      2 pick 2 pick rot read-stream
+      rot 2 pick rot read-stream
       s" END PEEK-STREAM" trace
     ;] critical
   ;
 
   \ Peek data at least a minimum number of bytes from a stream
-  : peek-stream-min ( addr bytes min-bytes stream -- addr peek-bytes )
+  : peek-stream-min ( addr bytes min-bytes stream -- peek-bytes )
     [:
       s" BEGIN PEEK-STREAM-MIN" trace
       current-task prepare-block
       tuck wait-recv-stream-min
       dup stream-current-count @ rot min swap
-      2 pick 2 pick rot read-stream
+      rot 2 pick rot read-stream
       s" END PEEK-STREAM-MIN" trace
     ;] critical
   ;
@@ -392,11 +392,11 @@ begin-module stream-module
 
   \ Receive data from a stream without blocking (note that no exception is
   \ raised, rather a count of 0 is returned)
-  : recv-stream-no-block ( addr bytes stream -- addr recv-bytes )
+  : recv-stream-no-block ( addr bytes stream -- recv-bytes )
     [:
       s" BEGIN RECV-STREAM-NO-BLOCK" trace
       dup stream-current-count @ rot min swap
-      2 pick 2 pick 2 pick read-stream
+      rot 2 pick 2 pick read-stream
       2dup advance-recv-stream
       dup stream-send-ready @ 0> if
 	stream-send-tqueue wake-tqueue
@@ -409,12 +409,12 @@ begin-module stream-module
 
   \ Receive at least a minimum number of bytes from a stream without blocking
   \ (note that no exception is raised, rather a count of 0 is returned)
-  : recv-stream-min-no-block ( addr bytes min-bytes stream -- addr recv-bytes )
+  : recv-stream-min-no-block ( addr bytes min-bytes stream -- recv-bytes )
     [:
       s" BEGIN RECV-STREAM-MIN-NO-BLOCK" trace
       tuck stream-current-count @ <= if
 	dup stream-current-count @ rot min swap
-	2 pick 2 pick 2 pick read-stream
+	rot 2 pick 2 pick read-stream
 	2dup advance-recv-stream
 	dup stream-send-ready @ 0> if
 	  stream-send-tqueue wake-tqueue
@@ -422,7 +422,7 @@ begin-module stream-module
 	  drop
 	then
       else
-	2drop 0
+	2drop drop 0
       then
       s" END RECV-STREAM-MIN-NO-BLOCK" trace
     ;] critical
@@ -430,25 +430,25 @@ begin-module stream-module
 
   \ Peek data from a stream without blocking (note that no exception is raised,
   \ rather a count of 0 is returned)
-  : peek-stream-no-block ( addr bytes stream -- addr peek-bytes )
+  : peek-stream-no-block ( addr bytes stream -- peek-bytes )
     [:
       s" BEGIN PEEK-STREAM-NO-BLOCK" trace
       dup stream-current-count @ rot min swap
-      2 pick 2 pick rot read-stream
+      rot 2 pick rot read-stream
       s" END PEEK-STREAM-NO-BLOCK" trace
     ;] critical
   ;
 
   \ Peek at least a minimum number of bytes from a stream without blocking
   \ (note that no exception is raised, rather a count of 0 is returned)
-  : peek-stream-min-no-block ( addr bytes min-bytes stream -- addr peek-bytes )
+  : peek-stream-min-no-block ( addr bytes min-bytes stream -- peek-bytes )
     [:
       s" BEGIN PEEK-STREAM-MIN-NO-BLOCK" trace
       tuck stream-current-count @ <= if
 	dup stream-current-count @ rot min swap
-	2 pick 2 pick rot read-stream
+	rot 2 pick rot read-stream
       else
-	2drop 0
+	2drop drop 0
       then
       s" END PEEK-STREAM-MIN-NO-BLOCK" trace
     ;] critical
