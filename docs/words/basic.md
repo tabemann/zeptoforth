@@ -532,24 +532,24 @@ Allot byte-sized cell-aligned RAM temporarily and write a byte into it before ex
 This is an exception raised by the `extract-allot-*` words if they do not receive a sufficient-sized buffer of data.
 
 ##### `extract-allot-2cell`
-( xt -- xd ) ( xt: addr bytes -- addr' bytes' )
+( xt -- xd ) ( xt: addr bytes -- bytes' )
 
-Allot double cell-sized cell-aligned RAM temporarily and provide its address and size in bytes to the *xt* that is executed, then read a double cell out of the buffer that is returned, unless the buffer length returned is shorter than a double cell, where then `x-insufficient-data` is raised.
+Allot double cell-sized cell-aligned RAM temporarily and provide its address and size in bytes to the *xt* that is executed, then read a double cell out of the buffer, unless the buffer length returned is shorter than a double cell, where then `x-insufficient-data` is raised.
 
 ##### `extract-allot-cell`
-( xt -- x ) ( xt: addr bytes -- addr' bytes' )
+( xt -- x ) ( xt: addr bytes -- bytes' )
 
-Allot cell-sized cell-aligned RAM temporarily and provide its address and size in bytes to the *xt* that is executed, then read a cell out of the buffer that is returned, unless the buffer length returned is shorter than a cell, where then `x-insufficient-data` is raised.
+Allot cell-sized cell-aligned RAM temporarily and provide its address and size in bytes to the *xt* that is executed, then read a cell out of the buffer, unless the buffer length returned is shorter than a cell, where then `x-insufficient-data` is raised.
 
 ##### `extract-allot-half`
-( xt -- h ) ( xt: addr bytes -- addr' bytes' )
+( xt -- h ) ( xt: addr bytes -- bytes' )
 
-Allot halfword-sized cell-aligned RAM temporarily and provide its address and size in bytes to the *xt* that is executed, then read a halfword out of the buffer that is returned, unless the buffer length returned is shorter than a halfword, where then `x-insufficient-data` is raised.
+Allot halfword-sized cell-aligned RAM temporarily and provide its address and size in bytes to the *xt* that is executed, then read a halfword out of the buffer, unless the buffer length returned is shorter than a halfword, where then `x-insufficient-data` is raised.
 
 ##### `extract-allot-byte`
 ( xt -- c ) ( xt: addr bytes -- addr' bytes' )
 
-Allot byte-sized cell-aligned RAM temporarily and provide its address and size in bytes to the *xt* that is executed, then read a byte out of the buffer that is returned, unless the buffer length returned is shorter than a byte, where then `x-insufficient-data` is raised.
+Allot byte-sized cell-aligned RAM temporarily and provide its address and size in bytes to the *xt* that is executed, then read a byte out of the buffer, unless the buffer length returned is shorter than a byte, where then `x-insufficient-data` is raised.
 
 ##### `compress-flash`
 ( -- )
