@@ -45,7 +45,7 @@ continue-module forth-module
   : consumer ( -- )
     begin
       my-recv-count [:
-	my-recv-count my-recv-count my-stream recv-stream-min type
+	dup my-recv-count my-recv-count my-stream recv-stream-min type
       ;] with-allot
     again
   ;

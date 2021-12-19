@@ -109,7 +109,7 @@ begin-module rchan-module
 
   \ Send data on a reply channel
   : send-rchan
-    ( send-addr send-bytes reply-addr reply-bytes rchan -- addr reply-bytes' )
+    ( send-addr send-bytes reply-addr reply-bytes rchan -- reply-bytes' )
     [:
       s" BEGIN SEND-RCHAN" trace
       dup rchan-closed? triggers x-rchan-closed
@@ -119,7 +119,7 @@ begin-module rchan-module
       cell [:
 	>r r@ over rchan-reply-size-addr !
 	swap r@ !
-	over >r tuck rchan-reply-addr !
+	tuck rchan-reply-addr !
 	tuck rchan-send-size !
 	tuck rchan-send-addr !
 	dup rchan-recv-tqueue wake-tqueue
@@ -127,14 +127,14 @@ begin-module rchan-module
 	  0 swap rchan-send-addr ! ?raise
 	then
 	rchan-closed? triggers x-rchan-closed
-	2r> @
+	r> @
       ;] with-aligned-allot
       s" END SEND-RCHAN" trace
     ;] critical
   ;
 
   \ Receive data on a reply channel
-  : recv-rchan ( addr bytes rchan -- addr recv-bytes )
+  : recv-rchan ( addr bytes rchan -- recv-bytes )
     dup rchan-closed? triggers x-rchan-closed
     dup rchan-reply-task @ current-task <> averts x-rchan-wait-reply
     dup rchan-recv-lock lock
@@ -150,9 +150,9 @@ begin-module rchan-module
 	2dup 0 fill
 	r@ rchan-send-size @ min
 	r@ rchan-send-addr @ ?dup if -rot
-	  2dup 2>r move 2r>
+	  dup >r move r>
 	else
-	  rot drop drop 0
+	  2drop 0
 	then
 	current-task r> rchan-reply-task !
 	s" END RECV-RCHAN" trace

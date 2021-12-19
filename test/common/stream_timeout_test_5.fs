@@ -48,7 +48,7 @@ continue-module forth-module
     5000 timeout !
     begin
       my-recv-count [:
-	my-recv-count my-stream peek-stream tuck type
+	dup my-recv-count my-stream peek-stream tuck type
 	my-stream skip-stream drop
       ;] with-allot
     again
