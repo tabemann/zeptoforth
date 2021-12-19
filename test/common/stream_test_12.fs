@@ -45,7 +45,8 @@ continue-module forth-module
   : consumer ( -- )
     begin
       my-recv-count [:
-	my-recv-count my-recv-count my-stream peek-stream-min-no-block tuck type
+	dup my-recv-count my-recv-count my-stream peek-stream-min-no-block
+	tuck type
 	dup my-recv-count min my-stream skip-stream-min-no-block drop
       ;] with-allot
     again
