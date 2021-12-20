@@ -2280,13 +2280,13 @@ forth-module set-current
 
 \ Extract a halfword from a buffer.
 : extract-allot-half ( xt -- h ) ( xt: addr bytes -- bytes' )
-  cell [: dup 2 rot execute 2 >= averts x-insufficient-data r> h@ ;]
+  cell [: dup >r 2 rot execute 2 >= averts x-insufficient-data r> h@ ;]
   with-aligned-allot
 ;
 
 \ Extract a byte from a buffer
 : extract-allot-byte ( xt -- c ) ( xt: addr bytes -- bytes' )
-  cell [: dup 1 rot execute 1 >= averts x-insufficient-data r> c@ ;]
+  cell [: dup >r 1 rot execute 1 >= averts x-insufficient-data r> c@ ;]
   with-aligned-allot
 ;
 
