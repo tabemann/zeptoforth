@@ -1104,6 +1104,8 @@ begin-module task-module
 
       in-critical @ 0= in-task-change @ 0= and if
 
+	1 pause-count +!
+
 	current-task @ dup prev-task !
 	
 	?dup if dup save-task-state reschedule-task then
