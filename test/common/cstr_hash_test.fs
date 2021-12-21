@@ -40,15 +40,15 @@ continue-module forth-module
   ;
   
   \ Initialize the test
-  : init-test ( -- ) ." a"
+  : init-test ( -- ) 
   
     \ Initialize the counted string hash
-    entry-count cell my-hash init-cstr-hash ." b"
+    entry-count cell my-hash init-cstr-hash
 
     \ Insert some values into the hash
-    10 c" foo" my-hash insert-cstr-hash ." c"
-    20 c" bar" my-hash insert-cstr-hash ." d"
-    30 c" baz" my-hash insert-cstr-hash ." e"
+    10 c" foo" my-hash insert-cstr-hash
+    20 c" bar" my-hash insert-cstr-hash
+    30 c" baz" my-hash insert-cstr-hash
 
     \ Get some values from the hash
     c" foo" my-hash find-cstr-hash cr ." foo:" .
