@@ -19,56 +19,53 @@
 \ SOFTWARE.
 
 \ Compile this to flash
-\ compile-to-flash
+compile-to-flash
 
-begin-module int-hash-module
+begin-module int-map-module
 
-  hash-module import
+  map-module import
 
-  begin-module int-hash-internal-module
+  begin-module int-map-internal-module
 
     \ Hash function for integers
-    : int-hash-hash ( c-addr -- hash ) @ ;
-    ;
+    : int-map-hash ( addr -- hash ) @ ;
 
     \ Equals function for integers
-    : int-hash-equals ( c-addr c-addr -- equals? )
-      @ swap @ =
-    ;
+    : int-map-equals ( addr addr -- equals? ) @ swap @ = ;
     
   end-module> import
   
-  \ Get the size of a integer hash for a given entry count and data size
+  \ Get the size of a integer map for a given entry count and data size
   \ in bytes
-  : int-hash-size ( count data-size -- size ) cell swap hash-size ;
+  : int-map-size ( count data-size -- size ) cell swap map-size ;
 
-  \ Initialize a integer hash
-  : init-int-hash ( count data-size addr -- )
-    2>r >r ['] int-hash-hash ['] int-hash-equals r> cell 2r> init-hash
+  \ Initialize a integer map with the specified remove handler, entry count
+  \ and value size in bytes at the specified address
+  \
+  \ remove-xt: ( value-addr key-addr -- )
+  : init-int-map ( remove-xt count data-size addr -- )
+    2>r 2>r ['] int-map-hash ['] int-map-equals 2r> cell 2r> init-map
   ;
 
-  \ Find a key's value in a integer hash or return 0 if not found
-  : find-int-hash ( key-int hash -- value-addr|0 )
-    cell [: rot over ! swap find-hash ;] with-aligned-allot
+  \ Find a key's value in a integer map or return 0 if not found
+  : find-int-map ( key-int map -- value-addr|0 )
+    cell [: rot over ! swap find-map ;] with-aligned-allot
   ;
 
-  \ Insert a value with a key into a integer hash
-  : insert-int-hash ( value-addr key-int hash -- )
-    cell [: rot over ! swap insert-hash ;] with-aligned-allot
+  \ Insert a value with a key into a integer map
+  : insert-int-map ( value-addr key-int map -- )
+    cell [: rot over ! swap insert-map ;] with-aligned-allot
   ;
 
-  \ Remove a value with a key from a integer hash
-  : remove-int-hash ( key-int hash -- )
-    cell [: rot over ! swap remove-hash ;] with-aligned-allot
+  \ Remove a value with a key from a integer map
+  : remove-int-map ( key-int map -- )
+    cell [: rot over ! swap remove-map ;] with-aligned-allot
   ;
 
-  \ Get the key and value at an index in a integer hash, or return 0 0
-  \ if no entry is found
-  : at-int-hash ( index hash -- key-int value-addr | 0 0 )
-    at-hash ?dup if swap @ swap else 0 then
-  ;
+  \ Get the key and value at an index in a integer map
+  : at-int-map ( index map -- value-addr key-int ) at-map @ ;
 
 end-module
 
 \ Reboot
-\ reboot
+reboot
