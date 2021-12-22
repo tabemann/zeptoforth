@@ -26,6 +26,9 @@
 #include src/common/forth/disassemble.fs
 #include src/common/forth/pool.fs
 #include src/common/forth/heap.fs
+#include src/common/forth/map.fs
+#include src/common/forth/cstr_map.fs
+#include src/common/forth/int_map.fs
 #include src/common/forth/tqueue.fs
 #include src/common/forth/lock.fs
 #include src/common/forth/semaphore.fs
