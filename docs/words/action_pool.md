@@ -2,6 +2,8 @@
 
 Action pools provide a means of managing multiple schedule actions and dynamically creating and destroying them. Note that the total number of actions that may exist at any one time is fixed, but the number of executing actions may be of any number less than or equal to that at any point in time. Also note that action pools are associated with particular schedules when they are initialized.
 
+### `action-pool-module`
+
 The following words are in `action-pool-module`:
 
 ##### `x-no-action-available`

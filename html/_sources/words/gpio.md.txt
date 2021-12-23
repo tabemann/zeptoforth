@@ -8,6 +8,8 @@ These words are in `gpio-module`.
 
 ## STM32 Words
 
+### `gpio-module`
+
 ##### `GPIOA` through `GPIOK`
 
 These are the memory addresses of the spaces for each of the the GPIO's, from GPIOA to GPIOI on the STM32F407 and STM32L476 and from GPIOA to GPIOK on the STM32F746.
@@ -235,6 +237,8 @@ Get the alternate function for the specified pin (from 0 to 15) on the specified
 Get the input for the specified pin (from 0 to 15) on the specified GPIO.
 
 ## RP2040 Words
+
+### `gpio-module`
 
 ##### `CTRL_NORMAL`
 
