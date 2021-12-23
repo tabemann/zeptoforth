@@ -2,6 +2,8 @@
 
 These are a number of word used to manage interaction with ANSI terminals. Note that no other terminals are supported.
 
+### `ansi-term-module`
+
 The following words are in `ansi-term-module`:
 
 ##### `escape`

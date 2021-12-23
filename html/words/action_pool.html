@@ -36,31 +36,34 @@
   <section id="action-pool-words">
 <h1>Action Pool words<a class="headerlink" href="#action-pool-words" title="Permalink to this headline">¶</a></h1>
 <p>Action pools provide a means of managing multiple schedule actions and dynamically creating and destroying them. Note that the total number of actions that may exist at any one time is fixed, but the number of executing actions may be of any number less than or equal to that at any point in time. Also note that action pools are associated with particular schedules when they are initialized.</p>
+<section id="action-pool-module">
+<h2><code class="docutils literal notranslate"><span class="pre">action-pool-module</span></code><a class="headerlink" href="#action-pool-module" title="Permalink to this headline">¶</a></h2>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">action-pool-module</span></code>:</p>
 <section id="x-no-action-available">
-<h2><code class="docutils literal notranslate"><span class="pre">x-no-action-available</span></code><a class="headerlink" href="#x-no-action-available" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">x-no-action-available</span></code><a class="headerlink" href="#x-no-action-available" title="Permalink to this headline">¶</a></h3>
 <p>( – )</p>
 <p>Exception raised if one attempts to spawn a action from a action pool and no actions are available.</p>
 </section>
 <section id="init-from-action-pool">
-<h2><code class="docutils literal notranslate"><span class="pre">init-from-action-pool</span></code><a class="headerlink" href="#init-from-action-pool" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">init-from-action-pool</span></code><a class="headerlink" href="#init-from-action-pool" title="Permalink to this headline">¶</a></h3>
 <p>( xt action-pool –  action )</p>
 <p>Initalize a action from a action pool, if a action is available, or raise <code class="docutils literal notranslate"><span class="pre">x-no-action-available</span></code> if no actions are available. The action is initialized for the schedule associated with the action pool.</p>
 </section>
 <section id="action-pool-free">
-<h2><code class="docutils literal notranslate"><span class="pre">action-pool-free</span></code><a class="headerlink" href="#action-pool-free" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">action-pool-free</span></code><a class="headerlink" href="#action-pool-free" title="Permalink to this headline">¶</a></h3>
 <p>( action-pool – count )</p>
 <p>Get the number of free actions in a action pool.</p>
 </section>
 <section id="init-action-pool">
-<h2><code class="docutils literal notranslate"><span class="pre">init-action-pool</span></code><a class="headerlink" href="#init-action-pool" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">init-action-pool</span></code><a class="headerlink" href="#init-action-pool" title="Permalink to this headline">¶</a></h3>
 <p>( schedule count addr – )</p>
 <p>Initialize a action pool at <em>addr</em>, with <em>count</em> actions, for schedule <em>schedule</em>. These actions are not initialized initially, and are free to be initialized as needed.</p>
 </section>
 <section id="action-pool-size">
-<h2><code class="docutils literal notranslate"><span class="pre">action-pool-size</span></code><a class="headerlink" href="#action-pool-size" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">action-pool-size</span></code><a class="headerlink" href="#action-pool-size" title="Permalink to this headline">¶</a></h3>
 <p>( count – bytes )</p>
 <p>Get the size taken up by a action pool with <em>count</em> actions; this size should be used for alloting the block of memory to be passed to <code class="docutils literal notranslate"><span class="pre">init-action-pool</span></code></p>
+</section>
 </section>
 </section>
 
@@ -99,17 +102,15 @@
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Action Pool words</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#x-no-action-available"><code class="docutils literal notranslate"><span class="pre">x-no-action-available</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#init-from-action-pool"><code class="docutils literal notranslate"><span class="pre">init-from-action-pool</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#action-pool-free"><code class="docutils literal notranslate"><span class="pre">action-pool-free</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#init-action-pool"><code class="docutils literal notranslate"><span class="pre">init-action-pool</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#action-pool-size"><code class="docutils literal notranslate"><span class="pre">action-pool-size</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#action-pool-module"><code class="docutils literal notranslate"><span class="pre">action-pool-module</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="map.html">Map Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rchannel.html">Reply Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>

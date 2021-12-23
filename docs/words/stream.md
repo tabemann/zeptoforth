@@ -4,6 +4,8 @@ A stream is a monodirectional means of communicating data, as a fixed-size queue
 
 Streams can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put in alloted memory in the dictionary or into allocated memory in the heap. Note that the size of a stream for a given data size may be calculated with `stream-size`.
 
+### `stream-module`
+
 The following words are in `stream-module`:
 
 ##### `x-stream-closed`

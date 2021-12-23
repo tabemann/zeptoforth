@@ -16,7 +16,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Stream Words" href="stream.html" />
-    <link rel="prev" title="Fast Channel Words" href="fchannel.html" />
+    <link rel="prev" title="Reply Channel Words" href="rchannel.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -36,41 +36,44 @@
   <section id="semaphore-words">
 <h1>Semaphore Words<a class="headerlink" href="#semaphore-words" title="Permalink to this headline">¶</a></h1>
 <p>A semaphore is a task synchronization construct which keeps a counter indicating some resource and, when the counter is negative, a queue of waiting tasks. Tasks can <em>give</em> a semaphore, which increments the counter, and if there one or more waiting tasks, readies the task that has been blocked the longest in an FIFO fashion. Note that a limit can be specified where <em>giving</em> a semaphore will not increase the counter beyond the specified limit. Tasks can also <em>take</em> a semaphore, which decrements the counter, and if afterwards the counter is negative, blocks the task and places it at the end of the queue of waiting tasks. Additionally there are operations for <em>ungiving</em> a semaphore, in the case where one needs to decrement the counter without potentially blocking the current task, and for <em>broadcasting</em> a semaphore, which is equivalent to <em>giving</em> each waiting task.</p>
+<section id="sema-module">
+<h2><code class="docutils literal notranslate"><span class="pre">sema-module</span></code><a class="headerlink" href="#sema-module" title="Permalink to this headline">¶</a></h2>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">sema-module</span></code>:</p>
 <section id="sema-size">
-<h2><code class="docutils literal notranslate"><span class="pre">sema-size</span></code><a class="headerlink" href="#sema-size" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">sema-size</span></code><a class="headerlink" href="#sema-size" title="Permalink to this headline">¶</a></h3>
 <p>( – bytes )</p>
 <p>The size of a semaphore in bytes.</p>
 </section>
 <section id="no-sema-limit">
-<h2><code class="docutils literal notranslate"><span class="pre">no-sema-limit</span></code><a class="headerlink" href="#no-sema-limit" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">no-sema-limit</span></code><a class="headerlink" href="#no-sema-limit" title="Permalink to this headline">¶</a></h3>
 <p>( – n )</p>
 <p>Magic value indicating no semaphore limit.</p>
 </section>
 <section id="init-sema">
-<h2><code class="docutils literal notranslate"><span class="pre">init-sema</span></code><a class="headerlink" href="#init-sema" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">init-sema</span></code><a class="headerlink" href="#init-sema" title="Permalink to this headline">¶</a></h3>
 <p>( limit counter addr – )</p>
 <p>Initialize a semaphore at the specified address <em>addr</em>, which must have size <code class="docutils literal notranslate"><span class="pre">sema-size</span></code>, with <em>counter</em> as the initial counter and <em>limit</em> as the counter limit; a <em>limit</em> of <code class="docutils literal notranslate"><span class="pre">no-sema-limit</span></code> will disable counter limits.</p>
 </section>
 <section id="take">
-<h2><code class="docutils literal notranslate"><span class="pre">take</span></code><a class="headerlink" href="#take" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">take</span></code><a class="headerlink" href="#take" title="Permalink to this headline">¶</a></h3>
 <p>( semaphore – )</p>
 <p>Decrement the counter of a semaphore, blocking the current task if the counter after decrementing is negative; if a timeout is specified via the user variable <code class="docutils literal notranslate"><span class="pre">timeout</span></code> and the current task is not readied before the timeout is reached, the exception <code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code> is raised (both <code class="docutils literal notranslate"><span class="pre">timeout</span></code> and <code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code> are defined in <code class="docutils literal notranslate"><span class="pre">task-module</span></code>). This is not safe to call within an interrupt service routine or critical section.</p>
 </section>
 <section id="give">
-<h2><code class="docutils literal notranslate"><span class="pre">give</span></code><a class="headerlink" href="#give" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">give</span></code><a class="headerlink" href="#give" title="Permalink to this headline">¶</a></h3>
 <p>( semaphore – )</p>
 <p>Increment the counter of a semaphore, up to the counter limit if one is set; if one or more tasks are blocked on the semaphore, the one that has been blocked the longest is readied. This is safe to call within an interrupt service routine or critical section.</p>
 </section>
 <section id="ungive">
-<h2><code class="docutils literal notranslate"><span class="pre">ungive</span></code><a class="headerlink" href="#ungive" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">ungive</span></code><a class="headerlink" href="#ungive" title="Permalink to this headline">¶</a></h3>
 <p>( semaphore – )</p>
 <p>Decrement the counter of a semaphore without blocking the current task. This is safe to call within an interrupt service routine or critical section.</p>
 </section>
 <section id="broadcast">
-<h2><code class="docutils literal notranslate"><span class="pre">broadcast</span></code><a class="headerlink" href="#broadcast" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">broadcast</span></code><a class="headerlink" href="#broadcast" title="Permalink to this headline">¶</a></h3>
 <p>( semaphore – )</p>
 <p><em>Give</em> all of the tasks blocked on a semaphore. This is safe to call within an interrupt service routine or critical section.</p>
+</section>
 </section>
 </section>
 
@@ -110,17 +113,13 @@
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="map.html">Map Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rchannel.html">Reply Channel Words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Semaphore Words</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#sema-size"><code class="docutils literal notranslate"><span class="pre">sema-size</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#no-sema-limit"><code class="docutils literal notranslate"><span class="pre">no-sema-limit</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#init-sema"><code class="docutils literal notranslate"><span class="pre">init-sema</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#take"><code class="docutils literal notranslate"><span class="pre">take</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#give"><code class="docutils literal notranslate"><span class="pre">give</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#ungive"><code class="docutils literal notranslate"><span class="pre">ungive</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#broadcast"><code class="docutils literal notranslate"><span class="pre">broadcast</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sema-module"><code class="docutils literal notranslate"><span class="pre">sema-module</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
@@ -142,7 +141,7 @@
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="fchannel.html" title="previous chapter">Fast Channel Words</a></li>
+      <li>Previous: <a href="rchannel.html" title="previous chapter">Reply Channel Words</a></li>
       <li>Next: <a href="stream.html" title="next chapter">Stream Words</a></li>
   </ul></li>
 </ul>

@@ -1,5 +1,7 @@
 # Compilation-specific words
 
+### `internal-module`
+
 These words are in `internal-module`.
 
 ##### `start-compile-no-push`

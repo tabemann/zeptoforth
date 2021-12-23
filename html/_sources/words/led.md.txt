@@ -6,6 +6,8 @@ The following words are in `led-module`.
 
 ## STM32L476 LED Words
 
+### `led-module`
+
 ##### `led-red-on`
 ( -- )
 
@@ -27,6 +29,8 @@ Turn the green LED on
 Turn the green LED off
 
 ## STM32F407 LED Words
+
+### `led-module`
 
 ##### `led-orange-on`
 ( -- )
@@ -69,6 +73,8 @@ Turn the blue LED on
 Turn the blue LED off
 
 ## Raspberry Pi Pico LED Words
+
+### `led-module`
 
 ##### `led-on`
 ( -- )

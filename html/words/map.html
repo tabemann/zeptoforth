@@ -1,0 +1,335 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Map Words &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Lock Words" href="lock.html" />
+    <link rel="prev" title="Heap Words" href="heap.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="map-words">
+<h1>Map Words<a class="headerlink" href="#map-words" title="Permalink to this headline">¶</a></h1>
+<p>Maps in zeptoforth are implemented as fixed-sized hash tables. They have fixed-sized keys and values; it is recommended that these be either addresses or indices into some other data structure, for sake of economy of space. For the sake of alignment, the amount of space taken up by a key and a value together is internally rounded up to the nearest cell.</p>
+<section id="map-module">
+<h2><code class="docutils literal notranslate"><span class="pre">map-module</span></code><a class="headerlink" href="#map-module" title="Permalink to this headline">¶</a></h2>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">map-module</span></code>:</p>
+<section id="map-size">
+<h3><code class="docutils literal notranslate"><span class="pre">map-size</span></code><a class="headerlink" href="#map-size" title="Permalink to this headline">¶</a></h3>
+<p>( count key-size value-size – map-bytes )</p>
+<p>Get the size in bytes of a map with an entry count <em>count</em>, a key size <em>size</em> in bytes, and a value size <em>value</em> in bytes.</p>
+</section>
+<section id="init-map">
+<h3><code class="docutils literal notranslate"><span class="pre">init-map</span></code><a class="headerlink" href="#init-map" title="Permalink to this headline">¶</a></h3>
+<p>( hash-xt equals-xt remove-xt count key-size value-size addr – )</p>
+<p>Initialize a map at <em>addr</em> with a key size <em>key-size</em> in bytes, a value size <em>value-size</em> in bytes, an entry count <em>count</em>, an entry removal handler <em>remove-xt</em> with the signature ( value-addr key-addr – ) which can be 0, an equals function <em>equals-xt</em> with the signature ( key-addr key-addr – equals? ), and a hash function <em>hash-xt</em> with the signature ( key-addr – hash ).</p>
+</section>
+<section id="find-map">
+<h3><code class="docutils literal notranslate"><span class="pre">find-map</span></code><a class="headerlink" href="#find-map" title="Permalink to this headline">¶</a></h3>
+<p>( key-addr map – value-addr | 0 )</p>
+<p>Find a the value of a key at <em>key-addr</em> in a map <em>map</em> and return the address of its value <em>value-addr</em>, or if the key is not found, return 0.</p>
+</section>
+<section id="insert-map">
+<h3><code class="docutils literal notranslate"><span class="pre">insert-map</span></code><a class="headerlink" href="#insert-map" title="Permalink to this headline">¶</a></h3>
+<p>( value-addr key-addr map – )</p>
+<p>Insert a value at <em>value-addr</em> at the key at <em>key-addr</em> in a map <em>map</em>. If the key is already present in the map, call the entry removal handler for the key and value already in the map (if set) and then replace the key and value in the map with those provided. If the key is not already present in the map and there is room for another entry in the map, add the value to the map at the specified key, otherwise raise <code class="docutils literal notranslate"><span class="pre">x-map-full</span></code>.</p>
+</section>
+<section id="remove-map">
+<h3><code class="docutils literal notranslate"><span class="pre">remove-map</span></code><a class="headerlink" href="#remove-map" title="Permalink to this headline">¶</a></h3>
+<p>( key-addr map – )</p>
+<p>Remove a value with a key at <em>key-addr</em> from a map <em>map</em> if it is present; if this is the case, first call the entry removal handler for the key and value already in the map (if set).</p>
+</section>
+<section id="first-map">
+<h3><code class="docutils literal notranslate"><span class="pre">first-map</span></code><a class="headerlink" href="#first-map" title="Permalink to this headline">¶</a></h3>
+<p>( map – index | -1 )</p>
+<p>Get the index <em>index</em> of the first entry in a map <em>map</em> or return -1 if the map is empty.</p>
+</section>
+<section id="next-map">
+<h3><code class="docutils literal notranslate"><span class="pre">next-map</span></code><a class="headerlink" href="#next-map" title="Permalink to this headline">¶</a></h3>
+<p>( index map – index’ | -1 )</p>
+<p>Get the next index <em>index’</em> of an entry in a map <em>map</em> after the entry at the index <em>index</em>; if there is no following entry, return -1.</p>
+</section>
+<section id="at-map">
+<h3><code class="docutils literal notranslate"><span class="pre">at-map</span></code><a class="headerlink" href="#at-map" title="Permalink to this headline">¶</a></h3>
+<p>( index map – value-addr key-addr )</p>
+<p>Get the value and key at <em>value-addr</em> and <em>key-addr</em> of the entry in map <em>map</em> at index <em>index</em>; if <em>index</em> is out of range, raise <code class="docutils literal notranslate"><span class="pre">x-map-index-out-of-range</span></code>, and if <em>index</em> does not correspond to a valid entry, raise <code class="docutils literal notranslate"><span class="pre">x-map-index-no-entry</span></code>.</p>
+</section>
+<section id="clear-map">
+<h3><code class="docutils literal notranslate"><span class="pre">clear-map</span></code><a class="headerlink" href="#clear-map" title="Permalink to this headline">¶</a></h3>
+<p>( map – )</p>
+<p>Clear map <em>map</em> of all entries, calling the entry removal handler for each cleared entry if set.</p>
+</section>
+<section id="copy-map">
+<h3><code class="docutils literal notranslate"><span class="pre">copy-map</span></code><a class="headerlink" href="#copy-map" title="Permalink to this headline">¶</a></h3>
+<p>( src-map dest-map – )</p>
+<p>Copy each entry in the source map <em>src-map</em> into the destination map <em>dest-map</em>, overwriting existing entries with identical keys (and calling the entry removal handler for them, if set for the destination map). If insufficient room is available to copy further entries into the destination map, <code class="docutils literal notranslate"><span class="pre">x-map-full</span></code> is raised. If the key size, value size, hash function, or equals function differ between the two maps, <code class="docutils literal notranslate"><span class="pre">x-dest-map-not-match</span></code> is raised.</p>
+</section>
+<section id="map-entry-count">
+<h3><code class="docutils literal notranslate"><span class="pre">map-entry-count</span></code><a class="headerlink" href="#map-entry-count" title="Permalink to this headline">¶</a></h3>
+<p>( map – entry-count )</p>
+<p>Get the total entry count of a map <em>map</em>.</p>
+</section>
+<section id="map-used-entry-count">
+<h3><code class="docutils literal notranslate"><span class="pre">map-used-entry-count</span></code><a class="headerlink" href="#map-used-entry-count" title="Permalink to this headline">¶</a></h3>
+<p>( map – used-entry-count )</p>
+<p>Get the used entry count of a map <em>map</em>.</p>
+</section>
+<section id="map-key-size">
+<h3><code class="docutils literal notranslate"><span class="pre">map-key-size</span></code><a class="headerlink" href="#map-key-size" title="Permalink to this headline">¶</a></h3>
+<p>( map – key-size )</p>
+<p>Get the key size in bytes of a map <em>map</em>.</p>
+</section>
+<section id="map-value-size">
+<h3><code class="docutils literal notranslate"><span class="pre">map-value-size</span></code><a class="headerlink" href="#map-value-size" title="Permalink to this headline">¶</a></h3>
+<p>( map – value-size )</p>
+<p>Get the value size in bytes of a map <em>map</em>.</p>
+</section>
+<section id="map-hash-xt">
+<h3><code class="docutils literal notranslate"><span class="pre">map-hash-xt</span></code><a class="headerlink" href="#map-hash-xt" title="Permalink to this headline">¶</a></h3>
+<p>( map – hash-xt )</p>
+<p>Get the hash function of a map <em>map</em>.</p>
+</section>
+<section id="map-equals-xt">
+<h3><code class="docutils literal notranslate"><span class="pre">map-equals-xt</span></code><a class="headerlink" href="#map-equals-xt" title="Permalink to this headline">¶</a></h3>
+<p>( map – equals-xt )</p>
+<p>Get the equals function of a map <em>map</em>.</p>
+</section>
+<section id="map-remove-xt">
+<h3><code class="docutils literal notranslate"><span class="pre">map-remove-xt</span></code> )<a class="headerlink" href="#map-remove-xt" title="Permalink to this headline">¶</a></h3>
+<p>( map – remove-xt )</p>
+<p>Get the entry removal handler of a map <em>map</em>.</p>
+</section>
+<section id="x-map-full">
+<h3><code class="docutils literal notranslate"><span class="pre">x-map-full</span></code><a class="headerlink" href="#x-map-full" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Map is full exception.</p>
+</section>
+<section id="x-map-index-out-of-range">
+<h3><code class="docutils literal notranslate"><span class="pre">x-map-index-out-of-range</span></code><a class="headerlink" href="#x-map-index-out-of-range" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Map index is out of range exception.</p>
+</section>
+<section id="x-map-index-no-entry">
+<h3><code class="docutils literal notranslate"><span class="pre">x-map-index-no-entry</span></code><a class="headerlink" href="#x-map-index-no-entry" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Map index has no entry exception.</p>
+</section>
+<section id="x-dest-map-not-match">
+<h3><code class="docutils literal notranslate"><span class="pre">x-dest-map-not-match</span></code><a class="headerlink" href="#x-dest-map-not-match" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Destination map does not match source map with regard to key size, value size, hash function, or equals function exception.</p>
+</section>
+</section>
+<section id="counted-string-maps">
+<h2>Counted String Maps<a class="headerlink" href="#counted-string-maps" title="Permalink to this headline">¶</a></h2>
+<p>Counted string maps are a subset of maps that have keys that are implemented as counted strings allocated (aside from an address) outside of the map data structure.</p>
+<section id="cstr-map-module">
+<h3><code class="docutils literal notranslate"><span class="pre">cstr-map-module</span></code><a class="headerlink" href="#cstr-map-module" title="Permalink to this headline">¶</a></h3>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">cstr-map-module</span></code>:</p>
+<section id="cstr-map-size">
+<h4><code class="docutils literal notranslate"><span class="pre">cstr-map-size</span></code><a class="headerlink" href="#cstr-map-size" title="Permalink to this headline">¶</a></h4>
+<p>( count value-size – map-bytes )</p>
+<p>Get the size in bytes of a counted string map with an entry count <em>count</em> and a value size <em>value</em> in bytes.</p>
+</section>
+<section id="init-cstr-map">
+<h4><code class="docutils literal notranslate"><span class="pre">init-cstr-map</span></code><a class="headerlink" href="#init-cstr-map" title="Permalink to this headline">¶</a></h4>
+<p>( hash-xt equals-xt remove-xt count key-size value-size addr – )</p>
+<p>Initialize a counted string map at <em>addr</em> with a value size <em>value-size</em> in bytes, an entry count <em>count</em>, and an entry removal handler <em>remove-xt</em> with the signature ( value-addr key-addr – ) which can be 0.</p>
+</section>
+<section id="find-cstr-map">
+<h4><code class="docutils literal notranslate"><span class="pre">find-cstr-map</span></code><a class="headerlink" href="#find-cstr-map" title="Permalink to this headline">¶</a></h4>
+<p>( key-cstr cstr-map – value-addr | 0 )</p>
+<p>Find a the value of a counted string key <em>key-cstr</em> in a counted string map <em>cstr-map</em> and return the address of its value <em>value-addr</em>, or if the key is not found, return 0.</p>
+</section>
+<section id="insert-cstr-map">
+<h4><code class="docutils literal notranslate"><span class="pre">insert-cstr-map</span></code><a class="headerlink" href="#insert-cstr-map" title="Permalink to this headline">¶</a></h4>
+<p>( value-addr key-cstr cstr-map – )</p>
+<p>Insert a value at <em>value-addr</em> at the counted string key <em>key-cstr</em> in a counted string map <em>cstr-map</em>. If the key is already present in the map, call the entry removal handler for the key and value already in the map (if set) and then replace the key and value in the map with those provided. If the key is not already present in the map and there is room for another entry in the map, add the value to the map at the specified key, otherwise raise <code class="docutils literal notranslate"><span class="pre">x-map-full</span></code>.</p>
+</section>
+<section id="remove-cstr-map">
+<h4><code class="docutils literal notranslate"><span class="pre">remove-cstr-map</span></code><a class="headerlink" href="#remove-cstr-map" title="Permalink to this headline">¶</a></h4>
+<p>( key-cstr cstr-map – )</p>
+<p>Remove a value with a counted string key <em>key-cstr</em> from a counted string map <em>cstr-map</em> if it is present; if this is the case, first call the entry removal handler for the key and value already in the map (if set).</p>
+</section>
+<section id="at-cstr-map">
+<h4><code class="docutils literal notranslate"><span class="pre">at-cstr-map</span></code><a class="headerlink" href="#at-cstr-map" title="Permalink to this headline">¶</a></h4>
+<p>( index cstr-map – value-addr key-cstr )</p>
+<p>Get the value at <em>value-addr</em> and counted string key <em>key-cstr</em> of the entry in a counted string map <em>cstr-map</em> at index <em>index</em>; if <em>index</em> is out of range, raise <code class="docutils literal notranslate"><span class="pre">x-map-index-out-of-range</span></code>, and if <em>index</em> does not correspond to a valid entry, raise <code class="docutils literal notranslate"><span class="pre">x-map-index-no-entry</span></code>.</p>
+</section>
+</section>
+</section>
+<section id="integer-maps">
+<h2>Integer Maps<a class="headerlink" href="#integer-maps" title="Permalink to this headline">¶</a></h2>
+<p>Integer maps are a subset of maps that have keys that are cell-sized integers.</p>
+<section id="int-map-module">
+<h3><code class="docutils literal notranslate"><span class="pre">int-map-module</span></code><a class="headerlink" href="#int-map-module" title="Permalink to this headline">¶</a></h3>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">int-map-module</span></code>:</p>
+<section id="int-map-size">
+<h4><code class="docutils literal notranslate"><span class="pre">int-map-size</span></code><a class="headerlink" href="#int-map-size" title="Permalink to this headline">¶</a></h4>
+<p>( count value-size – map-bytes )</p>
+<p>Get the size in bytes of a integer map with an entry count <em>count</em> and a value size <em>value</em> in bytes.</p>
+</section>
+<section id="init-int-map">
+<h4><code class="docutils literal notranslate"><span class="pre">init-int-map</span></code><a class="headerlink" href="#init-int-map" title="Permalink to this headline">¶</a></h4>
+<p>( hash-xt equals-xt remove-xt count key-size value-size addr – )</p>
+<p>Initialize a integer map at <em>addr</em> with a value size <em>value-size</em> in bytes, an entry count <em>count</em>, and an entry removal handler <em>remove-xt</em> with the signature ( value-addr key-addr – ) which can be 0.</p>
+</section>
+<section id="find-int-map">
+<h4><code class="docutils literal notranslate"><span class="pre">find-int-map</span></code><a class="headerlink" href="#find-int-map" title="Permalink to this headline">¶</a></h4>
+<p>( key-int int-map – value-addr | 0 )</p>
+<p>Find a the value of a integer key <em>key-int</em> in a map <em>int-map</em> and return the address of its value <em>value-addr</em>, or if the key is not found, return 0.</p>
+</section>
+<section id="insert-int-map">
+<h4><code class="docutils literal notranslate"><span class="pre">insert-int-map</span></code><a class="headerlink" href="#insert-int-map" title="Permalink to this headline">¶</a></h4>
+<p>( value-addr key-int int-map – )</p>
+<p>Insert a value at <em>value-addr</em> at the integer key <em>key-int</em> in an integer map <em>int-map</em>. If the key is already present in the map, call the entry removal handler for the key and value already in the map (if set) and then replace the key and value in the map with those provided. If the key is not already present in the map and there is room for another entry in the map, add the value to the map at the specified key, otherwise raise <code class="docutils literal notranslate"><span class="pre">x-map-full</span></code>.</p>
+</section>
+<section id="remove-int-map">
+<h4><code class="docutils literal notranslate"><span class="pre">remove-int-map</span></code><a class="headerlink" href="#remove-int-map" title="Permalink to this headline">¶</a></h4>
+<p>( key-int int-map – )</p>
+<p>Remove a value with a integer key <em>key-int</em> from an integer map <em>int-map</em> if it is present; if this is the case, first call the entry removal handler for the key and value already in the map (if set).</p>
+</section>
+<section id="at-int-map">
+<h4><code class="docutils literal notranslate"><span class="pre">at-int-map</span></code><a class="headerlink" href="#at-int-map" title="Permalink to this headline">¶</a></h4>
+<p>( index int-map – value-addr key-int )</p>
+<p>Get the value at <em>value-addr</em> and integer key <em>key-int</em> of the entry in an integer map <em>int-map</em> at index <em>index</em>; if <em>index</em> is out of range, raise <code class="docutils literal notranslate"><span class="pre">x-map-index-out-of-range</span></code>, and if <em>index</em> does not correspond to a valid entry, raise <code class="docutils literal notranslate"><span class="pre">x-map-index-no-entry</span></code>.</p>
+</section>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schedule.html">Scheduling Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Map Words</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#map-module"><code class="docutils literal notranslate"><span class="pre">map-module</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#counted-string-maps">Counted String Maps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#integer-maps">Integer Maps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rchannel.html">Reply Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="edit.html">Block Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="swd.html"><code class="docutils literal notranslate"><span class="pre">swdcom</span></code> Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="led.html">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test.html">Testing Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="heap.html" title="previous chapter">Heap Words</a></li>
+      <li>Next: <a href="lock.html" title="next chapter">Lock Words</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Travis Bemann.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/words/map.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
