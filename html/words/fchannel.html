@@ -39,46 +39,49 @@
 <p>If no task is listening to a rendezvous channel, if no other tasks are attempting to send on the rendezvous channel the data for the rendezvous channel is recorded in the rendezvous channel, and the sending task is descheduled, to be rescheduled at the back of the scheduling ring when a task then receives on the rendezvous channel. If no task is listening to a rendezvous channel, and if other tasks are already attempting to send on the rendezvous channel, another task attempting to send on the rendezvous channel waits until no more tasks are ahead of it, and then records its data, deschedules itself, immediately transfers control if a listening task is ready to receive a message, and once a listening task has received the message is rescheduled.</p>
 <p>Note that if multiple tasks attempt to send on a rendezvous channel, they are queued so that they send their data in the order in which they attempted to send their data. Likewise, if multiple tasks attempt to receive on a rendezvous channel, they are queued so that they receive data in the order in which they attempted to receive dat.</p>
 <p>Rendezvous channels can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put into alloted memory in the dictionary or into allocated memory in the heap.</p>
+<section id="fchan-module">
+<h2><code class="docutils literal notranslate"><span class="pre">fchan-module</span></code><a class="headerlink" href="#fchan-module" title="Permalink to this headline">¶</a></h2>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">fchan-module</span></code>:</p>
 <section id="x-fchan-closed">
-<h2><code class="docutils literal notranslate"><span class="pre">x-fchan-closed</span></code><a class="headerlink" href="#x-fchan-closed" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">x-fchan-closed</span></code><a class="headerlink" href="#x-fchan-closed" title="Permalink to this headline">¶</a></h3>
 <p>( – )</p>
 <p>The rendezvous channel closed exception.</p>
 </section>
 <section id="fchan-size">
-<h2><code class="docutils literal notranslate"><span class="pre">fchan-size</span></code><a class="headerlink" href="#fchan-size" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">fchan-size</span></code><a class="headerlink" href="#fchan-size" title="Permalink to this headline">¶</a></h3>
 <p>( – bytes )</p>
 <p>Get the size of an rendezvous channel in bytes.</p>
 </section>
 <section id="init-fchan">
-<h2><code class="docutils literal notranslate"><span class="pre">init-fchan</span></code><a class="headerlink" href="#init-fchan" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">init-fchan</span></code><a class="headerlink" href="#init-fchan" title="Permalink to this headline">¶</a></h3>
 <p>( addr – )</p>
 <p>Initialize a rendezvous channel starting at the specified address.</p>
 </section>
 <section id="close-fchan">
-<h2><code class="docutils literal notranslate"><span class="pre">close-fchan</span></code><a class="headerlink" href="#close-fchan" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">close-fchan</span></code><a class="headerlink" href="#close-fchan" title="Permalink to this headline">¶</a></h3>
 <p>( fchan – )</p>
 <p>Close a rendezvous channel. Pending sends and receives will be aborted with the exception <code class="docutils literal notranslate"><span class="pre">x-fchan-closed</span></code>.</p>
 </section>
 <section id="reopen-fchan">
-<h2><code class="docutils literal notranslate"><span class="pre">reopen-fchan</span></code><a class="headerlink" href="#reopen-fchan" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">reopen-fchan</span></code><a class="headerlink" href="#reopen-fchan" title="Permalink to this headline">¶</a></h3>
 <p>( fchan – )</p>
 <p>Reopen a rendezvous channel.</p>
 </section>
 <section id="fchan-closed">
-<h2><code class="docutils literal notranslate"><span class="pre">fchan-closed?</span></code><a class="headerlink" href="#fchan-closed" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">fchan-closed?</span></code><a class="headerlink" href="#fchan-closed" title="Permalink to this headline">¶</a></h3>
 <p>( fchan – closed )</p>
 <p>Get whether a rendezvous channel is closed.</p>
 </section>
 <section id="send-fchan">
-<h2><code class="docutils literal notranslate"><span class="pre">send-fchan</span></code><a class="headerlink" href="#send-fchan" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">send-fchan</span></code><a class="headerlink" href="#send-fchan" title="Permalink to this headline">¶</a></h3>
 <p>( addr bytes fchan – )</p>
 <p>Send message with a buffer as a payload over a rendezvous channel. Block until another task receives the message; if a task is already waiting for a message, transfer control to it. Note that the buffer is copied, and will be truncated if the buffer size of the rendezvous channel is smaller than the data provided, and padded with zeros if it is larger. Note that this must not be called within a critical section.</p>
 </section>
 <section id="recv-fchan">
-<h2><code class="docutils literal notranslate"><span class="pre">recv-fchan</span></code><a class="headerlink" href="#recv-fchan" title="Permalink to this headline">¶</a></h2>
-<p>( addr bytes fchan – addr recv-bytes )</p>
-<p>Receive message with a buffer as a payload over a rendezvous channel. Block until another task sends a message. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the bufer size of the rendezvous channel; the passed in buffer and the number of bytes copied into it are returned. Note that this must not be called within a critical section.</p>
+<h3><code class="docutils literal notranslate"><span class="pre">recv-fchan</span></code><a class="headerlink" href="#recv-fchan" title="Permalink to this headline">¶</a></h3>
+<p>( addr bytes fchan – recv-bytes )</p>
+<p>Receive message with a buffer as a payload over a rendezvous channel. Block until another task sends a message. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the rendezvous channel; the number of bytes copied is returned. Note that this must not be called within a critical section.</p>
+</section>
 </section>
 </section>
 
@@ -118,17 +121,11 @@
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="map.html">Map Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Rendezvous Channel Words</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#x-fchan-closed"><code class="docutils literal notranslate"><span class="pre">x-fchan-closed</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#fchan-size"><code class="docutils literal notranslate"><span class="pre">fchan-size</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#init-fchan"><code class="docutils literal notranslate"><span class="pre">init-fchan</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#close-fchan"><code class="docutils literal notranslate"><span class="pre">close-fchan</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#reopen-fchan"><code class="docutils literal notranslate"><span class="pre">reopen-fchan</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#fchan-closed"><code class="docutils literal notranslate"><span class="pre">fchan-closed?</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#send-fchan"><code class="docutils literal notranslate"><span class="pre">send-fchan</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#recv-fchan"><code class="docutils literal notranslate"><span class="pre">recv-fchan</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fchan-module"><code class="docutils literal notranslate"><span class="pre">fchan-module</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="rchannel.html">Reply Channel Words</a></li>

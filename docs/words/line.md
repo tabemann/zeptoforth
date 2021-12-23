@@ -17,12 +17,16 @@ Note that tabs and characters of code points greater than 127 are handled correc
 
 After a reboot, it is initialized for the main task only, and if, when enabled, `refill` is used for a different task, it needs to have already been initialized for that task.
 
+### `line-module`
+
 The following words are in `line-module`:
 
 ##### `init-line`
 ( index-ptr count-ptr buffer-ptr buffer-size -- )
 
 Enable the line editor for the current task, with a pointer to the index variable, a poiner to the count variable, a pointer to the input buffer, and a size of the input buffer provided. Note that it allots memory in the current task's dictionary.
+
+### `forth-module`
 
 The following words are in `forth-module`:
 

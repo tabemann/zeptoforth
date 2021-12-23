@@ -2,6 +2,8 @@
 
 The block interface is written for the STM32F746 DISCOVERY board. It provides a convenient interface for turning the Quad SPI flash functionality into a map of block id's to 1K blocks of memory.
 
+### `forth-module`
+
 The following words are in `forth-module`:
 
 ##### `load`
@@ -23,6 +25,8 @@ Display each 64-byte line in a block with the given id from first to last; if th
 ( start-id end-id -- )
 
 Display each 64-byte line from first to last in each block, if it exists, in the range from `start-id` to `end-id`.
+
+### `block-module`
 
 The following words are in `block-module`:
 

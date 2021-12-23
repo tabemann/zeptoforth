@@ -153,7 +153,6 @@ begin-module map-module
 
   \ Insert a value with a key into a map
   : insert-map ( value-addr key-addr map -- )
-    dup map-used-entry-count @ over map-entry-count @ < averts x-map-full
     2dup key-hash
     >r 2dup r@ -rot find-key ?dup if
       rdrop swap >r r@ map-entry cell+
@@ -161,6 +160,7 @@ begin-module map-module
 	dup dup r@ map-key-size @ + swap r@ map-remove-xt @ execute
       then
     else
+      dup map-used-entry-count @ over map-entry-count @ < averts x-map-full
       r> 2dup swap find-available
       rot >r r@ map-entry
       tuck ! cell+
@@ -204,7 +204,7 @@ begin-module map-module
   ;
 
   \ Get the key and value at an index in a map
-  : at-map ( index map -- key-addr value-addr )
+  : at-map ( index map -- value-addr key-addr )
     over 0 >= averts x-map-index-out-of-range
     2dup map-entry-count @ < averts x-map-index-out-of-range
     dup >r map-entry dup @ averts x-map-index-no-entry

@@ -40,61 +40,64 @@
 <p>Note that if multiple tasks attempt to send on a reply channel, they are queued so that they send their data in the order in which they attempted to send their data. Likewise, if multiple tasks attempt to receive on a reply channel, they are queued so that they receive data in the order in which they attempted to receive dat.</p>
 <p>Once a task receives a message on a reply channel, the reply channel is put into a state where it is pending a reply. No other messages will be sent over the reply channel until the task which received the message sends a reply back to the task which had originally sent on the reply channel. Like the original message sent from the sending task to the receiving task, no data is buffered in a reply but rather the reply data is copied directly from the buffer provided by the replying task to the reply buffer provided by the original sending task.</p>
 <p>Reply channels can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put into alloted memory in the dictionary or into allocated memory in the heap.</p>
+<section id="rchan-module">
+<h2><code class="docutils literal notranslate"><span class="pre">rchan-module</span></code><a class="headerlink" href="#rchan-module" title="Permalink to this headline">¶</a></h2>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">rchan-module</span></code>:</p>
 <section id="x-rchan-closed">
-<h2><code class="docutils literal notranslate"><span class="pre">x-rchan-closed</span></code><a class="headerlink" href="#x-rchan-closed" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">x-rchan-closed</span></code><a class="headerlink" href="#x-rchan-closed" title="Permalink to this headline">¶</a></h3>
 <p>( – )</p>
 <p>The reply channel closed exception.</p>
 </section>
 <section id="x-rchan-wait-reply">
-<h2><code class="docutils literal notranslate"><span class="pre">x-rchan-wait-reply</span></code><a class="headerlink" href="#x-rchan-wait-reply" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">x-rchan-wait-reply</span></code><a class="headerlink" href="#x-rchan-wait-reply" title="Permalink to this headline">¶</a></h3>
 <p>( – )</p>
 <p>This exceptions is raised if a task for which a reply channel is awaiting a reply follow a receive attempts to receive from that reply channel again.</p>
 </section>
 <section id="x-rchan-not-wait-reply">
-<h2><code class="docutils literal notranslate"><span class="pre">x-rchan-not-wait-reply</span></code><a class="headerlink" href="#x-rchan-not-wait-reply" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">x-rchan-not-wait-reply</span></code><a class="headerlink" href="#x-rchan-not-wait-reply" title="Permalink to this headline">¶</a></h3>
 <p>( – )</p>
 <p>This exception is raised if a task attempts to reply to a reply channel which is not awaiting a reply from that task.</p>
 </section>
 <section id="rchan-size">
-<h2><code class="docutils literal notranslate"><span class="pre">rchan-size</span></code><a class="headerlink" href="#rchan-size" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">rchan-size</span></code><a class="headerlink" href="#rchan-size" title="Permalink to this headline">¶</a></h3>
 <p>( – bytes )</p>
 <p>Get the size of an reply channel in bytes.</p>
 </section>
 <section id="init-rchan">
-<h2><code class="docutils literal notranslate"><span class="pre">init-rchan</span></code><a class="headerlink" href="#init-rchan" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">init-rchan</span></code><a class="headerlink" href="#init-rchan" title="Permalink to this headline">¶</a></h3>
 <p>( addr – )</p>
 <p>Initialize a reply channel starting at the specified address.</p>
 </section>
 <section id="close-rchan">
-<h2><code class="docutils literal notranslate"><span class="pre">close-rchan</span></code><a class="headerlink" href="#close-rchan" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">close-rchan</span></code><a class="headerlink" href="#close-rchan" title="Permalink to this headline">¶</a></h3>
 <p>( rchan – )</p>
 <p>Close a reply channel. Pending sends and receives will be aborted with the exception <code class="docutils literal notranslate"><span class="pre">x-rchan-closed</span></code>.</p>
 </section>
 <section id="reopen-rchan">
-<h2><code class="docutils literal notranslate"><span class="pre">reopen-rchan</span></code><a class="headerlink" href="#reopen-rchan" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">reopen-rchan</span></code><a class="headerlink" href="#reopen-rchan" title="Permalink to this headline">¶</a></h3>
 <p>( rchan – )</p>
 <p>Reopen a reply channel.</p>
 </section>
 <section id="rchan-closed">
-<h2><code class="docutils literal notranslate"><span class="pre">rchan-closed?</span></code><a class="headerlink" href="#rchan-closed" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">rchan-closed?</span></code><a class="headerlink" href="#rchan-closed" title="Permalink to this headline">¶</a></h3>
 <p>( rchan – closed )</p>
 <p>Get whether a reply channel is closed.</p>
 </section>
 <section id="send-rchan">
-<h2><code class="docutils literal notranslate"><span class="pre">send-rchan</span></code><a class="headerlink" href="#send-rchan" title="Permalink to this headline">¶</a></h2>
-<p>( send-addr send-bytes reply-addr reply-bytes rchan – reply-addr’ reply-bytes’ )</p>
-<p>Send message with a buffer <em>send-addr</em> with size <em>send-bytes</em> in bytes as a payload over a reply channel. Block until another task replies to the message; if a task is already waiting for a message, transfer control to it. Note that the buffer is copied, and will be truncated if the buffer size of the reply channel is smaller than the data provided, and padded with zeros if it is larger. In turn, the reply provided by the receiving task is copied into the provided reply buffer <em>reply-addr</em> with the size <em>reply-bytes</em> in bytes, and <em>reply-addr</em> along with the actual size in bytes of the reply is returned. Note that this must not be called within a critical section.</p>
+<h3><code class="docutils literal notranslate"><span class="pre">send-rchan</span></code><a class="headerlink" href="#send-rchan" title="Permalink to this headline">¶</a></h3>
+<p>( send-addr send-bytes reply-addr reply-bytes rchan – reply-bytes’ )</p>
+<p>Send message with a buffer <em>send-addr</em> with size <em>send-bytes</em> in bytes as a payload over a reply channel. Block until another task replies to the message; if a task is already waiting for a message, transfer control to it. Note that the buffer is copied, and will be truncated if the buffer size of the reply channel is smaller than the data provided, and padded with zeros if it is larger. In turn, the reply provided by the receiving task is copied into the provided reply buffer <em>reply-addr</em> with the size <em>reply-bytes</em> in bytes, and the actual size in bytes of the reply is returned. Note that this must not be called within a critical section.</p>
 </section>
 <section id="recv-rchan">
-<h2><code class="docutils literal notranslate"><span class="pre">recv-rchan</span></code><a class="headerlink" href="#recv-rchan" title="Permalink to this headline">¶</a></h2>
-<p>( addr bytes rchan – recv-addr recv-bytes )</p>
-<p>Receive message with a buffer <em>addr</em> with size <em>bytes</em> in bytes as a payload over a reply channel. Block until another task sends a message. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the bufer size of the reply channel; the passed in buffer and the number of bytes copied into it are returned. At this point the reply channel is in a state where it is waiting for a reply; the sending task will only be readied once a reply is provided with <code class="docutils literal notranslate"><span class="pre">reply-rchan</span></code>. Note that this must not be called within a critical section. Note that the task for which a reply channel is awaiting a reply following a receive cannot receive from that reply channel; if this is attenpted <code class="docutils literal notranslate"><span class="pre">x-rchan-wait-reply</span></code> is raised.</p>
+<h3><code class="docutils literal notranslate"><span class="pre">recv-rchan</span></code><a class="headerlink" href="#recv-rchan" title="Permalink to this headline">¶</a></h3>
+<p>( addr bytes rchan – recv-bytes )</p>
+<p>Receive message with a buffer <em>addr</em> with size <em>bytes</em> in bytes as a payload over a reply channel. Block until another task sends a message. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the bufer size of the reply channel; the number of bytes copied is returned. At this point the reply channel is in a state where it is waiting for a reply; the sending task will only be readied once a reply is provided with <code class="docutils literal notranslate"><span class="pre">reply-rchan</span></code>. Note that this must not be called within a critical section. Note that the task for which a reply channel is awaiting a reply following a receive cannot receive from that reply channel; if this is attenpted <code class="docutils literal notranslate"><span class="pre">x-rchan-wait-reply</span></code> is raised.</p>
 </section>
 <section id="reply-rchan">
-<h2><code class="docutils literal notranslate"><span class="pre">reply-rchan</span></code><a class="headerlink" href="#reply-rchan" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">reply-rchan</span></code><a class="headerlink" href="#reply-rchan" title="Permalink to this headline">¶</a></h3>
 <p>( addr bytes rchan – )</p>
 <p>Reply to a reply channel which the current task had received a message from with the data in buffer <em>addr</em> with size <em>bytes</em> in bytes. This data is copied into the reply buffer of the original sending task, truncated to the size of the sending task’s reply buffer. Note that the task replying to a reply channel must be the same task as that which had originally received from the reply channel, or else <code class="docutils literal notranslate"><span class="pre">x-rchan-not-wait-reply</span></code> is raised.</p>
+</section>
 </section>
 </section>
 
@@ -134,21 +137,12 @@
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="map.html">Map Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Reply Channel Words</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#x-rchan-closed"><code class="docutils literal notranslate"><span class="pre">x-rchan-closed</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#x-rchan-wait-reply"><code class="docutils literal notranslate"><span class="pre">x-rchan-wait-reply</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#x-rchan-not-wait-reply"><code class="docutils literal notranslate"><span class="pre">x-rchan-not-wait-reply</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#rchan-size"><code class="docutils literal notranslate"><span class="pre">rchan-size</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#init-rchan"><code class="docutils literal notranslate"><span class="pre">init-rchan</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#close-rchan"><code class="docutils literal notranslate"><span class="pre">close-rchan</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#reopen-rchan"><code class="docutils literal notranslate"><span class="pre">reopen-rchan</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#rchan-closed"><code class="docutils literal notranslate"><span class="pre">rchan-closed?</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#send-rchan"><code class="docutils literal notranslate"><span class="pre">send-rchan</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#recv-rchan"><code class="docutils literal notranslate"><span class="pre">recv-rchan</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#reply-rchan"><code class="docutils literal notranslate"><span class="pre">reply-rchan</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rchan-module"><code class="docutils literal notranslate"><span class="pre">rchan-module</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>

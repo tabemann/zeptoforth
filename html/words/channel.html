@@ -37,86 +37,89 @@
 <h1>Channel Words<a class="headerlink" href="#channel-words" title="Permalink to this headline">¶</a></h1>
 <p>A channel is a monodirectional means of communicating data, as arbitrary-sized blocks of data, between two or more different tasks. Channels form a fixed-size queue onto which data is sent on one end and data is received on the other. Any task which attempts to send data on a full channel, or receive data on an empty channel, will be suspended until either data is received from the channel, or data is sent to the channel, respectively, unless non-blocking operations are used, where then <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> (declared in <code class="docutils literal notranslate"><span class="pre">task-module</span></code>) is raised instead of blocking.</p>
 <p>Channels can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put into alloted memory in the dictionary or into allocated memory in the heap. Note that the size of a channel for a given element size and element count may be calculated with <code class="docutils literal notranslate"><span class="pre">chan-size</span></code>.</p>
+<section id="chan-module">
+<h2><code class="docutils literal notranslate"><span class="pre">chan-module</span></code><a class="headerlink" href="#chan-module" title="Permalink to this headline">¶</a></h2>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">chan-module</span></code>:</p>
 <section id="x-chan-closed">
-<h2><code class="docutils literal notranslate"><span class="pre">x-chan-closed</span></code><a class="headerlink" href="#x-chan-closed" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">x-chan-closed</span></code><a class="headerlink" href="#x-chan-closed" title="Permalink to this headline">¶</a></h3>
 <p>( – )</p>
 <p>Channel closed exception. Raised on attempting to send to a closed channel or when trying to receive on an empty closed channel.</p>
 </section>
 <section id="chan-full">
-<h2><code class="docutils literal notranslate"><span class="pre">chan-full?</span></code><a class="headerlink" href="#chan-full" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">chan-full?</span></code><a class="headerlink" href="#chan-full" title="Permalink to this headline">¶</a></h3>
 <p>( chan – flag )</p>
 <p>Get whether a channel is full.</p>
 </section>
 <section id="chan-empty">
-<h2><code class="docutils literal notranslate"><span class="pre">chan-empty?</span></code><a class="headerlink" href="#chan-empty" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">chan-empty?</span></code><a class="headerlink" href="#chan-empty" title="Permalink to this headline">¶</a></h3>
 <p>( chan – flag )</p>
 <p>Get whether a channel is empty.</p>
 </section>
 <section id="chan-size">
-<h2><code class="docutils literal notranslate"><span class="pre">chan-size</span></code><a class="headerlink" href="#chan-size" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">chan-size</span></code><a class="headerlink" href="#chan-size" title="Permalink to this headline">¶</a></h3>
 <p>( element-bytes element-count – total-bytes )</p>
 <p>Get the size in memory for a channel with a specified element size in bytes and element count.</p>
 </section>
 <section id="init-chan">
-<h2><code class="docutils literal notranslate"><span class="pre">init-chan</span></code><a class="headerlink" href="#init-chan" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">init-chan</span></code><a class="headerlink" href="#init-chan" title="Permalink to this headline">¶</a></h3>
 <p>( element-bytes element-count addr – )</p>
 <p>Initialize a channel starting at the specified address with the element size and element count. The <em>element-bytes</em> and <em>element-count</em> should be the same as when they were passed to <code class="docutils literal notranslate"><span class="pre">chan-size</span></code> when alloting or allocating the memory whose starting address is passed in.</p>
 </section>
 <section id="close-chan">
-<h2><code class="docutils literal notranslate"><span class="pre">close-chan</span></code><a class="headerlink" href="#close-chan" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">close-chan</span></code><a class="headerlink" href="#close-chan" title="Permalink to this headline">¶</a></h3>
 <p>( chan – )</p>
 <p>Close a channel. Raise <code class="docutils literal notranslate"><span class="pre">x-chan-closed</span></code> for all pending sending tasks or for all pending receiving tasks if the channel is empty.</p>
 </section>
 <section id="reopen-chan">
-<h2><code class="docutils literal notranslate"><span class="pre">reopen-chan</span></code><a class="headerlink" href="#reopen-chan" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">reopen-chan</span></code><a class="headerlink" href="#reopen-chan" title="Permalink to this headline">¶</a></h3>
 <p>( chan – )</p>
 <p>Reopen a channel.</p>
 </section>
 <section id="chan-closed">
-<h2><code class="docutils literal notranslate"><span class="pre">chan-closed?</span></code><a class="headerlink" href="#chan-closed" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">chan-closed?</span></code><a class="headerlink" href="#chan-closed" title="Permalink to this headline">¶</a></h3>
 <p>( chan – closed )</p>
 <p>Get whether a channel is closed.</p>
 </section>
 <section id="send-chan">
-<h2><code class="docutils literal notranslate"><span class="pre">send-chan</span></code><a class="headerlink" href="#send-chan" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">send-chan</span></code><a class="headerlink" href="#send-chan" title="Permalink to this headline">¶</a></h3>
 <p>( addr bytes chan – )</p>
 <p>Send message with a buffer as a payload over a channel. Block until another task receives the message if the channel is full. Note that the buffer is copied, and will be truncated if the buffer size of the channel is smaller than the data provided, and padded with zeros if it is larger. This is not safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="recv-chan">
-<h2><code class="docutils literal notranslate"><span class="pre">recv-chan</span></code><a class="headerlink" href="#recv-chan" title="Permalink to this headline">¶</a></h2>
-<p>( addr bytes chan – addr recv-bytes )</p>
-<p>Receive message into a buffer from a channel. Block until another task sends a message if the channel is empty. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the passed in buffer and the number of bytes copied into it are returned. This is not safe to call within an interrupt service routine or a critical section.</p>
+<h3><code class="docutils literal notranslate"><span class="pre">recv-chan</span></code><a class="headerlink" href="#recv-chan" title="Permalink to this headline">¶</a></h3>
+<p>( addr bytes chan – recv-bytes )</p>
+<p>Receive message into a buffer from a channel. Block until another task sends a message if the channel is empty. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the number of bytes copied is returned. This is not safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="peek-chan">
-<h2><code class="docutils literal notranslate"><span class="pre">peek-chan</span></code><a class="headerlink" href="#peek-chan" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">peek-chan</span></code><a class="headerlink" href="#peek-chan" title="Permalink to this headline">¶</a></h3>
 <p>( addr bytes chan – addr peek-bytes )</p>
-<p>Peek the oldest message into a buffer from a channel, without popping it from the channel’s queue. Block until another task sends a message if the channel is empty. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the passed in buffer and the number of bytes copied into it are returned. This is not safe to call within an interrupt service routine or a critical section.</p>
+<p>Peek the oldest message into a buffer from a channel, without popping it from the channel’s queue. Block until another task sends a message if the channel is empty. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the number of bytes copied is returned. This is not safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="skip-chan">
-<h2><code class="docutils literal notranslate"><span class="pre">skip-chan</span></code><a class="headerlink" href="#skip-chan" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">skip-chan</span></code><a class="headerlink" href="#skip-chan" title="Permalink to this headline">¶</a></h3>
 <p>( chan – )</p>
 <p>Skip the most oldest message in a channel. Block until another task sends a message if the channel is empty. Note that no copying takes place, making this faster than receiving a message. This is not safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="send-chan-no-block">
-<h2><code class="docutils literal notranslate"><span class="pre">send-chan-no-block</span></code><a class="headerlink" href="#send-chan-no-block" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">send-chan-no-block</span></code><a class="headerlink" href="#send-chan-no-block" title="Permalink to this headline">¶</a></h3>
 <p>( addr bytes chan – )</p>
 <p>Send message with a buffer as a payload over a channel. If the channel is full, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. Note that the buffer is copied, and will be truncated if the buffer size of the channel is smaller than the data provided, and padded with zeros if it is larger. This is safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="recv-chan-no-block">
-<h2><code class="docutils literal notranslate"><span class="pre">recv-chan-no-block</span></code><a class="headerlink" href="#recv-chan-no-block" title="Permalink to this headline">¶</a></h2>
-<p>( addr bytes chan – addr recv-bytes )</p>
-<p>Receive message into a buffer from a channel. If the channel is empty, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the passed in buffer and the number of bytes copied into it are returned. This is safe to call within an interrupt service routine or a critical section.</p>
+<h3><code class="docutils literal notranslate"><span class="pre">recv-chan-no-block</span></code><a class="headerlink" href="#recv-chan-no-block" title="Permalink to this headline">¶</a></h3>
+<p>( addr bytes chan – recv-bytes )</p>
+<p>Receive message into a buffer from a channel. If the channel is empty, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the number of bytes copied is returned. This is safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="peek-chan-no-block">
-<h2><code class="docutils literal notranslate"><span class="pre">peek-chan-no-block</span></code><a class="headerlink" href="#peek-chan-no-block" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">peek-chan-no-block</span></code><a class="headerlink" href="#peek-chan-no-block" title="Permalink to this headline">¶</a></h3>
 <p>( addr bytes chan – addr peek-bytes )</p>
-<p>Peek the oldest message into a buffer from a channel, without popping it from the channel’s queue. If the channel is empty, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the passed in buffer and the number of bytes copied into it are returned. This is safe to call within an interrupt service routine or a critical section.</p>
+<p>Peek the oldest message into a buffer from a channel, without popping it from the channel’s queue. If the channel is empty, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the number of bytes copied is returned. This is safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="skip-chan-no-block">
-<h2><code class="docutils literal notranslate"><span class="pre">skip-chan-no-block</span></code><a class="headerlink" href="#skip-chan-no-block" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">skip-chan-no-block</span></code><a class="headerlink" href="#skip-chan-no-block" title="Permalink to this headline">¶</a></h3>
 <p>( chan – )</p>
 <p>Skip the most oldest message in a channel. If the channel is empty, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. Note that no copying takes place, making this faster than receiving a message. This is safe to call within an interrupt service routine or a critical section.</p>
+</section>
 </section>
 </section>
 
@@ -156,24 +159,10 @@
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="map.html">Map Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Channel Words</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#x-chan-closed"><code class="docutils literal notranslate"><span class="pre">x-chan-closed</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#chan-full"><code class="docutils literal notranslate"><span class="pre">chan-full?</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#chan-empty"><code class="docutils literal notranslate"><span class="pre">chan-empty?</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#chan-size"><code class="docutils literal notranslate"><span class="pre">chan-size</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#init-chan"><code class="docutils literal notranslate"><span class="pre">init-chan</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#close-chan"><code class="docutils literal notranslate"><span class="pre">close-chan</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#reopen-chan"><code class="docutils literal notranslate"><span class="pre">reopen-chan</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#chan-closed"><code class="docutils literal notranslate"><span class="pre">chan-closed?</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#send-chan"><code class="docutils literal notranslate"><span class="pre">send-chan</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#recv-chan"><code class="docutils literal notranslate"><span class="pre">recv-chan</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#peek-chan"><code class="docutils literal notranslate"><span class="pre">peek-chan</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#skip-chan"><code class="docutils literal notranslate"><span class="pre">skip-chan</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#send-chan-no-block"><code class="docutils literal notranslate"><span class="pre">send-chan-no-block</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#recv-chan-no-block"><code class="docutils literal notranslate"><span class="pre">recv-chan-no-block</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#peek-chan-no-block"><code class="docutils literal notranslate"><span class="pre">peek-chan-no-block</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#skip-chan-no-block"><code class="docutils literal notranslate"><span class="pre">skip-chan-no-block</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#chan-module"><code class="docutils literal notranslate"><span class="pre">chan-module</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
