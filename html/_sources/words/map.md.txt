@@ -9,7 +9,7 @@ The following words are in `map-module`:
 ##### `map-size`
 ( count key-size value-size -- map-bytes )
 
-Get the size in bytes of a map with an entry count *count*, a key size *size* in bytes, and a value size *value* in bytes.
+Get the size in bytes of a map with an entry count *count*, a key size *key-size* in bytes, and a value size *value-size* in bytes.
 
 ##### `init-map`
 ( hash-xt equals-xt remove-xt count key-size value-size addr -- )
@@ -122,7 +122,7 @@ The following words are in `cstr-map-module`:
 ##### `cstr-map-size`
 ( count value-size -- map-bytes )
 
-Get the size in bytes of a counted string map with an entry count *count* and a value size *value* in bytes.
+Get the size in bytes of a counted string map with an entry count *count* and a value size *value-size* in bytes.
 
 ##### `init-cstr-map`
 ( hash-xt equals-xt remove-xt count key-size value-size addr -- )
@@ -160,7 +160,7 @@ The following words are in `int-map-module`:
 ##### `int-map-size`
 ( count value-size -- map-bytes )
 
-Get the size in bytes of a integer map with an entry count *count* and a value size *value* in bytes.
+Get the size in bytes of a integer map with an entry count *count* and a value size *value-size* in bytes.
 
 ##### `init-int-map`
 ( hash-xt equals-xt remove-xt count key-size value-size addr -- )
