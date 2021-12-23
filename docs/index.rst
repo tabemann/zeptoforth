@@ -22,6 +22,7 @@ Zeptoforth Documentation
    words/task_pool
    words/action_pool
    words/heap
+   words/map
    words/lock
    words/channel
    words/fchannel

@@ -40,61 +40,64 @@
 <p>When modules are defined, they automatically add their wordlist definition as a constant to the containing module. Also, if so specified by using <code class="docutils literal notranslate"><span class="pre">begin-import-module</span></code> or <code class="docutils literal notranslate"><span class="pre">begin-import-module-once</span></code>, the modules may be imported in the containing module. Note that modules may be defined multiple times, each time adding onto the existing definition, unless the module is defined with <code class="docutils literal notranslate"><span class="pre">begin-module-once</span></code> or <code class="docutils literal notranslate"><span class="pre">begin-import-module-once</span></code>, where then it is checked such that the module already exists by the name specified, and if it does exist, <code class="docutils literal notranslate"><span class="pre">x-module-already-defined</span></code> is raised.</p>
 <p>Within a given module, the user may import and unimport modules/wordlists, which pushes them on the wordlist order and removes them from that module’s portion of the wordlist’s order respectively. Note that all the wordlists imported with a module definition are automatically unimported when that module definition is ended.</p>
 <p>Note that it is recommended that once <code class="docutils literal notranslate"><span class="pre">src/common/forth/module.fs</span></code> is loaded, the user should not manually use <code class="docutils literal notranslate"><span class="pre">set-order</span></code> or <code class="docutils literal notranslate"><span class="pre">set-current</span></code>, as the module system will not know about this and thus unexpected results may occur.</p>
+<section id="forth-module">
+<h2><code class="docutils literal notranslate"><span class="pre">forth-module</span></code><a class="headerlink" href="#forth-module" title="Permalink to this headline">¶</a></h2>
 <p>The following words are defined in <code class="docutils literal notranslate"><span class="pre">forth-module</span></code>:</p>
 <section id="x-module-already-defined">
-<h2><code class="docutils literal notranslate"><span class="pre">x-module-already-defined</span></code><a class="headerlink" href="#x-module-already-defined" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">x-module-already-defined</span></code><a class="headerlink" href="#x-module-already-defined" title="Permalink to this headline">¶</a></h3>
 <p>( – )</p>
 <p>Module already defined exception.</p>
 </section>
 <section id="x-module-not-found">
-<h2><code class="docutils literal notranslate"><span class="pre">x-module-not-found</span></code><a class="headerlink" href="#x-module-not-found" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">x-module-not-found</span></code><a class="headerlink" href="#x-module-not-found" title="Permalink to this headline">¶</a></h3>
 <p>( – )</p>
 <p>Module not found exception.</p>
 </section>
 <section id="id1">
-<h2><code class="docutils literal notranslate"><span class="pre">^</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">^</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
 <p>( ? “module-name-0” … “module-name-x” “::” “word-name” – ? )</p>
 <p>Reference word <em>word-name</em> in a specified module <em>module-name-x</em>, which may be nested within any number of containing modules, where the first module referenced <em>module-name-0</em> must be within the current order, and apply it to the current compilation/interpretation state. <code class="docutils literal notranslate"><span class="pre">::</span></code> separates the innermost module <em>module-name-x</em>, from <em>word-name</em>. This is an immediate word, and the referenced word will be folded or inlined as if it were compiled normally.</p>
 </section>
 <section id="begin-module">
-<h2><code class="docutils literal notranslate"><span class="pre">begin-module</span></code><a class="headerlink" href="#begin-module" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">begin-module</span></code><a class="headerlink" href="#begin-module" title="Permalink to this headline">¶</a></h3>
 <p>( “name” – )</p>
 <p>Begin the definition of module <em>name</em>; module <em>name</em> must not already exist or <code class="docutils literal notranslate"><span class="pre">x-module-already-defined</span></code> will be raised.</p>
 </section>
 <section id="continue-module">
-<h2><code class="docutils literal notranslate"><span class="pre">continue-module</span></code><a class="headerlink" href="#continue-module" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">continue-module</span></code><a class="headerlink" href="#continue-module" title="Permalink to this headline">¶</a></h3>
 <p>( “name” – )</p>
 <p>Continue the definition of a preexisting module <em>name</em>; if module <em>name</em> does not exist <code class="docutils literal notranslate"><span class="pre">x-module-not-found</span></code> will be raised.</p>
 </section>
 <section id="private-module">
-<h2><code class="docutils literal notranslate"><span class="pre">private-module</span></code><a class="headerlink" href="#private-module" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">private-module</span></code><a class="headerlink" href="#private-module" title="Permalink to this headline">¶</a></h3>
 <p>( – )</p>
 <p>Begin the definition of a private module, i.e a module not bound to a word.</p>
 </section>
 <section id="end-module">
-<h2><code class="docutils literal notranslate"><span class="pre">end-module</span></code><a class="headerlink" href="#end-module" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">end-module</span></code><a class="headerlink" href="#end-module" title="Permalink to this headline">¶</a></h3>
 <p>( – )</p>
 <p>End the definition of the module at the top of the module stack, removing each wordlist for each module imported within it from the wordlist order.</p>
 </section>
 <section id="id2">
-<h2><code class="docutils literal notranslate"><span class="pre">end-module&gt;</span></code><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">end-module&gt;</span></code><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <p>( –  module )</p>
 <p>End the definition of the module at the top of the module stack, removing each wordlist for each module imported within it from th e wordlist order, and then push the module whose definition had ended onto the data stack.</p>
 </section>
 <section id="import">
-<h2><code class="docutils literal notranslate"><span class="pre">import</span></code><a class="headerlink" href="#import" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">import</span></code><a class="headerlink" href="#import" title="Permalink to this headline">¶</a></h3>
 <p>( module – )</p>
 <p>Import a specified module into the current module’s wordlist order; if the module does not exist <code class="docutils literal notranslate"><span class="pre">x-module-not-found</span></code> is raised.</p>
 </section>
 <section id="unimport">
-<h2><code class="docutils literal notranslate"><span class="pre">unimport</span></code><a class="headerlink" href="#unimport" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">unimport</span></code><a class="headerlink" href="#unimport" title="Permalink to this headline">¶</a></h3>
 <p>( module – )</p>
 <p>Remove a specified module from the current module’s wordlist order; note that it does not remove it from parent modules’ wordlist orders, so if it  had been imported within them they are still searchable.</p>
 </section>
 <section id="export">
-<h2><code class="docutils literal notranslate"><span class="pre">export</span></code><a class="headerlink" href="#export" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">export</span></code><a class="headerlink" href="#export" title="Permalink to this headline">¶</a></h3>
 <p>( “name” | “^” “module-name-0” … “module-name-x” “::” “name” – )</p>
 <p>Export a name in the current namespace or referred to by itself or by its path, from the current module.</p>
+</section>
 </section>
 </section>
 
@@ -119,17 +122,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Module Words</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#x-module-already-defined"><code class="docutils literal notranslate"><span class="pre">x-module-already-defined</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#x-module-not-found"><code class="docutils literal notranslate"><span class="pre">x-module-not-found</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">^</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#begin-module"><code class="docutils literal notranslate"><span class="pre">begin-module</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#continue-module"><code class="docutils literal notranslate"><span class="pre">continue-module</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#private-module"><code class="docutils literal notranslate"><span class="pre">private-module</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#end-module"><code class="docutils literal notranslate"><span class="pre">end-module</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">end-module&gt;</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#import"><code class="docutils literal notranslate"><span class="pre">import</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#unimport"><code class="docutils literal notranslate"><span class="pre">unimport</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#export"><code class="docutils literal notranslate"><span class="pre">export</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#forth-module"><code class="docutils literal notranslate"><span class="pre">forth-module</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="lambda.html">Lambda Words</a></li>
@@ -147,6 +140,7 @@
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="map.html">Map Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>

@@ -4,6 +4,8 @@ A channel is a monodirectional means of communicating data, as arbitrary-sized b
 
 Channels can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put into alloted memory in the dictionary or into allocated memory in the heap. Note that the size of a channel for a given element size and element count may be calculated with `chan-size`.
 
+### `chan-module`
+
 The following words are in `chan-module`:
 
 ##### `x-chan-closed`

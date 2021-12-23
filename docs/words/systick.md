@@ -2,12 +2,16 @@
 
 There is not much to SysTick, so this will be short. In zeptoforth SysTicks are at 10ths of milliseconds intervals, so:
 
+### `forth-module`
+
 The following word is in `forth-module`.
 
 ##### `ms`
 ( u -- )
 
 where *u* is the number of milliseconds to wait. Note that this word is replaced with an outwardly equivalent word by `sys/common/forth/task.fs`; unlike that word this word does not take advantage of the timing capabilities provided by `sys/common/forth/task.fs`, even though it does call `PAUSE`.
+
+### `systick-module`
 
 The following words are in `systick-module`.
 

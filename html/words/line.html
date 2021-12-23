@@ -50,22 +50,28 @@
 </ul>
 <p>Note that tabs and characters of code points greater than 127 are handled correctly. Also note that it is not compatible with non-terminal operation except when in upload mode, i.e. with loading code automatically via serial or swdcom; before this is done one must be in upload mode or it must be disabled.</p>
 <p>After a reboot, it is initialized for the main task only, and if, when enabled, <code class="docutils literal notranslate"><span class="pre">refill</span></code> is used for a different task, it needs to have already been initialized for that task.</p>
+<section id="line-module">
+<h2><code class="docutils literal notranslate"><span class="pre">line-module</span></code><a class="headerlink" href="#line-module" title="Permalink to this headline">¶</a></h2>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">line-module</span></code>:</p>
 <section id="init-line">
-<h2><code class="docutils literal notranslate"><span class="pre">init-line</span></code><a class="headerlink" href="#init-line" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">init-line</span></code><a class="headerlink" href="#init-line" title="Permalink to this headline">¶</a></h3>
 <p>( index-ptr count-ptr buffer-ptr buffer-size – )</p>
 <p>Enable the line editor for the current task, with a pointer to the index variable, a poiner to the count variable, a pointer to the input buffer, and a size of the input buffer provided. Note that it allots memory in the current task’s dictionary.</p>
-<p>The following words are in <code class="docutils literal notranslate"><span class="pre">forth-module</span></code>:</p>
 </section>
+</section>
+<section id="forth-module">
+<h2><code class="docutils literal notranslate"><span class="pre">forth-module</span></code><a class="headerlink" href="#forth-module" title="Permalink to this headline">¶</a></h2>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">forth-module</span></code>:</p>
 <section id="enable-line">
-<h2><code class="docutils literal notranslate"><span class="pre">enable-line</span></code><a class="headerlink" href="#enable-line" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">enable-line</span></code><a class="headerlink" href="#enable-line" title="Permalink to this headline">¶</a></h3>
 <p>( – )</p>
 <p>Enable the line editor.</p>
 </section>
 <section id="disable-line">
-<h2><code class="docutils literal notranslate"><span class="pre">disable-line</span></code><a class="headerlink" href="#disable-line" title="Permalink to this headline">¶</a></h2>
+<h3><code class="docutils literal notranslate"><span class="pre">disable-line</span></code><a class="headerlink" href="#disable-line" title="Permalink to this headline">¶</a></h3>
 <p>( – )</p>
 <p>Disable the line editor. This must be done before loading code automatically.</p>
+</section>
 </section>
 </section>
 
@@ -100,9 +106,8 @@
 <li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Line Editor</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#init-line"><code class="docutils literal notranslate"><span class="pre">init-line</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#enable-line"><code class="docutils literal notranslate"><span class="pre">enable-line</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#disable-line"><code class="docutils literal notranslate"><span class="pre">disable-line</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#line-module"><code class="docutils literal notranslate"><span class="pre">line-module</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#forth-module"><code class="docutils literal notranslate"><span class="pre">forth-module</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
@@ -110,9 +115,11 @@
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="map.html">Map Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rchannel.html">Reply Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>

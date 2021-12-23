@@ -35,15 +35,15 @@ begin-module int-map-module
     
   end-module> import
   
-  \ Get the size of a integer map for a given entry count and data size
+  \ Get the size of a integer map for a given entry count and value size
   \ in bytes
-  : int-map-size ( count data-size -- size ) cell swap map-size ;
+  : int-map-size ( count value-size -- size ) cell swap map-size ;
 
   \ Initialize a integer map with the specified remove handler, entry count
   \ and value size in bytes at the specified address
   \
   \ remove-xt: ( value-addr key-addr -- )
-  : init-int-map ( remove-xt count data-size addr -- )
+  : init-int-map ( remove-xt count value-size addr -- )
     2>r 2>r ['] int-map-hash ['] int-map-equals 2r> cell 2r> init-map
   ;
 

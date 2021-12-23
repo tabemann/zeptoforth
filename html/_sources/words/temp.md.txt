@@ -2,6 +2,8 @@
 
 Temporary buffers are circular buffers for allocating temporary data. Temporarily allocated space should not be relied upon to store data indefinitely, because they reallocate space allocated to old buffers when no more space for continguous blocks of memory are available.
 
+### `temp-module`
+
 The following words are in `temp-module`.
 
 ##### `x-data-too-big`
