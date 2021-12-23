@@ -2,6 +2,8 @@
 
 A task queue is a queue of waiting tasks, which then can be woken up, in the order of their joining the task queue, by another task. Note that tasks can wake up any given number of tasks *before* they join the task queue, upon which they will not actually deschedule themselves but rather increment the count of waiting tasks (which was negative in this case).
 
+## `tqueue-module`
+
 The following words are in `tqueue-module`:
 
 ##### `tqueue-size`

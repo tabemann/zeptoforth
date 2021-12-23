@@ -1,6 +1,8 @@
 # Wordlist Words
 
-These words are in `forth-module`.
+### `forth-wordlist`
+
+These words are in `forth-module`:
 
 ##### `forth-module`
 ( -- wid )
