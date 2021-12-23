@@ -2,6 +2,8 @@
 
 A semaphore is a task synchronization construct which keeps a counter indicating some resource and, when the counter is negative, a queue of waiting tasks. Tasks can *give* a semaphore, which increments the counter, and if there one or more waiting tasks, readies the task that has been blocked the longest in an FIFO fashion. Note that a limit can be specified where *giving* a semaphore will not increase the counter beyond the specified limit. Tasks can also *take* a semaphore, which decrements the counter, and if afterwards the counter is negative, blocks the task and places it at the end of the queue of waiting tasks. Additionally there are operations for *ungiving* a semaphore, in the case where one needs to decrement the counter without potentially blocking the current task, and for *broadcasting* a semaphore, which is equivalent to *giving* each waiting task.
 
+### `sema-module`
+
 The following words are in `sema-module`:
 
 ##### `sema-size`

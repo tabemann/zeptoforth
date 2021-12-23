@@ -1948,7 +1948,7 @@ commit-flash
 ;
 
 \ Store a string as a counted string in the RAM dictionary
-: cfix ( b-addr bytes > b-addr )
+: cfix ( b-addr bytes -- b-addr )
   [: here dup >r 2dup c! 1+ swap dup 1+ allot move r> ;] with-ram
 ;
 

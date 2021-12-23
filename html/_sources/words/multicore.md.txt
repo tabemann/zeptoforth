@@ -8,6 +8,8 @@ Note that there are currently some rough edges to multicore on the RP2040, speci
 
 Multicore support in zeptoforth is largely implemented outside the zeptoforth kernel and is split between `src/rp2040/forth/multicore.fs` (on platforms other than RP2040 stubbed out in `src/common/forth/multicore.fs`) and `src/common/forth/task.fs`, with a bit of supporting functionality also in `src/common/forth/systick.fs` and `src/rp2040/forth/erase.fs`.
 
+### `forth-module`
+
 Built into the kernel exists:
 
 ##### `cpu-count`
@@ -33,6 +35,8 @@ In `src/common/forth/basic.fs`, in `forth-module`, exists:
 
 Compile a one-cell-per-core variable into flash that has two words referring to it, a *global-name* which takes a core index when called and outputs the address for that core, and a *cpu-name* which returns its address for the current core.
 
+### `task-module`
+
 In `src/common/forth/task.fs`, in `task-module`, exists:
 
 ##### `spawn-aux-main`
@@ -49,6 +53,8 @@ Exception raised if one calls `spawn-aux-main` for a core which has already been
 ( -- )
 
 Exception raised if one attempts to call `spawn-aux-main` from a core other than core 0.
+
+### `multicore-module`
 
 In both `src/rp2040/forth/multicore.fs` and `src/common/forth/multicore.fs`, in `multicore-module` on all platforms, exists:
 

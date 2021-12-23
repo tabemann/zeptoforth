@@ -38,74 +38,80 @@
 <section id="stack-testing">
 <h2>Stack Testing<a class="headerlink" href="#stack-testing" title="Permalink to this headline">¶</a></h2>
 <p>Stack testing involves checking the stack pointer before and after the code being tested is executed, and testing for the change in the stack pointer as well as matching the values put on the stack by the code being tested against the values expected. By its very nature this code is applied a task-specific level but can be used in different tasks simultaneously. This code is not part of the prebuilt binaries, but rather is in <code class="docutils literal notranslate"><span class="pre">test/common/stack.fs</span></code> and may be used both compiled to flash and compiled to RAM.</p>
+<section id="forth-module">
+<h3><code class="docutils literal notranslate"><span class="pre">forth-module</span></code><a class="headerlink" href="#forth-module" title="Permalink to this headline">¶</a></h3>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">forth-module</span></code>.</p>
 <section id="stack-fail-hook">
-<h3><code class="docutils literal notranslate"><span class="pre">stack-fail-hook</span></code><a class="headerlink" href="#stack-fail-hook" title="Permalink to this headline">¶</a></h3>
+<h4><code class="docutils literal notranslate"><span class="pre">stack-fail-hook</span></code><a class="headerlink" href="#stack-fail-hook" title="Permalink to this headline">¶</a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">stack-fail-hook</span></code> specifies an xt to be executed, if set to a value other than 0, when a stack test fails. By default this is set to 0.</p>
 </section>
 <section id="x-stack-fail">
-<h3><code class="docutils literal notranslate"><span class="pre">x-stack-fail</span></code><a class="headerlink" href="#x-stack-fail" title="Permalink to this headline">¶</a></h3>
+<h4><code class="docutils literal notranslate"><span class="pre">x-stack-fail</span></code><a class="headerlink" href="#x-stack-fail" title="Permalink to this headline">¶</a></h4>
 <p>( – )</p>
 <p><code class="docutils literal notranslate"><span class="pre">x-stack-fail</span></code> is an exception raised when <code class="docutils literal notranslate"><span class="pre">}t</span></code> detects a stack position mismatch relative to the stack pointer recorded by <code class="docutils literal notranslate"><span class="pre">t{</span></code> and the number of cells on the stack passed into it. The purpose of this exception is that the stack pointer is unknown, so the only way to recover from it is by raising an exception.</p>
 </section>
 <section id="t">
-<h3><code class="docutils literal notranslate"><span class="pre">t{</span></code><a class="headerlink" href="#t" title="Permalink to this headline">¶</a></h3>
+<h4><code class="docutils literal notranslate"><span class="pre">t{</span></code><a class="headerlink" href="#t" title="Permalink to this headline">¶</a></h4>
 <p>( – ) ( R: – sp )</p>
 <p>This word saves the current stack pointer on the return stack for it to be used later by <code class="docutils literal notranslate"><span class="pre">}t</span></code>.</p>
 </section>
 <section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">}t</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<h4><code class="docutils literal notranslate"><span class="pre">}t</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
 <p>( x1 … xn y1 … yn u – ) ( R: old-sp – )</p>
 <p>This word checks that the current stack position is two times <em>u</em> cells greater than the old stack position recorded on the return stack; if this is not the case the xt stored in <code class="docutils literal notranslate"><span class="pre">stack-fail-hook</span></code> is executed, if it is not 0, and then <code class="docutils literal notranslate"><span class="pre">x-stack-fail</span></code> is raised. If this is the case each value <em>xi</em> is matched against its corresponding value <em>yi</em>, if any one of these does not match, then the xt stored in <code class="docutils literal notranslate"><span class="pre">stack-fail-hook</span></code> is executed if it is not 0.</p>
+</section>
 </section>
 </section>
 <section id="emit-capture-testing">
 <h2>Emit Capture Testing<a class="headerlink" href="#emit-capture-testing" title="Permalink to this headline">¶</a></h2>
 <p>Emit capture testing involves installing a hook into <code class="docutils literal notranslate"><span class="pre">emit</span></code> transparently, and using this to capture and test each byte emitted against specified rules without interfering with the operation of the system. This is done in a transparently multitasking-friendly manner, and can be used to test behavior spread across multiple tasks without any extra work being needed on the programmer’s part. This code is not part of the prebuilt binaries, but rather is in <code class="docutils literal notranslate"><span class="pre">test/common/capture.fs</span></code> and may be used both compiled to flash and compiled to RAM.</p>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">forth-module</span></code><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">forth-module</span></code>.</p>
 <section id="capture-fail-hook">
-<h3><code class="docutils literal notranslate"><span class="pre">capture-fail-hook</span></code><a class="headerlink" href="#capture-fail-hook" title="Permalink to this headline">¶</a></h3>
+<h4><code class="docutils literal notranslate"><span class="pre">capture-fail-hook</span></code><a class="headerlink" href="#capture-fail-hook" title="Permalink to this headline">¶</a></h4>
 <p><code class="docutils literal notranslate"><span class="pre">capture-fail-hook</span></code> specifies an xt to be executed, if set to a value other than 0, when an emit capture test fails. By default this is set to 0.</p>
 </section>
 <section id="enable-capture">
-<h3><code class="docutils literal notranslate"><span class="pre">enable-capture</span></code><a class="headerlink" href="#enable-capture" title="Permalink to this headline">¶</a></h3>
+<h4><code class="docutils literal notranslate"><span class="pre">enable-capture</span></code><a class="headerlink" href="#enable-capture" title="Permalink to this headline">¶</a></h4>
 <p>( – )</p>
 <p>This word enables emit capture testing.</p>
 </section>
 <section id="disable-capture">
-<h3><code class="docutils literal notranslate"><span class="pre">disable-capture</span></code><a class="headerlink" href="#disable-capture" title="Permalink to this headline">¶</a></h3>
+<h4><code class="docutils literal notranslate"><span class="pre">disable-capture</span></code><a class="headerlink" href="#disable-capture" title="Permalink to this headline">¶</a></h4>
 <p>( – )</p>
 <p>This word disables emit capture testing.</p>
 </section>
 <section id="no-capture">
-<h3><code class="docutils literal notranslate"><span class="pre">no-capture</span></code><a class="headerlink" href="#no-capture" title="Permalink to this headline">¶</a></h3>
+<h4><code class="docutils literal notranslate"><span class="pre">no-capture</span></code><a class="headerlink" href="#no-capture" title="Permalink to this headline">¶</a></h4>
 <p>( xt – )</p>
 <p>This word temporarily disables emit capture testing, and then executes <em>xt</em>, afterwards enabling emit capture testing if it had been previously enabled.</p>
 </section>
 <section id="x-capture-full">
-<h3><code class="docutils literal notranslate"><span class="pre">x-capture-full</span></code><a class="headerlink" href="#x-capture-full" title="Permalink to this headline">¶</a></h3>
+<h4><code class="docutils literal notranslate"><span class="pre">x-capture-full</span></code><a class="headerlink" href="#x-capture-full" title="Permalink to this headline">¶</a></h4>
 <p>( – )</p>
 <p>This word is the exception raised when the emit capture test buffer is full and the user attempts to add another emit capture test.</p>
 </section>
 <section id="clear-capture">
-<h3><code class="docutils literal notranslate"><span class="pre">clear-capture</span></code><a class="headerlink" href="#clear-capture" title="Permalink to this headline">¶</a></h3>
+<h4><code class="docutils literal notranslate"><span class="pre">clear-capture</span></code><a class="headerlink" href="#clear-capture" title="Permalink to this headline">¶</a></h4>
 <p>( – )</p>
 <p>This word clears the emit capture test buffer, effectively disabling emit capture test until another emit capture test is added.</p>
 </section>
 <section id="add-match-capture">
-<h3><code class="docutils literal notranslate"><span class="pre">add-match-capture</span></code><a class="headerlink" href="#add-match-capture" title="Permalink to this headline">¶</a></h3>
+<h4><code class="docutils literal notranslate"><span class="pre">add-match-capture</span></code><a class="headerlink" href="#add-match-capture" title="Permalink to this headline">¶</a></h4>
 <p>( b-addr bytes xt – )</p>
 <p>This word adds a matching emit capture test, which fails unless each character in the specified string is matched in order. <em>xt</em> is an xt which is executed when either the matching emit capture test fails, where then it is passed <code class="docutils literal notranslate"><span class="pre">false</span></code>, or when the matching emit capture test is successfully completed, where then it is passed <code class="docutils literal notranslate"><span class="pre">true</span></code>, unless it is set to 0, where then it is ignored.</p>
 </section>
 <section id="add-skip-capture">
-<h3><code class="docutils literal notranslate"><span class="pre">add-skip-capture</span></code><a class="headerlink" href="#add-skip-capture" title="Permalink to this headline">¶</a></h3>
+<h4><code class="docutils literal notranslate"><span class="pre">add-skip-capture</span></code><a class="headerlink" href="#add-skip-capture" title="Permalink to this headline">¶</a></h4>
 <p>( b-addr bytes limit xt – )</p>
 <p>This word adds a skipping emit capture test, which fails if more than <em>limit</em> characters are emitted without the specified string having been matched in full. <em>xt</em> is an xt which is executed when either the skipping emit capture test fails, where then it is passed <code class="docutils literal notranslate"><span class="pre">false</span></code>, or when the skipping emit capture test is successfully completed, where then it is passed <code class="docutils literal notranslate"><span class="pre">true</span></code>, unless it is set to 0, where then it is ignored.</p>
 </section>
 <section id="add-ignore-capture">
-<h3><code class="docutils literal notranslate"><span class="pre">add-ignore-capture</span></code><a class="headerlink" href="#add-ignore-capture" title="Permalink to this headline">¶</a></h3>
+<h4><code class="docutils literal notranslate"><span class="pre">add-ignore-capture</span></code><a class="headerlink" href="#add-ignore-capture" title="Permalink to this headline">¶</a></h4>
 <p>( b-addr bytes limit xt – )</p>
 <p>This word adds an ignoring emit capture test, which fails if more than <em>limit</em> characters are emitted without having matched the specified string fully 0 or more times. <em>xt</em> is an xt which is executed when either the ignoring emit capture test fails, where then it is passed <code class="docutils literal notranslate"><span class="pre">false</span></code>, or when the ignoring emit capture test is successfully completed, where then it is passed <code class="docutils literal notranslate"><span class="pre">true</span></code>, unless it is set to 0, where then it is ignored.</p>
+</section>
 </section>
 </section>
 </section>
@@ -146,9 +152,11 @@
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="map.html">Map Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="fchannel.html">Fast Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rchannel.html">Reply Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>

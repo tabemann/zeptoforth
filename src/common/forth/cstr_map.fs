@@ -42,7 +42,7 @@ begin-module cstr-map-module
     
   end-module> import
   
-  \ Get the size of a counted string map for a given entry count and data size
+  \ Get the size of a counted string map for a given entry count and value size
   \ in bytes
   : cstr-map-size ( count value-size -- size ) cell swap map-size ;
 

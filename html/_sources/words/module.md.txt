@@ -10,6 +10,8 @@ Within a given module, the user may import and unimport modules/wordlists, which
 
 Note that it is recommended that once `src/common/forth/module.fs` is loaded, the user should not manually use `set-order` or `set-current`, as the module system will not know about this and thus unexpected results may occur.
 
+### `forth-module`
+
 The following words are defined in `forth-module`:
 
 ##### `x-module-already-defined`
