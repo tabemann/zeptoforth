@@ -39,7 +39,7 @@ Begin the definition of module *name*; module *name* must not already exist or `
 
 Continue the definition of a preexisting module *name*; if module *name* does not exist `x-not-found` will be raised.
 
-##### `private`
+##### `private-module`
 ( -- )
 
 Begin the definition of a private module, i.e a module not bound to a word.
