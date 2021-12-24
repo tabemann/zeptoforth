@@ -1,12 +1,12 @@
 # Channel Words
 
-A channel is a monodirectional means of communicating data, as arbitrary-sized blocks of data, between two or more different tasks. Channels form a fixed-size queue onto which data is sent on one end and data is received on the other. Any task which attempts to send data on a full channel, or receive data on an empty channel, will be suspended until either data is received from the channel, or data is sent to the channel, respectively, unless non-blocking operations are used, where then `x-would-block` (declared in `task-module`) is raised instead of blocking.
+A channel is a monodirectional means of communicating data, as arbitrary-sized blocks of data, between two or more different tasks. Channels form a fixed-size queue onto which data is sent on one end and data is received on the other. Any task which attempts to send data on a full channel, or receive data on an empty channel, will be suspended until either data is received from the channel, or data is sent to the channel, respectively, unless non-blocking operations are used, where then `x-would-block` (declared in `task`) is raised instead of blocking.
 
 Channels can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put into alloted memory in the dictionary or into allocated memory in the heap. Note that the size of a channel for a given element size and element count may be calculated with `chan-size`.
 
-### `chan-module`
+### `chan`
 
-The following words are in `chan-module`:
+The following words are in `chan`:
 
 ##### `x-chan-closed`
 ( -- )

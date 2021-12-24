@@ -18,12 +18,12 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-continue-module forth-module
+continue-module forth
 
-  interrupt-module import
-  gpio-module import
-  exti-module import
-  task-module import
+  interrupt import
+  gpio import
+  exti import
+  task import
 
   \ Total count
   variable total-count

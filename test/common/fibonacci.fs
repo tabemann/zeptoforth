@@ -18,9 +18,9 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-continue-module forth-module
+continue-module forth
 
-  systick-module import
+  systick import
   
   \ Calculate a single fibonacci sequence with the specified number of
   \ iterations, returning the values

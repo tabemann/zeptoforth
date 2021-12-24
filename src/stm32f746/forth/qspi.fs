@@ -21,15 +21,15 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-module qspi-module
+begin-module qspi
 
-  internal-module import
-  gpio-module import
+  internal import
+  gpio import
 
   \ Quad SPI address validation exception
   : x-invalid-qspi-addr ( -- ) space ." invalid qspi address" cr ;
 
-  begin-module qspi-internal-module
+  begin-module qspi-internal
 
     \ Is mapping QSPI enabled
     variable map-qspi-enabled?

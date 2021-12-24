@@ -18,12 +18,12 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-continue-module forth-module
+continue-module forth
 
-  internal-module import
-  task-module import
-  fchan-module import
-  led-module import
+  internal import
+  task import
+  fchan import
+  led import
 
   \ Allot the channels
   fchan-size buffer: orange-fchan

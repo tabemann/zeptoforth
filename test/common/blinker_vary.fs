@@ -18,9 +18,9 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-continue-module forth-module
+continue-module forth
 
-  task-module import
+  task import
 
   \ The blinker variation delay
   variable vary-delay

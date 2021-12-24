@@ -21,10 +21,10 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-module line-internal-module
+begin-module line-internal
 
-  ansi-term-module import
-  heap-module import
+  ansi-term import
+  heap import
 
   \ Line structure for current task
   user line
@@ -681,7 +681,7 @@ begin-module line-internal-module
 
 end-module> import
 
-internal-module import
+internal import
 
 \ Initialize
 : init ( -- )

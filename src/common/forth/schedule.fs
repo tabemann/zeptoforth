@@ -21,12 +21,12 @@
 \ Compile to flash
 compile-to-flash
 
-begin-module schedule-module
+begin-module schedule
 
-  systick-module import
-  task-module import
+  systick import
+  task import
 
-  begin-module schedule-internal-module
+  begin-module schedule-internal
 
     \ The current action
     user current-action

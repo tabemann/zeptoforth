@@ -22,8 +22,8 @@
 compile-to-flash
 
 \ Set up the wordlist order
-forth-module internal-module 2 set-order
-internal-module set-current
+forth internal 2 set-order
+internal set-current
 
 \ Begin compressing compiled code in flash
 compress-flash
@@ -42,7 +42,7 @@ compress-flash
 ;
 
 \ Set forth
-forth-module set-current
+forth set-current
 
 \ Commit flash
 commit-flash
@@ -67,7 +67,7 @@ commit-flash
 ;
 
 \ Set internal
-internal-module set-current
+internal set-current
 
 \ Core of CORNERSTONE's DOES>
 : cornerstone-does> ( -- )
@@ -77,7 +77,7 @@ internal-module set-current
 ;
 
 \ Set forth
-forth-module set-current
+forth set-current
 
 \ Committing code in flash
 commit-flash

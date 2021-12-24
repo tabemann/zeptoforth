@@ -23,14 +23,14 @@ compile-to-flash
 
 compress-flash
 
-begin-module task-pool-module
+begin-module task-pool
 
-  task-module import
+  task import
 
   \ No tasks are available
   : x-no-task-available ( -- ) space ." no task is available" cr ;
   
-  begin-module task-pool-internal-module
+  begin-module task-pool-internal
 
     \ Task pool structure
     begin-structure task-pool-size

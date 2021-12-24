@@ -21,11 +21,11 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-module cstr-map-module
+begin-module cstr-map
 
-  map-module import
+  map import
 
-  begin-module cstr-map-internal-module
+  begin-module cstr-map-internal
 
     \ Hash function for counted strings
     : cstr-map-hash ( addr -- hash )

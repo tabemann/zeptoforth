@@ -36,9 +36,9 @@
   <section id="block-words">
 <h1>Block words<a class="headerlink" href="#block-words" title="Permalink to this headline">¶</a></h1>
 <p>The block interface is written for the STM32F746 DISCOVERY board. It provides a convenient interface for turning the Quad SPI flash functionality into a map of block id’s to 1K blocks of memory.</p>
-<section id="forth-module">
-<h2><code class="docutils literal notranslate"><span class="pre">forth-module</span></code><a class="headerlink" href="#forth-module" title="Permalink to this headline">¶</a></h2>
-<p>The following words are in <code class="docutils literal notranslate"><span class="pre">forth-module</span></code>:</p>
+<section id="forth">
+<h2><code class="docutils literal notranslate"><span class="pre">forth</span></code><a class="headerlink" href="#forth" title="Permalink to this headline">¶</a></h2>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">forth</span></code>:</p>
 <section id="load">
 <h3><code class="docutils literal notranslate"><span class="pre">load</span></code><a class="headerlink" href="#load" title="Permalink to this headline">¶</a></h3>
 <p>( id – )</p>
@@ -60,9 +60,9 @@
 <p>Display each 64-byte line from first to last in each block, if it exists, in the range from <code class="docutils literal notranslate"><span class="pre">start-id</span></code> to <code class="docutils literal notranslate"><span class="pre">end-id</span></code>.</p>
 </section>
 </section>
-<section id="block-module">
-<h2><code class="docutils literal notranslate"><span class="pre">block-module</span></code><a class="headerlink" href="#block-module" title="Permalink to this headline">¶</a></h2>
-<p>The following words are in <code class="docutils literal notranslate"><span class="pre">block-module</span></code>:</p>
+<section id="block">
+<h2><code class="docutils literal notranslate"><span class="pre">block</span></code><a class="headerlink" href="#block" title="Permalink to this headline">¶</a></h2>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">block</span></code>:</p>
 <section id="block-size">
 <h3><code class="docutils literal notranslate"><span class="pre">block-size</span></code><a class="headerlink" href="#block-size" title="Permalink to this headline">¶</a></h3>
 <p>( –  bytes )</p>
@@ -86,13 +86,13 @@
 <p>( id – addr | 0 )</p>
 <p>Find a block in the memory-mapped Quad SPI flash space by id, or return 0 if no such block can be found.</p>
 </section>
-<section id="block">
-<h3><code class="docutils literal notranslate"><span class="pre">block?</span></code><a class="headerlink" href="#block" title="Permalink to this headline">¶</a></h3>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">block?</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
 <p>( id – flag )</p>
 <p>Return whether a block by a given id exists.</p>
 </section>
-<section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">block!</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">block!</span></code><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <p>( addr id – )</p>
 <p>Attempt to write a the 1K buffer at the specified address to a block with a given id; this may fail and raise <code class="docutils literal notranslate"><span class="pre">x-block-write-fail</span></code>. Note that this is not friendly to realtime performance, especially when it has to reclaim existing used sectors</p>
 </section>
@@ -176,11 +176,7 @@
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Block words</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#forth-module"><code class="docutils literal notranslate"><span class="pre">forth-module</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#block-module"><code class="docutils literal notranslate"><span class="pre">block-module</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Block words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="edit.html">Block Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="swd.html"><code class="docutils literal notranslate"><span class="pre">swdcom</span></code> Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="led.html">LED Words</a></li>

@@ -4,9 +4,9 @@ In zeptoforth the user can define lightweight anonymous functions, known as lamb
 
 `[:` and `;]` are defined in `src/common/forth/basic.fs`, but the other words discussed here are defined in `src/common/forth/lambda.fs`.
 
-### `forth-module`
+### `forth`
 
-These words are in `forth-module`.
+These words are in `forth`.
 
 There are two simple conditional combinators, namely:
 

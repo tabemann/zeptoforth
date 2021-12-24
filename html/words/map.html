@@ -36,9 +36,9 @@
   <section id="map-words">
 <h1>Map Words<a class="headerlink" href="#map-words" title="Permalink to this headline">¶</a></h1>
 <p>Maps in zeptoforth are implemented as fixed-sized hash tables. They have fixed-sized keys and values; it is recommended that these be either addresses or indices into some other data structure, for sake of economy of space. For the sake of alignment, the amount of space taken up by a key and a value together is internally rounded up to the nearest cell.</p>
-<section id="map-module">
-<h2><code class="docutils literal notranslate"><span class="pre">map-module</span></code><a class="headerlink" href="#map-module" title="Permalink to this headline">¶</a></h2>
-<p>The following words are in <code class="docutils literal notranslate"><span class="pre">map-module</span></code>:</p>
+<section id="map">
+<h2><code class="docutils literal notranslate"><span class="pre">map</span></code><a class="headerlink" href="#map" title="Permalink to this headline">¶</a></h2>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">map</span></code>:</p>
 <section id="map-size">
 <h3><code class="docutils literal notranslate"><span class="pre">map-size</span></code><a class="headerlink" href="#map-size" title="Permalink to this headline">¶</a></h3>
 <p>( count key-size value-size – map-bytes )</p>
@@ -148,9 +148,9 @@
 <section id="counted-string-maps">
 <h2>Counted String Maps<a class="headerlink" href="#counted-string-maps" title="Permalink to this headline">¶</a></h2>
 <p>Counted string maps are a subset of maps that have keys that are implemented as counted strings allocated (aside from an address) outside of the map data structure.</p>
-<section id="cstr-map-module">
-<h3><code class="docutils literal notranslate"><span class="pre">cstr-map-module</span></code><a class="headerlink" href="#cstr-map-module" title="Permalink to this headline">¶</a></h3>
-<p>The following words are in <code class="docutils literal notranslate"><span class="pre">cstr-map-module</span></code>:</p>
+<section id="cstr-map">
+<h3><code class="docutils literal notranslate"><span class="pre">cstr-map</span></code><a class="headerlink" href="#cstr-map" title="Permalink to this headline">¶</a></h3>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">cstr-map</span></code>:</p>
 <section id="cstr-map-size">
 <h4><code class="docutils literal notranslate"><span class="pre">cstr-map-size</span></code><a class="headerlink" href="#cstr-map-size" title="Permalink to this headline">¶</a></h4>
 <p>( count value-size – map-bytes )</p>
@@ -186,9 +186,9 @@
 <section id="integer-maps">
 <h2>Integer Maps<a class="headerlink" href="#integer-maps" title="Permalink to this headline">¶</a></h2>
 <p>Integer maps are a subset of maps that have keys that are cell-sized integers.</p>
-<section id="int-map-module">
-<h3><code class="docutils literal notranslate"><span class="pre">int-map-module</span></code><a class="headerlink" href="#int-map-module" title="Permalink to this headline">¶</a></h3>
-<p>The following words are in <code class="docutils literal notranslate"><span class="pre">int-map-module</span></code>:</p>
+<section id="int-map">
+<h3><code class="docutils literal notranslate"><span class="pre">int-map</span></code><a class="headerlink" href="#int-map" title="Permalink to this headline">¶</a></h3>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">int-map</span></code>:</p>
 <section id="int-map-size">
 <h4><code class="docutils literal notranslate"><span class="pre">int-map-size</span></code><a class="headerlink" href="#int-map-size" title="Permalink to this headline">¶</a></h4>
 <p>( count value-size – map-bytes )</p>

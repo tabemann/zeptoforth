@@ -36,9 +36,9 @@
   <section id="task-queue-words">
 <h1>Task Queue Words<a class="headerlink" href="#task-queue-words" title="Permalink to this headline">¶</a></h1>
 <p>A task queue is a queue of waiting tasks, which then can be woken up, in the order of their joining the task queue, by another task. Note that tasks can wake up any given number of tasks <em>before</em> they join the task queue, upon which they will not actually deschedule themselves but rather increment the count of waiting tasks (which was negative in this case).</p>
-<section id="tqueue-module">
-<h2><code class="docutils literal notranslate"><span class="pre">tqueue-module</span></code><a class="headerlink" href="#tqueue-module" title="Permalink to this headline">¶</a></h2>
-<p>The following words are in <code class="docutils literal notranslate"><span class="pre">tqueue-module</span></code>:</p>
+<section id="tqueue">
+<h2><code class="docutils literal notranslate"><span class="pre">tqueue</span></code><a class="headerlink" href="#tqueue" title="Permalink to this headline">¶</a></h2>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">tqueue</span></code>:</p>
 <section id="tqueue-size">
 <h3><code class="docutils literal notranslate"><span class="pre">tqueue-size</span></code><a class="headerlink" href="#tqueue-size" title="Permalink to this headline">¶</a></h3>
 <p>( – bytes )</p>
@@ -125,10 +125,7 @@
 <li class="toctree-l1"><a class="reference internal" href="rchannel.html">Reply Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Task Queue Words</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#tqueue-module"><code class="docutils literal notranslate"><span class="pre">tqueue-module</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>

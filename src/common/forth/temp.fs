@@ -23,12 +23,12 @@ compile-to-flash
 
 compress-flash
 
-begin-module temp-module
+begin-module temp
 
   \ Data size is larger than temporary buffer size exception
   : x-data-too-big ( -- ) space ." data too big" cr ;
 
-  begin-module temp-internal-module
+  begin-module temp-internal
 
     \ Temporary buffer structure
     begin-structure temp-size

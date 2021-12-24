@@ -18,12 +18,12 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-continue-module forth-module
+continue-module forth
 
-  task-module import
-  schedule-module import
-  action-pool-module import
-  led-module import
+  task import
+  schedule import
+  action-pool import
+  led import
 
   \ The action count
   8 constant action-count

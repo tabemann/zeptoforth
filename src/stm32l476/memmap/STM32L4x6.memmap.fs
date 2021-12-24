@@ -21,7 +21,7 @@
 
 compile-to-flash
 
-begin-module memmap-module
+begin-module memmap
 
   execute-defined? use-DAC defined? DAC not and [if]
     $40007400 constant DAC ( Digital-to-analog converter ) 
