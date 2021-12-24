@@ -36,9 +36,9 @@
   <section id="quad-spi-words">
 <h1>Quad SPI words<a class="headerlink" href="#quad-spi-words" title="Permalink to this headline">¶</a></h1>
 <p>The Quad SPI interface is written for the STM32F746 DISCOVERY board. It maps Quad SPI flash to the addressing space at <code class="docutils literal notranslate"><span class="pre">qspi-base</span></code>. It also provides means for writing bytes, halfwords, words, and arbitrary buffers containing bytes to flash and erasing 4K and 32K subsectors, 64K sectors, and the entire flash. Note that even though internally they require turning off memory-mapped Quad SPI mode, it is automatically turned back on when they are complete, and they are hidden from all other tasks (however they significantly impact realtime performance due to being slow while requiring interrupts to be turned off).</p>
-<section id="qspi-module">
-<h2><code class="docutils literal notranslate"><span class="pre">qspi-module</span></code><a class="headerlink" href="#qspi-module" title="Permalink to this headline">¶</a></h2>
-<p>The following words are in <code class="docutils literal notranslate"><span class="pre">qspi-module</span></code>:</p>
+<section id="qspi">
+<h2><code class="docutils literal notranslate"><span class="pre">qspi</span></code><a class="headerlink" href="#qspi" title="Permalink to this headline">¶</a></h2>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">qspi</span></code>:</p>
 <section id="qspi-base">
 <h3><code class="docutils literal notranslate"><span class="pre">qspi-base</span></code><a class="headerlink" href="#qspi-base" title="Permalink to this headline">¶</a></h3>
 <p>( – addr )</p>
@@ -64,8 +64,8 @@
 <p>( – )</p>
 <p>Invalid Quad SPI address exception.</p>
 </section>
-<section id="qspi">
-<h3><code class="docutils literal notranslate"><span class="pre">qspi!</span></code><a class="headerlink" href="#qspi" title="Permalink to this headline">¶</a></h3>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">qspi!</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
 <p>( x addr – )</p>
 <p>Writes a 32-bit value in little-endian order to Quad SPI flash at the address corresponding to the specified address in memory-mapped Quad SPI space; note that it has to be 32-bit aligned.</p>
 </section>
@@ -153,10 +153,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Quad SPI words</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#qspi-module"><code class="docutils literal notranslate"><span class="pre">qspi-module</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Quad SPI words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="edit.html">Block Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="swd.html"><code class="docutils literal notranslate"><span class="pre">swdcom</span></code> Words</a></li>

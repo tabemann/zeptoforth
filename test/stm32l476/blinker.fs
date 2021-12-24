@@ -18,11 +18,11 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-continue-module forth-module
+continue-module forth
 
-  systick-module import
-  task-module import
-  led-module import
+  systick import
+  task import
+  led import
 
   \ The blinker delay time
   variable blinker-delay

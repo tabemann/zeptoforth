@@ -18,11 +18,11 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-continue-module forth-module
+continue-module forth
 
-  systick-module import
-  task-module import
-  rchan-module import
+  systick import
+  task import
+  rchan import
 
   \ Allot the channel
   rchan-size buffer: my-rchan

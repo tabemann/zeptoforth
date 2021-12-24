@@ -18,12 +18,12 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-continue-module forth-module
+continue-module forth
 
-  systick-module import
-  task-module import
-  schedule-module import
-  led-module import
+  systick import
+  task import
+  schedule import
+  led import
   
   \ Our task
   variable schedule-task

@@ -21,7 +21,7 @@
 
 compile-to-flash
 
-begin-module memmap-module
+begin-module memmap
 
   execute-defined? use-DAC defined? DAC_CR_EN1 not and [if]
     \ DAC_CR (read-write) Reset:0x00000000

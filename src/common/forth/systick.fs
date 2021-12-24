@@ -21,12 +21,12 @@
 \ Compile to flash
 compile-to-flash
 
-begin-module systick-module
+begin-module systick
 
-  internal-module import
-  interrupt-module import
+  internal import
+  interrupt import
   
-  begin-module systick-internal-module
+  begin-module systick-internal
 
     \ Interrupt Control and Status Register
     $E000ED04 constant ICSR
@@ -123,7 +123,7 @@ begin-module systick-module
 
 end-module> import
 
-internal-module import
+internal import
 
 commit-flash
 

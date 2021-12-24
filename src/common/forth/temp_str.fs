@@ -23,11 +23,11 @@ compile-to-flash
 
 compress-flash
 
-continue-module forth-module
+continue-module forth
 
-  temp-module import
-  internal-module import
-  esc-string-module import
+  temp import
+  internal import
+  esc-string import
 
   \ Our temporary buffer size
   256 constant temp-str-size

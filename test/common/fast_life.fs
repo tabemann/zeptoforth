@@ -18,9 +18,9 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module-once life-module
+begin-module-once life
 
-  ansi-term-module import
+  ansi-term import
   
   \ Life width
   variable life-width

@@ -23,13 +23,13 @@ compile-to-flash
 
 compress-flash
 
-begin-module rchan-module
+begin-module rchan
 
-  task-module import
-  tqueue-module import
-  lock-module import
+  task import
+  tqueue import
+  lock import
 
-  begin-module rchan-internal-module
+  begin-module rchan-internal
 
     \ Reply channel header structure
     begin-structure rchan-size
