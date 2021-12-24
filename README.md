@@ -23,6 +23,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 * User-reconfigurable processor exception vector support
 * Interrupt-driven serial IO
 * GPIO support (including EXTI support on STM32 microcontrollers)
+* Maps, including counted string and integer-keyed maps
 * Heap allocators
 * Memory pool allocators
 * Task pool allocators
