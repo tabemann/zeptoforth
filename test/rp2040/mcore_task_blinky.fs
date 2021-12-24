@@ -18,11 +18,11 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-continue-module forth-module
+continue-module forth
 
-  task-module import
-  led-module import
-  int-io-module import
+  task import
+  led import
+  int-io import
 
   \ LED test loop task
   : led-loop ( ms -- ) begin led-toggle dup ms again ;

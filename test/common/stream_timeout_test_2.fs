@@ -18,10 +18,10 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-continue-module forth-module
+continue-module forth
 
-  task-module import
-  stream-module import
+  task import
+  stream import
 
   \ Our byte count
   256 constant my-count

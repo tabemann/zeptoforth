@@ -21,9 +21,9 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-module ansi-term-module
+begin-module ansi-term
 
-  begin-module ansi-term-internal-module
+  begin-module ansi-term-internal
 
     \ Saved entered byte
     user saved-key

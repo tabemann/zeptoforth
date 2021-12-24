@@ -18,9 +18,9 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module-once benchmark-module
+begin-module-once benchmark
 
-  systick-module import
+  systick import
 
   \ Measure the time of the execution of an xt, averaged over a specified
   \ number of cycles. The returned time is a fixed point number.

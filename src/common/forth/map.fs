@@ -21,9 +21,9 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-module map-module
+begin-module map
 
-  begin-module map-internal-module
+  begin-module map-internal
     
     begin-structure map-header-size
 

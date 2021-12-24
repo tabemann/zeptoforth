@@ -1,10 +1,10 @@
 compile-to-flash
 
-begin-module swd-module
+begin-module swd
 
-  internal-module import
+  internal import
 
-  begin-module swd-internal-module
+  begin-module swd-internal
 
     here 256 2* cell+ buffer: swd
     swd 0 + constant swd-rx-w
@@ -89,7 +89,7 @@ commit-flash
   swd-console
 ;
 
-swd-module unimport
+swd unimport
 
 end-compress-flash
 

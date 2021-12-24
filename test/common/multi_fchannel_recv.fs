@@ -18,11 +18,11 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-continue-module forth-module
+continue-module forth
 
-  task-module import
-  fchan-module import
-  lock-module import
+  task import
+  fchan import
+  lock import
 
   \ Our fchannel
   fchan-size buffer: my-fchan

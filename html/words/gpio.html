@@ -37,11 +37,11 @@
 <h1>GPIO Words<a class="headerlink" href="#gpio-words" title="Permalink to this headline">¶</a></h1>
 <p>A GPIO API is provided for STM32 microcontrollers, with slight variations between individual microcontrollers (primarily in the number of supported GPIO’s, along with internal differences in the registers used by the API). It provides a thin layer over the hardware registers that control GPIO’s, so as to make them more user-friendly while not limiting the programmer’s capabilities.</p>
 <p>A GPIO API is also provided for the RP2040; note that this API differs considerably from the GPIO API for STM32 microcontrollers and has no compatiblity with it. It exposes registers for manipulating GPIO input and output and for controlling GPIO interrupts.</p>
-<p>These words are in <code class="docutils literal notranslate"><span class="pre">gpio-module</span></code>.</p>
+<p>These words are in <code class="docutils literal notranslate"><span class="pre">gpio</span></code>.</p>
 <section id="stm32-words">
 <h2>STM32 Words<a class="headerlink" href="#stm32-words" title="Permalink to this headline">¶</a></h2>
-<section id="gpio-module">
-<h3><code class="docutils literal notranslate"><span class="pre">gpio-module</span></code><a class="headerlink" href="#gpio-module" title="Permalink to this headline">¶</a></h3>
+<section id="gpio">
+<h3><code class="docutils literal notranslate"><span class="pre">gpio</span></code><a class="headerlink" href="#gpio" title="Permalink to this headline">¶</a></h3>
 <section id="gpioa-through-gpiok">
 <h4><code class="docutils literal notranslate"><span class="pre">GPIOA</span></code> through <code class="docutils literal notranslate"><span class="pre">GPIOK</span></code><a class="headerlink" href="#gpioa-through-gpiok" title="Permalink to this headline">¶</a></h4>
 <p>These are the memory addresses of the spaces for each of the the GPIO’s, from GPIOA to GPIOI on the STM32F407 and STM32L476 and from GPIOA to GPIOK on the STM32F746.</p>
@@ -273,7 +273,7 @@
 <section id="rp2040-words">
 <h2>RP2040 Words<a class="headerlink" href="#rp2040-words" title="Permalink to this headline">¶</a></h2>
 <section id="id18">
-<h3><code class="docutils literal notranslate"><span class="pre">gpio-module</span></code><a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">gpio</span></code><a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h3>
 <section id="ctrl-normal">
 <h4><code class="docutils literal notranslate"><span class="pre">CTRL_NORMAL</span></code><a class="headerlink" href="#ctrl-normal" title="Permalink to this headline">¶</a></h4>
 <p>Normal control state for GPIO control</p>
@@ -654,11 +654,7 @@
 <li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="schedule.html">Scheduling Words</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">GPIO Words</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#stm32-words">STM32 Words</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#rp2040-words">RP2040 Words</a></li>
-</ul>
-</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">GPIO Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>

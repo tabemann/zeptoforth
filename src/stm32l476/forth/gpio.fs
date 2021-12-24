@@ -21,9 +21,9 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-module gpio-module
+begin-module gpio
   
-  begin-module gpio-internal-module
+  begin-module gpio-internal
     
     \ GPIO base
     $48000000 constant GPIO_Base

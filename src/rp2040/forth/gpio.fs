@@ -21,9 +21,9 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-module gpio-module
+begin-module gpio
   
-  begin-module gpio-internal-module
+  begin-module gpio-internal
   
     \ IO bank 0 base
     $40014000 constant IO_BANK0_BASE

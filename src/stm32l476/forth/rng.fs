@@ -21,9 +21,9 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-module rng-module
+begin-module rng
 
-  begin-module rng-internal-module
+  begin-module rng-internal
 
     \ RCC base
     $40021000 constant RCC_Base

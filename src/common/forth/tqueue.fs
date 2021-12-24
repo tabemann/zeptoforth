@@ -23,11 +23,11 @@ compile-to-flash
 
 compress-flash
 
-begin-module tqueue-module
+begin-module tqueue
 
-  task-module import
+  task import
 
-  begin-module tqueue-internal-module
+  begin-module tqueue-internal
 
     \ Task queue header structure
     begin-structure tqueue-size

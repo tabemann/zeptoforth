@@ -23,12 +23,12 @@ compile-to-flash
 
 compress-flash
 
-begin-module chan-module
+begin-module chan
   
-  task-module import
-  tqueue-module import
+  task import
+  tqueue import
   
-  begin-module chan-internal-module
+  begin-module chan-internal
 
     \ Channel header structure
     begin-structure chan-header-size
@@ -90,7 +90,7 @@ begin-module chan-module
   \ Get whether a channel is empty
   : chan-empty? ( chan -- flag ) chan-empty-unsafe? ;
 
-  continue-module chan-internal-module
+  continue-module chan-internal
     
     \ Wait to send on a channel
     : wait-send-chan ( chan -- )

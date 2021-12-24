@@ -22,18 +22,18 @@
 compile-to-flash
 
 \ Set up the wordlist
-forth-module 1 set-order
-forth-module set-current
+forth 1 set-order
+forth set-current
 
 \ Actually set up the wordlist
-internal-module forth-module 2 set-order
-internal-module set-current
+internal forth 2 set-order
+internal set-current
 
 \ The module stack's size in entries
 5 constant module-stack-count
 
 \ The maximum wordlist order
-16 constant max-module-order
+16 constant max-order
 
 \ The current module stack index
 variable module-stack-index
@@ -43,13 +43,13 @@ compress-flash
 \ The module stack entry
 begin-structure module-entry-size
   \ The module stack wordlist count
-  hfield: module-module-count
+  hfield: module-count
 
   \ The module stack saved base
   hfield: module-base
 
   \ The module's wordlist
-  field: module-module
+  field: module
 
   \ The previous module's old current wordlist
   field: module-old-current
@@ -61,25 +61,25 @@ commit-flash
 module-entry-size module-stack-count * buffer: module-stack
 
 \ Switch wordlists
-forth-module set-current
+forth set-current
 
 \ Module stack overflow exception
-: x-module-stack-overflow ( -- ) space ." module stack overflow" cr ;
+: x-stack-overflow ( -- ) space ." module stack overflow" cr ;
 
 \ Module stack underflow exception
-: x-module-stack-underflow ( -- ) space ." module stack underflow" cr ;
+: x-stack-underflow ( -- ) space ." module stack underflow" cr ;
 
 \ Wordlist order overflow exception
 : x-order-overflow ( -- ) space ." wordlist order overflow" cr ;
 
 \ Module already defined exception
-: x-module-already-defined ( -- ) space ." module already defined" cr ;
+: x-already-defined ( -- ) space ." module already defined" cr ;
 
 \ Module does not exist
-: x-module-not-found ( -- ) space ." module not found" cr ;
+: x-not-found ( -- ) space ." module not found" cr ;
 
 \ Switch wordlists
-internal-module set-current
+internal set-current
 
 commit-flash
 
@@ -95,24 +95,24 @@ commit-flash
 commit-flash
 
 \ Push a module stack entry
-: push-module-stack ( wid -- )
-  module-stack-index @ module-stack-count < averts x-module-stack-overflow
+: push-stack ( wid -- )
+  module-stack-index @ module-stack-count < averts x-stack-overflow
   1 module-stack-index +!
   module-stack@
-  0 over module-module-count h!
+  0 over module-count h!
   base @ over module-base h!
   get-current over module-old-current !
   over set-current
-  module-module !
+  module !
 ;
 
 \ Drop a module stack entry
-: drop-module-stack ( -- )
-  module-stack-index @ 1 > averts x-module-stack-underflow
+: drop-stack ( -- )
+  module-stack-index @ 1 > averts x-stack-underflow
   module-stack@
   dup module-old-current @ set-current
   module-base h@ base !
-  get-order module-stack@ module-module-count h@ begin dup 0<> while
+  get-order module-stack@ module-count h@ begin dup 0<> while
     1- swap 1- swap rot drop
   repeat
   drop
@@ -121,25 +121,25 @@ commit-flash
 ;
 
 \ Add a wordlist to the order
-: add-module ( wid -- )
-  >r get-order dup max-module-order < r> swap averts x-order-overflow
-  module-stack@ module-module-count h@ 0<> if
-    rot drop swap module-stack@ module-module @ swap 1+ set-order
+: add ( wid -- )
+  >r get-order dup max-order < r> swap averts x-order-overflow
+  module-stack@ module-count h@ 0<> if
+    rot drop swap module-stack@ module @ swap 1+ set-order
   else
     swap 1+ set-order
   then
-  module-stack-index @ 0<> averts x-module-stack-underflow
+  module-stack-index @ 0<> averts x-stack-underflow
   module-stack@
-  1 swap module-module-count h+!
+  1 swap module-count h+!
 ;
 
 \ Remove a wordlist from the order
-: remove-module ( wid -- )
-  module-stack-index @ 0 > averts x-module-stack-underflow
-  >r get-order module-stack@ module-module-count h@ begin dup 0<> while
+: remove ( wid -- )
+  module-stack-index @ 0 > averts x-stack-underflow
+  >r get-order module-stack@ module-count h@ begin dup 0<> while
     dup 1+ pick r@ = if
       dup 1+ roll drop
-      -1 module-stack@ module-module-count h+!
+      -1 module-stack@ module-count h+!
       swap 1- swap
     then
     1-
@@ -156,7 +156,7 @@ commit-flash
 	visible-flag find ?dup if
 	  >body execute 1 set-order
 	else
-	  ['] x-module-not-found ?raise
+	  ['] x-not-found ?raise
 	then
 	false
       else
@@ -167,19 +167,19 @@ commit-flash
 ;
 
 \ Switch wordlists
-forth-module set-current
+forth set-current
 
 commit-flash
 
 \ Begin a module definition
 : begin-module ( "name" -- )
   token 2dup visible-flag find ?dup if
-    ['] x-module-already-defined ?raise
+    ['] x-already-defined ?raise
   else
     wordlist dup >r -rot constant-with-name r>
   then
-  dup push-module-stack
-  add-module
+  dup push-stack
+  add
 ;
 
 \ Continue an existing module definition
@@ -187,30 +187,30 @@ commit-flash
   token 2dup visible-flag find ?dup if
     nip nip >body execute
   else
-    ['] x-module-not-found ?raise
+    ['] x-not-found ?raise
   then
-  dup push-module-stack
-  add-module
+  dup push-stack
+  add
 ;
 
 \ Start a private module definition
-: private-module ( -- ) wordlist dup push-module-stack add-module ;
+: private ( -- ) wordlist dup push-stack add ;
 
 \ End a module definition
-: end-module ( -- ) drop-module-stack ;
+: end-module ( -- ) drop-stack ;
 
 \ End a module definition and place the module on the stack
 : end-module> ( -- module )
-  module-stack-index @ 1 > averts x-module-stack-underflow
-  module-stack@ module-module @
-  drop-module-stack
+  module-stack-index @ 1 > averts x-stack-underflow
+  module-stack@ module @
+  drop-stack
 ;
 
 \ Import a module
-: import ( module -- ) add-module ;
+: import ( module -- ) add ;
 
 \ Una module import
-: unimport ( module -- ) remove-module ;
+: unimport ( module -- ) remove ;
 
 \ Export a word from the current module
 : export ( "name" -- )
@@ -229,12 +229,12 @@ commit-flash
 : init ( -- )
   init
   0 module-stack-index !
-  forth-module push-module-stack
-  forth-module add-module
+  forth push-stack
+  forth add
 ;
 
-forth-module 1 set-order
-forth-module set-current
+forth 1 set-order
+forth set-current
 
 end-compress-flash
 

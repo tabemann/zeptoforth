@@ -21,9 +21,9 @@
 \ Compile this to flash
 compile-to-flash
 
-continue-module internal-module
+continue-module internal
 
-  multicore-module import
+  multicore import
   
   \ Begin compressing compiled code in flash
   compress-flash
@@ -79,7 +79,7 @@ commit-flash
   then
 ;
 
-continue-module internal-module
+continue-module internal
 
   \ Core of CORNERSTONE's DOES>
   : cornerstone-does> ( -- )

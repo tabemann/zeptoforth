@@ -22,9 +22,9 @@ The block editor provides a simple interface for allowing the user to edit block
 
 Note that tabs (which are treated as being of two spaces wide due to the limited space available in blocks) and characters of code points greater than 127 are handled correctly. Also note that only nine blocks (currently) are stored in memory, and if a modified block is removed from memory it is automatically saved.
 
-### `forth-module`
+### `forth`
 
-The following words are in `forth-module`:
+The following words are in `forth`:
 
 ##### `edit`
 ( id -- )

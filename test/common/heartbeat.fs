@@ -18,10 +18,10 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module-once heartbeat-module
+begin-module-once heartbeat
   
-  task-module import
-  led-module import
+  task import
+  led import
 
   \ Display a heartbeat
   : heartbeat ( -- )

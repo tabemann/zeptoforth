@@ -10,9 +10,9 @@ Once a task receives a message on a reply channel, the reply channel is put into
 
 Reply channels can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put into alloted memory in the dictionary or into allocated memory in the heap.
 
-### `rchan-module`
+### `rchan`
 
-The following words are in `rchan-module`:
+The following words are in `rchan`:
 
 ##### `x-rchan-closed`
 ( -- )

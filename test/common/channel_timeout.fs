@@ -18,10 +18,10 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-continue-module forth-module
+continue-module forth
 
-  task-module import
-  chan-module import
+  task import
+  chan import
 
   \ Our fchannel
   1 cells 1 chan-size buffer: my-chan

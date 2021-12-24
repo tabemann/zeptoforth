@@ -21,9 +21,9 @@
 \ Compile this to RAM
 compile-to-ram
 
-continue-module forth-module
+continue-module forth
 
-  task-module import
+  task import
   
   \ The stars task
   variable stars-task
