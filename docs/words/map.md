@@ -2,9 +2,9 @@
 
 Maps in zeptoforth are implemented as fixed-sized hash tables. They have fixed-sized keys and values; it is recommended that these be either addresses or indices into some other data structure, for sake of economy of space. For the sake of alignment, the amount of space taken up by a key and a value together is internally rounded up to the nearest cell.
 
-### `map-module`
+### `map`
 
-The following words are in `map-module`:
+The following words are in `map`:
 
 ##### `map-size`
 ( count key-size value-size -- map-bytes )
@@ -115,9 +115,9 @@ Destination map does not match source map with regard to key size, value size, h
 
 Counted string maps are a subset of maps that have keys that are implemented as counted strings allocated (aside from an address) outside of the map data structure.
 
-### `cstr-map-module`
+### `cstr-map`
 
-The following words are in `cstr-map-module`:
+The following words are in `cstr-map`:
 
 ##### `cstr-map-size`
 ( count value-size -- map-bytes )
@@ -153,9 +153,9 @@ Get the value at *value-addr* and counted string key *key-cstr* of the entry in 
 
 Integer maps are a subset of maps that have keys that are cell-sized integers.
 
-### `int-map-module`
+### `int-map`
 
-The following words are in `int-map-module`:
+The following words are in `int-map`:
 
 ##### `int-map-size`
 ( count value-size -- map-bytes )

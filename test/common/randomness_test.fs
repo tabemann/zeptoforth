@@ -18,9 +18,9 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-continue-module forth-module
+continue-module forth
 
-  rng-module import
+  rng import
 
   \ Number of bits in a random number
   32 constant bit-count

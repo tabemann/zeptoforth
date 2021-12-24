@@ -8,9 +8,9 @@ Note that if multiple tasks attempt to send on a rendezvous channel, they are qu
 
 Rendezvous channels can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put into alloted memory in the dictionary or into allocated memory in the heap.
 
-### `fchan-module`
+### `fchan`
 
-The following words are in `fchan-module`:
+The following words are in `fchan`:
 
 ##### `x-fchan-closed`
 ( -- )

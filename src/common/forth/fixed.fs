@@ -23,7 +23,7 @@ compile-to-flash
 
 compress-flash
 
-internal-module import
+internal import
 
 \ Get the value of pi
 0 314159265 0 100000000 f/ 2constant pi
@@ -92,7 +92,7 @@ commit-flash
   then
 ;
 
-continue-module internal-module
+continue-module internal
   
   \ Calculate whether a square root is close enough
   : sqrt-close-enough ( f1 f2 -- flag )
@@ -269,7 +269,7 @@ commit-flash
 \ Calculate atanh(x)
 : atanh ( f1 -- f2 ) 2dup 0 1 d+ 2swap dnegate 0 1 d+ f/ ln 2 0 d/ ;
 
-continue-module internal-module
+continue-module internal
   
   \ Get the number of instances of a character in a string
   : char-count ( b-addr bytes b -- count )

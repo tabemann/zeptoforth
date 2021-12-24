@@ -18,10 +18,10 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-continue-module forth-module
+continue-module forth
 
-  task-module import
-  fchan-module import
+  task import
+  fchan import
 
   \ Allot the outgoing channel
   fchan-size buffer: my-out-fchan

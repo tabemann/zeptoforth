@@ -18,12 +18,12 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-continue-module forth-module
+continue-module forth
 
-  internal-module import
-  systick-module import
-  task-module import
-  rng-module import
+  internal import
+  systick import
+  task import
+  rng import
 
   \ Our task
   variable rng-test-task

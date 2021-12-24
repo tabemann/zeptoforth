@@ -21,10 +21,10 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-module multicore-module
+begin-module multicore
 
-  internal-module import
-  interrupt-module import
+  internal import
+  interrupt import
 
   \ Must be carried out from core 0 only
   : x-core-0-only ( -- ) space ." core 0 only" cr ;
@@ -38,7 +38,7 @@ begin-module multicore-module
   \ Core not addressable exception
   : x-core-not-addressable ( -- ) space ." core not addressable" cr ;
 
-  begin-module multicore-internal-module
+  begin-module multicore-internal
       
     \ SIO base
     $D0000000 constant SIO_BASE

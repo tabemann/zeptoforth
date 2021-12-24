@@ -1,8 +1,8 @@
 # `swdcom` Words
 
-### `swd-module`
+### `swd`
 
-These words are in `swd-module`.
+These words are in `swd`.
 
 ##### `swd-console`
 ( -- )

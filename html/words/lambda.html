@@ -37,9 +37,9 @@
 <h1>Lambda Words<a class="headerlink" href="#lambda-words" title="Permalink to this headline">¶</a></h1>
 <p>In zeptoforth the user can define lightweight anonymous functions, known as lambdas, inline in other words with <code class="docutils literal notranslate"><span class="pre">[:</span></code> and <code class="docutils literal notranslate"><span class="pre">;]</span></code>, where <code class="docutils literal notranslate"><span class="pre">[:</span></code> starts compiling a lambda, and <code class="docutils literal notranslate"><span class="pre">;]</span></code> finishes it. compiling the <code class="docutils literal notranslate"><span class="pre">xt</span></code> for the lambda as a literal into the containing word. Multiple lambdas can be nested. Note that lambdas have no headers, making them lighter-weight than normal words. Provided that all words compiled into them are themselves inlined, they can be inlined into other words.</p>
 <p><code class="docutils literal notranslate"><span class="pre">[:</span></code> and <code class="docutils literal notranslate"><span class="pre">;]</span></code> are defined in <code class="docutils literal notranslate"><span class="pre">src/common/forth/basic.fs</span></code>, but the other words discussed here are defined in <code class="docutils literal notranslate"><span class="pre">src/common/forth/lambda.fs</span></code>.</p>
-<section id="forth-module">
-<h2><code class="docutils literal notranslate"><span class="pre">forth-module</span></code><a class="headerlink" href="#forth-module" title="Permalink to this headline">¶</a></h2>
-<p>These words are in <code class="docutils literal notranslate"><span class="pre">forth-module</span></code>.</p>
+<section id="forth">
+<h2><code class="docutils literal notranslate"><span class="pre">forth</span></code><a class="headerlink" href="#forth" title="Permalink to this headline">¶</a></h2>
+<p>These words are in <code class="docutils literal notranslate"><span class="pre">forth</span></code>.</p>
 <p>There are two simple conditional combinators, namely:</p>
 <section id="qif">
 <h3><code class="docutils literal notranslate"><span class="pre">qif</span></code><a class="headerlink" href="#qif" title="Permalink to this headline">¶</a></h3>
@@ -231,10 +231,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Lambda Words</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#forth-module"><code class="docutils literal notranslate"><span class="pre">forth-module</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Lambda Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="schedule.html">Scheduling Words</a></li>

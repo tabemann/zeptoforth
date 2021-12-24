@@ -31,17 +31,17 @@ compress-flash
 0 constant false
 
 \ Forth module constant
-0 constant forth-module
+0 constant forth
 
 \ Internal module constant
-1 constant internal-module
+1 constant internal
 
 \ Commit to flash
 commit-flash
 
 \ Set up wordlist order
-forth-module internal-module 2 set-order
-forth-module set-current
+forth internal 2 set-order
+forth set-current
 
 \ Base 2
 : binary 2 base ! ;
@@ -107,7 +107,7 @@ forth-module set-current
 : abs ( n -- u ) dup 0< if negate then ;
 
 \ Set internal
-internal-module set-current
+internal set-current
 
 \ Fill memory with zeros up until a given address
 : advance-here ( a -- )
@@ -120,7 +120,7 @@ internal-module set-current
 ;
 
 \ Set forth
-forth-module set-current
+forth set-current
 
 \ Align an address to a power of two
 : align ( a power -- a ) swap 1- swap 1- or 1+ ;
@@ -241,7 +241,7 @@ forth-module set-current
 ;
 
 \ Set internal
-internal-module set-current
+internal set-current
 
 \ Get the address of the flags for a word
 : word-flags ( word -- h-addr ) [inlined] ;
@@ -393,7 +393,7 @@ commit-flash
 commit-flash
 
 \ Set forth
-forth-module set-current
+forth set-current
 
 \ Express the semantics of a word in the present compilation/interpretation
 \ state
@@ -447,7 +447,7 @@ forth-module set-current
 ;
 
 \ Set internal
-internal-module set-current
+internal set-current
 
 \ Search for all the words that go by a certain name in a given dictionary
 : search-word-info ( b-addr bytes dict -- )
@@ -480,7 +480,7 @@ internal-module set-current
 ;  
 
 \ Set forth
-forth-module set-current
+forth set-current
 
 \ Dump all the words that go by a certain name
 : word-info ( "name" -- )
@@ -538,7 +538,7 @@ commit-flash
 ;
 
 \ Set internal
-internal-module set-current
+internal set-current
 
 \ In all cases:
 \
@@ -568,7 +568,7 @@ internal-module set-current
 ;
 
 \ Set forth
-forth-module set-current
+forth set-current
 
 \ Commit changes to flash
 commit-flash
@@ -584,7 +584,7 @@ commit-flash
 : x-no-word-being-built ( -- ) space ." no word is being built" cr ;
 
 \ Set internal
-internal-module set-current
+internal set-current
 
 \ Align to flash block if compiling to flash
 : block-align,
@@ -592,7 +592,7 @@ internal-module set-current
 ;
 
 \ Set forth
-forth-module set-current
+forth set-current
 
 \ Commit changes to flash
 commit-flash
@@ -748,7 +748,7 @@ commit-flash
 ;
 
 \ Set internal
-internal-module set-current
+internal set-current
 
 \ Look up next available user space
 : next-user-space ( -- offset )
@@ -766,7 +766,7 @@ internal-module set-current
   compile-to-flash
   get-current
   swap
-  internal-module set-current
+  internal set-current
   s" *USER*" constant-with-name
   set-current
   not if
@@ -792,7 +792,7 @@ internal-module set-current
   compile-to-flash
   get-current
   swap
-  internal-module set-current
+  internal set-current
   s" *RAM*" constant-with-name
   set-current
   not if
@@ -804,7 +804,7 @@ internal-module set-current
 : user> ( -- ) does> @ dict-base @ + ;
 
 \ Set forth
-forth-module set-current
+forth set-current
 
 \ Commit changes to flash
 commit-flash
@@ -898,7 +898,7 @@ commit-flash
 ;
 
 \ Set internal
-internal-module set-current
+internal set-current
 
 \ Allocate a byte variable in RAM
 : ram-cvariable ( "name" -- )
@@ -989,7 +989,7 @@ internal-module set-current
 ;
 
 \ Set forth
-forth-module set-current
+forth set-current
 
 \ Commit changes to flash
 commit-flash
@@ -1049,7 +1049,7 @@ commit-flash
 ;
 
 \ Set the internal wordlist
-internal-module set-current
+internal set-current
 
 \ Make the global portion of a CPU variable
 : global-cpu-variable ( addr "global-name" -- ) <builds , does> @ swap cells + ;
@@ -1058,7 +1058,7 @@ internal-module set-current
 commit-flash
 
 \ Set the forth wordlist
-forth-module set-current
+forth set-current
 
 \ Make a variable which is CPU-dependent
 : cpu-variable ( "global-name" "cpu-name" -- )
@@ -1072,7 +1072,7 @@ forth-module set-current
 commit-flash
 
 \ Set the internal wordlist
-internal-module set-current
+internal set-current
 
 \ Is there a deferred context switch for a give CPU
 cpu-count cells buffer: cpus-deferred-context-switch
@@ -1095,7 +1095,7 @@ commit-flash
 commit-flash
 
 \ Set the forth wordlist
-forth-module set-current
+forth set-current
 
 \ Begin a critical section
 : begin-critical ( -- )
@@ -1177,7 +1177,7 @@ commit-flash
 ;
 
 \ Set internal
-internal-module set-current
+internal set-current
 
 \ Specify current flash wordlist
 : set-current-flash-wordlist ( wid -- )
@@ -1186,7 +1186,7 @@ internal-module set-current
   compile-to-flash
   get-current
   swap
-  internal-module set-current
+  internal set-current
   s" *WORDLIST*" constant-with-name
   set-current
   not if
@@ -1199,12 +1199,12 @@ internal-module set-current
   s" *WORDLIST*" visible-flag flash-latest find-all-dict dup if
     >body execute
   else
-    drop internal-module
+    drop internal
   then
 ;
 
 \ Set forth
-forth-module set-current
+forth set-current
 
 \ Commit to flash
 commit-flash
@@ -1215,7 +1215,7 @@ commit-flash
 ;
 
 \ Set internal
-internal-module set-current
+internal set-current
 
 \ The minimum RAM wordlist
 32768 constant min-ram-wordlist
@@ -1224,7 +1224,7 @@ internal-module set-current
 variable current-ram-wordlist
 
 \ Set forth
-forth-module set-current
+forth set-current
 
 \ Commit to flash
 commit-flash
@@ -1296,7 +1296,7 @@ commit-flash
 commit-flash
 
 \ Set the internal module
-internal-module set-current
+internal set-current
 
 \ Dump 16 bytes of ASCII
 : dump-ascii-16 ( start-addr -- )
@@ -1308,7 +1308,7 @@ internal-module set-current
 ;
 
 \ Set the forth module
-forth-module set-current
+forth set-current
 
 \ Commit to flash
 commit-flash
@@ -1503,7 +1503,7 @@ commit-flash
 ;
 
 \ \ Set internal
-\ internal-module set-current
+\ internal set-current
 
 \ \ Decode the immediate field from a MOVW or MOVT instruction
 \ : decode-mov16 ( h-addr -- h )
@@ -1518,7 +1518,7 @@ commit-flash
 \ ;
 
 \ \ Set forth
-\ forth-module set-current
+\ forth set-current
 
 \ \ Get the referred xt from a deferred word in RAM
 \ : defer-ram@ ( xt-deferred -- xt )
@@ -1536,10 +1536,10 @@ commit-flash
 \ ;
 
 \ Set up the wordlist
-wordlist constant esc-string-module
+wordlist constant esc-string
 commit-flash
-internal-module forth-module esc-string-module 3 set-order
-esc-string-module set-current
+internal forth esc-string 3 set-order
+esc-string set-current
 
 \ Character constants
 $07 constant alert
@@ -1788,7 +1788,7 @@ commit-flash
 commit-flash
 
 \ Change wordlists
-forth-module set-current
+forth set-current
 
 \ Compile an escaped counted string
 : c\" ( -- )
@@ -1831,7 +1831,7 @@ forth-module set-current
 ;
 
 \ Set forth
-forth-module set-current
+forth set-current
 
 \ Inner case of [else]
 : [else]-case ( -- )
@@ -1880,7 +1880,7 @@ commit-flash
 : [then] ( -- ) [immediate] ;
 
 \ Set internal
-internal-module set-current
+internal set-current
 
 \ Maximum pictured numeric output size
 65 constant picture-size
@@ -1889,7 +1889,7 @@ internal-module set-current
 user picture-offset
 
 \ Set forth
-forth-module set-current
+forth set-current
 
 \ Commit to flash
 commit-flash
@@ -1994,7 +1994,7 @@ commit-flash
 ;
 
 \ Set internal
-internal-module set-current
+internal set-current
 
 \ Fraction size lookup table
 create fraction-size-table
@@ -2037,7 +2037,7 @@ commit-flash
 ;
 
 \ Set forth
-forth-module set-current
+forth set-current
 
 \ Commit to flash
 commit-flash
@@ -2095,7 +2095,7 @@ variable wake-hook
 : wake ( -- ) wake-hook @ ?execute ;
 
 \ Set internal
-internal-module set-current
+internal set-current
 
 commit-flash
 
@@ -2243,7 +2243,7 @@ flash-mini-dict-size [if]
 commit-flash
 
 \ Set forth
-forth-module set-current
+forth set-current
 
 \ Provide a double cell as a buffer.
 : provide-allot-2cell ( xd xt -- ) ( xt: addr bytes -- )

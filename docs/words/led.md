@@ -2,11 +2,11 @@
 
 LEDs are initialized at boot time, and can be used as is afterwards.
 
-The following words are in `led-module`.
+The following words are in `led`.
 
 ## STM32L476 LED Words
 
-### `led-module`
+### `led`
 
 ##### `led-red-on`
 ( -- )
@@ -30,7 +30,7 @@ Turn the green LED off
 
 ## STM32F407 LED Words
 
-### `led-module`
+### `led`
 
 ##### `led-orange-on`
 ( -- )
@@ -74,7 +74,7 @@ Turn the blue LED off
 
 ## Raspberry Pi Pico LED Words
 
-### `led-module`
+### `led`
 
 ##### `led-on`
 ( -- )

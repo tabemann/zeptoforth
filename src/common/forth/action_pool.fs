@@ -24,11 +24,11 @@ compile-to-flash
 \ Begin compressing flash
 compress-flash
 
-begin-module action-pool-module
+begin-module action-pool
 
-  schedule-module import
+  schedule import
 
-  begin-module action-pool-internal-module
+  begin-module action-pool-internal
 
     \ Action pool structure
     begin-structure action-pool-size
