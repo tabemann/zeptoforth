@@ -35,11 +35,11 @@
             
   <section id="stream-words">
 <h1>Stream Words<a class="headerlink" href="#stream-words" title="Permalink to this headline">¶</a></h1>
-<p>A stream is a monodirectional means of communicating data, as a fixed-size queue of bytes which may be accessed without any kind of message boundaries. Streams can be sent to and received from using both blocking operations, which when sending may wait to send entire buffers at once or may allow sending data in parts until all the data is sent, and when receiving/peeking/skipping may wait until a non-zero amount of data is available, and non-blocking operations, which when sending may raise <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> (declared in <code class="docutils literal notranslate"><span class="pre">task-module</span></code>) if blocking would occur or maysend only part of the buffer provided, and when receiving/peeking/skipping may return a zero byte count.</p>
+<p>A stream is a monodirectional means of communicating data, as a fixed-size queue of bytes which may be accessed without any kind of message boundaries. Streams can be sent to and received from using both blocking operations, which when sending may wait to send entire buffers at once or may allow sending data in parts until all the data is sent, and when receiving/peeking/skipping may wait until a non-zero amount of data is available, and non-blocking operations, which when sending may raise <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> (declared in <code class="docutils literal notranslate"><span class="pre">task</span></code>) if blocking would occur or maysend only part of the buffer provided, and when receiving/peeking/skipping may return a zero byte count.</p>
 <p>Streams can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put in alloted memory in the dictionary or into allocated memory in the heap. Note that the size of a stream for a given data size may be calculated with <code class="docutils literal notranslate"><span class="pre">stream-size</span></code>.</p>
-<section id="stream-module">
-<h2><code class="docutils literal notranslate"><span class="pre">stream-module</span></code><a class="headerlink" href="#stream-module" title="Permalink to this headline">¶</a></h2>
-<p>The following words are in <code class="docutils literal notranslate"><span class="pre">stream-module</span></code>:</p>
+<section id="stream">
+<h2><code class="docutils literal notranslate"><span class="pre">stream</span></code><a class="headerlink" href="#stream" title="Permalink to this headline">¶</a></h2>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">stream</span></code>:</p>
 <section id="x-stream-closed">
 <h3><code class="docutils literal notranslate"><span class="pre">x-stream-closed</span></code><a class="headerlink" href="#x-stream-closed" title="Permalink to this headline">¶</a></h3>
 <p>( – )</p>
@@ -210,10 +210,7 @@
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rchannel.html">Reply Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Stream Words</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#stream-module"><code class="docutils literal notranslate"><span class="pre">stream-module</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>

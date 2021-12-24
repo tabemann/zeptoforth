@@ -2,9 +2,9 @@
 
 An EXTI API is provided for STM32 microcontrollers, with slight variations between individual microcontrollers (primarily in the number of supported GPIO's, along with internal differences in the registers used by the API). It provides a thin layer over the hardware registers that control EXTI, so as to make them more user-friendly while not limiting the programmer's capabilities.
 
-### `exti-module`
+### `exti`
 
-These words are in `exti-module`.
+These words are in `exti`.
 
 ##### `EXTI_0` through `EXTI_4`
 

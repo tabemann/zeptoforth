@@ -1,8 +1,8 @@
 # Exposed Kernel Variables
 
-### `forth-module`
+### `forth`
 
-Thes words are in `forth-module`.
+Thes words are in `forth`.
 
 ##### `state`
 

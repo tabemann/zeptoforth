@@ -23,13 +23,13 @@ compile-to-flash
 
 compress-flash
 
-begin-module fchan-module
+begin-module fchan
 
-  task-module import
-  tqueue-module import
-  lock-module import
+  task import
+  tqueue import
+  lock import
 
-  begin-module fchan-internal-module
+  begin-module fchan-internal
 
     \ Rendezvous channel header structure
     begin-structure fchan-size

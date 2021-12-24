@@ -20,9 +20,9 @@
 
 compile-to-flash
 
-begin-module exti-module
+begin-module exti
 
-  begin-module exti-internal-module
+  begin-module exti-internal
 
     \ RCC registers
     $40021000 constant RCC_Base

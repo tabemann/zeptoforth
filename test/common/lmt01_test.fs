@@ -18,13 +18,13 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module-once temp-module
+begin-module-once temp
 
-  interrupt-module import
-  gpio-module import
-  exti-module import
-  task-module import
-  systick-module import
+  interrupt import
+  gpio import
+  exti import
+  task import
+  systick import
 
   \ A sensor structure
   begin-structure sensor-size

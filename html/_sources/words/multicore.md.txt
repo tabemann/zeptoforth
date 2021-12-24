@@ -4,11 +4,11 @@ Multiprocessing via multicore execution in zeptoforth is handled separtely from 
 
 Currently the only platform on which multicore execution is supported is the RP2040. On this platform cores communicate and synchronize via hardware spinlocks and hardware FIFO's (i.e. mailboxes). On platforms other than the RP2040 multicore words exist in the dictionary but are merely stubs which will always raise exceptions when called.
 
-Note that there are currently some rough edges to multicore on the RP2040, specifically that once the second core is booted, no writes to flash may be made, even across reboots, until the MCU is power-cycled, and that `disable-int-io` in `int-io-module` must be called prior to calling `spawn-aux-main`.
+Note that there are currently some rough edges to multicore on the RP2040, specifically that once the second core is booted, no writes to flash may be made, even across reboots, until the MCU is power-cycled, and that `disable-int-io` in `int-io` must be called prior to calling `spawn-aux-main`.
 
 Multicore support in zeptoforth is largely implemented outside the zeptoforth kernel and is split between `src/rp2040/forth/multicore.fs` (on platforms other than RP2040 stubbed out in `src/common/forth/multicore.fs`) and `src/common/forth/task.fs`, with a bit of supporting functionality also in `src/common/forth/systick.fs` and `src/rp2040/forth/erase.fs`.
 
-### `forth-module`
+### `forth`
 
 Built into the kernel exists:
 
@@ -27,7 +27,7 @@ Get the index of the core from which `cpu-index` was called.
 
 Return 4 times `cpu-index`.
 
-In `src/common/forth/basic.fs`, in `forth-module`, exists:
+In `src/common/forth/basic.fs`, in `forth`, exists:
 
 ##### `cpu-variable`
 
@@ -35,9 +35,9 @@ In `src/common/forth/basic.fs`, in `forth-module`, exists:
 
 Compile a one-cell-per-core variable into flash that has two words referring to it, a *global-name* which takes a core index when called and outputs the address for that core, and a *cpu-name* which returns its address for the current core.
 
-### `task-module`
+### `task`
 
-In `src/common/forth/task.fs`, in `task-module`, exists:
+In `src/common/forth/task.fs`, in `task`, exists:
 
 ##### `spawn-aux-main`
 ( xn ... x0 count xt dict-size stack-size rstack-size core -- )
@@ -54,9 +54,9 @@ Exception raised if one calls `spawn-aux-main` for a core which has already been
 
 Exception raised if one attempts to call `spawn-aux-main` from a core other than core 0.
 
-### `multicore-module`
+### `multicore`
 
-In both `src/rp2040/forth/multicore.fs` and `src/common/forth/multicore.fs`, in `multicore-module` on all platforms, exists:
+In both `src/rp2040/forth/multicore.fs` and `src/common/forth/multicore.fs`, in `multicore` on all platforms, exists:
 
 ##### `x-spinlock-out-of-range`
 ( -- )
@@ -73,7 +73,7 @@ Core out of range exception, i.e. core index not in range 0 \<= core \< cpu-coun
 
 Core not addressable exception, i.e. invalid core for an operation carried out ont the current core.
 
-In `src/rp2040/forth/multicore.fs`, in `multicore-module` on the `rp2040` platform, exists:
+In `src/rp2040/forth/multicore.fs`, in `multicore` on the `rp2040` platform, exists:
 
 ##### `sev`
 ( -- )
@@ -176,7 +176,7 @@ Do a blocking push onto a FIFO for inter-core communication; if *core* is outsid
 
 Launch an auxiliary core, i.e. a core *core* other than core 0 and execute *entry-xt* on it with the return stack pointer *rstack-ptr*, the data stack pointer *stack-ptr*, and the vector table base *vector-table*. Note that it is not recommended that this be used by the user, rather the user should use `spawn-aux-main` in `src/common/forth/task.fs`.
 
-In `src/common/forth/multicore.fs`, in `multicore-module` for all platforms other than rp2040, exists:
+In `src/common/forth/multicore.fs`, in `multicore` for all platforms other than rp2040, exists:
 
 ##### `spinlock-count`
 ( -- count )

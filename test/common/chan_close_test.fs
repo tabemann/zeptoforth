@@ -18,11 +18,11 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-continue-module forth-module
+continue-module forth
 
-  task-module import
-  chan-module import
-  task-pool-module import
+  task import
+  chan import
+  task-pool import
 
   \ Task count
   3 constant my-task-count

@@ -23,12 +23,12 @@ compile-to-flash
 
 compress-flash
 
-begin-module heap-module
+begin-module heap
 
   \ No blocks free exception
   : x-allocate-failed ( -- ) space ." allocate failed" cr ;
   
-  begin-module heap-internal-module
+  begin-module heap-internal
     
     \ The heap structure
     begin-structure heap-size

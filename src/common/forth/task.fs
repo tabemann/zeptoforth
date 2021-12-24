@@ -21,15 +21,15 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-module task-module
+begin-module task
 
-  internal-module import
-  interrupt-module import
-  multicore-module import
-  systick-module import
-  int-io-module import
+  internal import
+  interrupt import
+  multicore import
+  systick import
+  int-io import
 
-  begin-module task-internal-module
+  begin-module task-internal
 
     \ Task readied state
     0 constant readied
@@ -241,7 +241,7 @@ begin-module task-module
   \ Sleep
   : sleep ( -- ) sleep-enabled? @ if sleep then ;
 
-  continue-module task-internal-module
+  continue-module task-internal
 
     \ Get task stack base
     : task-stack-base ( task -- addr )
@@ -330,7 +330,7 @@ begin-module task-module
     task-active h@ terminated = triggers x-terminated
   ;
 
-  continue-module task-internal-module
+  continue-module task-internal
 
     \ Validate a notification index
     : validate-notify ( notify-index task -- )
@@ -855,7 +855,7 @@ begin-module task-module
   \ Get whether a task has terminated
   : terminated? ( task -- terminated ) task-active h@ terminated = ;
 
-  continue-module task-internal-module
+  continue-module task-internal
     
     \ Initialize the main task
     : init-main-task ( -- )
@@ -1029,7 +1029,7 @@ begin-module task-module
     ;] critical
   ;
 
-  continue-module task-internal-module
+  continue-module task-internal
 
     \ Wake tasks
     : do-wake ( -- ) true wake-tasks ! ;
@@ -1271,7 +1271,7 @@ begin-module task-module
     drop drop
   ;
 
-  continue-module task-internal-module
+  continue-module task-internal
 
     \ Wait the current thread
     : do-wait ( -- )
@@ -1459,9 +1459,9 @@ end-module> import
   init-tasker
 ;
 
-continue-module task-module
+continue-module task
   
-  task-internal-module import
+  task-internal import
   
   \ Make pause-count read-only
   : pause-count ( -- u ) pause-count @ ;

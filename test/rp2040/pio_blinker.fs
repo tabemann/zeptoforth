@@ -18,10 +18,10 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-continue-module forth-module
+continue-module forth
 
-  gpio-module import
-  pio-module import
+  gpio import
+  pio import
 
   \ The initial setup
   create pio-init

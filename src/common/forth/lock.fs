@@ -23,11 +23,11 @@ compile-to-flash
 
 compress-flash
 
-begin-module lock-module
+begin-module lock
 
-  task-module import
+  task import
 
-  begin-module lock-internal-module
+  begin-module lock-internal
 
     \ Lock header structure
     begin-structure lock-size

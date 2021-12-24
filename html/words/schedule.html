@@ -37,9 +37,9 @@
 <h1>Scheduling Words<a class="headerlink" href="#scheduling-words" title="Permalink to this headline">¶</a></h1>
 <p>Scheduling in zeptoforth is not part of the zeptoforth kernel, but is provided by <code class="docutils literal notranslate"><span class="pre">src/common/forth/schedule.fs</span></code>, which in turn relies upon <code class="docutils literal notranslate"><span class="pre">src/common/forth/systick.fs</span></code> and is normally combined with multitasking. It provides a lighter-weight means of asynchronous computing than multitasking, as each asynchronous action takes up far less RAM than a task does; however a scheduler comprising multiple asynchronous actions typically runs inside a task, so it can take advantage of automatic sleeping, and often that task is in addition to the main task, so the REPL can still be used while the scheduler operates.</p>
 <p>The scheduler involves repeatedly executing words based on the specified timing delays which may be enabled and disabled, just like tasks. However unlike tasks, these actions do not have their own dictionaries, data stacks, or return stacks. Rather they share those belonging to the scheduler itself. Uncaught exceptions within a task will be handled, with its message being displayed.</p>
-<section id="schedule-module">
-<h2><code class="docutils literal notranslate"><span class="pre">schedule-module</span></code><a class="headerlink" href="#schedule-module" title="Permalink to this headline">¶</a></h2>
-<p>These words are in <code class="docutils literal notranslate"><span class="pre">schedule-module</span></code>.</p>
+<section id="schedule">
+<h2><code class="docutils literal notranslate"><span class="pre">schedule</span></code><a class="headerlink" href="#schedule" title="Permalink to this headline">¶</a></h2>
+<p>These words are in <code class="docutils literal notranslate"><span class="pre">schedule</span></code>.</p>
 <section id="current-action">
 <h3><code class="docutils literal notranslate"><span class="pre">current-action</span></code><a class="headerlink" href="#current-action" title="Permalink to this headline">¶</a></h3>
 <p>( – action )</p>
@@ -150,10 +150,7 @@
 <li class="toctree-l1"><a class="reference internal" href="lambda.html">Lambda Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Scheduling Words</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#schedule-module"><code class="docutils literal notranslate"><span class="pre">schedule-module</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Scheduling Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>

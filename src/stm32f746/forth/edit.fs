@@ -21,11 +21,11 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-module edit-internal-module
+begin-module edit-internal
 
-  systick-module import
-  block-module import
-  ansi-term-module import
+  systick import
+  block import
+  ansi-term import
 
   \ Edit buffer count (must be <= 32)
   9 constant buffer-count

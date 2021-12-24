@@ -39,9 +39,9 @@
 <p>If no task is listening to a rendezvous channel, if no other tasks are attempting to send on the rendezvous channel the data for the rendezvous channel is recorded in the rendezvous channel, and the sending task is descheduled, to be rescheduled at the back of the scheduling ring when a task then receives on the rendezvous channel. If no task is listening to a rendezvous channel, and if other tasks are already attempting to send on the rendezvous channel, another task attempting to send on the rendezvous channel waits until no more tasks are ahead of it, and then records its data, deschedules itself, immediately transfers control if a listening task is ready to receive a message, and once a listening task has received the message is rescheduled.</p>
 <p>Note that if multiple tasks attempt to send on a rendezvous channel, they are queued so that they send their data in the order in which they attempted to send their data. Likewise, if multiple tasks attempt to receive on a rendezvous channel, they are queued so that they receive data in the order in which they attempted to receive dat.</p>
 <p>Rendezvous channels can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put into alloted memory in the dictionary or into allocated memory in the heap.</p>
-<section id="fchan-module">
-<h2><code class="docutils literal notranslate"><span class="pre">fchan-module</span></code><a class="headerlink" href="#fchan-module" title="Permalink to this headline">¶</a></h2>
-<p>The following words are in <code class="docutils literal notranslate"><span class="pre">fchan-module</span></code>:</p>
+<section id="fchan">
+<h2><code class="docutils literal notranslate"><span class="pre">fchan</span></code><a class="headerlink" href="#fchan" title="Permalink to this headline">¶</a></h2>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">fchan</span></code>:</p>
 <section id="x-fchan-closed">
 <h3><code class="docutils literal notranslate"><span class="pre">x-fchan-closed</span></code><a class="headerlink" href="#x-fchan-closed" title="Permalink to this headline">¶</a></h3>
 <p>( – )</p>
@@ -124,10 +124,7 @@
 <li class="toctree-l1"><a class="reference internal" href="map.html">Map Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Rendezvous Channel Words</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#fchan-module"><code class="docutils literal notranslate"><span class="pre">fchan-module</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Rendezvous Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rchannel.html">Reply Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>

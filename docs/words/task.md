@@ -10,18 +10,18 @@ Task notifications are the lightest-weight of all these mechanisms; simple synch
 
 Multitasking is enabled by default once `src/common/forth/task.fs` has been loaded and the MCU has been rebooted; afterwards each time the MCU is booted a new task is created for the REPL, the main task, and multitasking is initiated.
 
-### `forth-module`
+### `forth`
 
-This word is in `forth-module`:
+This word is in `forth`:
 
 ##### `pause`
 ( -- )
 
 Pass off control to the next active task; if no tasks are active, put the MCU to sleep until an interrupt occurs (typically due to SysTick or USART activity).
 
-### `task-module`
+### `task`
 
-These words are in `task-module`:
+These words are in `task`:
 
 ##### `current-task`
 ( -- task )

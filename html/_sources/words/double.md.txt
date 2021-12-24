@@ -1,8 +1,8 @@
 # Double-Cell Words
 
-### `forth-module`
+### `forth`
 
-These words are in `forth-module`.
+These words are in `forth`.
 
 ##### `2drop`
 ( d -- )

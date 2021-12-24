@@ -18,10 +18,10 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-continue-module forth-module
+continue-module forth
 
-  map-module import
-  cstr-map-module import
+  map import
+  cstr-map import
 
   \ Map entry count
   32 constant entry-count

@@ -23,11 +23,11 @@ compile-to-flash
 
 compress-flash
 
-begin-module pool-module
+begin-module pool
 
-  task-module import
+  task import
 
-  begin-module pool-internal-module
+  begin-module pool-internal
 
     \ Pool header structure
     begin-structure pool-size

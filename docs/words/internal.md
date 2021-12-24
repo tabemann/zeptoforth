@@ -1,8 +1,8 @@
 # Internal Words
 
-### `internal-module`
+### `internal`
 
-These words are in `internal-module`.
+These words are in `internal`.
 
 ##### `advance-here`
 ( a -- )

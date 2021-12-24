@@ -21,7 +21,7 @@
 \ Compile to flash
 compile-to-flash
 
-begin-module multicore-module
+begin-module multicore
 
   \ Spinlock count
   0 constant spinlock-count
