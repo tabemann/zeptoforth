@@ -18,12 +18,12 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-continue-module forth-module
+continue-module forth
 
-  task-module import
-  task-pool-module import
-  lock-module import
-  sema-module import
+  task import
+  task-pool import
+  lock import
+  sema import
 
   \ Our task pool count
   9 constant my-task-count

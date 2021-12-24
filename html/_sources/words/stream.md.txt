@@ -1,12 +1,12 @@
 # Stream Words
 
-A stream is a monodirectional means of communicating data, as a fixed-size queue of bytes which may be accessed without any kind of message boundaries. Streams can be sent to and received from using both blocking operations, which when sending may wait to send entire buffers at once or may allow sending data in parts until all the data is sent, and when receiving/peeking/skipping may wait until a non-zero amount of data is available, and non-blocking operations, which when sending may raise `x-would-block` (declared in `task-module`) if blocking would occur or maysend only part of the buffer provided, and when receiving/peeking/skipping may return a zero byte count.
+A stream is a monodirectional means of communicating data, as a fixed-size queue of bytes which may be accessed without any kind of message boundaries. Streams can be sent to and received from using both blocking operations, which when sending may wait to send entire buffers at once or may allow sending data in parts until all the data is sent, and when receiving/peeking/skipping may wait until a non-zero amount of data is available, and non-blocking operations, which when sending may raise `x-would-block` (declared in `task`) if blocking would occur or maysend only part of the buffer provided, and when receiving/peeking/skipping may return a zero byte count.
 
 Streams can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put in alloted memory in the dictionary or into allocated memory in the heap. Note that the size of a stream for a given data size may be calculated with `stream-size`.
 
-### `stream-module`
+### `stream`
 
-The following words are in `stream-module`:
+The following words are in `stream`:
 
 ##### `x-stream-closed`
 ( -- )

@@ -21,7 +21,7 @@
 
 compile-to-flash
 
-begin-module memmap-module
+begin-module memmap
 
   execute-defined? use-RNG defined? RNG_CR_IE not and [if]
     \ RNG_CR (read-write) Reset:0x00000000

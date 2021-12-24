@@ -22,12 +22,12 @@
 \ Compile to flash
 compile-to-flash
 
-begin-module int-io-module
+begin-module int-io
 
-  internal-module import
-  interrupt-module import
+  internal import
+  interrupt import
 
-  begin-module int-io-internal-module
+  begin-module int-io-internal
     
     \ RAM variable for rx buffer read-index
     cvariable rx-read-index
@@ -211,7 +211,7 @@ begin-module int-io-module
     ;
 
     \ Set non-internal
-    int-io-module set-current
+    int-io set-current
 
   end-module> import
   

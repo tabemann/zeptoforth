@@ -40,9 +40,9 @@
 <p>Note that if multiple tasks attempt to send on a reply channel, they are queued so that they send their data in the order in which they attempted to send their data. Likewise, if multiple tasks attempt to receive on a reply channel, they are queued so that they receive data in the order in which they attempted to receive dat.</p>
 <p>Once a task receives a message on a reply channel, the reply channel is put into a state where it is pending a reply. No other messages will be sent over the reply channel until the task which received the message sends a reply back to the task which had originally sent on the reply channel. Like the original message sent from the sending task to the receiving task, no data is buffered in a reply but rather the reply data is copied directly from the buffer provided by the replying task to the reply buffer provided by the original sending task.</p>
 <p>Reply channels can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put into alloted memory in the dictionary or into allocated memory in the heap.</p>
-<section id="rchan-module">
-<h2><code class="docutils literal notranslate"><span class="pre">rchan-module</span></code><a class="headerlink" href="#rchan-module" title="Permalink to this headline">¶</a></h2>
-<p>The following words are in <code class="docutils literal notranslate"><span class="pre">rchan-module</span></code>:</p>
+<section id="rchan">
+<h2><code class="docutils literal notranslate"><span class="pre">rchan</span></code><a class="headerlink" href="#rchan" title="Permalink to this headline">¶</a></h2>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">rchan</span></code>:</p>
 <section id="x-rchan-closed">
 <h3><code class="docutils literal notranslate"><span class="pre">x-rchan-closed</span></code><a class="headerlink" href="#x-rchan-closed" title="Permalink to this headline">¶</a></h3>
 <p>( – )</p>
@@ -141,10 +141,7 @@
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Reply Channel Words</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#rchan-module"><code class="docutils literal notranslate"><span class="pre">rchan-module</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Reply Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>

@@ -22,9 +22,9 @@
 \ Compile to flash
 compile-to-flash
 
-begin-module led-module
+begin-module led
 
-  gpio-module import
+  gpio import
 
   \ Initialize the LEDs
   : led-init  ( -- )

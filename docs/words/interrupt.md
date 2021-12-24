@@ -1,8 +1,8 @@
 # Interrupt Words
 
-### `interrupt-module`
+### `interrupt`
 
-These words are in `interrupt-module`.
+These words are in `interrupt`.
 
 ##### `x-invalid-vector`
 ( -- )

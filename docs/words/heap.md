@@ -2,9 +2,9 @@
 
 Heaps in zeptoforth are created by the user and consist of discretes blocks that are allocated, freed, and resized as multiples; the size of allocations plus a cell taken up by a block count is rounded up to the next full number of blocks. There is by default no global heap, and heaps created by the user are specifically *not* concurrency-safe; to make them concurrency-safe one must wrap them in locks, and because of the overhead this would impose, this is not done so by default. Note that the time taken up by heap allocation or resizing is bounded by a maximum which is defined by the number of blocks in the heap; any heap allocation or resizing may take this full time. On the other hand, the time taken up by freeing an allocation is determined solely by the number of blocks comprising the allocation.
 
-### `heap-module`
+### `heap`
 
-The following words are in `heap-module`:
+The following words are in `heap`:
 
 ##### `heap-size`
 ( block-size block-count -- heap-bytes )

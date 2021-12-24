@@ -21,9 +21,9 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-module disassemble-internal-module
+begin-module disassemble-internal
 
-  internal-module import
+  internal import
 
   \ Disassemble for gas
   variable for-gas

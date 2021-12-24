@@ -4,9 +4,9 @@ Scheduling in zeptoforth is not part of the zeptoforth kernel, but is provided b
 
 The scheduler involves repeatedly executing words based on the specified timing delays which may be enabled and disabled, just like tasks. However unlike tasks, these actions do not have their own dictionaries, data stacks, or return stacks. Rather they share those belonging to the scheduler itself. Uncaught exceptions within a task will be handled, with its message being displayed.
 
-### `schedule-module`
+### `schedule`
 
-These words are in `schedule-module`.
+These words are in `schedule`.
 
 ##### `current-action`
 ( -- action )

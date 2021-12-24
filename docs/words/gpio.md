@@ -4,11 +4,11 @@ A GPIO API is provided for STM32 microcontrollers, with slight variations betwee
 
 A GPIO API is also provided for the RP2040; note that this API differs considerably from the GPIO API for STM32 microcontrollers and has no compatiblity with it. It exposes registers for manipulating GPIO input and output and for controlling GPIO interrupts.
 
-These words are in `gpio-module`.
+These words are in `gpio`.
 
 ## STM32 Words
 
-### `gpio-module`
+### `gpio`
 
 ##### `GPIOA` through `GPIOK`
 
@@ -238,7 +238,7 @@ Get the input for the specified pin (from 0 to 15) on the specified GPIO.
 
 ## RP2040 Words
 
-### `gpio-module`
+### `gpio`
 
 ##### `CTRL_NORMAL`
 

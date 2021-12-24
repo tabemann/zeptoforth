@@ -23,12 +23,12 @@ compile-to-flash
 
 compress-flash
 
-begin-module sema-module
+begin-module sema
 
-  task-module import
-  tqueue-module import
+  task import
+  tqueue import
 
-  begin-module sema-internal-module
+  begin-module sema-internal
 
     \ Semaphore header structure
     begin-structure sema-size

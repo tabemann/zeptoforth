@@ -23,12 +23,12 @@ compile-to-flash
 
 compress-flash
 
-begin-module stream-module
+begin-module stream
 
-  task-module import
-  tqueue-module import
+  task import
+  tqueue import
   
-  begin-module stream-internal-module
+  begin-module stream-internal
 
     \ Stream structure
     begin-structure stream-size
@@ -101,7 +101,7 @@ begin-module stream-module
   \ Get the number of free bytes
   : stream-free ( stream -- bytes ) [: stream-free-unsafe ;] critical ;
   
-  continue-module stream-internal-module
+  continue-module stream-internal
 
     \ Wait to send on a stream
     : wait-send-stream ( bytes stream -- )

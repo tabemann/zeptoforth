@@ -21,11 +21,11 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-module int-map-module
+begin-module int-map
 
-  map-module import
+  map import
 
-  begin-module int-map-internal-module
+  begin-module int-map-internal
 
     \ Hash function for integers
     : int-map-hash ( addr -- hash ) @ ;

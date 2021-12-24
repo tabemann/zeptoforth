@@ -2,9 +2,9 @@
 
 Task pools provide a means of managing multiple tasks and dynamically creating and destroying them. Note that the total number of task that may exist at any one time is fixed, but the number of executing tasks may be of any number less than or equal to that at any point in time.
 
-### `task-pool-module`
+### `task-pool`
 
-The following words are in `task-pool-module`:
+The following words are in `task-pool`:
 
 ##### `x-no-task-available`
 ( -- )

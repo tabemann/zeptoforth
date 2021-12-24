@@ -21,7 +21,7 @@
 \ Compile this to flash
 compile-to-flash
 
-begin-module pio-module
+begin-module pio
   
   \ PIO0 base register
   $50200000 constant PIO0
