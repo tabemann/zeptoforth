@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2021 Travis Bemann
+\ Copyright (c) 2020-2022 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@ compress-flash
 begin-module fchan
 
   task import
+  multicore import
   tqueue import
   lock import
 
@@ -89,7 +90,7 @@ begin-module fchan
       then
       fchan-closed @ triggers x-fchan-closed
       s" END SEND-FCHAN" trace
-    ;] critical
+    ;] tqueue-spinlock critical-with-spinlock
   ;
 
   \ Receive data on a rendezvous channel
@@ -113,7 +114,7 @@ begin-module fchan
 	then
 	r> fchan-resp-tqueue wake-tqueue
 	s" END RECV-FCHAN" trace
-      ;] critical
+      ;] tqueue-spinlock critical-with-spinlock
     ;] over fchan-recv-lock with-lock
   ;
 
@@ -125,7 +126,7 @@ begin-module fchan
       true over fchan-closed !
       dup fchan-send-tqueue wake-tqueue-all
       fchan-recv-tqueue wake-tqueue-all
-    ;] critical
+    ;] tqueue-spinlock critical-with-spinlock
   ;
 
   \ Get whether a rendezvous channel is closed

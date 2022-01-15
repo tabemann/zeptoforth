@@ -431,7 +431,7 @@ _uge:	movs r0, tos
 _here:	push {lr}
 	bl _cpu_offset
 	ldr r0, =here
-	adds tos, r0
+	adds r0, tos
 	ldr tos, [r0]
 	pop {pc}
 	end_inlined

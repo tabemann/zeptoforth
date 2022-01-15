@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2021 Travis Bemann
+\ Copyright (c) 2020-2022 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -68,7 +68,7 @@ begin-module systick
     $00FFFFFF constant SYST_CALIB_TENMS
     
     \ SysTick counter
-    cpu-variable cpu-systick-counter systick-counter
+    variable systick-counter
 
     compress-flash
 
@@ -80,7 +80,10 @@ begin-module systick
   \ SysTick handler
   : systick-handler ( -- )
     SYST_CSR @ SYST_CSR_COUNTFLAG and if
-      systick-counter @ 1+ systick-counter ! wake
+      cpu-index 0= if
+	systick-counter @ 1+ systick-counter !
+      then
+      wake
     then
   ;
 

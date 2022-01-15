@@ -29,6 +29,12 @@ begin-module multicore
   \ Multitasker spinlock index
   -1 constant task-spinlock
 
+  \ Lock spinlock index
+  -1 constant lock-spinlock
+
+  \ Task queue spinlock index
+  -1 constant tqueue-spinlock
+  
   \ Spinlock out of range exception
   : x-spinlock-out-of-range space ." spinlock out of range" cr ;
 
@@ -38,12 +44,15 @@ begin-module multicore
   \ Core not addressable exception
   : x-core-not-addressable ( -- ) space ." core not addressable" cr ;
 
-  \ Claim a spinlock - note that this will always fail
-  : claim-spinlock ( index -- ) ['] x-spinlock-out-of-range ?raise ;
+  \ Claim a spinlock - note that this is a no-op
+  : claim-spinlock ( index -- ) drop ;
 
-  \ Release a spinlock - note that this will always fail
-  : release-spinlock ( index -- ) ['] x-spinlock-out-of-range ?raise ;
+  \ Release a spinlock - note that this is a no-op
+  : release-spinlock ( index -- ) drop ;
     
+  \ Enter a critical section (and not claim a spinlock)
+  : critical-with-spinlock ( xt spinlock -- ) drop critical ;
+  
   \ Drain a multicore FIFO
   : fifo-drain ( core -- ) ['] x-core-out-of-range ?raise ;
   

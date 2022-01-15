@@ -1,4 +1,4 @@
-@ Copyright (c) 2019-2021 Travis Bemann
+@ Copyright (c) 2019-2022 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -437,7 +437,7 @@ _uge:	movs r0, tos
 _here:	push {lr}
 	bl _cpu_offset
 	ldr r0, =here
-	adds tos, r0
+	adds r0, tos
 	ldr tos, [r0]
 	pop {pc}
 	end_inlined

@@ -1,4 +1,4 @@
-\ Copyright (c) 2021 Travis Bemann
+\ Copyright (c) 2021-2022 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -111,6 +111,24 @@ begin-module multicore
   \ Multitasker spinlock index
   31 constant task-spinlock
 
+  \ Lock spinlock index
+  30 constant lock-spinlock
+
+  \ Task queue spinlock index
+  29 constant tqueue-spinlock
+
+  continue-module multicore-internal
+
+    \ Spinlock lock counts
+    spinlock-count cpu-count * cells buffer: spinlock-lock-counts
+
+    \ Get the address of a spinlock lock count
+    : spinlock-lock-count ( index -- addr )
+      cpu-count * cpu-index + cells spinlock-lock-counts +
+    ;
+    
+  end-module
+  
   \ Hardware spinlocks; reading will return 0 if already locked, or
   \ 1 lock-number lshift on success; writing any value will release the spinlock
   : SPINLOCK ( index -- addr ) SIO_BASE $100 + swap cells + ;
@@ -118,13 +136,30 @@ begin-module multicore
   \ Claim a spinlock
   : claim-spinlock ( index -- )
     dup spinlock-count u< averts x-spinlock-out-of-range
-    SPINLOCK begin dup @ 0<> until drop
+    disable-int
+    dup spinlock-lock-count dup @ 1+ dup rot !
+    enable-int
+    1 = if SPINLOCK begin dup @ 0<> until then drop
   ;
 
   \ Release a spinlock
   : release-spinlock ( index -- )
     dup spinlock-count u< averts x-spinlock-out-of-range
-    SPINLOCK -1 swap !
+    disable-int
+    dup spinlock-lock-count dup @ 1- dup rot !
+    0= if SPINLOCK -1 swap ! else drop then
+    enable-int
+  ;
+
+  \ Claim a spinlock, releasing it afterwards
+  : with-spinlock ( xt spinlock -- )
+    >r r@ claim-spinlock try r> release-spinlock ?raise
+  ;
+
+  \ Enter a critical section and claim a spinlock, releasing it afterwards
+  : critical-with-spinlock ( xt spinlock -- )
+    >r r@ claim-spinlock begin-critical try
+    r> release-spinlock end-critical ?raise
   ;
   
   \ Drain a multicore FIFO
@@ -186,10 +221,19 @@ begin-module multicore
 
 end-module> import
 
+\ Initialize
+: init ( -- )
+  init
+  spinlock-count cpu-count * 0 ?do
+    0 ^ multicore multicore-internal :: spinlock-lock-counts i cells + !
+  loop
+;
+
 \ Set up reboot to reset the second core
 : reboot ( -- )
   cpu-index 0 = averts x-core-0-only
   1 reset-aux-core
+  spinlock-count 0 ?do -1 i SPINLOCK ! loop
   reboot
 ;
 
