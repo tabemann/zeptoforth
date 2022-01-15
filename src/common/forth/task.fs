@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2021 Travis Bemann
+\ Copyright (c) 2020-2022 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -49,6 +49,9 @@ begin-module task
     \ Task block timed out
     5 constant block-timed-out
 
+    \ Claim task spinlock on schedule bit
+    $2000 constant schedule-with-spinlock
+    
     \ User schedule into critical section bit
     $4000 constant schedule-user-critical
     
@@ -56,7 +59,7 @@ begin-module task
     $8000 constant schedule-critical
 
     \ Task state mask
-    $3FFF constant task-state-mask
+    $1FFF constant task-state-mask
     
     \ In task change
     cpu-variable cpu-in-task-change in-task-change
@@ -148,6 +151,9 @@ begin-module task
 
     \ The current notification area pointer
     user task-notify-area
+
+    \ Spinlock to claim
+    user spinlock-to-claim
   
     \ SVCall vector index
     11 constant svcall-vector
@@ -298,20 +304,6 @@ begin-module task
     : push-task-rstack ( x task -- )
       dup task-rstack-current @ cell - tuck swap task-rstack-current !
     ;
-
-    \ Claim the task spinlock if spinlocks are supported
-    spinlock-count 0> [if]
-      : claim-task-spinlock ( -- ) task-spinlock claim-spinlock ;
-    [else]
-      : claim-task-spinlock ( -- ) ;
-    [then]
-
-    \ Release the task spinlock if spinlocks are supported
-    spinlock-count 0> [if]
-      : release-task-spinlock ( -- ) task-spinlock release-spinlock ;
-    [else]
-      : release-task-spinlock ( -- ) ;
-    [then]
 
   end-module
   
@@ -538,7 +530,7 @@ begin-module task
       dup validate-not-terminated
       dup ['] task-systick-delay for-task @
       swap ['] task-systick-start for-task @
-    ;] critical
+    ;] task-spinlock critical-with-spinlock
   ;
 
   \ Delay a task
@@ -548,7 +540,7 @@ begin-module task
       tuck ['] task-systick-start for-task !
       tuck ['] task-systick-delay for-task !
       delayed over task-state h!
-    ;] critical
+    ;] task-spinlock critical-with-spinlock
     current-task @ = if pause then
   ;
 
@@ -560,7 +552,7 @@ begin-module task
       tuck ['] task-systick-delay for-task !
       [ delayed schedule-critical or schedule-user-critical or ] literal
       over task-state h!
-    ;] critical
+    ;] task-spinlock critical-with-spinlock
     current-task @ = if pause then
   ;
 
@@ -571,7 +563,7 @@ begin-module task
       tuck ['] task-systick-start for-task !
       tuck ['] task-systick-delay for-task !
       blocked-timeout over task-state h!
-    ;] critical
+    ;] task-spinlock critical-with-spinlock
     current-task @ = if pause then
   ;
 
@@ -581,9 +573,25 @@ begin-module task
       dup validate-not-terminated
       tuck ['] task-systick-start for-task !
       tuck ['] task-systick-delay for-task !
-      [ blocked-timeout schedule-critical or schedule-user-critical or ] literal
+      [ blocked-timeout schedule-critical or schedule-user-critical or ]
+      literal
       over task-state h!
-    ;] critical
+    ;] task-spinlock critical-with-spinlock
+    current-task @ = if pause then
+  ;
+
+  \ Mark a task as blocked until a timeout and schedule as critical along with
+  \ claiming a spinlock once done
+  : block-timeout-with-spinlock ( spinlock ticks-delay ticks-start task -- )
+    [:
+      dup validate-not-terminated
+      tuck ['] task-systick-start for-task !
+      tuck ['] task-systick-delay for-task !
+      tuck ['] spinlock-to-claim for-task !
+      [ blocked-timeout schedule-critical or schedule-user-critical or
+      schedule-with-spinlock or ] literal
+      over task-state h!
+    ;] task-spinlock critical-with-spinlock
     current-task @ = if pause then
   ;
 
@@ -599,13 +607,15 @@ begin-module task
       begin dup bit task-notified-bitmap bit@ not while
 	dup task-current-notify !
 	[ blocked-timeout schedule-critical or ] literal
-	current-task @ task-state h! end-critical pause
+	current-task @ task-state h!
+	task-spinlock release-spinlock end-critical pause
+	task-spinlock claim-spinlock
 	current-task @ validate-timeout
       repeat
       task-notify-area @ over cells + @
       swap bit task-notified-bitmap bic!
       -1 task-current-notify !
-    ;] critical
+    ;] task-spinlock critical-with-spinlock
   ;
 
   \ Wait until a timeout on the specified notification index and return the
@@ -614,22 +624,26 @@ begin-module task
   \ cleared immediately. x-timed-outo is raised if the timeout is reached.
   \ This word will leave the system in a critical section once completed.
   : wait-notify-timeout-critical ( ticks-delay ticks-start notify-index -- x )
-    begin-critical
     [:
-      dup current-task @ validate-notify
-      swap task-systick-start !
-      swap task-systick-delay !
-      begin dup bit task-notified-bitmap bit@ not while
-	dup task-current-notify !
-	[ blocked-timeout schedule-critical or schedule-user-critical or ]
-	literal
-	current-task @ task-state h! end-critical pause
-	current-task @ validate-timeout
-      repeat
-      task-notify-area @ over cells + @
-      swap bit task-notified-bitmap bic!
-      -1 task-current-notify !
-    ;] try ?dup if end-critical ?raise then
+      begin-critical
+      [:
+	dup current-task @ validate-notify
+	swap task-systick-start !
+	swap task-systick-delay !
+	begin dup bit task-notified-bitmap bit@ not while
+	  dup task-current-notify !
+	  [ blocked-timeout schedule-critical or schedule-user-critical or ]
+	  literal
+	  current-task @ task-state h!
+	  task-spinlock release-spinlock end-critical pause
+	  task-spinlock claim-spinlock
+	  current-task @ validate-timeout
+	repeat
+	task-notify-area @ over cells + @
+	swap bit task-notified-bitmap bic!
+	-1 task-current-notify !
+      ;] try ?dup if end-critical ?raise then
+    ;] task-spinlock with-spinlock
   ;
 
   \ Mark a task as waiting
@@ -662,6 +676,19 @@ begin-module task
     current-task @ = if pause then
   ;
 
+  \ Mark a task as blocked indefinitely and schedule as critical and claim a
+  \ spinlock when done
+  : block-indefinite-with-spinlock ( spinlock task -- )
+    [:
+      dup validate-not-terminated
+      tuck ['] spinlock-to-claim for-task !
+      [ blocked-indefinite schedule-critical or schedule-user-critical or
+      schedule-with-spinlock or ]
+      literal over task-state h!
+    ;] task-spinlock critical-with-spinlock
+    current-task @ = if pause then
+  ;
+
   \ Wait indefinitely on the specified notification index and return the value
   \ for that notification index once notified, unless already notified, where
   \ then that value will be returned and the notified state will be cleared
@@ -672,12 +699,14 @@ begin-module task
       begin dup bit task-notified-bitmap bit@ not while
 	dup task-current-notify !
 	[ blocked-indefinite schedule-critical or ] literal
-	current-task @ task-state h! end-critical pause
+	current-task @ task-state h!
+	task-spinlock release-spinlock end-critical pause
+	task-spinlock claim-spinlock
       repeat
       task-notify-area @ over cells + @
       swap bit task-notified-bitmap bic!
       -1 task-current-notify !
-    ;] critical
+    ;] task-spinlock critical-with-spinlock
   ;
 
   \ Wait indefinitely on the specified notification index and return the value
@@ -686,18 +715,23 @@ begin-module task
   \ immediately. This word will leave the system in a critical section once
   \ completed.
   : wait-notify-indefinite-critical ( notify-index -- x )
-    begin-critical
     [:
-      dup current-task @ validate-notify
-      begin dup bit task-notified-bitmap bit@ not while
-	dup task-current-notify !
-	[ blocked-indefinite schedule-critical or schedule-user-critical or ]
-	literal	current-task @ task-state h! end-critical pause
-      repeat
-      task-notify-area @ over cells + @
-      swap bit task-notified-bitmap bic!
-      -1 task-current-notify !
-    ;] try ?dup if end-critical ?raise then
+      begin-critical
+      [:
+	dup current-task @ validate-notify
+	begin dup bit task-notified-bitmap bit@ not while
+	  dup task-current-notify !
+	  [ blocked-indefinite schedule-critical or schedule-user-critical or ]
+	  literal
+	  current-task @ task-state h!
+	  task-spinlock release-spinlock end-critical pause
+	  task-spinlock claim-spinlock
+	repeat
+	task-notify-area @ over cells + @
+	swap bit task-notified-bitmap bic!
+	-1 task-current-notify !
+      ;] try ?dup if end-critical ?raise then
+    ;] task-spinlock with-spinlock
   ;
 
   \ Ready a task
@@ -705,12 +739,14 @@ begin-module task
     [:
       dup validate-not-terminated
       dup ['] task-current-notify for-task @ -1 = if
-	dup task-state h@ [ schedule-critical schedule-user-critical or ]
+	dup task-state h@
+	[ schedule-critical schedule-user-critical or
+	schedule-with-spinlock or ]
 	literal and readied or swap task-state h!
       else
 	drop
       then
-    ;] critical
+    ;] task-spinlock critical-with-spinlock
   ;
 
   \ Notify a task for a specified notification index
@@ -725,7 +761,7 @@ begin-module task
       else
 	drop false
       then
-    ;] critical
+    ;] task-spinlock critical-with-spinlock
     if pause then
   ;
 
@@ -743,7 +779,7 @@ begin-module task
       else
 	drop false
       then
-    ;] critical
+    ;] task-spinlock critical-with-spinlock
     if pause then
   ;
 
@@ -763,7 +799,7 @@ begin-module task
       else
 	drop false
       then
-    ;] critical
+    ;] task-spinlock critical-with-spinlock
     if pause then
   ;
 
@@ -773,7 +809,7 @@ begin-module task
       dup validate-not-terminated
       2dup validate-notify
       ['] task-notify-area for-task @ swap cells + @
-    ;] critical
+    ;] task-spinlock critical-with-spinlock
   ;
 
   \ Set the contents of a notification mailbox without notifying a task
@@ -782,7 +818,7 @@ begin-module task
       dup validate-not-terminated
       2dup validate-notify
       ['] task-notify-area for-task @ swap cells + !
-    ;] critical
+    ;] task-spinlock critical-with-spinlock
   ;
 
   \ Block a task for the specified initialized timeout
@@ -796,7 +832,7 @@ begin-module task
       else
 	block-indefinite
       then
-    ;] critical
+    ;] task-spinlock critical-with-spinlock
   ;
 
   \ Block a task for the specified initialized timeout and schedule as critical
@@ -811,18 +847,34 @@ begin-module task
       else
 	block-indefinite-critical
       then
-    ;] critical
+    ;] task-spinlock critical-with-spinlock
+  ;
+
+  \ Block a task for the specified initialized timeout and schedule as critical
+  \ and claim a spinlock once done
+  : block-with-spinlock ( spinlock task -- )
+    [:
+      dup validate-not-terminated
+      dup ['] timeout for-task @ no-timeout <> if
+	dup ['] timeout-systick-delay for-task @
+	over ['] timeout-systick-start for-task @
+	rot block-timeout-with-spinlock
+      else
+	block-indefinite-with-spinlock
+      then
+    ;] task-spinlock critical-with-spinlock
   ;
 
   \ Wait for a notification at a specified notification index with a specified
   \ initialized timeout and return the notification value
   : wait-notify ( notify-index -- x )
+    task-spinlock claim-spinlock
     begin-critical
     timeout @ no-timeout <> if
       timeout-systick-delay @ timeout-systick-start @ rot
-      end-critical wait-notify-timeout
+      end-critical task-spinlock release-spinlock wait-notify-timeout
     else
-      end-critical wait-notify-indefinite
+      end-critical task-spinlock release-spinlock wait-notify-indefinite
     then
   ;
 
@@ -830,12 +882,13 @@ begin-module task
   \ initialized timeout and return the notification value and schedule as
   \ critical once done
   : wait-notify-critical ( task -- )
+    task-spinlock claim-spinlock
     begin-critical
     timeout @ no-timeout <> if
       timeout-systick-delay @ timeout-systick-start @ rot
-      end-critical wait-notify-timeout-critical
+      end-critical task-spinlock release-spinlock wait-notify-timeout-critical
     else
-      end-critical wait-notify-indefinite-critical
+      end-critical task-spinlock release-spinlock wait-notify-indefinite-critical
     then
   ;
 
@@ -849,7 +902,7 @@ begin-module task
       else
 	drop
       then
-    ;] critical
+    ;] task-spinlock critical-with-spinlock
   ;
 
   \ Get whether a task has terminated
@@ -859,7 +912,7 @@ begin-module task
     
     \ Initialize the main task
     : init-main-task ( -- )
-      claim-task-spinlock
+      task-spinlock claim-spinlock
       free-end @ task -
       rstack-base @ rstack-end @ - over task-rstack-size h!
       stack-base @ stack-end @ - over task-stack-size h!
@@ -894,7 +947,7 @@ begin-module task
       dup prev-task !
       current-task !
       free-end @ task - free-end !
-      release-task-spinlock
+      task-spinlock release-spinlock
     ;
 
     \ Task entry point
@@ -998,14 +1051,14 @@ begin-module task
 
   \ Allot space for a task
   : task-allot ( dict-size stack-size rstack-size -- task )
-    claim-task-spinlock
+    task-spinlock claim-spinlock
     2dup + task +
     free-end @ swap -
     swap 4 align swap tuck task-rstack-size h!
     swap 4 align swap tuck task-stack-size h!
     swap 4 align swap tuck task-dict-size !
     dup dup task-dict-size @ - free-end !
-    release-task-spinlock
+    task-spinlock release-spinlock
   ;
   
   \ Spawn a non-main task
@@ -1106,22 +1159,29 @@ begin-module task
 
 	1 pause-count +!
 
-	current-task @ dup prev-task !
+	[:
+	  current-task @ dup prev-task !
+	  ?dup if dup save-task-state reschedule-task then
+	;] task-spinlock with-spinlock
 	
-	?dup if dup save-task-state reschedule-task then
-
 	begin
-	  true in-task-change !
-	  wake-tasks @ if actually-wake-tasks false wake-tasks ! then
+	  [:
+	    true in-task-change !
+	    wake-tasks @ if actually-wake-tasks false wake-tasks ! then
+	  ;] task-spinlock with-spinlock
 	  begin
-	    find-next-task dup 0<> if
+	    [: find-next-task ;] task-spinlock with-spinlock dup 0<> if
 	      dup task-active@ 1 < if
-		remove-task false
+		[: remove-task ;] task-spinlock with-spinlock false
 	      else
-		dup task-state h@ schedule-critical and if
+		dup task-state h@
+		dup schedule-critical and if
 		  1 in-critical !
 		then
-		dup task-state h@ task-state-mask and blocked-timeout = if
+		dup schedule-with-spinlock and if
+		  over ['] spinlock-to-claim for-task @ claim-spinlock
+		then
+		task-state-mask and blocked-timeout = if
 		  block-timed-out over task-state h!
 		else
 		  readied over task-state h!
@@ -1132,9 +1192,9 @@ begin-module task
 	      true
 	    then
 	  until
-	  current-task !
+	  dup current-task !
 	  false in-task-change !
-	  current-task @ if true else sleep false then
+	  0<> if true else sleep false then
 	until
 
 	prev-task @ current-task @ <> if
@@ -1353,16 +1413,14 @@ begin-module task
     [ cpu-count 1 > ] [if]
       cpu-index 0= averts x-core-can-only-be-launched-from-core-0
       dup 1 = averts x-core-out-of-range
-      disable-int
-      claim-task-spinlock
-      enable-int
+      task-spinlock claim-spinlock
       dup cpu-active? @ if
-	release-task-spinlock
+	task-spinlock release-spinlock
 	['] x-main-already-launched ?raise
       else
 	true over cpu-active? !
       then
-      release-task-spinlock
+      task-spinlock release-spinlock
       >r task-allot >r
       2r@ cpu-current-task !
       2r@ cpu-main-task !
@@ -1462,7 +1520,8 @@ end-module> import
 continue-module task
   
   task-internal import
-  
+  multicore import
+
   \ Make pause-count read-only
   : pause-count ( -- u ) pause-count @ ;
 
@@ -1486,7 +1545,9 @@ continue-module task
 
   \ Allot memory from the end of RAM
   : allot-end ( u -- addr )
-    claim-task-spinlock negate free-end +! free-end @ release-task-spinlock
+    task-spinlock claim-spinlock
+    negate free-end +! free-end @
+    task-spinlock release-spinlock
   ;
 
 end-module

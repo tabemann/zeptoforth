@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2021 Travis Bemann
+\ Copyright (c) 2020-2022 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@ compress-flash
 begin-module rchan
 
   task import
+  multicore import
   tqueue import
   lock import
 
@@ -130,7 +131,7 @@ begin-module rchan
 	r> @
       ;] with-aligned-allot
       s" END SEND-RCHAN" trace
-    ;] critical
+    ;] tqueue-spinlock critical-with-spinlock
   ;
 
   \ Receive data on a reply channel
@@ -156,7 +157,7 @@ begin-module rchan
 	then
 	current-task r> rchan-reply-task !
 	s" END RECV-RCHAN" trace
-      ;] critical
+      ;] tqueue-spinlock critical-with-spinlock
     ;] try r> swap ?dup if swap rchan-recv-lock unlock ?raise else drop then
   ;
 
@@ -181,7 +182,7 @@ begin-module rchan
       true over rchan-closed !
       dup rchan-send-tqueue wake-tqueue-all
       rchan-recv-tqueue wake-tqueue-all
-    ;] critical
+    ;] tqueue-spinlock critical-with-spinlock
   ;
 
   \ Reopen a reply channel
