@@ -165,7 +165,7 @@ begin-module task
     $8000 constant terminated
     
     \ The task structure
-    begin-structure task
+    begin-structure task-size
       \ Return stack size
       hfield: task-rstack-size
       
@@ -251,17 +251,17 @@ begin-module task
 
     \ Get task stack base
     : task-stack-base ( task -- addr )
-      dup task + swap task-stack-size h@ +
+      dup task-size + swap task-stack-size h@ +
     ;
 
     \ Get task stack end
     : task-stack-end ( task -- addr )
-      task +
+      task-size +
     ;
 
     \ Get task return stack base
     : task-rstack-base ( task -- addr )
-      dup task + over task-stack-size h@ + swap task-rstack-size h@ +
+      dup task-size + over task-stack-size h@ + swap task-rstack-size h@ +
     ;
 
     \ Get task dictionary base
@@ -913,10 +913,10 @@ begin-module task
     \ Initialize the main task
     : init-main-task ( -- )
       task-spinlock claim-spinlock
-      free-end @ task -
+      free-end @ task-size -
       rstack-base @ rstack-end @ - over task-rstack-size h!
       stack-base @ stack-end @ - over task-stack-size h!
-      free-end @ task - next-ram-space - over task-dict-size !
+      free-end @ task-size - next-ram-space - over task-dict-size !
       rp@ over task-rstack-current !
       ram-here next-ram-space - over task-dict-offset !
       0 over task-priority h!
@@ -946,7 +946,7 @@ begin-module task
       dup last-task !
       dup prev-task !
       current-task !
-      free-end @ task - free-end !
+      free-end @ task-size - free-end !
       task-spinlock release-spinlock
     ;
 
@@ -1052,7 +1052,7 @@ begin-module task
   \ Allot space for a task
   : task-allot ( dict-size stack-size rstack-size -- task )
     task-spinlock claim-spinlock
-    2dup + task +
+    2dup + task-size +
     free-end @ swap -
     swap 4 align swap tuck task-rstack-size h!
     swap 4 align swap tuck task-stack-size h!
@@ -1159,20 +1159,25 @@ begin-module task
 
 	1 pause-count +!
 
-	[:
-	  current-task @ dup prev-task !
-	  ?dup if dup save-task-state reschedule-task then
-	;] task-spinlock with-spinlock
+	task-spinlock claim-spinlock
+	current-task @ dup prev-task !
+	?dup if dup save-task-state reschedule-task then
+	task-spinlock release-spinlock
 	
 	begin
-	  [:
-	    true in-task-change !
-	    wake-tasks @ if actually-wake-tasks false wake-tasks ! then
-	  ;] task-spinlock with-spinlock
+	  task-spinlock claim-spinlock
+	  true in-task-change !
+	  wake-tasks @ if actually-wake-tasks false wake-tasks ! then
+	  task-spinlock release-spinlock
 	  begin
-	    [: find-next-task ;] task-spinlock with-spinlock dup 0<> if
+	    task-spinlock claim-spinlock
+	    find-next-task
+	    task-spinlock release-spinlock dup 0<> if
 	      dup task-active@ 1 < if
-		[: remove-task ;] task-spinlock with-spinlock false
+		task-spinlock claim-spinlock
+		remove-task
+		task-spinlock release-spinlock
+		false
 	      else
 		dup task-state h@
 		dup schedule-critical and if
@@ -1368,6 +1373,9 @@ begin-module task
 	current-task @ task-dict-current ram-here!
 	current-task @ task-stack-base stack-base !
 	current-task @ task-rstack-base rstack-base !
+	current-task @ task-dict-base dict-base !
+	task-handler @ handler !
+	task-base @ base !
 	$7F SHPR3_PRI_15!
 	$FF SHPR2_PRI_11!
 	$FF SHPR3_PRI_14!
