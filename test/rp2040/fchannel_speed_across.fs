@@ -1,4 +1,4 @@
-\ Copyright (c) 2021-2022 Travis Bemann
+\ Copyright (c) 2020-2022 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -20,43 +20,58 @@
 
 continue-module forth
 
+  systick import
   task import
-  fchan import
   int-io import
+  fchan import
 
-  \ The channel
+  \ Allot the channel
   fchan-size buffer: my-fchan
 
-  \ The task
-  variable consumer-task
+  \ The inner loop of the consumer
+  : consumer ( -- )
+    begin
+      [: my-fchan recv-fchan ;] extract-allot-cell drop
+    again
+  ;
+
+  \ The send count
+  variable send-count
+
+  \ The starting systick
+  variable start-systick
+
+  \ The send count limit
+  100 constant send-count-limit
+
+  \ The inner loop of a producer
+  : producer ( -- )
+    begin
+      0 [: my-fchan send-fchan ;] provide-allot-cell
+      1 send-count +!
+      send-count @ send-count-limit > if
+	0 send-count !
+	systick-counter dup start-systick @ -
+	cr ." Sends per second: " 0 swap 0 send-count-limit f/
+	10000,0 f/ 1,0 2swap f/ f.
+	start-systick !
+      then
+    again
+  ;
+
+  \ The producer task
   variable producer-task
 
-  \ The consumer
-  : consumer ( -- )
-    current-task consumer-task !
-    begin
-      [: my-fchan recv-fchan ;] extract-allot-cell cr ." Received:" .
-    again
-  ;
-
-  \ The producer
-  : producer ( -- )
-    0 begin
-      dup [: my-fchan send-fchan ;] provide-allot-cell 1+
-    again
-  ;
-  
-  \ Initialize the test
+  \ Initiate the test
   : init-test ( -- )
     disable-int-io
+    0 send-count !
+    systick-counter start-systick !
     my-fchan init-fchan
-    0 consumer-task !
-    0 ['] consumer 512 128 512 1 spawn-aux-main
-    0 ['] producer 512 128 512 spawn producer-task !
-    begin consumer-task @ until
-    c" consumer" consumer-task @ task-name!
-    c" producer" producer-task @ task-name!
+    0 ['] consumer 320 128 512 1 spawn-aux-main
+    0 ['] producer 320 128 512 spawn producer-task !
     producer-task @ run
+    pause
   ;
 
 end-module

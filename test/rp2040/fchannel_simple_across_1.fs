@@ -33,7 +33,6 @@ continue-module forth
 
   \ The consumer
   : consumer ( -- )
-    current-task consumer-task !
     begin
       [: my-fchan recv-fchan ;] extract-allot-cell cr ." Received:" .
     again
@@ -41,6 +40,7 @@ continue-module forth
 
   \ The producer
   : producer ( -- )
+    current-task producer-task !
     0 begin
       dup [: my-fchan send-fchan ;] provide-allot-cell 1+
     again
@@ -51,12 +51,12 @@ continue-module forth
     disable-int-io
     my-fchan init-fchan
     0 consumer-task !
-    0 ['] consumer 512 128 512 1 spawn-aux-main
-    0 ['] producer 512 128 512 spawn producer-task !
-    begin consumer-task @ until
+    0 ['] consumer 320 128 512 spawn consumer-task !
+    0 ['] producer 320 128 512 1 spawn-aux-main
+    begin producer-task @ until
     c" consumer" consumer-task @ task-name!
     c" producer" producer-task @ task-name!
-    producer-task @ run
+    consumer-task @ run
   ;
 
 end-module
