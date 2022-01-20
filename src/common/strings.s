@@ -202,8 +202,9 @@ _compile_char:
 	define_word "(.)", visible_flag
 _type_integer:
 	push {lr}
-	ldr r0, =here
-	ldr r0, [r0]
+	bl _here
+	movs r0, tos
+	pull_tos
 	movs r1, tos
 	movs tos, r0
 	push_tos
@@ -225,8 +226,9 @@ _type_integer:
 	define_word "(u.)", visible_flag
 _type_unsigned:
 	push {lr}
-	ldr r0, =here
-	ldr r0, [r0]
+	bl _here
+	movs r0, tos
+	pull_tos
 	movs r1, tos
 	movs tos, r0
 	push_tos
@@ -254,8 +256,11 @@ _debug_unsigned:
 	ldr r2, [r0]
 	movs r1, #16
 	str r1, [r0]
-	ldr r0, =here
-	ldr r0, [r0]
+	push {r1, r2}
+	bl _here
+	pop {r1, r2}
+	movs r0, tos
+	pull_tos
 	movs r1, tos
 	movs tos, r0
 	push_tos
@@ -376,8 +381,9 @@ _format_unsigned:
 	cmp tos, #0
 	beq 1f
 	bl _format_integer_inner
-	ldr r0, =here
-	ldr r0, [r0]
+	bl _here
+	movs r0, tos
+	pull_tos
 	movs r1, tos
 	movs tos, r0
 	push_tos
@@ -415,8 +421,9 @@ _format_integer:
 	blt 1f
 	beq 2f
 	bl _format_integer_inner
-	ldr r0, =here
-	ldr r0, [r0]
+	bl _here
+	movs r0, tos
+	pull_tos
 	movs r1, tos
 3:	movs tos, r0
 	push_tos
@@ -440,8 +447,9 @@ _format_integer:
 	pop {pc}
 1:	rsbs tos, tos, #0
 	bl _format_integer_inner
-	ldr r0, =here
-	ldr r0, [r0]
+	bl _here
+	movs r0, tos
+	pull_tos
 	movs r1, tos
 	adds r2, r0, r1
 	movs r3, #0x2D
@@ -463,8 +471,11 @@ _format_integer_inner:
 	bl _base
 	ldr r1, [tos]
 	pull_tos
-	ldr r0, =here
-	ldr r0, [r0]
+	push {r1}
+	bl _here
+	pop {r1}
+	movs r0, tos
+	pull_tos
 	movs r2, tos
 1:	cmp r2, #0
 	beq 3f
@@ -493,8 +504,11 @@ _format_integer_inner:
 	strb tos, [r0]
 	adds r0, #1
 	b 1b
-3:	ldr r1, =here
-	ldr r1, [r1]
+3:	push {r0}
+	bl _here
+	pop {r0}
+	movs r1, tos
+	pull_tos
 	subs tos, r0, r1
 	pop {pc}
 	end_inlined
