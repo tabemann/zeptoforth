@@ -39,7 +39,7 @@ continue-module internal
   : erase-all ( -- )
     cpu-index 0 = averts x-core-0-only
     1 reset-aux-core
-    task-spinlock release-spinlock
+\    task-spinlock release-spinlock
     erase-all
   ;
 
@@ -47,7 +47,7 @@ continue-module internal
   : erase-after ( addr -- )
     cpu-index 0 = averts x-core-0-only
     1 reset-aux-core
-    task-spinlock release-spinlock
+\    task-spinlock release-spinlock
     erase-after
   ;
 
