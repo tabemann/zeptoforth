@@ -26,9 +26,6 @@ begin-module multicore
   \ Spinlock count
   0 constant spinlock-count
 
-  \ Multitasker spinlock index
-  -1 constant task-spinlock
-
   \ Lock spinlock index
   -1 constant lock-spinlock
 
@@ -49,9 +46,31 @@ begin-module multicore
 
   \ Release a spinlock - note that this is a no-op
   : release-spinlock ( index -- ) drop ;
-    
+
+  \ Claim a spinlock for the current core's multitasker - this is a no-op
+  : claim-same-core-spinlock ( -- ) ;
+
+  \ Release a spinlock for the current core's multitasker - this is a no-op
+  : release-same-core-spinlock ( -- ) ;
+
+  \ Claim a spinlock for a different core's multitasker - this is a no-op
+  : claim-other-core-spinlock ( core -- ) ;
+
+  \ Release a spinlock for the other core's multitasker - this is a no-op
+  : release-other-core-spinlock ( core -- ) ;
+
+  \ Claim all core's multitasker's spinlocks - this is a no-op
+  : claim-all-core-spinlock ( -- ) ;
+
+  \ Release all core's multitasker's spinlocks - this is a no-op
+  : release-all-core-spinlock ( -- ) ;
+  
   \ Enter a critical section (and not claim a spinlock)
   : critical-with-spinlock ( xt spinlock -- ) drop critical ;
+
+  \ Enter a critical section (and not claim another core's multitasker's
+  \ spinlock)
+  : critical-with-other-core-spinlock ( xt core -- ) drop critical ;
   
   \ Drain a multicore FIFO
   : fifo-drain ( core -- ) ['] x-core-out-of-range ?raise ;

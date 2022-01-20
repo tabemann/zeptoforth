@@ -35,7 +35,7 @@ continue-module forth
   : consumer ( -- )
     current-task consumer-task !
     begin
-      [: my-fchan recv-fchan ;] extract-allot-cell cr ." Received:" .
+      [: my-fchan recv-fchan ;] extract-allot-cell drop
     again
   ;
 
@@ -51,8 +51,8 @@ continue-module forth
     disable-int-io
     my-fchan init-fchan
     0 consumer-task !
-    0 ['] consumer 512 128 512 1 spawn-aux-main
-    0 ['] producer 512 128 512 spawn producer-task !
+    0 ['] consumer 320 128 512 1 spawn-aux-main
+    0 ['] producer 320 128 512 spawn producer-task !
     begin consumer-task @ until
     c" consumer" consumer-task @ task-name!
     c" producer" producer-task @ task-name!

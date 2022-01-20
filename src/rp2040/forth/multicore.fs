@@ -108,14 +108,17 @@ begin-module multicore
   \ Spinlock count
   32 constant spinlock-count
 
-  \ Multitasker spinlock index
-  31 constant task-spinlock
+  \ Multitasker core 1 spinlock index
+  31 constant task-core-1-spinlock
 
+  \ Multitasker core 0 spinlock index
+  30 constant task-core-0-spinlock
+  
   \ Lock spinlock index
-  30 constant lock-spinlock
+  29 constant lock-spinlock
 
   \ Task queue spinlock index
-  29 constant tqueue-spinlock
+  28 constant tqueue-spinlock
 
   continue-module multicore-internal
 
@@ -151,6 +154,54 @@ begin-module multicore
     enable-int
   ;
 
+  \ Claim a spinlock for the current core's multitasker
+  : claim-same-core-spinlock ( -- )
+    cpu-index 0= if
+      task-core-0-spinlock claim-spinlock
+    else
+      task-core-1-spinlock claim-spinlock
+    then
+  ;
+
+  \ Release a spinlock for the current core's multitasker
+  : release-same-core-spinlock ( -- )
+    cpu-index 0= if
+      task-core-0-spinlock release-spinlock
+    else
+      task-core-1-spinlock release-spinlock
+    then
+  ;
+
+  \ Claim a spinlock for a different core's multitasker
+  : claim-other-core-spinlock ( core -- )
+    0= if
+      task-core-0-spinlock claim-spinlock
+    else
+      task-core-1-spinlock claim-spinlock
+    then
+  ;
+
+  \ Release a spinlock for the other core's multitasker
+  : release-other-core-spinlock ( core -- )
+    0= if
+      task-core-0-spinlock release-spinlock
+    else
+      task-core-1-spinlock release-spinlock
+    then
+  ;
+  
+  \ Claim all core's multitasker's spinlocks
+  : claim-all-core-spinlock ( -- )
+    task-core-0-spinlock claim-spinlock
+    task-core-1-spinlock claim-spinlock
+  ;
+
+  \ Release all core's multitasker's spinlocks
+  : release-all-core-spinlock ( -- )
+    task-core-0-spinlock release-spinlock
+    task-core-1-spinlock release-spinlock
+  ;
+
   \ Claim a spinlock, releasing it afterwards
   : with-spinlock ( xt spinlock -- )
     >r r@ claim-spinlock try r> release-spinlock ?raise
@@ -162,6 +213,13 @@ begin-module multicore
     r> release-spinlock end-critical ?raise
   ;
   
+  \ Enter a critical section and claim another core's multitasker's spinlock,
+  \ releasing it afterwards
+  : critical-with-other-core-spinlock ( xt core -- )
+    >r r@ claim-other-core-spinlock begin-critical try
+    r> release-other-core-spinlock end-critical ?raise
+  ;
+
   \ Drain a multicore FIFO
   : fifo-drain ( core -- )
     validate-addressable-core
