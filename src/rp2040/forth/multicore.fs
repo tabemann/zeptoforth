@@ -127,27 +127,28 @@ begin-module multicore
 
     \ Get the address of a spinlock lock count
     : spinlock-lock-count ( index -- addr )
-      cpu-count * cpu-index + cells spinlock-lock-counts +
+      1 lshift cpu-index + 2 lshift spinlock-lock-counts +
+\      cpu-count * cpu-index + cells spinlock-lock-counts +
     ;
     
   end-module
   
   \ Hardware spinlocks; reading will return 0 if already locked, or
   \ 1 lock-number lshift on success; writing any value will release the spinlock
-  : SPINLOCK ( index -- addr ) SIO_BASE $100 + swap cells + ;
+  : SPINLOCK ( index -- addr ) [ SIO_BASE $100 + ] literal swap 2 lshift + ;
 
   \ Claim a spinlock
   : claim-spinlock ( index -- )
-    dup spinlock-count u< averts x-spinlock-out-of-range
+\    dup spinlock-count u< averts x-spinlock-out-of-range
     disable-int
     dup spinlock-lock-count dup @ 1+ dup rot !
     enable-int
-    1 = if SPINLOCK begin dup @ 0<> until then drop
+    1 = if SPINLOCK begin dup @ until then drop
   ;
 
   \ Release a spinlock
   : release-spinlock ( index -- )
-    dup spinlock-count u< averts x-spinlock-out-of-range
+ \   dup spinlock-count u< averts x-spinlock-out-of-range
     disable-int
     dup spinlock-lock-count dup @ 1- dup rot !
     0= if SPINLOCK -1 swap ! else drop then
@@ -156,38 +157,22 @@ begin-module multicore
 
   \ Claim a spinlock for the current core's multitasker
   : claim-same-core-spinlock ( -- )
-    cpu-index 0= if
-      task-core-0-spinlock claim-spinlock
-    else
-      task-core-1-spinlock claim-spinlock
-    then
+    cpu-index task-core-0-spinlock + claim-spinlock
   ;
 
   \ Release a spinlock for the current core's multitasker
   : release-same-core-spinlock ( -- )
-    cpu-index 0= if
-      task-core-0-spinlock release-spinlock
-    else
-      task-core-1-spinlock release-spinlock
-    then
+    cpu-index task-core-0-spinlock + release-spinlock
   ;
 
   \ Claim a spinlock for a different core's multitasker
   : claim-other-core-spinlock ( core -- )
-    0= if
-      task-core-0-spinlock claim-spinlock
-    else
-      task-core-1-spinlock claim-spinlock
-    then
+    task-core-0-spinlock + claim-spinlock
   ;
 
   \ Release a spinlock for the other core's multitasker
   : release-other-core-spinlock ( core -- )
-    0= if
-      task-core-0-spinlock release-spinlock
-    else
-      task-core-1-spinlock release-spinlock
-    then
+    task-core-0-spinlock + release-spinlock
   ;
   
   \ Claim all core's multitasker's spinlocks
@@ -216,8 +201,8 @@ begin-module multicore
   \ Enter a critical section and claim another core's multitasker's spinlock,
   \ releasing it afterwards
   : critical-with-other-core-spinlock ( xt core -- )
-    >r r@ claim-other-core-spinlock begin-critical try
-    r> release-other-core-spinlock end-critical ?raise
+    task-core-0-spinlock + >r r@ claim-spinlock begin-critical try
+    r> release-spinlock end-critical ?raise
   ;
 
   \ Drain a multicore FIFO

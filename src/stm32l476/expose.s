@@ -21,8 +21,16 @@
 	.include "../common/expose.s"
 	
 	@@ Get the CPU index
-	define_word "cpu-index", visible_flag
+	define_word "cpu-index", visible_flag | inlined_flag
 _cpu_index:
+	push_tos
+	movs tos, #0
+	bx lr
+	end_inlined
+	
+	@@ Get the CPU offset for a word value
+	define_word "cpu-offset", visible_flag | inlined_flag
+_cpu_offset:
 	push_tos
 	movs tos, #0
 	bx lr

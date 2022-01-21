@@ -1145,8 +1145,10 @@ begin-module task
     \ Reschedule previous task
     : reschedule-task ( task -- )
       true in-task-change !
+      claim-same-core-spinlock
       dup remove-task
       dup task-active@ 0> if insert-task else drop then
+      release-same-core-spinlock
       false in-task-change !
     ;
 
@@ -1168,16 +1170,16 @@ begin-module task
 
 	1 pause-count +!
 
-	claim-same-core-spinlock
 	current-task @ dup prev-task !
 	?dup if dup save-task-state reschedule-task then
-	release-same-core-spinlock
 	
 	begin
-	  claim-same-core-spinlock
 	  true in-task-change !
-	  wake-tasks @ if actually-wake-tasks false wake-tasks ! then
-	  release-same-core-spinlock
+	  wake-tasks @ if
+	    claim-same-core-spinlock
+	    actually-wake-tasks false wake-tasks !
+	    release-same-core-spinlock
+	  then
 	  begin
 	    claim-same-core-spinlock
 	    find-next-task

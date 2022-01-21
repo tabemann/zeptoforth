@@ -35,6 +35,10 @@ continue-module forth
   : consumer ( -- )
     current-task consumer-task !
     begin
+      999 begin
+	[: my-fchan recv-fchan ;] extract-allot-cell drop
+      1- dup 0= until
+      drop
       [: my-fchan recv-fchan ;] extract-allot-cell cr ." Received:" .
     again
   ;
