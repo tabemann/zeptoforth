@@ -95,10 +95,10 @@ forth set-current
 \ : +! ( x addr -- ) swap over @ + swap ! [inlined] ;
 
 \ Get the minimum of two numbers
-: min ( n1 n2 -- n3 ) over - dup 0< and + ;
+\ : min ( n1 n2 -- n3 ) over - dup 0< and + ;
 
 \ Get the maximum of two numbers
-: max ( n1 n2 -- n3 ) 2dup > if drop else swap drop then ;
+\ : max ( n1 n2 -- n3 ) 2dup > if drop else swap drop then ;
 
 \ Rotate three cells in revese
 : -rot ( x1 x2 x3 -- x3 x1 x2 ) rot rot [inlined] ;

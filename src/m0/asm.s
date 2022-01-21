@@ -417,7 +417,7 @@ _asm_fold:
 	ldr r0, [r1]
 	cmp r0, #0
 	bne 1f
-	bl _asm_call
+	bl _asm_inline
 	pop {pc}
 1:	ldr r0, =_add
 	cmp tos, r0
@@ -498,7 +498,7 @@ _asm_fold:
 	bl _asm_fold_pick
 	pop {pc}
 1:	bl _asm_undefer_lit
-	bl _asm_call
+	bl _asm_inline
 	pop {pc}
 	end_inlined
 

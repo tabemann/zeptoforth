@@ -1,4 +1,4 @@
-@ Copyright (c) 2020-2021 Travis Bemann
+@ Copyright (c) 2020-2022 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -21,11 +21,24 @@
 	.include "../common/expose.s"
 	
 	@@ Get the CPU index
-	define_word "cpu-index", visible_flag
+	define_word "cpu-index", visible_flag | inlined_flag
 _cpu_index:
 	push_tos
-	ldr tos, =SIO_BASE + 0x000 @ CPUID (not the ARM CPUID)
+	movs tos, #0xD0
+	lsls tos, tos, #24
+@	ldr tos, =SIO_BASE + 0x000 @ CPUID (not the ARM CPUID)
 	ldr tos, [tos]
+	bx lr
+	end_inlined
+
+	@@ Get the CPU offset for a word value
+	define_word "cpu-offset", visible_flag | inlined_flag
+_cpu_offset:
+	push_tos
+	movs tos, #0xD0
+	lsls tos, tos, #24
+	ldr tos, [tos]
+	lsls tos, tos, #2
 	bx lr
 	end_inlined
 

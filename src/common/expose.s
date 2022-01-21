@@ -382,20 +382,11 @@ _thumb_2:
 	end_inlined
 
 	@@ Get the CPU count
-	define_word "cpu-count", visible_flag
+	define_word "cpu-count", visible_flag | inlined_flag
 _cpu_count:
 	push_tos
-	ldr tos, =cpu_count
+	movs tos, #cpu_count
 	bx lr
-	end_inlined
-
-	@@ Get the CPU offset for a word value
-	define_word "cpu-offset", visible_flag
-_cpu_offset:
-	push {lr}
-	bl _cpu_index
-	lsls tos, tos, #2
-	pop {pc}
 	end_inlined
 	
 	.ltorg
