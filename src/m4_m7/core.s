@@ -259,6 +259,24 @@ _4div:	asrs tos, tos, #2
 	bx lr
 	end_inlined
 
+	@@ Get the minimum of two values
+	define_word "min", visible_flag | inlined_flag
+_min:	ldmia dp!, {r0}
+	cmp tos, r0
+	blt 1f
+	movs tos, r0
+1:	bx lr
+	end_inlined
+
+	@@ Get the maximum of two values
+	define_word "max", visible_flag | inlined_flag
+_max:	ldmia dp!, {r0}
+	cmp tos, r0
+	bgt 1f
+	movs tos, r0
+1:	bx lr
+	end_inlined
+
 	@@ Equals
 	define_word "=", visible_flag
 _eq:	movs r0, tos

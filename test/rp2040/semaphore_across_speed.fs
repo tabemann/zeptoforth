@@ -73,11 +73,11 @@ continue-module forth
     disable-int-io
     0 send-count !
     systick-counter start-systick !
+    no-sema-limit 0 target-sema init-sema
+    no-sema-limit 0 source-sema init-sema
     0 ['] source 512 256 512 spawn source-task !
     0 ['] target 512 256 512 1 spawn-aux-main
     c" source" source-task @ task-name!
-    no-sema-limit 0 target-sema init-sema
-    no-sema-limit 0 source-sema init-sema
     source-task @ run
     target-sema give
     source-sema give

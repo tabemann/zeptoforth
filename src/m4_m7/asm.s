@@ -465,7 +465,7 @@ _asm_fold:
 	b _asm_inline
 	bx lr
 	end_inlined
-	
+
 	@@ Inline a word
 	define_internal_word "inline,", visible_flag
 _asm_inline:
