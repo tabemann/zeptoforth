@@ -1,4 +1,4 @@
-\ Copyright (c) 2021 Travis Bemann
+\ Copyright (c) 2021-2022 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -108,25 +108,103 @@ begin-module multicore
   \ Spinlock count
   32 constant spinlock-count
 
-  \ Multitasker spinlock index
-  31 constant task-spinlock
+  \ Multitasker core 1 spinlock index
+  31 constant task-core-1-spinlock
 
+  \ Multitasker core 0 spinlock index
+  30 constant task-core-0-spinlock
+  
+  \ Lock spinlock index
+  29 constant lock-spinlock
+
+  \ Task queue spinlock index
+  28 constant tqueue-spinlock
+
+  continue-module multicore-internal
+
+    \ Spinlock lock counts
+    spinlock-count cpu-count * cells buffer: spinlock-lock-counts
+
+    \ Get the address of a spinlock lock count
+    : spinlock-lock-count ( index -- addr )
+      1 lshift cpu-index + 2 lshift spinlock-lock-counts +
+\      cpu-count * cpu-index + cells spinlock-lock-counts +
+    ;
+    
+  end-module
+  
   \ Hardware spinlocks; reading will return 0 if already locked, or
   \ 1 lock-number lshift on success; writing any value will release the spinlock
-  : SPINLOCK ( index -- addr ) SIO_BASE $100 + swap cells + ;
+  : SPINLOCK ( index -- addr ) [ SIO_BASE $100 + ] literal swap 2 lshift + ;
 
   \ Claim a spinlock
   : claim-spinlock ( index -- )
-    dup spinlock-count u< averts x-spinlock-out-of-range
-    SPINLOCK begin dup @ 0<> until drop
+\    dup spinlock-count u< averts x-spinlock-out-of-range
+    disable-int
+    dup spinlock-lock-count dup @ 1+ dup rot !
+    enable-int
+    1 = if SPINLOCK begin dup @ until then drop
   ;
 
   \ Release a spinlock
   : release-spinlock ( index -- )
-    dup spinlock-count u< averts x-spinlock-out-of-range
-    SPINLOCK -1 swap !
+ \   dup spinlock-count u< averts x-spinlock-out-of-range
+    disable-int
+    dup spinlock-lock-count dup @ 1- dup rot !
+    0= if SPINLOCK -1 swap ! else drop then
+    enable-int
+  ;
+
+  \ Claim a spinlock for the current core's multitasker
+  : claim-same-core-spinlock ( -- )
+    cpu-index task-core-0-spinlock + claim-spinlock
+  ;
+
+  \ Release a spinlock for the current core's multitasker
+  : release-same-core-spinlock ( -- )
+    cpu-index task-core-0-spinlock + release-spinlock
+  ;
+
+  \ Claim a spinlock for a different core's multitasker
+  : claim-other-core-spinlock ( core -- )
+    task-core-0-spinlock + claim-spinlock
+  ;
+
+  \ Release a spinlock for the other core's multitasker
+  : release-other-core-spinlock ( core -- )
+    task-core-0-spinlock + release-spinlock
   ;
   
+  \ Claim all core's multitasker's spinlocks
+  : claim-all-core-spinlock ( -- )
+    task-core-0-spinlock claim-spinlock
+    task-core-1-spinlock claim-spinlock
+  ;
+
+  \ Release all core's multitasker's spinlocks
+  : release-all-core-spinlock ( -- )
+    task-core-0-spinlock release-spinlock
+    task-core-1-spinlock release-spinlock
+  ;
+
+  \ Claim a spinlock, releasing it afterwards
+  : with-spinlock ( xt spinlock -- )
+    >r r@ claim-spinlock try r> release-spinlock ?raise
+  ;
+
+  \ Enter a critical section and claim a spinlock, releasing it afterwards
+  : critical-with-spinlock ( xt spinlock -- )
+    >r r@ claim-spinlock begin-critical try
+    r> release-spinlock end-critical ?raise
+  ;
+  
+  \ Enter a critical section and claim another core's multitasker's spinlock,
+  \ releasing it afterwards
+  : critical-with-other-core-spinlock ( xt core -- )
+    task-core-0-spinlock + >r r@ claim-spinlock begin-critical try
+    r> release-spinlock end-critical ?raise
+  ;
+
   \ Drain a multicore FIFO
   : fifo-drain ( core -- )
     validate-addressable-core
@@ -186,10 +264,19 @@ begin-module multicore
 
 end-module> import
 
+\ Initialize
+: init ( -- )
+  init
+  spinlock-count cpu-count * 0 ?do
+    0 ^ multicore multicore-internal :: spinlock-lock-counts i cells + !
+  loop
+;
+
 \ Set up reboot to reset the second core
 : reboot ( -- )
   cpu-index 0 = averts x-core-0-only
   1 reset-aux-core
+  spinlock-count 0 ?do -1 i SPINLOCK ! loop
   reboot
 ;
 

@@ -38,13 +38,17 @@ continue-module internal
   \ Erase all flash
   : erase-all ( -- )
     cpu-index 0 = averts x-core-0-only
-    1 reset-aux-core erase-all
+    1 reset-aux-core
+\    task-spinlock release-spinlock
+    erase-all
   ;
 
   \ Erase after an address
   : erase-after ( addr -- )
     cpu-index 0 = averts x-core-0-only
-    1 reset-aux-core erase-after
+    1 reset-aux-core
+\    task-spinlock release-spinlock
+    erase-after
   ;
 
   \ Commit to flash

@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2021 Travis Bemann
+\ Copyright (c) 2020-2022 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -95,10 +95,10 @@ forth set-current
 \ : +! ( x addr -- ) swap over @ + swap ! [inlined] ;
 
 \ Get the minimum of two numbers
-: min ( n1 n2 -- n3 ) over - dup 0< and + ;
+\ : min ( n1 n2 -- n3 ) over - dup 0< and + ;
 
 \ Get the maximum of two numbers
-: max ( n1 n2 -- n3 ) 2dup > if drop else swap drop then ;
+\ : max ( n1 n2 -- n3 ) 2dup > if drop else swap drop then ;
 
 \ Rotate three cells in revese
 : -rot ( x1 x2 x3 -- x3 x1 x2 ) rot rot [inlined] ;
@@ -2299,7 +2299,7 @@ forth set-current
   min-ram-wordlist current-ram-wordlist !
   next-ram-space dict-base !
   dict-base @ next-user-space + ram-here!
-  false deferred-context-switch !
+  cpu-count 0 ?do false cpus-deferred-context-switch i cells + ! loop
   cpu-count 0 ?do 0 cpus-in-critical i cells + ! loop
   0 wait-hook !
   0 wake-hook !
