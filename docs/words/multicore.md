@@ -39,20 +39,10 @@ Compile a one-cell-per-core variable into flash that has two words referring to 
 
 In `src/common/forth/task.fs`, in `task`, exists:
 
-##### `spawn-aux-main`
-( xn ... x0 count xt dict-size stack-size rstack-size core -- )
+##### `spawn-on-core`
+( xn ... x0 count xt dict-size stack-size rstack-size core -- task )
 
-Allocate the space for a main task (with *rstack-size* bytes of return stack space, *stack-size* bytes of data stack space, and *dict-size* bytes of dictionary space), place *count* cells on its data stack (*xn* through *x0*, with *x0* on the top of the data stack), and boot core *core* (which currently must be 1, otherwise `x-core-out-of-range` is raised) with it, executing *xt* on it. In the process the Systick is initiated on the booted core and the booted core is initialized for multitasking. Note that this can only be called from core 0 (i.e. the core executing on initial boot), otherwise `x-core-can-only-be-launched-from-core-0` is raised. Once booted the core in question cannot be booted again until the RP2040 as a whole is rebooted, or else `x-main-already-launched` is raised. Note that once a main task is created on a core it behaves like a normal task for multitasking purposes on that core; it can be killed, for instance.
-
-##### `x-main-already-launched`
-( -- )
-
-Exception raised if one calls `spawn-aux-main` for a core which has already been booted.
-
-##### `x-core-can-only-be-launched-from-core-0`
-( -- )
-
-Exception raised if one attempts to call `spawn-aux-main` from a core other than core 0.
+Allocate the space for a task (with *rstack-size* bytes of return stack space, *stack-size* bytes of data stack space, and *dict-size* bytes of dictionary space), place *count* cells on its data stack (*xn* through *x0*, with *x0* on the top of the data stack), and set it to execute *xt* on core *core*, booting the core if necessary. If the core is to be booted, the Systick is initiated on the booted core and the booted core is initialized for multitasking.
 
 ### `multicore`
 
@@ -136,20 +126,60 @@ Returns the address of a spinlock with a given index. Note that reading from an 
 
 Returns the spinlock count, i.e. 32.
 
-##### `task-spinlock`
-( -- )
-
-The index of the multitasking spinlock, i.e. 31.
-
 ##### `claim-spinlock`
 ( spinlock-index -- )
 
-Claim a spinlock; if *spinlock-index* is outside the range 0 <= x < 32 `x-spinlock-out-of-range` is raised.
+Claim a spinlock; no validation is carried out.
 
 ##### `release-spinlock`
 ( spinlock-index -- )
 
-Release a spinlock; if *spinlock-index* is outside the range 0 <= x < 32 `x-spinlock-out-of-range` is raised.
+Release a spinlock; no validation is carried out.
+
+##### `claim-same-core-spinlock`
+( -- )
+
+Claim a multitasker spinlock for the current core.
+
+##### `release-same-core-spinlock`
+( -- )
+
+Release a multitasker spinlock for the current core.
+
+##### `claim-other-core-spinlock`
+( core -- )
+
+Claim a multitasker spinlock for the specified core.
+
+##### `release-other-core-spinlock`
+( core -- )
+
+Release a multitasker spinlock for the specified core.
+
+##### `claim-all-core-spinlock`
+( -- )
+
+Claim all the multitasker spinlocks.
+
+##### `release-all-core-spinlock`
+( -- )
+
+Release all the multitasker spinlocks.
+
+##### `with-spinlock`
+( xt spinlock -- )
+
+Claim a spinlock while executing *xt*, releasing it afterwards
+
+##### `critical-with-spinlock`
+( xt spinlock -- )
+
+Claim a spinlock, enter a critical section, execute *xt*, release the spinlock, and then exit the critical section.
+
+##### `critical-with-other-core-spinlock`
+( xt core -- )
+
+Claim a multitasker spinlock for the specified core, enter a critical section, execute *xt*, release the spinlock, and then exit the critical section.
 
 ##### `fifo-drain`
 ( core -- )
@@ -183,20 +213,60 @@ In `src/common/forth/multicore.fs`, in `multicore` for all platforms other than 
 
 Returns the spinlock count, i.e. 0.
 
-##### `task-spinlock`
-( -- )
-
-Returns -1 as there is no multitasking spinlock.
-
 ##### `claim-spinlock`
 ( spinlock-index -- )
 
-Placeholder for claiming a spinlock; this will always raise `x-spinlock-out-of-range`.
+Drop *spinlock-index*.
 
 ##### `release-spinlock`
 ( spinlock-index -- )
 
-Placeholder for releasing a spinlock; this will always raise `x-spinlock-out-of-range`.
+Drop *spinlock-index*.
+
+##### `claim-same-core-spinlock`
+( -- )
+
+This is a no-op.
+
+##### `release-same-core-spinlock`
+( -- )
+
+This is a no-op.
+
+##### `claim-other-core-spinlock`
+( core -- )
+
+Drop *core*.
+
+##### `release-other-core-spinlock`
+( core -- )
+
+Drop *core*.
+
+##### `claim-all-core-spinlock`
+( -- )
+
+This is a no-op.
+
+##### `release-all-core-spinlock`
+( -- )
+
+This is a no-op.
+
+##### `with-spinlock`
+( xt spinlock -- )
+
+Drop *spinlock* and execute *xt*.
+
+##### `critical-with-spinlock`
+( xt spinlock -- )
+
+Drop *spinlock* and execute *xt* in a critical section.
+
+##### `critical-with-other-core-spinlock`
+( xt core -- )
+
+Drop *core* and execute *xt* in a critical section.
 
 ##### `fifo-drain`
 ( core -- )

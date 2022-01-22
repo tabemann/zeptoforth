@@ -27,7 +27,7 @@ continue-module forth
   \ The channel
   fchan-size buffer: my-fchan
 
-  \ The task
+  \ The tasks
   variable consumer-task
   variable producer-task
 
@@ -40,7 +40,6 @@ continue-module forth
 
   \ The producer
   : producer ( -- )
-    current-task producer-task !
     0 begin
       dup [: my-fchan send-fchan ;] provide-allot-cell 1+
     again
@@ -52,11 +51,11 @@ continue-module forth
     my-fchan init-fchan
     0 consumer-task !
     0 ['] consumer 320 128 512 spawn consumer-task !
-    0 ['] producer 320 128 512 1 spawn-aux-main
-    begin producer-task @ until
+    0 ['] producer 320 128 512 1 spawn-on-core producer-task !
     c" consumer" consumer-task @ task-name!
     c" producer" producer-task @ task-name!
     consumer-task @ run
+    producer-task @ run
   ;
 
 end-module

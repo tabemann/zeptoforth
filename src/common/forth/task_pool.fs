@@ -63,7 +63,7 @@ begin-module task-pool
     begin-critical
     dup task-pool-count @ 0 ?do
       i over task@ terminated? if
-	i swap task@ dup >r init-task r> end-critical unloop exit
+	i swap task@ dup >r cpu-index init-task r> end-critical unloop exit
       then
     loop
     end-critical ['] x-no-task-available ?raise

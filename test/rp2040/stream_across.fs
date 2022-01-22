@@ -35,7 +35,7 @@ continue-module forth
 
   \ Our tasks
   variable producer-task
-\  variable consumer-task
+  variable consumer-task
   
   \ Our producer
   : producer ( -- )
@@ -44,7 +44,6 @@ continue-module forth
 
   \ Our consumer
   : consumer ( -- )
-\    enable-trace
     begin
       my-recv-count [:
 	dup my-recv-count my-stream recv-stream type
@@ -56,9 +55,10 @@ continue-module forth
   : init-test ( -- )
     disable-int-io
     my-count my-stream init-stream
+    0 ['] consumer 320 128 512 1 spawn-on-core consumer-task !
     0 ['] producer 320 128 512 spawn producer-task !
+    consumer-task @ run
     producer-task @ run
-    0 ['] consumer 320 128 512 1 spawn-aux-main
   ;
   
 end-module

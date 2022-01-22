@@ -1,5 +1,5 @@
-\ Copyright (c) 2020-2022 Travis Bemann
-\
+\ Copyright (c) 2022 Travis Bemann
+\ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
 \ in the Software without restriction, including without limitation the rights
@@ -20,60 +20,26 @@
 
 continue-module forth
 
-  systick import
   task import
   int-io import
-  fchan import
-
-  \ Allot the channel
-  fchan-size buffer: my-fchan
-
-  \ The inner loop of the consumer
-  : consumer ( -- )
-    begin
-      [: my-fchan recv-fchan ;] extract-allot-cell drop
-    again
-  ;
-
-  \ The send count
-  variable send-count
-
-  \ The starting systick
-  variable start-systick
-
-  \ The send count limit
-  100 constant send-count-limit
-
-  \ The inner loop of a producer
-  : producer ( -- )
-    begin
-      0 [: my-fchan send-fchan ;] provide-allot-cell
-      1 send-count +!
-      send-count @ send-count-limit > if
-	0 send-count !
-	systick-counter dup start-systick @ -
-	cr ." Sends per second: " 0 swap 0 send-count-limit f/
-	10000,0 f/ 1,0 2swap f/ f.
-	start-systick !
-      then
-    again
-  ;
 
   \ The tasks
-  variable consumer-task
-  variable producer-task
+  variable task-0
+  variable task-1
+  variable task-2
+  variable task-3
 
-  \ Initiate the test
+  \ Initialize the test
   : init-test ( -- )
     disable-int-io
-    0 send-count !
-    systick-counter start-systick !
-    my-fchan init-fchan
-    0 ['] consumer 320 128 512 1 spawn-on-core consumer-task !
-    0 ['] producer 320 128 512 spawn producer-task !
-    consumer-task @ run
-    producer-task @ run
-    pause
+    0 [: begin 500 ms ." *" again ;] 320 128 512 1 spawn-on-core task-0 !
+    0 [: begin 1000 ms ." +" again ;] 320 128 512 1 spawn-on-core task-1 !
+    0 [: begin 1500 ms ." x" again ;] 320 128 512 0 spawn-on-core task-2 !
+    0 [: begin 2000 ms ." #" again ;] 320 128 512 0 spawn-on-core task-3 !
+    task-1 @ run
+    task-3 @ run
+    task-0 @ run
+    task-2 @ run
   ;
 
 end-module

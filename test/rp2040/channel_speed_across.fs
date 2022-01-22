@@ -65,7 +65,8 @@ continue-module forth
     again
   ;
 
-  \ The producer task
+  \ The tasks
+  variable consumer-task
   variable producer-task
 
   \ Initiate the test
@@ -74,8 +75,9 @@ continue-module forth
     0 send-count !
     systick-counter start-systick !
     element-size element-count my-chan init-chan
-    0 ['] consumer 320 128 512 1 spawn-aux-main
+    0 ['] consumer 320 128 512 1 spawn-on-core consumer-task !
     0 ['] producer 320 128 512 spawn producer-task !
+    consumer-task @ run
     producer-task @ run
     pause
   ;
