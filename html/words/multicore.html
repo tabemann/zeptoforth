@@ -64,15 +64,6 @@
 <p>Compile a one-cell-per-core variable into flash that has two words referring to it, a <em>global-name</em> which takes a core index when called and outputs the address for that core, and a <em>cpu-name</em> which returns its address for the current core.</p>
 </section>
 </section>
-<section id="task">
-<h2><code class="docutils literal notranslate"><span class="pre">task</span></code><a class="headerlink" href="#task" title="Permalink to this headline">¶</a></h2>
-<p>In <code class="docutils literal notranslate"><span class="pre">src/common/forth/task.fs</span></code>, in <code class="docutils literal notranslate"><span class="pre">task</span></code>, exists:</p>
-<section id="spawn-on-core">
-<h3><code class="docutils literal notranslate"><span class="pre">spawn-on-core</span></code><a class="headerlink" href="#spawn-on-core" title="Permalink to this headline">¶</a></h3>
-<p>( xn … x0 count xt dict-size stack-size rstack-size core – task )</p>
-<p>Allocate the space for a task (with <em>rstack-size</em> bytes of return stack space, <em>stack-size</em> bytes of data stack space, and <em>dict-size</em> bytes of dictionary space), place <em>count</em> cells on its data stack (<em>xn</em> through <em>x0</em>, with <em>x0</em> on the top of the data stack), and set it to execute <em>xt</em> on core <em>core</em>, booting the core if necessary. If the core is to be booted, the Systick is initiated on the booted core and the booted core is initialized for multitasking.</p>
-</section>
-</section>
 <section id="multicore">
 <h2><code class="docutils literal notranslate"><span class="pre">multicore</span></code><a class="headerlink" href="#multicore" title="Permalink to this headline">¶</a></h2>
 <p>In both <code class="docutils literal notranslate"><span class="pre">src/rp2040/forth/multicore.fs</span></code> and <code class="docutils literal notranslate"><span class="pre">src/common/forth/multicore.fs</span></code>, in <code class="docutils literal notranslate"><span class="pre">multicore</span></code> on all platforms, exists:</p>

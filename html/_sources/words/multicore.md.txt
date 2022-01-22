@@ -35,15 +35,6 @@ In `src/common/forth/basic.fs`, in `forth`, exists:
 
 Compile a one-cell-per-core variable into flash that has two words referring to it, a *global-name* which takes a core index when called and outputs the address for that core, and a *cpu-name* which returns its address for the current core.
 
-### `task`
-
-In `src/common/forth/task.fs`, in `task`, exists:
-
-##### `spawn-on-core`
-( xn ... x0 count xt dict-size stack-size rstack-size core -- task )
-
-Allocate the space for a task (with *rstack-size* bytes of return stack space, *stack-size* bytes of data stack space, and *dict-size* bytes of dictionary space), place *count* cells on its data stack (*xn* through *x0*, with *x0* on the top of the data stack), and set it to execute *xt* on core *core*, booting the core if necessary. If the core is to be booted, the Systick is initiated on the booted core and the booted core is initialized for multitasking.
-
 ### `multicore`
 
 In both `src/rp2040/forth/multicore.fs` and `src/common/forth/multicore.fs`, in `multicore` on all platforms, exists:
