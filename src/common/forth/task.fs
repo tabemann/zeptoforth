@@ -1436,6 +1436,7 @@ begin-module task
 	2r@ init-aux-task
 	['] init-aux-main-task -rot
 	2r> swap >r launch-aux-core r>
+	begin dup task-core@ cpu-current-task @ 0= until
       [else]
 	['] x-core-out-of-range ?raise
       [then]
