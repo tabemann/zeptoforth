@@ -78,6 +78,12 @@
 <p>Tasks default to having no support for notifications; notifications must be configured for tasks with <code class="docutils literal notranslate"><span class="pre">config-notify</span></code>.</p>
 <p>Uncaught exceptions within a task will be handled, with the message for them being displayed, but they will result in said task being terminated.</p>
 </section>
+<section id="spawn-on-core">
+<h3><code class="docutils literal notranslate"><span class="pre">spawn-on-core</span></code><a class="headerlink" href="#spawn-on-core" title="Permalink to this headline">¶</a></h3>
+<p>( xn … x0 count xt dict-size stack-size rstack-size core – task )</p>
+<p>Allocate the space for a task (with <em>rstack-size</em> bytes of return stack space, <em>stack-size</em> bytes of data stack space, and <em>dict-size</em> bytes of dictionary space), place <em>count</em> cells on its data stack (<em>xn</em> through <em>x0</em>, with <em>x0</em> on the top of the data stack), and set it to execute <em>xt</em> on core <em>core</em>, booting the core if necessary. If the core is to be booted, the Systick is initiated on the booted core and the booted core is initialized for multitasking.</p>
+<p>The same as applies to <code class="docutils literal notranslate"><span class="pre">spawn</span></code> applies here.</p>
+</section>
 <section id="config-notify">
 <h3><code class="docutils literal notranslate"><span class="pre">config-notify</span></code><a class="headerlink" href="#config-notify" title="Permalink to this headline">¶</a></h3>
 <p>( notify-area-addr notify-count task – )</p>
@@ -274,6 +280,11 @@
 <p>( – )</p>
 <p>Operation would block exception. Raised on attempting to carry out a non-blocking operation when blocking would normally be necessary for the equivalent blocking operation.</p>
 </section>
+<section id="task-core">
+<h3><code class="docutils literal notranslate"><span class="pre">task-core&#64;</span></code><a class="headerlink" href="#task-core" title="Permalink to this headline">¶</a></h3>
+<p>( task – core )</p>
+<p>Get the core that a task is running on or is set to run on.</p>
+</section>
 <section id="task-priority">
 <h3><code class="docutils literal notranslate"><span class="pre">task-priority!</span></code><a class="headerlink" href="#task-priority" title="Permalink to this headline">¶</a></h3>
 <p>( priority task – )</p>
@@ -313,11 +324,6 @@
 <h3><code class="docutils literal notranslate"><span class="pre">task-min-timeslice!</span></code><a class="headerlink" href="#task-min-timeslice" title="Permalink to this headline">¶</a></h3>
 <p>( timeslice task – )</p>
 <p>Set the minimum timeslice, in ticks (usually 100 us increments), that a task will be guaranteed to run when scheduled, regardless of how many ticks the task executed for the last time it was scheduled. For instance, to ensure that each time a task will run for at least 10 ticks each time it is scheduled, this should be set to 10. By default, this value is set to 0 for each task, such that a given task is not guaranteed to not be descheduled immediately on a SysTick if it had already used up both its timeslice and also the next timeslice (through, e.g., spending time in critical sections).</p>
-</section>
-<section id="get-task-max-timeslice">
-<h3><code class="docutils literal notranslate"><span class="pre">get-task-max-timeslice</span></code><a class="headerlink" href="#get-task-max-timeslice" title="Permalink to this headline">¶</a></h3>
-<p>( task – timeslice )</p>
-<p>Getet the minimum timeslice, in ticks (usually 100 us increments), that a task will be guaranteed to run when scheduled, regardless of how many ticks the task executed for the last time it was scheduled.</p>
 </section>
 <section id="task-active">
 <h3><code class="docutils literal notranslate"><span class="pre">task-active&#64;</span></code><a class="headerlink" href="#task-active" title="Permalink to this headline">¶</a></h3>

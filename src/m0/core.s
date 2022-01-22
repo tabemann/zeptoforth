@@ -1,4 +1,4 @@
-@ Copyright (c) 2019-2021 Travis Bemann
+@ Copyright (c) 2019-2022 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -261,6 +261,24 @@ _4div:	asrs tos, tos, #2
 	bx lr
 	end_inlined
 
+	@@ Get the minimum of two values
+	define_word "min", visible_flag | inlined_flag
+_min:	ldmia dp!, {r0}
+	cmp tos, r0
+	blt 1f
+	movs tos, r0
+1:	bx lr
+	end_inlined
+
+	@@ Get the maximum of two values
+	define_word "max", visible_flag | inlined_flag
+_max:	ldmia dp!, {r0}
+	cmp tos, r0
+	bgt 1f
+	movs tos, r0
+1:	bx lr
+	end_inlined
+	
 	@@ Equals
 	define_word "=", visible_flag
 _eq:	movs r0, tos
@@ -437,7 +455,7 @@ _uge:	movs r0, tos
 _here:	push {lr}
 	bl _cpu_offset
 	ldr r0, =here
-	adds tos, r0
+	adds r0, tos
 	ldr tos, [r0]
 	pop {pc}
 	end_inlined
@@ -728,14 +746,14 @@ _key_q:	push {lr}
 	end_inlined
 
 	@@ Enable interrupts
-	define_word "enable-int", visible_flag
+	define_word "enable-int", visible_flag | inlined_flag
 _enable_int:
 	cpsie i
 	bx lr
 	end_inlined
 
 	@@ Disable interrupts
-	define_word "disable-int", visible_flag
+	define_word "disable-int", visible_flag | inlined_flag
 _disable_int:
 	cpsid i
 @	dsb
