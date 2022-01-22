@@ -55,6 +55,13 @@ Tasks default to having no support for notifications; notifications must be conf
 
 Uncaught exceptions within a task will be handled, with the message for them being displayed, but they will result in said task being terminated.
 
+##### `spawn-on-core`
+( xn ... x0 count xt dict-size stack-size rstack-size core -- task )
+
+Allocate the space for a task (with *rstack-size* bytes of return stack space, *stack-size* bytes of data stack space, and *dict-size* bytes of dictionary space), place *count* cells on its data stack (*xn* through *x0*, with *x0* on the top of the data stack), and set it to execute *xt* on core *core*, booting the core if necessary. If the core is to be booted, the Systick is initiated on the booted core and the booted core is initialized for multitasking.
+
+The same as applies to `spawn` applies here.
+
 ##### `config-notify`
 ( notify-area-addr notify-count task -- )
 
@@ -257,6 +264,11 @@ Validate whether a task has timed out, raising `x-timed-out` if it has.
 
 Operation would block exception. Raised on attempting to carry out a non-blocking operation when blocking would normally be necessary for the equivalent blocking operation.
 
+##### `task-core@`
+( task -- core )
+
+Get the core that a task is running on or is set to run on.
+
 ##### `task-priority!`
 ( priority task -- )
 
@@ -296,11 +308,6 @@ Get the timeslice, in ticks (usually 100 us increments), of a task.
 ( timeslice task -- )
 
 Set the minimum timeslice, in ticks (usually 100 us increments), that a task will be guaranteed to run when scheduled, regardless of how many ticks the task executed for the last time it was scheduled. For instance, to ensure that each time a task will run for at least 10 ticks each time it is scheduled, this should be set to 10. By default, this value is set to 0 for each task, such that a given task is not guaranteed to not be descheduled immediately on a SysTick if it had already used up both its timeslice and also the next timeslice (through, e.g., spending time in critical sections).
-
-##### `get-task-max-timeslice`
-( task -- timeslice )
-
-Getet the minimum timeslice, in ticks (usually 100 us increments), that a task will be guaranteed to run when scheduled, regardless of how many ticks the task executed for the last time it was scheduled.
 
 ##### `task-active@`
 ( task -- level )

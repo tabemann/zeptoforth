@@ -23,12 +23,6 @@ continue-module forth
   task import
   int-io import
 
-  \ The tasks
-  variable task-0
-  variable task-1
-  variable task-2
-  variable task-3
-
   \ Initialize the test
   : init-test ( -- )
     disable-int-io
