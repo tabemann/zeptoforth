@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2021 Travis Bemann
+\ Copyright (c) 2020-2022 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@ compress-flash
 begin-module chan
   
   task import
+  multicore import
   tqueue import
   
   begin-module chan-internal
@@ -179,7 +180,7 @@ begin-module chan
 	drop
       then
       s" END SEND-CHAN" trace
-    ;] critical
+    ;] tqueue-spinlock critical-with-spinlock
   ;
 
   \ Receive data from a channel
@@ -197,7 +198,7 @@ begin-module chan
 	drop
       then
       s" END RECV-CHAN" trace
-    ;] critical
+    ;] tqueue-spinlock critical-with-spinlock
   ;
 
   \ Peek data from a channel
@@ -209,7 +210,7 @@ begin-module chan
       >r 2dup 0 fill
       r@ chan-data-size @ min r> recv-chan-addr -rot dup >r move r>
       s" END PEEK-CHAN" trace
-    ;] critical
+    ;] tqueue-spinlock critical-with-spinlock
   ;
 
   \ Skip data on a channel
@@ -225,7 +226,7 @@ begin-module chan
 	drop
       then
       s" END SKIP-CHAN" trace
-    ;] critical
+    ;] tqueue-spinlock critical-with-spinlock
   ;
 
   \ Send data to a channel without blocking (raise x-would-block if blocking
@@ -244,7 +245,7 @@ begin-module chan
 	drop
       then
       s" END SEND-CHAN-NO-BLOCK" trace
-    ;] critical
+    ;] tqueue-spinlock critical-with-spinlock
   ;
 
   \ Receive data from a channel without blocking (raise x-would-block if
@@ -262,9 +263,9 @@ begin-module chan
 	drop
       then
       s" END RECV-CHAN-NO-BLOCK" trace
-    ;] critical
+    ;] tqueue-spinlock critical-with-spinlock
   ;
-
+  
   \ Peek data from a channel without blocking (raise x-would-block if blocking
   \ would normally occur)
   : peek-chan-no-block ( addr bytes chan -- addr peek-bytes )
@@ -274,9 +275,9 @@ begin-module chan
       >r 2dup 0 fill
       r@ chan-data-size @ min r> recv-chan-addr -rot dup >r move r>
       s" END PEEK-CHAN-NO-BLOCK" trace
-    ;] critical
+    ;] tqueue-spinlock critical-with-spinlock
   ;
-
+  
   \ Skip data on a channel without blocking (raise x-would-block if blocking
   \ would normally occur)
   : skip-chan-no-block ( chan -- )
@@ -290,9 +291,9 @@ begin-module chan
 	drop
       then
       s" END SKIP-CHAN-NO-BLOCK" trace
-    ;] critical
+    ;] tqueue-spinlock critical-with-spinlock
   ;
-
+  
   commit-flash
 
   \ Close a channel
@@ -301,7 +302,7 @@ begin-module chan
       true over chan-closed !
       dup chan-send-tqueue wake-tqueue-all
       chan-recv-tqueue wake-tqueue-all
-    ;] critical
+    ;] tqueue-spinlock critical-with-spinlock
   ;
 
   \ Get whether a channel is closed

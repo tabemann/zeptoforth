@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2021 Travis Bemann
+\ Copyright (c) 2020-2022 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@ compress-flash
 begin-module tqueue
 
   task import
+  multicore import
 
   begin-module tqueue-internal
 
@@ -140,7 +141,8 @@ begin-module tqueue
     then
     init-wait
     2dup swap add-wait
-    current-task block-critical
+    tqueue-spinlock current-task block-with-spinlock
+    tqueue-spinlock release-spinlock
     end-critical
     [: current-task validate-timeout ;] try ?dup if
       >r [:

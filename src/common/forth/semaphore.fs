@@ -1,4 +1,4 @@
-\ Copyright (c) 2021 Travis Bemann
+\ Copyright (c) 2021-2022 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@ compress-flash
 begin-module sema
 
   task import
+  multicore import
   tqueue import
 
   begin-module sema-internal
@@ -50,17 +51,31 @@ begin-module sema
 
   \ Take a semaphore, waiting up to a timeout if one is set
   : take ( semaphore -- )
-    [: current-task prepare-block sema-tqueue wait-tqueue ;] critical
+    [:
+      current-task prepare-block sema-tqueue wait-tqueue
+    ;] tqueue-spinlock critical-with-spinlock
   ;
 
   \ Give a semaphore
-  : give ( semaphore -- ) [: sema-tqueue wake-tqueue ;] critical ;
+  : give ( semaphore -- )
+    [:
+      sema-tqueue wake-tqueue
+    ;] tqueue-spinlock critical-with-spinlock
+  ;
   
   \ Reverse give a semaphore
-  : ungive ( semaphore -- ) [: sema-tqueue unwake-tqueue ;] critical ;
+  : ungive ( semaphore -- )
+    [:
+      sema-tqueue unwake-tqueue
+    ;] tqueue-spinlock critical-with-spinlock
+  ;
   
   \ Broadcast a semaphore
-  : broadcast ( semaphore -- ) [: sema-tqueue wake-tqueue-all ;] critical ;
+  : broadcast ( semaphore -- )
+    [:
+      sema-tqueue wake-tqueue-all
+    ;] tqueue-spinlock critical-with-spinlock
+  ;
 
   \ Export the semaphore size
   export sema-size

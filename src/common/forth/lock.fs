@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2021 Travis Bemann
+\ Copyright (c) 2020-2022 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@ compress-flash
 begin-module lock
 
   task import
+  multicore import
 
   begin-module lock-internal
 
@@ -241,7 +242,8 @@ begin-module lock
 	init-lock-wait
 	2dup swap add-lock-wait
 	over update-hold-priority
-	current-task block-critical
+	lock-spinlock current-task block-with-spinlock
+	lock-spinlock release-spinlock
 	end-critical
 	[: current-task validate-timeout ;] try ?dup if
 	  >r [:
@@ -256,7 +258,7 @@ begin-module lock
 	update-hold-priority
       then
       s" END LOCK" trace
-    ;] critical
+    ;] lock-spinlock critical-with-spinlock
   ;
 
   \ Unlock a lock
@@ -280,7 +282,7 @@ begin-module lock
 	0 swap lock-holder-task !      
       then
       s" END UNLOCK" trace
-    ;] critical
+    ;] lock-spinlock critical-with-spinlock
   ;
 
   \ Update the priorities of tasks holding locks
@@ -291,7 +293,7 @@ begin-module lock
   commit-flash
   
   \ Execute a block of code with a lock
-  : with-lock ( lock xt -- ) dup >r lock try r> unlock ?raise ;
+  : with-lock ( xt lock -- ) dup >r lock try r> unlock ?raise ;
 
   \ Export lock-size
   export lock-size
