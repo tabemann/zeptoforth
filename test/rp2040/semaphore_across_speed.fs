@@ -30,6 +30,7 @@ continue-module forth
   sema-size buffer: source-sema
   
   \ The two tasks
+  variable target-task
   variable source-task
 
   \ The inner loop of the target
@@ -76,8 +77,9 @@ continue-module forth
     no-sema-limit 0 target-sema init-sema
     no-sema-limit 0 source-sema init-sema
     0 ['] source 512 256 512 spawn source-task !
-    0 ['] target 512 256 512 1 spawn-aux-main
+    0 ['] target 512 256 512 1 spawn-on-core target-task !
     c" source" source-task @ task-name!
+    target-task @ run
     source-task @ run
     target-sema give
     source-sema give

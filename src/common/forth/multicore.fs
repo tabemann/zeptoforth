@@ -54,10 +54,10 @@ begin-module multicore
   : release-same-core-spinlock ( -- ) ;
 
   \ Claim a spinlock for a different core's multitasker - this is a no-op
-  : claim-other-core-spinlock ( core -- ) ;
+  : claim-other-core-spinlock ( core -- ) drop ;
 
   \ Release a spinlock for the other core's multitasker - this is a no-op
-  : release-other-core-spinlock ( core -- ) ;
+  : release-other-core-spinlock ( core -- ) drop ;
 
   \ Claim all core's multitasker's spinlocks - this is a no-op
   : claim-all-core-spinlock ( -- ) ;
@@ -65,6 +65,9 @@ begin-module multicore
   \ Release all core's multitasker's spinlocks - this is a no-op
   : release-all-core-spinlock ( -- ) ;
   
+  \ Execute an xt (and not claim a spinlock)
+  : with-spinlock ( xt spinlock -- ) drop execute ;
+
   \ Enter a critical section (and not claim a spinlock)
   : critical-with-spinlock ( xt spinlock -- ) drop critical ;
 
