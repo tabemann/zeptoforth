@@ -336,7 +336,7 @@ begin-module task
     \ exists with a higher priority.
     : find-higher-priority ( task -- higher-task )
       task-priority@ >r
-      last-task @ begin
+      dup ['] task-core for-task @ cpu-last-task @ begin
 	dup 0<> if
 	  dup task-priority@ r@ < if task-next @ false else true then
 	else
@@ -353,7 +353,7 @@ begin-module task
 	2dup task-prev @ swap task-prev !
       else
 	0 2 pick task-prev !
-	over last-task !
+	over dup ['] task-core for-task @ cpu-last-task !
       then
       2dup task-prev !
       swap task-next !
@@ -361,14 +361,15 @@ begin-module task
 
     \ Insert a task into first position
     : insert-task-first ( task -- )
-      first-task @ 0<> if
-	dup first-task @ task-next !
-	first-task @ over task-prev !
+      dup ['] task-core for-task @ >r
+      r@ cpu-first-task @ 0<> if
+	dup r@ cpu-first-task @ task-next !
+	r@ cpu-first-task @ over task-prev !
       else
-	dup last-task !
+	dup r@ cpu-last-task !
 	0 over task-prev !
       then
-      dup first-task !
+      dup r> cpu-first-task !
       0 swap task-next !
     ;
 
@@ -383,18 +384,20 @@ begin-module task
 
     \ Remove a task
     : remove-task ( task -- )
+      dup ['] task-core for-task @ >r
       dup task-next @ ?dup if
 	over task-prev @ swap task-prev !
       else
-	dup task-prev @ first-task !
+	dup task-prev @ r@ cpu-first-task !
       then
       dup task-prev @ ?dup if
 	over task-next @ swap task-next !
       else
-	dup task-next @ last-task !
+	dup task-next @ r@ cpu-last-task !
       then
       0 over task-prev !
       0 swap task-next !
+      rdrop
     ;
 
     \ Remove a task if it is scheduled
@@ -403,26 +406,28 @@ begin-module task
     ;
 
     \ Set task change
-    : start-task-change ( -- )
-      disable-int
-      begin in-task-change @ while
-	ICSR_VECTACTIVE@ 0 = if
-	  enable-int
-	  pause
-	  disable-int
-	else
-	  enable-int
-	  ['] x-in-task-change ?raise
-	then
-      repeat
-      true in-task-change !
-      enable-int
-    ;
+    \ : start-task-change ( core -- )
+    \   disable-int
+    \   begin dup cpu-in-task-change @ while
+    \ 	ICSR_VECTACTIVE@ 0 = if
+    \ 	  enable-int
+    \ 	  pause
+    \ 	  disable-int
+    \ 	else
+    \ 	  enable-int
+    \ 	  ['] x-in-task-change ?raise
+    \ 	then
+    \   repeat
+    \   true swap cpu-in-task-change !
+    \   enable-int
+    \ ;
 
     \ Start a task change
     : start-validate-task-change ( task -- )
-      start-task-change
-      ['] validate-not-terminated try ?dup if false in-task-change ! ?raise then
+\      dup ['] task-core for-task @ start-task-change
+      ['] validate-not-terminated try ?dup if
+	( false in-task-change ! ) ?raise
+      then
     ;
   
   end-module
@@ -504,30 +509,34 @@ begin-module task
 
   \ Start a task's execution
   : run ( task -- )
-    dup start-validate-task-change
-    dup task-active@ 1+
-    dup 1 = if over test-remove-task over insert-task then
-    swap task-active h!
-    false in-task-change !
+    [:
+      dup start-validate-task-change
+      dup task-active@ 1+
+      dup 1 = if over test-remove-task over insert-task then
+      swap task-active h!
+    ;] over task-core@ critical-with-other-core-spinlock
   ;
 
   \ Stop a task's execution
   : stop ( task -- )
-    dup start-validate-task-change
-    dup task-active@ 1-
-    swap task-active h!
-    false in-task-change !
+    [:
+      dup start-validate-task-change
+      dup task-active@ 1-
+      swap task-active h!
+    ;] over task-core@ critical-with-other-core-spinlock
   ;
 
   \ Kill a task
   : kill ( task -- )
-    dup start-validate-task-change
-    terminated over task-active h!
-    dup current-task @ = swap last-task @ = or if
-      false in-task-change ! begin pause again
-    else
-      false in-task-change !
-    then
+    [:
+      dup start-validate-task-change
+      terminated over task-active h!
+      dup current-task @ = swap last-task @ = or if
+	false begin pause again
+      else
+	false
+      then
+    ;] over task-core@ critical-with-other-core-spinlock
   ;
 
   \ Get the last delay time
@@ -986,17 +995,17 @@ begin-module task
       ;
       
       \ Initialize an auxiliary task
-      : init-aux-task ( xn...x0 count xt task -- )
+      : init-aux-task ( xn...x0 count xt task core -- data-stack return-stack )
+	over ['] task-core for-task !
 	0 over ['] task-handler for-task !
 	0 over task-priority h!
 	0 over task-saved-priority h!
-	1 over task-active h!
+	0 over task-active h!
 	base @ over ['] task-base for-task !
 	0 over ['] current-lock for-task !
 	0 over ['] current-lock-held for-task !
 	readied over task-state h!
 	no-timeout over ['] timeout for-task !
-	1 over ['] task-core for-task !
 	0 over ['] timeout-systick-start for-task !
 	0 over ['] timeout-systick-delay for-task !
 	0 over ['] task-systick-start for-task !
@@ -1023,7 +1032,8 @@ begin-module task
   end-module
 
   \ Initialize a task
-  : init-task ( xn...x0 count xt task -- )
+  : init-task ( xn...x0 count xt task core -- )
+    over ['] task-core for-task !
     0 over ['] task-handler for-task !
     0 over task-priority h!
     0 over task-saved-priority h!
@@ -1031,7 +1041,6 @@ begin-module task
     base @ over ['] task-base for-task !
     0 over ['] current-lock for-task !
     0 over ['] current-lock-held for-task !
-    cpu-index over ['] task-core for-task !
     readied over task-state h!
     no-timeout over ['] timeout for-task !
     0 over ['] timeout-systick-start for-task !
@@ -1068,11 +1077,6 @@ begin-module task
     swap 4 align swap tuck task-dict-size !
     dup dup task-dict-size @ - free-end !
     release-all-core-spinlock
-  ;
-  
-  \ Spawn a non-main task
-  : spawn ( xn...x0 count xt dict-size stack-size rstack-size -- task )
-    task-allot dup >r init-task r>
   ;
 
   \ Configure notification for a task; notify-count may be from 0 to 32, and
@@ -1393,13 +1397,72 @@ begin-module task
 	$FF SHPR3_PRI_14!
 	1 pause-enabled !
 	init-systick-aux-core
-	try ?dup if display-red execute display-normal then
+	pause try ?dup if display-red execute display-normal then
 	current-task @ kill
       ;
       
     [then]
 
+    \ Core already has a main task spawned exception
+    : x-main-already-launched ( -- )
+      space ." core already has main task" cr
+    ;
+    
+    \ Auxiliary cores can only be launched from core 0
+    : x-core-can-only-be-launched-from-core-0 ( -- )
+      space ." core can only be launched from core 0" cr
+    ;
+
+    \ Launch an auxiliary core with a task
+    : spawn-aux-main
+      ( xn ... x0 count xt dict-size stack-size rstack-size core -- task )
+      [ cpu-count 1 > ] [if]
+	cpu-index 0= averts x-core-can-only-be-launched-from-core-0
+	dup 1 = averts x-core-out-of-range
+	claim-all-core-spinlock
+	dup cpu-active? @ if
+	  release-all-core-spinlock
+	  ['] x-main-already-launched ?raise
+	else
+	  true over cpu-active? !
+	then
+	release-all-core-spinlock
+	>r task-allot >r
+	2r@ cpu-current-task !
+	2r@ cpu-main-task !
+	2r@ cpu-prev-task !
+	2r@ cpu-first-task !
+	2r@ cpu-last-task !
+	2r@ init-aux-task
+	['] init-aux-main-task -rot
+	2r> swap >r launch-aux-core r>
+      [else]
+	['] x-core-out-of-range ?raise
+      [then]
+    ;
+
   end-module
+
+  \ Spawn a non-main task
+  : spawn ( xn...x0 count xt dict-size stack-size rstack-size -- task )
+    task-allot dup >r cpu-index init-task r>
+  ;
+
+  \ Spawn a task on a particular core
+  : spawn-on-core
+    ( xn...x0 count xt dict-size stack-size rstack-size core -- task )
+    [ cpu-count 1 > ] [if]
+      dup cpu-count < over 0 >= and averts x-core-out-of-range
+      dup cpu-active? @ if
+	>r task-allot r> over >r init-task r>
+      else
+	spawn-aux-main
+      then
+    [else]
+      0= averts x-core-out-of-range
+      spawn
+    [then]
+  ;
 
   \ Make current-task read-only
   : current-task ( -- task ) current-task @ ;
@@ -1415,44 +1478,6 @@ begin-module task
       nip
     then
     enable-int
-  ;
-
-  \ Core already has a main task spawned exception
-  : x-main-already-launched ( -- )
-    space ." core already has main task" cr
-  ;
-
-  \ Auxiliary cores can only be launched from core 0
-  : x-core-can-only-be-launched-from-core-0 ( -- )
-    space ." core can only be launched from core 0" cr
-  ;
-
-  \ Launch an auxiliary core with a task
-  : spawn-aux-main
-    ( xn ... x0 count xt dict-size stack-size rstack-size core -- )
-    [ cpu-count 1 > ] [if]
-      cpu-index 0= averts x-core-can-only-be-launched-from-core-0
-      dup 1 = averts x-core-out-of-range
-      claim-all-core-spinlock
-      dup cpu-active? @ if
-	release-all-core-spinlock
-	['] x-main-already-launched ?raise
-      else
-	true over cpu-active? !
-      then
-      release-all-core-spinlock
-      >r task-allot >r
-      2r@ cpu-current-task !
-      2r@ cpu-main-task !
-      2r@ cpu-first-task !
-      2r@ cpu-last-task !
-      2r@ cpu-prev-task !
-      r> init-aux-task
-      ['] init-aux-main-task -rot
-      r> launch-aux-core
-    [else]
-      ['] x-core-out-of-range ?raise
-    [then]
   ;
 
   \ Initialize multitasking
