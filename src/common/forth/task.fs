@@ -112,6 +112,9 @@ begin-module task
     \ CPU is active
     cpu-count cells buffer: cpu-active?
     : cpu-active? ( index -- addr ) cells cpu-active? + ;
+
+    \ The task ready count
+    user task-ready-count
     
     \ The current task handler
     user task-handler
@@ -575,9 +578,14 @@ begin-module task
   : block-timeout ( ticks-delay ticks-start task -- )
     [:
       dup validate-not-terminated
-      tuck ['] task-systick-start for-task !
-      tuck ['] task-systick-delay for-task !
-      blocked-timeout over task-state h!
+      -1 over ['] task-ready-count for-task +!
+      dup ['] task-ready-count for-task @ 0< if
+	tuck ['] task-systick-start for-task !
+	tuck ['] task-systick-delay for-task !
+	blocked-timeout over task-state h!
+      else
+	nip nip
+      then
     ;] over task-core@ critical-with-other-core-spinlock
     current-task @ = if pause then
   ;
@@ -586,11 +594,19 @@ begin-module task
   : block-timeout-critical ( ticks-delay ticks-start task -- )
     [:
       dup validate-not-terminated
-      tuck ['] task-systick-start for-task !
-      tuck ['] task-systick-delay for-task !
-      [ blocked-timeout schedule-critical or schedule-user-critical or ]
-      literal
-      over task-state h!
+      -1 over ['] task-ready-count for-task +!
+      dup ['] task-ready-count for-task @ 0< if
+	tuck ['] task-systick-start for-task !
+	tuck ['] task-systick-delay for-task !
+	[ blocked-timeout schedule-critical or schedule-user-critical or ]
+	literal
+	over task-state h!
+      else
+	nip nip
+	[ readied schedule-critical or schedule-user-critical or ]
+	literal
+	over task-state h!
+      then
     ;] over task-core@ critical-with-other-core-spinlock
     current-task @ = if pause then
   ;
@@ -600,12 +616,20 @@ begin-module task
   : block-timeout-with-spinlock ( spinlock ticks-delay ticks-start task -- )
     [:
       dup validate-not-terminated
-      tuck ['] task-systick-start for-task !
-      tuck ['] task-systick-delay for-task !
-      tuck ['] spinlock-to-claim for-task !
-      [ blocked-timeout schedule-critical or schedule-user-critical or
-      schedule-with-spinlock or ] literal
-      over task-state h!
+      -1 over ['] task-ready-count for-task +!
+      dup ['] task-ready-count for-task @ 0< if
+	tuck ['] task-systick-start for-task !
+	tuck ['] task-systick-delay for-task !
+	tuck ['] spinlock-to-claim for-task !
+	[ blocked-timeout schedule-critical or schedule-user-critical or
+	schedule-with-spinlock or ] literal
+	over task-state h!
+      else
+	nip nip
+	[ readied schedule-critical or schedule-user-critical or ]
+	literal
+	over task-state h!
+      then
     ;] over task-core@ critical-with-other-core-spinlock
     current-task @ = if pause then
   ;
@@ -678,16 +702,29 @@ begin-module task
 
   \ Mark a task as blocked indefinitely
   : block-indefinite ( task -- )
-    dup validate-not-terminated
-    blocked-indefinite over task-state h!
+    [:
+      dup validate-not-terminated
+      -1 over ['] task-ready-count for-task +!
+      dup ['] task-ready-count for-task @ 0< if
+	blocked-indefinite over task-state h!
+      then
+    ;] over task-core@ critical-with-other-core-spinlock
     current-task @ = if pause then
   ;
 
   \ Mark a task as blocked indefinitely and schedule as critical when done
   : block-indefinite-critical ( task -- )
-    dup validate-not-terminated
-    [ blocked-indefinite schedule-critical or schedule-user-critical or ]
-    literal over task-state h!
+    [:
+      dup validate-not-terminated
+      -1 over ['] task-ready-count for-task +!
+      dup ['] task-ready-count for-task @ 0< if
+	[ blocked-indefinite schedule-critical or schedule-user-critical or ]
+	literal over task-state h!
+      else
+	[ readied schedule-critical or schedule-user-critical or ]
+	literal over task-state h!
+      then
+    ;] over task-core@ critical-with-other-core-spinlock
     current-task @ = if pause then
   ;
 
@@ -696,10 +733,17 @@ begin-module task
   : block-indefinite-with-spinlock ( spinlock task -- )
     [:
       dup validate-not-terminated
+      -1 over ['] task-ready-count for-task +!
       tuck ['] spinlock-to-claim for-task !
-      [ blocked-indefinite schedule-critical or schedule-user-critical or
-      schedule-with-spinlock or ]
-      literal over task-state h!
+      dup ['] task-ready-count for-task @ 0< if
+	[ blocked-indefinite schedule-critical or schedule-user-critical or
+	schedule-with-spinlock or ]
+	literal over task-state h!
+      else
+	[ readied schedule-critical or schedule-user-critical or
+	schedule-with-spinlock or ]
+	literal over task-state h!
+      then
     ;] over task-core@ critical-with-other-core-spinlock
     current-task @ = if pause then
   ;
@@ -754,10 +798,15 @@ begin-module task
     [:
       dup validate-not-terminated
       dup ['] task-current-notify for-task @ -1 = if
-	dup task-state h@
-	[ schedule-critical schedule-user-critical or
-	schedule-with-spinlock or ]
-	literal and readied or swap task-state h!
+	1 over ['] task-ready-count for-task +!
+	dup ['] task-ready-count for-task @ 0>= if
+	  dup task-state h@
+	  [ schedule-critical schedule-user-critical or
+	  schedule-with-spinlock or ]
+	  literal and readied or swap task-state h!
+	else
+	  drop
+	then
       else
 	drop
       then
@@ -939,6 +988,7 @@ begin-module task
       1 over task-active h!
       readied over task-state h!
       no-timeout timeout !
+      0 task-ready-count !
       0 timeout-systick-start !
       0 timeout-systick-delay !
       0 task-systick-start !
@@ -997,6 +1047,7 @@ begin-module task
       \ Initialize an auxiliary task
       : init-aux-task ( xn...x0 count xt task core -- data-stack return-stack )
 	over ['] task-core for-task !
+	0 over ['] task-ready-count for-task !
 	0 over ['] task-handler for-task !
 	0 over task-priority h!
 	0 over task-saved-priority h!
@@ -1034,6 +1085,7 @@ begin-module task
   \ Initialize a task
   : init-task ( xn...x0 count xt task core -- )
     over ['] task-core for-task !
+    0 over ['] task-ready-count for-task !
     0 over ['] task-handler for-task !
     0 over task-priority h!
     0 over task-saved-priority h!
