@@ -23,15 +23,20 @@ continue-module forth
   systick import
   task import
   int-io import
-  fchan import
+  rchan import
 
   \ Allot the channel
-  fchan-size buffer: my-fchan
+  rchan-size buffer: my-rchan
+
+  \ The tasks
+  variable consumer-task
+  variable producer-task
 
   \ The inner loop of the consumer
   : consumer ( -- )
     begin
-      [: my-fchan recv-fchan ;] extract-allot-cell drop
+      [: my-rchan recv-rchan ;] extract-allot-cell drop
+      0 [: my-rchan reply-rchan ;] provide-allot-cell
     again
   ;
 
@@ -47,7 +52,8 @@ continue-module forth
   \ The inner loop of a producer
   : producer ( -- )
     begin
-      0 [: my-fchan send-fchan ;] provide-allot-cell
+      0 [: [: my-rchan send-rchan ;] extract-allot-cell ;] provide-allot-cell
+      drop
       1 send-count +!
       send-count @ send-count-limit > if
 	0 send-count !
@@ -59,16 +65,12 @@ continue-module forth
     again
   ;
 
-  \ The tasks
-  variable consumer-task
-  variable producer-task
-
   \ Initiate the test
   : init-test ( -- )
     disable-int-io
     0 send-count !
     systick-counter start-systick !
-    my-fchan init-fchan
+    my-rchan init-rchan
     0 ['] consumer 320 128 512 1 spawn-on-core consumer-task !
     0 ['] producer 320 128 512 spawn producer-task !
     consumer-task @ run
