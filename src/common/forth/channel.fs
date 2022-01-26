@@ -52,12 +52,6 @@ begin-module chan
       \ Channel is closed
       field: chan-closed
       
-      \ Channel send ready
-      field: chan-send-ready
-
-      \ Channel receive ready
-      field: chan-recv-ready
-
       \ Channel send task queue
       tqueue-size +field chan-send-tqueue
       
@@ -96,9 +90,7 @@ begin-module chan
     \ Wait to send on a channel
     : wait-send-chan ( chan -- )
       dup chan-full-unsafe? if
-	1 over chan-send-ready +!
 	dup chan-send-tqueue ['] wait-tqueue try
-	-1 2 pick chan-send-ready +!
 	?raise
       then
       chan-closed @ triggers x-chan-closed
@@ -108,9 +100,7 @@ begin-module chan
     : wait-recv-chan ( chan -- )
       dup chan-empty-unsafe? if
 	dup chan-closed @ triggers x-chan-closed
-	1 over chan-recv-ready +!
-	dup chan-recv-tqueue ['] wait-tqueue try
-	-1 rot chan-recv-ready +!
+	chan-recv-tqueue ['] wait-tqueue try
 	?raise
       else
 	drop
@@ -155,10 +145,8 @@ begin-module chan
     0 over chan-current-count !
     0 over chan-recv-index !
     0 over chan-send-index !
-    0 over chan-recv-ready !
-    0 over chan-send-ready !
-    dup chan-recv-tqueue init-tqueue
-    dup chan-send-tqueue init-tqueue
+    1 0 2 pick chan-recv-tqueue init-tqueue-full
+    1 0 2 pick chan-send-tqueue init-tqueue-full
     false swap chan-closed !
   ;
 
@@ -174,11 +162,7 @@ begin-module chan
       dup send-chan-addr over chan-data-size @ 0 fill
       dup >r chan-data-size @ min r@ send-chan-addr swap move r>
       dup advance-send-chan
-      dup chan-recv-ready @ 0> if
-	chan-recv-tqueue wake-tqueue
-      else
-	drop
-      then
+      chan-recv-tqueue wake-tqueue
       s" END SEND-CHAN" trace
     ;] tqueue-spinlock critical-with-spinlock
   ;
@@ -192,11 +176,7 @@ begin-module chan
       >r 2dup 0 fill
       r@ chan-data-size @ min r@ recv-chan-addr -rot dup >r move 2r>
       dup advance-recv-chan
-      dup chan-send-ready @ 0> if
-	chan-send-tqueue wake-tqueue
-      else
-	drop
-      then
+      chan-send-tqueue wake-tqueue
       s" END RECV-CHAN" trace
     ;] tqueue-spinlock critical-with-spinlock
   ;
@@ -220,11 +200,7 @@ begin-module chan
       current-task prepare-block
       dup wait-recv-chan
       dup advance-recv-chan
-      dup chan-send-ready @ 0> if
-	chan-send-tqueue wake-tqueue
-      else
-	drop
-      then
+      chan-send-tqueue wake-tqueue
       s" END SKIP-CHAN" trace
     ;] tqueue-spinlock critical-with-spinlock
   ;
@@ -239,11 +215,7 @@ begin-module chan
       dup send-chan-addr over chan-data-size @ 0 fill
       dup >r chan-data-size @ min r@ send-chan-addr swap move r>
       dup advance-send-chan
-      dup chan-recv-ready @ 0> if
-	chan-recv-tqueue wake-tqueue
-      else
-	drop
-      then
+      chan-recv-tqueue wake-tqueue
       s" END SEND-CHAN-NO-BLOCK" trace
     ;] tqueue-spinlock critical-with-spinlock
   ;
@@ -257,11 +229,7 @@ begin-module chan
       >r 2dup 0 fill
       r@ chan-data-size @ min r@ recv-chan-addr -rot dup >r move 2r>
       dup advance-recv-chan
-      dup chan-send-ready @ 0> if
-	chan-send-tqueue wake-tqueue
-      else
-	drop
-      then
+      chan-send-tqueue wake-tqueue
       s" END RECV-CHAN-NO-BLOCK" trace
     ;] tqueue-spinlock critical-with-spinlock
   ;
@@ -285,11 +253,7 @@ begin-module chan
       s" BEGIN SKIP-CHAN-NO-BLOCK" trace
       dup chan-empty-unsafe? triggers x-would-block
       dup advance-recv-chan
-      dup chan-send-ready @ 0> if
-	chan-send-tqueue wake-tqueue
-      else
-	drop
-      then
+      chan-send-tqueue wake-tqueue
       s" END SKIP-CHAN-NO-BLOCK" trace
     ;] tqueue-spinlock critical-with-spinlock
   ;
