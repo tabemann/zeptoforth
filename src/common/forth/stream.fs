@@ -68,21 +68,6 @@ begin-module stream
     \ Stream data address
     : stream-data ( stream -- addr ) [inlined] stream-size + ;
 
-    \ Core of getting whether a stream is full
-    : stream-full-unsafe? ( stream -- flag )
-      dup stream-current-count @ swap stream-data-size @ =
-    ;
-
-    \ Core of getting whether a stream is empty
-    : stream-empty-unsafe? ( stream -- flag )
-      stream-current-count @ 0=
-    ;
-
-    \ Core of getting the number of free bytes
-    : stream-free-unsafe ( stream -- bytes )
-      dup stream-data-size @ swap stream-current-count @ -
-    ;
-
   end-module> import
 
   \ Stream is closed exception
@@ -91,22 +76,28 @@ begin-module stream
   \ Attempting to send data larger than the stream exception
   : x-stream-data-too-big ( -- ) space ." data is larger than stream" cr  ;
 
-  commit-flash
-
   \ Get whether a stream is full
-  : stream-full? ( stream -- flag ) [: stream-full-unsafe? ;] critical ;
+  : stream-full? ( stream -- flag )
+    dup stream-current-count @ swap stream-data-size @ =
+  ;
 
   \ Get whether a stream is empty
-  : stream-empty? ( stream -- flag ) stream-empty-unsafe? ;
-  
+  : stream-empty? ( stream -- flag )
+    stream-current-count @ 0=
+  ;
+
   \ Get the number of free bytes
-  : stream-free ( stream -- bytes ) [: stream-free-unsafe ;] critical ;
-  
+  : stream-free ( stream -- bytes )
+    dup stream-data-size @ swap stream-current-count @ -
+  ;
+
+  commit-flash
+
   continue-module stream-internal
 
     \ Wait to send on a stream
     : wait-send-stream ( bytes stream -- )
-      begin 2dup stream-free-unsafe > while
+      begin 2dup stream-free > while
 	1 over stream-send-ready +!
 	dup stream-send-tqueue ['] wait-tqueue try
 	-1 2 pick stream-send-ready +!
@@ -118,7 +109,7 @@ begin-module stream
 
     \ Wait to send data as parts on a stream
     : wait-send-stream-parts ( stream -- )
-      dup stream-full-unsafe? if
+      dup stream-full? if
 	1 over stream-send-ready +!
 	dup stream-send-tqueue ['] wait-tqueue try
 	-1 2 pick stream-send-ready +!
@@ -131,7 +122,7 @@ begin-module stream
 
     \ Wait to receive on a stream
     : wait-recv-stream ( stream -- )
-      dup stream-empty-unsafe? if
+      dup stream-empty? if
 	dup stream-closed @ triggers x-stream-closed
 	1 over stream-recv-ready +!
 	dup stream-recv-tqueue ['] wait-tqueue try
@@ -248,7 +239,7 @@ begin-module stream
       current-task prepare-block
       begin over 0> while
 	dup wait-send-stream-parts
-	dup stream-free-unsafe >r
+	dup stream-free >r
 	2 pick 2 pick r@ min 2 pick write-stream
 	2dup swap r@ min swap advance-send-stream
 	rot r@ + rot r> - rot
@@ -361,7 +352,7 @@ begin-module stream
     [:
       s" BEGIN SEND-STREAM-NO-BLOCK" trace
       dup stream-closed @ triggers x-stream-closed
-      dup stream-free-unsafe 2 pick < triggers x-would-block
+      dup stream-free 2 pick < triggers x-would-block
       rot 2 pick 2 pick write-stream
       dup >r advance-send-stream r>
       dup stream-recv-ready @ 0> if
@@ -379,7 +370,7 @@ begin-module stream
     [:
       s" BEGIN SEND-STREAM-PARTIAL-NO-BLOCK" trace
       dup stream-closed @ triggers x-stream-closed
-      dup stream-free-unsafe rot min swap
+      dup stream-free rot min swap
       rot 2 pick 2 pick write-stream
       2dup advance-send-stream
       dup stream-recv-ready @ 0> if
