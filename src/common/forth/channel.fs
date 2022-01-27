@@ -52,6 +52,12 @@ begin-module chan
       \ Channel is closed
       field: chan-closed
       
+      \ Channel send ready
+      field: chan-send-ready
+
+      \ Channel receive ready
+      field: chan-recv-ready
+
       \ Channel send task queue
       tqueue-size +field chan-send-tqueue
       
@@ -62,35 +68,31 @@ begin-module chan
 
     commit-flash
     
-    \ Core of getting whether a channel is full
-    : chan-full-unsafe? ( chan -- flag )
-      dup chan-current-count @ swap chan-count @ =
-    ;
-
-    \ Core of getting whether a channel is empty
-    : chan-empty-unsafe? ( chan -- flag )
-      chan-current-count @ 0=
-    ;
-
   end-module> import
   
   \ Channel is closed exception
   : x-chan-closed ( -- ) space ." channel is closed" cr ;
 
+  \ Get whether a channel is full
+  : chan-full? ( chan -- flag )
+    dup chan-current-count @ swap chan-count @ =
+  ;
+  
+  \ Get whether a channel is empty
+  : chan-empty? ( chan -- flag )
+    chan-current-count @ 0=
+  ;
+
   commit-flash
   
-  \ Get whether a channel is full
-  : chan-full? ( chan -- flag ) [: chan-full-unsafe? ;] critical ;
-
-  \ Get whether a channel is empty
-  : chan-empty? ( chan -- flag ) chan-empty-unsafe? ;
-
   continue-module chan-internal
     
     \ Wait to send on a channel
     : wait-send-chan ( chan -- )
-      dup chan-full-unsafe? if
+      dup chan-full? if
+	1 over chan-send-ready +!
 	dup chan-send-tqueue ['] wait-tqueue try
+	-1 2 pick chan-send-ready +!
 	?raise
       then
       chan-closed @ triggers x-chan-closed
@@ -98,9 +100,11 @@ begin-module chan
 
     \ Wait to receive on a channel
     : wait-recv-chan ( chan -- )
-      dup chan-empty-unsafe? if
+      dup chan-empty? if
 	dup chan-closed @ triggers x-chan-closed
-	chan-recv-tqueue ['] wait-tqueue try
+	1 over chan-recv-ready +!
+	dup chan-recv-tqueue ['] wait-tqueue try
+	-1 rot chan-recv-ready +!
 	?raise
       else
 	drop
@@ -145,8 +149,10 @@ begin-module chan
     0 over chan-current-count !
     0 over chan-recv-index !
     0 over chan-send-index !
-    1 0 2 pick chan-recv-tqueue init-tqueue-full
-    1 0 2 pick chan-send-tqueue init-tqueue-full
+    0 over chan-recv-ready !
+    0 over chan-send-ready !
+    dup chan-recv-tqueue init-tqueue
+    dup chan-send-tqueue init-tqueue
     false swap chan-closed !
   ;
 
@@ -162,7 +168,11 @@ begin-module chan
       dup send-chan-addr over chan-data-size @ 0 fill
       dup >r chan-data-size @ min r@ send-chan-addr swap move r>
       dup advance-send-chan
-      chan-recv-tqueue wake-tqueue
+      dup chan-recv-ready @ 0> if
+	chan-recv-tqueue wake-tqueue
+      else
+	drop
+      then
       s" END SEND-CHAN" trace
     ;] tqueue-spinlock critical-with-spinlock
   ;
@@ -176,7 +186,11 @@ begin-module chan
       >r 2dup 0 fill
       r@ chan-data-size @ min r@ recv-chan-addr -rot dup >r move 2r>
       dup advance-recv-chan
-      chan-send-tqueue wake-tqueue
+      dup chan-send-ready @ 0> if
+	chan-send-tqueue wake-tqueue
+      else
+	drop
+      then
       s" END RECV-CHAN" trace
     ;] tqueue-spinlock critical-with-spinlock
   ;
@@ -200,7 +214,11 @@ begin-module chan
       current-task prepare-block
       dup wait-recv-chan
       dup advance-recv-chan
-      chan-send-tqueue wake-tqueue
+      dup chan-send-ready @ 0> if
+	chan-send-tqueue wake-tqueue
+      else
+	drop
+      then
       s" END SKIP-CHAN" trace
     ;] tqueue-spinlock critical-with-spinlock
   ;
@@ -211,11 +229,15 @@ begin-module chan
     [:
       s" BEGIN SEND-CHAN-NO-BLOCK" trace
       dup chan-closed @ triggers x-chan-closed
-      dup chan-full-unsafe? triggers x-would-block
+      dup chan-full? triggers x-would-block
       dup send-chan-addr over chan-data-size @ 0 fill
       dup >r chan-data-size @ min r@ send-chan-addr swap move r>
       dup advance-send-chan
-      chan-recv-tqueue wake-tqueue
+      dup chan-recv-ready @ 0> if
+	chan-recv-tqueue wake-tqueue
+      else
+	drop
+      then
       s" END SEND-CHAN-NO-BLOCK" trace
     ;] tqueue-spinlock critical-with-spinlock
   ;
@@ -225,11 +247,15 @@ begin-module chan
   : recv-chan-no-block ( addr bytes chan -- addr recv-bytes )
     [:
       s" BEGIN RECV-CHAN-NO-BLOCK" trace
-      dup chan-empty-unsafe? triggers x-would-block
+      dup chan-empty? triggers x-would-block
       >r 2dup 0 fill
       r@ chan-data-size @ min r@ recv-chan-addr -rot dup >r move 2r>
       dup advance-recv-chan
-      chan-send-tqueue wake-tqueue
+      dup chan-send-ready @ 0> if
+	chan-send-tqueue wake-tqueue
+      else
+	drop
+      then
       s" END RECV-CHAN-NO-BLOCK" trace
     ;] tqueue-spinlock critical-with-spinlock
   ;
@@ -239,7 +265,7 @@ begin-module chan
   : peek-chan-no-block ( addr bytes chan -- addr peek-bytes )
     [:
       s" BEGIN PEEK-CHAN-NO-BLOCK" trace
-      dup chan-empty-unsafe? triggers x-would-block
+      dup chan-empty? triggers x-would-block
       >r 2dup 0 fill
       r@ chan-data-size @ min r> recv-chan-addr -rot dup >r move r>
       s" END PEEK-CHAN-NO-BLOCK" trace
@@ -251,9 +277,13 @@ begin-module chan
   : skip-chan-no-block ( chan -- )
     [:
       s" BEGIN SKIP-CHAN-NO-BLOCK" trace
-      dup chan-empty-unsafe? triggers x-would-block
+      dup chan-empty? triggers x-would-block
       dup advance-recv-chan
-      chan-send-tqueue wake-tqueue
+      dup chan-send-ready @ 0> if
+	chan-send-tqueue wake-tqueue
+      else
+	drop
+      then
       s" END SKIP-CHAN-NO-BLOCK" trace
     ;] tqueue-spinlock critical-with-spinlock
   ;
