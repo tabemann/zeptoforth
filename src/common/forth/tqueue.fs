@@ -182,7 +182,7 @@ begin-module tqueue
 
   \ Un-wake a task queue
   : unwake-tqueue ( tqueue -- )
-    -1 swap wait-counter +!
+    dup wait-counter @ dup 0> if 1- 0 max swap wait-counter ! else 2drop then
   ;
 
   commit-flash
@@ -190,7 +190,7 @@ begin-module tqueue
   \ Wake up all tasks in a task queue
   : wake-tqueue-all ( tqueue -- )
     \ begin-critical
-    begin dup wait-counter @ 0> while
+    begin dup wait-counter @ 0< while
       dup wake-tqueue
     repeat
     drop
