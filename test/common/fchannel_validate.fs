@@ -31,7 +31,7 @@ continue-module forth
   : consumer ( -- )
     0 begin
       [: my-fchan recv-fchan ;] extract-allot-cell 2dup <> if
-	cr ." Validation failed: Got:" . ."  Expected: " dup .
+	cr ." Validation failed: Got: " . ."  Expected: " dup .
       else
 	drop
       then

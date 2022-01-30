@@ -38,7 +38,7 @@ continue-module forth
 	[: my-fchan recv-fchan ;] extract-allot-cell drop
       1- dup 0= until
       drop
-      [: my-fchan recv-fchan ;] extract-allot-cell cr ." Received:" .
+      [: my-fchan recv-fchan ;] extract-allot-cell cr ." Received: " .
     again
   ;
 

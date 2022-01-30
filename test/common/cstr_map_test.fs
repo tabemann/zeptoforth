@@ -56,9 +56,9 @@ continue-module forth
     30 c" baz" my-map insert-cstr-map
 
     \ Get some values from the map
-    c" foo" my-map find-cstr-map cr ." foo:" .
-    c" bar" my-map find-cstr-map cr ." bar:" .
-    c" baz" my-map find-cstr-map cr ." baz:" .
+    c" foo" my-map find-cstr-map cr ." foo: " .
+    c" bar" my-map find-cstr-map cr ." bar: " .
+    c" baz" my-map find-cstr-map cr ." baz: " .
 
     \ Insert some different values into the map
     100 c" foo" my-map insert-cstr-map
@@ -66,9 +66,9 @@ continue-module forth
     300 c" baz" my-map insert-cstr-map
 
     \ Get some values from the map
-    c" foo" my-map find-cstr-map cr ." foo:" .
-    c" bar" my-map find-cstr-map cr ." bar:" .
-    c" baz" my-map find-cstr-map cr ." baz:" .
+    c" foo" my-map find-cstr-map cr ." foo: " .
+    c" bar" my-map find-cstr-map cr ." bar: " .
+    c" baz" my-map find-cstr-map cr ." baz: " .
 
     \ Remove some values from the map
     c" foo" my-map remove-cstr-map
@@ -76,9 +76,9 @@ continue-module forth
     c" baz" my-map remove-cstr-map
     
     \ Get some values from the map
-    c" foo" my-map find-cstr-map cr ." foo:" .
-    c" bar" my-map find-cstr-map cr ." bar:" .
-    c" baz" my-map find-cstr-map cr ." baz:" .
+    c" foo" my-map find-cstr-map cr ." foo: " .
+    c" bar" my-map find-cstr-map cr ." bar: " .
+    c" baz" my-map find-cstr-map cr ." baz: " .
 
   ;
   
