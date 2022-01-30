@@ -1,4 +1,4 @@
-\ Copyright (c) 2021 Travis Bemann
+\ Copyright (c) 2021-2022 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module-once life
+begin-module life
 
   ansi-term import
   
@@ -464,7 +464,7 @@ begin-module-once life
   : run-life ( -- )
     cr reset-ansi-term get-cursor-position drop 0
     begin
-      cycle-life over 0 go-to-coord 1+ ." Cycle:" dup . erase-end-of-line key?
+      cycle-life over 0 go-to-coord 1+ ." Cycle: " dup . erase-end-of-line key?
     until
     key 2drop
   ;

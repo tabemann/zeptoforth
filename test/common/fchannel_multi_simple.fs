@@ -40,7 +40,7 @@ continue-module forth
   : consumer ( -- )
     begin
       [: my-fchan recv-fchan ;] extract-allot-cell
-      [: cr ." Received:" . ;] my-lock with-lock
+      [: cr ." Received: " . ;] my-lock with-lock
     again
   ;
 

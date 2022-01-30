@@ -41,10 +41,10 @@ continue-module forth
   \ The sender loop
   : send-loop ( -- )
     0 begin
-      dup cr ." Sending:" .
+      dup cr ." Sending: " .
       dup [: [: my-rchan-0 send-rchan ;] extract-allot-cell ;]
       provide-allot-cell
-      cr ." Got reply:" . 1+
+      cr ." Got reply: " . 1+
     again
   ;
 
@@ -52,9 +52,9 @@ continue-module forth
   : middle-loop ( -- )
     begin
       [: my-rchan-0 recv-rchan ;] extract-allot-cell
-      dup cr ." Passing on:" .
+      dup cr ." Passing on: " .
       [: [: my-rchan-1 send-rchan ;] extract-allot-cell ;] provide-allot-cell
-      dup cr ." Passing back:" .
+      dup cr ." Passing back: " .
       [: my-rchan-0 reply-rchan ;] provide-allot-cell
     again
   ;
@@ -63,7 +63,7 @@ continue-module forth
   : reply-loop ( -- )
     0 begin
       [: my-rchan-1 recv-rchan ;] extract-allot-cell
-      cr ." Received:" .
+      cr ." Received: " .
       dup [: my-rchan-1 reply-rchan ;] provide-allot-cell 1+
     again
   ;

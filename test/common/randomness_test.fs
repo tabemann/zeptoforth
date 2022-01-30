@@ -31,12 +31,12 @@ continue-module forth
   \ Print statistics
   : rng-stats. ( stats-addr count -- )
     bit-count 0 ?do
-      cr ." Bit" i . ." :" over i cells + @ over 0 -rot 0 swap f/ f.
+      cr ." Bit " i (.) ." : " over i cells + @ over 0 -rot 0 swap f/ f.
     loop
     0 bit-count 0 ?do
       2 pick i cells + @ +
     loop
-    0 swap 0 bit-count f/ rot 0 swap f/ cr ." Mean:" f. drop
+    0 swap 0 bit-count f/ rot 0 swap f/ cr ." Mean: " f. drop
   ;
 
   \ Generate statistics

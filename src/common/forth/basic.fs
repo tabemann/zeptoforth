@@ -159,7 +159,7 @@ forth set-current
 
 \ Dump the contents of the data stack
 : .s ( -- )
-  space ." ["
+  space ." [ "
   sp@ begin
     dup stack-base @ <
   while
@@ -167,7 +167,7 @@ forth set-current
     4+
   repeat
   drop
-  space ." ]"
+  ." ]"
 ;
 
 \ Assert that a value is true, otherwise raise a specified exception
@@ -1982,12 +1982,12 @@ commit-flash
 \ Commit to flash
 commit-flash
 
-\ Type a signed double-cell number without a leading space
+\ Type a signed double-cell number without a following space
 : (d.) ( nd -- )
   ram-here -rot format-double dup >r dup ram-allot type r> negate ram-allot
 ;
 
-\ Type an unsigned double-cell number without a leading space
+\ Type an unsigned double-cell number without a following space
 : (ud.) ( ud -- )
   ram-here -rot format-double-unsigned
   dup >r dup ram-allot type r> negate ram-allot
@@ -1996,14 +1996,14 @@ commit-flash
 \ Commit to flash
 commit-flash
 
-\ Type a signed double-cell number with a leading space
+\ Type a signed double-cell number with a following space
 : d. ( nd -- )
-  space (d.)
+  (d.) space
 ;
 
-\ Type an unsigned double-cell number with a leading space
+\ Type an unsigned double-cell number with a following space
 : ud. ( ud -- )
-  space (ud.)
+  (ud.) space
 ;
 
 \ Set internal
@@ -2072,7 +2072,7 @@ commit-flash
 \ Commit to flash
 commit-flash
 
-\ Type a fixed-point number without a leading space
+\ Type a fixed-point number without a following space
 : (f.) ( f -- )
   ram-here -rot format-fixed dup >r dup ram-allot type r> negate ram-allot
 ;
@@ -2080,9 +2080,9 @@ commit-flash
 \ Commit to flash
 commit-flash
 
-\ Type a fixed-point number with a leading space
+\ Type a fixed-point number with a following space
 : f. ( f -- )
-  space (f.)
+  (f.) space
 ;
 
 \ Wait hook variable

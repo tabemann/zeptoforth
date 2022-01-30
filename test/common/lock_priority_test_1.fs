@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2021 Travis Bemann
+\ Copyright (c) 2020-2022 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -62,7 +62,7 @@ continue-module forth
       lock-b lock
       10 0 ?do
 	1000 ms
-	current-task task-priority@ . space
+	current-task task-priority@ .
       loop
       lock-b unlock
     again
