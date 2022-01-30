@@ -34,7 +34,7 @@ continue-module forth
   \ The consumer
   : consumer ( -- )
     begin
-      [: my-fchan recv-fchan ;] extract-allot-cell cr ." Received:" .
+      [: my-fchan recv-fchan ;] extract-allot-cell cr ." Received: " .
     again
   ;
 
