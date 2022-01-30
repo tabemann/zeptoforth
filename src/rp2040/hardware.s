@@ -1,4 +1,4 @@
-@ Copyright (c) 2021 Travis Bemann
+@ Copyright (c) 2021-2022 Travis Bemann
 @ Copyright (c) 2021 Jan Bramkamp
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
