@@ -46,7 +46,7 @@ continue-module forth
     no-timeout timeout !
     25 ms
     [: my-fchan recv-fchan ;] extract-allot-cell
-    cr ." Received 1:" .
+    cr ." Received 1: " .
   ;
 
   \ Run the third task
@@ -54,7 +54,7 @@ continue-module forth
     5000 timeout !
     50 ms
     [: my-fchan recv-fchan ;] extract-allot-cell
-    cr ." Received 2:" .
+    cr ." Received 2: " .
   ;
 
   \ Initialize our test
