@@ -126,7 +126,7 @@ begin-module weasel
 
   \ Find the buffer with the highest score
   : high-score ( -- i score )
-    -1 score-current reproduce-count 0 ?do
+    0 0 score reproduce-count 0 ?do
       i score 2dup < if
 	nip nip i swap
       else

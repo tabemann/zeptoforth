@@ -19,7 +19,7 @@
 \ SOFTWARE.
 
 \ Compile this to flash
-\ compile-to-flash
+compile-to-flash
 
 begin-module rng
 
@@ -45,4 +45,4 @@ begin-module rng
 end-module> import
 
 \ Reboot
-\ reboot
+reboot
