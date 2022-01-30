@@ -1,4 +1,4 @@
-@ Copyright (c) 2020-2021 Travis Bemann
+@ Copyright (c) 2020-2022 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -29,8 +29,10 @@ _state:	push_tos
 	define_word "base", visible_flag
 _base:	push {lr}
 	bl _cpu_offset
-	ldr r0, =base
+	ldr r0, =dict_base
 	adds tos, r0
+	ldr tos, [tos]
+	adds tos, #base_offset
 	pop {pc}
 	end_inlined
 
@@ -91,8 +93,10 @@ _flash_end:
 _stack_base:
 	push {lr}
 	bl _cpu_offset
-	ldr r0, =stack_base
+	ldr r0, =dict_base
 	adds tos, r0
+	ldr tos, [tos]
+	adds tos, #stack_base_offset
 	pop {pc}
 	end_inlined
 
@@ -101,8 +105,10 @@ _stack_base:
 _stack_end:
 	push {lr}
 	bl _cpu_offset
-	ldr r0, =stack_end
+	ldr r0, =dict_base
 	adds tos, r0
+	ldr tos, [tos]
+	adds tos, #stack_end_offset
 	pop {pc}
 	end_inlined
 
@@ -111,8 +117,10 @@ _stack_end:
 _rstack_base:
 	push {lr}
 	bl _cpu_offset
-	ldr r0, =rstack_base
+	ldr r0, =dict_base
 	adds tos, r0
+	ldr tos, [tos]
+	adds tos, #rstack_base_offset
 	pop {pc}
 	end_inlined
 
@@ -121,8 +129,10 @@ _rstack_base:
 _rstack_end:
 	push {lr}
 	bl _cpu_offset
-	ldr r0, =rstack_end
+	ldr r0, =dict_base
 	adds tos, r0
+	ldr tos, [tos]
+	adds tos, #rstack_end_offset
 	pop {pc}
 	end_inlined
 
@@ -131,8 +141,10 @@ _rstack_end:
 _handler:
 	push {lr}
 	bl _cpu_offset
-	ldr r0, =handler
+	ldr r0, =dict_base
 	adds tos, r0
+	ldr tos, [tos]
+	adds tos, #handler_offset
 	pop {pc}
 	end_inlined
 

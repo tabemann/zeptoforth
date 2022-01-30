@@ -1,4 +1,4 @@
-@ Copyright (c) 2019-2021 Travis Bemann
+@ Copyright (c) 2019-2022 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -1018,7 +1018,12 @@ _asm_reserve_literal:
 	ldr r0, [r0]
 	cmp r0, #0
 	bne 1f
-	ldr r0, =here
+	bl _cpu_offset
+	ldr r0, =dict_base
+	adds r0, tos
+	ldr r0, [r0]
+	adds r0, #ram_here_offset
+	pull_tos
 	b 2f
 1:	ldr r0, =flash_here
 2:	ldr r1, [r0]
