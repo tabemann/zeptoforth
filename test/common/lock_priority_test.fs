@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2021 Travis Bemann
+\ Copyright (c) 2020-2022 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -36,7 +36,7 @@ continue-module forth
       500000 0 ?do loop
       my-lock lock
       500000 0 ?do loop
-      [: my-lock unlock ;] try if space ." A " then
+      [: my-lock unlock ;] try if ." A " then
     again
   ;
 
@@ -48,7 +48,7 @@ continue-module forth
 	50000 0 ?do loop
 	current-task task-priority@ . space
       loop
-      [: my-lock unlock ;] try if space ." B " then
+      [: my-lock unlock ;] try if ." B " then
     again
   ;
 

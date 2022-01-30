@@ -34,16 +34,16 @@ continue-module forth
   : consumer ( -- )
     begin
       1000 timeout ! [: my-fchan recv-fchan ;] extract-allot-cell
-      [: space ." out:" . ;] my-lock with-lock
+      [: space ." out: " . ;] my-lock with-lock
     again
   ;
 
   \ The loop of a producer
   : producer ( c -- )
     0 begin
-      [: space ." in: " over emit ." :" dup . ;] my-lock with-lock
+      [: space ." in: " over emit ." : " dup . ;] my-lock with-lock
       1000 timeout ! dup [: my-fchan send-fchan ;] provide-allot-cell
-      [: space ." done: " over emit ." :" dup . ;] my-lock with-lock
+      [: space ." done: " over emit ." : " dup . ;] my-lock with-lock
       1+
     again
   ;

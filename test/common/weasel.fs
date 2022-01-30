@@ -139,7 +139,7 @@ begin-module weasel
   : run-weasel ( c-addr u -- )
     prepare-target
     prepare-current
-    score-current cr 0 . . space current-buffer target-length @ type
+    score-current cr 0 . . current-buffer target-length @ type
     0 begin
       1+ cr dup .
       reproduce
@@ -151,7 +151,7 @@ begin-module weasel
       else
 	drop
       then
-      space current-buffer target-length @ type
+      current-buffer target-length @ type
       target-length @ = key? or
     until
     drop

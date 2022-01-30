@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2021 Travis Bemann
+\ Copyright (c) 2020-2022 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -37,9 +37,9 @@ continue-module forth
     @ begin
       50000 0 ?do loop
       my-lock lock
-      ." ["
+      ." [ "
       25000 0 ?do loop
-      dup . space
+      dup .
       25000 0 ?do loop
       ." ] "
       my-lock unlock

@@ -1373,7 +1373,7 @@ begin-module task
   : trace ( c-addr u -- )
     trace-enabled? @ if
       [:
-	cr type space ." critical:" in-critical @ 1- . .s dump-tasks
+	cr type space ." critical: " in-critical @ 1- . .s dump-tasks
       ;] critical
     else
       2drop
