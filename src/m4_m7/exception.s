@@ -1,4 +1,4 @@
-@ Copyright (c) 2019-2020 Travis Bemann
+@ Copyright (c) 2019-2022 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -23,8 +23,10 @@
 _raise:	cmp tos, #0
 	beq 1f
 	bl _cpu_offset
-	ldr r0, =handler
+	ldr r0, =dict_base
 	adds r0, tos
+	ldr r0, [r0]
+	adds r0, #handler_offset
 	pull_tos
 	ldr sp, [r0]
 	ldr r1, [sp], #4 @ #2
@@ -39,9 +41,10 @@ _raise:	cmp tos, #0
 	define_word "try", visible_flag
 _try:	push {lr} @ #0
 	bl _cpu_offset
-	movs r1, tos
-	ldr r0, =handler
-	adds r1, r0
+	ldr r1, =dict_base
+	adds r1, tos
+	ldr r1, [r1]
+	adds r1, #handler_offset
 	pull_tos
 	str dp, [sp, #-4]! @ #1
 	movs r0, r1
@@ -54,8 +57,10 @@ _try:	push {lr} @ #0
 	pull_tos
 	blx r0
 	bl _cpu_offset
-	ldr r0, =handler
+	ldr r0, =dict_base
 	adds r0, tos
+	ldr r0, [r0]
+	adds r0, #handler_offset
 	pull_tos
 	pop {r1}
 	str r1, [r0]

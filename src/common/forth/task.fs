@@ -116,17 +116,11 @@ begin-module task
     \ The task ready count
     user task-ready-count
     
-    \ The current task handler
-    user task-handler
-
     \ Task systick start time
     user task-systick-start
 
     \ Task systick delay
     user task-systick-delay
-
-    \ The current base for a task
-    user task-base
 
     \ A task's timeslice
     user task-timeslice
@@ -184,9 +178,9 @@ begin-module task
       \ Current return stack adress
       field: task-rstack-current
 
-      \ Current dictionary offset
-      field: task-dict-offset
-
+      \ Current dictionary base
+      field: task-dict-base
+      
       \ Task priority
       hfield: task-priority
       
@@ -253,25 +247,22 @@ begin-module task
   \ Sleep
   : sleep ( -- ) sleep-enabled? @ if sleep then ;
 
+  \ Access a given user variable for a given task
+  : for-task ( task xt -- addr )
+    execute dict-base @ - swap task-dict-base @ +
+  ;
+
+  \ Set a given user variable for a given task
+  : for-task! ( x task xt -- )
+    execute dict-base @ - swap task-dict-base @ + !
+  ;
+
+  \ Get a given user variable for a given task
+  : for-task@ ( task xt -- x )
+    execute dict-base @ - swap task-dict-base @ + @
+  ;
+
   continue-module task-internal
-
-    \ Get task stack base
-    : task-stack-base ( task -- addr )
-      dup task-size + swap task-stack-size h@ +
-    ;
-
-    \ Get task stack end
-    : task-stack-end ( task -- addr )
-      task-size +
-    ;
-
-    \ Get task return stack base
-    : task-rstack-base ( task -- addr )
-      dup task-size + over task-stack-size h@ + swap task-rstack-size h@ +
-    ;
-
-    \ Get task dictionary base
-    : task-dict-base ( task -- addr ) dup task-dict-size @ - ;
 
     \ Get task dictionary end
     : task-dict-end ( task -- addr ) ;
@@ -283,7 +274,7 @@ begin-module task
 
     \ Get task current dictionary address
     : task-dict-current ( task -- addr )
-      dup task-dict-base swap task-dict-offset @ +
+      ['] task-ram-here for-task@
     ;
 
     \ Set task current stack address
@@ -291,12 +282,9 @@ begin-module task
       dup last-task @ = if drop sp! else task-rstack-current @ 12 + ! then
     ;
 
-    \ Get task return stack end
-    : task-rstack-end ( task -- addr ) task-stack-base ;
-
     \ Set task current dictionary address
     : task-dict-current! ( addr task -- )
-      dup task-dict-base rot swap - swap task-dict-offset !
+      ['] task-ram-here for-task!
     ;
 
     \ Push data onto a task's stack
@@ -313,11 +301,6 @@ begin-module task
 
   end-module
   
-  \ Access a given user variable for a given task
-  : for-task ( task xt -- addr )
-    execute dict-base @ - swap task-dict-base +
-  ;
-
   \ Get task priority
   : task-priority@ ( task -- priority )
     task-priority h@ 16 lshift 16 arshift
@@ -332,14 +315,14 @@ begin-module task
 
     \ Validate a notification index
     : validate-notify ( notify-index task -- )
-      ['] task-notify-count for-task @ u< averts x-out-of-range-notify
+      ['] task-notify-count for-task@ u< averts x-out-of-range-notify
     ;
     
     \ Find the next task with a higher priority; 0 returned indicates no task
     \ exists with a higher priority.
     : find-higher-priority ( task -- higher-task )
       task-priority@ >r
-      dup ['] task-core for-task @ cpu-last-task @ begin
+      dup ['] task-core for-task@ cpu-last-task @ begin
 	dup 0<> if
 	  dup task-priority@ r@ < if task-next @ false else true then
 	else
@@ -356,7 +339,7 @@ begin-module task
 	2dup task-prev @ swap task-prev !
       else
 	0 2 pick task-prev !
-	over dup ['] task-core for-task @ cpu-last-task !
+	over dup ['] task-core for-task@ cpu-last-task !
       then
       2dup task-prev !
       swap task-next !
@@ -364,7 +347,7 @@ begin-module task
 
     \ Insert a task into first position
     : insert-task-first ( task -- )
-      dup ['] task-core for-task @ >r
+      dup ['] task-core for-task@ >r
       r@ cpu-first-task @ 0<> if
 	dup r@ cpu-first-task @ task-next !
 	r@ cpu-first-task @ over task-prev !
@@ -387,7 +370,7 @@ begin-module task
 
     \ Remove a task
     : remove-task ( task -- )
-      dup ['] task-core for-task @ >r
+      dup ['] task-core for-task@ >r
       dup task-next @ ?dup if
 	over task-prev @ swap task-prev !
       else
@@ -427,7 +410,7 @@ begin-module task
 
     \ Start a task change
     : start-validate-task-change ( task -- )
-\      dup ['] task-core for-task @ start-task-change
+\      dup ['] task-core for-task@ start-task-change
       ['] validate-not-terminated try ?dup if
 	( false in-task-change ! ) ?raise
       then
@@ -455,7 +438,7 @@ begin-module task
   ;
 
   \ Get the core of a task
-  : task-core@ ( task -- core ) ['] task-core for-task @ ;
+  : task-core@ ( task -- core ) ['] task-core for-task@ ;
 
   \ Set task priority
   : task-priority! ( priority task -- )
@@ -476,38 +459,38 @@ begin-module task
     disable-int
     dup validate-not-terminated
     dup current-task @ = if
-      2dup ['] task-timeslice for-task @ - task-systick-counter @ +
+      2dup ['] task-timeslice for-task@ - task-systick-counter @ +
       task-systick-counter !
     then
-    swap 0 max swap ['] task-timeslice for-task !
+    swap 0 max swap ['] task-timeslice for-task!
     enable-int
   ;
 
   \ Get task timeslice
   : task-timeslice@ ( task -- timeslice )
-    dup validate-not-terminated ['] task-timeslice for-task @
+    dup validate-not-terminated ['] task-timeslice for-task@
   ;
 
   \ Set task minimum timeslice
   : task-min-timeslice! ( min-timeslice task -- )
-    dup validate-not-terminated ['] task-min-timeslice for-task !
+    dup validate-not-terminated ['] task-min-timeslice for-task!
   ;
 
   \ Get task minimum timeslice
   : task-min-timeslice@ ( task -- min-timeslice )
-    dup validate-not-terminated ['] task-min-timeslice for-task @
+    dup validate-not-terminated ['] task-min-timeslice for-task@
   ;
 
   \ Get a task's name as a counted string; an address of zero indicates no name
   \ is set.
   : task-name@ ( task -- addr )
-    dup validate-not-terminated ['] task-name for-task @
+    dup validate-not-terminated ['] task-name for-task@
   ;
 
   \ Set a task's name as a counted string; an address of zero indicates to set
   \ no name.
   : task-name! ( addr -- task )
-    dup validate-not-terminated ['] task-name for-task !
+    dup validate-not-terminated ['] task-name for-task!
   ;
 
   \ Start a task's execution
@@ -546,8 +529,8 @@ begin-module task
   : last-delay ( task -- ticks-delay ticks-start )
     [:
       dup validate-not-terminated
-      dup ['] task-systick-delay for-task @
-      swap ['] task-systick-start for-task @
+      dup ['] task-systick-delay for-task@
+      swap ['] task-systick-start for-task@
     ;] over task-core@ critical-with-other-core-spinlock
   ;
 
@@ -555,8 +538,8 @@ begin-module task
   : delay ( ticks-delay ticks-start task -- )
     [:
       dup validate-not-terminated
-      tuck ['] task-systick-start for-task !
-      tuck ['] task-systick-delay for-task !
+      tuck ['] task-systick-start for-task!
+      tuck ['] task-systick-delay for-task!
       delayed over task-state h!
     ;] over task-core@ critical-with-other-core-spinlock
     current-task @ = if pause then
@@ -566,8 +549,8 @@ begin-module task
   : delay-critical ( ticks-delay ticks-start task -- )
     [:
       dup validate-not-terminated
-      tuck ['] task-systick-start for-task !
-      tuck ['] task-systick-delay for-task !
+      tuck ['] task-systick-start for-task!
+      tuck ['] task-systick-delay for-task!
       [ delayed schedule-critical or schedule-user-critical or ] literal
       over task-state h!
     ;] over task-core@ critical-with-other-core-spinlock
@@ -579,9 +562,9 @@ begin-module task
     [:
       dup validate-not-terminated
       -1 over ['] task-ready-count for-task +!
-      dup ['] task-ready-count for-task @ 0< if
-	tuck ['] task-systick-start for-task !
-	tuck ['] task-systick-delay for-task !
+      dup ['] task-ready-count for-task@ 0< if
+	tuck ['] task-systick-start for-task!
+	tuck ['] task-systick-delay for-task!
 	blocked-timeout over task-state h!
       else
 	nip nip
@@ -595,9 +578,9 @@ begin-module task
     [:
       dup validate-not-terminated
       -1 over ['] task-ready-count for-task +!
-      dup ['] task-ready-count for-task @ 0< if
-	tuck ['] task-systick-start for-task !
-	tuck ['] task-systick-delay for-task !
+      dup ['] task-ready-count for-task@ 0< if
+	tuck ['] task-systick-start for-task!
+	tuck ['] task-systick-delay for-task!
 	[ blocked-timeout schedule-critical or schedule-user-critical or ]
 	literal
 	over task-state h!
@@ -617,10 +600,10 @@ begin-module task
     [:
       dup validate-not-terminated
       -1 over ['] task-ready-count for-task +!
-      dup ['] task-ready-count for-task @ 0< if
-	tuck ['] task-systick-start for-task !
-	tuck ['] task-systick-delay for-task !
-	tuck ['] spinlock-to-claim for-task !
+      dup ['] task-ready-count for-task@ 0< if
+	tuck ['] task-systick-start for-task!
+	tuck ['] task-systick-delay for-task!
+	tuck ['] spinlock-to-claim for-task!
 	[ blocked-timeout schedule-critical or schedule-user-critical or
 	schedule-with-spinlock or ] literal
 	over task-state h!
@@ -705,7 +688,7 @@ begin-module task
     [:
       dup validate-not-terminated
       -1 over ['] task-ready-count for-task +!
-      dup ['] task-ready-count for-task @ 0< if
+      dup ['] task-ready-count for-task@ 0< if
 	blocked-indefinite over task-state h!
       then
     ;] over task-core@ critical-with-other-core-spinlock
@@ -717,7 +700,7 @@ begin-module task
     [:
       dup validate-not-terminated
       -1 over ['] task-ready-count for-task +!
-      dup ['] task-ready-count for-task @ 0< if
+      dup ['] task-ready-count for-task@ 0< if
 	[ blocked-indefinite schedule-critical or schedule-user-critical or ]
 	literal over task-state h!
       else
@@ -734,8 +717,8 @@ begin-module task
     [:
       dup validate-not-terminated
       -1 over ['] task-ready-count for-task +!
-      tuck ['] spinlock-to-claim for-task !
-      dup ['] task-ready-count for-task @ 0< if
+      tuck ['] spinlock-to-claim for-task!
+      dup ['] task-ready-count for-task@ 0< if
 	[ blocked-indefinite schedule-critical or schedule-user-critical or
 	schedule-with-spinlock or ]
 	literal over task-state h!
@@ -797,9 +780,9 @@ begin-module task
   : ready ( task -- )
     [:
       dup validate-not-terminated
-      dup ['] task-current-notify for-task @ -1 = if
+      dup ['] task-current-notify for-task@ -1 = if
 	1 over ['] task-ready-count for-task +!
-	dup ['] task-ready-count for-task @ 0>= if
+	dup ['] task-ready-count for-task@ 0>= if
 	  dup task-state h@
 	  [ schedule-critical schedule-user-critical or
 	  schedule-with-spinlock or ]
@@ -819,7 +802,7 @@ begin-module task
       dup validate-not-terminated
       2dup validate-notify
       2dup swap bit swap ['] task-notified-bitmap for-task bis!
-      dup ['] task-current-notify for-task @ rot = if
+      dup ['] task-current-notify for-task@ rot = if
 	dup task-state h@ schedule-user-critical and
 	[ schedule-critical readied or ] literal or swap task-state h! true
       else
@@ -835,9 +818,9 @@ begin-module task
     [:
       dup validate-not-terminated
       2dup validate-notify
-      dup ['] task-notify-area for-task @ 2 pick cells + >r rot r> !
+      dup ['] task-notify-area for-task@ 2 pick cells + >r rot r> !
       2dup swap bit swap ['] task-notified-bitmap for-task bis!
-      dup ['] task-current-notify for-task @ rot = if
+      dup ['] task-current-notify for-task@ rot = if
 	dup task-state h@ schedule-user-critical and
 	[ schedule-critical readied or ] literal or swap task-state h! true
       else
@@ -854,10 +837,10 @@ begin-module task
       dup validate-not-terminated
       2dup validate-notify
       rot >r
-      dup ['] task-notify-area for-task @ 2 pick cells +
+      dup ['] task-notify-area for-task@ 2 pick cells +
       dup @ r> execute swap !
       2dup swap bit swap ['] task-notified-bitmap for-task bis!
-      dup ['] task-current-notify for-task @ rot = if
+      dup ['] task-current-notify for-task@ rot = if
 	dup task-state h@ schedule-user-critical and
 	[ schedule-critical readied or ] literal or swap task-state h! true
       else
@@ -872,7 +855,7 @@ begin-module task
     [:
       dup validate-not-terminated
       2dup validate-notify
-      ['] task-notify-area for-task @ swap cells + @
+      ['] task-notify-area for-task@ swap cells + @
     ;] over task-core@ critical-with-other-core-spinlock
   ;
 
@@ -881,7 +864,7 @@ begin-module task
     [:
       dup validate-not-terminated
       2dup validate-notify
-      ['] task-notify-area for-task @ swap cells + !
+      ['] task-notify-area for-task@ swap cells + !
     ;] over task-core@ critical-with-other-core-spinlock
   ;
 
@@ -889,9 +872,9 @@ begin-module task
   : block ( task -- )
     [:
       dup validate-not-terminated
-      dup ['] timeout for-task @ no-timeout <> if
-	dup ['] timeout-systick-delay for-task @
-	over ['] timeout-systick-start for-task @
+      dup ['] timeout for-task@ no-timeout <> if
+	dup ['] timeout-systick-delay for-task@
+	over ['] timeout-systick-start for-task@
 	rot block-timeout
       else
 	block-indefinite
@@ -904,9 +887,9 @@ begin-module task
   : block-critical ( task -- )
     [:
       dup validate-not-terminated
-      dup ['] timeout for-task @ no-timeout <> if
-	dup ['] timeout-systick-delay for-task @
-	over ['] timeout-systick-start for-task @
+      dup ['] timeout for-task@ no-timeout <> if
+	dup ['] timeout-systick-delay for-task@
+	over ['] timeout-systick-start for-task@
 	rot block-timeout-critical
       else
 	block-indefinite-critical
@@ -919,9 +902,9 @@ begin-module task
   : block-with-spinlock ( spinlock task -- )
     [:
       dup validate-not-terminated
-      dup ['] timeout for-task @ no-timeout <> if
-	dup ['] timeout-systick-delay for-task @
-	over ['] timeout-systick-start for-task @
+      dup ['] timeout for-task@ no-timeout <> if
+	dup ['] timeout-systick-delay for-task@
+	over ['] timeout-systick-start for-task@
 	rot block-timeout-with-spinlock
       else
 	block-indefinite-with-spinlock
@@ -960,9 +943,9 @@ begin-module task
   : prepare-block ( task -- )
     [:
       dup validate-not-terminated
-      dup ['] timeout for-task @ no-timeout <> if
-	systick-counter over ['] timeout-systick-start for-task !
-	dup ['] timeout for-task @ swap ['] timeout-systick-delay for-task !
+      dup ['] timeout for-task@ no-timeout <> if
+	systick-counter over ['] timeout-systick-start for-task!
+	dup ['] timeout for-task@ swap ['] timeout-systick-delay for-task!
       else
 	drop
       then
@@ -978,11 +961,11 @@ begin-module task
     : init-main-task ( -- )
       claim-all-core-spinlock
       free-end @ task-size -
+      dict-base @ over task-dict-base !
       rstack-base @ rstack-end @ - over task-rstack-size h!
       stack-base @ stack-end @ - over task-stack-size h!
       free-end @ task-size - next-ram-space - over task-dict-size !
       rp@ over task-rstack-current !
-      ram-here next-ram-space - over task-dict-offset !
       0 over task-priority h!
       0 over task-saved-priority h!
       1 over task-active h!
@@ -999,7 +982,6 @@ begin-module task
       0 task-notified-bitmap !
       0 task-notify-count !
       0 task-notify-area !
-      base @ task-base !
       default-timeslice task-timeslice !
       default-min-timeslice task-min-timeslice !
       default-timeslice task-saved-systick-counter !
@@ -1026,15 +1008,15 @@ begin-module task
 
     \ Get whether a task is finished with a delay or timeout
     : delayed? ( task -- )
-      systick-counter over ['] task-systick-start for-task @ -
-      swap ['] task-systick-delay for-task @ <
+      systick-counter over ['] task-systick-start for-task@ -
+      swap ['] task-systick-delay for-task@ <
     ;
 
     cpu-count 1 > [if]
       
       \ Populate an auxiliary task's stack
       : init-aux-task-stack ( xn...x0 count xt task -- sp )
-	task-stack-base
+	['] task-stack-base for-task@
 	swap >r >r
 	$FEDCBA98 r> cell - tuck ! >r
 	begin dup 0<> while
@@ -1046,36 +1028,44 @@ begin-module task
       
       \ Initialize an auxiliary task
       : init-aux-task ( xn...x0 count xt task core -- data-stack return-stack )
-	over ['] task-core for-task !
-	0 over ['] task-ready-count for-task !
-	0 over ['] task-handler for-task !
+	swap dup dup task-dict-size @ - over task-dict-base ! swap
+	over ['] task-core for-task!
+	dup task-rstack-size h@ over task-stack-size h@ + over + task-size +
+	over ['] task-rstack-base for-task!
+	dup task-stack-size h@ over + task-size +
+	over ['] task-rstack-end for-task!
+	dup ['] task-rstack-end for-task@ over ['] task-stack-base for-task!
+	dup task-size + over ['] task-stack-end for-task!
+	0 over ['] task-ready-count for-task!
+	0 over ['] task-handler for-task!
 	0 over task-priority h!
 	0 over task-saved-priority h!
 	0 over task-active h!
-	base @ over ['] task-base for-task !
-	0 over ['] current-lock for-task !
-	0 over ['] current-lock-held for-task !
+	base @ over ['] task-base for-task!
+	0 over ['] current-lock for-task!
+	0 over ['] current-lock-held for-task!
 	readied over task-state h!
-	no-timeout over ['] timeout for-task !
-	0 over ['] timeout-systick-start for-task !
-	0 over ['] timeout-systick-delay for-task !
-	0 over ['] task-systick-start for-task !
-	0 over ['] task-name for-task !
-	-1 over ['] task-current-notify for-task !
-	0 over ['] task-notified-bitmap for-task !
-	0 over ['] task-notify-count for-task !
-	0 over ['] task-notify-area for-task !
-	-1 over ['] task-systick-delay for-task !
-	c" aux-main" over ['] task-name for-task !
-	default-timeslice over ['] task-timeslice for-task !
-	default-min-timeslice over ['] task-min-timeslice for-task !
-	default-timeslice over ['] task-saved-systick-counter for-task !
-	dup task-rstack-base over task-rstack-current !
-	next-user-space over task-dict-offset !
+	no-timeout over ['] timeout for-task!
+	0 over ['] timeout-systick-start for-task!
+	0 over ['] timeout-systick-delay for-task!
+	0 over ['] task-systick-start for-task!
+	0 over ['] task-name for-task!
+	-1 over ['] task-current-notify for-task!
+	0 over ['] task-notified-bitmap for-task!
+	0 over ['] task-notify-count for-task!
+	0 over ['] task-notify-area for-task!
+	-1 over ['] task-systick-delay for-task!
+	c" aux-main" over ['] task-name for-task!
+	default-timeslice over ['] task-timeslice for-task!
+	default-min-timeslice over ['] task-min-timeslice for-task!
+	default-timeslice over ['] task-saved-systick-counter for-task!
+	dup ['] task-rstack-base for-task@ over task-rstack-current !
+	next-user-space over task-dict-base @ +
+	over ['] task-ram-here for-task!
 	0 over task-next !
 	0 over task-prev !
 	dup >r init-aux-task-stack
-	r> task-rstack-base
+	r> ['] task-rstack-base for-task@
       ;
 
     [then]
@@ -1084,32 +1074,40 @@ begin-module task
 
   \ Initialize a task
   : init-task ( xn...x0 count xt task core -- )
-    over ['] task-core for-task !
-    0 over ['] task-ready-count for-task !
-    0 over ['] task-handler for-task !
+    swap dup dup task-dict-size @ - over task-dict-base ! swap
+    over ['] task-core for-task!
+    dup task-rstack-size h@ over task-stack-size h@ + over + task-size +
+    over ['] task-rstack-base for-task!
+    dup task-stack-size h@ over + task-size +
+    over ['] task-rstack-end for-task!
+    dup ['] task-rstack-end for-task@ over ['] task-stack-base for-task!
+    dup task-size + over ['] task-stack-end for-task!
+    0 over ['] task-ready-count for-task!
+    0 over ['] task-handler for-task!
     0 over task-priority h!
     0 over task-saved-priority h!
     0 over task-active h!
-    base @ over ['] task-base for-task !
-    0 over ['] current-lock for-task !
-    0 over ['] current-lock-held for-task !
+    base @ over ['] task-base for-task!
+    0 over ['] current-lock for-task!
+    0 over ['] current-lock-held for-task!
     readied over task-state h!
-    no-timeout over ['] timeout for-task !
-    0 over ['] timeout-systick-start for-task !
-    0 over ['] timeout-systick-delay for-task !
-    0 over ['] task-systick-start for-task !
-    0 over ['] task-name for-task !
-    -1 over ['] task-current-notify for-task !
-    0 over ['] task-notified-bitmap for-task !
-    0 over ['] task-notify-count for-task !
-    0 over ['] task-notify-area for-task !
-    -1 over ['] task-systick-delay for-task !
-    default-timeslice over ['] task-timeslice for-task !
-    default-min-timeslice over ['] task-min-timeslice for-task !
-    default-timeslice over ['] task-saved-systick-counter for-task !
-    dup task-rstack-base over task-stack-base ['] task-entry
+    no-timeout over ['] timeout for-task!
+    0 over ['] timeout-systick-start for-task!
+    0 over ['] timeout-systick-delay for-task!
+    0 over ['] task-systick-start for-task!
+    0 over ['] task-name for-task!
+    -1 over ['] task-current-notify for-task!
+    0 over ['] task-notified-bitmap for-task!
+    0 over ['] task-notify-count for-task!
+    0 over ['] task-notify-area for-task!
+    -1 over ['] task-systick-delay for-task!
+    default-timeslice over ['] task-timeslice for-task!
+    default-min-timeslice over ['] task-min-timeslice for-task!
+    default-timeslice over ['] task-saved-systick-counter for-task!
+    dup ['] task-rstack-base for-task@
+    over ['] task-stack-base for-task@ ['] task-entry
     ['] init-context svc over task-rstack-current !
-    next-user-space over task-dict-offset !
+    next-user-space over task-dict-base @ + over ['] task-ram-here for-task!
     0 over task-next !
     0 over task-prev !
     swap >r >r
@@ -1137,13 +1135,13 @@ begin-module task
   : config-notify ( notify-area-addr notify-count task -- )
     [:
       over 32 u<= averts x-out-of-range-notify
-      2dup ['] task-current-notify for-task @ > averts x-current-wait-notify
+      2dup ['] task-current-notify for-task@ > averts x-current-wait-notify
       2dup swap $FFFFFFFF 32 rot - rshift
-      over ['] task-notified-bitmap for-task @
-      and swap ['] task-notified-bitmap for-task !
-      2dup ['] task-notify-count for-task !
+      over ['] task-notified-bitmap for-task@
+      and swap ['] task-notified-bitmap for-task!
+      2dup ['] task-notify-count for-task!
       2 pick rot cells 0 fill
-      ['] task-notify-area for-task !
+      ['] task-notify-area for-task!
     ;] critical
   ;
 
@@ -1180,22 +1178,12 @@ begin-module task
 
     \ Save task state
     : save-task-state ( task -- )
-      ram-here over task-dict-current!
-      task-systick-counter @ over ['] task-saved-systick-counter for-task !
-      handler @ over ['] task-handler for-task !
-      base @ swap ['] task-base for-task !
+      task-systick-counter @ swap ['] task-saved-systick-counter for-task!
     ;
 
     \ Restore task state
     : restore-task-state ( task -- )
-      dup task-stack-base stack-base !
-      dup task-stack-end stack-end !
-      dup task-rstack-base rstack-base !
-      dup task-rstack-end rstack-end !
-      dup task-dict-current ram-here!
-      task-dict-base dict-base !
-      task-base @ base !
-      task-handler @ handler !
+      task-dict-base @ dict-base !
     ;
 
     \ Reschedule previous task
@@ -1252,7 +1240,7 @@ begin-module task
 		  1 in-critical !
 		then
 		dup schedule-with-spinlock and if
-		  over ['] spinlock-to-claim for-task @ claim-spinlock
+		  over ['] spinlock-to-claim for-task@ claim-spinlock
 		then
 		task-state-mask and blocked-timeout = if
 		  block-timed-out over task-state h!
@@ -1317,7 +1305,7 @@ begin-module task
       dup current-task @ = if
 	s" running"
       else
-	dup ['] task-current-notify for-task @ -1 <> if
+	dup ['] task-current-notify for-task@ -1 <> if
 	  s" to-notify"
 	else
 	  dup task-state h@ task-state-mask and case
@@ -1438,12 +1426,7 @@ begin-module task
       
       \ Initialize an auxiliary core's main task
       : init-aux-main-task ( -- )
-	current-task @ task-dict-current ram-here!
-	current-task @ task-stack-base stack-base !
-	current-task @ task-rstack-base rstack-base !
-	current-task @ task-dict-base dict-base !
-	task-handler @ handler !
-	task-base @ base !
+	current-task @ task-dict-base @ dict-base !
 	$7F SHPR3_PRI_15!
 	$FF SHPR2_PRI_11!
 	$FF SHPR3_PRI_14!
@@ -1580,9 +1563,11 @@ begin-module task
     ." dictionary free: "
     dup task-dict-end over task-dict-current - 0 <# #s #> type cr
     ." stack free:      "
-    dup task-stack-current over task-stack-end - 0 <# #s #> type cr
+    dup task-stack-current over ['] task-stack-end for-task@ -
+    0 <# #s #> type cr
     ." rstack free:     "
-    dup task-rstack-current @ swap task-rstack-end - 0 <# #s #> type
+    dup task-rstack-current @ swap ['] task-rstack-end for-task@ -
+    0 <# #s #> type
   ;
   
   \ Display space free for the main task and for flash in general
@@ -1593,9 +1578,11 @@ begin-module task
     ." main task dictionary free: "
     dup task-dict-end over task-dict-current - 0 <# #s #> type cr
     ." main task stack free:      "
-    dup task-stack-current over task-stack-end - 0 <# #s #> type cr
+    dup task-stack-current over ['] task-stack-end for-task@ -
+    0 <# #s #> type cr
     ." main task rstack free:     "
-    dup task-rstack-current @ swap task-rstack-end - 0 <# #s #> type
+    dup task-rstack-current @ swap ['] task-rstack-end for-task@ -
+    0 <# #s #> type
   ;
 
 end-module> import

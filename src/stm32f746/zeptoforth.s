@@ -1,4 +1,4 @@
-@ Copyright (c) 2019-2021 Travis Bemann
+@ Copyright (c) 2019-2022 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -43,20 +43,23 @@ _handle_reset:
 	mov r11, #0
 	@@ Initialize the top of stack register
 	ldr tos, =0xFEDCBA98
-	@@ Initialize the data stack pointer
-	ldr r0, =stack_top
-	mov dp, r0
-	@@ Just in case someone calls this we will restore the return stack
-	@@ pointer.
-	ldr r0, =rstack_top
-	mov sp, r0
-	@@ Put a deliberate garbage value in handler
-	ldr r0, =0xF0E1C2D3
-	ldr r1, =handler
-	str r0, [r1]
-	@@ Initialize HERE
-	ldr r0, =here
+	@@ Get the dictionary base
+	ldr r0, =dict_base
 	ldr r1, =ram_current
+	str r1, [r0]
+	@@ Initialize HERE
+	ldr r0, =ram_current + ram_here_offset
+	ldr r1, =ram_current + user_offset
+	str r1, [r0]
+	@@ Initialize the data stack pointer
+	ldr r1, =stack_top
+	movs dp, r1
+	@@ Initialize the return stack pointer
+	ldr r1, =rstack_top
+	mov sp, r1
+	@@ Put a garbage value in HANDLER to force a crash if is used
+	ldr r0, =ram_current + handler_offset
+	ldr r1, =0xF0E1C2D3
 	str r1, [r0]
 	@@ Initialize the in-RAM vector table
 	bl _init_vector_table

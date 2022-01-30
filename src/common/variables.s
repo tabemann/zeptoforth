@@ -29,8 +29,29 @@
 
 	.endif
 
-	@@ Pointer to the current HERE location
-	allot here, 4 * cpu_count
+	@@ The stack base offset
+	.equ stack_base_offset, 0
+
+	@@ The stack end offset
+	.equ stack_end_offset, 4
+
+	@@ The return stack base offset
+	.equ rstack_base_offset, 8
+
+	@@ The return stack end offset
+	.equ rstack_end_offset, 12
+
+	@@ The RAM HERE offset
+	.equ ram_here_offset, 16
+
+	@@ The base offset
+	.equ base_offset, 20
+
+	@@ The handler offset
+	.equ handler_offset, 24
+
+	@@ The initial USER offset
+	.equ user_offset, 28
 
 	@@ Pointer to the current Flash HERE location
 	allot flash_here, 4
@@ -43,9 +64,6 @@
 
 	@@ Flash buffers
 	allot flash_buffers_start, flash_buffer_size * flash_buffer_count	
-
-	@@ The current exception handler
-	allot handler, 4 * cpu_count
 
 	@@ The word being currently compiled
 	allot current_compile, 4
@@ -71,18 +89,6 @@
 	@@ The current <BUILDS target address
 	allot build_target, 4
 
-	@@ The stack base (highest point in memory)
-	allot stack_base, 4 * cpu_count
-
-	@@ The return stack base (highest point in memory)
-	allot rstack_base, 4 * cpu_count
-
-	@@ The stack end (lowest point in memory)
-	allot stack_end, 4 * cpu_count
-
-	@@ The return stack end (lowest point in memory)
-	allot rstack_end, 4 * cpu_count
-
 	@@ The flags for the word being currently compiled
 	allot current_flags, 4
 
@@ -107,9 +113,6 @@
 	@@ The input buffer
 	allot input_buffer, input_buffer_size + 1
 
-	@@ The current numeric base
-	allot base, 4 * cpu_count
-	
 	@@ Are we in compilation state
 	allot state, 4
 

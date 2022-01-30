@@ -897,6 +897,19 @@ commit-flash
   set-next-user-space
 ;
 
+\ Commit to flash
+commit-flash
+
+\ Assign names to the built-in user variables; they must be in this order and
+\ must not be preceded by any other user variables
+user task-stack-base
+user task-stack-end
+user task-rstack-base
+user task-rstack-end
+user task-ram-here
+user task-base
+user task-handler
+
 \ Set internal
 internal set-current
 
@@ -2297,7 +2310,19 @@ forth set-current
 : init ( -- )
   init
   min-ram-wordlist current-ram-wordlist !
+  task-stack-base @
+  task-stack-end @
+  task-rstack-base @
+  task-rstack-end  @
+  task-base @
+  task-handler @
   next-ram-space dict-base !
+  task-handler !
+  task-base !
+  task-rstack-end !
+  task-rstack-base !
+  task-stack-end !
+  task-stack-base !
   dict-base @ next-user-space + ram-here!
   cpu-count 0 ?do false cpus-deferred-context-switch i cells + ! loop
   cpu-count 0 ?do 0 cpus-in-critical i cells + ! loop

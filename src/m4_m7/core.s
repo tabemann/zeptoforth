@@ -1,4 +1,4 @@
-@ Copyright (c) 2019-2021 Travis Bemann
+@ Copyright (c) 2019-2022 Travis Bemann
 @
 @ Permission is hereby granted, free of charge, to any person obtaining a copy
 @ of this software and associated documentation files (the "Software"), to deal
@@ -448,9 +448,11 @@ _uge:	movs r0, tos
 	define_word "ram-here", visible_flag
 _here:	push {lr}
 	bl _cpu_offset
-	ldr r0, =here
-	adds r0, tos
-	ldr tos, [r0]
+	ldr r0, =dict_base
+	adds tos, r0
+	ldr tos, [tos]
+	adds tos, #ram_here_offset
+	ldr tos, [tos]
 	pop {pc}
 	end_inlined
 
@@ -467,8 +469,10 @@ _pad:	push {lr}
 	define_word "ram-allot", visible_flag
 _allot:	push {lr}
 	bl _cpu_offset
-	ldr r0, =here
+	ldr r0, =dict_base
 	adds r0, tos
+	ldr r0, [r0]
+	adds r0, #ram_here_offset
 	pull_tos
 	ldr r1, [r0]
 	adds r1, tos
@@ -482,8 +486,10 @@ _allot:	push {lr}
 _store_here:
 	push {lr}
 	bl _cpu_offset
-	ldr r0, =here
+	ldr r0, =dict_base
 	adds r0, tos
+	ldr r0, [r0]
+	adds r0, #ram_here_offset
 	pull_tos
 	str tos, [r0]
 	pull_tos
@@ -1423,8 +1429,10 @@ _get_8:	ldr r0, [tos]
 _comma_1:
 	push {lr}
 	bl _cpu_offset
-	ldr r0, =here
+	ldr r0, =dict_base
 	adds r0, tos
+	ldr r0, [r0]
+	adds r0, #ram_here_offset
 	pull_tos
 	ldr r1, [r0]
 	movs r2, #0xFF
@@ -1440,8 +1448,10 @@ _comma_1:
 _comma_2:
 	push {lr}
 	bl _cpu_offset
-	ldr r0, =here
+	ldr r0, =dict_base
 	adds r0, tos
+	ldr r0, [r0]
+	adds r0, #ram_here_offset
 	pull_tos
 	ldr r1, [r0]
 	ldr r2, =0xFFFF
@@ -1457,8 +1467,10 @@ _comma_2:
 _comma_4:
 	push {lr}
 	bl _cpu_offset
-	ldr r0, =here
+	ldr r0, =dict_base
 	adds r0, tos
+	ldr r0, [r0]
+	adds r0, #ram_here_offset
 	pull_tos
 	ldr r1, [r0]
 	str tos, [r1], #4
@@ -1472,8 +1484,10 @@ _comma_4:
 _comma_8:
 	push {lr}
 	bl _cpu_offset
-	ldr r0, =here
+	ldr r0, =dict_base
 	adds r0, tos
+	ldr r0, [r0]
+	adds r0, #ram_here_offset
 	pull_tos
 	ldr r1, [r0]
 	str tos, [r1], #4
@@ -1660,8 +1674,10 @@ _current_comma_8:
 _reserve_1:
 	push {lr}
 	bl _cpu_offset
-	ldr r0, =here
+	ldr r0, =dict_base
 	adds r0, tos
+	ldr r0, [r0]
+	adds r0, #ram_here_offset
 	pull_tos
 	ldr r1, [r0]
 	push_tos
@@ -1676,8 +1692,10 @@ _reserve_1:
 _reserve_2:
 	push {lr}
 	bl _cpu_offset
-	ldr r0, =here
+	ldr r0, =dict_base
 	adds r0, tos
+	ldr r0, [r0]
+	adds r0, #ram_here_offset
 	pull_tos
 	ldr r1, [r0]
 	push_tos
@@ -1692,8 +1710,10 @@ _reserve_2:
 _reserve_4:
 	push {lr}
 	bl _cpu_offset
-	ldr r0, =here
+	ldr r0, =dict_base
 	adds r0, tos
+	ldr r0, [r0]
+	adds r0, #ram_here_offset
 	pull_tos
 	ldr r1, [r0]
 	push_tos
@@ -1708,8 +1728,10 @@ _reserve_4:
 _reserve_8:
 	push {lr}
 	bl _cpu_offset
-	ldr r0, =here
+	ldr r0, =dict_base
 	adds r0, tos
+	ldr r0, [r0]
+	adds r0, #ram_here_offset
 	pull_tos
 	ldr r1, [r0]
 	push_tos
@@ -2147,42 +2169,35 @@ _handle_null:
 	define_internal_word "init-variables", visible_flag
 _init_variables:
 	push {lr}
+	@@ Initialize the data stack base
+	ldr r0, =ram_current + stack_base_offset
+	ldr r1, =stack_top
+	str r1, [r0]
+	@@ Initialize the return stack base
+	ldr r0, =ram_current + rstack_base_offset
+	ldr r1, =rstack_top
+	str r1, [r0]
+	@@ Initialize the data stack end
+	ldr r0, =ram_current + stack_end_offset
+	ldr r1, =stack_top - stack_size
+	str r1, [r0]
+	@@ Initialize the return stack end
+	ldr r0, =ram_current + rstack_end_offset
+	ldr r1, =rstack_top - rstack_size
+	str r1, [r0]
+	@@ Initialize BASE
+	ldr r0, =ram_current + base_offset
+	movs r1, #10
+	str r1, [r0]
 	ldr r2, =cpu_count * 4
 1:	cmp r2, #0
 	beq 2f
 	subs r2, #4
-	ldr r0, =here
-	ldr r0, [r0, r2]
-	ldr r1, =dict_base
-	str r0, [r1, r2]
-	ldr r0, =stack_base
-	ldr r1, =stack_top
-	str r1, [r0, r2]
-	ldr r0, =stack_end
-	ldr r1, =stack_top - stack_size
-	str r1, [r0, r2]
-	ldr r0, =rstack_base
-	ldr r1, =rstack_top
-	str r1, [r0, r2]
-	ldr r0, =rstack_end
-	ldr r1, =rstack_top - rstack_size
-	str r1, [r0, r2]
-	movs r1, #10
-	ldr r0, =base
-	str r1, [r0, r2]
 	movs r1, #0
 	ldr r0, =pause_enabled
 	str r1, [r0, r2]
 	b 1b
-2:	ldr r2, =cpu_count * 4
-3:	cmp r2, #4
-	beq 4f
-	subs r2, #4
-	ldr r1, =0xF0E1C2D3
-	ldr r0, =handler
-	str r1, [r0, r2]
-	b 3b
-4:	ldr r0, =prompt_hook
+2:	ldr r0, =prompt_hook
 	ldr r1, =_do_prompt
 	str r1, [r0]
 	ldr r0, =handle_number_hook
