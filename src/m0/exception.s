@@ -23,8 +23,10 @@
 _raise:	cmp tos, #0
 	beq 1f
 	bl _cpu_offset
-	ldr r0, =handler
+	ldr r0, =dict_base
 	adds r0, tos
+	ldr r0, [r0]
+	adds r0, #handler_offset
 	pull_tos
 	ldr r1, [r0]
 	mov sp, r1
@@ -39,9 +41,10 @@ _raise:	cmp tos, #0
 	define_word "try", visible_flag
 _try:	push {lr} @ #0
 	bl _cpu_offset
-	movs r2, tos
-	ldr r0, =handler
-	adds r2, r0
+	ldr r2, =dict_base
+	adds r2, tos
+	ldr r2, [r2]
+	adds r2, #handler_offset
 	pull_tos
 	mov r1, sp
 	subs r1, #4
@@ -61,9 +64,11 @@ _try:	push {lr} @ #0
 	pull_tos
 	blx r0
 	bl _cpu_offset
-	ldr r0, =handler
+	ldr r0, =dict_base
 	adds r0, tos
-	pull_tos	
+	ldr r0, [r0]
+	adds r0, #handler_offset
+	pull_tos
 	pop {r1}
 	str r1, [r0]
 	pop {r1}

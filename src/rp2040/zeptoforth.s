@@ -42,27 +42,30 @@
 	@@ Initialize r11, relied upon by swdcom
 	movs r0, #0
 	mov r11, r0
-	@@ Initalize r5, relied upon to provide a pointer to RAM
-	ldr r5, =ram_real_start
 	@@ Initialize the top of stack register
 	ldr tos, =0xFEDCBA98
-	@@ Initialize the data stack pointer
-	ldr r0, =stack_top
-	mov dp, r0
-	@@ Just in case someone calls this we will restore the return stack
-	@@ pointer.
-	ldr r0, =rstack_top
-	mov sp, r0
-	@@ Put a deliberate garbage value in handler
-	ldr r0, =0xF0E1C2D3
-	ldr r1, =handler
-	str r0, [r1, #0]
-	str r0, [r1, #4]
-	@@ Initialize HERE
-	ldr r0, =here
+	@@ Get the dictionary base
+	ldr r0, =dict_base
 	ldr r1, =ram_current
-	str r1, [r0, #0]
-	str r1, [r0, #4]
+	str r1, [r0]
+	@@ Set a garbage dictionary base for the second core
+	ldr r0, =dict_base + 4
+	ldr r1, =0xEFBEADDE
+	str r1, [r0]
+	@@ Initialize HERE
+	ldr r0, =ram_current + ram_here_offset
+	ldr r1, =ram_current + user_offset
+	str r1, [r0]
+	@@ Initialize the data stack pointer
+	ldr r1, =stack_top
+	movs dp, r1
+	@@ Initialize the return stack pointer
+	ldr r1, =rstack_top
+	mov sp, r1
+	@@ Put a garbage value in HANDLER to force a crash if is used
+	ldr r0, =ram_current + handler_offset
+	ldr r1, =0xF0E1C2D3
+	str r1, [r0]
 	@@ Call the rest of the runtime in an exception handler
 2:	push_tos
 	ldr tos, =outer_exc_handled

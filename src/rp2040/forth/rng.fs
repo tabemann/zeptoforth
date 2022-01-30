@@ -1,5 +1,5 @@
-\ Copyright (c) 2021 Travis Bemann
-\
+\ Copyright (c) 2022 Travis Bemann
+\ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
 \ in the Software without restriction, including without limitation the rights
@@ -18,27 +18,31 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ This is not actual Forth code, but rather setup directives for e4thcom to be
-\ executed from the root of the zeptoforth directory to initialize zeptoforth
-\ on an RP2040 device.
+\ Compile this to flash
+\ compile-to-flash
 
-\ #include src/rp2040/forth/clock.fs
-#include src/common/forth/basic.fs
-#include src/common/forth/module.fs
-#include src/common/forth/interrupt.fs
-#include src/rp2040/forth/multicore.fs
-#include src/rp2040/forth/erase.fs
-#include src/common/forth/lambda.fs
-#include src/common/forth/fixed.fs
-#include src/common/forth/systick.fs
-#include src/rp2040/forth/int_io.fs
-#include src/rp2040/forth/gpio.fs
-#include src/rp2040/forth/pio.fs
-#include src/common/forth/task.fs
-#include src/common/forth/schedule.fs
-#include src/rp2040/forth/led.fs
-#include src/common/forth/full_default.fs
-#include src/rp2040/forth/rng.fs
+begin-module rng
 
-\ Set a cornerstone to enable deleting everything compiled after this code
-cornerstone restore-state
+  begin-module rng-internal
+
+    \ ROSC Base
+    $40060000 constant ROSC_Base
+
+    \ Random bit
+    ROSC_Base $1C + constant RANDOMBIT
+
+  end-module> import
+
+  \ Read a random number
+  : random ( -- random )
+    32 0 begin over 0> while
+      swap 1- swap
+      1 lshift RANDOMBIT @ 1 and or
+    repeat
+    nip
+  ;
+
+end-module> import
+
+\ Reboot
+\ reboot
