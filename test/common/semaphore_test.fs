@@ -1,4 +1,4 @@
-\ Copyright (c) 2021 Travis Bemann
+\ Copyright (c) 2021-2022 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -42,18 +42,18 @@ continue-module forth
   
   \ Our action task main
   : do-action ( n -- )
-    [: cr ." Taking semaphore:" dup . ;] my-lock with-lock
+    [: cr ." Taking semaphore: " dup . ;] my-lock with-lock
     my-sema take
-    [: cr ." Took semaphore:" dup . ;] my-lock with-lock
+    [: cr ." Took semaphore: " dup . ;] my-lock with-lock
     4000 ms
-    [: cr ." Releasing semaphore:" dup . ;] my-lock with-lock
+    [: cr ." Releasing semaphore: " dup . ;] my-lock with-lock
     my-sema give
   ;
   
   \ Our task creation task main
   : do-init-tasks ( -- )
     0 begin dup my-task-count 1- < while
-      [: cr ." Creating task:" dup . ;] my-lock with-lock
+      [: cr ." Creating task: " dup . ;] my-lock with-lock
       dup 1 ['] do-action my-task-pool spawn-from-task-pool run 1+ 1000 ms
     repeat
     drop

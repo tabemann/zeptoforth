@@ -1,4 +1,4 @@
-\ Copyright (c) 2021 Travis Bemann
+\ Copyright (c) 2021-2022 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -44,7 +44,7 @@ continue-module forth
   : do-producer ( -- )
     no-timeout timeout !
     0 begin
-      [: cr ." Producer:" dup . space ;] my-lock with-lock
+      [: cr ." Producer: " dup . ;] my-lock with-lock
       dup [: my-chan send-chan ;] provide-allot-cell 1+
     again
   ;
@@ -54,7 +54,7 @@ continue-module forth
     no-timeout timeout !
     begin
       [: my-chan recv-chan ;] extract-allot-cell
-      [: cr ." Consumer" over . ." :" . space ;] my-lock with-lock
+      [: cr ." Consumer" over . ." : " . ;] my-lock with-lock
     again
   ;
 

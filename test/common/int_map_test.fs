@@ -50,7 +50,7 @@ continue-module forth
 
   \ Handle item removal
   : handle-remove ( value-addr key-addr -- )
-    cr ." Removed:" @ . @ .
+    cr ." Removed: " @ . @ .
   ;
   
   \ Initialize the test
@@ -68,9 +68,9 @@ continue-module forth
     30 2 my-map insert-int-map
 
     \ Get some values from the map
-    0 my-map find-int-map cr ." 0:" .
-    1 my-map find-int-map cr ." 1:" .
-    2 my-map find-int-map cr ." 2:" .
+    0 my-map find-int-map cr ." 0: " .
+    1 my-map find-int-map cr ." 1: " .
+    2 my-map find-int-map cr ." 2: " .
 
     \ Insert some different values into the map
     100 0 my-map insert-int-map
@@ -78,14 +78,14 @@ continue-module forth
     300 2 my-map insert-int-map
 
     \ Get some values from the map
-    0 my-map find-int-map cr ." 0:" .
-    1 my-map find-int-map cr ." 1:" .
-    2 my-map find-int-map cr ." 2:" .
+    0 my-map find-int-map cr ." 0: " .
+    1 my-map find-int-map cr ." 1: " .
+    2 my-map find-int-map cr ." 2: " .
 
     \ Iterate through the entries in the map
     my-map first-map
     begin dup -1 <> while
-      dup my-map at-int-map cr ." Iterated:" . .
+      dup my-map at-int-map cr ." Iterated: " . .
       my-map next-map
     repeat
     drop
@@ -96,7 +96,7 @@ continue-module forth
     \ Iterate through the entries in the duplicate map
     my-copy-map first-map
     begin dup -1 <> while
-      dup my-copy-map at-int-map cr ." Iterated copy:" . .
+      dup my-copy-map at-int-map cr ." Iterated copy: " . .
       my-copy-map next-map
     repeat
     drop
@@ -107,14 +107,14 @@ continue-module forth
     2 my-map remove-int-map
     
     \ Get some values from the map
-    0 my-map find-int-map cr ." 0:" .
-    1 my-map find-int-map cr ." 1:" .
-    2 my-map find-int-map cr ." 2:" .
+    0 my-map find-int-map cr ." 0: " .
+    1 my-map find-int-map cr ." 1: " .
+    2 my-map find-int-map cr ." 2: " .
 
     \ Insert values until an exception occurs
     [:
       0 begin
-	10 + dup cr ." Inserting" . 0 over my-map insert-int-map
+	10 + dup cr ." Inserting " . 0 over my-map insert-int-map
       again
     ;] try drop
 
@@ -124,7 +124,7 @@ continue-module forth
     \ Insert values until an exception occurs again
     [:
       0 begin
-	10 + dup cr ." Inserting" . 0 over my-map insert-int-map
+	10 + dup cr ." Inserting " . 0 over my-map insert-int-map
       again
     ;] try drop
     

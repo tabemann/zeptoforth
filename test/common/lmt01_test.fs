@@ -1,4 +1,4 @@
-\ Copyright (c) 2021 Travis Bemann
+\ Copyright (c) 2021-2022 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module-once temp
+begin-module temp
 
   interrupt import
   gpio import
@@ -146,8 +146,8 @@ begin-module-once temp
   : display-temp ( sensor -- )
     dup sensor-count u>= triggers x-sensor-out-of-range
     >r r@ read-temp-f r@ read-temp-c r@ read-temp
-    cr ." Temperature" r> . ." :" . space ." pulses"
-    f. space ." °C" f. space ." °F"
+    cr ." Temperature " r> (.) ." : " . space ." pulses "
+    f. ." °C " f. ." °F"
   ;
 
   \ Display temperatures repeatedly

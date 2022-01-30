@@ -198,7 +198,7 @@ _compile_char:
 	pop {pc}
 	end_inlined
 
-	@@ Type an integer without a preceding space
+	@@ Type an integer without a following space
 	define_word "(.)", visible_flag
 _type_integer:
 	push {lr}
@@ -222,7 +222,7 @@ _type_integer:
 	pop {pc}
 	end_inlined
 
-	@@ Type an unsigned integer without a preceding space
+	@@ Type an unsigned integer without a following space
 	define_word "(u.)", visible_flag
 _type_unsigned:
 	push {lr}
@@ -246,7 +246,7 @@ _type_unsigned:
 	pop {pc}
 	end_inlined
 
-	@@ Type an unsigned hexadecimal integer safely without a preceding space
+	@@ Type an unsigned hexadecimal integer safely without a following space
 	define_word "debugu.", visible_flag
 _debug_unsigned:
 	push {lr}
@@ -283,21 +283,21 @@ _debug_unsigned:
 	pop {pc}
 	end_inlined
 
-	@@ Type an integer with a preceding space
+	@@ Type an integer with a following space
 	define_word ".", visible_flag
 _type_space_integer:
 	push {lr}
-	bl _space
 	bl _type_integer
+	bl _space
 	pop {pc}
 	end_inlined
 
-	@@ Type an unsigned integer with a preceding space
+	@@ Type an unsigned integer with a following space
 	define_word "u.", visible_flag
 _type_space_unsigned:
 	push {lr}
-	bl _space
 	bl _type_unsigned
+	bl _space
 	pop {pc}
 	end_inlined
 	
