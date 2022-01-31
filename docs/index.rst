@@ -31,6 +31,7 @@ Zeptoforth Documentation
    words/stream
    words/tqueue
    words/systick
+   words/rng
    words/ansi_term
    words/qspi
    words/block
