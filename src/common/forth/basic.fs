@@ -902,6 +902,7 @@ commit-flash
 
 \ Assign names to the built-in user variables; they must be in this order and
 \ must not be preceded by any other user variables
+end-compress-flash
 user task-stack-base
 user task-stack-end
 user task-rstack-base
@@ -909,6 +910,7 @@ user task-rstack-end
 user task-ram-here
 user task-base
 user task-handler
+compress-flash
 
 \ Set internal
 internal set-current
@@ -2309,7 +2311,6 @@ forth set-current
 \ Initialize the RAM variables
 : init ( -- )
   init
-  min-ram-wordlist current-ram-wordlist !
   task-stack-base @
   task-stack-end @
   task-rstack-base @
@@ -2324,6 +2325,7 @@ forth set-current
   task-stack-end !
   task-stack-base !
   dict-base @ next-user-space + ram-here!
+  min-ram-wordlist current-ram-wordlist !
   cpu-count 0 ?do false cpus-deferred-context-switch i cells + ! loop
   cpu-count 0 ?do 0 cpus-in-critical i cells + ! loop
   0 wait-hook !
