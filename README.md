@@ -33,7 +33,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 * LED drivers
 * Quad SPI flash storage support (on the STM32F746 DISCOVERY board)
 * A block editor (on the STM32F746 DISCOVERY board)
-* Random number generator support (except on the RP2040)
+* Random number generator support
 * Optional swdcom support
 
 To load the zeptoforth image (whether just the kernel or an image including precompiled Forth code) onto an STM32L476, STM32F407, or STM32F746 DISCOVERY board, first install st-flash, then attach the DISCOVERY board to one's PC via USB and execute:
