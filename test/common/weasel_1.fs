@@ -98,10 +98,11 @@ begin-module weasel
     then
   ;
 
-  \ Reproduce
-  : reproduce-once ( -- )
-    target-length @ 0 ?do
-      current-buffer i + c@ mutate reproduce-buffer i + c!
+  \ Reproduce and score
+  : reproduce-score ( -- )
+    0 target-length @ 0 ?do
+      current-buffer i + c@ mutate dup reproduce-buffer i + c!
+      target-buffer i + c@ = if 1+ then
     loop
   ;
 
@@ -109,15 +110,6 @@ begin-module weasel
   : score-current ( -- score )
     0 target-length @ 0 ?do
       current-buffer i + c@ target-buffer i + c@ = if
-	1+
-      then
-    loop
-  ;
-
-  \ Score a buffer
-  : score ( -- score )
-    0 target-length @ 0 ?do
-      reproduce-buffer i + c@ target-buffer i + c@ = if
 	1+
       then
     loop
@@ -135,8 +127,8 @@ begin-module weasel
 
   \ Reproduce one cycle
   : reproduce ( -- score )
-    reproduce-once score make-candidate reproduce-count 1 ?do
-      reproduce-once score 2dup < if
+    reproduce-score make-candidate reproduce-count 1 ?do
+      reproduce-score 2dup < if
 	make-candidate nip
       else
 	drop
