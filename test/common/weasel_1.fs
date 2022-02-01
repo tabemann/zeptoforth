@@ -62,9 +62,9 @@ begin-module weasel
   
   \ Convert the target string to be all uppercase or spaces
   : massage-target ( -- )
-    target-length @ 0 ?do
-      target-buffer i + c@ massage-char target-buffer i + c!
-    loop
+    target-length @ begin ?dup while
+      1- >r target-buffer r@ + c@ massage-char target-buffer r@ + c! r>
+    repeat
   ;
 
   \ Prepare the target
@@ -86,9 +86,9 @@ begin-module weasel
 
   \ Prepare the current buffer
   : prepare-current ( -- )
-    target-length @ 0 ?do
-      random-char current-buffer i + c!
-    loop
+    target-length @ begin ?dup while
+      1- random-char over current-buffer + c!
+    repeat
   ;
 
   \ Mutate a charcter
@@ -100,19 +100,19 @@ begin-module weasel
 
   \ Reproduce and score
   : reproduce-score ( -- )
-    0 target-length @ 0 ?do
-      current-buffer i + c@ mutate dup reproduce-buffer i + c!
-      target-buffer i + c@ = if 1+ then
-    loop
+    0 target-length @ begin ?dup while
+      1- >r current-buffer r@ + c@ mutate dup reproduce-buffer r@ + c!
+      target-buffer r@ + c@ = if 1+ then r>
+    repeat
   ;
 
   \ Score the current buffer
   : score-current ( -- score )
-    0 target-length @ 0 ?do
-      current-buffer i + c@ target-buffer i + c@ = if
+    0 target-length @ begin ?dup while
+      1- >r current-buffer r@ + c@ target-buffer r@ + c@ = if
 	1+
-      then
-    loop
+      then r>
+    repeat
   ;
 
   \ Copy the reproduction buffer into the candidate buffer
@@ -127,13 +127,13 @@ begin-module weasel
 
   \ Reproduce one cycle
   : reproduce ( -- score )
-    reproduce-score make-candidate reproduce-count 1 ?do
-      reproduce-score 2dup < if
+    reproduce-score make-candidate reproduce-count 1- begin ?dup while
+      1- >r reproduce-score 2dup < if
 	make-candidate nip
       else
 	drop
-      then
-    loop
+      then r>
+    repeat
   ;
 
   \ Weasel
