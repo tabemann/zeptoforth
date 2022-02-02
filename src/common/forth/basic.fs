@@ -2093,7 +2093,7 @@ variable wait-hook
 \ Wait for a predicate to become true
 : wait ( xt -- )
   begin
-    dup execute not
+    dup >r execute not r> swap
   while
     in-critical @ 0= if
       wait-hook @ ?execute

@@ -1148,7 +1148,11 @@ begin-module task
   continue-module task-internal
 
     \ Wake tasks
-    : do-wake ( -- ) true wake-tasks ! ;
+    : do-wake ( -- )
+      cpu-count begin ?dup while
+	1- true over cpu-wake-tasks !
+      repeat
+    ;
 
     \ Get whether a task is waiting
     : waiting-task? ( task -- )
@@ -1431,6 +1435,7 @@ begin-module task
 	$FF SHPR2_PRI_11!
 	$FF SHPR3_PRI_14!
 	1 pause-enabled !
+	^ int-io :: enable-int-io
 	init-systick-aux-core
 	pause try ?dup if display-red execute display-normal then
 	current-task @ kill

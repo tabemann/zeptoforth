@@ -22,7 +22,6 @@ continue-module forth
 
   task import
   fchan import
-  int-io import
 
   \ The channel
   fchan-size buffer: my-fchan
@@ -47,7 +46,6 @@ continue-module forth
   
   \ Initialize the test
   : init-test ( -- )
-    disable-int-io
     my-fchan init-fchan
     0 consumer-task !
     0 ['] consumer 320 128 512 1 spawn-on-core consumer-task !
