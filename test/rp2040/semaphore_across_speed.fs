@@ -21,7 +21,6 @@
 continue-module forth
 
   systick import
-  int-io import
   task import
   sema import
 
@@ -71,7 +70,6 @@ continue-module forth
 
   \ Initiate the test
   : init-test ( -- )
-    disable-int-io
     0 send-count !
     systick-counter start-systick !
     no-sema-limit 0 target-sema init-sema

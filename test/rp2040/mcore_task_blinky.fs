@@ -22,7 +22,6 @@ continue-module forth
 
   task import
   led import
-  int-io import
 
   \ LED test loop task
   : led-loop ( ms -- ) begin led-toggle dup ms again ;
@@ -39,7 +38,6 @@ continue-module forth
 
   \ Initialize the test
   : init-test ( -- )
-    disable-int-io
     1000 500 2 ['] core-1-main 320 128 512 1 spawn-aux-main
     250 ms 750 1 ['] led-loop 320 128 512 spawn run
   ;

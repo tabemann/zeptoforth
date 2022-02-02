@@ -22,7 +22,6 @@ continue-module forth
 
   systick import
   task import
-  int-io import
   fchan import
 
   \ Allot the channel
@@ -65,7 +64,6 @@ continue-module forth
 
   \ Initiate the test
   : init-test ( -- )
-    disable-int-io
     0 send-count !
     systick-counter start-systick !
     my-fchan init-fchan
