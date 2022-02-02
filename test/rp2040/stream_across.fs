@@ -22,7 +22,6 @@ continue-module forth
 
   task import
   stream import
-  int-io import
 
   \ Our byte count
   256 constant my-count
@@ -53,7 +52,6 @@ continue-module forth
   
   \ Initialize our test
   : init-test ( -- )
-    disable-int-io
     my-count my-stream init-stream
     0 ['] consumer 320 128 512 1 spawn-on-core consumer-task !
     0 ['] producer 320 128 512 spawn producer-task !
