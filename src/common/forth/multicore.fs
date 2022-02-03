@@ -32,6 +32,9 @@ begin-module multicore
   \ Task queue spinlock index
   -1 constant tqueue-spinlock
   
+  \ Serial spinlock index
+  -1 constant serial-spinlock
+
   \ Spinlock out of range exception
   : x-spinlock-out-of-range space ." spinlock out of range" cr ;
 
