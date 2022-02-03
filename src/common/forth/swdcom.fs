@@ -3,7 +3,8 @@ compile-to-flash
 begin-module swd
 
   internal import
-
+  multicore import
+  
   begin-module swd-internal
 
     here 256 2* cell+ buffer: swd
@@ -38,23 +39,35 @@ begin-module swd
     commit-flash
 
     : swd-key? ( -- flag )
+      serial-spinlock claim-spinlock
       disable-int swd h@ dup 8 rshift swap $ff and <> enable-int
+      serial-spinlock release-spinlock
     ;
+    
     : swd-key ( -- char )
+      serial-spinlock claim-spinlock
       [: swd-key? ;] pause-until
       disable-int swd-rx swd-rx-r c@ + c@ inc-rx-r enable-int
+      serial-spinlock release-spinlock
     ;
 
     : swd-emit? ( -- flag )
+      serial-spinlock claim-spinlock
       disable-int swd-tx-w h@ dup 8 rshift swap $ff and 1+ $ff and <> enable-int
+      serial-spinlock release-spinlock
     ;
+    
     : swd-emit ( char -- )
+      serial-spinlock claim-spinlock
       [: swd-emit? ;] pause-until
       disable-int swd-tx swd-tx-w c@ + c! inc-tx-w enable-int
+      serial-spinlock release-spinlock
     ;
 
     : swd-flush-console ( -- )
+      serial-spinlock claim-spinlock
       [: disable-int swd-tx-w h@ dup 8 rshift swap $FF and = enable-int ;] wait
+      serial-spinlock release-spinlock
     ;
 
     : >r11 ( x -- ) [ $46b3 h, ] drop ; \ $46b3 = mov r11, r6

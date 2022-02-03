@@ -26,6 +26,7 @@ begin-module int-io
 
   internal import
   interrupt import
+  multicore import
 
   begin-module int-io-internal
 
@@ -101,22 +102,26 @@ begin-module int-io
 
     \ Write a byte to the rx buffer
     : write-rx ( c -- )
-      rx-full? not if
-	rx-write-index c@ rx-buffer + c!
-	rx-write-index c@ 1+ $7F and rx-write-index c!
-      else
-	drop
-      then
+      [:
+	rx-full? not if
+	  rx-write-index c@ rx-buffer + c!
+	  rx-write-index c@ 1+ $7F and rx-write-index c!
+	else
+	  drop
+	then
+      ;] serial-spinlock critical-with-spinlock
     ;
 
     \ Read a byte from the rx buffer
     : read-rx ( -- c )
-      rx-empty? not if
-	rx-read-index c@ rx-buffer + c@
-	rx-read-index c@ 1+ $7F and rx-read-index c!
-      else
-	0
-      then
+      [:
+	rx-empty? not if
+	  rx-read-index c@ rx-buffer + c@
+	  rx-read-index c@ 1+ $7F and rx-read-index c!
+	else
+	  0
+	then
+      ;] serial-spinlock critical-with-spinlock
     ;
 
     \ Get whether the tx buffer is full
@@ -132,22 +137,26 @@ begin-module int-io
 
     \ Write a byte to the tx buffer
     : write-tx ( c -- )
-      tx-full? not if
-	tx-write-index c@ tx-buffer + c!
-	tx-write-index c@ 1+ $7F and tx-write-index c!
-      else
-	drop
-      then
+      [:
+	tx-full? not if
+	  tx-write-index c@ tx-buffer + c!
+	  tx-write-index c@ 1+ $7F and tx-write-index c!
+	else
+	  drop
+	then
+      ;] serial-spinlock critical-with-spinlock
     ;
 
     \ Read a byte from the tx buffer
     : read-tx ( -- c )
-      tx-empty? not if
-	tx-read-index c@ tx-buffer + c@
-	tx-read-index c@ 1+ $7F and tx-read-index c!
-      else
-	0
-      then
+      [:
+	tx-empty? not if
+	  tx-read-index c@ tx-buffer + c@
+	  tx-read-index c@ 1+ $7F and tx-read-index c!
+	else
+	  0
+	then
+      ;] serial-spinlock critical-with-spinlock
     ;
 
     \ Handle IO
