@@ -119,7 +119,10 @@ begin-module multicore
 
   \ Task queue spinlock index
   28 constant tqueue-spinlock
-
+  
+  \ Serial spinlock index
+  27 constant serial-spinlock
+  
   continue-module multicore-internal
 
     \ Spinlock lock counts
