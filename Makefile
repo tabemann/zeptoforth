@@ -26,7 +26,7 @@ export DUMP=arm-none-eabi-objdump
 export ASFLAGS=-g
 export PREFIX=/usr/local
 export PLATFORM=stm32f407
-export VERSION=0.26.3.Dev
+export VERSION=0.26.4.Dev
 
 KERNEL_INFO=src/common/kernel_info.s
 
