@@ -517,10 +517,13 @@ begin-module task
     [:
       dup start-validate-task-change
       terminated over task-active h!
-      dup current-task @ = swap last-task @ = or if
-	false begin pause again
+      dup current-task @ = over last-task @ = or
+      if
+	task-core@ release-other-core-spinlock
+	end-critical
+	begin pause again
       else
-	false
+	drop
       then
     ;] over task-core@ critical-with-other-core-spinlock
   ;

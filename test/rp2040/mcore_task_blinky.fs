@@ -33,7 +33,7 @@ continue-module forth
   : core-1-main ( star-ms led-ms -- )
     1 ['] led-loop 320 128 512 spawn run
     1 ['] star-loop 320 128 512 spawn run
-    begin again
+    current-task kill
   ;
 
   \ Initialize the test
