@@ -21,7 +21,6 @@
 continue-module forth
 
   task import
-  int-io import
   systick import
   chan import
 
@@ -88,7 +87,6 @@ continue-module forth
 
   \ Initialize our test
   : init-test ( -- )
-    disable-int-io
     0 recv-count !
     systick-counter start-systick !
     element-size inter-count inter-chan init-chan
