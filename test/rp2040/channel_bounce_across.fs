@@ -21,7 +21,6 @@
 continue-module forth
 
   task import
-  int-io import
   chan import
 
   \ The data size
@@ -76,7 +75,6 @@ continue-module forth
 
   \ Initialize our test
   : init-test ( -- )
-    disable-int-io
     element-size inter-count inter-chan init-chan
     element-size end-count end-chan init-chan
     0 ['] consumer 320 128 512 0 spawn-on-core consumer-task !
