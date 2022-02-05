@@ -45,7 +45,7 @@ continue-module forth
   element-size inter-count chan-size buffer: inter-chan
   element-size end-count chan-size buffer: end-chan
 
-  \ The receiver buffers
+  \ The data buffers
   element-size buffer: source-send-buf
   element-size buffer: inter-recv-buf
   element-size buffer: end-recv-buf
