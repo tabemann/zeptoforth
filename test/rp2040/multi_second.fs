@@ -21,7 +21,6 @@
 continue-module forth
 
   task import
-  int-io import
 
   \ The tasks
   variable task-0
@@ -31,7 +30,6 @@ continue-module forth
 
   \ Initialize the test
   : init-test ( -- )
-    disable-int-io
     0 [: begin 500 ms ." *" again ;] 320 128 512 1 spawn-on-core task-0 !
     0 [: begin 1000 ms ." +" again ;] 320 128 512 1 spawn-on-core task-1 !
     0 [: begin 1500 ms ." x" again ;] 320 128 512 0 spawn-on-core task-2 !

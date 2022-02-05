@@ -21,11 +21,9 @@
 continue-module forth
 
   task import
-  int-io import
 
   \ Initialize the test
   : init-test ( -- )
-    disable-int-io
     0 [:
       0 [: begin 500 ms ." *" again ;] 320 128 512 0 spawn-on-core run
       begin 1000 ms ." +" again
