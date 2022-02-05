@@ -22,7 +22,6 @@ continue-module forth
 
   systick import
   task import
-  int-io import
   chan import
 
   \ Element size
@@ -71,7 +70,6 @@ continue-module forth
 
   \ Initiate the test
   : init-test ( -- )
-    disable-int-io
     0 send-count !
     systick-counter start-systick !
     element-size element-count my-chan init-chan

@@ -21,7 +21,6 @@
 continue-module forth
 
   task import
-  int-io import
   stream import
 
   \ The intermediate stream byte count
@@ -77,7 +76,6 @@ continue-module forth
 
   \ Initialize our test
   : init-test ( -- )
-    disable-int-io
     inter-count inter-stream init-stream
     end-count end-stream init-stream
     0 ['] consumer 320 128 512 0 spawn-on-core consumer-task !

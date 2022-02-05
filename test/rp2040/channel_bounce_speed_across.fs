@@ -33,7 +33,7 @@ continue-module forth
   \ The endpoint stream byte count
   256 constant end-count
 
-  \ THe endpoint counter interval
+  \ The endpoint counter interval
   1000 constant end-interval
 
   \ The tasks
