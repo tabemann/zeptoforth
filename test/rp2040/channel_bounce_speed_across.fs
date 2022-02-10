@@ -34,7 +34,7 @@ continue-module forth
   256 constant end-count
 
   \ The endpoint counter interval
-  1000 constant end-interval
+  10000 constant end-interval
 
   \ The tasks
   variable producer-task
