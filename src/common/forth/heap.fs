@@ -226,7 +226,7 @@ begin-module heap
   \ Resize space on a heap
   : resize ( size addr heap -- new-addr )
     2dup free
-    2dup block-addr>index
+    2dup swap 4 - swap block-addr>index
     3 pick cell+ 2 pick size>blocks >r
     2dup swap r@ -rot blocks-free? if
       r@ 3 pick 4 - ! r> -rot swap mark-allocated nip
