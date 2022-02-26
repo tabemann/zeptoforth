@@ -18,6 +18,8 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
+compile-to-flash
+
 begin-module tinymt32
 
   begin-module tinymt32-internal
@@ -40,20 +42,10 @@ begin-module tinymt32
     \ This function always returns 127
     : tinymt32-get-mexp ( random -- mexp ) drop tinymt32-mexp ;
 
-    \ Print state
-    : state. ( random -- )
-      >r cr ." State: "
-      0 cells r@ tinymt32-status + @ h.8 space
-      1 cells r@ tinymt32-status + @ h.8 space
-      2 cells r@ tinymt32-status + @ h.8 space
-      3 cells r> tinymt32-status + @ h.8 cr
-    ;
-    
     \ This function changes internal state of tinymt32.
     \ Users should not call this function directly.
     : tinymt32-next-state ( random -- )
       >r ( )
-\      r@ state. ( )
       3 cells r@ tinymt32-status + @ ( y )
       0 cells r@ tinymt32-status + @ tinymt32-mask and ( y s0-masked )
       1 cells r@ tinymt32-status + @ xor ( y s0^s1 )
@@ -121,7 +113,6 @@ begin-module tinymt32
     r@ tinymt32-mat2 @ 2 cells r@ tinymt32-status + ! ( )
     r@ tinymt32-tmat @ 3 cells r@ tinymt32-status + ! ( )
     1 begin dup min-loop < while ( i )
-\      r@ state.
       dup 3 and cells r@ tinymt32-status + @ ( i x )
       1812433253 ( i x constant )
       2 pick 1- 3 and cells r@ tinymt32-status + @ ( i x constant y )
@@ -152,3 +143,5 @@ begin-module tinymt32
   ;
 
 end-module
+
+reboot
