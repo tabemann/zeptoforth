@@ -1387,7 +1387,16 @@ begin-module task
   ;
 
   \ Wait for n milliseconds with multitasking support
-  : ms1 ( u -- ) systick-divisor * systick-counter current-task @ delay ;
+  : ms ( u -- )
+    systick-divisor * systick-counter
+    2dup current-task @ delay
+    begin
+      dup systick-counter swap - 2 pick u<
+    while
+      pause
+    repeat
+    drop drop
+  ;
 
   continue-module task-internal
 
@@ -1592,7 +1601,7 @@ end-module> import
 : unused ( -- ) unused ;
 
 \ Wait for n milliseconds with multitasking support
-: ms ( u -- ) ms1 ;
+: ms ( u -- ) ms ;
 
 \ Init
 : init ( -- )
