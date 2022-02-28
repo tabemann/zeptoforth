@@ -295,91 +295,13 @@ begin-module new-heap
       then
     ;
 
-    \ \ Get the end of the previous free block group
-    \ : find-prev-free-group-end ( index heap -- index|-1 )
-    \   over 0> if
-    \ 	over $1F and if
-    \ 	  2dup heap-bitmap swap 5 rshift 2 lshift + @
-    \ 	  2 pick $1F and test-high-zero dup -1 <> if
-    \ 	    nip swap $1F bic or exit
-    \ 	  else
-    \ 	    drop swap $1F bic swap
-    \ 	  then
-    \ 	then
-    \ 	begin over while
-    \ 	  2dup heap-bitmap swap 1- 5 rshift 2 lshift + @
-    \ 	  32 test-high-zero dup -1 <> if
-    \ 	    nip swap 1- $1F bic or exit
-    \ 	  else
-    \ 	    drop swap 32 - swap
-    \ 	  then
-    \ 	repeat
-    \ 	2drop -1
-    \   else
-    \ 	2drop -1
-    \   then
-    \ ;
-
-    \ \ Get the start of a previous free block group
-    \ : find-free-group-start ( index heap -- index )
-    \   over -1 <> if
-    \ 	over 0> if
-    \ 	  over $1F and if
-    \ 	    2dup heap-bitmap swap 5 rshift 2 lshift + @
-    \ 	    2 pick $1F and test-high-nonzero dup -1 <> if
-    \ 	      nip swap $1F bic or 1+ exit
-    \ 	    else
-    \ 	      drop swap $1F bic swap
-    \ 	    then
-    \ 	  then
-    \ 	  begin over while
-    \ 	    2dup heap-bitmap swap 1- 5 rshift 2 lshift + @
-    \ 	    32 test-high-nonzero dup -1 <> if
-    \ 	      nip swap 1- $1F bic or 1+ exit
-    \ 	    else
-    \ 	      drop swap 32 - swap
-    \ 	    then
-    \ 	  repeat
-    \ 	  2drop 0
-    \ 	else
-    \ 	  2drop 0
-    \ 	then
-    \   else
-    \ 	2drop -1
-    \   then
-    \ ;
-
-    \ \ Get the start of the next free block group
-    \ : find-next-free-group-start ( index heap -- index|-1 )
-    \   2dup heap-block-count @ < if
-    \ 	over $1F and if
-    \ 	  2dup heap-bitmap swap 5 rshift 2 lshift + @
-    \ 	  2 pick $1F and test-low-zero dup -1 <> if
-    \ 	    nip swap $1F bic or exit
-    \ 	  else
-    \ 	    drop swap $1F bic 32 + swap
-    \ 	  then
-    \ 	then
-    \ 	begin 2dup heap-block-count @ < while
-    \ 	  2dup heap-bitmap swap 5 rshift 2 lshift + @
-    \ 	  0 test-low-zero dup -1 <> if
-    \ 	    nip or exit
-    \ 	  else
-    \ 	    drop swap 32 + swap
-    \ 	  then
-    \ 	repeat
-    \ 	2drop -1
-    \   else
-    \ 	2drop -1
-    \   then
-    \ ;
-
     \ Link the next free block group
     : link-group-next ( index next-index heap -- )
-      over -1 <> if
-	2 pick 2 pick 2 pick group-prev-free! ( index next-index heap )
+      >r
+      dup -1 <> if
+	2dup r@ group-prev-free! ( index next-index )
       then
-      rot swap group-next-free! ( )
+      swap r> group-next-free! ( )
     ;
 
     \ Link the previous free block group
@@ -387,12 +309,13 @@ begin-module new-heap
       [ debug-heap? ] [if]
 	cr ." prev-index: " over . \ DEBUG
       [then]
-      over -1 <> if
-	tuck find-free-group-start ( index heap prev-start-index )
-	2 pick over 3 pick group-next-free! ( index heap prev-start-index )
-	-rot group-prev-free! ( )
+      >r
+      dup -1 <> if
+	r@ find-free-group-start ( index prev-start-index )
+	2dup r@ group-next-free! ( index prev-start-index )
+	swap r> group-prev-free! ( )
       else
-	nip 2dup heap-next-free! -1 -rot group-prev-free! ( )
+	drop dup r@ heap-next-free! -1 swap r> group-prev-free! ( )
       then
     ;
 
@@ -400,16 +323,18 @@ begin-module new-heap
 
     \ Link an adjacent next free block group
     : link-group-next-adjacent ( index next-index heap -- )
-      2dup group-next-free@ ( index next-index heap next-next-index )
-      swap >r 2 pick r@ group-next-free! ( index next-index )
+      >r
+      dup r@ group-next-free@ ( index next-index next-next-index )
+      2 pick r@ group-next-free! ( index next-index )
       r@ group-size@ over r@ group-size@ + ( index size )
       swap r> group-size! ( )
     ;
 
     \ Link an adjacent previous free block group
     : link-group-prev-adjacent ( index prev-index heap -- )
-      over -1 <> if
-	dup >r find-free-group-start ( index prev-start-index )
+      >r
+      dup -1 <> if
+	r@ find-free-group-start ( index prev-start-index )
 	over r@ group-size@ ( index prev-start-index size )
 	rot r@ group-next-free@ ( prev-start-index size next-index )
 	-rot over r@ group-size@ ( next-index prev-start-index size prev-size )
@@ -419,7 +344,7 @@ begin-module new-heap
 	then
 	r> group-next-free! ( )
       else
-	nip -1 -rot swap group-prev-free! ( )
+	drop -1 swap r> group-prev-free! ( )
       then
     ;
 
@@ -456,60 +381,43 @@ begin-module new-heap
 
     \ Link a freed block group
     : link-group ( index heap -- )
+      >r
       [ debug-heap? ] [if]
-	cr ." heap-next-free@: " dup heap-next-free @ . \ DEBUG
+	cr ." heap-next-free@: " r@ heap-next-free @ . \ DEBUG
       [then]
-      2dup find-prev-free-group-end ( index heap prev-end )
+      dup r@ find-prev-free-group-end ( index prev-end )
       [ debug-heap? ] [if]
-	cr ." Link group: Index: " 2 pick . \ DEBUG
+	cr ." Link group: Index: " over . \ DEBUG
 	dup ." Prev index: " . \ DEBUG
       [then]
-      2 pick over 1+ = over -1 <> and if
-	[ debug-heap? ] [if]
-	  ." Prev adjacent " \ DEBUG
-	[then]
-	2 pick 2 pick tuck group-end@ swap ( index heap prev-end end heap )
-	find-next-free-group-start ( index heap prev-end next-start )
-	2over group-end@ ( index heap prev-end next-start end )
-	[ debug-heap? ] [if]
-	  over ." Next index: " . \ DEBUG
-	[then]
-	over = if ( index heap prev-end next-start )
-	  [ debug-heap? ] [if]
-	    ." Next adjacent " \ DEBUG
-	  [then]
-	  2over rot swap link-group-next-adjacent ( index heap prev-end )
-	  swap link-group-prev-adjacent ( )
-	else ( index heap prev-end next-start )
-	  [ debug-heap? ] [if]
-	    ." Next not adjacent " \ DEBUG
-	  [then]
-	  2over rot swap link-group-next ( index heap prev-end )
-	  swap link-group-prev-adjacent ( )
+      2dup 1+ = over -1 <> and if
+	[ debug-heap? ] [if] ." Prev adjacent " [then] \ DEBUG
+	over r@ group-end@ ( index prev-end end )
+	r@ find-next-free-group-start ( index prev-end next-start )
+	2 pick r@ group-end@ ( index prev-end next-start end )
+	[ debug-heap? ] [if] over ." Next index: " . [then] \ DEBUG
+	over = if ( index prev-end next-start )
+	  [ debug-heap? ] [if] ." Next adjacent " [then] \ DEBUG
+	  2 pick swap r@ link-group-next-adjacent ( index prev-end )
+	else ( index prev-end next-start )
+	  [ debug-heap? ] [if] ." Next not adjacent " [then] \ DEBUG
+	  2 pick swap r@ link-group-next ( index prev-end )
 	then
+	r> link-group-prev-adjacent ( )
       else
-	[ debug-heap? ] [if]
-	  ." Prev not adjacent " \ DEBUG
-	[then]
-	2 pick 2 pick tuck group-end@ swap ( index heap prev-end end heap )
-	find-next-free-group-start ( index heap prev-end next-start )
-	2over group-end@ ( index heap prev-end next-start end )
-	[ debug-heap? ] [if]
-	  over ." Next index: " . \ DEBUG
-	[then]
-	over = if ( index heap prev-end next-start )
-	  [ debug-heap? ] [if]
-	    ." Next adjacent " \ DEBUG
-	  [then]
-	  2over rot swap link-group-next-adjacent ( index heap prev-end )
-	  swap link-group-prev ( )
+	[ debug-heap? ] [if] ." Prev not adjacent " [then] \ DEBUG
+	over r@ group-end@ ( index prev-end end )
+	r@ find-next-free-group-start ( index prev-end next-start )
+	2 pick r@ group-end@ ( index prev-end next-start end )
+	[ debug-heap? ] [if] over ." Next index: " . [then] \ DEBUG
+	over = if ( index prev-end next-start )
+	  [ debug-heap? ] [if] ." Next adjacent " [then] \ DEBUG
+	  2 pick swap r@ link-group-next-adjacent ( index prev-end )
 	else
-	  [ debug-heap? ] [if]
-	    ." Next not adjacent " \ DEBUG
-	  [then]
-	  2over rot swap link-group-next ( index heap prev-end )
-	  swap link-group-prev ( )
+	  [ debug-heap? ] [if] ." Next not adjacent " [then] \ DEBUG
+	  2 pick swap r@ link-group-next ( index prev-end )
 	then
+	r> link-group-prev ( )
       then
     ;
 
@@ -611,16 +519,16 @@ begin-module new-heap
 	then
 	( size index )
       else
-	dup r@ group-next-free@ dup -1 <> if
-	  >r 2dup + r> r@ group-prev-free!
-	else
-	  drop
-	then
 	dup r@ group-prev-free@ dup -1 <> if
 	  >r 2dup + r> r@ group-next-free!
 	else
 	  drop 2dup + r@ heap-next-free!
 	then 
+	dup r@ group-next-free@ dup -1 <> if
+	  >r 2dup + r> r@ group-prev-free!
+	else
+	  drop
+	then
 	dup r@ group-prev-free@ 2 pick 2 pick + r@ group-prev-free!
 	dup r@ group-next-free@ 2 pick 2 pick + r@ group-next-free!
 	( size index )
