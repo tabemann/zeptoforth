@@ -23,10 +23,19 @@ compress-flash
 begin-module new-heap
 
   \ Debug heap
-  true constant debug-heap
+  true constant debug-heap?
+
+  \ Verify that memory is allocated
+  true constant verify-allocated?
 
   \ No blocks free exception
   : x-allocate-failed ( -- ) space ." allocate failed" cr ;
+
+  \ Internal error
+  : x-internal-error ( -- ) space ." heap internal error" cr ;
+
+  \ Memory is not allocated
+  : x-memory-not-allocated ( -- ) space ." memory not allocated" cr ;
 
   begin-module heap-internal
 
@@ -62,10 +71,15 @@ begin-module new-heap
 
     \ Get the heap bitmap
     : heap-bitmap ( heap -- bitmap ) [inlined] heap-size + ;
+
+    \ Get a heap bitmap cell
+    : heap-bitmap-cell ( index heap -- addr )
+      [inlined] heap-bitmap swap 5 rshift cells +
+    ;
     
     \ Get the heap blocks
     : heap-blocks ( heap -- blocks )
-      [inlined] dup heap-size + swap heap-block-count @ 5 rshift cells +
+      [inlined] dup heap-block-count @ swap heap-bitmap-cell
     ;
     
     commit-flash
@@ -96,7 +110,7 @@ begin-module new-heap
 
     \ Get whether a block has been allocated
     : block-allocated? ( index heap -- allocated? )
-      heap-bitmap over 5 rshift + swap $1F and bit swap bit@
+      heap-bitmap over 5 rshift cells + swap $1F and bit swap bit@
     ;
 
     commit-flash
@@ -106,18 +120,20 @@ begin-module new-heap
 
     \ Set the group size of a block
     : group-size! ( blocks group heap -- )
-      [ debug-heap ] [if]
-	cr ." group-size! Index: " over . \ DEBUG
-	." Address: " 2dup heap-block h.8 space \ DEBUG
+      [ debug-heap? ] [if]
+	cr
+	2 pick 900 > if ." ****** " then \ DEBUG
+	." group-size! Index: " over . \ DEBUG
 	." Old size: " 2dup group-size@ . \ DEBUG
 	." New size: " 2 pick . \ DEBUG
       [then]
+      2 pick 2 pick + over heap-block-count @ > triggers x-internal-error
       heap-block group-size !
     ;
 
     \ Set the next free group in the heap
     : heap-next-free! ( group heap -- )
-      [ debug-heap ] [if]
+      [ debug-heap? ] [if]
 	cr ." heap-next-free! Index: " over . \ DEBUG
       [then]
       heap-next-free !
@@ -128,7 +144,7 @@ begin-module new-heap
 
     \ Set the previous free group index
     : group-prev-free! ( index group heap -- )
-      [ debug-heap ] [if]
+      [ debug-heap? ] [if]
 	cr ." group-prev-free! Prev Index: " 2 pick . ." Index: " over . \ DEBUG
       [then]
       heap-block group-prev-free !
@@ -139,13 +155,16 @@ begin-module new-heap
 
     \ Set the next free group index
     : group-next-free! ( index group heap -- )
-      [ debug-heap ] [if]
+      [ debug-heap? ] [if]
 	cr ." group-next-free! Next Index: " 2 pick . ." Index: " over . \ DEBUG
       [then]
       heap-block group-next-free !
     ;
     
     commit-flash
+
+    \ Get the end of a group
+    : group-end@ ( group heap -- index ) swap tuck swap group-size@ + ;
     
     \ Get the highest zero bit in a cell lower than a given position
     : test-high-zero ( u i -- i|-1 )
@@ -185,20 +204,11 @@ begin-module new-heap
 
     \ Get the lowest zero bit in a cell higher than a given position
     : test-low-zero ( u i -- i|-1 )
-      [ debug-heap ] [if]
-	cr ." test-low-zero: u: " over h.8 space ." i: " dup . \ DEBUG
-      [then]
       over if
 	over -1 <> if
 	  tuck rshift swap
 	  begin dup 32 < while
-	    over 1 and 0= if
-	      nip
-	      [ debug-heap ] [if]
-		." f: " dup . \ DEBUG
-	      [then]
-	      exit
-	    then
+	    over 1 and 0= if nip exit then
 	    1+ swap 1 rshift swap
 	  repeat
 	  2drop -1
@@ -219,7 +229,6 @@ begin-module new-heap
 
     \ Get the end of the previous free block group
     : find-prev-free-group-end ( index heap -- index|-1 )
-      .s
       over 0> if
 	over $1F and if
 	  over >r swap $1F bic swap 2dup bitmap-index@ r> $1F and
@@ -227,8 +236,8 @@ begin-module new-heap
 	  swap 32 - swap 2dup bitmap-index@ 32
 	then
 	begin
-	  .s test-high-zero dup -1 <> if
-	    nip swap $1F bic + .s exit
+	  test-high-zero dup -1 <> if
+	    nip swap $1F bic + exit
 	  then
 	  drop over 0> if
 	    swap 32 - swap 2dup bitmap-index@ 32 false
@@ -367,13 +376,15 @@ begin-module new-heap
 
     \ Link the next free block group
     : link-group-next ( index next-index heap -- )
-      2 pick 2 pick 2 pick group-prev-free! ( index next-index heap )
+      over -1 <> if
+	2 pick 2 pick 2 pick group-prev-free! ( index next-index heap )
+      then
       rot swap group-next-free! ( )
     ;
 
     \ Link the previous free block group
     : link-group-prev ( index prev-index heap -- )
-      [ debug-heap ] [if]
+      [ debug-heap? ] [if]
 	cr ." prev-index: " over . \ DEBUG
       [then]
       over -1 <> if
@@ -408,18 +419,18 @@ begin-module new-heap
 	then
 	r> group-next-free! ( )
       else
-	nip -1 -rot group-prev-free! ( )
+	nip -1 -rot swap group-prev-free! ( )
       then
     ;
 
     \ Mark space as allocated
     : mark-allocated ( count index heap -- )
-      heap-bitmap over 5 rshift cells + >r
+      swap tuck swap heap-bitmap-cell >r
       begin over while
       	32 over $1F and - 2 pick min
       	$FFFFFFFF over 32 swap - rshift 2 pick $1F and lshift
 
-	[ debug-heap ] [if]
+	[ debug-heap? ] [if]
 	  cr ." mark-allocated: " dup h.8 \ DEBUG
 	[then]
 	
@@ -429,19 +440,9 @@ begin-module new-heap
       rdrop 2drop
     ;
 
-    \ \ Mark space as allocaed
-    \ : mark-allocated ( count index heap -- )
-    \ heap-bitmap >r
-    \ begin over while
-    \ 	dup $1F and 1 swap lshift over 5 rshift 2 lshift r@ + bis!
-    \ 	1+ swap 1- swap
-    \ repeat
-    \ rdrop 2drop
-    \ ;
-    
     \ Mark space as freed
     : mark-free ( count index heap -- )
-      heap-bitmap over 5 rshift cells + >r
+      swap tuck swap heap-bitmap-cell >r
       begin over while
       	32 over $1F and - 2 pick min
       	$FFFFFFFF over 32 swap - rshift 2 pick $1F and lshift
@@ -451,81 +452,59 @@ begin-module new-heap
       rdrop 2drop
     ;
 
-    \ \ Mark space as freed
-    \ : mark-free ( count index heap -- )
-    \ heap-bitmap >r
-    \ begin over while
-    \ 	dup $1F and 1 swap lshift over 5 rshift 2 lshift r@ + bic!
-    \ 	1+ swap 1- swap
-    \ repeat
-    \ rdrop 2drop
-    \ ;
-    
     commit-flash
 
     \ Link a freed block group
     : link-group ( index heap -- )
-      [ debug-heap ] [if]
+      [ debug-heap? ] [if]
 	cr ." heap-next-free@: " dup heap-next-free @ . \ DEBUG
       [then]
       2dup find-prev-free-group-end ( index heap prev-end )
-      [ debug-heap ] [if]
+      [ debug-heap? ] [if]
 	cr ." Link group: Index: " 2 pick . \ DEBUG
-	2 pick 2 pick  ." Address: " heap-block h.8 space \ DEBUG
 	dup ." Prev index: " . \ DEBUG
-	dup -1 <> if \ DEBUG
-	  2dup ." Prev address: " swap heap-block h.8 space \ DEBUG
-	then \ DEBUG
       [then]
       2 pick over 1+ = over -1 <> and if
-	[ debug-heap ] [if]
+	[ debug-heap? ] [if]
 	  ." Prev adjacent " \ DEBUG
 	[then]
-	2 pick 2 pick 2dup group-size@ rot +
-	swap ( index heap prev-end end heap )
+	2 pick 2 pick tuck group-end@ swap ( index heap prev-end end heap )
 	find-next-free-group-start ( index heap prev-end next-start )
-	2over group-size@ 4 pick + ( index heap prev-end next-start end )
-	[ debug-heap ] [if]
+	2over group-end@ ( index heap prev-end next-start end )
+	[ debug-heap? ] [if]
 	  over ." Next index: " . \ DEBUG
-	  over -1 <> if \ DEBUG
-	    over 4 pick ." Next address: " heap-block h.8 space \ DEBUG
-	  then \ DEBUG
 	[then]
 	over = if ( index heap prev-end next-start )
-	  [ debug-heap ] [if]
+	  [ debug-heap? ] [if]
 	    ." Next adjacent " \ DEBUG
 	  [then]
 	  2over rot swap link-group-next-adjacent ( index heap prev-end )
 	  swap link-group-prev-adjacent ( )
 	else ( index heap prev-end next-start )
-	  [ debug-heap ] [if]
+	  [ debug-heap? ] [if]
 	    ." Next not adjacent " \ DEBUG
 	  [then]
 	  2over rot swap link-group-next ( index heap prev-end )
 	  swap link-group-prev-adjacent ( )
 	then
       else
-	[ debug-heap ] [if]
+	[ debug-heap? ] [if]
 	  ." Prev not adjacent " \ DEBUG
 	[then]
-	2 pick 2 pick 2dup group-size@ rot +
-	swap ( index heap prev-end end heap )
+	2 pick 2 pick tuck group-end@ swap ( index heap prev-end end heap )
 	find-next-free-group-start ( index heap prev-end next-start )
-	2over group-size@ 4 pick + ( index heap prev-end next-start end )
-	[ debug-heap ] [if]
+	2over group-end@ ( index heap prev-end next-start end )
+	[ debug-heap? ] [if]
 	  over ." Next index: " . \ DEBUG
-	  over -1 <> if \ DEBUG
-	    over 4 pick ." Next address: " heap-block h.8 space \ DEBUG
-	  then \ DEBUG
 	[then]
 	over = if ( index heap prev-end next-start )
-	  [ debug-heap ] [if]
+	  [ debug-heap? ] [if]
 	    ." Next adjacent " \ DEBUG
 	  [then]
 	  2over rot swap link-group-next-adjacent ( index heap prev-end )
 	  swap link-group-prev ( )
 	else
-	  [ debug-heap ] [if]
+	  [ debug-heap? ] [if]
 	    ." Next not adjacent " \ DEBUG
 	  [then]
 	  2over rot swap link-group-next ( index heap prev-end )
@@ -549,26 +528,55 @@ begin-module new-heap
       dup heap-bitmap swap heap-block-count @ 3 rshift 0 fill
     ;
 
+    \ Find the last block in a heap
+    debug-heap? [if]
+      : find-last-block ( heap -- index )
+	>r r@ heap-next-free @ begin
+	  dup r@ group-size@ 2dup + r@ heap-block-count @ >= if
+	    2dup + r@ heap-block-count @ = if
+	      over r@ group-next-free@ -1 = if
+		drop true
+	      else
+		cr ." Unexpected lack of end: Index: " swap .
+		." Size: " .
+		['] x-internal-error ?raise
+	      then
+	    else
+	      cr ." Oversized block: Index: " over . ." Size: " .
+	      ." Next index: " r@ group-next-free@ .
+	      ['] x-internal-error ?raise
+	    then
+	  else
+	    drop dup r@ group-next-free@ dup -1 <> if
+	      nip false
+	    else
+	      drop cr ." Unexpected end: Index: " .
+	      ['] x-internal-error ?raise
+	    then
+	  then
+	until
+	rdrop
+      ;
+    [then]
+    
     commit-flash
 
     \ Find a free group
     : find-free ( size heap -- )
-      [ debug-heap ] [if]
+      [ debug-heap? ] [if]
 	cr ." Finding free for size: " over . \ DEBUG
       [then]
       dup >r heap-next-free @
       begin dup -1 <> while
-	[ debug-heap ] [if]
+	[ debug-heap? ] [if]
 	  cr ." Finding free: Index: " dup . \ DEBUG
-	  dup r@ heap-block ." Address: " h.8 space \ DEBUG
 	  dup r@ group-next-free@ over = if \ DEBUG
 	    cr ." LOOP!" [: ;] ?raise \ DEBUG
 	  then \ DEBUG
 	[then]
 	dup r@ group-size@ 2 pick >= if
-	  [ debug-heap ] [if]
+	  [ debug-heap? ] [if]
 	    cr ." Found free: Index: " dup . \ DEBUG
-	    dup r@ heap-block ." Address: " h.8 space \ DEBUG
 	    dup r@ group-size@ ." Size: " . space \ DEBUG
 	  [then]
 	  rdrop nip exit
@@ -577,17 +585,16 @@ begin-module new-heap
 	then
       repeat
       rdrop nip
-      [ debug-heap ] [if]
+      [ debug-heap? ] [if]
 	cr ." Not found!" \ DEBUG
       [then]
     ;
 
     \ Allocate from a group
     : allocate-from-group ( size index heap -- )
-      [ debug-heap ] [if]
+      [ debug-heap? ] [if]
 	cr ." heap-next-free@: " dup heap-next-free @ . \ DEBUG
 	cr ." Allocate from group: Index: " over . \ DEBUG
-	2dup heap-block ." Address: " h.8 space \ DEBUG
 	." Size: " 2 pick . \ DEBUG
 	." Group size: " 2dup group-size@ . \ DEBUG
       [then]
@@ -604,9 +611,12 @@ begin-module new-heap
 	then
 	( size index )
       else
-	2dup + over r@ group-next-free@ r@ group-prev-free!
+	dup r@ group-next-free@ dup -1 <> if
+	  >r 2dup + r> r@ group-prev-free!
+	else
+	  drop
+	then
 	dup r@ group-prev-free@ dup -1 <> if
-	  [ debug-heap ] [if] .s [then]
 	  >r 2dup + r> r@ group-next-free!
 	else
 	  drop 2dup + r@ heap-next-free!
@@ -618,14 +628,13 @@ begin-module new-heap
 	2 pick 2 pick + r@ group-size! ( size index )
 	2dup r@ group-size! ( size index )
       then
-      r> .s mark-allocated ( )
+      r> mark-allocated ( )
     ;
 
     \ Expand a group
     : expand-group ( size index heap -- )
-      [ debug-heap ] [if]
+      [ debug-heap? ] [if]
 	cr ." Expand group: Index: " over . \ DEBUG
-	2dup heap-block ." Address: " h.8 space \ DEBUG
 	." Size: " 2 pick . \ DEBUG
       [then]
       >r dup r@ group-size@ over + ( size index end )
@@ -651,7 +660,56 @@ begin-module new-heap
       then
     ;
 
+    \ Verify that memory is allocated
+    : is-allocated? ( index size heap -- allocated? )
+      >r swap tuck + begin 2dup < while
+	1- dup r@ block-allocated? not if rdrop 2drop false exit then
+      then
+      rdrop 2drop true
+    ;
+
+    \ Verify that no memory is allocated after the last free block
+    : verify-last-block ( heap -- )
+      [ debug-heap? ] [if]
+	>r r@ heap-block-count @ r@ find-last-block
+	dup -1 <> if
+	  begin 2dup > while
+	    dup r@ block-allocated? if
+	      cr ." Unexpected allocated block: Index: " dup .
+	      ['] x-internal-error ?raise
+	    else
+	      1+
+	    then
+	  repeat
+	then
+	rdrop 2drop
+      [else]
+	drop
+      [then]
+    ;
+    
   end-module> import
+
+  \ Dump a heap's bitmap
+  : diagnose-heap ( heap -- )
+    cr ." DIAGNOSTIC: "
+    cr ." Heap start: " 0 over heap-block h.8
+\    dup heap-next-free @ begin dup -1 <> while
+\      cr ." Free block: Index: " dup .
+\      ." Size: " 2dup swap group-size@ .
+\      2dup swap group-next-free@ over <> if \ DEBUG
+\	over group-next-free@
+\      else \ DEBUG
+\	2drop -1 \ DEBUG
+\      then \ DEBUG
+\    repeat
+    \    drop cr
+    cr
+    dup heap-block-count @ 0 ?do
+      i over block-allocated? if ." *" else ." ." then
+    loop
+    drop
+  ;
 
   commit-flash
 
@@ -668,21 +726,31 @@ begin-module new-heap
 
   \ Allocate from a heap
   : allocate ( bytes heap -- addr )
-    [ debug-heap ] [if]
+    [ debug-heap? ] [if]
       cr over ." Allocating bytes: " . \ DEBUG
     [then]
     >r cell+ r@ size>blocks ( size )
     dup r@ find-free dup -1 <> averts x-allocate-failed ( size index )
     tuck r@ allocate-from-group ( index size index )
-    r> heap-block cell+ ( addr )
+    r@ heap-block cell+ ( addr )
+    r> verify-last-block
   ;
 
   \ Free a group in a heap
   : free ( addr heap -- )
     >r cell - r@ block-addr>index ( index )
     dup r@ group-size@ ( index size )
+    [ verify-allocated? ] [if]
+      2dup r@ is-allocated? not if
+	[ debug-heap? ] [if]
+	  cr ." Memory not allocated: Index: " over . ." Size: " dup .
+	[then]
+	['] x-memory-not-allocated ?raise
+      then
+    [then]
     swap dup r@ link-group ( size index )
-    r> mark-free ( )
+    r@ mark-free ( )
+    r> verify-last-block
   ;
 
   \ Resize a group in a heap
@@ -703,30 +771,7 @@ begin-module new-heap
     else ( size index )
       nip r> heap-block cell+ ( same-addr )
     then
-  ;
-
-  \ Dump a heap's bitmap
-  : diagnose-heap ( heap -- )
-    cr ." DIAGNOSTIC: "
-    cr ." Heap start: " 0 over heap-block h.8
-\    dup heap-next-free @ begin dup -1 <> while
-\      cr ." Free block: Index: " dup .
-\      ." Address: " 2dup swap heap-block h.8 space
-\      ." Size: " 2dup swap group-size@ .
-\      2dup swap group-next-free@ over <> if \ DEBUG
-\	over group-next-free@
-\      else \ DEBUG
-\	2drop -1 \ DEBUG
-\      then \ DEBUG
-\    repeat
-    \    drop cr
-    cr
-    dup heap-block-count @ swap heap-bitmap swap 0 ?do ( bitmap )
-      i 5 rshift cells over + @ i $1F and rshift 1 and if ." *" else ." ." then
-    loop
-    drop
-  ;
-      
+  ;      
     
   commit-flash
 
