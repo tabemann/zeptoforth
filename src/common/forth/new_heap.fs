@@ -108,9 +108,16 @@ begin-module new-heap
       then
     ;
 
+    \ Get the value of the bitmap containing an index
+    : bitmap-index@ ( index heap -- bitmap )
+      heap-bitmap swap 5 rshift 2 lshift + @
+    ;
+
+    commit-flash
+
     \ Get whether a block has been allocated
     : block-allocated? ( index heap -- allocated? )
-      heap-bitmap over 5 rshift cells + swap $1F and bit swap bit@
+      swap tuck swap bitmap-index@ swap $1F and bit and 0<>
     ;
 
     commit-flash
@@ -220,11 +227,6 @@ begin-module new-heap
       then
     ;
 
-    \ Get the value of the bitmap containing an index
-    : bitmap-index@ ( index heap -- bitmap )
-      heap-bitmap swap 5 rshift 2 lshift + @
-    ;
-
     commit-flash
 
     \ Get the end of the previous free block group
@@ -261,7 +263,7 @@ begin-module new-heap
 	then
 	begin
 	  test-high-nonzero dup -1 <> if
-	    1+ nip swap $1F bic + exit
+	    nip swap $1F bic + 1+ exit
 	  then
 	  drop over 0> if
 	    swap 32 - swap 2dup bitmap-index@ 32 false
@@ -325,6 +327,9 @@ begin-module new-heap
     : link-group-next-adjacent ( index next-index heap -- )
       >r
       dup r@ group-next-free@ ( index next-index next-next-index )
+      dup -1 <> if
+	2 pick over r@ group-prev-free! ( index next-index next-next-index )
+      then
       2 pick r@ group-next-free! ( index next-index )
       r@ group-size@ over r@ group-size@ + ( index size )
       swap r> group-size! ( )
@@ -572,8 +577,31 @@ begin-module new-heap
     : is-allocated? ( index size heap -- allocated? )
       >r swap tuck + begin 2dup < while
 	1- dup r@ block-allocated? not if rdrop 2drop false exit then
-      then
+      repeat
       rdrop 2drop true
+    ;
+
+    \ Verify that the first free block is actually the first free block
+    : verify-first-block ( heap -- )
+      [ debug-heap? ] [if]
+	>r r@ heap-next-free @ r@ group-prev-free@ -1 <> if
+	  cr ." Supposed first free block not first: Index: "
+	  r@ heap-next-free @ . ." Prev index: "
+	  r@ heap-next-free @ r@ group-prev-free@ .
+	  ['] x-internal-error ?raise
+	then
+	r@ heap-next-free @ 1- r@ find-prev-free-group-end dup -1 <> if
+	  cr ." Supposed first free block not first: Index: "
+	  r@ heap-next-free @ . ." Prev found index: "
+	  r@ find-free-group-start .
+	  ['] x-internal-error ?raise
+	else
+	  drop
+	then
+	rdrop
+      [else]
+	drop
+      [then]
     ;
 
     \ Verify that no memory is allocated after the last free block
@@ -581,6 +609,7 @@ begin-module new-heap
       [ debug-heap? ] [if]
 	>r r@ heap-block-count @ r@ find-last-block
 	dup -1 <> if
+	  cr ." Last block: " dup .
 	  begin 2dup > while
 	    dup r@ block-allocated? if
 	      cr ." Unexpected allocated block: Index: " dup .
@@ -589,8 +618,11 @@ begin-module new-heap
 	      1+
 	    then
 	  repeat
+	  2drop
+	else
+	  drop
 	then
-	rdrop 2drop
+	rdrop
       [else]
 	drop
       [then]
@@ -641,6 +673,7 @@ begin-module new-heap
     dup r@ find-free dup -1 <> averts x-allocate-failed ( size index )
     tuck r@ allocate-from-group ( index size index )
     r@ heap-block cell+ ( addr )
+    r@ verify-first-block
     r> verify-last-block
   ;
 
@@ -658,6 +691,7 @@ begin-module new-heap
     [then]
     swap dup r@ link-group ( size index )
     r@ mark-free ( )
+    r@ verify-first-block
     r> verify-last-block
   ;
 
