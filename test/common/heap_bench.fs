@@ -83,13 +83,24 @@ begin-module heap-bench
       swap bench-block-size * swap + bench-head-size +
     ;
 
+    \ Dump the allocated blocks
+    : dump-blocks ( bench -- )
+      cr ." Blocks: "
+      dup dup bench-heap-current-count @ bench-block-size * bench-head-size + +
+      swap bench-head-size + ?do
+	i block-addr @ h.8 ." :" i block-size @ .
+      bench-block-size +loop
+    ;
+    
     \ Get a block
     : allocate-block ( addr size bench -- )
       >r
+      cr ." Allocated block: Addr: " over h.8 space ." Size: " dup .
       r@ bench-heap-current-count @ r@ bench-block
       tuck block-size !
       block-addr !
-      1 r> bench-heap-current-count +!
+      1 r@ bench-heap-current-count +!
+      r> dump-blocks
     ;
 
     \ Free a block
@@ -98,7 +109,8 @@ begin-module heap-bench
       dup 1+ r@ bench-block
       dup bench-block-size -
       rot 1+ r@ bench-heap-current-count @ swap - bench-block-size * move
-      -1 r> bench-heap-current-count +!
+      -1 r@ bench-heap-current-count +!
+      r> dump-blocks
     ;
 
     \ Do benchmark allocation
@@ -131,7 +143,8 @@ begin-module heap-bench
 	r@ bench-heap-current-count @ umod
 	dup r@ bench-block
 	dup block-size @ negate r@ bench-heap-current-size +!
-	block-addr @
+	dup block-addr @ cr ." Free: Addr: " dup h.8 space
+	swap block-size @ ." Size: " .
 	r@ bench-heap @ r@ bench-free @ execute
 	r> free-block
 	true
