@@ -23,10 +23,10 @@ compress-flash
 begin-module new-heap
 
   \ Debug heap
-  true constant debug-heap?
+  false constant debug-heap?
 
   \ Verify that memory is allocated
-  true constant verify-allocated?
+  false constant verify-allocated?
 
   \ No blocks free exception
   : x-allocate-failed ( -- ) space ." allocate failed" cr ;
@@ -187,7 +187,7 @@ begin-module new-heap
 	  2drop -1
 	then
       else
-	nip
+	nip 1-
       then
     ;
 
@@ -205,7 +205,7 @@ begin-module new-heap
 	  2drop -1
 	then
       else
-	nip
+	nip 1-
       then
     ;
 
@@ -255,6 +255,9 @@ begin-module new-heap
 
     \ Get the start of a previous free block group
     : find-free-group-start ( index heap -- index )
+      [ debug-heap? ] [if]
+	cr ." find-free-group-start: End index: " over . \ DEBUG
+      [then]
       over 0> if
 	over $1F and if
 	  over >r swap $1F bic swap 2dup bitmap-index@ r> $1F and
@@ -262,8 +265,15 @@ begin-module new-heap
 	  swap 32 - swap 2dup bitmap-index@ 32
 	then
 	begin
+	  [ debug-heap? ] [if]
+	    ." Bitmap cell " over h.8 space ." Bitmap cell index: " dup . \ DEBUG
+	  [then]
 	  test-high-nonzero dup -1 <> if
-	    nip swap $1F bic + 1+ exit
+	    nip swap $1F bic + 1+
+	    [ debug-heap? ] [if]
+	      ." Start index: " dup . \ DEBUG
+	    [then]
+	    exit
 	  then
 	  drop over 0> if
 	    swap 32 - swap 2dup bitmap-index@ 32 false
@@ -275,6 +285,9 @@ begin-module new-heap
       else
 	2drop 0
       then
+      [ debug-heap? ] [if]
+	." Start index: " dup . \ DEBUG
+      [then]
     ;
 
     \ Get the start of the next free block group
