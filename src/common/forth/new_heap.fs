@@ -441,7 +441,7 @@ begin-module new-heap
 
     \ Check whether a group is expandable
     : expandable-group? ( size index heap -- flag )
-      >r dup r@ group-size@ over + ( size index end )
+      >r dup r@ group-end@ ( size index end )
       dup r@ find-next-free-group-start over = if ( size index end )
 	r@ group-size@ swap r> group-size@ + <= ( flag )
       else
@@ -563,26 +563,41 @@ begin-module new-heap
 	cr ." Expand group: Index: " over . \ DEBUG
 	." Size: " 2 pick . \ DEBUG
       [then]
-      >r dup r@ group-size@ over + ( size index end )
+      >r dup r@ group-end@ ( size index end )
       over r@ group-size@ 3 pick - ( size index end size-diff )
       over r@ group-size@ + ( size index end new-end-size )
-      r> swap >r >r -rot tuck r@ group-size! ( end index )
-      dup r@ group-size@ over r@ mark-allocated swap ( index end )
-      over r@ group-prev-free@ ( index end prev-group )
-      swap r@ group-next-free@ ( index prev-group next-group )
-      rot dup r@ group-size@ + ( prev-group next-group new-end )
-      r> r> swap >r over r@ group-size! ( prev-group next-group new-end )
-      2dup r@ group-next-free! ( prev-group next-group new-end )
-      over -1 <> if
-	tuck swap r@ group-prev-free! ( prev-group new-end )
+      dup 0<> if
+	r> swap >r >r -rot tuck r@ group-size! ( end index )
+	dup r@ group-size@ over r@ mark-allocated swap ( index end )
+	dup r@ group-prev-free@ ( index end prev-group )
+	swap r@ group-next-free@ ( index prev-group next-group )
+	rot r@ group-end@ ( prev-group next-group new-end )
+	r> r> swap >r over r@ group-size! ( prev-group next-group new-end )
+	2dup r@ group-next-free! ( prev-group next-group new-end )
+	over -1 <> if
+	  tuck swap r@ group-prev-free! ( prev-group new-end )
+	else
+	  nip ( prev-group new-end )
+	then
+	2dup r@ group-prev-free! ( prev-group new-end )
+	over -1 <> if
+	  swap r> group-next-free! ( )
+	else
+	  nip r> heap-next-free! ( )
+	then
       else
-	nip ( prev-group new-end )
-      then
-      2dup r@ group-prev-free! ( prev-group new-end )
-      over -1 <> if
-	swap r> group-next-free! ( )
-      else
-	nip r> heap-next-free! ( )
+	drop -rot tuck r@ group-size! ( end index )
+	dup r@ group-size@ swap r@ mark-allocated ( end )
+	dup r@ group-prev-free@ ( end prev-group )
+	swap r@ group-next-free@ ( prev-group next-group )
+	dup -1 <> if
+	  2dup r@ group-prev-free! ( prev-group next-group )
+	then
+	over -1 <> if
+	  swap r> group-next-free! ( )
+	else
+	  nip r> heap-next-free! ( )
+	then
       then
     ;
 
@@ -712,10 +727,19 @@ begin-module new-heap
   : resize ( bytes addr heap -- new-addr )
     >r cell - r@ block-addr>index ( bytes index )
     swap cell+ r@ size>blocks swap ( size index )
+    [ debug-heap? ] [if]
+      cr ." Resizing block: Index: " dup . ." Size: " over . \ DEBUG
+    [then]
     2dup r@ group-size@ > if
       2dup r@ expandable-group? if ( size index )
+	[ debug-heap? ] [if]
+	  cr ." Expanding block" \ DEBUG
+	[then]
 	tuck r@ expand-group r> heap-block cell+ ( new-addr )
       else
+	[ debug-heap? ] [if]
+	  cr ." Moving block" \ DEBUG
+	[then]
 	swap r@ heap-block-size @ * cell - r@ allocate ( index new-addr )
 	over r@ heap-block cell+ swap ( index addr new-addr )
 	2 pick r@ group-size@ r@ heap-block-size @ * cell -
