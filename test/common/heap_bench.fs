@@ -150,7 +150,7 @@ begin-module heap-bench
 	  r@ bench-prng tinymt32-generate-uint32 swap umod 3 cells max 16 align
 	  r@ bench-prng tinymt32-generate-uint32
 	  r@ bench-heap-current-count @ umod
-	  bench-block
+	  r@ bench-block
 	  2dup block-size @ + r@ bench-heap-size-limit @ <= if
 	    over r@ bench-heap-current-size +!
 	    tuck block-size +!
@@ -173,13 +173,13 @@ begin-module heap-bench
     : bench-cycle ( bench -- )
       >r
       begin
-	r@ bench-prng tinymt32-generate-uint32 4 umod
+	r@ bench-prng tinymt32-generate-uint32 5 umod
 	case
 	  0 of r@ bench-do-allocate ( dup if ." +" then ) endof
 	  1 of r@ bench-do-allocate ( dup if ." +" then ) endof
 	  2 of r@ bench-do-free ( dup if ." -" then ) endof
 	  3 of r@ bench-do-free ( dup if ." -" then ) endof
-\	  4 of r@ bench-do-resize dup if ." x" then endof
+	  4 of r@ bench-do-resize ( dup if ." x" then ) endof
 	endcase
       until
       rdrop
