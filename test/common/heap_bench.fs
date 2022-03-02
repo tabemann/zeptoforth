@@ -83,24 +83,13 @@ begin-module heap-bench
       swap bench-block-size * swap + bench-head-size +
     ;
 
-    \ Dump the allocated blocks
-    : dump-blocks ( bench -- )
-      cr ." Blocks: "
-      dup dup bench-heap-current-count @ bench-block-size * bench-head-size + +
-      swap bench-head-size + ?do
-	i block-addr @ h.8 ." :" i block-size @ .
-      bench-block-size +loop
-    ;
-    
     \ Get a block
     : allocate-block ( addr size bench -- )
       >r
-      cr ." Allocated block: Addr: " over h.8 space ." Size: " dup .
       r@ bench-heap-current-count @ r@ bench-block
       tuck block-size !
       block-addr !
-      1 r@ bench-heap-current-count +!
-      r> dump-blocks
+      1 r> bench-heap-current-count +!
     ;
 
     \ Free a block
@@ -109,8 +98,7 @@ begin-module heap-bench
       dup 1+ r@ bench-block
       dup bench-block-size -
       rot 1+ r@ bench-heap-current-count @ swap - bench-block-size * move
-      -1 r@ bench-heap-current-count +!
-      r> dump-blocks
+      -1 r> bench-heap-current-count +!
     ;
 
     \ Do benchmark allocation
@@ -143,8 +131,7 @@ begin-module heap-bench
 	r@ bench-heap-current-count @ umod
 	dup r@ bench-block
 	dup block-size @ negate r@ bench-heap-current-size +!
-	dup block-addr @ cr ." Free: Addr: " dup h.8 space
-	swap block-size @ ." Size: " .
+	block-addr @
 	r@ bench-heap @ r@ bench-free @ execute
 	r> free-block
 	true
@@ -230,9 +217,9 @@ begin-module heap-bench
       r@ bench-heap @ r@ bench-init-heap @ execute
       r@ bench-seed @ r@ bench-prng tinymt32-init
       systick-counter
-      over begin ?dup while r@ bench-cycle repeat
+      over begin ?dup while r@ bench-cycle 1- repeat
       systick-counter swap -
-      rot 0 swap 0 swap f/ 10000,0 f/ rdrop
+      0 swap rot 0 swap 2swap f/ 10000,0 f/ rdrop
     ;] try if r> dup bench-heap @ swap bench-diagnose @ execute else rdrop then
   ;
 
