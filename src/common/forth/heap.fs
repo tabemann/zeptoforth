@@ -18,9 +18,11 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
+compile-to-flash
+
 compress-flash
 
-begin-module new-heap
+begin-module heap
 
   \ Debug heap
   false constant debug-heap?
@@ -723,6 +725,8 @@ begin-module new-heap
     r> verify-last-block
   ;
 
+  commit-flash
+  
   \ Resize a group in a heap
   : resize ( bytes addr heap -- new-addr )
     >r cell - r@ block-addr>index ( bytes index )
@@ -752,8 +756,6 @@ begin-module new-heap
     then
   ;      
     
-  commit-flash
-
   \ Get the size of a heap with a given block size and block count
   : heap-size ( block-size block-count -- heap-bytes )
     swap 16 align over * swap 32 align 5 rshift cells + heap-size +
@@ -762,3 +764,5 @@ begin-module new-heap
 end-module
 
 end-compress-flash
+
+reboot
