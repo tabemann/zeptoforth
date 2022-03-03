@@ -21,7 +21,7 @@
 begin-module heap-bench-new
 
   heap-bench import
-  new-heap import
+  heap import
   
   \ Block size
   16 constant block-size
