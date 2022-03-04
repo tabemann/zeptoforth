@@ -1423,10 +1423,13 @@ begin-module task
       
       \ Initialize an auxiliary core's main task
       : init-aux-main-task ( -- )
+	0 fifo-drain
 	current-task @ task-dict-base @ dict-base !
 	$7F SHPR3_PRI_15!
 	$FF SHPR2_PRI_11!
 	$FF SHPR3_PRI_14!
+	$00 SIO_IRQ_PROC1 NVIC_IPR_IP!
+	SIO_IRQ_PROC1 NVIC_ISER_SETENA!
 	1 pause-enabled !
 	^ int-io :: enable-int-io
 	init-systick-aux-core

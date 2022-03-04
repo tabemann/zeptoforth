@@ -93,6 +93,10 @@ _init_platform_variables:
 	str r0, [r1, #4]
 	ldr r1, =core_1_launched
 	str r0, [r1]
+	ldr r1, =begin_write
+	str r0, [r1]
+	ldr r1, =waiting_write_done
+	str r0, [r1]
 	bx lr
 
 	@ Reboot the RP2040 in BOOTSEL mode
