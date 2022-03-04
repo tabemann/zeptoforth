@@ -686,7 +686,7 @@ begin-module heap
   \ Initialize a heap at a given address with a given block size and block count
   : init-heap ( block-size block-count addr -- )
     tuck swap 32 align swap heap-block-count !
-    tuck swap 16 align swap heap-block-size !
+    tuck swap cell align 3 cells max swap heap-block-size !
     0 over heap-next-free!
     dup heap-block-count @ 0 2 pick group-size!
     -1 0 2 pick group-prev-free!
@@ -758,7 +758,8 @@ begin-module heap
     
   \ Get the size of a heap with a given block size and block count
   : heap-size ( block-size block-count -- heap-bytes )
-    swap 16 align over * swap 32 align 5 rshift cells + heap-size +
+    swap cell align 3 cells max over * swap 32 align 5 rshift cells +
+    heap-size +
   ;
 
 end-module
