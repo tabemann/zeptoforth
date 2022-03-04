@@ -626,8 +626,8 @@ _find_last_flash_word:
 	define_word "init-flash-write", visible_flag
 _init_flash_write:
 	push {lr}
-	bl _force_core_wait
 	cpsid i
+	bl _force_core_wait
 	bl _exit_xip
 	bl _enable_flash_cmd
 	bl _enable_flash_write

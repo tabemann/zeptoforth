@@ -51,5 +51,13 @@ _sio_hook:
 	adds tos, r0
 	pop {pc}
 	end_inlined
-	
+
+	@@ Get the core 1 launched variable
+	define_internal_word "core-1-launched", visible_flag
+_core_1_launched:
+	push_tos
+	ldr tos, =core_1_launched
+	bx lr
+	end_inlined
+
 	.ltorg

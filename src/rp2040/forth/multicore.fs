@@ -254,6 +254,9 @@ begin-module multicore
       then
     +loop
     drop
+    true core-1-launched !
+    $00 SIO_IRQ_PROC0 NVIC_IPR_IP!
+    SIO_IRQ_PROC0 NVIC_ISER_SETENA!
   ;
 
   \ Reset an auxiliary core
@@ -262,6 +265,7 @@ begin-module multicore
     PSM_FRCE_OFF_PROC1 PSM_FRCE_OFF bis!
     begin PSM_FRCE_OFF_PROC1 PSM_FRCE_OFF bit@ until
     PSM_FRCE_OFF_PROC1 PSM_FRCE_OFF bic!
+    false core-1-launched !
     1 fifo-pop-blocking drop
   ;
 
@@ -278,6 +282,7 @@ end-module> import
 \ Set up reboot to reset the second core
 : reboot ( -- )
   cpu-index 0 = averts x-core-0-only
+  SIO_IRQ_PROC0 ^ interrupt :: NVIC_ICER_CLRENA!
   1 reset-aux-core
   spinlock-count 0 ?do -1 i SPINLOCK ! loop
   reboot
