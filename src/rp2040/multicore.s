@@ -21,8 +21,20 @@
 	@@ CPUID register (do not confuse with the ARM CPUID register)
 	.equ SIO_CPUID, SIO_BASE + 0x000
 
+	@@ NVIC Base address
+	.equ NVIC_Base, 0xE000E100
+
+	@@ NVIC interrupt clear-pending register base address
+	.equ NVIC_ICPR_Base, NVIC_Base + 0x180
+
 	@@ FIFO status register
 	.equ FIFO_ST, SIO_BASE + 0x050
+
+	@@ Bit for core's read-on-empty flag
+	.equ FIFO_ST_ROE, 1 << 3
+
+	@@ Bit for core's write-on-empty flag
+	.equ FIFO_ST_WOF, 1 << 2
 
 	@@ Bit for core's TX FIFO is not full
 	.equ FIFO_ST_RDY, 1 << 1
@@ -45,62 +57,80 @@
 	@@ Synchronization value
 	.equ SYNC_VALUE, 0x7FFFFFFF
 
-	@@ Blocking FIFO push - reads value from R0
-_core_fifo_push:
-	ldr r1, =FIFO_ST
-	movs r2, #FIFO_ST_RDY
-1:	ldr r3, [r1]
-	tst r3, r2
-	beq 1b
-	ldr r1, =FIFO_WR
-	str r0, [r1]
-	sev
-	bx lr
-	
-	@@ Blocking FIFO pop - reads value into R0
-_core_fifo_pop:
-	ldr r0, =FIFO_ST
-	movs r1, #FIFO_ST_VLD
-1:	ldr r2, [r0]
-	tst r2, r1
-	beq 1b
-	ldr r0, =FIFO_RD
+	@@ Handle SIO interrupt
+_handle_sio:
+	push {lr}
+	ldr r0, =begin_write
+	ldr r1, [r0]
+	cmp r1, #0
+	beq 3f
+	ldr r2, =waiting_write_done
+	ldr r1, =-1
+	str r1, [r2]
+1:	ldr r1, [r0]
+	cmp r1, #0
+	beq 2f
+	b 1b
+2:	movs r1, #0
+	str r1, [r2]
+3:	ldr r0, =FIFO_ST
 	ldr r0, [r0]
-	bx lr
+	movs r1, #FIFO_ST_VLD
+	tst r0, r1
+	beq 4f
+	ldr r0, =FIFO_RD
+	ldr r1, [r0]
+	ldr r0, =SIO_CPUID
+	ldr r2, [r0]
+	lsls r2, r2, #2
+	ldr r0, =sio_hook
+	ldr r2, [r0, r2]
+	cmp r2, #0
+	beq 3b
+	push_tos
+	movs tos, r1
+	adds r2, #1
+	blx r2
+	b 3b
+4:	ldr r0, =FIFO_ST
+	ldr r1, =FIFO_ST_ROE | FIFO_ST_WOF
+	str r1, [r0]
+	pop {pc}
 
 	@@ Force the other core to wait
 	define_internal_word "force-core-wait", visible_flag
 _force_core_wait:
-	push {lr}
-@	ldr r0, =core_1_launched
-@	ldr r0, [r0]
-@	cmp r0, #0
-@	beq 2f
-@	ldr r0, =SYNC_SPINLOCK
-@1:	ldr r1, [r0]
-@	cmp r1, #0
-@	beq 1b
-@	ldr r0, =FIFO_ST
-@	movs r1, #FIFO_ST_RDY
-@	ldr r0, [r0]
-@	tst r0, r1
-@	beq 2f
-@	ldr r0, =SYNC_VALUE
-@	bl _core_fifo_push
-2:	pop {pc}
+	ldr r0, =core_1_launched
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 2f
+	ldr r0, =begin_write
+	ldr r1, =-1
+	str r1, [r0]
+	ldr r2, =FIFO_WR
+	str r1, [r2]
+	ldr r2, =waiting_write_done
+1:	ldr r1, [r2]
+	cmp r1, #0
+	beq 1b
+	bx lr
 	end_inlined
 
 	@@ Release the other core
 	define_internal_word "release-core", visible_flag
 _release_core:	
-@	ldr r0, =core_1_launched
-@	ldr r0, [r0]
-@	cmp r0, #0
-@	beq 1f
-@	ldr r0, =SYNC_SPINLOCK
-@	movs r1, #1
-@	str r1, [r0]
-1:	bx lr
+	ldr r0, =core_1_launched
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 2f
+	ldr r0, =begin_write
+	movs r1, #0
+	str r1, [r0]
+	ldr r0, =waiting_write_done
+1:	ldr r1, [r0]
+	cmp r1, #0
+	bne 1b
+2:	bx lr
 	end_inlined
 
 	.ltorg
