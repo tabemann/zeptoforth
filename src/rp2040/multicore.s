@@ -95,7 +95,16 @@ _handle_sio:
 4:	ldr r0, =FIFO_ST
 	ldr r1, =FIFO_ST_ROE | FIFO_ST_WOF
 	str r1, [r0]
-	pop {pc}
+	ldr r0, =force_core_reboot
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 5f
+	ldr r0, =0xE000ED0C @ AIRCR
+	ldr r1, =0x05FA0004
+	str r1, [r0]
+	dsb
+	isb	
+5:	pop {pc}
 
 	@@ Force the other core to wait
 	define_internal_word "force-core-wait", visible_flag
@@ -131,6 +140,21 @@ _release_core:
 	cmp r1, #0
 	bne 1b
 2:	bx lr
+	end_inlined
+
+	@@ Force a core to reboot
+	define_internal_word "force-core-reboot", visible_flag
+_force_core_reboot:	
+	ldr r0, =core_1_launched
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 1f
+	ldr r0, =force_core_reboot
+	ldr r1, =-1
+	str r1, [r0]
+	ldr r2, =FIFO_WR
+	str r1, [r2]
+1:	bx lr
 	end_inlined
 
 	.ltorg
