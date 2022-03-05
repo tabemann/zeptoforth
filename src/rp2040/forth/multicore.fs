@@ -262,12 +262,12 @@ begin-module multicore
   \ Prepare for rebooting the second core
   : prepare-reboot ( -- )
     cpu-index 0 = averts x-core-0-only
-    SIO_IRQ_PROC0 ^ interrupt :: NVIC_ICER_CLRENA!
+\    SIO_IRQ_PROC0 ^ interrupt :: NVIC_ICER_CLRENA!
     force-core-reboot
 \    PSM_FRCE_OFF_PROC1 PSM_FRCE_OFF bis!
 \    begin PSM_FRCE_OFF_PROC1 PSM_FRCE_OFF bit@ until
-\    PSM_FRCE_OFF_PROC1 PSM_FRCE_OFF bic!
-    false core-1-launched !
+\    PSM_FRCE_ON_PROC1 PSM_FRCE_ON bis!
+\    false core-1-launched !
 \    1 fifo-pop-blocking drop
     spinlock-count 0 ?do -1 i SPINLOCK ! loop
   ;    
