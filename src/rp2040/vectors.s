@@ -35,8 +35,8 @@
 	.word _handle_null+1 @ 28
 	.word _handle_null+1 @ 29
 	.word _handle_null+1 @ 30
-	.word _handle_null+1 @ _handle_sio+1 @ 31
-	.word _handle_null+1 @ _handle_sio+1 @ 32
+	.word _handle_sio+1 @ 31
+	.word _handle_sio+1 @ 32
 	.word _handle_null+1 @ 33
 	.word _handle_null+1 @ 34
 	.word _handle_null+1 @ 35
