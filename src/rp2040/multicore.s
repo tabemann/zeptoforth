@@ -48,15 +48,6 @@
 	@@ Read access to this core's RX FIFO
 	.equ FIFO_RD, SIO_BASE + 0x058
 
-	@@ Synchronization spinlock index
-	.equ SYNC_SPINLOCK_INDEX, 30
-
-	@@ Spinlock 30, which we will use for synchronizing between
-	.equ SYNC_SPINLOCK, SIO_BASE + 0x100 + (SYNC_SPINLOCK_INDEX * 4)
-
-	@@ Synchronization value
-	.equ SYNC_VALUE, 0x7FFFFFFF
-
 	@@ Handle SIO interrupt
 _handle_sio:
 	push {lr}
@@ -99,12 +90,36 @@ _handle_sio:
 	ldr r0, [r0]
 	cmp r0, #0
 	beq 5f
-	ldr r0, =0xE000ED0C @ AIRCR
-	ldr r1, =0x05FA0004
-	str r1, [r0]
-	dsb
-	isb	
+	bl _loop_forever_fifo
 5:	pop {pc}
+
+	@@ Loop forever handling the FIFO
+	define_internal_word "loop-forever-fifo", visible_flag
+_loop_forever_fifo:
+	push {lr}
+4:	ldr r0, =begin_write
+	ldr r1, [r0]
+	cmp r1, #0
+	beq 3f
+	ldr r2, =waiting_write_done
+	ldr r1, =-1
+	str r1, [r2]
+1:	ldr r1, [r0]
+	cmp r1, #0
+	beq 2f
+	b 1b
+2:	movs r1, #0
+	str r1, [r2]
+3:	ldr r0, =FIFO_ST
+	ldr r0, [r0]
+	movs r1, #FIFO_ST_VLD
+	tst r0, r1
+	beq 4b
+	ldr r0, =FIFO_RD
+	ldr r1, [r0]
+	b 3b
+	pop {pc}
+	end_inlined
 
 	@@ Force the other core to wait
 	define_internal_word "force-core-wait", visible_flag
