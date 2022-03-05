@@ -23,3 +23,9 @@
 	allot sio_hook, 4 * cpu_count
 	
 	allot core_1_launched, 4
+
+	allot begin_write, 4
+
+	allot waiting_write_done, 4
+
+	allot force_core_reboot, 4

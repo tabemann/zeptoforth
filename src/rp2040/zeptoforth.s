@@ -93,7 +93,42 @@ _init_platform_variables:
 	str r0, [r1, #4]
 	ldr r1, =core_1_launched
 	str r0, [r1]
+	ldr r1, =begin_write
+	str r0, [r1]
+	ldr r1, =waiting_write_done
+	str r0, [r1]
+	ldr r1, =force_core_reboot
+	str r0, [r1]
 	bx lr
+
+	@ Prepare for rebooting
+	define_internal_word "pre-reboot", visible_flag
+_pre_reboot:
+	ldr r0, =0xE000E180 @ NVIC_ICER_Base
+	ldr r1, =1 << 15 @ SIO_IRQ_PROC0
+	ldr r2, [r0]
+	orrs r2, r1
+	str r2, [r0]
+	ldr r0, =0x40010004 @ PSM_FRCE_OFF
+	ldr r1, =1 << 16 @ PSM_FRCE_OFF_PROC1
+	ldr r2, [r0]
+	orrs r2, r1
+	str r2, [r0]
+1:	ldr r2, [r0]
+	tst r2, r1
+	beq 1b
+	ldr r2, [r0]
+	bics r2, r1
+	str r2, [r0]
+	ldr r0, =FIFO_ST
+	ldr r1, =FIFO_ST_VLD
+2:	ldr r2, [r0]
+	tst r2, r1
+	beq 2b
+	ldr r0, =FIFO_RD
+	ldr r0, [r0]
+	bx lr
+	end_inlined
 
 	@ Reboot the RP2040 in BOOTSEL mode
 	define_word "bootsel", visible_flag
