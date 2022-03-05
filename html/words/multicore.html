@@ -35,9 +35,8 @@
             
   <section id="multicore-words">
 <h1>Multicore Words<a class="headerlink" href="#multicore-words" title="Permalink to this headline">¶</a></h1>
-<p>Multiprocessing via multicore execution in zeptoforth is handled separtely from multitasking; separate multitasking environments exist on each core after a second core has been booted. Once a second core has been booted, any attempt to directly control the multitasking environment of another core will result in undefined behavior.</p>
 <p>Currently the only platform on which multicore execution is supported is the RP2040. On this platform cores communicate and synchronize via hardware spinlocks and hardware FIFO’s (i.e. mailboxes). On platforms other than the RP2040 multicore words exist in the dictionary but are merely stubs which will always raise exceptions when called.</p>
-<p>Note that there are currently some rough edges to multicore on the RP2040, specifically that once the second core is booted, no writes to flash may be made, even across reboots, until the MCU is power-cycled, and that <code class="docutils literal notranslate"><span class="pre">disable-int-io</span></code> in <code class="docutils literal notranslate"><span class="pre">int-io</span></code> must be called prior to calling <code class="docutils literal notranslate"><span class="pre">spawn-aux-main</span></code>.</p>
+<p>Note that prior limitations to multicore operation on the RP2040 have been resolved, with there being no need to disable interrupt-driven serial IO, with tasks being able to be started arbitrarily on any core from a task on any core, with multitasking constructs being able to be used across cores, and with writing and erasing flash functioning properly when both cores are operational.</p>
 <p>Multicore support in zeptoforth is largely implemented outside the zeptoforth kernel and is split between <code class="docutils literal notranslate"><span class="pre">src/rp2040/forth/multicore.fs</span></code> (on platforms other than RP2040 stubbed out in <code class="docutils literal notranslate"><span class="pre">src/common/forth/multicore.fs</span></code>) and <code class="docutils literal notranslate"><span class="pre">src/common/forth/task.fs</span></code>, with a bit of supporting functionality also in <code class="docutils literal notranslate"><span class="pre">src/common/forth/systick.fs</span></code> and <code class="docutils literal notranslate"><span class="pre">src/rp2040/forth/erase.fs</span></code>.</p>
 <section id="forth">
 <h2><code class="docutils literal notranslate"><span class="pre">forth</span></code><a class="headerlink" href="#forth" title="Permalink to this headline">¶</a></h2>
@@ -56,6 +55,11 @@
 <h3><code class="docutils literal notranslate"><span class="pre">cpu-offset</span></code><a class="headerlink" href="#cpu-offset" title="Permalink to this headline">¶</a></h3>
 <p>( – offset )</p>
 <p>Return 4 times <code class="docutils literal notranslate"><span class="pre">cpu-index</span></code>.</p>
+</section>
+<section id="sio-hook">
+<h3><code class="docutils literal notranslate"><span class="pre">sio-hook</span></code><a class="headerlink" href="#sio-hook" title="Permalink to this headline">¶</a></h3>
+<p>( – addr )</p>
+<p>Get the address of a hook for the current core which may be set to an xt ( u – ) to handle values written to that core’s FIFO by the other core; note that a value of 0 (the default value) means that values read from the core’s FIFO are discarded.</p>
 <p>In <code class="docutils literal notranslate"><span class="pre">src/common/forth/basic.fs</span></code>, in <code class="docutils literal notranslate"><span class="pre">forth</span></code>, exists:</p>
 </section>
 <section id="cpu-variable">
