@@ -1,10 +1,8 @@
 # Multicore Words
 
-Multiprocessing via multicore execution in zeptoforth is handled separtely from multitasking; separate multitasking environments exist on each core after a second core has been booted. Once a second core has been booted, any attempt to directly control the multitasking environment of another core will result in undefined behavior.
-
 Currently the only platform on which multicore execution is supported is the RP2040. On this platform cores communicate and synchronize via hardware spinlocks and hardware FIFO's (i.e. mailboxes). On platforms other than the RP2040 multicore words exist in the dictionary but are merely stubs which will always raise exceptions when called.
 
-Note that there are currently some rough edges to multicore on the RP2040, specifically that once the second core is booted, no writes to flash may be made, even across reboots, until the MCU is power-cycled, and that `disable-int-io` in `int-io` must be called prior to calling `spawn-aux-main`.
+Note that prior limitations to multicore operation on the RP2040 have been resolved, with there being no need to disable interrupt-driven serial IO, with tasks being able to be started arbitrarily on any core from a task on any core, with multitasking constructs being able to be used across cores, and with writing and erasing flash functioning properly when both cores are operational.
 
 Multicore support in zeptoforth is largely implemented outside the zeptoforth kernel and is split between `src/rp2040/forth/multicore.fs` (on platforms other than RP2040 stubbed out in `src/common/forth/multicore.fs`) and `src/common/forth/task.fs`, with a bit of supporting functionality also in `src/common/forth/systick.fs` and `src/rp2040/forth/erase.fs`.
 
@@ -26,6 +24,11 @@ Get the index of the core from which `cpu-index` was called.
 ( -- offset )
 
 Return 4 times `cpu-index`.
+
+##### `sio-hook`
+( -- addr )
+
+Get the address of a hook for the current core which may be set to an xt ( u -- ) to handle values written to that core's FIFO by the other core; note that a value of 0 (the default value) means that values read from the core's FIFO are discarded.
 
 In `src/common/forth/basic.fs`, in `forth`, exists:
 
