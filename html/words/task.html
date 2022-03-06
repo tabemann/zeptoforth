@@ -225,6 +225,11 @@
 <p>( xt notify-index task – )</p>
 <p>Notify a task on a specified notification index <em>notify-index</em>, updating the value of its notification mailbox at <em>notify-index</em> by applying the execution token <em>xt</em> with the signature ( x0 – x1 ) to it, readying the task if it is currently waiting on that notification.</p>
 </section>
+<section id="clear-notify">
+<h3><code class="docutils literal notranslate"><span class="pre">clear-notify</span></code><a class="headerlink" href="#clear-notify" title="Permalink to this headline">¶</a></h3>
+<p>( notify-index task – )</p>
+<p>Clear a notification state for a specified notification index <em>notify-index</em> for a task <em>task</em>. A subsequent <code class="docutils literal notranslate"><span class="pre">wait-notify</span></code> etc. on this notification index will block until another notification occurs for this notification index even if a notifcation had occurred prior to calling <code class="docutils literal notranslate"><span class="pre">clear-notify</span></code>.</p>
+</section>
 <section id="block">
 <h3><code class="docutils literal notranslate"><span class="pre">block</span></code><a class="headerlink" href="#block" title="Permalink to this headline">¶</a></h3>
 <p>( task – )</p>
@@ -234,6 +239,16 @@
 <h3><code class="docutils literal notranslate"><span class="pre">block-critical</span></code><a class="headerlink" href="#block-critical" title="Permalink to this headline">¶</a></h3>
 <p>( task – )</p>
 <p>Block a task for which blocking has been prepared, and immediately start a new critical section once it finishes blocking.</p>
+</section>
+<section id="mailbox">
+<h3><code class="docutils literal notranslate"><span class="pre">mailbox&#64;</span></code><a class="headerlink" href="#mailbox" title="Permalink to this headline">¶</a></h3>
+<p>( notify-index task – x )</p>
+<p>Get the value for a mailbox at notification index <em>notify-index</em> for task <em>task</em> without blocking.</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">mailbox!</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>( x notify-index task – )</p>
+<p>Set the value for a mailbox at notification index <em>notify-index</em> for task <em>task</em> without setting the corresponding notification state and unblocking any wait on that notification index.</p>
 </section>
 <section id="wait-notify">
 <h3><code class="docutils literal notranslate"><span class="pre">wait-notify</span></code><a class="headerlink" href="#wait-notify" title="Permalink to this headline">¶</a></h3>
@@ -245,13 +260,13 @@
 <p>( notify-index – x )</p>
 <p>If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification that may be blockign or indefinite depending on how blocking has been prepared; after blocking finishes, immediately start a critical section unless an exception has been raised. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.</p>
 </section>
-<section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">wait-notify</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">wait-notify</span></code><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <p>( task – )</p>
 <p>If a task has not been notified, set the task in an awaiting notification state for which blocking has been prepared. If the task has already been notified, clear its notification state.</p>
 </section>
-<section id="id2">
-<h3><code class="docutils literal notranslate"><span class="pre">wait-notify-critical</span></code><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<section id="id3">
+<h3><code class="docutils literal notranslate"><span class="pre">wait-notify-critical</span></code><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
 <p>( task – )</p>
 <p>If a task has not been notified, set the task in an awaiting notification state for blocking has been prepared, and immediately start a new critical section once it finishes blocking. If the task has already been notified, clear its notification state.</p>
 </section>
@@ -290,8 +305,8 @@
 <p>( priority task – )</p>
 <p>Set the priority of a task, from -32768 to 32767, with higher numbers being greater task priorities.</p>
 </section>
-<section id="id3">
-<h3><code class="docutils literal notranslate"><span class="pre">task-priority&#64;</span></code><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<section id="id4">
+<h3><code class="docutils literal notranslate"><span class="pre">task-priority&#64;</span></code><a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
 <p>( task – priority )</p>
 <p>Get the priority of a task.</p>
 </section>
@@ -305,8 +320,8 @@
 <p>( priority task – )</p>
 <p>Set the saved priority of a task, from -32768 to 32767, with higher numbers being greater task priorities.</p>
 </section>
-<section id="id4">
-<h3><code class="docutils literal notranslate"><span class="pre">task-saved-priority&#64;</span></code><a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<section id="id5">
+<h3><code class="docutils literal notranslate"><span class="pre">task-saved-priority&#64;</span></code><a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
 <p>( task – priority )</p>
 <p>Get the saved priority of a task.</p>
 </section>
@@ -315,8 +330,8 @@
 <p>( timeslice task – )</p>
 <p>Set the timeslice, in ticks (usually 100 us increments), of a task, indicating the minimum amount of time a task will run before being preempted. If a task does not use up all of its timeslice before it gives up control of the processor, it will start off with the remainder of its timeslice next time it has control of the processor, unless it exhausted its timeslice, where then the timeslice value is added onto the tick counter (which may be negative) to yield the new timeslice (but which may not be less than the task’s minimum timeslice). Note that the default setting for this for a newly initialized task is 10.</p>
 </section>
-<section id="id5">
-<h3><code class="docutils literal notranslate"><span class="pre">task-timeslice&#64;</span></code><a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<section id="id6">
+<h3><code class="docutils literal notranslate"><span class="pre">task-timeslice&#64;</span></code><a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
 <p>( task – timeslice )</p>
 <p>Get the timeslice, in ticks (usually 100 us increments), of a task.</p>
 </section>
@@ -336,8 +351,8 @@
 <p>( task – addr )</p>
 <p>Get the name of a task as a counted string; an address of zero indicates no name is set.</p>
 </section>
-<section id="id6">
-<h3><code class="docutils literal notranslate"><span class="pre">task-name!</span></code><a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<section id="id7">
+<h3><code class="docutils literal notranslate"><span class="pre">task-name!</span></code><a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
 <p>( addr task – )</p>
 <p>Set the name of a task as a counted string; an address of zero indicates to set no name.</p>
 </section>
