@@ -51,6 +51,7 @@
 	@@ Handle SIO interrupt
 _handle_sio:
 	push {lr}
+	cpsid i
 	ldr r0, =begin_write
 	ldr r1, [r0]
 	cmp r1, #0
@@ -64,6 +65,11 @@ _handle_sio:
 	b 1b
 2:	movs r1, #0
 	str r1, [r2]
+	ldr r0, =hold_core
+	ldr r0, [r0]
+	cmp r0, #0
+	bne 3f
+	cpsie i
 3:	ldr r0, =FIFO_ST
 	ldr r0, [r0]
 	movs r1, #FIFO_ST_VLD
@@ -86,7 +92,7 @@ _handle_sio:
 4:	ldr r0, =FIFO_ST
 	ldr r1, =FIFO_ST_ROE | FIFO_ST_WOF
 	str r1, [r0]
-	ldr r0, =force_core_reboot
+	ldr r0, =hold_core
 	ldr r0, [r0]
 	cmp r0, #0
 	beq 5f
@@ -157,14 +163,14 @@ _release_core:
 2:	bx lr
 	end_inlined
 
-	@@ Force a core to reboot
-	define_internal_word "force-core-reboot", visible_flag
-_force_core_reboot:	
+	@@ Hold a core in a loop
+	define_internal_word "hold-core", visible_flag
+_hold_core:	
 	ldr r0, =core_1_launched
 	ldr r0, [r0]
 	cmp r0, #0
 	beq 1f
-	ldr r0, =force_core_reboot
+	ldr r0, =hold_core
 	ldr r1, =-1
 	str r1, [r0]
 	ldr r2, =FIFO_WR

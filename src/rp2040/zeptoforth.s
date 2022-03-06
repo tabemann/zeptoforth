@@ -97,7 +97,7 @@ _init_platform_variables:
 	str r0, [r1]
 	ldr r1, =waiting_write_done
 	str r0, [r1]
-	ldr r1, =force_core_reboot
+	ldr r1, =hold_core
 	str r0, [r1]
 	bx lr
 
