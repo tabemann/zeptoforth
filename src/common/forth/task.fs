@@ -852,6 +852,15 @@ begin-module task
     if pause then
   ;
 
+  \ Clear a notification for a task
+  : clear-notify ( notify-index task -- )
+    [:
+      dup validate-not-terminated
+      2dup validate-notify
+      swap bit swap ['] task-notified-bitmap for-task bic!
+    ;] over task-core@ critical-with-other-core-spinlock
+  ;
+
   \ Get the contents of a notification mailbox without waiting on it
   : mailbox@ ( notify-index task -- x )
     [:
