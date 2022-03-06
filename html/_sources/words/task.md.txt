@@ -209,6 +209,11 @@ Notify a task on a specified notification index *notify-index*, setting the valu
 
 Notify a task on a specified notification index *notify-index*, updating the value of its notification mailbox at *notify-index* by applying the execution token *xt* with the signature ( x0 -- x1 ) to it, readying the task if it is currently waiting on that notification.
 
+##### `clear-notify`
+( notify-index task -- )
+
+Clear a notification state for a specified notification index *notify-index* for a task *task*. A subsequent `wait-notify` etc. on this notification index will block until another notification occurs for this notification index even if a notifcation had occurred prior to calling `clear-notify`.
+
 ##### `block`
 ( task -- )
 
@@ -218,6 +223,16 @@ Block a task for which blocking has been prepared.
 ( task -- )
 
 Block a task for which blocking has been prepared, and immediately start a new critical section once it finishes blocking.
+
+##### `mailbox@`
+( notify-index task -- x )
+
+Get the value for a mailbox at notification index *notify-index* for task *task* without blocking.
+
+##### `mailbox!`
+( x notify-index task -- )
+
+Set the value for a mailbox at notification index *notify-index* for task *task* without setting the corresponding notification state and unblocking any wait on that notification index.
 
 ##### `wait-notify`
 ( notify-index -- x )
