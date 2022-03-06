@@ -28,4 +28,4 @@
 
 	allot waiting_write_done, 4
 
-	allot force_core_reboot, 4
+	allot hold_core, 4
