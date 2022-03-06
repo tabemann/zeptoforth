@@ -77,6 +77,10 @@ _handle_sio:
 	beq 4f
 	ldr r0, =FIFO_RD
 	ldr r1, [r0]
+	ldr r0, =hold_core
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 3b
 	ldr r0, =SIO_CPUID
 	ldr r2, [r0]
 	lsls r2, r2, #2
