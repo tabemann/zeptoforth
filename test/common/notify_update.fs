@@ -33,6 +33,7 @@ continue-module forth
   \ The inner loop of the consumer
   : consumer ( -- )
     0 wait-notify-indefinite drop
+    0 producer-task @ notify
     begin
       0 wait-notify-indefinite .
       0 producer-task @ notify
@@ -46,7 +47,7 @@ continue-module forth
   : producer ( -- )
     0 wait-notify-indefinite drop
     begin
-      ['] 1+ 0 consumer-task @ notify-update
+      1 ['] + 0 consumer-task @ notify-update
       0 wait-notify-indefinite drop
     again
   ;
@@ -63,7 +64,6 @@ continue-module forth
     consumer-task @ run
     producer-task @ run
     0 consumer-task @ notify
-    0 producer-task @ notify
     pause
   ;
 
