@@ -207,7 +207,7 @@ Notify a task on a specified notification index *notify-index*, setting the valu
 ##### `notify-update`
 ( xt notify-index task -- )
 
-Notify a task on a specified notification index *notify-index*, updating the value of its notification mailbox at *notify-index* by applying the execution token *xt* with the signature ( x0 -- x1 ) to it, readying the task if it is currently waiting on that notification.
+Notify a task on a specified notification index *notify-index*, updating the value of its notification mailbox at *notify-index* by applying the execution token *xt* with the signature ( x0 -- x1 ) to it, readying the task if it is currently waiting on that notification. Note that the code executed has full access to the contents of the stack below *xt* on it when `notify-update` was executed.
 
 ##### `clear-notify`
 ( notify-index task -- )
