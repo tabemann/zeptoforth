@@ -223,7 +223,7 @@
 <section id="notify-update">
 <h3><code class="docutils literal notranslate"><span class="pre">notify-update</span></code><a class="headerlink" href="#notify-update" title="Permalink to this headline">¶</a></h3>
 <p>( xt notify-index task – )</p>
-<p>Notify a task on a specified notification index <em>notify-index</em>, updating the value of its notification mailbox at <em>notify-index</em> by applying the execution token <em>xt</em> with the signature ( x0 – x1 ) to it, readying the task if it is currently waiting on that notification.</p>
+<p>Notify a task on a specified notification index <em>notify-index</em>, updating the value of its notification mailbox at <em>notify-index</em> by applying the execution token <em>xt</em> with the signature ( x0 – x1 ) to it, readying the task if it is currently waiting on that notification. Note that the code executed has full access to the contents of the stack below <em>xt</em> on it when <code class="docutils literal notranslate"><span class="pre">notify-update</span></code> was executed.</p>
 </section>
 <section id="clear-notify">
 <h3><code class="docutils literal notranslate"><span class="pre">clear-notify</span></code><a class="headerlink" href="#clear-notify" title="Permalink to this headline">¶</a></h3>
