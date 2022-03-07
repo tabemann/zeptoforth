@@ -838,10 +838,10 @@ begin-module task
     [:
       dup validate-not-terminated
       2dup validate-notify
-      rot >r
-      dup ['] task-notify-area for-task@ 2 pick cells +
-      dup @ r> execute swap !
-      2dup swap bit swap ['] task-notified-bitmap for-task bis!
+      rot >r ( index task )
+      dup ['] task-notify-area for-task@ 2 pick cells + ( index task addr )
+      r> rot >r rot >r swap dup >r @ swap execute r> ! ( )
+      r> r> 2dup swap bit swap ['] task-notified-bitmap for-task bis!
       dup ['] task-current-notify for-task@ rot = if
 	dup task-state h@ schedule-user-critical and
 	[ schedule-critical readied or ] literal or swap task-state h! true
