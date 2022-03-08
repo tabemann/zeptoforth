@@ -28,9 +28,9 @@ begin-module memmap
     RNG $0 + constant RNG_CR ( read-write )  \ control register
     RNG $4 + constant RNG_SR (  )  \ status register
     RNG $8 + constant RNG_DR ( read-only )  \ data register
-    : RNG_CR. cr ." RNG_CR.  RW   $" RNG_CR @ hex. RNG_CR 1b. ;
-    : RNG_SR. cr ." RNG_SR.   $" RNG_SR @ hex. RNG_SR 1b. ;
-    : RNG_DR. cr ." RNG_DR.  RO   $" RNG_DR @ hex. RNG_DR 1b. ;
+    : RNG_CR. cr ." RNG_CR.  RW   $" RNG_CR @ h.8 RNG_CR 1b. ;
+    : RNG_SR. cr ." RNG_SR.   $" RNG_SR @ h.8 RNG_SR 1b. ;
+    : RNG_DR. cr ." RNG_DR.  RO   $" RNG_DR @ h.8 RNG_DR 1b. ;
     : RNG.
       RNG_CR.
       RNG_SR.
@@ -112,78 +112,78 @@ begin-module memmap
     HASH $324 + constant HASH_HASH_HR5 ( read-only )  \ read-only
     HASH $328 + constant HASH_HASH_HR6 ( read-only )  \ read-only
     HASH $32C + constant HASH_HASH_HR7 ( read-only )  \ read-only
-    : HASH_CR. cr ." HASH_CR.   $" HASH_CR @ hex. HASH_CR 1b. ;
-    : HASH_DIN. cr ." HASH_DIN.  RW   $" HASH_DIN @ hex. HASH_DIN 1b. ;
-    : HASH_STR. cr ." HASH_STR.   $" HASH_STR @ hex. HASH_STR 1b. ;
-    : HASH_HR0. cr ." HASH_HR0.  RO   $" HASH_HR0 @ hex. HASH_HR0 1b. ;
-    : HASH_HR1. cr ." HASH_HR1.  RO   $" HASH_HR1 @ hex. HASH_HR1 1b. ;
-    : HASH_HR2. cr ." HASH_HR2.  RO   $" HASH_HR2 @ hex. HASH_HR2 1b. ;
-    : HASH_HR3. cr ." HASH_HR3.  RO   $" HASH_HR3 @ hex. HASH_HR3 1b. ;
-    : HASH_HR4. cr ." HASH_HR4.  RO   $" HASH_HR4 @ hex. HASH_HR4 1b. ;
-    : HASH_IMR. cr ." HASH_IMR.  RW   $" HASH_IMR @ hex. HASH_IMR 1b. ;
-    : HASH_SR. cr ." HASH_SR.   $" HASH_SR @ hex. HASH_SR 1b. ;
-    : HASH_CSR0. cr ." HASH_CSR0.  RW   $" HASH_CSR0 @ hex. HASH_CSR0 1b. ;
-    : HASH_CSR1. cr ." HASH_CSR1.  RW   $" HASH_CSR1 @ hex. HASH_CSR1 1b. ;
-    : HASH_CSR2. cr ." HASH_CSR2.  RW   $" HASH_CSR2 @ hex. HASH_CSR2 1b. ;
-    : HASH_CSR3. cr ." HASH_CSR3.  RW   $" HASH_CSR3 @ hex. HASH_CSR3 1b. ;
-    : HASH_CSR4. cr ." HASH_CSR4.  RW   $" HASH_CSR4 @ hex. HASH_CSR4 1b. ;
-    : HASH_CSR5. cr ." HASH_CSR5.  RW   $" HASH_CSR5 @ hex. HASH_CSR5 1b. ;
-    : HASH_CSR6. cr ." HASH_CSR6.  RW   $" HASH_CSR6 @ hex. HASH_CSR6 1b. ;
-    : HASH_CSR7. cr ." HASH_CSR7.  RW   $" HASH_CSR7 @ hex. HASH_CSR7 1b. ;
-    : HASH_CSR8. cr ." HASH_CSR8.  RW   $" HASH_CSR8 @ hex. HASH_CSR8 1b. ;
-    : HASH_CSR9. cr ." HASH_CSR9.  RW   $" HASH_CSR9 @ hex. HASH_CSR9 1b. ;
-    : HASH_CSR10. cr ." HASH_CSR10.  RW   $" HASH_CSR10 @ hex. HASH_CSR10 1b. ;
-    : HASH_CSR11. cr ." HASH_CSR11.  RW   $" HASH_CSR11 @ hex. HASH_CSR11 1b. ;
-    : HASH_CSR12. cr ." HASH_CSR12.  RW   $" HASH_CSR12 @ hex. HASH_CSR12 1b. ;
-    : HASH_CSR13. cr ." HASH_CSR13.  RW   $" HASH_CSR13 @ hex. HASH_CSR13 1b. ;
-    : HASH_CSR14. cr ." HASH_CSR14.  RW   $" HASH_CSR14 @ hex. HASH_CSR14 1b. ;
-    : HASH_CSR15. cr ." HASH_CSR15.  RW   $" HASH_CSR15 @ hex. HASH_CSR15 1b. ;
-    : HASH_CSR16. cr ." HASH_CSR16.  RW   $" HASH_CSR16 @ hex. HASH_CSR16 1b. ;
-    : HASH_CSR17. cr ." HASH_CSR17.  RW   $" HASH_CSR17 @ hex. HASH_CSR17 1b. ;
-    : HASH_CSR18. cr ." HASH_CSR18.  RW   $" HASH_CSR18 @ hex. HASH_CSR18 1b. ;
-    : HASH_CSR19. cr ." HASH_CSR19.  RW   $" HASH_CSR19 @ hex. HASH_CSR19 1b. ;
-    : HASH_CSR20. cr ." HASH_CSR20.  RW   $" HASH_CSR20 @ hex. HASH_CSR20 1b. ;
-    : HASH_CSR21. cr ." HASH_CSR21.  RW   $" HASH_CSR21 @ hex. HASH_CSR21 1b. ;
-    : HASH_CSR22. cr ." HASH_CSR22.  RW   $" HASH_CSR22 @ hex. HASH_CSR22 1b. ;
-    : HASH_CSR23. cr ." HASH_CSR23.  RW   $" HASH_CSR23 @ hex. HASH_CSR23 1b. ;
-    : HASH_CSR24. cr ." HASH_CSR24.  RW   $" HASH_CSR24 @ hex. HASH_CSR24 1b. ;
-    : HASH_CSR25. cr ." HASH_CSR25.  RW   $" HASH_CSR25 @ hex. HASH_CSR25 1b. ;
-    : HASH_CSR26. cr ." HASH_CSR26.  RW   $" HASH_CSR26 @ hex. HASH_CSR26 1b. ;
-    : HASH_CSR27. cr ." HASH_CSR27.  RW   $" HASH_CSR27 @ hex. HASH_CSR27 1b. ;
-    : HASH_CSR28. cr ." HASH_CSR28.  RW   $" HASH_CSR28 @ hex. HASH_CSR28 1b. ;
-    : HASH_CSR29. cr ." HASH_CSR29.  RW   $" HASH_CSR29 @ hex. HASH_CSR29 1b. ;
-    : HASH_CSR30. cr ." HASH_CSR30.  RW   $" HASH_CSR30 @ hex. HASH_CSR30 1b. ;
-    : HASH_CSR31. cr ." HASH_CSR31.  RW   $" HASH_CSR31 @ hex. HASH_CSR31 1b. ;
-    : HASH_CSR32. cr ." HASH_CSR32.  RW   $" HASH_CSR32 @ hex. HASH_CSR32 1b. ;
-    : HASH_CSR33. cr ." HASH_CSR33.  RW   $" HASH_CSR33 @ hex. HASH_CSR33 1b. ;
-    : HASH_CSR34. cr ." HASH_CSR34.  RW   $" HASH_CSR34 @ hex. HASH_CSR34 1b. ;
-    : HASH_CSR35. cr ." HASH_CSR35.  RW   $" HASH_CSR35 @ hex. HASH_CSR35 1b. ;
-    : HASH_CSR36. cr ." HASH_CSR36.  RW   $" HASH_CSR36 @ hex. HASH_CSR36 1b. ;
-    : HASH_CSR37. cr ." HASH_CSR37.  RW   $" HASH_CSR37 @ hex. HASH_CSR37 1b. ;
-    : HASH_CSR38. cr ." HASH_CSR38.  RW   $" HASH_CSR38 @ hex. HASH_CSR38 1b. ;
-    : HASH_CSR39. cr ." HASH_CSR39.  RW   $" HASH_CSR39 @ hex. HASH_CSR39 1b. ;
-    : HASH_CSR40. cr ." HASH_CSR40.  RW   $" HASH_CSR40 @ hex. HASH_CSR40 1b. ;
-    : HASH_CSR41. cr ." HASH_CSR41.  RW   $" HASH_CSR41 @ hex. HASH_CSR41 1b. ;
-    : HASH_CSR42. cr ." HASH_CSR42.  RW   $" HASH_CSR42 @ hex. HASH_CSR42 1b. ;
-    : HASH_CSR43. cr ." HASH_CSR43.  RW   $" HASH_CSR43 @ hex. HASH_CSR43 1b. ;
-    : HASH_CSR44. cr ." HASH_CSR44.  RW   $" HASH_CSR44 @ hex. HASH_CSR44 1b. ;
-    : HASH_CSR45. cr ." HASH_CSR45.  RW   $" HASH_CSR45 @ hex. HASH_CSR45 1b. ;
-    : HASH_CSR46. cr ." HASH_CSR46.  RW   $" HASH_CSR46 @ hex. HASH_CSR46 1b. ;
-    : HASH_CSR47. cr ." HASH_CSR47.  RW   $" HASH_CSR47 @ hex. HASH_CSR47 1b. ;
-    : HASH_CSR48. cr ." HASH_CSR48.  RW   $" HASH_CSR48 @ hex. HASH_CSR48 1b. ;
-    : HASH_CSR49. cr ." HASH_CSR49.  RW   $" HASH_CSR49 @ hex. HASH_CSR49 1b. ;
-    : HASH_CSR50. cr ." HASH_CSR50.  RW   $" HASH_CSR50 @ hex. HASH_CSR50 1b. ;
-    : HASH_CSR51. cr ." HASH_CSR51.  RW   $" HASH_CSR51 @ hex. HASH_CSR51 1b. ;
-    : HASH_CSR52. cr ." HASH_CSR52.  RW   $" HASH_CSR52 @ hex. HASH_CSR52 1b. ;
-    : HASH_CSR53. cr ." HASH_CSR53.  RW   $" HASH_CSR53 @ hex. HASH_CSR53 1b. ;
-    : HASH_HASH_HR0. cr ." HASH_HASH_HR0.  RO   $" HASH_HASH_HR0 @ hex. HASH_HASH_HR0 1b. ;
-    : HASH_HASH_HR1. cr ." HASH_HASH_HR1.  RO   $" HASH_HASH_HR1 @ hex. HASH_HASH_HR1 1b. ;
-    : HASH_HASH_HR2. cr ." HASH_HASH_HR2.  RO   $" HASH_HASH_HR2 @ hex. HASH_HASH_HR2 1b. ;
-    : HASH_HASH_HR3. cr ." HASH_HASH_HR3.  RO   $" HASH_HASH_HR3 @ hex. HASH_HASH_HR3 1b. ;
-    : HASH_HASH_HR4. cr ." HASH_HASH_HR4.  RO   $" HASH_HASH_HR4 @ hex. HASH_HASH_HR4 1b. ;
-    : HASH_HASH_HR5. cr ." HASH_HASH_HR5.  RO   $" HASH_HASH_HR5 @ hex. HASH_HASH_HR5 1b. ;
-    : HASH_HASH_HR6. cr ." HASH_HASH_HR6.  RO   $" HASH_HASH_HR6 @ hex. HASH_HASH_HR6 1b. ;
-    : HASH_HASH_HR7. cr ." HASH_HASH_HR7.  RO   $" HASH_HASH_HR7 @ hex. HASH_HASH_HR7 1b. ;
+    : HASH_CR. cr ." HASH_CR.   $" HASH_CR @ h.8 HASH_CR 1b. ;
+    : HASH_DIN. cr ." HASH_DIN.  RW   $" HASH_DIN @ h.8 HASH_DIN 1b. ;
+    : HASH_STR. cr ." HASH_STR.   $" HASH_STR @ h.8 HASH_STR 1b. ;
+    : HASH_HR0. cr ." HASH_HR0.  RO   $" HASH_HR0 @ h.8 HASH_HR0 1b. ;
+    : HASH_HR1. cr ." HASH_HR1.  RO   $" HASH_HR1 @ h.8 HASH_HR1 1b. ;
+    : HASH_HR2. cr ." HASH_HR2.  RO   $" HASH_HR2 @ h.8 HASH_HR2 1b. ;
+    : HASH_HR3. cr ." HASH_HR3.  RO   $" HASH_HR3 @ h.8 HASH_HR3 1b. ;
+    : HASH_HR4. cr ." HASH_HR4.  RO   $" HASH_HR4 @ h.8 HASH_HR4 1b. ;
+    : HASH_IMR. cr ." HASH_IMR.  RW   $" HASH_IMR @ h.8 HASH_IMR 1b. ;
+    : HASH_SR. cr ." HASH_SR.   $" HASH_SR @ h.8 HASH_SR 1b. ;
+    : HASH_CSR0. cr ." HASH_CSR0.  RW   $" HASH_CSR0 @ h.8 HASH_CSR0 1b. ;
+    : HASH_CSR1. cr ." HASH_CSR1.  RW   $" HASH_CSR1 @ h.8 HASH_CSR1 1b. ;
+    : HASH_CSR2. cr ." HASH_CSR2.  RW   $" HASH_CSR2 @ h.8 HASH_CSR2 1b. ;
+    : HASH_CSR3. cr ." HASH_CSR3.  RW   $" HASH_CSR3 @ h.8 HASH_CSR3 1b. ;
+    : HASH_CSR4. cr ." HASH_CSR4.  RW   $" HASH_CSR4 @ h.8 HASH_CSR4 1b. ;
+    : HASH_CSR5. cr ." HASH_CSR5.  RW   $" HASH_CSR5 @ h.8 HASH_CSR5 1b. ;
+    : HASH_CSR6. cr ." HASH_CSR6.  RW   $" HASH_CSR6 @ h.8 HASH_CSR6 1b. ;
+    : HASH_CSR7. cr ." HASH_CSR7.  RW   $" HASH_CSR7 @ h.8 HASH_CSR7 1b. ;
+    : HASH_CSR8. cr ." HASH_CSR8.  RW   $" HASH_CSR8 @ h.8 HASH_CSR8 1b. ;
+    : HASH_CSR9. cr ." HASH_CSR9.  RW   $" HASH_CSR9 @ h.8 HASH_CSR9 1b. ;
+    : HASH_CSR10. cr ." HASH_CSR10.  RW   $" HASH_CSR10 @ h.8 HASH_CSR10 1b. ;
+    : HASH_CSR11. cr ." HASH_CSR11.  RW   $" HASH_CSR11 @ h.8 HASH_CSR11 1b. ;
+    : HASH_CSR12. cr ." HASH_CSR12.  RW   $" HASH_CSR12 @ h.8 HASH_CSR12 1b. ;
+    : HASH_CSR13. cr ." HASH_CSR13.  RW   $" HASH_CSR13 @ h.8 HASH_CSR13 1b. ;
+    : HASH_CSR14. cr ." HASH_CSR14.  RW   $" HASH_CSR14 @ h.8 HASH_CSR14 1b. ;
+    : HASH_CSR15. cr ." HASH_CSR15.  RW   $" HASH_CSR15 @ h.8 HASH_CSR15 1b. ;
+    : HASH_CSR16. cr ." HASH_CSR16.  RW   $" HASH_CSR16 @ h.8 HASH_CSR16 1b. ;
+    : HASH_CSR17. cr ." HASH_CSR17.  RW   $" HASH_CSR17 @ h.8 HASH_CSR17 1b. ;
+    : HASH_CSR18. cr ." HASH_CSR18.  RW   $" HASH_CSR18 @ h.8 HASH_CSR18 1b. ;
+    : HASH_CSR19. cr ." HASH_CSR19.  RW   $" HASH_CSR19 @ h.8 HASH_CSR19 1b. ;
+    : HASH_CSR20. cr ." HASH_CSR20.  RW   $" HASH_CSR20 @ h.8 HASH_CSR20 1b. ;
+    : HASH_CSR21. cr ." HASH_CSR21.  RW   $" HASH_CSR21 @ h.8 HASH_CSR21 1b. ;
+    : HASH_CSR22. cr ." HASH_CSR22.  RW   $" HASH_CSR22 @ h.8 HASH_CSR22 1b. ;
+    : HASH_CSR23. cr ." HASH_CSR23.  RW   $" HASH_CSR23 @ h.8 HASH_CSR23 1b. ;
+    : HASH_CSR24. cr ." HASH_CSR24.  RW   $" HASH_CSR24 @ h.8 HASH_CSR24 1b. ;
+    : HASH_CSR25. cr ." HASH_CSR25.  RW   $" HASH_CSR25 @ h.8 HASH_CSR25 1b. ;
+    : HASH_CSR26. cr ." HASH_CSR26.  RW   $" HASH_CSR26 @ h.8 HASH_CSR26 1b. ;
+    : HASH_CSR27. cr ." HASH_CSR27.  RW   $" HASH_CSR27 @ h.8 HASH_CSR27 1b. ;
+    : HASH_CSR28. cr ." HASH_CSR28.  RW   $" HASH_CSR28 @ h.8 HASH_CSR28 1b. ;
+    : HASH_CSR29. cr ." HASH_CSR29.  RW   $" HASH_CSR29 @ h.8 HASH_CSR29 1b. ;
+    : HASH_CSR30. cr ." HASH_CSR30.  RW   $" HASH_CSR30 @ h.8 HASH_CSR30 1b. ;
+    : HASH_CSR31. cr ." HASH_CSR31.  RW   $" HASH_CSR31 @ h.8 HASH_CSR31 1b. ;
+    : HASH_CSR32. cr ." HASH_CSR32.  RW   $" HASH_CSR32 @ h.8 HASH_CSR32 1b. ;
+    : HASH_CSR33. cr ." HASH_CSR33.  RW   $" HASH_CSR33 @ h.8 HASH_CSR33 1b. ;
+    : HASH_CSR34. cr ." HASH_CSR34.  RW   $" HASH_CSR34 @ h.8 HASH_CSR34 1b. ;
+    : HASH_CSR35. cr ." HASH_CSR35.  RW   $" HASH_CSR35 @ h.8 HASH_CSR35 1b. ;
+    : HASH_CSR36. cr ." HASH_CSR36.  RW   $" HASH_CSR36 @ h.8 HASH_CSR36 1b. ;
+    : HASH_CSR37. cr ." HASH_CSR37.  RW   $" HASH_CSR37 @ h.8 HASH_CSR37 1b. ;
+    : HASH_CSR38. cr ." HASH_CSR38.  RW   $" HASH_CSR38 @ h.8 HASH_CSR38 1b. ;
+    : HASH_CSR39. cr ." HASH_CSR39.  RW   $" HASH_CSR39 @ h.8 HASH_CSR39 1b. ;
+    : HASH_CSR40. cr ." HASH_CSR40.  RW   $" HASH_CSR40 @ h.8 HASH_CSR40 1b. ;
+    : HASH_CSR41. cr ." HASH_CSR41.  RW   $" HASH_CSR41 @ h.8 HASH_CSR41 1b. ;
+    : HASH_CSR42. cr ." HASH_CSR42.  RW   $" HASH_CSR42 @ h.8 HASH_CSR42 1b. ;
+    : HASH_CSR43. cr ." HASH_CSR43.  RW   $" HASH_CSR43 @ h.8 HASH_CSR43 1b. ;
+    : HASH_CSR44. cr ." HASH_CSR44.  RW   $" HASH_CSR44 @ h.8 HASH_CSR44 1b. ;
+    : HASH_CSR45. cr ." HASH_CSR45.  RW   $" HASH_CSR45 @ h.8 HASH_CSR45 1b. ;
+    : HASH_CSR46. cr ." HASH_CSR46.  RW   $" HASH_CSR46 @ h.8 HASH_CSR46 1b. ;
+    : HASH_CSR47. cr ." HASH_CSR47.  RW   $" HASH_CSR47 @ h.8 HASH_CSR47 1b. ;
+    : HASH_CSR48. cr ." HASH_CSR48.  RW   $" HASH_CSR48 @ h.8 HASH_CSR48 1b. ;
+    : HASH_CSR49. cr ." HASH_CSR49.  RW   $" HASH_CSR49 @ h.8 HASH_CSR49 1b. ;
+    : HASH_CSR50. cr ." HASH_CSR50.  RW   $" HASH_CSR50 @ h.8 HASH_CSR50 1b. ;
+    : HASH_CSR51. cr ." HASH_CSR51.  RW   $" HASH_CSR51 @ h.8 HASH_CSR51 1b. ;
+    : HASH_CSR52. cr ." HASH_CSR52.  RW   $" HASH_CSR52 @ h.8 HASH_CSR52 1b. ;
+    : HASH_CSR53. cr ." HASH_CSR53.  RW   $" HASH_CSR53 @ h.8 HASH_CSR53 1b. ;
+    : HASH_HASH_HR0. cr ." HASH_HASH_HR0.  RO   $" HASH_HASH_HR0 @ h.8 HASH_HASH_HR0 1b. ;
+    : HASH_HASH_HR1. cr ." HASH_HASH_HR1.  RO   $" HASH_HASH_HR1 @ h.8 HASH_HASH_HR1 1b. ;
+    : HASH_HASH_HR2. cr ." HASH_HASH_HR2.  RO   $" HASH_HASH_HR2 @ h.8 HASH_HASH_HR2 1b. ;
+    : HASH_HASH_HR3. cr ." HASH_HASH_HR3.  RO   $" HASH_HASH_HR3 @ h.8 HASH_HASH_HR3 1b. ;
+    : HASH_HASH_HR4. cr ." HASH_HASH_HR4.  RO   $" HASH_HASH_HR4 @ h.8 HASH_HASH_HR4 1b. ;
+    : HASH_HASH_HR5. cr ." HASH_HASH_HR5.  RO   $" HASH_HASH_HR5 @ h.8 HASH_HASH_HR5 1b. ;
+    : HASH_HASH_HR6. cr ." HASH_HASH_HR6.  RO   $" HASH_HASH_HR6 @ h.8 HASH_HASH_HR6 1b. ;
+    : HASH_HASH_HR7. cr ." HASH_HASH_HR7.  RO   $" HASH_HASH_HR7 @ h.8 HASH_HASH_HR7 1b. ;
     : HASH.
       HASH_CR.
       HASH_DIN.
@@ -298,14 +298,14 @@ begin-module memmap
     CRYP $84 + constant CRYP_CSGCM5R ( read-write )  \ context swap register
     CRYP $88 + constant CRYP_CSGCM6R ( read-write )  \ context swap register
     CRYP $8C + constant CRYP_CSGCM7R ( read-write )  \ context swap register
-    : CRYP_CR. cr ." CRYP_CR.   $" CRYP_CR @ hex. CRYP_CR 1b. ;
-    : CRYP_SR. cr ." CRYP_SR.  RO   $" CRYP_SR @ hex. CRYP_SR 1b. ;
-    : CRYP_DIN. cr ." CRYP_DIN.  RW   $" CRYP_DIN @ hex. CRYP_DIN 1b. ;
-    : CRYP_DOUT. cr ." CRYP_DOUT.  RO   $" CRYP_DOUT @ hex. CRYP_DOUT 1b. ;
-    : CRYP_DMACR. cr ." CRYP_DMACR.  RW   $" CRYP_DMACR @ hex. CRYP_DMACR 1b. ;
-    : CRYP_IMSCR. cr ." CRYP_IMSCR.  RW   $" CRYP_IMSCR @ hex. CRYP_IMSCR 1b. ;
-    : CRYP_RISR. cr ." CRYP_RISR.  RO   $" CRYP_RISR @ hex. CRYP_RISR 1b. ;
-    : CRYP_MISR. cr ." CRYP_MISR.  RO   $" CRYP_MISR @ hex. CRYP_MISR 1b. ;
+    : CRYP_CR. cr ." CRYP_CR.   $" CRYP_CR @ h.8 CRYP_CR 1b. ;
+    : CRYP_SR. cr ." CRYP_SR.  RO   $" CRYP_SR @ h.8 CRYP_SR 1b. ;
+    : CRYP_DIN. cr ." CRYP_DIN.  RW   $" CRYP_DIN @ h.8 CRYP_DIN 1b. ;
+    : CRYP_DOUT. cr ." CRYP_DOUT.  RO   $" CRYP_DOUT @ h.8 CRYP_DOUT 1b. ;
+    : CRYP_DMACR. cr ." CRYP_DMACR.  RW   $" CRYP_DMACR @ h.8 CRYP_DMACR 1b. ;
+    : CRYP_IMSCR. cr ." CRYP_IMSCR.  RW   $" CRYP_IMSCR @ h.8 CRYP_IMSCR 1b. ;
+    : CRYP_RISR. cr ." CRYP_RISR.  RO   $" CRYP_RISR @ h.8 CRYP_RISR 1b. ;
+    : CRYP_MISR. cr ." CRYP_MISR.  RO   $" CRYP_MISR @ h.8 CRYP_MISR 1b. ;
     : CRYP_K0LR. cr ." CRYP_K0LR " WRITEONLY ; 
     : CRYP_K0RR. cr ." CRYP_K0RR " WRITEONLY ; 
     : CRYP_K1LR. cr ." CRYP_K1LR " WRITEONLY ; 
@@ -314,26 +314,26 @@ begin-module memmap
     : CRYP_K2RR. cr ." CRYP_K2RR " WRITEONLY ; 
     : CRYP_K3LR. cr ." CRYP_K3LR " WRITEONLY ; 
     : CRYP_K3RR. cr ." CRYP_K3RR " WRITEONLY ; 
-    : CRYP_IV0LR. cr ." CRYP_IV0LR.  RW   $" CRYP_IV0LR @ hex. CRYP_IV0LR 1b. ;
-    : CRYP_IV0RR. cr ." CRYP_IV0RR.  RW   $" CRYP_IV0RR @ hex. CRYP_IV0RR 1b. ;
-    : CRYP_IV1LR. cr ." CRYP_IV1LR.  RW   $" CRYP_IV1LR @ hex. CRYP_IV1LR 1b. ;
-    : CRYP_IV1RR. cr ." CRYP_IV1RR.  RW   $" CRYP_IV1RR @ hex. CRYP_IV1RR 1b. ;
-    : CRYP_CSGCMCCM0R. cr ." CRYP_CSGCMCCM0R.  RW   $" CRYP_CSGCMCCM0R @ hex. CRYP_CSGCMCCM0R 1b. ;
-    : CRYP_CSGCMCCM1R. cr ." CRYP_CSGCMCCM1R.  RW   $" CRYP_CSGCMCCM1R @ hex. CRYP_CSGCMCCM1R 1b. ;
-    : CRYP_CSGCMCCM2R. cr ." CRYP_CSGCMCCM2R.  RW   $" CRYP_CSGCMCCM2R @ hex. CRYP_CSGCMCCM2R 1b. ;
-    : CRYP_CSGCMCCM3R. cr ." CRYP_CSGCMCCM3R.  RW   $" CRYP_CSGCMCCM3R @ hex. CRYP_CSGCMCCM3R 1b. ;
-    : CRYP_CSGCMCCM4R. cr ." CRYP_CSGCMCCM4R.  RW   $" CRYP_CSGCMCCM4R @ hex. CRYP_CSGCMCCM4R 1b. ;
-    : CRYP_CSGCMCCM5R. cr ." CRYP_CSGCMCCM5R.  RW   $" CRYP_CSGCMCCM5R @ hex. CRYP_CSGCMCCM5R 1b. ;
-    : CRYP_CSGCMCCM6R. cr ." CRYP_CSGCMCCM6R.  RW   $" CRYP_CSGCMCCM6R @ hex. CRYP_CSGCMCCM6R 1b. ;
-    : CRYP_CSGCMCCM7R. cr ." CRYP_CSGCMCCM7R.  RW   $" CRYP_CSGCMCCM7R @ hex. CRYP_CSGCMCCM7R 1b. ;
-    : CRYP_CSGCM0R. cr ." CRYP_CSGCM0R.  RW   $" CRYP_CSGCM0R @ hex. CRYP_CSGCM0R 1b. ;
-    : CRYP_CSGCM1R. cr ." CRYP_CSGCM1R.  RW   $" CRYP_CSGCM1R @ hex. CRYP_CSGCM1R 1b. ;
-    : CRYP_CSGCM2R. cr ." CRYP_CSGCM2R.  RW   $" CRYP_CSGCM2R @ hex. CRYP_CSGCM2R 1b. ;
-    : CRYP_CSGCM3R. cr ." CRYP_CSGCM3R.  RW   $" CRYP_CSGCM3R @ hex. CRYP_CSGCM3R 1b. ;
-    : CRYP_CSGCM4R. cr ." CRYP_CSGCM4R.  RW   $" CRYP_CSGCM4R @ hex. CRYP_CSGCM4R 1b. ;
-    : CRYP_CSGCM5R. cr ." CRYP_CSGCM5R.  RW   $" CRYP_CSGCM5R @ hex. CRYP_CSGCM5R 1b. ;
-    : CRYP_CSGCM6R. cr ." CRYP_CSGCM6R.  RW   $" CRYP_CSGCM6R @ hex. CRYP_CSGCM6R 1b. ;
-    : CRYP_CSGCM7R. cr ." CRYP_CSGCM7R.  RW   $" CRYP_CSGCM7R @ hex. CRYP_CSGCM7R 1b. ;
+    : CRYP_IV0LR. cr ." CRYP_IV0LR.  RW   $" CRYP_IV0LR @ h.8 CRYP_IV0LR 1b. ;
+    : CRYP_IV0RR. cr ." CRYP_IV0RR.  RW   $" CRYP_IV0RR @ h.8 CRYP_IV0RR 1b. ;
+    : CRYP_IV1LR. cr ." CRYP_IV1LR.  RW   $" CRYP_IV1LR @ h.8 CRYP_IV1LR 1b. ;
+    : CRYP_IV1RR. cr ." CRYP_IV1RR.  RW   $" CRYP_IV1RR @ h.8 CRYP_IV1RR 1b. ;
+    : CRYP_CSGCMCCM0R. cr ." CRYP_CSGCMCCM0R.  RW   $" CRYP_CSGCMCCM0R @ h.8 CRYP_CSGCMCCM0R 1b. ;
+    : CRYP_CSGCMCCM1R. cr ." CRYP_CSGCMCCM1R.  RW   $" CRYP_CSGCMCCM1R @ h.8 CRYP_CSGCMCCM1R 1b. ;
+    : CRYP_CSGCMCCM2R. cr ." CRYP_CSGCMCCM2R.  RW   $" CRYP_CSGCMCCM2R @ h.8 CRYP_CSGCMCCM2R 1b. ;
+    : CRYP_CSGCMCCM3R. cr ." CRYP_CSGCMCCM3R.  RW   $" CRYP_CSGCMCCM3R @ h.8 CRYP_CSGCMCCM3R 1b. ;
+    : CRYP_CSGCMCCM4R. cr ." CRYP_CSGCMCCM4R.  RW   $" CRYP_CSGCMCCM4R @ h.8 CRYP_CSGCMCCM4R 1b. ;
+    : CRYP_CSGCMCCM5R. cr ." CRYP_CSGCMCCM5R.  RW   $" CRYP_CSGCMCCM5R @ h.8 CRYP_CSGCMCCM5R 1b. ;
+    : CRYP_CSGCMCCM6R. cr ." CRYP_CSGCMCCM6R.  RW   $" CRYP_CSGCMCCM6R @ h.8 CRYP_CSGCMCCM6R 1b. ;
+    : CRYP_CSGCMCCM7R. cr ." CRYP_CSGCMCCM7R.  RW   $" CRYP_CSGCMCCM7R @ h.8 CRYP_CSGCMCCM7R 1b. ;
+    : CRYP_CSGCM0R. cr ." CRYP_CSGCM0R.  RW   $" CRYP_CSGCM0R @ h.8 CRYP_CSGCM0R 1b. ;
+    : CRYP_CSGCM1R. cr ." CRYP_CSGCM1R.  RW   $" CRYP_CSGCM1R @ h.8 CRYP_CSGCM1R 1b. ;
+    : CRYP_CSGCM2R. cr ." CRYP_CSGCM2R.  RW   $" CRYP_CSGCM2R @ h.8 CRYP_CSGCM2R 1b. ;
+    : CRYP_CSGCM3R. cr ." CRYP_CSGCM3R.  RW   $" CRYP_CSGCM3R @ h.8 CRYP_CSGCM3R 1b. ;
+    : CRYP_CSGCM4R. cr ." CRYP_CSGCM4R.  RW   $" CRYP_CSGCM4R @ h.8 CRYP_CSGCM4R 1b. ;
+    : CRYP_CSGCM5R. cr ." CRYP_CSGCM5R.  RW   $" CRYP_CSGCM5R @ h.8 CRYP_CSGCM5R 1b. ;
+    : CRYP_CSGCM6R. cr ." CRYP_CSGCM6R.  RW   $" CRYP_CSGCM6R @ h.8 CRYP_CSGCM6R 1b. ;
+    : CRYP_CSGCM7R. cr ." CRYP_CSGCM7R.  RW   $" CRYP_CSGCM7R @ h.8 CRYP_CSGCM7R 1b. ;
     : CRYP.
       CRYP_CR.
       CRYP_SR.
@@ -387,17 +387,17 @@ begin-module memmap
     DCMI $20 + constant DCMI_CWSTRT ( read-write )  \ crop window start
     DCMI $24 + constant DCMI_CWSIZE ( read-write )  \ crop window size
     DCMI $28 + constant DCMI_DR ( read-only )  \ data register
-    : DCMI_CR. cr ." DCMI_CR.  RW   $" DCMI_CR @ hex. DCMI_CR 1b. ;
-    : DCMI_SR. cr ." DCMI_SR.  RO   $" DCMI_SR @ hex. DCMI_SR 1b. ;
-    : DCMI_RIS. cr ." DCMI_RIS.  RO   $" DCMI_RIS @ hex. DCMI_RIS 1b. ;
-    : DCMI_IER. cr ." DCMI_IER.  RW   $" DCMI_IER @ hex. DCMI_IER 1b. ;
-    : DCMI_MIS. cr ." DCMI_MIS.  RO   $" DCMI_MIS @ hex. DCMI_MIS 1b. ;
+    : DCMI_CR. cr ." DCMI_CR.  RW   $" DCMI_CR @ h.8 DCMI_CR 1b. ;
+    : DCMI_SR. cr ." DCMI_SR.  RO   $" DCMI_SR @ h.8 DCMI_SR 1b. ;
+    : DCMI_RIS. cr ." DCMI_RIS.  RO   $" DCMI_RIS @ h.8 DCMI_RIS 1b. ;
+    : DCMI_IER. cr ." DCMI_IER.  RW   $" DCMI_IER @ h.8 DCMI_IER 1b. ;
+    : DCMI_MIS. cr ." DCMI_MIS.  RO   $" DCMI_MIS @ h.8 DCMI_MIS 1b. ;
     : DCMI_ICR. cr ." DCMI_ICR " WRITEONLY ; 
-    : DCMI_ESCR. cr ." DCMI_ESCR.  RW   $" DCMI_ESCR @ hex. DCMI_ESCR 1b. ;
-    : DCMI_ESUR. cr ." DCMI_ESUR.  RW   $" DCMI_ESUR @ hex. DCMI_ESUR 1b. ;
-    : DCMI_CWSTRT. cr ." DCMI_CWSTRT.  RW   $" DCMI_CWSTRT @ hex. DCMI_CWSTRT 1b. ;
-    : DCMI_CWSIZE. cr ." DCMI_CWSIZE.  RW   $" DCMI_CWSIZE @ hex. DCMI_CWSIZE 1b. ;
-    : DCMI_DR. cr ." DCMI_DR.  RO   $" DCMI_DR @ hex. DCMI_DR 1b. ;
+    : DCMI_ESCR. cr ." DCMI_ESCR.  RW   $" DCMI_ESCR @ h.8 DCMI_ESCR 1b. ;
+    : DCMI_ESUR. cr ." DCMI_ESUR.  RW   $" DCMI_ESUR @ h.8 DCMI_ESUR 1b. ;
+    : DCMI_CWSTRT. cr ." DCMI_CWSTRT.  RW   $" DCMI_CWSTRT @ h.8 DCMI_CWSTRT 1b. ;
+    : DCMI_CWSIZE. cr ." DCMI_CWSIZE.  RW   $" DCMI_CWSIZE @ h.8 DCMI_CWSIZE 1b. ;
+    : DCMI_DR. cr ." DCMI_DR.  RO   $" DCMI_DR @ h.8 DCMI_DR 1b. ;
     : DCMI.
       DCMI_CR.
       DCMI_SR.
@@ -439,30 +439,30 @@ begin-module memmap
     FMC $150 + constant FMC_SDCMR (  )  \ SDRAM Command Mode register
     FMC $154 + constant FMC_SDRTR (  )  \ SDRAM Refresh Timer register
     FMC $158 + constant FMC_SDSR ( read-only )  \ SDRAM Status register
-    : FMC_BCR1. cr ." FMC_BCR1.  RW   $" FMC_BCR1 @ hex. FMC_BCR1 1b. ;
-    : FMC_BTR1. cr ." FMC_BTR1.  RW   $" FMC_BTR1 @ hex. FMC_BTR1 1b. ;
-    : FMC_BCR2. cr ." FMC_BCR2.  RW   $" FMC_BCR2 @ hex. FMC_BCR2 1b. ;
-    : FMC_BTR2. cr ." FMC_BTR2.  RW   $" FMC_BTR2 @ hex. FMC_BTR2 1b. ;
-    : FMC_BCR3. cr ." FMC_BCR3.  RW   $" FMC_BCR3 @ hex. FMC_BCR3 1b. ;
-    : FMC_BTR3. cr ." FMC_BTR3.  RW   $" FMC_BTR3 @ hex. FMC_BTR3 1b. ;
-    : FMC_BCR4. cr ." FMC_BCR4.  RW   $" FMC_BCR4 @ hex. FMC_BCR4 1b. ;
-    : FMC_BTR4. cr ." FMC_BTR4.  RW   $" FMC_BTR4 @ hex. FMC_BTR4 1b. ;
-    : FMC_PCR. cr ." FMC_PCR.  RW   $" FMC_PCR @ hex. FMC_PCR 1b. ;
-    : FMC_SR. cr ." FMC_SR.   $" FMC_SR @ hex. FMC_SR 1b. ;
-    : FMC_PMEM. cr ." FMC_PMEM.  RW   $" FMC_PMEM @ hex. FMC_PMEM 1b. ;
-    : FMC_PATT. cr ." FMC_PATT.  RW   $" FMC_PATT @ hex. FMC_PATT 1b. ;
-    : FMC_ECCR. cr ." FMC_ECCR.  RO   $" FMC_ECCR @ hex. FMC_ECCR 1b. ;
-    : FMC_BWTR1. cr ." FMC_BWTR1.  RW   $" FMC_BWTR1 @ hex. FMC_BWTR1 1b. ;
-    : FMC_BWTR2. cr ." FMC_BWTR2.  RW   $" FMC_BWTR2 @ hex. FMC_BWTR2 1b. ;
-    : FMC_BWTR3. cr ." FMC_BWTR3.  RW   $" FMC_BWTR3 @ hex. FMC_BWTR3 1b. ;
-    : FMC_BWTR4. cr ." FMC_BWTR4.  RW   $" FMC_BWTR4 @ hex. FMC_BWTR4 1b. ;
-    : FMC_SDCR1. cr ." FMC_SDCR1.  RW   $" FMC_SDCR1 @ hex. FMC_SDCR1 1b. ;
-    : FMC_SDCR2. cr ." FMC_SDCR2.  RW   $" FMC_SDCR2 @ hex. FMC_SDCR2 1b. ;
-    : FMC_SDTR1. cr ." FMC_SDTR1.  RW   $" FMC_SDTR1 @ hex. FMC_SDTR1 1b. ;
-    : FMC_SDTR2. cr ." FMC_SDTR2.  RW   $" FMC_SDTR2 @ hex. FMC_SDTR2 1b. ;
-    : FMC_SDCMR. cr ." FMC_SDCMR.   $" FMC_SDCMR @ hex. FMC_SDCMR 1b. ;
-    : FMC_SDRTR. cr ." FMC_SDRTR.   $" FMC_SDRTR @ hex. FMC_SDRTR 1b. ;
-    : FMC_SDSR. cr ." FMC_SDSR.  RO   $" FMC_SDSR @ hex. FMC_SDSR 1b. ;
+    : FMC_BCR1. cr ." FMC_BCR1.  RW   $" FMC_BCR1 @ h.8 FMC_BCR1 1b. ;
+    : FMC_BTR1. cr ." FMC_BTR1.  RW   $" FMC_BTR1 @ h.8 FMC_BTR1 1b. ;
+    : FMC_BCR2. cr ." FMC_BCR2.  RW   $" FMC_BCR2 @ h.8 FMC_BCR2 1b. ;
+    : FMC_BTR2. cr ." FMC_BTR2.  RW   $" FMC_BTR2 @ h.8 FMC_BTR2 1b. ;
+    : FMC_BCR3. cr ." FMC_BCR3.  RW   $" FMC_BCR3 @ h.8 FMC_BCR3 1b. ;
+    : FMC_BTR3. cr ." FMC_BTR3.  RW   $" FMC_BTR3 @ h.8 FMC_BTR3 1b. ;
+    : FMC_BCR4. cr ." FMC_BCR4.  RW   $" FMC_BCR4 @ h.8 FMC_BCR4 1b. ;
+    : FMC_BTR4. cr ." FMC_BTR4.  RW   $" FMC_BTR4 @ h.8 FMC_BTR4 1b. ;
+    : FMC_PCR. cr ." FMC_PCR.  RW   $" FMC_PCR @ h.8 FMC_PCR 1b. ;
+    : FMC_SR. cr ." FMC_SR.   $" FMC_SR @ h.8 FMC_SR 1b. ;
+    : FMC_PMEM. cr ." FMC_PMEM.  RW   $" FMC_PMEM @ h.8 FMC_PMEM 1b. ;
+    : FMC_PATT. cr ." FMC_PATT.  RW   $" FMC_PATT @ h.8 FMC_PATT 1b. ;
+    : FMC_ECCR. cr ." FMC_ECCR.  RO   $" FMC_ECCR @ h.8 FMC_ECCR 1b. ;
+    : FMC_BWTR1. cr ." FMC_BWTR1.  RW   $" FMC_BWTR1 @ h.8 FMC_BWTR1 1b. ;
+    : FMC_BWTR2. cr ." FMC_BWTR2.  RW   $" FMC_BWTR2 @ h.8 FMC_BWTR2 1b. ;
+    : FMC_BWTR3. cr ." FMC_BWTR3.  RW   $" FMC_BWTR3 @ h.8 FMC_BWTR3 1b. ;
+    : FMC_BWTR4. cr ." FMC_BWTR4.  RW   $" FMC_BWTR4 @ h.8 FMC_BWTR4 1b. ;
+    : FMC_SDCR1. cr ." FMC_SDCR1.  RW   $" FMC_SDCR1 @ h.8 FMC_SDCR1 1b. ;
+    : FMC_SDCR2. cr ." FMC_SDCR2.  RW   $" FMC_SDCR2 @ h.8 FMC_SDCR2 1b. ;
+    : FMC_SDTR1. cr ." FMC_SDTR1.  RW   $" FMC_SDTR1 @ h.8 FMC_SDTR1 1b. ;
+    : FMC_SDTR2. cr ." FMC_SDTR2.  RW   $" FMC_SDTR2 @ h.8 FMC_SDTR2 1b. ;
+    : FMC_SDCMR. cr ." FMC_SDCMR.   $" FMC_SDCMR @ h.8 FMC_SDCMR 1b. ;
+    : FMC_SDRTR. cr ." FMC_SDRTR.   $" FMC_SDRTR @ h.8 FMC_SDRTR 1b. ;
+    : FMC_SDSR. cr ." FMC_SDSR.  RO   $" FMC_SDSR @ h.8 FMC_SDSR 1b. ;
     : FMC.
       FMC_BCR1.
       FMC_BTR1.
@@ -497,10 +497,10 @@ begin-module memmap
     DBG $4 + constant DBG_DBGMCU_CR ( read-write )  \ Control Register
     DBG $8 + constant DBG_DBGMCU_APB1_FZ ( read-write )  \ Debug MCU APB1 Freeze registe
     DBG $C + constant DBG_DBGMCU_APB2_FZ ( read-write )  \ Debug MCU APB2 Freeze registe
-    : DBG_DBGMCU_IDCODE. cr ." DBG_DBGMCU_IDCODE.  RO   $" DBG_DBGMCU_IDCODE @ hex. DBG_DBGMCU_IDCODE 1b. ;
-    : DBG_DBGMCU_CR. cr ." DBG_DBGMCU_CR.  RW   $" DBG_DBGMCU_CR @ hex. DBG_DBGMCU_CR 1b. ;
-    : DBG_DBGMCU_APB1_FZ. cr ." DBG_DBGMCU_APB1_FZ.  RW   $" DBG_DBGMCU_APB1_FZ @ hex. DBG_DBGMCU_APB1_FZ 1b. ;
-    : DBG_DBGMCU_APB2_FZ. cr ." DBG_DBGMCU_APB2_FZ.  RW   $" DBG_DBGMCU_APB2_FZ @ hex. DBG_DBGMCU_APB2_FZ 1b. ;
+    : DBG_DBGMCU_IDCODE. cr ." DBG_DBGMCU_IDCODE.  RO   $" DBG_DBGMCU_IDCODE @ h.8 DBG_DBGMCU_IDCODE 1b. ;
+    : DBG_DBGMCU_CR. cr ." DBG_DBGMCU_CR.  RW   $" DBG_DBGMCU_CR @ h.8 DBG_DBGMCU_CR 1b. ;
+    : DBG_DBGMCU_APB1_FZ. cr ." DBG_DBGMCU_APB1_FZ.  RW   $" DBG_DBGMCU_APB1_FZ @ h.8 DBG_DBGMCU_APB1_FZ 1b. ;
+    : DBG_DBGMCU_APB2_FZ. cr ." DBG_DBGMCU_APB2_FZ.  RW   $" DBG_DBGMCU_APB2_FZ @ h.8 DBG_DBGMCU_APB2_FZ 1b. ;
     : DBG.
       DBG_DBGMCU_IDCODE.
       DBG_DBGMCU_CR.
@@ -563,58 +563,58 @@ begin-module memmap
     DMA2 $C4 + constant DMA2_S7M0AR ( read-write )  \ stream x memory 0 address register
     DMA2 $C8 + constant DMA2_S7M1AR ( read-write )  \ stream x memory 1 address register
     DMA2 $CC + constant DMA2_S7FCR (  )  \ stream x FIFO control register
-    : DMA2_LISR. cr ." DMA2_LISR.  RO   $" DMA2_LISR @ hex. DMA2_LISR 1b. ;
-    : DMA2_HISR. cr ." DMA2_HISR.  RO   $" DMA2_HISR @ hex. DMA2_HISR 1b. ;
-    : DMA2_LIFCR. cr ." DMA2_LIFCR.  RW   $" DMA2_LIFCR @ hex. DMA2_LIFCR 1b. ;
-    : DMA2_HIFCR. cr ." DMA2_HIFCR.  RW   $" DMA2_HIFCR @ hex. DMA2_HIFCR 1b. ;
-    : DMA2_S0CR. cr ." DMA2_S0CR.  RW   $" DMA2_S0CR @ hex. DMA2_S0CR 1b. ;
-    : DMA2_S0NDTR. cr ." DMA2_S0NDTR.  RW   $" DMA2_S0NDTR @ hex. DMA2_S0NDTR 1b. ;
-    : DMA2_S0PAR. cr ." DMA2_S0PAR.  RW   $" DMA2_S0PAR @ hex. DMA2_S0PAR 1b. ;
-    : DMA2_S0M0AR. cr ." DMA2_S0M0AR.  RW   $" DMA2_S0M0AR @ hex. DMA2_S0M0AR 1b. ;
-    : DMA2_S0M1AR. cr ." DMA2_S0M1AR.  RW   $" DMA2_S0M1AR @ hex. DMA2_S0M1AR 1b. ;
-    : DMA2_S0FCR. cr ." DMA2_S0FCR.   $" DMA2_S0FCR @ hex. DMA2_S0FCR 1b. ;
-    : DMA2_S1CR. cr ." DMA2_S1CR.  RW   $" DMA2_S1CR @ hex. DMA2_S1CR 1b. ;
-    : DMA2_S1NDTR. cr ." DMA2_S1NDTR.  RW   $" DMA2_S1NDTR @ hex. DMA2_S1NDTR 1b. ;
-    : DMA2_S1PAR. cr ." DMA2_S1PAR.  RW   $" DMA2_S1PAR @ hex. DMA2_S1PAR 1b. ;
-    : DMA2_S1M0AR. cr ." DMA2_S1M0AR.  RW   $" DMA2_S1M0AR @ hex. DMA2_S1M0AR 1b. ;
-    : DMA2_S1M1AR. cr ." DMA2_S1M1AR.  RW   $" DMA2_S1M1AR @ hex. DMA2_S1M1AR 1b. ;
-    : DMA2_S1FCR. cr ." DMA2_S1FCR.   $" DMA2_S1FCR @ hex. DMA2_S1FCR 1b. ;
-    : DMA2_S2CR. cr ." DMA2_S2CR.  RW   $" DMA2_S2CR @ hex. DMA2_S2CR 1b. ;
-    : DMA2_S2NDTR. cr ." DMA2_S2NDTR.  RW   $" DMA2_S2NDTR @ hex. DMA2_S2NDTR 1b. ;
-    : DMA2_S2PAR. cr ." DMA2_S2PAR.  RW   $" DMA2_S2PAR @ hex. DMA2_S2PAR 1b. ;
-    : DMA2_S2M0AR. cr ." DMA2_S2M0AR.  RW   $" DMA2_S2M0AR @ hex. DMA2_S2M0AR 1b. ;
-    : DMA2_S2M1AR. cr ." DMA2_S2M1AR.  RW   $" DMA2_S2M1AR @ hex. DMA2_S2M1AR 1b. ;
-    : DMA2_S2FCR. cr ." DMA2_S2FCR.   $" DMA2_S2FCR @ hex. DMA2_S2FCR 1b. ;
-    : DMA2_S3CR. cr ." DMA2_S3CR.  RW   $" DMA2_S3CR @ hex. DMA2_S3CR 1b. ;
-    : DMA2_S3NDTR. cr ." DMA2_S3NDTR.  RW   $" DMA2_S3NDTR @ hex. DMA2_S3NDTR 1b. ;
-    : DMA2_S3PAR. cr ." DMA2_S3PAR.  RW   $" DMA2_S3PAR @ hex. DMA2_S3PAR 1b. ;
-    : DMA2_S3M0AR. cr ." DMA2_S3M0AR.  RW   $" DMA2_S3M0AR @ hex. DMA2_S3M0AR 1b. ;
-    : DMA2_S3M1AR. cr ." DMA2_S3M1AR.  RW   $" DMA2_S3M1AR @ hex. DMA2_S3M1AR 1b. ;
-    : DMA2_S3FCR. cr ." DMA2_S3FCR.   $" DMA2_S3FCR @ hex. DMA2_S3FCR 1b. ;
-    : DMA2_S4CR. cr ." DMA2_S4CR.  RW   $" DMA2_S4CR @ hex. DMA2_S4CR 1b. ;
-    : DMA2_S4NDTR. cr ." DMA2_S4NDTR.  RW   $" DMA2_S4NDTR @ hex. DMA2_S4NDTR 1b. ;
-    : DMA2_S4PAR. cr ." DMA2_S4PAR.  RW   $" DMA2_S4PAR @ hex. DMA2_S4PAR 1b. ;
-    : DMA2_S4M0AR. cr ." DMA2_S4M0AR.  RW   $" DMA2_S4M0AR @ hex. DMA2_S4M0AR 1b. ;
-    : DMA2_S4M1AR. cr ." DMA2_S4M1AR.  RW   $" DMA2_S4M1AR @ hex. DMA2_S4M1AR 1b. ;
-    : DMA2_S4FCR. cr ." DMA2_S4FCR.   $" DMA2_S4FCR @ hex. DMA2_S4FCR 1b. ;
-    : DMA2_S5CR. cr ." DMA2_S5CR.  RW   $" DMA2_S5CR @ hex. DMA2_S5CR 1b. ;
-    : DMA2_S5NDTR. cr ." DMA2_S5NDTR.  RW   $" DMA2_S5NDTR @ hex. DMA2_S5NDTR 1b. ;
-    : DMA2_S5PAR. cr ." DMA2_S5PAR.  RW   $" DMA2_S5PAR @ hex. DMA2_S5PAR 1b. ;
-    : DMA2_S5M0AR. cr ." DMA2_S5M0AR.  RW   $" DMA2_S5M0AR @ hex. DMA2_S5M0AR 1b. ;
-    : DMA2_S5M1AR. cr ." DMA2_S5M1AR.  RW   $" DMA2_S5M1AR @ hex. DMA2_S5M1AR 1b. ;
-    : DMA2_S5FCR. cr ." DMA2_S5FCR.   $" DMA2_S5FCR @ hex. DMA2_S5FCR 1b. ;
-    : DMA2_S6CR. cr ." DMA2_S6CR.  RW   $" DMA2_S6CR @ hex. DMA2_S6CR 1b. ;
-    : DMA2_S6NDTR. cr ." DMA2_S6NDTR.  RW   $" DMA2_S6NDTR @ hex. DMA2_S6NDTR 1b. ;
-    : DMA2_S6PAR. cr ." DMA2_S6PAR.  RW   $" DMA2_S6PAR @ hex. DMA2_S6PAR 1b. ;
-    : DMA2_S6M0AR. cr ." DMA2_S6M0AR.  RW   $" DMA2_S6M0AR @ hex. DMA2_S6M0AR 1b. ;
-    : DMA2_S6M1AR. cr ." DMA2_S6M1AR.  RW   $" DMA2_S6M1AR @ hex. DMA2_S6M1AR 1b. ;
-    : DMA2_S6FCR. cr ." DMA2_S6FCR.   $" DMA2_S6FCR @ hex. DMA2_S6FCR 1b. ;
-    : DMA2_S7CR. cr ." DMA2_S7CR.  RW   $" DMA2_S7CR @ hex. DMA2_S7CR 1b. ;
-    : DMA2_S7NDTR. cr ." DMA2_S7NDTR.  RW   $" DMA2_S7NDTR @ hex. DMA2_S7NDTR 1b. ;
-    : DMA2_S7PAR. cr ." DMA2_S7PAR.  RW   $" DMA2_S7PAR @ hex. DMA2_S7PAR 1b. ;
-    : DMA2_S7M0AR. cr ." DMA2_S7M0AR.  RW   $" DMA2_S7M0AR @ hex. DMA2_S7M0AR 1b. ;
-    : DMA2_S7M1AR. cr ." DMA2_S7M1AR.  RW   $" DMA2_S7M1AR @ hex. DMA2_S7M1AR 1b. ;
-    : DMA2_S7FCR. cr ." DMA2_S7FCR.   $" DMA2_S7FCR @ hex. DMA2_S7FCR 1b. ;
+    : DMA2_LISR. cr ." DMA2_LISR.  RO   $" DMA2_LISR @ h.8 DMA2_LISR 1b. ;
+    : DMA2_HISR. cr ." DMA2_HISR.  RO   $" DMA2_HISR @ h.8 DMA2_HISR 1b. ;
+    : DMA2_LIFCR. cr ." DMA2_LIFCR.  RW   $" DMA2_LIFCR @ h.8 DMA2_LIFCR 1b. ;
+    : DMA2_HIFCR. cr ." DMA2_HIFCR.  RW   $" DMA2_HIFCR @ h.8 DMA2_HIFCR 1b. ;
+    : DMA2_S0CR. cr ." DMA2_S0CR.  RW   $" DMA2_S0CR @ h.8 DMA2_S0CR 1b. ;
+    : DMA2_S0NDTR. cr ." DMA2_S0NDTR.  RW   $" DMA2_S0NDTR @ h.8 DMA2_S0NDTR 1b. ;
+    : DMA2_S0PAR. cr ." DMA2_S0PAR.  RW   $" DMA2_S0PAR @ h.8 DMA2_S0PAR 1b. ;
+    : DMA2_S0M0AR. cr ." DMA2_S0M0AR.  RW   $" DMA2_S0M0AR @ h.8 DMA2_S0M0AR 1b. ;
+    : DMA2_S0M1AR. cr ." DMA2_S0M1AR.  RW   $" DMA2_S0M1AR @ h.8 DMA2_S0M1AR 1b. ;
+    : DMA2_S0FCR. cr ." DMA2_S0FCR.   $" DMA2_S0FCR @ h.8 DMA2_S0FCR 1b. ;
+    : DMA2_S1CR. cr ." DMA2_S1CR.  RW   $" DMA2_S1CR @ h.8 DMA2_S1CR 1b. ;
+    : DMA2_S1NDTR. cr ." DMA2_S1NDTR.  RW   $" DMA2_S1NDTR @ h.8 DMA2_S1NDTR 1b. ;
+    : DMA2_S1PAR. cr ." DMA2_S1PAR.  RW   $" DMA2_S1PAR @ h.8 DMA2_S1PAR 1b. ;
+    : DMA2_S1M0AR. cr ." DMA2_S1M0AR.  RW   $" DMA2_S1M0AR @ h.8 DMA2_S1M0AR 1b. ;
+    : DMA2_S1M1AR. cr ." DMA2_S1M1AR.  RW   $" DMA2_S1M1AR @ h.8 DMA2_S1M1AR 1b. ;
+    : DMA2_S1FCR. cr ." DMA2_S1FCR.   $" DMA2_S1FCR @ h.8 DMA2_S1FCR 1b. ;
+    : DMA2_S2CR. cr ." DMA2_S2CR.  RW   $" DMA2_S2CR @ h.8 DMA2_S2CR 1b. ;
+    : DMA2_S2NDTR. cr ." DMA2_S2NDTR.  RW   $" DMA2_S2NDTR @ h.8 DMA2_S2NDTR 1b. ;
+    : DMA2_S2PAR. cr ." DMA2_S2PAR.  RW   $" DMA2_S2PAR @ h.8 DMA2_S2PAR 1b. ;
+    : DMA2_S2M0AR. cr ." DMA2_S2M0AR.  RW   $" DMA2_S2M0AR @ h.8 DMA2_S2M0AR 1b. ;
+    : DMA2_S2M1AR. cr ." DMA2_S2M1AR.  RW   $" DMA2_S2M1AR @ h.8 DMA2_S2M1AR 1b. ;
+    : DMA2_S2FCR. cr ." DMA2_S2FCR.   $" DMA2_S2FCR @ h.8 DMA2_S2FCR 1b. ;
+    : DMA2_S3CR. cr ." DMA2_S3CR.  RW   $" DMA2_S3CR @ h.8 DMA2_S3CR 1b. ;
+    : DMA2_S3NDTR. cr ." DMA2_S3NDTR.  RW   $" DMA2_S3NDTR @ h.8 DMA2_S3NDTR 1b. ;
+    : DMA2_S3PAR. cr ." DMA2_S3PAR.  RW   $" DMA2_S3PAR @ h.8 DMA2_S3PAR 1b. ;
+    : DMA2_S3M0AR. cr ." DMA2_S3M0AR.  RW   $" DMA2_S3M0AR @ h.8 DMA2_S3M0AR 1b. ;
+    : DMA2_S3M1AR. cr ." DMA2_S3M1AR.  RW   $" DMA2_S3M1AR @ h.8 DMA2_S3M1AR 1b. ;
+    : DMA2_S3FCR. cr ." DMA2_S3FCR.   $" DMA2_S3FCR @ h.8 DMA2_S3FCR 1b. ;
+    : DMA2_S4CR. cr ." DMA2_S4CR.  RW   $" DMA2_S4CR @ h.8 DMA2_S4CR 1b. ;
+    : DMA2_S4NDTR. cr ." DMA2_S4NDTR.  RW   $" DMA2_S4NDTR @ h.8 DMA2_S4NDTR 1b. ;
+    : DMA2_S4PAR. cr ." DMA2_S4PAR.  RW   $" DMA2_S4PAR @ h.8 DMA2_S4PAR 1b. ;
+    : DMA2_S4M0AR. cr ." DMA2_S4M0AR.  RW   $" DMA2_S4M0AR @ h.8 DMA2_S4M0AR 1b. ;
+    : DMA2_S4M1AR. cr ." DMA2_S4M1AR.  RW   $" DMA2_S4M1AR @ h.8 DMA2_S4M1AR 1b. ;
+    : DMA2_S4FCR. cr ." DMA2_S4FCR.   $" DMA2_S4FCR @ h.8 DMA2_S4FCR 1b. ;
+    : DMA2_S5CR. cr ." DMA2_S5CR.  RW   $" DMA2_S5CR @ h.8 DMA2_S5CR 1b. ;
+    : DMA2_S5NDTR. cr ." DMA2_S5NDTR.  RW   $" DMA2_S5NDTR @ h.8 DMA2_S5NDTR 1b. ;
+    : DMA2_S5PAR. cr ." DMA2_S5PAR.  RW   $" DMA2_S5PAR @ h.8 DMA2_S5PAR 1b. ;
+    : DMA2_S5M0AR. cr ." DMA2_S5M0AR.  RW   $" DMA2_S5M0AR @ h.8 DMA2_S5M0AR 1b. ;
+    : DMA2_S5M1AR. cr ." DMA2_S5M1AR.  RW   $" DMA2_S5M1AR @ h.8 DMA2_S5M1AR 1b. ;
+    : DMA2_S5FCR. cr ." DMA2_S5FCR.   $" DMA2_S5FCR @ h.8 DMA2_S5FCR 1b. ;
+    : DMA2_S6CR. cr ." DMA2_S6CR.  RW   $" DMA2_S6CR @ h.8 DMA2_S6CR 1b. ;
+    : DMA2_S6NDTR. cr ." DMA2_S6NDTR.  RW   $" DMA2_S6NDTR @ h.8 DMA2_S6NDTR 1b. ;
+    : DMA2_S6PAR. cr ." DMA2_S6PAR.  RW   $" DMA2_S6PAR @ h.8 DMA2_S6PAR 1b. ;
+    : DMA2_S6M0AR. cr ." DMA2_S6M0AR.  RW   $" DMA2_S6M0AR @ h.8 DMA2_S6M0AR 1b. ;
+    : DMA2_S6M1AR. cr ." DMA2_S6M1AR.  RW   $" DMA2_S6M1AR @ h.8 DMA2_S6M1AR 1b. ;
+    : DMA2_S6FCR. cr ." DMA2_S6FCR.   $" DMA2_S6FCR @ h.8 DMA2_S6FCR 1b. ;
+    : DMA2_S7CR. cr ." DMA2_S7CR.  RW   $" DMA2_S7CR @ h.8 DMA2_S7CR 1b. ;
+    : DMA2_S7NDTR. cr ." DMA2_S7NDTR.  RW   $" DMA2_S7NDTR @ h.8 DMA2_S7NDTR 1b. ;
+    : DMA2_S7PAR. cr ." DMA2_S7PAR.  RW   $" DMA2_S7PAR @ h.8 DMA2_S7PAR 1b. ;
+    : DMA2_S7M0AR. cr ." DMA2_S7M0AR.  RW   $" DMA2_S7M0AR @ h.8 DMA2_S7M0AR 1b. ;
+    : DMA2_S7M1AR. cr ." DMA2_S7M1AR.  RW   $" DMA2_S7M1AR @ h.8 DMA2_S7M1AR 1b. ;
+    : DMA2_S7FCR. cr ." DMA2_S7FCR.   $" DMA2_S7FCR @ h.8 DMA2_S7FCR 1b. ;
     : DMA2.
       DMA2_LISR.
       DMA2_HISR.
@@ -725,58 +725,58 @@ begin-module memmap
     DMA1 $C4 + constant DMA1_S7M0AR ( read-write )  \ stream x memory 0 address register
     DMA1 $C8 + constant DMA1_S7M1AR ( read-write )  \ stream x memory 1 address register
     DMA1 $CC + constant DMA1_S7FCR (  )  \ stream x FIFO control register
-    : DMA1_LISR. cr ." DMA1_LISR.  RO   $" DMA1_LISR @ hex. DMA1_LISR 1b. ;
-    : DMA1_HISR. cr ." DMA1_HISR.  RO   $" DMA1_HISR @ hex. DMA1_HISR 1b. ;
-    : DMA1_LIFCR. cr ." DMA1_LIFCR.  RW   $" DMA1_LIFCR @ hex. DMA1_LIFCR 1b. ;
-    : DMA1_HIFCR. cr ." DMA1_HIFCR.  RW   $" DMA1_HIFCR @ hex. DMA1_HIFCR 1b. ;
-    : DMA1_S0CR. cr ." DMA1_S0CR.  RW   $" DMA1_S0CR @ hex. DMA1_S0CR 1b. ;
-    : DMA1_S0NDTR. cr ." DMA1_S0NDTR.  RW   $" DMA1_S0NDTR @ hex. DMA1_S0NDTR 1b. ;
-    : DMA1_S0PAR. cr ." DMA1_S0PAR.  RW   $" DMA1_S0PAR @ hex. DMA1_S0PAR 1b. ;
-    : DMA1_S0M0AR. cr ." DMA1_S0M0AR.  RW   $" DMA1_S0M0AR @ hex. DMA1_S0M0AR 1b. ;
-    : DMA1_S0M1AR. cr ." DMA1_S0M1AR.  RW   $" DMA1_S0M1AR @ hex. DMA1_S0M1AR 1b. ;
-    : DMA1_S0FCR. cr ." DMA1_S0FCR.   $" DMA1_S0FCR @ hex. DMA1_S0FCR 1b. ;
-    : DMA1_S1CR. cr ." DMA1_S1CR.  RW   $" DMA1_S1CR @ hex. DMA1_S1CR 1b. ;
-    : DMA1_S1NDTR. cr ." DMA1_S1NDTR.  RW   $" DMA1_S1NDTR @ hex. DMA1_S1NDTR 1b. ;
-    : DMA1_S1PAR. cr ." DMA1_S1PAR.  RW   $" DMA1_S1PAR @ hex. DMA1_S1PAR 1b. ;
-    : DMA1_S1M0AR. cr ." DMA1_S1M0AR.  RW   $" DMA1_S1M0AR @ hex. DMA1_S1M0AR 1b. ;
-    : DMA1_S1M1AR. cr ." DMA1_S1M1AR.  RW   $" DMA1_S1M1AR @ hex. DMA1_S1M1AR 1b. ;
-    : DMA1_S1FCR. cr ." DMA1_S1FCR.   $" DMA1_S1FCR @ hex. DMA1_S1FCR 1b. ;
-    : DMA1_S2CR. cr ." DMA1_S2CR.  RW   $" DMA1_S2CR @ hex. DMA1_S2CR 1b. ;
-    : DMA1_S2NDTR. cr ." DMA1_S2NDTR.  RW   $" DMA1_S2NDTR @ hex. DMA1_S2NDTR 1b. ;
-    : DMA1_S2PAR. cr ." DMA1_S2PAR.  RW   $" DMA1_S2PAR @ hex. DMA1_S2PAR 1b. ;
-    : DMA1_S2M0AR. cr ." DMA1_S2M0AR.  RW   $" DMA1_S2M0AR @ hex. DMA1_S2M0AR 1b. ;
-    : DMA1_S2M1AR. cr ." DMA1_S2M1AR.  RW   $" DMA1_S2M1AR @ hex. DMA1_S2M1AR 1b. ;
-    : DMA1_S2FCR. cr ." DMA1_S2FCR.   $" DMA1_S2FCR @ hex. DMA1_S2FCR 1b. ;
-    : DMA1_S3CR. cr ." DMA1_S3CR.  RW   $" DMA1_S3CR @ hex. DMA1_S3CR 1b. ;
-    : DMA1_S3NDTR. cr ." DMA1_S3NDTR.  RW   $" DMA1_S3NDTR @ hex. DMA1_S3NDTR 1b. ;
-    : DMA1_S3PAR. cr ." DMA1_S3PAR.  RW   $" DMA1_S3PAR @ hex. DMA1_S3PAR 1b. ;
-    : DMA1_S3M0AR. cr ." DMA1_S3M0AR.  RW   $" DMA1_S3M0AR @ hex. DMA1_S3M0AR 1b. ;
-    : DMA1_S3M1AR. cr ." DMA1_S3M1AR.  RW   $" DMA1_S3M1AR @ hex. DMA1_S3M1AR 1b. ;
-    : DMA1_S3FCR. cr ." DMA1_S3FCR.   $" DMA1_S3FCR @ hex. DMA1_S3FCR 1b. ;
-    : DMA1_S4CR. cr ." DMA1_S4CR.  RW   $" DMA1_S4CR @ hex. DMA1_S4CR 1b. ;
-    : DMA1_S4NDTR. cr ." DMA1_S4NDTR.  RW   $" DMA1_S4NDTR @ hex. DMA1_S4NDTR 1b. ;
-    : DMA1_S4PAR. cr ." DMA1_S4PAR.  RW   $" DMA1_S4PAR @ hex. DMA1_S4PAR 1b. ;
-    : DMA1_S4M0AR. cr ." DMA1_S4M0AR.  RW   $" DMA1_S4M0AR @ hex. DMA1_S4M0AR 1b. ;
-    : DMA1_S4M1AR. cr ." DMA1_S4M1AR.  RW   $" DMA1_S4M1AR @ hex. DMA1_S4M1AR 1b. ;
-    : DMA1_S4FCR. cr ." DMA1_S4FCR.   $" DMA1_S4FCR @ hex. DMA1_S4FCR 1b. ;
-    : DMA1_S5CR. cr ." DMA1_S5CR.  RW   $" DMA1_S5CR @ hex. DMA1_S5CR 1b. ;
-    : DMA1_S5NDTR. cr ." DMA1_S5NDTR.  RW   $" DMA1_S5NDTR @ hex. DMA1_S5NDTR 1b. ;
-    : DMA1_S5PAR. cr ." DMA1_S5PAR.  RW   $" DMA1_S5PAR @ hex. DMA1_S5PAR 1b. ;
-    : DMA1_S5M0AR. cr ." DMA1_S5M0AR.  RW   $" DMA1_S5M0AR @ hex. DMA1_S5M0AR 1b. ;
-    : DMA1_S5M1AR. cr ." DMA1_S5M1AR.  RW   $" DMA1_S5M1AR @ hex. DMA1_S5M1AR 1b. ;
-    : DMA1_S5FCR. cr ." DMA1_S5FCR.   $" DMA1_S5FCR @ hex. DMA1_S5FCR 1b. ;
-    : DMA1_S6CR. cr ." DMA1_S6CR.  RW   $" DMA1_S6CR @ hex. DMA1_S6CR 1b. ;
-    : DMA1_S6NDTR. cr ." DMA1_S6NDTR.  RW   $" DMA1_S6NDTR @ hex. DMA1_S6NDTR 1b. ;
-    : DMA1_S6PAR. cr ." DMA1_S6PAR.  RW   $" DMA1_S6PAR @ hex. DMA1_S6PAR 1b. ;
-    : DMA1_S6M0AR. cr ." DMA1_S6M0AR.  RW   $" DMA1_S6M0AR @ hex. DMA1_S6M0AR 1b. ;
-    : DMA1_S6M1AR. cr ." DMA1_S6M1AR.  RW   $" DMA1_S6M1AR @ hex. DMA1_S6M1AR 1b. ;
-    : DMA1_S6FCR. cr ." DMA1_S6FCR.   $" DMA1_S6FCR @ hex. DMA1_S6FCR 1b. ;
-    : DMA1_S7CR. cr ." DMA1_S7CR.  RW   $" DMA1_S7CR @ hex. DMA1_S7CR 1b. ;
-    : DMA1_S7NDTR. cr ." DMA1_S7NDTR.  RW   $" DMA1_S7NDTR @ hex. DMA1_S7NDTR 1b. ;
-    : DMA1_S7PAR. cr ." DMA1_S7PAR.  RW   $" DMA1_S7PAR @ hex. DMA1_S7PAR 1b. ;
-    : DMA1_S7M0AR. cr ." DMA1_S7M0AR.  RW   $" DMA1_S7M0AR @ hex. DMA1_S7M0AR 1b. ;
-    : DMA1_S7M1AR. cr ." DMA1_S7M1AR.  RW   $" DMA1_S7M1AR @ hex. DMA1_S7M1AR 1b. ;
-    : DMA1_S7FCR. cr ." DMA1_S7FCR.   $" DMA1_S7FCR @ hex. DMA1_S7FCR 1b. ;
+    : DMA1_LISR. cr ." DMA1_LISR.  RO   $" DMA1_LISR @ h.8 DMA1_LISR 1b. ;
+    : DMA1_HISR. cr ." DMA1_HISR.  RO   $" DMA1_HISR @ h.8 DMA1_HISR 1b. ;
+    : DMA1_LIFCR. cr ." DMA1_LIFCR.  RW   $" DMA1_LIFCR @ h.8 DMA1_LIFCR 1b. ;
+    : DMA1_HIFCR. cr ." DMA1_HIFCR.  RW   $" DMA1_HIFCR @ h.8 DMA1_HIFCR 1b. ;
+    : DMA1_S0CR. cr ." DMA1_S0CR.  RW   $" DMA1_S0CR @ h.8 DMA1_S0CR 1b. ;
+    : DMA1_S0NDTR. cr ." DMA1_S0NDTR.  RW   $" DMA1_S0NDTR @ h.8 DMA1_S0NDTR 1b. ;
+    : DMA1_S0PAR. cr ." DMA1_S0PAR.  RW   $" DMA1_S0PAR @ h.8 DMA1_S0PAR 1b. ;
+    : DMA1_S0M0AR. cr ." DMA1_S0M0AR.  RW   $" DMA1_S0M0AR @ h.8 DMA1_S0M0AR 1b. ;
+    : DMA1_S0M1AR. cr ." DMA1_S0M1AR.  RW   $" DMA1_S0M1AR @ h.8 DMA1_S0M1AR 1b. ;
+    : DMA1_S0FCR. cr ." DMA1_S0FCR.   $" DMA1_S0FCR @ h.8 DMA1_S0FCR 1b. ;
+    : DMA1_S1CR. cr ." DMA1_S1CR.  RW   $" DMA1_S1CR @ h.8 DMA1_S1CR 1b. ;
+    : DMA1_S1NDTR. cr ." DMA1_S1NDTR.  RW   $" DMA1_S1NDTR @ h.8 DMA1_S1NDTR 1b. ;
+    : DMA1_S1PAR. cr ." DMA1_S1PAR.  RW   $" DMA1_S1PAR @ h.8 DMA1_S1PAR 1b. ;
+    : DMA1_S1M0AR. cr ." DMA1_S1M0AR.  RW   $" DMA1_S1M0AR @ h.8 DMA1_S1M0AR 1b. ;
+    : DMA1_S1M1AR. cr ." DMA1_S1M1AR.  RW   $" DMA1_S1M1AR @ h.8 DMA1_S1M1AR 1b. ;
+    : DMA1_S1FCR. cr ." DMA1_S1FCR.   $" DMA1_S1FCR @ h.8 DMA1_S1FCR 1b. ;
+    : DMA1_S2CR. cr ." DMA1_S2CR.  RW   $" DMA1_S2CR @ h.8 DMA1_S2CR 1b. ;
+    : DMA1_S2NDTR. cr ." DMA1_S2NDTR.  RW   $" DMA1_S2NDTR @ h.8 DMA1_S2NDTR 1b. ;
+    : DMA1_S2PAR. cr ." DMA1_S2PAR.  RW   $" DMA1_S2PAR @ h.8 DMA1_S2PAR 1b. ;
+    : DMA1_S2M0AR. cr ." DMA1_S2M0AR.  RW   $" DMA1_S2M0AR @ h.8 DMA1_S2M0AR 1b. ;
+    : DMA1_S2M1AR. cr ." DMA1_S2M1AR.  RW   $" DMA1_S2M1AR @ h.8 DMA1_S2M1AR 1b. ;
+    : DMA1_S2FCR. cr ." DMA1_S2FCR.   $" DMA1_S2FCR @ h.8 DMA1_S2FCR 1b. ;
+    : DMA1_S3CR. cr ." DMA1_S3CR.  RW   $" DMA1_S3CR @ h.8 DMA1_S3CR 1b. ;
+    : DMA1_S3NDTR. cr ." DMA1_S3NDTR.  RW   $" DMA1_S3NDTR @ h.8 DMA1_S3NDTR 1b. ;
+    : DMA1_S3PAR. cr ." DMA1_S3PAR.  RW   $" DMA1_S3PAR @ h.8 DMA1_S3PAR 1b. ;
+    : DMA1_S3M0AR. cr ." DMA1_S3M0AR.  RW   $" DMA1_S3M0AR @ h.8 DMA1_S3M0AR 1b. ;
+    : DMA1_S3M1AR. cr ." DMA1_S3M1AR.  RW   $" DMA1_S3M1AR @ h.8 DMA1_S3M1AR 1b. ;
+    : DMA1_S3FCR. cr ." DMA1_S3FCR.   $" DMA1_S3FCR @ h.8 DMA1_S3FCR 1b. ;
+    : DMA1_S4CR. cr ." DMA1_S4CR.  RW   $" DMA1_S4CR @ h.8 DMA1_S4CR 1b. ;
+    : DMA1_S4NDTR. cr ." DMA1_S4NDTR.  RW   $" DMA1_S4NDTR @ h.8 DMA1_S4NDTR 1b. ;
+    : DMA1_S4PAR. cr ." DMA1_S4PAR.  RW   $" DMA1_S4PAR @ h.8 DMA1_S4PAR 1b. ;
+    : DMA1_S4M0AR. cr ." DMA1_S4M0AR.  RW   $" DMA1_S4M0AR @ h.8 DMA1_S4M0AR 1b. ;
+    : DMA1_S4M1AR. cr ." DMA1_S4M1AR.  RW   $" DMA1_S4M1AR @ h.8 DMA1_S4M1AR 1b. ;
+    : DMA1_S4FCR. cr ." DMA1_S4FCR.   $" DMA1_S4FCR @ h.8 DMA1_S4FCR 1b. ;
+    : DMA1_S5CR. cr ." DMA1_S5CR.  RW   $" DMA1_S5CR @ h.8 DMA1_S5CR 1b. ;
+    : DMA1_S5NDTR. cr ." DMA1_S5NDTR.  RW   $" DMA1_S5NDTR @ h.8 DMA1_S5NDTR 1b. ;
+    : DMA1_S5PAR. cr ." DMA1_S5PAR.  RW   $" DMA1_S5PAR @ h.8 DMA1_S5PAR 1b. ;
+    : DMA1_S5M0AR. cr ." DMA1_S5M0AR.  RW   $" DMA1_S5M0AR @ h.8 DMA1_S5M0AR 1b. ;
+    : DMA1_S5M1AR. cr ." DMA1_S5M1AR.  RW   $" DMA1_S5M1AR @ h.8 DMA1_S5M1AR 1b. ;
+    : DMA1_S5FCR. cr ." DMA1_S5FCR.   $" DMA1_S5FCR @ h.8 DMA1_S5FCR 1b. ;
+    : DMA1_S6CR. cr ." DMA1_S6CR.  RW   $" DMA1_S6CR @ h.8 DMA1_S6CR 1b. ;
+    : DMA1_S6NDTR. cr ." DMA1_S6NDTR.  RW   $" DMA1_S6NDTR @ h.8 DMA1_S6NDTR 1b. ;
+    : DMA1_S6PAR. cr ." DMA1_S6PAR.  RW   $" DMA1_S6PAR @ h.8 DMA1_S6PAR 1b. ;
+    : DMA1_S6M0AR. cr ." DMA1_S6M0AR.  RW   $" DMA1_S6M0AR @ h.8 DMA1_S6M0AR 1b. ;
+    : DMA1_S6M1AR. cr ." DMA1_S6M1AR.  RW   $" DMA1_S6M1AR @ h.8 DMA1_S6M1AR 1b. ;
+    : DMA1_S6FCR. cr ." DMA1_S6FCR.   $" DMA1_S6FCR @ h.8 DMA1_S6FCR 1b. ;
+    : DMA1_S7CR. cr ." DMA1_S7CR.  RW   $" DMA1_S7CR @ h.8 DMA1_S7CR 1b. ;
+    : DMA1_S7NDTR. cr ." DMA1_S7NDTR.  RW   $" DMA1_S7NDTR @ h.8 DMA1_S7NDTR 1b. ;
+    : DMA1_S7PAR. cr ." DMA1_S7PAR.  RW   $" DMA1_S7PAR @ h.8 DMA1_S7PAR 1b. ;
+    : DMA1_S7M0AR. cr ." DMA1_S7M0AR.  RW   $" DMA1_S7M0AR @ h.8 DMA1_S7M0AR 1b. ;
+    : DMA1_S7M1AR. cr ." DMA1_S7M1AR.  RW   $" DMA1_S7M1AR @ h.8 DMA1_S7M1AR 1b. ;
+    : DMA1_S7FCR. cr ." DMA1_S7FCR.   $" DMA1_S7FCR @ h.8 DMA1_S7FCR 1b. ;
     : DMA1.
       DMA1_LISR.
       DMA1_HISR.
@@ -861,32 +861,32 @@ begin-module memmap
     RCC $88 + constant RCC_PLLSAICFGR ( read-write )  \ PLL configuration register
     RCC $8C + constant RCC_DKCFGR1 ( read-write )  \ dedicated clocks configuration register
     RCC $90 + constant RCC_DKCFGR2 ( read-write )  \ dedicated clocks configuration register
-    : RCC_CR. cr ." RCC_CR.   $" RCC_CR @ hex. RCC_CR 1b. ;
-    : RCC_PLLCFGR. cr ." RCC_PLLCFGR.  RW   $" RCC_PLLCFGR @ hex. RCC_PLLCFGR 1b. ;
-    : RCC_CFGR. cr ." RCC_CFGR.   $" RCC_CFGR @ hex. RCC_CFGR 1b. ;
-    : RCC_CIR. cr ." RCC_CIR.   $" RCC_CIR @ hex. RCC_CIR 1b. ;
-    : RCC_AHB1RSTR. cr ." RCC_AHB1RSTR.  RW   $" RCC_AHB1RSTR @ hex. RCC_AHB1RSTR 1b. ;
-    : RCC_AHB2RSTR. cr ." RCC_AHB2RSTR.  RW   $" RCC_AHB2RSTR @ hex. RCC_AHB2RSTR 1b. ;
-    : RCC_AHB3RSTR. cr ." RCC_AHB3RSTR.  RW   $" RCC_AHB3RSTR @ hex. RCC_AHB3RSTR 1b. ;
-    : RCC_APB1RSTR. cr ." RCC_APB1RSTR.  RW   $" RCC_APB1RSTR @ hex. RCC_APB1RSTR 1b. ;
-    : RCC_APB2RSTR. cr ." RCC_APB2RSTR.  RW   $" RCC_APB2RSTR @ hex. RCC_APB2RSTR 1b. ;
-    : RCC_AHB1ENR. cr ." RCC_AHB1ENR.  RW   $" RCC_AHB1ENR @ hex. RCC_AHB1ENR 1b. ;
-    : RCC_AHB2ENR. cr ." RCC_AHB2ENR.  RW   $" RCC_AHB2ENR @ hex. RCC_AHB2ENR 1b. ;
-    : RCC_AHB3ENR. cr ." RCC_AHB3ENR.  RW   $" RCC_AHB3ENR @ hex. RCC_AHB3ENR 1b. ;
-    : RCC_APB1ENR. cr ." RCC_APB1ENR.  RW   $" RCC_APB1ENR @ hex. RCC_APB1ENR 1b. ;
-    : RCC_APB2ENR. cr ." RCC_APB2ENR.  RW   $" RCC_APB2ENR @ hex. RCC_APB2ENR 1b. ;
-    : RCC_AHB1LPENR. cr ." RCC_AHB1LPENR.  RW   $" RCC_AHB1LPENR @ hex. RCC_AHB1LPENR 1b. ;
-    : RCC_AHB2LPENR. cr ." RCC_AHB2LPENR.  RW   $" RCC_AHB2LPENR @ hex. RCC_AHB2LPENR 1b. ;
-    : RCC_AHB3LPENR. cr ." RCC_AHB3LPENR.  RW   $" RCC_AHB3LPENR @ hex. RCC_AHB3LPENR 1b. ;
-    : RCC_APB1LPENR. cr ." RCC_APB1LPENR.  RW   $" RCC_APB1LPENR @ hex. RCC_APB1LPENR 1b. ;
-    : RCC_APB2LPENR. cr ." RCC_APB2LPENR.  RW   $" RCC_APB2LPENR @ hex. RCC_APB2LPENR 1b. ;
-    : RCC_BDCR. cr ." RCC_BDCR.   $" RCC_BDCR @ hex. RCC_BDCR 1b. ;
-    : RCC_CSR. cr ." RCC_CSR.   $" RCC_CSR @ hex. RCC_CSR 1b. ;
-    : RCC_SSCGR. cr ." RCC_SSCGR.  RW   $" RCC_SSCGR @ hex. RCC_SSCGR 1b. ;
-    : RCC_PLLI2SCFGR. cr ." RCC_PLLI2SCFGR.  RW   $" RCC_PLLI2SCFGR @ hex. RCC_PLLI2SCFGR 1b. ;
-    : RCC_PLLSAICFGR. cr ." RCC_PLLSAICFGR.  RW   $" RCC_PLLSAICFGR @ hex. RCC_PLLSAICFGR 1b. ;
-    : RCC_DKCFGR1. cr ." RCC_DKCFGR1.  RW   $" RCC_DKCFGR1 @ hex. RCC_DKCFGR1 1b. ;
-    : RCC_DKCFGR2. cr ." RCC_DKCFGR2.  RW   $" RCC_DKCFGR2 @ hex. RCC_DKCFGR2 1b. ;
+    : RCC_CR. cr ." RCC_CR.   $" RCC_CR @ h.8 RCC_CR 1b. ;
+    : RCC_PLLCFGR. cr ." RCC_PLLCFGR.  RW   $" RCC_PLLCFGR @ h.8 RCC_PLLCFGR 1b. ;
+    : RCC_CFGR. cr ." RCC_CFGR.   $" RCC_CFGR @ h.8 RCC_CFGR 1b. ;
+    : RCC_CIR. cr ." RCC_CIR.   $" RCC_CIR @ h.8 RCC_CIR 1b. ;
+    : RCC_AHB1RSTR. cr ." RCC_AHB1RSTR.  RW   $" RCC_AHB1RSTR @ h.8 RCC_AHB1RSTR 1b. ;
+    : RCC_AHB2RSTR. cr ." RCC_AHB2RSTR.  RW   $" RCC_AHB2RSTR @ h.8 RCC_AHB2RSTR 1b. ;
+    : RCC_AHB3RSTR. cr ." RCC_AHB3RSTR.  RW   $" RCC_AHB3RSTR @ h.8 RCC_AHB3RSTR 1b. ;
+    : RCC_APB1RSTR. cr ." RCC_APB1RSTR.  RW   $" RCC_APB1RSTR @ h.8 RCC_APB1RSTR 1b. ;
+    : RCC_APB2RSTR. cr ." RCC_APB2RSTR.  RW   $" RCC_APB2RSTR @ h.8 RCC_APB2RSTR 1b. ;
+    : RCC_AHB1ENR. cr ." RCC_AHB1ENR.  RW   $" RCC_AHB1ENR @ h.8 RCC_AHB1ENR 1b. ;
+    : RCC_AHB2ENR. cr ." RCC_AHB2ENR.  RW   $" RCC_AHB2ENR @ h.8 RCC_AHB2ENR 1b. ;
+    : RCC_AHB3ENR. cr ." RCC_AHB3ENR.  RW   $" RCC_AHB3ENR @ h.8 RCC_AHB3ENR 1b. ;
+    : RCC_APB1ENR. cr ." RCC_APB1ENR.  RW   $" RCC_APB1ENR @ h.8 RCC_APB1ENR 1b. ;
+    : RCC_APB2ENR. cr ." RCC_APB2ENR.  RW   $" RCC_APB2ENR @ h.8 RCC_APB2ENR 1b. ;
+    : RCC_AHB1LPENR. cr ." RCC_AHB1LPENR.  RW   $" RCC_AHB1LPENR @ h.8 RCC_AHB1LPENR 1b. ;
+    : RCC_AHB2LPENR. cr ." RCC_AHB2LPENR.  RW   $" RCC_AHB2LPENR @ h.8 RCC_AHB2LPENR 1b. ;
+    : RCC_AHB3LPENR. cr ." RCC_AHB3LPENR.  RW   $" RCC_AHB3LPENR @ h.8 RCC_AHB3LPENR 1b. ;
+    : RCC_APB1LPENR. cr ." RCC_APB1LPENR.  RW   $" RCC_APB1LPENR @ h.8 RCC_APB1LPENR 1b. ;
+    : RCC_APB2LPENR. cr ." RCC_APB2LPENR.  RW   $" RCC_APB2LPENR @ h.8 RCC_APB2LPENR 1b. ;
+    : RCC_BDCR. cr ." RCC_BDCR.   $" RCC_BDCR @ h.8 RCC_BDCR 1b. ;
+    : RCC_CSR. cr ." RCC_CSR.   $" RCC_CSR @ h.8 RCC_CSR 1b. ;
+    : RCC_SSCGR. cr ." RCC_SSCGR.  RW   $" RCC_SSCGR @ h.8 RCC_SSCGR 1b. ;
+    : RCC_PLLI2SCFGR. cr ." RCC_PLLI2SCFGR.  RW   $" RCC_PLLI2SCFGR @ h.8 RCC_PLLI2SCFGR 1b. ;
+    : RCC_PLLSAICFGR. cr ." RCC_PLLSAICFGR.  RW   $" RCC_PLLSAICFGR @ h.8 RCC_PLLSAICFGR 1b. ;
+    : RCC_DKCFGR1. cr ." RCC_DKCFGR1.  RW   $" RCC_DKCFGR1 @ h.8 RCC_DKCFGR1 1b. ;
+    : RCC_DKCFGR2. cr ." RCC_DKCFGR2.  RW   $" RCC_DKCFGR2 @ h.8 RCC_DKCFGR2 1b. ;
     : RCC.
       RCC_CR.
       RCC_PLLCFGR.
@@ -930,17 +930,17 @@ begin-module memmap
     GPIOD $20 + constant GPIOD_AFRL ( read-write )  \ GPIO alternate function lowregister
     GPIOD $24 + constant GPIOD_AFRH ( read-write )  \ GPIO alternate function high register
     GPIOD $28 + constant GPIOD_BRR ( read-write )  \ GPIO port bit reset register
-    : GPIOD_MODER. cr ." GPIOD_MODER.  RW   $" GPIOD_MODER @ hex. GPIOD_MODER 1b. ;
-    : GPIOD_OTYPER. cr ." GPIOD_OTYPER.  RW   $" GPIOD_OTYPER @ hex. GPIOD_OTYPER 1b. ;
-    : GPIOD_GPIOB_OSPEEDR. cr ." GPIOD_GPIOB_OSPEEDR.  RW   $" GPIOD_GPIOB_OSPEEDR @ hex. GPIOD_GPIOB_OSPEEDR 1b. ;
-    : GPIOD_PUPDR. cr ." GPIOD_PUPDR.  RW   $" GPIOD_PUPDR @ hex. GPIOD_PUPDR 1b. ;
-    : GPIOD_IDR. cr ." GPIOD_IDR.  RO   $" GPIOD_IDR @ hex. GPIOD_IDR 1b. ;
-    : GPIOD_ODR. cr ." GPIOD_ODR.  RW   $" GPIOD_ODR @ hex. GPIOD_ODR 1b. ;
+    : GPIOD_MODER. cr ." GPIOD_MODER.  RW   $" GPIOD_MODER @ h.8 GPIOD_MODER 1b. ;
+    : GPIOD_OTYPER. cr ." GPIOD_OTYPER.  RW   $" GPIOD_OTYPER @ h.8 GPIOD_OTYPER 1b. ;
+    : GPIOD_GPIOB_OSPEEDR. cr ." GPIOD_GPIOB_OSPEEDR.  RW   $" GPIOD_GPIOB_OSPEEDR @ h.8 GPIOD_GPIOB_OSPEEDR 1b. ;
+    : GPIOD_PUPDR. cr ." GPIOD_PUPDR.  RW   $" GPIOD_PUPDR @ h.8 GPIOD_PUPDR 1b. ;
+    : GPIOD_IDR. cr ." GPIOD_IDR.  RO   $" GPIOD_IDR @ h.8 GPIOD_IDR 1b. ;
+    : GPIOD_ODR. cr ." GPIOD_ODR.  RW   $" GPIOD_ODR @ h.8 GPIOD_ODR 1b. ;
     : GPIOD_BSRR. cr ." GPIOD_BSRR " WRITEONLY ; 
-    : GPIOD_LCKR. cr ." GPIOD_LCKR.  RW   $" GPIOD_LCKR @ hex. GPIOD_LCKR 1b. ;
-    : GPIOD_AFRL. cr ." GPIOD_AFRL.  RW   $" GPIOD_AFRL @ hex. GPIOD_AFRL 1b. ;
-    : GPIOD_AFRH. cr ." GPIOD_AFRH.  RW   $" GPIOD_AFRH @ hex. GPIOD_AFRH 1b. ;
-    : GPIOD_BRR. cr ." GPIOD_BRR.  RW   $" GPIOD_BRR @ hex. GPIOD_BRR 1b. ;
+    : GPIOD_LCKR. cr ." GPIOD_LCKR.  RW   $" GPIOD_LCKR @ h.8 GPIOD_LCKR 1b. ;
+    : GPIOD_AFRL. cr ." GPIOD_AFRL.  RW   $" GPIOD_AFRL @ h.8 GPIOD_AFRL 1b. ;
+    : GPIOD_AFRH. cr ." GPIOD_AFRH.  RW   $" GPIOD_AFRH @ h.8 GPIOD_AFRH 1b. ;
+    : GPIOD_BRR. cr ." GPIOD_BRR.  RW   $" GPIOD_BRR @ h.8 GPIOD_BRR 1b. ;
     : GPIOD.
       GPIOD_MODER.
       GPIOD_OTYPER.
@@ -969,17 +969,17 @@ begin-module memmap
     GPIOC $20 + constant GPIOC_AFRL ( read-write )  \ GPIO alternate function lowregister
     GPIOC $24 + constant GPIOC_AFRH ( read-write )  \ GPIO alternate function high register
     GPIOC $28 + constant GPIOC_BRR ( read-write )  \ GPIO port bit reset register
-    : GPIOC_MODER. cr ." GPIOC_MODER.  RW   $" GPIOC_MODER @ hex. GPIOC_MODER 1b. ;
-    : GPIOC_OTYPER. cr ." GPIOC_OTYPER.  RW   $" GPIOC_OTYPER @ hex. GPIOC_OTYPER 1b. ;
-    : GPIOC_GPIOB_OSPEEDR. cr ." GPIOC_GPIOB_OSPEEDR.  RW   $" GPIOC_GPIOB_OSPEEDR @ hex. GPIOC_GPIOB_OSPEEDR 1b. ;
-    : GPIOC_PUPDR. cr ." GPIOC_PUPDR.  RW   $" GPIOC_PUPDR @ hex. GPIOC_PUPDR 1b. ;
-    : GPIOC_IDR. cr ." GPIOC_IDR.  RO   $" GPIOC_IDR @ hex. GPIOC_IDR 1b. ;
-    : GPIOC_ODR. cr ." GPIOC_ODR.  RW   $" GPIOC_ODR @ hex. GPIOC_ODR 1b. ;
+    : GPIOC_MODER. cr ." GPIOC_MODER.  RW   $" GPIOC_MODER @ h.8 GPIOC_MODER 1b. ;
+    : GPIOC_OTYPER. cr ." GPIOC_OTYPER.  RW   $" GPIOC_OTYPER @ h.8 GPIOC_OTYPER 1b. ;
+    : GPIOC_GPIOB_OSPEEDR. cr ." GPIOC_GPIOB_OSPEEDR.  RW   $" GPIOC_GPIOB_OSPEEDR @ h.8 GPIOC_GPIOB_OSPEEDR 1b. ;
+    : GPIOC_PUPDR. cr ." GPIOC_PUPDR.  RW   $" GPIOC_PUPDR @ h.8 GPIOC_PUPDR 1b. ;
+    : GPIOC_IDR. cr ." GPIOC_IDR.  RO   $" GPIOC_IDR @ h.8 GPIOC_IDR 1b. ;
+    : GPIOC_ODR. cr ." GPIOC_ODR.  RW   $" GPIOC_ODR @ h.8 GPIOC_ODR 1b. ;
     : GPIOC_BSRR. cr ." GPIOC_BSRR " WRITEONLY ; 
-    : GPIOC_LCKR. cr ." GPIOC_LCKR.  RW   $" GPIOC_LCKR @ hex. GPIOC_LCKR 1b. ;
-    : GPIOC_AFRL. cr ." GPIOC_AFRL.  RW   $" GPIOC_AFRL @ hex. GPIOC_AFRL 1b. ;
-    : GPIOC_AFRH. cr ." GPIOC_AFRH.  RW   $" GPIOC_AFRH @ hex. GPIOC_AFRH 1b. ;
-    : GPIOC_BRR. cr ." GPIOC_BRR.  RW   $" GPIOC_BRR @ hex. GPIOC_BRR 1b. ;
+    : GPIOC_LCKR. cr ." GPIOC_LCKR.  RW   $" GPIOC_LCKR @ h.8 GPIOC_LCKR 1b. ;
+    : GPIOC_AFRL. cr ." GPIOC_AFRL.  RW   $" GPIOC_AFRL @ h.8 GPIOC_AFRL 1b. ;
+    : GPIOC_AFRH. cr ." GPIOC_AFRH.  RW   $" GPIOC_AFRH @ h.8 GPIOC_AFRH 1b. ;
+    : GPIOC_BRR. cr ." GPIOC_BRR.  RW   $" GPIOC_BRR @ h.8 GPIOC_BRR 1b. ;
     : GPIOC.
       GPIOC_MODER.
       GPIOC_OTYPER.
@@ -1008,17 +1008,17 @@ begin-module memmap
     GPIOK $20 + constant GPIOK_AFRL ( read-write )  \ GPIO alternate function lowregister
     GPIOK $24 + constant GPIOK_AFRH ( read-write )  \ GPIO alternate function high register
     GPIOK $28 + constant GPIOK_BRR ( read-write )  \ GPIO port bit reset register
-    : GPIOK_MODER. cr ." GPIOK_MODER.  RW   $" GPIOK_MODER @ hex. GPIOK_MODER 1b. ;
-    : GPIOK_OTYPER. cr ." GPIOK_OTYPER.  RW   $" GPIOK_OTYPER @ hex. GPIOK_OTYPER 1b. ;
-    : GPIOK_GPIOB_OSPEEDR. cr ." GPIOK_GPIOB_OSPEEDR.  RW   $" GPIOK_GPIOB_OSPEEDR @ hex. GPIOK_GPIOB_OSPEEDR 1b. ;
-    : GPIOK_PUPDR. cr ." GPIOK_PUPDR.  RW   $" GPIOK_PUPDR @ hex. GPIOK_PUPDR 1b. ;
-    : GPIOK_IDR. cr ." GPIOK_IDR.  RO   $" GPIOK_IDR @ hex. GPIOK_IDR 1b. ;
-    : GPIOK_ODR. cr ." GPIOK_ODR.  RW   $" GPIOK_ODR @ hex. GPIOK_ODR 1b. ;
+    : GPIOK_MODER. cr ." GPIOK_MODER.  RW   $" GPIOK_MODER @ h.8 GPIOK_MODER 1b. ;
+    : GPIOK_OTYPER. cr ." GPIOK_OTYPER.  RW   $" GPIOK_OTYPER @ h.8 GPIOK_OTYPER 1b. ;
+    : GPIOK_GPIOB_OSPEEDR. cr ." GPIOK_GPIOB_OSPEEDR.  RW   $" GPIOK_GPIOB_OSPEEDR @ h.8 GPIOK_GPIOB_OSPEEDR 1b. ;
+    : GPIOK_PUPDR. cr ." GPIOK_PUPDR.  RW   $" GPIOK_PUPDR @ h.8 GPIOK_PUPDR 1b. ;
+    : GPIOK_IDR. cr ." GPIOK_IDR.  RO   $" GPIOK_IDR @ h.8 GPIOK_IDR 1b. ;
+    : GPIOK_ODR. cr ." GPIOK_ODR.  RW   $" GPIOK_ODR @ h.8 GPIOK_ODR 1b. ;
     : GPIOK_BSRR. cr ." GPIOK_BSRR " WRITEONLY ; 
-    : GPIOK_LCKR. cr ." GPIOK_LCKR.  RW   $" GPIOK_LCKR @ hex. GPIOK_LCKR 1b. ;
-    : GPIOK_AFRL. cr ." GPIOK_AFRL.  RW   $" GPIOK_AFRL @ hex. GPIOK_AFRL 1b. ;
-    : GPIOK_AFRH. cr ." GPIOK_AFRH.  RW   $" GPIOK_AFRH @ hex. GPIOK_AFRH 1b. ;
-    : GPIOK_BRR. cr ." GPIOK_BRR.  RW   $" GPIOK_BRR @ hex. GPIOK_BRR 1b. ;
+    : GPIOK_LCKR. cr ." GPIOK_LCKR.  RW   $" GPIOK_LCKR @ h.8 GPIOK_LCKR 1b. ;
+    : GPIOK_AFRL. cr ." GPIOK_AFRL.  RW   $" GPIOK_AFRL @ h.8 GPIOK_AFRL 1b. ;
+    : GPIOK_AFRH. cr ." GPIOK_AFRH.  RW   $" GPIOK_AFRH @ h.8 GPIOK_AFRH 1b. ;
+    : GPIOK_BRR. cr ." GPIOK_BRR.  RW   $" GPIOK_BRR @ h.8 GPIOK_BRR 1b. ;
     : GPIOK.
       GPIOK_MODER.
       GPIOK_OTYPER.
@@ -1047,17 +1047,17 @@ begin-module memmap
     GPIOJ $20 + constant GPIOJ_AFRL ( read-write )  \ GPIO alternate function lowregister
     GPIOJ $24 + constant GPIOJ_AFRH ( read-write )  \ GPIO alternate function high register
     GPIOJ $28 + constant GPIOJ_BRR ( read-write )  \ GPIO port bit reset register
-    : GPIOJ_MODER. cr ." GPIOJ_MODER.  RW   $" GPIOJ_MODER @ hex. GPIOJ_MODER 1b. ;
-    : GPIOJ_OTYPER. cr ." GPIOJ_OTYPER.  RW   $" GPIOJ_OTYPER @ hex. GPIOJ_OTYPER 1b. ;
-    : GPIOJ_GPIOB_OSPEEDR. cr ." GPIOJ_GPIOB_OSPEEDR.  RW   $" GPIOJ_GPIOB_OSPEEDR @ hex. GPIOJ_GPIOB_OSPEEDR 1b. ;
-    : GPIOJ_PUPDR. cr ." GPIOJ_PUPDR.  RW   $" GPIOJ_PUPDR @ hex. GPIOJ_PUPDR 1b. ;
-    : GPIOJ_IDR. cr ." GPIOJ_IDR.  RO   $" GPIOJ_IDR @ hex. GPIOJ_IDR 1b. ;
-    : GPIOJ_ODR. cr ." GPIOJ_ODR.  RW   $" GPIOJ_ODR @ hex. GPIOJ_ODR 1b. ;
+    : GPIOJ_MODER. cr ." GPIOJ_MODER.  RW   $" GPIOJ_MODER @ h.8 GPIOJ_MODER 1b. ;
+    : GPIOJ_OTYPER. cr ." GPIOJ_OTYPER.  RW   $" GPIOJ_OTYPER @ h.8 GPIOJ_OTYPER 1b. ;
+    : GPIOJ_GPIOB_OSPEEDR. cr ." GPIOJ_GPIOB_OSPEEDR.  RW   $" GPIOJ_GPIOB_OSPEEDR @ h.8 GPIOJ_GPIOB_OSPEEDR 1b. ;
+    : GPIOJ_PUPDR. cr ." GPIOJ_PUPDR.  RW   $" GPIOJ_PUPDR @ h.8 GPIOJ_PUPDR 1b. ;
+    : GPIOJ_IDR. cr ." GPIOJ_IDR.  RO   $" GPIOJ_IDR @ h.8 GPIOJ_IDR 1b. ;
+    : GPIOJ_ODR. cr ." GPIOJ_ODR.  RW   $" GPIOJ_ODR @ h.8 GPIOJ_ODR 1b. ;
     : GPIOJ_BSRR. cr ." GPIOJ_BSRR " WRITEONLY ; 
-    : GPIOJ_LCKR. cr ." GPIOJ_LCKR.  RW   $" GPIOJ_LCKR @ hex. GPIOJ_LCKR 1b. ;
-    : GPIOJ_AFRL. cr ." GPIOJ_AFRL.  RW   $" GPIOJ_AFRL @ hex. GPIOJ_AFRL 1b. ;
-    : GPIOJ_AFRH. cr ." GPIOJ_AFRH.  RW   $" GPIOJ_AFRH @ hex. GPIOJ_AFRH 1b. ;
-    : GPIOJ_BRR. cr ." GPIOJ_BRR.  RW   $" GPIOJ_BRR @ hex. GPIOJ_BRR 1b. ;
+    : GPIOJ_LCKR. cr ." GPIOJ_LCKR.  RW   $" GPIOJ_LCKR @ h.8 GPIOJ_LCKR 1b. ;
+    : GPIOJ_AFRL. cr ." GPIOJ_AFRL.  RW   $" GPIOJ_AFRL @ h.8 GPIOJ_AFRL 1b. ;
+    : GPIOJ_AFRH. cr ." GPIOJ_AFRH.  RW   $" GPIOJ_AFRH @ h.8 GPIOJ_AFRH 1b. ;
+    : GPIOJ_BRR. cr ." GPIOJ_BRR.  RW   $" GPIOJ_BRR @ h.8 GPIOJ_BRR 1b. ;
     : GPIOJ.
       GPIOJ_MODER.
       GPIOJ_OTYPER.
@@ -1086,17 +1086,17 @@ begin-module memmap
     GPIOI $20 + constant GPIOI_AFRL ( read-write )  \ GPIO alternate function lowregister
     GPIOI $24 + constant GPIOI_AFRH ( read-write )  \ GPIO alternate function high register
     GPIOI $28 + constant GPIOI_BRR ( read-write )  \ GPIO port bit reset register
-    : GPIOI_MODER. cr ." GPIOI_MODER.  RW   $" GPIOI_MODER @ hex. GPIOI_MODER 1b. ;
-    : GPIOI_OTYPER. cr ." GPIOI_OTYPER.  RW   $" GPIOI_OTYPER @ hex. GPIOI_OTYPER 1b. ;
-    : GPIOI_GPIOB_OSPEEDR. cr ." GPIOI_GPIOB_OSPEEDR.  RW   $" GPIOI_GPIOB_OSPEEDR @ hex. GPIOI_GPIOB_OSPEEDR 1b. ;
-    : GPIOI_PUPDR. cr ." GPIOI_PUPDR.  RW   $" GPIOI_PUPDR @ hex. GPIOI_PUPDR 1b. ;
-    : GPIOI_IDR. cr ." GPIOI_IDR.  RO   $" GPIOI_IDR @ hex. GPIOI_IDR 1b. ;
-    : GPIOI_ODR. cr ." GPIOI_ODR.  RW   $" GPIOI_ODR @ hex. GPIOI_ODR 1b. ;
+    : GPIOI_MODER. cr ." GPIOI_MODER.  RW   $" GPIOI_MODER @ h.8 GPIOI_MODER 1b. ;
+    : GPIOI_OTYPER. cr ." GPIOI_OTYPER.  RW   $" GPIOI_OTYPER @ h.8 GPIOI_OTYPER 1b. ;
+    : GPIOI_GPIOB_OSPEEDR. cr ." GPIOI_GPIOB_OSPEEDR.  RW   $" GPIOI_GPIOB_OSPEEDR @ h.8 GPIOI_GPIOB_OSPEEDR 1b. ;
+    : GPIOI_PUPDR. cr ." GPIOI_PUPDR.  RW   $" GPIOI_PUPDR @ h.8 GPIOI_PUPDR 1b. ;
+    : GPIOI_IDR. cr ." GPIOI_IDR.  RO   $" GPIOI_IDR @ h.8 GPIOI_IDR 1b. ;
+    : GPIOI_ODR. cr ." GPIOI_ODR.  RW   $" GPIOI_ODR @ h.8 GPIOI_ODR 1b. ;
     : GPIOI_BSRR. cr ." GPIOI_BSRR " WRITEONLY ; 
-    : GPIOI_LCKR. cr ." GPIOI_LCKR.  RW   $" GPIOI_LCKR @ hex. GPIOI_LCKR 1b. ;
-    : GPIOI_AFRL. cr ." GPIOI_AFRL.  RW   $" GPIOI_AFRL @ hex. GPIOI_AFRL 1b. ;
-    : GPIOI_AFRH. cr ." GPIOI_AFRH.  RW   $" GPIOI_AFRH @ hex. GPIOI_AFRH 1b. ;
-    : GPIOI_BRR. cr ." GPIOI_BRR.  RW   $" GPIOI_BRR @ hex. GPIOI_BRR 1b. ;
+    : GPIOI_LCKR. cr ." GPIOI_LCKR.  RW   $" GPIOI_LCKR @ h.8 GPIOI_LCKR 1b. ;
+    : GPIOI_AFRL. cr ." GPIOI_AFRL.  RW   $" GPIOI_AFRL @ h.8 GPIOI_AFRL 1b. ;
+    : GPIOI_AFRH. cr ." GPIOI_AFRH.  RW   $" GPIOI_AFRH @ h.8 GPIOI_AFRH 1b. ;
+    : GPIOI_BRR. cr ." GPIOI_BRR.  RW   $" GPIOI_BRR @ h.8 GPIOI_BRR 1b. ;
     : GPIOI.
       GPIOI_MODER.
       GPIOI_OTYPER.
@@ -1125,17 +1125,17 @@ begin-module memmap
     GPIOH $20 + constant GPIOH_AFRL ( read-write )  \ GPIO alternate function lowregister
     GPIOH $24 + constant GPIOH_AFRH ( read-write )  \ GPIO alternate function high register
     GPIOH $28 + constant GPIOH_BRR ( read-write )  \ GPIO port bit reset register
-    : GPIOH_MODER. cr ." GPIOH_MODER.  RW   $" GPIOH_MODER @ hex. GPIOH_MODER 1b. ;
-    : GPIOH_OTYPER. cr ." GPIOH_OTYPER.  RW   $" GPIOH_OTYPER @ hex. GPIOH_OTYPER 1b. ;
-    : GPIOH_GPIOB_OSPEEDR. cr ." GPIOH_GPIOB_OSPEEDR.  RW   $" GPIOH_GPIOB_OSPEEDR @ hex. GPIOH_GPIOB_OSPEEDR 1b. ;
-    : GPIOH_PUPDR. cr ." GPIOH_PUPDR.  RW   $" GPIOH_PUPDR @ hex. GPIOH_PUPDR 1b. ;
-    : GPIOH_IDR. cr ." GPIOH_IDR.  RO   $" GPIOH_IDR @ hex. GPIOH_IDR 1b. ;
-    : GPIOH_ODR. cr ." GPIOH_ODR.  RW   $" GPIOH_ODR @ hex. GPIOH_ODR 1b. ;
+    : GPIOH_MODER. cr ." GPIOH_MODER.  RW   $" GPIOH_MODER @ h.8 GPIOH_MODER 1b. ;
+    : GPIOH_OTYPER. cr ." GPIOH_OTYPER.  RW   $" GPIOH_OTYPER @ h.8 GPIOH_OTYPER 1b. ;
+    : GPIOH_GPIOB_OSPEEDR. cr ." GPIOH_GPIOB_OSPEEDR.  RW   $" GPIOH_GPIOB_OSPEEDR @ h.8 GPIOH_GPIOB_OSPEEDR 1b. ;
+    : GPIOH_PUPDR. cr ." GPIOH_PUPDR.  RW   $" GPIOH_PUPDR @ h.8 GPIOH_PUPDR 1b. ;
+    : GPIOH_IDR. cr ." GPIOH_IDR.  RO   $" GPIOH_IDR @ h.8 GPIOH_IDR 1b. ;
+    : GPIOH_ODR. cr ." GPIOH_ODR.  RW   $" GPIOH_ODR @ h.8 GPIOH_ODR 1b. ;
     : GPIOH_BSRR. cr ." GPIOH_BSRR " WRITEONLY ; 
-    : GPIOH_LCKR. cr ." GPIOH_LCKR.  RW   $" GPIOH_LCKR @ hex. GPIOH_LCKR 1b. ;
-    : GPIOH_AFRL. cr ." GPIOH_AFRL.  RW   $" GPIOH_AFRL @ hex. GPIOH_AFRL 1b. ;
-    : GPIOH_AFRH. cr ." GPIOH_AFRH.  RW   $" GPIOH_AFRH @ hex. GPIOH_AFRH 1b. ;
-    : GPIOH_BRR. cr ." GPIOH_BRR.  RW   $" GPIOH_BRR @ hex. GPIOH_BRR 1b. ;
+    : GPIOH_LCKR. cr ." GPIOH_LCKR.  RW   $" GPIOH_LCKR @ h.8 GPIOH_LCKR 1b. ;
+    : GPIOH_AFRL. cr ." GPIOH_AFRL.  RW   $" GPIOH_AFRL @ h.8 GPIOH_AFRL 1b. ;
+    : GPIOH_AFRH. cr ." GPIOH_AFRH.  RW   $" GPIOH_AFRH @ h.8 GPIOH_AFRH 1b. ;
+    : GPIOH_BRR. cr ." GPIOH_BRR.  RW   $" GPIOH_BRR @ h.8 GPIOH_BRR 1b. ;
     : GPIOH.
       GPIOH_MODER.
       GPIOH_OTYPER.
@@ -1164,17 +1164,17 @@ begin-module memmap
     GPIOG $20 + constant GPIOG_AFRL ( read-write )  \ GPIO alternate function lowregister
     GPIOG $24 + constant GPIOG_AFRH ( read-write )  \ GPIO alternate function high register
     GPIOG $28 + constant GPIOG_BRR ( read-write )  \ GPIO port bit reset register
-    : GPIOG_MODER. cr ." GPIOG_MODER.  RW   $" GPIOG_MODER @ hex. GPIOG_MODER 1b. ;
-    : GPIOG_OTYPER. cr ." GPIOG_OTYPER.  RW   $" GPIOG_OTYPER @ hex. GPIOG_OTYPER 1b. ;
-    : GPIOG_GPIOB_OSPEEDR. cr ." GPIOG_GPIOB_OSPEEDR.  RW   $" GPIOG_GPIOB_OSPEEDR @ hex. GPIOG_GPIOB_OSPEEDR 1b. ;
-    : GPIOG_PUPDR. cr ." GPIOG_PUPDR.  RW   $" GPIOG_PUPDR @ hex. GPIOG_PUPDR 1b. ;
-    : GPIOG_IDR. cr ." GPIOG_IDR.  RO   $" GPIOG_IDR @ hex. GPIOG_IDR 1b. ;
-    : GPIOG_ODR. cr ." GPIOG_ODR.  RW   $" GPIOG_ODR @ hex. GPIOG_ODR 1b. ;
+    : GPIOG_MODER. cr ." GPIOG_MODER.  RW   $" GPIOG_MODER @ h.8 GPIOG_MODER 1b. ;
+    : GPIOG_OTYPER. cr ." GPIOG_OTYPER.  RW   $" GPIOG_OTYPER @ h.8 GPIOG_OTYPER 1b. ;
+    : GPIOG_GPIOB_OSPEEDR. cr ." GPIOG_GPIOB_OSPEEDR.  RW   $" GPIOG_GPIOB_OSPEEDR @ h.8 GPIOG_GPIOB_OSPEEDR 1b. ;
+    : GPIOG_PUPDR. cr ." GPIOG_PUPDR.  RW   $" GPIOG_PUPDR @ h.8 GPIOG_PUPDR 1b. ;
+    : GPIOG_IDR. cr ." GPIOG_IDR.  RO   $" GPIOG_IDR @ h.8 GPIOG_IDR 1b. ;
+    : GPIOG_ODR. cr ." GPIOG_ODR.  RW   $" GPIOG_ODR @ h.8 GPIOG_ODR 1b. ;
     : GPIOG_BSRR. cr ." GPIOG_BSRR " WRITEONLY ; 
-    : GPIOG_LCKR. cr ." GPIOG_LCKR.  RW   $" GPIOG_LCKR @ hex. GPIOG_LCKR 1b. ;
-    : GPIOG_AFRL. cr ." GPIOG_AFRL.  RW   $" GPIOG_AFRL @ hex. GPIOG_AFRL 1b. ;
-    : GPIOG_AFRH. cr ." GPIOG_AFRH.  RW   $" GPIOG_AFRH @ hex. GPIOG_AFRH 1b. ;
-    : GPIOG_BRR. cr ." GPIOG_BRR.  RW   $" GPIOG_BRR @ hex. GPIOG_BRR 1b. ;
+    : GPIOG_LCKR. cr ." GPIOG_LCKR.  RW   $" GPIOG_LCKR @ h.8 GPIOG_LCKR 1b. ;
+    : GPIOG_AFRL. cr ." GPIOG_AFRL.  RW   $" GPIOG_AFRL @ h.8 GPIOG_AFRL 1b. ;
+    : GPIOG_AFRH. cr ." GPIOG_AFRH.  RW   $" GPIOG_AFRH @ h.8 GPIOG_AFRH 1b. ;
+    : GPIOG_BRR. cr ." GPIOG_BRR.  RW   $" GPIOG_BRR @ h.8 GPIOG_BRR 1b. ;
     : GPIOG.
       GPIOG_MODER.
       GPIOG_OTYPER.
@@ -1203,17 +1203,17 @@ begin-module memmap
     GPIOF $20 + constant GPIOF_AFRL ( read-write )  \ GPIO alternate function lowregister
     GPIOF $24 + constant GPIOF_AFRH ( read-write )  \ GPIO alternate function high register
     GPIOF $28 + constant GPIOF_BRR ( read-write )  \ GPIO port bit reset register
-    : GPIOF_MODER. cr ." GPIOF_MODER.  RW   $" GPIOF_MODER @ hex. GPIOF_MODER 1b. ;
-    : GPIOF_OTYPER. cr ." GPIOF_OTYPER.  RW   $" GPIOF_OTYPER @ hex. GPIOF_OTYPER 1b. ;
-    : GPIOF_GPIOB_OSPEEDR. cr ." GPIOF_GPIOB_OSPEEDR.  RW   $" GPIOF_GPIOB_OSPEEDR @ hex. GPIOF_GPIOB_OSPEEDR 1b. ;
-    : GPIOF_PUPDR. cr ." GPIOF_PUPDR.  RW   $" GPIOF_PUPDR @ hex. GPIOF_PUPDR 1b. ;
-    : GPIOF_IDR. cr ." GPIOF_IDR.  RO   $" GPIOF_IDR @ hex. GPIOF_IDR 1b. ;
-    : GPIOF_ODR. cr ." GPIOF_ODR.  RW   $" GPIOF_ODR @ hex. GPIOF_ODR 1b. ;
+    : GPIOF_MODER. cr ." GPIOF_MODER.  RW   $" GPIOF_MODER @ h.8 GPIOF_MODER 1b. ;
+    : GPIOF_OTYPER. cr ." GPIOF_OTYPER.  RW   $" GPIOF_OTYPER @ h.8 GPIOF_OTYPER 1b. ;
+    : GPIOF_GPIOB_OSPEEDR. cr ." GPIOF_GPIOB_OSPEEDR.  RW   $" GPIOF_GPIOB_OSPEEDR @ h.8 GPIOF_GPIOB_OSPEEDR 1b. ;
+    : GPIOF_PUPDR. cr ." GPIOF_PUPDR.  RW   $" GPIOF_PUPDR @ h.8 GPIOF_PUPDR 1b. ;
+    : GPIOF_IDR. cr ." GPIOF_IDR.  RO   $" GPIOF_IDR @ h.8 GPIOF_IDR 1b. ;
+    : GPIOF_ODR. cr ." GPIOF_ODR.  RW   $" GPIOF_ODR @ h.8 GPIOF_ODR 1b. ;
     : GPIOF_BSRR. cr ." GPIOF_BSRR " WRITEONLY ; 
-    : GPIOF_LCKR. cr ." GPIOF_LCKR.  RW   $" GPIOF_LCKR @ hex. GPIOF_LCKR 1b. ;
-    : GPIOF_AFRL. cr ." GPIOF_AFRL.  RW   $" GPIOF_AFRL @ hex. GPIOF_AFRL 1b. ;
-    : GPIOF_AFRH. cr ." GPIOF_AFRH.  RW   $" GPIOF_AFRH @ hex. GPIOF_AFRH 1b. ;
-    : GPIOF_BRR. cr ." GPIOF_BRR.  RW   $" GPIOF_BRR @ hex. GPIOF_BRR 1b. ;
+    : GPIOF_LCKR. cr ." GPIOF_LCKR.  RW   $" GPIOF_LCKR @ h.8 GPIOF_LCKR 1b. ;
+    : GPIOF_AFRL. cr ." GPIOF_AFRL.  RW   $" GPIOF_AFRL @ h.8 GPIOF_AFRL 1b. ;
+    : GPIOF_AFRH. cr ." GPIOF_AFRH.  RW   $" GPIOF_AFRH @ h.8 GPIOF_AFRH 1b. ;
+    : GPIOF_BRR. cr ." GPIOF_BRR.  RW   $" GPIOF_BRR @ h.8 GPIOF_BRR 1b. ;
     : GPIOF.
       GPIOF_MODER.
       GPIOF_OTYPER.
@@ -1242,17 +1242,17 @@ begin-module memmap
     GPIOE $20 + constant GPIOE_AFRL ( read-write )  \ GPIO alternate function lowregister
     GPIOE $24 + constant GPIOE_AFRH ( read-write )  \ GPIO alternate function high register
     GPIOE $28 + constant GPIOE_BRR ( read-write )  \ GPIO port bit reset register
-    : GPIOE_MODER. cr ." GPIOE_MODER.  RW   $" GPIOE_MODER @ hex. GPIOE_MODER 1b. ;
-    : GPIOE_OTYPER. cr ." GPIOE_OTYPER.  RW   $" GPIOE_OTYPER @ hex. GPIOE_OTYPER 1b. ;
-    : GPIOE_GPIOB_OSPEEDR. cr ." GPIOE_GPIOB_OSPEEDR.  RW   $" GPIOE_GPIOB_OSPEEDR @ hex. GPIOE_GPIOB_OSPEEDR 1b. ;
-    : GPIOE_PUPDR. cr ." GPIOE_PUPDR.  RW   $" GPIOE_PUPDR @ hex. GPIOE_PUPDR 1b. ;
-    : GPIOE_IDR. cr ." GPIOE_IDR.  RO   $" GPIOE_IDR @ hex. GPIOE_IDR 1b. ;
-    : GPIOE_ODR. cr ." GPIOE_ODR.  RW   $" GPIOE_ODR @ hex. GPIOE_ODR 1b. ;
+    : GPIOE_MODER. cr ." GPIOE_MODER.  RW   $" GPIOE_MODER @ h.8 GPIOE_MODER 1b. ;
+    : GPIOE_OTYPER. cr ." GPIOE_OTYPER.  RW   $" GPIOE_OTYPER @ h.8 GPIOE_OTYPER 1b. ;
+    : GPIOE_GPIOB_OSPEEDR. cr ." GPIOE_GPIOB_OSPEEDR.  RW   $" GPIOE_GPIOB_OSPEEDR @ h.8 GPIOE_GPIOB_OSPEEDR 1b. ;
+    : GPIOE_PUPDR. cr ." GPIOE_PUPDR.  RW   $" GPIOE_PUPDR @ h.8 GPIOE_PUPDR 1b. ;
+    : GPIOE_IDR. cr ." GPIOE_IDR.  RO   $" GPIOE_IDR @ h.8 GPIOE_IDR 1b. ;
+    : GPIOE_ODR. cr ." GPIOE_ODR.  RW   $" GPIOE_ODR @ h.8 GPIOE_ODR 1b. ;
     : GPIOE_BSRR. cr ." GPIOE_BSRR " WRITEONLY ; 
-    : GPIOE_LCKR. cr ." GPIOE_LCKR.  RW   $" GPIOE_LCKR @ hex. GPIOE_LCKR 1b. ;
-    : GPIOE_AFRL. cr ." GPIOE_AFRL.  RW   $" GPIOE_AFRL @ hex. GPIOE_AFRL 1b. ;
-    : GPIOE_AFRH. cr ." GPIOE_AFRH.  RW   $" GPIOE_AFRH @ hex. GPIOE_AFRH 1b. ;
-    : GPIOE_BRR. cr ." GPIOE_BRR.  RW   $" GPIOE_BRR @ hex. GPIOE_BRR 1b. ;
+    : GPIOE_LCKR. cr ." GPIOE_LCKR.  RW   $" GPIOE_LCKR @ h.8 GPIOE_LCKR 1b. ;
+    : GPIOE_AFRL. cr ." GPIOE_AFRL.  RW   $" GPIOE_AFRL @ h.8 GPIOE_AFRL 1b. ;
+    : GPIOE_AFRH. cr ." GPIOE_AFRH.  RW   $" GPIOE_AFRH @ h.8 GPIOE_AFRH 1b. ;
+    : GPIOE_BRR. cr ." GPIOE_BRR.  RW   $" GPIOE_BRR @ h.8 GPIOE_BRR 1b. ;
     : GPIOE.
       GPIOE_MODER.
       GPIOE_OTYPER.
@@ -1281,17 +1281,17 @@ begin-module memmap
     GPIOB $20 + constant GPIOB_AFRL ( read-write )  \ GPIO alternate function low register
     GPIOB $24 + constant GPIOB_AFRH ( read-write )  \ GPIO alternate function high register
     GPIOB $28 + constant GPIOB_BRR ( read-write )  \ GPIO port bit reset register
-    : GPIOB_MODER. cr ." GPIOB_MODER.  RW   $" GPIOB_MODER @ hex. GPIOB_MODER 1b. ;
-    : GPIOB_OTYPER. cr ." GPIOB_OTYPER.  RW   $" GPIOB_OTYPER @ hex. GPIOB_OTYPER 1b. ;
-    : GPIOB_GPIOB_OSPEEDR. cr ." GPIOB_GPIOB_OSPEEDR.  RW   $" GPIOB_GPIOB_OSPEEDR @ hex. GPIOB_GPIOB_OSPEEDR 1b. ;
-    : GPIOB_PUPDR. cr ." GPIOB_PUPDR.  RW   $" GPIOB_PUPDR @ hex. GPIOB_PUPDR 1b. ;
-    : GPIOB_IDR. cr ." GPIOB_IDR.  RO   $" GPIOB_IDR @ hex. GPIOB_IDR 1b. ;
-    : GPIOB_ODR. cr ." GPIOB_ODR.  RW   $" GPIOB_ODR @ hex. GPIOB_ODR 1b. ;
+    : GPIOB_MODER. cr ." GPIOB_MODER.  RW   $" GPIOB_MODER @ h.8 GPIOB_MODER 1b. ;
+    : GPIOB_OTYPER. cr ." GPIOB_OTYPER.  RW   $" GPIOB_OTYPER @ h.8 GPIOB_OTYPER 1b. ;
+    : GPIOB_GPIOB_OSPEEDR. cr ." GPIOB_GPIOB_OSPEEDR.  RW   $" GPIOB_GPIOB_OSPEEDR @ h.8 GPIOB_GPIOB_OSPEEDR 1b. ;
+    : GPIOB_PUPDR. cr ." GPIOB_PUPDR.  RW   $" GPIOB_PUPDR @ h.8 GPIOB_PUPDR 1b. ;
+    : GPIOB_IDR. cr ." GPIOB_IDR.  RO   $" GPIOB_IDR @ h.8 GPIOB_IDR 1b. ;
+    : GPIOB_ODR. cr ." GPIOB_ODR.  RW   $" GPIOB_ODR @ h.8 GPIOB_ODR 1b. ;
     : GPIOB_BSRR. cr ." GPIOB_BSRR " WRITEONLY ; 
-    : GPIOB_LCKR. cr ." GPIOB_LCKR.  RW   $" GPIOB_LCKR @ hex. GPIOB_LCKR 1b. ;
-    : GPIOB_AFRL. cr ." GPIOB_AFRL.  RW   $" GPIOB_AFRL @ hex. GPIOB_AFRL 1b. ;
-    : GPIOB_AFRH. cr ." GPIOB_AFRH.  RW   $" GPIOB_AFRH @ hex. GPIOB_AFRH 1b. ;
-    : GPIOB_BRR. cr ." GPIOB_BRR.  RW   $" GPIOB_BRR @ hex. GPIOB_BRR 1b. ;
+    : GPIOB_LCKR. cr ." GPIOB_LCKR.  RW   $" GPIOB_LCKR @ h.8 GPIOB_LCKR 1b. ;
+    : GPIOB_AFRL. cr ." GPIOB_AFRL.  RW   $" GPIOB_AFRL @ h.8 GPIOB_AFRL 1b. ;
+    : GPIOB_AFRH. cr ." GPIOB_AFRH.  RW   $" GPIOB_AFRH @ h.8 GPIOB_AFRH 1b. ;
+    : GPIOB_BRR. cr ." GPIOB_BRR.  RW   $" GPIOB_BRR @ h.8 GPIOB_BRR 1b. ;
     : GPIOB.
       GPIOB_MODER.
       GPIOB_OTYPER.
@@ -1320,17 +1320,17 @@ begin-module memmap
     GPIOA $20 + constant GPIOA_AFRL ( read-write )  \ GPIO alternate function low register
     GPIOA $24 + constant GPIOA_AFRH ( read-write )  \ GPIO alternate function high register
     GPIOA $28 + constant GPIOA_BRR ( read-write )  \ GPIO port bit reset register
-    : GPIOA_MODER. cr ." GPIOA_MODER.  RW   $" GPIOA_MODER @ hex. GPIOA_MODER 1b. ;
-    : GPIOA_OTYPER. cr ." GPIOA_OTYPER.  RW   $" GPIOA_OTYPER @ hex. GPIOA_OTYPER 1b. ;
-    : GPIOA_GPIOB_OSPEEDR. cr ." GPIOA_GPIOB_OSPEEDR.  RW   $" GPIOA_GPIOB_OSPEEDR @ hex. GPIOA_GPIOB_OSPEEDR 1b. ;
-    : GPIOA_PUPDR. cr ." GPIOA_PUPDR.  RW   $" GPIOA_PUPDR @ hex. GPIOA_PUPDR 1b. ;
-    : GPIOA_IDR. cr ." GPIOA_IDR.  RO   $" GPIOA_IDR @ hex. GPIOA_IDR 1b. ;
-    : GPIOA_ODR. cr ." GPIOA_ODR.  RW   $" GPIOA_ODR @ hex. GPIOA_ODR 1b. ;
+    : GPIOA_MODER. cr ." GPIOA_MODER.  RW   $" GPIOA_MODER @ h.8 GPIOA_MODER 1b. ;
+    : GPIOA_OTYPER. cr ." GPIOA_OTYPER.  RW   $" GPIOA_OTYPER @ h.8 GPIOA_OTYPER 1b. ;
+    : GPIOA_GPIOB_OSPEEDR. cr ." GPIOA_GPIOB_OSPEEDR.  RW   $" GPIOA_GPIOB_OSPEEDR @ h.8 GPIOA_GPIOB_OSPEEDR 1b. ;
+    : GPIOA_PUPDR. cr ." GPIOA_PUPDR.  RW   $" GPIOA_PUPDR @ h.8 GPIOA_PUPDR 1b. ;
+    : GPIOA_IDR. cr ." GPIOA_IDR.  RO   $" GPIOA_IDR @ h.8 GPIOA_IDR 1b. ;
+    : GPIOA_ODR. cr ." GPIOA_ODR.  RW   $" GPIOA_ODR @ h.8 GPIOA_ODR 1b. ;
     : GPIOA_BSRR. cr ." GPIOA_BSRR " WRITEONLY ; 
-    : GPIOA_LCKR. cr ." GPIOA_LCKR.  RW   $" GPIOA_LCKR @ hex. GPIOA_LCKR 1b. ;
-    : GPIOA_AFRL. cr ." GPIOA_AFRL.  RW   $" GPIOA_AFRL @ hex. GPIOA_AFRL 1b. ;
-    : GPIOA_AFRH. cr ." GPIOA_AFRH.  RW   $" GPIOA_AFRH @ hex. GPIOA_AFRH 1b. ;
-    : GPIOA_BRR. cr ." GPIOA_BRR.  RW   $" GPIOA_BRR @ hex. GPIOA_BRR 1b. ;
+    : GPIOA_LCKR. cr ." GPIOA_LCKR.  RW   $" GPIOA_LCKR @ h.8 GPIOA_LCKR 1b. ;
+    : GPIOA_AFRL. cr ." GPIOA_AFRL.  RW   $" GPIOA_AFRL @ h.8 GPIOA_AFRL 1b. ;
+    : GPIOA_AFRH. cr ." GPIOA_AFRH.  RW   $" GPIOA_AFRH @ h.8 GPIOA_AFRH 1b. ;
+    : GPIOA_BRR. cr ." GPIOA_BRR.  RW   $" GPIOA_BRR @ h.8 GPIOA_BRR 1b. ;
     : GPIOA.
       GPIOA_MODER.
       GPIOA_OTYPER.
@@ -1355,13 +1355,13 @@ begin-module memmap
     SYSCFG $10 + constant SYSCFG_EXTICR3 ( read-write )  \ external interrupt configuration register 3
     SYSCFG $14 + constant SYSCFG_EXTICR4 ( read-write )  \ external interrupt configuration register 4
     SYSCFG $20 + constant SYSCFG_CMPCR ( read-only )  \ Compensation cell control register
-    : SYSCFG_MEMRM. cr ." SYSCFG_MEMRM.  RW   $" SYSCFG_MEMRM @ hex. SYSCFG_MEMRM 1b. ;
-    : SYSCFG_PMC. cr ." SYSCFG_PMC.  RW   $" SYSCFG_PMC @ hex. SYSCFG_PMC 1b. ;
-    : SYSCFG_EXTICR1. cr ." SYSCFG_EXTICR1.  RW   $" SYSCFG_EXTICR1 @ hex. SYSCFG_EXTICR1 1b. ;
-    : SYSCFG_EXTICR2. cr ." SYSCFG_EXTICR2.  RW   $" SYSCFG_EXTICR2 @ hex. SYSCFG_EXTICR2 1b. ;
-    : SYSCFG_EXTICR3. cr ." SYSCFG_EXTICR3.  RW   $" SYSCFG_EXTICR3 @ hex. SYSCFG_EXTICR3 1b. ;
-    : SYSCFG_EXTICR4. cr ." SYSCFG_EXTICR4.  RW   $" SYSCFG_EXTICR4 @ hex. SYSCFG_EXTICR4 1b. ;
-    : SYSCFG_CMPCR. cr ." SYSCFG_CMPCR.  RO   $" SYSCFG_CMPCR @ hex. SYSCFG_CMPCR 1b. ;
+    : SYSCFG_MEMRM. cr ." SYSCFG_MEMRM.  RW   $" SYSCFG_MEMRM @ h.8 SYSCFG_MEMRM 1b. ;
+    : SYSCFG_PMC. cr ." SYSCFG_PMC.  RW   $" SYSCFG_PMC @ h.8 SYSCFG_PMC 1b. ;
+    : SYSCFG_EXTICR1. cr ." SYSCFG_EXTICR1.  RW   $" SYSCFG_EXTICR1 @ h.8 SYSCFG_EXTICR1 1b. ;
+    : SYSCFG_EXTICR2. cr ." SYSCFG_EXTICR2.  RW   $" SYSCFG_EXTICR2 @ h.8 SYSCFG_EXTICR2 1b. ;
+    : SYSCFG_EXTICR3. cr ." SYSCFG_EXTICR3.  RW   $" SYSCFG_EXTICR3 @ h.8 SYSCFG_EXTICR3 1b. ;
+    : SYSCFG_EXTICR4. cr ." SYSCFG_EXTICR4.  RW   $" SYSCFG_EXTICR4 @ h.8 SYSCFG_EXTICR4 1b. ;
+    : SYSCFG_CMPCR. cr ." SYSCFG_CMPCR.  RO   $" SYSCFG_CMPCR @ h.8 SYSCFG_CMPCR 1b. ;
     : SYSCFG.
       SYSCFG_MEMRM.
       SYSCFG_PMC.
@@ -1384,15 +1384,15 @@ begin-module memmap
     SPI1 $18 + constant SPI1_TXCRCR ( read-only )  \ TX CRC register
     SPI1 $1C + constant SPI1_I2SCFGR ( read-write )  \ I2S configuration register
     SPI1 $20 + constant SPI1_I2SPR ( read-write )  \ I2S prescaler register
-    : SPI1_CR1. cr ." SPI1_CR1.  RW   $" SPI1_CR1 @ hex. SPI1_CR1 1b. ;
-    : SPI1_CR2. cr ." SPI1_CR2.  RW   $" SPI1_CR2 @ hex. SPI1_CR2 1b. ;
-    : SPI1_SR. cr ." SPI1_SR.   $" SPI1_SR @ hex. SPI1_SR 1b. ;
-    : SPI1_DR. cr ." SPI1_DR.  RW   $" SPI1_DR @ hex. SPI1_DR 1b. ;
-    : SPI1_CRCPR. cr ." SPI1_CRCPR.  RW   $" SPI1_CRCPR @ hex. SPI1_CRCPR 1b. ;
-    : SPI1_RXCRCR. cr ." SPI1_RXCRCR.  RO   $" SPI1_RXCRCR @ hex. SPI1_RXCRCR 1b. ;
-    : SPI1_TXCRCR. cr ." SPI1_TXCRCR.  RO   $" SPI1_TXCRCR @ hex. SPI1_TXCRCR 1b. ;
-    : SPI1_I2SCFGR. cr ." SPI1_I2SCFGR.  RW   $" SPI1_I2SCFGR @ hex. SPI1_I2SCFGR 1b. ;
-    : SPI1_I2SPR. cr ." SPI1_I2SPR.  RW   $" SPI1_I2SPR @ hex. SPI1_I2SPR 1b. ;
+    : SPI1_CR1. cr ." SPI1_CR1.  RW   $" SPI1_CR1 @ h.8 SPI1_CR1 1b. ;
+    : SPI1_CR2. cr ." SPI1_CR2.  RW   $" SPI1_CR2 @ h.8 SPI1_CR2 1b. ;
+    : SPI1_SR. cr ." SPI1_SR.   $" SPI1_SR @ h.8 SPI1_SR 1b. ;
+    : SPI1_DR. cr ." SPI1_DR.  RW   $" SPI1_DR @ h.8 SPI1_DR 1b. ;
+    : SPI1_CRCPR. cr ." SPI1_CRCPR.  RW   $" SPI1_CRCPR @ h.8 SPI1_CRCPR 1b. ;
+    : SPI1_RXCRCR. cr ." SPI1_RXCRCR.  RO   $" SPI1_RXCRCR @ h.8 SPI1_RXCRCR 1b. ;
+    : SPI1_TXCRCR. cr ." SPI1_TXCRCR.  RO   $" SPI1_TXCRCR @ h.8 SPI1_TXCRCR 1b. ;
+    : SPI1_I2SCFGR. cr ." SPI1_I2SCFGR.  RW   $" SPI1_I2SCFGR @ h.8 SPI1_I2SCFGR 1b. ;
+    : SPI1_I2SPR. cr ." SPI1_I2SPR.  RW   $" SPI1_I2SPR @ h.8 SPI1_I2SPR 1b. ;
     : SPI1.
       SPI1_CR1.
       SPI1_CR2.
@@ -1417,15 +1417,15 @@ begin-module memmap
     SPI3 $18 + constant SPI3_TXCRCR ( read-only )  \ TX CRC register
     SPI3 $1C + constant SPI3_I2SCFGR ( read-write )  \ I2S configuration register
     SPI3 $20 + constant SPI3_I2SPR ( read-write )  \ I2S prescaler register
-    : SPI3_CR1. cr ." SPI3_CR1.  RW   $" SPI3_CR1 @ hex. SPI3_CR1 1b. ;
-    : SPI3_CR2. cr ." SPI3_CR2.  RW   $" SPI3_CR2 @ hex. SPI3_CR2 1b. ;
-    : SPI3_SR. cr ." SPI3_SR.   $" SPI3_SR @ hex. SPI3_SR 1b. ;
-    : SPI3_DR. cr ." SPI3_DR.  RW   $" SPI3_DR @ hex. SPI3_DR 1b. ;
-    : SPI3_CRCPR. cr ." SPI3_CRCPR.  RW   $" SPI3_CRCPR @ hex. SPI3_CRCPR 1b. ;
-    : SPI3_RXCRCR. cr ." SPI3_RXCRCR.  RO   $" SPI3_RXCRCR @ hex. SPI3_RXCRCR 1b. ;
-    : SPI3_TXCRCR. cr ." SPI3_TXCRCR.  RO   $" SPI3_TXCRCR @ hex. SPI3_TXCRCR 1b. ;
-    : SPI3_I2SCFGR. cr ." SPI3_I2SCFGR.  RW   $" SPI3_I2SCFGR @ hex. SPI3_I2SCFGR 1b. ;
-    : SPI3_I2SPR. cr ." SPI3_I2SPR.  RW   $" SPI3_I2SPR @ hex. SPI3_I2SPR 1b. ;
+    : SPI3_CR1. cr ." SPI3_CR1.  RW   $" SPI3_CR1 @ h.8 SPI3_CR1 1b. ;
+    : SPI3_CR2. cr ." SPI3_CR2.  RW   $" SPI3_CR2 @ h.8 SPI3_CR2 1b. ;
+    : SPI3_SR. cr ." SPI3_SR.   $" SPI3_SR @ h.8 SPI3_SR 1b. ;
+    : SPI3_DR. cr ." SPI3_DR.  RW   $" SPI3_DR @ h.8 SPI3_DR 1b. ;
+    : SPI3_CRCPR. cr ." SPI3_CRCPR.  RW   $" SPI3_CRCPR @ h.8 SPI3_CRCPR 1b. ;
+    : SPI3_RXCRCR. cr ." SPI3_RXCRCR.  RO   $" SPI3_RXCRCR @ h.8 SPI3_RXCRCR 1b. ;
+    : SPI3_TXCRCR. cr ." SPI3_TXCRCR.  RO   $" SPI3_TXCRCR @ h.8 SPI3_TXCRCR 1b. ;
+    : SPI3_I2SCFGR. cr ." SPI3_I2SCFGR.  RW   $" SPI3_I2SCFGR @ h.8 SPI3_I2SCFGR 1b. ;
+    : SPI3_I2SPR. cr ." SPI3_I2SPR.  RW   $" SPI3_I2SPR @ h.8 SPI3_I2SPR 1b. ;
     : SPI3.
       SPI3_CR1.
       SPI3_CR2.
@@ -1450,15 +1450,15 @@ begin-module memmap
     SPI4 $18 + constant SPI4_TXCRCR ( read-only )  \ TX CRC register
     SPI4 $1C + constant SPI4_I2SCFGR ( read-write )  \ I2S configuration register
     SPI4 $20 + constant SPI4_I2SPR ( read-write )  \ I2S prescaler register
-    : SPI4_CR1. cr ." SPI4_CR1.  RW   $" SPI4_CR1 @ hex. SPI4_CR1 1b. ;
-    : SPI4_CR2. cr ." SPI4_CR2.  RW   $" SPI4_CR2 @ hex. SPI4_CR2 1b. ;
-    : SPI4_SR. cr ." SPI4_SR.   $" SPI4_SR @ hex. SPI4_SR 1b. ;
-    : SPI4_DR. cr ." SPI4_DR.  RW   $" SPI4_DR @ hex. SPI4_DR 1b. ;
-    : SPI4_CRCPR. cr ." SPI4_CRCPR.  RW   $" SPI4_CRCPR @ hex. SPI4_CRCPR 1b. ;
-    : SPI4_RXCRCR. cr ." SPI4_RXCRCR.  RO   $" SPI4_RXCRCR @ hex. SPI4_RXCRCR 1b. ;
-    : SPI4_TXCRCR. cr ." SPI4_TXCRCR.  RO   $" SPI4_TXCRCR @ hex. SPI4_TXCRCR 1b. ;
-    : SPI4_I2SCFGR. cr ." SPI4_I2SCFGR.  RW   $" SPI4_I2SCFGR @ hex. SPI4_I2SCFGR 1b. ;
-    : SPI4_I2SPR. cr ." SPI4_I2SPR.  RW   $" SPI4_I2SPR @ hex. SPI4_I2SPR 1b. ;
+    : SPI4_CR1. cr ." SPI4_CR1.  RW   $" SPI4_CR1 @ h.8 SPI4_CR1 1b. ;
+    : SPI4_CR2. cr ." SPI4_CR2.  RW   $" SPI4_CR2 @ h.8 SPI4_CR2 1b. ;
+    : SPI4_SR. cr ." SPI4_SR.   $" SPI4_SR @ h.8 SPI4_SR 1b. ;
+    : SPI4_DR. cr ." SPI4_DR.  RW   $" SPI4_DR @ h.8 SPI4_DR 1b. ;
+    : SPI4_CRCPR. cr ." SPI4_CRCPR.  RW   $" SPI4_CRCPR @ h.8 SPI4_CRCPR 1b. ;
+    : SPI4_RXCRCR. cr ." SPI4_RXCRCR.  RO   $" SPI4_RXCRCR @ h.8 SPI4_RXCRCR 1b. ;
+    : SPI4_TXCRCR. cr ." SPI4_TXCRCR.  RO   $" SPI4_TXCRCR @ h.8 SPI4_TXCRCR 1b. ;
+    : SPI4_I2SCFGR. cr ." SPI4_I2SCFGR.  RW   $" SPI4_I2SCFGR @ h.8 SPI4_I2SCFGR 1b. ;
+    : SPI4_I2SPR. cr ." SPI4_I2SPR.  RW   $" SPI4_I2SPR @ h.8 SPI4_I2SPR 1b. ;
     : SPI4.
       SPI4_CR1.
       SPI4_CR2.
@@ -1483,15 +1483,15 @@ begin-module memmap
     SPI5 $18 + constant SPI5_TXCRCR ( read-only )  \ TX CRC register
     SPI5 $1C + constant SPI5_I2SCFGR ( read-write )  \ I2S configuration register
     SPI5 $20 + constant SPI5_I2SPR ( read-write )  \ I2S prescaler register
-    : SPI5_CR1. cr ." SPI5_CR1.  RW   $" SPI5_CR1 @ hex. SPI5_CR1 1b. ;
-    : SPI5_CR2. cr ." SPI5_CR2.  RW   $" SPI5_CR2 @ hex. SPI5_CR2 1b. ;
-    : SPI5_SR. cr ." SPI5_SR.   $" SPI5_SR @ hex. SPI5_SR 1b. ;
-    : SPI5_DR. cr ." SPI5_DR.  RW   $" SPI5_DR @ hex. SPI5_DR 1b. ;
-    : SPI5_CRCPR. cr ." SPI5_CRCPR.  RW   $" SPI5_CRCPR @ hex. SPI5_CRCPR 1b. ;
-    : SPI5_RXCRCR. cr ." SPI5_RXCRCR.  RO   $" SPI5_RXCRCR @ hex. SPI5_RXCRCR 1b. ;
-    : SPI5_TXCRCR. cr ." SPI5_TXCRCR.  RO   $" SPI5_TXCRCR @ hex. SPI5_TXCRCR 1b. ;
-    : SPI5_I2SCFGR. cr ." SPI5_I2SCFGR.  RW   $" SPI5_I2SCFGR @ hex. SPI5_I2SCFGR 1b. ;
-    : SPI5_I2SPR. cr ." SPI5_I2SPR.  RW   $" SPI5_I2SPR @ hex. SPI5_I2SPR 1b. ;
+    : SPI5_CR1. cr ." SPI5_CR1.  RW   $" SPI5_CR1 @ h.8 SPI5_CR1 1b. ;
+    : SPI5_CR2. cr ." SPI5_CR2.  RW   $" SPI5_CR2 @ h.8 SPI5_CR2 1b. ;
+    : SPI5_SR. cr ." SPI5_SR.   $" SPI5_SR @ h.8 SPI5_SR 1b. ;
+    : SPI5_DR. cr ." SPI5_DR.  RW   $" SPI5_DR @ h.8 SPI5_DR 1b. ;
+    : SPI5_CRCPR. cr ." SPI5_CRCPR.  RW   $" SPI5_CRCPR @ h.8 SPI5_CRCPR 1b. ;
+    : SPI5_RXCRCR. cr ." SPI5_RXCRCR.  RO   $" SPI5_RXCRCR @ h.8 SPI5_RXCRCR 1b. ;
+    : SPI5_TXCRCR. cr ." SPI5_TXCRCR.  RO   $" SPI5_TXCRCR @ h.8 SPI5_TXCRCR 1b. ;
+    : SPI5_I2SCFGR. cr ." SPI5_I2SCFGR.  RW   $" SPI5_I2SCFGR @ h.8 SPI5_I2SCFGR 1b. ;
+    : SPI5_I2SPR. cr ." SPI5_I2SPR.  RW   $" SPI5_I2SPR @ h.8 SPI5_I2SPR 1b. ;
     : SPI5.
       SPI5_CR1.
       SPI5_CR2.
@@ -1516,15 +1516,15 @@ begin-module memmap
     SPI6 $18 + constant SPI6_TXCRCR ( read-only )  \ TX CRC register
     SPI6 $1C + constant SPI6_I2SCFGR ( read-write )  \ I2S configuration register
     SPI6 $20 + constant SPI6_I2SPR ( read-write )  \ I2S prescaler register
-    : SPI6_CR1. cr ." SPI6_CR1.  RW   $" SPI6_CR1 @ hex. SPI6_CR1 1b. ;
-    : SPI6_CR2. cr ." SPI6_CR2.  RW   $" SPI6_CR2 @ hex. SPI6_CR2 1b. ;
-    : SPI6_SR. cr ." SPI6_SR.   $" SPI6_SR @ hex. SPI6_SR 1b. ;
-    : SPI6_DR. cr ." SPI6_DR.  RW   $" SPI6_DR @ hex. SPI6_DR 1b. ;
-    : SPI6_CRCPR. cr ." SPI6_CRCPR.  RW   $" SPI6_CRCPR @ hex. SPI6_CRCPR 1b. ;
-    : SPI6_RXCRCR. cr ." SPI6_RXCRCR.  RO   $" SPI6_RXCRCR @ hex. SPI6_RXCRCR 1b. ;
-    : SPI6_TXCRCR. cr ." SPI6_TXCRCR.  RO   $" SPI6_TXCRCR @ hex. SPI6_TXCRCR 1b. ;
-    : SPI6_I2SCFGR. cr ." SPI6_I2SCFGR.  RW   $" SPI6_I2SCFGR @ hex. SPI6_I2SCFGR 1b. ;
-    : SPI6_I2SPR. cr ." SPI6_I2SPR.  RW   $" SPI6_I2SPR @ hex. SPI6_I2SPR 1b. ;
+    : SPI6_CR1. cr ." SPI6_CR1.  RW   $" SPI6_CR1 @ h.8 SPI6_CR1 1b. ;
+    : SPI6_CR2. cr ." SPI6_CR2.  RW   $" SPI6_CR2 @ h.8 SPI6_CR2 1b. ;
+    : SPI6_SR. cr ." SPI6_SR.   $" SPI6_SR @ h.8 SPI6_SR 1b. ;
+    : SPI6_DR. cr ." SPI6_DR.  RW   $" SPI6_DR @ h.8 SPI6_DR 1b. ;
+    : SPI6_CRCPR. cr ." SPI6_CRCPR.  RW   $" SPI6_CRCPR @ h.8 SPI6_CRCPR 1b. ;
+    : SPI6_RXCRCR. cr ." SPI6_RXCRCR.  RO   $" SPI6_RXCRCR @ h.8 SPI6_RXCRCR 1b. ;
+    : SPI6_TXCRCR. cr ." SPI6_TXCRCR.  RO   $" SPI6_TXCRCR @ h.8 SPI6_TXCRCR 1b. ;
+    : SPI6_I2SCFGR. cr ." SPI6_I2SCFGR.  RW   $" SPI6_I2SCFGR @ h.8 SPI6_I2SCFGR 1b. ;
+    : SPI6_I2SPR. cr ." SPI6_I2SPR.  RW   $" SPI6_I2SPR @ h.8 SPI6_I2SPR 1b. ;
     : SPI6.
       SPI6_CR1.
       SPI6_CR2.
@@ -1549,15 +1549,15 @@ begin-module memmap
     SPI2 $18 + constant SPI2_TXCRCR ( read-only )  \ TX CRC register
     SPI2 $1C + constant SPI2_I2SCFGR ( read-write )  \ I2S configuration register
     SPI2 $20 + constant SPI2_I2SPR ( read-write )  \ I2S prescaler register
-    : SPI2_CR1. cr ." SPI2_CR1.  RW   $" SPI2_CR1 @ hex. SPI2_CR1 1b. ;
-    : SPI2_CR2. cr ." SPI2_CR2.  RW   $" SPI2_CR2 @ hex. SPI2_CR2 1b. ;
-    : SPI2_SR. cr ." SPI2_SR.   $" SPI2_SR @ hex. SPI2_SR 1b. ;
-    : SPI2_DR. cr ." SPI2_DR.  RW   $" SPI2_DR @ hex. SPI2_DR 1b. ;
-    : SPI2_CRCPR. cr ." SPI2_CRCPR.  RW   $" SPI2_CRCPR @ hex. SPI2_CRCPR 1b. ;
-    : SPI2_RXCRCR. cr ." SPI2_RXCRCR.  RO   $" SPI2_RXCRCR @ hex. SPI2_RXCRCR 1b. ;
-    : SPI2_TXCRCR. cr ." SPI2_TXCRCR.  RO   $" SPI2_TXCRCR @ hex. SPI2_TXCRCR 1b. ;
-    : SPI2_I2SCFGR. cr ." SPI2_I2SCFGR.  RW   $" SPI2_I2SCFGR @ hex. SPI2_I2SCFGR 1b. ;
-    : SPI2_I2SPR. cr ." SPI2_I2SPR.  RW   $" SPI2_I2SPR @ hex. SPI2_I2SPR 1b. ;
+    : SPI2_CR1. cr ." SPI2_CR1.  RW   $" SPI2_CR1 @ h.8 SPI2_CR1 1b. ;
+    : SPI2_CR2. cr ." SPI2_CR2.  RW   $" SPI2_CR2 @ h.8 SPI2_CR2 1b. ;
+    : SPI2_SR. cr ." SPI2_SR.   $" SPI2_SR @ h.8 SPI2_SR 1b. ;
+    : SPI2_DR. cr ." SPI2_DR.  RW   $" SPI2_DR @ h.8 SPI2_DR 1b. ;
+    : SPI2_CRCPR. cr ." SPI2_CRCPR.  RW   $" SPI2_CRCPR @ h.8 SPI2_CRCPR 1b. ;
+    : SPI2_RXCRCR. cr ." SPI2_RXCRCR.  RO   $" SPI2_RXCRCR @ h.8 SPI2_RXCRCR 1b. ;
+    : SPI2_TXCRCR. cr ." SPI2_TXCRCR.  RO   $" SPI2_TXCRCR @ h.8 SPI2_TXCRCR 1b. ;
+    : SPI2_I2SCFGR. cr ." SPI2_I2SCFGR.  RW   $" SPI2_I2SCFGR @ h.8 SPI2_I2SCFGR 1b. ;
+    : SPI2_I2SPR. cr ." SPI2_I2SPR.  RW   $" SPI2_I2SPR @ h.8 SPI2_I2SPR 1b. ;
     : SPI2.
       SPI2_CR1.
       SPI2_CR2.
@@ -1593,26 +1593,26 @@ begin-module memmap
     ADC1 $44 + constant ADC1_JDR3 ( read-only )  \ injected data register x
     ADC1 $48 + constant ADC1_JDR4 ( read-only )  \ injected data register x
     ADC1 $4C + constant ADC1_DR ( read-only )  \ regular data register
-    : ADC1_SR. cr ." ADC1_SR.  RW   $" ADC1_SR @ hex. ADC1_SR 1b. ;
-    : ADC1_CR1. cr ." ADC1_CR1.  RW   $" ADC1_CR1 @ hex. ADC1_CR1 1b. ;
-    : ADC1_CR2. cr ." ADC1_CR2.  RW   $" ADC1_CR2 @ hex. ADC1_CR2 1b. ;
-    : ADC1_SMPR1. cr ." ADC1_SMPR1.  RW   $" ADC1_SMPR1 @ hex. ADC1_SMPR1 1b. ;
-    : ADC1_SMPR2. cr ." ADC1_SMPR2.  RW   $" ADC1_SMPR2 @ hex. ADC1_SMPR2 1b. ;
-    : ADC1_JOFR1. cr ." ADC1_JOFR1.  RW   $" ADC1_JOFR1 @ hex. ADC1_JOFR1 1b. ;
-    : ADC1_JOFR2. cr ." ADC1_JOFR2.  RW   $" ADC1_JOFR2 @ hex. ADC1_JOFR2 1b. ;
-    : ADC1_JOFR3. cr ." ADC1_JOFR3.  RW   $" ADC1_JOFR3 @ hex. ADC1_JOFR3 1b. ;
-    : ADC1_JOFR4. cr ." ADC1_JOFR4.  RW   $" ADC1_JOFR4 @ hex. ADC1_JOFR4 1b. ;
-    : ADC1_HTR. cr ." ADC1_HTR.  RW   $" ADC1_HTR @ hex. ADC1_HTR 1b. ;
-    : ADC1_LTR. cr ." ADC1_LTR.  RW   $" ADC1_LTR @ hex. ADC1_LTR 1b. ;
-    : ADC1_SQR1. cr ." ADC1_SQR1.  RW   $" ADC1_SQR1 @ hex. ADC1_SQR1 1b. ;
-    : ADC1_SQR2. cr ." ADC1_SQR2.  RW   $" ADC1_SQR2 @ hex. ADC1_SQR2 1b. ;
-    : ADC1_SQR3. cr ." ADC1_SQR3.  RW   $" ADC1_SQR3 @ hex. ADC1_SQR3 1b. ;
-    : ADC1_JSQR. cr ." ADC1_JSQR.  RW   $" ADC1_JSQR @ hex. ADC1_JSQR 1b. ;
-    : ADC1_JDR1. cr ." ADC1_JDR1.  RO   $" ADC1_JDR1 @ hex. ADC1_JDR1 1b. ;
-    : ADC1_JDR2. cr ." ADC1_JDR2.  RO   $" ADC1_JDR2 @ hex. ADC1_JDR2 1b. ;
-    : ADC1_JDR3. cr ." ADC1_JDR3.  RO   $" ADC1_JDR3 @ hex. ADC1_JDR3 1b. ;
-    : ADC1_JDR4. cr ." ADC1_JDR4.  RO   $" ADC1_JDR4 @ hex. ADC1_JDR4 1b. ;
-    : ADC1_DR. cr ." ADC1_DR.  RO   $" ADC1_DR @ hex. ADC1_DR 1b. ;
+    : ADC1_SR. cr ." ADC1_SR.  RW   $" ADC1_SR @ h.8 ADC1_SR 1b. ;
+    : ADC1_CR1. cr ." ADC1_CR1.  RW   $" ADC1_CR1 @ h.8 ADC1_CR1 1b. ;
+    : ADC1_CR2. cr ." ADC1_CR2.  RW   $" ADC1_CR2 @ h.8 ADC1_CR2 1b. ;
+    : ADC1_SMPR1. cr ." ADC1_SMPR1.  RW   $" ADC1_SMPR1 @ h.8 ADC1_SMPR1 1b. ;
+    : ADC1_SMPR2. cr ." ADC1_SMPR2.  RW   $" ADC1_SMPR2 @ h.8 ADC1_SMPR2 1b. ;
+    : ADC1_JOFR1. cr ." ADC1_JOFR1.  RW   $" ADC1_JOFR1 @ h.8 ADC1_JOFR1 1b. ;
+    : ADC1_JOFR2. cr ." ADC1_JOFR2.  RW   $" ADC1_JOFR2 @ h.8 ADC1_JOFR2 1b. ;
+    : ADC1_JOFR3. cr ." ADC1_JOFR3.  RW   $" ADC1_JOFR3 @ h.8 ADC1_JOFR3 1b. ;
+    : ADC1_JOFR4. cr ." ADC1_JOFR4.  RW   $" ADC1_JOFR4 @ h.8 ADC1_JOFR4 1b. ;
+    : ADC1_HTR. cr ." ADC1_HTR.  RW   $" ADC1_HTR @ h.8 ADC1_HTR 1b. ;
+    : ADC1_LTR. cr ." ADC1_LTR.  RW   $" ADC1_LTR @ h.8 ADC1_LTR 1b. ;
+    : ADC1_SQR1. cr ." ADC1_SQR1.  RW   $" ADC1_SQR1 @ h.8 ADC1_SQR1 1b. ;
+    : ADC1_SQR2. cr ." ADC1_SQR2.  RW   $" ADC1_SQR2 @ h.8 ADC1_SQR2 1b. ;
+    : ADC1_SQR3. cr ." ADC1_SQR3.  RW   $" ADC1_SQR3 @ h.8 ADC1_SQR3 1b. ;
+    : ADC1_JSQR. cr ." ADC1_JSQR.  RW   $" ADC1_JSQR @ h.8 ADC1_JSQR 1b. ;
+    : ADC1_JDR1. cr ." ADC1_JDR1.  RO   $" ADC1_JDR1 @ h.8 ADC1_JDR1 1b. ;
+    : ADC1_JDR2. cr ." ADC1_JDR2.  RO   $" ADC1_JDR2 @ h.8 ADC1_JDR2 1b. ;
+    : ADC1_JDR3. cr ." ADC1_JDR3.  RO   $" ADC1_JDR3 @ h.8 ADC1_JDR3 1b. ;
+    : ADC1_JDR4. cr ." ADC1_JDR4.  RO   $" ADC1_JDR4 @ h.8 ADC1_JDR4 1b. ;
+    : ADC1_DR. cr ." ADC1_DR.  RO   $" ADC1_DR @ h.8 ADC1_DR 1b. ;
     : ADC1.
       ADC1_SR.
       ADC1_CR1.
@@ -1659,26 +1659,26 @@ begin-module memmap
     ADC2 $44 + constant ADC2_JDR3 ( read-only )  \ injected data register x
     ADC2 $48 + constant ADC2_JDR4 ( read-only )  \ injected data register x
     ADC2 $4C + constant ADC2_DR ( read-only )  \ regular data register
-    : ADC2_SR. cr ." ADC2_SR.  RW   $" ADC2_SR @ hex. ADC2_SR 1b. ;
-    : ADC2_CR1. cr ." ADC2_CR1.  RW   $" ADC2_CR1 @ hex. ADC2_CR1 1b. ;
-    : ADC2_CR2. cr ." ADC2_CR2.  RW   $" ADC2_CR2 @ hex. ADC2_CR2 1b. ;
-    : ADC2_SMPR1. cr ." ADC2_SMPR1.  RW   $" ADC2_SMPR1 @ hex. ADC2_SMPR1 1b. ;
-    : ADC2_SMPR2. cr ." ADC2_SMPR2.  RW   $" ADC2_SMPR2 @ hex. ADC2_SMPR2 1b. ;
-    : ADC2_JOFR1. cr ." ADC2_JOFR1.  RW   $" ADC2_JOFR1 @ hex. ADC2_JOFR1 1b. ;
-    : ADC2_JOFR2. cr ." ADC2_JOFR2.  RW   $" ADC2_JOFR2 @ hex. ADC2_JOFR2 1b. ;
-    : ADC2_JOFR3. cr ." ADC2_JOFR3.  RW   $" ADC2_JOFR3 @ hex. ADC2_JOFR3 1b. ;
-    : ADC2_JOFR4. cr ." ADC2_JOFR4.  RW   $" ADC2_JOFR4 @ hex. ADC2_JOFR4 1b. ;
-    : ADC2_HTR. cr ." ADC2_HTR.  RW   $" ADC2_HTR @ hex. ADC2_HTR 1b. ;
-    : ADC2_LTR. cr ." ADC2_LTR.  RW   $" ADC2_LTR @ hex. ADC2_LTR 1b. ;
-    : ADC2_SQR1. cr ." ADC2_SQR1.  RW   $" ADC2_SQR1 @ hex. ADC2_SQR1 1b. ;
-    : ADC2_SQR2. cr ." ADC2_SQR2.  RW   $" ADC2_SQR2 @ hex. ADC2_SQR2 1b. ;
-    : ADC2_SQR3. cr ." ADC2_SQR3.  RW   $" ADC2_SQR3 @ hex. ADC2_SQR3 1b. ;
-    : ADC2_JSQR. cr ." ADC2_JSQR.  RW   $" ADC2_JSQR @ hex. ADC2_JSQR 1b. ;
-    : ADC2_JDR1. cr ." ADC2_JDR1.  RO   $" ADC2_JDR1 @ hex. ADC2_JDR1 1b. ;
-    : ADC2_JDR2. cr ." ADC2_JDR2.  RO   $" ADC2_JDR2 @ hex. ADC2_JDR2 1b. ;
-    : ADC2_JDR3. cr ." ADC2_JDR3.  RO   $" ADC2_JDR3 @ hex. ADC2_JDR3 1b. ;
-    : ADC2_JDR4. cr ." ADC2_JDR4.  RO   $" ADC2_JDR4 @ hex. ADC2_JDR4 1b. ;
-    : ADC2_DR. cr ." ADC2_DR.  RO   $" ADC2_DR @ hex. ADC2_DR 1b. ;
+    : ADC2_SR. cr ." ADC2_SR.  RW   $" ADC2_SR @ h.8 ADC2_SR 1b. ;
+    : ADC2_CR1. cr ." ADC2_CR1.  RW   $" ADC2_CR1 @ h.8 ADC2_CR1 1b. ;
+    : ADC2_CR2. cr ." ADC2_CR2.  RW   $" ADC2_CR2 @ h.8 ADC2_CR2 1b. ;
+    : ADC2_SMPR1. cr ." ADC2_SMPR1.  RW   $" ADC2_SMPR1 @ h.8 ADC2_SMPR1 1b. ;
+    : ADC2_SMPR2. cr ." ADC2_SMPR2.  RW   $" ADC2_SMPR2 @ h.8 ADC2_SMPR2 1b. ;
+    : ADC2_JOFR1. cr ." ADC2_JOFR1.  RW   $" ADC2_JOFR1 @ h.8 ADC2_JOFR1 1b. ;
+    : ADC2_JOFR2. cr ." ADC2_JOFR2.  RW   $" ADC2_JOFR2 @ h.8 ADC2_JOFR2 1b. ;
+    : ADC2_JOFR3. cr ." ADC2_JOFR3.  RW   $" ADC2_JOFR3 @ h.8 ADC2_JOFR3 1b. ;
+    : ADC2_JOFR4. cr ." ADC2_JOFR4.  RW   $" ADC2_JOFR4 @ h.8 ADC2_JOFR4 1b. ;
+    : ADC2_HTR. cr ." ADC2_HTR.  RW   $" ADC2_HTR @ h.8 ADC2_HTR 1b. ;
+    : ADC2_LTR. cr ." ADC2_LTR.  RW   $" ADC2_LTR @ h.8 ADC2_LTR 1b. ;
+    : ADC2_SQR1. cr ." ADC2_SQR1.  RW   $" ADC2_SQR1 @ h.8 ADC2_SQR1 1b. ;
+    : ADC2_SQR2. cr ." ADC2_SQR2.  RW   $" ADC2_SQR2 @ h.8 ADC2_SQR2 1b. ;
+    : ADC2_SQR3. cr ." ADC2_SQR3.  RW   $" ADC2_SQR3 @ h.8 ADC2_SQR3 1b. ;
+    : ADC2_JSQR. cr ." ADC2_JSQR.  RW   $" ADC2_JSQR @ h.8 ADC2_JSQR 1b. ;
+    : ADC2_JDR1. cr ." ADC2_JDR1.  RO   $" ADC2_JDR1 @ h.8 ADC2_JDR1 1b. ;
+    : ADC2_JDR2. cr ." ADC2_JDR2.  RO   $" ADC2_JDR2 @ h.8 ADC2_JDR2 1b. ;
+    : ADC2_JDR3. cr ." ADC2_JDR3.  RO   $" ADC2_JDR3 @ h.8 ADC2_JDR3 1b. ;
+    : ADC2_JDR4. cr ." ADC2_JDR4.  RO   $" ADC2_JDR4 @ h.8 ADC2_JDR4 1b. ;
+    : ADC2_DR. cr ." ADC2_DR.  RO   $" ADC2_DR @ h.8 ADC2_DR 1b. ;
     : ADC2.
       ADC2_SR.
       ADC2_CR1.
@@ -1725,26 +1725,26 @@ begin-module memmap
     ADC3 $44 + constant ADC3_JDR3 ( read-only )  \ injected data register x
     ADC3 $48 + constant ADC3_JDR4 ( read-only )  \ injected data register x
     ADC3 $4C + constant ADC3_DR ( read-only )  \ regular data register
-    : ADC3_SR. cr ." ADC3_SR.  RW   $" ADC3_SR @ hex. ADC3_SR 1b. ;
-    : ADC3_CR1. cr ." ADC3_CR1.  RW   $" ADC3_CR1 @ hex. ADC3_CR1 1b. ;
-    : ADC3_CR2. cr ." ADC3_CR2.  RW   $" ADC3_CR2 @ hex. ADC3_CR2 1b. ;
-    : ADC3_SMPR1. cr ." ADC3_SMPR1.  RW   $" ADC3_SMPR1 @ hex. ADC3_SMPR1 1b. ;
-    : ADC3_SMPR2. cr ." ADC3_SMPR2.  RW   $" ADC3_SMPR2 @ hex. ADC3_SMPR2 1b. ;
-    : ADC3_JOFR1. cr ." ADC3_JOFR1.  RW   $" ADC3_JOFR1 @ hex. ADC3_JOFR1 1b. ;
-    : ADC3_JOFR2. cr ." ADC3_JOFR2.  RW   $" ADC3_JOFR2 @ hex. ADC3_JOFR2 1b. ;
-    : ADC3_JOFR3. cr ." ADC3_JOFR3.  RW   $" ADC3_JOFR3 @ hex. ADC3_JOFR3 1b. ;
-    : ADC3_JOFR4. cr ." ADC3_JOFR4.  RW   $" ADC3_JOFR4 @ hex. ADC3_JOFR4 1b. ;
-    : ADC3_HTR. cr ." ADC3_HTR.  RW   $" ADC3_HTR @ hex. ADC3_HTR 1b. ;
-    : ADC3_LTR. cr ." ADC3_LTR.  RW   $" ADC3_LTR @ hex. ADC3_LTR 1b. ;
-    : ADC3_SQR1. cr ." ADC3_SQR1.  RW   $" ADC3_SQR1 @ hex. ADC3_SQR1 1b. ;
-    : ADC3_SQR2. cr ." ADC3_SQR2.  RW   $" ADC3_SQR2 @ hex. ADC3_SQR2 1b. ;
-    : ADC3_SQR3. cr ." ADC3_SQR3.  RW   $" ADC3_SQR3 @ hex. ADC3_SQR3 1b. ;
-    : ADC3_JSQR. cr ." ADC3_JSQR.  RW   $" ADC3_JSQR @ hex. ADC3_JSQR 1b. ;
-    : ADC3_JDR1. cr ." ADC3_JDR1.  RO   $" ADC3_JDR1 @ hex. ADC3_JDR1 1b. ;
-    : ADC3_JDR2. cr ." ADC3_JDR2.  RO   $" ADC3_JDR2 @ hex. ADC3_JDR2 1b. ;
-    : ADC3_JDR3. cr ." ADC3_JDR3.  RO   $" ADC3_JDR3 @ hex. ADC3_JDR3 1b. ;
-    : ADC3_JDR4. cr ." ADC3_JDR4.  RO   $" ADC3_JDR4 @ hex. ADC3_JDR4 1b. ;
-    : ADC3_DR. cr ." ADC3_DR.  RO   $" ADC3_DR @ hex. ADC3_DR 1b. ;
+    : ADC3_SR. cr ." ADC3_SR.  RW   $" ADC3_SR @ h.8 ADC3_SR 1b. ;
+    : ADC3_CR1. cr ." ADC3_CR1.  RW   $" ADC3_CR1 @ h.8 ADC3_CR1 1b. ;
+    : ADC3_CR2. cr ." ADC3_CR2.  RW   $" ADC3_CR2 @ h.8 ADC3_CR2 1b. ;
+    : ADC3_SMPR1. cr ." ADC3_SMPR1.  RW   $" ADC3_SMPR1 @ h.8 ADC3_SMPR1 1b. ;
+    : ADC3_SMPR2. cr ." ADC3_SMPR2.  RW   $" ADC3_SMPR2 @ h.8 ADC3_SMPR2 1b. ;
+    : ADC3_JOFR1. cr ." ADC3_JOFR1.  RW   $" ADC3_JOFR1 @ h.8 ADC3_JOFR1 1b. ;
+    : ADC3_JOFR2. cr ." ADC3_JOFR2.  RW   $" ADC3_JOFR2 @ h.8 ADC3_JOFR2 1b. ;
+    : ADC3_JOFR3. cr ." ADC3_JOFR3.  RW   $" ADC3_JOFR3 @ h.8 ADC3_JOFR3 1b. ;
+    : ADC3_JOFR4. cr ." ADC3_JOFR4.  RW   $" ADC3_JOFR4 @ h.8 ADC3_JOFR4 1b. ;
+    : ADC3_HTR. cr ." ADC3_HTR.  RW   $" ADC3_HTR @ h.8 ADC3_HTR 1b. ;
+    : ADC3_LTR. cr ." ADC3_LTR.  RW   $" ADC3_LTR @ h.8 ADC3_LTR 1b. ;
+    : ADC3_SQR1. cr ." ADC3_SQR1.  RW   $" ADC3_SQR1 @ h.8 ADC3_SQR1 1b. ;
+    : ADC3_SQR2. cr ." ADC3_SQR2.  RW   $" ADC3_SQR2 @ h.8 ADC3_SQR2 1b. ;
+    : ADC3_SQR3. cr ." ADC3_SQR3.  RW   $" ADC3_SQR3 @ h.8 ADC3_SQR3 1b. ;
+    : ADC3_JSQR. cr ." ADC3_JSQR.  RW   $" ADC3_JSQR @ h.8 ADC3_JSQR 1b. ;
+    : ADC3_JDR1. cr ." ADC3_JDR1.  RO   $" ADC3_JDR1 @ h.8 ADC3_JDR1 1b. ;
+    : ADC3_JDR2. cr ." ADC3_JDR2.  RO   $" ADC3_JDR2 @ h.8 ADC3_JDR2 1b. ;
+    : ADC3_JDR3. cr ." ADC3_JDR3.  RO   $" ADC3_JDR3 @ h.8 ADC3_JDR3 1b. ;
+    : ADC3_JDR4. cr ." ADC3_JDR4.  RO   $" ADC3_JDR4 @ h.8 ADC3_JDR4 1b. ;
+    : ADC3_DR. cr ." ADC3_DR.  RO   $" ADC3_DR @ h.8 ADC3_DR 1b. ;
     : ADC3.
       ADC3_SR.
       ADC3_CR1.
@@ -1785,20 +1785,20 @@ begin-module memmap
     DAC $2C + constant DAC_DOR1 ( read-only )  \ channel1 data output register
     DAC $30 + constant DAC_DOR2 ( read-only )  \ channel2 data output register
     DAC $34 + constant DAC_SR ( read-write )  \ status register
-    : DAC_CR. cr ." DAC_CR.  RW   $" DAC_CR @ hex. DAC_CR 1b. ;
+    : DAC_CR. cr ." DAC_CR.  RW   $" DAC_CR @ h.8 DAC_CR 1b. ;
     : DAC_SWTRIGR. cr ." DAC_SWTRIGR " WRITEONLY ; 
-    : DAC_DHR12R1. cr ." DAC_DHR12R1.  RW   $" DAC_DHR12R1 @ hex. DAC_DHR12R1 1b. ;
-    : DAC_DHR12L1. cr ." DAC_DHR12L1.  RW   $" DAC_DHR12L1 @ hex. DAC_DHR12L1 1b. ;
-    : DAC_DHR8R1. cr ." DAC_DHR8R1.  RW   $" DAC_DHR8R1 @ hex. DAC_DHR8R1 1b. ;
-    : DAC_DHR12R2. cr ." DAC_DHR12R2.  RW   $" DAC_DHR12R2 @ hex. DAC_DHR12R2 1b. ;
-    : DAC_DHR12L2. cr ." DAC_DHR12L2.  RW   $" DAC_DHR12L2 @ hex. DAC_DHR12L2 1b. ;
-    : DAC_DHR8R2. cr ." DAC_DHR8R2.  RW   $" DAC_DHR8R2 @ hex. DAC_DHR8R2 1b. ;
-    : DAC_DHR12RD. cr ." DAC_DHR12RD.  RW   $" DAC_DHR12RD @ hex. DAC_DHR12RD 1b. ;
-    : DAC_DHR12LD. cr ." DAC_DHR12LD.  RW   $" DAC_DHR12LD @ hex. DAC_DHR12LD 1b. ;
-    : DAC_DHR8RD. cr ." DAC_DHR8RD.  RW   $" DAC_DHR8RD @ hex. DAC_DHR8RD 1b. ;
-    : DAC_DOR1. cr ." DAC_DOR1.  RO   $" DAC_DOR1 @ hex. DAC_DOR1 1b. ;
-    : DAC_DOR2. cr ." DAC_DOR2.  RO   $" DAC_DOR2 @ hex. DAC_DOR2 1b. ;
-    : DAC_SR. cr ." DAC_SR.  RW   $" DAC_SR @ hex. DAC_SR 1b. ;
+    : DAC_DHR12R1. cr ." DAC_DHR12R1.  RW   $" DAC_DHR12R1 @ h.8 DAC_DHR12R1 1b. ;
+    : DAC_DHR12L1. cr ." DAC_DHR12L1.  RW   $" DAC_DHR12L1 @ h.8 DAC_DHR12L1 1b. ;
+    : DAC_DHR8R1. cr ." DAC_DHR8R1.  RW   $" DAC_DHR8R1 @ h.8 DAC_DHR8R1 1b. ;
+    : DAC_DHR12R2. cr ." DAC_DHR12R2.  RW   $" DAC_DHR12R2 @ h.8 DAC_DHR12R2 1b. ;
+    : DAC_DHR12L2. cr ." DAC_DHR12L2.  RW   $" DAC_DHR12L2 @ h.8 DAC_DHR12L2 1b. ;
+    : DAC_DHR8R2. cr ." DAC_DHR8R2.  RW   $" DAC_DHR8R2 @ h.8 DAC_DHR8R2 1b. ;
+    : DAC_DHR12RD. cr ." DAC_DHR12RD.  RW   $" DAC_DHR12RD @ h.8 DAC_DHR12RD 1b. ;
+    : DAC_DHR12LD. cr ." DAC_DHR12LD.  RW   $" DAC_DHR12LD @ h.8 DAC_DHR12LD 1b. ;
+    : DAC_DHR8RD. cr ." DAC_DHR8RD.  RW   $" DAC_DHR8RD @ h.8 DAC_DHR8RD 1b. ;
+    : DAC_DOR1. cr ." DAC_DOR1.  RO   $" DAC_DOR1 @ h.8 DAC_DOR1 1b. ;
+    : DAC_DOR2. cr ." DAC_DOR2.  RO   $" DAC_DOR2 @ h.8 DAC_DOR2 1b. ;
+    : DAC_SR. cr ." DAC_SR.  RW   $" DAC_SR @ h.8 DAC_SR 1b. ;
     : DAC.
       DAC_CR.
       DAC_SWTRIGR.
@@ -1823,10 +1823,10 @@ begin-module memmap
     PWR $4 + constant PWR_CSR1 (  )  \ power control/status register
     PWR $8 + constant PWR_CR2 (  )  \ power control register
     PWR $C + constant PWR_CSR2 (  )  \ power control/status register
-    : PWR_CR1. cr ." PWR_CR1.  RW   $" PWR_CR1 @ hex. PWR_CR1 1b. ;
-    : PWR_CSR1. cr ." PWR_CSR1.   $" PWR_CSR1 @ hex. PWR_CSR1 1b. ;
-    : PWR_CR2. cr ." PWR_CR2.   $" PWR_CR2 @ hex. PWR_CR2 1b. ;
-    : PWR_CSR2. cr ." PWR_CSR2.   $" PWR_CSR2 @ hex. PWR_CSR2 1b. ;
+    : PWR_CR1. cr ." PWR_CR1.  RW   $" PWR_CR1 @ h.8 PWR_CR1 1b. ;
+    : PWR_CSR1. cr ." PWR_CSR1.   $" PWR_CSR1 @ h.8 PWR_CSR1 1b. ;
+    : PWR_CR2. cr ." PWR_CR2.   $" PWR_CR2 @ h.8 PWR_CR2 1b. ;
+    : PWR_CSR2. cr ." PWR_CSR2.   $" PWR_CSR2 @ h.8 PWR_CSR2 1b. ;
     : PWR.
       PWR_CR1.
       PWR_CSR1.
@@ -1843,10 +1843,10 @@ begin-module memmap
     IWDG $C + constant IWDG_SR ( read-only )  \ Status register
     IWDG $10 + constant IWDG_WINR ( read-write )  \ Window register
     : IWDG_KR. cr ." IWDG_KR " WRITEONLY ; 
-    : IWDG_PR. cr ." IWDG_PR.  RW   $" IWDG_PR @ hex. IWDG_PR 1b. ;
-    : IWDG_RLR. cr ." IWDG_RLR.  RW   $" IWDG_RLR @ hex. IWDG_RLR 1b. ;
-    : IWDG_SR. cr ." IWDG_SR.  RO   $" IWDG_SR @ hex. IWDG_SR 1b. ;
-    : IWDG_WINR. cr ." IWDG_WINR.  RW   $" IWDG_WINR @ hex. IWDG_WINR 1b. ;
+    : IWDG_PR. cr ." IWDG_PR.  RW   $" IWDG_PR @ h.8 IWDG_PR 1b. ;
+    : IWDG_RLR. cr ." IWDG_RLR.  RW   $" IWDG_RLR @ h.8 IWDG_RLR 1b. ;
+    : IWDG_SR. cr ." IWDG_SR.  RO   $" IWDG_SR @ h.8 IWDG_SR 1b. ;
+    : IWDG_WINR. cr ." IWDG_WINR.  RW   $" IWDG_WINR @ h.8 IWDG_WINR 1b. ;
     : IWDG.
       IWDG_KR.
       IWDG_PR.
@@ -1861,9 +1861,9 @@ begin-module memmap
     WWDG $0 + constant WWDG_CR ( read-write )  \ Control register
     WWDG $4 + constant WWDG_CFR ( read-write )  \ Configuration register
     WWDG $8 + constant WWDG_SR ( read-write )  \ Status register
-    : WWDG_CR. cr ." WWDG_CR.  RW   $" WWDG_CR @ hex. WWDG_CR 1b. ;
-    : WWDG_CFR. cr ." WWDG_CFR.  RW   $" WWDG_CFR @ hex. WWDG_CFR 1b. ;
-    : WWDG_SR. cr ." WWDG_SR.  RW   $" WWDG_SR @ hex. WWDG_SR 1b. ;
+    : WWDG_CR. cr ." WWDG_CR.  RW   $" WWDG_CR @ h.8 WWDG_CR 1b. ;
+    : WWDG_CFR. cr ." WWDG_CFR.  RW   $" WWDG_CFR @ h.8 WWDG_CFR 1b. ;
+    : WWDG_SR. cr ." WWDG_SR.  RW   $" WWDG_SR @ h.8 WWDG_SR 1b. ;
     : WWDG.
       WWDG_CR.
       WWDG_CFR.
@@ -1876,9 +1876,9 @@ begin-module memmap
     C_ADC $0 + constant C_ADC_CSR ( read-only )  \ ADC Common status register
     C_ADC $4 + constant C_ADC_CCR ( read-write )  \ ADC common control register
     C_ADC $8 + constant C_ADC_CDR ( read-only )  \ ADC common regular data register for dual and triple modes
-    : C_ADC_CSR. cr ." C_ADC_CSR.  RO   $" C_ADC_CSR @ hex. C_ADC_CSR 1b. ;
-    : C_ADC_CCR. cr ." C_ADC_CCR.  RW   $" C_ADC_CCR @ hex. C_ADC_CCR 1b. ;
-    : C_ADC_CDR. cr ." C_ADC_CDR.  RO   $" C_ADC_CDR @ hex. C_ADC_CDR 1b. ;
+    : C_ADC_CSR. cr ." C_ADC_CSR.  RO   $" C_ADC_CSR @ h.8 C_ADC_CSR 1b. ;
+    : C_ADC_CCR. cr ." C_ADC_CCR.  RW   $" C_ADC_CCR @ h.8 C_ADC_CCR 1b. ;
+    : C_ADC_CDR. cr ." C_ADC_CDR.  RO   $" C_ADC_CDR @ h.8 C_ADC_CDR 1b. ;
     : C_ADC.
       C_ADC_CSR.
       C_ADC_CCR.
@@ -1913,31 +1913,31 @@ begin-module memmap
     TIM1 $54 + constant TIM1_CCMR3_Output ( read-write )  \ capture/compare mode register 3 output mode
     TIM1 $58 + constant TIM1_CCR5 ( read-write )  \ capture/compare register 5
     TIM1 $5C + constant TIM1_CRR6 ( read-write )  \ capture/compare register 6
-    : TIM1_CR1. cr ." TIM1_CR1.  RW   $" TIM1_CR1 @ hex. TIM1_CR1 1b. ;
-    : TIM1_CR2. cr ." TIM1_CR2.  RW   $" TIM1_CR2 @ hex. TIM1_CR2 1b. ;
-    : TIM1_SMCR. cr ." TIM1_SMCR.  RW   $" TIM1_SMCR @ hex. TIM1_SMCR 1b. ;
-    : TIM1_DIER. cr ." TIM1_DIER.  RW   $" TIM1_DIER @ hex. TIM1_DIER 1b. ;
-    : TIM1_SR. cr ." TIM1_SR.  RW   $" TIM1_SR @ hex. TIM1_SR 1b. ;
+    : TIM1_CR1. cr ." TIM1_CR1.  RW   $" TIM1_CR1 @ h.8 TIM1_CR1 1b. ;
+    : TIM1_CR2. cr ." TIM1_CR2.  RW   $" TIM1_CR2 @ h.8 TIM1_CR2 1b. ;
+    : TIM1_SMCR. cr ." TIM1_SMCR.  RW   $" TIM1_SMCR @ h.8 TIM1_SMCR 1b. ;
+    : TIM1_DIER. cr ." TIM1_DIER.  RW   $" TIM1_DIER @ h.8 TIM1_DIER 1b. ;
+    : TIM1_SR. cr ." TIM1_SR.  RW   $" TIM1_SR @ h.8 TIM1_SR 1b. ;
     : TIM1_EGR. cr ." TIM1_EGR " WRITEONLY ; 
-    : TIM1_CCMR1_Output. cr ." TIM1_CCMR1_Output.  RW   $" TIM1_CCMR1_Output @ hex. TIM1_CCMR1_Output 1b. ;
-    : TIM1_CCMR1_Input. cr ." TIM1_CCMR1_Input.  RW   $" TIM1_CCMR1_Input @ hex. TIM1_CCMR1_Input 1b. ;
-    : TIM1_CCMR2_Output. cr ." TIM1_CCMR2_Output.  RW   $" TIM1_CCMR2_Output @ hex. TIM1_CCMR2_Output 1b. ;
-    : TIM1_CCMR2_Input. cr ." TIM1_CCMR2_Input.  RW   $" TIM1_CCMR2_Input @ hex. TIM1_CCMR2_Input 1b. ;
-    : TIM1_CCER. cr ." TIM1_CCER.  RW   $" TIM1_CCER @ hex. TIM1_CCER 1b. ;
-    : TIM1_CNT. cr ." TIM1_CNT.  RW   $" TIM1_CNT @ hex. TIM1_CNT 1b. ;
-    : TIM1_PSC. cr ." TIM1_PSC.  RW   $" TIM1_PSC @ hex. TIM1_PSC 1b. ;
-    : TIM1_ARR. cr ." TIM1_ARR.  RW   $" TIM1_ARR @ hex. TIM1_ARR 1b. ;
-    : TIM1_CCR1. cr ." TIM1_CCR1.  RW   $" TIM1_CCR1 @ hex. TIM1_CCR1 1b. ;
-    : TIM1_CCR2. cr ." TIM1_CCR2.  RW   $" TIM1_CCR2 @ hex. TIM1_CCR2 1b. ;
-    : TIM1_CCR3. cr ." TIM1_CCR3.  RW   $" TIM1_CCR3 @ hex. TIM1_CCR3 1b. ;
-    : TIM1_CCR4. cr ." TIM1_CCR4.  RW   $" TIM1_CCR4 @ hex. TIM1_CCR4 1b. ;
-    : TIM1_DCR. cr ." TIM1_DCR.  RW   $" TIM1_DCR @ hex. TIM1_DCR 1b. ;
-    : TIM1_DMAR. cr ." TIM1_DMAR.  RW   $" TIM1_DMAR @ hex. TIM1_DMAR 1b. ;
-    : TIM1_RCR. cr ." TIM1_RCR.  RW   $" TIM1_RCR @ hex. TIM1_RCR 1b. ;
-    : TIM1_BDTR. cr ." TIM1_BDTR.  RW   $" TIM1_BDTR @ hex. TIM1_BDTR 1b. ;
-    : TIM1_CCMR3_Output. cr ." TIM1_CCMR3_Output.  RW   $" TIM1_CCMR3_Output @ hex. TIM1_CCMR3_Output 1b. ;
-    : TIM1_CCR5. cr ." TIM1_CCR5.  RW   $" TIM1_CCR5 @ hex. TIM1_CCR5 1b. ;
-    : TIM1_CRR6. cr ." TIM1_CRR6.  RW   $" TIM1_CRR6 @ hex. TIM1_CRR6 1b. ;
+    : TIM1_CCMR1_Output. cr ." TIM1_CCMR1_Output.  RW   $" TIM1_CCMR1_Output @ h.8 TIM1_CCMR1_Output 1b. ;
+    : TIM1_CCMR1_Input. cr ." TIM1_CCMR1_Input.  RW   $" TIM1_CCMR1_Input @ h.8 TIM1_CCMR1_Input 1b. ;
+    : TIM1_CCMR2_Output. cr ." TIM1_CCMR2_Output.  RW   $" TIM1_CCMR2_Output @ h.8 TIM1_CCMR2_Output 1b. ;
+    : TIM1_CCMR2_Input. cr ." TIM1_CCMR2_Input.  RW   $" TIM1_CCMR2_Input @ h.8 TIM1_CCMR2_Input 1b. ;
+    : TIM1_CCER. cr ." TIM1_CCER.  RW   $" TIM1_CCER @ h.8 TIM1_CCER 1b. ;
+    : TIM1_CNT. cr ." TIM1_CNT.  RW   $" TIM1_CNT @ h.8 TIM1_CNT 1b. ;
+    : TIM1_PSC. cr ." TIM1_PSC.  RW   $" TIM1_PSC @ h.8 TIM1_PSC 1b. ;
+    : TIM1_ARR. cr ." TIM1_ARR.  RW   $" TIM1_ARR @ h.8 TIM1_ARR 1b. ;
+    : TIM1_CCR1. cr ." TIM1_CCR1.  RW   $" TIM1_CCR1 @ h.8 TIM1_CCR1 1b. ;
+    : TIM1_CCR2. cr ." TIM1_CCR2.  RW   $" TIM1_CCR2 @ h.8 TIM1_CCR2 1b. ;
+    : TIM1_CCR3. cr ." TIM1_CCR3.  RW   $" TIM1_CCR3 @ h.8 TIM1_CCR3 1b. ;
+    : TIM1_CCR4. cr ." TIM1_CCR4.  RW   $" TIM1_CCR4 @ h.8 TIM1_CCR4 1b. ;
+    : TIM1_DCR. cr ." TIM1_DCR.  RW   $" TIM1_DCR @ h.8 TIM1_DCR 1b. ;
+    : TIM1_DMAR. cr ." TIM1_DMAR.  RW   $" TIM1_DMAR @ h.8 TIM1_DMAR 1b. ;
+    : TIM1_RCR. cr ." TIM1_RCR.  RW   $" TIM1_RCR @ h.8 TIM1_RCR 1b. ;
+    : TIM1_BDTR. cr ." TIM1_BDTR.  RW   $" TIM1_BDTR @ h.8 TIM1_BDTR 1b. ;
+    : TIM1_CCMR3_Output. cr ." TIM1_CCMR3_Output.  RW   $" TIM1_CCMR3_Output @ h.8 TIM1_CCMR3_Output 1b. ;
+    : TIM1_CCR5. cr ." TIM1_CCR5.  RW   $" TIM1_CCR5 @ h.8 TIM1_CCR5 1b. ;
+    : TIM1_CRR6. cr ." TIM1_CRR6.  RW   $" TIM1_CRR6 @ h.8 TIM1_CRR6 1b. ;
     : TIM1.
       TIM1_CR1.
       TIM1_CR2.
@@ -1994,31 +1994,31 @@ begin-module memmap
     TIM8 $54 + constant TIM8_CCMR3_Output ( read-write )  \ capture/compare mode register 3 output mode
     TIM8 $58 + constant TIM8_CCR5 ( read-write )  \ capture/compare register 5
     TIM8 $5C + constant TIM8_CRR6 ( read-write )  \ capture/compare register 6
-    : TIM8_CR1. cr ." TIM8_CR1.  RW   $" TIM8_CR1 @ hex. TIM8_CR1 1b. ;
-    : TIM8_CR2. cr ." TIM8_CR2.  RW   $" TIM8_CR2 @ hex. TIM8_CR2 1b. ;
-    : TIM8_SMCR. cr ." TIM8_SMCR.  RW   $" TIM8_SMCR @ hex. TIM8_SMCR 1b. ;
-    : TIM8_DIER. cr ." TIM8_DIER.  RW   $" TIM8_DIER @ hex. TIM8_DIER 1b. ;
-    : TIM8_SR. cr ." TIM8_SR.  RW   $" TIM8_SR @ hex. TIM8_SR 1b. ;
+    : TIM8_CR1. cr ." TIM8_CR1.  RW   $" TIM8_CR1 @ h.8 TIM8_CR1 1b. ;
+    : TIM8_CR2. cr ." TIM8_CR2.  RW   $" TIM8_CR2 @ h.8 TIM8_CR2 1b. ;
+    : TIM8_SMCR. cr ." TIM8_SMCR.  RW   $" TIM8_SMCR @ h.8 TIM8_SMCR 1b. ;
+    : TIM8_DIER. cr ." TIM8_DIER.  RW   $" TIM8_DIER @ h.8 TIM8_DIER 1b. ;
+    : TIM8_SR. cr ." TIM8_SR.  RW   $" TIM8_SR @ h.8 TIM8_SR 1b. ;
     : TIM8_EGR. cr ." TIM8_EGR " WRITEONLY ; 
-    : TIM8_CCMR1_Output. cr ." TIM8_CCMR1_Output.  RW   $" TIM8_CCMR1_Output @ hex. TIM8_CCMR1_Output 1b. ;
-    : TIM8_CCMR1_Input. cr ." TIM8_CCMR1_Input.  RW   $" TIM8_CCMR1_Input @ hex. TIM8_CCMR1_Input 1b. ;
-    : TIM8_CCMR2_Output. cr ." TIM8_CCMR2_Output.  RW   $" TIM8_CCMR2_Output @ hex. TIM8_CCMR2_Output 1b. ;
-    : TIM8_CCMR2_Input. cr ." TIM8_CCMR2_Input.  RW   $" TIM8_CCMR2_Input @ hex. TIM8_CCMR2_Input 1b. ;
-    : TIM8_CCER. cr ." TIM8_CCER.  RW   $" TIM8_CCER @ hex. TIM8_CCER 1b. ;
-    : TIM8_CNT. cr ." TIM8_CNT.  RW   $" TIM8_CNT @ hex. TIM8_CNT 1b. ;
-    : TIM8_PSC. cr ." TIM8_PSC.  RW   $" TIM8_PSC @ hex. TIM8_PSC 1b. ;
-    : TIM8_ARR. cr ." TIM8_ARR.  RW   $" TIM8_ARR @ hex. TIM8_ARR 1b. ;
-    : TIM8_CCR1. cr ." TIM8_CCR1.  RW   $" TIM8_CCR1 @ hex. TIM8_CCR1 1b. ;
-    : TIM8_CCR2. cr ." TIM8_CCR2.  RW   $" TIM8_CCR2 @ hex. TIM8_CCR2 1b. ;
-    : TIM8_CCR3. cr ." TIM8_CCR3.  RW   $" TIM8_CCR3 @ hex. TIM8_CCR3 1b. ;
-    : TIM8_CCR4. cr ." TIM8_CCR4.  RW   $" TIM8_CCR4 @ hex. TIM8_CCR4 1b. ;
-    : TIM8_DCR. cr ." TIM8_DCR.  RW   $" TIM8_DCR @ hex. TIM8_DCR 1b. ;
-    : TIM8_DMAR. cr ." TIM8_DMAR.  RW   $" TIM8_DMAR @ hex. TIM8_DMAR 1b. ;
-    : TIM8_RCR. cr ." TIM8_RCR.  RW   $" TIM8_RCR @ hex. TIM8_RCR 1b. ;
-    : TIM8_BDTR. cr ." TIM8_BDTR.  RW   $" TIM8_BDTR @ hex. TIM8_BDTR 1b. ;
-    : TIM8_CCMR3_Output. cr ." TIM8_CCMR3_Output.  RW   $" TIM8_CCMR3_Output @ hex. TIM8_CCMR3_Output 1b. ;
-    : TIM8_CCR5. cr ." TIM8_CCR5.  RW   $" TIM8_CCR5 @ hex. TIM8_CCR5 1b. ;
-    : TIM8_CRR6. cr ." TIM8_CRR6.  RW   $" TIM8_CRR6 @ hex. TIM8_CRR6 1b. ;
+    : TIM8_CCMR1_Output. cr ." TIM8_CCMR1_Output.  RW   $" TIM8_CCMR1_Output @ h.8 TIM8_CCMR1_Output 1b. ;
+    : TIM8_CCMR1_Input. cr ." TIM8_CCMR1_Input.  RW   $" TIM8_CCMR1_Input @ h.8 TIM8_CCMR1_Input 1b. ;
+    : TIM8_CCMR2_Output. cr ." TIM8_CCMR2_Output.  RW   $" TIM8_CCMR2_Output @ h.8 TIM8_CCMR2_Output 1b. ;
+    : TIM8_CCMR2_Input. cr ." TIM8_CCMR2_Input.  RW   $" TIM8_CCMR2_Input @ h.8 TIM8_CCMR2_Input 1b. ;
+    : TIM8_CCER. cr ." TIM8_CCER.  RW   $" TIM8_CCER @ h.8 TIM8_CCER 1b. ;
+    : TIM8_CNT. cr ." TIM8_CNT.  RW   $" TIM8_CNT @ h.8 TIM8_CNT 1b. ;
+    : TIM8_PSC. cr ." TIM8_PSC.  RW   $" TIM8_PSC @ h.8 TIM8_PSC 1b. ;
+    : TIM8_ARR. cr ." TIM8_ARR.  RW   $" TIM8_ARR @ h.8 TIM8_ARR 1b. ;
+    : TIM8_CCR1. cr ." TIM8_CCR1.  RW   $" TIM8_CCR1 @ h.8 TIM8_CCR1 1b. ;
+    : TIM8_CCR2. cr ." TIM8_CCR2.  RW   $" TIM8_CCR2 @ h.8 TIM8_CCR2 1b. ;
+    : TIM8_CCR3. cr ." TIM8_CCR3.  RW   $" TIM8_CCR3 @ h.8 TIM8_CCR3 1b. ;
+    : TIM8_CCR4. cr ." TIM8_CCR4.  RW   $" TIM8_CCR4 @ h.8 TIM8_CCR4 1b. ;
+    : TIM8_DCR. cr ." TIM8_DCR.  RW   $" TIM8_DCR @ h.8 TIM8_DCR 1b. ;
+    : TIM8_DMAR. cr ." TIM8_DMAR.  RW   $" TIM8_DMAR @ h.8 TIM8_DMAR 1b. ;
+    : TIM8_RCR. cr ." TIM8_RCR.  RW   $" TIM8_RCR @ h.8 TIM8_RCR 1b. ;
+    : TIM8_BDTR. cr ." TIM8_BDTR.  RW   $" TIM8_BDTR @ h.8 TIM8_BDTR 1b. ;
+    : TIM8_CCMR3_Output. cr ." TIM8_CCMR3_Output.  RW   $" TIM8_CCMR3_Output @ h.8 TIM8_CCMR3_Output 1b. ;
+    : TIM8_CCR5. cr ." TIM8_CCR5.  RW   $" TIM8_CCR5 @ h.8 TIM8_CCR5 1b. ;
+    : TIM8_CRR6. cr ." TIM8_CRR6.  RW   $" TIM8_CRR6 @ h.8 TIM8_CRR6 1b. ;
     : TIM8.
       TIM8_CR1.
       TIM8_CR2.
@@ -2072,28 +2072,28 @@ begin-module memmap
     TIM2 $4C + constant TIM2_DMAR ( read-write )  \ DMA address for full transfer
     TIM2 $50 + constant TIM2_OR1 ( read-write )  \ TIM2 option register 1
     TIM2 $60 + constant TIM2_OR2 ( read-write )  \ TIM2 option register 2
-    : TIM2_CR1. cr ." TIM2_CR1.  RW   $" TIM2_CR1 @ hex. TIM2_CR1 1b. ;
-    : TIM2_CR2. cr ." TIM2_CR2.  RW   $" TIM2_CR2 @ hex. TIM2_CR2 1b. ;
-    : TIM2_SMCR. cr ." TIM2_SMCR.  RW   $" TIM2_SMCR @ hex. TIM2_SMCR 1b. ;
-    : TIM2_DIER. cr ." TIM2_DIER.  RW   $" TIM2_DIER @ hex. TIM2_DIER 1b. ;
-    : TIM2_SR. cr ." TIM2_SR.  RW   $" TIM2_SR @ hex. TIM2_SR 1b. ;
+    : TIM2_CR1. cr ." TIM2_CR1.  RW   $" TIM2_CR1 @ h.8 TIM2_CR1 1b. ;
+    : TIM2_CR2. cr ." TIM2_CR2.  RW   $" TIM2_CR2 @ h.8 TIM2_CR2 1b. ;
+    : TIM2_SMCR. cr ." TIM2_SMCR.  RW   $" TIM2_SMCR @ h.8 TIM2_SMCR 1b. ;
+    : TIM2_DIER. cr ." TIM2_DIER.  RW   $" TIM2_DIER @ h.8 TIM2_DIER 1b. ;
+    : TIM2_SR. cr ." TIM2_SR.  RW   $" TIM2_SR @ h.8 TIM2_SR 1b. ;
     : TIM2_EGR. cr ." TIM2_EGR " WRITEONLY ; 
-    : TIM2_CCMR1_Output. cr ." TIM2_CCMR1_Output.  RW   $" TIM2_CCMR1_Output @ hex. TIM2_CCMR1_Output 1b. ;
-    : TIM2_CCMR1_Input. cr ." TIM2_CCMR1_Input.  RW   $" TIM2_CCMR1_Input @ hex. TIM2_CCMR1_Input 1b. ;
-    : TIM2_CCMR2_Output. cr ." TIM2_CCMR2_Output.  RW   $" TIM2_CCMR2_Output @ hex. TIM2_CCMR2_Output 1b. ;
-    : TIM2_CCMR2_Input. cr ." TIM2_CCMR2_Input.  RW   $" TIM2_CCMR2_Input @ hex. TIM2_CCMR2_Input 1b. ;
-    : TIM2_CCER. cr ." TIM2_CCER.  RW   $" TIM2_CCER @ hex. TIM2_CCER 1b. ;
-    : TIM2_CNT. cr ." TIM2_CNT.  RW   $" TIM2_CNT @ hex. TIM2_CNT 1b. ;
-    : TIM2_PSC. cr ." TIM2_PSC.  RW   $" TIM2_PSC @ hex. TIM2_PSC 1b. ;
-    : TIM2_ARR. cr ." TIM2_ARR.  RW   $" TIM2_ARR @ hex. TIM2_ARR 1b. ;
-    : TIM2_CCR1. cr ." TIM2_CCR1.  RW   $" TIM2_CCR1 @ hex. TIM2_CCR1 1b. ;
-    : TIM2_CCR2. cr ." TIM2_CCR2.  RW   $" TIM2_CCR2 @ hex. TIM2_CCR2 1b. ;
-    : TIM2_CCR3. cr ." TIM2_CCR3.  RW   $" TIM2_CCR3 @ hex. TIM2_CCR3 1b. ;
-    : TIM2_CCR4. cr ." TIM2_CCR4.  RW   $" TIM2_CCR4 @ hex. TIM2_CCR4 1b. ;
-    : TIM2_DCR. cr ." TIM2_DCR.  RW   $" TIM2_DCR @ hex. TIM2_DCR 1b. ;
-    : TIM2_DMAR. cr ." TIM2_DMAR.  RW   $" TIM2_DMAR @ hex. TIM2_DMAR 1b. ;
-    : TIM2_OR1. cr ." TIM2_OR1.  RW   $" TIM2_OR1 @ hex. TIM2_OR1 1b. ;
-    : TIM2_OR2. cr ." TIM2_OR2.  RW   $" TIM2_OR2 @ hex. TIM2_OR2 1b. ;
+    : TIM2_CCMR1_Output. cr ." TIM2_CCMR1_Output.  RW   $" TIM2_CCMR1_Output @ h.8 TIM2_CCMR1_Output 1b. ;
+    : TIM2_CCMR1_Input. cr ." TIM2_CCMR1_Input.  RW   $" TIM2_CCMR1_Input @ h.8 TIM2_CCMR1_Input 1b. ;
+    : TIM2_CCMR2_Output. cr ." TIM2_CCMR2_Output.  RW   $" TIM2_CCMR2_Output @ h.8 TIM2_CCMR2_Output 1b. ;
+    : TIM2_CCMR2_Input. cr ." TIM2_CCMR2_Input.  RW   $" TIM2_CCMR2_Input @ h.8 TIM2_CCMR2_Input 1b. ;
+    : TIM2_CCER. cr ." TIM2_CCER.  RW   $" TIM2_CCER @ h.8 TIM2_CCER 1b. ;
+    : TIM2_CNT. cr ." TIM2_CNT.  RW   $" TIM2_CNT @ h.8 TIM2_CNT 1b. ;
+    : TIM2_PSC. cr ." TIM2_PSC.  RW   $" TIM2_PSC @ h.8 TIM2_PSC 1b. ;
+    : TIM2_ARR. cr ." TIM2_ARR.  RW   $" TIM2_ARR @ h.8 TIM2_ARR 1b. ;
+    : TIM2_CCR1. cr ." TIM2_CCR1.  RW   $" TIM2_CCR1 @ h.8 TIM2_CCR1 1b. ;
+    : TIM2_CCR2. cr ." TIM2_CCR2.  RW   $" TIM2_CCR2 @ h.8 TIM2_CCR2 1b. ;
+    : TIM2_CCR3. cr ." TIM2_CCR3.  RW   $" TIM2_CCR3 @ h.8 TIM2_CCR3 1b. ;
+    : TIM2_CCR4. cr ." TIM2_CCR4.  RW   $" TIM2_CCR4 @ h.8 TIM2_CCR4 1b. ;
+    : TIM2_DCR. cr ." TIM2_DCR.  RW   $" TIM2_DCR @ h.8 TIM2_DCR 1b. ;
+    : TIM2_DMAR. cr ." TIM2_DMAR.  RW   $" TIM2_DMAR @ h.8 TIM2_DMAR 1b. ;
+    : TIM2_OR1. cr ." TIM2_OR1.  RW   $" TIM2_OR1 @ h.8 TIM2_OR1 1b. ;
+    : TIM2_OR2. cr ." TIM2_OR2.  RW   $" TIM2_OR2 @ h.8 TIM2_OR2 1b. ;
     : TIM2.
       TIM2_CR1.
       TIM2_CR2.
@@ -2144,28 +2144,28 @@ begin-module memmap
     TIM3 $4C + constant TIM3_DMAR ( read-write )  \ DMA address for full transfer
     TIM3 $50 + constant TIM3_OR1 ( read-write )  \ TIM3 option register 1
     TIM3 $60 + constant TIM3_OR2 ( read-write )  \ TIM3 option register 2
-    : TIM3_CR1. cr ." TIM3_CR1.  RW   $" TIM3_CR1 @ hex. TIM3_CR1 1b. ;
-    : TIM3_CR2. cr ." TIM3_CR2.  RW   $" TIM3_CR2 @ hex. TIM3_CR2 1b. ;
-    : TIM3_SMCR. cr ." TIM3_SMCR.  RW   $" TIM3_SMCR @ hex. TIM3_SMCR 1b. ;
-    : TIM3_DIER. cr ." TIM3_DIER.  RW   $" TIM3_DIER @ hex. TIM3_DIER 1b. ;
-    : TIM3_SR. cr ." TIM3_SR.  RW   $" TIM3_SR @ hex. TIM3_SR 1b. ;
+    : TIM3_CR1. cr ." TIM3_CR1.  RW   $" TIM3_CR1 @ h.8 TIM3_CR1 1b. ;
+    : TIM3_CR2. cr ." TIM3_CR2.  RW   $" TIM3_CR2 @ h.8 TIM3_CR2 1b. ;
+    : TIM3_SMCR. cr ." TIM3_SMCR.  RW   $" TIM3_SMCR @ h.8 TIM3_SMCR 1b. ;
+    : TIM3_DIER. cr ." TIM3_DIER.  RW   $" TIM3_DIER @ h.8 TIM3_DIER 1b. ;
+    : TIM3_SR. cr ." TIM3_SR.  RW   $" TIM3_SR @ h.8 TIM3_SR 1b. ;
     : TIM3_EGR. cr ." TIM3_EGR " WRITEONLY ; 
-    : TIM3_CCMR1_Output. cr ." TIM3_CCMR1_Output.  RW   $" TIM3_CCMR1_Output @ hex. TIM3_CCMR1_Output 1b. ;
-    : TIM3_CCMR1_Input. cr ." TIM3_CCMR1_Input.  RW   $" TIM3_CCMR1_Input @ hex. TIM3_CCMR1_Input 1b. ;
-    : TIM3_CCMR2_Output. cr ." TIM3_CCMR2_Output.  RW   $" TIM3_CCMR2_Output @ hex. TIM3_CCMR2_Output 1b. ;
-    : TIM3_CCMR2_Input. cr ." TIM3_CCMR2_Input.  RW   $" TIM3_CCMR2_Input @ hex. TIM3_CCMR2_Input 1b. ;
-    : TIM3_CCER. cr ." TIM3_CCER.  RW   $" TIM3_CCER @ hex. TIM3_CCER 1b. ;
-    : TIM3_CNT. cr ." TIM3_CNT.  RW   $" TIM3_CNT @ hex. TIM3_CNT 1b. ;
-    : TIM3_PSC. cr ." TIM3_PSC.  RW   $" TIM3_PSC @ hex. TIM3_PSC 1b. ;
-    : TIM3_ARR. cr ." TIM3_ARR.  RW   $" TIM3_ARR @ hex. TIM3_ARR 1b. ;
-    : TIM3_CCR1. cr ." TIM3_CCR1.  RW   $" TIM3_CCR1 @ hex. TIM3_CCR1 1b. ;
-    : TIM3_CCR2. cr ." TIM3_CCR2.  RW   $" TIM3_CCR2 @ hex. TIM3_CCR2 1b. ;
-    : TIM3_CCR3. cr ." TIM3_CCR3.  RW   $" TIM3_CCR3 @ hex. TIM3_CCR3 1b. ;
-    : TIM3_CCR4. cr ." TIM3_CCR4.  RW   $" TIM3_CCR4 @ hex. TIM3_CCR4 1b. ;
-    : TIM3_DCR. cr ." TIM3_DCR.  RW   $" TIM3_DCR @ hex. TIM3_DCR 1b. ;
-    : TIM3_DMAR. cr ." TIM3_DMAR.  RW   $" TIM3_DMAR @ hex. TIM3_DMAR 1b. ;
-    : TIM3_OR1. cr ." TIM3_OR1.  RW   $" TIM3_OR1 @ hex. TIM3_OR1 1b. ;
-    : TIM3_OR2. cr ." TIM3_OR2.  RW   $" TIM3_OR2 @ hex. TIM3_OR2 1b. ;
+    : TIM3_CCMR1_Output. cr ." TIM3_CCMR1_Output.  RW   $" TIM3_CCMR1_Output @ h.8 TIM3_CCMR1_Output 1b. ;
+    : TIM3_CCMR1_Input. cr ." TIM3_CCMR1_Input.  RW   $" TIM3_CCMR1_Input @ h.8 TIM3_CCMR1_Input 1b. ;
+    : TIM3_CCMR2_Output. cr ." TIM3_CCMR2_Output.  RW   $" TIM3_CCMR2_Output @ h.8 TIM3_CCMR2_Output 1b. ;
+    : TIM3_CCMR2_Input. cr ." TIM3_CCMR2_Input.  RW   $" TIM3_CCMR2_Input @ h.8 TIM3_CCMR2_Input 1b. ;
+    : TIM3_CCER. cr ." TIM3_CCER.  RW   $" TIM3_CCER @ h.8 TIM3_CCER 1b. ;
+    : TIM3_CNT. cr ." TIM3_CNT.  RW   $" TIM3_CNT @ h.8 TIM3_CNT 1b. ;
+    : TIM3_PSC. cr ." TIM3_PSC.  RW   $" TIM3_PSC @ h.8 TIM3_PSC 1b. ;
+    : TIM3_ARR. cr ." TIM3_ARR.  RW   $" TIM3_ARR @ h.8 TIM3_ARR 1b. ;
+    : TIM3_CCR1. cr ." TIM3_CCR1.  RW   $" TIM3_CCR1 @ h.8 TIM3_CCR1 1b. ;
+    : TIM3_CCR2. cr ." TIM3_CCR2.  RW   $" TIM3_CCR2 @ h.8 TIM3_CCR2 1b. ;
+    : TIM3_CCR3. cr ." TIM3_CCR3.  RW   $" TIM3_CCR3 @ h.8 TIM3_CCR3 1b. ;
+    : TIM3_CCR4. cr ." TIM3_CCR4.  RW   $" TIM3_CCR4 @ h.8 TIM3_CCR4 1b. ;
+    : TIM3_DCR. cr ." TIM3_DCR.  RW   $" TIM3_DCR @ h.8 TIM3_DCR 1b. ;
+    : TIM3_DMAR. cr ." TIM3_DMAR.  RW   $" TIM3_DMAR @ h.8 TIM3_DMAR 1b. ;
+    : TIM3_OR1. cr ." TIM3_OR1.  RW   $" TIM3_OR1 @ h.8 TIM3_OR1 1b. ;
+    : TIM3_OR2. cr ." TIM3_OR2.  RW   $" TIM3_OR2 @ h.8 TIM3_OR2 1b. ;
     : TIM3.
       TIM3_CR1.
       TIM3_CR2.
@@ -2214,26 +2214,26 @@ begin-module memmap
     TIM4 $40 + constant TIM4_CCR4 ( read-write )  \ capture/compare register 4
     TIM4 $48 + constant TIM4_DCR ( read-write )  \ DMA control register
     TIM4 $4C + constant TIM4_DMAR ( read-write )  \ DMA address for full transfer
-    : TIM4_CR1. cr ." TIM4_CR1.  RW   $" TIM4_CR1 @ hex. TIM4_CR1 1b. ;
-    : TIM4_CR2. cr ." TIM4_CR2.  RW   $" TIM4_CR2 @ hex. TIM4_CR2 1b. ;
-    : TIM4_SMCR. cr ." TIM4_SMCR.  RW   $" TIM4_SMCR @ hex. TIM4_SMCR 1b. ;
-    : TIM4_DIER. cr ." TIM4_DIER.  RW   $" TIM4_DIER @ hex. TIM4_DIER 1b. ;
-    : TIM4_SR. cr ." TIM4_SR.  RW   $" TIM4_SR @ hex. TIM4_SR 1b. ;
+    : TIM4_CR1. cr ." TIM4_CR1.  RW   $" TIM4_CR1 @ h.8 TIM4_CR1 1b. ;
+    : TIM4_CR2. cr ." TIM4_CR2.  RW   $" TIM4_CR2 @ h.8 TIM4_CR2 1b. ;
+    : TIM4_SMCR. cr ." TIM4_SMCR.  RW   $" TIM4_SMCR @ h.8 TIM4_SMCR 1b. ;
+    : TIM4_DIER. cr ." TIM4_DIER.  RW   $" TIM4_DIER @ h.8 TIM4_DIER 1b. ;
+    : TIM4_SR. cr ." TIM4_SR.  RW   $" TIM4_SR @ h.8 TIM4_SR 1b. ;
     : TIM4_EGR. cr ." TIM4_EGR " WRITEONLY ; 
-    : TIM4_CCMR1_Output. cr ." TIM4_CCMR1_Output.  RW   $" TIM4_CCMR1_Output @ hex. TIM4_CCMR1_Output 1b. ;
-    : TIM4_CCMR1_Input. cr ." TIM4_CCMR1_Input.  RW   $" TIM4_CCMR1_Input @ hex. TIM4_CCMR1_Input 1b. ;
-    : TIM4_CCMR2_Output. cr ." TIM4_CCMR2_Output.  RW   $" TIM4_CCMR2_Output @ hex. TIM4_CCMR2_Output 1b. ;
-    : TIM4_CCMR2_Input. cr ." TIM4_CCMR2_Input.  RW   $" TIM4_CCMR2_Input @ hex. TIM4_CCMR2_Input 1b. ;
-    : TIM4_CCER. cr ." TIM4_CCER.  RW   $" TIM4_CCER @ hex. TIM4_CCER 1b. ;
-    : TIM4_CNT. cr ." TIM4_CNT.  RW   $" TIM4_CNT @ hex. TIM4_CNT 1b. ;
-    : TIM4_PSC. cr ." TIM4_PSC.  RW   $" TIM4_PSC @ hex. TIM4_PSC 1b. ;
-    : TIM4_ARR. cr ." TIM4_ARR.  RW   $" TIM4_ARR @ hex. TIM4_ARR 1b. ;
-    : TIM4_CCR1. cr ." TIM4_CCR1.  RW   $" TIM4_CCR1 @ hex. TIM4_CCR1 1b. ;
-    : TIM4_CCR2. cr ." TIM4_CCR2.  RW   $" TIM4_CCR2 @ hex. TIM4_CCR2 1b. ;
-    : TIM4_CCR3. cr ." TIM4_CCR3.  RW   $" TIM4_CCR3 @ hex. TIM4_CCR3 1b. ;
-    : TIM4_CCR4. cr ." TIM4_CCR4.  RW   $" TIM4_CCR4 @ hex. TIM4_CCR4 1b. ;
-    : TIM4_DCR. cr ." TIM4_DCR.  RW   $" TIM4_DCR @ hex. TIM4_DCR 1b. ;
-    : TIM4_DMAR. cr ." TIM4_DMAR.  RW   $" TIM4_DMAR @ hex. TIM4_DMAR 1b. ;
+    : TIM4_CCMR1_Output. cr ." TIM4_CCMR1_Output.  RW   $" TIM4_CCMR1_Output @ h.8 TIM4_CCMR1_Output 1b. ;
+    : TIM4_CCMR1_Input. cr ." TIM4_CCMR1_Input.  RW   $" TIM4_CCMR1_Input @ h.8 TIM4_CCMR1_Input 1b. ;
+    : TIM4_CCMR2_Output. cr ." TIM4_CCMR2_Output.  RW   $" TIM4_CCMR2_Output @ h.8 TIM4_CCMR2_Output 1b. ;
+    : TIM4_CCMR2_Input. cr ." TIM4_CCMR2_Input.  RW   $" TIM4_CCMR2_Input @ h.8 TIM4_CCMR2_Input 1b. ;
+    : TIM4_CCER. cr ." TIM4_CCER.  RW   $" TIM4_CCER @ h.8 TIM4_CCER 1b. ;
+    : TIM4_CNT. cr ." TIM4_CNT.  RW   $" TIM4_CNT @ h.8 TIM4_CNT 1b. ;
+    : TIM4_PSC. cr ." TIM4_PSC.  RW   $" TIM4_PSC @ h.8 TIM4_PSC 1b. ;
+    : TIM4_ARR. cr ." TIM4_ARR.  RW   $" TIM4_ARR @ h.8 TIM4_ARR 1b. ;
+    : TIM4_CCR1. cr ." TIM4_CCR1.  RW   $" TIM4_CCR1 @ h.8 TIM4_CCR1 1b. ;
+    : TIM4_CCR2. cr ." TIM4_CCR2.  RW   $" TIM4_CCR2 @ h.8 TIM4_CCR2 1b. ;
+    : TIM4_CCR3. cr ." TIM4_CCR3.  RW   $" TIM4_CCR3 @ h.8 TIM4_CCR3 1b. ;
+    : TIM4_CCR4. cr ." TIM4_CCR4.  RW   $" TIM4_CCR4 @ h.8 TIM4_CCR4 1b. ;
+    : TIM4_DCR. cr ." TIM4_DCR.  RW   $" TIM4_DCR @ h.8 TIM4_DCR 1b. ;
+    : TIM4_DMAR. cr ." TIM4_DMAR.  RW   $" TIM4_DMAR @ h.8 TIM4_DMAR 1b. ;
     : TIM4.
       TIM4_CR1.
       TIM4_CR2.
@@ -2280,26 +2280,26 @@ begin-module memmap
     TIM5 $40 + constant TIM5_CCR4 ( read-write )  \ capture/compare register 4
     TIM5 $48 + constant TIM5_DCR ( read-write )  \ DMA control register
     TIM5 $4C + constant TIM5_DMAR ( read-write )  \ DMA address for full transfer
-    : TIM5_CR1. cr ." TIM5_CR1.  RW   $" TIM5_CR1 @ hex. TIM5_CR1 1b. ;
-    : TIM5_CR2. cr ." TIM5_CR2.  RW   $" TIM5_CR2 @ hex. TIM5_CR2 1b. ;
-    : TIM5_SMCR. cr ." TIM5_SMCR.  RW   $" TIM5_SMCR @ hex. TIM5_SMCR 1b. ;
-    : TIM5_DIER. cr ." TIM5_DIER.  RW   $" TIM5_DIER @ hex. TIM5_DIER 1b. ;
-    : TIM5_SR. cr ." TIM5_SR.  RW   $" TIM5_SR @ hex. TIM5_SR 1b. ;
+    : TIM5_CR1. cr ." TIM5_CR1.  RW   $" TIM5_CR1 @ h.8 TIM5_CR1 1b. ;
+    : TIM5_CR2. cr ." TIM5_CR2.  RW   $" TIM5_CR2 @ h.8 TIM5_CR2 1b. ;
+    : TIM5_SMCR. cr ." TIM5_SMCR.  RW   $" TIM5_SMCR @ h.8 TIM5_SMCR 1b. ;
+    : TIM5_DIER. cr ." TIM5_DIER.  RW   $" TIM5_DIER @ h.8 TIM5_DIER 1b. ;
+    : TIM5_SR. cr ." TIM5_SR.  RW   $" TIM5_SR @ h.8 TIM5_SR 1b. ;
     : TIM5_EGR. cr ." TIM5_EGR " WRITEONLY ; 
-    : TIM5_CCMR1_Output. cr ." TIM5_CCMR1_Output.  RW   $" TIM5_CCMR1_Output @ hex. TIM5_CCMR1_Output 1b. ;
-    : TIM5_CCMR1_Input. cr ." TIM5_CCMR1_Input.  RW   $" TIM5_CCMR1_Input @ hex. TIM5_CCMR1_Input 1b. ;
-    : TIM5_CCMR2_Output. cr ." TIM5_CCMR2_Output.  RW   $" TIM5_CCMR2_Output @ hex. TIM5_CCMR2_Output 1b. ;
-    : TIM5_CCMR2_Input. cr ." TIM5_CCMR2_Input.  RW   $" TIM5_CCMR2_Input @ hex. TIM5_CCMR2_Input 1b. ;
-    : TIM5_CCER. cr ." TIM5_CCER.  RW   $" TIM5_CCER @ hex. TIM5_CCER 1b. ;
-    : TIM5_CNT. cr ." TIM5_CNT.  RW   $" TIM5_CNT @ hex. TIM5_CNT 1b. ;
-    : TIM5_PSC. cr ." TIM5_PSC.  RW   $" TIM5_PSC @ hex. TIM5_PSC 1b. ;
-    : TIM5_ARR. cr ." TIM5_ARR.  RW   $" TIM5_ARR @ hex. TIM5_ARR 1b. ;
-    : TIM5_CCR1. cr ." TIM5_CCR1.  RW   $" TIM5_CCR1 @ hex. TIM5_CCR1 1b. ;
-    : TIM5_CCR2. cr ." TIM5_CCR2.  RW   $" TIM5_CCR2 @ hex. TIM5_CCR2 1b. ;
-    : TIM5_CCR3. cr ." TIM5_CCR3.  RW   $" TIM5_CCR3 @ hex. TIM5_CCR3 1b. ;
-    : TIM5_CCR4. cr ." TIM5_CCR4.  RW   $" TIM5_CCR4 @ hex. TIM5_CCR4 1b. ;
-    : TIM5_DCR. cr ." TIM5_DCR.  RW   $" TIM5_DCR @ hex. TIM5_DCR 1b. ;
-    : TIM5_DMAR. cr ." TIM5_DMAR.  RW   $" TIM5_DMAR @ hex. TIM5_DMAR 1b. ;
+    : TIM5_CCMR1_Output. cr ." TIM5_CCMR1_Output.  RW   $" TIM5_CCMR1_Output @ h.8 TIM5_CCMR1_Output 1b. ;
+    : TIM5_CCMR1_Input. cr ." TIM5_CCMR1_Input.  RW   $" TIM5_CCMR1_Input @ h.8 TIM5_CCMR1_Input 1b. ;
+    : TIM5_CCMR2_Output. cr ." TIM5_CCMR2_Output.  RW   $" TIM5_CCMR2_Output @ h.8 TIM5_CCMR2_Output 1b. ;
+    : TIM5_CCMR2_Input. cr ." TIM5_CCMR2_Input.  RW   $" TIM5_CCMR2_Input @ h.8 TIM5_CCMR2_Input 1b. ;
+    : TIM5_CCER. cr ." TIM5_CCER.  RW   $" TIM5_CCER @ h.8 TIM5_CCER 1b. ;
+    : TIM5_CNT. cr ." TIM5_CNT.  RW   $" TIM5_CNT @ h.8 TIM5_CNT 1b. ;
+    : TIM5_PSC. cr ." TIM5_PSC.  RW   $" TIM5_PSC @ h.8 TIM5_PSC 1b. ;
+    : TIM5_ARR. cr ." TIM5_ARR.  RW   $" TIM5_ARR @ h.8 TIM5_ARR 1b. ;
+    : TIM5_CCR1. cr ." TIM5_CCR1.  RW   $" TIM5_CCR1 @ h.8 TIM5_CCR1 1b. ;
+    : TIM5_CCR2. cr ." TIM5_CCR2.  RW   $" TIM5_CCR2 @ h.8 TIM5_CCR2 1b. ;
+    : TIM5_CCR3. cr ." TIM5_CCR3.  RW   $" TIM5_CCR3 @ h.8 TIM5_CCR3 1b. ;
+    : TIM5_CCR4. cr ." TIM5_CCR4.  RW   $" TIM5_CCR4 @ h.8 TIM5_CCR4 1b. ;
+    : TIM5_DCR. cr ." TIM5_DCR.  RW   $" TIM5_DCR @ h.8 TIM5_DCR 1b. ;
+    : TIM5_DMAR. cr ." TIM5_DMAR.  RW   $" TIM5_DMAR @ h.8 TIM5_DMAR 1b. ;
     : TIM5.
       TIM5_CR1.
       TIM5_CR2.
@@ -2339,19 +2339,19 @@ begin-module memmap
     TIM9 $2C + constant TIM9_ARR ( read-write )  \ auto-reload register
     TIM9 $34 + constant TIM9_CCR1 ( read-write )  \ capture/compare register 1
     TIM9 $38 + constant TIM9_CCR2 ( read-write )  \ capture/compare register 2
-    : TIM9_CR1. cr ." TIM9_CR1.  RW   $" TIM9_CR1 @ hex. TIM9_CR1 1b. ;
-    : TIM9_SMCR. cr ." TIM9_SMCR.  RW   $" TIM9_SMCR @ hex. TIM9_SMCR 1b. ;
-    : TIM9_DIER. cr ." TIM9_DIER.  RW   $" TIM9_DIER @ hex. TIM9_DIER 1b. ;
-    : TIM9_SR. cr ." TIM9_SR.  RW   $" TIM9_SR @ hex. TIM9_SR 1b. ;
+    : TIM9_CR1. cr ." TIM9_CR1.  RW   $" TIM9_CR1 @ h.8 TIM9_CR1 1b. ;
+    : TIM9_SMCR. cr ." TIM9_SMCR.  RW   $" TIM9_SMCR @ h.8 TIM9_SMCR 1b. ;
+    : TIM9_DIER. cr ." TIM9_DIER.  RW   $" TIM9_DIER @ h.8 TIM9_DIER 1b. ;
+    : TIM9_SR. cr ." TIM9_SR.  RW   $" TIM9_SR @ h.8 TIM9_SR 1b. ;
     : TIM9_EGR. cr ." TIM9_EGR " WRITEONLY ; 
-    : TIM9_CCMR1_Output. cr ." TIM9_CCMR1_Output.  RW   $" TIM9_CCMR1_Output @ hex. TIM9_CCMR1_Output 1b. ;
-    : TIM9_CCMR1_Input. cr ." TIM9_CCMR1_Input.  RW   $" TIM9_CCMR1_Input @ hex. TIM9_CCMR1_Input 1b. ;
-    : TIM9_CCER. cr ." TIM9_CCER.  RW   $" TIM9_CCER @ hex. TIM9_CCER 1b. ;
-    : TIM9_CNT. cr ." TIM9_CNT.  RW   $" TIM9_CNT @ hex. TIM9_CNT 1b. ;
-    : TIM9_PSC. cr ." TIM9_PSC.  RW   $" TIM9_PSC @ hex. TIM9_PSC 1b. ;
-    : TIM9_ARR. cr ." TIM9_ARR.  RW   $" TIM9_ARR @ hex. TIM9_ARR 1b. ;
-    : TIM9_CCR1. cr ." TIM9_CCR1.  RW   $" TIM9_CCR1 @ hex. TIM9_CCR1 1b. ;
-    : TIM9_CCR2. cr ." TIM9_CCR2.  RW   $" TIM9_CCR2 @ hex. TIM9_CCR2 1b. ;
+    : TIM9_CCMR1_Output. cr ." TIM9_CCMR1_Output.  RW   $" TIM9_CCMR1_Output @ h.8 TIM9_CCMR1_Output 1b. ;
+    : TIM9_CCMR1_Input. cr ." TIM9_CCMR1_Input.  RW   $" TIM9_CCMR1_Input @ h.8 TIM9_CCMR1_Input 1b. ;
+    : TIM9_CCER. cr ." TIM9_CCER.  RW   $" TIM9_CCER @ h.8 TIM9_CCER 1b. ;
+    : TIM9_CNT. cr ." TIM9_CNT.  RW   $" TIM9_CNT @ h.8 TIM9_CNT 1b. ;
+    : TIM9_PSC. cr ." TIM9_PSC.  RW   $" TIM9_PSC @ h.8 TIM9_PSC 1b. ;
+    : TIM9_ARR. cr ." TIM9_ARR.  RW   $" TIM9_ARR @ h.8 TIM9_ARR 1b. ;
+    : TIM9_CCR1. cr ." TIM9_CCR1.  RW   $" TIM9_CCR1 @ h.8 TIM9_CCR1 1b. ;
+    : TIM9_CCR2. cr ." TIM9_CCR2.  RW   $" TIM9_CCR2 @ h.8 TIM9_CCR2 1b. ;
     : TIM9.
       TIM9_CR1.
       TIM9_SMCR.
@@ -2384,19 +2384,19 @@ begin-module memmap
     TIM12 $2C + constant TIM12_ARR ( read-write )  \ auto-reload register
     TIM12 $34 + constant TIM12_CCR1 ( read-write )  \ capture/compare register 1
     TIM12 $38 + constant TIM12_CCR2 ( read-write )  \ capture/compare register 2
-    : TIM12_CR1. cr ." TIM12_CR1.  RW   $" TIM12_CR1 @ hex. TIM12_CR1 1b. ;
-    : TIM12_SMCR. cr ." TIM12_SMCR.  RW   $" TIM12_SMCR @ hex. TIM12_SMCR 1b. ;
-    : TIM12_DIER. cr ." TIM12_DIER.  RW   $" TIM12_DIER @ hex. TIM12_DIER 1b. ;
-    : TIM12_SR. cr ." TIM12_SR.  RW   $" TIM12_SR @ hex. TIM12_SR 1b. ;
+    : TIM12_CR1. cr ." TIM12_CR1.  RW   $" TIM12_CR1 @ h.8 TIM12_CR1 1b. ;
+    : TIM12_SMCR. cr ." TIM12_SMCR.  RW   $" TIM12_SMCR @ h.8 TIM12_SMCR 1b. ;
+    : TIM12_DIER. cr ." TIM12_DIER.  RW   $" TIM12_DIER @ h.8 TIM12_DIER 1b. ;
+    : TIM12_SR. cr ." TIM12_SR.  RW   $" TIM12_SR @ h.8 TIM12_SR 1b. ;
     : TIM12_EGR. cr ." TIM12_EGR " WRITEONLY ; 
-    : TIM12_CCMR1_Output. cr ." TIM12_CCMR1_Output.  RW   $" TIM12_CCMR1_Output @ hex. TIM12_CCMR1_Output 1b. ;
-    : TIM12_CCMR1_Input. cr ." TIM12_CCMR1_Input.  RW   $" TIM12_CCMR1_Input @ hex. TIM12_CCMR1_Input 1b. ;
-    : TIM12_CCER. cr ." TIM12_CCER.  RW   $" TIM12_CCER @ hex. TIM12_CCER 1b. ;
-    : TIM12_CNT. cr ." TIM12_CNT.  RW   $" TIM12_CNT @ hex. TIM12_CNT 1b. ;
-    : TIM12_PSC. cr ." TIM12_PSC.  RW   $" TIM12_PSC @ hex. TIM12_PSC 1b. ;
-    : TIM12_ARR. cr ." TIM12_ARR.  RW   $" TIM12_ARR @ hex. TIM12_ARR 1b. ;
-    : TIM12_CCR1. cr ." TIM12_CCR1.  RW   $" TIM12_CCR1 @ hex. TIM12_CCR1 1b. ;
-    : TIM12_CCR2. cr ." TIM12_CCR2.  RW   $" TIM12_CCR2 @ hex. TIM12_CCR2 1b. ;
+    : TIM12_CCMR1_Output. cr ." TIM12_CCMR1_Output.  RW   $" TIM12_CCMR1_Output @ h.8 TIM12_CCMR1_Output 1b. ;
+    : TIM12_CCMR1_Input. cr ." TIM12_CCMR1_Input.  RW   $" TIM12_CCMR1_Input @ h.8 TIM12_CCMR1_Input 1b. ;
+    : TIM12_CCER. cr ." TIM12_CCER.  RW   $" TIM12_CCER @ h.8 TIM12_CCER 1b. ;
+    : TIM12_CNT. cr ." TIM12_CNT.  RW   $" TIM12_CNT @ h.8 TIM12_CNT 1b. ;
+    : TIM12_PSC. cr ." TIM12_PSC.  RW   $" TIM12_PSC @ h.8 TIM12_PSC 1b. ;
+    : TIM12_ARR. cr ." TIM12_ARR.  RW   $" TIM12_ARR @ h.8 TIM12_ARR 1b. ;
+    : TIM12_CCR1. cr ." TIM12_CCR1.  RW   $" TIM12_CCR1 @ h.8 TIM12_CCR1 1b. ;
+    : TIM12_CCR2. cr ." TIM12_CCR2.  RW   $" TIM12_CCR2 @ h.8 TIM12_CCR2 1b. ;
     : TIM12.
       TIM12_CR1.
       TIM12_SMCR.
@@ -2429,19 +2429,19 @@ begin-module memmap
     TIM10 $34 + constant TIM10_CCR1 ( read-write )  \ capture/compare register 1
     TIM10 $8 + constant TIM10_SMCR ( read-write )  \ slave mode control register
     TIM10 $50 + constant TIM10_OR ( read-write )  \ option register
-    : TIM10_CR1. cr ." TIM10_CR1.  RW   $" TIM10_CR1 @ hex. TIM10_CR1 1b. ;
-    : TIM10_DIER. cr ." TIM10_DIER.  RW   $" TIM10_DIER @ hex. TIM10_DIER 1b. ;
-    : TIM10_SR. cr ." TIM10_SR.  RW   $" TIM10_SR @ hex. TIM10_SR 1b. ;
+    : TIM10_CR1. cr ." TIM10_CR1.  RW   $" TIM10_CR1 @ h.8 TIM10_CR1 1b. ;
+    : TIM10_DIER. cr ." TIM10_DIER.  RW   $" TIM10_DIER @ h.8 TIM10_DIER 1b. ;
+    : TIM10_SR. cr ." TIM10_SR.  RW   $" TIM10_SR @ h.8 TIM10_SR 1b. ;
     : TIM10_EGR. cr ." TIM10_EGR " WRITEONLY ; 
-    : TIM10_CCMR1_Output. cr ." TIM10_CCMR1_Output.  RW   $" TIM10_CCMR1_Output @ hex. TIM10_CCMR1_Output 1b. ;
-    : TIM10_CCMR1_Input. cr ." TIM10_CCMR1_Input.  RW   $" TIM10_CCMR1_Input @ hex. TIM10_CCMR1_Input 1b. ;
-    : TIM10_CCER. cr ." TIM10_CCER.  RW   $" TIM10_CCER @ hex. TIM10_CCER 1b. ;
-    : TIM10_CNT. cr ." TIM10_CNT.  RW   $" TIM10_CNT @ hex. TIM10_CNT 1b. ;
-    : TIM10_PSC. cr ." TIM10_PSC.  RW   $" TIM10_PSC @ hex. TIM10_PSC 1b. ;
-    : TIM10_ARR. cr ." TIM10_ARR.  RW   $" TIM10_ARR @ hex. TIM10_ARR 1b. ;
-    : TIM10_CCR1. cr ." TIM10_CCR1.  RW   $" TIM10_CCR1 @ hex. TIM10_CCR1 1b. ;
-    : TIM10_SMCR. cr ." TIM10_SMCR.  RW   $" TIM10_SMCR @ hex. TIM10_SMCR 1b. ;
-    : TIM10_OR. cr ." TIM10_OR.  RW   $" TIM10_OR @ hex. TIM10_OR 1b. ;
+    : TIM10_CCMR1_Output. cr ." TIM10_CCMR1_Output.  RW   $" TIM10_CCMR1_Output @ h.8 TIM10_CCMR1_Output 1b. ;
+    : TIM10_CCMR1_Input. cr ." TIM10_CCMR1_Input.  RW   $" TIM10_CCMR1_Input @ h.8 TIM10_CCMR1_Input 1b. ;
+    : TIM10_CCER. cr ." TIM10_CCER.  RW   $" TIM10_CCER @ h.8 TIM10_CCER 1b. ;
+    : TIM10_CNT. cr ." TIM10_CNT.  RW   $" TIM10_CNT @ h.8 TIM10_CNT 1b. ;
+    : TIM10_PSC. cr ." TIM10_PSC.  RW   $" TIM10_PSC @ h.8 TIM10_PSC 1b. ;
+    : TIM10_ARR. cr ." TIM10_ARR.  RW   $" TIM10_ARR @ h.8 TIM10_ARR 1b. ;
+    : TIM10_CCR1. cr ." TIM10_CCR1.  RW   $" TIM10_CCR1 @ h.8 TIM10_CCR1 1b. ;
+    : TIM10_SMCR. cr ." TIM10_SMCR.  RW   $" TIM10_SMCR @ h.8 TIM10_SMCR 1b. ;
+    : TIM10_OR. cr ." TIM10_OR.  RW   $" TIM10_OR @ h.8 TIM10_OR 1b. ;
     : TIM10.
       TIM10_CR1.
       TIM10_DIER.
@@ -2474,19 +2474,19 @@ begin-module memmap
     TIM11 $34 + constant TIM11_CCR1 ( read-write )  \ capture/compare register 1
     TIM11 $8 + constant TIM11_SMCR ( read-write )  \ slave mode control register
     TIM11 $50 + constant TIM11_OR ( read-write )  \ option register
-    : TIM11_CR1. cr ." TIM11_CR1.  RW   $" TIM11_CR1 @ hex. TIM11_CR1 1b. ;
-    : TIM11_DIER. cr ." TIM11_DIER.  RW   $" TIM11_DIER @ hex. TIM11_DIER 1b. ;
-    : TIM11_SR. cr ." TIM11_SR.  RW   $" TIM11_SR @ hex. TIM11_SR 1b. ;
+    : TIM11_CR1. cr ." TIM11_CR1.  RW   $" TIM11_CR1 @ h.8 TIM11_CR1 1b. ;
+    : TIM11_DIER. cr ." TIM11_DIER.  RW   $" TIM11_DIER @ h.8 TIM11_DIER 1b. ;
+    : TIM11_SR. cr ." TIM11_SR.  RW   $" TIM11_SR @ h.8 TIM11_SR 1b. ;
     : TIM11_EGR. cr ." TIM11_EGR " WRITEONLY ; 
-    : TIM11_CCMR1_Output. cr ." TIM11_CCMR1_Output.  RW   $" TIM11_CCMR1_Output @ hex. TIM11_CCMR1_Output 1b. ;
-    : TIM11_CCMR1_Input. cr ." TIM11_CCMR1_Input.  RW   $" TIM11_CCMR1_Input @ hex. TIM11_CCMR1_Input 1b. ;
-    : TIM11_CCER. cr ." TIM11_CCER.  RW   $" TIM11_CCER @ hex. TIM11_CCER 1b. ;
-    : TIM11_CNT. cr ." TIM11_CNT.  RW   $" TIM11_CNT @ hex. TIM11_CNT 1b. ;
-    : TIM11_PSC. cr ." TIM11_PSC.  RW   $" TIM11_PSC @ hex. TIM11_PSC 1b. ;
-    : TIM11_ARR. cr ." TIM11_ARR.  RW   $" TIM11_ARR @ hex. TIM11_ARR 1b. ;
-    : TIM11_CCR1. cr ." TIM11_CCR1.  RW   $" TIM11_CCR1 @ hex. TIM11_CCR1 1b. ;
-    : TIM11_SMCR. cr ." TIM11_SMCR.  RW   $" TIM11_SMCR @ hex. TIM11_SMCR 1b. ;
-    : TIM11_OR. cr ." TIM11_OR.  RW   $" TIM11_OR @ hex. TIM11_OR 1b. ;
+    : TIM11_CCMR1_Output. cr ." TIM11_CCMR1_Output.  RW   $" TIM11_CCMR1_Output @ h.8 TIM11_CCMR1_Output 1b. ;
+    : TIM11_CCMR1_Input. cr ." TIM11_CCMR1_Input.  RW   $" TIM11_CCMR1_Input @ h.8 TIM11_CCMR1_Input 1b. ;
+    : TIM11_CCER. cr ." TIM11_CCER.  RW   $" TIM11_CCER @ h.8 TIM11_CCER 1b. ;
+    : TIM11_CNT. cr ." TIM11_CNT.  RW   $" TIM11_CNT @ h.8 TIM11_CNT 1b. ;
+    : TIM11_PSC. cr ." TIM11_PSC.  RW   $" TIM11_PSC @ h.8 TIM11_PSC 1b. ;
+    : TIM11_ARR. cr ." TIM11_ARR.  RW   $" TIM11_ARR @ h.8 TIM11_ARR 1b. ;
+    : TIM11_CCR1. cr ." TIM11_CCR1.  RW   $" TIM11_CCR1 @ h.8 TIM11_CCR1 1b. ;
+    : TIM11_SMCR. cr ." TIM11_SMCR.  RW   $" TIM11_SMCR @ h.8 TIM11_SMCR 1b. ;
+    : TIM11_OR. cr ." TIM11_OR.  RW   $" TIM11_OR @ h.8 TIM11_OR 1b. ;
     : TIM11.
       TIM11_CR1.
       TIM11_DIER.
@@ -2519,19 +2519,19 @@ begin-module memmap
     TIM13 $34 + constant TIM13_CCR1 ( read-write )  \ capture/compare register 1
     TIM13 $8 + constant TIM13_SMCR ( read-write )  \ slave mode control register
     TIM13 $50 + constant TIM13_OR ( read-write )  \ option register
-    : TIM13_CR1. cr ." TIM13_CR1.  RW   $" TIM13_CR1 @ hex. TIM13_CR1 1b. ;
-    : TIM13_DIER. cr ." TIM13_DIER.  RW   $" TIM13_DIER @ hex. TIM13_DIER 1b. ;
-    : TIM13_SR. cr ." TIM13_SR.  RW   $" TIM13_SR @ hex. TIM13_SR 1b. ;
+    : TIM13_CR1. cr ." TIM13_CR1.  RW   $" TIM13_CR1 @ h.8 TIM13_CR1 1b. ;
+    : TIM13_DIER. cr ." TIM13_DIER.  RW   $" TIM13_DIER @ h.8 TIM13_DIER 1b. ;
+    : TIM13_SR. cr ." TIM13_SR.  RW   $" TIM13_SR @ h.8 TIM13_SR 1b. ;
     : TIM13_EGR. cr ." TIM13_EGR " WRITEONLY ; 
-    : TIM13_CCMR1_Output. cr ." TIM13_CCMR1_Output.  RW   $" TIM13_CCMR1_Output @ hex. TIM13_CCMR1_Output 1b. ;
-    : TIM13_CCMR1_Input. cr ." TIM13_CCMR1_Input.  RW   $" TIM13_CCMR1_Input @ hex. TIM13_CCMR1_Input 1b. ;
-    : TIM13_CCER. cr ." TIM13_CCER.  RW   $" TIM13_CCER @ hex. TIM13_CCER 1b. ;
-    : TIM13_CNT. cr ." TIM13_CNT.  RW   $" TIM13_CNT @ hex. TIM13_CNT 1b. ;
-    : TIM13_PSC. cr ." TIM13_PSC.  RW   $" TIM13_PSC @ hex. TIM13_PSC 1b. ;
-    : TIM13_ARR. cr ." TIM13_ARR.  RW   $" TIM13_ARR @ hex. TIM13_ARR 1b. ;
-    : TIM13_CCR1. cr ." TIM13_CCR1.  RW   $" TIM13_CCR1 @ hex. TIM13_CCR1 1b. ;
-    : TIM13_SMCR. cr ." TIM13_SMCR.  RW   $" TIM13_SMCR @ hex. TIM13_SMCR 1b. ;
-    : TIM13_OR. cr ." TIM13_OR.  RW   $" TIM13_OR @ hex. TIM13_OR 1b. ;
+    : TIM13_CCMR1_Output. cr ." TIM13_CCMR1_Output.  RW   $" TIM13_CCMR1_Output @ h.8 TIM13_CCMR1_Output 1b. ;
+    : TIM13_CCMR1_Input. cr ." TIM13_CCMR1_Input.  RW   $" TIM13_CCMR1_Input @ h.8 TIM13_CCMR1_Input 1b. ;
+    : TIM13_CCER. cr ." TIM13_CCER.  RW   $" TIM13_CCER @ h.8 TIM13_CCER 1b. ;
+    : TIM13_CNT. cr ." TIM13_CNT.  RW   $" TIM13_CNT @ h.8 TIM13_CNT 1b. ;
+    : TIM13_PSC. cr ." TIM13_PSC.  RW   $" TIM13_PSC @ h.8 TIM13_PSC 1b. ;
+    : TIM13_ARR. cr ." TIM13_ARR.  RW   $" TIM13_ARR @ h.8 TIM13_ARR 1b. ;
+    : TIM13_CCR1. cr ." TIM13_CCR1.  RW   $" TIM13_CCR1 @ h.8 TIM13_CCR1 1b. ;
+    : TIM13_SMCR. cr ." TIM13_SMCR.  RW   $" TIM13_SMCR @ h.8 TIM13_SMCR 1b. ;
+    : TIM13_OR. cr ." TIM13_OR.  RW   $" TIM13_OR @ h.8 TIM13_OR 1b. ;
     : TIM13.
       TIM13_CR1.
       TIM13_DIER.
@@ -2564,19 +2564,19 @@ begin-module memmap
     TIM14 $34 + constant TIM14_CCR1 ( read-write )  \ capture/compare register 1
     TIM14 $8 + constant TIM14_SMCR ( read-write )  \ slave mode control register
     TIM14 $50 + constant TIM14_OR ( read-write )  \ option register
-    : TIM14_CR1. cr ." TIM14_CR1.  RW   $" TIM14_CR1 @ hex. TIM14_CR1 1b. ;
-    : TIM14_DIER. cr ." TIM14_DIER.  RW   $" TIM14_DIER @ hex. TIM14_DIER 1b. ;
-    : TIM14_SR. cr ." TIM14_SR.  RW   $" TIM14_SR @ hex. TIM14_SR 1b. ;
+    : TIM14_CR1. cr ." TIM14_CR1.  RW   $" TIM14_CR1 @ h.8 TIM14_CR1 1b. ;
+    : TIM14_DIER. cr ." TIM14_DIER.  RW   $" TIM14_DIER @ h.8 TIM14_DIER 1b. ;
+    : TIM14_SR. cr ." TIM14_SR.  RW   $" TIM14_SR @ h.8 TIM14_SR 1b. ;
     : TIM14_EGR. cr ." TIM14_EGR " WRITEONLY ; 
-    : TIM14_CCMR1_Output. cr ." TIM14_CCMR1_Output.  RW   $" TIM14_CCMR1_Output @ hex. TIM14_CCMR1_Output 1b. ;
-    : TIM14_CCMR1_Input. cr ." TIM14_CCMR1_Input.  RW   $" TIM14_CCMR1_Input @ hex. TIM14_CCMR1_Input 1b. ;
-    : TIM14_CCER. cr ." TIM14_CCER.  RW   $" TIM14_CCER @ hex. TIM14_CCER 1b. ;
-    : TIM14_CNT. cr ." TIM14_CNT.  RW   $" TIM14_CNT @ hex. TIM14_CNT 1b. ;
-    : TIM14_PSC. cr ." TIM14_PSC.  RW   $" TIM14_PSC @ hex. TIM14_PSC 1b. ;
-    : TIM14_ARR. cr ." TIM14_ARR.  RW   $" TIM14_ARR @ hex. TIM14_ARR 1b. ;
-    : TIM14_CCR1. cr ." TIM14_CCR1.  RW   $" TIM14_CCR1 @ hex. TIM14_CCR1 1b. ;
-    : TIM14_SMCR. cr ." TIM14_SMCR.  RW   $" TIM14_SMCR @ hex. TIM14_SMCR 1b. ;
-    : TIM14_OR. cr ." TIM14_OR.  RW   $" TIM14_OR @ hex. TIM14_OR 1b. ;
+    : TIM14_CCMR1_Output. cr ." TIM14_CCMR1_Output.  RW   $" TIM14_CCMR1_Output @ h.8 TIM14_CCMR1_Output 1b. ;
+    : TIM14_CCMR1_Input. cr ." TIM14_CCMR1_Input.  RW   $" TIM14_CCMR1_Input @ h.8 TIM14_CCMR1_Input 1b. ;
+    : TIM14_CCER. cr ." TIM14_CCER.  RW   $" TIM14_CCER @ h.8 TIM14_CCER 1b. ;
+    : TIM14_CNT. cr ." TIM14_CNT.  RW   $" TIM14_CNT @ h.8 TIM14_CNT 1b. ;
+    : TIM14_PSC. cr ." TIM14_PSC.  RW   $" TIM14_PSC @ h.8 TIM14_PSC 1b. ;
+    : TIM14_ARR. cr ." TIM14_ARR.  RW   $" TIM14_ARR @ h.8 TIM14_ARR 1b. ;
+    : TIM14_CCR1. cr ." TIM14_CCR1.  RW   $" TIM14_CCR1 @ h.8 TIM14_CCR1 1b. ;
+    : TIM14_SMCR. cr ." TIM14_SMCR.  RW   $" TIM14_SMCR @ h.8 TIM14_SMCR 1b. ;
+    : TIM14_OR. cr ." TIM14_OR.  RW   $" TIM14_OR @ h.8 TIM14_OR 1b. ;
     : TIM14.
       TIM14_CR1.
       TIM14_DIER.
@@ -2604,14 +2604,14 @@ begin-module memmap
     TIM6 $24 + constant TIM6_CNT ( read-write )  \ counter
     TIM6 $28 + constant TIM6_PSC ( read-write )  \ prescaler
     TIM6 $2C + constant TIM6_ARR ( read-write )  \ auto-reload register
-    : TIM6_CR1. cr ." TIM6_CR1.  RW   $" TIM6_CR1 @ hex. TIM6_CR1 1b. ;
-    : TIM6_CR2. cr ." TIM6_CR2.  RW   $" TIM6_CR2 @ hex. TIM6_CR2 1b. ;
-    : TIM6_DIER. cr ." TIM6_DIER.  RW   $" TIM6_DIER @ hex. TIM6_DIER 1b. ;
-    : TIM6_SR. cr ." TIM6_SR.  RW   $" TIM6_SR @ hex. TIM6_SR 1b. ;
+    : TIM6_CR1. cr ." TIM6_CR1.  RW   $" TIM6_CR1 @ h.8 TIM6_CR1 1b. ;
+    : TIM6_CR2. cr ." TIM6_CR2.  RW   $" TIM6_CR2 @ h.8 TIM6_CR2 1b. ;
+    : TIM6_DIER. cr ." TIM6_DIER.  RW   $" TIM6_DIER @ h.8 TIM6_DIER 1b. ;
+    : TIM6_SR. cr ." TIM6_SR.  RW   $" TIM6_SR @ h.8 TIM6_SR 1b. ;
     : TIM6_EGR. cr ." TIM6_EGR " WRITEONLY ; 
-    : TIM6_CNT. cr ." TIM6_CNT.  RW   $" TIM6_CNT @ hex. TIM6_CNT 1b. ;
-    : TIM6_PSC. cr ." TIM6_PSC.  RW   $" TIM6_PSC @ hex. TIM6_PSC 1b. ;
-    : TIM6_ARR. cr ." TIM6_ARR.  RW   $" TIM6_ARR @ hex. TIM6_ARR 1b. ;
+    : TIM6_CNT. cr ." TIM6_CNT.  RW   $" TIM6_CNT @ h.8 TIM6_CNT 1b. ;
+    : TIM6_PSC. cr ." TIM6_PSC.  RW   $" TIM6_PSC @ h.8 TIM6_PSC 1b. ;
+    : TIM6_ARR. cr ." TIM6_ARR.  RW   $" TIM6_ARR @ h.8 TIM6_ARR 1b. ;
     : TIM6.
       TIM6_CR1.
       TIM6_CR2.
@@ -2634,14 +2634,14 @@ begin-module memmap
     TIM7 $24 + constant TIM7_CNT ( read-write )  \ counter
     TIM7 $28 + constant TIM7_PSC ( read-write )  \ prescaler
     TIM7 $2C + constant TIM7_ARR ( read-write )  \ auto-reload register
-    : TIM7_CR1. cr ." TIM7_CR1.  RW   $" TIM7_CR1 @ hex. TIM7_CR1 1b. ;
-    : TIM7_CR2. cr ." TIM7_CR2.  RW   $" TIM7_CR2 @ hex. TIM7_CR2 1b. ;
-    : TIM7_DIER. cr ." TIM7_DIER.  RW   $" TIM7_DIER @ hex. TIM7_DIER 1b. ;
-    : TIM7_SR. cr ." TIM7_SR.  RW   $" TIM7_SR @ hex. TIM7_SR 1b. ;
+    : TIM7_CR1. cr ." TIM7_CR1.  RW   $" TIM7_CR1 @ h.8 TIM7_CR1 1b. ;
+    : TIM7_CR2. cr ." TIM7_CR2.  RW   $" TIM7_CR2 @ h.8 TIM7_CR2 1b. ;
+    : TIM7_DIER. cr ." TIM7_DIER.  RW   $" TIM7_DIER @ h.8 TIM7_DIER 1b. ;
+    : TIM7_SR. cr ." TIM7_SR.  RW   $" TIM7_SR @ h.8 TIM7_SR 1b. ;
     : TIM7_EGR. cr ." TIM7_EGR " WRITEONLY ; 
-    : TIM7_CNT. cr ." TIM7_CNT.  RW   $" TIM7_CNT @ hex. TIM7_CNT 1b. ;
-    : TIM7_PSC. cr ." TIM7_PSC.  RW   $" TIM7_PSC @ hex. TIM7_PSC 1b. ;
-    : TIM7_ARR. cr ." TIM7_ARR.  RW   $" TIM7_ARR @ hex. TIM7_ARR 1b. ;
+    : TIM7_CNT. cr ." TIM7_CNT.  RW   $" TIM7_CNT @ h.8 TIM7_CNT 1b. ;
+    : TIM7_PSC. cr ." TIM7_PSC.  RW   $" TIM7_PSC @ h.8 TIM7_PSC 1b. ;
+    : TIM7_ARR. cr ." TIM7_ARR.  RW   $" TIM7_ARR @ h.8 TIM7_ARR 1b. ;
     : TIM7.
       TIM7_CR1.
       TIM7_CR2.
@@ -2677,27 +2677,27 @@ begin-module memmap
     Ethernet_MAC $58 + constant Ethernet_MAC_MACA3HR ( read-write )  \ Ethernet MAC address 3 high register
     Ethernet_MAC $5C + constant Ethernet_MAC_MACA3LR ( read-write )  \ Ethernet MAC address 3 low register
     Ethernet_MAC $60 + constant Ethernet_MAC_MACRWUFFER ( read-write )  \ Ethernet MAC remote wakeup frame filter register
-    : Ethernet_MAC_MACCR. cr ." Ethernet_MAC_MACCR.  RW   $" Ethernet_MAC_MACCR @ hex. Ethernet_MAC_MACCR 1b. ;
-    : Ethernet_MAC_MACFFR. cr ." Ethernet_MAC_MACFFR.  RW   $" Ethernet_MAC_MACFFR @ hex. Ethernet_MAC_MACFFR 1b. ;
-    : Ethernet_MAC_MACHTHR. cr ." Ethernet_MAC_MACHTHR.  RW   $" Ethernet_MAC_MACHTHR @ hex. Ethernet_MAC_MACHTHR 1b. ;
-    : Ethernet_MAC_MACHTLR. cr ." Ethernet_MAC_MACHTLR.  RW   $" Ethernet_MAC_MACHTLR @ hex. Ethernet_MAC_MACHTLR 1b. ;
-    : Ethernet_MAC_MACMIIAR. cr ." Ethernet_MAC_MACMIIAR.  RW   $" Ethernet_MAC_MACMIIAR @ hex. Ethernet_MAC_MACMIIAR 1b. ;
-    : Ethernet_MAC_MACMIIDR. cr ." Ethernet_MAC_MACMIIDR.  RW   $" Ethernet_MAC_MACMIIDR @ hex. Ethernet_MAC_MACMIIDR 1b. ;
-    : Ethernet_MAC_MACFCR. cr ." Ethernet_MAC_MACFCR.  RW   $" Ethernet_MAC_MACFCR @ hex. Ethernet_MAC_MACFCR 1b. ;
-    : Ethernet_MAC_MACVLANTR. cr ." Ethernet_MAC_MACVLANTR.  RW   $" Ethernet_MAC_MACVLANTR @ hex. Ethernet_MAC_MACVLANTR 1b. ;
-    : Ethernet_MAC_MACPMTCSR. cr ." Ethernet_MAC_MACPMTCSR.  RW   $" Ethernet_MAC_MACPMTCSR @ hex. Ethernet_MAC_MACPMTCSR 1b. ;
-    : Ethernet_MAC_MACDBGR. cr ." Ethernet_MAC_MACDBGR.  RO   $" Ethernet_MAC_MACDBGR @ hex. Ethernet_MAC_MACDBGR 1b. ;
-    : Ethernet_MAC_MACSR. cr ." Ethernet_MAC_MACSR.   $" Ethernet_MAC_MACSR @ hex. Ethernet_MAC_MACSR 1b. ;
-    : Ethernet_MAC_MACIMR. cr ." Ethernet_MAC_MACIMR.  RW   $" Ethernet_MAC_MACIMR @ hex. Ethernet_MAC_MACIMR 1b. ;
-    : Ethernet_MAC_MACA0HR. cr ." Ethernet_MAC_MACA0HR.   $" Ethernet_MAC_MACA0HR @ hex. Ethernet_MAC_MACA0HR 1b. ;
-    : Ethernet_MAC_MACA0LR. cr ." Ethernet_MAC_MACA0LR.  RW   $" Ethernet_MAC_MACA0LR @ hex. Ethernet_MAC_MACA0LR 1b. ;
-    : Ethernet_MAC_MACA1HR. cr ." Ethernet_MAC_MACA1HR.  RW   $" Ethernet_MAC_MACA1HR @ hex. Ethernet_MAC_MACA1HR 1b. ;
-    : Ethernet_MAC_MACA1LR. cr ." Ethernet_MAC_MACA1LR.  RW   $" Ethernet_MAC_MACA1LR @ hex. Ethernet_MAC_MACA1LR 1b. ;
-    : Ethernet_MAC_MACA2HR. cr ." Ethernet_MAC_MACA2HR.  RW   $" Ethernet_MAC_MACA2HR @ hex. Ethernet_MAC_MACA2HR 1b. ;
-    : Ethernet_MAC_MACA2LR. cr ." Ethernet_MAC_MACA2LR.  RW   $" Ethernet_MAC_MACA2LR @ hex. Ethernet_MAC_MACA2LR 1b. ;
-    : Ethernet_MAC_MACA3HR. cr ." Ethernet_MAC_MACA3HR.  RW   $" Ethernet_MAC_MACA3HR @ hex. Ethernet_MAC_MACA3HR 1b. ;
-    : Ethernet_MAC_MACA3LR. cr ." Ethernet_MAC_MACA3LR.  RW   $" Ethernet_MAC_MACA3LR @ hex. Ethernet_MAC_MACA3LR 1b. ;
-    : Ethernet_MAC_MACRWUFFER. cr ." Ethernet_MAC_MACRWUFFER.  RW   $" Ethernet_MAC_MACRWUFFER @ hex. Ethernet_MAC_MACRWUFFER 1b. ;
+    : Ethernet_MAC_MACCR. cr ." Ethernet_MAC_MACCR.  RW   $" Ethernet_MAC_MACCR @ h.8 Ethernet_MAC_MACCR 1b. ;
+    : Ethernet_MAC_MACFFR. cr ." Ethernet_MAC_MACFFR.  RW   $" Ethernet_MAC_MACFFR @ h.8 Ethernet_MAC_MACFFR 1b. ;
+    : Ethernet_MAC_MACHTHR. cr ." Ethernet_MAC_MACHTHR.  RW   $" Ethernet_MAC_MACHTHR @ h.8 Ethernet_MAC_MACHTHR 1b. ;
+    : Ethernet_MAC_MACHTLR. cr ." Ethernet_MAC_MACHTLR.  RW   $" Ethernet_MAC_MACHTLR @ h.8 Ethernet_MAC_MACHTLR 1b. ;
+    : Ethernet_MAC_MACMIIAR. cr ." Ethernet_MAC_MACMIIAR.  RW   $" Ethernet_MAC_MACMIIAR @ h.8 Ethernet_MAC_MACMIIAR 1b. ;
+    : Ethernet_MAC_MACMIIDR. cr ." Ethernet_MAC_MACMIIDR.  RW   $" Ethernet_MAC_MACMIIDR @ h.8 Ethernet_MAC_MACMIIDR 1b. ;
+    : Ethernet_MAC_MACFCR. cr ." Ethernet_MAC_MACFCR.  RW   $" Ethernet_MAC_MACFCR @ h.8 Ethernet_MAC_MACFCR 1b. ;
+    : Ethernet_MAC_MACVLANTR. cr ." Ethernet_MAC_MACVLANTR.  RW   $" Ethernet_MAC_MACVLANTR @ h.8 Ethernet_MAC_MACVLANTR 1b. ;
+    : Ethernet_MAC_MACPMTCSR. cr ." Ethernet_MAC_MACPMTCSR.  RW   $" Ethernet_MAC_MACPMTCSR @ h.8 Ethernet_MAC_MACPMTCSR 1b. ;
+    : Ethernet_MAC_MACDBGR. cr ." Ethernet_MAC_MACDBGR.  RO   $" Ethernet_MAC_MACDBGR @ h.8 Ethernet_MAC_MACDBGR 1b. ;
+    : Ethernet_MAC_MACSR. cr ." Ethernet_MAC_MACSR.   $" Ethernet_MAC_MACSR @ h.8 Ethernet_MAC_MACSR 1b. ;
+    : Ethernet_MAC_MACIMR. cr ." Ethernet_MAC_MACIMR.  RW   $" Ethernet_MAC_MACIMR @ h.8 Ethernet_MAC_MACIMR 1b. ;
+    : Ethernet_MAC_MACA0HR. cr ." Ethernet_MAC_MACA0HR.   $" Ethernet_MAC_MACA0HR @ h.8 Ethernet_MAC_MACA0HR 1b. ;
+    : Ethernet_MAC_MACA0LR. cr ." Ethernet_MAC_MACA0LR.  RW   $" Ethernet_MAC_MACA0LR @ h.8 Ethernet_MAC_MACA0LR 1b. ;
+    : Ethernet_MAC_MACA1HR. cr ." Ethernet_MAC_MACA1HR.  RW   $" Ethernet_MAC_MACA1HR @ h.8 Ethernet_MAC_MACA1HR 1b. ;
+    : Ethernet_MAC_MACA1LR. cr ." Ethernet_MAC_MACA1LR.  RW   $" Ethernet_MAC_MACA1LR @ h.8 Ethernet_MAC_MACA1LR 1b. ;
+    : Ethernet_MAC_MACA2HR. cr ." Ethernet_MAC_MACA2HR.  RW   $" Ethernet_MAC_MACA2HR @ h.8 Ethernet_MAC_MACA2HR 1b. ;
+    : Ethernet_MAC_MACA2LR. cr ." Ethernet_MAC_MACA2LR.  RW   $" Ethernet_MAC_MACA2LR @ h.8 Ethernet_MAC_MACA2LR 1b. ;
+    : Ethernet_MAC_MACA3HR. cr ." Ethernet_MAC_MACA3HR.  RW   $" Ethernet_MAC_MACA3HR @ h.8 Ethernet_MAC_MACA3HR 1b. ;
+    : Ethernet_MAC_MACA3LR. cr ." Ethernet_MAC_MACA3LR.  RW   $" Ethernet_MAC_MACA3LR @ h.8 Ethernet_MAC_MACA3LR 1b. ;
+    : Ethernet_MAC_MACRWUFFER. cr ." Ethernet_MAC_MACRWUFFER.  RW   $" Ethernet_MAC_MACRWUFFER @ h.8 Ethernet_MAC_MACRWUFFER 1b. ;
     : Ethernet_MAC.
       Ethernet_MAC_MACCR.
       Ethernet_MAC_MACFFR.
@@ -2736,17 +2736,17 @@ begin-module memmap
     Ethernet_MMC $94 + constant Ethernet_MMC_MMCRFCECR ( read-only )  \ Ethernet MMC received frames with CRC error counter register
     Ethernet_MMC $98 + constant Ethernet_MMC_MMCRFAECR ( read-only )  \ Ethernet MMC received frames with alignment error counter register
     Ethernet_MMC $C4 + constant Ethernet_MMC_MMCRGUFCR ( read-only )  \ MMC received good unicast frames counter register
-    : Ethernet_MMC_MMCCR. cr ." Ethernet_MMC_MMCCR.  RW   $" Ethernet_MMC_MMCCR @ hex. Ethernet_MMC_MMCCR 1b. ;
-    : Ethernet_MMC_MMCRIR. cr ." Ethernet_MMC_MMCRIR.  RW   $" Ethernet_MMC_MMCRIR @ hex. Ethernet_MMC_MMCRIR 1b. ;
-    : Ethernet_MMC_MMCTIR. cr ." Ethernet_MMC_MMCTIR.  RO   $" Ethernet_MMC_MMCTIR @ hex. Ethernet_MMC_MMCTIR 1b. ;
-    : Ethernet_MMC_MMCRIMR. cr ." Ethernet_MMC_MMCRIMR.  RW   $" Ethernet_MMC_MMCRIMR @ hex. Ethernet_MMC_MMCRIMR 1b. ;
-    : Ethernet_MMC_MMCTIMR. cr ." Ethernet_MMC_MMCTIMR.  RW   $" Ethernet_MMC_MMCTIMR @ hex. Ethernet_MMC_MMCTIMR 1b. ;
-    : Ethernet_MMC_MMCTGFSCCR. cr ." Ethernet_MMC_MMCTGFSCCR.  RO   $" Ethernet_MMC_MMCTGFSCCR @ hex. Ethernet_MMC_MMCTGFSCCR 1b. ;
-    : Ethernet_MMC_MMCTGFMSCCR. cr ." Ethernet_MMC_MMCTGFMSCCR.  RO   $" Ethernet_MMC_MMCTGFMSCCR @ hex. Ethernet_MMC_MMCTGFMSCCR 1b. ;
-    : Ethernet_MMC_MMCTGFCR. cr ." Ethernet_MMC_MMCTGFCR.  RO   $" Ethernet_MMC_MMCTGFCR @ hex. Ethernet_MMC_MMCTGFCR 1b. ;
-    : Ethernet_MMC_MMCRFCECR. cr ." Ethernet_MMC_MMCRFCECR.  RO   $" Ethernet_MMC_MMCRFCECR @ hex. Ethernet_MMC_MMCRFCECR 1b. ;
-    : Ethernet_MMC_MMCRFAECR. cr ." Ethernet_MMC_MMCRFAECR.  RO   $" Ethernet_MMC_MMCRFAECR @ hex. Ethernet_MMC_MMCRFAECR 1b. ;
-    : Ethernet_MMC_MMCRGUFCR. cr ." Ethernet_MMC_MMCRGUFCR.  RO   $" Ethernet_MMC_MMCRGUFCR @ hex. Ethernet_MMC_MMCRGUFCR 1b. ;
+    : Ethernet_MMC_MMCCR. cr ." Ethernet_MMC_MMCCR.  RW   $" Ethernet_MMC_MMCCR @ h.8 Ethernet_MMC_MMCCR 1b. ;
+    : Ethernet_MMC_MMCRIR. cr ." Ethernet_MMC_MMCRIR.  RW   $" Ethernet_MMC_MMCRIR @ h.8 Ethernet_MMC_MMCRIR 1b. ;
+    : Ethernet_MMC_MMCTIR. cr ." Ethernet_MMC_MMCTIR.  RO   $" Ethernet_MMC_MMCTIR @ h.8 Ethernet_MMC_MMCTIR 1b. ;
+    : Ethernet_MMC_MMCRIMR. cr ." Ethernet_MMC_MMCRIMR.  RW   $" Ethernet_MMC_MMCRIMR @ h.8 Ethernet_MMC_MMCRIMR 1b. ;
+    : Ethernet_MMC_MMCTIMR. cr ." Ethernet_MMC_MMCTIMR.  RW   $" Ethernet_MMC_MMCTIMR @ h.8 Ethernet_MMC_MMCTIMR 1b. ;
+    : Ethernet_MMC_MMCTGFSCCR. cr ." Ethernet_MMC_MMCTGFSCCR.  RO   $" Ethernet_MMC_MMCTGFSCCR @ h.8 Ethernet_MMC_MMCTGFSCCR 1b. ;
+    : Ethernet_MMC_MMCTGFMSCCR. cr ." Ethernet_MMC_MMCTGFMSCCR.  RO   $" Ethernet_MMC_MMCTGFMSCCR @ h.8 Ethernet_MMC_MMCTGFMSCCR 1b. ;
+    : Ethernet_MMC_MMCTGFCR. cr ." Ethernet_MMC_MMCTGFCR.  RO   $" Ethernet_MMC_MMCTGFCR @ h.8 Ethernet_MMC_MMCTGFCR 1b. ;
+    : Ethernet_MMC_MMCRFCECR. cr ." Ethernet_MMC_MMCRFCECR.  RO   $" Ethernet_MMC_MMCRFCECR @ h.8 Ethernet_MMC_MMCRFCECR 1b. ;
+    : Ethernet_MMC_MMCRFAECR. cr ." Ethernet_MMC_MMCRFAECR.  RO   $" Ethernet_MMC_MMCRFAECR @ h.8 Ethernet_MMC_MMCRFAECR 1b. ;
+    : Ethernet_MMC_MMCRGUFCR. cr ." Ethernet_MMC_MMCRGUFCR.  RO   $" Ethernet_MMC_MMCRGUFCR @ h.8 Ethernet_MMC_MMCRGUFCR 1b. ;
     : Ethernet_MMC.
       Ethernet_MMC_MMCCR.
       Ethernet_MMC_MMCRIR.
@@ -2775,17 +2775,17 @@ begin-module memmap
     Ethernet_PTP $20 + constant Ethernet_PTP_PTPTTLR ( read-write )  \ Ethernet PTP target time low register
     Ethernet_PTP $28 + constant Ethernet_PTP_PTPTSSR ( read-only )  \ Ethernet PTP time stamp status register
     Ethernet_PTP $2C + constant Ethernet_PTP_PTPPPSCR ( read-only )  \ Ethernet PTP PPS control register
-    : Ethernet_PTP_PTPTSCR. cr ." Ethernet_PTP_PTPTSCR.  RW   $" Ethernet_PTP_PTPTSCR @ hex. Ethernet_PTP_PTPTSCR 1b. ;
-    : Ethernet_PTP_PTPSSIR. cr ." Ethernet_PTP_PTPSSIR.  RW   $" Ethernet_PTP_PTPSSIR @ hex. Ethernet_PTP_PTPSSIR 1b. ;
-    : Ethernet_PTP_PTPTSHR. cr ." Ethernet_PTP_PTPTSHR.  RO   $" Ethernet_PTP_PTPTSHR @ hex. Ethernet_PTP_PTPTSHR 1b. ;
-    : Ethernet_PTP_PTPTSLR. cr ." Ethernet_PTP_PTPTSLR.  RO   $" Ethernet_PTP_PTPTSLR @ hex. Ethernet_PTP_PTPTSLR 1b. ;
-    : Ethernet_PTP_PTPTSHUR. cr ." Ethernet_PTP_PTPTSHUR.  RW   $" Ethernet_PTP_PTPTSHUR @ hex. Ethernet_PTP_PTPTSHUR 1b. ;
-    : Ethernet_PTP_PTPTSLUR. cr ." Ethernet_PTP_PTPTSLUR.  RW   $" Ethernet_PTP_PTPTSLUR @ hex. Ethernet_PTP_PTPTSLUR 1b. ;
-    : Ethernet_PTP_PTPTSAR. cr ." Ethernet_PTP_PTPTSAR.  RW   $" Ethernet_PTP_PTPTSAR @ hex. Ethernet_PTP_PTPTSAR 1b. ;
-    : Ethernet_PTP_PTPTTHR. cr ." Ethernet_PTP_PTPTTHR.  RW   $" Ethernet_PTP_PTPTTHR @ hex. Ethernet_PTP_PTPTTHR 1b. ;
-    : Ethernet_PTP_PTPTTLR. cr ." Ethernet_PTP_PTPTTLR.  RW   $" Ethernet_PTP_PTPTTLR @ hex. Ethernet_PTP_PTPTTLR 1b. ;
-    : Ethernet_PTP_PTPTSSR. cr ." Ethernet_PTP_PTPTSSR.  RO   $" Ethernet_PTP_PTPTSSR @ hex. Ethernet_PTP_PTPTSSR 1b. ;
-    : Ethernet_PTP_PTPPPSCR. cr ." Ethernet_PTP_PTPPPSCR.  RO   $" Ethernet_PTP_PTPPPSCR @ hex. Ethernet_PTP_PTPPPSCR 1b. ;
+    : Ethernet_PTP_PTPTSCR. cr ." Ethernet_PTP_PTPTSCR.  RW   $" Ethernet_PTP_PTPTSCR @ h.8 Ethernet_PTP_PTPTSCR 1b. ;
+    : Ethernet_PTP_PTPSSIR. cr ." Ethernet_PTP_PTPSSIR.  RW   $" Ethernet_PTP_PTPSSIR @ h.8 Ethernet_PTP_PTPSSIR 1b. ;
+    : Ethernet_PTP_PTPTSHR. cr ." Ethernet_PTP_PTPTSHR.  RO   $" Ethernet_PTP_PTPTSHR @ h.8 Ethernet_PTP_PTPTSHR 1b. ;
+    : Ethernet_PTP_PTPTSLR. cr ." Ethernet_PTP_PTPTSLR.  RO   $" Ethernet_PTP_PTPTSLR @ h.8 Ethernet_PTP_PTPTSLR 1b. ;
+    : Ethernet_PTP_PTPTSHUR. cr ." Ethernet_PTP_PTPTSHUR.  RW   $" Ethernet_PTP_PTPTSHUR @ h.8 Ethernet_PTP_PTPTSHUR 1b. ;
+    : Ethernet_PTP_PTPTSLUR. cr ." Ethernet_PTP_PTPTSLUR.  RW   $" Ethernet_PTP_PTPTSLUR @ h.8 Ethernet_PTP_PTPTSLUR 1b. ;
+    : Ethernet_PTP_PTPTSAR. cr ." Ethernet_PTP_PTPTSAR.  RW   $" Ethernet_PTP_PTPTSAR @ h.8 Ethernet_PTP_PTPTSAR 1b. ;
+    : Ethernet_PTP_PTPTTHR. cr ." Ethernet_PTP_PTPTTHR.  RW   $" Ethernet_PTP_PTPTTHR @ h.8 Ethernet_PTP_PTPTTHR 1b. ;
+    : Ethernet_PTP_PTPTTLR. cr ." Ethernet_PTP_PTPTTLR.  RW   $" Ethernet_PTP_PTPTTLR @ h.8 Ethernet_PTP_PTPTTLR 1b. ;
+    : Ethernet_PTP_PTPTSSR. cr ." Ethernet_PTP_PTPTSSR.  RO   $" Ethernet_PTP_PTPTSSR @ h.8 Ethernet_PTP_PTPTSSR 1b. ;
+    : Ethernet_PTP_PTPPPSCR. cr ." Ethernet_PTP_PTPPPSCR.  RO   $" Ethernet_PTP_PTPPPSCR @ h.8 Ethernet_PTP_PTPPPSCR 1b. ;
     : Ethernet_PTP.
       Ethernet_PTP_PTPTSCR.
       Ethernet_PTP_PTPSSIR.
@@ -2817,20 +2817,20 @@ begin-module memmap
     Ethernet_DMA $4C + constant Ethernet_DMA_DMACHRDR ( read-only )  \ Ethernet DMA current host receive descriptor register
     Ethernet_DMA $50 + constant Ethernet_DMA_DMACHTBAR ( read-only )  \ Ethernet DMA current host transmit buffer address register
     Ethernet_DMA $54 + constant Ethernet_DMA_DMACHRBAR ( read-only )  \ Ethernet DMA current host receive buffer address register
-    : Ethernet_DMA_DMABMR. cr ." Ethernet_DMA_DMABMR.  RW   $" Ethernet_DMA_DMABMR @ hex. Ethernet_DMA_DMABMR 1b. ;
-    : Ethernet_DMA_DMATPDR. cr ." Ethernet_DMA_DMATPDR.  RW   $" Ethernet_DMA_DMATPDR @ hex. Ethernet_DMA_DMATPDR 1b. ;
-    : Ethernet_DMA_DMARPDR. cr ." Ethernet_DMA_DMARPDR.  RW   $" Ethernet_DMA_DMARPDR @ hex. Ethernet_DMA_DMARPDR 1b. ;
-    : Ethernet_DMA_DMARDLAR. cr ." Ethernet_DMA_DMARDLAR.  RW   $" Ethernet_DMA_DMARDLAR @ hex. Ethernet_DMA_DMARDLAR 1b. ;
-    : Ethernet_DMA_DMATDLAR. cr ." Ethernet_DMA_DMATDLAR.  RW   $" Ethernet_DMA_DMATDLAR @ hex. Ethernet_DMA_DMATDLAR 1b. ;
-    : Ethernet_DMA_DMASR. cr ." Ethernet_DMA_DMASR.   $" Ethernet_DMA_DMASR @ hex. Ethernet_DMA_DMASR 1b. ;
-    : Ethernet_DMA_DMAOMR. cr ." Ethernet_DMA_DMAOMR.  RW   $" Ethernet_DMA_DMAOMR @ hex. Ethernet_DMA_DMAOMR 1b. ;
-    : Ethernet_DMA_DMAIER. cr ." Ethernet_DMA_DMAIER.  RW   $" Ethernet_DMA_DMAIER @ hex. Ethernet_DMA_DMAIER 1b. ;
-    : Ethernet_DMA_DMAMFBOCR. cr ." Ethernet_DMA_DMAMFBOCR.  RW   $" Ethernet_DMA_DMAMFBOCR @ hex. Ethernet_DMA_DMAMFBOCR 1b. ;
-    : Ethernet_DMA_DMARSWTR. cr ." Ethernet_DMA_DMARSWTR.  RW   $" Ethernet_DMA_DMARSWTR @ hex. Ethernet_DMA_DMARSWTR 1b. ;
-    : Ethernet_DMA_DMACHTDR. cr ." Ethernet_DMA_DMACHTDR.  RO   $" Ethernet_DMA_DMACHTDR @ hex. Ethernet_DMA_DMACHTDR 1b. ;
-    : Ethernet_DMA_DMACHRDR. cr ." Ethernet_DMA_DMACHRDR.  RO   $" Ethernet_DMA_DMACHRDR @ hex. Ethernet_DMA_DMACHRDR 1b. ;
-    : Ethernet_DMA_DMACHTBAR. cr ." Ethernet_DMA_DMACHTBAR.  RO   $" Ethernet_DMA_DMACHTBAR @ hex. Ethernet_DMA_DMACHTBAR 1b. ;
-    : Ethernet_DMA_DMACHRBAR. cr ." Ethernet_DMA_DMACHRBAR.  RO   $" Ethernet_DMA_DMACHRBAR @ hex. Ethernet_DMA_DMACHRBAR 1b. ;
+    : Ethernet_DMA_DMABMR. cr ." Ethernet_DMA_DMABMR.  RW   $" Ethernet_DMA_DMABMR @ h.8 Ethernet_DMA_DMABMR 1b. ;
+    : Ethernet_DMA_DMATPDR. cr ." Ethernet_DMA_DMATPDR.  RW   $" Ethernet_DMA_DMATPDR @ h.8 Ethernet_DMA_DMATPDR 1b. ;
+    : Ethernet_DMA_DMARPDR. cr ." Ethernet_DMA_DMARPDR.  RW   $" Ethernet_DMA_DMARPDR @ h.8 Ethernet_DMA_DMARPDR 1b. ;
+    : Ethernet_DMA_DMARDLAR. cr ." Ethernet_DMA_DMARDLAR.  RW   $" Ethernet_DMA_DMARDLAR @ h.8 Ethernet_DMA_DMARDLAR 1b. ;
+    : Ethernet_DMA_DMATDLAR. cr ." Ethernet_DMA_DMATDLAR.  RW   $" Ethernet_DMA_DMATDLAR @ h.8 Ethernet_DMA_DMATDLAR 1b. ;
+    : Ethernet_DMA_DMASR. cr ." Ethernet_DMA_DMASR.   $" Ethernet_DMA_DMASR @ h.8 Ethernet_DMA_DMASR 1b. ;
+    : Ethernet_DMA_DMAOMR. cr ." Ethernet_DMA_DMAOMR.  RW   $" Ethernet_DMA_DMAOMR @ h.8 Ethernet_DMA_DMAOMR 1b. ;
+    : Ethernet_DMA_DMAIER. cr ." Ethernet_DMA_DMAIER.  RW   $" Ethernet_DMA_DMAIER @ h.8 Ethernet_DMA_DMAIER 1b. ;
+    : Ethernet_DMA_DMAMFBOCR. cr ." Ethernet_DMA_DMAMFBOCR.  RW   $" Ethernet_DMA_DMAMFBOCR @ h.8 Ethernet_DMA_DMAMFBOCR 1b. ;
+    : Ethernet_DMA_DMARSWTR. cr ." Ethernet_DMA_DMARSWTR.  RW   $" Ethernet_DMA_DMARSWTR @ h.8 Ethernet_DMA_DMARSWTR 1b. ;
+    : Ethernet_DMA_DMACHTDR. cr ." Ethernet_DMA_DMACHTDR.  RO   $" Ethernet_DMA_DMACHTDR @ h.8 Ethernet_DMA_DMACHTDR 1b. ;
+    : Ethernet_DMA_DMACHRDR. cr ." Ethernet_DMA_DMACHRDR.  RO   $" Ethernet_DMA_DMACHRDR @ h.8 Ethernet_DMA_DMACHRDR 1b. ;
+    : Ethernet_DMA_DMACHTBAR. cr ." Ethernet_DMA_DMACHTBAR.  RO   $" Ethernet_DMA_DMACHTBAR @ h.8 Ethernet_DMA_DMACHTBAR 1b. ;
+    : Ethernet_DMA_DMACHRBAR. cr ." Ethernet_DMA_DMACHRBAR.  RO   $" Ethernet_DMA_DMACHRBAR @ h.8 Ethernet_DMA_DMACHRBAR 1b. ;
     : Ethernet_DMA.
       Ethernet_DMA_DMABMR.
       Ethernet_DMA_DMATPDR.
@@ -2856,11 +2856,11 @@ begin-module memmap
     CRC $8 + constant CRC_CR ( write-only )  \ Control register
     CRC $10 + constant CRC_INIT ( read-write )  \ Initial CRC value
     CRC $14 + constant CRC_POL ( read-write )  \ CRC polynomial
-    : CRC_DR. cr ." CRC_DR.  RW   $" CRC_DR @ hex. CRC_DR 1b. ;
-    : CRC_IDR. cr ." CRC_IDR.  RW   $" CRC_IDR @ hex. CRC_IDR 1b. ;
+    : CRC_DR. cr ." CRC_DR.  RW   $" CRC_DR @ h.8 CRC_DR 1b. ;
+    : CRC_IDR. cr ." CRC_IDR.  RW   $" CRC_IDR @ h.8 CRC_IDR 1b. ;
     : CRC_CR. cr ." CRC_CR " WRITEONLY ; 
-    : CRC_INIT. cr ." CRC_INIT.  RW   $" CRC_INIT @ hex. CRC_INIT 1b. ;
-    : CRC_POL. cr ." CRC_POL.  RW   $" CRC_POL @ hex. CRC_POL 1b. ;
+    : CRC_INIT. cr ." CRC_INIT.  RW   $" CRC_INIT @ h.8 CRC_INIT 1b. ;
+    : CRC_POL. cr ." CRC_POL.  RW   $" CRC_POL @ h.8 CRC_POL 1b. ;
     : CRC.
       CRC_DR.
       CRC_IDR.
@@ -2961,95 +2961,95 @@ begin-module memmap
     CAN1 $314 + constant CAN1_F26R2 ( read-write )  \ Filter bank 26 register 2
     CAN1 $318 + constant CAN1_F27R1 ( read-write )  \ Filter bank 27 register 1
     CAN1 $31C + constant CAN1_F27R2 ( read-write )  \ Filter bank 27 register 2
-    : CAN1_MCR. cr ." CAN1_MCR.  RW   $" CAN1_MCR @ hex. CAN1_MCR 1b. ;
-    : CAN1_MSR. cr ." CAN1_MSR.   $" CAN1_MSR @ hex. CAN1_MSR 1b. ;
-    : CAN1_TSR. cr ." CAN1_TSR.   $" CAN1_TSR @ hex. CAN1_TSR 1b. ;
-    : CAN1_RF0R. cr ." CAN1_RF0R.   $" CAN1_RF0R @ hex. CAN1_RF0R 1b. ;
-    : CAN1_RF1R. cr ." CAN1_RF1R.   $" CAN1_RF1R @ hex. CAN1_RF1R 1b. ;
-    : CAN1_IER. cr ." CAN1_IER.  RW   $" CAN1_IER @ hex. CAN1_IER 1b. ;
-    : CAN1_ESR. cr ." CAN1_ESR.   $" CAN1_ESR @ hex. CAN1_ESR 1b. ;
-    : CAN1_BTR. cr ." CAN1_BTR.  RW   $" CAN1_BTR @ hex. CAN1_BTR 1b. ;
-    : CAN1_TI0R. cr ." CAN1_TI0R.  RW   $" CAN1_TI0R @ hex. CAN1_TI0R 1b. ;
-    : CAN1_TDT0R. cr ." CAN1_TDT0R.  RW   $" CAN1_TDT0R @ hex. CAN1_TDT0R 1b. ;
-    : CAN1_TDL0R. cr ." CAN1_TDL0R.  RW   $" CAN1_TDL0R @ hex. CAN1_TDL0R 1b. ;
-    : CAN1_TDH0R. cr ." CAN1_TDH0R.  RW   $" CAN1_TDH0R @ hex. CAN1_TDH0R 1b. ;
-    : CAN1_TI1R. cr ." CAN1_TI1R.  RW   $" CAN1_TI1R @ hex. CAN1_TI1R 1b. ;
-    : CAN1_TDT1R. cr ." CAN1_TDT1R.  RW   $" CAN1_TDT1R @ hex. CAN1_TDT1R 1b. ;
-    : CAN1_TDL1R. cr ." CAN1_TDL1R.  RW   $" CAN1_TDL1R @ hex. CAN1_TDL1R 1b. ;
-    : CAN1_TDH1R. cr ." CAN1_TDH1R.  RW   $" CAN1_TDH1R @ hex. CAN1_TDH1R 1b. ;
-    : CAN1_TI2R. cr ." CAN1_TI2R.  RW   $" CAN1_TI2R @ hex. CAN1_TI2R 1b. ;
-    : CAN1_TDT2R. cr ." CAN1_TDT2R.  RW   $" CAN1_TDT2R @ hex. CAN1_TDT2R 1b. ;
-    : CAN1_TDL2R. cr ." CAN1_TDL2R.  RW   $" CAN1_TDL2R @ hex. CAN1_TDL2R 1b. ;
-    : CAN1_TDH2R. cr ." CAN1_TDH2R.  RW   $" CAN1_TDH2R @ hex. CAN1_TDH2R 1b. ;
-    : CAN1_RI0R. cr ." CAN1_RI0R.  RO   $" CAN1_RI0R @ hex. CAN1_RI0R 1b. ;
-    : CAN1_RDT0R. cr ." CAN1_RDT0R.  RO   $" CAN1_RDT0R @ hex. CAN1_RDT0R 1b. ;
-    : CAN1_RDL0R. cr ." CAN1_RDL0R.  RO   $" CAN1_RDL0R @ hex. CAN1_RDL0R 1b. ;
-    : CAN1_RDH0R. cr ." CAN1_RDH0R.  RO   $" CAN1_RDH0R @ hex. CAN1_RDH0R 1b. ;
-    : CAN1_RI1R. cr ." CAN1_RI1R.  RO   $" CAN1_RI1R @ hex. CAN1_RI1R 1b. ;
-    : CAN1_RDT1R. cr ." CAN1_RDT1R.  RO   $" CAN1_RDT1R @ hex. CAN1_RDT1R 1b. ;
-    : CAN1_RDL1R. cr ." CAN1_RDL1R.  RO   $" CAN1_RDL1R @ hex. CAN1_RDL1R 1b. ;
-    : CAN1_RDH1R. cr ." CAN1_RDH1R.  RO   $" CAN1_RDH1R @ hex. CAN1_RDH1R 1b. ;
-    : CAN1_FMR. cr ." CAN1_FMR.  RW   $" CAN1_FMR @ hex. CAN1_FMR 1b. ;
-    : CAN1_FM1R. cr ." CAN1_FM1R.  RW   $" CAN1_FM1R @ hex. CAN1_FM1R 1b. ;
-    : CAN1_FS1R. cr ." CAN1_FS1R.  RW   $" CAN1_FS1R @ hex. CAN1_FS1R 1b. ;
-    : CAN1_FFA1R. cr ." CAN1_FFA1R.  RW   $" CAN1_FFA1R @ hex. CAN1_FFA1R 1b. ;
-    : CAN1_FA1R. cr ." CAN1_FA1R.  RW   $" CAN1_FA1R @ hex. CAN1_FA1R 1b. ;
-    : CAN1_F0R1. cr ." CAN1_F0R1.  RW   $" CAN1_F0R1 @ hex. CAN1_F0R1 1b. ;
-    : CAN1_F0R2. cr ." CAN1_F0R2.  RW   $" CAN1_F0R2 @ hex. CAN1_F0R2 1b. ;
-    : CAN1_F1R1. cr ." CAN1_F1R1.  RW   $" CAN1_F1R1 @ hex. CAN1_F1R1 1b. ;
-    : CAN1_F1R2. cr ." CAN1_F1R2.  RW   $" CAN1_F1R2 @ hex. CAN1_F1R2 1b. ;
-    : CAN1_F2R1. cr ." CAN1_F2R1.  RW   $" CAN1_F2R1 @ hex. CAN1_F2R1 1b. ;
-    : CAN1_F2R2. cr ." CAN1_F2R2.  RW   $" CAN1_F2R2 @ hex. CAN1_F2R2 1b. ;
-    : CAN1_F3R1. cr ." CAN1_F3R1.  RW   $" CAN1_F3R1 @ hex. CAN1_F3R1 1b. ;
-    : CAN1_F3R2. cr ." CAN1_F3R2.  RW   $" CAN1_F3R2 @ hex. CAN1_F3R2 1b. ;
-    : CAN1_F4R1. cr ." CAN1_F4R1.  RW   $" CAN1_F4R1 @ hex. CAN1_F4R1 1b. ;
-    : CAN1_F4R2. cr ." CAN1_F4R2.  RW   $" CAN1_F4R2 @ hex. CAN1_F4R2 1b. ;
-    : CAN1_F5R1. cr ." CAN1_F5R1.  RW   $" CAN1_F5R1 @ hex. CAN1_F5R1 1b. ;
-    : CAN1_F5R2. cr ." CAN1_F5R2.  RW   $" CAN1_F5R2 @ hex. CAN1_F5R2 1b. ;
-    : CAN1_F6R1. cr ." CAN1_F6R1.  RW   $" CAN1_F6R1 @ hex. CAN1_F6R1 1b. ;
-    : CAN1_F6R2. cr ." CAN1_F6R2.  RW   $" CAN1_F6R2 @ hex. CAN1_F6R2 1b. ;
-    : CAN1_F7R1. cr ." CAN1_F7R1.  RW   $" CAN1_F7R1 @ hex. CAN1_F7R1 1b. ;
-    : CAN1_F7R2. cr ." CAN1_F7R2.  RW   $" CAN1_F7R2 @ hex. CAN1_F7R2 1b. ;
-    : CAN1_F8R1. cr ." CAN1_F8R1.  RW   $" CAN1_F8R1 @ hex. CAN1_F8R1 1b. ;
-    : CAN1_F8R2. cr ." CAN1_F8R2.  RW   $" CAN1_F8R2 @ hex. CAN1_F8R2 1b. ;
-    : CAN1_F9R1. cr ." CAN1_F9R1.  RW   $" CAN1_F9R1 @ hex. CAN1_F9R1 1b. ;
-    : CAN1_F9R2. cr ." CAN1_F9R2.  RW   $" CAN1_F9R2 @ hex. CAN1_F9R2 1b. ;
-    : CAN1_F10R1. cr ." CAN1_F10R1.  RW   $" CAN1_F10R1 @ hex. CAN1_F10R1 1b. ;
-    : CAN1_F10R2. cr ." CAN1_F10R2.  RW   $" CAN1_F10R2 @ hex. CAN1_F10R2 1b. ;
-    : CAN1_F11R1. cr ." CAN1_F11R1.  RW   $" CAN1_F11R1 @ hex. CAN1_F11R1 1b. ;
-    : CAN1_F11R2. cr ." CAN1_F11R2.  RW   $" CAN1_F11R2 @ hex. CAN1_F11R2 1b. ;
-    : CAN1_F12R1. cr ." CAN1_F12R1.  RW   $" CAN1_F12R1 @ hex. CAN1_F12R1 1b. ;
-    : CAN1_F12R2. cr ." CAN1_F12R2.  RW   $" CAN1_F12R2 @ hex. CAN1_F12R2 1b. ;
-    : CAN1_F13R1. cr ." CAN1_F13R1.  RW   $" CAN1_F13R1 @ hex. CAN1_F13R1 1b. ;
-    : CAN1_F13R2. cr ." CAN1_F13R2.  RW   $" CAN1_F13R2 @ hex. CAN1_F13R2 1b. ;
-    : CAN1_F14R1. cr ." CAN1_F14R1.  RW   $" CAN1_F14R1 @ hex. CAN1_F14R1 1b. ;
-    : CAN1_F14R2. cr ." CAN1_F14R2.  RW   $" CAN1_F14R2 @ hex. CAN1_F14R2 1b. ;
-    : CAN1_F15R1. cr ." CAN1_F15R1.  RW   $" CAN1_F15R1 @ hex. CAN1_F15R1 1b. ;
-    : CAN1_F15R2. cr ." CAN1_F15R2.  RW   $" CAN1_F15R2 @ hex. CAN1_F15R2 1b. ;
-    : CAN1_F16R1. cr ." CAN1_F16R1.  RW   $" CAN1_F16R1 @ hex. CAN1_F16R1 1b. ;
-    : CAN1_F16R2. cr ." CAN1_F16R2.  RW   $" CAN1_F16R2 @ hex. CAN1_F16R2 1b. ;
-    : CAN1_F17R1. cr ." CAN1_F17R1.  RW   $" CAN1_F17R1 @ hex. CAN1_F17R1 1b. ;
-    : CAN1_F17R2. cr ." CAN1_F17R2.  RW   $" CAN1_F17R2 @ hex. CAN1_F17R2 1b. ;
-    : CAN1_F18R1. cr ." CAN1_F18R1.  RW   $" CAN1_F18R1 @ hex. CAN1_F18R1 1b. ;
-    : CAN1_F18R2. cr ." CAN1_F18R2.  RW   $" CAN1_F18R2 @ hex. CAN1_F18R2 1b. ;
-    : CAN1_F19R1. cr ." CAN1_F19R1.  RW   $" CAN1_F19R1 @ hex. CAN1_F19R1 1b. ;
-    : CAN1_F19R2. cr ." CAN1_F19R2.  RW   $" CAN1_F19R2 @ hex. CAN1_F19R2 1b. ;
-    : CAN1_F20R1. cr ." CAN1_F20R1.  RW   $" CAN1_F20R1 @ hex. CAN1_F20R1 1b. ;
-    : CAN1_F20R2. cr ." CAN1_F20R2.  RW   $" CAN1_F20R2 @ hex. CAN1_F20R2 1b. ;
-    : CAN1_F21R1. cr ." CAN1_F21R1.  RW   $" CAN1_F21R1 @ hex. CAN1_F21R1 1b. ;
-    : CAN1_F21R2. cr ." CAN1_F21R2.  RW   $" CAN1_F21R2 @ hex. CAN1_F21R2 1b. ;
-    : CAN1_F22R1. cr ." CAN1_F22R1.  RW   $" CAN1_F22R1 @ hex. CAN1_F22R1 1b. ;
-    : CAN1_F22R2. cr ." CAN1_F22R2.  RW   $" CAN1_F22R2 @ hex. CAN1_F22R2 1b. ;
-    : CAN1_F23R1. cr ." CAN1_F23R1.  RW   $" CAN1_F23R1 @ hex. CAN1_F23R1 1b. ;
-    : CAN1_F23R2. cr ." CAN1_F23R2.  RW   $" CAN1_F23R2 @ hex. CAN1_F23R2 1b. ;
-    : CAN1_F24R1. cr ." CAN1_F24R1.  RW   $" CAN1_F24R1 @ hex. CAN1_F24R1 1b. ;
-    : CAN1_F24R2. cr ." CAN1_F24R2.  RW   $" CAN1_F24R2 @ hex. CAN1_F24R2 1b. ;
-    : CAN1_F25R1. cr ." CAN1_F25R1.  RW   $" CAN1_F25R1 @ hex. CAN1_F25R1 1b. ;
-    : CAN1_F25R2. cr ." CAN1_F25R2.  RW   $" CAN1_F25R2 @ hex. CAN1_F25R2 1b. ;
-    : CAN1_F26R1. cr ." CAN1_F26R1.  RW   $" CAN1_F26R1 @ hex. CAN1_F26R1 1b. ;
-    : CAN1_F26R2. cr ." CAN1_F26R2.  RW   $" CAN1_F26R2 @ hex. CAN1_F26R2 1b. ;
-    : CAN1_F27R1. cr ." CAN1_F27R1.  RW   $" CAN1_F27R1 @ hex. CAN1_F27R1 1b. ;
-    : CAN1_F27R2. cr ." CAN1_F27R2.  RW   $" CAN1_F27R2 @ hex. CAN1_F27R2 1b. ;
+    : CAN1_MCR. cr ." CAN1_MCR.  RW   $" CAN1_MCR @ h.8 CAN1_MCR 1b. ;
+    : CAN1_MSR. cr ." CAN1_MSR.   $" CAN1_MSR @ h.8 CAN1_MSR 1b. ;
+    : CAN1_TSR. cr ." CAN1_TSR.   $" CAN1_TSR @ h.8 CAN1_TSR 1b. ;
+    : CAN1_RF0R. cr ." CAN1_RF0R.   $" CAN1_RF0R @ h.8 CAN1_RF0R 1b. ;
+    : CAN1_RF1R. cr ." CAN1_RF1R.   $" CAN1_RF1R @ h.8 CAN1_RF1R 1b. ;
+    : CAN1_IER. cr ." CAN1_IER.  RW   $" CAN1_IER @ h.8 CAN1_IER 1b. ;
+    : CAN1_ESR. cr ." CAN1_ESR.   $" CAN1_ESR @ h.8 CAN1_ESR 1b. ;
+    : CAN1_BTR. cr ." CAN1_BTR.  RW   $" CAN1_BTR @ h.8 CAN1_BTR 1b. ;
+    : CAN1_TI0R. cr ." CAN1_TI0R.  RW   $" CAN1_TI0R @ h.8 CAN1_TI0R 1b. ;
+    : CAN1_TDT0R. cr ." CAN1_TDT0R.  RW   $" CAN1_TDT0R @ h.8 CAN1_TDT0R 1b. ;
+    : CAN1_TDL0R. cr ." CAN1_TDL0R.  RW   $" CAN1_TDL0R @ h.8 CAN1_TDL0R 1b. ;
+    : CAN1_TDH0R. cr ." CAN1_TDH0R.  RW   $" CAN1_TDH0R @ h.8 CAN1_TDH0R 1b. ;
+    : CAN1_TI1R. cr ." CAN1_TI1R.  RW   $" CAN1_TI1R @ h.8 CAN1_TI1R 1b. ;
+    : CAN1_TDT1R. cr ." CAN1_TDT1R.  RW   $" CAN1_TDT1R @ h.8 CAN1_TDT1R 1b. ;
+    : CAN1_TDL1R. cr ." CAN1_TDL1R.  RW   $" CAN1_TDL1R @ h.8 CAN1_TDL1R 1b. ;
+    : CAN1_TDH1R. cr ." CAN1_TDH1R.  RW   $" CAN1_TDH1R @ h.8 CAN1_TDH1R 1b. ;
+    : CAN1_TI2R. cr ." CAN1_TI2R.  RW   $" CAN1_TI2R @ h.8 CAN1_TI2R 1b. ;
+    : CAN1_TDT2R. cr ." CAN1_TDT2R.  RW   $" CAN1_TDT2R @ h.8 CAN1_TDT2R 1b. ;
+    : CAN1_TDL2R. cr ." CAN1_TDL2R.  RW   $" CAN1_TDL2R @ h.8 CAN1_TDL2R 1b. ;
+    : CAN1_TDH2R. cr ." CAN1_TDH2R.  RW   $" CAN1_TDH2R @ h.8 CAN1_TDH2R 1b. ;
+    : CAN1_RI0R. cr ." CAN1_RI0R.  RO   $" CAN1_RI0R @ h.8 CAN1_RI0R 1b. ;
+    : CAN1_RDT0R. cr ." CAN1_RDT0R.  RO   $" CAN1_RDT0R @ h.8 CAN1_RDT0R 1b. ;
+    : CAN1_RDL0R. cr ." CAN1_RDL0R.  RO   $" CAN1_RDL0R @ h.8 CAN1_RDL0R 1b. ;
+    : CAN1_RDH0R. cr ." CAN1_RDH0R.  RO   $" CAN1_RDH0R @ h.8 CAN1_RDH0R 1b. ;
+    : CAN1_RI1R. cr ." CAN1_RI1R.  RO   $" CAN1_RI1R @ h.8 CAN1_RI1R 1b. ;
+    : CAN1_RDT1R. cr ." CAN1_RDT1R.  RO   $" CAN1_RDT1R @ h.8 CAN1_RDT1R 1b. ;
+    : CAN1_RDL1R. cr ." CAN1_RDL1R.  RO   $" CAN1_RDL1R @ h.8 CAN1_RDL1R 1b. ;
+    : CAN1_RDH1R. cr ." CAN1_RDH1R.  RO   $" CAN1_RDH1R @ h.8 CAN1_RDH1R 1b. ;
+    : CAN1_FMR. cr ." CAN1_FMR.  RW   $" CAN1_FMR @ h.8 CAN1_FMR 1b. ;
+    : CAN1_FM1R. cr ." CAN1_FM1R.  RW   $" CAN1_FM1R @ h.8 CAN1_FM1R 1b. ;
+    : CAN1_FS1R. cr ." CAN1_FS1R.  RW   $" CAN1_FS1R @ h.8 CAN1_FS1R 1b. ;
+    : CAN1_FFA1R. cr ." CAN1_FFA1R.  RW   $" CAN1_FFA1R @ h.8 CAN1_FFA1R 1b. ;
+    : CAN1_FA1R. cr ." CAN1_FA1R.  RW   $" CAN1_FA1R @ h.8 CAN1_FA1R 1b. ;
+    : CAN1_F0R1. cr ." CAN1_F0R1.  RW   $" CAN1_F0R1 @ h.8 CAN1_F0R1 1b. ;
+    : CAN1_F0R2. cr ." CAN1_F0R2.  RW   $" CAN1_F0R2 @ h.8 CAN1_F0R2 1b. ;
+    : CAN1_F1R1. cr ." CAN1_F1R1.  RW   $" CAN1_F1R1 @ h.8 CAN1_F1R1 1b. ;
+    : CAN1_F1R2. cr ." CAN1_F1R2.  RW   $" CAN1_F1R2 @ h.8 CAN1_F1R2 1b. ;
+    : CAN1_F2R1. cr ." CAN1_F2R1.  RW   $" CAN1_F2R1 @ h.8 CAN1_F2R1 1b. ;
+    : CAN1_F2R2. cr ." CAN1_F2R2.  RW   $" CAN1_F2R2 @ h.8 CAN1_F2R2 1b. ;
+    : CAN1_F3R1. cr ." CAN1_F3R1.  RW   $" CAN1_F3R1 @ h.8 CAN1_F3R1 1b. ;
+    : CAN1_F3R2. cr ." CAN1_F3R2.  RW   $" CAN1_F3R2 @ h.8 CAN1_F3R2 1b. ;
+    : CAN1_F4R1. cr ." CAN1_F4R1.  RW   $" CAN1_F4R1 @ h.8 CAN1_F4R1 1b. ;
+    : CAN1_F4R2. cr ." CAN1_F4R2.  RW   $" CAN1_F4R2 @ h.8 CAN1_F4R2 1b. ;
+    : CAN1_F5R1. cr ." CAN1_F5R1.  RW   $" CAN1_F5R1 @ h.8 CAN1_F5R1 1b. ;
+    : CAN1_F5R2. cr ." CAN1_F5R2.  RW   $" CAN1_F5R2 @ h.8 CAN1_F5R2 1b. ;
+    : CAN1_F6R1. cr ." CAN1_F6R1.  RW   $" CAN1_F6R1 @ h.8 CAN1_F6R1 1b. ;
+    : CAN1_F6R2. cr ." CAN1_F6R2.  RW   $" CAN1_F6R2 @ h.8 CAN1_F6R2 1b. ;
+    : CAN1_F7R1. cr ." CAN1_F7R1.  RW   $" CAN1_F7R1 @ h.8 CAN1_F7R1 1b. ;
+    : CAN1_F7R2. cr ." CAN1_F7R2.  RW   $" CAN1_F7R2 @ h.8 CAN1_F7R2 1b. ;
+    : CAN1_F8R1. cr ." CAN1_F8R1.  RW   $" CAN1_F8R1 @ h.8 CAN1_F8R1 1b. ;
+    : CAN1_F8R2. cr ." CAN1_F8R2.  RW   $" CAN1_F8R2 @ h.8 CAN1_F8R2 1b. ;
+    : CAN1_F9R1. cr ." CAN1_F9R1.  RW   $" CAN1_F9R1 @ h.8 CAN1_F9R1 1b. ;
+    : CAN1_F9R2. cr ." CAN1_F9R2.  RW   $" CAN1_F9R2 @ h.8 CAN1_F9R2 1b. ;
+    : CAN1_F10R1. cr ." CAN1_F10R1.  RW   $" CAN1_F10R1 @ h.8 CAN1_F10R1 1b. ;
+    : CAN1_F10R2. cr ." CAN1_F10R2.  RW   $" CAN1_F10R2 @ h.8 CAN1_F10R2 1b. ;
+    : CAN1_F11R1. cr ." CAN1_F11R1.  RW   $" CAN1_F11R1 @ h.8 CAN1_F11R1 1b. ;
+    : CAN1_F11R2. cr ." CAN1_F11R2.  RW   $" CAN1_F11R2 @ h.8 CAN1_F11R2 1b. ;
+    : CAN1_F12R1. cr ." CAN1_F12R1.  RW   $" CAN1_F12R1 @ h.8 CAN1_F12R1 1b. ;
+    : CAN1_F12R2. cr ." CAN1_F12R2.  RW   $" CAN1_F12R2 @ h.8 CAN1_F12R2 1b. ;
+    : CAN1_F13R1. cr ." CAN1_F13R1.  RW   $" CAN1_F13R1 @ h.8 CAN1_F13R1 1b. ;
+    : CAN1_F13R2. cr ." CAN1_F13R2.  RW   $" CAN1_F13R2 @ h.8 CAN1_F13R2 1b. ;
+    : CAN1_F14R1. cr ." CAN1_F14R1.  RW   $" CAN1_F14R1 @ h.8 CAN1_F14R1 1b. ;
+    : CAN1_F14R2. cr ." CAN1_F14R2.  RW   $" CAN1_F14R2 @ h.8 CAN1_F14R2 1b. ;
+    : CAN1_F15R1. cr ." CAN1_F15R1.  RW   $" CAN1_F15R1 @ h.8 CAN1_F15R1 1b. ;
+    : CAN1_F15R2. cr ." CAN1_F15R2.  RW   $" CAN1_F15R2 @ h.8 CAN1_F15R2 1b. ;
+    : CAN1_F16R1. cr ." CAN1_F16R1.  RW   $" CAN1_F16R1 @ h.8 CAN1_F16R1 1b. ;
+    : CAN1_F16R2. cr ." CAN1_F16R2.  RW   $" CAN1_F16R2 @ h.8 CAN1_F16R2 1b. ;
+    : CAN1_F17R1. cr ." CAN1_F17R1.  RW   $" CAN1_F17R1 @ h.8 CAN1_F17R1 1b. ;
+    : CAN1_F17R2. cr ." CAN1_F17R2.  RW   $" CAN1_F17R2 @ h.8 CAN1_F17R2 1b. ;
+    : CAN1_F18R1. cr ." CAN1_F18R1.  RW   $" CAN1_F18R1 @ h.8 CAN1_F18R1 1b. ;
+    : CAN1_F18R2. cr ." CAN1_F18R2.  RW   $" CAN1_F18R2 @ h.8 CAN1_F18R2 1b. ;
+    : CAN1_F19R1. cr ." CAN1_F19R1.  RW   $" CAN1_F19R1 @ h.8 CAN1_F19R1 1b. ;
+    : CAN1_F19R2. cr ." CAN1_F19R2.  RW   $" CAN1_F19R2 @ h.8 CAN1_F19R2 1b. ;
+    : CAN1_F20R1. cr ." CAN1_F20R1.  RW   $" CAN1_F20R1 @ h.8 CAN1_F20R1 1b. ;
+    : CAN1_F20R2. cr ." CAN1_F20R2.  RW   $" CAN1_F20R2 @ h.8 CAN1_F20R2 1b. ;
+    : CAN1_F21R1. cr ." CAN1_F21R1.  RW   $" CAN1_F21R1 @ h.8 CAN1_F21R1 1b. ;
+    : CAN1_F21R2. cr ." CAN1_F21R2.  RW   $" CAN1_F21R2 @ h.8 CAN1_F21R2 1b. ;
+    : CAN1_F22R1. cr ." CAN1_F22R1.  RW   $" CAN1_F22R1 @ h.8 CAN1_F22R1 1b. ;
+    : CAN1_F22R2. cr ." CAN1_F22R2.  RW   $" CAN1_F22R2 @ h.8 CAN1_F22R2 1b. ;
+    : CAN1_F23R1. cr ." CAN1_F23R1.  RW   $" CAN1_F23R1 @ h.8 CAN1_F23R1 1b. ;
+    : CAN1_F23R2. cr ." CAN1_F23R2.  RW   $" CAN1_F23R2 @ h.8 CAN1_F23R2 1b. ;
+    : CAN1_F24R1. cr ." CAN1_F24R1.  RW   $" CAN1_F24R1 @ h.8 CAN1_F24R1 1b. ;
+    : CAN1_F24R2. cr ." CAN1_F24R2.  RW   $" CAN1_F24R2 @ h.8 CAN1_F24R2 1b. ;
+    : CAN1_F25R1. cr ." CAN1_F25R1.  RW   $" CAN1_F25R1 @ h.8 CAN1_F25R1 1b. ;
+    : CAN1_F25R2. cr ." CAN1_F25R2.  RW   $" CAN1_F25R2 @ h.8 CAN1_F25R2 1b. ;
+    : CAN1_F26R1. cr ." CAN1_F26R1.  RW   $" CAN1_F26R1 @ h.8 CAN1_F26R1 1b. ;
+    : CAN1_F26R2. cr ." CAN1_F26R2.  RW   $" CAN1_F26R2 @ h.8 CAN1_F26R2 1b. ;
+    : CAN1_F27R1. cr ." CAN1_F27R1.  RW   $" CAN1_F27R1 @ h.8 CAN1_F27R1 1b. ;
+    : CAN1_F27R2. cr ." CAN1_F27R2.  RW   $" CAN1_F27R2 @ h.8 CAN1_F27R2 1b. ;
     : CAN1.
       CAN1_MCR.
       CAN1_MSR.
@@ -3234,95 +3234,95 @@ begin-module memmap
     CAN2 $314 + constant CAN2_F26R2 ( read-write )  \ Filter bank 26 register 2
     CAN2 $318 + constant CAN2_F27R1 ( read-write )  \ Filter bank 27 register 1
     CAN2 $31C + constant CAN2_F27R2 ( read-write )  \ Filter bank 27 register 2
-    : CAN2_MCR. cr ." CAN2_MCR.  RW   $" CAN2_MCR @ hex. CAN2_MCR 1b. ;
-    : CAN2_MSR. cr ." CAN2_MSR.   $" CAN2_MSR @ hex. CAN2_MSR 1b. ;
-    : CAN2_TSR. cr ." CAN2_TSR.   $" CAN2_TSR @ hex. CAN2_TSR 1b. ;
-    : CAN2_RF0R. cr ." CAN2_RF0R.   $" CAN2_RF0R @ hex. CAN2_RF0R 1b. ;
-    : CAN2_RF1R. cr ." CAN2_RF1R.   $" CAN2_RF1R @ hex. CAN2_RF1R 1b. ;
-    : CAN2_IER. cr ." CAN2_IER.  RW   $" CAN2_IER @ hex. CAN2_IER 1b. ;
-    : CAN2_ESR. cr ." CAN2_ESR.   $" CAN2_ESR @ hex. CAN2_ESR 1b. ;
-    : CAN2_BTR. cr ." CAN2_BTR.  RW   $" CAN2_BTR @ hex. CAN2_BTR 1b. ;
-    : CAN2_TI0R. cr ." CAN2_TI0R.  RW   $" CAN2_TI0R @ hex. CAN2_TI0R 1b. ;
-    : CAN2_TDT0R. cr ." CAN2_TDT0R.  RW   $" CAN2_TDT0R @ hex. CAN2_TDT0R 1b. ;
-    : CAN2_TDL0R. cr ." CAN2_TDL0R.  RW   $" CAN2_TDL0R @ hex. CAN2_TDL0R 1b. ;
-    : CAN2_TDH0R. cr ." CAN2_TDH0R.  RW   $" CAN2_TDH0R @ hex. CAN2_TDH0R 1b. ;
-    : CAN2_TI1R. cr ." CAN2_TI1R.  RW   $" CAN2_TI1R @ hex. CAN2_TI1R 1b. ;
-    : CAN2_TDT1R. cr ." CAN2_TDT1R.  RW   $" CAN2_TDT1R @ hex. CAN2_TDT1R 1b. ;
-    : CAN2_TDL1R. cr ." CAN2_TDL1R.  RW   $" CAN2_TDL1R @ hex. CAN2_TDL1R 1b. ;
-    : CAN2_TDH1R. cr ." CAN2_TDH1R.  RW   $" CAN2_TDH1R @ hex. CAN2_TDH1R 1b. ;
-    : CAN2_TI2R. cr ." CAN2_TI2R.  RW   $" CAN2_TI2R @ hex. CAN2_TI2R 1b. ;
-    : CAN2_TDT2R. cr ." CAN2_TDT2R.  RW   $" CAN2_TDT2R @ hex. CAN2_TDT2R 1b. ;
-    : CAN2_TDL2R. cr ." CAN2_TDL2R.  RW   $" CAN2_TDL2R @ hex. CAN2_TDL2R 1b. ;
-    : CAN2_TDH2R. cr ." CAN2_TDH2R.  RW   $" CAN2_TDH2R @ hex. CAN2_TDH2R 1b. ;
-    : CAN2_RI0R. cr ." CAN2_RI0R.  RO   $" CAN2_RI0R @ hex. CAN2_RI0R 1b. ;
-    : CAN2_RDT0R. cr ." CAN2_RDT0R.  RO   $" CAN2_RDT0R @ hex. CAN2_RDT0R 1b. ;
-    : CAN2_RDL0R. cr ." CAN2_RDL0R.  RO   $" CAN2_RDL0R @ hex. CAN2_RDL0R 1b. ;
-    : CAN2_RDH0R. cr ." CAN2_RDH0R.  RO   $" CAN2_RDH0R @ hex. CAN2_RDH0R 1b. ;
-    : CAN2_RI1R. cr ." CAN2_RI1R.  RO   $" CAN2_RI1R @ hex. CAN2_RI1R 1b. ;
-    : CAN2_RDT1R. cr ." CAN2_RDT1R.  RO   $" CAN2_RDT1R @ hex. CAN2_RDT1R 1b. ;
-    : CAN2_RDL1R. cr ." CAN2_RDL1R.  RO   $" CAN2_RDL1R @ hex. CAN2_RDL1R 1b. ;
-    : CAN2_RDH1R. cr ." CAN2_RDH1R.  RO   $" CAN2_RDH1R @ hex. CAN2_RDH1R 1b. ;
-    : CAN2_FMR. cr ." CAN2_FMR.  RW   $" CAN2_FMR @ hex. CAN2_FMR 1b. ;
-    : CAN2_FM1R. cr ." CAN2_FM1R.  RW   $" CAN2_FM1R @ hex. CAN2_FM1R 1b. ;
-    : CAN2_FS1R. cr ." CAN2_FS1R.  RW   $" CAN2_FS1R @ hex. CAN2_FS1R 1b. ;
-    : CAN2_FFA1R. cr ." CAN2_FFA1R.  RW   $" CAN2_FFA1R @ hex. CAN2_FFA1R 1b. ;
-    : CAN2_FA1R. cr ." CAN2_FA1R.  RW   $" CAN2_FA1R @ hex. CAN2_FA1R 1b. ;
-    : CAN2_F0R1. cr ." CAN2_F0R1.  RW   $" CAN2_F0R1 @ hex. CAN2_F0R1 1b. ;
-    : CAN2_F0R2. cr ." CAN2_F0R2.  RW   $" CAN2_F0R2 @ hex. CAN2_F0R2 1b. ;
-    : CAN2_F1R1. cr ." CAN2_F1R1.  RW   $" CAN2_F1R1 @ hex. CAN2_F1R1 1b. ;
-    : CAN2_F1R2. cr ." CAN2_F1R2.  RW   $" CAN2_F1R2 @ hex. CAN2_F1R2 1b. ;
-    : CAN2_F2R1. cr ." CAN2_F2R1.  RW   $" CAN2_F2R1 @ hex. CAN2_F2R1 1b. ;
-    : CAN2_F2R2. cr ." CAN2_F2R2.  RW   $" CAN2_F2R2 @ hex. CAN2_F2R2 1b. ;
-    : CAN2_F3R1. cr ." CAN2_F3R1.  RW   $" CAN2_F3R1 @ hex. CAN2_F3R1 1b. ;
-    : CAN2_F3R2. cr ." CAN2_F3R2.  RW   $" CAN2_F3R2 @ hex. CAN2_F3R2 1b. ;
-    : CAN2_F4R1. cr ." CAN2_F4R1.  RW   $" CAN2_F4R1 @ hex. CAN2_F4R1 1b. ;
-    : CAN2_F4R2. cr ." CAN2_F4R2.  RW   $" CAN2_F4R2 @ hex. CAN2_F4R2 1b. ;
-    : CAN2_F5R1. cr ." CAN2_F5R1.  RW   $" CAN2_F5R1 @ hex. CAN2_F5R1 1b. ;
-    : CAN2_F5R2. cr ." CAN2_F5R2.  RW   $" CAN2_F5R2 @ hex. CAN2_F5R2 1b. ;
-    : CAN2_F6R1. cr ." CAN2_F6R1.  RW   $" CAN2_F6R1 @ hex. CAN2_F6R1 1b. ;
-    : CAN2_F6R2. cr ." CAN2_F6R2.  RW   $" CAN2_F6R2 @ hex. CAN2_F6R2 1b. ;
-    : CAN2_F7R1. cr ." CAN2_F7R1.  RW   $" CAN2_F7R1 @ hex. CAN2_F7R1 1b. ;
-    : CAN2_F7R2. cr ." CAN2_F7R2.  RW   $" CAN2_F7R2 @ hex. CAN2_F7R2 1b. ;
-    : CAN2_F8R1. cr ." CAN2_F8R1.  RW   $" CAN2_F8R1 @ hex. CAN2_F8R1 1b. ;
-    : CAN2_F8R2. cr ." CAN2_F8R2.  RW   $" CAN2_F8R2 @ hex. CAN2_F8R2 1b. ;
-    : CAN2_F9R1. cr ." CAN2_F9R1.  RW   $" CAN2_F9R1 @ hex. CAN2_F9R1 1b. ;
-    : CAN2_F9R2. cr ." CAN2_F9R2.  RW   $" CAN2_F9R2 @ hex. CAN2_F9R2 1b. ;
-    : CAN2_F10R1. cr ." CAN2_F10R1.  RW   $" CAN2_F10R1 @ hex. CAN2_F10R1 1b. ;
-    : CAN2_F10R2. cr ." CAN2_F10R2.  RW   $" CAN2_F10R2 @ hex. CAN2_F10R2 1b. ;
-    : CAN2_F11R1. cr ." CAN2_F11R1.  RW   $" CAN2_F11R1 @ hex. CAN2_F11R1 1b. ;
-    : CAN2_F11R2. cr ." CAN2_F11R2.  RW   $" CAN2_F11R2 @ hex. CAN2_F11R2 1b. ;
-    : CAN2_F12R1. cr ." CAN2_F12R1.  RW   $" CAN2_F12R1 @ hex. CAN2_F12R1 1b. ;
-    : CAN2_F12R2. cr ." CAN2_F12R2.  RW   $" CAN2_F12R2 @ hex. CAN2_F12R2 1b. ;
-    : CAN2_F13R1. cr ." CAN2_F13R1.  RW   $" CAN2_F13R1 @ hex. CAN2_F13R1 1b. ;
-    : CAN2_F13R2. cr ." CAN2_F13R2.  RW   $" CAN2_F13R2 @ hex. CAN2_F13R2 1b. ;
-    : CAN2_F14R1. cr ." CAN2_F14R1.  RW   $" CAN2_F14R1 @ hex. CAN2_F14R1 1b. ;
-    : CAN2_F14R2. cr ." CAN2_F14R2.  RW   $" CAN2_F14R2 @ hex. CAN2_F14R2 1b. ;
-    : CAN2_F15R1. cr ." CAN2_F15R1.  RW   $" CAN2_F15R1 @ hex. CAN2_F15R1 1b. ;
-    : CAN2_F15R2. cr ." CAN2_F15R2.  RW   $" CAN2_F15R2 @ hex. CAN2_F15R2 1b. ;
-    : CAN2_F16R1. cr ." CAN2_F16R1.  RW   $" CAN2_F16R1 @ hex. CAN2_F16R1 1b. ;
-    : CAN2_F16R2. cr ." CAN2_F16R2.  RW   $" CAN2_F16R2 @ hex. CAN2_F16R2 1b. ;
-    : CAN2_F17R1. cr ." CAN2_F17R1.  RW   $" CAN2_F17R1 @ hex. CAN2_F17R1 1b. ;
-    : CAN2_F17R2. cr ." CAN2_F17R2.  RW   $" CAN2_F17R2 @ hex. CAN2_F17R2 1b. ;
-    : CAN2_F18R1. cr ." CAN2_F18R1.  RW   $" CAN2_F18R1 @ hex. CAN2_F18R1 1b. ;
-    : CAN2_F18R2. cr ." CAN2_F18R2.  RW   $" CAN2_F18R2 @ hex. CAN2_F18R2 1b. ;
-    : CAN2_F19R1. cr ." CAN2_F19R1.  RW   $" CAN2_F19R1 @ hex. CAN2_F19R1 1b. ;
-    : CAN2_F19R2. cr ." CAN2_F19R2.  RW   $" CAN2_F19R2 @ hex. CAN2_F19R2 1b. ;
-    : CAN2_F20R1. cr ." CAN2_F20R1.  RW   $" CAN2_F20R1 @ hex. CAN2_F20R1 1b. ;
-    : CAN2_F20R2. cr ." CAN2_F20R2.  RW   $" CAN2_F20R2 @ hex. CAN2_F20R2 1b. ;
-    : CAN2_F21R1. cr ." CAN2_F21R1.  RW   $" CAN2_F21R1 @ hex. CAN2_F21R1 1b. ;
-    : CAN2_F21R2. cr ." CAN2_F21R2.  RW   $" CAN2_F21R2 @ hex. CAN2_F21R2 1b. ;
-    : CAN2_F22R1. cr ." CAN2_F22R1.  RW   $" CAN2_F22R1 @ hex. CAN2_F22R1 1b. ;
-    : CAN2_F22R2. cr ." CAN2_F22R2.  RW   $" CAN2_F22R2 @ hex. CAN2_F22R2 1b. ;
-    : CAN2_F23R1. cr ." CAN2_F23R1.  RW   $" CAN2_F23R1 @ hex. CAN2_F23R1 1b. ;
-    : CAN2_F23R2. cr ." CAN2_F23R2.  RW   $" CAN2_F23R2 @ hex. CAN2_F23R2 1b. ;
-    : CAN2_F24R1. cr ." CAN2_F24R1.  RW   $" CAN2_F24R1 @ hex. CAN2_F24R1 1b. ;
-    : CAN2_F24R2. cr ." CAN2_F24R2.  RW   $" CAN2_F24R2 @ hex. CAN2_F24R2 1b. ;
-    : CAN2_F25R1. cr ." CAN2_F25R1.  RW   $" CAN2_F25R1 @ hex. CAN2_F25R1 1b. ;
-    : CAN2_F25R2. cr ." CAN2_F25R2.  RW   $" CAN2_F25R2 @ hex. CAN2_F25R2 1b. ;
-    : CAN2_F26R1. cr ." CAN2_F26R1.  RW   $" CAN2_F26R1 @ hex. CAN2_F26R1 1b. ;
-    : CAN2_F26R2. cr ." CAN2_F26R2.  RW   $" CAN2_F26R2 @ hex. CAN2_F26R2 1b. ;
-    : CAN2_F27R1. cr ." CAN2_F27R1.  RW   $" CAN2_F27R1 @ hex. CAN2_F27R1 1b. ;
-    : CAN2_F27R2. cr ." CAN2_F27R2.  RW   $" CAN2_F27R2 @ hex. CAN2_F27R2 1b. ;
+    : CAN2_MCR. cr ." CAN2_MCR.  RW   $" CAN2_MCR @ h.8 CAN2_MCR 1b. ;
+    : CAN2_MSR. cr ." CAN2_MSR.   $" CAN2_MSR @ h.8 CAN2_MSR 1b. ;
+    : CAN2_TSR. cr ." CAN2_TSR.   $" CAN2_TSR @ h.8 CAN2_TSR 1b. ;
+    : CAN2_RF0R. cr ." CAN2_RF0R.   $" CAN2_RF0R @ h.8 CAN2_RF0R 1b. ;
+    : CAN2_RF1R. cr ." CAN2_RF1R.   $" CAN2_RF1R @ h.8 CAN2_RF1R 1b. ;
+    : CAN2_IER. cr ." CAN2_IER.  RW   $" CAN2_IER @ h.8 CAN2_IER 1b. ;
+    : CAN2_ESR. cr ." CAN2_ESR.   $" CAN2_ESR @ h.8 CAN2_ESR 1b. ;
+    : CAN2_BTR. cr ." CAN2_BTR.  RW   $" CAN2_BTR @ h.8 CAN2_BTR 1b. ;
+    : CAN2_TI0R. cr ." CAN2_TI0R.  RW   $" CAN2_TI0R @ h.8 CAN2_TI0R 1b. ;
+    : CAN2_TDT0R. cr ." CAN2_TDT0R.  RW   $" CAN2_TDT0R @ h.8 CAN2_TDT0R 1b. ;
+    : CAN2_TDL0R. cr ." CAN2_TDL0R.  RW   $" CAN2_TDL0R @ h.8 CAN2_TDL0R 1b. ;
+    : CAN2_TDH0R. cr ." CAN2_TDH0R.  RW   $" CAN2_TDH0R @ h.8 CAN2_TDH0R 1b. ;
+    : CAN2_TI1R. cr ." CAN2_TI1R.  RW   $" CAN2_TI1R @ h.8 CAN2_TI1R 1b. ;
+    : CAN2_TDT1R. cr ." CAN2_TDT1R.  RW   $" CAN2_TDT1R @ h.8 CAN2_TDT1R 1b. ;
+    : CAN2_TDL1R. cr ." CAN2_TDL1R.  RW   $" CAN2_TDL1R @ h.8 CAN2_TDL1R 1b. ;
+    : CAN2_TDH1R. cr ." CAN2_TDH1R.  RW   $" CAN2_TDH1R @ h.8 CAN2_TDH1R 1b. ;
+    : CAN2_TI2R. cr ." CAN2_TI2R.  RW   $" CAN2_TI2R @ h.8 CAN2_TI2R 1b. ;
+    : CAN2_TDT2R. cr ." CAN2_TDT2R.  RW   $" CAN2_TDT2R @ h.8 CAN2_TDT2R 1b. ;
+    : CAN2_TDL2R. cr ." CAN2_TDL2R.  RW   $" CAN2_TDL2R @ h.8 CAN2_TDL2R 1b. ;
+    : CAN2_TDH2R. cr ." CAN2_TDH2R.  RW   $" CAN2_TDH2R @ h.8 CAN2_TDH2R 1b. ;
+    : CAN2_RI0R. cr ." CAN2_RI0R.  RO   $" CAN2_RI0R @ h.8 CAN2_RI0R 1b. ;
+    : CAN2_RDT0R. cr ." CAN2_RDT0R.  RO   $" CAN2_RDT0R @ h.8 CAN2_RDT0R 1b. ;
+    : CAN2_RDL0R. cr ." CAN2_RDL0R.  RO   $" CAN2_RDL0R @ h.8 CAN2_RDL0R 1b. ;
+    : CAN2_RDH0R. cr ." CAN2_RDH0R.  RO   $" CAN2_RDH0R @ h.8 CAN2_RDH0R 1b. ;
+    : CAN2_RI1R. cr ." CAN2_RI1R.  RO   $" CAN2_RI1R @ h.8 CAN2_RI1R 1b. ;
+    : CAN2_RDT1R. cr ." CAN2_RDT1R.  RO   $" CAN2_RDT1R @ h.8 CAN2_RDT1R 1b. ;
+    : CAN2_RDL1R. cr ." CAN2_RDL1R.  RO   $" CAN2_RDL1R @ h.8 CAN2_RDL1R 1b. ;
+    : CAN2_RDH1R. cr ." CAN2_RDH1R.  RO   $" CAN2_RDH1R @ h.8 CAN2_RDH1R 1b. ;
+    : CAN2_FMR. cr ." CAN2_FMR.  RW   $" CAN2_FMR @ h.8 CAN2_FMR 1b. ;
+    : CAN2_FM1R. cr ." CAN2_FM1R.  RW   $" CAN2_FM1R @ h.8 CAN2_FM1R 1b. ;
+    : CAN2_FS1R. cr ." CAN2_FS1R.  RW   $" CAN2_FS1R @ h.8 CAN2_FS1R 1b. ;
+    : CAN2_FFA1R. cr ." CAN2_FFA1R.  RW   $" CAN2_FFA1R @ h.8 CAN2_FFA1R 1b. ;
+    : CAN2_FA1R. cr ." CAN2_FA1R.  RW   $" CAN2_FA1R @ h.8 CAN2_FA1R 1b. ;
+    : CAN2_F0R1. cr ." CAN2_F0R1.  RW   $" CAN2_F0R1 @ h.8 CAN2_F0R1 1b. ;
+    : CAN2_F0R2. cr ." CAN2_F0R2.  RW   $" CAN2_F0R2 @ h.8 CAN2_F0R2 1b. ;
+    : CAN2_F1R1. cr ." CAN2_F1R1.  RW   $" CAN2_F1R1 @ h.8 CAN2_F1R1 1b. ;
+    : CAN2_F1R2. cr ." CAN2_F1R2.  RW   $" CAN2_F1R2 @ h.8 CAN2_F1R2 1b. ;
+    : CAN2_F2R1. cr ." CAN2_F2R1.  RW   $" CAN2_F2R1 @ h.8 CAN2_F2R1 1b. ;
+    : CAN2_F2R2. cr ." CAN2_F2R2.  RW   $" CAN2_F2R2 @ h.8 CAN2_F2R2 1b. ;
+    : CAN2_F3R1. cr ." CAN2_F3R1.  RW   $" CAN2_F3R1 @ h.8 CAN2_F3R1 1b. ;
+    : CAN2_F3R2. cr ." CAN2_F3R2.  RW   $" CAN2_F3R2 @ h.8 CAN2_F3R2 1b. ;
+    : CAN2_F4R1. cr ." CAN2_F4R1.  RW   $" CAN2_F4R1 @ h.8 CAN2_F4R1 1b. ;
+    : CAN2_F4R2. cr ." CAN2_F4R2.  RW   $" CAN2_F4R2 @ h.8 CAN2_F4R2 1b. ;
+    : CAN2_F5R1. cr ." CAN2_F5R1.  RW   $" CAN2_F5R1 @ h.8 CAN2_F5R1 1b. ;
+    : CAN2_F5R2. cr ." CAN2_F5R2.  RW   $" CAN2_F5R2 @ h.8 CAN2_F5R2 1b. ;
+    : CAN2_F6R1. cr ." CAN2_F6R1.  RW   $" CAN2_F6R1 @ h.8 CAN2_F6R1 1b. ;
+    : CAN2_F6R2. cr ." CAN2_F6R2.  RW   $" CAN2_F6R2 @ h.8 CAN2_F6R2 1b. ;
+    : CAN2_F7R1. cr ." CAN2_F7R1.  RW   $" CAN2_F7R1 @ h.8 CAN2_F7R1 1b. ;
+    : CAN2_F7R2. cr ." CAN2_F7R2.  RW   $" CAN2_F7R2 @ h.8 CAN2_F7R2 1b. ;
+    : CAN2_F8R1. cr ." CAN2_F8R1.  RW   $" CAN2_F8R1 @ h.8 CAN2_F8R1 1b. ;
+    : CAN2_F8R2. cr ." CAN2_F8R2.  RW   $" CAN2_F8R2 @ h.8 CAN2_F8R2 1b. ;
+    : CAN2_F9R1. cr ." CAN2_F9R1.  RW   $" CAN2_F9R1 @ h.8 CAN2_F9R1 1b. ;
+    : CAN2_F9R2. cr ." CAN2_F9R2.  RW   $" CAN2_F9R2 @ h.8 CAN2_F9R2 1b. ;
+    : CAN2_F10R1. cr ." CAN2_F10R1.  RW   $" CAN2_F10R1 @ h.8 CAN2_F10R1 1b. ;
+    : CAN2_F10R2. cr ." CAN2_F10R2.  RW   $" CAN2_F10R2 @ h.8 CAN2_F10R2 1b. ;
+    : CAN2_F11R1. cr ." CAN2_F11R1.  RW   $" CAN2_F11R1 @ h.8 CAN2_F11R1 1b. ;
+    : CAN2_F11R2. cr ." CAN2_F11R2.  RW   $" CAN2_F11R2 @ h.8 CAN2_F11R2 1b. ;
+    : CAN2_F12R1. cr ." CAN2_F12R1.  RW   $" CAN2_F12R1 @ h.8 CAN2_F12R1 1b. ;
+    : CAN2_F12R2. cr ." CAN2_F12R2.  RW   $" CAN2_F12R2 @ h.8 CAN2_F12R2 1b. ;
+    : CAN2_F13R1. cr ." CAN2_F13R1.  RW   $" CAN2_F13R1 @ h.8 CAN2_F13R1 1b. ;
+    : CAN2_F13R2. cr ." CAN2_F13R2.  RW   $" CAN2_F13R2 @ h.8 CAN2_F13R2 1b. ;
+    : CAN2_F14R1. cr ." CAN2_F14R1.  RW   $" CAN2_F14R1 @ h.8 CAN2_F14R1 1b. ;
+    : CAN2_F14R2. cr ." CAN2_F14R2.  RW   $" CAN2_F14R2 @ h.8 CAN2_F14R2 1b. ;
+    : CAN2_F15R1. cr ." CAN2_F15R1.  RW   $" CAN2_F15R1 @ h.8 CAN2_F15R1 1b. ;
+    : CAN2_F15R2. cr ." CAN2_F15R2.  RW   $" CAN2_F15R2 @ h.8 CAN2_F15R2 1b. ;
+    : CAN2_F16R1. cr ." CAN2_F16R1.  RW   $" CAN2_F16R1 @ h.8 CAN2_F16R1 1b. ;
+    : CAN2_F16R2. cr ." CAN2_F16R2.  RW   $" CAN2_F16R2 @ h.8 CAN2_F16R2 1b. ;
+    : CAN2_F17R1. cr ." CAN2_F17R1.  RW   $" CAN2_F17R1 @ h.8 CAN2_F17R1 1b. ;
+    : CAN2_F17R2. cr ." CAN2_F17R2.  RW   $" CAN2_F17R2 @ h.8 CAN2_F17R2 1b. ;
+    : CAN2_F18R1. cr ." CAN2_F18R1.  RW   $" CAN2_F18R1 @ h.8 CAN2_F18R1 1b. ;
+    : CAN2_F18R2. cr ." CAN2_F18R2.  RW   $" CAN2_F18R2 @ h.8 CAN2_F18R2 1b. ;
+    : CAN2_F19R1. cr ." CAN2_F19R1.  RW   $" CAN2_F19R1 @ h.8 CAN2_F19R1 1b. ;
+    : CAN2_F19R2. cr ." CAN2_F19R2.  RW   $" CAN2_F19R2 @ h.8 CAN2_F19R2 1b. ;
+    : CAN2_F20R1. cr ." CAN2_F20R1.  RW   $" CAN2_F20R1 @ h.8 CAN2_F20R1 1b. ;
+    : CAN2_F20R2. cr ." CAN2_F20R2.  RW   $" CAN2_F20R2 @ h.8 CAN2_F20R2 1b. ;
+    : CAN2_F21R1. cr ." CAN2_F21R1.  RW   $" CAN2_F21R1 @ h.8 CAN2_F21R1 1b. ;
+    : CAN2_F21R2. cr ." CAN2_F21R2.  RW   $" CAN2_F21R2 @ h.8 CAN2_F21R2 1b. ;
+    : CAN2_F22R1. cr ." CAN2_F22R1.  RW   $" CAN2_F22R1 @ h.8 CAN2_F22R1 1b. ;
+    : CAN2_F22R2. cr ." CAN2_F22R2.  RW   $" CAN2_F22R2 @ h.8 CAN2_F22R2 1b. ;
+    : CAN2_F23R1. cr ." CAN2_F23R1.  RW   $" CAN2_F23R1 @ h.8 CAN2_F23R1 1b. ;
+    : CAN2_F23R2. cr ." CAN2_F23R2.  RW   $" CAN2_F23R2 @ h.8 CAN2_F23R2 1b. ;
+    : CAN2_F24R1. cr ." CAN2_F24R1.  RW   $" CAN2_F24R1 @ h.8 CAN2_F24R1 1b. ;
+    : CAN2_F24R2. cr ." CAN2_F24R2.  RW   $" CAN2_F24R2 @ h.8 CAN2_F24R2 1b. ;
+    : CAN2_F25R1. cr ." CAN2_F25R1.  RW   $" CAN2_F25R1 @ h.8 CAN2_F25R1 1b. ;
+    : CAN2_F25R2. cr ." CAN2_F25R2.  RW   $" CAN2_F25R2 @ h.8 CAN2_F25R2 1b. ;
+    : CAN2_F26R1. cr ." CAN2_F26R1.  RW   $" CAN2_F26R1 @ h.8 CAN2_F26R1 1b. ;
+    : CAN2_F26R2. cr ." CAN2_F26R2.  RW   $" CAN2_F26R2 @ h.8 CAN2_F26R2 1b. ;
+    : CAN2_F27R1. cr ." CAN2_F27R1.  RW   $" CAN2_F27R1 @ h.8 CAN2_F27R1 1b. ;
+    : CAN2_F27R2. cr ." CAN2_F27R2.  RW   $" CAN2_F27R2 @ h.8 CAN2_F27R2 1b. ;
     : CAN2.
       CAN2_MCR.
       CAN2_MSR.
@@ -3425,13 +3425,13 @@ begin-module memmap
     FLASH $10 + constant FLASH_CR ( read-write )  \ Control register
     FLASH $14 + constant FLASH_OPTCR ( read-write )  \ Flash option control register
     FLASH $18 + constant FLASH_OPTCR1 ( read-write )  \ Flash option control register 1
-    : FLASH_ACR. cr ." FLASH_ACR.  RW   $" FLASH_ACR @ hex. FLASH_ACR 1b. ;
+    : FLASH_ACR. cr ." FLASH_ACR.  RW   $" FLASH_ACR @ h.8 FLASH_ACR 1b. ;
     : FLASH_KEYR. cr ." FLASH_KEYR " WRITEONLY ; 
     : FLASH_OPTKEYR. cr ." FLASH_OPTKEYR " WRITEONLY ; 
-    : FLASH_SR. cr ." FLASH_SR.   $" FLASH_SR @ hex. FLASH_SR 1b. ;
-    : FLASH_CR. cr ." FLASH_CR.  RW   $" FLASH_CR @ hex. FLASH_CR 1b. ;
-    : FLASH_OPTCR. cr ." FLASH_OPTCR.  RW   $" FLASH_OPTCR @ hex. FLASH_OPTCR 1b. ;
-    : FLASH_OPTCR1. cr ." FLASH_OPTCR1.  RW   $" FLASH_OPTCR1 @ hex. FLASH_OPTCR1 1b. ;
+    : FLASH_SR. cr ." FLASH_SR.   $" FLASH_SR @ h.8 FLASH_SR 1b. ;
+    : FLASH_CR. cr ." FLASH_CR.  RW   $" FLASH_CR @ h.8 FLASH_CR 1b. ;
+    : FLASH_OPTCR. cr ." FLASH_OPTCR.  RW   $" FLASH_OPTCR @ h.8 FLASH_OPTCR 1b. ;
+    : FLASH_OPTCR1. cr ." FLASH_OPTCR1.  RW   $" FLASH_OPTCR1 @ h.8 FLASH_OPTCR1 1b. ;
     : FLASH.
       FLASH_ACR.
       FLASH_KEYR.
@@ -3451,12 +3451,12 @@ begin-module memmap
     EXTI $C + constant EXTI_FTSR ( read-write )  \ Falling Trigger selection register EXTI_FTSR
     EXTI $10 + constant EXTI_SWIER ( read-write )  \ Software interrupt event register EXTI_SWIER
     EXTI $14 + constant EXTI_PR ( read-write )  \ Pending register EXTI_PR
-    : EXTI_IMR. cr ." EXTI_IMR.  RW   $" EXTI_IMR @ hex. EXTI_IMR 1b. ;
-    : EXTI_EMR. cr ." EXTI_EMR.  RW   $" EXTI_EMR @ hex. EXTI_EMR 1b. ;
-    : EXTI_RTSR. cr ." EXTI_RTSR.  RW   $" EXTI_RTSR @ hex. EXTI_RTSR 1b. ;
-    : EXTI_FTSR. cr ." EXTI_FTSR.  RW   $" EXTI_FTSR @ hex. EXTI_FTSR 1b. ;
-    : EXTI_SWIER. cr ." EXTI_SWIER.  RW   $" EXTI_SWIER @ hex. EXTI_SWIER 1b. ;
-    : EXTI_PR. cr ." EXTI_PR.  RW   $" EXTI_PR @ hex. EXTI_PR 1b. ;
+    : EXTI_IMR. cr ." EXTI_IMR.  RW   $" EXTI_IMR @ h.8 EXTI_IMR 1b. ;
+    : EXTI_EMR. cr ." EXTI_EMR.  RW   $" EXTI_EMR @ h.8 EXTI_EMR 1b. ;
+    : EXTI_RTSR. cr ." EXTI_RTSR.  RW   $" EXTI_RTSR @ h.8 EXTI_RTSR 1b. ;
+    : EXTI_FTSR. cr ." EXTI_FTSR.  RW   $" EXTI_FTSR @ h.8 EXTI_FTSR 1b. ;
+    : EXTI_SWIER. cr ." EXTI_SWIER.  RW   $" EXTI_SWIER @ h.8 EXTI_SWIER 1b. ;
+    : EXTI_PR. cr ." EXTI_PR.  RW   $" EXTI_PR @ h.8 EXTI_PR 1b. ;
     : EXTI.
       EXTI_IMR.
       EXTI_EMR.
@@ -3506,42 +3506,42 @@ begin-module memmap
     LTDC $130 + constant LTDC_L2CFBLR ( read-write )  \ Layerx Color Frame Buffer Length Register
     LTDC $134 + constant LTDC_L2CFBLNR ( read-write )  \ Layerx ColorFrame Buffer Line Number Register
     LTDC $144 + constant LTDC_L2CLUTWR ( write-only )  \ Layerx CLUT Write Register
-    : LTDC_SSCR. cr ." LTDC_SSCR.  RW   $" LTDC_SSCR @ hex. LTDC_SSCR 1b. ;
-    : LTDC_BPCR. cr ." LTDC_BPCR.  RW   $" LTDC_BPCR @ hex. LTDC_BPCR 1b. ;
-    : LTDC_AWCR. cr ." LTDC_AWCR.  RW   $" LTDC_AWCR @ hex. LTDC_AWCR 1b. ;
-    : LTDC_TWCR. cr ." LTDC_TWCR.  RW   $" LTDC_TWCR @ hex. LTDC_TWCR 1b. ;
-    : LTDC_GCR. cr ." LTDC_GCR.   $" LTDC_GCR @ hex. LTDC_GCR 1b. ;
-    : LTDC_SRCR. cr ." LTDC_SRCR.  RW   $" LTDC_SRCR @ hex. LTDC_SRCR 1b. ;
-    : LTDC_BCCR. cr ." LTDC_BCCR.  RW   $" LTDC_BCCR @ hex. LTDC_BCCR 1b. ;
-    : LTDC_IER. cr ." LTDC_IER.  RW   $" LTDC_IER @ hex. LTDC_IER 1b. ;
-    : LTDC_ISR. cr ." LTDC_ISR.  RO   $" LTDC_ISR @ hex. LTDC_ISR 1b. ;
+    : LTDC_SSCR. cr ." LTDC_SSCR.  RW   $" LTDC_SSCR @ h.8 LTDC_SSCR 1b. ;
+    : LTDC_BPCR. cr ." LTDC_BPCR.  RW   $" LTDC_BPCR @ h.8 LTDC_BPCR 1b. ;
+    : LTDC_AWCR. cr ." LTDC_AWCR.  RW   $" LTDC_AWCR @ h.8 LTDC_AWCR 1b. ;
+    : LTDC_TWCR. cr ." LTDC_TWCR.  RW   $" LTDC_TWCR @ h.8 LTDC_TWCR 1b. ;
+    : LTDC_GCR. cr ." LTDC_GCR.   $" LTDC_GCR @ h.8 LTDC_GCR 1b. ;
+    : LTDC_SRCR. cr ." LTDC_SRCR.  RW   $" LTDC_SRCR @ h.8 LTDC_SRCR 1b. ;
+    : LTDC_BCCR. cr ." LTDC_BCCR.  RW   $" LTDC_BCCR @ h.8 LTDC_BCCR 1b. ;
+    : LTDC_IER. cr ." LTDC_IER.  RW   $" LTDC_IER @ h.8 LTDC_IER 1b. ;
+    : LTDC_ISR. cr ." LTDC_ISR.  RO   $" LTDC_ISR @ h.8 LTDC_ISR 1b. ;
     : LTDC_ICR. cr ." LTDC_ICR " WRITEONLY ; 
-    : LTDC_LIPCR. cr ." LTDC_LIPCR.  RW   $" LTDC_LIPCR @ hex. LTDC_LIPCR 1b. ;
-    : LTDC_CPSR. cr ." LTDC_CPSR.  RO   $" LTDC_CPSR @ hex. LTDC_CPSR 1b. ;
-    : LTDC_CDSR. cr ." LTDC_CDSR.  RO   $" LTDC_CDSR @ hex. LTDC_CDSR 1b. ;
-    : LTDC_L1CR. cr ." LTDC_L1CR.  RW   $" LTDC_L1CR @ hex. LTDC_L1CR 1b. ;
-    : LTDC_L1WHPCR. cr ." LTDC_L1WHPCR.  RW   $" LTDC_L1WHPCR @ hex. LTDC_L1WHPCR 1b. ;
-    : LTDC_L1WVPCR. cr ." LTDC_L1WVPCR.  RW   $" LTDC_L1WVPCR @ hex. LTDC_L1WVPCR 1b. ;
-    : LTDC_L1CKCR. cr ." LTDC_L1CKCR.  RW   $" LTDC_L1CKCR @ hex. LTDC_L1CKCR 1b. ;
-    : LTDC_L1PFCR. cr ." LTDC_L1PFCR.  RW   $" LTDC_L1PFCR @ hex. LTDC_L1PFCR 1b. ;
-    : LTDC_L1CACR. cr ." LTDC_L1CACR.  RW   $" LTDC_L1CACR @ hex. LTDC_L1CACR 1b. ;
-    : LTDC_L1DCCR. cr ." LTDC_L1DCCR.  RW   $" LTDC_L1DCCR @ hex. LTDC_L1DCCR 1b. ;
-    : LTDC_L1BFCR. cr ." LTDC_L1BFCR.  RW   $" LTDC_L1BFCR @ hex. LTDC_L1BFCR 1b. ;
-    : LTDC_L1CFBAR. cr ." LTDC_L1CFBAR.  RW   $" LTDC_L1CFBAR @ hex. LTDC_L1CFBAR 1b. ;
-    : LTDC_L1CFBLR. cr ." LTDC_L1CFBLR.  RW   $" LTDC_L1CFBLR @ hex. LTDC_L1CFBLR 1b. ;
-    : LTDC_L1CFBLNR. cr ." LTDC_L1CFBLNR.  RW   $" LTDC_L1CFBLNR @ hex. LTDC_L1CFBLNR 1b. ;
+    : LTDC_LIPCR. cr ." LTDC_LIPCR.  RW   $" LTDC_LIPCR @ h.8 LTDC_LIPCR 1b. ;
+    : LTDC_CPSR. cr ." LTDC_CPSR.  RO   $" LTDC_CPSR @ h.8 LTDC_CPSR 1b. ;
+    : LTDC_CDSR. cr ." LTDC_CDSR.  RO   $" LTDC_CDSR @ h.8 LTDC_CDSR 1b. ;
+    : LTDC_L1CR. cr ." LTDC_L1CR.  RW   $" LTDC_L1CR @ h.8 LTDC_L1CR 1b. ;
+    : LTDC_L1WHPCR. cr ." LTDC_L1WHPCR.  RW   $" LTDC_L1WHPCR @ h.8 LTDC_L1WHPCR 1b. ;
+    : LTDC_L1WVPCR. cr ." LTDC_L1WVPCR.  RW   $" LTDC_L1WVPCR @ h.8 LTDC_L1WVPCR 1b. ;
+    : LTDC_L1CKCR. cr ." LTDC_L1CKCR.  RW   $" LTDC_L1CKCR @ h.8 LTDC_L1CKCR 1b. ;
+    : LTDC_L1PFCR. cr ." LTDC_L1PFCR.  RW   $" LTDC_L1PFCR @ h.8 LTDC_L1PFCR 1b. ;
+    : LTDC_L1CACR. cr ." LTDC_L1CACR.  RW   $" LTDC_L1CACR @ h.8 LTDC_L1CACR 1b. ;
+    : LTDC_L1DCCR. cr ." LTDC_L1DCCR.  RW   $" LTDC_L1DCCR @ h.8 LTDC_L1DCCR 1b. ;
+    : LTDC_L1BFCR. cr ." LTDC_L1BFCR.  RW   $" LTDC_L1BFCR @ h.8 LTDC_L1BFCR 1b. ;
+    : LTDC_L1CFBAR. cr ." LTDC_L1CFBAR.  RW   $" LTDC_L1CFBAR @ h.8 LTDC_L1CFBAR 1b. ;
+    : LTDC_L1CFBLR. cr ." LTDC_L1CFBLR.  RW   $" LTDC_L1CFBLR @ h.8 LTDC_L1CFBLR 1b. ;
+    : LTDC_L1CFBLNR. cr ." LTDC_L1CFBLNR.  RW   $" LTDC_L1CFBLNR @ h.8 LTDC_L1CFBLNR 1b. ;
     : LTDC_L1CLUTWR. cr ." LTDC_L1CLUTWR " WRITEONLY ; 
-    : LTDC_L2CR. cr ." LTDC_L2CR.  RW   $" LTDC_L2CR @ hex. LTDC_L2CR 1b. ;
-    : LTDC_L2WHPCR. cr ." LTDC_L2WHPCR.  RW   $" LTDC_L2WHPCR @ hex. LTDC_L2WHPCR 1b. ;
-    : LTDC_L2WVPCR. cr ." LTDC_L2WVPCR.  RW   $" LTDC_L2WVPCR @ hex. LTDC_L2WVPCR 1b. ;
-    : LTDC_L2CKCR. cr ." LTDC_L2CKCR.  RW   $" LTDC_L2CKCR @ hex. LTDC_L2CKCR 1b. ;
-    : LTDC_L2PFCR. cr ." LTDC_L2PFCR.  RW   $" LTDC_L2PFCR @ hex. LTDC_L2PFCR 1b. ;
-    : LTDC_L2CACR. cr ." LTDC_L2CACR.  RW   $" LTDC_L2CACR @ hex. LTDC_L2CACR 1b. ;
-    : LTDC_L2DCCR. cr ." LTDC_L2DCCR.  RW   $" LTDC_L2DCCR @ hex. LTDC_L2DCCR 1b. ;
-    : LTDC_L2BFCR. cr ." LTDC_L2BFCR.  RW   $" LTDC_L2BFCR @ hex. LTDC_L2BFCR 1b. ;
-    : LTDC_L2CFBAR. cr ." LTDC_L2CFBAR.  RW   $" LTDC_L2CFBAR @ hex. LTDC_L2CFBAR 1b. ;
-    : LTDC_L2CFBLR. cr ." LTDC_L2CFBLR.  RW   $" LTDC_L2CFBLR @ hex. LTDC_L2CFBLR 1b. ;
-    : LTDC_L2CFBLNR. cr ." LTDC_L2CFBLNR.  RW   $" LTDC_L2CFBLNR @ hex. LTDC_L2CFBLNR 1b. ;
+    : LTDC_L2CR. cr ." LTDC_L2CR.  RW   $" LTDC_L2CR @ h.8 LTDC_L2CR 1b. ;
+    : LTDC_L2WHPCR. cr ." LTDC_L2WHPCR.  RW   $" LTDC_L2WHPCR @ h.8 LTDC_L2WHPCR 1b. ;
+    : LTDC_L2WVPCR. cr ." LTDC_L2WVPCR.  RW   $" LTDC_L2WVPCR @ h.8 LTDC_L2WVPCR 1b. ;
+    : LTDC_L2CKCR. cr ." LTDC_L2CKCR.  RW   $" LTDC_L2CKCR @ h.8 LTDC_L2CKCR 1b. ;
+    : LTDC_L2PFCR. cr ." LTDC_L2PFCR.  RW   $" LTDC_L2PFCR @ h.8 LTDC_L2PFCR 1b. ;
+    : LTDC_L2CACR. cr ." LTDC_L2CACR.  RW   $" LTDC_L2CACR @ h.8 LTDC_L2CACR 1b. ;
+    : LTDC_L2DCCR. cr ." LTDC_L2DCCR.  RW   $" LTDC_L2DCCR @ h.8 LTDC_L2DCCR 1b. ;
+    : LTDC_L2BFCR. cr ." LTDC_L2BFCR.  RW   $" LTDC_L2BFCR @ h.8 LTDC_L2BFCR 1b. ;
+    : LTDC_L2CFBAR. cr ." LTDC_L2CFBAR.  RW   $" LTDC_L2CFBAR @ h.8 LTDC_L2CFBAR 1b. ;
+    : LTDC_L2CFBLR. cr ." LTDC_L2CFBLR.  RW   $" LTDC_L2CFBLR @ h.8 LTDC_L2CFBLR 1b. ;
+    : LTDC_L2CFBLNR. cr ." LTDC_L2CFBLNR.  RW   $" LTDC_L2CFBLNR @ h.8 LTDC_L2CFBLNR 1b. ;
     : LTDC_L2CLUTWR. cr ." LTDC_L2CLUTWR " WRITEONLY ; 
     : LTDC.
       LTDC_SSCR.
@@ -3603,23 +3603,23 @@ begin-module memmap
     SAI1 $1C + constant SAI1_ACLRFR ( read-write )  \ AClear flag register
     SAI1 $20 + constant SAI1_ADR ( read-write )  \ AData register
     SAI1 $0 + constant SAI1_GCR ( read-write )  \ Global configuration register
-    : SAI1_BCR1. cr ." SAI1_BCR1.  RW   $" SAI1_BCR1 @ hex. SAI1_BCR1 1b. ;
-    : SAI1_BCR2. cr ." SAI1_BCR2.  RW   $" SAI1_BCR2 @ hex. SAI1_BCR2 1b. ;
-    : SAI1_BFRCR. cr ." SAI1_BFRCR.  RW   $" SAI1_BFRCR @ hex. SAI1_BFRCR 1b. ;
-    : SAI1_BSLOTR. cr ." SAI1_BSLOTR.  RW   $" SAI1_BSLOTR @ hex. SAI1_BSLOTR 1b. ;
-    : SAI1_BIM. cr ." SAI1_BIM.  RW   $" SAI1_BIM @ hex. SAI1_BIM 1b. ;
-    : SAI1_BSR. cr ." SAI1_BSR.  RO   $" SAI1_BSR @ hex. SAI1_BSR 1b. ;
+    : SAI1_BCR1. cr ." SAI1_BCR1.  RW   $" SAI1_BCR1 @ h.8 SAI1_BCR1 1b. ;
+    : SAI1_BCR2. cr ." SAI1_BCR2.  RW   $" SAI1_BCR2 @ h.8 SAI1_BCR2 1b. ;
+    : SAI1_BFRCR. cr ." SAI1_BFRCR.  RW   $" SAI1_BFRCR @ h.8 SAI1_BFRCR 1b. ;
+    : SAI1_BSLOTR. cr ." SAI1_BSLOTR.  RW   $" SAI1_BSLOTR @ h.8 SAI1_BSLOTR 1b. ;
+    : SAI1_BIM. cr ." SAI1_BIM.  RW   $" SAI1_BIM @ h.8 SAI1_BIM 1b. ;
+    : SAI1_BSR. cr ." SAI1_BSR.  RO   $" SAI1_BSR @ h.8 SAI1_BSR 1b. ;
     : SAI1_BCLRFR. cr ." SAI1_BCLRFR " WRITEONLY ; 
-    : SAI1_BDR. cr ." SAI1_BDR.  RW   $" SAI1_BDR @ hex. SAI1_BDR 1b. ;
-    : SAI1_ACR1. cr ." SAI1_ACR1.  RW   $" SAI1_ACR1 @ hex. SAI1_ACR1 1b. ;
-    : SAI1_ACR2. cr ." SAI1_ACR2.  RW   $" SAI1_ACR2 @ hex. SAI1_ACR2 1b. ;
-    : SAI1_AFRCR. cr ." SAI1_AFRCR.  RW   $" SAI1_AFRCR @ hex. SAI1_AFRCR 1b. ;
-    : SAI1_ASLOTR. cr ." SAI1_ASLOTR.  RW   $" SAI1_ASLOTR @ hex. SAI1_ASLOTR 1b. ;
-    : SAI1_AIM. cr ." SAI1_AIM.  RW   $" SAI1_AIM @ hex. SAI1_AIM 1b. ;
-    : SAI1_ASR. cr ." SAI1_ASR.  RW   $" SAI1_ASR @ hex. SAI1_ASR 1b. ;
-    : SAI1_ACLRFR. cr ." SAI1_ACLRFR.  RW   $" SAI1_ACLRFR @ hex. SAI1_ACLRFR 1b. ;
-    : SAI1_ADR. cr ." SAI1_ADR.  RW   $" SAI1_ADR @ hex. SAI1_ADR 1b. ;
-    : SAI1_GCR. cr ." SAI1_GCR.  RW   $" SAI1_GCR @ hex. SAI1_GCR 1b. ;
+    : SAI1_BDR. cr ." SAI1_BDR.  RW   $" SAI1_BDR @ h.8 SAI1_BDR 1b. ;
+    : SAI1_ACR1. cr ." SAI1_ACR1.  RW   $" SAI1_ACR1 @ h.8 SAI1_ACR1 1b. ;
+    : SAI1_ACR2. cr ." SAI1_ACR2.  RW   $" SAI1_ACR2 @ h.8 SAI1_ACR2 1b. ;
+    : SAI1_AFRCR. cr ." SAI1_AFRCR.  RW   $" SAI1_AFRCR @ h.8 SAI1_AFRCR 1b. ;
+    : SAI1_ASLOTR. cr ." SAI1_ASLOTR.  RW   $" SAI1_ASLOTR @ h.8 SAI1_ASLOTR 1b. ;
+    : SAI1_AIM. cr ." SAI1_AIM.  RW   $" SAI1_AIM @ h.8 SAI1_AIM 1b. ;
+    : SAI1_ASR. cr ." SAI1_ASR.  RW   $" SAI1_ASR @ h.8 SAI1_ASR 1b. ;
+    : SAI1_ACLRFR. cr ." SAI1_ACLRFR.  RW   $" SAI1_ACLRFR @ h.8 SAI1_ACLRFR 1b. ;
+    : SAI1_ADR. cr ." SAI1_ADR.  RW   $" SAI1_ADR @ h.8 SAI1_ADR 1b. ;
+    : SAI1_GCR. cr ." SAI1_GCR.  RW   $" SAI1_GCR @ h.8 SAI1_GCR 1b. ;
     : SAI1.
       SAI1_BCR1.
       SAI1_BCR2.
@@ -3660,23 +3660,23 @@ begin-module memmap
     SAI2 $1C + constant SAI2_ACLRFR ( read-write )  \ AClear flag register
     SAI2 $20 + constant SAI2_ADR ( read-write )  \ AData register
     SAI2 $0 + constant SAI2_GCR ( read-write )  \ Global configuration register
-    : SAI2_BCR1. cr ." SAI2_BCR1.  RW   $" SAI2_BCR1 @ hex. SAI2_BCR1 1b. ;
-    : SAI2_BCR2. cr ." SAI2_BCR2.  RW   $" SAI2_BCR2 @ hex. SAI2_BCR2 1b. ;
-    : SAI2_BFRCR. cr ." SAI2_BFRCR.  RW   $" SAI2_BFRCR @ hex. SAI2_BFRCR 1b. ;
-    : SAI2_BSLOTR. cr ." SAI2_BSLOTR.  RW   $" SAI2_BSLOTR @ hex. SAI2_BSLOTR 1b. ;
-    : SAI2_BIM. cr ." SAI2_BIM.  RW   $" SAI2_BIM @ hex. SAI2_BIM 1b. ;
-    : SAI2_BSR. cr ." SAI2_BSR.  RO   $" SAI2_BSR @ hex. SAI2_BSR 1b. ;
+    : SAI2_BCR1. cr ." SAI2_BCR1.  RW   $" SAI2_BCR1 @ h.8 SAI2_BCR1 1b. ;
+    : SAI2_BCR2. cr ." SAI2_BCR2.  RW   $" SAI2_BCR2 @ h.8 SAI2_BCR2 1b. ;
+    : SAI2_BFRCR. cr ." SAI2_BFRCR.  RW   $" SAI2_BFRCR @ h.8 SAI2_BFRCR 1b. ;
+    : SAI2_BSLOTR. cr ." SAI2_BSLOTR.  RW   $" SAI2_BSLOTR @ h.8 SAI2_BSLOTR 1b. ;
+    : SAI2_BIM. cr ." SAI2_BIM.  RW   $" SAI2_BIM @ h.8 SAI2_BIM 1b. ;
+    : SAI2_BSR. cr ." SAI2_BSR.  RO   $" SAI2_BSR @ h.8 SAI2_BSR 1b. ;
     : SAI2_BCLRFR. cr ." SAI2_BCLRFR " WRITEONLY ; 
-    : SAI2_BDR. cr ." SAI2_BDR.  RW   $" SAI2_BDR @ hex. SAI2_BDR 1b. ;
-    : SAI2_ACR1. cr ." SAI2_ACR1.  RW   $" SAI2_ACR1 @ hex. SAI2_ACR1 1b. ;
-    : SAI2_ACR2. cr ." SAI2_ACR2.  RW   $" SAI2_ACR2 @ hex. SAI2_ACR2 1b. ;
-    : SAI2_AFRCR. cr ." SAI2_AFRCR.  RW   $" SAI2_AFRCR @ hex. SAI2_AFRCR 1b. ;
-    : SAI2_ASLOTR. cr ." SAI2_ASLOTR.  RW   $" SAI2_ASLOTR @ hex. SAI2_ASLOTR 1b. ;
-    : SAI2_AIM. cr ." SAI2_AIM.  RW   $" SAI2_AIM @ hex. SAI2_AIM 1b. ;
-    : SAI2_ASR. cr ." SAI2_ASR.  RW   $" SAI2_ASR @ hex. SAI2_ASR 1b. ;
-    : SAI2_ACLRFR. cr ." SAI2_ACLRFR.  RW   $" SAI2_ACLRFR @ hex. SAI2_ACLRFR 1b. ;
-    : SAI2_ADR. cr ." SAI2_ADR.  RW   $" SAI2_ADR @ hex. SAI2_ADR 1b. ;
-    : SAI2_GCR. cr ." SAI2_GCR.  RW   $" SAI2_GCR @ hex. SAI2_GCR 1b. ;
+    : SAI2_BDR. cr ." SAI2_BDR.  RW   $" SAI2_BDR @ h.8 SAI2_BDR 1b. ;
+    : SAI2_ACR1. cr ." SAI2_ACR1.  RW   $" SAI2_ACR1 @ h.8 SAI2_ACR1 1b. ;
+    : SAI2_ACR2. cr ." SAI2_ACR2.  RW   $" SAI2_ACR2 @ h.8 SAI2_ACR2 1b. ;
+    : SAI2_AFRCR. cr ." SAI2_AFRCR.  RW   $" SAI2_AFRCR @ h.8 SAI2_AFRCR 1b. ;
+    : SAI2_ASLOTR. cr ." SAI2_ASLOTR.  RW   $" SAI2_ASLOTR @ h.8 SAI2_ASLOTR 1b. ;
+    : SAI2_AIM. cr ." SAI2_AIM.  RW   $" SAI2_AIM @ h.8 SAI2_AIM 1b. ;
+    : SAI2_ASR. cr ." SAI2_ASR.  RW   $" SAI2_ASR @ h.8 SAI2_ASR 1b. ;
+    : SAI2_ACLRFR. cr ." SAI2_ACLRFR.  RW   $" SAI2_ACLRFR @ h.8 SAI2_ACLRFR 1b. ;
+    : SAI2_ADR. cr ." SAI2_ADR.  RW   $" SAI2_ADR @ h.8 SAI2_ADR 1b. ;
+    : SAI2_GCR. cr ." SAI2_GCR.  RW   $" SAI2_GCR @ h.8 SAI2_GCR 1b. ;
     : SAI2.
       SAI2_BCR1.
       SAI2_BCR2.
@@ -3722,28 +3722,28 @@ begin-module memmap
     DMA2D $4C + constant DMA2D_AMTCR ( read-write )  \ AHB master timer configuration register
     DMA2D $400 + constant DMA2D_FGCLUT ( read-write )  \ FGCLUT
     DMA2D $800 + constant DMA2D_BGCLUT ( read-write )  \ BGCLUT
-    : DMA2D_CR. cr ." DMA2D_CR.  RW   $" DMA2D_CR @ hex. DMA2D_CR 1b. ;
-    : DMA2D_ISR. cr ." DMA2D_ISR.  RO   $" DMA2D_ISR @ hex. DMA2D_ISR 1b. ;
-    : DMA2D_IFCR. cr ." DMA2D_IFCR.  RW   $" DMA2D_IFCR @ hex. DMA2D_IFCR 1b. ;
-    : DMA2D_FGMAR. cr ." DMA2D_FGMAR.  RW   $" DMA2D_FGMAR @ hex. DMA2D_FGMAR 1b. ;
-    : DMA2D_FGOR. cr ." DMA2D_FGOR.  RW   $" DMA2D_FGOR @ hex. DMA2D_FGOR 1b. ;
-    : DMA2D_BGMAR. cr ." DMA2D_BGMAR.  RW   $" DMA2D_BGMAR @ hex. DMA2D_BGMAR 1b. ;
-    : DMA2D_BGOR. cr ." DMA2D_BGOR.  RW   $" DMA2D_BGOR @ hex. DMA2D_BGOR 1b. ;
-    : DMA2D_FGPFCCR. cr ." DMA2D_FGPFCCR.  RW   $" DMA2D_FGPFCCR @ hex. DMA2D_FGPFCCR 1b. ;
-    : DMA2D_FGCOLR. cr ." DMA2D_FGCOLR.  RW   $" DMA2D_FGCOLR @ hex. DMA2D_FGCOLR 1b. ;
-    : DMA2D_BGPFCCR. cr ." DMA2D_BGPFCCR.  RW   $" DMA2D_BGPFCCR @ hex. DMA2D_BGPFCCR 1b. ;
-    : DMA2D_BGCOLR. cr ." DMA2D_BGCOLR.  RW   $" DMA2D_BGCOLR @ hex. DMA2D_BGCOLR 1b. ;
-    : DMA2D_FGCMAR. cr ." DMA2D_FGCMAR.  RW   $" DMA2D_FGCMAR @ hex. DMA2D_FGCMAR 1b. ;
-    : DMA2D_BGCMAR. cr ." DMA2D_BGCMAR.  RW   $" DMA2D_BGCMAR @ hex. DMA2D_BGCMAR 1b. ;
-    : DMA2D_OPFCCR. cr ." DMA2D_OPFCCR.  RW   $" DMA2D_OPFCCR @ hex. DMA2D_OPFCCR 1b. ;
-    : DMA2D_OCOLR. cr ." DMA2D_OCOLR.  RW   $" DMA2D_OCOLR @ hex. DMA2D_OCOLR 1b. ;
-    : DMA2D_OMAR. cr ." DMA2D_OMAR.  RW   $" DMA2D_OMAR @ hex. DMA2D_OMAR 1b. ;
-    : DMA2D_OOR. cr ." DMA2D_OOR.  RW   $" DMA2D_OOR @ hex. DMA2D_OOR 1b. ;
-    : DMA2D_NLR. cr ." DMA2D_NLR.  RW   $" DMA2D_NLR @ hex. DMA2D_NLR 1b. ;
-    : DMA2D_LWR. cr ." DMA2D_LWR.  RW   $" DMA2D_LWR @ hex. DMA2D_LWR 1b. ;
-    : DMA2D_AMTCR. cr ." DMA2D_AMTCR.  RW   $" DMA2D_AMTCR @ hex. DMA2D_AMTCR 1b. ;
-    : DMA2D_FGCLUT. cr ." DMA2D_FGCLUT.  RW   $" DMA2D_FGCLUT @ hex. DMA2D_FGCLUT 1b. ;
-    : DMA2D_BGCLUT. cr ." DMA2D_BGCLUT.  RW   $" DMA2D_BGCLUT @ hex. DMA2D_BGCLUT 1b. ;
+    : DMA2D_CR. cr ." DMA2D_CR.  RW   $" DMA2D_CR @ h.8 DMA2D_CR 1b. ;
+    : DMA2D_ISR. cr ." DMA2D_ISR.  RO   $" DMA2D_ISR @ h.8 DMA2D_ISR 1b. ;
+    : DMA2D_IFCR. cr ." DMA2D_IFCR.  RW   $" DMA2D_IFCR @ h.8 DMA2D_IFCR 1b. ;
+    : DMA2D_FGMAR. cr ." DMA2D_FGMAR.  RW   $" DMA2D_FGMAR @ h.8 DMA2D_FGMAR 1b. ;
+    : DMA2D_FGOR. cr ." DMA2D_FGOR.  RW   $" DMA2D_FGOR @ h.8 DMA2D_FGOR 1b. ;
+    : DMA2D_BGMAR. cr ." DMA2D_BGMAR.  RW   $" DMA2D_BGMAR @ h.8 DMA2D_BGMAR 1b. ;
+    : DMA2D_BGOR. cr ." DMA2D_BGOR.  RW   $" DMA2D_BGOR @ h.8 DMA2D_BGOR 1b. ;
+    : DMA2D_FGPFCCR. cr ." DMA2D_FGPFCCR.  RW   $" DMA2D_FGPFCCR @ h.8 DMA2D_FGPFCCR 1b. ;
+    : DMA2D_FGCOLR. cr ." DMA2D_FGCOLR.  RW   $" DMA2D_FGCOLR @ h.8 DMA2D_FGCOLR 1b. ;
+    : DMA2D_BGPFCCR. cr ." DMA2D_BGPFCCR.  RW   $" DMA2D_BGPFCCR @ h.8 DMA2D_BGPFCCR 1b. ;
+    : DMA2D_BGCOLR. cr ." DMA2D_BGCOLR.  RW   $" DMA2D_BGCOLR @ h.8 DMA2D_BGCOLR 1b. ;
+    : DMA2D_FGCMAR. cr ." DMA2D_FGCMAR.  RW   $" DMA2D_FGCMAR @ h.8 DMA2D_FGCMAR 1b. ;
+    : DMA2D_BGCMAR. cr ." DMA2D_BGCMAR.  RW   $" DMA2D_BGCMAR @ h.8 DMA2D_BGCMAR 1b. ;
+    : DMA2D_OPFCCR. cr ." DMA2D_OPFCCR.  RW   $" DMA2D_OPFCCR @ h.8 DMA2D_OPFCCR 1b. ;
+    : DMA2D_OCOLR. cr ." DMA2D_OCOLR.  RW   $" DMA2D_OCOLR @ h.8 DMA2D_OCOLR 1b. ;
+    : DMA2D_OMAR. cr ." DMA2D_OMAR.  RW   $" DMA2D_OMAR @ h.8 DMA2D_OMAR 1b. ;
+    : DMA2D_OOR. cr ." DMA2D_OOR.  RW   $" DMA2D_OOR @ h.8 DMA2D_OOR 1b. ;
+    : DMA2D_NLR. cr ." DMA2D_NLR.  RW   $" DMA2D_NLR @ h.8 DMA2D_NLR 1b. ;
+    : DMA2D_LWR. cr ." DMA2D_LWR.  RW   $" DMA2D_LWR @ h.8 DMA2D_LWR 1b. ;
+    : DMA2D_AMTCR. cr ." DMA2D_AMTCR.  RW   $" DMA2D_AMTCR @ h.8 DMA2D_AMTCR 1b. ;
+    : DMA2D_FGCLUT. cr ." DMA2D_FGCLUT.  RW   $" DMA2D_FGCLUT @ h.8 DMA2D_FGCLUT 1b. ;
+    : DMA2D_BGCLUT. cr ." DMA2D_BGCLUT.  RW   $" DMA2D_BGCLUT @ h.8 DMA2D_BGCLUT 1b. ;
     : DMA2D.
       DMA2D_CR.
       DMA2D_ISR.
@@ -3785,19 +3785,19 @@ begin-module memmap
     QUADSPI $28 + constant QUADSPI_PSMAR ( read-write )  \ polling status match register
     QUADSPI $2C + constant QUADSPI_PIR ( read-write )  \ polling interval register
     QUADSPI $30 + constant QUADSPI_LPTR ( read-write )  \ low-power timeout register
-    : QUADSPI_CR. cr ." QUADSPI_CR.  RW   $" QUADSPI_CR @ hex. QUADSPI_CR 1b. ;
-    : QUADSPI_DCR. cr ." QUADSPI_DCR.  RW   $" QUADSPI_DCR @ hex. QUADSPI_DCR 1b. ;
-    : QUADSPI_SR. cr ." QUADSPI_SR.  RO   $" QUADSPI_SR @ hex. QUADSPI_SR 1b. ;
-    : QUADSPI_FCR. cr ." QUADSPI_FCR.  RW   $" QUADSPI_FCR @ hex. QUADSPI_FCR 1b. ;
-    : QUADSPI_DLR. cr ." QUADSPI_DLR.  RW   $" QUADSPI_DLR @ hex. QUADSPI_DLR 1b. ;
-    : QUADSPI_CCR. cr ." QUADSPI_CCR.  RW   $" QUADSPI_CCR @ hex. QUADSPI_CCR 1b. ;
-    : QUADSPI_AR. cr ." QUADSPI_AR.  RW   $" QUADSPI_AR @ hex. QUADSPI_AR 1b. ;
-    : QUADSPI_ABR. cr ." QUADSPI_ABR.  RW   $" QUADSPI_ABR @ hex. QUADSPI_ABR 1b. ;
-    : QUADSPI_DR. cr ." QUADSPI_DR.  RW   $" QUADSPI_DR @ hex. QUADSPI_DR 1b. ;
-    : QUADSPI_PSMKR. cr ." QUADSPI_PSMKR.  RW   $" QUADSPI_PSMKR @ hex. QUADSPI_PSMKR 1b. ;
-    : QUADSPI_PSMAR. cr ." QUADSPI_PSMAR.  RW   $" QUADSPI_PSMAR @ hex. QUADSPI_PSMAR 1b. ;
-    : QUADSPI_PIR. cr ." QUADSPI_PIR.  RW   $" QUADSPI_PIR @ hex. QUADSPI_PIR 1b. ;
-    : QUADSPI_LPTR. cr ." QUADSPI_LPTR.  RW   $" QUADSPI_LPTR @ hex. QUADSPI_LPTR 1b. ;
+    : QUADSPI_CR. cr ." QUADSPI_CR.  RW   $" QUADSPI_CR @ h.8 QUADSPI_CR 1b. ;
+    : QUADSPI_DCR. cr ." QUADSPI_DCR.  RW   $" QUADSPI_DCR @ h.8 QUADSPI_DCR 1b. ;
+    : QUADSPI_SR. cr ." QUADSPI_SR.  RO   $" QUADSPI_SR @ h.8 QUADSPI_SR 1b. ;
+    : QUADSPI_FCR. cr ." QUADSPI_FCR.  RW   $" QUADSPI_FCR @ h.8 QUADSPI_FCR 1b. ;
+    : QUADSPI_DLR. cr ." QUADSPI_DLR.  RW   $" QUADSPI_DLR @ h.8 QUADSPI_DLR 1b. ;
+    : QUADSPI_CCR. cr ." QUADSPI_CCR.  RW   $" QUADSPI_CCR @ h.8 QUADSPI_CCR 1b. ;
+    : QUADSPI_AR. cr ." QUADSPI_AR.  RW   $" QUADSPI_AR @ h.8 QUADSPI_AR 1b. ;
+    : QUADSPI_ABR. cr ." QUADSPI_ABR.  RW   $" QUADSPI_ABR @ h.8 QUADSPI_ABR 1b. ;
+    : QUADSPI_DR. cr ." QUADSPI_DR.  RW   $" QUADSPI_DR @ h.8 QUADSPI_DR 1b. ;
+    : QUADSPI_PSMKR. cr ." QUADSPI_PSMKR.  RW   $" QUADSPI_PSMKR @ h.8 QUADSPI_PSMKR 1b. ;
+    : QUADSPI_PSMAR. cr ." QUADSPI_PSMAR.  RW   $" QUADSPI_PSMAR @ h.8 QUADSPI_PSMAR 1b. ;
+    : QUADSPI_PIR. cr ." QUADSPI_PIR.  RW   $" QUADSPI_PIR @ h.8 QUADSPI_PIR 1b. ;
+    : QUADSPI_LPTR. cr ." QUADSPI_LPTR.  RW   $" QUADSPI_LPTR @ h.8 QUADSPI_LPTR 1b. ;
     : QUADSPI.
       QUADSPI_CR.
       QUADSPI_DCR.
@@ -3823,12 +3823,12 @@ begin-module memmap
     CEC $C + constant CEC_RXDR ( read-only )  \ Rx Data Register
     CEC $10 + constant CEC_ISR ( read-write )  \ Interrupt and Status Register
     CEC $14 + constant CEC_IER ( read-write )  \ interrupt enable register
-    : CEC_CR. cr ." CEC_CR.  RW   $" CEC_CR @ hex. CEC_CR 1b. ;
-    : CEC_CFGR. cr ." CEC_CFGR.  RW   $" CEC_CFGR @ hex. CEC_CFGR 1b. ;
+    : CEC_CR. cr ." CEC_CR.  RW   $" CEC_CR @ h.8 CEC_CR 1b. ;
+    : CEC_CFGR. cr ." CEC_CFGR.  RW   $" CEC_CFGR @ h.8 CEC_CFGR 1b. ;
     : CEC_TXDR. cr ." CEC_TXDR " WRITEONLY ; 
-    : CEC_RXDR. cr ." CEC_RXDR.  RO   $" CEC_RXDR @ hex. CEC_RXDR 1b. ;
-    : CEC_ISR. cr ." CEC_ISR.  RW   $" CEC_ISR @ hex. CEC_ISR 1b. ;
-    : CEC_IER. cr ." CEC_IER.  RW   $" CEC_IER @ hex. CEC_IER 1b. ;
+    : CEC_RXDR. cr ." CEC_RXDR.  RO   $" CEC_RXDR @ h.8 CEC_RXDR 1b. ;
+    : CEC_ISR. cr ." CEC_ISR.  RW   $" CEC_ISR @ h.8 CEC_ISR 1b. ;
+    : CEC_IER. cr ." CEC_IER.  RW   $" CEC_IER @ h.8 CEC_IER 1b. ;
     : CEC.
       CEC_CR.
       CEC_CFGR.
@@ -3848,13 +3848,13 @@ begin-module memmap
     SPDIF_RX $10 + constant SPDIF_RX_DR ( read-only )  \ Data input register
     SPDIF_RX $14 + constant SPDIF_RX_CSR ( read-only )  \ Channel Status register
     SPDIF_RX $18 + constant SPDIF_RX_DIR ( read-only )  \ Debug Information register
-    : SPDIF_RX_CR. cr ." SPDIF_RX_CR.  RW   $" SPDIF_RX_CR @ hex. SPDIF_RX_CR 1b. ;
-    : SPDIF_RX_IMR. cr ." SPDIF_RX_IMR.  RW   $" SPDIF_RX_IMR @ hex. SPDIF_RX_IMR 1b. ;
-    : SPDIF_RX_SR. cr ." SPDIF_RX_SR.  RO   $" SPDIF_RX_SR @ hex. SPDIF_RX_SR 1b. ;
+    : SPDIF_RX_CR. cr ." SPDIF_RX_CR.  RW   $" SPDIF_RX_CR @ h.8 SPDIF_RX_CR 1b. ;
+    : SPDIF_RX_IMR. cr ." SPDIF_RX_IMR.  RW   $" SPDIF_RX_IMR @ h.8 SPDIF_RX_IMR 1b. ;
+    : SPDIF_RX_SR. cr ." SPDIF_RX_SR.  RO   $" SPDIF_RX_SR @ h.8 SPDIF_RX_SR 1b. ;
     : SPDIF_RX_IFCR. cr ." SPDIF_RX_IFCR " WRITEONLY ; 
-    : SPDIF_RX_DR. cr ." SPDIF_RX_DR.  RO   $" SPDIF_RX_DR @ hex. SPDIF_RX_DR 1b. ;
-    : SPDIF_RX_CSR. cr ." SPDIF_RX_CSR.  RO   $" SPDIF_RX_CSR @ hex. SPDIF_RX_CSR 1b. ;
-    : SPDIF_RX_DIR. cr ." SPDIF_RX_DIR.  RO   $" SPDIF_RX_DIR @ hex. SPDIF_RX_DIR 1b. ;
+    : SPDIF_RX_DR. cr ." SPDIF_RX_DR.  RO   $" SPDIF_RX_DR @ h.8 SPDIF_RX_DR 1b. ;
+    : SPDIF_RX_CSR. cr ." SPDIF_RX_CSR.  RO   $" SPDIF_RX_CSR @ h.8 SPDIF_RX_CSR 1b. ;
+    : SPDIF_RX_DIR. cr ." SPDIF_RX_DIR.  RO   $" SPDIF_RX_DIR @ h.8 SPDIF_RX_DIR 1b. ;
     : SPDIF_RX.
       SPDIF_RX_CR.
       SPDIF_RX_IMR.
@@ -3886,24 +3886,24 @@ begin-module memmap
     SDMMC1 $3C + constant SDMMC1_MASK ( read-write )  \ mask register
     SDMMC1 $48 + constant SDMMC1_FIFOCNT ( read-only )  \ FIFO counter register
     SDMMC1 $80 + constant SDMMC1_FIFO ( read-write )  \ data FIFO register
-    : SDMMC1_POWER. cr ." SDMMC1_POWER.  RW   $" SDMMC1_POWER @ hex. SDMMC1_POWER 1b. ;
-    : SDMMC1_CLKCR. cr ." SDMMC1_CLKCR.  RW   $" SDMMC1_CLKCR @ hex. SDMMC1_CLKCR 1b. ;
-    : SDMMC1_ARG. cr ." SDMMC1_ARG.  RW   $" SDMMC1_ARG @ hex. SDMMC1_ARG 1b. ;
-    : SDMMC1_CMD. cr ." SDMMC1_CMD.  RW   $" SDMMC1_CMD @ hex. SDMMC1_CMD 1b. ;
-    : SDMMC1_RESPCMD. cr ." SDMMC1_RESPCMD.  RO   $" SDMMC1_RESPCMD @ hex. SDMMC1_RESPCMD 1b. ;
-    : SDMMC1_RESP1. cr ." SDMMC1_RESP1.  RO   $" SDMMC1_RESP1 @ hex. SDMMC1_RESP1 1b. ;
-    : SDMMC1_RESP2. cr ." SDMMC1_RESP2.  RO   $" SDMMC1_RESP2 @ hex. SDMMC1_RESP2 1b. ;
-    : SDMMC1_RESP3. cr ." SDMMC1_RESP3.  RO   $" SDMMC1_RESP3 @ hex. SDMMC1_RESP3 1b. ;
-    : SDMMC1_RESP4. cr ." SDMMC1_RESP4.  RO   $" SDMMC1_RESP4 @ hex. SDMMC1_RESP4 1b. ;
-    : SDMMC1_DTIMER. cr ." SDMMC1_DTIMER.  RW   $" SDMMC1_DTIMER @ hex. SDMMC1_DTIMER 1b. ;
-    : SDMMC1_DLEN. cr ." SDMMC1_DLEN.  RW   $" SDMMC1_DLEN @ hex. SDMMC1_DLEN 1b. ;
-    : SDMMC1_DCTRL. cr ." SDMMC1_DCTRL.  RW   $" SDMMC1_DCTRL @ hex. SDMMC1_DCTRL 1b. ;
-    : SDMMC1_DCOUNT. cr ." SDMMC1_DCOUNT.  RO   $" SDMMC1_DCOUNT @ hex. SDMMC1_DCOUNT 1b. ;
-    : SDMMC1_STA. cr ." SDMMC1_STA.  RO   $" SDMMC1_STA @ hex. SDMMC1_STA 1b. ;
-    : SDMMC1_ICR. cr ." SDMMC1_ICR.  RW   $" SDMMC1_ICR @ hex. SDMMC1_ICR 1b. ;
-    : SDMMC1_MASK. cr ." SDMMC1_MASK.  RW   $" SDMMC1_MASK @ hex. SDMMC1_MASK 1b. ;
-    : SDMMC1_FIFOCNT. cr ." SDMMC1_FIFOCNT.  RO   $" SDMMC1_FIFOCNT @ hex. SDMMC1_FIFOCNT 1b. ;
-    : SDMMC1_FIFO. cr ." SDMMC1_FIFO.  RW   $" SDMMC1_FIFO @ hex. SDMMC1_FIFO 1b. ;
+    : SDMMC1_POWER. cr ." SDMMC1_POWER.  RW   $" SDMMC1_POWER @ h.8 SDMMC1_POWER 1b. ;
+    : SDMMC1_CLKCR. cr ." SDMMC1_CLKCR.  RW   $" SDMMC1_CLKCR @ h.8 SDMMC1_CLKCR 1b. ;
+    : SDMMC1_ARG. cr ." SDMMC1_ARG.  RW   $" SDMMC1_ARG @ h.8 SDMMC1_ARG 1b. ;
+    : SDMMC1_CMD. cr ." SDMMC1_CMD.  RW   $" SDMMC1_CMD @ h.8 SDMMC1_CMD 1b. ;
+    : SDMMC1_RESPCMD. cr ." SDMMC1_RESPCMD.  RO   $" SDMMC1_RESPCMD @ h.8 SDMMC1_RESPCMD 1b. ;
+    : SDMMC1_RESP1. cr ." SDMMC1_RESP1.  RO   $" SDMMC1_RESP1 @ h.8 SDMMC1_RESP1 1b. ;
+    : SDMMC1_RESP2. cr ." SDMMC1_RESP2.  RO   $" SDMMC1_RESP2 @ h.8 SDMMC1_RESP2 1b. ;
+    : SDMMC1_RESP3. cr ." SDMMC1_RESP3.  RO   $" SDMMC1_RESP3 @ h.8 SDMMC1_RESP3 1b. ;
+    : SDMMC1_RESP4. cr ." SDMMC1_RESP4.  RO   $" SDMMC1_RESP4 @ h.8 SDMMC1_RESP4 1b. ;
+    : SDMMC1_DTIMER. cr ." SDMMC1_DTIMER.  RW   $" SDMMC1_DTIMER @ h.8 SDMMC1_DTIMER 1b. ;
+    : SDMMC1_DLEN. cr ." SDMMC1_DLEN.  RW   $" SDMMC1_DLEN @ h.8 SDMMC1_DLEN 1b. ;
+    : SDMMC1_DCTRL. cr ." SDMMC1_DCTRL.  RW   $" SDMMC1_DCTRL @ h.8 SDMMC1_DCTRL 1b. ;
+    : SDMMC1_DCOUNT. cr ." SDMMC1_DCOUNT.  RO   $" SDMMC1_DCOUNT @ h.8 SDMMC1_DCOUNT 1b. ;
+    : SDMMC1_STA. cr ." SDMMC1_STA.  RO   $" SDMMC1_STA @ h.8 SDMMC1_STA 1b. ;
+    : SDMMC1_ICR. cr ." SDMMC1_ICR.  RW   $" SDMMC1_ICR @ h.8 SDMMC1_ICR 1b. ;
+    : SDMMC1_MASK. cr ." SDMMC1_MASK.  RW   $" SDMMC1_MASK @ h.8 SDMMC1_MASK 1b. ;
+    : SDMMC1_FIFOCNT. cr ." SDMMC1_FIFOCNT.  RO   $" SDMMC1_FIFOCNT @ h.8 SDMMC1_FIFOCNT 1b. ;
+    : SDMMC1_FIFO. cr ." SDMMC1_FIFO.  RW   $" SDMMC1_FIFO @ h.8 SDMMC1_FIFO 1b. ;
     : SDMMC1.
       SDMMC1_POWER.
       SDMMC1_CLKCR.
@@ -3936,14 +3936,14 @@ begin-module memmap
     LPTIM1 $14 + constant LPTIM1_CMP ( read-write )  \ Compare Register
     LPTIM1 $18 + constant LPTIM1_ARR ( read-write )  \ Autoreload Register
     LPTIM1 $1C + constant LPTIM1_CNT ( read-only )  \ Counter Register
-    : LPTIM1_ISR. cr ." LPTIM1_ISR.  RO   $" LPTIM1_ISR @ hex. LPTIM1_ISR 1b. ;
+    : LPTIM1_ISR. cr ." LPTIM1_ISR.  RO   $" LPTIM1_ISR @ h.8 LPTIM1_ISR 1b. ;
     : LPTIM1_ICR. cr ." LPTIM1_ICR " WRITEONLY ; 
-    : LPTIM1_IER. cr ." LPTIM1_IER.  RW   $" LPTIM1_IER @ hex. LPTIM1_IER 1b. ;
-    : LPTIM1_CFGR. cr ." LPTIM1_CFGR.  RW   $" LPTIM1_CFGR @ hex. LPTIM1_CFGR 1b. ;
-    : LPTIM1_CR. cr ." LPTIM1_CR.  RW   $" LPTIM1_CR @ hex. LPTIM1_CR 1b. ;
-    : LPTIM1_CMP. cr ." LPTIM1_CMP.  RW   $" LPTIM1_CMP @ hex. LPTIM1_CMP 1b. ;
-    : LPTIM1_ARR. cr ." LPTIM1_ARR.  RW   $" LPTIM1_ARR @ hex. LPTIM1_ARR 1b. ;
-    : LPTIM1_CNT. cr ." LPTIM1_CNT.  RO   $" LPTIM1_CNT @ hex. LPTIM1_CNT 1b. ;
+    : LPTIM1_IER. cr ." LPTIM1_IER.  RW   $" LPTIM1_IER @ h.8 LPTIM1_IER 1b. ;
+    : LPTIM1_CFGR. cr ." LPTIM1_CFGR.  RW   $" LPTIM1_CFGR @ h.8 LPTIM1_CFGR 1b. ;
+    : LPTIM1_CR. cr ." LPTIM1_CR.  RW   $" LPTIM1_CR @ h.8 LPTIM1_CR 1b. ;
+    : LPTIM1_CMP. cr ." LPTIM1_CMP.  RW   $" LPTIM1_CMP @ h.8 LPTIM1_CMP 1b. ;
+    : LPTIM1_ARR. cr ." LPTIM1_ARR.  RW   $" LPTIM1_ARR @ h.8 LPTIM1_ARR 1b. ;
+    : LPTIM1_CNT. cr ." LPTIM1_CNT.  RO   $" LPTIM1_CNT @ h.8 LPTIM1_CNT 1b. ;
     : LPTIM1.
       LPTIM1_ISR.
       LPTIM1_ICR.
@@ -3969,17 +3969,17 @@ begin-module memmap
     I2C1 $20 + constant I2C1_PECR ( read-only )  \ PEC register
     I2C1 $24 + constant I2C1_RXDR ( read-only )  \ Receive data register
     I2C1 $28 + constant I2C1_TXDR ( read-write )  \ Transmit data register
-    : I2C1_CR1. cr ." I2C1_CR1.  RW   $" I2C1_CR1 @ hex. I2C1_CR1 1b. ;
-    : I2C1_CR2. cr ." I2C1_CR2.  RW   $" I2C1_CR2 @ hex. I2C1_CR2 1b. ;
-    : I2C1_OAR1. cr ." I2C1_OAR1.  RW   $" I2C1_OAR1 @ hex. I2C1_OAR1 1b. ;
-    : I2C1_OAR2. cr ." I2C1_OAR2.  RW   $" I2C1_OAR2 @ hex. I2C1_OAR2 1b. ;
-    : I2C1_TIMINGR. cr ." I2C1_TIMINGR.  RW   $" I2C1_TIMINGR @ hex. I2C1_TIMINGR 1b. ;
-    : I2C1_TIMEOUTR. cr ." I2C1_TIMEOUTR.  RW   $" I2C1_TIMEOUTR @ hex. I2C1_TIMEOUTR 1b. ;
-    : I2C1_ISR. cr ." I2C1_ISR.   $" I2C1_ISR @ hex. I2C1_ISR 1b. ;
+    : I2C1_CR1. cr ." I2C1_CR1.  RW   $" I2C1_CR1 @ h.8 I2C1_CR1 1b. ;
+    : I2C1_CR2. cr ." I2C1_CR2.  RW   $" I2C1_CR2 @ h.8 I2C1_CR2 1b. ;
+    : I2C1_OAR1. cr ." I2C1_OAR1.  RW   $" I2C1_OAR1 @ h.8 I2C1_OAR1 1b. ;
+    : I2C1_OAR2. cr ." I2C1_OAR2.  RW   $" I2C1_OAR2 @ h.8 I2C1_OAR2 1b. ;
+    : I2C1_TIMINGR. cr ." I2C1_TIMINGR.  RW   $" I2C1_TIMINGR @ h.8 I2C1_TIMINGR 1b. ;
+    : I2C1_TIMEOUTR. cr ." I2C1_TIMEOUTR.  RW   $" I2C1_TIMEOUTR @ h.8 I2C1_TIMEOUTR 1b. ;
+    : I2C1_ISR. cr ." I2C1_ISR.   $" I2C1_ISR @ h.8 I2C1_ISR 1b. ;
     : I2C1_ICR. cr ." I2C1_ICR " WRITEONLY ; 
-    : I2C1_PECR. cr ." I2C1_PECR.  RO   $" I2C1_PECR @ hex. I2C1_PECR 1b. ;
-    : I2C1_RXDR. cr ." I2C1_RXDR.  RO   $" I2C1_RXDR @ hex. I2C1_RXDR 1b. ;
-    : I2C1_TXDR. cr ." I2C1_TXDR.  RW   $" I2C1_TXDR @ hex. I2C1_TXDR 1b. ;
+    : I2C1_PECR. cr ." I2C1_PECR.  RO   $" I2C1_PECR @ h.8 I2C1_PECR 1b. ;
+    : I2C1_RXDR. cr ." I2C1_RXDR.  RO   $" I2C1_RXDR @ h.8 I2C1_RXDR 1b. ;
+    : I2C1_TXDR. cr ." I2C1_TXDR.  RW   $" I2C1_TXDR @ h.8 I2C1_TXDR 1b. ;
     : I2C1.
       I2C1_CR1.
       I2C1_CR2.
@@ -4008,17 +4008,17 @@ begin-module memmap
     I2C2 $20 + constant I2C2_PECR ( read-only )  \ PEC register
     I2C2 $24 + constant I2C2_RXDR ( read-only )  \ Receive data register
     I2C2 $28 + constant I2C2_TXDR ( read-write )  \ Transmit data register
-    : I2C2_CR1. cr ." I2C2_CR1.  RW   $" I2C2_CR1 @ hex. I2C2_CR1 1b. ;
-    : I2C2_CR2. cr ." I2C2_CR2.  RW   $" I2C2_CR2 @ hex. I2C2_CR2 1b. ;
-    : I2C2_OAR1. cr ." I2C2_OAR1.  RW   $" I2C2_OAR1 @ hex. I2C2_OAR1 1b. ;
-    : I2C2_OAR2. cr ." I2C2_OAR2.  RW   $" I2C2_OAR2 @ hex. I2C2_OAR2 1b. ;
-    : I2C2_TIMINGR. cr ." I2C2_TIMINGR.  RW   $" I2C2_TIMINGR @ hex. I2C2_TIMINGR 1b. ;
-    : I2C2_TIMEOUTR. cr ." I2C2_TIMEOUTR.  RW   $" I2C2_TIMEOUTR @ hex. I2C2_TIMEOUTR 1b. ;
-    : I2C2_ISR. cr ." I2C2_ISR.   $" I2C2_ISR @ hex. I2C2_ISR 1b. ;
+    : I2C2_CR1. cr ." I2C2_CR1.  RW   $" I2C2_CR1 @ h.8 I2C2_CR1 1b. ;
+    : I2C2_CR2. cr ." I2C2_CR2.  RW   $" I2C2_CR2 @ h.8 I2C2_CR2 1b. ;
+    : I2C2_OAR1. cr ." I2C2_OAR1.  RW   $" I2C2_OAR1 @ h.8 I2C2_OAR1 1b. ;
+    : I2C2_OAR2. cr ." I2C2_OAR2.  RW   $" I2C2_OAR2 @ h.8 I2C2_OAR2 1b. ;
+    : I2C2_TIMINGR. cr ." I2C2_TIMINGR.  RW   $" I2C2_TIMINGR @ h.8 I2C2_TIMINGR 1b. ;
+    : I2C2_TIMEOUTR. cr ." I2C2_TIMEOUTR.  RW   $" I2C2_TIMEOUTR @ h.8 I2C2_TIMEOUTR 1b. ;
+    : I2C2_ISR. cr ." I2C2_ISR.   $" I2C2_ISR @ h.8 I2C2_ISR 1b. ;
     : I2C2_ICR. cr ." I2C2_ICR " WRITEONLY ; 
-    : I2C2_PECR. cr ." I2C2_PECR.  RO   $" I2C2_PECR @ hex. I2C2_PECR 1b. ;
-    : I2C2_RXDR. cr ." I2C2_RXDR.  RO   $" I2C2_RXDR @ hex. I2C2_RXDR 1b. ;
-    : I2C2_TXDR. cr ." I2C2_TXDR.  RW   $" I2C2_TXDR @ hex. I2C2_TXDR 1b. ;
+    : I2C2_PECR. cr ." I2C2_PECR.  RO   $" I2C2_PECR @ h.8 I2C2_PECR 1b. ;
+    : I2C2_RXDR. cr ." I2C2_RXDR.  RO   $" I2C2_RXDR @ h.8 I2C2_RXDR 1b. ;
+    : I2C2_TXDR. cr ." I2C2_TXDR.  RW   $" I2C2_TXDR @ h.8 I2C2_TXDR 1b. ;
     : I2C2.
       I2C2_CR1.
       I2C2_CR2.
@@ -4047,17 +4047,17 @@ begin-module memmap
     I2C3 $20 + constant I2C3_PECR ( read-only )  \ PEC register
     I2C3 $24 + constant I2C3_RXDR ( read-only )  \ Receive data register
     I2C3 $28 + constant I2C3_TXDR ( read-write )  \ Transmit data register
-    : I2C3_CR1. cr ." I2C3_CR1.  RW   $" I2C3_CR1 @ hex. I2C3_CR1 1b. ;
-    : I2C3_CR2. cr ." I2C3_CR2.  RW   $" I2C3_CR2 @ hex. I2C3_CR2 1b. ;
-    : I2C3_OAR1. cr ." I2C3_OAR1.  RW   $" I2C3_OAR1 @ hex. I2C3_OAR1 1b. ;
-    : I2C3_OAR2. cr ." I2C3_OAR2.  RW   $" I2C3_OAR2 @ hex. I2C3_OAR2 1b. ;
-    : I2C3_TIMINGR. cr ." I2C3_TIMINGR.  RW   $" I2C3_TIMINGR @ hex. I2C3_TIMINGR 1b. ;
-    : I2C3_TIMEOUTR. cr ." I2C3_TIMEOUTR.  RW   $" I2C3_TIMEOUTR @ hex. I2C3_TIMEOUTR 1b. ;
-    : I2C3_ISR. cr ." I2C3_ISR.   $" I2C3_ISR @ hex. I2C3_ISR 1b. ;
+    : I2C3_CR1. cr ." I2C3_CR1.  RW   $" I2C3_CR1 @ h.8 I2C3_CR1 1b. ;
+    : I2C3_CR2. cr ." I2C3_CR2.  RW   $" I2C3_CR2 @ h.8 I2C3_CR2 1b. ;
+    : I2C3_OAR1. cr ." I2C3_OAR1.  RW   $" I2C3_OAR1 @ h.8 I2C3_OAR1 1b. ;
+    : I2C3_OAR2. cr ." I2C3_OAR2.  RW   $" I2C3_OAR2 @ h.8 I2C3_OAR2 1b. ;
+    : I2C3_TIMINGR. cr ." I2C3_TIMINGR.  RW   $" I2C3_TIMINGR @ h.8 I2C3_TIMINGR 1b. ;
+    : I2C3_TIMEOUTR. cr ." I2C3_TIMEOUTR.  RW   $" I2C3_TIMEOUTR @ h.8 I2C3_TIMEOUTR 1b. ;
+    : I2C3_ISR. cr ." I2C3_ISR.   $" I2C3_ISR @ h.8 I2C3_ISR 1b. ;
     : I2C3_ICR. cr ." I2C3_ICR " WRITEONLY ; 
-    : I2C3_PECR. cr ." I2C3_PECR.  RO   $" I2C3_PECR @ hex. I2C3_PECR 1b. ;
-    : I2C3_RXDR. cr ." I2C3_RXDR.  RO   $" I2C3_RXDR @ hex. I2C3_RXDR 1b. ;
-    : I2C3_TXDR. cr ." I2C3_TXDR.  RW   $" I2C3_TXDR @ hex. I2C3_TXDR 1b. ;
+    : I2C3_PECR. cr ." I2C3_PECR.  RO   $" I2C3_PECR @ h.8 I2C3_PECR 1b. ;
+    : I2C3_RXDR. cr ." I2C3_RXDR.  RO   $" I2C3_RXDR @ h.8 I2C3_RXDR 1b. ;
+    : I2C3_TXDR. cr ." I2C3_TXDR.  RW   $" I2C3_TXDR @ h.8 I2C3_TXDR 1b. ;
     : I2C3.
       I2C3_CR1.
       I2C3_CR2.
@@ -4086,17 +4086,17 @@ begin-module memmap
     I2C4 $20 + constant I2C4_PECR ( read-only )  \ PEC register
     I2C4 $24 + constant I2C4_RXDR ( read-only )  \ Receive data register
     I2C4 $28 + constant I2C4_TXDR ( read-write )  \ Transmit data register
-    : I2C4_CR1. cr ." I2C4_CR1.  RW   $" I2C4_CR1 @ hex. I2C4_CR1 1b. ;
-    : I2C4_CR2. cr ." I2C4_CR2.  RW   $" I2C4_CR2 @ hex. I2C4_CR2 1b. ;
-    : I2C4_OAR1. cr ." I2C4_OAR1.  RW   $" I2C4_OAR1 @ hex. I2C4_OAR1 1b. ;
-    : I2C4_OAR2. cr ." I2C4_OAR2.  RW   $" I2C4_OAR2 @ hex. I2C4_OAR2 1b. ;
-    : I2C4_TIMINGR. cr ." I2C4_TIMINGR.  RW   $" I2C4_TIMINGR @ hex. I2C4_TIMINGR 1b. ;
-    : I2C4_TIMEOUTR. cr ." I2C4_TIMEOUTR.  RW   $" I2C4_TIMEOUTR @ hex. I2C4_TIMEOUTR 1b. ;
-    : I2C4_ISR. cr ." I2C4_ISR.   $" I2C4_ISR @ hex. I2C4_ISR 1b. ;
+    : I2C4_CR1. cr ." I2C4_CR1.  RW   $" I2C4_CR1 @ h.8 I2C4_CR1 1b. ;
+    : I2C4_CR2. cr ." I2C4_CR2.  RW   $" I2C4_CR2 @ h.8 I2C4_CR2 1b. ;
+    : I2C4_OAR1. cr ." I2C4_OAR1.  RW   $" I2C4_OAR1 @ h.8 I2C4_OAR1 1b. ;
+    : I2C4_OAR2. cr ." I2C4_OAR2.  RW   $" I2C4_OAR2 @ h.8 I2C4_OAR2 1b. ;
+    : I2C4_TIMINGR. cr ." I2C4_TIMINGR.  RW   $" I2C4_TIMINGR @ h.8 I2C4_TIMINGR 1b. ;
+    : I2C4_TIMEOUTR. cr ." I2C4_TIMEOUTR.  RW   $" I2C4_TIMEOUTR @ h.8 I2C4_TIMEOUTR 1b. ;
+    : I2C4_ISR. cr ." I2C4_ISR.   $" I2C4_ISR @ h.8 I2C4_ISR 1b. ;
     : I2C4_ICR. cr ." I2C4_ICR " WRITEONLY ; 
-    : I2C4_PECR. cr ." I2C4_PECR.  RO   $" I2C4_PECR @ hex. I2C4_PECR 1b. ;
-    : I2C4_RXDR. cr ." I2C4_RXDR.  RO   $" I2C4_RXDR @ hex. I2C4_RXDR 1b. ;
-    : I2C4_TXDR. cr ." I2C4_TXDR.  RW   $" I2C4_TXDR @ hex. I2C4_TXDR 1b. ;
+    : I2C4_PECR. cr ." I2C4_PECR.  RO   $" I2C4_PECR @ h.8 I2C4_PECR 1b. ;
+    : I2C4_RXDR. cr ." I2C4_RXDR.  RO   $" I2C4_RXDR @ h.8 I2C4_RXDR 1b. ;
+    : I2C4_TXDR. cr ." I2C4_TXDR.  RW   $" I2C4_TXDR @ h.8 I2C4_TXDR 1b. ;
     : I2C4.
       I2C4_CR1.
       I2C4_CR2.
@@ -4165,57 +4165,57 @@ begin-module memmap
     RTC $C4 + constant RTC_BKP29R ( read-write )  \ backup register
     RTC $C8 + constant RTC_BKP30R ( read-write )  \ backup register
     RTC $CC + constant RTC_BKP31R ( read-write )  \ backup register
-    : RTC_TR. cr ." RTC_TR.  RW   $" RTC_TR @ hex. RTC_TR 1b. ;
-    : RTC_DR. cr ." RTC_DR.  RW   $" RTC_DR @ hex. RTC_DR 1b. ;
-    : RTC_CR. cr ." RTC_CR.  RW   $" RTC_CR @ hex. RTC_CR 1b. ;
-    : RTC_ISR. cr ." RTC_ISR.   $" RTC_ISR @ hex. RTC_ISR 1b. ;
-    : RTC_PRER. cr ." RTC_PRER.  RW   $" RTC_PRER @ hex. RTC_PRER 1b. ;
-    : RTC_WUTR. cr ." RTC_WUTR.  RW   $" RTC_WUTR @ hex. RTC_WUTR 1b. ;
-    : RTC_ALRMAR. cr ." RTC_ALRMAR.  RW   $" RTC_ALRMAR @ hex. RTC_ALRMAR 1b. ;
-    : RTC_ALRMBR. cr ." RTC_ALRMBR.  RW   $" RTC_ALRMBR @ hex. RTC_ALRMBR 1b. ;
+    : RTC_TR. cr ." RTC_TR.  RW   $" RTC_TR @ h.8 RTC_TR 1b. ;
+    : RTC_DR. cr ." RTC_DR.  RW   $" RTC_DR @ h.8 RTC_DR 1b. ;
+    : RTC_CR. cr ." RTC_CR.  RW   $" RTC_CR @ h.8 RTC_CR 1b. ;
+    : RTC_ISR. cr ." RTC_ISR.   $" RTC_ISR @ h.8 RTC_ISR 1b. ;
+    : RTC_PRER. cr ." RTC_PRER.  RW   $" RTC_PRER @ h.8 RTC_PRER 1b. ;
+    : RTC_WUTR. cr ." RTC_WUTR.  RW   $" RTC_WUTR @ h.8 RTC_WUTR 1b. ;
+    : RTC_ALRMAR. cr ." RTC_ALRMAR.  RW   $" RTC_ALRMAR @ h.8 RTC_ALRMAR 1b. ;
+    : RTC_ALRMBR. cr ." RTC_ALRMBR.  RW   $" RTC_ALRMBR @ h.8 RTC_ALRMBR 1b. ;
     : RTC_WPR. cr ." RTC_WPR " WRITEONLY ; 
-    : RTC_SSR. cr ." RTC_SSR.  RO   $" RTC_SSR @ hex. RTC_SSR 1b. ;
+    : RTC_SSR. cr ." RTC_SSR.  RO   $" RTC_SSR @ h.8 RTC_SSR 1b. ;
     : RTC_SHIFTR. cr ." RTC_SHIFTR " WRITEONLY ; 
-    : RTC_TSTR. cr ." RTC_TSTR.  RO   $" RTC_TSTR @ hex. RTC_TSTR 1b. ;
-    : RTC_TSDR. cr ." RTC_TSDR.  RO   $" RTC_TSDR @ hex. RTC_TSDR 1b. ;
-    : RTC_TSSSR. cr ." RTC_TSSSR.  RO   $" RTC_TSSSR @ hex. RTC_TSSSR 1b. ;
-    : RTC_CALR. cr ." RTC_CALR.  RW   $" RTC_CALR @ hex. RTC_CALR 1b. ;
-    : RTC_TAMPCR. cr ." RTC_TAMPCR.  RW   $" RTC_TAMPCR @ hex. RTC_TAMPCR 1b. ;
-    : RTC_ALRMASSR. cr ." RTC_ALRMASSR.  RW   $" RTC_ALRMASSR @ hex. RTC_ALRMASSR 1b. ;
-    : RTC_ALRMBSSR. cr ." RTC_ALRMBSSR.  RW   $" RTC_ALRMBSSR @ hex. RTC_ALRMBSSR 1b. ;
-    : RTC_OR. cr ." RTC_OR.  RW   $" RTC_OR @ hex. RTC_OR 1b. ;
-    : RTC_BKP0R. cr ." RTC_BKP0R.  RW   $" RTC_BKP0R @ hex. RTC_BKP0R 1b. ;
-    : RTC_BKP1R. cr ." RTC_BKP1R.  RW   $" RTC_BKP1R @ hex. RTC_BKP1R 1b. ;
-    : RTC_BKP2R. cr ." RTC_BKP2R.  RW   $" RTC_BKP2R @ hex. RTC_BKP2R 1b. ;
-    : RTC_BKP3R. cr ." RTC_BKP3R.  RW   $" RTC_BKP3R @ hex. RTC_BKP3R 1b. ;
-    : RTC_BKP4R. cr ." RTC_BKP4R.  RW   $" RTC_BKP4R @ hex. RTC_BKP4R 1b. ;
-    : RTC_BKP5R. cr ." RTC_BKP5R.  RW   $" RTC_BKP5R @ hex. RTC_BKP5R 1b. ;
-    : RTC_BKP6R. cr ." RTC_BKP6R.  RW   $" RTC_BKP6R @ hex. RTC_BKP6R 1b. ;
-    : RTC_BKP7R. cr ." RTC_BKP7R.  RW   $" RTC_BKP7R @ hex. RTC_BKP7R 1b. ;
-    : RTC_BKP8R. cr ." RTC_BKP8R.  RW   $" RTC_BKP8R @ hex. RTC_BKP8R 1b. ;
-    : RTC_BKP9R. cr ." RTC_BKP9R.  RW   $" RTC_BKP9R @ hex. RTC_BKP9R 1b. ;
-    : RTC_BKP10R. cr ." RTC_BKP10R.  RW   $" RTC_BKP10R @ hex. RTC_BKP10R 1b. ;
-    : RTC_BKP11R. cr ." RTC_BKP11R.  RW   $" RTC_BKP11R @ hex. RTC_BKP11R 1b. ;
-    : RTC_BKP12R. cr ." RTC_BKP12R.  RW   $" RTC_BKP12R @ hex. RTC_BKP12R 1b. ;
-    : RTC_BKP13R. cr ." RTC_BKP13R.  RW   $" RTC_BKP13R @ hex. RTC_BKP13R 1b. ;
-    : RTC_BKP14R. cr ." RTC_BKP14R.  RW   $" RTC_BKP14R @ hex. RTC_BKP14R 1b. ;
-    : RTC_BKP15R. cr ." RTC_BKP15R.  RW   $" RTC_BKP15R @ hex. RTC_BKP15R 1b. ;
-    : RTC_BKP16R. cr ." RTC_BKP16R.  RW   $" RTC_BKP16R @ hex. RTC_BKP16R 1b. ;
-    : RTC_BKP17R. cr ." RTC_BKP17R.  RW   $" RTC_BKP17R @ hex. RTC_BKP17R 1b. ;
-    : RTC_BKP18R. cr ." RTC_BKP18R.  RW   $" RTC_BKP18R @ hex. RTC_BKP18R 1b. ;
-    : RTC_BKP19R. cr ." RTC_BKP19R.  RW   $" RTC_BKP19R @ hex. RTC_BKP19R 1b. ;
-    : RTC_BKP20R. cr ." RTC_BKP20R.  RW   $" RTC_BKP20R @ hex. RTC_BKP20R 1b. ;
-    : RTC_BKP21R. cr ." RTC_BKP21R.  RW   $" RTC_BKP21R @ hex. RTC_BKP21R 1b. ;
-    : RTC_BKP22R. cr ." RTC_BKP22R.  RW   $" RTC_BKP22R @ hex. RTC_BKP22R 1b. ;
-    : RTC_BKP23R. cr ." RTC_BKP23R.  RW   $" RTC_BKP23R @ hex. RTC_BKP23R 1b. ;
-    : RTC_BKP24R. cr ." RTC_BKP24R.  RW   $" RTC_BKP24R @ hex. RTC_BKP24R 1b. ;
-    : RTC_BKP25R. cr ." RTC_BKP25R.  RW   $" RTC_BKP25R @ hex. RTC_BKP25R 1b. ;
-    : RTC_BKP26R. cr ." RTC_BKP26R.  RW   $" RTC_BKP26R @ hex. RTC_BKP26R 1b. ;
-    : RTC_BKP27R. cr ." RTC_BKP27R.  RW   $" RTC_BKP27R @ hex. RTC_BKP27R 1b. ;
-    : RTC_BKP28R. cr ." RTC_BKP28R.  RW   $" RTC_BKP28R @ hex. RTC_BKP28R 1b. ;
-    : RTC_BKP29R. cr ." RTC_BKP29R.  RW   $" RTC_BKP29R @ hex. RTC_BKP29R 1b. ;
-    : RTC_BKP30R. cr ." RTC_BKP30R.  RW   $" RTC_BKP30R @ hex. RTC_BKP30R 1b. ;
-    : RTC_BKP31R. cr ." RTC_BKP31R.  RW   $" RTC_BKP31R @ hex. RTC_BKP31R 1b. ;
+    : RTC_TSTR. cr ." RTC_TSTR.  RO   $" RTC_TSTR @ h.8 RTC_TSTR 1b. ;
+    : RTC_TSDR. cr ." RTC_TSDR.  RO   $" RTC_TSDR @ h.8 RTC_TSDR 1b. ;
+    : RTC_TSSSR. cr ." RTC_TSSSR.  RO   $" RTC_TSSSR @ h.8 RTC_TSSSR 1b. ;
+    : RTC_CALR. cr ." RTC_CALR.  RW   $" RTC_CALR @ h.8 RTC_CALR 1b. ;
+    : RTC_TAMPCR. cr ." RTC_TAMPCR.  RW   $" RTC_TAMPCR @ h.8 RTC_TAMPCR 1b. ;
+    : RTC_ALRMASSR. cr ." RTC_ALRMASSR.  RW   $" RTC_ALRMASSR @ h.8 RTC_ALRMASSR 1b. ;
+    : RTC_ALRMBSSR. cr ." RTC_ALRMBSSR.  RW   $" RTC_ALRMBSSR @ h.8 RTC_ALRMBSSR 1b. ;
+    : RTC_OR. cr ." RTC_OR.  RW   $" RTC_OR @ h.8 RTC_OR 1b. ;
+    : RTC_BKP0R. cr ." RTC_BKP0R.  RW   $" RTC_BKP0R @ h.8 RTC_BKP0R 1b. ;
+    : RTC_BKP1R. cr ." RTC_BKP1R.  RW   $" RTC_BKP1R @ h.8 RTC_BKP1R 1b. ;
+    : RTC_BKP2R. cr ." RTC_BKP2R.  RW   $" RTC_BKP2R @ h.8 RTC_BKP2R 1b. ;
+    : RTC_BKP3R. cr ." RTC_BKP3R.  RW   $" RTC_BKP3R @ h.8 RTC_BKP3R 1b. ;
+    : RTC_BKP4R. cr ." RTC_BKP4R.  RW   $" RTC_BKP4R @ h.8 RTC_BKP4R 1b. ;
+    : RTC_BKP5R. cr ." RTC_BKP5R.  RW   $" RTC_BKP5R @ h.8 RTC_BKP5R 1b. ;
+    : RTC_BKP6R. cr ." RTC_BKP6R.  RW   $" RTC_BKP6R @ h.8 RTC_BKP6R 1b. ;
+    : RTC_BKP7R. cr ." RTC_BKP7R.  RW   $" RTC_BKP7R @ h.8 RTC_BKP7R 1b. ;
+    : RTC_BKP8R. cr ." RTC_BKP8R.  RW   $" RTC_BKP8R @ h.8 RTC_BKP8R 1b. ;
+    : RTC_BKP9R. cr ." RTC_BKP9R.  RW   $" RTC_BKP9R @ h.8 RTC_BKP9R 1b. ;
+    : RTC_BKP10R. cr ." RTC_BKP10R.  RW   $" RTC_BKP10R @ h.8 RTC_BKP10R 1b. ;
+    : RTC_BKP11R. cr ." RTC_BKP11R.  RW   $" RTC_BKP11R @ h.8 RTC_BKP11R 1b. ;
+    : RTC_BKP12R. cr ." RTC_BKP12R.  RW   $" RTC_BKP12R @ h.8 RTC_BKP12R 1b. ;
+    : RTC_BKP13R. cr ." RTC_BKP13R.  RW   $" RTC_BKP13R @ h.8 RTC_BKP13R 1b. ;
+    : RTC_BKP14R. cr ." RTC_BKP14R.  RW   $" RTC_BKP14R @ h.8 RTC_BKP14R 1b. ;
+    : RTC_BKP15R. cr ." RTC_BKP15R.  RW   $" RTC_BKP15R @ h.8 RTC_BKP15R 1b. ;
+    : RTC_BKP16R. cr ." RTC_BKP16R.  RW   $" RTC_BKP16R @ h.8 RTC_BKP16R 1b. ;
+    : RTC_BKP17R. cr ." RTC_BKP17R.  RW   $" RTC_BKP17R @ h.8 RTC_BKP17R 1b. ;
+    : RTC_BKP18R. cr ." RTC_BKP18R.  RW   $" RTC_BKP18R @ h.8 RTC_BKP18R 1b. ;
+    : RTC_BKP19R. cr ." RTC_BKP19R.  RW   $" RTC_BKP19R @ h.8 RTC_BKP19R 1b. ;
+    : RTC_BKP20R. cr ." RTC_BKP20R.  RW   $" RTC_BKP20R @ h.8 RTC_BKP20R 1b. ;
+    : RTC_BKP21R. cr ." RTC_BKP21R.  RW   $" RTC_BKP21R @ h.8 RTC_BKP21R 1b. ;
+    : RTC_BKP22R. cr ." RTC_BKP22R.  RW   $" RTC_BKP22R @ h.8 RTC_BKP22R 1b. ;
+    : RTC_BKP23R. cr ." RTC_BKP23R.  RW   $" RTC_BKP23R @ h.8 RTC_BKP23R 1b. ;
+    : RTC_BKP24R. cr ." RTC_BKP24R.  RW   $" RTC_BKP24R @ h.8 RTC_BKP24R 1b. ;
+    : RTC_BKP25R. cr ." RTC_BKP25R.  RW   $" RTC_BKP25R @ h.8 RTC_BKP25R 1b. ;
+    : RTC_BKP26R. cr ." RTC_BKP26R.  RW   $" RTC_BKP26R @ h.8 RTC_BKP26R 1b. ;
+    : RTC_BKP27R. cr ." RTC_BKP27R.  RW   $" RTC_BKP27R @ h.8 RTC_BKP27R 1b. ;
+    : RTC_BKP28R. cr ." RTC_BKP28R.  RW   $" RTC_BKP28R @ h.8 RTC_BKP28R 1b. ;
+    : RTC_BKP29R. cr ." RTC_BKP29R.  RW   $" RTC_BKP29R @ h.8 RTC_BKP29R 1b. ;
+    : RTC_BKP30R. cr ." RTC_BKP30R.  RW   $" RTC_BKP30R @ h.8 RTC_BKP30R 1b. ;
+    : RTC_BKP31R. cr ." RTC_BKP31R.  RW   $" RTC_BKP31R @ h.8 RTC_BKP31R 1b. ;
     : RTC.
       RTC_TR.
       RTC_DR.
@@ -4284,17 +4284,17 @@ begin-module memmap
     USART6 $20 + constant USART6_ICR ( write-only )  \ Interrupt flag clear register
     USART6 $24 + constant USART6_RDR ( read-only )  \ Receive data register
     USART6 $28 + constant USART6_TDR ( read-write )  \ Transmit data register
-    : USART6_CR1. cr ." USART6_CR1.  RW   $" USART6_CR1 @ hex. USART6_CR1 1b. ;
-    : USART6_CR2. cr ." USART6_CR2.  RW   $" USART6_CR2 @ hex. USART6_CR2 1b. ;
-    : USART6_CR3. cr ." USART6_CR3.  RW   $" USART6_CR3 @ hex. USART6_CR3 1b. ;
-    : USART6_BRR. cr ." USART6_BRR.  RW   $" USART6_BRR @ hex. USART6_BRR 1b. ;
-    : USART6_GTPR. cr ." USART6_GTPR.  RW   $" USART6_GTPR @ hex. USART6_GTPR 1b. ;
-    : USART6_RTOR. cr ." USART6_RTOR.  RW   $" USART6_RTOR @ hex. USART6_RTOR 1b. ;
+    : USART6_CR1. cr ." USART6_CR1.  RW   $" USART6_CR1 @ h.8 USART6_CR1 1b. ;
+    : USART6_CR2. cr ." USART6_CR2.  RW   $" USART6_CR2 @ h.8 USART6_CR2 1b. ;
+    : USART6_CR3. cr ." USART6_CR3.  RW   $" USART6_CR3 @ h.8 USART6_CR3 1b. ;
+    : USART6_BRR. cr ." USART6_BRR.  RW   $" USART6_BRR @ h.8 USART6_BRR 1b. ;
+    : USART6_GTPR. cr ." USART6_GTPR.  RW   $" USART6_GTPR @ h.8 USART6_GTPR 1b. ;
+    : USART6_RTOR. cr ." USART6_RTOR.  RW   $" USART6_RTOR @ h.8 USART6_RTOR 1b. ;
     : USART6_RQR. cr ." USART6_RQR " WRITEONLY ; 
-    : USART6_ISR. cr ." USART6_ISR.  RO   $" USART6_ISR @ hex. USART6_ISR 1b. ;
+    : USART6_ISR. cr ." USART6_ISR.  RO   $" USART6_ISR @ h.8 USART6_ISR 1b. ;
     : USART6_ICR. cr ." USART6_ICR " WRITEONLY ; 
-    : USART6_RDR. cr ." USART6_RDR.  RO   $" USART6_RDR @ hex. USART6_RDR 1b. ;
-    : USART6_TDR. cr ." USART6_TDR.  RW   $" USART6_TDR @ hex. USART6_TDR 1b. ;
+    : USART6_RDR. cr ." USART6_RDR.  RO   $" USART6_RDR @ h.8 USART6_RDR 1b. ;
+    : USART6_TDR. cr ." USART6_TDR.  RW   $" USART6_TDR @ h.8 USART6_TDR 1b. ;
     : USART6.
       USART6_CR1.
       USART6_CR2.
@@ -4323,17 +4323,17 @@ begin-module memmap
     USART1 $20 + constant USART1_ICR ( write-only )  \ Interrupt flag clear register
     USART1 $24 + constant USART1_RDR ( read-only )  \ Receive data register
     USART1 $28 + constant USART1_TDR ( read-write )  \ Transmit data register
-    : USART1_CR1. cr ." USART1_CR1.  RW   $" USART1_CR1 @ hex. USART1_CR1 1b. ;
-    : USART1_CR2. cr ." USART1_CR2.  RW   $" USART1_CR2 @ hex. USART1_CR2 1b. ;
-    : USART1_CR3. cr ." USART1_CR3.  RW   $" USART1_CR3 @ hex. USART1_CR3 1b. ;
-    : USART1_BRR. cr ." USART1_BRR.  RW   $" USART1_BRR @ hex. USART1_BRR 1b. ;
-    : USART1_GTPR. cr ." USART1_GTPR.  RW   $" USART1_GTPR @ hex. USART1_GTPR 1b. ;
-    : USART1_RTOR. cr ." USART1_RTOR.  RW   $" USART1_RTOR @ hex. USART1_RTOR 1b. ;
+    : USART1_CR1. cr ." USART1_CR1.  RW   $" USART1_CR1 @ h.8 USART1_CR1 1b. ;
+    : USART1_CR2. cr ." USART1_CR2.  RW   $" USART1_CR2 @ h.8 USART1_CR2 1b. ;
+    : USART1_CR3. cr ." USART1_CR3.  RW   $" USART1_CR3 @ h.8 USART1_CR3 1b. ;
+    : USART1_BRR. cr ." USART1_BRR.  RW   $" USART1_BRR @ h.8 USART1_BRR 1b. ;
+    : USART1_GTPR. cr ." USART1_GTPR.  RW   $" USART1_GTPR @ h.8 USART1_GTPR 1b. ;
+    : USART1_RTOR. cr ." USART1_RTOR.  RW   $" USART1_RTOR @ h.8 USART1_RTOR 1b. ;
     : USART1_RQR. cr ." USART1_RQR " WRITEONLY ; 
-    : USART1_ISR. cr ." USART1_ISR.  RO   $" USART1_ISR @ hex. USART1_ISR 1b. ;
+    : USART1_ISR. cr ." USART1_ISR.  RO   $" USART1_ISR @ h.8 USART1_ISR 1b. ;
     : USART1_ICR. cr ." USART1_ICR " WRITEONLY ; 
-    : USART1_RDR. cr ." USART1_RDR.  RO   $" USART1_RDR @ hex. USART1_RDR 1b. ;
-    : USART1_TDR. cr ." USART1_TDR.  RW   $" USART1_TDR @ hex. USART1_TDR 1b. ;
+    : USART1_RDR. cr ." USART1_RDR.  RO   $" USART1_RDR @ h.8 USART1_RDR 1b. ;
+    : USART1_TDR. cr ." USART1_TDR.  RW   $" USART1_TDR @ h.8 USART1_TDR 1b. ;
     : USART1.
       USART1_CR1.
       USART1_CR2.
@@ -4362,17 +4362,17 @@ begin-module memmap
     USART3 $20 + constant USART3_ICR ( write-only )  \ Interrupt flag clear register
     USART3 $24 + constant USART3_RDR ( read-only )  \ Receive data register
     USART3 $28 + constant USART3_TDR ( read-write )  \ Transmit data register
-    : USART3_CR1. cr ." USART3_CR1.  RW   $" USART3_CR1 @ hex. USART3_CR1 1b. ;
-    : USART3_CR2. cr ." USART3_CR2.  RW   $" USART3_CR2 @ hex. USART3_CR2 1b. ;
-    : USART3_CR3. cr ." USART3_CR3.  RW   $" USART3_CR3 @ hex. USART3_CR3 1b. ;
-    : USART3_BRR. cr ." USART3_BRR.  RW   $" USART3_BRR @ hex. USART3_BRR 1b. ;
-    : USART3_GTPR. cr ." USART3_GTPR.  RW   $" USART3_GTPR @ hex. USART3_GTPR 1b. ;
-    : USART3_RTOR. cr ." USART3_RTOR.  RW   $" USART3_RTOR @ hex. USART3_RTOR 1b. ;
+    : USART3_CR1. cr ." USART3_CR1.  RW   $" USART3_CR1 @ h.8 USART3_CR1 1b. ;
+    : USART3_CR2. cr ." USART3_CR2.  RW   $" USART3_CR2 @ h.8 USART3_CR2 1b. ;
+    : USART3_CR3. cr ." USART3_CR3.  RW   $" USART3_CR3 @ h.8 USART3_CR3 1b. ;
+    : USART3_BRR. cr ." USART3_BRR.  RW   $" USART3_BRR @ h.8 USART3_BRR 1b. ;
+    : USART3_GTPR. cr ." USART3_GTPR.  RW   $" USART3_GTPR @ h.8 USART3_GTPR 1b. ;
+    : USART3_RTOR. cr ." USART3_RTOR.  RW   $" USART3_RTOR @ h.8 USART3_RTOR 1b. ;
     : USART3_RQR. cr ." USART3_RQR " WRITEONLY ; 
-    : USART3_ISR. cr ." USART3_ISR.  RO   $" USART3_ISR @ hex. USART3_ISR 1b. ;
+    : USART3_ISR. cr ." USART3_ISR.  RO   $" USART3_ISR @ h.8 USART3_ISR 1b. ;
     : USART3_ICR. cr ." USART3_ICR " WRITEONLY ; 
-    : USART3_RDR. cr ." USART3_RDR.  RO   $" USART3_RDR @ hex. USART3_RDR 1b. ;
-    : USART3_TDR. cr ." USART3_TDR.  RW   $" USART3_TDR @ hex. USART3_TDR 1b. ;
+    : USART3_RDR. cr ." USART3_RDR.  RO   $" USART3_RDR @ h.8 USART3_RDR 1b. ;
+    : USART3_TDR. cr ." USART3_TDR.  RW   $" USART3_TDR @ h.8 USART3_TDR 1b. ;
     : USART3.
       USART3_CR1.
       USART3_CR2.
@@ -4401,17 +4401,17 @@ begin-module memmap
     USART2 $20 + constant USART2_ICR ( write-only )  \ Interrupt flag clear register
     USART2 $24 + constant USART2_RDR ( read-only )  \ Receive data register
     USART2 $28 + constant USART2_TDR ( read-write )  \ Transmit data register
-    : USART2_CR1. cr ." USART2_CR1.  RW   $" USART2_CR1 @ hex. USART2_CR1 1b. ;
-    : USART2_CR2. cr ." USART2_CR2.  RW   $" USART2_CR2 @ hex. USART2_CR2 1b. ;
-    : USART2_CR3. cr ." USART2_CR3.  RW   $" USART2_CR3 @ hex. USART2_CR3 1b. ;
-    : USART2_BRR. cr ." USART2_BRR.  RW   $" USART2_BRR @ hex. USART2_BRR 1b. ;
-    : USART2_GTPR. cr ." USART2_GTPR.  RW   $" USART2_GTPR @ hex. USART2_GTPR 1b. ;
-    : USART2_RTOR. cr ." USART2_RTOR.  RW   $" USART2_RTOR @ hex. USART2_RTOR 1b. ;
+    : USART2_CR1. cr ." USART2_CR1.  RW   $" USART2_CR1 @ h.8 USART2_CR1 1b. ;
+    : USART2_CR2. cr ." USART2_CR2.  RW   $" USART2_CR2 @ h.8 USART2_CR2 1b. ;
+    : USART2_CR3. cr ." USART2_CR3.  RW   $" USART2_CR3 @ h.8 USART2_CR3 1b. ;
+    : USART2_BRR. cr ." USART2_BRR.  RW   $" USART2_BRR @ h.8 USART2_BRR 1b. ;
+    : USART2_GTPR. cr ." USART2_GTPR.  RW   $" USART2_GTPR @ h.8 USART2_GTPR 1b. ;
+    : USART2_RTOR. cr ." USART2_RTOR.  RW   $" USART2_RTOR @ h.8 USART2_RTOR 1b. ;
     : USART2_RQR. cr ." USART2_RQR " WRITEONLY ; 
-    : USART2_ISR. cr ." USART2_ISR.  RO   $" USART2_ISR @ hex. USART2_ISR 1b. ;
+    : USART2_ISR. cr ." USART2_ISR.  RO   $" USART2_ISR @ h.8 USART2_ISR 1b. ;
     : USART2_ICR. cr ." USART2_ICR " WRITEONLY ; 
-    : USART2_RDR. cr ." USART2_RDR.  RO   $" USART2_RDR @ hex. USART2_RDR 1b. ;
-    : USART2_TDR. cr ." USART2_TDR.  RW   $" USART2_TDR @ hex. USART2_TDR 1b. ;
+    : USART2_RDR. cr ." USART2_RDR.  RO   $" USART2_RDR @ h.8 USART2_RDR 1b. ;
+    : USART2_TDR. cr ." USART2_TDR.  RW   $" USART2_TDR @ h.8 USART2_TDR 1b. ;
     : USART2.
       USART2_CR1.
       USART2_CR2.
@@ -4440,17 +4440,17 @@ begin-module memmap
     UART5 $20 + constant UART5_ICR ( write-only )  \ Interrupt flag clear register
     UART5 $24 + constant UART5_RDR ( read-only )  \ Receive data register
     UART5 $28 + constant UART5_TDR ( read-write )  \ Transmit data register
-    : UART5_CR1. cr ." UART5_CR1.  RW   $" UART5_CR1 @ hex. UART5_CR1 1b. ;
-    : UART5_CR2. cr ." UART5_CR2.  RW   $" UART5_CR2 @ hex. UART5_CR2 1b. ;
-    : UART5_CR3. cr ." UART5_CR3.  RW   $" UART5_CR3 @ hex. UART5_CR3 1b. ;
-    : UART5_BRR. cr ." UART5_BRR.  RW   $" UART5_BRR @ hex. UART5_BRR 1b. ;
-    : UART5_GTPR. cr ." UART5_GTPR.  RW   $" UART5_GTPR @ hex. UART5_GTPR 1b. ;
-    : UART5_RTOR. cr ." UART5_RTOR.  RW   $" UART5_RTOR @ hex. UART5_RTOR 1b. ;
+    : UART5_CR1. cr ." UART5_CR1.  RW   $" UART5_CR1 @ h.8 UART5_CR1 1b. ;
+    : UART5_CR2. cr ." UART5_CR2.  RW   $" UART5_CR2 @ h.8 UART5_CR2 1b. ;
+    : UART5_CR3. cr ." UART5_CR3.  RW   $" UART5_CR3 @ h.8 UART5_CR3 1b. ;
+    : UART5_BRR. cr ." UART5_BRR.  RW   $" UART5_BRR @ h.8 UART5_BRR 1b. ;
+    : UART5_GTPR. cr ." UART5_GTPR.  RW   $" UART5_GTPR @ h.8 UART5_GTPR 1b. ;
+    : UART5_RTOR. cr ." UART5_RTOR.  RW   $" UART5_RTOR @ h.8 UART5_RTOR 1b. ;
     : UART5_RQR. cr ." UART5_RQR " WRITEONLY ; 
-    : UART5_ISR. cr ." UART5_ISR.  RO   $" UART5_ISR @ hex. UART5_ISR 1b. ;
+    : UART5_ISR. cr ." UART5_ISR.  RO   $" UART5_ISR @ h.8 UART5_ISR 1b. ;
     : UART5_ICR. cr ." UART5_ICR " WRITEONLY ; 
-    : UART5_RDR. cr ." UART5_RDR.  RO   $" UART5_RDR @ hex. UART5_RDR 1b. ;
-    : UART5_TDR. cr ." UART5_TDR.  RW   $" UART5_TDR @ hex. UART5_TDR 1b. ;
+    : UART5_RDR. cr ." UART5_RDR.  RO   $" UART5_RDR @ h.8 UART5_RDR 1b. ;
+    : UART5_TDR. cr ." UART5_TDR.  RW   $" UART5_TDR @ h.8 UART5_TDR 1b. ;
     : UART5.
       UART5_CR1.
       UART5_CR2.
@@ -4479,17 +4479,17 @@ begin-module memmap
     UART4 $20 + constant UART4_ICR ( write-only )  \ Interrupt flag clear register
     UART4 $24 + constant UART4_RDR ( read-only )  \ Receive data register
     UART4 $28 + constant UART4_TDR ( read-write )  \ Transmit data register
-    : UART4_CR1. cr ." UART4_CR1.  RW   $" UART4_CR1 @ hex. UART4_CR1 1b. ;
-    : UART4_CR2. cr ." UART4_CR2.  RW   $" UART4_CR2 @ hex. UART4_CR2 1b. ;
-    : UART4_CR3. cr ." UART4_CR3.  RW   $" UART4_CR3 @ hex. UART4_CR3 1b. ;
-    : UART4_BRR. cr ." UART4_BRR.  RW   $" UART4_BRR @ hex. UART4_BRR 1b. ;
-    : UART4_GTPR. cr ." UART4_GTPR.  RW   $" UART4_GTPR @ hex. UART4_GTPR 1b. ;
-    : UART4_RTOR. cr ." UART4_RTOR.  RW   $" UART4_RTOR @ hex. UART4_RTOR 1b. ;
+    : UART4_CR1. cr ." UART4_CR1.  RW   $" UART4_CR1 @ h.8 UART4_CR1 1b. ;
+    : UART4_CR2. cr ." UART4_CR2.  RW   $" UART4_CR2 @ h.8 UART4_CR2 1b. ;
+    : UART4_CR3. cr ." UART4_CR3.  RW   $" UART4_CR3 @ h.8 UART4_CR3 1b. ;
+    : UART4_BRR. cr ." UART4_BRR.  RW   $" UART4_BRR @ h.8 UART4_BRR 1b. ;
+    : UART4_GTPR. cr ." UART4_GTPR.  RW   $" UART4_GTPR @ h.8 UART4_GTPR 1b. ;
+    : UART4_RTOR. cr ." UART4_RTOR.  RW   $" UART4_RTOR @ h.8 UART4_RTOR 1b. ;
     : UART4_RQR. cr ." UART4_RQR " WRITEONLY ; 
-    : UART4_ISR. cr ." UART4_ISR.  RO   $" UART4_ISR @ hex. UART4_ISR 1b. ;
+    : UART4_ISR. cr ." UART4_ISR.  RO   $" UART4_ISR @ h.8 UART4_ISR 1b. ;
     : UART4_ICR. cr ." UART4_ICR " WRITEONLY ; 
-    : UART4_RDR. cr ." UART4_RDR.  RO   $" UART4_RDR @ hex. UART4_RDR 1b. ;
-    : UART4_TDR. cr ." UART4_TDR.  RW   $" UART4_TDR @ hex. UART4_TDR 1b. ;
+    : UART4_RDR. cr ." UART4_RDR.  RO   $" UART4_RDR @ h.8 UART4_RDR 1b. ;
+    : UART4_TDR. cr ." UART4_TDR.  RW   $" UART4_TDR @ h.8 UART4_TDR 1b. ;
     : UART4.
       UART4_CR1.
       UART4_CR2.
@@ -4518,17 +4518,17 @@ begin-module memmap
     UART8 $20 + constant UART8_ICR ( write-only )  \ Interrupt flag clear register
     UART8 $24 + constant UART8_RDR ( read-only )  \ Receive data register
     UART8 $28 + constant UART8_TDR ( read-write )  \ Transmit data register
-    : UART8_CR1. cr ." UART8_CR1.  RW   $" UART8_CR1 @ hex. UART8_CR1 1b. ;
-    : UART8_CR2. cr ." UART8_CR2.  RW   $" UART8_CR2 @ hex. UART8_CR2 1b. ;
-    : UART8_CR3. cr ." UART8_CR3.  RW   $" UART8_CR3 @ hex. UART8_CR3 1b. ;
-    : UART8_BRR. cr ." UART8_BRR.  RW   $" UART8_BRR @ hex. UART8_BRR 1b. ;
-    : UART8_GTPR. cr ." UART8_GTPR.  RW   $" UART8_GTPR @ hex. UART8_GTPR 1b. ;
-    : UART8_RTOR. cr ." UART8_RTOR.  RW   $" UART8_RTOR @ hex. UART8_RTOR 1b. ;
+    : UART8_CR1. cr ." UART8_CR1.  RW   $" UART8_CR1 @ h.8 UART8_CR1 1b. ;
+    : UART8_CR2. cr ." UART8_CR2.  RW   $" UART8_CR2 @ h.8 UART8_CR2 1b. ;
+    : UART8_CR3. cr ." UART8_CR3.  RW   $" UART8_CR3 @ h.8 UART8_CR3 1b. ;
+    : UART8_BRR. cr ." UART8_BRR.  RW   $" UART8_BRR @ h.8 UART8_BRR 1b. ;
+    : UART8_GTPR. cr ." UART8_GTPR.  RW   $" UART8_GTPR @ h.8 UART8_GTPR 1b. ;
+    : UART8_RTOR. cr ." UART8_RTOR.  RW   $" UART8_RTOR @ h.8 UART8_RTOR 1b. ;
     : UART8_RQR. cr ." UART8_RQR " WRITEONLY ; 
-    : UART8_ISR. cr ." UART8_ISR.  RO   $" UART8_ISR @ hex. UART8_ISR 1b. ;
+    : UART8_ISR. cr ." UART8_ISR.  RO   $" UART8_ISR @ h.8 UART8_ISR 1b. ;
     : UART8_ICR. cr ." UART8_ICR " WRITEONLY ; 
-    : UART8_RDR. cr ." UART8_RDR.  RO   $" UART8_RDR @ hex. UART8_RDR 1b. ;
-    : UART8_TDR. cr ." UART8_TDR.  RW   $" UART8_TDR @ hex. UART8_TDR 1b. ;
+    : UART8_RDR. cr ." UART8_RDR.  RO   $" UART8_RDR @ h.8 UART8_RDR 1b. ;
+    : UART8_TDR. cr ." UART8_TDR.  RW   $" UART8_TDR @ h.8 UART8_TDR 1b. ;
     : UART8.
       UART8_CR1.
       UART8_CR2.
@@ -4557,17 +4557,17 @@ begin-module memmap
     UART7 $20 + constant UART7_ICR ( write-only )  \ Interrupt flag clear register
     UART7 $24 + constant UART7_RDR ( read-only )  \ Receive data register
     UART7 $28 + constant UART7_TDR ( read-write )  \ Transmit data register
-    : UART7_CR1. cr ." UART7_CR1.  RW   $" UART7_CR1 @ hex. UART7_CR1 1b. ;
-    : UART7_CR2. cr ." UART7_CR2.  RW   $" UART7_CR2 @ hex. UART7_CR2 1b. ;
-    : UART7_CR3. cr ." UART7_CR3.  RW   $" UART7_CR3 @ hex. UART7_CR3 1b. ;
-    : UART7_BRR. cr ." UART7_BRR.  RW   $" UART7_BRR @ hex. UART7_BRR 1b. ;
-    : UART7_GTPR. cr ." UART7_GTPR.  RW   $" UART7_GTPR @ hex. UART7_GTPR 1b. ;
-    : UART7_RTOR. cr ." UART7_RTOR.  RW   $" UART7_RTOR @ hex. UART7_RTOR 1b. ;
+    : UART7_CR1. cr ." UART7_CR1.  RW   $" UART7_CR1 @ h.8 UART7_CR1 1b. ;
+    : UART7_CR2. cr ." UART7_CR2.  RW   $" UART7_CR2 @ h.8 UART7_CR2 1b. ;
+    : UART7_CR3. cr ." UART7_CR3.  RW   $" UART7_CR3 @ h.8 UART7_CR3 1b. ;
+    : UART7_BRR. cr ." UART7_BRR.  RW   $" UART7_BRR @ h.8 UART7_BRR 1b. ;
+    : UART7_GTPR. cr ." UART7_GTPR.  RW   $" UART7_GTPR @ h.8 UART7_GTPR 1b. ;
+    : UART7_RTOR. cr ." UART7_RTOR.  RW   $" UART7_RTOR @ h.8 UART7_RTOR 1b. ;
     : UART7_RQR. cr ." UART7_RQR " WRITEONLY ; 
-    : UART7_ISR. cr ." UART7_ISR.  RO   $" UART7_ISR @ hex. UART7_ISR 1b. ;
+    : UART7_ISR. cr ." UART7_ISR.  RO   $" UART7_ISR @ h.8 UART7_ISR 1b. ;
     : UART7_ICR. cr ." UART7_ICR " WRITEONLY ; 
-    : UART7_RDR. cr ." UART7_RDR.  RO   $" UART7_RDR @ hex. UART7_RDR 1b. ;
-    : UART7_TDR. cr ." UART7_TDR.  RW   $" UART7_TDR @ hex. UART7_TDR 1b. ;
+    : UART7_RDR. cr ." UART7_RDR.  RO   $" UART7_RDR @ h.8 UART7_RDR 1b. ;
+    : UART7_TDR. cr ." UART7_TDR.  RW   $" UART7_TDR @ h.8 UART7_TDR 1b. ;
     : UART7.
       UART7_CR1.
       UART7_CR2.
@@ -4612,33 +4612,33 @@ begin-module memmap
     OTG_FS_GLOBAL $110 + constant OTG_FS_GLOBAL_OTG_FS_DIEPTXF4 ( read-write )  \ OTG_FS device IN endpoint transmit FIFO size register OTG_FS_DIEPTXF4
     OTG_FS_GLOBAL $114 + constant OTG_FS_GLOBAL_OTG_FS_DIEPTXF5 ( read-write )  \ OTG_FS device IN endpoint transmit FIFO size register OTG_FS_DIEPTXF5
     OTG_FS_GLOBAL $54 + constant OTG_FS_GLOBAL_OTG_FS_GLPMCFG (  )  \ OTG core LPM configuration register
-    : OTG_FS_GLOBAL_OTG_FS_GOTGCTL. cr ." OTG_FS_GLOBAL_OTG_FS_GOTGCTL.   $" OTG_FS_GLOBAL_OTG_FS_GOTGCTL @ hex. OTG_FS_GLOBAL_OTG_FS_GOTGCTL 1b. ;
-    : OTG_FS_GLOBAL_OTG_FS_GOTGINT. cr ." OTG_FS_GLOBAL_OTG_FS_GOTGINT.  RW   $" OTG_FS_GLOBAL_OTG_FS_GOTGINT @ hex. OTG_FS_GLOBAL_OTG_FS_GOTGINT 1b. ;
-    : OTG_FS_GLOBAL_OTG_FS_GAHBCFG. cr ." OTG_FS_GLOBAL_OTG_FS_GAHBCFG.  RW   $" OTG_FS_GLOBAL_OTG_FS_GAHBCFG @ hex. OTG_FS_GLOBAL_OTG_FS_GAHBCFG 1b. ;
-    : OTG_FS_GLOBAL_OTG_FS_GUSBCFG. cr ." OTG_FS_GLOBAL_OTG_FS_GUSBCFG.   $" OTG_FS_GLOBAL_OTG_FS_GUSBCFG @ hex. OTG_FS_GLOBAL_OTG_FS_GUSBCFG 1b. ;
-    : OTG_FS_GLOBAL_OTG_FS_GRSTCTL. cr ." OTG_FS_GLOBAL_OTG_FS_GRSTCTL.   $" OTG_FS_GLOBAL_OTG_FS_GRSTCTL @ hex. OTG_FS_GLOBAL_OTG_FS_GRSTCTL 1b. ;
-    : OTG_FS_GLOBAL_OTG_FS_GINTSTS. cr ." OTG_FS_GLOBAL_OTG_FS_GINTSTS.   $" OTG_FS_GLOBAL_OTG_FS_GINTSTS @ hex. OTG_FS_GLOBAL_OTG_FS_GINTSTS 1b. ;
-    : OTG_FS_GLOBAL_OTG_FS_GINTMSK. cr ." OTG_FS_GLOBAL_OTG_FS_GINTMSK.   $" OTG_FS_GLOBAL_OTG_FS_GINTMSK @ hex. OTG_FS_GLOBAL_OTG_FS_GINTMSK 1b. ;
-    : OTG_FS_GLOBAL_OTG_FS_GRXSTSR_Device. cr ." OTG_FS_GLOBAL_OTG_FS_GRXSTSR_Device.  RO   $" OTG_FS_GLOBAL_OTG_FS_GRXSTSR_Device @ hex. OTG_FS_GLOBAL_OTG_FS_GRXSTSR_Device 1b. ;
-    : OTG_FS_GLOBAL_OTG_FS_GRXSTSR_Host. cr ." OTG_FS_GLOBAL_OTG_FS_GRXSTSR_Host.  RO   $" OTG_FS_GLOBAL_OTG_FS_GRXSTSR_Host @ hex. OTG_FS_GLOBAL_OTG_FS_GRXSTSR_Host 1b. ;
-    : OTG_FS_GLOBAL_OTG_FS_GRXFSIZ. cr ." OTG_FS_GLOBAL_OTG_FS_GRXFSIZ.  RW   $" OTG_FS_GLOBAL_OTG_FS_GRXFSIZ @ hex. OTG_FS_GLOBAL_OTG_FS_GRXFSIZ 1b. ;
-    : OTG_FS_GLOBAL_OTG_FS_DIEPTXF0_Device. cr ." OTG_FS_GLOBAL_OTG_FS_DIEPTXF0_Device.  RW   $" OTG_FS_GLOBAL_OTG_FS_DIEPTXF0_Device @ hex. OTG_FS_GLOBAL_OTG_FS_DIEPTXF0_Device 1b. ;
-    : OTG_FS_GLOBAL_OTG_FS_HNPTXFSIZ_Host. cr ." OTG_FS_GLOBAL_OTG_FS_HNPTXFSIZ_Host.  RW   $" OTG_FS_GLOBAL_OTG_FS_HNPTXFSIZ_Host @ hex. OTG_FS_GLOBAL_OTG_FS_HNPTXFSIZ_Host 1b. ;
-    : OTG_FS_GLOBAL_OTG_FS_HNPTXSTS. cr ." OTG_FS_GLOBAL_OTG_FS_HNPTXSTS.  RO   $" OTG_FS_GLOBAL_OTG_FS_HNPTXSTS @ hex. OTG_FS_GLOBAL_OTG_FS_HNPTXSTS 1b. ;
-    : OTG_FS_GLOBAL_OTG_FS_GCCFG. cr ." OTG_FS_GLOBAL_OTG_FS_GCCFG.  RW   $" OTG_FS_GLOBAL_OTG_FS_GCCFG @ hex. OTG_FS_GLOBAL_OTG_FS_GCCFG 1b. ;
-    : OTG_FS_GLOBAL_OTG_FS_CID. cr ." OTG_FS_GLOBAL_OTG_FS_CID.  RW   $" OTG_FS_GLOBAL_OTG_FS_CID @ hex. OTG_FS_GLOBAL_OTG_FS_CID 1b. ;
-    : OTG_FS_GLOBAL_OTG_FS_HPTXFSIZ. cr ." OTG_FS_GLOBAL_OTG_FS_HPTXFSIZ.  RW   $" OTG_FS_GLOBAL_OTG_FS_HPTXFSIZ @ hex. OTG_FS_GLOBAL_OTG_FS_HPTXFSIZ 1b. ;
-    : OTG_FS_GLOBAL_OTG_FS_DIEPTXF1. cr ." OTG_FS_GLOBAL_OTG_FS_DIEPTXF1.  RW   $" OTG_FS_GLOBAL_OTG_FS_DIEPTXF1 @ hex. OTG_FS_GLOBAL_OTG_FS_DIEPTXF1 1b. ;
-    : OTG_FS_GLOBAL_OTG_FS_DIEPTXF2. cr ." OTG_FS_GLOBAL_OTG_FS_DIEPTXF2.  RW   $" OTG_FS_GLOBAL_OTG_FS_DIEPTXF2 @ hex. OTG_FS_GLOBAL_OTG_FS_DIEPTXF2 1b. ;
-    : OTG_FS_GLOBAL_OTG_FS_DIEPTXF3. cr ." OTG_FS_GLOBAL_OTG_FS_DIEPTXF3.  RW   $" OTG_FS_GLOBAL_OTG_FS_DIEPTXF3 @ hex. OTG_FS_GLOBAL_OTG_FS_DIEPTXF3 1b. ;
-    : OTG_FS_GLOBAL_OTG_FS_GRXSTSP_Device. cr ." OTG_FS_GLOBAL_OTG_FS_GRXSTSP_Device.  RO   $" OTG_FS_GLOBAL_OTG_FS_GRXSTSP_Device @ hex. OTG_FS_GLOBAL_OTG_FS_GRXSTSP_Device 1b. ;
-    : OTG_FS_GLOBAL_OTG_FS_GRXSTSP_Host. cr ." OTG_FS_GLOBAL_OTG_FS_GRXSTSP_Host.  RO   $" OTG_FS_GLOBAL_OTG_FS_GRXSTSP_Host @ hex. OTG_FS_GLOBAL_OTG_FS_GRXSTSP_Host 1b. ;
-    : OTG_FS_GLOBAL_OTG_FS_GI2CCTL. cr ." OTG_FS_GLOBAL_OTG_FS_GI2CCTL.  RW   $" OTG_FS_GLOBAL_OTG_FS_GI2CCTL @ hex. OTG_FS_GLOBAL_OTG_FS_GI2CCTL 1b. ;
-    : OTG_FS_GLOBAL_OTG_FS_GPWRDN. cr ." OTG_FS_GLOBAL_OTG_FS_GPWRDN.  RW   $" OTG_FS_GLOBAL_OTG_FS_GPWRDN @ hex. OTG_FS_GLOBAL_OTG_FS_GPWRDN 1b. ;
-    : OTG_FS_GLOBAL_OTG_FS_GADPCTL. cr ." OTG_FS_GLOBAL_OTG_FS_GADPCTL.   $" OTG_FS_GLOBAL_OTG_FS_GADPCTL @ hex. OTG_FS_GLOBAL_OTG_FS_GADPCTL 1b. ;
-    : OTG_FS_GLOBAL_OTG_FS_DIEPTXF4. cr ." OTG_FS_GLOBAL_OTG_FS_DIEPTXF4.  RW   $" OTG_FS_GLOBAL_OTG_FS_DIEPTXF4 @ hex. OTG_FS_GLOBAL_OTG_FS_DIEPTXF4 1b. ;
-    : OTG_FS_GLOBAL_OTG_FS_DIEPTXF5. cr ." OTG_FS_GLOBAL_OTG_FS_DIEPTXF5.  RW   $" OTG_FS_GLOBAL_OTG_FS_DIEPTXF5 @ hex. OTG_FS_GLOBAL_OTG_FS_DIEPTXF5 1b. ;
-    : OTG_FS_GLOBAL_OTG_FS_GLPMCFG. cr ." OTG_FS_GLOBAL_OTG_FS_GLPMCFG.   $" OTG_FS_GLOBAL_OTG_FS_GLPMCFG @ hex. OTG_FS_GLOBAL_OTG_FS_GLPMCFG 1b. ;
+    : OTG_FS_GLOBAL_OTG_FS_GOTGCTL. cr ." OTG_FS_GLOBAL_OTG_FS_GOTGCTL.   $" OTG_FS_GLOBAL_OTG_FS_GOTGCTL @ h.8 OTG_FS_GLOBAL_OTG_FS_GOTGCTL 1b. ;
+    : OTG_FS_GLOBAL_OTG_FS_GOTGINT. cr ." OTG_FS_GLOBAL_OTG_FS_GOTGINT.  RW   $" OTG_FS_GLOBAL_OTG_FS_GOTGINT @ h.8 OTG_FS_GLOBAL_OTG_FS_GOTGINT 1b. ;
+    : OTG_FS_GLOBAL_OTG_FS_GAHBCFG. cr ." OTG_FS_GLOBAL_OTG_FS_GAHBCFG.  RW   $" OTG_FS_GLOBAL_OTG_FS_GAHBCFG @ h.8 OTG_FS_GLOBAL_OTG_FS_GAHBCFG 1b. ;
+    : OTG_FS_GLOBAL_OTG_FS_GUSBCFG. cr ." OTG_FS_GLOBAL_OTG_FS_GUSBCFG.   $" OTG_FS_GLOBAL_OTG_FS_GUSBCFG @ h.8 OTG_FS_GLOBAL_OTG_FS_GUSBCFG 1b. ;
+    : OTG_FS_GLOBAL_OTG_FS_GRSTCTL. cr ." OTG_FS_GLOBAL_OTG_FS_GRSTCTL.   $" OTG_FS_GLOBAL_OTG_FS_GRSTCTL @ h.8 OTG_FS_GLOBAL_OTG_FS_GRSTCTL 1b. ;
+    : OTG_FS_GLOBAL_OTG_FS_GINTSTS. cr ." OTG_FS_GLOBAL_OTG_FS_GINTSTS.   $" OTG_FS_GLOBAL_OTG_FS_GINTSTS @ h.8 OTG_FS_GLOBAL_OTG_FS_GINTSTS 1b. ;
+    : OTG_FS_GLOBAL_OTG_FS_GINTMSK. cr ." OTG_FS_GLOBAL_OTG_FS_GINTMSK.   $" OTG_FS_GLOBAL_OTG_FS_GINTMSK @ h.8 OTG_FS_GLOBAL_OTG_FS_GINTMSK 1b. ;
+    : OTG_FS_GLOBAL_OTG_FS_GRXSTSR_Device. cr ." OTG_FS_GLOBAL_OTG_FS_GRXSTSR_Device.  RO   $" OTG_FS_GLOBAL_OTG_FS_GRXSTSR_Device @ h.8 OTG_FS_GLOBAL_OTG_FS_GRXSTSR_Device 1b. ;
+    : OTG_FS_GLOBAL_OTG_FS_GRXSTSR_Host. cr ." OTG_FS_GLOBAL_OTG_FS_GRXSTSR_Host.  RO   $" OTG_FS_GLOBAL_OTG_FS_GRXSTSR_Host @ h.8 OTG_FS_GLOBAL_OTG_FS_GRXSTSR_Host 1b. ;
+    : OTG_FS_GLOBAL_OTG_FS_GRXFSIZ. cr ." OTG_FS_GLOBAL_OTG_FS_GRXFSIZ.  RW   $" OTG_FS_GLOBAL_OTG_FS_GRXFSIZ @ h.8 OTG_FS_GLOBAL_OTG_FS_GRXFSIZ 1b. ;
+    : OTG_FS_GLOBAL_OTG_FS_DIEPTXF0_Device. cr ." OTG_FS_GLOBAL_OTG_FS_DIEPTXF0_Device.  RW   $" OTG_FS_GLOBAL_OTG_FS_DIEPTXF0_Device @ h.8 OTG_FS_GLOBAL_OTG_FS_DIEPTXF0_Device 1b. ;
+    : OTG_FS_GLOBAL_OTG_FS_HNPTXFSIZ_Host. cr ." OTG_FS_GLOBAL_OTG_FS_HNPTXFSIZ_Host.  RW   $" OTG_FS_GLOBAL_OTG_FS_HNPTXFSIZ_Host @ h.8 OTG_FS_GLOBAL_OTG_FS_HNPTXFSIZ_Host 1b. ;
+    : OTG_FS_GLOBAL_OTG_FS_HNPTXSTS. cr ." OTG_FS_GLOBAL_OTG_FS_HNPTXSTS.  RO   $" OTG_FS_GLOBAL_OTG_FS_HNPTXSTS @ h.8 OTG_FS_GLOBAL_OTG_FS_HNPTXSTS 1b. ;
+    : OTG_FS_GLOBAL_OTG_FS_GCCFG. cr ." OTG_FS_GLOBAL_OTG_FS_GCCFG.  RW   $" OTG_FS_GLOBAL_OTG_FS_GCCFG @ h.8 OTG_FS_GLOBAL_OTG_FS_GCCFG 1b. ;
+    : OTG_FS_GLOBAL_OTG_FS_CID. cr ." OTG_FS_GLOBAL_OTG_FS_CID.  RW   $" OTG_FS_GLOBAL_OTG_FS_CID @ h.8 OTG_FS_GLOBAL_OTG_FS_CID 1b. ;
+    : OTG_FS_GLOBAL_OTG_FS_HPTXFSIZ. cr ." OTG_FS_GLOBAL_OTG_FS_HPTXFSIZ.  RW   $" OTG_FS_GLOBAL_OTG_FS_HPTXFSIZ @ h.8 OTG_FS_GLOBAL_OTG_FS_HPTXFSIZ 1b. ;
+    : OTG_FS_GLOBAL_OTG_FS_DIEPTXF1. cr ." OTG_FS_GLOBAL_OTG_FS_DIEPTXF1.  RW   $" OTG_FS_GLOBAL_OTG_FS_DIEPTXF1 @ h.8 OTG_FS_GLOBAL_OTG_FS_DIEPTXF1 1b. ;
+    : OTG_FS_GLOBAL_OTG_FS_DIEPTXF2. cr ." OTG_FS_GLOBAL_OTG_FS_DIEPTXF2.  RW   $" OTG_FS_GLOBAL_OTG_FS_DIEPTXF2 @ h.8 OTG_FS_GLOBAL_OTG_FS_DIEPTXF2 1b. ;
+    : OTG_FS_GLOBAL_OTG_FS_DIEPTXF3. cr ." OTG_FS_GLOBAL_OTG_FS_DIEPTXF3.  RW   $" OTG_FS_GLOBAL_OTG_FS_DIEPTXF3 @ h.8 OTG_FS_GLOBAL_OTG_FS_DIEPTXF3 1b. ;
+    : OTG_FS_GLOBAL_OTG_FS_GRXSTSP_Device. cr ." OTG_FS_GLOBAL_OTG_FS_GRXSTSP_Device.  RO   $" OTG_FS_GLOBAL_OTG_FS_GRXSTSP_Device @ h.8 OTG_FS_GLOBAL_OTG_FS_GRXSTSP_Device 1b. ;
+    : OTG_FS_GLOBAL_OTG_FS_GRXSTSP_Host. cr ." OTG_FS_GLOBAL_OTG_FS_GRXSTSP_Host.  RO   $" OTG_FS_GLOBAL_OTG_FS_GRXSTSP_Host @ h.8 OTG_FS_GLOBAL_OTG_FS_GRXSTSP_Host 1b. ;
+    : OTG_FS_GLOBAL_OTG_FS_GI2CCTL. cr ." OTG_FS_GLOBAL_OTG_FS_GI2CCTL.  RW   $" OTG_FS_GLOBAL_OTG_FS_GI2CCTL @ h.8 OTG_FS_GLOBAL_OTG_FS_GI2CCTL 1b. ;
+    : OTG_FS_GLOBAL_OTG_FS_GPWRDN. cr ." OTG_FS_GLOBAL_OTG_FS_GPWRDN.  RW   $" OTG_FS_GLOBAL_OTG_FS_GPWRDN @ h.8 OTG_FS_GLOBAL_OTG_FS_GPWRDN 1b. ;
+    : OTG_FS_GLOBAL_OTG_FS_GADPCTL. cr ." OTG_FS_GLOBAL_OTG_FS_GADPCTL.   $" OTG_FS_GLOBAL_OTG_FS_GADPCTL @ h.8 OTG_FS_GLOBAL_OTG_FS_GADPCTL 1b. ;
+    : OTG_FS_GLOBAL_OTG_FS_DIEPTXF4. cr ." OTG_FS_GLOBAL_OTG_FS_DIEPTXF4.  RW   $" OTG_FS_GLOBAL_OTG_FS_DIEPTXF4 @ h.8 OTG_FS_GLOBAL_OTG_FS_DIEPTXF4 1b. ;
+    : OTG_FS_GLOBAL_OTG_FS_DIEPTXF5. cr ." OTG_FS_GLOBAL_OTG_FS_DIEPTXF5.  RW   $" OTG_FS_GLOBAL_OTG_FS_DIEPTXF5 @ h.8 OTG_FS_GLOBAL_OTG_FS_DIEPTXF5 1b. ;
+    : OTG_FS_GLOBAL_OTG_FS_GLPMCFG. cr ." OTG_FS_GLOBAL_OTG_FS_GLPMCFG.   $" OTG_FS_GLOBAL_OTG_FS_GLPMCFG @ h.8 OTG_FS_GLOBAL_OTG_FS_GLPMCFG 1b. ;
     : OTG_FS_GLOBAL.
       OTG_FS_GLOBAL_OTG_FS_GOTGCTL.
       OTG_FS_GLOBAL_OTG_FS_GOTGINT.
@@ -4727,61 +4727,61 @@ begin-module memmap
     OTG_FS_HOST $228 + constant OTG_FS_HOST_OTG_FS_HCINT11 ( read-write )  \ OTG_FS host channel-11 interrupt register
     OTG_FS_HOST $22C + constant OTG_FS_HOST_OTG_FS_HCINTMSK11 ( read-write )  \ OTG_FS host channel-11 mask register
     OTG_FS_HOST $230 + constant OTG_FS_HOST_OTG_FS_HCTSIZ11 ( read-write )  \ OTG_FS host channel-11 transfer size register
-    : OTG_FS_HOST_OTG_FS_HCFG. cr ." OTG_FS_HOST_OTG_FS_HCFG.   $" OTG_FS_HOST_OTG_FS_HCFG @ hex. OTG_FS_HOST_OTG_FS_HCFG 1b. ;
-    : OTG_FS_HOST_OTG_FS_HFIR. cr ." OTG_FS_HOST_OTG_FS_HFIR.  RW   $" OTG_FS_HOST_OTG_FS_HFIR @ hex. OTG_FS_HOST_OTG_FS_HFIR 1b. ;
-    : OTG_FS_HOST_OTG_FS_HFNUM. cr ." OTG_FS_HOST_OTG_FS_HFNUM.  RO   $" OTG_FS_HOST_OTG_FS_HFNUM @ hex. OTG_FS_HOST_OTG_FS_HFNUM 1b. ;
-    : OTG_FS_HOST_OTG_FS_HPTXSTS. cr ." OTG_FS_HOST_OTG_FS_HPTXSTS.   $" OTG_FS_HOST_OTG_FS_HPTXSTS @ hex. OTG_FS_HOST_OTG_FS_HPTXSTS 1b. ;
-    : OTG_FS_HOST_OTG_FS_HAINT. cr ." OTG_FS_HOST_OTG_FS_HAINT.  RO   $" OTG_FS_HOST_OTG_FS_HAINT @ hex. OTG_FS_HOST_OTG_FS_HAINT 1b. ;
-    : OTG_FS_HOST_OTG_FS_HAINTMSK. cr ." OTG_FS_HOST_OTG_FS_HAINTMSK.  RW   $" OTG_FS_HOST_OTG_FS_HAINTMSK @ hex. OTG_FS_HOST_OTG_FS_HAINTMSK 1b. ;
-    : OTG_FS_HOST_OTG_FS_HPRT. cr ." OTG_FS_HOST_OTG_FS_HPRT.   $" OTG_FS_HOST_OTG_FS_HPRT @ hex. OTG_FS_HOST_OTG_FS_HPRT 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCCHAR0. cr ." OTG_FS_HOST_OTG_FS_HCCHAR0.  RW   $" OTG_FS_HOST_OTG_FS_HCCHAR0 @ hex. OTG_FS_HOST_OTG_FS_HCCHAR0 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCCHAR1. cr ." OTG_FS_HOST_OTG_FS_HCCHAR1.  RW   $" OTG_FS_HOST_OTG_FS_HCCHAR1 @ hex. OTG_FS_HOST_OTG_FS_HCCHAR1 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCCHAR2. cr ." OTG_FS_HOST_OTG_FS_HCCHAR2.  RW   $" OTG_FS_HOST_OTG_FS_HCCHAR2 @ hex. OTG_FS_HOST_OTG_FS_HCCHAR2 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCCHAR3. cr ." OTG_FS_HOST_OTG_FS_HCCHAR3.  RW   $" OTG_FS_HOST_OTG_FS_HCCHAR3 @ hex. OTG_FS_HOST_OTG_FS_HCCHAR3 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCCHAR4. cr ." OTG_FS_HOST_OTG_FS_HCCHAR4.  RW   $" OTG_FS_HOST_OTG_FS_HCCHAR4 @ hex. OTG_FS_HOST_OTG_FS_HCCHAR4 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCCHAR5. cr ." OTG_FS_HOST_OTG_FS_HCCHAR5.  RW   $" OTG_FS_HOST_OTG_FS_HCCHAR5 @ hex. OTG_FS_HOST_OTG_FS_HCCHAR5 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCCHAR6. cr ." OTG_FS_HOST_OTG_FS_HCCHAR6.  RW   $" OTG_FS_HOST_OTG_FS_HCCHAR6 @ hex. OTG_FS_HOST_OTG_FS_HCCHAR6 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCCHAR7. cr ." OTG_FS_HOST_OTG_FS_HCCHAR7.  RW   $" OTG_FS_HOST_OTG_FS_HCCHAR7 @ hex. OTG_FS_HOST_OTG_FS_HCCHAR7 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCINT0. cr ." OTG_FS_HOST_OTG_FS_HCINT0.  RW   $" OTG_FS_HOST_OTG_FS_HCINT0 @ hex. OTG_FS_HOST_OTG_FS_HCINT0 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCINT1. cr ." OTG_FS_HOST_OTG_FS_HCINT1.  RW   $" OTG_FS_HOST_OTG_FS_HCINT1 @ hex. OTG_FS_HOST_OTG_FS_HCINT1 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCINT2. cr ." OTG_FS_HOST_OTG_FS_HCINT2.  RW   $" OTG_FS_HOST_OTG_FS_HCINT2 @ hex. OTG_FS_HOST_OTG_FS_HCINT2 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCINT3. cr ." OTG_FS_HOST_OTG_FS_HCINT3.  RW   $" OTG_FS_HOST_OTG_FS_HCINT3 @ hex. OTG_FS_HOST_OTG_FS_HCINT3 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCINT4. cr ." OTG_FS_HOST_OTG_FS_HCINT4.  RW   $" OTG_FS_HOST_OTG_FS_HCINT4 @ hex. OTG_FS_HOST_OTG_FS_HCINT4 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCINT5. cr ." OTG_FS_HOST_OTG_FS_HCINT5.  RW   $" OTG_FS_HOST_OTG_FS_HCINT5 @ hex. OTG_FS_HOST_OTG_FS_HCINT5 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCINT6. cr ." OTG_FS_HOST_OTG_FS_HCINT6.  RW   $" OTG_FS_HOST_OTG_FS_HCINT6 @ hex. OTG_FS_HOST_OTG_FS_HCINT6 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCINT7. cr ." OTG_FS_HOST_OTG_FS_HCINT7.  RW   $" OTG_FS_HOST_OTG_FS_HCINT7 @ hex. OTG_FS_HOST_OTG_FS_HCINT7 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCINTMSK0. cr ." OTG_FS_HOST_OTG_FS_HCINTMSK0.  RW   $" OTG_FS_HOST_OTG_FS_HCINTMSK0 @ hex. OTG_FS_HOST_OTG_FS_HCINTMSK0 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCINTMSK1. cr ." OTG_FS_HOST_OTG_FS_HCINTMSK1.  RW   $" OTG_FS_HOST_OTG_FS_HCINTMSK1 @ hex. OTG_FS_HOST_OTG_FS_HCINTMSK1 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCINTMSK2. cr ." OTG_FS_HOST_OTG_FS_HCINTMSK2.  RW   $" OTG_FS_HOST_OTG_FS_HCINTMSK2 @ hex. OTG_FS_HOST_OTG_FS_HCINTMSK2 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCINTMSK3. cr ." OTG_FS_HOST_OTG_FS_HCINTMSK3.  RW   $" OTG_FS_HOST_OTG_FS_HCINTMSK3 @ hex. OTG_FS_HOST_OTG_FS_HCINTMSK3 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCINTMSK4. cr ." OTG_FS_HOST_OTG_FS_HCINTMSK4.  RW   $" OTG_FS_HOST_OTG_FS_HCINTMSK4 @ hex. OTG_FS_HOST_OTG_FS_HCINTMSK4 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCINTMSK5. cr ." OTG_FS_HOST_OTG_FS_HCINTMSK5.  RW   $" OTG_FS_HOST_OTG_FS_HCINTMSK5 @ hex. OTG_FS_HOST_OTG_FS_HCINTMSK5 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCINTMSK6. cr ." OTG_FS_HOST_OTG_FS_HCINTMSK6.  RW   $" OTG_FS_HOST_OTG_FS_HCINTMSK6 @ hex. OTG_FS_HOST_OTG_FS_HCINTMSK6 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCINTMSK7. cr ." OTG_FS_HOST_OTG_FS_HCINTMSK7.  RW   $" OTG_FS_HOST_OTG_FS_HCINTMSK7 @ hex. OTG_FS_HOST_OTG_FS_HCINTMSK7 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCTSIZ0. cr ." OTG_FS_HOST_OTG_FS_HCTSIZ0.  RW   $" OTG_FS_HOST_OTG_FS_HCTSIZ0 @ hex. OTG_FS_HOST_OTG_FS_HCTSIZ0 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCTSIZ1. cr ." OTG_FS_HOST_OTG_FS_HCTSIZ1.  RW   $" OTG_FS_HOST_OTG_FS_HCTSIZ1 @ hex. OTG_FS_HOST_OTG_FS_HCTSIZ1 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCTSIZ2. cr ." OTG_FS_HOST_OTG_FS_HCTSIZ2.  RW   $" OTG_FS_HOST_OTG_FS_HCTSIZ2 @ hex. OTG_FS_HOST_OTG_FS_HCTSIZ2 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCTSIZ3. cr ." OTG_FS_HOST_OTG_FS_HCTSIZ3.  RW   $" OTG_FS_HOST_OTG_FS_HCTSIZ3 @ hex. OTG_FS_HOST_OTG_FS_HCTSIZ3 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCTSIZ4. cr ." OTG_FS_HOST_OTG_FS_HCTSIZ4.  RW   $" OTG_FS_HOST_OTG_FS_HCTSIZ4 @ hex. OTG_FS_HOST_OTG_FS_HCTSIZ4 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCTSIZ5. cr ." OTG_FS_HOST_OTG_FS_HCTSIZ5.  RW   $" OTG_FS_HOST_OTG_FS_HCTSIZ5 @ hex. OTG_FS_HOST_OTG_FS_HCTSIZ5 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCTSIZ6. cr ." OTG_FS_HOST_OTG_FS_HCTSIZ6.  RW   $" OTG_FS_HOST_OTG_FS_HCTSIZ6 @ hex. OTG_FS_HOST_OTG_FS_HCTSIZ6 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCTSIZ7. cr ." OTG_FS_HOST_OTG_FS_HCTSIZ7.  RW   $" OTG_FS_HOST_OTG_FS_HCTSIZ7 @ hex. OTG_FS_HOST_OTG_FS_HCTSIZ7 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCCHAR8. cr ." OTG_FS_HOST_OTG_FS_HCCHAR8.  RW   $" OTG_FS_HOST_OTG_FS_HCCHAR8 @ hex. OTG_FS_HOST_OTG_FS_HCCHAR8 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCINT8. cr ." OTG_FS_HOST_OTG_FS_HCINT8.  RW   $" OTG_FS_HOST_OTG_FS_HCINT8 @ hex. OTG_FS_HOST_OTG_FS_HCINT8 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCINTMSK8. cr ." OTG_FS_HOST_OTG_FS_HCINTMSK8.  RW   $" OTG_FS_HOST_OTG_FS_HCINTMSK8 @ hex. OTG_FS_HOST_OTG_FS_HCINTMSK8 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCTSIZ8. cr ." OTG_FS_HOST_OTG_FS_HCTSIZ8.  RW   $" OTG_FS_HOST_OTG_FS_HCTSIZ8 @ hex. OTG_FS_HOST_OTG_FS_HCTSIZ8 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCCHAR9. cr ." OTG_FS_HOST_OTG_FS_HCCHAR9.  RW   $" OTG_FS_HOST_OTG_FS_HCCHAR9 @ hex. OTG_FS_HOST_OTG_FS_HCCHAR9 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCINT9. cr ." OTG_FS_HOST_OTG_FS_HCINT9.  RW   $" OTG_FS_HOST_OTG_FS_HCINT9 @ hex. OTG_FS_HOST_OTG_FS_HCINT9 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCINTMSK9. cr ." OTG_FS_HOST_OTG_FS_HCINTMSK9.  RW   $" OTG_FS_HOST_OTG_FS_HCINTMSK9 @ hex. OTG_FS_HOST_OTG_FS_HCINTMSK9 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCTSIZ9. cr ." OTG_FS_HOST_OTG_FS_HCTSIZ9.  RW   $" OTG_FS_HOST_OTG_FS_HCTSIZ9 @ hex. OTG_FS_HOST_OTG_FS_HCTSIZ9 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCCHAR10. cr ." OTG_FS_HOST_OTG_FS_HCCHAR10.  RW   $" OTG_FS_HOST_OTG_FS_HCCHAR10 @ hex. OTG_FS_HOST_OTG_FS_HCCHAR10 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCINT10. cr ." OTG_FS_HOST_OTG_FS_HCINT10.  RW   $" OTG_FS_HOST_OTG_FS_HCINT10 @ hex. OTG_FS_HOST_OTG_FS_HCINT10 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCINTMSK10. cr ." OTG_FS_HOST_OTG_FS_HCINTMSK10.  RW   $" OTG_FS_HOST_OTG_FS_HCINTMSK10 @ hex. OTG_FS_HOST_OTG_FS_HCINTMSK10 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCTSIZ10. cr ." OTG_FS_HOST_OTG_FS_HCTSIZ10.  RW   $" OTG_FS_HOST_OTG_FS_HCTSIZ10 @ hex. OTG_FS_HOST_OTG_FS_HCTSIZ10 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCCHAR11. cr ." OTG_FS_HOST_OTG_FS_HCCHAR11.  RW   $" OTG_FS_HOST_OTG_FS_HCCHAR11 @ hex. OTG_FS_HOST_OTG_FS_HCCHAR11 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCINT11. cr ." OTG_FS_HOST_OTG_FS_HCINT11.  RW   $" OTG_FS_HOST_OTG_FS_HCINT11 @ hex. OTG_FS_HOST_OTG_FS_HCINT11 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCINTMSK11. cr ." OTG_FS_HOST_OTG_FS_HCINTMSK11.  RW   $" OTG_FS_HOST_OTG_FS_HCINTMSK11 @ hex. OTG_FS_HOST_OTG_FS_HCINTMSK11 1b. ;
-    : OTG_FS_HOST_OTG_FS_HCTSIZ11. cr ." OTG_FS_HOST_OTG_FS_HCTSIZ11.  RW   $" OTG_FS_HOST_OTG_FS_HCTSIZ11 @ hex. OTG_FS_HOST_OTG_FS_HCTSIZ11 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCFG. cr ." OTG_FS_HOST_OTG_FS_HCFG.   $" OTG_FS_HOST_OTG_FS_HCFG @ h.8 OTG_FS_HOST_OTG_FS_HCFG 1b. ;
+    : OTG_FS_HOST_OTG_FS_HFIR. cr ." OTG_FS_HOST_OTG_FS_HFIR.  RW   $" OTG_FS_HOST_OTG_FS_HFIR @ h.8 OTG_FS_HOST_OTG_FS_HFIR 1b. ;
+    : OTG_FS_HOST_OTG_FS_HFNUM. cr ." OTG_FS_HOST_OTG_FS_HFNUM.  RO   $" OTG_FS_HOST_OTG_FS_HFNUM @ h.8 OTG_FS_HOST_OTG_FS_HFNUM 1b. ;
+    : OTG_FS_HOST_OTG_FS_HPTXSTS. cr ." OTG_FS_HOST_OTG_FS_HPTXSTS.   $" OTG_FS_HOST_OTG_FS_HPTXSTS @ h.8 OTG_FS_HOST_OTG_FS_HPTXSTS 1b. ;
+    : OTG_FS_HOST_OTG_FS_HAINT. cr ." OTG_FS_HOST_OTG_FS_HAINT.  RO   $" OTG_FS_HOST_OTG_FS_HAINT @ h.8 OTG_FS_HOST_OTG_FS_HAINT 1b. ;
+    : OTG_FS_HOST_OTG_FS_HAINTMSK. cr ." OTG_FS_HOST_OTG_FS_HAINTMSK.  RW   $" OTG_FS_HOST_OTG_FS_HAINTMSK @ h.8 OTG_FS_HOST_OTG_FS_HAINTMSK 1b. ;
+    : OTG_FS_HOST_OTG_FS_HPRT. cr ." OTG_FS_HOST_OTG_FS_HPRT.   $" OTG_FS_HOST_OTG_FS_HPRT @ h.8 OTG_FS_HOST_OTG_FS_HPRT 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCCHAR0. cr ." OTG_FS_HOST_OTG_FS_HCCHAR0.  RW   $" OTG_FS_HOST_OTG_FS_HCCHAR0 @ h.8 OTG_FS_HOST_OTG_FS_HCCHAR0 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCCHAR1. cr ." OTG_FS_HOST_OTG_FS_HCCHAR1.  RW   $" OTG_FS_HOST_OTG_FS_HCCHAR1 @ h.8 OTG_FS_HOST_OTG_FS_HCCHAR1 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCCHAR2. cr ." OTG_FS_HOST_OTG_FS_HCCHAR2.  RW   $" OTG_FS_HOST_OTG_FS_HCCHAR2 @ h.8 OTG_FS_HOST_OTG_FS_HCCHAR2 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCCHAR3. cr ." OTG_FS_HOST_OTG_FS_HCCHAR3.  RW   $" OTG_FS_HOST_OTG_FS_HCCHAR3 @ h.8 OTG_FS_HOST_OTG_FS_HCCHAR3 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCCHAR4. cr ." OTG_FS_HOST_OTG_FS_HCCHAR4.  RW   $" OTG_FS_HOST_OTG_FS_HCCHAR4 @ h.8 OTG_FS_HOST_OTG_FS_HCCHAR4 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCCHAR5. cr ." OTG_FS_HOST_OTG_FS_HCCHAR5.  RW   $" OTG_FS_HOST_OTG_FS_HCCHAR5 @ h.8 OTG_FS_HOST_OTG_FS_HCCHAR5 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCCHAR6. cr ." OTG_FS_HOST_OTG_FS_HCCHAR6.  RW   $" OTG_FS_HOST_OTG_FS_HCCHAR6 @ h.8 OTG_FS_HOST_OTG_FS_HCCHAR6 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCCHAR7. cr ." OTG_FS_HOST_OTG_FS_HCCHAR7.  RW   $" OTG_FS_HOST_OTG_FS_HCCHAR7 @ h.8 OTG_FS_HOST_OTG_FS_HCCHAR7 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCINT0. cr ." OTG_FS_HOST_OTG_FS_HCINT0.  RW   $" OTG_FS_HOST_OTG_FS_HCINT0 @ h.8 OTG_FS_HOST_OTG_FS_HCINT0 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCINT1. cr ." OTG_FS_HOST_OTG_FS_HCINT1.  RW   $" OTG_FS_HOST_OTG_FS_HCINT1 @ h.8 OTG_FS_HOST_OTG_FS_HCINT1 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCINT2. cr ." OTG_FS_HOST_OTG_FS_HCINT2.  RW   $" OTG_FS_HOST_OTG_FS_HCINT2 @ h.8 OTG_FS_HOST_OTG_FS_HCINT2 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCINT3. cr ." OTG_FS_HOST_OTG_FS_HCINT3.  RW   $" OTG_FS_HOST_OTG_FS_HCINT3 @ h.8 OTG_FS_HOST_OTG_FS_HCINT3 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCINT4. cr ." OTG_FS_HOST_OTG_FS_HCINT4.  RW   $" OTG_FS_HOST_OTG_FS_HCINT4 @ h.8 OTG_FS_HOST_OTG_FS_HCINT4 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCINT5. cr ." OTG_FS_HOST_OTG_FS_HCINT5.  RW   $" OTG_FS_HOST_OTG_FS_HCINT5 @ h.8 OTG_FS_HOST_OTG_FS_HCINT5 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCINT6. cr ." OTG_FS_HOST_OTG_FS_HCINT6.  RW   $" OTG_FS_HOST_OTG_FS_HCINT6 @ h.8 OTG_FS_HOST_OTG_FS_HCINT6 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCINT7. cr ." OTG_FS_HOST_OTG_FS_HCINT7.  RW   $" OTG_FS_HOST_OTG_FS_HCINT7 @ h.8 OTG_FS_HOST_OTG_FS_HCINT7 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCINTMSK0. cr ." OTG_FS_HOST_OTG_FS_HCINTMSK0.  RW   $" OTG_FS_HOST_OTG_FS_HCINTMSK0 @ h.8 OTG_FS_HOST_OTG_FS_HCINTMSK0 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCINTMSK1. cr ." OTG_FS_HOST_OTG_FS_HCINTMSK1.  RW   $" OTG_FS_HOST_OTG_FS_HCINTMSK1 @ h.8 OTG_FS_HOST_OTG_FS_HCINTMSK1 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCINTMSK2. cr ." OTG_FS_HOST_OTG_FS_HCINTMSK2.  RW   $" OTG_FS_HOST_OTG_FS_HCINTMSK2 @ h.8 OTG_FS_HOST_OTG_FS_HCINTMSK2 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCINTMSK3. cr ." OTG_FS_HOST_OTG_FS_HCINTMSK3.  RW   $" OTG_FS_HOST_OTG_FS_HCINTMSK3 @ h.8 OTG_FS_HOST_OTG_FS_HCINTMSK3 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCINTMSK4. cr ." OTG_FS_HOST_OTG_FS_HCINTMSK4.  RW   $" OTG_FS_HOST_OTG_FS_HCINTMSK4 @ h.8 OTG_FS_HOST_OTG_FS_HCINTMSK4 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCINTMSK5. cr ." OTG_FS_HOST_OTG_FS_HCINTMSK5.  RW   $" OTG_FS_HOST_OTG_FS_HCINTMSK5 @ h.8 OTG_FS_HOST_OTG_FS_HCINTMSK5 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCINTMSK6. cr ." OTG_FS_HOST_OTG_FS_HCINTMSK6.  RW   $" OTG_FS_HOST_OTG_FS_HCINTMSK6 @ h.8 OTG_FS_HOST_OTG_FS_HCINTMSK6 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCINTMSK7. cr ." OTG_FS_HOST_OTG_FS_HCINTMSK7.  RW   $" OTG_FS_HOST_OTG_FS_HCINTMSK7 @ h.8 OTG_FS_HOST_OTG_FS_HCINTMSK7 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCTSIZ0. cr ." OTG_FS_HOST_OTG_FS_HCTSIZ0.  RW   $" OTG_FS_HOST_OTG_FS_HCTSIZ0 @ h.8 OTG_FS_HOST_OTG_FS_HCTSIZ0 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCTSIZ1. cr ." OTG_FS_HOST_OTG_FS_HCTSIZ1.  RW   $" OTG_FS_HOST_OTG_FS_HCTSIZ1 @ h.8 OTG_FS_HOST_OTG_FS_HCTSIZ1 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCTSIZ2. cr ." OTG_FS_HOST_OTG_FS_HCTSIZ2.  RW   $" OTG_FS_HOST_OTG_FS_HCTSIZ2 @ h.8 OTG_FS_HOST_OTG_FS_HCTSIZ2 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCTSIZ3. cr ." OTG_FS_HOST_OTG_FS_HCTSIZ3.  RW   $" OTG_FS_HOST_OTG_FS_HCTSIZ3 @ h.8 OTG_FS_HOST_OTG_FS_HCTSIZ3 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCTSIZ4. cr ." OTG_FS_HOST_OTG_FS_HCTSIZ4.  RW   $" OTG_FS_HOST_OTG_FS_HCTSIZ4 @ h.8 OTG_FS_HOST_OTG_FS_HCTSIZ4 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCTSIZ5. cr ." OTG_FS_HOST_OTG_FS_HCTSIZ5.  RW   $" OTG_FS_HOST_OTG_FS_HCTSIZ5 @ h.8 OTG_FS_HOST_OTG_FS_HCTSIZ5 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCTSIZ6. cr ." OTG_FS_HOST_OTG_FS_HCTSIZ6.  RW   $" OTG_FS_HOST_OTG_FS_HCTSIZ6 @ h.8 OTG_FS_HOST_OTG_FS_HCTSIZ6 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCTSIZ7. cr ." OTG_FS_HOST_OTG_FS_HCTSIZ7.  RW   $" OTG_FS_HOST_OTG_FS_HCTSIZ7 @ h.8 OTG_FS_HOST_OTG_FS_HCTSIZ7 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCCHAR8. cr ." OTG_FS_HOST_OTG_FS_HCCHAR8.  RW   $" OTG_FS_HOST_OTG_FS_HCCHAR8 @ h.8 OTG_FS_HOST_OTG_FS_HCCHAR8 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCINT8. cr ." OTG_FS_HOST_OTG_FS_HCINT8.  RW   $" OTG_FS_HOST_OTG_FS_HCINT8 @ h.8 OTG_FS_HOST_OTG_FS_HCINT8 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCINTMSK8. cr ." OTG_FS_HOST_OTG_FS_HCINTMSK8.  RW   $" OTG_FS_HOST_OTG_FS_HCINTMSK8 @ h.8 OTG_FS_HOST_OTG_FS_HCINTMSK8 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCTSIZ8. cr ." OTG_FS_HOST_OTG_FS_HCTSIZ8.  RW   $" OTG_FS_HOST_OTG_FS_HCTSIZ8 @ h.8 OTG_FS_HOST_OTG_FS_HCTSIZ8 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCCHAR9. cr ." OTG_FS_HOST_OTG_FS_HCCHAR9.  RW   $" OTG_FS_HOST_OTG_FS_HCCHAR9 @ h.8 OTG_FS_HOST_OTG_FS_HCCHAR9 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCINT9. cr ." OTG_FS_HOST_OTG_FS_HCINT9.  RW   $" OTG_FS_HOST_OTG_FS_HCINT9 @ h.8 OTG_FS_HOST_OTG_FS_HCINT9 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCINTMSK9. cr ." OTG_FS_HOST_OTG_FS_HCINTMSK9.  RW   $" OTG_FS_HOST_OTG_FS_HCINTMSK9 @ h.8 OTG_FS_HOST_OTG_FS_HCINTMSK9 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCTSIZ9. cr ." OTG_FS_HOST_OTG_FS_HCTSIZ9.  RW   $" OTG_FS_HOST_OTG_FS_HCTSIZ9 @ h.8 OTG_FS_HOST_OTG_FS_HCTSIZ9 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCCHAR10. cr ." OTG_FS_HOST_OTG_FS_HCCHAR10.  RW   $" OTG_FS_HOST_OTG_FS_HCCHAR10 @ h.8 OTG_FS_HOST_OTG_FS_HCCHAR10 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCINT10. cr ." OTG_FS_HOST_OTG_FS_HCINT10.  RW   $" OTG_FS_HOST_OTG_FS_HCINT10 @ h.8 OTG_FS_HOST_OTG_FS_HCINT10 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCINTMSK10. cr ." OTG_FS_HOST_OTG_FS_HCINTMSK10.  RW   $" OTG_FS_HOST_OTG_FS_HCINTMSK10 @ h.8 OTG_FS_HOST_OTG_FS_HCINTMSK10 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCTSIZ10. cr ." OTG_FS_HOST_OTG_FS_HCTSIZ10.  RW   $" OTG_FS_HOST_OTG_FS_HCTSIZ10 @ h.8 OTG_FS_HOST_OTG_FS_HCTSIZ10 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCCHAR11. cr ." OTG_FS_HOST_OTG_FS_HCCHAR11.  RW   $" OTG_FS_HOST_OTG_FS_HCCHAR11 @ h.8 OTG_FS_HOST_OTG_FS_HCCHAR11 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCINT11. cr ." OTG_FS_HOST_OTG_FS_HCINT11.  RW   $" OTG_FS_HOST_OTG_FS_HCINT11 @ h.8 OTG_FS_HOST_OTG_FS_HCINT11 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCINTMSK11. cr ." OTG_FS_HOST_OTG_FS_HCINTMSK11.  RW   $" OTG_FS_HOST_OTG_FS_HCINTMSK11 @ h.8 OTG_FS_HOST_OTG_FS_HCINTMSK11 1b. ;
+    : OTG_FS_HOST_OTG_FS_HCTSIZ11. cr ." OTG_FS_HOST_OTG_FS_HCTSIZ11.  RW   $" OTG_FS_HOST_OTG_FS_HCTSIZ11 @ h.8 OTG_FS_HOST_OTG_FS_HCTSIZ11 1b. ;
     : OTG_FS_HOST.
       OTG_FS_HOST_OTG_FS_HCFG.
       OTG_FS_HOST_OTG_FS_HFIR.
@@ -4895,58 +4895,58 @@ begin-module memmap
     OTG_FS_DEVICE $390 + constant OTG_FS_DEVICE_OTG_FS_DOEPCTL5 (  )  \ device endpoint-5 control register
     OTG_FS_DEVICE $398 + constant OTG_FS_DEVICE_OTG_FS_DOEPINT5 ( read-write )  \ device endpoint-5 interrupt register
     OTG_FS_DEVICE $3A0 + constant OTG_FS_DEVICE_OTG_FS_DOEPTSIZ5 ( read-write )  \ device OUT endpoint-5 transfer size register
-    : OTG_FS_DEVICE_OTG_FS_DCFG. cr ." OTG_FS_DEVICE_OTG_FS_DCFG.  RW   $" OTG_FS_DEVICE_OTG_FS_DCFG @ hex. OTG_FS_DEVICE_OTG_FS_DCFG 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DCTL. cr ." OTG_FS_DEVICE_OTG_FS_DCTL.   $" OTG_FS_DEVICE_OTG_FS_DCTL @ hex. OTG_FS_DEVICE_OTG_FS_DCTL 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DSTS. cr ." OTG_FS_DEVICE_OTG_FS_DSTS.  RO   $" OTG_FS_DEVICE_OTG_FS_DSTS @ hex. OTG_FS_DEVICE_OTG_FS_DSTS 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DIEPMSK. cr ." OTG_FS_DEVICE_OTG_FS_DIEPMSK.  RW   $" OTG_FS_DEVICE_OTG_FS_DIEPMSK @ hex. OTG_FS_DEVICE_OTG_FS_DIEPMSK 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DOEPMSK. cr ." OTG_FS_DEVICE_OTG_FS_DOEPMSK.  RW   $" OTG_FS_DEVICE_OTG_FS_DOEPMSK @ hex. OTG_FS_DEVICE_OTG_FS_DOEPMSK 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DAINT. cr ." OTG_FS_DEVICE_OTG_FS_DAINT.  RO   $" OTG_FS_DEVICE_OTG_FS_DAINT @ hex. OTG_FS_DEVICE_OTG_FS_DAINT 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DAINTMSK. cr ." OTG_FS_DEVICE_OTG_FS_DAINTMSK.  RW   $" OTG_FS_DEVICE_OTG_FS_DAINTMSK @ hex. OTG_FS_DEVICE_OTG_FS_DAINTMSK 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DVBUSDIS. cr ." OTG_FS_DEVICE_OTG_FS_DVBUSDIS.  RW   $" OTG_FS_DEVICE_OTG_FS_DVBUSDIS @ hex. OTG_FS_DEVICE_OTG_FS_DVBUSDIS 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DVBUSPULSE. cr ." OTG_FS_DEVICE_OTG_FS_DVBUSPULSE.  RW   $" OTG_FS_DEVICE_OTG_FS_DVBUSPULSE @ hex. OTG_FS_DEVICE_OTG_FS_DVBUSPULSE 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DIEPEMPMSK. cr ." OTG_FS_DEVICE_OTG_FS_DIEPEMPMSK.  RW   $" OTG_FS_DEVICE_OTG_FS_DIEPEMPMSK @ hex. OTG_FS_DEVICE_OTG_FS_DIEPEMPMSK 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DIEPCTL0. cr ." OTG_FS_DEVICE_OTG_FS_DIEPCTL0.   $" OTG_FS_DEVICE_OTG_FS_DIEPCTL0 @ hex. OTG_FS_DEVICE_OTG_FS_DIEPCTL0 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DIEPCTL1. cr ." OTG_FS_DEVICE_OTG_FS_DIEPCTL1.   $" OTG_FS_DEVICE_OTG_FS_DIEPCTL1 @ hex. OTG_FS_DEVICE_OTG_FS_DIEPCTL1 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DIEPCTL2. cr ." OTG_FS_DEVICE_OTG_FS_DIEPCTL2.   $" OTG_FS_DEVICE_OTG_FS_DIEPCTL2 @ hex. OTG_FS_DEVICE_OTG_FS_DIEPCTL2 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DIEPCTL3. cr ." OTG_FS_DEVICE_OTG_FS_DIEPCTL3.   $" OTG_FS_DEVICE_OTG_FS_DIEPCTL3 @ hex. OTG_FS_DEVICE_OTG_FS_DIEPCTL3 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DOEPCTL0. cr ." OTG_FS_DEVICE_OTG_FS_DOEPCTL0.   $" OTG_FS_DEVICE_OTG_FS_DOEPCTL0 @ hex. OTG_FS_DEVICE_OTG_FS_DOEPCTL0 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DOEPCTL1. cr ." OTG_FS_DEVICE_OTG_FS_DOEPCTL1.   $" OTG_FS_DEVICE_OTG_FS_DOEPCTL1 @ hex. OTG_FS_DEVICE_OTG_FS_DOEPCTL1 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DOEPCTL2. cr ." OTG_FS_DEVICE_OTG_FS_DOEPCTL2.   $" OTG_FS_DEVICE_OTG_FS_DOEPCTL2 @ hex. OTG_FS_DEVICE_OTG_FS_DOEPCTL2 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DOEPCTL3. cr ." OTG_FS_DEVICE_OTG_FS_DOEPCTL3.   $" OTG_FS_DEVICE_OTG_FS_DOEPCTL3 @ hex. OTG_FS_DEVICE_OTG_FS_DOEPCTL3 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DIEPINT0. cr ." OTG_FS_DEVICE_OTG_FS_DIEPINT0.   $" OTG_FS_DEVICE_OTG_FS_DIEPINT0 @ hex. OTG_FS_DEVICE_OTG_FS_DIEPINT0 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DIEPINT1. cr ." OTG_FS_DEVICE_OTG_FS_DIEPINT1.   $" OTG_FS_DEVICE_OTG_FS_DIEPINT1 @ hex. OTG_FS_DEVICE_OTG_FS_DIEPINT1 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DIEPINT2. cr ." OTG_FS_DEVICE_OTG_FS_DIEPINT2.   $" OTG_FS_DEVICE_OTG_FS_DIEPINT2 @ hex. OTG_FS_DEVICE_OTG_FS_DIEPINT2 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DIEPINT3. cr ." OTG_FS_DEVICE_OTG_FS_DIEPINT3.   $" OTG_FS_DEVICE_OTG_FS_DIEPINT3 @ hex. OTG_FS_DEVICE_OTG_FS_DIEPINT3 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DOEPINT0. cr ." OTG_FS_DEVICE_OTG_FS_DOEPINT0.  RW   $" OTG_FS_DEVICE_OTG_FS_DOEPINT0 @ hex. OTG_FS_DEVICE_OTG_FS_DOEPINT0 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DOEPINT1. cr ." OTG_FS_DEVICE_OTG_FS_DOEPINT1.  RW   $" OTG_FS_DEVICE_OTG_FS_DOEPINT1 @ hex. OTG_FS_DEVICE_OTG_FS_DOEPINT1 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DOEPINT2. cr ." OTG_FS_DEVICE_OTG_FS_DOEPINT2.  RW   $" OTG_FS_DEVICE_OTG_FS_DOEPINT2 @ hex. OTG_FS_DEVICE_OTG_FS_DOEPINT2 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DOEPINT3. cr ." OTG_FS_DEVICE_OTG_FS_DOEPINT3.  RW   $" OTG_FS_DEVICE_OTG_FS_DOEPINT3 @ hex. OTG_FS_DEVICE_OTG_FS_DOEPINT3 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DIEPTSIZ0. cr ." OTG_FS_DEVICE_OTG_FS_DIEPTSIZ0.  RW   $" OTG_FS_DEVICE_OTG_FS_DIEPTSIZ0 @ hex. OTG_FS_DEVICE_OTG_FS_DIEPTSIZ0 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DOEPTSIZ0. cr ." OTG_FS_DEVICE_OTG_FS_DOEPTSIZ0.  RW   $" OTG_FS_DEVICE_OTG_FS_DOEPTSIZ0 @ hex. OTG_FS_DEVICE_OTG_FS_DOEPTSIZ0 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DIEPTSIZ1. cr ." OTG_FS_DEVICE_OTG_FS_DIEPTSIZ1.  RW   $" OTG_FS_DEVICE_OTG_FS_DIEPTSIZ1 @ hex. OTG_FS_DEVICE_OTG_FS_DIEPTSIZ1 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DIEPTSIZ2. cr ." OTG_FS_DEVICE_OTG_FS_DIEPTSIZ2.  RW   $" OTG_FS_DEVICE_OTG_FS_DIEPTSIZ2 @ hex. OTG_FS_DEVICE_OTG_FS_DIEPTSIZ2 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DIEPTSIZ3. cr ." OTG_FS_DEVICE_OTG_FS_DIEPTSIZ3.  RW   $" OTG_FS_DEVICE_OTG_FS_DIEPTSIZ3 @ hex. OTG_FS_DEVICE_OTG_FS_DIEPTSIZ3 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DTXFSTS0. cr ." OTG_FS_DEVICE_OTG_FS_DTXFSTS0.  RO   $" OTG_FS_DEVICE_OTG_FS_DTXFSTS0 @ hex. OTG_FS_DEVICE_OTG_FS_DTXFSTS0 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DTXFSTS1. cr ." OTG_FS_DEVICE_OTG_FS_DTXFSTS1.  RO   $" OTG_FS_DEVICE_OTG_FS_DTXFSTS1 @ hex. OTG_FS_DEVICE_OTG_FS_DTXFSTS1 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DTXFSTS2. cr ." OTG_FS_DEVICE_OTG_FS_DTXFSTS2.  RO   $" OTG_FS_DEVICE_OTG_FS_DTXFSTS2 @ hex. OTG_FS_DEVICE_OTG_FS_DTXFSTS2 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DTXFSTS3. cr ." OTG_FS_DEVICE_OTG_FS_DTXFSTS3.  RO   $" OTG_FS_DEVICE_OTG_FS_DTXFSTS3 @ hex. OTG_FS_DEVICE_OTG_FS_DTXFSTS3 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DOEPTSIZ1. cr ." OTG_FS_DEVICE_OTG_FS_DOEPTSIZ1.  RW   $" OTG_FS_DEVICE_OTG_FS_DOEPTSIZ1 @ hex. OTG_FS_DEVICE_OTG_FS_DOEPTSIZ1 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DOEPTSIZ2. cr ." OTG_FS_DEVICE_OTG_FS_DOEPTSIZ2.  RW   $" OTG_FS_DEVICE_OTG_FS_DOEPTSIZ2 @ hex. OTG_FS_DEVICE_OTG_FS_DOEPTSIZ2 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DOEPTSIZ3. cr ." OTG_FS_DEVICE_OTG_FS_DOEPTSIZ3.  RW   $" OTG_FS_DEVICE_OTG_FS_DOEPTSIZ3 @ hex. OTG_FS_DEVICE_OTG_FS_DOEPTSIZ3 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DIEPCTL4. cr ." OTG_FS_DEVICE_OTG_FS_DIEPCTL4.   $" OTG_FS_DEVICE_OTG_FS_DIEPCTL4 @ hex. OTG_FS_DEVICE_OTG_FS_DIEPCTL4 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DIEPINT4. cr ." OTG_FS_DEVICE_OTG_FS_DIEPINT4.   $" OTG_FS_DEVICE_OTG_FS_DIEPINT4 @ hex. OTG_FS_DEVICE_OTG_FS_DIEPINT4 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DIEPTSIZ4. cr ." OTG_FS_DEVICE_OTG_FS_DIEPTSIZ4.  RW   $" OTG_FS_DEVICE_OTG_FS_DIEPTSIZ4 @ hex. OTG_FS_DEVICE_OTG_FS_DIEPTSIZ4 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DTXFSTS4. cr ." OTG_FS_DEVICE_OTG_FS_DTXFSTS4.  RW   $" OTG_FS_DEVICE_OTG_FS_DTXFSTS4 @ hex. OTG_FS_DEVICE_OTG_FS_DTXFSTS4 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DIEPCTL5. cr ." OTG_FS_DEVICE_OTG_FS_DIEPCTL5.   $" OTG_FS_DEVICE_OTG_FS_DIEPCTL5 @ hex. OTG_FS_DEVICE_OTG_FS_DIEPCTL5 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DIEPINT5. cr ." OTG_FS_DEVICE_OTG_FS_DIEPINT5.   $" OTG_FS_DEVICE_OTG_FS_DIEPINT5 @ hex. OTG_FS_DEVICE_OTG_FS_DIEPINT5 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DIEPTSIZ55. cr ." OTG_FS_DEVICE_OTG_FS_DIEPTSIZ55.  RW   $" OTG_FS_DEVICE_OTG_FS_DIEPTSIZ55 @ hex. OTG_FS_DEVICE_OTG_FS_DIEPTSIZ55 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DTXFSTS55. cr ." OTG_FS_DEVICE_OTG_FS_DTXFSTS55.  RW   $" OTG_FS_DEVICE_OTG_FS_DTXFSTS55 @ hex. OTG_FS_DEVICE_OTG_FS_DTXFSTS55 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DOEPCTL4. cr ." OTG_FS_DEVICE_OTG_FS_DOEPCTL4.   $" OTG_FS_DEVICE_OTG_FS_DOEPCTL4 @ hex. OTG_FS_DEVICE_OTG_FS_DOEPCTL4 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DOEPINT4. cr ." OTG_FS_DEVICE_OTG_FS_DOEPINT4.  RW   $" OTG_FS_DEVICE_OTG_FS_DOEPINT4 @ hex. OTG_FS_DEVICE_OTG_FS_DOEPINT4 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DOEPTSIZ4. cr ." OTG_FS_DEVICE_OTG_FS_DOEPTSIZ4.  RW   $" OTG_FS_DEVICE_OTG_FS_DOEPTSIZ4 @ hex. OTG_FS_DEVICE_OTG_FS_DOEPTSIZ4 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DOEPCTL5. cr ." OTG_FS_DEVICE_OTG_FS_DOEPCTL5.   $" OTG_FS_DEVICE_OTG_FS_DOEPCTL5 @ hex. OTG_FS_DEVICE_OTG_FS_DOEPCTL5 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DOEPINT5. cr ." OTG_FS_DEVICE_OTG_FS_DOEPINT5.  RW   $" OTG_FS_DEVICE_OTG_FS_DOEPINT5 @ hex. OTG_FS_DEVICE_OTG_FS_DOEPINT5 1b. ;
-    : OTG_FS_DEVICE_OTG_FS_DOEPTSIZ5. cr ." OTG_FS_DEVICE_OTG_FS_DOEPTSIZ5.  RW   $" OTG_FS_DEVICE_OTG_FS_DOEPTSIZ5 @ hex. OTG_FS_DEVICE_OTG_FS_DOEPTSIZ5 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DCFG. cr ." OTG_FS_DEVICE_OTG_FS_DCFG.  RW   $" OTG_FS_DEVICE_OTG_FS_DCFG @ h.8 OTG_FS_DEVICE_OTG_FS_DCFG 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DCTL. cr ." OTG_FS_DEVICE_OTG_FS_DCTL.   $" OTG_FS_DEVICE_OTG_FS_DCTL @ h.8 OTG_FS_DEVICE_OTG_FS_DCTL 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DSTS. cr ." OTG_FS_DEVICE_OTG_FS_DSTS.  RO   $" OTG_FS_DEVICE_OTG_FS_DSTS @ h.8 OTG_FS_DEVICE_OTG_FS_DSTS 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DIEPMSK. cr ." OTG_FS_DEVICE_OTG_FS_DIEPMSK.  RW   $" OTG_FS_DEVICE_OTG_FS_DIEPMSK @ h.8 OTG_FS_DEVICE_OTG_FS_DIEPMSK 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DOEPMSK. cr ." OTG_FS_DEVICE_OTG_FS_DOEPMSK.  RW   $" OTG_FS_DEVICE_OTG_FS_DOEPMSK @ h.8 OTG_FS_DEVICE_OTG_FS_DOEPMSK 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DAINT. cr ." OTG_FS_DEVICE_OTG_FS_DAINT.  RO   $" OTG_FS_DEVICE_OTG_FS_DAINT @ h.8 OTG_FS_DEVICE_OTG_FS_DAINT 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DAINTMSK. cr ." OTG_FS_DEVICE_OTG_FS_DAINTMSK.  RW   $" OTG_FS_DEVICE_OTG_FS_DAINTMSK @ h.8 OTG_FS_DEVICE_OTG_FS_DAINTMSK 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DVBUSDIS. cr ." OTG_FS_DEVICE_OTG_FS_DVBUSDIS.  RW   $" OTG_FS_DEVICE_OTG_FS_DVBUSDIS @ h.8 OTG_FS_DEVICE_OTG_FS_DVBUSDIS 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DVBUSPULSE. cr ." OTG_FS_DEVICE_OTG_FS_DVBUSPULSE.  RW   $" OTG_FS_DEVICE_OTG_FS_DVBUSPULSE @ h.8 OTG_FS_DEVICE_OTG_FS_DVBUSPULSE 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DIEPEMPMSK. cr ." OTG_FS_DEVICE_OTG_FS_DIEPEMPMSK.  RW   $" OTG_FS_DEVICE_OTG_FS_DIEPEMPMSK @ h.8 OTG_FS_DEVICE_OTG_FS_DIEPEMPMSK 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DIEPCTL0. cr ." OTG_FS_DEVICE_OTG_FS_DIEPCTL0.   $" OTG_FS_DEVICE_OTG_FS_DIEPCTL0 @ h.8 OTG_FS_DEVICE_OTG_FS_DIEPCTL0 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DIEPCTL1. cr ." OTG_FS_DEVICE_OTG_FS_DIEPCTL1.   $" OTG_FS_DEVICE_OTG_FS_DIEPCTL1 @ h.8 OTG_FS_DEVICE_OTG_FS_DIEPCTL1 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DIEPCTL2. cr ." OTG_FS_DEVICE_OTG_FS_DIEPCTL2.   $" OTG_FS_DEVICE_OTG_FS_DIEPCTL2 @ h.8 OTG_FS_DEVICE_OTG_FS_DIEPCTL2 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DIEPCTL3. cr ." OTG_FS_DEVICE_OTG_FS_DIEPCTL3.   $" OTG_FS_DEVICE_OTG_FS_DIEPCTL3 @ h.8 OTG_FS_DEVICE_OTG_FS_DIEPCTL3 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DOEPCTL0. cr ." OTG_FS_DEVICE_OTG_FS_DOEPCTL0.   $" OTG_FS_DEVICE_OTG_FS_DOEPCTL0 @ h.8 OTG_FS_DEVICE_OTG_FS_DOEPCTL0 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DOEPCTL1. cr ." OTG_FS_DEVICE_OTG_FS_DOEPCTL1.   $" OTG_FS_DEVICE_OTG_FS_DOEPCTL1 @ h.8 OTG_FS_DEVICE_OTG_FS_DOEPCTL1 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DOEPCTL2. cr ." OTG_FS_DEVICE_OTG_FS_DOEPCTL2.   $" OTG_FS_DEVICE_OTG_FS_DOEPCTL2 @ h.8 OTG_FS_DEVICE_OTG_FS_DOEPCTL2 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DOEPCTL3. cr ." OTG_FS_DEVICE_OTG_FS_DOEPCTL3.   $" OTG_FS_DEVICE_OTG_FS_DOEPCTL3 @ h.8 OTG_FS_DEVICE_OTG_FS_DOEPCTL3 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DIEPINT0. cr ." OTG_FS_DEVICE_OTG_FS_DIEPINT0.   $" OTG_FS_DEVICE_OTG_FS_DIEPINT0 @ h.8 OTG_FS_DEVICE_OTG_FS_DIEPINT0 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DIEPINT1. cr ." OTG_FS_DEVICE_OTG_FS_DIEPINT1.   $" OTG_FS_DEVICE_OTG_FS_DIEPINT1 @ h.8 OTG_FS_DEVICE_OTG_FS_DIEPINT1 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DIEPINT2. cr ." OTG_FS_DEVICE_OTG_FS_DIEPINT2.   $" OTG_FS_DEVICE_OTG_FS_DIEPINT2 @ h.8 OTG_FS_DEVICE_OTG_FS_DIEPINT2 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DIEPINT3. cr ." OTG_FS_DEVICE_OTG_FS_DIEPINT3.   $" OTG_FS_DEVICE_OTG_FS_DIEPINT3 @ h.8 OTG_FS_DEVICE_OTG_FS_DIEPINT3 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DOEPINT0. cr ." OTG_FS_DEVICE_OTG_FS_DOEPINT0.  RW   $" OTG_FS_DEVICE_OTG_FS_DOEPINT0 @ h.8 OTG_FS_DEVICE_OTG_FS_DOEPINT0 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DOEPINT1. cr ." OTG_FS_DEVICE_OTG_FS_DOEPINT1.  RW   $" OTG_FS_DEVICE_OTG_FS_DOEPINT1 @ h.8 OTG_FS_DEVICE_OTG_FS_DOEPINT1 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DOEPINT2. cr ." OTG_FS_DEVICE_OTG_FS_DOEPINT2.  RW   $" OTG_FS_DEVICE_OTG_FS_DOEPINT2 @ h.8 OTG_FS_DEVICE_OTG_FS_DOEPINT2 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DOEPINT3. cr ." OTG_FS_DEVICE_OTG_FS_DOEPINT3.  RW   $" OTG_FS_DEVICE_OTG_FS_DOEPINT3 @ h.8 OTG_FS_DEVICE_OTG_FS_DOEPINT3 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DIEPTSIZ0. cr ." OTG_FS_DEVICE_OTG_FS_DIEPTSIZ0.  RW   $" OTG_FS_DEVICE_OTG_FS_DIEPTSIZ0 @ h.8 OTG_FS_DEVICE_OTG_FS_DIEPTSIZ0 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DOEPTSIZ0. cr ." OTG_FS_DEVICE_OTG_FS_DOEPTSIZ0.  RW   $" OTG_FS_DEVICE_OTG_FS_DOEPTSIZ0 @ h.8 OTG_FS_DEVICE_OTG_FS_DOEPTSIZ0 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DIEPTSIZ1. cr ." OTG_FS_DEVICE_OTG_FS_DIEPTSIZ1.  RW   $" OTG_FS_DEVICE_OTG_FS_DIEPTSIZ1 @ h.8 OTG_FS_DEVICE_OTG_FS_DIEPTSIZ1 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DIEPTSIZ2. cr ." OTG_FS_DEVICE_OTG_FS_DIEPTSIZ2.  RW   $" OTG_FS_DEVICE_OTG_FS_DIEPTSIZ2 @ h.8 OTG_FS_DEVICE_OTG_FS_DIEPTSIZ2 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DIEPTSIZ3. cr ." OTG_FS_DEVICE_OTG_FS_DIEPTSIZ3.  RW   $" OTG_FS_DEVICE_OTG_FS_DIEPTSIZ3 @ h.8 OTG_FS_DEVICE_OTG_FS_DIEPTSIZ3 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DTXFSTS0. cr ." OTG_FS_DEVICE_OTG_FS_DTXFSTS0.  RO   $" OTG_FS_DEVICE_OTG_FS_DTXFSTS0 @ h.8 OTG_FS_DEVICE_OTG_FS_DTXFSTS0 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DTXFSTS1. cr ." OTG_FS_DEVICE_OTG_FS_DTXFSTS1.  RO   $" OTG_FS_DEVICE_OTG_FS_DTXFSTS1 @ h.8 OTG_FS_DEVICE_OTG_FS_DTXFSTS1 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DTXFSTS2. cr ." OTG_FS_DEVICE_OTG_FS_DTXFSTS2.  RO   $" OTG_FS_DEVICE_OTG_FS_DTXFSTS2 @ h.8 OTG_FS_DEVICE_OTG_FS_DTXFSTS2 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DTXFSTS3. cr ." OTG_FS_DEVICE_OTG_FS_DTXFSTS3.  RO   $" OTG_FS_DEVICE_OTG_FS_DTXFSTS3 @ h.8 OTG_FS_DEVICE_OTG_FS_DTXFSTS3 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DOEPTSIZ1. cr ." OTG_FS_DEVICE_OTG_FS_DOEPTSIZ1.  RW   $" OTG_FS_DEVICE_OTG_FS_DOEPTSIZ1 @ h.8 OTG_FS_DEVICE_OTG_FS_DOEPTSIZ1 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DOEPTSIZ2. cr ." OTG_FS_DEVICE_OTG_FS_DOEPTSIZ2.  RW   $" OTG_FS_DEVICE_OTG_FS_DOEPTSIZ2 @ h.8 OTG_FS_DEVICE_OTG_FS_DOEPTSIZ2 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DOEPTSIZ3. cr ." OTG_FS_DEVICE_OTG_FS_DOEPTSIZ3.  RW   $" OTG_FS_DEVICE_OTG_FS_DOEPTSIZ3 @ h.8 OTG_FS_DEVICE_OTG_FS_DOEPTSIZ3 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DIEPCTL4. cr ." OTG_FS_DEVICE_OTG_FS_DIEPCTL4.   $" OTG_FS_DEVICE_OTG_FS_DIEPCTL4 @ h.8 OTG_FS_DEVICE_OTG_FS_DIEPCTL4 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DIEPINT4. cr ." OTG_FS_DEVICE_OTG_FS_DIEPINT4.   $" OTG_FS_DEVICE_OTG_FS_DIEPINT4 @ h.8 OTG_FS_DEVICE_OTG_FS_DIEPINT4 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DIEPTSIZ4. cr ." OTG_FS_DEVICE_OTG_FS_DIEPTSIZ4.  RW   $" OTG_FS_DEVICE_OTG_FS_DIEPTSIZ4 @ h.8 OTG_FS_DEVICE_OTG_FS_DIEPTSIZ4 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DTXFSTS4. cr ." OTG_FS_DEVICE_OTG_FS_DTXFSTS4.  RW   $" OTG_FS_DEVICE_OTG_FS_DTXFSTS4 @ h.8 OTG_FS_DEVICE_OTG_FS_DTXFSTS4 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DIEPCTL5. cr ." OTG_FS_DEVICE_OTG_FS_DIEPCTL5.   $" OTG_FS_DEVICE_OTG_FS_DIEPCTL5 @ h.8 OTG_FS_DEVICE_OTG_FS_DIEPCTL5 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DIEPINT5. cr ." OTG_FS_DEVICE_OTG_FS_DIEPINT5.   $" OTG_FS_DEVICE_OTG_FS_DIEPINT5 @ h.8 OTG_FS_DEVICE_OTG_FS_DIEPINT5 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DIEPTSIZ55. cr ." OTG_FS_DEVICE_OTG_FS_DIEPTSIZ55.  RW   $" OTG_FS_DEVICE_OTG_FS_DIEPTSIZ55 @ h.8 OTG_FS_DEVICE_OTG_FS_DIEPTSIZ55 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DTXFSTS55. cr ." OTG_FS_DEVICE_OTG_FS_DTXFSTS55.  RW   $" OTG_FS_DEVICE_OTG_FS_DTXFSTS55 @ h.8 OTG_FS_DEVICE_OTG_FS_DTXFSTS55 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DOEPCTL4. cr ." OTG_FS_DEVICE_OTG_FS_DOEPCTL4.   $" OTG_FS_DEVICE_OTG_FS_DOEPCTL4 @ h.8 OTG_FS_DEVICE_OTG_FS_DOEPCTL4 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DOEPINT4. cr ." OTG_FS_DEVICE_OTG_FS_DOEPINT4.  RW   $" OTG_FS_DEVICE_OTG_FS_DOEPINT4 @ h.8 OTG_FS_DEVICE_OTG_FS_DOEPINT4 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DOEPTSIZ4. cr ." OTG_FS_DEVICE_OTG_FS_DOEPTSIZ4.  RW   $" OTG_FS_DEVICE_OTG_FS_DOEPTSIZ4 @ h.8 OTG_FS_DEVICE_OTG_FS_DOEPTSIZ4 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DOEPCTL5. cr ." OTG_FS_DEVICE_OTG_FS_DOEPCTL5.   $" OTG_FS_DEVICE_OTG_FS_DOEPCTL5 @ h.8 OTG_FS_DEVICE_OTG_FS_DOEPCTL5 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DOEPINT5. cr ." OTG_FS_DEVICE_OTG_FS_DOEPINT5.  RW   $" OTG_FS_DEVICE_OTG_FS_DOEPINT5 @ h.8 OTG_FS_DEVICE_OTG_FS_DOEPINT5 1b. ;
+    : OTG_FS_DEVICE_OTG_FS_DOEPTSIZ5. cr ." OTG_FS_DEVICE_OTG_FS_DOEPTSIZ5.  RW   $" OTG_FS_DEVICE_OTG_FS_DOEPTSIZ5 @ h.8 OTG_FS_DEVICE_OTG_FS_DOEPTSIZ5 1b. ;
     : OTG_FS_DEVICE.
       OTG_FS_DEVICE_OTG_FS_DCFG.
       OTG_FS_DEVICE_OTG_FS_DCTL.
@@ -5006,7 +5006,7 @@ begin-module memmap
   execute-defined? use-OTG_FS_PWRCLK [if]
     $50000E00 constant OTG_FS_PWRCLK ( USB on the go full speed ) 
     OTG_FS_PWRCLK $0 + constant OTG_FS_PWRCLK_OTG_FS_PCGCCTL ( read-write )  \ OTG_FS power and clock gating control register OTG_FS_PCGCCTL
-    : OTG_FS_PWRCLK_OTG_FS_PCGCCTL. cr ." OTG_FS_PWRCLK_OTG_FS_PCGCCTL.  RW   $" OTG_FS_PWRCLK_OTG_FS_PCGCCTL @ hex. OTG_FS_PWRCLK_OTG_FS_PCGCCTL 1b. ;
+    : OTG_FS_PWRCLK_OTG_FS_PCGCCTL. cr ." OTG_FS_PWRCLK_OTG_FS_PCGCCTL.  RW   $" OTG_FS_PWRCLK_OTG_FS_PCGCCTL @ h.8 OTG_FS_PWRCLK_OTG_FS_PCGCCTL 1b. ;
     : OTG_FS_PWRCLK.
       OTG_FS_PWRCLK_OTG_FS_PCGCCTL.
     ;
@@ -5040,32 +5040,32 @@ begin-module memmap
     OTG_HS_GLOBAL $1C + constant OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Device ( read-only )  \ OTG_HS Receive status debug read register peripheral mode mode
     OTG_HS_GLOBAL $20 + constant OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Device ( read-only )  \ OTG_HS status read and pop register peripheral mode
     OTG_HS_GLOBAL $54 + constant OTG_HS_GLOBAL_OTG_HS_GLPMCFG (  )  \ OTG core LPM configuration register
-    : OTG_HS_GLOBAL_OTG_HS_GOTGCTL. cr ." OTG_HS_GLOBAL_OTG_HS_GOTGCTL.   $" OTG_HS_GLOBAL_OTG_HS_GOTGCTL @ hex. OTG_HS_GLOBAL_OTG_HS_GOTGCTL 1b. ;
-    : OTG_HS_GLOBAL_OTG_HS_GOTGINT. cr ." OTG_HS_GLOBAL_OTG_HS_GOTGINT.  RW   $" OTG_HS_GLOBAL_OTG_HS_GOTGINT @ hex. OTG_HS_GLOBAL_OTG_HS_GOTGINT 1b. ;
-    : OTG_HS_GLOBAL_OTG_HS_GAHBCFG. cr ." OTG_HS_GLOBAL_OTG_HS_GAHBCFG.  RW   $" OTG_HS_GLOBAL_OTG_HS_GAHBCFG @ hex. OTG_HS_GLOBAL_OTG_HS_GAHBCFG 1b. ;
-    : OTG_HS_GLOBAL_OTG_HS_GUSBCFG. cr ." OTG_HS_GLOBAL_OTG_HS_GUSBCFG.   $" OTG_HS_GLOBAL_OTG_HS_GUSBCFG @ hex. OTG_HS_GLOBAL_OTG_HS_GUSBCFG 1b. ;
-    : OTG_HS_GLOBAL_OTG_HS_GRSTCTL. cr ." OTG_HS_GLOBAL_OTG_HS_GRSTCTL.   $" OTG_HS_GLOBAL_OTG_HS_GRSTCTL @ hex. OTG_HS_GLOBAL_OTG_HS_GRSTCTL 1b. ;
-    : OTG_HS_GLOBAL_OTG_HS_GINTSTS. cr ." OTG_HS_GLOBAL_OTG_HS_GINTSTS.   $" OTG_HS_GLOBAL_OTG_HS_GINTSTS @ hex. OTG_HS_GLOBAL_OTG_HS_GINTSTS 1b. ;
-    : OTG_HS_GLOBAL_OTG_HS_GINTMSK. cr ." OTG_HS_GLOBAL_OTG_HS_GINTMSK.   $" OTG_HS_GLOBAL_OTG_HS_GINTMSK @ hex. OTG_HS_GLOBAL_OTG_HS_GINTMSK 1b. ;
-    : OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Host. cr ." OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Host.  RO   $" OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Host @ hex. OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Host 1b. ;
-    : OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Host. cr ." OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Host.  RO   $" OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Host @ hex. OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Host 1b. ;
-    : OTG_HS_GLOBAL_OTG_HS_GRXFSIZ. cr ." OTG_HS_GLOBAL_OTG_HS_GRXFSIZ.  RW   $" OTG_HS_GLOBAL_OTG_HS_GRXFSIZ @ hex. OTG_HS_GLOBAL_OTG_HS_GRXFSIZ 1b. ;
-    : OTG_HS_GLOBAL_OTG_HS_HNPTXFSIZ_Host. cr ." OTG_HS_GLOBAL_OTG_HS_HNPTXFSIZ_Host.  RW   $" OTG_HS_GLOBAL_OTG_HS_HNPTXFSIZ_Host @ hex. OTG_HS_GLOBAL_OTG_HS_HNPTXFSIZ_Host 1b. ;
-    : OTG_HS_GLOBAL_OTG_HS_DIEPTXF0_Device. cr ." OTG_HS_GLOBAL_OTG_HS_DIEPTXF0_Device.  RW   $" OTG_HS_GLOBAL_OTG_HS_DIEPTXF0_Device @ hex. OTG_HS_GLOBAL_OTG_HS_DIEPTXF0_Device 1b. ;
-    : OTG_HS_GLOBAL_OTG_HS_GNPTXSTS. cr ." OTG_HS_GLOBAL_OTG_HS_GNPTXSTS.  RO   $" OTG_HS_GLOBAL_OTG_HS_GNPTXSTS @ hex. OTG_HS_GLOBAL_OTG_HS_GNPTXSTS 1b. ;
-    : OTG_HS_GLOBAL_OTG_HS_GCCFG. cr ." OTG_HS_GLOBAL_OTG_HS_GCCFG.  RW   $" OTG_HS_GLOBAL_OTG_HS_GCCFG @ hex. OTG_HS_GLOBAL_OTG_HS_GCCFG 1b. ;
-    : OTG_HS_GLOBAL_OTG_HS_CID. cr ." OTG_HS_GLOBAL_OTG_HS_CID.  RW   $" OTG_HS_GLOBAL_OTG_HS_CID @ hex. OTG_HS_GLOBAL_OTG_HS_CID 1b. ;
-    : OTG_HS_GLOBAL_OTG_HS_HPTXFSIZ. cr ." OTG_HS_GLOBAL_OTG_HS_HPTXFSIZ.  RW   $" OTG_HS_GLOBAL_OTG_HS_HPTXFSIZ @ hex. OTG_HS_GLOBAL_OTG_HS_HPTXFSIZ 1b. ;
-    : OTG_HS_GLOBAL_OTG_HS_DIEPTXF1. cr ." OTG_HS_GLOBAL_OTG_HS_DIEPTXF1.  RW   $" OTG_HS_GLOBAL_OTG_HS_DIEPTXF1 @ hex. OTG_HS_GLOBAL_OTG_HS_DIEPTXF1 1b. ;
-    : OTG_HS_GLOBAL_OTG_HS_DIEPTXF2. cr ." OTG_HS_GLOBAL_OTG_HS_DIEPTXF2.  RW   $" OTG_HS_GLOBAL_OTG_HS_DIEPTXF2 @ hex. OTG_HS_GLOBAL_OTG_HS_DIEPTXF2 1b. ;
-    : OTG_HS_GLOBAL_OTG_HS_DIEPTXF3. cr ." OTG_HS_GLOBAL_OTG_HS_DIEPTXF3.  RW   $" OTG_HS_GLOBAL_OTG_HS_DIEPTXF3 @ hex. OTG_HS_GLOBAL_OTG_HS_DIEPTXF3 1b. ;
-    : OTG_HS_GLOBAL_OTG_HS_DIEPTXF4. cr ." OTG_HS_GLOBAL_OTG_HS_DIEPTXF4.  RW   $" OTG_HS_GLOBAL_OTG_HS_DIEPTXF4 @ hex. OTG_HS_GLOBAL_OTG_HS_DIEPTXF4 1b. ;
-    : OTG_HS_GLOBAL_OTG_HS_DIEPTXF5. cr ." OTG_HS_GLOBAL_OTG_HS_DIEPTXF5.  RW   $" OTG_HS_GLOBAL_OTG_HS_DIEPTXF5 @ hex. OTG_HS_GLOBAL_OTG_HS_DIEPTXF5 1b. ;
-    : OTG_HS_GLOBAL_OTG_HS_DIEPTXF6. cr ." OTG_HS_GLOBAL_OTG_HS_DIEPTXF6.  RW   $" OTG_HS_GLOBAL_OTG_HS_DIEPTXF6 @ hex. OTG_HS_GLOBAL_OTG_HS_DIEPTXF6 1b. ;
-    : OTG_HS_GLOBAL_OTG_HS_DIEPTXF7. cr ." OTG_HS_GLOBAL_OTG_HS_DIEPTXF7.  RW   $" OTG_HS_GLOBAL_OTG_HS_DIEPTXF7 @ hex. OTG_HS_GLOBAL_OTG_HS_DIEPTXF7 1b. ;
-    : OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Device. cr ." OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Device.  RO   $" OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Device @ hex. OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Device 1b. ;
-    : OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Device. cr ." OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Device.  RO   $" OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Device @ hex. OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Device 1b. ;
-    : OTG_HS_GLOBAL_OTG_HS_GLPMCFG. cr ." OTG_HS_GLOBAL_OTG_HS_GLPMCFG.   $" OTG_HS_GLOBAL_OTG_HS_GLPMCFG @ hex. OTG_HS_GLOBAL_OTG_HS_GLPMCFG 1b. ;
+    : OTG_HS_GLOBAL_OTG_HS_GOTGCTL. cr ." OTG_HS_GLOBAL_OTG_HS_GOTGCTL.   $" OTG_HS_GLOBAL_OTG_HS_GOTGCTL @ h.8 OTG_HS_GLOBAL_OTG_HS_GOTGCTL 1b. ;
+    : OTG_HS_GLOBAL_OTG_HS_GOTGINT. cr ." OTG_HS_GLOBAL_OTG_HS_GOTGINT.  RW   $" OTG_HS_GLOBAL_OTG_HS_GOTGINT @ h.8 OTG_HS_GLOBAL_OTG_HS_GOTGINT 1b. ;
+    : OTG_HS_GLOBAL_OTG_HS_GAHBCFG. cr ." OTG_HS_GLOBAL_OTG_HS_GAHBCFG.  RW   $" OTG_HS_GLOBAL_OTG_HS_GAHBCFG @ h.8 OTG_HS_GLOBAL_OTG_HS_GAHBCFG 1b. ;
+    : OTG_HS_GLOBAL_OTG_HS_GUSBCFG. cr ." OTG_HS_GLOBAL_OTG_HS_GUSBCFG.   $" OTG_HS_GLOBAL_OTG_HS_GUSBCFG @ h.8 OTG_HS_GLOBAL_OTG_HS_GUSBCFG 1b. ;
+    : OTG_HS_GLOBAL_OTG_HS_GRSTCTL. cr ." OTG_HS_GLOBAL_OTG_HS_GRSTCTL.   $" OTG_HS_GLOBAL_OTG_HS_GRSTCTL @ h.8 OTG_HS_GLOBAL_OTG_HS_GRSTCTL 1b. ;
+    : OTG_HS_GLOBAL_OTG_HS_GINTSTS. cr ." OTG_HS_GLOBAL_OTG_HS_GINTSTS.   $" OTG_HS_GLOBAL_OTG_HS_GINTSTS @ h.8 OTG_HS_GLOBAL_OTG_HS_GINTSTS 1b. ;
+    : OTG_HS_GLOBAL_OTG_HS_GINTMSK. cr ." OTG_HS_GLOBAL_OTG_HS_GINTMSK.   $" OTG_HS_GLOBAL_OTG_HS_GINTMSK @ h.8 OTG_HS_GLOBAL_OTG_HS_GINTMSK 1b. ;
+    : OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Host. cr ." OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Host.  RO   $" OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Host @ h.8 OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Host 1b. ;
+    : OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Host. cr ." OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Host.  RO   $" OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Host @ h.8 OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Host 1b. ;
+    : OTG_HS_GLOBAL_OTG_HS_GRXFSIZ. cr ." OTG_HS_GLOBAL_OTG_HS_GRXFSIZ.  RW   $" OTG_HS_GLOBAL_OTG_HS_GRXFSIZ @ h.8 OTG_HS_GLOBAL_OTG_HS_GRXFSIZ 1b. ;
+    : OTG_HS_GLOBAL_OTG_HS_HNPTXFSIZ_Host. cr ." OTG_HS_GLOBAL_OTG_HS_HNPTXFSIZ_Host.  RW   $" OTG_HS_GLOBAL_OTG_HS_HNPTXFSIZ_Host @ h.8 OTG_HS_GLOBAL_OTG_HS_HNPTXFSIZ_Host 1b. ;
+    : OTG_HS_GLOBAL_OTG_HS_DIEPTXF0_Device. cr ." OTG_HS_GLOBAL_OTG_HS_DIEPTXF0_Device.  RW   $" OTG_HS_GLOBAL_OTG_HS_DIEPTXF0_Device @ h.8 OTG_HS_GLOBAL_OTG_HS_DIEPTXF0_Device 1b. ;
+    : OTG_HS_GLOBAL_OTG_HS_GNPTXSTS. cr ." OTG_HS_GLOBAL_OTG_HS_GNPTXSTS.  RO   $" OTG_HS_GLOBAL_OTG_HS_GNPTXSTS @ h.8 OTG_HS_GLOBAL_OTG_HS_GNPTXSTS 1b. ;
+    : OTG_HS_GLOBAL_OTG_HS_GCCFG. cr ." OTG_HS_GLOBAL_OTG_HS_GCCFG.  RW   $" OTG_HS_GLOBAL_OTG_HS_GCCFG @ h.8 OTG_HS_GLOBAL_OTG_HS_GCCFG 1b. ;
+    : OTG_HS_GLOBAL_OTG_HS_CID. cr ." OTG_HS_GLOBAL_OTG_HS_CID.  RW   $" OTG_HS_GLOBAL_OTG_HS_CID @ h.8 OTG_HS_GLOBAL_OTG_HS_CID 1b. ;
+    : OTG_HS_GLOBAL_OTG_HS_HPTXFSIZ. cr ." OTG_HS_GLOBAL_OTG_HS_HPTXFSIZ.  RW   $" OTG_HS_GLOBAL_OTG_HS_HPTXFSIZ @ h.8 OTG_HS_GLOBAL_OTG_HS_HPTXFSIZ 1b. ;
+    : OTG_HS_GLOBAL_OTG_HS_DIEPTXF1. cr ." OTG_HS_GLOBAL_OTG_HS_DIEPTXF1.  RW   $" OTG_HS_GLOBAL_OTG_HS_DIEPTXF1 @ h.8 OTG_HS_GLOBAL_OTG_HS_DIEPTXF1 1b. ;
+    : OTG_HS_GLOBAL_OTG_HS_DIEPTXF2. cr ." OTG_HS_GLOBAL_OTG_HS_DIEPTXF2.  RW   $" OTG_HS_GLOBAL_OTG_HS_DIEPTXF2 @ h.8 OTG_HS_GLOBAL_OTG_HS_DIEPTXF2 1b. ;
+    : OTG_HS_GLOBAL_OTG_HS_DIEPTXF3. cr ." OTG_HS_GLOBAL_OTG_HS_DIEPTXF3.  RW   $" OTG_HS_GLOBAL_OTG_HS_DIEPTXF3 @ h.8 OTG_HS_GLOBAL_OTG_HS_DIEPTXF3 1b. ;
+    : OTG_HS_GLOBAL_OTG_HS_DIEPTXF4. cr ." OTG_HS_GLOBAL_OTG_HS_DIEPTXF4.  RW   $" OTG_HS_GLOBAL_OTG_HS_DIEPTXF4 @ h.8 OTG_HS_GLOBAL_OTG_HS_DIEPTXF4 1b. ;
+    : OTG_HS_GLOBAL_OTG_HS_DIEPTXF5. cr ." OTG_HS_GLOBAL_OTG_HS_DIEPTXF5.  RW   $" OTG_HS_GLOBAL_OTG_HS_DIEPTXF5 @ h.8 OTG_HS_GLOBAL_OTG_HS_DIEPTXF5 1b. ;
+    : OTG_HS_GLOBAL_OTG_HS_DIEPTXF6. cr ." OTG_HS_GLOBAL_OTG_HS_DIEPTXF6.  RW   $" OTG_HS_GLOBAL_OTG_HS_DIEPTXF6 @ h.8 OTG_HS_GLOBAL_OTG_HS_DIEPTXF6 1b. ;
+    : OTG_HS_GLOBAL_OTG_HS_DIEPTXF7. cr ." OTG_HS_GLOBAL_OTG_HS_DIEPTXF7.  RW   $" OTG_HS_GLOBAL_OTG_HS_DIEPTXF7 @ h.8 OTG_HS_GLOBAL_OTG_HS_DIEPTXF7 1b. ;
+    : OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Device. cr ." OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Device.  RO   $" OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Device @ h.8 OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Device 1b. ;
+    : OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Device. cr ." OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Device.  RO   $" OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Device @ h.8 OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Device 1b. ;
+    : OTG_HS_GLOBAL_OTG_HS_GLPMCFG. cr ." OTG_HS_GLOBAL_OTG_HS_GLPMCFG.   $" OTG_HS_GLOBAL_OTG_HS_GLPMCFG @ h.8 OTG_HS_GLOBAL_OTG_HS_GLPMCFG 1b. ;
     : OTG_HS_GLOBAL.
       OTG_HS_GLOBAL_OTG_HS_GOTGCTL.
       OTG_HS_GLOBAL_OTG_HS_GOTGINT.
@@ -5201,109 +5201,109 @@ begin-module memmap
     OTG_HS_HOST $2CC + constant OTG_HS_HOST_OTG_HS_HCINTMSK15 ( read-write )  \ OTG_HS host channel-15 interrupt mask register
     OTG_HS_HOST $2D0 + constant OTG_HS_HOST_OTG_HS_HCTSIZ15 ( read-write )  \ OTG_HS host channel-15 transfer size register
     OTG_HS_HOST $2D4 + constant OTG_HS_HOST_OTG_HS_HCDMA15 ( read-write )  \ OTG_HS host channel-15 DMA address register
-    : OTG_HS_HOST_OTG_HS_HCFG. cr ." OTG_HS_HOST_OTG_HS_HCFG.   $" OTG_HS_HOST_OTG_HS_HCFG @ hex. OTG_HS_HOST_OTG_HS_HCFG 1b. ;
-    : OTG_HS_HOST_OTG_HS_HFIR. cr ." OTG_HS_HOST_OTG_HS_HFIR.  RW   $" OTG_HS_HOST_OTG_HS_HFIR @ hex. OTG_HS_HOST_OTG_HS_HFIR 1b. ;
-    : OTG_HS_HOST_OTG_HS_HFNUM. cr ." OTG_HS_HOST_OTG_HS_HFNUM.  RO   $" OTG_HS_HOST_OTG_HS_HFNUM @ hex. OTG_HS_HOST_OTG_HS_HFNUM 1b. ;
-    : OTG_HS_HOST_OTG_HS_HPTXSTS. cr ." OTG_HS_HOST_OTG_HS_HPTXSTS.   $" OTG_HS_HOST_OTG_HS_HPTXSTS @ hex. OTG_HS_HOST_OTG_HS_HPTXSTS 1b. ;
-    : OTG_HS_HOST_OTG_HS_HAINT. cr ." OTG_HS_HOST_OTG_HS_HAINT.  RO   $" OTG_HS_HOST_OTG_HS_HAINT @ hex. OTG_HS_HOST_OTG_HS_HAINT 1b. ;
-    : OTG_HS_HOST_OTG_HS_HAINTMSK. cr ." OTG_HS_HOST_OTG_HS_HAINTMSK.  RW   $" OTG_HS_HOST_OTG_HS_HAINTMSK @ hex. OTG_HS_HOST_OTG_HS_HAINTMSK 1b. ;
-    : OTG_HS_HOST_OTG_HS_HPRT. cr ." OTG_HS_HOST_OTG_HS_HPRT.   $" OTG_HS_HOST_OTG_HS_HPRT @ hex. OTG_HS_HOST_OTG_HS_HPRT 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCCHAR0. cr ." OTG_HS_HOST_OTG_HS_HCCHAR0.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR0 @ hex. OTG_HS_HOST_OTG_HS_HCCHAR0 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCCHAR1. cr ." OTG_HS_HOST_OTG_HS_HCCHAR1.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR1 @ hex. OTG_HS_HOST_OTG_HS_HCCHAR1 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCCHAR2. cr ." OTG_HS_HOST_OTG_HS_HCCHAR2.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR2 @ hex. OTG_HS_HOST_OTG_HS_HCCHAR2 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCCHAR3. cr ." OTG_HS_HOST_OTG_HS_HCCHAR3.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR3 @ hex. OTG_HS_HOST_OTG_HS_HCCHAR3 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCCHAR4. cr ." OTG_HS_HOST_OTG_HS_HCCHAR4.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR4 @ hex. OTG_HS_HOST_OTG_HS_HCCHAR4 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCCHAR5. cr ." OTG_HS_HOST_OTG_HS_HCCHAR5.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR5 @ hex. OTG_HS_HOST_OTG_HS_HCCHAR5 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCCHAR6. cr ." OTG_HS_HOST_OTG_HS_HCCHAR6.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR6 @ hex. OTG_HS_HOST_OTG_HS_HCCHAR6 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCCHAR7. cr ." OTG_HS_HOST_OTG_HS_HCCHAR7.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR7 @ hex. OTG_HS_HOST_OTG_HS_HCCHAR7 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCCHAR8. cr ." OTG_HS_HOST_OTG_HS_HCCHAR8.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR8 @ hex. OTG_HS_HOST_OTG_HS_HCCHAR8 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCCHAR9. cr ." OTG_HS_HOST_OTG_HS_HCCHAR9.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR9 @ hex. OTG_HS_HOST_OTG_HS_HCCHAR9 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCCHAR10. cr ." OTG_HS_HOST_OTG_HS_HCCHAR10.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR10 @ hex. OTG_HS_HOST_OTG_HS_HCCHAR10 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCCHAR11. cr ." OTG_HS_HOST_OTG_HS_HCCHAR11.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR11 @ hex. OTG_HS_HOST_OTG_HS_HCCHAR11 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCSPLT0. cr ." OTG_HS_HOST_OTG_HS_HCSPLT0.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT0 @ hex. OTG_HS_HOST_OTG_HS_HCSPLT0 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCSPLT1. cr ." OTG_HS_HOST_OTG_HS_HCSPLT1.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT1 @ hex. OTG_HS_HOST_OTG_HS_HCSPLT1 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCSPLT2. cr ." OTG_HS_HOST_OTG_HS_HCSPLT2.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT2 @ hex. OTG_HS_HOST_OTG_HS_HCSPLT2 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCSPLT3. cr ." OTG_HS_HOST_OTG_HS_HCSPLT3.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT3 @ hex. OTG_HS_HOST_OTG_HS_HCSPLT3 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCSPLT4. cr ." OTG_HS_HOST_OTG_HS_HCSPLT4.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT4 @ hex. OTG_HS_HOST_OTG_HS_HCSPLT4 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCSPLT5. cr ." OTG_HS_HOST_OTG_HS_HCSPLT5.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT5 @ hex. OTG_HS_HOST_OTG_HS_HCSPLT5 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCSPLT6. cr ." OTG_HS_HOST_OTG_HS_HCSPLT6.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT6 @ hex. OTG_HS_HOST_OTG_HS_HCSPLT6 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCSPLT7. cr ." OTG_HS_HOST_OTG_HS_HCSPLT7.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT7 @ hex. OTG_HS_HOST_OTG_HS_HCSPLT7 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCSPLT8. cr ." OTG_HS_HOST_OTG_HS_HCSPLT8.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT8 @ hex. OTG_HS_HOST_OTG_HS_HCSPLT8 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCSPLT9. cr ." OTG_HS_HOST_OTG_HS_HCSPLT9.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT9 @ hex. OTG_HS_HOST_OTG_HS_HCSPLT9 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCSPLT10. cr ." OTG_HS_HOST_OTG_HS_HCSPLT10.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT10 @ hex. OTG_HS_HOST_OTG_HS_HCSPLT10 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCSPLT11. cr ." OTG_HS_HOST_OTG_HS_HCSPLT11.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT11 @ hex. OTG_HS_HOST_OTG_HS_HCSPLT11 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINT0. cr ." OTG_HS_HOST_OTG_HS_HCINT0.  RW   $" OTG_HS_HOST_OTG_HS_HCINT0 @ hex. OTG_HS_HOST_OTG_HS_HCINT0 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINT1. cr ." OTG_HS_HOST_OTG_HS_HCINT1.  RW   $" OTG_HS_HOST_OTG_HS_HCINT1 @ hex. OTG_HS_HOST_OTG_HS_HCINT1 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINT2. cr ." OTG_HS_HOST_OTG_HS_HCINT2.  RW   $" OTG_HS_HOST_OTG_HS_HCINT2 @ hex. OTG_HS_HOST_OTG_HS_HCINT2 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINT3. cr ." OTG_HS_HOST_OTG_HS_HCINT3.  RW   $" OTG_HS_HOST_OTG_HS_HCINT3 @ hex. OTG_HS_HOST_OTG_HS_HCINT3 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINT4. cr ." OTG_HS_HOST_OTG_HS_HCINT4.  RW   $" OTG_HS_HOST_OTG_HS_HCINT4 @ hex. OTG_HS_HOST_OTG_HS_HCINT4 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINT5. cr ." OTG_HS_HOST_OTG_HS_HCINT5.  RW   $" OTG_HS_HOST_OTG_HS_HCINT5 @ hex. OTG_HS_HOST_OTG_HS_HCINT5 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINT6. cr ." OTG_HS_HOST_OTG_HS_HCINT6.  RW   $" OTG_HS_HOST_OTG_HS_HCINT6 @ hex. OTG_HS_HOST_OTG_HS_HCINT6 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINT7. cr ." OTG_HS_HOST_OTG_HS_HCINT7.  RW   $" OTG_HS_HOST_OTG_HS_HCINT7 @ hex. OTG_HS_HOST_OTG_HS_HCINT7 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINT8. cr ." OTG_HS_HOST_OTG_HS_HCINT8.  RW   $" OTG_HS_HOST_OTG_HS_HCINT8 @ hex. OTG_HS_HOST_OTG_HS_HCINT8 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINT9. cr ." OTG_HS_HOST_OTG_HS_HCINT9.  RW   $" OTG_HS_HOST_OTG_HS_HCINT9 @ hex. OTG_HS_HOST_OTG_HS_HCINT9 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINT10. cr ." OTG_HS_HOST_OTG_HS_HCINT10.  RW   $" OTG_HS_HOST_OTG_HS_HCINT10 @ hex. OTG_HS_HOST_OTG_HS_HCINT10 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINT11. cr ." OTG_HS_HOST_OTG_HS_HCINT11.  RW   $" OTG_HS_HOST_OTG_HS_HCINT11 @ hex. OTG_HS_HOST_OTG_HS_HCINT11 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINTMSK0. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK0.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK0 @ hex. OTG_HS_HOST_OTG_HS_HCINTMSK0 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINTMSK1. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK1.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK1 @ hex. OTG_HS_HOST_OTG_HS_HCINTMSK1 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINTMSK2. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK2.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK2 @ hex. OTG_HS_HOST_OTG_HS_HCINTMSK2 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINTMSK3. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK3.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK3 @ hex. OTG_HS_HOST_OTG_HS_HCINTMSK3 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINTMSK4. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK4.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK4 @ hex. OTG_HS_HOST_OTG_HS_HCINTMSK4 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINTMSK5. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK5.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK5 @ hex. OTG_HS_HOST_OTG_HS_HCINTMSK5 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINTMSK6. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK6.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK6 @ hex. OTG_HS_HOST_OTG_HS_HCINTMSK6 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINTMSK7. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK7.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK7 @ hex. OTG_HS_HOST_OTG_HS_HCINTMSK7 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINTMSK8. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK8.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK8 @ hex. OTG_HS_HOST_OTG_HS_HCINTMSK8 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINTMSK9. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK9.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK9 @ hex. OTG_HS_HOST_OTG_HS_HCINTMSK9 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINTMSK10. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK10.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK10 @ hex. OTG_HS_HOST_OTG_HS_HCINTMSK10 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINTMSK11. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK11.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK11 @ hex. OTG_HS_HOST_OTG_HS_HCINTMSK11 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCTSIZ0. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ0.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ0 @ hex. OTG_HS_HOST_OTG_HS_HCTSIZ0 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCTSIZ1. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ1.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ1 @ hex. OTG_HS_HOST_OTG_HS_HCTSIZ1 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCTSIZ2. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ2.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ2 @ hex. OTG_HS_HOST_OTG_HS_HCTSIZ2 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCTSIZ3. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ3.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ3 @ hex. OTG_HS_HOST_OTG_HS_HCTSIZ3 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCTSIZ4. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ4.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ4 @ hex. OTG_HS_HOST_OTG_HS_HCTSIZ4 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCTSIZ5. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ5.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ5 @ hex. OTG_HS_HOST_OTG_HS_HCTSIZ5 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCTSIZ6. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ6.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ6 @ hex. OTG_HS_HOST_OTG_HS_HCTSIZ6 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCTSIZ7. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ7.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ7 @ hex. OTG_HS_HOST_OTG_HS_HCTSIZ7 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCTSIZ8. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ8.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ8 @ hex. OTG_HS_HOST_OTG_HS_HCTSIZ8 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCTSIZ9. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ9.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ9 @ hex. OTG_HS_HOST_OTG_HS_HCTSIZ9 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCTSIZ10. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ10.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ10 @ hex. OTG_HS_HOST_OTG_HS_HCTSIZ10 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCTSIZ11. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ11.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ11 @ hex. OTG_HS_HOST_OTG_HS_HCTSIZ11 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCDMA0. cr ." OTG_HS_HOST_OTG_HS_HCDMA0.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA0 @ hex. OTG_HS_HOST_OTG_HS_HCDMA0 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCDMA1. cr ." OTG_HS_HOST_OTG_HS_HCDMA1.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA1 @ hex. OTG_HS_HOST_OTG_HS_HCDMA1 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCDMA2. cr ." OTG_HS_HOST_OTG_HS_HCDMA2.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA2 @ hex. OTG_HS_HOST_OTG_HS_HCDMA2 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCDMA3. cr ." OTG_HS_HOST_OTG_HS_HCDMA3.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA3 @ hex. OTG_HS_HOST_OTG_HS_HCDMA3 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCDMA4. cr ." OTG_HS_HOST_OTG_HS_HCDMA4.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA4 @ hex. OTG_HS_HOST_OTG_HS_HCDMA4 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCDMA5. cr ." OTG_HS_HOST_OTG_HS_HCDMA5.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA5 @ hex. OTG_HS_HOST_OTG_HS_HCDMA5 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCDMA6. cr ." OTG_HS_HOST_OTG_HS_HCDMA6.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA6 @ hex. OTG_HS_HOST_OTG_HS_HCDMA6 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCDMA7. cr ." OTG_HS_HOST_OTG_HS_HCDMA7.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA7 @ hex. OTG_HS_HOST_OTG_HS_HCDMA7 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCDMA8. cr ." OTG_HS_HOST_OTG_HS_HCDMA8.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA8 @ hex. OTG_HS_HOST_OTG_HS_HCDMA8 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCDMA9. cr ." OTG_HS_HOST_OTG_HS_HCDMA9.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA9 @ hex. OTG_HS_HOST_OTG_HS_HCDMA9 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCDMA10. cr ." OTG_HS_HOST_OTG_HS_HCDMA10.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA10 @ hex. OTG_HS_HOST_OTG_HS_HCDMA10 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCDMA11. cr ." OTG_HS_HOST_OTG_HS_HCDMA11.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA11 @ hex. OTG_HS_HOST_OTG_HS_HCDMA11 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCCHAR12. cr ." OTG_HS_HOST_OTG_HS_HCCHAR12.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR12 @ hex. OTG_HS_HOST_OTG_HS_HCCHAR12 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCSPLT12. cr ." OTG_HS_HOST_OTG_HS_HCSPLT12.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT12 @ hex. OTG_HS_HOST_OTG_HS_HCSPLT12 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINT12. cr ." OTG_HS_HOST_OTG_HS_HCINT12.  RW   $" OTG_HS_HOST_OTG_HS_HCINT12 @ hex. OTG_HS_HOST_OTG_HS_HCINT12 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINTMSK12. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK12.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK12 @ hex. OTG_HS_HOST_OTG_HS_HCINTMSK12 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCTSIZ12. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ12.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ12 @ hex. OTG_HS_HOST_OTG_HS_HCTSIZ12 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCDMA12. cr ." OTG_HS_HOST_OTG_HS_HCDMA12.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA12 @ hex. OTG_HS_HOST_OTG_HS_HCDMA12 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCCHAR13. cr ." OTG_HS_HOST_OTG_HS_HCCHAR13.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR13 @ hex. OTG_HS_HOST_OTG_HS_HCCHAR13 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCSPLT13. cr ." OTG_HS_HOST_OTG_HS_HCSPLT13.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT13 @ hex. OTG_HS_HOST_OTG_HS_HCSPLT13 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINT13. cr ." OTG_HS_HOST_OTG_HS_HCINT13.  RW   $" OTG_HS_HOST_OTG_HS_HCINT13 @ hex. OTG_HS_HOST_OTG_HS_HCINT13 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINTMSK13. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK13.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK13 @ hex. OTG_HS_HOST_OTG_HS_HCINTMSK13 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCTSIZ13. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ13.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ13 @ hex. OTG_HS_HOST_OTG_HS_HCTSIZ13 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCDMA13. cr ." OTG_HS_HOST_OTG_HS_HCDMA13.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA13 @ hex. OTG_HS_HOST_OTG_HS_HCDMA13 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCCHAR14. cr ." OTG_HS_HOST_OTG_HS_HCCHAR14.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR14 @ hex. OTG_HS_HOST_OTG_HS_HCCHAR14 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCSPLT14. cr ." OTG_HS_HOST_OTG_HS_HCSPLT14.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT14 @ hex. OTG_HS_HOST_OTG_HS_HCSPLT14 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINT14. cr ." OTG_HS_HOST_OTG_HS_HCINT14.  RW   $" OTG_HS_HOST_OTG_HS_HCINT14 @ hex. OTG_HS_HOST_OTG_HS_HCINT14 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINTMSK14. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK14.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK14 @ hex. OTG_HS_HOST_OTG_HS_HCINTMSK14 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCTSIZ14. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ14.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ14 @ hex. OTG_HS_HOST_OTG_HS_HCTSIZ14 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCDMA14. cr ." OTG_HS_HOST_OTG_HS_HCDMA14.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA14 @ hex. OTG_HS_HOST_OTG_HS_HCDMA14 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCCHAR15. cr ." OTG_HS_HOST_OTG_HS_HCCHAR15.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR15 @ hex. OTG_HS_HOST_OTG_HS_HCCHAR15 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCSPLT15. cr ." OTG_HS_HOST_OTG_HS_HCSPLT15.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT15 @ hex. OTG_HS_HOST_OTG_HS_HCSPLT15 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINT15. cr ." OTG_HS_HOST_OTG_HS_HCINT15.  RW   $" OTG_HS_HOST_OTG_HS_HCINT15 @ hex. OTG_HS_HOST_OTG_HS_HCINT15 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCINTMSK15. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK15.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK15 @ hex. OTG_HS_HOST_OTG_HS_HCINTMSK15 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCTSIZ15. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ15.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ15 @ hex. OTG_HS_HOST_OTG_HS_HCTSIZ15 1b. ;
-    : OTG_HS_HOST_OTG_HS_HCDMA15. cr ." OTG_HS_HOST_OTG_HS_HCDMA15.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA15 @ hex. OTG_HS_HOST_OTG_HS_HCDMA15 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCFG. cr ." OTG_HS_HOST_OTG_HS_HCFG.   $" OTG_HS_HOST_OTG_HS_HCFG @ h.8 OTG_HS_HOST_OTG_HS_HCFG 1b. ;
+    : OTG_HS_HOST_OTG_HS_HFIR. cr ." OTG_HS_HOST_OTG_HS_HFIR.  RW   $" OTG_HS_HOST_OTG_HS_HFIR @ h.8 OTG_HS_HOST_OTG_HS_HFIR 1b. ;
+    : OTG_HS_HOST_OTG_HS_HFNUM. cr ." OTG_HS_HOST_OTG_HS_HFNUM.  RO   $" OTG_HS_HOST_OTG_HS_HFNUM @ h.8 OTG_HS_HOST_OTG_HS_HFNUM 1b. ;
+    : OTG_HS_HOST_OTG_HS_HPTXSTS. cr ." OTG_HS_HOST_OTG_HS_HPTXSTS.   $" OTG_HS_HOST_OTG_HS_HPTXSTS @ h.8 OTG_HS_HOST_OTG_HS_HPTXSTS 1b. ;
+    : OTG_HS_HOST_OTG_HS_HAINT. cr ." OTG_HS_HOST_OTG_HS_HAINT.  RO   $" OTG_HS_HOST_OTG_HS_HAINT @ h.8 OTG_HS_HOST_OTG_HS_HAINT 1b. ;
+    : OTG_HS_HOST_OTG_HS_HAINTMSK. cr ." OTG_HS_HOST_OTG_HS_HAINTMSK.  RW   $" OTG_HS_HOST_OTG_HS_HAINTMSK @ h.8 OTG_HS_HOST_OTG_HS_HAINTMSK 1b. ;
+    : OTG_HS_HOST_OTG_HS_HPRT. cr ." OTG_HS_HOST_OTG_HS_HPRT.   $" OTG_HS_HOST_OTG_HS_HPRT @ h.8 OTG_HS_HOST_OTG_HS_HPRT 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCCHAR0. cr ." OTG_HS_HOST_OTG_HS_HCCHAR0.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR0 @ h.8 OTG_HS_HOST_OTG_HS_HCCHAR0 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCCHAR1. cr ." OTG_HS_HOST_OTG_HS_HCCHAR1.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR1 @ h.8 OTG_HS_HOST_OTG_HS_HCCHAR1 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCCHAR2. cr ." OTG_HS_HOST_OTG_HS_HCCHAR2.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR2 @ h.8 OTG_HS_HOST_OTG_HS_HCCHAR2 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCCHAR3. cr ." OTG_HS_HOST_OTG_HS_HCCHAR3.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR3 @ h.8 OTG_HS_HOST_OTG_HS_HCCHAR3 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCCHAR4. cr ." OTG_HS_HOST_OTG_HS_HCCHAR4.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR4 @ h.8 OTG_HS_HOST_OTG_HS_HCCHAR4 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCCHAR5. cr ." OTG_HS_HOST_OTG_HS_HCCHAR5.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR5 @ h.8 OTG_HS_HOST_OTG_HS_HCCHAR5 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCCHAR6. cr ." OTG_HS_HOST_OTG_HS_HCCHAR6.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR6 @ h.8 OTG_HS_HOST_OTG_HS_HCCHAR6 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCCHAR7. cr ." OTG_HS_HOST_OTG_HS_HCCHAR7.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR7 @ h.8 OTG_HS_HOST_OTG_HS_HCCHAR7 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCCHAR8. cr ." OTG_HS_HOST_OTG_HS_HCCHAR8.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR8 @ h.8 OTG_HS_HOST_OTG_HS_HCCHAR8 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCCHAR9. cr ." OTG_HS_HOST_OTG_HS_HCCHAR9.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR9 @ h.8 OTG_HS_HOST_OTG_HS_HCCHAR9 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCCHAR10. cr ." OTG_HS_HOST_OTG_HS_HCCHAR10.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR10 @ h.8 OTG_HS_HOST_OTG_HS_HCCHAR10 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCCHAR11. cr ." OTG_HS_HOST_OTG_HS_HCCHAR11.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR11 @ h.8 OTG_HS_HOST_OTG_HS_HCCHAR11 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCSPLT0. cr ." OTG_HS_HOST_OTG_HS_HCSPLT0.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT0 @ h.8 OTG_HS_HOST_OTG_HS_HCSPLT0 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCSPLT1. cr ." OTG_HS_HOST_OTG_HS_HCSPLT1.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT1 @ h.8 OTG_HS_HOST_OTG_HS_HCSPLT1 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCSPLT2. cr ." OTG_HS_HOST_OTG_HS_HCSPLT2.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT2 @ h.8 OTG_HS_HOST_OTG_HS_HCSPLT2 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCSPLT3. cr ." OTG_HS_HOST_OTG_HS_HCSPLT3.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT3 @ h.8 OTG_HS_HOST_OTG_HS_HCSPLT3 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCSPLT4. cr ." OTG_HS_HOST_OTG_HS_HCSPLT4.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT4 @ h.8 OTG_HS_HOST_OTG_HS_HCSPLT4 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCSPLT5. cr ." OTG_HS_HOST_OTG_HS_HCSPLT5.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT5 @ h.8 OTG_HS_HOST_OTG_HS_HCSPLT5 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCSPLT6. cr ." OTG_HS_HOST_OTG_HS_HCSPLT6.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT6 @ h.8 OTG_HS_HOST_OTG_HS_HCSPLT6 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCSPLT7. cr ." OTG_HS_HOST_OTG_HS_HCSPLT7.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT7 @ h.8 OTG_HS_HOST_OTG_HS_HCSPLT7 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCSPLT8. cr ." OTG_HS_HOST_OTG_HS_HCSPLT8.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT8 @ h.8 OTG_HS_HOST_OTG_HS_HCSPLT8 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCSPLT9. cr ." OTG_HS_HOST_OTG_HS_HCSPLT9.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT9 @ h.8 OTG_HS_HOST_OTG_HS_HCSPLT9 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCSPLT10. cr ." OTG_HS_HOST_OTG_HS_HCSPLT10.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT10 @ h.8 OTG_HS_HOST_OTG_HS_HCSPLT10 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCSPLT11. cr ." OTG_HS_HOST_OTG_HS_HCSPLT11.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT11 @ h.8 OTG_HS_HOST_OTG_HS_HCSPLT11 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINT0. cr ." OTG_HS_HOST_OTG_HS_HCINT0.  RW   $" OTG_HS_HOST_OTG_HS_HCINT0 @ h.8 OTG_HS_HOST_OTG_HS_HCINT0 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINT1. cr ." OTG_HS_HOST_OTG_HS_HCINT1.  RW   $" OTG_HS_HOST_OTG_HS_HCINT1 @ h.8 OTG_HS_HOST_OTG_HS_HCINT1 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINT2. cr ." OTG_HS_HOST_OTG_HS_HCINT2.  RW   $" OTG_HS_HOST_OTG_HS_HCINT2 @ h.8 OTG_HS_HOST_OTG_HS_HCINT2 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINT3. cr ." OTG_HS_HOST_OTG_HS_HCINT3.  RW   $" OTG_HS_HOST_OTG_HS_HCINT3 @ h.8 OTG_HS_HOST_OTG_HS_HCINT3 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINT4. cr ." OTG_HS_HOST_OTG_HS_HCINT4.  RW   $" OTG_HS_HOST_OTG_HS_HCINT4 @ h.8 OTG_HS_HOST_OTG_HS_HCINT4 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINT5. cr ." OTG_HS_HOST_OTG_HS_HCINT5.  RW   $" OTG_HS_HOST_OTG_HS_HCINT5 @ h.8 OTG_HS_HOST_OTG_HS_HCINT5 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINT6. cr ." OTG_HS_HOST_OTG_HS_HCINT6.  RW   $" OTG_HS_HOST_OTG_HS_HCINT6 @ h.8 OTG_HS_HOST_OTG_HS_HCINT6 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINT7. cr ." OTG_HS_HOST_OTG_HS_HCINT7.  RW   $" OTG_HS_HOST_OTG_HS_HCINT7 @ h.8 OTG_HS_HOST_OTG_HS_HCINT7 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINT8. cr ." OTG_HS_HOST_OTG_HS_HCINT8.  RW   $" OTG_HS_HOST_OTG_HS_HCINT8 @ h.8 OTG_HS_HOST_OTG_HS_HCINT8 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINT9. cr ." OTG_HS_HOST_OTG_HS_HCINT9.  RW   $" OTG_HS_HOST_OTG_HS_HCINT9 @ h.8 OTG_HS_HOST_OTG_HS_HCINT9 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINT10. cr ." OTG_HS_HOST_OTG_HS_HCINT10.  RW   $" OTG_HS_HOST_OTG_HS_HCINT10 @ h.8 OTG_HS_HOST_OTG_HS_HCINT10 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINT11. cr ." OTG_HS_HOST_OTG_HS_HCINT11.  RW   $" OTG_HS_HOST_OTG_HS_HCINT11 @ h.8 OTG_HS_HOST_OTG_HS_HCINT11 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINTMSK0. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK0.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK0 @ h.8 OTG_HS_HOST_OTG_HS_HCINTMSK0 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINTMSK1. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK1.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK1 @ h.8 OTG_HS_HOST_OTG_HS_HCINTMSK1 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINTMSK2. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK2.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK2 @ h.8 OTG_HS_HOST_OTG_HS_HCINTMSK2 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINTMSK3. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK3.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK3 @ h.8 OTG_HS_HOST_OTG_HS_HCINTMSK3 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINTMSK4. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK4.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK4 @ h.8 OTG_HS_HOST_OTG_HS_HCINTMSK4 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINTMSK5. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK5.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK5 @ h.8 OTG_HS_HOST_OTG_HS_HCINTMSK5 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINTMSK6. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK6.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK6 @ h.8 OTG_HS_HOST_OTG_HS_HCINTMSK6 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINTMSK7. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK7.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK7 @ h.8 OTG_HS_HOST_OTG_HS_HCINTMSK7 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINTMSK8. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK8.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK8 @ h.8 OTG_HS_HOST_OTG_HS_HCINTMSK8 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINTMSK9. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK9.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK9 @ h.8 OTG_HS_HOST_OTG_HS_HCINTMSK9 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINTMSK10. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK10.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK10 @ h.8 OTG_HS_HOST_OTG_HS_HCINTMSK10 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINTMSK11. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK11.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK11 @ h.8 OTG_HS_HOST_OTG_HS_HCINTMSK11 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCTSIZ0. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ0.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ0 @ h.8 OTG_HS_HOST_OTG_HS_HCTSIZ0 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCTSIZ1. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ1.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ1 @ h.8 OTG_HS_HOST_OTG_HS_HCTSIZ1 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCTSIZ2. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ2.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ2 @ h.8 OTG_HS_HOST_OTG_HS_HCTSIZ2 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCTSIZ3. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ3.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ3 @ h.8 OTG_HS_HOST_OTG_HS_HCTSIZ3 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCTSIZ4. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ4.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ4 @ h.8 OTG_HS_HOST_OTG_HS_HCTSIZ4 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCTSIZ5. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ5.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ5 @ h.8 OTG_HS_HOST_OTG_HS_HCTSIZ5 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCTSIZ6. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ6.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ6 @ h.8 OTG_HS_HOST_OTG_HS_HCTSIZ6 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCTSIZ7. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ7.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ7 @ h.8 OTG_HS_HOST_OTG_HS_HCTSIZ7 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCTSIZ8. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ8.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ8 @ h.8 OTG_HS_HOST_OTG_HS_HCTSIZ8 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCTSIZ9. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ9.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ9 @ h.8 OTG_HS_HOST_OTG_HS_HCTSIZ9 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCTSIZ10. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ10.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ10 @ h.8 OTG_HS_HOST_OTG_HS_HCTSIZ10 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCTSIZ11. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ11.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ11 @ h.8 OTG_HS_HOST_OTG_HS_HCTSIZ11 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCDMA0. cr ." OTG_HS_HOST_OTG_HS_HCDMA0.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA0 @ h.8 OTG_HS_HOST_OTG_HS_HCDMA0 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCDMA1. cr ." OTG_HS_HOST_OTG_HS_HCDMA1.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA1 @ h.8 OTG_HS_HOST_OTG_HS_HCDMA1 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCDMA2. cr ." OTG_HS_HOST_OTG_HS_HCDMA2.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA2 @ h.8 OTG_HS_HOST_OTG_HS_HCDMA2 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCDMA3. cr ." OTG_HS_HOST_OTG_HS_HCDMA3.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA3 @ h.8 OTG_HS_HOST_OTG_HS_HCDMA3 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCDMA4. cr ." OTG_HS_HOST_OTG_HS_HCDMA4.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA4 @ h.8 OTG_HS_HOST_OTG_HS_HCDMA4 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCDMA5. cr ." OTG_HS_HOST_OTG_HS_HCDMA5.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA5 @ h.8 OTG_HS_HOST_OTG_HS_HCDMA5 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCDMA6. cr ." OTG_HS_HOST_OTG_HS_HCDMA6.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA6 @ h.8 OTG_HS_HOST_OTG_HS_HCDMA6 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCDMA7. cr ." OTG_HS_HOST_OTG_HS_HCDMA7.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA7 @ h.8 OTG_HS_HOST_OTG_HS_HCDMA7 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCDMA8. cr ." OTG_HS_HOST_OTG_HS_HCDMA8.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA8 @ h.8 OTG_HS_HOST_OTG_HS_HCDMA8 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCDMA9. cr ." OTG_HS_HOST_OTG_HS_HCDMA9.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA9 @ h.8 OTG_HS_HOST_OTG_HS_HCDMA9 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCDMA10. cr ." OTG_HS_HOST_OTG_HS_HCDMA10.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA10 @ h.8 OTG_HS_HOST_OTG_HS_HCDMA10 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCDMA11. cr ." OTG_HS_HOST_OTG_HS_HCDMA11.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA11 @ h.8 OTG_HS_HOST_OTG_HS_HCDMA11 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCCHAR12. cr ." OTG_HS_HOST_OTG_HS_HCCHAR12.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR12 @ h.8 OTG_HS_HOST_OTG_HS_HCCHAR12 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCSPLT12. cr ." OTG_HS_HOST_OTG_HS_HCSPLT12.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT12 @ h.8 OTG_HS_HOST_OTG_HS_HCSPLT12 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINT12. cr ." OTG_HS_HOST_OTG_HS_HCINT12.  RW   $" OTG_HS_HOST_OTG_HS_HCINT12 @ h.8 OTG_HS_HOST_OTG_HS_HCINT12 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINTMSK12. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK12.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK12 @ h.8 OTG_HS_HOST_OTG_HS_HCINTMSK12 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCTSIZ12. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ12.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ12 @ h.8 OTG_HS_HOST_OTG_HS_HCTSIZ12 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCDMA12. cr ." OTG_HS_HOST_OTG_HS_HCDMA12.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA12 @ h.8 OTG_HS_HOST_OTG_HS_HCDMA12 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCCHAR13. cr ." OTG_HS_HOST_OTG_HS_HCCHAR13.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR13 @ h.8 OTG_HS_HOST_OTG_HS_HCCHAR13 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCSPLT13. cr ." OTG_HS_HOST_OTG_HS_HCSPLT13.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT13 @ h.8 OTG_HS_HOST_OTG_HS_HCSPLT13 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINT13. cr ." OTG_HS_HOST_OTG_HS_HCINT13.  RW   $" OTG_HS_HOST_OTG_HS_HCINT13 @ h.8 OTG_HS_HOST_OTG_HS_HCINT13 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINTMSK13. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK13.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK13 @ h.8 OTG_HS_HOST_OTG_HS_HCINTMSK13 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCTSIZ13. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ13.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ13 @ h.8 OTG_HS_HOST_OTG_HS_HCTSIZ13 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCDMA13. cr ." OTG_HS_HOST_OTG_HS_HCDMA13.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA13 @ h.8 OTG_HS_HOST_OTG_HS_HCDMA13 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCCHAR14. cr ." OTG_HS_HOST_OTG_HS_HCCHAR14.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR14 @ h.8 OTG_HS_HOST_OTG_HS_HCCHAR14 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCSPLT14. cr ." OTG_HS_HOST_OTG_HS_HCSPLT14.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT14 @ h.8 OTG_HS_HOST_OTG_HS_HCSPLT14 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINT14. cr ." OTG_HS_HOST_OTG_HS_HCINT14.  RW   $" OTG_HS_HOST_OTG_HS_HCINT14 @ h.8 OTG_HS_HOST_OTG_HS_HCINT14 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINTMSK14. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK14.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK14 @ h.8 OTG_HS_HOST_OTG_HS_HCINTMSK14 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCTSIZ14. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ14.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ14 @ h.8 OTG_HS_HOST_OTG_HS_HCTSIZ14 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCDMA14. cr ." OTG_HS_HOST_OTG_HS_HCDMA14.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA14 @ h.8 OTG_HS_HOST_OTG_HS_HCDMA14 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCCHAR15. cr ." OTG_HS_HOST_OTG_HS_HCCHAR15.  RW   $" OTG_HS_HOST_OTG_HS_HCCHAR15 @ h.8 OTG_HS_HOST_OTG_HS_HCCHAR15 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCSPLT15. cr ." OTG_HS_HOST_OTG_HS_HCSPLT15.  RW   $" OTG_HS_HOST_OTG_HS_HCSPLT15 @ h.8 OTG_HS_HOST_OTG_HS_HCSPLT15 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINT15. cr ." OTG_HS_HOST_OTG_HS_HCINT15.  RW   $" OTG_HS_HOST_OTG_HS_HCINT15 @ h.8 OTG_HS_HOST_OTG_HS_HCINT15 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCINTMSK15. cr ." OTG_HS_HOST_OTG_HS_HCINTMSK15.  RW   $" OTG_HS_HOST_OTG_HS_HCINTMSK15 @ h.8 OTG_HS_HOST_OTG_HS_HCINTMSK15 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCTSIZ15. cr ." OTG_HS_HOST_OTG_HS_HCTSIZ15.  RW   $" OTG_HS_HOST_OTG_HS_HCTSIZ15 @ h.8 OTG_HS_HOST_OTG_HS_HCTSIZ15 1b. ;
+    : OTG_HS_HOST_OTG_HS_HCDMA15. cr ." OTG_HS_HOST_OTG_HS_HCDMA15.  RW   $" OTG_HS_HOST_OTG_HS_HCDMA15 @ h.8 OTG_HS_HOST_OTG_HS_HCDMA15 1b. ;
     : OTG_HS_HOST.
       OTG_HS_HOST_OTG_HS_HCFG.
       OTG_HS_HOST_OTG_HS_HFIR.
@@ -5487,80 +5487,80 @@ begin-module memmap
     OTG_HS_DEVICE $3B0 + constant OTG_HS_DEVICE_OTG_HS_DOEPTSIZ5 ( read-write )  \ OTG_HS device endpoint-5 transfer size register
     OTG_HS_DEVICE $3D0 + constant OTG_HS_DEVICE_OTG_HS_DOEPTSIZ6 ( read-write )  \ OTG_HS device endpoint-6 transfer size register
     OTG_HS_DEVICE $3F0 + constant OTG_HS_DEVICE_OTG_HS_DOEPTSIZ7 ( read-write )  \ OTG_HS device endpoint-7 transfer size register
-    : OTG_HS_DEVICE_OTG_HS_DCFG. cr ." OTG_HS_DEVICE_OTG_HS_DCFG.  RW   $" OTG_HS_DEVICE_OTG_HS_DCFG @ hex. OTG_HS_DEVICE_OTG_HS_DCFG 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DCTL. cr ." OTG_HS_DEVICE_OTG_HS_DCTL.   $" OTG_HS_DEVICE_OTG_HS_DCTL @ hex. OTG_HS_DEVICE_OTG_HS_DCTL 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DSTS. cr ." OTG_HS_DEVICE_OTG_HS_DSTS.  RO   $" OTG_HS_DEVICE_OTG_HS_DSTS @ hex. OTG_HS_DEVICE_OTG_HS_DSTS 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPMSK. cr ." OTG_HS_DEVICE_OTG_HS_DIEPMSK.  RW   $" OTG_HS_DEVICE_OTG_HS_DIEPMSK @ hex. OTG_HS_DEVICE_OTG_HS_DIEPMSK 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DOEPMSK. cr ." OTG_HS_DEVICE_OTG_HS_DOEPMSK.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPMSK @ hex. OTG_HS_DEVICE_OTG_HS_DOEPMSK 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DAINT. cr ." OTG_HS_DEVICE_OTG_HS_DAINT.  RO   $" OTG_HS_DEVICE_OTG_HS_DAINT @ hex. OTG_HS_DEVICE_OTG_HS_DAINT 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DAINTMSK. cr ." OTG_HS_DEVICE_OTG_HS_DAINTMSK.  RW   $" OTG_HS_DEVICE_OTG_HS_DAINTMSK @ hex. OTG_HS_DEVICE_OTG_HS_DAINTMSK 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DVBUSDIS. cr ." OTG_HS_DEVICE_OTG_HS_DVBUSDIS.  RW   $" OTG_HS_DEVICE_OTG_HS_DVBUSDIS @ hex. OTG_HS_DEVICE_OTG_HS_DVBUSDIS 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DVBUSPULSE. cr ." OTG_HS_DEVICE_OTG_HS_DVBUSPULSE.  RW   $" OTG_HS_DEVICE_OTG_HS_DVBUSPULSE @ hex. OTG_HS_DEVICE_OTG_HS_DVBUSPULSE 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DTHRCTL. cr ." OTG_HS_DEVICE_OTG_HS_DTHRCTL.  RW   $" OTG_HS_DEVICE_OTG_HS_DTHRCTL @ hex. OTG_HS_DEVICE_OTG_HS_DTHRCTL 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPEMPMSK. cr ." OTG_HS_DEVICE_OTG_HS_DIEPEMPMSK.  RW   $" OTG_HS_DEVICE_OTG_HS_DIEPEMPMSK @ hex. OTG_HS_DEVICE_OTG_HS_DIEPEMPMSK 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DEACHINT. cr ." OTG_HS_DEVICE_OTG_HS_DEACHINT.  RW   $" OTG_HS_DEVICE_OTG_HS_DEACHINT @ hex. OTG_HS_DEVICE_OTG_HS_DEACHINT 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DEACHINTMSK. cr ." OTG_HS_DEVICE_OTG_HS_DEACHINTMSK.  RW   $" OTG_HS_DEVICE_OTG_HS_DEACHINTMSK @ hex. OTG_HS_DEVICE_OTG_HS_DEACHINTMSK 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPCTL0. cr ." OTG_HS_DEVICE_OTG_HS_DIEPCTL0.   $" OTG_HS_DEVICE_OTG_HS_DIEPCTL0 @ hex. OTG_HS_DEVICE_OTG_HS_DIEPCTL0 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPCTL1. cr ." OTG_HS_DEVICE_OTG_HS_DIEPCTL1.   $" OTG_HS_DEVICE_OTG_HS_DIEPCTL1 @ hex. OTG_HS_DEVICE_OTG_HS_DIEPCTL1 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPCTL2. cr ." OTG_HS_DEVICE_OTG_HS_DIEPCTL2.   $" OTG_HS_DEVICE_OTG_HS_DIEPCTL2 @ hex. OTG_HS_DEVICE_OTG_HS_DIEPCTL2 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPCTL3. cr ." OTG_HS_DEVICE_OTG_HS_DIEPCTL3.   $" OTG_HS_DEVICE_OTG_HS_DIEPCTL3 @ hex. OTG_HS_DEVICE_OTG_HS_DIEPCTL3 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPCTL4. cr ." OTG_HS_DEVICE_OTG_HS_DIEPCTL4.   $" OTG_HS_DEVICE_OTG_HS_DIEPCTL4 @ hex. OTG_HS_DEVICE_OTG_HS_DIEPCTL4 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPCTL5. cr ." OTG_HS_DEVICE_OTG_HS_DIEPCTL5.   $" OTG_HS_DEVICE_OTG_HS_DIEPCTL5 @ hex. OTG_HS_DEVICE_OTG_HS_DIEPCTL5 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPCTL6. cr ." OTG_HS_DEVICE_OTG_HS_DIEPCTL6.   $" OTG_HS_DEVICE_OTG_HS_DIEPCTL6 @ hex. OTG_HS_DEVICE_OTG_HS_DIEPCTL6 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPCTL7. cr ." OTG_HS_DEVICE_OTG_HS_DIEPCTL7.   $" OTG_HS_DEVICE_OTG_HS_DIEPCTL7 @ hex. OTG_HS_DEVICE_OTG_HS_DIEPCTL7 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPINT0. cr ." OTG_HS_DEVICE_OTG_HS_DIEPINT0.   $" OTG_HS_DEVICE_OTG_HS_DIEPINT0 @ hex. OTG_HS_DEVICE_OTG_HS_DIEPINT0 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPINT1. cr ." OTG_HS_DEVICE_OTG_HS_DIEPINT1.   $" OTG_HS_DEVICE_OTG_HS_DIEPINT1 @ hex. OTG_HS_DEVICE_OTG_HS_DIEPINT1 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPINT2. cr ." OTG_HS_DEVICE_OTG_HS_DIEPINT2.   $" OTG_HS_DEVICE_OTG_HS_DIEPINT2 @ hex. OTG_HS_DEVICE_OTG_HS_DIEPINT2 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPINT3. cr ." OTG_HS_DEVICE_OTG_HS_DIEPINT3.   $" OTG_HS_DEVICE_OTG_HS_DIEPINT3 @ hex. OTG_HS_DEVICE_OTG_HS_DIEPINT3 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPINT4. cr ." OTG_HS_DEVICE_OTG_HS_DIEPINT4.   $" OTG_HS_DEVICE_OTG_HS_DIEPINT4 @ hex. OTG_HS_DEVICE_OTG_HS_DIEPINT4 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPINT5. cr ." OTG_HS_DEVICE_OTG_HS_DIEPINT5.   $" OTG_HS_DEVICE_OTG_HS_DIEPINT5 @ hex. OTG_HS_DEVICE_OTG_HS_DIEPINT5 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPINT6. cr ." OTG_HS_DEVICE_OTG_HS_DIEPINT6.   $" OTG_HS_DEVICE_OTG_HS_DIEPINT6 @ hex. OTG_HS_DEVICE_OTG_HS_DIEPINT6 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPINT7. cr ." OTG_HS_DEVICE_OTG_HS_DIEPINT7.   $" OTG_HS_DEVICE_OTG_HS_DIEPINT7 @ hex. OTG_HS_DEVICE_OTG_HS_DIEPINT7 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ0. cr ." OTG_HS_DEVICE_OTG_HS_DIEPTSIZ0.  RW   $" OTG_HS_DEVICE_OTG_HS_DIEPTSIZ0 @ hex. OTG_HS_DEVICE_OTG_HS_DIEPTSIZ0 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPDMA1. cr ." OTG_HS_DEVICE_OTG_HS_DIEPDMA1.  RW   $" OTG_HS_DEVICE_OTG_HS_DIEPDMA1 @ hex. OTG_HS_DEVICE_OTG_HS_DIEPDMA1 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPDMA2. cr ." OTG_HS_DEVICE_OTG_HS_DIEPDMA2.  RW   $" OTG_HS_DEVICE_OTG_HS_DIEPDMA2 @ hex. OTG_HS_DEVICE_OTG_HS_DIEPDMA2 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPDMA3. cr ." OTG_HS_DEVICE_OTG_HS_DIEPDMA3.  RW   $" OTG_HS_DEVICE_OTG_HS_DIEPDMA3 @ hex. OTG_HS_DEVICE_OTG_HS_DIEPDMA3 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPDMA4. cr ." OTG_HS_DEVICE_OTG_HS_DIEPDMA4.  RW   $" OTG_HS_DEVICE_OTG_HS_DIEPDMA4 @ hex. OTG_HS_DEVICE_OTG_HS_DIEPDMA4 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPDMA5. cr ." OTG_HS_DEVICE_OTG_HS_DIEPDMA5.  RW   $" OTG_HS_DEVICE_OTG_HS_DIEPDMA5 @ hex. OTG_HS_DEVICE_OTG_HS_DIEPDMA5 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DTXFSTS0. cr ." OTG_HS_DEVICE_OTG_HS_DTXFSTS0.  RO   $" OTG_HS_DEVICE_OTG_HS_DTXFSTS0 @ hex. OTG_HS_DEVICE_OTG_HS_DTXFSTS0 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DTXFSTS1. cr ." OTG_HS_DEVICE_OTG_HS_DTXFSTS1.  RO   $" OTG_HS_DEVICE_OTG_HS_DTXFSTS1 @ hex. OTG_HS_DEVICE_OTG_HS_DTXFSTS1 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DTXFSTS2. cr ." OTG_HS_DEVICE_OTG_HS_DTXFSTS2.  RO   $" OTG_HS_DEVICE_OTG_HS_DTXFSTS2 @ hex. OTG_HS_DEVICE_OTG_HS_DTXFSTS2 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DTXFSTS3. cr ." OTG_HS_DEVICE_OTG_HS_DTXFSTS3.  RO   $" OTG_HS_DEVICE_OTG_HS_DTXFSTS3 @ hex. OTG_HS_DEVICE_OTG_HS_DTXFSTS3 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DTXFSTS4. cr ." OTG_HS_DEVICE_OTG_HS_DTXFSTS4.  RO   $" OTG_HS_DEVICE_OTG_HS_DTXFSTS4 @ hex. OTG_HS_DEVICE_OTG_HS_DTXFSTS4 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DTXFSTS5. cr ." OTG_HS_DEVICE_OTG_HS_DTXFSTS5.  RO   $" OTG_HS_DEVICE_OTG_HS_DTXFSTS5 @ hex. OTG_HS_DEVICE_OTG_HS_DTXFSTS5 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ1. cr ." OTG_HS_DEVICE_OTG_HS_DIEPTSIZ1.  RW   $" OTG_HS_DEVICE_OTG_HS_DIEPTSIZ1 @ hex. OTG_HS_DEVICE_OTG_HS_DIEPTSIZ1 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ2. cr ." OTG_HS_DEVICE_OTG_HS_DIEPTSIZ2.  RW   $" OTG_HS_DEVICE_OTG_HS_DIEPTSIZ2 @ hex. OTG_HS_DEVICE_OTG_HS_DIEPTSIZ2 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ3. cr ." OTG_HS_DEVICE_OTG_HS_DIEPTSIZ3.  RW   $" OTG_HS_DEVICE_OTG_HS_DIEPTSIZ3 @ hex. OTG_HS_DEVICE_OTG_HS_DIEPTSIZ3 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ4. cr ." OTG_HS_DEVICE_OTG_HS_DIEPTSIZ4.  RW   $" OTG_HS_DEVICE_OTG_HS_DIEPTSIZ4 @ hex. OTG_HS_DEVICE_OTG_HS_DIEPTSIZ4 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ5. cr ." OTG_HS_DEVICE_OTG_HS_DIEPTSIZ5.  RW   $" OTG_HS_DEVICE_OTG_HS_DIEPTSIZ5 @ hex. OTG_HS_DEVICE_OTG_HS_DIEPTSIZ5 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DOEPCTL0. cr ." OTG_HS_DEVICE_OTG_HS_DOEPCTL0.   $" OTG_HS_DEVICE_OTG_HS_DOEPCTL0 @ hex. OTG_HS_DEVICE_OTG_HS_DOEPCTL0 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DOEPCTL1. cr ." OTG_HS_DEVICE_OTG_HS_DOEPCTL1.   $" OTG_HS_DEVICE_OTG_HS_DOEPCTL1 @ hex. OTG_HS_DEVICE_OTG_HS_DOEPCTL1 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DOEPCTL2. cr ." OTG_HS_DEVICE_OTG_HS_DOEPCTL2.   $" OTG_HS_DEVICE_OTG_HS_DOEPCTL2 @ hex. OTG_HS_DEVICE_OTG_HS_DOEPCTL2 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DOEPCTL3. cr ." OTG_HS_DEVICE_OTG_HS_DOEPCTL3.   $" OTG_HS_DEVICE_OTG_HS_DOEPCTL3 @ hex. OTG_HS_DEVICE_OTG_HS_DOEPCTL3 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DOEPINT0. cr ." OTG_HS_DEVICE_OTG_HS_DOEPINT0.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPINT0 @ hex. OTG_HS_DEVICE_OTG_HS_DOEPINT0 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DOEPINT1. cr ." OTG_HS_DEVICE_OTG_HS_DOEPINT1.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPINT1 @ hex. OTG_HS_DEVICE_OTG_HS_DOEPINT1 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DOEPINT2. cr ." OTG_HS_DEVICE_OTG_HS_DOEPINT2.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPINT2 @ hex. OTG_HS_DEVICE_OTG_HS_DOEPINT2 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DOEPINT3. cr ." OTG_HS_DEVICE_OTG_HS_DOEPINT3.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPINT3 @ hex. OTG_HS_DEVICE_OTG_HS_DOEPINT3 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DOEPINT4. cr ." OTG_HS_DEVICE_OTG_HS_DOEPINT4.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPINT4 @ hex. OTG_HS_DEVICE_OTG_HS_DOEPINT4 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DOEPINT5. cr ." OTG_HS_DEVICE_OTG_HS_DOEPINT5.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPINT5 @ hex. OTG_HS_DEVICE_OTG_HS_DOEPINT5 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DOEPINT6. cr ." OTG_HS_DEVICE_OTG_HS_DOEPINT6.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPINT6 @ hex. OTG_HS_DEVICE_OTG_HS_DOEPINT6 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DOEPINT7. cr ." OTG_HS_DEVICE_OTG_HS_DOEPINT7.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPINT7 @ hex. OTG_HS_DEVICE_OTG_HS_DOEPINT7 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ0. cr ." OTG_HS_DEVICE_OTG_HS_DOEPTSIZ0.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPTSIZ0 @ hex. OTG_HS_DEVICE_OTG_HS_DOEPTSIZ0 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ1. cr ." OTG_HS_DEVICE_OTG_HS_DOEPTSIZ1.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPTSIZ1 @ hex. OTG_HS_DEVICE_OTG_HS_DOEPTSIZ1 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ2. cr ." OTG_HS_DEVICE_OTG_HS_DOEPTSIZ2.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPTSIZ2 @ hex. OTG_HS_DEVICE_OTG_HS_DOEPTSIZ2 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ3. cr ." OTG_HS_DEVICE_OTG_HS_DOEPTSIZ3.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPTSIZ3 @ hex. OTG_HS_DEVICE_OTG_HS_DOEPTSIZ3 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ4. cr ." OTG_HS_DEVICE_OTG_HS_DOEPTSIZ4.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPTSIZ4 @ hex. OTG_HS_DEVICE_OTG_HS_DOEPTSIZ4 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ6. cr ." OTG_HS_DEVICE_OTG_HS_DIEPTSIZ6.  RW   $" OTG_HS_DEVICE_OTG_HS_DIEPTSIZ6 @ hex. OTG_HS_DEVICE_OTG_HS_DIEPTSIZ6 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DTXFSTS6. cr ." OTG_HS_DEVICE_OTG_HS_DTXFSTS6.  RW   $" OTG_HS_DEVICE_OTG_HS_DTXFSTS6 @ hex. OTG_HS_DEVICE_OTG_HS_DTXFSTS6 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ7. cr ." OTG_HS_DEVICE_OTG_HS_DIEPTSIZ7.  RW   $" OTG_HS_DEVICE_OTG_HS_DIEPTSIZ7 @ hex. OTG_HS_DEVICE_OTG_HS_DIEPTSIZ7 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DTXFSTS7. cr ." OTG_HS_DEVICE_OTG_HS_DTXFSTS7.  RW   $" OTG_HS_DEVICE_OTG_HS_DTXFSTS7 @ hex. OTG_HS_DEVICE_OTG_HS_DTXFSTS7 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DOEPCTL4. cr ." OTG_HS_DEVICE_OTG_HS_DOEPCTL4.   $" OTG_HS_DEVICE_OTG_HS_DOEPCTL4 @ hex. OTG_HS_DEVICE_OTG_HS_DOEPCTL4 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DOEPCTL5. cr ." OTG_HS_DEVICE_OTG_HS_DOEPCTL5.   $" OTG_HS_DEVICE_OTG_HS_DOEPCTL5 @ hex. OTG_HS_DEVICE_OTG_HS_DOEPCTL5 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DOEPCTL6. cr ." OTG_HS_DEVICE_OTG_HS_DOEPCTL6.   $" OTG_HS_DEVICE_OTG_HS_DOEPCTL6 @ hex. OTG_HS_DEVICE_OTG_HS_DOEPCTL6 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DOEPCTL7. cr ." OTG_HS_DEVICE_OTG_HS_DOEPCTL7.   $" OTG_HS_DEVICE_OTG_HS_DOEPCTL7 @ hex. OTG_HS_DEVICE_OTG_HS_DOEPCTL7 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ5. cr ." OTG_HS_DEVICE_OTG_HS_DOEPTSIZ5.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPTSIZ5 @ hex. OTG_HS_DEVICE_OTG_HS_DOEPTSIZ5 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ6. cr ." OTG_HS_DEVICE_OTG_HS_DOEPTSIZ6.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPTSIZ6 @ hex. OTG_HS_DEVICE_OTG_HS_DOEPTSIZ6 1b. ;
-    : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ7. cr ." OTG_HS_DEVICE_OTG_HS_DOEPTSIZ7.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPTSIZ7 @ hex. OTG_HS_DEVICE_OTG_HS_DOEPTSIZ7 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DCFG. cr ." OTG_HS_DEVICE_OTG_HS_DCFG.  RW   $" OTG_HS_DEVICE_OTG_HS_DCFG @ h.8 OTG_HS_DEVICE_OTG_HS_DCFG 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DCTL. cr ." OTG_HS_DEVICE_OTG_HS_DCTL.   $" OTG_HS_DEVICE_OTG_HS_DCTL @ h.8 OTG_HS_DEVICE_OTG_HS_DCTL 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DSTS. cr ." OTG_HS_DEVICE_OTG_HS_DSTS.  RO   $" OTG_HS_DEVICE_OTG_HS_DSTS @ h.8 OTG_HS_DEVICE_OTG_HS_DSTS 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPMSK. cr ." OTG_HS_DEVICE_OTG_HS_DIEPMSK.  RW   $" OTG_HS_DEVICE_OTG_HS_DIEPMSK @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPMSK 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DOEPMSK. cr ." OTG_HS_DEVICE_OTG_HS_DOEPMSK.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPMSK @ h.8 OTG_HS_DEVICE_OTG_HS_DOEPMSK 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DAINT. cr ." OTG_HS_DEVICE_OTG_HS_DAINT.  RO   $" OTG_HS_DEVICE_OTG_HS_DAINT @ h.8 OTG_HS_DEVICE_OTG_HS_DAINT 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DAINTMSK. cr ." OTG_HS_DEVICE_OTG_HS_DAINTMSK.  RW   $" OTG_HS_DEVICE_OTG_HS_DAINTMSK @ h.8 OTG_HS_DEVICE_OTG_HS_DAINTMSK 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DVBUSDIS. cr ." OTG_HS_DEVICE_OTG_HS_DVBUSDIS.  RW   $" OTG_HS_DEVICE_OTG_HS_DVBUSDIS @ h.8 OTG_HS_DEVICE_OTG_HS_DVBUSDIS 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DVBUSPULSE. cr ." OTG_HS_DEVICE_OTG_HS_DVBUSPULSE.  RW   $" OTG_HS_DEVICE_OTG_HS_DVBUSPULSE @ h.8 OTG_HS_DEVICE_OTG_HS_DVBUSPULSE 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DTHRCTL. cr ." OTG_HS_DEVICE_OTG_HS_DTHRCTL.  RW   $" OTG_HS_DEVICE_OTG_HS_DTHRCTL @ h.8 OTG_HS_DEVICE_OTG_HS_DTHRCTL 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPEMPMSK. cr ." OTG_HS_DEVICE_OTG_HS_DIEPEMPMSK.  RW   $" OTG_HS_DEVICE_OTG_HS_DIEPEMPMSK @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPEMPMSK 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DEACHINT. cr ." OTG_HS_DEVICE_OTG_HS_DEACHINT.  RW   $" OTG_HS_DEVICE_OTG_HS_DEACHINT @ h.8 OTG_HS_DEVICE_OTG_HS_DEACHINT 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DEACHINTMSK. cr ." OTG_HS_DEVICE_OTG_HS_DEACHINTMSK.  RW   $" OTG_HS_DEVICE_OTG_HS_DEACHINTMSK @ h.8 OTG_HS_DEVICE_OTG_HS_DEACHINTMSK 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPCTL0. cr ." OTG_HS_DEVICE_OTG_HS_DIEPCTL0.   $" OTG_HS_DEVICE_OTG_HS_DIEPCTL0 @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPCTL0 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPCTL1. cr ." OTG_HS_DEVICE_OTG_HS_DIEPCTL1.   $" OTG_HS_DEVICE_OTG_HS_DIEPCTL1 @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPCTL1 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPCTL2. cr ." OTG_HS_DEVICE_OTG_HS_DIEPCTL2.   $" OTG_HS_DEVICE_OTG_HS_DIEPCTL2 @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPCTL2 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPCTL3. cr ." OTG_HS_DEVICE_OTG_HS_DIEPCTL3.   $" OTG_HS_DEVICE_OTG_HS_DIEPCTL3 @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPCTL3 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPCTL4. cr ." OTG_HS_DEVICE_OTG_HS_DIEPCTL4.   $" OTG_HS_DEVICE_OTG_HS_DIEPCTL4 @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPCTL4 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPCTL5. cr ." OTG_HS_DEVICE_OTG_HS_DIEPCTL5.   $" OTG_HS_DEVICE_OTG_HS_DIEPCTL5 @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPCTL5 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPCTL6. cr ." OTG_HS_DEVICE_OTG_HS_DIEPCTL6.   $" OTG_HS_DEVICE_OTG_HS_DIEPCTL6 @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPCTL6 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPCTL7. cr ." OTG_HS_DEVICE_OTG_HS_DIEPCTL7.   $" OTG_HS_DEVICE_OTG_HS_DIEPCTL7 @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPCTL7 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPINT0. cr ." OTG_HS_DEVICE_OTG_HS_DIEPINT0.   $" OTG_HS_DEVICE_OTG_HS_DIEPINT0 @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPINT0 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPINT1. cr ." OTG_HS_DEVICE_OTG_HS_DIEPINT1.   $" OTG_HS_DEVICE_OTG_HS_DIEPINT1 @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPINT1 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPINT2. cr ." OTG_HS_DEVICE_OTG_HS_DIEPINT2.   $" OTG_HS_DEVICE_OTG_HS_DIEPINT2 @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPINT2 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPINT3. cr ." OTG_HS_DEVICE_OTG_HS_DIEPINT3.   $" OTG_HS_DEVICE_OTG_HS_DIEPINT3 @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPINT3 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPINT4. cr ." OTG_HS_DEVICE_OTG_HS_DIEPINT4.   $" OTG_HS_DEVICE_OTG_HS_DIEPINT4 @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPINT4 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPINT5. cr ." OTG_HS_DEVICE_OTG_HS_DIEPINT5.   $" OTG_HS_DEVICE_OTG_HS_DIEPINT5 @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPINT5 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPINT6. cr ." OTG_HS_DEVICE_OTG_HS_DIEPINT6.   $" OTG_HS_DEVICE_OTG_HS_DIEPINT6 @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPINT6 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPINT7. cr ." OTG_HS_DEVICE_OTG_HS_DIEPINT7.   $" OTG_HS_DEVICE_OTG_HS_DIEPINT7 @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPINT7 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ0. cr ." OTG_HS_DEVICE_OTG_HS_DIEPTSIZ0.  RW   $" OTG_HS_DEVICE_OTG_HS_DIEPTSIZ0 @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPTSIZ0 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPDMA1. cr ." OTG_HS_DEVICE_OTG_HS_DIEPDMA1.  RW   $" OTG_HS_DEVICE_OTG_HS_DIEPDMA1 @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPDMA1 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPDMA2. cr ." OTG_HS_DEVICE_OTG_HS_DIEPDMA2.  RW   $" OTG_HS_DEVICE_OTG_HS_DIEPDMA2 @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPDMA2 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPDMA3. cr ." OTG_HS_DEVICE_OTG_HS_DIEPDMA3.  RW   $" OTG_HS_DEVICE_OTG_HS_DIEPDMA3 @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPDMA3 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPDMA4. cr ." OTG_HS_DEVICE_OTG_HS_DIEPDMA4.  RW   $" OTG_HS_DEVICE_OTG_HS_DIEPDMA4 @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPDMA4 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPDMA5. cr ." OTG_HS_DEVICE_OTG_HS_DIEPDMA5.  RW   $" OTG_HS_DEVICE_OTG_HS_DIEPDMA5 @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPDMA5 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DTXFSTS0. cr ." OTG_HS_DEVICE_OTG_HS_DTXFSTS0.  RO   $" OTG_HS_DEVICE_OTG_HS_DTXFSTS0 @ h.8 OTG_HS_DEVICE_OTG_HS_DTXFSTS0 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DTXFSTS1. cr ." OTG_HS_DEVICE_OTG_HS_DTXFSTS1.  RO   $" OTG_HS_DEVICE_OTG_HS_DTXFSTS1 @ h.8 OTG_HS_DEVICE_OTG_HS_DTXFSTS1 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DTXFSTS2. cr ." OTG_HS_DEVICE_OTG_HS_DTXFSTS2.  RO   $" OTG_HS_DEVICE_OTG_HS_DTXFSTS2 @ h.8 OTG_HS_DEVICE_OTG_HS_DTXFSTS2 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DTXFSTS3. cr ." OTG_HS_DEVICE_OTG_HS_DTXFSTS3.  RO   $" OTG_HS_DEVICE_OTG_HS_DTXFSTS3 @ h.8 OTG_HS_DEVICE_OTG_HS_DTXFSTS3 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DTXFSTS4. cr ." OTG_HS_DEVICE_OTG_HS_DTXFSTS4.  RO   $" OTG_HS_DEVICE_OTG_HS_DTXFSTS4 @ h.8 OTG_HS_DEVICE_OTG_HS_DTXFSTS4 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DTXFSTS5. cr ." OTG_HS_DEVICE_OTG_HS_DTXFSTS5.  RO   $" OTG_HS_DEVICE_OTG_HS_DTXFSTS5 @ h.8 OTG_HS_DEVICE_OTG_HS_DTXFSTS5 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ1. cr ." OTG_HS_DEVICE_OTG_HS_DIEPTSIZ1.  RW   $" OTG_HS_DEVICE_OTG_HS_DIEPTSIZ1 @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPTSIZ1 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ2. cr ." OTG_HS_DEVICE_OTG_HS_DIEPTSIZ2.  RW   $" OTG_HS_DEVICE_OTG_HS_DIEPTSIZ2 @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPTSIZ2 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ3. cr ." OTG_HS_DEVICE_OTG_HS_DIEPTSIZ3.  RW   $" OTG_HS_DEVICE_OTG_HS_DIEPTSIZ3 @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPTSIZ3 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ4. cr ." OTG_HS_DEVICE_OTG_HS_DIEPTSIZ4.  RW   $" OTG_HS_DEVICE_OTG_HS_DIEPTSIZ4 @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPTSIZ4 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ5. cr ." OTG_HS_DEVICE_OTG_HS_DIEPTSIZ5.  RW   $" OTG_HS_DEVICE_OTG_HS_DIEPTSIZ5 @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPTSIZ5 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DOEPCTL0. cr ." OTG_HS_DEVICE_OTG_HS_DOEPCTL0.   $" OTG_HS_DEVICE_OTG_HS_DOEPCTL0 @ h.8 OTG_HS_DEVICE_OTG_HS_DOEPCTL0 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DOEPCTL1. cr ." OTG_HS_DEVICE_OTG_HS_DOEPCTL1.   $" OTG_HS_DEVICE_OTG_HS_DOEPCTL1 @ h.8 OTG_HS_DEVICE_OTG_HS_DOEPCTL1 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DOEPCTL2. cr ." OTG_HS_DEVICE_OTG_HS_DOEPCTL2.   $" OTG_HS_DEVICE_OTG_HS_DOEPCTL2 @ h.8 OTG_HS_DEVICE_OTG_HS_DOEPCTL2 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DOEPCTL3. cr ." OTG_HS_DEVICE_OTG_HS_DOEPCTL3.   $" OTG_HS_DEVICE_OTG_HS_DOEPCTL3 @ h.8 OTG_HS_DEVICE_OTG_HS_DOEPCTL3 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DOEPINT0. cr ." OTG_HS_DEVICE_OTG_HS_DOEPINT0.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPINT0 @ h.8 OTG_HS_DEVICE_OTG_HS_DOEPINT0 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DOEPINT1. cr ." OTG_HS_DEVICE_OTG_HS_DOEPINT1.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPINT1 @ h.8 OTG_HS_DEVICE_OTG_HS_DOEPINT1 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DOEPINT2. cr ." OTG_HS_DEVICE_OTG_HS_DOEPINT2.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPINT2 @ h.8 OTG_HS_DEVICE_OTG_HS_DOEPINT2 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DOEPINT3. cr ." OTG_HS_DEVICE_OTG_HS_DOEPINT3.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPINT3 @ h.8 OTG_HS_DEVICE_OTG_HS_DOEPINT3 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DOEPINT4. cr ." OTG_HS_DEVICE_OTG_HS_DOEPINT4.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPINT4 @ h.8 OTG_HS_DEVICE_OTG_HS_DOEPINT4 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DOEPINT5. cr ." OTG_HS_DEVICE_OTG_HS_DOEPINT5.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPINT5 @ h.8 OTG_HS_DEVICE_OTG_HS_DOEPINT5 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DOEPINT6. cr ." OTG_HS_DEVICE_OTG_HS_DOEPINT6.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPINT6 @ h.8 OTG_HS_DEVICE_OTG_HS_DOEPINT6 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DOEPINT7. cr ." OTG_HS_DEVICE_OTG_HS_DOEPINT7.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPINT7 @ h.8 OTG_HS_DEVICE_OTG_HS_DOEPINT7 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ0. cr ." OTG_HS_DEVICE_OTG_HS_DOEPTSIZ0.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPTSIZ0 @ h.8 OTG_HS_DEVICE_OTG_HS_DOEPTSIZ0 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ1. cr ." OTG_HS_DEVICE_OTG_HS_DOEPTSIZ1.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPTSIZ1 @ h.8 OTG_HS_DEVICE_OTG_HS_DOEPTSIZ1 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ2. cr ." OTG_HS_DEVICE_OTG_HS_DOEPTSIZ2.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPTSIZ2 @ h.8 OTG_HS_DEVICE_OTG_HS_DOEPTSIZ2 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ3. cr ." OTG_HS_DEVICE_OTG_HS_DOEPTSIZ3.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPTSIZ3 @ h.8 OTG_HS_DEVICE_OTG_HS_DOEPTSIZ3 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ4. cr ." OTG_HS_DEVICE_OTG_HS_DOEPTSIZ4.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPTSIZ4 @ h.8 OTG_HS_DEVICE_OTG_HS_DOEPTSIZ4 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ6. cr ." OTG_HS_DEVICE_OTG_HS_DIEPTSIZ6.  RW   $" OTG_HS_DEVICE_OTG_HS_DIEPTSIZ6 @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPTSIZ6 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DTXFSTS6. cr ." OTG_HS_DEVICE_OTG_HS_DTXFSTS6.  RW   $" OTG_HS_DEVICE_OTG_HS_DTXFSTS6 @ h.8 OTG_HS_DEVICE_OTG_HS_DTXFSTS6 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ7. cr ." OTG_HS_DEVICE_OTG_HS_DIEPTSIZ7.  RW   $" OTG_HS_DEVICE_OTG_HS_DIEPTSIZ7 @ h.8 OTG_HS_DEVICE_OTG_HS_DIEPTSIZ7 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DTXFSTS7. cr ." OTG_HS_DEVICE_OTG_HS_DTXFSTS7.  RW   $" OTG_HS_DEVICE_OTG_HS_DTXFSTS7 @ h.8 OTG_HS_DEVICE_OTG_HS_DTXFSTS7 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DOEPCTL4. cr ." OTG_HS_DEVICE_OTG_HS_DOEPCTL4.   $" OTG_HS_DEVICE_OTG_HS_DOEPCTL4 @ h.8 OTG_HS_DEVICE_OTG_HS_DOEPCTL4 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DOEPCTL5. cr ." OTG_HS_DEVICE_OTG_HS_DOEPCTL5.   $" OTG_HS_DEVICE_OTG_HS_DOEPCTL5 @ h.8 OTG_HS_DEVICE_OTG_HS_DOEPCTL5 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DOEPCTL6. cr ." OTG_HS_DEVICE_OTG_HS_DOEPCTL6.   $" OTG_HS_DEVICE_OTG_HS_DOEPCTL6 @ h.8 OTG_HS_DEVICE_OTG_HS_DOEPCTL6 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DOEPCTL7. cr ." OTG_HS_DEVICE_OTG_HS_DOEPCTL7.   $" OTG_HS_DEVICE_OTG_HS_DOEPCTL7 @ h.8 OTG_HS_DEVICE_OTG_HS_DOEPCTL7 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ5. cr ." OTG_HS_DEVICE_OTG_HS_DOEPTSIZ5.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPTSIZ5 @ h.8 OTG_HS_DEVICE_OTG_HS_DOEPTSIZ5 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ6. cr ." OTG_HS_DEVICE_OTG_HS_DOEPTSIZ6.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPTSIZ6 @ h.8 OTG_HS_DEVICE_OTG_HS_DOEPTSIZ6 1b. ;
+    : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ7. cr ." OTG_HS_DEVICE_OTG_HS_DOEPTSIZ7.  RW   $" OTG_HS_DEVICE_OTG_HS_DOEPTSIZ7 @ h.8 OTG_HS_DEVICE_OTG_HS_DOEPTSIZ7 1b. ;
     : OTG_HS_DEVICE.
       OTG_HS_DEVICE_OTG_HS_DCFG.
       OTG_HS_DEVICE_OTG_HS_DCTL.
@@ -5642,7 +5642,7 @@ begin-module memmap
   execute-defined? use-OTG_HS_PWRCLK [if]
     $40040E00 constant OTG_HS_PWRCLK ( USB on the go high speed ) 
     OTG_HS_PWRCLK $0 + constant OTG_HS_PWRCLK_OTG_HS_PCGCR ( read-write )  \ Power and clock gating control register
-    : OTG_HS_PWRCLK_OTG_HS_PCGCR. cr ." OTG_HS_PWRCLK_OTG_HS_PCGCR.  RW   $" OTG_HS_PWRCLK_OTG_HS_PCGCR @ hex. OTG_HS_PWRCLK_OTG_HS_PCGCR 1b. ;
+    : OTG_HS_PWRCLK_OTG_HS_PCGCR. cr ." OTG_HS_PWRCLK_OTG_HS_PCGCR.  RW   $" OTG_HS_PWRCLK_OTG_HS_PCGCR @ h.8 OTG_HS_PWRCLK_OTG_HS_PCGCR 1b. ;
     : OTG_HS_PWRCLK.
       OTG_HS_PWRCLK_OTG_HS_PCGCR.
     ;
@@ -5691,47 +5691,47 @@ begin-module memmap
     NVIC $35C + constant NVIC_IPR23 ( read-write )  \ Interrupt Priority Register
     NVIC $360 + constant NVIC_IPR24 ( read-write )  \ Interrupt Priority Register
     NVIC $364 + constant NVIC_IPR25 ( read-write )  \ Interrupt Priority Register
-    : NVIC_ISER0. cr ." NVIC_ISER0.  RW   $" NVIC_ISER0 @ hex. NVIC_ISER0 1b. ;
-    : NVIC_ISER1. cr ." NVIC_ISER1.  RW   $" NVIC_ISER1 @ hex. NVIC_ISER1 1b. ;
-    : NVIC_ISER2. cr ." NVIC_ISER2.  RW   $" NVIC_ISER2 @ hex. NVIC_ISER2 1b. ;
-    : NVIC_ICER0. cr ." NVIC_ICER0.  RW   $" NVIC_ICER0 @ hex. NVIC_ICER0 1b. ;
-    : NVIC_ICER1. cr ." NVIC_ICER1.  RW   $" NVIC_ICER1 @ hex. NVIC_ICER1 1b. ;
-    : NVIC_ICER2. cr ." NVIC_ICER2.  RW   $" NVIC_ICER2 @ hex. NVIC_ICER2 1b. ;
-    : NVIC_ISPR0. cr ." NVIC_ISPR0.  RW   $" NVIC_ISPR0 @ hex. NVIC_ISPR0 1b. ;
-    : NVIC_ISPR1. cr ." NVIC_ISPR1.  RW   $" NVIC_ISPR1 @ hex. NVIC_ISPR1 1b. ;
-    : NVIC_ISPR2. cr ." NVIC_ISPR2.  RW   $" NVIC_ISPR2 @ hex. NVIC_ISPR2 1b. ;
-    : NVIC_ICPR0. cr ." NVIC_ICPR0.  RW   $" NVIC_ICPR0 @ hex. NVIC_ICPR0 1b. ;
-    : NVIC_ICPR1. cr ." NVIC_ICPR1.  RW   $" NVIC_ICPR1 @ hex. NVIC_ICPR1 1b. ;
-    : NVIC_ICPR2. cr ." NVIC_ICPR2.  RW   $" NVIC_ICPR2 @ hex. NVIC_ICPR2 1b. ;
-    : NVIC_IABR0. cr ." NVIC_IABR0.  RO   $" NVIC_IABR0 @ hex. NVIC_IABR0 1b. ;
-    : NVIC_IABR1. cr ." NVIC_IABR1.  RO   $" NVIC_IABR1 @ hex. NVIC_IABR1 1b. ;
-    : NVIC_IABR2. cr ." NVIC_IABR2.  RO   $" NVIC_IABR2 @ hex. NVIC_IABR2 1b. ;
-    : NVIC_IPR0. cr ." NVIC_IPR0.  RW   $" NVIC_IPR0 @ hex. NVIC_IPR0 1b. ;
-    : NVIC_IPR1. cr ." NVIC_IPR1.  RW   $" NVIC_IPR1 @ hex. NVIC_IPR1 1b. ;
-    : NVIC_IPR2. cr ." NVIC_IPR2.  RW   $" NVIC_IPR2 @ hex. NVIC_IPR2 1b. ;
-    : NVIC_IPR3. cr ." NVIC_IPR3.  RW   $" NVIC_IPR3 @ hex. NVIC_IPR3 1b. ;
-    : NVIC_IPR4. cr ." NVIC_IPR4.  RW   $" NVIC_IPR4 @ hex. NVIC_IPR4 1b. ;
-    : NVIC_IPR5. cr ." NVIC_IPR5.  RW   $" NVIC_IPR5 @ hex. NVIC_IPR5 1b. ;
-    : NVIC_IPR6. cr ." NVIC_IPR6.  RW   $" NVIC_IPR6 @ hex. NVIC_IPR6 1b. ;
-    : NVIC_IPR7. cr ." NVIC_IPR7.  RW   $" NVIC_IPR7 @ hex. NVIC_IPR7 1b. ;
-    : NVIC_IPR8. cr ." NVIC_IPR8.  RW   $" NVIC_IPR8 @ hex. NVIC_IPR8 1b. ;
-    : NVIC_IPR9. cr ." NVIC_IPR9.  RW   $" NVIC_IPR9 @ hex. NVIC_IPR9 1b. ;
-    : NVIC_IPR10. cr ." NVIC_IPR10.  RW   $" NVIC_IPR10 @ hex. NVIC_IPR10 1b. ;
-    : NVIC_IPR11. cr ." NVIC_IPR11.  RW   $" NVIC_IPR11 @ hex. NVIC_IPR11 1b. ;
-    : NVIC_IPR12. cr ." NVIC_IPR12.  RW   $" NVIC_IPR12 @ hex. NVIC_IPR12 1b. ;
-    : NVIC_IPR13. cr ." NVIC_IPR13.  RW   $" NVIC_IPR13 @ hex. NVIC_IPR13 1b. ;
-    : NVIC_IPR14. cr ." NVIC_IPR14.  RW   $" NVIC_IPR14 @ hex. NVIC_IPR14 1b. ;
-    : NVIC_IPR15. cr ." NVIC_IPR15.  RW   $" NVIC_IPR15 @ hex. NVIC_IPR15 1b. ;
-    : NVIC_IPR16. cr ." NVIC_IPR16.  RW   $" NVIC_IPR16 @ hex. NVIC_IPR16 1b. ;
-    : NVIC_IPR17. cr ." NVIC_IPR17.  RW   $" NVIC_IPR17 @ hex. NVIC_IPR17 1b. ;
-    : NVIC_IPR18. cr ." NVIC_IPR18.  RW   $" NVIC_IPR18 @ hex. NVIC_IPR18 1b. ;
-    : NVIC_IPR19. cr ." NVIC_IPR19.  RW   $" NVIC_IPR19 @ hex. NVIC_IPR19 1b. ;
-    : NVIC_IPR20. cr ." NVIC_IPR20.  RW   $" NVIC_IPR20 @ hex. NVIC_IPR20 1b. ;
-    : NVIC_IPR21. cr ." NVIC_IPR21.  RW   $" NVIC_IPR21 @ hex. NVIC_IPR21 1b. ;
-    : NVIC_IPR22. cr ." NVIC_IPR22.  RW   $" NVIC_IPR22 @ hex. NVIC_IPR22 1b. ;
-    : NVIC_IPR23. cr ." NVIC_IPR23.  RW   $" NVIC_IPR23 @ hex. NVIC_IPR23 1b. ;
-    : NVIC_IPR24. cr ." NVIC_IPR24.  RW   $" NVIC_IPR24 @ hex. NVIC_IPR24 1b. ;
-    : NVIC_IPR25. cr ." NVIC_IPR25.  RW   $" NVIC_IPR25 @ hex. NVIC_IPR25 1b. ;
+    : NVIC_ISER0. cr ." NVIC_ISER0.  RW   $" NVIC_ISER0 @ h.8 NVIC_ISER0 1b. ;
+    : NVIC_ISER1. cr ." NVIC_ISER1.  RW   $" NVIC_ISER1 @ h.8 NVIC_ISER1 1b. ;
+    : NVIC_ISER2. cr ." NVIC_ISER2.  RW   $" NVIC_ISER2 @ h.8 NVIC_ISER2 1b. ;
+    : NVIC_ICER0. cr ." NVIC_ICER0.  RW   $" NVIC_ICER0 @ h.8 NVIC_ICER0 1b. ;
+    : NVIC_ICER1. cr ." NVIC_ICER1.  RW   $" NVIC_ICER1 @ h.8 NVIC_ICER1 1b. ;
+    : NVIC_ICER2. cr ." NVIC_ICER2.  RW   $" NVIC_ICER2 @ h.8 NVIC_ICER2 1b. ;
+    : NVIC_ISPR0. cr ." NVIC_ISPR0.  RW   $" NVIC_ISPR0 @ h.8 NVIC_ISPR0 1b. ;
+    : NVIC_ISPR1. cr ." NVIC_ISPR1.  RW   $" NVIC_ISPR1 @ h.8 NVIC_ISPR1 1b. ;
+    : NVIC_ISPR2. cr ." NVIC_ISPR2.  RW   $" NVIC_ISPR2 @ h.8 NVIC_ISPR2 1b. ;
+    : NVIC_ICPR0. cr ." NVIC_ICPR0.  RW   $" NVIC_ICPR0 @ h.8 NVIC_ICPR0 1b. ;
+    : NVIC_ICPR1. cr ." NVIC_ICPR1.  RW   $" NVIC_ICPR1 @ h.8 NVIC_ICPR1 1b. ;
+    : NVIC_ICPR2. cr ." NVIC_ICPR2.  RW   $" NVIC_ICPR2 @ h.8 NVIC_ICPR2 1b. ;
+    : NVIC_IABR0. cr ." NVIC_IABR0.  RO   $" NVIC_IABR0 @ h.8 NVIC_IABR0 1b. ;
+    : NVIC_IABR1. cr ." NVIC_IABR1.  RO   $" NVIC_IABR1 @ h.8 NVIC_IABR1 1b. ;
+    : NVIC_IABR2. cr ." NVIC_IABR2.  RO   $" NVIC_IABR2 @ h.8 NVIC_IABR2 1b. ;
+    : NVIC_IPR0. cr ." NVIC_IPR0.  RW   $" NVIC_IPR0 @ h.8 NVIC_IPR0 1b. ;
+    : NVIC_IPR1. cr ." NVIC_IPR1.  RW   $" NVIC_IPR1 @ h.8 NVIC_IPR1 1b. ;
+    : NVIC_IPR2. cr ." NVIC_IPR2.  RW   $" NVIC_IPR2 @ h.8 NVIC_IPR2 1b. ;
+    : NVIC_IPR3. cr ." NVIC_IPR3.  RW   $" NVIC_IPR3 @ h.8 NVIC_IPR3 1b. ;
+    : NVIC_IPR4. cr ." NVIC_IPR4.  RW   $" NVIC_IPR4 @ h.8 NVIC_IPR4 1b. ;
+    : NVIC_IPR5. cr ." NVIC_IPR5.  RW   $" NVIC_IPR5 @ h.8 NVIC_IPR5 1b. ;
+    : NVIC_IPR6. cr ." NVIC_IPR6.  RW   $" NVIC_IPR6 @ h.8 NVIC_IPR6 1b. ;
+    : NVIC_IPR7. cr ." NVIC_IPR7.  RW   $" NVIC_IPR7 @ h.8 NVIC_IPR7 1b. ;
+    : NVIC_IPR8. cr ." NVIC_IPR8.  RW   $" NVIC_IPR8 @ h.8 NVIC_IPR8 1b. ;
+    : NVIC_IPR9. cr ." NVIC_IPR9.  RW   $" NVIC_IPR9 @ h.8 NVIC_IPR9 1b. ;
+    : NVIC_IPR10. cr ." NVIC_IPR10.  RW   $" NVIC_IPR10 @ h.8 NVIC_IPR10 1b. ;
+    : NVIC_IPR11. cr ." NVIC_IPR11.  RW   $" NVIC_IPR11 @ h.8 NVIC_IPR11 1b. ;
+    : NVIC_IPR12. cr ." NVIC_IPR12.  RW   $" NVIC_IPR12 @ h.8 NVIC_IPR12 1b. ;
+    : NVIC_IPR13. cr ." NVIC_IPR13.  RW   $" NVIC_IPR13 @ h.8 NVIC_IPR13 1b. ;
+    : NVIC_IPR14. cr ." NVIC_IPR14.  RW   $" NVIC_IPR14 @ h.8 NVIC_IPR14 1b. ;
+    : NVIC_IPR15. cr ." NVIC_IPR15.  RW   $" NVIC_IPR15 @ h.8 NVIC_IPR15 1b. ;
+    : NVIC_IPR16. cr ." NVIC_IPR16.  RW   $" NVIC_IPR16 @ h.8 NVIC_IPR16 1b. ;
+    : NVIC_IPR17. cr ." NVIC_IPR17.  RW   $" NVIC_IPR17 @ h.8 NVIC_IPR17 1b. ;
+    : NVIC_IPR18. cr ." NVIC_IPR18.  RW   $" NVIC_IPR18 @ h.8 NVIC_IPR18 1b. ;
+    : NVIC_IPR19. cr ." NVIC_IPR19.  RW   $" NVIC_IPR19 @ h.8 NVIC_IPR19 1b. ;
+    : NVIC_IPR20. cr ." NVIC_IPR20.  RW   $" NVIC_IPR20 @ h.8 NVIC_IPR20 1b. ;
+    : NVIC_IPR21. cr ." NVIC_IPR21.  RW   $" NVIC_IPR21 @ h.8 NVIC_IPR21 1b. ;
+    : NVIC_IPR22. cr ." NVIC_IPR22.  RW   $" NVIC_IPR22 @ h.8 NVIC_IPR22 1b. ;
+    : NVIC_IPR23. cr ." NVIC_IPR23.  RW   $" NVIC_IPR23 @ h.8 NVIC_IPR23 1b. ;
+    : NVIC_IPR24. cr ." NVIC_IPR24.  RW   $" NVIC_IPR24 @ h.8 NVIC_IPR24 1b. ;
+    : NVIC_IPR25. cr ." NVIC_IPR25.  RW   $" NVIC_IPR25 @ h.8 NVIC_IPR25 1b. ;
     : NVIC.
       NVIC_ISER0.
       NVIC_ISER1.
@@ -5784,11 +5784,11 @@ begin-module memmap
     MPU $8 + constant MPU_MPU_RNR ( read-write )  \ MPU region number register
     MPU $C + constant MPU_MPU_RBAR ( read-write )  \ MPU region base address register
     MPU $10 + constant MPU_MPU_RASR ( read-write )  \ MPU region attribute and size register
-    : MPU_MPU_TYPER. cr ." MPU_MPU_TYPER.  RO   $" MPU_MPU_TYPER @ hex. MPU_MPU_TYPER 1b. ;
-    : MPU_MPU_CTRL. cr ." MPU_MPU_CTRL.  RO   $" MPU_MPU_CTRL @ hex. MPU_MPU_CTRL 1b. ;
-    : MPU_MPU_RNR. cr ." MPU_MPU_RNR.  RW   $" MPU_MPU_RNR @ hex. MPU_MPU_RNR 1b. ;
-    : MPU_MPU_RBAR. cr ." MPU_MPU_RBAR.  RW   $" MPU_MPU_RBAR @ hex. MPU_MPU_RBAR 1b. ;
-    : MPU_MPU_RASR. cr ." MPU_MPU_RASR.  RW   $" MPU_MPU_RASR @ hex. MPU_MPU_RASR 1b. ;
+    : MPU_MPU_TYPER. cr ." MPU_MPU_TYPER.  RO   $" MPU_MPU_TYPER @ h.8 MPU_MPU_TYPER 1b. ;
+    : MPU_MPU_CTRL. cr ." MPU_MPU_CTRL.  RO   $" MPU_MPU_CTRL @ h.8 MPU_MPU_CTRL 1b. ;
+    : MPU_MPU_RNR. cr ." MPU_MPU_RNR.  RW   $" MPU_MPU_RNR @ h.8 MPU_MPU_RNR 1b. ;
+    : MPU_MPU_RBAR. cr ." MPU_MPU_RBAR.  RW   $" MPU_MPU_RBAR @ h.8 MPU_MPU_RBAR 1b. ;
+    : MPU_MPU_RASR. cr ." MPU_MPU_RASR.  RW   $" MPU_MPU_RASR @ h.8 MPU_MPU_RASR 1b. ;
     : MPU.
       MPU_MPU_TYPER.
       MPU_MPU_CTRL.
@@ -5804,10 +5804,10 @@ begin-module memmap
     STK $4 + constant STK_RVR ( read-write )  \ SysTick reload value register
     STK $8 + constant STK_CVR ( read-write )  \ SysTick current value register
     STK $C + constant STK_CALIB ( read-write )  \ SysTick calibration value register
-    : STK_CSR. cr ." STK_CSR.  RW   $" STK_CSR @ hex. STK_CSR 1b. ;
-    : STK_RVR. cr ." STK_RVR.  RW   $" STK_RVR @ hex. STK_RVR 1b. ;
-    : STK_CVR. cr ." STK_CVR.  RW   $" STK_CVR @ hex. STK_CVR 1b. ;
-    : STK_CALIB. cr ." STK_CALIB.  RW   $" STK_CALIB @ hex. STK_CALIB 1b. ;
+    : STK_CSR. cr ." STK_CSR.  RW   $" STK_CSR @ h.8 STK_CSR 1b. ;
+    : STK_RVR. cr ." STK_RVR.  RW   $" STK_RVR @ h.8 STK_RVR 1b. ;
+    : STK_CVR. cr ." STK_CVR.  RW   $" STK_CVR @ h.8 STK_CVR 1b. ;
+    : STK_CALIB. cr ." STK_CALIB.  RW   $" STK_CALIB @ h.8 STK_CALIB 1b. ;
     : STK.
       STK_CSR.
       STK_RVR.
@@ -5819,7 +5819,7 @@ begin-module memmap
   execute-defined? use-NVIC_STIR [if]
     $E000EF00 constant NVIC_STIR ( Nested vectored interrupt controller ) 
     NVIC_STIR $0 + constant NVIC_STIR_STIR ( read-write )  \ Software trigger interrupt register
-    : NVIC_STIR_STIR. cr ." NVIC_STIR_STIR.  RW   $" NVIC_STIR_STIR @ hex. NVIC_STIR_STIR 1b. ;
+    : NVIC_STIR_STIR. cr ." NVIC_STIR_STIR.  RW   $" NVIC_STIR_STIR @ h.8 NVIC_STIR_STIR 1b. ;
     : NVIC_STIR.
       NVIC_STIR_STIR.
     ;
@@ -5828,7 +5828,7 @@ begin-module memmap
   execute-defined? use-FPU_CPACR [if]
     $E000ED88 constant FPU_CPACR ( Floating point unit CPACR ) 
     FPU_CPACR $0 + constant FPU_CPACR_CPACR ( read-write )  \ Coprocessor access control register
-    : FPU_CPACR_CPACR. cr ." FPU_CPACR_CPACR.  RW   $" FPU_CPACR_CPACR @ hex. FPU_CPACR_CPACR 1b. ;
+    : FPU_CPACR_CPACR. cr ." FPU_CPACR_CPACR.  RW   $" FPU_CPACR_CPACR @ h.8 FPU_CPACR_CPACR 1b. ;
     : FPU_CPACR.
       FPU_CPACR_CPACR.
     ;
@@ -5837,7 +5837,7 @@ begin-module memmap
   execute-defined? use-SCB_ACTRL [if]
     $E000E008 constant SCB_ACTRL ( System control block ACTLR ) 
     SCB_ACTRL $0 + constant SCB_ACTRL_ACTRL ( read-write )  \ Auxiliary control register
-    : SCB_ACTRL_ACTRL. cr ." SCB_ACTRL_ACTRL.  RW   $" SCB_ACTRL_ACTRL @ hex. SCB_ACTRL_ACTRL 1b. ;
+    : SCB_ACTRL_ACTRL. cr ." SCB_ACTRL_ACTRL.  RW   $" SCB_ACTRL_ACTRL @ h.8 SCB_ACTRL_ACTRL 1b. ;
     : SCB_ACTRL.
       SCB_ACTRL_ACTRL.
     ;
@@ -5848,9 +5848,9 @@ begin-module memmap
     FPU $0 + constant FPU_FPCCR ( read-write )  \ Floating-point context control register
     FPU $4 + constant FPU_FPCAR ( read-write )  \ Floating-point context address register
     FPU $8 + constant FPU_FPSCR ( read-write )  \ Floating-point status control register
-    : FPU_FPCCR. cr ." FPU_FPCCR.  RW   $" FPU_FPCCR @ hex. FPU_FPCCR 1b. ;
-    : FPU_FPCAR. cr ." FPU_FPCAR.  RW   $" FPU_FPCAR @ hex. FPU_FPCAR 1b. ;
-    : FPU_FPSCR. cr ." FPU_FPSCR.  RW   $" FPU_FPSCR @ hex. FPU_FPSCR 1b. ;
+    : FPU_FPCCR. cr ." FPU_FPCCR.  RW   $" FPU_FPCCR @ h.8 FPU_FPCCR 1b. ;
+    : FPU_FPCAR. cr ." FPU_FPCAR.  RW   $" FPU_FPCAR @ h.8 FPU_FPCAR 1b. ;
+    : FPU_FPSCR. cr ." FPU_FPSCR.  RW   $" FPU_FPSCR @ h.8 FPU_FPSCR 1b. ;
     : FPU.
       FPU_FPCCR.
       FPU_FPCAR.
@@ -5874,20 +5874,20 @@ begin-module memmap
     SCB $2C + constant SCB_HFSR ( read-write )  \ Hard fault status register
     SCB $34 + constant SCB_MMFAR ( read-write )  \ Memory management fault address register
     SCB $38 + constant SCB_BFAR ( read-write )  \ Bus fault address register
-    : SCB_CPUID. cr ." SCB_CPUID.  RO   $" SCB_CPUID @ hex. SCB_CPUID 1b. ;
-    : SCB_ICSR. cr ." SCB_ICSR.  RW   $" SCB_ICSR @ hex. SCB_ICSR 1b. ;
-    : SCB_VTOR. cr ." SCB_VTOR.  RW   $" SCB_VTOR @ hex. SCB_VTOR 1b. ;
-    : SCB_AIRCR. cr ." SCB_AIRCR.  RW   $" SCB_AIRCR @ hex. SCB_AIRCR 1b. ;
-    : SCB_SCR. cr ." SCB_SCR.  RW   $" SCB_SCR @ hex. SCB_SCR 1b. ;
-    : SCB_CCR. cr ." SCB_CCR.  RW   $" SCB_CCR @ hex. SCB_CCR 1b. ;
-    : SCB_SHPR1. cr ." SCB_SHPR1.  RW   $" SCB_SHPR1 @ hex. SCB_SHPR1 1b. ;
-    : SCB_SHPR2. cr ." SCB_SHPR2.  RW   $" SCB_SHPR2 @ hex. SCB_SHPR2 1b. ;
-    : SCB_SHPR3. cr ." SCB_SHPR3.  RW   $" SCB_SHPR3 @ hex. SCB_SHPR3 1b. ;
-    : SCB_SHCRS. cr ." SCB_SHCRS.  RW   $" SCB_SHCRS @ hex. SCB_SHCRS 1b. ;
-    : SCB_CFSR_UFSR_BFSR_MMFSR. cr ." SCB_CFSR_UFSR_BFSR_MMFSR.  RW   $" SCB_CFSR_UFSR_BFSR_MMFSR @ hex. SCB_CFSR_UFSR_BFSR_MMFSR 1b. ;
-    : SCB_HFSR. cr ." SCB_HFSR.  RW   $" SCB_HFSR @ hex. SCB_HFSR 1b. ;
-    : SCB_MMFAR. cr ." SCB_MMFAR.  RW   $" SCB_MMFAR @ hex. SCB_MMFAR 1b. ;
-    : SCB_BFAR. cr ." SCB_BFAR.  RW   $" SCB_BFAR @ hex. SCB_BFAR 1b. ;
+    : SCB_CPUID. cr ." SCB_CPUID.  RO   $" SCB_CPUID @ h.8 SCB_CPUID 1b. ;
+    : SCB_ICSR. cr ." SCB_ICSR.  RW   $" SCB_ICSR @ h.8 SCB_ICSR 1b. ;
+    : SCB_VTOR. cr ." SCB_VTOR.  RW   $" SCB_VTOR @ h.8 SCB_VTOR 1b. ;
+    : SCB_AIRCR. cr ." SCB_AIRCR.  RW   $" SCB_AIRCR @ h.8 SCB_AIRCR 1b. ;
+    : SCB_SCR. cr ." SCB_SCR.  RW   $" SCB_SCR @ h.8 SCB_SCR 1b. ;
+    : SCB_CCR. cr ." SCB_CCR.  RW   $" SCB_CCR @ h.8 SCB_CCR 1b. ;
+    : SCB_SHPR1. cr ." SCB_SHPR1.  RW   $" SCB_SHPR1 @ h.8 SCB_SHPR1 1b. ;
+    : SCB_SHPR2. cr ." SCB_SHPR2.  RW   $" SCB_SHPR2 @ h.8 SCB_SHPR2 1b. ;
+    : SCB_SHPR3. cr ." SCB_SHPR3.  RW   $" SCB_SHPR3 @ h.8 SCB_SHPR3 1b. ;
+    : SCB_SHCRS. cr ." SCB_SHCRS.  RW   $" SCB_SHCRS @ h.8 SCB_SHCRS 1b. ;
+    : SCB_CFSR_UFSR_BFSR_MMFSR. cr ." SCB_CFSR_UFSR_BFSR_MMFSR.  RW   $" SCB_CFSR_UFSR_BFSR_MMFSR @ h.8 SCB_CFSR_UFSR_BFSR_MMFSR 1b. ;
+    : SCB_HFSR. cr ." SCB_HFSR.  RW   $" SCB_HFSR @ h.8 SCB_HFSR 1b. ;
+    : SCB_MMFAR. cr ." SCB_MMFAR.  RW   $" SCB_MMFAR @ h.8 SCB_MMFAR 1b. ;
+    : SCB_BFAR. cr ." SCB_BFAR.  RW   $" SCB_BFAR @ h.8 SCB_BFAR 1b. ;
     : SCB.
       SCB_CPUID.
       SCB_ICSR.
@@ -5911,9 +5911,9 @@ begin-module memmap
     PF $0 + constant PF_CLIDR ( read-only )  \ Cache Level ID register
     PF $4 + constant PF_CTR ( read-only )  \ Cache Type register
     PF $8 + constant PF_CCSIDR ( read-only )  \ Cache Size ID register
-    : PF_CLIDR. cr ." PF_CLIDR.  RO   $" PF_CLIDR @ hex. PF_CLIDR 1b. ;
-    : PF_CTR. cr ." PF_CTR.  RO   $" PF_CTR @ hex. PF_CTR 1b. ;
-    : PF_CCSIDR. cr ." PF_CCSIDR.  RO   $" PF_CCSIDR @ hex. PF_CCSIDR 1b. ;
+    : PF_CLIDR. cr ." PF_CLIDR.  RO   $" PF_CLIDR @ h.8 PF_CLIDR 1b. ;
+    : PF_CTR. cr ." PF_CTR.  RO   $" PF_CTR @ h.8 PF_CTR 1b. ;
+    : PF_CCSIDR. cr ." PF_CCSIDR.  RO   $" PF_CCSIDR @ h.8 PF_CCSIDR 1b. ;
     : PF.
       PF_CLIDR.
       PF_CTR.
@@ -5929,12 +5929,12 @@ begin-module memmap
     AC $C + constant AC_CACR ( read-write )  \ Auxiliary Cache Control register
     AC $10 + constant AC_AHBSCR ( read-write )  \ AHB Slave Control register
     AC $18 + constant AC_ABFSR ( read-write )  \ Auxiliary Bus Fault Status register
-    : AC_ITCMCR. cr ." AC_ITCMCR.  RW   $" AC_ITCMCR @ hex. AC_ITCMCR 1b. ;
-    : AC_DTCMCR. cr ." AC_DTCMCR.  RW   $" AC_DTCMCR @ hex. AC_DTCMCR 1b. ;
-    : AC_AHBPCR. cr ." AC_AHBPCR.  RW   $" AC_AHBPCR @ hex. AC_AHBPCR 1b. ;
-    : AC_CACR. cr ." AC_CACR.  RW   $" AC_CACR @ hex. AC_CACR 1b. ;
-    : AC_AHBSCR. cr ." AC_AHBSCR.  RW   $" AC_AHBSCR @ hex. AC_AHBSCR 1b. ;
-    : AC_ABFSR. cr ." AC_ABFSR.  RW   $" AC_ABFSR @ hex. AC_ABFSR 1b. ;
+    : AC_ITCMCR. cr ." AC_ITCMCR.  RW   $" AC_ITCMCR @ h.8 AC_ITCMCR 1b. ;
+    : AC_DTCMCR. cr ." AC_DTCMCR.  RW   $" AC_DTCMCR @ h.8 AC_DTCMCR 1b. ;
+    : AC_AHBPCR. cr ." AC_AHBPCR.  RW   $" AC_AHBPCR @ h.8 AC_AHBPCR 1b. ;
+    : AC_CACR. cr ." AC_CACR.  RW   $" AC_CACR @ h.8 AC_CACR 1b. ;
+    : AC_AHBSCR. cr ." AC_AHBSCR.  RW   $" AC_AHBSCR @ h.8 AC_AHBSCR 1b. ;
+    : AC_ABFSR. cr ." AC_ABFSR.  RW   $" AC_ABFSR @ h.8 AC_ABFSR 1b. ;
     : AC.
       AC_ITCMCR.
       AC_DTCMCR.
