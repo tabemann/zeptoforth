@@ -25,7 +25,7 @@ import re
 
 def parse_devices(memmap):
     devices = []
-    regex = re.compile(r'^(defined\? use-)([A-Za-z0-9_]*)(.*)$')
+    regex = re.compile(r'^(execute-defined\? use-)([A-Za-z0-9_]*)(.*)$')
     line = memmap.readline()
     while line:
         match = regex.match(line)
@@ -50,8 +50,7 @@ def process(memmap, bitfields, output):
         if match:
             device = get_device(devices, match.group(2))
             if device:
-                output.write('defined? use-%s defined? %s not and [if]\n' %
-                             (device, device))
+                output.write('execute-defined? use-%s [if]\n' % device)
                 output.write(line)
                 line = bitfields.readline()
                 while line:

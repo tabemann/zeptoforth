@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Terry Porter <terry@tjporter.com.au>
+\ Copyright (c) 2016-2020 Terry Porter <terry@tjporter.com.au>
 \ Copyright (c) 2020-2022 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,15 +21,15 @@
 
 compile-to-flash
 
-begin-module memmap
+begin-module bitfields
 
-  execute-defined? use-RNG defined? RNG_CR_IE not and [if]
+  execute-defined? use-RNG [if]
     \ RNG_CR (read-write) Reset:0x00000000
     : RNG_CR_IE ( -- x addr ) 3 bit RNG_CR ; \ RNG_CR_IE, Interrupt enable
     : RNG_CR_RNGEN ( -- x addr ) 2 bit RNG_CR ; \ RNG_CR_RNGEN, Random number generator  enable
   [then]
 
-  execute-defined? use-RNG defined? RNG_SR_SEIS? not and [if]
+  execute-defined? use-RNG [if]
     \ RNG_SR (multiple-access)  Reset:0x00000000
     : RNG_SR_SEIS? ( -- 1|0 ) 6 bit RNG_SR bit@ ; \ RNG_SR_SEIS, Seed error interrupt  status
     : RNG_SR_CEIS? ( -- 1|0 ) 5 bit RNG_SR bit@ ; \ RNG_SR_CEIS, Clock error interrupt  status
@@ -38,12 +38,12 @@ begin-module memmap
     : RNG_SR_DRDY ( -- x addr ) 0 bit RNG_SR ; \ RNG_SR_DRDY, Data ready
   [then]
 
-  defined? use-RNG defined? RNG_DR_RNDATA? not and [if]
+  [if]
     \ RNG_DR (read-only) Reset:0x00000000
     : RNG_DR_RNDATA? ( --  x ) RNG_DR @ ; \ RNG_DR_RNDATA, Random data
   [then]
 
-  execute-defined? use-DCMI defined? DCMI_CR_ENABLE not and [if]
+  execute-defined? use-DCMI [if]
     \ DCMI_CR (read-write) Reset:0x0000
     : DCMI_CR_ENABLE ( -- x addr ) 14 bit DCMI_CR ; \ DCMI_CR_ENABLE, DCMI enable
     : DCMI_CR_EDM ( %bb -- x addr ) 10 lshift DCMI_CR ; \ DCMI_CR_EDM, Extended data mode
@@ -58,14 +58,14 @@ begin-module memmap
     : DCMI_CR_CAPTURE ( -- x addr ) 0 bit DCMI_CR ; \ DCMI_CR_CAPTURE, Capture enable
   [then]
 
-  defined? use-DCMI defined? DCMI_SR_FNE? not and [if]
+  [if]
     \ DCMI_SR (read-only) Reset:0x0000
     : DCMI_SR_FNE? ( --  1|0 ) 2 bit DCMI_SR bit@ ; \ DCMI_SR_FNE, FIFO not empty
     : DCMI_SR_VSYNC? ( --  1|0 ) 1 bit DCMI_SR bit@ ; \ DCMI_SR_VSYNC, VSYNC
     : DCMI_SR_HSYNC? ( --  1|0 ) 0 bit DCMI_SR bit@ ; \ DCMI_SR_HSYNC, HSYNC
   [then]
 
-  execute-defined? use-DCMI defined? DCMI_RIS_LINE_RIS? not and [if]
+  execute-defined? use-DCMI [if]
     \ DCMI_RIS (read-only) Reset:0x0000
     : DCMI_RIS_LINE_RIS? ( --  1|0 ) 4 bit DCMI_RIS bit@ ; \ DCMI_RIS_LINE_RIS, Line raw interrupt status
     : DCMI_RIS_VSYNC_RIS? ( --  1|0 ) 3 bit DCMI_RIS bit@ ; \ DCMI_RIS_VSYNC_RIS, VSYNC raw interrupt status
@@ -74,7 +74,7 @@ begin-module memmap
     : DCMI_RIS_FRAME_RIS? ( --  1|0 ) 0 bit DCMI_RIS bit@ ; \ DCMI_RIS_FRAME_RIS, Capture complete raw interrupt  status
   [then]
 
-  defined? use-DCMI defined? DCMI_IER_LINE_IE not and [if]
+  [if]
     \ DCMI_IER (read-write) Reset:0x0000
     : DCMI_IER_LINE_IE ( -- x addr ) 4 bit DCMI_IER ; \ DCMI_IER_LINE_IE, Line interrupt enable
     : DCMI_IER_VSYNC_IE ( -- x addr ) 3 bit DCMI_IER ; \ DCMI_IER_VSYNC_IE, VSYNC interrupt enable
@@ -83,7 +83,7 @@ begin-module memmap
     : DCMI_IER_FRAME_IE ( -- x addr ) 0 bit DCMI_IER ; \ DCMI_IER_FRAME_IE, Capture complete interrupt  enable
   [then]
 
-  execute-defined? use-DCMI defined? DCMI_MIS_LINE_MIS? not and [if]
+  execute-defined? use-DCMI [if]
     \ DCMI_MIS (read-only) Reset:0x0000
     : DCMI_MIS_LINE_MIS? ( --  1|0 ) 4 bit DCMI_MIS bit@ ; \ DCMI_MIS_LINE_MIS, Line masked interrupt  status
     : DCMI_MIS_VSYNC_MIS? ( --  1|0 ) 3 bit DCMI_MIS bit@ ; \ DCMI_MIS_VSYNC_MIS, VSYNC masked interrupt  status
@@ -92,7 +92,7 @@ begin-module memmap
     : DCMI_MIS_FRAME_MIS? ( --  1|0 ) 0 bit DCMI_MIS bit@ ; \ DCMI_MIS_FRAME_MIS, Capture complete masked interrupt  status
   [then]
 
-  defined? use-DCMI defined? DCMI_ICR_LINE_ISC not and [if]
+  [if]
     \ DCMI_ICR (write-only) Reset:0x0000
     : DCMI_ICR_LINE_ISC ( -- x addr ) 4 bit DCMI_ICR ; \ DCMI_ICR_LINE_ISC, line interrupt status  clear
     : DCMI_ICR_VSYNC_ISC ( -- x addr ) 3 bit DCMI_ICR ; \ DCMI_ICR_VSYNC_ISC, Vertical synch interrupt status  clear
@@ -101,7 +101,7 @@ begin-module memmap
     : DCMI_ICR_FRAME_ISC ( -- x addr ) 0 bit DCMI_ICR ; \ DCMI_ICR_FRAME_ISC, Capture complete interrupt status  clear
   [then]
 
-  execute-defined? use-DCMI defined? DCMI_ESCR_FEC not and [if]
+  execute-defined? use-DCMI [if]
     \ DCMI_ESCR (read-write) Reset:0x0000
     : DCMI_ESCR_FEC ( %bbbbbbbb -- x addr ) 24 lshift DCMI_ESCR ; \ DCMI_ESCR_FEC, Frame end delimiter code
     : DCMI_ESCR_LEC ( %bbbbbbbb -- x addr ) 16 lshift DCMI_ESCR ; \ DCMI_ESCR_LEC, Line end delimiter code
@@ -109,7 +109,7 @@ begin-module memmap
     : DCMI_ESCR_FSC ( %bbbbbbbb -- x addr ) DCMI_ESCR ; \ DCMI_ESCR_FSC, Frame start delimiter code
   [then]
 
-  defined? use-DCMI defined? DCMI_ESUR_FEU not and [if]
+  [if]
     \ DCMI_ESUR (read-write) Reset:0x0000
     : DCMI_ESUR_FEU ( %bbbbbbbb -- x addr ) 24 lshift DCMI_ESUR ; \ DCMI_ESUR_FEU, Frame end delimiter unmask
     : DCMI_ESUR_LEU ( %bbbbbbbb -- x addr ) 16 lshift DCMI_ESUR ; \ DCMI_ESUR_LEU, Line end delimiter unmask
@@ -117,19 +117,19 @@ begin-module memmap
     : DCMI_ESUR_FSU ( %bbbbbbbb -- x addr ) DCMI_ESUR ; \ DCMI_ESUR_FSU, Frame start delimiter  unmask
   [then]
 
-  execute-defined? use-DCMI defined? DCMI_CWSTRT_VST not and [if]
+  execute-defined? use-DCMI [if]
     \ DCMI_CWSTRT (read-write) Reset:0x0000
     : DCMI_CWSTRT_VST x addr ) 16 lshift DCMI_CWSTRT ; \ DCMI_CWSTRT_VST, Vertical start line count
     : DCMI_CWSTRT_HOFFCNT ( %bbbbbbbbbbbbbb -- x addr ) DCMI_CWSTRT ; \ DCMI_CWSTRT_HOFFCNT, Horizontal offset count
   [then]
 
-  defined? use-DCMI defined? DCMI_CWSIZE_VLINE not and [if]
+  [if]
     \ DCMI_CWSIZE (read-write) Reset:0x0000
     : DCMI_CWSIZE_VLINE ( %bbbbbbbbbbbbbb -- x addr ) 16 lshift DCMI_CWSIZE ; \ DCMI_CWSIZE_VLINE, Vertical line count
     : DCMI_CWSIZE_CAPCNT ( %bbbbbbbbbbbbbb -- x addr ) DCMI_CWSIZE ; \ DCMI_CWSIZE_CAPCNT, Capture count
   [then]
 
-  execute-defined? use-DCMI defined? DCMI_DR_Byte3? not and [if]
+  execute-defined? use-DCMI [if]
     \ DCMI_DR (read-only) Reset:0x0000
     : DCMI_DR_Byte3? ( --  x ) 24 lshift DCMI_DR @ ; \ DCMI_DR_Byte3, Data byte 3
     : DCMI_DR_Byte2? ( --  x ) 16 lshift DCMI_DR @ ; \ DCMI_DR_Byte2, Data byte 2
@@ -137,7 +137,7 @@ begin-module memmap
     : DCMI_DR_Byte0? ( --  x ) DCMI_DR @ ; \ DCMI_DR_Byte0, Data byte 0
   [then]
 
-  defined? use-FSMC defined? FSMC_BCR1_CBURSTRW not and [if]
+  [if]
     \ FSMC_BCR1 (read-write) Reset:0x000030D0
     : FSMC_BCR1_CBURSTRW ( -- x addr ) 19 bit FSMC_BCR1 ; \ FSMC_BCR1_CBURSTRW, CBURSTRW
     : FSMC_BCR1_ASYNCWAIT ( -- x addr ) 15 bit FSMC_BCR1 ; \ FSMC_BCR1_ASYNCWAIT, ASYNCWAIT
@@ -154,7 +154,7 @@ begin-module memmap
     : FSMC_BCR1_MBKEN ( -- x addr ) 0 bit FSMC_BCR1 ; \ FSMC_BCR1_MBKEN, MBKEN
   [then]
 
-  execute-defined? use-FSMC defined? FSMC_BTR1_ACCMOD not and [if]
+  execute-defined? use-FSMC [if]
     \ FSMC_BTR1 (read-write) Reset:0xFFFFFFFF
     : FSMC_BTR1_ACCMOD ( %bb -- x addr ) 28 lshift FSMC_BTR1 ; \ FSMC_BTR1_ACCMOD, ACCMOD
     : FSMC_BTR1_DATLAT ( %bbbb -- x addr ) 24 lshift FSMC_BTR1 ; \ FSMC_BTR1_DATLAT, DATLAT
@@ -165,7 +165,7 @@ begin-module memmap
     : FSMC_BTR1_ADDSET ( %bbbb -- x addr ) FSMC_BTR1 ; \ FSMC_BTR1_ADDSET, ADDSET
   [then]
 
-  defined? use-FSMC defined? FSMC_BCR2_CBURSTRW not and [if]
+  [if]
     \ FSMC_BCR2 (read-write) Reset:0x000030D0
     : FSMC_BCR2_CBURSTRW ( -- x addr ) 19 bit FSMC_BCR2 ; \ FSMC_BCR2_CBURSTRW, CBURSTRW
     : FSMC_BCR2_ASYNCWAIT ( -- x addr ) 15 bit FSMC_BCR2 ; \ FSMC_BCR2_ASYNCWAIT, ASYNCWAIT
@@ -183,7 +183,7 @@ begin-module memmap
     : FSMC_BCR2_MBKEN ( -- x addr ) 0 bit FSMC_BCR2 ; \ FSMC_BCR2_MBKEN, MBKEN
   [then]
 
-  execute-defined? use-FSMC defined? FSMC_BTR2_ACCMOD not and [if]
+  execute-defined? use-FSMC [if]
     \ FSMC_BTR2 (read-write) Reset:0xFFFFFFFF
     : FSMC_BTR2_ACCMOD ( %bb -- x addr ) 28 lshift FSMC_BTR2 ; \ FSMC_BTR2_ACCMOD, ACCMOD
     : FSMC_BTR2_DATLAT ( %bbbb -- x addr ) 24 lshift FSMC_BTR2 ; \ FSMC_BTR2_DATLAT, DATLAT
@@ -194,7 +194,7 @@ begin-module memmap
     : FSMC_BTR2_ADDSET ( %bbbb -- x addr ) FSMC_BTR2 ; \ FSMC_BTR2_ADDSET, ADDSET
   [then]
 
-  defined? use-FSMC defined? FSMC_BCR3_CBURSTRW not and [if]
+  [if]
     \ FSMC_BCR3 (read-write) Reset:0x000030D0
     : FSMC_BCR3_CBURSTRW ( -- x addr ) 19 bit FSMC_BCR3 ; \ FSMC_BCR3_CBURSTRW, CBURSTRW
     : FSMC_BCR3_ASYNCWAIT ( -- x addr ) 15 bit FSMC_BCR3 ; \ FSMC_BCR3_ASYNCWAIT, ASYNCWAIT
@@ -212,7 +212,7 @@ begin-module memmap
     : FSMC_BCR3_MBKEN ( -- x addr ) 0 bit FSMC_BCR3 ; \ FSMC_BCR3_MBKEN, MBKEN
   [then]
 
-  execute-defined? use-FSMC defined? FSMC_BTR3_ACCMOD not and [if]
+  execute-defined? use-FSMC [if]
     \ FSMC_BTR3 (read-write) Reset:0xFFFFFFFF
     : FSMC_BTR3_ACCMOD ( %bb -- x addr ) 28 lshift FSMC_BTR3 ; \ FSMC_BTR3_ACCMOD, ACCMOD
     : FSMC_BTR3_DATLAT ( %bbbb -- x addr ) 24 lshift FSMC_BTR3 ; \ FSMC_BTR3_DATLAT, DATLAT
@@ -223,7 +223,7 @@ begin-module memmap
     : FSMC_BTR3_ADDSET ( %bbbb -- x addr ) FSMC_BTR3 ; \ FSMC_BTR3_ADDSET, ADDSET
   [then]
 
-  defined? use-FSMC defined? FSMC_BCR4_CBURSTRW not and [if]
+  [if]
     \ FSMC_BCR4 (read-write) Reset:0x000030D0
     : FSMC_BCR4_CBURSTRW ( -- x addr ) 19 bit FSMC_BCR4 ; \ FSMC_BCR4_CBURSTRW, CBURSTRW
     : FSMC_BCR4_ASYNCWAIT ( -- x addr ) 15 bit FSMC_BCR4 ; \ FSMC_BCR4_ASYNCWAIT, ASYNCWAIT
@@ -241,7 +241,7 @@ begin-module memmap
     : FSMC_BCR4_MBKEN ( -- x addr ) 0 bit FSMC_BCR4 ; \ FSMC_BCR4_MBKEN, MBKEN
   [then]
 
-  execute-defined? use-FSMC defined? FSMC_BTR4_ACCMOD not and [if]
+  execute-defined? use-FSMC [if]
     \ FSMC_BTR4 (read-write) Reset:0xFFFFFFFF
     : FSMC_BTR4_ACCMOD ( %bb -- x addr ) 28 lshift FSMC_BTR4 ; \ FSMC_BTR4_ACCMOD, ACCMOD
     : FSMC_BTR4_DATLAT ( %bbbb -- x addr ) 24 lshift FSMC_BTR4 ; \ FSMC_BTR4_DATLAT, DATLAT
@@ -252,7 +252,7 @@ begin-module memmap
     : FSMC_BTR4_ADDSET ( %bbbb -- x addr ) FSMC_BTR4 ; \ FSMC_BTR4_ADDSET, ADDSET
   [then]
 
-  defined? use-FSMC defined? FSMC_PCR2_ECCPS not and [if]
+  [if]
     \ FSMC_PCR2 (read-write) Reset:0x00000018
     : FSMC_PCR2_ECCPS ( %bbb -- x addr ) 17 lshift FSMC_PCR2 ; \ FSMC_PCR2_ECCPS, ECCPS
     : FSMC_PCR2_TAR ( %bbbb -- x addr ) 13 lshift FSMC_PCR2 ; \ FSMC_PCR2_TAR, TAR
@@ -264,7 +264,7 @@ begin-module memmap
     : FSMC_PCR2_PWAITEN ( -- x addr ) 1 bit FSMC_PCR2 ; \ FSMC_PCR2_PWAITEN, PWAITEN
   [then]
 
-  execute-defined? use-FSMC defined? FSMC_SR2_FEMPT not and [if]
+  execute-defined? use-FSMC [if]
     \ FSMC_SR2 (multiple-access)  Reset:0x00000040
     : FSMC_SR2_FEMPT ( -- x addr ) 6 bit FSMC_SR2 ; \ FSMC_SR2_FEMPT, FEMPT
     : FSMC_SR2_IFEN ( -- x addr ) 5 bit FSMC_SR2 ; \ FSMC_SR2_IFEN, IFEN
@@ -275,7 +275,7 @@ begin-module memmap
     : FSMC_SR2_IRS ( -- x addr ) 0 bit FSMC_SR2 ; \ FSMC_SR2_IRS, IRS
   [then]
 
-  defined? use-FSMC defined? FSMC_PMEM2_MEMHIZx not and [if]
+  [if]
     \ FSMC_PMEM2 (read-write) Reset:0xFCFCFCFC
     : FSMC_PMEM2_MEMHIZx ( %bbbbbbbb -- x addr ) 24 lshift FSMC_PMEM2 ; \ FSMC_PMEM2_MEMHIZx, MEMHIZx
     : FSMC_PMEM2_MEMHOLDx ( %bbbbbbbb -- x addr ) 16 lshift FSMC_PMEM2 ; \ FSMC_PMEM2_MEMHOLDx, MEMHOLDx
@@ -283,7 +283,7 @@ begin-module memmap
     : FSMC_PMEM2_MEMSETx ( %bbbbbbbb -- x addr ) FSMC_PMEM2 ; \ FSMC_PMEM2_MEMSETx, MEMSETx
   [then]
 
-  execute-defined? use-FSMC defined? FSMC_PATT2_ATTHIZx not and [if]
+  execute-defined? use-FSMC [if]
     \ FSMC_PATT2 (read-write) Reset:0xFCFCFCFC
     : FSMC_PATT2_ATTHIZx ( %bbbbbbbb -- x addr ) 24 lshift FSMC_PATT2 ; \ FSMC_PATT2_ATTHIZx, ATTHIZx
     : FSMC_PATT2_ATTHOLDx ( %bbbbbbbb -- x addr ) 16 lshift FSMC_PATT2 ; \ FSMC_PATT2_ATTHOLDx, ATTHOLDx
@@ -291,12 +291,12 @@ begin-module memmap
     : FSMC_PATT2_ATTSETx ( %bbbbbbbb -- x addr ) FSMC_PATT2 ; \ FSMC_PATT2_ATTSETx, ATTSETx
   [then]
 
-  defined? use-FSMC defined? FSMC_ECCR2_ECCx? not and [if]
+  [if]
     \ FSMC_ECCR2 (read-only) Reset:0x00000000
     : FSMC_ECCR2_ECCx? ( --  x ) FSMC_ECCR2 @ ; \ FSMC_ECCR2_ECCx, ECCx
   [then]
 
-  execute-defined? use-FSMC defined? FSMC_PCR3_ECCPS not and [if]
+  execute-defined? use-FSMC [if]
     \ FSMC_PCR3 (read-write) Reset:0x00000018
     : FSMC_PCR3_ECCPS ( %bbb -- x addr ) 17 lshift FSMC_PCR3 ; \ FSMC_PCR3_ECCPS, ECCPS
     : FSMC_PCR3_TAR ( %bbbb -- x addr ) 13 lshift FSMC_PCR3 ; \ FSMC_PCR3_TAR, TAR
@@ -308,7 +308,7 @@ begin-module memmap
     : FSMC_PCR3_PWAITEN ( -- x addr ) 1 bit FSMC_PCR3 ; \ FSMC_PCR3_PWAITEN, PWAITEN
   [then]
 
-  defined? use-FSMC defined? FSMC_SR3_FEMPT not and [if]
+  [if]
     \ FSMC_SR3 (multiple-access)  Reset:0x00000040
     : FSMC_SR3_FEMPT ( -- x addr ) 6 bit FSMC_SR3 ; \ FSMC_SR3_FEMPT, FEMPT
     : FSMC_SR3_IFEN ( -- x addr ) 5 bit FSMC_SR3 ; \ FSMC_SR3_IFEN, IFEN
@@ -319,7 +319,7 @@ begin-module memmap
     : FSMC_SR3_IRS ( -- x addr ) 0 bit FSMC_SR3 ; \ FSMC_SR3_IRS, IRS
   [then]
 
-  execute-defined? use-FSMC defined? FSMC_PMEM3_MEMHIZx not and [if]
+  execute-defined? use-FSMC [if]
     \ FSMC_PMEM3 (read-write) Reset:0xFCFCFCFC
     : FSMC_PMEM3_MEMHIZx ( %bbbbbbbb -- x addr ) 24 lshift FSMC_PMEM3 ; \ FSMC_PMEM3_MEMHIZx, MEMHIZx
     : FSMC_PMEM3_MEMHOLDx ( %bbbbbbbb -- x addr ) 16 lshift FSMC_PMEM3 ; \ FSMC_PMEM3_MEMHOLDx, MEMHOLDx
@@ -327,7 +327,7 @@ begin-module memmap
     : FSMC_PMEM3_MEMSETx ( %bbbbbbbb -- x addr ) FSMC_PMEM3 ; \ FSMC_PMEM3_MEMSETx, MEMSETx
   [then]
 
-  defined? use-FSMC defined? FSMC_PATT3_ATTHIZx not and [if]
+  [if]
     \ FSMC_PATT3 (read-write) Reset:0xFCFCFCFC
     : FSMC_PATT3_ATTHIZx ( %bbbbbbbb -- x addr ) 24 lshift FSMC_PATT3 ; \ FSMC_PATT3_ATTHIZx, ATTHIZx
     : FSMC_PATT3_ATTHOLDx ( %bbbbbbbb -- x addr ) 16 lshift FSMC_PATT3 ; \ FSMC_PATT3_ATTHOLDx, ATTHOLDx
@@ -335,12 +335,12 @@ begin-module memmap
     : FSMC_PATT3_ATTSETx ( %bbbbbbbb -- x addr ) FSMC_PATT3 ; \ FSMC_PATT3_ATTSETx, ATTSETx
   [then]
 
-  execute-defined? use-FSMC defined? FSMC_ECCR3_ECCx? not and [if]
+  execute-defined? use-FSMC [if]
     \ FSMC_ECCR3 (read-only) Reset:0x00000000
     : FSMC_ECCR3_ECCx? ( --  x ) FSMC_ECCR3 @ ; \ FSMC_ECCR3_ECCx, ECCx
   [then]
 
-  defined? use-FSMC defined? FSMC_PCR4_ECCPS not and [if]
+  [if]
     \ FSMC_PCR4 (read-write) Reset:0x00000018
     : FSMC_PCR4_ECCPS ( %bbb -- x addr ) 17 lshift FSMC_PCR4 ; \ FSMC_PCR4_ECCPS, ECCPS
     : FSMC_PCR4_TAR ( %bbbb -- x addr ) 13 lshift FSMC_PCR4 ; \ FSMC_PCR4_TAR, TAR
@@ -352,7 +352,7 @@ begin-module memmap
     : FSMC_PCR4_PWAITEN ( -- x addr ) 1 bit FSMC_PCR4 ; \ FSMC_PCR4_PWAITEN, PWAITEN
   [then]
 
-  execute-defined? use-FSMC defined? FSMC_SR4_FEMPT not and [if]
+  execute-defined? use-FSMC [if]
     \ FSMC_SR4 (multiple-access)  Reset:0x00000040
     : FSMC_SR4_FEMPT ( -- x addr ) 6 bit FSMC_SR4 ; \ FSMC_SR4_FEMPT, FEMPT
     : FSMC_SR4_IFEN ( -- x addr ) 5 bit FSMC_SR4 ; \ FSMC_SR4_IFEN, IFEN
@@ -363,7 +363,7 @@ begin-module memmap
     : FSMC_SR4_IRS ( -- x addr ) 0 bit FSMC_SR4 ; \ FSMC_SR4_IRS, IRS
   [then]
 
-  defined? use-FSMC defined? FSMC_PMEM4_MEMHIZx not and [if]
+  [if]
     \ FSMC_PMEM4 (read-write) Reset:0xFCFCFCFC
     : FSMC_PMEM4_MEMHIZx ( %bbbbbbbb -- x addr ) 24 lshift FSMC_PMEM4 ; \ FSMC_PMEM4_MEMHIZx, MEMHIZx
     : FSMC_PMEM4_MEMHOLDx ( %bbbbbbbb -- x addr ) 16 lshift FSMC_PMEM4 ; \ FSMC_PMEM4_MEMHOLDx, MEMHOLDx
@@ -371,7 +371,7 @@ begin-module memmap
     : FSMC_PMEM4_MEMSETx ( %bbbbbbbb -- x addr ) FSMC_PMEM4 ; \ FSMC_PMEM4_MEMSETx, MEMSETx
   [then]
 
-  execute-defined? use-FSMC defined? FSMC_PATT4_ATTHIZx not and [if]
+  execute-defined? use-FSMC [if]
     \ FSMC_PATT4 (read-write) Reset:0xFCFCFCFC
     : FSMC_PATT4_ATTHIZx ( %bbbbbbbb -- x addr ) 24 lshift FSMC_PATT4 ; \ FSMC_PATT4_ATTHIZx, ATTHIZx
     : FSMC_PATT4_ATTHOLDx ( %bbbbbbbb -- x addr ) 16 lshift FSMC_PATT4 ; \ FSMC_PATT4_ATTHOLDx, ATTHOLDx
@@ -379,7 +379,7 @@ begin-module memmap
     : FSMC_PATT4_ATTSETx ( %bbbbbbbb -- x addr ) FSMC_PATT4 ; \ FSMC_PATT4_ATTSETx, ATTSETx
   [then]
 
-  defined? use-FSMC defined? FSMC_PIO4_IOHIZx not and [if]
+  [if]
     \ FSMC_PIO4 (read-write) Reset:0xFCFCFCFC
     : FSMC_PIO4_IOHIZx ( %bbbbbbbb -- x addr ) 24 lshift FSMC_PIO4 ; \ FSMC_PIO4_IOHIZx, IOHIZx
     : FSMC_PIO4_IOHOLDx ( %bbbbbbbb -- x addr ) 16 lshift FSMC_PIO4 ; \ FSMC_PIO4_IOHOLDx, IOHOLDx
@@ -387,7 +387,7 @@ begin-module memmap
     : FSMC_PIO4_IOSETx ( %bbbbbbbb -- x addr ) FSMC_PIO4 ; \ FSMC_PIO4_IOSETx, IOSETx
   [then]
 
-  execute-defined? use-FSMC defined? FSMC_BWTR1_ACCMOD not and [if]
+  execute-defined? use-FSMC [if]
     \ FSMC_BWTR1 (read-write) Reset:0x0FFFFFFF
     : FSMC_BWTR1_ACCMOD ( %bb -- x addr ) 28 lshift FSMC_BWTR1 ; \ FSMC_BWTR1_ACCMOD, ACCMOD
     : FSMC_BWTR1_DATLAT ( %bbbb -- x addr ) 24 lshift FSMC_BWTR1 ; \ FSMC_BWTR1_DATLAT, DATLAT
@@ -397,7 +397,7 @@ begin-module memmap
     : FSMC_BWTR1_ADDSET ( %bbbb -- x addr ) FSMC_BWTR1 ; \ FSMC_BWTR1_ADDSET, ADDSET
   [then]
 
-  defined? use-FSMC defined? FSMC_BWTR2_ACCMOD not and [if]
+  [if]
     \ FSMC_BWTR2 (read-write) Reset:0x0FFFFFFF
     : FSMC_BWTR2_ACCMOD ( %bb -- x addr ) 28 lshift FSMC_BWTR2 ; \ FSMC_BWTR2_ACCMOD, ACCMOD
     : FSMC_BWTR2_DATLAT ( %bbbb -- x addr ) 24 lshift FSMC_BWTR2 ; \ FSMC_BWTR2_DATLAT, DATLAT
@@ -407,7 +407,7 @@ begin-module memmap
     : FSMC_BWTR2_ADDSET ( %bbbb -- x addr ) FSMC_BWTR2 ; \ FSMC_BWTR2_ADDSET, ADDSET
   [then]
 
-  execute-defined? use-FSMC defined? FSMC_BWTR3_ACCMOD not and [if]
+  execute-defined? use-FSMC [if]
     \ FSMC_BWTR3 (read-write) Reset:0x0FFFFFFF
     : FSMC_BWTR3_ACCMOD ( %bb -- x addr ) 28 lshift FSMC_BWTR3 ; \ FSMC_BWTR3_ACCMOD, ACCMOD
     : FSMC_BWTR3_DATLAT ( %bbbb -- x addr ) 24 lshift FSMC_BWTR3 ; \ FSMC_BWTR3_DATLAT, DATLAT
@@ -417,7 +417,7 @@ begin-module memmap
     : FSMC_BWTR3_ADDSET ( %bbbb -- x addr ) FSMC_BWTR3 ; \ FSMC_BWTR3_ADDSET, ADDSET
   [then]
 
-  defined? use-FSMC defined? FSMC_BWTR4_ACCMOD not and [if]
+  [if]
     \ FSMC_BWTR4 (read-write) Reset:0x0FFFFFFF
     : FSMC_BWTR4_ACCMOD ( %bb -- x addr ) 28 lshift FSMC_BWTR4 ; \ FSMC_BWTR4_ACCMOD, ACCMOD
     : FSMC_BWTR4_DATLAT ( %bbbb -- x addr ) 24 lshift FSMC_BWTR4 ; \ FSMC_BWTR4_DATLAT, DATLAT
@@ -427,13 +427,13 @@ begin-module memmap
     : FSMC_BWTR4_ADDSET ( %bbbb -- x addr ) FSMC_BWTR4 ; \ FSMC_BWTR4_ADDSET, ADDSET
   [then]
 
-  execute-defined? use-DBG defined? DBG_DBGMCU_IDCODE_DEV_ID? not and [if]
+  execute-defined? use-DBG [if]
     \ DBG_DBGMCU_IDCODE (read-only) Reset:0x10006411
     : DBG_DBGMCU_IDCODE_DEV_ID? ( --  x ) DBG_DBGMCU_IDCODE @ ; \ DBG_DBGMCU_IDCODE_DEV_ID, DEV_ID
     : DBG_DBGMCU_IDCODE_REV_ID? ( --  x ) 16 lshift DBG_DBGMCU_IDCODE @ ; \ DBG_DBGMCU_IDCODE_REV_ID, REV_ID
   [then]
 
-  defined? use-DBG defined? DBG_DBGMCU_CR_DBG_SLEEP not and [if]
+  [if]
     \ DBG_DBGMCU_CR (read-write) Reset:0x00000000
     : DBG_DBGMCU_CR_DBG_SLEEP ( -- x addr ) 0 bit DBG_DBGMCU_CR ; \ DBG_DBGMCU_CR_DBG_SLEEP, DBG_SLEEP
     : DBG_DBGMCU_CR_DBG_STOP ( -- x addr ) 1 bit DBG_DBGMCU_CR ; \ DBG_DBGMCU_CR_DBG_STOP, DBG_STOP
@@ -447,7 +447,7 @@ begin-module memmap
     : DBG_DBGMCU_CR_DBG_TIM7_STOP ( -- x addr ) 20 bit DBG_DBGMCU_CR ; \ DBG_DBGMCU_CR_DBG_TIM7_STOP, DBG_TIM7_STOP
   [then]
 
-  execute-defined? use-DBG defined? DBG_DBGMCU_APB1_FZ_DBG_TIM2_STOP not and [if]
+  execute-defined? use-DBG [if]
     \ DBG_DBGMCU_APB1_FZ (read-write) Reset:0x00000000
     : DBG_DBGMCU_APB1_FZ_DBG_TIM2_STOP ( -- x addr ) 0 bit DBG_DBGMCU_APB1_FZ ; \ DBG_DBGMCU_APB1_FZ_DBG_TIM2_STOP, DBG_TIM2_STOP
     : DBG_DBGMCU_APB1_FZ_DBG_TIM3_STOP ( -- x addr ) 1 bit DBG_DBGMCU_APB1_FZ ; \ DBG_DBGMCU_APB1_FZ_DBG_TIM3_STOP, DBG_TIM3 _STOP
@@ -467,7 +467,7 @@ begin-module memmap
     : DBG_DBGMCU_APB1_FZ_DBG_CAN2_STOP ( -- x addr ) 26 bit DBG_DBGMCU_APB1_FZ ; \ DBG_DBGMCU_APB1_FZ_DBG_CAN2_STOP, DBG_CAN2_STOP
   [then]
 
-  defined? use-DBG defined? DBG_DBGMCU_APB2_FZ_DBG_TIM1_STOP not and [if]
+  [if]
     \ DBG_DBGMCU_APB2_FZ (read-write) Reset:0x00000000
     : DBG_DBGMCU_APB2_FZ_DBG_TIM1_STOP ( -- x addr ) 0 bit DBG_DBGMCU_APB2_FZ ; \ DBG_DBGMCU_APB2_FZ_DBG_TIM1_STOP, TIM1 counter stopped when core is  halted
     : DBG_DBGMCU_APB2_FZ_DBG_TIM8_STOP ( -- x addr ) 1 bit DBG_DBGMCU_APB2_FZ ; \ DBG_DBGMCU_APB2_FZ_DBG_TIM8_STOP, TIM8 counter stopped when core is  halted
@@ -476,7 +476,7 @@ begin-module memmap
     : DBG_DBGMCU_APB2_FZ_DBG_TIM11_STOP ( -- x addr ) 18 bit DBG_DBGMCU_APB2_FZ ; \ DBG_DBGMCU_APB2_FZ_DBG_TIM11_STOP, TIM11 counter stopped when core is  halted
   [then]
 
-  execute-defined? use-DMA2 defined? DMA2_LISR_TCIF3? not and [if]
+  execute-defined? use-DMA2 [if]
     \ DMA2_LISR (read-only) Reset:0x00000000
     : DMA2_LISR_TCIF3? ( --  1|0 ) 27 bit DMA2_LISR bit@ ; \ DMA2_LISR_TCIF3, Stream x transfer complete interrupt  flag x = 3..0
     : DMA2_LISR_HTIF3? ( --  1|0 ) 26 bit DMA2_LISR bit@ ; \ DMA2_LISR_HTIF3, Stream x half transfer interrupt flag  x=3..0
@@ -500,7 +500,7 @@ begin-module memmap
     : DMA2_LISR_FEIF0? ( --  1|0 ) 0 bit DMA2_LISR bit@ ; \ DMA2_LISR_FEIF0, Stream x FIFO error interrupt flag  x=3..0
   [then]
 
-  defined? use-DMA2 defined? DMA2_HISR_TCIF7? not and [if]
+  [if]
     \ DMA2_HISR (read-only) Reset:0x00000000
     : DMA2_HISR_TCIF7? ( --  1|0 ) 27 bit DMA2_HISR bit@ ; \ DMA2_HISR_TCIF7, Stream x transfer complete interrupt  flag x=7..4
     : DMA2_HISR_HTIF7? ( --  1|0 ) 26 bit DMA2_HISR bit@ ; \ DMA2_HISR_HTIF7, Stream x half transfer interrupt flag  x=7..4
@@ -524,7 +524,7 @@ begin-module memmap
     : DMA2_HISR_FEIF4? ( --  1|0 ) 0 bit DMA2_HISR bit@ ; \ DMA2_HISR_FEIF4, Stream x FIFO error interrupt flag  x=7..4
   [then]
 
-  execute-defined? use-DMA2 defined? DMA2_LIFCR_CTCIF3 not and [if]
+  execute-defined? use-DMA2 [if]
     \ DMA2_LIFCR (read-write) Reset:0x00000000
     : DMA2_LIFCR_CTCIF3 ( -- x addr ) 27 bit DMA2_LIFCR ; \ DMA2_LIFCR_CTCIF3, Stream x clear transfer complete  interrupt flag x = 3..0
     : DMA2_LIFCR_CHTIF3 ( -- x addr ) 26 bit DMA2_LIFCR ; \ DMA2_LIFCR_CHTIF3, Stream x clear half transfer interrupt  flag x = 3..0
@@ -548,7 +548,7 @@ begin-module memmap
     : DMA2_LIFCR_CFEIF0 ( -- x addr ) 0 bit DMA2_LIFCR ; \ DMA2_LIFCR_CFEIF0, Stream x clear FIFO error interrupt flag  x = 3..0
   [then]
 
-  defined? use-DMA2 defined? DMA2_HIFCR_CTCIF7 not and [if]
+  [if]
     \ DMA2_HIFCR (read-write) Reset:0x00000000
     : DMA2_HIFCR_CTCIF7 ( -- x addr ) 27 bit DMA2_HIFCR ; \ DMA2_HIFCR_CTCIF7, Stream x clear transfer complete  interrupt flag x = 7..4
     : DMA2_HIFCR_CHTIF7 ( -- x addr ) 26 bit DMA2_HIFCR ; \ DMA2_HIFCR_CHTIF7, Stream x clear half transfer interrupt  flag x = 7..4
@@ -572,7 +572,7 @@ begin-module memmap
     : DMA2_HIFCR_CFEIF4 ( -- x addr ) 0 bit DMA2_HIFCR ; \ DMA2_HIFCR_CFEIF4, Stream x clear FIFO error interrupt flag  x = 7..4
   [then]
 
-  execute-defined? use-DMA2 defined? DMA2_S0CR_CHSEL not and [if]
+  execute-defined? use-DMA2 [if]
     \ DMA2_S0CR (read-write) Reset:0x00000000
     : DMA2_S0CR_CHSEL ( %bbb -- x addr ) 25 lshift DMA2_S0CR ; \ DMA2_S0CR_CHSEL, Channel selection
     : DMA2_S0CR_MBURST ( %bb -- x addr ) 23 lshift DMA2_S0CR ; \ DMA2_S0CR_MBURST, Memory burst transfer  configuration
@@ -595,27 +595,27 @@ begin-module memmap
     : DMA2_S0CR_EN ( -- x addr ) 0 bit DMA2_S0CR ; \ DMA2_S0CR_EN, Stream enable / flag stream ready when  read low
   [then]
 
-  defined? use-DMA2 defined? DMA2_S0NDTR_NDT not and [if]
+  [if]
     \ DMA2_S0NDTR (read-write) Reset:0x00000000
     : DMA2_S0NDTR_NDT ( %bbbbbbbbbbbbbbbb -- x addr ) DMA2_S0NDTR ; \ DMA2_S0NDTR_NDT, Number of data items to  transfer
   [then]
 
-  execute-defined? use-DMA2 defined? DMA2_S0PAR_PA not and [if]
+  execute-defined? use-DMA2 [if]
     \ DMA2_S0PAR (read-write) Reset:0x00000000
     : DMA2_S0PAR_PA ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA2_S0PAR ; \ DMA2_S0PAR_PA, Peripheral address
   [then]
 
-  defined? use-DMA2 defined? DMA2_S0M0AR_M0A not and [if]
+  [if]
     \ DMA2_S0M0AR (read-write) Reset:0x00000000
     : DMA2_S0M0AR_M0A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA2_S0M0AR ; \ DMA2_S0M0AR_M0A, Memory 0 address
   [then]
 
-  execute-defined? use-DMA2 defined? DMA2_S0M1AR_M1A not and [if]
+  execute-defined? use-DMA2 [if]
     \ DMA2_S0M1AR (read-write) Reset:0x00000000
     : DMA2_S0M1AR_M1A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA2_S0M1AR ; \ DMA2_S0M1AR_M1A, Memory 1 address used in case of Double  buffer mode
   [then]
 
-  defined? use-DMA2 defined? DMA2_S0FCR_FEIE not and [if]
+  [if]
     \ DMA2_S0FCR (multiple-access)  Reset:0x00000021
     : DMA2_S0FCR_FEIE ( -- x addr ) 7 bit DMA2_S0FCR ; \ DMA2_S0FCR_FEIE, FIFO error interrupt  enable
     : DMA2_S0FCR_FS? ( %bbb -- 1|0 ) 3 lshift DMA2_S0FCR bit@ ; \ DMA2_S0FCR_FS, FIFO status
@@ -623,7 +623,7 @@ begin-module memmap
     : DMA2_S0FCR_FTH ( %bb -- x addr ) DMA2_S0FCR ; \ DMA2_S0FCR_FTH, FIFO threshold selection
   [then]
 
-  execute-defined? use-DMA2 defined? DMA2_S1CR_CHSEL not and [if]
+  execute-defined? use-DMA2 [if]
     \ DMA2_S1CR (read-write) Reset:0x00000000
     : DMA2_S1CR_CHSEL ( %bbb -- x addr ) 25 lshift DMA2_S1CR ; \ DMA2_S1CR_CHSEL, Channel selection
     : DMA2_S1CR_MBURST ( %bb -- x addr ) 23 lshift DMA2_S1CR ; \ DMA2_S1CR_MBURST, Memory burst transfer  configuration
@@ -647,27 +647,27 @@ begin-module memmap
     : DMA2_S1CR_EN ( -- x addr ) 0 bit DMA2_S1CR ; \ DMA2_S1CR_EN, Stream enable / flag stream ready when  read low
   [then]
 
-  defined? use-DMA2 defined? DMA2_S1NDTR_NDT not and [if]
+  [if]
     \ DMA2_S1NDTR (read-write) Reset:0x00000000
     : DMA2_S1NDTR_NDT ( %bbbbbbbbbbbbbbbb -- x addr ) DMA2_S1NDTR ; \ DMA2_S1NDTR_NDT, Number of data items to  transfer
   [then]
 
-  execute-defined? use-DMA2 defined? DMA2_S1PAR_PA not and [if]
+  execute-defined? use-DMA2 [if]
     \ DMA2_S1PAR (read-write) Reset:0x00000000
     : DMA2_S1PAR_PA ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA2_S1PAR ; \ DMA2_S1PAR_PA, Peripheral address
   [then]
 
-  defined? use-DMA2 defined? DMA2_S1M0AR_M0A not and [if]
+  [if]
     \ DMA2_S1M0AR (read-write) Reset:0x00000000
     : DMA2_S1M0AR_M0A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA2_S1M0AR ; \ DMA2_S1M0AR_M0A, Memory 0 address
   [then]
 
-  execute-defined? use-DMA2 defined? DMA2_S1M1AR_M1A not and [if]
+  execute-defined? use-DMA2 [if]
     \ DMA2_S1M1AR (read-write) Reset:0x00000000
     : DMA2_S1M1AR_M1A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA2_S1M1AR ; \ DMA2_S1M1AR_M1A, Memory 1 address used in case of Double  buffer mode
   [then]
 
-  defined? use-DMA2 defined? DMA2_S1FCR_FEIE not and [if]
+  [if]
     \ DMA2_S1FCR (multiple-access)  Reset:0x00000021
     : DMA2_S1FCR_FEIE ( -- x addr ) 7 bit DMA2_S1FCR ; \ DMA2_S1FCR_FEIE, FIFO error interrupt  enable
     : DMA2_S1FCR_FS? ( %bbb -- 1|0 ) 3 lshift DMA2_S1FCR bit@ ; \ DMA2_S1FCR_FS, FIFO status
@@ -675,7 +675,7 @@ begin-module memmap
     : DMA2_S1FCR_FTH ( %bb -- x addr ) DMA2_S1FCR ; \ DMA2_S1FCR_FTH, FIFO threshold selection
   [then]
 
-  execute-defined? use-DMA2 defined? DMA2_S2CR_CHSEL not and [if]
+  execute-defined? use-DMA2 [if]
     \ DMA2_S2CR (read-write) Reset:0x00000000
     : DMA2_S2CR_CHSEL ( %bbb -- x addr ) 25 lshift DMA2_S2CR ; \ DMA2_S2CR_CHSEL, Channel selection
     : DMA2_S2CR_MBURST ( %bb -- x addr ) 23 lshift DMA2_S2CR ; \ DMA2_S2CR_MBURST, Memory burst transfer  configuration
@@ -699,27 +699,27 @@ begin-module memmap
     : DMA2_S2CR_EN ( -- x addr ) 0 bit DMA2_S2CR ; \ DMA2_S2CR_EN, Stream enable / flag stream ready when  read low
   [then]
 
-  defined? use-DMA2 defined? DMA2_S2NDTR_NDT not and [if]
+  [if]
     \ DMA2_S2NDTR (read-write) Reset:0x00000000
     : DMA2_S2NDTR_NDT ( %bbbbbbbbbbbbbbbb -- x addr ) DMA2_S2NDTR ; \ DMA2_S2NDTR_NDT, Number of data items to  transfer
   [then]
 
-  execute-defined? use-DMA2 defined? DMA2_S2PAR_PA not and [if]
+  execute-defined? use-DMA2 [if]
     \ DMA2_S2PAR (read-write) Reset:0x00000000
     : DMA2_S2PAR_PA ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA2_S2PAR ; \ DMA2_S2PAR_PA, Peripheral address
   [then]
 
-  defined? use-DMA2 defined? DMA2_S2M0AR_M0A not and [if]
+  [if]
     \ DMA2_S2M0AR (read-write) Reset:0x00000000
     : DMA2_S2M0AR_M0A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA2_S2M0AR ; \ DMA2_S2M0AR_M0A, Memory 0 address
   [then]
 
-  execute-defined? use-DMA2 defined? DMA2_S2M1AR_M1A not and [if]
+  execute-defined? use-DMA2 [if]
     \ DMA2_S2M1AR (read-write) Reset:0x00000000
     : DMA2_S2M1AR_M1A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA2_S2M1AR ; \ DMA2_S2M1AR_M1A, Memory 1 address used in case of Double  buffer mode
   [then]
 
-  defined? use-DMA2 defined? DMA2_S2FCR_FEIE not and [if]
+  [if]
     \ DMA2_S2FCR (multiple-access)  Reset:0x00000021
     : DMA2_S2FCR_FEIE ( -- x addr ) 7 bit DMA2_S2FCR ; \ DMA2_S2FCR_FEIE, FIFO error interrupt  enable
     : DMA2_S2FCR_FS? ( %bbb -- 1|0 ) 3 lshift DMA2_S2FCR bit@ ; \ DMA2_S2FCR_FS, FIFO status
@@ -727,7 +727,7 @@ begin-module memmap
     : DMA2_S2FCR_FTH ( %bb -- x addr ) DMA2_S2FCR ; \ DMA2_S2FCR_FTH, FIFO threshold selection
   [then]
 
-  execute-defined? use-DMA2 defined? DMA2_S3CR_CHSEL not and [if]
+  execute-defined? use-DMA2 [if]
     \ DMA2_S3CR (read-write) Reset:0x00000000
     : DMA2_S3CR_CHSEL ( %bbb -- x addr ) 25 lshift DMA2_S3CR ; \ DMA2_S3CR_CHSEL, Channel selection
     : DMA2_S3CR_MBURST ( %bb -- x addr ) 23 lshift DMA2_S3CR ; \ DMA2_S3CR_MBURST, Memory burst transfer  configuration
@@ -751,27 +751,27 @@ begin-module memmap
     : DMA2_S3CR_EN ( -- x addr ) 0 bit DMA2_S3CR ; \ DMA2_S3CR_EN, Stream enable / flag stream ready when  read low
   [then]
 
-  defined? use-DMA2 defined? DMA2_S3NDTR_NDT not and [if]
+  [if]
     \ DMA2_S3NDTR (read-write) Reset:0x00000000
     : DMA2_S3NDTR_NDT ( %bbbbbbbbbbbbbbbb -- x addr ) DMA2_S3NDTR ; \ DMA2_S3NDTR_NDT, Number of data items to  transfer
   [then]
 
-  execute-defined? use-DMA2 defined? DMA2_S3PAR_PA not and [if]
+  execute-defined? use-DMA2 [if]
     \ DMA2_S3PAR (read-write) Reset:0x00000000
     : DMA2_S3PAR_PA ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA2_S3PAR ; \ DMA2_S3PAR_PA, Peripheral address
   [then]
 
-  defined? use-DMA2 defined? DMA2_S3M0AR_M0A not and [if]
+  [if]
     \ DMA2_S3M0AR (read-write) Reset:0x00000000
     : DMA2_S3M0AR_M0A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA2_S3M0AR ; \ DMA2_S3M0AR_M0A, Memory 0 address
   [then]
 
-  execute-defined? use-DMA2 defined? DMA2_S3M1AR_M1A not and [if]
+  execute-defined? use-DMA2 [if]
     \ DMA2_S3M1AR (read-write) Reset:0x00000000
     : DMA2_S3M1AR_M1A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA2_S3M1AR ; \ DMA2_S3M1AR_M1A, Memory 1 address used in case of Double  buffer mode
   [then]
 
-  defined? use-DMA2 defined? DMA2_S3FCR_FEIE not and [if]
+  [if]
     \ DMA2_S3FCR (multiple-access)  Reset:0x00000021
     : DMA2_S3FCR_FEIE ( -- x addr ) 7 bit DMA2_S3FCR ; \ DMA2_S3FCR_FEIE, FIFO error interrupt  enable
     : DMA2_S3FCR_FS? ( %bbb -- 1|0 ) 3 lshift DMA2_S3FCR bit@ ; \ DMA2_S3FCR_FS, FIFO status
@@ -779,7 +779,7 @@ begin-module memmap
     : DMA2_S3FCR_FTH ( %bb -- x addr ) DMA2_S3FCR ; \ DMA2_S3FCR_FTH, FIFO threshold selection
   [then]
 
-  execute-defined? use-DMA2 defined? DMA2_S4CR_CHSEL not and [if]
+  execute-defined? use-DMA2 [if]
     \ DMA2_S4CR (read-write) Reset:0x00000000
     : DMA2_S4CR_CHSEL ( %bbb -- x addr ) 25 lshift DMA2_S4CR ; \ DMA2_S4CR_CHSEL, Channel selection
     : DMA2_S4CR_MBURST ( %bb -- x addr ) 23 lshift DMA2_S4CR ; \ DMA2_S4CR_MBURST, Memory burst transfer  configuration
@@ -803,27 +803,27 @@ begin-module memmap
     : DMA2_S4CR_EN ( -- x addr ) 0 bit DMA2_S4CR ; \ DMA2_S4CR_EN, Stream enable / flag stream ready when  read low
   [then]
 
-  defined? use-DMA2 defined? DMA2_S4NDTR_NDT not and [if]
+  [if]
     \ DMA2_S4NDTR (read-write) Reset:0x00000000
     : DMA2_S4NDTR_NDT ( %bbbbbbbbbbbbbbbb -- x addr ) DMA2_S4NDTR ; \ DMA2_S4NDTR_NDT, Number of data items to  transfer
   [then]
 
-  execute-defined? use-DMA2 defined? DMA2_S4PAR_PA not and [if]
+  execute-defined? use-DMA2 [if]
     \ DMA2_S4PAR (read-write) Reset:0x00000000
     : DMA2_S4PAR_PA ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA2_S4PAR ; \ DMA2_S4PAR_PA, Peripheral address
   [then]
 
-  defined? use-DMA2 defined? DMA2_S4M0AR_M0A not and [if]
+  [if]
     \ DMA2_S4M0AR (read-write) Reset:0x00000000
     : DMA2_S4M0AR_M0A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA2_S4M0AR ; \ DMA2_S4M0AR_M0A, Memory 0 address
   [then]
 
-  execute-defined? use-DMA2 defined? DMA2_S4M1AR_M1A not and [if]
+  execute-defined? use-DMA2 [if]
     \ DMA2_S4M1AR (read-write) Reset:0x00000000
     : DMA2_S4M1AR_M1A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA2_S4M1AR ; \ DMA2_S4M1AR_M1A, Memory 1 address used in case of Double  buffer mode
   [then]
 
-  defined? use-DMA2 defined? DMA2_S4FCR_FEIE not and [if]
+  [if]
     \ DMA2_S4FCR (multiple-access)  Reset:0x00000021
     : DMA2_S4FCR_FEIE ( -- x addr ) 7 bit DMA2_S4FCR ; \ DMA2_S4FCR_FEIE, FIFO error interrupt  enable
     : DMA2_S4FCR_FS? ( %bbb -- 1|0 ) 3 lshift DMA2_S4FCR bit@ ; \ DMA2_S4FCR_FS, FIFO status
@@ -831,7 +831,7 @@ begin-module memmap
     : DMA2_S4FCR_FTH ( %bb -- x addr ) DMA2_S4FCR ; \ DMA2_S4FCR_FTH, FIFO threshold selection
   [then]
 
-  execute-defined? use-DMA2 defined? DMA2_S5CR_CHSEL not and [if]
+  execute-defined? use-DMA2 [if]
     \ DMA2_S5CR (read-write) Reset:0x00000000
     : DMA2_S5CR_CHSEL ( %bbb -- x addr ) 25 lshift DMA2_S5CR ; \ DMA2_S5CR_CHSEL, Channel selection
     : DMA2_S5CR_MBURST ( %bb -- x addr ) 23 lshift DMA2_S5CR ; \ DMA2_S5CR_MBURST, Memory burst transfer  configuration
@@ -855,27 +855,27 @@ begin-module memmap
     : DMA2_S5CR_EN ( -- x addr ) 0 bit DMA2_S5CR ; \ DMA2_S5CR_EN, Stream enable / flag stream ready when  read low
   [then]
 
-  defined? use-DMA2 defined? DMA2_S5NDTR_NDT not and [if]
+  [if]
     \ DMA2_S5NDTR (read-write) Reset:0x00000000
     : DMA2_S5NDTR_NDT ( %bbbbbbbbbbbbbbbb -- x addr ) DMA2_S5NDTR ; \ DMA2_S5NDTR_NDT, Number of data items to  transfer
   [then]
 
-  execute-defined? use-DMA2 defined? DMA2_S5PAR_PA not and [if]
+  execute-defined? use-DMA2 [if]
     \ DMA2_S5PAR (read-write) Reset:0x00000000
     : DMA2_S5PAR_PA ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA2_S5PAR ; \ DMA2_S5PAR_PA, Peripheral address
   [then]
 
-  defined? use-DMA2 defined? DMA2_S5M0AR_M0A not and [if]
+  [if]
     \ DMA2_S5M0AR (read-write) Reset:0x00000000
     : DMA2_S5M0AR_M0A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA2_S5M0AR ; \ DMA2_S5M0AR_M0A, Memory 0 address
   [then]
 
-  execute-defined? use-DMA2 defined? DMA2_S5M1AR_M1A not and [if]
+  execute-defined? use-DMA2 [if]
     \ DMA2_S5M1AR (read-write) Reset:0x00000000
     : DMA2_S5M1AR_M1A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA2_S5M1AR ; \ DMA2_S5M1AR_M1A, Memory 1 address used in case of Double  buffer mode
   [then]
 
-  defined? use-DMA2 defined? DMA2_S5FCR_FEIE not and [if]
+  [if]
     \ DMA2_S5FCR (multiple-access)  Reset:0x00000021
     : DMA2_S5FCR_FEIE ( -- x addr ) 7 bit DMA2_S5FCR ; \ DMA2_S5FCR_FEIE, FIFO error interrupt  enable
     : DMA2_S5FCR_FS? ( %bbb -- 1|0 ) 3 lshift DMA2_S5FCR bit@ ; \ DMA2_S5FCR_FS, FIFO status
@@ -883,7 +883,7 @@ begin-module memmap
     : DMA2_S5FCR_FTH ( %bb -- x addr ) DMA2_S5FCR ; \ DMA2_S5FCR_FTH, FIFO threshold selection
   [then]
 
-  execute-defined? use-DMA2 defined? DMA2_S6CR_CHSEL not and [if]
+  execute-defined? use-DMA2 [if]
     \ DMA2_S6CR (read-write) Reset:0x00000000
     : DMA2_S6CR_CHSEL ( %bbb -- x addr ) 25 lshift DMA2_S6CR ; \ DMA2_S6CR_CHSEL, Channel selection
     : DMA2_S6CR_MBURST ( %bb -- x addr ) 23 lshift DMA2_S6CR ; \ DMA2_S6CR_MBURST, Memory burst transfer  configuration
@@ -907,27 +907,27 @@ begin-module memmap
     : DMA2_S6CR_EN ( -- x addr ) 0 bit DMA2_S6CR ; \ DMA2_S6CR_EN, Stream enable / flag stream ready when  read low
   [then]
 
-  defined? use-DMA2 defined? DMA2_S6NDTR_NDT not and [if]
+  [if]
     \ DMA2_S6NDTR (read-write) Reset:0x00000000
     : DMA2_S6NDTR_NDT ( %bbbbbbbbbbbbbbbb -- x addr ) DMA2_S6NDTR ; \ DMA2_S6NDTR_NDT, Number of data items to  transfer
   [then]
 
-  execute-defined? use-DMA2 defined? DMA2_S6PAR_PA not and [if]
+  execute-defined? use-DMA2 [if]
     \ DMA2_S6PAR (read-write) Reset:0x00000000
     : DMA2_S6PAR_PA ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA2_S6PAR ; \ DMA2_S6PAR_PA, Peripheral address
   [then]
 
-  defined? use-DMA2 defined? DMA2_S6M0AR_M0A not and [if]
+  [if]
     \ DMA2_S6M0AR (read-write) Reset:0x00000000
     : DMA2_S6M0AR_M0A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA2_S6M0AR ; \ DMA2_S6M0AR_M0A, Memory 0 address
   [then]
 
-  execute-defined? use-DMA2 defined? DMA2_S6M1AR_M1A not and [if]
+  execute-defined? use-DMA2 [if]
     \ DMA2_S6M1AR (read-write) Reset:0x00000000
     : DMA2_S6M1AR_M1A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA2_S6M1AR ; \ DMA2_S6M1AR_M1A, Memory 1 address used in case of Double  buffer mode
   [then]
 
-  defined? use-DMA2 defined? DMA2_S6FCR_FEIE not and [if]
+  [if]
     \ DMA2_S6FCR (multiple-access)  Reset:0x00000021
     : DMA2_S6FCR_FEIE ( -- x addr ) 7 bit DMA2_S6FCR ; \ DMA2_S6FCR_FEIE, FIFO error interrupt  enable
     : DMA2_S6FCR_FS? ( %bbb -- 1|0 ) 3 lshift DMA2_S6FCR bit@ ; \ DMA2_S6FCR_FS, FIFO status
@@ -935,7 +935,7 @@ begin-module memmap
     : DMA2_S6FCR_FTH ( %bb -- x addr ) DMA2_S6FCR ; \ DMA2_S6FCR_FTH, FIFO threshold selection
   [then]
 
-  execute-defined? use-DMA2 defined? DMA2_S7CR_CHSEL not and [if]
+  execute-defined? use-DMA2 [if]
     \ DMA2_S7CR (read-write) Reset:0x00000000
     : DMA2_S7CR_CHSEL ( %bbb -- x addr ) 25 lshift DMA2_S7CR ; \ DMA2_S7CR_CHSEL, Channel selection
     : DMA2_S7CR_MBURST ( %bb -- x addr ) 23 lshift DMA2_S7CR ; \ DMA2_S7CR_MBURST, Memory burst transfer  configuration
@@ -959,27 +959,27 @@ begin-module memmap
     : DMA2_S7CR_EN ( -- x addr ) 0 bit DMA2_S7CR ; \ DMA2_S7CR_EN, Stream enable / flag stream ready when  read low
   [then]
 
-  defined? use-DMA2 defined? DMA2_S7NDTR_NDT not and [if]
+  [if]
     \ DMA2_S7NDTR (read-write) Reset:0x00000000
     : DMA2_S7NDTR_NDT ( %bbbbbbbbbbbbbbbb -- x addr ) DMA2_S7NDTR ; \ DMA2_S7NDTR_NDT, Number of data items to  transfer
   [then]
 
-  execute-defined? use-DMA2 defined? DMA2_S7PAR_PA not and [if]
+  execute-defined? use-DMA2 [if]
     \ DMA2_S7PAR (read-write) Reset:0x00000000
     : DMA2_S7PAR_PA ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA2_S7PAR ; \ DMA2_S7PAR_PA, Peripheral address
   [then]
 
-  defined? use-DMA2 defined? DMA2_S7M0AR_M0A not and [if]
+  [if]
     \ DMA2_S7M0AR (read-write) Reset:0x00000000
     : DMA2_S7M0AR_M0A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA2_S7M0AR ; \ DMA2_S7M0AR_M0A, Memory 0 address
   [then]
 
-  execute-defined? use-DMA2 defined? DMA2_S7M1AR_M1A not and [if]
+  execute-defined? use-DMA2 [if]
     \ DMA2_S7M1AR (read-write) Reset:0x00000000
     : DMA2_S7M1AR_M1A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA2_S7M1AR ; \ DMA2_S7M1AR_M1A, Memory 1 address used in case of Double  buffer mode
   [then]
 
-  defined? use-DMA2 defined? DMA2_S7FCR_FEIE not and [if]
+  [if]
     \ DMA2_S7FCR (multiple-access)  Reset:0x00000021
     : DMA2_S7FCR_FEIE ( -- x addr ) 7 bit DMA2_S7FCR ; \ DMA2_S7FCR_FEIE, FIFO error interrupt  enable
     : DMA2_S7FCR_FS? ( %bbb -- 1|0 ) 3 lshift DMA2_S7FCR bit@ ; \ DMA2_S7FCR_FS, FIFO status
@@ -987,7 +987,7 @@ begin-module memmap
     : DMA2_S7FCR_FTH ( %bb -- x addr ) DMA2_S7FCR ; \ DMA2_S7FCR_FTH, FIFO threshold selection
   [then]
 
-  execute-defined? use-DMA1 defined? DMA1_LISR_TCIF3? not and [if]
+  execute-defined? use-DMA1 [if]
     \ DMA1_LISR (read-only) Reset:0x00000000
     : DMA1_LISR_TCIF3? ( --  1|0 ) 27 bit DMA1_LISR bit@ ; \ DMA1_LISR_TCIF3, Stream x transfer complete interrupt  flag x = 3..0
     : DMA1_LISR_HTIF3? ( --  1|0 ) 26 bit DMA1_LISR bit@ ; \ DMA1_LISR_HTIF3, Stream x half transfer interrupt flag  x=3..0
@@ -1011,7 +1011,7 @@ begin-module memmap
     : DMA1_LISR_FEIF0? ( --  1|0 ) 0 bit DMA1_LISR bit@ ; \ DMA1_LISR_FEIF0, Stream x FIFO error interrupt flag  x=3..0
   [then]
 
-  defined? use-DMA1 defined? DMA1_HISR_TCIF7? not and [if]
+  [if]
     \ DMA1_HISR (read-only) Reset:0x00000000
     : DMA1_HISR_TCIF7? ( --  1|0 ) 27 bit DMA1_HISR bit@ ; \ DMA1_HISR_TCIF7, Stream x transfer complete interrupt  flag x=7..4
     : DMA1_HISR_HTIF7? ( --  1|0 ) 26 bit DMA1_HISR bit@ ; \ DMA1_HISR_HTIF7, Stream x half transfer interrupt flag  x=7..4
@@ -1035,7 +1035,7 @@ begin-module memmap
     : DMA1_HISR_FEIF4? ( --  1|0 ) 0 bit DMA1_HISR bit@ ; \ DMA1_HISR_FEIF4, Stream x FIFO error interrupt flag  x=7..4
   [then]
 
-  execute-defined? use-DMA1 defined? DMA1_LIFCR_CTCIF3 not and [if]
+  execute-defined? use-DMA1 [if]
     \ DMA1_LIFCR (read-write) Reset:0x00000000
     : DMA1_LIFCR_CTCIF3 ( -- x addr ) 27 bit DMA1_LIFCR ; \ DMA1_LIFCR_CTCIF3, Stream x clear transfer complete  interrupt flag x = 3..0
     : DMA1_LIFCR_CHTIF3 ( -- x addr ) 26 bit DMA1_LIFCR ; \ DMA1_LIFCR_CHTIF3, Stream x clear half transfer interrupt  flag x = 3..0
@@ -1059,7 +1059,7 @@ begin-module memmap
     : DMA1_LIFCR_CFEIF0 ( -- x addr ) 0 bit DMA1_LIFCR ; \ DMA1_LIFCR_CFEIF0, Stream x clear FIFO error interrupt flag  x = 3..0
   [then]
 
-  defined? use-DMA1 defined? DMA1_HIFCR_CTCIF7 not and [if]
+  [if]
     \ DMA1_HIFCR (read-write) Reset:0x00000000
     : DMA1_HIFCR_CTCIF7 ( -- x addr ) 27 bit DMA1_HIFCR ; \ DMA1_HIFCR_CTCIF7, Stream x clear transfer complete  interrupt flag x = 7..4
     : DMA1_HIFCR_CHTIF7 ( -- x addr ) 26 bit DMA1_HIFCR ; \ DMA1_HIFCR_CHTIF7, Stream x clear half transfer interrupt  flag x = 7..4
@@ -1083,7 +1083,7 @@ begin-module memmap
     : DMA1_HIFCR_CFEIF4 ( -- x addr ) 0 bit DMA1_HIFCR ; \ DMA1_HIFCR_CFEIF4, Stream x clear FIFO error interrupt flag  x = 7..4
   [then]
 
-  execute-defined? use-DMA1 defined? DMA1_S0CR_CHSEL not and [if]
+  execute-defined? use-DMA1 [if]
     \ DMA1_S0CR (read-write) Reset:0x00000000
     : DMA1_S0CR_CHSEL ( %bbb -- x addr ) 25 lshift DMA1_S0CR ; \ DMA1_S0CR_CHSEL, Channel selection
     : DMA1_S0CR_MBURST ( %bb -- x addr ) 23 lshift DMA1_S0CR ; \ DMA1_S0CR_MBURST, Memory burst transfer  configuration
@@ -1106,27 +1106,27 @@ begin-module memmap
     : DMA1_S0CR_EN ( -- x addr ) 0 bit DMA1_S0CR ; \ DMA1_S0CR_EN, Stream enable / flag stream ready when  read low
   [then]
 
-  defined? use-DMA1 defined? DMA1_S0NDTR_NDT not and [if]
+  [if]
     \ DMA1_S0NDTR (read-write) Reset:0x00000000
     : DMA1_S0NDTR_NDT ( %bbbbbbbbbbbbbbbb -- x addr ) DMA1_S0NDTR ; \ DMA1_S0NDTR_NDT, Number of data items to  transfer
   [then]
 
-  execute-defined? use-DMA1 defined? DMA1_S0PAR_PA not and [if]
+  execute-defined? use-DMA1 [if]
     \ DMA1_S0PAR (read-write) Reset:0x00000000
     : DMA1_S0PAR_PA ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA1_S0PAR ; \ DMA1_S0PAR_PA, Peripheral address
   [then]
 
-  defined? use-DMA1 defined? DMA1_S0M0AR_M0A not and [if]
+  [if]
     \ DMA1_S0M0AR (read-write) Reset:0x00000000
     : DMA1_S0M0AR_M0A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA1_S0M0AR ; \ DMA1_S0M0AR_M0A, Memory 0 address
   [then]
 
-  execute-defined? use-DMA1 defined? DMA1_S0M1AR_M1A not and [if]
+  execute-defined? use-DMA1 [if]
     \ DMA1_S0M1AR (read-write) Reset:0x00000000
     : DMA1_S0M1AR_M1A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA1_S0M1AR ; \ DMA1_S0M1AR_M1A, Memory 1 address used in case of Double  buffer mode
   [then]
 
-  defined? use-DMA1 defined? DMA1_S0FCR_FEIE not and [if]
+  [if]
     \ DMA1_S0FCR (multiple-access)  Reset:0x00000021
     : DMA1_S0FCR_FEIE ( -- x addr ) 7 bit DMA1_S0FCR ; \ DMA1_S0FCR_FEIE, FIFO error interrupt  enable
     : DMA1_S0FCR_FS? ( %bbb -- 1|0 ) 3 lshift DMA1_S0FCR bit@ ; \ DMA1_S0FCR_FS, FIFO status
@@ -1134,7 +1134,7 @@ begin-module memmap
     : DMA1_S0FCR_FTH ( %bb -- x addr ) DMA1_S0FCR ; \ DMA1_S0FCR_FTH, FIFO threshold selection
   [then]
 
-  execute-defined? use-DMA1 defined? DMA1_S1CR_CHSEL not and [if]
+  execute-defined? use-DMA1 [if]
     \ DMA1_S1CR (read-write) Reset:0x00000000
     : DMA1_S1CR_CHSEL ( %bbb -- x addr ) 25 lshift DMA1_S1CR ; \ DMA1_S1CR_CHSEL, Channel selection
     : DMA1_S1CR_MBURST ( %bb -- x addr ) 23 lshift DMA1_S1CR ; \ DMA1_S1CR_MBURST, Memory burst transfer  configuration
@@ -1158,27 +1158,27 @@ begin-module memmap
     : DMA1_S1CR_EN ( -- x addr ) 0 bit DMA1_S1CR ; \ DMA1_S1CR_EN, Stream enable / flag stream ready when  read low
   [then]
 
-  defined? use-DMA1 defined? DMA1_S1NDTR_NDT not and [if]
+  [if]
     \ DMA1_S1NDTR (read-write) Reset:0x00000000
     : DMA1_S1NDTR_NDT ( %bbbbbbbbbbbbbbbb -- x addr ) DMA1_S1NDTR ; \ DMA1_S1NDTR_NDT, Number of data items to  transfer
   [then]
 
-  execute-defined? use-DMA1 defined? DMA1_S1PAR_PA not and [if]
+  execute-defined? use-DMA1 [if]
     \ DMA1_S1PAR (read-write) Reset:0x00000000
     : DMA1_S1PAR_PA ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA1_S1PAR ; \ DMA1_S1PAR_PA, Peripheral address
   [then]
 
-  defined? use-DMA1 defined? DMA1_S1M0AR_M0A not and [if]
+  [if]
     \ DMA1_S1M0AR (read-write) Reset:0x00000000
     : DMA1_S1M0AR_M0A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA1_S1M0AR ; \ DMA1_S1M0AR_M0A, Memory 0 address
   [then]
 
-  execute-defined? use-DMA1 defined? DMA1_S1M1AR_M1A not and [if]
+  execute-defined? use-DMA1 [if]
     \ DMA1_S1M1AR (read-write) Reset:0x00000000
     : DMA1_S1M1AR_M1A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA1_S1M1AR ; \ DMA1_S1M1AR_M1A, Memory 1 address used in case of Double  buffer mode
   [then]
 
-  defined? use-DMA1 defined? DMA1_S1FCR_FEIE not and [if]
+  [if]
     \ DMA1_S1FCR (multiple-access)  Reset:0x00000021
     : DMA1_S1FCR_FEIE ( -- x addr ) 7 bit DMA1_S1FCR ; \ DMA1_S1FCR_FEIE, FIFO error interrupt  enable
     : DMA1_S1FCR_FS? ( %bbb -- 1|0 ) 3 lshift DMA1_S1FCR bit@ ; \ DMA1_S1FCR_FS, FIFO status
@@ -1186,7 +1186,7 @@ begin-module memmap
     : DMA1_S1FCR_FTH ( %bb -- x addr ) DMA1_S1FCR ; \ DMA1_S1FCR_FTH, FIFO threshold selection
   [then]
 
-  execute-defined? use-DMA1 defined? DMA1_S2CR_CHSEL not and [if]
+  execute-defined? use-DMA1 [if]
     \ DMA1_S2CR (read-write) Reset:0x00000000
     : DMA1_S2CR_CHSEL ( %bbb -- x addr ) 25 lshift DMA1_S2CR ; \ DMA1_S2CR_CHSEL, Channel selection
     : DMA1_S2CR_MBURST ( %bb -- x addr ) 23 lshift DMA1_S2CR ; \ DMA1_S2CR_MBURST, Memory burst transfer  configuration
@@ -1210,27 +1210,27 @@ begin-module memmap
     : DMA1_S2CR_EN ( -- x addr ) 0 bit DMA1_S2CR ; \ DMA1_S2CR_EN, Stream enable / flag stream ready when  read low
   [then]
 
-  defined? use-DMA1 defined? DMA1_S2NDTR_NDT not and [if]
+  [if]
     \ DMA1_S2NDTR (read-write) Reset:0x00000000
     : DMA1_S2NDTR_NDT ( %bbbbbbbbbbbbbbbb -- x addr ) DMA1_S2NDTR ; \ DMA1_S2NDTR_NDT, Number of data items to  transfer
   [then]
 
-  execute-defined? use-DMA1 defined? DMA1_S2PAR_PA not and [if]
+  execute-defined? use-DMA1 [if]
     \ DMA1_S2PAR (read-write) Reset:0x00000000
     : DMA1_S2PAR_PA ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA1_S2PAR ; \ DMA1_S2PAR_PA, Peripheral address
   [then]
 
-  defined? use-DMA1 defined? DMA1_S2M0AR_M0A not and [if]
+  [if]
     \ DMA1_S2M0AR (read-write) Reset:0x00000000
     : DMA1_S2M0AR_M0A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA1_S2M0AR ; \ DMA1_S2M0AR_M0A, Memory 0 address
   [then]
 
-  execute-defined? use-DMA1 defined? DMA1_S2M1AR_M1A not and [if]
+  execute-defined? use-DMA1 [if]
     \ DMA1_S2M1AR (read-write) Reset:0x00000000
     : DMA1_S2M1AR_M1A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA1_S2M1AR ; \ DMA1_S2M1AR_M1A, Memory 1 address used in case of Double  buffer mode
   [then]
 
-  defined? use-DMA1 defined? DMA1_S2FCR_FEIE not and [if]
+  [if]
     \ DMA1_S2FCR (multiple-access)  Reset:0x00000021
     : DMA1_S2FCR_FEIE ( -- x addr ) 7 bit DMA1_S2FCR ; \ DMA1_S2FCR_FEIE, FIFO error interrupt  enable
     : DMA1_S2FCR_FS? ( %bbb -- 1|0 ) 3 lshift DMA1_S2FCR bit@ ; \ DMA1_S2FCR_FS, FIFO status
@@ -1238,7 +1238,7 @@ begin-module memmap
     : DMA1_S2FCR_FTH ( %bb -- x addr ) DMA1_S2FCR ; \ DMA1_S2FCR_FTH, FIFO threshold selection
   [then]
 
-  execute-defined? use-DMA1 defined? DMA1_S3CR_CHSEL not and [if]
+  execute-defined? use-DMA1 [if]
     \ DMA1_S3CR (read-write) Reset:0x00000000
     : DMA1_S3CR_CHSEL ( %bbb -- x addr ) 25 lshift DMA1_S3CR ; \ DMA1_S3CR_CHSEL, Channel selection
     : DMA1_S3CR_MBURST ( %bb -- x addr ) 23 lshift DMA1_S3CR ; \ DMA1_S3CR_MBURST, Memory burst transfer  configuration
@@ -1262,27 +1262,27 @@ begin-module memmap
     : DMA1_S3CR_EN ( -- x addr ) 0 bit DMA1_S3CR ; \ DMA1_S3CR_EN, Stream enable / flag stream ready when  read low
   [then]
 
-  defined? use-DMA1 defined? DMA1_S3NDTR_NDT not and [if]
+  [if]
     \ DMA1_S3NDTR (read-write) Reset:0x00000000
     : DMA1_S3NDTR_NDT ( %bbbbbbbbbbbbbbbb -- x addr ) DMA1_S3NDTR ; \ DMA1_S3NDTR_NDT, Number of data items to  transfer
   [then]
 
-  execute-defined? use-DMA1 defined? DMA1_S3PAR_PA not and [if]
+  execute-defined? use-DMA1 [if]
     \ DMA1_S3PAR (read-write) Reset:0x00000000
     : DMA1_S3PAR_PA ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA1_S3PAR ; \ DMA1_S3PAR_PA, Peripheral address
   [then]
 
-  defined? use-DMA1 defined? DMA1_S3M0AR_M0A not and [if]
+  [if]
     \ DMA1_S3M0AR (read-write) Reset:0x00000000
     : DMA1_S3M0AR_M0A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA1_S3M0AR ; \ DMA1_S3M0AR_M0A, Memory 0 address
   [then]
 
-  execute-defined? use-DMA1 defined? DMA1_S3M1AR_M1A not and [if]
+  execute-defined? use-DMA1 [if]
     \ DMA1_S3M1AR (read-write) Reset:0x00000000
     : DMA1_S3M1AR_M1A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA1_S3M1AR ; \ DMA1_S3M1AR_M1A, Memory 1 address used in case of Double  buffer mode
   [then]
 
-  defined? use-DMA1 defined? DMA1_S3FCR_FEIE not and [if]
+  [if]
     \ DMA1_S3FCR (multiple-access)  Reset:0x00000021
     : DMA1_S3FCR_FEIE ( -- x addr ) 7 bit DMA1_S3FCR ; \ DMA1_S3FCR_FEIE, FIFO error interrupt  enable
     : DMA1_S3FCR_FS? ( %bbb -- 1|0 ) 3 lshift DMA1_S3FCR bit@ ; \ DMA1_S3FCR_FS, FIFO status
@@ -1290,7 +1290,7 @@ begin-module memmap
     : DMA1_S3FCR_FTH ( %bb -- x addr ) DMA1_S3FCR ; \ DMA1_S3FCR_FTH, FIFO threshold selection
   [then]
 
-  execute-defined? use-DMA1 defined? DMA1_S4CR_CHSEL not and [if]
+  execute-defined? use-DMA1 [if]
     \ DMA1_S4CR (read-write) Reset:0x00000000
     : DMA1_S4CR_CHSEL ( %bbb -- x addr ) 25 lshift DMA1_S4CR ; \ DMA1_S4CR_CHSEL, Channel selection
     : DMA1_S4CR_MBURST ( %bb -- x addr ) 23 lshift DMA1_S4CR ; \ DMA1_S4CR_MBURST, Memory burst transfer  configuration
@@ -1314,27 +1314,27 @@ begin-module memmap
     : DMA1_S4CR_EN ( -- x addr ) 0 bit DMA1_S4CR ; \ DMA1_S4CR_EN, Stream enable / flag stream ready when  read low
   [then]
 
-  defined? use-DMA1 defined? DMA1_S4NDTR_NDT not and [if]
+  [if]
     \ DMA1_S4NDTR (read-write) Reset:0x00000000
     : DMA1_S4NDTR_NDT ( %bbbbbbbbbbbbbbbb -- x addr ) DMA1_S4NDTR ; \ DMA1_S4NDTR_NDT, Number of data items to  transfer
   [then]
 
-  execute-defined? use-DMA1 defined? DMA1_S4PAR_PA not and [if]
+  execute-defined? use-DMA1 [if]
     \ DMA1_S4PAR (read-write) Reset:0x00000000
     : DMA1_S4PAR_PA ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA1_S4PAR ; \ DMA1_S4PAR_PA, Peripheral address
   [then]
 
-  defined? use-DMA1 defined? DMA1_S4M0AR_M0A not and [if]
+  [if]
     \ DMA1_S4M0AR (read-write) Reset:0x00000000
     : DMA1_S4M0AR_M0A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA1_S4M0AR ; \ DMA1_S4M0AR_M0A, Memory 0 address
   [then]
 
-  execute-defined? use-DMA1 defined? DMA1_S4M1AR_M1A not and [if]
+  execute-defined? use-DMA1 [if]
     \ DMA1_S4M1AR (read-write) Reset:0x00000000
     : DMA1_S4M1AR_M1A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA1_S4M1AR ; \ DMA1_S4M1AR_M1A, Memory 1 address used in case of Double  buffer mode
   [then]
 
-  defined? use-DMA1 defined? DMA1_S4FCR_FEIE not and [if]
+  [if]
     \ DMA1_S4FCR (multiple-access)  Reset:0x00000021
     : DMA1_S4FCR_FEIE ( -- x addr ) 7 bit DMA1_S4FCR ; \ DMA1_S4FCR_FEIE, FIFO error interrupt  enable
     : DMA1_S4FCR_FS? ( %bbb -- 1|0 ) 3 lshift DMA1_S4FCR bit@ ; \ DMA1_S4FCR_FS, FIFO status
@@ -1342,7 +1342,7 @@ begin-module memmap
     : DMA1_S4FCR_FTH ( %bb -- x addr ) DMA1_S4FCR ; \ DMA1_S4FCR_FTH, FIFO threshold selection
   [then]
 
-  execute-defined? use-DMA1 defined? DMA1_S5CR_CHSEL not and [if]
+  execute-defined? use-DMA1 [if]
     \ DMA1_S5CR (read-write) Reset:0x00000000
     : DMA1_S5CR_CHSEL ( %bbb -- x addr ) 25 lshift DMA1_S5CR ; \ DMA1_S5CR_CHSEL, Channel selection
     : DMA1_S5CR_MBURST ( %bb -- x addr ) 23 lshift DMA1_S5CR ; \ DMA1_S5CR_MBURST, Memory burst transfer  configuration
@@ -1366,27 +1366,27 @@ begin-module memmap
     : DMA1_S5CR_EN ( -- x addr ) 0 bit DMA1_S5CR ; \ DMA1_S5CR_EN, Stream enable / flag stream ready when  read low
   [then]
 
-  defined? use-DMA1 defined? DMA1_S5NDTR_NDT not and [if]
+  [if]
     \ DMA1_S5NDTR (read-write) Reset:0x00000000
     : DMA1_S5NDTR_NDT ( %bbbbbbbbbbbbbbbb -- x addr ) DMA1_S5NDTR ; \ DMA1_S5NDTR_NDT, Number of data items to  transfer
   [then]
 
-  execute-defined? use-DMA1 defined? DMA1_S5PAR_PA not and [if]
+  execute-defined? use-DMA1 [if]
     \ DMA1_S5PAR (read-write) Reset:0x00000000
     : DMA1_S5PAR_PA ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA1_S5PAR ; \ DMA1_S5PAR_PA, Peripheral address
   [then]
 
-  defined? use-DMA1 defined? DMA1_S5M0AR_M0A not and [if]
+  [if]
     \ DMA1_S5M0AR (read-write) Reset:0x00000000
     : DMA1_S5M0AR_M0A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA1_S5M0AR ; \ DMA1_S5M0AR_M0A, Memory 0 address
   [then]
 
-  execute-defined? use-DMA1 defined? DMA1_S5M1AR_M1A not and [if]
+  execute-defined? use-DMA1 [if]
     \ DMA1_S5M1AR (read-write) Reset:0x00000000
     : DMA1_S5M1AR_M1A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA1_S5M1AR ; \ DMA1_S5M1AR_M1A, Memory 1 address used in case of Double  buffer mode
   [then]
 
-  defined? use-DMA1 defined? DMA1_S5FCR_FEIE not and [if]
+  [if]
     \ DMA1_S5FCR (multiple-access)  Reset:0x00000021
     : DMA1_S5FCR_FEIE ( -- x addr ) 7 bit DMA1_S5FCR ; \ DMA1_S5FCR_FEIE, FIFO error interrupt  enable
     : DMA1_S5FCR_FS? ( %bbb -- 1|0 ) 3 lshift DMA1_S5FCR bit@ ; \ DMA1_S5FCR_FS, FIFO status
@@ -1394,7 +1394,7 @@ begin-module memmap
     : DMA1_S5FCR_FTH ( %bb -- x addr ) DMA1_S5FCR ; \ DMA1_S5FCR_FTH, FIFO threshold selection
   [then]
 
-  execute-defined? use-DMA1 defined? DMA1_S6CR_CHSEL not and [if]
+  execute-defined? use-DMA1 [if]
     \ DMA1_S6CR (read-write) Reset:0x00000000
     : DMA1_S6CR_CHSEL ( %bbb -- x addr ) 25 lshift DMA1_S6CR ; \ DMA1_S6CR_CHSEL, Channel selection
     : DMA1_S6CR_MBURST ( %bb -- x addr ) 23 lshift DMA1_S6CR ; \ DMA1_S6CR_MBURST, Memory burst transfer  configuration
@@ -1418,27 +1418,27 @@ begin-module memmap
     : DMA1_S6CR_EN ( -- x addr ) 0 bit DMA1_S6CR ; \ DMA1_S6CR_EN, Stream enable / flag stream ready when  read low
   [then]
 
-  defined? use-DMA1 defined? DMA1_S6NDTR_NDT not and [if]
+  [if]
     \ DMA1_S6NDTR (read-write) Reset:0x00000000
     : DMA1_S6NDTR_NDT ( %bbbbbbbbbbbbbbbb -- x addr ) DMA1_S6NDTR ; \ DMA1_S6NDTR_NDT, Number of data items to  transfer
   [then]
 
-  execute-defined? use-DMA1 defined? DMA1_S6PAR_PA not and [if]
+  execute-defined? use-DMA1 [if]
     \ DMA1_S6PAR (read-write) Reset:0x00000000
     : DMA1_S6PAR_PA ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA1_S6PAR ; \ DMA1_S6PAR_PA, Peripheral address
   [then]
 
-  defined? use-DMA1 defined? DMA1_S6M0AR_M0A not and [if]
+  [if]
     \ DMA1_S6M0AR (read-write) Reset:0x00000000
     : DMA1_S6M0AR_M0A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA1_S6M0AR ; \ DMA1_S6M0AR_M0A, Memory 0 address
   [then]
 
-  execute-defined? use-DMA1 defined? DMA1_S6M1AR_M1A not and [if]
+  execute-defined? use-DMA1 [if]
     \ DMA1_S6M1AR (read-write) Reset:0x00000000
     : DMA1_S6M1AR_M1A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA1_S6M1AR ; \ DMA1_S6M1AR_M1A, Memory 1 address used in case of Double  buffer mode
   [then]
 
-  defined? use-DMA1 defined? DMA1_S6FCR_FEIE not and [if]
+  [if]
     \ DMA1_S6FCR (multiple-access)  Reset:0x00000021
     : DMA1_S6FCR_FEIE ( -- x addr ) 7 bit DMA1_S6FCR ; \ DMA1_S6FCR_FEIE, FIFO error interrupt  enable
     : DMA1_S6FCR_FS? ( %bbb -- 1|0 ) 3 lshift DMA1_S6FCR bit@ ; \ DMA1_S6FCR_FS, FIFO status
@@ -1446,7 +1446,7 @@ begin-module memmap
     : DMA1_S6FCR_FTH ( %bb -- x addr ) DMA1_S6FCR ; \ DMA1_S6FCR_FTH, FIFO threshold selection
   [then]
 
-  execute-defined? use-DMA1 defined? DMA1_S7CR_CHSEL not and [if]
+  execute-defined? use-DMA1 [if]
     \ DMA1_S7CR (read-write) Reset:0x00000000
     : DMA1_S7CR_CHSEL ( %bbb -- x addr ) 25 lshift DMA1_S7CR ; \ DMA1_S7CR_CHSEL, Channel selection
     : DMA1_S7CR_MBURST ( %bb -- x addr ) 23 lshift DMA1_S7CR ; \ DMA1_S7CR_MBURST, Memory burst transfer  configuration
@@ -1470,27 +1470,27 @@ begin-module memmap
     : DMA1_S7CR_EN ( -- x addr ) 0 bit DMA1_S7CR ; \ DMA1_S7CR_EN, Stream enable / flag stream ready when  read low
   [then]
 
-  defined? use-DMA1 defined? DMA1_S7NDTR_NDT not and [if]
+  [if]
     \ DMA1_S7NDTR (read-write) Reset:0x00000000
     : DMA1_S7NDTR_NDT ( %bbbbbbbbbbbbbbbb -- x addr ) DMA1_S7NDTR ; \ DMA1_S7NDTR_NDT, Number of data items to  transfer
   [then]
 
-  execute-defined? use-DMA1 defined? DMA1_S7PAR_PA not and [if]
+  execute-defined? use-DMA1 [if]
     \ DMA1_S7PAR (read-write) Reset:0x00000000
     : DMA1_S7PAR_PA ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA1_S7PAR ; \ DMA1_S7PAR_PA, Peripheral address
   [then]
 
-  defined? use-DMA1 defined? DMA1_S7M0AR_M0A not and [if]
+  [if]
     \ DMA1_S7M0AR (read-write) Reset:0x00000000
     : DMA1_S7M0AR_M0A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA1_S7M0AR ; \ DMA1_S7M0AR_M0A, Memory 0 address
   [then]
 
-  execute-defined? use-DMA1 defined? DMA1_S7M1AR_M1A not and [if]
+  execute-defined? use-DMA1 [if]
     \ DMA1_S7M1AR (read-write) Reset:0x00000000
     : DMA1_S7M1AR_M1A ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) DMA1_S7M1AR ; \ DMA1_S7M1AR_M1A, Memory 1 address used in case of Double  buffer mode
   [then]
 
-  defined? use-DMA1 defined? DMA1_S7FCR_FEIE not and [if]
+  [if]
     \ DMA1_S7FCR (multiple-access)  Reset:0x00000021
     : DMA1_S7FCR_FEIE ( -- x addr ) 7 bit DMA1_S7FCR ; \ DMA1_S7FCR_FEIE, FIFO error interrupt  enable
     : DMA1_S7FCR_FS? ( %bbb -- 1|0 ) 3 lshift DMA1_S7FCR bit@ ; \ DMA1_S7FCR_FS, FIFO status
@@ -1498,7 +1498,7 @@ begin-module memmap
     : DMA1_S7FCR_FTH ( %bb -- x addr ) DMA1_S7FCR ; \ DMA1_S7FCR_FTH, FIFO threshold selection
   [then]
 
-  execute-defined? use-RCC defined? RCC_CR_PLLI2SRDY? not and [if]
+  execute-defined? use-RCC [if]
     \ RCC_CR (multiple-access)  Reset:0x00000083
     : RCC_CR_PLLI2SRDY? ( -- 1|0 ) 27 bit RCC_CR bit@ ; \ RCC_CR_PLLI2SRDY, PLLI2S clock ready flag
     : RCC_CR_PLLI2SON ( -- x addr ) 26 bit RCC_CR ; \ RCC_CR_PLLI2SON, PLLI2S enable
@@ -1514,7 +1514,7 @@ begin-module memmap
     : RCC_CR_HSION ( -- x addr ) 0 bit RCC_CR ; \ RCC_CR_HSION, Internal high-speed clock  enable
   [then]
 
-  defined? use-RCC defined? RCC_PLLCFGR_PLLQ3 not and [if]
+  [if]
     \ RCC_PLLCFGR (read-write) Reset:0x24003010
     : RCC_PLLCFGR_PLLQ3 ( -- x addr ) 27 bit RCC_PLLCFGR ; \ RCC_PLLCFGR_PLLQ3, Main PLL PLL division factor for USB  OTG FS, SDIO and random number generator  clocks
     : RCC_PLLCFGR_PLLQ2 ( -- x addr ) 26 bit RCC_PLLCFGR ; \ RCC_PLLCFGR_PLLQ2, Main PLL PLL division factor for USB  OTG FS, SDIO and random number generator  clocks
@@ -1540,7 +1540,7 @@ begin-module memmap
     : RCC_PLLCFGR_PLLM0 ( -- x addr ) 0 bit RCC_PLLCFGR ; \ RCC_PLLCFGR_PLLM0, Division factor for the main PLL PLL  and audio PLL PLLI2S input clock
   [then]
 
-  execute-defined? use-RCC defined? RCC_CFGR_MCO2 not and [if]
+  execute-defined? use-RCC [if]
     \ RCC_CFGR (multiple-access)  Reset:0x00000000
     : RCC_CFGR_MCO2 ( %bb -- x addr ) 30 lshift RCC_CFGR ; \ RCC_CFGR_MCO2, Microcontroller clock output  2
     : RCC_CFGR_MCO2PRE ( %bbb -- x addr ) 27 lshift RCC_CFGR ; \ RCC_CFGR_MCO2PRE, MCO2 prescaler
@@ -1557,7 +1557,7 @@ begin-module memmap
     : RCC_CFGR_SW0 ( -- x addr ) 0 bit RCC_CFGR ; \ RCC_CFGR_SW0, System clock switch
   [then]
 
-  defined? use-RCC defined? RCC_CIR_CSSC not and [if]
+  [if]
     \ RCC_CIR (multiple-access)  Reset:0x00000000
     : RCC_CIR_CSSC ( -- x addr ) 23 bit RCC_CIR ; \ RCC_CIR_CSSC, Clock security system interrupt  clear
     : RCC_CIR_PLLI2SRDYC ( -- x addr ) 21 bit RCC_CIR ; \ RCC_CIR_PLLI2SRDYC, PLLI2S ready interrupt  clear
@@ -1581,7 +1581,7 @@ begin-module memmap
     : RCC_CIR_LSIRDYF? ( -- 1|0 ) 0 bit RCC_CIR bit@ ; \ RCC_CIR_LSIRDYF, LSI ready interrupt flag
   [then]
 
-  execute-defined? use-RCC defined? RCC_AHB1RSTR_OTGHSRST not and [if]
+  execute-defined? use-RCC [if]
     \ RCC_AHB1RSTR (read-write) Reset:0x00000000
     : RCC_AHB1RSTR_OTGHSRST ( -- x addr ) 29 bit RCC_AHB1RSTR ; \ RCC_AHB1RSTR_OTGHSRST, USB OTG HS module reset
     : RCC_AHB1RSTR_ETHMACRST ( -- x addr ) 25 bit RCC_AHB1RSTR ; \ RCC_AHB1RSTR_ETHMACRST, Ethernet MAC reset
@@ -1599,19 +1599,19 @@ begin-module memmap
     : RCC_AHB1RSTR_GPIOARST ( -- x addr ) 0 bit RCC_AHB1RSTR ; \ RCC_AHB1RSTR_GPIOARST, IO port A reset
   [then]
 
-  defined? use-RCC defined? RCC_AHB2RSTR_OTGFSRST not and [if]
+  [if]
     \ RCC_AHB2RSTR (read-write) Reset:0x00000000
     : RCC_AHB2RSTR_OTGFSRST ( -- x addr ) 7 bit RCC_AHB2RSTR ; \ RCC_AHB2RSTR_OTGFSRST, USB OTG FS module reset
     : RCC_AHB2RSTR_RNGRST ( -- x addr ) 6 bit RCC_AHB2RSTR ; \ RCC_AHB2RSTR_RNGRST, Random number generator module  reset
     : RCC_AHB2RSTR_DCMIRST ( -- x addr ) 0 bit RCC_AHB2RSTR ; \ RCC_AHB2RSTR_DCMIRST, Camera interface reset
   [then]
 
-  execute-defined? use-RCC defined? RCC_AHB3RSTR_FSMCRST not and [if]
+  execute-defined? use-RCC [if]
     \ RCC_AHB3RSTR (read-write) Reset:0x00000000
     : RCC_AHB3RSTR_FSMCRST ( -- x addr ) 0 bit RCC_AHB3RSTR ; \ RCC_AHB3RSTR_FSMCRST, Flexible static memory controller module  reset
   [then]
 
-  defined? use-RCC defined? RCC_APB1RSTR_DACRST not and [if]
+  [if]
     \ RCC_APB1RSTR (read-write) Reset:0x00000000
     : RCC_APB1RSTR_DACRST ( -- x addr ) 29 bit RCC_APB1RSTR ; \ RCC_APB1RSTR_DACRST, DAC reset
     : RCC_APB1RSTR_PWRRST ( -- x addr ) 28 bit RCC_APB1RSTR ; \ RCC_APB1RSTR_PWRRST, Power interface reset
@@ -1638,7 +1638,7 @@ begin-module memmap
     : RCC_APB1RSTR_TIM2RST ( -- x addr ) 0 bit RCC_APB1RSTR ; \ RCC_APB1RSTR_TIM2RST, TIM2 reset
   [then]
 
-  execute-defined? use-RCC defined? RCC_APB2RSTR_TIM11RST not and [if]
+  execute-defined? use-RCC [if]
     \ RCC_APB2RSTR (read-write) Reset:0x00000000
     : RCC_APB2RSTR_TIM11RST ( -- x addr ) 18 bit RCC_APB2RSTR ; \ RCC_APB2RSTR_TIM11RST, TIM11 reset
     : RCC_APB2RSTR_TIM10RST ( -- x addr ) 17 bit RCC_APB2RSTR ; \ RCC_APB2RSTR_TIM10RST, TIM10 reset
@@ -1653,7 +1653,7 @@ begin-module memmap
     : RCC_APB2RSTR_TIM1RST ( -- x addr ) 0 bit RCC_APB2RSTR ; \ RCC_APB2RSTR_TIM1RST, TIM1 reset
   [then]
 
-  defined? use-RCC defined? RCC_AHB1ENR_OTGHSULPIEN not and [if]
+  [if]
     \ RCC_AHB1ENR (read-write) Reset:0x00100000
     : RCC_AHB1ENR_OTGHSULPIEN ( -- x addr ) 30 bit RCC_AHB1ENR ; \ RCC_AHB1ENR_OTGHSULPIEN, USB OTG HSULPI clock  enable
     : RCC_AHB1ENR_OTGHSEN ( -- x addr ) 29 bit RCC_AHB1ENR ; \ RCC_AHB1ENR_OTGHSEN, USB OTG HS clock enable
@@ -1676,19 +1676,19 @@ begin-module memmap
     : RCC_AHB1ENR_GPIOAEN ( -- x addr ) 0 bit RCC_AHB1ENR ; \ RCC_AHB1ENR_GPIOAEN, IO port A clock enable
   [then]
 
-  execute-defined? use-RCC defined? RCC_AHB2ENR_OTGFSEN not and [if]
+  execute-defined? use-RCC [if]
     \ RCC_AHB2ENR (read-write) Reset:0x00000000
     : RCC_AHB2ENR_OTGFSEN ( -- x addr ) 7 bit RCC_AHB2ENR ; \ RCC_AHB2ENR_OTGFSEN, USB OTG FS clock enable
     : RCC_AHB2ENR_RNGEN ( -- x addr ) 6 bit RCC_AHB2ENR ; \ RCC_AHB2ENR_RNGEN, Random number generator clock  enable
     : RCC_AHB2ENR_DCMIEN ( -- x addr ) 0 bit RCC_AHB2ENR ; \ RCC_AHB2ENR_DCMIEN, Camera interface enable
   [then]
 
-  defined? use-RCC defined? RCC_AHB3ENR_FSMCEN not and [if]
+  [if]
     \ RCC_AHB3ENR (read-write) Reset:0x00000000
     : RCC_AHB3ENR_FSMCEN ( -- x addr ) 0 bit RCC_AHB3ENR ; \ RCC_AHB3ENR_FSMCEN, Flexible static memory controller module  clock enable
   [then]
 
-  execute-defined? use-RCC defined? RCC_APB1ENR_DACEN not and [if]
+  execute-defined? use-RCC [if]
     \ RCC_APB1ENR (read-write) Reset:0x00000000
     : RCC_APB1ENR_DACEN ( -- x addr ) 29 bit RCC_APB1ENR ; \ RCC_APB1ENR_DACEN, DAC interface clock enable
     : RCC_APB1ENR_PWREN ( -- x addr ) 28 bit RCC_APB1ENR ; \ RCC_APB1ENR_PWREN, Power interface clock  enable
@@ -1715,7 +1715,7 @@ begin-module memmap
     : RCC_APB1ENR_TIM2EN ( -- x addr ) 0 bit RCC_APB1ENR ; \ RCC_APB1ENR_TIM2EN, TIM2 clock enable
   [then]
 
-  defined? use-RCC defined? RCC_APB2ENR_TIM11EN not and [if]
+  [if]
     \ RCC_APB2ENR (read-write) Reset:0x00000000
     : RCC_APB2ENR_TIM11EN ( -- x addr ) 18 bit RCC_APB2ENR ; \ RCC_APB2ENR_TIM11EN, TIM11 clock enable
     : RCC_APB2ENR_TIM10EN ( -- x addr ) 17 bit RCC_APB2ENR ; \ RCC_APB2ENR_TIM10EN, TIM10 clock enable
@@ -1732,7 +1732,7 @@ begin-module memmap
     : RCC_APB2ENR_TIM1EN ( -- x addr ) 0 bit RCC_APB2ENR ; \ RCC_APB2ENR_TIM1EN, TIM1 clock enable
   [then]
 
-  execute-defined? use-RCC defined? RCC_AHB1LPENR_OTGHSULPILPEN not and [if]
+  execute-defined? use-RCC [if]
     \ RCC_AHB1LPENR (read-write) Reset:0x7E6791FF
     : RCC_AHB1LPENR_OTGHSULPILPEN ( -- x addr ) 30 bit RCC_AHB1LPENR ; \ RCC_AHB1LPENR_OTGHSULPILPEN, USB OTG HS ULPI clock enable during  Sleep mode
     : RCC_AHB1LPENR_OTGHSLPEN ( -- x addr ) 29 bit RCC_AHB1LPENR ; \ RCC_AHB1LPENR_OTGHSLPEN, USB OTG HS clock enable during Sleep  mode
@@ -1758,19 +1758,19 @@ begin-module memmap
     : RCC_AHB1LPENR_GPIOALPEN ( -- x addr ) 0 bit RCC_AHB1LPENR ; \ RCC_AHB1LPENR_GPIOALPEN, IO port A clock enable during sleep  mode
   [then]
 
-  defined? use-RCC defined? RCC_AHB2LPENR_OTGFSLPEN not and [if]
+  [if]
     \ RCC_AHB2LPENR (read-write) Reset:0x000000F1
     : RCC_AHB2LPENR_OTGFSLPEN ( -- x addr ) 7 bit RCC_AHB2LPENR ; \ RCC_AHB2LPENR_OTGFSLPEN, USB OTG FS clock enable during Sleep  mode
     : RCC_AHB2LPENR_RNGLPEN ( -- x addr ) 6 bit RCC_AHB2LPENR ; \ RCC_AHB2LPENR_RNGLPEN, Random number generator clock enable  during Sleep mode
     : RCC_AHB2LPENR_DCMILPEN ( -- x addr ) 0 bit RCC_AHB2LPENR ; \ RCC_AHB2LPENR_DCMILPEN, Camera interface enable during Sleep  mode
   [then]
 
-  execute-defined? use-RCC defined? RCC_AHB3LPENR_FSMCLPEN not and [if]
+  execute-defined? use-RCC [if]
     \ RCC_AHB3LPENR (read-write) Reset:0x00000001
     : RCC_AHB3LPENR_FSMCLPEN ( -- x addr ) 0 bit RCC_AHB3LPENR ; \ RCC_AHB3LPENR_FSMCLPEN, Flexible static memory controller module  clock enable during Sleep mode
   [then]
 
-  defined? use-RCC defined? RCC_APB1LPENR_DACLPEN not and [if]
+  [if]
     \ RCC_APB1LPENR (read-write) Reset:0x36FEC9FF
     : RCC_APB1LPENR_DACLPEN ( -- x addr ) 29 bit RCC_APB1LPENR ; \ RCC_APB1LPENR_DACLPEN, DAC interface clock enable during Sleep  mode
     : RCC_APB1LPENR_PWRLPEN ( -- x addr ) 28 bit RCC_APB1LPENR ; \ RCC_APB1LPENR_PWRLPEN, Power interface clock enable during  Sleep mode
@@ -1797,7 +1797,7 @@ begin-module memmap
     : RCC_APB1LPENR_TIM2LPEN ( -- x addr ) 0 bit RCC_APB1LPENR ; \ RCC_APB1LPENR_TIM2LPEN, TIM2 clock enable during Sleep  mode
   [then]
 
-  execute-defined? use-RCC defined? RCC_APB2LPENR_TIM11LPEN not and [if]
+  execute-defined? use-RCC [if]
     \ RCC_APB2LPENR (read-write) Reset:0x00075F33
     : RCC_APB2LPENR_TIM11LPEN ( -- x addr ) 18 bit RCC_APB2LPENR ; \ RCC_APB2LPENR_TIM11LPEN, TIM11 clock enable during Sleep  mode
     : RCC_APB2LPENR_TIM10LPEN ( -- x addr ) 17 bit RCC_APB2LPENR ; \ RCC_APB2LPENR_TIM10LPEN, TIM10 clock enable during Sleep  mode
@@ -1814,7 +1814,7 @@ begin-module memmap
     : RCC_APB2LPENR_TIM1LPEN ( -- x addr ) 0 bit RCC_APB2LPENR ; \ RCC_APB2LPENR_TIM1LPEN, TIM1 clock enable during Sleep  mode
   [then]
 
-  defined? use-RCC defined? RCC_BDCR_BDRST not and [if]
+  [if]
     \ RCC_BDCR (multiple-access)  Reset:0x00000000
     : RCC_BDCR_BDRST ( -- x addr ) 16 bit RCC_BDCR ; \ RCC_BDCR_BDRST, Backup domain software  reset
     : RCC_BDCR_RTCEN ( -- x addr ) 15 bit RCC_BDCR ; \ RCC_BDCR_RTCEN, RTC clock enable
@@ -1825,7 +1825,7 @@ begin-module memmap
     : RCC_BDCR_LSEON ( -- x addr ) 0 bit RCC_BDCR ; \ RCC_BDCR_LSEON, External low-speed oscillator  enable
   [then]
 
-  execute-defined? use-RCC defined? RCC_CSR_LPWRRSTF? not and [if]
+  execute-defined? use-RCC [if]
     \ RCC_CSR (multiple-access)  Reset:0x0E000000
     : RCC_CSR_LPWRRSTF? ( -- 1|0 ) 31 bit RCC_CSR bit@ ; \ RCC_CSR_LPWRRSTF, Low-power reset flag
     : RCC_CSR_WWDGRSTF? ( -- 1|0 ) 30 bit RCC_CSR bit@ ; \ RCC_CSR_WWDGRSTF, Window watchdog reset flag
@@ -1839,7 +1839,7 @@ begin-module memmap
     : RCC_CSR_LSION ( -- x addr ) 0 bit RCC_CSR ; \ RCC_CSR_LSION, Internal low-speed oscillator  enable
   [then]
 
-  defined? use-RCC defined? RCC_SSCGR_SSCGEN not and [if]
+  [if]
     \ RCC_SSCGR (read-write) Reset:0x00000000
     : RCC_SSCGR_SSCGEN ( -- x addr ) 31 bit RCC_SSCGR ; \ RCC_SSCGR_SSCGEN, Spread spectrum modulation  enable
     : RCC_SSCGR_SPREADSEL ( -- x addr ) 30 bit RCC_SSCGR ; \ RCC_SSCGR_SPREADSEL, Spread Select
@@ -1847,13 +1847,13 @@ begin-module memmap
     : RCC_SSCGR_MODPER x addr ) RCC_SSCGR ; \ RCC_SSCGR_MODPER, Modulation period
   [then]
 
-  execute-defined? use-RCC defined? RCC_PLLI2SCFGR_PLLI2SRx not and [if]
+  execute-defined? use-RCC [if]
     \ RCC_PLLI2SCFGR (read-write) Reset:0x20003000
     : RCC_PLLI2SCFGR_PLLI2SRx ( %bbb -- x addr ) 28 lshift RCC_PLLI2SCFGR ; \ RCC_PLLI2SCFGR_PLLI2SRx, PLLI2S division factor for I2S  clocks
     : RCC_PLLI2SCFGR_PLLI2SNx ( %bbbbbbbbb -- x addr ) 6 lshift RCC_PLLI2SCFGR ; \ RCC_PLLI2SCFGR_PLLI2SNx, PLLI2S multiplication factor for  VCO
   [then]
 
-  defined? use-GPIOI defined? GPIOI_MODER_MODER15 not and [if]
+  [if]
     \ GPIOI_MODER (read-write) Reset:0x00000000
     : GPIOI_MODER_MODER15 ( %bb -- x addr ) 30 lshift GPIOI_MODER ; \ GPIOI_MODER_MODER15, Port x configuration bits y =  0..15
     : GPIOI_MODER_MODER14 ( %bb -- x addr ) 28 lshift GPIOI_MODER ; \ GPIOI_MODER_MODER14, Port x configuration bits y =  0..15
@@ -1873,7 +1873,7 @@ begin-module memmap
     : GPIOI_MODER_MODER0 ( %bb -- x addr ) GPIOI_MODER ; \ GPIOI_MODER_MODER0, Port x configuration bits y =  0..15
   [then]
 
-  execute-defined? use-GPIOI defined? GPIOI_OTYPER_OT15 not and [if]
+  execute-defined? use-GPIOI [if]
     \ GPIOI_OTYPER (read-write) Reset:0x00000000
     : GPIOI_OTYPER_OT15 ( -- x addr ) 15 bit GPIOI_OTYPER ; \ GPIOI_OTYPER_OT15, Port x configuration bits y =  0..15
     : GPIOI_OTYPER_OT14 ( -- x addr ) 14 bit GPIOI_OTYPER ; \ GPIOI_OTYPER_OT14, Port x configuration bits y =  0..15
@@ -1893,7 +1893,7 @@ begin-module memmap
     : GPIOI_OTYPER_OT0 ( -- x addr ) 0 bit GPIOI_OTYPER ; \ GPIOI_OTYPER_OT0, Port x configuration bits y =  0..15
   [then]
 
-  defined? use-GPIOI defined? GPIOI_OSPEEDR_OSPEEDR15 not and [if]
+  [if]
     \ GPIOI_OSPEEDR (read-write) Reset:0x00000000
     : GPIOI_OSPEEDR_OSPEEDR15 ( %bb -- x addr ) 30 lshift GPIOI_OSPEEDR ; \ GPIOI_OSPEEDR_OSPEEDR15, Port x configuration bits y =  0..15
     : GPIOI_OSPEEDR_OSPEEDR14 ( %bb -- x addr ) 28 lshift GPIOI_OSPEEDR ; \ GPIOI_OSPEEDR_OSPEEDR14, Port x configuration bits y =  0..15
@@ -1913,7 +1913,7 @@ begin-module memmap
     : GPIOI_OSPEEDR_OSPEEDR0 ( %bb -- x addr ) GPIOI_OSPEEDR ; \ GPIOI_OSPEEDR_OSPEEDR0, Port x configuration bits y =  0..15
   [then]
 
-  execute-defined? use-GPIOI defined? GPIOI_PUPDR_PUPDR15 not and [if]
+  execute-defined? use-GPIOI [if]
     \ GPIOI_PUPDR (read-write) Reset:0x00000000
     : GPIOI_PUPDR_PUPDR15 ( %bb -- x addr ) 30 lshift GPIOI_PUPDR ; \ GPIOI_PUPDR_PUPDR15, Port x configuration bits y =  0..15
     : GPIOI_PUPDR_PUPDR14 ( %bb -- x addr ) 28 lshift GPIOI_PUPDR ; \ GPIOI_PUPDR_PUPDR14, Port x configuration bits y =  0..15
@@ -1933,7 +1933,7 @@ begin-module memmap
     : GPIOI_PUPDR_PUPDR0 ( %bb -- x addr ) GPIOI_PUPDR ; \ GPIOI_PUPDR_PUPDR0, Port x configuration bits y =  0..15
   [then]
 
-  defined? use-GPIOI defined? GPIOI_IDR_IDR15? not and [if]
+  [if]
     \ GPIOI_IDR (read-only) Reset:0x00000000
     : GPIOI_IDR_IDR15? ( --  1|0 ) 15 bit GPIOI_IDR bit@ ; \ GPIOI_IDR_IDR15, Port input data y =  0..15
     : GPIOI_IDR_IDR14? ( --  1|0 ) 14 bit GPIOI_IDR bit@ ; \ GPIOI_IDR_IDR14, Port input data y =  0..15
@@ -1953,7 +1953,7 @@ begin-module memmap
     : GPIOI_IDR_IDR0? ( --  1|0 ) 0 bit GPIOI_IDR bit@ ; \ GPIOI_IDR_IDR0, Port input data y =  0..15
   [then]
 
-  execute-defined? use-GPIOI defined? GPIOI_ODR_ODR15 not and [if]
+  execute-defined? use-GPIOI [if]
     \ GPIOI_ODR (read-write) Reset:0x00000000
     : GPIOI_ODR_ODR15 ( -- x addr ) 15 bit GPIOI_ODR ; \ GPIOI_ODR_ODR15, Port output data y =  0..15
     : GPIOI_ODR_ODR14 ( -- x addr ) 14 bit GPIOI_ODR ; \ GPIOI_ODR_ODR14, Port output data y =  0..15
@@ -1973,7 +1973,7 @@ begin-module memmap
     : GPIOI_ODR_ODR0 ( -- x addr ) 0 bit GPIOI_ODR ; \ GPIOI_ODR_ODR0, Port output data y =  0..15
   [then]
 
-  defined? use-GPIOI defined? GPIOI_BSRR_BR15 not and [if]
+  [if]
     \ GPIOI_BSRR (write-only) Reset:0x00000000
     : GPIOI_BSRR_BR15 ( -- ) 31 bit GPIOI_BSRR ! ; \ GPIOI_BSRR_BR15, Port x reset bit y y =  0..15
     : GPIOI_BSRR_BR14 ( -- ) 30 bit GPIOI_BSRR ! ; \ GPIOI_BSRR_BR14, Port x reset bit y y =  0..15
@@ -2009,7 +2009,7 @@ begin-module memmap
     : GPIOI_BSRR_BS0 ( -- ) 0 bit GPIOI_BSRR ! ; \ GPIOI_BSRR_BS0, Port x set bit y y=  0..15
   [then]
 
-  execute-defined? use-GPIOI defined? GPIOI_LCKR_LCKK not and [if]
+  execute-defined? use-GPIOI [if]
     \ GPIOI_LCKR (read-write) Reset:0x00000000
     : GPIOI_LCKR_LCKK ( -- x addr ) 16 bit GPIOI_LCKR ; \ GPIOI_LCKR_LCKK, Port x lock bit y y=  0..15
     : GPIOI_LCKR_LCK15 ( -- x addr ) 15 bit GPIOI_LCKR ; \ GPIOI_LCKR_LCK15, Port x lock bit y y=  0..15
@@ -2030,7 +2030,7 @@ begin-module memmap
     : GPIOI_LCKR_LCK0 ( -- x addr ) 0 bit GPIOI_LCKR ; \ GPIOI_LCKR_LCK0, Port x lock bit y y=  0..15
   [then]
 
-  defined? use-GPIOI defined? GPIOI_AFRL_AFRL7 not and [if]
+  [if]
     \ GPIOI_AFRL (read-write) Reset:0x00000000
     : GPIOI_AFRL_AFRL7 ( %bbbb -- x addr ) 28 lshift GPIOI_AFRL ; \ GPIOI_AFRL_AFRL7, Alternate function selection for port x  bit y y = 0..7
     : GPIOI_AFRL_AFRL6 ( %bbbb -- x addr ) 24 lshift GPIOI_AFRL ; \ GPIOI_AFRL_AFRL6, Alternate function selection for port x  bit y y = 0..7
@@ -2042,7 +2042,7 @@ begin-module memmap
     : GPIOI_AFRL_AFRL0 ( %bbbb -- x addr ) GPIOI_AFRL ; \ GPIOI_AFRL_AFRL0, Alternate function selection for port x  bit y y = 0..7
   [then]
 
-  execute-defined? use-GPIOI defined? GPIOI_AFRH_AFRH15 not and [if]
+  execute-defined? use-GPIOI [if]
     \ GPIOI_AFRH (read-write) Reset:0x00000000
     : GPIOI_AFRH_AFRH15 ( %bbbb -- x addr ) 28 lshift GPIOI_AFRH ; \ GPIOI_AFRH_AFRH15, Alternate function selection for port x  bit y y = 8..15
     : GPIOI_AFRH_AFRH14 ( %bbbb -- x addr ) 24 lshift GPIOI_AFRH ; \ GPIOI_AFRH_AFRH14, Alternate function selection for port x  bit y y = 8..15
@@ -2054,7 +2054,7 @@ begin-module memmap
     : GPIOI_AFRH_AFRH8 ( %bbbb -- x addr ) GPIOI_AFRH ; \ GPIOI_AFRH_AFRH8, Alternate function selection for port x  bit y y = 8..15
   [then]
 
-  defined? use-GPIOH defined? GPIOH_MODER_MODER15 not and [if]
+  [if]
     \ GPIOH_MODER (read-write) Reset:0x00000000
     : GPIOH_MODER_MODER15 ( %bb -- x addr ) 30 lshift GPIOH_MODER ; \ GPIOH_MODER_MODER15, Port x configuration bits y =  0..15
     : GPIOH_MODER_MODER14 ( %bb -- x addr ) 28 lshift GPIOH_MODER ; \ GPIOH_MODER_MODER14, Port x configuration bits y =  0..15
@@ -2074,7 +2074,7 @@ begin-module memmap
     : GPIOH_MODER_MODER0 ( %bb -- x addr ) GPIOH_MODER ; \ GPIOH_MODER_MODER0, Port x configuration bits y =  0..15
   [then]
 
-  execute-defined? use-GPIOH defined? GPIOH_OTYPER_OT15 not and [if]
+  execute-defined? use-GPIOH [if]
     \ GPIOH_OTYPER (read-write) Reset:0x00000000
     : GPIOH_OTYPER_OT15 ( -- x addr ) 15 bit GPIOH_OTYPER ; \ GPIOH_OTYPER_OT15, Port x configuration bits y =  0..15
     : GPIOH_OTYPER_OT14 ( -- x addr ) 14 bit GPIOH_OTYPER ; \ GPIOH_OTYPER_OT14, Port x configuration bits y =  0..15
@@ -2094,7 +2094,7 @@ begin-module memmap
     : GPIOH_OTYPER_OT0 ( -- x addr ) 0 bit GPIOH_OTYPER ; \ GPIOH_OTYPER_OT0, Port x configuration bits y =  0..15
   [then]
 
-  defined? use-GPIOH defined? GPIOH_OSPEEDR_OSPEEDR15 not and [if]
+  [if]
     \ GPIOH_OSPEEDR (read-write) Reset:0x00000000
     : GPIOH_OSPEEDR_OSPEEDR15 ( %bb -- x addr ) 30 lshift GPIOH_OSPEEDR ; \ GPIOH_OSPEEDR_OSPEEDR15, Port x configuration bits y =  0..15
     : GPIOH_OSPEEDR_OSPEEDR14 ( %bb -- x addr ) 28 lshift GPIOH_OSPEEDR ; \ GPIOH_OSPEEDR_OSPEEDR14, Port x configuration bits y =  0..15
@@ -2114,7 +2114,7 @@ begin-module memmap
     : GPIOH_OSPEEDR_OSPEEDR0 ( %bb -- x addr ) GPIOH_OSPEEDR ; \ GPIOH_OSPEEDR_OSPEEDR0, Port x configuration bits y =  0..15
   [then]
 
-  execute-defined? use-GPIOH defined? GPIOH_PUPDR_PUPDR15 not and [if]
+  execute-defined? use-GPIOH [if]
     \ GPIOH_PUPDR (read-write) Reset:0x00000000
     : GPIOH_PUPDR_PUPDR15 ( %bb -- x addr ) 30 lshift GPIOH_PUPDR ; \ GPIOH_PUPDR_PUPDR15, Port x configuration bits y =  0..15
     : GPIOH_PUPDR_PUPDR14 ( %bb -- x addr ) 28 lshift GPIOH_PUPDR ; \ GPIOH_PUPDR_PUPDR14, Port x configuration bits y =  0..15
@@ -2134,7 +2134,7 @@ begin-module memmap
     : GPIOH_PUPDR_PUPDR0 ( %bb -- x addr ) GPIOH_PUPDR ; \ GPIOH_PUPDR_PUPDR0, Port x configuration bits y =  0..15
   [then]
 
-  defined? use-GPIOH defined? GPIOH_IDR_IDR15? not and [if]
+  [if]
     \ GPIOH_IDR (read-only) Reset:0x00000000
     : GPIOH_IDR_IDR15? ( --  1|0 ) 15 bit GPIOH_IDR bit@ ; \ GPIOH_IDR_IDR15, Port input data y =  0..15
     : GPIOH_IDR_IDR14? ( --  1|0 ) 14 bit GPIOH_IDR bit@ ; \ GPIOH_IDR_IDR14, Port input data y =  0..15
@@ -2154,7 +2154,7 @@ begin-module memmap
     : GPIOH_IDR_IDR0? ( --  1|0 ) 0 bit GPIOH_IDR bit@ ; \ GPIOH_IDR_IDR0, Port input data y =  0..15
   [then]
 
-  execute-defined? use-GPIOH defined? GPIOH_ODR_ODR15 not and [if]
+  execute-defined? use-GPIOH [if]
     \ GPIOH_ODR (read-write) Reset:0x00000000
     : GPIOH_ODR_ODR15 ( -- x addr ) 15 bit GPIOH_ODR ; \ GPIOH_ODR_ODR15, Port output data y =  0..15
     : GPIOH_ODR_ODR14 ( -- x addr ) 14 bit GPIOH_ODR ; \ GPIOH_ODR_ODR14, Port output data y =  0..15
@@ -2174,7 +2174,7 @@ begin-module memmap
     : GPIOH_ODR_ODR0 ( -- x addr ) 0 bit GPIOH_ODR ; \ GPIOH_ODR_ODR0, Port output data y =  0..15
   [then]
 
-  defined? use-GPIOH defined? GPIOH_BSRR_BR15 not and [if]
+  [if]
     \ GPIOH_BSRR (write-only) Reset:0x00000000
     : GPIOH_BSRR_BR15 ( -- ) 31 bit GPIOH_BSRR ! ; \ GPIOH_BSRR_BR15, Port x reset bit y y =  0..15
     : GPIOH_BSRR_BR14 ( -- ) 30 bit GPIOH_BSRR ! ; \ GPIOH_BSRR_BR14, Port x reset bit y y =  0..15
@@ -2210,7 +2210,7 @@ begin-module memmap
     : GPIOH_BSRR_BS0 ( -- ) 0 bit GPIOH_BSRR ! ; \ GPIOH_BSRR_BS0, Port x set bit y y=  0..15
   [then]
 
-  execute-defined? use-GPIOH defined? GPIOH_LCKR_LCKK not and [if]
+  execute-defined? use-GPIOH [if]
     \ GPIOH_LCKR (read-write) Reset:0x00000000
     : GPIOH_LCKR_LCKK ( -- x addr ) 16 bit GPIOH_LCKR ; \ GPIOH_LCKR_LCKK, Port x lock bit y y=  0..15
     : GPIOH_LCKR_LCK15 ( -- x addr ) 15 bit GPIOH_LCKR ; \ GPIOH_LCKR_LCK15, Port x lock bit y y=  0..15
@@ -2231,7 +2231,7 @@ begin-module memmap
     : GPIOH_LCKR_LCK0 ( -- x addr ) 0 bit GPIOH_LCKR ; \ GPIOH_LCKR_LCK0, Port x lock bit y y=  0..15
   [then]
 
-  defined? use-GPIOH defined? GPIOH_AFRL_AFRL7 not and [if]
+  [if]
     \ GPIOH_AFRL (read-write) Reset:0x00000000
     : GPIOH_AFRL_AFRL7 ( %bbbb -- x addr ) 28 lshift GPIOH_AFRL ; \ GPIOH_AFRL_AFRL7, Alternate function selection for port x  bit y y = 0..7
     : GPIOH_AFRL_AFRL6 ( %bbbb -- x addr ) 24 lshift GPIOH_AFRL ; \ GPIOH_AFRL_AFRL6, Alternate function selection for port x  bit y y = 0..7
@@ -2243,7 +2243,7 @@ begin-module memmap
     : GPIOH_AFRL_AFRL0 ( %bbbb -- x addr ) GPIOH_AFRL ; \ GPIOH_AFRL_AFRL0, Alternate function selection for port x  bit y y = 0..7
   [then]
 
-  execute-defined? use-GPIOH defined? GPIOH_AFRH_AFRH15 not and [if]
+  execute-defined? use-GPIOH [if]
     \ GPIOH_AFRH (read-write) Reset:0x00000000
     : GPIOH_AFRH_AFRH15 ( %bbbb -- x addr ) 28 lshift GPIOH_AFRH ; \ GPIOH_AFRH_AFRH15, Alternate function selection for port x  bit y y = 8..15
     : GPIOH_AFRH_AFRH14 ( %bbbb -- x addr ) 24 lshift GPIOH_AFRH ; \ GPIOH_AFRH_AFRH14, Alternate function selection for port x  bit y y = 8..15
@@ -2255,7 +2255,7 @@ begin-module memmap
     : GPIOH_AFRH_AFRH8 ( %bbbb -- x addr ) GPIOH_AFRH ; \ GPIOH_AFRH_AFRH8, Alternate function selection for port x  bit y y = 8..15
   [then]
 
-  defined? use-GPIOG defined? GPIOG_MODER_MODER15 not and [if]
+  [if]
     \ GPIOG_MODER (read-write) Reset:0x00000000
     : GPIOG_MODER_MODER15 ( %bb -- x addr ) 30 lshift GPIOG_MODER ; \ GPIOG_MODER_MODER15, Port x configuration bits y =  0..15
     : GPIOG_MODER_MODER14 ( %bb -- x addr ) 28 lshift GPIOG_MODER ; \ GPIOG_MODER_MODER14, Port x configuration bits y =  0..15
@@ -2275,7 +2275,7 @@ begin-module memmap
     : GPIOG_MODER_MODER0 ( %bb -- x addr ) GPIOG_MODER ; \ GPIOG_MODER_MODER0, Port x configuration bits y =  0..15
   [then]
 
-  execute-defined? use-GPIOG defined? GPIOG_OTYPER_OT15 not and [if]
+  execute-defined? use-GPIOG [if]
     \ GPIOG_OTYPER (read-write) Reset:0x00000000
     : GPIOG_OTYPER_OT15 ( -- x addr ) 15 bit GPIOG_OTYPER ; \ GPIOG_OTYPER_OT15, Port x configuration bits y =  0..15
     : GPIOG_OTYPER_OT14 ( -- x addr ) 14 bit GPIOG_OTYPER ; \ GPIOG_OTYPER_OT14, Port x configuration bits y =  0..15
@@ -2295,7 +2295,7 @@ begin-module memmap
     : GPIOG_OTYPER_OT0 ( -- x addr ) 0 bit GPIOG_OTYPER ; \ GPIOG_OTYPER_OT0, Port x configuration bits y =  0..15
   [then]
 
-  defined? use-GPIOG defined? GPIOG_OSPEEDR_OSPEEDR15 not and [if]
+  [if]
     \ GPIOG_OSPEEDR (read-write) Reset:0x00000000
     : GPIOG_OSPEEDR_OSPEEDR15 ( %bb -- x addr ) 30 lshift GPIOG_OSPEEDR ; \ GPIOG_OSPEEDR_OSPEEDR15, Port x configuration bits y =  0..15
     : GPIOG_OSPEEDR_OSPEEDR14 ( %bb -- x addr ) 28 lshift GPIOG_OSPEEDR ; \ GPIOG_OSPEEDR_OSPEEDR14, Port x configuration bits y =  0..15
@@ -2315,7 +2315,7 @@ begin-module memmap
     : GPIOG_OSPEEDR_OSPEEDR0 ( %bb -- x addr ) GPIOG_OSPEEDR ; \ GPIOG_OSPEEDR_OSPEEDR0, Port x configuration bits y =  0..15
   [then]
 
-  execute-defined? use-GPIOG defined? GPIOG_PUPDR_PUPDR15 not and [if]
+  execute-defined? use-GPIOG [if]
     \ GPIOG_PUPDR (read-write) Reset:0x00000000
     : GPIOG_PUPDR_PUPDR15 ( %bb -- x addr ) 30 lshift GPIOG_PUPDR ; \ GPIOG_PUPDR_PUPDR15, Port x configuration bits y =  0..15
     : GPIOG_PUPDR_PUPDR14 ( %bb -- x addr ) 28 lshift GPIOG_PUPDR ; \ GPIOG_PUPDR_PUPDR14, Port x configuration bits y =  0..15
@@ -2335,7 +2335,7 @@ begin-module memmap
     : GPIOG_PUPDR_PUPDR0 ( %bb -- x addr ) GPIOG_PUPDR ; \ GPIOG_PUPDR_PUPDR0, Port x configuration bits y =  0..15
   [then]
 
-  defined? use-GPIOG defined? GPIOG_IDR_IDR15? not and [if]
+  [if]
     \ GPIOG_IDR (read-only) Reset:0x00000000
     : GPIOG_IDR_IDR15? ( --  1|0 ) 15 bit GPIOG_IDR bit@ ; \ GPIOG_IDR_IDR15, Port input data y =  0..15
     : GPIOG_IDR_IDR14? ( --  1|0 ) 14 bit GPIOG_IDR bit@ ; \ GPIOG_IDR_IDR14, Port input data y =  0..15
@@ -2355,7 +2355,7 @@ begin-module memmap
     : GPIOG_IDR_IDR0? ( --  1|0 ) 0 bit GPIOG_IDR bit@ ; \ GPIOG_IDR_IDR0, Port input data y =  0..15
   [then]
 
-  execute-defined? use-GPIOG defined? GPIOG_ODR_ODR15 not and [if]
+  execute-defined? use-GPIOG [if]
     \ GPIOG_ODR (read-write) Reset:0x00000000
     : GPIOG_ODR_ODR15 ( -- x addr ) 15 bit GPIOG_ODR ; \ GPIOG_ODR_ODR15, Port output data y =  0..15
     : GPIOG_ODR_ODR14 ( -- x addr ) 14 bit GPIOG_ODR ; \ GPIOG_ODR_ODR14, Port output data y =  0..15
@@ -2375,7 +2375,7 @@ begin-module memmap
     : GPIOG_ODR_ODR0 ( -- x addr ) 0 bit GPIOG_ODR ; \ GPIOG_ODR_ODR0, Port output data y =  0..15
   [then]
 
-  defined? use-GPIOG defined? GPIOG_BSRR_BR15 not and [if]
+  [if]
     \ GPIOG_BSRR (write-only) Reset:0x00000000
     : GPIOG_BSRR_BR15 ( -- ) 31 bit GPIOG_BSRR ! ; \ GPIOG_BSRR_BR15, Port x reset bit y y =  0..15
     : GPIOG_BSRR_BR14 ( -- ) 30 bit GPIOG_BSRR ! ; \ GPIOG_BSRR_BR14, Port x reset bit y y =  0..15
@@ -2411,7 +2411,7 @@ begin-module memmap
     : GPIOG_BSRR_BS0 ( -- ) 0 bit GPIOG_BSRR ! ; \ GPIOG_BSRR_BS0, Port x set bit y y=  0..15
   [then]
 
-  execute-defined? use-GPIOG defined? GPIOG_LCKR_LCKK not and [if]
+  execute-defined? use-GPIOG [if]
     \ GPIOG_LCKR (read-write) Reset:0x00000000
     : GPIOG_LCKR_LCKK ( -- x addr ) 16 bit GPIOG_LCKR ; \ GPIOG_LCKR_LCKK, Port x lock bit y y=  0..15
     : GPIOG_LCKR_LCK15 ( -- x addr ) 15 bit GPIOG_LCKR ; \ GPIOG_LCKR_LCK15, Port x lock bit y y=  0..15
@@ -2432,7 +2432,7 @@ begin-module memmap
     : GPIOG_LCKR_LCK0 ( -- x addr ) 0 bit GPIOG_LCKR ; \ GPIOG_LCKR_LCK0, Port x lock bit y y=  0..15
   [then]
 
-  defined? use-GPIOG defined? GPIOG_AFRL_AFRL7 not and [if]
+  [if]
     \ GPIOG_AFRL (read-write) Reset:0x00000000
     : GPIOG_AFRL_AFRL7 ( %bbbb -- x addr ) 28 lshift GPIOG_AFRL ; \ GPIOG_AFRL_AFRL7, Alternate function selection for port x  bit y y = 0..7
     : GPIOG_AFRL_AFRL6 ( %bbbb -- x addr ) 24 lshift GPIOG_AFRL ; \ GPIOG_AFRL_AFRL6, Alternate function selection for port x  bit y y = 0..7
@@ -2444,7 +2444,7 @@ begin-module memmap
     : GPIOG_AFRL_AFRL0 ( %bbbb -- x addr ) GPIOG_AFRL ; \ GPIOG_AFRL_AFRL0, Alternate function selection for port x  bit y y = 0..7
   [then]
 
-  execute-defined? use-GPIOG defined? GPIOG_AFRH_AFRH15 not and [if]
+  execute-defined? use-GPIOG [if]
     \ GPIOG_AFRH (read-write) Reset:0x00000000
     : GPIOG_AFRH_AFRH15 ( %bbbb -- x addr ) 28 lshift GPIOG_AFRH ; \ GPIOG_AFRH_AFRH15, Alternate function selection for port x  bit y y = 8..15
     : GPIOG_AFRH_AFRH14 ( %bbbb -- x addr ) 24 lshift GPIOG_AFRH ; \ GPIOG_AFRH_AFRH14, Alternate function selection for port x  bit y y = 8..15
@@ -2456,7 +2456,7 @@ begin-module memmap
     : GPIOG_AFRH_AFRH8 ( %bbbb -- x addr ) GPIOG_AFRH ; \ GPIOG_AFRH_AFRH8, Alternate function selection for port x  bit y y = 8..15
   [then]
 
-  defined? use-GPIOF defined? GPIOF_MODER_MODER15 not and [if]
+  [if]
     \ GPIOF_MODER (read-write) Reset:0x00000000
     : GPIOF_MODER_MODER15 ( %bb -- x addr ) 30 lshift GPIOF_MODER ; \ GPIOF_MODER_MODER15, Port x configuration bits y =  0..15
     : GPIOF_MODER_MODER14 ( %bb -- x addr ) 28 lshift GPIOF_MODER ; \ GPIOF_MODER_MODER14, Port x configuration bits y =  0..15
@@ -2476,7 +2476,7 @@ begin-module memmap
     : GPIOF_MODER_MODER0 ( %bb -- x addr ) GPIOF_MODER ; \ GPIOF_MODER_MODER0, Port x configuration bits y =  0..15
   [then]
 
-  execute-defined? use-GPIOF defined? GPIOF_OTYPER_OT15 not and [if]
+  execute-defined? use-GPIOF [if]
     \ GPIOF_OTYPER (read-write) Reset:0x00000000
     : GPIOF_OTYPER_OT15 ( -- x addr ) 15 bit GPIOF_OTYPER ; \ GPIOF_OTYPER_OT15, Port x configuration bits y =  0..15
     : GPIOF_OTYPER_OT14 ( -- x addr ) 14 bit GPIOF_OTYPER ; \ GPIOF_OTYPER_OT14, Port x configuration bits y =  0..15
@@ -2496,7 +2496,7 @@ begin-module memmap
     : GPIOF_OTYPER_OT0 ( -- x addr ) 0 bit GPIOF_OTYPER ; \ GPIOF_OTYPER_OT0, Port x configuration bits y =  0..15
   [then]
 
-  defined? use-GPIOF defined? GPIOF_OSPEEDR_OSPEEDR15 not and [if]
+  [if]
     \ GPIOF_OSPEEDR (read-write) Reset:0x00000000
     : GPIOF_OSPEEDR_OSPEEDR15 ( %bb -- x addr ) 30 lshift GPIOF_OSPEEDR ; \ GPIOF_OSPEEDR_OSPEEDR15, Port x configuration bits y =  0..15
     : GPIOF_OSPEEDR_OSPEEDR14 ( %bb -- x addr ) 28 lshift GPIOF_OSPEEDR ; \ GPIOF_OSPEEDR_OSPEEDR14, Port x configuration bits y =  0..15
@@ -2516,7 +2516,7 @@ begin-module memmap
     : GPIOF_OSPEEDR_OSPEEDR0 ( %bb -- x addr ) GPIOF_OSPEEDR ; \ GPIOF_OSPEEDR_OSPEEDR0, Port x configuration bits y =  0..15
   [then]
 
-  execute-defined? use-GPIOF defined? GPIOF_PUPDR_PUPDR15 not and [if]
+  execute-defined? use-GPIOF [if]
     \ GPIOF_PUPDR (read-write) Reset:0x00000000
     : GPIOF_PUPDR_PUPDR15 ( %bb -- x addr ) 30 lshift GPIOF_PUPDR ; \ GPIOF_PUPDR_PUPDR15, Port x configuration bits y =  0..15
     : GPIOF_PUPDR_PUPDR14 ( %bb -- x addr ) 28 lshift GPIOF_PUPDR ; \ GPIOF_PUPDR_PUPDR14, Port x configuration bits y =  0..15
@@ -2536,7 +2536,7 @@ begin-module memmap
     : GPIOF_PUPDR_PUPDR0 ( %bb -- x addr ) GPIOF_PUPDR ; \ GPIOF_PUPDR_PUPDR0, Port x configuration bits y =  0..15
   [then]
 
-  defined? use-GPIOF defined? GPIOF_IDR_IDR15? not and [if]
+  [if]
     \ GPIOF_IDR (read-only) Reset:0x00000000
     : GPIOF_IDR_IDR15? ( --  1|0 ) 15 bit GPIOF_IDR bit@ ; \ GPIOF_IDR_IDR15, Port input data y =  0..15
     : GPIOF_IDR_IDR14? ( --  1|0 ) 14 bit GPIOF_IDR bit@ ; \ GPIOF_IDR_IDR14, Port input data y =  0..15
@@ -2556,7 +2556,7 @@ begin-module memmap
     : GPIOF_IDR_IDR0? ( --  1|0 ) 0 bit GPIOF_IDR bit@ ; \ GPIOF_IDR_IDR0, Port input data y =  0..15
   [then]
 
-  execute-defined? use-GPIOF defined? GPIOF_ODR_ODR15 not and [if]
+  execute-defined? use-GPIOF [if]
     \ GPIOF_ODR (read-write) Reset:0x00000000
     : GPIOF_ODR_ODR15 ( -- x addr ) 15 bit GPIOF_ODR ; \ GPIOF_ODR_ODR15, Port output data y =  0..15
     : GPIOF_ODR_ODR14 ( -- x addr ) 14 bit GPIOF_ODR ; \ GPIOF_ODR_ODR14, Port output data y =  0..15
@@ -2576,7 +2576,7 @@ begin-module memmap
     : GPIOF_ODR_ODR0 ( -- x addr ) 0 bit GPIOF_ODR ; \ GPIOF_ODR_ODR0, Port output data y =  0..15
   [then]
 
-  defined? use-GPIOF defined? GPIOF_BSRR_BR15 not and [if]
+  [if]
     \ GPIOF_BSRR (write-only) Reset:0x00000000
     : GPIOF_BSRR_BR15 ( -- ) 31 bit GPIOF_BSRR ! ; \ GPIOF_BSRR_BR15, Port x reset bit y y =  0..15
     : GPIOF_BSRR_BR14 ( -- ) 30 bit GPIOF_BSRR ! ; \ GPIOF_BSRR_BR14, Port x reset bit y y =  0..15
@@ -2612,7 +2612,7 @@ begin-module memmap
     : GPIOF_BSRR_BS0 ( -- ) 0 bit GPIOF_BSRR ! ; \ GPIOF_BSRR_BS0, Port x set bit y y=  0..15
   [then]
 
-  execute-defined? use-GPIOF defined? GPIOF_LCKR_LCKK not and [if]
+  execute-defined? use-GPIOF [if]
     \ GPIOF_LCKR (read-write) Reset:0x00000000
     : GPIOF_LCKR_LCKK ( -- x addr ) 16 bit GPIOF_LCKR ; \ GPIOF_LCKR_LCKK, Port x lock bit y y=  0..15
     : GPIOF_LCKR_LCK15 ( -- x addr ) 15 bit GPIOF_LCKR ; \ GPIOF_LCKR_LCK15, Port x lock bit y y=  0..15
@@ -2633,7 +2633,7 @@ begin-module memmap
     : GPIOF_LCKR_LCK0 ( -- x addr ) 0 bit GPIOF_LCKR ; \ GPIOF_LCKR_LCK0, Port x lock bit y y=  0..15
   [then]
 
-  defined? use-GPIOF defined? GPIOF_AFRL_AFRL7 not and [if]
+  [if]
     \ GPIOF_AFRL (read-write) Reset:0x00000000
     : GPIOF_AFRL_AFRL7 ( %bbbb -- x addr ) 28 lshift GPIOF_AFRL ; \ GPIOF_AFRL_AFRL7, Alternate function selection for port x  bit y y = 0..7
     : GPIOF_AFRL_AFRL6 ( %bbbb -- x addr ) 24 lshift GPIOF_AFRL ; \ GPIOF_AFRL_AFRL6, Alternate function selection for port x  bit y y = 0..7
@@ -2645,7 +2645,7 @@ begin-module memmap
     : GPIOF_AFRL_AFRL0 ( %bbbb -- x addr ) GPIOF_AFRL ; \ GPIOF_AFRL_AFRL0, Alternate function selection for port x  bit y y = 0..7
   [then]
 
-  execute-defined? use-GPIOF defined? GPIOF_AFRH_AFRH15 not and [if]
+  execute-defined? use-GPIOF [if]
     \ GPIOF_AFRH (read-write) Reset:0x00000000
     : GPIOF_AFRH_AFRH15 ( %bbbb -- x addr ) 28 lshift GPIOF_AFRH ; \ GPIOF_AFRH_AFRH15, Alternate function selection for port x  bit y y = 8..15
     : GPIOF_AFRH_AFRH14 ( %bbbb -- x addr ) 24 lshift GPIOF_AFRH ; \ GPIOF_AFRH_AFRH14, Alternate function selection for port x  bit y y = 8..15
@@ -2657,7 +2657,7 @@ begin-module memmap
     : GPIOF_AFRH_AFRH8 ( %bbbb -- x addr ) GPIOF_AFRH ; \ GPIOF_AFRH_AFRH8, Alternate function selection for port x  bit y y = 8..15
   [then]
 
-  defined? use-GPIOE defined? GPIOE_MODER_MODER15 not and [if]
+  [if]
     \ GPIOE_MODER (read-write) Reset:0x00000000
     : GPIOE_MODER_MODER15 ( %bb -- x addr ) 30 lshift GPIOE_MODER ; \ GPIOE_MODER_MODER15, Port x configuration bits y =  0..15
     : GPIOE_MODER_MODER14 ( %bb -- x addr ) 28 lshift GPIOE_MODER ; \ GPIOE_MODER_MODER14, Port x configuration bits y =  0..15
@@ -2677,7 +2677,7 @@ begin-module memmap
     : GPIOE_MODER_MODER0 ( %bb -- x addr ) GPIOE_MODER ; \ GPIOE_MODER_MODER0, Port x configuration bits y =  0..15
   [then]
 
-  execute-defined? use-GPIOE defined? GPIOE_OTYPER_OT15 not and [if]
+  execute-defined? use-GPIOE [if]
     \ GPIOE_OTYPER (read-write) Reset:0x00000000
     : GPIOE_OTYPER_OT15 ( -- x addr ) 15 bit GPIOE_OTYPER ; \ GPIOE_OTYPER_OT15, Port x configuration bits y =  0..15
     : GPIOE_OTYPER_OT14 ( -- x addr ) 14 bit GPIOE_OTYPER ; \ GPIOE_OTYPER_OT14, Port x configuration bits y =  0..15
@@ -2697,7 +2697,7 @@ begin-module memmap
     : GPIOE_OTYPER_OT0 ( -- x addr ) 0 bit GPIOE_OTYPER ; \ GPIOE_OTYPER_OT0, Port x configuration bits y =  0..15
   [then]
 
-  defined? use-GPIOE defined? GPIOE_OSPEEDR_OSPEEDR15 not and [if]
+  [if]
     \ GPIOE_OSPEEDR (read-write) Reset:0x00000000
     : GPIOE_OSPEEDR_OSPEEDR15 ( %bb -- x addr ) 30 lshift GPIOE_OSPEEDR ; \ GPIOE_OSPEEDR_OSPEEDR15, Port x configuration bits y =  0..15
     : GPIOE_OSPEEDR_OSPEEDR14 ( %bb -- x addr ) 28 lshift GPIOE_OSPEEDR ; \ GPIOE_OSPEEDR_OSPEEDR14, Port x configuration bits y =  0..15
@@ -2717,7 +2717,7 @@ begin-module memmap
     : GPIOE_OSPEEDR_OSPEEDR0 ( %bb -- x addr ) GPIOE_OSPEEDR ; \ GPIOE_OSPEEDR_OSPEEDR0, Port x configuration bits y =  0..15
   [then]
 
-  execute-defined? use-GPIOE defined? GPIOE_PUPDR_PUPDR15 not and [if]
+  execute-defined? use-GPIOE [if]
     \ GPIOE_PUPDR (read-write) Reset:0x00000000
     : GPIOE_PUPDR_PUPDR15 ( %bb -- x addr ) 30 lshift GPIOE_PUPDR ; \ GPIOE_PUPDR_PUPDR15, Port x configuration bits y =  0..15
     : GPIOE_PUPDR_PUPDR14 ( %bb -- x addr ) 28 lshift GPIOE_PUPDR ; \ GPIOE_PUPDR_PUPDR14, Port x configuration bits y =  0..15
@@ -2737,7 +2737,7 @@ begin-module memmap
     : GPIOE_PUPDR_PUPDR0 ( %bb -- x addr ) GPIOE_PUPDR ; \ GPIOE_PUPDR_PUPDR0, Port x configuration bits y =  0..15
   [then]
 
-  defined? use-GPIOE defined? GPIOE_IDR_IDR15? not and [if]
+  [if]
     \ GPIOE_IDR (read-only) Reset:0x00000000
     : GPIOE_IDR_IDR15? ( --  1|0 ) 15 bit GPIOE_IDR bit@ ; \ GPIOE_IDR_IDR15, Port input data y =  0..15
     : GPIOE_IDR_IDR14? ( --  1|0 ) 14 bit GPIOE_IDR bit@ ; \ GPIOE_IDR_IDR14, Port input data y =  0..15
@@ -2757,7 +2757,7 @@ begin-module memmap
     : GPIOE_IDR_IDR0? ( --  1|0 ) 0 bit GPIOE_IDR bit@ ; \ GPIOE_IDR_IDR0, Port input data y =  0..15
   [then]
 
-  execute-defined? use-GPIOE defined? GPIOE_ODR_ODR15 not and [if]
+  execute-defined? use-GPIOE [if]
     \ GPIOE_ODR (read-write) Reset:0x00000000
     : GPIOE_ODR_ODR15 ( -- x addr ) 15 bit GPIOE_ODR ; \ GPIOE_ODR_ODR15, Port output data y =  0..15
     : GPIOE_ODR_ODR14 ( -- x addr ) 14 bit GPIOE_ODR ; \ GPIOE_ODR_ODR14, Port output data y =  0..15
@@ -2777,7 +2777,7 @@ begin-module memmap
     : GPIOE_ODR_ODR0 ( -- x addr ) 0 bit GPIOE_ODR ; \ GPIOE_ODR_ODR0, Port output data y =  0..15
   [then]
 
-  defined? use-GPIOE defined? GPIOE_BSRR_BR15 not and [if]
+  [if]
     \ GPIOE_BSRR (write-only) Reset:0x00000000
     : GPIOE_BSRR_BR15 ( -- ) 31 bit GPIOE_BSRR ! ; \ GPIOE_BSRR_BR15, Port x reset bit y y =  0..15
     : GPIOE_BSRR_BR14 ( -- ) 30 bit GPIOE_BSRR ! ; \ GPIOE_BSRR_BR14, Port x reset bit y y =  0..15
@@ -2813,7 +2813,7 @@ begin-module memmap
     : GPIOE_BSRR_BS0 ( -- ) 0 bit GPIOE_BSRR ! ; \ GPIOE_BSRR_BS0, Port x set bit y y=  0..15
   [then]
 
-  execute-defined? use-GPIOE defined? GPIOE_LCKR_LCKK not and [if]
+  execute-defined? use-GPIOE [if]
     \ GPIOE_LCKR (read-write) Reset:0x00000000
     : GPIOE_LCKR_LCKK ( -- x addr ) 16 bit GPIOE_LCKR ; \ GPIOE_LCKR_LCKK, Port x lock bit y y=  0..15
     : GPIOE_LCKR_LCK15 ( -- x addr ) 15 bit GPIOE_LCKR ; \ GPIOE_LCKR_LCK15, Port x lock bit y y=  0..15
@@ -2834,7 +2834,7 @@ begin-module memmap
     : GPIOE_LCKR_LCK0 ( -- x addr ) 0 bit GPIOE_LCKR ; \ GPIOE_LCKR_LCK0, Port x lock bit y y=  0..15
   [then]
 
-  defined? use-GPIOE defined? GPIOE_AFRL_AFRL7 not and [if]
+  [if]
     \ GPIOE_AFRL (read-write) Reset:0x00000000
     : GPIOE_AFRL_AFRL7 ( %bbbb -- x addr ) 28 lshift GPIOE_AFRL ; \ GPIOE_AFRL_AFRL7, Alternate function selection for port x  bit y y = 0..7
     : GPIOE_AFRL_AFRL6 ( %bbbb -- x addr ) 24 lshift GPIOE_AFRL ; \ GPIOE_AFRL_AFRL6, Alternate function selection for port x  bit y y = 0..7
@@ -2846,7 +2846,7 @@ begin-module memmap
     : GPIOE_AFRL_AFRL0 ( %bbbb -- x addr ) GPIOE_AFRL ; \ GPIOE_AFRL_AFRL0, Alternate function selection for port x  bit y y = 0..7
   [then]
 
-  execute-defined? use-GPIOE defined? GPIOE_AFRH_AFRH15 not and [if]
+  execute-defined? use-GPIOE [if]
     \ GPIOE_AFRH (read-write) Reset:0x00000000
     : GPIOE_AFRH_AFRH15 ( %bbbb -- x addr ) 28 lshift GPIOE_AFRH ; \ GPIOE_AFRH_AFRH15, Alternate function selection for port x  bit y y = 8..15
     : GPIOE_AFRH_AFRH14 ( %bbbb -- x addr ) 24 lshift GPIOE_AFRH ; \ GPIOE_AFRH_AFRH14, Alternate function selection for port x  bit y y = 8..15
@@ -2858,7 +2858,7 @@ begin-module memmap
     : GPIOE_AFRH_AFRH8 ( %bbbb -- x addr ) GPIOE_AFRH ; \ GPIOE_AFRH_AFRH8, Alternate function selection for port x  bit y y = 8..15
   [then]
 
-  defined? use-GPIOD defined? GPIOD_MODER_MODER15 not and [if]
+  [if]
     \ GPIOD_MODER (read-write) Reset:0x00000000
     : GPIOD_MODER_MODER15 ( %bb -- x addr ) 30 lshift GPIOD_MODER ; \ GPIOD_MODER_MODER15, Port x configuration bits y =  0..15
     : GPIOD_MODER_MODER14 ( %bb -- x addr ) 28 lshift GPIOD_MODER ; \ GPIOD_MODER_MODER14, Port x configuration bits y =  0..15
@@ -2878,7 +2878,7 @@ begin-module memmap
     : GPIOD_MODER_MODER0 ( %bb -- x addr ) GPIOD_MODER ; \ GPIOD_MODER_MODER0, Port x configuration bits y =  0..15
   [then]
 
-  execute-defined? use-GPIOD defined? GPIOD_OTYPER_OT15 not and [if]
+  execute-defined? use-GPIOD [if]
     \ GPIOD_OTYPER (read-write) Reset:0x00000000
     : GPIOD_OTYPER_OT15 ( -- x addr ) 15 bit GPIOD_OTYPER ; \ GPIOD_OTYPER_OT15, Port x configuration bits y =  0..15
     : GPIOD_OTYPER_OT14 ( -- x addr ) 14 bit GPIOD_OTYPER ; \ GPIOD_OTYPER_OT14, Port x configuration bits y =  0..15
@@ -2898,7 +2898,7 @@ begin-module memmap
     : GPIOD_OTYPER_OT0 ( -- x addr ) 0 bit GPIOD_OTYPER ; \ GPIOD_OTYPER_OT0, Port x configuration bits y =  0..15
   [then]
 
-  defined? use-GPIOD defined? GPIOD_OSPEEDR_OSPEEDR15 not and [if]
+  [if]
     \ GPIOD_OSPEEDR (read-write) Reset:0x00000000
     : GPIOD_OSPEEDR_OSPEEDR15 ( %bb -- x addr ) 30 lshift GPIOD_OSPEEDR ; \ GPIOD_OSPEEDR_OSPEEDR15, Port x configuration bits y =  0..15
     : GPIOD_OSPEEDR_OSPEEDR14 ( %bb -- x addr ) 28 lshift GPIOD_OSPEEDR ; \ GPIOD_OSPEEDR_OSPEEDR14, Port x configuration bits y =  0..15
@@ -2918,7 +2918,7 @@ begin-module memmap
     : GPIOD_OSPEEDR_OSPEEDR0 ( %bb -- x addr ) GPIOD_OSPEEDR ; \ GPIOD_OSPEEDR_OSPEEDR0, Port x configuration bits y =  0..15
   [then]
 
-  execute-defined? use-GPIOD defined? GPIOD_PUPDR_PUPDR15 not and [if]
+  execute-defined? use-GPIOD [if]
     \ GPIOD_PUPDR (read-write) Reset:0x00000000
     : GPIOD_PUPDR_PUPDR15 ( %bb -- x addr ) 30 lshift GPIOD_PUPDR ; \ GPIOD_PUPDR_PUPDR15, Port x configuration bits y =  0..15
     : GPIOD_PUPDR_PUPDR14 ( %bb -- x addr ) 28 lshift GPIOD_PUPDR ; \ GPIOD_PUPDR_PUPDR14, Port x configuration bits y =  0..15
@@ -2938,7 +2938,7 @@ begin-module memmap
     : GPIOD_PUPDR_PUPDR0 ( %bb -- x addr ) GPIOD_PUPDR ; \ GPIOD_PUPDR_PUPDR0, Port x configuration bits y =  0..15
   [then]
 
-  defined? use-GPIOD defined? GPIOD_IDR_IDR15? not and [if]
+  [if]
     \ GPIOD_IDR (read-only) Reset:0x00000000
     : GPIOD_IDR_IDR15? ( --  1|0 ) 15 bit GPIOD_IDR bit@ ; \ GPIOD_IDR_IDR15, Port input data y =  0..15
     : GPIOD_IDR_IDR14? ( --  1|0 ) 14 bit GPIOD_IDR bit@ ; \ GPIOD_IDR_IDR14, Port input data y =  0..15
@@ -2958,7 +2958,7 @@ begin-module memmap
     : GPIOD_IDR_IDR0? ( --  1|0 ) 0 bit GPIOD_IDR bit@ ; \ GPIOD_IDR_IDR0, Port input data y =  0..15
   [then]
 
-  execute-defined? use-GPIOD defined? GPIOD_ODR_ODR15 not and [if]
+  execute-defined? use-GPIOD [if]
     \ GPIOD_ODR (read-write) Reset:0x00000000
     : GPIOD_ODR_ODR15 ( -- x addr ) 15 bit GPIOD_ODR ; \ GPIOD_ODR_ODR15, Port output data y =  0..15
     : GPIOD_ODR_ODR14 ( -- x addr ) 14 bit GPIOD_ODR ; \ GPIOD_ODR_ODR14, Port output data y =  0..15
@@ -2978,7 +2978,7 @@ begin-module memmap
     : GPIOD_ODR_ODR0 ( -- x addr ) 0 bit GPIOD_ODR ; \ GPIOD_ODR_ODR0, Port output data y =  0..15
   [then]
 
-  defined? use-GPIOD defined? GPIOD_BSRR_BR15 not and [if]
+  [if]
     \ GPIOD_BSRR (write-only) Reset:0x00000000
     : GPIOD_BSRR_BR15 ( -- ) 31 bit GPIOD_BSRR ! ; \ GPIOD_BSRR_BR15, Port x reset bit y y =  0..15
     : GPIOD_BSRR_BR14 ( -- ) 30 bit GPIOD_BSRR ! ; \ GPIOD_BSRR_BR14, Port x reset bit y y =  0..15
@@ -3014,7 +3014,7 @@ begin-module memmap
     : GPIOD_BSRR_BS0 ( -- ) 0 bit GPIOD_BSRR ! ; \ GPIOD_BSRR_BS0, Port x set bit y y=  0..15
   [then]
 
-  execute-defined? use-GPIOD defined? GPIOD_LCKR_LCKK not and [if]
+  execute-defined? use-GPIOD [if]
     \ GPIOD_LCKR (read-write) Reset:0x00000000
     : GPIOD_LCKR_LCKK ( -- x addr ) 16 bit GPIOD_LCKR ; \ GPIOD_LCKR_LCKK, Port x lock bit y y=  0..15
     : GPIOD_LCKR_LCK15 ( -- x addr ) 15 bit GPIOD_LCKR ; \ GPIOD_LCKR_LCK15, Port x lock bit y y=  0..15
@@ -3035,7 +3035,7 @@ begin-module memmap
     : GPIOD_LCKR_LCK0 ( -- x addr ) 0 bit GPIOD_LCKR ; \ GPIOD_LCKR_LCK0, Port x lock bit y y=  0..15
   [then]
 
-  defined? use-GPIOD defined? GPIOD_AFRL_AFRL7 not and [if]
+  [if]
     \ GPIOD_AFRL (read-write) Reset:0x00000000
     : GPIOD_AFRL_AFRL7 ( %bbbb -- x addr ) 28 lshift GPIOD_AFRL ; \ GPIOD_AFRL_AFRL7, Alternate function selection for port x  bit y y = 0..7
     : GPIOD_AFRL_AFRL6 ( %bbbb -- x addr ) 24 lshift GPIOD_AFRL ; \ GPIOD_AFRL_AFRL6, Alternate function selection for port x  bit y y = 0..7
@@ -3047,7 +3047,7 @@ begin-module memmap
     : GPIOD_AFRL_AFRL0 ( %bbbb -- x addr ) GPIOD_AFRL ; \ GPIOD_AFRL_AFRL0, Alternate function selection for port x  bit y y = 0..7
   [then]
 
-  execute-defined? use-GPIOD defined? GPIOD_AFRH_AFRH15 not and [if]
+  execute-defined? use-GPIOD [if]
     \ GPIOD_AFRH (read-write) Reset:0x00000000
     : GPIOD_AFRH_AFRH15 ( %bbbb -- x addr ) 28 lshift GPIOD_AFRH ; \ GPIOD_AFRH_AFRH15, Alternate function selection for port x  bit y y = 8..15
     : GPIOD_AFRH_AFRH14 ( %bbbb -- x addr ) 24 lshift GPIOD_AFRH ; \ GPIOD_AFRH_AFRH14, Alternate function selection for port x  bit y y = 8..15
@@ -3059,7 +3059,7 @@ begin-module memmap
     : GPIOD_AFRH_AFRH8 ( %bbbb -- x addr ) GPIOD_AFRH ; \ GPIOD_AFRH_AFRH8, Alternate function selection for port x  bit y y = 8..15
   [then]
 
-  defined? use-GPIOC defined? GPIOC_MODER_MODER15 not and [if]
+  [if]
     \ GPIOC_MODER (read-write) Reset:0x00000000
     : GPIOC_MODER_MODER15 ( %bb -- x addr ) 30 lshift GPIOC_MODER ; \ GPIOC_MODER_MODER15, Port x configuration bits y =  0..15
     : GPIOC_MODER_MODER14 ( %bb -- x addr ) 28 lshift GPIOC_MODER ; \ GPIOC_MODER_MODER14, Port x configuration bits y =  0..15
@@ -3079,7 +3079,7 @@ begin-module memmap
     : GPIOC_MODER_MODER0 ( %bb -- x addr ) GPIOC_MODER ; \ GPIOC_MODER_MODER0, Port x configuration bits y =  0..15
   [then]
 
-  execute-defined? use-GPIOC defined? GPIOC_OTYPER_OT15 not and [if]
+  execute-defined? use-GPIOC [if]
     \ GPIOC_OTYPER (read-write) Reset:0x00000000
     : GPIOC_OTYPER_OT15 ( -- x addr ) 15 bit GPIOC_OTYPER ; \ GPIOC_OTYPER_OT15, Port x configuration bits y =  0..15
     : GPIOC_OTYPER_OT14 ( -- x addr ) 14 bit GPIOC_OTYPER ; \ GPIOC_OTYPER_OT14, Port x configuration bits y =  0..15
@@ -3099,7 +3099,7 @@ begin-module memmap
     : GPIOC_OTYPER_OT0 ( -- x addr ) 0 bit GPIOC_OTYPER ; \ GPIOC_OTYPER_OT0, Port x configuration bits y =  0..15
   [then]
 
-  defined? use-GPIOC defined? GPIOC_OSPEEDR_OSPEEDR15 not and [if]
+  [if]
     \ GPIOC_OSPEEDR (read-write) Reset:0x00000000
     : GPIOC_OSPEEDR_OSPEEDR15 ( %bb -- x addr ) 30 lshift GPIOC_OSPEEDR ; \ GPIOC_OSPEEDR_OSPEEDR15, Port x configuration bits y =  0..15
     : GPIOC_OSPEEDR_OSPEEDR14 ( %bb -- x addr ) 28 lshift GPIOC_OSPEEDR ; \ GPIOC_OSPEEDR_OSPEEDR14, Port x configuration bits y =  0..15
@@ -3119,7 +3119,7 @@ begin-module memmap
     : GPIOC_OSPEEDR_OSPEEDR0 ( %bb -- x addr ) GPIOC_OSPEEDR ; \ GPIOC_OSPEEDR_OSPEEDR0, Port x configuration bits y =  0..15
   [then]
 
-  execute-defined? use-GPIOC defined? GPIOC_PUPDR_PUPDR15 not and [if]
+  execute-defined? use-GPIOC [if]
     \ GPIOC_PUPDR (read-write) Reset:0x00000000
     : GPIOC_PUPDR_PUPDR15 ( %bb -- x addr ) 30 lshift GPIOC_PUPDR ; \ GPIOC_PUPDR_PUPDR15, Port x configuration bits y =  0..15
     : GPIOC_PUPDR_PUPDR14 ( %bb -- x addr ) 28 lshift GPIOC_PUPDR ; \ GPIOC_PUPDR_PUPDR14, Port x configuration bits y =  0..15
@@ -3139,7 +3139,7 @@ begin-module memmap
     : GPIOC_PUPDR_PUPDR0 ( %bb -- x addr ) GPIOC_PUPDR ; \ GPIOC_PUPDR_PUPDR0, Port x configuration bits y =  0..15
   [then]
 
-  defined? use-GPIOC defined? GPIOC_IDR_IDR15? not and [if]
+  [if]
     \ GPIOC_IDR (read-only) Reset:0x00000000
     : GPIOC_IDR_IDR15? ( --  1|0 ) 15 bit GPIOC_IDR bit@ ; \ GPIOC_IDR_IDR15, Port input data y =  0..15
     : GPIOC_IDR_IDR14? ( --  1|0 ) 14 bit GPIOC_IDR bit@ ; \ GPIOC_IDR_IDR14, Port input data y =  0..15
@@ -3159,7 +3159,7 @@ begin-module memmap
     : GPIOC_IDR_IDR0? ( --  1|0 ) 0 bit GPIOC_IDR bit@ ; \ GPIOC_IDR_IDR0, Port input data y =  0..15
   [then]
 
-  execute-defined? use-GPIOC defined? GPIOC_ODR_ODR15 not and [if]
+  execute-defined? use-GPIOC [if]
     \ GPIOC_ODR (read-write) Reset:0x00000000
     : GPIOC_ODR_ODR15 ( -- x addr ) 15 bit GPIOC_ODR ; \ GPIOC_ODR_ODR15, Port output data y =  0..15
     : GPIOC_ODR_ODR14 ( -- x addr ) 14 bit GPIOC_ODR ; \ GPIOC_ODR_ODR14, Port output data y =  0..15
@@ -3179,7 +3179,7 @@ begin-module memmap
     : GPIOC_ODR_ODR0 ( -- x addr ) 0 bit GPIOC_ODR ; \ GPIOC_ODR_ODR0, Port output data y =  0..15
   [then]
 
-  defined? use-GPIOC defined? GPIOC_BSRR_BR15 not and [if]
+  [if]
     \ GPIOC_BSRR (write-only) Reset:0x00000000
     : GPIOC_BSRR_BR15 ( -- ) 31 bit GPIOC_BSRR ! ; \ GPIOC_BSRR_BR15, Port x reset bit y y =  0..15
     : GPIOC_BSRR_BR14 ( -- ) 30 bit GPIOC_BSRR ! ; \ GPIOC_BSRR_BR14, Port x reset bit y y =  0..15
@@ -3215,7 +3215,7 @@ begin-module memmap
     : GPIOC_BSRR_BS0 ( -- ) 0 bit GPIOC_BSRR ! ; \ GPIOC_BSRR_BS0, Port x set bit y y=  0..15
   [then]
 
-  execute-defined? use-GPIOC defined? GPIOC_LCKR_LCKK not and [if]
+  execute-defined? use-GPIOC [if]
     \ GPIOC_LCKR (read-write) Reset:0x00000000
     : GPIOC_LCKR_LCKK ( -- x addr ) 16 bit GPIOC_LCKR ; \ GPIOC_LCKR_LCKK, Port x lock bit y y=  0..15
     : GPIOC_LCKR_LCK15 ( -- x addr ) 15 bit GPIOC_LCKR ; \ GPIOC_LCKR_LCK15, Port x lock bit y y=  0..15
@@ -3236,7 +3236,7 @@ begin-module memmap
     : GPIOC_LCKR_LCK0 ( -- x addr ) 0 bit GPIOC_LCKR ; \ GPIOC_LCKR_LCK0, Port x lock bit y y=  0..15
   [then]
 
-  defined? use-GPIOC defined? GPIOC_AFRL_AFRL7 not and [if]
+  [if]
     \ GPIOC_AFRL (read-write) Reset:0x00000000
     : GPIOC_AFRL_AFRL7 ( %bbbb -- x addr ) 28 lshift GPIOC_AFRL ; \ GPIOC_AFRL_AFRL7, Alternate function selection for port x  bit y y = 0..7
     : GPIOC_AFRL_AFRL6 ( %bbbb -- x addr ) 24 lshift GPIOC_AFRL ; \ GPIOC_AFRL_AFRL6, Alternate function selection for port x  bit y y = 0..7
@@ -3248,7 +3248,7 @@ begin-module memmap
     : GPIOC_AFRL_AFRL0 ( %bbbb -- x addr ) GPIOC_AFRL ; \ GPIOC_AFRL_AFRL0, Alternate function selection for port x  bit y y = 0..7
   [then]
 
-  execute-defined? use-GPIOC defined? GPIOC_AFRH_AFRH15 not and [if]
+  execute-defined? use-GPIOC [if]
     \ GPIOC_AFRH (read-write) Reset:0x00000000
     : GPIOC_AFRH_AFRH15 ( %bbbb -- x addr ) 28 lshift GPIOC_AFRH ; \ GPIOC_AFRH_AFRH15, Alternate function selection for port x  bit y y = 8..15
     : GPIOC_AFRH_AFRH14 ( %bbbb -- x addr ) 24 lshift GPIOC_AFRH ; \ GPIOC_AFRH_AFRH14, Alternate function selection for port x  bit y y = 8..15
@@ -3260,7 +3260,7 @@ begin-module memmap
     : GPIOC_AFRH_AFRH8 ( %bbbb -- x addr ) GPIOC_AFRH ; \ GPIOC_AFRH_AFRH8, Alternate function selection for port x  bit y y = 8..15
   [then]
 
-  defined? use-GPIOB defined? GPIOB_MODER_MODER15 not and [if]
+  [if]
     \ GPIOB_MODER (read-write) Reset:0x00000280
     : GPIOB_MODER_MODER15 ( %bb -- x addr ) 30 lshift GPIOB_MODER ; \ GPIOB_MODER_MODER15, Port x configuration bits y =  0..15
     : GPIOB_MODER_MODER14 ( %bb -- x addr ) 28 lshift GPIOB_MODER ; \ GPIOB_MODER_MODER14, Port x configuration bits y =  0..15
@@ -3280,7 +3280,7 @@ begin-module memmap
     : GPIOB_MODER_MODER0 ( %bb -- x addr ) GPIOB_MODER ; \ GPIOB_MODER_MODER0, Port x configuration bits y =  0..15
   [then]
 
-  execute-defined? use-GPIOB defined? GPIOB_OTYPER_OT15 not and [if]
+  execute-defined? use-GPIOB [if]
     \ GPIOB_OTYPER (read-write) Reset:0x00000000
     : GPIOB_OTYPER_OT15 ( -- x addr ) 15 bit GPIOB_OTYPER ; \ GPIOB_OTYPER_OT15, Port x configuration bits y =  0..15
     : GPIOB_OTYPER_OT14 ( -- x addr ) 14 bit GPIOB_OTYPER ; \ GPIOB_OTYPER_OT14, Port x configuration bits y =  0..15
@@ -3300,7 +3300,7 @@ begin-module memmap
     : GPIOB_OTYPER_OT0 ( -- x addr ) 0 bit GPIOB_OTYPER ; \ GPIOB_OTYPER_OT0, Port x configuration bits y =  0..15
   [then]
 
-  defined? use-GPIOB defined? GPIOB_OSPEEDR_OSPEEDR15 not and [if]
+  [if]
     \ GPIOB_OSPEEDR (read-write) Reset:0x000000C0
     : GPIOB_OSPEEDR_OSPEEDR15 ( %bb -- x addr ) 30 lshift GPIOB_OSPEEDR ; \ GPIOB_OSPEEDR_OSPEEDR15, Port x configuration bits y =  0..15
     : GPIOB_OSPEEDR_OSPEEDR14 ( %bb -- x addr ) 28 lshift GPIOB_OSPEEDR ; \ GPIOB_OSPEEDR_OSPEEDR14, Port x configuration bits y =  0..15
@@ -3320,7 +3320,7 @@ begin-module memmap
     : GPIOB_OSPEEDR_OSPEEDR0 ( %bb -- x addr ) GPIOB_OSPEEDR ; \ GPIOB_OSPEEDR_OSPEEDR0, Port x configuration bits y =  0..15
   [then]
 
-  execute-defined? use-GPIOB defined? GPIOB_PUPDR_PUPDR15 not and [if]
+  execute-defined? use-GPIOB [if]
     \ GPIOB_PUPDR (read-write) Reset:0x00000100
     : GPIOB_PUPDR_PUPDR15 ( %bb -- x addr ) 30 lshift GPIOB_PUPDR ; \ GPIOB_PUPDR_PUPDR15, Port x configuration bits y =  0..15
     : GPIOB_PUPDR_PUPDR14 ( %bb -- x addr ) 28 lshift GPIOB_PUPDR ; \ GPIOB_PUPDR_PUPDR14, Port x configuration bits y =  0..15
@@ -3340,7 +3340,7 @@ begin-module memmap
     : GPIOB_PUPDR_PUPDR0 ( %bb -- x addr ) GPIOB_PUPDR ; \ GPIOB_PUPDR_PUPDR0, Port x configuration bits y =  0..15
   [then]
 
-  defined? use-GPIOB defined? GPIOB_IDR_IDR15? not and [if]
+  [if]
     \ GPIOB_IDR (read-only) Reset:0x00000000
     : GPIOB_IDR_IDR15? ( --  1|0 ) 15 bit GPIOB_IDR bit@ ; \ GPIOB_IDR_IDR15, Port input data y =  0..15
     : GPIOB_IDR_IDR14? ( --  1|0 ) 14 bit GPIOB_IDR bit@ ; \ GPIOB_IDR_IDR14, Port input data y =  0..15
@@ -3360,7 +3360,7 @@ begin-module memmap
     : GPIOB_IDR_IDR0? ( --  1|0 ) 0 bit GPIOB_IDR bit@ ; \ GPIOB_IDR_IDR0, Port input data y =  0..15
   [then]
 
-  execute-defined? use-GPIOB defined? GPIOB_ODR_ODR15 not and [if]
+  execute-defined? use-GPIOB [if]
     \ GPIOB_ODR (read-write) Reset:0x00000000
     : GPIOB_ODR_ODR15 ( -- x addr ) 15 bit GPIOB_ODR ; \ GPIOB_ODR_ODR15, Port output data y =  0..15
     : GPIOB_ODR_ODR14 ( -- x addr ) 14 bit GPIOB_ODR ; \ GPIOB_ODR_ODR14, Port output data y =  0..15
@@ -3380,7 +3380,7 @@ begin-module memmap
     : GPIOB_ODR_ODR0 ( -- x addr ) 0 bit GPIOB_ODR ; \ GPIOB_ODR_ODR0, Port output data y =  0..15
   [then]
 
-  defined? use-GPIOB defined? GPIOB_BSRR_BR15 not and [if]
+  [if]
     \ GPIOB_BSRR (write-only) Reset:0x00000000
     : GPIOB_BSRR_BR15 ( -- ) 31 bit GPIOB_BSRR ! ; \ GPIOB_BSRR_BR15, Port x reset bit y y =  0..15
     : GPIOB_BSRR_BR14 ( -- ) 30 bit GPIOB_BSRR ! ; \ GPIOB_BSRR_BR14, Port x reset bit y y =  0..15
@@ -3416,7 +3416,7 @@ begin-module memmap
     : GPIOB_BSRR_BS0 ( -- ) 0 bit GPIOB_BSRR ! ; \ GPIOB_BSRR_BS0, Port x set bit y y=  0..15
   [then]
 
-  execute-defined? use-GPIOB defined? GPIOB_LCKR_LCKK not and [if]
+  execute-defined? use-GPIOB [if]
     \ GPIOB_LCKR (read-write) Reset:0x00000000
     : GPIOB_LCKR_LCKK ( -- x addr ) 16 bit GPIOB_LCKR ; \ GPIOB_LCKR_LCKK, Port x lock bit y y=  0..15
     : GPIOB_LCKR_LCK15 ( -- x addr ) 15 bit GPIOB_LCKR ; \ GPIOB_LCKR_LCK15, Port x lock bit y y=  0..15
@@ -3437,7 +3437,7 @@ begin-module memmap
     : GPIOB_LCKR_LCK0 ( -- x addr ) 0 bit GPIOB_LCKR ; \ GPIOB_LCKR_LCK0, Port x lock bit y y=  0..15
   [then]
 
-  defined? use-GPIOB defined? GPIOB_AFRL_AFRL7 not and [if]
+  [if]
     \ GPIOB_AFRL (read-write) Reset:0x00000000
     : GPIOB_AFRL_AFRL7 ( %bbbb -- x addr ) 28 lshift GPIOB_AFRL ; \ GPIOB_AFRL_AFRL7, Alternate function selection for port x  bit y y = 0..7
     : GPIOB_AFRL_AFRL6 ( %bbbb -- x addr ) 24 lshift GPIOB_AFRL ; \ GPIOB_AFRL_AFRL6, Alternate function selection for port x  bit y y = 0..7
@@ -3449,7 +3449,7 @@ begin-module memmap
     : GPIOB_AFRL_AFRL0 ( %bbbb -- x addr ) GPIOB_AFRL ; \ GPIOB_AFRL_AFRL0, Alternate function selection for port x  bit y y = 0..7
   [then]
 
-  execute-defined? use-GPIOB defined? GPIOB_AFRH_AFRH15 not and [if]
+  execute-defined? use-GPIOB [if]
     \ GPIOB_AFRH (read-write) Reset:0x00000000
     : GPIOB_AFRH_AFRH15 ( %bbbb -- x addr ) 28 lshift GPIOB_AFRH ; \ GPIOB_AFRH_AFRH15, Alternate function selection for port x  bit y y = 8..15
     : GPIOB_AFRH_AFRH14 ( %bbbb -- x addr ) 24 lshift GPIOB_AFRH ; \ GPIOB_AFRH_AFRH14, Alternate function selection for port x  bit y y = 8..15
@@ -3461,7 +3461,7 @@ begin-module memmap
     : GPIOB_AFRH_AFRH8 ( %bbbb -- x addr ) GPIOB_AFRH ; \ GPIOB_AFRH_AFRH8, Alternate function selection for port x  bit y y = 8..15
   [then]
 
-  defined? use-GPIOA defined? GPIOA_MODER_MODER15 not and [if]
+  [if]
     \ GPIOA_MODER (read-write) Reset:0xA8000000
     : GPIOA_MODER_MODER15 ( %bb -- x addr ) 30 lshift GPIOA_MODER ; \ GPIOA_MODER_MODER15, Port x configuration bits y =  0..15
     : GPIOA_MODER_MODER14 ( %bb -- x addr ) 28 lshift GPIOA_MODER ; \ GPIOA_MODER_MODER14, Port x configuration bits y =  0..15
@@ -3481,7 +3481,7 @@ begin-module memmap
     : GPIOA_MODER_MODER0 ( %bb -- x addr ) GPIOA_MODER ; \ GPIOA_MODER_MODER0, Port x configuration bits y =  0..15
   [then]
 
-  execute-defined? use-GPIOA defined? GPIOA_OTYPER_OT15 not and [if]
+  execute-defined? use-GPIOA [if]
     \ GPIOA_OTYPER (read-write) Reset:0x00000000
     : GPIOA_OTYPER_OT15 ( -- x addr ) 15 bit GPIOA_OTYPER ; \ GPIOA_OTYPER_OT15, Port x configuration bits y =  0..15
     : GPIOA_OTYPER_OT14 ( -- x addr ) 14 bit GPIOA_OTYPER ; \ GPIOA_OTYPER_OT14, Port x configuration bits y =  0..15
@@ -3501,7 +3501,7 @@ begin-module memmap
     : GPIOA_OTYPER_OT0 ( -- x addr ) 0 bit GPIOA_OTYPER ; \ GPIOA_OTYPER_OT0, Port x configuration bits y =  0..15
   [then]
 
-  defined? use-GPIOA defined? GPIOA_OSPEEDR_OSPEEDR15 not and [if]
+  [if]
     \ GPIOA_OSPEEDR (read-write) Reset:0x00000000
     : GPIOA_OSPEEDR_OSPEEDR15 ( %bb -- x addr ) 30 lshift GPIOA_OSPEEDR ; \ GPIOA_OSPEEDR_OSPEEDR15, Port x configuration bits y =  0..15
     : GPIOA_OSPEEDR_OSPEEDR14 ( %bb -- x addr ) 28 lshift GPIOA_OSPEEDR ; \ GPIOA_OSPEEDR_OSPEEDR14, Port x configuration bits y =  0..15
@@ -3521,7 +3521,7 @@ begin-module memmap
     : GPIOA_OSPEEDR_OSPEEDR0 ( %bb -- x addr ) GPIOA_OSPEEDR ; \ GPIOA_OSPEEDR_OSPEEDR0, Port x configuration bits y =  0..15
   [then]
 
-  execute-defined? use-GPIOA defined? GPIOA_PUPDR_PUPDR15 not and [if]
+  execute-defined? use-GPIOA [if]
     \ GPIOA_PUPDR (read-write) Reset:0x64000000
     : GPIOA_PUPDR_PUPDR15 ( %bb -- x addr ) 30 lshift GPIOA_PUPDR ; \ GPIOA_PUPDR_PUPDR15, Port x configuration bits y =  0..15
     : GPIOA_PUPDR_PUPDR14 ( %bb -- x addr ) 28 lshift GPIOA_PUPDR ; \ GPIOA_PUPDR_PUPDR14, Port x configuration bits y =  0..15
@@ -3541,7 +3541,7 @@ begin-module memmap
     : GPIOA_PUPDR_PUPDR0 ( %bb -- x addr ) GPIOA_PUPDR ; \ GPIOA_PUPDR_PUPDR0, Port x configuration bits y =  0..15
   [then]
 
-  defined? use-GPIOA defined? GPIOA_IDR_IDR15? not and [if]
+  [if]
     \ GPIOA_IDR (read-only) Reset:0x00000000
     : GPIOA_IDR_IDR15? ( --  1|0 ) 15 bit GPIOA_IDR bit@ ; \ GPIOA_IDR_IDR15, Port input data y =  0..15
     : GPIOA_IDR_IDR14? ( --  1|0 ) 14 bit GPIOA_IDR bit@ ; \ GPIOA_IDR_IDR14, Port input data y =  0..15
@@ -3561,7 +3561,7 @@ begin-module memmap
     : GPIOA_IDR_IDR0? ( --  1|0 ) 0 bit GPIOA_IDR bit@ ; \ GPIOA_IDR_IDR0, Port input data y =  0..15
   [then]
 
-  execute-defined? use-GPIOA defined? GPIOA_ODR_ODR15 not and [if]
+  execute-defined? use-GPIOA [if]
     \ GPIOA_ODR (read-write) Reset:0x00000000
     : GPIOA_ODR_ODR15 ( -- x addr ) 15 bit GPIOA_ODR ; \ GPIOA_ODR_ODR15, Port output data y =  0..15
     : GPIOA_ODR_ODR14 ( -- x addr ) 14 bit GPIOA_ODR ; \ GPIOA_ODR_ODR14, Port output data y =  0..15
@@ -3581,7 +3581,7 @@ begin-module memmap
     : GPIOA_ODR_ODR0 ( -- x addr ) 0 bit GPIOA_ODR ; \ GPIOA_ODR_ODR0, Port output data y =  0..15
   [then]
 
-  defined? use-GPIOA defined? GPIOA_BSRR_BR15 not and [if]
+  [if]
     \ GPIOA_BSRR (write-only) Reset:0x00000000
     : GPIOA_BSRR_BR15 ( -- ) 31 bit GPIOA_BSRR ! ; \ GPIOA_BSRR_BR15, Port x reset bit y y =  0..15
     : GPIOA_BSRR_BR14 ( -- ) 30 bit GPIOA_BSRR ! ; \ GPIOA_BSRR_BR14, Port x reset bit y y =  0..15
@@ -3617,7 +3617,7 @@ begin-module memmap
     : GPIOA_BSRR_BS0 ( -- ) 0 bit GPIOA_BSRR ! ; \ GPIOA_BSRR_BS0, Port x set bit y y=  0..15
   [then]
 
-  execute-defined? use-GPIOA defined? GPIOA_LCKR_LCKK not and [if]
+  execute-defined? use-GPIOA [if]
     \ GPIOA_LCKR (read-write) Reset:0x00000000
     : GPIOA_LCKR_LCKK ( -- x addr ) 16 bit GPIOA_LCKR ; \ GPIOA_LCKR_LCKK, Port x lock bit y y=  0..15
     : GPIOA_LCKR_LCK15 ( -- x addr ) 15 bit GPIOA_LCKR ; \ GPIOA_LCKR_LCK15, Port x lock bit y y=  0..15
@@ -3638,7 +3638,7 @@ begin-module memmap
     : GPIOA_LCKR_LCK0 ( -- x addr ) 0 bit GPIOA_LCKR ; \ GPIOA_LCKR_LCK0, Port x lock bit y y=  0..15
   [then]
 
-  defined? use-GPIOA defined? GPIOA_AFRL_AFRL7 not and [if]
+  [if]
     \ GPIOA_AFRL (read-write) Reset:0x00000000
     : GPIOA_AFRL_AFRL7 ( %bbbb -- x addr ) 28 lshift GPIOA_AFRL ; \ GPIOA_AFRL_AFRL7, Alternate function selection for port x  bit y y = 0..7
     : GPIOA_AFRL_AFRL6 ( %bbbb -- x addr ) 24 lshift GPIOA_AFRL ; \ GPIOA_AFRL_AFRL6, Alternate function selection for port x  bit y y = 0..7
@@ -3650,7 +3650,7 @@ begin-module memmap
     : GPIOA_AFRL_AFRL0 ( %bbbb -- x addr ) GPIOA_AFRL ; \ GPIOA_AFRL_AFRL0, Alternate function selection for port x  bit y y = 0..7
   [then]
 
-  execute-defined? use-GPIOA defined? GPIOA_AFRH_AFRH15 not and [if]
+  execute-defined? use-GPIOA [if]
     \ GPIOA_AFRH (read-write) Reset:0x00000000
     : GPIOA_AFRH_AFRH15 ( %bbbb -- x addr ) 28 lshift GPIOA_AFRH ; \ GPIOA_AFRH_AFRH15, Alternate function selection for port x  bit y y = 8..15
     : GPIOA_AFRH_AFRH14 ( %bbbb -- x addr ) 24 lshift GPIOA_AFRH ; \ GPIOA_AFRH_AFRH14, Alternate function selection for port x  bit y y = 8..15
@@ -3662,17 +3662,17 @@ begin-module memmap
     : GPIOA_AFRH_AFRH8 ( %bbbb -- x addr ) GPIOA_AFRH ; \ GPIOA_AFRH_AFRH8, Alternate function selection for port x  bit y y = 8..15
   [then]
 
-  defined? use-SYSCFG defined? SYSCFG_MEMRM_MEM_MODE not and [if]
+  [if]
     \ SYSCFG_MEMRM (read-write) Reset:0x00000000
     : SYSCFG_MEMRM_MEM_MODE ( %bb -- x addr ) SYSCFG_MEMRM ; \ SYSCFG_MEMRM_MEM_MODE, MEM_MODE
   [then]
 
-  execute-defined? use-SYSCFG defined? SYSCFG_PMC_MII_RMII_SEL not and [if]
+  execute-defined? use-SYSCFG [if]
     \ SYSCFG_PMC (read-write) Reset:0x00000000
     : SYSCFG_PMC_MII_RMII_SEL ( -- x addr ) 23 bit SYSCFG_PMC ; \ SYSCFG_PMC_MII_RMII_SEL, Ethernet PHY interface  selection
   [then]
 
-  defined? use-SYSCFG defined? SYSCFG_EXTICR1_EXTI3 not and [if]
+  [if]
     \ SYSCFG_EXTICR1 (read-write) Reset:0x0000
     : SYSCFG_EXTICR1_EXTI3 ( %bbbb -- x addr ) 12 lshift SYSCFG_EXTICR1 ; \ SYSCFG_EXTICR1_EXTI3, EXTI x configuration x = 0 to  3
     : SYSCFG_EXTICR1_EXTI2 ( %bbbb -- x addr ) 8 lshift SYSCFG_EXTICR1 ; \ SYSCFG_EXTICR1_EXTI2, EXTI x configuration x = 0 to  3
@@ -3680,7 +3680,7 @@ begin-module memmap
     : SYSCFG_EXTICR1_EXTI0 ( %bbbb -- x addr ) SYSCFG_EXTICR1 ; \ SYSCFG_EXTICR1_EXTI0, EXTI x configuration x = 0 to  3
   [then]
 
-  execute-defined? use-SYSCFG defined? SYSCFG_EXTICR2_EXTI7 not and [if]
+  execute-defined? use-SYSCFG [if]
     \ SYSCFG_EXTICR2 (read-write) Reset:0x0000
     : SYSCFG_EXTICR2_EXTI7 ( %bbbb -- x addr ) 12 lshift SYSCFG_EXTICR2 ; \ SYSCFG_EXTICR2_EXTI7, EXTI x configuration x = 4 to  7
     : SYSCFG_EXTICR2_EXTI6 ( %bbbb -- x addr ) 8 lshift SYSCFG_EXTICR2 ; \ SYSCFG_EXTICR2_EXTI6, EXTI x configuration x = 4 to  7
@@ -3688,7 +3688,7 @@ begin-module memmap
     : SYSCFG_EXTICR2_EXTI4 ( %bbbb -- x addr ) SYSCFG_EXTICR2 ; \ SYSCFG_EXTICR2_EXTI4, EXTI x configuration x = 4 to  7
   [then]
 
-  defined? use-SYSCFG defined? SYSCFG_EXTICR3_EXTI11 not and [if]
+  [if]
     \ SYSCFG_EXTICR3 (read-write) Reset:0x0000
     : SYSCFG_EXTICR3_EXTI11 ( %bbbb -- x addr ) 12 lshift SYSCFG_EXTICR3 ; \ SYSCFG_EXTICR3_EXTI11, EXTI x configuration x = 8 to  11
     : SYSCFG_EXTICR3_EXTI10 ( %bbbb -- x addr ) 8 lshift SYSCFG_EXTICR3 ; \ SYSCFG_EXTICR3_EXTI10, EXTI10
@@ -3696,7 +3696,7 @@ begin-module memmap
     : SYSCFG_EXTICR3_EXTI8 ( %bbbb -- x addr ) SYSCFG_EXTICR3 ; \ SYSCFG_EXTICR3_EXTI8, EXTI x configuration x = 8 to  11
   [then]
 
-  execute-defined? use-SYSCFG defined? SYSCFG_EXTICR4_EXTI15 not and [if]
+  execute-defined? use-SYSCFG [if]
     \ SYSCFG_EXTICR4 (read-write) Reset:0x0000
     : SYSCFG_EXTICR4_EXTI15 ( %bbbb -- x addr ) 12 lshift SYSCFG_EXTICR4 ; \ SYSCFG_EXTICR4_EXTI15, EXTI x configuration x = 12 to  15
     : SYSCFG_EXTICR4_EXTI14 ( %bbbb -- x addr ) 8 lshift SYSCFG_EXTICR4 ; \ SYSCFG_EXTICR4_EXTI14, EXTI x configuration x = 12 to  15
@@ -3704,13 +3704,13 @@ begin-module memmap
     : SYSCFG_EXTICR4_EXTI12 ( %bbbb -- x addr ) SYSCFG_EXTICR4 ; \ SYSCFG_EXTICR4_EXTI12, EXTI x configuration x = 12 to  15
   [then]
 
-  defined? use-SYSCFG defined? SYSCFG_CMPCR_READY? not and [if]
+  [if]
     \ SYSCFG_CMPCR (read-only) Reset:0x00000000
     : SYSCFG_CMPCR_READY? ( --  1|0 ) 8 bit SYSCFG_CMPCR bit@ ; \ SYSCFG_CMPCR_READY, READY
     : SYSCFG_CMPCR_CMP_PD? ( --  1|0 ) 0 bit SYSCFG_CMPCR bit@ ; \ SYSCFG_CMPCR_CMP_PD, Compensation cell  power-down
   [then]
 
-  execute-defined? use-SPI1 defined? SPI1_CR1_BIDIMODE not and [if]
+  execute-defined? use-SPI1 [if]
     \ SPI1_CR1 (read-write) Reset:0x0000
     : SPI1_CR1_BIDIMODE ( -- x addr ) 15 bit SPI1_CR1 ; \ SPI1_CR1_BIDIMODE, Bidirectional data mode  enable
     : SPI1_CR1_BIDIOE ( -- x addr ) 14 bit SPI1_CR1 ; \ SPI1_CR1_BIDIOE, Output enable in bidirectional  mode
@@ -3728,7 +3728,7 @@ begin-module memmap
     : SPI1_CR1_CPHA ( -- x addr ) 0 bit SPI1_CR1 ; \ SPI1_CR1_CPHA, Clock phase
   [then]
 
-  defined? use-SPI1 defined? SPI1_CR2_TXEIE not and [if]
+  [if]
     \ SPI1_CR2 (read-write) Reset:0x0000
     : SPI1_CR2_TXEIE ( -- x addr ) 7 bit SPI1_CR2 ; \ SPI1_CR2_TXEIE, Tx buffer empty interrupt  enable
     : SPI1_CR2_RXNEIE ( -- x addr ) 6 bit SPI1_CR2 ; \ SPI1_CR2_RXNEIE, RX buffer not empty interrupt  enable
@@ -3739,7 +3739,7 @@ begin-module memmap
     : SPI1_CR2_RXDMAEN ( -- x addr ) 0 bit SPI1_CR2 ; \ SPI1_CR2_RXDMAEN, Rx buffer DMA enable
   [then]
 
-  execute-defined? use-SPI1 defined? SPI1_SR_TIFRFE not and [if]
+  execute-defined? use-SPI1 [if]
     \ SPI1_SR (multiple-access)  Reset:0x0002
     : SPI1_SR_TIFRFE ( -- x addr ) 8 bit SPI1_SR ; \ SPI1_SR_TIFRFE, TI frame format error
     : SPI1_SR_BSY? ( -- 1|0 ) 7 bit SPI1_SR bit@ ; \ SPI1_SR_BSY, Busy flag
@@ -3752,27 +3752,27 @@ begin-module memmap
     : SPI1_SR_RXNE ( -- x addr ) 0 bit SPI1_SR ; \ SPI1_SR_RXNE, Receive buffer not empty
   [then]
 
-  defined? use-SPI1 defined? SPI1_DR_DR not and [if]
+  [if]
     \ SPI1_DR (read-write) Reset:0x0000
     : SPI1_DR_DR ( %bbbbbbbbbbbbbbbb -- x addr ) SPI1_DR ; \ SPI1_DR_DR, Data register
   [then]
 
-  execute-defined? use-SPI1 defined? SPI1_CRCPR_CRCPOLY not and [if]
+  execute-defined? use-SPI1 [if]
     \ SPI1_CRCPR (read-write) Reset:0x0007
     : SPI1_CRCPR_CRCPOLY ( %bbbbbbbbbbbbbbbb -- x addr ) SPI1_CRCPR ; \ SPI1_CRCPR_CRCPOLY, CRC polynomial register
   [then]
 
-  defined? use-SPI1 defined? SPI1_RXCRCR_RxCRC? not and [if]
+  [if]
     \ SPI1_RXCRCR (read-only) Reset:0x0000
     : SPI1_RXCRCR_RxCRC? ( --  x ) SPI1_RXCRCR @ ; \ SPI1_RXCRCR_RxCRC, Rx CRC register
   [then]
 
-  execute-defined? use-SPI1 defined? SPI1_TXCRCR_TxCRC? not and [if]
+  execute-defined? use-SPI1 [if]
     \ SPI1_TXCRCR (read-only) Reset:0x0000
     : SPI1_TXCRCR_TxCRC? ( --  x ) SPI1_TXCRCR @ ; \ SPI1_TXCRCR_TxCRC, Tx CRC register
   [then]
 
-  defined? use-SPI1 defined? SPI1_I2SCFGR_I2SMOD not and [if]
+  [if]
     \ SPI1_I2SCFGR (read-write) Reset:0x0000
     : SPI1_I2SCFGR_I2SMOD ( -- x addr ) 11 bit SPI1_I2SCFGR ; \ SPI1_I2SCFGR_I2SMOD, I2S mode selection
     : SPI1_I2SCFGR_I2SE ( -- x addr ) 10 bit SPI1_I2SCFGR ; \ SPI1_I2SCFGR_I2SE, I2S Enable
@@ -3784,14 +3784,14 @@ begin-module memmap
     : SPI1_I2SCFGR_CHLEN ( -- x addr ) 0 bit SPI1_I2SCFGR ; \ SPI1_I2SCFGR_CHLEN, Channel length number of bits per audio  channel
   [then]
 
-  execute-defined? use-SPI1 defined? SPI1_I2SPR_MCKOE not and [if]
+  execute-defined? use-SPI1 [if]
     \ SPI1_I2SPR (read-write) Reset:00000010
     : SPI1_I2SPR_MCKOE ( -- x addr ) 9 bit SPI1_I2SPR ; \ SPI1_I2SPR_MCKOE, Master clock output enable
     : SPI1_I2SPR_ODD ( -- x addr ) 8 bit SPI1_I2SPR ; \ SPI1_I2SPR_ODD, Odd factor for the  prescaler
     : SPI1_I2SPR_I2SDIV ( %bbbbbbbb -- x addr ) SPI1_I2SPR ; \ SPI1_I2SPR_I2SDIV, I2S Linear prescaler
   [then]
 
-  defined? use-SPI2 defined? SPI2_CR1_BIDIMODE not and [if]
+  [if]
     \ SPI2_CR1 (read-write) Reset:0x0000
     : SPI2_CR1_BIDIMODE ( -- x addr ) 15 bit SPI2_CR1 ; \ SPI2_CR1_BIDIMODE, Bidirectional data mode  enable
     : SPI2_CR1_BIDIOE ( -- x addr ) 14 bit SPI2_CR1 ; \ SPI2_CR1_BIDIOE, Output enable in bidirectional  mode
@@ -3809,7 +3809,7 @@ begin-module memmap
     : SPI2_CR1_CPHA ( -- x addr ) 0 bit SPI2_CR1 ; \ SPI2_CR1_CPHA, Clock phase
   [then]
 
-  execute-defined? use-SPI2 defined? SPI2_CR2_TXEIE not and [if]
+  execute-defined? use-SPI2 [if]
     \ SPI2_CR2 (read-write) Reset:0x0000
     : SPI2_CR2_TXEIE ( -- x addr ) 7 bit SPI2_CR2 ; \ SPI2_CR2_TXEIE, Tx buffer empty interrupt  enable
     : SPI2_CR2_RXNEIE ( -- x addr ) 6 bit SPI2_CR2 ; \ SPI2_CR2_RXNEIE, RX buffer not empty interrupt  enable
@@ -3820,7 +3820,7 @@ begin-module memmap
     : SPI2_CR2_RXDMAEN ( -- x addr ) 0 bit SPI2_CR2 ; \ SPI2_CR2_RXDMAEN, Rx buffer DMA enable
   [then]
 
-  defined? use-SPI2 defined? SPI2_SR_TIFRFE not and [if]
+  [if]
     \ SPI2_SR (multiple-access)  Reset:0x0002
     : SPI2_SR_TIFRFE ( -- x addr ) 8 bit SPI2_SR ; \ SPI2_SR_TIFRFE, TI frame format error
     : SPI2_SR_BSY? ( -- 1|0 ) 7 bit SPI2_SR bit@ ; \ SPI2_SR_BSY, Busy flag
@@ -3833,27 +3833,27 @@ begin-module memmap
     : SPI2_SR_RXNE ( -- x addr ) 0 bit SPI2_SR ; \ SPI2_SR_RXNE, Receive buffer not empty
   [then]
 
-  execute-defined? use-SPI2 defined? SPI2_DR_DR not and [if]
+  execute-defined? use-SPI2 [if]
     \ SPI2_DR (read-write) Reset:0x0000
     : SPI2_DR_DR ( %bbbbbbbbbbbbbbbb -- x addr ) SPI2_DR ; \ SPI2_DR_DR, Data register
   [then]
 
-  defined? use-SPI2 defined? SPI2_CRCPR_CRCPOLY not and [if]
+  [if]
     \ SPI2_CRCPR (read-write) Reset:0x0007
     : SPI2_CRCPR_CRCPOLY ( %bbbbbbbbbbbbbbbb -- x addr ) SPI2_CRCPR ; \ SPI2_CRCPR_CRCPOLY, CRC polynomial register
   [then]
 
-  execute-defined? use-SPI2 defined? SPI2_RXCRCR_RxCRC? not and [if]
+  execute-defined? use-SPI2 [if]
     \ SPI2_RXCRCR (read-only) Reset:0x0000
     : SPI2_RXCRCR_RxCRC? ( --  x ) SPI2_RXCRCR @ ; \ SPI2_RXCRCR_RxCRC, Rx CRC register
   [then]
 
-  defined? use-SPI2 defined? SPI2_TXCRCR_TxCRC? not and [if]
+  [if]
     \ SPI2_TXCRCR (read-only) Reset:0x0000
     : SPI2_TXCRCR_TxCRC? ( --  x ) SPI2_TXCRCR @ ; \ SPI2_TXCRCR_TxCRC, Tx CRC register
   [then]
 
-  execute-defined? use-SPI2 defined? SPI2_I2SCFGR_I2SMOD not and [if]
+  execute-defined? use-SPI2 [if]
     \ SPI2_I2SCFGR (read-write) Reset:0x0000
     : SPI2_I2SCFGR_I2SMOD ( -- x addr ) 11 bit SPI2_I2SCFGR ; \ SPI2_I2SCFGR_I2SMOD, I2S mode selection
     : SPI2_I2SCFGR_I2SE ( -- x addr ) 10 bit SPI2_I2SCFGR ; \ SPI2_I2SCFGR_I2SE, I2S Enable
@@ -3865,14 +3865,14 @@ begin-module memmap
     : SPI2_I2SCFGR_CHLEN ( -- x addr ) 0 bit SPI2_I2SCFGR ; \ SPI2_I2SCFGR_CHLEN, Channel length number of bits per audio  channel
   [then]
 
-  defined? use-SPI2 defined? SPI2_I2SPR_MCKOE not and [if]
+  [if]
     \ SPI2_I2SPR (read-write) Reset:00000010
     : SPI2_I2SPR_MCKOE ( -- x addr ) 9 bit SPI2_I2SPR ; \ SPI2_I2SPR_MCKOE, Master clock output enable
     : SPI2_I2SPR_ODD ( -- x addr ) 8 bit SPI2_I2SPR ; \ SPI2_I2SPR_ODD, Odd factor for the  prescaler
     : SPI2_I2SPR_I2SDIV ( %bbbbbbbb -- x addr ) SPI2_I2SPR ; \ SPI2_I2SPR_I2SDIV, I2S Linear prescaler
   [then]
 
-  execute-defined? use-SPI3 defined? SPI3_CR1_BIDIMODE not and [if]
+  execute-defined? use-SPI3 [if]
     \ SPI3_CR1 (read-write) Reset:0x0000
     : SPI3_CR1_BIDIMODE ( -- x addr ) 15 bit SPI3_CR1 ; \ SPI3_CR1_BIDIMODE, Bidirectional data mode  enable
     : SPI3_CR1_BIDIOE ( -- x addr ) 14 bit SPI3_CR1 ; \ SPI3_CR1_BIDIOE, Output enable in bidirectional  mode
@@ -3890,7 +3890,7 @@ begin-module memmap
     : SPI3_CR1_CPHA ( -- x addr ) 0 bit SPI3_CR1 ; \ SPI3_CR1_CPHA, Clock phase
   [then]
 
-  defined? use-SPI3 defined? SPI3_CR2_TXEIE not and [if]
+  [if]
     \ SPI3_CR2 (read-write) Reset:0x0000
     : SPI3_CR2_TXEIE ( -- x addr ) 7 bit SPI3_CR2 ; \ SPI3_CR2_TXEIE, Tx buffer empty interrupt  enable
     : SPI3_CR2_RXNEIE ( -- x addr ) 6 bit SPI3_CR2 ; \ SPI3_CR2_RXNEIE, RX buffer not empty interrupt  enable
@@ -3901,7 +3901,7 @@ begin-module memmap
     : SPI3_CR2_RXDMAEN ( -- x addr ) 0 bit SPI3_CR2 ; \ SPI3_CR2_RXDMAEN, Rx buffer DMA enable
   [then]
 
-  execute-defined? use-SPI3 defined? SPI3_SR_TIFRFE not and [if]
+  execute-defined? use-SPI3 [if]
     \ SPI3_SR (multiple-access)  Reset:0x0002
     : SPI3_SR_TIFRFE ( -- x addr ) 8 bit SPI3_SR ; \ SPI3_SR_TIFRFE, TI frame format error
     : SPI3_SR_BSY? ( -- 1|0 ) 7 bit SPI3_SR bit@ ; \ SPI3_SR_BSY, Busy flag
@@ -3914,27 +3914,27 @@ begin-module memmap
     : SPI3_SR_RXNE ( -- x addr ) 0 bit SPI3_SR ; \ SPI3_SR_RXNE, Receive buffer not empty
   [then]
 
-  defined? use-SPI3 defined? SPI3_DR_DR not and [if]
+  [if]
     \ SPI3_DR (read-write) Reset:0x0000
     : SPI3_DR_DR ( %bbbbbbbbbbbbbbbb -- x addr ) SPI3_DR ; \ SPI3_DR_DR, Data register
   [then]
 
-  execute-defined? use-SPI3 defined? SPI3_CRCPR_CRCPOLY not and [if]
+  execute-defined? use-SPI3 [if]
     \ SPI3_CRCPR (read-write) Reset:0x0007
     : SPI3_CRCPR_CRCPOLY ( %bbbbbbbbbbbbbbbb -- x addr ) SPI3_CRCPR ; \ SPI3_CRCPR_CRCPOLY, CRC polynomial register
   [then]
 
-  defined? use-SPI3 defined? SPI3_RXCRCR_RxCRC? not and [if]
+  [if]
     \ SPI3_RXCRCR (read-only) Reset:0x0000
     : SPI3_RXCRCR_RxCRC? ( --  x ) SPI3_RXCRCR @ ; \ SPI3_RXCRCR_RxCRC, Rx CRC register
   [then]
 
-  execute-defined? use-SPI3 defined? SPI3_TXCRCR_TxCRC? not and [if]
+  execute-defined? use-SPI3 [if]
     \ SPI3_TXCRCR (read-only) Reset:0x0000
     : SPI3_TXCRCR_TxCRC? ( --  x ) SPI3_TXCRCR @ ; \ SPI3_TXCRCR_TxCRC, Tx CRC register
   [then]
 
-  defined? use-SPI3 defined? SPI3_I2SCFGR_I2SMOD not and [if]
+  [if]
     \ SPI3_I2SCFGR (read-write) Reset:0x0000
     : SPI3_I2SCFGR_I2SMOD ( -- x addr ) 11 bit SPI3_I2SCFGR ; \ SPI3_I2SCFGR_I2SMOD, I2S mode selection
     : SPI3_I2SCFGR_I2SE ( -- x addr ) 10 bit SPI3_I2SCFGR ; \ SPI3_I2SCFGR_I2SE, I2S Enable
@@ -3946,14 +3946,14 @@ begin-module memmap
     : SPI3_I2SCFGR_CHLEN ( -- x addr ) 0 bit SPI3_I2SCFGR ; \ SPI3_I2SCFGR_CHLEN, Channel length number of bits per audio  channel
   [then]
 
-  execute-defined? use-SPI3 defined? SPI3_I2SPR_MCKOE not and [if]
+  execute-defined? use-SPI3 [if]
     \ SPI3_I2SPR (read-write) Reset:00000010
     : SPI3_I2SPR_MCKOE ( -- x addr ) 9 bit SPI3_I2SPR ; \ SPI3_I2SPR_MCKOE, Master clock output enable
     : SPI3_I2SPR_ODD ( -- x addr ) 8 bit SPI3_I2SPR ; \ SPI3_I2SPR_ODD, Odd factor for the  prescaler
     : SPI3_I2SPR_I2SDIV ( %bbbbbbbb -- x addr ) SPI3_I2SPR ; \ SPI3_I2SPR_I2SDIV, I2S Linear prescaler
   [then]
 
-  defined? use-I2S2ext defined? I2S2ext_CR1_BIDIMODE not and [if]
+  [if]
     \ I2S2ext_CR1 (read-write) Reset:0x0000
     : I2S2ext_CR1_BIDIMODE ( -- x addr ) 15 bit I2S2ext_CR1 ; \ I2S2ext_CR1_BIDIMODE, Bidirectional data mode  enable
     : I2S2ext_CR1_BIDIOE ( -- x addr ) 14 bit I2S2ext_CR1 ; \ I2S2ext_CR1_BIDIOE, Output enable in bidirectional  mode
@@ -3971,7 +3971,7 @@ begin-module memmap
     : I2S2ext_CR1_CPHA ( -- x addr ) 0 bit I2S2ext_CR1 ; \ I2S2ext_CR1_CPHA, Clock phase
   [then]
 
-  execute-defined? use-I2S2ext defined? I2S2ext_CR2_TXEIE not and [if]
+  execute-defined? use-I2S2ext [if]
     \ I2S2ext_CR2 (read-write) Reset:0x0000
     : I2S2ext_CR2_TXEIE ( -- x addr ) 7 bit I2S2ext_CR2 ; \ I2S2ext_CR2_TXEIE, Tx buffer empty interrupt  enable
     : I2S2ext_CR2_RXNEIE ( -- x addr ) 6 bit I2S2ext_CR2 ; \ I2S2ext_CR2_RXNEIE, RX buffer not empty interrupt  enable
@@ -3982,7 +3982,7 @@ begin-module memmap
     : I2S2ext_CR2_RXDMAEN ( -- x addr ) 0 bit I2S2ext_CR2 ; \ I2S2ext_CR2_RXDMAEN, Rx buffer DMA enable
   [then]
 
-  defined? use-I2S2ext defined? I2S2ext_SR_TIFRFE not and [if]
+  [if]
     \ I2S2ext_SR (multiple-access)  Reset:0x0002
     : I2S2ext_SR_TIFRFE ( -- x addr ) 8 bit I2S2ext_SR ; \ I2S2ext_SR_TIFRFE, TI frame format error
     : I2S2ext_SR_BSY? ( -- 1|0 ) 7 bit I2S2ext_SR bit@ ; \ I2S2ext_SR_BSY, Busy flag
@@ -3995,27 +3995,27 @@ begin-module memmap
     : I2S2ext_SR_RXNE ( -- x addr ) 0 bit I2S2ext_SR ; \ I2S2ext_SR_RXNE, Receive buffer not empty
   [then]
 
-  execute-defined? use-I2S2ext defined? I2S2ext_DR_DR not and [if]
+  execute-defined? use-I2S2ext [if]
     \ I2S2ext_DR (read-write) Reset:0x0000
     : I2S2ext_DR_DR ( %bbbbbbbbbbbbbbbb -- x addr ) I2S2ext_DR ; \ I2S2ext_DR_DR, Data register
   [then]
 
-  defined? use-I2S2ext defined? I2S2ext_CRCPR_CRCPOLY not and [if]
+  [if]
     \ I2S2ext_CRCPR (read-write) Reset:0x0007
     : I2S2ext_CRCPR_CRCPOLY ( %bbbbbbbbbbbbbbbb -- x addr ) I2S2ext_CRCPR ; \ I2S2ext_CRCPR_CRCPOLY, CRC polynomial register
   [then]
 
-  execute-defined? use-I2S2ext defined? I2S2ext_RXCRCR_RxCRC? not and [if]
+  execute-defined? use-I2S2ext [if]
     \ I2S2ext_RXCRCR (read-only) Reset:0x0000
     : I2S2ext_RXCRCR_RxCRC? ( --  x ) I2S2ext_RXCRCR @ ; \ I2S2ext_RXCRCR_RxCRC, Rx CRC register
   [then]
 
-  defined? use-I2S2ext defined? I2S2ext_TXCRCR_TxCRC? not and [if]
+  [if]
     \ I2S2ext_TXCRCR (read-only) Reset:0x0000
     : I2S2ext_TXCRCR_TxCRC? ( --  x ) I2S2ext_TXCRCR @ ; \ I2S2ext_TXCRCR_TxCRC, Tx CRC register
   [then]
 
-  execute-defined? use-I2S2ext defined? I2S2ext_I2SCFGR_I2SMOD not and [if]
+  execute-defined? use-I2S2ext [if]
     \ I2S2ext_I2SCFGR (read-write) Reset:0x0000
     : I2S2ext_I2SCFGR_I2SMOD ( -- x addr ) 11 bit I2S2ext_I2SCFGR ; \ I2S2ext_I2SCFGR_I2SMOD, I2S mode selection
     : I2S2ext_I2SCFGR_I2SE ( -- x addr ) 10 bit I2S2ext_I2SCFGR ; \ I2S2ext_I2SCFGR_I2SE, I2S Enable
@@ -4027,14 +4027,14 @@ begin-module memmap
     : I2S2ext_I2SCFGR_CHLEN ( -- x addr ) 0 bit I2S2ext_I2SCFGR ; \ I2S2ext_I2SCFGR_CHLEN, Channel length number of bits per audio  channel
   [then]
 
-  defined? use-I2S2ext defined? I2S2ext_I2SPR_MCKOE not and [if]
+  [if]
     \ I2S2ext_I2SPR (read-write) Reset:00000010
     : I2S2ext_I2SPR_MCKOE ( -- x addr ) 9 bit I2S2ext_I2SPR ; \ I2S2ext_I2SPR_MCKOE, Master clock output enable
     : I2S2ext_I2SPR_ODD ( -- x addr ) 8 bit I2S2ext_I2SPR ; \ I2S2ext_I2SPR_ODD, Odd factor for the  prescaler
     : I2S2ext_I2SPR_I2SDIV ( %bbbbbbbb -- x addr ) I2S2ext_I2SPR ; \ I2S2ext_I2SPR_I2SDIV, I2S Linear prescaler
   [then]
 
-  execute-defined? use-I2S3ext defined? I2S3ext_CR1_BIDIMODE not and [if]
+  execute-defined? use-I2S3ext [if]
     \ I2S3ext_CR1 (read-write) Reset:0x0000
     : I2S3ext_CR1_BIDIMODE ( -- x addr ) 15 bit I2S3ext_CR1 ; \ I2S3ext_CR1_BIDIMODE, Bidirectional data mode  enable
     : I2S3ext_CR1_BIDIOE ( -- x addr ) 14 bit I2S3ext_CR1 ; \ I2S3ext_CR1_BIDIOE, Output enable in bidirectional  mode
@@ -4052,7 +4052,7 @@ begin-module memmap
     : I2S3ext_CR1_CPHA ( -- x addr ) 0 bit I2S3ext_CR1 ; \ I2S3ext_CR1_CPHA, Clock phase
   [then]
 
-  defined? use-I2S3ext defined? I2S3ext_CR2_TXEIE not and [if]
+  [if]
     \ I2S3ext_CR2 (read-write) Reset:0x0000
     : I2S3ext_CR2_TXEIE ( -- x addr ) 7 bit I2S3ext_CR2 ; \ I2S3ext_CR2_TXEIE, Tx buffer empty interrupt  enable
     : I2S3ext_CR2_RXNEIE ( -- x addr ) 6 bit I2S3ext_CR2 ; \ I2S3ext_CR2_RXNEIE, RX buffer not empty interrupt  enable
@@ -4063,7 +4063,7 @@ begin-module memmap
     : I2S3ext_CR2_RXDMAEN ( -- x addr ) 0 bit I2S3ext_CR2 ; \ I2S3ext_CR2_RXDMAEN, Rx buffer DMA enable
   [then]
 
-  execute-defined? use-I2S3ext defined? I2S3ext_SR_TIFRFE not and [if]
+  execute-defined? use-I2S3ext [if]
     \ I2S3ext_SR (multiple-access)  Reset:0x0002
     : I2S3ext_SR_TIFRFE ( -- x addr ) 8 bit I2S3ext_SR ; \ I2S3ext_SR_TIFRFE, TI frame format error
     : I2S3ext_SR_BSY? ( -- 1|0 ) 7 bit I2S3ext_SR bit@ ; \ I2S3ext_SR_BSY, Busy flag
@@ -4076,27 +4076,27 @@ begin-module memmap
     : I2S3ext_SR_RXNE ( -- x addr ) 0 bit I2S3ext_SR ; \ I2S3ext_SR_RXNE, Receive buffer not empty
   [then]
 
-  defined? use-I2S3ext defined? I2S3ext_DR_DR not and [if]
+  [if]
     \ I2S3ext_DR (read-write) Reset:0x0000
     : I2S3ext_DR_DR ( %bbbbbbbbbbbbbbbb -- x addr ) I2S3ext_DR ; \ I2S3ext_DR_DR, Data register
   [then]
 
-  execute-defined? use-I2S3ext defined? I2S3ext_CRCPR_CRCPOLY not and [if]
+  execute-defined? use-I2S3ext [if]
     \ I2S3ext_CRCPR (read-write) Reset:0x0007
     : I2S3ext_CRCPR_CRCPOLY ( %bbbbbbbbbbbbbbbb -- x addr ) I2S3ext_CRCPR ; \ I2S3ext_CRCPR_CRCPOLY, CRC polynomial register
   [then]
 
-  defined? use-I2S3ext defined? I2S3ext_RXCRCR_RxCRC? not and [if]
+  [if]
     \ I2S3ext_RXCRCR (read-only) Reset:0x0000
     : I2S3ext_RXCRCR_RxCRC? ( --  x ) I2S3ext_RXCRCR @ ; \ I2S3ext_RXCRCR_RxCRC, Rx CRC register
   [then]
 
-  execute-defined? use-I2S3ext defined? I2S3ext_TXCRCR_TxCRC? not and [if]
+  execute-defined? use-I2S3ext [if]
     \ I2S3ext_TXCRCR (read-only) Reset:0x0000
     : I2S3ext_TXCRCR_TxCRC? ( --  x ) I2S3ext_TXCRCR @ ; \ I2S3ext_TXCRCR_TxCRC, Tx CRC register
   [then]
 
-  defined? use-I2S3ext defined? I2S3ext_I2SCFGR_I2SMOD not and [if]
+  [if]
     \ I2S3ext_I2SCFGR (read-write) Reset:0x0000
     : I2S3ext_I2SCFGR_I2SMOD ( -- x addr ) 11 bit I2S3ext_I2SCFGR ; \ I2S3ext_I2SCFGR_I2SMOD, I2S mode selection
     : I2S3ext_I2SCFGR_I2SE ( -- x addr ) 10 bit I2S3ext_I2SCFGR ; \ I2S3ext_I2SCFGR_I2SE, I2S Enable
@@ -4108,19 +4108,19 @@ begin-module memmap
     : I2S3ext_I2SCFGR_CHLEN ( -- x addr ) 0 bit I2S3ext_I2SCFGR ; \ I2S3ext_I2SCFGR_CHLEN, Channel length number of bits per audio  channel
   [then]
 
-  execute-defined? use-I2S3ext defined? I2S3ext_I2SPR_MCKOE not and [if]
+  execute-defined? use-I2S3ext [if]
     \ I2S3ext_I2SPR (read-write) Reset:00000010
     : I2S3ext_I2SPR_MCKOE ( -- x addr ) 9 bit I2S3ext_I2SPR ; \ I2S3ext_I2SPR_MCKOE, Master clock output enable
     : I2S3ext_I2SPR_ODD ( -- x addr ) 8 bit I2S3ext_I2SPR ; \ I2S3ext_I2SPR_ODD, Odd factor for the  prescaler
     : I2S3ext_I2SPR_I2SDIV ( %bbbbbbbb -- x addr ) I2S3ext_I2SPR ; \ I2S3ext_I2SPR_I2SDIV, I2S Linear prescaler
   [then]
 
-  defined? use-SDIO defined? SDIO_POWER_PWRCTRL not and [if]
+  [if]
     \ SDIO_POWER (read-write) Reset:0x00000000
     : SDIO_POWER_PWRCTRL ( %bb -- x addr ) SDIO_POWER ; \ SDIO_POWER_PWRCTRL, PWRCTRL
   [then]
 
-  execute-defined? use-SDIO defined? SDIO_CLKCR_HWFC_EN not and [if]
+  execute-defined? use-SDIO [if]
     \ SDIO_CLKCR (read-write) Reset:0x00000000
     : SDIO_CLKCR_HWFC_EN ( -- x addr ) 14 bit SDIO_CLKCR ; \ SDIO_CLKCR_HWFC_EN, HW Flow Control enable
     : SDIO_CLKCR_NEGEDGE ( -- x addr ) 13 bit SDIO_CLKCR ; \ SDIO_CLKCR_NEGEDGE, SDIO_CK dephasing selection  bit
@@ -4131,12 +4131,12 @@ begin-module memmap
     : SDIO_CLKCR_CLKDIV ( %bbbbbbbb -- x addr ) SDIO_CLKCR ; \ SDIO_CLKCR_CLKDIV, Clock divide factor
   [then]
 
-  defined? use-SDIO defined? SDIO_ARG_CMDARG not and [if]
+  [if]
     \ SDIO_ARG (read-write) Reset:0x00000000
     : SDIO_ARG_CMDARG ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) SDIO_ARG ; \ SDIO_ARG_CMDARG, Command argument
   [then]
 
-  execute-defined? use-SDIO defined? SDIO_CMD_CE_ATACMD not and [if]
+  execute-defined? use-SDIO [if]
     \ SDIO_CMD (read-write) Reset:0x00000000
     : SDIO_CMD_CE_ATACMD ( -- x addr ) 14 bit SDIO_CMD ; \ SDIO_CMD_CE_ATACMD, CE-ATA command
     : SDIO_CMD_nIEN ( -- x addr ) 13 bit SDIO_CMD ; \ SDIO_CMD_nIEN, not Interrupt Enable
@@ -4149,42 +4149,42 @@ begin-module memmap
     : SDIO_CMD_CMDINDEX ( %bbbbbb -- x addr ) SDIO_CMD ; \ SDIO_CMD_CMDINDEX, Command index
   [then]
 
-  defined? use-SDIO defined? SDIO_RESPCMD_RESPCMD? not and [if]
+  [if]
     \ SDIO_RESPCMD (read-only) Reset:0x00000000
     : SDIO_RESPCMD_RESPCMD? ( --  x ) SDIO_RESPCMD @ ; \ SDIO_RESPCMD_RESPCMD, Response command index
   [then]
 
-  execute-defined? use-SDIO defined? SDIO_RESP1_CARDSTATUS1? not and [if]
+  execute-defined? use-SDIO [if]
     \ SDIO_RESP1 (read-only) Reset:0x00000000
     : SDIO_RESP1_CARDSTATUS1? ( --  x ) SDIO_RESP1 @ ; \ SDIO_RESP1_CARDSTATUS1, see Table 132.
   [then]
 
-  defined? use-SDIO defined? SDIO_RESP2_CARDSTATUS2? not and [if]
+  [if]
     \ SDIO_RESP2 (read-only) Reset:0x00000000
     : SDIO_RESP2_CARDSTATUS2? ( --  x ) SDIO_RESP2 @ ; \ SDIO_RESP2_CARDSTATUS2, see Table 132.
   [then]
 
-  execute-defined? use-SDIO defined? SDIO_RESP3_CARDSTATUS3? not and [if]
+  execute-defined? use-SDIO [if]
     \ SDIO_RESP3 (read-only) Reset:0x00000000
     : SDIO_RESP3_CARDSTATUS3? ( --  x ) SDIO_RESP3 @ ; \ SDIO_RESP3_CARDSTATUS3, see Table 132.
   [then]
 
-  defined? use-SDIO defined? SDIO_RESP4_CARDSTATUS4? not and [if]
+  [if]
     \ SDIO_RESP4 (read-only) Reset:0x00000000
     : SDIO_RESP4_CARDSTATUS4? ( --  x ) SDIO_RESP4 @ ; \ SDIO_RESP4_CARDSTATUS4, see Table 132.
   [then]
 
-  execute-defined? use-SDIO defined? SDIO_DTIMER_DATATIME not and [if]
+  execute-defined? use-SDIO [if]
     \ SDIO_DTIMER (read-write) Reset:0x00000000
     : SDIO_DTIMER_DATATIME ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) SDIO_DTIMER ; \ SDIO_DTIMER_DATATIME, Data timeout period
   [then]
 
-  defined? use-SDIO defined? SDIO_DLEN_DATALENGTH not and [if]
+  [if]
     \ SDIO_DLEN (read-write) Reset:0x00000000
     : SDIO_DLEN_DATALENGTH x addr ) SDIO_DLEN ; \ SDIO_DLEN_DATALENGTH, Data length value
   [then]
 
-  execute-defined? use-SDIO defined? SDIO_DCTRL_SDIOEN not and [if]
+  execute-defined? use-SDIO [if]
     \ SDIO_DCTRL (read-write) Reset:0x00000000
     : SDIO_DCTRL_SDIOEN ( -- x addr ) 11 bit SDIO_DCTRL ; \ SDIO_DCTRL_SDIOEN, SD I/O enable functions
     : SDIO_DCTRL_RWMOD ( -- x addr ) 10 bit SDIO_DCTRL ; \ SDIO_DCTRL_RWMOD, Read wait mode
@@ -4197,12 +4197,12 @@ begin-module memmap
     : SDIO_DCTRL_DTEN ( -- x addr ) 0 bit SDIO_DCTRL ; \ SDIO_DCTRL_DTEN, DTEN
   [then]
 
-  defined? use-SDIO defined? SDIO_DCOUNT_DATACOUNT? not and [if]
+  [if]
     \ SDIO_DCOUNT (read-only) Reset:0x00000000
     : SDIO_DCOUNT_DATACOUNT? ( --  x ) SDIO_DCOUNT @ ; \ SDIO_DCOUNT_DATACOUNT, Data count value
   [then]
 
-  execute-defined? use-SDIO defined? SDIO_STA_CEATAEND? not and [if]
+  execute-defined? use-SDIO [if]
     \ SDIO_STA (read-only) Reset:0x00000000
     : SDIO_STA_CEATAEND? ( --  1|0 ) 23 bit SDIO_STA bit@ ; \ SDIO_STA_CEATAEND, CE-ATA command completion signal  received for CMD61
     : SDIO_STA_SDIOIT? ( --  1|0 ) 22 bit SDIO_STA bit@ ; \ SDIO_STA_SDIOIT, SDIO interrupt received
@@ -4230,7 +4230,7 @@ begin-module memmap
     : SDIO_STA_CCRCFAIL? ( --  1|0 ) 0 bit SDIO_STA bit@ ; \ SDIO_STA_CCRCFAIL, Command response received CRC check  failed
   [then]
 
-  defined? use-SDIO defined? SDIO_ICR_CEATAENDC not and [if]
+  [if]
     \ SDIO_ICR (read-write) Reset:0x00000000
     : SDIO_ICR_CEATAENDC ( -- x addr ) 23 bit SDIO_ICR ; \ SDIO_ICR_CEATAENDC, CEATAEND flag clear bit
     : SDIO_ICR_SDIOITC ( -- x addr ) 22 bit SDIO_ICR ; \ SDIO_ICR_SDIOITC, SDIOIT flag clear bit
@@ -4247,7 +4247,7 @@ begin-module memmap
     : SDIO_ICR_CCRCFAILC ( -- x addr ) 0 bit SDIO_ICR ; \ SDIO_ICR_CCRCFAILC, CCRCFAIL flag clear bit
   [then]
 
-  execute-defined? use-SDIO defined? SDIO_MASK_CEATAENDIE not and [if]
+  execute-defined? use-SDIO [if]
     \ SDIO_MASK (read-write) Reset:0x00000000
     : SDIO_MASK_CEATAENDIE ( -- x addr ) 23 bit SDIO_MASK ; \ SDIO_MASK_CEATAENDIE, CE-ATA command completion signal  received interrupt enable
     : SDIO_MASK_SDIOITIE ( -- x addr ) 22 bit SDIO_MASK ; \ SDIO_MASK_SDIOITIE, SDIO mode interrupt received interrupt  enable
@@ -4275,17 +4275,17 @@ begin-module memmap
     : SDIO_MASK_CCRCFAILIE ( -- x addr ) 0 bit SDIO_MASK ; \ SDIO_MASK_CCRCFAILIE, Command CRC fail interrupt  enable
   [then]
 
-  defined? use-SDIO defined? SDIO_FIFOCNT_FIFOCOUNT? not and [if]
+  [if]
     \ SDIO_FIFOCNT (read-only) Reset:0x00000000
     : SDIO_FIFOCNT_FIFOCOUNT? ( --  x ) SDIO_FIFOCNT @ ; \ SDIO_FIFOCNT_FIFOCOUNT, Remaining number of words to be written  to or read from the FIFO.
   [then]
 
-  execute-defined? use-SDIO defined? SDIO_FIFO_FIFOData not and [if]
+  execute-defined? use-SDIO [if]
     \ SDIO_FIFO (read-write) Reset:0x00000000
     : SDIO_FIFO_FIFOData ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) SDIO_FIFO ; \ SDIO_FIFO_FIFOData, Receive and transmit FIFO  data
   [then]
 
-  defined? use-ADC1 defined? ADC1_SR_OVR not and [if]
+  [if]
     \ ADC1_SR (read-write) Reset:0x00000000
     : ADC1_SR_OVR ( -- x addr ) 5 bit ADC1_SR ; \ ADC1_SR_OVR, Overrun
     : ADC1_SR_STRT ( -- x addr ) 4 bit ADC1_SR ; \ ADC1_SR_STRT, Regular channel start flag
@@ -4295,7 +4295,7 @@ begin-module memmap
     : ADC1_SR_AWD ( -- x addr ) 0 bit ADC1_SR ; \ ADC1_SR_AWD, Analog watchdog flag
   [then]
 
-  execute-defined? use-ADC1 defined? ADC1_CR1_OVRIE not and [if]
+  execute-defined? use-ADC1 [if]
     \ ADC1_CR1 (read-write) Reset:0x00000000
     : ADC1_CR1_OVRIE ( -- x addr ) 26 bit ADC1_CR1 ; \ ADC1_CR1_OVRIE, Overrun interrupt enable
     : ADC1_CR1_RES ( %bb -- x addr ) 24 lshift ADC1_CR1 ; \ ADC1_CR1_RES, Resolution
@@ -4313,7 +4313,7 @@ begin-module memmap
     : ADC1_CR1_AWDCH ( %bbbbb -- x addr ) ADC1_CR1 ; \ ADC1_CR1_AWDCH, Analog watchdog channel select  bits
   [then]
 
-  defined? use-ADC1 defined? ADC1_CR2_SWSTART not and [if]
+  [if]
     \ ADC1_CR2 (read-write) Reset:0x00000000
     : ADC1_CR2_SWSTART ( -- x addr ) 30 bit ADC1_CR2 ; \ ADC1_CR2_SWSTART, Start conversion of regular  channels
     : ADC1_CR2_EXTEN ( %bb -- x addr ) 28 lshift ADC1_CR2 ; \ ADC1_CR2_EXTEN, External trigger enable for regular  channels
@@ -4329,47 +4329,47 @@ begin-module memmap
     : ADC1_CR2_ADON ( -- x addr ) 0 bit ADC1_CR2 ; \ ADC1_CR2_ADON, A/D Converter ON / OFF
   [then]
 
-  execute-defined? use-ADC1 defined? ADC1_SMPR1_SMPx_x not and [if]
+  execute-defined? use-ADC1 [if]
     \ ADC1_SMPR1 (read-write) Reset:0x00000000
     : ADC1_SMPR1_SMPx_x ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) ADC1_SMPR1 ; \ ADC1_SMPR1_SMPx_x, Sample time bits
   [then]
 
-  defined? use-ADC1 defined? ADC1_SMPR2_SMPx_x not and [if]
+  [if]
     \ ADC1_SMPR2 (read-write) Reset:0x00000000
     : ADC1_SMPR2_SMPx_x ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) ADC1_SMPR2 ; \ ADC1_SMPR2_SMPx_x, Sample time bits
   [then]
 
-  execute-defined? use-ADC1 defined? ADC1_JOFR1_JOFFSET1 not and [if]
+  execute-defined? use-ADC1 [if]
     \ ADC1_JOFR1 (read-write) Reset:0x00000000
     : ADC1_JOFR1_JOFFSET1 ( %bbbbbbbbbbb -- x addr ) ADC1_JOFR1 ; \ ADC1_JOFR1_JOFFSET1, Data offset for injected channel  x
   [then]
 
-  defined? use-ADC1 defined? ADC1_JOFR2_JOFFSET2 not and [if]
+  [if]
     \ ADC1_JOFR2 (read-write) Reset:0x00000000
     : ADC1_JOFR2_JOFFSET2 ( %bbbbbbbbbbb -- x addr ) ADC1_JOFR2 ; \ ADC1_JOFR2_JOFFSET2, Data offset for injected channel  x
   [then]
 
-  execute-defined? use-ADC1 defined? ADC1_JOFR3_JOFFSET3 not and [if]
+  execute-defined? use-ADC1 [if]
     \ ADC1_JOFR3 (read-write) Reset:0x00000000
     : ADC1_JOFR3_JOFFSET3 ( %bbbbbbbbbbb -- x addr ) ADC1_JOFR3 ; \ ADC1_JOFR3_JOFFSET3, Data offset for injected channel  x
   [then]
 
-  defined? use-ADC1 defined? ADC1_JOFR4_JOFFSET4 not and [if]
+  [if]
     \ ADC1_JOFR4 (read-write) Reset:0x00000000
     : ADC1_JOFR4_JOFFSET4 ( %bbbbbbbbbbb -- x addr ) ADC1_JOFR4 ; \ ADC1_JOFR4_JOFFSET4, Data offset for injected channel  x
   [then]
 
-  execute-defined? use-ADC1 defined? ADC1_HTR_HT not and [if]
+  execute-defined? use-ADC1 [if]
     \ ADC1_HTR (read-write) Reset:0x00000FFF
     : ADC1_HTR_HT ( %bbbbbbbbbbb -- x addr ) ADC1_HTR ; \ ADC1_HTR_HT, Analog watchdog higher  threshold
   [then]
 
-  defined? use-ADC1 defined? ADC1_LTR_LT not and [if]
+  [if]
     \ ADC1_LTR (read-write) Reset:0x00000000
     : ADC1_LTR_LT ( %bbbbbbbbbbb -- x addr ) ADC1_LTR ; \ ADC1_LTR_LT, Analog watchdog lower  threshold
   [then]
 
-  execute-defined? use-ADC1 defined? ADC1_SQR1_L not and [if]
+  execute-defined? use-ADC1 [if]
     \ ADC1_SQR1 (read-write) Reset:0x00000000
     : ADC1_SQR1_L ( %bbbb -- x addr ) 20 lshift ADC1_SQR1 ; \ ADC1_SQR1_L, Regular channel sequence  length
     : ADC1_SQR1_SQ16 ( %bbbbb -- x addr ) 15 lshift ADC1_SQR1 ; \ ADC1_SQR1_SQ16, 16th conversion in regular  sequence
@@ -4378,7 +4378,7 @@ begin-module memmap
     : ADC1_SQR1_SQ13 ( %bbbbb -- x addr ) ADC1_SQR1 ; \ ADC1_SQR1_SQ13, 13th conversion in regular  sequence
   [then]
 
-  defined? use-ADC1 defined? ADC1_SQR2_SQ12 not and [if]
+  [if]
     \ ADC1_SQR2 (read-write) Reset:0x00000000
     : ADC1_SQR2_SQ12 ( %bbbbb -- x addr ) 25 lshift ADC1_SQR2 ; \ ADC1_SQR2_SQ12, 12th conversion in regular  sequence
     : ADC1_SQR2_SQ11 ( %bbbbb -- x addr ) 20 lshift ADC1_SQR2 ; \ ADC1_SQR2_SQ11, 11th conversion in regular  sequence
@@ -4388,7 +4388,7 @@ begin-module memmap
     : ADC1_SQR2_SQ7 ( %bbbbb -- x addr ) ADC1_SQR2 ; \ ADC1_SQR2_SQ7, 7th conversion in regular  sequence
   [then]
 
-  execute-defined? use-ADC1 defined? ADC1_SQR3_SQ6 not and [if]
+  execute-defined? use-ADC1 [if]
     \ ADC1_SQR3 (read-write) Reset:0x00000000
     : ADC1_SQR3_SQ6 ( %bbbbb -- x addr ) 25 lshift ADC1_SQR3 ; \ ADC1_SQR3_SQ6, 6th conversion in regular  sequence
     : ADC1_SQR3_SQ5 ( %bbbbb -- x addr ) 20 lshift ADC1_SQR3 ; \ ADC1_SQR3_SQ5, 5th conversion in regular  sequence
@@ -4398,7 +4398,7 @@ begin-module memmap
     : ADC1_SQR3_SQ1 ( %bbbbb -- x addr ) ADC1_SQR3 ; \ ADC1_SQR3_SQ1, 1st conversion in regular  sequence
   [then]
 
-  defined? use-ADC1 defined? ADC1_JSQR_JL not and [if]
+  [if]
     \ ADC1_JSQR (read-write) Reset:0x00000000
     : ADC1_JSQR_JL ( %bb -- x addr ) 20 lshift ADC1_JSQR ; \ ADC1_JSQR_JL, Injected sequence length
     : ADC1_JSQR_JSQ4 ( %bbbbb -- x addr ) 15 lshift ADC1_JSQR ; \ ADC1_JSQR_JSQ4, 4th conversion in injected  sequence
@@ -4407,32 +4407,32 @@ begin-module memmap
     : ADC1_JSQR_JSQ1 ( %bbbbb -- x addr ) ADC1_JSQR ; \ ADC1_JSQR_JSQ1, 1st conversion in injected  sequence
   [then]
 
-  execute-defined? use-ADC1 defined? ADC1_JDR1_JDATA? not and [if]
+  execute-defined? use-ADC1 [if]
     \ ADC1_JDR1 (read-only) Reset:0x00000000
     : ADC1_JDR1_JDATA? ( --  x ) ADC1_JDR1 @ ; \ ADC1_JDR1_JDATA, Injected data
   [then]
 
-  defined? use-ADC1 defined? ADC1_JDR2_JDATA? not and [if]
+  [if]
     \ ADC1_JDR2 (read-only) Reset:0x00000000
     : ADC1_JDR2_JDATA? ( --  x ) ADC1_JDR2 @ ; \ ADC1_JDR2_JDATA, Injected data
   [then]
 
-  execute-defined? use-ADC1 defined? ADC1_JDR3_JDATA? not and [if]
+  execute-defined? use-ADC1 [if]
     \ ADC1_JDR3 (read-only) Reset:0x00000000
     : ADC1_JDR3_JDATA? ( --  x ) ADC1_JDR3 @ ; \ ADC1_JDR3_JDATA, Injected data
   [then]
 
-  defined? use-ADC1 defined? ADC1_JDR4_JDATA? not and [if]
+  [if]
     \ ADC1_JDR4 (read-only) Reset:0x00000000
     : ADC1_JDR4_JDATA? ( --  x ) ADC1_JDR4 @ ; \ ADC1_JDR4_JDATA, Injected data
   [then]
 
-  execute-defined? use-ADC1 defined? ADC1_DR_DATA? not and [if]
+  execute-defined? use-ADC1 [if]
     \ ADC1_DR (read-only) Reset:0x00000000
     : ADC1_DR_DATA? ( --  x ) ADC1_DR @ ; \ ADC1_DR_DATA, Regular data
   [then]
 
-  defined? use-ADC2 defined? ADC2_SR_OVR not and [if]
+  [if]
     \ ADC2_SR (read-write) Reset:0x00000000
     : ADC2_SR_OVR ( -- x addr ) 5 bit ADC2_SR ; \ ADC2_SR_OVR, Overrun
     : ADC2_SR_STRT ( -- x addr ) 4 bit ADC2_SR ; \ ADC2_SR_STRT, Regular channel start flag
@@ -4442,7 +4442,7 @@ begin-module memmap
     : ADC2_SR_AWD ( -- x addr ) 0 bit ADC2_SR ; \ ADC2_SR_AWD, Analog watchdog flag
   [then]
 
-  execute-defined? use-ADC2 defined? ADC2_CR1_OVRIE not and [if]
+  execute-defined? use-ADC2 [if]
     \ ADC2_CR1 (read-write) Reset:0x00000000
     : ADC2_CR1_OVRIE ( -- x addr ) 26 bit ADC2_CR1 ; \ ADC2_CR1_OVRIE, Overrun interrupt enable
     : ADC2_CR1_RES ( %bb -- x addr ) 24 lshift ADC2_CR1 ; \ ADC2_CR1_RES, Resolution
@@ -4460,7 +4460,7 @@ begin-module memmap
     : ADC2_CR1_AWDCH ( %bbbbb -- x addr ) ADC2_CR1 ; \ ADC2_CR1_AWDCH, Analog watchdog channel select  bits
   [then]
 
-  defined? use-ADC2 defined? ADC2_CR2_SWSTART not and [if]
+  [if]
     \ ADC2_CR2 (read-write) Reset:0x00000000
     : ADC2_CR2_SWSTART ( -- x addr ) 30 bit ADC2_CR2 ; \ ADC2_CR2_SWSTART, Start conversion of regular  channels
     : ADC2_CR2_EXTEN ( %bb -- x addr ) 28 lshift ADC2_CR2 ; \ ADC2_CR2_EXTEN, External trigger enable for regular  channels
@@ -4476,47 +4476,47 @@ begin-module memmap
     : ADC2_CR2_ADON ( -- x addr ) 0 bit ADC2_CR2 ; \ ADC2_CR2_ADON, A/D Converter ON / OFF
   [then]
 
-  execute-defined? use-ADC2 defined? ADC2_SMPR1_SMPx_x not and [if]
+  execute-defined? use-ADC2 [if]
     \ ADC2_SMPR1 (read-write) Reset:0x00000000
     : ADC2_SMPR1_SMPx_x ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) ADC2_SMPR1 ; \ ADC2_SMPR1_SMPx_x, Sample time bits
   [then]
 
-  defined? use-ADC2 defined? ADC2_SMPR2_SMPx_x not and [if]
+  [if]
     \ ADC2_SMPR2 (read-write) Reset:0x00000000
     : ADC2_SMPR2_SMPx_x ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) ADC2_SMPR2 ; \ ADC2_SMPR2_SMPx_x, Sample time bits
   [then]
 
-  execute-defined? use-ADC2 defined? ADC2_JOFR1_JOFFSET1 not and [if]
+  execute-defined? use-ADC2 [if]
     \ ADC2_JOFR1 (read-write) Reset:0x00000000
     : ADC2_JOFR1_JOFFSET1 ( %bbbbbbbbbbb -- x addr ) ADC2_JOFR1 ; \ ADC2_JOFR1_JOFFSET1, Data offset for injected channel  x
   [then]
 
-  defined? use-ADC2 defined? ADC2_JOFR2_JOFFSET2 not and [if]
+  [if]
     \ ADC2_JOFR2 (read-write) Reset:0x00000000
     : ADC2_JOFR2_JOFFSET2 ( %bbbbbbbbbbb -- x addr ) ADC2_JOFR2 ; \ ADC2_JOFR2_JOFFSET2, Data offset for injected channel  x
   [then]
 
-  execute-defined? use-ADC2 defined? ADC2_JOFR3_JOFFSET3 not and [if]
+  execute-defined? use-ADC2 [if]
     \ ADC2_JOFR3 (read-write) Reset:0x00000000
     : ADC2_JOFR3_JOFFSET3 ( %bbbbbbbbbbb -- x addr ) ADC2_JOFR3 ; \ ADC2_JOFR3_JOFFSET3, Data offset for injected channel  x
   [then]
 
-  defined? use-ADC2 defined? ADC2_JOFR4_JOFFSET4 not and [if]
+  [if]
     \ ADC2_JOFR4 (read-write) Reset:0x00000000
     : ADC2_JOFR4_JOFFSET4 ( %bbbbbbbbbbb -- x addr ) ADC2_JOFR4 ; \ ADC2_JOFR4_JOFFSET4, Data offset for injected channel  x
   [then]
 
-  execute-defined? use-ADC2 defined? ADC2_HTR_HT not and [if]
+  execute-defined? use-ADC2 [if]
     \ ADC2_HTR (read-write) Reset:0x00000FFF
     : ADC2_HTR_HT ( %bbbbbbbbbbb -- x addr ) ADC2_HTR ; \ ADC2_HTR_HT, Analog watchdog higher  threshold
   [then]
 
-  defined? use-ADC2 defined? ADC2_LTR_LT not and [if]
+  [if]
     \ ADC2_LTR (read-write) Reset:0x00000000
     : ADC2_LTR_LT ( %bbbbbbbbbbb -- x addr ) ADC2_LTR ; \ ADC2_LTR_LT, Analog watchdog lower  threshold
   [then]
 
-  execute-defined? use-ADC2 defined? ADC2_SQR1_L not and [if]
+  execute-defined? use-ADC2 [if]
     \ ADC2_SQR1 (read-write) Reset:0x00000000
     : ADC2_SQR1_L ( %bbbb -- x addr ) 20 lshift ADC2_SQR1 ; \ ADC2_SQR1_L, Regular channel sequence  length
     : ADC2_SQR1_SQ16 ( %bbbbb -- x addr ) 15 lshift ADC2_SQR1 ; \ ADC2_SQR1_SQ16, 16th conversion in regular  sequence
@@ -4525,7 +4525,7 @@ begin-module memmap
     : ADC2_SQR1_SQ13 ( %bbbbb -- x addr ) ADC2_SQR1 ; \ ADC2_SQR1_SQ13, 13th conversion in regular  sequence
   [then]
 
-  defined? use-ADC2 defined? ADC2_SQR2_SQ12 not and [if]
+  [if]
     \ ADC2_SQR2 (read-write) Reset:0x00000000
     : ADC2_SQR2_SQ12 ( %bbbbb -- x addr ) 25 lshift ADC2_SQR2 ; \ ADC2_SQR2_SQ12, 12th conversion in regular  sequence
     : ADC2_SQR2_SQ11 ( %bbbbb -- x addr ) 20 lshift ADC2_SQR2 ; \ ADC2_SQR2_SQ11, 11th conversion in regular  sequence
@@ -4535,7 +4535,7 @@ begin-module memmap
     : ADC2_SQR2_SQ7 ( %bbbbb -- x addr ) ADC2_SQR2 ; \ ADC2_SQR2_SQ7, 7th conversion in regular  sequence
   [then]
 
-  execute-defined? use-ADC2 defined? ADC2_SQR3_SQ6 not and [if]
+  execute-defined? use-ADC2 [if]
     \ ADC2_SQR3 (read-write) Reset:0x00000000
     : ADC2_SQR3_SQ6 ( %bbbbb -- x addr ) 25 lshift ADC2_SQR3 ; \ ADC2_SQR3_SQ6, 6th conversion in regular  sequence
     : ADC2_SQR3_SQ5 ( %bbbbb -- x addr ) 20 lshift ADC2_SQR3 ; \ ADC2_SQR3_SQ5, 5th conversion in regular  sequence
@@ -4545,7 +4545,7 @@ begin-module memmap
     : ADC2_SQR3_SQ1 ( %bbbbb -- x addr ) ADC2_SQR3 ; \ ADC2_SQR3_SQ1, 1st conversion in regular  sequence
   [then]
 
-  defined? use-ADC2 defined? ADC2_JSQR_JL not and [if]
+  [if]
     \ ADC2_JSQR (read-write) Reset:0x00000000
     : ADC2_JSQR_JL ( %bb -- x addr ) 20 lshift ADC2_JSQR ; \ ADC2_JSQR_JL, Injected sequence length
     : ADC2_JSQR_JSQ4 ( %bbbbb -- x addr ) 15 lshift ADC2_JSQR ; \ ADC2_JSQR_JSQ4, 4th conversion in injected  sequence
@@ -4554,32 +4554,32 @@ begin-module memmap
     : ADC2_JSQR_JSQ1 ( %bbbbb -- x addr ) ADC2_JSQR ; \ ADC2_JSQR_JSQ1, 1st conversion in injected  sequence
   [then]
 
-  execute-defined? use-ADC2 defined? ADC2_JDR1_JDATA? not and [if]
+  execute-defined? use-ADC2 [if]
     \ ADC2_JDR1 (read-only) Reset:0x00000000
     : ADC2_JDR1_JDATA? ( --  x ) ADC2_JDR1 @ ; \ ADC2_JDR1_JDATA, Injected data
   [then]
 
-  defined? use-ADC2 defined? ADC2_JDR2_JDATA? not and [if]
+  [if]
     \ ADC2_JDR2 (read-only) Reset:0x00000000
     : ADC2_JDR2_JDATA? ( --  x ) ADC2_JDR2 @ ; \ ADC2_JDR2_JDATA, Injected data
   [then]
 
-  execute-defined? use-ADC2 defined? ADC2_JDR3_JDATA? not and [if]
+  execute-defined? use-ADC2 [if]
     \ ADC2_JDR3 (read-only) Reset:0x00000000
     : ADC2_JDR3_JDATA? ( --  x ) ADC2_JDR3 @ ; \ ADC2_JDR3_JDATA, Injected data
   [then]
 
-  defined? use-ADC2 defined? ADC2_JDR4_JDATA? not and [if]
+  [if]
     \ ADC2_JDR4 (read-only) Reset:0x00000000
     : ADC2_JDR4_JDATA? ( --  x ) ADC2_JDR4 @ ; \ ADC2_JDR4_JDATA, Injected data
   [then]
 
-  execute-defined? use-ADC2 defined? ADC2_DR_DATA? not and [if]
+  execute-defined? use-ADC2 [if]
     \ ADC2_DR (read-only) Reset:0x00000000
     : ADC2_DR_DATA? ( --  x ) ADC2_DR @ ; \ ADC2_DR_DATA, Regular data
   [then]
 
-  defined? use-ADC3 defined? ADC3_SR_OVR not and [if]
+  [if]
     \ ADC3_SR (read-write) Reset:0x00000000
     : ADC3_SR_OVR ( -- x addr ) 5 bit ADC3_SR ; \ ADC3_SR_OVR, Overrun
     : ADC3_SR_STRT ( -- x addr ) 4 bit ADC3_SR ; \ ADC3_SR_STRT, Regular channel start flag
@@ -4589,7 +4589,7 @@ begin-module memmap
     : ADC3_SR_AWD ( -- x addr ) 0 bit ADC3_SR ; \ ADC3_SR_AWD, Analog watchdog flag
   [then]
 
-  execute-defined? use-ADC3 defined? ADC3_CR1_OVRIE not and [if]
+  execute-defined? use-ADC3 [if]
     \ ADC3_CR1 (read-write) Reset:0x00000000
     : ADC3_CR1_OVRIE ( -- x addr ) 26 bit ADC3_CR1 ; \ ADC3_CR1_OVRIE, Overrun interrupt enable
     : ADC3_CR1_RES ( %bb -- x addr ) 24 lshift ADC3_CR1 ; \ ADC3_CR1_RES, Resolution
@@ -4607,7 +4607,7 @@ begin-module memmap
     : ADC3_CR1_AWDCH ( %bbbbb -- x addr ) ADC3_CR1 ; \ ADC3_CR1_AWDCH, Analog watchdog channel select  bits
   [then]
 
-  defined? use-ADC3 defined? ADC3_CR2_SWSTART not and [if]
+  [if]
     \ ADC3_CR2 (read-write) Reset:0x00000000
     : ADC3_CR2_SWSTART ( -- x addr ) 30 bit ADC3_CR2 ; \ ADC3_CR2_SWSTART, Start conversion of regular  channels
     : ADC3_CR2_EXTEN ( %bb -- x addr ) 28 lshift ADC3_CR2 ; \ ADC3_CR2_EXTEN, External trigger enable for regular  channels
@@ -4623,47 +4623,47 @@ begin-module memmap
     : ADC3_CR2_ADON ( -- x addr ) 0 bit ADC3_CR2 ; \ ADC3_CR2_ADON, A/D Converter ON / OFF
   [then]
 
-  execute-defined? use-ADC3 defined? ADC3_SMPR1_SMPx_x not and [if]
+  execute-defined? use-ADC3 [if]
     \ ADC3_SMPR1 (read-write) Reset:0x00000000
     : ADC3_SMPR1_SMPx_x ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) ADC3_SMPR1 ; \ ADC3_SMPR1_SMPx_x, Sample time bits
   [then]
 
-  defined? use-ADC3 defined? ADC3_SMPR2_SMPx_x not and [if]
+  [if]
     \ ADC3_SMPR2 (read-write) Reset:0x00000000
     : ADC3_SMPR2_SMPx_x ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) ADC3_SMPR2 ; \ ADC3_SMPR2_SMPx_x, Sample time bits
   [then]
 
-  execute-defined? use-ADC3 defined? ADC3_JOFR1_JOFFSET1 not and [if]
+  execute-defined? use-ADC3 [if]
     \ ADC3_JOFR1 (read-write) Reset:0x00000000
     : ADC3_JOFR1_JOFFSET1 ( %bbbbbbbbbbb -- x addr ) ADC3_JOFR1 ; \ ADC3_JOFR1_JOFFSET1, Data offset for injected channel  x
   [then]
 
-  defined? use-ADC3 defined? ADC3_JOFR2_JOFFSET2 not and [if]
+  [if]
     \ ADC3_JOFR2 (read-write) Reset:0x00000000
     : ADC3_JOFR2_JOFFSET2 ( %bbbbbbbbbbb -- x addr ) ADC3_JOFR2 ; \ ADC3_JOFR2_JOFFSET2, Data offset for injected channel  x
   [then]
 
-  execute-defined? use-ADC3 defined? ADC3_JOFR3_JOFFSET3 not and [if]
+  execute-defined? use-ADC3 [if]
     \ ADC3_JOFR3 (read-write) Reset:0x00000000
     : ADC3_JOFR3_JOFFSET3 ( %bbbbbbbbbbb -- x addr ) ADC3_JOFR3 ; \ ADC3_JOFR3_JOFFSET3, Data offset for injected channel  x
   [then]
 
-  defined? use-ADC3 defined? ADC3_JOFR4_JOFFSET4 not and [if]
+  [if]
     \ ADC3_JOFR4 (read-write) Reset:0x00000000
     : ADC3_JOFR4_JOFFSET4 ( %bbbbbbbbbbb -- x addr ) ADC3_JOFR4 ; \ ADC3_JOFR4_JOFFSET4, Data offset for injected channel  x
   [then]
 
-  execute-defined? use-ADC3 defined? ADC3_HTR_HT not and [if]
+  execute-defined? use-ADC3 [if]
     \ ADC3_HTR (read-write) Reset:0x00000FFF
     : ADC3_HTR_HT ( %bbbbbbbbbbb -- x addr ) ADC3_HTR ; \ ADC3_HTR_HT, Analog watchdog higher  threshold
   [then]
 
-  defined? use-ADC3 defined? ADC3_LTR_LT not and [if]
+  [if]
     \ ADC3_LTR (read-write) Reset:0x00000000
     : ADC3_LTR_LT ( %bbbbbbbbbbb -- x addr ) ADC3_LTR ; \ ADC3_LTR_LT, Analog watchdog lower  threshold
   [then]
 
-  execute-defined? use-ADC3 defined? ADC3_SQR1_L not and [if]
+  execute-defined? use-ADC3 [if]
     \ ADC3_SQR1 (read-write) Reset:0x00000000
     : ADC3_SQR1_L ( %bbbb -- x addr ) 20 lshift ADC3_SQR1 ; \ ADC3_SQR1_L, Regular channel sequence  length
     : ADC3_SQR1_SQ16 ( %bbbbb -- x addr ) 15 lshift ADC3_SQR1 ; \ ADC3_SQR1_SQ16, 16th conversion in regular  sequence
@@ -4672,7 +4672,7 @@ begin-module memmap
     : ADC3_SQR1_SQ13 ( %bbbbb -- x addr ) ADC3_SQR1 ; \ ADC3_SQR1_SQ13, 13th conversion in regular  sequence
   [then]
 
-  defined? use-ADC3 defined? ADC3_SQR2_SQ12 not and [if]
+  [if]
     \ ADC3_SQR2 (read-write) Reset:0x00000000
     : ADC3_SQR2_SQ12 ( %bbbbb -- x addr ) 25 lshift ADC3_SQR2 ; \ ADC3_SQR2_SQ12, 12th conversion in regular  sequence
     : ADC3_SQR2_SQ11 ( %bbbbb -- x addr ) 20 lshift ADC3_SQR2 ; \ ADC3_SQR2_SQ11, 11th conversion in regular  sequence
@@ -4682,7 +4682,7 @@ begin-module memmap
     : ADC3_SQR2_SQ7 ( %bbbbb -- x addr ) ADC3_SQR2 ; \ ADC3_SQR2_SQ7, 7th conversion in regular  sequence
   [then]
 
-  execute-defined? use-ADC3 defined? ADC3_SQR3_SQ6 not and [if]
+  execute-defined? use-ADC3 [if]
     \ ADC3_SQR3 (read-write) Reset:0x00000000
     : ADC3_SQR3_SQ6 ( %bbbbb -- x addr ) 25 lshift ADC3_SQR3 ; \ ADC3_SQR3_SQ6, 6th conversion in regular  sequence
     : ADC3_SQR3_SQ5 ( %bbbbb -- x addr ) 20 lshift ADC3_SQR3 ; \ ADC3_SQR3_SQ5, 5th conversion in regular  sequence
@@ -4692,7 +4692,7 @@ begin-module memmap
     : ADC3_SQR3_SQ1 ( %bbbbb -- x addr ) ADC3_SQR3 ; \ ADC3_SQR3_SQ1, 1st conversion in regular  sequence
   [then]
 
-  defined? use-ADC3 defined? ADC3_JSQR_JL not and [if]
+  [if]
     \ ADC3_JSQR (read-write) Reset:0x00000000
     : ADC3_JSQR_JL ( %bb -- x addr ) 20 lshift ADC3_JSQR ; \ ADC3_JSQR_JL, Injected sequence length
     : ADC3_JSQR_JSQ4 ( %bbbbb -- x addr ) 15 lshift ADC3_JSQR ; \ ADC3_JSQR_JSQ4, 4th conversion in injected  sequence
@@ -4701,32 +4701,32 @@ begin-module memmap
     : ADC3_JSQR_JSQ1 ( %bbbbb -- x addr ) ADC3_JSQR ; \ ADC3_JSQR_JSQ1, 1st conversion in injected  sequence
   [then]
 
-  execute-defined? use-ADC3 defined? ADC3_JDR1_JDATA? not and [if]
+  execute-defined? use-ADC3 [if]
     \ ADC3_JDR1 (read-only) Reset:0x00000000
     : ADC3_JDR1_JDATA? ( --  x ) ADC3_JDR1 @ ; \ ADC3_JDR1_JDATA, Injected data
   [then]
 
-  defined? use-ADC3 defined? ADC3_JDR2_JDATA? not and [if]
+  [if]
     \ ADC3_JDR2 (read-only) Reset:0x00000000
     : ADC3_JDR2_JDATA? ( --  x ) ADC3_JDR2 @ ; \ ADC3_JDR2_JDATA, Injected data
   [then]
 
-  execute-defined? use-ADC3 defined? ADC3_JDR3_JDATA? not and [if]
+  execute-defined? use-ADC3 [if]
     \ ADC3_JDR3 (read-only) Reset:0x00000000
     : ADC3_JDR3_JDATA? ( --  x ) ADC3_JDR3 @ ; \ ADC3_JDR3_JDATA, Injected data
   [then]
 
-  defined? use-ADC3 defined? ADC3_JDR4_JDATA? not and [if]
+  [if]
     \ ADC3_JDR4 (read-only) Reset:0x00000000
     : ADC3_JDR4_JDATA? ( --  x ) ADC3_JDR4 @ ; \ ADC3_JDR4_JDATA, Injected data
   [then]
 
-  execute-defined? use-ADC3 defined? ADC3_DR_DATA? not and [if]
+  execute-defined? use-ADC3 [if]
     \ ADC3_DR (read-only) Reset:0x00000000
     : ADC3_DR_DATA? ( --  x ) ADC3_DR @ ; \ ADC3_DR_DATA, Regular data
   [then]
 
-  defined? use-USART6 defined? USART6_SR_CTS? not and [if]
+  [if]
     \ USART6_SR (multiple-access)  Reset:0x00C00000
     : USART6_SR_CTS? ( -- 1|0 ) 9 bit USART6_SR bit@ ; \ USART6_SR_CTS, CTS flag
     : USART6_SR_LBD? ( -- 1|0 ) 8 bit USART6_SR bit@ ; \ USART6_SR_LBD, LIN break detection flag
@@ -4740,18 +4740,18 @@ begin-module memmap
     : USART6_SR_PE ( -- x addr ) 0 bit USART6_SR ; \ USART6_SR_PE, Parity error
   [then]
 
-  execute-defined? use-USART6 defined? USART6_DR_DR not and [if]
+  execute-defined? use-USART6 [if]
     \ USART6_DR (read-write) Reset:0x00000000
     : USART6_DR_DR ( %bbbbbbbbb -- x addr ) USART6_DR ; \ USART6_DR_DR, Data value
   [then]
 
-  defined? use-USART6 defined? USART6_BRR_DIV_Mantissa not and [if]
+  [if]
     \ USART6_BRR (read-write) Reset:0x0000
     : USART6_BRR_DIV_Mantissa ( %bbbbbbbbbbb -- x addr ) 4 lshift USART6_BRR ; \ USART6_BRR_DIV_Mantissa, mantissa of USARTDIV
     : USART6_BRR_DIV_Fraction ( %bbbb -- x addr ) USART6_BRR ; \ USART6_BRR_DIV_Fraction, fraction of USARTDIV
   [then]
 
-  execute-defined? use-USART6 defined? USART6_CR1_OVER8 not and [if]
+  execute-defined? use-USART6 [if]
     \ USART6_CR1 (read-write) Reset:0x0000
     : USART6_CR1_OVER8 ( -- x addr ) 15 bit USART6_CR1 ; \ USART6_CR1_OVER8, Oversampling mode
     : USART6_CR1_UE ( -- x addr ) 13 bit USART6_CR1 ; \ USART6_CR1_UE, USART enable
@@ -4770,7 +4770,7 @@ begin-module memmap
     : USART6_CR1_SBK ( -- x addr ) 0 bit USART6_CR1 ; \ USART6_CR1_SBK, Send break
   [then]
 
-  defined? use-USART6 defined? USART6_CR2_LINEN not and [if]
+  [if]
     \ USART6_CR2 (read-write) Reset:0x0000
     : USART6_CR2_LINEN ( -- x addr ) 14 bit USART6_CR2 ; \ USART6_CR2_LINEN, LIN mode enable
     : USART6_CR2_STOP ( %bb -- x addr ) 12 lshift USART6_CR2 ; \ USART6_CR2_STOP, STOP bits
@@ -4783,7 +4783,7 @@ begin-module memmap
     : USART6_CR2_ADD ( %bbbb -- x addr ) USART6_CR2 ; \ USART6_CR2_ADD, Address of the USART node
   [then]
 
-  execute-defined? use-USART6 defined? USART6_CR3_ONEBIT not and [if]
+  execute-defined? use-USART6 [if]
     \ USART6_CR3 (read-write) Reset:0x0000
     : USART6_CR3_ONEBIT ( -- x addr ) 11 bit USART6_CR3 ; \ USART6_CR3_ONEBIT, One sample bit method  enable
     : USART6_CR3_CTSIE ( -- x addr ) 10 bit USART6_CR3 ; \ USART6_CR3_CTSIE, CTS interrupt enable
@@ -4799,13 +4799,13 @@ begin-module memmap
     : USART6_CR3_EIE ( -- x addr ) 0 bit USART6_CR3 ; \ USART6_CR3_EIE, Error interrupt enable
   [then]
 
-  defined? use-USART6 defined? USART6_GTPR_GT not and [if]
+  [if]
     \ USART6_GTPR (read-write) Reset:0x0000
     : USART6_GTPR_GT ( %bbbbbbbb -- x addr ) 8 lshift USART6_GTPR ; \ USART6_GTPR_GT, Guard time value
     : USART6_GTPR_PSC ( %bbbbbbbb -- x addr ) USART6_GTPR ; \ USART6_GTPR_PSC, Prescaler value
   [then]
 
-  execute-defined? use-USART1 defined? USART1_SR_CTS? not and [if]
+  execute-defined? use-USART1 [if]
     \ USART1_SR (multiple-access)  Reset:0x00C00000
     : USART1_SR_CTS? ( -- 1|0 ) 9 bit USART1_SR bit@ ; \ USART1_SR_CTS, CTS flag
     : USART1_SR_LBD? ( -- 1|0 ) 8 bit USART1_SR bit@ ; \ USART1_SR_LBD, LIN break detection flag
@@ -4819,18 +4819,18 @@ begin-module memmap
     : USART1_SR_PE ( -- x addr ) 0 bit USART1_SR ; \ USART1_SR_PE, Parity error
   [then]
 
-  defined? use-USART1 defined? USART1_DR_DR not and [if]
+  [if]
     \ USART1_DR (read-write) Reset:0x00000000
     : USART1_DR_DR ( %bbbbbbbbb -- x addr ) USART1_DR ; \ USART1_DR_DR, Data value
   [then]
 
-  execute-defined? use-USART1 defined? USART1_BRR_DIV_Mantissa not and [if]
+  execute-defined? use-USART1 [if]
     \ USART1_BRR (read-write) Reset:0x0000
     : USART1_BRR_DIV_Mantissa ( %bbbbbbbbbbb -- x addr ) 4 lshift USART1_BRR ; \ USART1_BRR_DIV_Mantissa, mantissa of USARTDIV
     : USART1_BRR_DIV_Fraction ( %bbbb -- x addr ) USART1_BRR ; \ USART1_BRR_DIV_Fraction, fraction of USARTDIV
   [then]
 
-  defined? use-USART1 defined? USART1_CR1_OVER8 not and [if]
+  [if]
     \ USART1_CR1 (read-write) Reset:0x0000
     : USART1_CR1_OVER8 ( -- x addr ) 15 bit USART1_CR1 ; \ USART1_CR1_OVER8, Oversampling mode
     : USART1_CR1_UE ( -- x addr ) 13 bit USART1_CR1 ; \ USART1_CR1_UE, USART enable
@@ -4849,7 +4849,7 @@ begin-module memmap
     : USART1_CR1_SBK ( -- x addr ) 0 bit USART1_CR1 ; \ USART1_CR1_SBK, Send break
   [then]
 
-  execute-defined? use-USART1 defined? USART1_CR2_LINEN not and [if]
+  execute-defined? use-USART1 [if]
     \ USART1_CR2 (read-write) Reset:0x0000
     : USART1_CR2_LINEN ( -- x addr ) 14 bit USART1_CR2 ; \ USART1_CR2_LINEN, LIN mode enable
     : USART1_CR2_STOP ( %bb -- x addr ) 12 lshift USART1_CR2 ; \ USART1_CR2_STOP, STOP bits
@@ -4862,7 +4862,7 @@ begin-module memmap
     : USART1_CR2_ADD ( %bbbb -- x addr ) USART1_CR2 ; \ USART1_CR2_ADD, Address of the USART node
   [then]
 
-  defined? use-USART1 defined? USART1_CR3_ONEBIT not and [if]
+  [if]
     \ USART1_CR3 (read-write) Reset:0x0000
     : USART1_CR3_ONEBIT ( -- x addr ) 11 bit USART1_CR3 ; \ USART1_CR3_ONEBIT, One sample bit method  enable
     : USART1_CR3_CTSIE ( -- x addr ) 10 bit USART1_CR3 ; \ USART1_CR3_CTSIE, CTS interrupt enable
@@ -4878,13 +4878,13 @@ begin-module memmap
     : USART1_CR3_EIE ( -- x addr ) 0 bit USART1_CR3 ; \ USART1_CR3_EIE, Error interrupt enable
   [then]
 
-  execute-defined? use-USART1 defined? USART1_GTPR_GT not and [if]
+  execute-defined? use-USART1 [if]
     \ USART1_GTPR (read-write) Reset:0x0000
     : USART1_GTPR_GT ( %bbbbbbbb -- x addr ) 8 lshift USART1_GTPR ; \ USART1_GTPR_GT, Guard time value
     : USART1_GTPR_PSC ( %bbbbbbbb -- x addr ) USART1_GTPR ; \ USART1_GTPR_PSC, Prescaler value
   [then]
 
-  defined? use-USART2 defined? USART2_SR_CTS? not and [if]
+  [if]
     \ USART2_SR (multiple-access)  Reset:0x00C00000
     : USART2_SR_CTS? ( -- 1|0 ) 9 bit USART2_SR bit@ ; \ USART2_SR_CTS, CTS flag
     : USART2_SR_LBD? ( -- 1|0 ) 8 bit USART2_SR bit@ ; \ USART2_SR_LBD, LIN break detection flag
@@ -4898,18 +4898,18 @@ begin-module memmap
     : USART2_SR_PE ( -- x addr ) 0 bit USART2_SR ; \ USART2_SR_PE, Parity error
   [then]
 
-  execute-defined? use-USART2 defined? USART2_DR_DR not and [if]
+  execute-defined? use-USART2 [if]
     \ USART2_DR (read-write) Reset:0x00000000
     : USART2_DR_DR ( %bbbbbbbbb -- x addr ) USART2_DR ; \ USART2_DR_DR, Data value
   [then]
 
-  defined? use-USART2 defined? USART2_BRR_DIV_Mantissa not and [if]
+  [if]
     \ USART2_BRR (read-write) Reset:0x0000
     : USART2_BRR_DIV_Mantissa ( %bbbbbbbbbbb -- x addr ) 4 lshift USART2_BRR ; \ USART2_BRR_DIV_Mantissa, mantissa of USARTDIV
     : USART2_BRR_DIV_Fraction ( %bbbb -- x addr ) USART2_BRR ; \ USART2_BRR_DIV_Fraction, fraction of USARTDIV
   [then]
 
-  execute-defined? use-USART2 defined? USART2_CR1_OVER8 not and [if]
+  execute-defined? use-USART2 [if]
     \ USART2_CR1 (read-write) Reset:0x0000
     : USART2_CR1_OVER8 ( -- x addr ) 15 bit USART2_CR1 ; \ USART2_CR1_OVER8, Oversampling mode
     : USART2_CR1_UE ( -- x addr ) 13 bit USART2_CR1 ; \ USART2_CR1_UE, USART enable
@@ -4928,7 +4928,7 @@ begin-module memmap
     : USART2_CR1_SBK ( -- x addr ) 0 bit USART2_CR1 ; \ USART2_CR1_SBK, Send break
   [then]
 
-  defined? use-USART2 defined? USART2_CR2_LINEN not and [if]
+  [if]
     \ USART2_CR2 (read-write) Reset:0x0000
     : USART2_CR2_LINEN ( -- x addr ) 14 bit USART2_CR2 ; \ USART2_CR2_LINEN, LIN mode enable
     : USART2_CR2_STOP ( %bb -- x addr ) 12 lshift USART2_CR2 ; \ USART2_CR2_STOP, STOP bits
@@ -4941,7 +4941,7 @@ begin-module memmap
     : USART2_CR2_ADD ( %bbbb -- x addr ) USART2_CR2 ; \ USART2_CR2_ADD, Address of the USART node
   [then]
 
-  execute-defined? use-USART2 defined? USART2_CR3_ONEBIT not and [if]
+  execute-defined? use-USART2 [if]
     \ USART2_CR3 (read-write) Reset:0x0000
     : USART2_CR3_ONEBIT ( -- x addr ) 11 bit USART2_CR3 ; \ USART2_CR3_ONEBIT, One sample bit method  enable
     : USART2_CR3_CTSIE ( -- x addr ) 10 bit USART2_CR3 ; \ USART2_CR3_CTSIE, CTS interrupt enable
@@ -4957,13 +4957,13 @@ begin-module memmap
     : USART2_CR3_EIE ( -- x addr ) 0 bit USART2_CR3 ; \ USART2_CR3_EIE, Error interrupt enable
   [then]
 
-  defined? use-USART2 defined? USART2_GTPR_GT not and [if]
+  [if]
     \ USART2_GTPR (read-write) Reset:0x0000
     : USART2_GTPR_GT ( %bbbbbbbb -- x addr ) 8 lshift USART2_GTPR ; \ USART2_GTPR_GT, Guard time value
     : USART2_GTPR_PSC ( %bbbbbbbb -- x addr ) USART2_GTPR ; \ USART2_GTPR_PSC, Prescaler value
   [then]
 
-  execute-defined? use-USART3 defined? USART3_SR_CTS? not and [if]
+  execute-defined? use-USART3 [if]
     \ USART3_SR (multiple-access)  Reset:0x00C00000
     : USART3_SR_CTS? ( -- 1|0 ) 9 bit USART3_SR bit@ ; \ USART3_SR_CTS, CTS flag
     : USART3_SR_LBD? ( -- 1|0 ) 8 bit USART3_SR bit@ ; \ USART3_SR_LBD, LIN break detection flag
@@ -4977,18 +4977,18 @@ begin-module memmap
     : USART3_SR_PE ( -- x addr ) 0 bit USART3_SR ; \ USART3_SR_PE, Parity error
   [then]
 
-  defined? use-USART3 defined? USART3_DR_DR not and [if]
+  [if]
     \ USART3_DR (read-write) Reset:0x00000000
     : USART3_DR_DR ( %bbbbbbbbb -- x addr ) USART3_DR ; \ USART3_DR_DR, Data value
   [then]
 
-  execute-defined? use-USART3 defined? USART3_BRR_DIV_Mantissa not and [if]
+  execute-defined? use-USART3 [if]
     \ USART3_BRR (read-write) Reset:0x0000
     : USART3_BRR_DIV_Mantissa ( %bbbbbbbbbbb -- x addr ) 4 lshift USART3_BRR ; \ USART3_BRR_DIV_Mantissa, mantissa of USARTDIV
     : USART3_BRR_DIV_Fraction ( %bbbb -- x addr ) USART3_BRR ; \ USART3_BRR_DIV_Fraction, fraction of USARTDIV
   [then]
 
-  defined? use-USART3 defined? USART3_CR1_OVER8 not and [if]
+  [if]
     \ USART3_CR1 (read-write) Reset:0x0000
     : USART3_CR1_OVER8 ( -- x addr ) 15 bit USART3_CR1 ; \ USART3_CR1_OVER8, Oversampling mode
     : USART3_CR1_UE ( -- x addr ) 13 bit USART3_CR1 ; \ USART3_CR1_UE, USART enable
@@ -5007,7 +5007,7 @@ begin-module memmap
     : USART3_CR1_SBK ( -- x addr ) 0 bit USART3_CR1 ; \ USART3_CR1_SBK, Send break
   [then]
 
-  execute-defined? use-USART3 defined? USART3_CR2_LINEN not and [if]
+  execute-defined? use-USART3 [if]
     \ USART3_CR2 (read-write) Reset:0x0000
     : USART3_CR2_LINEN ( -- x addr ) 14 bit USART3_CR2 ; \ USART3_CR2_LINEN, LIN mode enable
     : USART3_CR2_STOP ( %bb -- x addr ) 12 lshift USART3_CR2 ; \ USART3_CR2_STOP, STOP bits
@@ -5020,7 +5020,7 @@ begin-module memmap
     : USART3_CR2_ADD ( %bbbb -- x addr ) USART3_CR2 ; \ USART3_CR2_ADD, Address of the USART node
   [then]
 
-  defined? use-USART3 defined? USART3_CR3_ONEBIT not and [if]
+  [if]
     \ USART3_CR3 (read-write) Reset:0x0000
     : USART3_CR3_ONEBIT ( -- x addr ) 11 bit USART3_CR3 ; \ USART3_CR3_ONEBIT, One sample bit method  enable
     : USART3_CR3_CTSIE ( -- x addr ) 10 bit USART3_CR3 ; \ USART3_CR3_CTSIE, CTS interrupt enable
@@ -5036,13 +5036,13 @@ begin-module memmap
     : USART3_CR3_EIE ( -- x addr ) 0 bit USART3_CR3 ; \ USART3_CR3_EIE, Error interrupt enable
   [then]
 
-  execute-defined? use-USART3 defined? USART3_GTPR_GT not and [if]
+  execute-defined? use-USART3 [if]
     \ USART3_GTPR (read-write) Reset:0x0000
     : USART3_GTPR_GT ( %bbbbbbbb -- x addr ) 8 lshift USART3_GTPR ; \ USART3_GTPR_GT, Guard time value
     : USART3_GTPR_PSC ( %bbbbbbbb -- x addr ) USART3_GTPR ; \ USART3_GTPR_PSC, Prescaler value
   [then]
 
-  defined? use-DAC defined? DAC_CR_DMAUDRIE2 not and [if]
+  [if]
     \ DAC_CR (read-write) Reset:0x00000000
     : DAC_CR_DMAUDRIE2 ( -- x addr ) 29 bit DAC_CR ; \ DAC_CR_DMAUDRIE2, DAC channel2 DMA underrun interrupt  enable
     : DAC_CR_DMAEN2 ( -- x addr ) 28 bit DAC_CR ; \ DAC_CR_DMAEN2, DAC channel2 DMA enable
@@ -5062,77 +5062,77 @@ begin-module memmap
     : DAC_CR_EN1 ( -- x addr ) 0 bit DAC_CR ; \ DAC_CR_EN1, DAC channel1 enable
   [then]
 
-  execute-defined? use-DAC defined? DAC_SWTRIGR_SWTRIG2 not and [if]
+  execute-defined? use-DAC [if]
     \ DAC_SWTRIGR (write-only) Reset:0x00000000
     : DAC_SWTRIGR_SWTRIG2 ( -- x addr ) 1 bit DAC_SWTRIGR ; \ DAC_SWTRIGR_SWTRIG2, DAC channel2 software  trigger
     : DAC_SWTRIGR_SWTRIG1 ( -- x addr ) 0 bit DAC_SWTRIGR ; \ DAC_SWTRIGR_SWTRIG1, DAC channel1 software  trigger
   [then]
 
-  defined? use-DAC defined? DAC_DHR12R1_DACC1DHR not and [if]
+  [if]
     \ DAC_DHR12R1 (read-write) Reset:0x00000000
     : DAC_DHR12R1_DACC1DHR ( %bbbbbbbbbbb -- x addr ) DAC_DHR12R1 ; \ DAC_DHR12R1_DACC1DHR, DAC channel1 12-bit right-aligned  data
   [then]
 
-  execute-defined? use-DAC defined? DAC_DHR12L1_DACC1DHR not and [if]
+  execute-defined? use-DAC [if]
     \ DAC_DHR12L1 (read-write) Reset:0x00000000
     : DAC_DHR12L1_DACC1DHR ( %bbbbbbbbbbb -- x addr ) 4 lshift DAC_DHR12L1 ; \ DAC_DHR12L1_DACC1DHR, DAC channel1 12-bit left-aligned  data
   [then]
 
-  defined? use-DAC defined? DAC_DHR8R1_DACC1DHR not and [if]
+  [if]
     \ DAC_DHR8R1 (read-write) Reset:0x00000000
     : DAC_DHR8R1_DACC1DHR ( %bbbbbbbb -- x addr ) DAC_DHR8R1 ; \ DAC_DHR8R1_DACC1DHR, DAC channel1 8-bit right-aligned  data
   [then]
 
-  execute-defined? use-DAC defined? DAC_DHR12R2_DACC2DHR not and [if]
+  execute-defined? use-DAC [if]
     \ DAC_DHR12R2 (read-write) Reset:0x00000000
     : DAC_DHR12R2_DACC2DHR ( %bbbbbbbbbbb -- x addr ) DAC_DHR12R2 ; \ DAC_DHR12R2_DACC2DHR, DAC channel2 12-bit right-aligned  data
   [then]
 
-  defined? use-DAC defined? DAC_DHR12L2_DACC2DHR not and [if]
+  [if]
     \ DAC_DHR12L2 (read-write) Reset:0x00000000
     : DAC_DHR12L2_DACC2DHR ( %bbbbbbbbbbb -- x addr ) 4 lshift DAC_DHR12L2 ; \ DAC_DHR12L2_DACC2DHR, DAC channel2 12-bit left-aligned  data
   [then]
 
-  execute-defined? use-DAC defined? DAC_DHR8R2_DACC2DHR not and [if]
+  execute-defined? use-DAC [if]
     \ DAC_DHR8R2 (read-write) Reset:0x00000000
     : DAC_DHR8R2_DACC2DHR ( %bbbbbbbb -- x addr ) DAC_DHR8R2 ; \ DAC_DHR8R2_DACC2DHR, DAC channel2 8-bit right-aligned  data
   [then]
 
-  defined? use-DAC defined? DAC_DHR12RD_DACC2DHR not and [if]
+  [if]
     \ DAC_DHR12RD (read-write) Reset:0x00000000
     : DAC_DHR12RD_DACC2DHR ( %bbbbbbbbbbb -- x addr ) 16 lshift DAC_DHR12RD ; \ DAC_DHR12RD_DACC2DHR, DAC channel2 12-bit right-aligned  data
     : DAC_DHR12RD_DACC1DHR ( %bbbbbbbbbbb -- x addr ) DAC_DHR12RD ; \ DAC_DHR12RD_DACC1DHR, DAC channel1 12-bit right-aligned  data
   [then]
 
-  execute-defined? use-DAC defined? DAC_DHR12LD_DACC2DHR not and [if]
+  execute-defined? use-DAC [if]
     \ DAC_DHR12LD (read-write) Reset:0x00000000
     : DAC_DHR12LD_DACC2DHR ( %bbbbbbbbbbb -- x addr ) 20 lshift DAC_DHR12LD ; \ DAC_DHR12LD_DACC2DHR, DAC channel2 12-bit left-aligned  data
     : DAC_DHR12LD_DACC1DHR ( %bbbbbbbbbbb -- x addr ) 4 lshift DAC_DHR12LD ; \ DAC_DHR12LD_DACC1DHR, DAC channel1 12-bit left-aligned  data
   [then]
 
-  defined? use-DAC defined? DAC_DHR8RD_DACC2DHR not and [if]
+  [if]
     \ DAC_DHR8RD (read-write) Reset:0x00000000
     : DAC_DHR8RD_DACC2DHR ( %bbbbbbbb -- x addr ) 8 lshift DAC_DHR8RD ; \ DAC_DHR8RD_DACC2DHR, DAC channel2 8-bit right-aligned  data
     : DAC_DHR8RD_DACC1DHR ( %bbbbbbbb -- x addr ) DAC_DHR8RD ; \ DAC_DHR8RD_DACC1DHR, DAC channel1 8-bit right-aligned  data
   [then]
 
-  execute-defined? use-DAC defined? DAC_DOR1_DACC1DOR? not and [if]
+  execute-defined? use-DAC [if]
     \ DAC_DOR1 (read-only) Reset:0x00000000
     : DAC_DOR1_DACC1DOR? ( --  x ) DAC_DOR1 @ ; \ DAC_DOR1_DACC1DOR, DAC channel1 data output
   [then]
 
-  defined? use-DAC defined? DAC_DOR2_DACC2DOR? not and [if]
+  [if]
     \ DAC_DOR2 (read-only) Reset:0x00000000
     : DAC_DOR2_DACC2DOR? ( --  x ) DAC_DOR2 @ ; \ DAC_DOR2_DACC2DOR, DAC channel2 data output
   [then]
 
-  execute-defined? use-DAC defined? DAC_SR_DMAUDR2 not and [if]
+  execute-defined? use-DAC [if]
     \ DAC_SR (read-write) Reset:0x00000000
     : DAC_SR_DMAUDR2 ( -- x addr ) 29 bit DAC_SR ; \ DAC_SR_DMAUDR2, DAC channel2 DMA underrun  flag
     : DAC_SR_DMAUDR1 ( -- x addr ) 13 bit DAC_SR ; \ DAC_SR_DMAUDR1, DAC channel1 DMA underrun  flag
   [then]
 
-  defined? use-PWR defined? PWR_CR_FPDS not and [if]
+  [if]
     \ PWR_CR (read-write) Reset:0x00000000
     : PWR_CR_FPDS ( -- x addr ) 9 bit PWR_CR ; \ PWR_CR_FPDS, Flash power down in Stop  mode
     : PWR_CR_DBP ( -- x addr ) 8 bit PWR_CR ; \ PWR_CR_DBP, Disable backup domain write  protection
@@ -5144,7 +5144,7 @@ begin-module memmap
     : PWR_CR_LPDS ( -- x addr ) 0 bit PWR_CR ; \ PWR_CR_LPDS, Low-power deep sleep
   [then]
 
-  execute-defined? use-PWR defined? PWR_CSR_WUF? not and [if]
+  execute-defined? use-PWR [if]
     \ PWR_CSR (multiple-access)  Reset:0x00000000
     : PWR_CSR_WUF? ( -- 1|0 ) 0 bit PWR_CSR bit@ ; \ PWR_CSR_WUF, Wakeup flag
     : PWR_CSR_SBF? ( -- 1|0 ) 1 bit PWR_CSR bit@ ; \ PWR_CSR_SBF, Standby flag
@@ -5155,7 +5155,7 @@ begin-module memmap
     : PWR_CSR_VOSRDY ( -- x addr ) 14 bit PWR_CSR ; \ PWR_CSR_VOSRDY, Regulator voltage scaling output  selection ready bit
   [then]
 
-  defined? use-I2C3 defined? I2C3_CR1_SWRST not and [if]
+  [if]
     \ I2C3_CR1 (read-write) Reset:0x0000
     : I2C3_CR1_SWRST ( -- x addr ) 15 bit I2C3_CR1 ; \ I2C3_CR1_SWRST, Software reset
     : I2C3_CR1_ALERT ( -- x addr ) 13 bit I2C3_CR1 ; \ I2C3_CR1_ALERT, SMBus alert
@@ -5173,7 +5173,7 @@ begin-module memmap
     : I2C3_CR1_PE ( -- x addr ) 0 bit I2C3_CR1 ; \ I2C3_CR1_PE, Peripheral enable
   [then]
 
-  execute-defined? use-I2C3 defined? I2C3_CR2_LAST not and [if]
+  execute-defined? use-I2C3 [if]
     \ I2C3_CR2 (read-write) Reset:0x0000
     : I2C3_CR2_LAST ( -- x addr ) 12 bit I2C3_CR2 ; \ I2C3_CR2_LAST, DMA last transfer
     : I2C3_CR2_DMAEN ( -- x addr ) 11 bit I2C3_CR2 ; \ I2C3_CR2_DMAEN, DMA requests enable
@@ -5183,7 +5183,7 @@ begin-module memmap
     : I2C3_CR2_FREQ ( %bbbbbb -- x addr ) I2C3_CR2 ; \ I2C3_CR2_FREQ, Peripheral clock frequency
   [then]
 
-  defined? use-I2C3 defined? I2C3_OAR1_ADDMODE not and [if]
+  [if]
     \ I2C3_OAR1 (read-write) Reset:0x0000
     : I2C3_OAR1_ADDMODE ( -- x addr ) 15 bit I2C3_OAR1 ; \ I2C3_OAR1_ADDMODE, Addressing mode slave  mode
     : I2C3_OAR1_ADD10 ( %bb -- x addr ) 8 lshift I2C3_OAR1 ; \ I2C3_OAR1_ADD10, Interface address
@@ -5191,18 +5191,18 @@ begin-module memmap
     : I2C3_OAR1_ADD0 ( -- x addr ) 0 bit I2C3_OAR1 ; \ I2C3_OAR1_ADD0, Interface address
   [then]
 
-  execute-defined? use-I2C3 defined? I2C3_OAR2_ADD2 not and [if]
+  execute-defined? use-I2C3 [if]
     \ I2C3_OAR2 (read-write) Reset:0x0000
     : I2C3_OAR2_ADD2 ( %bbbbbbb -- x addr ) 1 lshift I2C3_OAR2 ; \ I2C3_OAR2_ADD2, Interface address
     : I2C3_OAR2_ENDUAL ( -- x addr ) 0 bit I2C3_OAR2 ; \ I2C3_OAR2_ENDUAL, Dual addressing mode  enable
   [then]
 
-  defined? use-I2C3 defined? I2C3_DR_DR not and [if]
+  [if]
     \ I2C3_DR (read-write) Reset:0x0000
     : I2C3_DR_DR ( %bbbbbbbb -- x addr ) I2C3_DR ; \ I2C3_DR_DR, 8-bit data register
   [then]
 
-  execute-defined? use-I2C3 defined? I2C3_SR1_SMBALERT not and [if]
+  execute-defined? use-I2C3 [if]
     \ I2C3_SR1 (multiple-access)  Reset:0x0000
     : I2C3_SR1_SMBALERT ( -- x addr ) 15 bit I2C3_SR1 ; \ I2C3_SR1_SMBALERT, SMBus alert
     : I2C3_SR1_TIMEOUT ( -- x addr ) 14 bit I2C3_SR1 ; \ I2C3_SR1_TIMEOUT, Timeout or Tlow error
@@ -5220,7 +5220,7 @@ begin-module memmap
     : I2C3_SR1_SB ( -- x addr ) 0 bit I2C3_SR1 ; \ I2C3_SR1_SB, Start bit Master mode
   [then]
 
-  defined? use-I2C3 defined? I2C3_SR2_PEC? not and [if]
+  [if]
     \ I2C3_SR2 (read-only) Reset:0x0000
     : I2C3_SR2_PEC? ( --  x ) 8 lshift I2C3_SR2 @ ; \ I2C3_SR2_PEC, acket error checking  register
     : I2C3_SR2_DUALF? ( --  1|0 ) 7 bit I2C3_SR2 bit@ ; \ I2C3_SR2_DUALF, Dual flag Slave mode
@@ -5232,19 +5232,19 @@ begin-module memmap
     : I2C3_SR2_MSL? ( --  1|0 ) 0 bit I2C3_SR2 bit@ ; \ I2C3_SR2_MSL, Master/slave
   [then]
 
-  execute-defined? use-I2C3 defined? I2C3_CCR_F_S not and [if]
+  execute-defined? use-I2C3 [if]
     \ I2C3_CCR (read-write) Reset:0x0000
     : I2C3_CCR_F_S ( -- x addr ) 15 bit I2C3_CCR ; \ I2C3_CCR_F_S, I2C master mode selection
     : I2C3_CCR_DUTY ( -- x addr ) 14 bit I2C3_CCR ; \ I2C3_CCR_DUTY, Fast mode duty cycle
     : I2C3_CCR_CCR ( %bbbbbbbbbbb -- x addr ) I2C3_CCR ; \ I2C3_CCR_CCR, Clock control register in Fast/Standard  mode Master mode
   [then]
 
-  defined? use-I2C3 defined? I2C3_TRISE_TRISE not and [if]
+  [if]
     \ I2C3_TRISE (read-write) Reset:0x0002
     : I2C3_TRISE_TRISE ( %bbbbbb -- x addr ) I2C3_TRISE ; \ I2C3_TRISE_TRISE, Maximum rise time in Fast/Standard mode  Master mode
   [then]
 
-  execute-defined? use-I2C2 defined? I2C2_CR1_SWRST not and [if]
+  execute-defined? use-I2C2 [if]
     \ I2C2_CR1 (read-write) Reset:0x0000
     : I2C2_CR1_SWRST ( -- x addr ) 15 bit I2C2_CR1 ; \ I2C2_CR1_SWRST, Software reset
     : I2C2_CR1_ALERT ( -- x addr ) 13 bit I2C2_CR1 ; \ I2C2_CR1_ALERT, SMBus alert
@@ -5262,7 +5262,7 @@ begin-module memmap
     : I2C2_CR1_PE ( -- x addr ) 0 bit I2C2_CR1 ; \ I2C2_CR1_PE, Peripheral enable
   [then]
 
-  defined? use-I2C2 defined? I2C2_CR2_LAST not and [if]
+  [if]
     \ I2C2_CR2 (read-write) Reset:0x0000
     : I2C2_CR2_LAST ( -- x addr ) 12 bit I2C2_CR2 ; \ I2C2_CR2_LAST, DMA last transfer
     : I2C2_CR2_DMAEN ( -- x addr ) 11 bit I2C2_CR2 ; \ I2C2_CR2_DMAEN, DMA requests enable
@@ -5272,7 +5272,7 @@ begin-module memmap
     : I2C2_CR2_FREQ ( %bbbbbb -- x addr ) I2C2_CR2 ; \ I2C2_CR2_FREQ, Peripheral clock frequency
   [then]
 
-  execute-defined? use-I2C2 defined? I2C2_OAR1_ADDMODE not and [if]
+  execute-defined? use-I2C2 [if]
     \ I2C2_OAR1 (read-write) Reset:0x0000
     : I2C2_OAR1_ADDMODE ( -- x addr ) 15 bit I2C2_OAR1 ; \ I2C2_OAR1_ADDMODE, Addressing mode slave  mode
     : I2C2_OAR1_ADD10 ( %bb -- x addr ) 8 lshift I2C2_OAR1 ; \ I2C2_OAR1_ADD10, Interface address
@@ -5280,18 +5280,18 @@ begin-module memmap
     : I2C2_OAR1_ADD0 ( -- x addr ) 0 bit I2C2_OAR1 ; \ I2C2_OAR1_ADD0, Interface address
   [then]
 
-  defined? use-I2C2 defined? I2C2_OAR2_ADD2 not and [if]
+  [if]
     \ I2C2_OAR2 (read-write) Reset:0x0000
     : I2C2_OAR2_ADD2 ( %bbbbbbb -- x addr ) 1 lshift I2C2_OAR2 ; \ I2C2_OAR2_ADD2, Interface address
     : I2C2_OAR2_ENDUAL ( -- x addr ) 0 bit I2C2_OAR2 ; \ I2C2_OAR2_ENDUAL, Dual addressing mode  enable
   [then]
 
-  execute-defined? use-I2C2 defined? I2C2_DR_DR not and [if]
+  execute-defined? use-I2C2 [if]
     \ I2C2_DR (read-write) Reset:0x0000
     : I2C2_DR_DR ( %bbbbbbbb -- x addr ) I2C2_DR ; \ I2C2_DR_DR, 8-bit data register
   [then]
 
-  defined? use-I2C2 defined? I2C2_SR1_SMBALERT not and [if]
+  [if]
     \ I2C2_SR1 (multiple-access)  Reset:0x0000
     : I2C2_SR1_SMBALERT ( -- x addr ) 15 bit I2C2_SR1 ; \ I2C2_SR1_SMBALERT, SMBus alert
     : I2C2_SR1_TIMEOUT ( -- x addr ) 14 bit I2C2_SR1 ; \ I2C2_SR1_TIMEOUT, Timeout or Tlow error
@@ -5309,7 +5309,7 @@ begin-module memmap
     : I2C2_SR1_SB ( -- x addr ) 0 bit I2C2_SR1 ; \ I2C2_SR1_SB, Start bit Master mode
   [then]
 
-  execute-defined? use-I2C2 defined? I2C2_SR2_PEC? not and [if]
+  execute-defined? use-I2C2 [if]
     \ I2C2_SR2 (read-only) Reset:0x0000
     : I2C2_SR2_PEC? ( --  x ) 8 lshift I2C2_SR2 @ ; \ I2C2_SR2_PEC, acket error checking  register
     : I2C2_SR2_DUALF? ( --  1|0 ) 7 bit I2C2_SR2 bit@ ; \ I2C2_SR2_DUALF, Dual flag Slave mode
@@ -5321,19 +5321,19 @@ begin-module memmap
     : I2C2_SR2_MSL? ( --  1|0 ) 0 bit I2C2_SR2 bit@ ; \ I2C2_SR2_MSL, Master/slave
   [then]
 
-  defined? use-I2C2 defined? I2C2_CCR_F_S not and [if]
+  [if]
     \ I2C2_CCR (read-write) Reset:0x0000
     : I2C2_CCR_F_S ( -- x addr ) 15 bit I2C2_CCR ; \ I2C2_CCR_F_S, I2C master mode selection
     : I2C2_CCR_DUTY ( -- x addr ) 14 bit I2C2_CCR ; \ I2C2_CCR_DUTY, Fast mode duty cycle
     : I2C2_CCR_CCR ( %bbbbbbbbbbb -- x addr ) I2C2_CCR ; \ I2C2_CCR_CCR, Clock control register in Fast/Standard  mode Master mode
   [then]
 
-  execute-defined? use-I2C2 defined? I2C2_TRISE_TRISE not and [if]
+  execute-defined? use-I2C2 [if]
     \ I2C2_TRISE (read-write) Reset:0x0002
     : I2C2_TRISE_TRISE ( %bbbbbb -- x addr ) I2C2_TRISE ; \ I2C2_TRISE_TRISE, Maximum rise time in Fast/Standard mode  Master mode
   [then]
 
-  defined? use-I2C1 defined? I2C1_CR1_SWRST not and [if]
+  [if]
     \ I2C1_CR1 (read-write) Reset:0x0000
     : I2C1_CR1_SWRST ( -- x addr ) 15 bit I2C1_CR1 ; \ I2C1_CR1_SWRST, Software reset
     : I2C1_CR1_ALERT ( -- x addr ) 13 bit I2C1_CR1 ; \ I2C1_CR1_ALERT, SMBus alert
@@ -5351,7 +5351,7 @@ begin-module memmap
     : I2C1_CR1_PE ( -- x addr ) 0 bit I2C1_CR1 ; \ I2C1_CR1_PE, Peripheral enable
   [then]
 
-  execute-defined? use-I2C1 defined? I2C1_CR2_LAST not and [if]
+  execute-defined? use-I2C1 [if]
     \ I2C1_CR2 (read-write) Reset:0x0000
     : I2C1_CR2_LAST ( -- x addr ) 12 bit I2C1_CR2 ; \ I2C1_CR2_LAST, DMA last transfer
     : I2C1_CR2_DMAEN ( -- x addr ) 11 bit I2C1_CR2 ; \ I2C1_CR2_DMAEN, DMA requests enable
@@ -5361,7 +5361,7 @@ begin-module memmap
     : I2C1_CR2_FREQ ( %bbbbbb -- x addr ) I2C1_CR2 ; \ I2C1_CR2_FREQ, Peripheral clock frequency
   [then]
 
-  defined? use-I2C1 defined? I2C1_OAR1_ADDMODE not and [if]
+  [if]
     \ I2C1_OAR1 (read-write) Reset:0x0000
     : I2C1_OAR1_ADDMODE ( -- x addr ) 15 bit I2C1_OAR1 ; \ I2C1_OAR1_ADDMODE, Addressing mode slave  mode
     : I2C1_OAR1_ADD10 ( %bb -- x addr ) 8 lshift I2C1_OAR1 ; \ I2C1_OAR1_ADD10, Interface address
@@ -5369,18 +5369,18 @@ begin-module memmap
     : I2C1_OAR1_ADD0 ( -- x addr ) 0 bit I2C1_OAR1 ; \ I2C1_OAR1_ADD0, Interface address
   [then]
 
-  execute-defined? use-I2C1 defined? I2C1_OAR2_ADD2 not and [if]
+  execute-defined? use-I2C1 [if]
     \ I2C1_OAR2 (read-write) Reset:0x0000
     : I2C1_OAR2_ADD2 ( %bbbbbbb -- x addr ) 1 lshift I2C1_OAR2 ; \ I2C1_OAR2_ADD2, Interface address
     : I2C1_OAR2_ENDUAL ( -- x addr ) 0 bit I2C1_OAR2 ; \ I2C1_OAR2_ENDUAL, Dual addressing mode  enable
   [then]
 
-  defined? use-I2C1 defined? I2C1_DR_DR not and [if]
+  [if]
     \ I2C1_DR (read-write) Reset:0x0000
     : I2C1_DR_DR ( %bbbbbbbb -- x addr ) I2C1_DR ; \ I2C1_DR_DR, 8-bit data register
   [then]
 
-  execute-defined? use-I2C1 defined? I2C1_SR1_SMBALERT not and [if]
+  execute-defined? use-I2C1 [if]
     \ I2C1_SR1 (multiple-access)  Reset:0x0000
     : I2C1_SR1_SMBALERT ( -- x addr ) 15 bit I2C1_SR1 ; \ I2C1_SR1_SMBALERT, SMBus alert
     : I2C1_SR1_TIMEOUT ( -- x addr ) 14 bit I2C1_SR1 ; \ I2C1_SR1_TIMEOUT, Timeout or Tlow error
@@ -5398,7 +5398,7 @@ begin-module memmap
     : I2C1_SR1_SB ( -- x addr ) 0 bit I2C1_SR1 ; \ I2C1_SR1_SB, Start bit Master mode
   [then]
 
-  defined? use-I2C1 defined? I2C1_SR2_PEC? not and [if]
+  [if]
     \ I2C1_SR2 (read-only) Reset:0x0000
     : I2C1_SR2_PEC? ( --  x ) 8 lshift I2C1_SR2 @ ; \ I2C1_SR2_PEC, acket error checking  register
     : I2C1_SR2_DUALF? ( --  1|0 ) 7 bit I2C1_SR2 bit@ ; \ I2C1_SR2_DUALF, Dual flag Slave mode
@@ -5410,46 +5410,46 @@ begin-module memmap
     : I2C1_SR2_MSL? ( --  1|0 ) 0 bit I2C1_SR2 bit@ ; \ I2C1_SR2_MSL, Master/slave
   [then]
 
-  execute-defined? use-I2C1 defined? I2C1_CCR_F_S not and [if]
+  execute-defined? use-I2C1 [if]
     \ I2C1_CCR (read-write) Reset:0x0000
     : I2C1_CCR_F_S ( -- x addr ) 15 bit I2C1_CCR ; \ I2C1_CCR_F_S, I2C master mode selection
     : I2C1_CCR_DUTY ( -- x addr ) 14 bit I2C1_CCR ; \ I2C1_CCR_DUTY, Fast mode duty cycle
     : I2C1_CCR_CCR ( %bbbbbbbbbbb -- x addr ) I2C1_CCR ; \ I2C1_CCR_CCR, Clock control register in Fast/Standard  mode Master mode
   [then]
 
-  defined? use-I2C1 defined? I2C1_TRISE_TRISE not and [if]
+  [if]
     \ I2C1_TRISE (read-write) Reset:0x0002
     : I2C1_TRISE_TRISE ( %bbbbbb -- x addr ) I2C1_TRISE ; \ I2C1_TRISE_TRISE, Maximum rise time in Fast/Standard mode  Master mode
   [then]
 
-  execute-defined? use-IWDG defined? IWDG_KR_KEY not and [if]
+  execute-defined? use-IWDG [if]
     \ IWDG_KR (write-only) Reset:0x00000000
     : IWDG_KR_KEY ( %bbbbbbbbbbbbbbbb -- x addr ) IWDG_KR ; \ IWDG_KR_KEY, Key value write only, read  0000h
   [then]
 
-  defined? use-IWDG defined? IWDG_PR_PR not and [if]
+  [if]
     \ IWDG_PR (read-write) Reset:0x00000000
     : IWDG_PR_PR ( %bbb -- x addr ) IWDG_PR ; \ IWDG_PR_PR, Prescaler divider
   [then]
 
-  execute-defined? use-IWDG defined? IWDG_RLR_RL not and [if]
+  execute-defined? use-IWDG [if]
     \ IWDG_RLR (read-write) Reset:0x00000FFF
     : IWDG_RLR_RL ( %bbbbbbbbbbb -- x addr ) IWDG_RLR ; \ IWDG_RLR_RL, Watchdog counter reload  value
   [then]
 
-  defined? use-IWDG defined? IWDG_SR_RVU? not and [if]
+  [if]
     \ IWDG_SR (read-only) Reset:0x00000000
     : IWDG_SR_RVU? ( --  1|0 ) 1 bit IWDG_SR bit@ ; \ IWDG_SR_RVU, Watchdog counter reload value  update
     : IWDG_SR_PVU? ( --  1|0 ) 0 bit IWDG_SR bit@ ; \ IWDG_SR_PVU, Watchdog prescaler value  update
   [then]
 
-  execute-defined? use-WWDG defined? WWDG_CR_WDGA not and [if]
+  execute-defined? use-WWDG [if]
     \ WWDG_CR (read-write) Reset:0x7F
     : WWDG_CR_WDGA ( -- x addr ) 7 bit WWDG_CR ; \ WWDG_CR_WDGA, Activation bit
     : WWDG_CR_T ( %bbbbbbb -- x addr ) WWDG_CR ; \ WWDG_CR_T, 7-bit counter MSB to LSB
   [then]
 
-  defined? use-WWDG defined? WWDG_CFR_EWI not and [if]
+  [if]
     \ WWDG_CFR (read-write) Reset:0x7F
     : WWDG_CFR_EWI ( -- x addr ) 9 bit WWDG_CFR ; \ WWDG_CFR_EWI, Early wakeup interrupt
     : WWDG_CFR_WDGTB1 ( -- x addr ) 8 bit WWDG_CFR ; \ WWDG_CFR_WDGTB1, Timer base
@@ -5457,12 +5457,12 @@ begin-module memmap
     : WWDG_CFR_W ( %bbbbbbb -- x addr ) WWDG_CFR ; \ WWDG_CFR_W, 7-bit window value
   [then]
 
-  execute-defined? use-WWDG defined? WWDG_SR_EWIF not and [if]
+  execute-defined? use-WWDG [if]
     \ WWDG_SR (read-write) Reset:0x00
     : WWDG_SR_EWIF ( -- x addr ) 0 bit WWDG_SR ; \ WWDG_SR_EWIF, Early wakeup interrupt  flag
   [then]
 
-  defined? use-RTC defined? RTC_TR_PM not and [if]
+  [if]
     \ RTC_TR (read-write) Reset:0x00000000
     : RTC_TR_PM ( -- x addr ) 22 bit RTC_TR ; \ RTC_TR_PM, AM/PM notation
     : RTC_TR_HT ( %bb -- x addr ) 20 lshift RTC_TR ; \ RTC_TR_HT, Hour tens in BCD format
@@ -5473,7 +5473,7 @@ begin-module memmap
     : RTC_TR_SU ( %bbbb -- x addr ) RTC_TR ; \ RTC_TR_SU, Second units in BCD format
   [then]
 
-  execute-defined? use-RTC defined? RTC_DR_YT not and [if]
+  execute-defined? use-RTC [if]
     \ RTC_DR (read-write) Reset:0x00002101
     : RTC_DR_YT ( %bbbb -- x addr ) 20 lshift RTC_DR ; \ RTC_DR_YT, Year tens in BCD format
     : RTC_DR_YU ( %bbbb -- x addr ) 16 lshift RTC_DR ; \ RTC_DR_YU, Year units in BCD format
@@ -5484,7 +5484,7 @@ begin-module memmap
     : RTC_DR_DU ( %bbbb -- x addr ) RTC_DR ; \ RTC_DR_DU, Date units in BCD format
   [then]
 
-  defined? use-RTC defined? RTC_CR_COE not and [if]
+  [if]
     \ RTC_CR (read-write) Reset:0x00000000
     : RTC_CR_COE ( -- x addr ) 23 bit RTC_CR ; \ RTC_CR_COE, Calibration output enable
     : RTC_CR_OSEL ( %bb -- x addr ) 21 lshift RTC_CR ; \ RTC_CR_OSEL, Output selection
@@ -5507,7 +5507,7 @@ begin-module memmap
     : RTC_CR_WCKSEL ( %bbb -- x addr ) RTC_CR ; \ RTC_CR_WCKSEL, Wakeup clock selection
   [then]
 
-  execute-defined? use-RTC defined? RTC_ISR_ALRAWF? not and [if]
+  execute-defined? use-RTC [if]
     \ RTC_ISR (multiple-access)  Reset:0x00000007
     : RTC_ISR_ALRAWF? ( -- 1|0 ) 0 bit RTC_ISR bit@ ; \ RTC_ISR_ALRAWF, Alarm A write flag
     : RTC_ISR_ALRBWF? ( -- 1|0 ) 1 bit RTC_ISR bit@ ; \ RTC_ISR_ALRBWF, Alarm B write flag
@@ -5527,24 +5527,24 @@ begin-module memmap
     : RTC_ISR_RECALPF ( -- x addr ) 16 bit RTC_ISR ; \ RTC_ISR_RECALPF, Recalibration pending Flag
   [then]
 
-  defined? use-RTC defined? RTC_PRER_PREDIV_A not and [if]
+  [if]
     \ RTC_PRER (read-write) Reset:0x007F00FF
     : RTC_PRER_PREDIV_A ( %bbbbbbb -- x addr ) 16 lshift RTC_PRER ; \ RTC_PRER_PREDIV_A, Asynchronous prescaler  factor
     : RTC_PRER_PREDIV_S ( %bbbbbbbbbbbbbbb -- x addr ) RTC_PRER ; \ RTC_PRER_PREDIV_S, Synchronous prescaler  factor
   [then]
 
-  execute-defined? use-RTC defined? RTC_WUTR_WUT not and [if]
+  execute-defined? use-RTC [if]
     \ RTC_WUTR (read-write) Reset:0x0000FFFF
     : RTC_WUTR_WUT ( %bbbbbbbbbbbbbbbb -- x addr ) RTC_WUTR ; \ RTC_WUTR_WUT, Wakeup auto-reload value  bits
   [then]
 
-  defined? use-RTC defined? RTC_CALIBR_DCS not and [if]
+  [if]
     \ RTC_CALIBR (read-write) Reset:0x00000000
     : RTC_CALIBR_DCS ( -- x addr ) 7 bit RTC_CALIBR ; \ RTC_CALIBR_DCS, Digital calibration sign
     : RTC_CALIBR_DC ( %bbbbb -- x addr ) RTC_CALIBR ; \ RTC_CALIBR_DC, Digital calibration
   [then]
 
-  execute-defined? use-RTC defined? RTC_ALRMAR_MSK4 not and [if]
+  execute-defined? use-RTC [if]
     \ RTC_ALRMAR (read-write) Reset:0x00000000
     : RTC_ALRMAR_MSK4 ( -- x addr ) 31 bit RTC_ALRMAR ; \ RTC_ALRMAR_MSK4, Alarm A date mask
     : RTC_ALRMAR_WDSEL ( -- x addr ) 30 bit RTC_ALRMAR ; \ RTC_ALRMAR_WDSEL, Week day selection
@@ -5562,7 +5562,7 @@ begin-module memmap
     : RTC_ALRMAR_SU ( %bbbb -- x addr ) RTC_ALRMAR ; \ RTC_ALRMAR_SU, Second units in BCD format
   [then]
 
-  defined? use-RTC defined? RTC_ALRMBR_MSK4 not and [if]
+  [if]
     \ RTC_ALRMBR (read-write) Reset:0x00000000
     : RTC_ALRMBR_MSK4 ( -- x addr ) 31 bit RTC_ALRMBR ; \ RTC_ALRMBR_MSK4, Alarm B date mask
     : RTC_ALRMBR_WDSEL ( -- x addr ) 30 bit RTC_ALRMBR ; \ RTC_ALRMBR_WDSEL, Week day selection
@@ -5580,23 +5580,23 @@ begin-module memmap
     : RTC_ALRMBR_SU ( %bbbb -- x addr ) RTC_ALRMBR ; \ RTC_ALRMBR_SU, Second units in BCD format
   [then]
 
-  execute-defined? use-RTC defined? RTC_WPR_KEY not and [if]
+  execute-defined? use-RTC [if]
     \ RTC_WPR (write-only) Reset:0x00000000
     : RTC_WPR_KEY ( %bbbbbbbb -- x addr ) RTC_WPR ; \ RTC_WPR_KEY, Write protection key
   [then]
 
-  defined? use-RTC defined? RTC_SSR_SS? not and [if]
+  [if]
     \ RTC_SSR (read-only) Reset:0x00000000
     : RTC_SSR_SS? ( --  x ) RTC_SSR @ ; \ RTC_SSR_SS, Sub second value
   [then]
 
-  execute-defined? use-RTC defined? RTC_SHIFTR_ADD1S not and [if]
+  execute-defined? use-RTC [if]
     \ RTC_SHIFTR (write-only) Reset:0x00000000
     : RTC_SHIFTR_ADD1S ( -- x addr ) 31 bit RTC_SHIFTR ; \ RTC_SHIFTR_ADD1S, Add one second
     : RTC_SHIFTR_SUBFS ( %bbbbbbbbbbbbbbb -- x addr ) RTC_SHIFTR ; \ RTC_SHIFTR_SUBFS, Subtract a fraction of a  second
   [then]
 
-  defined? use-RTC defined? RTC_TSTR_ALARMOUTTYPE? not and [if]
+  [if]
     \ RTC_TSTR (read-only) Reset:0x00000000
     : RTC_TSTR_ALARMOUTTYPE? ( --  1|0 ) 18 bit RTC_TSTR bit@ ; \ RTC_TSTR_ALARMOUTTYPE, AFO_ALARM output type
     : RTC_TSTR_TSINSEL? ( --  1|0 ) 17 bit RTC_TSTR bit@ ; \ RTC_TSTR_TSINSEL, TIMESTAMP mapping
@@ -5606,7 +5606,7 @@ begin-module memmap
     : RTC_TSTR_TAMP1E? ( --  1|0 ) 0 bit RTC_TSTR bit@ ; \ RTC_TSTR_TAMP1E, Tamper 1 detection enable
   [then]
 
-  execute-defined? use-RTC defined? RTC_TSDR_WDU? not and [if]
+  execute-defined? use-RTC [if]
     \ RTC_TSDR (read-only) Reset:0x00000000
     : RTC_TSDR_WDU? ( --  x ) 13 lshift RTC_TSDR @ ; \ RTC_TSDR_WDU, Week day units
     : RTC_TSDR_MT? ( --  1|0 ) 12 bit RTC_TSDR bit@ ; \ RTC_TSDR_MT, Month tens in BCD format
@@ -5615,12 +5615,12 @@ begin-module memmap
     : RTC_TSDR_DU? ( --  x ) RTC_TSDR @ ; \ RTC_TSDR_DU, Date units in BCD format
   [then]
 
-  defined? use-RTC defined? RTC_TSSSR_SS? not and [if]
+  [if]
     \ RTC_TSSSR (read-only) Reset:0x00000000
     : RTC_TSSSR_SS? ( --  x ) RTC_TSSSR @ ; \ RTC_TSSSR_SS, Sub second value
   [then]
 
-  execute-defined? use-RTC defined? RTC_CALR_CALP not and [if]
+  execute-defined? use-RTC [if]
     \ RTC_CALR (read-write) Reset:0x00000000
     : RTC_CALR_CALP ( -- x addr ) 15 bit RTC_CALR ; \ RTC_CALR_CALP, Increase frequency of RTC by 488.5  ppm
     : RTC_CALR_CALW8 ( -- x addr ) 14 bit RTC_CALR ; \ RTC_CALR_CALW8, Use an 8-second calibration cycle  period
@@ -5628,7 +5628,7 @@ begin-module memmap
     : RTC_CALR_CALM ( %bbbbbbbbb -- x addr ) RTC_CALR ; \ RTC_CALR_CALM, Calibration minus
   [then]
 
-  defined? use-RTC defined? RTC_TAFCR_ALARMOUTTYPE not and [if]
+  [if]
     \ RTC_TAFCR (read-write) Reset:0x00000000
     : RTC_TAFCR_ALARMOUTTYPE ( -- x addr ) 18 bit RTC_TAFCR ; \ RTC_TAFCR_ALARMOUTTYPE, AFO_ALARM output type
     : RTC_TAFCR_TSINSEL ( -- x addr ) 17 bit RTC_TAFCR ; \ RTC_TAFCR_TSINSEL, TIMESTAMP mapping
@@ -5645,119 +5645,119 @@ begin-module memmap
     : RTC_TAFCR_TAMP1E ( -- x addr ) 0 bit RTC_TAFCR ; \ RTC_TAFCR_TAMP1E, Tamper 1 detection enable
   [then]
 
-  execute-defined? use-RTC defined? RTC_ALRMASSR_MASKSS not and [if]
+  execute-defined? use-RTC [if]
     \ RTC_ALRMASSR (read-write) Reset:0x00000000
     : RTC_ALRMASSR_MASKSS ( %bbbb -- x addr ) 24 lshift RTC_ALRMASSR ; \ RTC_ALRMASSR_MASKSS, Mask the most-significant bits starting  at this bit
     : RTC_ALRMASSR_SS ( %bbbbbbbbbbbbbbb -- x addr ) RTC_ALRMASSR ; \ RTC_ALRMASSR_SS, Sub seconds value
   [then]
 
-  defined? use-RTC defined? RTC_ALRMBSSR_MASKSS not and [if]
+  [if]
     \ RTC_ALRMBSSR (read-write) Reset:0x00000000
     : RTC_ALRMBSSR_MASKSS ( %bbbb -- x addr ) 24 lshift RTC_ALRMBSSR ; \ RTC_ALRMBSSR_MASKSS, Mask the most-significant bits starting  at this bit
     : RTC_ALRMBSSR_SS ( %bbbbbbbbbbbbbbb -- x addr ) RTC_ALRMBSSR ; \ RTC_ALRMBSSR_SS, Sub seconds value
   [then]
 
-  execute-defined? use-RTC defined? RTC_BKP0R_BKP not and [if]
+  execute-defined? use-RTC [if]
     \ RTC_BKP0R (read-write) Reset:0x00000000
     : RTC_BKP0R_BKP ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) RTC_BKP0R ; \ RTC_BKP0R_BKP, BKP
   [then]
 
-  defined? use-RTC defined? RTC_BKP1R_BKP not and [if]
+  [if]
     \ RTC_BKP1R (read-write) Reset:0x00000000
     : RTC_BKP1R_BKP ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) RTC_BKP1R ; \ RTC_BKP1R_BKP, BKP
   [then]
 
-  execute-defined? use-RTC defined? RTC_BKP2R_BKP not and [if]
+  execute-defined? use-RTC [if]
     \ RTC_BKP2R (read-write) Reset:0x00000000
     : RTC_BKP2R_BKP ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) RTC_BKP2R ; \ RTC_BKP2R_BKP, BKP
   [then]
 
-  defined? use-RTC defined? RTC_BKP3R_BKP not and [if]
+  [if]
     \ RTC_BKP3R (read-write) Reset:0x00000000
     : RTC_BKP3R_BKP ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) RTC_BKP3R ; \ RTC_BKP3R_BKP, BKP
   [then]
 
-  execute-defined? use-RTC defined? RTC_BKP4R_BKP not and [if]
+  execute-defined? use-RTC [if]
     \ RTC_BKP4R (read-write) Reset:0x00000000
     : RTC_BKP4R_BKP ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) RTC_BKP4R ; \ RTC_BKP4R_BKP, BKP
   [then]
 
-  defined? use-RTC defined? RTC_BKP5R_BKP not and [if]
+  [if]
     \ RTC_BKP5R (read-write) Reset:0x00000000
     : RTC_BKP5R_BKP ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) RTC_BKP5R ; \ RTC_BKP5R_BKP, BKP
   [then]
 
-  execute-defined? use-RTC defined? RTC_BKP6R_BKP not and [if]
+  execute-defined? use-RTC [if]
     \ RTC_BKP6R (read-write) Reset:0x00000000
     : RTC_BKP6R_BKP ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) RTC_BKP6R ; \ RTC_BKP6R_BKP, BKP
   [then]
 
-  defined? use-RTC defined? RTC_BKP7R_BKP not and [if]
+  [if]
     \ RTC_BKP7R (read-write) Reset:0x00000000
     : RTC_BKP7R_BKP ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) RTC_BKP7R ; \ RTC_BKP7R_BKP, BKP
   [then]
 
-  execute-defined? use-RTC defined? RTC_BKP8R_BKP not and [if]
+  execute-defined? use-RTC [if]
     \ RTC_BKP8R (read-write) Reset:0x00000000
     : RTC_BKP8R_BKP ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) RTC_BKP8R ; \ RTC_BKP8R_BKP, BKP
   [then]
 
-  defined? use-RTC defined? RTC_BKP9R_BKP not and [if]
+  [if]
     \ RTC_BKP9R (read-write) Reset:0x00000000
     : RTC_BKP9R_BKP ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) RTC_BKP9R ; \ RTC_BKP9R_BKP, BKP
   [then]
 
-  execute-defined? use-RTC defined? RTC_BKP10R_BKP not and [if]
+  execute-defined? use-RTC [if]
     \ RTC_BKP10R (read-write) Reset:0x00000000
     : RTC_BKP10R_BKP ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) RTC_BKP10R ; \ RTC_BKP10R_BKP, BKP
   [then]
 
-  defined? use-RTC defined? RTC_BKP11R_BKP not and [if]
+  [if]
     \ RTC_BKP11R (read-write) Reset:0x00000000
     : RTC_BKP11R_BKP ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) RTC_BKP11R ; \ RTC_BKP11R_BKP, BKP
   [then]
 
-  execute-defined? use-RTC defined? RTC_BKP12R_BKP not and [if]
+  execute-defined? use-RTC [if]
     \ RTC_BKP12R (read-write) Reset:0x00000000
     : RTC_BKP12R_BKP ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) RTC_BKP12R ; \ RTC_BKP12R_BKP, BKP
   [then]
 
-  defined? use-RTC defined? RTC_BKP13R_BKP not and [if]
+  [if]
     \ RTC_BKP13R (read-write) Reset:0x00000000
     : RTC_BKP13R_BKP ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) RTC_BKP13R ; \ RTC_BKP13R_BKP, BKP
   [then]
 
-  execute-defined? use-RTC defined? RTC_BKP14R_BKP not and [if]
+  execute-defined? use-RTC [if]
     \ RTC_BKP14R (read-write) Reset:0x00000000
     : RTC_BKP14R_BKP ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) RTC_BKP14R ; \ RTC_BKP14R_BKP, BKP
   [then]
 
-  defined? use-RTC defined? RTC_BKP15R_BKP not and [if]
+  [if]
     \ RTC_BKP15R (read-write) Reset:0x00000000
     : RTC_BKP15R_BKP ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) RTC_BKP15R ; \ RTC_BKP15R_BKP, BKP
   [then]
 
-  execute-defined? use-RTC defined? RTC_BKP16R_BKP not and [if]
+  execute-defined? use-RTC [if]
     \ RTC_BKP16R (read-write) Reset:0x00000000
     : RTC_BKP16R_BKP ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) RTC_BKP16R ; \ RTC_BKP16R_BKP, BKP
   [then]
 
-  defined? use-RTC defined? RTC_BKP17R_BKP not and [if]
+  [if]
     \ RTC_BKP17R (read-write) Reset:0x00000000
     : RTC_BKP17R_BKP ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) RTC_BKP17R ; \ RTC_BKP17R_BKP, BKP
   [then]
 
-  execute-defined? use-RTC defined? RTC_BKP18R_BKP not and [if]
+  execute-defined? use-RTC [if]
     \ RTC_BKP18R (read-write) Reset:0x00000000
     : RTC_BKP18R_BKP ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) RTC_BKP18R ; \ RTC_BKP18R_BKP, BKP
   [then]
 
-  defined? use-RTC defined? RTC_BKP19R_BKP not and [if]
+  [if]
     \ RTC_BKP19R (read-write) Reset:0x00000000
     : RTC_BKP19R_BKP ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) RTC_BKP19R ; \ RTC_BKP19R_BKP, BKP
   [then]
 
-  execute-defined? use-UART4 defined? UART4_SR_LBD? not and [if]
+  execute-defined? use-UART4 [if]
     \ UART4_SR (multiple-access)  Reset:0x00C00000
     : UART4_SR_LBD? ( -- 1|0 ) 8 bit UART4_SR bit@ ; \ UART4_SR_LBD, LIN break detection flag
     : UART4_SR_TXE ( -- x addr ) 7 bit UART4_SR ; \ UART4_SR_TXE, Transmit data register  empty
@@ -5770,18 +5770,18 @@ begin-module memmap
     : UART4_SR_PE ( -- x addr ) 0 bit UART4_SR ; \ UART4_SR_PE, Parity error
   [then]
 
-  defined? use-UART4 defined? UART4_DR_DR not and [if]
+  [if]
     \ UART4_DR (read-write) Reset:0x00000000
     : UART4_DR_DR ( %bbbbbbbbb -- x addr ) UART4_DR ; \ UART4_DR_DR, Data value
   [then]
 
-  execute-defined? use-UART4 defined? UART4_BRR_DIV_Mantissa not and [if]
+  execute-defined? use-UART4 [if]
     \ UART4_BRR (read-write) Reset:0x0000
     : UART4_BRR_DIV_Mantissa ( %bbbbbbbbbbb -- x addr ) 4 lshift UART4_BRR ; \ UART4_BRR_DIV_Mantissa, mantissa of USARTDIV
     : UART4_BRR_DIV_Fraction ( %bbbb -- x addr ) UART4_BRR ; \ UART4_BRR_DIV_Fraction, fraction of USARTDIV
   [then]
 
-  defined? use-UART4 defined? UART4_CR1_OVER8 not and [if]
+  [if]
     \ UART4_CR1 (read-write) Reset:0x0000
     : UART4_CR1_OVER8 ( -- x addr ) 15 bit UART4_CR1 ; \ UART4_CR1_OVER8, Oversampling mode
     : UART4_CR1_UE ( -- x addr ) 13 bit UART4_CR1 ; \ UART4_CR1_UE, USART enable
@@ -5800,7 +5800,7 @@ begin-module memmap
     : UART4_CR1_SBK ( -- x addr ) 0 bit UART4_CR1 ; \ UART4_CR1_SBK, Send break
   [then]
 
-  execute-defined? use-UART4 defined? UART4_CR2_LINEN not and [if]
+  execute-defined? use-UART4 [if]
     \ UART4_CR2 (read-write) Reset:0x0000
     : UART4_CR2_LINEN ( -- x addr ) 14 bit UART4_CR2 ; \ UART4_CR2_LINEN, LIN mode enable
     : UART4_CR2_STOP ( %bb -- x addr ) 12 lshift UART4_CR2 ; \ UART4_CR2_STOP, STOP bits
@@ -5809,7 +5809,7 @@ begin-module memmap
     : UART4_CR2_ADD ( %bbbb -- x addr ) UART4_CR2 ; \ UART4_CR2_ADD, Address of the USART node
   [then]
 
-  defined? use-UART4 defined? UART4_CR3_ONEBIT not and [if]
+  [if]
     \ UART4_CR3 (read-write) Reset:0x0000
     : UART4_CR3_ONEBIT ( -- x addr ) 11 bit UART4_CR3 ; \ UART4_CR3_ONEBIT, One sample bit method  enable
     : UART4_CR3_DMAT ( -- x addr ) 7 bit UART4_CR3 ; \ UART4_CR3_DMAT, DMA enable transmitter
@@ -5820,7 +5820,7 @@ begin-module memmap
     : UART4_CR3_EIE ( -- x addr ) 0 bit UART4_CR3 ; \ UART4_CR3_EIE, Error interrupt enable
   [then]
 
-  execute-defined? use-UART5 defined? UART5_SR_LBD? not and [if]
+  execute-defined? use-UART5 [if]
     \ UART5_SR (multiple-access)  Reset:0x00C00000
     : UART5_SR_LBD? ( -- 1|0 ) 8 bit UART5_SR bit@ ; \ UART5_SR_LBD, LIN break detection flag
     : UART5_SR_TXE ( -- x addr ) 7 bit UART5_SR ; \ UART5_SR_TXE, Transmit data register  empty
@@ -5833,18 +5833,18 @@ begin-module memmap
     : UART5_SR_PE ( -- x addr ) 0 bit UART5_SR ; \ UART5_SR_PE, Parity error
   [then]
 
-  defined? use-UART5 defined? UART5_DR_DR not and [if]
+  [if]
     \ UART5_DR (read-write) Reset:0x00000000
     : UART5_DR_DR ( %bbbbbbbbb -- x addr ) UART5_DR ; \ UART5_DR_DR, Data value
   [then]
 
-  execute-defined? use-UART5 defined? UART5_BRR_DIV_Mantissa not and [if]
+  execute-defined? use-UART5 [if]
     \ UART5_BRR (read-write) Reset:0x0000
     : UART5_BRR_DIV_Mantissa ( %bbbbbbbbbbb -- x addr ) 4 lshift UART5_BRR ; \ UART5_BRR_DIV_Mantissa, mantissa of USARTDIV
     : UART5_BRR_DIV_Fraction ( %bbbb -- x addr ) UART5_BRR ; \ UART5_BRR_DIV_Fraction, fraction of USARTDIV
   [then]
 
-  defined? use-UART5 defined? UART5_CR1_OVER8 not and [if]
+  [if]
     \ UART5_CR1 (read-write) Reset:0x0000
     : UART5_CR1_OVER8 ( -- x addr ) 15 bit UART5_CR1 ; \ UART5_CR1_OVER8, Oversampling mode
     : UART5_CR1_UE ( -- x addr ) 13 bit UART5_CR1 ; \ UART5_CR1_UE, USART enable
@@ -5863,7 +5863,7 @@ begin-module memmap
     : UART5_CR1_SBK ( -- x addr ) 0 bit UART5_CR1 ; \ UART5_CR1_SBK, Send break
   [then]
 
-  execute-defined? use-UART5 defined? UART5_CR2_LINEN not and [if]
+  execute-defined? use-UART5 [if]
     \ UART5_CR2 (read-write) Reset:0x0000
     : UART5_CR2_LINEN ( -- x addr ) 14 bit UART5_CR2 ; \ UART5_CR2_LINEN, LIN mode enable
     : UART5_CR2_STOP ( %bb -- x addr ) 12 lshift UART5_CR2 ; \ UART5_CR2_STOP, STOP bits
@@ -5872,7 +5872,7 @@ begin-module memmap
     : UART5_CR2_ADD ( %bbbb -- x addr ) UART5_CR2 ; \ UART5_CR2_ADD, Address of the USART node
   [then]
 
-  defined? use-UART5 defined? UART5_CR3_ONEBIT not and [if]
+  [if]
     \ UART5_CR3 (read-write) Reset:0x0000
     : UART5_CR3_ONEBIT ( -- x addr ) 11 bit UART5_CR3 ; \ UART5_CR3_ONEBIT, One sample bit method  enable
     : UART5_CR3_DMAT ( -- x addr ) 7 bit UART5_CR3 ; \ UART5_CR3_DMAT, DMA enable transmitter
@@ -5883,7 +5883,7 @@ begin-module memmap
     : UART5_CR3_EIE ( -- x addr ) 0 bit UART5_CR3 ; \ UART5_CR3_EIE, Error interrupt enable
   [then]
 
-  execute-defined? use-C_ADC defined? C_ADC_CSR_OVR3? not and [if]
+  execute-defined? use-C_ADC [if]
     \ C_ADC_CSR (read-only) Reset:0x00000000
     : C_ADC_CSR_OVR3? ( --  1|0 ) 21 bit C_ADC_CSR bit@ ; \ C_ADC_CSR_OVR3, Overrun flag of ADC3
     : C_ADC_CSR_STRT3? ( --  1|0 ) 20 bit C_ADC_CSR bit@ ; \ C_ADC_CSR_STRT3, Regular channel Start flag of ADC  3
@@ -5905,7 +5905,7 @@ begin-module memmap
     : C_ADC_CSR_AWD1? ( --  1|0 ) 0 bit C_ADC_CSR bit@ ; \ C_ADC_CSR_AWD1, Analog watchdog flag of ADC  1
   [then]
 
-  defined? use-C_ADC defined? C_ADC_CCR_TSVREFE not and [if]
+  [if]
     \ C_ADC_CCR (read-write) Reset:0x00000000
     : C_ADC_CCR_TSVREFE ( -- x addr ) 23 bit C_ADC_CCR ; \ C_ADC_CCR_TSVREFE, Temperature sensor and VREFINT  enable
     : C_ADC_CCR_VBATE ( -- x addr ) 22 bit C_ADC_CCR ; \ C_ADC_CCR_VBATE, VBAT enable
@@ -5916,13 +5916,13 @@ begin-module memmap
     : C_ADC_CCR_MULT ( %bbbbb -- x addr ) C_ADC_CCR ; \ C_ADC_CCR_MULT, Multi ADC mode selection
   [then]
 
-  execute-defined? use-C_ADC defined? C_ADC_CDR_DATA2? not and [if]
+  execute-defined? use-C_ADC [if]
     \ C_ADC_CDR (read-only) Reset:0x00000000
     : C_ADC_CDR_DATA2? ( --  x ) 16 lshift C_ADC_CDR @ ; \ C_ADC_CDR_DATA2, 2nd data item of a pair of regular  conversions
     : C_ADC_CDR_DATA1? ( --  x ) C_ADC_CDR @ ; \ C_ADC_CDR_DATA1, 1st data item of a pair of regular  conversions
   [then]
 
-  defined? use-TIM1 defined? TIM1_CR1_CKD not and [if]
+  [if]
     \ TIM1_CR1 (read-write) Reset:0x0000
     : TIM1_CR1_CKD ( %bb -- x addr ) 8 lshift TIM1_CR1 ; \ TIM1_CR1_CKD, Clock division
     : TIM1_CR1_ARPE ( -- x addr ) 7 bit TIM1_CR1 ; \ TIM1_CR1_ARPE, Auto-reload preload enable
@@ -5934,7 +5934,7 @@ begin-module memmap
     : TIM1_CR1_CEN ( -- x addr ) 0 bit TIM1_CR1 ; \ TIM1_CR1_CEN, Counter enable
   [then]
 
-  execute-defined? use-TIM1 defined? TIM1_CR2_OIS4 not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM1_CR2 (read-write) Reset:0x0000
     : TIM1_CR2_OIS4 ( -- x addr ) 14 bit TIM1_CR2 ; \ TIM1_CR2_OIS4, Output Idle state 4
     : TIM1_CR2_OIS3N ( -- x addr ) 13 bit TIM1_CR2 ; \ TIM1_CR2_OIS3N, Output Idle state 3
@@ -5950,7 +5950,7 @@ begin-module memmap
     : TIM1_CR2_CCPC ( -- x addr ) 0 bit TIM1_CR2 ; \ TIM1_CR2_CCPC, Capture/compare preloaded  control
   [then]
 
-  defined? use-TIM1 defined? TIM1_SMCR_ETP not and [if]
+  [if]
     \ TIM1_SMCR (read-write) Reset:0x0000
     : TIM1_SMCR_ETP ( -- x addr ) 15 bit TIM1_SMCR ; \ TIM1_SMCR_ETP, External trigger polarity
     : TIM1_SMCR_ECE ( -- x addr ) 14 bit TIM1_SMCR ; \ TIM1_SMCR_ECE, External clock enable
@@ -5961,7 +5961,7 @@ begin-module memmap
     : TIM1_SMCR_SMS ( %bbb -- x addr ) TIM1_SMCR ; \ TIM1_SMCR_SMS, Slave mode selection
   [then]
 
-  execute-defined? use-TIM1 defined? TIM1_DIER_TDE not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM1_DIER (read-write) Reset:0x0000
     : TIM1_DIER_TDE ( -- x addr ) 14 bit TIM1_DIER ; \ TIM1_DIER_TDE, Trigger DMA request enable
     : TIM1_DIER_COMDE ( -- x addr ) 13 bit TIM1_DIER ; \ TIM1_DIER_COMDE, COM DMA request enable
@@ -5980,7 +5980,7 @@ begin-module memmap
     : TIM1_DIER_COMIE ( -- x addr ) 5 bit TIM1_DIER ; \ TIM1_DIER_COMIE, COM interrupt enable
   [then]
 
-  defined? use-TIM1 defined? TIM1_SR_CC4OF not and [if]
+  [if]
     \ TIM1_SR (read-write) Reset:0x0000
     : TIM1_SR_CC4OF ( -- x addr ) 12 bit TIM1_SR ; \ TIM1_SR_CC4OF, Capture/Compare 4 overcapture  flag
     : TIM1_SR_CC3OF ( -- x addr ) 11 bit TIM1_SR ; \ TIM1_SR_CC3OF, Capture/Compare 3 overcapture  flag
@@ -5996,7 +5996,7 @@ begin-module memmap
     : TIM1_SR_UIF ( -- x addr ) 0 bit TIM1_SR ; \ TIM1_SR_UIF, Update interrupt flag
   [then]
 
-  execute-defined? use-TIM1 defined? TIM1_EGR_BG not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM1_EGR (write-only) Reset:0x0000
     : TIM1_EGR_BG ( -- x addr ) 7 bit TIM1_EGR ; \ TIM1_EGR_BG, Break generation
     : TIM1_EGR_TG ( -- x addr ) 6 bit TIM1_EGR ; \ TIM1_EGR_TG, Trigger generation
@@ -6008,7 +6008,7 @@ begin-module memmap
     : TIM1_EGR_UG ( -- x addr ) 0 bit TIM1_EGR ; \ TIM1_EGR_UG, Update generation
   [then]
 
-  defined? use-TIM1 defined? TIM1_CCMR1_Output_OC2CE not and [if]
+  [if]
     \ TIM1_CCMR1_Output (read-write) Reset:0x00000000
     : TIM1_CCMR1_Output_OC2CE ( -- x addr ) 15 bit TIM1_CCMR1_Output ; \ TIM1_CCMR1_Output_OC2CE, Output Compare 2 clear  enable
     : TIM1_CCMR1_Output_OC2M ( %bbb -- x addr ) 12 lshift TIM1_CCMR1_Output ; \ TIM1_CCMR1_Output_OC2M, Output Compare 2 mode
@@ -6022,7 +6022,7 @@ begin-module memmap
     : TIM1_CCMR1_Output_CC1S ( %bb -- x addr ) TIM1_CCMR1_Output ; \ TIM1_CCMR1_Output_CC1S, Capture/Compare 1  selection
   [then]
 
-  execute-defined? use-TIM1 defined? TIM1_CCMR1_Input_IC2F not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM1_CCMR1_Input (read-write) Reset:0x00000000
     : TIM1_CCMR1_Input_IC2F ( %bbbb -- x addr ) 12 lshift TIM1_CCMR1_Input ; \ TIM1_CCMR1_Input_IC2F, Input capture 2 filter
     : TIM1_CCMR1_Input_IC2PCS ( %bb -- x addr ) 10 lshift TIM1_CCMR1_Input ; \ TIM1_CCMR1_Input_IC2PCS, Input capture 2 prescaler
@@ -6032,7 +6032,7 @@ begin-module memmap
     : TIM1_CCMR1_Input_CC1S ( %bb -- x addr ) TIM1_CCMR1_Input ; \ TIM1_CCMR1_Input_CC1S, Capture/Compare 1  selection
   [then]
 
-  defined? use-TIM1 defined? TIM1_CCMR2_Output_OC4CE not and [if]
+  [if]
     \ TIM1_CCMR2_Output (read-write) Reset:0x00000000
     : TIM1_CCMR2_Output_OC4CE ( -- x addr ) 15 bit TIM1_CCMR2_Output ; \ TIM1_CCMR2_Output_OC4CE, Output compare 4 clear  enable
     : TIM1_CCMR2_Output_OC4M ( %bbb -- x addr ) 12 lshift TIM1_CCMR2_Output ; \ TIM1_CCMR2_Output_OC4M, Output compare 4 mode
@@ -6046,7 +6046,7 @@ begin-module memmap
     : TIM1_CCMR2_Output_CC3S ( %bb -- x addr ) TIM1_CCMR2_Output ; \ TIM1_CCMR2_Output_CC3S, Capture/Compare 3  selection
   [then]
 
-  execute-defined? use-TIM1 defined? TIM1_CCMR2_Input_IC4F not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM1_CCMR2_Input (read-write) Reset:0x00000000
     : TIM1_CCMR2_Input_IC4F ( %bbbb -- x addr ) 12 lshift TIM1_CCMR2_Input ; \ TIM1_CCMR2_Input_IC4F, Input capture 4 filter
     : TIM1_CCMR2_Input_IC4PSC ( %bb -- x addr ) 10 lshift TIM1_CCMR2_Input ; \ TIM1_CCMR2_Input_IC4PSC, Input capture 4 prescaler
@@ -6056,7 +6056,7 @@ begin-module memmap
     : TIM1_CCMR2_Input_CC3S ( %bb -- x addr ) TIM1_CCMR2_Input ; \ TIM1_CCMR2_Input_CC3S, Capture/compare 3  selection
   [then]
 
-  defined? use-TIM1 defined? TIM1_CCER_CC4P not and [if]
+  [if]
     \ TIM1_CCER (read-write) Reset:0x0000
     : TIM1_CCER_CC4P ( -- x addr ) 13 bit TIM1_CCER ; \ TIM1_CCER_CC4P, Capture/Compare 3 output  Polarity
     : TIM1_CCER_CC4E ( -- x addr ) 12 bit TIM1_CCER ; \ TIM1_CCER_CC4E, Capture/Compare 4 output  enable
@@ -6074,58 +6074,58 @@ begin-module memmap
     : TIM1_CCER_CC1E ( -- x addr ) 0 bit TIM1_CCER ; \ TIM1_CCER_CC1E, Capture/Compare 1 output  enable
   [then]
 
-  execute-defined? use-TIM1 defined? TIM1_CNT_CNT not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM1_CNT (read-write) Reset:0x00000000
     : TIM1_CNT_CNT ( %bbbbbbbbbbbbbbbb -- x addr ) TIM1_CNT ; \ TIM1_CNT_CNT, counter value
   [then]
 
-  defined? use-TIM1 defined? TIM1_PSC_PSC not and [if]
+  [if]
     \ TIM1_PSC (read-write) Reset:0x0000
     : TIM1_PSC_PSC ( %bbbbbbbbbbbbbbbb -- x addr ) TIM1_PSC ; \ TIM1_PSC_PSC, Prescaler value
   [then]
 
-  execute-defined? use-TIM1 defined? TIM1_ARR_ARR not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM1_ARR (read-write) Reset:0x00000000
     : TIM1_ARR_ARR ( %bbbbbbbbbbbbbbbb -- x addr ) TIM1_ARR ; \ TIM1_ARR_ARR, Auto-reload value
   [then]
 
-  defined? use-TIM1 defined? TIM1_CCR1_CCR1 not and [if]
+  [if]
     \ TIM1_CCR1 (read-write) Reset:0x00000000
     : TIM1_CCR1_CCR1 ( %bbbbbbbbbbbbbbbb -- x addr ) TIM1_CCR1 ; \ TIM1_CCR1_CCR1, Capture/Compare 1 value
   [then]
 
-  execute-defined? use-TIM1 defined? TIM1_CCR2_CCR2 not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM1_CCR2 (read-write) Reset:0x00000000
     : TIM1_CCR2_CCR2 ( %bbbbbbbbbbbbbbbb -- x addr ) TIM1_CCR2 ; \ TIM1_CCR2_CCR2, Capture/Compare 2 value
   [then]
 
-  defined? use-TIM1 defined? TIM1_CCR3_CCR3 not and [if]
+  [if]
     \ TIM1_CCR3 (read-write) Reset:0x00000000
     : TIM1_CCR3_CCR3 ( %bbbbbbbbbbbbbbbb -- x addr ) TIM1_CCR3 ; \ TIM1_CCR3_CCR3, Capture/Compare value
   [then]
 
-  execute-defined? use-TIM1 defined? TIM1_CCR4_CCR4 not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM1_CCR4 (read-write) Reset:0x00000000
     : TIM1_CCR4_CCR4 ( %bbbbbbbbbbbbbbbb -- x addr ) TIM1_CCR4 ; \ TIM1_CCR4_CCR4, Capture/Compare value
   [then]
 
-  defined? use-TIM1 defined? TIM1_DCR_DBL not and [if]
+  [if]
     \ TIM1_DCR (read-write) Reset:0x0000
     : TIM1_DCR_DBL ( %bbbbb -- x addr ) 8 lshift TIM1_DCR ; \ TIM1_DCR_DBL, DMA burst length
     : TIM1_DCR_DBA ( %bbbbb -- x addr ) TIM1_DCR ; \ TIM1_DCR_DBA, DMA base address
   [then]
 
-  execute-defined? use-TIM1 defined? TIM1_DMAR_DMAB not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM1_DMAR (read-write) Reset:0x0000
     : TIM1_DMAR_DMAB ( %bbbbbbbbbbbbbbbb -- x addr ) TIM1_DMAR ; \ TIM1_DMAR_DMAB, DMA register for burst  accesses
   [then]
 
-  defined? use-TIM1 defined? TIM1_RCR_REP not and [if]
+  [if]
     \ TIM1_RCR (read-write) Reset:0x0000
     : TIM1_RCR_REP ( %bbbbbbbb -- x addr ) TIM1_RCR ; \ TIM1_RCR_REP, Repetition counter value
   [then]
 
-  execute-defined? use-TIM1 defined? TIM1_BDTR_MOE not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM1_BDTR (read-write) Reset:0x0000
     : TIM1_BDTR_MOE ( -- x addr ) 15 bit TIM1_BDTR ; \ TIM1_BDTR_MOE, Main output enable
     : TIM1_BDTR_AOE ( -- x addr ) 14 bit TIM1_BDTR ; \ TIM1_BDTR_AOE, Automatic output enable
@@ -6137,7 +6137,7 @@ begin-module memmap
     : TIM1_BDTR_DTG ( %bbbbbbbb -- x addr ) TIM1_BDTR ; \ TIM1_BDTR_DTG, Dead-time generator setup
   [then]
 
-  defined? use-TIM8 defined? TIM8_CR1_CKD not and [if]
+  [if]
     \ TIM8_CR1 (read-write) Reset:0x0000
     : TIM8_CR1_CKD ( %bb -- x addr ) 8 lshift TIM8_CR1 ; \ TIM8_CR1_CKD, Clock division
     : TIM8_CR1_ARPE ( -- x addr ) 7 bit TIM8_CR1 ; \ TIM8_CR1_ARPE, Auto-reload preload enable
@@ -6149,7 +6149,7 @@ begin-module memmap
     : TIM8_CR1_CEN ( -- x addr ) 0 bit TIM8_CR1 ; \ TIM8_CR1_CEN, Counter enable
   [then]
 
-  execute-defined? use-TIM8 defined? TIM8_CR2_OIS4 not and [if]
+  execute-defined? use-TIM8 [if]
     \ TIM8_CR2 (read-write) Reset:0x0000
     : TIM8_CR2_OIS4 ( -- x addr ) 14 bit TIM8_CR2 ; \ TIM8_CR2_OIS4, Output Idle state 4
     : TIM8_CR2_OIS3N ( -- x addr ) 13 bit TIM8_CR2 ; \ TIM8_CR2_OIS3N, Output Idle state 3
@@ -6165,7 +6165,7 @@ begin-module memmap
     : TIM8_CR2_CCPC ( -- x addr ) 0 bit TIM8_CR2 ; \ TIM8_CR2_CCPC, Capture/compare preloaded  control
   [then]
 
-  defined? use-TIM8 defined? TIM8_SMCR_ETP not and [if]
+  [if]
     \ TIM8_SMCR (read-write) Reset:0x0000
     : TIM8_SMCR_ETP ( -- x addr ) 15 bit TIM8_SMCR ; \ TIM8_SMCR_ETP, External trigger polarity
     : TIM8_SMCR_ECE ( -- x addr ) 14 bit TIM8_SMCR ; \ TIM8_SMCR_ECE, External clock enable
@@ -6176,7 +6176,7 @@ begin-module memmap
     : TIM8_SMCR_SMS ( %bbb -- x addr ) TIM8_SMCR ; \ TIM8_SMCR_SMS, Slave mode selection
   [then]
 
-  execute-defined? use-TIM8 defined? TIM8_DIER_TDE not and [if]
+  execute-defined? use-TIM8 [if]
     \ TIM8_DIER (read-write) Reset:0x0000
     : TIM8_DIER_TDE ( -- x addr ) 14 bit TIM8_DIER ; \ TIM8_DIER_TDE, Trigger DMA request enable
     : TIM8_DIER_COMDE ( -- x addr ) 13 bit TIM8_DIER ; \ TIM8_DIER_COMDE, COM DMA request enable
@@ -6195,7 +6195,7 @@ begin-module memmap
     : TIM8_DIER_COMIE ( -- x addr ) 5 bit TIM8_DIER ; \ TIM8_DIER_COMIE, COM interrupt enable
   [then]
 
-  defined? use-TIM8 defined? TIM8_SR_CC4OF not and [if]
+  [if]
     \ TIM8_SR (read-write) Reset:0x0000
     : TIM8_SR_CC4OF ( -- x addr ) 12 bit TIM8_SR ; \ TIM8_SR_CC4OF, Capture/Compare 4 overcapture  flag
     : TIM8_SR_CC3OF ( -- x addr ) 11 bit TIM8_SR ; \ TIM8_SR_CC3OF, Capture/Compare 3 overcapture  flag
@@ -6211,7 +6211,7 @@ begin-module memmap
     : TIM8_SR_UIF ( -- x addr ) 0 bit TIM8_SR ; \ TIM8_SR_UIF, Update interrupt flag
   [then]
 
-  execute-defined? use-TIM8 defined? TIM8_EGR_BG not and [if]
+  execute-defined? use-TIM8 [if]
     \ TIM8_EGR (write-only) Reset:0x0000
     : TIM8_EGR_BG ( -- x addr ) 7 bit TIM8_EGR ; \ TIM8_EGR_BG, Break generation
     : TIM8_EGR_TG ( -- x addr ) 6 bit TIM8_EGR ; \ TIM8_EGR_TG, Trigger generation
@@ -6223,7 +6223,7 @@ begin-module memmap
     : TIM8_EGR_UG ( -- x addr ) 0 bit TIM8_EGR ; \ TIM8_EGR_UG, Update generation
   [then]
 
-  defined? use-TIM8 defined? TIM8_CCMR1_Output_OC2CE not and [if]
+  [if]
     \ TIM8_CCMR1_Output (read-write) Reset:0x00000000
     : TIM8_CCMR1_Output_OC2CE ( -- x addr ) 15 bit TIM8_CCMR1_Output ; \ TIM8_CCMR1_Output_OC2CE, Output Compare 2 clear  enable
     : TIM8_CCMR1_Output_OC2M ( %bbb -- x addr ) 12 lshift TIM8_CCMR1_Output ; \ TIM8_CCMR1_Output_OC2M, Output Compare 2 mode
@@ -6237,7 +6237,7 @@ begin-module memmap
     : TIM8_CCMR1_Output_CC1S ( %bb -- x addr ) TIM8_CCMR1_Output ; \ TIM8_CCMR1_Output_CC1S, Capture/Compare 1  selection
   [then]
 
-  execute-defined? use-TIM8 defined? TIM8_CCMR1_Input_IC2F not and [if]
+  execute-defined? use-TIM8 [if]
     \ TIM8_CCMR1_Input (read-write) Reset:0x00000000
     : TIM8_CCMR1_Input_IC2F ( %bbbb -- x addr ) 12 lshift TIM8_CCMR1_Input ; \ TIM8_CCMR1_Input_IC2F, Input capture 2 filter
     : TIM8_CCMR1_Input_IC2PCS ( %bb -- x addr ) 10 lshift TIM8_CCMR1_Input ; \ TIM8_CCMR1_Input_IC2PCS, Input capture 2 prescaler
@@ -6247,7 +6247,7 @@ begin-module memmap
     : TIM8_CCMR1_Input_CC1S ( %bb -- x addr ) TIM8_CCMR1_Input ; \ TIM8_CCMR1_Input_CC1S, Capture/Compare 1  selection
   [then]
 
-  defined? use-TIM8 defined? TIM8_CCMR2_Output_OC4CE not and [if]
+  [if]
     \ TIM8_CCMR2_Output (read-write) Reset:0x00000000
     : TIM8_CCMR2_Output_OC4CE ( -- x addr ) 15 bit TIM8_CCMR2_Output ; \ TIM8_CCMR2_Output_OC4CE, Output compare 4 clear  enable
     : TIM8_CCMR2_Output_OC4M ( %bbb -- x addr ) 12 lshift TIM8_CCMR2_Output ; \ TIM8_CCMR2_Output_OC4M, Output compare 4 mode
@@ -6261,7 +6261,7 @@ begin-module memmap
     : TIM8_CCMR2_Output_CC3S ( %bb -- x addr ) TIM8_CCMR2_Output ; \ TIM8_CCMR2_Output_CC3S, Capture/Compare 3  selection
   [then]
 
-  execute-defined? use-TIM8 defined? TIM8_CCMR2_Input_IC4F not and [if]
+  execute-defined? use-TIM8 [if]
     \ TIM8_CCMR2_Input (read-write) Reset:0x00000000
     : TIM8_CCMR2_Input_IC4F ( %bbbb -- x addr ) 12 lshift TIM8_CCMR2_Input ; \ TIM8_CCMR2_Input_IC4F, Input capture 4 filter
     : TIM8_CCMR2_Input_IC4PSC ( %bb -- x addr ) 10 lshift TIM8_CCMR2_Input ; \ TIM8_CCMR2_Input_IC4PSC, Input capture 4 prescaler
@@ -6271,7 +6271,7 @@ begin-module memmap
     : TIM8_CCMR2_Input_CC3S ( %bb -- x addr ) TIM8_CCMR2_Input ; \ TIM8_CCMR2_Input_CC3S, Capture/compare 3  selection
   [then]
 
-  defined? use-TIM8 defined? TIM8_CCER_CC4P not and [if]
+  [if]
     \ TIM8_CCER (read-write) Reset:0x0000
     : TIM8_CCER_CC4P ( -- x addr ) 13 bit TIM8_CCER ; \ TIM8_CCER_CC4P, Capture/Compare 3 output  Polarity
     : TIM8_CCER_CC4E ( -- x addr ) 12 bit TIM8_CCER ; \ TIM8_CCER_CC4E, Capture/Compare 4 output  enable
@@ -6289,58 +6289,58 @@ begin-module memmap
     : TIM8_CCER_CC1E ( -- x addr ) 0 bit TIM8_CCER ; \ TIM8_CCER_CC1E, Capture/Compare 1 output  enable
   [then]
 
-  execute-defined? use-TIM8 defined? TIM8_CNT_CNT not and [if]
+  execute-defined? use-TIM8 [if]
     \ TIM8_CNT (read-write) Reset:0x00000000
     : TIM8_CNT_CNT ( %bbbbbbbbbbbbbbbb -- x addr ) TIM8_CNT ; \ TIM8_CNT_CNT, counter value
   [then]
 
-  defined? use-TIM8 defined? TIM8_PSC_PSC not and [if]
+  [if]
     \ TIM8_PSC (read-write) Reset:0x0000
     : TIM8_PSC_PSC ( %bbbbbbbbbbbbbbbb -- x addr ) TIM8_PSC ; \ TIM8_PSC_PSC, Prescaler value
   [then]
 
-  execute-defined? use-TIM8 defined? TIM8_ARR_ARR not and [if]
+  execute-defined? use-TIM8 [if]
     \ TIM8_ARR (read-write) Reset:0x00000000
     : TIM8_ARR_ARR ( %bbbbbbbbbbbbbbbb -- x addr ) TIM8_ARR ; \ TIM8_ARR_ARR, Auto-reload value
   [then]
 
-  defined? use-TIM8 defined? TIM8_CCR1_CCR1 not and [if]
+  [if]
     \ TIM8_CCR1 (read-write) Reset:0x00000000
     : TIM8_CCR1_CCR1 ( %bbbbbbbbbbbbbbbb -- x addr ) TIM8_CCR1 ; \ TIM8_CCR1_CCR1, Capture/Compare 1 value
   [then]
 
-  execute-defined? use-TIM8 defined? TIM8_CCR2_CCR2 not and [if]
+  execute-defined? use-TIM8 [if]
     \ TIM8_CCR2 (read-write) Reset:0x00000000
     : TIM8_CCR2_CCR2 ( %bbbbbbbbbbbbbbbb -- x addr ) TIM8_CCR2 ; \ TIM8_CCR2_CCR2, Capture/Compare 2 value
   [then]
 
-  defined? use-TIM8 defined? TIM8_CCR3_CCR3 not and [if]
+  [if]
     \ TIM8_CCR3 (read-write) Reset:0x00000000
     : TIM8_CCR3_CCR3 ( %bbbbbbbbbbbbbbbb -- x addr ) TIM8_CCR3 ; \ TIM8_CCR3_CCR3, Capture/Compare value
   [then]
 
-  execute-defined? use-TIM8 defined? TIM8_CCR4_CCR4 not and [if]
+  execute-defined? use-TIM8 [if]
     \ TIM8_CCR4 (read-write) Reset:0x00000000
     : TIM8_CCR4_CCR4 ( %bbbbbbbbbbbbbbbb -- x addr ) TIM8_CCR4 ; \ TIM8_CCR4_CCR4, Capture/Compare value
   [then]
 
-  defined? use-TIM8 defined? TIM8_DCR_DBL not and [if]
+  [if]
     \ TIM8_DCR (read-write) Reset:0x0000
     : TIM8_DCR_DBL ( %bbbbb -- x addr ) 8 lshift TIM8_DCR ; \ TIM8_DCR_DBL, DMA burst length
     : TIM8_DCR_DBA ( %bbbbb -- x addr ) TIM8_DCR ; \ TIM8_DCR_DBA, DMA base address
   [then]
 
-  execute-defined? use-TIM8 defined? TIM8_DMAR_DMAB not and [if]
+  execute-defined? use-TIM8 [if]
     \ TIM8_DMAR (read-write) Reset:0x0000
     : TIM8_DMAR_DMAB ( %bbbbbbbbbbbbbbbb -- x addr ) TIM8_DMAR ; \ TIM8_DMAR_DMAB, DMA register for burst  accesses
   [then]
 
-  defined? use-TIM8 defined? TIM8_RCR_REP not and [if]
+  [if]
     \ TIM8_RCR (read-write) Reset:0x0000
     : TIM8_RCR_REP ( %bbbbbbbb -- x addr ) TIM8_RCR ; \ TIM8_RCR_REP, Repetition counter value
   [then]
 
-  execute-defined? use-TIM8 defined? TIM8_BDTR_MOE not and [if]
+  execute-defined? use-TIM8 [if]
     \ TIM8_BDTR (read-write) Reset:0x0000
     : TIM8_BDTR_MOE ( -- x addr ) 15 bit TIM8_BDTR ; \ TIM8_BDTR_MOE, Main output enable
     : TIM8_BDTR_AOE ( -- x addr ) 14 bit TIM8_BDTR ; \ TIM8_BDTR_AOE, Automatic output enable
@@ -6352,7 +6352,7 @@ begin-module memmap
     : TIM8_BDTR_DTG ( %bbbbbbbb -- x addr ) TIM8_BDTR ; \ TIM8_BDTR_DTG, Dead-time generator setup
   [then]
 
-  defined? use-TIM2 defined? TIM2_CR1_CKD not and [if]
+  [if]
     \ TIM2_CR1 (read-write) Reset:0x0000
     : TIM2_CR1_CKD ( %bb -- x addr ) 8 lshift TIM2_CR1 ; \ TIM2_CR1_CKD, Clock division
     : TIM2_CR1_ARPE ( -- x addr ) 7 bit TIM2_CR1 ; \ TIM2_CR1_ARPE, Auto-reload preload enable
@@ -6364,14 +6364,14 @@ begin-module memmap
     : TIM2_CR1_CEN ( -- x addr ) 0 bit TIM2_CR1 ; \ TIM2_CR1_CEN, Counter enable
   [then]
 
-  execute-defined? use-TIM2 defined? TIM2_CR2_TI1S not and [if]
+  execute-defined? use-TIM2 [if]
     \ TIM2_CR2 (read-write) Reset:0x0000
     : TIM2_CR2_TI1S ( -- x addr ) 7 bit TIM2_CR2 ; \ TIM2_CR2_TI1S, TI1 selection
     : TIM2_CR2_MMS ( %bbb -- x addr ) 4 lshift TIM2_CR2 ; \ TIM2_CR2_MMS, Master mode selection
     : TIM2_CR2_CCDS ( -- x addr ) 3 bit TIM2_CR2 ; \ TIM2_CR2_CCDS, Capture/compare DMA  selection
   [then]
 
-  defined? use-TIM2 defined? TIM2_SMCR_ETP not and [if]
+  [if]
     \ TIM2_SMCR (read-write) Reset:0x0000
     : TIM2_SMCR_ETP ( -- x addr ) 15 bit TIM2_SMCR ; \ TIM2_SMCR_ETP, External trigger polarity
     : TIM2_SMCR_ECE ( -- x addr ) 14 bit TIM2_SMCR ; \ TIM2_SMCR_ECE, External clock enable
@@ -6382,7 +6382,7 @@ begin-module memmap
     : TIM2_SMCR_SMS ( %bbb -- x addr ) TIM2_SMCR ; \ TIM2_SMCR_SMS, Slave mode selection
   [then]
 
-  execute-defined? use-TIM2 defined? TIM2_DIER_TDE not and [if]
+  execute-defined? use-TIM2 [if]
     \ TIM2_DIER (read-write) Reset:0x0000
     : TIM2_DIER_TDE ( -- x addr ) 14 bit TIM2_DIER ; \ TIM2_DIER_TDE, Trigger DMA request enable
     : TIM2_DIER_CC4DE ( -- x addr ) 12 bit TIM2_DIER ; \ TIM2_DIER_CC4DE, Capture/Compare 4 DMA request  enable
@@ -6398,7 +6398,7 @@ begin-module memmap
     : TIM2_DIER_UIE ( -- x addr ) 0 bit TIM2_DIER ; \ TIM2_DIER_UIE, Update interrupt enable
   [then]
 
-  defined? use-TIM2 defined? TIM2_SR_CC4OF not and [if]
+  [if]
     \ TIM2_SR (read-write) Reset:0x0000
     : TIM2_SR_CC4OF ( -- x addr ) 12 bit TIM2_SR ; \ TIM2_SR_CC4OF, Capture/Compare 4 overcapture  flag
     : TIM2_SR_CC3OF ( -- x addr ) 11 bit TIM2_SR ; \ TIM2_SR_CC3OF, Capture/Compare 3 overcapture  flag
@@ -6412,7 +6412,7 @@ begin-module memmap
     : TIM2_SR_UIF ( -- x addr ) 0 bit TIM2_SR ; \ TIM2_SR_UIF, Update interrupt flag
   [then]
 
-  execute-defined? use-TIM2 defined? TIM2_EGR_TG not and [if]
+  execute-defined? use-TIM2 [if]
     \ TIM2_EGR (write-only) Reset:0x0000
     : TIM2_EGR_TG ( -- x addr ) 6 bit TIM2_EGR ; \ TIM2_EGR_TG, Trigger generation
     : TIM2_EGR_CC4G ( -- x addr ) 4 bit TIM2_EGR ; \ TIM2_EGR_CC4G, Capture/compare 4  generation
@@ -6422,7 +6422,7 @@ begin-module memmap
     : TIM2_EGR_UG ( -- x addr ) 0 bit TIM2_EGR ; \ TIM2_EGR_UG, Update generation
   [then]
 
-  defined? use-TIM2 defined? TIM2_CCMR1_Output_OC2CE not and [if]
+  [if]
     \ TIM2_CCMR1_Output (read-write) Reset:0x00000000
     : TIM2_CCMR1_Output_OC2CE ( -- x addr ) 15 bit TIM2_CCMR1_Output ; \ TIM2_CCMR1_Output_OC2CE, OC2CE
     : TIM2_CCMR1_Output_OC2M ( %bbb -- x addr ) 12 lshift TIM2_CCMR1_Output ; \ TIM2_CCMR1_Output_OC2M, OC2M
@@ -6436,7 +6436,7 @@ begin-module memmap
     : TIM2_CCMR1_Output_CC1S ( %bb -- x addr ) TIM2_CCMR1_Output ; \ TIM2_CCMR1_Output_CC1S, CC1S
   [then]
 
-  execute-defined? use-TIM2 defined? TIM2_CCMR1_Input_IC2F not and [if]
+  execute-defined? use-TIM2 [if]
     \ TIM2_CCMR1_Input (read-write) Reset:0x00000000
     : TIM2_CCMR1_Input_IC2F ( %bbbb -- x addr ) 12 lshift TIM2_CCMR1_Input ; \ TIM2_CCMR1_Input_IC2F, Input capture 2 filter
     : TIM2_CCMR1_Input_IC2PCS ( %bb -- x addr ) 10 lshift TIM2_CCMR1_Input ; \ TIM2_CCMR1_Input_IC2PCS, Input capture 2 prescaler
@@ -6446,7 +6446,7 @@ begin-module memmap
     : TIM2_CCMR1_Input_CC1S ( %bb -- x addr ) TIM2_CCMR1_Input ; \ TIM2_CCMR1_Input_CC1S, Capture/Compare 1  selection
   [then]
 
-  defined? use-TIM2 defined? TIM2_CCMR2_Output_O24CE not and [if]
+  [if]
     \ TIM2_CCMR2_Output (read-write) Reset:0x00000000
     : TIM2_CCMR2_Output_O24CE ( -- x addr ) 15 bit TIM2_CCMR2_Output ; \ TIM2_CCMR2_Output_O24CE, O24CE
     : TIM2_CCMR2_Output_OC4M ( %bbb -- x addr ) 12 lshift TIM2_CCMR2_Output ; \ TIM2_CCMR2_Output_OC4M, OC4M
@@ -6460,7 +6460,7 @@ begin-module memmap
     : TIM2_CCMR2_Output_CC3S ( %bb -- x addr ) TIM2_CCMR2_Output ; \ TIM2_CCMR2_Output_CC3S, CC3S
   [then]
 
-  execute-defined? use-TIM2 defined? TIM2_CCMR2_Input_IC4F not and [if]
+  execute-defined? use-TIM2 [if]
     \ TIM2_CCMR2_Input (read-write) Reset:0x00000000
     : TIM2_CCMR2_Input_IC4F ( %bbbb -- x addr ) 12 lshift TIM2_CCMR2_Input ; \ TIM2_CCMR2_Input_IC4F, Input capture 4 filter
     : TIM2_CCMR2_Input_IC4PSC ( %bb -- x addr ) 10 lshift TIM2_CCMR2_Input ; \ TIM2_CCMR2_Input_IC4PSC, Input capture 4 prescaler
@@ -6470,7 +6470,7 @@ begin-module memmap
     : TIM2_CCMR2_Input_CC3S ( %bb -- x addr ) TIM2_CCMR2_Input ; \ TIM2_CCMR2_Input_CC3S, Capture/compare 3  selection
   [then]
 
-  defined? use-TIM2 defined? TIM2_CCER_CC4NP not and [if]
+  [if]
     \ TIM2_CCER (read-write) Reset:0x0000
     : TIM2_CCER_CC4NP ( -- x addr ) 15 bit TIM2_CCER ; \ TIM2_CCER_CC4NP, Capture/Compare 4 output  Polarity
     : TIM2_CCER_CC4P ( -- x addr ) 13 bit TIM2_CCER ; \ TIM2_CCER_CC4P, Capture/Compare 3 output  Polarity
@@ -6486,64 +6486,64 @@ begin-module memmap
     : TIM2_CCER_CC1E ( -- x addr ) 0 bit TIM2_CCER ; \ TIM2_CCER_CC1E, Capture/Compare 1 output  enable
   [then]
 
-  execute-defined? use-TIM2 defined? TIM2_CNT_CNT_H not and [if]
+  execute-defined? use-TIM2 [if]
     \ TIM2_CNT (read-write) Reset:0x00000000
     : TIM2_CNT_CNT_H ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift TIM2_CNT ; \ TIM2_CNT_CNT_H, High counter value
     : TIM2_CNT_CNT_L ( %bbbbbbbbbbbbbbbb -- x addr ) TIM2_CNT ; \ TIM2_CNT_CNT_L, Low counter value
   [then]
 
-  defined? use-TIM2 defined? TIM2_PSC_PSC not and [if]
+  [if]
     \ TIM2_PSC (read-write) Reset:0x0000
     : TIM2_PSC_PSC ( %bbbbbbbbbbbbbbbb -- x addr ) TIM2_PSC ; \ TIM2_PSC_PSC, Prescaler value
   [then]
 
-  execute-defined? use-TIM2 defined? TIM2_ARR_ARR_H not and [if]
+  execute-defined? use-TIM2 [if]
     \ TIM2_ARR (read-write) Reset:0x00000000
     : TIM2_ARR_ARR_H ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift TIM2_ARR ; \ TIM2_ARR_ARR_H, High Auto-reload value
     : TIM2_ARR_ARR_L ( %bbbbbbbbbbbbbbbb -- x addr ) TIM2_ARR ; \ TIM2_ARR_ARR_L, Low Auto-reload value
   [then]
 
-  defined? use-TIM2 defined? TIM2_CCR1_CCR1_H not and [if]
+  [if]
     \ TIM2_CCR1 (read-write) Reset:0x00000000
     : TIM2_CCR1_CCR1_H ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift TIM2_CCR1 ; \ TIM2_CCR1_CCR1_H, High Capture/Compare 1  value
     : TIM2_CCR1_CCR1_L ( %bbbbbbbbbbbbbbbb -- x addr ) TIM2_CCR1 ; \ TIM2_CCR1_CCR1_L, Low Capture/Compare 1  value
   [then]
 
-  execute-defined? use-TIM2 defined? TIM2_CCR2_CCR2_H not and [if]
+  execute-defined? use-TIM2 [if]
     \ TIM2_CCR2 (read-write) Reset:0x00000000
     : TIM2_CCR2_CCR2_H ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift TIM2_CCR2 ; \ TIM2_CCR2_CCR2_H, High Capture/Compare 2  value
     : TIM2_CCR2_CCR2_L ( %bbbbbbbbbbbbbbbb -- x addr ) TIM2_CCR2 ; \ TIM2_CCR2_CCR2_L, Low Capture/Compare 2  value
   [then]
 
-  defined? use-TIM2 defined? TIM2_CCR3_CCR3_H not and [if]
+  [if]
     \ TIM2_CCR3 (read-write) Reset:0x00000000
     : TIM2_CCR3_CCR3_H ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift TIM2_CCR3 ; \ TIM2_CCR3_CCR3_H, High Capture/Compare value
     : TIM2_CCR3_CCR3_L ( %bbbbbbbbbbbbbbbb -- x addr ) TIM2_CCR3 ; \ TIM2_CCR3_CCR3_L, Low Capture/Compare value
   [then]
 
-  execute-defined? use-TIM2 defined? TIM2_CCR4_CCR4_H not and [if]
+  execute-defined? use-TIM2 [if]
     \ TIM2_CCR4 (read-write) Reset:0x00000000
     : TIM2_CCR4_CCR4_H ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift TIM2_CCR4 ; \ TIM2_CCR4_CCR4_H, High Capture/Compare value
     : TIM2_CCR4_CCR4_L ( %bbbbbbbbbbbbbbbb -- x addr ) TIM2_CCR4 ; \ TIM2_CCR4_CCR4_L, Low Capture/Compare value
   [then]
 
-  defined? use-TIM2 defined? TIM2_DCR_DBL not and [if]
+  [if]
     \ TIM2_DCR (read-write) Reset:0x0000
     : TIM2_DCR_DBL ( %bbbbb -- x addr ) 8 lshift TIM2_DCR ; \ TIM2_DCR_DBL, DMA burst length
     : TIM2_DCR_DBA ( %bbbbb -- x addr ) TIM2_DCR ; \ TIM2_DCR_DBA, DMA base address
   [then]
 
-  execute-defined? use-TIM2 defined? TIM2_DMAR_DMAB not and [if]
+  execute-defined? use-TIM2 [if]
     \ TIM2_DMAR (read-write) Reset:0x0000
     : TIM2_DMAR_DMAB ( %bbbbbbbbbbbbbbbb -- x addr ) TIM2_DMAR ; \ TIM2_DMAR_DMAB, DMA register for burst  accesses
   [then]
 
-  defined? use-TIM2 defined? TIM2_OR_ITR1_RMP not and [if]
+  [if]
     \ TIM2_OR (read-write) Reset:0x0000
     : TIM2_OR_ITR1_RMP ( %bb -- x addr ) 10 lshift TIM2_OR ; \ TIM2_OR_ITR1_RMP, Timer Input 4 remap
   [then]
 
-  execute-defined? use-TIM3 defined? TIM3_CR1_CKD not and [if]
+  execute-defined? use-TIM3 [if]
     \ TIM3_CR1 (read-write) Reset:0x0000
     : TIM3_CR1_CKD ( %bb -- x addr ) 8 lshift TIM3_CR1 ; \ TIM3_CR1_CKD, Clock division
     : TIM3_CR1_ARPE ( -- x addr ) 7 bit TIM3_CR1 ; \ TIM3_CR1_ARPE, Auto-reload preload enable
@@ -6555,14 +6555,14 @@ begin-module memmap
     : TIM3_CR1_CEN ( -- x addr ) 0 bit TIM3_CR1 ; \ TIM3_CR1_CEN, Counter enable
   [then]
 
-  defined? use-TIM3 defined? TIM3_CR2_TI1S not and [if]
+  [if]
     \ TIM3_CR2 (read-write) Reset:0x0000
     : TIM3_CR2_TI1S ( -- x addr ) 7 bit TIM3_CR2 ; \ TIM3_CR2_TI1S, TI1 selection
     : TIM3_CR2_MMS ( %bbb -- x addr ) 4 lshift TIM3_CR2 ; \ TIM3_CR2_MMS, Master mode selection
     : TIM3_CR2_CCDS ( -- x addr ) 3 bit TIM3_CR2 ; \ TIM3_CR2_CCDS, Capture/compare DMA  selection
   [then]
 
-  execute-defined? use-TIM3 defined? TIM3_SMCR_ETP not and [if]
+  execute-defined? use-TIM3 [if]
     \ TIM3_SMCR (read-write) Reset:0x0000
     : TIM3_SMCR_ETP ( -- x addr ) 15 bit TIM3_SMCR ; \ TIM3_SMCR_ETP, External trigger polarity
     : TIM3_SMCR_ECE ( -- x addr ) 14 bit TIM3_SMCR ; \ TIM3_SMCR_ECE, External clock enable
@@ -6573,7 +6573,7 @@ begin-module memmap
     : TIM3_SMCR_SMS ( %bbb -- x addr ) TIM3_SMCR ; \ TIM3_SMCR_SMS, Slave mode selection
   [then]
 
-  defined? use-TIM3 defined? TIM3_DIER_TDE not and [if]
+  [if]
     \ TIM3_DIER (read-write) Reset:0x0000
     : TIM3_DIER_TDE ( -- x addr ) 14 bit TIM3_DIER ; \ TIM3_DIER_TDE, Trigger DMA request enable
     : TIM3_DIER_CC4DE ( -- x addr ) 12 bit TIM3_DIER ; \ TIM3_DIER_CC4DE, Capture/Compare 4 DMA request  enable
@@ -6589,7 +6589,7 @@ begin-module memmap
     : TIM3_DIER_UIE ( -- x addr ) 0 bit TIM3_DIER ; \ TIM3_DIER_UIE, Update interrupt enable
   [then]
 
-  execute-defined? use-TIM3 defined? TIM3_SR_CC4OF not and [if]
+  execute-defined? use-TIM3 [if]
     \ TIM3_SR (read-write) Reset:0x0000
     : TIM3_SR_CC4OF ( -- x addr ) 12 bit TIM3_SR ; \ TIM3_SR_CC4OF, Capture/Compare 4 overcapture  flag
     : TIM3_SR_CC3OF ( -- x addr ) 11 bit TIM3_SR ; \ TIM3_SR_CC3OF, Capture/Compare 3 overcapture  flag
@@ -6603,7 +6603,7 @@ begin-module memmap
     : TIM3_SR_UIF ( -- x addr ) 0 bit TIM3_SR ; \ TIM3_SR_UIF, Update interrupt flag
   [then]
 
-  defined? use-TIM3 defined? TIM3_EGR_TG not and [if]
+  [if]
     \ TIM3_EGR (write-only) Reset:0x0000
     : TIM3_EGR_TG ( -- x addr ) 6 bit TIM3_EGR ; \ TIM3_EGR_TG, Trigger generation
     : TIM3_EGR_CC4G ( -- x addr ) 4 bit TIM3_EGR ; \ TIM3_EGR_CC4G, Capture/compare 4  generation
@@ -6613,7 +6613,7 @@ begin-module memmap
     : TIM3_EGR_UG ( -- x addr ) 0 bit TIM3_EGR ; \ TIM3_EGR_UG, Update generation
   [then]
 
-  execute-defined? use-TIM3 defined? TIM3_CCMR1_Output_OC2CE not and [if]
+  execute-defined? use-TIM3 [if]
     \ TIM3_CCMR1_Output (read-write) Reset:0x00000000
     : TIM3_CCMR1_Output_OC2CE ( -- x addr ) 15 bit TIM3_CCMR1_Output ; \ TIM3_CCMR1_Output_OC2CE, OC2CE
     : TIM3_CCMR1_Output_OC2M ( %bbb -- x addr ) 12 lshift TIM3_CCMR1_Output ; \ TIM3_CCMR1_Output_OC2M, OC2M
@@ -6627,7 +6627,7 @@ begin-module memmap
     : TIM3_CCMR1_Output_CC1S ( %bb -- x addr ) TIM3_CCMR1_Output ; \ TIM3_CCMR1_Output_CC1S, CC1S
   [then]
 
-  defined? use-TIM3 defined? TIM3_CCMR1_Input_IC2F not and [if]
+  [if]
     \ TIM3_CCMR1_Input (read-write) Reset:0x00000000
     : TIM3_CCMR1_Input_IC2F ( %bbbb -- x addr ) 12 lshift TIM3_CCMR1_Input ; \ TIM3_CCMR1_Input_IC2F, Input capture 2 filter
     : TIM3_CCMR1_Input_IC2PCS ( %bb -- x addr ) 10 lshift TIM3_CCMR1_Input ; \ TIM3_CCMR1_Input_IC2PCS, Input capture 2 prescaler
@@ -6637,7 +6637,7 @@ begin-module memmap
     : TIM3_CCMR1_Input_CC1S ( %bb -- x addr ) TIM3_CCMR1_Input ; \ TIM3_CCMR1_Input_CC1S, Capture/Compare 1  selection
   [then]
 
-  execute-defined? use-TIM3 defined? TIM3_CCMR2_Output_O24CE not and [if]
+  execute-defined? use-TIM3 [if]
     \ TIM3_CCMR2_Output (read-write) Reset:0x00000000
     : TIM3_CCMR2_Output_O24CE ( -- x addr ) 15 bit TIM3_CCMR2_Output ; \ TIM3_CCMR2_Output_O24CE, O24CE
     : TIM3_CCMR2_Output_OC4M ( %bbb -- x addr ) 12 lshift TIM3_CCMR2_Output ; \ TIM3_CCMR2_Output_OC4M, OC4M
@@ -6651,7 +6651,7 @@ begin-module memmap
     : TIM3_CCMR2_Output_CC3S ( %bb -- x addr ) TIM3_CCMR2_Output ; \ TIM3_CCMR2_Output_CC3S, CC3S
   [then]
 
-  defined? use-TIM3 defined? TIM3_CCMR2_Input_IC4F not and [if]
+  [if]
     \ TIM3_CCMR2_Input (read-write) Reset:0x00000000
     : TIM3_CCMR2_Input_IC4F ( %bbbb -- x addr ) 12 lshift TIM3_CCMR2_Input ; \ TIM3_CCMR2_Input_IC4F, Input capture 4 filter
     : TIM3_CCMR2_Input_IC4PSC ( %bb -- x addr ) 10 lshift TIM3_CCMR2_Input ; \ TIM3_CCMR2_Input_IC4PSC, Input capture 4 prescaler
@@ -6661,7 +6661,7 @@ begin-module memmap
     : TIM3_CCMR2_Input_CC3S ( %bb -- x addr ) TIM3_CCMR2_Input ; \ TIM3_CCMR2_Input_CC3S, Capture/compare 3  selection
   [then]
 
-  execute-defined? use-TIM3 defined? TIM3_CCER_CC4NP not and [if]
+  execute-defined? use-TIM3 [if]
     \ TIM3_CCER (read-write) Reset:0x0000
     : TIM3_CCER_CC4NP ( -- x addr ) 15 bit TIM3_CCER ; \ TIM3_CCER_CC4NP, Capture/Compare 4 output  Polarity
     : TIM3_CCER_CC4P ( -- x addr ) 13 bit TIM3_CCER ; \ TIM3_CCER_CC4P, Capture/Compare 3 output  Polarity
@@ -6677,59 +6677,59 @@ begin-module memmap
     : TIM3_CCER_CC1E ( -- x addr ) 0 bit TIM3_CCER ; \ TIM3_CCER_CC1E, Capture/Compare 1 output  enable
   [then]
 
-  defined? use-TIM3 defined? TIM3_CNT_CNT_H not and [if]
+  [if]
     \ TIM3_CNT (read-write) Reset:0x00000000
     : TIM3_CNT_CNT_H ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift TIM3_CNT ; \ TIM3_CNT_CNT_H, High counter value
     : TIM3_CNT_CNT_L ( %bbbbbbbbbbbbbbbb -- x addr ) TIM3_CNT ; \ TIM3_CNT_CNT_L, Low counter value
   [then]
 
-  execute-defined? use-TIM3 defined? TIM3_PSC_PSC not and [if]
+  execute-defined? use-TIM3 [if]
     \ TIM3_PSC (read-write) Reset:0x0000
     : TIM3_PSC_PSC ( %bbbbbbbbbbbbbbbb -- x addr ) TIM3_PSC ; \ TIM3_PSC_PSC, Prescaler value
   [then]
 
-  defined? use-TIM3 defined? TIM3_ARR_ARR_H not and [if]
+  [if]
     \ TIM3_ARR (read-write) Reset:0x00000000
     : TIM3_ARR_ARR_H ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift TIM3_ARR ; \ TIM3_ARR_ARR_H, High Auto-reload value
     : TIM3_ARR_ARR_L ( %bbbbbbbbbbbbbbbb -- x addr ) TIM3_ARR ; \ TIM3_ARR_ARR_L, Low Auto-reload value
   [then]
 
-  execute-defined? use-TIM3 defined? TIM3_CCR1_CCR1_H not and [if]
+  execute-defined? use-TIM3 [if]
     \ TIM3_CCR1 (read-write) Reset:0x00000000
     : TIM3_CCR1_CCR1_H ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift TIM3_CCR1 ; \ TIM3_CCR1_CCR1_H, High Capture/Compare 1  value
     : TIM3_CCR1_CCR1_L ( %bbbbbbbbbbbbbbbb -- x addr ) TIM3_CCR1 ; \ TIM3_CCR1_CCR1_L, Low Capture/Compare 1  value
   [then]
 
-  defined? use-TIM3 defined? TIM3_CCR2_CCR2_H not and [if]
+  [if]
     \ TIM3_CCR2 (read-write) Reset:0x00000000
     : TIM3_CCR2_CCR2_H ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift TIM3_CCR2 ; \ TIM3_CCR2_CCR2_H, High Capture/Compare 2  value
     : TIM3_CCR2_CCR2_L ( %bbbbbbbbbbbbbbbb -- x addr ) TIM3_CCR2 ; \ TIM3_CCR2_CCR2_L, Low Capture/Compare 2  value
   [then]
 
-  execute-defined? use-TIM3 defined? TIM3_CCR3_CCR3_H not and [if]
+  execute-defined? use-TIM3 [if]
     \ TIM3_CCR3 (read-write) Reset:0x00000000
     : TIM3_CCR3_CCR3_H ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift TIM3_CCR3 ; \ TIM3_CCR3_CCR3_H, High Capture/Compare value
     : TIM3_CCR3_CCR3_L ( %bbbbbbbbbbbbbbbb -- x addr ) TIM3_CCR3 ; \ TIM3_CCR3_CCR3_L, Low Capture/Compare value
   [then]
 
-  defined? use-TIM3 defined? TIM3_CCR4_CCR4_H not and [if]
+  [if]
     \ TIM3_CCR4 (read-write) Reset:0x00000000
     : TIM3_CCR4_CCR4_H ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift TIM3_CCR4 ; \ TIM3_CCR4_CCR4_H, High Capture/Compare value
     : TIM3_CCR4_CCR4_L ( %bbbbbbbbbbbbbbbb -- x addr ) TIM3_CCR4 ; \ TIM3_CCR4_CCR4_L, Low Capture/Compare value
   [then]
 
-  execute-defined? use-TIM3 defined? TIM3_DCR_DBL not and [if]
+  execute-defined? use-TIM3 [if]
     \ TIM3_DCR (read-write) Reset:0x0000
     : TIM3_DCR_DBL ( %bbbbb -- x addr ) 8 lshift TIM3_DCR ; \ TIM3_DCR_DBL, DMA burst length
     : TIM3_DCR_DBA ( %bbbbb -- x addr ) TIM3_DCR ; \ TIM3_DCR_DBA, DMA base address
   [then]
 
-  defined? use-TIM3 defined? TIM3_DMAR_DMAB not and [if]
+  [if]
     \ TIM3_DMAR (read-write) Reset:0x0000
     : TIM3_DMAR_DMAB ( %bbbbbbbbbbbbbbbb -- x addr ) TIM3_DMAR ; \ TIM3_DMAR_DMAB, DMA register for burst  accesses
   [then]
 
-  execute-defined? use-TIM4 defined? TIM4_CR1_CKD not and [if]
+  execute-defined? use-TIM4 [if]
     \ TIM4_CR1 (read-write) Reset:0x0000
     : TIM4_CR1_CKD ( %bb -- x addr ) 8 lshift TIM4_CR1 ; \ TIM4_CR1_CKD, Clock division
     : TIM4_CR1_ARPE ( -- x addr ) 7 bit TIM4_CR1 ; \ TIM4_CR1_ARPE, Auto-reload preload enable
@@ -6741,14 +6741,14 @@ begin-module memmap
     : TIM4_CR1_CEN ( -- x addr ) 0 bit TIM4_CR1 ; \ TIM4_CR1_CEN, Counter enable
   [then]
 
-  defined? use-TIM4 defined? TIM4_CR2_TI1S not and [if]
+  [if]
     \ TIM4_CR2 (read-write) Reset:0x0000
     : TIM4_CR2_TI1S ( -- x addr ) 7 bit TIM4_CR2 ; \ TIM4_CR2_TI1S, TI1 selection
     : TIM4_CR2_MMS ( %bbb -- x addr ) 4 lshift TIM4_CR2 ; \ TIM4_CR2_MMS, Master mode selection
     : TIM4_CR2_CCDS ( -- x addr ) 3 bit TIM4_CR2 ; \ TIM4_CR2_CCDS, Capture/compare DMA  selection
   [then]
 
-  execute-defined? use-TIM4 defined? TIM4_SMCR_ETP not and [if]
+  execute-defined? use-TIM4 [if]
     \ TIM4_SMCR (read-write) Reset:0x0000
     : TIM4_SMCR_ETP ( -- x addr ) 15 bit TIM4_SMCR ; \ TIM4_SMCR_ETP, External trigger polarity
     : TIM4_SMCR_ECE ( -- x addr ) 14 bit TIM4_SMCR ; \ TIM4_SMCR_ECE, External clock enable
@@ -6759,7 +6759,7 @@ begin-module memmap
     : TIM4_SMCR_SMS ( %bbb -- x addr ) TIM4_SMCR ; \ TIM4_SMCR_SMS, Slave mode selection
   [then]
 
-  defined? use-TIM4 defined? TIM4_DIER_TDE not and [if]
+  [if]
     \ TIM4_DIER (read-write) Reset:0x0000
     : TIM4_DIER_TDE ( -- x addr ) 14 bit TIM4_DIER ; \ TIM4_DIER_TDE, Trigger DMA request enable
     : TIM4_DIER_CC4DE ( -- x addr ) 12 bit TIM4_DIER ; \ TIM4_DIER_CC4DE, Capture/Compare 4 DMA request  enable
@@ -6775,7 +6775,7 @@ begin-module memmap
     : TIM4_DIER_UIE ( -- x addr ) 0 bit TIM4_DIER ; \ TIM4_DIER_UIE, Update interrupt enable
   [then]
 
-  execute-defined? use-TIM4 defined? TIM4_SR_CC4OF not and [if]
+  execute-defined? use-TIM4 [if]
     \ TIM4_SR (read-write) Reset:0x0000
     : TIM4_SR_CC4OF ( -- x addr ) 12 bit TIM4_SR ; \ TIM4_SR_CC4OF, Capture/Compare 4 overcapture  flag
     : TIM4_SR_CC3OF ( -- x addr ) 11 bit TIM4_SR ; \ TIM4_SR_CC3OF, Capture/Compare 3 overcapture  flag
@@ -6789,7 +6789,7 @@ begin-module memmap
     : TIM4_SR_UIF ( -- x addr ) 0 bit TIM4_SR ; \ TIM4_SR_UIF, Update interrupt flag
   [then]
 
-  defined? use-TIM4 defined? TIM4_EGR_TG not and [if]
+  [if]
     \ TIM4_EGR (write-only) Reset:0x0000
     : TIM4_EGR_TG ( -- x addr ) 6 bit TIM4_EGR ; \ TIM4_EGR_TG, Trigger generation
     : TIM4_EGR_CC4G ( -- x addr ) 4 bit TIM4_EGR ; \ TIM4_EGR_CC4G, Capture/compare 4  generation
@@ -6799,7 +6799,7 @@ begin-module memmap
     : TIM4_EGR_UG ( -- x addr ) 0 bit TIM4_EGR ; \ TIM4_EGR_UG, Update generation
   [then]
 
-  execute-defined? use-TIM4 defined? TIM4_CCMR1_Output_OC2CE not and [if]
+  execute-defined? use-TIM4 [if]
     \ TIM4_CCMR1_Output (read-write) Reset:0x00000000
     : TIM4_CCMR1_Output_OC2CE ( -- x addr ) 15 bit TIM4_CCMR1_Output ; \ TIM4_CCMR1_Output_OC2CE, OC2CE
     : TIM4_CCMR1_Output_OC2M ( %bbb -- x addr ) 12 lshift TIM4_CCMR1_Output ; \ TIM4_CCMR1_Output_OC2M, OC2M
@@ -6813,7 +6813,7 @@ begin-module memmap
     : TIM4_CCMR1_Output_CC1S ( %bb -- x addr ) TIM4_CCMR1_Output ; \ TIM4_CCMR1_Output_CC1S, CC1S
   [then]
 
-  defined? use-TIM4 defined? TIM4_CCMR1_Input_IC2F not and [if]
+  [if]
     \ TIM4_CCMR1_Input (read-write) Reset:0x00000000
     : TIM4_CCMR1_Input_IC2F ( %bbbb -- x addr ) 12 lshift TIM4_CCMR1_Input ; \ TIM4_CCMR1_Input_IC2F, Input capture 2 filter
     : TIM4_CCMR1_Input_IC2PCS ( %bb -- x addr ) 10 lshift TIM4_CCMR1_Input ; \ TIM4_CCMR1_Input_IC2PCS, Input capture 2 prescaler
@@ -6823,7 +6823,7 @@ begin-module memmap
     : TIM4_CCMR1_Input_CC1S ( %bb -- x addr ) TIM4_CCMR1_Input ; \ TIM4_CCMR1_Input_CC1S, Capture/Compare 1  selection
   [then]
 
-  execute-defined? use-TIM4 defined? TIM4_CCMR2_Output_O24CE not and [if]
+  execute-defined? use-TIM4 [if]
     \ TIM4_CCMR2_Output (read-write) Reset:0x00000000
     : TIM4_CCMR2_Output_O24CE ( -- x addr ) 15 bit TIM4_CCMR2_Output ; \ TIM4_CCMR2_Output_O24CE, O24CE
     : TIM4_CCMR2_Output_OC4M ( %bbb -- x addr ) 12 lshift TIM4_CCMR2_Output ; \ TIM4_CCMR2_Output_OC4M, OC4M
@@ -6837,7 +6837,7 @@ begin-module memmap
     : TIM4_CCMR2_Output_CC3S ( %bb -- x addr ) TIM4_CCMR2_Output ; \ TIM4_CCMR2_Output_CC3S, CC3S
   [then]
 
-  defined? use-TIM4 defined? TIM4_CCMR2_Input_IC4F not and [if]
+  [if]
     \ TIM4_CCMR2_Input (read-write) Reset:0x00000000
     : TIM4_CCMR2_Input_IC4F ( %bbbb -- x addr ) 12 lshift TIM4_CCMR2_Input ; \ TIM4_CCMR2_Input_IC4F, Input capture 4 filter
     : TIM4_CCMR2_Input_IC4PSC ( %bb -- x addr ) 10 lshift TIM4_CCMR2_Input ; \ TIM4_CCMR2_Input_IC4PSC, Input capture 4 prescaler
@@ -6847,7 +6847,7 @@ begin-module memmap
     : TIM4_CCMR2_Input_CC3S ( %bb -- x addr ) TIM4_CCMR2_Input ; \ TIM4_CCMR2_Input_CC3S, Capture/compare 3  selection
   [then]
 
-  execute-defined? use-TIM4 defined? TIM4_CCER_CC4NP not and [if]
+  execute-defined? use-TIM4 [if]
     \ TIM4_CCER (read-write) Reset:0x0000
     : TIM4_CCER_CC4NP ( -- x addr ) 15 bit TIM4_CCER ; \ TIM4_CCER_CC4NP, Capture/Compare 4 output  Polarity
     : TIM4_CCER_CC4P ( -- x addr ) 13 bit TIM4_CCER ; \ TIM4_CCER_CC4P, Capture/Compare 3 output  Polarity
@@ -6863,59 +6863,59 @@ begin-module memmap
     : TIM4_CCER_CC1E ( -- x addr ) 0 bit TIM4_CCER ; \ TIM4_CCER_CC1E, Capture/Compare 1 output  enable
   [then]
 
-  defined? use-TIM4 defined? TIM4_CNT_CNT_H not and [if]
+  [if]
     \ TIM4_CNT (read-write) Reset:0x00000000
     : TIM4_CNT_CNT_H ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift TIM4_CNT ; \ TIM4_CNT_CNT_H, High counter value
     : TIM4_CNT_CNT_L ( %bbbbbbbbbbbbbbbb -- x addr ) TIM4_CNT ; \ TIM4_CNT_CNT_L, Low counter value
   [then]
 
-  execute-defined? use-TIM4 defined? TIM4_PSC_PSC not and [if]
+  execute-defined? use-TIM4 [if]
     \ TIM4_PSC (read-write) Reset:0x0000
     : TIM4_PSC_PSC ( %bbbbbbbbbbbbbbbb -- x addr ) TIM4_PSC ; \ TIM4_PSC_PSC, Prescaler value
   [then]
 
-  defined? use-TIM4 defined? TIM4_ARR_ARR_H not and [if]
+  [if]
     \ TIM4_ARR (read-write) Reset:0x00000000
     : TIM4_ARR_ARR_H ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift TIM4_ARR ; \ TIM4_ARR_ARR_H, High Auto-reload value
     : TIM4_ARR_ARR_L ( %bbbbbbbbbbbbbbbb -- x addr ) TIM4_ARR ; \ TIM4_ARR_ARR_L, Low Auto-reload value
   [then]
 
-  execute-defined? use-TIM4 defined? TIM4_CCR1_CCR1_H not and [if]
+  execute-defined? use-TIM4 [if]
     \ TIM4_CCR1 (read-write) Reset:0x00000000
     : TIM4_CCR1_CCR1_H ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift TIM4_CCR1 ; \ TIM4_CCR1_CCR1_H, High Capture/Compare 1  value
     : TIM4_CCR1_CCR1_L ( %bbbbbbbbbbbbbbbb -- x addr ) TIM4_CCR1 ; \ TIM4_CCR1_CCR1_L, Low Capture/Compare 1  value
   [then]
 
-  defined? use-TIM4 defined? TIM4_CCR2_CCR2_H not and [if]
+  [if]
     \ TIM4_CCR2 (read-write) Reset:0x00000000
     : TIM4_CCR2_CCR2_H ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift TIM4_CCR2 ; \ TIM4_CCR2_CCR2_H, High Capture/Compare 2  value
     : TIM4_CCR2_CCR2_L ( %bbbbbbbbbbbbbbbb -- x addr ) TIM4_CCR2 ; \ TIM4_CCR2_CCR2_L, Low Capture/Compare 2  value
   [then]
 
-  execute-defined? use-TIM4 defined? TIM4_CCR3_CCR3_H not and [if]
+  execute-defined? use-TIM4 [if]
     \ TIM4_CCR3 (read-write) Reset:0x00000000
     : TIM4_CCR3_CCR3_H ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift TIM4_CCR3 ; \ TIM4_CCR3_CCR3_H, High Capture/Compare value
     : TIM4_CCR3_CCR3_L ( %bbbbbbbbbbbbbbbb -- x addr ) TIM4_CCR3 ; \ TIM4_CCR3_CCR3_L, Low Capture/Compare value
   [then]
 
-  defined? use-TIM4 defined? TIM4_CCR4_CCR4_H not and [if]
+  [if]
     \ TIM4_CCR4 (read-write) Reset:0x00000000
     : TIM4_CCR4_CCR4_H ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift TIM4_CCR4 ; \ TIM4_CCR4_CCR4_H, High Capture/Compare value
     : TIM4_CCR4_CCR4_L ( %bbbbbbbbbbbbbbbb -- x addr ) TIM4_CCR4 ; \ TIM4_CCR4_CCR4_L, Low Capture/Compare value
   [then]
 
-  execute-defined? use-TIM4 defined? TIM4_DCR_DBL not and [if]
+  execute-defined? use-TIM4 [if]
     \ TIM4_DCR (read-write) Reset:0x0000
     : TIM4_DCR_DBL ( %bbbbb -- x addr ) 8 lshift TIM4_DCR ; \ TIM4_DCR_DBL, DMA burst length
     : TIM4_DCR_DBA ( %bbbbb -- x addr ) TIM4_DCR ; \ TIM4_DCR_DBA, DMA base address
   [then]
 
-  defined? use-TIM4 defined? TIM4_DMAR_DMAB not and [if]
+  [if]
     \ TIM4_DMAR (read-write) Reset:0x0000
     : TIM4_DMAR_DMAB ( %bbbbbbbbbbbbbbbb -- x addr ) TIM4_DMAR ; \ TIM4_DMAR_DMAB, DMA register for burst  accesses
   [then]
 
-  execute-defined? use-TIM5 defined? TIM5_CR1_CKD not and [if]
+  execute-defined? use-TIM5 [if]
     \ TIM5_CR1 (read-write) Reset:0x0000
     : TIM5_CR1_CKD ( %bb -- x addr ) 8 lshift TIM5_CR1 ; \ TIM5_CR1_CKD, Clock division
     : TIM5_CR1_ARPE ( -- x addr ) 7 bit TIM5_CR1 ; \ TIM5_CR1_ARPE, Auto-reload preload enable
@@ -6927,14 +6927,14 @@ begin-module memmap
     : TIM5_CR1_CEN ( -- x addr ) 0 bit TIM5_CR1 ; \ TIM5_CR1_CEN, Counter enable
   [then]
 
-  defined? use-TIM5 defined? TIM5_CR2_TI1S not and [if]
+  [if]
     \ TIM5_CR2 (read-write) Reset:0x0000
     : TIM5_CR2_TI1S ( -- x addr ) 7 bit TIM5_CR2 ; \ TIM5_CR2_TI1S, TI1 selection
     : TIM5_CR2_MMS ( %bbb -- x addr ) 4 lshift TIM5_CR2 ; \ TIM5_CR2_MMS, Master mode selection
     : TIM5_CR2_CCDS ( -- x addr ) 3 bit TIM5_CR2 ; \ TIM5_CR2_CCDS, Capture/compare DMA  selection
   [then]
 
-  execute-defined? use-TIM5 defined? TIM5_SMCR_ETP not and [if]
+  execute-defined? use-TIM5 [if]
     \ TIM5_SMCR (read-write) Reset:0x0000
     : TIM5_SMCR_ETP ( -- x addr ) 15 bit TIM5_SMCR ; \ TIM5_SMCR_ETP, External trigger polarity
     : TIM5_SMCR_ECE ( -- x addr ) 14 bit TIM5_SMCR ; \ TIM5_SMCR_ECE, External clock enable
@@ -6945,7 +6945,7 @@ begin-module memmap
     : TIM5_SMCR_SMS ( %bbb -- x addr ) TIM5_SMCR ; \ TIM5_SMCR_SMS, Slave mode selection
   [then]
 
-  defined? use-TIM5 defined? TIM5_DIER_TDE not and [if]
+  [if]
     \ TIM5_DIER (read-write) Reset:0x0000
     : TIM5_DIER_TDE ( -- x addr ) 14 bit TIM5_DIER ; \ TIM5_DIER_TDE, Trigger DMA request enable
     : TIM5_DIER_CC4DE ( -- x addr ) 12 bit TIM5_DIER ; \ TIM5_DIER_CC4DE, Capture/Compare 4 DMA request  enable
@@ -6961,7 +6961,7 @@ begin-module memmap
     : TIM5_DIER_UIE ( -- x addr ) 0 bit TIM5_DIER ; \ TIM5_DIER_UIE, Update interrupt enable
   [then]
 
-  execute-defined? use-TIM5 defined? TIM5_SR_CC4OF not and [if]
+  execute-defined? use-TIM5 [if]
     \ TIM5_SR (read-write) Reset:0x0000
     : TIM5_SR_CC4OF ( -- x addr ) 12 bit TIM5_SR ; \ TIM5_SR_CC4OF, Capture/Compare 4 overcapture  flag
     : TIM5_SR_CC3OF ( -- x addr ) 11 bit TIM5_SR ; \ TIM5_SR_CC3OF, Capture/Compare 3 overcapture  flag
@@ -6975,7 +6975,7 @@ begin-module memmap
     : TIM5_SR_UIF ( -- x addr ) 0 bit TIM5_SR ; \ TIM5_SR_UIF, Update interrupt flag
   [then]
 
-  defined? use-TIM5 defined? TIM5_EGR_TG not and [if]
+  [if]
     \ TIM5_EGR (write-only) Reset:0x0000
     : TIM5_EGR_TG ( -- x addr ) 6 bit TIM5_EGR ; \ TIM5_EGR_TG, Trigger generation
     : TIM5_EGR_CC4G ( -- x addr ) 4 bit TIM5_EGR ; \ TIM5_EGR_CC4G, Capture/compare 4  generation
@@ -6985,7 +6985,7 @@ begin-module memmap
     : TIM5_EGR_UG ( -- x addr ) 0 bit TIM5_EGR ; \ TIM5_EGR_UG, Update generation
   [then]
 
-  execute-defined? use-TIM5 defined? TIM5_CCMR1_Output_OC2CE not and [if]
+  execute-defined? use-TIM5 [if]
     \ TIM5_CCMR1_Output (read-write) Reset:0x00000000
     : TIM5_CCMR1_Output_OC2CE ( -- x addr ) 15 bit TIM5_CCMR1_Output ; \ TIM5_CCMR1_Output_OC2CE, OC2CE
     : TIM5_CCMR1_Output_OC2M ( %bbb -- x addr ) 12 lshift TIM5_CCMR1_Output ; \ TIM5_CCMR1_Output_OC2M, OC2M
@@ -6999,7 +6999,7 @@ begin-module memmap
     : TIM5_CCMR1_Output_CC1S ( %bb -- x addr ) TIM5_CCMR1_Output ; \ TIM5_CCMR1_Output_CC1S, CC1S
   [then]
 
-  defined? use-TIM5 defined? TIM5_CCMR1_Input_IC2F not and [if]
+  [if]
     \ TIM5_CCMR1_Input (read-write) Reset:0x00000000
     : TIM5_CCMR1_Input_IC2F ( %bbbb -- x addr ) 12 lshift TIM5_CCMR1_Input ; \ TIM5_CCMR1_Input_IC2F, Input capture 2 filter
     : TIM5_CCMR1_Input_IC2PCS ( %bb -- x addr ) 10 lshift TIM5_CCMR1_Input ; \ TIM5_CCMR1_Input_IC2PCS, Input capture 2 prescaler
@@ -7009,7 +7009,7 @@ begin-module memmap
     : TIM5_CCMR1_Input_CC1S ( %bb -- x addr ) TIM5_CCMR1_Input ; \ TIM5_CCMR1_Input_CC1S, Capture/Compare 1  selection
   [then]
 
-  execute-defined? use-TIM5 defined? TIM5_CCMR2_Output_O24CE not and [if]
+  execute-defined? use-TIM5 [if]
     \ TIM5_CCMR2_Output (read-write) Reset:0x00000000
     : TIM5_CCMR2_Output_O24CE ( -- x addr ) 15 bit TIM5_CCMR2_Output ; \ TIM5_CCMR2_Output_O24CE, O24CE
     : TIM5_CCMR2_Output_OC4M ( %bbb -- x addr ) 12 lshift TIM5_CCMR2_Output ; \ TIM5_CCMR2_Output_OC4M, OC4M
@@ -7023,7 +7023,7 @@ begin-module memmap
     : TIM5_CCMR2_Output_CC3S ( %bb -- x addr ) TIM5_CCMR2_Output ; \ TIM5_CCMR2_Output_CC3S, CC3S
   [then]
 
-  defined? use-TIM5 defined? TIM5_CCMR2_Input_IC4F not and [if]
+  [if]
     \ TIM5_CCMR2_Input (read-write) Reset:0x00000000
     : TIM5_CCMR2_Input_IC4F ( %bbbb -- x addr ) 12 lshift TIM5_CCMR2_Input ; \ TIM5_CCMR2_Input_IC4F, Input capture 4 filter
     : TIM5_CCMR2_Input_IC4PSC ( %bb -- x addr ) 10 lshift TIM5_CCMR2_Input ; \ TIM5_CCMR2_Input_IC4PSC, Input capture 4 prescaler
@@ -7033,7 +7033,7 @@ begin-module memmap
     : TIM5_CCMR2_Input_CC3S ( %bb -- x addr ) TIM5_CCMR2_Input ; \ TIM5_CCMR2_Input_CC3S, Capture/compare 3  selection
   [then]
 
-  execute-defined? use-TIM5 defined? TIM5_CCER_CC4NP not and [if]
+  execute-defined? use-TIM5 [if]
     \ TIM5_CCER (read-write) Reset:0x0000
     : TIM5_CCER_CC4NP ( -- x addr ) 15 bit TIM5_CCER ; \ TIM5_CCER_CC4NP, Capture/Compare 4 output  Polarity
     : TIM5_CCER_CC4P ( -- x addr ) 13 bit TIM5_CCER ; \ TIM5_CCER_CC4P, Capture/Compare 3 output  Polarity
@@ -7049,64 +7049,64 @@ begin-module memmap
     : TIM5_CCER_CC1E ( -- x addr ) 0 bit TIM5_CCER ; \ TIM5_CCER_CC1E, Capture/Compare 1 output  enable
   [then]
 
-  defined? use-TIM5 defined? TIM5_CNT_CNT_H not and [if]
+  [if]
     \ TIM5_CNT (read-write) Reset:0x00000000
     : TIM5_CNT_CNT_H ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift TIM5_CNT ; \ TIM5_CNT_CNT_H, High counter value
     : TIM5_CNT_CNT_L ( %bbbbbbbbbbbbbbbb -- x addr ) TIM5_CNT ; \ TIM5_CNT_CNT_L, Low counter value
   [then]
 
-  execute-defined? use-TIM5 defined? TIM5_PSC_PSC not and [if]
+  execute-defined? use-TIM5 [if]
     \ TIM5_PSC (read-write) Reset:0x0000
     : TIM5_PSC_PSC ( %bbbbbbbbbbbbbbbb -- x addr ) TIM5_PSC ; \ TIM5_PSC_PSC, Prescaler value
   [then]
 
-  defined? use-TIM5 defined? TIM5_ARR_ARR_H not and [if]
+  [if]
     \ TIM5_ARR (read-write) Reset:0x00000000
     : TIM5_ARR_ARR_H ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift TIM5_ARR ; \ TIM5_ARR_ARR_H, High Auto-reload value
     : TIM5_ARR_ARR_L ( %bbbbbbbbbbbbbbbb -- x addr ) TIM5_ARR ; \ TIM5_ARR_ARR_L, Low Auto-reload value
   [then]
 
-  execute-defined? use-TIM5 defined? TIM5_CCR1_CCR1_H not and [if]
+  execute-defined? use-TIM5 [if]
     \ TIM5_CCR1 (read-write) Reset:0x00000000
     : TIM5_CCR1_CCR1_H ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift TIM5_CCR1 ; \ TIM5_CCR1_CCR1_H, High Capture/Compare 1  value
     : TIM5_CCR1_CCR1_L ( %bbbbbbbbbbbbbbbb -- x addr ) TIM5_CCR1 ; \ TIM5_CCR1_CCR1_L, Low Capture/Compare 1  value
   [then]
 
-  defined? use-TIM5 defined? TIM5_CCR2_CCR2_H not and [if]
+  [if]
     \ TIM5_CCR2 (read-write) Reset:0x00000000
     : TIM5_CCR2_CCR2_H ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift TIM5_CCR2 ; \ TIM5_CCR2_CCR2_H, High Capture/Compare 2  value
     : TIM5_CCR2_CCR2_L ( %bbbbbbbbbbbbbbbb -- x addr ) TIM5_CCR2 ; \ TIM5_CCR2_CCR2_L, Low Capture/Compare 2  value
   [then]
 
-  execute-defined? use-TIM5 defined? TIM5_CCR3_CCR3_H not and [if]
+  execute-defined? use-TIM5 [if]
     \ TIM5_CCR3 (read-write) Reset:0x00000000
     : TIM5_CCR3_CCR3_H ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift TIM5_CCR3 ; \ TIM5_CCR3_CCR3_H, High Capture/Compare value
     : TIM5_CCR3_CCR3_L ( %bbbbbbbbbbbbbbbb -- x addr ) TIM5_CCR3 ; \ TIM5_CCR3_CCR3_L, Low Capture/Compare value
   [then]
 
-  defined? use-TIM5 defined? TIM5_CCR4_CCR4_H not and [if]
+  [if]
     \ TIM5_CCR4 (read-write) Reset:0x00000000
     : TIM5_CCR4_CCR4_H ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift TIM5_CCR4 ; \ TIM5_CCR4_CCR4_H, High Capture/Compare value
     : TIM5_CCR4_CCR4_L ( %bbbbbbbbbbbbbbbb -- x addr ) TIM5_CCR4 ; \ TIM5_CCR4_CCR4_L, Low Capture/Compare value
   [then]
 
-  execute-defined? use-TIM5 defined? TIM5_DCR_DBL not and [if]
+  execute-defined? use-TIM5 [if]
     \ TIM5_DCR (read-write) Reset:0x0000
     : TIM5_DCR_DBL ( %bbbbb -- x addr ) 8 lshift TIM5_DCR ; \ TIM5_DCR_DBL, DMA burst length
     : TIM5_DCR_DBA ( %bbbbb -- x addr ) TIM5_DCR ; \ TIM5_DCR_DBA, DMA base address
   [then]
 
-  defined? use-TIM5 defined? TIM5_DMAR_DMAB not and [if]
+  [if]
     \ TIM5_DMAR (read-write) Reset:0x0000
     : TIM5_DMAR_DMAB ( %bbbbbbbbbbbbbbbb -- x addr ) TIM5_DMAR ; \ TIM5_DMAR_DMAB, DMA register for burst  accesses
   [then]
 
-  execute-defined? use-TIM5 defined? TIM5_OR_IT4_RMP not and [if]
+  execute-defined? use-TIM5 [if]
     \ TIM5_OR (read-write) Reset:0x0000
     : TIM5_OR_IT4_RMP ( %bb -- x addr ) 6 lshift TIM5_OR ; \ TIM5_OR_IT4_RMP, Timer Input 4 remap
   [then]
 
-  defined? use-TIM9 defined? TIM9_CR1_CKD not and [if]
+  [if]
     \ TIM9_CR1 (read-write) Reset:0x0000
     : TIM9_CR1_CKD ( %bb -- x addr ) 8 lshift TIM9_CR1 ; \ TIM9_CR1_CKD, Clock division
     : TIM9_CR1_ARPE ( -- x addr ) 7 bit TIM9_CR1 ; \ TIM9_CR1_ARPE, Auto-reload preload enable
@@ -7116,19 +7116,19 @@ begin-module memmap
     : TIM9_CR1_CEN ( -- x addr ) 0 bit TIM9_CR1 ; \ TIM9_CR1_CEN, Counter enable
   [then]
 
-  execute-defined? use-TIM9 defined? TIM9_CR2_MMS not and [if]
+  execute-defined? use-TIM9 [if]
     \ TIM9_CR2 (read-write) Reset:0x0000
     : TIM9_CR2_MMS ( %bbb -- x addr ) 4 lshift TIM9_CR2 ; \ TIM9_CR2_MMS, Master mode selection
   [then]
 
-  defined? use-TIM9 defined? TIM9_SMCR_MSM not and [if]
+  [if]
     \ TIM9_SMCR (read-write) Reset:0x0000
     : TIM9_SMCR_MSM ( -- x addr ) 7 bit TIM9_SMCR ; \ TIM9_SMCR_MSM, Master/Slave mode
     : TIM9_SMCR_TS ( %bbb -- x addr ) 4 lshift TIM9_SMCR ; \ TIM9_SMCR_TS, Trigger selection
     : TIM9_SMCR_SMS ( %bbb -- x addr ) TIM9_SMCR ; \ TIM9_SMCR_SMS, Slave mode selection
   [then]
 
-  execute-defined? use-TIM9 defined? TIM9_DIER_TIE not and [if]
+  execute-defined? use-TIM9 [if]
     \ TIM9_DIER (read-write) Reset:0x0000
     : TIM9_DIER_TIE ( -- x addr ) 6 bit TIM9_DIER ; \ TIM9_DIER_TIE, Trigger interrupt enable
     : TIM9_DIER_CC2IE ( -- x addr ) 2 bit TIM9_DIER ; \ TIM9_DIER_CC2IE, Capture/Compare 2 interrupt  enable
@@ -7136,7 +7136,7 @@ begin-module memmap
     : TIM9_DIER_UIE ( -- x addr ) 0 bit TIM9_DIER ; \ TIM9_DIER_UIE, Update interrupt enable
   [then]
 
-  defined? use-TIM9 defined? TIM9_SR_CC2OF not and [if]
+  [if]
     \ TIM9_SR (read-write) Reset:0x0000
     : TIM9_SR_CC2OF ( -- x addr ) 10 bit TIM9_SR ; \ TIM9_SR_CC2OF, Capture/compare 2 overcapture  flag
     : TIM9_SR_CC1OF ( -- x addr ) 9 bit TIM9_SR ; \ TIM9_SR_CC1OF, Capture/Compare 1 overcapture  flag
@@ -7146,7 +7146,7 @@ begin-module memmap
     : TIM9_SR_UIF ( -- x addr ) 0 bit TIM9_SR ; \ TIM9_SR_UIF, Update interrupt flag
   [then]
 
-  execute-defined? use-TIM9 defined? TIM9_EGR_TG not and [if]
+  execute-defined? use-TIM9 [if]
     \ TIM9_EGR (write-only) Reset:0x0000
     : TIM9_EGR_TG ( -- x addr ) 6 bit TIM9_EGR ; \ TIM9_EGR_TG, Trigger generation
     : TIM9_EGR_CC2G ( -- x addr ) 2 bit TIM9_EGR ; \ TIM9_EGR_CC2G, Capture/compare 2  generation
@@ -7154,7 +7154,7 @@ begin-module memmap
     : TIM9_EGR_UG ( -- x addr ) 0 bit TIM9_EGR ; \ TIM9_EGR_UG, Update generation
   [then]
 
-  defined? use-TIM9 defined? TIM9_CCMR1_Output_OC2M not and [if]
+  [if]
     \ TIM9_CCMR1_Output (read-write) Reset:0x00000000
     : TIM9_CCMR1_Output_OC2M ( %bbb -- x addr ) 12 lshift TIM9_CCMR1_Output ; \ TIM9_CCMR1_Output_OC2M, Output Compare 2 mode
     : TIM9_CCMR1_Output_OC2PE ( -- x addr ) 11 bit TIM9_CCMR1_Output ; \ TIM9_CCMR1_Output_OC2PE, Output Compare 2 preload  enable
@@ -7166,7 +7166,7 @@ begin-module memmap
     : TIM9_CCMR1_Output_CC1S ( %bb -- x addr ) TIM9_CCMR1_Output ; \ TIM9_CCMR1_Output_CC1S, Capture/Compare 1  selection
   [then]
 
-  execute-defined? use-TIM9 defined? TIM9_CCMR1_Input_IC2F not and [if]
+  execute-defined? use-TIM9 [if]
     \ TIM9_CCMR1_Input (read-write) Reset:0x00000000
     : TIM9_CCMR1_Input_IC2F ( %bbb -- x addr ) 12 lshift TIM9_CCMR1_Input ; \ TIM9_CCMR1_Input_IC2F, Input capture 2 filter
     : TIM9_CCMR1_Input_IC2PCS ( %bb -- x addr ) 10 lshift TIM9_CCMR1_Input ; \ TIM9_CCMR1_Input_IC2PCS, Input capture 2 prescaler
@@ -7176,7 +7176,7 @@ begin-module memmap
     : TIM9_CCMR1_Input_CC1S ( %bb -- x addr ) TIM9_CCMR1_Input ; \ TIM9_CCMR1_Input_CC1S, Capture/Compare 1  selection
   [then]
 
-  defined? use-TIM9 defined? TIM9_CCER_CC2NP not and [if]
+  [if]
     \ TIM9_CCER (read-write) Reset:0x0000
     : TIM9_CCER_CC2NP ( -- x addr ) 7 bit TIM9_CCER ; \ TIM9_CCER_CC2NP, Capture/Compare 2 output  Polarity
     : TIM9_CCER_CC2P ( -- x addr ) 5 bit TIM9_CCER ; \ TIM9_CCER_CC2P, Capture/Compare 2 output  Polarity
@@ -7186,32 +7186,32 @@ begin-module memmap
     : TIM9_CCER_CC1E ( -- x addr ) 0 bit TIM9_CCER ; \ TIM9_CCER_CC1E, Capture/Compare 1 output  enable
   [then]
 
-  execute-defined? use-TIM9 defined? TIM9_CNT_CNT not and [if]
+  execute-defined? use-TIM9 [if]
     \ TIM9_CNT (read-write) Reset:0x00000000
     : TIM9_CNT_CNT ( %bbbbbbbbbbbbbbbb -- x addr ) TIM9_CNT ; \ TIM9_CNT_CNT, counter value
   [then]
 
-  defined? use-TIM9 defined? TIM9_PSC_PSC not and [if]
+  [if]
     \ TIM9_PSC (read-write) Reset:0x0000
     : TIM9_PSC_PSC ( %bbbbbbbbbbbbbbbb -- x addr ) TIM9_PSC ; \ TIM9_PSC_PSC, Prescaler value
   [then]
 
-  execute-defined? use-TIM9 defined? TIM9_ARR_ARR not and [if]
+  execute-defined? use-TIM9 [if]
     \ TIM9_ARR (read-write) Reset:0x00000000
     : TIM9_ARR_ARR ( %bbbbbbbbbbbbbbbb -- x addr ) TIM9_ARR ; \ TIM9_ARR_ARR, Auto-reload value
   [then]
 
-  defined? use-TIM9 defined? TIM9_CCR1_CCR1 not and [if]
+  [if]
     \ TIM9_CCR1 (read-write) Reset:0x00000000
     : TIM9_CCR1_CCR1 ( %bbbbbbbbbbbbbbbb -- x addr ) TIM9_CCR1 ; \ TIM9_CCR1_CCR1, Capture/Compare 1 value
   [then]
 
-  execute-defined? use-TIM9 defined? TIM9_CCR2_CCR2 not and [if]
+  execute-defined? use-TIM9 [if]
     \ TIM9_CCR2 (read-write) Reset:0x00000000
     : TIM9_CCR2_CCR2 ( %bbbbbbbbbbbbbbbb -- x addr ) TIM9_CCR2 ; \ TIM9_CCR2_CCR2, Capture/Compare 2 value
   [then]
 
-  defined? use-TIM1 defined? TIM12_CR1_CKD not and [if]
+  [if]
     \ TIM12_CR1 (read-write) Reset:0x0000
     : TIM12_CR1_CKD ( %bb -- x addr ) 8 lshift TIM12_CR1 ; \ TIM12_CR1_CKD, Clock division
     : TIM12_CR1_ARPE ( -- x addr ) 7 bit TIM12_CR1 ; \ TIM12_CR1_ARPE, Auto-reload preload enable
@@ -7221,19 +7221,19 @@ begin-module memmap
     : TIM12_CR1_CEN ( -- x addr ) 0 bit TIM12_CR1 ; \ TIM12_CR1_CEN, Counter enable
   [then]
 
-  execute-defined? use-TIM1 defined? TIM12_CR2_MMS not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM12_CR2 (read-write) Reset:0x0000
     : TIM12_CR2_MMS ( %bbb -- x addr ) 4 lshift TIM12_CR2 ; \ TIM12_CR2_MMS, Master mode selection
   [then]
 
-  defined? use-TIM1 defined? TIM12_SMCR_MSM not and [if]
+  [if]
     \ TIM12_SMCR (read-write) Reset:0x0000
     : TIM12_SMCR_MSM ( -- x addr ) 7 bit TIM12_SMCR ; \ TIM12_SMCR_MSM, Master/Slave mode
     : TIM12_SMCR_TS ( %bbb -- x addr ) 4 lshift TIM12_SMCR ; \ TIM12_SMCR_TS, Trigger selection
     : TIM12_SMCR_SMS ( %bbb -- x addr ) TIM12_SMCR ; \ TIM12_SMCR_SMS, Slave mode selection
   [then]
 
-  execute-defined? use-TIM1 defined? TIM12_DIER_TIE not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM12_DIER (read-write) Reset:0x0000
     : TIM12_DIER_TIE ( -- x addr ) 6 bit TIM12_DIER ; \ TIM12_DIER_TIE, Trigger interrupt enable
     : TIM12_DIER_CC2IE ( -- x addr ) 2 bit TIM12_DIER ; \ TIM12_DIER_CC2IE, Capture/Compare 2 interrupt  enable
@@ -7241,7 +7241,7 @@ begin-module memmap
     : TIM12_DIER_UIE ( -- x addr ) 0 bit TIM12_DIER ; \ TIM12_DIER_UIE, Update interrupt enable
   [then]
 
-  defined? use-TIM1 defined? TIM12_SR_CC2OF not and [if]
+  [if]
     \ TIM12_SR (read-write) Reset:0x0000
     : TIM12_SR_CC2OF ( -- x addr ) 10 bit TIM12_SR ; \ TIM12_SR_CC2OF, Capture/compare 2 overcapture  flag
     : TIM12_SR_CC1OF ( -- x addr ) 9 bit TIM12_SR ; \ TIM12_SR_CC1OF, Capture/Compare 1 overcapture  flag
@@ -7251,7 +7251,7 @@ begin-module memmap
     : TIM12_SR_UIF ( -- x addr ) 0 bit TIM12_SR ; \ TIM12_SR_UIF, Update interrupt flag
   [then]
 
-  execute-defined? use-TIM1 defined? TIM12_EGR_TG not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM12_EGR (write-only) Reset:0x0000
     : TIM12_EGR_TG ( -- x addr ) 6 bit TIM12_EGR ; \ TIM12_EGR_TG, Trigger generation
     : TIM12_EGR_CC2G ( -- x addr ) 2 bit TIM12_EGR ; \ TIM12_EGR_CC2G, Capture/compare 2  generation
@@ -7259,7 +7259,7 @@ begin-module memmap
     : TIM12_EGR_UG ( -- x addr ) 0 bit TIM12_EGR ; \ TIM12_EGR_UG, Update generation
   [then]
 
-  defined? use-TIM1 defined? TIM12_CCMR1_Output_OC2M not and [if]
+  [if]
     \ TIM12_CCMR1_Output (read-write) Reset:0x00000000
     : TIM12_CCMR1_Output_OC2M ( %bbb -- x addr ) 12 lshift TIM12_CCMR1_Output ; \ TIM12_CCMR1_Output_OC2M, Output Compare 2 mode
     : TIM12_CCMR1_Output_OC2PE ( -- x addr ) 11 bit TIM12_CCMR1_Output ; \ TIM12_CCMR1_Output_OC2PE, Output Compare 2 preload  enable
@@ -7271,7 +7271,7 @@ begin-module memmap
     : TIM12_CCMR1_Output_CC1S ( %bb -- x addr ) TIM12_CCMR1_Output ; \ TIM12_CCMR1_Output_CC1S, Capture/Compare 1  selection
   [then]
 
-  execute-defined? use-TIM1 defined? TIM12_CCMR1_Input_IC2F not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM12_CCMR1_Input (read-write) Reset:0x00000000
     : TIM12_CCMR1_Input_IC2F ( %bbb -- x addr ) 12 lshift TIM12_CCMR1_Input ; \ TIM12_CCMR1_Input_IC2F, Input capture 2 filter
     : TIM12_CCMR1_Input_IC2PCS ( %bb -- x addr ) 10 lshift TIM12_CCMR1_Input ; \ TIM12_CCMR1_Input_IC2PCS, Input capture 2 prescaler
@@ -7281,7 +7281,7 @@ begin-module memmap
     : TIM12_CCMR1_Input_CC1S ( %bb -- x addr ) TIM12_CCMR1_Input ; \ TIM12_CCMR1_Input_CC1S, Capture/Compare 1  selection
   [then]
 
-  defined? use-TIM1 defined? TIM12_CCER_CC2NP not and [if]
+  [if]
     \ TIM12_CCER (read-write) Reset:0x0000
     : TIM12_CCER_CC2NP ( -- x addr ) 7 bit TIM12_CCER ; \ TIM12_CCER_CC2NP, Capture/Compare 2 output  Polarity
     : TIM12_CCER_CC2P ( -- x addr ) 5 bit TIM12_CCER ; \ TIM12_CCER_CC2P, Capture/Compare 2 output  Polarity
@@ -7291,32 +7291,32 @@ begin-module memmap
     : TIM12_CCER_CC1E ( -- x addr ) 0 bit TIM12_CCER ; \ TIM12_CCER_CC1E, Capture/Compare 1 output  enable
   [then]
 
-  execute-defined? use-TIM1 defined? TIM12_CNT_CNT not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM12_CNT (read-write) Reset:0x00000000
     : TIM12_CNT_CNT ( %bbbbbbbbbbbbbbbb -- x addr ) TIM12_CNT ; \ TIM12_CNT_CNT, counter value
   [then]
 
-  defined? use-TIM1 defined? TIM12_PSC_PSC not and [if]
+  [if]
     \ TIM12_PSC (read-write) Reset:0x0000
     : TIM12_PSC_PSC ( %bbbbbbbbbbbbbbbb -- x addr ) TIM12_PSC ; \ TIM12_PSC_PSC, Prescaler value
   [then]
 
-  execute-defined? use-TIM1 defined? TIM12_ARR_ARR not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM12_ARR (read-write) Reset:0x00000000
     : TIM12_ARR_ARR ( %bbbbbbbbbbbbbbbb -- x addr ) TIM12_ARR ; \ TIM12_ARR_ARR, Auto-reload value
   [then]
 
-  defined? use-TIM1 defined? TIM12_CCR1_CCR1 not and [if]
+  [if]
     \ TIM12_CCR1 (read-write) Reset:0x00000000
     : TIM12_CCR1_CCR1 ( %bbbbbbbbbbbbbbbb -- x addr ) TIM12_CCR1 ; \ TIM12_CCR1_CCR1, Capture/Compare 1 value
   [then]
 
-  execute-defined? use-TIM1 defined? TIM12_CCR2_CCR2 not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM12_CCR2 (read-write) Reset:0x00000000
     : TIM12_CCR2_CCR2 ( %bbbbbbbbbbbbbbbb -- x addr ) TIM12_CCR2 ; \ TIM12_CCR2_CCR2, Capture/Compare 2 value
   [then]
 
-  defined? use-TIM1 defined? TIM10_CR1_CKD not and [if]
+  [if]
     \ TIM10_CR1 (read-write) Reset:0x0000
     : TIM10_CR1_CKD ( %bb -- x addr ) 8 lshift TIM10_CR1 ; \ TIM10_CR1_CKD, Clock division
     : TIM10_CR1_ARPE ( -- x addr ) 7 bit TIM10_CR1 ; \ TIM10_CR1_ARPE, Auto-reload preload enable
@@ -7325,26 +7325,26 @@ begin-module memmap
     : TIM10_CR1_CEN ( -- x addr ) 0 bit TIM10_CR1 ; \ TIM10_CR1_CEN, Counter enable
   [then]
 
-  execute-defined? use-TIM1 defined? TIM10_DIER_CC1IE not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM10_DIER (read-write) Reset:0x0000
     : TIM10_DIER_CC1IE ( -- x addr ) 1 bit TIM10_DIER ; \ TIM10_DIER_CC1IE, Capture/Compare 1 interrupt  enable
     : TIM10_DIER_UIE ( -- x addr ) 0 bit TIM10_DIER ; \ TIM10_DIER_UIE, Update interrupt enable
   [then]
 
-  defined? use-TIM1 defined? TIM10_SR_CC1OF not and [if]
+  [if]
     \ TIM10_SR (read-write) Reset:0x0000
     : TIM10_SR_CC1OF ( -- x addr ) 9 bit TIM10_SR ; \ TIM10_SR_CC1OF, Capture/Compare 1 overcapture  flag
     : TIM10_SR_CC1IF ( -- x addr ) 1 bit TIM10_SR ; \ TIM10_SR_CC1IF, Capture/compare 1 interrupt  flag
     : TIM10_SR_UIF ( -- x addr ) 0 bit TIM10_SR ; \ TIM10_SR_UIF, Update interrupt flag
   [then]
 
-  execute-defined? use-TIM1 defined? TIM10_EGR_CC1G not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM10_EGR (write-only) Reset:0x0000
     : TIM10_EGR_CC1G ( -- x addr ) 1 bit TIM10_EGR ; \ TIM10_EGR_CC1G, Capture/compare 1  generation
     : TIM10_EGR_UG ( -- x addr ) 0 bit TIM10_EGR ; \ TIM10_EGR_UG, Update generation
   [then]
 
-  defined? use-TIM1 defined? TIM10_CCMR1_Output_OC1M not and [if]
+  [if]
     \ TIM10_CCMR1_Output (read-write) Reset:0x00000000
     : TIM10_CCMR1_Output_OC1M ( %bbb -- x addr ) 4 lshift TIM10_CCMR1_Output ; \ TIM10_CCMR1_Output_OC1M, Output Compare 1 mode
     : TIM10_CCMR1_Output_OC1PE ( -- x addr ) 3 bit TIM10_CCMR1_Output ; \ TIM10_CCMR1_Output_OC1PE, Output Compare 1 preload  enable
@@ -7352,41 +7352,41 @@ begin-module memmap
     : TIM10_CCMR1_Output_CC1S ( %bb -- x addr ) TIM10_CCMR1_Output ; \ TIM10_CCMR1_Output_CC1S, Capture/Compare 1  selection
   [then]
 
-  execute-defined? use-TIM1 defined? TIM10_CCMR1_Input_IC1F not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM10_CCMR1_Input (read-write) Reset:0x00000000
     : TIM10_CCMR1_Input_IC1F ( %bbbb -- x addr ) 4 lshift TIM10_CCMR1_Input ; \ TIM10_CCMR1_Input_IC1F, Input capture 1 filter
     : TIM10_CCMR1_Input_ICPCS ( %bb -- x addr ) 2 lshift TIM10_CCMR1_Input ; \ TIM10_CCMR1_Input_ICPCS, Input capture 1 prescaler
     : TIM10_CCMR1_Input_CC1S ( %bb -- x addr ) TIM10_CCMR1_Input ; \ TIM10_CCMR1_Input_CC1S, Capture/Compare 1  selection
   [then]
 
-  defined? use-TIM1 defined? TIM10_CCER_CC1NP not and [if]
+  [if]
     \ TIM10_CCER (read-write) Reset:0x0000
     : TIM10_CCER_CC1NP ( -- x addr ) 3 bit TIM10_CCER ; \ TIM10_CCER_CC1NP, Capture/Compare 1 output  Polarity
     : TIM10_CCER_CC1P ( -- x addr ) 1 bit TIM10_CCER ; \ TIM10_CCER_CC1P, Capture/Compare 1 output  Polarity
     : TIM10_CCER_CC1E ( -- x addr ) 0 bit TIM10_CCER ; \ TIM10_CCER_CC1E, Capture/Compare 1 output  enable
   [then]
 
-  execute-defined? use-TIM1 defined? TIM10_CNT_CNT not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM10_CNT (read-write) Reset:0x00000000
     : TIM10_CNT_CNT ( %bbbbbbbbbbbbbbbb -- x addr ) TIM10_CNT ; \ TIM10_CNT_CNT, counter value
   [then]
 
-  defined? use-TIM1 defined? TIM10_PSC_PSC not and [if]
+  [if]
     \ TIM10_PSC (read-write) Reset:0x0000
     : TIM10_PSC_PSC ( %bbbbbbbbbbbbbbbb -- x addr ) TIM10_PSC ; \ TIM10_PSC_PSC, Prescaler value
   [then]
 
-  execute-defined? use-TIM1 defined? TIM10_ARR_ARR not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM10_ARR (read-write) Reset:0x00000000
     : TIM10_ARR_ARR ( %bbbbbbbbbbbbbbbb -- x addr ) TIM10_ARR ; \ TIM10_ARR_ARR, Auto-reload value
   [then]
 
-  defined? use-TIM1 defined? TIM10_CCR1_CCR1 not and [if]
+  [if]
     \ TIM10_CCR1 (read-write) Reset:0x00000000
     : TIM10_CCR1_CCR1 ( %bbbbbbbbbbbbbbbb -- x addr ) TIM10_CCR1 ; \ TIM10_CCR1_CCR1, Capture/Compare 1 value
   [then]
 
-  execute-defined? use-TIM1 defined? TIM13_CR1_CKD not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM13_CR1 (read-write) Reset:0x0000
     : TIM13_CR1_CKD ( %bb -- x addr ) 8 lshift TIM13_CR1 ; \ TIM13_CR1_CKD, Clock division
     : TIM13_CR1_ARPE ( -- x addr ) 7 bit TIM13_CR1 ; \ TIM13_CR1_ARPE, Auto-reload preload enable
@@ -7395,26 +7395,26 @@ begin-module memmap
     : TIM13_CR1_CEN ( -- x addr ) 0 bit TIM13_CR1 ; \ TIM13_CR1_CEN, Counter enable
   [then]
 
-  defined? use-TIM1 defined? TIM13_DIER_CC1IE not and [if]
+  [if]
     \ TIM13_DIER (read-write) Reset:0x0000
     : TIM13_DIER_CC1IE ( -- x addr ) 1 bit TIM13_DIER ; \ TIM13_DIER_CC1IE, Capture/Compare 1 interrupt  enable
     : TIM13_DIER_UIE ( -- x addr ) 0 bit TIM13_DIER ; \ TIM13_DIER_UIE, Update interrupt enable
   [then]
 
-  execute-defined? use-TIM1 defined? TIM13_SR_CC1OF not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM13_SR (read-write) Reset:0x0000
     : TIM13_SR_CC1OF ( -- x addr ) 9 bit TIM13_SR ; \ TIM13_SR_CC1OF, Capture/Compare 1 overcapture  flag
     : TIM13_SR_CC1IF ( -- x addr ) 1 bit TIM13_SR ; \ TIM13_SR_CC1IF, Capture/compare 1 interrupt  flag
     : TIM13_SR_UIF ( -- x addr ) 0 bit TIM13_SR ; \ TIM13_SR_UIF, Update interrupt flag
   [then]
 
-  defined? use-TIM1 defined? TIM13_EGR_CC1G not and [if]
+  [if]
     \ TIM13_EGR (write-only) Reset:0x0000
     : TIM13_EGR_CC1G ( -- x addr ) 1 bit TIM13_EGR ; \ TIM13_EGR_CC1G, Capture/compare 1  generation
     : TIM13_EGR_UG ( -- x addr ) 0 bit TIM13_EGR ; \ TIM13_EGR_UG, Update generation
   [then]
 
-  execute-defined? use-TIM1 defined? TIM13_CCMR1_Output_OC1M not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM13_CCMR1_Output (read-write) Reset:0x00000000
     : TIM13_CCMR1_Output_OC1M ( %bbb -- x addr ) 4 lshift TIM13_CCMR1_Output ; \ TIM13_CCMR1_Output_OC1M, Output Compare 1 mode
     : TIM13_CCMR1_Output_OC1PE ( -- x addr ) 3 bit TIM13_CCMR1_Output ; \ TIM13_CCMR1_Output_OC1PE, Output Compare 1 preload  enable
@@ -7422,41 +7422,41 @@ begin-module memmap
     : TIM13_CCMR1_Output_CC1S ( %bb -- x addr ) TIM13_CCMR1_Output ; \ TIM13_CCMR1_Output_CC1S, Capture/Compare 1  selection
   [then]
 
-  defined? use-TIM1 defined? TIM13_CCMR1_Input_IC1F not and [if]
+  [if]
     \ TIM13_CCMR1_Input (read-write) Reset:0x00000000
     : TIM13_CCMR1_Input_IC1F ( %bbbb -- x addr ) 4 lshift TIM13_CCMR1_Input ; \ TIM13_CCMR1_Input_IC1F, Input capture 1 filter
     : TIM13_CCMR1_Input_ICPCS ( %bb -- x addr ) 2 lshift TIM13_CCMR1_Input ; \ TIM13_CCMR1_Input_ICPCS, Input capture 1 prescaler
     : TIM13_CCMR1_Input_CC1S ( %bb -- x addr ) TIM13_CCMR1_Input ; \ TIM13_CCMR1_Input_CC1S, Capture/Compare 1  selection
   [then]
 
-  execute-defined? use-TIM1 defined? TIM13_CCER_CC1NP not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM13_CCER (read-write) Reset:0x0000
     : TIM13_CCER_CC1NP ( -- x addr ) 3 bit TIM13_CCER ; \ TIM13_CCER_CC1NP, Capture/Compare 1 output  Polarity
     : TIM13_CCER_CC1P ( -- x addr ) 1 bit TIM13_CCER ; \ TIM13_CCER_CC1P, Capture/Compare 1 output  Polarity
     : TIM13_CCER_CC1E ( -- x addr ) 0 bit TIM13_CCER ; \ TIM13_CCER_CC1E, Capture/Compare 1 output  enable
   [then]
 
-  defined? use-TIM1 defined? TIM13_CNT_CNT not and [if]
+  [if]
     \ TIM13_CNT (read-write) Reset:0x00000000
     : TIM13_CNT_CNT ( %bbbbbbbbbbbbbbbb -- x addr ) TIM13_CNT ; \ TIM13_CNT_CNT, counter value
   [then]
 
-  execute-defined? use-TIM1 defined? TIM13_PSC_PSC not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM13_PSC (read-write) Reset:0x0000
     : TIM13_PSC_PSC ( %bbbbbbbbbbbbbbbb -- x addr ) TIM13_PSC ; \ TIM13_PSC_PSC, Prescaler value
   [then]
 
-  defined? use-TIM1 defined? TIM13_ARR_ARR not and [if]
+  [if]
     \ TIM13_ARR (read-write) Reset:0x00000000
     : TIM13_ARR_ARR ( %bbbbbbbbbbbbbbbb -- x addr ) TIM13_ARR ; \ TIM13_ARR_ARR, Auto-reload value
   [then]
 
-  execute-defined? use-TIM1 defined? TIM13_CCR1_CCR1 not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM13_CCR1 (read-write) Reset:0x00000000
     : TIM13_CCR1_CCR1 ( %bbbbbbbbbbbbbbbb -- x addr ) TIM13_CCR1 ; \ TIM13_CCR1_CCR1, Capture/Compare 1 value
   [then]
 
-  defined? use-TIM1 defined? TIM14_CR1_CKD not and [if]
+  [if]
     \ TIM14_CR1 (read-write) Reset:0x0000
     : TIM14_CR1_CKD ( %bb -- x addr ) 8 lshift TIM14_CR1 ; \ TIM14_CR1_CKD, Clock division
     : TIM14_CR1_ARPE ( -- x addr ) 7 bit TIM14_CR1 ; \ TIM14_CR1_ARPE, Auto-reload preload enable
@@ -7465,26 +7465,26 @@ begin-module memmap
     : TIM14_CR1_CEN ( -- x addr ) 0 bit TIM14_CR1 ; \ TIM14_CR1_CEN, Counter enable
   [then]
 
-  execute-defined? use-TIM1 defined? TIM14_DIER_CC1IE not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM14_DIER (read-write) Reset:0x0000
     : TIM14_DIER_CC1IE ( -- x addr ) 1 bit TIM14_DIER ; \ TIM14_DIER_CC1IE, Capture/Compare 1 interrupt  enable
     : TIM14_DIER_UIE ( -- x addr ) 0 bit TIM14_DIER ; \ TIM14_DIER_UIE, Update interrupt enable
   [then]
 
-  defined? use-TIM1 defined? TIM14_SR_CC1OF not and [if]
+  [if]
     \ TIM14_SR (read-write) Reset:0x0000
     : TIM14_SR_CC1OF ( -- x addr ) 9 bit TIM14_SR ; \ TIM14_SR_CC1OF, Capture/Compare 1 overcapture  flag
     : TIM14_SR_CC1IF ( -- x addr ) 1 bit TIM14_SR ; \ TIM14_SR_CC1IF, Capture/compare 1 interrupt  flag
     : TIM14_SR_UIF ( -- x addr ) 0 bit TIM14_SR ; \ TIM14_SR_UIF, Update interrupt flag
   [then]
 
-  execute-defined? use-TIM1 defined? TIM14_EGR_CC1G not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM14_EGR (write-only) Reset:0x0000
     : TIM14_EGR_CC1G ( -- x addr ) 1 bit TIM14_EGR ; \ TIM14_EGR_CC1G, Capture/compare 1  generation
     : TIM14_EGR_UG ( -- x addr ) 0 bit TIM14_EGR ; \ TIM14_EGR_UG, Update generation
   [then]
 
-  defined? use-TIM1 defined? TIM14_CCMR1_Output_OC1M not and [if]
+  [if]
     \ TIM14_CCMR1_Output (read-write) Reset:0x00000000
     : TIM14_CCMR1_Output_OC1M ( %bbb -- x addr ) 4 lshift TIM14_CCMR1_Output ; \ TIM14_CCMR1_Output_OC1M, Output Compare 1 mode
     : TIM14_CCMR1_Output_OC1PE ( -- x addr ) 3 bit TIM14_CCMR1_Output ; \ TIM14_CCMR1_Output_OC1PE, Output Compare 1 preload  enable
@@ -7492,41 +7492,41 @@ begin-module memmap
     : TIM14_CCMR1_Output_CC1S ( %bb -- x addr ) TIM14_CCMR1_Output ; \ TIM14_CCMR1_Output_CC1S, Capture/Compare 1  selection
   [then]
 
-  execute-defined? use-TIM1 defined? TIM14_CCMR1_Input_IC1F not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM14_CCMR1_Input (read-write) Reset:0x00000000
     : TIM14_CCMR1_Input_IC1F ( %bbbb -- x addr ) 4 lshift TIM14_CCMR1_Input ; \ TIM14_CCMR1_Input_IC1F, Input capture 1 filter
     : TIM14_CCMR1_Input_ICPCS ( %bb -- x addr ) 2 lshift TIM14_CCMR1_Input ; \ TIM14_CCMR1_Input_ICPCS, Input capture 1 prescaler
     : TIM14_CCMR1_Input_CC1S ( %bb -- x addr ) TIM14_CCMR1_Input ; \ TIM14_CCMR1_Input_CC1S, Capture/Compare 1  selection
   [then]
 
-  defined? use-TIM1 defined? TIM14_CCER_CC1NP not and [if]
+  [if]
     \ TIM14_CCER (read-write) Reset:0x0000
     : TIM14_CCER_CC1NP ( -- x addr ) 3 bit TIM14_CCER ; \ TIM14_CCER_CC1NP, Capture/Compare 1 output  Polarity
     : TIM14_CCER_CC1P ( -- x addr ) 1 bit TIM14_CCER ; \ TIM14_CCER_CC1P, Capture/Compare 1 output  Polarity
     : TIM14_CCER_CC1E ( -- x addr ) 0 bit TIM14_CCER ; \ TIM14_CCER_CC1E, Capture/Compare 1 output  enable
   [then]
 
-  execute-defined? use-TIM1 defined? TIM14_CNT_CNT not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM14_CNT (read-write) Reset:0x00000000
     : TIM14_CNT_CNT ( %bbbbbbbbbbbbbbbb -- x addr ) TIM14_CNT ; \ TIM14_CNT_CNT, counter value
   [then]
 
-  defined? use-TIM1 defined? TIM14_PSC_PSC not and [if]
+  [if]
     \ TIM14_PSC (read-write) Reset:0x0000
     : TIM14_PSC_PSC ( %bbbbbbbbbbbbbbbb -- x addr ) TIM14_PSC ; \ TIM14_PSC_PSC, Prescaler value
   [then]
 
-  execute-defined? use-TIM1 defined? TIM14_ARR_ARR not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM14_ARR (read-write) Reset:0x00000000
     : TIM14_ARR_ARR ( %bbbbbbbbbbbbbbbb -- x addr ) TIM14_ARR ; \ TIM14_ARR_ARR, Auto-reload value
   [then]
 
-  defined? use-TIM1 defined? TIM14_CCR1_CCR1 not and [if]
+  [if]
     \ TIM14_CCR1 (read-write) Reset:0x00000000
     : TIM14_CCR1_CCR1 ( %bbbbbbbbbbbbbbbb -- x addr ) TIM14_CCR1 ; \ TIM14_CCR1_CCR1, Capture/Compare 1 value
   [then]
 
-  execute-defined? use-TIM1 defined? TIM11_CR1_CKD not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM11_CR1 (read-write) Reset:0x0000
     : TIM11_CR1_CKD ( %bb -- x addr ) 8 lshift TIM11_CR1 ; \ TIM11_CR1_CKD, Clock division
     : TIM11_CR1_ARPE ( -- x addr ) 7 bit TIM11_CR1 ; \ TIM11_CR1_ARPE, Auto-reload preload enable
@@ -7535,26 +7535,26 @@ begin-module memmap
     : TIM11_CR1_CEN ( -- x addr ) 0 bit TIM11_CR1 ; \ TIM11_CR1_CEN, Counter enable
   [then]
 
-  defined? use-TIM1 defined? TIM11_DIER_CC1IE not and [if]
+  [if]
     \ TIM11_DIER (read-write) Reset:0x0000
     : TIM11_DIER_CC1IE ( -- x addr ) 1 bit TIM11_DIER ; \ TIM11_DIER_CC1IE, Capture/Compare 1 interrupt  enable
     : TIM11_DIER_UIE ( -- x addr ) 0 bit TIM11_DIER ; \ TIM11_DIER_UIE, Update interrupt enable
   [then]
 
-  execute-defined? use-TIM1 defined? TIM11_SR_CC1OF not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM11_SR (read-write) Reset:0x0000
     : TIM11_SR_CC1OF ( -- x addr ) 9 bit TIM11_SR ; \ TIM11_SR_CC1OF, Capture/Compare 1 overcapture  flag
     : TIM11_SR_CC1IF ( -- x addr ) 1 bit TIM11_SR ; \ TIM11_SR_CC1IF, Capture/compare 1 interrupt  flag
     : TIM11_SR_UIF ( -- x addr ) 0 bit TIM11_SR ; \ TIM11_SR_UIF, Update interrupt flag
   [then]
 
-  defined? use-TIM1 defined? TIM11_EGR_CC1G not and [if]
+  [if]
     \ TIM11_EGR (write-only) Reset:0x0000
     : TIM11_EGR_CC1G ( -- x addr ) 1 bit TIM11_EGR ; \ TIM11_EGR_CC1G, Capture/compare 1  generation
     : TIM11_EGR_UG ( -- x addr ) 0 bit TIM11_EGR ; \ TIM11_EGR_UG, Update generation
   [then]
 
-  execute-defined? use-TIM1 defined? TIM11_CCMR1_Output_OC1M not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM11_CCMR1_Output (read-write) Reset:0x00000000
     : TIM11_CCMR1_Output_OC1M ( %bbb -- x addr ) 4 lshift TIM11_CCMR1_Output ; \ TIM11_CCMR1_Output_OC1M, Output Compare 1 mode
     : TIM11_CCMR1_Output_OC1PE ( -- x addr ) 3 bit TIM11_CCMR1_Output ; \ TIM11_CCMR1_Output_OC1PE, Output Compare 1 preload  enable
@@ -7562,46 +7562,46 @@ begin-module memmap
     : TIM11_CCMR1_Output_CC1S ( %bb -- x addr ) TIM11_CCMR1_Output ; \ TIM11_CCMR1_Output_CC1S, Capture/Compare 1  selection
   [then]
 
-  defined? use-TIM1 defined? TIM11_CCMR1_Input_IC1F not and [if]
+  [if]
     \ TIM11_CCMR1_Input (read-write) Reset:0x00000000
     : TIM11_CCMR1_Input_IC1F ( %bbbb -- x addr ) 4 lshift TIM11_CCMR1_Input ; \ TIM11_CCMR1_Input_IC1F, Input capture 1 filter
     : TIM11_CCMR1_Input_ICPCS ( %bb -- x addr ) 2 lshift TIM11_CCMR1_Input ; \ TIM11_CCMR1_Input_ICPCS, Input capture 1 prescaler
     : TIM11_CCMR1_Input_CC1S ( %bb -- x addr ) TIM11_CCMR1_Input ; \ TIM11_CCMR1_Input_CC1S, Capture/Compare 1  selection
   [then]
 
-  execute-defined? use-TIM1 defined? TIM11_CCER_CC1NP not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM11_CCER (read-write) Reset:0x0000
     : TIM11_CCER_CC1NP ( -- x addr ) 3 bit TIM11_CCER ; \ TIM11_CCER_CC1NP, Capture/Compare 1 output  Polarity
     : TIM11_CCER_CC1P ( -- x addr ) 1 bit TIM11_CCER ; \ TIM11_CCER_CC1P, Capture/Compare 1 output  Polarity
     : TIM11_CCER_CC1E ( -- x addr ) 0 bit TIM11_CCER ; \ TIM11_CCER_CC1E, Capture/Compare 1 output  enable
   [then]
 
-  defined? use-TIM1 defined? TIM11_CNT_CNT not and [if]
+  [if]
     \ TIM11_CNT (read-write) Reset:0x00000000
     : TIM11_CNT_CNT ( %bbbbbbbbbbbbbbbb -- x addr ) TIM11_CNT ; \ TIM11_CNT_CNT, counter value
   [then]
 
-  execute-defined? use-TIM1 defined? TIM11_PSC_PSC not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM11_PSC (read-write) Reset:0x0000
     : TIM11_PSC_PSC ( %bbbbbbbbbbbbbbbb -- x addr ) TIM11_PSC ; \ TIM11_PSC_PSC, Prescaler value
   [then]
 
-  defined? use-TIM1 defined? TIM11_ARR_ARR not and [if]
+  [if]
     \ TIM11_ARR (read-write) Reset:0x00000000
     : TIM11_ARR_ARR ( %bbbbbbbbbbbbbbbb -- x addr ) TIM11_ARR ; \ TIM11_ARR_ARR, Auto-reload value
   [then]
 
-  execute-defined? use-TIM1 defined? TIM11_CCR1_CCR1 not and [if]
+  execute-defined? use-TIM1 [if]
     \ TIM11_CCR1 (read-write) Reset:0x00000000
     : TIM11_CCR1_CCR1 ( %bbbbbbbbbbbbbbbb -- x addr ) TIM11_CCR1 ; \ TIM11_CCR1_CCR1, Capture/Compare 1 value
   [then]
 
-  defined? use-TIM1 defined? TIM11_OR_RMP not and [if]
+  [if]
     \ TIM11_OR (read-write) Reset:0x00000000
     : TIM11_OR_RMP ( %bb -- x addr ) TIM11_OR ; \ TIM11_OR_RMP, Input 1 remapping  capability
   [then]
 
-  execute-defined? use-TIM6 defined? TIM6_CR1_ARPE not and [if]
+  execute-defined? use-TIM6 [if]
     \ TIM6_CR1 (read-write) Reset:0x0000
     : TIM6_CR1_ARPE ( -- x addr ) 7 bit TIM6_CR1 ; \ TIM6_CR1_ARPE, Auto-reload preload enable
     : TIM6_CR1_OPM ( -- x addr ) 3 bit TIM6_CR1 ; \ TIM6_CR1_OPM, One-pulse mode
@@ -7610,43 +7610,43 @@ begin-module memmap
     : TIM6_CR1_CEN ( -- x addr ) 0 bit TIM6_CR1 ; \ TIM6_CR1_CEN, Counter enable
   [then]
 
-  defined? use-TIM6 defined? TIM6_CR2_MMS not and [if]
+  [if]
     \ TIM6_CR2 (read-write) Reset:0x0000
     : TIM6_CR2_MMS ( %bbb -- x addr ) 4 lshift TIM6_CR2 ; \ TIM6_CR2_MMS, Master mode selection
   [then]
 
-  execute-defined? use-TIM6 defined? TIM6_DIER_UDE not and [if]
+  execute-defined? use-TIM6 [if]
     \ TIM6_DIER (read-write) Reset:0x0000
     : TIM6_DIER_UDE ( -- x addr ) 8 bit TIM6_DIER ; \ TIM6_DIER_UDE, Update DMA request enable
     : TIM6_DIER_UIE ( -- x addr ) 0 bit TIM6_DIER ; \ TIM6_DIER_UIE, Update interrupt enable
   [then]
 
-  defined? use-TIM6 defined? TIM6_SR_UIF not and [if]
+  [if]
     \ TIM6_SR (read-write) Reset:0x0000
     : TIM6_SR_UIF ( -- x addr ) 0 bit TIM6_SR ; \ TIM6_SR_UIF, Update interrupt flag
   [then]
 
-  execute-defined? use-TIM6 defined? TIM6_EGR_UG not and [if]
+  execute-defined? use-TIM6 [if]
     \ TIM6_EGR (write-only) Reset:0x0000
     : TIM6_EGR_UG ( -- x addr ) 0 bit TIM6_EGR ; \ TIM6_EGR_UG, Update generation
   [then]
 
-  defined? use-TIM6 defined? TIM6_CNT_CNT not and [if]
+  [if]
     \ TIM6_CNT (read-write) Reset:0x00000000
     : TIM6_CNT_CNT ( %bbbbbbbbbbbbbbbb -- x addr ) TIM6_CNT ; \ TIM6_CNT_CNT, Low counter value
   [then]
 
-  execute-defined? use-TIM6 defined? TIM6_PSC_PSC not and [if]
+  execute-defined? use-TIM6 [if]
     \ TIM6_PSC (read-write) Reset:0x0000
     : TIM6_PSC_PSC ( %bbbbbbbbbbbbbbbb -- x addr ) TIM6_PSC ; \ TIM6_PSC_PSC, Prescaler value
   [then]
 
-  defined? use-TIM6 defined? TIM6_ARR_ARR not and [if]
+  [if]
     \ TIM6_ARR (read-write) Reset:0x00000000
     : TIM6_ARR_ARR ( %bbbbbbbbbbbbbbbb -- x addr ) TIM6_ARR ; \ TIM6_ARR_ARR, Low Auto-reload value
   [then]
 
-  execute-defined? use-TIM7 defined? TIM7_CR1_ARPE not and [if]
+  execute-defined? use-TIM7 [if]
     \ TIM7_CR1 (read-write) Reset:0x0000
     : TIM7_CR1_ARPE ( -- x addr ) 7 bit TIM7_CR1 ; \ TIM7_CR1_ARPE, Auto-reload preload enable
     : TIM7_CR1_OPM ( -- x addr ) 3 bit TIM7_CR1 ; \ TIM7_CR1_OPM, One-pulse mode
@@ -7655,43 +7655,43 @@ begin-module memmap
     : TIM7_CR1_CEN ( -- x addr ) 0 bit TIM7_CR1 ; \ TIM7_CR1_CEN, Counter enable
   [then]
 
-  defined? use-TIM7 defined? TIM7_CR2_MMS not and [if]
+  [if]
     \ TIM7_CR2 (read-write) Reset:0x0000
     : TIM7_CR2_MMS ( %bbb -- x addr ) 4 lshift TIM7_CR2 ; \ TIM7_CR2_MMS, Master mode selection
   [then]
 
-  execute-defined? use-TIM7 defined? TIM7_DIER_UDE not and [if]
+  execute-defined? use-TIM7 [if]
     \ TIM7_DIER (read-write) Reset:0x0000
     : TIM7_DIER_UDE ( -- x addr ) 8 bit TIM7_DIER ; \ TIM7_DIER_UDE, Update DMA request enable
     : TIM7_DIER_UIE ( -- x addr ) 0 bit TIM7_DIER ; \ TIM7_DIER_UIE, Update interrupt enable
   [then]
 
-  defined? use-TIM7 defined? TIM7_SR_UIF not and [if]
+  [if]
     \ TIM7_SR (read-write) Reset:0x0000
     : TIM7_SR_UIF ( -- x addr ) 0 bit TIM7_SR ; \ TIM7_SR_UIF, Update interrupt flag
   [then]
 
-  execute-defined? use-TIM7 defined? TIM7_EGR_UG not and [if]
+  execute-defined? use-TIM7 [if]
     \ TIM7_EGR (write-only) Reset:0x0000
     : TIM7_EGR_UG ( -- x addr ) 0 bit TIM7_EGR ; \ TIM7_EGR_UG, Update generation
   [then]
 
-  defined? use-TIM7 defined? TIM7_CNT_CNT not and [if]
+  [if]
     \ TIM7_CNT (read-write) Reset:0x00000000
     : TIM7_CNT_CNT ( %bbbbbbbbbbbbbbbb -- x addr ) TIM7_CNT ; \ TIM7_CNT_CNT, Low counter value
   [then]
 
-  execute-defined? use-TIM7 defined? TIM7_PSC_PSC not and [if]
+  execute-defined? use-TIM7 [if]
     \ TIM7_PSC (read-write) Reset:0x0000
     : TIM7_PSC_PSC ( %bbbbbbbbbbbbbbbb -- x addr ) TIM7_PSC ; \ TIM7_PSC_PSC, Prescaler value
   [then]
 
-  defined? use-TIM7 defined? TIM7_ARR_ARR not and [if]
+  [if]
     \ TIM7_ARR (read-write) Reset:0x00000000
     : TIM7_ARR_ARR ( %bbbbbbbbbbbbbbbb -- x addr ) TIM7_ARR ; \ TIM7_ARR_ARR, Low Auto-reload value
   [then]
 
-  execute-defined? use-Ethernet_MAC defined? Ethernet_MAC_MACCR_RE not and [if]
+  execute-defined? use-Ethernet_MAC [if]
     \ Ethernet_MAC_MACCR (read-write) Reset:0x0008000
     : Ethernet_MAC_MACCR_RE ( -- x addr ) 2 bit Ethernet_MAC_MACCR ; \ Ethernet_MAC_MACCR_RE, RE
     : Ethernet_MAC_MACCR_TE ( -- x addr ) 3 bit Ethernet_MAC_MACCR ; \ Ethernet_MAC_MACCR_TE, TE
@@ -7711,7 +7711,7 @@ begin-module memmap
     : Ethernet_MAC_MACCR_CSTF ( -- x addr ) 25 bit Ethernet_MAC_MACCR ; \ Ethernet_MAC_MACCR_CSTF, CSTF
   [then]
 
-  defined? use-Ethernet_MAC defined? Ethernet_MAC_MACFFR_PM not and [if]
+  [if]
     \ Ethernet_MAC_MACFFR (read-write) Reset:0x00000000
     : Ethernet_MAC_MACFFR_PM ( -- x addr ) 0 bit Ethernet_MAC_MACFFR ; \ Ethernet_MAC_MACFFR_PM, no description available
     : Ethernet_MAC_MACFFR_HU ( -- x addr ) 1 bit Ethernet_MAC_MACFFR ; \ Ethernet_MAC_MACFFR_HU, no description available
@@ -7726,17 +7726,17 @@ begin-module memmap
     : Ethernet_MAC_MACFFR_RA ( -- x addr ) 31 bit Ethernet_MAC_MACFFR ; \ Ethernet_MAC_MACFFR_RA, no description available
   [then]
 
-  execute-defined? use-Ethernet_MAC defined? Ethernet_MAC_MACHTHR_HTH not and [if]
+  execute-defined? use-Ethernet_MAC [if]
     \ Ethernet_MAC_MACHTHR (read-write) Reset:0x00000000
     : Ethernet_MAC_MACHTHR_HTH ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) Ethernet_MAC_MACHTHR ; \ Ethernet_MAC_MACHTHR_HTH, no description available
   [then]
 
-  defined? use-Ethernet_MAC defined? Ethernet_MAC_MACHTLR_HTL not and [if]
+  [if]
     \ Ethernet_MAC_MACHTLR (read-write) Reset:0x00000000
     : Ethernet_MAC_MACHTLR_HTL ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) Ethernet_MAC_MACHTLR ; \ Ethernet_MAC_MACHTLR_HTL, no description available
   [then]
 
-  execute-defined? use-Ethernet_MAC defined? Ethernet_MAC_MACMIIAR_MB not and [if]
+  execute-defined? use-Ethernet_MAC [if]
     \ Ethernet_MAC_MACMIIAR (read-write) Reset:0x00000000
     : Ethernet_MAC_MACMIIAR_MB ( -- x addr ) 0 bit Ethernet_MAC_MACMIIAR ; \ Ethernet_MAC_MACMIIAR_MB, no description available
     : Ethernet_MAC_MACMIIAR_MW ( -- x addr ) 1 bit Ethernet_MAC_MACMIIAR ; \ Ethernet_MAC_MACMIIAR_MW, no description available
@@ -7745,12 +7745,12 @@ begin-module memmap
     : Ethernet_MAC_MACMIIAR_PA ( %bbbbb -- x addr ) 11 lshift Ethernet_MAC_MACMIIAR ; \ Ethernet_MAC_MACMIIAR_PA, no description available
   [then]
 
-  defined? use-Ethernet_MAC defined? Ethernet_MAC_MACMIIDR_TD not and [if]
+  [if]
     \ Ethernet_MAC_MACMIIDR (read-write) Reset:0x00000000
     : Ethernet_MAC_MACMIIDR_TD ( %bbbbbbbbbbbbbbbb -- x addr ) Ethernet_MAC_MACMIIDR ; \ Ethernet_MAC_MACMIIDR_TD, no description available
   [then]
 
-  execute-defined? use-Ethernet_MAC defined? Ethernet_MAC_MACFCR_FCB not and [if]
+  execute-defined? use-Ethernet_MAC [if]
     \ Ethernet_MAC_MACFCR (read-write) Reset:0x00000000
     : Ethernet_MAC_MACFCR_FCB ( -- x addr ) 0 bit Ethernet_MAC_MACFCR ; \ Ethernet_MAC_MACFCR_FCB, no description available
     : Ethernet_MAC_MACFCR_TFCE ( -- x addr ) 1 bit Ethernet_MAC_MACFCR ; \ Ethernet_MAC_MACFCR_TFCE, no description available
@@ -7761,13 +7761,13 @@ begin-module memmap
     : Ethernet_MAC_MACFCR_PT ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift Ethernet_MAC_MACFCR ; \ Ethernet_MAC_MACFCR_PT, no description available
   [then]
 
-  defined? use-Ethernet_MAC defined? Ethernet_MAC_MACVLANTR_VLANTI not and [if]
+  [if]
     \ Ethernet_MAC_MACVLANTR (read-write) Reset:0x00000000
     : Ethernet_MAC_MACVLANTR_VLANTI ( %bbbbbbbbbbbbbbbb -- x addr ) Ethernet_MAC_MACVLANTR ; \ Ethernet_MAC_MACVLANTR_VLANTI, no description available
     : Ethernet_MAC_MACVLANTR_VLANTC ( -- x addr ) 16 bit Ethernet_MAC_MACVLANTR ; \ Ethernet_MAC_MACVLANTR_VLANTC, no description available
   [then]
 
-  execute-defined? use-Ethernet_MAC defined? Ethernet_MAC_MACPMTCSR_PD not and [if]
+  execute-defined? use-Ethernet_MAC [if]
     \ Ethernet_MAC_MACPMTCSR (read-write) Reset:0x00000000
     : Ethernet_MAC_MACPMTCSR_PD ( -- x addr ) 0 bit Ethernet_MAC_MACPMTCSR ; \ Ethernet_MAC_MACPMTCSR_PD, no description available
     : Ethernet_MAC_MACPMTCSR_MPE ( -- x addr ) 1 bit Ethernet_MAC_MACPMTCSR ; \ Ethernet_MAC_MACPMTCSR_MPE, no description available
@@ -7778,7 +7778,7 @@ begin-module memmap
     : Ethernet_MAC_MACPMTCSR_WFFRPR ( -- x addr ) 31 bit Ethernet_MAC_MACPMTCSR ; \ Ethernet_MAC_MACPMTCSR_WFFRPR, no description available
   [then]
 
-  defined? use-Ethernet_MAC defined? Ethernet_MAC_MACDBGR_CR? not and [if]
+  [if]
     \ Ethernet_MAC_MACDBGR (read-only) Reset:0x00000000
     : Ethernet_MAC_MACDBGR_CR? ( --  1|0 ) 0 bit Ethernet_MAC_MACDBGR bit@ ; \ Ethernet_MAC_MACDBGR_CR, CR
     : Ethernet_MAC_MACDBGR_CSR? ( --  1|0 ) 1 bit Ethernet_MAC_MACDBGR bit@ ; \ Ethernet_MAC_MACDBGR_CSR, CSR
@@ -7788,7 +7788,7 @@ begin-module memmap
     : Ethernet_MAC_MACDBGR_MCFHP? ( --  1|0 ) 5 bit Ethernet_MAC_MACDBGR bit@ ; \ Ethernet_MAC_MACDBGR_MCFHP, MCFHP
   [then]
 
-  execute-defined? use-Ethernet_MAC defined? Ethernet_MAC_MACSR_PMTS not and [if]
+  execute-defined? use-Ethernet_MAC [if]
     \ Ethernet_MAC_MACSR (multiple-access)  Reset:0x00000000
     : Ethernet_MAC_MACSR_PMTS ( -- x addr ) 3 bit Ethernet_MAC_MACSR ; \ Ethernet_MAC_MACSR_PMTS, no description available
     : Ethernet_MAC_MACSR_MMCS ( -- x addr ) 4 bit Ethernet_MAC_MACSR ; \ Ethernet_MAC_MACSR_MMCS, no description available
@@ -7797,24 +7797,24 @@ begin-module memmap
     : Ethernet_MAC_MACSR_TSTS ( -- x addr ) 9 bit Ethernet_MAC_MACSR ; \ Ethernet_MAC_MACSR_TSTS, no description available
   [then]
 
-  defined? use-Ethernet_MAC defined? Ethernet_MAC_MACIMR_PMTIM not and [if]
+  [if]
     \ Ethernet_MAC_MACIMR (read-write) Reset:0x00000000
     : Ethernet_MAC_MACIMR_PMTIM ( -- x addr ) 3 bit Ethernet_MAC_MACIMR ; \ Ethernet_MAC_MACIMR_PMTIM, no description available
     : Ethernet_MAC_MACIMR_TSTIM ( -- x addr ) 9 bit Ethernet_MAC_MACIMR ; \ Ethernet_MAC_MACIMR_TSTIM, no description available
   [then]
 
-  execute-defined? use-Ethernet_MAC defined? Ethernet_MAC_MACA0HR_MACA0H not and [if]
+  execute-defined? use-Ethernet_MAC [if]
     \ Ethernet_MAC_MACA0HR (multiple-access)  Reset:0x0010FFFF
     : Ethernet_MAC_MACA0HR_MACA0H ( %bbbbbbbbbbbbbbbb -- x addr ) Ethernet_MAC_MACA0HR ; \ Ethernet_MAC_MACA0HR_MACA0H, MAC address0 high
     : Ethernet_MAC_MACA0HR_MO ( -- x addr ) 31 bit Ethernet_MAC_MACA0HR ; \ Ethernet_MAC_MACA0HR_MO, Always 1
   [then]
 
-  defined? use-Ethernet_MAC defined? Ethernet_MAC_MACA0LR_MACA0L not and [if]
+  [if]
     \ Ethernet_MAC_MACA0LR (read-write) Reset:0xFFFFFFFF
     : Ethernet_MAC_MACA0LR_MACA0L ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) Ethernet_MAC_MACA0LR ; \ Ethernet_MAC_MACA0LR_MACA0L, 0
   [then]
 
-  execute-defined? use-Ethernet_MAC defined? Ethernet_MAC_MACA1HR_MACA1H not and [if]
+  execute-defined? use-Ethernet_MAC [if]
     \ Ethernet_MAC_MACA1HR (read-write) Reset:0x0000FFFF
     : Ethernet_MAC_MACA1HR_MACA1H ( %bbbbbbbbbbbbbbbb -- x addr ) Ethernet_MAC_MACA1HR ; \ Ethernet_MAC_MACA1HR_MACA1H, no description available
     : Ethernet_MAC_MACA1HR_MBC ( %bbbbbb -- x addr ) 24 lshift Ethernet_MAC_MACA1HR ; \ Ethernet_MAC_MACA1HR_MBC, no description available
@@ -7822,12 +7822,12 @@ begin-module memmap
     : Ethernet_MAC_MACA1HR_AE ( -- x addr ) 31 bit Ethernet_MAC_MACA1HR ; \ Ethernet_MAC_MACA1HR_AE, no description available
   [then]
 
-  defined? use-Ethernet_MAC defined? Ethernet_MAC_MACA1LR_MACA1LR not and [if]
+  [if]
     \ Ethernet_MAC_MACA1LR (read-write) Reset:0xFFFFFFFF
     : Ethernet_MAC_MACA1LR_MACA1LR ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) Ethernet_MAC_MACA1LR ; \ Ethernet_MAC_MACA1LR_MACA1LR, no description available
   [then]
 
-  execute-defined? use-Ethernet_MAC defined? Ethernet_MAC_MACA2HR_MAC2AH not and [if]
+  execute-defined? use-Ethernet_MAC [if]
     \ Ethernet_MAC_MACA2HR (read-write) Reset:0x0000FFFF
     : Ethernet_MAC_MACA2HR_MAC2AH ( %bbbbbbbbbbbbbbbb -- x addr ) Ethernet_MAC_MACA2HR ; \ Ethernet_MAC_MACA2HR_MAC2AH, no description available
     : Ethernet_MAC_MACA2HR_MBC ( %bbbbbb -- x addr ) 24 lshift Ethernet_MAC_MACA2HR ; \ Ethernet_MAC_MACA2HR_MBC, no description available
@@ -7835,12 +7835,12 @@ begin-module memmap
     : Ethernet_MAC_MACA2HR_AE ( -- x addr ) 31 bit Ethernet_MAC_MACA2HR ; \ Ethernet_MAC_MACA2HR_AE, no description available
   [then]
 
-  defined? use-Ethernet_MAC defined? Ethernet_MAC_MACA2LR_MACA2L not and [if]
+  [if]
     \ Ethernet_MAC_MACA2LR (read-write) Reset:0xFFFFFFFF
     : Ethernet_MAC_MACA2LR_MACA2L x addr ) Ethernet_MAC_MACA2LR ; \ Ethernet_MAC_MACA2LR_MACA2L, no description available
   [then]
 
-  execute-defined? use-Ethernet_MAC defined? Ethernet_MAC_MACA3HR_MACA3H not and [if]
+  execute-defined? use-Ethernet_MAC [if]
     \ Ethernet_MAC_MACA3HR (read-write) Reset:0x0000FFFF
     : Ethernet_MAC_MACA3HR_MACA3H ( %bbbbbbbbbbbbbbbb -- x addr ) Ethernet_MAC_MACA3HR ; \ Ethernet_MAC_MACA3HR_MACA3H, no description available
     : Ethernet_MAC_MACA3HR_MBC ( %bbbbbb -- x addr ) 24 lshift Ethernet_MAC_MACA3HR ; \ Ethernet_MAC_MACA3HR_MBC, no description available
@@ -7848,12 +7848,12 @@ begin-module memmap
     : Ethernet_MAC_MACA3HR_AE ( -- x addr ) 31 bit Ethernet_MAC_MACA3HR ; \ Ethernet_MAC_MACA3HR_AE, no description available
   [then]
 
-  defined? use-Ethernet_MAC defined? Ethernet_MAC_MACA3LR_MBCA3L not and [if]
+  [if]
     \ Ethernet_MAC_MACA3LR (read-write) Reset:0xFFFFFFFF
     : Ethernet_MAC_MACA3LR_MBCA3L ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) Ethernet_MAC_MACA3LR ; \ Ethernet_MAC_MACA3LR_MBCA3L, no description available
   [then]
 
-  execute-defined? use-Ethernet_MMC defined? Ethernet_MMC_MMCCR_CR not and [if]
+  execute-defined? use-Ethernet_MMC [if]
     \ Ethernet_MMC_MMCCR (read-write) Reset:0x00000000
     : Ethernet_MMC_MMCCR_CR ( -- x addr ) 0 bit Ethernet_MMC_MMCCR ; \ Ethernet_MMC_MMCCR_CR, no description available
     : Ethernet_MMC_MMCCR_CSR ( -- x addr ) 1 bit Ethernet_MMC_MMCCR ; \ Ethernet_MMC_MMCCR_CSR, no description available
@@ -7863,65 +7863,65 @@ begin-module memmap
     : Ethernet_MMC_MMCCR_MCFHP ( -- x addr ) 5 bit Ethernet_MMC_MMCCR ; \ Ethernet_MMC_MMCCR_MCFHP, no description available
   [then]
 
-  defined? use-Ethernet_MMC defined? Ethernet_MMC_MMCRIR_RFCES not and [if]
+  [if]
     \ Ethernet_MMC_MMCRIR (read-write) Reset:0x00000000
     : Ethernet_MMC_MMCRIR_RFCES ( -- x addr ) 5 bit Ethernet_MMC_MMCRIR ; \ Ethernet_MMC_MMCRIR_RFCES, no description available
     : Ethernet_MMC_MMCRIR_RFAES ( -- x addr ) 6 bit Ethernet_MMC_MMCRIR ; \ Ethernet_MMC_MMCRIR_RFAES, no description available
     : Ethernet_MMC_MMCRIR_RGUFS ( -- x addr ) 17 bit Ethernet_MMC_MMCRIR ; \ Ethernet_MMC_MMCRIR_RGUFS, no description available
   [then]
 
-  execute-defined? use-Ethernet_MMC defined? Ethernet_MMC_MMCTIR_TGFSCS? not and [if]
+  execute-defined? use-Ethernet_MMC [if]
     \ Ethernet_MMC_MMCTIR (read-only) Reset:0x00000000
     : Ethernet_MMC_MMCTIR_TGFSCS? ( --  1|0 ) 14 bit Ethernet_MMC_MMCTIR bit@ ; \ Ethernet_MMC_MMCTIR_TGFSCS, no description available
     : Ethernet_MMC_MMCTIR_TGFMSCS? ( --  1|0 ) 15 bit Ethernet_MMC_MMCTIR bit@ ; \ Ethernet_MMC_MMCTIR_TGFMSCS, no description available
     : Ethernet_MMC_MMCTIR_TGFS? ( --  1|0 ) 21 bit Ethernet_MMC_MMCTIR bit@ ; \ Ethernet_MMC_MMCTIR_TGFS, no description available
   [then]
 
-  defined? use-Ethernet_MMC defined? Ethernet_MMC_MMCRIMR_RFCEM not and [if]
+  [if]
     \ Ethernet_MMC_MMCRIMR (read-write) Reset:0x00000000
     : Ethernet_MMC_MMCRIMR_RFCEM ( -- x addr ) 5 bit Ethernet_MMC_MMCRIMR ; \ Ethernet_MMC_MMCRIMR_RFCEM, no description available
     : Ethernet_MMC_MMCRIMR_RFAEM ( -- x addr ) 6 bit Ethernet_MMC_MMCRIMR ; \ Ethernet_MMC_MMCRIMR_RFAEM, no description available
     : Ethernet_MMC_MMCRIMR_RGUFM ( -- x addr ) 17 bit Ethernet_MMC_MMCRIMR ; \ Ethernet_MMC_MMCRIMR_RGUFM, no description available
   [then]
 
-  execute-defined? use-Ethernet_MMC defined? Ethernet_MMC_MMCTIMR_TGFSCM not and [if]
+  execute-defined? use-Ethernet_MMC [if]
     \ Ethernet_MMC_MMCTIMR (read-write) Reset:0x00000000
     : Ethernet_MMC_MMCTIMR_TGFSCM ( -- x addr ) 14 bit Ethernet_MMC_MMCTIMR ; \ Ethernet_MMC_MMCTIMR_TGFSCM, no description available
     : Ethernet_MMC_MMCTIMR_TGFMSCM ( -- x addr ) 15 bit Ethernet_MMC_MMCTIMR ; \ Ethernet_MMC_MMCTIMR_TGFMSCM, no description available
     : Ethernet_MMC_MMCTIMR_TGFM ( -- x addr ) 16 bit Ethernet_MMC_MMCTIMR ; \ Ethernet_MMC_MMCTIMR_TGFM, no description available
   [then]
 
-  defined? use-Ethernet_MMC defined? Ethernet_MMC_MMCTGFSCCR_TGFSCC? not and [if]
+  [if]
     \ Ethernet_MMC_MMCTGFSCCR (read-only) Reset:0x00000000
     : Ethernet_MMC_MMCTGFSCCR_TGFSCC? ( --  x ) Ethernet_MMC_MMCTGFSCCR @ ; \ Ethernet_MMC_MMCTGFSCCR_TGFSCC, no description available
   [then]
 
-  execute-defined? use-Ethernet_MMC defined? Ethernet_MMC_MMCTGFMSCCR_TGFMSCC? not and [if]
+  execute-defined? use-Ethernet_MMC [if]
     \ Ethernet_MMC_MMCTGFMSCCR (read-only) Reset:0x00000000
     : Ethernet_MMC_MMCTGFMSCCR_TGFMSCC? ( --  x ) Ethernet_MMC_MMCTGFMSCCR @ ; \ Ethernet_MMC_MMCTGFMSCCR_TGFMSCC, no description available
   [then]
 
-  defined? use-Ethernet_MMC defined? Ethernet_MMC_MMCTGFCR_TGFC? not and [if]
+  [if]
     \ Ethernet_MMC_MMCTGFCR (read-only) Reset:0x00000000
     : Ethernet_MMC_MMCTGFCR_TGFC? ( --  x ) Ethernet_MMC_MMCTGFCR @ ; \ Ethernet_MMC_MMCTGFCR_TGFC, HTL
   [then]
 
-  execute-defined? use-Ethernet_MMC defined? Ethernet_MMC_MMCRFCECR_RFCFC? not and [if]
+  execute-defined? use-Ethernet_MMC [if]
     \ Ethernet_MMC_MMCRFCECR (read-only) Reset:0x00000000
     : Ethernet_MMC_MMCRFCECR_RFCFC? ( --  x ) Ethernet_MMC_MMCRFCECR @ ; \ Ethernet_MMC_MMCRFCECR_RFCFC, no description available
   [then]
 
-  defined? use-Ethernet_MMC defined? Ethernet_MMC_MMCRFAECR_RFAEC? not and [if]
+  [if]
     \ Ethernet_MMC_MMCRFAECR (read-only) Reset:0x00000000
     : Ethernet_MMC_MMCRFAECR_RFAEC? ( --  x ) Ethernet_MMC_MMCRFAECR @ ; \ Ethernet_MMC_MMCRFAECR_RFAEC, no description available
   [then]
 
-  execute-defined? use-Ethernet_MMC defined? Ethernet_MMC_MMCRGUFCR_RGUFC? not and [if]
+  execute-defined? use-Ethernet_MMC [if]
     \ Ethernet_MMC_MMCRGUFCR (read-only) Reset:0x00000000
     : Ethernet_MMC_MMCRGUFCR_RGUFC? ( --  x ) Ethernet_MMC_MMCRGUFCR @ ; \ Ethernet_MMC_MMCRGUFCR_RGUFC, no description available
   [then]
 
-  defined? use-Ethernet_PTP defined? Ethernet_PTP_PTPTSCR_TSE not and [if]
+  [if]
     \ Ethernet_PTP_PTPTSCR (read-write) Reset:0x00002000
     : Ethernet_PTP_PTPTSCR_TSE ( -- x addr ) 0 bit Ethernet_PTP_PTPTSCR ; \ Ethernet_PTP_PTPTSCR_TSE, no description available
     : Ethernet_PTP_PTPTSCR_TSFCU ( -- x addr ) 1 bit Ethernet_PTP_PTPTSCR ; \ Ethernet_PTP_PTPTSCR_TSFCU, no description available
@@ -7941,61 +7941,61 @@ begin-module memmap
     : Ethernet_PTP_PTPTSCR_TSSSR ( -- x addr ) 9 bit Ethernet_PTP_PTPTSCR ; \ Ethernet_PTP_PTPTSCR_TSSSR, no description available
   [then]
 
-  execute-defined? use-Ethernet_PTP defined? Ethernet_PTP_PTPSSIR_STSSI not and [if]
+  execute-defined? use-Ethernet_PTP [if]
     \ Ethernet_PTP_PTPSSIR (read-write) Reset:0x00000000
     : Ethernet_PTP_PTPSSIR_STSSI ( %bbbbbbbb -- x addr ) Ethernet_PTP_PTPSSIR ; \ Ethernet_PTP_PTPSSIR_STSSI, no description available
   [then]
 
-  defined? use-Ethernet_PTP defined? Ethernet_PTP_PTPTSHR_STS? not and [if]
+  [if]
     \ Ethernet_PTP_PTPTSHR (read-only) Reset:0x00000000
     : Ethernet_PTP_PTPTSHR_STS? ( --  x ) Ethernet_PTP_PTPTSHR @ ; \ Ethernet_PTP_PTPTSHR_STS, no description available
   [then]
 
-  execute-defined? use-Ethernet_PTP defined? Ethernet_PTP_PTPTSLR_STSS? not and [if]
+  execute-defined? use-Ethernet_PTP [if]
     \ Ethernet_PTP_PTPTSLR (read-only) Reset:0x00000000
     : Ethernet_PTP_PTPTSLR_STSS? ( --  x ) Ethernet_PTP_PTPTSLR @ ; \ Ethernet_PTP_PTPTSLR_STSS, no description available
     : Ethernet_PTP_PTPTSLR_STPNS? ( --  1|0 ) 31 bit Ethernet_PTP_PTPTSLR bit@ ; \ Ethernet_PTP_PTPTSLR_STPNS, no description available
   [then]
 
-  defined? use-Ethernet_PTP defined? Ethernet_PTP_PTPTSHUR_TSUS not and [if]
+  [if]
     \ Ethernet_PTP_PTPTSHUR (read-write) Reset:0x00000000
     : Ethernet_PTP_PTPTSHUR_TSUS ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) Ethernet_PTP_PTPTSHUR ; \ Ethernet_PTP_PTPTSHUR_TSUS, no description available
   [then]
 
-  execute-defined? use-Ethernet_PTP defined? Ethernet_PTP_PTPTSLUR_TSUSS not and [if]
+  execute-defined? use-Ethernet_PTP [if]
     \ Ethernet_PTP_PTPTSLUR (read-write) Reset:0x00000000
     : Ethernet_PTP_PTPTSLUR_TSUSS x addr ) Ethernet_PTP_PTPTSLUR ; \ Ethernet_PTP_PTPTSLUR_TSUSS, no description available
     : Ethernet_PTP_PTPTSLUR_TSUPNS ( -- x addr ) 31 bit Ethernet_PTP_PTPTSLUR ; \ Ethernet_PTP_PTPTSLUR_TSUPNS, no description available
   [then]
 
-  defined? use-Ethernet_PTP defined? Ethernet_PTP_PTPTSAR_TSA not and [if]
+  [if]
     \ Ethernet_PTP_PTPTSAR (read-write) Reset:0x00000000
     : Ethernet_PTP_PTPTSAR_TSA ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) Ethernet_PTP_PTPTSAR ; \ Ethernet_PTP_PTPTSAR_TSA, no description available
   [then]
 
-  execute-defined? use-Ethernet_PTP defined? Ethernet_PTP_PTPTTHR_TTSH not and [if]
+  execute-defined? use-Ethernet_PTP [if]
     \ Ethernet_PTP_PTPTTHR (read-write) Reset:0x00000000
     : Ethernet_PTP_PTPTTHR_TTSH ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) Ethernet_PTP_PTPTTHR ; \ Ethernet_PTP_PTPTTHR_TTSH, 0
   [then]
 
-  defined? use-Ethernet_PTP defined? Ethernet_PTP_PTPTTLR_TTSL not and [if]
+  [if]
     \ Ethernet_PTP_PTPTTLR (read-write) Reset:0x00000000
     : Ethernet_PTP_PTPTTLR_TTSL ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) Ethernet_PTP_PTPTTLR ; \ Ethernet_PTP_PTPTTLR_TTSL, no description available
   [then]
 
-  execute-defined? use-Ethernet_PTP defined? Ethernet_PTP_PTPTSSR_TSSO? not and [if]
+  execute-defined? use-Ethernet_PTP [if]
     \ Ethernet_PTP_PTPTSSR (read-only) Reset:0x00000000
     : Ethernet_PTP_PTPTSSR_TSSO? ( --  1|0 ) 0 bit Ethernet_PTP_PTPTSSR bit@ ; \ Ethernet_PTP_PTPTSSR_TSSO, no description available
     : Ethernet_PTP_PTPTSSR_TSTTR? ( --  1|0 ) 1 bit Ethernet_PTP_PTPTSSR bit@ ; \ Ethernet_PTP_PTPTSSR_TSTTR, no description available
   [then]
 
-  defined? use-Ethernet_PTP defined? Ethernet_PTP_PTPPPSCR_TSSO? not and [if]
+  [if]
     \ Ethernet_PTP_PTPPPSCR (read-only) Reset:0x00000000
     : Ethernet_PTP_PTPPPSCR_TSSO? ( --  1|0 ) 0 bit Ethernet_PTP_PTPPPSCR bit@ ; \ Ethernet_PTP_PTPPPSCR_TSSO, TSSO
     : Ethernet_PTP_PTPPPSCR_TSTTR? ( --  1|0 ) 1 bit Ethernet_PTP_PTPPPSCR bit@ ; \ Ethernet_PTP_PTPPPSCR_TSTTR, TSTTR
   [then]
 
-  execute-defined? use-Ethernet_DMA defined? Ethernet_DMA_DMABMR_SR not and [if]
+  execute-defined? use-Ethernet_DMA [if]
     \ Ethernet_DMA_DMABMR (read-write) Reset:0x00002101
     : Ethernet_DMA_DMABMR_SR ( -- x addr ) 0 bit Ethernet_DMA_DMABMR ; \ Ethernet_DMA_DMABMR_SR, no description available
     : Ethernet_DMA_DMABMR_DA ( -- x addr ) 1 bit Ethernet_DMA_DMABMR ; \ Ethernet_DMA_DMABMR_DA, no description available
@@ -8011,27 +8011,27 @@ begin-module memmap
     : Ethernet_DMA_DMABMR_MB ( -- x addr ) 26 bit Ethernet_DMA_DMABMR ; \ Ethernet_DMA_DMABMR_MB, no description available
   [then]
 
-  defined? use-Ethernet_DMA defined? Ethernet_DMA_DMATPDR_TPD not and [if]
+  [if]
     \ Ethernet_DMA_DMATPDR (read-write) Reset:0x00000000
     : Ethernet_DMA_DMATPDR_TPD ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) Ethernet_DMA_DMATPDR ; \ Ethernet_DMA_DMATPDR_TPD, no description available
   [then]
 
-  execute-defined? use-Ethernet_DMA defined? Ethernet_DMA_DMARPDR_RPD not and [if]
+  execute-defined? use-Ethernet_DMA [if]
     \ Ethernet_DMA_DMARPDR (read-write) Reset:0x00000000
     : Ethernet_DMA_DMARPDR_RPD ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) Ethernet_DMA_DMARPDR ; \ Ethernet_DMA_DMARPDR_RPD, RPD
   [then]
 
-  defined? use-Ethernet_DMA defined? Ethernet_DMA_DMARDLAR_SRL not and [if]
+  [if]
     \ Ethernet_DMA_DMARDLAR (read-write) Reset:0x00000000
     : Ethernet_DMA_DMARDLAR_SRL ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) Ethernet_DMA_DMARDLAR ; \ Ethernet_DMA_DMARDLAR_SRL, no description available
   [then]
 
-  execute-defined? use-Ethernet_DMA defined? Ethernet_DMA_DMATDLAR_STL not and [if]
+  execute-defined? use-Ethernet_DMA [if]
     \ Ethernet_DMA_DMATDLAR (read-write) Reset:0x00000000
     : Ethernet_DMA_DMATDLAR_STL ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) Ethernet_DMA_DMATDLAR ; \ Ethernet_DMA_DMATDLAR_STL, no description available
   [then]
 
-  defined? use-Ethernet_DMA defined? Ethernet_DMA_DMASR_TS not and [if]
+  [if]
     \ Ethernet_DMA_DMASR (multiple-access)  Reset:0x00000000
     : Ethernet_DMA_DMASR_TS ( -- x addr ) 0 bit Ethernet_DMA_DMASR ; \ Ethernet_DMA_DMASR_TS, no description available
     : Ethernet_DMA_DMASR_TPSS ( -- x addr ) 1 bit Ethernet_DMA_DMASR ; \ Ethernet_DMA_DMASR_TPSS, no description available
@@ -8056,7 +8056,7 @@ begin-module memmap
     : Ethernet_DMA_DMASR_TSTS ( -- x addr ) 29 bit Ethernet_DMA_DMASR ; \ Ethernet_DMA_DMASR_TSTS, no description available
   [then]
 
-  execute-defined? use-Ethernet_DMA defined? Ethernet_DMA_DMAOMR_SR not and [if]
+  execute-defined? use-Ethernet_DMA [if]
     \ Ethernet_DMA_DMAOMR (read-write) Reset:0x00000000
     : Ethernet_DMA_DMAOMR_SR ( -- x addr ) 1 bit Ethernet_DMA_DMAOMR ; \ Ethernet_DMA_DMAOMR_SR, SR
     : Ethernet_DMA_DMAOMR_OSF ( -- x addr ) 2 bit Ethernet_DMA_DMAOMR ; \ Ethernet_DMA_DMAOMR_OSF, OSF
@@ -8072,7 +8072,7 @@ begin-module memmap
     : Ethernet_DMA_DMAOMR_DTCEFD ( -- x addr ) 26 bit Ethernet_DMA_DMAOMR ; \ Ethernet_DMA_DMAOMR_DTCEFD, DTCEFD
   [then]
 
-  defined? use-Ethernet_DMA defined? Ethernet_DMA_DMAIER_TIE not and [if]
+  [if]
     \ Ethernet_DMA_DMAIER (read-write) Reset:0x00000000
     : Ethernet_DMA_DMAIER_TIE ( -- x addr ) 0 bit Ethernet_DMA_DMAIER ; \ Ethernet_DMA_DMAIER_TIE, no description available
     : Ethernet_DMA_DMAIER_TPSIE ( -- x addr ) 1 bit Ethernet_DMA_DMAIER ; \ Ethernet_DMA_DMAIER_TPSIE, no description available
@@ -8091,7 +8091,7 @@ begin-module memmap
     : Ethernet_DMA_DMAIER_NISE ( -- x addr ) 16 bit Ethernet_DMA_DMAIER ; \ Ethernet_DMA_DMAIER_NISE, no description available
   [then]
 
-  execute-defined? use-Ethernet_DMA defined? Ethernet_DMA_DMAMFBOCR_MFC not and [if]
+  execute-defined? use-Ethernet_DMA [if]
     \ Ethernet_DMA_DMAMFBOCR (read-write) Reset:0x00000000
     : Ethernet_DMA_DMAMFBOCR_MFC ( %bbbbbbbbbbbbbbbb -- x addr ) Ethernet_DMA_DMAMFBOCR ; \ Ethernet_DMA_DMAMFBOCR_MFC, no description available
     : Ethernet_DMA_DMAMFBOCR_OMFC ( -- x addr ) 16 bit Ethernet_DMA_DMAMFBOCR ; \ Ethernet_DMA_DMAMFBOCR_OMFC, no description available
@@ -8099,47 +8099,47 @@ begin-module memmap
     : Ethernet_DMA_DMAMFBOCR_OFOC ( -- x addr ) 28 bit Ethernet_DMA_DMAMFBOCR ; \ Ethernet_DMA_DMAMFBOCR_OFOC, no description available
   [then]
 
-  defined? use-Ethernet_DMA defined? Ethernet_DMA_DMARSWTR_RSWTC not and [if]
+  [if]
     \ Ethernet_DMA_DMARSWTR (read-write) Reset:0x00000000
     : Ethernet_DMA_DMARSWTR_RSWTC ( %bbbbbbbb -- x addr ) Ethernet_DMA_DMARSWTR ; \ Ethernet_DMA_DMARSWTR_RSWTC, RSWTC
   [then]
 
-  execute-defined? use-Ethernet_DMA defined? Ethernet_DMA_DMACHTDR_HTDAP? not and [if]
+  execute-defined? use-Ethernet_DMA [if]
     \ Ethernet_DMA_DMACHTDR (read-only) Reset:0x00000000
     : Ethernet_DMA_DMACHTDR_HTDAP? ( --  x ) Ethernet_DMA_DMACHTDR @ ; \ Ethernet_DMA_DMACHTDR_HTDAP, HTDAP
   [then]
 
-  defined? use-Ethernet_DMA defined? Ethernet_DMA_DMACHRDR_HRDAP? not and [if]
+  [if]
     \ Ethernet_DMA_DMACHRDR (read-only) Reset:0x00000000
     : Ethernet_DMA_DMACHRDR_HRDAP? ( --  x ) Ethernet_DMA_DMACHRDR @ ; \ Ethernet_DMA_DMACHRDR_HRDAP, HRDAP
   [then]
 
-  execute-defined? use-Ethernet_DMA defined? Ethernet_DMA_DMACHTBAR_HTBAP? not and [if]
+  execute-defined? use-Ethernet_DMA [if]
     \ Ethernet_DMA_DMACHTBAR (read-only) Reset:0x00000000
     : Ethernet_DMA_DMACHTBAR_HTBAP? ( --  x ) Ethernet_DMA_DMACHTBAR @ ; \ Ethernet_DMA_DMACHTBAR_HTBAP, no description available
   [then]
 
-  defined? use-Ethernet_DMA defined? Ethernet_DMA_DMACHRBAR_HRBAP? not and [if]
+  [if]
     \ Ethernet_DMA_DMACHRBAR (read-only) Reset:0x00000000
     : Ethernet_DMA_DMACHRBAR_HRBAP? ( --  x ) Ethernet_DMA_DMACHRBAR @ ; \ Ethernet_DMA_DMACHRBAR_HRBAP, no description available
   [then]
 
-  execute-defined? use-CRC defined? CRC_DR_DR not and [if]
+  execute-defined? use-CRC [if]
     \ CRC_DR (read-write) Reset:0xFFFFFFFF
     : CRC_DR_DR ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) CRC_DR ; \ CRC_DR_DR, Data Register
   [then]
 
-  defined? use-CRC defined? CRC_IDR_IDR not and [if]
+  [if]
     \ CRC_IDR (read-write) Reset:0x00000000
     : CRC_IDR_IDR ( %bbbbbbbb -- x addr ) CRC_IDR ; \ CRC_IDR_IDR, Independent Data register
   [then]
 
-  execute-defined? use-CRC defined? CRC_CR_CR not and [if]
+  execute-defined? use-CRC [if]
     \ CRC_CR (write-only) Reset:0x00000000
     : CRC_CR_CR ( -- x addr ) 0 bit CRC_CR ; \ CRC_CR_CR, Control regidter
   [then]
 
-  defined? use-OTG_FS_GLOBAL defined? OTG_FS_GLOBAL_FS_GOTGCTL_SRQSCS not and [if]
+  [if]
     \ OTG_FS_GLOBAL_FS_GOTGCTL (multiple-access)  Reset:0x00000800
     : OTG_FS_GLOBAL_FS_GOTGCTL_SRQSCS ( -- x addr ) 0 bit OTG_FS_GLOBAL_FS_GOTGCTL ; \ OTG_FS_GLOBAL_FS_GOTGCTL_SRQSCS, Session request success
     : OTG_FS_GLOBAL_FS_GOTGCTL_SRQ ( -- x addr ) 1 bit OTG_FS_GLOBAL_FS_GOTGCTL ; \ OTG_FS_GLOBAL_FS_GOTGCTL_SRQ, Session request
@@ -8153,7 +8153,7 @@ begin-module memmap
     : OTG_FS_GLOBAL_FS_GOTGCTL_BSVLD ( -- x addr ) 19 bit OTG_FS_GLOBAL_FS_GOTGCTL ; \ OTG_FS_GLOBAL_FS_GOTGCTL_BSVLD, B-session valid
   [then]
 
-  execute-defined? use-OTG_FS_GLOBAL defined? OTG_FS_GLOBAL_FS_GOTGINT_SEDET not and [if]
+  execute-defined? use-OTG_FS_GLOBAL [if]
     \ OTG_FS_GLOBAL_FS_GOTGINT (read-write) Reset:0x00000000
     : OTG_FS_GLOBAL_FS_GOTGINT_SEDET ( -- x addr ) 2 bit OTG_FS_GLOBAL_FS_GOTGINT ; \ OTG_FS_GLOBAL_FS_GOTGINT_SEDET, Session end detected
     : OTG_FS_GLOBAL_FS_GOTGINT_SRSSCHG ( -- x addr ) 8 bit OTG_FS_GLOBAL_FS_GOTGINT ; \ OTG_FS_GLOBAL_FS_GOTGINT_SRSSCHG, Session request success status  change
@@ -8163,14 +8163,14 @@ begin-module memmap
     : OTG_FS_GLOBAL_FS_GOTGINT_DBCDNE ( -- x addr ) 19 bit OTG_FS_GLOBAL_FS_GOTGINT ; \ OTG_FS_GLOBAL_FS_GOTGINT_DBCDNE, Debounce done
   [then]
 
-  defined? use-OTG_FS_GLOBAL defined? OTG_FS_GLOBAL_FS_GAHBCFG_GINT not and [if]
+  [if]
     \ OTG_FS_GLOBAL_FS_GAHBCFG (read-write) Reset:0x00000000
     : OTG_FS_GLOBAL_FS_GAHBCFG_GINT ( -- x addr ) 0 bit OTG_FS_GLOBAL_FS_GAHBCFG ; \ OTG_FS_GLOBAL_FS_GAHBCFG_GINT, Global interrupt mask
     : OTG_FS_GLOBAL_FS_GAHBCFG_TXFELVL ( -- x addr ) 7 bit OTG_FS_GLOBAL_FS_GAHBCFG ; \ OTG_FS_GLOBAL_FS_GAHBCFG_TXFELVL, TxFIFO empty level
     : OTG_FS_GLOBAL_FS_GAHBCFG_PTXFELVL ( -- x addr ) 8 bit OTG_FS_GLOBAL_FS_GAHBCFG ; \ OTG_FS_GLOBAL_FS_GAHBCFG_PTXFELVL, Periodic TxFIFO empty  level
   [then]
 
-  execute-defined? use-OTG_FS_GLOBAL defined? OTG_FS_GLOBAL_FS_GUSBCFG_TOCAL not and [if]
+  execute-defined? use-OTG_FS_GLOBAL [if]
     \ OTG_FS_GLOBAL_FS_GUSBCFG (multiple-access)  Reset:0x00000A00
     : OTG_FS_GLOBAL_FS_GUSBCFG_TOCAL ( %bbb -- x addr ) OTG_FS_GLOBAL_FS_GUSBCFG ; \ OTG_FS_GLOBAL_FS_GUSBCFG_TOCAL, FS timeout calibration
     : OTG_FS_GLOBAL_FS_GUSBCFG_PHYSEL ( -- x addr ) 6 bit OTG_FS_GLOBAL_FS_GUSBCFG ; \ OTG_FS_GLOBAL_FS_GUSBCFG_PHYSEL, Full Speed serial transceiver  select
@@ -8182,7 +8182,7 @@ begin-module memmap
     : OTG_FS_GLOBAL_FS_GUSBCFG_CTXPKT ( -- x addr ) 31 bit OTG_FS_GLOBAL_FS_GUSBCFG ; \ OTG_FS_GLOBAL_FS_GUSBCFG_CTXPKT, Corrupt Tx packet
   [then]
 
-  defined? use-OTG_FS_GLOBAL defined? OTG_FS_GLOBAL_FS_GRSTCTL_CSRST not and [if]
+  [if]
     \ OTG_FS_GLOBAL_FS_GRSTCTL (multiple-access)  Reset:0x20000000
     : OTG_FS_GLOBAL_FS_GRSTCTL_CSRST ( -- x addr ) 0 bit OTG_FS_GLOBAL_FS_GRSTCTL ; \ OTG_FS_GLOBAL_FS_GRSTCTL_CSRST, Core soft reset
     : OTG_FS_GLOBAL_FS_GRSTCTL_HSRST ( -- x addr ) 1 bit OTG_FS_GLOBAL_FS_GRSTCTL ; \ OTG_FS_GLOBAL_FS_GRSTCTL_HSRST, HCLK soft reset
@@ -8193,7 +8193,7 @@ begin-module memmap
     : OTG_FS_GLOBAL_FS_GRSTCTL_AHBIDL ( -- x addr ) 31 bit OTG_FS_GLOBAL_FS_GRSTCTL ; \ OTG_FS_GLOBAL_FS_GRSTCTL_AHBIDL, AHB master idle
   [then]
 
-  execute-defined? use-OTG_FS_GLOBAL defined? OTG_FS_GLOBAL_FS_GINTSTS_CMOD not and [if]
+  execute-defined? use-OTG_FS_GLOBAL [if]
     \ OTG_FS_GLOBAL_FS_GINTSTS (multiple-access)  Reset:0x04000020
     : OTG_FS_GLOBAL_FS_GINTSTS_CMOD ( -- x addr ) 0 bit OTG_FS_GLOBAL_FS_GINTSTS ; \ OTG_FS_GLOBAL_FS_GINTSTS_CMOD, Current mode of operation
     : OTG_FS_GLOBAL_FS_GINTSTS_MMIS ( -- x addr ) 1 bit OTG_FS_GLOBAL_FS_GINTSTS ; \ OTG_FS_GLOBAL_FS_GINTSTS_MMIS, Mode mismatch interrupt
@@ -8222,7 +8222,7 @@ begin-module memmap
     : OTG_FS_GLOBAL_FS_GINTSTS_WKUPINT ( -- x addr ) 31 bit OTG_FS_GLOBAL_FS_GINTSTS ; \ OTG_FS_GLOBAL_FS_GINTSTS_WKUPINT, Resume/remote wakeup detected  interrupt
   [then]
 
-  defined? use-OTG_FS_GLOBAL defined? OTG_FS_GLOBAL_FS_GINTMSK_MMISM not and [if]
+  [if]
     \ OTG_FS_GLOBAL_FS_GINTMSK (multiple-access)  Reset:0x00000000
     : OTG_FS_GLOBAL_FS_GINTMSK_MMISM ( -- x addr ) 1 bit OTG_FS_GLOBAL_FS_GINTMSK ; \ OTG_FS_GLOBAL_FS_GINTMSK_MMISM, Mode mismatch interrupt  mask
     : OTG_FS_GLOBAL_FS_GINTMSK_OTGINT ( -- x addr ) 2 bit OTG_FS_GLOBAL_FS_GINTMSK ; \ OTG_FS_GLOBAL_FS_GINTMSK_OTGINT, OTG interrupt mask
@@ -8251,7 +8251,7 @@ begin-module memmap
     : OTG_FS_GLOBAL_FS_GINTMSK_WUIM ( -- x addr ) 31 bit OTG_FS_GLOBAL_FS_GINTMSK ; \ OTG_FS_GLOBAL_FS_GINTMSK_WUIM, Resume/remote wakeup detected interrupt  mask
   [then]
 
-  execute-defined? use-OTG_FS_GLOBAL defined? OTG_FS_GLOBAL_FS_GRXSTSR_Device_EPNUM? not and [if]
+  execute-defined? use-OTG_FS_GLOBAL [if]
     \ OTG_FS_GLOBAL_FS_GRXSTSR_Device (read-only) Reset:0x00000000
     : OTG_FS_GLOBAL_FS_GRXSTSR_Device_EPNUM? ( --  x ) OTG_FS_GLOBAL_FS_GRXSTSR_Device @ ; \ OTG_FS_GLOBAL_FS_GRXSTSR_Device_EPNUM, Endpoint number
     : OTG_FS_GLOBAL_FS_GRXSTSR_Device_BCNT? ( --  x ) 4 lshift OTG_FS_GLOBAL_FS_GRXSTSR_Device @ ; \ OTG_FS_GLOBAL_FS_GRXSTSR_Device_BCNT, Byte count
@@ -8260,7 +8260,7 @@ begin-module memmap
     : OTG_FS_GLOBAL_FS_GRXSTSR_Device_FRMNUM? ( --  x ) 21 lshift OTG_FS_GLOBAL_FS_GRXSTSR_Device @ ; \ OTG_FS_GLOBAL_FS_GRXSTSR_Device_FRMNUM, Frame number
   [then]
 
-  defined? use-OTG_FS_GLOBAL defined? OTG_FS_GLOBAL_FS_GRXSTSR_Host_EPNUM? not and [if]
+  [if]
     \ OTG_FS_GLOBAL_FS_GRXSTSR_Host (read-only) Reset:0x00000000
     : OTG_FS_GLOBAL_FS_GRXSTSR_Host_EPNUM? ( --  x ) OTG_FS_GLOBAL_FS_GRXSTSR_Host @ ; \ OTG_FS_GLOBAL_FS_GRXSTSR_Host_EPNUM, Endpoint number
     : OTG_FS_GLOBAL_FS_GRXSTSR_Host_BCNT? ( --  x ) 4 lshift OTG_FS_GLOBAL_FS_GRXSTSR_Host @ ; \ OTG_FS_GLOBAL_FS_GRXSTSR_Host_BCNT, Byte count
@@ -8269,31 +8269,31 @@ begin-module memmap
     : OTG_FS_GLOBAL_FS_GRXSTSR_Host_FRMNUM? ( --  x ) 21 lshift OTG_FS_GLOBAL_FS_GRXSTSR_Host @ ; \ OTG_FS_GLOBAL_FS_GRXSTSR_Host_FRMNUM, Frame number
   [then]
 
-  execute-defined? use-OTG_FS_GLOBAL defined? OTG_FS_GLOBAL_FS_GRXFSIZ_RXFD not and [if]
+  execute-defined? use-OTG_FS_GLOBAL [if]
     \ OTG_FS_GLOBAL_FS_GRXFSIZ (read-write) Reset:0x00000200
     : OTG_FS_GLOBAL_FS_GRXFSIZ_RXFD ( %bbbbbbbbbbbbbbbb -- x addr ) OTG_FS_GLOBAL_FS_GRXFSIZ ; \ OTG_FS_GLOBAL_FS_GRXFSIZ_RXFD, RxFIFO depth
   [then]
 
-  defined? use-OTG_FS_GLOBAL defined? OTG_FS_GLOBAL_FS_GNPTXFSIZ_Device_TX0FSA not and [if]
+  [if]
     \ OTG_FS_GLOBAL_FS_GNPTXFSIZ_Device (read-write) Reset:0x00000200
     : OTG_FS_GLOBAL_FS_GNPTXFSIZ_Device_TX0FSA ( %bbbbbbbbbbbbbbbb -- x addr ) OTG_FS_GLOBAL_FS_GNPTXFSIZ_Device ; \ OTG_FS_GLOBAL_FS_GNPTXFSIZ_Device_TX0FSA, Endpoint 0 transmit RAM start  address
     : OTG_FS_GLOBAL_FS_GNPTXFSIZ_Device_TX0FD ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift OTG_FS_GLOBAL_FS_GNPTXFSIZ_Device ; \ OTG_FS_GLOBAL_FS_GNPTXFSIZ_Device_TX0FD, Endpoint 0 TxFIFO depth
   [then]
 
-  execute-defined? use-OTG_FS_GLOBAL defined? OTG_FS_GLOBAL_FS_GNPTXFSIZ_Host_NPTXFSA not and [if]
+  execute-defined? use-OTG_FS_GLOBAL [if]
     \ OTG_FS_GLOBAL_FS_GNPTXFSIZ_Host (read-write) Reset:0x00000200
     : OTG_FS_GLOBAL_FS_GNPTXFSIZ_Host_NPTXFSA ( %bbbbbbbbbbbbbbbb -- x addr ) OTG_FS_GLOBAL_FS_GNPTXFSIZ_Host ; \ OTG_FS_GLOBAL_FS_GNPTXFSIZ_Host_NPTXFSA, Non-periodic transmit RAM start  address
     : OTG_FS_GLOBAL_FS_GNPTXFSIZ_Host_NPTXFD ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift OTG_FS_GLOBAL_FS_GNPTXFSIZ_Host ; \ OTG_FS_GLOBAL_FS_GNPTXFSIZ_Host_NPTXFD, Non-periodic TxFIFO depth
   [then]
 
-  defined? use-OTG_FS_GLOBAL defined? OTG_FS_GLOBAL_FS_GNPTXSTS_NPTXFSAV? not and [if]
+  [if]
     \ OTG_FS_GLOBAL_FS_GNPTXSTS (read-only) Reset:0x00080200
     : OTG_FS_GLOBAL_FS_GNPTXSTS_NPTXFSAV? ( --  x ) OTG_FS_GLOBAL_FS_GNPTXSTS @ ; \ OTG_FS_GLOBAL_FS_GNPTXSTS_NPTXFSAV, Non-periodic TxFIFO space  available
     : OTG_FS_GLOBAL_FS_GNPTXSTS_NPTQXSAV? ( --  x ) 16 lshift OTG_FS_GLOBAL_FS_GNPTXSTS @ ; \ OTG_FS_GLOBAL_FS_GNPTXSTS_NPTQXSAV, Non-periodic transmit request queue  space available
     : OTG_FS_GLOBAL_FS_GNPTXSTS_NPTXQTOP? ( --  x ) 24 lshift OTG_FS_GLOBAL_FS_GNPTXSTS @ ; \ OTG_FS_GLOBAL_FS_GNPTXSTS_NPTXQTOP, Top of the non-periodic transmit request  queue
   [then]
 
-  execute-defined? use-OTG_FS_GLOBAL defined? OTG_FS_GLOBAL_FS_GCCFG_PWRDWN not and [if]
+  execute-defined? use-OTG_FS_GLOBAL [if]
     \ OTG_FS_GLOBAL_FS_GCCFG (read-write) Reset:0x00000000
     : OTG_FS_GLOBAL_FS_GCCFG_PWRDWN ( -- x addr ) 16 bit OTG_FS_GLOBAL_FS_GCCFG ; \ OTG_FS_GLOBAL_FS_GCCFG_PWRDWN, Power down
     : OTG_FS_GLOBAL_FS_GCCFG_VBUSASEN ( -- x addr ) 18 bit OTG_FS_GLOBAL_FS_GCCFG ; \ OTG_FS_GLOBAL_FS_GCCFG_VBUSASEN, Enable the VBUS sensing  device
@@ -8301,70 +8301,70 @@ begin-module memmap
     : OTG_FS_GLOBAL_FS_GCCFG_SOFOUTEN ( -- x addr ) 20 bit OTG_FS_GLOBAL_FS_GCCFG ; \ OTG_FS_GLOBAL_FS_GCCFG_SOFOUTEN, SOF output enable
   [then]
 
-  defined? use-OTG_FS_GLOBAL defined? OTG_FS_GLOBAL_FS_CID_PRODUCT_ID not and [if]
+  [if]
     \ OTG_FS_GLOBAL_FS_CID (read-write) Reset:0x00001000
     : OTG_FS_GLOBAL_FS_CID_PRODUCT_ID ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) OTG_FS_GLOBAL_FS_CID ; \ OTG_FS_GLOBAL_FS_CID_PRODUCT_ID, Product ID field
   [then]
 
-  execute-defined? use-OTG_FS_GLOBAL defined? OTG_FS_GLOBAL_FS_HPTXFSIZ_PTXSA not and [if]
+  execute-defined? use-OTG_FS_GLOBAL [if]
     \ OTG_FS_GLOBAL_FS_HPTXFSIZ (read-write) Reset:0x02000600
     : OTG_FS_GLOBAL_FS_HPTXFSIZ_PTXSA ( %bbbbbbbbbbbbbbbb -- x addr ) OTG_FS_GLOBAL_FS_HPTXFSIZ ; \ OTG_FS_GLOBAL_FS_HPTXFSIZ_PTXSA, Host periodic TxFIFO start  address
     : OTG_FS_GLOBAL_FS_HPTXFSIZ_PTXFSIZ ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift OTG_FS_GLOBAL_FS_HPTXFSIZ ; \ OTG_FS_GLOBAL_FS_HPTXFSIZ_PTXFSIZ, Host periodic TxFIFO depth
   [then]
 
-  defined? use-OTG_FS_GLOBAL defined? OTG_FS_GLOBAL_FS_DIEPTXF1_INEPTXSA not and [if]
+  [if]
     \ OTG_FS_GLOBAL_FS_DIEPTXF1 (read-write) Reset:0x02000400
     : OTG_FS_GLOBAL_FS_DIEPTXF1_INEPTXSA ( %bbbbbbbbbbbbbbbb -- x addr ) OTG_FS_GLOBAL_FS_DIEPTXF1 ; \ OTG_FS_GLOBAL_FS_DIEPTXF1_INEPTXSA, IN endpoint FIFO2 transmit RAM start  address
     : OTG_FS_GLOBAL_FS_DIEPTXF1_INEPTXFD ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift OTG_FS_GLOBAL_FS_DIEPTXF1 ; \ OTG_FS_GLOBAL_FS_DIEPTXF1_INEPTXFD, IN endpoint TxFIFO depth
   [then]
 
-  execute-defined? use-OTG_FS_GLOBAL defined? OTG_FS_GLOBAL_FS_DIEPTXF2_INEPTXSA not and [if]
+  execute-defined? use-OTG_FS_GLOBAL [if]
     \ OTG_FS_GLOBAL_FS_DIEPTXF2 (read-write) Reset:0x02000400
     : OTG_FS_GLOBAL_FS_DIEPTXF2_INEPTXSA ( %bbbbbbbbbbbbbbbb -- x addr ) OTG_FS_GLOBAL_FS_DIEPTXF2 ; \ OTG_FS_GLOBAL_FS_DIEPTXF2_INEPTXSA, IN endpoint FIFO3 transmit RAM start  address
     : OTG_FS_GLOBAL_FS_DIEPTXF2_INEPTXFD ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift OTG_FS_GLOBAL_FS_DIEPTXF2 ; \ OTG_FS_GLOBAL_FS_DIEPTXF2_INEPTXFD, IN endpoint TxFIFO depth
   [then]
 
-  defined? use-OTG_FS_GLOBAL defined? OTG_FS_GLOBAL_FS_DIEPTXF3_INEPTXSA not and [if]
+  [if]
     \ OTG_FS_GLOBAL_FS_DIEPTXF3 (read-write) Reset:0x02000400
     : OTG_FS_GLOBAL_FS_DIEPTXF3_INEPTXSA ( %bbbbbbbbbbbbbbbb -- x addr ) OTG_FS_GLOBAL_FS_DIEPTXF3 ; \ OTG_FS_GLOBAL_FS_DIEPTXF3_INEPTXSA, IN endpoint FIFO4 transmit RAM start  address
     : OTG_FS_GLOBAL_FS_DIEPTXF3_INEPTXFD ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift OTG_FS_GLOBAL_FS_DIEPTXF3 ; \ OTG_FS_GLOBAL_FS_DIEPTXF3_INEPTXFD, IN endpoint TxFIFO depth
   [then]
 
-  execute-defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCFG_FSLSPCS not and [if]
+  execute-defined? use-OTG_FS_HOST [if]
     \ OTG_FS_HOST_FS_HCFG (multiple-access)  Reset:0x00000000
     : OTG_FS_HOST_FS_HCFG_FSLSPCS ( %bb -- x addr ) OTG_FS_HOST_FS_HCFG ; \ OTG_FS_HOST_FS_HCFG_FSLSPCS, FS/LS PHY clock select
     : OTG_FS_HOST_FS_HCFG_FSLSS ( -- x addr ) 2 bit OTG_FS_HOST_FS_HCFG ; \ OTG_FS_HOST_FS_HCFG_FSLSS, FS- and LS-only support
   [then]
 
-  defined? use-OTG_FS_HOST defined? OTG_FS_HOST_HFIR_FRIVL not and [if]
+  [if]
     \ OTG_FS_HOST_HFIR (read-write) Reset:0x0000EA60
     : OTG_FS_HOST_HFIR_FRIVL ( %bbbbbbbbbbbbbbbb -- x addr ) OTG_FS_HOST_HFIR ; \ OTG_FS_HOST_HFIR_FRIVL, Frame interval
   [then]
 
-  execute-defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HFNUM_FRNUM? not and [if]
+  execute-defined? use-OTG_FS_HOST [if]
     \ OTG_FS_HOST_FS_HFNUM (read-only) Reset:0x00003FFF
     : OTG_FS_HOST_FS_HFNUM_FRNUM? ( --  x ) OTG_FS_HOST_FS_HFNUM @ ; \ OTG_FS_HOST_FS_HFNUM_FRNUM, Frame number
     : OTG_FS_HOST_FS_HFNUM_FTREM? ( --  x ) 16 lshift OTG_FS_HOST_FS_HFNUM @ ; \ OTG_FS_HOST_FS_HFNUM_FTREM, Frame time remaining
   [then]
 
-  defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HPTXSTS_PTXFSAVL not and [if]
+  [if]
     \ OTG_FS_HOST_FS_HPTXSTS (multiple-access)  Reset:0x00080100
     : OTG_FS_HOST_FS_HPTXSTS_PTXFSAVL ( %bbbbbbbbbbbbbbbb -- x addr ) OTG_FS_HOST_FS_HPTXSTS ; \ OTG_FS_HOST_FS_HPTXSTS_PTXFSAVL, Periodic transmit data FIFO space  available
     : OTG_FS_HOST_FS_HPTXSTS_PTXQSAV ( %bbbbbbbb -- x addr ) 16 lshift OTG_FS_HOST_FS_HPTXSTS ; \ OTG_FS_HOST_FS_HPTXSTS_PTXQSAV, Periodic transmit request queue space  available
     : OTG_FS_HOST_FS_HPTXSTS_PTXQTOP ( %bbbbbbbb -- x addr ) 24 lshift OTG_FS_HOST_FS_HPTXSTS ; \ OTG_FS_HOST_FS_HPTXSTS_PTXQTOP, Top of the periodic transmit request  queue
   [then]
 
-  execute-defined? use-OTG_FS_HOST defined? OTG_FS_HOST_HAINT_HAINT? not and [if]
+  execute-defined? use-OTG_FS_HOST [if]
     \ OTG_FS_HOST_HAINT (read-only) Reset:0x00000000
     : OTG_FS_HOST_HAINT_HAINT? ( --  x ) OTG_FS_HOST_HAINT @ ; \ OTG_FS_HOST_HAINT_HAINT, Channel interrupts
   [then]
 
-  defined? use-OTG_FS_HOST defined? OTG_FS_HOST_HAINTMSK_HAINTM not and [if]
+  [if]
     \ OTG_FS_HOST_HAINTMSK (read-write) Reset:0x00000000
     : OTG_FS_HOST_HAINTMSK_HAINTM ( %bbbbbbbbbbbbbbbb -- x addr ) OTG_FS_HOST_HAINTMSK ; \ OTG_FS_HOST_HAINTMSK_HAINTM, Channel interrupt mask
   [then]
 
-  execute-defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HPRT_PCSTS? not and [if]
+  execute-defined? use-OTG_FS_HOST [if]
     \ OTG_FS_HOST_FS_HPRT (multiple-access)  Reset:0x00000000
     : OTG_FS_HOST_FS_HPRT_PCSTS? ( -- 1|0 ) 0 bit OTG_FS_HOST_FS_HPRT bit@ ; \ OTG_FS_HOST_FS_HPRT_PCSTS, Port connect status
     : OTG_FS_HOST_FS_HPRT_PCDET ( -- x addr ) 1 bit OTG_FS_HOST_FS_HPRT ; \ OTG_FS_HOST_FS_HPRT_PCDET, Port connect detected
@@ -8381,7 +8381,7 @@ begin-module memmap
     : OTG_FS_HOST_FS_HPRT_PSPD ( %bb -- x addr ) 17 lshift OTG_FS_HOST_FS_HPRT ; \ OTG_FS_HOST_FS_HPRT_PSPD, Port speed
   [then]
 
-  defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCCHAR0_MPSIZ not and [if]
+  [if]
     \ OTG_FS_HOST_FS_HCCHAR0 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCCHAR0_MPSIZ x addr ) OTG_FS_HOST_FS_HCCHAR0 ; \ OTG_FS_HOST_FS_HCCHAR0_MPSIZ, Maximum packet size
     : OTG_FS_HOST_FS_HCCHAR0_EPNUM ( %bbbb -- x addr ) 11 lshift OTG_FS_HOST_FS_HCCHAR0 ; \ OTG_FS_HOST_FS_HCCHAR0_EPNUM, Endpoint number
@@ -8395,7 +8395,7 @@ begin-module memmap
     : OTG_FS_HOST_FS_HCCHAR0_CHENA ( -- x addr ) 31 bit OTG_FS_HOST_FS_HCCHAR0 ; \ OTG_FS_HOST_FS_HCCHAR0_CHENA, Channel enable
   [then]
 
-  execute-defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCCHAR1_MPSIZ not and [if]
+  execute-defined? use-OTG_FS_HOST [if]
     \ OTG_FS_HOST_FS_HCCHAR1 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCCHAR1_MPSIZ x addr ) OTG_FS_HOST_FS_HCCHAR1 ; \ OTG_FS_HOST_FS_HCCHAR1_MPSIZ, Maximum packet size
     : OTG_FS_HOST_FS_HCCHAR1_EPNUM ( %bbbb -- x addr ) 11 lshift OTG_FS_HOST_FS_HCCHAR1 ; \ OTG_FS_HOST_FS_HCCHAR1_EPNUM, Endpoint number
@@ -8409,7 +8409,7 @@ begin-module memmap
     : OTG_FS_HOST_FS_HCCHAR1_CHENA ( -- x addr ) 31 bit OTG_FS_HOST_FS_HCCHAR1 ; \ OTG_FS_HOST_FS_HCCHAR1_CHENA, Channel enable
   [then]
 
-  defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCCHAR2_MPSIZ not and [if]
+  [if]
     \ OTG_FS_HOST_FS_HCCHAR2 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCCHAR2_MPSIZ x addr ) OTG_FS_HOST_FS_HCCHAR2 ; \ OTG_FS_HOST_FS_HCCHAR2_MPSIZ, Maximum packet size
     : OTG_FS_HOST_FS_HCCHAR2_EPNUM ( %bbbb -- x addr ) 11 lshift OTG_FS_HOST_FS_HCCHAR2 ; \ OTG_FS_HOST_FS_HCCHAR2_EPNUM, Endpoint number
@@ -8423,7 +8423,7 @@ begin-module memmap
     : OTG_FS_HOST_FS_HCCHAR2_CHENA ( -- x addr ) 31 bit OTG_FS_HOST_FS_HCCHAR2 ; \ OTG_FS_HOST_FS_HCCHAR2_CHENA, Channel enable
   [then]
 
-  execute-defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCCHAR3_MPSIZ not and [if]
+  execute-defined? use-OTG_FS_HOST [if]
     \ OTG_FS_HOST_FS_HCCHAR3 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCCHAR3_MPSIZ x addr ) OTG_FS_HOST_FS_HCCHAR3 ; \ OTG_FS_HOST_FS_HCCHAR3_MPSIZ, Maximum packet size
     : OTG_FS_HOST_FS_HCCHAR3_EPNUM ( %bbbb -- x addr ) 11 lshift OTG_FS_HOST_FS_HCCHAR3 ; \ OTG_FS_HOST_FS_HCCHAR3_EPNUM, Endpoint number
@@ -8437,7 +8437,7 @@ begin-module memmap
     : OTG_FS_HOST_FS_HCCHAR3_CHENA ( -- x addr ) 31 bit OTG_FS_HOST_FS_HCCHAR3 ; \ OTG_FS_HOST_FS_HCCHAR3_CHENA, Channel enable
   [then]
 
-  defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCCHAR4_MPSIZ not and [if]
+  [if]
     \ OTG_FS_HOST_FS_HCCHAR4 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCCHAR4_MPSIZ x addr ) OTG_FS_HOST_FS_HCCHAR4 ; \ OTG_FS_HOST_FS_HCCHAR4_MPSIZ, Maximum packet size
     : OTG_FS_HOST_FS_HCCHAR4_EPNUM ( %bbbb -- x addr ) 11 lshift OTG_FS_HOST_FS_HCCHAR4 ; \ OTG_FS_HOST_FS_HCCHAR4_EPNUM, Endpoint number
@@ -8451,7 +8451,7 @@ begin-module memmap
     : OTG_FS_HOST_FS_HCCHAR4_CHENA ( -- x addr ) 31 bit OTG_FS_HOST_FS_HCCHAR4 ; \ OTG_FS_HOST_FS_HCCHAR4_CHENA, Channel enable
   [then]
 
-  execute-defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCCHAR5_MPSIZ not and [if]
+  execute-defined? use-OTG_FS_HOST [if]
     \ OTG_FS_HOST_FS_HCCHAR5 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCCHAR5_MPSIZ x addr ) OTG_FS_HOST_FS_HCCHAR5 ; \ OTG_FS_HOST_FS_HCCHAR5_MPSIZ, Maximum packet size
     : OTG_FS_HOST_FS_HCCHAR5_EPNUM ( %bbbb -- x addr ) 11 lshift OTG_FS_HOST_FS_HCCHAR5 ; \ OTG_FS_HOST_FS_HCCHAR5_EPNUM, Endpoint number
@@ -8465,7 +8465,7 @@ begin-module memmap
     : OTG_FS_HOST_FS_HCCHAR5_CHENA ( -- x addr ) 31 bit OTG_FS_HOST_FS_HCCHAR5 ; \ OTG_FS_HOST_FS_HCCHAR5_CHENA, Channel enable
   [then]
 
-  defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCCHAR6_MPSIZ not and [if]
+  [if]
     \ OTG_FS_HOST_FS_HCCHAR6 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCCHAR6_MPSIZ x addr ) OTG_FS_HOST_FS_HCCHAR6 ; \ OTG_FS_HOST_FS_HCCHAR6_MPSIZ, Maximum packet size
     : OTG_FS_HOST_FS_HCCHAR6_EPNUM ( %bbbb -- x addr ) 11 lshift OTG_FS_HOST_FS_HCCHAR6 ; \ OTG_FS_HOST_FS_HCCHAR6_EPNUM, Endpoint number
@@ -8479,7 +8479,7 @@ begin-module memmap
     : OTG_FS_HOST_FS_HCCHAR6_CHENA ( -- x addr ) 31 bit OTG_FS_HOST_FS_HCCHAR6 ; \ OTG_FS_HOST_FS_HCCHAR6_CHENA, Channel enable
   [then]
 
-  execute-defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCCHAR7_MPSIZ not and [if]
+  execute-defined? use-OTG_FS_HOST [if]
     \ OTG_FS_HOST_FS_HCCHAR7 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCCHAR7_MPSIZ x addr ) OTG_FS_HOST_FS_HCCHAR7 ; \ OTG_FS_HOST_FS_HCCHAR7_MPSIZ, Maximum packet size
     : OTG_FS_HOST_FS_HCCHAR7_EPNUM ( %bbbb -- x addr ) 11 lshift OTG_FS_HOST_FS_HCCHAR7 ; \ OTG_FS_HOST_FS_HCCHAR7_EPNUM, Endpoint number
@@ -8493,7 +8493,7 @@ begin-module memmap
     : OTG_FS_HOST_FS_HCCHAR7_CHENA ( -- x addr ) 31 bit OTG_FS_HOST_FS_HCCHAR7 ; \ OTG_FS_HOST_FS_HCCHAR7_CHENA, Channel enable
   [then]
 
-  defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCINT0_XFRC not and [if]
+  [if]
     \ OTG_FS_HOST_FS_HCINT0 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCINT0_XFRC ( -- x addr ) 0 bit OTG_FS_HOST_FS_HCINT0 ; \ OTG_FS_HOST_FS_HCINT0_XFRC, Transfer completed
     : OTG_FS_HOST_FS_HCINT0_CHH ( -- x addr ) 1 bit OTG_FS_HOST_FS_HCINT0 ; \ OTG_FS_HOST_FS_HCINT0_CHH, Channel halted
@@ -8506,7 +8506,7 @@ begin-module memmap
     : OTG_FS_HOST_FS_HCINT0_DTERR ( -- x addr ) 10 bit OTG_FS_HOST_FS_HCINT0 ; \ OTG_FS_HOST_FS_HCINT0_DTERR, Data toggle error
   [then]
 
-  execute-defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCINT1_XFRC not and [if]
+  execute-defined? use-OTG_FS_HOST [if]
     \ OTG_FS_HOST_FS_HCINT1 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCINT1_XFRC ( -- x addr ) 0 bit OTG_FS_HOST_FS_HCINT1 ; \ OTG_FS_HOST_FS_HCINT1_XFRC, Transfer completed
     : OTG_FS_HOST_FS_HCINT1_CHH ( -- x addr ) 1 bit OTG_FS_HOST_FS_HCINT1 ; \ OTG_FS_HOST_FS_HCINT1_CHH, Channel halted
@@ -8519,7 +8519,7 @@ begin-module memmap
     : OTG_FS_HOST_FS_HCINT1_DTERR ( -- x addr ) 10 bit OTG_FS_HOST_FS_HCINT1 ; \ OTG_FS_HOST_FS_HCINT1_DTERR, Data toggle error
   [then]
 
-  defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCINT2_XFRC not and [if]
+  [if]
     \ OTG_FS_HOST_FS_HCINT2 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCINT2_XFRC ( -- x addr ) 0 bit OTG_FS_HOST_FS_HCINT2 ; \ OTG_FS_HOST_FS_HCINT2_XFRC, Transfer completed
     : OTG_FS_HOST_FS_HCINT2_CHH ( -- x addr ) 1 bit OTG_FS_HOST_FS_HCINT2 ; \ OTG_FS_HOST_FS_HCINT2_CHH, Channel halted
@@ -8532,7 +8532,7 @@ begin-module memmap
     : OTG_FS_HOST_FS_HCINT2_DTERR ( -- x addr ) 10 bit OTG_FS_HOST_FS_HCINT2 ; \ OTG_FS_HOST_FS_HCINT2_DTERR, Data toggle error
   [then]
 
-  execute-defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCINT3_XFRC not and [if]
+  execute-defined? use-OTG_FS_HOST [if]
     \ OTG_FS_HOST_FS_HCINT3 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCINT3_XFRC ( -- x addr ) 0 bit OTG_FS_HOST_FS_HCINT3 ; \ OTG_FS_HOST_FS_HCINT3_XFRC, Transfer completed
     : OTG_FS_HOST_FS_HCINT3_CHH ( -- x addr ) 1 bit OTG_FS_HOST_FS_HCINT3 ; \ OTG_FS_HOST_FS_HCINT3_CHH, Channel halted
@@ -8545,7 +8545,7 @@ begin-module memmap
     : OTG_FS_HOST_FS_HCINT3_DTERR ( -- x addr ) 10 bit OTG_FS_HOST_FS_HCINT3 ; \ OTG_FS_HOST_FS_HCINT3_DTERR, Data toggle error
   [then]
 
-  defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCINT4_XFRC not and [if]
+  [if]
     \ OTG_FS_HOST_FS_HCINT4 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCINT4_XFRC ( -- x addr ) 0 bit OTG_FS_HOST_FS_HCINT4 ; \ OTG_FS_HOST_FS_HCINT4_XFRC, Transfer completed
     : OTG_FS_HOST_FS_HCINT4_CHH ( -- x addr ) 1 bit OTG_FS_HOST_FS_HCINT4 ; \ OTG_FS_HOST_FS_HCINT4_CHH, Channel halted
@@ -8558,7 +8558,7 @@ begin-module memmap
     : OTG_FS_HOST_FS_HCINT4_DTERR ( -- x addr ) 10 bit OTG_FS_HOST_FS_HCINT4 ; \ OTG_FS_HOST_FS_HCINT4_DTERR, Data toggle error
   [then]
 
-  execute-defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCINT5_XFRC not and [if]
+  execute-defined? use-OTG_FS_HOST [if]
     \ OTG_FS_HOST_FS_HCINT5 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCINT5_XFRC ( -- x addr ) 0 bit OTG_FS_HOST_FS_HCINT5 ; \ OTG_FS_HOST_FS_HCINT5_XFRC, Transfer completed
     : OTG_FS_HOST_FS_HCINT5_CHH ( -- x addr ) 1 bit OTG_FS_HOST_FS_HCINT5 ; \ OTG_FS_HOST_FS_HCINT5_CHH, Channel halted
@@ -8571,7 +8571,7 @@ begin-module memmap
     : OTG_FS_HOST_FS_HCINT5_DTERR ( -- x addr ) 10 bit OTG_FS_HOST_FS_HCINT5 ; \ OTG_FS_HOST_FS_HCINT5_DTERR, Data toggle error
   [then]
 
-  defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCINT6_XFRC not and [if]
+  [if]
     \ OTG_FS_HOST_FS_HCINT6 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCINT6_XFRC ( -- x addr ) 0 bit OTG_FS_HOST_FS_HCINT6 ; \ OTG_FS_HOST_FS_HCINT6_XFRC, Transfer completed
     : OTG_FS_HOST_FS_HCINT6_CHH ( -- x addr ) 1 bit OTG_FS_HOST_FS_HCINT6 ; \ OTG_FS_HOST_FS_HCINT6_CHH, Channel halted
@@ -8584,7 +8584,7 @@ begin-module memmap
     : OTG_FS_HOST_FS_HCINT6_DTERR ( -- x addr ) 10 bit OTG_FS_HOST_FS_HCINT6 ; \ OTG_FS_HOST_FS_HCINT6_DTERR, Data toggle error
   [then]
 
-  execute-defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCINT7_XFRC not and [if]
+  execute-defined? use-OTG_FS_HOST [if]
     \ OTG_FS_HOST_FS_HCINT7 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCINT7_XFRC ( -- x addr ) 0 bit OTG_FS_HOST_FS_HCINT7 ; \ OTG_FS_HOST_FS_HCINT7_XFRC, Transfer completed
     : OTG_FS_HOST_FS_HCINT7_CHH ( -- x addr ) 1 bit OTG_FS_HOST_FS_HCINT7 ; \ OTG_FS_HOST_FS_HCINT7_CHH, Channel halted
@@ -8597,7 +8597,7 @@ begin-module memmap
     : OTG_FS_HOST_FS_HCINT7_DTERR ( -- x addr ) 10 bit OTG_FS_HOST_FS_HCINT7 ; \ OTG_FS_HOST_FS_HCINT7_DTERR, Data toggle error
   [then]
 
-  defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCINTMSK0_XFRCM not and [if]
+  [if]
     \ OTG_FS_HOST_FS_HCINTMSK0 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCINTMSK0_XFRCM ( -- x addr ) 0 bit OTG_FS_HOST_FS_HCINTMSK0 ; \ OTG_FS_HOST_FS_HCINTMSK0_XFRCM, Transfer completed mask
     : OTG_FS_HOST_FS_HCINTMSK0_CHHM ( -- x addr ) 1 bit OTG_FS_HOST_FS_HCINTMSK0 ; \ OTG_FS_HOST_FS_HCINTMSK0_CHHM, Channel halted mask
@@ -8611,7 +8611,7 @@ begin-module memmap
     : OTG_FS_HOST_FS_HCINTMSK0_DTERRM ( -- x addr ) 10 bit OTG_FS_HOST_FS_HCINTMSK0 ; \ OTG_FS_HOST_FS_HCINTMSK0_DTERRM, Data toggle error mask
   [then]
 
-  execute-defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCINTMSK1_XFRCM not and [if]
+  execute-defined? use-OTG_FS_HOST [if]
     \ OTG_FS_HOST_FS_HCINTMSK1 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCINTMSK1_XFRCM ( -- x addr ) 0 bit OTG_FS_HOST_FS_HCINTMSK1 ; \ OTG_FS_HOST_FS_HCINTMSK1_XFRCM, Transfer completed mask
     : OTG_FS_HOST_FS_HCINTMSK1_CHHM ( -- x addr ) 1 bit OTG_FS_HOST_FS_HCINTMSK1 ; \ OTG_FS_HOST_FS_HCINTMSK1_CHHM, Channel halted mask
@@ -8625,7 +8625,7 @@ begin-module memmap
     : OTG_FS_HOST_FS_HCINTMSK1_DTERRM ( -- x addr ) 10 bit OTG_FS_HOST_FS_HCINTMSK1 ; \ OTG_FS_HOST_FS_HCINTMSK1_DTERRM, Data toggle error mask
   [then]
 
-  defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCINTMSK2_XFRCM not and [if]
+  [if]
     \ OTG_FS_HOST_FS_HCINTMSK2 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCINTMSK2_XFRCM ( -- x addr ) 0 bit OTG_FS_HOST_FS_HCINTMSK2 ; \ OTG_FS_HOST_FS_HCINTMSK2_XFRCM, Transfer completed mask
     : OTG_FS_HOST_FS_HCINTMSK2_CHHM ( -- x addr ) 1 bit OTG_FS_HOST_FS_HCINTMSK2 ; \ OTG_FS_HOST_FS_HCINTMSK2_CHHM, Channel halted mask
@@ -8639,7 +8639,7 @@ begin-module memmap
     : OTG_FS_HOST_FS_HCINTMSK2_DTERRM ( -- x addr ) 10 bit OTG_FS_HOST_FS_HCINTMSK2 ; \ OTG_FS_HOST_FS_HCINTMSK2_DTERRM, Data toggle error mask
   [then]
 
-  execute-defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCINTMSK3_XFRCM not and [if]
+  execute-defined? use-OTG_FS_HOST [if]
     \ OTG_FS_HOST_FS_HCINTMSK3 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCINTMSK3_XFRCM ( -- x addr ) 0 bit OTG_FS_HOST_FS_HCINTMSK3 ; \ OTG_FS_HOST_FS_HCINTMSK3_XFRCM, Transfer completed mask
     : OTG_FS_HOST_FS_HCINTMSK3_CHHM ( -- x addr ) 1 bit OTG_FS_HOST_FS_HCINTMSK3 ; \ OTG_FS_HOST_FS_HCINTMSK3_CHHM, Channel halted mask
@@ -8653,7 +8653,7 @@ begin-module memmap
     : OTG_FS_HOST_FS_HCINTMSK3_DTERRM ( -- x addr ) 10 bit OTG_FS_HOST_FS_HCINTMSK3 ; \ OTG_FS_HOST_FS_HCINTMSK3_DTERRM, Data toggle error mask
   [then]
 
-  defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCINTMSK4_XFRCM not and [if]
+  [if]
     \ OTG_FS_HOST_FS_HCINTMSK4 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCINTMSK4_XFRCM ( -- x addr ) 0 bit OTG_FS_HOST_FS_HCINTMSK4 ; \ OTG_FS_HOST_FS_HCINTMSK4_XFRCM, Transfer completed mask
     : OTG_FS_HOST_FS_HCINTMSK4_CHHM ( -- x addr ) 1 bit OTG_FS_HOST_FS_HCINTMSK4 ; \ OTG_FS_HOST_FS_HCINTMSK4_CHHM, Channel halted mask
@@ -8667,7 +8667,7 @@ begin-module memmap
     : OTG_FS_HOST_FS_HCINTMSK4_DTERRM ( -- x addr ) 10 bit OTG_FS_HOST_FS_HCINTMSK4 ; \ OTG_FS_HOST_FS_HCINTMSK4_DTERRM, Data toggle error mask
   [then]
 
-  execute-defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCINTMSK5_XFRCM not and [if]
+  execute-defined? use-OTG_FS_HOST [if]
     \ OTG_FS_HOST_FS_HCINTMSK5 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCINTMSK5_XFRCM ( -- x addr ) 0 bit OTG_FS_HOST_FS_HCINTMSK5 ; \ OTG_FS_HOST_FS_HCINTMSK5_XFRCM, Transfer completed mask
     : OTG_FS_HOST_FS_HCINTMSK5_CHHM ( -- x addr ) 1 bit OTG_FS_HOST_FS_HCINTMSK5 ; \ OTG_FS_HOST_FS_HCINTMSK5_CHHM, Channel halted mask
@@ -8681,7 +8681,7 @@ begin-module memmap
     : OTG_FS_HOST_FS_HCINTMSK5_DTERRM ( -- x addr ) 10 bit OTG_FS_HOST_FS_HCINTMSK5 ; \ OTG_FS_HOST_FS_HCINTMSK5_DTERRM, Data toggle error mask
   [then]
 
-  defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCINTMSK6_XFRCM not and [if]
+  [if]
     \ OTG_FS_HOST_FS_HCINTMSK6 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCINTMSK6_XFRCM ( -- x addr ) 0 bit OTG_FS_HOST_FS_HCINTMSK6 ; \ OTG_FS_HOST_FS_HCINTMSK6_XFRCM, Transfer completed mask
     : OTG_FS_HOST_FS_HCINTMSK6_CHHM ( -- x addr ) 1 bit OTG_FS_HOST_FS_HCINTMSK6 ; \ OTG_FS_HOST_FS_HCINTMSK6_CHHM, Channel halted mask
@@ -8695,7 +8695,7 @@ begin-module memmap
     : OTG_FS_HOST_FS_HCINTMSK6_DTERRM ( -- x addr ) 10 bit OTG_FS_HOST_FS_HCINTMSK6 ; \ OTG_FS_HOST_FS_HCINTMSK6_DTERRM, Data toggle error mask
   [then]
 
-  execute-defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCINTMSK7_XFRCM not and [if]
+  execute-defined? use-OTG_FS_HOST [if]
     \ OTG_FS_HOST_FS_HCINTMSK7 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCINTMSK7_XFRCM ( -- x addr ) 0 bit OTG_FS_HOST_FS_HCINTMSK7 ; \ OTG_FS_HOST_FS_HCINTMSK7_XFRCM, Transfer completed mask
     : OTG_FS_HOST_FS_HCINTMSK7_CHHM ( -- x addr ) 1 bit OTG_FS_HOST_FS_HCINTMSK7 ; \ OTG_FS_HOST_FS_HCINTMSK7_CHHM, Channel halted mask
@@ -8709,63 +8709,63 @@ begin-module memmap
     : OTG_FS_HOST_FS_HCINTMSK7_DTERRM ( -- x addr ) 10 bit OTG_FS_HOST_FS_HCINTMSK7 ; \ OTG_FS_HOST_FS_HCINTMSK7_DTERRM, Data toggle error mask
   [then]
 
-  defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCTSIZ0_XFRSIZ not and [if]
+  [if]
     \ OTG_FS_HOST_FS_HCTSIZ0 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCTSIZ0_XFRSIZ x addr ) OTG_FS_HOST_FS_HCTSIZ0 ; \ OTG_FS_HOST_FS_HCTSIZ0_XFRSIZ, Transfer size
     : OTG_FS_HOST_FS_HCTSIZ0_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_FS_HOST_FS_HCTSIZ0 ; \ OTG_FS_HOST_FS_HCTSIZ0_PKTCNT, Packet count
     : OTG_FS_HOST_FS_HCTSIZ0_DPID ( %bb -- x addr ) 29 lshift OTG_FS_HOST_FS_HCTSIZ0 ; \ OTG_FS_HOST_FS_HCTSIZ0_DPID, Data PID
   [then]
 
-  execute-defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCTSIZ1_XFRSIZ not and [if]
+  execute-defined? use-OTG_FS_HOST [if]
     \ OTG_FS_HOST_FS_HCTSIZ1 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCTSIZ1_XFRSIZ x addr ) OTG_FS_HOST_FS_HCTSIZ1 ; \ OTG_FS_HOST_FS_HCTSIZ1_XFRSIZ, Transfer size
     : OTG_FS_HOST_FS_HCTSIZ1_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_FS_HOST_FS_HCTSIZ1 ; \ OTG_FS_HOST_FS_HCTSIZ1_PKTCNT, Packet count
     : OTG_FS_HOST_FS_HCTSIZ1_DPID ( %bb -- x addr ) 29 lshift OTG_FS_HOST_FS_HCTSIZ1 ; \ OTG_FS_HOST_FS_HCTSIZ1_DPID, Data PID
   [then]
 
-  defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCTSIZ2_XFRSIZ not and [if]
+  [if]
     \ OTG_FS_HOST_FS_HCTSIZ2 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCTSIZ2_XFRSIZ x addr ) OTG_FS_HOST_FS_HCTSIZ2 ; \ OTG_FS_HOST_FS_HCTSIZ2_XFRSIZ, Transfer size
     : OTG_FS_HOST_FS_HCTSIZ2_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_FS_HOST_FS_HCTSIZ2 ; \ OTG_FS_HOST_FS_HCTSIZ2_PKTCNT, Packet count
     : OTG_FS_HOST_FS_HCTSIZ2_DPID ( %bb -- x addr ) 29 lshift OTG_FS_HOST_FS_HCTSIZ2 ; \ OTG_FS_HOST_FS_HCTSIZ2_DPID, Data PID
   [then]
 
-  execute-defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCTSIZ3_XFRSIZ not and [if]
+  execute-defined? use-OTG_FS_HOST [if]
     \ OTG_FS_HOST_FS_HCTSIZ3 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCTSIZ3_XFRSIZ x addr ) OTG_FS_HOST_FS_HCTSIZ3 ; \ OTG_FS_HOST_FS_HCTSIZ3_XFRSIZ, Transfer size
     : OTG_FS_HOST_FS_HCTSIZ3_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_FS_HOST_FS_HCTSIZ3 ; \ OTG_FS_HOST_FS_HCTSIZ3_PKTCNT, Packet count
     : OTG_FS_HOST_FS_HCTSIZ3_DPID ( %bb -- x addr ) 29 lshift OTG_FS_HOST_FS_HCTSIZ3 ; \ OTG_FS_HOST_FS_HCTSIZ3_DPID, Data PID
   [then]
 
-  defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCTSIZ4_XFRSIZ not and [if]
+  [if]
     \ OTG_FS_HOST_FS_HCTSIZ4 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCTSIZ4_XFRSIZ x addr ) OTG_FS_HOST_FS_HCTSIZ4 ; \ OTG_FS_HOST_FS_HCTSIZ4_XFRSIZ, Transfer size
     : OTG_FS_HOST_FS_HCTSIZ4_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_FS_HOST_FS_HCTSIZ4 ; \ OTG_FS_HOST_FS_HCTSIZ4_PKTCNT, Packet count
     : OTG_FS_HOST_FS_HCTSIZ4_DPID ( %bb -- x addr ) 29 lshift OTG_FS_HOST_FS_HCTSIZ4 ; \ OTG_FS_HOST_FS_HCTSIZ4_DPID, Data PID
   [then]
 
-  execute-defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCTSIZ5_XFRSIZ not and [if]
+  execute-defined? use-OTG_FS_HOST [if]
     \ OTG_FS_HOST_FS_HCTSIZ5 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCTSIZ5_XFRSIZ x addr ) OTG_FS_HOST_FS_HCTSIZ5 ; \ OTG_FS_HOST_FS_HCTSIZ5_XFRSIZ, Transfer size
     : OTG_FS_HOST_FS_HCTSIZ5_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_FS_HOST_FS_HCTSIZ5 ; \ OTG_FS_HOST_FS_HCTSIZ5_PKTCNT, Packet count
     : OTG_FS_HOST_FS_HCTSIZ5_DPID ( %bb -- x addr ) 29 lshift OTG_FS_HOST_FS_HCTSIZ5 ; \ OTG_FS_HOST_FS_HCTSIZ5_DPID, Data PID
   [then]
 
-  defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCTSIZ6_XFRSIZ not and [if]
+  [if]
     \ OTG_FS_HOST_FS_HCTSIZ6 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCTSIZ6_XFRSIZ x addr ) OTG_FS_HOST_FS_HCTSIZ6 ; \ OTG_FS_HOST_FS_HCTSIZ6_XFRSIZ, Transfer size
     : OTG_FS_HOST_FS_HCTSIZ6_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_FS_HOST_FS_HCTSIZ6 ; \ OTG_FS_HOST_FS_HCTSIZ6_PKTCNT, Packet count
     : OTG_FS_HOST_FS_HCTSIZ6_DPID ( %bb -- x addr ) 29 lshift OTG_FS_HOST_FS_HCTSIZ6 ; \ OTG_FS_HOST_FS_HCTSIZ6_DPID, Data PID
   [then]
 
-  execute-defined? use-OTG_FS_HOST defined? OTG_FS_HOST_FS_HCTSIZ7_XFRSIZ not and [if]
+  execute-defined? use-OTG_FS_HOST [if]
     \ OTG_FS_HOST_FS_HCTSIZ7 (read-write) Reset:0x00000000
     : OTG_FS_HOST_FS_HCTSIZ7_XFRSIZ x addr ) OTG_FS_HOST_FS_HCTSIZ7 ; \ OTG_FS_HOST_FS_HCTSIZ7_XFRSIZ, Transfer size
     : OTG_FS_HOST_FS_HCTSIZ7_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_FS_HOST_FS_HCTSIZ7 ; \ OTG_FS_HOST_FS_HCTSIZ7_PKTCNT, Packet count
     : OTG_FS_HOST_FS_HCTSIZ7_DPID ( %bb -- x addr ) 29 lshift OTG_FS_HOST_FS_HCTSIZ7 ; \ OTG_FS_HOST_FS_HCTSIZ7_DPID, Data PID
   [then]
 
-  defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_FS_DCFG_DSPD not and [if]
+  [if]
     \ OTG_FS_DEVICE_FS_DCFG (read-write) Reset:0x02200000
     : OTG_FS_DEVICE_FS_DCFG_DSPD ( %bb -- x addr ) OTG_FS_DEVICE_FS_DCFG ; \ OTG_FS_DEVICE_FS_DCFG_DSPD, Device speed
     : OTG_FS_DEVICE_FS_DCFG_NZLSOHSK ( -- x addr ) 2 bit OTG_FS_DEVICE_FS_DCFG ; \ OTG_FS_DEVICE_FS_DCFG_NZLSOHSK, Non-zero-length status OUT  handshake
@@ -8773,7 +8773,7 @@ begin-module memmap
     : OTG_FS_DEVICE_FS_DCFG_PFIVL ( %bb -- x addr ) 11 lshift OTG_FS_DEVICE_FS_DCFG ; \ OTG_FS_DEVICE_FS_DCFG_PFIVL, Periodic frame interval
   [then]
 
-  execute-defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_FS_DCTL_RWUSIG not and [if]
+  execute-defined? use-OTG_FS_DEVICE [if]
     \ OTG_FS_DEVICE_FS_DCTL (multiple-access)  Reset:0x00000000
     : OTG_FS_DEVICE_FS_DCTL_RWUSIG ( -- x addr ) 0 bit OTG_FS_DEVICE_FS_DCTL ; \ OTG_FS_DEVICE_FS_DCTL_RWUSIG, Remote wakeup signaling
     : OTG_FS_DEVICE_FS_DCTL_SDIS ( -- x addr ) 1 bit OTG_FS_DEVICE_FS_DCTL ; \ OTG_FS_DEVICE_FS_DCTL_SDIS, Soft disconnect
@@ -8787,7 +8787,7 @@ begin-module memmap
     : OTG_FS_DEVICE_FS_DCTL_POPRGDNE ( -- x addr ) 11 bit OTG_FS_DEVICE_FS_DCTL ; \ OTG_FS_DEVICE_FS_DCTL_POPRGDNE, Power-on programming done
   [then]
 
-  defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_FS_DSTS_SUSPSTS? not and [if]
+  [if]
     \ OTG_FS_DEVICE_FS_DSTS (read-only) Reset:0x00000010
     : OTG_FS_DEVICE_FS_DSTS_SUSPSTS? ( --  1|0 ) 0 bit OTG_FS_DEVICE_FS_DSTS bit@ ; \ OTG_FS_DEVICE_FS_DSTS_SUSPSTS, Suspend status
     : OTG_FS_DEVICE_FS_DSTS_ENUMSPD? ( --  x ) 1 lshift OTG_FS_DEVICE_FS_DSTS @ ; \ OTG_FS_DEVICE_FS_DSTS_ENUMSPD, Enumerated speed
@@ -8795,7 +8795,7 @@ begin-module memmap
     : OTG_FS_DEVICE_FS_DSTS_FNSOF? ( --  x ) 8 lshift OTG_FS_DEVICE_FS_DSTS @ ; \ OTG_FS_DEVICE_FS_DSTS_FNSOF, Frame number of the received  SOF
   [then]
 
-  execute-defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_FS_DIEPMSK_XFRCM not and [if]
+  execute-defined? use-OTG_FS_DEVICE [if]
     \ OTG_FS_DEVICE_FS_DIEPMSK (read-write) Reset:0x00000000
     : OTG_FS_DEVICE_FS_DIEPMSK_XFRCM ( -- x addr ) 0 bit OTG_FS_DEVICE_FS_DIEPMSK ; \ OTG_FS_DEVICE_FS_DIEPMSK_XFRCM, Transfer completed interrupt  mask
     : OTG_FS_DEVICE_FS_DIEPMSK_EPDM ( -- x addr ) 1 bit OTG_FS_DEVICE_FS_DIEPMSK ; \ OTG_FS_DEVICE_FS_DIEPMSK_EPDM, Endpoint disabled interrupt  mask
@@ -8805,7 +8805,7 @@ begin-module memmap
     : OTG_FS_DEVICE_FS_DIEPMSK_INEPNEM ( -- x addr ) 6 bit OTG_FS_DEVICE_FS_DIEPMSK ; \ OTG_FS_DEVICE_FS_DIEPMSK_INEPNEM, IN endpoint NAK effective  mask
   [then]
 
-  defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_FS_DOEPMSK_XFRCM not and [if]
+  [if]
     \ OTG_FS_DEVICE_FS_DOEPMSK (read-write) Reset:0x00000000
     : OTG_FS_DEVICE_FS_DOEPMSK_XFRCM ( -- x addr ) 0 bit OTG_FS_DEVICE_FS_DOEPMSK ; \ OTG_FS_DEVICE_FS_DOEPMSK_XFRCM, Transfer completed interrupt  mask
     : OTG_FS_DEVICE_FS_DOEPMSK_EPDM ( -- x addr ) 1 bit OTG_FS_DEVICE_FS_DOEPMSK ; \ OTG_FS_DEVICE_FS_DOEPMSK_EPDM, Endpoint disabled interrupt  mask
@@ -8813,34 +8813,34 @@ begin-module memmap
     : OTG_FS_DEVICE_FS_DOEPMSK_OTEPDM ( -- x addr ) 4 bit OTG_FS_DEVICE_FS_DOEPMSK ; \ OTG_FS_DEVICE_FS_DOEPMSK_OTEPDM, OUT token received when endpoint  disabled mask
   [then]
 
-  execute-defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_FS_DAINT_IEPINT? not and [if]
+  execute-defined? use-OTG_FS_DEVICE [if]
     \ OTG_FS_DEVICE_FS_DAINT (read-only) Reset:0x00000000
     : OTG_FS_DEVICE_FS_DAINT_IEPINT? ( --  x ) OTG_FS_DEVICE_FS_DAINT @ ; \ OTG_FS_DEVICE_FS_DAINT_IEPINT, IN endpoint interrupt bits
     : OTG_FS_DEVICE_FS_DAINT_OEPINT? ( --  x ) 16 lshift OTG_FS_DEVICE_FS_DAINT @ ; \ OTG_FS_DEVICE_FS_DAINT_OEPINT, OUT endpoint interrupt  bits
   [then]
 
-  defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_FS_DAINTMSK_IEPM not and [if]
+  [if]
     \ OTG_FS_DEVICE_FS_DAINTMSK (read-write) Reset:0x00000000
     : OTG_FS_DEVICE_FS_DAINTMSK_IEPM ( %bbbbbbbbbbbbbbbb -- x addr ) OTG_FS_DEVICE_FS_DAINTMSK ; \ OTG_FS_DEVICE_FS_DAINTMSK_IEPM, IN EP interrupt mask bits
     : OTG_FS_DEVICE_FS_DAINTMSK_OEPINT ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift OTG_FS_DEVICE_FS_DAINTMSK ; \ OTG_FS_DEVICE_FS_DAINTMSK_OEPINT, OUT endpoint interrupt  bits
   [then]
 
-  execute-defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_DVBUSDIS_VBUSDT not and [if]
+  execute-defined? use-OTG_FS_DEVICE [if]
     \ OTG_FS_DEVICE_DVBUSDIS (read-write) Reset:0x000017D7
     : OTG_FS_DEVICE_DVBUSDIS_VBUSDT ( %bbbbbbbbbbbbbbbb -- x addr ) OTG_FS_DEVICE_DVBUSDIS ; \ OTG_FS_DEVICE_DVBUSDIS_VBUSDT, Device VBUS discharge time
   [then]
 
-  defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_DVBUSPULSE_DVBUSP not and [if]
+  [if]
     \ OTG_FS_DEVICE_DVBUSPULSE (read-write) Reset:0x000005B8
     : OTG_FS_DEVICE_DVBUSPULSE_DVBUSP ( %bbbbbbbbbbb -- x addr ) OTG_FS_DEVICE_DVBUSPULSE ; \ OTG_FS_DEVICE_DVBUSPULSE_DVBUSP, Device VBUS pulsing time
   [then]
 
-  execute-defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_DIEPEMPMSK_INEPTXFEM not and [if]
+  execute-defined? use-OTG_FS_DEVICE [if]
     \ OTG_FS_DEVICE_DIEPEMPMSK (read-write) Reset:0x00000000
     : OTG_FS_DEVICE_DIEPEMPMSK_INEPTXFEM ( %bbbbbbbbbbbbbbbb -- x addr ) OTG_FS_DEVICE_DIEPEMPMSK ; \ OTG_FS_DEVICE_DIEPEMPMSK_INEPTXFEM, IN EP Tx FIFO empty interrupt mask  bits
   [then]
 
-  defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_FS_DIEPCTL0_MPSIZ not and [if]
+  [if]
     \ OTG_FS_DEVICE_FS_DIEPCTL0 (multiple-access)  Reset:0x00000000
     : OTG_FS_DEVICE_FS_DIEPCTL0_MPSIZ ( %bb -- x addr ) OTG_FS_DEVICE_FS_DIEPCTL0 ; \ OTG_FS_DEVICE_FS_DIEPCTL0_MPSIZ, Maximum packet size
     : OTG_FS_DEVICE_FS_DIEPCTL0_USBAEP ( -- x addr ) 15 bit OTG_FS_DEVICE_FS_DIEPCTL0 ; \ OTG_FS_DEVICE_FS_DIEPCTL0_USBAEP, USB active endpoint
@@ -8854,7 +8854,7 @@ begin-module memmap
     : OTG_FS_DEVICE_FS_DIEPCTL0_EPENA ( -- x addr ) 31 bit OTG_FS_DEVICE_FS_DIEPCTL0 ; \ OTG_FS_DEVICE_FS_DIEPCTL0_EPENA, Endpoint enable
   [then]
 
-  execute-defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_DIEPCTL1_EPENA not and [if]
+  execute-defined? use-OTG_FS_DEVICE [if]
     \ OTG_FS_DEVICE_DIEPCTL1 (multiple-access)  Reset:0x00000000
     : OTG_FS_DEVICE_DIEPCTL1_EPENA ( -- x addr ) 31 bit OTG_FS_DEVICE_DIEPCTL1 ; \ OTG_FS_DEVICE_DIEPCTL1_EPENA, EPENA
     : OTG_FS_DEVICE_DIEPCTL1_EPDIS ( -- x addr ) 30 bit OTG_FS_DEVICE_DIEPCTL1 ; \ OTG_FS_DEVICE_DIEPCTL1_EPDIS, EPDIS
@@ -8871,7 +8871,7 @@ begin-module memmap
     : OTG_FS_DEVICE_DIEPCTL1_MPSIZ x addr ) OTG_FS_DEVICE_DIEPCTL1 ; \ OTG_FS_DEVICE_DIEPCTL1_MPSIZ, MPSIZ
   [then]
 
-  defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_DIEPCTL2_EPENA not and [if]
+  [if]
     \ OTG_FS_DEVICE_DIEPCTL2 (multiple-access)  Reset:0x00000000
     : OTG_FS_DEVICE_DIEPCTL2_EPENA ( -- x addr ) 31 bit OTG_FS_DEVICE_DIEPCTL2 ; \ OTG_FS_DEVICE_DIEPCTL2_EPENA, EPENA
     : OTG_FS_DEVICE_DIEPCTL2_EPDIS ( -- x addr ) 30 bit OTG_FS_DEVICE_DIEPCTL2 ; \ OTG_FS_DEVICE_DIEPCTL2_EPDIS, EPDIS
@@ -8888,7 +8888,7 @@ begin-module memmap
     : OTG_FS_DEVICE_DIEPCTL2_MPSIZ x addr ) OTG_FS_DEVICE_DIEPCTL2 ; \ OTG_FS_DEVICE_DIEPCTL2_MPSIZ, MPSIZ
   [then]
 
-  execute-defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_DIEPCTL3_EPENA not and [if]
+  execute-defined? use-OTG_FS_DEVICE [if]
     \ OTG_FS_DEVICE_DIEPCTL3 (multiple-access)  Reset:0x00000000
     : OTG_FS_DEVICE_DIEPCTL3_EPENA ( -- x addr ) 31 bit OTG_FS_DEVICE_DIEPCTL3 ; \ OTG_FS_DEVICE_DIEPCTL3_EPENA, EPENA
     : OTG_FS_DEVICE_DIEPCTL3_EPDIS ( -- x addr ) 30 bit OTG_FS_DEVICE_DIEPCTL3 ; \ OTG_FS_DEVICE_DIEPCTL3_EPDIS, EPDIS
@@ -8905,7 +8905,7 @@ begin-module memmap
     : OTG_FS_DEVICE_DIEPCTL3_MPSIZ x addr ) OTG_FS_DEVICE_DIEPCTL3 ; \ OTG_FS_DEVICE_DIEPCTL3_MPSIZ, MPSIZ
   [then]
 
-  defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_DOEPCTL0_EPENA not and [if]
+  [if]
     \ OTG_FS_DEVICE_DOEPCTL0 (multiple-access)  Reset:0x00008000
     : OTG_FS_DEVICE_DOEPCTL0_EPENA ( -- x addr ) 31 bit OTG_FS_DEVICE_DOEPCTL0 ; \ OTG_FS_DEVICE_DOEPCTL0_EPENA, EPENA
     : OTG_FS_DEVICE_DOEPCTL0_EPDIS ( -- x addr ) 30 bit OTG_FS_DEVICE_DOEPCTL0 ; \ OTG_FS_DEVICE_DOEPCTL0_EPDIS, EPDIS
@@ -8919,7 +8919,7 @@ begin-module memmap
     : OTG_FS_DEVICE_DOEPCTL0_MPSIZ ( %bb -- x addr ) OTG_FS_DEVICE_DOEPCTL0 ; \ OTG_FS_DEVICE_DOEPCTL0_MPSIZ, MPSIZ
   [then]
 
-  execute-defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_DOEPCTL1_EPENA not and [if]
+  execute-defined? use-OTG_FS_DEVICE [if]
     \ OTG_FS_DEVICE_DOEPCTL1 (multiple-access)  Reset:0x00000000
     : OTG_FS_DEVICE_DOEPCTL1_EPENA ( -- x addr ) 31 bit OTG_FS_DEVICE_DOEPCTL1 ; \ OTG_FS_DEVICE_DOEPCTL1_EPENA, EPENA
     : OTG_FS_DEVICE_DOEPCTL1_EPDIS ( -- x addr ) 30 bit OTG_FS_DEVICE_DOEPCTL1 ; \ OTG_FS_DEVICE_DOEPCTL1_EPDIS, EPDIS
@@ -8936,7 +8936,7 @@ begin-module memmap
     : OTG_FS_DEVICE_DOEPCTL1_MPSIZ x addr ) OTG_FS_DEVICE_DOEPCTL1 ; \ OTG_FS_DEVICE_DOEPCTL1_MPSIZ, MPSIZ
   [then]
 
-  defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_DOEPCTL2_EPENA not and [if]
+  [if]
     \ OTG_FS_DEVICE_DOEPCTL2 (multiple-access)  Reset:0x00000000
     : OTG_FS_DEVICE_DOEPCTL2_EPENA ( -- x addr ) 31 bit OTG_FS_DEVICE_DOEPCTL2 ; \ OTG_FS_DEVICE_DOEPCTL2_EPENA, EPENA
     : OTG_FS_DEVICE_DOEPCTL2_EPDIS ( -- x addr ) 30 bit OTG_FS_DEVICE_DOEPCTL2 ; \ OTG_FS_DEVICE_DOEPCTL2_EPDIS, EPDIS
@@ -8953,7 +8953,7 @@ begin-module memmap
     : OTG_FS_DEVICE_DOEPCTL2_MPSIZ x addr ) OTG_FS_DEVICE_DOEPCTL2 ; \ OTG_FS_DEVICE_DOEPCTL2_MPSIZ, MPSIZ
   [then]
 
-  execute-defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_DOEPCTL3_EPENA not and [if]
+  execute-defined? use-OTG_FS_DEVICE [if]
     \ OTG_FS_DEVICE_DOEPCTL3 (multiple-access)  Reset:0x00000000
     : OTG_FS_DEVICE_DOEPCTL3_EPENA ( -- x addr ) 31 bit OTG_FS_DEVICE_DOEPCTL3 ; \ OTG_FS_DEVICE_DOEPCTL3_EPENA, EPENA
     : OTG_FS_DEVICE_DOEPCTL3_EPDIS ( -- x addr ) 30 bit OTG_FS_DEVICE_DOEPCTL3 ; \ OTG_FS_DEVICE_DOEPCTL3_EPDIS, EPDIS
@@ -8970,7 +8970,7 @@ begin-module memmap
     : OTG_FS_DEVICE_DOEPCTL3_MPSIZ x addr ) OTG_FS_DEVICE_DOEPCTL3 ; \ OTG_FS_DEVICE_DOEPCTL3_MPSIZ, MPSIZ
   [then]
 
-  defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_DIEPINT0_TXFE not and [if]
+  [if]
     \ OTG_FS_DEVICE_DIEPINT0 (multiple-access)  Reset:0x00000080
     : OTG_FS_DEVICE_DIEPINT0_TXFE ( -- x addr ) 7 bit OTG_FS_DEVICE_DIEPINT0 ; \ OTG_FS_DEVICE_DIEPINT0_TXFE, TXFE
     : OTG_FS_DEVICE_DIEPINT0_INEPNE ( -- x addr ) 6 bit OTG_FS_DEVICE_DIEPINT0 ; \ OTG_FS_DEVICE_DIEPINT0_INEPNE, INEPNE
@@ -8980,7 +8980,7 @@ begin-module memmap
     : OTG_FS_DEVICE_DIEPINT0_XFRC ( -- x addr ) 0 bit OTG_FS_DEVICE_DIEPINT0 ; \ OTG_FS_DEVICE_DIEPINT0_XFRC, XFRC
   [then]
 
-  execute-defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_DIEPINT1_TXFE not and [if]
+  execute-defined? use-OTG_FS_DEVICE [if]
     \ OTG_FS_DEVICE_DIEPINT1 (multiple-access)  Reset:0x00000080
     : OTG_FS_DEVICE_DIEPINT1_TXFE ( -- x addr ) 7 bit OTG_FS_DEVICE_DIEPINT1 ; \ OTG_FS_DEVICE_DIEPINT1_TXFE, TXFE
     : OTG_FS_DEVICE_DIEPINT1_INEPNE ( -- x addr ) 6 bit OTG_FS_DEVICE_DIEPINT1 ; \ OTG_FS_DEVICE_DIEPINT1_INEPNE, INEPNE
@@ -8990,7 +8990,7 @@ begin-module memmap
     : OTG_FS_DEVICE_DIEPINT1_XFRC ( -- x addr ) 0 bit OTG_FS_DEVICE_DIEPINT1 ; \ OTG_FS_DEVICE_DIEPINT1_XFRC, XFRC
   [then]
 
-  defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_DIEPINT2_TXFE not and [if]
+  [if]
     \ OTG_FS_DEVICE_DIEPINT2 (multiple-access)  Reset:0x00000080
     : OTG_FS_DEVICE_DIEPINT2_TXFE ( -- x addr ) 7 bit OTG_FS_DEVICE_DIEPINT2 ; \ OTG_FS_DEVICE_DIEPINT2_TXFE, TXFE
     : OTG_FS_DEVICE_DIEPINT2_INEPNE ( -- x addr ) 6 bit OTG_FS_DEVICE_DIEPINT2 ; \ OTG_FS_DEVICE_DIEPINT2_INEPNE, INEPNE
@@ -9000,7 +9000,7 @@ begin-module memmap
     : OTG_FS_DEVICE_DIEPINT2_XFRC ( -- x addr ) 0 bit OTG_FS_DEVICE_DIEPINT2 ; \ OTG_FS_DEVICE_DIEPINT2_XFRC, XFRC
   [then]
 
-  execute-defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_DIEPINT3_TXFE not and [if]
+  execute-defined? use-OTG_FS_DEVICE [if]
     \ OTG_FS_DEVICE_DIEPINT3 (multiple-access)  Reset:0x00000080
     : OTG_FS_DEVICE_DIEPINT3_TXFE ( -- x addr ) 7 bit OTG_FS_DEVICE_DIEPINT3 ; \ OTG_FS_DEVICE_DIEPINT3_TXFE, TXFE
     : OTG_FS_DEVICE_DIEPINT3_INEPNE ( -- x addr ) 6 bit OTG_FS_DEVICE_DIEPINT3 ; \ OTG_FS_DEVICE_DIEPINT3_INEPNE, INEPNE
@@ -9010,7 +9010,7 @@ begin-module memmap
     : OTG_FS_DEVICE_DIEPINT3_XFRC ( -- x addr ) 0 bit OTG_FS_DEVICE_DIEPINT3 ; \ OTG_FS_DEVICE_DIEPINT3_XFRC, XFRC
   [then]
 
-  defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_DOEPINT0_B2BSTUP not and [if]
+  [if]
     \ OTG_FS_DEVICE_DOEPINT0 (read-write) Reset:0x00000080
     : OTG_FS_DEVICE_DOEPINT0_B2BSTUP ( -- x addr ) 6 bit OTG_FS_DEVICE_DOEPINT0 ; \ OTG_FS_DEVICE_DOEPINT0_B2BSTUP, B2BSTUP
     : OTG_FS_DEVICE_DOEPINT0_OTEPDIS ( -- x addr ) 4 bit OTG_FS_DEVICE_DOEPINT0 ; \ OTG_FS_DEVICE_DOEPINT0_OTEPDIS, OTEPDIS
@@ -9019,7 +9019,7 @@ begin-module memmap
     : OTG_FS_DEVICE_DOEPINT0_XFRC ( -- x addr ) 0 bit OTG_FS_DEVICE_DOEPINT0 ; \ OTG_FS_DEVICE_DOEPINT0_XFRC, XFRC
   [then]
 
-  execute-defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_DOEPINT1_B2BSTUP not and [if]
+  execute-defined? use-OTG_FS_DEVICE [if]
     \ OTG_FS_DEVICE_DOEPINT1 (read-write) Reset:0x00000080
     : OTG_FS_DEVICE_DOEPINT1_B2BSTUP ( -- x addr ) 6 bit OTG_FS_DEVICE_DOEPINT1 ; \ OTG_FS_DEVICE_DOEPINT1_B2BSTUP, B2BSTUP
     : OTG_FS_DEVICE_DOEPINT1_OTEPDIS ( -- x addr ) 4 bit OTG_FS_DEVICE_DOEPINT1 ; \ OTG_FS_DEVICE_DOEPINT1_OTEPDIS, OTEPDIS
@@ -9028,7 +9028,7 @@ begin-module memmap
     : OTG_FS_DEVICE_DOEPINT1_XFRC ( -- x addr ) 0 bit OTG_FS_DEVICE_DOEPINT1 ; \ OTG_FS_DEVICE_DOEPINT1_XFRC, XFRC
   [then]
 
-  defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_DOEPINT2_B2BSTUP not and [if]
+  [if]
     \ OTG_FS_DEVICE_DOEPINT2 (read-write) Reset:0x00000080
     : OTG_FS_DEVICE_DOEPINT2_B2BSTUP ( -- x addr ) 6 bit OTG_FS_DEVICE_DOEPINT2 ; \ OTG_FS_DEVICE_DOEPINT2_B2BSTUP, B2BSTUP
     : OTG_FS_DEVICE_DOEPINT2_OTEPDIS ( -- x addr ) 4 bit OTG_FS_DEVICE_DOEPINT2 ; \ OTG_FS_DEVICE_DOEPINT2_OTEPDIS, OTEPDIS
@@ -9037,7 +9037,7 @@ begin-module memmap
     : OTG_FS_DEVICE_DOEPINT2_XFRC ( -- x addr ) 0 bit OTG_FS_DEVICE_DOEPINT2 ; \ OTG_FS_DEVICE_DOEPINT2_XFRC, XFRC
   [then]
 
-  execute-defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_DOEPINT3_B2BSTUP not and [if]
+  execute-defined? use-OTG_FS_DEVICE [if]
     \ OTG_FS_DEVICE_DOEPINT3 (read-write) Reset:0x00000080
     : OTG_FS_DEVICE_DOEPINT3_B2BSTUP ( -- x addr ) 6 bit OTG_FS_DEVICE_DOEPINT3 ; \ OTG_FS_DEVICE_DOEPINT3_B2BSTUP, B2BSTUP
     : OTG_FS_DEVICE_DOEPINT3_OTEPDIS ( -- x addr ) 4 bit OTG_FS_DEVICE_DOEPINT3 ; \ OTG_FS_DEVICE_DOEPINT3_OTEPDIS, OTEPDIS
@@ -9046,89 +9046,89 @@ begin-module memmap
     : OTG_FS_DEVICE_DOEPINT3_XFRC ( -- x addr ) 0 bit OTG_FS_DEVICE_DOEPINT3 ; \ OTG_FS_DEVICE_DOEPINT3_XFRC, XFRC
   [then]
 
-  defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_DIEPTSIZ0_PKTCNT not and [if]
+  [if]
     \ OTG_FS_DEVICE_DIEPTSIZ0 (read-write) Reset:0x00000000
     : OTG_FS_DEVICE_DIEPTSIZ0_PKTCNT ( %bb -- x addr ) 19 lshift OTG_FS_DEVICE_DIEPTSIZ0 ; \ OTG_FS_DEVICE_DIEPTSIZ0_PKTCNT, Packet count
     : OTG_FS_DEVICE_DIEPTSIZ0_XFRSIZ ( %bbbbbbb -- x addr ) OTG_FS_DEVICE_DIEPTSIZ0 ; \ OTG_FS_DEVICE_DIEPTSIZ0_XFRSIZ, Transfer size
   [then]
 
-  execute-defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_DOEPTSIZ0_STUPCNT not and [if]
+  execute-defined? use-OTG_FS_DEVICE [if]
     \ OTG_FS_DEVICE_DOEPTSIZ0 (read-write) Reset:0x00000000
     : OTG_FS_DEVICE_DOEPTSIZ0_STUPCNT ( %bb -- x addr ) 29 lshift OTG_FS_DEVICE_DOEPTSIZ0 ; \ OTG_FS_DEVICE_DOEPTSIZ0_STUPCNT, SETUP packet count
     : OTG_FS_DEVICE_DOEPTSIZ0_PKTCNT ( -- x addr ) 19 bit OTG_FS_DEVICE_DOEPTSIZ0 ; \ OTG_FS_DEVICE_DOEPTSIZ0_PKTCNT, Packet count
     : OTG_FS_DEVICE_DOEPTSIZ0_XFRSIZ ( %bbbbbbb -- x addr ) OTG_FS_DEVICE_DOEPTSIZ0 ; \ OTG_FS_DEVICE_DOEPTSIZ0_XFRSIZ, Transfer size
   [then]
 
-  defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_DIEPTSIZ1_MCNT not and [if]
+  [if]
     \ OTG_FS_DEVICE_DIEPTSIZ1 (read-write) Reset:0x00000000
     : OTG_FS_DEVICE_DIEPTSIZ1_MCNT ( %bb -- x addr ) 29 lshift OTG_FS_DEVICE_DIEPTSIZ1 ; \ OTG_FS_DEVICE_DIEPTSIZ1_MCNT, Multi count
     : OTG_FS_DEVICE_DIEPTSIZ1_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_FS_DEVICE_DIEPTSIZ1 ; \ OTG_FS_DEVICE_DIEPTSIZ1_PKTCNT, Packet count
     : OTG_FS_DEVICE_DIEPTSIZ1_XFRSIZ x addr ) OTG_FS_DEVICE_DIEPTSIZ1 ; \ OTG_FS_DEVICE_DIEPTSIZ1_XFRSIZ, Transfer size
   [then]
 
-  execute-defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_DIEPTSIZ2_MCNT not and [if]
+  execute-defined? use-OTG_FS_DEVICE [if]
     \ OTG_FS_DEVICE_DIEPTSIZ2 (read-write) Reset:0x00000000
     : OTG_FS_DEVICE_DIEPTSIZ2_MCNT ( %bb -- x addr ) 29 lshift OTG_FS_DEVICE_DIEPTSIZ2 ; \ OTG_FS_DEVICE_DIEPTSIZ2_MCNT, Multi count
     : OTG_FS_DEVICE_DIEPTSIZ2_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_FS_DEVICE_DIEPTSIZ2 ; \ OTG_FS_DEVICE_DIEPTSIZ2_PKTCNT, Packet count
     : OTG_FS_DEVICE_DIEPTSIZ2_XFRSIZ x addr ) OTG_FS_DEVICE_DIEPTSIZ2 ; \ OTG_FS_DEVICE_DIEPTSIZ2_XFRSIZ, Transfer size
   [then]
 
-  defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_DIEPTSIZ3_MCNT not and [if]
+  [if]
     \ OTG_FS_DEVICE_DIEPTSIZ3 (read-write) Reset:0x00000000
     : OTG_FS_DEVICE_DIEPTSIZ3_MCNT ( %bb -- x addr ) 29 lshift OTG_FS_DEVICE_DIEPTSIZ3 ; \ OTG_FS_DEVICE_DIEPTSIZ3_MCNT, Multi count
     : OTG_FS_DEVICE_DIEPTSIZ3_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_FS_DEVICE_DIEPTSIZ3 ; \ OTG_FS_DEVICE_DIEPTSIZ3_PKTCNT, Packet count
     : OTG_FS_DEVICE_DIEPTSIZ3_XFRSIZ x addr ) OTG_FS_DEVICE_DIEPTSIZ3 ; \ OTG_FS_DEVICE_DIEPTSIZ3_XFRSIZ, Transfer size
   [then]
 
-  execute-defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_DTXFSTS0_INEPTFSAV? not and [if]
+  execute-defined? use-OTG_FS_DEVICE [if]
     \ OTG_FS_DEVICE_DTXFSTS0 (read-only) Reset:0x00000000
     : OTG_FS_DEVICE_DTXFSTS0_INEPTFSAV? ( --  x ) OTG_FS_DEVICE_DTXFSTS0 @ ; \ OTG_FS_DEVICE_DTXFSTS0_INEPTFSAV, IN endpoint TxFIFO space  available
   [then]
 
-  defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_DTXFSTS1_INEPTFSAV? not and [if]
+  [if]
     \ OTG_FS_DEVICE_DTXFSTS1 (read-only) Reset:0x00000000
     : OTG_FS_DEVICE_DTXFSTS1_INEPTFSAV? ( --  x ) OTG_FS_DEVICE_DTXFSTS1 @ ; \ OTG_FS_DEVICE_DTXFSTS1_INEPTFSAV, IN endpoint TxFIFO space  available
   [then]
 
-  execute-defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_DTXFSTS2_INEPTFSAV? not and [if]
+  execute-defined? use-OTG_FS_DEVICE [if]
     \ OTG_FS_DEVICE_DTXFSTS2 (read-only) Reset:0x00000000
     : OTG_FS_DEVICE_DTXFSTS2_INEPTFSAV? ( --  x ) OTG_FS_DEVICE_DTXFSTS2 @ ; \ OTG_FS_DEVICE_DTXFSTS2_INEPTFSAV, IN endpoint TxFIFO space  available
   [then]
 
-  defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_DTXFSTS3_INEPTFSAV? not and [if]
+  [if]
     \ OTG_FS_DEVICE_DTXFSTS3 (read-only) Reset:0x00000000
     : OTG_FS_DEVICE_DTXFSTS3_INEPTFSAV? ( --  x ) OTG_FS_DEVICE_DTXFSTS3 @ ; \ OTG_FS_DEVICE_DTXFSTS3_INEPTFSAV, IN endpoint TxFIFO space  available
   [then]
 
-  execute-defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_DOEPTSIZ1_RXDPID_STUPCNT not and [if]
+  execute-defined? use-OTG_FS_DEVICE [if]
     \ OTG_FS_DEVICE_DOEPTSIZ1 (read-write) Reset:0x00000000
     : OTG_FS_DEVICE_DOEPTSIZ1_RXDPID_STUPCNT ( %bb -- x addr ) 29 lshift OTG_FS_DEVICE_DOEPTSIZ1 ; \ OTG_FS_DEVICE_DOEPTSIZ1_RXDPID_STUPCNT, Received data PID/SETUP packet  count
     : OTG_FS_DEVICE_DOEPTSIZ1_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_FS_DEVICE_DOEPTSIZ1 ; \ OTG_FS_DEVICE_DOEPTSIZ1_PKTCNT, Packet count
     : OTG_FS_DEVICE_DOEPTSIZ1_XFRSIZ x addr ) OTG_FS_DEVICE_DOEPTSIZ1 ; \ OTG_FS_DEVICE_DOEPTSIZ1_XFRSIZ, Transfer size
   [then]
 
-  defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_DOEPTSIZ2_RXDPID_STUPCNT not and [if]
+  [if]
     \ OTG_FS_DEVICE_DOEPTSIZ2 (read-write) Reset:0x00000000
     : OTG_FS_DEVICE_DOEPTSIZ2_RXDPID_STUPCNT ( %bb -- x addr ) 29 lshift OTG_FS_DEVICE_DOEPTSIZ2 ; \ OTG_FS_DEVICE_DOEPTSIZ2_RXDPID_STUPCNT, Received data PID/SETUP packet  count
     : OTG_FS_DEVICE_DOEPTSIZ2_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_FS_DEVICE_DOEPTSIZ2 ; \ OTG_FS_DEVICE_DOEPTSIZ2_PKTCNT, Packet count
     : OTG_FS_DEVICE_DOEPTSIZ2_XFRSIZ x addr ) OTG_FS_DEVICE_DOEPTSIZ2 ; \ OTG_FS_DEVICE_DOEPTSIZ2_XFRSIZ, Transfer size
   [then]
 
-  execute-defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE_DOEPTSIZ3_RXDPID_STUPCNT not and [if]
+  execute-defined? use-OTG_FS_DEVICE [if]
     \ OTG_FS_DEVICE_DOEPTSIZ3 (read-write) Reset:0x00000000
     : OTG_FS_DEVICE_DOEPTSIZ3_RXDPID_STUPCNT ( %bb -- x addr ) 29 lshift OTG_FS_DEVICE_DOEPTSIZ3 ; \ OTG_FS_DEVICE_DOEPTSIZ3_RXDPID_STUPCNT, Received data PID/SETUP packet  count
     : OTG_FS_DEVICE_DOEPTSIZ3_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_FS_DEVICE_DOEPTSIZ3 ; \ OTG_FS_DEVICE_DOEPTSIZ3_PKTCNT, Packet count
     : OTG_FS_DEVICE_DOEPTSIZ3_XFRSIZ x addr ) OTG_FS_DEVICE_DOEPTSIZ3 ; \ OTG_FS_DEVICE_DOEPTSIZ3_XFRSIZ, Transfer size
   [then]
 
-  defined? use-OTG_FS_PWRCLK defined? OTG_FS_PWRCLK_FS_PCGCCTL_STPPCLK not and [if]
+  [if]
     \ OTG_FS_PWRCLK_FS_PCGCCTL (read-write) Reset:0x00000000
     : OTG_FS_PWRCLK_FS_PCGCCTL_STPPCLK ( -- x addr ) 0 bit OTG_FS_PWRCLK_FS_PCGCCTL ; \ OTG_FS_PWRCLK_FS_PCGCCTL_STPPCLK, Stop PHY clock
     : OTG_FS_PWRCLK_FS_PCGCCTL_GATEHCLK ( -- x addr ) 1 bit OTG_FS_PWRCLK_FS_PCGCCTL ; \ OTG_FS_PWRCLK_FS_PCGCCTL_GATEHCLK, Gate HCLK
     : OTG_FS_PWRCLK_FS_PCGCCTL_PHYSUSP ( -- x addr ) 4 bit OTG_FS_PWRCLK_FS_PCGCCTL ; \ OTG_FS_PWRCLK_FS_PCGCCTL_PHYSUSP, PHY Suspended
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_MCR_DBF not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_MCR (read-write) Reset:0x00010002
     : CAN1_MCR_DBF ( -- x addr ) 16 bit CAN1_MCR ; \ CAN1_MCR_DBF, DBF
     : CAN1_MCR_RESET ( -- x addr ) 15 bit CAN1_MCR ; \ CAN1_MCR_RESET, RESET
@@ -9142,7 +9142,7 @@ begin-module memmap
     : CAN1_MCR_INRQ ( -- x addr ) 0 bit CAN1_MCR ; \ CAN1_MCR_INRQ, INRQ
   [then]
 
-  defined? use-CAN1 defined? CAN1_MSR_RX not and [if]
+  [if]
     \ CAN1_MSR (multiple-access)  Reset:0x00000C02
     : CAN1_MSR_RX ( -- x addr ) 11 bit CAN1_MSR ; \ CAN1_MSR_RX, RX
     : CAN1_MSR_SAMP ( -- x addr ) 10 bit CAN1_MSR ; \ CAN1_MSR_SAMP, SAMP
@@ -9155,7 +9155,7 @@ begin-module memmap
     : CAN1_MSR_INAK ( -- x addr ) 0 bit CAN1_MSR ; \ CAN1_MSR_INAK, INAK
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_TSR_LOW2? not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_TSR (multiple-access)  Reset:0x1C000000
     : CAN1_TSR_LOW2? ( -- 1|0 ) 31 bit CAN1_TSR bit@ ; \ CAN1_TSR_LOW2, Lowest priority flag for mailbox  2
     : CAN1_TSR_LOW1? ( -- 1|0 ) 30 bit CAN1_TSR bit@ ; \ CAN1_TSR_LOW1, Lowest priority flag for mailbox  1
@@ -9181,7 +9181,7 @@ begin-module memmap
     : CAN1_TSR_RQCP0 ( -- x addr ) 0 bit CAN1_TSR ; \ CAN1_TSR_RQCP0, RQCP0
   [then]
 
-  defined? use-CAN1 defined? CAN1_RF0R_RFOM0 not and [if]
+  [if]
     \ CAN1_RF0R (multiple-access)  Reset:0x00000000
     : CAN1_RF0R_RFOM0 ( -- x addr ) 5 bit CAN1_RF0R ; \ CAN1_RF0R_RFOM0, RFOM0
     : CAN1_RF0R_FOVR0 ( -- x addr ) 4 bit CAN1_RF0R ; \ CAN1_RF0R_FOVR0, FOVR0
@@ -9189,7 +9189,7 @@ begin-module memmap
     : CAN1_RF0R_FMP0 ( %bb -- x addr ) CAN1_RF0R ; \ CAN1_RF0R_FMP0, FMP0
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_RF1R_RFOM1 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_RF1R (multiple-access)  Reset:0x00000000
     : CAN1_RF1R_RFOM1 ( -- x addr ) 5 bit CAN1_RF1R ; \ CAN1_RF1R_RFOM1, RFOM1
     : CAN1_RF1R_FOVR1 ( -- x addr ) 4 bit CAN1_RF1R ; \ CAN1_RF1R_FOVR1, FOVR1
@@ -9197,7 +9197,7 @@ begin-module memmap
     : CAN1_RF1R_FMP1 ( %bb -- x addr ) CAN1_RF1R ; \ CAN1_RF1R_FMP1, FMP1
   [then]
 
-  defined? use-CAN1 defined? CAN1_IER_SLKIE not and [if]
+  [if]
     \ CAN1_IER (read-write) Reset:0x00000000
     : CAN1_IER_SLKIE ( -- x addr ) 17 bit CAN1_IER ; \ CAN1_IER_SLKIE, SLKIE
     : CAN1_IER_WKUIE ( -- x addr ) 16 bit CAN1_IER ; \ CAN1_IER_WKUIE, WKUIE
@@ -9215,7 +9215,7 @@ begin-module memmap
     : CAN1_IER_TMEIE ( -- x addr ) 0 bit CAN1_IER ; \ CAN1_IER_TMEIE, TMEIE
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_ESR_REC not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_ESR (multiple-access)  Reset:0x00000000
     : CAN1_ESR_REC ( %bbbbbbbb -- x addr ) 24 lshift CAN1_ESR ; \ CAN1_ESR_REC, REC
     : CAN1_ESR_TEC ( %bbbbbbbb -- x addr ) 16 lshift CAN1_ESR ; \ CAN1_ESR_TEC, TEC
@@ -9225,7 +9225,7 @@ begin-module memmap
     : CAN1_ESR_EWGF ( -- x addr ) 0 bit CAN1_ESR ; \ CAN1_ESR_EWGF, EWGF
   [then]
 
-  defined? use-CAN1 defined? CAN1_BTR_SILM not and [if]
+  [if]
     \ CAN1_BTR (read-write) Reset:0x00000000
     : CAN1_BTR_SILM ( -- x addr ) 31 bit CAN1_BTR ; \ CAN1_BTR_SILM, SILM
     : CAN1_BTR_LBKM ( -- x addr ) 30 bit CAN1_BTR ; \ CAN1_BTR_LBKM, LBKM
@@ -9235,7 +9235,7 @@ begin-module memmap
     : CAN1_BTR_BRP ( %bbbbbbbbbb -- x addr ) CAN1_BTR ; \ CAN1_BTR_BRP, BRP
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_TI0R_STID not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_TI0R (read-write) Reset:0x00000000
     : CAN1_TI0R_STID x addr ) 21 lshift CAN1_TI0R ; \ CAN1_TI0R_STID, STID
     : CAN1_TI0R_EXID x addr ) 3 lshift CAN1_TI0R ; \ CAN1_TI0R_EXID, EXID
@@ -9244,14 +9244,14 @@ begin-module memmap
     : CAN1_TI0R_TXRQ ( -- x addr ) 0 bit CAN1_TI0R ; \ CAN1_TI0R_TXRQ, TXRQ
   [then]
 
-  defined? use-CAN1 defined? CAN1_TDT0R_TIME not and [if]
+  [if]
     \ CAN1_TDT0R (read-write) Reset:0x00000000
     : CAN1_TDT0R_TIME ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift CAN1_TDT0R ; \ CAN1_TDT0R_TIME, TIME
     : CAN1_TDT0R_TGT ( -- x addr ) 8 bit CAN1_TDT0R ; \ CAN1_TDT0R_TGT, TGT
     : CAN1_TDT0R_DLC ( %bbbb -- x addr ) CAN1_TDT0R ; \ CAN1_TDT0R_DLC, DLC
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_TDL0R_DATA3 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_TDL0R (read-write) Reset:0x00000000
     : CAN1_TDL0R_DATA3 ( %bbbbbbbb -- x addr ) 24 lshift CAN1_TDL0R ; \ CAN1_TDL0R_DATA3, DATA3
     : CAN1_TDL0R_DATA2 ( %bbbbbbbb -- x addr ) 16 lshift CAN1_TDL0R ; \ CAN1_TDL0R_DATA2, DATA2
@@ -9259,7 +9259,7 @@ begin-module memmap
     : CAN1_TDL0R_DATA0 ( %bbbbbbbb -- x addr ) CAN1_TDL0R ; \ CAN1_TDL0R_DATA0, DATA0
   [then]
 
-  defined? use-CAN1 defined? CAN1_TDH0R_DATA7 not and [if]
+  [if]
     \ CAN1_TDH0R (read-write) Reset:0x00000000
     : CAN1_TDH0R_DATA7 ( %bbbbbbbb -- x addr ) 24 lshift CAN1_TDH0R ; \ CAN1_TDH0R_DATA7, DATA7
     : CAN1_TDH0R_DATA6 ( %bbbbbbbb -- x addr ) 16 lshift CAN1_TDH0R ; \ CAN1_TDH0R_DATA6, DATA6
@@ -9267,7 +9267,7 @@ begin-module memmap
     : CAN1_TDH0R_DATA4 ( %bbbbbbbb -- x addr ) CAN1_TDH0R ; \ CAN1_TDH0R_DATA4, DATA4
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_TI1R_STID not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_TI1R (read-write) Reset:0x00000000
     : CAN1_TI1R_STID x addr ) 21 lshift CAN1_TI1R ; \ CAN1_TI1R_STID, STID
     : CAN1_TI1R_EXID x addr ) 3 lshift CAN1_TI1R ; \ CAN1_TI1R_EXID, EXID
@@ -9276,14 +9276,14 @@ begin-module memmap
     : CAN1_TI1R_TXRQ ( -- x addr ) 0 bit CAN1_TI1R ; \ CAN1_TI1R_TXRQ, TXRQ
   [then]
 
-  defined? use-CAN1 defined? CAN1_TDT1R_TIME not and [if]
+  [if]
     \ CAN1_TDT1R (read-write) Reset:0x00000000
     : CAN1_TDT1R_TIME ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift CAN1_TDT1R ; \ CAN1_TDT1R_TIME, TIME
     : CAN1_TDT1R_TGT ( -- x addr ) 8 bit CAN1_TDT1R ; \ CAN1_TDT1R_TGT, TGT
     : CAN1_TDT1R_DLC ( %bbbb -- x addr ) CAN1_TDT1R ; \ CAN1_TDT1R_DLC, DLC
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_TDL1R_DATA3 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_TDL1R (read-write) Reset:0x00000000
     : CAN1_TDL1R_DATA3 ( %bbbbbbbb -- x addr ) 24 lshift CAN1_TDL1R ; \ CAN1_TDL1R_DATA3, DATA3
     : CAN1_TDL1R_DATA2 ( %bbbbbbbb -- x addr ) 16 lshift CAN1_TDL1R ; \ CAN1_TDL1R_DATA2, DATA2
@@ -9291,7 +9291,7 @@ begin-module memmap
     : CAN1_TDL1R_DATA0 ( %bbbbbbbb -- x addr ) CAN1_TDL1R ; \ CAN1_TDL1R_DATA0, DATA0
   [then]
 
-  defined? use-CAN1 defined? CAN1_TDH1R_DATA7 not and [if]
+  [if]
     \ CAN1_TDH1R (read-write) Reset:0x00000000
     : CAN1_TDH1R_DATA7 ( %bbbbbbbb -- x addr ) 24 lshift CAN1_TDH1R ; \ CAN1_TDH1R_DATA7, DATA7
     : CAN1_TDH1R_DATA6 ( %bbbbbbbb -- x addr ) 16 lshift CAN1_TDH1R ; \ CAN1_TDH1R_DATA6, DATA6
@@ -9299,7 +9299,7 @@ begin-module memmap
     : CAN1_TDH1R_DATA4 ( %bbbbbbbb -- x addr ) CAN1_TDH1R ; \ CAN1_TDH1R_DATA4, DATA4
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_TI2R_STID not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_TI2R (read-write) Reset:0x00000000
     : CAN1_TI2R_STID x addr ) 21 lshift CAN1_TI2R ; \ CAN1_TI2R_STID, STID
     : CAN1_TI2R_EXID x addr ) 3 lshift CAN1_TI2R ; \ CAN1_TI2R_EXID, EXID
@@ -9308,14 +9308,14 @@ begin-module memmap
     : CAN1_TI2R_TXRQ ( -- x addr ) 0 bit CAN1_TI2R ; \ CAN1_TI2R_TXRQ, TXRQ
   [then]
 
-  defined? use-CAN1 defined? CAN1_TDT2R_TIME not and [if]
+  [if]
     \ CAN1_TDT2R (read-write) Reset:0x00000000
     : CAN1_TDT2R_TIME ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift CAN1_TDT2R ; \ CAN1_TDT2R_TIME, TIME
     : CAN1_TDT2R_TGT ( -- x addr ) 8 bit CAN1_TDT2R ; \ CAN1_TDT2R_TGT, TGT
     : CAN1_TDT2R_DLC ( %bbbb -- x addr ) CAN1_TDT2R ; \ CAN1_TDT2R_DLC, DLC
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_TDL2R_DATA3 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_TDL2R (read-write) Reset:0x00000000
     : CAN1_TDL2R_DATA3 ( %bbbbbbbb -- x addr ) 24 lshift CAN1_TDL2R ; \ CAN1_TDL2R_DATA3, DATA3
     : CAN1_TDL2R_DATA2 ( %bbbbbbbb -- x addr ) 16 lshift CAN1_TDL2R ; \ CAN1_TDL2R_DATA2, DATA2
@@ -9323,7 +9323,7 @@ begin-module memmap
     : CAN1_TDL2R_DATA0 ( %bbbbbbbb -- x addr ) CAN1_TDL2R ; \ CAN1_TDL2R_DATA0, DATA0
   [then]
 
-  defined? use-CAN1 defined? CAN1_TDH2R_DATA7 not and [if]
+  [if]
     \ CAN1_TDH2R (read-write) Reset:0x00000000
     : CAN1_TDH2R_DATA7 ( %bbbbbbbb -- x addr ) 24 lshift CAN1_TDH2R ; \ CAN1_TDH2R_DATA7, DATA7
     : CAN1_TDH2R_DATA6 ( %bbbbbbbb -- x addr ) 16 lshift CAN1_TDH2R ; \ CAN1_TDH2R_DATA6, DATA6
@@ -9331,7 +9331,7 @@ begin-module memmap
     : CAN1_TDH2R_DATA4 ( %bbbbbbbb -- x addr ) CAN1_TDH2R ; \ CAN1_TDH2R_DATA4, DATA4
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_RI0R_STID? not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_RI0R (read-only) Reset:0x00000000
     : CAN1_RI0R_STID? ( --  x ) 21 lshift CAN1_RI0R @ ; \ CAN1_RI0R_STID, STID
     : CAN1_RI0R_EXID? ( --  x ) 3 lshift CAN1_RI0R @ ; \ CAN1_RI0R_EXID, EXID
@@ -9339,14 +9339,14 @@ begin-module memmap
     : CAN1_RI0R_RTR? ( --  1|0 ) 1 bit CAN1_RI0R bit@ ; \ CAN1_RI0R_RTR, RTR
   [then]
 
-  defined? use-CAN1 defined? CAN1_RDT0R_TIME? not and [if]
+  [if]
     \ CAN1_RDT0R (read-only) Reset:0x00000000
     : CAN1_RDT0R_TIME? ( --  x ) 16 lshift CAN1_RDT0R @ ; \ CAN1_RDT0R_TIME, TIME
     : CAN1_RDT0R_FMI? ( --  x ) 8 lshift CAN1_RDT0R @ ; \ CAN1_RDT0R_FMI, FMI
     : CAN1_RDT0R_DLC? ( --  x ) CAN1_RDT0R @ ; \ CAN1_RDT0R_DLC, DLC
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_RDL0R_DATA3? not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_RDL0R (read-only) Reset:0x00000000
     : CAN1_RDL0R_DATA3? ( --  x ) 24 lshift CAN1_RDL0R @ ; \ CAN1_RDL0R_DATA3, DATA3
     : CAN1_RDL0R_DATA2? ( --  x ) 16 lshift CAN1_RDL0R @ ; \ CAN1_RDL0R_DATA2, DATA2
@@ -9354,7 +9354,7 @@ begin-module memmap
     : CAN1_RDL0R_DATA0? ( --  x ) CAN1_RDL0R @ ; \ CAN1_RDL0R_DATA0, DATA0
   [then]
 
-  defined? use-CAN1 defined? CAN1_RDH0R_DATA7? not and [if]
+  [if]
     \ CAN1_RDH0R (read-only) Reset:0x00000000
     : CAN1_RDH0R_DATA7? ( --  x ) 24 lshift CAN1_RDH0R @ ; \ CAN1_RDH0R_DATA7, DATA7
     : CAN1_RDH0R_DATA6? ( --  x ) 16 lshift CAN1_RDH0R @ ; \ CAN1_RDH0R_DATA6, DATA6
@@ -9362,7 +9362,7 @@ begin-module memmap
     : CAN1_RDH0R_DATA4? ( --  x ) CAN1_RDH0R @ ; \ CAN1_RDH0R_DATA4, DATA4
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_RI1R_STID? not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_RI1R (read-only) Reset:0x00000000
     : CAN1_RI1R_STID? ( --  x ) 21 lshift CAN1_RI1R @ ; \ CAN1_RI1R_STID, STID
     : CAN1_RI1R_EXID? ( --  x ) 3 lshift CAN1_RI1R @ ; \ CAN1_RI1R_EXID, EXID
@@ -9370,14 +9370,14 @@ begin-module memmap
     : CAN1_RI1R_RTR? ( --  1|0 ) 1 bit CAN1_RI1R bit@ ; \ CAN1_RI1R_RTR, RTR
   [then]
 
-  defined? use-CAN1 defined? CAN1_RDT1R_TIME? not and [if]
+  [if]
     \ CAN1_RDT1R (read-only) Reset:0x00000000
     : CAN1_RDT1R_TIME? ( --  x ) 16 lshift CAN1_RDT1R @ ; \ CAN1_RDT1R_TIME, TIME
     : CAN1_RDT1R_FMI? ( --  x ) 8 lshift CAN1_RDT1R @ ; \ CAN1_RDT1R_FMI, FMI
     : CAN1_RDT1R_DLC? ( --  x ) CAN1_RDT1R @ ; \ CAN1_RDT1R_DLC, DLC
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_RDL1R_DATA3? not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_RDL1R (read-only) Reset:0x00000000
     : CAN1_RDL1R_DATA3? ( --  x ) 24 lshift CAN1_RDL1R @ ; \ CAN1_RDL1R_DATA3, DATA3
     : CAN1_RDL1R_DATA2? ( --  x ) 16 lshift CAN1_RDL1R @ ; \ CAN1_RDL1R_DATA2, DATA2
@@ -9385,7 +9385,7 @@ begin-module memmap
     : CAN1_RDL1R_DATA0? ( --  x ) CAN1_RDL1R @ ; \ CAN1_RDL1R_DATA0, DATA0
   [then]
 
-  defined? use-CAN1 defined? CAN1_RDH1R_DATA7? not and [if]
+  [if]
     \ CAN1_RDH1R (read-only) Reset:0x00000000
     : CAN1_RDH1R_DATA7? ( --  x ) 24 lshift CAN1_RDH1R @ ; \ CAN1_RDH1R_DATA7, DATA7
     : CAN1_RDH1R_DATA6? ( --  x ) 16 lshift CAN1_RDH1R @ ; \ CAN1_RDH1R_DATA6, DATA6
@@ -9393,13 +9393,13 @@ begin-module memmap
     : CAN1_RDH1R_DATA4? ( --  x ) CAN1_RDH1R @ ; \ CAN1_RDH1R_DATA4, DATA4
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_FMR_CAN2SB not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_FMR (read-write) Reset:0x2A1C0E01
     : CAN1_FMR_CAN2SB ( %bbbbbb -- x addr ) 8 lshift CAN1_FMR ; \ CAN1_FMR_CAN2SB, CAN2SB
     : CAN1_FMR_FINIT ( -- x addr ) 0 bit CAN1_FMR ; \ CAN1_FMR_FINIT, FINIT
   [then]
 
-  defined? use-CAN1 defined? CAN1_FM1R_FBM0 not and [if]
+  [if]
     \ CAN1_FM1R (read-write) Reset:0x00000000
     : CAN1_FM1R_FBM0 ( -- x addr ) 0 bit CAN1_FM1R ; \ CAN1_FM1R_FBM0, Filter mode
     : CAN1_FM1R_FBM1 ( -- x addr ) 1 bit CAN1_FM1R ; \ CAN1_FM1R_FBM1, Filter mode
@@ -9431,7 +9431,7 @@ begin-module memmap
     : CAN1_FM1R_FBM27 ( -- x addr ) 27 bit CAN1_FM1R ; \ CAN1_FM1R_FBM27, Filter mode
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_FS1R_FSC0 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_FS1R (read-write) Reset:0x00000000
     : CAN1_FS1R_FSC0 ( -- x addr ) 0 bit CAN1_FS1R ; \ CAN1_FS1R_FSC0, Filter scale configuration
     : CAN1_FS1R_FSC1 ( -- x addr ) 1 bit CAN1_FS1R ; \ CAN1_FS1R_FSC1, Filter scale configuration
@@ -9463,7 +9463,7 @@ begin-module memmap
     : CAN1_FS1R_FSC27 ( -- x addr ) 27 bit CAN1_FS1R ; \ CAN1_FS1R_FSC27, Filter scale configuration
   [then]
 
-  defined? use-CAN1 defined? CAN1_FFA1R_FFA0 not and [if]
+  [if]
     \ CAN1_FFA1R (read-write) Reset:0x00000000
     : CAN1_FFA1R_FFA0 ( -- x addr ) 0 bit CAN1_FFA1R ; \ CAN1_FFA1R_FFA0, Filter FIFO assignment for filter  0
     : CAN1_FFA1R_FFA1 ( -- x addr ) 1 bit CAN1_FFA1R ; \ CAN1_FFA1R_FFA1, Filter FIFO assignment for filter  1
@@ -9495,7 +9495,7 @@ begin-module memmap
     : CAN1_FFA1R_FFA27 ( -- x addr ) 27 bit CAN1_FFA1R ; \ CAN1_FFA1R_FFA27, Filter FIFO assignment for filter  27
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_FA1R_FACT0 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_FA1R (read-write) Reset:0x00000000
     : CAN1_FA1R_FACT0 ( -- x addr ) 0 bit CAN1_FA1R ; \ CAN1_FA1R_FACT0, Filter active
     : CAN1_FA1R_FACT1 ( -- x addr ) 1 bit CAN1_FA1R ; \ CAN1_FA1R_FACT1, Filter active
@@ -9527,7 +9527,7 @@ begin-module memmap
     : CAN1_FA1R_FACT27 ( -- x addr ) 27 bit CAN1_FA1R ; \ CAN1_FA1R_FACT27, Filter active
   [then]
 
-  defined? use-CAN1 defined? CAN1_F0R1_FB0 not and [if]
+  [if]
     \ CAN1_F0R1 (read-write) Reset:0x00000000
     : CAN1_F0R1_FB0 ( -- x addr ) 0 bit CAN1_F0R1 ; \ CAN1_F0R1_FB0, Filter bits
     : CAN1_F0R1_FB1 ( -- x addr ) 1 bit CAN1_F0R1 ; \ CAN1_F0R1_FB1, Filter bits
@@ -9563,7 +9563,7 @@ begin-module memmap
     : CAN1_F0R1_FB31 ( -- x addr ) 31 bit CAN1_F0R1 ; \ CAN1_F0R1_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_F0R2_FB0 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_F0R2 (read-write) Reset:0x00000000
     : CAN1_F0R2_FB0 ( -- x addr ) 0 bit CAN1_F0R2 ; \ CAN1_F0R2_FB0, Filter bits
     : CAN1_F0R2_FB1 ( -- x addr ) 1 bit CAN1_F0R2 ; \ CAN1_F0R2_FB1, Filter bits
@@ -9599,7 +9599,7 @@ begin-module memmap
     : CAN1_F0R2_FB31 ( -- x addr ) 31 bit CAN1_F0R2 ; \ CAN1_F0R2_FB31, Filter bits
   [then]
 
-  defined? use-CAN1 defined? CAN1_F1R1_FB0 not and [if]
+  [if]
     \ CAN1_F1R1 (read-write) Reset:0x00000000
     : CAN1_F1R1_FB0 ( -- x addr ) 0 bit CAN1_F1R1 ; \ CAN1_F1R1_FB0, Filter bits
     : CAN1_F1R1_FB1 ( -- x addr ) 1 bit CAN1_F1R1 ; \ CAN1_F1R1_FB1, Filter bits
@@ -9635,7 +9635,7 @@ begin-module memmap
     : CAN1_F1R1_FB31 ( -- x addr ) 31 bit CAN1_F1R1 ; \ CAN1_F1R1_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_F1R2_FB0 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_F1R2 (read-write) Reset:0x00000000
     : CAN1_F1R2_FB0 ( -- x addr ) 0 bit CAN1_F1R2 ; \ CAN1_F1R2_FB0, Filter bits
     : CAN1_F1R2_FB1 ( -- x addr ) 1 bit CAN1_F1R2 ; \ CAN1_F1R2_FB1, Filter bits
@@ -9671,7 +9671,7 @@ begin-module memmap
     : CAN1_F1R2_FB31 ( -- x addr ) 31 bit CAN1_F1R2 ; \ CAN1_F1R2_FB31, Filter bits
   [then]
 
-  defined? use-CAN1 defined? CAN1_F2R1_FB0 not and [if]
+  [if]
     \ CAN1_F2R1 (read-write) Reset:0x00000000
     : CAN1_F2R1_FB0 ( -- x addr ) 0 bit CAN1_F2R1 ; \ CAN1_F2R1_FB0, Filter bits
     : CAN1_F2R1_FB1 ( -- x addr ) 1 bit CAN1_F2R1 ; \ CAN1_F2R1_FB1, Filter bits
@@ -9707,7 +9707,7 @@ begin-module memmap
     : CAN1_F2R1_FB31 ( -- x addr ) 31 bit CAN1_F2R1 ; \ CAN1_F2R1_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_F2R2_FB0 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_F2R2 (read-write) Reset:0x00000000
     : CAN1_F2R2_FB0 ( -- x addr ) 0 bit CAN1_F2R2 ; \ CAN1_F2R2_FB0, Filter bits
     : CAN1_F2R2_FB1 ( -- x addr ) 1 bit CAN1_F2R2 ; \ CAN1_F2R2_FB1, Filter bits
@@ -9743,7 +9743,7 @@ begin-module memmap
     : CAN1_F2R2_FB31 ( -- x addr ) 31 bit CAN1_F2R2 ; \ CAN1_F2R2_FB31, Filter bits
   [then]
 
-  defined? use-CAN1 defined? CAN1_F3R1_FB0 not and [if]
+  [if]
     \ CAN1_F3R1 (read-write) Reset:0x00000000
     : CAN1_F3R1_FB0 ( -- x addr ) 0 bit CAN1_F3R1 ; \ CAN1_F3R1_FB0, Filter bits
     : CAN1_F3R1_FB1 ( -- x addr ) 1 bit CAN1_F3R1 ; \ CAN1_F3R1_FB1, Filter bits
@@ -9779,7 +9779,7 @@ begin-module memmap
     : CAN1_F3R1_FB31 ( -- x addr ) 31 bit CAN1_F3R1 ; \ CAN1_F3R1_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_F3R2_FB0 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_F3R2 (read-write) Reset:0x00000000
     : CAN1_F3R2_FB0 ( -- x addr ) 0 bit CAN1_F3R2 ; \ CAN1_F3R2_FB0, Filter bits
     : CAN1_F3R2_FB1 ( -- x addr ) 1 bit CAN1_F3R2 ; \ CAN1_F3R2_FB1, Filter bits
@@ -9815,7 +9815,7 @@ begin-module memmap
     : CAN1_F3R2_FB31 ( -- x addr ) 31 bit CAN1_F3R2 ; \ CAN1_F3R2_FB31, Filter bits
   [then]
 
-  defined? use-CAN1 defined? CAN1_F4R1_FB0 not and [if]
+  [if]
     \ CAN1_F4R1 (read-write) Reset:0x00000000
     : CAN1_F4R1_FB0 ( -- x addr ) 0 bit CAN1_F4R1 ; \ CAN1_F4R1_FB0, Filter bits
     : CAN1_F4R1_FB1 ( -- x addr ) 1 bit CAN1_F4R1 ; \ CAN1_F4R1_FB1, Filter bits
@@ -9851,7 +9851,7 @@ begin-module memmap
     : CAN1_F4R1_FB31 ( -- x addr ) 31 bit CAN1_F4R1 ; \ CAN1_F4R1_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_F4R2_FB0 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_F4R2 (read-write) Reset:0x00000000
     : CAN1_F4R2_FB0 ( -- x addr ) 0 bit CAN1_F4R2 ; \ CAN1_F4R2_FB0, Filter bits
     : CAN1_F4R2_FB1 ( -- x addr ) 1 bit CAN1_F4R2 ; \ CAN1_F4R2_FB1, Filter bits
@@ -9887,7 +9887,7 @@ begin-module memmap
     : CAN1_F4R2_FB31 ( -- x addr ) 31 bit CAN1_F4R2 ; \ CAN1_F4R2_FB31, Filter bits
   [then]
 
-  defined? use-CAN1 defined? CAN1_F5R1_FB0 not and [if]
+  [if]
     \ CAN1_F5R1 (read-write) Reset:0x00000000
     : CAN1_F5R1_FB0 ( -- x addr ) 0 bit CAN1_F5R1 ; \ CAN1_F5R1_FB0, Filter bits
     : CAN1_F5R1_FB1 ( -- x addr ) 1 bit CAN1_F5R1 ; \ CAN1_F5R1_FB1, Filter bits
@@ -9923,7 +9923,7 @@ begin-module memmap
     : CAN1_F5R1_FB31 ( -- x addr ) 31 bit CAN1_F5R1 ; \ CAN1_F5R1_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_F5R2_FB0 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_F5R2 (read-write) Reset:0x00000000
     : CAN1_F5R2_FB0 ( -- x addr ) 0 bit CAN1_F5R2 ; \ CAN1_F5R2_FB0, Filter bits
     : CAN1_F5R2_FB1 ( -- x addr ) 1 bit CAN1_F5R2 ; \ CAN1_F5R2_FB1, Filter bits
@@ -9959,7 +9959,7 @@ begin-module memmap
     : CAN1_F5R2_FB31 ( -- x addr ) 31 bit CAN1_F5R2 ; \ CAN1_F5R2_FB31, Filter bits
   [then]
 
-  defined? use-CAN1 defined? CAN1_F6R1_FB0 not and [if]
+  [if]
     \ CAN1_F6R1 (read-write) Reset:0x00000000
     : CAN1_F6R1_FB0 ( -- x addr ) 0 bit CAN1_F6R1 ; \ CAN1_F6R1_FB0, Filter bits
     : CAN1_F6R1_FB1 ( -- x addr ) 1 bit CAN1_F6R1 ; \ CAN1_F6R1_FB1, Filter bits
@@ -9995,7 +9995,7 @@ begin-module memmap
     : CAN1_F6R1_FB31 ( -- x addr ) 31 bit CAN1_F6R1 ; \ CAN1_F6R1_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_F6R2_FB0 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_F6R2 (read-write) Reset:0x00000000
     : CAN1_F6R2_FB0 ( -- x addr ) 0 bit CAN1_F6R2 ; \ CAN1_F6R2_FB0, Filter bits
     : CAN1_F6R2_FB1 ( -- x addr ) 1 bit CAN1_F6R2 ; \ CAN1_F6R2_FB1, Filter bits
@@ -10031,7 +10031,7 @@ begin-module memmap
     : CAN1_F6R2_FB31 ( -- x addr ) 31 bit CAN1_F6R2 ; \ CAN1_F6R2_FB31, Filter bits
   [then]
 
-  defined? use-CAN1 defined? CAN1_F7R1_FB0 not and [if]
+  [if]
     \ CAN1_F7R1 (read-write) Reset:0x00000000
     : CAN1_F7R1_FB0 ( -- x addr ) 0 bit CAN1_F7R1 ; \ CAN1_F7R1_FB0, Filter bits
     : CAN1_F7R1_FB1 ( -- x addr ) 1 bit CAN1_F7R1 ; \ CAN1_F7R1_FB1, Filter bits
@@ -10067,7 +10067,7 @@ begin-module memmap
     : CAN1_F7R1_FB31 ( -- x addr ) 31 bit CAN1_F7R1 ; \ CAN1_F7R1_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_F7R2_FB0 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_F7R2 (read-write) Reset:0x00000000
     : CAN1_F7R2_FB0 ( -- x addr ) 0 bit CAN1_F7R2 ; \ CAN1_F7R2_FB0, Filter bits
     : CAN1_F7R2_FB1 ( -- x addr ) 1 bit CAN1_F7R2 ; \ CAN1_F7R2_FB1, Filter bits
@@ -10103,7 +10103,7 @@ begin-module memmap
     : CAN1_F7R2_FB31 ( -- x addr ) 31 bit CAN1_F7R2 ; \ CAN1_F7R2_FB31, Filter bits
   [then]
 
-  defined? use-CAN1 defined? CAN1_F8R1_FB0 not and [if]
+  [if]
     \ CAN1_F8R1 (read-write) Reset:0x00000000
     : CAN1_F8R1_FB0 ( -- x addr ) 0 bit CAN1_F8R1 ; \ CAN1_F8R1_FB0, Filter bits
     : CAN1_F8R1_FB1 ( -- x addr ) 1 bit CAN1_F8R1 ; \ CAN1_F8R1_FB1, Filter bits
@@ -10139,7 +10139,7 @@ begin-module memmap
     : CAN1_F8R1_FB31 ( -- x addr ) 31 bit CAN1_F8R1 ; \ CAN1_F8R1_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_F8R2_FB0 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_F8R2 (read-write) Reset:0x00000000
     : CAN1_F8R2_FB0 ( -- x addr ) 0 bit CAN1_F8R2 ; \ CAN1_F8R2_FB0, Filter bits
     : CAN1_F8R2_FB1 ( -- x addr ) 1 bit CAN1_F8R2 ; \ CAN1_F8R2_FB1, Filter bits
@@ -10175,7 +10175,7 @@ begin-module memmap
     : CAN1_F8R2_FB31 ( -- x addr ) 31 bit CAN1_F8R2 ; \ CAN1_F8R2_FB31, Filter bits
   [then]
 
-  defined? use-CAN1 defined? CAN1_F9R1_FB0 not and [if]
+  [if]
     \ CAN1_F9R1 (read-write) Reset:0x00000000
     : CAN1_F9R1_FB0 ( -- x addr ) 0 bit CAN1_F9R1 ; \ CAN1_F9R1_FB0, Filter bits
     : CAN1_F9R1_FB1 ( -- x addr ) 1 bit CAN1_F9R1 ; \ CAN1_F9R1_FB1, Filter bits
@@ -10211,7 +10211,7 @@ begin-module memmap
     : CAN1_F9R1_FB31 ( -- x addr ) 31 bit CAN1_F9R1 ; \ CAN1_F9R1_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_F9R2_FB0 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_F9R2 (read-write) Reset:0x00000000
     : CAN1_F9R2_FB0 ( -- x addr ) 0 bit CAN1_F9R2 ; \ CAN1_F9R2_FB0, Filter bits
     : CAN1_F9R2_FB1 ( -- x addr ) 1 bit CAN1_F9R2 ; \ CAN1_F9R2_FB1, Filter bits
@@ -10247,7 +10247,7 @@ begin-module memmap
     : CAN1_F9R2_FB31 ( -- x addr ) 31 bit CAN1_F9R2 ; \ CAN1_F9R2_FB31, Filter bits
   [then]
 
-  defined? use-CAN1 defined? CAN1_F10R1_FB0 not and [if]
+  [if]
     \ CAN1_F10R1 (read-write) Reset:0x00000000
     : CAN1_F10R1_FB0 ( -- x addr ) 0 bit CAN1_F10R1 ; \ CAN1_F10R1_FB0, Filter bits
     : CAN1_F10R1_FB1 ( -- x addr ) 1 bit CAN1_F10R1 ; \ CAN1_F10R1_FB1, Filter bits
@@ -10283,7 +10283,7 @@ begin-module memmap
     : CAN1_F10R1_FB31 ( -- x addr ) 31 bit CAN1_F10R1 ; \ CAN1_F10R1_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_F10R2_FB0 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_F10R2 (read-write) Reset:0x00000000
     : CAN1_F10R2_FB0 ( -- x addr ) 0 bit CAN1_F10R2 ; \ CAN1_F10R2_FB0, Filter bits
     : CAN1_F10R2_FB1 ( -- x addr ) 1 bit CAN1_F10R2 ; \ CAN1_F10R2_FB1, Filter bits
@@ -10319,7 +10319,7 @@ begin-module memmap
     : CAN1_F10R2_FB31 ( -- x addr ) 31 bit CAN1_F10R2 ; \ CAN1_F10R2_FB31, Filter bits
   [then]
 
-  defined? use-CAN1 defined? CAN1_F11R1_FB0 not and [if]
+  [if]
     \ CAN1_F11R1 (read-write) Reset:0x00000000
     : CAN1_F11R1_FB0 ( -- x addr ) 0 bit CAN1_F11R1 ; \ CAN1_F11R1_FB0, Filter bits
     : CAN1_F11R1_FB1 ( -- x addr ) 1 bit CAN1_F11R1 ; \ CAN1_F11R1_FB1, Filter bits
@@ -10355,7 +10355,7 @@ begin-module memmap
     : CAN1_F11R1_FB31 ( -- x addr ) 31 bit CAN1_F11R1 ; \ CAN1_F11R1_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_F11R2_FB0 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_F11R2 (read-write) Reset:0x00000000
     : CAN1_F11R2_FB0 ( -- x addr ) 0 bit CAN1_F11R2 ; \ CAN1_F11R2_FB0, Filter bits
     : CAN1_F11R2_FB1 ( -- x addr ) 1 bit CAN1_F11R2 ; \ CAN1_F11R2_FB1, Filter bits
@@ -10391,7 +10391,7 @@ begin-module memmap
     : CAN1_F11R2_FB31 ( -- x addr ) 31 bit CAN1_F11R2 ; \ CAN1_F11R2_FB31, Filter bits
   [then]
 
-  defined? use-CAN1 defined? CAN1_F12R1_FB0 not and [if]
+  [if]
     \ CAN1_F12R1 (read-write) Reset:0x00000000
     : CAN1_F12R1_FB0 ( -- x addr ) 0 bit CAN1_F12R1 ; \ CAN1_F12R1_FB0, Filter bits
     : CAN1_F12R1_FB1 ( -- x addr ) 1 bit CAN1_F12R1 ; \ CAN1_F12R1_FB1, Filter bits
@@ -10427,7 +10427,7 @@ begin-module memmap
     : CAN1_F12R1_FB31 ( -- x addr ) 31 bit CAN1_F12R1 ; \ CAN1_F12R1_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_F12R2_FB0 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_F12R2 (read-write) Reset:0x00000000
     : CAN1_F12R2_FB0 ( -- x addr ) 0 bit CAN1_F12R2 ; \ CAN1_F12R2_FB0, Filter bits
     : CAN1_F12R2_FB1 ( -- x addr ) 1 bit CAN1_F12R2 ; \ CAN1_F12R2_FB1, Filter bits
@@ -10463,7 +10463,7 @@ begin-module memmap
     : CAN1_F12R2_FB31 ( -- x addr ) 31 bit CAN1_F12R2 ; \ CAN1_F12R2_FB31, Filter bits
   [then]
 
-  defined? use-CAN1 defined? CAN1_F13R1_FB0 not and [if]
+  [if]
     \ CAN1_F13R1 (read-write) Reset:0x00000000
     : CAN1_F13R1_FB0 ( -- x addr ) 0 bit CAN1_F13R1 ; \ CAN1_F13R1_FB0, Filter bits
     : CAN1_F13R1_FB1 ( -- x addr ) 1 bit CAN1_F13R1 ; \ CAN1_F13R1_FB1, Filter bits
@@ -10499,7 +10499,7 @@ begin-module memmap
     : CAN1_F13R1_FB31 ( -- x addr ) 31 bit CAN1_F13R1 ; \ CAN1_F13R1_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_F13R2_FB0 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_F13R2 (read-write) Reset:0x00000000
     : CAN1_F13R2_FB0 ( -- x addr ) 0 bit CAN1_F13R2 ; \ CAN1_F13R2_FB0, Filter bits
     : CAN1_F13R2_FB1 ( -- x addr ) 1 bit CAN1_F13R2 ; \ CAN1_F13R2_FB1, Filter bits
@@ -10535,7 +10535,7 @@ begin-module memmap
     : CAN1_F13R2_FB31 ( -- x addr ) 31 bit CAN1_F13R2 ; \ CAN1_F13R2_FB31, Filter bits
   [then]
 
-  defined? use-CAN1 defined? CAN1_F14R1_FB0 not and [if]
+  [if]
     \ CAN1_F14R1 (read-write) Reset:0x00000000
     : CAN1_F14R1_FB0 ( -- x addr ) 0 bit CAN1_F14R1 ; \ CAN1_F14R1_FB0, Filter bits
     : CAN1_F14R1_FB1 ( -- x addr ) 1 bit CAN1_F14R1 ; \ CAN1_F14R1_FB1, Filter bits
@@ -10571,7 +10571,7 @@ begin-module memmap
     : CAN1_F14R1_FB31 ( -- x addr ) 31 bit CAN1_F14R1 ; \ CAN1_F14R1_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_F14R2_FB0 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_F14R2 (read-write) Reset:0x00000000
     : CAN1_F14R2_FB0 ( -- x addr ) 0 bit CAN1_F14R2 ; \ CAN1_F14R2_FB0, Filter bits
     : CAN1_F14R2_FB1 ( -- x addr ) 1 bit CAN1_F14R2 ; \ CAN1_F14R2_FB1, Filter bits
@@ -10607,7 +10607,7 @@ begin-module memmap
     : CAN1_F14R2_FB31 ( -- x addr ) 31 bit CAN1_F14R2 ; \ CAN1_F14R2_FB31, Filter bits
   [then]
 
-  defined? use-CAN1 defined? CAN1_F15R1_FB0 not and [if]
+  [if]
     \ CAN1_F15R1 (read-write) Reset:0x00000000
     : CAN1_F15R1_FB0 ( -- x addr ) 0 bit CAN1_F15R1 ; \ CAN1_F15R1_FB0, Filter bits
     : CAN1_F15R1_FB1 ( -- x addr ) 1 bit CAN1_F15R1 ; \ CAN1_F15R1_FB1, Filter bits
@@ -10643,7 +10643,7 @@ begin-module memmap
     : CAN1_F15R1_FB31 ( -- x addr ) 31 bit CAN1_F15R1 ; \ CAN1_F15R1_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_F15R2_FB0 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_F15R2 (read-write) Reset:0x00000000
     : CAN1_F15R2_FB0 ( -- x addr ) 0 bit CAN1_F15R2 ; \ CAN1_F15R2_FB0, Filter bits
     : CAN1_F15R2_FB1 ( -- x addr ) 1 bit CAN1_F15R2 ; \ CAN1_F15R2_FB1, Filter bits
@@ -10679,7 +10679,7 @@ begin-module memmap
     : CAN1_F15R2_FB31 ( -- x addr ) 31 bit CAN1_F15R2 ; \ CAN1_F15R2_FB31, Filter bits
   [then]
 
-  defined? use-CAN1 defined? CAN1_F16R1_FB0 not and [if]
+  [if]
     \ CAN1_F16R1 (read-write) Reset:0x00000000
     : CAN1_F16R1_FB0 ( -- x addr ) 0 bit CAN1_F16R1 ; \ CAN1_F16R1_FB0, Filter bits
     : CAN1_F16R1_FB1 ( -- x addr ) 1 bit CAN1_F16R1 ; \ CAN1_F16R1_FB1, Filter bits
@@ -10715,7 +10715,7 @@ begin-module memmap
     : CAN1_F16R1_FB31 ( -- x addr ) 31 bit CAN1_F16R1 ; \ CAN1_F16R1_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_F16R2_FB0 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_F16R2 (read-write) Reset:0x00000000
     : CAN1_F16R2_FB0 ( -- x addr ) 0 bit CAN1_F16R2 ; \ CAN1_F16R2_FB0, Filter bits
     : CAN1_F16R2_FB1 ( -- x addr ) 1 bit CAN1_F16R2 ; \ CAN1_F16R2_FB1, Filter bits
@@ -10751,7 +10751,7 @@ begin-module memmap
     : CAN1_F16R2_FB31 ( -- x addr ) 31 bit CAN1_F16R2 ; \ CAN1_F16R2_FB31, Filter bits
   [then]
 
-  defined? use-CAN1 defined? CAN1_F17R1_FB0 not and [if]
+  [if]
     \ CAN1_F17R1 (read-write) Reset:0x00000000
     : CAN1_F17R1_FB0 ( -- x addr ) 0 bit CAN1_F17R1 ; \ CAN1_F17R1_FB0, Filter bits
     : CAN1_F17R1_FB1 ( -- x addr ) 1 bit CAN1_F17R1 ; \ CAN1_F17R1_FB1, Filter bits
@@ -10787,7 +10787,7 @@ begin-module memmap
     : CAN1_F17R1_FB31 ( -- x addr ) 31 bit CAN1_F17R1 ; \ CAN1_F17R1_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_F17R2_FB0 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_F17R2 (read-write) Reset:0x00000000
     : CAN1_F17R2_FB0 ( -- x addr ) 0 bit CAN1_F17R2 ; \ CAN1_F17R2_FB0, Filter bits
     : CAN1_F17R2_FB1 ( -- x addr ) 1 bit CAN1_F17R2 ; \ CAN1_F17R2_FB1, Filter bits
@@ -10823,7 +10823,7 @@ begin-module memmap
     : CAN1_F17R2_FB31 ( -- x addr ) 31 bit CAN1_F17R2 ; \ CAN1_F17R2_FB31, Filter bits
   [then]
 
-  defined? use-CAN1 defined? CAN1_F18R1_FB0 not and [if]
+  [if]
     \ CAN1_F18R1 (read-write) Reset:0x00000000
     : CAN1_F18R1_FB0 ( -- x addr ) 0 bit CAN1_F18R1 ; \ CAN1_F18R1_FB0, Filter bits
     : CAN1_F18R1_FB1 ( -- x addr ) 1 bit CAN1_F18R1 ; \ CAN1_F18R1_FB1, Filter bits
@@ -10859,7 +10859,7 @@ begin-module memmap
     : CAN1_F18R1_FB31 ( -- x addr ) 31 bit CAN1_F18R1 ; \ CAN1_F18R1_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_F18R2_FB0 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_F18R2 (read-write) Reset:0x00000000
     : CAN1_F18R2_FB0 ( -- x addr ) 0 bit CAN1_F18R2 ; \ CAN1_F18R2_FB0, Filter bits
     : CAN1_F18R2_FB1 ( -- x addr ) 1 bit CAN1_F18R2 ; \ CAN1_F18R2_FB1, Filter bits
@@ -10895,7 +10895,7 @@ begin-module memmap
     : CAN1_F18R2_FB31 ( -- x addr ) 31 bit CAN1_F18R2 ; \ CAN1_F18R2_FB31, Filter bits
   [then]
 
-  defined? use-CAN1 defined? CAN1_F19R1_FB0 not and [if]
+  [if]
     \ CAN1_F19R1 (read-write) Reset:0x00000000
     : CAN1_F19R1_FB0 ( -- x addr ) 0 bit CAN1_F19R1 ; \ CAN1_F19R1_FB0, Filter bits
     : CAN1_F19R1_FB1 ( -- x addr ) 1 bit CAN1_F19R1 ; \ CAN1_F19R1_FB1, Filter bits
@@ -10931,7 +10931,7 @@ begin-module memmap
     : CAN1_F19R1_FB31 ( -- x addr ) 31 bit CAN1_F19R1 ; \ CAN1_F19R1_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_F19R2_FB0 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_F19R2 (read-write) Reset:0x00000000
     : CAN1_F19R2_FB0 ( -- x addr ) 0 bit CAN1_F19R2 ; \ CAN1_F19R2_FB0, Filter bits
     : CAN1_F19R2_FB1 ( -- x addr ) 1 bit CAN1_F19R2 ; \ CAN1_F19R2_FB1, Filter bits
@@ -10967,7 +10967,7 @@ begin-module memmap
     : CAN1_F19R2_FB31 ( -- x addr ) 31 bit CAN1_F19R2 ; \ CAN1_F19R2_FB31, Filter bits
   [then]
 
-  defined? use-CAN1 defined? CAN1_F20R1_FB0 not and [if]
+  [if]
     \ CAN1_F20R1 (read-write) Reset:0x00000000
     : CAN1_F20R1_FB0 ( -- x addr ) 0 bit CAN1_F20R1 ; \ CAN1_F20R1_FB0, Filter bits
     : CAN1_F20R1_FB1 ( -- x addr ) 1 bit CAN1_F20R1 ; \ CAN1_F20R1_FB1, Filter bits
@@ -11003,7 +11003,7 @@ begin-module memmap
     : CAN1_F20R1_FB31 ( -- x addr ) 31 bit CAN1_F20R1 ; \ CAN1_F20R1_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_F20R2_FB0 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_F20R2 (read-write) Reset:0x00000000
     : CAN1_F20R2_FB0 ( -- x addr ) 0 bit CAN1_F20R2 ; \ CAN1_F20R2_FB0, Filter bits
     : CAN1_F20R2_FB1 ( -- x addr ) 1 bit CAN1_F20R2 ; \ CAN1_F20R2_FB1, Filter bits
@@ -11039,7 +11039,7 @@ begin-module memmap
     : CAN1_F20R2_FB31 ( -- x addr ) 31 bit CAN1_F20R2 ; \ CAN1_F20R2_FB31, Filter bits
   [then]
 
-  defined? use-CAN1 defined? CAN1_F21R1_FB0 not and [if]
+  [if]
     \ CAN1_F21R1 (read-write) Reset:0x00000000
     : CAN1_F21R1_FB0 ( -- x addr ) 0 bit CAN1_F21R1 ; \ CAN1_F21R1_FB0, Filter bits
     : CAN1_F21R1_FB1 ( -- x addr ) 1 bit CAN1_F21R1 ; \ CAN1_F21R1_FB1, Filter bits
@@ -11075,7 +11075,7 @@ begin-module memmap
     : CAN1_F21R1_FB31 ( -- x addr ) 31 bit CAN1_F21R1 ; \ CAN1_F21R1_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_F21R2_FB0 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_F21R2 (read-write) Reset:0x00000000
     : CAN1_F21R2_FB0 ( -- x addr ) 0 bit CAN1_F21R2 ; \ CAN1_F21R2_FB0, Filter bits
     : CAN1_F21R2_FB1 ( -- x addr ) 1 bit CAN1_F21R2 ; \ CAN1_F21R2_FB1, Filter bits
@@ -11111,7 +11111,7 @@ begin-module memmap
     : CAN1_F21R2_FB31 ( -- x addr ) 31 bit CAN1_F21R2 ; \ CAN1_F21R2_FB31, Filter bits
   [then]
 
-  defined? use-CAN1 defined? CAN1_F22R1_FB0 not and [if]
+  [if]
     \ CAN1_F22R1 (read-write) Reset:0x00000000
     : CAN1_F22R1_FB0 ( -- x addr ) 0 bit CAN1_F22R1 ; \ CAN1_F22R1_FB0, Filter bits
     : CAN1_F22R1_FB1 ( -- x addr ) 1 bit CAN1_F22R1 ; \ CAN1_F22R1_FB1, Filter bits
@@ -11147,7 +11147,7 @@ begin-module memmap
     : CAN1_F22R1_FB31 ( -- x addr ) 31 bit CAN1_F22R1 ; \ CAN1_F22R1_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_F22R2_FB0 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_F22R2 (read-write) Reset:0x00000000
     : CAN1_F22R2_FB0 ( -- x addr ) 0 bit CAN1_F22R2 ; \ CAN1_F22R2_FB0, Filter bits
     : CAN1_F22R2_FB1 ( -- x addr ) 1 bit CAN1_F22R2 ; \ CAN1_F22R2_FB1, Filter bits
@@ -11183,7 +11183,7 @@ begin-module memmap
     : CAN1_F22R2_FB31 ( -- x addr ) 31 bit CAN1_F22R2 ; \ CAN1_F22R2_FB31, Filter bits
   [then]
 
-  defined? use-CAN1 defined? CAN1_F23R1_FB0 not and [if]
+  [if]
     \ CAN1_F23R1 (read-write) Reset:0x00000000
     : CAN1_F23R1_FB0 ( -- x addr ) 0 bit CAN1_F23R1 ; \ CAN1_F23R1_FB0, Filter bits
     : CAN1_F23R1_FB1 ( -- x addr ) 1 bit CAN1_F23R1 ; \ CAN1_F23R1_FB1, Filter bits
@@ -11219,7 +11219,7 @@ begin-module memmap
     : CAN1_F23R1_FB31 ( -- x addr ) 31 bit CAN1_F23R1 ; \ CAN1_F23R1_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_F23R2_FB0 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_F23R2 (read-write) Reset:0x00000000
     : CAN1_F23R2_FB0 ( -- x addr ) 0 bit CAN1_F23R2 ; \ CAN1_F23R2_FB0, Filter bits
     : CAN1_F23R2_FB1 ( -- x addr ) 1 bit CAN1_F23R2 ; \ CAN1_F23R2_FB1, Filter bits
@@ -11255,7 +11255,7 @@ begin-module memmap
     : CAN1_F23R2_FB31 ( -- x addr ) 31 bit CAN1_F23R2 ; \ CAN1_F23R2_FB31, Filter bits
   [then]
 
-  defined? use-CAN1 defined? CAN1_F24R1_FB0 not and [if]
+  [if]
     \ CAN1_F24R1 (read-write) Reset:0x00000000
     : CAN1_F24R1_FB0 ( -- x addr ) 0 bit CAN1_F24R1 ; \ CAN1_F24R1_FB0, Filter bits
     : CAN1_F24R1_FB1 ( -- x addr ) 1 bit CAN1_F24R1 ; \ CAN1_F24R1_FB1, Filter bits
@@ -11291,7 +11291,7 @@ begin-module memmap
     : CAN1_F24R1_FB31 ( -- x addr ) 31 bit CAN1_F24R1 ; \ CAN1_F24R1_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_F24R2_FB0 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_F24R2 (read-write) Reset:0x00000000
     : CAN1_F24R2_FB0 ( -- x addr ) 0 bit CAN1_F24R2 ; \ CAN1_F24R2_FB0, Filter bits
     : CAN1_F24R2_FB1 ( -- x addr ) 1 bit CAN1_F24R2 ; \ CAN1_F24R2_FB1, Filter bits
@@ -11327,7 +11327,7 @@ begin-module memmap
     : CAN1_F24R2_FB31 ( -- x addr ) 31 bit CAN1_F24R2 ; \ CAN1_F24R2_FB31, Filter bits
   [then]
 
-  defined? use-CAN1 defined? CAN1_F25R1_FB0 not and [if]
+  [if]
     \ CAN1_F25R1 (read-write) Reset:0x00000000
     : CAN1_F25R1_FB0 ( -- x addr ) 0 bit CAN1_F25R1 ; \ CAN1_F25R1_FB0, Filter bits
     : CAN1_F25R1_FB1 ( -- x addr ) 1 bit CAN1_F25R1 ; \ CAN1_F25R1_FB1, Filter bits
@@ -11363,7 +11363,7 @@ begin-module memmap
     : CAN1_F25R1_FB31 ( -- x addr ) 31 bit CAN1_F25R1 ; \ CAN1_F25R1_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_F25R2_FB0 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_F25R2 (read-write) Reset:0x00000000
     : CAN1_F25R2_FB0 ( -- x addr ) 0 bit CAN1_F25R2 ; \ CAN1_F25R2_FB0, Filter bits
     : CAN1_F25R2_FB1 ( -- x addr ) 1 bit CAN1_F25R2 ; \ CAN1_F25R2_FB1, Filter bits
@@ -11399,7 +11399,7 @@ begin-module memmap
     : CAN1_F25R2_FB31 ( -- x addr ) 31 bit CAN1_F25R2 ; \ CAN1_F25R2_FB31, Filter bits
   [then]
 
-  defined? use-CAN1 defined? CAN1_F26R1_FB0 not and [if]
+  [if]
     \ CAN1_F26R1 (read-write) Reset:0x00000000
     : CAN1_F26R1_FB0 ( -- x addr ) 0 bit CAN1_F26R1 ; \ CAN1_F26R1_FB0, Filter bits
     : CAN1_F26R1_FB1 ( -- x addr ) 1 bit CAN1_F26R1 ; \ CAN1_F26R1_FB1, Filter bits
@@ -11435,7 +11435,7 @@ begin-module memmap
     : CAN1_F26R1_FB31 ( -- x addr ) 31 bit CAN1_F26R1 ; \ CAN1_F26R1_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_F26R2_FB0 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_F26R2 (read-write) Reset:0x00000000
     : CAN1_F26R2_FB0 ( -- x addr ) 0 bit CAN1_F26R2 ; \ CAN1_F26R2_FB0, Filter bits
     : CAN1_F26R2_FB1 ( -- x addr ) 1 bit CAN1_F26R2 ; \ CAN1_F26R2_FB1, Filter bits
@@ -11471,7 +11471,7 @@ begin-module memmap
     : CAN1_F26R2_FB31 ( -- x addr ) 31 bit CAN1_F26R2 ; \ CAN1_F26R2_FB31, Filter bits
   [then]
 
-  defined? use-CAN1 defined? CAN1_F27R1_FB0 not and [if]
+  [if]
     \ CAN1_F27R1 (read-write) Reset:0x00000000
     : CAN1_F27R1_FB0 ( -- x addr ) 0 bit CAN1_F27R1 ; \ CAN1_F27R1_FB0, Filter bits
     : CAN1_F27R1_FB1 ( -- x addr ) 1 bit CAN1_F27R1 ; \ CAN1_F27R1_FB1, Filter bits
@@ -11507,7 +11507,7 @@ begin-module memmap
     : CAN1_F27R1_FB31 ( -- x addr ) 31 bit CAN1_F27R1 ; \ CAN1_F27R1_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN1 defined? CAN1_F27R2_FB0 not and [if]
+  execute-defined? use-CAN1 [if]
     \ CAN1_F27R2 (read-write) Reset:0x00000000
     : CAN1_F27R2_FB0 ( -- x addr ) 0 bit CAN1_F27R2 ; \ CAN1_F27R2_FB0, Filter bits
     : CAN1_F27R2_FB1 ( -- x addr ) 1 bit CAN1_F27R2 ; \ CAN1_F27R2_FB1, Filter bits
@@ -11543,7 +11543,7 @@ begin-module memmap
     : CAN1_F27R2_FB31 ( -- x addr ) 31 bit CAN1_F27R2 ; \ CAN1_F27R2_FB31, Filter bits
   [then]
 
-  defined? use-CAN2 defined? CAN2_MCR_DBF not and [if]
+  [if]
     \ CAN2_MCR (read-write) Reset:0x00010002
     : CAN2_MCR_DBF ( -- x addr ) 16 bit CAN2_MCR ; \ CAN2_MCR_DBF, DBF
     : CAN2_MCR_RESET ( -- x addr ) 15 bit CAN2_MCR ; \ CAN2_MCR_RESET, RESET
@@ -11557,7 +11557,7 @@ begin-module memmap
     : CAN2_MCR_INRQ ( -- x addr ) 0 bit CAN2_MCR ; \ CAN2_MCR_INRQ, INRQ
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_MSR_RX not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_MSR (multiple-access)  Reset:0x00000C02
     : CAN2_MSR_RX ( -- x addr ) 11 bit CAN2_MSR ; \ CAN2_MSR_RX, RX
     : CAN2_MSR_SAMP ( -- x addr ) 10 bit CAN2_MSR ; \ CAN2_MSR_SAMP, SAMP
@@ -11570,7 +11570,7 @@ begin-module memmap
     : CAN2_MSR_INAK ( -- x addr ) 0 bit CAN2_MSR ; \ CAN2_MSR_INAK, INAK
   [then]
 
-  defined? use-CAN2 defined? CAN2_TSR_LOW2? not and [if]
+  [if]
     \ CAN2_TSR (multiple-access)  Reset:0x1C000000
     : CAN2_TSR_LOW2? ( -- 1|0 ) 31 bit CAN2_TSR bit@ ; \ CAN2_TSR_LOW2, Lowest priority flag for mailbox  2
     : CAN2_TSR_LOW1? ( -- 1|0 ) 30 bit CAN2_TSR bit@ ; \ CAN2_TSR_LOW1, Lowest priority flag for mailbox  1
@@ -11596,7 +11596,7 @@ begin-module memmap
     : CAN2_TSR_RQCP0 ( -- x addr ) 0 bit CAN2_TSR ; \ CAN2_TSR_RQCP0, RQCP0
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_RF0R_RFOM0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_RF0R (multiple-access)  Reset:0x00000000
     : CAN2_RF0R_RFOM0 ( -- x addr ) 5 bit CAN2_RF0R ; \ CAN2_RF0R_RFOM0, RFOM0
     : CAN2_RF0R_FOVR0 ( -- x addr ) 4 bit CAN2_RF0R ; \ CAN2_RF0R_FOVR0, FOVR0
@@ -11604,7 +11604,7 @@ begin-module memmap
     : CAN2_RF0R_FMP0 ( %bb -- x addr ) CAN2_RF0R ; \ CAN2_RF0R_FMP0, FMP0
   [then]
 
-  defined? use-CAN2 defined? CAN2_RF1R_RFOM1 not and [if]
+  [if]
     \ CAN2_RF1R (multiple-access)  Reset:0x00000000
     : CAN2_RF1R_RFOM1 ( -- x addr ) 5 bit CAN2_RF1R ; \ CAN2_RF1R_RFOM1, RFOM1
     : CAN2_RF1R_FOVR1 ( -- x addr ) 4 bit CAN2_RF1R ; \ CAN2_RF1R_FOVR1, FOVR1
@@ -11612,7 +11612,7 @@ begin-module memmap
     : CAN2_RF1R_FMP1 ( %bb -- x addr ) CAN2_RF1R ; \ CAN2_RF1R_FMP1, FMP1
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_IER_SLKIE not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_IER (read-write) Reset:0x00000000
     : CAN2_IER_SLKIE ( -- x addr ) 17 bit CAN2_IER ; \ CAN2_IER_SLKIE, SLKIE
     : CAN2_IER_WKUIE ( -- x addr ) 16 bit CAN2_IER ; \ CAN2_IER_WKUIE, WKUIE
@@ -11630,7 +11630,7 @@ begin-module memmap
     : CAN2_IER_TMEIE ( -- x addr ) 0 bit CAN2_IER ; \ CAN2_IER_TMEIE, TMEIE
   [then]
 
-  defined? use-CAN2 defined? CAN2_ESR_REC not and [if]
+  [if]
     \ CAN2_ESR (multiple-access)  Reset:0x00000000
     : CAN2_ESR_REC ( %bbbbbbbb -- x addr ) 24 lshift CAN2_ESR ; \ CAN2_ESR_REC, REC
     : CAN2_ESR_TEC ( %bbbbbbbb -- x addr ) 16 lshift CAN2_ESR ; \ CAN2_ESR_TEC, TEC
@@ -11640,7 +11640,7 @@ begin-module memmap
     : CAN2_ESR_EWGF ( -- x addr ) 0 bit CAN2_ESR ; \ CAN2_ESR_EWGF, EWGF
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_BTR_SILM not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_BTR (read-write) Reset:0x00000000
     : CAN2_BTR_SILM ( -- x addr ) 31 bit CAN2_BTR ; \ CAN2_BTR_SILM, SILM
     : CAN2_BTR_LBKM ( -- x addr ) 30 bit CAN2_BTR ; \ CAN2_BTR_LBKM, LBKM
@@ -11650,7 +11650,7 @@ begin-module memmap
     : CAN2_BTR_BRP ( %bbbbbbbbbb -- x addr ) CAN2_BTR ; \ CAN2_BTR_BRP, BRP
   [then]
 
-  defined? use-CAN2 defined? CAN2_TI0R_STID not and [if]
+  [if]
     \ CAN2_TI0R (read-write) Reset:0x00000000
     : CAN2_TI0R_STID x addr ) 21 lshift CAN2_TI0R ; \ CAN2_TI0R_STID, STID
     : CAN2_TI0R_EXID x addr ) 3 lshift CAN2_TI0R ; \ CAN2_TI0R_EXID, EXID
@@ -11659,14 +11659,14 @@ begin-module memmap
     : CAN2_TI0R_TXRQ ( -- x addr ) 0 bit CAN2_TI0R ; \ CAN2_TI0R_TXRQ, TXRQ
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_TDT0R_TIME not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_TDT0R (read-write) Reset:0x00000000
     : CAN2_TDT0R_TIME ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift CAN2_TDT0R ; \ CAN2_TDT0R_TIME, TIME
     : CAN2_TDT0R_TGT ( -- x addr ) 8 bit CAN2_TDT0R ; \ CAN2_TDT0R_TGT, TGT
     : CAN2_TDT0R_DLC ( %bbbb -- x addr ) CAN2_TDT0R ; \ CAN2_TDT0R_DLC, DLC
   [then]
 
-  defined? use-CAN2 defined? CAN2_TDL0R_DATA3 not and [if]
+  [if]
     \ CAN2_TDL0R (read-write) Reset:0x00000000
     : CAN2_TDL0R_DATA3 ( %bbbbbbbb -- x addr ) 24 lshift CAN2_TDL0R ; \ CAN2_TDL0R_DATA3, DATA3
     : CAN2_TDL0R_DATA2 ( %bbbbbbbb -- x addr ) 16 lshift CAN2_TDL0R ; \ CAN2_TDL0R_DATA2, DATA2
@@ -11674,7 +11674,7 @@ begin-module memmap
     : CAN2_TDL0R_DATA0 ( %bbbbbbbb -- x addr ) CAN2_TDL0R ; \ CAN2_TDL0R_DATA0, DATA0
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_TDH0R_DATA7 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_TDH0R (read-write) Reset:0x00000000
     : CAN2_TDH0R_DATA7 ( %bbbbbbbb -- x addr ) 24 lshift CAN2_TDH0R ; \ CAN2_TDH0R_DATA7, DATA7
     : CAN2_TDH0R_DATA6 ( %bbbbbbbb -- x addr ) 16 lshift CAN2_TDH0R ; \ CAN2_TDH0R_DATA6, DATA6
@@ -11682,7 +11682,7 @@ begin-module memmap
     : CAN2_TDH0R_DATA4 ( %bbbbbbbb -- x addr ) CAN2_TDH0R ; \ CAN2_TDH0R_DATA4, DATA4
   [then]
 
-  defined? use-CAN2 defined? CAN2_TI1R_STID not and [if]
+  [if]
     \ CAN2_TI1R (read-write) Reset:0x00000000
     : CAN2_TI1R_STID x addr ) 21 lshift CAN2_TI1R ; \ CAN2_TI1R_STID, STID
     : CAN2_TI1R_EXID x addr ) 3 lshift CAN2_TI1R ; \ CAN2_TI1R_EXID, EXID
@@ -11691,14 +11691,14 @@ begin-module memmap
     : CAN2_TI1R_TXRQ ( -- x addr ) 0 bit CAN2_TI1R ; \ CAN2_TI1R_TXRQ, TXRQ
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_TDT1R_TIME not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_TDT1R (read-write) Reset:0x00000000
     : CAN2_TDT1R_TIME ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift CAN2_TDT1R ; \ CAN2_TDT1R_TIME, TIME
     : CAN2_TDT1R_TGT ( -- x addr ) 8 bit CAN2_TDT1R ; \ CAN2_TDT1R_TGT, TGT
     : CAN2_TDT1R_DLC ( %bbbb -- x addr ) CAN2_TDT1R ; \ CAN2_TDT1R_DLC, DLC
   [then]
 
-  defined? use-CAN2 defined? CAN2_TDL1R_DATA3 not and [if]
+  [if]
     \ CAN2_TDL1R (read-write) Reset:0x00000000
     : CAN2_TDL1R_DATA3 ( %bbbbbbbb -- x addr ) 24 lshift CAN2_TDL1R ; \ CAN2_TDL1R_DATA3, DATA3
     : CAN2_TDL1R_DATA2 ( %bbbbbbbb -- x addr ) 16 lshift CAN2_TDL1R ; \ CAN2_TDL1R_DATA2, DATA2
@@ -11706,7 +11706,7 @@ begin-module memmap
     : CAN2_TDL1R_DATA0 ( %bbbbbbbb -- x addr ) CAN2_TDL1R ; \ CAN2_TDL1R_DATA0, DATA0
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_TDH1R_DATA7 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_TDH1R (read-write) Reset:0x00000000
     : CAN2_TDH1R_DATA7 ( %bbbbbbbb -- x addr ) 24 lshift CAN2_TDH1R ; \ CAN2_TDH1R_DATA7, DATA7
     : CAN2_TDH1R_DATA6 ( %bbbbbbbb -- x addr ) 16 lshift CAN2_TDH1R ; \ CAN2_TDH1R_DATA6, DATA6
@@ -11714,7 +11714,7 @@ begin-module memmap
     : CAN2_TDH1R_DATA4 ( %bbbbbbbb -- x addr ) CAN2_TDH1R ; \ CAN2_TDH1R_DATA4, DATA4
   [then]
 
-  defined? use-CAN2 defined? CAN2_TI2R_STID not and [if]
+  [if]
     \ CAN2_TI2R (read-write) Reset:0x00000000
     : CAN2_TI2R_STID x addr ) 21 lshift CAN2_TI2R ; \ CAN2_TI2R_STID, STID
     : CAN2_TI2R_EXID x addr ) 3 lshift CAN2_TI2R ; \ CAN2_TI2R_EXID, EXID
@@ -11723,14 +11723,14 @@ begin-module memmap
     : CAN2_TI2R_TXRQ ( -- x addr ) 0 bit CAN2_TI2R ; \ CAN2_TI2R_TXRQ, TXRQ
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_TDT2R_TIME not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_TDT2R (read-write) Reset:0x00000000
     : CAN2_TDT2R_TIME ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift CAN2_TDT2R ; \ CAN2_TDT2R_TIME, TIME
     : CAN2_TDT2R_TGT ( -- x addr ) 8 bit CAN2_TDT2R ; \ CAN2_TDT2R_TGT, TGT
     : CAN2_TDT2R_DLC ( %bbbb -- x addr ) CAN2_TDT2R ; \ CAN2_TDT2R_DLC, DLC
   [then]
 
-  defined? use-CAN2 defined? CAN2_TDL2R_DATA3 not and [if]
+  [if]
     \ CAN2_TDL2R (read-write) Reset:0x00000000
     : CAN2_TDL2R_DATA3 ( %bbbbbbbb -- x addr ) 24 lshift CAN2_TDL2R ; \ CAN2_TDL2R_DATA3, DATA3
     : CAN2_TDL2R_DATA2 ( %bbbbbbbb -- x addr ) 16 lshift CAN2_TDL2R ; \ CAN2_TDL2R_DATA2, DATA2
@@ -11738,7 +11738,7 @@ begin-module memmap
     : CAN2_TDL2R_DATA0 ( %bbbbbbbb -- x addr ) CAN2_TDL2R ; \ CAN2_TDL2R_DATA0, DATA0
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_TDH2R_DATA7 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_TDH2R (read-write) Reset:0x00000000
     : CAN2_TDH2R_DATA7 ( %bbbbbbbb -- x addr ) 24 lshift CAN2_TDH2R ; \ CAN2_TDH2R_DATA7, DATA7
     : CAN2_TDH2R_DATA6 ( %bbbbbbbb -- x addr ) 16 lshift CAN2_TDH2R ; \ CAN2_TDH2R_DATA6, DATA6
@@ -11746,7 +11746,7 @@ begin-module memmap
     : CAN2_TDH2R_DATA4 ( %bbbbbbbb -- x addr ) CAN2_TDH2R ; \ CAN2_TDH2R_DATA4, DATA4
   [then]
 
-  defined? use-CAN2 defined? CAN2_RI0R_STID? not and [if]
+  [if]
     \ CAN2_RI0R (read-only) Reset:0x00000000
     : CAN2_RI0R_STID? ( --  x ) 21 lshift CAN2_RI0R @ ; \ CAN2_RI0R_STID, STID
     : CAN2_RI0R_EXID? ( --  x ) 3 lshift CAN2_RI0R @ ; \ CAN2_RI0R_EXID, EXID
@@ -11754,14 +11754,14 @@ begin-module memmap
     : CAN2_RI0R_RTR? ( --  1|0 ) 1 bit CAN2_RI0R bit@ ; \ CAN2_RI0R_RTR, RTR
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_RDT0R_TIME? not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_RDT0R (read-only) Reset:0x00000000
     : CAN2_RDT0R_TIME? ( --  x ) 16 lshift CAN2_RDT0R @ ; \ CAN2_RDT0R_TIME, TIME
     : CAN2_RDT0R_FMI? ( --  x ) 8 lshift CAN2_RDT0R @ ; \ CAN2_RDT0R_FMI, FMI
     : CAN2_RDT0R_DLC? ( --  x ) CAN2_RDT0R @ ; \ CAN2_RDT0R_DLC, DLC
   [then]
 
-  defined? use-CAN2 defined? CAN2_RDL0R_DATA3? not and [if]
+  [if]
     \ CAN2_RDL0R (read-only) Reset:0x00000000
     : CAN2_RDL0R_DATA3? ( --  x ) 24 lshift CAN2_RDL0R @ ; \ CAN2_RDL0R_DATA3, DATA3
     : CAN2_RDL0R_DATA2? ( --  x ) 16 lshift CAN2_RDL0R @ ; \ CAN2_RDL0R_DATA2, DATA2
@@ -11769,7 +11769,7 @@ begin-module memmap
     : CAN2_RDL0R_DATA0? ( --  x ) CAN2_RDL0R @ ; \ CAN2_RDL0R_DATA0, DATA0
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_RDH0R_DATA7? not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_RDH0R (read-only) Reset:0x00000000
     : CAN2_RDH0R_DATA7? ( --  x ) 24 lshift CAN2_RDH0R @ ; \ CAN2_RDH0R_DATA7, DATA7
     : CAN2_RDH0R_DATA6? ( --  x ) 16 lshift CAN2_RDH0R @ ; \ CAN2_RDH0R_DATA6, DATA6
@@ -11777,7 +11777,7 @@ begin-module memmap
     : CAN2_RDH0R_DATA4? ( --  x ) CAN2_RDH0R @ ; \ CAN2_RDH0R_DATA4, DATA4
   [then]
 
-  defined? use-CAN2 defined? CAN2_RI1R_STID? not and [if]
+  [if]
     \ CAN2_RI1R (read-only) Reset:0x00000000
     : CAN2_RI1R_STID? ( --  x ) 21 lshift CAN2_RI1R @ ; \ CAN2_RI1R_STID, STID
     : CAN2_RI1R_EXID? ( --  x ) 3 lshift CAN2_RI1R @ ; \ CAN2_RI1R_EXID, EXID
@@ -11785,14 +11785,14 @@ begin-module memmap
     : CAN2_RI1R_RTR? ( --  1|0 ) 1 bit CAN2_RI1R bit@ ; \ CAN2_RI1R_RTR, RTR
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_RDT1R_TIME? not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_RDT1R (read-only) Reset:0x00000000
     : CAN2_RDT1R_TIME? ( --  x ) 16 lshift CAN2_RDT1R @ ; \ CAN2_RDT1R_TIME, TIME
     : CAN2_RDT1R_FMI? ( --  x ) 8 lshift CAN2_RDT1R @ ; \ CAN2_RDT1R_FMI, FMI
     : CAN2_RDT1R_DLC? ( --  x ) CAN2_RDT1R @ ; \ CAN2_RDT1R_DLC, DLC
   [then]
 
-  defined? use-CAN2 defined? CAN2_RDL1R_DATA3? not and [if]
+  [if]
     \ CAN2_RDL1R (read-only) Reset:0x00000000
     : CAN2_RDL1R_DATA3? ( --  x ) 24 lshift CAN2_RDL1R @ ; \ CAN2_RDL1R_DATA3, DATA3
     : CAN2_RDL1R_DATA2? ( --  x ) 16 lshift CAN2_RDL1R @ ; \ CAN2_RDL1R_DATA2, DATA2
@@ -11800,7 +11800,7 @@ begin-module memmap
     : CAN2_RDL1R_DATA0? ( --  x ) CAN2_RDL1R @ ; \ CAN2_RDL1R_DATA0, DATA0
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_RDH1R_DATA7? not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_RDH1R (read-only) Reset:0x00000000
     : CAN2_RDH1R_DATA7? ( --  x ) 24 lshift CAN2_RDH1R @ ; \ CAN2_RDH1R_DATA7, DATA7
     : CAN2_RDH1R_DATA6? ( --  x ) 16 lshift CAN2_RDH1R @ ; \ CAN2_RDH1R_DATA6, DATA6
@@ -11808,13 +11808,13 @@ begin-module memmap
     : CAN2_RDH1R_DATA4? ( --  x ) CAN2_RDH1R @ ; \ CAN2_RDH1R_DATA4, DATA4
   [then]
 
-  defined? use-CAN2 defined? CAN2_FMR_CAN2SB not and [if]
+  [if]
     \ CAN2_FMR (read-write) Reset:0x2A1C0E01
     : CAN2_FMR_CAN2SB ( %bbbbbb -- x addr ) 8 lshift CAN2_FMR ; \ CAN2_FMR_CAN2SB, CAN2SB
     : CAN2_FMR_FINIT ( -- x addr ) 0 bit CAN2_FMR ; \ CAN2_FMR_FINIT, FINIT
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_FM1R_FBM0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_FM1R (read-write) Reset:0x00000000
     : CAN2_FM1R_FBM0 ( -- x addr ) 0 bit CAN2_FM1R ; \ CAN2_FM1R_FBM0, Filter mode
     : CAN2_FM1R_FBM1 ( -- x addr ) 1 bit CAN2_FM1R ; \ CAN2_FM1R_FBM1, Filter mode
@@ -11846,7 +11846,7 @@ begin-module memmap
     : CAN2_FM1R_FBM27 ( -- x addr ) 27 bit CAN2_FM1R ; \ CAN2_FM1R_FBM27, Filter mode
   [then]
 
-  defined? use-CAN2 defined? CAN2_FS1R_FSC0 not and [if]
+  [if]
     \ CAN2_FS1R (read-write) Reset:0x00000000
     : CAN2_FS1R_FSC0 ( -- x addr ) 0 bit CAN2_FS1R ; \ CAN2_FS1R_FSC0, Filter scale configuration
     : CAN2_FS1R_FSC1 ( -- x addr ) 1 bit CAN2_FS1R ; \ CAN2_FS1R_FSC1, Filter scale configuration
@@ -11878,7 +11878,7 @@ begin-module memmap
     : CAN2_FS1R_FSC27 ( -- x addr ) 27 bit CAN2_FS1R ; \ CAN2_FS1R_FSC27, Filter scale configuration
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_FFA1R_FFA0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_FFA1R (read-write) Reset:0x00000000
     : CAN2_FFA1R_FFA0 ( -- x addr ) 0 bit CAN2_FFA1R ; \ CAN2_FFA1R_FFA0, Filter FIFO assignment for filter  0
     : CAN2_FFA1R_FFA1 ( -- x addr ) 1 bit CAN2_FFA1R ; \ CAN2_FFA1R_FFA1, Filter FIFO assignment for filter  1
@@ -11910,7 +11910,7 @@ begin-module memmap
     : CAN2_FFA1R_FFA27 ( -- x addr ) 27 bit CAN2_FFA1R ; \ CAN2_FFA1R_FFA27, Filter FIFO assignment for filter  27
   [then]
 
-  defined? use-CAN2 defined? CAN2_FA1R_FACT0 not and [if]
+  [if]
     \ CAN2_FA1R (read-write) Reset:0x00000000
     : CAN2_FA1R_FACT0 ( -- x addr ) 0 bit CAN2_FA1R ; \ CAN2_FA1R_FACT0, Filter active
     : CAN2_FA1R_FACT1 ( -- x addr ) 1 bit CAN2_FA1R ; \ CAN2_FA1R_FACT1, Filter active
@@ -11942,7 +11942,7 @@ begin-module memmap
     : CAN2_FA1R_FACT27 ( -- x addr ) 27 bit CAN2_FA1R ; \ CAN2_FA1R_FACT27, Filter active
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_F0R1_FB0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_F0R1 (read-write) Reset:0x00000000
     : CAN2_F0R1_FB0 ( -- x addr ) 0 bit CAN2_F0R1 ; \ CAN2_F0R1_FB0, Filter bits
     : CAN2_F0R1_FB1 ( -- x addr ) 1 bit CAN2_F0R1 ; \ CAN2_F0R1_FB1, Filter bits
@@ -11978,7 +11978,7 @@ begin-module memmap
     : CAN2_F0R1_FB31 ( -- x addr ) 31 bit CAN2_F0R1 ; \ CAN2_F0R1_FB31, Filter bits
   [then]
 
-  defined? use-CAN2 defined? CAN2_F0R2_FB0 not and [if]
+  [if]
     \ CAN2_F0R2 (read-write) Reset:0x00000000
     : CAN2_F0R2_FB0 ( -- x addr ) 0 bit CAN2_F0R2 ; \ CAN2_F0R2_FB0, Filter bits
     : CAN2_F0R2_FB1 ( -- x addr ) 1 bit CAN2_F0R2 ; \ CAN2_F0R2_FB1, Filter bits
@@ -12014,7 +12014,7 @@ begin-module memmap
     : CAN2_F0R2_FB31 ( -- x addr ) 31 bit CAN2_F0R2 ; \ CAN2_F0R2_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_F1R1_FB0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_F1R1 (read-write) Reset:0x00000000
     : CAN2_F1R1_FB0 ( -- x addr ) 0 bit CAN2_F1R1 ; \ CAN2_F1R1_FB0, Filter bits
     : CAN2_F1R1_FB1 ( -- x addr ) 1 bit CAN2_F1R1 ; \ CAN2_F1R1_FB1, Filter bits
@@ -12050,7 +12050,7 @@ begin-module memmap
     : CAN2_F1R1_FB31 ( -- x addr ) 31 bit CAN2_F1R1 ; \ CAN2_F1R1_FB31, Filter bits
   [then]
 
-  defined? use-CAN2 defined? CAN2_F1R2_FB0 not and [if]
+  [if]
     \ CAN2_F1R2 (read-write) Reset:0x00000000
     : CAN2_F1R2_FB0 ( -- x addr ) 0 bit CAN2_F1R2 ; \ CAN2_F1R2_FB0, Filter bits
     : CAN2_F1R2_FB1 ( -- x addr ) 1 bit CAN2_F1R2 ; \ CAN2_F1R2_FB1, Filter bits
@@ -12086,7 +12086,7 @@ begin-module memmap
     : CAN2_F1R2_FB31 ( -- x addr ) 31 bit CAN2_F1R2 ; \ CAN2_F1R2_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_F2R1_FB0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_F2R1 (read-write) Reset:0x00000000
     : CAN2_F2R1_FB0 ( -- x addr ) 0 bit CAN2_F2R1 ; \ CAN2_F2R1_FB0, Filter bits
     : CAN2_F2R1_FB1 ( -- x addr ) 1 bit CAN2_F2R1 ; \ CAN2_F2R1_FB1, Filter bits
@@ -12122,7 +12122,7 @@ begin-module memmap
     : CAN2_F2R1_FB31 ( -- x addr ) 31 bit CAN2_F2R1 ; \ CAN2_F2R1_FB31, Filter bits
   [then]
 
-  defined? use-CAN2 defined? CAN2_F2R2_FB0 not and [if]
+  [if]
     \ CAN2_F2R2 (read-write) Reset:0x00000000
     : CAN2_F2R2_FB0 ( -- x addr ) 0 bit CAN2_F2R2 ; \ CAN2_F2R2_FB0, Filter bits
     : CAN2_F2R2_FB1 ( -- x addr ) 1 bit CAN2_F2R2 ; \ CAN2_F2R2_FB1, Filter bits
@@ -12158,7 +12158,7 @@ begin-module memmap
     : CAN2_F2R2_FB31 ( -- x addr ) 31 bit CAN2_F2R2 ; \ CAN2_F2R2_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_F3R1_FB0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_F3R1 (read-write) Reset:0x00000000
     : CAN2_F3R1_FB0 ( -- x addr ) 0 bit CAN2_F3R1 ; \ CAN2_F3R1_FB0, Filter bits
     : CAN2_F3R1_FB1 ( -- x addr ) 1 bit CAN2_F3R1 ; \ CAN2_F3R1_FB1, Filter bits
@@ -12194,7 +12194,7 @@ begin-module memmap
     : CAN2_F3R1_FB31 ( -- x addr ) 31 bit CAN2_F3R1 ; \ CAN2_F3R1_FB31, Filter bits
   [then]
 
-  defined? use-CAN2 defined? CAN2_F3R2_FB0 not and [if]
+  [if]
     \ CAN2_F3R2 (read-write) Reset:0x00000000
     : CAN2_F3R2_FB0 ( -- x addr ) 0 bit CAN2_F3R2 ; \ CAN2_F3R2_FB0, Filter bits
     : CAN2_F3R2_FB1 ( -- x addr ) 1 bit CAN2_F3R2 ; \ CAN2_F3R2_FB1, Filter bits
@@ -12230,7 +12230,7 @@ begin-module memmap
     : CAN2_F3R2_FB31 ( -- x addr ) 31 bit CAN2_F3R2 ; \ CAN2_F3R2_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_F4R1_FB0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_F4R1 (read-write) Reset:0x00000000
     : CAN2_F4R1_FB0 ( -- x addr ) 0 bit CAN2_F4R1 ; \ CAN2_F4R1_FB0, Filter bits
     : CAN2_F4R1_FB1 ( -- x addr ) 1 bit CAN2_F4R1 ; \ CAN2_F4R1_FB1, Filter bits
@@ -12266,7 +12266,7 @@ begin-module memmap
     : CAN2_F4R1_FB31 ( -- x addr ) 31 bit CAN2_F4R1 ; \ CAN2_F4R1_FB31, Filter bits
   [then]
 
-  defined? use-CAN2 defined? CAN2_F4R2_FB0 not and [if]
+  [if]
     \ CAN2_F4R2 (read-write) Reset:0x00000000
     : CAN2_F4R2_FB0 ( -- x addr ) 0 bit CAN2_F4R2 ; \ CAN2_F4R2_FB0, Filter bits
     : CAN2_F4R2_FB1 ( -- x addr ) 1 bit CAN2_F4R2 ; \ CAN2_F4R2_FB1, Filter bits
@@ -12302,7 +12302,7 @@ begin-module memmap
     : CAN2_F4R2_FB31 ( -- x addr ) 31 bit CAN2_F4R2 ; \ CAN2_F4R2_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_F5R1_FB0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_F5R1 (read-write) Reset:0x00000000
     : CAN2_F5R1_FB0 ( -- x addr ) 0 bit CAN2_F5R1 ; \ CAN2_F5R1_FB0, Filter bits
     : CAN2_F5R1_FB1 ( -- x addr ) 1 bit CAN2_F5R1 ; \ CAN2_F5R1_FB1, Filter bits
@@ -12338,7 +12338,7 @@ begin-module memmap
     : CAN2_F5R1_FB31 ( -- x addr ) 31 bit CAN2_F5R1 ; \ CAN2_F5R1_FB31, Filter bits
   [then]
 
-  defined? use-CAN2 defined? CAN2_F5R2_FB0 not and [if]
+  [if]
     \ CAN2_F5R2 (read-write) Reset:0x00000000
     : CAN2_F5R2_FB0 ( -- x addr ) 0 bit CAN2_F5R2 ; \ CAN2_F5R2_FB0, Filter bits
     : CAN2_F5R2_FB1 ( -- x addr ) 1 bit CAN2_F5R2 ; \ CAN2_F5R2_FB1, Filter bits
@@ -12374,7 +12374,7 @@ begin-module memmap
     : CAN2_F5R2_FB31 ( -- x addr ) 31 bit CAN2_F5R2 ; \ CAN2_F5R2_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_F6R1_FB0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_F6R1 (read-write) Reset:0x00000000
     : CAN2_F6R1_FB0 ( -- x addr ) 0 bit CAN2_F6R1 ; \ CAN2_F6R1_FB0, Filter bits
     : CAN2_F6R1_FB1 ( -- x addr ) 1 bit CAN2_F6R1 ; \ CAN2_F6R1_FB1, Filter bits
@@ -12410,7 +12410,7 @@ begin-module memmap
     : CAN2_F6R1_FB31 ( -- x addr ) 31 bit CAN2_F6R1 ; \ CAN2_F6R1_FB31, Filter bits
   [then]
 
-  defined? use-CAN2 defined? CAN2_F6R2_FB0 not and [if]
+  [if]
     \ CAN2_F6R2 (read-write) Reset:0x00000000
     : CAN2_F6R2_FB0 ( -- x addr ) 0 bit CAN2_F6R2 ; \ CAN2_F6R2_FB0, Filter bits
     : CAN2_F6R2_FB1 ( -- x addr ) 1 bit CAN2_F6R2 ; \ CAN2_F6R2_FB1, Filter bits
@@ -12446,7 +12446,7 @@ begin-module memmap
     : CAN2_F6R2_FB31 ( -- x addr ) 31 bit CAN2_F6R2 ; \ CAN2_F6R2_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_F7R1_FB0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_F7R1 (read-write) Reset:0x00000000
     : CAN2_F7R1_FB0 ( -- x addr ) 0 bit CAN2_F7R1 ; \ CAN2_F7R1_FB0, Filter bits
     : CAN2_F7R1_FB1 ( -- x addr ) 1 bit CAN2_F7R1 ; \ CAN2_F7R1_FB1, Filter bits
@@ -12482,7 +12482,7 @@ begin-module memmap
     : CAN2_F7R1_FB31 ( -- x addr ) 31 bit CAN2_F7R1 ; \ CAN2_F7R1_FB31, Filter bits
   [then]
 
-  defined? use-CAN2 defined? CAN2_F7R2_FB0 not and [if]
+  [if]
     \ CAN2_F7R2 (read-write) Reset:0x00000000
     : CAN2_F7R2_FB0 ( -- x addr ) 0 bit CAN2_F7R2 ; \ CAN2_F7R2_FB0, Filter bits
     : CAN2_F7R2_FB1 ( -- x addr ) 1 bit CAN2_F7R2 ; \ CAN2_F7R2_FB1, Filter bits
@@ -12518,7 +12518,7 @@ begin-module memmap
     : CAN2_F7R2_FB31 ( -- x addr ) 31 bit CAN2_F7R2 ; \ CAN2_F7R2_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_F8R1_FB0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_F8R1 (read-write) Reset:0x00000000
     : CAN2_F8R1_FB0 ( -- x addr ) 0 bit CAN2_F8R1 ; \ CAN2_F8R1_FB0, Filter bits
     : CAN2_F8R1_FB1 ( -- x addr ) 1 bit CAN2_F8R1 ; \ CAN2_F8R1_FB1, Filter bits
@@ -12554,7 +12554,7 @@ begin-module memmap
     : CAN2_F8R1_FB31 ( -- x addr ) 31 bit CAN2_F8R1 ; \ CAN2_F8R1_FB31, Filter bits
   [then]
 
-  defined? use-CAN2 defined? CAN2_F8R2_FB0 not and [if]
+  [if]
     \ CAN2_F8R2 (read-write) Reset:0x00000000
     : CAN2_F8R2_FB0 ( -- x addr ) 0 bit CAN2_F8R2 ; \ CAN2_F8R2_FB0, Filter bits
     : CAN2_F8R2_FB1 ( -- x addr ) 1 bit CAN2_F8R2 ; \ CAN2_F8R2_FB1, Filter bits
@@ -12590,7 +12590,7 @@ begin-module memmap
     : CAN2_F8R2_FB31 ( -- x addr ) 31 bit CAN2_F8R2 ; \ CAN2_F8R2_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_F9R1_FB0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_F9R1 (read-write) Reset:0x00000000
     : CAN2_F9R1_FB0 ( -- x addr ) 0 bit CAN2_F9R1 ; \ CAN2_F9R1_FB0, Filter bits
     : CAN2_F9R1_FB1 ( -- x addr ) 1 bit CAN2_F9R1 ; \ CAN2_F9R1_FB1, Filter bits
@@ -12626,7 +12626,7 @@ begin-module memmap
     : CAN2_F9R1_FB31 ( -- x addr ) 31 bit CAN2_F9R1 ; \ CAN2_F9R1_FB31, Filter bits
   [then]
 
-  defined? use-CAN2 defined? CAN2_F9R2_FB0 not and [if]
+  [if]
     \ CAN2_F9R2 (read-write) Reset:0x00000000
     : CAN2_F9R2_FB0 ( -- x addr ) 0 bit CAN2_F9R2 ; \ CAN2_F9R2_FB0, Filter bits
     : CAN2_F9R2_FB1 ( -- x addr ) 1 bit CAN2_F9R2 ; \ CAN2_F9R2_FB1, Filter bits
@@ -12662,7 +12662,7 @@ begin-module memmap
     : CAN2_F9R2_FB31 ( -- x addr ) 31 bit CAN2_F9R2 ; \ CAN2_F9R2_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_F10R1_FB0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_F10R1 (read-write) Reset:0x00000000
     : CAN2_F10R1_FB0 ( -- x addr ) 0 bit CAN2_F10R1 ; \ CAN2_F10R1_FB0, Filter bits
     : CAN2_F10R1_FB1 ( -- x addr ) 1 bit CAN2_F10R1 ; \ CAN2_F10R1_FB1, Filter bits
@@ -12698,7 +12698,7 @@ begin-module memmap
     : CAN2_F10R1_FB31 ( -- x addr ) 31 bit CAN2_F10R1 ; \ CAN2_F10R1_FB31, Filter bits
   [then]
 
-  defined? use-CAN2 defined? CAN2_F10R2_FB0 not and [if]
+  [if]
     \ CAN2_F10R2 (read-write) Reset:0x00000000
     : CAN2_F10R2_FB0 ( -- x addr ) 0 bit CAN2_F10R2 ; \ CAN2_F10R2_FB0, Filter bits
     : CAN2_F10R2_FB1 ( -- x addr ) 1 bit CAN2_F10R2 ; \ CAN2_F10R2_FB1, Filter bits
@@ -12734,7 +12734,7 @@ begin-module memmap
     : CAN2_F10R2_FB31 ( -- x addr ) 31 bit CAN2_F10R2 ; \ CAN2_F10R2_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_F11R1_FB0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_F11R1 (read-write) Reset:0x00000000
     : CAN2_F11R1_FB0 ( -- x addr ) 0 bit CAN2_F11R1 ; \ CAN2_F11R1_FB0, Filter bits
     : CAN2_F11R1_FB1 ( -- x addr ) 1 bit CAN2_F11R1 ; \ CAN2_F11R1_FB1, Filter bits
@@ -12770,7 +12770,7 @@ begin-module memmap
     : CAN2_F11R1_FB31 ( -- x addr ) 31 bit CAN2_F11R1 ; \ CAN2_F11R1_FB31, Filter bits
   [then]
 
-  defined? use-CAN2 defined? CAN2_F11R2_FB0 not and [if]
+  [if]
     \ CAN2_F11R2 (read-write) Reset:0x00000000
     : CAN2_F11R2_FB0 ( -- x addr ) 0 bit CAN2_F11R2 ; \ CAN2_F11R2_FB0, Filter bits
     : CAN2_F11R2_FB1 ( -- x addr ) 1 bit CAN2_F11R2 ; \ CAN2_F11R2_FB1, Filter bits
@@ -12806,7 +12806,7 @@ begin-module memmap
     : CAN2_F11R2_FB31 ( -- x addr ) 31 bit CAN2_F11R2 ; \ CAN2_F11R2_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_F12R1_FB0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_F12R1 (read-write) Reset:0x00000000
     : CAN2_F12R1_FB0 ( -- x addr ) 0 bit CAN2_F12R1 ; \ CAN2_F12R1_FB0, Filter bits
     : CAN2_F12R1_FB1 ( -- x addr ) 1 bit CAN2_F12R1 ; \ CAN2_F12R1_FB1, Filter bits
@@ -12842,7 +12842,7 @@ begin-module memmap
     : CAN2_F12R1_FB31 ( -- x addr ) 31 bit CAN2_F12R1 ; \ CAN2_F12R1_FB31, Filter bits
   [then]
 
-  defined? use-CAN2 defined? CAN2_F12R2_FB0 not and [if]
+  [if]
     \ CAN2_F12R2 (read-write) Reset:0x00000000
     : CAN2_F12R2_FB0 ( -- x addr ) 0 bit CAN2_F12R2 ; \ CAN2_F12R2_FB0, Filter bits
     : CAN2_F12R2_FB1 ( -- x addr ) 1 bit CAN2_F12R2 ; \ CAN2_F12R2_FB1, Filter bits
@@ -12878,7 +12878,7 @@ begin-module memmap
     : CAN2_F12R2_FB31 ( -- x addr ) 31 bit CAN2_F12R2 ; \ CAN2_F12R2_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_F13R1_FB0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_F13R1 (read-write) Reset:0x00000000
     : CAN2_F13R1_FB0 ( -- x addr ) 0 bit CAN2_F13R1 ; \ CAN2_F13R1_FB0, Filter bits
     : CAN2_F13R1_FB1 ( -- x addr ) 1 bit CAN2_F13R1 ; \ CAN2_F13R1_FB1, Filter bits
@@ -12914,7 +12914,7 @@ begin-module memmap
     : CAN2_F13R1_FB31 ( -- x addr ) 31 bit CAN2_F13R1 ; \ CAN2_F13R1_FB31, Filter bits
   [then]
 
-  defined? use-CAN2 defined? CAN2_F13R2_FB0 not and [if]
+  [if]
     \ CAN2_F13R2 (read-write) Reset:0x00000000
     : CAN2_F13R2_FB0 ( -- x addr ) 0 bit CAN2_F13R2 ; \ CAN2_F13R2_FB0, Filter bits
     : CAN2_F13R2_FB1 ( -- x addr ) 1 bit CAN2_F13R2 ; \ CAN2_F13R2_FB1, Filter bits
@@ -12950,7 +12950,7 @@ begin-module memmap
     : CAN2_F13R2_FB31 ( -- x addr ) 31 bit CAN2_F13R2 ; \ CAN2_F13R2_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_F14R1_FB0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_F14R1 (read-write) Reset:0x00000000
     : CAN2_F14R1_FB0 ( -- x addr ) 0 bit CAN2_F14R1 ; \ CAN2_F14R1_FB0, Filter bits
     : CAN2_F14R1_FB1 ( -- x addr ) 1 bit CAN2_F14R1 ; \ CAN2_F14R1_FB1, Filter bits
@@ -12986,7 +12986,7 @@ begin-module memmap
     : CAN2_F14R1_FB31 ( -- x addr ) 31 bit CAN2_F14R1 ; \ CAN2_F14R1_FB31, Filter bits
   [then]
 
-  defined? use-CAN2 defined? CAN2_F14R2_FB0 not and [if]
+  [if]
     \ CAN2_F14R2 (read-write) Reset:0x00000000
     : CAN2_F14R2_FB0 ( -- x addr ) 0 bit CAN2_F14R2 ; \ CAN2_F14R2_FB0, Filter bits
     : CAN2_F14R2_FB1 ( -- x addr ) 1 bit CAN2_F14R2 ; \ CAN2_F14R2_FB1, Filter bits
@@ -13022,7 +13022,7 @@ begin-module memmap
     : CAN2_F14R2_FB31 ( -- x addr ) 31 bit CAN2_F14R2 ; \ CAN2_F14R2_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_F15R1_FB0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_F15R1 (read-write) Reset:0x00000000
     : CAN2_F15R1_FB0 ( -- x addr ) 0 bit CAN2_F15R1 ; \ CAN2_F15R1_FB0, Filter bits
     : CAN2_F15R1_FB1 ( -- x addr ) 1 bit CAN2_F15R1 ; \ CAN2_F15R1_FB1, Filter bits
@@ -13058,7 +13058,7 @@ begin-module memmap
     : CAN2_F15R1_FB31 ( -- x addr ) 31 bit CAN2_F15R1 ; \ CAN2_F15R1_FB31, Filter bits
   [then]
 
-  defined? use-CAN2 defined? CAN2_F15R2_FB0 not and [if]
+  [if]
     \ CAN2_F15R2 (read-write) Reset:0x00000000
     : CAN2_F15R2_FB0 ( -- x addr ) 0 bit CAN2_F15R2 ; \ CAN2_F15R2_FB0, Filter bits
     : CAN2_F15R2_FB1 ( -- x addr ) 1 bit CAN2_F15R2 ; \ CAN2_F15R2_FB1, Filter bits
@@ -13094,7 +13094,7 @@ begin-module memmap
     : CAN2_F15R2_FB31 ( -- x addr ) 31 bit CAN2_F15R2 ; \ CAN2_F15R2_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_F16R1_FB0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_F16R1 (read-write) Reset:0x00000000
     : CAN2_F16R1_FB0 ( -- x addr ) 0 bit CAN2_F16R1 ; \ CAN2_F16R1_FB0, Filter bits
     : CAN2_F16R1_FB1 ( -- x addr ) 1 bit CAN2_F16R1 ; \ CAN2_F16R1_FB1, Filter bits
@@ -13130,7 +13130,7 @@ begin-module memmap
     : CAN2_F16R1_FB31 ( -- x addr ) 31 bit CAN2_F16R1 ; \ CAN2_F16R1_FB31, Filter bits
   [then]
 
-  defined? use-CAN2 defined? CAN2_F16R2_FB0 not and [if]
+  [if]
     \ CAN2_F16R2 (read-write) Reset:0x00000000
     : CAN2_F16R2_FB0 ( -- x addr ) 0 bit CAN2_F16R2 ; \ CAN2_F16R2_FB0, Filter bits
     : CAN2_F16R2_FB1 ( -- x addr ) 1 bit CAN2_F16R2 ; \ CAN2_F16R2_FB1, Filter bits
@@ -13166,7 +13166,7 @@ begin-module memmap
     : CAN2_F16R2_FB31 ( -- x addr ) 31 bit CAN2_F16R2 ; \ CAN2_F16R2_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_F17R1_FB0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_F17R1 (read-write) Reset:0x00000000
     : CAN2_F17R1_FB0 ( -- x addr ) 0 bit CAN2_F17R1 ; \ CAN2_F17R1_FB0, Filter bits
     : CAN2_F17R1_FB1 ( -- x addr ) 1 bit CAN2_F17R1 ; \ CAN2_F17R1_FB1, Filter bits
@@ -13202,7 +13202,7 @@ begin-module memmap
     : CAN2_F17R1_FB31 ( -- x addr ) 31 bit CAN2_F17R1 ; \ CAN2_F17R1_FB31, Filter bits
   [then]
 
-  defined? use-CAN2 defined? CAN2_F17R2_FB0 not and [if]
+  [if]
     \ CAN2_F17R2 (read-write) Reset:0x00000000
     : CAN2_F17R2_FB0 ( -- x addr ) 0 bit CAN2_F17R2 ; \ CAN2_F17R2_FB0, Filter bits
     : CAN2_F17R2_FB1 ( -- x addr ) 1 bit CAN2_F17R2 ; \ CAN2_F17R2_FB1, Filter bits
@@ -13238,7 +13238,7 @@ begin-module memmap
     : CAN2_F17R2_FB31 ( -- x addr ) 31 bit CAN2_F17R2 ; \ CAN2_F17R2_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_F18R1_FB0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_F18R1 (read-write) Reset:0x00000000
     : CAN2_F18R1_FB0 ( -- x addr ) 0 bit CAN2_F18R1 ; \ CAN2_F18R1_FB0, Filter bits
     : CAN2_F18R1_FB1 ( -- x addr ) 1 bit CAN2_F18R1 ; \ CAN2_F18R1_FB1, Filter bits
@@ -13274,7 +13274,7 @@ begin-module memmap
     : CAN2_F18R1_FB31 ( -- x addr ) 31 bit CAN2_F18R1 ; \ CAN2_F18R1_FB31, Filter bits
   [then]
 
-  defined? use-CAN2 defined? CAN2_F18R2_FB0 not and [if]
+  [if]
     \ CAN2_F18R2 (read-write) Reset:0x00000000
     : CAN2_F18R2_FB0 ( -- x addr ) 0 bit CAN2_F18R2 ; \ CAN2_F18R2_FB0, Filter bits
     : CAN2_F18R2_FB1 ( -- x addr ) 1 bit CAN2_F18R2 ; \ CAN2_F18R2_FB1, Filter bits
@@ -13310,7 +13310,7 @@ begin-module memmap
     : CAN2_F18R2_FB31 ( -- x addr ) 31 bit CAN2_F18R2 ; \ CAN2_F18R2_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_F19R1_FB0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_F19R1 (read-write) Reset:0x00000000
     : CAN2_F19R1_FB0 ( -- x addr ) 0 bit CAN2_F19R1 ; \ CAN2_F19R1_FB0, Filter bits
     : CAN2_F19R1_FB1 ( -- x addr ) 1 bit CAN2_F19R1 ; \ CAN2_F19R1_FB1, Filter bits
@@ -13346,7 +13346,7 @@ begin-module memmap
     : CAN2_F19R1_FB31 ( -- x addr ) 31 bit CAN2_F19R1 ; \ CAN2_F19R1_FB31, Filter bits
   [then]
 
-  defined? use-CAN2 defined? CAN2_F19R2_FB0 not and [if]
+  [if]
     \ CAN2_F19R2 (read-write) Reset:0x00000000
     : CAN2_F19R2_FB0 ( -- x addr ) 0 bit CAN2_F19R2 ; \ CAN2_F19R2_FB0, Filter bits
     : CAN2_F19R2_FB1 ( -- x addr ) 1 bit CAN2_F19R2 ; \ CAN2_F19R2_FB1, Filter bits
@@ -13382,7 +13382,7 @@ begin-module memmap
     : CAN2_F19R2_FB31 ( -- x addr ) 31 bit CAN2_F19R2 ; \ CAN2_F19R2_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_F20R1_FB0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_F20R1 (read-write) Reset:0x00000000
     : CAN2_F20R1_FB0 ( -- x addr ) 0 bit CAN2_F20R1 ; \ CAN2_F20R1_FB0, Filter bits
     : CAN2_F20R1_FB1 ( -- x addr ) 1 bit CAN2_F20R1 ; \ CAN2_F20R1_FB1, Filter bits
@@ -13418,7 +13418,7 @@ begin-module memmap
     : CAN2_F20R1_FB31 ( -- x addr ) 31 bit CAN2_F20R1 ; \ CAN2_F20R1_FB31, Filter bits
   [then]
 
-  defined? use-CAN2 defined? CAN2_F20R2_FB0 not and [if]
+  [if]
     \ CAN2_F20R2 (read-write) Reset:0x00000000
     : CAN2_F20R2_FB0 ( -- x addr ) 0 bit CAN2_F20R2 ; \ CAN2_F20R2_FB0, Filter bits
     : CAN2_F20R2_FB1 ( -- x addr ) 1 bit CAN2_F20R2 ; \ CAN2_F20R2_FB1, Filter bits
@@ -13454,7 +13454,7 @@ begin-module memmap
     : CAN2_F20R2_FB31 ( -- x addr ) 31 bit CAN2_F20R2 ; \ CAN2_F20R2_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_F21R1_FB0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_F21R1 (read-write) Reset:0x00000000
     : CAN2_F21R1_FB0 ( -- x addr ) 0 bit CAN2_F21R1 ; \ CAN2_F21R1_FB0, Filter bits
     : CAN2_F21R1_FB1 ( -- x addr ) 1 bit CAN2_F21R1 ; \ CAN2_F21R1_FB1, Filter bits
@@ -13490,7 +13490,7 @@ begin-module memmap
     : CAN2_F21R1_FB31 ( -- x addr ) 31 bit CAN2_F21R1 ; \ CAN2_F21R1_FB31, Filter bits
   [then]
 
-  defined? use-CAN2 defined? CAN2_F21R2_FB0 not and [if]
+  [if]
     \ CAN2_F21R2 (read-write) Reset:0x00000000
     : CAN2_F21R2_FB0 ( -- x addr ) 0 bit CAN2_F21R2 ; \ CAN2_F21R2_FB0, Filter bits
     : CAN2_F21R2_FB1 ( -- x addr ) 1 bit CAN2_F21R2 ; \ CAN2_F21R2_FB1, Filter bits
@@ -13526,7 +13526,7 @@ begin-module memmap
     : CAN2_F21R2_FB31 ( -- x addr ) 31 bit CAN2_F21R2 ; \ CAN2_F21R2_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_F22R1_FB0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_F22R1 (read-write) Reset:0x00000000
     : CAN2_F22R1_FB0 ( -- x addr ) 0 bit CAN2_F22R1 ; \ CAN2_F22R1_FB0, Filter bits
     : CAN2_F22R1_FB1 ( -- x addr ) 1 bit CAN2_F22R1 ; \ CAN2_F22R1_FB1, Filter bits
@@ -13562,7 +13562,7 @@ begin-module memmap
     : CAN2_F22R1_FB31 ( -- x addr ) 31 bit CAN2_F22R1 ; \ CAN2_F22R1_FB31, Filter bits
   [then]
 
-  defined? use-CAN2 defined? CAN2_F22R2_FB0 not and [if]
+  [if]
     \ CAN2_F22R2 (read-write) Reset:0x00000000
     : CAN2_F22R2_FB0 ( -- x addr ) 0 bit CAN2_F22R2 ; \ CAN2_F22R2_FB0, Filter bits
     : CAN2_F22R2_FB1 ( -- x addr ) 1 bit CAN2_F22R2 ; \ CAN2_F22R2_FB1, Filter bits
@@ -13598,7 +13598,7 @@ begin-module memmap
     : CAN2_F22R2_FB31 ( -- x addr ) 31 bit CAN2_F22R2 ; \ CAN2_F22R2_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_F23R1_FB0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_F23R1 (read-write) Reset:0x00000000
     : CAN2_F23R1_FB0 ( -- x addr ) 0 bit CAN2_F23R1 ; \ CAN2_F23R1_FB0, Filter bits
     : CAN2_F23R1_FB1 ( -- x addr ) 1 bit CAN2_F23R1 ; \ CAN2_F23R1_FB1, Filter bits
@@ -13634,7 +13634,7 @@ begin-module memmap
     : CAN2_F23R1_FB31 ( -- x addr ) 31 bit CAN2_F23R1 ; \ CAN2_F23R1_FB31, Filter bits
   [then]
 
-  defined? use-CAN2 defined? CAN2_F23R2_FB0 not and [if]
+  [if]
     \ CAN2_F23R2 (read-write) Reset:0x00000000
     : CAN2_F23R2_FB0 ( -- x addr ) 0 bit CAN2_F23R2 ; \ CAN2_F23R2_FB0, Filter bits
     : CAN2_F23R2_FB1 ( -- x addr ) 1 bit CAN2_F23R2 ; \ CAN2_F23R2_FB1, Filter bits
@@ -13670,7 +13670,7 @@ begin-module memmap
     : CAN2_F23R2_FB31 ( -- x addr ) 31 bit CAN2_F23R2 ; \ CAN2_F23R2_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_F24R1_FB0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_F24R1 (read-write) Reset:0x00000000
     : CAN2_F24R1_FB0 ( -- x addr ) 0 bit CAN2_F24R1 ; \ CAN2_F24R1_FB0, Filter bits
     : CAN2_F24R1_FB1 ( -- x addr ) 1 bit CAN2_F24R1 ; \ CAN2_F24R1_FB1, Filter bits
@@ -13706,7 +13706,7 @@ begin-module memmap
     : CAN2_F24R1_FB31 ( -- x addr ) 31 bit CAN2_F24R1 ; \ CAN2_F24R1_FB31, Filter bits
   [then]
 
-  defined? use-CAN2 defined? CAN2_F24R2_FB0 not and [if]
+  [if]
     \ CAN2_F24R2 (read-write) Reset:0x00000000
     : CAN2_F24R2_FB0 ( -- x addr ) 0 bit CAN2_F24R2 ; \ CAN2_F24R2_FB0, Filter bits
     : CAN2_F24R2_FB1 ( -- x addr ) 1 bit CAN2_F24R2 ; \ CAN2_F24R2_FB1, Filter bits
@@ -13742,7 +13742,7 @@ begin-module memmap
     : CAN2_F24R2_FB31 ( -- x addr ) 31 bit CAN2_F24R2 ; \ CAN2_F24R2_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_F25R1_FB0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_F25R1 (read-write) Reset:0x00000000
     : CAN2_F25R1_FB0 ( -- x addr ) 0 bit CAN2_F25R1 ; \ CAN2_F25R1_FB0, Filter bits
     : CAN2_F25R1_FB1 ( -- x addr ) 1 bit CAN2_F25R1 ; \ CAN2_F25R1_FB1, Filter bits
@@ -13778,7 +13778,7 @@ begin-module memmap
     : CAN2_F25R1_FB31 ( -- x addr ) 31 bit CAN2_F25R1 ; \ CAN2_F25R1_FB31, Filter bits
   [then]
 
-  defined? use-CAN2 defined? CAN2_F25R2_FB0 not and [if]
+  [if]
     \ CAN2_F25R2 (read-write) Reset:0x00000000
     : CAN2_F25R2_FB0 ( -- x addr ) 0 bit CAN2_F25R2 ; \ CAN2_F25R2_FB0, Filter bits
     : CAN2_F25R2_FB1 ( -- x addr ) 1 bit CAN2_F25R2 ; \ CAN2_F25R2_FB1, Filter bits
@@ -13814,7 +13814,7 @@ begin-module memmap
     : CAN2_F25R2_FB31 ( -- x addr ) 31 bit CAN2_F25R2 ; \ CAN2_F25R2_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_F26R1_FB0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_F26R1 (read-write) Reset:0x00000000
     : CAN2_F26R1_FB0 ( -- x addr ) 0 bit CAN2_F26R1 ; \ CAN2_F26R1_FB0, Filter bits
     : CAN2_F26R1_FB1 ( -- x addr ) 1 bit CAN2_F26R1 ; \ CAN2_F26R1_FB1, Filter bits
@@ -13850,7 +13850,7 @@ begin-module memmap
     : CAN2_F26R1_FB31 ( -- x addr ) 31 bit CAN2_F26R1 ; \ CAN2_F26R1_FB31, Filter bits
   [then]
 
-  defined? use-CAN2 defined? CAN2_F26R2_FB0 not and [if]
+  [if]
     \ CAN2_F26R2 (read-write) Reset:0x00000000
     : CAN2_F26R2_FB0 ( -- x addr ) 0 bit CAN2_F26R2 ; \ CAN2_F26R2_FB0, Filter bits
     : CAN2_F26R2_FB1 ( -- x addr ) 1 bit CAN2_F26R2 ; \ CAN2_F26R2_FB1, Filter bits
@@ -13886,7 +13886,7 @@ begin-module memmap
     : CAN2_F26R2_FB31 ( -- x addr ) 31 bit CAN2_F26R2 ; \ CAN2_F26R2_FB31, Filter bits
   [then]
 
-  execute-defined? use-CAN2 defined? CAN2_F27R1_FB0 not and [if]
+  execute-defined? use-CAN2 [if]
     \ CAN2_F27R1 (read-write) Reset:0x00000000
     : CAN2_F27R1_FB0 ( -- x addr ) 0 bit CAN2_F27R1 ; \ CAN2_F27R1_FB0, Filter bits
     : CAN2_F27R1_FB1 ( -- x addr ) 1 bit CAN2_F27R1 ; \ CAN2_F27R1_FB1, Filter bits
@@ -13922,7 +13922,7 @@ begin-module memmap
     : CAN2_F27R1_FB31 ( -- x addr ) 31 bit CAN2_F27R1 ; \ CAN2_F27R1_FB31, Filter bits
   [then]
 
-  defined? use-CAN2 defined? CAN2_F27R2_FB0 not and [if]
+  [if]
     \ CAN2_F27R2 (read-write) Reset:0x00000000
     : CAN2_F27R2_FB0 ( -- x addr ) 0 bit CAN2_F27R2 ; \ CAN2_F27R2_FB0, Filter bits
     : CAN2_F27R2_FB1 ( -- x addr ) 1 bit CAN2_F27R2 ; \ CAN2_F27R2_FB1, Filter bits
@@ -13958,7 +13958,7 @@ begin-module memmap
     : CAN2_F27R2_FB31 ( -- x addr ) 31 bit CAN2_F27R2 ; \ CAN2_F27R2_FB31, Filter bits
   [then]
 
-  execute-defined? use-FLASH defined? FLASH_ACR_LATENCY not and [if]
+  execute-defined? use-FLASH [if]
     \ FLASH_ACR (multiple-access)  Reset:0x00000000
     : FLASH_ACR_LATENCY ( %bbb -- x addr ) FLASH_ACR ; \ FLASH_ACR_LATENCY, Latency
     : FLASH_ACR_PRFTEN ( -- x addr ) 8 bit FLASH_ACR ; \ FLASH_ACR_PRFTEN, Prefetch enable
@@ -13968,17 +13968,17 @@ begin-module memmap
     : FLASH_ACR_DCRST ( -- x addr ) 12 bit FLASH_ACR ; \ FLASH_ACR_DCRST, Data cache reset
   [then]
 
-  defined? use-FLASH defined? FLASH_KEYR_KEY not and [if]
+  [if]
     \ FLASH_KEYR (write-only) Reset:0x00000000
     : FLASH_KEYR_KEY ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) FLASH_KEYR ; \ FLASH_KEYR_KEY, FPEC key
   [then]
 
-  execute-defined? use-FLASH defined? FLASH_OPTKEYR_OPTKEY not and [if]
+  execute-defined? use-FLASH [if]
     \ FLASH_OPTKEYR (write-only) Reset:0x00000000
     : FLASH_OPTKEYR_OPTKEY ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) FLASH_OPTKEYR ; \ FLASH_OPTKEYR_OPTKEY, Option byte key
   [then]
 
-  defined? use-FLASH defined? FLASH_SR_EOP not and [if]
+  [if]
     \ FLASH_SR (multiple-access)  Reset:0x00000000
     : FLASH_SR_EOP ( -- x addr ) 0 bit FLASH_SR ; \ FLASH_SR_EOP, End of operation
     : FLASH_SR_OPERR ( -- x addr ) 1 bit FLASH_SR ; \ FLASH_SR_OPERR, Operation error
@@ -13989,7 +13989,7 @@ begin-module memmap
     : FLASH_SR_BSY ( -- x addr ) 16 bit FLASH_SR ; \ FLASH_SR_BSY, Busy
   [then]
 
-  execute-defined? use-FLASH defined? FLASH_CR_PG not and [if]
+  execute-defined? use-FLASH [if]
     \ FLASH_CR (read-write) Reset:0x80000000
     : FLASH_CR_PG ( -- x addr ) 0 bit FLASH_CR ; \ FLASH_CR_PG, Programming
     : FLASH_CR_SER ( -- x addr ) 1 bit FLASH_CR ; \ FLASH_CR_SER, Sector Erase
@@ -14002,7 +14002,7 @@ begin-module memmap
     : FLASH_CR_LOCK ( -- x addr ) 31 bit FLASH_CR ; \ FLASH_CR_LOCK, Lock
   [then]
 
-  defined? use-FLASH defined? FLASH_OPTCR_OPTLOCK not and [if]
+  [if]
     \ FLASH_OPTCR (read-write) Reset:0x00000014
     : FLASH_OPTCR_OPTLOCK ( -- x addr ) 0 bit FLASH_OPTCR ; \ FLASH_OPTCR_OPTLOCK, Option lock
     : FLASH_OPTCR_OPTSTRT ( -- x addr ) 1 bit FLASH_OPTCR ; \ FLASH_OPTCR_OPTSTRT, Option start
@@ -14014,7 +14014,7 @@ begin-module memmap
     : FLASH_OPTCR_nWRP ( %bbbbbbbbbbb -- x addr ) 16 lshift FLASH_OPTCR ; \ FLASH_OPTCR_nWRP, Not write protect
   [then]
 
-  execute-defined? use-EXTI defined? EXTI_IMR_MR0 not and [if]
+  execute-defined? use-EXTI [if]
     \ EXTI_IMR (read-write) Reset:0x00000000
     : EXTI_IMR_MR0 ( -- x addr ) 0 bit EXTI_IMR ; \ EXTI_IMR_MR0, Interrupt Mask on line 0
     : EXTI_IMR_MR1 ( -- x addr ) 1 bit EXTI_IMR ; \ EXTI_IMR_MR1, Interrupt Mask on line 1
@@ -14041,7 +14041,7 @@ begin-module memmap
     : EXTI_IMR_MR22 ( -- x addr ) 22 bit EXTI_IMR ; \ EXTI_IMR_MR22, Interrupt Mask on line 22
   [then]
 
-  defined? use-EXTI defined? EXTI_EMR_MR0 not and [if]
+  [if]
     \ EXTI_EMR (read-write) Reset:0x00000000
     : EXTI_EMR_MR0 ( -- x addr ) 0 bit EXTI_EMR ; \ EXTI_EMR_MR0, Event Mask on line 0
     : EXTI_EMR_MR1 ( -- x addr ) 1 bit EXTI_EMR ; \ EXTI_EMR_MR1, Event Mask on line 1
@@ -14068,7 +14068,7 @@ begin-module memmap
     : EXTI_EMR_MR22 ( -- x addr ) 22 bit EXTI_EMR ; \ EXTI_EMR_MR22, Event Mask on line 22
   [then]
 
-  execute-defined? use-EXTI defined? EXTI_RTSR_TR0 not and [if]
+  execute-defined? use-EXTI [if]
     \ EXTI_RTSR (read-write) Reset:0x00000000
     : EXTI_RTSR_TR0 ( -- x addr ) 0 bit EXTI_RTSR ; \ EXTI_RTSR_TR0, Rising trigger event configuration of  line 0
     : EXTI_RTSR_TR1 ( -- x addr ) 1 bit EXTI_RTSR ; \ EXTI_RTSR_TR1, Rising trigger event configuration of  line 1
@@ -14095,7 +14095,7 @@ begin-module memmap
     : EXTI_RTSR_TR22 ( -- x addr ) 22 bit EXTI_RTSR ; \ EXTI_RTSR_TR22, Rising trigger event configuration of  line 22
   [then]
 
-  defined? use-EXTI defined? EXTI_FTSR_TR0 not and [if]
+  [if]
     \ EXTI_FTSR (read-write) Reset:0x00000000
     : EXTI_FTSR_TR0 ( -- x addr ) 0 bit EXTI_FTSR ; \ EXTI_FTSR_TR0, Falling trigger event configuration of  line 0
     : EXTI_FTSR_TR1 ( -- x addr ) 1 bit EXTI_FTSR ; \ EXTI_FTSR_TR1, Falling trigger event configuration of  line 1
@@ -14122,7 +14122,7 @@ begin-module memmap
     : EXTI_FTSR_TR22 ( -- x addr ) 22 bit EXTI_FTSR ; \ EXTI_FTSR_TR22, Falling trigger event configuration of  line 22
   [then]
 
-  execute-defined? use-EXTI defined? EXTI_SWIER_SWIER0 not and [if]
+  execute-defined? use-EXTI [if]
     \ EXTI_SWIER (read-write) Reset:0x00000000
     : EXTI_SWIER_SWIER0 ( -- x addr ) 0 bit EXTI_SWIER ; \ EXTI_SWIER_SWIER0, Software Interrupt on line  0
     : EXTI_SWIER_SWIER1 ( -- x addr ) 1 bit EXTI_SWIER ; \ EXTI_SWIER_SWIER1, Software Interrupt on line  1
@@ -14149,7 +14149,7 @@ begin-module memmap
     : EXTI_SWIER_SWIER22 ( -- x addr ) 22 bit EXTI_SWIER ; \ EXTI_SWIER_SWIER22, Software Interrupt on line  22
   [then]
 
-  defined? use-EXTI defined? EXTI_PR_PR0 not and [if]
+  [if]
     \ EXTI_PR (read-write) Reset:0x00000000
     : EXTI_PR_PR0 ( -- x addr ) 0 bit EXTI_PR ; \ EXTI_PR_PR0, Pending bit 0
     : EXTI_PR_PR1 ( -- x addr ) 1 bit EXTI_PR ; \ EXTI_PR_PR1, Pending bit 1
@@ -14176,7 +14176,7 @@ begin-module memmap
     : EXTI_PR_PR22 ( -- x addr ) 22 bit EXTI_PR ; \ EXTI_PR_PR22, Pending bit 22
   [then]
 
-  execute-defined? use-OTG_HS_GLOBAL defined? OTG_HS_GLOBAL_OTG_HS_GOTGCTL_SRQSCS not and [if]
+  execute-defined? use-OTG_HS_GLOBAL [if]
     \ OTG_HS_GLOBAL_OTG_HS_GOTGCTL (multiple-access)  Reset:0x00000800
     : OTG_HS_GLOBAL_OTG_HS_GOTGCTL_SRQSCS ( -- x addr ) 0 bit OTG_HS_GLOBAL_OTG_HS_GOTGCTL ; \ OTG_HS_GLOBAL_OTG_HS_GOTGCTL_SRQSCS, Session request success
     : OTG_HS_GLOBAL_OTG_HS_GOTGCTL_SRQ ( -- x addr ) 1 bit OTG_HS_GLOBAL_OTG_HS_GOTGCTL ; \ OTG_HS_GLOBAL_OTG_HS_GOTGCTL_SRQ, Session request
@@ -14190,7 +14190,7 @@ begin-module memmap
     : OTG_HS_GLOBAL_OTG_HS_GOTGCTL_BSVLD ( -- x addr ) 19 bit OTG_HS_GLOBAL_OTG_HS_GOTGCTL ; \ OTG_HS_GLOBAL_OTG_HS_GOTGCTL_BSVLD, B-session valid
   [then]
 
-  defined? use-OTG_HS_GLOBAL defined? OTG_HS_GLOBAL_OTG_HS_GOTGINT_SEDET not and [if]
+  [if]
     \ OTG_HS_GLOBAL_OTG_HS_GOTGINT (read-write) Reset:0x0
     : OTG_HS_GLOBAL_OTG_HS_GOTGINT_SEDET ( -- x addr ) 2 bit OTG_HS_GLOBAL_OTG_HS_GOTGINT ; \ OTG_HS_GLOBAL_OTG_HS_GOTGINT_SEDET, Session end detected
     : OTG_HS_GLOBAL_OTG_HS_GOTGINT_SRSSCHG ( -- x addr ) 8 bit OTG_HS_GLOBAL_OTG_HS_GOTGINT ; \ OTG_HS_GLOBAL_OTG_HS_GOTGINT_SRSSCHG, Session request success status  change
@@ -14200,7 +14200,7 @@ begin-module memmap
     : OTG_HS_GLOBAL_OTG_HS_GOTGINT_DBCDNE ( -- x addr ) 19 bit OTG_HS_GLOBAL_OTG_HS_GOTGINT ; \ OTG_HS_GLOBAL_OTG_HS_GOTGINT_DBCDNE, Debounce done
   [then]
 
-  execute-defined? use-OTG_HS_GLOBAL defined? OTG_HS_GLOBAL_OTG_HS_GAHBCFG_GINT not and [if]
+  execute-defined? use-OTG_HS_GLOBAL [if]
     \ OTG_HS_GLOBAL_OTG_HS_GAHBCFG (read-write) Reset:0x0
     : OTG_HS_GLOBAL_OTG_HS_GAHBCFG_GINT ( -- x addr ) 0 bit OTG_HS_GLOBAL_OTG_HS_GAHBCFG ; \ OTG_HS_GLOBAL_OTG_HS_GAHBCFG_GINT, Global interrupt mask
     : OTG_HS_GLOBAL_OTG_HS_GAHBCFG_HBSTLEN ( %bbbb -- x addr ) 1 lshift OTG_HS_GLOBAL_OTG_HS_GAHBCFG ; \ OTG_HS_GLOBAL_OTG_HS_GAHBCFG_HBSTLEN, Burst length/type
@@ -14209,7 +14209,7 @@ begin-module memmap
     : OTG_HS_GLOBAL_OTG_HS_GAHBCFG_PTXFELVL ( -- x addr ) 8 bit OTG_HS_GLOBAL_OTG_HS_GAHBCFG ; \ OTG_HS_GLOBAL_OTG_HS_GAHBCFG_PTXFELVL, Periodic TxFIFO empty  level
   [then]
 
-  defined? use-OTG_HS_GLOBAL defined? OTG_HS_GLOBAL_OTG_HS_GUSBCFG_TOCAL not and [if]
+  [if]
     \ OTG_HS_GLOBAL_OTG_HS_GUSBCFG (multiple-access)  Reset:0x00000A00
     : OTG_HS_GLOBAL_OTG_HS_GUSBCFG_TOCAL ( %bbb -- x addr ) OTG_HS_GLOBAL_OTG_HS_GUSBCFG ; \ OTG_HS_GLOBAL_OTG_HS_GUSBCFG_TOCAL, FS timeout calibration
     : OTG_HS_GLOBAL_OTG_HS_GUSBCFG_PHYSEL ( -- x addr ) 6 bit OTG_HS_GLOBAL_OTG_HS_GUSBCFG ; \ OTG_HS_GLOBAL_OTG_HS_GUSBCFG_PHYSEL, USB 2.0 high-speed ULPI PHY or USB 1.1  full-speed serial transceiver select
@@ -14231,7 +14231,7 @@ begin-module memmap
     : OTG_HS_GLOBAL_OTG_HS_GUSBCFG_CTXPKT ( -- x addr ) 31 bit OTG_HS_GLOBAL_OTG_HS_GUSBCFG ; \ OTG_HS_GLOBAL_OTG_HS_GUSBCFG_CTXPKT, Corrupt Tx packet
   [then]
 
-  execute-defined? use-OTG_HS_GLOBAL defined? OTG_HS_GLOBAL_OTG_HS_GRSTCTL_CSRST not and [if]
+  execute-defined? use-OTG_HS_GLOBAL [if]
     \ OTG_HS_GLOBAL_OTG_HS_GRSTCTL (multiple-access)  Reset:0x20000000
     : OTG_HS_GLOBAL_OTG_HS_GRSTCTL_CSRST ( -- x addr ) 0 bit OTG_HS_GLOBAL_OTG_HS_GRSTCTL ; \ OTG_HS_GLOBAL_OTG_HS_GRSTCTL_CSRST, Core soft reset
     : OTG_HS_GLOBAL_OTG_HS_GRSTCTL_HSRST ( -- x addr ) 1 bit OTG_HS_GLOBAL_OTG_HS_GRSTCTL ; \ OTG_HS_GLOBAL_OTG_HS_GRSTCTL_HSRST, HCLK soft reset
@@ -14243,7 +14243,7 @@ begin-module memmap
     : OTG_HS_GLOBAL_OTG_HS_GRSTCTL_AHBIDL ( -- x addr ) 31 bit OTG_HS_GLOBAL_OTG_HS_GRSTCTL ; \ OTG_HS_GLOBAL_OTG_HS_GRSTCTL_AHBIDL, AHB master idle
   [then]
 
-  defined? use-OTG_HS_GLOBAL defined? OTG_HS_GLOBAL_OTG_HS_GINTSTS_CMOD not and [if]
+  [if]
     \ OTG_HS_GLOBAL_OTG_HS_GINTSTS (multiple-access)  Reset:0x04000020
     : OTG_HS_GLOBAL_OTG_HS_GINTSTS_CMOD ( -- x addr ) 0 bit OTG_HS_GLOBAL_OTG_HS_GINTSTS ; \ OTG_HS_GLOBAL_OTG_HS_GINTSTS_CMOD, Current mode of operation
     : OTG_HS_GLOBAL_OTG_HS_GINTSTS_MMIS ( -- x addr ) 1 bit OTG_HS_GLOBAL_OTG_HS_GINTSTS ; \ OTG_HS_GLOBAL_OTG_HS_GINTSTS_MMIS, Mode mismatch interrupt
@@ -14273,7 +14273,7 @@ begin-module memmap
     : OTG_HS_GLOBAL_OTG_HS_GINTSTS_WKUINT ( -- x addr ) 31 bit OTG_HS_GLOBAL_OTG_HS_GINTSTS ; \ OTG_HS_GLOBAL_OTG_HS_GINTSTS_WKUINT, Resume/remote wakeup detected  interrupt
   [then]
 
-  execute-defined? use-OTG_HS_GLOBAL defined? OTG_HS_GLOBAL_OTG_HS_GINTMSK_MMISM not and [if]
+  execute-defined? use-OTG_HS_GLOBAL [if]
     \ OTG_HS_GLOBAL_OTG_HS_GINTMSK (multiple-access)  Reset:0x0
     : OTG_HS_GLOBAL_OTG_HS_GINTMSK_MMISM ( -- x addr ) 1 bit OTG_HS_GLOBAL_OTG_HS_GINTMSK ; \ OTG_HS_GLOBAL_OTG_HS_GINTMSK_MMISM, Mode mismatch interrupt  mask
     : OTG_HS_GLOBAL_OTG_HS_GINTMSK_OTGINT ( -- x addr ) 2 bit OTG_HS_GLOBAL_OTG_HS_GINTMSK ; \ OTG_HS_GLOBAL_OTG_HS_GINTMSK_OTGINT, OTG interrupt mask
@@ -14303,7 +14303,7 @@ begin-module memmap
     : OTG_HS_GLOBAL_OTG_HS_GINTMSK_WUIM ( -- x addr ) 31 bit OTG_HS_GLOBAL_OTG_HS_GINTMSK ; \ OTG_HS_GLOBAL_OTG_HS_GINTMSK_WUIM, Resume/remote wakeup detected interrupt  mask
   [then]
 
-  defined? use-OTG_HS_GLOBAL defined? OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Host_CHNUM? not and [if]
+  [if]
     \ OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Host (read-only) Reset:0x0
     : OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Host_CHNUM? ( --  x ) OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Host @ ; \ OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Host_CHNUM, Channel number
     : OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Host_BCNT? ( --  x ) 4 lshift OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Host @ ; \ OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Host_BCNT, Byte count
@@ -14311,7 +14311,7 @@ begin-module memmap
     : OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Host_PKTSTS? ( --  x ) 17 lshift OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Host @ ; \ OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Host_PKTSTS, Packet status
   [then]
 
-  execute-defined? use-OTG_HS_GLOBAL defined? OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Host_CHNUM? not and [if]
+  execute-defined? use-OTG_HS_GLOBAL [if]
     \ OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Host (read-only) Reset:0x0
     : OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Host_CHNUM? ( --  x ) OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Host @ ; \ OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Host_CHNUM, Channel number
     : OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Host_BCNT? ( --  x ) 4 lshift OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Host @ ; \ OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Host_BCNT, Byte count
@@ -14319,31 +14319,31 @@ begin-module memmap
     : OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Host_PKTSTS? ( --  x ) 17 lshift OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Host @ ; \ OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Host_PKTSTS, Packet status
   [then]
 
-  defined? use-OTG_HS_GLOBAL defined? OTG_HS_GLOBAL_OTG_HS_GRXFSIZ_RXFD not and [if]
+  [if]
     \ OTG_HS_GLOBAL_OTG_HS_GRXFSIZ (read-write) Reset:0x00000200
     : OTG_HS_GLOBAL_OTG_HS_GRXFSIZ_RXFD ( %bbbbbbbbbbbbbbbb -- x addr ) OTG_HS_GLOBAL_OTG_HS_GRXFSIZ ; \ OTG_HS_GLOBAL_OTG_HS_GRXFSIZ_RXFD, RxFIFO depth
   [then]
 
-  execute-defined? use-OTG_HS_GLOBAL defined? OTG_HS_GLOBAL_OTG_HS_GNPTXFSIZ_Host_NPTXFSA not and [if]
+  execute-defined? use-OTG_HS_GLOBAL [if]
     \ OTG_HS_GLOBAL_OTG_HS_GNPTXFSIZ_Host (read-write) Reset:0x00000200
     : OTG_HS_GLOBAL_OTG_HS_GNPTXFSIZ_Host_NPTXFSA ( %bbbbbbbbbbbbbbbb -- x addr ) OTG_HS_GLOBAL_OTG_HS_GNPTXFSIZ_Host ; \ OTG_HS_GLOBAL_OTG_HS_GNPTXFSIZ_Host_NPTXFSA, Nonperiodic transmit RAM start  address
     : OTG_HS_GLOBAL_OTG_HS_GNPTXFSIZ_Host_NPTXFD ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift OTG_HS_GLOBAL_OTG_HS_GNPTXFSIZ_Host ; \ OTG_HS_GLOBAL_OTG_HS_GNPTXFSIZ_Host_NPTXFD, Nonperiodic TxFIFO depth
   [then]
 
-  defined? use-OTG_HS_GLOBAL defined? OTG_HS_GLOBAL_OTG_HS_TX0FSIZ_Peripheral_TX0FSA not and [if]
+  [if]
     \ OTG_HS_GLOBAL_OTG_HS_TX0FSIZ_Peripheral (read-write) Reset:0x00000200
     : OTG_HS_GLOBAL_OTG_HS_TX0FSIZ_Peripheral_TX0FSA ( %bbbbbbbbbbbbbbbb -- x addr ) OTG_HS_GLOBAL_OTG_HS_TX0FSIZ_Peripheral ; \ OTG_HS_GLOBAL_OTG_HS_TX0FSIZ_Peripheral_TX0FSA, Endpoint 0 transmit RAM start  address
     : OTG_HS_GLOBAL_OTG_HS_TX0FSIZ_Peripheral_TX0FD ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift OTG_HS_GLOBAL_OTG_HS_TX0FSIZ_Peripheral ; \ OTG_HS_GLOBAL_OTG_HS_TX0FSIZ_Peripheral_TX0FD, Endpoint 0 TxFIFO depth
   [then]
 
-  execute-defined? use-OTG_HS_GLOBAL defined? OTG_HS_GLOBAL_OTG_HS_GNPTXSTS_NPTXFSAV? not and [if]
+  execute-defined? use-OTG_HS_GLOBAL [if]
     \ OTG_HS_GLOBAL_OTG_HS_GNPTXSTS (read-only) Reset:0x00080200
     : OTG_HS_GLOBAL_OTG_HS_GNPTXSTS_NPTXFSAV? ( --  x ) OTG_HS_GLOBAL_OTG_HS_GNPTXSTS @ ; \ OTG_HS_GLOBAL_OTG_HS_GNPTXSTS_NPTXFSAV, Nonperiodic TxFIFO space  available
     : OTG_HS_GLOBAL_OTG_HS_GNPTXSTS_NPTQXSAV? ( --  x ) 16 lshift OTG_HS_GLOBAL_OTG_HS_GNPTXSTS @ ; \ OTG_HS_GLOBAL_OTG_HS_GNPTXSTS_NPTQXSAV, Nonperiodic transmit request queue space  available
     : OTG_HS_GLOBAL_OTG_HS_GNPTXSTS_NPTXQTOP? ( --  x ) 24 lshift OTG_HS_GLOBAL_OTG_HS_GNPTXSTS @ ; \ OTG_HS_GLOBAL_OTG_HS_GNPTXSTS_NPTXQTOP, Top of the nonperiodic transmit request  queue
   [then]
 
-  defined? use-OTG_HS_GLOBAL defined? OTG_HS_GLOBAL_OTG_HS_GCCFG_PWRDWN not and [if]
+  [if]
     \ OTG_HS_GLOBAL_OTG_HS_GCCFG (read-write) Reset:0x0
     : OTG_HS_GLOBAL_OTG_HS_GCCFG_PWRDWN ( -- x addr ) 16 bit OTG_HS_GLOBAL_OTG_HS_GCCFG ; \ OTG_HS_GLOBAL_OTG_HS_GCCFG_PWRDWN, Power down
     : OTG_HS_GLOBAL_OTG_HS_GCCFG_I2CPADEN ( -- x addr ) 17 bit OTG_HS_GLOBAL_OTG_HS_GCCFG ; \ OTG_HS_GLOBAL_OTG_HS_GCCFG_I2CPADEN, Enable I2C bus connection for the  external I2C PHY interface
@@ -14353,60 +14353,60 @@ begin-module memmap
     : OTG_HS_GLOBAL_OTG_HS_GCCFG_NOVBUSSENS ( -- x addr ) 21 bit OTG_HS_GLOBAL_OTG_HS_GCCFG ; \ OTG_HS_GLOBAL_OTG_HS_GCCFG_NOVBUSSENS, VBUS sensing disable  option
   [then]
 
-  execute-defined? use-OTG_HS_GLOBAL defined? OTG_HS_GLOBAL_OTG_HS_CID_PRODUCT_ID not and [if]
+  execute-defined? use-OTG_HS_GLOBAL [if]
     \ OTG_HS_GLOBAL_OTG_HS_CID (read-write) Reset:0x00001200
     : OTG_HS_GLOBAL_OTG_HS_CID_PRODUCT_ID ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) OTG_HS_GLOBAL_OTG_HS_CID ; \ OTG_HS_GLOBAL_OTG_HS_CID_PRODUCT_ID, Product ID field
   [then]
 
-  defined? use-OTG_HS_GLOBAL defined? OTG_HS_GLOBAL_OTG_HS_HPTXFSIZ_PTXSA not and [if]
+  [if]
     \ OTG_HS_GLOBAL_OTG_HS_HPTXFSIZ (read-write) Reset:0x02000600
     : OTG_HS_GLOBAL_OTG_HS_HPTXFSIZ_PTXSA ( %bbbbbbbbbbbbbbbb -- x addr ) OTG_HS_GLOBAL_OTG_HS_HPTXFSIZ ; \ OTG_HS_GLOBAL_OTG_HS_HPTXFSIZ_PTXSA, Host periodic TxFIFO start  address
     : OTG_HS_GLOBAL_OTG_HS_HPTXFSIZ_PTXFD ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift OTG_HS_GLOBAL_OTG_HS_HPTXFSIZ ; \ OTG_HS_GLOBAL_OTG_HS_HPTXFSIZ_PTXFD, Host periodic TxFIFO depth
   [then]
 
-  execute-defined? use-OTG_HS_GLOBAL defined? OTG_HS_GLOBAL_OTG_HS_DIEPTXF1_INEPTXSA not and [if]
+  execute-defined? use-OTG_HS_GLOBAL [if]
     \ OTG_HS_GLOBAL_OTG_HS_DIEPTXF1 (read-write) Reset:0x02000400
     : OTG_HS_GLOBAL_OTG_HS_DIEPTXF1_INEPTXSA ( %bbbbbbbbbbbbbbbb -- x addr ) OTG_HS_GLOBAL_OTG_HS_DIEPTXF1 ; \ OTG_HS_GLOBAL_OTG_HS_DIEPTXF1_INEPTXSA, IN endpoint FIFOx transmit RAM start  address
     : OTG_HS_GLOBAL_OTG_HS_DIEPTXF1_INEPTXFD ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift OTG_HS_GLOBAL_OTG_HS_DIEPTXF1 ; \ OTG_HS_GLOBAL_OTG_HS_DIEPTXF1_INEPTXFD, IN endpoint TxFIFO depth
   [then]
 
-  defined? use-OTG_HS_GLOBAL defined? OTG_HS_GLOBAL_OTG_HS_DIEPTXF2_INEPTXSA not and [if]
+  [if]
     \ OTG_HS_GLOBAL_OTG_HS_DIEPTXF2 (read-write) Reset:0x02000400
     : OTG_HS_GLOBAL_OTG_HS_DIEPTXF2_INEPTXSA ( %bbbbbbbbbbbbbbbb -- x addr ) OTG_HS_GLOBAL_OTG_HS_DIEPTXF2 ; \ OTG_HS_GLOBAL_OTG_HS_DIEPTXF2_INEPTXSA, IN endpoint FIFOx transmit RAM start  address
     : OTG_HS_GLOBAL_OTG_HS_DIEPTXF2_INEPTXFD ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift OTG_HS_GLOBAL_OTG_HS_DIEPTXF2 ; \ OTG_HS_GLOBAL_OTG_HS_DIEPTXF2_INEPTXFD, IN endpoint TxFIFO depth
   [then]
 
-  execute-defined? use-OTG_HS_GLOBAL defined? OTG_HS_GLOBAL_OTG_HS_DIEPTXF3_INEPTXSA not and [if]
+  execute-defined? use-OTG_HS_GLOBAL [if]
     \ OTG_HS_GLOBAL_OTG_HS_DIEPTXF3 (read-write) Reset:0x02000400
     : OTG_HS_GLOBAL_OTG_HS_DIEPTXF3_INEPTXSA ( %bbbbbbbbbbbbbbbb -- x addr ) OTG_HS_GLOBAL_OTG_HS_DIEPTXF3 ; \ OTG_HS_GLOBAL_OTG_HS_DIEPTXF3_INEPTXSA, IN endpoint FIFOx transmit RAM start  address
     : OTG_HS_GLOBAL_OTG_HS_DIEPTXF3_INEPTXFD ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift OTG_HS_GLOBAL_OTG_HS_DIEPTXF3 ; \ OTG_HS_GLOBAL_OTG_HS_DIEPTXF3_INEPTXFD, IN endpoint TxFIFO depth
   [then]
 
-  defined? use-OTG_HS_GLOBAL defined? OTG_HS_GLOBAL_OTG_HS_DIEPTXF4_INEPTXSA not and [if]
+  [if]
     \ OTG_HS_GLOBAL_OTG_HS_DIEPTXF4 (read-write) Reset:0x02000400
     : OTG_HS_GLOBAL_OTG_HS_DIEPTXF4_INEPTXSA ( %bbbbbbbbbbbbbbbb -- x addr ) OTG_HS_GLOBAL_OTG_HS_DIEPTXF4 ; \ OTG_HS_GLOBAL_OTG_HS_DIEPTXF4_INEPTXSA, IN endpoint FIFOx transmit RAM start  address
     : OTG_HS_GLOBAL_OTG_HS_DIEPTXF4_INEPTXFD ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift OTG_HS_GLOBAL_OTG_HS_DIEPTXF4 ; \ OTG_HS_GLOBAL_OTG_HS_DIEPTXF4_INEPTXFD, IN endpoint TxFIFO depth
   [then]
 
-  execute-defined? use-OTG_HS_GLOBAL defined? OTG_HS_GLOBAL_OTG_HS_DIEPTXF5_INEPTXSA not and [if]
+  execute-defined? use-OTG_HS_GLOBAL [if]
     \ OTG_HS_GLOBAL_OTG_HS_DIEPTXF5 (read-write) Reset:0x02000400
     : OTG_HS_GLOBAL_OTG_HS_DIEPTXF5_INEPTXSA ( %bbbbbbbbbbbbbbbb -- x addr ) OTG_HS_GLOBAL_OTG_HS_DIEPTXF5 ; \ OTG_HS_GLOBAL_OTG_HS_DIEPTXF5_INEPTXSA, IN endpoint FIFOx transmit RAM start  address
     : OTG_HS_GLOBAL_OTG_HS_DIEPTXF5_INEPTXFD ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift OTG_HS_GLOBAL_OTG_HS_DIEPTXF5 ; \ OTG_HS_GLOBAL_OTG_HS_DIEPTXF5_INEPTXFD, IN endpoint TxFIFO depth
   [then]
 
-  defined? use-OTG_HS_GLOBAL defined? OTG_HS_GLOBAL_OTG_HS_DIEPTXF6_INEPTXSA not and [if]
+  [if]
     \ OTG_HS_GLOBAL_OTG_HS_DIEPTXF6 (read-write) Reset:0x02000400
     : OTG_HS_GLOBAL_OTG_HS_DIEPTXF6_INEPTXSA ( %bbbbbbbbbbbbbbbb -- x addr ) OTG_HS_GLOBAL_OTG_HS_DIEPTXF6 ; \ OTG_HS_GLOBAL_OTG_HS_DIEPTXF6_INEPTXSA, IN endpoint FIFOx transmit RAM start  address
     : OTG_HS_GLOBAL_OTG_HS_DIEPTXF6_INEPTXFD ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift OTG_HS_GLOBAL_OTG_HS_DIEPTXF6 ; \ OTG_HS_GLOBAL_OTG_HS_DIEPTXF6_INEPTXFD, IN endpoint TxFIFO depth
   [then]
 
-  execute-defined? use-OTG_HS_GLOBAL defined? OTG_HS_GLOBAL_OTG_HS_DIEPTXF7_INEPTXSA not and [if]
+  execute-defined? use-OTG_HS_GLOBAL [if]
     \ OTG_HS_GLOBAL_OTG_HS_DIEPTXF7 (read-write) Reset:0x02000400
     : OTG_HS_GLOBAL_OTG_HS_DIEPTXF7_INEPTXSA ( %bbbbbbbbbbbbbbbb -- x addr ) OTG_HS_GLOBAL_OTG_HS_DIEPTXF7 ; \ OTG_HS_GLOBAL_OTG_HS_DIEPTXF7_INEPTXSA, IN endpoint FIFOx transmit RAM start  address
     : OTG_HS_GLOBAL_OTG_HS_DIEPTXF7_INEPTXFD ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift OTG_HS_GLOBAL_OTG_HS_DIEPTXF7 ; \ OTG_HS_GLOBAL_OTG_HS_DIEPTXF7_INEPTXFD, IN endpoint TxFIFO depth
   [then]
 
-  defined? use-OTG_HS_GLOBAL defined? OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Peripheral_EPNUM? not and [if]
+  [if]
     \ OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Peripheral (read-only) Reset:0x0
     : OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Peripheral_EPNUM? ( --  x ) OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Peripheral @ ; \ OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Peripheral_EPNUM, Endpoint number
     : OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Peripheral_BCNT? ( --  x ) 4 lshift OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Peripheral @ ; \ OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Peripheral_BCNT, Byte count
@@ -14415,7 +14415,7 @@ begin-module memmap
     : OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Peripheral_FRMNUM? ( --  x ) 21 lshift OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Peripheral @ ; \ OTG_HS_GLOBAL_OTG_HS_GRXSTSR_Peripheral_FRMNUM, Frame number
   [then]
 
-  execute-defined? use-OTG_HS_GLOBAL defined? OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Peripheral_EPNUM? not and [if]
+  execute-defined? use-OTG_HS_GLOBAL [if]
     \ OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Peripheral (read-only) Reset:0x0
     : OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Peripheral_EPNUM? ( --  x ) OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Peripheral @ ; \ OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Peripheral_EPNUM, Endpoint number
     : OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Peripheral_BCNT? ( --  x ) 4 lshift OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Peripheral @ ; \ OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Peripheral_BCNT, Byte count
@@ -14424,41 +14424,41 @@ begin-module memmap
     : OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Peripheral_FRMNUM? ( --  x ) 21 lshift OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Peripheral @ ; \ OTG_HS_GLOBAL_OTG_HS_GRXSTSP_Peripheral_FRMNUM, Frame number
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCFG_FSLSPCS not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCFG (multiple-access)  Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCFG_FSLSPCS ( %bb -- x addr ) OTG_HS_HOST_OTG_HS_HCFG ; \ OTG_HS_HOST_OTG_HS_HCFG_FSLSPCS, FS/LS PHY clock select
     : OTG_HS_HOST_OTG_HS_HCFG_FSLSS ( -- x addr ) 2 bit OTG_HS_HOST_OTG_HS_HCFG ; \ OTG_HS_HOST_OTG_HS_HCFG_FSLSS, FS- and LS-only support
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HFIR_FRIVL not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HFIR (read-write) Reset:0x0000EA60
     : OTG_HS_HOST_OTG_HS_HFIR_FRIVL ( %bbbbbbbbbbbbbbbb -- x addr ) OTG_HS_HOST_OTG_HS_HFIR ; \ OTG_HS_HOST_OTG_HS_HFIR_FRIVL, Frame interval
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HFNUM_FRNUM? not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HFNUM (read-only) Reset:0x00003FFF
     : OTG_HS_HOST_OTG_HS_HFNUM_FRNUM? ( --  x ) OTG_HS_HOST_OTG_HS_HFNUM @ ; \ OTG_HS_HOST_OTG_HS_HFNUM_FRNUM, Frame number
     : OTG_HS_HOST_OTG_HS_HFNUM_FTREM? ( --  x ) 16 lshift OTG_HS_HOST_OTG_HS_HFNUM @ ; \ OTG_HS_HOST_OTG_HS_HFNUM_FTREM, Frame time remaining
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HPTXSTS_PTXFSAVL not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HPTXSTS (multiple-access)  Reset:0x00080100
     : OTG_HS_HOST_OTG_HS_HPTXSTS_PTXFSAVL ( %bbbbbbbbbbbbbbbb -- x addr ) OTG_HS_HOST_OTG_HS_HPTXSTS ; \ OTG_HS_HOST_OTG_HS_HPTXSTS_PTXFSAVL, Periodic transmit data FIFO space  available
     : OTG_HS_HOST_OTG_HS_HPTXSTS_PTXQSAV ( %bbbbbbbb -- x addr ) 16 lshift OTG_HS_HOST_OTG_HS_HPTXSTS ; \ OTG_HS_HOST_OTG_HS_HPTXSTS_PTXQSAV, Periodic transmit request queue space  available
     : OTG_HS_HOST_OTG_HS_HPTXSTS_PTXQTOP ( %bbbbbbbb -- x addr ) 24 lshift OTG_HS_HOST_OTG_HS_HPTXSTS ; \ OTG_HS_HOST_OTG_HS_HPTXSTS_PTXQTOP, Top of the periodic transmit request  queue
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HAINT_HAINT? not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HAINT (read-only) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HAINT_HAINT? ( --  x ) OTG_HS_HOST_OTG_HS_HAINT @ ; \ OTG_HS_HOST_OTG_HS_HAINT_HAINT, Channel interrupts
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HAINTMSK_HAINTM not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HAINTMSK (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HAINTMSK_HAINTM ( %bbbbbbbbbbbbbbbb -- x addr ) OTG_HS_HOST_OTG_HS_HAINTMSK ; \ OTG_HS_HOST_OTG_HS_HAINTMSK_HAINTM, Channel interrupt mask
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HPRT_PCSTS? not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HPRT (multiple-access)  Reset:0x0
     : OTG_HS_HOST_OTG_HS_HPRT_PCSTS? ( -- 1|0 ) 0 bit OTG_HS_HOST_OTG_HS_HPRT bit@ ; \ OTG_HS_HOST_OTG_HS_HPRT_PCSTS, Port connect status
     : OTG_HS_HOST_OTG_HS_HPRT_PCDET ( -- x addr ) 1 bit OTG_HS_HOST_OTG_HS_HPRT ; \ OTG_HS_HOST_OTG_HS_HPRT_PCDET, Port connect detected
@@ -14475,7 +14475,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HPRT_PSPD ( %bb -- x addr ) 17 lshift OTG_HS_HOST_OTG_HS_HPRT ; \ OTG_HS_HOST_OTG_HS_HPRT_PSPD, Port speed
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCCHAR0_MPSIZ not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCCHAR0 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCCHAR0_MPSIZ x addr ) OTG_HS_HOST_OTG_HS_HCCHAR0 ; \ OTG_HS_HOST_OTG_HS_HCCHAR0_MPSIZ, Maximum packet size
     : OTG_HS_HOST_OTG_HS_HCCHAR0_EPNUM ( %bbbb -- x addr ) 11 lshift OTG_HS_HOST_OTG_HS_HCCHAR0 ; \ OTG_HS_HOST_OTG_HS_HCCHAR0_EPNUM, Endpoint number
@@ -14489,7 +14489,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCCHAR0_CHENA ( -- x addr ) 31 bit OTG_HS_HOST_OTG_HS_HCCHAR0 ; \ OTG_HS_HOST_OTG_HS_HCCHAR0_CHENA, Channel enable
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCCHAR1_MPSIZ not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCCHAR1 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCCHAR1_MPSIZ x addr ) OTG_HS_HOST_OTG_HS_HCCHAR1 ; \ OTG_HS_HOST_OTG_HS_HCCHAR1_MPSIZ, Maximum packet size
     : OTG_HS_HOST_OTG_HS_HCCHAR1_EPNUM ( %bbbb -- x addr ) 11 lshift OTG_HS_HOST_OTG_HS_HCCHAR1 ; \ OTG_HS_HOST_OTG_HS_HCCHAR1_EPNUM, Endpoint number
@@ -14503,7 +14503,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCCHAR1_CHENA ( -- x addr ) 31 bit OTG_HS_HOST_OTG_HS_HCCHAR1 ; \ OTG_HS_HOST_OTG_HS_HCCHAR1_CHENA, Channel enable
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCCHAR2_MPSIZ not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCCHAR2 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCCHAR2_MPSIZ x addr ) OTG_HS_HOST_OTG_HS_HCCHAR2 ; \ OTG_HS_HOST_OTG_HS_HCCHAR2_MPSIZ, Maximum packet size
     : OTG_HS_HOST_OTG_HS_HCCHAR2_EPNUM ( %bbbb -- x addr ) 11 lshift OTG_HS_HOST_OTG_HS_HCCHAR2 ; \ OTG_HS_HOST_OTG_HS_HCCHAR2_EPNUM, Endpoint number
@@ -14517,7 +14517,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCCHAR2_CHENA ( -- x addr ) 31 bit OTG_HS_HOST_OTG_HS_HCCHAR2 ; \ OTG_HS_HOST_OTG_HS_HCCHAR2_CHENA, Channel enable
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCCHAR3_MPSIZ not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCCHAR3 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCCHAR3_MPSIZ x addr ) OTG_HS_HOST_OTG_HS_HCCHAR3 ; \ OTG_HS_HOST_OTG_HS_HCCHAR3_MPSIZ, Maximum packet size
     : OTG_HS_HOST_OTG_HS_HCCHAR3_EPNUM ( %bbbb -- x addr ) 11 lshift OTG_HS_HOST_OTG_HS_HCCHAR3 ; \ OTG_HS_HOST_OTG_HS_HCCHAR3_EPNUM, Endpoint number
@@ -14531,7 +14531,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCCHAR3_CHENA ( -- x addr ) 31 bit OTG_HS_HOST_OTG_HS_HCCHAR3 ; \ OTG_HS_HOST_OTG_HS_HCCHAR3_CHENA, Channel enable
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCCHAR4_MPSIZ not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCCHAR4 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCCHAR4_MPSIZ x addr ) OTG_HS_HOST_OTG_HS_HCCHAR4 ; \ OTG_HS_HOST_OTG_HS_HCCHAR4_MPSIZ, Maximum packet size
     : OTG_HS_HOST_OTG_HS_HCCHAR4_EPNUM ( %bbbb -- x addr ) 11 lshift OTG_HS_HOST_OTG_HS_HCCHAR4 ; \ OTG_HS_HOST_OTG_HS_HCCHAR4_EPNUM, Endpoint number
@@ -14545,7 +14545,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCCHAR4_CHENA ( -- x addr ) 31 bit OTG_HS_HOST_OTG_HS_HCCHAR4 ; \ OTG_HS_HOST_OTG_HS_HCCHAR4_CHENA, Channel enable
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCCHAR5_MPSIZ not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCCHAR5 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCCHAR5_MPSIZ x addr ) OTG_HS_HOST_OTG_HS_HCCHAR5 ; \ OTG_HS_HOST_OTG_HS_HCCHAR5_MPSIZ, Maximum packet size
     : OTG_HS_HOST_OTG_HS_HCCHAR5_EPNUM ( %bbbb -- x addr ) 11 lshift OTG_HS_HOST_OTG_HS_HCCHAR5 ; \ OTG_HS_HOST_OTG_HS_HCCHAR5_EPNUM, Endpoint number
@@ -14559,7 +14559,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCCHAR5_CHENA ( -- x addr ) 31 bit OTG_HS_HOST_OTG_HS_HCCHAR5 ; \ OTG_HS_HOST_OTG_HS_HCCHAR5_CHENA, Channel enable
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCCHAR6_MPSIZ not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCCHAR6 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCCHAR6_MPSIZ x addr ) OTG_HS_HOST_OTG_HS_HCCHAR6 ; \ OTG_HS_HOST_OTG_HS_HCCHAR6_MPSIZ, Maximum packet size
     : OTG_HS_HOST_OTG_HS_HCCHAR6_EPNUM ( %bbbb -- x addr ) 11 lshift OTG_HS_HOST_OTG_HS_HCCHAR6 ; \ OTG_HS_HOST_OTG_HS_HCCHAR6_EPNUM, Endpoint number
@@ -14573,7 +14573,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCCHAR6_CHENA ( -- x addr ) 31 bit OTG_HS_HOST_OTG_HS_HCCHAR6 ; \ OTG_HS_HOST_OTG_HS_HCCHAR6_CHENA, Channel enable
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCCHAR7_MPSIZ not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCCHAR7 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCCHAR7_MPSIZ x addr ) OTG_HS_HOST_OTG_HS_HCCHAR7 ; \ OTG_HS_HOST_OTG_HS_HCCHAR7_MPSIZ, Maximum packet size
     : OTG_HS_HOST_OTG_HS_HCCHAR7_EPNUM ( %bbbb -- x addr ) 11 lshift OTG_HS_HOST_OTG_HS_HCCHAR7 ; \ OTG_HS_HOST_OTG_HS_HCCHAR7_EPNUM, Endpoint number
@@ -14587,7 +14587,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCCHAR7_CHENA ( -- x addr ) 31 bit OTG_HS_HOST_OTG_HS_HCCHAR7 ; \ OTG_HS_HOST_OTG_HS_HCCHAR7_CHENA, Channel enable
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCCHAR8_MPSIZ not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCCHAR8 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCCHAR8_MPSIZ x addr ) OTG_HS_HOST_OTG_HS_HCCHAR8 ; \ OTG_HS_HOST_OTG_HS_HCCHAR8_MPSIZ, Maximum packet size
     : OTG_HS_HOST_OTG_HS_HCCHAR8_EPNUM ( %bbbb -- x addr ) 11 lshift OTG_HS_HOST_OTG_HS_HCCHAR8 ; \ OTG_HS_HOST_OTG_HS_HCCHAR8_EPNUM, Endpoint number
@@ -14601,7 +14601,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCCHAR8_CHENA ( -- x addr ) 31 bit OTG_HS_HOST_OTG_HS_HCCHAR8 ; \ OTG_HS_HOST_OTG_HS_HCCHAR8_CHENA, Channel enable
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCCHAR9_MPSIZ not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCCHAR9 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCCHAR9_MPSIZ x addr ) OTG_HS_HOST_OTG_HS_HCCHAR9 ; \ OTG_HS_HOST_OTG_HS_HCCHAR9_MPSIZ, Maximum packet size
     : OTG_HS_HOST_OTG_HS_HCCHAR9_EPNUM ( %bbbb -- x addr ) 11 lshift OTG_HS_HOST_OTG_HS_HCCHAR9 ; \ OTG_HS_HOST_OTG_HS_HCCHAR9_EPNUM, Endpoint number
@@ -14615,7 +14615,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCCHAR9_CHENA ( -- x addr ) 31 bit OTG_HS_HOST_OTG_HS_HCCHAR9 ; \ OTG_HS_HOST_OTG_HS_HCCHAR9_CHENA, Channel enable
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCCHAR10_MPSIZ not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCCHAR10 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCCHAR10_MPSIZ x addr ) OTG_HS_HOST_OTG_HS_HCCHAR10 ; \ OTG_HS_HOST_OTG_HS_HCCHAR10_MPSIZ, Maximum packet size
     : OTG_HS_HOST_OTG_HS_HCCHAR10_EPNUM ( %bbbb -- x addr ) 11 lshift OTG_HS_HOST_OTG_HS_HCCHAR10 ; \ OTG_HS_HOST_OTG_HS_HCCHAR10_EPNUM, Endpoint number
@@ -14629,7 +14629,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCCHAR10_CHENA ( -- x addr ) 31 bit OTG_HS_HOST_OTG_HS_HCCHAR10 ; \ OTG_HS_HOST_OTG_HS_HCCHAR10_CHENA, Channel enable
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCCHAR11_MPSIZ not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCCHAR11 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCCHAR11_MPSIZ x addr ) OTG_HS_HOST_OTG_HS_HCCHAR11 ; \ OTG_HS_HOST_OTG_HS_HCCHAR11_MPSIZ, Maximum packet size
     : OTG_HS_HOST_OTG_HS_HCCHAR11_EPNUM ( %bbbb -- x addr ) 11 lshift OTG_HS_HOST_OTG_HS_HCCHAR11 ; \ OTG_HS_HOST_OTG_HS_HCCHAR11_EPNUM, Endpoint number
@@ -14643,7 +14643,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCCHAR11_CHENA ( -- x addr ) 31 bit OTG_HS_HOST_OTG_HS_HCCHAR11 ; \ OTG_HS_HOST_OTG_HS_HCCHAR11_CHENA, Channel enable
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCSPLT0_PRTADDR not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCSPLT0 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCSPLT0_PRTADDR ( %bbbbbbb -- x addr ) OTG_HS_HOST_OTG_HS_HCSPLT0 ; \ OTG_HS_HOST_OTG_HS_HCSPLT0_PRTADDR, Port address
     : OTG_HS_HOST_OTG_HS_HCSPLT0_HUBADDR ( %bbbbbbb -- x addr ) 7 lshift OTG_HS_HOST_OTG_HS_HCSPLT0 ; \ OTG_HS_HOST_OTG_HS_HCSPLT0_HUBADDR, Hub address
@@ -14652,7 +14652,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCSPLT0_SPLITEN ( -- x addr ) 31 bit OTG_HS_HOST_OTG_HS_HCSPLT0 ; \ OTG_HS_HOST_OTG_HS_HCSPLT0_SPLITEN, Split enable
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCSPLT1_PRTADDR not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCSPLT1 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCSPLT1_PRTADDR ( %bbbbbbb -- x addr ) OTG_HS_HOST_OTG_HS_HCSPLT1 ; \ OTG_HS_HOST_OTG_HS_HCSPLT1_PRTADDR, Port address
     : OTG_HS_HOST_OTG_HS_HCSPLT1_HUBADDR ( %bbbbbbb -- x addr ) 7 lshift OTG_HS_HOST_OTG_HS_HCSPLT1 ; \ OTG_HS_HOST_OTG_HS_HCSPLT1_HUBADDR, Hub address
@@ -14661,7 +14661,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCSPLT1_SPLITEN ( -- x addr ) 31 bit OTG_HS_HOST_OTG_HS_HCSPLT1 ; \ OTG_HS_HOST_OTG_HS_HCSPLT1_SPLITEN, Split enable
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCSPLT2_PRTADDR not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCSPLT2 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCSPLT2_PRTADDR ( %bbbbbbb -- x addr ) OTG_HS_HOST_OTG_HS_HCSPLT2 ; \ OTG_HS_HOST_OTG_HS_HCSPLT2_PRTADDR, Port address
     : OTG_HS_HOST_OTG_HS_HCSPLT2_HUBADDR ( %bbbbbbb -- x addr ) 7 lshift OTG_HS_HOST_OTG_HS_HCSPLT2 ; \ OTG_HS_HOST_OTG_HS_HCSPLT2_HUBADDR, Hub address
@@ -14670,7 +14670,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCSPLT2_SPLITEN ( -- x addr ) 31 bit OTG_HS_HOST_OTG_HS_HCSPLT2 ; \ OTG_HS_HOST_OTG_HS_HCSPLT2_SPLITEN, Split enable
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCSPLT3_PRTADDR not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCSPLT3 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCSPLT3_PRTADDR ( %bbbbbbb -- x addr ) OTG_HS_HOST_OTG_HS_HCSPLT3 ; \ OTG_HS_HOST_OTG_HS_HCSPLT3_PRTADDR, Port address
     : OTG_HS_HOST_OTG_HS_HCSPLT3_HUBADDR ( %bbbbbbb -- x addr ) 7 lshift OTG_HS_HOST_OTG_HS_HCSPLT3 ; \ OTG_HS_HOST_OTG_HS_HCSPLT3_HUBADDR, Hub address
@@ -14679,7 +14679,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCSPLT3_SPLITEN ( -- x addr ) 31 bit OTG_HS_HOST_OTG_HS_HCSPLT3 ; \ OTG_HS_HOST_OTG_HS_HCSPLT3_SPLITEN, Split enable
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCSPLT4_PRTADDR not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCSPLT4 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCSPLT4_PRTADDR ( %bbbbbbb -- x addr ) OTG_HS_HOST_OTG_HS_HCSPLT4 ; \ OTG_HS_HOST_OTG_HS_HCSPLT4_PRTADDR, Port address
     : OTG_HS_HOST_OTG_HS_HCSPLT4_HUBADDR ( %bbbbbbb -- x addr ) 7 lshift OTG_HS_HOST_OTG_HS_HCSPLT4 ; \ OTG_HS_HOST_OTG_HS_HCSPLT4_HUBADDR, Hub address
@@ -14688,7 +14688,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCSPLT4_SPLITEN ( -- x addr ) 31 bit OTG_HS_HOST_OTG_HS_HCSPLT4 ; \ OTG_HS_HOST_OTG_HS_HCSPLT4_SPLITEN, Split enable
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCSPLT5_PRTADDR not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCSPLT5 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCSPLT5_PRTADDR ( %bbbbbbb -- x addr ) OTG_HS_HOST_OTG_HS_HCSPLT5 ; \ OTG_HS_HOST_OTG_HS_HCSPLT5_PRTADDR, Port address
     : OTG_HS_HOST_OTG_HS_HCSPLT5_HUBADDR ( %bbbbbbb -- x addr ) 7 lshift OTG_HS_HOST_OTG_HS_HCSPLT5 ; \ OTG_HS_HOST_OTG_HS_HCSPLT5_HUBADDR, Hub address
@@ -14697,7 +14697,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCSPLT5_SPLITEN ( -- x addr ) 31 bit OTG_HS_HOST_OTG_HS_HCSPLT5 ; \ OTG_HS_HOST_OTG_HS_HCSPLT5_SPLITEN, Split enable
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCSPLT6_PRTADDR not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCSPLT6 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCSPLT6_PRTADDR ( %bbbbbbb -- x addr ) OTG_HS_HOST_OTG_HS_HCSPLT6 ; \ OTG_HS_HOST_OTG_HS_HCSPLT6_PRTADDR, Port address
     : OTG_HS_HOST_OTG_HS_HCSPLT6_HUBADDR ( %bbbbbbb -- x addr ) 7 lshift OTG_HS_HOST_OTG_HS_HCSPLT6 ; \ OTG_HS_HOST_OTG_HS_HCSPLT6_HUBADDR, Hub address
@@ -14706,7 +14706,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCSPLT6_SPLITEN ( -- x addr ) 31 bit OTG_HS_HOST_OTG_HS_HCSPLT6 ; \ OTG_HS_HOST_OTG_HS_HCSPLT6_SPLITEN, Split enable
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCSPLT7_PRTADDR not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCSPLT7 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCSPLT7_PRTADDR ( %bbbbbbb -- x addr ) OTG_HS_HOST_OTG_HS_HCSPLT7 ; \ OTG_HS_HOST_OTG_HS_HCSPLT7_PRTADDR, Port address
     : OTG_HS_HOST_OTG_HS_HCSPLT7_HUBADDR ( %bbbbbbb -- x addr ) 7 lshift OTG_HS_HOST_OTG_HS_HCSPLT7 ; \ OTG_HS_HOST_OTG_HS_HCSPLT7_HUBADDR, Hub address
@@ -14715,7 +14715,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCSPLT7_SPLITEN ( -- x addr ) 31 bit OTG_HS_HOST_OTG_HS_HCSPLT7 ; \ OTG_HS_HOST_OTG_HS_HCSPLT7_SPLITEN, Split enable
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCSPLT8_PRTADDR not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCSPLT8 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCSPLT8_PRTADDR ( %bbbbbbb -- x addr ) OTG_HS_HOST_OTG_HS_HCSPLT8 ; \ OTG_HS_HOST_OTG_HS_HCSPLT8_PRTADDR, Port address
     : OTG_HS_HOST_OTG_HS_HCSPLT8_HUBADDR ( %bbbbbbb -- x addr ) 7 lshift OTG_HS_HOST_OTG_HS_HCSPLT8 ; \ OTG_HS_HOST_OTG_HS_HCSPLT8_HUBADDR, Hub address
@@ -14724,7 +14724,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCSPLT8_SPLITEN ( -- x addr ) 31 bit OTG_HS_HOST_OTG_HS_HCSPLT8 ; \ OTG_HS_HOST_OTG_HS_HCSPLT8_SPLITEN, Split enable
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCSPLT9_PRTADDR not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCSPLT9 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCSPLT9_PRTADDR ( %bbbbbbb -- x addr ) OTG_HS_HOST_OTG_HS_HCSPLT9 ; \ OTG_HS_HOST_OTG_HS_HCSPLT9_PRTADDR, Port address
     : OTG_HS_HOST_OTG_HS_HCSPLT9_HUBADDR ( %bbbbbbb -- x addr ) 7 lshift OTG_HS_HOST_OTG_HS_HCSPLT9 ; \ OTG_HS_HOST_OTG_HS_HCSPLT9_HUBADDR, Hub address
@@ -14733,7 +14733,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCSPLT9_SPLITEN ( -- x addr ) 31 bit OTG_HS_HOST_OTG_HS_HCSPLT9 ; \ OTG_HS_HOST_OTG_HS_HCSPLT9_SPLITEN, Split enable
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCSPLT10_PRTADDR not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCSPLT10 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCSPLT10_PRTADDR ( %bbbbbbb -- x addr ) OTG_HS_HOST_OTG_HS_HCSPLT10 ; \ OTG_HS_HOST_OTG_HS_HCSPLT10_PRTADDR, Port address
     : OTG_HS_HOST_OTG_HS_HCSPLT10_HUBADDR ( %bbbbbbb -- x addr ) 7 lshift OTG_HS_HOST_OTG_HS_HCSPLT10 ; \ OTG_HS_HOST_OTG_HS_HCSPLT10_HUBADDR, Hub address
@@ -14742,7 +14742,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCSPLT10_SPLITEN ( -- x addr ) 31 bit OTG_HS_HOST_OTG_HS_HCSPLT10 ; \ OTG_HS_HOST_OTG_HS_HCSPLT10_SPLITEN, Split enable
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCSPLT11_PRTADDR not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCSPLT11 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCSPLT11_PRTADDR ( %bbbbbbb -- x addr ) OTG_HS_HOST_OTG_HS_HCSPLT11 ; \ OTG_HS_HOST_OTG_HS_HCSPLT11_PRTADDR, Port address
     : OTG_HS_HOST_OTG_HS_HCSPLT11_HUBADDR ( %bbbbbbb -- x addr ) 7 lshift OTG_HS_HOST_OTG_HS_HCSPLT11 ; \ OTG_HS_HOST_OTG_HS_HCSPLT11_HUBADDR, Hub address
@@ -14751,7 +14751,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCSPLT11_SPLITEN ( -- x addr ) 31 bit OTG_HS_HOST_OTG_HS_HCSPLT11 ; \ OTG_HS_HOST_OTG_HS_HCSPLT11_SPLITEN, Split enable
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCINT0_XFRC not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCINT0 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCINT0_XFRC ( -- x addr ) 0 bit OTG_HS_HOST_OTG_HS_HCINT0 ; \ OTG_HS_HOST_OTG_HS_HCINT0_XFRC, Transfer completed
     : OTG_HS_HOST_OTG_HS_HCINT0_CHH ( -- x addr ) 1 bit OTG_HS_HOST_OTG_HS_HCINT0 ; \ OTG_HS_HOST_OTG_HS_HCINT0_CHH, Channel halted
@@ -14766,7 +14766,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCINT0_DTERR ( -- x addr ) 10 bit OTG_HS_HOST_OTG_HS_HCINT0 ; \ OTG_HS_HOST_OTG_HS_HCINT0_DTERR, Data toggle error
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCINT1_XFRC not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCINT1 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCINT1_XFRC ( -- x addr ) 0 bit OTG_HS_HOST_OTG_HS_HCINT1 ; \ OTG_HS_HOST_OTG_HS_HCINT1_XFRC, Transfer completed
     : OTG_HS_HOST_OTG_HS_HCINT1_CHH ( -- x addr ) 1 bit OTG_HS_HOST_OTG_HS_HCINT1 ; \ OTG_HS_HOST_OTG_HS_HCINT1_CHH, Channel halted
@@ -14781,7 +14781,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCINT1_DTERR ( -- x addr ) 10 bit OTG_HS_HOST_OTG_HS_HCINT1 ; \ OTG_HS_HOST_OTG_HS_HCINT1_DTERR, Data toggle error
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCINT2_XFRC not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCINT2 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCINT2_XFRC ( -- x addr ) 0 bit OTG_HS_HOST_OTG_HS_HCINT2 ; \ OTG_HS_HOST_OTG_HS_HCINT2_XFRC, Transfer completed
     : OTG_HS_HOST_OTG_HS_HCINT2_CHH ( -- x addr ) 1 bit OTG_HS_HOST_OTG_HS_HCINT2 ; \ OTG_HS_HOST_OTG_HS_HCINT2_CHH, Channel halted
@@ -14796,7 +14796,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCINT2_DTERR ( -- x addr ) 10 bit OTG_HS_HOST_OTG_HS_HCINT2 ; \ OTG_HS_HOST_OTG_HS_HCINT2_DTERR, Data toggle error
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCINT3_XFRC not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCINT3 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCINT3_XFRC ( -- x addr ) 0 bit OTG_HS_HOST_OTG_HS_HCINT3 ; \ OTG_HS_HOST_OTG_HS_HCINT3_XFRC, Transfer completed
     : OTG_HS_HOST_OTG_HS_HCINT3_CHH ( -- x addr ) 1 bit OTG_HS_HOST_OTG_HS_HCINT3 ; \ OTG_HS_HOST_OTG_HS_HCINT3_CHH, Channel halted
@@ -14811,7 +14811,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCINT3_DTERR ( -- x addr ) 10 bit OTG_HS_HOST_OTG_HS_HCINT3 ; \ OTG_HS_HOST_OTG_HS_HCINT3_DTERR, Data toggle error
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCINT4_XFRC not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCINT4 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCINT4_XFRC ( -- x addr ) 0 bit OTG_HS_HOST_OTG_HS_HCINT4 ; \ OTG_HS_HOST_OTG_HS_HCINT4_XFRC, Transfer completed
     : OTG_HS_HOST_OTG_HS_HCINT4_CHH ( -- x addr ) 1 bit OTG_HS_HOST_OTG_HS_HCINT4 ; \ OTG_HS_HOST_OTG_HS_HCINT4_CHH, Channel halted
@@ -14826,7 +14826,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCINT4_DTERR ( -- x addr ) 10 bit OTG_HS_HOST_OTG_HS_HCINT4 ; \ OTG_HS_HOST_OTG_HS_HCINT4_DTERR, Data toggle error
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCINT5_XFRC not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCINT5 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCINT5_XFRC ( -- x addr ) 0 bit OTG_HS_HOST_OTG_HS_HCINT5 ; \ OTG_HS_HOST_OTG_HS_HCINT5_XFRC, Transfer completed
     : OTG_HS_HOST_OTG_HS_HCINT5_CHH ( -- x addr ) 1 bit OTG_HS_HOST_OTG_HS_HCINT5 ; \ OTG_HS_HOST_OTG_HS_HCINT5_CHH, Channel halted
@@ -14841,7 +14841,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCINT5_DTERR ( -- x addr ) 10 bit OTG_HS_HOST_OTG_HS_HCINT5 ; \ OTG_HS_HOST_OTG_HS_HCINT5_DTERR, Data toggle error
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCINT6_XFRC not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCINT6 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCINT6_XFRC ( -- x addr ) 0 bit OTG_HS_HOST_OTG_HS_HCINT6 ; \ OTG_HS_HOST_OTG_HS_HCINT6_XFRC, Transfer completed
     : OTG_HS_HOST_OTG_HS_HCINT6_CHH ( -- x addr ) 1 bit OTG_HS_HOST_OTG_HS_HCINT6 ; \ OTG_HS_HOST_OTG_HS_HCINT6_CHH, Channel halted
@@ -14856,7 +14856,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCINT6_DTERR ( -- x addr ) 10 bit OTG_HS_HOST_OTG_HS_HCINT6 ; \ OTG_HS_HOST_OTG_HS_HCINT6_DTERR, Data toggle error
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCINT7_XFRC not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCINT7 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCINT7_XFRC ( -- x addr ) 0 bit OTG_HS_HOST_OTG_HS_HCINT7 ; \ OTG_HS_HOST_OTG_HS_HCINT7_XFRC, Transfer completed
     : OTG_HS_HOST_OTG_HS_HCINT7_CHH ( -- x addr ) 1 bit OTG_HS_HOST_OTG_HS_HCINT7 ; \ OTG_HS_HOST_OTG_HS_HCINT7_CHH, Channel halted
@@ -14871,7 +14871,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCINT7_DTERR ( -- x addr ) 10 bit OTG_HS_HOST_OTG_HS_HCINT7 ; \ OTG_HS_HOST_OTG_HS_HCINT7_DTERR, Data toggle error
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCINT8_XFRC not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCINT8 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCINT8_XFRC ( -- x addr ) 0 bit OTG_HS_HOST_OTG_HS_HCINT8 ; \ OTG_HS_HOST_OTG_HS_HCINT8_XFRC, Transfer completed
     : OTG_HS_HOST_OTG_HS_HCINT8_CHH ( -- x addr ) 1 bit OTG_HS_HOST_OTG_HS_HCINT8 ; \ OTG_HS_HOST_OTG_HS_HCINT8_CHH, Channel halted
@@ -14886,7 +14886,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCINT8_DTERR ( -- x addr ) 10 bit OTG_HS_HOST_OTG_HS_HCINT8 ; \ OTG_HS_HOST_OTG_HS_HCINT8_DTERR, Data toggle error
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCINT9_XFRC not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCINT9 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCINT9_XFRC ( -- x addr ) 0 bit OTG_HS_HOST_OTG_HS_HCINT9 ; \ OTG_HS_HOST_OTG_HS_HCINT9_XFRC, Transfer completed
     : OTG_HS_HOST_OTG_HS_HCINT9_CHH ( -- x addr ) 1 bit OTG_HS_HOST_OTG_HS_HCINT9 ; \ OTG_HS_HOST_OTG_HS_HCINT9_CHH, Channel halted
@@ -14901,7 +14901,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCINT9_DTERR ( -- x addr ) 10 bit OTG_HS_HOST_OTG_HS_HCINT9 ; \ OTG_HS_HOST_OTG_HS_HCINT9_DTERR, Data toggle error
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCINT10_XFRC not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCINT10 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCINT10_XFRC ( -- x addr ) 0 bit OTG_HS_HOST_OTG_HS_HCINT10 ; \ OTG_HS_HOST_OTG_HS_HCINT10_XFRC, Transfer completed
     : OTG_HS_HOST_OTG_HS_HCINT10_CHH ( -- x addr ) 1 bit OTG_HS_HOST_OTG_HS_HCINT10 ; \ OTG_HS_HOST_OTG_HS_HCINT10_CHH, Channel halted
@@ -14916,7 +14916,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCINT10_DTERR ( -- x addr ) 10 bit OTG_HS_HOST_OTG_HS_HCINT10 ; \ OTG_HS_HOST_OTG_HS_HCINT10_DTERR, Data toggle error
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCINT11_XFRC not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCINT11 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCINT11_XFRC ( -- x addr ) 0 bit OTG_HS_HOST_OTG_HS_HCINT11 ; \ OTG_HS_HOST_OTG_HS_HCINT11_XFRC, Transfer completed
     : OTG_HS_HOST_OTG_HS_HCINT11_CHH ( -- x addr ) 1 bit OTG_HS_HOST_OTG_HS_HCINT11 ; \ OTG_HS_HOST_OTG_HS_HCINT11_CHH, Channel halted
@@ -14931,7 +14931,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCINT11_DTERR ( -- x addr ) 10 bit OTG_HS_HOST_OTG_HS_HCINT11 ; \ OTG_HS_HOST_OTG_HS_HCINT11_DTERR, Data toggle error
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCINTMSK0_XFRCM not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCINTMSK0 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCINTMSK0_XFRCM ( -- x addr ) 0 bit OTG_HS_HOST_OTG_HS_HCINTMSK0 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK0_XFRCM, Transfer completed mask
     : OTG_HS_HOST_OTG_HS_HCINTMSK0_CHHM ( -- x addr ) 1 bit OTG_HS_HOST_OTG_HS_HCINTMSK0 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK0_CHHM, Channel halted mask
@@ -14946,7 +14946,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCINTMSK0_DTERRM ( -- x addr ) 10 bit OTG_HS_HOST_OTG_HS_HCINTMSK0 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK0_DTERRM, Data toggle error mask
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCINTMSK1_XFRCM not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCINTMSK1 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCINTMSK1_XFRCM ( -- x addr ) 0 bit OTG_HS_HOST_OTG_HS_HCINTMSK1 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK1_XFRCM, Transfer completed mask
     : OTG_HS_HOST_OTG_HS_HCINTMSK1_CHHM ( -- x addr ) 1 bit OTG_HS_HOST_OTG_HS_HCINTMSK1 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK1_CHHM, Channel halted mask
@@ -14961,7 +14961,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCINTMSK1_DTERRM ( -- x addr ) 10 bit OTG_HS_HOST_OTG_HS_HCINTMSK1 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK1_DTERRM, Data toggle error mask
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCINTMSK2_XFRCM not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCINTMSK2 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCINTMSK2_XFRCM ( -- x addr ) 0 bit OTG_HS_HOST_OTG_HS_HCINTMSK2 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK2_XFRCM, Transfer completed mask
     : OTG_HS_HOST_OTG_HS_HCINTMSK2_CHHM ( -- x addr ) 1 bit OTG_HS_HOST_OTG_HS_HCINTMSK2 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK2_CHHM, Channel halted mask
@@ -14976,7 +14976,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCINTMSK2_DTERRM ( -- x addr ) 10 bit OTG_HS_HOST_OTG_HS_HCINTMSK2 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK2_DTERRM, Data toggle error mask
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCINTMSK3_XFRCM not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCINTMSK3 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCINTMSK3_XFRCM ( -- x addr ) 0 bit OTG_HS_HOST_OTG_HS_HCINTMSK3 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK3_XFRCM, Transfer completed mask
     : OTG_HS_HOST_OTG_HS_HCINTMSK3_CHHM ( -- x addr ) 1 bit OTG_HS_HOST_OTG_HS_HCINTMSK3 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK3_CHHM, Channel halted mask
@@ -14991,7 +14991,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCINTMSK3_DTERRM ( -- x addr ) 10 bit OTG_HS_HOST_OTG_HS_HCINTMSK3 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK3_DTERRM, Data toggle error mask
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCINTMSK4_XFRCM not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCINTMSK4 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCINTMSK4_XFRCM ( -- x addr ) 0 bit OTG_HS_HOST_OTG_HS_HCINTMSK4 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK4_XFRCM, Transfer completed mask
     : OTG_HS_HOST_OTG_HS_HCINTMSK4_CHHM ( -- x addr ) 1 bit OTG_HS_HOST_OTG_HS_HCINTMSK4 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK4_CHHM, Channel halted mask
@@ -15006,7 +15006,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCINTMSK4_DTERRM ( -- x addr ) 10 bit OTG_HS_HOST_OTG_HS_HCINTMSK4 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK4_DTERRM, Data toggle error mask
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCINTMSK5_XFRCM not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCINTMSK5 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCINTMSK5_XFRCM ( -- x addr ) 0 bit OTG_HS_HOST_OTG_HS_HCINTMSK5 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK5_XFRCM, Transfer completed mask
     : OTG_HS_HOST_OTG_HS_HCINTMSK5_CHHM ( -- x addr ) 1 bit OTG_HS_HOST_OTG_HS_HCINTMSK5 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK5_CHHM, Channel halted mask
@@ -15021,7 +15021,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCINTMSK5_DTERRM ( -- x addr ) 10 bit OTG_HS_HOST_OTG_HS_HCINTMSK5 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK5_DTERRM, Data toggle error mask
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCINTMSK6_XFRCM not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCINTMSK6 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCINTMSK6_XFRCM ( -- x addr ) 0 bit OTG_HS_HOST_OTG_HS_HCINTMSK6 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK6_XFRCM, Transfer completed mask
     : OTG_HS_HOST_OTG_HS_HCINTMSK6_CHHM ( -- x addr ) 1 bit OTG_HS_HOST_OTG_HS_HCINTMSK6 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK6_CHHM, Channel halted mask
@@ -15036,7 +15036,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCINTMSK6_DTERRM ( -- x addr ) 10 bit OTG_HS_HOST_OTG_HS_HCINTMSK6 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK6_DTERRM, Data toggle error mask
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCINTMSK7_XFRCM not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCINTMSK7 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCINTMSK7_XFRCM ( -- x addr ) 0 bit OTG_HS_HOST_OTG_HS_HCINTMSK7 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK7_XFRCM, Transfer completed mask
     : OTG_HS_HOST_OTG_HS_HCINTMSK7_CHHM ( -- x addr ) 1 bit OTG_HS_HOST_OTG_HS_HCINTMSK7 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK7_CHHM, Channel halted mask
@@ -15051,7 +15051,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCINTMSK7_DTERRM ( -- x addr ) 10 bit OTG_HS_HOST_OTG_HS_HCINTMSK7 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK7_DTERRM, Data toggle error mask
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCINTMSK8_XFRCM not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCINTMSK8 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCINTMSK8_XFRCM ( -- x addr ) 0 bit OTG_HS_HOST_OTG_HS_HCINTMSK8 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK8_XFRCM, Transfer completed mask
     : OTG_HS_HOST_OTG_HS_HCINTMSK8_CHHM ( -- x addr ) 1 bit OTG_HS_HOST_OTG_HS_HCINTMSK8 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK8_CHHM, Channel halted mask
@@ -15066,7 +15066,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCINTMSK8_DTERRM ( -- x addr ) 10 bit OTG_HS_HOST_OTG_HS_HCINTMSK8 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK8_DTERRM, Data toggle error mask
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCINTMSK9_XFRCM not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCINTMSK9 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCINTMSK9_XFRCM ( -- x addr ) 0 bit OTG_HS_HOST_OTG_HS_HCINTMSK9 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK9_XFRCM, Transfer completed mask
     : OTG_HS_HOST_OTG_HS_HCINTMSK9_CHHM ( -- x addr ) 1 bit OTG_HS_HOST_OTG_HS_HCINTMSK9 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK9_CHHM, Channel halted mask
@@ -15081,7 +15081,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCINTMSK9_DTERRM ( -- x addr ) 10 bit OTG_HS_HOST_OTG_HS_HCINTMSK9 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK9_DTERRM, Data toggle error mask
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCINTMSK10_XFRCM not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCINTMSK10 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCINTMSK10_XFRCM ( -- x addr ) 0 bit OTG_HS_HOST_OTG_HS_HCINTMSK10 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK10_XFRCM, Transfer completed mask
     : OTG_HS_HOST_OTG_HS_HCINTMSK10_CHHM ( -- x addr ) 1 bit OTG_HS_HOST_OTG_HS_HCINTMSK10 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK10_CHHM, Channel halted mask
@@ -15096,7 +15096,7 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCINTMSK10_DTERRM ( -- x addr ) 10 bit OTG_HS_HOST_OTG_HS_HCINTMSK10 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK10_DTERRM, Data toggle error mask
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCINTMSK11_XFRCM not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCINTMSK11 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCINTMSK11_XFRCM ( -- x addr ) 0 bit OTG_HS_HOST_OTG_HS_HCINTMSK11 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK11_XFRCM, Transfer completed mask
     : OTG_HS_HOST_OTG_HS_HCINTMSK11_CHHM ( -- x addr ) 1 bit OTG_HS_HOST_OTG_HS_HCINTMSK11 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK11_CHHM, Channel halted mask
@@ -15111,151 +15111,151 @@ begin-module memmap
     : OTG_HS_HOST_OTG_HS_HCINTMSK11_DTERRM ( -- x addr ) 10 bit OTG_HS_HOST_OTG_HS_HCINTMSK11 ; \ OTG_HS_HOST_OTG_HS_HCINTMSK11_DTERRM, Data toggle error mask
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCTSIZ0_XFRSIZ not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCTSIZ0 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCTSIZ0_XFRSIZ x addr ) OTG_HS_HOST_OTG_HS_HCTSIZ0 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ0_XFRSIZ, Transfer size
     : OTG_HS_HOST_OTG_HS_HCTSIZ0_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_HS_HOST_OTG_HS_HCTSIZ0 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ0_PKTCNT, Packet count
     : OTG_HS_HOST_OTG_HS_HCTSIZ0_DPID ( %bb -- x addr ) 29 lshift OTG_HS_HOST_OTG_HS_HCTSIZ0 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ0_DPID, Data PID
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCTSIZ1_XFRSIZ not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCTSIZ1 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCTSIZ1_XFRSIZ x addr ) OTG_HS_HOST_OTG_HS_HCTSIZ1 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ1_XFRSIZ, Transfer size
     : OTG_HS_HOST_OTG_HS_HCTSIZ1_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_HS_HOST_OTG_HS_HCTSIZ1 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ1_PKTCNT, Packet count
     : OTG_HS_HOST_OTG_HS_HCTSIZ1_DPID ( %bb -- x addr ) 29 lshift OTG_HS_HOST_OTG_HS_HCTSIZ1 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ1_DPID, Data PID
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCTSIZ2_XFRSIZ not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCTSIZ2 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCTSIZ2_XFRSIZ x addr ) OTG_HS_HOST_OTG_HS_HCTSIZ2 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ2_XFRSIZ, Transfer size
     : OTG_HS_HOST_OTG_HS_HCTSIZ2_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_HS_HOST_OTG_HS_HCTSIZ2 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ2_PKTCNT, Packet count
     : OTG_HS_HOST_OTG_HS_HCTSIZ2_DPID ( %bb -- x addr ) 29 lshift OTG_HS_HOST_OTG_HS_HCTSIZ2 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ2_DPID, Data PID
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCTSIZ3_XFRSIZ not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCTSIZ3 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCTSIZ3_XFRSIZ x addr ) OTG_HS_HOST_OTG_HS_HCTSIZ3 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ3_XFRSIZ, Transfer size
     : OTG_HS_HOST_OTG_HS_HCTSIZ3_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_HS_HOST_OTG_HS_HCTSIZ3 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ3_PKTCNT, Packet count
     : OTG_HS_HOST_OTG_HS_HCTSIZ3_DPID ( %bb -- x addr ) 29 lshift OTG_HS_HOST_OTG_HS_HCTSIZ3 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ3_DPID, Data PID
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCTSIZ4_XFRSIZ not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCTSIZ4 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCTSIZ4_XFRSIZ x addr ) OTG_HS_HOST_OTG_HS_HCTSIZ4 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ4_XFRSIZ, Transfer size
     : OTG_HS_HOST_OTG_HS_HCTSIZ4_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_HS_HOST_OTG_HS_HCTSIZ4 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ4_PKTCNT, Packet count
     : OTG_HS_HOST_OTG_HS_HCTSIZ4_DPID ( %bb -- x addr ) 29 lshift OTG_HS_HOST_OTG_HS_HCTSIZ4 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ4_DPID, Data PID
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCTSIZ5_XFRSIZ not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCTSIZ5 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCTSIZ5_XFRSIZ x addr ) OTG_HS_HOST_OTG_HS_HCTSIZ5 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ5_XFRSIZ, Transfer size
     : OTG_HS_HOST_OTG_HS_HCTSIZ5_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_HS_HOST_OTG_HS_HCTSIZ5 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ5_PKTCNT, Packet count
     : OTG_HS_HOST_OTG_HS_HCTSIZ5_DPID ( %bb -- x addr ) 29 lshift OTG_HS_HOST_OTG_HS_HCTSIZ5 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ5_DPID, Data PID
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCTSIZ6_XFRSIZ not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCTSIZ6 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCTSIZ6_XFRSIZ x addr ) OTG_HS_HOST_OTG_HS_HCTSIZ6 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ6_XFRSIZ, Transfer size
     : OTG_HS_HOST_OTG_HS_HCTSIZ6_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_HS_HOST_OTG_HS_HCTSIZ6 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ6_PKTCNT, Packet count
     : OTG_HS_HOST_OTG_HS_HCTSIZ6_DPID ( %bb -- x addr ) 29 lshift OTG_HS_HOST_OTG_HS_HCTSIZ6 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ6_DPID, Data PID
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCTSIZ7_XFRSIZ not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCTSIZ7 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCTSIZ7_XFRSIZ x addr ) OTG_HS_HOST_OTG_HS_HCTSIZ7 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ7_XFRSIZ, Transfer size
     : OTG_HS_HOST_OTG_HS_HCTSIZ7_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_HS_HOST_OTG_HS_HCTSIZ7 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ7_PKTCNT, Packet count
     : OTG_HS_HOST_OTG_HS_HCTSIZ7_DPID ( %bb -- x addr ) 29 lshift OTG_HS_HOST_OTG_HS_HCTSIZ7 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ7_DPID, Data PID
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCTSIZ8_XFRSIZ not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCTSIZ8 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCTSIZ8_XFRSIZ x addr ) OTG_HS_HOST_OTG_HS_HCTSIZ8 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ8_XFRSIZ, Transfer size
     : OTG_HS_HOST_OTG_HS_HCTSIZ8_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_HS_HOST_OTG_HS_HCTSIZ8 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ8_PKTCNT, Packet count
     : OTG_HS_HOST_OTG_HS_HCTSIZ8_DPID ( %bb -- x addr ) 29 lshift OTG_HS_HOST_OTG_HS_HCTSIZ8 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ8_DPID, Data PID
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCTSIZ9_XFRSIZ not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCTSIZ9 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCTSIZ9_XFRSIZ x addr ) OTG_HS_HOST_OTG_HS_HCTSIZ9 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ9_XFRSIZ, Transfer size
     : OTG_HS_HOST_OTG_HS_HCTSIZ9_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_HS_HOST_OTG_HS_HCTSIZ9 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ9_PKTCNT, Packet count
     : OTG_HS_HOST_OTG_HS_HCTSIZ9_DPID ( %bb -- x addr ) 29 lshift OTG_HS_HOST_OTG_HS_HCTSIZ9 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ9_DPID, Data PID
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCTSIZ10_XFRSIZ not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCTSIZ10 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCTSIZ10_XFRSIZ x addr ) OTG_HS_HOST_OTG_HS_HCTSIZ10 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ10_XFRSIZ, Transfer size
     : OTG_HS_HOST_OTG_HS_HCTSIZ10_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_HS_HOST_OTG_HS_HCTSIZ10 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ10_PKTCNT, Packet count
     : OTG_HS_HOST_OTG_HS_HCTSIZ10_DPID ( %bb -- x addr ) 29 lshift OTG_HS_HOST_OTG_HS_HCTSIZ10 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ10_DPID, Data PID
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCTSIZ11_XFRSIZ not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCTSIZ11 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCTSIZ11_XFRSIZ x addr ) OTG_HS_HOST_OTG_HS_HCTSIZ11 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ11_XFRSIZ, Transfer size
     : OTG_HS_HOST_OTG_HS_HCTSIZ11_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_HS_HOST_OTG_HS_HCTSIZ11 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ11_PKTCNT, Packet count
     : OTG_HS_HOST_OTG_HS_HCTSIZ11_DPID ( %bb -- x addr ) 29 lshift OTG_HS_HOST_OTG_HS_HCTSIZ11 ; \ OTG_HS_HOST_OTG_HS_HCTSIZ11_DPID, Data PID
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCDMA0_DMAADDR not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCDMA0 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCDMA0_DMAADDR ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) OTG_HS_HOST_OTG_HS_HCDMA0 ; \ OTG_HS_HOST_OTG_HS_HCDMA0_DMAADDR, DMA address
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCDMA1_DMAADDR not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCDMA1 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCDMA1_DMAADDR ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) OTG_HS_HOST_OTG_HS_HCDMA1 ; \ OTG_HS_HOST_OTG_HS_HCDMA1_DMAADDR, DMA address
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCDMA2_DMAADDR not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCDMA2 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCDMA2_DMAADDR ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) OTG_HS_HOST_OTG_HS_HCDMA2 ; \ OTG_HS_HOST_OTG_HS_HCDMA2_DMAADDR, DMA address
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCDMA3_DMAADDR not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCDMA3 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCDMA3_DMAADDR ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) OTG_HS_HOST_OTG_HS_HCDMA3 ; \ OTG_HS_HOST_OTG_HS_HCDMA3_DMAADDR, DMA address
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCDMA4_DMAADDR not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCDMA4 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCDMA4_DMAADDR ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) OTG_HS_HOST_OTG_HS_HCDMA4 ; \ OTG_HS_HOST_OTG_HS_HCDMA4_DMAADDR, DMA address
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCDMA5_DMAADDR not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCDMA5 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCDMA5_DMAADDR ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) OTG_HS_HOST_OTG_HS_HCDMA5 ; \ OTG_HS_HOST_OTG_HS_HCDMA5_DMAADDR, DMA address
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCDMA6_DMAADDR not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCDMA6 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCDMA6_DMAADDR ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) OTG_HS_HOST_OTG_HS_HCDMA6 ; \ OTG_HS_HOST_OTG_HS_HCDMA6_DMAADDR, DMA address
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCDMA7_DMAADDR not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCDMA7 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCDMA7_DMAADDR ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) OTG_HS_HOST_OTG_HS_HCDMA7 ; \ OTG_HS_HOST_OTG_HS_HCDMA7_DMAADDR, DMA address
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCDMA8_DMAADDR not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCDMA8 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCDMA8_DMAADDR ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) OTG_HS_HOST_OTG_HS_HCDMA8 ; \ OTG_HS_HOST_OTG_HS_HCDMA8_DMAADDR, DMA address
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCDMA9_DMAADDR not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCDMA9 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCDMA9_DMAADDR ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) OTG_HS_HOST_OTG_HS_HCDMA9 ; \ OTG_HS_HOST_OTG_HS_HCDMA9_DMAADDR, DMA address
   [then]
 
-  execute-defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCDMA10_DMAADDR not and [if]
+  execute-defined? use-OTG_HS_HOST [if]
     \ OTG_HS_HOST_OTG_HS_HCDMA10 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCDMA10_DMAADDR ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) OTG_HS_HOST_OTG_HS_HCDMA10 ; \ OTG_HS_HOST_OTG_HS_HCDMA10_DMAADDR, DMA address
   [then]
 
-  defined? use-OTG_HS_HOST defined? OTG_HS_HOST_OTG_HS_HCDMA11_DMAADDR not and [if]
+  [if]
     \ OTG_HS_HOST_OTG_HS_HCDMA11 (read-write) Reset:0x0
     : OTG_HS_HOST_OTG_HS_HCDMA11_DMAADDR ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) OTG_HS_HOST_OTG_HS_HCDMA11 ; \ OTG_HS_HOST_OTG_HS_HCDMA11_DMAADDR, DMA address
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DCFG_DSPD not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DCFG (read-write) Reset:0x02200000
     : OTG_HS_DEVICE_OTG_HS_DCFG_DSPD ( %bb -- x addr ) OTG_HS_DEVICE_OTG_HS_DCFG ; \ OTG_HS_DEVICE_OTG_HS_DCFG_DSPD, Device speed
     : OTG_HS_DEVICE_OTG_HS_DCFG_NZLSOHSK ( -- x addr ) 2 bit OTG_HS_DEVICE_OTG_HS_DCFG ; \ OTG_HS_DEVICE_OTG_HS_DCFG_NZLSOHSK, Nonzero-length status OUT  handshake
@@ -15264,7 +15264,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DCFG_PERSCHIVL ( %bb -- x addr ) 24 lshift OTG_HS_DEVICE_OTG_HS_DCFG ; \ OTG_HS_DEVICE_OTG_HS_DCFG_PERSCHIVL, Periodic scheduling  interval
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DCTL_RWUSIG not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DCTL (multiple-access)  Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DCTL_RWUSIG ( -- x addr ) 0 bit OTG_HS_DEVICE_OTG_HS_DCTL ; \ OTG_HS_DEVICE_OTG_HS_DCTL_RWUSIG, Remote wakeup signaling
     : OTG_HS_DEVICE_OTG_HS_DCTL_SDIS ( -- x addr ) 1 bit OTG_HS_DEVICE_OTG_HS_DCTL ; \ OTG_HS_DEVICE_OTG_HS_DCTL_SDIS, Soft disconnect
@@ -15278,7 +15278,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DCTL_POPRGDNE ( -- x addr ) 11 bit OTG_HS_DEVICE_OTG_HS_DCTL ; \ OTG_HS_DEVICE_OTG_HS_DCTL_POPRGDNE, Power-on programming done
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DSTS_SUSPSTS? not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DSTS (read-only) Reset:0x00000010
     : OTG_HS_DEVICE_OTG_HS_DSTS_SUSPSTS? ( --  1|0 ) 0 bit OTG_HS_DEVICE_OTG_HS_DSTS bit@ ; \ OTG_HS_DEVICE_OTG_HS_DSTS_SUSPSTS, Suspend status
     : OTG_HS_DEVICE_OTG_HS_DSTS_ENUMSPD? ( --  x ) 1 lshift OTG_HS_DEVICE_OTG_HS_DSTS @ ; \ OTG_HS_DEVICE_OTG_HS_DSTS_ENUMSPD, Enumerated speed
@@ -15286,7 +15286,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DSTS_FNSOF? ( --  x ) 8 lshift OTG_HS_DEVICE_OTG_HS_DSTS @ ; \ OTG_HS_DEVICE_OTG_HS_DSTS_FNSOF, Frame number of the received  SOF
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DIEPMSK_XFRCM not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DIEPMSK (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DIEPMSK_XFRCM ( -- x addr ) 0 bit OTG_HS_DEVICE_OTG_HS_DIEPMSK ; \ OTG_HS_DEVICE_OTG_HS_DIEPMSK_XFRCM, Transfer completed interrupt  mask
     : OTG_HS_DEVICE_OTG_HS_DIEPMSK_EPDM ( -- x addr ) 1 bit OTG_HS_DEVICE_OTG_HS_DIEPMSK ; \ OTG_HS_DEVICE_OTG_HS_DIEPMSK_EPDM, Endpoint disabled interrupt  mask
@@ -15298,7 +15298,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DIEPMSK_BIM ( -- x addr ) 9 bit OTG_HS_DEVICE_OTG_HS_DIEPMSK ; \ OTG_HS_DEVICE_OTG_HS_DIEPMSK_BIM, BNA interrupt mask
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DOEPMSK_XFRCM not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DOEPMSK (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DOEPMSK_XFRCM ( -- x addr ) 0 bit OTG_HS_DEVICE_OTG_HS_DOEPMSK ; \ OTG_HS_DEVICE_OTG_HS_DOEPMSK_XFRCM, Transfer completed interrupt  mask
     : OTG_HS_DEVICE_OTG_HS_DOEPMSK_EPDM ( -- x addr ) 1 bit OTG_HS_DEVICE_OTG_HS_DOEPMSK ; \ OTG_HS_DEVICE_OTG_HS_DOEPMSK_EPDM, Endpoint disabled interrupt  mask
@@ -15309,29 +15309,29 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DOEPMSK_BOIM ( -- x addr ) 9 bit OTG_HS_DEVICE_OTG_HS_DOEPMSK ; \ OTG_HS_DEVICE_OTG_HS_DOEPMSK_BOIM, BNA interrupt mask
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DAINT_IEPINT? not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DAINT (read-only) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DAINT_IEPINT? ( --  x ) OTG_HS_DEVICE_OTG_HS_DAINT @ ; \ OTG_HS_DEVICE_OTG_HS_DAINT_IEPINT, IN endpoint interrupt bits
     : OTG_HS_DEVICE_OTG_HS_DAINT_OEPINT? ( --  x ) 16 lshift OTG_HS_DEVICE_OTG_HS_DAINT @ ; \ OTG_HS_DEVICE_OTG_HS_DAINT_OEPINT, OUT endpoint interrupt  bits
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DAINTMSK_IEPM not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DAINTMSK (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DAINTMSK_IEPM ( %bbbbbbbbbbbbbbbb -- x addr ) OTG_HS_DEVICE_OTG_HS_DAINTMSK ; \ OTG_HS_DEVICE_OTG_HS_DAINTMSK_IEPM, IN EP interrupt mask bits
     : OTG_HS_DEVICE_OTG_HS_DAINTMSK_OEPM ( %bbbbbbbbbbbbbbbb -- x addr ) 16 lshift OTG_HS_DEVICE_OTG_HS_DAINTMSK ; \ OTG_HS_DEVICE_OTG_HS_DAINTMSK_OEPM, OUT EP interrupt mask bits
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DVBUSDIS_VBUSDT not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DVBUSDIS (read-write) Reset:0x000017D7
     : OTG_HS_DEVICE_OTG_HS_DVBUSDIS_VBUSDT ( %bbbbbbbbbbbbbbbb -- x addr ) OTG_HS_DEVICE_OTG_HS_DVBUSDIS ; \ OTG_HS_DEVICE_OTG_HS_DVBUSDIS_VBUSDT, Device VBUS discharge time
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DVBUSPULSE_DVBUSP not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DVBUSPULSE (read-write) Reset:0x000005B8
     : OTG_HS_DEVICE_OTG_HS_DVBUSPULSE_DVBUSP ( %bbbbbbbbbbb -- x addr ) OTG_HS_DEVICE_OTG_HS_DVBUSPULSE ; \ OTG_HS_DEVICE_OTG_HS_DVBUSPULSE_DVBUSP, Device VBUS pulsing time
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DTHRCTL_NONISOTHREN not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DTHRCTL (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DTHRCTL_NONISOTHREN ( -- x addr ) 0 bit OTG_HS_DEVICE_OTG_HS_DTHRCTL ; \ OTG_HS_DEVICE_OTG_HS_DTHRCTL_NONISOTHREN, Nonisochronous IN endpoints threshold  enable
     : OTG_HS_DEVICE_OTG_HS_DTHRCTL_ISOTHREN ( -- x addr ) 1 bit OTG_HS_DEVICE_OTG_HS_DTHRCTL ; \ OTG_HS_DEVICE_OTG_HS_DTHRCTL_ISOTHREN, ISO IN endpoint threshold  enable
@@ -15341,24 +15341,24 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DTHRCTL_ARPEN ( -- x addr ) 27 bit OTG_HS_DEVICE_OTG_HS_DTHRCTL ; \ OTG_HS_DEVICE_OTG_HS_DTHRCTL_ARPEN, Arbiter parking enable
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DIEPEMPMSK_INEPTXFEM not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DIEPEMPMSK (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DIEPEMPMSK_INEPTXFEM ( %bbbbbbbbbbbbbbbb -- x addr ) OTG_HS_DEVICE_OTG_HS_DIEPEMPMSK ; \ OTG_HS_DEVICE_OTG_HS_DIEPEMPMSK_INEPTXFEM, IN EP Tx FIFO empty interrupt mask  bits
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DEACHINT_IEP1INT not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DEACHINT (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DEACHINT_IEP1INT ( -- x addr ) 1 bit OTG_HS_DEVICE_OTG_HS_DEACHINT ; \ OTG_HS_DEVICE_OTG_HS_DEACHINT_IEP1INT, IN endpoint 1interrupt bit
     : OTG_HS_DEVICE_OTG_HS_DEACHINT_OEP1INT ( -- x addr ) 17 bit OTG_HS_DEVICE_OTG_HS_DEACHINT ; \ OTG_HS_DEVICE_OTG_HS_DEACHINT_OEP1INT, OUT endpoint 1 interrupt  bit
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DEACHINTMSK_IEP1INTM not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DEACHINTMSK (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DEACHINTMSK_IEP1INTM ( -- x addr ) 1 bit OTG_HS_DEVICE_OTG_HS_DEACHINTMSK ; \ OTG_HS_DEVICE_OTG_HS_DEACHINTMSK_IEP1INTM, IN Endpoint 1 interrupt mask  bit
     : OTG_HS_DEVICE_OTG_HS_DEACHINTMSK_OEP1INTM ( -- x addr ) 17 bit OTG_HS_DEVICE_OTG_HS_DEACHINTMSK ; \ OTG_HS_DEVICE_OTG_HS_DEACHINTMSK_OEP1INTM, OUT Endpoint 1 interrupt mask  bit
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DIEPEACHMSK1_XFRCM not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DIEPEACHMSK1 (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DIEPEACHMSK1_XFRCM ( -- x addr ) 0 bit OTG_HS_DEVICE_OTG_HS_DIEPEACHMSK1 ; \ OTG_HS_DEVICE_OTG_HS_DIEPEACHMSK1_XFRCM, Transfer completed interrupt  mask
     : OTG_HS_DEVICE_OTG_HS_DIEPEACHMSK1_EPDM ( -- x addr ) 1 bit OTG_HS_DEVICE_OTG_HS_DIEPEACHMSK1 ; \ OTG_HS_DEVICE_OTG_HS_DIEPEACHMSK1_EPDM, Endpoint disabled interrupt  mask
@@ -15371,7 +15371,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DIEPEACHMSK1_NAKM ( -- x addr ) 13 bit OTG_HS_DEVICE_OTG_HS_DIEPEACHMSK1 ; \ OTG_HS_DEVICE_OTG_HS_DIEPEACHMSK1_NAKM, NAK interrupt mask
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DOEPEACHMSK1_XFRCM not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DOEPEACHMSK1 (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DOEPEACHMSK1_XFRCM ( -- x addr ) 0 bit OTG_HS_DEVICE_OTG_HS_DOEPEACHMSK1 ; \ OTG_HS_DEVICE_OTG_HS_DOEPEACHMSK1_XFRCM, Transfer completed interrupt  mask
     : OTG_HS_DEVICE_OTG_HS_DOEPEACHMSK1_EPDM ( -- x addr ) 1 bit OTG_HS_DEVICE_OTG_HS_DOEPEACHMSK1 ; \ OTG_HS_DEVICE_OTG_HS_DOEPEACHMSK1_EPDM, Endpoint disabled interrupt  mask
@@ -15386,7 +15386,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DOEPEACHMSK1_NYETM ( -- x addr ) 14 bit OTG_HS_DEVICE_OTG_HS_DOEPEACHMSK1 ; \ OTG_HS_DEVICE_OTG_HS_DOEPEACHMSK1_NYETM, NYET interrupt mask
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DIEPCTL0_MPSIZ not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DIEPCTL0 (multiple-access)  Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DIEPCTL0_MPSIZ x addr ) OTG_HS_DEVICE_OTG_HS_DIEPCTL0 ; \ OTG_HS_DEVICE_OTG_HS_DIEPCTL0_MPSIZ, Maximum packet size
     : OTG_HS_DEVICE_OTG_HS_DIEPCTL0_USBAEP ( -- x addr ) 15 bit OTG_HS_DEVICE_OTG_HS_DIEPCTL0 ; \ OTG_HS_DEVICE_OTG_HS_DIEPCTL0_USBAEP, USB active endpoint
@@ -15403,7 +15403,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DIEPCTL0_EPENA ( -- x addr ) 31 bit OTG_HS_DEVICE_OTG_HS_DIEPCTL0 ; \ OTG_HS_DEVICE_OTG_HS_DIEPCTL0_EPENA, Endpoint enable
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DIEPCTL1_MPSIZ not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DIEPCTL1 (multiple-access)  Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DIEPCTL1_MPSIZ x addr ) OTG_HS_DEVICE_OTG_HS_DIEPCTL1 ; \ OTG_HS_DEVICE_OTG_HS_DIEPCTL1_MPSIZ, Maximum packet size
     : OTG_HS_DEVICE_OTG_HS_DIEPCTL1_USBAEP ( -- x addr ) 15 bit OTG_HS_DEVICE_OTG_HS_DIEPCTL1 ; \ OTG_HS_DEVICE_OTG_HS_DIEPCTL1_USBAEP, USB active endpoint
@@ -15420,7 +15420,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DIEPCTL1_EPENA ( -- x addr ) 31 bit OTG_HS_DEVICE_OTG_HS_DIEPCTL1 ; \ OTG_HS_DEVICE_OTG_HS_DIEPCTL1_EPENA, Endpoint enable
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DIEPCTL2_MPSIZ not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DIEPCTL2 (multiple-access)  Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DIEPCTL2_MPSIZ x addr ) OTG_HS_DEVICE_OTG_HS_DIEPCTL2 ; \ OTG_HS_DEVICE_OTG_HS_DIEPCTL2_MPSIZ, Maximum packet size
     : OTG_HS_DEVICE_OTG_HS_DIEPCTL2_USBAEP ( -- x addr ) 15 bit OTG_HS_DEVICE_OTG_HS_DIEPCTL2 ; \ OTG_HS_DEVICE_OTG_HS_DIEPCTL2_USBAEP, USB active endpoint
@@ -15437,7 +15437,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DIEPCTL2_EPENA ( -- x addr ) 31 bit OTG_HS_DEVICE_OTG_HS_DIEPCTL2 ; \ OTG_HS_DEVICE_OTG_HS_DIEPCTL2_EPENA, Endpoint enable
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DIEPCTL3_MPSIZ not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DIEPCTL3 (multiple-access)  Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DIEPCTL3_MPSIZ x addr ) OTG_HS_DEVICE_OTG_HS_DIEPCTL3 ; \ OTG_HS_DEVICE_OTG_HS_DIEPCTL3_MPSIZ, Maximum packet size
     : OTG_HS_DEVICE_OTG_HS_DIEPCTL3_USBAEP ( -- x addr ) 15 bit OTG_HS_DEVICE_OTG_HS_DIEPCTL3 ; \ OTG_HS_DEVICE_OTG_HS_DIEPCTL3_USBAEP, USB active endpoint
@@ -15454,7 +15454,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DIEPCTL3_EPENA ( -- x addr ) 31 bit OTG_HS_DEVICE_OTG_HS_DIEPCTL3 ; \ OTG_HS_DEVICE_OTG_HS_DIEPCTL3_EPENA, Endpoint enable
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DIEPCTL4_MPSIZ not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DIEPCTL4 (multiple-access)  Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DIEPCTL4_MPSIZ x addr ) OTG_HS_DEVICE_OTG_HS_DIEPCTL4 ; \ OTG_HS_DEVICE_OTG_HS_DIEPCTL4_MPSIZ, Maximum packet size
     : OTG_HS_DEVICE_OTG_HS_DIEPCTL4_USBAEP ( -- x addr ) 15 bit OTG_HS_DEVICE_OTG_HS_DIEPCTL4 ; \ OTG_HS_DEVICE_OTG_HS_DIEPCTL4_USBAEP, USB active endpoint
@@ -15471,7 +15471,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DIEPCTL4_EPENA ( -- x addr ) 31 bit OTG_HS_DEVICE_OTG_HS_DIEPCTL4 ; \ OTG_HS_DEVICE_OTG_HS_DIEPCTL4_EPENA, Endpoint enable
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DIEPCTL5_MPSIZ not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DIEPCTL5 (multiple-access)  Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DIEPCTL5_MPSIZ x addr ) OTG_HS_DEVICE_OTG_HS_DIEPCTL5 ; \ OTG_HS_DEVICE_OTG_HS_DIEPCTL5_MPSIZ, Maximum packet size
     : OTG_HS_DEVICE_OTG_HS_DIEPCTL5_USBAEP ( -- x addr ) 15 bit OTG_HS_DEVICE_OTG_HS_DIEPCTL5 ; \ OTG_HS_DEVICE_OTG_HS_DIEPCTL5_USBAEP, USB active endpoint
@@ -15488,7 +15488,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DIEPCTL5_EPENA ( -- x addr ) 31 bit OTG_HS_DEVICE_OTG_HS_DIEPCTL5 ; \ OTG_HS_DEVICE_OTG_HS_DIEPCTL5_EPENA, Endpoint enable
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DIEPCTL6_MPSIZ not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DIEPCTL6 (multiple-access)  Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DIEPCTL6_MPSIZ x addr ) OTG_HS_DEVICE_OTG_HS_DIEPCTL6 ; \ OTG_HS_DEVICE_OTG_HS_DIEPCTL6_MPSIZ, Maximum packet size
     : OTG_HS_DEVICE_OTG_HS_DIEPCTL6_USBAEP ( -- x addr ) 15 bit OTG_HS_DEVICE_OTG_HS_DIEPCTL6 ; \ OTG_HS_DEVICE_OTG_HS_DIEPCTL6_USBAEP, USB active endpoint
@@ -15505,7 +15505,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DIEPCTL6_EPENA ( -- x addr ) 31 bit OTG_HS_DEVICE_OTG_HS_DIEPCTL6 ; \ OTG_HS_DEVICE_OTG_HS_DIEPCTL6_EPENA, Endpoint enable
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DIEPCTL7_MPSIZ not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DIEPCTL7 (multiple-access)  Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DIEPCTL7_MPSIZ x addr ) OTG_HS_DEVICE_OTG_HS_DIEPCTL7 ; \ OTG_HS_DEVICE_OTG_HS_DIEPCTL7_MPSIZ, Maximum packet size
     : OTG_HS_DEVICE_OTG_HS_DIEPCTL7_USBAEP ( -- x addr ) 15 bit OTG_HS_DEVICE_OTG_HS_DIEPCTL7 ; \ OTG_HS_DEVICE_OTG_HS_DIEPCTL7_USBAEP, USB active endpoint
@@ -15522,7 +15522,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DIEPCTL7_EPENA ( -- x addr ) 31 bit OTG_HS_DEVICE_OTG_HS_DIEPCTL7 ; \ OTG_HS_DEVICE_OTG_HS_DIEPCTL7_EPENA, Endpoint enable
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DIEPINT0_XFRC not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DIEPINT0 (multiple-access)  Reset:0x00000080
     : OTG_HS_DEVICE_OTG_HS_DIEPINT0_XFRC ( -- x addr ) 0 bit OTG_HS_DEVICE_OTG_HS_DIEPINT0 ; \ OTG_HS_DEVICE_OTG_HS_DIEPINT0_XFRC, Transfer completed  interrupt
     : OTG_HS_DEVICE_OTG_HS_DIEPINT0_EPDISD ( -- x addr ) 1 bit OTG_HS_DEVICE_OTG_HS_DIEPINT0 ; \ OTG_HS_DEVICE_OTG_HS_DIEPINT0_EPDISD, Endpoint disabled  interrupt
@@ -15537,7 +15537,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DIEPINT0_NAK ( -- x addr ) 13 bit OTG_HS_DEVICE_OTG_HS_DIEPINT0 ; \ OTG_HS_DEVICE_OTG_HS_DIEPINT0_NAK, NAK interrupt
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DIEPINT1_XFRC not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DIEPINT1 (multiple-access)  Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DIEPINT1_XFRC ( -- x addr ) 0 bit OTG_HS_DEVICE_OTG_HS_DIEPINT1 ; \ OTG_HS_DEVICE_OTG_HS_DIEPINT1_XFRC, Transfer completed  interrupt
     : OTG_HS_DEVICE_OTG_HS_DIEPINT1_EPDISD ( -- x addr ) 1 bit OTG_HS_DEVICE_OTG_HS_DIEPINT1 ; \ OTG_HS_DEVICE_OTG_HS_DIEPINT1_EPDISD, Endpoint disabled  interrupt
@@ -15552,7 +15552,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DIEPINT1_NAK ( -- x addr ) 13 bit OTG_HS_DEVICE_OTG_HS_DIEPINT1 ; \ OTG_HS_DEVICE_OTG_HS_DIEPINT1_NAK, NAK interrupt
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DIEPINT2_XFRC not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DIEPINT2 (multiple-access)  Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DIEPINT2_XFRC ( -- x addr ) 0 bit OTG_HS_DEVICE_OTG_HS_DIEPINT2 ; \ OTG_HS_DEVICE_OTG_HS_DIEPINT2_XFRC, Transfer completed  interrupt
     : OTG_HS_DEVICE_OTG_HS_DIEPINT2_EPDISD ( -- x addr ) 1 bit OTG_HS_DEVICE_OTG_HS_DIEPINT2 ; \ OTG_HS_DEVICE_OTG_HS_DIEPINT2_EPDISD, Endpoint disabled  interrupt
@@ -15567,7 +15567,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DIEPINT2_NAK ( -- x addr ) 13 bit OTG_HS_DEVICE_OTG_HS_DIEPINT2 ; \ OTG_HS_DEVICE_OTG_HS_DIEPINT2_NAK, NAK interrupt
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DIEPINT3_XFRC not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DIEPINT3 (multiple-access)  Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DIEPINT3_XFRC ( -- x addr ) 0 bit OTG_HS_DEVICE_OTG_HS_DIEPINT3 ; \ OTG_HS_DEVICE_OTG_HS_DIEPINT3_XFRC, Transfer completed  interrupt
     : OTG_HS_DEVICE_OTG_HS_DIEPINT3_EPDISD ( -- x addr ) 1 bit OTG_HS_DEVICE_OTG_HS_DIEPINT3 ; \ OTG_HS_DEVICE_OTG_HS_DIEPINT3_EPDISD, Endpoint disabled  interrupt
@@ -15582,7 +15582,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DIEPINT3_NAK ( -- x addr ) 13 bit OTG_HS_DEVICE_OTG_HS_DIEPINT3 ; \ OTG_HS_DEVICE_OTG_HS_DIEPINT3_NAK, NAK interrupt
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DIEPINT4_XFRC not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DIEPINT4 (multiple-access)  Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DIEPINT4_XFRC ( -- x addr ) 0 bit OTG_HS_DEVICE_OTG_HS_DIEPINT4 ; \ OTG_HS_DEVICE_OTG_HS_DIEPINT4_XFRC, Transfer completed  interrupt
     : OTG_HS_DEVICE_OTG_HS_DIEPINT4_EPDISD ( -- x addr ) 1 bit OTG_HS_DEVICE_OTG_HS_DIEPINT4 ; \ OTG_HS_DEVICE_OTG_HS_DIEPINT4_EPDISD, Endpoint disabled  interrupt
@@ -15597,7 +15597,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DIEPINT4_NAK ( -- x addr ) 13 bit OTG_HS_DEVICE_OTG_HS_DIEPINT4 ; \ OTG_HS_DEVICE_OTG_HS_DIEPINT4_NAK, NAK interrupt
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DIEPINT5_XFRC not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DIEPINT5 (multiple-access)  Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DIEPINT5_XFRC ( -- x addr ) 0 bit OTG_HS_DEVICE_OTG_HS_DIEPINT5 ; \ OTG_HS_DEVICE_OTG_HS_DIEPINT5_XFRC, Transfer completed  interrupt
     : OTG_HS_DEVICE_OTG_HS_DIEPINT5_EPDISD ( -- x addr ) 1 bit OTG_HS_DEVICE_OTG_HS_DIEPINT5 ; \ OTG_HS_DEVICE_OTG_HS_DIEPINT5_EPDISD, Endpoint disabled  interrupt
@@ -15612,7 +15612,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DIEPINT5_NAK ( -- x addr ) 13 bit OTG_HS_DEVICE_OTG_HS_DIEPINT5 ; \ OTG_HS_DEVICE_OTG_HS_DIEPINT5_NAK, NAK interrupt
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DIEPINT6_XFRC not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DIEPINT6 (multiple-access)  Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DIEPINT6_XFRC ( -- x addr ) 0 bit OTG_HS_DEVICE_OTG_HS_DIEPINT6 ; \ OTG_HS_DEVICE_OTG_HS_DIEPINT6_XFRC, Transfer completed  interrupt
     : OTG_HS_DEVICE_OTG_HS_DIEPINT6_EPDISD ( -- x addr ) 1 bit OTG_HS_DEVICE_OTG_HS_DIEPINT6 ; \ OTG_HS_DEVICE_OTG_HS_DIEPINT6_EPDISD, Endpoint disabled  interrupt
@@ -15627,7 +15627,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DIEPINT6_NAK ( -- x addr ) 13 bit OTG_HS_DEVICE_OTG_HS_DIEPINT6 ; \ OTG_HS_DEVICE_OTG_HS_DIEPINT6_NAK, NAK interrupt
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DIEPINT7_XFRC not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DIEPINT7 (multiple-access)  Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DIEPINT7_XFRC ( -- x addr ) 0 bit OTG_HS_DEVICE_OTG_HS_DIEPINT7 ; \ OTG_HS_DEVICE_OTG_HS_DIEPINT7_XFRC, Transfer completed  interrupt
     : OTG_HS_DEVICE_OTG_HS_DIEPINT7_EPDISD ( -- x addr ) 1 bit OTG_HS_DEVICE_OTG_HS_DIEPINT7 ; \ OTG_HS_DEVICE_OTG_HS_DIEPINT7_EPDISD, Endpoint disabled  interrupt
@@ -15642,103 +15642,103 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DIEPINT7_NAK ( -- x addr ) 13 bit OTG_HS_DEVICE_OTG_HS_DIEPINT7 ; \ OTG_HS_DEVICE_OTG_HS_DIEPINT7_NAK, NAK interrupt
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DIEPTSIZ0_XFRSIZ not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DIEPTSIZ0 (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ0_XFRSIZ ( %bbbbbbb -- x addr ) OTG_HS_DEVICE_OTG_HS_DIEPTSIZ0 ; \ OTG_HS_DEVICE_OTG_HS_DIEPTSIZ0_XFRSIZ, Transfer size
     : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ0_PKTCNT ( %bb -- x addr ) 19 lshift OTG_HS_DEVICE_OTG_HS_DIEPTSIZ0 ; \ OTG_HS_DEVICE_OTG_HS_DIEPTSIZ0_PKTCNT, Packet count
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DIEPDMA1_DMAADDR not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DIEPDMA1 (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DIEPDMA1_DMAADDR ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) OTG_HS_DEVICE_OTG_HS_DIEPDMA1 ; \ OTG_HS_DEVICE_OTG_HS_DIEPDMA1_DMAADDR, DMA address
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DIEPDMA2_DMAADDR not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DIEPDMA2 (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DIEPDMA2_DMAADDR ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) OTG_HS_DEVICE_OTG_HS_DIEPDMA2 ; \ OTG_HS_DEVICE_OTG_HS_DIEPDMA2_DMAADDR, DMA address
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DIEPDMA3_DMAADDR not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DIEPDMA3 (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DIEPDMA3_DMAADDR ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) OTG_HS_DEVICE_OTG_HS_DIEPDMA3 ; \ OTG_HS_DEVICE_OTG_HS_DIEPDMA3_DMAADDR, DMA address
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DIEPDMA4_DMAADDR not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DIEPDMA4 (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DIEPDMA4_DMAADDR ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) OTG_HS_DEVICE_OTG_HS_DIEPDMA4 ; \ OTG_HS_DEVICE_OTG_HS_DIEPDMA4_DMAADDR, DMA address
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DIEPDMA5_DMAADDR not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DIEPDMA5 (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DIEPDMA5_DMAADDR ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) OTG_HS_DEVICE_OTG_HS_DIEPDMA5 ; \ OTG_HS_DEVICE_OTG_HS_DIEPDMA5_DMAADDR, DMA address
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DTXFSTS0_INEPTFSAV? not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DTXFSTS0 (read-only) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DTXFSTS0_INEPTFSAV? ( --  x ) OTG_HS_DEVICE_OTG_HS_DTXFSTS0 @ ; \ OTG_HS_DEVICE_OTG_HS_DTXFSTS0_INEPTFSAV, IN endpoint TxFIFO space  avail
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DTXFSTS1_INEPTFSAV? not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DTXFSTS1 (read-only) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DTXFSTS1_INEPTFSAV? ( --  x ) OTG_HS_DEVICE_OTG_HS_DTXFSTS1 @ ; \ OTG_HS_DEVICE_OTG_HS_DTXFSTS1_INEPTFSAV, IN endpoint TxFIFO space  avail
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DTXFSTS2_INEPTFSAV? not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DTXFSTS2 (read-only) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DTXFSTS2_INEPTFSAV? ( --  x ) OTG_HS_DEVICE_OTG_HS_DTXFSTS2 @ ; \ OTG_HS_DEVICE_OTG_HS_DTXFSTS2_INEPTFSAV, IN endpoint TxFIFO space  avail
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DTXFSTS3_INEPTFSAV? not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DTXFSTS3 (read-only) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DTXFSTS3_INEPTFSAV? ( --  x ) OTG_HS_DEVICE_OTG_HS_DTXFSTS3 @ ; \ OTG_HS_DEVICE_OTG_HS_DTXFSTS3_INEPTFSAV, IN endpoint TxFIFO space  avail
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DTXFSTS4_INEPTFSAV? not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DTXFSTS4 (read-only) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DTXFSTS4_INEPTFSAV? ( --  x ) OTG_HS_DEVICE_OTG_HS_DTXFSTS4 @ ; \ OTG_HS_DEVICE_OTG_HS_DTXFSTS4_INEPTFSAV, IN endpoint TxFIFO space  avail
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DTXFSTS5_INEPTFSAV? not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DTXFSTS5 (read-only) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DTXFSTS5_INEPTFSAV? ( --  x ) OTG_HS_DEVICE_OTG_HS_DTXFSTS5 @ ; \ OTG_HS_DEVICE_OTG_HS_DTXFSTS5_INEPTFSAV, IN endpoint TxFIFO space  avail
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DIEPTSIZ1_XFRSIZ not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DIEPTSIZ1 (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ1_XFRSIZ x addr ) OTG_HS_DEVICE_OTG_HS_DIEPTSIZ1 ; \ OTG_HS_DEVICE_OTG_HS_DIEPTSIZ1_XFRSIZ, Transfer size
     : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ1_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_HS_DEVICE_OTG_HS_DIEPTSIZ1 ; \ OTG_HS_DEVICE_OTG_HS_DIEPTSIZ1_PKTCNT, Packet count
     : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ1_MCNT ( %bb -- x addr ) 29 lshift OTG_HS_DEVICE_OTG_HS_DIEPTSIZ1 ; \ OTG_HS_DEVICE_OTG_HS_DIEPTSIZ1_MCNT, Multi count
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DIEPTSIZ2_XFRSIZ not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DIEPTSIZ2 (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ2_XFRSIZ x addr ) OTG_HS_DEVICE_OTG_HS_DIEPTSIZ2 ; \ OTG_HS_DEVICE_OTG_HS_DIEPTSIZ2_XFRSIZ, Transfer size
     : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ2_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_HS_DEVICE_OTG_HS_DIEPTSIZ2 ; \ OTG_HS_DEVICE_OTG_HS_DIEPTSIZ2_PKTCNT, Packet count
     : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ2_MCNT ( %bb -- x addr ) 29 lshift OTG_HS_DEVICE_OTG_HS_DIEPTSIZ2 ; \ OTG_HS_DEVICE_OTG_HS_DIEPTSIZ2_MCNT, Multi count
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DIEPTSIZ3_XFRSIZ not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DIEPTSIZ3 (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ3_XFRSIZ x addr ) OTG_HS_DEVICE_OTG_HS_DIEPTSIZ3 ; \ OTG_HS_DEVICE_OTG_HS_DIEPTSIZ3_XFRSIZ, Transfer size
     : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ3_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_HS_DEVICE_OTG_HS_DIEPTSIZ3 ; \ OTG_HS_DEVICE_OTG_HS_DIEPTSIZ3_PKTCNT, Packet count
     : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ3_MCNT ( %bb -- x addr ) 29 lshift OTG_HS_DEVICE_OTG_HS_DIEPTSIZ3 ; \ OTG_HS_DEVICE_OTG_HS_DIEPTSIZ3_MCNT, Multi count
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DIEPTSIZ4_XFRSIZ not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DIEPTSIZ4 (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ4_XFRSIZ x addr ) OTG_HS_DEVICE_OTG_HS_DIEPTSIZ4 ; \ OTG_HS_DEVICE_OTG_HS_DIEPTSIZ4_XFRSIZ, Transfer size
     : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ4_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_HS_DEVICE_OTG_HS_DIEPTSIZ4 ; \ OTG_HS_DEVICE_OTG_HS_DIEPTSIZ4_PKTCNT, Packet count
     : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ4_MCNT ( %bb -- x addr ) 29 lshift OTG_HS_DEVICE_OTG_HS_DIEPTSIZ4 ; \ OTG_HS_DEVICE_OTG_HS_DIEPTSIZ4_MCNT, Multi count
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DIEPTSIZ5_XFRSIZ not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DIEPTSIZ5 (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ5_XFRSIZ x addr ) OTG_HS_DEVICE_OTG_HS_DIEPTSIZ5 ; \ OTG_HS_DEVICE_OTG_HS_DIEPTSIZ5_XFRSIZ, Transfer size
     : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ5_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_HS_DEVICE_OTG_HS_DIEPTSIZ5 ; \ OTG_HS_DEVICE_OTG_HS_DIEPTSIZ5_PKTCNT, Packet count
     : OTG_HS_DEVICE_OTG_HS_DIEPTSIZ5_MCNT ( %bb -- x addr ) 29 lshift OTG_HS_DEVICE_OTG_HS_DIEPTSIZ5 ; \ OTG_HS_DEVICE_OTG_HS_DIEPTSIZ5_MCNT, Multi count
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DOEPCTL0_MPSIZ not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DOEPCTL0 (multiple-access)  Reset:0x00008000
     : OTG_HS_DEVICE_OTG_HS_DOEPCTL0_MPSIZ ( %bb -- x addr ) OTG_HS_DEVICE_OTG_HS_DOEPCTL0 ; \ OTG_HS_DEVICE_OTG_HS_DOEPCTL0_MPSIZ, Maximum packet size
     : OTG_HS_DEVICE_OTG_HS_DOEPCTL0_USBAEP ( -- x addr ) 15 bit OTG_HS_DEVICE_OTG_HS_DOEPCTL0 ; \ OTG_HS_DEVICE_OTG_HS_DOEPCTL0_USBAEP, USB active endpoint
@@ -15752,7 +15752,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DOEPCTL0_EPENA ( -- x addr ) 31 bit OTG_HS_DEVICE_OTG_HS_DOEPCTL0 ; \ OTG_HS_DEVICE_OTG_HS_DOEPCTL0_EPENA, Endpoint enable
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DOEPCTL1_MPSIZ not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DOEPCTL1 (multiple-access)  Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DOEPCTL1_MPSIZ x addr ) OTG_HS_DEVICE_OTG_HS_DOEPCTL1 ; \ OTG_HS_DEVICE_OTG_HS_DOEPCTL1_MPSIZ, Maximum packet size
     : OTG_HS_DEVICE_OTG_HS_DOEPCTL1_USBAEP ( -- x addr ) 15 bit OTG_HS_DEVICE_OTG_HS_DOEPCTL1 ; \ OTG_HS_DEVICE_OTG_HS_DOEPCTL1_USBAEP, USB active endpoint
@@ -15769,7 +15769,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DOEPCTL1_EPENA ( -- x addr ) 31 bit OTG_HS_DEVICE_OTG_HS_DOEPCTL1 ; \ OTG_HS_DEVICE_OTG_HS_DOEPCTL1_EPENA, Endpoint enable
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DOEPCTL2_MPSIZ not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DOEPCTL2 (multiple-access)  Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DOEPCTL2_MPSIZ x addr ) OTG_HS_DEVICE_OTG_HS_DOEPCTL2 ; \ OTG_HS_DEVICE_OTG_HS_DOEPCTL2_MPSIZ, Maximum packet size
     : OTG_HS_DEVICE_OTG_HS_DOEPCTL2_USBAEP ( -- x addr ) 15 bit OTG_HS_DEVICE_OTG_HS_DOEPCTL2 ; \ OTG_HS_DEVICE_OTG_HS_DOEPCTL2_USBAEP, USB active endpoint
@@ -15786,7 +15786,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DOEPCTL2_EPENA ( -- x addr ) 31 bit OTG_HS_DEVICE_OTG_HS_DOEPCTL2 ; \ OTG_HS_DEVICE_OTG_HS_DOEPCTL2_EPENA, Endpoint enable
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DOEPCTL3_MPSIZ not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DOEPCTL3 (multiple-access)  Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DOEPCTL3_MPSIZ x addr ) OTG_HS_DEVICE_OTG_HS_DOEPCTL3 ; \ OTG_HS_DEVICE_OTG_HS_DOEPCTL3_MPSIZ, Maximum packet size
     : OTG_HS_DEVICE_OTG_HS_DOEPCTL3_USBAEP ( -- x addr ) 15 bit OTG_HS_DEVICE_OTG_HS_DOEPCTL3 ; \ OTG_HS_DEVICE_OTG_HS_DOEPCTL3_USBAEP, USB active endpoint
@@ -15803,7 +15803,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DOEPCTL3_EPENA ( -- x addr ) 31 bit OTG_HS_DEVICE_OTG_HS_DOEPCTL3 ; \ OTG_HS_DEVICE_OTG_HS_DOEPCTL3_EPENA, Endpoint enable
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DOEPINT0_XFRC not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DOEPINT0 (read-write) Reset:0x00000080
     : OTG_HS_DEVICE_OTG_HS_DOEPINT0_XFRC ( -- x addr ) 0 bit OTG_HS_DEVICE_OTG_HS_DOEPINT0 ; \ OTG_HS_DEVICE_OTG_HS_DOEPINT0_XFRC, Transfer completed  interrupt
     : OTG_HS_DEVICE_OTG_HS_DOEPINT0_EPDISD ( -- x addr ) 1 bit OTG_HS_DEVICE_OTG_HS_DOEPINT0 ; \ OTG_HS_DEVICE_OTG_HS_DOEPINT0_EPDISD, Endpoint disabled  interrupt
@@ -15813,7 +15813,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DOEPINT0_NYET ( -- x addr ) 14 bit OTG_HS_DEVICE_OTG_HS_DOEPINT0 ; \ OTG_HS_DEVICE_OTG_HS_DOEPINT0_NYET, NYET interrupt
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DOEPINT1_XFRC not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DOEPINT1 (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DOEPINT1_XFRC ( -- x addr ) 0 bit OTG_HS_DEVICE_OTG_HS_DOEPINT1 ; \ OTG_HS_DEVICE_OTG_HS_DOEPINT1_XFRC, Transfer completed  interrupt
     : OTG_HS_DEVICE_OTG_HS_DOEPINT1_EPDISD ( -- x addr ) 1 bit OTG_HS_DEVICE_OTG_HS_DOEPINT1 ; \ OTG_HS_DEVICE_OTG_HS_DOEPINT1_EPDISD, Endpoint disabled  interrupt
@@ -15823,7 +15823,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DOEPINT1_NYET ( -- x addr ) 14 bit OTG_HS_DEVICE_OTG_HS_DOEPINT1 ; \ OTG_HS_DEVICE_OTG_HS_DOEPINT1_NYET, NYET interrupt
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DOEPINT2_XFRC not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DOEPINT2 (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DOEPINT2_XFRC ( -- x addr ) 0 bit OTG_HS_DEVICE_OTG_HS_DOEPINT2 ; \ OTG_HS_DEVICE_OTG_HS_DOEPINT2_XFRC, Transfer completed  interrupt
     : OTG_HS_DEVICE_OTG_HS_DOEPINT2_EPDISD ( -- x addr ) 1 bit OTG_HS_DEVICE_OTG_HS_DOEPINT2 ; \ OTG_HS_DEVICE_OTG_HS_DOEPINT2_EPDISD, Endpoint disabled  interrupt
@@ -15833,7 +15833,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DOEPINT2_NYET ( -- x addr ) 14 bit OTG_HS_DEVICE_OTG_HS_DOEPINT2 ; \ OTG_HS_DEVICE_OTG_HS_DOEPINT2_NYET, NYET interrupt
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DOEPINT3_XFRC not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DOEPINT3 (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DOEPINT3_XFRC ( -- x addr ) 0 bit OTG_HS_DEVICE_OTG_HS_DOEPINT3 ; \ OTG_HS_DEVICE_OTG_HS_DOEPINT3_XFRC, Transfer completed  interrupt
     : OTG_HS_DEVICE_OTG_HS_DOEPINT3_EPDISD ( -- x addr ) 1 bit OTG_HS_DEVICE_OTG_HS_DOEPINT3 ; \ OTG_HS_DEVICE_OTG_HS_DOEPINT3_EPDISD, Endpoint disabled  interrupt
@@ -15843,7 +15843,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DOEPINT3_NYET ( -- x addr ) 14 bit OTG_HS_DEVICE_OTG_HS_DOEPINT3 ; \ OTG_HS_DEVICE_OTG_HS_DOEPINT3_NYET, NYET interrupt
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DOEPINT4_XFRC not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DOEPINT4 (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DOEPINT4_XFRC ( -- x addr ) 0 bit OTG_HS_DEVICE_OTG_HS_DOEPINT4 ; \ OTG_HS_DEVICE_OTG_HS_DOEPINT4_XFRC, Transfer completed  interrupt
     : OTG_HS_DEVICE_OTG_HS_DOEPINT4_EPDISD ( -- x addr ) 1 bit OTG_HS_DEVICE_OTG_HS_DOEPINT4 ; \ OTG_HS_DEVICE_OTG_HS_DOEPINT4_EPDISD, Endpoint disabled  interrupt
@@ -15853,7 +15853,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DOEPINT4_NYET ( -- x addr ) 14 bit OTG_HS_DEVICE_OTG_HS_DOEPINT4 ; \ OTG_HS_DEVICE_OTG_HS_DOEPINT4_NYET, NYET interrupt
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DOEPINT5_XFRC not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DOEPINT5 (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DOEPINT5_XFRC ( -- x addr ) 0 bit OTG_HS_DEVICE_OTG_HS_DOEPINT5 ; \ OTG_HS_DEVICE_OTG_HS_DOEPINT5_XFRC, Transfer completed  interrupt
     : OTG_HS_DEVICE_OTG_HS_DOEPINT5_EPDISD ( -- x addr ) 1 bit OTG_HS_DEVICE_OTG_HS_DOEPINT5 ; \ OTG_HS_DEVICE_OTG_HS_DOEPINT5_EPDISD, Endpoint disabled  interrupt
@@ -15863,7 +15863,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DOEPINT5_NYET ( -- x addr ) 14 bit OTG_HS_DEVICE_OTG_HS_DOEPINT5 ; \ OTG_HS_DEVICE_OTG_HS_DOEPINT5_NYET, NYET interrupt
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DOEPINT6_XFRC not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DOEPINT6 (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DOEPINT6_XFRC ( -- x addr ) 0 bit OTG_HS_DEVICE_OTG_HS_DOEPINT6 ; \ OTG_HS_DEVICE_OTG_HS_DOEPINT6_XFRC, Transfer completed  interrupt
     : OTG_HS_DEVICE_OTG_HS_DOEPINT6_EPDISD ( -- x addr ) 1 bit OTG_HS_DEVICE_OTG_HS_DOEPINT6 ; \ OTG_HS_DEVICE_OTG_HS_DOEPINT6_EPDISD, Endpoint disabled  interrupt
@@ -15873,7 +15873,7 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DOEPINT6_NYET ( -- x addr ) 14 bit OTG_HS_DEVICE_OTG_HS_DOEPINT6 ; \ OTG_HS_DEVICE_OTG_HS_DOEPINT6_NYET, NYET interrupt
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DOEPINT7_XFRC not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DOEPINT7 (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DOEPINT7_XFRC ( -- x addr ) 0 bit OTG_HS_DEVICE_OTG_HS_DOEPINT7 ; \ OTG_HS_DEVICE_OTG_HS_DOEPINT7_XFRC, Transfer completed  interrupt
     : OTG_HS_DEVICE_OTG_HS_DOEPINT7_EPDISD ( -- x addr ) 1 bit OTG_HS_DEVICE_OTG_HS_DOEPINT7 ; \ OTG_HS_DEVICE_OTG_HS_DOEPINT7_EPDISD, Endpoint disabled  interrupt
@@ -15883,134 +15883,134 @@ begin-module memmap
     : OTG_HS_DEVICE_OTG_HS_DOEPINT7_NYET ( -- x addr ) 14 bit OTG_HS_DEVICE_OTG_HS_DOEPINT7 ; \ OTG_HS_DEVICE_OTG_HS_DOEPINT7_NYET, NYET interrupt
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DOEPTSIZ0_XFRSIZ not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DOEPTSIZ0 (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ0_XFRSIZ ( %bbbbbbb -- x addr ) OTG_HS_DEVICE_OTG_HS_DOEPTSIZ0 ; \ OTG_HS_DEVICE_OTG_HS_DOEPTSIZ0_XFRSIZ, Transfer size
     : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ0_PKTCNT ( -- x addr ) 19 bit OTG_HS_DEVICE_OTG_HS_DOEPTSIZ0 ; \ OTG_HS_DEVICE_OTG_HS_DOEPTSIZ0_PKTCNT, Packet count
     : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ0_STUPCNT ( %bb -- x addr ) 29 lshift OTG_HS_DEVICE_OTG_HS_DOEPTSIZ0 ; \ OTG_HS_DEVICE_OTG_HS_DOEPTSIZ0_STUPCNT, SETUP packet count
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DOEPTSIZ1_XFRSIZ not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DOEPTSIZ1 (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ1_XFRSIZ x addr ) OTG_HS_DEVICE_OTG_HS_DOEPTSIZ1 ; \ OTG_HS_DEVICE_OTG_HS_DOEPTSIZ1_XFRSIZ, Transfer size
     : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ1_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_HS_DEVICE_OTG_HS_DOEPTSIZ1 ; \ OTG_HS_DEVICE_OTG_HS_DOEPTSIZ1_PKTCNT, Packet count
     : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ1_RXDPID_STUPCNT ( %bb -- x addr ) 29 lshift OTG_HS_DEVICE_OTG_HS_DOEPTSIZ1 ; \ OTG_HS_DEVICE_OTG_HS_DOEPTSIZ1_RXDPID_STUPCNT, Received data PID/SETUP packet  count
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DOEPTSIZ2_XFRSIZ not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DOEPTSIZ2 (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ2_XFRSIZ x addr ) OTG_HS_DEVICE_OTG_HS_DOEPTSIZ2 ; \ OTG_HS_DEVICE_OTG_HS_DOEPTSIZ2_XFRSIZ, Transfer size
     : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ2_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_HS_DEVICE_OTG_HS_DOEPTSIZ2 ; \ OTG_HS_DEVICE_OTG_HS_DOEPTSIZ2_PKTCNT, Packet count
     : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ2_RXDPID_STUPCNT ( %bb -- x addr ) 29 lshift OTG_HS_DEVICE_OTG_HS_DOEPTSIZ2 ; \ OTG_HS_DEVICE_OTG_HS_DOEPTSIZ2_RXDPID_STUPCNT, Received data PID/SETUP packet  count
   [then]
 
-  defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DOEPTSIZ3_XFRSIZ not and [if]
+  [if]
     \ OTG_HS_DEVICE_OTG_HS_DOEPTSIZ3 (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ3_XFRSIZ x addr ) OTG_HS_DEVICE_OTG_HS_DOEPTSIZ3 ; \ OTG_HS_DEVICE_OTG_HS_DOEPTSIZ3_XFRSIZ, Transfer size
     : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ3_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_HS_DEVICE_OTG_HS_DOEPTSIZ3 ; \ OTG_HS_DEVICE_OTG_HS_DOEPTSIZ3_PKTCNT, Packet count
     : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ3_RXDPID_STUPCNT ( %bb -- x addr ) 29 lshift OTG_HS_DEVICE_OTG_HS_DOEPTSIZ3 ; \ OTG_HS_DEVICE_OTG_HS_DOEPTSIZ3_RXDPID_STUPCNT, Received data PID/SETUP packet  count
   [then]
 
-  execute-defined? use-OTG_HS_DEVICE defined? OTG_HS_DEVICE_OTG_HS_DOEPTSIZ4_XFRSIZ not and [if]
+  execute-defined? use-OTG_HS_DEVICE [if]
     \ OTG_HS_DEVICE_OTG_HS_DOEPTSIZ4 (read-write) Reset:0x0
     : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ4_XFRSIZ x addr ) OTG_HS_DEVICE_OTG_HS_DOEPTSIZ4 ; \ OTG_HS_DEVICE_OTG_HS_DOEPTSIZ4_XFRSIZ, Transfer size
     : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ4_PKTCNT ( %bbbbbbbbbb -- x addr ) 19 lshift OTG_HS_DEVICE_OTG_HS_DOEPTSIZ4 ; \ OTG_HS_DEVICE_OTG_HS_DOEPTSIZ4_PKTCNT, Packet count
     : OTG_HS_DEVICE_OTG_HS_DOEPTSIZ4_RXDPID_STUPCNT ( %bb -- x addr ) 29 lshift OTG_HS_DEVICE_OTG_HS_DOEPTSIZ4 ; \ OTG_HS_DEVICE_OTG_HS_DOEPTSIZ4_RXDPID_STUPCNT, Received data PID/SETUP packet  count
   [then]
 
-  defined? use-OTG_HS_PWRCLK defined? OTG_HS_PWRCLK_OTG_HS_PCGCR_STPPCLK not and [if]
+  [if]
     \ OTG_HS_PWRCLK_OTG_HS_PCGCR (read-write) Reset:0x0
     : OTG_HS_PWRCLK_OTG_HS_PCGCR_STPPCLK ( -- x addr ) 0 bit OTG_HS_PWRCLK_OTG_HS_PCGCR ; \ OTG_HS_PWRCLK_OTG_HS_PCGCR_STPPCLK, Stop PHY clock
     : OTG_HS_PWRCLK_OTG_HS_PCGCR_GATEHCLK ( -- x addr ) 1 bit OTG_HS_PWRCLK_OTG_HS_PCGCR ; \ OTG_HS_PWRCLK_OTG_HS_PCGCR_GATEHCLK, Gate HCLK
     : OTG_HS_PWRCLK_OTG_HS_PCGCR_PHYSUSP ( -- x addr ) 4 bit OTG_HS_PWRCLK_OTG_HS_PCGCR ; \ OTG_HS_PWRCLK_OTG_HS_PCGCR_PHYSUSP, PHY suspended
   [then]
 
-  execute-defined? use-NVIC defined? NVIC_ICTR_INTLINESNUM? not and [if]
+  execute-defined? use-NVIC [if]
     \ NVIC_ICTR (read-only) Reset:0x00000000
     : NVIC_ICTR_INTLINESNUM? ( --  x ) NVIC_ICTR @ ; \ NVIC_ICTR_INTLINESNUM, Total number of interrupt lines in  groups
   [then]
 
-  defined? use-NVIC defined? NVIC_STIR_INTID not and [if]
+  [if]
     \ NVIC_STIR (write-only) Reset:0x00000000
     : NVIC_STIR_INTID ( %bbbbbbbbb -- x addr ) NVIC_STIR ; \ NVIC_STIR_INTID, interrupt to be triggered
   [then]
 
-  execute-defined? use-NVIC defined? NVIC_ISER0_SETENA not and [if]
+  execute-defined? use-NVIC [if]
     \ NVIC_ISER0 (read-write) Reset:0x00000000
     : NVIC_ISER0_SETENA ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) NVIC_ISER0 ; \ NVIC_ISER0_SETENA, SETENA
   [then]
 
-  defined? use-NVIC defined? NVIC_ISER1_SETENA not and [if]
+  [if]
     \ NVIC_ISER1 (read-write) Reset:0x00000000
     : NVIC_ISER1_SETENA ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) NVIC_ISER1 ; \ NVIC_ISER1_SETENA, SETENA
   [then]
 
-  execute-defined? use-NVIC defined? NVIC_ISER2_SETENA not and [if]
+  execute-defined? use-NVIC [if]
     \ NVIC_ISER2 (read-write) Reset:0x00000000
     : NVIC_ISER2_SETENA ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) NVIC_ISER2 ; \ NVIC_ISER2_SETENA, SETENA
   [then]
 
-  defined? use-NVIC defined? NVIC_ICER0_CLRENA not and [if]
+  [if]
     \ NVIC_ICER0 (read-write) Reset:0x00000000
     : NVIC_ICER0_CLRENA ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) NVIC_ICER0 ; \ NVIC_ICER0_CLRENA, CLRENA
   [then]
 
-  execute-defined? use-NVIC defined? NVIC_ICER1_CLRENA not and [if]
+  execute-defined? use-NVIC [if]
     \ NVIC_ICER1 (read-write) Reset:0x00000000
     : NVIC_ICER1_CLRENA ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) NVIC_ICER1 ; \ NVIC_ICER1_CLRENA, CLRENA
   [then]
 
-  defined? use-NVIC defined? NVIC_ICER2_CLRENA not and [if]
+  [if]
     \ NVIC_ICER2 (read-write) Reset:0x00000000
     : NVIC_ICER2_CLRENA ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) NVIC_ICER2 ; \ NVIC_ICER2_CLRENA, CLRENA
   [then]
 
-  execute-defined? use-NVIC defined? NVIC_ISPR0_SETPEND not and [if]
+  execute-defined? use-NVIC [if]
     \ NVIC_ISPR0 (read-write) Reset:0x00000000
     : NVIC_ISPR0_SETPEND ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) NVIC_ISPR0 ; \ NVIC_ISPR0_SETPEND, SETPEND
   [then]
 
-  defined? use-NVIC defined? NVIC_ISPR1_SETPEND not and [if]
+  [if]
     \ NVIC_ISPR1 (read-write) Reset:0x00000000
     : NVIC_ISPR1_SETPEND ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) NVIC_ISPR1 ; \ NVIC_ISPR1_SETPEND, SETPEND
   [then]
 
-  execute-defined? use-NVIC defined? NVIC_ISPR2_SETPEND not and [if]
+  execute-defined? use-NVIC [if]
     \ NVIC_ISPR2 (read-write) Reset:0x00000000
     : NVIC_ISPR2_SETPEND ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) NVIC_ISPR2 ; \ NVIC_ISPR2_SETPEND, SETPEND
   [then]
 
-  defined? use-NVIC defined? NVIC_ICPR0_CLRPEND not and [if]
+  [if]
     \ NVIC_ICPR0 (read-write) Reset:0x00000000
     : NVIC_ICPR0_CLRPEND ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) NVIC_ICPR0 ; \ NVIC_ICPR0_CLRPEND, CLRPEND
   [then]
 
-  execute-defined? use-NVIC defined? NVIC_ICPR1_CLRPEND not and [if]
+  execute-defined? use-NVIC [if]
     \ NVIC_ICPR1 (read-write) Reset:0x00000000
     : NVIC_ICPR1_CLRPEND ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) NVIC_ICPR1 ; \ NVIC_ICPR1_CLRPEND, CLRPEND
   [then]
 
-  defined? use-NVIC defined? NVIC_ICPR2_CLRPEND not and [if]
+  [if]
     \ NVIC_ICPR2 (read-write) Reset:0x00000000
     : NVIC_ICPR2_CLRPEND ( %bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb -- x addr ) NVIC_ICPR2 ; \ NVIC_ICPR2_CLRPEND, CLRPEND
   [then]
 
-  execute-defined? use-NVIC defined? NVIC_IABR0_ACTIVE? not and [if]
+  execute-defined? use-NVIC [if]
     \ NVIC_IABR0 (read-only) Reset:0x00000000
     : NVIC_IABR0_ACTIVE? ( --  x ) NVIC_IABR0 @ ; \ NVIC_IABR0_ACTIVE, ACTIVE
   [then]
 
-  defined? use-NVIC defined? NVIC_IABR1_ACTIVE? not and [if]
+  [if]
     \ NVIC_IABR1 (read-only) Reset:0x00000000
     : NVIC_IABR1_ACTIVE? ( --  x ) NVIC_IABR1 @ ; \ NVIC_IABR1_ACTIVE, ACTIVE
   [then]
 
-  execute-defined? use-NVIC defined? NVIC_IABR2_ACTIVE? not and [if]
+  execute-defined? use-NVIC [if]
     \ NVIC_IABR2 (read-only) Reset:0x00000000
     : NVIC_IABR2_ACTIVE? ( --  x ) NVIC_IABR2 @ ; \ NVIC_IABR2_ACTIVE, ACTIVE
   [then]
 
-  defined? use-NVIC defined? NVIC_IPR0_IPR_N0 not and [if]
+  [if]
     \ NVIC_IPR0 (read-write) Reset:0x00000000
     : NVIC_IPR0_IPR_N0 ( %bbbbbbbb -- x addr ) NVIC_IPR0 ; \ NVIC_IPR0_IPR_N0, IPR_N0
     : NVIC_IPR0_IPR_N1 ( %bbbbbbbb -- x addr ) 8 lshift NVIC_IPR0 ; \ NVIC_IPR0_IPR_N1, IPR_N1
@@ -16018,7 +16018,7 @@ begin-module memmap
     : NVIC_IPR0_IPR_N3 ( %bbbbbbbb -- x addr ) 24 lshift NVIC_IPR0 ; \ NVIC_IPR0_IPR_N3, IPR_N3
   [then]
 
-  execute-defined? use-NVIC defined? NVIC_IPR1_IPR_N0 not and [if]
+  execute-defined? use-NVIC [if]
     \ NVIC_IPR1 (read-write) Reset:0x00000000
     : NVIC_IPR1_IPR_N0 ( %bbbbbbbb -- x addr ) NVIC_IPR1 ; \ NVIC_IPR1_IPR_N0, IPR_N0
     : NVIC_IPR1_IPR_N1 ( %bbbbbbbb -- x addr ) 8 lshift NVIC_IPR1 ; \ NVIC_IPR1_IPR_N1, IPR_N1
@@ -16026,7 +16026,7 @@ begin-module memmap
     : NVIC_IPR1_IPR_N3 ( %bbbbbbbb -- x addr ) 24 lshift NVIC_IPR1 ; \ NVIC_IPR1_IPR_N3, IPR_N3
   [then]
 
-  defined? use-NVIC defined? NVIC_IPR2_IPR_N0 not and [if]
+  [if]
     \ NVIC_IPR2 (read-write) Reset:0x00000000
     : NVIC_IPR2_IPR_N0 ( %bbbbbbbb -- x addr ) NVIC_IPR2 ; \ NVIC_IPR2_IPR_N0, IPR_N0
     : NVIC_IPR2_IPR_N1 ( %bbbbbbbb -- x addr ) 8 lshift NVIC_IPR2 ; \ NVIC_IPR2_IPR_N1, IPR_N1
@@ -16034,7 +16034,7 @@ begin-module memmap
     : NVIC_IPR2_IPR_N3 ( %bbbbbbbb -- x addr ) 24 lshift NVIC_IPR2 ; \ NVIC_IPR2_IPR_N3, IPR_N3
   [then]
 
-  execute-defined? use-NVIC defined? NVIC_IPR3_IPR_N0 not and [if]
+  execute-defined? use-NVIC [if]
     \ NVIC_IPR3 (read-write) Reset:0x00000000
     : NVIC_IPR3_IPR_N0 ( %bbbbbbbb -- x addr ) NVIC_IPR3 ; \ NVIC_IPR3_IPR_N0, IPR_N0
     : NVIC_IPR3_IPR_N1 ( %bbbbbbbb -- x addr ) 8 lshift NVIC_IPR3 ; \ NVIC_IPR3_IPR_N1, IPR_N1
@@ -16042,7 +16042,7 @@ begin-module memmap
     : NVIC_IPR3_IPR_N3 ( %bbbbbbbb -- x addr ) 24 lshift NVIC_IPR3 ; \ NVIC_IPR3_IPR_N3, IPR_N3
   [then]
 
-  defined? use-NVIC defined? NVIC_IPR4_IPR_N0 not and [if]
+  [if]
     \ NVIC_IPR4 (read-write) Reset:0x00000000
     : NVIC_IPR4_IPR_N0 ( %bbbbbbbb -- x addr ) NVIC_IPR4 ; \ NVIC_IPR4_IPR_N0, IPR_N0
     : NVIC_IPR4_IPR_N1 ( %bbbbbbbb -- x addr ) 8 lshift NVIC_IPR4 ; \ NVIC_IPR4_IPR_N1, IPR_N1
@@ -16050,7 +16050,7 @@ begin-module memmap
     : NVIC_IPR4_IPR_N3 ( %bbbbbbbb -- x addr ) 24 lshift NVIC_IPR4 ; \ NVIC_IPR4_IPR_N3, IPR_N3
   [then]
 
-  execute-defined? use-NVIC defined? NVIC_IPR5_IPR_N0 not and [if]
+  execute-defined? use-NVIC [if]
     \ NVIC_IPR5 (read-write) Reset:0x00000000
     : NVIC_IPR5_IPR_N0 ( %bbbbbbbb -- x addr ) NVIC_IPR5 ; \ NVIC_IPR5_IPR_N0, IPR_N0
     : NVIC_IPR5_IPR_N1 ( %bbbbbbbb -- x addr ) 8 lshift NVIC_IPR5 ; \ NVIC_IPR5_IPR_N1, IPR_N1
@@ -16058,7 +16058,7 @@ begin-module memmap
     : NVIC_IPR5_IPR_N3 ( %bbbbbbbb -- x addr ) 24 lshift NVIC_IPR5 ; \ NVIC_IPR5_IPR_N3, IPR_N3
   [then]
 
-  defined? use-NVIC defined? NVIC_IPR6_IPR_N0 not and [if]
+  [if]
     \ NVIC_IPR6 (read-write) Reset:0x00000000
     : NVIC_IPR6_IPR_N0 ( %bbbbbbbb -- x addr ) NVIC_IPR6 ; \ NVIC_IPR6_IPR_N0, IPR_N0
     : NVIC_IPR6_IPR_N1 ( %bbbbbbbb -- x addr ) 8 lshift NVIC_IPR6 ; \ NVIC_IPR6_IPR_N1, IPR_N1
@@ -16066,7 +16066,7 @@ begin-module memmap
     : NVIC_IPR6_IPR_N3 ( %bbbbbbbb -- x addr ) 24 lshift NVIC_IPR6 ; \ NVIC_IPR6_IPR_N3, IPR_N3
   [then]
 
-  execute-defined? use-NVIC defined? NVIC_IPR7_IPR_N0 not and [if]
+  execute-defined? use-NVIC [if]
     \ NVIC_IPR7 (read-write) Reset:0x00000000
     : NVIC_IPR7_IPR_N0 ( %bbbbbbbb -- x addr ) NVIC_IPR7 ; \ NVIC_IPR7_IPR_N0, IPR_N0
     : NVIC_IPR7_IPR_N1 ( %bbbbbbbb -- x addr ) 8 lshift NVIC_IPR7 ; \ NVIC_IPR7_IPR_N1, IPR_N1
@@ -16074,7 +16074,7 @@ begin-module memmap
     : NVIC_IPR7_IPR_N3 ( %bbbbbbbb -- x addr ) 24 lshift NVIC_IPR7 ; \ NVIC_IPR7_IPR_N3, IPR_N3
   [then]
 
-  defined? use-NVIC defined? NVIC_IPR8_IPR_N0 not and [if]
+  [if]
     \ NVIC_IPR8 (read-write) Reset:0x00000000
     : NVIC_IPR8_IPR_N0 ( %bbbbbbbb -- x addr ) NVIC_IPR8 ; \ NVIC_IPR8_IPR_N0, IPR_N0
     : NVIC_IPR8_IPR_N1 ( %bbbbbbbb -- x addr ) 8 lshift NVIC_IPR8 ; \ NVIC_IPR8_IPR_N1, IPR_N1
@@ -16082,7 +16082,7 @@ begin-module memmap
     : NVIC_IPR8_IPR_N3 ( %bbbbbbbb -- x addr ) 24 lshift NVIC_IPR8 ; \ NVIC_IPR8_IPR_N3, IPR_N3
   [then]
 
-  execute-defined? use-NVIC defined? NVIC_IPR9_IPR_N0 not and [if]
+  execute-defined? use-NVIC [if]
     \ NVIC_IPR9 (read-write) Reset:0x00000000
     : NVIC_IPR9_IPR_N0 ( %bbbbbbbb -- x addr ) NVIC_IPR9 ; \ NVIC_IPR9_IPR_N0, IPR_N0
     : NVIC_IPR9_IPR_N1 ( %bbbbbbbb -- x addr ) 8 lshift NVIC_IPR9 ; \ NVIC_IPR9_IPR_N1, IPR_N1
@@ -16090,7 +16090,7 @@ begin-module memmap
     : NVIC_IPR9_IPR_N3 ( %bbbbbbbb -- x addr ) 24 lshift NVIC_IPR9 ; \ NVIC_IPR9_IPR_N3, IPR_N3
   [then]
 
-  defined? use-NVIC defined? NVIC_IPR10_IPR_N0 not and [if]
+  [if]
     \ NVIC_IPR10 (read-write) Reset:0x00000000
     : NVIC_IPR10_IPR_N0 ( %bbbbbbbb -- x addr ) NVIC_IPR10 ; \ NVIC_IPR10_IPR_N0, IPR_N0
     : NVIC_IPR10_IPR_N1 ( %bbbbbbbb -- x addr ) 8 lshift NVIC_IPR10 ; \ NVIC_IPR10_IPR_N1, IPR_N1
@@ -16098,7 +16098,7 @@ begin-module memmap
     : NVIC_IPR10_IPR_N3 ( %bbbbbbbb -- x addr ) 24 lshift NVIC_IPR10 ; \ NVIC_IPR10_IPR_N3, IPR_N3
   [then]
 
-  execute-defined? use-NVIC defined? NVIC_IPR11_IPR_N0 not and [if]
+  execute-defined? use-NVIC [if]
     \ NVIC_IPR11 (read-write) Reset:0x00000000
     : NVIC_IPR11_IPR_N0 ( %bbbbbbbb -- x addr ) NVIC_IPR11 ; \ NVIC_IPR11_IPR_N0, IPR_N0
     : NVIC_IPR11_IPR_N1 ( %bbbbbbbb -- x addr ) 8 lshift NVIC_IPR11 ; \ NVIC_IPR11_IPR_N1, IPR_N1
@@ -16106,7 +16106,7 @@ begin-module memmap
     : NVIC_IPR11_IPR_N3 ( %bbbbbbbb -- x addr ) 24 lshift NVIC_IPR11 ; \ NVIC_IPR11_IPR_N3, IPR_N3
   [then]
 
-  defined? use-NVIC defined? NVIC_IPR12_IPR_N0 not and [if]
+  [if]
     \ NVIC_IPR12 (read-write) Reset:0x00000000
     : NVIC_IPR12_IPR_N0 ( %bbbbbbbb -- x addr ) NVIC_IPR12 ; \ NVIC_IPR12_IPR_N0, IPR_N0
     : NVIC_IPR12_IPR_N1 ( %bbbbbbbb -- x addr ) 8 lshift NVIC_IPR12 ; \ NVIC_IPR12_IPR_N1, IPR_N1
@@ -16114,7 +16114,7 @@ begin-module memmap
     : NVIC_IPR12_IPR_N3 ( %bbbbbbbb -- x addr ) 24 lshift NVIC_IPR12 ; \ NVIC_IPR12_IPR_N3, IPR_N3
   [then]
 
-  execute-defined? use-NVIC defined? NVIC_IPR13_IPR_N0 not and [if]
+  execute-defined? use-NVIC [if]
     \ NVIC_IPR13 (read-write) Reset:0x00000000
     : NVIC_IPR13_IPR_N0 ( %bbbbbbbb -- x addr ) NVIC_IPR13 ; \ NVIC_IPR13_IPR_N0, IPR_N0
     : NVIC_IPR13_IPR_N1 ( %bbbbbbbb -- x addr ) 8 lshift NVIC_IPR13 ; \ NVIC_IPR13_IPR_N1, IPR_N1
@@ -16122,7 +16122,7 @@ begin-module memmap
     : NVIC_IPR13_IPR_N3 ( %bbbbbbbb -- x addr ) 24 lshift NVIC_IPR13 ; \ NVIC_IPR13_IPR_N3, IPR_N3
   [then]
 
-  defined? use-NVIC defined? NVIC_IPR14_IPR_N0 not and [if]
+  [if]
     \ NVIC_IPR14 (read-write) Reset:0x00000000
     : NVIC_IPR14_IPR_N0 ( %bbbbbbbb -- x addr ) NVIC_IPR14 ; \ NVIC_IPR14_IPR_N0, IPR_N0
     : NVIC_IPR14_IPR_N1 ( %bbbbbbbb -- x addr ) 8 lshift NVIC_IPR14 ; \ NVIC_IPR14_IPR_N1, IPR_N1
@@ -16130,7 +16130,7 @@ begin-module memmap
     : NVIC_IPR14_IPR_N3 ( %bbbbbbbb -- x addr ) 24 lshift NVIC_IPR14 ; \ NVIC_IPR14_IPR_N3, IPR_N3
   [then]
 
-  execute-defined? use-NVIC defined? NVIC_IPR15_IPR_N0 not and [if]
+  execute-defined? use-NVIC [if]
     \ NVIC_IPR15 (read-write) Reset:0x00000000
     : NVIC_IPR15_IPR_N0 ( %bbbbbbbb -- x addr ) NVIC_IPR15 ; \ NVIC_IPR15_IPR_N0, IPR_N0
     : NVIC_IPR15_IPR_N1 ( %bbbbbbbb -- x addr ) 8 lshift NVIC_IPR15 ; \ NVIC_IPR15_IPR_N1, IPR_N1
@@ -16138,7 +16138,7 @@ begin-module memmap
     : NVIC_IPR15_IPR_N3 ( %bbbbbbbb -- x addr ) 24 lshift NVIC_IPR15 ; \ NVIC_IPR15_IPR_N3, IPR_N3
   [then]
 
-  defined? use-NVIC defined? NVIC_IPR16_IPR_N0 not and [if]
+  [if]
     \ NVIC_IPR16 (read-write) Reset:0x00000000
     : NVIC_IPR16_IPR_N0 ( %bbbbbbbb -- x addr ) NVIC_IPR16 ; \ NVIC_IPR16_IPR_N0, IPR_N0
     : NVIC_IPR16_IPR_N1 ( %bbbbbbbb -- x addr ) 8 lshift NVIC_IPR16 ; \ NVIC_IPR16_IPR_N1, IPR_N1
@@ -16146,7 +16146,7 @@ begin-module memmap
     : NVIC_IPR16_IPR_N3 ( %bbbbbbbb -- x addr ) 24 lshift NVIC_IPR16 ; \ NVIC_IPR16_IPR_N3, IPR_N3
   [then]
 
-  execute-defined? use-NVIC defined? NVIC_IPR17_IPR_N0 not and [if]
+  execute-defined? use-NVIC [if]
     \ NVIC_IPR17 (read-write) Reset:0x00000000
     : NVIC_IPR17_IPR_N0 ( %bbbbbbbb -- x addr ) NVIC_IPR17 ; \ NVIC_IPR17_IPR_N0, IPR_N0
     : NVIC_IPR17_IPR_N1 ( %bbbbbbbb -- x addr ) 8 lshift NVIC_IPR17 ; \ NVIC_IPR17_IPR_N1, IPR_N1
@@ -16154,7 +16154,7 @@ begin-module memmap
     : NVIC_IPR17_IPR_N3 ( %bbbbbbbb -- x addr ) 24 lshift NVIC_IPR17 ; \ NVIC_IPR17_IPR_N3, IPR_N3
   [then]
 
-  defined? use-NVIC defined? NVIC_IPR18_IPR_N0 not and [if]
+  [if]
     \ NVIC_IPR18 (read-write) Reset:0x00000000
     : NVIC_IPR18_IPR_N0 ( %bbbbbbbb -- x addr ) NVIC_IPR18 ; \ NVIC_IPR18_IPR_N0, IPR_N0
     : NVIC_IPR18_IPR_N1 ( %bbbbbbbb -- x addr ) 8 lshift NVIC_IPR18 ; \ NVIC_IPR18_IPR_N1, IPR_N1
@@ -16162,7 +16162,7 @@ begin-module memmap
     : NVIC_IPR18_IPR_N3 ( %bbbbbbbb -- x addr ) 24 lshift NVIC_IPR18 ; \ NVIC_IPR18_IPR_N3, IPR_N3
   [then]
 
-  execute-defined? use-NVIC defined? NVIC_IPR19_IPR_N0 not and [if]
+  execute-defined? use-NVIC [if]
     \ NVIC_IPR19 (read-write) Reset:0x00000000
     : NVIC_IPR19_IPR_N0 ( %bbbbbbbb -- x addr ) NVIC_IPR19 ; \ NVIC_IPR19_IPR_N0, IPR_N0
     : NVIC_IPR19_IPR_N1 ( %bbbbbbbb -- x addr ) 8 lshift NVIC_IPR19 ; \ NVIC_IPR19_IPR_N1, IPR_N1

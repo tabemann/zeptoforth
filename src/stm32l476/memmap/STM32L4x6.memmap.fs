@@ -1,4 +1,4 @@
-\ Copyright (c) 2020 Terry Porter <terry@tjporter.com.au>
+\ Copyright (c) 2016-2020 Terry Porter <terry@tjporter.com.au>
 \ Copyright (c) 2020-2022 Travis Bemann
 \ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,9 +21,11 @@
 
 compile-to-flash
 
+compress-flash
+
 begin-module memmap
 
-  execute-defined? use-DAC defined? DAC not and [if]
+  execute-defined? use-DAC [if]
     $40007400 constant DAC ( Digital-to-analog converter ) 
     DAC $0 + constant DAC_CR ( read-write )  \ control register
     DAC $4 + constant DAC_SWTRIGR ( write-only )  \ software trigger register
@@ -47,7 +49,7 @@ begin-module memmap
     DAC $4C + constant DAC_SHRR ( read-write )  \ Sample and Hold refresh time  register
   [then]
 
-  defined? use-DMA1 defined? DMA1 not and [if]
+  [if]
     $40020000 constant DMA1 ( Direct memory access controller ) 
     DMA1 $0 + constant DMA1_ISR ( read-only )  \ interrupt status register
     DMA1 $4 + constant DMA1_IFCR ( write-only )  \ interrupt flag clear register
@@ -82,7 +84,7 @@ begin-module memmap
     DMA1 $A8 + constant DMA1_CSELR ( read-write )  \ channel selection register
   [then]
 
-  execute-defined? use-DMA2 defined? DMA2 not and [if]
+  execute-defined? use-DMA2 [if]
     $40020400 constant DMA2 ( Direct memory access controller ) 
     DMA2 $0 + constant DMA2_ISR ( read-only )  \ interrupt status register
     DMA2 $4 + constant DMA2_IFCR ( write-only )  \ interrupt flag clear register
@@ -117,7 +119,7 @@ begin-module memmap
     DMA2 $A8 + constant DMA2_CSELR ( read-write )  \ channel selection register
   [then]
 
-  defined? use-CRC defined? CRC not and [if]
+  [if]
     $40023000 constant CRC ( Cyclic redundancy check calculation  unit ) 
     CRC $0 + constant CRC_DR ( read-write )  \ Data register
     CRC $4 + constant CRC_IDR ( read-write )  \ Independent data register
@@ -126,7 +128,7 @@ begin-module memmap
     CRC $14 + constant CRC_POL ( read-write )  \ polynomial
   [then]
 
-  execute-defined? use-IWDG defined? IWDG not and [if]
+  execute-defined? use-IWDG [if]
     $40003000 constant IWDG ( Independent watchdog ) 
     IWDG $0 + constant IWDG_KR ( write-only )  \ Key register
     IWDG $4 + constant IWDG_PR ( read-write )  \ Prescaler register
@@ -135,14 +137,14 @@ begin-module memmap
     IWDG $10 + constant IWDG_WINR ( read-write )  \ Window register
   [then]
 
-  defined? use-WWDG defined? WWDG not and [if]
+  [if]
     $40002C00 constant WWDG ( System window watchdog ) 
     WWDG $0 + constant WWDG_CR ( read-write )  \ Control register
     WWDG $4 + constant WWDG_CFR ( read-write )  \ Configuration register
     WWDG $8 + constant WWDG_SR ( read-write )  \ Status register
   [then]
 
-  execute-defined? use-I2C1 defined? I2C1 not and [if]
+  execute-defined? use-I2C1 [if]
     $40005400 constant I2C1 ( Inter-integrated circuit ) 
     I2C1 $0 + constant I2C1_CR1 ( read-write )  \ Control register 1
     I2C1 $4 + constant I2C1_CR2 ( read-write )  \ Control register 2
@@ -157,7 +159,7 @@ begin-module memmap
     I2C1 $28 + constant I2C1_TXDR ( read-write )  \ Transmit data register
   [then]
 
-  defined? use-I2C2 defined? I2C2 not and [if]
+  [if]
     $40005800 constant I2C2 ( Inter-integrated circuit ) 
     I2C2 $0 + constant I2C2_CR1 ( read-write )  \ Control register 1
     I2C2 $4 + constant I2C2_CR2 ( read-write )  \ Control register 2
@@ -172,7 +174,7 @@ begin-module memmap
     I2C2 $28 + constant I2C2_TXDR ( read-write )  \ Transmit data register
   [then]
 
-  execute-defined? use-I2C3 defined? I2C3 not and [if]
+  execute-defined? use-I2C3 [if]
     $40005C00 constant I2C3 ( Inter-integrated circuit ) 
     I2C3 $0 + constant I2C3_CR1 ( read-write )  \ Control register 1
     I2C3 $4 + constant I2C3_CR2 ( read-write )  \ Control register 2
@@ -187,7 +189,7 @@ begin-module memmap
     I2C3 $28 + constant I2C3_TXDR ( read-write )  \ Transmit data register
   [then]
 
-  defined? use-RCC defined? RCC not and [if]
+  [if]
     $40021000 constant RCC ( Reset and clock control ) 
     RCC $0 + constant RCC_CR (  )  \ Clock control register
     RCC $4 + constant RCC_ICSCR (  )  \ Internal clock sources calibration  register
@@ -221,7 +223,7 @@ begin-module memmap
     RCC $94 + constant RCC_CSR (  )  \ CSR
   [then]
 
-  execute-defined? use-PWR defined? PWR not and [if]
+  execute-defined? use-PWR [if]
     $40007000 constant PWR ( Power control ) 
     PWR $0 + constant PWR_CR1 ( read-write )  \ Power control register 1
     PWR $4 + constant PWR_CR2 ( read-write )  \ Power control register 2
@@ -248,7 +250,7 @@ begin-module memmap
     PWR $5C + constant PWR_PDCRH ( read-write )  \ Power Port H pull-down control  register
   [then]
 
-  defined? use-SYSCFG defined? SYSCFG not and [if]
+  [if]
     $40010000 constant SYSCFG ( System configuration controller ) 
     SYSCFG $0 + constant SYSCFG_MEMRMP ( read-write )  \ memory remap register
     SYSCFG $4 + constant SYSCFG_CFGR1 ( read-write )  \ configuration register 1
@@ -262,14 +264,14 @@ begin-module memmap
     SYSCFG $24 + constant SYSCFG_SKR ( write-only )  \ SKR
   [then]
 
-  execute-defined? use-RNG defined? RNG not and [if]
+  execute-defined? use-RNG [if]
     $50060800 constant RNG ( Random number generator ) 
     RNG $0 + constant RNG_CR ( read-write )  \ control register
     RNG $4 + constant RNG_SR (  )  \ status register
     RNG $8 + constant RNG_DR ( read-only )  \ data register
   [then]
 
-  defined? use-ADC1 defined? ADC1 not and [if]
+  [if]
     $50040000 constant ADC1 ( Analog-to-Digital Converter ) 
     ADC1 $0 + constant ADC1_ISR ( read-write )  \ interrupt and status register
     ADC1 $4 + constant ADC1_IER ( read-write )  \ interrupt enable register
@@ -301,7 +303,7 @@ begin-module memmap
     ADC1 $B4 + constant ADC1_CALFACT ( read-write )  \ Calibration Factors
   [then]
 
-  execute-defined? use-ADC2 defined? ADC2 not and [if]
+  execute-defined? use-ADC2 [if]
     $50040100 constant ADC2 ( Analog-to-Digital Converter ) 
     ADC2 $0 + constant ADC2_ISR ( read-write )  \ interrupt and status register
     ADC2 $4 + constant ADC2_IER ( read-write )  \ interrupt enable register
@@ -333,7 +335,7 @@ begin-module memmap
     ADC2 $B4 + constant ADC2_CALFACT ( read-write )  \ Calibration Factors
   [then]
 
-  defined? use-ADC3 defined? ADC3 not and [if]
+  [if]
     $50040200 constant ADC3 ( Analog-to-Digital Converter ) 
     ADC3 $0 + constant ADC3_ISR ( read-write )  \ interrupt and status register
     ADC3 $4 + constant ADC3_IER ( read-write )  \ interrupt enable register
@@ -365,7 +367,7 @@ begin-module memmap
     ADC3 $B4 + constant ADC3_CALFACT ( read-write )  \ Calibration Factors
   [then]
 
-  execute-defined? use-GPIOA defined? GPIOA not and [if]
+  execute-defined? use-GPIOA [if]
     $48000000 constant GPIOA ( General-purpose I/Os ) 
     GPIOA $0 + constant GPIOA_MODER ( read-write )  \ GPIO port mode register
     GPIOA $4 + constant GPIOA_OTYPER ( read-write )  \ GPIO port output type register
@@ -379,7 +381,7 @@ begin-module memmap
     GPIOA $24 + constant GPIOA_AFRH ( read-write )  \ GPIO alternate function high  register
   [then]
 
-  defined? use-GPIOB defined? GPIOB not and [if]
+  [if]
     $48000400 constant GPIOB ( General-purpose I/Os ) 
     GPIOB $0 + constant GPIOB_MODER ( read-write )  \ GPIO port mode register
     GPIOB $4 + constant GPIOB_OTYPER ( read-write )  \ GPIO port output type register
@@ -393,7 +395,7 @@ begin-module memmap
     GPIOB $24 + constant GPIOB_AFRH ( read-write )  \ GPIO alternate function high  register
   [then]
 
-  execute-defined? use-GPIOC defined? GPIOC not and [if]
+  execute-defined? use-GPIOC [if]
     $48000800 constant GPIOC ( General-purpose I/Os ) 
     GPIOC $0 + constant GPIOC_MODER ( read-write )  \ GPIO port mode register
     GPIOC $4 + constant GPIOC_OTYPER ( read-write )  \ GPIO port output type register
@@ -407,7 +409,7 @@ begin-module memmap
     GPIOC $24 + constant GPIOC_AFRH ( read-write )  \ GPIO alternate function high  register
   [then]
 
-  defined? use-GPIOD defined? GPIOD not and [if]
+  [if]
     $48000C00 constant GPIOD ( General-purpose I/Os ) 
     GPIOD $0 + constant GPIOD_MODER ( read-write )  \ GPIO port mode register
     GPIOD $4 + constant GPIOD_OTYPER ( read-write )  \ GPIO port output type register
@@ -421,7 +423,7 @@ begin-module memmap
     GPIOD $24 + constant GPIOD_AFRH ( read-write )  \ GPIO alternate function high  register
   [then]
 
-  execute-defined? use-GPIOE defined? GPIOE not and [if]
+  execute-defined? use-GPIOE [if]
     $48001000 constant GPIOE ( General-purpose I/Os ) 
     GPIOE $0 + constant GPIOE_MODER ( read-write )  \ GPIO port mode register
     GPIOE $4 + constant GPIOE_OTYPER ( read-write )  \ GPIO port output type register
@@ -435,7 +437,7 @@ begin-module memmap
     GPIOE $24 + constant GPIOE_AFRH ( read-write )  \ GPIO alternate function high  register
   [then]
 
-  defined? use-GPIOF defined? GPIOF not and [if]
+  [if]
     $48001400 constant GPIOF ( General-purpose I/Os ) 
     GPIOF $0 + constant GPIOF_MODER ( read-write )  \ GPIO port mode register
     GPIOF $4 + constant GPIOF_OTYPER ( read-write )  \ GPIO port output type register
@@ -449,7 +451,7 @@ begin-module memmap
     GPIOF $24 + constant GPIOF_AFRH ( read-write )  \ GPIO alternate function high  register
   [then]
 
-  execute-defined? use-GPIOG defined? GPIOG not and [if]
+  execute-defined? use-GPIOG [if]
     $48001800 constant GPIOG ( General-purpose I/Os ) 
     GPIOG $0 + constant GPIOG_MODER ( read-write )  \ GPIO port mode register
     GPIOG $4 + constant GPIOG_OTYPER ( read-write )  \ GPIO port output type register
@@ -463,7 +465,7 @@ begin-module memmap
     GPIOG $24 + constant GPIOG_AFRH ( read-write )  \ GPIO alternate function high  register
   [then]
 
-  defined? use-GPIOH defined? GPIOH not and [if]
+  [if]
     $48001C00 constant GPIOH ( General-purpose I/Os ) 
     GPIOH $0 + constant GPIOH_MODER ( read-write )  \ GPIO port mode register
     GPIOH $4 + constant GPIOH_OTYPER ( read-write )  \ GPIO port output type register
@@ -477,7 +479,7 @@ begin-module memmap
     GPIOH $24 + constant GPIOH_AFRH ( read-write )  \ GPIO alternate function high  register
   [then]
 
-  execute-defined? use-TIM2 defined? TIM2 not and [if]
+  execute-defined? use-TIM2 [if]
     $40000000 constant TIM2 ( General-purpose-timers ) 
     TIM2 $0 + constant TIM2_CR1 ( read-write )  \ control register 1
     TIM2 $4 + constant TIM2_CR2 ( read-write )  \ control register 2
@@ -502,7 +504,7 @@ begin-module memmap
     TIM2 $50 + constant TIM2_OR ( read-write )  \ TIM2 option register
   [then]
 
-  defined? use-TIM3 defined? TIM3 not and [if]
+  [if]
     $40000400 constant TIM3 ( General-purpose-timers ) 
     TIM3 $0 + constant TIM3_CR1 ( read-write )  \ control register 1
     TIM3 $4 + constant TIM3_CR2 ( read-write )  \ control register 2
@@ -527,7 +529,7 @@ begin-module memmap
     TIM3 $50 + constant TIM3_OR ( read-write )  \ TIM2 option register
   [then]
 
-  execute-defined? use-TIM4 defined? TIM4 not and [if]
+  execute-defined? use-TIM4 [if]
     $40000800 constant TIM4 ( General-purpose-timers ) 
     TIM4 $0 + constant TIM4_CR1 ( read-write )  \ control register 1
     TIM4 $4 + constant TIM4_CR2 ( read-write )  \ control register 2
@@ -552,7 +554,7 @@ begin-module memmap
     TIM4 $50 + constant TIM4_OR ( read-write )  \ TIM2 option register
   [then]
 
-  defined? use-TIM5 defined? TIM5 not and [if]
+  [if]
     $40000C00 constant TIM5 ( General-purpose-timers ) 
     TIM5 $0 + constant TIM5_CR1 ( read-write )  \ control register 1
     TIM5 $4 + constant TIM5_CR2 ( read-write )  \ control register 2
@@ -577,7 +579,7 @@ begin-module memmap
     TIM5 $50 + constant TIM5_OR ( read-write )  \ TIM2 option register
   [then]
 
-  execute-defined? use-TIM1 defined? TIM1 not and [if]
+  execute-defined? use-TIM1 [if]
     $40012C00 constant TIM1 ( Advanced-timers ) 
     TIM1 $0 + constant TIM1_CR1 ( read-write )  \ control register 1
     TIM1 $4 + constant TIM1_CR2 ( read-write )  \ control register 2
@@ -609,7 +611,7 @@ begin-module memmap
     TIM1 $64 + constant TIM1_OR3 ( read-write )  \ DMA address for full transfer
   [then]
 
-  defined? use-TIM8 defined? TIM8 not and [if]
+  [if]
     $40013400 constant TIM8 ( Advanced-timers ) 
     TIM8 $0 + constant TIM8_CR1 ( read-write )  \ control register 1
     TIM8 $4 + constant TIM8_CR2 ( read-write )  \ control register 2
@@ -641,7 +643,7 @@ begin-module memmap
     TIM8 $64 + constant TIM8_OR3 ( read-write )  \ DMA address for full transfer
   [then]
 
-  execute-defined? use-TIM6 defined? TIM6 not and [if]
+  execute-defined? use-TIM6 [if]
     $40001000 constant TIM6 ( Basic-timers ) 
     TIM6 $0 + constant TIM6_CR1 ( read-write )  \ control register 1
     TIM6 $4 + constant TIM6_CR2 ( read-write )  \ control register 2
@@ -653,7 +655,7 @@ begin-module memmap
     TIM6 $2C + constant TIM6_ARR ( read-write )  \ auto-reload register
   [then]
 
-  defined? use-TIM7 defined? TIM7 not and [if]
+  [if]
     $40001400 constant TIM7 ( Basic-timers ) 
     TIM7 $0 + constant TIM7_CR1 ( read-write )  \ control register 1
     TIM7 $4 + constant TIM7_CR2 ( read-write )  \ control register 2
@@ -665,7 +667,7 @@ begin-module memmap
     TIM7 $2C + constant TIM7_ARR ( read-write )  \ auto-reload register
   [then]
 
-  execute-defined? use-USART1 defined? USART1 not and [if]
+  execute-defined? use-USART1 [if]
     $40013800 constant USART1 ( Universal synchronous asynchronous receiver  transmitter ) 
     USART1 $0 + constant USART1_CR1 ( read-write )  \ Control register 1
     USART1 $4 + constant USART1_CR2 ( read-write )  \ Control register 2
@@ -680,7 +682,7 @@ begin-module memmap
     USART1 $28 + constant USART1_TDR ( read-write )  \ Transmit data register
   [then]
 
-  defined? use-USART2 defined? USART2 not and [if]
+  [if]
     $40004400 constant USART2 ( Universal synchronous asynchronous receiver  transmitter ) 
     USART2 $0 + constant USART2_CR1 ( read-write )  \ Control register 1
     USART2 $4 + constant USART2_CR2 ( read-write )  \ Control register 2
@@ -695,7 +697,7 @@ begin-module memmap
     USART2 $28 + constant USART2_TDR ( read-write )  \ Transmit data register
   [then]
 
-  execute-defined? use-USART3 defined? USART3 not and [if]
+  execute-defined? use-USART3 [if]
     $40004800 constant USART3 ( Universal synchronous asynchronous receiver  transmitter ) 
     USART3 $0 + constant USART3_CR1 ( read-write )  \ Control register 1
     USART3 $4 + constant USART3_CR2 ( read-write )  \ Control register 2
@@ -710,7 +712,7 @@ begin-module memmap
     USART3 $28 + constant USART3_TDR ( read-write )  \ Transmit data register
   [then]
 
-  defined? use-UART4 defined? UART4 not and [if]
+  [if]
     $40004C00 constant UART4 ( Universal synchronous asynchronous receiver  transmitter ) 
     UART4 $0 + constant UART4_CR1 ( read-write )  \ Control register 1
     UART4 $4 + constant UART4_CR2 ( read-write )  \ Control register 2
@@ -725,7 +727,7 @@ begin-module memmap
     UART4 $28 + constant UART4_TDR ( read-write )  \ Transmit data register
   [then]
 
-  execute-defined? use-UART5 defined? UART5 not and [if]
+  execute-defined? use-UART5 [if]
     $40005000 constant UART5 ( Universal synchronous asynchronous receiver  transmitter ) 
     UART5 $0 + constant UART5_CR1 ( read-write )  \ Control register 1
     UART5 $4 + constant UART5_CR2 ( read-write )  \ Control register 2
@@ -740,7 +742,7 @@ begin-module memmap
     UART5 $28 + constant UART5_TDR ( read-write )  \ Transmit data register
   [then]
 
-  defined? use-SPI1 defined? SPI1 not and [if]
+  [if]
     $40013000 constant SPI1 ( Serial peripheral interface/Inter-IC  sound ) 
     SPI1 $0 + constant SPI1_CR1 ( read-write )  \ control register 1
     SPI1 $4 + constant SPI1_CR2 ( read-write )  \ control register 2
@@ -751,7 +753,7 @@ begin-module memmap
     SPI1 $18 + constant SPI1_TXCRCR ( read-only )  \ TX CRC register
   [then]
 
-  execute-defined? use-SPI2 defined? SPI2 not and [if]
+  execute-defined? use-SPI2 [if]
     $40003800 constant SPI2 ( Serial peripheral interface/Inter-IC  sound ) 
     SPI2 $0 + constant SPI2_CR1 ( read-write )  \ control register 1
     SPI2 $4 + constant SPI2_CR2 ( read-write )  \ control register 2
@@ -762,7 +764,7 @@ begin-module memmap
     SPI2 $18 + constant SPI2_TXCRCR ( read-only )  \ TX CRC register
   [then]
 
-  defined? use-SPI3 defined? SPI3 not and [if]
+  [if]
     $40003C00 constant SPI3 ( Serial peripheral interface/Inter-IC  sound ) 
     SPI3 $0 + constant SPI3_CR1 ( read-write )  \ control register 1
     SPI3 $4 + constant SPI3_CR2 ( read-write )  \ control register 2
@@ -773,7 +775,7 @@ begin-module memmap
     SPI3 $18 + constant SPI3_TXCRCR ( read-only )  \ TX CRC register
   [then]
 
-  execute-defined? use-EXTI defined? EXTI not and [if]
+  execute-defined? use-EXTI [if]
     $40010400 constant EXTI ( External interrupt/event  controller ) 
     EXTI $0 + constant EXTI_IMR1 ( read-write )  \ Interrupt mask register
     EXTI $4 + constant EXTI_EMR1 ( read-write )  \ Event mask register
@@ -789,7 +791,7 @@ begin-module memmap
     EXTI $34 + constant EXTI_PR2 ( read-write )  \ Pending register
   [then]
 
-  defined? use-RTC defined? RTC not and [if]
+  [if]
     $40002800 constant RTC ( Real-time clock ) 
     RTC $0 + constant RTC_TR ( read-write )  \ time register
     RTC $4 + constant RTC_DR ( read-write )  \ date register
@@ -844,7 +846,7 @@ begin-module memmap
     RTC $CC + constant RTC_BKP31R ( read-write )  \ backup register
   [then]
 
-  execute-defined? use-OTG_FS_GLOBAL defined? OTG_FS_GLOBAL not and [if]
+  execute-defined? use-OTG_FS_GLOBAL [if]
     $50000000 constant OTG_FS_GLOBAL ( USB on the go full speed ) 
     OTG_FS_GLOBAL $0 + constant OTG_FS_GLOBAL_FS_GOTGCTL (  )  \ OTG_FS control and status register  OTG_FS_GOTGCTL
     OTG_FS_GLOBAL $4 + constant OTG_FS_GLOBAL_FS_GOTGINT ( read-write )  \ OTG_FS interrupt register  OTG_FS_GOTGINT
@@ -867,7 +869,7 @@ begin-module memmap
     OTG_FS_GLOBAL $10C + constant OTG_FS_GLOBAL_FS_DIEPTXF3 ( read-write )  \ OTG_FS device IN endpoint transmit FIFO size  register OTG_FS_DIEPTXF4
   [then]
 
-  defined? use-OTG_FS_HOST defined? OTG_FS_HOST not and [if]
+  [if]
     $50000400 constant OTG_FS_HOST ( USB on the go full speed ) 
     OTG_FS_HOST $0 + constant OTG_FS_HOST_FS_HCFG (  )  \ OTG_FS host configuration register  OTG_FS_HCFG
     OTG_FS_HOST $4 + constant OTG_FS_HOST_HFIR ( read-write )  \ OTG_FS Host frame interval  register
@@ -910,7 +912,7 @@ begin-module memmap
     OTG_FS_HOST $1F0 + constant OTG_FS_HOST_FS_HCTSIZ7 ( read-write )  \ OTG_FS host channel-7 transfer size  register
   [then]
 
-  execute-defined? use-OTG_FS_DEVICE defined? OTG_FS_DEVICE not and [if]
+  execute-defined? use-OTG_FS_DEVICE [if]
     $50000800 constant OTG_FS_DEVICE ( USB on the go full speed ) 
     OTG_FS_DEVICE $0 + constant OTG_FS_DEVICE_FS_DCFG ( read-write )  \ OTG_FS device configuration register  OTG_FS_DCFG
     OTG_FS_DEVICE $4 + constant OTG_FS_DEVICE_FS_DCTL (  )  \ OTG_FS device control register  OTG_FS_DCTL
@@ -952,12 +954,12 @@ begin-module memmap
     OTG_FS_DEVICE $370 + constant OTG_FS_DEVICE_DOEPTSIZ3 ( read-write )  \ device OUT endpoint-3 transfer size  register
   [then]
 
-  defined? use-OTG_FS_PWRCLK defined? OTG_FS_PWRCLK not and [if]
+  [if]
     $50000E00 constant OTG_FS_PWRCLK ( USB on the go full speed ) 
     OTG_FS_PWRCLK $0 + constant OTG_FS_PWRCLK_FS_PCGCCTL ( read-write )  \ OTG_FS power and clock gating control  register OTG_FS_PCGCCTL
   [then]
 
-  execute-defined? use-NVIC defined? NVIC not and [if]
+  execute-defined? use-NVIC [if]
     $E000E000 constant NVIC ( Nested Vectored Interrupt  Controller ) 
     NVIC $4 + constant NVIC_ICTR ( read-only )  \ Interrupt Controller Type  Register
     NVIC $F00 + constant NVIC_STIR ( write-only )  \ Software Triggered Interrupt  Register
@@ -1000,5 +1002,7 @@ begin-module memmap
   [then]
 
 end-module
+
+end-compress-flash
 
 compile-to-ram
