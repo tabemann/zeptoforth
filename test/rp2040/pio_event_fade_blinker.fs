@@ -67,6 +67,9 @@ continue-module forth
   \ The maximum blinker step delay in 100 us increments
   variable blinker-max-step-delay
 
+  \ The minimum blinker step delay in 100 us increments
+  variable blinker-min-step-delay
+
   \ The blinker shade step delay in 100 us increments
   variable blinker-step-delay
 
@@ -91,7 +94,7 @@ continue-module forth
   \ The blinker input step delay conversion routine
   : convert-step-delay ( i -- step-delay )
     step-delay-poly blinker-max-input-step-delay @ step-delay-poly f/
-    0 blinker-max-step-delay @ f* nip
+    0 blinker-max-step-delay @ f* nip blinker-min-step-delay @ max
   ;
   
   \ PIO interrupt handler
@@ -114,18 +117,21 @@ continue-module forth
   
   \ The blinker shading loop
   : blinker-shade-loop ( -- )
+    0 systick-counter current-action action-delay
     begin
       begin blinker-max-input-shade @ blinker-input-shade @ > while
 	1 blinker-input-shade +!
 	blinker-input-shade @ blinker-shade!
-	blinker-step-delay @ systick-counter current-action action-delay
+	blinker-step-delay @ current-action action-delay-latest +
+	current-action action-delay
 	yield
       repeat
       yield
       begin 0 blinker-input-shade @ < while
 	-1 blinker-input-shade +!
 	blinker-input-shade @ blinker-shade!
-	blinker-step-delay @ systick-counter current-action action-delay
+	blinker-step-delay @ current-action action-delay-latest +
+	current-action action-delay
 	yield
       repeat
       yield
@@ -134,11 +140,12 @@ continue-module forth
 
   \ The blinker shading rate loop
   : blinker-rate-loop ( -- )
+    0 systick-counter current-action action-delay
     begin
       begin blinker-max-input-step-delay @ blinker-input-step-delay @ > while
 	1 blinker-input-step-delay +!
 	blinker-input-step-delay @ convert-step-delay blinker-step-delay !
-	blinker-step-delay-step-delay @ systick-counter
+	blinker-step-delay-step-delay @ current-action action-delay-latest +
 	current-action action-delay
 	yield
       repeat
@@ -146,7 +153,7 @@ continue-module forth
       begin 0 blinker-input-step-delay @ < while
 	-1 blinker-input-step-delay +!
 	blinker-input-step-delay @ convert-step-delay blinker-step-delay !
-	blinker-step-delay-step-delay @ systick-counter
+	blinker-step-delay-step-delay @ current-action action-delay-latest +
 	current-action action-delay
 	yield
       repeat
@@ -162,6 +169,7 @@ continue-module forth
     1000 blinker-max-input-step-delay !
     0 blinker-input-step-delay !
     25 blinker-max-step-delay !
+    1 blinker-min-step-delay !
     0 blinker-step-delay !
     100 blinker-step-delay-step-delay !
     0 blinker-shade!
