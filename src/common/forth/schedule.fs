@@ -189,7 +189,7 @@ begin-module schedule
   : action-delay-latest ( action -- ticks-delay ticks-start )
     begin-critical
     dup action-systick-delay @
-    over action-systick-start @
+    swap action-systick-start @
     end-critical
   ;
 
@@ -204,7 +204,6 @@ begin-module schedule
   \ Run a schedule
   : run-schedule ( schedule -- )
     begin
-      pause
       begin-critical
       dup schedule-current @ dup if
 	dup action-active @ 0>
