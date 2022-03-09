@@ -24,6 +24,7 @@ continue-module forth
   gpio import
   pio import
   task import
+  schedule import
   systick import
 
   \ The initial setup
@@ -48,18 +49,51 @@ continue-module forth
   \ The blinker maximum input shade
   variable blinker-max-input-shade
 
+  \ The blinker input shade
+  variable blinker-input-shade
+  
   \ The blinker maximum shade
   variable blinker-max-shade
   
   \ The blinker shading
   variable blinker-shade
 
+  \ The blinker maximum input step delay
+  variable blinker-max-input-step-delay
+
+  \ The blinker input step delay
+  variable blinker-input-step-delay
+
+  \ The maximum blinker step delay in 100 us increments
+  variable blinker-max-step-delay
+
   \ The blinker shade step delay in 100 us increments
   variable blinker-step-delay
+
+  \ The blinker step delay step delay
+  variable blinker-step-delay-step-delay
+
+  \ The blinker schedule
+  schedule-size buffer: blinker-schedule
+
+  \ The blinker shade action
+  action-size buffer: blinker-shade-action
+
+  \ The blinker shade rate action
+  action-size buffer: blinker-rate-action
 
   \ The blinker shade conversion routine
   : convert-shade ( i -- shade ) 0 swap 2dup 2dup f* 0,01 f* d+ nip ;
 
+  \ Step delay polynomial
+  : step-delay-poly ( i -- step-delay ) 0 swap 2dup 2dup f* 0,1 f* d+ ;
+  
+  \ The blinker input step delay conversion routine
+  : convert-step-delay ( i -- step-delay )
+    step-delay-poly blinker-max-input-step-delay @ step-delay-poly f/
+    0 blinker-max-step-delay @ f* nip
+  ;
+  
   \ PIO interrupt handler
   : handle-pio ( -- )
     blinker-state @ not if
@@ -78,17 +112,45 @@ continue-module forth
     convert-shade blinker-shade !
   ;
   
-  \ The blinker shading task loop
+  \ The blinker shading loop
   : blinker-shade-loop ( -- )
     begin
-      blinker-max-input-shade @ 0 ?do
-	i blinker-shade!
-	blinker-step-delay @ systick-counter current-task delay
-      loop
-      0 blinker-max-input-shade @ ?do	
-	i blinker-shade!
-	blinker-step-delay @ systick-counter current-task delay
-      -1 +loop
+      begin blinker-max-input-shade @ blinker-input-shade @ > while
+	1 blinker-input-shade +!
+	blinker-input-shade @ blinker-shade!
+	blinker-step-delay @ systick-counter current-action action-delay
+	yield
+      repeat
+      yield
+      begin 0 blinker-input-shade @ < while
+	-1 blinker-input-shade +!
+	blinker-input-shade @ blinker-shade!
+	blinker-step-delay @ systick-counter current-action action-delay
+	yield
+      repeat
+      yield
+    again
+  ;
+
+  \ The blinker shading rate loop
+  : blinker-rate-loop ( -- )
+    begin
+      begin blinker-max-input-step-delay @ blinker-input-step-delay @ > while
+	1 blinker-input-step-delay +!
+	blinker-input-step-delay @ convert-step-delay blinker-step-delay !
+	blinker-step-delay-step-delay @ systick-counter
+	current-action action-delay
+	yield
+      repeat
+      yield
+      begin 0 blinker-input-step-delay @ < while
+	-1 blinker-input-step-delay +!
+	blinker-input-step-delay @ convert-step-delay blinker-step-delay !
+	blinker-step-delay-step-delay @ systick-counter
+	current-action action-delay
+	yield
+      repeat
+      yield
     again
   ;
 
@@ -96,7 +158,12 @@ continue-module forth
   : init-blinker ( -- )
     true blinker-state !
     500 blinker-max-input-shade !
-    25 blinker-step-delay !
+    0 blinker-input-shade !
+    1000 blinker-max-input-step-delay !
+    0 blinker-input-step-delay !
+    25 blinker-max-step-delay !
+    0 blinker-step-delay !
+    100 blinker-step-delay-step-delay !
     0 blinker-shade!
     %0000 CTRL_SM_ENABLE_MASK CTRL_SM_ENABLE_LSB PIO0 CTRL field!
     %0001 CTRL_SM_RESTART_MASK CTRL_SM_RESTART_LSB PIO0 CTRL field!
@@ -122,7 +189,12 @@ continue-module forth
     0 INT_SM_TXNFULL IRQ0 PIO0 INTE bis!
     PIO0_IRQ0 NVIC_ISER_SETENA!
     %0001 CTRL_SM_ENABLE_MASK CTRL_SM_ENABLE_LSB PIO0 CTRL field!
-    0 ['] blinker-shade-loop 320 128 512 spawn run
+    blinker-schedule init-schedule
+    ['] blinker-shade-loop blinker-shade-action blinker-schedule init-action
+    ['] blinker-rate-loop blinker-rate-action blinker-schedule init-action
+    blinker-shade-action enable-action
+    blinker-rate-action enable-action
+    0 [: blinker-schedule run-schedule ;] 320 128 512 spawn run
   ;
 
 end-module
