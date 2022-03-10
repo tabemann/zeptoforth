@@ -1,5 +1,5 @@
-\ Copyright (c) 2021-2022 Travis Bemann
-\
+\ Copyright (c) 2022 Travis Bemann
+\ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
 \ in the Software without restriction, including without limitation the rights
@@ -18,27 +18,52 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ This is not actual Forth code, but rather setup directives for e4thcom to be
-\ executed to load a "big" configuration
+compile-to-flash
 
-#include src/common/forth/temp.fs
-#include src/common/forth/temp_str.fs
-#include src/common/forth/disassemble.fs
-#include src/common/forth/pool.fs
-#include src/common/forth/heap.fs
-#include src/common/forth/map.fs
-#include src/common/forth/cstr_map.fs
-#include src/common/forth/int_map.fs
-#include src/common/forth/slock.fs
-#include src/common/forth/tqueue.fs
-#include src/common/forth/lock.fs
-#include src/common/forth/semaphore.fs
-#include src/common/forth/fchannel.fs
-#include src/common/forth/channel.fs
-#include src/common/forth/rchannel.fs
-#include src/common/forth/stream.fs
-#include src/common/forth/ansi_term.fs
-#include src/common/forth/line.fs
-#include src/common/forth/task_pool.fs
-#include src/common/forth/action_pool.fs
-#include src/common/forth/tinymt.fs
+begin-module slock
+
+  multicore import
+
+  begin-module slock-internal
+  
+    begin-structure slock-size
+      
+      \ Whether the simple lock is held
+      field: slock-cpu-index
+
+    end-structure
+    
+  end-module> import
+
+  export slock-size
+
+  \ Initialize a simple lock
+  : init-slock ( addr -- ) -1 swap ! ;
+
+  \ Claim a simple lock
+  : claim-slock ( slock -- )
+    begin
+      disable-int
+      claim-slock-spinlock
+      dup @ 0< if
+	cpu-index swap ! true false
+      else
+	false true
+      then
+      release-slock-spinlock
+      enable-int
+      if over @ cpu-index = if pause then then
+    until
+  ;
+
+  \ Release a simple lock
+  : release-slock ( slock -- ) -1 swap ! ;
+
+  \ Claim and release a simple lock while properly handling exceptions
+  : with-slock ( xt slock -- )
+    >r r@ claim-slock try r> release-slock ?raise
+  ;
+  
+end-module
+
+reboot

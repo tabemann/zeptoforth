@@ -114,14 +114,11 @@ begin-module multicore
   \ Multitasker core 0 spinlock index
   30 constant task-core-0-spinlock
   
-  \ Lock spinlock index
-  29 constant lock-spinlock
-
-  \ Task queue spinlock index
-  28 constant tqueue-spinlock
-  
   \ Serial spinlock index
-  27 constant serial-spinlock
+  29 constant serial-spinlock
+
+  \ Simple lock spinlock index
+  28 constant slock-spinlock
   
   continue-module multicore-internal
 
@@ -140,6 +137,14 @@ begin-module multicore
   \ 1 lock-number lshift on success; writing any value will release the spinlock
   : SPINLOCK ( index -- addr ) [ SIO_BASE $100 + ] literal swap 2 lshift + ;
 
+  \ Claim the simple lock spinlock
+  : claim-slock-spinlock ( -- )
+    [ slock-spinlock SPINLOCK ] literal begin dup @ until drop
+  ;
+
+  \ Release the simple lock spinlock
+  : release-slock-spinlock ( -- ) -1 [ slock-spinlock SPINLOCK ] literal ! ;
+  
   \ Claim a spinlock
   : claim-spinlock ( index -- )
 \    dup spinlock-count u< averts x-spinlock-out-of-range

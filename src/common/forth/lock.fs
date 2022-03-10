@@ -26,12 +26,15 @@ compress-flash
 begin-module lock
 
   task import
-  multicore import
+  slock import
 
   begin-module lock-internal
 
     \ Lock header structure
     begin-structure lock-size
+
+      \ Lock simple lock
+      slock-size +field lock-slock
       
       \ Lock holder task
       field: lock-holder-task
@@ -217,6 +220,7 @@ begin-module lock
 
   \ Initialize a lock
   : init-lock ( addr -- )
+    dup lock-slock init-slock
     0 over lock-holder-task !
     0 over lock-first-wait !
     0 over lock-last-wait !
@@ -242,9 +246,9 @@ begin-module lock
 	init-lock-wait
 	2dup swap add-lock-wait
 	over update-hold-priority
-	lock-spinlock current-task block-with-spinlock
-	lock-spinlock release-spinlock
-	end-critical
+	over lock-slock release-slock
+	current-task block
+	over lock-slock claim-slock
 	[: current-task validate-timeout ;] try ?dup if
 	  >r [:
 	    dup rot remove-lock-wait lock-wait-orig-here @ ram-here!
@@ -258,7 +262,7 @@ begin-module lock
 	update-hold-priority
       then
       s" END LOCK" trace
-    ;] lock-spinlock critical-with-spinlock
+    ;] over lock-slock with-slock
   ;
 
   \ Unlock a lock
@@ -282,12 +286,12 @@ begin-module lock
 	0 swap lock-holder-task !      
       then
       s" END UNLOCK" trace
-    ;] lock-spinlock critical-with-spinlock
+    ;] over lock-slock with-slock
   ;
 
   \ Update the priorities of tasks holding locks
   : update-lock-priority ( lock -- )
-    ['] update-hold-priority critical
+    ['] update-hold-priority over lock-slock with-slock
   ;
 
   commit-flash

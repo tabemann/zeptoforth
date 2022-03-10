@@ -26,13 +26,16 @@ compress-flash
 begin-module chan
   
   task import
-  multicore import
+  slock import
   tqueue import
   
   begin-module chan-internal
 
     \ Channel header structure
     begin-structure chan-header-size
+
+      \ Channel simple lock
+      slock-size +field chan-slock
       
       \ Channel element count
       field: chan-count
@@ -144,6 +147,7 @@ begin-module chan
   \ Initialize a channel for a channel with a specified element size in bytes
   \ and element count at a specified address
   : init-chan ( element-bytes element-count addr -- )
+    dup chan-slock init-slock
     tuck chan-count !
     tuck chan-data-size !
     0 over chan-current-count !
@@ -151,8 +155,8 @@ begin-module chan
     0 over chan-send-index !
     0 over chan-recv-ready !
     0 over chan-send-ready !
-    dup chan-recv-tqueue init-tqueue
-    dup chan-send-tqueue init-tqueue
+    dup chan-slock over chan-recv-tqueue init-tqueue
+    dup chan-slock over chan-send-tqueue init-tqueue
     false swap chan-closed !
   ;
 
@@ -174,7 +178,7 @@ begin-module chan
 	drop
       then
       s" END SEND-CHAN" trace
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over chan-slock with-slock
   ;
 
   \ Receive data from a channel
@@ -192,7 +196,7 @@ begin-module chan
 	drop
       then
       s" END RECV-CHAN" trace
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over chan-slock with-slock
   ;
 
   \ Peek data from a channel
@@ -204,7 +208,7 @@ begin-module chan
       >r 2dup 0 fill
       r@ chan-data-size @ min r> recv-chan-addr -rot dup >r move r>
       s" END PEEK-CHAN" trace
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over chan-slock with-slock
   ;
 
   \ Skip data on a channel
@@ -220,7 +224,7 @@ begin-module chan
 	drop
       then
       s" END SKIP-CHAN" trace
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over chan-slock with-slock
   ;
 
   \ Send data to a channel without blocking (raise x-would-block if blocking
@@ -239,7 +243,7 @@ begin-module chan
 	drop
       then
       s" END SEND-CHAN-NO-BLOCK" trace
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over chan-slock with-slock
   ;
 
   \ Receive data from a channel without blocking (raise x-would-block if
@@ -257,7 +261,7 @@ begin-module chan
 	drop
       then
       s" END RECV-CHAN-NO-BLOCK" trace
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over chan-slock with-slock
   ;
   
   \ Peek data from a channel without blocking (raise x-would-block if blocking
@@ -269,7 +273,7 @@ begin-module chan
       >r 2dup 0 fill
       r@ chan-data-size @ min r> recv-chan-addr -rot dup >r move r>
       s" END PEEK-CHAN-NO-BLOCK" trace
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over chan-slock with-slock
   ;
   
   \ Skip data on a channel without blocking (raise x-would-block if blocking
@@ -285,7 +289,7 @@ begin-module chan
 	drop
       then
       s" END SKIP-CHAN-NO-BLOCK" trace
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over chan-slock with-slock
   ;
   
   commit-flash
@@ -296,7 +300,7 @@ begin-module chan
       true over chan-closed !
       dup chan-send-tqueue wake-tqueue-all
       chan-recv-tqueue wake-tqueue-all
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over chan-slock with-slock
   ;
 
   \ Get whether a channel is closed

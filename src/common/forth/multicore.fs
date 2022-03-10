@@ -26,14 +26,11 @@ begin-module multicore
   \ Spinlock count
   0 constant spinlock-count
 
-  \ Lock spinlock index
-  -1 constant lock-spinlock
-
-  \ Task queue spinlock index
-  -1 constant tqueue-spinlock
-  
   \ Serial spinlock index
   -1 constant serial-spinlock
+
+  \ Simple lock spinlock index
+  -1 constant slock-spinlock
 
   \ Spinlock out of range exception
   : x-spinlock-out-of-range space ." spinlock out of range" cr ;
@@ -43,6 +40,12 @@ begin-module multicore
 
   \ Core not addressable exception
   : x-core-not-addressable ( -- ) space ." core not addressable" cr ;
+
+  \ Claim a spinlock fast - note that this is a no-op
+  : fast-claim-spinlock ( index -- ) drop ;
+
+  \ Release a spinlock fast - note that this is a no-op
+  : fast-release-spinlock ( index -- ) drop ;
 
   \ Claim a spinlock - note that this is a no-op
   : claim-spinlock ( index -- ) drop ;
