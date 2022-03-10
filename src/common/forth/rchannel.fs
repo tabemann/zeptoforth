@@ -26,7 +26,7 @@ compress-flash
 begin-module rchan
 
   task import
-  multicore import
+  slock import
   tqueue import
   lock import
 
@@ -34,6 +34,10 @@ begin-module rchan
 
     \ Reply channel header structure
     begin-structure rchan-size
+
+      \ Reply channel simple lock
+      slock-size +field rchan-slock
+      
       \ Reply channel send data address
       field: rchan-send-addr
 
@@ -96,6 +100,7 @@ begin-module rchan
   
   \ Initialize a reply channel
   : init-rchan ( addr -- )
+    dup rchan-slock init-slock
     0 over rchan-send-addr !
     0 over rchan-send-size !
     0 over rchan-reply-addr !
@@ -131,7 +136,7 @@ begin-module rchan
 	r> @
       ;] with-aligned-allot
       s" END SEND-RCHAN" trace
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over rchan-slock with-slock
   ;
 
   \ Receive data on a reply channel
@@ -157,7 +162,7 @@ begin-module rchan
 	then
 	current-task r> rchan-reply-task !
 	s" END RECV-RCHAN" trace
-      ;] tqueue-spinlock critical-with-spinlock
+      ;] over rchan-slock with-slock
     ;] try r> swap ?dup if swap rchan-recv-lock unlock ?raise else drop then
   ;
 
@@ -182,7 +187,7 @@ begin-module rchan
       true over rchan-closed !
       dup rchan-send-tqueue wake-tqueue-all
       rchan-recv-tqueue wake-tqueue-all
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over rchan-slock with-slock
   ;
 
   \ Reopen a reply channel

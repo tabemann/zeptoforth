@@ -26,7 +26,7 @@ compress-flash
 begin-module fchan
 
   task import
-  multicore import
+  slock import
   tqueue import
   lock import
 
@@ -34,6 +34,10 @@ begin-module fchan
 
     \ Rendezvous channel header structure
     begin-structure fchan-size
+
+      \ Rendezvous channel simple lock
+      slock-size +field fchan-slock
+      
       \ Rendezvous channel data address
       field: fchan-data-addr
 
@@ -65,13 +69,14 @@ begin-module fchan
   
   \ Initialize a rendezvous channel
   : init-fchan ( addr -- )
+    dup fchan-slock init-slock
     0 over fchan-data-addr !
     0 over fchan-data-size !
     false over fchan-closed !
     dup fchan-recv-lock init-lock
-    dup fchan-send-tqueue init-tqueue
-    dup fchan-recv-tqueue init-tqueue
-    fchan-resp-tqueue init-tqueue
+    dup fchan-slock over fchan-send-tqueue init-tqueue
+    dup fchan-slock over fchan-recv-tqueue init-tqueue
+    dup fchan-slock swap fchan-resp-tqueue init-tqueue
   ;
 
   \ Send data on a rendezvous channel
@@ -90,7 +95,7 @@ begin-module fchan
       then
       fchan-closed @ triggers x-fchan-closed
       s" END SEND-FCHAN" trace
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over fchan-slock with-slock
   ;
 
   \ Receive data on a rendezvous channel
@@ -114,7 +119,7 @@ begin-module fchan
 	then
 	r> fchan-resp-tqueue wake-tqueue
 	s" END RECV-FCHAN" trace
-      ;] tqueue-spinlock critical-with-spinlock
+      ;] over fchan-slock with-slock
     ;] over fchan-recv-lock with-lock
   ;
 
@@ -126,7 +131,7 @@ begin-module fchan
       true over fchan-closed !
       dup fchan-send-tqueue wake-tqueue-all
       fchan-recv-tqueue wake-tqueue-all
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over fchan-slock with-slock
   ;
 
   \ Get whether a rendezvous channel is closed

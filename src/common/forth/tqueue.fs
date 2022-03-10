@@ -26,12 +26,15 @@ compress-flash
 begin-module tqueue
 
   task import
-  multicore import
+  slock import
 
   begin-module tqueue-internal
 
     \ Task queue header structure
     begin-structure tqueue-size
+
+      \ A simple lock used by the task quee
+      field: tqueue-slock
 
       \ First fast channel send task queue
       field: first-wait
@@ -112,16 +115,18 @@ begin-module tqueue
   \ Value indicating no task queue limti
   -1 constant no-tqueue-limit
   
-  \ Initialize a task queue
-  : init-tqueue ( addr -- )
+  \ Initialize a task queue with a given simple lock
+  : init-tqueue ( slock addr -- )
+    tuck tqueue-slock !
     0 over wait-counter !
     -1 over wait-limit !
     0 over first-wait !
     0 swap last-wait !
   ;
 
-  \ Initialize a task queue with a limit and initial counter
-  : init-tqueue-full ( limit counter addr -- )
+  \ Initialize a task queue with a simple loc, a limit, and a initial counter
+  : init-tqueue-full ( limit counter slock addr -- )
+    tuck tqueue-slock !
     tuck wait-counter !
     tuck wait-limit !
     0 over first-wait !
@@ -133,7 +138,6 @@ begin-module tqueue
   \ Wait on a task queue
   \ Note that this must be called within a critical section
   : wait-tqueue ( tqueue -- )
-    \    begin-critical
     s" BEGIN WAIT-TQUEUE" trace
     -1 over wait-counter +!
     dup wait-counter @ 0>= if
@@ -141,24 +145,23 @@ begin-module tqueue
     then
     init-wait
     2dup swap add-wait
-    tqueue-spinlock current-task block-with-spinlock
-    tqueue-spinlock release-spinlock
-    end-critical
+    over tqueue-slock @ release-slock
+    current-task block
+    over tqueue-slock @ claim-slock
     [: current-task validate-timeout ;] try ?dup if
       >r [:
-	1 over wait-counter +! tuck swap remove-wait wait-orig-here @ ram-here!
+	1 2 pick wait-counter +!
+	tuck swap remove-wait wait-orig-here @ ram-here!
       ;] critical r> ?raise
     then
     wait-orig-here @ ram-here!
     drop
     s" END WAIT-TQUEUE" trace
-\    end-critical
   ;
 
   \ Wake up a task in a task queue
   \ Note that this must be called within a critical section
   : wake-tqueue ( tqueue -- )
-    \    begin-critical
     s" BEGIN WAKE-TQUEUE" trace
     dup wait-limit @ 0> if
       dup wait-counter @ 1+ over wait-limit @ min over wait-counter !
@@ -177,7 +180,6 @@ begin-module tqueue
       drop
     then
     s" END WAKE-TQUEUE" trace
-\    end-critical
   ;
 
   \ Un-wake a task queue

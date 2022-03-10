@@ -1122,7 +1122,7 @@ forth set-current
 \ End a critical section
 : end-critical ( -- )
   disable-int
-  in-critical @ 1 - 0 max dup in-critical !
+  in-critical @ 1- 0 max dup in-critical !
   enable-int
   0= if
     deferred-context-switch @
