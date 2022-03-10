@@ -46,7 +46,7 @@ continue-module forth
   variable start-systick
 
   \ The send count limit
-  10000 constant send-count-limit
+  1000 constant send-count-limit
 
   \ The inner loop of a producer
   : producer ( -- )
