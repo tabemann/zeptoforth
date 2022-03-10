@@ -41,11 +41,11 @@ begin-module multicore
   \ Core not addressable exception
   : x-core-not-addressable ( -- ) space ." core not addressable" cr ;
 
-  \ Claim a spinlock fast - note that this is a no-op
-  : fast-claim-spinlock ( index -- ) drop ;
+  \ Claim the simple lock spinlock - note that this is a no-op
+  : claim-slock-spinlock ( -- ) ;
 
-  \ Release a spinlock fast - note that this is a no-op
-  : fast-release-spinlock ( index -- ) drop ;
+  \ Release the simple lock spinlock - note that this is a no-op
+  : release-slock-spinlock ( -- ) ;
 
   \ Claim a spinlock - note that this is a no-op
   : claim-spinlock ( index -- ) drop ;
