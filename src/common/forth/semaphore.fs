@@ -26,13 +26,16 @@ compress-flash
 begin-module sema
 
   task import
-  multicore import
+  slock import
   tqueue import
 
   begin-module sema-internal
 
     \ Semaphore header structure
     begin-structure sema-size
+
+      \ The simple lock
+      slock-size +field sema-slock
 
       \ The task queue
       tqueue-size +field sema-tqueue
@@ -47,34 +50,37 @@ begin-module sema
   commit-flash
 
   \ Initialize a semaphore with the given counter limit and initial counter
-  : init-sema ( limit counter addr -- ) sema-tqueue init-tqueue-full ;
+  : init-sema ( limit counter addr -- )
+    dup sema-slock init-slock
+    dup sema-slock swap sema-tqueue init-tqueue-full
+  ;
 
   \ Take a semaphore, waiting up to a timeout if one is set
   : take ( semaphore -- )
     [:
       current-task prepare-block sema-tqueue wait-tqueue
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over sema-slock with-slock
   ;
 
   \ Give a semaphore
   : give ( semaphore -- )
     [:
       sema-tqueue wake-tqueue
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over sema-slock with-slock
   ;
   
   \ Reverse give a semaphore
   : ungive ( semaphore -- )
     [:
       sema-tqueue unwake-tqueue
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over sema-slock with-slock
   ;
   
   \ Broadcast a semaphore
   : broadcast ( semaphore -- )
     [:
       sema-tqueue wake-tqueue-all
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over sema-slock with-slock
   ;
 
   \ Export the semaphore size

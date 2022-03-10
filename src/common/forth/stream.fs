@@ -26,7 +26,7 @@ compress-flash
 begin-module stream
 
   task import
-  multicore import
+  slock import
   tqueue import
   
   begin-module stream-internal
@@ -34,6 +34,9 @@ begin-module stream
     \ Stream structure
     begin-structure stream-size
 
+      \ Stream simple lock
+      slock-size +field stream-slock
+      
       \ Stream data size
       field: stream-data-size
 
@@ -197,6 +200,7 @@ begin-module stream
   
   \ Initialize a stream with the given data size
   : init-stream ( data-bytes addr -- )
+    dup stream-slock init-slock
     tuck stream-data-size !
     0 over stream-recv-index !
     0 over stream-send-index !
@@ -226,7 +230,7 @@ begin-module stream
 	drop
       then
       s" END SEND-STREAM" trace
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over stream-slock with-slock
   ;
 
   \ Send data to a stream in parts (if the data is bigger than the available
@@ -249,7 +253,7 @@ begin-module stream
       repeat
       2drop drop
       s" END SEND-STREAM-PARTS" trace
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over stream-slock with-slock
   ;
 
   \ Receive data from a stream
@@ -267,7 +271,7 @@ begin-module stream
 	drop
       then
       s" END RECV-STREAM" trace
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over stream-slock with-slock
   ;
   
   \ Receive data at least a minimum number of bytes from a stream
@@ -285,7 +289,7 @@ begin-module stream
 	drop
       then
       s" END RECV-STREAM-MIN" trace
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over stream-slock with-slock
   ;
 
   \ Peek data from a stream
@@ -297,7 +301,7 @@ begin-module stream
       dup stream-current-count @ rot min swap
       rot 2 pick rot read-stream
       s" END PEEK-STREAM" trace
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over stream-slock with-slock
   ;
 
   \ Peek data at least a minimum number of bytes from a stream
@@ -309,7 +313,7 @@ begin-module stream
       dup stream-current-count @ rot min swap
       rot 2 pick rot read-stream
       s" END PEEK-STREAM-MIN" trace
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over stream-slock with-slock
   ;
 
   \ Skip data on a stream
@@ -326,7 +330,7 @@ begin-module stream
 	drop
       then
       s" END SKIP-STREAM" trace
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over stream-slock with-slock
   ;
 
   \ Skip at least a minimum number of bytes on a stream
@@ -343,7 +347,7 @@ begin-module stream
 	drop
       then
       s" END SKIP-STREAM-MIN" trace
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over stream-slock with-slock
   ;
 
   \ Send data to a stream without blocking (raise x-would-block if blocking
@@ -361,7 +365,7 @@ begin-module stream
 	drop
       then
       s" END SEND-STREAM-NO-BLOCK" trace
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over stream-slock with-slock
   ;
 
   \ Send data to a sream without blocking, partially sending data if blocking
@@ -379,7 +383,7 @@ begin-module stream
 	drop
       then
       s" END SEND-STREAM-PARTIAL-NO-BLOCK" trace
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over stream-slock with-slock
   ;
 
   \ Receive data from a stream without blocking (note that no exception is
@@ -396,7 +400,7 @@ begin-module stream
 	drop
       then
       s" END RECV-STREAM-NO-BLOCK" trace
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over stream-slock with-slock
   ;
 
   \ Receive at least a minimum number of bytes from a stream without blocking
@@ -417,7 +421,7 @@ begin-module stream
 	2drop drop 0
       then
       s" END RECV-STREAM-MIN-NO-BLOCK" trace
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over stream-slock with-slock
   ;
 
   \ Peek data from a stream without blocking (note that no exception is raised,
@@ -428,7 +432,7 @@ begin-module stream
       dup stream-current-count @ rot min swap
       rot 2 pick rot read-stream
       s" END PEEK-STREAM-NO-BLOCK" trace
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over stream-slock with-slock
   ;
 
   \ Peek at least a minimum number of bytes from a stream without blocking
@@ -443,7 +447,7 @@ begin-module stream
 	2drop drop 0
       then
       s" END PEEK-STREAM-MIN-NO-BLOCK" trace
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over stream-slock with-slock
   ;
   
   \ Skip at least a minimum number of bytes on a stream without blocking (note
@@ -463,7 +467,7 @@ begin-module stream
 	2drop 0
       then
       s" END SKIP-STREAM-MIN-NO-BLOCK" trace
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over stream-slock with-slock
   ;
   
   \ Close a stream
@@ -472,7 +476,7 @@ begin-module stream
       true over stream-closed !
       dup stream-send-tqueue wake-tqueue-all
       stream-recv-tqueue wake-tqueue-all
-    ;] tqueue-spinlock critical-with-spinlock
+    ;] over stream-slock with-slock
   ;
 
   \ Get whether a stream is closed
