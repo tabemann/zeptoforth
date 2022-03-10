@@ -42,18 +42,19 @@ begin-module slock
 
   \ Claim a simple lock
   : claim-slock ( slock -- )
-    begin
-      disable-int
-      claim-slock-spinlock
-      dup @ 0< if
-	cpu-index swap ! true false
-      else
-	false true
-      then
-      release-slock-spinlock
-      enable-int
-      if over @ cpu-index = if pause then then
-    until
+    ^ internal :: claim-slock
+\    begin
+\      claim-slock-spinlock
+\      disable-int
+\      dup @ 0< if
+\	cpu-index swap ! true false
+\      else
+\	false true
+\      then
+\      enable-int
+\      release-slock-spinlock
+\      if over @ cpu-index = if pause then then
+\    until
   ;
 
   \ Release a simple lock

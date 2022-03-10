@@ -48,6 +48,40 @@
 	@@ Read access to this core's RX FIFO
 	.equ FIFO_RD, SIO_BASE + 0x058
 
+	@@ The simple lock spinlock
+	.equ SLOCK_SPINLOCK, SIO_BASE + 0x100 + (28 * 4)
+
+	@@ Implement claiming a simple lock ( slock -- )
+	define_internal_word "claim-slock", visible_flag
+_claim_slock:
+	push {lr}
+	ldr r0, =SLOCK_SPINLOCK
+	ldr r2, =SIO_CPUID
+	ldr r2, [r2]
+1:	ldr r1, [r0]
+	cmp r1, #0
+	beq 1b
+@	cpsid i
+	ldr r1, [tos]
+	cmp r1, #0
+	blt 2f
+@	cpsie i
+	ldr r3, =-1
+	str r3, [r0]
+	cmp r1, r2
+	bne 1b
+	push {r0, r2}
+	bl _pause
+	pop {r0, r2}
+	b 1b
+2:	str r2, [tos]
+@	cpsie i
+	ldr r1, =-1
+	str r1, [r0]
+	pull_tos
+	pop {pc}
+	end_inlined
+
 	@@ Handle SIO interrupt
 _handle_sio:
 	push {lr}

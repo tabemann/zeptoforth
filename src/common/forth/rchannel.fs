@@ -108,9 +108,9 @@ begin-module rchan
     false over rchan-closed !
     0 over rchan-reply-task !
     dup rchan-recv-lock init-lock
-    dup rchan-send-tqueue init-tqueue
-    dup rchan-recv-tqueue init-tqueue
-    rchan-resp-tqueue init-tqueue
+    dup rchan-slock over rchan-send-tqueue init-tqueue
+    dup rchan-slock over rchan-recv-tqueue init-tqueue
+    dup rchan-slock swap rchan-resp-tqueue init-tqueue
   ;
 
   \ Send data on a reply channel
