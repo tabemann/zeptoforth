@@ -46,9 +46,6 @@ begin-module stream
       \ Stream send index
       field: stream-send-index
 
-      \ Stream is closed
-      field: stream-closed
-
       \ Stream current count
       field: stream-current-count
 
@@ -72,9 +69,6 @@ begin-module stream
     : stream-data ( stream -- addr ) [inlined] stream-size + ;
 
   end-module> import
-
-  \ Stream is closed exception
-  : x-stream-closed ( -- ) space ." stream is closed" cr ;
 
   \ Attempting to send data larger than the stream exception
   : x-stream-data-too-big ( -- ) space ." data is larger than stream" cr  ;
@@ -105,7 +99,6 @@ begin-module stream
 	dup stream-send-tqueue ['] wait-tqueue try
 	-1 2 pick stream-send-ready +!
 	?raise
-	dup stream-closed @ triggers x-stream-closed
       repeat
       2drop
     ;
@@ -115,9 +108,8 @@ begin-module stream
       dup stream-full? if
 	1 over stream-send-ready +!
 	dup stream-send-tqueue ['] wait-tqueue try
-	-1 2 pick stream-send-ready +!
+	-1 rot stream-send-ready +!
 	?raise
-	stream-closed @ triggers x-stream-closed
       else
 	drop
       then
@@ -126,7 +118,6 @@ begin-module stream
     \ Wait to receive on a stream
     : wait-recv-stream ( stream -- )
       dup stream-empty? if
-	dup stream-closed @ triggers x-stream-closed
 	1 over stream-recv-ready +!
 	dup stream-recv-tqueue ['] wait-tqueue try
 	-1 rot stream-recv-ready +!
@@ -139,7 +130,6 @@ begin-module stream
     \ Wait to receive a minimum number of bytes on a stream
     : wait-recv-stream-min ( min-bytes stream -- )
       begin 2dup stream-current-count @ > while
-	dup stream-closed @ triggers x-stream-closed
 	1 over stream-recv-ready +!
 	dup stream-recv-tqueue ['] wait-tqueue try
 	-1 2 pick stream-recv-ready +!
@@ -204,7 +194,6 @@ begin-module stream
     tuck stream-data-size !
     0 over stream-recv-index !
     0 over stream-send-index !
-    false over stream-closed !
     0 over stream-current-count !
     0 over stream-send-ready !
     0 over stream-recv-ready !
@@ -219,7 +208,6 @@ begin-module stream
     2dup stream-data-size @ > triggers x-stream-data-too-big
     [:
       s" BEGIN SEND-STREAM" trace
-      dup stream-closed @ triggers x-stream-closed
       current-task prepare-block
       2dup wait-send-stream
       rot 2 pick 2 pick write-stream
@@ -239,7 +227,6 @@ begin-module stream
   : send-stream-parts ( addr bytes stream -- )
     [:
       s" BEGIN SEND-STREAM-PARTS" trace
-      dup stream-closed @ triggers x-stream-closed
       current-task prepare-block
       begin over 0> while
 	dup wait-send-stream-parts
@@ -355,7 +342,6 @@ begin-module stream
   : send-stream-no-block ( addr bytes stream -- )
     [:
       s" BEGIN SEND-STREAM-NO-BLOCK" trace
-      dup stream-closed @ triggers x-stream-closed
       dup stream-free 2 pick < triggers x-would-block
       rot 2 pick 2 pick write-stream
       dup >r advance-send-stream r>
@@ -373,7 +359,6 @@ begin-module stream
   : send-stream-partial-no-block ( addr bytes stream -- send-bytes )
     [:
       s" BEGIN SEND-STREAM-PARTIAL-NO-BLOCK" trace
-      dup stream-closed @ triggers x-stream-closed
       dup stream-free rot min swap
       rot 2 pick 2 pick write-stream
       2dup advance-send-stream
@@ -470,21 +455,6 @@ begin-module stream
     ;] over stream-slock with-slock
   ;
   
-  \ Close a stream
-  : close-stream ( stream -- )
-    [:
-      true over stream-closed !
-      dup stream-send-tqueue wake-tqueue-all
-      stream-recv-tqueue wake-tqueue-all
-    ;] over stream-slock with-slock
-  ;
-
-  \ Get whether a stream is closed
-  : stream-closed? ( stream -- closed ) stream-closed @ ;
-
-  \ Reopen a stream
-  : reopen-stream ( stream -- ) false swap stream-closed ! ;
-
   \ Get the size of a stream for a given data size
   : stream-size ( data-bytes -- bytes ) [inlined] stream-size + ;
 
