@@ -52,9 +52,6 @@ begin-module chan
       \ Channel current count
       field: chan-current-count
 
-      \ Channel is closed
-      field: chan-closed
-      
       \ Channel send ready
       field: chan-send-ready
 
@@ -73,9 +70,6 @@ begin-module chan
     
   end-module> import
   
-  \ Channel is closed exception
-  : x-chan-closed ( -- ) space ." channel is closed" cr ;
-
   \ Get whether a channel is full
   : chan-full? ( chan -- flag )
     dup chan-current-count @ swap chan-count @ =
@@ -95,16 +89,14 @@ begin-module chan
       dup chan-full? if
 	1 over chan-send-ready +!
 	dup chan-send-tqueue ['] wait-tqueue try
-	-1 2 pick chan-send-ready +!
+	-1 rot chan-send-ready +!
 	?raise
       then
-      chan-closed @ triggers x-chan-closed
     ;
 
     \ Wait to receive on a channel
     : wait-recv-chan ( chan -- )
       dup chan-empty? if
-	dup chan-closed @ triggers x-chan-closed
 	1 over chan-recv-ready +!
 	dup chan-recv-tqueue ['] wait-tqueue try
 	-1 rot chan-recv-ready +!
@@ -156,8 +148,7 @@ begin-module chan
     0 over chan-recv-ready !
     0 over chan-send-ready !
     dup chan-slock over chan-recv-tqueue init-tqueue
-    dup chan-slock over chan-send-tqueue init-tqueue
-    false swap chan-closed !
+    dup chan-slock swap chan-send-tqueue init-tqueue
   ;
 
   commit-flash
@@ -166,7 +157,6 @@ begin-module chan
   : send-chan ( addr bytes chan -- )
     [:
       s" BEGIN SEND-CHAN" trace
-      dup chan-closed @ triggers x-chan-closed
       current-task prepare-block
       dup wait-send-chan
       dup send-chan-addr over chan-data-size @ 0 fill
@@ -232,7 +222,6 @@ begin-module chan
   : send-chan-no-block ( addr bytes chan -- )
     [:
       s" BEGIN SEND-CHAN-NO-BLOCK" trace
-      dup chan-closed @ triggers x-chan-closed
       dup chan-full? triggers x-would-block
       dup send-chan-addr over chan-data-size @ 0 fill
       dup >r chan-data-size @ min r@ send-chan-addr swap move r>
@@ -294,21 +283,6 @@ begin-module chan
   
   commit-flash
 
-  \ Close a channel
-  : close-chan ( chan -- )
-    [:
-      true over chan-closed !
-      dup chan-send-tqueue wake-tqueue-all
-      chan-recv-tqueue wake-tqueue-all
-    ;] over chan-slock with-slock
-  ;
-
-  \ Get whether a channel is closed
-  : chan-closed? ( chan -- closed ) chan-closed @ ;
-
-  \ Reopen a channel
-  : reopen-chan ( chan -- ) false swap chan-closed ! ;
-  
   \ Get the channel element count
   : chan-count ( chan -- element-count ) chan-count @ ;
 

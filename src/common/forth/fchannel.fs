@@ -27,10 +27,19 @@ begin-module fchan
 
   task import
   slock import
-  tqueue import
-  lock import
 
   begin-module fchan-internal
+
+    \ Rendezvous channel queue structure
+    begin-structure fchan-queue-size
+
+      \ First wait in rendezvous channel queue
+      field: fchan-queue-first
+
+      \ Last wait in rendezvous channel queue
+      field: fchan-queue-last
+      
+    end-structure
 
     \ Rendezvous channel header structure
     begin-structure fchan-size
@@ -38,107 +47,200 @@ begin-module fchan
       \ Rendezvous channel simple lock
       slock-size +field fchan-slock
       
-      \ Rendezvous channel data address
-      field: fchan-data-addr
+      \ Rendezvous channel send queue
+      fchan-queue-size +field fchan-send-queue
 
-      \ Rendezvous channel data size
-      field: fchan-data-size
-      
-      \ Rendezvous channel is closed
-      field: fchan-closed
+      \ Rendezvous channel receive queue
+      fchan-queue-size +field fchan-recv-queue
 
-      \ Rendezvous channel receive lock
-      lock-size +field fchan-recv-lock
-      
-      \ Rendezvous channel send task queue
-      tqueue-size +field fchan-send-tqueue
-
-      \ Rendezvous channel receive task queue
-      tqueue-size +field fchan-recv-tqueue
-
-      \ Rendezvous channel response task queue
-      tqueue-size +field fchan-resp-tqueue
     end-structure
+
+    \ Rendezvous channel wait structure
+    begin-structure fchan-wait-size
+
+      \ Waiting task
+      field: fchan-wait-task
+
+      \ Data buffer
+      field: fchan-wait-buf
+
+      \ Data buffer size
+      field: fchan-wait-buf-size
+
+      \ Previous entry in queue
+      field: fchan-wait-prev
+
+      \ Next entry in queue
+      field: fchan-wait-next
+
+      \ Popped flag
+      field: fchan-wait-popped
+
+    end-structure
+
+    \ Initialize a rendezvous channel queue
+    : init-fchan-queue ( addr -- )
+      0 over fchan-queue-first !
+      0 swap fchan-queue-last !
+    ;
+
+    \ Get last higher priority wait in queue
+    : find-fchan-queue-next ( priority queue -- wait|0 )
+      fchan-queue-last @
+      begin dup while
+	dup fchan-wait-task @ task-priority@
+	2 pick >= if nip exit then
+	fchan-wait-next @
+      repeat
+      nip
+    ;
+
+    \ Insert a wait into a queue
+    : push-fchan-queue ( wait queue -- )
+      over false swap fchan-wait-popped ! ( wait queue )
+      2dup swap fchan-wait-task @ task-priority@ swap find-fchan-queue-next
+      dup 0= if
+	drop over 0 swap fchan-wait-next ! ( wait queue )
+	2dup fchan-queue-first @ ( wait queue wait first )
+	?dup if
+	  2dup swap fchan-wait-prev ! ( wait queue wait first )
+	  fchan-wait-next ! ( wait queue )
+	else
+	  0 swap fchan-wait-prev ! ( wait queue )
+	  2dup fchan-queue-last ! ( wait queue )
+	then
+	fchan-queue-first ! ( )
+      else ( wait queue next )
+	dup fchan-wait-prev @ ( wait queue next prev )
+	dup 4 pick fchan-wait-prev ! ( wait queue next prev )
+	?dup if
+	  3 pick swap fchan-wait-next ! ( wait queue next )
+	else
+	  2 pick 2 pick fchan-queue-last ! ( wait queue next )
+	then
+	dup 3 pick fchan-wait-next ! ( wait queue next )
+	nip fchan-wait-prev ! ( )
+      then
+    ;
+
+    \ Pop a wait from a queue or return null if no queue is available
+    : pop-fchan-queue ( queue -- wait|0 )
+      dup fchan-queue-first @ dup if ( queue first )
+	true over fchan-wait-popped ! ( queue first )
+	dup fchan-wait-prev @ ( queue first prev )
+	dup 3 pick fchan-queue-first ! ( queue first prev )
+	?dup if
+	  0 swap fchan-wait-next ! ( queue first )
+	  nip ( first )
+	else
+	  0 rot fchan-queue-last ! ( first )
+	then
+      else
+	nip ( 0 )
+      then
+    ;
+
+    \ Remove a wait from a queue if it has not already been popped
+    : remove-fchan-queue ( wait queue -- )
+      over fchan-wait-popped @ not if ( wait queue )
+	over fchan-wait-next @ dup if ( wait queue next )
+	  2 pick fchan-wait-prev @ ( wait queue next prev )
+	  swap fchan-wait-prev ! ( wait queue )
+	else
+	  drop over fchan-wait-prev @ ( wait queue prev )
+	  over fchan-queue-first ! ( wait queue )
+	then
+	over fchan-wait-prev @ dup if ( wait queue prev )
+	  2 pick fchan-wait-next @ ( wait queue prev next )
+	  swap fchan-wait-next ! ( wait queue )
+	else
+	  drop over fchan-wait-next @ ( wait queue next )
+	  over fchan-queue-last ! ( wait queue )
+	then
+      then
+      2drop ( )
+    ;
 
   end-module> import
 
-  \ Rendezvous channel is closed exception
-  : x-fchan-closed ( -- ) space ." fchannel is closed" cr ;
-  
   commit-flash
   
   \ Initialize a rendezvous channel
   : init-fchan ( addr -- )
     dup fchan-slock init-slock
-    0 over fchan-data-addr !
-    0 over fchan-data-size !
-    false over fchan-closed !
-    dup fchan-recv-lock init-lock
-    dup fchan-slock over fchan-send-tqueue init-tqueue
-    dup fchan-slock over fchan-recv-tqueue init-tqueue
-    dup fchan-slock swap fchan-resp-tqueue init-tqueue
+    dup fchan-send-queue init-fchan-queue
+    fchan-recv-queue init-fchan-queue
   ;
 
   \ Send data on a rendezvous channel
   : send-fchan ( addr bytes fchan -- )
-    [:
-      s" BEGIN SEND-FCHAN" trace
-      dup fchan-closed @ triggers x-fchan-closed
-      current-task prepare-block
-      dup fchan-send-tqueue wait-tqueue
-      dup fchan-closed @ triggers x-fchan-closed
-      tuck fchan-data-size !
-      tuck fchan-data-addr !
-      dup fchan-recv-tqueue wake-tqueue
-      [: dup fchan-resp-tqueue wait-tqueue ;] try ?dup if
-	0 swap fchan-data-addr ! ?raise
-      then
-      fchan-closed @ triggers x-fchan-closed
-      s" END SEND-FCHAN" trace
-    ;] over fchan-slock with-slock
+    >r
+    r@ fchan-slock claim-slock
+    s" BEGIN SEND-FCHAN" trace
+    current-task prepare-block
+    r@ fchan-recv-queue pop-fchan-queue ?dup if ( addr bytes wait )
+      swap over fchan-wait-buf-size @ min ( addr wait bytes )
+      >r swap over fchan-wait-buf @ r@ ( wait addr recv-addr bytes ) move
+      r> over fchan-wait-buf-size ! ( wait )
+      r> fchan-slock release-slock ( wait )
+      fchan-wait-task @ ready ( )
+    else
+      r> fchan-wait-size [: swap >r ( addr bytes wait )
+	current-task over fchan-wait-task ! ( addr bytes wait )
+	tuck fchan-wait-buf-size ! ( addr wait )
+	tuck fchan-wait-buf ! ( wait )
+	dup r@ fchan-send-queue push-fchan-queue ( wait )
+	r@ fchan-slock release-slock ( wait )
+	[: current-task block ;] try ( wait exc )
+	?dup if
+	  r@ fchan-slock claim-slock ( wait exc )
+	  swap r@ fchan-send-queue remove-fchan-queue ( exc )
+	  r> fchan-slock release-slock ( exc )
+	  ?raise
+	else ( wait )
+	  drop ( )
+	  rdrop
+	then
+      ;] with-aligned-allot
+    then
+    s" END SEND-FCHAN" trace
   ;
 
   \ Receive data on a rendezvous channel
   : recv-fchan ( addr bytes fchan -- recv-bytes )
-    dup fchan-closed @ triggers x-fchan-closed
-    [:
-      [:
-	s" BEGIN RECV-FCHAN" trace
-	dup fchan-send-tqueue wake-tqueue
-	[: dup fchan-recv-tqueue wait-tqueue ;] try ?dup if
-	  swap fchan-send-tqueue unwake-tqueue ?raise
+    >r
+    r@ fchan-slock claim-slock
+    s" BEGIN RECV-FCHAN" trace
+    current-task prepare-block
+    r@ fchan-send-queue pop-fchan-queue ?dup if ( addr bytes wait )
+      swap over fchan-wait-buf-size @ min ( addr wait bytes )
+      >r swap over fchan-wait-buf @ swap r@ ( wait send-addr addr bytes ) move
+      r> swap ( bytes wait )
+      r> fchan-slock release-slock ( bytes wait )
+      fchan-wait-task @ ready ( bytes )
+    else
+      r> fchan-wait-size [: swap >r ( addr bytes wait )
+	current-task over fchan-wait-task ! ( addr bytes wait )
+	tuck fchan-wait-buf-size ! ( addr wait )
+	tuck fchan-wait-buf ! ( wait )
+	dup r@ fchan-recv-queue push-fchan-queue ( wait )
+	r@ fchan-slock release-slock ( wait )
+	[: current-task block ;] try ( wait exc )
+	?dup if
+	  r@ fchan-slock claim-slock ( wait exc )
+	  swap r@ fchan-recv-queue remove-fchan-queue ( exc )
+	  r> fchan-slock release-slock ( exc )
+	  ?raise
+	else ( wait )
+	  fchan-wait-buf-size @ ( bytes )
+	  rdrop
 	then
-	dup fchan-closed @ triggers x-fchan-closed
-	>r
-	2dup 0 fill
-	r@ fchan-data-size @ min
-	r@ fchan-data-addr @ ?dup if -rot
-	  dup >r move r>
-	else
-	  2drop 0
-	then
-	r> fchan-resp-tqueue wake-tqueue
-	s" END RECV-FCHAN" trace
-      ;] over fchan-slock with-slock
-    ;] over fchan-recv-lock with-lock
+      ;] with-aligned-allot
+    then
+    s" END RECV-FCHAN" trace
   ;
 
   commit-flash
-
-  \ Close a rendezvous channel
-  : close-fchan ( fchan -- )
-    [:
-      true over fchan-closed !
-      dup fchan-send-tqueue wake-tqueue-all
-      fchan-recv-tqueue wake-tqueue-all
-    ;] over fchan-slock with-slock
-  ;
-
-  \ Get whether a rendezvous channel is closed
-  : fchan-closed? ( fchan -- closed ) fchan-closed @ ;
-
-  \ Reopen a rendezvous channel
-  : reopen-fchan ( fchan -- ) false swap fchan-closed ! ;
 
   \ Export the fchannel size
   export fchan-size
