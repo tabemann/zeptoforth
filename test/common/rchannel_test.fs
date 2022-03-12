@@ -36,7 +36,7 @@ continue-module forth
   : send-loop ( -- )
     0 begin
       dup cr ." Sending: " .
-      dup [: [: 2swap my-rchan send-rchan ;] extract-allot-cell ;]
+      dup [: [: my-rchan send-rchan ;] extract-allot-cell ;]
       provide-allot-cell
       cr ." Got reply: " . 1+
     again
