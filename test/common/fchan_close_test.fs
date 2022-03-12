@@ -31,7 +31,7 @@ continue-module forth
   my-task-count task-pool-size buffer: my-task-pool
 
   \ The fchannel
-  my-fchan fchan-size buffer: my-fchan
+  fchan-size buffer: my-fchan
 
   \ The producer
   : producer ( -- )

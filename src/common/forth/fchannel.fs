@@ -46,6 +46,9 @@ begin-module fchan
 
       \ Rendezvous channel simple lock
       slock-size +field fchan-slock
+
+      \ Rendezvous channel is closed
+      field: fchan-closed
       
       \ Rendezvous channel send queue
       fchan-queue-size +field fchan-send-queue
@@ -161,13 +164,28 @@ begin-module fchan
       2drop ( )
     ;
 
+    \ Wake all the tasks in a queue
+    : wake-all-fchan-queue ( queue -- )
+      >r r@ fchan-queue-first @
+      begin ?dup while
+	dup fchan-wait-task @ ready
+	fchan-wait-prev @
+      repeat
+      0 r@ fchan-queue-first !
+      0 r> fchan-queue-last !
+    ;
+
   end-module> import
+
+  \ Rendezvous channel is closed exception
+  : x-fchan-closed ( -- ) space ." fchannel is closed" cr ;
 
   commit-flash
   
   \ Initialize a rendezvous channel
   : init-fchan ( addr -- )
     dup fchan-slock init-slock
+    false over fchan-closed !
     dup fchan-send-queue init-fchan-queue
     fchan-recv-queue init-fchan-queue
   ;
@@ -175,6 +193,7 @@ begin-module fchan
   \ Send data on a rendezvous channel
   : send-fchan ( addr bytes fchan -- )
     >r
+    r@ fchan-closed @ triggers x-fchan-closed
     r@ fchan-slock claim-slock
     s" BEGIN SEND-FCHAN" trace
     current-task prepare-block
@@ -199,7 +218,7 @@ begin-module fchan
 	  ?raise
 	else ( wait )
 	  drop ( )
-	  rdrop
+	  r> fchan-closed @ triggers x-fchan-closed ( )
 	then
       ;] with-aligned-allot
     then
@@ -209,6 +228,7 @@ begin-module fchan
   \ Receive data on a rendezvous channel
   : recv-fchan ( addr bytes fchan -- recv-bytes )
     >r
+    r@ fchan-closed @ triggers x-fchan-closed
     r@ fchan-slock claim-slock
     s" BEGIN RECV-FCHAN" trace
     current-task prepare-block
@@ -232,12 +252,30 @@ begin-module fchan
 	  r> fchan-slock release-slock ( exc )
 	  ?raise
 	else ( wait )
+	  r> fchan-closed @ triggers x-fchan-closed
 	  fchan-wait-buf-size @ ( bytes )
-	  rdrop
 	then
       ;] with-aligned-allot
     then
     s" END RECV-FCHAN" trace
+  ;
+
+  \ Close a rendezvous channel
+  : close-fchan ( fchan -- )
+    [:
+      >r
+      true r@ fchan-closed !
+      r@ fchan-send-queue wake-all-fchan-queue
+      r> fchan-recv-queue wake-all-fchan-queue
+    ;] over fchan-slock with-slock
+  ;
+
+  \ Get whether a rendezvous channel is closed
+  : fchan-closed? ( fchan -- closed ) fchan-closed @ ;
+
+  \ Reopen a rendezvous channel
+  : reopen-fchan ( fchan -- )
+    [: true swap fchan-closed ! ;] over fchan-slock with-slock
   ;
 
   commit-flash

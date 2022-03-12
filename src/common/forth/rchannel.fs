@@ -47,6 +47,9 @@ begin-module rchan
       \ Bidirectional channel simple lock
       slock-size +field rchan-slock
       
+      \ Bidirectional channel is closed
+      field: rchan-closed
+
       \ Bidirectional channel send queue
       rchan-queue-size +field rchan-send-queue
 
@@ -176,7 +179,21 @@ begin-module rchan
       2drop ( )
     ;
 
+    \ Wake all the tasks in a queue
+    : wake-all-rchan-queue ( queue -- )
+      >r r@ rchan-queue-first @
+      begin ?dup while
+	dup rchan-wait-task @ ready
+	rchan-wait-prev @
+      repeat
+      0 r@ rchan-queue-first !
+      0 r> rchan-queue-last !
+    ;
+
   end-module> import
+
+  \ Bidirectional channel is closed exception
+  : x-rchan-closed ( -- ) space ." rchannel is closed" cr ;
 
   \ Reply pending exception
   : x-reply-pending ( -- ) space ." reply pending" cr ;
@@ -186,6 +203,7 @@ begin-module rchan
   \ Initialize a bidirectional channel
   : init-rchan ( addr -- )
     dup rchan-slock init-slock
+    false over rchan-closed !
     dup rchan-send-queue init-rchan-queue
     dup rchan-recv-queue init-rchan-queue
     0 over rchan-reply-task !
@@ -196,6 +214,7 @@ begin-module rchan
   \ Send data on a bidirectional channel
   : send-rchan ( s-addr s-bytes r-addr r-bytes rchan -- r-bytes' )
     >r
+    r@ rchan-closed @ triggers x-rchan-closed
     r@ rchan-slock claim-slock
     s" BEGIN SEND-RCHAN" trace
     current-task prepare-block
@@ -216,8 +235,9 @@ begin-module rchan
 	rchan-wait-task @ ready ( )
 	[: current-task block ;] try ( exc )
 	r@ rchan-reply-buf-size @ ( exc r-bytes' )
-	0 r> rchan-reply-task ! ( exc r-bytes' )
+	0 r@ rchan-reply-task ! ( exc r-bytes' )
 	swap ?raise ( r-bytes' )
+	r> rchan-closed @ triggers x-rchan-closed ( r-bytes' )
 	false
       else
 	true
@@ -245,7 +265,8 @@ begin-module rchan
 	else ( wait )
 	  drop ( )
 	  r@ rchan-reply-buf-size @ ( r-bytes' )
-	  0 r> rchan-reply-task ! ( )
+	  0 r@ rchan-reply-task ! ( r-bytes' )
+	  r> rchan-closed @ triggers x-rchan-closed ( r-bytes' )
 	then
       ;] with-aligned-allot
     then
@@ -255,6 +276,7 @@ begin-module rchan
   \ Receive data on a bidirectional channel
   : recv-rchan ( addr bytes rchan -- recv-bytes )
     >r
+    r@ rchan-closed @ triggers x-rchan-closed
     r@ rchan-slock claim-slock
     s" BEGIN RECV-RCHAN" trace
     current-task prepare-block
@@ -281,7 +303,7 @@ begin-module rchan
 	  ?raise
 	else ( wait )
 	  rchan-wait-buf-size @ ( bytes )
-	  rdrop
+	  r> rchan-closed @ triggers x-rchan-closed ( bytes )
 	then
       ;] with-aligned-allot
     then
@@ -291,6 +313,7 @@ begin-module rchan
   \ Reply to a bidirectional channel
   : reply-rchan ( addr bytes rchan -- )
     >r ( addr bytes )
+    r@ rchan-closed @ triggers x-rchan-closed ( addr bytes )
     r@ rchan-slock claim-slock ( addr bytes )
     r@ rchan-reply-task @ if ( addr bytes )
       r@ rchan-reply-task @ 1 and triggers x-reply-pending ( addr bytes )
@@ -306,6 +329,24 @@ begin-module rchan
     then
   ;
 
+  \ Close a bidirectional channel
+  : close-rchan ( rchan -- )
+    [:
+      >r
+      true r@ rchan-closed !
+      r@ rchan-send-queue wake-all-rchan-queue
+      r> rchan-recv-queue wake-all-rchan-queue
+    ;] over rchan-slock with-slock
+  ;
+
+  \ Get whether a bidirectional channel is closed
+  : rchan-closed? ( rchan -- closed ) rchan-closed @ ;
+
+  \ Reopen a bidirectional channel
+  : reopen-rchan ( rchan -- )
+    [: true swap rchan-closed ! ;] over rchan-slock with-slock
+  ;
+  
   commit-flash
 
   \ Export the rchannel size
