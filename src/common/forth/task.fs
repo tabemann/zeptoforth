@@ -1423,7 +1423,9 @@ begin-module task
       main-task @ task-dict-end main-task @ actual-here - 1024 <
       ram-dict-warned @ not and if
 	true ram-dict-warned !
-	space ." RAM dictionary space is running low (<1K left)" cr
+	display-red
+	." RAM dictionary space is running low (<1K left)" cr
+	display-normal
       then
       saved-validate-dict @ ?execute
     ;
@@ -1449,13 +1451,11 @@ begin-module task
     [then]
 
     \ Core already has a main task spawned exception
-    : x-main-already-launched ( -- )
-      space ." core already has main task" cr
-    ;
+    : x-main-already-launched ( -- ) ." core already has main task" cr ;
     
     \ Auxiliary cores can only be launched from core 0
     : x-core-can-only-be-launched-from-core-0 ( -- )
-      space ." core can only be launched from core 0" cr
+      ." core can only be launched from core 0" cr
     ;
 
     \ Launch an auxiliary core with a task

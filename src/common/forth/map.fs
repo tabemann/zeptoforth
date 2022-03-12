@@ -109,7 +109,7 @@ begin-module map
   \ Destination map does not match key size, value size, hash function, or
   \ equals function of the source map exception
   : x-dest-map-not-match ( -- )
-    space ." destination map does not match source map" cr
+    ." destination map does not match source map" cr
   ;
 
   \ Index contains no entry

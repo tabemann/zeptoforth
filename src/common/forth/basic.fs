@@ -2129,7 +2129,7 @@ commit-flash
 : do-flash-validate-dict ( -- )
   flash-end flash-here - 1024 < flash-dict-warned @ not and if
     true flash-dict-warned !
-    space ." flash dictionary space is running low (<1K left)" cr
+    ." flash dictionary space is running low (<1K left)" cr
   then
 ;
 
