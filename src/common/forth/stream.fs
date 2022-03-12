@@ -74,10 +74,10 @@ begin-module stream
   end-module> import
 
   \ Stream is closed exception
-  : x-stream-closed ( -- ) space ." stream is closed" cr ;
+  : x-stream-closed ( -- ) ." stream is closed" cr ;
 
   \ Attempting to send data larger than the stream exception
-  : x-stream-data-too-big ( -- ) space ." data is larger than stream" cr  ;
+  : x-stream-data-too-big ( -- ) ." data is larger than stream" cr  ;
 
   \ Get whether a stream is full
   : stream-full? ( stream -- flag )

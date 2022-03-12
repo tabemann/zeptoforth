@@ -1221,7 +1221,7 @@ _recurse:
 	define_word "x-unknown-word", visible_flag
 _unknown_word:
 	push {lr}
-	string_ln " unknown word"
+	string_ln "unknown word"
 	bl _type
 	pop {pc}
 	end_inlined

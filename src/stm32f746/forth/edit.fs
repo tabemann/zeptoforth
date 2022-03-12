@@ -135,7 +135,7 @@ begin-module edit-internal
   : current-id ( -- id ) edit-state @ edit-current @ id@ ;
 
   \ Buffer not found exception
-  : x-buffer-not-found ( -- ) space ." buffer not found" cr ;
+  : x-buffer-not-found ( -- ) ." buffer not found" cr ;
   
   \ Get a buffer's index by id
   : buffer-of-id ( id -- index )

@@ -49,7 +49,7 @@ begin-module action-pool
   end-module> import
   
   \ No actions are available
-  : x-no-action-available ( -- ) space ." no action is available" cr ;
+  : x-no-action-available ( -- ) ." no action is available" cr ;
   
   \ Get action pool free count
   : action-pool-free ( action-pool -- count )

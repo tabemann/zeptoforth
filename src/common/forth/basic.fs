@@ -581,7 +581,7 @@ commit-flash
 ;
 
 \ No word is being built exception
-: x-no-word-being-built ( -- ) space ." no word is being built" cr ;
+: x-no-word-being-built ( -- ) ." no word is being built" cr ;
 
 \ Set internal
 internal set-current
@@ -1157,7 +1157,7 @@ commit-flash
 ;
 
 \ Insufficient data exception
-: x-insufficient-data ( -- ) space ." insufficient data" cr ;
+: x-insufficient-data ( -- ) ." insufficient data" cr ;
 
 \ Commit to flash
 commit-flash

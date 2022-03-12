@@ -98,7 +98,7 @@ begin-module rng
     : RNG_SR_DRDY@ ( -- flag ) 0 bit RNG_SR bit@ ;
     
     \ Error detecting a random number
-    : x-rng-error ( -- ) space ." RNG error" cr ;
+    : x-rng-error ( -- ) ." RNG error" cr ;
 
     \ The core of reading a random number
     : random-raw ( -- random )

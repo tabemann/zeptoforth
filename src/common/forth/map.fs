@@ -101,10 +101,10 @@ begin-module map
   end-module> import
 
   \ Map index is out of range
-  : x-map-index-out-of-range ( -- ) space ." map index is out of range" cr ;
+  : x-map-index-out-of-range ( -- ) ." map index is out of range" cr ;
   
   \ Map is full exception
-  : x-map-full ( -- ) space ." map is full" cr ;
+  : x-map-full ( -- ) ." map is full" cr ;
 
   \ Destination map does not match key size, value size, hash function, or
   \ equals function of the source map exception
@@ -113,7 +113,7 @@ begin-module map
   ;
 
   \ Index contains no entry
-  : x-map-index-no-entry ( -- ) space ." map index has no entry" cr ;
+  : x-map-index-no-entry ( -- ) ." map index has no entry" cr ;
 
   \ Get the size of a map for a given entry count, key size in bytes, and
   \ value size in bytes

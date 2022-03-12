@@ -27,16 +27,16 @@ begin-module multicore
   interrupt import
 
   \ Must be carried out from core 0 only
-  : x-core-0-only ( -- ) space ." core 0 only" cr ;
+  : x-core-0-only ( -- ) ." core 0 only" cr ;
   
   \ Spinlock out of range exception
-  : x-spinlock-out-of-range ( -- ) space ." spinlock out of range" cr ;
+  : x-spinlock-out-of-range ( -- ) ." spinlock out of range" cr ;
   
   \ Core out of range exception
-  : x-core-out-of-range ( -- ) space ." core out of range" cr ;
+  : x-core-out-of-range ( -- ) ." core out of range" cr ;
 
   \ Core not addressable exception
-  : x-core-not-addressable ( -- ) space ." core not addressable" cr ;
+  : x-core-not-addressable ( -- ) ." core not addressable" cr ;
 
   begin-module multicore-internal
       

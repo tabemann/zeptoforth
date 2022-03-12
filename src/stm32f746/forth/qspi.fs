@@ -27,7 +27,7 @@ begin-module qspi
   gpio import
 
   \ Quad SPI address validation exception
-  : x-invalid-qspi-addr ( -- ) space ." invalid qspi address" cr ;
+  : x-invalid-qspi-addr ( -- ) ." invalid qspi address" cr ;
 
   begin-module qspi-internal
 
