@@ -178,7 +178,7 @@ begin-module fchan
   end-module> import
 
   \ Rendezvous channel is closed exception
-  : x-fchan-closed ( -- ) space ." fchannel is closed" cr ;
+  : x-fchan-closed ( -- ) ." fchannel is closed" cr ;
 
   commit-flash
   

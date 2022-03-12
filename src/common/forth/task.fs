@@ -224,25 +224,25 @@ begin-module task
   -1 constant no-timeout
   
   \ Attempted to use a terminated task
-  : x-terminated ( -- ) space ." task has been terminated" cr ;
+  : x-terminated ( -- ) ." task has been terminated" cr ;
 
   \ Would block exception
-  : x-would-block ( -- ) space ." operation would block" cr ;
+  : x-would-block ( -- ) ." operation would block" cr ;
   
   \ Attempted to task change while changing tasks during interrupt
-  : x-in-task-change ( -- ) space ." in task change" cr ;
+  : x-in-task-change ( -- ) ." in task change" cr ;
 
   \ Out of range task priority exception
-  : x-out-of-range-priority ( -- ) space ." out of range priority" cr ;
+  : x-out-of-range-priority ( -- ) ." out of range priority" cr ;
 
   \ Timed out exception
-  : x-timed-out ( -- ) space ." block timed out" cr ;
+  : x-timed-out ( -- ) ." block timed out" cr ;
 
   \ Out of range notification index
-  : x-out-of-range-notify ( -- ) space ." out of range notification" cr ;
+  : x-out-of-range-notify ( -- ) ." out of range notification" cr ;
 
   \ Currently waiting on notification that would be removed
-  : x-current-wait-notify ( -- ) space ." currently await notification" cr ;
+  : x-current-wait-notify ( -- ) ." currently await notification" cr ;
 
   \ Sleep
   : sleep ( -- ) sleep-enabled? @ if sleep then ;

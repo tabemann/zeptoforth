@@ -64,19 +64,19 @@ module-entry-size module-stack-count * buffer: module-stack
 forth set-current
 
 \ Module stack overflow exception
-: x-stack-overflow ( -- ) space ." module stack overflow" cr ;
+: x-stack-overflow ( -- ) ." module stack overflow" cr ;
 
 \ Module stack underflow exception
-: x-stack-underflow ( -- ) space ." module stack underflow" cr ;
+: x-stack-underflow ( -- ) ." module stack underflow" cr ;
 
 \ Wordlist order overflow exception
-: x-order-overflow ( -- ) space ." wordlist order overflow" cr ;
+: x-order-overflow ( -- ) ." wordlist order overflow" cr ;
 
 \ Module already defined exception
-: x-already-defined ( -- ) space ." module already defined" cr ;
+: x-already-defined ( -- ) ." module already defined" cr ;
 
 \ Module does not exist
-: x-not-found ( -- ) space ." module not found" cr ;
+: x-not-found ( -- ) ." module not found" cr ;
 
 \ Switch wordlists
 internal set-current

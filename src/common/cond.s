@@ -71,7 +71,7 @@ _else:	push {lr}
 	define_word "not-following-if", visible_flag
 _not_following_if:
 	push {lr}
-	string " not following if"
+	string "not following if"
 	bl _type
 	pop {pc}
 	end_inlined

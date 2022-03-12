@@ -29,7 +29,7 @@ internal import
 0 314159265 0 100000000 f/ 2constant pi
 
 \ Domain error exception
-: x-domain-error ( -- ) space ." domain error" cr ;
+: x-domain-error ( -- ) ." domain error" cr ;
 
 \ Duplicate four cells
 : 4dup ( d1 d2 -- d1 d2 d1 d2 ) 3 pick 3 pick 3 pick 3 pick ;

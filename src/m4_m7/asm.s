@@ -2327,7 +2327,7 @@ _asm_reserve_branch:
 	define_internal_word "out-of-range-branch", visible_flag
 _out_of_range_branch:
 	push {lr}
-	string_ln " out of range branch"
+	string_ln "out of range branch"
 	bl _type
 	pop {pc}
 
@@ -2335,7 +2335,7 @@ _out_of_range_branch:
 	define_internal_word "already-building", visible_flag
 _already_building:
 	push {lr}
-	string_ln " already building"
+	string_ln "already building"
 	bl _type
 	pop {pc}
 	end_inlined
@@ -2344,7 +2344,7 @@ _already_building:
 	define_internal_word "not-building", visible_flag
 _not_building:
 	push {lr}
-	string_ln " not building"
+	string_ln "not building"
 	bl _type
 	pop {pc}
 	end_inlined

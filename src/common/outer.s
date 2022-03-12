@@ -375,7 +375,7 @@ _find:	ldr r0, =find_hook
 	define_word "x-hook-needed", visible_flag
 _hook_needed:
 	push {lr}
-	string_ln " hook needed"
+	string_ln "hook needed"
 	bl _type
 	pop {pc}
 	
@@ -708,7 +708,7 @@ _validate:
 	define_word "stack-overflow", visible_flag
 _stack_overflow:
 	push {lr}
-	string_ln " stack overflow"
+	string_ln "stack overflow"
 	bl _type
 	pop {pc}
 	end_inlined
@@ -717,7 +717,7 @@ _stack_overflow:
 	define_word "stack-underflow", visible_flag
 _stack_underflow:
 	push {lr}
-	string_ln " stack underflow"
+	string_ln "stack underflow"
 	bl _type
 	pop {pc}
 	end_inlined
@@ -726,7 +726,7 @@ _stack_underflow:
 	define_word "rstack-overflow", visible_flag
 _rstack_overflow:
 	push {lr}
-	string_ln " return stack overflow"
+	string_ln "return stack overflow"
 	bl _type
 	pop {pc}
 	end_inlined
@@ -735,7 +735,7 @@ _rstack_overflow:
 	define_word "rstack-underflow", visible_flag
 _rstack_underflow:
 	push {lr}
-	string_ln " return stack underflow"
+	string_ln "return stack underflow"
 	bl _type
 	pop {pc}
 	end_inlined
@@ -929,7 +929,7 @@ _do_refill:
 _do_failed_parse:
 	push {lr}
 	bl _display_red
-	string " unable to parse: "
+	string "unable to parse: "
 	bl _type
 	bl _type
 	string_ln ""
@@ -1332,7 +1332,7 @@ _constant_with_name_8:
 	define_word "x-token-expected", visible_flag
 _token_expected:
 	push {lr}
-	string_ln " token expected"
+	string_ln "token expected"
 	bl _type
 	pop {pc}
 	end_inlined
@@ -1341,7 +1341,7 @@ _token_expected:
 	define_word "x-not-compiling", visible_flag
 _not_compiling:
 	push {lr}
-	string_ln " not compiling"
+	string_ln "not compiling"
 	bl _type
 	pop {pc}
 	end_inlined
@@ -1350,7 +1350,7 @@ _not_compiling:
 	define_word "x-compile-to-ram-only", visible_flag
 _compile_to_ram_only:
 	push {lr}
-	string_ln " compile to ram only"
+	string_ln "compile to ram only"
 	bl _type
 	pop {pc}
 	end_inlined

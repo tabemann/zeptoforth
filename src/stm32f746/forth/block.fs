@@ -31,7 +31,7 @@ begin-module block
   1024 constant block-size
 
   \ Write failure exception
-  : x-block-write-fail ( -- ) space ." unable to write block" cr ;
+  : x-block-write-fail ( -- ) ." unable to write block" cr ;
 
   begin-module block-internal
 
@@ -232,7 +232,7 @@ begin-module block
     ;
 
     \ This should never happen
-    : x-should-never-happen ( -- ) space ." this should never happen!" cr ;
+    : x-should-never-happen ( -- ) ." this should never happen!" cr ;
 
     \ Find a free block, or return -1 -1 if no free block can be allocated
     : find-free-block ( -- block-index sector-index | -1 -1 )
@@ -434,10 +434,10 @@ begin-module block
   ;
 
   \ Block not found exception
-  : x-block-not-found ( -- ) space ." block not found" cr ;
+  : x-block-not-found ( -- ) ." block not found" cr ;
 
   \ Invalid block id exception
-  : x-invalid-block-id ( -- ) space ." invalid block id" cr ;
+  : x-invalid-block-id ( -- ) ." invalid block id" cr ;
 
   \ Delete a block
   : delete-block ( id -- )
@@ -487,7 +487,7 @@ begin-module block
   : block-size ( -- bytes ) block-size ;
 
   \ Block not found
-  : x-block-not-found ( -- ) space ." block not found" cr ;
+  : x-block-not-found ( -- ) ." block not found" cr ;
 
   \ Copy a single block
   : copy-block ( src-id dest-id -- )
