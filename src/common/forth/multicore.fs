@@ -36,10 +36,10 @@ begin-module multicore
   : x-spinlock-out-of-range space ." spinlock out of range" cr ;
 
   \ Core out of range exception
-  : x-core-out-of-range ( -- ) space ." core out of range" cr ;
+  : x-core-out-of-range ( -- ) ." core out of range" cr ;
 
   \ Core not addressable exception
-  : x-core-not-addressable ( -- ) space ." core not addressable" cr ;
+  : x-core-not-addressable ( -- ) ." core not addressable" cr ;
 
   \ Claim the simple lock spinlock - note that this is a no-op
   : claim-slock-spinlock ( -- ) ;

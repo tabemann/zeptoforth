@@ -28,7 +28,7 @@ begin-module task-pool
   task import
 
   \ No tasks are available
-  : x-no-task-available ( -- ) space ." no task is available" cr ;
+  : x-no-task-available ( -- ) ." no task is available" cr ;
   
   begin-module task-pool-internal
 

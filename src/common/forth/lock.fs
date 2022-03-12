@@ -228,10 +228,10 @@ begin-module lock
   ;
 
   \ Double locking exception
-  : x-double-lock ( -- ) space ." double locked" cr ;
+  : x-double-lock ( -- ) ." double locked" cr ;
 
   \ Attempted to unlock a lock not owned by the current task
-  : x-not-currently-owned ( -- ) space ." lock not owned by current task" cr ;
+  : x-not-currently-owned ( -- ) ." lock not owned by current task" cr ;
 
   commit-flash
   

@@ -74,7 +74,7 @@ begin-module chan
   end-module> import
   
   \ Channel is closed exception
-  : x-chan-closed ( -- ) space ." channel is closed" cr ;
+  : x-chan-closed ( -- ) ." channel is closed" cr ;
 
   \ Get whether a channel is full
   : chan-full? ( chan -- flag )

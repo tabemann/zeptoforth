@@ -26,7 +26,7 @@ compress-flash
 begin-module interrupt
 
   \ Invalid interrupt vector index exception
-  : x-invalid-vector ( -- ) space ." invalid vector" cr ;
+  : x-invalid-vector ( -- ) ." invalid vector" cr ;
 
   \ ICSR register
   $E000ED04 constant ICSR

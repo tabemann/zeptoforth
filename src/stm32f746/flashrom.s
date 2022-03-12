@@ -248,7 +248,7 @@ _store_flash_2:
 	define_internal_word "flash!-unaligned", visible_flag
 _store_flash_unaligned:
 	push {lr}
-	string_ln " unaligned flash write"
+	string_ln "unaligned flash write"
 	bl _type
 	pop {pc}
 	end_inlined
@@ -258,7 +258,7 @@ _store_flash_unaligned:
 	define_word "flash!-already-written", visible_flag
 _store_flash_already_written:
 	push {lr}
-	string_ln " flash already written"
+	string_ln "flash already written"
 	bl _type
 	pop {pc}
 	end_inlined
@@ -329,7 +329,7 @@ _erase_sector:
 	@@ written
 _attempted_to_write_core_flash:
 	push {lr}
-	string_ln " attempted to write to core flash"
+	string_ln "attempted to write to core flash"
 	bl _type
 	pop {pc}
 	end_inlined
@@ -337,7 +337,7 @@ _attempted_to_write_core_flash:
 	@@ Exception handler for flash writes past the end of flash
 _attempted_to_write_past_flash_end:
 	push {lr}
-	string_ln " attempted to write past flash end"
+	string_ln "attempted to write past flash end"
 	bl _type
 	pop {pc}
 	end_inlined

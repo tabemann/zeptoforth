@@ -26,7 +26,7 @@ compress-flash
 begin-module temp
 
   \ Data size is larger than temporary buffer size exception
-  : x-data-too-big ( -- ) space ." data too big" cr ;
+  : x-data-too-big ( -- ) ." data too big" cr ;
 
   begin-module temp-internal
 

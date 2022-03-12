@@ -193,10 +193,10 @@ begin-module rchan
   end-module> import
 
   \ Bidirectional channel is closed exception
-  : x-rchan-closed ( -- ) space ." rchannel is closed" cr ;
+  : x-rchan-closed ( -- ) ." rchannel is closed" cr ;
 
   \ Reply pending exception
-  : x-reply-pending ( -- ) space ." reply pending" cr ;
+  : x-reply-pending ( -- ) ." reply pending" cr ;
 
   commit-flash
   
@@ -335,7 +335,9 @@ begin-module rchan
       >r
       true r@ rchan-closed !
       r@ rchan-send-queue wake-all-rchan-queue
-      r> rchan-recv-queue wake-all-rchan-queue
+      r@ rchan-recv-queue wake-all-rchan-queue
+      r@ rchan-reply-task @ 1 bic ?dup if ready then
+      0 r> rchan-reply-task !
     ;] over rchan-slock with-slock
   ;
 

@@ -26,7 +26,7 @@ compress-flash
 begin-module heap
 
   \ No blocks free exception
-  : x-allocate-failed ( -- ) space ." allocate failed" cr ;
+  : x-allocate-failed ( -- ) ." allocate failed" cr ;
   
   begin-module heap-internal
     

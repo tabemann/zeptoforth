@@ -24,6 +24,7 @@ Zeptoforth Documentation
    words/heap
    words/map
    words/lock
+   words/slock
    words/channel
    words/fchannel
    words/rchannel

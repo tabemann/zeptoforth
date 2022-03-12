@@ -31,13 +31,13 @@ begin-module heap
   false constant verify-allocated?
 
   \ No blocks free exception
-  : x-allocate-failed ( -- ) space ." allocate failed" cr ;
+  : x-allocate-failed ( -- ) ." allocate failed" cr ;
 
   \ Internal error
-  : x-internal-error ( -- ) space ." heap internal error" cr ;
+  : x-internal-error ( -- ) ." heap internal error" cr ;
 
   \ Memory is not allocated
-  : x-memory-not-allocated ( -- ) space ." memory not allocated" cr ;
+  : x-memory-not-allocated ( -- ) ." memory not allocated" cr ;
 
   begin-module heap-internal
 

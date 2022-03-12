@@ -79,7 +79,7 @@ _store_flash_4:
 	define_internal_word "flash!-unaligned", visible_flag
 _store_flash_4_unaligned:
 	push {lr}
-	string_ln " unaligned 16-byte flash write"
+	string_ln "unaligned 16-byte flash write"
 	bl _type
 	pop {pc}
 	end_inlined
@@ -89,7 +89,7 @@ _store_flash_4_unaligned:
 	define_word "flash!-already-written", visible_flag
 _store_flash_4_already_written:
 	push {lr}
-	string_ln " flash already written"
+	string_ln "flash already written"
 	bl _type
 	pop {pc}
 	end_inlined
@@ -137,7 +137,7 @@ _erase_page:
 	@@ written
 _attempted_to_write_core_flash:
 	push {lr}
-	string_ln " attempted to write to core flash"
+	string_ln "attempted to write to core flash"
 	bl _type
 	pop {pc}
 	end_inlined
@@ -145,7 +145,7 @@ _attempted_to_write_core_flash:
 	@@ Exception handler for flash writes past the end of flash
 _attempted_to_write_past_flash_end:
 	push {lr}
-	string_ln " attempted to write past flash end"
+	string_ln "attempted to write past flash end"
 	bl _type
 	pop {pc}
 	end_inlined
@@ -244,7 +244,7 @@ _init_flash_buffers:
 	define_internal_word "no-flash-buffers-free", visible_flag
 _no_flash_buffers_free:
 	push {lr}
-	string_ln " no flash buffers free"
+	string_ln "no flash buffers free"
 	bl _type
 	pop {pc}
 	end_inlined
