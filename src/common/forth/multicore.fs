@@ -33,7 +33,7 @@ begin-module multicore
   -1 constant slock-spinlock
 
   \ Spinlock out of range exception
-  : x-spinlock-out-of-range space ." spinlock out of range" cr ;
+  : x-spinlock-out-of-range ( -- ) ." spinlock out of range" cr ;
 
   \ Core out of range exception
   : x-core-out-of-range ( -- ) ." core out of range" cr ;
