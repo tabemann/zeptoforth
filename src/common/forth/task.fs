@@ -154,7 +154,10 @@ begin-module task
 
     \ The current core of a task
     user task-core
-  
+
+    \ Task being waited for
+    user task-waited-for
+
     \ SVCall vector index
     11 constant svcall-vector
 
@@ -778,10 +781,10 @@ begin-module task
     ;] cpu-index critical-with-other-core-spinlock
   ;
 
-  \ Ready a task
-  : ready ( task -- )
-    [:
-      dup validate-not-terminated
+  continue-module task-internal
+
+    \ Core of readying a task
+    : do-ready ( task -- )
       dup ['] task-current-notify for-task@ -1 = if
 	1 over ['] task-ready-count for-task +!
 	dup ['] task-ready-count for-task@ 0>= if
@@ -795,6 +798,14 @@ begin-module task
       else
 	drop
       then
+    ;
+
+  end-module
+      
+  \ Ready a task
+  : ready ( task -- )
+    [:
+      dup validate-not-terminated do-ready
     ;] over task-core@ critical-with-other-core-spinlock
   ;
 
@@ -966,6 +977,19 @@ begin-module task
   \ Get whether a task has terminated
   : terminated? ( task -- terminated ) task-active h@ terminated = ;
 
+  \ Ready tasks waiting for current task
+  \ argument
+  : wake-other-tasks ( -- )
+    cpu-count 0 do \ ." E"
+      i cpu-first-task @ begin ?dup while \ ." F"
+	dup ['] task-waited-for for-task@ current-task @ = if \ ." G"
+	  0 over ['] task-waited-for for-task! dup do-ready \ ." H"
+	then \ ." J"
+	task-prev @ \ ." K"
+      repeat \ ." L"
+    loop \ ." M"
+  ;
+  
   continue-module task-internal
     
     \ Initialize the main task
@@ -983,6 +1007,7 @@ begin-module task
       readied over task-state h!
       no-timeout timeout !
       0 task-ready-count !
+      0 task-waited-for !
       0 timeout-systick-start !
       0 timeout-systick-delay !
       0 task-systick-start !
@@ -1049,6 +1074,7 @@ begin-module task
 	dup task-size + over ['] task-stack-end for-task!
 	0 over ['] task-ready-count for-task!
 	0 over ['] task-handler for-task!
+	0 over ['] task-waited-for for-task!
 	0 over task-priority h!
 	0 over task-saved-priority h!
 	0 over task-active h!
@@ -1095,6 +1121,7 @@ begin-module task
     dup task-size + over ['] task-stack-end for-task!
     0 over ['] task-ready-count for-task!
     0 over ['] task-handler for-task!
+    0 over ['] task-waited-for for-task!
     0 over task-priority h!
     0 over task-saved-priority h!
     0 over task-active h!
@@ -1435,6 +1462,7 @@ begin-module task
       \ Initialize an auxiliary core's main task
       : init-aux-main-task ( -- )
 	0 fifo-drain
+	wait-current-core
 	current-task @ task-dict-base @ dict-base !
 	$7F SHPR3_PRI_15!
 	$FF SHPR2_PRI_11!

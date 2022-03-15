@@ -22,14 +22,15 @@ compile-to-flash
 
 begin-module slock
 
+  task import
   multicore import
 
   begin-module slock-internal
   
     begin-structure slock-size
       
-      \ Whether the simple lock is held
-      field: slock-cpu-index
+      \ The claiming task
+      field: slock-task
 
     end-structure
     
@@ -38,21 +39,31 @@ begin-module slock
   export slock-size
 
   \ Initialize a simple lock
-  : init-slock ( addr -- ) -1 swap ! ;
+  : init-slock ( addr -- ) 0 swap ! ;
 
   \ Claim a simple lock
   : claim-slock ( slock -- )
-    ^ internal :: claim-slock
+    begin-critical-wait-core begin
+      dup slock-task @ ?dup if
+	^ task task-internal :: task-waited-for !
+	current-task block-indefinite end-critical-release-core
+	begin-critical-wait-core false
+      else
+	current-task swap slock-task ! end-critical-release-core true
+      then
+    until
   ;
 
   \ Release a simple lock
-  : release-slock ( slock -- ) -1 swap ! ;
+  : release-slock ( slock -- )
+    [: 0 swap ! wake-other-tasks ;] critical-with-all-core-spinlock
+  ;
 
   \ Claim and release a simple lock while properly handling exceptions
   : with-slock ( xt slock -- )
     >r r@ claim-slock try r> release-slock ?raise
   ;
-  
+
 end-module
 
 reboot
