@@ -80,6 +80,15 @@ begin-module multicore
   \ Enter a critical section (and not claim another core's multitasker's
   \ spinlock)
   : critical-with-other-core-spinlock ( xt core -- ) drop critical ;
+
+  \ Enter a critical section (and do not claim any spinlocks)
+  : critical-with-all-core-spinlock ( xt -- ) critical ;
+
+  \ Begin a critical section (and not halt any other core)
+  : begin-critical-wait-core ( -- ) begin-critical ;
+
+  \ End a critcal section (and not release any other core)
+  : end-critical-release-core ( -- ) end-critical ;
   
   \ Drain a multicore FIFO
   : fifo-drain ( core -- ) ['] x-core-out-of-range ?raise ;

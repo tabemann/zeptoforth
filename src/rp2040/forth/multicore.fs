@@ -213,6 +213,19 @@ begin-module multicore
     r> release-spinlock end-critical ?raise
   ;
 
+  \ Enter a critical section and claim both cores' spinlocks, releasing then
+  \ afterwards
+  : critical-with-all-core-spinlock ( xt -- )
+    claim-all-core-spinlock begin-critical try
+    release-all-core-spinlock end-critical ?raise
+  ;
+
+  \ Begin a critical section and not halt any other core
+  : begin-critical-wait-core ( -- ) begin-critical force-core-wait ;
+
+  \ End a critcal section and not release any other core
+  : end-critical-release-core ( -- ) release-core end-critical ;
+
   \ Drain a multicore FIFO
   : fifo-drain ( core -- )
     validate-addressable-core

@@ -89,13 +89,14 @@ begin-module fchan
 
     \ Get last higher priority wait in queue
     : find-fchan-queue-next ( priority queue -- wait|0 )
-      fchan-queue-last @
-      begin dup while
+      fchan-queue-last @ ( priority current )
+      begin dup while ( priority current )
 	dup fchan-wait-task @ task-priority@
-	2 pick >= if nip exit then
-	fchan-wait-next @
+	( priority current current-priority )
+	2 pick >= if nip ( current ) exit then
+	fchan-wait-next @ ( priority next )
       repeat
-      nip
+      nip ( 0 )
     ;
 
     \ Insert a wait into a queue
@@ -194,6 +195,7 @@ begin-module fchan
   : send-fchan ( addr bytes fchan -- )
     >r
     r@ fchan-closed @ triggers x-fchan-closed
+\    ." !" current-task h.8 ." #" current-task task-priority@ .
     r@ fchan-slock claim-slock
     s" BEGIN SEND-FCHAN" trace
     current-task prepare-block
@@ -229,6 +231,7 @@ begin-module fchan
   : recv-fchan ( addr bytes fchan -- recv-bytes )
     >r
     r@ fchan-closed @ triggers x-fchan-closed
+\    ." @" current-task h.8 ." #" current-task task-priority@ .
     r@ fchan-slock claim-slock
     s" BEGIN RECV-FCHAN" trace
     current-task prepare-block
