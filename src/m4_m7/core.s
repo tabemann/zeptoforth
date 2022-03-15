@@ -959,8 +959,6 @@ _bracket_inlined:
 	bx lr
 	end_inlined
 
-	.ltorg
-	
 	@@ Set the currently-defined word to be immediate
 	define_word "immediate", visible_flag
 _immediate:
@@ -972,6 +970,8 @@ _immediate:
 	bx lr
 	end_inlined
 
+	.ltorg
+	
 	@@ Set the currently-defined word to be compile-only
 	define_word "compile-only", visible_flag
 _compile_only:
@@ -2296,26 +2296,6 @@ _init_vector_table:
 	dsb
 	isb
 	bx lr
-
-	@@ Implement claiming a simple lock ( slock -- )
-	define_internal_word "claim-slock", visible_flag
-_claim_slock:
-	push {lr}
-1:	cpsid i
-	ldr r1, [tos]
-	cmp r1, #0
-	blt 2f
-	cpsie i
-	bl _pause
-	b 1b
-2:	movs r2, #0
-	str r2, [tos]
-	cpsie i
-	ldr r1, =-1
-	str r1, [r0]
-	pull_tos
-	pop {pc}
-	end_inlined
 
 	.ltorg
 	

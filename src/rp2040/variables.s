@@ -24,8 +24,8 @@
 	
 	allot core_1_launched, 4
 
-	allot begin_write, 4
+	allot begin_core_wait, 4 * cpu_count
 
-	allot waiting_write_done, 4
+	allot core_waited, 4 * cpu_count
 
-	allot hold_core, 4
+	allot hold_core, 4 * cpu_count

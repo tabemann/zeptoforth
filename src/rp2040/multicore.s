@@ -51,56 +51,28 @@
 	@@ The simple lock spinlock
 	.equ SLOCK_SPINLOCK, SIO_BASE + 0x100 + (28 * 4)
 
-	@@ Implement claiming a simple lock ( slock -- )
-	define_internal_word "claim-slock", visible_flag
-_claim_slock:
-	push {lr}
-	ldr r0, =SLOCK_SPINLOCK
-	ldr r2, =SIO_CPUID
-	ldr r2, [r2]
-1:	ldr r1, [r0]
-	cmp r1, #0
-	beq 1b
-@	cpsid i
-	ldr r1, [tos]
-	cmp r1, #0
-	blt 2f
-@	cpsie i
-	ldr r3, =-1
-	str r3, [r0]
-	cmp r1, r2
-	bne 1b
-	push {r0, r2}
-	bl _pause
-	pop {r0, r2}
-	b 1b
-2:	str r2, [tos]
-@	cpsie i
-	ldr r1, =-1
-	str r1, [r0]
-	pull_tos
-	pop {pc}
-	end_inlined
-
 	@@ Handle SIO interrupt
 _handle_sio:
 	push {lr}
 	cpsid i
-	ldr r0, =begin_write
-	ldr r1, [r0]
+	ldr r3, =SIO_CPUID
+	ldr r3, [r3]
+	lsls r3, r3, #2
+	ldr r0, =begin_core_wait
+	ldr r1, [r0, r3]
 	cmp r1, #0
 	beq 3f
-	ldr r2, =waiting_write_done
+	ldr r2, =core_waited
 	ldr r1, =-1
-	str r1, [r2]
-1:	ldr r1, [r0]
+	str r1, [r2, r3]
+1:	ldr r1, [r0, r3]
 	cmp r1, #0
 	beq 2f
 	b 1b
 2:	movs r1, #0
-	str r1, [r2]
+	str r1, [r2, r3]
 	ldr r0, =hold_core
-	ldr r0, [r0]
+	ldr r0, [r0, r3]
 	cmp r0, #0
 	bne 3f
 	cpsie i
@@ -112,14 +84,11 @@ _handle_sio:
 	ldr r0, =FIFO_RD
 	ldr r1, [r0]
 	ldr r0, =hold_core
-	ldr r0, [r0]
+	ldr r0, [r0, r3]
 	cmp r0, #0
 	beq 3b
-	ldr r0, =SIO_CPUID
-	ldr r2, [r0]
-	lsls r2, r2, #2
 	ldr r0, =sio_hook
-	ldr r2, [r0, r2]
+	ldr r2, [r0, r3]
 	cmp r2, #0
 	beq 3b
 	push_tos
@@ -131,7 +100,7 @@ _handle_sio:
 	ldr r1, =FIFO_ST_ROE | FIFO_ST_WOF
 	str r1, [r0]
 	ldr r0, =hold_core
-	ldr r0, [r0]
+	ldr r0, [r0, r3]
 	cmp r0, #0
 	beq 5f
 	bl _loop_forever_fifo
@@ -141,19 +110,22 @@ _handle_sio:
 	define_internal_word "loop-forever-fifo", visible_flag
 _loop_forever_fifo:
 	push {lr}
-4:	ldr r0, =begin_write
-	ldr r1, [r0]
+	ldr r3, =SIO_CPUID
+	ldr r3, [r3]
+	lsls r3, r3, #2
+4:	ldr r0, =begin_core_wait
+	ldr r1, [r0, r3]
 	cmp r1, #0
 	beq 3f
-	ldr r2, =waiting_write_done
+	ldr r2, =core_waited
 	ldr r1, =-1
-	str r1, [r2]
-1:	ldr r1, [r0]
+	str r1, [r2, r3]
+1:	ldr r1, [r0, r3]
 	cmp r1, #0
 	beq 2f
 	b 1b
 2:	movs r1, #0
-	str r1, [r2]
+	str r1, [r2, r3]
 3:	ldr r0, =FIFO_ST
 	ldr r0, [r0]
 	movs r1, #FIFO_ST_VLD
@@ -168,49 +140,77 @@ _loop_forever_fifo:
 	@@ Force the other core to wait
 	define_internal_word "force-core-wait", visible_flag
 _force_core_wait:
+	ldr r3, =SIO_CPUID
+	ldr r3, [r3]
+	movs r1, #1
+	eors r3, r1
+	lsls r3, r3, #2
+	ldr r0, =begin_core_wait
+	ldr r1, =-1
+	str r1, [r0, r3]
 	ldr r0, =core_1_launched
 	ldr r0, [r0]
 	cmp r0, #0
 	beq 2f
-	ldr r0, =begin_write
-	ldr r1, =-1
-	str r1, [r0]
 	ldr r2, =FIFO_WR
 	str r1, [r2]
-	ldr r2, =waiting_write_done
-1:	ldr r1, [r2]
+	ldr r2, =core_waited
+1:	ldr r1, [r2, r3]
 	cmp r1, #0
 	beq 1b
-	bx lr
+2:	bx lr
 	end_inlined
 
 	@@ Release the other core
 	define_internal_word "release-core", visible_flag
 _release_core:	
+	ldr r3, =SIO_CPUID
+	ldr r3, [r3]
+	movs r1, #1
+	eors r3, r1
+	lsls r3, r3, #2
+	ldr r0, =begin_core_wait
+	movs r1, #0
+	str r1, [r0, r3]
 	ldr r0, =core_1_launched
 	ldr r0, [r0]
 	cmp r0, #0
 	beq 2f
-	ldr r0, =begin_write
-	movs r1, #0
-	str r1, [r0]
-	ldr r0, =waiting_write_done
-1:	ldr r1, [r0]
+	ldr r0, =core_waited
+1:	ldr r1, [r0, r3]
 	cmp r1, #0
 	bne 1b
 2:	bx lr
 	end_inlined
 
+	@@ Wait if necessary if a wait has already begun
+	define_internal_word "wait-current-core", visible_flag
+_wait_current_core:
+	ldr r3, =SIO_CPUID
+	ldr r3, [r3]
+	lsls r3, r3, #2
+	ldr r0, =begin_core_wait
+1:	ldr r1, [r0, r3]
+	cmp r1, #0
+	bne 1b
+	bx lr
+	end_inlined
+
 	@@ Hold a core in a loop
 	define_internal_word "hold-core", visible_flag
 _hold_core:	
+	ldr r3, =SIO_CPUID
+	ldr r3, [r3]
+	movs r1, #1
+	eors r3, r1
+	lsls r3, r3, #2
 	ldr r0, =core_1_launched
 	ldr r0, [r0]
 	cmp r0, #0
 	beq 1f
 	ldr r0, =hold_core
 	ldr r1, =-1
-	str r1, [r0]
+	str r1, [r0, r3]
 	ldr r2, =FIFO_WR
 	str r1, [r2]
 1:	bx lr
