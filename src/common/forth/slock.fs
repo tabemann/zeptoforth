@@ -43,20 +43,67 @@ begin-module slock
 
   \ Claim a simple lock
   : claim-slock ( slock -- )
-    begin-critical-wait-core begin
+    begin-critical slock-spinlock claim-spinlock begin
       dup slock-task @ ?dup if
-	^ task task-internal :: task-waited-for !
-	current-task block-indefinite end-critical-release-core
-	begin-critical-wait-core false
+	^ task-internal :: task-waited-for !
+	slock-spinlock ^ task-internal :: spinlock-to-claim !
+	-1 ^ task-internal :: task-ready-count +!
+	^ task-internal :: task-ready-count @ 0< if
+	  slock-spinlock ^ task-internal :: spinlock-to-claim !
+	  [ ^ task-internal :: blocked-indefinite
+	  ^ task-internal :: schedule-critical or
+	  ^ task-internal :: schedule-with-spinlock or ] literal
+	else
+	  [ ^ task-internal :: readied
+	  ^ task-internal :: schedule-critical or
+	  ^ task-internal :: schedule-with-spinlock or ] literal
+	then
+	current-task ^ task-internal :: task-state h!
+	slock-spinlock release-spinlock end-critical
+	pause
+	slock-spinlock claim-spinlock
+	false
       else
-	current-task swap slock-task ! end-critical-release-core true
+	current-task swap slock-task !
+	slock-spinlock release-spinlock end-critical
+	true
       then
     until
   ;
 
+\  \ Claim a simple lock
+\  : claim-slock ( slock -- )
+\    begin-critical claim-all-core-spinlock begin
+\      dup slock-task @ ?dup if
+\	^ task-internal :: task-waited-for !
+\	-1 ^ task-internal :: task-ready-count +!
+\	^ task-internal :: task-ready-count @ 0< if
+\	  [ ^ task-internal :: blocked-indefinite
+\	  ^ task-internal :: schedule-critical or ] literal
+\	  current-task ^ task-internal :: task-state h!
+\	  release-all-core-spinlock end-critical
+\	  pause
+\	  claim-all-core-spinlock
+\	else
+\	  [ ^ task-internal :: schedule-critical ] literal
+\	  current-task ^ task-internal :: task-state h!
+\	  release-all-core-spinlock end-critical
+\	  pause
+\	  claim-all-core-spinlock
+\	then
+\	false
+\      else
+\	current-task swap slock-task ! release-all-core-spinlock end-critical
+\	true
+\      then
+\    until
+\  ;
+
   \ Release a simple lock
   : release-slock ( slock -- )
-    [: 0 swap ! wake-other-tasks ;] critical-with-all-core-spinlock
+    begin-critical slock-spinlock claim-spinlock claim-all-core-spinlock
+    0 swap ! wake-other-tasks
+    release-all-core-spinlock slock-spinlock release-spinlock end-critical
   ;
 
   \ Claim and release a simple lock while properly handling exceptions
