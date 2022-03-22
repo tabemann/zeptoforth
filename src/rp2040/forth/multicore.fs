@@ -300,6 +300,6 @@ end-module> import
 ;
 
 \ Set up reboot to reset the second core
-: reboot ( -- ) prepare-reboot reboot ;
+: reboot ( -- ) [: prepare-reboot reboot ;] critical ;
 \ Reboot
 reboot

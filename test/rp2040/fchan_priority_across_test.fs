@@ -26,12 +26,15 @@ continue-module forth
   \ Our fchannel
   fchan-size buffer: my-fchan
 
+  \ Generate task index from priority
+  : task-index ( priority -- index ) cpu-index 4 * + ;
+
   \ Our producers
   : producer ( delay-ms send-count priority -- )
-    >r r@ current-task task-priority!
+    >r r@ current-task task-priority! r@ 500 * ms
     begin
       dup begin ?dup while
-	r@ [: my-fchan send-fchan ;] provide-allot-cell 1-
+	r@ task-index [: my-fchan send-fchan ;] provide-allot-cell 1-
       repeat
       over ms
     again
@@ -39,10 +42,11 @@ continue-module forth
 
   \ Our consumers
   : consumer ( delay-ms recv-count priority -- )
-    >r r@ current-task task-priority!
+    >r r@ current-task task-priority! r@ 1+ 500 * ms
     begin
       dup begin ?dup while
-	[: my-fchan recv-fchan ;] extract-allot-cell r@ (.) ." :" . 1-
+	[: my-fchan recv-fchan ;] extract-allot-cell
+	r@ task-index (.) ." :" . 1-
       repeat
       over ms
     again
@@ -51,7 +55,7 @@ continue-module forth
   \ Initialize our test
   : init-test ( -- )
     my-fchan init-fchan
-    2 current-task task-priority!
+    3 current-task task-priority!
     1000 3000 0 3 ['] producer 320 128 512 0 spawn-on-core run
     1500 2000 0 3 ['] consumer 320 128 512 0 spawn-on-core run
     1000 3000 0 3 ['] producer 320 128 512 1 spawn-on-core run
@@ -60,6 +64,16 @@ continue-module forth
     1500 3000 1 3 ['] consumer 320 128 512 0 spawn-on-core run
     1000 3000 1 3 ['] producer 320 128 512 1 spawn-on-core run
     1500 3000 1 3 ['] consumer 320 128 512 1 spawn-on-core run
+
+\    1000 3000 1 3 ['] producer 320 128 512 0 spawn-on-core run
+\    1500 2000 1 3 ['] consumer 320 128 512 0 spawn-on-core run
+\    1000 3000 1 3 ['] producer 320 128 512 1 spawn-on-core run
+\    1500 2000 1 3 ['] consumer 320 128 512 1 spawn-on-core run
+\    1000 3000 2 3 ['] producer 320 128 512 0 spawn-on-core run
+\    1500 3000 2 3 ['] consumer 320 128 512 0 spawn-on-core run
+\    1000 3000 2 3 ['] producer 320 128 512 1 spawn-on-core run
+\    1500 3000 2 3 ['] consumer 320 128 512 1 spawn-on-core run
+
     0 current-task task-priority!
   ;
   
