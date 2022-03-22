@@ -1131,6 +1131,9 @@ forth set-current
   then
 ;
 
+\ End a critical section and pause
+: end-critical-pause ( -- ) disable-int 0 in-critical ! pause enable-int ;
+
 \ Commit to flash
 commit-flash
 

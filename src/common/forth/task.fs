@@ -49,7 +49,10 @@ begin-module task
     \ Task block timed out
     5 constant block-timed-out
 
-    \ Claim task spinlock on schedule bit
+    \ Claim same core spinlock on schedule bit
+    $1000 constant schedule-with-same-core-spinlock
+
+    \ Claim arbitrary spinlock on schedule bit
     $2000 constant schedule-with-spinlock
     
     \ User schedule into critical section bit
@@ -59,7 +62,7 @@ begin-module task
     $8000 constant schedule-critical
 
     \ Task state mask
-    $1FFF constant task-state-mask
+    $0FFF constant task-state-mask
     
     \ In task change
     cpu-variable cpu-in-task-change in-task-change
@@ -716,6 +719,22 @@ begin-module task
     current-task @ = if pause then
   ;
 
+  \ Exit a critical section, release a spinlock, block indefinitely, and then
+  \ claim the spinlock and enter a critical section on readying
+  : block-indefinite-self-release ( spinlock -- )
+    -1 task-ready-count +!
+    dup spinlock-to-claim !
+    task-ready-count @ 0< if
+      [ blocked-indefinite schedule-critical or schedule-user-critical or
+      schedule-with-spinlock or schedule-with-same-core-spinlock or ] literal
+    else
+      [ readied schedule-critical or schedule-user-critical or
+      schedule-with-spinlock or schedule-with-same-core-spinlock or ] literal
+    then
+    current-task @ task-state h!
+    release-spinlock release-same-core-spinlock end-critical-pause
+  ;
+
   \ Mark a task as blocked indefinitely and schedule as critical and claim a
   \ spinlock when done
   : block-indefinite-with-spinlock ( spinlock task -- )
@@ -790,7 +809,7 @@ begin-module task
 	dup ['] task-ready-count for-task@ 0>= if
 	  dup task-state h@
 	  [ schedule-critical schedule-user-critical or
-	  schedule-with-spinlock or ]
+	  schedule-with-spinlock or schedule-with-same-core-spinlock or ]
 	  literal and readied or swap task-state h!
 	else
 	  drop
@@ -1278,6 +1297,9 @@ begin-module task
 		false
 	      else
 		dup task-state h@
+		dup schedule-with-same-core-spinlock and if
+		  claim-same-core-spinlock
+		then
 		dup schedule-critical and if
 		  1 in-critical !
 		then
