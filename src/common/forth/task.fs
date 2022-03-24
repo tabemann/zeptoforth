@@ -722,17 +722,31 @@ begin-module task
   \ Exit a critical section, release a spinlock, block indefinitely, and then
   \ claim the spinlock and enter a critical section on readying
   : block-indefinite-self-release ( spinlock -- )
-    -1 task-ready-count +!
-    dup spinlock-to-claim !
-    task-ready-count @ 0< if
-      [ blocked-indefinite schedule-critical or schedule-user-critical or
-      schedule-with-spinlock or schedule-with-same-core-spinlock or ] literal
-    else
-      [ readied schedule-critical or schedule-user-critical or
-      schedule-with-spinlock or schedule-with-same-core-spinlock or ] literal
-    then
-    current-task @ task-state h!
-    release-spinlock release-same-core-spinlock end-critical-pause
+    disable-int
+    -1 task-ready-count !
+    blocked-indefinite current-task @ task-state h!
+    release-same-core-spinlock
+    dup release-spinlock 
+    0 in-critical !
+    pause
+    enable-int
+    disable-int
+    1 in-critical !
+    claim-same-core-spinlock
+    claim-spinlock
+    enable-int
+
+\     -1 task-ready-count +!
+\     dup spinlock-to-claim !
+\     task-ready-count @ 0< if
+\       [ blocked-indefinite schedule-critical or schedule-user-critical or
+\       schedule-with-spinlock or schedule-with-same-core-spinlock or ] literal
+\     else
+\       [ readied schedule-critical or schedule-user-critical or
+\       schedule-with-spinlock or schedule-with-same-core-spinlock or ] literal
+\     then
+\     current-task @ task-state h!
+\     release-spinlock release-same-core-spinlock end-critical-pause
   ;
 
   \ Mark a task as blocked indefinitely and schedule as critical and claim a
