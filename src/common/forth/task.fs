@@ -725,15 +725,15 @@ begin-module task
     disable-int
     -1 task-ready-count !
     blocked-indefinite current-task @ task-state h!
-    release-same-core-spinlock
-    dup release-spinlock 
+    release-same-core-spinlock-raw
+    dup release-spinlock-raw
     0 in-critical !
     pause
     enable-int
     disable-int
     1 in-critical !
-    claim-same-core-spinlock
-    claim-spinlock
+    claim-same-core-spinlock-raw
+    claim-spinlock-raw
     enable-int
 
 \     -1 task-ready-count +!
