@@ -144,6 +144,18 @@ begin-module multicore
 
   \ Release the simple lock spinlock
   : release-slock-spinlock ( -- ) -1 [ slock-spinlock SPINLOCK ] literal ! ;
+
+  \ Just claim a spinlock
+  : claim-spinlock-raw ( index -- )
+    dup spinlock-lock-count dup @ 1+ dup rot !
+    1 = if SPINLOCK begin dup @ until then drop
+  ;
+
+  \ Just release a spinlock ( index -- )
+  : release-spinlock-raw ( index -- )
+    dup spinlock-lock-count dup @ 1- dup rot !
+    0= if SPINLOCK -1 swap ! else drop then
+  ;
   
   \ Claim a spinlock
   : claim-spinlock ( index -- )
@@ -171,6 +183,16 @@ begin-module multicore
   \ Release a spinlock for the current core's multitasker
   : release-same-core-spinlock ( -- )
     cpu-index task-core-0-spinlock + release-spinlock
+  ;
+
+  \ Just claim a spinlock for the current core's multitasker
+  : claim-same-core-spinlock-raw ( -- )
+    cpu-index task-core-0-spinlock + claim-spinlock-raw
+  ;
+
+  \ Just release a spinlock for the current core's multitasker
+  : release-same-core-spinlock-raw ( -- )
+    cpu-index task-core-0-spinlock + release-spinlock-raw
   ;
 
   \ Claim a spinlock for a different core's multitasker
