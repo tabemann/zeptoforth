@@ -203,21 +203,22 @@ begin-module fchan
       swap over fchan-wait-buf-size @ min ( addr wait bytes )
       >r swap over fchan-wait-buf @ r@ ( wait addr recv-addr bytes ) move
       r> over fchan-wait-buf-size ! ( wait )
-      r> fchan-slock release-slock ( wait )
       fchan-wait-task @ ready ( )
+      r> fchan-slock release-slock ( )
+\      fchan-wait-task @ ready ( )
     else
       r> fchan-wait-size [: swap >r ( addr bytes wait )
 	current-task over fchan-wait-task ! ( addr bytes wait )
 	tuck fchan-wait-buf-size ! ( addr wait )
 	tuck fchan-wait-buf ! ( wait )
 	dup r@ fchan-send-queue push-fchan-queue ( wait )
-	r@ fchan-slock release-slock ( wait )
-	[: current-task block ;] try ( wait exc )
-	?dup if
-	  r@ fchan-slock claim-slock ( wait exc )
-	  swap r@ fchan-send-queue remove-fchan-queue ( exc )
-	  r> fchan-slock release-slock ( exc )
-	  ?raise
+\	r@ fchan-slock release-slock ( wait )
+	r@ fchan-slock release-slock-block ( wait )
+	current-task timed-out? if
+	  r@ fchan-slock claim-slock ( wait )
+	  r@ fchan-send-queue remove-fchan-queue ( )
+	  r> fchan-slock release-slock ( )
+	  ['] x-timed-out ?raise
 	else ( wait )
 	  drop ( )
 	  r> fchan-closed @ triggers x-fchan-closed ( )
@@ -239,21 +240,22 @@ begin-module fchan
       swap over fchan-wait-buf-size @ min ( addr wait bytes )
       >r swap over fchan-wait-buf @ swap r@ ( wait send-addr addr bytes ) move
       r> swap ( bytes wait )
-      r> fchan-slock release-slock ( bytes wait )
       fchan-wait-task @ ready ( bytes )
+      r> fchan-slock release-slock ( bytes )
+\      fchan-wait-task @ ready ( bytes )
     else
       r> fchan-wait-size [: swap >r ( addr bytes wait )
 	current-task over fchan-wait-task ! ( addr bytes wait )
 	tuck fchan-wait-buf-size ! ( addr wait )
 	tuck fchan-wait-buf ! ( wait )
 	dup r@ fchan-recv-queue push-fchan-queue ( wait )
-	r@ fchan-slock release-slock ( wait )
-	[: current-task block ;] try ( wait exc )
-	?dup if
-	  r@ fchan-slock claim-slock ( wait exc )
-	  swap r@ fchan-recv-queue remove-fchan-queue ( exc )
-	  r> fchan-slock release-slock ( exc )
-	  ?raise
+\	r@ fchan-slock release-slock ( wait )
+	r@ fchan-slock release-slock-block ( wait )
+	current-task timed-out? if
+	  r@ fchan-slock claim-slock ( wait )
+	  r@ fchan-recv-queue remove-fchan-queue ( )
+	  r> fchan-slock release-slock ( )
+	  ['] x-timed-out ?raise
 	else ( wait )
 	  r> fchan-closed @ triggers x-fchan-closed
 	  fchan-wait-buf-size @ ( bytes )

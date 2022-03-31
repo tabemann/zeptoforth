@@ -231,12 +231,12 @@ begin-module rchan
 	swap r@ rchan-reply-buf ! ( s-addr s-bytes wait )
 	current-task r@ rchan-reply-task ! ( s-addr s-bytes wait )
 	-rot 2drop ( wait )
-	r@ rchan-slock release-slock ( wait )
 	rchan-wait-task @ ready ( )
-	[: current-task block ;] try ( exc )
-	r@ rchan-reply-buf-size @ ( exc r-bytes' )
-	0 r@ rchan-reply-task ! ( exc r-bytes' )
-	swap ?raise ( r-bytes' )
+\	r@ rchan-slock release-slock ( )
+	r@ rchan-slock release-slock-block ( )
+	r@ rchan-reply-buf-size @ ( r-bytes' )
+	0 r@ rchan-reply-task ! ( r-bytes' )
+	current-task timed-out? triggers x-timed-out
 	r> rchan-closed @ triggers x-rchan-closed ( r-bytes' )
 	false
       else
@@ -253,15 +253,15 @@ begin-module rchan
 	tuck rchan-wait-buf-size ! ( s-addr wait )
 	tuck rchan-wait-buf ! ( wait )
 	dup r@ rchan-send-queue push-rchan-queue ( wait )
-	r@ rchan-slock release-slock ( wait )
-	[: current-task block ;] try ( wait exc )
-	?dup if
-	  r@ rchan-slock claim-slock ( wait exc )
-	  r@ rchan-reply-task @ 1 bic ( wait exc task )
-	  current-task = if 0 r@ rchan-reply-task ! then ( wait exc )
-	  swap r@ rchan-send-queue remove-rchan-queue ( exc )
-	  r> rchan-slock release-slock ( exc )
-	  ?raise
+\	r@ rchan-slock release-slock ( wait )
+	r@ rchan-slock release-slock-block ( wait )
+	current-task timed-out? if
+	  r@ rchan-slock claim-slock ( wait )
+	  r@ rchan-reply-task @ 1 bic ( wait task )
+	  current-task = if 0 r@ rchan-reply-task ! then ( wait )
+	  r@ rchan-send-queue remove-rchan-queue ( )
+	  r> rchan-slock release-slock ( )
+	  ['] x-timed-out ?raise
 	else ( wait )
 	  drop ( )
 	  r@ rchan-reply-buf-size @ ( r-bytes' )
@@ -294,13 +294,13 @@ begin-module rchan
 	tuck rchan-wait-buf-size ! ( addr wait )
 	tuck rchan-wait-buf ! ( wait )
 	dup r@ rchan-recv-queue push-rchan-queue ( wait )
-	r@ rchan-slock release-slock ( wait )
-	[: current-task block ;] try ( wait exc )
-	?dup if
-	  r@ rchan-slock claim-slock ( wait exc )
-	  swap r@ rchan-recv-queue remove-rchan-queue ( exc )
-	  r> rchan-slock release-slock ( exc )
-	  ?raise
+\	r@ rchan-slock release-slock ( wait )
+	r@ rchan-slock release-slock-block ( wait )
+	current-task timed-out? if
+	  r@ rchan-slock claim-slock ( wait )
+	  r@ rchan-recv-queue remove-rchan-queue ( )
+	  r> rchan-slock release-slock ( )
+	  ['] x-timed-out ?raise
 	else ( wait )
 	  rchan-wait-buf-size @ ( bytes )
 	  r> rchan-closed @ triggers x-rchan-closed ( bytes )
@@ -321,9 +321,10 @@ begin-module rchan
       r@ rchan-reply-buf-size @ min ( addr r-addr r-bytes )
       move ( )
       r@ rchan-reply-task @ ( r-task )
-      r@ rchan-reply-task 1 or r@ rchan-reply-task ! ( r-task )
-      r> rchan-slock release-slock ( )
+      dup 1 or r@ rchan-reply-task ! ( r-task )
       ready ( )
+      r> rchan-slock release-slock ( )
+\      ready ( )
     else
       2drop r> rchan-slock release-slock ( )
     then
