@@ -47,12 +47,30 @@ begin-module multicore
   \ Release the simple lock spinlock - note that this is a no-op
   : release-slock-spinlock ( -- ) ;
 
+  \ Just claim a spinlock - note that this is a no-op
+  : claim-spinlock-raw ( index -- ) drop ;
+
+  \ Just release a spinlock - note that this is a no-op
+  : release-spinlock-raw ( index -- ) drop ;
+
   \ Claim a spinlock - note that this is a no-op
   : claim-spinlock ( index -- ) drop ;
 
   \ Release a spinlock - note that this is a no-op
   : release-spinlock ( index -- ) drop ;
 
+  \ Just claim a spinlock for the current core's multitasker - this is a no-op
+  : claim-same-core-spinlock-raw ( -- ) ;
+
+  \ Just release a spinlock for the current core's multitasker - this is a no-op
+  : release-same-core-spinlock-raw ( -- ) ;
+
+  \ Just claim a spinlock for all cores' multitasker - this is a no-op
+  : claim-all-core-spinlock-raw ( -- ) ;
+
+  \ Just release a spinlock for all-cores multitasker - this is a no-op
+  : release-all-core-spinlock-raw ( -- ) ;
+  
   \ Claim a spinlock for the current core's multitasker - this is a no-op
   : claim-same-core-spinlock ( -- ) ;
 

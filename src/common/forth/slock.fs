@@ -43,9 +43,12 @@ begin-module slock
 
   \ Claim a simple lock
   : claim-slock ( slock -- )
-    begin-critical
-    claim-same-core-spinlock
-    slock-spinlock claim-spinlock
+    \ begin-critical
+    \ claim-same-core-spinlock
+    \ slock-spinlock claim-spinlock
+    disable-int
+    claim-same-core-spinlock-raw
+    slock-spinlock claim-spinlock-raw
     begin
       dup slock-task @ ?dup if
 	^ task-internal :: task-waited-for !
@@ -56,9 +59,12 @@ begin-module slock
 	true
       then
     until
-    release-same-core-spinlock
-    slock-spinlock release-spinlock
-    end-critical
+    \ release-same-core-spinlock
+    \ slock-spinlock release-spinlock
+    \ end-critical
+    release-same-core-spinlock-raw
+    slock-spinlock release-spinlock-raw
+    enable-int
   ;
 
 \   : claim-slock ( slock -- )
@@ -92,9 +98,20 @@ begin-module slock
 
   \ Release a simple lock
   : release-slock ( slock -- )
-    claim-all-core-spinlock begin-critical
+    disable-int claim-all-core-spinlock-raw
     0 swap ! wake-other-tasks
-    release-all-core-spinlock end-critical
+    release-all-core-spinlock-raw enable-int
+    
+\    claim-all-core-spinlock begin-critical
+\    0 swap ! wake-other-tasks
+\    release-all-core-spinlock end-critical
+  ;
+
+  \ Release a simple lock and block atomically
+  : release-slock-block ( slock -- )
+    disable-int claim-all-core-spinlock-raw
+    0 swap ! wake-other-tasks current-task block-raw
+    release-all-core-spinlock-raw enable-int
   ;
 
   \ Claim and release a simple lock while properly handling exceptions
