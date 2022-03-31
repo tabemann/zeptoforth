@@ -195,6 +195,18 @@ begin-module multicore
     cpu-index task-core-0-spinlock + release-spinlock-raw
   ;
 
+  \ Just claim a spinlock for all cores' multitasker
+  : claim-all-core-spinlock-raw ( -- )
+    task-core-0-spinlock claim-spinlock-raw
+    task-core-1-spinlock claim-spinlock-raw
+  ;
+
+  \ Just release a spinlock for all-cores multitasker
+  : release-all-core-spinlock-raw ( -- )
+    task-core-0-spinlock release-spinlock-raw
+    task-core-1-spinlock release-spinlock-raw
+  ;
+
   \ Claim a spinlock for a different core's multitasker
   : claim-other-core-spinlock ( core -- )
     task-core-0-spinlock + claim-spinlock

@@ -719,22 +719,21 @@ begin-module task
     current-task @ = if pause then
   ;
 
-  \ Exit a critical section, release a spinlock, block indefinitely, and then
-  \ claim the spinlock and enter a critical section on readying
+  \ Release the same core spinlock, release a spinlock, block indefinitely, and
+  \ then claim the same core spinlock, and claim a spinlock.
   : block-indefinite-self-release ( spinlock -- )
-    disable-int
-    -1 task-ready-count !
-    blocked-indefinite current-task @ task-state h!
+    -1 task-ready-count +!
+    task-ready-count @ 0< if blocked-indefinite else readied then
+    current-task @ task-state h!
     release-same-core-spinlock-raw
     dup release-spinlock-raw
-    0 in-critical !
+\    0 in-critical !
     pause
     enable-int
     disable-int
-    1 in-critical !
+\    1 in-critical !
     claim-same-core-spinlock-raw
     claim-spinlock-raw
-    enable-int
 
 \     -1 task-ready-count +!
 \     dup spinlock-to-claim !
@@ -1021,6 +1020,29 @@ begin-module task
 	task-prev @ \ ." K"
       repeat \ ." L"
     loop \ ." M"
+  ;
+
+  \ Block the current task with spinlocks already held
+  : block-raw ( task -- )
+    dup validate-not-terminated
+    dup ['] timeout for-task@ no-timeout <> if
+      dup ['] timeout-systick-delay for-task@
+      over ['] timeout-systick-start for-task@
+      rot -1 over ['] task-ready-count for-task +!
+      dup ['] task-ready-count for-task@ 0< if
+	tuck ['] task-systick-start for-task!
+	tuck ['] task-systick-delay for-task!
+	blocked-timeout over task-state h!
+      else
+	nip nip
+      then
+    else
+      -1 over ['] task-ready-count for-task +!
+      dup ['] task-ready-count for-task@ 0< if
+	blocked-indefinite over task-state h!
+      then
+    then
+    current-task @ = if pause then
   ;
   
   continue-module task-internal
