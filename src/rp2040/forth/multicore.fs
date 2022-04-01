@@ -137,14 +137,6 @@ begin-module multicore
   \ 1 lock-number lshift on success; writing any value will release the spinlock
   : SPINLOCK ( index -- addr ) [ SIO_BASE $100 + ] literal swap 2 lshift + ;
 
-  \ Claim the simple lock spinlock
-  : claim-slock-spinlock ( -- )
-    [ slock-spinlock SPINLOCK ] literal begin dup @ until drop
-  ;
-
-  \ Release the simple lock spinlock
-  : release-slock-spinlock ( -- ) -1 [ slock-spinlock SPINLOCK ] literal ! ;
-
   \ Just claim a spinlock
   : claim-spinlock-raw ( index -- )
     dup spinlock-lock-count dup @ 1+ dup rot !
@@ -156,7 +148,7 @@ begin-module multicore
     dup spinlock-lock-count dup @ 1- dup rot !
     0= if SPINLOCK -1 swap ! else drop then
   ;
-  
+
   \ Claim a spinlock
   : claim-spinlock ( index -- )
 \    dup spinlock-count u< averts x-spinlock-out-of-range
@@ -183,16 +175,6 @@ begin-module multicore
   \ Release a spinlock for the current core's multitasker
   : release-same-core-spinlock ( -- )
     cpu-index task-core-0-spinlock + release-spinlock
-  ;
-
-  \ Just claim a spinlock for the current core's multitasker
-  : claim-same-core-spinlock-raw ( -- )
-    cpu-index task-core-0-spinlock + claim-spinlock-raw
-  ;
-
-  \ Just release a spinlock for the current core's multitasker
-  : release-same-core-spinlock-raw ( -- )
-    cpu-index task-core-0-spinlock + release-spinlock-raw
   ;
 
   \ Just claim a spinlock for all cores' multitasker
@@ -253,12 +235,6 @@ begin-module multicore
     claim-all-core-spinlock begin-critical try
     release-all-core-spinlock end-critical ?raise
   ;
-
-  \ Begin a critical section and not halt any other core
-  : begin-critical-wait-core ( -- ) begin-critical force-core-wait ;
-
-  \ End a critcal section and not release any other core
-  : end-critical-release-core ( -- ) release-core end-critical ;
 
   \ Drain a multicore FIFO
   : fifo-drain ( core -- )

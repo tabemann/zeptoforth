@@ -719,34 +719,21 @@ begin-module task
     current-task @ = if pause then
   ;
 
-  \ Release the same core spinlock, release a spinlock, block indefinitely, and
-  \ then claim the same core spinlock, and claim a spinlock.
-  : block-indefinite-self-release ( spinlock -- )
-    -1 task-ready-count +!
-    task-ready-count @ 0< if blocked-indefinite else readied then
-    current-task @ task-state h!
-    release-same-core-spinlock-raw
-    dup release-spinlock-raw
-\    0 in-critical !
-    pause
-    enable-int
-    disable-int
-\    1 in-critical !
-    claim-same-core-spinlock-raw
-    claim-spinlock-raw
+  continue-module task-internal
 
-\     -1 task-ready-count +!
-\     dup spinlock-to-claim !
-\     task-ready-count @ 0< if
-\       [ blocked-indefinite schedule-critical or schedule-user-critical or
-\       schedule-with-spinlock or schedule-with-same-core-spinlock or ] literal
-\     else
-\       [ readied schedule-critical or schedule-user-critical or
-\       schedule-with-spinlock or schedule-with-same-core-spinlock or ] literal
-\     then
-\     current-task @ task-state h!
-\     release-spinlock release-same-core-spinlock end-critical-pause
-  ;
+    \ Release the same core spinlock, release a spinlock, block indefinitely,
+    \ and then claim the same core spinlock, and claim a spinlock.
+    : block-indefinite-self-release ( spinlock -- )
+      -1 task-ready-count !
+      blocked-indefinite current-task @ task-state h!
+      dup release-spinlock-raw
+      pause
+      enable-int
+      disable-int
+      claim-spinlock-raw
+    ;
+
+  end-module
 
   \ Mark a task as blocked indefinitely and schedule as critical and claim a
   \ spinlock when done
@@ -1009,44 +996,44 @@ begin-module task
   \ Get whether a task has terminated
   : terminated? ( task -- terminated ) task-active h@ terminated = ;
 
-  \ Ready tasks waiting for current task
-  \ argument
-  : wake-other-tasks ( -- )
-    cpu-count 0 do \ ." E"
-      i cpu-first-task @ begin ?dup while \ ." F"
-	dup ['] task-waited-for for-task@ current-task @ = if \ ." G"
-	  0 over ['] task-waited-for for-task! dup do-ready \ ." H"
-	then \ ." J"
-	task-prev @ \ ." K"
-      repeat \ ." L"
-    loop \ ." M"
-  ;
-
-  \ Block the current task with spinlocks already held
-  : block-raw ( task -- )
-    dup validate-not-terminated
-    dup ['] timeout for-task@ no-timeout <> if
-      dup ['] timeout-systick-delay for-task@
-      over ['] timeout-systick-start for-task@
-      rot -1 over ['] task-ready-count for-task +!
-      dup ['] task-ready-count for-task@ 0< if
-	tuck ['] task-systick-start for-task!
-	tuck ['] task-systick-delay for-task!
-	blocked-timeout over task-state h!
-      else
-	nip nip
-      then
-    else
-      -1 over ['] task-ready-count for-task +!
-      dup ['] task-ready-count for-task@ 0< if
-	blocked-indefinite over task-state h!
-      then
-    then
-    current-task @ = if pause then
-  ;
-  
   continue-module task-internal
+  
+    \ Ready tasks waiting for current task
+    \ argument
+    : wake-other-tasks ( -- )
+      cpu-count 0 do
+	i cpu-first-task @ begin ?dup while
+	  dup ['] task-waited-for for-task@ current-task @ = if
+	    0 over ['] task-waited-for for-task! dup do-ready
+	  then
+	  task-prev @
+	repeat
+      loop
+    ;
     
+    \ Block the current task with spinlocks already held
+    : block-raw ( task -- )
+      dup validate-not-terminated
+      dup ['] timeout for-task@ no-timeout <> if
+	dup ['] timeout-systick-delay for-task@
+	over ['] timeout-systick-start for-task@
+	rot -1 over ['] task-ready-count for-task +!
+	dup ['] task-ready-count for-task@ 0< if
+	  tuck ['] task-systick-start for-task!
+	  tuck ['] task-systick-delay for-task!
+	  blocked-timeout over task-state h!
+	else
+	  nip nip
+	then
+      else
+	-1 over ['] task-ready-count for-task +!
+	dup ['] task-ready-count for-task@ 0< if
+	  blocked-indefinite over task-state h!
+	then
+      then
+      current-task @ = if pause then
+    ;
+
     \ Initialize the main task
     : init-main-task ( -- )
       claim-all-core-spinlock
