@@ -41,12 +41,6 @@ begin-module multicore
   \ Core not addressable exception
   : x-core-not-addressable ( -- ) ." core not addressable" cr ;
 
-  \ Claim the simple lock spinlock - note that this is a no-op
-  : claim-slock-spinlock ( -- ) ;
-
-  \ Release the simple lock spinlock - note that this is a no-op
-  : release-slock-spinlock ( -- ) ;
-
   \ Just claim a spinlock - note that this is a no-op
   : claim-spinlock-raw ( index -- ) drop ;
 
@@ -58,12 +52,6 @@ begin-module multicore
 
   \ Release a spinlock - note that this is a no-op
   : release-spinlock ( index -- ) drop ;
-
-  \ Just claim a spinlock for the current core's multitasker - this is a no-op
-  : claim-same-core-spinlock-raw ( -- ) ;
-
-  \ Just release a spinlock for the current core's multitasker - this is a no-op
-  : release-same-core-spinlock-raw ( -- ) ;
 
   \ Just claim a spinlock for all cores' multitasker - this is a no-op
   : claim-all-core-spinlock-raw ( -- ) ;
@@ -102,12 +90,6 @@ begin-module multicore
   \ Enter a critical section (and do not claim any spinlocks)
   : critical-with-all-core-spinlock ( xt -- ) critical ;
 
-  \ Begin a critical section (and not halt any other core)
-  : begin-critical-wait-core ( -- ) begin-critical ;
-
-  \ End a critcal section (and not release any other core)
-  : end-critical-release-core ( -- ) end-critical ;
-  
   \ Drain a multicore FIFO
   : fifo-drain ( core -- ) ['] x-core-out-of-range ?raise ;
   
