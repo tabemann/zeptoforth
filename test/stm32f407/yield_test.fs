@@ -134,7 +134,7 @@ continue-module forth
     my-schedule init-schedule
     ['] do-red-green red-green-action my-schedule init-action
     ['] do-orange-blue orange-blue-action my-schedule init-action
-    0 [: my-schedule run-schedule ;] 320 128 512 spawn schedule-task !
+    0 [: my-schedule run-schedule ;] 480 128 512 spawn schedule-task !
     1666 orange-blue-action start-action-delay
     red-green-action enable-action
     orange-blue-action enable-action

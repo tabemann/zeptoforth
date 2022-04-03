@@ -60,9 +60,9 @@ continue-module forth
   : init-test ( -- )
     1 cells 1 my-chan init-chan
     0 [: my-chan send-chan ;] provide-allot-cell
-    0 ['] do-task-1 320 128 512 spawn my-task-1 !
-    0 ['] do-task-2 320 128 512 spawn my-task-2 !
-    0 ['] do-task-3 320 128 512 spawn my-task-3 !
+    0 ['] do-task-1 480 128 512 spawn my-task-1 !
+    0 ['] do-task-2 480 128 512 spawn my-task-2 !
+    0 ['] do-task-3 480 128 512 spawn my-task-3 !
     my-task-1 @ run
     my-task-2 @ run
     my-task-3 @ run

@@ -147,18 +147,18 @@ begin-module fchan
     \ Remove a wait from a queue if it has not already been popped
     : remove-fchan-queue ( wait queue -- )
       over fchan-wait-popped @ not if ( wait queue )
-	over fchan-wait-next @ dup if ( wait queue next )
+	over fchan-wait-next @ ?dup if ( wait queue next )
 	  2 pick fchan-wait-prev @ ( wait queue next prev )
 	  swap fchan-wait-prev ! ( wait queue )
 	else
-	  drop over fchan-wait-prev @ ( wait queue prev )
+	  over fchan-wait-prev @ ( wait queue prev )
 	  over fchan-queue-first ! ( wait queue )
 	then
-	over fchan-wait-prev @ dup if ( wait queue prev )
+	over fchan-wait-prev @ ?dup if ( wait queue prev )
 	  2 pick fchan-wait-next @ ( wait queue prev next )
 	  swap fchan-wait-next ! ( wait queue )
 	else
-	  drop over fchan-wait-next @ ( wait queue next )
+	  over fchan-wait-next @ ( wait queue next )
 	  over fchan-queue-last ! ( wait queue )
 	then
       then
@@ -195,7 +195,6 @@ begin-module fchan
   : send-fchan ( addr bytes fchan -- )
     >r
     r@ fchan-closed @ triggers x-fchan-closed
-\    ." !" current-task h.8 ." #" current-task task-priority@ .
     r@ fchan-slock claim-slock
     s" BEGIN SEND-FCHAN" trace
     current-task prepare-block
@@ -205,14 +204,12 @@ begin-module fchan
       r> over fchan-wait-buf-size ! ( wait )
       fchan-wait-task @ ready ( )
       r> fchan-slock release-slock ( )
-\      fchan-wait-task @ ready ( )
     else
       r> fchan-wait-size [: swap >r ( addr bytes wait )
 	current-task over fchan-wait-task ! ( addr bytes wait )
 	tuck fchan-wait-buf-size ! ( addr wait )
 	tuck fchan-wait-buf ! ( wait )
 	dup r@ fchan-send-queue push-fchan-queue ( wait )
-\	r@ fchan-slock release-slock ( wait )
 	r@ fchan-slock release-slock-block ( wait )
 	current-task timed-out? if
 	  r@ fchan-slock claim-slock ( wait )
@@ -232,7 +229,6 @@ begin-module fchan
   : recv-fchan ( addr bytes fchan -- recv-bytes )
     >r
     r@ fchan-closed @ triggers x-fchan-closed
-\    ." @" current-task h.8 ." #" current-task task-priority@ .
     r@ fchan-slock claim-slock
     s" BEGIN RECV-FCHAN" trace
     current-task prepare-block
@@ -242,14 +238,12 @@ begin-module fchan
       r> swap ( bytes wait )
       fchan-wait-task @ ready ( bytes )
       r> fchan-slock release-slock ( bytes )
-\      fchan-wait-task @ ready ( bytes )
     else
       r> fchan-wait-size [: swap >r ( addr bytes wait )
 	current-task over fchan-wait-task ! ( addr bytes wait )
 	tuck fchan-wait-buf-size ! ( addr wait )
 	tuck fchan-wait-buf ! ( wait )
 	dup r@ fchan-recv-queue push-fchan-queue ( wait )
-\	r@ fchan-slock release-slock ( wait )
 	r@ fchan-slock release-slock-block ( wait )
 	current-task timed-out? if
 	  r@ fchan-slock claim-slock ( wait )

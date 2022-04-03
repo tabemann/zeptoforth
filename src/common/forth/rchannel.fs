@@ -161,18 +161,18 @@ begin-module rchan
     \ Remove a wait from a queue if it has not already been popped
     : remove-rchan-queue ( wait queue -- )
       over rchan-wait-popped @ not if ( wait queue )
-	over rchan-wait-next @ dup if ( wait queue next )
+	over rchan-wait-next @ ?dup if ( wait queue next )
 	  2 pick rchan-wait-prev @ ( wait queue next prev )
 	  swap rchan-wait-prev ! ( wait queue )
 	else
-	  drop over rchan-wait-prev @ ( wait queue prev )
+	  over rchan-wait-prev @ ( wait queue prev )
 	  over rchan-queue-first ! ( wait queue )
 	then
-	over rchan-wait-prev @ dup if ( wait queue prev )
+	over rchan-wait-prev @ ?dup if ( wait queue prev )
 	  2 pick rchan-wait-next @ ( wait queue prev next )
 	  swap rchan-wait-next ! ( wait queue )
 	else
-	  drop over rchan-wait-next @ ( wait queue next )
+	  over rchan-wait-next @ ( wait queue next )
 	  over rchan-queue-last ! ( wait queue )
 	then
       then
@@ -232,10 +232,10 @@ begin-module rchan
 	current-task r@ rchan-reply-task ! ( s-addr s-bytes wait )
 	-rot 2drop ( wait )
 	rchan-wait-task @ ready ( )
-\	r@ rchan-slock release-slock ( )
 	r@ rchan-slock release-slock-block ( )
 	r@ rchan-reply-buf-size @ ( r-bytes' )
-	0 r@ rchan-reply-task ! ( r-bytes' )
+	r@ rchan-reply-task @ 1 bic ( r-bytes' task )
+	current-task = if 0 r@ rchan-reply-task ! then ( r-bytes' )
 	current-task timed-out? triggers x-timed-out
 	r> rchan-closed @ triggers x-rchan-closed ( r-bytes' )
 	false
@@ -253,7 +253,6 @@ begin-module rchan
 	tuck rchan-wait-buf-size ! ( s-addr wait )
 	tuck rchan-wait-buf ! ( wait )
 	dup r@ rchan-send-queue push-rchan-queue ( wait )
-\	r@ rchan-slock release-slock ( wait )
 	r@ rchan-slock release-slock-block ( wait )
 	current-task timed-out? if
 	  r@ rchan-slock claim-slock ( wait )
@@ -294,7 +293,6 @@ begin-module rchan
 	tuck rchan-wait-buf-size ! ( addr wait )
 	tuck rchan-wait-buf ! ( wait )
 	dup r@ rchan-recv-queue push-rchan-queue ( wait )
-\	r@ rchan-slock release-slock ( wait )
 	r@ rchan-slock release-slock-block ( wait )
 	current-task timed-out? if
 	  r@ rchan-slock claim-slock ( wait )
@@ -324,7 +322,6 @@ begin-module rchan
       dup 1 or r@ rchan-reply-task ! ( r-task )
       ready ( )
       r> rchan-slock release-slock ( )
-\      ready ( )
     else
       2drop r> rchan-slock release-slock ( )
     then

@@ -122,7 +122,7 @@ continue-module forth
     0 INT_SM_TXNFULL IRQ0 PIO0 INTE bis!
     PIO0_IRQ0 NVIC_ISER_SETENA!
     %0001 CTRL_SM_ENABLE_MASK CTRL_SM_ENABLE_LSB PIO0 CTRL field!
-    0 ['] blinker-shade-loop 320 128 512 spawn run
+    0 ['] blinker-shade-loop 480 128 512 spawn run
   ;
 
 end-module

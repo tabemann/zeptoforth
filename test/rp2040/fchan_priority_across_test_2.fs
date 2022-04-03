@@ -106,15 +106,15 @@ continue-module forth
     task-counts task-counts-current !
     my-fchan init-fchan
     4 current-task task-priority!
-    0 ['] output 320 128 512 0 spawn-on-core run
-    333 1000 0 3 ['] producer 320 128 512 0 spawn-on-core run
-    500 1000 0 3 ['] consumer 320 128 512 0 spawn-on-core run
-    333 1000 0 3 ['] producer 320 128 512 1 spawn-on-core run
-    500 1000 0 3 ['] consumer 320 128 512 1 spawn-on-core run
-    333 1000 1 3 ['] producer 320 128 512 0 spawn-on-core run
-    500 1000 1 3 ['] consumer 320 128 512 0 spawn-on-core run
-    333 1000 1 3 ['] producer 320 128 512 1 spawn-on-core run
-    500 1000 1 3 ['] consumer 320 128 512 1 spawn-on-core run
+    0 ['] output 480 128 512 0 spawn-on-core run
+    333 1000 0 3 ['] producer 480 128 512 0 spawn-on-core run
+    500 1000 0 3 ['] consumer 480 128 512 0 spawn-on-core run
+    333 1000 0 3 ['] producer 480 128 512 1 spawn-on-core run
+    500 1000 0 3 ['] consumer 480 128 512 1 spawn-on-core run
+    333 1000 1 3 ['] producer 480 128 512 0 spawn-on-core run
+    500 1000 1 3 ['] consumer 480 128 512 0 spawn-on-core run
+    333 1000 1 3 ['] producer 480 128 512 1 spawn-on-core run
+    500 1000 1 3 ['] consumer 480 128 512 1 spawn-on-core run
     0 current-task task-priority!
   ;
   

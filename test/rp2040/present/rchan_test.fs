@@ -24,7 +24,7 @@ rchan-size buffer: my-rchan
 : init-test ( -- )
   my-rchan init-rchan
   0 [: begin cell [: dup cell my-rchan recv-rchan my-rchan reply-rchan ;]
-      with-aligned-allot again ;] 320 128 512 0 spawn-on-core run
+      with-aligned-allot again ;] 480 128 512 0 spawn-on-core run
   0 [: 0 begin dup [: [: my-rchan send-rchan ;] extract-allot-cell . ;] provide-allot-cell
       1+ 1000 ms again ;]
-  320 128 512 1 spawn-on-core run ;
+  480 128 512 1 spawn-on-core run ;
