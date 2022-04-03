@@ -40,7 +40,7 @@ continue-module forth
   ;
 
   \ The consumer task
-  0 ' consumer 320 128 512 spawn consumer-task !
+  0 ' consumer 480 128 512 spawn consumer-task !
 
   \ The inner loop of a producer
   : producer ( -- )
@@ -52,7 +52,7 @@ continue-module forth
   ;
 
   \ The producer task
-  0 ' producer 320 128 512 spawn producer-task !
+  0 ' producer 480 128 512 spawn producer-task !
 
   \ Initiate the test
   : init-test ( -- )

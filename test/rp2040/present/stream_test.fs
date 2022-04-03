@@ -25,6 +25,6 @@ my-bytes stream-size buffer: my-stream
 : init-test ( -- )
   my-bytes my-stream init-stream
   0 [: begin 16 [: dup 16 my-stream recv-stream type ;] with-allot again ;]
-  320 128 512 0 spawn-on-core run
+  480 128 512 0 spawn-on-core run
   0 [: begin s" 0123456789ABCDEF" my-stream send-stream again ;]
-  320 128 512 1 spawn-on-core run ;
+  480 128 512 1 spawn-on-core run ;

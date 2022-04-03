@@ -41,7 +41,7 @@ continue-module forth
   ;
 
   \ The target task
-  0 ' target 320 128 512 1 spawn-on-core target-task !
+  0 ' target 480 128 512 1 spawn-on-core target-task !
 
   \ The send count
   variable send-count
@@ -70,7 +70,7 @@ continue-module forth
   ;
 
   \ The source task
-  0 ' source 320 128 512 0 spawn-on-core source-task !
+  0 ' source 480 128 512 0 spawn-on-core source-task !
 
   \ Initiate the test
   : init-test ( -- )

@@ -20,4 +20,4 @@
 
 task import
 : init-test ( -- )
-  0 [: begin ." *" 1000 ms again ;] 320 128 512 1 spawn-on-core run ;
+  0 [: begin ." *" 1000 ms again ;] 480 128 512 1 spawn-on-core run ;

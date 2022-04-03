@@ -33,8 +33,8 @@ continue-module forth
 
   \ Initialize the test
   : init-test ( -- )
-    0 1 ['] test 320 128 512 spawn test-0-task !
-    1 1 ['] test 320 128 512 spawn test-1-task !
+    0 1 ['] test 480 128 512 spawn test-0-task !
+    1 1 ['] test 480 128 512 spawn test-1-task !
     test-0-task @ run
     test-1-task @ run
   ;

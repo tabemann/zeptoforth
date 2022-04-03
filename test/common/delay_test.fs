@@ -38,8 +38,8 @@ continue-module forth
 
   \ Initialize the test
   : init-test ( -- )
-    [char] * 250 2 ['] run-task 320 128 512 spawn task1 !
-    [char] x 1000 2 ['] run-task 320 128 512 spawn task2 !
+    [char] * 250 2 ['] run-task 480 128 512 spawn task1 !
+    [char] x 1000 2 ['] run-task 480 128 512 spawn task2 !
     task1 @ run
     task2 @ run
   ;

@@ -25,6 +25,6 @@ cell element-count chan-size buffer: my-chan
 : init-test ( -- )
   cell element-count my-chan init-chan
   0 [: begin [: my-chan recv-chan ;] extract-allot-cell . again ;]
-  320 128 512 0 spawn-on-core run
+  480 128 512 0 spawn-on-core run
   0 [: 0 begin dup [: my-chan send-chan ;] provide-allot-cell 1+ 1000 ms again ;]
-  320 128 512 1 spawn-on-core run ;
+  480 128 512 1 spawn-on-core run ;
