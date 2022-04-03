@@ -56,23 +56,23 @@ continue-module forth
   : init-test ( -- )
     my-fchan init-fchan
     3 current-task task-priority!
-    1000 3000 0 3 ['] producer 320 128 512 0 spawn-on-core run
-    1500 2000 0 3 ['] consumer 320 128 512 0 spawn-on-core run
-    1000 3000 0 3 ['] producer 320 128 512 1 spawn-on-core run
-    1500 2000 0 3 ['] consumer 320 128 512 1 spawn-on-core run
-    1000 3000 1 3 ['] producer 320 128 512 0 spawn-on-core run
-    1500 3000 1 3 ['] consumer 320 128 512 0 spawn-on-core run
-    1000 3000 1 3 ['] producer 320 128 512 1 spawn-on-core run
-    1500 3000 1 3 ['] consumer 320 128 512 1 spawn-on-core run
+    1000 3000 0 3 ['] producer 480 128 512 0 spawn-on-core run
+    1500 2000 0 3 ['] consumer 480 128 512 0 spawn-on-core run
+    1000 3000 0 3 ['] producer 480 128 512 1 spawn-on-core run
+    1500 2000 0 3 ['] consumer 480 128 512 1 spawn-on-core run
+    1000 3000 1 3 ['] producer 480 128 512 0 spawn-on-core run
+    1500 3000 1 3 ['] consumer 480 128 512 0 spawn-on-core run
+    1000 3000 1 3 ['] producer 480 128 512 1 spawn-on-core run
+    1500 3000 1 3 ['] consumer 480 128 512 1 spawn-on-core run
 
-\    1000 3000 1 3 ['] producer 320 128 512 0 spawn-on-core run
-\    1500 2000 1 3 ['] consumer 320 128 512 0 spawn-on-core run
-\    1000 3000 1 3 ['] producer 320 128 512 1 spawn-on-core run
-\    1500 2000 1 3 ['] consumer 320 128 512 1 spawn-on-core run
-\    1000 3000 2 3 ['] producer 320 128 512 0 spawn-on-core run
-\    1500 3000 2 3 ['] consumer 320 128 512 0 spawn-on-core run
-\    1000 3000 2 3 ['] producer 320 128 512 1 spawn-on-core run
-\    1500 3000 2 3 ['] consumer 320 128 512 1 spawn-on-core run
+\    1000 3000 1 3 ['] producer 480 128 512 0 spawn-on-core run
+\    1500 2000 1 3 ['] consumer 480 128 512 0 spawn-on-core run
+\    1000 3000 1 3 ['] producer 480 128 512 1 spawn-on-core run
+\    1500 2000 1 3 ['] consumer 480 128 512 1 spawn-on-core run
+\    1000 3000 2 3 ['] producer 480 128 512 0 spawn-on-core run
+\    1500 3000 2 3 ['] consumer 480 128 512 0 spawn-on-core run
+\    1000 3000 2 3 ['] producer 480 128 512 1 spawn-on-core run
+\    1500 3000 2 3 ['] consumer 480 128 512 1 spawn-on-core run
 
     0 current-task task-priority!
   ;

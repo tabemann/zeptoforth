@@ -21,23 +21,36 @@
 continue-module forth
 
   task import
-  fchan import
+  rchan import
 
-  \ Our fchannel
-  fchan-size buffer: my-fchan
+  \ Our rchannel
+  rchan-size buffer: my-rchan
   
   \ Our tasks
   variable my-task-1
   variable my-task-2
   variable my-task-3
+  variable my-task-4
 
   \ Run the first task
   : do-task-1 ( -- )
     no-timeout timeout !
+    cr ." Receive 1"
+    [: my-rchan recv-rchan ;] extract-allot-cell
     cr ." Start wait 1" 1000 ms cr ." End wait 1"
-    0 [: my-fchan send-fchan ;] provide-allot-cell
+    [: my-rchan reply-rchan ;] provide-allot-cell
+    cr ." Receive 2"
+    [: my-rchan recv-rchan ;] extract-allot-cell
     cr ." Start wait 2" 1000 ms cr ." End wait 2"
-    1 [: my-fchan send-fchan ;] provide-allot-cell
+    [: my-rchan reply-rchan ;] provide-allot-cell
+    cr ." Receive 3"
+    [: my-rchan recv-rchan ;] extract-allot-cell
+    cr ." Start wait 3" 1000 ms cr ." End wait 3"
+    [: my-rchan reply-rchan ;] provide-allot-cell
+    cr ." Receive 4"
+    [: my-rchan recv-rchan ;] extract-allot-cell
+    cr ." Start wait 4" 1000 ms cr ." End wait 3"
+    [: my-rchan reply-rchan ;] provide-allot-cell
     cr ." Done"
   ;
 
@@ -45,27 +58,40 @@ continue-module forth
   : do-task-2 ( -- )
     no-timeout timeout !
     25 ms
-    [: my-fchan recv-fchan ;] extract-allot-cell
-    cr ." Received 1: " .
+    cr ." Sending 1"
+    0 [: [: my-rchan send-rchan ;] extract-allot-cell ;] provide-allot-cell
+    cr ." Sent 1"
   ;
 
   \ Run the third task
   : do-task-3 ( -- )
     5000 timeout !
     50 ms
-    [: my-fchan recv-fchan ;] extract-allot-cell
-    cr ." Received 2: " .
+    cr ." Sending 2"
+    0 [: [: my-rchan send-rchan ;] extract-allot-cell ;] provide-allot-cell
+    cr ." Sent 2"
+  ;
+
+  \ Run the fourth task
+  : do-task-4 ( -- )
+    no-timeout timeout !
+    75 ms
+    cr ." Sending 3"
+    0 [: [: my-rchan send-rchan ;] extract-allot-cell ;] provide-allot-cell
+    cr ." Sent 3"
   ;
 
   \ Initialize our test
   : init-test ( -- )
-    my-fchan init-fchan
+    my-rchan init-rchan
     0 ['] do-task-1 480 128 512 spawn my-task-1 !
     0 ['] do-task-2 480 128 512 spawn my-task-2 !
     0 ['] do-task-3 480 128 512 spawn my-task-3 !
+    0 ['] do-task-4 480 128 512 spawn my-task-4 !
     my-task-1 @ run
     my-task-2 @ run
     my-task-3 @ run
+    my-task-4 @ run
   ;
   
 end-module

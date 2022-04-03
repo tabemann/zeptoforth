@@ -85,7 +85,7 @@ continue-module forth
     0 rising-edge-count !
     0 falling-edge-count !
     PE 2 SYSCFG_EXTICRx!
-    0 ['] edge-tracker 320 128 512 spawn edge-tracker-task !
+    0 ['] edge-tracker 480 128 512 spawn edge-tracker-task !
     edge-tracker-task @ run
     ['] handle-exti-2 exti-2-handler-hook !
     EXTI_2 NVIC_ISER_SETENA!

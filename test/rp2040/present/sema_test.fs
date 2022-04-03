@@ -23,5 +23,5 @@ sema import
 sema-size buffer: my-sema
 : init-test ( -- )
   1 0 my-sema init-sema \ This is a binary semaphore, as indicated by the limit of 1
-  0 [: begin my-sema take ." *" again ;] 320 128 512 0 spawn-on-core run
-  0 [: begin my-sema give 1000 ms again ;] 320 128 512 1 spawn-on-core run ;
+  0 [: begin my-sema take ." *" again ;] 480 128 512 0 spawn-on-core run
+  0 [: begin my-sema give 1000 ms again ;] 480 128 512 1 spawn-on-core run ;

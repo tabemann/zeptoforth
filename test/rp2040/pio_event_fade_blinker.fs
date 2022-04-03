@@ -202,7 +202,7 @@ continue-module forth
     ['] blinker-rate-loop blinker-rate-action blinker-schedule init-action
     blinker-shade-action enable-action
     blinker-rate-action enable-action
-    0 [: blinker-schedule run-schedule ;] 320 128 512 spawn run
+    0 [: blinker-schedule run-schedule ;] 480 128 512 spawn run
   ;
 
 end-module

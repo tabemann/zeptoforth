@@ -51,11 +51,11 @@ continue-module forth
   \ Initialize
   my-fchan init-fchan
   my-lock init-lock
-  0 ' consumer 320 128 512 spawn constant my-consumer-task
-  char A 1 ' producer 320 128 512 spawn constant my-producer-a-task
-  char B 1 ' producer 320 128 512 spawn constant my-producer-b-task
-  char C 1 ' producer 320 128 512 spawn constant my-producer-c-task
-  char D 1 ' producer 320 128 512 spawn constant my-producer-d-task
+  0 ' consumer 480 128 512 spawn constant my-consumer-task
+  char A 1 ' producer 480 128 512 spawn constant my-producer-a-task
+  char B 1 ' producer 480 128 512 spawn constant my-producer-b-task
+  char C 1 ' producer 480 128 512 spawn constant my-producer-c-task
+  char D 1 ' producer 480 128 512 spawn constant my-producer-d-task
   my-consumer-task run
   my-producer-a-task run
   my-producer-b-task run

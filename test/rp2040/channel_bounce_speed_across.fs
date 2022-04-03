@@ -91,9 +91,9 @@ continue-module forth
     systick-counter start-systick !
     element-size inter-count inter-chan init-chan
     element-size end-count end-chan init-chan
-    0 ['] consumer 320 128 512 0 spawn-on-core consumer-task !
-    0 ['] inter 320 128 512 1 spawn-on-core inter-task !
-    0 ['] producer 320 128 512 0 spawn-on-core producer-task !
+    0 ['] consumer 480 128 512 0 spawn-on-core consumer-task !
+    0 ['] inter 480 128 512 1 spawn-on-core inter-task !
+    0 ['] producer 480 128 512 0 spawn-on-core producer-task !
     consumer-task @ run
     inter-task @ run
     producer-task @ run

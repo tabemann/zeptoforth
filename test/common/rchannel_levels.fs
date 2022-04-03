@@ -72,9 +72,9 @@ continue-module forth
   : init-test ( -- )
     my-rchan-0 init-rchan
     my-rchan-1 init-rchan
-    0 ['] send-loop 320 128 512 spawn send-task !
-    0 ['] middle-loop 320 128 512 spawn middle-task !
-    0 ['] reply-loop 320 128 512 spawn reply-task !
+    0 ['] send-loop 480 128 512 spawn send-task !
+    0 ['] middle-loop 480 128 512 spawn middle-task !
+    0 ['] reply-loop 480 128 512 spawn reply-task !
     send-task @ run
     middle-task @ run
     reply-task @ run

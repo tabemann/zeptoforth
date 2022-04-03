@@ -25,9 +25,9 @@ continue-module forth
   \ Initialize the test
   : init-test ( -- )
     0 [:
-      0 [: begin 500 ms ." *" again ;] 320 128 512 0 spawn-on-core run
+      0 [: begin 500 ms ." *" again ;] 480 128 512 0 spawn-on-core run
       begin 1000 ms ." +" again
-    ;] 320 128 512 1 spawn-on-core run
+    ;] 480 128 512 1 spawn-on-core run
   ;
 
 end-module
