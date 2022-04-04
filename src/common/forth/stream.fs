@@ -208,8 +208,8 @@ begin-module stream
     0 over stream-current-count !
     0 over stream-send-ready !
     0 over stream-recv-ready !
-    dup stream-send-tqueue init-tqueue
-    stream-recv-tqueue init-tqueue
+    dup stream-slock over stream-send-tqueue init-tqueue
+    dup stream-slock swap stream-recv-tqueue init-tqueue
   ;
 
   commit-flash
