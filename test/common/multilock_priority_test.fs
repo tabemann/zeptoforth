@@ -32,7 +32,7 @@ continue-module forth
   : locker ( priority ms lock "name" -- )
     <builds , , , does>
     dup @ swap cell + dup @ ms cell + @ current-task task-priority!
-    dup lock unlock begin 1000 ms again
+    dup claim-lock release-lock begin 1000 ms again
     current-task kill
   ;
 
@@ -47,15 +47,15 @@ continue-module forth
 
   \ Our main locking task word
   : do-lock-all ( -- )
-    lock-a lock
-    lock-b lock
-    lock-c lock
+    lock-a claim-lock
+    lock-b claim-lock
+    lock-c claim-lock
     40 100 monitor-priority space ." A"
-    lock-a unlock
+    lock-a release-unlock
     20 100 monitor-priority space ." B"
-    lock-b unlock
+    lock-b release-unlock
     20 100 monitor-priority space ." C"
-    lock-c unlock
+    lock-c release-unlock
     20 100 monitor-priority space ." D"
     current-task kill
   ;

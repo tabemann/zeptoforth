@@ -26,12 +26,12 @@ Get the size of a lock in bytes.
 
 Initialize a lock starting at the specified address *addr*; note that it must be `lock-size` bytes in size.
 
-##### `lock`
+##### `claim-lock`
 ( lock -- )
 
 Attempt to acquire a lock *lock*; if the lock is already held, put the current task in a queue and disable it. In that case, update the priority of the holder of a lock, and any subsequent holders of any locks waited for by the holder of this lock, in order to avoid priority inversion. Note that this must not be called within a critical section. If a task attempts to lock a lock it has already locked, `x-double-lock` is raised.
 
-##### `unlock`
+##### `release-lock`
 ( lock -- )
 
 Attempt to release a lock *lock*; if the current task is not the holder of the lock, raise `x-not-currently-owned`. If releasing the lock is successful, restore the priority of the current task to what it would be had its priority not been updated in order to avoid priority inversion; afterwards, carry out all the functionality that `lock` would carry out had it been called by the task at the head of the queue if there is one. Note that this must not be called within a critical section.

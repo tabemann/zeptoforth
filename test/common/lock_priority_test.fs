@@ -32,23 +32,24 @@ continue-module forth
 
   \ Our higher-priority task loop
   : high ( -- )
+    2000 ms
     begin
-      500000 0 ?do loop
-      my-lock lock
-      500000 0 ?do loop
-      [: my-lock unlock ;] try if ." A " then
+      5000000 0 ?do loop
+      my-lock claim-lock
+      5000000 0 ?do loop
+      my-lock release-lock
     again
   ;
 
   \ Our lower-priority task loop
   : low ( -- )
     begin
-      my-lock lock
+      my-lock claim-lock
       10 0 ?do
-	50000 0 ?do loop
+	5000000 0 ?do loop
 	current-task task-priority@ . space
       loop
-      [: my-lock unlock ;] try if ." B " then
+      my-lock release-lock
     again
   ;
 
@@ -59,7 +60,6 @@ continue-module forth
     0 ['] high 480 128 512 spawn high-task !
     1 high-task @ task-priority!
     low-task @ run
-    500000 0 ?do loop
     high-task @ run
   ;
 
