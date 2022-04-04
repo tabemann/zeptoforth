@@ -145,8 +145,7 @@ begin-module tqueue
     then
     init-wait
     2dup swap add-wait
-    over tqueue-slock @ release-slock
-    current-task block
+    over tqueue-slock @ release-slock-block
     over tqueue-slock @ claim-slock
     [: current-task validate-timeout ;] try ?dup if
       >r [:
