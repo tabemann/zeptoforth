@@ -36,9 +36,9 @@ continue-module forth
   : high ( -- )
     begin
       5000 ms
-      lock-a lock
+      lock-a claim-lock
       5000 ms
-      lock-a unlock
+      lock-a release-lock
     again
   ;
 
@@ -46,25 +46,25 @@ continue-module forth
   : middle ( -- )
     begin
       2500 ms
-      lock-a lock
+      lock-a claim-lock
       2500 ms
-      lock-b lock
+      lock-b claim-lock
       2500 ms
-      lock-b unlock
+      lock-b release-lock
       2500 ms
-      lock-a unlock
+      lock-a release-lock
     again
   ;
 
   \ Our lower-priority task loop
   : low ( -- )
     begin
-      lock-b lock
+      lock-b claim-lock
       10 0 ?do
 	1000 ms
 	current-task task-priority@ .
       loop
-      lock-b unlock
+      lock-b release-lock
     again
   ;
 

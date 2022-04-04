@@ -236,9 +236,9 @@ begin-module lock
   commit-flash
   
   \ Lock a lock
-  : lock ( lock -- )
+  : claim-lock ( lock -- )
     [:
-      s" BEGIN LOCK" trace
+      s" BEGIN CLAIM LOCK" trace
       dup lock-holder-task @ current-task = triggers x-double-lock
       current-task prepare-block
       dup lock-holder-task @ if
@@ -246,8 +246,7 @@ begin-module lock
 	init-lock-wait
 	2dup swap add-lock-wait
 	over update-hold-priority
-	over lock-slock release-slock
-	current-task block
+	over lock-slock release-slock-block
 	over lock-slock claim-slock
 	[: current-task validate-timeout ;] try ?dup if
 	  >r [:
@@ -261,14 +260,14 @@ begin-module lock
 	current-task over lock-holder-task !
 	update-hold-priority
       then
-      s" END LOCK" trace
+      s" END CLAIM LOCK" trace
     ;] over lock-slock with-slock
   ;
 
   \ Unlock a lock
-  : unlock ( lock -- )
+  : release-lock ( lock -- )
     [:
-      s" BEGIN UNLOCK" trace
+      s" BEGIN RELEASE LOCK" trace
       dup lock-holder-task @ current-task = averts x-not-currently-owned
       dup update-release-priority
       dup lock-first-wait @ ?dup if
@@ -285,7 +284,7 @@ begin-module lock
       else
 	0 swap lock-holder-task !      
       then
-      s" END UNLOCK" trace
+      s" END RELEASE LOCK" trace
     ;] over lock-slock with-slock
   ;
 
@@ -297,7 +296,7 @@ begin-module lock
   commit-flash
   
   \ Execute a block of code with a lock
-  : with-lock ( xt lock -- ) dup >r lock try r> unlock ?raise ;
+  : with-lock ( xt lock -- ) dup >r claim-lock try r> release-lock ?raise ;
 
   \ Export lock-size
   export lock-size
