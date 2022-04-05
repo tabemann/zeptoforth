@@ -36,78 +36,115 @@ begin-module tqueue
       \ A simple lock used by the task quee
       field: tqueue-slock
 
-      \ First fast channel send task queue
-      field: first-wait
+      \ First wait in task queue channel queue
+      field: tqueue-first
 
-      \ First fast channel receive task queue
-      field: last-wait
-
+      \ Last wait in task queue channel queue
+      field: tqueue-last
+      
       \ Wait counter
-      field: wait-counter
+      field: tqueue-counter
       
       \ Wait limit
-      field: wait-limit
+      field: tqueue-limit
       
     end-structure
 
-    \ Wait structure
+    \ Task queue wait structure
     begin-structure wait-size
 
-      \ Fast channel wait previous record
-      field: wait-prev
-
-      \ Fast channel wait task
+      \ Waiting task
       field: wait-task
 
-      \ Original here position
-      field: wait-orig-here
+      \ Previous entry in queue
+      field: wait-prev
+
+      \ Next entry in queue
+      field: wait-next
+
+      \ Popped flag
+      field: wait-popped
 
     end-structure
 
     commit-flash
-    
-    \ Set up a wait record
-    : init-wait ( -- wait )
-      ram-here 4 ram-align, ram-here wait-size ram-allot
-      tuck wait-orig-here !
-      0 over wait-prev !
-      current-task over wait-task !
+
+    \ Get last higher priority wait in queue
+    : find-wait-queue-next ( priority queue -- wait|0 )
+      tqueue-last @ ( priority current )
+      begin dup while ( priority current )
+	dup wait-task @ task-priority@
+	( priority current current-priority )
+	2 pick >= if nip ( current ) exit then
+	wait-next @ ( priority next )
+      repeat
+      nip ( 0 )
     ;
 
-    \ Add a wait record
-    : add-wait ( wait tqueue -- )
-      dup first-wait @ if
-	2dup last-wait @ wait-prev !
-      else
-	2dup first-wait !
-      then
-      last-wait !
-    ;
-
-    \ Remove a wait record
-    : remove-wait ( wait tqueue -- )
-      dup first-wait @ 2 pick = if
-	dup last-wait @ 2 pick = if
-	  0 over last-wait !
+    \ Insert a wait into a queue
+    : push-wait-queue ( wait queue -- )
+      over false swap wait-popped ! ( wait queue )
+      2dup swap wait-task @ task-priority@ swap find-wait-queue-next
+      dup 0= if
+	drop over 0 swap wait-next ! ( wait queue )
+	2dup tqueue-first @ ( wait queue wait first )
+	?dup if
+	  2dup swap wait-prev ! ( wait queue wait first )
+	  wait-next ! ( wait queue )
+	else
+	  0 swap wait-prev ! ( wait queue )
+	  2dup tqueue-last ! ( wait queue )
 	then
-	swap wait-prev @ swap first-wait !
-      else
-	dup first-wait @ begin
-	  dup if
-	    dup wait-prev @ 3 pick = if
-	      over last-wait @ 3 pick = if
-		0 over wait-prev ! swap last-wait ! drop true
-	      else
-		rot wait-prev @ swap wait-prev ! drop true
-	      then
-	    else
-	      wait-prev @ false
-	    then
-	  else
-	    2drop drop true
-	  then
-	until
+	tqueue-first ! ( )
+      else ( wait queue next )
+	dup wait-prev @ ( wait queue next prev )
+	dup 4 pick wait-prev ! ( wait queue next prev )
+	?dup if
+	  3 pick swap wait-next ! ( wait queue next )
+	else
+	  2 pick 2 pick tqueue-last ! ( wait queue next )
+	then
+	dup 3 pick wait-next ! ( wait queue next )
+	nip wait-prev ! ( )
       then
+    ;
+
+    \ Pop a wait from a queue or return null if no queue is available
+    : pop-wait-queue ( queue -- wait|0 )
+      dup tqueue-first @ dup if ( queue first )
+	true over wait-popped ! ( queue first )
+	dup wait-prev @ ( queue first prev )
+	dup 3 pick tqueue-first ! ( queue first prev )
+	?dup if
+	  0 swap wait-next ! ( queue first )
+	  nip ( first )
+	else
+	  0 rot tqueue-last ! ( first )
+	then
+      else
+	nip ( 0 )
+      then
+    ;
+
+    \ Remove a wait from a queue if it has not already been popped
+    : remove-wait-queue ( wait queue -- )
+      over wait-popped @ not if ( wait queue )
+	over wait-next @ ?dup if ( wait queue next )
+	  2 pick wait-prev @ ( wait queue next prev )
+	  swap wait-prev ! ( wait queue )
+	else
+	  over wait-prev @ ( wait queue prev )
+	  over tqueue-first ! ( wait queue )
+	then
+	over wait-prev @ ?dup if ( wait queue prev )
+	  2 pick wait-next @ ( wait queue prev next )
+	  swap wait-next ! ( wait queue )
+	else
+	  over wait-next @ ( wait queue next )
+	  over tqueue-last ! ( wait queue )
+	then
+      then
+      2drop ( )
     ;
 
   end-module> import
@@ -118,19 +155,19 @@ begin-module tqueue
   \ Initialize a task queue with a given simple lock
   : init-tqueue ( slock addr -- )
     tuck tqueue-slock !
-    0 over wait-counter !
-    -1 over wait-limit !
-    0 over first-wait !
-    0 swap last-wait !
+    0 over tqueue-counter !
+    -1 over tqueue-limit !
+    0 over tqueue-first !
+    0 swap tqueue-last !
   ;
 
   \ Initialize a task queue with a simple loc, a limit, and a initial counter
   : init-tqueue-full ( limit counter slock addr -- )
     tuck tqueue-slock !
-    tuck wait-counter !
-    tuck wait-limit !
-    0 over first-wait !
-    0 swap last-wait !
+    tuck tqueue-counter !
+    tuck tqueue-limit !
+    0 over tqueue-first !
+    0 swap tqueue-last !
   ;
 
   commit-flash
@@ -139,22 +176,23 @@ begin-module tqueue
   \ Note that this must be called within a critical section
   : wait-tqueue ( tqueue -- )
     s" BEGIN WAIT-TQUEUE" trace
-    -1 over wait-counter +!
-    dup wait-counter @ 0>= if
+    -1 over tqueue-counter +!
+    dup tqueue-counter @ 0>= if
       drop exit
     then
-    init-wait
-    2dup swap add-wait
-    over tqueue-slock @ release-slock-block
-    over tqueue-slock @ claim-slock
-    [: current-task validate-timeout ;] try ?dup if
-      >r [:
-	1 2 pick wait-counter +!
-	tuck swap remove-wait wait-orig-here @ ram-here!
-      ;] critical r> ?raise
-    then
-    wait-orig-here @ ram-here!
-    drop
+    wait-size [:
+      current-task over wait-task !
+      false over wait-popped !
+      2dup swap push-wait-queue
+      over tqueue-slock @ release-slock-block
+      over tqueue-slock @ claim-slock
+      current-task timed-out? if
+	swap remove-wait-queue
+	['] x-timed-out ?raise
+      else
+	2drop
+      then
+    ;] with-aligned-allot
     s" END WAIT-TQUEUE" trace
   ;
 
@@ -162,40 +200,34 @@ begin-module tqueue
   \ Note that this must be called within a critical section
   : wake-tqueue ( tqueue -- )
     s" BEGIN WAKE-TQUEUE" trace
-    dup wait-limit @ 0> if
-      dup wait-counter @ 1+ over wait-limit @ min over wait-counter !
+    dup tqueue-limit @ 0> if
+      dup tqueue-counter @ 1+ over tqueue-limit @ min over tqueue-counter !
     else
-      1 over wait-counter +!
+      1 over tqueue-counter +!
     then
-    dup first-wait @ ?dup if
-      dup wait-prev @ 2 pick first-wait !
-      over first-wait @ 0= if
-	0 rot last-wait !
-      else
-	nip
-      then
+    pop-wait-queue ?dup if
       wait-task @ ready
-    else
-      drop
     then
     s" END WAKE-TQUEUE" trace
   ;
 
   \ Un-wake a task queue
   : unwake-tqueue ( tqueue -- )
-    dup wait-counter @ dup 0> if 1- 0 max swap wait-counter ! else 2drop then
+    dup tqueue-counter @ dup 0> if
+      1- 0 max swap tqueue-counter !
+    else
+      2drop
+    then
   ;
 
   commit-flash
 
   \ Wake up all tasks in a task queue
   : wake-tqueue-all ( tqueue -- )
-    \ begin-critical
-    begin dup wait-counter @ 0< while
+    begin dup tqueue-counter @ 0< while
       dup wake-tqueue
     repeat
     drop
-    \ end-critical
   ;
   
   \ Export tqueue-size
