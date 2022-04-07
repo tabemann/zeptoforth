@@ -2314,6 +2314,10 @@ _init_variables:
 	ldr r0, =compiling_to_flash
 	movs r1, #0
 	str r1, [r0]
+	ldr r0, =consts_used_count
+	str r1, [r0]
+	ldr r0, =set_const_end
+	str r1, [r0]
 	ldr r0, =current_compile
 	str r1, [r0]
 	ldr r0, =deferred_literal

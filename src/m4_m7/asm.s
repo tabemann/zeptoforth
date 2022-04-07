@@ -2324,7 +2324,7 @@ _asm_reserve_branch:
 	.endif
 
 	@@ Out of range branch exception
-	define_internal_word "out-of-range-branch", visible_flag
+	define_internal_word "x-out-of-range-branch", visible_flag
 _out_of_range_branch:
 	push {lr}
 	string_ln "out of range branch"
@@ -2332,7 +2332,7 @@ _out_of_range_branch:
 	pop {pc}
 
 	@@ Already building exception
-	define_internal_word "already-building", visible_flag
+	define_internal_word "x-already-building", visible_flag
 _already_building:
 	push {lr}
 	string_ln "already building"
@@ -2341,7 +2341,7 @@ _already_building:
 	end_inlined
 
 	@@ Not building exception
-	define_internal_word "not-building", visible_flag
+	define_internal_word "x-not-building", visible_flag
 _not_building:
 	push {lr}
 	string_ln "not building"
@@ -2639,4 +2639,22 @@ _asm_bx:
 	pop {pc}
 	end_inlined
 
+	@@ Dummy set-const-end word
+	define_internal_word "set-const-end", visible_flag
+_asm_set_const_end:
+	bx lr
+	end_inlined
+
+	@@ Dummy register-const word
+	define_internal_word "register-const", visible_flag
+_asm_register_const:
+	bx lr
+	end_inlined
+
+	@@ Dummy const, word
+	define_internal_word "consts,", visible_flag
+_asm_dump_consts:
+	bx lr
+	end_inlined
+	
 	.ltorg
