@@ -18,7 +18,7 @@
 @ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 @ SOFTWARE.
 
-	.include "../common/variables.s"
+	.include "../m0/variables.s"
 
 	allot sio_hook, 4 * cpu_count
 	

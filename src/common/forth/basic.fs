@@ -527,14 +527,18 @@ commit-flash
   dup 0= triggers x-token-expected
   start-compile-no-push
   6 push,
-  reserve-literal
+  thumb-2 not if
+    6 hreserve set-const-end
+  else
+    reserve-literal
+  then
   14 bx,
   $003F h,
   visible
-\  inlined
   finalize,
-\  advance-here
-  here 6 rot literal!
+  thumb-2 if
+    here 6 rot literal!
+  then
 ;
 
 \ Set internal
@@ -557,14 +561,19 @@ internal set-current
 : <builds-with-name ( addr bytes -- )
   start-compile
   tos push,
-  reserve-literal
+  thumb-2 not if
+    6 hreserve set-const-end
+  else
+    reserve-literal
+  then
   reserve-literal build-target !
   0 bx,
   $003F h,
   visible
   finalize,
-\  advance-here
-  here 6 rot literal!
+  thumb-2 if
+    here 6 rot literal!
+  then
 ;
 
 \ Set forth
@@ -605,6 +614,7 @@ commit-flash
   build-target @ 0= triggers x-no-word-being-built
   r>
   0 build-target @ literal!
+  thumb-2 not if consts, then
   0 build-target !
 ;
 
@@ -1474,84 +1484,6 @@ commit-flash
   here rot branch-back!
   lit,
 ;
-
-\ Create a deferred word
-: defer ( "name" -- )
-  token
-  dup 0= triggers x-token-expected
-  start-compile-no-push
-  visible
-  compiling-to-flash? if
-    block-align,
-  then
-  reserve-literal drop
-  0 bx,
-  finalize,
-;
-
-\ Set a deferred word in RAM
-: defer-ram! ( xt xt-deferred -- )
-  swap 1+ swap
-  0 swap
-  compiling-to-flash? >r
-  compile-to-ram
-  literal!
-  r> if
-    compile-to-flash
-  then
-;
-
-\ Set a deferred word in flash
-: defer-flash! ( xt xt-deferred -- )
-  flash-block-size align
-  swap 1+ swap
-  0 swap
-  compiling-to-flash? >r
-  compile-to-flash
-  literal!
-  r> not if
-    compile-to-ram
-  then
-;
-
-\ Set a deferred word; note that a deferred word stored in flash can only have
-\ its implementation set once
-: defer! ( xt xt-deferred -- )
-  dup ram-base < if defer-flash! else defer-ram! then
-;
-
-\ \ Set internal
-\ internal set-current
-
-\ \ Decode the immediate field from a MOVW or MOVT instruction
-\ : decode-mov16 ( h-addr -- h )
-\   dup h@ dup $F and 1 lshift swap 10 rshift $1 and or 11 lshift
-\   swap 2+ h@ dup $FF and swap 4 rshift $700 and or or
-\ ;
-
-\ \ Decode the immediate field from a pair of a MOVW instruction followed by a
-\ \ MOVT instruction
-\ : decode-literal ( h-addr -- x )
-\   dup decode-mov16 swap 4+ decode-mov16 16 lshift or
-\ ;
-
-\ \ Set forth
-\ forth set-current
-
-\ \ Get the referred xt from a deferred word in RAM
-\ : defer-ram@ ( xt-deferred -- xt )
-\   decode-literal 1 -
-\ ;
-
-\ \ Get the referred xt from a deferred word in flash
-\ : defer-flash@ ( xt-deferred -- xt )
-\   flash-block-size align decode-literal 1 -
-\ ;
-
-\ \ Get the referred xt from a deferred word
-\ : defer@ ( xt-deferred -- xt )
-\   dup ram-base < if defer-flash@ else defer-ram@ then
-\ ;
 
 \ Set up the wordlist
 wordlist constant esc-string

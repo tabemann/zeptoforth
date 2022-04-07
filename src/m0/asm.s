@@ -24,6 +24,10 @@ _asm_start_no_push:
 	push {lr}
 	bl _asm_undefer_lit
 	movs r0, #0
+	ldr r1, =consts_used_count
+	str r0, [r1]
+	ldr r1, =set_const_end
+	str r0, [r1]
 	ldr r1, =suppress_inline
 	str r0, [r1]
 	push_tos
@@ -86,6 +90,7 @@ _asm_finalize:
 	push {lr}
 	bl _asm_undefer_lit
 	bl _asm_word_align
+	bl _asm_dump_consts
 	push_tos
 	ldr tos, =current_flags
 	ldr tos, [tos]
@@ -116,12 +121,14 @@ _asm_finalize:
 	ldr tos, =0xDEADBEEF
 	bl _current_comma_4
 	bl _flash_align
-3:	ldr r0, =current_compile
+3:	bl _asm_resolve_const_end
+	ldr r0, =current_compile
 	ldr r1, [r0]
 	ldr r2, =flash_latest
 	str r1, [r2]
 	b 2f
-1:	ldr r0, =current_compile
+1:	bl _asm_resolve_const_end
+	ldr r0, =current_compile
 	ldr r1, [r0]
 	ldr r2, =ram_latest
 	str r1, [r2]
@@ -141,6 +148,7 @@ _asm_finalize:
 _asm_finalize_no_align:
 	push {lr}
 	bl _asm_undefer_lit
+	bl _asm_dump_consts
 	bl _asm_word_align
 	push_tos
 	ldr tos, =current_flags
@@ -171,12 +179,14 @@ _asm_finalize_no_align:
 	push_tos
 	ldr tos, =0xDEADBEEF
 	bl _current_comma_4
-3:	ldr r0, =current_compile
+3:	bl _asm_resolve_const_end
+	ldr r0, =current_compile
 	ldr r1, [r0]
 	ldr r2, =flash_latest
 	str r1, [r2]
 	b 2f
-1:	ldr r0, =current_compile
+1:	bl _asm_resolve_const_end
+	ldr r0, =current_compile
 	ldr r1, [r0]
 	ldr r2, =ram_latest
 	str r1, [r2]
@@ -1013,24 +1023,7 @@ _asm_reserve_literal:
 	ldr r0, =suppress_inline
 	ldr r1, =-1
 	str r1, [r0]
-	bl _asm_word_align
-	ldr r0, =compiling_to_flash
-	ldr r0, [r0]
-	cmp r0, #0
-	bne 1f
-	bl _cpu_offset
-	ldr r0, =dict_base
-	adds r0, tos
-	ldr r0, [r0]
-	adds r0, #ram_here_offset
-	pull_tos
-	b 2f
-1:	ldr r0, =flash_here
-2:	ldr r1, [r0]
-	push_tos
-	movs tos, r1
-	adds r1, #12
-	str r1, [r0]
+	bl _current_reserve_4
 	pop {pc}
 	end_inlined
 
@@ -1038,50 +1031,21 @@ _asm_reserve_literal:
 	define_internal_word "literal!", visible_flag
 _asm_store_literal:	
 	push {lr}
-	movs r1, tos
-	pull_tos
 	movs r0, tos
-	movs tos, #8
-	push_tos
-	movs tos, r0
-	push_tos
-	movs tos, r1
+	ldr r1, [dp]
 	push {r0, r1}
-	bl _asm_store_adr
+	bl _asm_register_const
 	pop {r0, r1}
 	push_tos
 	movs tos, #0
 	push_tos
-	movs tos, r0
-	push_tos
-	movs tos, r0
+	movs tos, r1
 	push_tos
 	movs tos, r1
+	push_tos
+	movs tos, r0
 	adds tos, #2
-	push {r1}
 	bl _asm_store_ldr_imm
-	pop {r1}
-	push_tos
-	movs tos, r1
-	adds tos, #12
-	push_tos
-	movs tos, r1
-	adds tos, #4
-	push {r1}
-	bl _asm_branch_back
-	pop {r1}
-	push_tos
-	movs tos, #0
-	push_tos
-	movs tos, r1
-	adds tos, #6
-	push {r1}
-	bl _store_current_2
-	pop {r1}
-	push_tos
-	movs tos, r1
-	adds tos, #8
-	bl _store_current_4
 	pop {pc}
 	end_inlined
 	
@@ -1214,37 +1178,16 @@ _asm_literal:
 	pop {pc}
 2:	ldr r1, =65535
 	cmp tos, r1
-	bgt 4f
+	bgt 6f
 	ldr r1, =-65536
 	cmp tos, r1
-	blt 4f
+	blt 6f
 	cmp tos, #0
 	blt 5f
 	push_tos
 	movs tos, r0
 	bl _asm_literal_16
 	pop {pc}
-4:
-@	ldr r1, =ram_real_start
-@	cmp tos, r1
-@	blo 6f
-@	ldr r2, =ram_real_start + 65535
-@	cmp tos, r2
-@	bhi 6f
-@	subs tos, r1
-@	push_tos
-@	movs tos, r0
-@	push {r0}
-@	bl _asm_literal_16
-@	pop {r0}
-@	push_tos
-@	movs tos, #5
-@	push_tos
-@	movs tos, r0
-@	push_tos
-@	movs tos, r0
-@	bl _asm_add
-@	pop {pc}
 6:	push_tos
 	movs tos, r0
 	bl _asm_long_literal
@@ -1323,11 +1266,9 @@ _asm_long_literal:
 	ldr r1, =-1
 	str r1, [r0]
 	movs r0, tos
-	movs tos, #8
-	push_tos
-	movs tos, r0
 	push {r0}
-	bl _asm_adr
+	bl _current_reserve_2
+	bl _asm_register_const
 	pop {r0}
 	push_tos
 	movs tos, #0
@@ -1336,13 +1277,6 @@ _asm_long_literal:
 	push_tos
 	movs tos, r0
 	bl _asm_ldr_imm
-	bl _current_here
-	adds tos, #8
-	bl _asm_branch
-	push_tos
-	movs tos, #0
-	bl _current_comma_2
-	bl _current_comma_4
 	pop {pc}
 	end_inlined
 	
@@ -1355,7 +1289,7 @@ _asm_reserve_branch:
 	end_inlined
 
 	@@ Out of range branch exception
-	define_internal_word "out-of-range-branch", visible_flag
+	define_internal_word "x-out-of-range-branch", visible_flag
 _out_of_range_branch:
 	push {lr}
 	string_ln "out of range branch"
@@ -1363,7 +1297,7 @@ _out_of_range_branch:
 	pop {pc}
 
 	@@ Already building exception
-	define_internal_word "already-building", visible_flag
+	define_internal_word "x-already-building", visible_flag
 _already_building:
 	push {lr}
 	string_ln "already building"
@@ -1372,13 +1306,21 @@ _already_building:
 	end_inlined
 
 	@@ Not building exception
-	define_internal_word "not-building", visible_flag
+	define_internal_word "x-not-building", visible_flag
 _not_building:
 	push {lr}
 	string_ln "not building"
 	bl _type
 	pop {pc}
 	end_inlined
+
+	@@ Out of range literal
+	define_internal_word "x-out-of-range-literal", visible_flag
+_out_of_range_literal:
+	push {lr}
+	string_ln "out of range literal"
+	bl _type
+	pop {pc}
 	
 	@@ Assemble an unconditional branch
 	define_internal_word "b-16,", visible_flag
@@ -1768,6 +1710,159 @@ _asm_store_adr:
 	pop {pc}
 	end_inlined
 
+.ltorg
+
+	@@ Assemble an instruction at an address to generate a PC-relative
+	@@ address
+	define_internal_word "adr-unaligned!", visible_flag
+_asm_store_unaligned_adr:
+	push {lr}
+	movs r2, tos
+	pull_tos
+	movs r1, #7
+	ands r1, tos
+	lsls r1, r1, #8
+	pull_tos
+	subs tos, r2
+	movs r3, #3
+	subs tos, #1
+	orrs tos, r3
+	subs tos, #3
+	lsrs tos, tos, #2
+	ldr r0, =0xFF
+	cmp tos, r0
+	bhi 1f
+	ands tos, r0
+	orrs tos, r1
+	ldr r0, =0xA000
+	orrs tos, r0
+	push_tos
+	movs tos, r2
+	bl _store_current_2
+	pop {pc}
+1:	push_tos
+	ldr tos, =_out_of_range_literal
+	bl _raise
+	pop {pc}
+	end_inlined
+
+	@@ Write out constants
+	define_internal_word "consts,", visible_flag
+_asm_dump_consts:
+	push {lr}
+	ldr r0, =consts_used_count
+	ldr r1, [r0]
+	cmp r1, #0
+	beq 2f
+	push {r0}
+	bl _asm_word_align
+	pop {r0}
+	movs r1, #0
+1:	ldr r2, [r0]
+	cmp r1, r2
+	beq 2f
+	push {r0, r1}
+	bl _current_here
+	pop {r0, r1}
+	push_tos
+	ldr r2, =const_buffer_reg
+	ldrb tos, [r2, r1]
+	push_tos
+	ldr r2, =const_buffer_addr
+	lsls r3, r1, #2
+	ldr tos, [r2, r3]
+	push {r0, r1, r3}
+	bl _asm_store_unaligned_adr
+	pop {r0, r1, r3}
+	push_tos
+	ldr r2, =const_buffer_value
+	ldr tos, [r2, r3]
+	push {r0, r1}
+	bl _current_comma_4
+	pop {r0, r1}
+	adds r1, #1
+	b 1b
+2:	movs r1, #0
+	str r1, [r0]
+	pop {pc}
+	end_inlined
+
+	@@ Write out constants to the code
+	define_internal_word "consts-inline,", visible_flag
+_asm_dump_consts_inline:
+	push {lr}
+	bl _current_reserve_2
+	bl _asm_dump_consts
+	movs r0, tos
+	pull_tos
+	push {r0}
+	bl _current_here
+	pop {r0}
+	push_tos
+	movs tos, r0
+	bl _asm_branch_back
+	pop {pc}
+	end_inlined
+	
+	@@ Register a constant
+	define_internal_word "register-const", visible_flag
+_asm_register_const:
+	push {lr}
+	ldr r0, =consts_used_count
+	ldr r1, [r0]
+	lsls r2, r1, #2
+	ldr r3, =const_buffer_addr
+	str tos, [r3, r2]
+	pull_tos
+	ldr r3, =const_buffer_reg
+	strb tos, [r3, r1]
+	pull_tos
+	ldr r3, =const_buffer_value
+	str tos, [r3, r2]
+	pull_tos
+	adds r1, #1
+	str r1, [r0]
+	movs r3, #const_count
+	cmp r1, r3
+	bne 2f
+	bl _asm_dump_consts_inline
+2:	pop {pc}
+	end_inlined
+
+	@@ Set a constant to be set pointing to the end of a word ( r addr -- )
+	@@ Note that only one such constant may be set for a given word.
+	define_internal_word "set-const-end" visible_flag
+_asm_set_const_end:
+	ldr r0, =set_const_end
+	str tos, [r0]
+	pull_tos
+	ldr r0, =set_const_end_reg
+	str tos, [r0]
+	pull_tos
+	bx lr
+	end_inlined
+
+	@@ Set an end-of-word constant, both with regard to the ADR instruction
+	@@ for the constant and the space alloted for its value.
+	define_internal_word "resolve-const-end", visible_flag
+_asm_resolve_const_end:
+	push {lr}
+	ldr r0, =set_const_end
+	ldr r1, [r0]
+	cmp r1, #0
+	beq 1f
+	push {r1}
+	bl _current_here
+	pop {r1}
+	push_tos
+	ldr r3, =set_const_end_reg
+	ldr tos, [r3]
+	push_tos
+	movs tos, r1
+	bl _asm_store_unaligned_adr
+1:	pop {pc}
+	end_inlined
+	
 	@@ Assemble a BX instruction
 	define_internal_word "bx,", visible_flag
 _asm_bx:
