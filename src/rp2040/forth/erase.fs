@@ -77,8 +77,8 @@ continue-module internal
 
   \ Core of CORNERSTONE's DOES>
   : cornerstone-does> ( -- )
-    does>
-    $800 align
+    does> @
+    $1000 align
     erase-after
   ;
 
@@ -91,9 +91,8 @@ commit-flash
 : cornerstone ( "name" -- )
   compiling-to-flash?
   compile-to-flash
-  <builds
+  <builds here cell allot cornerstone-does> here swap current!
   pad-flash-erase-block
-  cornerstone-does>
   not if
     compile-to-ram
   then
