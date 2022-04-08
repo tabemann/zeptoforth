@@ -1377,26 +1377,6 @@ otherwise passing the specified argument through.</p>
 <p>( <text>” – )</p>
 <p>Create an anonymous word for an exception</p>
 </section>
-<section id="defer">
-<h3><code class="docutils literal notranslate"><span class="pre">defer</span></code><a class="headerlink" href="#defer" title="Permalink to this headline">¶</a></h3>
-<p>( “name” – )</p>
-<p>Create a deferred word</p>
-</section>
-<section id="defer-ram">
-<h3><code class="docutils literal notranslate"><span class="pre">defer-ram!</span></code><a class="headerlink" href="#defer-ram" title="Permalink to this headline">¶</a></h3>
-<p>( xt xt-deferred – )</p>
-<p>Set a deferred word in RAM</p>
-</section>
-<section id="defer-flash">
-<h3><code class="docutils literal notranslate"><span class="pre">defer-flash!</span></code><a class="headerlink" href="#defer-flash" title="Permalink to this headline">¶</a></h3>
-<p>( xt xt-deferred – )</p>
-<p>Set a deferred word in flash</p>
-</section>
-<section id="id83">
-<h3><code class="docutils literal notranslate"><span class="pre">defer!</span></code><a class="headerlink" href="#id83" title="Permalink to this headline">¶</a></h3>
-<p>( xt xt-deferred – )</p>
-<p>Set a deferred word; note that a deferred word stored in flash can only have its implementation set once</p>
-</section>
 <section id="ws">
 <h3><code class="docutils literal notranslate"><span class="pre">ws?</span></code><a class="headerlink" href="#ws" title="Permalink to this headline">¶</a></h3>
 <p>( b – flag )</p>
@@ -1422,13 +1402,13 @@ otherwise passing the specified argument through.</p>
 <p>( “token” – b-addr u )</p>
 <p>Parse a token</p>
 </section>
-<section id="id84">
-<h3><code class="docutils literal notranslate"><span class="pre">\</span></code><a class="headerlink" href="#id84" title="Permalink to this headline">¶</a></h3>
+<section id="id83">
+<h3><code class="docutils literal notranslate"><span class="pre">\</span></code><a class="headerlink" href="#id83" title="Permalink to this headline">¶</a></h3>
 <p>( “comment<NL>” – )</p>
 <p>Parse a line comment</p>
 </section>
-<section id="id85">
-<h3><code class="docutils literal notranslate"><span class="pre">(</span></code><a class="headerlink" href="#id85" title="Permalink to this headline">¶</a></h3>
+<section id="id84">
+<h3><code class="docutils literal notranslate"><span class="pre">(</span></code><a class="headerlink" href="#id84" title="Permalink to this headline">¶</a></h3>
 <p>( “comment)” – )</p>
 <p>Parse a paren coment</p>
 </section>
@@ -1442,8 +1422,8 @@ otherwise passing the specified argument through.</p>
 <p>( b-addr1 u1 b-addr2 u2 – flag )</p>
 <p>Compare whether two strings are equal</p>
 </section>
-<section id="id86">
-<h3><code class="docutils literal notranslate"><span class="pre">3dup</span></code><a class="headerlink" href="#id86" title="Permalink to this headline">¶</a></h3>
+<section id="id85">
+<h3><code class="docutils literal notranslate"><span class="pre">3dup</span></code><a class="headerlink" href="#id85" title="Permalink to this headline">¶</a></h3>
 <p>( x1 x2 x3 – x1 x2 x3 x1 x2 x3 )</p>
 <p>Duplicate three items on the stack</p>
 </section>
@@ -1552,8 +1532,8 @@ otherwise passing the specified argument through.</p>
 <p>( b base – u success  )</p>
 <p>Parse a digit</p>
 </section>
-<section id="id87">
-<h3><code class="docutils literal notranslate"><span class="pre">:</span></code><a class="headerlink" href="#id87" title="Permalink to this headline">¶</a></h3>
+<section id="id86">
+<h3><code class="docutils literal notranslate"><span class="pre">:</span></code><a class="headerlink" href="#id86" title="Permalink to this headline">¶</a></h3>
 <p>( – )</p>
 <p>Start a colon definition</p>
 </section>
@@ -1562,8 +1542,8 @@ otherwise passing the specified argument through.</p>
 <p>( – xt )</p>
 <p>Start an anonymous colon definition</p>
 </section>
-<section id="id88">
-<h3><code class="docutils literal notranslate"><span class="pre">;</span></code><a class="headerlink" href="#id88" title="Permalink to this headline">¶</a></h3>
+<section id="id87">
+<h3><code class="docutils literal notranslate"><span class="pre">;</span></code><a class="headerlink" href="#id87" title="Permalink to this headline">¶</a></h3>
 <p>( – )</p>
 <p>End a colon definition</p>
 </section>
@@ -1572,8 +1552,8 @@ otherwise passing the specified argument through.</p>
 <p>( x “name” – )</p>
 <p>Create a constant</p>
 </section>
-<section id="id89">
-<h3><code class="docutils literal notranslate"><span class="pre">2constant</span></code><a class="headerlink" href="#id89" title="Permalink to this headline">¶</a></h3>
+<section id="id88">
+<h3><code class="docutils literal notranslate"><span class="pre">2constant</span></code><a class="headerlink" href="#id88" title="Permalink to this headline">¶</a></h3>
 <p>( d “name” – )</p>
 <p>Create a 2-word constant</p>
 </section>
@@ -1612,18 +1592,18 @@ otherwise passing the specified argument through.</p>
 <p>( b – )</p>
 <p>Add a character to pictured numeric output</p>
 </section>
-<section id="id90">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;#</span></code><a class="headerlink" href="#id90" title="Permalink to this headline">¶</a></h3>
+<section id="id89">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;#</span></code><a class="headerlink" href="#id89" title="Permalink to this headline">¶</a></h3>
 <p>( – )</p>
 <p>Start pictured numeric output</p>
 </section>
-<section id="id91">
-<h3><code class="docutils literal notranslate"><span class="pre">#</span></code><a class="headerlink" href="#id91" title="Permalink to this headline">¶</a></h3>
+<section id="id90">
+<h3><code class="docutils literal notranslate"><span class="pre">#</span></code><a class="headerlink" href="#id90" title="Permalink to this headline">¶</a></h3>
 <p>( ud1 – ud2 )</p>
 <p>Add a digit to the pictured numeric output</p>
 </section>
-<section id="id92">
-<h3><code class="docutils literal notranslate"><span class="pre">#s</span></code><a class="headerlink" href="#id92" title="Permalink to this headline">¶</a></h3>
+<section id="id91">
+<h3><code class="docutils literal notranslate"><span class="pre">#s</span></code><a class="headerlink" href="#id91" title="Permalink to this headline">¶</a></h3>
 <p>( ud – 0 0 )</p>
 <p>Add one or more digits to the pictured numeric output</p>
 </section>
@@ -1632,8 +1612,8 @@ otherwise passing the specified argument through.</p>
 <p>( n – )</p>
 <p>If n (a single number) is negative, append ‘-’ to the pictured numeric output</p>
 </section>
-<section id="id93">
-<h3><code class="docutils literal notranslate"><span class="pre">#&gt;</span></code><a class="headerlink" href="#id93" title="Permalink to this headline">¶</a></h3>
+<section id="id92">
+<h3><code class="docutils literal notranslate"><span class="pre">#&gt;</span></code><a class="headerlink" href="#id92" title="Permalink to this headline">¶</a></h3>
 <p>( xd – c-addr bytes )</p>
 <p>Finish pictured numeric output</p>
 </section>
@@ -1657,13 +1637,13 @@ otherwise passing the specified argument through.</p>
 <p>( ud – )</p>
 <p>Type an unsigned double-cell number without a leading space</p>
 </section>
-<section id="id94">
-<h3><code class="docutils literal notranslate"><span class="pre">d.</span></code><a class="headerlink" href="#id94" title="Permalink to this headline">¶</a></h3>
+<section id="id93">
+<h3><code class="docutils literal notranslate"><span class="pre">d.</span></code><a class="headerlink" href="#id93" title="Permalink to this headline">¶</a></h3>
 <p>( nd – )</p>
 <p>Type a signed double-cell number with a leading space</p>
 </section>
-<section id="id95">
-<h3><code class="docutils literal notranslate"><span class="pre">ud.</span></code><a class="headerlink" href="#id95" title="Permalink to this headline">¶</a></h3>
+<section id="id94">
+<h3><code class="docutils literal notranslate"><span class="pre">ud.</span></code><a class="headerlink" href="#id94" title="Permalink to this headline">¶</a></h3>
 <p>( ud – )</p>
 <p>Type an unsigned double-cell number with a leading space</p>
 </section>
@@ -1677,8 +1657,8 @@ otherwise passing the specified argument through.</p>
 <p>( f – )</p>
 <p>Type a fixed-point number without a leading space</p>
 </section>
-<section id="id96">
-<h3><code class="docutils literal notranslate"><span class="pre">f.</span></code><a class="headerlink" href="#id96" title="Permalink to this headline">¶</a></h3>
+<section id="id95">
+<h3><code class="docutils literal notranslate"><span class="pre">f.</span></code><a class="headerlink" href="#id95" title="Permalink to this headline">¶</a></h3>
 <p>( f – )</p>
 <p>Type a fixed-point number with a leading space</p>
 </section>
@@ -1717,43 +1697,43 @@ otherwise passing the specified argument through.</p>
 <p>( – )</p>
 <p>Display the license notice</p>
 </section>
-<section id="id97">
-<h3><code class="docutils literal notranslate"><span class="pre">.&quot;</span></code><a class="headerlink" href="#id97" title="Permalink to this headline">¶</a></h3>
+<section id="id96">
+<h3><code class="docutils literal notranslate"><span class="pre">.&quot;</span></code><a class="headerlink" href="#id96" title="Permalink to this headline">¶</a></h3>
 <p>( “text<quote>” – )</p>
 <p>Compile a string to be printed.</p>
 </section>
-<section id="id98">
-<h3><code class="docutils literal notranslate"><span class="pre">s&quot;</span></code><a class="headerlink" href="#id98" title="Permalink to this headline">¶</a></h3>
+<section id="id97">
+<h3><code class="docutils literal notranslate"><span class="pre">s&quot;</span></code><a class="headerlink" href="#id97" title="Permalink to this headline">¶</a></h3>
 <p>( “text<quote>” – ) ( compiled: – b-addr u )</p>
 <p>Compile a non-counted string</p>
 </section>
-<section id="id99">
-<h3><code class="docutils literal notranslate"><span class="pre">c&quot;</span></code><a class="headerlink" href="#id99" title="Permalink to this headline">¶</a></h3>
+<section id="id98">
+<h3><code class="docutils literal notranslate"><span class="pre">c&quot;</span></code><a class="headerlink" href="#id98" title="Permalink to this headline">¶</a></h3>
 <p>( “text<quote>” – ) ( compiled: – b-addr )</p>
 <p>Compile a counted-string</p>
 </section>
-<section id="id100">
-<h3><code class="docutils literal notranslate"><span class="pre">.(</span></code><a class="headerlink" href="#id100" title="Permalink to this headline">¶</a></h3>
+<section id="id99">
+<h3><code class="docutils literal notranslate"><span class="pre">.(</span></code><a class="headerlink" href="#id99" title="Permalink to this headline">¶</a></h3>
 <p>( “text<close-paren>” – )</p>
 <p>Immediately print a string.</p>
 </section>
-<section id="id101">
-<h3><code class="docutils literal notranslate"><span class="pre">.\&quot;</span></code><a class="headerlink" href="#id101" title="Permalink to this headline">¶</a></h3>
+<section id="id100">
+<h3><code class="docutils literal notranslate"><span class="pre">.\&quot;</span></code><a class="headerlink" href="#id100" title="Permalink to this headline">¶</a></h3>
 <p>( “text<quote>” – )</p>
 <p>Compile an escaped string to be printed.</p>
 </section>
-<section id="id102">
-<h3><code class="docutils literal notranslate"><span class="pre">s\&quot;</span></code><a class="headerlink" href="#id102" title="Permalink to this headline">¶</a></h3>
+<section id="id101">
+<h3><code class="docutils literal notranslate"><span class="pre">s\&quot;</span></code><a class="headerlink" href="#id101" title="Permalink to this headline">¶</a></h3>
 <p>( “text<quote>” – ) ( compiled: – b-addr u )</p>
 <p>Compile an escaped non-counted string</p>
 </section>
-<section id="id103">
-<h3><code class="docutils literal notranslate"><span class="pre">c\&quot;</span></code><a class="headerlink" href="#id103" title="Permalink to this headline">¶</a></h3>
+<section id="id102">
+<h3><code class="docutils literal notranslate"><span class="pre">c\&quot;</span></code><a class="headerlink" href="#id102" title="Permalink to this headline">¶</a></h3>
 <p>( “text<quote>” – ) ( compiled: – b-addr )</p>
 <p>Compile an escaped counted-string</p>
 </section>
-<section id="id104">
-<h3><code class="docutils literal notranslate"><span class="pre">.\(</span></code><a class="headerlink" href="#id104" title="Permalink to this headline">¶</a></h3>
+<section id="id103">
+<h3><code class="docutils literal notranslate"><span class="pre">.\(</span></code><a class="headerlink" href="#id103" title="Permalink to this headline">¶</a></h3>
 <p>( “text<close-paren>” – )</p>
 <p>Immediately print an escaped string.</p>
 </section>
@@ -1767,18 +1747,18 @@ otherwise passing the specified argument through.</p>
 <p>( “char” – b )</p>
 <p>Parse a character and put it on the stack</p>
 </section>
-<section id="id105">
-<h3><code class="docutils literal notranslate"><span class="pre">[char]</span></code><a class="headerlink" href="#id105" title="Permalink to this headline">¶</a></h3>
+<section id="id104">
+<h3><code class="docutils literal notranslate"><span class="pre">[char]</span></code><a class="headerlink" href="#id104" title="Permalink to this headline">¶</a></h3>
 <p>( “char” – ) ( compiled: – b )</p>
 <p>Parse a character and compile it</p>
 </section>
-<section id="id106">
-<h3><code class="docutils literal notranslate"><span class="pre">(.)</span></code><a class="headerlink" href="#id106" title="Permalink to this headline">¶</a></h3>
+<section id="id105">
+<h3><code class="docutils literal notranslate"><span class="pre">(.)</span></code><a class="headerlink" href="#id105" title="Permalink to this headline">¶</a></h3>
 <p>( n – )</p>
 <p>Type an integer without a preceding space</p>
 </section>
-<section id="id107">
-<h3><code class="docutils literal notranslate"><span class="pre">(u.)</span></code><a class="headerlink" href="#id107" title="Permalink to this headline">¶</a></h3>
+<section id="id106">
+<h3><code class="docutils literal notranslate"><span class="pre">(u.)</span></code><a class="headerlink" href="#id106" title="Permalink to this headline">¶</a></h3>
 <p>( u – )</p>
 <p>Type an unsigned integer without a preceding space</p>
 </section>
@@ -1787,13 +1767,13 @@ otherwise passing the specified argument through.</p>
 <p>( u – )</p>
 <p>Type an unsigned hexadecimal integer safely without a preceding space</p>
 </section>
-<section id="id108">
-<h3><code class="docutils literal notranslate"><span class="pre">.</span></code><a class="headerlink" href="#id108" title="Permalink to this headline">¶</a></h3>
+<section id="id107">
+<h3><code class="docutils literal notranslate"><span class="pre">.</span></code><a class="headerlink" href="#id107" title="Permalink to this headline">¶</a></h3>
 <p>( n – )</p>
 <p>Type an integer with a preceding space</p>
 </section>
-<section id="id109">
-<h3><code class="docutils literal notranslate"><span class="pre">u.</span></code><a class="headerlink" href="#id109" title="Permalink to this headline">¶</a></h3>
+<section id="id108">
+<h3><code class="docutils literal notranslate"><span class="pre">u.</span></code><a class="headerlink" href="#id108" title="Permalink to this headline">¶</a></h3>
 <p>( u – )</p>
 <p>Type an unsigned integer with a preceding space</p>
 </section>
@@ -1893,13 +1873,15 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="map.html">Map Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="rchannel.html">Reply Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rchannel.html">Bidirectional Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>

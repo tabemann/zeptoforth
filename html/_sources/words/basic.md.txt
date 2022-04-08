@@ -1332,26 +1332,6 @@ End lambda
 
 Create an anonymous word for an exception
 
-##### `defer`
-( "name" -- )
-
-Create a deferred word
-
-##### `defer-ram!`
-( xt xt-deferred -- )
-
-Set a deferred word in RAM
-
-##### `defer-flash!`
-( xt xt-deferred -- )
-
-Set a deferred word in flash
-
-##### `defer!`
-( xt xt-deferred -- )
-
-Set a deferred word; note that a deferred word stored in flash can only have its implementation set once
-
 ##### `ws?`
 ( b -- flag )
 
