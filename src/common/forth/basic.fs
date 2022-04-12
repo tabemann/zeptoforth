@@ -1073,24 +1073,23 @@ commit-flash
   then
 ;
 
-\ Set the internal wordlist
-internal set-current
-
-\ Make the global portion of a CPU variable
-: global-cpu-variable ( addr "global-name" -- ) <builds , does> @ swap cells + ;
-
-\ Commit to flash
-commit-flash
-
-\ Set the forth wordlist
-forth set-current
-
 \ Make a variable which is CPU-dependent
 : cpu-variable ( "global-name" "cpu-name" -- )
-  next-ram-space
-  dup global-cpu-variable
-  dup cpu-count cells + set-next-ram-space
-  <builds , does> @ cpu-offset +
+  next-ram-space dup cpu-count cells + set-next-ram-space
+  token start-compile visible
+  cpu-count 1 > if
+    2 lit, postpone lshift dup lit, postpone +
+  else
+    postpone drop dup lit,
+  then
+  end-compile,
+  token start-compile visible
+  cpu-count 1 > if
+    lit, postpone cpu-offset postpone +
+  else
+    lit,
+  then
+  end-compile,
 ;
 
 \ Commit to flash
