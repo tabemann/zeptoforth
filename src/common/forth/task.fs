@@ -116,6 +116,9 @@ begin-module task
     cpu-count cells buffer: cpu-active?
     : cpu-active? ( index -- addr ) cells cpu-active? + ;
 
+    \ Whether to keep the current task at the head of the schedule
+    cpu-variable cpu-reschedule? reschedule?
+
     \ The task ready count
     user task-ready-count
     
@@ -266,6 +269,11 @@ begin-module task
   \ Get a given user variable for a given task
   : for-task@ ( task xt -- x )
     execute dict-base @ - swap task-dict-base @ + @
+  ;
+
+  \ Pause a task without rescheduling it
+  : pause-wo-reschedule ( -- )
+    disable-int false reschedule? ! pause enable-int
   ;
 
   continue-module task-internal
@@ -550,7 +558,7 @@ begin-module task
       tuck ['] task-systick-delay for-task!
       delayed over task-state h!
     ;] over task-core@ critical-with-other-core-spinlock
-    current-task @ = if pause then
+    current-task @ = if pause-wo-reschedule then
   ;
 
   \ Delay a task and schedule as critcal once done
@@ -562,7 +570,7 @@ begin-module task
       [ delayed schedule-critical or schedule-user-critical or ] literal
       over task-state h!
     ;] over task-core@ critical-with-other-core-spinlock
-    current-task @ = if pause then
+    current-task @ = if pause-wo-reschedule then
   ;
 
   \ Mark a task as blocked until a timeout
@@ -578,7 +586,7 @@ begin-module task
 	nip nip
       then
     ;] over task-core@ critical-with-other-core-spinlock
-    current-task @ = if pause then
+    current-task @ = if pause-wo-reschedule then
   ;
 
   \ Mark a task as blocked until a timeout and schedule as critical once done
@@ -599,7 +607,7 @@ begin-module task
 	over task-state h!
       then
     ;] over task-core@ critical-with-other-core-spinlock
-    current-task @ = if pause then
+    current-task @ = if pause-wo-reschedule then
   ;
 
   \ Mark a task as blocked until a timeout and schedule as critical along with
@@ -622,7 +630,7 @@ begin-module task
 	over task-state h!
       then
     ;] over task-core@ critical-with-other-core-spinlock
-    current-task @ = if pause then
+    current-task @ = if pause-wo-reschedule then
   ;
 
   \ Wait until a timeout on the specified notification index and return the
@@ -638,7 +646,7 @@ begin-module task
 	dup task-current-notify !
 	[ blocked-timeout schedule-critical or ] literal
 	current-task @ task-state h!
-	release-same-core-spinlock end-critical pause
+	release-same-core-spinlock end-critical pause-wo-reschedule
 	claim-same-core-spinlock
 	current-task @ validate-timeout
       repeat
@@ -665,7 +673,7 @@ begin-module task
 	  [ blocked-timeout schedule-critical or schedule-user-critical or ]
 	  literal
 	  current-task @ task-state h!
-	  release-same-core-spinlock end-critical pause
+	  release-same-core-spinlock end-critical pause-wo-reschedule
 	  claim-same-core-spinlock
 	  current-task @ validate-timeout
 	repeat
@@ -680,7 +688,7 @@ begin-module task
   : block-wait ( task -- )
     dup validate-not-terminated
     blocked-wait over task-state h!
-    current-task @ = if pause then
+    current-task @ = if pause-wo-reschedule then
   ;
   
   \ Mark a task as waiting
@@ -688,7 +696,7 @@ begin-module task
     dup validate-not-terminated
     [ blocked-wait schedule-critical or schedule-user-critical or ] literal
     over task-state h!
-    current-task @ = if pause then
+    current-task @ = if pause-wo-reschedule then
   ;
 
   \ Mark a task as blocked indefinitely
@@ -700,7 +708,7 @@ begin-module task
 	blocked-indefinite over task-state h!
       then
     ;] over task-core@ critical-with-other-core-spinlock
-    current-task @ = if pause then
+    current-task @ = if pause-wo-reschedule then
   ;
 
   \ Mark a task as blocked indefinitely and schedule as critical when done
@@ -716,7 +724,7 @@ begin-module task
 	literal over task-state h!
       then
     ;] over task-core@ critical-with-other-core-spinlock
-    current-task @ = if pause then
+    current-task @ = if pause-wo-reschedule then
   ;
 
   continue-module task-internal
@@ -727,7 +735,7 @@ begin-module task
       -1 task-ready-count !
       blocked-indefinite current-task @ task-state h!
       dup release-spinlock-raw
-      pause
+      false reschedule? ! pause
       enable-int
       disable-int
       claim-spinlock-raw
@@ -752,7 +760,7 @@ begin-module task
 	literal over task-state h!
       then
     ;] over task-core@ critical-with-other-core-spinlock
-    current-task @ = if pause then
+    current-task @ = if pause-wo-reschedule then
   ;
 
   \ Wait indefinitely on the specified notification index and return the value
@@ -766,7 +774,7 @@ begin-module task
 	dup task-current-notify !
 	[ blocked-indefinite schedule-critical or ] literal
 	current-task @ task-state h!
-	release-same-core-spinlock end-critical pause
+	release-same-core-spinlock end-critical pause-wo-reschedule
 	claim-same-core-spinlock
       repeat
       task-notify-area @ over cells + @
@@ -790,7 +798,7 @@ begin-module task
 	  [ blocked-indefinite schedule-critical or schedule-user-critical or ]
 	  literal
 	  current-task @ task-state h!
-	  release-same-core-spinlock end-critical pause
+	  release-same-core-spinlock end-critical pause-wo-reschedule
 	  claim-same-core-spinlock
 	repeat
 	task-notify-area @ over cells + @
@@ -841,7 +849,7 @@ begin-module task
 	drop false
       then
     ;] over task-core@ critical-with-other-core-spinlock
-    if pause then
+    if pause-wo-reschedule then
   ;
 
   \ Notify a task for a specified notification index, setting the notification
@@ -859,7 +867,7 @@ begin-module task
 	drop false
       then
     ;] over task-core@ critical-with-other-core-spinlock
-    if pause then
+    if pause-wo-reschedule then
   ;
 
   \ Notify a task for a specified notification index, updating the notification
@@ -879,7 +887,7 @@ begin-module task
 	drop false
       then
     ;] over task-core@ critical-with-other-core-spinlock
-    if pause then
+    if pause-wo-reschedule then
   ;
 
   \ Clear a notification for a task
@@ -1031,7 +1039,7 @@ begin-module task
 	  blocked-indefinite over task-state h!
 	then
       then
-      current-task @ = if pause then
+      current-task @ = if false reschedule? ! pause then
     ;
 
     \ Initialize the main task
@@ -1274,8 +1282,13 @@ begin-module task
     : reschedule-task ( task -- )
       true in-task-change !
       claim-same-core-spinlock
-      dup remove-task
-      dup task-active@ 0> if insert-task else drop then
+      reschedule? @ if
+	dup remove-task
+	dup task-active@ 0> if insert-task else drop then
+      else
+	drop
+      then
+      true reschedule? !
       release-same-core-spinlock
       false in-task-change !
     ;
@@ -1619,6 +1632,7 @@ begin-module task
       false i cpu-trace-enabled? !
       false i cpu-in-task-change !
       false i cpu-wake-tasks !
+      true i cpu-reschedule? !
       0 i cpu-task-systick-counter !
       i 0= if
 	true i cpu-active? !

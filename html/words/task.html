@@ -84,6 +84,11 @@
 <p>Allocate the space for a task (with <em>rstack-size</em> bytes of return stack space, <em>stack-size</em> bytes of data stack space, and <em>dict-size</em> bytes of dictionary space), place <em>count</em> cells on its data stack (<em>xn</em> through <em>x0</em>, with <em>x0</em> on the top of the data stack), and set it to execute <em>xt</em> on core <em>core</em>, booting the core if necessary. If the core is to be booted, the Systick is initiated on the booted core and the booted core is initialized for multitasking.</p>
 <p>The same as applies to <code class="docutils literal notranslate"><span class="pre">spawn</span></code> applies here.</p>
 </section>
+<section id="pause-wo-reschedule">
+<h3><code class="docutils literal notranslate"><span class="pre">pause-wo-reschedule</span></code><a class="headerlink" href="#pause-wo-reschedule" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Relinquish control of the current core without rescheduling the current task, i.e. reinserting it into the schedule. This ensures that once the task will not move in the schedule despite its giving up control ofthe current core.</p>
+</section>
 <section id="config-notify">
 <h3><code class="docutils literal notranslate"><span class="pre">config-notify</span></code><a class="headerlink" href="#config-notify" title="Permalink to this headline">¶</a></h3>
 <p>( notify-area-addr notify-count task – )</p>
@@ -425,7 +430,7 @@
 <li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="rchannel.html">Reply Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rchannel.html">Bidirectional Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>

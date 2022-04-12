@@ -62,6 +62,11 @@ Allocate the space for a task (with *rstack-size* bytes of return stack space, *
 
 The same as applies to `spawn` applies here.
 
+##### `pause-wo-reschedule`
+( -- )
+
+Relinquish control of the current core without rescheduling the current task, i.e. reinserting it into the schedule. This ensures that once the task will not move in the schedule despite its giving up control ofthe current core.
+
 ##### `config-notify`
 ( notify-area-addr notify-count task -- )
 
