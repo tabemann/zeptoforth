@@ -1076,20 +1076,20 @@ commit-flash
 \ Make a variable which is CPU-dependent
 : cpu-variable ( "global-name" "cpu-name" -- )
   next-ram-space dup cpu-count cells + set-next-ram-space
-  token start-compile visible
+  token start-compile-no-push visible
   cpu-count 1 > if
     2 lit, postpone lshift dup lit, postpone +
   else
     postpone drop dup lit,
   then
-  end-compile,
-  token start-compile visible
+  undefer-lit 14 bx, finalize,
   cpu-count 1 > if
+    token start-compile-no-push visible
     lit, postpone cpu-offset postpone +
+    undefer-lit 14 bx, finalize,
   else
-    lit,
+    constant
   then
-  end-compile,
 ;
 
 \ Commit to flash
