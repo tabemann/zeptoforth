@@ -401,6 +401,9 @@ _asm_extract_constant:
 	ldr r1, =0xFF00
 	movs r2, r0
 	ands r2, r1
+	ldr r1, =0x4E00
+	cmp r2, r1
+	beq 5f
 	ldr r1, =0x2600
 	cmp r2, r1
 	bne 3b
@@ -414,6 +417,17 @@ _asm_extract_constant:
 	movs tos, r0
 	push_tos
 	ldr tos, =-1
+	pop {pc}
+5:	ldr r1, =0x00FF
+	ands r0, r1
+	lsls r0, r0, #2
+	adds r0, #1
+	adds r0, tos
+	movs r1, #3
+	orrs r0, r1
+	adds r0, #1
+	ldr r0, [r0]
+	b 4b
 	pop {pc}
 	end_inlined
 
@@ -1023,7 +1037,8 @@ _asm_reserve_literal:
 	ldr r0, =suppress_inline
 	ldr r1, =-1
 	str r1, [r0]
-	bl _current_reserve_4
+@	bl _current_reserve_4
+	bl _current_reserve_2
 	pop {pc}
 	end_inlined
 
@@ -1031,21 +1046,21 @@ _asm_reserve_literal:
 	define_internal_word "literal!", visible_flag
 _asm_store_literal:	
 	push {lr}
-	movs r0, tos
-	ldr r1, [dp]
-	push {r0, r1}
+@	movs r0, tos
+@	ldr r1, [dp]
+@	push {r0, r1}
 	bl _asm_register_const
-	pop {r0, r1}
-	push_tos
-	movs tos, #0
-	push_tos
-	movs tos, r1
-	push_tos
-	movs tos, r1
-	push_tos
-	movs tos, r0
-	adds tos, #2
-	bl _asm_store_ldr_imm
+@	pop {r0, r1}
+@	push_tos
+@	movs tos, #0
+@	push_tos
+@	movs tos, r1
+@	push_tos
+@	movs tos, r1
+@	push_tos
+@	movs tos, r0
+@	adds tos, #2
+@	bl _asm_store_ldr_imm
 	pop {pc}
 	end_inlined
 	
@@ -1265,18 +1280,18 @@ _asm_long_literal:
 	ldr r0, =suppress_inline
 	ldr r1, =-1
 	str r1, [r0]
-	movs r0, tos
-	push {r0}
+@	movs r0, tos
+@	push {r0}
 	bl _current_reserve_2
 	bl _asm_register_const
-	pop {r0}
-	push_tos
-	movs tos, #0
-	push_tos
-	movs tos, r0
-	push_tos
-	movs tos, r0
-	bl _asm_ldr_imm
+@	pop {r0}
+@	push_tos
+@	movs tos, #0
+@	push_tos
+@	movs tos, r0
+@	push_tos
+@	movs tos, r0
+@	bl _asm_ldr_imm
 	pop {pc}
 	end_inlined
 	
@@ -1746,6 +1761,40 @@ _asm_store_unaligned_adr:
 	pop {pc}
 	end_inlined
 
+	@@ Assemble an instruction at an address to generate a PC-relative
+	@@ load
+	define_internal_word "ldr-pc!", visible_flag
+_asm_store_ldr_pc:
+	push {lr}
+	movs r2, tos
+	pull_tos
+	movs r1, #7
+	ands r1, tos
+	lsls r1, r1, #8
+	pull_tos
+	subs tos, r2
+	movs r3, #3
+	subs tos, #1
+	orrs tos, r3
+	subs tos, #3
+	lsrs tos, tos, #2
+	ldr r0, =0xFF
+	cmp tos, r0
+	bhi 1f
+	ands tos, r0
+	orrs tos, r1
+	ldr r0, =0x4800
+	orrs tos, r0
+	push_tos
+	movs tos, r2
+	bl _store_current_2
+	pop {pc}
+1:	push_tos
+	ldr tos, =_out_of_range_literal
+	bl _raise
+	pop {pc}
+	end_inlined
+
 	@@ Write out constants
 	define_internal_word "consts,", visible_flag
 _asm_dump_consts:
@@ -1772,7 +1821,8 @@ _asm_dump_consts:
 	lsls r3, r1, #2
 	ldr tos, [r2, r3]
 	push {r0, r1, r3}
-	bl _asm_store_unaligned_adr
+@	bl _asm_store_unaligned_adr
+	bl _asm_store_ldr_pc
 	pop {r0, r1, r3}
 	push_tos
 	ldr r2, =const_buffer_value
