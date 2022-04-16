@@ -97,9 +97,6 @@ begin-module task
     \ The multitasker SysTick counter
     cpu-variable cpu-task-systick-counter task-systick-counter
 
-    \ The saved multitasker SysTick counter
-    user task-saved-systick-counter
-    
     \ The default timeslice
     10 constant default-timeslice
 
@@ -118,51 +115,6 @@ begin-module task
 
     \ Whether to keep the current task at the head of the schedule
     cpu-variable cpu-reschedule? reschedule?
-
-    \ The task ready count
-    user task-ready-count
-    
-    \ Task systick start time
-    user task-systick-start
-
-    \ Task systick delay
-    user task-systick-delay
-
-    \ A task's timeslice
-    user task-timeslice
-
-    \ A task's minimum timeslice
-    user task-min-timeslice
-
-    \ The current timeout start time in ticks
-    user timeout-systick-start
-    
-    \ The current timeout delay time in ticks
-    user timeout-systick-delay
-  
-    \ The task's name as a counted string
-    user task-name
-
-    \ The notification being waited on
-    user task-current-notify
-
-    \ The notified bitmap
-    user task-notified-bitmap
-
-    \ The current notification count
-    user task-notify-count
-
-    \ The current notification area pointer
-    user task-notify-area
-
-    \ Spinlock to claim
-    user spinlock-to-claim
-
-    \ The current core of a task
-    user task-core
-
-    \ Task being waited for
-    user task-waited-for
 
     \ SVCall vector index
     11 constant svcall-vector
@@ -207,6 +159,52 @@ begin-module task
       
       \ Next task
       field: task-next
+
+      \ The saved multitasker SysTick counter
+      field: task-saved-systick-counter
+    
+      \ The task ready count
+      field: task-ready-count
+      
+      \ Task systick start time
+      field: task-systick-start
+      
+      \ Task systick delay
+      field: task-systick-delay
+      
+      \ A task's timeslice
+      field: task-timeslice
+      
+      \ A task's minimum timeslice
+      field: task-min-timeslice
+
+      \ The current timeout start time in ticks
+      field: timeout-systick-start
+      
+      \ The current timeout delay time in ticks
+      field: timeout-systick-delay
+  
+      \ The task's name as a counted string
+      field: task-name
+
+      \ The notification being waited on
+      field: task-current-notify
+
+      \ The notified bitmap
+      field: task-notified-bitmap
+
+      \ The current notification count
+      field: task-notify-count
+
+      \ The current notification area pointer
+      field: task-notify-area
+
+      \ Spinlock to claim
+      field: spinlock-to-claim
+
+      \ The current core of a task
+      field: task-core
+
     end-structure
 
     \ Auxiliary main task dictionary size in bytes
@@ -228,6 +226,9 @@ begin-module task
 
   \ The default timeout
   user timeout
+
+  \ Task being waited for
+  user task-waited-for
 
   \ No timeout
   -1 constant no-timeout
@@ -329,14 +330,14 @@ begin-module task
 
     \ Validate a notification index
     : validate-notify ( notify-index task -- )
-      ['] task-notify-count for-task@ u< averts x-out-of-range-notify
+      task-notify-count @ u< averts x-out-of-range-notify
     ;
     
     \ Find the next task with a higher priority; 0 returned indicates no task
     \ exists with a higher priority.
     : find-higher-priority ( task -- higher-task )
       task-priority@ >r
-      dup ['] task-core for-task@ cpu-last-task @ begin
+      dup task-core @ cpu-last-task @ begin
 	dup 0<> if
 	  dup task-priority@ r@ < if task-next @ false else true then
 	else
@@ -353,7 +354,7 @@ begin-module task
 	2dup task-prev @ swap task-prev !
       else
 	0 2 pick task-prev !
-	over dup ['] task-core for-task@ cpu-last-task !
+	over dup task-core @ cpu-last-task !
       then
       2dup task-prev !
       swap task-next !
@@ -361,7 +362,7 @@ begin-module task
 
     \ Insert a task into first position
     : insert-task-first ( task -- )
-      dup ['] task-core for-task@ >r
+      dup task-core @ >r
       r@ cpu-first-task @ 0<> if
 	dup r@ cpu-first-task @ task-next !
 	r@ cpu-first-task @ over task-prev !
@@ -384,7 +385,7 @@ begin-module task
 
     \ Remove a task
     : remove-task ( task -- )
-      dup ['] task-core for-task@ >r
+      dup task-core @ >r
       dup task-next @ ?dup if
 	over task-prev @ swap task-prev !
       else
@@ -424,7 +425,7 @@ begin-module task
 
     \ Start a task change
     : start-validate-task-change ( task -- )
-\      dup ['] task-core for-task@ start-task-change
+\      dup task-core @ start-task-change
       ['] validate-not-terminated try ?dup if
 	( false in-task-change ! ) ?raise
       then
@@ -452,7 +453,7 @@ begin-module task
   ;
 
   \ Get the core of a task
-  : task-core@ ( task -- core ) ['] task-core for-task@ ;
+  : task-core@ ( task -- core ) task-core @ ;
 
   \ Set task priority
   : task-priority! ( priority task -- )
@@ -473,38 +474,38 @@ begin-module task
     disable-int
     dup validate-not-terminated
     dup current-task @ = if
-      2dup ['] task-timeslice for-task@ - task-systick-counter @ +
+      2dup task-timeslice @ - task-systick-counter @ +
       task-systick-counter !
     then
-    swap 0 max swap ['] task-timeslice for-task!
+    swap 0 max swap task-timeslice !
     enable-int
   ;
 
   \ Get task timeslice
   : task-timeslice@ ( task -- timeslice )
-    dup validate-not-terminated ['] task-timeslice for-task@
+    dup validate-not-terminated task-timeslice @
   ;
 
   \ Set task minimum timeslice
   : task-min-timeslice! ( min-timeslice task -- )
-    dup validate-not-terminated ['] task-min-timeslice for-task!
+    dup validate-not-terminated task-min-timeslice !
   ;
 
   \ Get task minimum timeslice
   : task-min-timeslice@ ( task -- min-timeslice )
-    dup validate-not-terminated ['] task-min-timeslice for-task@
+    dup validate-not-terminated task-min-timeslice @
   ;
 
   \ Get a task's name as a counted string; an address of zero indicates no name
   \ is set.
   : task-name@ ( task -- addr )
-    dup validate-not-terminated ['] task-name for-task@
+    dup validate-not-terminated task-name @
   ;
 
   \ Set a task's name as a counted string; an address of zero indicates to set
   \ no name.
   : task-name! ( addr -- task )
-    dup validate-not-terminated ['] task-name for-task!
+    dup validate-not-terminated task-name !
   ;
 
   \ Start a task's execution
@@ -514,7 +515,7 @@ begin-module task
       dup task-active@ 1+
       dup 1 = if over test-remove-task over insert-task then
       swap task-active h!
-    ;] over task-core@ critical-with-other-core-spinlock
+    ;] over task-core @ critical-with-other-core-spinlock
   ;
 
   \ Stop a task's execution
@@ -523,7 +524,7 @@ begin-module task
       dup start-validate-task-change
       dup task-active@ 1-
       swap task-active h!
-    ;] over task-core@ critical-with-other-core-spinlock
+    ;] over task-core @ critical-with-other-core-spinlock
   ;
 
   \ Kill a task
@@ -532,32 +533,32 @@ begin-module task
       dup start-validate-task-change
       terminated over task-active h!
       dup current-task @ = if
-	task-core@ release-other-core-spinlock
+	task-core @ release-other-core-spinlock
 	end-critical
 	begin pause again
       else
 	drop
       then
-    ;] over task-core@ critical-with-other-core-spinlock
+    ;] over task-core @ critical-with-other-core-spinlock
   ;
 
   \ Get the last delay time
   : last-delay ( task -- ticks-delay ticks-start )
     [:
       dup validate-not-terminated
-      dup ['] task-systick-delay for-task@
-      swap ['] task-systick-start for-task@
-    ;] over task-core@ critical-with-other-core-spinlock
+      dup task-systick-delay @
+      swap task-systick-start @
+    ;] over task-core @ critical-with-other-core-spinlock
   ;
 
   \ Delay a task
   : delay ( ticks-delay ticks-start task -- )
     [:
       dup validate-not-terminated
-      tuck ['] task-systick-start for-task!
-      tuck ['] task-systick-delay for-task!
+      tuck task-systick-start !
+      tuck task-systick-delay !
       delayed over task-state h!
-    ;] over task-core@ critical-with-other-core-spinlock
+    ;] over task-core @ critical-with-other-core-spinlock
     current-task @ = if pause-wo-reschedule then
   ;
 
@@ -565,11 +566,11 @@ begin-module task
   : delay-critical ( ticks-delay ticks-start task -- )
     [:
       dup validate-not-terminated
-      tuck ['] task-systick-start for-task!
-      tuck ['] task-systick-delay for-task!
+      tuck task-systick-start !
+      tuck task-systick-delay !
       [ delayed schedule-critical or schedule-user-critical or ] literal
       over task-state h!
-    ;] over task-core@ critical-with-other-core-spinlock
+    ;] over task-core @ critical-with-other-core-spinlock
     current-task @ = if pause-wo-reschedule then
   ;
 
@@ -577,15 +578,15 @@ begin-module task
   : block-timeout ( ticks-delay ticks-start task -- )
     [:
       dup validate-not-terminated
-      -1 over ['] task-ready-count for-task +!
-      dup ['] task-ready-count for-task@ 0< if
-	tuck ['] task-systick-start for-task!
-	tuck ['] task-systick-delay for-task!
+      -1 over task-ready-count +!
+      dup task-ready-count @ 0< if
+	tuck task-systick-start !
+	tuck task-systick-delay !
 	blocked-timeout over task-state h!
       else
 	nip nip
       then
-    ;] over task-core@ critical-with-other-core-spinlock
+    ;] over task-core @ critical-with-other-core-spinlock
     current-task @ = if pause-wo-reschedule then
   ;
 
@@ -593,10 +594,10 @@ begin-module task
   : block-timeout-critical ( ticks-delay ticks-start task -- )
     [:
       dup validate-not-terminated
-      -1 over ['] task-ready-count for-task +!
-      dup ['] task-ready-count for-task@ 0< if
-	tuck ['] task-systick-start for-task!
-	tuck ['] task-systick-delay for-task!
+      -1 over task-ready-count +!
+      dup task-ready-count @ 0< if
+	tuck task-systick-start !
+	tuck task-systick-delay !
 	[ blocked-timeout schedule-critical or schedule-user-critical or ]
 	literal
 	over task-state h!
@@ -606,7 +607,7 @@ begin-module task
 	literal
 	over task-state h!
       then
-    ;] over task-core@ critical-with-other-core-spinlock
+    ;] over task-core @ critical-with-other-core-spinlock
     current-task @ = if pause-wo-reschedule then
   ;
 
@@ -615,11 +616,11 @@ begin-module task
   : block-timeout-with-spinlock ( spinlock ticks-delay ticks-start task -- )
     [:
       dup validate-not-terminated
-      -1 over ['] task-ready-count for-task +!
-      dup ['] task-ready-count for-task@ 0< if
-	tuck ['] task-systick-start for-task!
-	tuck ['] task-systick-delay for-task!
-	tuck ['] spinlock-to-claim for-task!
+      -1 over task-ready-count +!
+      dup task-ready-count @ 0< if
+	tuck task-systick-start !
+	tuck task-systick-delay !
+	tuck spinlock-to-claim !
 	[ blocked-timeout schedule-critical or schedule-user-critical or
 	schedule-with-spinlock or ] literal
 	over task-state h!
@@ -629,7 +630,7 @@ begin-module task
 	literal
 	over task-state h!
       then
-    ;] over task-core@ critical-with-other-core-spinlock
+    ;] over task-core @ critical-with-other-core-spinlock
     current-task @ = if pause-wo-reschedule then
   ;
 
@@ -703,11 +704,11 @@ begin-module task
   : block-indefinite ( task -- )
     [:
       dup validate-not-terminated
-      -1 over ['] task-ready-count for-task +!
-      dup ['] task-ready-count for-task@ 0< if
+      -1 over task-ready-count +!
+      dup task-ready-count @ 0< if
 	blocked-indefinite over task-state h!
       then
-    ;] over task-core@ critical-with-other-core-spinlock
+    ;] over task-core @ critical-with-other-core-spinlock
     current-task @ = if pause-wo-reschedule then
   ;
 
@@ -715,15 +716,15 @@ begin-module task
   : block-indefinite-critical ( task -- )
     [:
       dup validate-not-terminated
-      -1 over ['] task-ready-count for-task +!
-      dup ['] task-ready-count for-task@ 0< if
+      -1 over task-ready-count +!
+      dup task-ready-count @ 0< if
 	[ blocked-indefinite schedule-critical or schedule-user-critical or ]
 	literal over task-state h!
       else
 	[ readied schedule-critical or schedule-user-critical or ]
 	literal over task-state h!
       then
-    ;] over task-core@ critical-with-other-core-spinlock
+    ;] over task-core @ critical-with-other-core-spinlock
     current-task @ = if pause-wo-reschedule then
   ;
 
@@ -732,7 +733,7 @@ begin-module task
     \ Release the same core spinlock, release a spinlock, block indefinitely,
     \ and then claim the same core spinlock, and claim a spinlock.
     : block-indefinite-self-release ( spinlock -- )
-      -1 task-ready-count !
+      -1 current-task @ task-ready-count !
       blocked-indefinite current-task @ task-state h!
       dup release-spinlock-raw
       false reschedule? ! pause
@@ -748,9 +749,9 @@ begin-module task
   : block-indefinite-with-spinlock ( spinlock task -- )
     [:
       dup validate-not-terminated
-      -1 over ['] task-ready-count for-task +!
-      tuck ['] spinlock-to-claim for-task!
-      dup ['] task-ready-count for-task@ 0< if
+      -1 over task-ready-count +!
+      tuck spinlock-to-claim !
+      dup task-ready-count @ 0< if
 	[ blocked-indefinite schedule-critical or schedule-user-critical or
 	schedule-with-spinlock or ]
 	literal over task-state h!
@@ -759,7 +760,7 @@ begin-module task
 	schedule-with-spinlock or ]
 	literal over task-state h!
       then
-    ;] over task-core@ critical-with-other-core-spinlock
+    ;] over task-core @ critical-with-other-core-spinlock
     current-task @ = if pause-wo-reschedule then
   ;
 
@@ -770,16 +771,16 @@ begin-module task
   : wait-notify-indefinite ( notify-index -- x )
     [:
       dup current-task @ validate-notify
-      begin dup bit task-notified-bitmap bit@ not while
-	dup task-current-notify !
+      begin dup bit current-task @ task-notified-bitmap bit@ not while
+	dup current-task @ task-current-notify !
 	[ blocked-indefinite schedule-critical or ] literal
 	current-task @ task-state h!
 	release-same-core-spinlock end-critical pause-wo-reschedule
 	claim-same-core-spinlock
       repeat
-      task-notify-area @ over cells + @
-      swap bit task-notified-bitmap bic!
-      -1 task-current-notify !
+      current-task @ task-notify-area @ over cells + @
+      swap bit current-task @ task-notified-bitmap bic!
+      -1 current-task @ task-current-notify !
     ;] cpu-index critical-with-other-core-spinlock
   ;
 
@@ -793,17 +794,17 @@ begin-module task
       begin-critical
       [:
 	dup current-task @ validate-notify
-	begin dup bit task-notified-bitmap bit@ not while
-	  dup task-current-notify !
+	begin dup bit current-task @ task-notified-bitmap bit@ not while
+	  dup current-task @ task-current-notify !
 	  [ blocked-indefinite schedule-critical or schedule-user-critical or ]
 	  literal
 	  current-task @ task-state h!
 	  release-same-core-spinlock end-critical pause-wo-reschedule
 	  claim-same-core-spinlock
 	repeat
-	task-notify-area @ over cells + @
-	swap bit task-notified-bitmap bic!
-	-1 task-current-notify !
+	current-task @ task-notify-area @ over cells + @
+	swap bit current-task @ task-notified-bitmap bic!
+	-1 current-task @ task-current-notify !
       ;] try ?dup if end-critical ?raise then
     ;] cpu-index critical-with-other-core-spinlock
   ;
@@ -812,9 +813,9 @@ begin-module task
 
     \ Core of readying a task
     : do-ready ( task -- )
-      dup ['] task-current-notify for-task@ -1 = if
-	1 over ['] task-ready-count for-task +!
-	dup ['] task-ready-count for-task@ 0>= if
+      dup task-current-notify @ -1 = if
+	1 over task-ready-count +!
+	dup task-ready-count @ 0>= if
 	  dup task-state h@
 	  [ schedule-critical schedule-user-critical or
 	  schedule-with-spinlock or schedule-with-same-core-spinlock or ]
@@ -833,7 +834,7 @@ begin-module task
   : ready ( task -- )
     [:
       dup validate-not-terminated do-ready
-    ;] over task-core@ critical-with-other-core-spinlock
+    ;] over task-core @ critical-with-other-core-spinlock
   ;
 
   \ Notify a task for a specified notification index
@@ -841,14 +842,14 @@ begin-module task
     [:
       dup validate-not-terminated
       2dup validate-notify
-      2dup swap bit swap ['] task-notified-bitmap for-task bis!
-      dup ['] task-current-notify for-task@ rot = if
+      2dup swap bit swap task-notified-bitmap bis!
+      dup task-current-notify @ rot = if
 	dup task-state h@ schedule-user-critical and
 	[ schedule-critical readied or ] literal or swap task-state h! true
       else
 	drop false
       then
-    ;] over task-core@ critical-with-other-core-spinlock
+    ;] over task-core @ critical-with-other-core-spinlock
     if pause-wo-reschedule then
   ;
 
@@ -858,15 +859,15 @@ begin-module task
     [:
       dup validate-not-terminated
       2dup validate-notify
-      dup ['] task-notify-area for-task@ 2 pick cells + >r rot r> !
-      2dup swap bit swap ['] task-notified-bitmap for-task bis!
-      dup ['] task-current-notify for-task@ rot = if
+      dup task-notify-area @ 2 pick cells + >r rot r> !
+      2dup swap bit swap task-notified-bitmap bis!
+      dup task-current-notify @ rot = if
 	dup task-state h@ schedule-user-critical and
 	[ schedule-critical readied or ] literal or swap task-state h! true
       else
 	drop false
       then
-    ;] over task-core@ critical-with-other-core-spinlock
+    ;] over task-core @ critical-with-other-core-spinlock
     if pause-wo-reschedule then
   ;
 
@@ -877,16 +878,16 @@ begin-module task
       dup validate-not-terminated
       2dup validate-notify
       rot >r ( index task )
-      dup ['] task-notify-area for-task@ 2 pick cells + ( index task addr )
+      dup task-notify-area @ 2 pick cells + ( index task addr )
       r> rot >r rot >r swap dup >r @ swap execute r> ! ( )
-      r> r> 2dup swap bit swap ['] task-notified-bitmap for-task bis!
-      dup ['] task-current-notify for-task@ rot = if
+      r> r> 2dup swap bit swap task-notified-bitmap bis!
+      dup task-current-notify @ rot = if
 	dup task-state h@ schedule-user-critical and
 	[ schedule-critical readied or ] literal or swap task-state h! true
       else
 	drop false
       then
-    ;] over task-core@ critical-with-other-core-spinlock
+    ;] over task-core @ critical-with-other-core-spinlock
     if pause-wo-reschedule then
   ;
 
@@ -895,8 +896,8 @@ begin-module task
     [:
       dup validate-not-terminated
       2dup validate-notify
-      swap bit swap ['] task-notified-bitmap for-task bic!
-    ;] over task-core@ critical-with-other-core-spinlock
+      swap bit swap task-notified-bitmap bic!
+    ;] over task-core @ critical-with-other-core-spinlock
   ;
 
   \ Get the contents of a notification mailbox without waiting on it
@@ -904,8 +905,8 @@ begin-module task
     [:
       dup validate-not-terminated
       2dup validate-notify
-      ['] task-notify-area for-task@ swap cells + @
-    ;] over task-core@ critical-with-other-core-spinlock
+      task-notify-area @ swap cells + @
+    ;] over task-core @ critical-with-other-core-spinlock
   ;
 
   \ Set the contents of a notification mailbox without notifying a task
@@ -913,8 +914,8 @@ begin-module task
     [:
       dup validate-not-terminated
       2dup validate-notify
-      ['] task-notify-area for-task@ swap cells + !
-    ;] over task-core@ critical-with-other-core-spinlock
+      task-notify-area @ swap cells + !
+    ;] over task-core @ critical-with-other-core-spinlock
   ;
 
   \ Block a task for the specified initialized timeout
@@ -922,13 +923,13 @@ begin-module task
     [:
       dup validate-not-terminated
       dup ['] timeout for-task@ no-timeout <> if
-	dup ['] timeout-systick-delay for-task@
-	over ['] timeout-systick-start for-task@
+	dup timeout-systick-delay @
+	over timeout-systick-start @
 	rot block-timeout
       else
 	block-indefinite
       then
-    ;] over task-core@ critical-with-other-core-spinlock
+    ;] over task-core @ critical-with-other-core-spinlock
   ;
 
   \ Block a task for the specified initialized timeout and schedule as critical
@@ -937,13 +938,13 @@ begin-module task
     [:
       dup validate-not-terminated
       dup ['] timeout for-task@ no-timeout <> if
-	dup ['] timeout-systick-delay for-task@
-	over ['] timeout-systick-start for-task@
+	dup timeout-systick-delay @
+	over timeout-systick-start @
 	rot block-timeout-critical
       else
 	block-indefinite-critical
       then
-    ;] over task-core@ critical-with-other-core-spinlock
+    ;] over task-core @ critical-with-other-core-spinlock
   ;
 
   \ Block a task for the specified initialized timeout and schedule as critical
@@ -952,13 +953,13 @@ begin-module task
     [:
       dup validate-not-terminated
       dup ['] timeout for-task@ no-timeout <> if
-	dup ['] timeout-systick-delay for-task@
-	over ['] timeout-systick-start for-task@
+	dup timeout-systick-delay @
+	over timeout-systick-start @
 	rot block-timeout-with-spinlock
       else
 	block-indefinite-with-spinlock
       then
-    ;] over task-core@ critical-with-other-core-spinlock
+    ;] over task-core @ critical-with-other-core-spinlock
   ;
 
   \ Wait for a notification at a specified notification index with a specified
@@ -967,7 +968,8 @@ begin-module task
     claim-same-core-spinlock
     begin-critical
     timeout @ no-timeout <> if
-      timeout-systick-delay @ timeout-systick-start @ rot
+      current-task @ timeout-systick-delay @
+      current-task @ timeout-systick-start @ rot
       end-critical release-same-core-spinlock wait-notify-timeout
     else
       end-critical release-same-core-spinlock wait-notify-indefinite
@@ -981,7 +983,8 @@ begin-module task
     claim-same-core-spinlock
     begin-critical
     timeout @ no-timeout <> if
-      timeout-systick-delay @ timeout-systick-start @ rot
+      current-task @ timeout-systick-delay @
+      current-task @ timeout-systick-start @ rot
       end-critical release-same-core-spinlock wait-notify-timeout-critical
     else
       end-critical release-same-core-spinlock wait-notify-indefinite-critical
@@ -993,12 +996,12 @@ begin-module task
     [:
       dup validate-not-terminated
       dup ['] timeout for-task@ no-timeout <> if
-	systick-counter over ['] timeout-systick-start for-task!
-	dup ['] timeout for-task@ swap ['] timeout-systick-delay for-task!
+	systick-counter over timeout-systick-start !
+	dup ['] timeout for-task@ swap timeout-systick-delay !
       else
 	drop
       then
-    ;] over task-core@ critical-with-other-core-spinlock
+    ;] over task-core @ critical-with-other-core-spinlock
   ;
 
   \ Get whether a task has terminated
@@ -1023,19 +1026,19 @@ begin-module task
     : block-raw ( task -- )
       dup validate-not-terminated
       dup ['] timeout for-task@ no-timeout <> if
-	dup ['] timeout-systick-delay for-task@
-	over ['] timeout-systick-start for-task@
-	rot -1 over ['] task-ready-count for-task +!
-	dup ['] task-ready-count for-task@ 0< if
-	  tuck ['] task-systick-start for-task!
-	  tuck ['] task-systick-delay for-task!
+	dup timeout-systick-delay @
+	over timeout-systick-start @
+	rot -1 over task-ready-count +!
+	dup task-ready-count @ 0< if
+	  tuck task-systick-start !
+	  tuck task-systick-delay !
 	  blocked-timeout over task-state h!
 	else
 	  nip nip
 	then
       else
-	-1 over ['] task-ready-count for-task +!
-	dup ['] task-ready-count for-task@ 0< if
+	-1 over task-ready-count +!
+	dup task-ready-count @ 0< if
 	  blocked-indefinite over task-state h!
 	then
       then
@@ -1056,21 +1059,21 @@ begin-module task
       1 over task-active h!
       readied over task-state h!
       no-timeout timeout !
-      0 task-ready-count !
+      0 over task-ready-count !
       0 task-waited-for !
-      0 timeout-systick-start !
-      0 timeout-systick-delay !
-      0 task-systick-start !
-      -1 task-systick-delay !
-      cpu-index task-core !
-      c" main" task-name !
-      -1 task-current-notify !
-      0 task-notified-bitmap !
-      0 task-notify-count !
-      0 task-notify-area !
-      default-timeslice task-timeslice !
-      default-min-timeslice task-min-timeslice !
-      default-timeslice task-saved-systick-counter !
+      0 over timeout-systick-start !
+      0 over timeout-systick-delay !
+      0 over task-systick-start !
+      -1 over task-systick-delay !
+      cpu-index over task-core !
+      c" main" over task-name !
+      -1 over task-current-notify !
+      0 over task-notified-bitmap !
+      0 over task-notify-count !
+      0 over task-notify-area !
+      default-timeslice over task-timeslice !
+      default-min-timeslice over task-min-timeslice !
+      default-timeslice over task-saved-systick-counter !
       0 current-lock !
       0 current-lock-held !
       0 over task-next !
@@ -1094,8 +1097,8 @@ begin-module task
 
     \ Get whether a task is finished with a delay or timeout
     : delayed? ( task -- )
-      systick-counter over ['] task-systick-start for-task@ -
-      swap ['] task-systick-delay for-task@ <
+      systick-counter over task-systick-start @ -
+      swap task-systick-delay @ <
     ;
 
     cpu-count 1 > [if]
@@ -1115,14 +1118,14 @@ begin-module task
       \ Initialize an auxiliary task
       : init-aux-task ( xn...x0 count xt task core -- data-stack return-stack )
 	swap dup dup task-dict-size @ - over task-dict-base ! swap
-	over ['] task-core for-task!
+	over task-core !
 	dup task-rstack-size h@ over task-stack-size h@ + over + task-size +
 	over ['] task-rstack-base for-task!
 	dup task-stack-size h@ over + task-size +
 	over ['] task-rstack-end for-task!
 	dup ['] task-rstack-end for-task@ over ['] task-stack-base for-task!
 	dup task-size + over ['] task-stack-end for-task!
-	0 over ['] task-ready-count for-task!
+	0 over task-ready-count !
 	0 over ['] task-handler for-task!
 	0 over ['] task-waited-for for-task!
 	0 over task-priority h!
@@ -1133,19 +1136,19 @@ begin-module task
 	0 over ['] current-lock-held for-task!
 	readied over task-state h!
 	no-timeout over ['] timeout for-task!
-	0 over ['] timeout-systick-start for-task!
-	0 over ['] timeout-systick-delay for-task!
-	0 over ['] task-systick-start for-task!
-	0 over ['] task-name for-task!
-	-1 over ['] task-current-notify for-task!
-	0 over ['] task-notified-bitmap for-task!
-	0 over ['] task-notify-count for-task!
-	0 over ['] task-notify-area for-task!
-	-1 over ['] task-systick-delay for-task!
-	c" aux-main" over ['] task-name for-task!
-	default-timeslice over ['] task-timeslice for-task!
-	default-min-timeslice over ['] task-min-timeslice for-task!
-	default-timeslice over ['] task-saved-systick-counter for-task!
+	0 over timeout-systick-start !
+	0 over timeout-systick-delay !
+	0 over task-systick-start !
+	0 over task-name !
+	-1 over task-current-notify !
+	0 over task-notified-bitmap !
+	0 over task-notify-count !
+	0 over task-notify-area !
+	-1 over task-systick-delay !
+	c" aux-main" over task-name !
+	default-timeslice over task-timeslice !
+	default-min-timeslice over task-min-timeslice !
+	default-timeslice over task-saved-systick-counter !
 	dup ['] task-rstack-base for-task@ over task-rstack-current !
 	next-user-space over task-dict-base @ +
 	over ['] task-ram-here for-task!
@@ -1162,14 +1165,14 @@ begin-module task
   \ Initialize a task
   : init-task ( xn...x0 count xt task core -- )
     swap dup dup task-dict-size @ - over task-dict-base ! swap
-    over ['] task-core for-task!
+    over task-core !
     dup task-rstack-size h@ over task-stack-size h@ + over + task-size +
     over ['] task-rstack-base for-task!
     dup task-stack-size h@ over + task-size +
     over ['] task-rstack-end for-task!
     dup ['] task-rstack-end for-task@ over ['] task-stack-base for-task!
     dup task-size + over ['] task-stack-end for-task!
-    0 over ['] task-ready-count for-task!
+    0 over task-ready-count !
     0 over ['] task-handler for-task!
     0 over ['] task-waited-for for-task!
     0 over task-priority h!
@@ -1180,18 +1183,18 @@ begin-module task
     0 over ['] current-lock-held for-task!
     readied over task-state h!
     no-timeout over ['] timeout for-task!
-    0 over ['] timeout-systick-start for-task!
-    0 over ['] timeout-systick-delay for-task!
-    0 over ['] task-systick-start for-task!
-    0 over ['] task-name for-task!
-    -1 over ['] task-current-notify for-task!
-    0 over ['] task-notified-bitmap for-task!
-    0 over ['] task-notify-count for-task!
-    0 over ['] task-notify-area for-task!
-    -1 over ['] task-systick-delay for-task!
-    default-timeslice over ['] task-timeslice for-task!
-    default-min-timeslice over ['] task-min-timeslice for-task!
-    default-timeslice over ['] task-saved-systick-counter for-task!
+    0 over timeout-systick-start !
+    0 over timeout-systick-delay !
+    0 over task-systick-start !
+    0 over task-name !
+    -1 over task-current-notify !
+    0 over task-notified-bitmap !
+    0 over task-notify-count !
+    0 over task-notify-area !
+    -1 over task-systick-delay !
+    default-timeslice over task-timeslice !
+    default-min-timeslice over task-min-timeslice !
+    default-timeslice over task-saved-systick-counter !
     dup ['] task-rstack-base for-task@
     over ['] task-stack-base for-task@ ['] task-entry
     ['] init-context svc over task-rstack-current !
@@ -1223,13 +1226,13 @@ begin-module task
   : config-notify ( notify-area-addr notify-count task -- )
     [:
       over 32 u<= averts x-out-of-range-notify
-      2dup ['] task-current-notify for-task@ > averts x-current-wait-notify
+      2dup task-current-notify @ > averts x-current-wait-notify
       2dup swap $FFFFFFFF 32 rot - rshift
-      over ['] task-notified-bitmap for-task@
-      and swap ['] task-notified-bitmap for-task!
-      2dup ['] task-notify-count for-task!
+      over task-notified-bitmap @
+      and swap task-notified-bitmap !
+      2dup task-notify-count !
       2 pick rot cells 0 fill
-      ['] task-notify-area for-task!
+      task-notify-area !
     ;] critical
   ;
 
@@ -1270,7 +1273,7 @@ begin-module task
 
     \ Save task state
     : save-task-state ( task -- )
-      task-systick-counter @ swap ['] task-saved-systick-counter for-task!
+      task-systick-counter @ swap task-saved-systick-counter !
     ;
 
     \ Restore task state
@@ -1340,7 +1343,7 @@ begin-module task
 		  1 in-critical !
 		then
 		dup schedule-with-spinlock and if
-		  over ['] spinlock-to-claim for-task@ claim-spinlock
+		  over spinlock-to-claim @ claim-spinlock
 		then
 		task-state-mask and blocked-timeout = if
 		  block-timed-out over task-state h!
@@ -1366,12 +1369,13 @@ begin-module task
 	  enable-int
 	then
 
-	task-saved-systick-counter @ 0<= if
-	  task-saved-systick-counter @ task-timeslice @ +
-	  task-min-timeslice @ max
+	current-task @ task-saved-systick-counter @ 0<= if
+	  current-task @ task-saved-systick-counter @
+	  current-task @ task-timeslice @ +
+	  current-task @ task-min-timeslice @ max
 	  task-systick-counter !
 	else
-	  task-saved-systick-counter @ task-systick-counter !
+	  current-task @ task-saved-systick-counter @ task-systick-counter !
 	then
 	
       else
@@ -1405,7 +1409,7 @@ begin-module task
       dup current-task @ = if
 	s" running"
       else
-	dup ['] task-current-notify for-task@ -1 <> if
+	dup task-current-notify @ -1 <> if
 	  s" to-notify"
 	else
 	  dup task-state h@ task-state-mask and case
@@ -1567,7 +1571,7 @@ begin-module task
 	2r@ init-aux-task
 	['] init-aux-main-task -rot
 	2r> swap >r launch-aux-core r>
-	begin dup task-core@ cpu-current-task @ 0= until
+	begin dup task-core @ cpu-current-task @ 0= until
       [else]
 	['] x-core-out-of-range ?raise
       [then]

@@ -1232,19 +1232,17 @@ _constant_4:
 	movs tos, #6
 	bl _asm_push
 	ldr r0, =current_flags
-	ldr r1, =65535
-	cmp tos, r1
-	bgt 1f
-	ldr r1, =-65536
-	cmp tos, r1
-	blt 1f
 	movs r1, #visible_flag | inlined_flag
-	b 2f
-1:	movs r1, #visible_flag
-2:	str r1, [r0]
+	str r1, [r0]
 	push_tos
 	movs tos, #6
+	ldr r0, =suppress_suppress_inline
+	ldr r1, =-1
+	str r1, [r0]
 	bl _asm_literal
+	ldr r0, =suppress_suppress_inline
+	movs r1, #0
+	str r1, [r0]
 	bl _asm_end
 	pop {pc}
 3:	push_tos
@@ -1264,19 +1262,17 @@ _constant_with_name_4:
 	movs tos, #6
 	bl _asm_push
 	ldr r0, =current_flags
-	ldr r1, =65535
-	cmp tos, r1
-	bgt 1f
-	ldr r1, =-65536
-	cmp tos, r1
-	blt 1f
 	movs r1, #visible_flag | inlined_flag
-	b 2f
-1:	movs r1, #visible_flag
-2:	str r1, [r0]
+	str r1, [r0]
 	push_tos
 	movs tos, #6
+	ldr r0, =suppress_suppress_inline
+	ldr r1, =-1
+	str r1, [r0]
 	bl _asm_literal
+	ldr r0, =suppress_suppress_inline
+	movs r1, #0
+	str r1, [r0]
 	bl _asm_end
 	pop {pc}
 	end_inlined

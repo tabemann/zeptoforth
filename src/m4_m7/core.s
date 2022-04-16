@@ -775,9 +775,9 @@ _sleep:
 	define_word "execute", visible_flag
 _execute:
 	movs r0, tos
-	adds r0, #1 @ Commented out to deal with an issue with Cutter @@@
 	pull_tos
-	bx r0
+	mov pc, r0
+	bx lr
 	end_inlined
 	
 	@@ Execute an xt if it is non-zero
@@ -787,26 +787,20 @@ _execute_nz:
 	pull_tos
 	cmp r0, #0
 	beq 1f
-	adds r0, #1
-	bx r0
+	mov pc, r0
 1:	bx lr
 	end_inlined
 
 	@@ Execute a PAUSE word, if one is set
 	define_word "pause", visible_flag
-_pause:	push {lr}
-	bl _pause_enabled
-	ldr r0, [tos]
-	pull_tos
+_pause:	ldr r0, =pause_enabled
+	ldr r0, [r0]
 	cmp r0, #0
 	ble 1f
 	ldr r0, =pause_hook
 	ldr r0, [r0]
-	cmp r0, #0
-	beq 1f
-	adds r0, #1
-	blx r0
-1:	pop {pc}
+	mov pc, r0
+1:	bx lr
 	end_inlined
 	
 	@@ Do nothing
@@ -2193,7 +2187,7 @@ _init_variables:
 1:	cmp r2, #0
 	beq 2f
 	subs r2, #4
-	movs r1, #0
+	ldr r1, =_do_nothing
 	ldr r0, =pause_enabled
 	str r1, [r0, r2]
 	b 1b
