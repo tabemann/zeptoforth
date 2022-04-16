@@ -47,7 +47,7 @@ begin-module slock
     slock-spinlock claim-spinlock-raw
     begin
       dup slock-task @ ?dup if
-	^ task-internal :: task-waited-for !
+	task-waited-for !
 	slock-spinlock ^ task-internal :: block-indefinite-self-release
 	false
       else

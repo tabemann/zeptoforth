@@ -1279,6 +1279,9 @@ _asm_long_literal:
 	push {lr}
 	ldr r0, =suppress_inline
 	ldr r1, =-1
+	ldr r2, =suppress_suppress_inline
+	ldr r2, [r2]
+	bics r1, r2
 	str r1, [r0]
 @	movs r0, tos
 @	push {r0}

@@ -148,6 +148,21 @@ _bootsel:
 	bx lr
 	end_inlined
 
+	@@ Execute a PAUSE word, if one is set
+	define_word "pause", visible_flag
+_pause:	ldr r0, =SIO_BASE + 0x000
+	ldr r0, [r0]
+	lsls r0, r0, #2
+	ldr r1, =pause_enabled
+	ldr r1, [r1, r0]
+	cmp r1, #0
+	ble 1f
+	ldr r0, =pause_hook
+	ldr r0, [r0]
+	mov pc, r0
+1:	bx lr
+	end_inlined
+
 	.ltorg
 	
 	.include "hardware.s"

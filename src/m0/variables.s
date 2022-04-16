@@ -31,3 +31,5 @@
 	allot const_buffer_addr, 4 * const_count
 
 	allot const_buffer_value, 4 * const_count
+
+	allot suppress_suppress_inline, 4
