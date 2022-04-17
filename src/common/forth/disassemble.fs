@@ -395,25 +395,27 @@ begin-module disassemble-internal
   : 4s?. ( low -- ) 4 1 bitfield if ." S" then ;
 
   \ Type a PC-relative address
-  : rel. ( pc rel extend -- ) rot dup >r 4 + -rot extend + r> swap addr. ;
+  : rel. ( pc rel extend -- ) rot dup >r 2 + -rot extend + r> swap addr. ;
 
   \ Type a 4-aligned PC-relative address
   : rel4. ( pc rel extend -- )
-    rot dup >r 4 + 4 align -rot extend + r> swap addr.
+    rot dup >r 2 + 4 align -rot extend + r> swap addr.
   ;
 
   \ Type a non-sign-extended PC-relative address
-  : nrel. ( pc rel -- ) swap dup >r 4 + swap + r> swap addr. ;
+  : nrel. ( pc rel -- ) swap dup >r 2 + swap + r> swap addr. ;
 
   \ Type a non-sign-extended 4-aligned PC-relative address
-  : nrel4. ( pc rel -- ) swap dup >r 4 + 4 align swap + r> swap addr. ;
+  : nrel4. ( pc rel -- ) swap dup >r 2 + 4 align swap + r> swap addr. ;
 
   \ Type out .W
   : .w ( -- ) ." .W " ;
 
+  \ Type a constant at a non-sign-extended 4-aligned PC-relative address
+  : nconst4. ( pc rel -- ) swap 2 + 4 align swap + @ space ." @ " h.8 ;
+
   \ Commit to flash
   commit-flash
-
 
   \ Type out a register and a separator
   : reg-sep. ( reg -- ) reg. sep. ;
@@ -1050,7 +1052,7 @@ begin-module disassemble-internal
   \ Parse an LDR literal instruction
   : p-ldr-lit-1
     ." LDR" size. csp. dup 8_3_bf reg-sep. 0_8_bf 2 lshift
-    for-gas @ if ." [PC, #" (udec.) ." ]" drop else nrel4. then
+    for-gas @ if ." [PC, #" (udec.) ." ]" drop else 2dup nrel4. nconst4. then
   ;
 
   thumb-2 [if]
@@ -1059,7 +1061,7 @@ begin-module disassemble-internal
     : p-ldr-lit-2
       ." LDR" size. c.w dup dup 12_4_bf reg-sep.
       0_12_bf swap 7 1 bitfield if negate then
-      for-gas @ if ." [PC, #" (dec.) ." ]" drop else nrel4. then
+      for-gas @ if ." [PC, #" (dec.) ." ]" drop else 2dup nrel4. nconst4. then
     ;
 
   [then]
