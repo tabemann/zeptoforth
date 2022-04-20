@@ -556,8 +556,8 @@ _flush_all_flash:
 	end_inlined
 
 	@@ Fill flash until it is aligned to a block
-	define_word "flash-align,", visible_flag
-_flash_align:
+	define_word "flash-block-align,", visible_flag
+_flash_block_align:
 	push {lr}
 	pop {pc}
 	end_inlined
