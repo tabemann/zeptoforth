@@ -541,6 +541,48 @@ commit-flash
   then
 ;
 
+\ Declare a deferred word
+: defer ( "name" -- )
+  token
+  dup 0= triggers x-token-expected
+  start-compile-no-push
+  hreserve
+  0 bx,
+  $003F h,
+  visible
+  finalize-no-align,
+  reserve 0 rot ldr-pc!
+  flash-block-align,
+;
+
+internal set-current
+
+\ Get a deferred word's xt address
+: defer-xt@ ( deferred-xt -- ) dup h@ $FF and 2 lshift 2 + 4 align + ;
+
+forth set-current
+
+commit-flash
+
+\ Set a deferred word
+: defer! ( xt deferred-xt -- )
+  compiling-to-flash? >r
+  dup $20000000 < over $2FFFFFFF > or if
+    compile-to-flash
+  else
+    compile-to-ram
+  then
+  swap 1 or swap defer-xt@ current!
+  r> if
+    compile-to-flash
+  else
+    compile-to-ram
+  then
+;
+
+\ Get a deferred word
+: defer@ ( deferred-xt -- xt ) defer-xt@ @ 1 bic ;
+
 \ Set internal
 internal set-current
 

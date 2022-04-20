@@ -115,7 +115,7 @@ _asm_finalize:
 	push_tos
 	ldr tos, =0xDEADBEEF
 	bl _current_comma_4
-	bl _flash_align
+	bl _flash_block_align
 3:	ldr r0, =current_compile
 	ldr r1, [r0]
 	ldr r2, =flash_latest
@@ -217,7 +217,7 @@ _asm_end_compress_flash:
 	push_tos
 	ldr tos, =0xDEADBEEF
 	bl _flash_comma_4
-	bl _flash_align
+	bl _flash_block_align
 1:	pop {pc}
 	end_inlined
 
@@ -231,7 +231,7 @@ _asm_commit_flash:
 	cmp r1, #0
 	beq 1f
 	bl _asm_word_align
-	bl _flash_align
+	bl _flash_block_align
 1:	pop {pc}
 	end_inlined
 
@@ -2626,6 +2626,48 @@ _asm_adr:
 	pop {pc}
 	end_inlined
 
+	@@ Assemble an instruction at an address to generate a PC-relative
+	@@ load
+	define_internal_word "ldr-pc!", visible_flag
+_asm_store_ldr_pc:
+	push {lr}
+	movs r2, tos
+	pull_tos
+	movs r1, #7
+	ands r1, tos
+	lsls r1, r1, #8
+	pull_tos
+	subs tos, r2
+	movs r3, #3
+	subs tos, #1
+	orrs tos, r3
+	subs tos, #3
+	lsrs tos, tos, #2
+	ldr r0, =0xFF
+	cmp tos, r0
+	bhi 1f
+	ands tos, r0
+	orrs tos, r1
+	ldr r0, =0x4800
+	orrs tos, r0
+	push_tos
+	movs tos, r2
+	bl _store_current_2
+	pop {pc}
+1:	push_tos
+	ldr tos, =_out_of_range_literal
+	bl _raise
+	pop {pc}
+	end_inlined
+
+	@@ Out of range literal
+	define_internal_word "x-out-of-range-literal", visible_flag
+_out_of_range_literal:
+	push {lr}
+	string_ln "out of range literal"
+	bl _type
+	pop {pc}
+	
 	@@ Assemble a BX instruction
 	define_internal_word "bx,", visible_flag
 _asm_bx:
