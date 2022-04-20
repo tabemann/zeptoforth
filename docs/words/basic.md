@@ -1117,6 +1117,21 @@ Create a word that executes code specified by DOES>
 
 Specify code for a word created wth <BUILDS
 
+##### `defer`
+( "name" -- )
+
+Create a deferred word with the given name; note that executing it before it is set will result in a crash.
+
+##### `defer!`
+( xt deferred-xt -- )
+
+Set the deferred word corresponding to the execution token *deferred-xt* to execute the execution token *xt* when it is executed. If the deferred word is compiled to flash this may only be done once. Also note that a crash will result if *deferred-xt* is in flash and *xt* is in RAM and one executes *deferred-xt* after rebooting.
+
+##### `defer@`
+( deferred-xt -- xt )
+
+Get the execution token *xt* executed when the deferred word corresponding to the execution token *deferred-xt* is executed.
+
 ##### `begin-structure`
 ( "name" -- offset )
 

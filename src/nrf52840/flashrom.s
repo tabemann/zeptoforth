@@ -434,8 +434,8 @@ _flush_all_flash:
 	end_inlined
 
 	@@ Fill flash until it is aligned to a 16-byte block
-	define_word "flash-align,", visible_flag
-_flash_align:
+	define_word "flash-block-align,", visible_flag
+_flash_block_align:
 	push {lr}
 1:	bl _flash_here
 	tst tos, #0x3

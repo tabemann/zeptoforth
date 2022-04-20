@@ -120,7 +120,7 @@ _asm_finalize:
 	push_tos
 	ldr tos, =0xDEADBEEF
 	bl _current_comma_4
-	bl _flash_align
+	bl _flash_block_align
 3:	bl _asm_resolve_const_end
 	ldr r0, =current_compile
 	ldr r1, [r0]
@@ -237,7 +237,7 @@ _asm_end_compress_flash:
 	push_tos
 	ldr tos, =0xDEADBEEF
 	bl _flash_comma_4
-	bl _flash_align
+	bl _flash_block_align
 1:	pop {pc}
 	end_inlined
 
@@ -251,7 +251,7 @@ _asm_commit_flash:
 	cmp r1, #0
 	beq 1f
 	bl _asm_word_align
-	bl _flash_align
+	bl _flash_block_align
 1:	pop {pc}
 	end_inlined
 
