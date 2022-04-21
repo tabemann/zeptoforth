@@ -16,7 +16,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Stream Words" href="stream.html" />
-    <link rel="prev" title="Reply Channel Words" href="rchannel.html" />
+    <link rel="prev" title="Bidirectional Channel Words" href="rchannel.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -62,17 +62,17 @@
 <section id="give">
 <h3><code class="docutils literal notranslate"><span class="pre">give</span></code><a class="headerlink" href="#give" title="Permalink to this headline">¶</a></h3>
 <p>( semaphore – )</p>
-<p>Increment the counter of a semaphore, up to the counter limit if one is set; if one or more tasks are blocked on the semaphore, the one that has been blocked the longest is readied. This is safe to call within an interrupt service routine or critical section.</p>
+<p>Increment the counter of a semaphore, up to the counter limit if one is set; if one or more tasks are blocked on the semaphore, the one that has been blocked the longest is readied. This is not safe to call within an interrupt service routine or critical section.</p>
 </section>
 <section id="ungive">
 <h3><code class="docutils literal notranslate"><span class="pre">ungive</span></code><a class="headerlink" href="#ungive" title="Permalink to this headline">¶</a></h3>
 <p>( semaphore – )</p>
-<p>Decrement the counter of a semaphore without blocking the current task. This is safe to call within an interrupt service routine or critical section.</p>
+<p>Decrement the counter of a semaphore without blocking the current task. This is not safe to call within an interrupt service routine or critical section.</p>
 </section>
 <section id="broadcast">
 <h3><code class="docutils literal notranslate"><span class="pre">broadcast</span></code><a class="headerlink" href="#broadcast" title="Permalink to this headline">¶</a></h3>
 <p>( semaphore – )</p>
-<p><em>Give</em> all of the tasks blocked on a semaphore. This is safe to call within an interrupt service routine or critical section.</p>
+<p><em>Give</em> all of the tasks blocked on a semaphore. This is not safe to call within an interrupt service routine or critical section.</p>
 </section>
 </section>
 </section>
@@ -115,13 +115,15 @@
 <li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="map.html">Map Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="rchannel.html">Reply Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rchannel.html">Bidirectional Channel Words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Semaphore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>
@@ -138,7 +140,7 @@
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="rchannel.html" title="previous chapter">Reply Channel Words</a></li>
+      <li>Previous: <a href="rchannel.html" title="previous chapter">Bidirectional Channel Words</a></li>
       <li>Next: <a href="stream.html" title="next chapter">Stream Words</a></li>
   </ul></li>
 </ul>

@@ -128,42 +128,42 @@
 <section id="send-stream-no-block">
 <h3><code class="docutils literal notranslate"><span class="pre">send-stream-no-block</span></code><a class="headerlink" href="#send-stream-no-block" title="Permalink to this headline">¶</a></h3>
 <p>( addr bytes stream – )</p>
-<p>Send data with a buffer to a stream. If there is insufficient space available in the stream to copy the entire buffer, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. This is safe to call within an interrupt service routine or a critical section.</p>
+<p>Send data with a buffer to a stream. If there is insufficient space available in the stream to copy the entire buffer, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. This is not safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="send-stream-partial-no-block">
 <h3><code class="docutils literal notranslate"><span class="pre">send-stream-partial-no-block</span></code><a class="headerlink" href="#send-stream-partial-no-block" title="Permalink to this headline">¶</a></h3>
 <p>( addr bytes stream – send-bytes )</p>
-<p>Send data with a buffer to a stream. Only as much data as there is space for inthe stream is sent; the remaining data is omitted. The actual number of bytes sent is returned. This is safe to call within an interrupt service routine or a critical section.</p>
+<p>Send data with a buffer to a stream. Only as much data as there is space for inthe stream is sent; the remaining data is omitted. The actual number of bytes sent is returned. This is not safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="recv-stream-no-block">
 <h3><code class="docutils literal notranslate"><span class="pre">recv-stream-no-block</span></code><a class="headerlink" href="#recv-stream-no-block" title="Permalink to this headline">¶</a></h3>
 <p>( addr bytes stream – recv-bytes )</p>
-<p>Receive data into a buffer from a stream. If no data is available, return a byte count of zero. Note that only as much data is available is copied, and the returned byte count may be lower than the byte count passed in. This is safe to call within an interrupt service routine or a critical section.</p>
+<p>Receive data into a buffer from a stream. If no data is available, return a byte count of zero. Note that only as much data is available is copied, and the returned byte count may be lower than the byte count passed in. This is not safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="recv-stream-min-no-block">
 <h3><code class="docutils literal notranslate"><span class="pre">recv-stream-min-no-block</span></code><a class="headerlink" href="#recv-stream-min-no-block" title="Permalink to this headline">¶</a></h3>
 <p>( addr bytes min-bytes stream – recv-bytes )</p>
-<p>Receive at least a minimum number of bytes from a stream. If the minimum number of bytes is not available, receive no bytes and return a byte count of zero. Note that only as much data is available is copied, and the returned byte count may be lower than the byte count <em>bytes</em> passed in. This is safe to call within an interrupt service routine or a critical section.</p>
+<p>Receive at least a minimum number of bytes from a stream. If the minimum number of bytes is not available, receive no bytes and return a byte count of zero. Note that only as much data is available is copied, and the returned byte count may be lower than the byte count <em>bytes</em> passed in. This is not safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="peek-stream-no-block">
 <h3><code class="docutils literal notranslate"><span class="pre">peek-stream-no-block</span></code><a class="headerlink" href="#peek-stream-no-block" title="Permalink to this headline">¶</a></h3>
 <p>( addr bytes stream – peek-bytes )</p>
-<p>Peek data into a buffer from a stream, without removing it from the stream. if no data is available, return a byte count of zero. Note that only as much data is available is copied, and the returned byte count may be lower than the byte count passed in. This is safe to call within an interrupt service routine or a critical section.</p>
+<p>Peek data into a buffer from a stream, without removing it from the stream. if no data is available, return a byte count of zero. Note that only as much data is available is copied, and the returned byte count may be lower than the byte count passed in. This is not safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="peek-stream-min-no-block">
 <h3><code class="docutils literal notranslate"><span class="pre">peek-stream-min-no-block</span></code><a class="headerlink" href="#peek-stream-min-no-block" title="Permalink to this headline">¶</a></h3>
 <p>( addr bytes min-bytes stream – peek-bytes )</p>
-<p>Peek at least a minimum number of bytes from a stream, without removing them from the stream. If the minimum number of bytes is not available, peek no bytes and return a byte count of zero. Note that only as much data is available is copied, and the returned byte count may be lower th an the byte count <em>bytes</em> passed in. This is safe to call within an interrupt service routine or a critical section.</p>
+<p>Peek at least a minimum number of bytes from a stream, without removing them from the stream. If the minimum number of bytes is not available, peek no bytes and return a byte count of zero. Note that only as much data is available is copied, and the returned byte count may be lower th an the byte count <em>bytes</em> passed in. This is not safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="skip-stream-no-block">
 <h3><code class="docutils literal notranslate"><span class="pre">skip-stream-no-block</span></code><a class="headerlink" href="#skip-stream-no-block" title="Permalink to this headline">¶</a></h3>
 <p>( bytes stream – skip-bytes )</p>
-<p>Skip data in a stream, removing it from the stream without copying it. If no data is available, return a byte count of zero. Note that less data may be skipped than the byte count provided, and the returned byte count is the number of bytes actually skipped. This is safe to call within an interrupt service routine or a critical section.</p>
+<p>Skip data in a stream, removing it from the stream without copying it. If no data is available, return a byte count of zero. Note that less data may be skipped than the byte count provided, and the returned byte count is the number of bytes actually skipped. This is not safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="skip-stream-min-no-block">
 <h3><code class="docutils literal notranslate"><span class="pre">skip-stream-min-no-block</span></code><a class="headerlink" href="#skip-stream-min-no-block" title="Permalink to this headline">¶</a></h3>
 <p>( bytes min-bytes stream – skip-bytes )</p>
-<p>Skip at least a minimum number of bytes in a stream, removing them from the stream without copying them. If the minimum number of bytes is not available, skip no bytes and return a byte count of zero. Note that less data may be skipped by thane byte count <em>bytes</em> provided, and the returned byte count is the number of bytes actually skipped. This is safe to call within an interrupt service routine or a critical section.</p>
+<p>Skip at least a minimum number of bytes in a stream, removing them from the stream without copying them. If the minimum number of bytes is not available, skip no bytes and return a byte count of zero. Note that less data may be skipped by thane byte count <em>bytes</em> provided, and the returned byte count is the number of bytes actually skipped. This is not safe to call within an interrupt service routine or a critical section.</p>
 </section>
 </section>
 </section>
@@ -206,13 +206,15 @@
 <li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="map.html">Map Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="rchannel.html">Reply Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rchannel.html">Bidirectional Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>
