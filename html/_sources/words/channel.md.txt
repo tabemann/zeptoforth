@@ -71,19 +71,19 @@ Skip the most oldest message in a channel. Block until another task sends a mess
 ##### `send-chan-no-block`
 ( addr bytes chan -- )
 
-Send message with a buffer as a payload over a channel. If the channel is full, `x-would-block` is raised. Note that the buffer is copied, and will be truncated if the buffer size of the channel is smaller than the data provided, and padded with zeros if it is larger. This is safe to call within an interrupt service routine or a critical section.
+Send message with a buffer as a payload over a channel. If the channel is full, `x-would-block` is raised. Note that the buffer is copied, and will be truncated if the buffer size of the channel is smaller than the data provided, and padded with zeros if it is larger. This is not safe to call within an interrupt service routine or a critical section.
 
 ##### `recv-chan-no-block`
 ( addr bytes chan -- recv-bytes )
 
-Receive message into a buffer from a channel. If the channel is empty, `x-would-block` is raised. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the number of bytes copied is returned. This is safe to call within an interrupt service routine or a critical section.
+Receive message into a buffer from a channel. If the channel is empty, `x-would-block` is raised. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the number of bytes copied is returned. This is not safe to call within an interrupt service routine or a critical section.
 
 ##### `peek-chan-no-block`
 ( addr bytes chan -- addr peek-bytes )
 
-Peek the oldest message into a buffer from a channel, without popping it from the channel's queue. If the channel is empty, `x-would-block` is raised. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the number of bytes copied is returned. This is safe to call within an interrupt service routine or a critical section.
+Peek the oldest message into a buffer from a channel, without popping it from the channel's queue. If the channel is empty, `x-would-block` is raised. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the number of bytes copied is returned. This is not safe to call within an interrupt service routine or a critical section.
 
 ##### `skip-chan-no-block`
 ( chan -- )
 
-Skip the most oldest message in a channel. If the channel is empty, `x-would-block` is raised. Note that no copying takes place, making this faster than receiving a message. This is safe to call within an interrupt service routine or a critical section.
+Skip the most oldest message in a channel. If the channel is empty, `x-would-block` is raised. Note that no copying takes place, making this faster than receiving a message. This is not safe to call within an interrupt service routine or a critical section.

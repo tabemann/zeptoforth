@@ -29,14 +29,14 @@ Decrement the counter of a semaphore, blocking the current task if the counter a
 ##### `give`
 ( semaphore -- )
 
-Increment the counter of a semaphore, up to the counter limit if one is set; if one or more tasks are blocked on the semaphore, the one that has been blocked the longest is readied. This is safe to call within an interrupt service routine or critical section.
+Increment the counter of a semaphore, up to the counter limit if one is set; if one or more tasks are blocked on the semaphore, the one that has been blocked the longest is readied. This is not safe to call within an interrupt service routine or critical section.
 
 ##### `ungive`
 ( semaphore -- )
 
-Decrement the counter of a semaphore without blocking the current task. This is safe to call within an interrupt service routine or critical section.
+Decrement the counter of a semaphore without blocking the current task. This is not safe to call within an interrupt service routine or critical section.
 
 ##### `broadcast`
 ( semaphore -- )
 
-*Give* all of the tasks blocked on a semaphore. This is safe to call within an interrupt service routine or critical section.
+*Give* all of the tasks blocked on a semaphore. This is not safe to call within an interrupt service routine or critical section.
