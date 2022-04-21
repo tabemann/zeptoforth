@@ -16,7 +16,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Rendezvous Channel Words" href="fchannel.html" />
-    <link rel="prev" title="Lock Words" href="lock.html" />
+    <link rel="prev" title="Simple Lock Words" href="slock.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -103,22 +103,22 @@
 <section id="send-chan-no-block">
 <h3><code class="docutils literal notranslate"><span class="pre">send-chan-no-block</span></code><a class="headerlink" href="#send-chan-no-block" title="Permalink to this headline">¶</a></h3>
 <p>( addr bytes chan – )</p>
-<p>Send message with a buffer as a payload over a channel. If the channel is full, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. Note that the buffer is copied, and will be truncated if the buffer size of the channel is smaller than the data provided, and padded with zeros if it is larger. This is safe to call within an interrupt service routine or a critical section.</p>
+<p>Send message with a buffer as a payload over a channel. If the channel is full, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. Note that the buffer is copied, and will be truncated if the buffer size of the channel is smaller than the data provided, and padded with zeros if it is larger. This is not safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="recv-chan-no-block">
 <h3><code class="docutils literal notranslate"><span class="pre">recv-chan-no-block</span></code><a class="headerlink" href="#recv-chan-no-block" title="Permalink to this headline">¶</a></h3>
 <p>( addr bytes chan – recv-bytes )</p>
-<p>Receive message into a buffer from a channel. If the channel is empty, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the number of bytes copied is returned. This is safe to call within an interrupt service routine or a critical section.</p>
+<p>Receive message into a buffer from a channel. If the channel is empty, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the number of bytes copied is returned. This is not safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="peek-chan-no-block">
 <h3><code class="docutils literal notranslate"><span class="pre">peek-chan-no-block</span></code><a class="headerlink" href="#peek-chan-no-block" title="Permalink to this headline">¶</a></h3>
 <p>( addr bytes chan – addr peek-bytes )</p>
-<p>Peek the oldest message into a buffer from a channel, without popping it from the channel’s queue. If the channel is empty, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the number of bytes copied is returned. This is safe to call within an interrupt service routine or a critical section.</p>
+<p>Peek the oldest message into a buffer from a channel, without popping it from the channel’s queue. If the channel is empty, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the number of bytes copied is returned. This is not safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="skip-chan-no-block">
 <h3><code class="docutils literal notranslate"><span class="pre">skip-chan-no-block</span></code><a class="headerlink" href="#skip-chan-no-block" title="Permalink to this headline">¶</a></h3>
 <p>( chan – )</p>
-<p>Skip the most oldest message in a channel. If the channel is empty, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. Note that no copying takes place, making this faster than receiving a message. This is safe to call within an interrupt service routine or a critical section.</p>
+<p>Skip the most oldest message in a channel. If the channel is empty, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. Note that no copying takes place, making this faster than receiving a message. This is not safe to call within an interrupt service routine or a critical section.</p>
 </section>
 </section>
 </section>
@@ -161,13 +161,15 @@
 <li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="map.html">Map Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="rchannel.html">Reply Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rchannel.html">Bidirectional Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>
@@ -184,7 +186,7 @@
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="lock.html" title="previous chapter">Lock Words</a></li>
+      <li>Previous: <a href="slock.html" title="previous chapter">Simple Lock Words</a></li>
       <li>Next: <a href="fchannel.html" title="next chapter">Rendezvous Channel Words</a></li>
   </ul></li>
 </ul>
