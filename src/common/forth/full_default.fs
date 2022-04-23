@@ -35,6 +35,7 @@
 #include src/common/forth/semaphore.fs
 #include src/common/forth/fchannel.fs
 #include src/common/forth/channel.fs
+#include src/common/forth/schannel.fs
 #include src/common/forth/rchannel.fs
 #include src/common/forth/stream.fs
 #include src/common/forth/ansi_term.fs
