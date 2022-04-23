@@ -41,6 +41,19 @@ begin-module slock
   \ Initialize a simple lock
   : init-slock ( addr -- ) 0 swap ! ;
 
+  \ Try to claim a simple lock
+  : try-claim-slock ( slock -- success? )
+    disable-int
+    slock-spinlock claim-spinlock-raw
+    dup slock-task @ if
+      drop false
+    else
+      current-task swap slock-task ! true
+    then
+    slock-spinlock release-spinlock-raw
+    enable-int
+  ;
+  
   \ Claim a simple lock
   : claim-slock ( slock -- )
     disable-int
@@ -53,6 +66,30 @@ begin-module slock
       else
 	current-task swap slock-task !
 	true
+      then
+    until
+    slock-spinlock release-spinlock-raw
+    enable-int
+  ;
+
+  \ Claim a simple lock with a timeout
+  : claim-slock-timeout ( slock -- )
+    disable-int
+    slock-spinlock claim-spinlock-raw
+    begin
+      current-task compare-timeout if
+	slock-spinlock release-spinlock-raw
+	enable-int
+	['] x-timed-out ?raise
+      else
+	dup slock-task @ ?dup if
+	  task-waited-for !
+	  slock-spinlock ^ task-internal :: block-indefinite-self-release
+	  false
+	else
+	  current-task swap slock-task !
+	  true
+	then
       then
     until
     slock-spinlock release-spinlock-raw
