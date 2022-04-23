@@ -200,7 +200,7 @@ begin-module chan
   ;
 
   \ Peek data from a channel
-  : peek-chan ( addr bytes chan -- addr peek-bytes )
+  : peek-chan ( addr bytes chan -- peek-bytes )
     [:
       s" BEGIN PEEK-CHAN" trace
       current-task prepare-block

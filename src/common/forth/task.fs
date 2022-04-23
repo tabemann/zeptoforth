@@ -744,6 +744,16 @@ begin-module task
 
   end-module
 
+  \ Check for timing out for non-blocked tasks
+  : compare-timeout ( task -- timed-out? )
+    dup ['] timeout for-task@ no-timeout <> if
+      systick-counter over timeout-systick-start @ -
+      swap timeout-systick-delay @ >=
+    else
+      drop false
+    then
+  ;
+
   \ Mark a task as blocked indefinitely and schedule as critical and claim a
   \ spinlock when done
   : block-indefinite-with-spinlock ( spinlock task -- )
