@@ -27,6 +27,7 @@ Zeptoforth Documentation
    words/slock
    words/channel
    words/fchannel
+   words/schannel
    words/rchannel
    words/semaphore
    words/stream
