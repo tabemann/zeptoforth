@@ -1810,9 +1810,17 @@ _asm_dump_consts:
 	bl _asm_word_align
 	pop {r0}
 	movs r1, #0
-1:	ldr r2, [r0]
+1:	ldr r0, =consts_used_count
+	ldr r2, [r0]
 	cmp r1, r2
 	beq 2f
+	push_tos
+	movs tos, r1
+	push {r1}
+	bl _asm_const_index
+	pop {r1}
+	movs r0, tos
+	pull_tos
 	push {r0, r1}
 	bl _current_here
 	pop {r0, r1}
@@ -1823,21 +1831,43 @@ _asm_dump_consts:
 	ldr r2, =const_buffer_addr
 	lsls r3, r1, #2
 	ldr tos, [r2, r3]
-	push {r0, r1, r3}
+	push {r0, r1}
 @	bl _asm_store_unaligned_adr
 	bl _asm_store_ldr_pc
-	pop {r0, r1, r3}
+	pop {r0, r1}
 	push_tos
 	ldr r2, =const_buffer_value
-	ldr tos, [r2, r3]
-	push {r0, r1}
+	lsls r0, r0, #2
+	ldr tos, [r2, r0]
+	push {r1}
 	bl _current_comma_4
-	pop {r0, r1}
+	pop {r1}
 	adds r1, #1
 	b 1b
 2:	movs r1, #0
 	str r1, [r0]
 	pop {pc}
+	end_inlined
+
+	@@ Get index of constant to use (to resolve duplicate constants)
+	@@ ( index -- index' )
+	define_internal_word "const-index", visible_flag
+_asm_const_index:	
+	lsls tos, tos, #2
+	ldr r0, =const_buffer_value
+	ldr r3, [r0, tos]
+	movs r1, #0
+1:	cmp r1, tos
+	beq 2f
+	ldr r2, [r0, r1]
+	cmp r2, r3
+	beq 3f
+	adds r1, #4
+	b 1b
+2:	lsrs tos, tos, #2
+	bx lr
+3:	lsrs tos, r1, #2
+	bx lr
 	end_inlined
 
 	@@ Write out constants to the code
