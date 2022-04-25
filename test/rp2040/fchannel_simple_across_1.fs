@@ -48,8 +48,8 @@ continue-module forth
   : init-test ( -- )
     my-fchan init-fchan
     0 consumer-task !
-    0 ['] consumer 480 128 512 spawn consumer-task !
-    0 ['] producer 480 128 512 1 spawn-on-core producer-task !
+    0 ['] consumer 420 128 512 spawn consumer-task !
+    0 ['] producer 420 128 512 1 spawn-on-core producer-task !
     c" consumer" consumer-task @ task-name!
     c" producer" producer-task @ task-name!
     consumer-task @ run

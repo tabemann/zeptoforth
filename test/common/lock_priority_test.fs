@@ -56,8 +56,8 @@ continue-module forth
   \ Initialize the test
   : init-test ( -- )
     my-lock init-lock
-    0 ['] low 480 128 512 spawn low-task !
-    0 ['] high 480 128 512 spawn high-task !
+    0 ['] low 420 128 512 spawn low-task !
+    0 ['] high 420 128 512 spawn high-task !
     1 high-task @ task-priority!
     low-task @ run
     high-task @ run

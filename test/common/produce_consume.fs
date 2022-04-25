@@ -55,10 +55,10 @@ continue-module forth
   variable consumer-task
 
   \ Spawn my producer task
-  0 ' producer 480 128 512 spawn producer-task !
+  0 ' producer 420 128 512 spawn producer-task !
 
   \ Spawn my consumer task
-  0 ' consumer 480 128 512 spawn consumer-task !
+  0 ' consumer 420 128 512 spawn consumer-task !
 
   \ Enable my consumer task
   consumer-task @ run

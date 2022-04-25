@@ -57,8 +57,8 @@ continue-module forth
   \ Initialize our test
   : init-test ( -- )
     my-count my-stream init-stream
-    0 ['] producer 480 128 512 spawn producer-task !
-    0 ['] consumer 480 128 512 spawn consumer-task !
+    0 ['] producer 420 128 512 spawn producer-task !
+    0 ['] consumer 420 128 512 spawn consumer-task !
     producer-task @ run consumer-task @ run
   ;
   

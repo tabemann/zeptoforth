@@ -59,11 +59,11 @@ continue-module forth
   : init-test ( -- )
     my-fchan init-fchan
     my-lock init-lock
-    0 ['] do-producer 480 128 512 spawn producer-task !
-    1 1 ['] do-consumer 480 128 512 spawn consumer-1-task !
-    2 1 ['] do-consumer 480 128 512 spawn consumer-2-task !
-    3 1 ['] do-consumer 480 128 512 spawn consumer-3-task !
-    4 1 ['] do-consumer 480 128 512 spawn consumer-4-task !
+    0 ['] do-producer 420 128 512 spawn producer-task !
+    1 1 ['] do-consumer 420 128 512 spawn consumer-1-task !
+    2 1 ['] do-consumer 420 128 512 spawn consumer-2-task !
+    3 1 ['] do-consumer 420 128 512 spawn consumer-3-task !
+    4 1 ['] do-consumer 420 128 512 spawn consumer-4-task !
     producer-task @ run
     consumer-1-task @ run
     consumer-2-task @ run

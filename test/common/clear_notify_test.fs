@@ -39,7 +39,7 @@ continue-module forth
 
   \ Initialize the test
   : init-test ( -- )
-    0 ['] test 480 128 512 spawn dup my-task !
+    0 ['] test 420 128 512 spawn dup my-task !
     my-mailboxes 2 my-task @ config-notify
     my-task @ run
     1 my-task @ notify

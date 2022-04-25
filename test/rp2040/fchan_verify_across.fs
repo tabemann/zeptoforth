@@ -55,14 +55,14 @@ continue-module forth
   : init-test ( -- )
     my-fchan init-fchan
     3 current-task task-priority!
-    0 1 ['] producer 480 128 512 0 spawn-on-core run
-    0 1 ['] consumer 480 128 512 0 spawn-on-core run
-    0 1 ['] producer 480 128 512 1 spawn-on-core run
-    0 1 ['] consumer 480 128 512 1 spawn-on-core run
-    1 1 ['] producer 480 128 512 0 spawn-on-core run
-    1 1 ['] consumer 480 128 512 0 spawn-on-core run
-    1 1 ['] producer 480 128 512 1 spawn-on-core run
-    1 1 ['] consumer 480 128 512 1 spawn-on-core run
+    0 1 ['] producer 420 128 512 0 spawn-on-core run
+    0 1 ['] consumer 420 128 512 0 spawn-on-core run
+    0 1 ['] producer 420 128 512 1 spawn-on-core run
+    0 1 ['] consumer 420 128 512 1 spawn-on-core run
+    1 1 ['] producer 420 128 512 0 spawn-on-core run
+    1 1 ['] consumer 420 128 512 0 spawn-on-core run
+    1 1 ['] producer 420 128 512 1 spawn-on-core run
+    1 1 ['] consumer 420 128 512 1 spawn-on-core run
     0 current-task task-priority!
   ;
     

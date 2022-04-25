@@ -42,7 +42,7 @@ continue-module forth
 
   \ Initialize the test
   : rng-test-task ( -- )
-    0 ['] rng-test 480 128 512 spawn rng-test-task !
+    0 ['] rng-test 420 128 512 spawn rng-test-task !
     rng-test-task @ run
   ;
 

@@ -24,6 +24,6 @@ lock-size buffer: my-lock
 : init-test ( -- )
   my-lock init-lock
   0 [: begin [: $100 0 ?do i h.2 space loop ;] my-lock with-lock again ;]
-  480 128 512 0 spawn-on-core run
+  420 128 512 0 spawn-on-core run
   0 [: begin [: 100 0 ?do i . loop ;] my-lock with-lock again ;]
-  480 128 512 1 spawn-on-core run ;
+  420 128 512 1 spawn-on-core run ;

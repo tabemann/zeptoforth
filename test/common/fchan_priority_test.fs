@@ -51,10 +51,10 @@ continue-module forth
   \ Initialize our test
   : init-test ( -- )
     my-fchan init-fchan
-    1000 3000 1 3 ['] producer 480 128 512 spawn run
-    1000 3000 0 3 ['] producer 480 128 512 spawn run
-    1500 3000 1 3 ['] consumer 480 128 512 spawn run
-    1500 2000 0 3 ['] consumer 480 128 512 spawn run
+    1000 3000 1 3 ['] producer 420 128 512 spawn run
+    1000 3000 0 3 ['] producer 420 128 512 spawn run
+    1500 3000 1 3 ['] consumer 420 128 512 spawn run
+    1500 2000 0 3 ['] consumer 420 128 512 spawn run
   ;
   
 end-module

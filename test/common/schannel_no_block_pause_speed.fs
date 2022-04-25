@@ -43,7 +43,7 @@ continue-module forth
   ;
 
   \ The consumer task
-  0 ' consumer 480 128 512 spawn constant consumer-task
+  0 ' consumer 420 128 512 spawn constant consumer-task
 
   \ The send count
   variable send-count
@@ -73,7 +73,7 @@ continue-module forth
   ;
 
   \ The producer task
-  0 ' producer 480 128 512 spawn constant producer-task
+  0 ' producer 420 128 512 spawn constant producer-task
 
   \ Initiate the test
   : init-test ( -- )
