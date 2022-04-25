@@ -106,7 +106,7 @@ continue-module forth
     orange-blink-off-action enable-action
     green-blink-off-action enable-action
     blue-blink-off-action enable-action
-    0 [: my-schedule run-schedule ;] 480 128 512 spawn schedule-task !
+    0 [: my-schedule run-schedule ;] 420 128 512 spawn schedule-task !
     schedule-task @ run
     pause
   ;

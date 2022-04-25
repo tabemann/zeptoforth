@@ -40,7 +40,7 @@ continue-module forth
   \ Init blinker
   : init-blinker ( -- )
     500 blinker-delay !
-    0 ['] blinker 480 128 512 spawn blinker-task !
+    0 ['] blinker 420 128 512 spawn blinker-task !
     blinker-task @ run
   ;
 

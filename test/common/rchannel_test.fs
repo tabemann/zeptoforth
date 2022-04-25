@@ -55,8 +55,8 @@ continue-module forth
   \ Initialize the test
   : init-test ( -- )
     my-rchan init-rchan
-    0 ['] send-loop 480 128 512 spawn send-task !
-    0 ['] reply-loop 480 128 512 spawn reply-task !
+    0 ['] send-loop 420 128 512 spawn send-task !
+    0 ['] reply-loop 420 128 512 spawn reply-task !
     send-task @ run
     reply-task @ run
   ;

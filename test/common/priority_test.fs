@@ -38,9 +38,9 @@ continue-module forth
 
   \ Initialize the test
   : init-test ( -- )
-    0 ['] highest 480 128 512 spawn highest-task !
-    0 ['] middle 480 128 512 spawn middle-task !
-    0 ['] lowest 480 128 512 spawn lowest-task !
+    0 ['] highest 420 128 512 spawn highest-task !
+    0 ['] middle 420 128 512 spawn middle-task !
+    0 ['] lowest 420 128 512 spawn lowest-task !
     -1 lowest-task @ task-priority!
     0 middle-task @ task-priority!
     1 highest-task @ task-priority!

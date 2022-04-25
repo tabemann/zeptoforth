@@ -30,10 +30,10 @@ continue-module forth
 
   \ Initialize the test
   : init-test ( -- )
-    0 [: begin 500 ms ." *" again ;] 480 128 512 1 spawn-on-core task-0 !
-    0 [: begin 1000 ms ." +" again ;] 480 128 512 1 spawn-on-core task-1 !
-    0 [: begin 1500 ms ." x" again ;] 480 128 512 0 spawn-on-core task-2 !
-    0 [: begin 2000 ms ." #" again ;] 480 128 512 0 spawn-on-core task-3 !
+    0 [: begin 500 ms ." *" again ;] 420 128 512 1 spawn-on-core task-0 !
+    0 [: begin 1000 ms ." +" again ;] 420 128 512 1 spawn-on-core task-1 !
+    0 [: begin 1500 ms ." x" again ;] 420 128 512 0 spawn-on-core task-2 !
+    0 [: begin 2000 ms ." #" again ;] 420 128 512 0 spawn-on-core task-3 !
     task-1 @ run
     task-3 @ run
     task-0 @ run

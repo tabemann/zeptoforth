@@ -63,7 +63,7 @@ continue-module forth
     50 vary-min !
     500 vary-max !
     25 vary-step !
-    0 ['] vary 480 128 512 spawn vary-task !
+    0 ['] vary 420 128 512 spawn vary-task !
     vary-task @ run
   ;
 

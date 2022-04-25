@@ -30,7 +30,7 @@ continue-module forth
 
   \ Initiate the test
   : init-test ( -- )
-    0 [: begin again ;] 480 128 512 spawn test-task !
+    0 [: begin again ;] 420 128 512 spawn test-task !
     c" test" test-task @ task-name!
     test-mailboxes 1 test-task @ config-notify
     255 0 test-task @ mailbox!

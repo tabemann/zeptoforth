@@ -78,9 +78,9 @@ continue-module forth
   : init-test ( -- )
     inter-count inter-stream init-stream
     end-count end-stream init-stream
-    0 ['] consumer 480 128 512 0 spawn-on-core consumer-task !
-    0 ['] inter 480 128 512 1 spawn-on-core inter-task !
-    0 ['] producer 480 128 512 0 spawn-on-core producer-task !
+    0 ['] consumer 420 128 512 0 spawn-on-core consumer-task !
+    0 ['] inter 420 128 512 1 spawn-on-core inter-task !
+    0 ['] producer 420 128 512 0 spawn-on-core producer-task !
     consumer-task @ run
     inter-task @ run
     producer-task @ run

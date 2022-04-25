@@ -24,6 +24,6 @@ fchan-size buffer: my-fchan
 : init-test ( -- )
   my-fchan init-fchan
   0 [: begin [: my-fchan recv-fchan ;] extract-allot-cell . again ;]
-  480 128 512 0 spawn-on-core run
+  420 128 512 0 spawn-on-core run
   0 [: 0 begin dup [: my-fchan send-fchan ;] provide-allot-cell 1+ 1000 ms again ;]
-  480 128 512 1 spawn-on-core run ;
+  420 128 512 1 spawn-on-core run ;
