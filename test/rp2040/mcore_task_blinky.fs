@@ -31,15 +31,15 @@ continue-module forth
 
   \ Second core main task
   : core-1-main ( star-ms led-ms -- )
-    1 ['] led-loop 480 128 512 spawn run
-    1 ['] star-loop 480 128 512 spawn run
+    1 ['] led-loop 420 128 512 spawn run
+    1 ['] star-loop 420 128 512 spawn run
     current-task kill
   ;
 
   \ Initialize the test
   : init-test ( -- )
-    1000 500 2 ['] core-1-main 480 128 512 1 spawn-on-core run
-    250 ms 750 1 ['] led-loop 480 128 512 spawn run
+    1000 500 2 ['] core-1-main 420 128 512 1 spawn-on-core run
+    250 ms 750 1 ['] led-loop 420 128 512 spawn run
   ;
   
 end-module

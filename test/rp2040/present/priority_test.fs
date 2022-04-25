@@ -21,6 +21,6 @@
 task import
 : init-test ( -- )
   0 [: begin ." *" 250 ms again ;]
-  480 128 512 spawn 0 over task-priority! run
+  420 128 512 spawn 0 over task-priority! run
   0 [: begin 10 0 ?do ." x" 100000 0 ?do loop loop 4000 ms again ;]
-  480 128 512 spawn 1 over task-priority! run ;
+  420 128 512 spawn 1 over task-priority! run ;

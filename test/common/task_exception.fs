@@ -26,7 +26,7 @@ continue-module forth
   : test ( -- ) begin 1000 ms again ;
   
   \ The loop task
-  0 ' test 480 128 512 spawn constant test-task
+  0 ' test 420 128 512 spawn constant test-task
   
   \ Start the loop task
   test-task run

@@ -23,8 +23,8 @@ task import
 notify-count cells buffer: notify-area
 variable notified-task
 : init-test ( -- )
-  0 [: begin 0 wait-notify . again ;] 480 128 512 0 spawn-on-core notified-task !
+  0 [: begin 0 wait-notify . again ;] 420 128 512 0 spawn-on-core notified-task !
   notify-area notify-count notified-task @ config-notify -1 0 notified-task @ mailbox!
   notified-task @ run
   0 [: begin ['] 1+ 0 notified-task @ notify-update 1000 ms again ;]
-  480 128 512 1 spawn-on-core run ;
+  420 128 512 1 spawn-on-core run ;

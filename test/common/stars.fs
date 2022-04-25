@@ -32,6 +32,6 @@ continue-module forth
   : stars ( -- ) begin ." *" 500000 0 ?do loop again ;
   
   \ Initialize the stars task
-  : init-stars ( -- ) 0 ['] stars 480 128 512 spawn stars-task ! ;
+  : init-stars ( -- ) 0 ['] stars 420 128 512 spawn stars-task ! ;
 
 end-module

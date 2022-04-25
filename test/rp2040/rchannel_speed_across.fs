@@ -69,8 +69,8 @@ continue-module forth
     0 send-count !
     systick-counter start-systick !
     my-rchan init-rchan
-    0 ['] consumer 480 128 512 1 spawn-on-core consumer-task !
-    0 ['] producer 480 128 512 spawn producer-task !
+    0 ['] consumer 420 128 512 1 spawn-on-core consumer-task !
+    0 ['] producer 420 128 512 spawn producer-task !
     consumer-task @ run
     producer-task @ run
     pause

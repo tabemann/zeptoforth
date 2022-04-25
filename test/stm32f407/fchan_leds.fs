@@ -99,11 +99,11 @@ continue-module forth
     orange-response-fchan init-fchan
     green-response-fchan init-fchan
     blue-response-fchan init-fchan
-    0 ['] handle-led 480 128 512 spawn handle-led-task !
-    0 ['] request-red 480 128 512 spawn request-red-task !
-    0 ['] request-orange 480 128 512 spawn request-orange-task !
-    0 ['] request-green 480 128 512 spawn request-green-task !
-    0 ['] request-blue 480 128 512 spawn request-blue-task !
+    0 ['] handle-led 420 128 512 spawn handle-led-task !
+    0 ['] request-red 420 128 512 spawn request-red-task !
+    0 ['] request-orange 420 128 512 spawn request-orange-task !
+    0 ['] request-green 420 128 512 spawn request-green-task !
+    0 ['] request-blue 420 128 512 spawn request-blue-task !
     handle-led-task @ run
     request-red-task @ run
     request-orange-task @ run

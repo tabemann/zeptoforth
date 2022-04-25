@@ -39,7 +39,7 @@ continue-module forth
   ;
 
   \ The consumer task
-  0 ' consumer 480 128 512 spawn constant consumer-task
+  0 ' consumer 420 128 512 spawn constant consumer-task
 
   \ The inner loop of a producer
   : do-producer ( -- )
@@ -55,7 +55,7 @@ continue-module forth
 
   \ Create a producer task
   : make-producer ( xt "name" -- )
-    s" " <builds-with-name , do-producer 0 latest >body 480 128 512 spawn
+    s" " <builds-with-name , do-producer 0 latest >body 420 128 512 spawn
     constant
   ;
 

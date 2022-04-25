@@ -47,7 +47,7 @@ continue-module forth
   ;
 
   \ The counter task
-  0 ' counter 480 128 512 spawn constant counter-task
+  0 ' counter 420 128 512 spawn constant counter-task
 
   \ Initiate the test
   : init-test ( -- )
