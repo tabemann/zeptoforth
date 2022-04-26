@@ -39,6 +39,9 @@
 #include src/rp2040/forth/led.fs
 #include src/common/forth/full_default.fs
 #include src/rp2040/forth/rng.fs
+#include src/rp2040/forth/qspi.fs
+#include src/common/forth/block.fs
+#include src/common/forth/edit.fs
 
 \ Set a cornerstone to enable deleting everything compiled after this code
 cornerstone restore-state
