@@ -80,6 +80,9 @@
 	.equ IO_QSPI_GPIO_QSPI_SS_CTRL_OUTOVER_INVERT, 0x100
 	.equ IO_QSPI_GPIO_QSPI_SS_CTRL_OUTOVER_LOW, 0x200
 	.equ IO_QSPI_GPIO_QSPI_SS_CTRL_OUTOVER_HIGH, 0x300
+
+	@ QSPI page size
+	.equ QSPI_PAGE_SIZE, 256
 	
 	@ Mode to send commands
 	@ Standard SPI mode (0 << 21)
@@ -372,6 +375,8 @@ _enter_xip:
 	pop {pc}
 	end_inlined
 
+.ltorg
+	
 	@ Enable SSI
 	define_word "enable-ssi", visible_flag
 _enable_ssi:
@@ -479,6 +484,28 @@ _exit_xip:
 	push_tos
 	ldr tos, ='E | ('X << 8)
 	bl _call_rom_0
+	pop {pc}
+	end_inlined
+
+	@ Erase a QSPI 64K sector
+	define_internal_word "erase-qspi-sector", visible_flag
+_erase_qspi_sector:
+	push {lr}
+	bl _force_core_wait
+	cpsid i
+	dsb
+	isb
+	bl _exit_xip
+	ldr r0, =flash_start
+	subs tos, r0
+	ldr r0, =0xFFFF
+	bics tos, r0
+	push_tos
+	ldr tos, =CMD_BLOCK_ERASE_64K
+	bl _erase_flash
+	bl _enable_flush_xip_cache
+	bl _enter_xip
+	cpsie i
 	pop {pc}
 	end_inlined
 
@@ -649,18 +676,111 @@ _wait_tx_empty:
 	bx lr
 	end_inlined
 
+	@ Actually mass write a buffer to QSPI flash ( data-addr bytes -- )
+	define_internal_word "actually-mass-qspi!", visible_flag
+_actually_store_mass_qspi:
+	push {lr}
+	movs r1, tos
+	pull_tos
+1:	cmp r1, #0
+	beq 2f
+	subs r1, #1
+	ldrb r2, [tos]
+	adds tos, #1
+	ldr r0, =XIP_SSI_BASE
+	str r2, [r0, #SSI_DR0_OFFSET]
+	push {r1}
+	bl _wait_ssi_busy
+	pop {r1}
+	ldr r0, =XIP_SSI_BASE
+	ldr r2, [r0, #SSI_DR0_OFFSET]
+	b 1b
+2:	ldr r0, =XIP_SSI_BASE
+	ldr r2, [r0, #SSI_DR0_OFFSET]
+	ldr r2, [r0, #SSI_DR0_OFFSET]
+	ldr r2, [r0, #SSI_DR0_OFFSET]
+	ldr r2, [r0, #SSI_DR0_OFFSET]
+	bl _force_flash_cs_high
+	bl _wait_flash_write_busy
+	pull_tos
+	pop {pc}
+	end_inlined
 	
-	@ Write a byte to an address in a flash buffer
-	define_word "cflash!", visible_flag
-_store_flash_1:
+	@ Write a buffer to QSPI flash ( data-addr bytes addr -- )
+	define_internal_word "mass-qspi!", visible_flag
+_store_mass_qspi:
+	push {lr}
+	ldr r0, =flash_dict_start
+	cmp tos, r0
+	blo 1f
+	cpsid i
+	bl _force_core_wait
+	bl _exit_xip
+	bl _enable_flash_cmd
+	bl _enable_flash_write
+	movs r0, tos
+	pull_tos
+	ldr r1, =flash_start
+	subs r0, r1
+	movs r1, tos
+	pull_tos
+	movs r2, tos
+	pull_tos
+2:	cmp r1, #0
+	beq 3f
+	push {r0, r1, r2}
+	bl _enable_flash_write
+	pop {r0, r1, r2}
+	push_tos
+	movs tos, r0
+	push {r0, r1, r2}
+	bl _write_flash_address
+	pop {r0, r1, r2}
+	push {r4}
+	ldr r3, =QSPI_PAGE_SIZE - 1
+	movs r4, r0
+	subs r4, #1
+	orrs r3, r4
+	adds r3, #1
+	subs r3, r0
+	pop {r4}
+	cmp r3, #0
+	bne 5f
+	ldr r3, =0x100
+5:	cmp r1, r3
+	bhi 4f
+	movs r3, r1
+4:	push_tos
+	movs tos, r2
+	push_tos
+	movs tos, r3
+	push {r0, r1, r2, r3}
+	bl _actually_store_mass_qspi
+	pop {r0, r1, r2, r3}
+	subs r1, r3
+	adds r0, r3
+	adds r2, r3
+	b 2b
+3:	bl _enable_flush_xip_cache
+	bl _enter_xip
+	cpsie i
+	bl _release_core
+	pop {pc}
+1:	ldr tos, =_attempted_to_write_core_flash
+	bl _raise
+	bx lr
+	end_inlined
+
+.ltorg
+	
+	@ Write a byte to QSPI flash
+	define_internal_word "cqspi!", visible_flag
+_store_qspi_1:	
 	push {lr}
 	ldrb r0, [tos]
 	movs r1, 0xFF
 	cmp r0, r1
 	bne 1f
-	ldr r0, =flash_end - 1
-	cmp tos, r0
-	bhi 2f
 	ldr r0, =flash_dict_start
 	cmp tos, r0
 	blo 3f
@@ -686,16 +806,13 @@ _store_flash_1:
 	pop {pc}
 1:	ldr tos, =_store_flash_already_written
 	bl _raise
-2:	ldr tos, =_attempted_to_write_past_flash_end
-	bl _raise
 3:	ldr tos, =_attempted_to_write_core_flash
 	bl _raise
 	pop {pc}
-	end_inlined
-	
-	@ Write a halfword to an address in one or more flash_buffers
-	define_word "hflash!", visible_flag
-_store_flash_2:
+
+	@ Write a halfword to QSPI flash
+	define_internal_word "hqspi!", visible_flag
+_store_qspi_2:
 	push {lr}
 	movs r1, #0xFF
 	movs r2, tos
@@ -706,9 +823,6 @@ _store_flash_2:
 	ldr r1, =0xFFFF
 	cmp r0, r1
 	bne 2f
-	ldr r0, =flash_end - 2
-	cmp tos, r0
-	bhi 3f
 	ldr r0, =flash_dict_start
 	cmp tos, r0
 	blo 4f
@@ -744,7 +858,7 @@ _store_flash_2:
 	ands r0, r2
 	str r0, [dp]
 	push {r1, r2, r3}
-	bl _store_flash_1
+	bl _store_qspi_1
 	pop {r1, r2, r3}
 	push_tos
 	lsrs tos, r1, #8
@@ -752,20 +866,18 @@ _store_flash_2:
 	push_tos
 	movs tos, r3
 	adds r3, #1
-	bl _store_flash_1
+	bl _store_qspi_1
 	pop {pc}
 2:	ldr tos, =_store_flash_already_written
-	bl _raise
-3:	ldr tos, =_attempted_to_write_past_flash_end
 	bl _raise
 4:	ldr tos, =_attempted_to_write_core_flash
 	bl _raise
 	pop {pc}
 	end_inlined
-
-	@ Write a word to an address in one or more flash_buffers
-	define_word "flash!", visible_flag
-_store_flash_4:
+	
+	@ Write a word to QSPI flash
+	define_internal_word "qspi!", visible_flag
+_store_qspi_4:
 	push {lr}
 	movs r1, #0xFF
 	movs r2, tos
@@ -777,9 +889,6 @@ _store_flash_4:
 	ldr r1, =0xFFFFFFFF
 	cmp r0, r1
 	bne 2f
-	ldr r0, =flash_end - 4
-	cmp tos, r0
-	bhi 3f
 	ldr r0, =flash_dict_start
 	cmp tos, r0
 	blo 4f
@@ -822,7 +931,7 @@ _store_flash_4:
 	ands r0, r2
 	str r0, [dp]
 	push {r1, r2, r3}
-	bl _store_flash_2
+	bl _store_qspi_2
 	pop {r1, r2, r3}
 	push_tos
 	lsrs tos, r1, #16
@@ -830,15 +939,62 @@ _store_flash_4:
 	push_tos
 	movs tos, r3
 	adds r3, #1
-	bl _store_flash_2
+	bl _store_qspi_2
 	pop {pc}
 2:	ldr tos, =_store_flash_already_written
-	bl _raise
-3:	ldr tos, =_attempted_to_write_past_flash_end
 	bl _raise
 4:	ldr tos, =_attempted_to_write_core_flash
 	bl _raise
 	pop {pc}
+	end_inlined
+
+	@ Write two words to QSPI flash
+	define_internal_word "2qspi!", visible_flag
+_store_qspi_8:
+	push {lr}
+	push {tos}
+	bl _store_qspi_4
+	push_tos
+	pop {tos}
+	adds tos, #4
+	bl _store_qspi_4
+	pop {pc}
+	end_inlined
+
+	@ Write a byte to an address in a flash buffer
+	define_word "cflash!", visible_flag
+_store_flash_1:
+	ldr r0, =flash_end - 1
+	cmp tos, r0
+	bhi 2f
+	b _store_qspi_1
+2:	ldr tos, =_attempted_to_write_past_flash_end
+	bl _raise
+	bx lr
+	end_inlined
+	
+	@ Write a halfword to an address in one or more flash_buffers
+	define_word "hflash!", visible_flag
+_store_flash_2:
+	ldr r0, =flash_end - 2
+	cmp tos, r0
+	bhi 3f
+	b _store_qspi_2
+3:	ldr tos, =_attempted_to_write_past_flash_end
+	bl _raise
+	bx lr
+	end_inlined
+
+	@ Write a word to an address in one or more flash_buffers
+	define_word "flash!", visible_flag
+_store_flash_4:
+	ldr r0, =flash_end - 4
+	cmp tos, r0
+	bhi 3f
+	b _store_qspi_4
+3:	ldr tos, =_attempted_to_write_past_flash_end
+	bl _raise
+	bx lr
 	end_inlined
 
 	@ Write a word to an address in one or more flash_buffers
