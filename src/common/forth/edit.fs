@@ -543,10 +543,8 @@ begin-module edit-internal
 
   \ Handle deleting a row
   : handle-delete-row ( -- )
-    current-row-index@ row-len 0> if
-      current-row buffer-width $20 fill
-      0 current-column-index!
-      save-current-column
+    max-columns 0> if
+      current-column-bytes current-row over + buffer-width rot - $20 fill
       update-all
       dirty
     else
@@ -558,6 +556,7 @@ begin-module edit-internal
 	save-current-column
 	update-all
 	dirty
+	go-to-current-coord
       then
     then
   ;
@@ -676,7 +675,6 @@ begin-module edit-internal
 
   \ Configure the block editor
   : config-edit ( id -- )
-    ram-here edit-size ram-allot edit-state !
     reset-ansi-term
     draw-empty
     get-cursor-position
@@ -693,7 +691,7 @@ begin-module edit-internal
     0 edit-state @ edit-dirty !
     buffer-count 0 ?do i edit-state @ edit-ids i cells + ! loop
     load-all-buffers
-    update-all
+    current-id change-buffer
   ;
 
   \ Leave the editor
@@ -731,40 +729,43 @@ begin-module edit-internal
   \ Edit a block
   : edit ( id -- )
     dup $FFFFFFFF <> averts x-invalid-block-id
-    config-edit
-    begin
-      resolve-unicode-entered
-      get-key
-      dup $20 u< if
-	case
-	  return of handle-newline false endof
-	  newline of handle-newline false endof
-	  tab of handle-tab false endof
-	  ctrl-a of handle-start false endof
-	  ctrl-e of handle-end false endof
-	  ctrl-f of handle-forward false endof
-	  ctrl-b of handle-backward false endof
-	  ctrl-n of handle-next false endof
-	  ctrl-p of handle-prev false endof
-	  ctrl-v of true endof
-	  ctrl-w of handle-write false endof
-	  ctrl-x of handle-revert false endof
-	  ctrl-u of handle-insert-row false endof
-	  ctrl-k of handle-delete-row false endof
-	  escape of handle-escape false endof
-	  swap false swap
-	endcase
-      else
-	dup delete = if
-	  drop handle-delete
+    edit-size [:
+      edit-state !
+      config-edit
+      begin
+	resolve-unicode-entered
+	get-key
+	dup $20 u< if
+	  case
+	    return of handle-newline false endof
+	    newline of handle-newline false endof
+	    tab of handle-tab false endof
+	    ctrl-a of handle-start false endof
+	    ctrl-e of handle-end false endof
+	    ctrl-f of handle-forward false endof
+	    ctrl-b of handle-backward false endof
+	    ctrl-n of handle-next false endof
+	    ctrl-p of handle-prev false endof
+	    ctrl-v of true endof
+	    ctrl-w of handle-write false endof
+	    ctrl-x of handle-revert false endof
+	    ctrl-u of handle-insert-row false endof
+	    ctrl-k of handle-delete-row false endof
+	    escape of handle-escape false endof
+	    swap false swap
+	  endcase
 	else
-	  handle-insert
+	  dup delete = if
+	    drop handle-delete
+	  else
+	    handle-insert
+	  then
+	  false
 	then
-	false
-      then
-    until
-    save-all-buffers
-    leave-edit
+      until
+      save-all-buffers
+      leave-edit
+    ;] with-aligned-allot
   ;
 
 end-module> import
