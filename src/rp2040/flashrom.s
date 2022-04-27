@@ -717,7 +717,6 @@ _store_mass_qspi:
 	bl _force_core_wait
 	bl _exit_xip
 	bl _enable_flash_cmd
-	bl _enable_flash_write
 	movs r0, tos
 	pull_tos
 	ldr r1, =flash_start
@@ -733,6 +732,8 @@ _store_mass_qspi:
 	pop {r0, r1, r2}
 	push_tos
 	movs tos, r0
+	push_tos
+	ldr tos, =CMD_PAGE_PROGRAM
 	push {r0, r1, r2}
 	bl _write_flash_address
 	pop {r0, r1, r2}
