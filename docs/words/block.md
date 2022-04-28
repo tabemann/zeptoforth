@@ -1,6 +1,8 @@
 # Block words
 
-The block interface is written for the STM32F746 DISCOVERY board. It provides a convenient interface for turning the Quad SPI flash functionality into a map of block id's to 1K blocks of memory.
+The block interface is written for the STM32F746 DISCOVERY board and the Raspberry Pico (along with other RP2040 boards with Quad SPI flash compatible with the Winbond Quad SPI flash used by the Raspberry Pi Pico). It provides a convenient interface for turning the Quad SPI flash functionality into a map of block id's to 1K blocks of memory.
+
+Note that block ids start from zero, unlike on many Forths where they traditionally started from one.
 
 ### `forth`
 

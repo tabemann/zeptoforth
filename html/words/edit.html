@@ -35,7 +35,7 @@
             
   <section id="block-editor">
 <h1>Block Editor<a class="headerlink" href="#block-editor" title="Permalink to this headline">¶</a></h1>
-<p>The block editor provides a simple interface for allowing the user to edit blocks stored in the Quad SPI flash on supported devices, currently the STM32F746 DISCOVERY board. When in use, the following keys can be used to control editing:</p>
+<p>The block editor provides a simple interface for allowing the user to edit blocks stored in the Quad SPI flash on supported devices, currently the STM32F746 DISCOVERY board and the Raspberry Pi Pico (along with other RP2040 boards with Quad SPI flash compatible with the Winbond Quad SPI flash used by the Raspberry Pi Pico). When in use, the following keys can be used to control editing:</p>
 <ul class="simple">
 <li><p>Backspace: delete the character to the left of the cursor</p></li>
 <li><p>Delete: delete the character under the cursor</p></li>
@@ -56,6 +56,7 @@
 <li><p>Control-V: exit the editor, saving all modified blocks</p></li>
 </ul>
 <p>Note that tabs (which are treated as being of two spaces wide due to the limited space available in blocks) and characters of code points greater than 127 are handled correctly. Also note that only nine blocks (currently) are stored in memory, and if a modified block is removed from memory it is automatically saved.</p>
+<p>Note that block ids start from zero, unlike on many Forths where they traditionally started from one.</p>
 <section id="forth">
 <h2><code class="docutils literal notranslate"><span class="pre">forth</span></code><a class="headerlink" href="#forth" title="Permalink to this headline">¶</a></h2>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">forth</span></code>:</p>
@@ -105,13 +106,16 @@
 <li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="map.html">Map Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="rchannel.html">Reply Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schannel.html">Simple channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rchannel.html">Bidirectional Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>
