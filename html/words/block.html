@@ -35,7 +35,8 @@
             
   <section id="block-words">
 <h1>Block words<a class="headerlink" href="#block-words" title="Permalink to this headline">¶</a></h1>
-<p>The block interface is written for the STM32F746 DISCOVERY board. It provides a convenient interface for turning the Quad SPI flash functionality into a map of block id’s to 1K blocks of memory.</p>
+<p>The block interface is written for the STM32F746 DISCOVERY board and the Raspberry Pico (along with other RP2040 boards with Quad SPI flash compatible with the Winbond Quad SPI flash used by the Raspberry Pi Pico). It provides a convenient interface for turning the Quad SPI flash functionality into a map of block id’s to 1K blocks of memory.</p>
+<p>Note that block ids start from zero, unlike on many Forths where they traditionally started from one.</p>
 <section id="forth">
 <h2><code class="docutils literal notranslate"><span class="pre">forth</span></code><a class="headerlink" href="#forth" title="Permalink to this headline">¶</a></h2>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">forth</span></code>:</p>
@@ -167,13 +168,16 @@
 <li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="map.html">Map Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="rchannel.html">Reply Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schannel.html">Simple channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rchannel.html">Bidirectional Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Block words</a></li>

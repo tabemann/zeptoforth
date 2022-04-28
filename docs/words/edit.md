@@ -1,6 +1,6 @@
 # Block Editor
 
-The block editor provides a simple interface for allowing the user to edit blocks stored in the Quad SPI flash on supported devices, currently the STM32F746 DISCOVERY board. When in use, the following keys can be used to control editing:
+The block editor provides a simple interface for allowing the user to edit blocks stored in the Quad SPI flash on supported devices, currently the STM32F746 DISCOVERY board and the Raspberry Pi Pico (along with other RP2040 boards with Quad SPI flash compatible with the Winbond Quad SPI flash used by the Raspberry Pi Pico). When in use, the following keys can be used to control editing:
 
 * Backspace: delete the character to the left of the cursor
 * Delete: delete the character under the cursor
@@ -21,6 +21,8 @@ The block editor provides a simple interface for allowing the user to edit block
 * Control-V: exit the editor, saving all modified blocks
 
 Note that tabs (which are treated as being of two spaces wide due to the limited space available in blocks) and characters of code points greater than 127 are handled correctly. Also note that only nine blocks (currently) are stored in memory, and if a modified block is removed from memory it is automatically saved.
+
+Note that block ids start from zero, unlike on many Forths where they traditionally started from one.
 
 ### `forth`
 
