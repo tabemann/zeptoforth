@@ -168,11 +168,11 @@ begin-module edit-internal
   \ Initally draw the empty block editor
   : draw-empty ( -- )
     cr
-    [char] + emit buffer-width 0 ?do [char] - emit loop [char] + emit
+    [char] + emit buffer-width 3 + 0 ?do [char] - emit loop [char] + emit
     buffer-height 0 ?do
-      cr [char] | emit buffer-width 0 ?do space loop [char] | emit
+      cr [char] | emit buffer-width 3 + 0 ?do space loop [char] | emit
     loop
-    cr [char] + emit buffer-width 0 ?do [char] - emit loop [char] + emit
+    cr [char] + emit buffer-width 3 + 0 ?do [char] - emit loop [char] + emit
   ;
 
   \ Actually draw a row of the block editor
@@ -180,6 +180,8 @@ begin-module edit-internal
     [:
       dup edit-state @ edit-start-row @ +
       edit-state @ edit-start-column @ go-to-coord
+      dup 9 < if space then
+      dup 1+ .
       0 swap get-row dup buffer-width + swap ?do
 	i c@ dup $20 >= over $7F <> and over unicode? not and if
 	  emit 1+
@@ -213,7 +215,7 @@ begin-module edit-internal
       then
       space ." ]-"
       get-cursor-position nip
-      buffer-width 1+ swap - 0 ?do [char] - emit loop
+      buffer-width 4 + swap - 0 ?do [char] - emit loop
     ;] execute-hide-cursor
   ;
 
@@ -354,16 +356,6 @@ begin-module edit-internal
   \ Get the maximum number of columns in a row
   : max-columns ( -- columns )
     current-row-index@ row-len
-    \ 0 buffer-width 0 ?do
-    \   i current-row + c@
-    \   dup $20 >= over $80 < and if
-    \ 	drop 1+
-    \   else
-    \ 	dup unicode? swap unicode-start? and if
-    \ 	  1+
-    \ 	then
-    \   then
-    \ loop
   ;
 
   \ Get the number of bytes of the character to the left of the cursor
@@ -419,7 +411,8 @@ begin-module edit-internal
 
   \ Go to the current coordinate
   : go-to-current-coord ( -- )
-    edit-state @ edit-cursor-row @ edit-state @ edit-cursor-column @ go-to-coord
+    edit-state @ edit-cursor-row @ edit-state @ edit-cursor-column @ 3 +
+    go-to-coord
   ;
 
   \ Dirty the current buffer
@@ -679,7 +672,7 @@ begin-module edit-internal
     draw-empty
     get-cursor-position
     false edit-state @ edit-unicode-entered !
-    buffer-width 1+ - 0 max edit-state @ edit-start-column !
+    buffer-width 4 + - 0 max edit-state @ edit-start-column !
     buffer-height - 0 max edit-state @ edit-start-row !
     get-terminal-size
     edit-state @ edit-terminal-columns ! edit-state @ edit-terminal-rows !
@@ -697,7 +690,7 @@ begin-module edit-internal
   \ Leave the editor
   : leave-edit ( -- )
     edit-state @ edit-start-row @ buffer-height +
-    edit-state @ edit-start-column @ buffer-width 1+ + go-to-coord
+    edit-state @ edit-start-column @ buffer-width 4 + + go-to-coord
     edit-state @ ram-here!
   ;
 
