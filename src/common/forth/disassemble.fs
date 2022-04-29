@@ -395,18 +395,18 @@ begin-module disassemble-internal
   : 4s?. ( low -- ) 4 1 bitfield if ." S" then ;
 
   \ Type a PC-relative address
-  : rel. ( pc rel extend -- ) rot dup >r 2 + -rot extend + r> swap addr. ;
+  : rel. ( pc rel extend -- ) rot dup >r 4 + -rot extend + r> swap addr. ;
 
   \ Type a 4-aligned PC-relative address
   : rel4. ( pc rel extend -- )
-    rot dup >r 2 + 4 align -rot extend + r> swap addr.
+    rot dup >r 4 + 4 align -rot extend + r> swap addr.
   ;
 
   \ Type a non-sign-extended PC-relative address
-  : nrel. ( pc rel -- ) swap dup >r 2 + swap + r> swap addr. ;
+  : nrel. ( pc rel -- ) swap dup >r 4 + swap + r> swap addr. ;
 
   \ Type a non-sign-extended 4-aligned PC-relative address
-  : nrel4. ( pc rel -- ) swap dup >r 2 + 4 align swap + r> swap addr. ;
+  : nrel4. ( pc rel -- ) swap dup >r 4 + 4 align swap + r> swap addr. ;
 
   \ Type out .W
   : .w ( -- ) ." .W " ;
