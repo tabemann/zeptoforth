@@ -571,10 +571,11 @@ begin-module block
   \ List a block
   : list ( id -- )
     dup block? averts x-block-not-found
-    find-block dup block-size + swap ?do
-      cr i 64 truncate-invalid type
-    64 +loop
-    cr
+    find-block
+    16 0 ?do
+      cr i 9 < if space then i 1+ . dup i 64 * + 64 truncate-invalid type
+    loop
+    cr drop
   ;
 
   \ Load a range of blocks, ignoring nonexistent blocks
