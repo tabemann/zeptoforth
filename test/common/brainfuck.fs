@@ -73,7 +73,7 @@ begin-module brainfuck
   end-module> import
 
   \ Begin a word written in brainfuck; note that the word generated has the
-  \ signature ( addr -- addr' )
+  \ signature ( addr -- addr' ) and operates in terms of bytes.
   : :bf ( "name" "code" -- )
     token
     dup 0= triggers x-token-expected
@@ -95,6 +95,42 @@ begin-module brainfuck
 	    -1 find-addr-change lit, postpone + false endof
 	  [char] . of postpone dup postpone c@ postpone emit false endof
 	  [char] , of postpone key postpone over postpone c! false endof
+	  [char] ; of true endof
+	  false swap
+	endcase
+      else
+	drop prompt-hook @ ?execute refill false
+      then
+    until
+    visible
+    end-compile,
+  ;
+
+  \ Begin a word written in brainfuck; note that the word generated has the
+  \ signature ( addr -- addr' ) and operates in terms of cells.
+  : :bf-cell ( "name" "code" -- )
+    token
+    dup 0= triggers x-token-expected
+    start-compile
+    begin
+      source >parse @ > if
+	>parse @ + c@ 1 >parse +!
+	case
+	  [char] [ of
+	    postpone begin postpone dup postpone @ postpone while false endof
+	  [char] ] of postpone repeat false endof
+	  [char] + of
+	    1 find-data-change lit, postpone over postpone +! false endof
+	  [char] - of
+	    -1 find-data-change lit, postpone over postpone +! false endof
+	  [char] > of
+	    1 find-addr-change cells lit, postpone + false endof
+	  [char] < of
+	    -1 find-addr-change cells lit, postpone + false endof
+	  [char] . of
+	    postpone dup postpone @ $FF lit, postpone and postpone emit
+	    false endof
+	  [char] , of postpone key postpone over postpone ! false endof
 	  [char] ; of true endof
 	  false swap
 	endcase
