@@ -269,7 +269,7 @@ begin-module disassemble-internal
   : sep. ( -- ) ." , " ;
 
   \ Separator with immediate
-  : sep-imm. ( -- ) ."  , #" ;
+  : sep-imm. ( -- ) ." , #" ;
 
   \ Type a 16-bit instruction in halfwords
   : instr16. ( h -- ) for-gas @ if drop else h.4 ." :      " then ;
