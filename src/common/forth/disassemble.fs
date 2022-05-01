@@ -406,7 +406,7 @@ begin-module disassemble-internal
   : nrel. ( pc rel -- ) swap dup >r 4 + swap + r> swap addr. ;
 
   \ Type a non-sign-extended 4-aligned PC-relative address
-  : nrel4. ( pc rel -- ) swap dup >r 4 + 4 align swap + r> swap addr. ;
+  : nrel4. ( pc rel -- ) swap dup >r 2 + 4 align swap + r> swap addr. ;
 
   \ Type out .W
   : .w ( -- ) ." .W " ;
