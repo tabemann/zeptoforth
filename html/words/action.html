@@ -1,0 +1,273 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Action Words &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="GPIO Words" href="gpio.html" />
+    <link rel="prev" title="Multitasking Words" href="task.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="action-words">
+<h1>Action Words<a class="headerlink" href="#action-words" title="Permalink to this headline">¶</a></h1>
+<p>Actions provide a means of asynchronous processing involving message-passing that is lighter-weight than tasks as all computation takes place within a single task and there is none of the complexities of dealing with multiprocessing (except when handling other tasks adding actions to or removing actions from a scheduler that is currently running within a given task, which are minimal in impact). Individual actions do not have their own stacks but rather share the stacks of their parent task.</p>
+<p>Message-passing between actions is synchronous; a given action is halted when it is waiting to receive a message or when it is waiting for the message it has sent to be received. Messages can be of any size, and are stored in a buffer provided by the sending task and copied into a buffer provided by the receiving task when received. Note that no order is guaranteed with regard to message-passing, but messages are guaranteed to be eventually received. Note that actions may only send messages to actions within the same schedule; otherwise they will be ignored. Also, if an action is waiting to send a message and that other message is removed from the schedule, the first action is unblocked.</p>
+<p>Schedules may be run in any task, may have actions added to or removed from them at any time, and may be stopped safely at any time (the current action’s execution is completed before the schedule stops executing). One note is that a schedule may not be run while it is already running, whether from within the same task or from within a different task.</p>
+<section id="action">
+<h2><code class="docutils literal notranslate"><span class="pre">action</span></code><a class="headerlink" href="#action" title="Permalink to this headline">¶</a></h2>
+<p>These words are in the module <code class="docutils literal notranslate"><span class="pre">action</span></code>.</p>
+<section id="current-schedule">
+<h3><code class="docutils literal notranslate"><span class="pre">current-schedule</span></code><a class="headerlink" href="#current-schedule" title="Permalink to this headline">¶</a></h3>
+<p>( – schedule )</p>
+<p>Get the current schedule.</p>
+</section>
+<section id="current-action">
+<h3><code class="docutils literal notranslate"><span class="pre">current-action</span></code><a class="headerlink" href="#current-action" title="Permalink to this headline">¶</a></h3>
+<p>( – action )</p>
+<p>Get the current action.</p>
+</section>
+<section id="current-data">
+<h3><code class="docutils literal notranslate"><span class="pre">current-data</span></code><a class="headerlink" href="#current-data" title="Permalink to this headline">¶</a></h3>
+<p>( – data )</p>
+<p>Get the current action’s data.</p>
+</section>
+<section id="schedule-size">
+<h3><code class="docutils literal notranslate"><span class="pre">schedule-size</span></code><a class="headerlink" href="#schedule-size" title="Permalink to this headline">¶</a></h3>
+<p>( – bytes )</p>
+<p>Get the size of a schedule in bytes.</p>
+</section>
+<section id="action-size">
+<h3><code class="docutils literal notranslate"><span class="pre">action-size</span></code><a class="headerlink" href="#action-size" title="Permalink to this headline">¶</a></h3>
+<p>( – bytes )</p>
+<p>Get the size of an action in bytes.</p>
+</section>
+<section id="init-schedule">
+<h3><code class="docutils literal notranslate"><span class="pre">init-schedule</span></code><a class="headerlink" href="#init-schedule" title="Permalink to this headline">¶</a></h3>
+<p>( addr – )</p>
+<p>Initialize a schedule at the address <em>addr</em>.</p>
+</section>
+<section id="init-action">
+<h3><code class="docutils literal notranslate"><span class="pre">init-action</span></code><a class="headerlink" href="#init-action" title="Permalink to this headline">¶</a></h3>
+<p>( data xt addr – )</p>
+<p>Initialize an action at the address <em>addr</em> with the initial execution token <em>xt</em> and the data <em>data</em></p>
+</section>
+<section id="add-action">
+<h3><code class="docutils literal notranslate"><span class="pre">add-action</span></code><a class="headerlink" href="#add-action" title="Permalink to this headline">¶</a></h3>
+<p>( schedule action – )</p>
+<p>Add an action <em>action</em> to schedule <em>schedule</em>. This may be done at any time, including while the schedule is executing.</p>
+</section>
+<section id="remove-action">
+<h3><code class="docutils literal notranslate"><span class="pre">remove-action</span></code><a class="headerlink" href="#remove-action" title="Permalink to this headline">¶</a></h3>
+<p>( schedule action – )</p>
+<p>Remove an action <em>action</em> from schedule <em>schedule</em>. This may be done at any time, including while the schedule is executing.</p>
+</section>
+<section id="send-action">
+<h3><code class="docutils literal notranslate"><span class="pre">send-action</span></code><a class="headerlink" href="#send-action" title="Permalink to this headline">¶</a></h3>
+<p>( send-xt addr bytes dest-action – )</p>
+<p>Send a message in a buffer at <em>addr</em> of size <em>bytes</em> to action <em>dest-action</em> and set the send execution token to be called once the message is sent or message-sending fails to <em>send-xt</em>. <em>send-xt</em> has the signature ( – ). Sending a message is synchronous; the current action will not execute until either the message is received or the message becomes unable to be sent. <em>dest-action</em> must be in the current schedule or otherwise this routine is a no-op. Sending a message must be done within an executing schedule; messages may not be sent outside of a schedule. Only one message may be sent before control returns to the scheduler; to send multiple messages, send them within subsequent <em>send-xt</em>s.</p>
+</section>
+<section id="send-action-fail">
+<h3><code class="docutils literal notranslate"><span class="pre">send-action-fail</span></code><a class="headerlink" href="#send-action-fail" title="Permalink to this headline">¶</a></h3>
+<p>( send-xt fail-xt addr bytes dest-action – )</p>
+<p>Send with failure-handling a message in a buffer at <em>addr</em> of size <em>bytes</em> to action <em>dest-action</em>, set the send execution token to be called once the message is sent to <em>send-xt</em>, and set the failure execution token to be called if message-sending fails to <em>fail-xt</em>. <em>send-xt</em> and <em>fail-xt</em> have the signature ( – ). Sending a message is synchronous; the current action will not execute until either the message is received or the message becomes unable to be sent. <em>dest-action</em> must be in the current schedule or otherwise this routine is a no-op. Sending a message must be done within an executing schedule; messages may not be sent outside of a schedule. Only one message may be sent before control returns to the scheduler; to send multiple messages, send them within subsequent <em>send-xt</em>s.</p>
+</section>
+<section id="send-action-timeout">
+<h3><code class="docutils literal notranslate"><span class="pre">send-action-timeout</span></code><a class="headerlink" href="#send-action-timeout" title="Permalink to this headline">¶</a></h3>
+<p>( send-xt fail-xt addr bytes dest-action timeout-ticks – )</p>
+<p>Send with failure and timeoout-handling a message in a buffer at <em>addr</em> of size <em>bytes</em> to action <em>dest-action</em> with a timeout of <em>timeout-ticks</em>, set the send execution token to be called once the message is sent to <em>send-xt</em>, and set the failure/timeout execution token to be called if message-sending fails to <em>fail-xt</em>. <em>send-xt</em> and <em>fail-xt</em> have the signature ( – ). Sending a message is synchronous; the current action will not execute until either the message is received, the message becomes unable to be sent, or the timeout is reached. <em>dest-action</em> must be in the current schedule or otherwise this routine is a no-op. Sending a message must be done within an executing schedule; messages may not be sent outside of a schedule. Only one message may be sent before control returns to the scheduler; to send multiple messages, send them within subsequent <em>send-xt</em>s.</p>
+</section>
+<section id="recv-action">
+<h3><code class="docutils literal notranslate"><span class="pre">recv-action</span></code><a class="headerlink" href="#recv-action" title="Permalink to this headline">¶</a></h3>
+<p>( recv-xt addr bytes – )</p>
+<p>Receive a message sent to the current action into a buffer at <em>addr</em> of size <em>bytes</em> and set the receive execution token to <em>recv-xt</em>. <em>recv-xt</em> has the signature ( addr bytes src-action – ) where <em>addr</em> is the same <em>addr</em> of the buffer provided earlier, <em>bytes</em> is the actual size of the message received or the size of the buffer, whichever is smaller, and <em>src-action</em> is the source action which sent the message received. Receiving messages is synchronous; the current action will not execute until a message is received. Note that only messages sent from other actions in the same schedule may be received.</p>
+</section>
+<section id="recv-action-timeout">
+<h3><code class="docutils literal notranslate"><span class="pre">recv-action-timeout</span></code><a class="headerlink" href="#recv-action-timeout" title="Permalink to this headline">¶</a></h3>
+<p>( recv-xt timeout-xt addr bytes timeout-ticks – )</p>
+<p>Receive a message sent to the current action into a buffer at <em>addr</em> of size <em>bytes</em> and set the receive execution token to <em>recv-xt</em> and the timeout execution token to <em>timeout-xt</em>. <em>recv-xt</em> has the signature ( addr bytes src-action – ) where <em>addr</em> is the same <em>addr</em> of the buffer provided earlier, <em>bytes</em> is the actual size of the message received or the size of the buffer, whichever is smaller, and <em>src-action</em> is the source action which sent the message received. Receiving messages is synchronous; the current action will not execute until either a message is received or <em>timeout-ticks</em> elapses, where then execution will resume at <em>timeout-xt</em> rather than at <em>recv-xt</em> as it would were a message received. Note that only messages sent from other actions in the same schedule may be received.</p>
+</section>
+<section id="delay-action">
+<h3><code class="docutils literal notranslate"><span class="pre">delay-action</span></code><a class="headerlink" href="#delay-action" title="Permalink to this headline">¶</a></h3>
+<p>( resume-xt systick-start systick-delay – )</p>
+<p>Delay the current action to a time starting from <em>systick-start</em> ticks with a delay of <em>systick-delay</em> ticks and set the resume execution token to <em>resume-xt</em>.</p>
+</section>
+<section id="yield-action">
+<h3><code class="docutils literal notranslate"><span class="pre">yield-action</span></code><a class="headerlink" href="#yield-action" title="Permalink to this headline">¶</a></h3>
+<p>( resume-xt – )</p>
+<p>Yield the current action and set the resume execution token to <em>resume-xt</em>.</p>
+</section>
+<section id="run-schedule">
+<h3><code class="docutils literal notranslate"><span class="pre">run-schedule</span></code><a class="headerlink" href="#run-schedule" title="Permalink to this headline">¶</a></h3>
+<p>( schedule – )</p>
+<p>Run the schedule <em>schedule</em> in the current task. Note that this may not be done if the schedule is already running in any task.</p>
+</section>
+<section id="stop-schedule">
+<h3><code class="docutils literal notranslate"><span class="pre">stop-schedule</span></code><a class="headerlink" href="#stop-schedule" title="Permalink to this headline">¶</a></h3>
+<p>( schedule – )</p>
+<p>Stop the schedule <em>schedule</em> safely, allowing it to finish executing its current action before stopping.</p>
+</section>
+<section id="x-already-in-schedule">
+<h3><code class="docutils literal notranslate"><span class="pre">x-already-in-schedule</span></code><a class="headerlink" href="#x-already-in-schedule" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Action is already in schedule exception.</p>
+</section>
+<section id="x-not-in-schedule">
+<h3><code class="docutils literal notranslate"><span class="pre">x-not-in-schedule</span></code><a class="headerlink" href="#x-not-in-schedule" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Action is not in a schedule exception.</p>
+</section>
+<section id="x-schedule-already-running">
+<h3><code class="docutils literal notranslate"><span class="pre">x-schedule-already-running</span></code><a class="headerlink" href="#x-schedule-already-running" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Schedule is already running exception.</p>
+</section>
+<section id="x-already-sending-msg">
+<h3><code class="docutils literal notranslate"><span class="pre">x-already-sending-msg</span></code><a class="headerlink" href="#x-already-sending-msg" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Action is already sending a message exception.</p>
+</section>
+<section id="x-already-recving-msg">
+<h3><code class="docutils literal notranslate"><span class="pre">x-already-recving-msg</span></code><a class="headerlink" href="#x-already-recving-msg" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Action is already receiving a message exception.</p>
+</section>
+<section id="x-resume-xt-already-set">
+<h3><code class="docutils literal notranslate"><span class="pre">x-resume-xt-already-set</span></code><a class="headerlink" href="#x-resume-xt-already-set" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Resume xt already set for action exception.</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Action Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="map.html">Map Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schannel.html">Simple channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rchannel.html">Bidirectional Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="edit.html">Block Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="swd.html"><code class="docutils literal notranslate"><span class="pre">swdcom</span></code> Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="led.html">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test.html">Testing Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="task.html" title="previous chapter">Multitasking Words</a></li>
+      <li>Next: <a href="gpio.html" title="next chapter">GPIO Words</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Travis Bemann.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/words/action.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

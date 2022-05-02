@@ -558,7 +558,7 @@ commit-flash
 internal set-current
 
 \ Get a deferred word's xt address
-: defer-xt@ ( deferred-xt -- ) dup h@ $FF and 2 lshift 2 + 4 align + ;
+: defer-xt@ ( deferred-xt -- ) dup h@ $FF and 2 lshift 2 + + 4 align ;
 
 forth set-current
 
