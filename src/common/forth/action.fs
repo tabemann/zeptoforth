@@ -197,11 +197,6 @@ begin-module action
       current-action @ action-systick-start @ -1 = averts x-delay-already-set
     ;
 
-    \ Execute a word and handle exceptions while continuing
-    : execute-handle ( xt -- )
-      try ?dup if display-red execute display-normal then
-    ;
-
   end-module
 
   export schedule-size
@@ -379,6 +374,17 @@ begin-module action
     current-action @ action-resume-xt !
   ;
   
+  continue-module action-internal
+  
+    \ Execute a word and handle exceptions while continuing
+    : execute-handle ( xt -- )
+      try ?dup if
+	current-action @ remove-action display-red execute display-normal
+      then
+    ;
+
+  end-module
+
   \ Run schedule
   : run-schedule ( schedule -- )
     dup schedule-running? @ triggers x-schedule-already-running
