@@ -30,6 +30,7 @@
 #include src/common/forth/cstr_map.fs
 #include src/common/forth/int_map.fs
 #include src/common/forth/slock.fs
+#include src/common/forth/action.fs
 #include src/common/forth/tqueue.fs
 #include src/common/forth/lock.fs
 #include src/common/forth/semaphore.fs
@@ -41,5 +42,4 @@
 #include src/common/forth/ansi_term.fs
 #include src/common/forth/line.fs
 #include src/common/forth/task_pool.fs
-#include src/common/forth/action_pool.fs
 #include src/common/forth/tinymt.fs
