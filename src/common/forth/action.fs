@@ -35,18 +35,9 @@ begin-module action
   \ Schedule is already running exception
   : x-schedule-already-running ( -- ) ." schedule is already running" cr ;
 
-  \ Action is already sending a message exception
-  : x-already-sending-msg ( -- ) ." action is already sending a message" cr ;
+  \ Operation already set exception
+  : x-operation-set ( -- ) ." operation already set" cr ;
 
-  \ Action is already receiving a message exception
-  : x-already-recving-msg ( -- ) ." action is already receiving a message" cr ;
-  
-  \ Resume xt already set for action exception
-  : x-resume-xt-already-set ( -- ) ." resume xt already set for action" cr ;
-
-  \ Delay already set for action exception
-  : x-delay-already-set ( -- ) ." delay already set for action" cr ;
-  
   begin-module action-internal
 
     user current-schedule
@@ -56,7 +47,6 @@ begin-module action
 
       slock-size +field schedule-slock
       field: schedule-next
-      field: schedule-prev
       field: schedule-running?
       
     end-structure
@@ -83,7 +73,6 @@ begin-module action
   \ Print out a schedule
   : schedule. ( action -- )
     cr ." schedule-next:     " dup schedule-next @ h.8
-    cr ." schedule-prev:     " dup schedule-prev @ h.8
     cr ." schedule-running?: " schedule-running? @ .
   ;
 
@@ -94,6 +83,7 @@ begin-module action
     cr ." action-prev:          " dup action-prev @ h.8
     cr ." action-resume-xt:     " dup action-resume-xt @ h.8
     cr ." action-recv-xt:       " dup action-recv-xt @ h.8
+    cr ." action-send-xt:       " dup action-send-xt @ h.8
     cr ." action-systick-start: " dup action-systick-start @ .
     cr ." action-systick-delay: " dup action-systick-delay @ .
     cr ." action-data:          " dup action-data @ h.8
@@ -104,6 +94,12 @@ begin-module action
 
   continue-module action-internal
 
+    \ No operation
+    -2 constant no-operation
+
+    \ No delay
+    -1 constant no-delay
+    
     \ Find a message for the current action
     : find-msg ( action -- msg-action | 0 )
       current-schedule @ schedule-next @ dup >r
@@ -129,31 +125,27 @@ begin-module action
 
     \ Clear sending message
     : clear-send-msg ( src-action -- )
-      -1 over action-systick-start ! -1 over action-systick-delay !
-      0 over action-msg-dest ! 0 over action-msg-data ! 0 over action-msg-size !
-      dup action-send-xt @ over action-resume-xt !
+      no-operation over action-systick-delay !
+      0 over action-msg-dest ! dup action-send-xt @ over action-resume-xt !
       0 swap action-send-xt !
     ;
 
     \ Fail sending message
     : fail-send-msg ( src-action -- )
-      -1 over action-systick-start ! -1 over action-systick-delay !
-      0 over action-msg-dest ! 0 over action-msg-data ! 0 over action-msg-size !
-      0 swap action-send-xt !
+      no-operation over action-systick-delay !
+      0 over action-msg-dest ! 0 swap action-send-xt !
     ;
     
     \ Clear send timeout
     : clear-send-timeout ( src-action -- )
-      -1 over action-systick-start ! -1 over action-systick-delay !
-      0 over action-msg-dest ! 0 over action-msg-data ! 0 over action-msg-size !
-      0 over action-send-xt ! 0 swap action-resume-xt !
+      no-operation over action-systick-delay !
+      0 over action-msg-dest ! 0 over action-send-xt ! 0 swap action-resume-xt !
     ;
 
     \ Clear receiving message
     : clear-recv-msg ( dest-action -- )
-      -1 over action-systick-start ! -1 over action-systick-delay !
-      0 over action-recv-xt ! 0 over action-msg-data ! 0 over action-msg-size !
-      0 swap action-resume-xt !
+      no-operation over action-systick-delay !
+      0 over action-recv-xt ! 0 swap action-resume-xt !
     ;
 
     \ Fail all sends to an action in a schedule
@@ -173,28 +165,22 @@ begin-module action
       [:
 	dup current-schedule @ schedule-next @ = if
 	  action-next @ current-schedule @ schedule-next !
-	  current-schedule @ schedule-next @ action-prev @
-	  current-schedule @ schedule-prev !
 	then
       ;] current-schedule @ schedule-slock with-slock
     ; 
 
     \ Get whether an action is the only action in a schedule
-    : only-in-schedule? ( action schedule -- flag )
-      2dup schedule-next @ = -rot schedule-prev @ = and
-    ;
+    : only-in-schedule? ( action -- flag ) dup action-next @ = ;
     
     \ Set no delay for the current action
     : no-action-delay ( -- )
-      -1 current-action @ 2dup action-systick-delay ! action-systick-start !
+      no-delay current-action @ action-systick-delay !
     ;
 
     \ Validate the state of the current action
     : validate-current-action ( -- )
-      current-action @ action-resume-xt @ 0= averts x-resume-xt-already-set
-      current-action @ action-recv-xt @ 0= averts x-already-recving-msg
-      current-action @ action-send-xt @ 0= averts x-already-sending-msg
-      current-action @ action-systick-start @ -1 = averts x-delay-already-set
+      current-action @ action-systick-delay @ no-operation =
+      averts x-operation-set
     ;
 
   end-module
@@ -206,16 +192,15 @@ begin-module action
   : init-schedule ( addr -- )
     dup schedule-slock init-slock
     false over schedule-running? !
-    0 over schedule-next !
-    0 swap schedule-prev !
+    0 swap schedule-next !
   ;
 
   \ Initialize an action
   : init-action ( data xt addr -- )
     0 over action-schedule !
     tuck action-resume-xt !
-    -1 over action-systick-start !
-    -1 over action-systick-delay !
+    no-operation over action-systick-start !
+    no-operation over action-systick-delay !
     0 over action-recv-xt !
     0 over action-send-xt !
     tuck action-data !
@@ -231,13 +216,12 @@ begin-module action
       tuck action-schedule !
       dup action-schedule @ schedule-next @ if
 	dup action-schedule @ schedule-next @ over action-next !
-	dup action-schedule @ schedule-prev @ over action-prev !
+	dup action-schedule @ schedule-next @ action-prev @ over action-prev !
+	dup dup action-schedule @ schedule-next @ action-prev @ action-next !
 	dup dup action-schedule @ schedule-next @ action-prev !
-	dup dup action-schedule @ schedule-prev @ action-next !
 	dup action-schedule @ schedule-next !
       else
 	dup dup action-schedule @ schedule-next !
-	dup dup action-schedule @ schedule-prev !
 	dup dup action-next !
 	dup action-prev !
       then
@@ -249,14 +233,11 @@ begin-module action
     dup action-schedule @ 0<> averts x-not-in-schedule
     [:
       dup fail-all-send-msg
-      dup dup action-schedule @ only-in-schedule? if
-	dup action-schedule @ 0 over schedule-prev ! 0 over schedule-next !
+      dup only-in-schedule? if
+	dup action-schedule @ 0 swap schedule-next !
       else
 	dup action-schedule @ schedule-next @ over = if
 	  dup action-next @ over action-schedule @ schedule-next !
-	then
-	dup action-schedule @ schedule-prev @ over = if
-	  dup action-prev @ over action-schedule @ schedule-prev !
 	then
 	dup action-next @ over action-prev @ action-next !
 	dup action-prev @ over action-next @ action-prev !
@@ -300,8 +281,13 @@ begin-module action
     current-action @ >r
     r@ action-schedule @ current-schedule @ = if
       over action-schedule @ current-schedule @ = if
-	r@ action-systick-delay !
-	systick-counter r@ action-systick-start !
+	dup 0>= if
+	  r@ action-systick-delay !
+	  systick-counter r@ action-systick-start !
+	else
+	  0 r@ action-systick-delay !
+	  systick-counter + r@ action-systick-start !
+	then
 	r@ action-msg-dest !
 	r@ action-msg-size !
 	r@ action-msg-data !
@@ -338,8 +324,13 @@ begin-module action
     validate-current-action
     current-action @ >r
     r@ action-schedule @ current-schedule @ = if
-      r@ action-systick-delay !
-      systick-counter r@ action-systick-start !
+      dup 0>= if
+	r@ action-systick-delay !
+	systick-counter r@ action-systick-start !
+      else
+	0 r@ action-systick-delay !
+	systick-counter + r@ action-systick-start !
+      then
       r@ action-msg-size !
       r@ action-msg-data !
       r@ action-resume-xt !
@@ -353,8 +344,13 @@ begin-module action
   : delay-action ( resume-xt ticks -- )
     validate-current-action
     current-action @ >r
-    r@ action-systick-delay !
-    systick-counter r@ action-systick-start !
+    dup 0>= if
+      r@ action-systick-delay !
+      systick-counter r@ action-systick-start !
+    else
+      0 r@ action-systick-delay !
+      systick-counter + r@ action-systick-start !
+    then
     r> action-resume-xt !
   ;
 
@@ -362,8 +358,13 @@ begin-module action
   : delay-action-from-time ( resume-xt systick-start systick-delay -- )
     validate-current-action
     current-action @ >r
-    r@ action-systick-delay !
-    r@ action-systick-start !
+    dup 0>= if
+      r@ action-systick-delay !
+      r@ action-systick-start !
+    else
+      0 r@ action-systick-delay !
+      + r@ action-systick-start !
+    then
     r> action-resume-xt !
   ;
 
@@ -393,7 +394,7 @@ begin-module action
     begin current-schedule @ schedule-running? @ while
       current-schedule @ schedule-next @ ?dup if
 	dup action-recv-xt @ if
-	  dup action-systick-start @ -1 = swap
+	  dup action-systick-delay @ 0< swap
 	  systick-counter over action-systick-start @ -
 	  over action-systick-delay @ < rot or if
 	    dup find-msg ?dup if
@@ -412,12 +413,13 @@ begin-module action
 	else
 	  dup action-send-xt @ 0= if
 	    dup action-resume-xt @ if
-	      dup action-systick-start @ -1 = swap
+	      dup action-systick-delay @ 0< swap
 	      systick-counter over action-systick-start @ -
 	      over action-systick-delay @ >= rot or if
 		dup current-action ! dup advance-action dup action-resume-xt @
-		0 rot action-resume-xt !
-		no-action-delay execute-handle
+		swap no-operation over action-systick-delay !
+		0 swap action-resume-xt !
+		execute-handle
 	      else
 		advance-action
 	      then
@@ -426,12 +428,12 @@ begin-module action
 	    then
 	  else
 	    dup action-resume-xt @ if
-	      dup action-systick-start @ -1 <> swap
+	      dup action-systick-delay @ 0>= swap
 	      systick-counter over action-systick-start @ -
 	      over action-systick-delay @ >= rot and if
 		dup current-action ! dup advance-action dup action-resume-xt @
 		swap clear-send-timeout
-		no-action-delay execute-handle
+		execute-handle
 	      else
 		advance-action
 	      then

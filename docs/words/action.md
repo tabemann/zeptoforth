@@ -115,17 +115,7 @@ Action is not in a schedule exception.
 
 Schedule is already running exception.
 
-##### `x-already-sending-msg`
+##### `x-operation-set`
 ( -- )
 
-Action is already sending a message exception.
-
-##### `x-already-recving-msg`
-( -- )
-
-Action is already receiving a message exception.
-
-##### `x-resume-xt-already-set`
-( -- )
-
-Resume xt already set for action exception.
+Operation is already set for current action exception.

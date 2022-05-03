@@ -30,6 +30,7 @@ continue-module forth
   \ Our actions
   action-size buffer: star-action
   action-size buffer: dot-action
+  action-size buffer: exception-action
 
   \ The star delay time
   variable star-time
@@ -63,6 +64,12 @@ continue-module forth
   \ Set the deferred dot routine
   ' do-dot ' dot defer!
 
+  \ The exception routine
+  : exception ( -- )
+    [: [: ." my exception has been raised" cr ;] ?raise ;]
+    100000 delay-action
+  ;
+
   \ Initialize the test
   : init-test ( -- )
     systick-counter star-time !
@@ -70,8 +77,10 @@ continue-module forth
     my-schedule init-schedule
     0 ['] star star-action init-action
     0 ['] dot dot-action init-action
+    0 ['] exception exception-action init-action
     my-schedule star-action add-action
     my-schedule dot-action add-action
+    my-schedule exception-action add-action
     0 [: my-schedule run-schedule ;] 420 128 512 spawn run
   ;
   
