@@ -62,6 +62,7 @@ begin-module action
       field: action-recv-xt
       field: action-send-xt
       field: action-data
+      field: action-msg-src
       field: action-msg-dest
       field: action-msg-data
       field: action-msg-size
@@ -87,6 +88,7 @@ begin-module action
     cr ." action-systick-start: " dup action-systick-start @ .
     cr ." action-systick-delay: " dup action-systick-delay @ .
     cr ." action-data:          " dup action-data @ h.8
+    cr ." action-msg-src:       " dup action-msg-src @ h.8
     cr ." action-msg-dest:      " dup action-msg-dest @ h.8
     cr ." action-msg-data:      " dup action-msg-data @ h.8
     cr ." action-msg-size:      " action-msg-size @ .
@@ -99,6 +101,9 @@ begin-module action
 
     \ No delay
     -1 constant no-delay
+
+    \ No message
+    -1 constant no-msg
     
     \ Find a message for the current action
     : find-msg ( action -- msg-action | 0 )
@@ -117,9 +122,15 @@ begin-module action
       rdrop
     ;
 
-    \ Copy a message from one action to another
-    : copy-msg ( src-action dest-action -- bytes )
-      2dup action-msg-size @ swap action-msg-size @ min >r
+    \ Copy a message from a source action to another action
+    : copy-msg-src ( src-addr dest-action src-size -- bytes )
+      over action-msg-size @ min >r
+      action-msg-data @ r@ move r>
+    ;
+
+    \ Copy a message from one action to a destination action
+    : copy-msg-dest ( src-action dest-action dest-size -- bytes )
+      2 pick action-msg-size @ min >r
       swap action-msg-data @ swap action-msg-data @ r@ move r>
     ;
 
@@ -145,7 +156,7 @@ begin-module action
     \ Clear receiving message
     : clear-recv-msg ( dest-action -- )
       no-operation over action-systick-delay !
-      0 over action-recv-xt ! 0 swap action-resume-xt !
+      0 over action-msg-src ! 0 swap action-resume-xt !
     ;
 
     \ Fail all sends to an action in a schedule
@@ -204,6 +215,7 @@ begin-module action
     0 over action-recv-xt !
     0 over action-send-xt !
     tuck action-data !
+    0 over action-msg-src !
     0 over action-msg-dest !
     0 over action-msg-data !
     0 swap action-msg-size !
@@ -254,11 +266,17 @@ begin-module action
     current-action @ >r
     r@ action-schedule @ current-schedule @ = if
       dup action-schedule @ current-schedule @ = if
-	r@ action-msg-dest !
-	r@ action-msg-size !
-	r@ action-msg-data !
-	r@ action-resume-xt !
-	r> action-send-xt !
+	dup action-msg-src @ no-msg = if
+	  dup >r swap copy-msg-src r@ action-msg-size !
+	  r> r@ swap action-msg-src !
+	  drop r> action-resume-xt !
+	else
+	  r@ action-msg-dest !
+	  r@ action-msg-size !
+	  r@ action-msg-data !
+	  r@ action-resume-xt !
+	  r> action-send-xt !
+	then
       else
 	drop 2drop r> action-resume-xt ! drop
       then
@@ -281,18 +299,26 @@ begin-module action
     current-action @ >r
     r@ action-schedule @ current-schedule @ = if
       over action-schedule @ current-schedule @ = if
-	dup 0>= if
-	  r@ action-systick-delay !
-	  systick-counter r@ action-systick-start !
+	over action-msg-src @ no-msg = if
+	  drop
+	  dup >r swap copy-msg-src r@ action-msg-size !
+	  r> r@ swap action-msg-src !
+	  drop r> action-resume-xt !
+	  no-action-delay
 	else
-	  0 r@ action-systick-delay !
-	  systick-counter + r@ action-systick-start !
+	  dup 0>= if
+	    r@ action-systick-delay !
+	    systick-counter r@ action-systick-start !
+	  else
+	    0 r@ action-systick-delay !
+	    systick-counter + r@ action-systick-start !
+	  then
+	  r@ action-msg-dest !
+	  r@ action-msg-size !
+	  r@ action-msg-data !
+	  r@ action-resume-xt !
+	  r> action-send-xt !
 	then
-	r@ action-msg-dest !
-	r@ action-msg-size !
-	r@ action-msg-data !
-	r@ action-resume-xt !
-	r> action-send-xt !
       else
 	2drop 2drop r> action-resume-xt ! drop
       then
@@ -308,8 +334,15 @@ begin-module action
     no-action-delay
     current-action @ >r
     r@ action-schedule @ current-schedule @ = if
-      r@ action-msg-size !
-      r@ action-msg-data !
+      r@ find-msg ?dup if
+	dup r@ action-msg-src !
+	rot r@ action-msg-data !
+	r@ over >r rot copy-msg-dest r> clear-send-msg r@ action-msg-size !
+      else
+	no-msg r@ action-msg-src !
+	r@ action-msg-size !
+	r@ action-msg-data !
+      then
       r> action-recv-xt !
     else
       2drop drop rdrop
@@ -324,17 +357,28 @@ begin-module action
     validate-current-action
     current-action @ >r
     r@ action-schedule @ current-schedule @ = if
-      dup 0>= if
-	r@ action-systick-delay !
-	systick-counter r@ action-systick-start !
+      r@ find-msg ?dup if
+	nip
+	dup r@ action-msg-src !
+	rot r@ action-msg-data !
+	r@ over >r rot copy-msg-dest r> clear-send-msg r@ action-msg-size !
+	drop
+	r> action-recv-xt !
+	no-action-delay
       else
-	0 r@ action-systick-delay !
-	systick-counter + r@ action-systick-start !
+	dup 0>= if
+	  r@ action-systick-delay !
+	  systick-counter r@ action-systick-start !
+	else
+	  0 r@ action-systick-delay !
+	  systick-counter + r@ action-systick-start !
+	then
+	no-msg r@ action-msg-src !
+	r@ action-msg-size !
+	r@ action-msg-data !
+	r@ action-resume-xt !
+	r> action-recv-xt !
       then
-      r@ action-msg-size !
-      r@ action-msg-data !
-      r@ action-resume-xt !
-      r> action-recv-xt !
     else
       2drop 2drop drop rdrop
     then
@@ -393,22 +437,21 @@ begin-module action
     true current-schedule @ schedule-running? !
     begin current-schedule @ schedule-running? @ while
       current-schedule @ schedule-next @ ?dup if
-	dup action-recv-xt @ if
-	  dup action-systick-delay @ 0< swap
-	  systick-counter over action-systick-start @ -
-	  over action-systick-delay @ < rot or if
-	    dup find-msg ?dup if
-	      2dup swap copy-msg swap >r r@ clear-send-msg
-	      over action-msg-data @ swap rot dup action-recv-xt @
-	      swap dup clear-recv-msg
-	      dup current-action ! advance-action
-	      r> swap execute-handle
+	dup action-msg-src @ ?dup if
+	  no-msg = if
+	    dup action-systick-delay @ 0>= swap
+	    systick-counter over action-systick-start @ -
+	    over action-systick-delay @ >= rot and if
+	      dup current-action ! dup advance-action dup action-resume-xt @
+	      swap clear-recv-msg execute-handle
 	    else
 	      advance-action
 	    then
 	  else
-	    dup current-action ! dup advance-action dup action-resume-xt @
-	    swap clear-recv-msg no-action-delay execute-handle
+	    >r r@ action-msg-data @ r@ action-msg-size @
+	    r@ action-msg-src @ r@ advance-action r@ action-recv-xt @
+	    r@ clear-recv-msg r> current-action !
+	    execute-handle
 	  then
 	else
 	  dup action-send-xt @ 0= if
@@ -458,7 +501,7 @@ begin-module action
   : current-action ( -- action ) current-action @ ;
 
   \ Get the current action's data
-  : current-data ( -- data ) current-action @ action-data @ ;
+  : current-data ( -- data ) current-action action-data @ ;
   
 end-module
 
