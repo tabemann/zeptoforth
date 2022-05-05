@@ -25,6 +25,21 @@ Get the current action.
 
 Get the current action's data.
 
+##### `action-schedule@`
+( action -- schedule )
+
+Get the schedule of an action.
+
+##### `action-data@`
+( action -- data )
+
+Get the data of an action.
+
+##### `in-schedule?`
+( action -- flag )
+
+Get whether an action is in a schedule.
+
 ##### `schedule-size`
 ( -- bytes )
 
