@@ -491,6 +491,15 @@ begin-module action
     repeat
   ;
 
+  \ Get the schedule of an action
+  : action-schedule@ ( action -- schedule ) action-schedule @ ;
+
+  \ Get the data of an action
+  : action-data@ ( action -- data ) action-data @ ;
+
+  \ Get whether an action is in a schedule
+  : in-schedule? ( action -- flag ) action-schedule @ 0<> ;
+
   \ Stop a running schedule cleanly
   : stop-schedule ( schedule -- ) false swap schedule-running? ! ;
   

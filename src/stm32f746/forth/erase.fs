@@ -35,9 +35,10 @@ continue-module internal
   : next-flash-sector ( -- addr )
     $300000
     $208000 $20FFFF check-flash-sector
-    $210000 $21FFFF check-flash-sector
-    $228000 $23FFFF check-flash-sector
-    $24C000 $27FFFF check-flash-sector
+    $210000 $217FFF check-flash-sector
+    $218000 $21FFFF check-flash-sector
+    $220000 $23FFFF check-flash-sector
+    $240000 $27FFFF check-flash-sector
     $280000 $2BFFFF check-flash-sector
     $2C0000 $2FFFFF check-flash-sector
   ;
@@ -51,9 +52,10 @@ continue-module internal
   : erase-align ( addr -- addr )
     >r $300000
     r@ swap $208000 $20FFFF check-flash-sector-for-addr
-    r@ swap $210000 $21FFFF check-flash-sector-for-addr
-    r@ swap $228000 $23FFFF check-flash-sector-for-addr
-    r@ swap $24C000 $27FFFF check-flash-sector-for-addr
+    r@ swap $210000 $217FFF check-flash-sector-for-addr
+    r@ swap $218000 $21FFFF check-flash-sector-for-addr
+    r@ swap $220000 $23FFFF check-flash-sector-for-addr
+    r@ swap $240000 $27FFFF check-flash-sector-for-addr
     r@ swap $280000 $2BFFFF check-flash-sector-for-addr
     r> swap $2C0000 $2FFFFF check-flash-sector-for-addr
   ;
