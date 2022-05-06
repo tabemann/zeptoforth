@@ -20,6 +20,7 @@ Zeptoforth Documentation
    words/double
    words/temp
    words/task_pool
+   words/action_pool
    words/heap
    words/map
    words/lock
