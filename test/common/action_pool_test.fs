@@ -1,5 +1,5 @@
-\ Copyright (c) 2021-2022 Travis Bemann
-\
+\ Copyright (c) 2022 Travis Bemann
+\ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
 \ in the Software without restriction, including without limitation the rights
@@ -18,29 +18,45 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ This is not actual Forth code, but rather setup directives for e4thcom to be
-\ executed to load a "big" configuration
+continue-module forth
 
-#include src/common/forth/temp.fs
-#include src/common/forth/temp_str.fs
-#include src/common/forth/disassemble.fs
-#include src/common/forth/pool.fs
-#include src/common/forth/heap.fs
-#include src/common/forth/map.fs
-#include src/common/forth/cstr_map.fs
-#include src/common/forth/int_map.fs
-#include src/common/forth/slock.fs
-#include src/common/forth/action.fs
-#include src/common/forth/tqueue.fs
-#include src/common/forth/lock.fs
-#include src/common/forth/semaphore.fs
-#include src/common/forth/fchannel.fs
-#include src/common/forth/channel.fs
-#include src/common/forth/schannel.fs
-#include src/common/forth/rchannel.fs
-#include src/common/forth/stream.fs
-#include src/common/forth/ansi_term.fs
-#include src/common/forth/line.fs
-#include src/common/forth/task_pool.fs
-#include src/common/forth/action_pool.fs
-#include src/common/forth/tinymt.fs
+  task import
+  action import
+  action-pool import
+
+  \ Our schedule
+  schedule-size buffer: my-schedule
+
+  \ Our action pool size
+  32 constant my-count
+  
+  \ Our action pool
+  my-count action-pool-size buffer: my-pool
+
+  \ Our star emitter
+  defer stars
+  : do-stars ( -- ) [: ." *" stars ;] 10000 delay-action ;
+  ' do-stars ' stars defer!
+  
+  \ Our action-starter
+  defer start-actions
+  : do-start-actions ( -- )
+    [:
+      [:
+	my-pool action-pool-free .
+	my-schedule 0 ['] stars my-pool add-action-from-pool drop
+	start-actions
+      ;] yield-action
+    ;] 10000 delay-action
+  ;
+  ' do-start-actions ' start-actions defer!
+
+  \ Initialize our test
+  : init-test ( -- )
+    my-schedule init-schedule
+    my-count my-pool init-action-pool
+    my-schedule 0 ['] start-actions my-pool add-action-from-pool
+    0 [: my-schedule run-schedule ;] 420 128 512 spawn run
+  ;
+
+end-module
