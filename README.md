@@ -15,7 +15,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 * Byte-oriented streams
 * Task notifications
 * Action scheduler support
-* Multicore support (on the RP2040)
+* Multicore support (on the Raspberry Pi Pico)
 * Double cell and fixed point numeric support
 * Lambda expressions
 * A disassembler
@@ -34,6 +34,8 @@ The library of code included along with the zeptoforth kernel, which is present 
 * Quad SPI flash storage support (on the STM32F746 DISCOVERY board and the Raspberry Pi Pico)
 * A block editor (on the STM32F746 DISCOVERY board and the Raspberry Pi Pico)
 * Random number generator support
+* Pseudorandom number generator support (using the TinyMT32 PRNG)
+* Programmable input/output support (on the Raspberry Pi Pico)
 * Optional swdcom support
 
 To load the zeptoforth image (whether just the kernel or an image including precompiled Forth code) onto an STM32L476, STM32F407, or STM32F746 DISCOVERY board, first install st-flash, then attach the DISCOVERY board to one's PC via USB and execute:
