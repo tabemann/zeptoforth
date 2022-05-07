@@ -13,6 +13,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 * Message-oriented rendezvous channels, aka "fchannels"
 * Message-oriented bidirectional synchronous reply channels, aka "rchannels"
 * Byte-oriented streams
+* Interrupt service handler-safe channels, aka "schannels"
 * Task notifications
 * Action scheduler support
 * Multicore support (on the Raspberry Pi Pico)
