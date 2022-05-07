@@ -14,7 +14,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 * Message-oriented bidirectional synchronous reply channels, aka "rchannels"
 * Byte-oriented streams
 * Task notifications
-* Event/coroutine scheduler support
+* Action scheduler support
 * Multicore support (on the RP2040)
 * Double cell and fixed point numeric support
 * Lambda expressions
@@ -27,7 +27,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 * Heap allocators
 * Memory pool allocators
 * Task pool allocators
-* Event/coroutine pool allocators
+* Action pool allocators
 * Temporary storage allocators (used to provide immediate string constants)
 * A line editor
 * LED drivers
