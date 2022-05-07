@@ -45,6 +45,8 @@ To load the zeptoforth image (whether just the kernel or an image including prec
     $ st-flash write <location of the zeptoforth image> 0x08000000
     $ st-flash reset
 
+Note the address referred to above. This will also reboot the board.
+
 To load the zeptoforth image (whether just the kernel or an image including precompiled Forth code) onto a Raspberry Pi Pico board, hold down the BOOTSEL button while connecting the Raspberry Pi Pico to one's computer via USB. This will result in a USB Mass Storage device appearing in one's `/dev` directory, and if supported by one's system, automatically mounted. Then one can copy the appropriate UF2 file to the USB Mass Storage device, which will automatically cause it to be loaded into flash and then executed.
 
 Prebuilt binaries are in `bin/<version>/<platform>/`.
@@ -71,7 +73,7 @@ and where \<platform> is one of
 
 Note that for the `rp2040` platform, to load code with the bootloader onto the Raspberry Pi Pico one needs a `.uf2` file rather than a `.bin` file, unlike the other platforms, which will be located in the same location. Note that these files contain a boot block with a CRC32 checksum.
 
-To build the kernel for each of the supported platforms, one first needs to install the gas and binutils arm-none-eabi toolchain along with Python 3.9, and then execute:
+To build the kernel for each of the supported platforms, one first needs to install the gas and binutils arm-none-eabi toolchain along with Python 3.9 or later, and then execute:
 
     $ make
 
@@ -81,9 +83,7 @@ to use the default version or:
 
 This build a `zeptoforth.<platform>.bin`, a `zeptoforth.<platform>.ihex`, and a `zeptoforth.<platform>.elf` file for each supported platform. Additionally a `zeptoforth.rp2040.uf2` file will be built for the rp2040 platform. The `zeptoforth.<platform>.elf` file is of use if one wishes to do source debugging with gdb of the zeptoforth kernel, otherwise disregard it.
 
-Note the address referred to above. This will also reboot the board.
-
-To use the board on Linux, download and install e4thcom (at https://wiki.forth-ev.de/doku.php/en:projects:e4thcom), swdcom (at http://github.com/crest/swdcom), GNU Screen (at https://www.gnu.org/software/screen/), or picocom (at https://github.com/npat-efault/picocom).
+To use the board on Linux, download and install e4thcom (at https://wiki.forth-ev.de/doku.php/en:projects:e4thcom), swdcom (at http://github.com/crest/swdcom), GNU Screen (at https://www.gnu.org/software/screen/), or picocom (at https://github.com/npat-efault/picocom). To use the board on xBSD, the same applies, except that e4thcom does not work under xBSD.
 
 The following applies if one is using e4thcom: If one is using an STM32F407 DISCOVERY or Raspberry Pi Pico board, attach a USB-to-serial converter to your machine (make sure you have the proper permissions to access its device file) and, for the STM32F407 DISCOVERY board, attach the RXD pin on the converter to PA2 on the board and the TXD pin on the converter to PA3 on the board or, for the Raspberry Pico, attach the RXD pin on the converter to GPIO0 on the board and the TXD pin on the converter to GPIO1 on the board with jumper cables. Then, from the zeptoforth base directory execute:
 
@@ -111,7 +111,7 @@ This will load the auxiliary Forth routines that would be useful to have onto th
 
     restore-state
 
-erases everyting compiled to Flash afterwards and then does a restart.
+erases everything compiled to Flash afterwards and then does a restart.
 
 To do a restart by itself (which now does a full reset of the hardware), execute the following:
 
@@ -132,3 +132,6 @@ If one is using swdcom (assuming one has already built it and installed `swd2` i
     cat <path> > upload.fs && pkill -QUIT swd2
 
 This will simply upload the given file to the board as-is without any support for `#include` or `#require`, unlike e4thcom.
+
+Note that screen and e4thcom are not suitable for using the block editor on the STM32F746 DISCOVERY board or the Raspberry Pi Pico—attempting to use the block editor on them will lock up zeptoforth because it will wait forever for a response when querying the terminal for a cursor position—whereas picocom and swdcom enable it to be used. Also, to use the block editor one must have the backspace key set to $7F (DEL), as it is by default; remapping backspace to backspace will break deleting characters in the block editor
+
