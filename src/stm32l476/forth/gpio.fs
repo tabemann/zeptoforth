@@ -214,7 +214,12 @@ begin-module gpio
     over 8 >= if AFRH@ else AFRL@ then
   ;
 
-  \ Get an input for an GPIO pin
+  \ Get an output for a GPIO pin
+  : ODR@ ( pin gpio -- output )
+    ODR @ swap rshift %1 and 0<>
+  ;
+
+  \ Get an input for a GPIO pin
   : IDR@ ( pin gpio -- input )
     IDR @ swap rshift %1 and 0<>
   ;
