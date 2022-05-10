@@ -33,6 +33,7 @@
 #include src/common/forth/systick.fs
 #include src/rp2040/forth/int_io.fs
 #include src/rp2040/forth/gpio.fs
+#include src/rp2040/forth/pin.fs
 #include src/rp2040/forth/pio.fs
 #include src/common/forth/task.fs
 #include src/rp2040/forth/led.fs

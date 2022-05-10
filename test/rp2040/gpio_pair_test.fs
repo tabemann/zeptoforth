@@ -1,5 +1,5 @@
-\ Copyright (c) 2021-2022 Travis Bemann
-\
+\ Copyright (c) 2022 Travis Bemann
+\ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
 \ in the Software without restriction, including without limitation the rights
@@ -18,29 +18,21 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ This is not actual Forth code, but rather setup directives for e4thcom to be
-\ executed from the root of the zeptoforth directory to initialize zeptoforth
-\ on an STM32F746 device.
+continue-module forth
 
-#include src/stm32f746/forth/clock.fs
-#include src/common/forth/basic.fs
-#include src/common/forth/module.fs
-#include src/common/forth/interrupt.fs
-#include src/common/forth/multicore.fs
-#include src/stm32f746/forth/erase.fs
-#include src/common/forth/lambda.fs
-#include src/common/forth/fixed.fs
-#include src/common/forth/systick.fs
-#include src/stm32f746/forth/int_io.fs
-#include src/stm32f746/forth/gpio.fs
-#include src/stm32f746/forth/pin.fs
-#include src/stm32f746/forth/exti.fs
-#include src/common/forth/task.fs
-#include src/common/forth/full_default.fs
-#include src/stm32f746/forth/rng.fs
-#include src/stm32f746/forth/qspi.fs
-#include src/common/forth/block.fs
-#include src/common/forth/edit.fs
-
-\ Set a cornerstone to enable deleting everything compiled after this code
-cornerstone restore-state
+  gpio import
+  
+  \ Initialize our test
+  : init-test ( -- )
+    true 3 PADS_BANK0_PUE!
+    false 3 PADS_BANK0_PDE!
+    true 3 PADS_BANK0_IE!
+    true 3 PADS_BANK0_OD!
+    25 bit GPIO_OE_SET !
+    2 bit GPIO_OE_SET !
+    3 bit GPIO_OE_CLR !
+    2 bit GPIO_OUT_SET !
+    3 bit GPIO_IN bit@ if 25 bit GPIO_OUT_XOR ! then
+  ;
+  
+end-module

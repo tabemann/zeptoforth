@@ -1,0 +1,113 @@
+\ Copyright (c) 2022 Travis Bemann
+\ 
+\ Permission is hereby granted, free of charge, to any person obtaining a copy
+\ of this software and associated documentation files (the "Software"), to deal
+\ in the Software without restriction, including without limitation the rights
+\ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+\ copies of the Software, and to permit persons to whom the Software is
+\ furnished to do so, subject to the following conditions:
+\ 
+\ The above copyright notice and this permission notice shall be included in
+\ all copies or substantial portions of the Software.
+\ 
+\ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+\ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+\ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+\ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+\ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+\ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+\ SOFTWARE.
+
+begin-module pin
+
+  gpio import
+  
+  \ Pin out of range exception
+  : x-pin-out-of-range ." pin out of range" cr ;
+
+  \ Alternate function out of range exception
+  : x-alternate-out-of-range ." alternate function out of range" cr ;
+
+  begin-module pin-internal
+
+    \ Pin count
+    30 constant pin-count
+
+    \ Alternate function count
+    10 constant alternate-count
+
+    \ Validate a pin
+    : validate-pin pin-count < averts x-pin-out-of-range ;
+
+    \ Validate an alternate function
+    : validate-alternate alternate-count < averts x-alternate-out-of-range ;
+    
+  end-module> import
+
+  \ Set a pin to input
+  : input-pin ( pin -- )
+    dup validate-pin
+    true over PADS_BANK0_IE!
+    true over PADS_BANK0_OD!
+    5 over GPIO_CTRL_FUNCSEL!
+    bit GPIO_OE_CLR !
+  ;
+  
+  \ Set a pin to output
+  : output-pin ( pin -- )
+    dup validate-pin
+    false over PADS_BANK0_IE!
+    false over PADS_BANK0_OD!
+    5 over GPIO_CTRL_FUNCSEL!
+    bit GPIO_OE_SET !
+  ;
+
+  \ Set a pin to pull-up
+  : pull-up-pin ( pin -- )
+    dup validate-pin
+    true over PADS_BANK0_PUE!
+    false swap PADS_BANK0_PDE!
+  ;
+
+  \ Set a pin to pull-down
+  : pull-down-pin ( pin -- )
+    dup validate-pin
+    true over PADS_BANK0_PDE!
+    false swap PADS_BANK0_PUE!
+  ;
+
+  \ Set a pin to floating
+  : floating-pin ( pin -- )
+    dup validate-pin
+    false over PADS_BANK0_PUE!
+    false swap PADS_BANK0_PDE!
+  ;
+
+  \ Set the output of a pin
+  : pin! ( state pin -- )
+    dup validate-pin
+    bit swap if GPIO_OUT_SET else GPIO_OUT_CLR then !
+  ;
+
+  \ Get the input of a pin
+  : pin@ ( pin -- state )
+    dup validate-pin
+    bit GPIO_IN bit@
+  ;
+
+  \ Toggle a pin
+  : toggle-pin ( pin -- )
+    dup validate-pin
+    bit GPIO_OUT_XOR !
+  ;
+
+  \ Set an alternate function
+  : alternate-pin ( function pin -- )
+    dup validate-pin
+    over validate-alternate
+    true over PADS_BANK0_IE!
+    false over PADS_BANK0_OD!
+    GPIO_CTRL_FUNCSEL!
+  ;
+  
+end-module
