@@ -51,32 +51,32 @@ continue-module forth
   : do-red-green ( -- )
     systick-counter red-green-start !
     begin
-      led-red-on led-green-off
+      on red led! off green led!
       red-green-start @ red-delay @ + red-green-start !
       begin
 	systick-counter red-green-start @ - red-delay @ < if
 	  50 current-action start-action-delay
 	  yield
-	  led-green-on
+	  on green led!
 	  2 current-action start-action-delay
 	  yield
-	  led-green-off
+	  off green led!
 	  false
 	else
 	  true
 	then
       until
       yield
-      led-green-on led-red-off
+      on green led! off red led!
       red-green-start @ green-delay @ + red-green-start !
       begin
 	systick-counter red-green-start @ - green-delay @ < if
 	  50 current-action start-action-delay
 	  yield
-	  led-red-on
+	  on red led!
 	  2 current-action start-action-delay
 	  yield
-	  led-red-off
+	  off red led!
 	  false
 	else
 	  true
@@ -90,32 +90,32 @@ continue-module forth
   : do-orange-blue ( -- )
     systick-counter orange-blue-start !
     begin
-      led-orange-on led-blue-off
+      on orange led! off blue led!
       orange-blue-start @ orange-delay @ + orange-blue-start !
       begin
 	systick-counter orange-blue-start @ - orange-delay @ < if
 	  50 current-action start-action-delay
 	  yield
-	  led-blue-on
+	  on blue led!
 	  2 current-action start-action-delay
 	  yield
-	  led-blue-off
+	  off blue led!
 	  false
 	else
 	  true
 	then
       until
       yield
-      led-blue-on led-orange-off
+      on blue led! off orange led!
       orange-blue-start @ blue-delay @ + orange-blue-start !
       begin
 	systick-counter orange-blue-start @ - blue-delay @ < if
 	  50 current-action start-action-delay
 	  yield
-	  led-orange-on
+	  on orange led!
 	  2 current-action start-action-delay
 	  yield
-	  led-orange-off
+	  off orange led!
 	  false
 	else
 	  true

@@ -28,24 +28,24 @@ continue-module forth
 
   \ The blinker
   : blinker ( -- )
-    led-red-on
+    on red led!
     begin
       \    pause
       blinker-delay @ ms
-      led-red-off
-      led-orange-on
+      off red led!
+      on orange led!
       \    pause
       blinker-delay @ ms
-      led-orange-off
-      led-green-on
+      off orange led!
+      on green led!
       \    pause
       blinker-delay @ ms
-      led-green-off
-      led-blue-on
+      off green led!
+      on blue led!
       \    pause
       blinker-delay @ ms
-      led-blue-off
-      led-red-on
+      off blue led!
+      on red led!
     again
   ;
 
@@ -55,10 +55,10 @@ continue-module forth
 
   \ Init blinker
   : init-blinker ( -- )
-    led-red-off
-    led-orange-off
-    led-green-off
-    led-blue-off
+    off red led!
+    off orange led!
+    off green led!
+    off blue led!
     500 blinker-delay !
     0 ['] blinker 420 128 512 spawn blinker-task !
     blinker-task @ run

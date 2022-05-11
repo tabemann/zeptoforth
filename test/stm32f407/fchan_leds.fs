@@ -43,22 +43,22 @@ continue-module forth
   
   \ Select the red LED
   : select-red ( -- )
-    led-red-on led-orange-off led-green-off led-blue-off
+    on red led! off orange led! off green led! off blue led!
   ;
 
   \ Select the orange LED
   : select-orange ( -- )
-    led-red-off led-orange-on led-green-off led-blue-off
+    off red led! on orange led! off green led! off blue led!
   ;
 
   \ Select the green LED
   : select-green ( -- )
-    led-red-off led-orange-off led-green-on led-blue-off
+    off red led! off orange led! on green led! off blue led!
   ;
 
   \ Select the blue LED
   : select-blue ( -- )
-    led-red-off led-orange-off led-green-off led-blue-on
+    off red led! off orange led! off green led! on blue led!
   ;
   
   \ Handle LED requests
