@@ -18,6 +18,8 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
+compile-to-flash
+
 begin-module pin
 
   gpio import
@@ -44,18 +46,18 @@ begin-module pin
 
     \ Create a pin
     : make-gpio ( index "name" -- )
-      <builds , does> over pin-count < averts x-pin-out-of-range
+      <builds , does> over pin-count u< averts x-pin-out-of-range
       @ 16 lshift or
     ;
 
     \ Validate a pin
     : validate-pin ( pin -- )
-      dup $FFFF and pin-count < averts x-pin-out-of-range
-      16 rshift gpio-count < averts x-gpio-out-of-range
+      dup $FFFF and pin-count u< averts x-pin-out-of-range
+      16 rshift gpio-count u< averts x-gpio-out-of-range
     ;
 
     \ Validate an alternate function
-    : validate-alternate alternate-count < averts x-alternate-out-of-range ;
+    : validate-alternate alternate-count u< averts x-alternate-out-of-range ;
     
     \ Extract a GPIO
     : extract-gpio ( pin -- gpio )
@@ -85,6 +87,10 @@ begin-module pin
   7 make-gpio XH
   8 make-gpio XI
 
+  \ Declare high and low constants
+  true constant high
+  false constant low
+
   \ Set a pin to input
   : input-pin ( pin -- )
     dup validate-pin
@@ -99,6 +105,14 @@ begin-module pin
     OUTPUT_MODE swap extract-both MODER!
   ;
 
+  \ Set an alternate function
+  : alternate-pin ( function pin -- )
+    dup validate-pin
+    over validate-alternate
+    extract-both 2dup 2>r AFR!
+    ALTERNATE_MODE 2r> MODER!
+  ;
+  
   \ Set a pin to pull-up
   : pull-up-pin ( pin -- )
     dup validate-pin
@@ -132,18 +146,18 @@ begin-module pin
     extract-both IDR@
   ;
 
+  \ Get the output of a pin
+  : pin-out@ ( pin -- state )
+    dup validate-pin
+    extract-both ODR@
+  ;
+
   \ Toggle a pin
   : toggle-pin ( pin -- )
     dup validate-pin
     extract-both 2dup ODR@ not -rot BSRR!
   ;
 
-  \ Set an alternate function
-  : alternate-pin ( function pin -- )
-    dup validate-pin
-    over validate-alternate
-    extract-both 2dup 2>r AFR!
-    ALTERNATE_MODE 2r> MODER!
-  ;
-  
 end-module
+
+reboot

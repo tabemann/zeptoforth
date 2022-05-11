@@ -48,11 +48,8 @@ continue-module forth
     \ The after channel
     field: after-chan
 
-    \ The on xt
-    field: on-xt
-
-    \ The off xt
-    field: off-xt
+    \ The color
+    field: color
 
     \ The delay
     field: delay-ms
@@ -62,26 +59,25 @@ continue-module forth
   : do-led ( -- )
     does> begin
       [: 2 pick before-chan @ recv-chan ;] extract-allot-byte drop
-      dup on-xt @ execute
+      dup color @ on swap led!
       dup delay-ms @ ms
-      dup off-xt @ execute
+      dup color @ off swap led!
       0 [: 2 pick after-chan @ send-chan ;] provide-allot-byte
       pause
     again
   ;
 
   \ Create an led task
-  : make-led ( before-chan after-chan on-xt off-xt delay "name" -- )
-    s" " <builds-with-name 4 roll , 3 roll , rot , swap , , do-led
+  : make-led ( before-chan after-chan color delay "name" -- )
+    s" " <builds-with-name 3 roll , rot , swap , , do-led
     0 latest >body 420 128 512 spawn constant
   ;
 
   \ Create the led tasks
-  orange-chan green-chan ' led-orange-on ' led-orange-off 100
-  make-led orange-task
-  green-chan blue-chan ' led-green-on ' led-green-off 100 make-led green-task
-  blue-chan red-chan ' led-blue-on ' led-blue-off 100 make-led blue-task
-  red-chan orange-chan ' led-red-on ' led-red-off 100 make-led red-task
+  orange-chan green-chan orange 100 make-led orange-task
+  green-chan blue-chan green 100 make-led green-task
+  blue-chan red-chan blue 100 make-led blue-task
+  red-chan orange-chan red 100 make-led red-task
 
   \ Initialize the blinky
   : init-blinky ( -- )

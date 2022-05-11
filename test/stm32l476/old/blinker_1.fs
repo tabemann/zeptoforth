@@ -51,9 +51,9 @@ continue-module forth
   \ Blink the red LED
   : red-blinker ( -- )
     red-led-state @ if
-      led-red-off
+      off red led!
     else
-      led-red-on
+      on red led!
     then
     red-led-state @ not red-led-state !
     red-blinker-delay @ current-action reset-action-delay
@@ -62,9 +62,9 @@ continue-module forth
   \ Blink the green LED
   : green-blinker ( -- )
     green-led-state @ if
-      led-green-off
+      off green led!
     else
-      led-green-on
+      on green led!
     then
     green-led-state @ not green-led-state !
     green-blinker-delay @ current-action reset-action-delay

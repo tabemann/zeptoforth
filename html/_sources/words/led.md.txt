@@ -2,91 +2,79 @@
 
 LEDs are initialized at boot time, and can be used as is afterwards.
 
-The following words are in `led`:
-
-## STM32L476 LED Words
-
 ### `led`
 
-##### `led-red-on`
+The following words are in the `led` module:
+
+#### Common LED Words
+
+##### `x-led-out-of-range`
 ( -- )
 
-Turn the red LED on
+LED out of range exception.
 
-##### `led-red-off`
+##### `on`
 ( -- )
 
-Turn the red LED off
+LED on state.
 
-##### `led-green-on`
+##### `off`
 ( -- )
 
-Turn the green LED on
+LED off state
 
-##### `led-green-off`
-( -- )
+##### `led!`
+( state led -- )
 
-Turn the green LED off
+Set *led* to the on/off state *state*
 
-## STM32F407 LED Words
+##### `led@`
+( led -- state )
 
-### `led`
+Get the on/off state of *led*.
 
-##### `led-orange-on`
-( -- )
+##### `toggle-led`
+( led -- )
 
-Turn the orange LED on
+Toggle the on/off state of *led*.
 
-##### `led-orange-off`
-( -- )
+#### STM32F407 DISCOVERY LED Words
 
-Turn the orange LED off
+##### `green`
+( -- led )
 
-##### `led-green-on`
-( -- )
+The green LED.
 
-Turn the green LED on
+##### `orange`
+( -- led )
 
-##### `led-green-off`
-( -- )
+The orange LED.
 
-Turn the green LED off
+##### `red`
+( -- led )
 
-##### `led-red-on`
-( -- )
+The red LED.
 
-Turn the red LED on
+##### `blue`
+( -- led )
 
-##### `led-red-off`
-( -- )
+The blue LED.
 
-Turn the red LED off
+#### STM32L476 DISCOVERY LED Words
 
-##### `led-blue-on`
-( -- )
+##### `green`
+( -- led )
 
-Turn the blue LED on
+The green LED.
 
-##### `led-blue-off`
-( -- )
+##### `red`
+( -- led )
 
-Turn the blue LED off
+The red LED.
 
-## Raspberry Pi Pico LED Words
+#### Raspberry Pi Pico LED WOrds
 
-### `led`
+##### `green`
+( -- led )
 
-##### `led-on`
-( -- )
-
-Turn the LED on
-
-##### `led-off`
-( -- )
-
-Turn the LED off
-
-##### `led-toggle`
-( -- )
-
-Toggle the state of the LED
+The green LED.

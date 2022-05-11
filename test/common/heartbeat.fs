@@ -26,9 +26,9 @@ begin-module-once heartbeat
   \ Display a heartbeat
   : heartbeat ( -- )
     begin
-      led-red-on
+      on red led!
       250 ms
-      led-red-off
+      off red led!
       250 ms
     again
   ;

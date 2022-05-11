@@ -45,11 +45,8 @@ continue-module forth
     \ The after fast channel
     field: after-fchan
 
-    \ The on xt
-    field: on-xt
-
-    \ The off xt
-    field: off-xt
+    \ The colork
+    field: color
 
     \ The delay
     field: delay-ms
@@ -59,26 +56,25 @@ continue-module forth
   : do-led ( -- )
     does> begin
       [: 2 pick before-fchan @ recv-fchan ;] extract-allot-cell drop
-      dup on-xt @ execute
+      dup color @ on swap led!
       dup delay-ms @ ms
-      dup off-xt @ execute
+      dup color @ off swap led!
       0 [: 2 pick after-fchan @ send-fchan ;] provide-allot-cell
       pause
     again
   ;
 
   \ Create an led task
-  : make-led ( before-fchan after-fchan on-xt off-xt delay "name" -- )
-    s" " <builds-with-name 4 roll , 3 roll , rot , swap , , do-led
+  : make-led ( before-fchan after-fchan color delay "name" -- )
+    s" " <builds-with-name 3 roll , rot , swap , , do-led
     0 latest >body 420 128 512 spawn dup 1 swap task-priority! constant
   ;
 
   \ Create the led tasks
-  orange-fchan green-fchan ' led-orange-on ' led-orange-off 100
-  make-led orange-task
-  green-fchan blue-fchan ' led-green-on ' led-green-off 100 make-led green-task
-  blue-fchan red-fchan ' led-blue-on ' led-blue-off 100 make-led blue-task
-  red-fchan orange-fchan ' led-red-on ' led-red-off 100 make-led red-task
+  orange-fchan green-fchan orange 100 make-led orange-task
+  green-fchan blue-fchan green 100 make-led green-task
+  blue-fchan red-fchan blue 100 make-led blue-task
+  red-fchan orange-fchan red 100 make-led red-task
 
   \ Initialize the blinky
   : init-blinky ( -- )

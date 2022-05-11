@@ -18,6 +18,8 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
+compile-to-flash
+
 begin-module pin
 
   gpio import
@@ -37,12 +39,16 @@ begin-module pin
     10 constant alternate-count
 
     \ Validate a pin
-    : validate-pin pin-count < averts x-pin-out-of-range ;
+    : validate-pin pin-count u< averts x-pin-out-of-range ;
 
     \ Validate an alternate function
-    : validate-alternate alternate-count < averts x-alternate-out-of-range ;
+    : validate-alternate alternate-count u< averts x-alternate-out-of-range ;
     
   end-module> import
+
+  \ Declare high and low constants
+  true constant high
+  false constant low
 
   \ Set a pin to input
   : input-pin ( pin -- )
@@ -62,6 +68,15 @@ begin-module pin
     bit GPIO_OE_SET !
   ;
 
+  \ Set an alternate function
+  : alternate-pin ( function pin -- )
+    dup validate-pin
+    over validate-alternate
+    true over PADS_BANK0_IE!
+    false over PADS_BANK0_OD!
+    GPIO_CTRL_FUNCSEL!
+  ;
+  
   \ Set a pin to pull-up
   : pull-up-pin ( pin -- )
     dup validate-pin
@@ -95,19 +110,18 @@ begin-module pin
     bit GPIO_IN bit@
   ;
 
+  \ Get the output of a pin
+  : pin-out@ ( pin -- state )
+    dup validate-pin
+    bit GPIO_OUT bit@
+  ;
+
   \ Toggle a pin
   : toggle-pin ( pin -- )
     dup validate-pin
     bit GPIO_OUT_XOR !
   ;
 
-  \ Set an alternate function
-  : alternate-pin ( function pin -- )
-    dup validate-pin
-    over validate-alternate
-    true over PADS_BANK0_IE!
-    false over PADS_BANK0_OD!
-    GPIO_CTRL_FUNCSEL!
-  ;
-  
 end-module
+
+reboot

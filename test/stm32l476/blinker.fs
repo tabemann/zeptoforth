@@ -30,18 +30,18 @@ continue-module forth
   \ The blinker
   : blinker ( -- )
     \  disable-int
-    led-red-on
+    on red led!
     begin
       \    pause
       blinker-delay @ ms
       \    1000000 0 ?do loop
-      led-red-off
-      led-green-on
+      off red led!
+      on green led!
       \    pause
       blinker-delay @ ms
       \    1000000 0 ?do loop
-      led-green-off
-      led-red-on
+      off green led!
+      on red led!
     again
   ;
 

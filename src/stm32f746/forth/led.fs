@@ -1,5 +1,5 @@
-\ Copyright (c) 2022 Travis Bemann
-\ 
+\ Copyright (c) 2020-2022 Travis Bemann
+\
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
 \ in the Software without restriction, including without limitation the rights
@@ -18,8 +18,62 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-task import
-led import
-: init-test ( -- )
-  0 [: begin green toggle-led 750 ms again ;] 420 128 512 1 spawn-on-core run
-  150 ms 0 [: begin green toggle-led 600 ms again ;] 420 128 512 0 spawn-on-core run ;
+\ Compile to flash
+compile-to-flash
+
+begin-module led
+
+  pin import
+
+  \ The LED states
+  low constant off
+  high constant on
+
+  \ Out of range LED exception
+  : x-led-out-of-range ( -- ) ." led out of range" cr ;
+
+  begin-module led-internal
+
+    \ The LED count
+    0 constant led-count
+
+    \ Validate an LED
+    : validate-led ( led -- ) led-count u< averts x-led-out-of-range ;
+
+    \ Get the pin of an LED
+    : pin-of-led ( led -- pin ) ['] x-led-out-of-range ?raise ;
+
+  end-module> import
+
+  \ Initialize the LEDs
+  : led-init ( -- )
+  ;
+
+  \ Set an LED
+  : led! ( state led -- )
+    dup validate-led
+    pin-of-led pin!
+  ;
+
+  \ Get an LED
+  : led@ ( led -- state )
+    dup validate-led
+    pin-of-led pin-out@
+  ;
+
+  \ Toggle an LED
+  : toggle-led ( led -- )
+    dup validate-led
+    pin-of-led toggle-pin
+  ;
+  
+end-module> import
+
+\ Init
+: init ( -- )
+  init
+  led-init
+;
+
+\ Reboot
+reboot

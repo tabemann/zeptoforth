@@ -11,6 +11,8 @@ Zeptoforth Documentation
    words/wordlist
    words/task
    words/action
+   words/pin
+   words/led
    words/gpio
    words/exti
    words/interrupt
@@ -39,7 +41,6 @@ Zeptoforth Documentation
    words/block
    words/edit
    words/swd
-   words/led
    words/test
    words/internal
    words/asm
