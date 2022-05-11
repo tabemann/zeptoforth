@@ -21,5 +21,5 @@
 task import
 led import
 : init-test ( -- )
-  0 [: begin led-toggle 750 ms again ;] 420 128 512 1 spawn-on-core run
-  150 ms 0 [: begin led-toggle 600 ms again ;] 420 128 512 0 spawn-on-core run ;
+  0 [: begin green toggle-led 750 ms again ;] 420 128 512 1 spawn-on-core run
+  150 ms 0 [: begin green toggle-led 600 ms again ;] 420 128 512 0 spawn-on-core run ;

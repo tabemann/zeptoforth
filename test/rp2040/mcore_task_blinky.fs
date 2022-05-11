@@ -24,7 +24,7 @@ continue-module forth
   led import
 
   \ LED test loop task
-  : led-loop ( ms -- ) begin led-toggle dup ms again ;
+  : led-loop ( ms -- ) begin green toggle-led dup ms again ;
 
   \ Star test loop task
   : star-loop ( ms -- ) begin ." *" dup ms again ;

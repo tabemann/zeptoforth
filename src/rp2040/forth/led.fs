@@ -1,4 +1,4 @@
-\ Copyright (c) 2021-2022 Travis Bemann
+\ Copyright (c) 2020-2022 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -23,20 +23,56 @@ compile-to-flash
 
 begin-module led
 
-  gpio import
+  pin import
+
+  \ The LED constants
+  0 constant green
+
+  \ The LED states
+  low constant off
+  high constant on
+
+  \ Out of range LED exception
+  : x-led-out-of-range ( -- ) ." led out of range" cr ;
+
+  begin-module led-internal
+
+    \ The LED count
+    2 constant led-count
+
+    \ Validate an LED
+    : validate-led ( led -- ) led-count u< averts x-led-out-of-range ;
+
+    \ Get the pin of an LED
+    : pin-of-led ( led -- pin )
+      drop 25
+    ;
+    
+  end-module> import
 
   \ Initialize the LEDs
-  : led-init ( -- ) 1 25 lshift GPIO_OE_SET ! ;
+  : led-init ( -- )
+    green pin-of-led output-pin
+  ;
 
-  \ Turn the LED on
-  : led-on ( -- ) 1 25 lshift GPIO_OUT_SET ! ;
+  \ Set an LED
+  : led! ( state led -- )
+    dup validate-led
+    pin-of-led pin!
+  ;
 
-  \ Turn the LED off
-  : led-off ( -- ) 1 25 lshift GPIO_OUT_CLR ! ;
+  \ Get an LED
+  : led@ ( led -- state )
+    dup validate-led
+    pin-of-led pin-out@
+  ;
 
-  \ Toggle the LED
-  : led-toggle ( -- ) 1 25 lshift GPIO_OUT_XOR ! ;
-
+  \ Toggle an LED
+  : toggle-led ( led -- )
+    dup validate-led
+    pin-of-led toggle-pin
+  ;
+  
 end-module> import
 
 \ Init

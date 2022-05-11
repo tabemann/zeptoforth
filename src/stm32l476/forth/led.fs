@@ -1,4 +1,3 @@
-\ Copyright (c) 2013? Matthias Koch
 \ Copyright (c) 2020-2022 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,36 +23,58 @@ compile-to-flash
 
 begin-module led
 
-  gpio import
-  
+  pin import
+
+  \ The LED constants
+  0 constant green
+  1 constant red
+
+  \ The LED states
+  low constant off
+  high constant on
+
+  \ Out of range LED exception
+  : x-led-out-of-range ( -- ) ." led out of range" cr ;
+
+  begin-module led-internal
+
+    \ The LED count
+    2 constant led-count
+
+    \ Validate an LED
+    : validate-led ( led -- ) led-count u< averts x-led-out-of-range ;
+
+    \ Get the pin of an LED
+    : pin-of-led ( led -- pin )
+      case green of 8 xe endof red of 2 xb endof endcase
+    ;
+    
+  end-module> import
+
   \ Initialize the LEDs
-  : led-init  ( -- )
-    GPIOB gpio-clock-enable
-    GPIOE gpio-clock-enable
-    OUTPUT_MODE 2 GPIOB MODER!
-    OUTPUT_MODE 8 GPIOE MODER!
+  : led-init ( -- )
+    green pin-of-led output-pin
+    red pin-of-led output-pin
   ;
 
-  \ Turn the red LED on
-  : led-red-on  ( -- )
-    true 2 GPIOB BSRR!
+  \ Set an LED
+  : led! ( state led -- )
+    dup validate-led
+    pin-of-led pin!
   ;
 
-  \ Turn the red LED off
-  : led-red-off  ( -- )
-    false 2 GPIOB BSRR!
+  \ Get an LED
+  : led@ ( led -- state )
+    dup validate-led
+    pin-of-led pin-out@
   ;
 
-  \ Turn the green LED on
-  : led-green-on  ( -- )
-    true 8 GPIOE BSRR!
+  \ Toggle an LED
+  : toggle-led ( led -- )
+    dup validate-led
+    pin-of-led toggle-pin
   ;
-
-  \ Turn the green LED offd
-  : led-green-off  ( -- )
-    false 8 GPIOE BSRR!
-  ;
-
+  
 end-module> import
 
 \ Init

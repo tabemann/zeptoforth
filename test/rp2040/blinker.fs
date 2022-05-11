@@ -29,7 +29,7 @@ continue-module forth
   \ The blinker
   : blinker ( -- )
     begin
-      led-toggle
+      green toggle-led
       blinker-delay @ ms
     again
   ;
