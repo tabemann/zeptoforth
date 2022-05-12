@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>LED Words &#8212; zeptoforth  documentation</title>
+    <title>Pool Words &#8212; zeptoforth  documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
@@ -15,8 +15,8 @@
     <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="GPIO Words" href="gpio.html" />
-    <link rel="prev" title="Pin Words" href="pin.html" />
+    <link rel="next" title="Map Words" href="map.html" />
+    <link rel="prev" title="Heap Words" href="heap.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -33,88 +33,56 @@
 
           <div class="body" role="main">
             
-  <section id="led-words">
-<h1>LED Words<a class="headerlink" href="#led-words" title="Permalink to this headline">¶</a></h1>
-<p>LEDs are initialized at boot time, and can be used as is afterwards.</p>
-<section id="led">
-<h2><code class="docutils literal notranslate"><span class="pre">led</span></code><a class="headerlink" href="#led" title="Permalink to this headline">¶</a></h2>
-<p>The following words are in the <code class="docutils literal notranslate"><span class="pre">led</span></code> module:</p>
-<section id="common-led-words">
-<h3>Common LED Words<a class="headerlink" href="#common-led-words" title="Permalink to this headline">¶</a></h3>
-<section id="x-led-out-of-range">
-<h4><code class="docutils literal notranslate"><span class="pre">x-led-out-of-range</span></code><a class="headerlink" href="#x-led-out-of-range" title="Permalink to this headline">¶</a></h4>
+  <section id="pool-words">
+<h1>Pool Words<a class="headerlink" href="#pool-words" title="Permalink to this headline">¶</a></h1>
+<p>Pools in zeptoforth are created by the user and consist of discretes blocks that are allocated and freed individual as wholes. There is by default no global pool, and pools created by the user are specifically <em>not</em> concurrency-safe; to make them concurrency-safe one must wrap them in locks, and because of the overhead this would impose, this is not done so by default. Allocating and freeing blocks in pools occurs in constant time and are fast, unlike allocation, resizing, and freeing in heaps</p>
+<section id="pool">
+<h2><code class="docutils literal notranslate"><span class="pre">pool</span></code><a class="headerlink" href="#pool" title="Permalink to this headline">¶</a></h2>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">pool</span></code>:</p>
+<section id="pool-size">
+<h3><code class="docutils literal notranslate"><span class="pre">pool-size</span></code><a class="headerlink" href="#pool-size" title="Permalink to this headline">¶</a></h3>
+<p>( – bytes )</p>
+<p>Get the size of a pool header in bytes.</p>
+</section>
+<section id="init-pool">
+<h3><code class="docutils literal notranslate"><span class="pre">init-pool</span></code><a class="headerlink" href="#init-pool" title="Permalink to this headline">¶</a></h3>
+<p>( block-size addr – )</p>
+<p>Initialize a pool at <em>addr</em> with the given block size of <em>block-size</em> bytes. Note that no space for storing blocks is available in a pool when it is first initialized; to add memory to a pool use <code class="docutils literal notranslate"><span class="pre">add-pool</span></code>.</p>
+</section>
+<section id="add-pool">
+<h3><code class="docutils literal notranslate"><span class="pre">add-pool</span></code><a class="headerlink" href="#add-pool" title="Permalink to this headline">¶</a></h3>
+<p>( addr bytes pool – )</p>
+<p>Add memory starting at <em>addr</em> of size <em>bytes</em> to <em>pool</em> as discrete blocks; only a multiple of the block size of the pool will be added to the pool, so if <em>bytes</em> is not a multiple of said block size not all of the space in the memory provided will be used.</p>
+</section>
+<section id="allocate-pool">
+<h3><code class="docutils literal notranslate"><span class="pre">allocate-pool</span></code><a class="headerlink" href="#allocate-pool" title="Permalink to this headline">¶</a></h3>
+<p>( pool – addr )</p>
+<p>Allocate a block in <em>pool</em> and return its address. If no blocks are available in the pool, <code class="docutils literal notranslate"><span class="pre">x-allocate-failed</span></code> is raised.</p>
+</section>
+<section id="free-pool">
+<h3><code class="docutils literal notranslate"><span class="pre">free-pool</span></code><a class="headerlink" href="#free-pool" title="Permalink to this headline">¶</a></h3>
+<p>( addr pool – )</p>
+<p>Free a block at <em>addr</em> in <em>pool</em>, making it available to future allocation.</p>
+</section>
+<section id="pool-block-size">
+<h3><code class="docutils literal notranslate"><span class="pre">pool-block-size</span></code><a class="headerlink" href="#pool-block-size" title="Permalink to this headline">¶</a></h3>
+<p>( pool – bytes )</p>
+<p>Get the block size of a pool.</p>
+</section>
+<section id="pool-free-count">
+<h3><code class="docutils literal notranslate"><span class="pre">pool-free-count</span></code><a class="headerlink" href="#pool-free-count" title="Permalink to this headline">¶</a></h3>
+<p>( pool – count )</p>
+<p>Get the number of free blocks in a pool.</p>
+</section>
+<section id="pool-total-count">
+<h3><code class="docutils literal notranslate"><span class="pre">pool-total-count</span></code><a class="headerlink" href="#pool-total-count" title="Permalink to this headline">¶</a></h3>
+<p>( pool – count )</p>
+<p>Get the total number of blocks in a pool.</p>
+</section>
+<section id="x-allocate-failed">
+<h3><code class="docutils literal notranslate"><span class="pre">x-allocate-failed</span></code><a class="headerlink" href="#x-allocate-failed" title="Permalink to this headline">¶</a></h3>
 <p>( – )</p>
-<p>LED out of range exception.</p>
-</section>
-<section id="on">
-<h4><code class="docutils literal notranslate"><span class="pre">on</span></code><a class="headerlink" href="#on" title="Permalink to this headline">¶</a></h4>
-<p>( – )</p>
-<p>LED on state.</p>
-</section>
-<section id="off">
-<h4><code class="docutils literal notranslate"><span class="pre">off</span></code><a class="headerlink" href="#off" title="Permalink to this headline">¶</a></h4>
-<p>( – )</p>
-<p>LED off state</p>
-</section>
-<section id="id1">
-<h4><code class="docutils literal notranslate"><span class="pre">led!</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
-<p>( state led – )</p>
-<p>Set <em>led</em> to the on/off state <em>state</em></p>
-</section>
-<section id="id2">
-<h4><code class="docutils literal notranslate"><span class="pre">led&#64;</span></code><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
-<p>( led – state )</p>
-<p>Get the on/off state of <em>led</em>.</p>
-</section>
-<section id="toggle-led">
-<h4><code class="docutils literal notranslate"><span class="pre">toggle-led</span></code><a class="headerlink" href="#toggle-led" title="Permalink to this headline">¶</a></h4>
-<p>( led – )</p>
-<p>Toggle the on/off state of <em>led</em>.</p>
-</section>
-</section>
-<section id="stm32f407-discovery-led-words">
-<h3>STM32F407 DISCOVERY LED Words<a class="headerlink" href="#stm32f407-discovery-led-words" title="Permalink to this headline">¶</a></h3>
-<section id="green">
-<h4><code class="docutils literal notranslate"><span class="pre">green</span></code><a class="headerlink" href="#green" title="Permalink to this headline">¶</a></h4>
-<p>( – led )</p>
-<p>The green LED.</p>
-</section>
-<section id="orange">
-<h4><code class="docutils literal notranslate"><span class="pre">orange</span></code><a class="headerlink" href="#orange" title="Permalink to this headline">¶</a></h4>
-<p>( – led )</p>
-<p>The orange LED.</p>
-</section>
-<section id="red">
-<h4><code class="docutils literal notranslate"><span class="pre">red</span></code><a class="headerlink" href="#red" title="Permalink to this headline">¶</a></h4>
-<p>( – led )</p>
-<p>The red LED.</p>
-</section>
-<section id="blue">
-<h4><code class="docutils literal notranslate"><span class="pre">blue</span></code><a class="headerlink" href="#blue" title="Permalink to this headline">¶</a></h4>
-<p>( – led )</p>
-<p>The blue LED.</p>
-</section>
-</section>
-<section id="stm32l476-discovery-led-words">
-<h3>STM32L476 DISCOVERY LED Words<a class="headerlink" href="#stm32l476-discovery-led-words" title="Permalink to this headline">¶</a></h3>
-<section id="id3">
-<h4><code class="docutils literal notranslate"><span class="pre">green</span></code><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h4>
-<p>( – led )</p>
-<p>The green LED.</p>
-</section>
-<section id="id4">
-<h4><code class="docutils literal notranslate"><span class="pre">red</span></code><a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h4>
-<p>( – led )</p>
-<p>The red LED.</p>
-</section>
-</section>
-<section id="raspberry-pi-pico-led-words">
-<h3>Raspberry Pi Pico LED WOrds<a class="headerlink" href="#raspberry-pi-pico-led-words" title="Permalink to this headline">¶</a></h3>
-<section id="id5">
-<h4><code class="docutils literal notranslate"><span class="pre">green</span></code><a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h4>
-<p>( – led )</p>
-<p>The green LED.</p>
-</section>
+<p>The exception raised if block allocation fails.</p>
 </section>
 </section>
 </section>
@@ -145,7 +113,7 @@
 <li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="led.html">LED Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
@@ -157,7 +125,7 @@
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pool.html">Pool Words</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Pool Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="map.html">Map Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
@@ -185,8 +153,8 @@
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="pin.html" title="previous chapter">Pin Words</a></li>
-      <li>Next: <a href="gpio.html" title="next chapter">GPIO Words</a></li>
+      <li>Previous: <a href="heap.html" title="previous chapter">Heap Words</a></li>
+      <li>Next: <a href="map.html" title="next chapter">Map Words</a></li>
   </ul></li>
 </ul>
 </div>
@@ -220,7 +188,7 @@
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
-      <a href="../_sources/words/led.md.txt"
+      <a href="../_sources/words/pool.md.txt"
           rel="nofollow">Page source</a>
     </div>
 
