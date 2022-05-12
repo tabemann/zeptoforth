@@ -24,6 +24,7 @@ Zeptoforth Documentation
    words/task_pool
    words/action_pool
    words/heap
+   words/pool
    words/map
    words/lock
    words/slock
