@@ -85,7 +85,7 @@ begin-module pool
   \ Add memory to a pool
   : pool-add ( addr bytes pool -- )
     begin
-      dup pool-block-size @ 2 pick u<=
+      dup pool-block-size @ 2 pick <=
     while
       2 pick over pool-free
       1 over pool-total-count +!
@@ -98,7 +98,7 @@ begin-module pool
 
   \ Allocate memory from a pool, or return 0 if no space is available
   : pool-allocate ( pool -- addr | 0 )
-    dup pool-first-free ?dup if
+    dup pool-first-free @ ?dup if
       dup pool-next-free @
       2 pick pool-first-free !
       over pool-first-free @ 0= if
