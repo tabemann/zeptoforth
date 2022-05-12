@@ -22,6 +22,7 @@ compile-to-flash
 
 begin-module pin
 
+  internal import
   gpio import
 
   \ Pin out of range exception
@@ -46,8 +47,11 @@ begin-module pin
 
     \ Create a pin
     : make-gpio ( index "name" -- )
-      <builds , does> over pin-count u< averts x-pin-out-of-range
-      @ 16 lshift or
+\      <builds , does> over pin-count u< averts x-pin-out-of-range
+\      @ 16 lshift or
+      token dup 0<> averts x-token-expected
+      start-compile lit, 16 lit, postpone lshift postpone or
+      inlined visible end-compile,
     ;
 
     \ Validate a pin
@@ -61,7 +65,7 @@ begin-module pin
     
     \ Extract a GPIO
     : extract-gpio ( pin -- gpio )
-      16 rshift $400 * ^ gpio-internal :: GPIO_Base +
+      16 rshift 10 lshift ( 16 rshift $400 * ) ^ gpio-internal :: GPIO_Base +
     ;
 
     \ Extract a pin

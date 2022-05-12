@@ -173,7 +173,8 @@ commit-flash
 
 \ Begin a module definition
 : begin-module ( "name" -- )
-  token 2dup visible-flag find ?dup if
+  token dup 0<> averts x-token-expected
+  2dup visible-flag find ?dup if
     ['] x-already-defined ?raise
   else
     wordlist dup >r -rot constant-with-name r>
@@ -184,7 +185,8 @@ commit-flash
 
 \ Continue an existing module definition
 : continue-module ( "name" -- )
-  token 2dup visible-flag find ?dup if
+  token dup 0<> averts x-token-expected
+  2dup visible-flag find ?dup if
     nip nip >body execute
   else
     ['] x-not-found ?raise
@@ -214,7 +216,8 @@ commit-flash
 
 \ Export a word from the current module
 : export ( "name" -- )
-  token 2dup s" ^" equal-strings? if
+  token dup 0<> averts x-token-expected
+  2dup s" ^" equal-strings? if
     2drop lookup-path
   else
     2dup visible-flag find dup 0= triggers x-unknown-word
