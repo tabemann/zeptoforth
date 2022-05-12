@@ -27,6 +27,9 @@ begin-module pool
 
   task import
 
+  \ No blocks free exception
+  : x-allocate-failed ( -- ) ." allocate failed" cr ;
+
   begin-module pool-internal
 
     \ Pool header structure
@@ -71,7 +74,7 @@ begin-module pool
   ;
 
   \ Free memory to a pool
-  : pool-free ( addr pool -- )
+  : free-pool ( addr pool -- )
     1 over pool-free-count +!
     over 0 swap pool-next-free !
     dup pool-first-free @ 0= if
@@ -83,11 +86,11 @@ begin-module pool
   ;
 
   \ Add memory to a pool
-  : pool-add ( addr bytes pool -- )
+  : add-pool ( addr bytes pool -- )
     begin
       dup pool-block-size @ 2 pick <=
     while
-      2 pick over pool-free
+      2 pick over free-pool
       1 over pool-total-count +!
       dup pool-block-size @ 3 roll +
       over pool-block-size @ 3 roll swap -
@@ -96,8 +99,8 @@ begin-module pool
     2drop drop
   ;
 
-  \ Allocate memory from a pool, or return 0 if no space is available
-  : pool-allocate ( pool -- addr | 0 )
+  \ Allocate memory from a pool, or raise x-allocate-failed
+  : allocate-pool ( pool -- addr )
     dup pool-first-free @ ?dup if
       dup pool-next-free @
       2 pick pool-first-free !
@@ -106,7 +109,7 @@ begin-module pool
       then
       -1 rot pool-free-count +!
     else
-      drop 0
+      drop ['] x-allocate-failed ?raise
     then
   ;
 
