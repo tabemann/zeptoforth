@@ -71,7 +71,7 @@ and where \<platform> is one of
 * `stm32l476`
 * `rp2040`
 
-Note that for the `rp2040` platform, to load code with the bootloader onto the Raspberry Pi Pico one needs a `.uf2` file rather than a `.bin` file, unlike the other platforms, which will be located in the same location. Note that these files contain a boot block with a CRC32 checksum.
+Note that for the `rp2040` platform, to load code with the bootloader onto the Raspberry Pi Pico one needs a `.uf2` file rather than a `.bin` file, unlike the other platforms, which will be located in the same location. Note that these files contain a boot block with a CRC32 checksum. Also note that from release 0.35.0 on the `rp2040` platform does not have the `full_swdcom` or `mini_swdcom` builds as swdcom does not properly function on this platform.
 
 To build the kernel for each of the supported platforms, one first needs to install the gas and binutils arm-none-eabi toolchain along with Python 3.9 or later, and then execute:
 
