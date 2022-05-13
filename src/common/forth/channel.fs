@@ -92,26 +92,25 @@ begin-module chan
     
     \ Wait to send on a channel
     : wait-send-chan ( chan -- )
-      dup chan-full? if
+      begin dup chan-full? while
 	1 over chan-send-ready +!
 	dup chan-send-tqueue ['] wait-tqueue try
 	-1 2 pick chan-send-ready +!
 	?raise
-      then
+      repeat
       chan-closed @ triggers x-chan-closed
     ;
 
     \ Wait to receive on a channel
     : wait-recv-chan ( chan -- )
-      dup chan-empty? if
+      begin dup chan-empty? while
 	dup chan-closed @ triggers x-chan-closed
 	1 over chan-recv-ready +!
 	dup chan-recv-tqueue ['] wait-tqueue try
-	-1 rot chan-recv-ready +!
+	-1 2 pick chan-recv-ready +!
 	?raise
-      else
-	drop
-      then
+      repeat
+      drop
     ;
 
     \ Get the channel send address
@@ -155,8 +154,8 @@ begin-module chan
     0 over chan-send-index !
     0 over chan-recv-ready !
     0 over chan-send-ready !
-    dup chan-slock over chan-recv-tqueue init-tqueue
-    dup chan-slock over chan-send-tqueue init-tqueue
+    dup chan-slock over chan-recv-tqueue 1 -rot 0 -rot init-tqueue-full
+    dup chan-slock over chan-send-tqueue 1 -rot 0 -rot init-tqueue-full
     false swap chan-closed !
   ;
 
