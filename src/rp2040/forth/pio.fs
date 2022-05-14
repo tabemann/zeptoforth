@@ -22,7 +22,79 @@
 compile-to-flash
 
 begin-module pio
+
+  internal import
   
+  begin-module pio-internal
+
+    \ Create a multibit field setter and getter for a PIO
+    : make-pio-field ( mask lsb "register" "setter" "getter" -- )
+      ' >r swap 2dup
+      token dup 0<> averts x-token-expected
+      start-compile
+      lit, postpone swap lit, postpone swap r@ lit, postpone execute
+      postpone field!
+      visible end-compile,
+      token dup 0<> averts x-token-expected
+      start-compile
+      lit, postpone swap lit, postpone swap r> lit, postpone execute
+      postpone field@
+      visible end-compile,
+    ;
+
+    \ Create a multibit field getter for a PIO
+    : make-pio-field-getter ( mask lsb "register" "getter" -- )
+      ' >r swap
+      token dup 0<> averts x-token-expected
+      start-compile
+      lit, postpone swap lit, postpone swap r> lit, postpone execute
+      postpone field@
+      visible end-compile,
+    ;
+
+    \ Create a single bit setter and getter for a state machine
+    : make-bit ( bit "register" "setter" "getter" -- )
+      ' >r dup
+      token dup 0<> averts x-token-expected
+      start-compile
+      r@ lit, postpone execute postpone >r lit, postpone swap
+      postpone 0<> postpone if
+      postpone r@ postpone @ postpone or postpone else
+      postpone r@ postpone @ postpone swap postpone bic postpone then
+      postpone r> postpone !
+      visible end-compile,
+      token dup 0<> averts x-token-expected
+      start-compile
+      r> lit, postpone execute postpone bit@
+      visible end-compile,
+    ;
+
+    \ Create a single bit getter for a state machine
+    : make-bit-getter ( bit "register" "getter" -- )
+      ' >r
+      token dup 0<> averts x-token-expected
+      start-compile
+      r> lit, postpone execute postpone bit@
+      visible end-compile,
+    ;
+
+    \ Create a multibit field setter and getter for a state machine
+    : make-sm-field ( mask lsb "register" "setter" "getter" -- )
+      ' >r swap 2dup
+      token dup 0<> averts x-token-expected
+      start-compile
+      lit, postpone -rot lit, postpone -rot r@ lit, postpone execute
+      postpone field!
+      visible end-compile,
+      token dup 0<> averts x-token-expected
+      start-compile
+      lit, postpone -rot lit, postpone -rot r> lit, postpone execute
+      postpone field@
+      visible end-compile,
+    ;
+
+  end-module> import
+
   \ PIO0 base register
   $50200000 constant PIO0
   
@@ -49,6 +121,10 @@ begin-module pio
   
   \ Restart state machines' clock dividers mask
   $F 8 lshift constant CTRL_CLKDIV_RESTART_MASK
+
+  \ Set/get restart state machines' clock dividers
+  CTRL_CLKDIV_RESTART_MASK CTRL_CLKDIV_RESTART_LSB
+  make-pio-field CTRL CTRL_CLKDIV_RESTART! CTRL_CLKDIV_RESTART@
   
   \ Clear state machine internal state LSB
   4 constant CTRL_SM_RESTART_LSB
@@ -56,11 +132,19 @@ begin-module pio
   \ Clear state machine internal state mask
   $F 4 lshift constant CTRL_SM_RESTART_MASK
 
+  \ Set/get clear state machine internal state
+  CTRL_SM_RESTART_MASK CTRL_SM_RESTART_LSB
+  make-pio-field CTRL CTRL_SM_RESTART! CTRL_SM_RESTART@
+
   \ Enable/disable state machines LSB
   0 constant CTRL_SM_ENABLE_LSB
 
   \ Enable/disable state machines mask
   $F 0 lshift constant CTRL_SM_ENABLE_MASK
+
+  \ Set/get enable/disable state machines
+  CTRL_SM_ENABLE_MASK CTRL_SM_ENABLE_LSB
+  make-pio-field CTRL CTRL_SM_ENABLE! CTRL_SM_ENABLE@
   
   \ FIFO status register
   : FSTAT ( pio -- addr ) [inlined] $004 + ;
@@ -71,11 +155,19 @@ begin-module pio
   \ State machine TX FIFO is empty mask
   $F 24 lshift constant FSTAT_TXEMPTY_MASK
 
+  \ Get state machine TX FIFO is empty
+  FSTAT_TXEMPTY_MASK FSTAT_TXEMPTY_LSB
+  make-pio-field-getter FSTAT FSTAT_TXEMPTY@
+
   \ State machine TX FIFO is full LSB
   16 constant FSTAT_TXFULL_LSB
 
   \ State machine TX FIFO is full mask
   $F 16 lshift constant FSTAT_TXFULL_MASK
+
+  \ Get state machine TX FIFO is full
+  FSTAT_TXFULL_MASK FSTAT_TXFULL_LSB
+  make-pio-field-getter FSTAT FSTAT_TXFULL@
 
   \ State machine RX FIFO is empty LSB
   8 constant FSTAT_RXEMPTY_LSB
@@ -83,11 +175,19 @@ begin-module pio
   \ State machine RX FIFO is empty mask
   $F 8 lshift constant FSTAT_RXEMPTY_MASK
 
+  \ Get state machine RX FIFO is empty
+  FSTAT_RXEMPTY_MASK FSTAT_RXEMPTY_LSB
+  make-pio-field-getter FSTAT FSTAT_RXEMPTY@
+
   \ State machine RX FIFO is full LSB
   0 constant FSTAT_RXFULL_LSB
 
   \ State machine RX FIFO is full mask
   $F 0 lshift constant FSTAT_RXFULL_MASK
+
+  \ Set/get state machine RX FIFO is full
+  FSTAT_RXFULL_MASK FSTAT_RXFULL_LSB
+  make-pio-field-getter FSTAT FSTAT_RXFULL@
   
   \ FIFO debug register
   : FDEBUG ( pio -- addr ) [inlined] $008 + ;
@@ -100,17 +200,30 @@ begin-module pio
   \ OUT with autopull enabled. Write 1 to clear.
   $F 24 lshift constant FDEBUG_TXSTALL_MASK
 
+  \ Set/get state machine has stalled on empty TX FIFO during a blocking pull
+  \ or an OUT with autopull enabled. Write 1 to clear.
+  FDEBUG_TXSTALL_MASK FDEBUG_TXSTALL_LSB
+  make-pio-field FDEBUG FDEBUG_TXSTALL! FDEBUG_TXSTALL@
+
   \ State machine TX FIFO overflow has occurred. Write 1 to clear.
   16 constant FDEBUG_TXOVER_LSB
 
   \ State machine TX FIFO overflow has occurred. Write 1 to clear.
   $F 16 lshift constant FDEBUG_TXOVER_MASK
 
+  \ Set/get state machine TX FIFO overflow has occurred. Write 1 to clear.
+  FDEBUG_TXOVER_MASK FDEBUG_TXOVER_LSB
+  make-pio-field FDEBUG FDEBUG_TXOVER! FDEBUG_TXOVER@
+
   \ State machine RX FIFO underflow has occurred. Write 1 to clear.
   8 constant FDEBUG_RXUNDER_LSB
 
   \ State machine RX FIFO underflow has occurred. Write 1 to clear.
   $F 8 lshift constant FDEBUG_RXUNDER_MASK
+
+  \ Set/get state machine RX FIFO underflow has occurred. Write 1 to clear.
+  FDEBUG_RXUNDER_MASK FDEBUG_RXUNDER_LSB
+  make-pio-field FDEBUG FDEBUG_RXUNDER! FDEBUG_RXUNDER@
 
   \ State machine has stalled on a full RX FIFO during a blocking PUSH or
   \ an IN with autopush enabled. Write 1 to clear.
@@ -119,6 +232,11 @@ begin-module pio
   \ State machine has stalled on a full RX FIFO during a blocking PUSH or
   \ an IN with autopush enabled. Write 1 to clear.
   $F 0 lshift constant FDEBUG_RXSTALL_MASK
+
+  \ Set/get state machine has stalled on a full RX FIFO during a blocking PUSH
+  \ or an IN with autopush enabled. Write 1 to clear.
+  FDEBUG_RXSTALL_MASK FDEBUG_RXSTALL_LSB
+  make-pio-field FDEBUG FDEBUG_RXSTALL! FDEBUG_RXSTALL@
 
   \ FIFO levels
   : FLEVEL ( pio -- addr ) [inlined] $00C + ;
@@ -129,11 +247,21 @@ begin-module pio
   \ RX FIFO masks
   : FLEVEL_RX_MASK ( index -- mask ) [inlined] $F swap FLEVEL_RX_LSB lshift ;
 
+  \ Get RX FIFO levels
+  : FLEVEL_RX@ ( index pio -- level )
+    swap dup FLEVEL_RX_MASK swap FLEVEL_RX_LSB rot FLEVEL field@
+  ;
+  
   \ TX FIFO levels
-  : FLEVEL_TX_LSB ( index -- lsb ) [inlined] 8 * 4 + ;
+  : FLEVEL_TX_LSB ( index -- lsb ) [inlined] 8 * ;
 
   \ TX FIFO masks
   : FLEVEL_TX_MASK ( index -- mask ) [inlined] $F swap FLEVEL_TX_LSB lshift ;
+
+  \ Get TX FIFO levels
+  : FLEVEL_TX@ ( index pio -- level )
+    swap dup FLEVEL_TX_MASK swap FLEVEL_TX_LSB rot FLEVEL field@
+  ;
 
   \ Direct write access to the TX FIFO for this state machine
   : TXF ( state-machine pio -- addr ) [inlined] swap cells + $010 + ;
@@ -168,11 +296,19 @@ begin-module pio
   \ Mask of the size of instruction memory in instructions
   $3F 16 lshift constant DBG_CFGINFO_IMEM_SIZE_MASK
 
+  \ Get the size of instruction memory in instructions
+  DBG_CFGINFO_IMEM_SIZE_MASK DBG_CFGINFO_IMEM_SIZE_LSB
+  make-pio-field-getter DBG_CFGINFO DBG_CFGINFO_IMEM_SIZE@
+  
   \ LSB of the number of state machines this PIO instance supports
   8 constant DBG_CFGINFO_SM_COUNT_LSB
 
   \ Mask of the number of state machines this PIO instance supports
   $F 8 lshift constant DBG_CFGINFO_SM_COUNT_MASK
+
+  \ Get the number of state machines this PIO instance supports
+  DBG_CFGINFO_SM_COUNT_MASK DBG_CFGINFO_SM_COUNT_LSB
+  make-pio-field-getter DBG_CFGINFO DBG_CFGINFO_SM_COUNT@
 
   \ LSB of the depth of the state machine TX/RX FIFO's in words
   0 constant DBG_CFGINFO_FIFO_DEPTH_LSB
@@ -180,6 +316,10 @@ begin-module pio
   \ Mask of the depth of the state machine TX/RX FIFO's in words
   $3F 0 lshift constant DBG_CFGINFO_FIFO_DEPTH_MASK
   
+  \ Get the the depth of the state machine TX/RX FIFO's in words
+  DBG_CFGINFO_FIFO_DEPTH_MASK DBG_CFGINFO_FIFO_DEPTH_LSB
+  make-pio-field-getter DBG_CFGINFO DBG_CFGINFO_FIFO_DEPTH@
+
   \ Write only instruction memory (32 words in all)
   : INSTR_MEM ( index pio -- addr ) [inlined] $048 + swap cells + ;
 
@@ -194,23 +334,44 @@ begin-module pio
   \ then FRAC must also be 0
   $FFFF 16 lshift constant SM_CLKDIV_INT_MASK
 
+  \ Set/get clock divisor register for state machines
+  SM_CLKDIV_INT_MASK SM_CLKDIV_INT_LSB
+  make-sm-field SM_CLKDIV SM_CLKDIV_INT! SM_CLKDIV_INT@
+
   \ LSB of the fractional portion of the clock divisor, i.e. divided by 256
   8 constant SM_CLKDIV_FRAC_LSB
 
   \ Mask of the fractional portion of the clock divisor, i.e. divided by 256
   $FF 8 lshift constant SM_CLKDIV_FRAC_MASK
   
+  \ Set/get clock divisor register for state machines
+  SM_CLKDIV_FRAC_MASK SM_CLKDIV_FRAC_LSB
+  make-sm-field SM_CLKDIV SM_CLKDIV_FRAC! SM_CLKDIV_FRAC@
+
   \ Execution/behavioral settings for state machines
   : SM_EXECCTRL ( state-machine pio -- addr ) [inlined] swap $18 * + $0CC + ;
 
   \ State machine is stalled bit
   31 bit constant SM_EXECCTRL_EXEC_STALLED
 
+  \ Get state machine is stalled bit
+  SM_EXECCTRL_EXEC_STALLED
+  make-bit-getter SM_EXECCTRL SM_EXECCTRL_EXEC_STALLED@
+
   \ MSB of delay/side-set instruction field is used as side-set enable bit
   30 bit constant SM_EXECCTRL_SIDE_EN
 
+  \ Set/get MSB of delay/side-set instruction field is used as side-set enable
+  \ bit
+  SM_EXECCTRL_SIDE_EN
+  make-bit SM_EXECCTRL SM_EXECCTRL_SIDE_EN! SM_EXECCTRL_SIDE_EN@
+
   \ Side-set data is asserted to pin directions bit
   29 bit constant SM_EXECCTRL_SIDE_PINDIR
+
+  \ Set/get side-set data is asserted to pin directions bit
+  SM_EXECCTRL_SIDE_PINDIR
+  make-bit SM_EXECCTRL SM_EXECCTRL_SIDE_PINDIR! SM_EXECCTRL_SIDE_PINDIR@
 
   \ LSB of GPIO number to use as condition for JMP PIN
   24 constant SM_EXECCTRL_JMP_PIN_LSB
@@ -218,17 +379,33 @@ begin-module pio
   \ Mask of GPIO number to use as condition for JMP PIN
   $1F 24 lshift constant SM_EXECCTRL_JMP_PIN_MASK
 
+  \ Set/get GPIO number to use as condition for JMP PIN
+  SM_EXECCTRL_JMP_PIN_MASK SM_EXECCTRL_JMP_PIN_LSB
+  make-sm-field SM_EXECCTRL SM_EXECCTRL_JMP_PIN! SM_EXECCTRL_JMP_PIN@
+
   \ LSB of data bit to use for inline OUT enable
   19 constant SM_EXECCTRL_OUT_EN_SEL_LSB
 
   \ Mask of data bit to use for the inline OUT enable
   $1F 19 lshift constant SM_EXECCTRL_OUT_EN_SEL_MASK
 
+  \ Set/get data bit to use for inline OUT enable
+  SM_EXECCTRL_OUT_EN_SEL_MASK SM_EXECCTRL_OUT_EN_SEL_LSB
+  make-sm-field SM_EXECCTRL SM_EXECCTRL_OUT_EN_SEL! SM_EXECCTRL_OUT_EN_SEL@
+
   \ Use a bit of OUT data as an auxiliary write enable bit
   18 bit constant SM_EXECCTRL_INLINE_OUT_EN
 
+  \ Set/get use a bit of OUT data as an auxiliary write enable bit
+  SM_EXECCTRL_INLINE_OUT_EN
+  make-bit SM_EXECCTRL SM_EXECCTRL_INLINE_OUT_EN! SM_EXECCTRL_INLINE_OUT_EN@
+
   \ Continuously assert the most recent OUT/SET to the pins
   17 bit constant SM_EXECCTRL_OUT_STICKY
+
+  \ Set/get continuously assert he most recent OUT/SET to the pins
+  SM_EXECCTRL_OUT_STICKY
+  make-bit SM_EXECCTRL SM_EXECCTRL_OUT_STICKY! SM_EXECCTRL_OUT_STICKY@
 
   \ LSB of address reached to wrap execution to WRAP_BOTTOM; if a jump and
   \ condition is true, jump takes priority
@@ -238,21 +415,39 @@ begin-module pio
   \ condition is true, jump takes priority
   $1F 12 lshift constant SM_EXECCTRL_WRAP_TOP_MASK
 
+  \ Set/get address reached to wrap execution to WRAP_BOTTOM; if a jump and
+  \ condition is true, jump takes priority
+  SM_EXECCTRL_WRAP_TOP_MASK SM_EXECCTRL_WRAP_TOP_LSB
+  make-sm-field SM_EXECCTRL SM_EXECCTRL_WRAP_TOP! SM_EXECCTRL_WRAP_TOP@
+    
   \ LSB of address execution is wrapped to
   7 constant SM_EXECCTRL_WRAP_BOTTOM_LSB
 
   \ Mask of address execution is wrapped to
   $1F 7 lshift constant SM_EXECCTRL_WRAP_BOTTOM_MASK
 
+  \ Set/get address execution is wrapped to
+  SM_EXECCTRL_WRAP_BOTTOM_MASK SM_EXECCTRL_WRAP_BOTTOM_LSB
+  make-sm-field SM_EXECCTRL SM_EXECCTRL_WRAP_BOTTOM! SM_EXECCTRL_WRAP_BOTTOM@
+
   \ MOV x, STATUS comparison; 0 is all ones if TX FIFO level < N else all zeros
   \ 1 is all ones if RX FIFO level < N else all zeros
   4 bit constant SM_EXECCTRL_STATUS_SEL
+
+  \ Set/get MOV x, STATUS comparison; 0 is all ones if TX FIFO level < N else
+  \ all zeros 1 is all ones if RX FIFO level < N else all zeros
+  SM_EXECCTRL_STATUS_SEL
+  make-bit SM_EXECCTRL SM_EXECCTRL_STATUS_SEL! SM_EXECCTRL_STATUS_SEL@
 
   \ LSB of comparison level for MOV x, STATUS
   0 constant SM_EXECCTRL_STATUS_N_LSB
 
   \ Mask of comparison level for MOV x, STATUS
   $F 0 lshift constant SM_EXECCTRL_STATUS_N_MASK
+
+  \ Set/get comparison level for MOV x, STATUS
+  SM_EXECCTRL_STATUS_N_MASK SM_EXECCTRL_STATUS_N_LSB
+  make-sm-field SM_EXECCTRL SM_EXECCTRL_STATUS_N! SM_EXECCTRL_STATUS_N@
 
   \ Control behavior of the input/output shift registers for state machines
   : SM_SHIFTCTRL ( state-machine pio -- addr ) [inlined] swap $18 * + $0D0 + ;
@@ -261,9 +456,19 @@ begin-module pio
   \ flushed when set
   31 bit constant SM_SHIFTCTRL_FJOIN_RX
 
+  \ Set/get RX FIFO steals the TX FIFO's storage and becomes twice as deep;
+  \ FIFO's are flushed when set
+  SM_SHIFTCTRL_FJOIN_RX
+  make-bit SM_SHIFTCTRL SM_SHIFTCTRL_FJOIN_RX! SM_SHIFTCTRL_FJOIN_RX@
+
   \ TX FIFO steals the RX FIFO's storage and becomes twice as deep; FIFO's are
   \ flushed when set
   30 bit constant SM_SHIFTCTRL_FJOIN_TX
+
+  \ Set/get TX FIFO steals the RX FIFO's storage and becomes twice as deep;
+  \ FIFO's are flushed when set
+  SM_SHIFTCTRL_FJOIN_TX
+  make-bit SM_SHIFTCTRL SM_SHIFTCTRL_FJOIN_TX! SM_SHIFTCTRL_FJOIN_TX@
 
   \ LSB of number of bits shifted out of OSR before autopull or conditional
   \ pull will take place; 0 means 32
@@ -271,7 +476,12 @@ begin-module pio
 
   \ Mask of number of bits shifted out of OSR before autopull or conditional
   \ pull will take place; 0 means 32
-  $1F 25 lshift constant SM_SHIFTCTRL_PULL_THRES_MASK
+  $1F 25 lshift constant SM_SHIFTCTRL_PULL_THRESH_MASK
+
+  \ Set/get number of bits shifted out of OSR before autopull or conditional
+  \ pull will take place; 0 means 32
+  SM_SHIFTCTRL_PULL_THRESH_MASK SM_SHIFTCTRL_PULL_THRESH_LSB
+  make-sm-field SM_SHIFTCTRL SM_SHIFTCTRL_PULL_THRESH! SM_SHIFTCTRL_PULL_THRESH@
 
   \ LSB of number of bits shifted into ISR before autopush or conditional
   \ push will take place; 0 means 32
@@ -279,20 +489,42 @@ begin-module pio
 
   \ Mask of number of bits shifted into ISR before autopush or conditional
   \ push will take place; 0 means 32
-  $1F 20 lshift constant SM_SHIFTCTRL_PUSH_THRES_MASK
+  $1F 20 lshift constant SM_SHIFTCTRL_PUSH_THRESH_MASK
+
+  \ Set/get number of bits shifted into ISR before autopush or conditional
+  \ push will take place; 0 means 32
+  SM_SHIFTCTRL_PUSH_THRESH_MASK SM_SHIFTCTRL_PUSH_THRESH_LSB
+  make-sm-field SM_SHIFTCTRL SM_SHIFTCTRL_PUSH_THRESH! SM_SHIFTCTRL_PUSH_THRESH@
 
   \ 1 = shift out of output shift register to right; 0 = to left
   19 bit constant SM_SHIFTCTRL_OUT_SHIFTDIR
 
+  \ Set/get 1 = shift out of output shift register to right; 0 = to left
+  SM_SHIFTCTRL_OUT_SHIFTDIR
+  make-bit SM_SHIFTCTRL SM_SHIFTCTRL_OUT_SHIFTDIR! SM_SHIFTCTRL_OUT_SHIFTDIR@
+
   \ 1 = shift input shift register to right (data enters from left); 0 = to left
   18 bit constant SM_SHIFTCTRL_IN_SHIFTDIR
+
+  \ Set/get 1 = shift input shift register to right (data enters from left);
+  \ 0 = to left
+  SM_SHIFTCTRL_IN_SHIFTDIR
+  make-bit SM_SHIFTCTRL SM_SHIFTCTRL_IN_SHIFTDIR! SM_SHIFTCTRL_IN_SHIFTDIR@
 
   \ Pull automatically when the output shift register is emptied
   17 bit constant SM_SHIFTCTRL_AUTOPULL
 
+  \ Set/get pull automatically when the output shift register is emptied
+  SM_SHIFTCTRL_AUTOPULL
+  make-bit SM_SHIFTCTRL SM_SHIFTCTRL_AUTOPULL! SM_SHIFTCTRL_AUTOPULL@
+
   \ Push automatically when the input shift register is filled
   16 bit constant SM_SHIFTCTRL_AUTOPUSH
   
+  \ Set/get push automatically when the input shift register is filled
+  SM_SHIFTCTRL_AUTOPUSH
+  make-bit SM_SHIFTCTRL SM_SHIFTCTRL_AUTOPUSH! SM_SHIFTCTRL_AUTOPUSH@
+
   \ Current instruction address of state machines
   : SM_ADDR ( state-machine pio -- addr ) [inlined] swap $18 * + $0D4 + ;
 
@@ -309,11 +541,19 @@ begin-module pio
   \ Mask of side-set-bit count, minimum of 0, maximum of 5
   7 29 lshift constant SM_PINCTRL_SIDESET_COUNT_MASK
 
+  \ Set/get side-set bit count, minimum of 0, maximum of 5
+  SM_PINCTRL_SIDESET_COUNT_MASK SM_PINCTRL_SIDESET_COUNT_LSB
+  make-sm-field SM_PINCTRL SM_PINCTRL_SIDESET_COUNT! SM_PINCTRL_SIDESET_COUNT@
+
   \ LSB of SET pin count, minimum of 0, maximum of 5
   26 constant SM_PINCTRL_SET_COUNT_LSB
 
   \ Mask of SET pin count, minimum of 0, maximum of 5
   7 26 lshift constant SM_PINCTRL_SET_COUNT_MASK
+
+  \ Set/get SET pin count, minimum of 0, maximum of 5
+  SM_PINCTRL_SET_COUNT_MASK SM_PINCTRL_SET_COUNT_LSB
+  make-sm-field SM_PINCTRL SM_PINCTRL_SET_COUNT! SM_PINCTRL_SET_COUNT@
 
   \ LSB of OUT PINS, OUT PINDIRS, or MOV PINS pin count, minimum of 0, maximum
   \ of 32 (inclusive)
@@ -323,13 +563,23 @@ begin-module pio
   \ of 32 (inclusive)
   $3F 20 lshift constant SM_PINCTRL_OUT_COUNT_MASK
 
+  \ Set/get OUT PINS, OUT PINDIRS, or MOV PINS pin count, minimum of 0, maximum
+  \ of 32 (inclusive)
+  SM_PINCTRL_OUT_COUNT_MASK SM_PINCTRL_OUT_COUNT_LSB
+  make-sm-field SM_PINCTRL SM_PINCTRL_OUT_COUNT! SM_PINCTRL_OUT_COUNT@
+
   \ LSB of pin mapped to the least-significant bit of a state machine's IN
-  \ data bus; higher pins are mapped to more signifcant data bits, modulo 32
+  \ data bus; higher pins are mapped to more significant data bits, modulo 32
   15 constant SM_PINCTRL_IN_BASE_LSB
 
   \ Mask of pin mapped to the least-significant bit of a state machine's IN
-  \ data bus; higher pins are mapped to more signifcant data bits, modulo 32
+  \ data bus; higher pins are mapped to more significant data bits, modulo 32
   $1F 15 lshift constant SM_PINCTRL_IN_BASE_MASK
+
+  \ Set/get pin mapped to the least-significant bit of a state machine's IN
+  \ data bus; higher pins are mapped to more significant data bits, modulo 32
+  SM_PINCTRL_IN_BASE_MASK SM_PINCTRL_IN_BASE_LSB
+  make-sm-field SM_PINCTRL SM_PINCTRL_IN_BASE! SM_PINCTRL_IN_BASE@
 
   \ LSB of lowest-number pin affected by side-set operation
   10 constant SM_PINCTRL_SIDESET_BASE_LSB
@@ -337,11 +587,19 @@ begin-module pio
   \ Mask of lowest-number pin affected by side-set operation
   $1F 10 lshift constant SM_PINCTRL_SIDESET_BASE_MASK
 
+  \ Set/get lowest-number pin affected by side-set operation
+  SM_PINCTRL_SIDESET_BASE_MASK SM_PINCTRL_SIDESET_BASE_LSB
+  make-sm-field SM_PINCTRL SM_PINCTRL_SIDESET_BASE! SM_PINCTRL_SIDESET_BASE@
+
   \ LSB of lowest-number pin affected by SET PINS or SET PINDIRS operation
   5 constant SM_PINCTRL_SET_BASE_LSB
 
   \ Mask of lowest-number pin affected by SET PINS or SET PINDIRS operation
   $1F 5 lshift constant SM_PINCTRL_SET_BASE_MASK
+
+  \ Set/get lowest-number pin affected by SET PINS or SET PINDIRS operation
+  SM_PINCTRL_SET_BASE_MASK SM_PINCTRL_SET_BASE_LSB
+  make-sm-field SM_PINCTRL SM_PINCTRL_SET_BASE! SM_PINCTRL_SET_BASE@
 
   \ LSB of lowest-number pin affected by OUT PINS, OUT PINDIRS, or MOV PINS
   \ operation
@@ -350,6 +608,11 @@ begin-module pio
   \ Mask of lowest-number pin affected by OUT PINS, OUT PINDIRS, or MOV PINS
   \ operation
   $1F 0 lshift constant SM_PINCTRL_OUT_BASE_MASK
+
+  \ Set/get lowest-number pin affected by OUT PINS, OUT PINDIRS, or MOV PINS
+  \ operation
+  SM_PINCTRL_OUT_BASE_MASK SM_PINCTRL_OUT_BASE_LSB
+  make-sm-field SM_PINCTRL SM_PINCTRL_OUT_BASE! SM_PINCTRL_OUT_BASE@
 
   \ Interrupt bits
   : INT_SM ( state-machine -- index ) [inlined] 8 + bit ;
@@ -645,6 +908,16 @@ begin-module pio
   \ PIO SET instruction with delay or side-set
   : set+, ( data delay/side-set destination -- )
     $07 and 5 lshift swap $1F and 8 lshift or swap $1F and or $E000 or h,
+  ;
+
+  \ Manually write instructions to a state machine
+  : sm-instr! ( addr count state-machine pio -- )
+    SM_INSTR -rot 0 ?do 2dup h@ swap ! 2 + loop 2drop
+  ;
+  
+  \ Write a number of halfwords to instruction memory
+  : instr-mem! ( addr count pio -- )
+    -rot 0 ?do 2dup h@ i rot INSTR_MEM ! 2 + loop 2drop
   ;
 
 end-module
