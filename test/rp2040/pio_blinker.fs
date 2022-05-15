@@ -50,7 +50,7 @@ continue-module forth
     0 9 0 PIO0 sm-wrap!
     on 0 PIO0 sm-out-sticky!
     pio-init 2 0 PIO0 sm-instr!
-    pio-code 10 PIO0 instr-mem!
+    pio-code 10 PIO0 pio-instr-mem!
     0 0 PIO0 sm-addr!
     %0001 PIO0 sm-enable
   ;

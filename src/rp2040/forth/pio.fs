@@ -56,6 +56,12 @@ begin-module pio
 
   \ Clock divisor out of range exception
   : x-clkdiv-out-of-range ( -- ) ." PIO clock divisor out of range" cr ;
+
+  \ IRQ out of range
+  : x-irq-out-of-range ( -- ) ." IRQ out of range" cr ;
+
+  \ Interrupt out of range
+  : x-interrupt-out-of-range ( -- ) ." interrupt out of range" cr ;  
   
   begin-module pio-internal
 
@@ -72,6 +78,14 @@ begin-module pio
 
     \ Validate a pin
     : validate-pin ( pin -- ) 30 u< averts x-pin-out-of-range ;
+
+    \ Validate an IRQ
+    : validate-irq ( irq -- ) 2 u< averts x-irq-out-of-range ;
+
+    \ Validate interrupt bits
+    : validate-interrupt ( bits -- )
+      $FFF bic 0= averts x-interrupt-out-of-range
+    ;
 
     \ Create a multibit field setter and getter for a PIO
     : make-pio-field ( mask lsb "register" "setter" "getter" -- )
@@ -954,14 +968,14 @@ begin-module pio
   : sm-enable ( state-machine-bits pio -- )
     dup validate-pio
     over %1111 bic 0= averts x-sm-out-of-range
-    dup CTRL_SM_ENABLE@ rot or swap CTRL_SM_ENABLE!
+    swap CTRL_SM_ENABLE_LSB lshift swap CTRL bis!
   ;
 
   \ Disable state machines
   : sm-disable ( state-machine-bits pio -- )
     dup validate-pio
     over %1111 bic 0= averts x-sm-out-of-range
-    dup CTRL_SM_ENABLE@ rot bic swap CTRL_SM_ENABLE!
+    swap CTRL_SM_ENABLE_LSB lshift swap CTRL bic!
   ;
 
   \ Restart state machines
@@ -1063,10 +1077,49 @@ begin-module pio
   ;
   
   \ Write a number of halfwords to instruction memory
-  : instr-mem! ( addr count pio -- )
+  : pio-instr-mem! ( addr count pio -- )
     dup validate-pio
     over 32 u<= averts x-too-many-instructions
     -rot 0 ?do 2dup h@ i rot INSTR_MEM ! 2 + loop 2drop
+  ;
+
+  \ Enable interrupts
+  : pio-interrupt-enable ( interrupt-bits irq pio -- )
+    dup validate-pio
+    over validate-irq
+    2 pick validate-interrupt
+    INTE bis!
+  ;
+
+  \ Disable interrupts
+  : pio-interrupt-disable ( interrupt-bits irq pio -- )
+    dup validate-pio
+    over validate-irq
+    2 pick validate-interrupt
+    INTE bic!
+  ;
+
+  \ Enable forcing interrupts
+  : pio-interrupt-enable-force ( interrupt-bits irq pio -- )
+    dup validate-pio
+    over validate-irq
+    2 pick validate-interrupt
+    INTF bis!
+  ;
+
+  \ Disable forcing interrupts
+  : pio-interrupt-disable-force ( interrupt-bits irq pio -- )
+    dup validate-pio
+    over validate-irq
+    2 pick validate-interrupt
+    INTF bic!
+  ;
+
+  \ Get interrupt status
+  : pio-interrupt@ ( irq pio -- interrupt-bits )
+    dup validate-pio
+    over validate-irq
+    INTS @
   ;
 
 end-module
