@@ -105,11 +105,11 @@ continue-module forth
     0 7 0 PIO0 sm-wrap!
     on 0 PIO0 sm-out-sticky!
     pio-init 2 0 PIO0 sm-instr!
-    pio-code 8 PIO0 instr-mem!
+    pio-code 8 PIO0 pio-instr-mem!
     0 0 PIO0 sm-addr!
     blinker-shade @ 0 PIO0 sm-txf!
     ['] handle-pio PIO0_IRQ0 16 + vector!
-    0 INT_SM_TXNFULL IRQ0 PIO0 INTE bis!
+    0 INT_SM_TXNFULL IRQ0 PIO0 pio-interrupt-enable
     PIO0_IRQ0 NVIC_ISER_SETENA!
     %0001 PIO0 sm-enable
     0 ['] blinker-shade-loop 420 128 512 spawn run
