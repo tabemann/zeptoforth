@@ -24,8 +24,54 @@ compile-to-flash
 begin-module pio
 
   internal import
+  pin import
+
+  \ On/off constants
+  true constant on
+  false constant off
+  
+  \ PIO0 base register
+  $50200000 constant PIO0
+  
+  \ PIO1 base register
+  $50300000 constant PIO1
+
+  \ State machine out of range exception
+  : x-sm-out-of-range ( -- ) ." state machine out of range" cr ;
+
+  \ PIO out of range exception
+  : x-pio-out-of-range ( -- ) ." PIO out of range" cr ;
+
+  \ Too many instructions exception
+  : x-too-many-instructions ( -- ) ." too many PIO instructions" cr ;
+
+  \ Address out of range exception
+  : x-address-out-of-range ( -- ) ." PIO address out of range" cr ;
+
+  \ Too many pins exception
+  : x-too-many-pins ( -- ) ." too many pins" cr ;
+
+  \ Pin out of range exception
+  : x-pin-out-of-range ( -- ) ." pin out of range" cr ;
+
+  \ Clock divisor out of range exception
+  : x-clkdiv-out-of-range ( -- ) ." PIO clock divisor out of range" cr ;
   
   begin-module pio-internal
+
+    \ Validate a PIO
+    : validate-pio ( pio -- )
+      dup PIO0 = swap PIO1 = or averts x-pio-out-of-range
+    ;
+
+    \ Validate a state machine
+    : validate-sm ( state-machine -- ) 4 u< averts x-sm-out-of-range ;
+
+    \ Validate a state machine and PIO
+    : validate-sm-pio ( state-machine pio -- ) validate-pio validate-sm ;
+
+    \ Validate a pin
+    : validate-pin ( pin -- ) 30 u< averts x-pin-out-of-range ;
 
     \ Create a multibit field setter and getter for a PIO
     : make-pio-field ( mask lsb "register" "setter" "getter" -- )
@@ -94,12 +140,6 @@ begin-module pio
     ;
 
   end-module> import
-
-  \ PIO0 base register
-  $50200000 constant PIO0
-  
-  \ PIO1 base register
-  $50300000 constant PIO1
 
   \ PIO0 IRQ0 index
   7 constant PIO0_IRQ0
@@ -910,13 +950,122 @@ begin-module pio
     $07 and 5 lshift swap $1F and 8 lshift or swap $1F and or $E000 or h,
   ;
 
+  \ Enable state machines
+  : sm-enable ( state-machine-bits pio -- )
+    dup validate-pio
+    over %1111 bic 0= averts x-sm-out-of-range
+    dup CTRL_SM_ENABLE@ rot or swap CTRL_SM_ENABLE!
+  ;
+
+  \ Disable state machines
+  : sm-disable ( state-machine-bits pio -- )
+    dup validate-pio
+    over %1111 bic 0= averts x-sm-out-of-range
+    dup CTRL_SM_ENABLE@ rot bic swap CTRL_SM_ENABLE!
+  ;
+
+  \ Restart state machines
+  : sm-restart ( state-machine-bits pio -- )
+    dup validate-pio
+    over %1111 bic 0= averts x-sm-out-of-range
+    CTRL_SM_RESTART!
+  ;
+
+  \ Set the clock divisor for a state machine
+  : sm-clkdiv! ( fractional integral state-machine pio -- )
+    2dup validate-sm-pio
+    2 pick $10000 u< averts x-clkdiv-out-of-range
+    3 pick $100 u< averts x-clkdiv-out-of-range
+    2dup 2>r SM_CLKDIV_INT! 2r> SM_CLKDIV_FRAC!
+  ;
+
+  \ Set the address for a state machine
+  : sm-addr! ( address state-machine pio -- )
+    2dup validate-sm-pio
+    2 pick 32 u< averts x-address-out-of-range
+    SM_ADDR !
+  ;
+
+  \ Set the wrapping of a state machine
+  : sm-wrap! ( bottom-address top-address state-machine pio -- )
+    2dup validate-sm-pio
+    2 pick 32 u< averts x-address-out-of-range
+    3 pick 32 u< averts x-address-out-of-range
+    2dup 2>r SM_EXECCTRL_WRAP_TOP! 2r> SM_EXECCTRL_WRAP_BOTTOM!
+  ;
+
+  \ Set the sticky state of a state machine
+  : sm-out-sticky! ( sticky state-machine pio -- )
+    2dup validate-sm-pio
+    SM_EXECCTRL_OUT_STICKY!
+  ;
+
+  \ Write to the TX FIFO of a state machine
+  : sm-txf! ( x state-machine pio -- )
+    2dup validate-sm-pio
+    TXF !
+  ;
+
+  \ Read from the RX FIFO of a state machine
+  : sm-rxf@ ( x state-machine pio -- )
+    2dup validate-sm-pio
+    RXF @
+  ;
+
+  \ Set pins to PIO mode
+  : pins-pio-alternate ( pin-base pin-count -- )
+    dup 30 u<= averts x-too-many-pins
+    over 30 u< averts x-pin-out-of-range
+    over + swap ?do 6 i alternate-pin loop
+  ;
+
+  \ Set the sideset pins for a state machine
+  : sm-sideset-pins! ( pin-base pin-count state-matchine pio -- )
+    2dup validate-sm-pio
+    2 pin 6 u< averts x-too-many-pins
+    3 pin validate-pin
+    2>r 2dup pins-pio-alternate
+    2r@ SM_PINCTRL_SIDESET_COUNT!
+    2r> SM_PINCTRL_SIDESET_BASE!
+  ;
+
+  \ Set the SET pins for a state machine
+  : sm-set-pins! ( pin-base pin-count state-machine pio -- )
+    2dup validate-sm-pio
+    2 pick 6 u< averts x-too-many-pins
+    3 pick validate-pin
+    2>r 2dup pins-pio-alternate
+    2r@ SM_PINCTRL_SET_COUNT!
+    2r> SM_PINCTRL_SET_BASE!
+  ;
+
+  \ Set the OUT pins for a state machine
+  : sm-out-pins! ( pin-base pin-count state-machine pio -- )
+    2dup validate-sm-pio
+    2 pick 32 u<= averts x-too-many-pins
+    3 pick validate-pin
+    2>r 2dup pins-pio-alternate
+    2r@ SM_PINCTRL_OUT_COUNT!
+    2r> SM_PINCTRL_OUT_BASE!
+  ;
+
+  \ Set the IN pin base for a state machine
+  : sm-in-pin-base! ( pin-base state-machine pio -- )
+    2dup validate-sm-pio
+    2 pick validate-pin
+    SM_PINCTRL_IN_BASE!
+  ;
+
   \ Manually write instructions to a state machine
   : sm-instr! ( addr count state-machine pio -- )
+    2dup validate-sm-pio
     SM_INSTR -rot 0 ?do 2dup h@ swap ! 2 + loop 2drop
   ;
   
   \ Write a number of halfwords to instruction memory
   : instr-mem! ( addr count pio -- )
+    dup validate-pio
+    over 32 u<= averts x-too-many-instructions
     -rot 0 ?do 2dup h@ i rot INSTR_MEM ! 2 + loop 2drop
   ;
 

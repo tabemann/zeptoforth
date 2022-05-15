@@ -21,7 +21,7 @@
 continue-module forth
 
   interrupt import
-  gpio import
+  pin import
   pio import
   task import
   systick import
@@ -63,9 +63,9 @@ continue-module forth
   \ PIO interrupt handler
   : handle-pio ( -- )
     blinker-state @ not if
-      blinker-shade @ 0 PIO0 TXF !
+      blinker-shade @ 0 PIO0 sm-txf!
     else
-      blinker-max-shade @ blinker-shade @ - 0 PIO0 TXF !
+      blinker-max-shade @ blinker-shade @ - 0 PIO0 sm-txf!
     then
     blinker-state @ not blinker-state !
     0 INT_SM_TXNFULL PIO0 INTR !
@@ -98,26 +98,20 @@ continue-module forth
     500 blinker-max-input-shade !
     25 blinker-step-delay !
     0 blinker-shade!
-    %0000 PIO0 CTRL_SM_ENABLE!
-    %0001 PIO0 CTRL_SM_RESTART!
-    6 25 GPIO_CTRL_FUNCSEL!
-    25 bit GPIO_OE_SET !
-    25 bit GPIO_OUT_CLR !
-    781 0 PIO0 SM_CLKDIV_INT!
-    0 0 PIO0 SM_CLKDIV_FRAC!
-    1 0 PIO0 SM_PINCTRL_SET_COUNT!
-    25 0 PIO0 SM_PINCTRL_SET_BASE!
-    0 0 PIO0 SM_EXECCTRL_WRAP_BOTTOM!
-    7 0 PIO0 SM_EXECCTRL_WRAP_TOP!
-    true 0 PIO0 SM_EXECCTRL_OUT_STICKY!
+    %0001 PIO0 sm-disable
+    %0001 PIO0 sm-restart
+    0 758 0 PIO0 sm-clkdiv!
+    25 1 0 PIO0 sm-set-pins!
+    0 7 0 PIO0 sm-wrap!
+    on 0 PIO0 sm-out-sticky!
     pio-init 2 0 PIO0 sm-instr!
     pio-code 8 PIO0 instr-mem!
-    0 0 PIO0 SM_ADDR !
-    blinker-shade @ 0 PIO0 TXF !
+    0 0 PIO0 sm-addr!
+    blinker-shade @ 0 PIO0 sm-txf!
     ['] handle-pio PIO0_IRQ0 16 + vector!
     0 INT_SM_TXNFULL IRQ0 PIO0 INTE bis!
     PIO0_IRQ0 NVIC_ISER_SETENA!
-    %0001 PIO0 CTRL_SM_ENABLE!
+    %0001 PIO0 sm-enable
     0 ['] blinker-shade-loop 420 128 512 spawn run
   ;
 
