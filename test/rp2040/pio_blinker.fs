@@ -43,21 +43,16 @@ continue-module forth
   
   \ Init blinker
   : init-blinker ( -- )
-    %0000 PIO0 CTRL_SM_ENABLE!
-    6 25 GPIO_CTRL_FUNCSEL!
-    25 bit GPIO_OE_SET !
-    25 bit GPIO_OUT_CLR !
-    62500 0 PIO0 SM_CLKDIV_INT!
-    0 0 PIO0 SM_CLKDIV_FRAC!
-    1 0 PIO0 SM_PINCTRL_SET_COUNT!
-    25 0 PIO0 SM_PINCTRL_SET_BASE!
-    0 0 PIO0 SM_EXECCTRL_WRAP_BOTTOM!
-    9 0 PIO0 SM_EXECCTRL_WRAP_TOP!
-    true 0 PIO0 SM_EXECCTRL_OUT_STICKY!
+    %0001 PIO0 sm-disable
+    %0001 PIO0 sm-restart
+    0 62500 0 PIO0 sm-clkdiv!
+    25 1 0 PIO0 sm-set-pins!
+    0 9 0 PIO0 sm-wrap!
+    on 0 PIO0 sm-out-sticky!
     pio-init 2 0 PIO0 sm-instr!
     pio-code 10 PIO0 instr-mem!
-    0 0 PIO0 SM_ADDR !
-    %0001 PIO0 CTRL_SM_ENABLE!
+    0 0 PIO0 sm-addr!
+    %0001 PIO0 sm-enable
   ;
 
 end-module

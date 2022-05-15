@@ -45,7 +45,7 @@ continue-module forth
 
   \ PIO interrupt handler
   : handle-pio ( -- )
-    blinker-vary @ 0 PIO0 TXF !
+    blinker-vary @ 0 PIO0 sm-txf!
     0 INT_SM_TXNFULL PIO0 INTR !
     PIO0_IRQ0 NVIC_ICPR_CLRPEND!
   ;
@@ -53,26 +53,20 @@ continue-module forth
   \ Init blinker
   : init-blinker ( -- )
     500 blinker-vary !
-    %0000 PIO0 CTRL_SM_ENABLE!
-    %0001 PIO0 CTRL_SM_RESTART!
-    6 25 GPIO_CTRL_FUNCSEL!
-    25 bit GPIO_OE_SET !
-    25 bit GPIO_OUT_CLR !
-    62500 0 PIO0 SM_CLKDIV_INT!
-    0 0 PIO0 SM_CLKDIV_FRAC!
-    1 0 PIO0 SM_PINCTRL_SET_COUNT!
-    25 0 PIO0 SM_PINCTRL_SET_BASE!
-    0 0 PIO0 SM_EXECCTRL_WRAP_BOTTOM!
-    7 0 PIO0 SM_EXECCTRL_WRAP_TOP!
-    true 0 PIO0 SM_EXECCTRL_OUT_STICKY!
+    %0001 PIO0 sm-disable
+    %0001 PIO0 sm-restart
+    0 62500 0 PIO0 sm-clkdiv!
+    25 1 0 PIO0 sm-set-pins!
+    0 7 0 PIO0 sm-wrap!
+    on 0 PIO0 sm-out-sticky!
     pio-init 2 0 PIO0 sm-instr!
     pio-code 8 PIO0 instr-mem!
-    0 0 PIO0 SM_ADDR !
+    0 0 PIO0 sm-addr!
     blinker-vary @ 0 PIO0 TXF !
     ['] handle-pio PIO0_IRQ0 16 + vector!
     0 INT_SM_TXNFULL IRQ0 PIO0 INTE bis!
     PIO0_IRQ0 NVIC_ISER_SETENA!
-    %0001 CTRL_SM_ENABLE_MASK CTRL_SM_ENABLE_LSB PIO0 CTRL field!
+    %0001 PIO0 sm-enable
   ;
 
 end-module
