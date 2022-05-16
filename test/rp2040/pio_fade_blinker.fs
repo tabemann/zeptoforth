@@ -68,7 +68,6 @@ continue-module forth
       blinker-max-shade @ blinker-shade @ - 0 PIO0 sm-txf!
     then
     blinker-state @ not blinker-state !
-    0 INT_SM_TXNFULL PIO0 INTR !
     PIO0_IRQ0 NVIC_ICPR_CLRPEND!
   ;
 
