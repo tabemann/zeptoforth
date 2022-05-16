@@ -70,7 +70,7 @@ continue-module forth
     PIO0_IRQ0 NVIC_ICPR_CLRPEND!
   ;
 
-  \ Set the sahding
+  \ Set the shading
   : blinker-shade! ( i -- )
     blinker-max-input-shade @ convert-shade blinker-max-shade !
     convert-shade blinker-shade !
@@ -81,11 +81,11 @@ continue-module forth
     begin
       blinker-max-input-shade @ 0 ?do
 	i blinker-shade!
-	blinker-step-delay @ systick-counter current-task delay
+	systick-counter blinker-step-delay @ current-task delay
       loop
       0 blinker-max-input-shade @ ?do	
 	i blinker-shade!
-	blinker-step-delay @ systick-counter current-task delay
+	systick-counter blinker-step-delay @ current-task delay
       -1 +loop
     again
   ;
