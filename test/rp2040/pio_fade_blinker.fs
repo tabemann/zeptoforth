@@ -21,7 +21,6 @@
 continue-module forth
 
   interrupt import
-  pin import
   pio import
   task import
   systick import
