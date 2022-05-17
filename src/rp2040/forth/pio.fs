@@ -893,12 +893,12 @@ begin-module pio
 
   \ PIO IN instruction
   : in, ( bit-count source -- )
-    $07 and 5 lshift swap 1- $1F and or $4000 or h,
+    $07 and 5 lshift swap $1F and or $4000 or h,
   ;
 
   \ PIO OUT instruction
   : out, ( bit-count destination -- )
-    $07 and 5 lshift swap 1- $1F and or $6000 or h,
+    $07 and 5 lshift swap $1F and or $6000 or h,
   ;
 
   \ PIO PUSH instruction
@@ -939,12 +939,12 @@ begin-module pio
 
   \ PIO IN instruction with delay or side-set
   : in+, ( bit-count delay/side-set source -- )
-    $07 and 5 lshift swap $1F and 8 lshift or swap 1- $1F and or $4000 or h,
+    $07 and 5 lshift swap $1F and 8 lshift or swap $1F and or $4000 or h,
   ;
 
   \ PIO OUT instruction with delay or side-set
   : out+, ( bit-count delay/side-set destination -- )
-    $07 and 5 lshift swap $1F and 8 lshift or swap 1- $1F and or $6000 or h,
+    $07 and 5 lshift swap $1F and 8 lshift or swap $1F and or $6000 or h,
   ;
 
   \ PIO PUSH instruction with delay or side-set
