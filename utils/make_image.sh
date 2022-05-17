@@ -29,12 +29,12 @@ DELAY=35
 
 if [ $IMAGE = 'full' ];
 then
-    DELAY=80
+    DELAY=85
 fi
 
 if [ $IMAGE = 'full_swdcom' ];
 then
-    DELAY=80
+    DELAY=85
 fi
 
 
