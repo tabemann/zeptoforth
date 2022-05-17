@@ -6,7 +6,9 @@ PIO's may have up to 32 PIO instructions in their memory, which are 16 bits in s
 
 Up to four PIO state machines may be enabled, disabled, or reset at a time with `sm-enable`, `sm-disable`, or `sm-restart` respectively. These take a bitset of four bits where the position of each bit corresponds to the index of the state machine to enable, disable, or restart.
 
-Each PIO state machine has an RX FIFO and a TX FIFO of four 32-bit values each. Note that the RX FIFO and TX FIFO on a PIO state machine may be joined into a single unidirectional FIFO consisting of eight 32-bit values. The RX FIFO for a state machine may be pushed to from a state machine's ISR register, which is 32-bits in size. The TX FIFO for a state machine may be pulled from to a state machine's OSR register, which is also 32-bits in size.
+Each PIO state machine has four 32-bit registers, an input shift register (ISR), an output shift register (OSR), an X register, and a Y register. They also have a 5-bit program counter (PC). These are all initialized to zero.
+
+Each PIO state machine has an RX FIFO and a TX FIFO of four 32-bit values each. These are initialized to empty. Note that the RX FIFO and TX FIFO on a PIO state machine may be joined into a single unidirectional FIFO consisting of eight 32-bit values. The RX FIFO for a state machine may be pushed to from a state machine's ISR register, which is 32-bits in size. The TX FIFO for a state machine may be pulled from to a state machine's OSR register, which is also 32-bits in size.
 
 PIO state machines may automatically *pull* from its TX FIFO after a threshold number of bits have been shifted out of its OSR register. They may also automatically *push* to its RX FIFO after a threshold number of bits have been shifted into its ISR register.
 
