@@ -283,92 +283,92 @@ Manually write instructions to a state machine.
 ##### `jmp,`
 ( address condition -- )
 
-PIO JMP instruction.
+PIO JMP instruction. Branch, conditionally or unconditionally. *Condition* is the condition, with or without a decrement, to apply to whether to branch. *Address* is the PIO instruction address to branch to.
 
 ##### `wait,`
 ( index source polarity -- )
 
-PIO WAIT instruction.
+PIO WAIT instruction. Wait for a condition to be true. *Polarity* is whether to wait for a 1 or a 0. *Source* is whether to wait for an absolute GPIO pin, a pin relative to the absolute `IN` pin base, or a PIO IRQ index. *Index* is the pin or PIO IRQ index to wait for.
 
 ##### `in,`
 ( bit-count source -- )
 
-PIO IN instruction.
+PIO IN instruction. Input bits from a source into the current state machine's ISR register. *Source* is the source to shift bits into the ISR register for the current state machine into, according to the configured shift in direction. *Bit-count* is how many bits to shift, a value from 1 to 32. The ISR bit shift count is increased by the bit count, saturating at 32.
 
 ##### `out,`
 ( bit-count destination -- )
 
-PIO OUT instruction.
+PIO OUT instruction. Output bits from the current state machine's OSR register to a destination. *Destination* is the destination to shift bits into from the OSR register for the current state machine, according to the configured shift out direction. *Bit-count* is how many bits to shift, value from 1 to 32. The OSR bit shift count is increased by the bit count, saturating at 32.
 
 ##### `push,`
 ( block if-full -- )
 
-PIO PUSH instruction.
+PIO PUSH instruction. Push the contents of the current state machine's ISR register into the current state machine's RX FIFO and reset the ISR register to all zeros. *If-full* is the condition as to whether to conditionally push. *Block* is whether to stall if pushing is not possible due to the RX FIFO being full.
 
 ##### `pull,`
 ( block if-empty -- )
 
-PIO PULL instruction.
+PIO PULL instruction. Pull a 32-bit value from the current state machine's TX FIFO into the current state machine's OSR register. *If-empty* is the condition as to whether to conditionally pull. *Block* is whether to stall if pulling is not possible due to the TX FIFO being empty.
 
 ##### `mov,`
 ( source op destination -- )
 
-PIO MOV instruction.
+PIO MOV instruction. Transfer a value from *source* to *destination*, applying *op* (which may be a no-op) to the value in the process.
 
 ##### `irq,`
 ( index set/wait -- )
 
-PIO IRQ instruction.
+PIO IRQ instruction. Set or wait on a PIO IRQ *index*, from 0 to 7 before `REL` is applied. Note that `REL` can be used to mark a PIO IRQ as relative to the current state machine ID by adding the state machine ID to the lower two bits of the IRQ index, by way of module-4 addition on the two LSB's.
 
 ##### `set,`
 ( data destination -- )
 
-PIO SET instruction.
+PIO SET instruction. Set *destination* to *data*, which is a value from $00 to $1F.
 
 ##### `jmp+,`
 ( address delay/side-set condition -- )
 
-PIO JMP instruction with delay or side-set.
+PIO JMP instruction with delay or side-set. Branch, conditionally or unconditionally. *Condition* is the condition, with or without a decrement, to apply to whether to branch. *Address* is the PIO instruction address to branch to. *Delay/side-set* is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.
 
 ##### `wait+,`
 ( index delay/side-set source polarity -- )
 
-PIO WAIT instruction with delay or side-set.
+PIO WAIT instruction with delay or side-set. Wait for a condition to be true. *Polarity* is whether to wait for a 1 or a 0. *Source* is whether to wait for an absolute GPIO pin, a pin relative to the absolute `IN` pin base, or a PIO IRQ index. *Index* is the pin or PIO IRQ index to wait for. *Delay/side-set* is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.
 
 ##### `in+,`
 ( bit-count delay/side-set source -- )
 
-PIO IN instruction with delay or side-set.
+PIO IN instruction with delay or side-set. Input bits from a source into the current state machine's ISR register. *Source* is the source to shift bits into the ISR register for the current state machine into, according to the configured shift in direction. *Bit-count* is how many bits to shift, a value from 1 to 32. The ISR bit shift count is increased by the bit count, saturating at 32. *Delay/side-set* is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.
 
 ##### `out+,`
 ( bit-count delay/side-set destination -- )
 
-PIO OUT instruction with delay or side-set.
+PIO OUT instruction with delay or side-set. Output bits from the current state machine's OSR register to a destination. *Destination* is the destination to shift bits into from the OSR register for the current state machine, according to the configured shift out direction. *Bit-count* is how many bits to shift, value from 1 to 32. The OSR bit shift count is increased by the bit count, saturating at 32. *Delay/side-set* is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.
 
 ##### `push+,`
 ( delay/side-set block if-full -- )
 
-PIO PUSH instruction with delay or side-set.
+PIO PUSH instruction with delay or side-set. Push the contents of the current state machine's ISR register into the current state machine's RX FIFO and reset the ISR register to all zeros. *If-full* is the condition as to whether to conditionally push. *Block* is whether to stall if pushing is not possible due to the RX FIFO being full. *Delay/side-set* is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.
 
 ##### `pull+,`
 ( delay/side-set block if-empty -- )
 
-PIO PULL instruction with delay or side-set.
+PIO PULL instruction with delay or side-set. Pull a 32-bit value from the current state machine's TX FIFO into the current state machine's OSR register. *If-empty* is the condition as to whether to conditionally pull. *Block* is whether to stall if pulling is not possible due to the TX FIFO being empty.
 
 ##### `mov+,`
 ( source delay/side-set op destination -- )
 
-PIO MOV instruction with delay or side-set.
+PIO MOV instruction with delay or side-set. Transfer a value from *source* to *destination*, applying *op* (which may be a no-op) to the value in the process. *Delay/side-set* is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.
 
 ##### `irq+,`
 ( index delay/side-set set/wait -- )
 
-PIO IRQ instruction with delay or side-set.
+PIO IRQ instruction with delay or side-set. Set or wait on a PIO IRQ *index*, from 0 to 7 before `REL` is applied. Note that `REL` can be used to mark a PIO IRQ as relative to the current state machine ID by adding the state machine ID to the lower two bits of the IRQ index, by way of module-4 addition on the two LSB's. *Delay/side-set* is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.
 
 ##### `set+,`
 ( data delay/side-set destination -- )
 
-PIO SET instruction with delay or side-set.
+PIO SET instruction with delay or side-set. Set *destination* to *data*, which is a value from $00 to $1F. *Delay/side-set* is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.
 
 ##### `COND_ALWAYS`
 ( -- condition )
