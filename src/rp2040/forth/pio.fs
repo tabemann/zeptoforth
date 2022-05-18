@@ -1001,6 +1001,7 @@ begin-module pio
     2dup validate-sm-pio
     2 pick $10000 u<= averts x-clkdiv-out-of-range
     3 pick $100 u< averts x-clkdiv-out-of-range
+    3 pick 0<> 3 pick $FFFF and 0= and triggers x-clkdiv-out-of-range
     2dup 2>r SM_CLKDIV_INT! 2r> SM_CLKDIV_FRAC!
   ;
 
