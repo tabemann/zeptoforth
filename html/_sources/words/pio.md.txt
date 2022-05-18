@@ -12,7 +12,7 @@ Each PIO state machine has an RX FIFO and a TX FIFO of four 32-bit values each. 
 
 PIO state machines may automatically *pull* from its TX FIFO after a threshold number of bits have been shifted out of its OSR register. They may also automatically *push* to its RX FIFO after a threshold number of bits have been shifted into its ISR register.
 
-The clock divider for a state machine is set with `sm-clkdiv!`, which takes a fractional component (from 0 to 255) and an integral component (from 0 to 65536) to divide the system clock by for the clock rate of the state machine in question. Note that an integral component of 0 is a special value which must be accompanied by a fractional component of 0 which indicates to disable the clock divider.
+The clock divider for a state machine is set with `sm-clkdiv!`, which takes a fractional component (from 0 to 255) and an integral component (from 0 to 65536) to divide the system clock by for the clock rate of the state machine in question. Note that if the integral clock divisor is 0 it is treated as 65536 and the fractional clock divisor must be 0.
 
 PIO state machines may either have an optional delay associated with each PIO instruction, or may have *sideset* enabled, where they may set the state of up to five output pins each cycle simultaneous with whatever other operations they are carrying out. `sm-delay-enable` is used to enable delay mode and `sm-sideset-enable` is to enable sideset mode.
 
