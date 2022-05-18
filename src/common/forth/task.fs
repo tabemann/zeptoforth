@@ -207,15 +207,6 @@ begin-module task
 
     end-structure
 
-    \ Auxiliary main task dictionary size in bytes
-    256 constant aux-main-task-dict-size
-
-    \ Auxiliary main task data stack size in bytes
-    128 constant aux-main-task-stack-size
-
-    \ Auxiliary main task return stack size in bytes
-    512 constant aux-main-task-rstack-size
-
   end-module> import
 
   \ The currently waited-for lock
