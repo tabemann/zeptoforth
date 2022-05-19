@@ -1026,16 +1026,10 @@ begin-module pio
     SM_EXECCTRL_OUT_STICKY!
   ;
 
-  \ Set delay enable (sideset disable) state for a statemachine
-  : sm-delay-enable ( state-machine pio -- )
+  \ Set sideset highest-bit enable for a state machine
+  : sm-sideset-high-enable! ( on/off state-machine pio -- )
     2dup validate-sm-pio
-    off -rot SM_EXECCTRL_SIDE_EN!
-  ;
-
-  \ Set sideset enable (delay disable) state for a state machine
-  : sm-sideset-enable ( state-machine pio -- )
-    2dup validate-sm-pio
-    on -rot SM_EXECCTRL_SIDE_EN!
+    SM_EXECCTRL_SIDE_EN!
   ;
 
   \ Set OSR threshold before autopull or conditional pull will take place; value
@@ -1078,8 +1072,8 @@ begin-module pio
   \ Set the sideset pins for a state machine
   : sm-sideset-pins! ( pin-base pin-count state-matchine pio -- )
     2dup validate-sm-pio
-    2 pin 6 u< averts x-too-many-pins
-    3 pin validate-pin
+    2 pick 6 u< averts x-too-many-pins
+    3 pick validate-pin
     2>r 2dup pins-pio-alternate
     2r@ SM_PINCTRL_SIDESET_COUNT!
     2r> SM_PINCTRL_SIDESET_BASE!
