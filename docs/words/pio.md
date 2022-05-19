@@ -14,7 +14,7 @@ PIO state machines may automatically *pull* from its TX FIFO after a threshold n
 
 The clock divider for a state machine is set with `sm-clkdiv!`, which takes a fractional component (from 0 to 255) and an integral component (from 0 to 65536) to divide the system clock by for the clock rate of the state machine in question. Note that if the integral clock divisor is 0 it is treated as 65536, and in those cases the fractional clock divisor must be 0.
 
-PIO state machines may either have an optional delay associated with each PIO instruction, or may have *sideset* enabled, where they may set the state of up to five output pins each cycle simultaneous with whatever other operations they are carrying out. `sm-delay-enable` is used to enable delay mode and `sm-sideset-enable` is to enable sideset mode.
+PIO state machines may either have an optional delay associated with each PIO instruction, or may have *sideset* enabled, where they may set the state of up to five output pins each cycle simultaneous with whatever other operations they are carrying out. `sm-sideset-pins!` sets the number of higher bits in this field will be used for sideset, with the remaining lower bits used for delay.
 
 PIO assembler words compile PIO instructions to `here` as 16 bits per instruction. There are two different basic types of PIO instructions - instructions without an associated delay or sideset, and instructions with an associated delay or sideset. The latter kind of instruction is marked with an `+` in its assembling word.
 
@@ -180,15 +180,10 @@ Set the wrapping of a state machine.
 
 Set the sticky state of a state machine.
 
-##### `sm-delay-enable`
-( state-machine pio -- )
+##### `sm-sideset-high-enable!`
+( on/off state-machine pio -- )
 
-Set delay enable (sideset disable) state for a state-machine.
-
-##### `sm-sideset-enable`
-( state-machine pio -- )
-
-Set sideset enable (delay disable) state for a state machine.
+Set sideset highest-bit enable for a state machine.
 
 ##### `sm-pull-threshold!`
 ( threshold state-machine pio -- )
