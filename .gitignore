@@ -3,3 +3,7 @@
 *.map
 *.list
 *.lst
+*.bin
+*.uf2
+*.elf
+*.ihex
