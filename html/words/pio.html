@@ -211,6 +211,26 @@
 <p>( on/off state-machine pio – )</p>
 <p>Set sideset highest-bit enable for a state machine.</p>
 </section>
+<section id="sm-sideset-pindir">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-sideset-pindir!</span></code><a class="headerlink" href="#sm-sideset-pindir" title="Permalink to this headline">¶</a></h4>
+<p>( on/off state-machine pio – )</p>
+<p>Set sideset data assserted to pin directions pit.</p>
+</section>
+<section id="sm-jmp-pin">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-jmp-pin!</span></code><a class="headerlink" href="#sm-jmp-pin" title="Permalink to this headline">¶</a></h4>
+<p>( pin state-machine pio – )</p>
+<p>Set GPIO number to use as condition for JMP PIN.</p>
+</section>
+<section id="sm-inline-out-enable">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-inline-out-enable!</span></code><a class="headerlink" href="#sm-inline-out-enable" title="Permalink to this headline">¶</a></h4>
+<p>( pin state-machine pio – )</p>
+<p>Set a bit of OUT data to use as an inline OUT enable.</p>
+</section>
+<section id="sm-inline-out-enable-clear">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-inline-out-enable-clear</span></code><a class="headerlink" href="#sm-inline-out-enable-clear" title="Permalink to this headline">¶</a></h4>
+<p>( state-machine pio – )</p>
+<p>Disable using a bit of OUT data as an inline OUT enable.</p>
+</section>
 <section id="sm-pull-threshold">
 <h4><code class="docutils literal notranslate"><span class="pre">sm-pull-threshold!</span></code><a class="headerlink" href="#sm-pull-threshold" title="Permalink to this headline">¶</a></h4>
 <p>( threshold state-machine pio – )</p>
@@ -736,6 +756,11 @@
 <h4><code class="docutils literal notranslate"><span class="pre">x-threshold-out-of-range</span></code><a class="headerlink" href="#x-threshold-out-of-range" title="Permalink to this headline">¶</a></h4>
 <p>( – )</p>
 <p>Buffer threshold out of range exception.</p>
+</section>
+<section id="x-bit-out-of-range">
+<h4>`x-bit-out-of-range<a class="headerlink" href="#x-bit-out-of-range" title="Permalink to this headline">¶</a></h4>
+<p>( – )</p>
+<p>Bit out of range exception.</p>
 </section>
 </section>
 </section>

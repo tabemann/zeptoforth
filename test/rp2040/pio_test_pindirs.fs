@@ -22,7 +22,7 @@ continue-module forth
 
   pio import
   pin import
-
+  
   2 constant your-pin \ Change this to the desired GPIO pin
 
   \ Our initial PIO instructions
@@ -32,22 +32,21 @@ continue-module forth
 
   \ Our PIO program
   create pio-code
-  %00001 %10000 SET_PINDIRS set+,
-  MOV_SRC_NULL %10000 MOV_OP_NONE MOV_DEST_X mov+,
-  %00001 %00000 SET_PINDIRS set+,
-  MOV_SRC_NULL %00000 MOV_OP_NONE MOV_DEST_X mov+,
-
+  %00001 %10000 SET_PINS set+,
+  %00000 %10000 SET_PINS set+,
+  
   \ Initialize our test
   : init-test ( -- )
     %0001 PIO0 sm-disable
     %0001 PIO0 sm-restart
+    on 0 PIO0 sm-sideset-pindir!
     0 1 0 PIO0 sm-clkdiv!
-    your-pin 1 0 PIO0 sm-set-pins!
     your-pin 1 0 PIO0 sm-sideset-pins!
-    0 3 0 PIO0 sm-wrap!
+    your-pin 1 0 PIO0 sm-set-pins!
+    0 1 0 PIO0 sm-wrap!
     on 0 PIO0 sm-out-sticky!
     pio-init 2 0 PIO0 sm-instr!
-    pio-code 4 PIO0 pio-instr-mem!
+    pio-code 2 PIO0 pio-instr-mem!
     your-pin fast-pin
     0 0 PIO0 sm-addr!
     %0001 PIO0 sm-enable

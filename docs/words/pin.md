@@ -58,6 +58,16 @@ Set *pin* to be pull-down.
 
 Set *pin* to be floating.
 
+##### `slow-pin`
+( pin -- )
+
+Set *pin* to have a slow data rate.
+
+##### `fast-pin`
+( pin -- )
+
+Set *pin* to have a fast data rate.
+
 ##### `pin!`
 ( state pin -- )
 

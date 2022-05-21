@@ -185,6 +185,26 @@ Set the sticky state of a state machine.
 
 Set sideset highest-bit enable for a state machine.
 
+##### `sm-sideset-pindir!`
+( on/off state-machine pio -- )
+
+Set sideset data assserted to pin directions pit.
+
+##### `sm-jmp-pin!`
+( pin state-machine pio -- )
+
+Set GPIO number to use as condition for JMP PIN.
+
+##### `sm-inline-out-enable!`
+( pin state-machine pio -- )
+
+Set a bit of OUT data to use as an inline OUT enable.
+
+##### `sm-inline-out-enable-clear`
+( state-machine pio -- )
+
+Disable using a bit of OUT data as an inline OUT enable.
+
 ##### `sm-pull-threshold!`
 ( threshold state-machine pio -- )
 
@@ -708,3 +728,8 @@ Interrupt out of range exception.
 ( -- )
 
 Buffer threshold out of range exception.
+
+##### `x-bit-out-of-range
+( -- )
+
+Bit out of range exception.

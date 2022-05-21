@@ -21,6 +21,7 @@
 continue-module forth
 
   pio import
+  pin import
   
   2 constant your-pin \ Change this to the desired GPIO pin
 
@@ -46,6 +47,7 @@ continue-module forth
     on 0 PIO0 sm-out-sticky!
     pio-init 2 0 PIO0 sm-instr!
     pio-code 4 PIO0 pio-instr-mem!
+    your-pin fast-pin
     0 0 PIO0 sm-addr!
     %0001 PIO0 sm-enable
   ;

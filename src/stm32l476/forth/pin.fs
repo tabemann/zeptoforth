@@ -138,6 +138,20 @@ begin-module pin
     NO_PULL_UP_PULL_DOWN swap extract-both PUPDR!
   ;
 
+  \ Set a pin to have a slow slew rate
+  : slow-pin ( pin -- )
+    dup validate-pin
+    dup extract-gpio gpio-clock-enable
+    LOW_SPEED swap extract-both OSPEEDR!
+  ;
+
+  \ Set a pin to have a high slew rate
+  : fast-pin ( pin -- )
+    dup validate-pin
+    dup extract-gpio gpio-clock-enable
+    VERY_HIGH_SPEED swap extract-both OSPEEDR!
+  ;
+  
   \ Set the output of a pin
   : pin! ( state pin -- )
     dup validate-pin

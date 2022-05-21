@@ -69,6 +69,9 @@ begin-module pio
 
   \ Buffer threshold out of range exception
   : x-threshold-out-of-range ( -- ) ." threshold out of range" cr ;
+
+  \ Bit out of range exception
+  : x-bit-out-of-range ( -- ) ." bit out of range" cr ;
   
   begin-module pio-internal
 
@@ -1030,6 +1033,33 @@ begin-module pio
   : sm-sideset-high-enable! ( on/off state-machine pio -- )
     2dup validate-sm-pio
     SM_EXECCTRL_SIDE_EN!
+  ;
+
+  \ Set sideset data asserted to pin directions bit
+  : sm-sideset-pindir! ( on/off state-machine pio -- )
+    2dup validate-sm-pio
+    SM_EXECCTRL_SIDE_PINDIR!
+  ;
+
+  \ Set GPIO number to use as condition for JMP PIN
+  : sm-jmp-pin! ( pin state-machine pio -- )
+    2dup validate-sm-pio
+    2 pick 32 u< averts x-pin-out-of-range
+    SM_EXECCTRL_JMP_PIN!
+  ;
+
+  \ Set a bit of OUT data to use as an inline OUT enable
+  : sm-inline-out-enable! ( pin state-machine pio -- )
+    2dup validate-sm-pio
+    2 pick 32 u< averts x-bit-out-of-range
+    2dup 2>r SM_EXECCTRL_OUT_EN_SEL!
+    on 2r> SM_EXECCTRL_INLINE_OUT_EN!
+  ;
+
+  \ Disable using a bit of OUT data as an inline OUT enable
+  : sm-inline-out-enable-clear ( state-machine pio -- )
+    2dup validate-sm-pio
+    off -rot SM_EXECCTRL_INLINE_OUT_EN!
   ;
 
   \ Set OSR threshold before autopull or conditional pull will take place; value

@@ -98,6 +98,18 @@ begin-module pin
     false swap PADS_BANK0_PDE!
   ;
 
+  \ Set a pin to have a slow slew rate
+  : slow-pin ( pin -- )
+    dup validate-pin
+    false swap PADS_BANK0_SLEWFAST!
+  ;
+
+  \ Set a pin to have a high slew rate
+  : fast-pin ( pin -- )
+    dup validate-pin
+    true swap PADS_BANK0_SLEWFAST!
+  ;
+
   \ Set the output of a pin
   : pin! ( state pin -- )
     dup validate-pin
