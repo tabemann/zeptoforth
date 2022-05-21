@@ -31,16 +31,16 @@ continue-module forth
 
   \ Our PIO program
   create pio-code
-  %00001 SET_PINDIRS set,
+  %00001 %10000 SET_PINDIRS set+,
   MOV_SRC_NULL %10000 MOV_OP_NONE MOV_DEST_X mov+,
-  %00001 SET_PINDIRS set,
+  %00001 %00000 SET_PINDIRS set+,
   MOV_SRC_NULL %00000 MOV_OP_NONE MOV_DEST_X mov+,
 
   \ Initialize our test
   : init-test ( -- )
     %0001 PIO0 sm-disable
     %0001 PIO0 sm-restart
-    0 10 0 PIO0 sm-clkdiv!
+    0 1 0 PIO0 sm-clkdiv!
     your-pin 1 0 PIO0 sm-set-pins!
     your-pin 1 0 PIO0 sm-sideset-pins!
     0 3 0 PIO0 sm-wrap!
