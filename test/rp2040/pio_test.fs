@@ -40,7 +40,7 @@ continue-module forth
   : init-test ( -- )
     %0001 PIO0 sm-disable
     %0001 PIO0 sm-restart
-    0 10 0 PIO0 sm-clkdiv!
+    0 1 0 PIO0 sm-clkdiv!
     your-pin 1 0 PIO0 sm-set-pins!
     0 3 0 PIO0 sm-wrap!
     on 0 PIO0 sm-out-sticky!
