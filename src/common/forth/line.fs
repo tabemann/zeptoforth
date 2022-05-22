@@ -574,7 +574,7 @@ begin-module line-internal
   \ Set upload mode
   : handle-set-upload ( -- )
     0 line @ line-index-ptr @ ! 0 line @ line-count-ptr @ !
-    0 line @ line-offset ! 0 line @ line-count !
+    0 line @ line-offset h! 0 line @ line-count h!
     update-line
     s" entering upload mode " tuck type
     offset-position go-to-coord
