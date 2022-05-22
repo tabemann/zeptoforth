@@ -2,6 +2,8 @@
 
 zeptoforth is a Cortex-M Forth, currently targeted at the Raspberry Pi Pico (but it should also work with other RP2040 boards using compatible Winbond Quad SPI flash) and the STM32L476, STM32F407, and STM32F746 DISCOVERY boards. Ports to more platforms are on hold due to the current chip shortage (aside from a possible port to an STM32H7 board I have lying around somewhere).
 
+API documentation is available [on GitHub](https://github.com/tabemann/zeptoforth/tree/master/docs/words) and in the docs directory on the build tarballs (which is the same as the html directory in git and in the source tarballs available on GitHub generated from that, which is built from the API documentation in Markdown format in the docs directory in git). There is also a [wiki on GitHub](https://github.com/tabemann/zeptoforth/wiki) outlining zeptoforth and providing useful guides to it.
+
 Its kernel has versions written in Thumb-1 assembly, for the Raspberry Pi Pico, and Thumb-2 assembly, for the STM32L476, STM32F407, and STM32F746 DISCOVERY boards. and there is a body of other core code that is loaded after it is loaded which is written in Forth.
 
 The library of code included along with the zeptoforth kernel, which is present in its full form in `full` and `full_swdcom` builds, includes the following:
@@ -83,7 +85,7 @@ to use the default version or:
 
 This build a `zeptoforth.<platform>.bin`, a `zeptoforth.<platform>.ihex`, and a `zeptoforth.<platform>.elf` file for each supported platform. Additionally a `zeptoforth.rp2040.uf2` file will be built for the rp2040 platform. The `zeptoforth.<platform>.elf` file is of use if one wishes to do source debugging with gdb of the zeptoforth kernel, otherwise disregard it.
 
-To use the board on Linux, download and install e4thcom (at https://wiki.forth-ev.de/doku.php/en:projects:e4thcom), swdcom (at http://github.com/crest/swdcom), GNU Screen (at https://www.gnu.org/software/screen/), or picocom (at https://github.com/npat-efault/picocom). To use the board on xBSD, the same applies, except that e4thcom does not work under xBSD. To use the board on Windows, it is highly recommend one uses escom (https://github.com/Edzelf/escom), which provides e4thcom-like functionality for Windows.
+To use the board on Linux, download and install [e4thcom](https://wiki.forth-ev.de/doku.php/en:projects:e4thcom), [swdcom](https://github.com/crest/swdcom), GNU Screen (at https://www.gnu.org/software/screen/), or picocom (at https://github.com/npat-efault/picocom). To use the board on xBSD, the same applies, except that e4thcom does not work under xBSD. To use the board on Windows, it is highly recommend one uses [escom](https://github.com/Edzelf/escom), which provides e4thcom-like functionality for Windows.
 
 The following applies if one is using e4thcom: If one is using an STM32F407 DISCOVERY or Raspberry Pi Pico board, attach a USB-to-serial converter to your machine (make sure you have the proper permissions to access its device file) and, for the STM32F407 DISCOVERY board, attach the RXD pin on the converter to PA2 on the board and the TXD pin on the converter to PA3 on the board or, for the Raspberry Pico, attach the RXD pin on the converter to GPIO0 on the board and the TXD pin on the converter to GPIO1 on the board with jumper cables. Then, from the zeptoforth base directory execute:
 
