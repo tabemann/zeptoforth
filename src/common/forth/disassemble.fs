@@ -310,7 +310,7 @@ begin-module disassemble-internal
 	  dup %11111111 and 0 = if
 	    ." UNPREDICTABLE" drop
 	  else
-	    dup 16 lshift val.
+	    16 lshift val. \ Removed up
 	  then
 	endof
 	%10 of
