@@ -33,7 +33,7 @@ void register_handler(handler_t handler, uint16_t mask, uint16_t key) {
     uint16_t instr = ((uint16_t)i & ~mask) | (key & mask);
     if(state.handlers[instr] != default_handler &&
        state.handlers[instr] != handler) {
-      fprintf(stderr, "OVERLAPPING HANDLERS: mask: %04x key: %04x i: %04x\n",
+      fprintf(stderr, "OVERLAPPING HANDLERS: mask: %04X key: %04X i: %04X\n",
 	      (uint32_t)mask, (uint32_t)key, (uint32_t)i);
       exit(1);
     }
@@ -43,14 +43,14 @@ void register_handler(handler_t handler, uint16_t mask, uint16_t key) {
 
 /* Default handler */
 void default_handler(uint16_t instr) {
-  fprintf(stderr, "UNRECOGNIZED INSTRUCTION: %04x @ %08x\n",
+  fprintf(stderr, "UNRECOGNIZED INSTRUCTION: %04X @ %08X\n",
 	  (uint32_t)instr, state.registers[15]);
   exit(1);
 }
 
 /* Unaligned access */
 void unaligned_access(uint32_t address) {
-  fprintf(stderr, "UNALIGNED ACCESS: %08x\n", address);
+  fprintf(stderr, "UNALIGNED ACCESS: %08X\n", address);
   exit(1);
 }
 
