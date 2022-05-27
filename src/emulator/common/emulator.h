@@ -106,6 +106,9 @@ uint32_t load_32(uint32_t address);
 /* Load peripheral */
 uint32_t load_peripheral(uint32_t address, int bits);
 
+/* Load common peripheral */
+uint32_t load_common_peripheral(uint32_t address, int bits);
+
 /* Store byte */
 void store_8(uint32_t address, uint8_t value);
 
@@ -117,6 +120,15 @@ void store_32(uint32_t address, uint32_t value);
 
 /* Store peripheral */
 void store_peripheral(uint32_t address, uint32_t value, int bits);
+
+/* Store common peripheral */
+void store_common_peripheral(uint32_t address, uint32_t value, int bits);
+
+/* Reset */
+void reset(void);
+
+/* Common reset */
+void common_reset(void);
 
 /* Load an image into flash */
 void load_image(int argc, char** argv);

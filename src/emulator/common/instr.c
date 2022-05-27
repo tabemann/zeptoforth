@@ -36,6 +36,7 @@ extern state_t state;
 #define BF_8_3(instr) ((uint32_t)(((instr) >> 8) & 0x7))
 #define BF_0_7(instr) ((uint32_t)((instr) & 0x7F))
 #define BF_0_8(instr) ((uint32_t)((instr) & 0xFF))
+#define BF_0_10(instr) ((uint32_t)((instr) & 0x3FF))
 #define BF_0_11(instr) ((uint32_t)((instr) & 0x7FF))
 #define BF_3_4(instr) ((uint32_t)(((instr) >> 3) & 0xF))
 #define BF_6_5(instr) ((uint32_t)(((instr) >> 6) & 0x1F))
@@ -113,27 +114,27 @@ uint32_t check_sub_oveflow(uint32_t result, uint32_t dest, uint32_t src) {
 }
 
 /* Update the APSR for an ADD */
-#define UPDATE_APSR_ADD(result, temp, src0_value, src1_value)	\
-  (state.apsr =							\
-   ((result) >> 31 ? APSR_N : 0) |				\
-   ((result) == 0 ? APSR_Z : 0) |				\
-   ((temp) >> 32 ? APSR_C : 0) |				\
-   check_add_overflow((result), (src0_value), (src1_value)))
+#define UPDATE_APSR_ADD(result, temp, src0_value, src1_value)		\
+  {state.apsr =								\
+      ((result) >> 31 ? APSR_N : 0) |					\
+      ((result) == 0 ? APSR_Z : 0) |					\
+      ((temp) >> 32 ? APSR_C : 0) |					\
+      check_add_overflow((result), (src0_value), (src1_value));}
 
 /* Update the APSR for an ADD */
-#define UPDATE_APSR_SUB(result, temp, src0_value, src1_value)	\
-  (state.apsr =							\
-   ((result) >> 31 ? APSR_N : 0) |				\
-   ((result) == 0 ? APSR_Z : 0) |				\
-   ((temp) >> 32 ? APSR_C : 0) |				\
-   check_sub_overflow((result), (src0_value), (src1_value)))
+#define UPDATE_APSR_SUB(result, temp, src0_value, src1_value)		\
+  {state.apsr =								\
+      ((result) >> 31 ? APSR_N : 0) |					\
+      ((result) == 0 ? APSR_Z : 0) |					\
+      ((temp) >> 32 ? APSR_C : 0) |					\
+      check_sub_overflow((result), (src0_value), (src1_value));}
 
 /* Update the APSR for bit operations */
 #define UPDATE_APSR_BIT(result)		   \
-  (state.apsr =				   \
-   ((result) >> 31 ? APSR_N : 0) |	   \
-   ((result) == 0 ? APSR_Z : 0) |	   \
-   (state.apsr & (APSR_C | APSR_V)))
+  {state.apsr =				   \
+      ((result) >> 31 ? APSR_N : 0) |	   \
+      ((result) == 0 ? APSR_Z : 0) |	   \
+      (state.apsr & (APSR_C | APSR_V));}
 
 /* Print the APSR */
 void print_apsr(void) {
@@ -378,7 +379,7 @@ void instr_asr_reg_1(uint16_t instr) {
   state.apsr =
     (result >> 31 ? APSR_N : 0) |
     (result == 0 ? APSR_Z : 0) |
-    (rn_value ? ((rdn_value >> (rm_value - 1)) & 0x1 ? APSR_C : 0) : 0) |
+    (rm_value ? ((rdn_value >> (rm_value - 1)) & 0x1 ? APSR_C : 0) : 0) |
     (state.apsr & APSR_V);
 #ifdef TRACE
   printf("%08X: %04X      ASRS R%d (%d $%08X), R%d (%d $%08X) => %d $%08X ",
@@ -707,7 +708,8 @@ void instr_ldmia_1(uint16_t instr) {
   uint32_t bitmap = BF_0_8(instr);
   uint32_t addr = state.registers[mem];
 #ifdef TRACE
-  printf("%08X: %04X      LDMIA R%d", state.registers[PC], instr, mem);
+  printf("%08X: %04X      LDMIA R%d ($%08X)", state.registers[PC], instr, mem,
+	 addr);
   if(!((1 << mem) & bitmap)) {
     printf("!");
   }
@@ -834,142 +836,276 @@ void instr_ldr_imm_1_w(uint16_t instr) {
   uint32_t rt = BF_0_3(instr);
   uint32_t rn = BF_3_3(instr);
   uint32_t imm = BF_6_5(instr) << 2;
-  uint32_t addr = state.registers[rn] + imm;
+  uint32_t rn_value = state.registers[rn];
+  uint32_t addr = rn_value + imm;
+#ifdef TRACE
+  uint32 saved_pc = state.registers[PC];
+#endif
   ADVANCE_PC_2;
   state.registers[rt] = load_32(addr);
+#ifdef TRACE
+  printf("%08X: %04X      LDR R%d, [R%d (%d $%08X), #%d $%08X] => %d $%08X ",
+	 saved_pc, instr, rt, rn, (int32_t)rn_value, rn_value,
+	 (int32_t)imm, imm,
+	 (int32_t)state.registers[rt], state.registers[rt]);
+  print_apsr();
+#endif
 }
 
 void instr_ldr_imm_2_w(uint16_t instr) {
   uint32_t rt = BF_8_3(instr);
   uint32_t imm = BF_0_8(instr) << 2;
   uint32_t addr = state.registers[SP] + imm;
+#ifdef TRACE
+  uint32 saved_pc = state.registers[PC];
+#endif
   ADVANCE_PC_2;
   state.registers[rt] = load_32(addr);
+#ifdef TRACE
+  printf("%08X: %04X      LDR R%d, [SP (%d $%08X), #%d $%08X] => %d $%08X ",
+	 saved_pc, instr, rt, (int32_t)state.registers[SP],
+	 state.registers[SP], (int32_t)imm, imm,
+	 (int32_t)state.registers[rt], state.registers[rt]);
+  print_apsr();
+#endif
 }
 
 void instr_ldr_lit_1_w(uint16_t instr) {
   uint32_t rt = BF_8_3(instr);
   uint32_t imm = BF_0_8(instr) << 2;
   uint32_t addr = (((state.registers[PC] + 1) | 0x3) + 1) + imm;
+#ifdef TRACE
+  uint32 saved_pc = state.registers[PC];
+#endif
   ADVANCE_PC_2;
   state.registers[rt] = load_32(addr);
+#ifdef TRACE
+  printf("%08X: %04X        LDR R%d, #%08X => %d $%08X ",
+	 saved_pc, instr, rt, addr, (int32_t)state.registers[rt],
+	 state.registers[rt]);
+  print_apsr();
+#endif
 }
 
 void instr_ldr_reg_1_w(uint16_t instr) {
   uint32_t rt = BF_0_3(instr);
   uint32_t rn = BF_3_3(instr);
   uint32_t rm = BF_6_3(instr);
-  uint32_t addr = state.registers[rn] + state.registers[rm];
+  uint32_t rn_value = state.registers[rn];
+  uint32_t rm_value = state.registers[rm];
+  uint32_t addr = rn_value + rm_value;
+#ifdef TRACE
+  uint32_t saved_pc = state.registers[PC];
+#endif
   ADVANCE_PC_2;
   state.registers[rt] = load_32(addr);
+#ifdef TRACE
+  printf("%08X: %04X      LDR R%d, [R%d (%d $%08X), R%d (#%d $%08X)] "
+	 "=> %d $%08X ",
+	 saved_pc, instr, rt, rn, (int32_t)rn_value, rn_value,
+	 rm, (int32_t)rm_value, rm_value,
+	 (int32_t)state.registers[rt], state.registers[rt]);
+  print_apsr();
+#endif
 }
 
 void instr_ldr_imm_1_b(uint16_t instr) {
   uint32_t rt = BF_0_3(instr);
   uint32_t rn = BF_3_3(instr);
   uint32_t imm = BF_6_5(instr);
-  uint32_t addr = state.registers[rn] + imm;
+  uint32_t rn_value = state.registers[rn];
+  uint32_t addr = rn_value + imm;
+#ifdef TRACE
+  uint32_t saved_pc = state.registers[PC];
+#endif
   ADVANCE_PC_2;
   state.registers[rt] = load_8(addr);
+#ifdef TRACE
+  printf("%08X: %04X      LDRB R%d, [R%d (%d $%08X), #%d $%08X] => %d $%08X ",
+	 saved_pc, instr, rt, rn, (int32_t)rn_value, rn_value,
+	 (int32_t)imm. imm,
+	 (int32_t)state.registers[rt], state.registers[rt]);
+  print_apsr();
+#endif
 }
 
 void instr_ldr_reg_1_b(uint16_t instr) {
   uint32_t rt = BF_0_3(instr);
   uint32_t rn = BF_3_3(instr);
   uint32_t rm = BF_6_3(instr);
-  uint32_t addr = state.registers[rn] + state.registers[rm];
+  uint32_t rn_value = state.registers[rn];
+  uint32_t rm_value = state.registers[rm];
+  uint32_t addr = rn_value + rm_value;
+#ifdef TRACE
+  uint32_t saved_pc = state.registers[PC];
+#endif
   ADVANCE_PC_2;
   state.registers[rt] = load_8(addr);
+#ifdef TRACE
+  printf("%08X: %04X      LDRB R%d, [R%d (%d $%08X), R%d (#%d $%08X)] "
+	 "=> %d $%08X ",
+	 saved_pc, instr, rt, rn, (int32_t)rn_value, rn_value,
+	 rm, (int32_t)rm_value, rm_value,
+	 (int32_t)state.registers[rt], state.registers[rt]);
+  print_apsr();
+#endif
 }
 
 void instr_ldr_imm_1_h(uint16_t instr) {
   uint32_t rt = BF_0_3(instr);
   uint32_t rn = BF_3_3(instr);
   uint32_t imm = BF_6_5(instr) << 1;
-  uint32_t addr = state.registers[rn] + imm;
+  uint32_t rn_value = state.registers[rn];
+  uint32_t addr = rn_value + imm;
+#ifdef TRACE
+  uint32_t saved_pc = state.registers[PC];
+#endif
   ADVANCE_PC_2;
   state.registers[rt] = load_16(addr);
+#ifdef TRACE
+  printf("%08X: %04X      LDRH R%d, [R%d (%d $%08X), #%d $%08X] => %d $%08X ",
+	 saved_pc, instr, rt, rn, (int32_t)rn_value, rn_value,
+	 (int32_t)imm. imm,
+	 (int32_t)state.registers[rt], state.registers[rt]);
+  print_apsr();
+#endif
 }
 
 void instr_ldr_reg_1_h(uint16_t instr) {
   uint32_t rt = BF_0_3(instr);
   uint32_t rn = BF_3_3(instr);
   uint32_t rm = BF_6_3(instr);
-  uint32_t addr = state.registers[rn] + state.registers[rm];
+  uint32_t rn_value = state.registers[rn];
+  uint32_t rm_value = state.registers[rm];
+  uint32_t addr = rn_value + rm_value;
+#ifdef TRACE
+  uint32_t saved_pc = state.registers[PC];
+#endif
   ADVANCE_PC_2;
   state.registers[rt] = load_16(addr);
+#ifdef TRACE
+  printf("%08X: %04X      LDRH R%d, [R%d (%d $%08X), R%d (#%d $%08X)] "
+	 "=> %d $%08X ",
+	 saved_pc, instr, rt, rn, (int32_t)rn_value, rn_value,
+	 rm, (int32_t)rm_value, rm_value,
+	 (int32_t)state.registers[rt], state.registers[rt]);
+  print_apsr();
+#endif
 }
 
 void instr_ldr_reg_1_sh(uint16_t instr) {
   uint32_t rt = BF_0_3(instr);
   uint32_t rn = BF_3_3(instr);
-  uint32_t offset = BF_6_3(instr);
-  uint32_t addr = state.registers[rn] + state.registers[offset];
+  uint32_t rm = BF_6_3(instr);
+  uint32_t rn_value = state.registers[rn];
+  uint32_t rm_value = state.registers[rm];
+  uint32_t addr = rn_value + rm_value;
+#ifdef TRACE
+  uint32_t saved_pc = state.registers[PC];
+#endif
   ADVANCE_PC_2;
   state.registers[rt] = (uint32_t)((int32_t)(load_16(addr) << 16) >> 16);
+#ifdef TRACE
+  printf("%08X: %04X      LDRSH R%d, [R%d (%d $%08X), R%d (#%d $%08X)] "
+	 "=> %d $%08X ",
+	 saved_pc, instr, rt, rn, (int32_t)rn_value, rn_value,
+	 rm, (int32_t)rm_value, rm_value,
+	 (int32_t)state.registers[rt], state.registers[rt]);
+  print_apsr();
+#endif
 }
 
 void instr_lsl_imm_1(uint16_t instr) {
   uint32_t rd = BF_0_3(instr);
-  uint32_t rn = BF_3_3(instr);
+  uint32_t rm = BF_3_3(instr);
   uint32_t imm = BF_6_5(instr);
-  uint32_t rn_value = state.registers[rn];
-  uint32_t result = rn_value << imm;
+  uint32_t rm_value = state.registers[rm];
+  uint32_t result = rm_value << imm;
   state.registers[rd] = result;
   state.apsr =
     (result >> 31 ? APSR_N : 0) |
     (result == 0 ? APSR_Z : 0) |
-    ((imm > 0 ? rn_value << (imm - 1) & $80000000 : 0) ? APSR_C : 0) |
+    ((imm > 0 ? rm_value << (imm - 1) & $80000000 : 0) ? APSR_C : 0) |
     (state.apsr & APSR_V);
+#ifdef TRACE
+  if(imm) {
+    printf("%08X: %04X      LSLS R%d, R%d (%d $%08X), #%d $%08X => %d $%08X ",
+	   state.registers[PC], instr, rd, rm, (int32_t)rm_value, rm_value,
+	   (int32_t)imm, imm, (int32_t)result, result);
+  } else {
+    printf("%08X: %04X      MOVS R%d, R%d (%d $%08X) => %d $%08X ",
+	   state.registers[PC], instr, rd, rm, (int32_t)rm_value, rm_value,
+	   (int32_t)result, result);
+  }    
+  print_apsr();
+#endif
   ADVANCE_PC_2;
 }
 
 void instr_lsl_reg_1(uint16_t instr) {
-  uint32_t rd = BF_0_3(instr);
-  uint32_t rn = BF_3_3(instr);
-  uint32_t rd_value = state.registers[rd];
-  uint32_t rn_value = state.registers[rn];
-  uint32_t result = rd_value << rn_value;
-  state.registers[rd] = result;
+  uint32_t rdn = BF_0_3(instr);
+  uint32_t rm = BF_3_3(instr);
+  uint32_t rdn_value = state.registers[rdn];
+  uint32_t rm_value = state.registers[rm];
+  uint32_t result = rdn_value << rm_value;
+  state.registers[rdn] = result;
   state.apsr =
     (result >> 31 ? APSR_N : 0) |
     (result == 0 ? APSR_Z : 0) |
-    ((rn_value > 0 ? rd_value << (rn_value - 1) & $80000000 : 0) ?
+    ((rm_value > 0 ? rdn_value << (rm_value - 1) & $80000000 : 0) ?
      APSR_C : 0) |
     (state.apsr & APSR_V);
+#ifdef TRACE
+  printf("%08X: %04X      ASRS R%d (%d $%08X), R%d (%d $%08X) => %d $%08X ",
+	 state.registers[PC], instr, rdn, (int32_t)rdn_value, rdn_value,
+	 rm, (int32_t)rm_value, rm_value, (int32_t)result, result);
+  print_apsr();
+#endif
   ADVANCE_PC_2;
 }
 
 void instr_lsr_imm_1(uint16_t instr) {
   uint32_t rd = BF_0_3(instr);
-  uint32_t rn = BF_3_3(instr);
+  uint32_t rm = BF_3_3(instr);
   uint32_t imm = BF_6_5(instr);
   if(imm == 0) {
     imm == 32;
   }
-  uint32_t rn_value = state.registers[rn];
-  uint32_t result = rn_value >> imm;
+  uint32_t rm_value = state.registers[rm];
+  uint32_t result = rm_value >> imm;
   state.registers[rd] = result;
   state.apsr =
     (result >> 31 ? APSR_N : 0) |
     (result == 0 ? APSR_Z : 0) |
     ((rn_value >> (imm - 1)) & 0x1 ? APSR_C : 0) |
     (state.apsr & APSR_V);
+#ifdef TRACE
+  printf("%08X: %04X      LSRS R%d, R%d (%d $%08X), #%d $%08X => %d $%08X ",
+	 state.registers[PC], instr, rd, rm, (int32_t)rm_value, rm_value,
+	 (int32_t)imm, imm, (int32_t)result, result);
+  print_apsr();
+#endif
   ADVANCE_PC_2;
 }
 
 void instr_lsr_reg_1(uint16_t instr) {
-  uint32_t rd = BF_0_3(instr);
-  uint32_t rn = BF_3_3(instr);
-  uint32_t rd_value = state.registers[rd];
-  uint32_t rn_value = state.registers[rn];
-  uint32_t result = rd_value >> rn_value;
-  state.registers[rd] = result;
+  uint32_t rdn = BF_0_3(instr);
+  uint32_t rm = BF_3_3(instr);
+  uint32_t rdn_value = state.registers[rdn];
+  uint32_t rm_value = state.registers[rm];
+  uint32_t result = rdn_value >> rm_value;
+  state.registers[rdn] = result;
   state.apsr =
     (result >> 31 ? APSR_N : 0) |
     (result == 0 ? APSR_Z : 0) |
     (rn_value ? ((rd_value >> (rn_value - 1)) & 0x1 ? APSR_C : 0) : 0) |
     (state.apsr & APSR_V);
+#ifdef TRACE
+  printf("%08X: %04X      LSRS R%d (%d $%08X), R%d (%d $%08X) => %d $%08X ",
+	 state.registers[PC], instr, rdn, (int32_t)rdn_value, rdn_value,
+	 rm, (int32_t)rm_value, rm_value, (int32_t)result, result);
+  print_apsr();
+#endif
   ADVANCE_PC_2;
 }
 
@@ -981,55 +1117,91 @@ void instr_mov_imm_1(uint16_t instr) {
     (imm >> 31 ? APSR_N : 0) |
     (imm == 0 ? APSR_Z : 0) |
     (state.apsr & (APSR_C | APSR_V));
+#ifdef TRACE
+  printf("%08X: %04X      MOVS R%d, #%d $%08X => %d $%08X ",
+	 state.registers[PC], instr, rd, (int32_t)imm, imm,
+	 (int32_t)result, result);
+  print_apsr();
+#endif
   ADVANCE_PC_2;
 }
 
 void instr_mov_reg_1(uint16_t instr) {
   uint32_t rd = BF_0_3(instr) | ((instr & 0x80) >> 4);
-  uint32_t rn = BF_3_4(instr);
-  state.registers[rd] = state.registers[rn];
+  uint32_t rm = BF_3_4(instr);
+  uint32_t rm_value = state.registers[rm];
+  state.registers[rd] = rm_value;
+#ifdef TRACE
+  printf("%08X: %04X      MOV R%d, R%d (%d $%08X) => %d $%08X ",
+	 state.registers[PC], instr, rd, rm, (int32_t)rm_value, rm_value,
+	 (int32_t)state.registers[rd], state.registers[rd]);
+  print_apsr();
+#endif
   ADVANCE_PC_2;
 }
 
 void instr_mul_1(uint16_t instr) {
-  uint32_t rd = BF_0_3(instr);
-  uint32_t rn = BF_3_3(instr);
-  uint32_t rd_value = state.registers[rd];
-  uint32_t rn_value = state.registers[rn];
-  uint32_t result = rd_value * rn_value;
-  state.registers[rd] = result;
+  uint32_t rdn = BF_0_3(instr);
+  uint32_t rm = BF_3_3(instr);
+  uint32_t rdn_value = state.registers[rdn];
+  uint32_t rm_value = state.registers[rm];
+  uint32_t result = rdn_value * rm_value;
+  state.registers[rdn] = result;
   state.apsr =
     (result >> 31 ? APSR_N : 0) |
     (result == 0 ? APSR_Z : 0) |
     (state.apsr & (APSR_C | APSR_V));
+#ifdef TRACE
+  printf("%08X: %04X      MULS R%d (%d $%04X), R%d (%d $%04X) => %d $%04X ",
+	 state.registers[PC], instr, rdn, (int32_t)rdn_value, rdn_value,
+	 rm, (int32_t)rm_value, rm_value, (int32_t)result, result);
+  print_apsr();
+#endif
   ADVANCE_PC_2;
 }
 
 void instr_mvn_reg_1(uint16_t instr) {
   uint32_t rd = BF_0_3(instr);
-  uint32_t rn = BF_3_3(instr);
-  uint32_t rn_value = state.registers[rn];
-  uint32_t result = ~rn_value;
+  uint32_t rm = BF_3_3(instr);
+  uint32_t rm_value = state.registers[rm];
+  uint32_t result = ~rm_value;
   state.registers[rd] = result;
   state.apsr =
     (result >> 31 ? APSR_N : 0) |
     (result == 0 ? APSR_Z : 0) |
     (state.apsr & (APSR_C | APSR_V));
+#ifdef TRACE
+  printf("%08X: %04X      MVNS R%d, R%d (%d $%08X) => %d $%08X ",
+	 state.registers[PC], instr, rd, rm, (int32_t)rm_value, rm_value,
+	 (int32_t)result, result);
+  print_apsr();
+#endif
   ADVANCE_PC_2;
 }
 
 void instr_nop_1(uint16_t instr) {
+#ifdef TRACE
+  printf("%08X: %04X      NOP ",
+	 state.registers[PC], instr);
+  print_apsr();
+#endif
   ADVANCE_PC_2;
 }
 
 void instr_orr_reg_1(uint16_t instr) {
-  uint32_t rd = BF_0_3(instr);
-  uint32_t rn = BF_3_3(instr);
-  uint32_t rd_value = state.registers[rd];
-  uint32_t rn_value = state.registers[rn];
-  uint32_t result = rd_value | rn_value;
-  state.registers[rd] = result;
+  uint32_t rdn = BF_0_3(instr);
+  uint32_t rm = BF_3_3(instr);
+  uint32_t rdn_value = state.registers[rdn];
+  uint32_t rm_value = state.registers[rm];
+  uint32_t result = rdn_value | rm_value;
+  state.registers[rdn] = result;
   UPDATE_APSR_BIT(result);
+#ifdef TRACE
+  printf("%08X: %04X      ORRS R%d (%d $%08X), R%d (%d $%08X) => %d $%08X ",
+	 state.registers[PC], instr, rdn, (int32_t)rdn_value, rdn_value,
+	 rm, (int32_t)rm_value, rm_value, (int32_t)result, result);
+  print_apsr();
+#endif
   ADVANCE_PC_2;
 }
 
@@ -1037,39 +1209,117 @@ void instr_pop_1(uint16_t instr) {
   uint32_t bitmap = BF_0_8(instr);
   uint32_t pop_pc = instr & 0x100;
   uint32_t addr = state.registers[SP];
+#ifdef TRACE
+  printf("%08X: %04X      POP {", state.registers[PC], instr);
+#endif
   if(bitmap & 0x01) {
+#ifdef TRACE
+    printf("R0");
+#endif
     state.registers[0] = load_32(addr);
+#ifdef TRACE
+    printf(" (=> %d $%08X)", (int32_t)state.registers[0], state.registers[0]);
+    if((bitmap & 0xFE) || pop_pc) {
+      printf(", ");
+    }
+#endif
     addr += 4;
   }
   if(bitmap & 0x02) {
+#ifdef TRACE
+    printf("R1");
+#endif
     state.registers[1] = load_32(addr);
+#ifdef TRACE
+    printf(" (=> %d $%08X)", (int32_t)state.registers[1], state.registers[1]);
+    if((bitmap & 0xFC) || pop_pc) {
+      printf(", ");
+    }
+#endif
     addr += 4;
   }
   if(bitmap & 0x04) {
+#ifdef TRACE
+    printf("R2");
+#endif
     state.registers[2] = load_32(addr);
+#ifdef TRACE
+    printf(" (=> %d $%08X)", (int32_t)state.registers[2], state.registers[2]);
+    if((bitmap & 0xF8) || pop_pc) {
+      printf(", ");
+    }
+#endif
     addr += 4;
   }
   if(bitmap & 0x08) {
+#ifdef TRACE
+    printf("R3");
+#endif
     state.registers[3] = load_32(addr);
+#ifdef TRACE
+    printf(" (=> %d $%08X)", (int32_t)state.registers[3], state.registers[3]);
+    if((bitmap & 0xF0) || pop_pc) {
+      printf(", ");
+    }
+#endif
     addr += 4;
   }
   if(bitmap & 0x10) {
+#ifdef TRACE
+    printf("R4");
+#endif
     state.registers[4] = load_32(addr);
+#ifdef TRACE
+    printf(" (=> %d $%08X)", (int32_t)state.registers[4], state.registers[4]);
+    if((bitmap & 0xE0) || pop_pc) {
+      printf(", ");
+    }
+#endif
     addr += 4;
   }
   if(bitmap & 0x20) {
+#ifdef TRACE
+    printf("R5");
+#endif
     state.registers[5] = load_32(addr);
+#ifdef TRACE
+    printf(" (=> %d $%08X)", (int32_t)state.registers[5], state.registers[5]);
+    if((bitmap & 0xC0) || pop_pc) {
+      printf(", ");
+    }
+#endif
     addr += 4;
   }
   if(bitmap & 0x40) {
+#ifdef TRACE
+    printf("R6");
+#endif
     state.registers[6] = load_32(addr);
+#ifdef TRACE
+    printf(" (=> %d $%08X)", (int32_t)state.registers[6], state.registers[6]);
+    if((bitmap & 0x80) || pop_pc) {
+      printf(", ");
+    }
+#endif
     addr += 4;
   }
   if(bitmap & 0x80) {
+#ifdef TRACE
+    printf("R7");
+#endif
     state.registers[7] = load_32(addr);
+#ifdef TRACE
+    printf(" (=> %d $%08X)", (int32_t)state.registers[7], state.registers[7]);
+    if(pop_pc) {
+      printf(", ");
+    }
+#endif
     addr += 4;
   }
   if(pop_pc) {
+#ifdef TRACE
+    printf("PC");
+#endif
     uint32_t new_pc = load_32(addr);
     if(!(new_pc & 0x1)) {
       fprintf(stderr, "BAD POP PC DESTINATION: %08X from %08X @ %08X\n",
@@ -1077,17 +1327,78 @@ void instr_pop_1(uint16_t instr) {
       exit(1);
     }
     state.registers[PC] = new_pc & ~0x1;
+#ifdef TRACE
+    printf(" => (%d $%08X)", (int32_t)state.registers[PC], state.registers[PC]);
+#endif
     addr += 4;
   } else {
     ADVANCE_PC_2;
   }
   state.registers[SP] = addr;
+#ifdef TRACE
+  printf("} => $%08X ", addr);
+  print_apsr();
+#endif
 }
 
 void instr_push_1(uint16_t instr) {
   uint32_t bitmap = BF_0_8(instr);
   uint32_t push_lr = instr & 0x100;
   uint32_t addr = state.registers[SP];
+#ifdef TRACE
+  printf("%08X: %04X      PUSH {", state.registers[PC], instr)
+  if(bitmap & 0x01) {
+    printf("R0 (%d $%08X)", (int32_t)state.registers[0], state.registers[0]);
+    if((bitmap & 0xFE) || push_lr) {
+      printf(", ");
+    }
+  }
+  if(bitmap & 0x02) {
+    printf("R1 (%d $%08X)", (int32_t)state.registers[1], state.registers[1]);
+    if((bitmap & 0xFC) || push_lr) {
+      printf(", ");
+    }
+  }
+  if(bitmap & 0x04) {
+    printf("R2 (%d $%08X)", (int32_t)state.registers[2], state.registers[2]);
+    if((bitmap & 0xF8) || push_lr) {
+      printf(", ");
+    }
+  }
+  if(bitmap & 0x08) {
+    printf("R3 (%d $%08X)", (int32_t)state.registers[3], state.registers[3]);
+    if((bitmap & 0xF0) || push_lr) {
+      printf(", ");
+    }
+  }
+  if(bitmap & 0x10) {
+    printf("R4 (%d $%08X)", (int32_t)state.registers[4], state.registers[4]);
+    if((bitmap & 0xE0) || push_lr) {
+      printf(", ");
+    }
+  }
+  if(bitmap & 0x20) {
+    printf("R5 (%d $%08X)", (int32_t)state.registers[5], state.registers[5]);
+    if((bitmap & 0xC0) || push_lr) {
+      printf(", ");
+    }
+  }
+  if(bitmap & 0x40) {
+    printf("R6 (%d $%08X)", (int32_t)state.registers[6], state.registers[6]);
+    if((bitmap & 0x80) || push_lr) {
+      printf(", ");
+    }
+  }
+  if(bitmap & 0x80) {
+    printf("R7 (%d $%08X)", (int32_t)state.registers[7], state.registers[7]);
+    if(push_lr) {
+      printf(", ");
+    }
+  }
+  if(push_lr) {
+    printf("LR (%d $%08X)", (int32_t)state.registers[LR], state.registers[LR]);
+  }
+#endif
   if(push_lr) {
     addr -= 4;
     store_32(addr, state.registers[LR]);
@@ -1125,22 +1436,32 @@ void instr_push_1(uint16_t instr) {
     store_32(addr, state.registers[0]);
   }
   state.registers[SP] = addr;
+#ifdef TRACE
+  printf("} => $%08X ", addr);
+  print_apsr();
+#endif
   ADVANCE_PC_2;
 }
 
 void instr_ror_reg_1(uint16_t instr) {
-  uint32_t rd = BF_0_3(instr);
-  uint32_t rn = BF_3_3(instr);
-  uint32_t rd_value = state.registers[rd];
-  uint32_t rn_value = state.registers[rn];
+  uint32_t rdn = BF_0_3(instr);
+  uint32_t rm = BF_3_3(instr);
+  uint32_t rdn_value = state.registers[rdn];
+  uint32_t rm_value = state.registers[rm];
   uint32_t result =
-    (rd_value >> rn_value) | (rd_value << (32 - rn_value));
+    (rdn_value >> rm_value) | (rdn_value << (32 - rm_value));
   state.registers[rd] = result;
   state.apsr =
     (result >> 31 ? APSR_N : 0) |
     (result == 0 ? APSR_Z : 0) |
     (result >> 31 ? APSR_C : 0) |
     (state.apsr & APSR_V);
+#ifdef TRACE
+  printf("%08X: %04X      RORS R%d (%d $%08X), R%d (%d $%08X) => %d $%08X ",
+	 state.registers[PC], instr, rdn, (int32_t)rdn_value, rdn_value,
+	 rm, (int32_t)rm_value, rm_value, (int32_t)result, result);
+  print_apsr();
+#endif
   ADVANCE_PC_2;
 }
 
@@ -1152,20 +1473,32 @@ void instr_rsb_imm_1(uint16_t instr) {
   uint32_t result = (uint32_t)(temp & 0xFFFFFFFF);
   state.registers[rd] = result;
   UPDATE_APSR_SUB(result, temp, 0, rn_value);
+#ifdef TRACE
+  printf("%08X: %04X      RSBS R%d, R%d (%d $%08X) => %d $%08X ",
+	 state.registers[PC], instr, rd, rn, (int32_t)rn_value, rn_value,
+	 (int32_t)result, result);
+  print_apsr();
+#endif
   ADVANCE_PC_2;
 }
 
 void instr_sbc_reg_1(uint16_t instr) {
-  uint32_t rd = BF_0_3(instr);
-  uint32_t rn = BF_3_3(instr);
-  uint32_t rd_value = state.registers[rd];
-  uint32_t rn_value = state.registers[rn];
+  uint32_t rdn = BF_0_3(instr);
+  uint32_t rm = BF_3_3(instr);
+  uint32_t rdn_value = state.registers[rdn];
+  uint32_t rm_value = state.registers[rm];
   uint64_t temp =
-    ((uint64_t)rd_value - (uint64_t)rn_value) -
+    ((uint64_t)rdn_value - (uint64_t)rm_value) -
     (state.apsr & APSR_C ? 0L : 1L);
   uint32_t result = (uint32_t)(temp & 0xFFFFFFFF);
-  state.registers[rd] = result;
-  UPDATE_APSR_SUB(result, temp, rd_value, rn_value);
+  state.registers[rdn] = result;
+  UPDATE_APSR_SUB(result, temp, rdn_value, rm_value);
+#ifdef TRACE
+  printf("%08X: %04X      SBCS R%d (%d $%08X), R%d (%d $%08X) => %d $%08X ",
+	 state.registers[PC], instr, rdn, (int32_t)rdn_value, rdn_value,
+	 rm, (int32_t)rm_value, rm_value, (int32_t)result, result);
+  print_apsr();
+#endif
   ADVANCE_PC_2;
 }
 
@@ -1173,39 +1506,92 @@ void instr_stmia_1(uint16_t instr) {
   uint32_t bitmap = BF_0_8(instr);
   uint32_t mem = BF_8_3(instr);
   uint32_t addr = state.registers[mem];
+#ifdef TRACE
+  printf("%08X: %04X      STMIA R%d ($%08X)!, {",
+	 state.registers[PC], instr, mem, addr);
+#endif
   if(bitmap & 0x01) {
+#ifdef TRACE
+    printf("R0 (%d $%08X)", (int32_t)state.registers[0], state.registers[0]);
+    if(bitmap & 0xFE) {
+      printf(", ");
+    }
+#endif
     store_32(addr, state.registers[0]);
     addr += 4;
   }
   if(bitmap & 0x02) {
+#ifdef TRACE
+    printf("R1 (%d $%08X)", (int32_t)state.registers[1], state.registers[1]);
+    if(bitmap & 0xFC) {
+      printf(", ");
+    }
+#endif
     store_32(addr, state.registers[1]);
     addr += 4;
   }
   if(bitmap & 0x04) {
+#ifdef TRACE
+    printf("R2 (%d $%08X)", (int32_t)state.registers[2], state.registers[2]);
+    if(bitmap & 0xF8) {
+      printf(", ");
+    }
+#endif
     store_32(addr, state.registers[2]);
     addr += 4;
   }
   if(bitmap & 0x08) {
+#ifdef TRACE
+    printf("R3 (%d $%08X)", (int32_t)state.registers[3], state.registers[3]);
+    if(bitmap & 0xF0) {
+      printf(", ");
+    }
+#endif
     store_32(addr, state.registers[3]);
     addr += 4;
   }
   if(bitmap & 0x10) {
+#ifdef TRACE
+    printf("R4 (%d $%08X)", (int32_t)state.registers[4], state.registers[4]);
+    if(bitmap & 0xE0) {
+      printf(", ");
+    }
+#endif
     store_32(addr, state.registers[4]);
     addr += 4;
   }
   if(bitmap & 0x20) {
+#ifdef TRACE
+    printf("R5 (%d $%08X)", (int32_t)state.registers[5], state.registers[5]);
+    if(bitmap & 0xC0) {
+      printf(", ");
+    }
+#endif
     store_32(addr, state.registers[5]);
     addr += 4;
   }
   if(bitmap & 0x40) {
+#ifdef TRACE
+    printf("R6 (%d $%08X)", (int32_t)state.registers[6], state.registers[6]);
+    if(bitmap & 0x80) {
+      printf(", ");
+    }
+#endif
     store_32(addr, state.registers[6]);
     addr += 4;
   }
   if(bitmap & 0x80) {
+#ifdef TRACE
+    printf("R7 (%d $%08X)", (int32_t)state.registers[7], state.registers[7]);
+#endif
     store_32(addr, state.registers[7]);
     addr += 4;
   }
   state.registers[mem] = addr;
+#ifdef TRACE
+  printf(" => $%08X ", addr);
+  print_apsr();
+#endif
   ADVANCE_PC_2;
 }
 
@@ -1214,9 +1600,19 @@ void instr_str_imm_1_w(uint16_t instr) {
   uint32_t rn = BF_3_3(instr);
   uint32_t imm = BF_6_5(instr) << 2;
   uint32_t rt_value = state.registers[rt];
-  uint32_t addr = state.registers[rn] + imm;
+  uint32_t rn_value = state.registers[rn];
+  uint32_t addr = rn_value + imm;
+#ifdef TRACE
+  uint32 saved_pc = state.registers[PC];
+#endif
   ADVANCE_PC_2;
   store_32(addr, rt_value);
+#ifdef TRACE
+  printf("%08X: %04X      STR R%d (%d $%08X), [R%d (%d $%08X), #%d $%08X] ",
+	 saved_pc, instr, rt, (int32_t)rt_value, rt_value,
+	 rn, (int32_t)rn_value, rn_value, (int32_t)imm, imm);
+  print_apsr();
+#endif
 }
 
 void instr_str_imm_2_w(uint16_t instr) {
@@ -1224,8 +1620,18 @@ void instr_str_imm_2_w(uint16_t instr) {
   uint32_t imm = BF_0_8(instr) << 2;
   uint32_t rt_value = state.registers[rt];
   uint32_t addr = state.registers[SP] + imm;
+#ifdef TRACE
+  uint32 saved_pc = state.registers[PC];
+#endif
   ADVANCE_PC_2;
   store_32(addr, rt_value);
+#ifdef TRACE
+  printf("%08X: %04X      STR R%d (%d $%08X), [SP (%d $%08X), #%d $%08X] ",
+	 saved_pc, instr, rt, (int32_t)rt_value, rt_value,
+	 (int32_t)state.registers[SP],
+	 state.registers[SP], (int32_t)imm, imm);
+  print_apsr();
+#endif
 }
 
 void instr_str_reg_1_w(uint16_t instr) {
@@ -1233,9 +1639,22 @@ void instr_str_reg_1_w(uint16_t instr) {
   uint32_t rn = BF_3_3(instr);
   uint32_t rm = BF_6_3(instr);
   uint32_t rt_value = state.registers[rt];
-  uint32_t addr = state.registers[rn] + state.registers[rm];
+  uint32_t rn_value = state.registers[rn];
+  uint32_t rm_value = state.registers[rm];
+  uint32_t addr = rn_value + rm_value;
+#ifdef TRACE
+  uint32 saved_pc = state.registers[PC];
+#endif
   ADVANCE_PC_2;
   store_32(addr, rt_value);
+#ifdef TRACE
+  printf("%08X: %04X      STR R%d (%d $%08X), [R%d (%d $%08X), "
+	 "R%d (#%d $%08X)] ",
+	 saved_pc, instr, rt, (int32_t)rt_value, rt_value,
+	 rn, (int32_t)rn_value, rn_value,
+	 rm, (int32_t)rm_value, rm_value);
+  print_apsr();
+#endif
 }
 
 void instr_str_imm_1_b(uint16_t instr) {
@@ -1243,9 +1662,20 @@ void instr_str_imm_1_b(uint16_t instr) {
   uint32_t rn = BF_3_3(instr);
   uint32_t imm = BF_6_5(instr);
   uint32_t rt_value = state.registers[rt];
-  uint32_t addr = state.registers[rn] + imm;
+  uint32_t rn_value = state.registers[rn];
+  uint32_t addr = rn_value + imm;
+#ifdef TRACE
+  uint32 saved_pc = state.registers[PC];
+#endif
   ADVANCE_PC_2;
   store_8(addr, (uint8_t)(rt_value & 0xFF));
+#ifdef TRACE
+  printf("%08X: %04X      STRB R%d (%d $%08X), [SP (%d $%08X), #%d $%08X] ",
+	 saved_pc, instr, rt, (int32_t)rt_value, rt_value,
+	 (int32_t)state.registers[SP],
+	 state.registers[SP], (int32_t)imm, imm);
+  print_apsr();
+#endif
 }
 
 void instr_str_reg_1_b(uint16_t instr) {
@@ -1253,9 +1683,22 @@ void instr_str_reg_1_b(uint16_t instr) {
   uint32_t rn = BF_3_3(instr);
   uint32_t offset = BF_6_3(instr);
   uint32_t rt_value = state.registers[rt];
-  uint32_t addr = state.registers[rn] + state.registers[rm];
+  uint32_t rn_value = state.registers[rn];
+  uint32_t rm_value = state.registers[rm];
+  uint32_t addr = rn_value + rm_value;
+#ifdef TRACE
+  uint32 saved_pc = state.registers[PC];
+#endif
   ADVANCE_PC_2;
   store_8(addr, (uint8_t)(rt_value & 0xFF));
+#ifdef TRACE
+  printf("%08X: %04X      STRB R%d (%d $%08X), [R%d (%d $%08X), "
+	 "R%d (#%d $%08X)] ",
+	 saved_pc, instr, rt, (int32_t)rt_value, rt_value,
+	 rn, (int32_t)rn_value, rn_value,
+	 rm, (int32_t)rm_value, rm_value);
+  print_apsr();
+#endif
 }
 
 void instr_str_imm_1_h(uint16_t instr) {
@@ -1263,9 +1706,20 @@ void instr_str_imm_1_h(uint16_t instr) {
   uint32_t rn = BF_3_3(instr);
   uint32_t imm = BF_6_5(instr) << 1;
   uint32_t rt_value = state.registers[rt];
-  uint32_t addr = state.registers[rn] + imm;
+  uint32_t rn_value = state.registers[rn];
+  uint32_t addr = rn_value + imm;
+#ifdef TRACE
+  uint32 saved_pc = state.registers[PC];
+#endif
   ADVANCE_PC_2;
   store_16(addr, (uint16_t)(rt_value & 0xFFFF));
+#ifdef TRACE
+  printf("%08X: %04X      STRH R%d (%d $%08X), [SP (%d $%08X), #%d $%08X] ",
+	 saved_pc, instr, rt, (int32_t)rt_value, rt_value,
+	 (int32_t)state.registers[SP],
+	 state.registers[SP], (int32_t)imm, imm);
+  print_apsr();
+#endif
 }
 
 void instr_str_reg_1_h(uint16_t instr) {
@@ -1273,9 +1727,22 @@ void instr_str_reg_1_h(uint16_t instr) {
   uint32_t rn = BF_3_3(instr);
   uint32_t rm = BF_6_3(instr);
   uint32_t rt_value = state.registers[rt];
-  uint32_t addr = state.registers[rn] + state.registers[rm];
+  uint32_t rn_value = state.registers[rn];
+  uint32_t rm_value = state.registers[rm];
+  uint32_t addr = rn_value + rm_value
+#ifdef TRACE
+  uint32 saved_pc = state.registers[PC];
+#endif
   ADVANCE_PC_2;
   store_16(addr, (uint16_t)(rt_value & 0xFFFF));
+#ifdef TRACE
+  printf("%08X: %04X      STRH R%d (%d $%08X), [R%d (%d $%08X), "
+	 "R%d (#%d $%08X)] ",
+	 saved_pc, instr, rt, (int32_t)rt_value, rt_value,
+	 rn, (int32_t)rn_value, rn_value,
+	 rm, (int32_t)rm_value, rm_value);
+  print_apsr();
+#endif
 }
 
 void instr_sub_imm_1(uint16_t instr) {
@@ -1287,17 +1754,29 @@ void instr_sub_imm_1(uint16_t instr) {
   uint32_t result = (uint32_t)(temp & 0xFFFFFFFF);
   state.registers[rd] = result;
   UPDATE_APSR_SUB(result, temp, rn_value, imm);
+#ifdef TRACE
+  printf("%08X: %04X      SUBS R%d, R%d (%d $%08X), #%d $%08X => %d $%08X ",
+	 state.registers[PC], instr, rd, rn, (int32_t)rn_value, rn_value,
+	 (int32_t)imm, imm, (int32_t)result, result);
+  print_apsr();
+#endif
   ADVANCE_PC_2;
 }
 
 void instr_sub_imm_2(uint16_t instr) {
-  uint32_t rd = BF_8_3(instr);
+  uint32_t rdn = BF_8_3(instr);
   uint32_t imm = BF_0_8(instr);
-  uint32_t rd_value = state.registers[rd];
-  uint64_t temp = (uint64_t)rd_value - (uint64_t)imm;
+  uint32_t rdn_value = state.registers[rdn];
+  uint64_t temp = (uint64_t)rdn_value - (uint64_t)imm;
   uint32_t result = (uint32_t)(temp & 0xFFFFFFFF);
-  state.registers[rd] = result;
-  UPDATE_APSR_SUB(result, temp, rd_value, imm);
+  state.registers[rdn] = result;
+  UPDATE_APSR_SUB(result, temp, rdn_value, imm);
+#ifdef TRACE
+  printf("%08X: %04X      SUBS R%d (%d $%08X), #%d $%08X => %d $%08X ",
+	 state.registers[PC], instr, rdn, (int32_t)rdn_value, rdn_value,
+	 (int32_t)imm, imm, (int32_t)result, result);
+  print_apsr();
+#endif
   ADVANCE_PC_2;
 }
 
@@ -1311,16 +1790,36 @@ void instr_sub_reg_1(uint16_t instr) {
   uint32_t result = (uint32_t)(temp & 0xFFFFFFFF);
   state.registers[rd] = result;
   UPDATE_APSR_SUB(result, temp, rn_value, rm_value);
+#ifdef TRACE
+  printf("%08X: %04X      SUBS R%d, R%d (%d $%08X), R%d (%d $%08X) => "
+	 "%d $%08X ",
+	 state.registers[PC], instr, rd, rn, (int32_t)rn_value, rn_value,
+	 rm, (int32_t)rm_value, rm_value, (int32_t)result, result);
+  print_apsr();
+#endif
   ADVANCE_PC_2;
 }
 
 void instr_sub_sp_imm_1(uint16_t instr) {
   uint32_t imm = BF_0_7(instr) << 2;
+#ifdef TRACE
+  uint32_t saved_sp = state.registers[SP];
+#endif
   state.registers[SP] -= imm;
+#ifdef TRACE
+  printf("%08X: %04X      SUB SP, SP (%d $%08X), #%d $%08X => %d $%08X ",
+	 state.registers[PC], instr, (int32_t)saved_sp, saved_sp,
+	 (int32_t)imm, imm, (int32_t)state.registers[SP], state.registers[SP]);
+  print_apsr();
+#endif
   ADVANCE_PC_2;
 }
 
 void instr_svc(uint16_t instr) {
+#ifdef TRACE
+  printf("%08X: %04X      SVC ", state.registers[PC], instr);
+  print_apsr();
+#endif
   ADVANCE_PC_2;
 }
 
@@ -1329,6 +1828,12 @@ void instr_sxtb_reg_1(uint16_t instr) {
   uint32_t rm = BF_3_3(instr);
   uint32_t rm_value = state.registers[rm];
   state.registers[rd] = (uint32_t)((int32_t)(rm_value << 24) >> 24);
+#ifdef TRACE
+  printf("%08X: %04X      SXTB R%d, R%d (%d $%08X) => %d $%08X ",
+	 state.registers[PC], instr, rd, rm, (int32_t)rm_value, rm_value,
+	 (int32_t)state.registers[rd], state.registers[rd]);
+  print_apsr();
+#endif
   ADVANCE_PC_2;
 }
 
@@ -1337,6 +1842,12 @@ void instr_sxth_reg_1(uint16_t instr) {
   uint32_t rm = BF_3_3(instr);
   uint32_t rm_value = state.registers[rm];
   state.registers[rd] = (uint32_t)((int32_t)(rm_value << 16) >> 16);
+#ifdef TRACE
+  printf("%08X: %04X      SXTH R%d, R%d (%d $%08X) => %d $%08X ",
+	 state.registers[PC], instr, rd, rm, (int32_t)rm_value, rm_value,
+	 (int32_t)state.registers[rd], state.registers[rd]);
+  print_apsr();
+#endif
   ADVANCE_PC_2;
 }
 
@@ -1347,6 +1858,12 @@ void instr_tst_reg_1(uint16_t instr) {
   uint32_t rm_value = state.registers[rm];
   uint32_t result = rn_value & rn_value;
   UPDATE_APSR_BIT(result);
+#ifdef TRACE
+  printf("%08X: %04X      TST R%d (%d $%08X), R%d (%d $%08X) ",
+	 state.registers[PC], instr, rn, (int32_t)rn_value, rn_value,
+	 rm, (int32_t)rm_value, rm_value);
+  print_apsr();
+#endif
   ADVANCE_PC_2;
 }
 
@@ -1355,6 +1872,12 @@ void instr_uxtb_reg_1(uint16_t instr) {
   uint32_t rm = BF_3_3(instr);
   uint32_t rm_value = state.registers[rm];
   state.registers[rd] = rm_value & 0xFF;
+#ifdef TRACE
+  printf("%08X: %04X      UXTB R%d, R%d (%d $%08X) => %d $%08X ",
+	 state.registers[PC], instr, rd, rm, (int32_t)rm_value, rm_value,
+	 (int32_t)state.registers[rd], state.registers[rd]);
+  print_apsr();
+#endif
   ADVANCE_PC_2;
 }
 
@@ -1363,18 +1886,36 @@ void instr_uxth_reg_1(uint16_t instr) {
   uint32_t rm = BF_3_3(instr);
   uint32_t rm_value = state.registers[rm];
   state.registers[rd] = rm_value & 0xFFFF;
+#ifdef TRACE
+  printf("%08X: %04X      UXTH R%d, R%d (%d $%08X) => %d $%08X ",
+	 state.registers[PC], instr, rd, rm, (int32_t)rm_value, rm_value,
+	 (int32_t)state.registers[rd], state.registers[rd]);
+  print_apsr();
+#endif
   ADVANCE_PC_2;
 }
 
 void instr_wfe_1(uint16_t instr) {
+#ifdef TRACE
+  printf("%08X: %04X      WFE ", state.registers[PC], instr);
+  print_apsr();
+#endif
   ADVANCE_PC_2;
 }
 
 void instr_wfi_1(uint16_t instr) {
+#ifdef TRACE
+  printf("%08X: %04X      WFI ", state.registers[PC], instr);
+  print_apsr();
+#endif
   ADVANCE_PC_2;
 }
 
 void instr_yield_1(uint16_t instr) {
+#ifdef TRACE
+  printf("%08X: %04X      YIELD ", state.registers[PC], instr);
+  print_apsr();
+#endif
   ADVANCE_PC_2;
 }
 

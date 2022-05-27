@@ -384,7 +384,7 @@ int main(int argc, char** argv) {
 #ifdef RP2040
   load_aux_image(argc, argv);
 #endif
-  state.registers[PC] = load_32(0x00000000) & ~0x1;
+  reset();
   execute();
   return 0;
 }
