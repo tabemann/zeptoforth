@@ -2163,6 +2163,9 @@ _handle_null:
 	define_internal_word "init-variables", visible_flag
 _init_variables:
 	push {lr}
+	movs r1, #0
+	ldr r0, =xon_xoff_enabled
+	str r1, [r0]
 	@@ Initialize the data stack base
 	ldr r0, =ram_current + stack_base_offset
 	ldr r1, =stack_top

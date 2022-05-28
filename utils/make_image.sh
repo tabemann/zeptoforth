@@ -25,18 +25,6 @@ PLATFORM=$2
 PORT=$3
 IMAGE=$4
 PROJECT=zeptoforth
-DELAY=35
-
-if [ $IMAGE = 'full' ];
-then
-    DELAY=85
-fi
-
-if [ $IMAGE = 'full_swdcom' ];
-then
-    DELAY=85
-fi
-
 
 rm screenlog.0
 st-flash erase
@@ -48,7 +36,10 @@ sleep 3
 screen -d -m $PORT 115200
 screen -X log on
 screen -X stuff 'clone\n'
-sleep $DELAY
+until grep 'clone_end' screenlog.0
+do
+    sleep 1
+done
 screen -X log off
 screen -X quit
 sleep 1

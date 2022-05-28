@@ -46,6 +46,14 @@ _pause_enabled:
 	pop {pc}
 	end_inlined
 
+	@@ Get the XON/XOFF enabled variable address
+	define_word "xon-xoff-enabled", visible_flag
+_xon_xoff_enabled:
+	push_tos
+	ldr tos, =xon_xoff_enabled
+	bx lr
+	end_inlined
+
 	@@ Get the RAM dictionary base variable address
 	define_word "dict-base", visible_flag
 _dict_base:

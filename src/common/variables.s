@@ -121,6 +121,9 @@
 
 	@@ Is compress flash enabled
 	allot compress_flash_enabled, 4
+
+	@@ Is XON/XOFF enabled
+	allot xon_xoff_enabled, 4
 	
 	@@ The prompt hook
 	allot prompt_hook, 4

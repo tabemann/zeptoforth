@@ -14,7 +14,11 @@ Get the BASE variable address
 
 ##### `pause-enabled`
 
-Get the PAUSE enabled variable address
+Get the PAUSE enabled variable address.
+
+##### `xon-xoff-enabled`
+
+Get the XON/XOFF enabled variable address; note that this variable defaults to 0 (disabled).
 
 ##### `dict-base`
 

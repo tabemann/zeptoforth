@@ -807,19 +807,27 @@ _refill:
 	@@ Send XON
 	define_word "xon", visible_flag
 _xon:	push {lr}
+	ldr r0, =xon_xoff_enabled
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 1f
 	push_tos
 	movs tos, #0x11
 	bl _emit
-	pop {pc}
+1:	pop {pc}
 	end_inlined
 
 	@@ Send XOFF
 	define_word "xoff", visible_flag
 _xoff:	push {lr}
+	ldr r0, =xon_xoff_enabled
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 1f
 	push_tos
 	movs tos, #0x13
 	bl _emit
-	pop {pc}
+1:	pop {pc}
 	end_inlined
 
 	@@ Send ACK

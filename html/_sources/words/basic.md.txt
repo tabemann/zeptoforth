@@ -1801,3 +1801,23 @@ Get the number of interrupt vectors.
 ( -- addr )
 
 Get the interrupt vector table address.
+
+##### `xon`
+( -- )
+
+Emit an XON character if `xon-xoff-enabled` is set to non-zero.
+
+##### `xoff`
+( -- )
+
+Emit an XOFF character if `xon-xoff-enabled` is seto to zero.
+
+##### `ack`
+( -- )
+
+Emit an ACK character.
+
+##### `nak`
+( -- )
+
+Emit a NAK character.
