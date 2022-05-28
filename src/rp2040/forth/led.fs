@@ -38,7 +38,7 @@ begin-module led
   begin-module led-internal
 
     \ The LED count
-    2 constant led-count
+    1 constant led-count
 
     \ Validate an LED
     : validate-led ( led -- ) led-count u< averts x-led-out-of-range ;
