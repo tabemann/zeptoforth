@@ -1674,7 +1674,7 @@ begin-module task
   
   \ Display space free for the main task and for flash in general
   : unused ( -- )
-    cr main-task @
+    cr main-task
     ." flash dictionary free:     "
     flash-end flash-here - 0 <# #s #> type cr
     ." main task dictionary free: "
