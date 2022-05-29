@@ -16,6 +16,7 @@ Zeptoforth Documentation
    words/gpio
    words/exti
    words/pio
+   words/uart
    words/interrupt
    words/multicore
    words/dev_tools
