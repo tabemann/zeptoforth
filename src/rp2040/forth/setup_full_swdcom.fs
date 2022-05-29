@@ -42,6 +42,7 @@
 #include src/rp2040/forth/qspi.fs
 #include src/common/forth/block.fs
 #include src/common/forth/edit.fs
+#include src/rp2040/forth/uart.fs
 #include src/common/forth/swdcom.fs
 
 \ Set a cornerstone to enable deleting everything compiled after this code

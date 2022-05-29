@@ -208,7 +208,7 @@ begin-module int-io
     ;
 
     : do-flush-console ( -- )
-      [: tx-empty? not ;] wait
+      [: tx-empty? ;] wait
     ;
 
   end-module> import

@@ -54,7 +54,7 @@ begin-module int-io
     \ Tx buffer
     tx-buffer-size buffer: tx-buffer
 
-    \ USART2
+    \ UART0
     $40034000 constant UART0_Base
     UART0_Base $00 + constant UART0_UARTDR
     UART0_Base $18 + constant UART0_UARTFR
@@ -191,6 +191,8 @@ begin-module int-io
 	UART0_UARTIMSC_TXIM_Clear
       then
       uart0-irq NVIC_ICPR_CLRPEND!
+      wake
+      dmb dsb isb
     ;
 
     \ Interrupt-driven IO hooks
@@ -221,7 +223,7 @@ begin-module int-io
     ;
 
     : do-flush-console ( -- )
-      [: tx-empty? not ;] wait
+      [: tx-empty? ;] wait
     ;
 
   end-module> import

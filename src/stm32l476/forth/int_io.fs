@@ -215,7 +215,7 @@ begin-module int-io
     ;
 
     : do-flush-console ( -- )
-      [: tx-empty? not ;] wait
+      [: tx-empty? ;] wait
     ;
 
     \ Set non-internal
