@@ -597,7 +597,7 @@ _main:	push {lr}
 	@@ The actual outer loop of Forth
 	define_internal_word "outer", visible_flag
 _outer:	push {lr}
-1:	@ bl _validate
+1:	bl _validate
 	bl _token
 	cmp tos, #0
 	beq 2f
