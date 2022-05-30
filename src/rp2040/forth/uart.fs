@@ -241,7 +241,7 @@ begin-module uart
   \ Enable a UART
   : enable-uart ( uart -- )
     dup validate-uart
-    UART_8N1 UART_FIFO or over 0= if UART1_UARTLCR_H else UART1_UARTLCR_H then !
+    UART_8N1 UART_FIFO or over 0= if UART0_UARTLCR_H else UART1_UARTLCR_H then !
     UART_ENABLE swap 0= if UART0_UARTCR else UART1_UARTCR then bis!
   ;
 
