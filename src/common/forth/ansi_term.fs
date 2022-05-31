@@ -23,6 +23,8 @@ compile-to-flash
 
 begin-module ansi-term
 
+  systick import
+
   begin-module ansi-term-internal
 
     \ Saved entered byte
@@ -114,7 +116,10 @@ begin-module ansi-term
   : get-key ( -- b )
     saved-key @ ?dup if 0 saved-key ! else key then
   ;
-  
+
+  \ Get whether a key is available
+  : get-key? ( -- flag ) saved-key @ if true else key? then ;
+
   \ Save a key
   : set-key ( b -- ) saved-key ! ;
 
@@ -208,6 +213,24 @@ begin-module ansi-term
   \ Reset terminal state
   : reset-ansi-term ( -- ) 0 show-cursor-count ! 0 saved-key ! ;
 
+  \ Clear window in ticks
+  100 constant clear-ticks
+  
+  \ Clear input of multiple escaped characters
+  : clear-keys ( -- )
+    systick-counter clear-ticks +
+    begin
+      get-key? if
+	get-key dup escape = if
+	  set-key true
+	else
+	  drop dup systick-counter <
+	then
+      then
+    until
+    drop
+  ;
+  
 end-module
 
 end-compress-flash

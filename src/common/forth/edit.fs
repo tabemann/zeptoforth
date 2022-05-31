@@ -209,13 +209,12 @@ begin-module edit-internal
       edit-state @ edit-start-row @ 1-
       edit-state @ edit-start-column @ 1- go-to-coord
       ." +-[ "
-      edit-state @ edit-current @ id@ (.)
+      edit-state @ edit-current @ id@ 0 <# #s #> dup >r type
       edit-state @ edit-current @ dirty? if
-	space [char] * emit
+	space [char] * emit r> 1+ >r
       then
-      space ." ]-"
-      get-cursor-position nip
-      buffer-width 4 + swap - 0 ?do [char] - emit loop
+      space ." ]"
+      buffer-width r> 2 + - 0 ?do [char] - emit loop
     ;] execute-hide-cursor
   ;
 
@@ -704,10 +703,22 @@ begin-module edit-internal
       [char] 3 of
 	get-key case
 	  [char] ~ of handle-delete-forward endof
-	  dup set-key
+	  clear-keys
 	endcase
       endof
-      dup set-key
+      [char] 5 of
+	get-key case
+	  [char] ~ of handle-prev endof
+	  clear-keys
+	endcase
+      endof
+      [char] 6 of
+	get-key case
+	  [char] ~ of handle-next endof
+	  clear-keys
+	endcase
+      endof
+      clear-keys
     endcase
   ;
 
@@ -715,7 +726,7 @@ begin-module edit-internal
   : handle-escape ( -- )
     get-key case
       [char] [ of handle-special endof
-      dup set-key
+      clear-keys
     endcase
   ;
   
