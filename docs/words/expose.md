@@ -20,6 +20,14 @@ Get the PAUSE enabled variable address.
 
 Get the XON/XOFF enabled variable address; note that this variable defaults to 0 (disabled).
 
+##### `ack-nak-enabled`
+
+Get the ACK/NAK enabled variable address; note that this variable defaults to -1 (enabled).
+
+##### `bel-enabled`
+
+Get the BEL enabled variable address; note that this variable defaults to -1 (enabled).
+
 ##### `dict-base`
 
 Get the RAM dictionary base variable address
