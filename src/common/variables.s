@@ -124,6 +124,9 @@
 
 	@@ Is XON/XOFF enabled
 	allot xon_xoff_enabled, 4
+
+	@@ Is ACK/NAK enabled
+	allot ack_nak_enabled, 4
 	
 	@@ The prompt hook
 	allot prompt_hook, 4

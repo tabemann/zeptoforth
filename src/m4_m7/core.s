@@ -2166,6 +2166,9 @@ _init_variables:
 	movs r1, #0
 	ldr r0, =xon_xoff_enabled
 	str r1, [r0]
+	ldr r1, =-1
+	ldr r0, =ack_nak_enabled
+	str r1, [r0]
 	@@ Initialize the data stack base
 	ldr r0, =ram_current + stack_base_offset
 	ldr r1, =stack_top

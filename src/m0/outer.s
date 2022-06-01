@@ -833,19 +833,27 @@ _xoff:	push {lr}
 	@@ Send ACK
 	define_word "ack", visible_flag
 _ack:	push {lr}
+	ldr r0, =ack_nak_enabled
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 1f
 	push_tos
 	movs tos, #0x06
 	bl _emit
-	pop {pc}
+1:	pop {pc}
 	end_inlined
 
 	@@ Send NAK
 	define_word "nak", visible_flag
 _nak:	push {lr}
+	ldr r0, =ack_nak_enabled
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 1f
 	push_tos
 	movs tos, #0x15
 	bl _emit
-	pop {pc}
+1:	pop {pc}
 	end_inlined
 
 	@@ Send BEL

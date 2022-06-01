@@ -54,6 +54,14 @@ _xon_xoff_enabled:
 	bx lr
 	end_inlined
 
+	@@ Get the ACK/NAK enabled variable address
+	define_word "ack-nak-enabled", visible_flag
+_ack_nak_enabled:
+	push_tos
+	ldr tos, =ack_nak_enabled
+	bx lr
+	end_inlined
+
 	@@ Get the RAM dictionary base variable address
 	define_word "dict-base", visible_flag
 _dict_base:
