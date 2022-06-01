@@ -127,6 +127,9 @@
 
 	@@ Is ACK/NAK enabled
 	allot ack_nak_enabled, 4
+
+	@@ Is BEL enabled
+	allot bel_enabled, 4
 	
 	@@ The prompt hook
 	allot prompt_hook, 4

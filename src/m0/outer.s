@@ -859,10 +859,14 @@ _nak:	push {lr}
 	@@ Send BEL
 	define_word "bel", visible_flag
 _bel:	push {lr}
+	ldr r0, =bel_enabled
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 1f
 	push_tos
 	movs tos, #0x07
 	bl _emit
-	pop {pc}
+1:	pop {pc}
 	end_inlined
 
 	@@ Implement the refill hook
