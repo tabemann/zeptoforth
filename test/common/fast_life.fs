@@ -88,7 +88,7 @@ begin-module life
     2dup 1- swap 1+ swap wrap-coord -alive
     2dup 1- swap 1- swap wrap-coord -alive
     2dup swap 1- swap wrap-coord -alive
-    life-width @ * + current-buffer @ + 16 swap bic!
+    life-width @ * + current-buffer @ + 16 swap cbic!
   ;
 
   \ Set a life cell to be dead
@@ -101,7 +101,7 @@ begin-module life
     2dup 1- swap 1+ swap wrap-coord +alive
     2dup 1- swap 1- swap wrap-coord +alive
     2dup swap 1- swap wrap-coord +alive
-    life-width @ * + current-buffer @ + 16 swap bis!
+    life-width @ * + current-buffer @ + 16 swap cbis!
   ;
   
   \ Set whether a life cell is alive
@@ -342,35 +342,9 @@ begin-module life
     then
   ;
 
-  \ Display the life viewport using sixels
-  : display-life-sixel ( -- )
-    hide-cursor 0 0 go-to-coord init-sixel
-    life-display-y @ 6 / 6 * begin dup life-display-y-end @ 6 / 6 * < while
-      ." #1" init-sixel-rle
-      life-display-x @ begin dup life-display-x-end @ < while
-	swap 0 >r
-	2dup alive? 1 and r> or >r
-	2dup 1 + alive? 2 and r> or >r
-	2dup 2 + alive? 4 and r> or >r
-	2dup 3 + alive? 8 and r> or >r
-	2dup 4 + alive? 16 and r> or >r
-	2dup 5 + alive? 32 and r> or >r
-	swap dup life-line-buffer @ + r@ swap c!
-	r> [char] ? + add-sixel-rle
-	1+
-      repeat
-      drop force-sixel-rle-out ." $#0" init-sixel-rle
-      life-display-x @ begin dup life-display-x-end @ < while
-	dup life-line-buffer @ + c@ 63 swap bic
-	[char] ? + add-sixel-rle
-	1+
-      repeat
-      drop
-      force-sixel-rle-out ." -"
-      6 +
-    repeat
-    drop
-    ." #1" init-sixel-rle
+  \ Part two of displaying the life viewport using sixels
+  : display-life-sixel-part1 ( -- )
+        ." #1" init-sixel-rle
     life-display-x @ begin dup life-display-x-end @ < while
       0 >r
       life-display-y-end @ 6 / 6 * life-height @ < if
@@ -407,31 +381,39 @@ begin-module life
     escape emit $5C emit show-cursor
   ;
 
-  \ Display the life viewport using 2x2 sixels
-  : display-life-sixel2 ( -- )
+  \ Display the life viewport using sixels
+  : display-life-sixel ( -- )
     hide-cursor 0 0 go-to-coord init-sixel
-    life-display-y @ 3 / 3 * begin dup life-display-y-end @ 3 / 3 * < while
+    life-display-y @ 6 / 6 * begin dup life-display-y-end @ 6 / 6 * < while
       ." #1" init-sixel-rle
       life-display-x @ begin dup life-display-x-end @ < while
 	swap 0 >r
-	2dup alive? 3 and r> or >r
-	2dup 1 + alive? 12 and r> or >r
-	2dup 2 + alive? 48 and r> or >r
+	2dup alive? 1 and r> or >r
+	2dup 1 + alive? 2 and r> or >r
+	2dup 2 + alive? 4 and r> or >r
+	2dup 3 + alive? 8 and r> or >r
+	2dup 4 + alive? 16 and r> or >r
+	2dup 5 + alive? 32 and r> or >r
 	swap dup life-line-buffer @ + r@ swap c!
-	r> [char] ? + add-sixel-rle2
+	r> [char] ? + add-sixel-rle
 	1+
       repeat
       drop force-sixel-rle-out ." $#0" init-sixel-rle
       life-display-x @ begin dup life-display-x-end @ < while
 	dup life-line-buffer @ + c@ 63 swap bic
-	[char] ? + add-sixel-rle2
+	[char] ? + add-sixel-rle
 	1+
       repeat
       drop
       force-sixel-rle-out ." -"
-      3 +
+      6 +
     repeat
     drop
+    display-life-sixel-part1
+  ;
+
+  \ The second part of displaying the life viewport using 2x2 sixels
+  : display-life-sixel2-part1 ( -- )
     ." #1" init-sixel-rle
     life-display-x @ begin dup life-display-x-end @ < while
       0 >r
@@ -458,6 +440,34 @@ begin-module life
     drop
     force-sixel-rle-out ." -"
     escape emit $5C emit show-cursor
+  ;
+
+  \ Display the life viewport using 2x2 sixels
+  : display-life-sixel2 ( -- )
+    hide-cursor 0 0 go-to-coord init-sixel
+    life-display-y @ 3 / 3 * begin dup life-display-y-end @ 3 / 3 * < while
+      ." #1" init-sixel-rle
+      life-display-x @ begin dup life-display-x-end @ < while
+	swap 0 >r
+	2dup alive? 3 and r> or >r
+	2dup 1 + alive? 12 and r> or >r
+	2dup 2 + alive? 48 and r> or >r
+	swap dup life-line-buffer @ + r@ swap c!
+	r> [char] ? + add-sixel-rle2
+	1+
+      repeat
+      drop force-sixel-rle-out ." $#0" init-sixel-rle
+      life-display-x @ begin dup life-display-x-end @ < while
+	dup life-line-buffer @ + c@ 63 swap bic
+	[char] ? + add-sixel-rle2
+	1+
+      repeat
+      drop
+      force-sixel-rle-out ." -"
+      3 +
+    repeat
+    drop
+    display-life-sixel2-part1
   ;
 
   \ Run life without displaying it until a key is pressed
@@ -587,14 +597,14 @@ begin-module life
   \ Set multiple cells with a string with the format "_" for an dead cell,
   \ "*" for a live cell, and a "/" for a newline
   : set-multiple ( addr bytes x y -- )
-    over >r 2swap begin get-char dup 0 <> while
+    over >r 2swap begin get-char dup 0<> while
       case
 	[char] _ of 2swap 2dup false -rot alive! swap 1 + swap 2swap endof
 	[char] * of 2swap 2dup true -rot alive! swap 1 + swap 2swap endof
 	[char] / of 2swap 1 + nip r@ swap 2swap endof
       endcase
     repeat
-    drop 2drop 2drop r> drop
+    drop 2drop 2drop rdrop
   ;
   
   \ Add a block to the world
