@@ -215,6 +215,8 @@ begin-module ansi-term
 
   \ Clear window in ticks
   100 constant clear-ticks
+
+  commit-flash
   
   \ Clear input of multiple escaped characters
   : clear-keys ( -- )
