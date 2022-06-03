@@ -252,13 +252,23 @@ the next column</p>
 </section>
 <section id="find-dict">
 <h3><code class="docutils literal notranslate"><span class="pre">find-dict</span></code><a class="headerlink" href="#find-dict" title="Permalink to this headline">¶</a></h3>
-<p>Find a word in a specific dictionary for a specific wordlist
-( addr bytes mask dict wid – addr|0 )</p>
+<p>( addr bytes dict wid – word|0 )</p>
+<p>Find a word in a specific dictionary for a specific wordlist or return zero for no word found</p>
 </section>
 <section id="find-in-wordlist">
 <h3><code class="docutils literal notranslate"><span class="pre">find-in-wordlist</span></code><a class="headerlink" href="#find-in-wordlist" title="Permalink to this headline">¶</a></h3>
-<p>Find a word in a specific wordlist
-( addr bytes mask wid – addr|0 )</p>
+<p>( addr bytes wid – word|0 )</p>
+<p>Find a word in a specific wordlist or return zero for no word found</p>
+</section>
+<section id="find-dict-by-xt">
+<h3><code class="docutils literal notranslate"><span class="pre">find-dict-by-xt</span></code><a class="headerlink" href="#find-dict-by-xt" title="Permalink to this headline">¶</a></h3>
+<p>( xt dict – word|0 )</p>
+<p>Find a word in a dictionary by execution token or return zero for no word found; only words with headers will be found</p>
+</section>
+<section id="find-by-xt">
+<h3><code class="docutils literal notranslate"><span class="pre">find-by-xt</span></code><a class="headerlink" href="#find-by-xt" title="Permalink to this headline">¶</a></h3>
+<p>( xt – word|0 )</p>
+<p>Find a word in any dictionary by execution token or return zero for no word found; only words with headers will be found</p>
 </section>
 <section id="main">
 <h3><code class="docutils literal notranslate"><span class="pre">main</span></code><a class="headerlink" href="#main" title="Permalink to this headline">¶</a></h3>
@@ -343,6 +353,7 @@ the next column</p>
 <li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pio.html">Programmable Input/Output Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uart.html">UART Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>

@@ -233,11 +233,11 @@ forth set-current
 ;
 
 \ Get whether a word is defined
-: defined? ( "word" -- flag ) token visible-flag find-all 0<> ;
+: defined? ( "word" -- flag ) token find-all 0<> ;
 
 \ Get whether a word is defined, and if it is, execute it
 : execute-defined? ( "word" -- x )
-  token visible-flag find-all ?dup if >body execute else 0 then
+  token find-all ?dup if >body execute else 0 then
 ;
 
 \ Set internal
@@ -804,7 +804,7 @@ internal set-current
 
 \ Look up next available user space
 : next-user-space ( -- offset )
-  s" *USER*" visible-flag flash-latest find-all-dict dup if
+  s" *USER*" flash-latest find-all-dict dup if
     >body execute
   else
     drop 0
@@ -828,7 +828,7 @@ internal set-current
 
 \ Look up next available RAM space
 : next-ram-space ( -- addr )
-  s" *RAM*" visible-flag flash-latest find-all-dict dup if
+  s" *RAM*" flash-latest find-all-dict dup if
     >body execute
   else
     drop 0
@@ -1265,7 +1265,7 @@ internal set-current
 
 \ Look up the current flash wordlist
 : get-current-flash-wordlist ( -- wid )
-  s" *WORDLIST*" visible-flag flash-latest find-all-dict dup if
+  s" *WORDLIST*" flash-latest find-all-dict dup if
     >body execute
   else
     drop internal
@@ -2177,21 +2177,21 @@ flash-mini-dict-size [if]
   ;
 
   \ Find a word in the flash mini-dictionary
-  : find-flash-mini-dict ( b-addr bytes mask wid -- addr|0 )
-    swap >r 3dup hash-string-and-wid flash-mini-dict-end @ 
+  : find-flash-mini-dict ( b-addr bytes wid -- addr|0 )
+    3dup hash-string-and-wid flash-mini-dict-end @ 
     begin dup flash-mini-dict u> while
       2 cells -
       2dup @ = if
 	dup cell+ @ wordlist-id h@ 3 pick = if
-	  dup cell+ @ word-flags h@ r@ and if
+	  dup cell+ @ word-flags h@ visible-flag and if
 	    4 pick 4 pick 2 pick cell+ @ word-name count equal-case-strings? if
-	      rdrop cell+ @ nip nip nip nip exit
+	      cell+ @ nip nip nip nip exit
 	    then
 	  then
 	then
       then
     repeat
-    rdrop 2drop 2drop drop 0
+    2drop 2drop drop 0
   ;
 
   \ Commit to flash
@@ -2199,12 +2199,12 @@ flash-mini-dict-size [if]
 
   \ Find a word in a particular dictionary, while making use of the flash
   \ mini-dictionary
-  : find-optimized-wid ( b-addr bytes mask wid -- addr|0 )
+  : find-optimized-wid ( b-addr bytes wid -- addr|0 )
     compiling-to-flash? if
       find-flash-mini-dict
     else
-      2over 2over ram-latest swap find-dict ?dup if
-	nip nip nip nip
+      3dup ram-latest swap find-dict ?dup if
+	nip nip nip
       else
 	find-flash-mini-dict
       then
@@ -2215,14 +2215,14 @@ flash-mini-dict-size [if]
   commit-flash
 
   \ Find a word using the flash mini-dictionary for optimization
-  : find-optimized ( b-addr bytes mask -- addr|0 )
+  : find-optimized ( b-addr bytes -- addr|0 )
     flash-mini-dict-end @ -1 <> if
       order-count @ 1 lshift order + order ?do
-	3dup i h@ find-optimized-wid ?dup if
-	  nip nip nip unloop exit
+	2dup i h@ find-optimized-wid ?dup if
+	  nip nip unloop exit
 	then
       2 +loop
-      drop 2drop 0
+      2drop 0
     else
       do-find
     then
@@ -2230,8 +2230,33 @@ flash-mini-dict-size [if]
 
 [then]
 
+\ Find a word in a dictionary by execution tokey
+: find-dict-by-xt ( xt dict -- word|0 )
+  begin
+    dup 0<> if
+      dup >body 2 pick = if
+	true
+      else
+	next-word @ false
+      then
+    else
+      true
+    then
+  until
+  nip
+;
+
 \ Commit to flash
 commit-flash
+
+\ Find a word by execution tokey
+: find-by-xt ( xt -- word|0 )
+  dup ram-latest find-dict-by-xt dup 0= if
+    drop flash-latest find-dict-by-xt
+  else
+    nip
+  then
+;
 
 \ Set forth
 forth set-current
@@ -2313,8 +2338,8 @@ forth set-current
     flash-mini-dict flash-mini-dict-size + flash-mini-dict-end !
     init-flash-mini-dict
     ['] add-flash-mini-dict finalize-hook !
-    ['] find-optimized find-hook !
-  [then]
+    ['] find-optimized find-hook ! 
+ [then]
 ;
 
 \ Finish compressing the code

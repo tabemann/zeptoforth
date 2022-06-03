@@ -153,14 +153,14 @@ commit-flash
   [:
     begin
       token 2dup s" ::" equal-strings? not if
-	visible-flag find ?dup if
+	find ?dup if
 	  >body execute 1 set-order
 	else
 	  ['] x-not-found ?raise
 	then
 	false
       else
-	2drop token 2dup visible-flag find dup 0= triggers x-unknown-word true
+	2drop token 2dup find dup 0= triggers x-unknown-word true
       then
     until
   ;] try r> dup begin ?dup while 1- r> -rot repeat set-order ?raise
@@ -174,7 +174,7 @@ commit-flash
 \ Begin a module definition
 : begin-module ( "name" -- )
   token dup 0<> averts x-token-expected
-  2dup visible-flag find ?dup if
+  2dup find ?dup if
     ['] x-already-defined ?raise
   else
     wordlist dup >r -rot constant-with-name r>
@@ -186,7 +186,7 @@ commit-flash
 \ Continue an existing module definition
 : continue-module ( "name" -- )
   token dup 0<> averts x-token-expected
-  2dup visible-flag find ?dup if
+  2dup find ?dup if
     nip nip >body execute
   else
     ['] x-not-found ?raise
@@ -220,7 +220,7 @@ commit-flash
   2dup s" ^" equal-strings? if
     2drop lookup-path
   else
-    2dup visible-flag find dup 0= triggers x-unknown-word
+    2dup find dup 0= triggers x-unknown-word
   then
   -rot start-compile visible >body compile, end-compile,
 ;

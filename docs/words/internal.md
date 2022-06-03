@@ -216,14 +216,24 @@ Find the last visible word
 Initialize the variables
 
 ##### `find-dict`
+( addr bytes dict wid -- word|0 )
 
-Find a word in a specific dictionary for a specific wordlist
-( addr bytes mask dict wid -- addr|0 )
+Find a word in a specific dictionary for a specific wordlist or return zero for no word found
 
 ##### `find-in-wordlist`
+( addr bytes wid -- word|0 )
 
-Find a word in a specific wordlist
-( addr bytes mask wid -- addr|0 )
+Find a word in a specific wordlist or return zero for no word found
+
+##### `find-dict-by-xt`
+( xt dict -- word|0 )
+
+Find a word in a dictionary by execution token or return zero for no word found; only words with headers will be found
+
+##### `find-by-xt`
+( xt -- word|0 )
+
+Find a word in any dictionary by execution token or return zero for no word found; only words with headers will be found
 
 ##### `main`
 

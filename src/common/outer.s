@@ -231,7 +231,7 @@ _equal_case_strings:
 	end_inlined
 
 	@@ Find a word in a specific dictionary for a specific wordlist
-	@@ ( addr bytes mask dict wid -- addr|0 )
+	@@ ( addr bytes dict wid -- addr|0 )
 	define_internal_word "find-dict", visible_flag
 _find_dict:
 	push {r4, r5, lr}
@@ -239,8 +239,7 @@ _find_dict:
 	pull_tos
 	movs r0, tos
 	pull_tos
-	movs r1, tos
-	pull_tos
+	movs r1, #visible_flag
 	movs r2, tos
 	pull_tos
 	movs r3, tos
@@ -288,7 +287,7 @@ _3dup:	push_tos
 	end_inlined
 
 	@@ Find a word in a specific wordlist
-	@@ ( addr bytes mask wid -- addr|0 )
+	@@ ( addr bytes wid -- addr|0 )
 	define_internal_word "find-in-wordlist", visible_flag
 _find_in_wordlist:
 	push {lr}
@@ -299,7 +298,7 @@ _find_in_wordlist:
 3:	movs r0, tos
 	pull_tos
 	push {r0}
-	bl _3dup
+	bl _2dup
 	pop {r0}
 	push_tos
 	ldr r1, =ram_latest
@@ -323,12 +322,12 @@ _find_in_wordlist:
 	beq 3b
 	movs r0, tos
 	b 4b
-2:	adds dp, #12
+2:	adds dp, #8
 	pop {pc}
 	end_inlined
 	
 	@@ Find a word in the dictionary according to the word order list
-	@@ ( addr bytes mask -- addr|0 )
+	@@ ( addr bytes -- addr|0 )
 	define_internal_word "do-find", visible_flag
 _do_find:
 	push {lr}
@@ -338,7 +337,7 @@ _do_find:
 1:	cmp r0, #0
 	beq 2f
 	push {r0, r1}
-	bl _3dup
+	bl _2dup
 	pop {r0, r1}
 	push_tos
 	ldrh tos, [r1]
@@ -351,14 +350,15 @@ _do_find:
 	adds r1, #2
 	pull_tos
 	b 1b
-2:	adds dp, #8
+2:	adds dp, #4
 	movs tos, #0
 	pop {pc}
-3:	adds dp, #12
+3:	adds dp, #8
 	pop {pc}
+	end_inlined
 
 	@@ Invoke the find hook
-	@@ ( b-addr bytes mask -- addr|0 )
+	@@ ( b-addr bytes -- addr|0 )
 	define_word "find", visible_flag
 _find:	ldr r0, =find_hook
 	ldr r0, [r0]
@@ -381,14 +381,13 @@ _hook_needed:
 	
 	@@ Find a word in a specific dictionary in any wordlist in order of
 	@@ definition
-	@@ ( addr bytes mask dict -- addr|0 )
+	@@ ( addr bytes dict -- addr|0 )
 	define_word "find-all-dict", visible_flag
 _find_all_dict:
 	push {r4, lr}
 	movs r0, tos
 	pull_tos
-	movs r1, tos
-	pull_tos
+	movs r1, #visible_flag
 	movs r2, tos
 	pull_tos
 	movs r3, tos
@@ -422,7 +421,7 @@ _find_all_dict:
 	.ltorg
 	
 	@@ Find a word in the dictionary in any wordlist in order of definition
-	@@ ( addr bytes mask -- addr|0 )
+	@@ ( addr bytes -- addr|0 )
 	define_word "find-all", visible_flag
 _find_all:
 	push {lr}
@@ -430,28 +429,22 @@ _find_all:
 	ldr r0, [r0]
 	cmp r0, #0
 	bne 1f
-3:	movs r0, tos
-	pull_tos
-	movs r1, tos
+3:	movs r1, tos
 	pull_tos
 	movs r2, tos
 	push_tos
 	movs tos, r1
 	push_tos
-	movs tos, r0
-	push_tos
 	ldr r3, =ram_latest
 	ldr tos, [r3]
-	push {r0, r1, r2}
+	push {r1, r2}
 	bl _find_all_dict
-	pop {r0, r1, r2}
+	pop {r1, r2}
 	cmp tos, #0
 	bne 2f
 	movs tos, r2
 	push_tos
 	movs tos, r1
-	push_tos
-	movs tos, r0
 	push_tos
 	ldr r3, =flash_latest
 	ldr tos, [r3]
@@ -603,8 +596,6 @@ _outer:	push {lr}
 	beq 2f
 	movs r0, tos
 	ldr r1, [dp]
-	push_tos
-	movs tos, #visible_flag
 	push {r0, r1}
 	bl _find
 	pop {r0, r1}

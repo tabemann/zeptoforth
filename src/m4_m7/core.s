@@ -908,8 +908,6 @@ _init:	movs r0, #0
 _do_init:
 	push {lr}
 	string "init"
-	push_tos
-	movs tos, #visible_flag
 	bl _find_all
 	cmp tos, #0
 	beq 1f
@@ -1081,8 +1079,6 @@ _token_word:
 	bl _token
 	cmp tos, #0
 	beq 1f
-	push_tos
-	movs tos, #visible_flag
 	bl _find
 	cmp tos, #0
 	beq 2f

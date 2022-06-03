@@ -43,22 +43,6 @@ begin-module disassemble-internal
   \ Begin compressing compiled code in flash
   compress-flash
 
-  \ Find a word in a dictionary by address
-  : find-dict-by-address ( addr dict -- word|0 )
-    begin
-      dup 0<> if
-	dup >body 2 pick = if
-	  true
-	else
-	  next-word @ false
-	then
-      else
-	true
-      then
-    until
-    nip
-  ;
-
   \ Look up a local label
   : lookup-local ( addr -- label|0 )
     local-index @ 0 ?do
@@ -71,15 +55,6 @@ begin-module disassemble-internal
 
   \ Commit to flash
   commit-flash
-
-  \ Find a word by address
-  : find-by-address ( addr -- word|0 )
-    dup ram-latest find-dict-by-address dup 0= if
-      drop flash-latest find-dict-by-address
-    else
-      nip
-    then
-  ;
 
   \ Type a condition
   : (cond.) ( cond -- )
@@ -227,7 +202,7 @@ begin-module disassemble-internal
 
   \ Print out an absolute address
   : addr. ( op-addr ref-addr -- )
-    dup find-by-address ?dup if
+    dup find-by-xt ?dup if
       rot drop word-name count label-type drop
       for-gas @ if drop else space ." <" val. ." >" then
     else
@@ -246,7 +221,7 @@ begin-module disassemble-internal
 
   \ Print out a label
   : label. ( addr -- )
-    dup find-by-address ?dup if
+    dup find-by-xt ?dup if
       nip word-name count for-gas @ if
 	label-type ." :" 20 swap - 0 max 1 + 0 ?do space loop
       else
