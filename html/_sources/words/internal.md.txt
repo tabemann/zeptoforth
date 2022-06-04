@@ -230,11 +230,6 @@ Find a word in a specific wordlist or return zero for no word found
 
 Find a word in a dictionary by execution token or return zero for no word found; only words with headers will be found
 
-##### `find-by-xt`
-( xt -- word|0 )
-
-Find a word in any dictionary by execution token or return zero for no word found; only words with headers will be found
-
 ##### `main`
 
 The main functionality, within the main exception handler
