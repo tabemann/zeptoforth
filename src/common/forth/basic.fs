@@ -2249,6 +2249,9 @@ flash-mini-dict-size [if]
 \ Commit to flash
 commit-flash
 
+\ Set forth
+forth set-current
+
 \ Find a word by execution tokey
 : find-by-xt ( xt -- word|0 )
   dup ram-latest find-dict-by-xt dup 0= if
@@ -2257,9 +2260,6 @@ commit-flash
     nip
   then
 ;
-
-\ Set forth
-forth set-current
 
 \ Provide a double cell as a buffer.
 : provide-allot-2cell ( xd xt -- ) ( xt: addr bytes -- )

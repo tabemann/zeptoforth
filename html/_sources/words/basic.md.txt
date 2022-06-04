@@ -1398,14 +1398,19 @@ Compare whether two strings are equal
 Duplicate three items on the stack
 	
 ##### `find`
-( b-addr u mask -- addr|0 )
+( b-addr u -- word|0 )
 
 Find a word in the dictionary according to the word order list
 
 ##### `find-all`
-( b-addr u mask -- addr|0 )
+( b-addr u -- word|0 )
 
 Find a word in the dictionary in any wordlist in order of definition
+
+##### `find-by-xt`
+( xt -- word|0 )
+
+Find a word in any dictionary by execution token or return zero for no word found; only words with headers will be found
 
 ##### `>body`
 ( word -- xt )

@@ -1444,13 +1444,18 @@ otherwise passing the specified argument through.</p>
 </section>
 <section id="find">
 <h3><code class="docutils literal notranslate"><span class="pre">find</span></code><a class="headerlink" href="#find" title="Permalink to this headline">¶</a></h3>
-<p>( b-addr u mask – addr|0 )</p>
+<p>( b-addr u – word|0 )</p>
 <p>Find a word in the dictionary according to the word order list</p>
 </section>
 <section id="find-all">
 <h3><code class="docutils literal notranslate"><span class="pre">find-all</span></code><a class="headerlink" href="#find-all" title="Permalink to this headline">¶</a></h3>
-<p>( b-addr u mask – addr|0 )</p>
+<p>( b-addr u – word|0 )</p>
 <p>Find a word in the dictionary in any wordlist in order of definition</p>
+</section>
+<section id="find-by-xt">
+<h3><code class="docutils literal notranslate"><span class="pre">find-by-xt</span></code><a class="headerlink" href="#find-by-xt" title="Permalink to this headline">¶</a></h3>
+<p>( xt – word|0 )</p>
+<p>Find a word in any dictionary by execution token or return zero for no word found; only words with headers will be found</p>
 </section>
 <section id="body">
 <h3><code class="docutils literal notranslate"><span class="pre">&gt;body</span></code><a class="headerlink" href="#body" title="Permalink to this headline">¶</a></h3>
