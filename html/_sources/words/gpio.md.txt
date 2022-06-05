@@ -12,7 +12,7 @@ These words are in `gpio`.
 
 ##### `GPIOA` through `GPIOK`
 
-These are the memory addresses of the spaces for each of the the GPIO's, from GPIOA to GPIOI on the STM32F407 and STM32L476 and from GPIOA to GPIOK on the STM32F746.
+These are the memory addresses of the spaces for each of the the GPIO's, from GPIOA to GPIOI on the STM32F407 and STM32L476, from GPIOA to GPIOK on the STM32F746, and from GPIOA to GPIOE as well as GPIOH on the STM32F411.
 
 ##### `MODER`
 ( gpio-addr -- addr )

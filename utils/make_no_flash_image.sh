@@ -1,4 +1,6 @@
-# Copyright (c) 2019-2022 Travis Bemann
+#!/bin/sh
+
+# Copyright (c) 2020 Travis Bemann
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -18,52 +20,35 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-export IDIR=src/include
-export AS=arm-none-eabi-as
-export LD=arm-none-eabi-ld
-export COPY=arm-none-eabi-objcopy
-export DUMP=arm-none-eabi-objdump
-export ASFLAGS=-g
-export PREFIX=/usr/local
-export PLATFORM=stm32f407
-export VERSION=0.39.1-dev
+VERSION=$1
+PLATFORM=$2
+PORT=$3
+IMAGE=$4
+PROJECT=zeptoforth
 
-KERNEL_INFO=src/common/kernel_info.s
-
-all: stm32f407 stm32f411 stm32l476 stm32f746 rp2040
-
-install:
-	$(MAKE) -C src/stm32f407 install
-	$(MAKE) -C src/stm32f411 install
-	$(MAKE) -C src/stm32l476 install
-	$(MAKE) -C src/stm32f746 install
-	$(MAKE) -C src/rp2040 install
-
-stm32f407:
-	$(MAKE) -C src/stm32f407
-
-stm32f411:
-	$(MAKE) -C src/stm32f411
-
-stm32l476:
-	$(MAKE) -C src/stm32l476
-
-stm32f746:
-	$(MAKE) -C src/stm32f746
-
-rp2040:
-	$(MAKE) -C src/rp2040
-
-.PHONY: all install stm32f407 stm32f411 stm32l746 stm32f746 clean html
-
-html:
-	cd docs ; sphinx-build -b html . ../html
-
-clean:
-	$(MAKE) -C src/stm32f407 clean
-	$(MAKE) -C src/stm32f411 clean
-	$(MAKE) -C src/stm32l476 clean
-	$(MAKE) -C src/stm32f746 clean
-	$(MAKE) -C src/rp2040 clean
-	$(MAKE) -C src/common clean
-
+rm screenlog.0
+#st-flash erase
+#st-flash write bin/$VERSION/$PLATFORM/zeptoforth_kernel-$VERSION.bin 0x08000000
+#st-flash reset
+#sleep 3
+./utils/codeload3.py -B 115200 -p $PORT serial src/$PLATFORM/forth/setup_$IMAGE.fs
+./utils/codeload3.py -B 115200 -p $PORT serial src/common/forth/ihex.fs
+screen -d -m $PORT 115200
+screen -X log on
+screen -X stuff 'clone\n'
+until grep 'clone_end' screenlog.0
+do
+    sleep 1
+done
+screen -X log off
+screen -X stuff 'erase-all\n'
+screen -X quit
+sleep 1
+sed '1d' screenlog.0 > inter
+sed '$d' inter > inter.1
+sed '$d' inter.1 > inter
+sed 's/:00000001FF clone_end/:00000001FF/' inter > inter.1
+mv inter.1 bin/$VERSION/$PLATFORM/zeptoforth_$IMAGE-$VERSION.ihex
+arm-none-eabi-objcopy -I ihex -O binary bin/$VERSION/$PLATFORM/zeptoforth_$IMAGE-$VERSION.ihex bin/$VERSION/$PLATFORM/zeptoforth_$IMAGE-$VERSION.bin
+rm screenlog.0
+rm inter

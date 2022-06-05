@@ -126,26 +126,34 @@
 <h3>RP2040 Notes<a class="headerlink" href="#rp2040-notes" title="Permalink to this headline">¶</a></h3>
 <p>On the RP2040, a pin is simply an integer from 0 to 29 corresponding to GPIO0 through GPIO29.</p>
 </section>
-<section id="stm32f407-stm32l476-and-stm32f746-pin-words">
-<h3>STM32F407, STM32L476, and STM32F746 Pin Words<a class="headerlink" href="#stm32f407-stm32l476-and-stm32f746-pin-words" title="Permalink to this headline">¶</a></h3>
-<p>On the STM32F407, STM32L476, and STM32F746, a pin is a value that combines a pin on a GPIO with a GPIO which is constructed with <code class="docutils literal notranslate"><span class="pre">XA</span></code> through <code class="docutils literal notranslate"><span class="pre">XI</span></code>, or on the STM32F746, through <code class="docutils literal notranslate"><span class="pre">XK</span></code>.</p>
+<section id="stm32f407-stm32l476-stm32f746-and-stm32f411-pin-words">
+<h3>STM32F407, STM32L476, STM32F746, and STM32F411 Pin Words<a class="headerlink" href="#stm32f407-stm32l476-stm32f746-and-stm32f411-pin-words" title="Permalink to this headline">¶</a></h3>
+<p>On the STM32F407, STM32L476, STM32F746, or STM32F411, a pin is a value that combines a pin on a GPIO with a GPIO which is constructed on the STM32F407 or STM32L476 with <code class="docutils literal notranslate"><span class="pre">XA</span></code> through <code class="docutils literal notranslate"><span class="pre">XI</span></code>, on the STM32F746 with <code class="docutils literal notranslate"><span class="pre">XA</span></code> through <code class="docutils literal notranslate"><span class="pre">XK</span></code>, or on the STM32F411 with <code class="docutils literal notranslate"><span class="pre">XA</span></code> through <code class="docutils literal notranslate"><span class="pre">XE</span></code> or with <code class="docutils literal notranslate"><span class="pre">XH</span></code>.</p>
 <section id="x-gpio-out-of-range">
 <h4><code class="docutils literal notranslate"><span class="pre">x-gpio-out-of-range</span></code><a class="headerlink" href="#x-gpio-out-of-range" title="Permalink to this headline">¶</a></h4>
 <p>( – )</p>
 <p>GPIO out of range exception.</p>
 </section>
+</section>
+<section id="stm32f407-and-stm32l476-pin-words">
+<h3>STM32F407 and STM32L476 Pin Words<a class="headerlink" href="#stm32f407-and-stm32l476-pin-words" title="Permalink to this headline">¶</a></h3>
 <section id="xa-through-xi">
 <h4><code class="docutils literal notranslate"><span class="pre">XA</span></code> through <code class="docutils literal notranslate"><span class="pre">XI</span></code><a class="headerlink" href="#xa-through-xi" title="Permalink to this headline">¶</a></h4>
 <p>( index – pin )</p>
 <p>Take a pin index on a GPIO and return a pin on GPIOA through GPIOI.</p>
 </section>
 </section>
-<section id="stm32f746-only-pin-words">
-<h3>STM32F746-only Pin Words<a class="headerlink" href="#stm32f746-only-pin-words" title="Permalink to this headline">¶</a></h3>
-<section id="xj-through-xk">
-<h4><code class="docutils literal notranslate"><span class="pre">XJ</span></code> through <code class="docutils literal notranslate"><span class="pre">XK</span></code><a class="headerlink" href="#xj-through-xk" title="Permalink to this headline">¶</a></h4>
+<section id="stm32f746-pin-words">
+<h3>STM32F746 Pin Words<a class="headerlink" href="#stm32f746-pin-words" title="Permalink to this headline">¶</a></h3>
+<section id="xa-through-xk">
+<h4><code class="docutils literal notranslate"><span class="pre">XA</span></code> through <code class="docutils literal notranslate"><span class="pre">XK</span></code><a class="headerlink" href="#xa-through-xk" title="Permalink to this headline">¶</a></h4>
 <p>( index – pin )</p>
-<p>Take a pin index on a GPIO and return a pin on GPIOJ through GPIOK.</p>
+<p>Take a pin index on a GPIO and return a pin on GPIOA through GPIOK.</p>
+</section>
+<section id="xa-through-xe-and-xh">
+<h4><code class="docutils literal notranslate"><span class="pre">XA</span></code> through <code class="docutils literal notranslate"><span class="pre">XE</span></code> and <code class="docutils literal notranslate"><span class="pre">XH</span></code><a class="headerlink" href="#xa-through-xe-and-xh" title="Permalink to this headline">¶</a></h4>
+<p>( index – pin )</p>
+<p>Take a pin index on a GPIO and return a pin on GPIOA through GPIOE and GPIOH.</p>
 </section>
 </section>
 </section>
@@ -181,6 +189,7 @@
 <li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pio.html">Programmable Input/Output Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uart.html">UART Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>

@@ -60,6 +60,13 @@ The red LED.
 
 The blue LED.
 
+#### STM32F411 "Black Pill" Words
+
+##### `blue`
+( -- led )
+
+The blue LED.
+
 #### STM32L476 DISCOVERY LED Words
 
 ##### `green`

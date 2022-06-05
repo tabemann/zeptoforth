@@ -92,23 +92,30 @@ Toggle the high/low state of *pin*.
 
 On the RP2040, a pin is simply an integer from 0 to 29 corresponding to GPIO0 through GPIO29.
 
-#### STM32F407, STM32L476, and STM32F746 Pin Words
+#### STM32F407, STM32L476, STM32F746, and STM32F411 Pin Words
 
-On the STM32F407, STM32L476, and STM32F746, a pin is a value that combines a pin on a GPIO with a GPIO which is constructed with `XA` through `XI`, or on the STM32F746, through `XK`.
+On the STM32F407, STM32L476, STM32F746, or STM32F411, a pin is a value that combines a pin on a GPIO with a GPIO which is constructed on the STM32F407 or STM32L476 with `XA` through `XI`, on the STM32F746 with `XA` through `XK`, or on the STM32F411 with `XA` through `XE` or with `XH`.
 
 ##### `x-gpio-out-of-range`
 ( -- )
 
 GPIO out of range exception.
 
+#### STM32F407 and STM32L476 Pin Words
+
 ##### `XA` through `XI`
 ( index -- pin )
 
 Take a pin index on a GPIO and return a pin on GPIOA through GPIOI.
 
-#### STM32F746-only Pin Words
+#### STM32F746 Pin Words
 
-##### `XJ` through `XK`
+##### `XA` through `XK`
 ( index -- pin )
 
-Take a pin index on a GPIO and return a pin on GPIOJ through GPIOK.
+Take a pin index on a GPIO and return a pin on GPIOA through GPIOK.
+
+##### `XA` through `XE` and `XH`
+( index -- pin )
+
+Take a pin index on a GPIO and return a pin on GPIOA through GPIOE and GPIOH.

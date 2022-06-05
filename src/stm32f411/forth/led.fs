@@ -26,10 +26,7 @@ begin-module led
   pin import
 
   \ The LED constants
-  0 constant green
-  1 constant orange
-  2 constant red
-  3 constant blue
+  0 constant blue
 
   \ The LED states
   low constant off
@@ -41,34 +38,32 @@ begin-module led
   begin-module led-internal
 
     \ The LED count
-    4 constant led-count
+    1 constant led-count
 
     \ Validate an LED
     : validate-led ( led -- ) led-count u< averts x-led-out-of-range ;
 
     \ Get the pin of an LED
-    : pin-of-led ( led -- pin ) 12 + xd ;
+    : pin-of-led ( led -- pin ) 13 + xc ;
 
   end-module> import
 
   \ Initialize the LEDs
   : led-init ( -- )
-    green pin-of-led output-pin
-    orange pin-of-led output-pin
-    red pin-of-led output-pin
     blue pin-of-led output-pin
+    high blue pin-of-led pin!
   ;
 
   \ Set an LED
   : led! ( state led -- )
     dup validate-led
-    pin-of-led pin!
+    swap not swap pin-of-led pin!
   ;
 
   \ Get an LED
   : led@ ( led -- state )
     dup validate-led
-    pin-of-led pin-out@
+    pin-of-led pin-out@ not
   ;
 
   \ Toggle an LED

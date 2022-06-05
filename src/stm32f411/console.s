@@ -112,7 +112,7 @@ _uart_init:
 	@ Configure BRR by deviding the bus clock with the baud rate
 	
 	ldr r1, =CONSOLE_BRR
-	movs r0, #0x8B  @ 115200 bps
+	movs r0, #0xD9  @ 115200 bps
 	str r0, [r1]
 
 	@ Enable the USART, TX, and RX circuit

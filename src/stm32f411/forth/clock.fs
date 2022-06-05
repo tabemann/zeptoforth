@@ -163,7 +163,7 @@ USART2_Base $0C + constant USART2_CR1
 : init ( -- )
   init
   fix-ldmia-issue
-  use-168mhz
+  use-100mhz
 ;
 
 \ Reboot
