@@ -122,7 +122,7 @@ begin-module armv6m
     \ Resolve an unconditional branch
     : resolve-b ( mark-addr mark -- )
       drop
-      here over - 1 rshift
+      here over - 1 arshift
       dup 1024 < over -1025 > and averts x-out-of-range-pc-rel
       $7FF and $E000 or swap hcurrent!
     ;
@@ -130,7 +130,7 @@ begin-module armv6m
     \ Resolve a conditional branch
     : resolve-bc ( mark-addr mark -- )
       mark-param dup validate-cond >r
-      here over - 1 rshift
+      here over - 1 arshift
       dup 128 < over -129 > and averts x-out-of-range-pc-rel
       $FF and r> 8 lshift or $D000 or swap hcurrent!
     ;
@@ -258,7 +258,7 @@ begin-module armv6m
     \ Assemble an unconditional branch to a marker
     : b< ( mark-addr mark -- )
       mark-dest validate-mark
-      here 4 + - 1 rshift
+      here 4 + - 1 arshift
       dup 1024 < over -1025 > and averts x-out-of-range-pc-rel
       $7FF and $E000 or h,
     ;
@@ -267,7 +267,7 @@ begin-module armv6m
     : bc< ( mark-addr mark cond -- )
       dup validate-cond
       swap mark-dest validate-mark
-      swap here 4 + - 1 rshift
+      swap here 4 + - 1 arshift
       dup 128 < over -129 > and averts x-out-of-range-pc-rel
       $FF and swap 8 lshift or $D000 or h,
     ;
@@ -485,7 +485,7 @@ begin-module armv6m
     ;
 
     \ Assemble a POP instruction
-    : pop ( rx ... r0 count rn -- )
+    : pop ( rx ... r0 count -- )
       0 begin over while
 	rot dup pc = if
 	  drop 8 bit or
@@ -498,7 +498,7 @@ begin-module armv6m
     ;
 
     \ Assemble a PUSH instruction
-    : push ( rx ... r0 count rn -- )
+    : push ( rx ... r0 count -- )
       0 begin over while
 	rot dup lr = if
 	  drop 8 bit or
@@ -686,9 +686,11 @@ begin-module armv6m
   end-module
 
   \ Begin an assembly block
-  : code[ [immediate] undefer-lit armv6m-instr import postpone [ ;
+  : code[
+    [compile-only] [immediate] undefer-lit armv6m-instr import postpone [
+  ;
 
   \ End an assembly block
-  : ]code [immediate] armv6m-instr unimport postpone ] ;
+  : ]code armv6m-instr unimport ] ;
   
 end-module
