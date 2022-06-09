@@ -124,7 +124,7 @@ begin-module armv6m
       drop
       here over - 1 arshift
       dup 1024 < over -1025 > and averts x-out-of-range-pc-rel
-      $7FF and $E000 or swap hcurrent!
+      $7FF and $E000 or swap 4 - hcurrent!
     ;
 
     \ Resolve a conditional branch
@@ -132,7 +132,7 @@ begin-module armv6m
       mark-param dup validate-cond >r
       here over - 1 arshift
       dup 128 < over -129 > and averts x-out-of-range-pc-rel
-      $FF and r> 8 lshift or $D000 or swap hcurrent!
+      $FF and r> 8 lshift or $D000 or swap 4 - hcurrent!
     ;
     
   end-module> import
@@ -507,7 +507,7 @@ begin-module armv6m
 	then
 	swap 1- swap
       repeat
-      nip $BC00 or h,
+      nip $B400 or h,
     ;
 
     \ Assemble an REV (register) instruction

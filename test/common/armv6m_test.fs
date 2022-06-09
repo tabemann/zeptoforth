@@ -27,18 +27,25 @@ begin-module armv6m-test
   
   \ ADDS TOS, TOS, #1 test
   : test-adds-tos-tos-#1 ( -- )
-    1 code[ 1 tos tos adds_,_,#_ ]code 2 = s" ADDS TOS, TOS, #1" verify
+    1 code[
+    1 tos tos adds_,_,#_
+    ]code 2 = s" ADDS TOS, TOS, #1" verify
   ;
 
   \ ADDS TOS, #1 test
   : test-adds-tos-#1 ( -- )
-    2 code[ 1 tos adds_,#_ ]code 3 = s" ADDS TOS, #1" verify
+    2 code[
+    1 tos adds_,#_
+    ]code 3 = s" ADDS TOS, #1" verify
   ;
 
   \ ADDS TOS, R0, R1 test
   : test-adds-tos-r0-r1 ( -- )
-    0 code[ 1 r0 movs_,#_ 2 r1 movs_,#_ r1 r0 tos adds_,_,_ ]code
-    3 = s" ADDS TOS, R0, R1" verify
+    0 code[
+    1 r0 movs_,#_
+    2 r1 movs_,#_
+    r1 r0 tos adds_,_,_
+    ]code 3 = s" ADDS TOS, R0, R1" verify
   ;
 
   \ ADDS TOS, R12 test
@@ -49,8 +56,30 @@ begin-module armv6m-test
     r0 r12 mov4_,4_
     r12 tos add4_,4_
     r1 r12 mov4_,4_
-    ]code
-    3 = s" ADDS TOS, R12" verify
+    ]code 3 = s" ADDS TOS, R12" verify
+  ;
+
+  \ SUBS TOS, TOS, #1 test
+  : test-subs-tos-tos-#1 ( -- )
+    3 code[
+    1 tos tos subs_,_,#_
+    ]code 2 = s" SUBS TOS, TOS, #1" verify
+  ;
+
+  \ SUBS TOS, #1 test
+  : test-subs-tos-#1 ( -- )
+    3 code[
+    1 tos subs_,#_
+    ]code 2 = s" SUBS TOS, #1" verify
+  ;
+
+  \ SUBS TOS, R0, R1 test
+  : test-subs-tos-r0-r1 ( -- )
+    0 code[
+    3 r0 movs_,#_
+    1 r1 movs_,#_
+    r1 r0 tos subs_,_,_
+    ]code 2 = s" SUBS TOS, R0, R1" verify
   ;
 
   \ ANDS TOS, R0 test
@@ -58,8 +87,100 @@ begin-module armv6m-test
     $FC0 code[
     $FF r0 movs_,#_
     r0 tos ands_,_
-    ]code
-    $C0 = s" ANDS TOS, R0" verify
+    ]code $C0 = s" ANDS TOS, R0" verify
+  ;
+
+  \ ORRS TOS, R0 test
+  : test-orrs-tos-r0 ( -- )
+    $F0 code[
+    $0F r0 movs_,#_
+    r0 tos orrs_,_
+    ]code $FF = s" ORRS TOS, R0" verify
+  ;
+
+  \ EORS TOS, R0 test
+  : test-eors-tos-r0 ( -- )
+    $F0 code[
+    $3F r0 movs_,#_
+    r0 tos eors_,_
+    ]code $CF = s" EORS TOS, R0" verify
+  ;
+
+  \ BICS TOS, R0 test
+  : test-bics-tos-r0 ( -- )
+    $FF code[
+    $0F r0 movs_,#_
+    r0 tos bics_,_
+    ]code $F0 = s" BICS TOS, R0" verify
+  ;
+
+  \ LSLS TOS, R0 test
+  : test-lsls-tos-r0 ( -- )
+    1 code[
+    1 r0 movs_,#_
+    r0 tos lsls_,_
+    ]code 2 = s" LSLS TOS, R0" verify
+  ;
+
+  \ LSRS TOS, R0 test
+  : test-lsrs-tos-r0 ( -- )
+    $80000000 code[
+    1 r0 movs_,#_
+    r0 tos lsrs_,_
+    ]code $40000000 = s" LSRS TOS, R0" verify
+  ;
+
+  \ ASRS TOS, R0 test
+  : test-asrs-tos-r0 ( -- )
+    $80000000 code[
+    1 r0 movs_,#_
+    r0 tos asrs_,_
+    ]code $C0000000 = s" ASRS TOS, R0" verify
+  ;
+
+  \ RORS TOS, TOS, R0 test
+  : test-rors-tos-r0 ( -- )
+    $80000001 code[
+    1 r0 movs_,#_
+    r0 tos rors_,_
+    ]code $C0000000 = s" RORS TOS, R0" verify
+  ;
+
+  \ LSLS TOS, TOS, #1 test
+  : test-lsls-tos-tos-#1 ( -- )
+    1 code[
+    1 tos tos lsls_,_,#_
+    ]code 2 = s" LSLS TOS, TOS, #1" verify
+  ;
+
+  \ LSRS TOS, TOS, #1 test
+  : test-lsrs-tos-tos-#1 ( -- )
+    $80000000 code[
+    1 tos tos lsrs_,_,#_
+    ]code $40000000 = s" LSRS TOS, TOS, #1" verify
+  ;
+
+  \ ASRS TOS, TOS, #1 test
+  : test-asrs-tos-tos-#1 ( -- )
+    $80000000 code[
+    1 tos tos asrs_,_,#_
+    ]code $C0000000 = s" ASRS TOS, TOS, #1" verify
+  ;
+
+  \ MULS TOS, R0 test
+  : test-muls-tos-r0 ( -- )
+    2 code[
+    3 r0 movs_,#_
+    r0 tos muls_,_
+    ]code 6 = s" MULS TOS, R0" verify
+  ;
+
+  \ MVNS TOS, R0 test
+  : test-mvns-tos-r0 ( -- )
+    2 code[
+    0 r0 movs_,#_
+    r0 tos mvns_,_
+    ]code -1 = s" MVNS TOS, R0" verify
   ;
 
   \ Simple loop test
@@ -72,8 +193,78 @@ begin-module armv6m-test
 \    0 tos cmp_,#_
     ne bc<
     r0 tos movs_,_
+    ]code 32 = s" SIMPLE LOOP" verify
+  ;
+
+  \ Simple backward unconditional branch test
+  : test-b-backward ( -- )
+    1 [:
+      code[
+      mark>
+      0 tos cmp_,#_
+      ne bc>
+      pc 1 pop
+      >mark
+      0 tos movs_,#_
+      b<
+      ]code
+    ;] execute 0 = s" B BACKWARD" verify
+  ;
+
+  \ Simple forward unconditional branch test
+  : test-b-forward ( -- )
+    1 code[
+    b>
+    2 tos movs_,#_
+    >mark
+    ]code 1 = s" B FORWARD" verify
+  ;
+
+  \ Simple forward conditional branch test
+  : test-bc-forward ( -- )
+    1 code[
+    0 r0 movs_,#_
+    eq bc>
+    2 tos movs_,#_
+    >mark
+    ]code 1 = s" BC FOWARD" verify
+  ;
+
+  \ Simple PUSH and POP test
+  : test-push-pop ( -- )
+    1 code[
+    2 r0 movs_,#_
+    3 r1 movs_,#_
+    4 r2 movs_,#_
+    5 r3 movs_,#_
+    r3 r2 r1 r0 4 push
     ]code
-    32 = s" SIMPLE LOOP" verify
+    s" " type
+    code[
+    r3 r2 r1 r0 4 pop
+    r0 tos tos adds_,_,_
+    r1 tos tos adds_,_,_
+    r2 tos tos adds_,_,_
+    r3 tos tos adds_,_,_
+    ]code 15 = s" PUSH POP" verify
+  ;
+
+  \ Simple STM and LDM test
+  : test-stm-ldm ( -- )
+    here code[
+    tos r0 movs_,_
+    2 r1 movs_,#_
+    4 r2 movs_,#_
+    8 r3 movs_,#_
+    r1 r2 r3 3 r0 stm
+    tos r0 movs_,_
+    0 r1 movs_,#_
+    0 r2 movs_,#_
+    0 r3 movs_,#_
+    r1 r2 r3 3 r0 ldm
+    r2 r1 tos adds_,_,_
+    r3 tos tos adds_,_,_
+    ]code 14 = s" STM LDM" verify
   ;
 
   \ Run tests
@@ -82,8 +273,28 @@ begin-module armv6m-test
     test-adds-tos-#1
     test-adds-tos-r0-r1
     test-adds-tos-r12
+    test-subs-tos-tos-#1
+    test-subs-tos-#1
+    test-subs-tos-r0-r1
     test-ands-tos-r0
+    test-orrs-tos-r0
+    test-eors-tos-r0
+    test-bics-tos-r0
+    test-lsls-tos-r0
+    test-lsrs-tos-r0
+    test-asrs-tos-r0
+    test-rors-tos-r0
+    test-lsls-tos-tos-#1
+    test-lsrs-tos-tos-#1
+    test-asrs-tos-tos-#1
+    test-muls-tos-r0
+    test-mvns-tos-r0
     test-simple-loop
+    test-b-backward
+    test-b-forward
+    test-bc-forward
+    test-push-pop
+    test-stm-ldm
   ;
   
 end-module
