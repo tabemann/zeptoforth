@@ -183,6 +183,122 @@ begin-module armv6m-test
     ]code -1 = s" MVNS TOS, R0" verify
   ;
 
+  \ REV TOS, TOS test
+  : test-rev-tos-tos ( -- )
+    $04030201 code[
+    tos tos rev_,_
+    ]code $01020304 = s" REV TOS, TOS" verify
+  ;
+
+  \ REV16 TOS, TOS test
+  : test-rev16-tos-tos ( -- )
+    $04030201 code[
+    tos tos rev16_,_
+    ]code $03040102 = s" REV16 TOS, TOS" verify
+  ;
+
+  \ REVSH TOS, TOS test
+  : test-revsh-tos-tos ( -- )
+    $0000FFFE code[
+    tos tos revsh_,_
+    ]code $FFFFFEFF = s" REVSH TOS, TOS" verify
+  ;
+
+  \ RSBS TOS, R0, #0 test
+  : test-rsbs-tos-r0-#0 ( -- )
+    0 code[
+    1 r0 movs_,#_
+    r0 tos rsbs_,_,#0
+    ]code -1 =  s" RSBS TOS, R0, #0" verify
+  ;
+
+  \ NOP test
+  : test-nop ( -- )
+    1 code[
+    nop
+    ]code 1 = s" NOP" verify
+  ;
+
+  \ MOV TOS, R12 test
+  : test-mov-tos-r12 ( -- )
+    0 code[
+    1 r0 movs_,#_
+    r0 r12 mov4_,4_
+    r12 tos mov4_,4_
+    ]code 1 = s" MOV TOS, R12" verify
+  ;
+
+  2 cells buffer: test-buffer
+
+  \ STR and LDR immediate test
+  : test-str-ldr-imm ( -- )
+    test-buffer code[
+    1 r0 movs_,#_
+    4 tos r0 str_,[_,#_]
+    2 r0 movs_,#_
+    4 tos r0 str_,[_,#_]
+    4 tos tos ldr_,[_,#_]
+    ]code 2 = s" STR AND LDR IMMEDIATE" verify
+  ;
+
+  \ STRB and LDRB immediate test
+  : test-strb-ldrb-imm ( -- )
+    test-buffer code[
+    1 r0 movs_,#_
+    4 tos r0 strb_,[_,#_]
+    2 r0 movs_,#_
+    4 tos r0 strb_,[_,#_]
+    4 tos tos ldrb_,[_,#_]
+    ]code 2 = s" STRB AND LDRB IMMEDIATE" verify
+  ;
+
+  \ STRH and LDRH immediate test
+  : test-strh-ldrh-imm ( -- )
+    test-buffer code[
+    1 r0 movs_,#_
+    4 tos r0 strh_,[_,#_]
+    2 r0 movs_,#_
+    4 tos r0 strh_,[_,#_]
+    4 tos tos ldrh_,[_,#_]
+    ]code 2 = s" STRH AND LDRH IMMEDIATE" verify
+  ;
+
+  \ STR and LDR register test
+  : test-str-ldr-reg ( -- )
+    test-buffer code[
+    1 r0 movs_,#_
+    4 r1 movs_,#_
+    r1 tos r0 str_,[_,_]
+    2 r0 movs_,#_
+    r1 tos r0 str_,[_,_]
+    r1 tos tos ldr_,[_,_]
+    ]code 2 = s" STR AND LDR REGISTER" verify
+  ;
+
+  \ STRB and LDRB register test
+  : test-strb-ldrb-reg ( -- )
+    test-buffer code[
+    1 r0 movs_,#_
+    4 r1 movs_,#_
+    r1 tos r0 strb_,[_,_]
+    2 r0 movs_,#_
+    r1 tos r0 strb_,[_,_]
+    r1 tos tos ldrb_,[_,_]
+    ]code 2 = s" STRB AND LDRB REGISTER" verify
+  ;
+
+  \ STRH and LDRH register test
+  : test-strh-ldrh-reg ( -- )
+    test-buffer code[
+    1 r0 movs_,#_
+    4 r1 movs_,#_
+    r1 tos r0 strh_,[_,_]
+    2 r0 movs_,#_
+    r1 tos r0 strh_,[_,_]
+    r1 tos tos ldrh_,[_,_]
+    ]code 2 = s" STRH AND LDRH REGISTER" verify
+  ;
+
   \ Simple loop test
   : test-simple-loop ( -- )
     16 code[
@@ -289,6 +405,18 @@ begin-module armv6m-test
     test-asrs-tos-tos-#1
     test-muls-tos-r0
     test-mvns-tos-r0
+    test-rev-tos-tos
+    test-rev16-tos-tos
+    test-revsh-tos-tos
+    test-rsbs-tos-r0-#0
+    test-nop
+    test-mov-tos-r12
+    test-str-ldr-imm
+    test-strb-ldrb-imm
+    test-strh-ldrh-imm
+    test-str-ldr-reg
+    test-strb-ldrb-reg
+    test-strh-ldrh-reg
     test-simple-loop
     test-b-backward
     test-b-forward

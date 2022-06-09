@@ -358,14 +358,14 @@ begin-module armv6m
     \ Assemble an LDR (immediate) instruction
     : ldr_,[_,#_] ( imm5 rn rt -- )
       2dup validate-2-3reg 2 pick validate-imm-4align
-      swap 3 lshift or swap 2 lshift dup 32 u< averts x-out-of-range-imm
+      swap 3 lshift or swap 2 rshift dup 32 u< averts x-out-of-range-imm
       6 lshift or $6800 or h,
     ;
 
     \ Assemble an LDR (immediate) instruction
     : ldr_,[sp,#_] ( imm8 rt -- )
       dup validate-3reg over validate-imm-4align
-      8 lshift swap 2 lshift dup 256 u< averts x-out-of-range-imm
+      8 lshift swap 2 rshift dup 256 u< averts x-out-of-range-imm
       or $9800 or h,
     ;
 
@@ -394,7 +394,7 @@ begin-module armv6m
     \ Assemble an LDRH (immediate) instruction
     : ldrh_,[_,#_] ( imm5 rn rt -- )
       2dup validate-2-3reg 2 pick validate-imm-2align
-      swap 3 lshift or swap 1 lshift dup 32 u< averts x-out-of-range-imm
+      swap 3 lshift or swap 1 rshift dup 32 u< averts x-out-of-range-imm
       6 lshift or $8800 or h,
     ;
 
@@ -553,14 +553,14 @@ begin-module armv6m
     \ Assemble an STR (immediate) instruction
     : str_,[_,#_] ( imm5 rn rt -- )
       2dup validate-2-3reg 2 pick validate-imm-4align
-      swap 3 lshift or swap 2 lshift dup 32 u< averts x-out-of-range-imm
+      swap 3 lshift or swap 2 rshift dup 32 u< averts x-out-of-range-imm
       6 lshift or $6000 or h,
     ;
 
     \ Assemble an STR (immediate) instruction
     : str_,[sp,#_] ( imm8 rt -- )
       dup validate-3reg over validate-imm-4align
-      8 lshift swap 2 lshift dup 256 u< averts x-out-of-range-imm
+      8 lshift swap 2 rshift dup 256 u< averts x-out-of-range-imm
       or $9000 or h,
     ;
 
@@ -584,7 +584,7 @@ begin-module armv6m
     \ Assemble an STRH (immediate) instruction
     : strh_,[_,#_] ( imm5 rn rt -- )
       2dup validate-2-3reg 2 pick validate-imm-2align
-      swap 3 lshift or swap 1 lshift dup 32 u< averts x-out-of-range-imm
+      swap 3 lshift or swap 1 rshift dup 32 u< averts x-out-of-range-imm
       6 lshift or $8000 or h,
     ;
 
