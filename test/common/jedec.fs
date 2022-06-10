@@ -20,9 +20,6 @@
 
 continue-module forth
 
-  $E00FFFD0 constant jdec-cont
-  $E00FFFE0 constant jdec-id
-
   \ Get the JEP106 ID code
   : jep106-id@ ( -- id )
     $E00FFFE4 @ 4 rshift $F and
