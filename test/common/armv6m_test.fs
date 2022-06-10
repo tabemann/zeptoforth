@@ -402,6 +402,23 @@ begin-module armv6m-test
     ]code 32 = s" REGISTER CMP LOOP" verify
   ;
 
+  \ 4-bit register CMP loop test
+  : test-reg4-cmp-loop ( -- )
+    16 code[
+    0 r0 movs_,#_
+    r12 r2 mov4_,4_
+    mark>
+    2 r0 adds_,#_
+    1 tos subs_,#_
+    0 r1 movs_,#_
+    r1 r12 mov4_,4_
+    r12 tos cmp4_,4_
+    ne bc<
+    r2 r12 mov4_,4_
+    r0 tos movs_,_
+    ]code 32 = s" REGISTER4 CMP LOOP" verify
+  ;
+
   \ Register TST loop test
   : test-reg-tst-loop ( -- )
     16 code[
@@ -416,6 +433,20 @@ begin-module armv6m-test
     ]code 32 = s" REGISTER TST LOOP" verify
   ;
   
+  \ Register CMN loop test
+  : test-reg-cmn-loop ( -- )
+    16 code[
+    0 r0 movs_,#_
+    mark>
+    2 r0 adds_,#_
+    1 tos subs_,#_
+    0 r1 movs_,#_
+    r1 tos cmn_,_
+    ne bc<
+    r0 tos movs_,_
+    ]code 32 = s" REGISTER CMN LOOP" verify
+  ;
+
   \ Simple backward unconditional branch test
   : test-b-backward ( -- )
     1 [:
@@ -450,6 +481,37 @@ begin-module armv6m-test
     ]code 1 = s" BC FOWARD" verify
   ;
 
+  \ ADD R12, SP, R12 test
+  : test-add-r12-sp-r12 ( -- )
+    0 code[
+    1 r0 movs_,#_
+    2 r1 movs_,#_
+    4 r2 movs_,#_
+    r12 r3 mov4_,4_
+    r0 r1 r2 r3 4 push
+    r2 r12 mov4_,4_
+    r12 add4_,sp
+    r12 tos mov4_,4_
+    0 tos tos ldr_,[_,#_]
+    16 addsp,sp,#_
+    r3 r12 mov4_,4_
+    ]code 2 = s" ADD R12, SP, R12" verify
+  ;
+
+  \ ADD TOS, SP, #4 test
+  : test-add-tos-sp-#4 ( -- )
+    0 code[
+    1 r0 movs_,#_
+    2 r1 movs_,#_
+    3 r2 movs_,#_
+    4 r3 movs_,#_
+    r0 r1 r2 r3 4 push
+    4 tos add_,sp,#_
+    0 tos tos ldr_,[_,#_]
+    16 addsp,sp,#_
+    ]code 2 = s" ADD TOS, SP, #4" verify
+  ;
+
   \ LDR TOS, [SP, #4] test
   : test-ldr-tos-sp-#4 ( -- )
     0 code[
@@ -460,8 +522,20 @@ begin-module armv6m-test
     r0 r1 r2 r3 4 push
     4 tos ldr_,[sp,#_]
     16 r0 movs_,#_
-    r0 addsp,4_
+    r0 addsp,sp,4_
     ]code 2 = s" LDR TOS, [SP, #4]" verify
+  ;
+
+  \ STR R0, [SP, #4] test
+  : test-str-r0-sp-#4 ( -- )
+    0 code[
+    8 r0 movs_,#_
+    16 subsp,sp,#_
+    4 r0 str_,[sp,#_]
+    4 tos ldr_,[sp,#_]
+    16 r0 movs_,#_
+    r0 addsp,sp,4_
+    ]code 8 = s" STR R0, [SP, #4]" verify
   ;
 
   \ LDR TOS, [PC, #_] test
@@ -545,6 +619,17 @@ begin-module armv6m-test
     ;] execute -1 = s" BX TOS" verify
   ;
 
+  \ Miscellaneous instructions test
+  : test-misc ( -- )
+    0 code[
+    cpsie
+    cpsid
+    dmb
+    dsb
+    isb
+    ]code 0 = s" MISC" verify
+  ;
+
   \ Run tests
   : run-tests ( -- )
     test-adds-tos-tos-#1
@@ -589,17 +674,23 @@ begin-module armv6m-test
     test-strh-ldrsh-reg
     test-simple-cmp-loop
     test-reg-cmp-loop
+    test-reg4-cmp-loop
     test-reg-tst-loop
+    test-reg-cmn-loop
     test-b-backward
     test-b-forward
     test-bc-forward
+    test-add-r12-sp-r12
+    test-add-tos-sp-#4
     test-ldr-tos-sp-#4
+    test-str-r0-sp-#4
     test-ldr-tos-pc-#
     test-adr-tos
     test-push-pop
     test-stm-ldm
     test-blx-tos
     test-bx-tos
+    test-misc
   ;
   
 end-module

@@ -223,12 +223,12 @@ begin-module armv6m
     ;
 
     \ Assemble an ADD (SP plus register) instruction
-    : add4_,sp,4_ ( rdm4 -- )
+    : add4_,sp ( rdm4 -- )
       dup validate-4reg dup $7 and swap $8 and 4 lshift or $4468 or h,
     ;
 
     \ Assemble an ADD (SP plus register to SP) instruction
-    : addsp,4_ ( rm4 -- )
+    : addsp,sp,4_ ( rm4 -- )
       dup validate-4reg 3 lshift $4485 or h,
     ;
 
