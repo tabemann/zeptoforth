@@ -108,7 +108,7 @@ begin-module armv6m
       4 align,
       over 2 + 4 align here swap -
       dup 1024 u< averts x-out-of-range-pc-rel
-      2 rshift swap mark-param 8 lshift or $B000 or swap hcurrent!
+      2 rshift swap mark-param 8 lshift or $A000 or swap hcurrent!
     ;
 
     \ Resolve an LDR instruction
@@ -210,7 +210,7 @@ begin-module armv6m
     ;
 
     \ Assemble an ADD (SP plus immediate) instruction
-    : add_,sp,_#_ ( imm8 rd -- )
+    : add_,sp,#_ ( imm8 rd -- )
       dup validate-3reg over validate-imm-4align
       over 1024 u< averts x-out-of-range-imm
       8 lshift swap 2 rshift or $A800 or h,

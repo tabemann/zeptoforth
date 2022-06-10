@@ -58,6 +58,17 @@ begin-module armv6m-test
     r1 r12 mov4_,4_
     ]code 3 = s" ADDS TOS, R12" verify
   ;
+  
+  \ ADCS TOS, R0 test
+  : test-adcs-tos-r0 ( -- )
+    0 code[
+    0 r0 movs_,#_
+    0 r1 movs_,#_
+    r1 r1 mvns_,_
+    1 r1 r1 adds_,_,#_
+    r0 tos adcs_,_
+    ]code 1 s" ADCS TOS, R0" verify
+  ;
 
   \ SUBS TOS, TOS, #1 test
   : test-subs-tos-tos-#1 ( -- )
@@ -80,6 +91,16 @@ begin-module armv6m-test
     1 r1 movs_,#_
     r1 r0 tos subs_,_,_
     ]code 2 = s" SUBS TOS, R0, R1" verify
+  ;
+
+  \ SBCS TOS, R0 test
+  : test-sbcs-tos-r0 ( -- )
+    0 code[
+    0 r0 movs_,#_
+    0 r1 movs_,#_
+    1 r1 r1 subs_,_,#_
+    r0 tos sbcs_,_
+    ]code -1 s" SBCS TOS, R0" verify
   ;
 
   \ ANDS TOS, R0 test
@@ -209,7 +230,35 @@ begin-module armv6m-test
     0 code[
     1 r0 movs_,#_
     r0 tos rsbs_,_,#0
-    ]code -1 =  s" RSBS TOS, R0, #0" verify
+    ]code -1 = s" RSBS TOS, R0, #0" verify
+  ;
+
+  \ SXTB TOS, TOS test
+  : test-sxtb-tos-tos ( -- )
+    $0000FCF0 code[
+    tos tos sxtb_,_
+    ]code $FFFFFFF0 = s" SXTB TOS, TOS" verify
+  ;
+
+  \ SXTH TOS, TOS test
+  : test-sxth-tos-tos ( -- )
+    $00FCF8F0 code[
+    tos tos sxth_,_
+    ]code $FFFFF8F0 = s" SXTH TOS, TOS" verify
+  ;
+
+  \ UXTB TOS, TOS test
+  : test-uxtb-tos-tos ( -- )
+    $0000FCF0 code[
+    tos tos uxtb_,_
+    ]code $000000F0 = s" UXTB TOS, TOS" verify
+  ;
+
+  \ UXTH TOS, TOS test
+  : test-uxth-tos-tos ( -- )
+    $00FCF8F0 code[
+    tos tos uxth_,_
+    ]code $0000F8F0 = s" UXTH TOS, TOS" verify
   ;
 
   \ NOP test
@@ -299,19 +348,74 @@ begin-module armv6m-test
     ]code 2 = s" STRH AND LDRH REGISTER" verify
   ;
 
-  \ Simple loop test
-  : test-simple-loop ( -- )
+  \ STRB and LDRSB register test
+  : test-strb-ldrsb-reg ( -- )
+    test-buffer code[
+    1 r0 movs_,#_
+    4 r1 movs_,#_
+    r1 tos r0 strb_,[_,_]
+    $F0 r0 movs_,#_
+    r1 tos r0 strb_,[_,_]
+    r1 tos tos ldrsb_,[_,_]
+    ]code $FFFFFFF0 = s" STRB AND LDRSB REGISTER" verify
+  ;
+
+  \ STRH and LDRH register test
+  : test-strh-ldrsh-reg ( -- )
+    test-buffer code[
+    1 r0 movs_,#_
+    4 r1 movs_,#_
+    r1 tos r0 strh_,[_,_]
+    $F0 r0 movs_,#_
+    $F1 r2 movs_,#_
+    8 r2 r2 lsls_,_,#_
+    r2 r0 orrs_,_
+    r1 tos r0 strh_,[_,_]
+    r1 tos tos ldrsh_,[_,_]
+    ]code $FFFFF1F0 = s" STRH AND LDRSH REGISTER" verify
+  ;
+
+  \ Simple CMP loop test
+  : test-simple-cmp-loop ( -- )
     16 code[
     0 r0 movs_,#_
     mark>
     2 r0 adds_,#_
     1 tos subs_,#_
-\    0 tos cmp_,#_
+    0 tos cmp_,#_
     ne bc<
     r0 tos movs_,_
-    ]code 32 = s" SIMPLE LOOP" verify
+    ]code 32 = s" SIMPLE CMP LOOP" verify
   ;
 
+  \ Register CMP loop test
+  : test-reg-cmp-loop ( -- )
+    16 code[
+    0 r0 movs_,#_
+    mark>
+    2 r0 adds_,#_
+    1 tos subs_,#_
+    0 r1 movs_,#_
+    r1 tos cmp_,_
+    ne bc<
+    r0 tos movs_,_
+    ]code 32 = s" REGISTER CMP LOOP" verify
+  ;
+
+  \ Register TST loop test
+  : test-reg-tst-loop ( -- )
+    16 code[
+    0 r0 movs_,#_
+    mark>
+    2 r0 adds_,#_
+    1 tos subs_,#_
+    $FF r1 movs_,#_
+    r1 tos tst_,_
+    ne bc<
+    r0 tos movs_,_
+    ]code 32 = s" REGISTER TST LOOP" verify
+  ;
+  
   \ Simple backward unconditional branch test
   : test-b-backward ( -- )
     1 [:
@@ -344,6 +448,43 @@ begin-module armv6m-test
     2 tos movs_,#_
     >mark
     ]code 1 = s" BC FOWARD" verify
+  ;
+
+  \ LDR TOS, [SP, #4] test
+  : test-ldr-tos-sp-#4 ( -- )
+    0 code[
+    1 r0 movs_,#_
+    2 r1 movs_,#_
+    3 r2 movs_,#_
+    4 r3 movs_,#_
+    r0 r1 r2 r3 4 push
+    4 tos ldr_,[sp,#_]
+    16 r0 movs_,#_
+    r0 addsp,4_
+    ]code 2 = s" LDR TOS, [SP, #4]" verify
+  ;
+
+  \ LDR TOS, [PC, #_] test
+  : test-ldr-tos-pc-# ( -- )
+    0 [:
+      code[
+      tos ldr_,[pc]
+      pc 1 pop
+      >mark $7FFFFFFF ,
+      ]code
+    ;] execute $7FFFFFFF = s" LDR TOS, [PC, #_]" verify
+  ;
+
+  \ ADR test
+  : test-adr-tos ( -- )
+    0 [:
+      code[
+      tos adr_
+      0 tos tos ldr_,[_,#_]
+      pc 1 pop
+      >mark $7FFFFFFF ,
+      ]code
+    ;] execute $7FFFFFFF = s" ADR TOS" verify
   ;
 
   \ Simple PUSH and POP test
@@ -383,15 +524,38 @@ begin-module armv6m-test
     ]code 14 = s" STM LDM" verify
   ;
 
+  \ BLX TOS test
+  : test-blx-tos ( -- )
+    0 [: drop -1 ;] [:
+      code[
+      1 tos tos adds_,_,#_
+      tos blx_
+      ]code
+    ;] execute -1 = s" BLX TOS" verify
+  ;
+
+  \ BX TOS test
+  : test-bx-tos ( -- )
+    0 [: 2drop -1 ;] [:
+      code[
+      4 addsp,sp,#_
+      1 tos tos adds_,_,#_
+      tos bx_
+      ]code
+    ;] execute -1 = s" BX TOS" verify
+  ;
+
   \ Run tests
   : run-tests ( -- )
     test-adds-tos-tos-#1
     test-adds-tos-#1
     test-adds-tos-r0-r1
     test-adds-tos-r12
+    test-adcs-tos-r0
     test-subs-tos-tos-#1
     test-subs-tos-#1
     test-subs-tos-r0-r1
+    test-sbcs-tos-r0
     test-ands-tos-r0
     test-orrs-tos-r0
     test-eors-tos-r0
@@ -409,6 +573,10 @@ begin-module armv6m-test
     test-rev16-tos-tos
     test-revsh-tos-tos
     test-rsbs-tos-r0-#0
+    test-sxtb-tos-tos
+    test-sxth-tos-tos
+    test-uxtb-tos-tos
+    test-uxth-tos-tos
     test-nop
     test-mov-tos-r12
     test-str-ldr-imm
@@ -417,12 +585,21 @@ begin-module armv6m-test
     test-str-ldr-reg
     test-strb-ldrb-reg
     test-strh-ldrh-reg
-    test-simple-loop
+    test-strb-ldrsb-reg
+    test-strh-ldrsh-reg
+    test-simple-cmp-loop
+    test-reg-cmp-loop
+    test-reg-tst-loop
     test-b-backward
     test-b-forward
     test-bc-forward
+    test-ldr-tos-sp-#4
+    test-ldr-tos-pc-#
+    test-adr-tos
     test-push-pop
     test-stm-ldm
+    test-blx-tos
+    test-bx-tos
   ;
   
 end-module
