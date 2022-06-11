@@ -110,11 +110,15 @@ USART2_Base $0C + constant USART2_CR1
 \ Enable clock for 100 MHz
 : set-clock-100mhz
   RCC_CR_PLLON RCC_CR bic!
+  s" clock-pllm" find dup if
+    >body execute dup 2 < over 432 > or if drop RCC_PLLCFGR_PLLM_VALUE then
+  else
+    drop RCC_PLLCFGR_PLLM_Value
+  then
   [ RCC_PLLCFGR_PLLSRC
   RCC_PLLCFGR_PLLQ_Value or
   RCC_PLLCFGR_PLLP_Value or
-  RCC_PLLCFGR_PLLN_Value or
-  RCC_PLLCFGR_PLLM_Value or ] literal RCC_PLLCFGR !
+  RCC_PLLCFGR_PLLN_Value or ] literal or RCC_PLLCFGR !    
   RCC_CR @ RCC_CR_PLLON or RCC_CR !
   begin RCC_CR @ RCC_CR_PLLRDY or until
   RCC_CFGR_PPRE2_Value RCC_CFGR_PPRE1_Value or RCC_CFGR_HPRE_Value or
