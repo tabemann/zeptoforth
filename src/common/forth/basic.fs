@@ -122,6 +122,9 @@ internal set-current
 \ Set forth
 forth set-current
 
+\ Provide an alias to NOT
+: invert ( u -- u ) [inlined] not ;
+
 \ Align an address to a power of two
 : align ( a power -- a ) swap 1- swap 1- or 1+ ;
 
