@@ -1,0 +1,776 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>ARMv6-M Assembler Words &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Line Editor" href="line.html" />
+    <link rel="prev" title="Development Tools Words" href="dev_tools.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="armv6-m-assembler-words">
+<h1>ARMv6-M Assembler Words<a class="headerlink" href="#armv6-m-assembler-words" title="Permalink to this headline">¶</a></h1>
+<p>zeptoforth includes an ARMv6-M assembler, which can be used on all platforms, whether ARMv6-M or ARMv7-M. It supports all ARMv6-M instructions except for BL, as it is expected that the user will drop out of the assembler to call Forth words, which will be compiled to BL. It does not make use of labels as many assemblers do, but rather uses “marks”, which are double-cells on the data stack, for forward and backward references.</p>
+<section id="armv6m">
+<h2><code class="docutils literal notranslate"><span class="pre">armv6m</span></code><a class="headerlink" href="#armv6m" title="Permalink to this headline">¶</a></h2>
+<p>The following words are in the <code class="docutils literal notranslate"><span class="pre">armv6m</span></code> module:</p>
+<section id="code">
+<h3><code class="docutils literal notranslate"><span class="pre">code[</span></code><a class="headerlink" href="#code" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Begin a block of assembled code, making the assembler wordlist available within and forcing any deferred literal to be compiled in place.</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">]code</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>End a block of assembled code, removing the assembler wordlist from the wordlist order.</p>
+</section>
+<section id="x-out-of-range-3reg">
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-3reg</span></code><a class="headerlink" href="#x-out-of-range-3reg" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Out of range 3-bit register exception.</p>
+</section>
+<section id="x-out-of-range-4reg">
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-4reg</span></code><a class="headerlink" href="#x-out-of-range-4reg" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Out of range 4-bit register exception.</p>
+</section>
+<section id="x-out-of-range-imm">
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-imm</span></code><a class="headerlink" href="#x-out-of-range-imm" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Out of range immediate exception.</p>
+</section>
+<section id="x-unaligned-imm">
+<h3><code class="docutils literal notranslate"><span class="pre">x-unaligned-imm</span></code><a class="headerlink" href="#x-unaligned-imm" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Unaligned immediate exception.</p>
+</section>
+<section id="x-out-of-range-pc-rel">
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-pc-rel</span></code><a class="headerlink" href="#x-out-of-range-pc-rel" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Out of range PC-relative address exception.</p>
+</section>
+<section id="x-incorrect-mark-type">
+<h3><code class="docutils literal notranslate"><span class="pre">x-incorrect-mark-type</span></code><a class="headerlink" href="#x-incorrect-mark-type" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Incorrect marker type exception.</p>
+</section>
+<section id="x-invalid-cond">
+<h3><code class="docutils literal notranslate"><span class="pre">x-invalid-cond</span></code><a class="headerlink" href="#x-invalid-cond" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Invalid condition exception.</p>
+</section>
+<section id="x-out-of-range-special">
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-special</span></code><a class="headerlink" href="#x-out-of-range-special" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Out of range special register exception.</p>
+</section>
+</section>
+<section id="assembler-words">
+<h2>Assembler words<a class="headerlink" href="#assembler-words" title="Permalink to this headline">¶</a></h2>
+<p>The following words are accessible between <code class="docutils literal notranslate"><span class="pre">code[</span></code> and <code class="docutils literal notranslate"><span class="pre">]code</span></code>:</p>
+<section id="registers">
+<h3>Registers<a class="headerlink" href="#registers" title="Permalink to this headline">¶</a></h3>
+<section id="r0">
+<h4><code class="docutils literal notranslate"><span class="pre">r0</span></code><a class="headerlink" href="#r0" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="r1">
+<h4><code class="docutils literal notranslate"><span class="pre">r1</span></code><a class="headerlink" href="#r1" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="r2">
+<h4><code class="docutils literal notranslate"><span class="pre">r2</span></code><a class="headerlink" href="#r2" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="r3">
+<h4><code class="docutils literal notranslate"><span class="pre">r3</span></code><a class="headerlink" href="#r3" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="r4">
+<h4><code class="docutils literal notranslate"><span class="pre">r4</span></code><a class="headerlink" href="#r4" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="r5">
+<h4><code class="docutils literal notranslate"><span class="pre">r5</span></code><a class="headerlink" href="#r5" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="r6">
+<h4><code class="docutils literal notranslate"><span class="pre">r6</span></code><a class="headerlink" href="#r6" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="r7">
+<h4><code class="docutils literal notranslate"><span class="pre">r7</span></code><a class="headerlink" href="#r7" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="r8">
+<h4><code class="docutils literal notranslate"><span class="pre">r8</span></code><a class="headerlink" href="#r8" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="r9">
+<h4><code class="docutils literal notranslate"><span class="pre">r9</span></code><a class="headerlink" href="#r9" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="r10">
+<h4><code class="docutils literal notranslate"><span class="pre">r10</span></code><a class="headerlink" href="#r10" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="r11">
+<h4><code class="docutils literal notranslate"><span class="pre">r11</span></code><a class="headerlink" href="#r11" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="r12">
+<h4><code class="docutils literal notranslate"><span class="pre">r12</span></code><a class="headerlink" href="#r12" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="r13">
+<h4><code class="docutils literal notranslate"><span class="pre">r13</span></code><a class="headerlink" href="#r13" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="r14">
+<h4><code class="docutils literal notranslate"><span class="pre">r14</span></code><a class="headerlink" href="#r14" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="r15">
+<h4><code class="docutils literal notranslate"><span class="pre">r15</span></code><a class="headerlink" href="#r15" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="tos">
+<h4><code class="docutils literal notranslate"><span class="pre">tos</span></code><a class="headerlink" href="#tos" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="dp">
+<h4><code class="docutils literal notranslate"><span class="pre">dp</span></code><a class="headerlink" href="#dp" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="sp">
+<h4><code class="docutils literal notranslate"><span class="pre">sp</span></code><a class="headerlink" href="#sp" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="lr">
+<h4><code class="docutils literal notranslate"><span class="pre">lr</span></code><a class="headerlink" href="#lr" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="pc">
+<h4><code class="docutils literal notranslate"><span class="pre">pc</span></code><a class="headerlink" href="#pc" title="Permalink to this headline">¶</a></h4>
+</section>
+</section>
+<section id="condition-codes">
+<h3>Condition codes<a class="headerlink" href="#condition-codes" title="Permalink to this headline">¶</a></h3>
+<section id="eq">
+<h4><code class="docutils literal notranslate"><span class="pre">eq</span></code><a class="headerlink" href="#eq" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="ne">
+<h4><code class="docutils literal notranslate"><span class="pre">ne</span></code><a class="headerlink" href="#ne" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="cs">
+<h4><code class="docutils literal notranslate"><span class="pre">cs</span></code><a class="headerlink" href="#cs" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="hs">
+<h4><code class="docutils literal notranslate"><span class="pre">hs</span></code><a class="headerlink" href="#hs" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="cc">
+<h4><code class="docutils literal notranslate"><span class="pre">cc</span></code><a class="headerlink" href="#cc" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="lo">
+<h4><code class="docutils literal notranslate"><span class="pre">lo</span></code><a class="headerlink" href="#lo" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="mi">
+<h4><code class="docutils literal notranslate"><span class="pre">mi</span></code><a class="headerlink" href="#mi" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="pl">
+<h4><code class="docutils literal notranslate"><span class="pre">pl</span></code><a class="headerlink" href="#pl" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="vs">
+<h4><code class="docutils literal notranslate"><span class="pre">vs</span></code><a class="headerlink" href="#vs" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="vc">
+<h4><code class="docutils literal notranslate"><span class="pre">vc</span></code><a class="headerlink" href="#vc" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="hi">
+<h4><code class="docutils literal notranslate"><span class="pre">hi</span></code><a class="headerlink" href="#hi" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="ls">
+<h4><code class="docutils literal notranslate"><span class="pre">ls</span></code><a class="headerlink" href="#ls" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="ge">
+<h4><code class="docutils literal notranslate"><span class="pre">ge</span></code><a class="headerlink" href="#ge" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="lt">
+<h4><code class="docutils literal notranslate"><span class="pre">lt</span></code><a class="headerlink" href="#lt" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="gt">
+<h4><code class="docutils literal notranslate"><span class="pre">gt</span></code><a class="headerlink" href="#gt" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="le">
+<h4><code class="docutils literal notranslate"><span class="pre">le</span></code><a class="headerlink" href="#le" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="al">
+<h4><code class="docutils literal notranslate"><span class="pre">al</span></code><a class="headerlink" href="#al" title="Permalink to this headline">¶</a></h4>
+</section>
+<section id="adcs">
+<h4><code class="docutils literal notranslate"><span class="pre">adcs_,_</span></code><a class="headerlink" href="#adcs" title="Permalink to this headline">¶</a></h4>
+<p>( rm rdn – )</p>
+<p>Assemble an ADCS instruction.</p>
+</section>
+<section id="adds">
+<h4><code class="docutils literal notranslate"><span class="pre">adds_,_,#_</span></code><a class="headerlink" href="#adds" title="Permalink to this headline">¶</a></h4>
+<p>( imm3 rn rd – )</p>
+<p>Assemble a two-register ADDS immediate instruction.</p>
+</section>
+<section id="id2">
+<h4><code class="docutils literal notranslate"><span class="pre">adds_,#_</span></code><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
+<p>( imm8 rdn – )</p>
+<p>Assemble a one-register ADDS immediate instruction.</p>
+</section>
+<section id="id3">
+<h4><code class="docutils literal notranslate"><span class="pre">adds_,_,_</span></code><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h4>
+<p>( rm rn rd – )</p>
+<p>Assemble a three-register ADDS register instruction.</p>
+</section>
+<section id="add4-4">
+<h4><code class="docutils literal notranslate"><span class="pre">add4_,4_</span></code><a class="headerlink" href="#add4-4" title="Permalink to this headline">¶</a></h4>
+<p>( rm4 rdn4 – )</p>
+<p>Assemble a two-4-bit register ADDS register instruction.</p>
+</section>
+<section id="add-sp">
+<h4><code class="docutils literal notranslate"><span class="pre">add_,sp,#_</span></code><a class="headerlink" href="#add-sp" title="Permalink to this headline">¶</a></h4>
+<p>( imm8 rd – )</p>
+<p>Assemble an ADD (SP plus immediate) instruction.</p>
+</section>
+<section id="addsp-sp">
+<h4><code class="docutils literal notranslate"><span class="pre">addsp,sp,#_</span></code><a class="headerlink" href="#addsp-sp" title="Permalink to this headline">¶</a></h4>
+<p>( imm7 – )</p>
+<p>Assemble an ADD (SP plus immediate to SP) instruction.</p>
+</section>
+<section id="add4-sp">
+<h4><code class="docutils literal notranslate"><span class="pre">add4_,sp</span></code><a class="headerlink" href="#add4-sp" title="Permalink to this headline">¶</a></h4>
+<p>( rdm4 – )</p>
+<p>Assemble an ADD (SP plus register) instruction.</p>
+</section>
+<section id="addsp-sp-4">
+<h4><code class="docutils literal notranslate"><span class="pre">addsp,sp,4_</span></code><a class="headerlink" href="#addsp-sp-4" title="Permalink to this headline">¶</a></h4>
+<p>( rm4 – )</p>
+<p>Assemble an ADD (SP plus register to SP) instruction.</p>
+</section>
+<section id="adr">
+<h4><code class="docutils literal notranslate"><span class="pre">adr_</span></code><a class="headerlink" href="#adr" title="Permalink to this headline">¶</a></h4>
+<p>( rd – mark-addr mark )</p>
+<p>Mark an ADR instruction.</p>
+</section>
+<section id="ands">
+<h4><code class="docutils literal notranslate"><span class="pre">ands_,_</span></code><a class="headerlink" href="#ands" title="Permalink to this headline">¶</a></h4>
+<p>( rm rdn – )</p>
+<p>Assemble an ANDS (register) instruction.</p>
+</section>
+<section id="asrs">
+<h4><code class="docutils literal notranslate"><span class="pre">asrs_,_,#_</span></code><a class="headerlink" href="#asrs" title="Permalink to this headline">¶</a></h4>
+<p>( imm5 rm rd – )</p>
+<p>Assemble an ASRS (immediate) instruction.</p>
+</section>
+<section id="id4">
+<h4><code class="docutils literal notranslate"><span class="pre">asrs_,_</span></code><a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h4>
+<p>( rm rdn – )</p>
+<p>Assemble an ASRS (register) instruction.</p>
+</section>
+<section id="b">
+<h4><code class="docutils literal notranslate"><span class="pre">b&lt;</span></code><a class="headerlink" href="#b" title="Permalink to this headline">¶</a></h4>
+<p>( mark-addr mark – )</p>
+<p>Assemble an unconditional branch to a marker.</p>
+</section>
+<section id="bc">
+<h4><code class="docutils literal notranslate"><span class="pre">bc&lt;</span></code><a class="headerlink" href="#bc" title="Permalink to this headline">¶</a></h4>
+<p>( mark-addr mark cond – )</p>
+<p>Assemble a conditional branch to a marker.</p>
+</section>
+<section id="id5">
+<h4><code class="docutils literal notranslate"><span class="pre">b&gt;</span></code><a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h4>
+<p>( – mark-addr mark )</p>
+<p>Mark an unconditional branch.</p>
+</section>
+<section id="id6">
+<h4><code class="docutils literal notranslate"><span class="pre">bc&gt;</span></code><a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h4>
+<p>( cond – mark-addr mark )</p>
+<p>Mark a conditional branch.</p>
+</section>
+<section id="bics">
+<h4><code class="docutils literal notranslate"><span class="pre">bics_,_</span></code><a class="headerlink" href="#bics" title="Permalink to this headline">¶</a></h4>
+<p>( rm rdn – )</p>
+<p>Assemble an BICS (register) instruction.</p>
+</section>
+<section id="bkpt">
+<h4><code class="docutils literal notranslate"><span class="pre">bkpt#_</span></code><a class="headerlink" href="#bkpt" title="Permalink to this headline">¶</a></h4>
+<p>( imm8 – )</p>
+<p>Assemble a BKPT instruction.</p>
+</section>
+<section id="blx">
+<h4><code class="docutils literal notranslate"><span class="pre">blx_</span></code><a class="headerlink" href="#blx" title="Permalink to this headline">¶</a></h4>
+<p>( rm – )</p>
+<p>Assemble a BLX (register) instruction.</p>
+</section>
+<section id="bx">
+<h4><code class="docutils literal notranslate"><span class="pre">bx_</span></code><a class="headerlink" href="#bx" title="Permalink to this headline">¶</a></h4>
+<p>( rm – )</p>
+<p>Assemble a BX instruction.</p>
+</section>
+<section id="cmn">
+<h4><code class="docutils literal notranslate"><span class="pre">cmn_,_</span></code><a class="headerlink" href="#cmn" title="Permalink to this headline">¶</a></h4>
+<p>( rm rn – )</p>
+<p>Assemble an CMN (register) instruction.</p>
+</section>
+<section id="cmp">
+<h4><code class="docutils literal notranslate"><span class="pre">cmp_,#_</span></code><a class="headerlink" href="#cmp" title="Permalink to this headline">¶</a></h4>
+<p>( imm8 rn – )</p>
+<p>Assemble a CMP (immediate) instruction.</p>
+</section>
+<section id="id7">
+<h4><code class="docutils literal notranslate"><span class="pre">cmp_,_</span></code><a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h4>
+<p>( rm rn – )</p>
+<p>Assemble an CMP (register) instruction.</p>
+</section>
+<section id="cmp4-4">
+<h4><code class="docutils literal notranslate"><span class="pre">cmp4_,4_</span></code><a class="headerlink" href="#cmp4-4" title="Permalink to this headline">¶</a></h4>
+<p>( rm4 rdn4 – )</p>
+<p>Assemble an CMP (register) instruction.</p>
+</section>
+<section id="cpsie">
+<h4><code class="docutils literal notranslate"><span class="pre">cpsie</span></code><a class="headerlink" href="#cpsie" title="Permalink to this headline">¶</a></h4>
+<p>( – )</p>
+<p>Assemble a CPSIE instruction.</p>
+</section>
+<section id="cpsid">
+<h4><code class="docutils literal notranslate"><span class="pre">cpsid</span></code><a class="headerlink" href="#cpsid" title="Permalink to this headline">¶</a></h4>
+<p>( – )</p>
+<p>Assemble a CPSID instruction.</p>
+</section>
+<section id="dmb">
+<h4><code class="docutils literal notranslate"><span class="pre">dmb</span></code><a class="headerlink" href="#dmb" title="Permalink to this headline">¶</a></h4>
+<p>( – )</p>
+<p>Assemble a DMB instruction.</p>
+</section>
+<section id="dsb">
+<h4><code class="docutils literal notranslate"><span class="pre">dsb</span></code><a class="headerlink" href="#dsb" title="Permalink to this headline">¶</a></h4>
+<p>( – )</p>
+<p>Assemble a DSB instruction.</p>
+</section>
+<section id="eors">
+<h4><code class="docutils literal notranslate"><span class="pre">eors_,_</span></code><a class="headerlink" href="#eors" title="Permalink to this headline">¶</a></h4>
+<p>( rm rdn – )</p>
+<p>Assemble an EORS (register) instruction.</p>
+</section>
+<section id="isb">
+<h4><code class="docutils literal notranslate"><span class="pre">isb</span></code><a class="headerlink" href="#isb" title="Permalink to this headline">¶</a></h4>
+<p>( – )</p>
+<p>Assemble an ISB instruction.</p>
+</section>
+<section id="ldm">
+<h4><code class="docutils literal notranslate"><span class="pre">ldm</span></code><a class="headerlink" href="#ldm" title="Permalink to this headline">¶</a></h4>
+<p>( rx … r0 count rn – )</p>
+<p>Assemble an LDM instruction.</p>
+</section>
+<section id="ldr">
+<h4><code class="docutils literal notranslate"><span class="pre">ldr_,[_,#_]</span></code><a class="headerlink" href="#ldr" title="Permalink to this headline">¶</a></h4>
+<p>( imm5 rn rt – )</p>
+<p>Assemble an LDR (immediate) instruction.</p>
+</section>
+<section id="ldr-sp">
+<h4><code class="docutils literal notranslate"><span class="pre">ldr_,[sp,#_]</span></code><a class="headerlink" href="#ldr-sp" title="Permalink to this headline">¶</a></h4>
+<p>( imm8 rt – )</p>
+<p>Assemble an LDR (immediate) instruction.</p>
+</section>
+<section id="ldr-pc">
+<h4><code class="docutils literal notranslate"><span class="pre">ldr_,[pc]</span></code><a class="headerlink" href="#ldr-pc" title="Permalink to this headline">¶</a></h4>
+<p>( rd – mark-addr mark )</p>
+<p>Mark an LDR (literal) instruction.</p>
+</section>
+<section id="id8">
+<h4><code class="docutils literal notranslate"><span class="pre">ldr_,[_,_]</span></code><a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h4>
+<p>( rm rn rt – )</p>
+<p>Assemble an LDR (register) instruction.</p>
+</section>
+<section id="ldrb">
+<h4><code class="docutils literal notranslate"><span class="pre">ldrb_,[_,#_]</span></code><a class="headerlink" href="#ldrb" title="Permalink to this headline">¶</a></h4>
+<p>( imm5 rn rt – )</p>
+<p>Assemble an LDRB (immediate) instruction.</p>
+</section>
+<section id="id9">
+<h4><code class="docutils literal notranslate"><span class="pre">ldrb_,[_,_]</span></code><a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h4>
+<p>( rm rn rt – )</p>
+<p>Assemble an LDRB (register) instruction.</p>
+</section>
+<section id="ldrh">
+<h4><code class="docutils literal notranslate"><span class="pre">ldrh_,[_,#_]</span></code><a class="headerlink" href="#ldrh" title="Permalink to this headline">¶</a></h4>
+<p>( imm5 rn rt – )</p>
+<p>Assemble an LDRH (immediate) instruction.</p>
+</section>
+<section id="id10">
+<h4><code class="docutils literal notranslate"><span class="pre">ldrh_,[_,_]</span></code><a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h4>
+<p>( rm rn rt – )</p>
+<p>Assemble an LDRH (register) instruction.</p>
+</section>
+<section id="ldrsb">
+<h4><code class="docutils literal notranslate"><span class="pre">ldrsb_,[_,_]</span></code><a class="headerlink" href="#ldrsb" title="Permalink to this headline">¶</a></h4>
+<p>( rm rn rt – )</p>
+<p>Assemble an LDRSB (register) instruction.</p>
+</section>
+<section id="ldrsh">
+<h4><code class="docutils literal notranslate"><span class="pre">ldrsh_,[_,_]</span></code><a class="headerlink" href="#ldrsh" title="Permalink to this headline">¶</a></h4>
+<p>( rm rn rt – )</p>
+<p>Assemble an LDRSH (register) instruction.</p>
+</section>
+<section id="lsls">
+<h4><code class="docutils literal notranslate"><span class="pre">lsls_,_,#_</span></code><a class="headerlink" href="#lsls" title="Permalink to this headline">¶</a></h4>
+<p>( imm5 rm rd – )</p>
+<p>Assemble an LSLS (immediate) instruction.</p>
+</section>
+<section id="id11">
+<h4><code class="docutils literal notranslate"><span class="pre">lsls_,_</span></code><a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h4>
+<p>( rm rdn – )</p>
+<p>Assemble an LSLS (register) instruction.</p>
+</section>
+<section id="lsrs">
+<h4><code class="docutils literal notranslate"><span class="pre">lsrs_,_,#_</span></code><a class="headerlink" href="#lsrs" title="Permalink to this headline">¶</a></h4>
+<p>( imm5 rm rd – )</p>
+<p>Assemble an LSRS (immediate) instruction.</p>
+</section>
+<section id="id12">
+<h4><code class="docutils literal notranslate"><span class="pre">lsrs_,_</span></code><a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h4>
+<p>( rm rdn – )</p>
+<p>Assemble an LSRS (register) instruction.</p>
+</section>
+<section id="movs">
+<h4><code class="docutils literal notranslate"><span class="pre">movs_,#_</span></code><a class="headerlink" href="#movs" title="Permalink to this headline">¶</a></h4>
+<p>( imm8 rdn – )</p>
+<p>Assemble a MOVS (immediate) instruction.</p>
+</section>
+<section id="mov4-4">
+<h4><code class="docutils literal notranslate"><span class="pre">mov4_,4_</span></code><a class="headerlink" href="#mov4-4" title="Permalink to this headline">¶</a></h4>
+<p>( rm4 rdn4 – )</p>
+<p>Assemble a MOV (register) instruction.</p>
+</section>
+<section id="id13">
+<h4><code class="docutils literal notranslate"><span class="pre">movs_,_</span></code><a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h4>
+<p>( rm rd – )</p>
+<p>Assemble a MOVS (register) instruction.</p>
+</section>
+<section id="mrs">
+<h4><code class="docutils literal notranslate"><span class="pre">mrs_,_</span></code><a class="headerlink" href="#mrs" title="Permalink to this headline">¶</a></h4>
+<p>( sysm rd – )</p>
+<p>Assemble an MRS instruction.</p>
+</section>
+<section id="msr">
+<h4><code class="docutils literal notranslate"><span class="pre">msr_,_</span></code><a class="headerlink" href="#msr" title="Permalink to this headline">¶</a></h4>
+<p>( rn sysm – )</p>
+<p>Assemble an MSR (register) instruction.</p>
+</section>
+<section id="muls">
+<h4><code class="docutils literal notranslate"><span class="pre">muls_,_</span></code><a class="headerlink" href="#muls" title="Permalink to this headline">¶</a></h4>
+<p>( rn rdm – )</p>
+<p>Assemble an MULS (register) instruction.</p>
+</section>
+<section id="mvns">
+<h4><code class="docutils literal notranslate"><span class="pre">mvns_,_</span></code><a class="headerlink" href="#mvns" title="Permalink to this headline">¶</a></h4>
+<p>( rm rd – )</p>
+<p>Assemble an MVNS (register) instruction.</p>
+</section>
+<section id="nop">
+<h4><code class="docutils literal notranslate"><span class="pre">nop</span></code><a class="headerlink" href="#nop" title="Permalink to this headline">¶</a></h4>
+<p>( – )</p>
+<p>Assemble a NOP instruction.</p>
+</section>
+<section id="orrs">
+<h4><code class="docutils literal notranslate"><span class="pre">orrs_,_</span></code><a class="headerlink" href="#orrs" title="Permalink to this headline">¶</a></h4>
+<p>( rm rdn – )</p>
+<p>Assemble an ORRS (register) instruction.</p>
+</section>
+<section id="pop">
+<h4><code class="docutils literal notranslate"><span class="pre">pop</span></code><a class="headerlink" href="#pop" title="Permalink to this headline">¶</a></h4>
+<p>( rx … r0 count – )</p>
+<p>Assemble a POP instruction.</p>
+</section>
+<section id="push">
+<h4><code class="docutils literal notranslate"><span class="pre">push</span></code><a class="headerlink" href="#push" title="Permalink to this headline">¶</a></h4>
+<p>( rx … r0 count – )</p>
+<p>Assemble a PUSH instruction.</p>
+</section>
+<section id="rev">
+<h4><code class="docutils literal notranslate"><span class="pre">rev_,_</span></code><a class="headerlink" href="#rev" title="Permalink to this headline">¶</a></h4>
+<p>( rm rd – )</p>
+<p>Assemble an REV (register) instruction.</p>
+</section>
+<section id="rev16">
+<h4><code class="docutils literal notranslate"><span class="pre">rev16_,_</span></code><a class="headerlink" href="#rev16" title="Permalink to this headline">¶</a></h4>
+<p>( rm rd – )</p>
+<p>Assemble an REV16 (register) instruction.</p>
+</section>
+<section id="revsh">
+<h4><code class="docutils literal notranslate"><span class="pre">revsh_,_</span></code><a class="headerlink" href="#revsh" title="Permalink to this headline">¶</a></h4>
+<p>( rm rd – )</p>
+<p>Assemble an REVSH (register) instruction.</p>
+</section>
+<section id="rors">
+<h4><code class="docutils literal notranslate"><span class="pre">rors_,_</span></code><a class="headerlink" href="#rors" title="Permalink to this headline">¶</a></h4>
+<p>( rm rdn – )</p>
+<p>Assemble an RORS (register) instruction.</p>
+</section>
+<section id="rsbs-0">
+<h4><code class="docutils literal notranslate"><span class="pre">rsbs_,_,#0</span></code><a class="headerlink" href="#rsbs-0" title="Permalink to this headline">¶</a></h4>
+<p>( rn rd – )</p>
+<p>Assemble an RSBS (immediate) instruction.</p>
+</section>
+<section id="sbcs">
+<h4><code class="docutils literal notranslate"><span class="pre">sbcs_,_</span></code><a class="headerlink" href="#sbcs" title="Permalink to this headline">¶</a></h4>
+<p>( rm rdn – )</p>
+<p>Assemble an SBC (register) instruction.</p>
+</section>
+<section id="sev">
+<h4><code class="docutils literal notranslate"><span class="pre">sev</span></code><a class="headerlink" href="#sev" title="Permalink to this headline">¶</a></h4>
+<p>( – )</p>
+<p>Assemble an SEV instruction.</p>
+</section>
+<section id="stm">
+<h4><code class="docutils literal notranslate"><span class="pre">stm</span></code><a class="headerlink" href="#stm" title="Permalink to this headline">¶</a></h4>
+<p>( rx … r0 count rn – )</p>
+<p>Assemble an STM instruction.</p>
+</section>
+<section id="str">
+<h4><code class="docutils literal notranslate"><span class="pre">str_,[_,#_]</span></code><a class="headerlink" href="#str" title="Permalink to this headline">¶</a></h4>
+<p>( imm5 rn rt – )</p>
+<p>Assemble an STR (immediate) instruction.</p>
+</section>
+<section id="str-sp">
+<h4><code class="docutils literal notranslate"><span class="pre">str_,[sp,#_]</span></code><a class="headerlink" href="#str-sp" title="Permalink to this headline">¶</a></h4>
+<p>( imm8 rt – )</p>
+<p>Assemble an STR (immediate) instruction.</p>
+</section>
+<section id="id14">
+<h4><code class="docutils literal notranslate"><span class="pre">str_,[_,_]</span></code><a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h4>
+<p>( rm rn rt – )</p>
+<p>Assemble an STR (register) instruction.</p>
+</section>
+<section id="strb">
+<h4><code class="docutils literal notranslate"><span class="pre">strb_,[_,#_]</span></code><a class="headerlink" href="#strb" title="Permalink to this headline">¶</a></h4>
+<p>( imm5 rn rt – )</p>
+<p>Assemble an STRB (immediate) instruction.</p>
+</section>
+<section id="id15">
+<h4><code class="docutils literal notranslate"><span class="pre">strb_,[_,_]</span></code><a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h4>
+<p>( rm rn rt – )</p>
+<p>Assemble an STRB (register) instruction.</p>
+</section>
+<section id="strh">
+<h4><code class="docutils literal notranslate"><span class="pre">strh_,[_,#_]</span></code><a class="headerlink" href="#strh" title="Permalink to this headline">¶</a></h4>
+<p>( imm5 rn rt – )</p>
+<p>Assemble an STRH (immediate) instruction.</p>
+</section>
+<section id="id16">
+<h4><code class="docutils literal notranslate"><span class="pre">strh_,[_,_]</span></code><a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h4>
+<p>( rm rn rt – )</p>
+<p>Assemble an STRH (register) instruction.</p>
+</section>
+<section id="subs">
+<h4><code class="docutils literal notranslate"><span class="pre">subs_,_,#_</span></code><a class="headerlink" href="#subs" title="Permalink to this headline">¶</a></h4>
+<p>( imm3 rn rd – )</p>
+<p>Assemble a two-register SUBS immediate instruction.</p>
+</section>
+<section id="id17">
+<h4><code class="docutils literal notranslate"><span class="pre">subs_,#_</span></code><a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h4>
+<p>( imm8 rdn – )</p>
+<p>Assemble a one-register SUBS immediate instruction.</p>
+</section>
+<section id="id18">
+<h4><code class="docutils literal notranslate"><span class="pre">subs_,_,_</span></code><a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h4>
+<p>( rm rn rd – )</p>
+<p>Assemble a three-register SUBS register instruction.</p>
+</section>
+<section id="subsp-sp">
+<h4><code class="docutils literal notranslate"><span class="pre">subsp,sp,#_</span></code><a class="headerlink" href="#subsp-sp" title="Permalink to this headline">¶</a></h4>
+<p>( imm7 – )</p>
+<p>Assemble an SUB (SP plus immediate to SP) instruction.</p>
+</section>
+<section id="svc">
+<h4><code class="docutils literal notranslate"><span class="pre">svc#_</span></code><a class="headerlink" href="#svc" title="Permalink to this headline">¶</a></h4>
+<p>( imm8 – )</p>
+<p>Assemble an SVC instruction.</p>
+</section>
+<section id="sxtb">
+<h4><code class="docutils literal notranslate"><span class="pre">sxtb_,_</span></code><a class="headerlink" href="#sxtb" title="Permalink to this headline">¶</a></h4>
+<p>( rm rd – )</p>
+<p>Assemble an SXTB instruction.</p>
+</section>
+<section id="sxth">
+<h4><code class="docutils literal notranslate"><span class="pre">sxth_,_</span></code><a class="headerlink" href="#sxth" title="Permalink to this headline">¶</a></h4>
+<p>( rm rd – )</p>
+<p>Assemble an SXTH instruction.</p>
+</section>
+<section id="tst">
+<h4><code class="docutils literal notranslate"><span class="pre">tst_,_</span></code><a class="headerlink" href="#tst" title="Permalink to this headline">¶</a></h4>
+<p>( rm rn – )</p>
+<p>Assemble an tST (register) instruction.</p>
+</section>
+<section id="udf">
+<h4><code class="docutils literal notranslate"><span class="pre">udf#_</span></code><a class="headerlink" href="#udf" title="Permalink to this headline">¶</a></h4>
+<p>( imm8 – )</p>
+<p>Assemble a UDF instruction.</p>
+</section>
+<section id="udf-w">
+<h4><code class="docutils literal notranslate"><span class="pre">udf.w#_</span></code><a class="headerlink" href="#udf-w" title="Permalink to this headline">¶</a></h4>
+<p>( imm16 – )</p>
+<p>Assemble a 32-bit UDF instruction.</p>
+</section>
+<section id="uxtb">
+<h4><code class="docutils literal notranslate"><span class="pre">uxtb_,_</span></code><a class="headerlink" href="#uxtb" title="Permalink to this headline">¶</a></h4>
+<p>( rm rd – )</p>
+<p>Assemble an UXTB instruction.</p>
+</section>
+<section id="uxth">
+<h4><code class="docutils literal notranslate"><span class="pre">uxth_,_</span></code><a class="headerlink" href="#uxth" title="Permalink to this headline">¶</a></h4>
+<p>( rm rd – )</p>
+<p>Assemble an UXTH instruction.</p>
+</section>
+<section id="wfe">
+<h4><code class="docutils literal notranslate"><span class="pre">wfe</span></code><a class="headerlink" href="#wfe" title="Permalink to this headline">¶</a></h4>
+<p>( – )</p>
+<p>Assemble a WFE instruction.</p>
+</section>
+<section id="wfi">
+<h4><code class="docutils literal notranslate"><span class="pre">wfi</span></code><a class="headerlink" href="#wfi" title="Permalink to this headline">¶</a></h4>
+<p>( – )</p>
+<p>Assemble a WFI instruction.</p>
+</section>
+<section id="yield">
+<h4><code class="docutils literal notranslate"><span class="pre">yield</span></code><a class="headerlink" href="#yield" title="Permalink to this headline">¶</a></h4>
+<p>( – )</p>
+<p>Assemble a YIELD instruction.</p>
+</section>
+<section id="mark">
+<h4><code class="docutils literal notranslate"><span class="pre">mark&gt;</span></code><a class="headerlink" href="#mark" title="Permalink to this headline">¶</a></h4>
+<p>( – mark-addr mark )</p>
+<p>Mark a backward destination.</p>
+</section>
+<section id="id19">
+<h4><code class="docutils literal notranslate"><span class="pre">&gt;mark</span></code><a class="headerlink" href="#id19" title="Permalink to this headline">¶</a></h4>
+<p>( mark-addr mark – )</p>
+<p>Mark a forward destination.</p>
+</section>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="led.html">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pio.html">Programmable Input/Output Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uart.html">UART Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ARMv6-M Assembler Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pool.html">Pool Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="map.html">Map Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schannel.html">Simple channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rchannel.html">Bidirectional Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="edit.html">Block Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="swd.html"><code class="docutils literal notranslate"><span class="pre">swdcom</span></code> Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test.html">Testing Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="dev_tools.html" title="previous chapter">Development Tools Words</a></li>
+      <li>Next: <a href="line.html" title="next chapter">Line Editor</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Travis Bemann.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/words/armv6m.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

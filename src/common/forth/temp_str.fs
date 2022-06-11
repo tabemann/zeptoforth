@@ -78,6 +78,18 @@ continue-module forth
     then
   ;
 
+  \ Interpret or compile a typed string
+  : ." ( -- )
+    [immediate]
+    state @ if
+      postpone ."
+    else
+      advance-once
+      [char] " parse-to-char
+      type
+    then
+  ;
+
   \ Interpret or compile an escaped counted string
   : c\" ( -- )
     [immediate]
@@ -110,6 +122,19 @@ continue-module forth
 	rot ram-here! swap
 	1 advance-bytes
       ;] with-ram
+    then
+  ;
+
+  \ Interpret or compile an escaped typed string
+  : .\" ( -- )
+    [immediate]
+    state @ if
+      postpone .\"
+    else
+      advance-once
+      here [char] " parse-esc-string
+      dup dup here swap - type ram-here!
+      1 advance-bytes
     then
   ;
 

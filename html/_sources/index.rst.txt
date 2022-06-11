@@ -20,6 +20,7 @@ Zeptoforth Documentation
    words/interrupt
    words/multicore
    words/dev_tools
+   words/armv6m
    words/line
    words/double
    words/temp

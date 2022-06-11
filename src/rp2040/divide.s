@@ -92,7 +92,7 @@ _udivmod:
 	bx lr
 	end_inlined
 
-	@@ Signed division with modulus ( u1 u2 -- remainder quotient )
+	@@ Signed division with modulus ( n1 n2 -- remainder quotient )
 	define_word "/mod", visible_flag
 _divmod:
 	ldr r0, =SIO_BASE

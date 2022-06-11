@@ -18,6 +18,12 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
+\ Compile this to flash
+compile-to-flash
+
+\ Begin compressing compiled code in flash
+compress-flash
+
 begin-module armv6m
 
   internal import
@@ -34,16 +40,16 @@ begin-module armv6m
   \ Unaligned immediate exception
   : x-unaligned-imm ( -- ) ." unaligned immediate" cr ;
 
-  \ Out of range PC-relative address
+  \ Out of range PC-relative address exception
   : x-out-of-range-pc-rel ( -- ) ." out of range PC-relative address" cr ;
 
-  \ Incorrect marker type
+  \ Incorrect marker type exception
   : x-incorrect-mark-type ( -- ) ." incorrect marker type" cr ;
 
-  \ Invalid condition
+  \ Invalid condition exception
   : x-invalid-cond ( -- ) ." invalid condition" cr ;
 
-  \ Out of range special register
+  \ Out of range special register exception
   : x-out-of-range-special ( -- ) ." out of range special register" ;
   
   begin-module armv6m-internal
@@ -69,12 +75,18 @@ begin-module armv6m
     \ Unconditional branch marker type
     4 constant mark-b
 
+    \ Commit to flash
+    commit-flash
+    
     \ Validate a 3-bit register
     : validate-3reg ( reg -- ) 8 u< averts x-out-of-range-3reg ;
 
     \ Validate a 4-bit register
     : validate-4reg ( reg -- ) 16 u< averts x-out-of-range-4reg ;
 
+    \ Commit to flash
+    commit-flash
+    
     \ Validate two 3-bit registers
     : validate-2-3reg ( reg1 reg0 -- ) validate-3reg validate-3reg ;
 
@@ -136,6 +148,9 @@ begin-module armv6m
     ;
     
   end-module> import
+
+  \ Commit to flash
+  commit-flash
   
   begin-module armv6m-instr
 
@@ -685,6 +700,9 @@ begin-module armv6m
     
   end-module
 
+  \ Commit to flash
+  commit-flash
+  
   \ Begin an assembly block
   : code[
     [compile-only] [immediate] undefer-lit armv6m-instr import postpone [
@@ -694,3 +712,9 @@ begin-module armv6m
   : ]code armv6m-instr unimport ] ;
   
 end-module
+
+\ Finish compressing the code
+end-compress-flash
+
+\ Set compilation back to RAM
+compile-to-ram

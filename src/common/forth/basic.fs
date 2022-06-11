@@ -159,15 +159,7 @@ forth set-current
 
 \ Dump the contents of the data stack
 : .s ( -- )
-  space ." [ "
-  sp@ begin
-    dup stack-base @ cell - <
-  while
-    dup @ .
-    4+
-  repeat
-  drop
-  ." ]"
+  space ." [ " depth begin dup 0> while dup pick . 1- repeat drop ." ]"
 ;
 
 \ Assert that a value is true, otherwise raise a specified exception

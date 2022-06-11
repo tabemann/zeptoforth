@@ -52,3 +52,28 @@ _umod:	movs r0, tos
 	bx lr
 	end_inlined
 
+	@@ Signed division and modulus of two two's complement integers
+	@@ ( n1 n2 -- remainder quotient )
+	define_word "/mod", visible_flag | inlined_flag
+_divmod:
+	movs r0, tos
+	ldr r1, [dp]
+	sdiv tos, r1, r0
+	mls r2, tos, r0, r1
+	str r2, [dp]
+	bx lr
+	end_inlined
+
+	@@ Unsigned division and modulus of two unsigned integers
+	@@ ( u1 u2 -- remainder quotient )
+	define_word "u/mod", visible_flag | inlined_flag
+_udivmod:
+	movs r0, tos
+	ldr r1, [dp]
+	udiv tos, r1, r0
+	mls r2, tos, r0, r1
+	str r2, [dp]
+	bx lr
+	end_inlined
+
+	

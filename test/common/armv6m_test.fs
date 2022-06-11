@@ -67,7 +67,7 @@ begin-module armv6m-test
     r1 r1 mvns_,_
     1 r1 r1 adds_,_,#_
     r0 tos adcs_,_
-    ]code 1 s" ADCS TOS, R0" verify
+    ]code 1 = s" ADCS TOS, R0" verify
   ;
 
   \ SUBS TOS, TOS, #1 test
@@ -100,7 +100,7 @@ begin-module armv6m-test
     0 r1 movs_,#_
     1 r1 r1 subs_,_,#_
     r0 tos sbcs_,_
-    ]code -1 s" SBCS TOS, R0" verify
+    ]code -1 = s" SBCS TOS, R0" verify
   ;
 
   \ ANDS TOS, R0 test
@@ -600,7 +600,7 @@ begin-module armv6m-test
 
   \ BLX TOS test
   : test-blx-tos ( -- )
-    0 [: drop -1 ;] [:
+    0 [: 2drop -1 ;] [:
       code[
       1 tos tos adds_,_,#_
       tos blx_
