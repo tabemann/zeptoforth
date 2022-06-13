@@ -35,7 +35,7 @@
             
   <section id="uart-words">
 <h1>UART Words<a class="headerlink" href="#uart-words" title="Permalink to this headline">¶</a></h1>
-<p>There are a number of words for controlling UART0 and UART1 available on the RP2040 on top of the general <code class="docutils literal notranslate"><span class="pre">emit</span></code>, key<code class="docutils literal notranslate"><span class="pre">,</span> </code>emit?<code class="docutils literal notranslate"><span class="pre">,</span> <span class="pre">and</span> </code>key?` words. These are as follows:</p>
+<p>There are a number of words for controlling UART0 and UART1 available on the RP2040, STM32F411, and STM32F407 on top of the general <code class="docutils literal notranslate"><span class="pre">emit</span></code>, key<code class="docutils literal notranslate"><span class="pre">,</span> </code>emit?<code class="docutils literal notranslate"><span class="pre">,</span> <span class="pre">and</span> </code>key?` words. These are as follows:</p>
 <section id="uart">
 <h2><code class="docutils literal notranslate"><span class="pre">uart</span></code><a class="headerlink" href="#uart" title="Permalink to this headline">¶</a></h2>
 <p>These words are in the <code class="docutils literal notranslate"><span class="pre">uart</span></code> module:</p>
@@ -91,8 +91,13 @@
 </section>
 <section id="uart-alternate">
 <h3><code class="docutils literal notranslate"><span class="pre">uart-alternate</span></code><a class="headerlink" href="#uart-alternate" title="Permalink to this headline">¶</a></h3>
-<p>( – )</p>
-<p>The alternate function for UART’s, i.e. 2.</p>
+<p>( uart – )</p>
+<p>The alternate function for a given UART.</p>
+</section>
+<section id="uart-pin">
+<h3><code class="docutils literal notranslate"><span class="pre">uart-pin</span></code><a class="headerlink" href="#uart-pin" title="Permalink to this headline">¶</a></h3>
+<p>( uart pin – )</p>
+<p>Set the alternate function for <em>pin</em> to configure it for <em>uart</em>.</p>
 </section>
 <section id="x-invalid-uart">
 <h3><code class="docutils literal notranslate"><span class="pre">x-invalid-uart</span></code><a class="headerlink" href="#x-invalid-uart" title="Permalink to this headline">¶</a></h3>
@@ -136,6 +141,7 @@
 <li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>

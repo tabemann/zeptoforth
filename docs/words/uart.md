@@ -1,6 +1,6 @@
 # UART Words
 
-There are a number of words for controlling UART0 and UART1 available on the RP2040 on top of the general `emit`, key`, `emit?`, and `key?` words. These are as follows:
+There are a number of words for controlling UART0 and UART1 available on the RP2040, STM32F411, and STM32F407 on top of the general `emit`, key`, `emit?`, and `key?` words. These are as follows:
 
 ### `uart`
 
