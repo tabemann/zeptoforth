@@ -1,4 +1,4 @@
-\ Copyright (c) 2021-2022 Travis Bemann
+\ Copyright (c) 2022 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -18,28 +18,15 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ This is not actual Forth code, but rather setup directives for e4thcom to be
-\ executed from the root of the zeptoforth directory to initialize zeptoforth
-\ on an STM32F411 device.
+continue-module forth
 
-#include src/stm32f411/forth/clock.fs
-#include src/common/forth/basic.fs
-#include src/common/forth/module.fs
-#include src/common/forth/interrupt.fs
-#include src/common/forth/multicore.fs
-#include src/stm32f411/forth/erase.fs
-#include src/common/forth/lambda.fs
-#include src/common/forth/fixed.fs
-#include src/common/forth/systick.fs
-#include src/stm32f411/forth/int_io.fs
-#include src/stm32f411/forth/gpio.fs
-#include src/stm32f411/forth/pin.fs
-#include src/stm32f411/forth/exti.fs
-#include src/common/forth/task.fs
-#include src/stm32f411/forth/led.fs
-#include src/common/forth/full_default.fs
-#include src/stm32f411/forth/uart.fs
-#include src/common/forth/swdcom.fs
+  uart import
+  pin import
 
-\ Set a cornerstone to enable deleting everything compiled after this code
-cornerstone restore-state
+  \ Echo characters received by UART1 (GPIO pins 4, 5) at a given baud
+  : init-test ( baud -- )
+    1 6 xb uart-pin 1 7 xb uart-pin 1 uart-baud!
+    begin 1 key-uart? if 1 key-uart dup emit 1 emit-uart then key? until
+  ;
+  
+end-module

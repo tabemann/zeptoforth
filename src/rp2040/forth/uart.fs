@@ -34,9 +34,6 @@ begin-module uart
   \ Invalid UART exception
   : x-invalid-uart ( -- ) ." invalid UART" cr ;
 
-  \ UART alternate function
-  2 constant uart-alternate
-
   begin-module uart-internal
 
     \ Validate a UART
@@ -225,14 +222,40 @@ begin-module uart
       then
       uart1-irq NVIC_ICPR_CLRPEND!
       wake
-      dmb dsb isb
     ;
-
+  
+    \ Enable interrupt-driven IO on UART1
+    : enable-uart1-int-io ( -- )
+      disable-int
+      0 UART1_UARTIFLS_RXIFLSEL! \ Interrupt on receive FIFO >= 1/8 full
+      0 UART1_UARTIFLS_TXIFLSEL! \ Interrupt on transmit FIFO <= 1/8 full
+      0 uart1-irq NVIC_IPR_IP!
+      ['] handle-uart1-io uart1-vector vector!
+      uart1-irq NVIC_ISER_SETENA!
+      UART1_UARTIMSC_RTIM!
+      UART1_UARTIMSC_RXIM!
+      enable-int
+    ;
+    
+    \ Disable interrupt-driven IO on UART1
+    : disable-uart1-int-io ( -- )
+      disable-int
+      ['] handle-null uart1-vector vector!
+      UART1_UARTIMSC_RTIM_Clear
+      UART1_UARTIMSC_RXIM_Clear
+      UART1_UARTIMSC_TXIM_Clear
+      uart1-irq NVIC_ICER_CLRENA!
+      enable-int
+    ;
+    
   end-module> import
 
+  \ UART alternate function
+  : uart-alternate ( uart -- alternate ) validate-uart 2 ;
+  
   \ Carry out operations on arbitrary UART's
 
-  \ Get whether is a UART is enabled
+  \ Get whether a UART is enabled
   : uart-enabled? ( uart -- flag )
     dup validate-uart
     0 bit swap 0= if UART0_UARTCR else UART1_UARTCR then bit@
@@ -265,6 +288,21 @@ begin-module uart
       0 64,0 f* 0,5 d+ nip r> 0= if UART0_UARTFBRD else UART1_UARTFBRD then !
     ;] over with-uart-disabled
   ;
+
+  continue-module uart-internal
+    
+    \ Initialize interrupt-driven IO on UART1
+    : init-uart1 ( -- )
+      0 uart1-rx-read-index c!
+      0 uart1-rx-write-index c!
+      0 uart1-tx-read-index c!
+      0 uart1-tx-write-index c!
+      115200 1 uart-baud!
+      1 enable-uart
+      enable-uart1-int-io
+    ;
+
+  end-module
 
   \ Emit a byte to a UART
   : emit-uart ( c uart -- )
@@ -324,52 +362,30 @@ begin-module uart
       [: uart1-tx-empty? ;] wait
     then
   ;
-  
-  \ Enable interrupt-driven IO on UART1
-  : enable-uart1-int-io ( -- )
-    disable-int
-    0 UART1_UARTIFLS_RXIFLSEL! \ Interrupt on receive FIFO >= 1/8 full
-    0 UART1_UARTIFLS_TXIFLSEL! \ Interrupt on transmit FIFO <= 1/8 full
-    0 uart1-irq NVIC_IPR_IP!
-    ['] handle-uart1-io uart1-vector vector!
-    uart1-irq NVIC_ISER_SETENA!
-    UART1_UARTIMSC_RTIM!
-    UART1_UARTIMSC_RXIM!
-    enable-int
+
+  \ Enable interrupt-driven IO on a UART
+  : enable-uart-int-io ( uart -- )
+    dup validate-uart
+    0= if enable-int-io else enable-uart1-int-io then
   ;
 
-  \ Disable interrupt-driven IO on UART1
-  : disable-uart1-int-io ( -- )
-    disable-int
-    ['] handle-null uart1-vector vector!
-    UART1_UARTIMSC_RTIM_Clear
-    UART1_UARTIMSC_RXIM_Clear
-    UART1_UARTIMSC_TXIM_Clear
-    uart1-irq NVIC_ICER_CLRENA!
-    enable-int
-  ;
-
-  \ Initialize interrupt-driven IO on UART1
-  : init-uart1 ( -- )
-    0 uart1-rx-read-index c!
-    0 uart1-rx-write-index c!
-    0 uart1-tx-read-index c!
-    0 uart1-tx-write-index c!
-    38400 1 uart-baud!
-    UART_8N1 UART_FIFO or UART1_UARTLCR_H !
-    UART_ENABLE UART1_UARTCR !
-    enable-uart1-int-io
+  \ Disable interrupt-driven IO on a UART
+  : disable-uart-int-io ( uart -- )
+    dup validate-uart
+    0= if disable-int-io else disable-uart1-int-io then
   ;
 
   \ Set a pin to be a UART pin
-  : uart-pin ( pin -- ) uart-alternate swap alternate-pin ;
+  : uart-pin ( uart pin -- )
+    swap uart-alternate swap alternate-pin
+  ;
 
 end-module> import
 
 \ Init
 : init ( -- )
   init
-  init-uart1
+  ^ uart-internal :: init-uart1
 ;
 
 \ Reboot

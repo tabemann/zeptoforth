@@ -57,9 +57,14 @@ Get whether a byte is ready to be read from a UART.
 Flush a UART's transmit buffer.
 
 ##### `uart-alternate`
-( -- )
+( uart -- )
 
-The alternate function for UART's, i.e. 2.
+The alternate function for a given UART.
+
+##### `uart-pin`
+( uart pin -- )
+
+Set the alternate function for *pin* to configure it for *uart*.
 
 ##### `x-invalid-uart`
 ( -- )

@@ -24,7 +24,7 @@ continue-module forth
 
   \ Echo characters received by UART1 (GPIO pins 4, 5) at a given baud
   : init-test ( baud -- )
-    4 uart-pin 5 uart-pin 1 uart-baud!
+    1 4 uart-pin 1 5 uart-pin 1 uart-baud!
     begin 1 key-uart? if 1 key-uart dup emit 1 emit-uart then key? until
   ;
   

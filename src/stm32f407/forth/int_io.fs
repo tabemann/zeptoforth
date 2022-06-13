@@ -149,8 +149,6 @@ begin-module int-io
 
     \ Handle IO
     : handle-io ( -- )
-      dmb dsb isb
-      disable-int
       begin
 	rx-full? not if
 	  USART2_SR @ RXNE and if
@@ -180,9 +178,7 @@ begin-module int-io
 	USART2_CR1_TXEIE_Clear
       then
       usart2-irq NVIC_ICPR_CLRPEND!
-      enable-int
       wake
-      dmb dsb isb
     ;
 
     \ Interrupt-driven IO hooks

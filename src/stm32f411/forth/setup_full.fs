@@ -38,7 +38,7 @@
 #include src/common/forth/task.fs
 #include src/stm32f411/forth/led.fs
 #include src/common/forth/full_default.fs
-\ #include src/stm32f411/forth/rng.fs
+#include src/stm32f411/forth/uart.fs
 
 \ Set a cornerstone to enable deleting everything compiled after this code
 cornerstone restore-state
