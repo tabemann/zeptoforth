@@ -60,6 +60,7 @@ $0C constant RCC_CFGR_SWS
 0 16 lshift constant RCC_PLLCFGR_PLLP_Value \ divide by 2
 192 6 lshift constant RCC_PLLCFGR_PLLN_Value
 25 0 lshift constant RCC_PLLCFGR_PLLM_Value
+8 0 lshift constant RCC_PLLCFGR_PLLM_Nucleo64_Value
 0 13 lshift constant RCC_CFGR_PPRE2_Value
 4 10 lshift constant RCC_CFGR_PPRE1_Value
 0 4 lshift constant RCC_CFGR_HPRE_Value
@@ -110,10 +111,17 @@ USART2_Base $0C + constant USART2_CR1
 \ Enable clock for 100 MHz
 : set-clock-100mhz
   RCC_CR_PLLON RCC_CR bic!
-  s" clock-pllm" find dup if
-    >body execute dup 2 < over 432 > or if drop RCC_PLLCFGR_PLLM_VALUE then
+  s" platform-nucleo64" find dup if
+    >body execute if RCC_PLLCFGR_PLLM_Nucleo64_Value 0 else -1 then
   else
-    drop RCC_PLLCFGR_PLLM_Value
+    drop -1
+  then
+  if
+    s" clock-pllm" find dup if
+      >body execute dup 2 < over 432 > or if drop RCC_PLLCFGR_PLLM_VALUE then
+    else
+      drop RCC_PLLCFGR_PLLM_Value
+    then
   then
   [ RCC_PLLCFGR_PLLSRC
   RCC_PLLCFGR_PLLQ_Value or

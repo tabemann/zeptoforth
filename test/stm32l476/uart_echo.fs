@@ -1,4 +1,4 @@
-\ Copyright (c) 2021-2022 Travis Bemann
+\ Copyright (c) 2022 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -18,25 +18,21 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-#include src/stm32l476/forth/clock.fs
-#include src/common/forth/basic.fs
-#include src/common/forth/module.fs
-#include src/common/forth/interrupt.fs
-#include src/common/forth/multicore.fs
-#include src/stm32l476/forth/erase.fs
-#include src/common/forth/lambda.fs
-#include src/common/forth/fixed.fs
-#include src/common/forth/systick.fs
-#include src/stm32l476/forth/int_io.fs
-#include src/stm32l476/forth/gpio.fs
-#include src/stm32l476/forth/pin.fs
-#include src/stm32l476/forth/exti.fs
-#include src/common/forth/task.fs
-#include src/stm32l476/forth/led.fs
-#include src/common/forth/full_default.fs
-#include src/stm32l476/forth/rng.fs
-#include src/stm32l476/forth/uart.fs
+continue-module forth
 
-\ Set a cornerstone to enable deleting everything compiled after this code
-cornerstone restore-state
+  uart import
+  pin import
 
+  \ Echo characters received by USART6 (GPIO pins PB6, PB7) at a given baud
+  : init-test-1 ( baud -- )
+    1 6 xb uart-pin 1 7 xb uart-pin 1 uart-baud!
+    begin 1 key-uart? if 1 key-uart dup emit 1 emit-uart then key? until
+  ;
+
+  \ Echo characters received by UART7 (GPIO pins PA0, PA1) at a given baud
+  : init-test-4 ( baud -- )
+    4 0 xa uart-pin 4 1 xa uart-pin 4 uart-baud!
+    begin 4 key-uart? if 4 key-uart dup emit 4 emit-uart then key? until
+  ;
+
+end-module

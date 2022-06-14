@@ -32,12 +32,15 @@ begin-module uart
   
   \ Invalid UART exception
   : x-invalid-uart ( -- ) ." invalid UART" cr ;
+
+\  \ LPUART1
+\  6 constant lpuart1
   
   begin-module uart-internal
 
     \ Validate a USART
     : validate-uart ( uart -- )
-      dup 1 >= swap 8 <= and averts x-invalid-uart
+      dup 1 >= swap 5 ( lpuart ) <= and averts x-invalid-uart
     ;
     
     \ Constant for number of bytes to buffer
@@ -69,18 +72,16 @@ begin-module uart
     end-structure
 
     \ UART buffers
-    uart-size 7 * buffer: usarts
+    uart-size 4 ( 5 ) * buffer: usarts
 
     \ USART base register table
     create USART_Base_table
-    $40011000 ,
+    $40013800 ,
     $40004400 ,
     $40004800 ,
     $40004C00 ,
     $40005000 ,
-    $40011400 ,
-    $40007800 ,
-    $40007C00 ,
+\    $40008000 ,
     
     \ USART base
     : USART_Base ( usart -- addr ) 1- cells USART_Base_table + @ ;
@@ -101,9 +102,7 @@ begin-module uart
 	3 of 39 endof
 	4 of 52 endof
 	5 of 53 endof
-	6 of 71 endof
-	7 of 82 endof
-	8 of 83 endof
+\	lpuart of 70 endof
 	['] x-invalid-uart ?raise
       endcase
     ;
@@ -111,43 +110,37 @@ begin-module uart
     \ USART vector number
     : uart-vector ( usart -- vector ) uart-irq 16 + ;
 
-    $40023800 constant RCC_Base
-    RCC_Base $40 + constant RCC_APB1ENR ( RCC_APB1ENR )
-    RCC_Base $44 + constant RCC_APB2ENR ( RCC_APB2ENR )
-    RCC_Base $60 + constant RCC_APB1LPENR ( RCC_APB1LPENR )
-    RCC_Base $64 + constant RCC_APB2LPENR ( RCC_APB2LPENR )
-    : RCC_APB1ENR_USART2EN 17 bit RCC_APB1ENR bis! ;
-    : RCC_APB1ENR_USART2EN_Clear 17 bit RCC_APB1ENR bic! ;
-    : RCC_APB1ENR_USART3EN 18 bit RCC_APB1ENR bis! ;
-    : RCC_APB1ENR_USART3EN_Clear 18 bit RCC_APB1ENR bic! ;
-    : RCC_APB1ENR_UART4EN 19 bit RCC_APB1ENR bis! ;
-    : RCC_APB1ENR_UART4EN_Clear 19 bit RCC_APB1ENR bic! ;
-    : RCC_APB1ENR_UART5EN 20 bit RCC_APB1ENR bis! ;
-    : RCC_APB1ENR_UART5EN_Clear 20 bit RCC_APB1ENR bic! ;
-    : RCC_APB2ENR_USART1EN 4 bit RCC_APB2ENR bis! ;
-    : RCC_APB2ENR_USART1EN_Clear 4 RCC_APB2ENR bic! ;
-    : RCC_APB2ENR_USART6EN 5 bit RCC_APB2ENR bis! ;
-    : RCC_APB2ENR_USART6EN_Clear 5 RCC_APB2ENR bic! ;
-    : RCC_APB1ENR_UART7EN 30 bit RCC_APB1ENR bis! ;
-    : RCC_APB1ENR_UART7EN_Clear 30 bit RCC_APB1ENR bic! ;
-    : RCC_APB1ENR_UART8EN 31 bit RCC_APB1ENR bis! ;
-    : RCC_APB1ENR_UART8EN_Clear 31 bit RCC_APB1ENR bic! ;
-    : RCC_APB1LPENR_USART2LPEN 17 bit RCC_APB1LPENR bis! ;
-    : RCC_APB1LPENR_USART2LPEN_Clear 17 bit RCC_APB1LPENR bic! ;
-    : RCC_APB1LPENR_USART3LPEN 18 bit RCC_APB1LPENR bis! ;
-    : RCC_APB1LPENR_USART3LPEN_Clear 18 bit RCC_APB1LPENR bic! ;
-    : RCC_APB1LPENR_UART4LPEN 19 bit RCC_APB1LPENR bis! ;
-    : RCC_APB1LPENR_UART4LPEN_Clear 19 bit RCC_APB1LPENR bic! ;
-    : RCC_APB1LPENR_UART5LPEN 20 bit RCC_APB1LPENR bis! ;
-    : RCC_APB1LPENR_UART5LPEN_Clear 20 bit RCC_APB1LPENR bic! ;
-    : RCC_APB2LPENR_USART1LPEN 4 bit RCC_APB2LPENR bis! ;
-    : RCC_APB2LPENR_USART1LPEN_Clear 4 RCC_APB2LPENR bic! ;
-    : RCC_APB2LPENR_USART6LPEN 5 bit RCC_APB2LPENR bis! ;
-    : RCC_APB2LPENR_USART6LPEN_Clear 5 RCC_APB2LPENR bic! ;
-    : RCC_APB1LPENR_UART7LPEN 30 bit RCC_APB1LPENR bis! ;
-    : RCC_APB1LPENR_UART7LPEN_Clear 30 bit RCC_APB1LPENR bic! ;
-    : RCC_APB1LPENR_UART8LPEN 31 bit RCC_APB1LPENR bis! ;
-    : RCC_APB1LPENR_UART8LPEN_Clear 31 bit RCC_APB1LPENR bic! ;
+    $40021000 constant RCC_Base
+    RCC_Base $58 + constant RCC_APB1ENR1
+\    RCC_Base $5C + constant RCC_APB1ENR2
+    RCC_Base $60 + constant RCC_APB2ENR
+    RCC_Base $78 + constant RCC_APB1SMENR1
+\    RCC_Base $7C + constant RCC_APB1SMENR2
+    RCC_Base $80 + constant RCC_APB2SMENR
+    : RCC_APB1ENR1_USART2EN 17 bit RCC_APB1ENR1 bis! ;
+    : RCC_APB1ENR1_USART2EN_Clear 17 bit RCC_APB1ENR1 bic! ;
+    : RCC_APB1ENR1_USART3EN 18 bit RCC_APB1ENR1 bis! ;
+    : RCC_APB1ENR1_USART3EN_Clear 18 bit RCC_APB1ENR1 bic! ;
+    : RCC_APB1ENR1_UART4EN 19 bit RCC_APB1ENR1 bis! ;
+    : RCC_APB1ENR1_UART4EN_Clear 19 bit RCC_APB1ENR1 bic! ;
+    : RCC_APB1ENR1_UART5EN 20 bit RCC_APB1ENR1 bis! ;
+    : RCC_APB1ENR1_UART5EN_Clear 20 bit RCC_APB1ENR1 bic! ;
+    : RCC_APB2ENR_USART1EN 14 bit RCC_APB2ENR bis! ;
+    : RCC_APB2ENR_USART1EN_Clear 14 RCC_APB2ENR bic! ;
+\    : RCC_APB1ENR2_LPUART1EN 0 bit RCC_APB1ENR2 bis! ;
+\    : RCC_APB1ENR2_LPUART1EN_Clear 0 bit RCC_APB1ENR2 bic! ;
+    : RCC_APB1SMENR1_USART2SMEN 17 bit RCC_APB1SMENR1 bis! ;
+    : RCC_APB1SMENR1_USART2SMEN_Clear 17 bit RCC_APB1SMENR1 bic! ;
+    : RCC_APB1SMENR1_USART3SMEN 18 bit RCC_APB1SMENR1 bis! ;
+    : RCC_APB1SMENR1_USART3SMEN_Clear 18 bit RCC_APB1SMENR1 bic! ;
+    : RCC_APB1SMENR1_UART4SMEN 19 bit RCC_APB1SMENR1 bis! ;
+    : RCC_APB1SMENR1_UART4SMEN_Clear 19 bit RCC_APB1SMENR1 bic! ;
+    : RCC_APB1SMENR1_UART5SMEN 20 bit RCC_APB1SMENR1 bis! ;
+    : RCC_APB1SMENR1_UART5SMEN_Clear 20 bit RCC_APB1SMENR1 bic! ;
+    : RCC_APB2SMENR_USART1SMEN 14 bit RCC_APB2SMENR bis! ;
+    : RCC_APB2SMENR_USART1SMEN_Clear 14 RCC_APB2SMENR bic! ;
+\    : RCC_APB1SMENR2_LPUART1SMEN 0 bit RCC_APB1SMENR2 bis! ;
+\    : RCC_APB1SMENR2_LPUART1SMEN_Clear 0 bit RCC_APB1SMENR2 bic! ;
     : USART_CR1_TXEIE   %1 7 lshift swap USART_CR1 bis! ;  \ USART_CR1_TXEIE    interrupt enable
     : USART_CR1_RXNEIE   %1 5 lshift swap USART_CR1 bis! ;  \ USART_CR1_RXNEIE    RXNE interrupt enable
     : USART_CR1_TXEIE_Clear   %1 7 lshift swap USART_CR1 bic! ;  \ USART_CR1_TXEIE    interrupt disable
@@ -164,7 +157,9 @@ begin-module uart
     2 bit constant USART_CR1_RE
 
     \ Select USART structure
-    : uart-select ( usart -- addr ) 2 - uart-size * usarts + ;
+    : uart-select ( usart -- addr )
+      dup 1 = if drop usarts else 2 - uart-size * usarts + then
+    ;
 
     \ RX buffer read-index
     : uart-rx-read-index ( usart -- addr )
@@ -308,22 +303,20 @@ begin-module uart
     ;
 
     \ USART interrupt handlers
-    : handle-uart2-io ( -- ) 2 handle-uart-io ;
+    : handle-uart1-io ( -- ) 1 handle-uart-io ;
     : handle-uart3-io ( -- ) 3 handle-uart-io ;
     : handle-uart4-io ( -- ) 4 handle-uart-io ;
     : handle-uart5-io ( -- ) 5 handle-uart-io ;
-    : handle-uart6-io ( -- ) 6 handle-uart-io ;
-    : handle-uart7-io ( -- ) 7 handle-uart-io ;
-    : handle-uart8-io ( -- ) 8 handle-uart-io ;
+\    : handle-lpuart1-io ( -- ) lpuart handle-uart-io ;
     
     \ Enable USART2 interrupt-driven IO
-    : enable-uart2-int-io ( usart -- )
+    : enable-uart1-int-io ( usart -- )
       disable-int
-      0 2 uart-irq NVIC_IPR_IP!
-      ['] handle-uart2-io 2 uart-vector vector!
-      RCC_APB1LPENR_USART2LPEN
-      2 uart-irq NVIC_ISER_SETENA!
-      2 USART_CR1_RXNEIE
+      0 1 uart-irq NVIC_IPR_IP!
+      ['] handle-uart1-io 1 uart-vector vector!
+      RCC_APB2SMENR_USART1SMEN
+      1 uart-irq NVIC_ISER_SETENA!
+      1 USART_CR1_RXNEIE
       enable-int
     ;
 
@@ -332,7 +325,7 @@ begin-module uart
       disable-int
       0 3 uart-irq NVIC_IPR_IP!
       ['] handle-uart3-io 3 uart-vector vector!
-      RCC_APB1LPENR_USART3LPEN
+      RCC_APB1SMENR1_USART3SMEN
       3 uart-irq NVIC_ISER_SETENA!
       3 USART_CR1_RXNEIE
       enable-int
@@ -343,7 +336,7 @@ begin-module uart
       disable-int
       0 4 uart-irq NVIC_IPR_IP!
       ['] handle-uart4-io 4 uart-vector vector!
-      RCC_APB1LPENR_UART4LPEN
+      RCC_APB1SMENR1_UART4SMEN
       4 uart-irq NVIC_ISER_SETENA!
       4 USART_CR1_RXNEIE
       enable-int
@@ -354,53 +347,31 @@ begin-module uart
       disable-int
       0 5 uart-irq NVIC_IPR_IP!
       ['] handle-uart5-io 5 uart-vector vector!
-      RCC_APB1LPENR_UART5LPEN
+      RCC_APB1SMENR1_UART5SMEN
       5 uart-irq NVIC_ISER_SETENA!
       5 USART_CR1_RXNEIE
       enable-int
     ;
 
-    \ Enable USART6 interrupt-driven IO
-    : enable-uart6-int-io ( usart -- )
-      disable-int
-      0 6 uart-irq NVIC_IPR_IP!
-      ['] handle-uart6-io 6 uart-vector vector!
-      RCC_APB2LPENR_USART6LPEN
-      6 uart-irq NVIC_ISER_SETENA!
-      6 USART_CR1_RXNEIE
-      enable-int
-    ;
+\    \ Enable LPUART1 interrupt-driven IO
+\    : enable-lpuart1-int-io ( usart -- )
+\      disable-int
+\      0 lpuart uart-irq NVIC_IPR_IP!
+\      ['] handle-lpuart1-io lpuart uart-vector vector!
+\      RCC_APB2SMENR_USART6SMEN
+\      lpuart uart-irq NVIC_ISER_SETENA!
+\      lpuart USART_CR1_RXNEIE
+\      enable-int
+\    ;
     
-    \ Enable UART7 interrupt-driven IO
-    : enable-uart7-int-io ( usart -- )
-      disable-int
-      0 7 uart-irq NVIC_IPR_IP!
-      ['] handle-uart7-io 7 uart-vector vector!
-      RCC_APB1LPENR_UART7LPEN
-      7 uart-irq NVIC_ISER_SETENA!
-      7 USART_CR1_RXNEIE
-      enable-int
-    ;
-
-    \ Enable UART8 interrupt-driven IO
-    : enable-uart8-int-io ( usart -- )
-      disable-int
-      0 8 uart-irq NVIC_IPR_IP!
-      ['] handle-uart8-io 8 uart-vector vector!
-      RCC_APB1LPENR_UART8LPEN
-      8 uart-irq NVIC_ISER_SETENA!
-      8 USART_CR1_RXNEIE
-      enable-int
-    ;
-
     \ Disable USART2 interrupt-driven IO
-    : disable-uart2-int-io ( -- )
+    : disable-uart1-int-io ( -- )
       disable-int
-      ['] handle-null 2 uart-vector vector!
-      2 USART_CR1_RXNEIE_Clear
-      2 USART_CR1_TXEIE_Clear
-      2 uart-irq NVIC_ICER_CLRENA!
-      RCC_APB1LPENR_USART2LPEN_Clear
+      ['] handle-null 1 uart-vector vector!
+      1 USART_CR1_RXNEIE_Clear
+      1 USART_CR1_TXEIE_Clear
+      1 uart-irq NVIC_ICER_CLRENA!
+      RCC_APB2SMENR_USART1SMEN_Clear
       enable-int
     ;
 
@@ -411,7 +382,7 @@ begin-module uart
       3 USART_CR1_RXNEIE_Clear
       3 USART_CR1_TXEIE_Clear
       3 uart-irq NVIC_ICER_CLRENA!
-      RCC_APB1LPENR_USART3LPEN_Clear
+      RCC_APB1SMENR1_USART3SMEN_Clear
       enable-int
     ;
 
@@ -422,7 +393,7 @@ begin-module uart
       4 USART_CR1_RXNEIE_Clear
       4 USART_CR1_TXEIE_Clear
       4 uart-irq NVIC_ICER_CLRENA!
-      RCC_APB1LPENR_UART4LPEN_Clear
+      RCC_APB1SMENR1_UART4SMEN_Clear
       enable-int
     ;
     
@@ -433,42 +404,20 @@ begin-module uart
       5 USART_CR1_RXNEIE_Clear
       5 USART_CR1_TXEIE_Clear
       5 uart-irq NVIC_ICER_CLRENA!
-      RCC_APB1LPENR_UART5LPEN_Clear
+      RCC_APB1SMENR1_UART5SMEN_Clear
       enable-int
     ;
 
-    \ Disable USART6 interrupt-driven IO
-    : disable-uart6-int-io ( -- )
-      disable-int
-      ['] handle-null 6 uart-vector vector!
-      6 USART_CR1_RXNEIE_Clear
-      6 USART_CR1_TXEIE_Clear
-      6 uart-irq NVIC_ICER_CLRENA!
-      RCC_APB2LPENR_USART6LPEN_Clear
-      enable-int
-    ;
-
-    \ Disable UART7 interrupt-driven IO
-    : disable-uart7-int-io ( -- )
-      disable-int
-      ['] handle-null 7 uart-vector vector!
-      7 USART_CR1_RXNEIE_Clear
-      7 USART_CR1_TXEIE_Clear
-      7 uart-irq NVIC_ICER_CLRENA!
-      RCC_APB1LPENR_UART7LPEN_Clear
-      enable-int
-    ;
-
-    \ Disable UART8 interrupt-driven IO
-    : disable-uart8-int-io ( -- )
-      disable-int
-      ['] handle-null 8 uart-vector vector!
-      8 USART_CR1_RXNEIE_Clear
-      8 USART_CR1_TXEIE_Clear
-      8 uart-irq NVIC_ICER_CLRENA!
-      RCC_APB1LPENR_UART8LPEN_Clear
-      enable-int
-    ;
+\    \ Disable LPUART1 interrupt-driven IO
+\    : disable-lpuart1-int-io ( -- )
+\      disable-int
+\      ['] handle-null lpuart uart-vector vector!
+\      lpuart USART_CR1_RXNEIE_Clear
+\      lpuart USART_CR1_TXEIE_Clear
+\      lpuart uart-irq NVIC_ICER_CLRENA!
+\      RCC_APB1SMENR2_LPUART1SMEN_Clear
+\      enable-int
+\    ;
 
   end-module> import
 
@@ -481,9 +430,7 @@ begin-module uart
       3 of 7 endof
       4 of 8 endof
       5 of 8 endof
-      6 of 8 endof
-      7 of 8 endof
-      8 of 8 endof
+\      lpuart of 8 endof
     endcase
   ;
 
@@ -516,14 +463,12 @@ begin-module uart
     [:
       swap dup 2 /
       2 pick case
-	1 of 108000000 endof
-	2 of 54000000 endof
-	3 of 54000000 endof
-	4 of 54000000 endof
-	5 of 54000000 endof
-	6 of 108000000 endof
-	7 of 54000000 endof
-	8 of 54000000 endof
+	1 of 72000000 endof
+	2 of 72000000 endof
+	3 of 72000000 endof
+	4 of 72000000 endof
+	5 of 72000000 endof
+\ 	lpuart of 72000000 endof
       endcase
       + swap / swap USART_BRR !
     ;] over with-uart-disabled
@@ -532,16 +477,16 @@ begin-module uart
   continue-module uart-internal
 
     \ Initialize interrupt-driven IO on USART2
-    : init-uart2 ( -- )
-      0 2 uart-rx-read-index c!
-      0 2 uart-rx-write-index c!
-      0 2 uart-tx-read-index c!
-      0 2 uart-tx-write-index c!
-      RCC_APB1ENR_USART2EN
-      RCC_APB1LPENR_USART2LPEN
-      115200 2 uart-baud!
-      2 enable-uart
-      enable-uart2-int-io
+    : init-uart1 ( -- )
+      0 1 uart-rx-read-index c!
+      0 1 uart-rx-write-index c!
+      0 1 uart-tx-read-index c!
+      0 1 uart-tx-write-index c!
+      RCC_APB2ENR_USART1EN
+      RCC_APB2SMENR_USART1SMEN
+      115200 1 uart-baud!
+      1 enable-uart
+      enable-uart1-int-io
     ;
     
     \ Initialize interrupt-driven IO on USART3
@@ -550,8 +495,8 @@ begin-module uart
       0 3 uart-rx-write-index c!
       0 3 uart-tx-read-index c!
       0 3 uart-tx-write-index c!
-      RCC_APB1ENR_USART3EN
-      RCC_APB1LPENR_USART3LPEN
+      RCC_APB1ENR1_USART3EN
+      RCC_APB1SMENR1_USART3SMEN
       115200 3 uart-baud!
       3 enable-uart
       enable-uart3-int-io
@@ -563,8 +508,8 @@ begin-module uart
       0 4 uart-rx-write-index c!
       0 4 uart-tx-read-index c!
       0 4 uart-tx-write-index c!
-      RCC_APB1ENR_UART4EN
-      RCC_APB1LPENR_UART4LPEN
+      RCC_APB1ENR1_UART4EN
+      RCC_APB1SMENR1_UART4SMEN
       115200 4 uart-baud!
       4 enable-uart
       enable-uart4-int-io
@@ -576,58 +521,32 @@ begin-module uart
       0 5 uart-rx-write-index c!
       0 5 uart-tx-read-index c!
       0 5 uart-tx-write-index c!
-      RCC_APB1ENR_UART5EN
-      RCC_APB1LPENR_UART5LPEN
+      RCC_APB1ENR1_UART5EN
+      RCC_APB1SMENR1_UART5SMEN
       115200 5 uart-baud!
       5 enable-uart
       enable-uart5-int-io
     ;
 
-    \ Initialize interrupt-driven IO on USART6
-    : init-uart6 ( -- )
-      0 6 uart-rx-read-index c!
-      0 6 uart-rx-write-index c!
-      0 6 uart-tx-read-index c!
-      0 6 uart-tx-write-index c!
-      RCC_APB2ENR_USART6EN
-      RCC_APB2LPENR_USART6LPEN
-      115200 6 uart-baud!
-      6 enable-uart
-      enable-uart6-int-io
-    ;
-    
-    \ Initialize interrupt-driven IO on UART7
-    : init-uart7 ( -- )
-      0 7 uart-rx-read-index c!
-      0 7 uart-rx-write-index c!
-      0 7 uart-tx-read-index c!
-      0 7 uart-tx-write-index c!
-      RCC_APB1ENR_UART7EN
-      RCC_APB1LPENR_UART7LPEN
-      115200 7 uart-baud!
-      7 enable-uart
-      enable-uart7-int-io
-    ;
-
-    \ Initialize interrupt-driven IO on UART8
-    : init-uart8 ( -- )
-      0 8 uart-rx-read-index c!
-      0 8 uart-rx-write-index c!
-      0 8 uart-tx-read-index c!
-      0 8 uart-tx-write-index c!
-      RCC_APB1ENR_UART8EN
-      RCC_APB1LPENR_UART8LPEN
-      115200 8 uart-baud!
-      8 enable-uart
-      enable-uart8-int-io
-    ;
+\    \ Initialize interrupt-driven IO on LPUART1
+\    : init-lpuart1 ( -- )
+\      0 lpuart uart-rx-read-index c!
+\      0 lpuart uart-rx-write-index c!
+\      0 lpuart uart-tx-read-index c!
+\      0 lpuart uart-tx-write-index c!
+\      RCC_APB1ENR2_LPUART1EN
+\      RCC_APB1SMENR2_LPUART1SMEN
+\      115200 lpuart uart-baud!
+\      lpuart enable-uart
+\      enable-lpuart1-int-io
+\    ;
 
   end-module
 
   \ Emit a byte to a USART
   : emit-uart ( c usart -- )
     dup validate-uart
-    dup 1 = if
+    dup 2 = if
       drop do-emit
     else
       [: dup uart-tx-full? not ;] wait
@@ -639,7 +558,7 @@ begin-module uart
   \ Read a byte from a USART
   : key-uart ( usart -- c )
     dup validate-uart
-    dup 1 = if
+    dup 2 = if
       drop do-key
     else
       dup USART_CR1_RXNEIE
@@ -651,7 +570,7 @@ begin-module uart
   \ Get whether a USART is ready to emit a byte
   : emit-uart? ( usart -- flag )
     dup validate-uart
-    dup 1 = if
+    dup 2 = if
       drop do-emit?
     else
       uart-tx-full? not
@@ -661,7 +580,7 @@ begin-module uart
   \ Get whether a byte is ready to be read from a USART
   : key-uart? ( usart -- flag )
     dup validate-uart
-    dup 1 = if
+    dup 2 = if
       drop do-key?
     else
       uart-rx-empty? not
@@ -671,7 +590,7 @@ begin-module uart
   \ Flush the transmit buffer for a USART
   : flush-uart ( usart -- )
     dup validate-uart
-    dup 1 = if
+    dup 2 = if
       drop do-flush-console
     else
       [: dup uart-tx-empty? ;] wait drop
@@ -682,14 +601,12 @@ begin-module uart
   : enable-uart-int-io ( uart -- )
     dup validate-uart
     case
-      1 of enable-int-io endof
-      2 of enable-uart2-int-io endof
+      1 of enable-uart1-int-io endof
+      2 of enable-int-io endof
       3 of enable-uart3-int-io endof
       4 of enable-uart4-int-io endof
       5 of enable-uart5-int-io endof
-      6 of enable-uart6-int-io endof
-      7 of enable-uart7-int-io endof
-      8 of enable-uart8-int-io endof
+\      lpuart of enable-lpuart1-int-io endof
     endcase
   ;
 
@@ -697,39 +614,28 @@ begin-module uart
   : disable-uart-int-io ( uart -- )
     dup validate-uart
     case
-      1 of disable-int-io endof
-      2 of disable-uart2-int-io endof
+      1 of disable-uart1-int-io endof
+      2 of disable-int-io endof
       3 of disable-uart3-int-io endof
       4 of disable-uart4-int-io endof
       5 of disable-uart5-int-io endof
-      6 of disable-uart6-int-io endof
-      7 of disable-uart7-int-io endof
-      8 of disable-uart8-int-io endof
+\      lpuart of disable-lpuart1-int-io endof
     endcase
   ;
   
   \ Set a pin to be a UART pin
-  : uart-pin ( uart pin -- )
-    over 5 = if
-      dup 8 xc = over 9 xc = or if nip 7 else swap uart-alternate then
-    else
-      swap uart-alternate
-    then
-    swap alternate-pin
-  ;
+  : uart-pin ( uart pin -- ) swap uart-alternate swap alternate-pin ;
   
 end-module> import
 
 \ Init
 : init ( -- )
   init
-  ^ uart-internal :: init-uart2
+  ^ uart-internal :: init-uart1
   ^ uart-internal :: init-uart3
   ^ uart-internal :: init-uart4
   ^ uart-internal :: init-uart5
-  ^ uart-internal :: init-uart6
-  ^ uart-internal :: init-uart7
-  ^ uart-internal :: init-uart8
+\  ^ uart-internal :: init-lpuart1
 ;
 
 \ Reboot

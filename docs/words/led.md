@@ -67,6 +67,13 @@ The blue LED.
 
 The blue LED.
 
+#### STM32F411 Nucleo 64 Words
+
+##### `green`
+( -- led )
+
+The green LED.
+
 #### STM32L476 DISCOVERY LED Words
 
 ##### `green`

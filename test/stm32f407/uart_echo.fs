@@ -23,7 +23,7 @@ continue-module forth
   uart import
   pin import
 
-  \ Echo characters received by UART1 (GPIO pins 4, 5) at a given baud
+  \ Echo characters received by UART1 (GPIO pins PB6, PB7) at a given baud
   : init-test ( baud -- )
     1 6 xb uart-pin 1 7 xb uart-pin 1 uart-baud!
     begin 1 key-uart? if 1 key-uart dup emit 1 emit-uart then key? until

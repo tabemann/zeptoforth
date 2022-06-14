@@ -1,4 +1,4 @@
-\ Copyright (c) 2021-2022 Travis Bemann
+\ Copyright (c) 2022 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -18,25 +18,32 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-#include src/stm32l476/forth/clock.fs
-#include src/common/forth/basic.fs
-#include src/common/forth/module.fs
-#include src/common/forth/interrupt.fs
-#include src/common/forth/multicore.fs
-#include src/stm32l476/forth/erase.fs
-#include src/common/forth/lambda.fs
-#include src/common/forth/fixed.fs
-#include src/common/forth/systick.fs
-#include src/stm32l476/forth/int_io.fs
-#include src/stm32l476/forth/gpio.fs
-#include src/stm32l476/forth/pin.fs
-#include src/stm32l476/forth/exti.fs
-#include src/common/forth/task.fs
-#include src/stm32l476/forth/led.fs
-#include src/common/forth/full_default.fs
-#include src/stm32l476/forth/rng.fs
-#include src/stm32l476/forth/uart.fs
+continue-module forth
 
-\ Set a cornerstone to enable deleting everything compiled after this code
-cornerstone restore-state
+  uart import
+  pin import
+  task import
+  
+  \ Test receiving data from USART6 (GPIO pins PB6, PB7)
+  : init-test-1 ( -- )
+    1 6 xb uart-pin 1 7 xb uart-pin
+    0 [: begin 1 key-uart h.2 space again ;] 256 128 512 spawn run
+  ;
 
+  \ Test receiving data from UART7 (GPIO pins PA0, PA1)
+  : init-test-4 ( -- )
+    4 0 xa uart-pin 4 1 xa uart-pin
+    0 [: begin 4 key-uart h.2 space again ;] 256 128 512 spawn run
+  ;
+
+  \ Type a string on USART6
+  : type-test-1 ( c-addr u -- )
+    begin ?dup while swap dup c@ 1 emit-uart 1+ swap 1- repeat drop
+  ;
+
+  \ Type a string on UART7
+  : type-test-4 ( c-addr u -- )
+    begin ?dup while swap dup c@ 4 emit-uart 1+ swap 1- repeat drop
+  ;
+
+end-module

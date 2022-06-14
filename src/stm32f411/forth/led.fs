@@ -25,8 +25,17 @@ begin-module led
 
   pin import
 
+  \ Detect Nucleo64 boards
+  : nucleo64? ( -- flag )
+    s" platform-nucleo64" find dup if >body execute else drop false then
+  ;
+
+  \ LED is not supported exception
+  : x-led-not-supported ( -- ) ." LED is not supported" cr ;
+  
   \ The LED constants
-  0 constant blue
+  : blue ( -- led ) nucleo64? triggers x-led-not-supported 0 ;
+  : green ( -- led ) nucleo64? averts x-led-not-supported 0 ;
 
   \ The LED states
   low constant off
@@ -44,7 +53,7 @@ begin-module led
     : validate-led ( led -- ) led-count u< averts x-led-out-of-range ;
 
     \ Get the pin of an LED
-    : pin-of-led ( led -- pin ) 13 + xc ;
+    : pin-of-led ( led -- pin ) nucleo64? if 5 + xa else 13 + xc then ;
 
   end-module> import
 
