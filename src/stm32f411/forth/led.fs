@@ -25,8 +25,11 @@ begin-module led
 
   pin import
 
+  \ Is this a Nucleo64 board
+  variable nucleo64?
+  
   \ Detect Nucleo64 boards
-  : nucleo64? ( -- flag )
+  : detect-nucleo64 ( -- flag )
     s" platform-nucleo64" find dup if >body execute else drop false then
   ;
 
@@ -34,8 +37,8 @@ begin-module led
   : x-led-not-supported ( -- ) ." LED is not supported" cr ;
   
   \ The LED constants
-  : blue ( -- led ) nucleo64? triggers x-led-not-supported 0 ;
-  : green ( -- led ) nucleo64? averts x-led-not-supported 0 ;
+  : blue ( -- led ) nucleo64? @ triggers x-led-not-supported 0 ;
+  : green ( -- led ) nucleo64? @ averts x-led-not-supported 0 ;
 
   \ The LED states
   low constant off
@@ -53,26 +56,32 @@ begin-module led
     : validate-led ( led -- ) led-count u< averts x-led-out-of-range ;
 
     \ Get the pin of an LED
-    : pin-of-led ( led -- pin ) nucleo64? if 5 + xa else 13 + xc then ;
+    : pin-of-led ( led -- pin ) nucleo64? @ if 5 + xa else 13 + xc then ;
 
   end-module> import
 
   \ Initialize the LEDs
   : led-init ( -- )
-    blue pin-of-led output-pin
-    high blue pin-of-led pin!
+    detect-nucleo64 nucleo64? !
+    nucleo64? @ if
+      green pin-of-led output-pin
+      low green pin-of-led pin!
+    else
+      blue pin-of-led output-pin
+      high blue pin-of-led pin!
+    then
   ;
 
   \ Set an LED
   : led! ( state led -- )
     dup validate-led
-    swap not swap pin-of-led pin!
+    swap nucleo64? @ not xor swap pin-of-led pin!
   ;
 
   \ Get an LED
   : led@ ( led -- state )
     dup validate-led
-    pin-of-led pin-out@ not
+    pin-of-led pin-out@ nucleo64? @ not xor
   ;
 
   \ Toggle an LED
