@@ -2129,6 +2129,9 @@ flash-mini-dict-size [if]
   : hash-word ( word -- hash )
     dup word-name count rot wordlist-id h@ hash-string-and-wid
   ;
+
+  \ Copying flash-mini-dict so it is properly inlined
+  flash-mini-dict constant flash-mini-dict
   
   \ Commit to flash
   commit-flash
@@ -2174,8 +2177,8 @@ flash-mini-dict-size [if]
   \ Find a word in the flash mini-dictionary
   : find-flash-mini-dict ( b-addr bytes wid -- addr|0 )
     3dup hash-string-and-wid flash-mini-dict-end @ 
-    begin dup flash-mini-dict u> while
-      2 cells -
+    begin dup flash-mini-dict - while
+      8 -
       2dup @ = if
 	dup cell+ @ wordlist-id h@ 3 pick = if
 	  dup cell+ @ word-flags h@ visible-flag and if
