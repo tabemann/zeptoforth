@@ -2179,7 +2179,8 @@ flash-mini-dict-size [if]
     3dup hash-string-and-wid flash-mini-dict-end @ 
     begin dup flash-mini-dict - while
       8 -
-      2dup @ = if
+      2dup @ - if
+      else
 	dup cell+ @ wordlist-id h@ 3 pick = if
 	  dup cell+ @ word-flags h@ visible-flag and if
 	    4 pick 4 pick 2 pick cell+ @ word-name count equal-case-strings? if
