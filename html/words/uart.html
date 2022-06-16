@@ -35,7 +35,15 @@
             
   <section id="uart-words">
 <h1>UART Words<a class="headerlink" href="#uart-words" title="Permalink to this headline">¶</a></h1>
-<p>There are a number of words for controlling UART0 and UART1 available on the RP2040, STM32F411, and STM32F407 on top of the general <code class="docutils literal notranslate"><span class="pre">emit</span></code>, key<code class="docutils literal notranslate"><span class="pre">,</span> </code>emit?<code class="docutils literal notranslate"><span class="pre">,</span> <span class="pre">and</span> </code>key?` words. These are as follows:</p>
+<p>There are a number of words for controlling UARTS available on each of the supportee microcontrollers on top of the general <code class="docutils literal notranslate"><span class="pre">emit</span></code>, key<code class="docutils literal notranslate"><span class="pre">,</span> </code>emit?<code class="docutils literal notranslate"><span class="pre">,</span> <span class="pre">and</span> </code>key?` words. These are as follows:</p>
+<p>Note that <em>uart</em> values as mentioned below vary between the different supported platforms. The following applies:</p>
+<ul class="simple">
+<li><p>On the RP2040 the available <em>uart</em> values are 0 and 1, with 0 corresponding to the console.</p></li>
+<li><p>On the STM32F411 the available <em>uart</em> values are 1, 2, and 6, with 2 corresponding to the console.</p></li>
+<li><p>On the STM32F407 the available <em>uart</em> values are 1 through 6, with 2 corresponding to the console.</p></li>
+<li><p>On the STM32L476 the available <em>uart</em> values are 1 through 5, with 2 corresponding to the console. Note that LPUART1 is not currently supported.</p></li>
+<li><p>On the STM32F746 the available <em>uart</em> values are 1 through 8, with 1 corresponding to the console.</p></li>
+</ul>
 <section id="uart">
 <h2><code class="docutils literal notranslate"><span class="pre">uart</span></code><a class="headerlink" href="#uart" title="Permalink to this headline">¶</a></h2>
 <p>These words are in the <code class="docutils literal notranslate"><span class="pre">uart</span></code> module:</p>
@@ -207,7 +215,7 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.2.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

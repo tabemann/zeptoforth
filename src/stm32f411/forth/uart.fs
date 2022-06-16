@@ -20,7 +20,7 @@
 \ SOFTWARE.
 
 \ Compile to flash
-\ compile-to-flash
+compile-to-flash
 
 begin-module uart
 

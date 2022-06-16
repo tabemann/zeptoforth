@@ -1,6 +1,14 @@
 # UART Words
 
-There are a number of words for controlling UART0 and UART1 available on the RP2040, STM32F411, and STM32F407 on top of the general `emit`, key`, `emit?`, and `key?` words. These are as follows:
+There are a number of words for controlling UARTS available on each of the supportee microcontrollers on top of the general `emit`, key`, `emit?`, and `key?` words. These are as follows:
+
+Note that *uart* values as mentioned below vary between the different supported platforms. The following applies:
+
+* On the RP2040 the available *uart* values are 0 and 1, with 0 corresponding to the console.
+* On the STM32F411 the available *uart* values are 1, 2, and 6, with 2 corresponding to the console.
+* On the STM32F407 the available *uart* values are 1 through 6, with 2 corresponding to the console.
+* On the STM32L476 the available *uart* values are 1 through 5, with 2 corresponding to the console. Note that LPUART1 is not currently supported.
+* On the STM32F746 the available *uart* values are 1 through 8, with 1 corresponding to the console.
 
 ### `uart`
 
