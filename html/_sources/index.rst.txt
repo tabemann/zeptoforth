@@ -17,6 +17,7 @@ Zeptoforth Documentation
    words/exti
    words/pio
    words/uart
+   words/adc
    words/interrupt
    words/multicore
    words/dev_tools

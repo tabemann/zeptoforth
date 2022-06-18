@@ -127,17 +127,17 @@ begin-module adc
     
   end-module> import
 
-  \ Enable the VBATE internal channel
-  : enable-vbate ( -- ) true ADC_CCR_VBATE! ;
+  \ Enable the VBAT internal channel
+  : enable-vbat ( -- ) true ADC_CCR_VBATE! ;
 
-  \ Disable the VBATE internal channel
-  : disable-vbate ( -- ) false ADC_CCR_VBATE! ;
+  \ Disable the VBAT internal channel
+  : disable-vbat ( -- ) false ADC_CCR_VBATE! ;
 
   \ Enable the temperature sensor and VREFINT internal channels
-  : enable-tsvrefe ( -- ) true ADC_CCR_TSVREFE! ;
+  : enable-tsvref ( -- ) true ADC_CCR_TSVREFE! ;
 
   \ Disable the temperature sensor and VREFINT internal channels
-  : disable-tsvrefe ( -- ) false ADC_CCR_TSVREFE! ;
+  : disable-tsvref ( -- ) false ADC_CCR_TSVREFE! ;
   
   \ Enable an ADC
   : enable-adc ( adc -- )
