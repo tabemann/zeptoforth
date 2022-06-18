@@ -40,6 +40,7 @@
 #include src/common/forth/full_default.fs
 #include src/stm32f746/forth/rng.fs
 #include src/stm32f746/forth/uart.fs
+#include src/stm32f746/forth/adc.fs
 #include src/stm32f746/forth/qspi.fs
 #include src/common/forth/block.fs
 #include src/common/forth/edit.fs
