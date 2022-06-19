@@ -65,6 +65,11 @@ Get the ADC channel for *pin*.
 
 #### STM32F407, STM32F411, STM32F746, and STM32L476 only words
 
+##### `adc-sampling-time!`
+( sampling-time channel adc -- )
+
+Set *sampling-time* for *channel* on *adc*. Note that this value is rounded up to the next valid sampling time for the microcontroller in question, and on the STM32L476 an additional 0.5 is added to the value. The maximum sampling time for STM32F407, STM32F411, and STM32F746 microcontrollers is 480, and the maximum sampling time for STM32L476 microcontrollers is 640 (before the 0.5 is added). For more information see the microcontroller's reference manual. Also note that without sufficient sampling time, some channels, such as the temperature sensor, may provide erroneous data.
+
 ##### `vrefint-adc-chan`
 ( -- channel )
 
@@ -74,6 +79,11 @@ Channel on ADC 1 for the internal reference voltage.
 ( -- channel )
 
 Channel on ADC 1 for Vbat.
+
+##### `x-out-of-range-sampling-time`
+( -- )
+
+Out of range sampling time exception.
 
 #### STM32F411, STM32F746, and STM32L476 only words
 

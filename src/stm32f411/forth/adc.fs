@@ -31,6 +31,9 @@ begin-module adc
   
   \ Invalid ADC channel exception
   : x-invalid-adc-chan ( -- ) ." invalid ADC channel" cr ;
+
+  \ Out of range sampling time exception
+  : x-out-of-range-sampling-time ( -- ) ." out of range sampling time" cr ;
   
   begin-module adc-internal
 
@@ -68,6 +71,8 @@ begin-module adc
     : ADC_SR ( adc -- addr ) ADC_Base $00 + ;
     : ADC_CR1 ( adc -- addr ) ADC_Base $04 + ;
     : ADC_CR2 ( adc -- addr ) ADC_Base $08 + ;
+    : ADC_SMPR1 ( adc -- addr ) ADC_Base $0C + ;
+    : ADC_SMPR2 ( adc -- addr ) ADC_Base $10 + ;
     : ADC_SQR1 ( adc -- addr ) ADC_Base $2C + ;
     : ADC_SQR2 ( adc -- addr ) ADC_Base $30 + ;
     : ADC_SQR3 ( adc -- addr ) ADC_Base $34 + ;
@@ -87,6 +92,11 @@ begin-module adc
     ;
     : ADC_CR2_ADON! ( flag adc -- )
       0 bit swap ADC_CR2 rot if bis! else bic! then
+    ;
+    : ADC_SMPRx_SMPx! ( sampling channel adc -- )
+      over 10 u< if ADC_SMPR2 else ADC_SMPR1 swap 10 - swap then
+      >r r@ @ swap 3 * tuck $7 swap lshift bic
+      -rot lshift or r> !
     ;
     : ADC_SQR1_L! ( count adc -- )
       ADC_SQR1 swap $F and 20 lshift
@@ -108,6 +118,9 @@ begin-module adc
       true ADC_CCR_TSVREFE!
     ;
     
+    \ Sampling times array
+    create sampling-times 3 h, 15 h, 28 h, 56 h, 84 h, 112 h, 144 h, 480 h,
+
   end-module> import
 
   \ Enable the VBAT internal channel
@@ -121,6 +134,22 @@ begin-module adc
 
   \ Disable the temperature sensor and VREFINT internal channels
   : disable-tsvref ( -- ) false ADC_CCR_TSVREFE! ;
+
+  \ Set sampling time for a channel
+  : adc-sampling-time! ( sampling channel adc -- )
+    dup validate-adc
+    over validate-adc-chan
+    rot dup 480 u<= averts x-out-of-range-sampling-time
+    [:
+      >r 0 begin
+	dup 2* sampling-times + h@ r@ u>= if
+	  rdrop -rot ADC_SMPRx_SMPx! true
+	else
+	  1+ false
+	then
+      until
+    ;] adc-lock with-lock
+  ;
   
   \ Enable an ADC
   : enable-adc ( adc -- )
@@ -175,7 +204,7 @@ begin-module adc
     over validate-adc-chan
     [:
       true over ADC_CR2_EOCS!
-      1 over ADC_SQR1_L!
+      0 over ADC_SQR1_L!
       tuck ADC_SQR3_SQ1!
       true over ADC_CR2_SWSTART!
       begin dup ADC_SR_EOC@ until

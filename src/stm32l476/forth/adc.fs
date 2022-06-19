@@ -32,6 +32,9 @@ begin-module adc
   \ Invalid ADC channel exception
   : x-invalid-adc-chan ( -- ) ." invalid ADC channel" cr ;
   
+  \ Out of range sampling time exception
+  : x-out-of-range-sampling-time ( -- ) ." out of range sampling time" cr ;
+  
   begin-module adc-internal
 
     \ Validate an ADC
@@ -72,6 +75,8 @@ begin-module adc
     \ ADC registers
     : ADC_ISR ( adc -- addr ) ADC_Base $00 + ;
     : ADC_CR ( adc -- addr ) ADC_Base $08 + ;
+    : ADC_SMPR1 ( adc -- adr ) ADC_Base $14 + ;
+    : ADC_SMPR2 ( adc -- adr ) ADC_Base $18 + ;
     : ADC_SQR1 ( adc -- addr ) ADC_Base $30 + ;
     : ADC_DR ( adc -- addr ) ADC_Base $40 + ;
 
@@ -103,6 +108,11 @@ begin-module adc
     ;
     : ADC_CR_ADEN! ( flag adc -- )
       0 bit swap ADC_CR rot if bis! else bic! then
+    ;
+    : ADC_SMPRx_SMPx! ( sampling channel adc -- )
+      over 10 u< if ADC_SMPR1 else ADC_SMPR2 swap 10 - swap then
+      >r r@ @ swap 3 * tuck $7 swap lshift bic
+      -rot lshift or r> !
     ;
     : ADC_SQR1_L! ( count adc -- )
       ADC_SQR1 swap $F and over @ $F bic or swap !
@@ -160,6 +170,9 @@ begin-module adc
       false ADC_CCR_VREFEN!
     ;
     
+    \ Sampling times array
+    create sampling-times 2 h, 6 h, 12 h, 24 h, 47 h, 92 h, 247 h, 640 h,
+
   end-module> import
 
   \ Enable the VBAT internal channel connected to ADC1_INP18
@@ -180,6 +193,22 @@ begin-module adc
   \ Disable the VREFINT internal channel connected to ADC1_INP0
   : disable-vrefint ( -- ) false ADC_CCR_VREFEN! ;
   
+  \ Set sampling time (plus 0.5 ADC clock cycles) for a channel
+  : adc-sampling-time! ( sampling channel adc -- )
+    dup validate-adc
+    over validate-adc-chan
+    rot dup 640 u<= averts x-out-of-range-sampling-time
+    [:
+      >r 0 begin
+	dup 2* sampling-times + h@ r@ u>= if
+	  rdrop -rot ADC_SMPRx_SMPx! true
+	else
+	  1+ false
+	then
+      until
+    ;] 2 pick adc-lock with-lock
+  ;
+
   \ Enable an ADC
   : enable-adc ( adc -- )
     dup validate-adc
@@ -232,7 +261,7 @@ begin-module adc
     over validate-adc-chan
     [:
       dup wait-adc-ready
-      1 over ADC_SQR1_L!
+      0 over ADC_SQR1_L!
       tuck ADC_SQR1_SQ1!
       true over ADC_CR_ADSTART!
       begin dup ADC_ISR_EOC@ until

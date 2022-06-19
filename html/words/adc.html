@@ -101,6 +101,11 @@
 </section>
 <section id="stm32f407-stm32f411-stm32f746-and-stm32l476-only-words">
 <h3>STM32F407, STM32F411, STM32F746, and STM32L476 only words<a class="headerlink" href="#stm32f407-stm32f411-stm32f746-and-stm32l476-only-words" title="Permalink to this headline">¶</a></h3>
+<section id="adc-sampling-time">
+<h4><code class="docutils literal notranslate"><span class="pre">adc-sampling-time!</span></code><a class="headerlink" href="#adc-sampling-time" title="Permalink to this headline">¶</a></h4>
+<p>( sampling-time channel adc – )</p>
+<p>Set <em>sampling-time</em> for <em>channel</em> on <em>adc</em>. Note that this value is rounded up to the next valid sampling time for the microcontroller in question, and on the STM32L476 an additional 0.5 is added to the value. The maximum sampling time for STM32F407, STM32F411, and STM32F746 microcontrollers is 480, and the maximum sampling time for STM32L476 microcontrollers is 640 (before the 0.5 is added). For more information see the microcontroller’s reference manual. Also note that without sufficient sampling time, some channels, such as the temperature sensor, may provide erroneous data.</p>
+</section>
 <section id="vrefint-adc-chan">
 <h4><code class="docutils literal notranslate"><span class="pre">vrefint-adc-chan</span></code><a class="headerlink" href="#vrefint-adc-chan" title="Permalink to this headline">¶</a></h4>
 <p>( – channel )</p>
@@ -110,6 +115,11 @@
 <h4><code class="docutils literal notranslate"><span class="pre">vbat-adc-chan</span></code><a class="headerlink" href="#vbat-adc-chan" title="Permalink to this headline">¶</a></h4>
 <p>( – channel )</p>
 <p>Channel on ADC 1 for Vbat.</p>
+</section>
+<section id="x-out-of-range-sampling-time">
+<h4><code class="docutils literal notranslate"><span class="pre">x-out-of-range-sampling-time</span></code><a class="headerlink" href="#x-out-of-range-sampling-time" title="Permalink to this headline">¶</a></h4>
+<p>( – )</p>
+<p>Out of range sampling time exception.</p>
 </section>
 </section>
 <section id="stm32f411-stm32f746-and-stm32l476-only-words">
