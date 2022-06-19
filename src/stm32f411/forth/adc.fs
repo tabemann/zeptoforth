@@ -104,12 +104,24 @@ begin-module adc
       adc-lock init-lock
       true RCC_APB2ENR_ADC1EN!
       true 1 ADC_CR2_ADON!
-      true ADC_CCR_VBATE!
+      false ADC_CCR_VBATE!
       true ADC_CCR_TSVREFE!
     ;
     
   end-module> import
 
+  \ Enable the VBAT internal channel
+  : enable-vbat ( -- ) true ADC_CCR_VBATE! ;
+
+  \ Disable the VBAT internal channel
+  : disable-vbat ( -- ) false ADC_CCR_VBATE! ;
+
+  \ Enable the temperature sensor and VREFINT internal channels
+  : enable-tsvref ( -- ) true ADC_CCR_TSVREFE! ;
+
+  \ Disable the temperature sensor and VREFINT internal channels
+  : disable-tsvref ( -- ) false ADC_CCR_TSVREFE! ;
+  
   \ Enable an ADC
   : enable-adc ( adc -- )
     dup validate-adc
@@ -143,7 +155,7 @@ begin-module adc
   1 constant default-adc
 
   \ Internal temperature sensor ADC channel
-  16 constant temp-adc-chan
+  18 constant temp-adc-chan
 
   \ Internal reference voltage ADC channel
   17 constant vrefint-adc-chan

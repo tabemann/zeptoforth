@@ -75,7 +75,7 @@ Channel on ADC 1 for the internal reference voltage.
 
 Channel on ADC 1 for Vbat.
 
-#### STM32F746 and STM32L476 only words
+#### STM32F411, STM32F746, and STM32L476 only words
 
 ##### `enable-vbat`
 ( -- )
@@ -87,7 +87,7 @@ Enable the Vbat ADC channel.
 
 Disable the Vbat ADC channel.
 
-#### STM32F746 only words
+#### STM32F411 and STM32F746 only words
 
 ##### `enable-tsvref`
 ( -- )
