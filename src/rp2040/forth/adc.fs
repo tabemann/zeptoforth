@@ -120,8 +120,8 @@ begin-module adc
 
   \ Get an ADC value
   : adc@ ( adc-chan adc -- value )
-    dup validate-adc
-    over validate-adc-chan
+    validate-adc
+    dup validate-adc-chan
     [:
       begin ADC_CS_READY@ until
       ADC_CS_AINSEL!
