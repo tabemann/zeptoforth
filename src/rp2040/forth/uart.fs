@@ -305,7 +305,7 @@ begin-module uart
   end-module
 
   \ Emit a byte to a UART
-  : emit-uart ( c uart -- )
+  : >uart ( c uart -- )
     dup validate-uart
     0= if
       do-emit
@@ -321,7 +321,7 @@ begin-module uart
   ; 
 
   \ Read a byte from a UART
-  : key-uart ( uart -- c )
+  : uart> ( uart -- c )
     dup validate-uart
     0= if
       do-key
@@ -334,7 +334,7 @@ begin-module uart
   ;
 
   \ Get whether a UART is ready to emit a byte
-  : emit-uart? ( uart -- flag )
+  : >uart? ( uart -- flag )
     dup validate-uart
     0= if
       do-emit?
@@ -344,7 +344,7 @@ begin-module uart
   ;
 
   \ Get whether a byte is ready to be read from a UART
-  : key-uart? ( uart -- flag )
+  : uart>? ( uart -- flag )
     dup validate-uart
     0= if
       do-key?

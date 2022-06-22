@@ -39,22 +39,22 @@ Execute *xt* with a UART disabled, re-enabling it afterwards if it was previousl
 
 Set the baud of a UART.
 
-##### `emit-uart`
+##### `>uart`
 ( c uart -- )
 
 Emit a byte to a UART.
 
-##### `key-uart`
+##### `uart>`
 ( uart -- c )
 
 Read a byte from a UART.
 
-##### `emit-uart?`
+##### `>uart?`
 ( uart -- flag )
 
 Get whether a UART is ready to emit a byte.
 
-##### `key-uart?`
+##### `uart>?`
 ( uart -- flag )
 
 Get whether a byte is ready to be read from a UART.

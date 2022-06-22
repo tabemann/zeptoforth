@@ -1,5 +1,5 @@
 \ Copyright (c) 2022 Travis Bemann
-\
+\ 
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
 \ in the Software without restriction, including without limitation the rights
@@ -20,12 +20,40 @@
 
 continue-module forth
 
-  uart import
+  spi import
+  pin import
+  task import
 
-  \ Echo characters received by UART1 (GPIO pins 4, 5) at a given baud
-  : init-test ( baud -- )
-    1 4 uart-pin 1 5 uart-pin 1 uart-baud!
-    begin 1 uart>? if 1 uart> dup emit 1 >uart then key? until
+\  cell buffer: notify-buffer
+\  variable response-task
+
+  \ Initialize the test
+  : init-test ( -- )
+    0 ^ spi-internal :: init-spi
+    1 ^ spi-internal :: init-spi
+    0 6 spi-pin \ SPI0 SCK
+    0 7 spi-pin \ SPI0 TX
+    1 8 spi-pin \ SPI1 RX
+    1 9 spi-pin \ SPI1 CSn
+    1 10 spi-pin \ SPI1 SCK
+    1 11 spi-pin \ SPI1 TX
+    0 16 spi-pin \ SPI0 RX
+    0 17 spi-pin \ SPI0 CSn
+    0 master-spi
+    1 slave-spi
+    2 0 do
+\      i enable-spi-loopback
+      128 127 i spi-bit-rate!
+      false false i motorola-spi
+      16 i spi-data-size!
+      i enable-spi
+    loop
+    100 ms
+
+    0 [: 256 begin dup 1 >spi 1 spi> ." *" . 1+ again ;] 256 128 512 spawn run
+
+    0 [: 10 0 do i 0 >spi 0 spi> ." +" . loop ;]
+    256 128 512 spawn run
   ;
   
 end-module

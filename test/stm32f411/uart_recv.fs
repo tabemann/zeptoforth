@@ -28,12 +28,12 @@ continue-module forth
   : init-test ( -- )
     1 6 xb uart-pin
     1 7 xb uart-pin
-    0 [: begin 1 key-uart h.2 space again ;] 256 128 512 spawn run
+    0 [: begin 1 uart> h.2 space again ;] 256 128 512 spawn run
   ;
 
   \ Type a string on the UART
   : type-test ( c-addr u -- )
-    begin ?dup while swap dup c@ 1 emit-uart 1+ swap 1- repeat drop
+    begin ?dup while swap dup c@ 1 >uart 1+ swap 1- repeat drop
   ;
   
 end-module

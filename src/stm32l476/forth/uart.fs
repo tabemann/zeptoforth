@@ -544,7 +544,7 @@ begin-module uart
   end-module
 
   \ Emit a byte to a USART
-  : emit-uart ( c usart -- )
+  : >uart ( c usart -- )
     dup validate-uart
     dup 2 = if
       drop do-emit
@@ -556,7 +556,7 @@ begin-module uart
   ; 
 
   \ Read a byte from a USART
-  : key-uart ( usart -- c )
+  : uart> ( usart -- c )
     dup validate-uart
     dup 2 = if
       drop do-key
@@ -568,7 +568,7 @@ begin-module uart
   ;
 
   \ Get whether a USART is ready to emit a byte
-  : emit-uart? ( usart -- flag )
+  : >uart? ( usart -- flag )
     dup validate-uart
     dup 2 = if
       drop do-emit?
@@ -578,7 +578,7 @@ begin-module uart
   ;
 
   \ Get whether a byte is ready to be read from a USART
-  : key-uart? ( usart -- flag )
+  : uart>? ( usart -- flag )
     dup validate-uart
     dup 2 = if
       drop do-key?

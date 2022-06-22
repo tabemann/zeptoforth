@@ -26,13 +26,13 @@ continue-module forth
   \ Echo characters received by USART6 (GPIO pins PB6, PB7) at a given baud
   : init-test-1 ( baud -- )
     1 6 xb uart-pin 1 7 xb uart-pin 1 uart-baud!
-    begin 1 key-uart? if 1 key-uart dup emit 1 emit-uart then key? until
+    begin 1 uart>? if 1 uart> dup emit 1 >uart then key? until
   ;
 
   \ Echo characters received by UART7 (GPIO pins PA0, PA1) at a given baud
   : init-test-4 ( baud -- )
     4 0 xa uart-pin 4 1 xa uart-pin 4 uart-baud!
-    begin 4 key-uart? if 4 key-uart dup emit 4 emit-uart then key? until
+    begin 4 uart>? if 4 uart> dup emit 4 >uart then key? until
   ;
 
 end-module

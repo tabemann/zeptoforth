@@ -23,6 +23,7 @@
 begin-module spi
 
   interrupt import
+  multicore import
   pin import
   
   \ Invalid SPI periperal exception
@@ -189,28 +190,24 @@ begin-module spi
 
     \ Write a halfword to the rx buffer
     : spi-write-rx ( h spi -- )
-      [:
-	dup spi-rx-full? not if
-	  tuck dup spi-rx-write-index c@ swap spi-rx-buffer + h!
-	  dup spi-rx-write-index c@ 2 + spi-rx-buffer-size mod
-	  swap spi-rx-write-index c!
-	else
-	  2drop
-	then
-      ;] critical
+      dup spi-rx-full? not if
+	tuck dup spi-rx-write-index c@ swap spi-rx-buffer + h!
+	dup spi-rx-write-index c@ 2 + spi-rx-buffer-size mod
+	swap spi-rx-write-index c!
+      else
+	2drop
+      then
     ;
 
     \ Read a halfword from the rx buffer
     : spi-read-rx ( spi -- h )
-      [:
-	dup spi-rx-empty? not if
-	  dup spi-rx-read-index c@ over spi-rx-buffer + h@
-	  over spi-rx-read-index c@ 2 + spi-rx-buffer-size mod
-	  rot spi-rx-read-index c!
-	else
-	  drop 0
-	then
-      ;] critical
+      dup spi-rx-empty? not if
+	dup spi-rx-read-index c@ over spi-rx-buffer + h@
+	over spi-rx-read-index c@ 2 + spi-rx-buffer-size mod
+	rot spi-rx-read-index c!
+      else
+	drop 0
+      then
     ;
 
     \ Get whether the tx buffer is full
@@ -226,57 +223,55 @@ begin-module spi
 
     \ Write a halfword to the tx buffer
     : spi-write-tx ( h spi -- )
-      [:
-	dup spi-tx-full? not if
-	  tuck dup spi-tx-write-index c@ swap spi-tx-buffer + h!
-	  dup spi-tx-write-index c@ 2 + spi-tx-buffer-size mod
-	  swap spi-tx-write-index c!
-	else
-	  2drop
-	then
-      ;] critical
+      dup spi-tx-full? not if
+	tuck dup spi-tx-write-index c@ swap spi-tx-buffer + h!
+	dup spi-tx-write-index c@ 2 + spi-tx-buffer-size mod
+	swap spi-tx-write-index c!
+      else
+	2drop
+      then
     ;
 
     \ Read a halfword from the tx buffer
     : spi-read-tx ( spi -- h )
-      [:
-	dup spi-tx-empty? not if
-	  dup spi-tx-read-index c@ over spi-tx-buffer + h@
-	  over spi-tx-read-index c@ 2 + spi-tx-buffer-size mod
-	  rot spi-tx-read-index c!
-	else
-	  drop 0
-	then
-      ;] critical
+      dup spi-tx-empty? not if
+	dup spi-tx-read-index c@ over spi-tx-buffer + h@
+	over spi-tx-read-index c@ 2 + spi-tx-buffer-size mod
+	rot spi-tx-read-index c!
+      else
+	drop 0
+      then
     ;
 
     \ Handle an SPI interrupt
     : handle-spi ( spi -- )
-      begin
-	dup spi-tx-empty? not if
-	  dup SPI_SSPSR_TNF@ if
-	    dup spi-read-tx over SPI_SSPDR h! false
+      [:
+	begin
+	  dup spi-tx-empty? not if
+	    dup SPI_SSPSR_TNF@ if
+	      dup spi-read-tx over SPI_SSPDR h! false
+	    else
+	      true
+	    then
 	  else
 	    true
 	  then
-	else
-	  true
-	then
-      until
-      false
-      begin
-	dup spi-rx-full? not if
-	  dup SPI_SSPSR_RNE@ if
-	    dup SPI_SSPDR h@ over spi-write-rx drop true false
+	until
+	false
+	begin
+	  over spi-rx-full? not if
+	    over SPI_SSPSR_RNE@ if
+	      over SPI_SSPDR h@ 2 pick spi-write-rx drop true false
+	    else
+	      true
+	    then
 	  else
 	    true
 	  then
-	else
-	  true
-	then
-      until
-      true over SPI_SSPICR_RTIC!
-      true over SPI_SSPICR_RORIC!
+	until
+	true 2 pick SPI_SSPICR_RTIC!
+	true 2 pick SPI_SSPICR_RORIC!
+      ;] serial-spinlock critical-with-spinlock
       if dup spi-rx-handler @ ?execute then
       dup spi-tx-empty? not swap SPI_SSPIMSC_TXIM!
     ;
@@ -373,46 +368,62 @@ begin-module spi
   ;
 
   \ Write a halfword to SPI
-  : spi! ( h spi -- )
+  : >spi ( h spi -- )
     dup validate-spi
-    dup spi-tx-empty? if
-      dup SPI_SSPSR_RFF@ if
+    [:
+      dup spi-tx-empty? if
+	dup SPI_SSPSR_RFF@ if
+	  dup spi-tx-full? not if
+	    tuck spi-write-tx
+	    true swap SPI_SSPIMSC_TXIM!
+	  then
+	else
+	  SPI_SSPDR h!
+	then
+      else
 	dup spi-tx-full? not if
 	  tuck spi-write-tx
 	  true swap SPI_SSPIMSC_TXIM!
 	then
-      else
-	SPI_SSPDR h!
       then
-    else
-      dup spi-tx-full? not if
-	tuck spi-write-tx
-	true swap SPI_SSPIMSC_TXIM!
-      then
-    then      
+    ;] serial-spinlock critical-with-spinlock
   ;
 
   \ Read a halfword from SPI
-  : spi@ ( spi -- h )
+  : spi> ( spi -- h )
     dup validate-spi
-    disable-int
-    begin dup spi-rx-empty? while
-      dup SPI_SSPSR_RNE@ if
-	SPI_SSPDR h@ enable-int exit
-      else
-	disable-int pause enable-int
-      then
-    repeat
-    enable-int
-    spi-read-rx
+    begin
+      [:
+	disable-int
+	dup spi-rx-empty? if
+	  dup SPI_SSPSR_RNE@ if
+	    SPI_SSPDR h@ enable-int false true
+	  else
+	    enable-int false
+	  then
+	else
+	  enable-int true true
+	then
+      ;] serial-spinlock critical-with-spinlock
+      dup not if pause then
+    until
+    if spi-read-rx then
   ;
 
   \ Get whether an SPI peripheral can have data written
-  : spi-tx? ( spi -- tx? ) dup validate-spi spi-tx-full? not ;
+  : >spi? ( spi -- tx? ) dup validate-spi spi-tx-full? not ;
 
   \ Get whether there is data to receive in the SPI FIFO's
-  : spi-rx? ( spi -- rx? )
+  : spi>? ( spi -- rx? )
     dup validate-spi dup spi-rx-empty? not swap SPI_SSPSR_RNE@ or
+  ;
+
+  \ Drain SPI
+  : drain-spi ( spi -- )
+    dup validate-spi
+    begin dup spi>? while dup spi> drop repeat
+    begin dup SPI_SSPSR_BSY@ while repeat
+    begin dup spi>? while dup spi> drop repeat drop
   ;
   
 end-module> import

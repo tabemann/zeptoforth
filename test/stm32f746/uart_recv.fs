@@ -27,23 +27,23 @@ continue-module forth
   \ Test receiving data from USART6 (GPIO pins PC6, PC7)
   : init-test-6 ( -- )
     6 6 xc uart-pin 6 7 xc uart-pin
-    0 [: begin 6 key-uart h.2 space again ;] 256 128 512 spawn run
+    0 [: begin 6 uart> h.2 space again ;] 256 128 512 spawn run
   ;
 
   \ Test receiving data from UART7 (GPIO pins PF7, PF6)
   : init-test-7 ( -- )
     7 7 xf uart-pin 7 6 xf uart-pin
-    0 [: begin 7 key-uart h.2 space again ;] 256 128 512 spawn run
+    0 [: begin 7 uart> h.2 space again ;] 256 128 512 spawn run
   ;
 
   \ Type a string on USART6
   : type-test-6 ( c-addr u -- )
-    begin ?dup while swap dup c@ 6 emit-uart 1+ swap 1- repeat drop
+    begin ?dup while swap dup c@ 6 >uart 1+ swap 1- repeat drop
   ;
 
   \ Type a string on UART7
   : type-test-7 ( c-addr u -- )
-    begin ?dup while swap dup c@ 7 emit-uart 1+ swap 1- repeat drop
+    begin ?dup while swap dup c@ 7 >uart 1+ swap 1- repeat drop
   ;
 
 end-module
