@@ -42,8 +42,10 @@ continue-module forth
     0 master-spi
     1 slave-spi
     2 0 do
-\      i enable-spi-loopback
-      128 127 i spi-bit-rate!
+      \      i enable-spi-loopback
+      1000000 i spi-baud!
+\      i ti-ss-spi
+\      i natl-microwire-spi
       false false i motorola-spi
       16 i spi-data-size!
       i enable-spi

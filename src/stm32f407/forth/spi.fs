@@ -44,10 +44,13 @@ begin-module spi
     128 constant spi-tx-buffer-size
 
     \ SPI peripheral count
-    2 constant spi-count
+    3 constant spi-count
     
     \ Validate an SPI peripheral
-    : validate-spi ( spi -- ) spi-count u< averts x-invalid-spi ;
+    : validate-spi ( spi -- )
+      dup 1 u>= averts x-invalid-spi
+      spi-count 1+ u< averts x-invalid-spi
+    ;
 
     begin-structure spi-size
 
@@ -76,80 +79,119 @@ begin-module spi
 
     spi-size spi-count * buffer: spi-buffers
 
-    \ SPI base address
-    : SPI_Base ( spi -- addr ) $4000 * $4003C000 + ;
+    \ RCC base address
+    $40023800 constant RCC_Base
+
+    \ RCC registers
+    RCC_Base $40 + constant RCC_APB1ENR ( RCC_APB1ENR )
+    RCC_Base $44 + constant RCC_APB2ENR ( RCC_APB2ENR )
+    RCC_Base $60 + constant RCC_APB1LPENR ( RCC_APB1LPENR )
+    RCC_Base $64 + constant RCC_APB2LPENR ( RCC_APB2LPENR )
+
+    \ RCC fields
+    : RCC_APB1ENR_SPI2EN 14 bit RCC_APB1ENR bis! ;
+    : RCC_APB1ENR_SPI2EN_Clear 14 bit RCC_APB1ENR bic! ;
+    : RCC_APB1ENR_SPI3EN 15 bit RCC_APB1ENR bis! ;
+    : RCC_APB1ENR_SPI3EN_Clear 15 bit RCC_APB1ENR bic! ;
+    : RCC_APB2ENR_SPI1EN 12 bit RCC_APB2ENR bis! ;
+    : RCC_APB2ENR_SPI1EN_Clear 12 RCC_APB2ENR bic! ;
+    : RCC_APB1LPENR_SPI2LPEN 14 bit RCC_APB1LPENR bis! ;
+    : RCC_APB1LPENR_SPI2LPEN_Clear 14 bit RCC_APB1LPENR bic! ;
+    : RCC_APB1LPENR_SPI3LPEN 15 bit RCC_APB1LPENR bis! ;
+    : RCC_APB1LPENR_SPI3LPEN_Clear 15 bit RCC_APB1LPENR bic! ;
+    : RCC_APB2LPENR_SPI1LPEN 12 bit RCC_APB2LPENR bis! ;
+    : RCC_APB2LPENR_SPI1LPEN_Clear 12 RCC_APB2LPENR bic! ;
+
+    \ SPI base register table
+    create SPI_Base_table
+    $40013000 ,
+    $40003800 ,
+    $40003C00 ,
+    
+    \ SPI base
+    : SPI_Base ( spi -- addr ) 1- cells SPI_Base_table + @ ;
 
     \ SPI registers
-    : SPI_SSPCR0 ( spi -- addr ) SPI_Base $000 + ;
-    : SPI_SSPCR1 ( spi -- addr ) SPI_Base $004 + ;
-    : SPI_SSPDR ( spi -- addr ) SPI_Base $008 + ;
-    : SPI_SSPSR ( spi -- addr ) SPI_Base $00C + ;
-    : SPI_SSPCPSR ( spi -- addr ) SPI_Base $010 + ;
-    : SPI_SSPIMSC ( spi -- addr ) SPI_Base $014 + ;
-    : SPI_SSPRIS ( spi -- addr ) SPI_Base $018 + ;
-    : SPI_SSPMIS ( spi -- addr ) SPI_Base $01C + ;
-    : SPI_SSPICR ( spi -- addr ) SPI_Base $020 + ;
-    : SPI_SSPDMACR ( spi -- addr ) SPI_Base $024 + ;
+    : SPI_CR1 ( spi -- addr ) SPI_Base $000 + ;
+    : SPI_CR2 ( spi -- addr ) SPI_Base $004 + ;
+    : SPI_SR ( spi -- addr ) SPI_Base $008 + ;
+    : SPI_DR ( spi -- addr ) SPI_Base $00C + ;
+    : SPI_CRCPR ( spi -- addr ) SPI_Base $010 + ;
+    : SPI_RXCRCR ( spi -- addr ) SPI_Base $014 + ;
+    : SPI_TXCRCR ( spi -- addr ) SPI_Base $018 + ;
 
     \ SPI fields
-    : SPI_SSPCR0_SCR! ( scr spi -- )
-      SPI_SSPCR0 dup >r @ $FF00 bic swap $FF and 8 lshift or r> !
+    : SPI_CR1_BIDIMODE! ( bidimode spi -- )
+      15 bit swap SPI_CR1 rot if bis! else bic! then
     ;
-    : SPI_SSPCR0_SPH! ( sph spi -- )
-      7 bit swap SPI_SSPCR0 rot if bis! else bic! then
+    : SPI_CR1_BIDIOE! ( bidioe spi -- )
+      14 bit swap SPI_CR1 rot if bis! else bic! then
     ;
-    : SPI_SSPCR0_SPO! ( spo spi -- )
-      6 bit swap SPI_SSPCR0 rot if bis! else bic! then
+    : SPI_CR1_CRCEN! ( crcen spi -- )
+      13 bit swap SPI_CR1 rot if bis! else bic! then
     ;
-    : SPI_SSPCR0_FRF! ( frf spi -- )
-      SPI_SSPCR0 dup >r @ $30 bic swap $3 and 4 lshift or r> !
+    : SPI_CR1_CRCNEXT! ( crcnext spi -- )
+      12 bit swap SPI_CR1 rot if bis! else bic! then
     ;
-    : SPI_SSPCR0_DSS! ( dss spi -- )
-      SPI_SSPCR0 dup >r @ $F bic swap $F and or r> !
+    : SPI_CR1_DFF! ( dff spi -- )
+      11 bit swap SPI_CR1 rot if bis! else bic! then
     ;
-    : SPI_SSPCR1_SOD! ( sod spi -- )
-      3 bit swap SPI_SSPCR1 rot if bis! else bic! then
+    : SPI_CR1_RXONLY! ( rxonly spi -- )
+      10 bit swap SPI_CR1 rot if bis! else bic! then
     ;
-    : SPI_SSPCR1_MS! ( ms spi -- )
-      2 bit swap SPI_SSPCR1 rot if bis! else bic! then
+    : SPI_CR1_SSM! ( ssm spi -- )
+      9 bit swap SPI_CR1 rot if bis! else bic! then
     ;
-    : SPI_SSPCR1_SSE! ( sse spi -- )
-      1 bit swap SPI_SSPCR1 rot if bis! else bic! then
+    : SPI_CR1_SSI! ( ssi spi -- )
+      8 bit swap SPI_CR1 rot if bis! else bic! then
     ;
-    : SPI_SSPCR1_LBM! ( lbm spi -- )
-      0 bit swap SPI_SSPCR1 rot if bis! else bic! then
+    : SPI_CR1_LSBFIRST! ( lsbfirst spi -- )
+      7 bit swap SPI_CR1 rot if bis! else bic! then
     ;
-    : SPI_SSPSR_BSY@ ( spi -- bsy ) 4 bit swap SPI_SSPSR bit@ ;
-    : SPI_SSPSR_RFF@ ( spi -- rff ) 3 bit swap SPI_SSPSR bit@ ;
-    : SPI_SSPSR_RNE@ ( spi -- rne ) 2 bit swap SPI_SSPSR bit@ ;
-    : SPI_SSPSR_TNF@ ( spi -- tnf ) 1 bit swap SPI_SSPSR bit@ ;
-    : SPI_SSPSR_TFE@ ( spi -- tfe ) 0 bit swap SPI_SSPSR bit@ ;
-    : SPI_SSPIMSC_TXIM! ( txim spi -- )
-      3 bit swap SPI_SSPIMSC rot if bis! else bic! then
+    : SPI_CR1_SPE! ( spe spi -- )
+      6 bit swap SPI_CR1 rot if bis! else bic! then
     ;
-    : SPI_SSPIMSC_RXIM! ( rxim spi -- )
-      2 bit swap SPI_SSPIMSC rot if bis! else bic! then
+    : SPI_CR1_BR! ( br spi -- )
+      SPI_CR1 dup >r @ $38 bic swap $7 and 3 lshift or r> !
     ;
-    : SPI_SSPIMSC_RTIM! ( rtim spi -- )
-      1 bit swap SPI_SSPIMSC rot if bis! else bic! then
+    : SPI_CR1_MSTR! ( mstr spi -- )
+      2 bit swap SPI_CR1 rot if bis! else bic! then
     ;
-    : SPI_SSPIMSC_RORIM! ( rorim spi -- )
-      0 bit swap SPI_SSPIMSC rot if bis! else bic! then
+    : SPI_CR1_CPOL! ( cpol spi -- )
+      1 bit swap SPI_CR1 rot if bis! else bic! then
     ;
-    : SPI_SSPMIS_TXMIS@ ( spi -- txmis ) 3 bit swap SPI_SSPMIS bit@ ;
-    : SPI_SSPMIS_RXMIS@ ( spi -- rxmis ) 2 bit swap SPI_SSPMIS bit@ ;
-    : SPI_SSPMIS_RTMIS@ ( spi -- rtmis ) 1 bit swap SPI_SSPMIS bit@ ;
-    : SPI_SSPMIS_RORMIS@ ( spi -- rormis ) 0 bit swap SPI_SSPMIS bit@ ;
-    : SPI_SSPICR_RTIC! ( rtic spi -- )
-      1 bit swap SPI_SSPICR rot if bis! else bic! then
+    : SPI_CR1_CPHA! ( cpha spi -- )
+      0 bit swap SPI_CR1 rot if bis! else bic! then
     ;
-    : SPI_SSPICR_RORIC! ( roric spi -- )
-      0 bit swap SPI_SSPICR rot if bis! else bic! then
+    : SPI_CR2_TXEIE! ( txeie spi -- )
+      7 bit swap SPI_CR2 rot if bis! else bic! then
     ;
+    : SPI_CR2_RXNEIE! ( rxneie spi -- )
+      6 bit swap SPI_CR2 rot if bis! else bic! then
+    ;
+    : SPI_CR2_ERRIE! ( errie spi -- )
+      5 bit swap SPI_CR2 rot if bis! else bic! then
+    ;
+    : SPI_CR2_FRF! ( frf spi -- )
+      4 bit swap SPI_CR2 rot if bis! else bic! then
+    ;
+    : SPI_CR2_SSOE! ( ssoe spi -- )
+      2 bit swap SPI_CR2 rot if bis! else bic! then
+    ;
+    : SPI_SR_FRE@ ( spi -- fre ) 8 bit swap SPI_SR bit@ ;
+    : SPI_SR_BSY@ ( spi -- bsy ) 7 bit swap SPI_SR bit@ ;
+    : SPI_SR_OVR@ ( spi -- ovr ) 6 bit swap SPI_SR bit@ ;
+    : SPI_SR_MODF@ ( spi -- modf ) 5 bit swap SPI_SR bit@ ;
+    : SPI_SR_CRCERR@ ( spi -- crcerr ) 4 bit swap SPI_SR bit@ ;
+    : SPI_SR_TXE@ ( spi -- txe ) 1 bit swap SPI_SR bit@ ;
+    : SPI_SR_RXNE@ ( spi -- rxne ) 0 bit swap SPI_SR bit@ ;
 
+    \ SPI IRQ table
+    create spi-irq-table 35 h, 36 h, 51 h, 
+    
     \ SPI IRQ
-    : spi-irq ( spi -- irq ) 18 + ;
-
+    : spi-irq ( spi -- addr ) 1- 2* spi-irq-table + h@ ;
+    
     \ SPI vector
     : spi-vector ( spi -- vector ) spi-irq 16 + ;
     
@@ -248,8 +290,8 @@ begin-module spi
       [:
 	begin
 	  dup spi-tx-empty? not if
-	    dup SPI_SSPSR_TNF@ if
-	      dup spi-read-tx over SPI_SSPDR h! false
+	    dup SPI_SR_TXE@ if
+	      dup spi-read-tx over SPI_DR h! false
 	    else
 	      true
 	    then
@@ -260,8 +302,8 @@ begin-module spi
 	false
 	begin
 	  over spi-rx-full? not if
-	    over SPI_SSPSR_RNE@ if
-	      over SPI_SSPDR h@ 2 pick spi-write-rx drop true false
+	    over SPI_SR_RXNE@ if
+	      over SPI_DR h@ 2 pick spi-write-rx drop true false
 	    else
 	      true
 	    then
@@ -269,18 +311,19 @@ begin-module spi
 	    true
 	  then
 	until
-	true 2 pick SPI_SSPICR_RTIC!
-	true 2 pick SPI_SSPICR_RORIC!
       ;] serial-spinlock critical-with-spinlock
       if dup spi-rx-handler @ ?execute then
-      dup spi-tx-empty? not swap SPI_SSPIMSC_TXIM!
+      dup spi-tx-empty? not swap SPI_CR2_TXEIE!
     ;
-
-    \ Handle an SPI interrupt for SPI0
-    : handle-spi0 0 handle-spi ;
 
     \ Handle an SPI interrupt for SPI1
     : handle-spi1 1 handle-spi ;
+
+    \ Handle an SPI interrupt for SPI2
+    : handle-spi2 2 handle-spi ;
+
+    \ Handle an SPI interrupt for SPI3
+    : handle-spi3 3 handle-spi ;
 
     \ Initialize an SPI entity
     : init-spi ( spi -- )
@@ -290,94 +333,109 @@ begin-module spi
       0 over spi-tx-write-index c!
       0 over spi-irq NVIC_IPR_IP!
       0 over spi-rx-handler !
-      dup if ['] handle-spi1 else ['] handle-spi0 then over spi-vector vector!
-      true swap SPI_SSPIMSC_RXIM!
+      dup case
+	1 of RCC_APB2ENR_SPI1EN RCC_APB2LPENR_SPI1LPEN endof
+	2 of RCC_APB1ENR_SPI2EN RCC_APB1LPENR_SPI2LPEN endof
+	3 of RCC_APB1ENR_SPI3EN RCC_APB1LPENR_SPI3LPEN endof
+      endcase
+      dup case
+	1 of ['] handle-spi1 endof
+	2 of ['] handle-spi2 endof
+	3 of ['] handle-spi3 endof
+      endcase
+      over spi-vector vector!
+      true swap SPI_CR2_RXNEIE!
     ;
 
-    \ Find a prescale for a baud rate
-    : find-spi-prescale ( baud -- prescale )
-      2 begin dup 254 <= while
-	dup 2 + 256 * 2 pick * 125000000 > if
-	  nip exit
-	else
-	  2 +
-	then
-      repeat
-      nip
-    ;
-
-    \ Find a postdiv for a baud rate and prescale
-    : find-spi-postdiv ( baud prescale -- postdiv )
-      256 begin dup 1 > while
-	2dup 1- * 125000000 swap / 3 pick > if
-	  nip nip exit
-	else
-	  1-
-	then
-      repeat
-      nip nip
-    ;
-    
   end-module> import
 
   \ Set the SPI baud
   : spi-baud! ( baud spi -- )
-    dup validate-spi swap
-    dup 125000000 u<= averts x-invalid-spi-clock
-    dup find-spi-prescale
-    dup 254 u<= averts x-invalid-spi-clock
-    tuck find-spi-postdiv
-    1- rot tuck SPI_SSPCR0_SCR!
-    SPI_SSPCPSR !
+    dup validate-spi dup -rot
+    case
+      1 of 84000000 endof
+      2 of 42000000 endof
+      3 of 42000000 endof
+    endcase
+    2 8 do
+      dup i rshift 2 pick >= if
+	2drop i 1- swap SPI_CR1_BR! unloop exit
+      then
+    -1 +loop
+    ['] x-invalid-spi-clock ?raise
   ;
 
   \ Set SPI to master
-  : master-spi ( spi -- ) dup validate-spi false swap SPI_SSPCR1_MS! ;
+  : master-spi ( spi -- ) dup validate-spi true swap SPI_CR1_MSTR! ;
 
   \ Set SPI to salve
-  : slave-spi ( spi -- ) dup validate-spi true swap SPI_SSPCR1_MS! ;
+  : slave-spi ( spi -- ) dup validate-spi true false SPI_CR1_MSTR! ;
 
   \ Set SPI to Motorola SPI frame format with SPH and SPO settings
   : motorola-spi ( sph spo spi -- )
     dup validate-spi
-    tuck SPI_SSPCR0_SPO!
-    tuck SPI_SSPCR0_SPH!
-    0 swap SPI_SSPCR0_FRF!
+    tuck SPI_CR1_CPOL!
+    tuck SPI_CR1_CPHA!
+    false swap SPI_CR2_FRF!
   ;
 
   \ Set SPI to TI synchronous serial frame format
-  : ti-ss-spi ( spi -- ) dup validate-spi 1 swap SPI_SSPCR0_FRF! ;
+  : ti-ss-spi ( spi -- ) dup validate-spi true swap SPI_CR2_FRF! ;
 
-  \ Set SPI to National Microwire frame format
-  : natl-microwire-spi ( spi -- ) dup validate-spi 2 swap SPI_SSPCR0_FRF! ;
+  \ Set SPI to MSB-first (not needed in TI mode)
+  : msb-first-spi ( spi -- )
+    dup validate-spi
+    false swap SPI_CR1_LSBFIRST!
+  ;
 
+  \ Set SPI to LSB-first (not needed in TI mode)
+  : lsb-first-spi ( spi -- )
+    dup validate-spi
+    true swap SPI_CR1_LSBFIRST!
+  ;
+  
   \ Set SPI data size
   : spi-data-size! ( data-size spi -- )
     dup validate-spi swap
-    dup 4 u>= averts x-invalid-spi-data-size
-    dup 16 u<= averts x-invalid-spi-data-size
-    1- swap SPI_SSPCR0_DSS!
+    swap case
+      8 of false swap SPI_CR1_DFF! endof
+      16 of true swap SPI_CR1_DFF! endof
+      ['] x-invalid-spi-data-size ?raise
+    endcase
   ;
+
+  \ Enable software slave management
+  : enable-spi-ssm ( spi -- ) dup validate-spi true swap SPI_CR1_SSM! ;
     
+  \ Disable software slave managemnt
+  : disable-spi-ssm ( spi -- ) dup validate-spi false swap SPI_CR1_SSM! ;
+
+  \ Set internal slave select
+  : spi-ssm! ( ssi spi -- ) dup validate-spi SPI_CR1_SSI! ;
+  
   \ Enable SPI
-  : enable-spi ( spi -- ) dup validate-spi true swap SPI_SSPCR1_SSE! ;
+  : enable-spi ( spi -- ) dup validate-spi true swap SPI_CR1_SPE! ;
 
   \ Disable SPI
-  : disable-spi ( spi -- ) dup validate-spi false swap SPI_SSPCR1_SSE! ;
+  : disable-spi ( spi -- ) dup validate-spi false swap SPI_CR1_SPE! ;
 
   \ Enable SPI TX
-  : enable-spi-tx ( spi -- ) dup validate-spi false swap SPI_SSPCR1_SOD! ;
+  : enable-spi-tx ( spi -- ) dup validate-spi false swap SPI_CR1_RXONLY! ;
 
   \ Disable SPI TX for slaves
-  : disable-spi-tx ( spi -- ) dup validate-spi true swap SPI_SSPCR1_SOD! ;
+  : disable-spi-tx ( spi -- ) dup validate-spi true swap SPI_CR1_RXONLY! ;
 
-  \ Enable loopback
-  : enable-spi-loopback ( spi -- ) dup validate-spi true swap SPI_SSPCR1_LBM! ;
+  \ Enable 1-line SPI
+  : 1-line-spi ( spi -- ) dup validate-spi true swap SPI_CR1_BIDIMODE! ;
 
-  \ Disable loopback
-  : disable-spi-loopback ( spi -- )
-    dup validate-spi false swap SPI_SSPCR1_LBM!
-  ;
+  \ Enable 2-line SPI
+  : 2-line-spi ( spi -- ) dup validate-spi false swap SPI_CR1_BIDIMODE! ;
+
+  \ 1-line SPI in mode
+  : 1-line-spi-in ( spi -- ) dup validate-spi false swap SPI_CR1_BIDIOE! ;
+  
+  \ 1-line SPI out mode
+  : 1-line-spi-out ( spi -- ) dup validate-spi true swap SPI_CR1_BIDIOE! ;
 
   \ Set the SPI RX handler; note that this handler executes in an interrupt
   \ handler
@@ -396,18 +454,18 @@ begin-module spi
     dup validate-spi
     [:
       dup spi-tx-empty? if
-	dup SPI_SSPSR_TNF@ not if
+	dup SPI_SR_TXE@ not if
 	  dup spi-tx-full? not if
 	    tuck spi-write-tx
-	    true swap SPI_SSPIMSC_TXIM!
+	    true swap SPI_CR2_TXEIE!
 	  then
 	else
-	  SPI_SSPDR h!
+	  SPI_DR h!
 	then
       else
 	dup spi-tx-full? not if
 	  tuck spi-write-tx
-	  true swap SPI_SSPIMSC_TXIM!
+	  true swap SPI_CR2_TXEIE!
 	then
       then
     ;] serial-spinlock critical-with-spinlock
@@ -420,8 +478,8 @@ begin-module spi
       [:
 	disable-int
 	dup spi-rx-empty? if
-	  dup SPI_SSPSR_RNE@ if
-	    SPI_SSPDR h@ enable-int false true
+	  dup SPI_SR_RXNE@ if
+	    SPI_DR h@ enable-int false true
 	  else
 	    enable-int false
 	  then
@@ -439,21 +497,21 @@ begin-module spi
 
   \ Get whether there is data to receive in the SPI FIFO's
   : spi>? ( spi -- rx? )
-    dup validate-spi dup spi-rx-empty? not swap SPI_SSPSR_RNE@ or
+    dup validate-spi dup spi-rx-empty? not swap SPI_SR_RXNE@ or
   ;
 
   \ Flush SPI
   : flush-spi ( spi -- )
     dup validate-spi
     begin dup spi-tx-empty? not while pause repeat
-    begin dup SPI_SSPSR_BSY@ while repeat drop
+    begin dup SPI_SR_BSY@ while repeat drop
   ;
-  
+
   \ Drain SPI
   : drain-spi ( spi -- )
     dup validate-spi
     begin dup spi>? while dup spi> drop repeat
-    begin dup SPI_SSPSR_BSY@ while repeat
+    begin dup SPI_SR_BSY@ while repeat
     begin dup spi>? while dup spi> drop repeat drop
   ;
   
@@ -462,8 +520,9 @@ end-module> import
 \ Initialize
 : init ( -- )
   init
-  0 ^ spi-internal :: init-spi
   1 ^ spi-internal :: init-spi
+  2 ^ spi-internal :: init-spi
+  3 ^ spi-internal :: init-spi
 ;
 
 \ reboot

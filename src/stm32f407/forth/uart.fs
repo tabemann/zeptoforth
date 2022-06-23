@@ -108,13 +108,16 @@ begin-module uart
     \ USART vector number
     : uart-vector ( usart -- vector ) uart-irq 16 + ;
 
-    \ USART alternate function
-    
+    \ RCC base address
     $40023800 constant RCC_Base
+
+    \ RCC registers
     RCC_Base $40 + constant RCC_APB1ENR ( RCC_APB1ENR )
     RCC_Base $44 + constant RCC_APB2ENR ( RCC_APB2ENR )
     RCC_Base $60 + constant RCC_APB1LPENR ( RCC_APB1LPENR )
     RCC_Base $64 + constant RCC_APB2LPENR ( RCC_APB2LPENR )
+
+    \ RCC fields
     : RCC_APB1ENR_USART2EN 17 bit RCC_APB1ENR bis! ;
     : RCC_APB1ENR_USART2EN_Clear 17 bit RCC_APB1ENR bic! ;
     : RCC_APB1ENR_USART3EN 18 bit RCC_APB1ENR bis! ;
@@ -139,6 +142,8 @@ begin-module uart
     : RCC_APB2LPENR_USART1LPEN_Clear 4 RCC_APB2LPENR bic! ;
     : RCC_APB2LPENR_USART6LPEN 5 bit RCC_APB2LPENR bis! ;
     : RCC_APB2LPENR_USART6LPEN_Clear 5 RCC_APB2LPENR bic! ;
+
+    \ USART_CR1 fields
     : USART_CR1_TXEIE   %1 7 lshift swap USART_CR1 bis! ;  \ USART_CR1_TXEIE    interrupt enable
     : USART_CR1_RXNEIE   %1 5 lshift swap USART_CR1 bis! ;  \ USART_CR1_RXNEIE    RXNE interrupt enable
     : USART_CR1_TXEIE_Clear   %1 7 lshift swap USART_CR1 bic! ;  \ USART_CR1_TXEIE    interrupt disable
