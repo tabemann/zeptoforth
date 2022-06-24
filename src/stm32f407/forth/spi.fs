@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ compile-to-flash
+compile-to-flash
 
 begin-module spi
 
@@ -196,7 +196,7 @@ begin-module spi
     : spi-vector ( spi -- vector ) spi-irq 16 + ;
     
     \ Select SPI structure
-    : spi-select ( spi -- addr ) spi-size * spi-buffers + ;
+    : spi-select ( spi -- addr ) 1- spi-size * spi-buffers + ;
 
     \ RX buffer read-index
     : spi-rx-read-index ( spi -- addr ) spi-select spi-rx-read-index ;
@@ -369,7 +369,7 @@ begin-module spi
   : master-spi ( spi -- ) dup validate-spi true swap SPI_CR1_MSTR! ;
 
   \ Set SPI to salve
-  : slave-spi ( spi -- ) dup validate-spi true false SPI_CR1_MSTR! ;
+  : slave-spi ( spi -- ) dup validate-spi false swap SPI_CR1_MSTR! ;
 
   \ Set SPI to Motorola SPI frame format with SPH and SPO settings
   : motorola-spi ( sph spo spi -- )
@@ -397,7 +397,7 @@ begin-module spi
   \ Set SPI data size
   : spi-data-size! ( data-size spi -- )
     dup validate-spi swap
-    swap case
+    case
       8 of false swap SPI_CR1_DFF! endof
       16 of true swap SPI_CR1_DFF! endof
       ['] x-invalid-spi-data-size ?raise
@@ -412,6 +412,12 @@ begin-module spi
 
   \ Set internal slave select
   : spi-ssm! ( ssi spi -- ) dup validate-spi SPI_CR1_SSI! ;
+
+  \ Enable NSS output
+  : enable-spi-nss ( spi -- ) dup validate-spi true swap SPI_CR2_SSOE! ;
+
+  \ Disable NSS output
+  : disable-spi-nss ( spi -- ) dup validate-spi false swap SPI_CR2_SSOE! ;
   
   \ Enable SPI
   : enable-spi ( spi -- ) dup validate-spi true swap SPI_CR1_SPE! ;
@@ -442,11 +448,18 @@ begin-module spi
   : spi-rx-handler! ( xt spi -- ) dup validate-spi spi-rx-handler ! ;
 
   \ SPI alternate function
-  : spi-alternate ( spi -- alternate ) validate-spi 1 ;
+  : spi-alternate ( spi -- alternate )
+    dup validate-spi
+    case
+      1 of 5 endof
+      2 of 5 endof
+      3 of 6 endof
+    endcase
+  ;
 
   \ Set a pin to be an SPI pin
   : spi-pin ( spi pin -- )
-    swap spi-alternate swap alternate-pin
+    swap spi-alternate swap dup fast-pin alternate-pin
   ;
 
   \ Write a halfword to SPI
@@ -525,4 +538,4 @@ end-module> import
   3 ^ spi-internal :: init-spi
 ;
 
-\ reboot
+reboot

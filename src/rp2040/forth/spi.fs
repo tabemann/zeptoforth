@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ compile-to-flash
+compile-to-flash
 
 begin-module spi
 
@@ -466,4 +466,4 @@ end-module> import
   1 ^ spi-internal :: init-spi
 ;
 
-\ reboot
+reboot
