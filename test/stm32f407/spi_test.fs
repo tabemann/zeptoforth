@@ -24,13 +24,8 @@ continue-module forth
   pin import
   task import
 
-\  cell buffer: notify-buffer
-\  variable response-task
-
   \ Initialize the test
   : init-test ( -- )
-    1 ^ spi-internal :: init-spi
-    2 ^ spi-internal :: init-spi
     1 15 xa spi-pin \ SPI1_NSS
     1 3 xb spi-pin \ SPI1_SCK
     1 4 xb spi-pin \ SPI1_MISO

@@ -26,33 +26,23 @@ continue-module forth
 
   \ Initialize the test
   : init-test ( -- )
-    1 4 xa spi-pin \ SPI1_NSS
-    1 5 xa spi-pin \ SPI1_SCK
-    1 6 xa spi-pin \ SPI1_MISO
-    1 7 xa spi-pin \ SPI1_MOSI
-    3 15 xa spi-pin \ SPI3_NSS
-    3 3 xb spi-pin \ SPI3_SCK
-    3 4 xb spi-pin \ SPI3_MISO
-    3 5 xb spi-pin \ SPI3_MOSI
+    1 12 xe spi-pin \ SPI1_NSS
+    1 13 xe spi-pin \ SPI1_SCK
+    1 14 xe spi-pin \ SPI1_MISO
+    1 15 xe spi-pin \ SPI1_MOSI
     1 master-spi
-    3 slave-spi
-    1000000 1 spi-baud!
+    281250 1 spi-baud!
     1 enable-spi-nss
     16 1 spi-data-size!
-    true true 1 motorola-spi
+\    1 ti-ss-spi
+    true false 1 motorola-spi
     1 msb-first-spi
     1 disable-spi-ssm
-    16 3 spi-data-size!
-    true true 3 motorola-spi
-    3 msb-first-spi
-    3 enable-spi
     1 enable-spi
     
     100 ms
 
-    0 [: 256 begin dup 3 >spi 3 spi> ." *" . 1+ again ;] 256 128 512 spawn run
-
-    0 [: 10 0 do i 1 >spi 1 spi> ." +" . loop ;] 256 128 512 spawn run
+    0 [: 355 256 do i 1 >spi 1 spi> . 1 ms loop ;] 256 128 512 spawn run
   ;
   
 end-module

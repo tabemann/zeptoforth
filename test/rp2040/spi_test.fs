@@ -24,13 +24,8 @@ continue-module forth
   pin import
   task import
 
-\  cell buffer: notify-buffer
-\  variable response-task
-
   \ Initialize the test
   : init-test ( -- )
-    0 ^ spi-internal :: init-spi
-    1 ^ spi-internal :: init-spi
     0 6 spi-pin \ SPI0 SCK
     0 7 spi-pin \ SPI0 TX
     1 8 spi-pin \ SPI1 RX
@@ -42,7 +37,6 @@ continue-module forth
     0 master-spi
     1 slave-spi
     2 0 do
-      \      i enable-spi-loopback
       1000000 i spi-baud!
 \      i ti-ss-spi
 \      i natl-microwire-spi
