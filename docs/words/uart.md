@@ -1,6 +1,6 @@
 # UART Words
 
-There are a number of words for controlling UARTS available on each of the supportee microcontrollers on top of the general `emit`, key`, `emit?`, and `key?` words. These are as follows:
+There are a number of words for controlling UART's available on each of the supported microcontrollers on top of the console `emit`, `key`, `emit?`, and `key?` words. These are as follows:
 
 Note that *uart* values as mentioned below vary between the different supported platforms. The following applies:
 
@@ -77,4 +77,4 @@ Set the alternate function for *pin* to configure it for *uart*.
 ##### `x-invalid-uart`
 ( -- )
 
-Invalid UART exception, i.e. a UART other than 0 or 1.
+Invalid UART exception.

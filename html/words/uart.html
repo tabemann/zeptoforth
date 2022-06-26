@@ -35,7 +35,7 @@
             
   <section id="uart-words">
 <h1>UART Words<a class="headerlink" href="#uart-words" title="Permalink to this headline">¶</a></h1>
-<p>There are a number of words for controlling UARTS available on each of the supportee microcontrollers on top of the general <code class="docutils literal notranslate"><span class="pre">emit</span></code>, key<code class="docutils literal notranslate"><span class="pre">,</span> </code>emit?<code class="docutils literal notranslate"><span class="pre">,</span> <span class="pre">and</span> </code>key?` words. These are as follows:</p>
+<p>There are a number of words for controlling UART’s available on each of the supported microcontrollers on top of the console <code class="docutils literal notranslate"><span class="pre">emit</span></code>, <code class="docutils literal notranslate"><span class="pre">key</span></code>, <code class="docutils literal notranslate"><span class="pre">emit?</span></code>, and <code class="docutils literal notranslate"><span class="pre">key?</span></code> words. These are as follows:</p>
 <p>Note that <em>uart</em> values as mentioned below vary between the different supported platforms. The following applies:</p>
 <ul class="simple">
 <li><p>On the RP2040 the available <em>uart</em> values are 0 and 1, with 0 corresponding to the console.</p></li>
@@ -72,23 +72,23 @@
 <p>( baud uart – )</p>
 <p>Set the baud of a UART.</p>
 </section>
-<section id="emit-uart">
-<h3><code class="docutils literal notranslate"><span class="pre">emit-uart</span></code><a class="headerlink" href="#emit-uart" title="Permalink to this headline">¶</a></h3>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">&gt;uart</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
 <p>( c uart – )</p>
 <p>Emit a byte to a UART.</p>
 </section>
-<section id="key-uart">
-<h3><code class="docutils literal notranslate"><span class="pre">key-uart</span></code><a class="headerlink" href="#key-uart" title="Permalink to this headline">¶</a></h3>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">uart&gt;</span></code><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <p>( uart – c )</p>
 <p>Read a byte from a UART.</p>
 </section>
-<section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">emit-uart?</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<section id="id3">
+<h3><code class="docutils literal notranslate"><span class="pre">&gt;uart?</span></code><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
 <p>( uart – flag )</p>
 <p>Get whether a UART is ready to emit a byte.</p>
 </section>
-<section id="id2">
-<h3><code class="docutils literal notranslate"><span class="pre">key-uart?</span></code><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<section id="id4">
+<h3><code class="docutils literal notranslate"><span class="pre">uart&gt;?</span></code><a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
 <p>( uart – flag )</p>
 <p>Get whether a byte is ready to be read from a UART.</p>
 </section>
@@ -110,7 +110,7 @@
 <section id="x-invalid-uart">
 <h3><code class="docutils literal notranslate"><span class="pre">x-invalid-uart</span></code><a class="headerlink" href="#x-invalid-uart" title="Permalink to this headline">¶</a></h3>
 <p>( – )</p>
-<p>Invalid UART exception, i.e. a UART other than 0 or 1.</p>
+<p>Invalid UART exception.</p>
 </section>
 </section>
 </section>
@@ -147,6 +147,7 @@
 <li class="toctree-l1"><a class="reference internal" href="pio.html">Programmable Input/Output Words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">UART Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adc.html">Analog-Digital Converter Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spi.html">SPI Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
