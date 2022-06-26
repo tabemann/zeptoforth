@@ -37,6 +37,7 @@
 #include src/stm32l476/forth/rng.fs
 #include src/stm32l476/forth/uart.fs
 #include src/stm32l476/forth/adc.fs
+#include src/stm32l476/forth/spi.fs
 
 \ Set a cornerstone to enable deleting everything compiled after this code
 cornerstone restore-state
