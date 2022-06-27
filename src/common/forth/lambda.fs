@@ -78,8 +78,8 @@ compress-flash
   begin
     over 0>
   while
-    dup >r swap >r swap dup >r @ swap execute
-    r> 2+ r> 1- r>
+    dup >r swap >r swap dup >r c@ swap execute
+    r> 1+ r> 1- r>
   repeat
 ;
 
@@ -108,7 +108,7 @@ compress-flash
   begin
     over 0>
   while
-    dup >r swap >r swap dup >r 2@ swap execute
+    dup >r swap >r swap dup >r 2@ rot execute
     r> 2 cells + r> 1- r>
   repeat
 ;
