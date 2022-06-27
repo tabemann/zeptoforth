@@ -30,6 +30,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 * GPIO support (including EXTI support on STM32 microcontrollers)
 * General UART support (in addition to serial console support)
 * One-shot ADC support
+* SPI (both master and slave) support
 * Maps, including counted string and integer-keyed maps
 * Heap allocators
 * Memory pool allocators
