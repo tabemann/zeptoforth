@@ -32,7 +32,7 @@ compress-flash
 \ Execute one of two different xts based on whether a condition is true or false
 : qifelse ( f true-xt false-xt -- )
   ( true-xt: ??? -- ??? ) ( false-xt: ??? -- ??? )
-  rot if drop execute else nip execute then
+  2 pick if drop nip execute else nip nip execute then
 ;
 
 \ Execute an until loop with an xt
@@ -59,7 +59,7 @@ compress-flash
 
 \ Execute a counted loop with an xt
 : qcount ( ??? limit init xt -- ??? ) ( xt: ??? i -- ??? )
-  rot rot ?do
+  -rot ?do
     i swap dup >r execute r>
   loop
   drop
@@ -67,7 +67,7 @@ compress-flash
 
 \ Execute a counted loop with an arbitrary increment with an xt
 : qcount+ ( ??? limit init xt -- ??? ) ( xt: ??? i -- ???? increment )
-  rot rot ?do
+  -rot ?do
     i swap dup >r execute r> swap
   +loop
   drop
@@ -81,6 +81,7 @@ compress-flash
     dup >r swap >r swap dup >r c@ swap execute
     r> 1+ r> 1- r>
   repeat
+  drop 2drop
 ;
 
 \ Iterate executing an xt over a halfword array
@@ -91,6 +92,7 @@ compress-flash
     dup >r swap >r swap dup >r h@ swap execute
     r> 2+ r> 1- r>
   repeat
+  drop 2drop
 ;
 
 \ Iterate executing an xt over a cell array
@@ -101,6 +103,7 @@ compress-flash
     dup >r swap >r swap dup >r @ swap execute
     r> cell+ r> 1- r>
   repeat
+  drop 2drop
 ;
 
 \ Iterate executing an xt over a double-word array
@@ -111,6 +114,7 @@ compress-flash
     dup >r swap >r swap dup >r 2@ rot execute
     r> 2 cells + r> 1- r>
   repeat
+  drop 2drop
 ;
 
 \ Iterate executing at xt over values from a getter
@@ -247,7 +251,6 @@ compress-flash
   drop drop drop 0 false
 ;
 
-
 \ Find a value in a double-word array with a predicate
 : 2find-value ( ??? a-addr count xt -- ??? d|0 f ) ( xt: ??? d -- ??? f )
   begin
@@ -259,7 +262,7 @@ compress-flash
       r> [ 2 cells ] literal + r> 1- r>
     then
   repeat
-  drop drop drop - 0 false
+  drop drop drop 0 0 false
 ;
 
 \ Find a value from a getter with a predicate

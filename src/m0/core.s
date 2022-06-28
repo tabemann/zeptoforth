@@ -1505,6 +1505,7 @@ _comma_8:
 	str tos, [r1]
 	adds r1, #4
 	str r1, [r0]
+	pull_tos
 	pop {pc}
 	end_inlined
 
