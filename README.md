@@ -157,3 +157,17 @@ This will simply upload the given file to the board as-is without any support fo
 
 Note that screen and e4thcom are not suitable for using the block editor on the STM32F746 DISCOVERY board or the Raspberry Pi Pico—attempting to use the block editor on them will lock up zeptoforth because it will wait forever for a response when querying the terminal for a cursor position—whereas picocom and swdcom enable it to be used. Also, to use the block editor one must have the backspace key set to $7F (DEL), as it is by default; remapping backspace to backspace will break deleting characters in the block editor
 
+To build a complete image for zeptoforth, one uses `utils/make_image.sh` or, for the Raspberry Pi Pico, `utils/make_uf2_image.sh` after using `make clean`, `make VERSION=<version>`, and `make install VERSION=<version>` to install binaries for all platforms in the `bin/<version>/<platform>` directories (which it creates if they do not exist).
+
+In the case of the Raspberry Pi Pico one must then flash one's Raspberry Pi Pico with `bin/<version>/<platform>/rp2040/zeptoforth_kernel-<version>.uf2` using the USB Mass Storage device, for which one either presses the BOOTSEL button while power cycling the Raspberry Pi Pico, or, if one already had zeptoforth installed, one enters `bootsel` at the console, after which one mounts the USB Mass Storage device.
+
+Afterwards, one executes:
+
+    utils/make_image.sh <version> <platform> <TTY device> <build>
+
+which will build `bin/<version>/<platform>/zeptoforth_<build>-<version>.bin` and the associated `.ihex` file, or for the Raspberry Pi Pico, one executes:
+
+    utils/make_uf2_image.sh <version> <platform> <TTY device> <build>
+
+which will build `bin/<version>/<platform>/zeptoforth_<build>-<version>.uf2` and the associated `.ihex` and `.bin` files. Note that `utils/make_uf2_image.sh` erases the contents of flash after it executes except for the zeptoforth kernel, as it is meant to be used with multiple different builds in a row; if one wants a particular build to be installed, execute `bootsel` at the console, mount the USB Mass Storage device, and the copies the desired build to the USB Mass Storage device.
+
