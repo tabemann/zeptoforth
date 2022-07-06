@@ -52,13 +52,19 @@
 <p>( ??? f true-xt false-xt – ??? )</p>
 <p>which takes <em>f</em>, <em>true-xt</em>, and <em>false-xt</em>; <em>true-xt</em> is executed when <em>f</em> is non-zero and <em>false-xt</em> is executed when <em>f</em> is zero. These have the following signature:</p>
 <p>( ??? – ??? )</p>
-<p>There are two simple looping combinators:</p>
+<p>There are three simple looping combinators:</p>
 </section>
 <section id="quntil">
 <h3><code class="docutils literal notranslate"><span class="pre">quntil</span></code><a class="headerlink" href="#quntil" title="Permalink to this headline">¶</a></h3>
 <p>( ??? xt – ??? )</p>
 <p>which takes <em>xt</em> and executes it repeatedly until it returns a non-zero value; <em>xt</em> has the following signature:</p>
 <p>( ??? – ??? f )</p>
+</section>
+<section id="qagain">
+<h3><code class="docutils literal notranslate"><span class="pre">qagain</span></code><a class="headerlink" href="#qagain" title="Permalink to this headline">¶</a></h3>
+<p>( ??? xt – ??? )</p>
+<p>which takes <em>xt</em> and executes it repeatedly forever until an exception is raised; <em>xt</em> has the following signature:</p>
+<p>( ??? – ??? )</p>
 </section>
 <section id="qwhile">
 <h3><code class="docutils literal notranslate"><span class="pre">qwhile</span></code><a class="headerlink" href="#qwhile" title="Permalink to this headline">¶</a></h3>

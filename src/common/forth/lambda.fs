@@ -44,6 +44,15 @@ compress-flash
   rdrop
 ;
 
+\ Execute an again loop with an xt
+: qagain ( ??? xt -- ??? ) ( xt: ??? -- ??? )
+  >r
+  begin
+    r@ execute
+  again
+\  rdrop -- will never be reached
+;
+
 \ Execute a while loop with a while-xt and a body-xt
 : qwhile ( ??? while-xt body-xt -- ??? )
   ( while-xt: ??? -- ??? f ) ( body-xt: ??? -- ??? )

@@ -24,7 +24,7 @@ which takes *f*, *true-xt*, and *false-xt*; *true-xt* is executed when *f* is no
 
 ( ??? -- ??? )
 
-There are two simple looping combinators:
+There are three simple looping combinators:
 
 ##### `quntil`
 ( ??? xt -- ??? )
@@ -32,6 +32,13 @@ There are two simple looping combinators:
 which takes *xt* and executes it repeatedly until it returns a non-zero value; *xt* has the following signature:
 
 ( ??? -- ??? f )
+
+##### `qagain`
+( ??? xt -- ??? )
+
+which takes *xt* and executes it repeatedly forever until an exception is raised; *xt* has the following signature:
+
+( ??? -- ??? )
 
 ##### `qwhile`
 ( ??? while-xt body-xt -- ??? )
