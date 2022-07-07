@@ -52,6 +52,12 @@ continue-module forth
     0 10 [: swap 1- swap 1- dup 0= ;] quntil drop
     -10 = s" quntil" verify
   ;
+  
+  \ qagain test
+  : test-qagain ( -- )
+    [: 0 [: 1+ dup 10 = [: [: ;] ?raise ;] qif ;] qagain ;] try
+    drop true s" qagain" verify
+  ;
 
   \ qwhile test
   : test-qwhile ( -- )
@@ -282,6 +288,7 @@ continue-module forth
     test-qifelse-true
     test-qifelse-false
     test-quntil
+    test-qagain
     test-qwhile
     test-qcount
     test-qcount+
