@@ -67,12 +67,20 @@ begin-module oo-test
   end-implement
   
   my-class class-size buffer: my-object-0
-  my-class my-object-0 init-object
-
   my-subclass-0 class-size buffer: my-object-1
-  my-subclass-0 my-object-1 init-object
-
   my-subclass-1 class-size buffer: my-object-2
-  my-subclass-1 my-object-2 init-object
+  
+  compiling-to-flash? [if]
+    : init ( -- )
+      init
+      my-class my-object-0 init-object
+      my-subclass-0 my-object-1 init-object
+      my-subclass-1 my-object-2 init-object
+    ;
+  [else]
+    my-class my-object-0 init-object
+    my-subclass-0 my-object-1 init-object
+    my-subclass-1 my-object-2 init-object    
+  [then]
 
 end-module
