@@ -30,6 +30,7 @@
 #include src/common/forth/map.fs
 #include src/common/forth/cstr_map.fs
 #include src/common/forth/int_map.fs
+#include src/common/forth/oo.fs
 #include src/common/forth/slock.fs
 #include src/common/forth/action.fs
 #include src/common/forth/tqueue.fs
