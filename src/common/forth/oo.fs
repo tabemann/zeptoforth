@@ -82,22 +82,32 @@ begin-module oo
       0 swap begin ?dup while swap 1+ swap prev-method @ repeat
     ;
     
+    \ Base new method
+    : new ( object -- ) drop ;
+
+    \ Base destroy method
+    : destroy ( object -- ) drop ;
+
   end-module> import
 
   \ Method not found in class exception
   : x-method-not-in-class ( -- ) ." method not in class" cr ;
   
-  \ Base new method
-  : new ( object -- ) drop ;
-
   \ The object class's method list
   create new-method 0 , 0 , s" new" find ,
+  create destroy-method new-method , 1 , s" destroy" find ,
 
   \ The object class's method table
-  create object-method-table ' new ,
+  create object-method-table ' new , ' destroy ,
     
   \ Define the object class
-  create object object-method-table , object , new-method , 0 , 1 ,
+  create object object-method-table , object , destroy-method , 0 , 1 ,
+
+  \ This is the entry point to the new method
+  : new ( object -- ) dup @ @ 0 + @ execute ;
+
+  \ This is the entry point to the destroy method
+  : destroy ( object -- ) dup @ @ 4 + @ execute ;
 
   \ Begin the declaration of a class
   : begin-class
