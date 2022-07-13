@@ -102,7 +102,7 @@ begin-module tinymt32
 
   end-module> import
 
-  export tinymt32-size
+  ' tinymt32-size export tinymt32-size
   
   \ This function initializes the internal state array with a 32-bit unsigned
   \ integer seed.

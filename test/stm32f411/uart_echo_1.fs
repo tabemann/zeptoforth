@@ -1,5 +1,5 @@
 \ Copyright (c) 2022 Travis Bemann
-\ 
+\
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
 \ in the Software without restriction, including without limitation the rights
@@ -20,26 +20,22 @@
 
 continue-module forth
 
-  spi import
+  uart import
   pin import
-  task import
 
-  \ Initialize the test
-  : init-test ( -- )
-\    1 [ spi-internal ] :: init-spi
-    1 12 xe spi-pin \ SPI1_NSS
-    1 13 xe spi-pin \ SPI1_SCK
-    1 14 xe spi-pin \ SPI1_MISO
-    1 15 xe spi-pin \ SPI1_MOSI
-    1 slave-spi
-\    1 ti-ss-spi
-    true false 1 motorola-spi
-    16 1 spi-data-size!
-    1 enable-spi
-
-    100 ms
-
-    0 [: 65535 begin 1 >spi 1 spi> again ;] 256 128 512 spawn run
+  \ Echo characters received by UART1 (GPIO pins PB6, PB7) at a given baud
+  : init-test ( baud -- )
+    1 6 xb uart-pin 1 7 xb uart-pin 1 uart-baud!
+    [:
+      1 uart>?
+      [:
+        1 uart>
+        dup dup emit 1 >uart
+        $0D = [: $0A emit $0A 1 >uart ;] qif
+      ;] qif
+      key?
+    ;] quntil
+    key drop
   ;
   
 end-module

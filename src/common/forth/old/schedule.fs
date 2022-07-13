@@ -252,8 +252,8 @@ begin-module schedule
   : current-action ( -- action ) current-action @ ;
 
   \ Export these constants
-  export schedule-size
-  export action-size
+  ' schedule-size export schedule-size
+  ' action-size export action-size
 
 end-module
 

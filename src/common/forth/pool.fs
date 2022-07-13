@@ -123,7 +123,7 @@ begin-module pool
   : pool-total-count ( pool -- u ) pool-total-count @ ;
 
   \ Export pool-size
-  export pool-size
+  ' pool-size export pool-size
 
 end-module
 

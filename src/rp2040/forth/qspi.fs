@@ -39,12 +39,12 @@ begin-module qspi
   end-module> import
     
   \ Internal words which are exported through this module
-  export mass-qspi! \ ( data-addr bytes addr -- )
-  export cqspi! \ ( c addr -- )
-  export hqspi! \ ( h addr -- )
-  export qspi!  \ ( x addr -- )
-  export 2qspi! \ ( d addr -- )
-  export erase-qspi-sector \ ( addr -- )
+  ' mass-qspi! export mass-qspi! \ ( data-addr bytes addr -- )
+  ' cqspi! export cqspi! \ ( c addr -- )
+  ' hqspi! export hqspi! \ ( h addr -- )
+  ' qspi!  export qspi!  \ ( x addr -- )
+  ' 2qspi! export 2qspi! \ ( d addr -- )
+  ' erase-qspi-sector export erase-qspi-sector \ ( addr -- )
 
   \ Get whether QSPI is initialized
   : qspi-inited? ( -- flag ) true ;

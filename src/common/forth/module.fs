@@ -147,25 +147,6 @@ commit-flash
   drop rdrop set-order
 ;
 
-\ Execute or compile a particular word in a provided module
-: lookup-path ( "module-name" "word-name" -- c-addr bytes word )
-  get-order dup begin ?dup while 1- rot >r repeat >r
-  [:
-    begin
-      token 2dup s" ::" equal-strings? not if
-	find ?dup if
-	  >body execute 1 set-order
-	else
-	  ['] x-not-found ?raise
-	then
-	false
-      else
-	2drop token 2dup find dup 0= triggers x-unknown-word true
-      then
-    until
-  ;] try r> dup begin ?dup while 1- r> -rot repeat set-order ?raise
-;
-
 \ Switch wordlists
 forth set-current
 
@@ -215,18 +196,21 @@ commit-flash
 : unimport ( module -- ) remove ;
 
 \ Export a word from the current module
-: export ( "name" -- )
+: export ( xt "name" -- )
   token dup 0<> averts x-token-expected
-  2dup s" ^" equal-strings? if
-    2drop lookup-path
-  else
-    2dup find dup 0= triggers x-unknown-word
-  then
-  -rot start-compile visible >body compile, end-compile,
+  start-compile visible compile, end-compile,
 ;
 
 \ Execute or compile a particular word in a provided module
-: ^ ( "module-name" "word-name" -- ) [immediate] lookup-path nip nip apply ;
+: :: ( module "word-name" -- )
+  [immediate]
+  >r get-order r> 1 set-order
+  [:
+    token dup 0<> averts x-token-expected
+    find dup 0<> averts x-unknown-word
+  ;] try 2>r set-order 2r> ?raise
+  apply
+;
 
 \ Initialize
 : init ( -- )

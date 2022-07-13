@@ -280,7 +280,7 @@ begin-module fchan
   commit-flash
 
   \ Export the fchannel size
-  export fchan-size
+  ' fchan-size export fchan-size
 
 end-module
 

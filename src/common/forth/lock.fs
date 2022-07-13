@@ -299,7 +299,7 @@ begin-module lock
   : with-lock ( xt lock -- ) dup >r claim-lock try r> release-lock ?raise ;
 
   \ Export lock-size
-  export lock-size
+  ' lock-size export lock-size
 
 end-module
 

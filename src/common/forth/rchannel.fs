@@ -350,7 +350,7 @@ begin-module rchan
   commit-flash
 
   \ Export the rchannel size
-  export rchan-size
+  ' rchan-size export rchan-size
 
 end-module
 

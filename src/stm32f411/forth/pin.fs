@@ -65,7 +65,7 @@ begin-module pin
     
     \ Extract a GPIO
     : extract-gpio ( pin -- gpio )
-      16 rshift 10 lshift ( 16 rshift $400 * ) ^ gpio-internal :: GPIO_Base +
+      16 rshift 10 lshift ( 16 rshift $400 * ) [ gpio-internal ] :: GPIO_Base +
     ;
 
     \ Extract a pin

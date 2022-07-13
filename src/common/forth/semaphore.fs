@@ -84,7 +84,7 @@ begin-module sema
   ;
 
   \ Export the semaphore size
-  export sema-size
+  ' sema-size export sema-size
 
 end-module
 

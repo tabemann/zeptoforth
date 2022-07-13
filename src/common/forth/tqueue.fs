@@ -231,7 +231,7 @@ begin-module tqueue
   ;
   
   \ Export tqueue-size
-  export tqueue-size
+  ' tqueue-size export tqueue-size
 
 end-module
 

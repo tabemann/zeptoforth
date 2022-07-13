@@ -1,5 +1,5 @@
 \ Copyright (c) 2022 Travis Bemann
-\ 
+\
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
 \ in the Software without restriction, including without limitation the rights
@@ -18,28 +18,36 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-continue-module forth
+begin-module temp-test
 
-  spi import
-  pin import
   task import
-
-  \ Initialize the test
-  : init-test ( -- )
-\    1 [ spi-internal ] :: init-spi
-    1 12 xe spi-pin \ SPI1_NSS
-    1 13 xe spi-pin \ SPI1_SCK
-    1 14 xe spi-pin \ SPI1_MISO
-    1 15 xe spi-pin \ SPI1_MOSI
-    1 slave-spi
-\    1 ti-ss-spi
-    true false 1 motorola-spi
-    16 1 spi-data-size!
-    1 enable-spi
-
-    100 ms
-
-    0 [: 65535 begin 1 >spi 1 spi> again ;] 256 128 512 spawn run
-  ;
+  adc import
   
+  begin-module temp-test-internal
+  
+    \ Enable the temperature sensor regardless of platform
+    : enable-temp ( -- )
+      [ s" enable-tsvref" find ] [if]
+        enable-tsvref
+        480 temp-adc-chan default-adc adc-sampling-time!
+      [else]
+        [ s" enable-vsense" find ] [if]
+          enable-vsense
+          640 temp-adc-chan default-adc adc-sampling-time!
+        [else]
+          [ s" adc-sampling-time!" find ] [if]
+            480 temp-adc-chan default-adc adc-sampling-time!
+          [then]
+        [then]
+      [then]
+    ;
+    
+  end-module> import
+    
+  \ Display the temperature every second
+  : display-temp ( -- )
+    enable-temp
+    0 [: [: temp-adc-chan default-adc adc@ . 1000 ms ;] qagain ;] 256 128 512 spawn run
+  ;
+
 end-module

@@ -465,7 +465,7 @@ begin-module spi
   \ Set a pin to be an SPI pin
   : spi-pin ( spi pin -- )
     over validate-spi
-    dup ^ pin-internal :: validate-pin
+    dup [ pin-internal ] :: validate-pin
     swap spi-alternate swap dup fast-pin alternate-pin
   ;
 
@@ -540,9 +540,9 @@ end-module> import
 \ Initialize
 : init ( -- )
   init
-  1 ^ spi-internal :: init-spi
-  2 ^ spi-internal :: init-spi
-  3 ^ spi-internal :: init-spi
+  1 [ spi-internal ] :: init-spi
+  2 [ spi-internal ] :: init-spi
+  3 [ spi-internal ] :: init-spi
 ;
 
 \ reboot

@@ -1,5 +1,5 @@
 \ Copyright (c) 2022 Travis Bemann
-\ 
+\
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
 \ in the Software without restriction, including without limitation the rights
@@ -18,28 +18,36 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-continue-module forth
+begin-module stream-test
 
-  spi import
-  pin import
   task import
-
-  \ Initialize the test
+  stream import
+  
+  1024 constant my-stream-data-size
+  256 constant recv-buf-size
+  256 constant send-buf-size
+  65536 constant interval
+  
+  my-stream-data-size stream-size buffer: my-stream
+  recv-buf-size buffer: recv-buf
+  send-buf-size buffer: send-buf
+  
+  : consumer ( -- )
+    interval 0 [:
+      recv-buf recv-buf-size my-stream recv-stream
+      + 2dup <= [: dup u. swap interval + swap ;] qif
+    ;] qagain
+  ;
+  
+  : producer ( -- )
+    [: send-buf send-buf-size my-stream send-stream-parts ;] qagain
+  ;
+  
   : init-test ( -- )
-\    1 [ spi-internal ] :: init-spi
-    1 12 xe spi-pin \ SPI1_NSS
-    1 13 xe spi-pin \ SPI1_SCK
-    1 14 xe spi-pin \ SPI1_MISO
-    1 15 xe spi-pin \ SPI1_MOSI
-    1 slave-spi
-\    1 ti-ss-spi
-    true false 1 motorola-spi
-    16 1 spi-data-size!
-    1 enable-spi
-
-    100 ms
-
-    0 [: 65535 begin 1 >spi 1 spi> again ;] 256 128 512 spawn run
+    my-stream-data-size my-stream init-stream
+    send-buf-size 0 [: dup send-buf + c! ;] qcount
+    0 ['] consumer 256 128 512 spawn run
+    0 ['] producer 256 128 512 spawn run
   ;
   
 end-module

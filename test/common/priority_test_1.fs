@@ -1,5 +1,5 @@
 \ Copyright (c) 2022 Travis Bemann
-\ 
+\
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
 \ in the Software without restriction, including without limitation the rights
@@ -18,28 +18,29 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-continue-module forth
+begin-module priority-test
 
-  spi import
-  pin import
   task import
-
-  \ Initialize the test
-  : init-test ( -- )
-\    1 [ spi-internal ] :: init-spi
-    1 12 xe spi-pin \ SPI1_NSS
-    1 13 xe spi-pin \ SPI1_SCK
-    1 14 xe spi-pin \ SPI1_MISO
-    1 15 xe spi-pin \ SPI1_MOSI
-    1 slave-spi
-\    1 ti-ss-spi
-    true false 1 motorola-spi
-    16 1 spi-data-size!
-    1 enable-spi
-
-    100 ms
-
-    0 [: 65535 begin 1 >spi 1 spi> again ;] 256 128 512 spawn run
+  lock import
+  
+  lock-size buffer: my-lock
+  
+  : busy-wait ( --- ) 1000000 0 ['] drop qcount ;
+  
+  : high-priority ( -- )
+    1 current-task task-priority!
+    [: 10 0 [: [: display-red ." +" . display-normal ;] my-lock with-lock busy-wait ;] qcount 5000 ms ;] qagain
   ;
   
+  : low-priority ( -- )
+    0 current-task task-priority!
+    [: 10 0 [: [: ." *" . ;] my-lock with-lock busy-wait ;] qcount ;] qagain
+  ;
+  
+  : init-test ( -- )
+    my-lock init-lock
+    0 ['] low-priority 256 128 512 spawn run
+    0 ['] high-priority 256 128 512 spawn run
+  ;
+
 end-module

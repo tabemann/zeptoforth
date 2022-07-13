@@ -24,10 +24,10 @@ Module already defined exception.
 
 Module not found exception.
 
-##### `^`
-( ? "module-name-0" ... "module-name-x" "::" "word-name" -- ? )
+##### `::`
+( ? module "word-name" -- ? )
 
-Reference word *word-name* in a specified module *module-name-x*, which may be nested within any number of containing modules, where the first module referenced *module-name-0* must be within the current order, and apply it to the current compilation/interpretation state. `::` separates the innermost module *module-name-x*, from *word-name*. This is an immediate word, and the referenced word will be folded or inlined as if it were compiled normally.
+Evaluate *word-name* in the context of *module* and execute it. Note that this is an immediate word, so while compiling one will probably want to bracket one's module with `[` and `]`.
 
 ##### `begin-module`
 ( "name" -- )
@@ -65,6 +65,7 @@ Import a specified module into the current module's wordlist order; if the modul
 Remove a specified module from the current module's wordlist order; note that it does not remove it from parent modules' wordlist orders, so if it  had been imported within them they are still searchable.
 
 ##### `export`
-( "name" | "^" "module-name-0" ... "module-name-x" "::" "name" -- )
+( xt "word-name" -- )
 
-Export a name in the current namespace or referred to by itself or by its path, from the current module.
+Export *xt* from the module currently being defined as *word-name*.
+

@@ -196,8 +196,8 @@ begin-module action
 
   end-module
 
-  export schedule-size
-  export action-size
+  ' schedule-size export schedule-size
+  ' action-size export action-size
 
   \ Initialize a schedule
   : init-schedule ( addr -- )

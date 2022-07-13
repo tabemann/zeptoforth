@@ -489,8 +489,8 @@ end-module> import
 \ Init
 : init ( -- )
   init
-  ^ uart-internal :: init-uart1
-  ^ uart-internal :: init-uart6
+  [ uart-internal ] :: init-uart1
+  [ uart-internal ] :: init-uart6
 ;
 
 \ Reboot
