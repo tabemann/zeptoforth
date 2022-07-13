@@ -66,15 +66,15 @@ begin-module oo
     ;
 
     \ Find a method index by name
-    : method-by-name ( c-addr u class -- index|-1 ) ( ." A" )
-      class-method-list @ begin ?dup while ( ." B" )
-	dup method-word @ word-name 2over rot count ( ." C" )
-	equal-case-strings? if ( ." D" )
-	  nip nip method-index @ ( ." E" ) exit
-	then ( ." F" )
-	prev-method @ ( ." G" )
-      repeat ( ." H" )
-      2drop -1 ( ." I" )
+    : method-by-name ( c-addr u class -- index|-1 )
+      class-method-list @ begin ?dup while
+	dup method-word @ word-name 2over rot count
+	equal-case-strings? if
+	  nip nip method-index @ exit
+	then
+	prev-method @
+      repeat
+      2drop -1
     ;
     
     \ Get a method list length
