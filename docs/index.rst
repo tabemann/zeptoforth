@@ -31,6 +31,7 @@ Zeptoforth Documentation
    words/heap
    words/pool
    words/map
+   words/oo
    words/lock
    words/slock
    words/channel
