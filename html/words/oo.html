@@ -51,11 +51,11 @@ end-class
 my-class begin-implement
   :noname
     dup [ object ] -&gt; new
-1 swap member-0 !
+    1 swap member-0 !
   ; define new
   :noname
     .&quot; Destroying my-class &quot;
-[ object ] -&gt; destroy
+    [ object ] -&gt; destroy
   ; define destroy
   :noname member-0 @ ; define member-0@
   :noname drop .&quot; foo&quot; ; define display-msg
@@ -68,12 +68,12 @@ end-class
 
 my-subclass begin-implement
   :noname
-dup [ my-class ] -&gt; new
--1 swap member-1 !
+    dup [ my-class ] -&gt; new
+    -1 swap member-1 !
   ; define new
   :noname
     .&quot; Destroying my-subclass &quot;
-[ my-class ] -&gt; destroy
+    [ my-class ] -&gt; destroy
   ; define destroy
   :noname drop .&quot; bar&quot; ; define display-msg
   :noname member-1 @ ; define member-1@
