@@ -21,11 +21,11 @@ For a simple example of the definition of a class and a subclass of it, take the
     my-class begin-implement
       :noname
         dup [ object ] -> new
-	1 swap member-0 !
+        1 swap member-0 !
       ; define new
       :noname
         ." Destroying my-class "
-	[ object ] -> destroy
+        [ object ] -> destroy
       ; define destroy
       :noname member-0 @ ; define member-0@
       :noname drop ." foo" ; define display-msg
@@ -38,12 +38,12 @@ For a simple example of the definition of a class and a subclass of it, take the
 
     my-subclass begin-implement
       :noname
-	dup [ my-class ] -> new
-	-1 swap member-1 !
+        dup [ my-class ] -> new
+        -1 swap member-1 !
       ; define new
       :noname
         ." Destroying my-subclass "
-	[ my-class ] -> destroy
+        [ my-class ] -> destroy
       ; define destroy
       :noname drop ." bar" ; define display-msg
       :noname member-1 @ ; define member-1@
