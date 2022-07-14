@@ -55,9 +55,6 @@ begin-module oo
       \ The size of the members of a class
       field: members-size
       
-      \ The number of methods of a class
-      field: methods-count
-      
     end-structure
 
     \ A method of a class
@@ -101,7 +98,7 @@ begin-module oo
   create object-method-table ' new , ' destroy ,
     
   \ Define the object class
-  create object object-method-table , object , destroy-method , 0 , 1 ,
+  create object object-method-table , object , destroy-method , 0 ,
 
   \ This is the entry point to the new method
   : new ( object -- ) dup @ @ 0 + @ execute ;
