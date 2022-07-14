@@ -154,6 +154,11 @@ end-implement
 <p>( class addr – )</p>
 <p>Initialize the memory at <em>addr</em> to be an object of <em>class</em> and then call <em>new</em> for that object.</p>
 </section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">-&gt;</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>( ? class “name” – ? )</p>
+<p>Look up <em>name</em> in <em>class</em> and compile its binding in that class if in compilation state or else execute it. This is an immediate word, so in compilation state is advisable to bracket <em>class</em> in <code class="docutils literal notranslate"><span class="pre">[</span></code> and <code class="docutils literal notranslate"><span class="pre">]</span></code>. Note that even if <em>name</em> were overridden the definition used in <em>class</em>, or if not defined in <em>class</em>, that defined in the closest superclass of <em>class</em> in which it is defined is used.</p>
+</section>
 </section>
 </section>
 

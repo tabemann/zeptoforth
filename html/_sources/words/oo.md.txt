@@ -129,3 +129,8 @@ Get the class of *object*.
 ( class addr -- )
 
 Initialize the memory at *addr* to be an object of *class* and then call *new* for that object.
+
+##### `->`
+( ? class "name" -- ? )
+
+Look up *name* in *class* and compile its binding in that class if in compilation state or else execute it. This is an immediate word, so in compilation state is advisable to bracket *class* in `[` and `]`. Note that even if *name* were overridden the definition used in *class*, or if not defined in *class*, that defined in the closest superclass of *class* in which it is defined is used.
