@@ -198,7 +198,13 @@ commit-flash
 \ Export a word from the current module
 : export ( xt "name" -- )
   token dup 0<> averts x-token-expected
-  start-compile visible compile, end-compile,
+  start-compile visible
+  dup >name ?dup if
+    word-flags h@
+    dup immediate-flag and if immediate then
+    compiled-flag and if compile-only then
+  then
+  compile, end-compile,
 ;
 
 \ Execute or compile a particular word in a provided module
