@@ -59,7 +59,7 @@ begin-module oo
 
     \ A method of a class
     : class-method ( index class -- addr )
-      class-methods @ swap cells +
+      class-methods @ swap 1+ cells +
     ;
 
     \ Find a method index by name
@@ -95,11 +95,12 @@ begin-module oo
   create destroy-method new-method , 1 , s" destroy" find ,
 
   \ The object class's method table
-  create object-method-table ' new , ' destroy ,
+  create object-method-table cell allot ' new , ' destroy ,
     
   \ Define the object class
   create object object-method-table , object , destroy-method , 0 ,
-
+  object object-method-table current!
+  
   \ This is the entry point to the new method
   : new ( object -- ) dup @ @ 0 + @ execute ;
 
@@ -110,22 +111,23 @@ begin-module oo
   : begin-class
     ( super-class "name" -- class-header member-offset list )
     <builds here cell allot over , over members-size @
-    3 cells allot rot class-method-list @
+    2 cells allot rot class-method-list @
     does>
   ;
 
   \ Finish the declaration of a class
   : end-class ( class-header member-offset list -- )
     -rot over members-size current!
-    over method-list-len cells cell align, here swap allot
+    over method-index @ 2 + cells cell align, here swap allot
     over class-methods current!
+    dup dup class-methods @ current!
     class-method-list current!
   ;
 
   \ Begin the implementation of a class
   : begin-implement ( class -- class-header )
     compiling-to-flash? not if
-      dup class-methods @ over class-method-list @ method-index @ 1+ cells
+      dup class-methods @ cell+ over class-method-list @ method-index @ 1+ cells
       0 fill
     then
   ;
@@ -155,7 +157,7 @@ begin-module oo
     :
     dup method-index @ 1+ cells 65536 u< thumb-2 or if inlined then
     postpone dup
-    postpone @ postpone @ dup method-index @ 1+ cells lit,
+    postpone @ dup method-index @ 2 + cells lit,
     postpone + postpone @ postpone execute
     postpone ;
     cell align, here method-header-size allot
@@ -176,12 +178,10 @@ begin-module oo
   : class-size ( class -- bytes ) members-size @ cell+ ;
 
   \ Get the class of an object
-  : object-class ( object -- class ) @ ;
+  : object-class ( object -- class ) @ @ ;
 
   \ Initialize an instance of a class
-  : init-object ( class addr -- )
-    2dup ! swap 0 swap class-method @ execute
-  ;
+  : init-object ( class addr -- ) tuck swap @ swap ! new ;
 
   \ Early-bind a method call
   : -> ( ? class "name" -- ? )
