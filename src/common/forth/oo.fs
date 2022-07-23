@@ -90,6 +90,12 @@ begin-module oo
   \ Method not found in class exception
   : x-method-not-in-class ( -- ) ." method not in class" cr ;
   
+  \ Method not implemented exception
+  : x-method-not-implemented ( -- ) ." method not implemented" cr ;
+
+  \ Abstract method
+  : abstract-method ( -- ) ['] x-method-not-implemented ?raise ;
+  
   \ The object class's method list
   create new-method 0 , 0 , s" new" find ,
   create destroy-method new-method , 1 , s" destroy" find ,
@@ -98,14 +104,14 @@ begin-module oo
   create object-method-table cell allot ' new , ' destroy ,
     
   \ Define the object class
-  create object object-method-table , object , destroy-method , 0 ,
-  object object-method-table current!
+  create <object> object-method-table , <object> , destroy-method , 0 ,
+  <object> object-method-table current!
   
   \ This is the entry point to the new method
-  : new ( object -- ) dup @ @ 0 + @ execute ;
+  : new ( object -- ) dup @ 4 + @ execute ;
 
   \ This is the entry point to the destroy method
-  : destroy ( object -- ) dup @ @ 4 + @ execute ;
+  : destroy ( object -- ) dup @ 8 + @ execute ;
 
   \ Begin the declaration of a class
   : begin-class
