@@ -30,14 +30,14 @@ begin-module oo-heap-test
   
   variable last-object
   
-  object begin-class heap-class
+  <object> begin-class <heap-object>
     cell member index
     cell member prev-object
   end-class
   
-  heap-class begin-implement
+  <heap-object> begin-implement
     :noname
-      dup [ object ] -> new
+      dup [ <object> ] -> new
       last-object @ swap
       2dup prev-object !
       over [:
@@ -50,7 +50,7 @@ begin-module oo-heap-test
       last-object !
     ; define new
     :noname
-      dup [ object ] -> destroy
+      dup [ <object> ] -> destroy
       cr ." Destroying object "
       dup index @ .
       dup prev-object @ last-object !
@@ -69,7 +69,7 @@ begin-module oo-heap-test
   
   : fill-heap-with-objects ( -- )
     [:
-      [: heap-class allocate-object drop ;] qagain
+      [: <heap-object> allocate-object drop ;] qagain
     ;] try dup ['] x-allocate-failed = [: drop 0 ;] qif ?raise
   ;
   

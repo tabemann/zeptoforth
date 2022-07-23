@@ -22,7 +22,7 @@ begin-module oo-test
 
   oo import
   
-  object begin-class my-class
+  <object> begin-class <my-class>
   
     cell member foo#
     cell member bar#
@@ -32,16 +32,16 @@ begin-module oo-test
     
   end-class
   
-  my-class begin-implement
+  <my-class> begin-implement
   
-    :noname dup [ object ] -> new 0 over foo# ! 0 swap bar# ! ; define new
-    :noname cr ." Destroying my-class" [ object ] -> destroy ; define destroy
+    :noname dup [ <object> ] -> new 0 over foo# ! 0 swap bar# ! ; define new
+    :noname cr ." Destroying my-class" [ <object> ] -> destroy ; define destroy
     :noname foo# @ ; define foo@
     :noname bar# @ ; define bar@
   
   end-implement
   
-  my-class begin-class my-subclass-0
+  <my-class> begin-class <my-subclass-0>
   
     cell member baz#
     
@@ -49,38 +49,40 @@ begin-module oo-test
   
   end-class
   
-  my-subclass-0 begin-implement
+  <my-subclass-0> begin-implement
   
-    :noname dup [ my-class ] -> new 2 over bar# ! 3 swap baz# ! ; define new
-    :noname cr ." Destroying my-subclass-0" [ my-class ] -> destroy ; define destroy
+    :noname dup [ <my-class> ] -> new 2 over bar# ! 3 swap baz# ! ; define new
+    :noname cr ." Destroying my-subclass-0" [ <my-class> ] -> destroy ;
+    define destroy
     :noname baz# @ ; define baz@
   
   end-implement
   
-  my-class begin-class my-subclass-1 end-class
+  <my-class> begin-class <my-subclass-1> end-class
   
-  my-subclass-1 begin-implement
+  <my-subclass-1> begin-implement
   
-    :noname cr ." Destroying my-subclass-1" [ my-class ] -> destroy ; define destroy
+    :noname cr ." Destroying my-subclass-1" [ <my-class> ] -> destroy ;
+    define destroy
     :noname drop 4 ; define bar@
     
   end-implement
   
-  my-class class-size buffer: my-object-0
-  my-subclass-0 class-size buffer: my-object-1
-  my-subclass-1 class-size buffer: my-object-2
+  <my-class> class-size buffer: my-object-0
+  <my-subclass-0> class-size buffer: my-object-1
+  <my-subclass-1> class-size buffer: my-object-2
   
   compiling-to-flash? [if]
     : init ( -- )
       init
-      my-class my-object-0 init-object
-      my-subclass-0 my-object-1 init-object
-      my-subclass-1 my-object-2 init-object
+      <my-class> my-object-0 init-object
+      <my-subclass-0> my-object-1 init-object
+      <my-subclass-1> my-object-2 init-object
     ;
   [else]
-    my-class my-object-0 init-object
-    my-subclass-0 my-object-1 init-object
-    my-subclass-1 my-object-2 init-object    
+    <my-class> my-object-0 init-object
+    <my-subclass-0> my-object-1 init-object
+    <my-subclass-1> my-object-2 init-object    
   [then]
 
 end-module
