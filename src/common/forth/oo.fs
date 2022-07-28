@@ -164,7 +164,7 @@ begin-module oo
     dup method-index @ 1+ cells 65536 u< thumb-2 or if inlined then
     postpone dup
     postpone @ dup method-index @ 2 + cells lit,
-    postpone + postpone @ postpone execute
+    postpone + postpone @ postpone inline-execute
     postpone ;
     cell align, here method-header-size allot
     2dup prev-method current!
