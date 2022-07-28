@@ -213,12 +213,12 @@ begin-module ramfs
     :noname drop false ; define entity-read-only?
     :noname ( c-addr u file -- u )
       dup >r ram-file-orig @ ram-data-size @ r@ ram-file-offset @ -
-      min tuck r@ ram-data-addr @ r@ ram-file-offset @ + -rot move
+      min tuck r@ ram-file-orig @ ram-data-addr @ r@ ram-file-offset @ + -rot move
       dup r> ram-file-offset +!
     ; define read-file
     :noname ( c-addr u file -- u )
       dup >r ram-file-orig @ ram-data-size @ r@ ram-file-offset @ -
-      min tuck r@ ram-data-addr @ r@ ram-file-offset @ + swap move
+      min tuck r@ ram-file-orig @ ram-data-addr @ r@ ram-file-offset @ + swap move
       dup r> ram-file-offset +!
     ; define write-file
     :noname ( offset whence file -- )

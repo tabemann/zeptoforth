@@ -326,11 +326,13 @@ begin-module file
   \ Call an execution token with a concatenated path
   : with-concat-path ( c-addr u c-addr u xt -- )
     >r 2swap strip-end-slash 2swap strip-end-slash r>
-    3 pick 2 pick 1+ [:
-      5 pick 5 pick 2 pick swap move
-      [char] / 5 pick 2 pick + c!
-      3 pick 3 pick 2 pick 6 pick 1+ + swap move
-      rot 1+ 3 roll drop 3 roll + 3 roll drop
+    3 pick 2 pick 1+ + [: ( c-addr0 u0 c-addr1 u1 xt buf )
+      5 pick 5 pick 2 pick swap move ( c-addr0 u0 c-addr1 u1 xt buf )
+      [char] / 5 pick 2 pick + c! ( c-addr0 u0 c-addr1 u1 xt buf )
+      3 pick 3 pick 2 pick ( c-addr0 u0 c-addr1 u1 xt buf c-addr1 u1 buf )
+      7 pick 1+ + swap move ( c-addr0 u0 c-addr1 u1 xt buf )
+      rot 1+ ( c-addr0 u0 c-addr1 xt buf bytes ) 3 roll drop ( c-addr0 u0 xt buf bytes )
+      3 roll + ( c-addr0 xt buf bytes' ) 3 roll drop ( xt buf bytes' )
       rot execute
     ;] with-allot
   ;

@@ -127,5 +127,26 @@ begin-module fs-test
     s" /dir/mount" [: 0 swap list-dirs ;] my-context find-with-entity
     s" /foobar" [: 0 swap list-dirs ;] my-context find-with-entity
   ;
+  
+  : test-1 ( -- )
+    s" /dir" my-context working-dir 2!
+    s" mount/mount-file" [:
+      128 0 ?do
+        i 1 [: tuck c! 1 2 pick write-file drop ;] with-allot
+      loop
+    ;] my-context find-with-entity
+    s" /dir/mount" my-context working-dir 2!
+    s" mount-file" [:
+      1 [:
+        begin
+          2dup 1 rot read-file 0> if
+            dup c@ h.2 space false
+          else
+            true
+          then
+        until
+      ;] with-allot
+    ;] my-context find-with-entity
+  ;
 
 end-module
