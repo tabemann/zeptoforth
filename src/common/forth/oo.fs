@@ -187,7 +187,7 @@ begin-module oo
   : object-class ( object -- class ) @ @ ;
 
   \ Initialize an instance of a class
-  : init-object ( class addr -- ) tuck swap @ swap ! new ;
+  : init-object ( ? class addr -- ) tuck swap @ swap ! new ;
 
   \ Early-bind a method call
   : -> ( ? class "name" -- ? )
@@ -195,7 +195,20 @@ begin-module oo
     token
     dup 0= triggers x-token-expected
     2 pick method-by-name dup -1 <> averts x-method-not-in-class
-    swap class-method @ state @ if compile, else execute then
+    state @ if
+      swap class-method lit, postpone @ postpone inline-execute
+    else
+      swap class-method @ execute
+    then
+  ;
+  
+  \ Allot an object and initialize it
+  : with-object ( ? class xt -- )
+    over class-size [:
+      swap >r dup >r init-object
+      r> r> over >r execute
+      r> destroy
+    ;] with-aligned-allot
   ;
   
 end-module

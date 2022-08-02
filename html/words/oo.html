@@ -40,7 +40,7 @@
 <p>Outside of early binding, classes provide no sort of namespace mechanism; for that one must rely on modules or naming conventions.</p>
 <p>Declaring the methods and members associated with a class and all its subclasses is separate from providing implementations for classes’ methods, which may be inherited by subclasses. Methods and members of classes are declared between <code class="docutils literal notranslate"><span class="pre">begin-class</span></code> and <code class="docutils literal notranslate"><span class="pre">end-class</span></code> with <code class="docutils literal notranslate"><span class="pre">method</span></code> and <code class="docutils literal notranslate"><span class="pre">member</span></code> respectively, while method implementations are declared between <code class="docutils literal notranslate"><span class="pre">begin-implement</span></code> and <code class="docutils literal notranslate"><span class="pre">end-implement</span></code> with <code class="docutils literal notranslate"><span class="pre">define</span></code>. Note that no code may call any methods on a class until after <code class="docutils literal notranslate"><span class="pre">end-implement</span></code> is called matching the call to <code class="docutils literal notranslate"><span class="pre">begin-implement</span></code> for that class, but calls to methods on that class can be compiled before that.</p>
 <p>For a simple example of the definition of a class and a subclass of it, take the following example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>oo import
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>oo import
 
 object begin-class my-class
   cell member member-0
