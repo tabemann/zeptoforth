@@ -161,6 +161,54 @@ begin-module fat32
     method expand-dir ( index cluster fs -- )
   end-class
   
+  \ FAT32 file class
+  <object> begin-class <fat32-file>
+    \ Filesystem
+    cell member file-fs
+    
+    \ Parent directory index
+    cell member file-parent-index
+    
+    \ Parent directory cluster
+    cell member file-parent-cluster
+    
+    \ Starting cluster
+    cell member file-start-cluster
+    
+    \ File size
+    cell member file-size
+    
+    \ Create a file
+    method create-file ( c-addr u parent-dir file -- )
+  end-class
+  
+  \ FAT32 directory class
+  <object> end-class <fat32-dir>
+    \ Filesystem
+    cell member dir-fs
+  
+    \ Parent directory index
+    cell member dir-parent-index
+    
+    \ Parent directory cluster
+    cell member dir-parent-cluster
+    
+    \ Starting cluster
+    cell member dir-start-cluster
+    
+    \ Create a directory with . and .. entries
+    method create-dir ( c-addr u parent-dir dir -- )
+    
+    \ Create a directory without any . or .. entries
+    method create-dir-raw ( c-addr u parent-dir dir -- )
+    
+    \ Create . directory entry
+    method create-dot-entry ( dir -- )
+    
+    \ Create .. directory entry
+    method create-dot-dot-entry ( parent-dir dir -- )
+  end-class
+  
   \ FAT32 directory entry class
   <object> begin-class <fat32-entry>
     \ The short file name component, padded with spaces
@@ -236,7 +284,7 @@ begin-module fat32
     2 member first-cluster-low
     
     \ The file size; is always 0 for subdirectories and volume labels
-    4 member file-size
+    4 member entry-file-size
     
     \ Import a buffer into a directory entry
     method buffer>entry ( addr entry -- )
@@ -695,6 +743,88 @@ begin-module fat32
     ; define expand-dir
   end-implement
   
+  \ Implement FAT32 file class
+  <fat32-file> begin-implement
+    :noname ( fs file -- )
+      dup [ <object> ] -> new
+      tuck file-fs !
+      -1 over file-parent-index !
+      -1 over file-parent-cluster !
+      -1 swap file-start-cluster !
+    ; define new
+    
+    :noname ( c-addr u parent-dir file -- )
+      swap dir-start-cluster @ over file-fs @ allocate-entry ( c-addr u file parent-index parent-cluster )
+      2 pick file-parent-cluster ! ( c-addr u file parent-index )
+      over file-parent-index ! ( c-addr u file )
+      dup file-fs @ allocate-cluster ( c-addr u file dir-cluster )
+      over file-start-cluster ! ( c-addr u file )
+      <fat32-entry> [: ( c-addr u file entry )
+        0 2 pick file-start-cluster @ rot ( c-addr u file 0 file-cluster entry )
+        5 roll 5 roll rot ( file 0 file-cluster c-addr u entry )
+        dup >r init-dir-entry r> ( file entry )
+        over file-parent-index @ ( file entry parent-index )
+        2 pick file-parent-cluster @ ( file entry parent-index parent-cluster )
+        3 roll file-fs @ entry! ( )
+      ;] with-object
+    ; define create-file
+  end-implement
+  
+  \ Implement FAT32 directory class
+  <fat32-dir> begin-implement
+    :noname ( fs dir -- )
+      dup [ <object> ] -> new
+      tuck dir-fs !
+      -1 over dir-parent-index !
+      -1 over dir-parent-cluster !
+      -1 swap dir-start-cluster !
+    ; define new
+    
+    :noname ( c-addr u parent-dir dir -- )
+      swap dir-start-cluster @ over dir-fs @ allocate-entry ( c-addr u dir parent-index parent-cluster )
+      2 pick dir-parent-cluster ! ( c-addr u dir parent-index )
+      over dir-parent-index ! ( c-addr u dir )
+      dup dir-fs @ allocate-cluster ( c-addr u dir dir-cluster )
+      over dir-start-cluster ! ( c-addr u dir )
+      <fat32-entry> [: ( c-addr u dir entry )
+        over dir-start-cluster @ swap ( c-addr u dir dir-cluster entry )
+        4 roll 4 roll rot ( dir dir-cluster c-addr u entry )
+        dup >r init-dir-entry r> ( dir entry )
+        over dir-parent-index @ ( dir entry parent-index )
+        2 pick dir-parent-cluster @ ( dir entry parent-index parent-cluster )
+        3 roll dir-fs @ entry! ( )
+      ;] with-object
+    ; define create-dir-raw
+    
+    :noname ( c-addr u parent-dir dir -- )
+      2dup 2>r create-parent-raw 2r> ( parent-dir dir -- )
+      dup create-dot-entry
+      create-dot-dot-entry
+    ; define create-dir
+    
+    \ Create . directory entry
+    :noname ( dir -- )
+      dup dir-start-cluster @ over dir-fs @ allocate-entry ( dir child-index child-cluster )
+      <fat32-entry> [: ( dir child-index child-cluster entry )
+        2 pick dir-start-cluster @ swap ( dir child-index child-cluster start-cluster entry )
+        s" ." rot ( dir child-index child-cluster start-cluster c-addr u entry )
+        dup >r init-dir-entry r> ( dir child-index child-cluster entry )
+        3 roll dir-fs @ entry! ( )
+      ;] with-object    ;
+    ; define create-dot-entry
+    
+    \ Create .. directory entry
+    :noname ( parent-dir dir -- )
+      dup dir-start-cluster @ over dir-fs @ allocate-entry ( parent-dir dir child-index child-cluster )
+      <fat32-entry> [: ( parent-dir dir child-index child-cluster entry )
+        4 roll dir-start-cluster @ swap ( dir child-index child-cluster start-cluster entry )
+        s" .." rot ( dir child-index child-cluster start-cluster c-addr u entry )
+        dup >r init-dir-entry r> ( dir child-index child-cluster entry )
+        3 roll dir-fs @ entry! ( )
+      ;] with-object
+    ; define create-dot-dot-entry
+  end-implement
+  
   \ Implement FAT32 directory entry class
   <fat32-entry> begin-implement
 
@@ -711,7 +841,7 @@ begin-module fat32
       2dup swap 22 + h@ swap modify-time-coarse h!
       2dup swap 24 + h@ swap modify-date h!
       2dup swap 26 + h@ swap first-cluster-low h!
-      swap 28 + @ swap file-size !
+      swap 28 + @ swap entry-file-size !
     ; define buffer>entry
     
     :noname ( addr entry -- )
@@ -727,13 +857,13 @@ begin-module fat32
       2dup modify-time-coarse h@ swap 22 + h!
       2dup modify-date h@ swap 24 + h!
       2dup first-cluster-low h@ swap 26 + h!
-      file-size @ swap 28 + !
+      entry-file-size @ swap 28 + !
     ; define entry>buffer
     
     :noname ( file-size first-cluster c-addr u entry -- )
       dup >r file-name!
       r@ first-cluster!
-      r@ file-size !
+      r@ entry-file-size !
       0 r@ file-attributes c!
       0 r@ nt-vfat-case c!
       0 r@ create-time-fine c!
@@ -747,7 +877,7 @@ begin-module fat32
     :noname ( first-cluster c-addr u entry -- )
       dup >r dir-name!
       r@ first-cluster!
-      0 r@ file-size !
+      0 r@ entry-file-size !
       $10 r@ file-attributes c!
       0 r@ nt-vfat-case c!
       0 r@ create-time-fine c!
@@ -771,7 +901,7 @@ begin-module fat32
       0 over modify-time-coarse h!
       0 over modify-date h!
       0 over first-cluster-low h!
-      0 swap file-size !
+      0 swap entry-file-size !
     ; define init-end-entry
     
     :noname ( entry -- ) $E5 swap short-file-name c! ; define mark-entry-deleted

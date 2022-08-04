@@ -32,6 +32,9 @@ begin-module block-dev
 
     \ Read block
     method block@ ( c-addr u block-index dev -- )
+
+    \ Flush blocks
+    method flush-blocks ( dev -- )
   end-class
 
   \ Implement block device base class
