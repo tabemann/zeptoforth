@@ -23,7 +23,7 @@ begin-module block-dev
   oo import
   
   \ Block device base class
-  object begin-class <block-dev>
+  <object> begin-class <block-dev>
     \ Get block size
     method block-size ( dev -- bytes )
 
