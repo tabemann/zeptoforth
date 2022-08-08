@@ -23,6 +23,7 @@ begin-module sd
   oo import
   block-dev import
   spi import
+  pin import
   systick import
   lock import
 
@@ -47,7 +48,7 @@ begin-module sd
   begin-module sd-internal
     
     \ SD Card init timeout
-    2000 systick-divisor * constant sd-init-timeout
+    10000 systick-divisor * constant sd-init-timeout
 
     \ SD Card erase timeout
     10000 systick-divisor * constant sd-erase-timeout
@@ -98,11 +99,11 @@ begin-module sd
     $3A constant CMD_READ_OCR
 
     \ set the number of write blocks to be pre-erased before writing
-    $17 constant CMD_SET_WR_BLOCK_ERASE_COUNT
+    $17 constant ACMD_SET_WR_BLOCK_ERASE_COUNT
 
     \ sends the host capacity support information and activates the card's
     \ initialization process
-    $29 constant CMD_SD_SEND_OP_CMD
+    $29 constant ACMD_SD_SEND_OP_CMD
 
     \ Ready state
     $00 constant R1_READY_STATE
@@ -131,6 +132,9 @@ begin-module sd
       
       \ SPI device index
       cell member spi-device
+      
+      \ Chip select pin
+      cell member cs-pin
 
       \ Lock protecting the SPI device
       lock-size member sd-lock
@@ -160,8 +164,35 @@ begin-module sd
 
     continue-module sd-internal
       
+      \ Assert CS
+      method assert-cs ( sd-card -- )
+      
+      \ Deassert CS
+      method deassert-cs ( sd-card -- )
+      
+      \ Send a byte with a response
+      method send-get-byte ( tx sd-card -- rx )
+      
+      \ Send a byte and discard the response
+      method send-byte ( tx sd-card -- )
+      
+      \ Send a dummy value ($FF) and get the response
+      method get-byte ( sd-card -- rx )
+      
+      \ Send four dummy values ($FF) and get the response as a 32-bit value
+      method get-word ( sd-card -- rx )
+      
+      \ Send a dummy value ($FF) and discard the response
+      method dummy-byte ( sd-card -- )
+      
       \ Send an SD card command
       method send-sd-cmd ( argument command sd-card -- response )
+      
+      \ End an SD card command
+      method end-sd-cmd ( sd-card -- )
+      
+      \ Send an SD card command with no extra data sent or received
+      method send-simple-sd-cmd ( argument command sd-card -- response )
 
       \ Initialize the SD card itself
       method init-sd-card ( sd-card -- )
@@ -203,10 +234,11 @@ begin-module sd
   \ Implement SD Card block device class
   <sd> begin-implement
 
-    :noname ( spi-device sd-card -- )
+    :noname ( cs-pin spi-device sd-card -- )
       dup >r [ <block-dev> ] -> new r>
       dup sd-lock init-lock
       tuck spi-device !
+      tuck cs-pin !
       true over sd-protect-block-zero !
       0 begin dup buffer-count < while
 	2dup cells swap sd-buffer-assign + -1 swap !
@@ -219,16 +251,23 @@ begin-module sd
 
     :noname ( sd-card -- bytes ) sector-size ; define block-size
 
-    :noname ( sd-card -- ) ." A" 1 ms
-      [: ." B" 1 ms
+    :noname ( sd-card -- )
+      [:
 	>r
-	false false r@ spi-device @ motorola-spi ." C" 1 ms
-	r@ spi-device @ master-spi ." D" 1 ms
-	250000 r@ spi-device @ spi-baud! ." E" 1 ms
-	8 r@ spi-device @ spi-data-size! ." F" 1 ms
-	r@ spi-device @ enable-spi ." G" 1 ms
-	1 ms \ Must supply minimum 74 clock cycles with CS high
-	r> init-sd-card ." H" 1 ms
+	false false r@ spi-device @ motorola-spi
+	r@ spi-device @ master-spi
+	250000 r@ spi-device @ spi-baud!
+	8 r@ spi-device @ spi-data-size!
+        r@ deassert-cs
+	r@ spi-device @ enable-spi
+	100 begin ?dup while
+          1- $FF r@ spi-device @ >spi r@ spi-device @ spi> drop
+        repeat
+	r@ init-sd-card
+\	r@ spi-device @ disable-spi
+	1000000 r@ spi-device @ spi-baud!
+\	r> spi-device @ enable-spi
+	1 ms
       ;] over sd-lock with-lock
     ; define init-sd
 
@@ -287,85 +326,119 @@ begin-module sd
       ;] over sd-lock with-lock
     ; define flush-blocks
     
+    :noname ( sd-card -- ) high swap cs-pin @ pin! ; define deassert-cs
+
+    :noname ( sd-card -- ) low swap cs-pin @ pin! ; define assert-cs
+    
+    :noname ( tx sd-card -- rx ) over h.2 ." >" spi-device @ tuck >spi spi> dup h.2 space ; define send-get-byte
+    
+    :noname ( tx sd-card -- ) send-get-byte drop ; define send-byte
+    
+    :noname ( sd-card -- rx ) $FF swap send-get-byte ; define get-byte
+    
+    :noname ( sd-card -- rx )
+      >r r@ get-byte 8 lshift
+      r@ get-byte or 8 lshift
+      r@ get-byte or 8 lshift
+      r> get-byte or
+    ; define get-word
+    
+    :noname ( sd-card -- ) $FF swap send-get-byte drop ; define dummy-byte
+    
     :noname ( argument command sd-card -- response )
       [:
 	>r
-	tuck $40 or r@ spi-device @ >spi
-	dup 24 rshift r@ spi-device @ >spi
-	dup 16 rshift $FF and r@ spi-device @ >spi
-	dup 8 rshift $FF and r@ spi-device @ >spi
-	$FF and r@ spi-device @ >spi
+	r@ deassert-cs
+	r@ dummy-byte
+	r@ assert-cs
+	r@ dummy-byte r@ dummy-byte
+	tuck $40 or r@ send-byte
+	dup 24 rshift r@ send-byte
+	dup 16 rshift $FF and r@ send-byte
+	dup 8 rshift $FF and r@ send-byte
+	$FF and r@ send-byte
 	case
 	  CMD_GO_IDLE_STATE of \ CRC for CMD0 with arg 0x000
-	    $95 r@ spi-device @ >spi
+	    $95 r@ send-byte
 	  endof
 	  CMD_SEND_IF_COND of \ CRC for CMD8 with arg 0x1AA
-	    $87 r@ spi-device @ >spi
+	    $87 r@ send-byte
 	  endof
-	  CMD_SD_SEND_OP_CMD of \ CRC for CMD41 with arg $50000000
-	    $17 r@ spi-device @ >spi
+	  CMD_READ_OCR of \ CRC for CMD58 with arg $00000000
+	    $25 r@ send-byte
 	  endof
-	  $FF r@ spi-device @ >spi \ CRC is ignored otherwise
+	  ACMD_SD_SEND_OP_CMD of \ CRC for ACMD41 with arg $40000000
+	    $77 r@ send-byte
+	  endof
+\	  ACMD_SD_SEND_OP_CMD of \ CRC for ACMD41 with arg $50000000
+\	    $17 r@ send-byte
+\	  endof
+	  $FF r@ send-byte \ CRC is ignored otherwise
 	endcase
-	6 begin ?dup while 1- r@ spi-device @ spi> drop repeat
 	0 begin
-	  dup $100 < if
-	    $FF r@ spi-device @ >spi
-	    r@ spi-device @ spi> dup $80 and if
+	  dup $10000 < if
+	    r@ get-byte dup $80 and if
 	      drop 1+ false
 	    else
 	      nip true
 	    then
 	  else
-	    drop $00 true
+            ['] x-sd-timeout ?raise
 	  then
-	until .s
+	until
 	rdrop
       ;] critical
     ; define send-sd-cmd
+    
+    :noname ( sd-card -- )
+      >r r@ dummy-byte r@ deassert-cs r> dummy-byte
+    ; define end-sd-cmd
+    
+    :noname ( argument cmd sd-card -- response )
+      dup >r send-sd-cmd r> end-sd-cmd
+    ; define send-simple-sd-cmd
 
     :noname ( sd-card -- )
-      >r systick-counter ." A"
-      begin ." B"
-	systick-counter over - sd-init-timeout <= averts x-sd-init-error ." C"
-	0 CMD_GO_IDLE_STATE r@ send-sd-cmd R1_IDLE_STATE = ." D"
-      until ." E"
-      drop ." F"
-      $1AA CMD_SEND_IF_COND r@ send-sd-cmd
-      R1_ILLEGAL_COMMAND and triggers x-sd-not-sdhc ." G"
-      $FF r@ spi-device @ >spi r@ spi-device @ spi> drop ." H"
-      $FF r@ spi-device @ >spi r@ spi-device @ spi> drop
-      $FF r@ spi-device @ >spi r@ spi-device @ spi> drop
-      $FF r@ spi-device @ >spi r@ spi-device @ spi>
-      $AA <> triggers x-sd-init-error ." I"
-      systick-counter ." J"
-      begin ." K"
-	systick-counter over - sd-init-timeout <= averts x-sd-init-error ." L"
-	$50000000 CMD_SD_SEND_OP_CMD r@ send-sd-cmd R1_READY_STATE = ." M"
-      until ." N"
-      drop ." O"
-      0 CMD_READ_OCR r@ send-sd-cmd R1_READY_STATE = averts x-sd-init-error ." P"
-      $FF r@ spi-device @ >spi r@ spi-device @ spi>
-      $C0 and averts x-sd-not-sdhc ." Q"
-      $FF r@ spi-device @ >spi r@ spi-device @ spi> drop
-      $FF r@ spi-device @ >spi r@ spi-device @ spi> drop
-      $FF r@ spi-device @ >spi r> spi-device @ spi> drop ." R"
+      [:
+        >r systick-counter ." A "
+        begin
+          systick-counter over - sd-init-timeout <= averts x-sd-init-error
+          0 CMD_GO_IDLE_STATE r@ send-simple-sd-cmd R1_IDLE_STATE = ." B "
+        until
+        drop
+        $1AA CMD_SEND_IF_COND r@ send-sd-cmd
+        R1_ILLEGAL_COMMAND and triggers x-sd-not-sdhc
+        r@ get-word $FF and $AA = averts x-sd-init-error
+        r@ end-sd-cmd ." C "
+        systick-counter
+        begin
+          systick-counter over - sd-init-timeout <= averts x-sd-init-error
+          0 CMD_APP_CMD r@ send-simple-sd-cmd drop ." E "
+          $40000000 ACMD_SD_SEND_OP_CMD r@ send-simple-sd-cmd R1_READY_STATE =
+        until
+        drop
+        0 CMD_READ_OCR r@ send-sd-cmd R1_READY_STATE = averts x-sd-init-error ." F "
+        r@ get-word r@ end-sd-cmd
+\        $C0000000 and averts x-sd-not-sdhc
+        h.8 space
+        r> 16 [:
+          CMD_SEND_CID rot read-sd-register
+        ;] with-allot
+      ;] critical
     ; define init-sd-card
 
     :noname ( sd-card -- )
       [:
 	>r systick-counter
 	begin
-	  $FF r@ spi-device @ >spi
-	  r@ spi-device @ spi>
-	  dup $FF = if
-	    systick-counter over - sd-read-timeout <= averts x-sd-timeout
+	  r@ get-byte dup $FF = if
+	    drop systick-counter over - sd-read-timeout <= averts x-sd-timeout
 	    false
 	  else
 	    DATA_START_TOKEN = averts x-sd-read-error true
 	  then
 	until
-	rdrop
+	drop rdrop
       ;] critical
     ; define wait-sd-start-block
 
@@ -375,14 +448,11 @@ begin-module sd
 	CMD_READ_BLOCK r@ send-sd-cmd triggers x-sd-read-error
 	r@ wait-sd-start-block
 	0 begin dup 512 < while
-	  $FF r@ spi-device @ >spi r@ spi-device @ spi>
-	  2 pick buffer-count * 2 pick + r@ sd-buffers + c! 1+
+	  r@ get-byte 2 pick buffer-count * 2 pick + r@ sd-buffers + c! 1+
 	repeat
 	2drop
-	2 begin ?dup while
-	  $FF r@ spi-device @ >spi r@ spi-device @ spi> drop 1-
-	repeat
-	rdrop
+	2 begin ?dup while r@ dummy-byte 1- repeat
+	r> end-sd-cmd
       ;] critical
     ; define read-sd-block
 
@@ -392,14 +462,11 @@ begin-module sd
 	0 swap r@ send-sd-cmd triggers x-sd-read-error
 	r@ wait-sd-start-block
 	0 begin dup 16 < while
-	  $FF r@ spi-device @ >spi r@ spi-device @ spi>
-	  >r 2dup + r> swap c! 1+
+	  r@ get-byte >r 2dup + r> swap c! 1+
 	repeat
 	2drop
-	2 begin ?dup while
-	  $FF r@ spi-device @ >spi r@ spi-device @ spi> drop 1-
-	repeat
-	rdrop
+	2 begin ?dup while r@ dummy-byte 1- repeat
+	r> end-sd-cmd
       ;] critical
     ; define read-sd-register
 
@@ -410,13 +477,14 @@ begin-module sd
 	CMD_WRITE_BLOCK r@ send-sd-cmd triggers x-sd-write-error
 	DATA_START_TOKEN r@ spi-device @ >spi r@ spi-device @ spi> drop
 	0 begin dup sector-size < while
-	  over sector-size * over + r@ sd-buffers + c@ 1+
-	  r@ spi-device @ >spi r@ spi-device @ spi> drop
+	  over sector-size * over + r@ sd-buffers + c@ r@ send-byte 1+
 	repeat
 	2drop
 	sd-write-timeout r@ wait-sd-not-busy
+	r@ end-sd-cmd
 	0 CMD_SEND_STATUS r@ send-sd-cmd triggers x-sd-write-error
-	$FF r@ spi-device @ >spi r@ spi-device @ spi> triggers x-sd-write-error
+	r@ get-byte triggers x-sd-write-error
+	r> end-sd-cmd
       ;] critical
     ; define write-sd-block
 
@@ -444,7 +512,7 @@ begin-module sd
     
     :noname ( block sd-card -- index | -1 )
       >r 0 begin dup buffer-count < while
-	2dup = if nip rdrop exit then 1+
+	2dup cells r@ sd-buffer-assign + @ = if nip rdrop exit then 1+
       repeat
       2drop rdrop -1
     ; define find-sd-buffer
@@ -457,18 +525,18 @@ begin-module sd
     ; define age-sd-buffers
 
     :noname ( sd-card -- index )
-      >r -1 0 0 begin dup buffer-count < while
-	dup cells swap r@ sd-buffer-assign + @ -1 <>  if
-	  dup cells swap r@ sd-buffer-age + @ 3 pick > if
-	    rot drop dup cells swap r@ sd-buffer-age + @ -rot nip dup 1+
-	  else
-	    1+
-	  then
-	else
-	  1+
-	then
+      >r 0 -1 0 begin dup buffer-count < while ( oldest-index oldest-age index )
+        dup cells r@ sd-buffer-assign + @ -1 <> if ( oldest-index oldest-age index )
+          dup cells r@ sd-buffer-age + @ 2 pick > if ( oldest-index oldest-age index )
+            rot drop tuck dup cells r@ sd-buffer-age + @ rot drop swap 1+
+          else
+            1+
+          then
+        else
+          1+
+        then
       repeat
-      drop nip rdrop
+      2drop rdrop
     ; define oldest-sd-buffer
 
     :noname ( sd-card -- index )
