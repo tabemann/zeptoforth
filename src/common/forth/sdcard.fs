@@ -58,6 +58,9 @@ begin-module sd
 
     \ SD Card write timeout
     600 systick-divisor * constant sd-write-timeout
+    
+    \ SD Card dummy timeout
+    10000 systick-divisor * constant sd-dummy-timeout
 
     \ init card in spi mode if CS low
     $00 constant CMD_GO_IDLE_STATE
@@ -97,6 +100,9 @@ begin-module sd
 
     \ read the OCR register of a card
     $3A constant CMD_READ_OCR
+    
+    \ turn CRC checking on/off
+    $3B constant CMD_CRC_ON_OFF
 
     \ set the number of write blocks to be pre-erased before writing
     $17 constant ACMD_SET_WR_BLOCK_ERASE_COUNT
@@ -176,14 +182,17 @@ begin-module sd
       \ Send a byte and discard the response
       method send-byte ( tx sd-card -- )
       
-      \ Send a dummy value ($FF) and get the response
+      \ Send a dummy byte ($FF) and get the response
       method get-byte ( sd-card -- rx )
       
-      \ Send four dummy values ($FF) and get the response as a 32-bit value
+      \ Send four dummy bytes ($FF) and get the response as a 32-bit value
       method get-word ( sd-card -- rx )
       
-      \ Send a dummy value ($FF) and discard the response
+      \ Send a dummy byte ($FF) and discard the response
       method dummy-byte ( sd-card -- )
+      
+      \ Send 8 dummy bytes ($FF) and discard the responses
+      method dummy-bytes ( sd-card -- )
       
       \ Send an SD card command
       method send-sd-cmd ( argument command sd-card -- response )
@@ -265,7 +274,7 @@ begin-module sd
         repeat
 	r@ init-sd-card
 \	r@ spi-device @ disable-spi
-	1000000 r@ spi-device @ spi-baud!
+\	1000000 r@ spi-device @ spi-baud!
 \	r> spi-device @ enable-spi
 	1 ms
       ;] over sd-lock with-lock
@@ -330,7 +339,9 @@ begin-module sd
 
     :noname ( sd-card -- ) low swap cs-pin @ pin! ; define assert-cs
     
-    :noname ( tx sd-card -- rx ) over h.2 ." >" spi-device @ tuck >spi spi> dup h.2 space ; define send-get-byte
+    :noname ( tx sd-card -- rx )
+      over h.2 ." >" spi-device @ tuck >spi spi> dup h.2 space
+    ; define send-get-byte
     
     :noname ( tx sd-card -- ) send-get-byte drop ; define send-byte
     
@@ -345,13 +356,17 @@ begin-module sd
     
     :noname ( sd-card -- ) $FF swap send-get-byte drop ; define dummy-byte
     
+    :noname ( sd-card -- )
+      display-red >r 8 begin ?dup while r@ dummy-byte 1- repeat rdrop display-normal
+    ; define dummy-bytes
+    
     :noname ( argument command sd-card -- response )
       [:
 	>r
 	r@ deassert-cs
-	r@ dummy-byte
+	r@ dummy-bytes
 	r@ assert-cs
-	r@ dummy-byte r@ dummy-byte
+	r@ dummy-bytes
 	tuck $40 or r@ send-byte
 	dup 24 rshift r@ send-byte
 	dup 16 rshift $FF and r@ send-byte
@@ -367,6 +382,9 @@ begin-module sd
 	  CMD_READ_OCR of \ CRC for CMD58 with arg $00000000
 	    $25 r@ send-byte
 	  endof
+	  CMD_CRC_ON_OFF of \ CRC for CMD59 with arg $00000000
+            $91 r@ send-byte
+          endof
 	  ACMD_SD_SEND_OP_CMD of \ CRC for ACMD41 with arg $40000000
 	    $77 r@ send-byte
 	  endof
@@ -391,7 +409,7 @@ begin-module sd
     ; define send-sd-cmd
     
     :noname ( sd-card -- )
-      >r r@ dummy-byte r@ deassert-cs r> dummy-byte
+      >r r@ dummy-bytes r@ deassert-cs r> dummy-bytes
     ; define end-sd-cmd
     
     :noname ( argument cmd sd-card -- response )
@@ -410,6 +428,7 @@ begin-module sd
         R1_ILLEGAL_COMMAND and triggers x-sd-not-sdhc
         r@ get-word $FF and $AA = averts x-sd-init-error
         r@ end-sd-cmd ." C "
+        0 CMD_CRC_ON_OFF r@ send-simple-sd-cmd R1_IDLE_STATE = averts x-sd-init-error ." Q "
         systick-counter
         begin
           systick-counter over - sd-init-timeout <= averts x-sd-init-error
@@ -417,6 +436,7 @@ begin-module sd
           $40000000 ACMD_SD_SEND_OP_CMD r@ send-simple-sd-cmd R1_READY_STATE =
         until
         drop
+	1000000 r@ spi-device @ spi-baud!
         0 CMD_READ_OCR r@ send-sd-cmd R1_READY_STATE = averts x-sd-init-error ." F "
         r@ get-word r@ end-sd-cmd
 \        $C0000000 and averts x-sd-not-sdhc
