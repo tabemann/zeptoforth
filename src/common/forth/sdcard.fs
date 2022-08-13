@@ -265,12 +265,11 @@ begin-module sd
 	>r
 	false false r@ spi-device @ motorola-spi
 	r@ spi-device @ master-spi
-	250000 r@ spi-device @ spi-baud!
+	125000 r@ spi-device @ spi-baud!
 	8 r@ spi-device @ spi-data-size!
         r@ deassert-cs
 	r@ spi-device @ enable-spi
-	100 begin ?dup while
-          1- $FF r@ spi-device @ >spi r@ spi-device @ spi> drop
+	10 begin ?dup while 1- r@ dummy-bytes
         repeat
 	r@ init-sd-card
 \	r@ spi-device @ disable-spi
@@ -436,7 +435,7 @@ begin-module sd
           $40000000 ACMD_SD_SEND_OP_CMD r@ send-simple-sd-cmd R1_READY_STATE =
         until
         drop
-	1000000 r@ spi-device @ spi-baud!
+\        1000000 r@ spi-device @ spi-baud!
         0 CMD_READ_OCR r@ send-sd-cmd R1_READY_STATE = averts x-sd-init-error ." F "
         r@ get-word r@ end-sd-cmd
 \        $C0000000 and averts x-sd-not-sdhc
