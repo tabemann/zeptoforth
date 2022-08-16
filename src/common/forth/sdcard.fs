@@ -300,7 +300,7 @@ begin-module sd
     ; define block!
 
     :noname ( c-addr u block sd-card -- )
-      [: ." B"
+      [:
 	>r dup r@ find-sd-buffer dup -1 <> if ( c-addr u block index )
 	  r> over >r >r nip ( c-addr u index )
 	else
