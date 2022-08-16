@@ -292,7 +292,7 @@ begin-module sd
 	  tuck cells r@ sd-buffer-assign + ! ( c-addr u index )
 	then
 	$FF over r@ sd-buffer-dirty + c! ( c-addr u index )
-	r> over r> r> ( c-addr u index )
+	r> over >r >r ( c-addr u index )
 	sector-size * r@ sd-buffers + swap sector-size min move ( )
 	r@ age-sd-buffers ( )
 	r> r> cells swap sd-buffer-age + 0 swap ! ( )
@@ -300,14 +300,14 @@ begin-module sd
     ; define block!
 
     :noname ( c-addr u block sd-card -- )
-      [:
+      [: ." B"
 	>r dup r@ find-sd-buffer dup -1 <> if ( c-addr u block index )
 	  r> over >r >r nip ( c-addr u index )
 	else
 	  drop r@ select-sd-buffer ( c-addr u block index )
 	  2dup cells r@ sd-buffer-assign + ! ( c-addr u block index )
 	  tuck swap r@ read-sd-block ( c-addr u index )
-	  >r over r> r> ( c-addr u index )
+	  r> over >r >r ( c-addr u index )
 	then
 	sector-size * r@ sd-buffers + -rot sector-size min move ( )
 	r@ age-sd-buffers ( )
@@ -533,10 +533,10 @@ begin-module sd
     ; define find-sd-buffer
 
     :noname ( sd-card -- )
-      0 begin dup buffer-count < while
-	2dup cells swap sd-buffer-age + 1 swap +! 1+
+      >r 0 begin dup buffer-count < while
+        dup cells r@ sd-buffer-age + 1 swap +! 1+
       repeat
-      2drop
+      drop rdrop
     ; define age-sd-buffers
 
     :noname ( sd-card -- index )
