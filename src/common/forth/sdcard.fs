@@ -265,18 +265,14 @@ begin-module sd
 	>r
 	false false r@ spi-device @ motorola-spi
 	r@ spi-device @ master-spi
-	250000 r@ spi-device @ spi-baud!
+	125000 r@ spi-device @ spi-baud!
 	8 r@ spi-device @ spi-data-size!
         r@ deassert-cs
 	r@ spi-device @ enable-spi
 	100 begin ?dup while
           1- $FF r@ spi-device @ >spi r@ spi-device @ spi> drop
         repeat
-	r@ init-sd-card
-\	r@ spi-device @ disable-spi
-\	1000000 r@ spi-device @ spi-baud!
-\	r> spi-device @ enable-spi
-	1 ms
+	r> init-sd-card
       ;] over sd-lock with-lock
     ; define init-sd
 
@@ -340,7 +336,7 @@ begin-module sd
     :noname ( sd-card -- ) low swap cs-pin @ pin! ; define assert-cs
     
     :noname ( tx sd-card -- rx )
-      over h.2 ." >" spi-device @ tuck >spi spi> dup h.2 space
+      ( over h.2 ." >" ) spi-device @ tuck >spi spi> ( dup h.2 space )
     ; define send-get-byte
     
     :noname ( tx sd-card -- ) send-get-byte drop ; define send-byte
@@ -357,7 +353,7 @@ begin-module sd
     :noname ( sd-card -- ) $FF swap send-get-byte drop ; define dummy-byte
     
     :noname ( sd-card -- )
-      display-red >r 8 begin ?dup while r@ dummy-byte 1- repeat rdrop display-normal
+      ( display-red ) >r 8 begin ?dup while r@ dummy-byte 1- repeat rdrop ( display-normal )
     ; define dummy-bytes
     
     :noname ( argument command sd-card -- response )
@@ -418,29 +414,28 @@ begin-module sd
 
     :noname ( sd-card -- )
       [:
-        >r systick-counter ." A "
+        >r systick-counter
         begin
           systick-counter over - sd-init-timeout <= averts x-sd-init-error
-          0 CMD_GO_IDLE_STATE r@ send-simple-sd-cmd R1_IDLE_STATE = ." B "
+          0 CMD_GO_IDLE_STATE r@ send-simple-sd-cmd R1_IDLE_STATE =
         until
         drop
         $1AA CMD_SEND_IF_COND r@ send-sd-cmd
         R1_ILLEGAL_COMMAND and triggers x-sd-not-sdhc
         r@ get-word $FF and $AA = averts x-sd-init-error
-        r@ end-sd-cmd ." C "
-        0 CMD_CRC_ON_OFF r@ send-simple-sd-cmd R1_IDLE_STATE = averts x-sd-init-error ." Q "
+        r@ end-sd-cmd
+        0 CMD_CRC_ON_OFF r@ send-simple-sd-cmd R1_IDLE_STATE = averts x-sd-init-error
         systick-counter
         begin
           systick-counter over - sd-init-timeout <= averts x-sd-init-error
-          0 CMD_APP_CMD r@ send-simple-sd-cmd drop ." E "
+          0 CMD_APP_CMD r@ send-simple-sd-cmd drop
           $40000000 ACMD_SD_SEND_OP_CMD r@ send-simple-sd-cmd R1_READY_STATE =
         until
         drop
-	1000000 r@ spi-device @ spi-baud!
-        0 CMD_READ_OCR r@ send-sd-cmd R1_READY_STATE = averts x-sd-init-error ." F "
+        1000000 r@ spi-device @ spi-baud!
+        0 CMD_READ_OCR r@ send-sd-cmd R1_READY_STATE = averts x-sd-init-error
         r@ get-word r@ end-sd-cmd
-\        $C0000000 and averts x-sd-not-sdhc
-        h.8 space
+        $C0000000 and averts x-sd-not-sdhc
         r> 16 [:
           CMD_SEND_CID rot read-sd-register
         ;] with-allot

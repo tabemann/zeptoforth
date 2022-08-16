@@ -40,9 +40,10 @@ begin-module sdcard-test
     my-spi 3 spi-pin
     my-spi 4 spi-pin
     5 output-pin
-    5 my-spi <sd> my-sd init-object
-    my-sd init-sd
-    my-buffer block-size 0 my-sd block@
+    6 2 ?do i pull-up-pin loop ." a"
+    5 my-spi <sd> my-sd init-object ." b"
+    my-sd init-sd ." c"
+    my-buffer block-size 0 my-sd block@ ." d"
     my-buffer my-buffer block-size +  dump
   ;
 
