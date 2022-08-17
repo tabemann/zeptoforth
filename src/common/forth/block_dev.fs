@@ -35,6 +35,9 @@ begin-module block-dev
 
     \ Flush blocks
     method flush-blocks ( dev -- )
+    
+    \ Clear cached blocks
+    method clear-blocks ( dev -- )
   end-class
 
   \ Implement block device base class
@@ -42,6 +45,8 @@ begin-module block-dev
     ' abstract-method define block-size
     ' abstract-method define block!
     ' abstract-method define block@
+    ' abstract-method define flush-blocks
+    ' abstract-method define clear-blocks
   end-implement
   
 end-module

@@ -249,13 +249,7 @@ begin-module sd
       tuck spi-device !
       tuck cs-pin !
       true over sd-protect-block-zero !
-      0 begin dup buffer-count < while
-	2dup cells swap sd-buffer-assign + -1 swap !
-	2dup cells swap sd-buffer-age + 0 swap !
-	2dup swap sd-buffer-dirty + 0 swap c!
-	1+
-      repeat
-      2drop
+      clear-blocks
     ; define new
 
     :noname ( sd-card -- bytes ) sector-size ; define block-size
@@ -315,7 +309,7 @@ begin-module sd
       ;] over sd-lock with-lock
     ; define block@
 
-    :noname ( sd-card )
+    :noname ( sd-card -- )
       [:
 	>r
 	0 begin dup buffer-count < while
@@ -330,6 +324,18 @@ begin-module sd
 	drop rdrop
       ;] over sd-lock with-lock
     ; define flush-blocks
+    
+    :noname ( sd-card -- )
+      [:
+        0 begin dup buffer-count < while
+          2dup cells swap sd-buffer-assign + -1 swap !
+          2dup cells swap sd-buffer-age + 0 swap !
+          2dup swap sd-buffer-dirty + 0 swap c!
+          1+
+        repeat
+        2drop
+      ;] over sd-lock with-lock
+    ; define clear-blocks
     
     :noname ( sd-card -- ) high swap cs-pin @ pin! ; define deassert-cs
 
@@ -507,11 +513,11 @@ begin-module sd
       [:
 	>r
 	systick-counter
-	begin systick-counter over - 2 pick < while
-	  $FF r@ spi-device @ r> r@ spi-device @ spi>
-	  $FF = if 2drop rdrop exit then
-	repeat
-	drop rdrop ['] x-sd-timeout ?raise
+	begin
+          systick-counter over - 2 pick <= averts x-sd-timeout
+          r@ get-byte $FF =
+	until
+	2drop rdrop
       ;] critical
     ; define wait-sd-not-busy
 

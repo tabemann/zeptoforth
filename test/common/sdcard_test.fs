@@ -30,7 +30,7 @@ begin-module sdcard-test
   
   512 constant block-size
   
-  block-size buffer: my-buffer
+  block-size aligned-buffer: my-buffer
   
   0 constant my-spi
 
@@ -44,7 +44,32 @@ begin-module sdcard-test
     5 my-spi <sd> my-sd init-object
     my-sd init-sd
     my-buffer block-size 0 my-sd block@
-    my-buffer my-buffer block-size +  dump
+    my-buffer my-buffer block-size + dump
+  ;
+  
+  \ Flush and clear blocks
+  : flush-clear ( -- )
+    my-sd flush-blocks
+    my-sd clear-blocks
+  ;
+  
+  \ Read a block
+  : read-block ( block -- )
+    my-buffer block-size $7F fill
+    my-buffer block-size rot my-sd block@
+    my-buffer my-buffer block-size + dump
+  ;
+  
+  \ Read/write a block
+  : rw-block ( x block -- )
+    my-buffer block-size $00 fill
+    >r my-buffer !
+    my-buffer block-size r@ my-sd block!
+    my-sd flush-blocks
+    my-sd clear-blocks
+    my-buffer block-size $7F fill
+    my-buffer block-size r> my-sd block@
+    my-buffer my-buffer block-size + dump
   ;
 
 end-module
