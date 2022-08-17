@@ -159,6 +159,9 @@ begin-module sd
 
       \ Protect block zero
       cell member sd-protect-block-zero
+      
+      \ Maximum block count
+      cell member max-block-count
 
     end-module
 
@@ -169,6 +172,9 @@ begin-module sd
     method write-sd-block-zero! ( enabled sd-card -- )
 
     continue-module sd-internal
+    
+      \ Validate a block index
+      method validate-block ( block sd-card -- )
       
       \ Assert CS
       method assert-cs ( sd-card -- )
@@ -253,6 +259,8 @@ begin-module sd
     ; define new
 
     :noname ( sd-card -- bytes ) sector-size ; define block-size
+    
+    :noname ( sd-card -- blocks ) max-block-count @ ; define block-count
 
     :noname ( sd-card -- )
       [:
@@ -276,6 +284,7 @@ begin-module sd
     ; define write-sd-block-zero!
 
     :noname ( c-addr u block sd-card -- )
+      2dup validate-block
       [:
 	>r
 	dup 0= r@ sd-protect-block-zero @ and triggers x-block-zero-protected
@@ -294,6 +303,7 @@ begin-module sd
     ; define block!
 
     :noname ( c-addr u block sd-card -- )
+      2dup validate-block
       [:
 	>r dup r@ find-sd-buffer dup -1 <> if ( c-addr u block index )
 	  r> over >r >r nip ( c-addr u index )
@@ -336,6 +346,11 @@ begin-module sd
         2drop
       ;] over sd-lock with-lock
     ; define clear-blocks
+    
+    :noname ( block sd-card -- )
+      over 0 >= averts x-block-out-of-range
+      block-count < averts x-block-out-of-range
+    ; define validate-block
     
     :noname ( sd-card -- ) high swap cs-pin @ pin! ; define deassert-cs
 
@@ -443,8 +458,10 @@ begin-module sd
         r@ get-word r@ end-sd-cmd
         $C0000000 and averts x-sd-not-sdhc
         r> 16 [:
-          CMD_SEND_CID rot read-sd-register
-        ;] with-allot
+          2dup 2>r CMD_SEND_CSD rot read-sd-register 2r>
+          dup 7 + c@ $3F and 16 lshift over 8 + c@ 8 lshift or swap 9 + c@ or 1+ 1024 *
+          swap max-block-count !
+        ;] with-aligned-allot
       ;] critical
     ; define init-sd-card
 

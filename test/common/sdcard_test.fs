@@ -60,6 +60,13 @@ begin-module sdcard-test
     my-buffer my-buffer block-size + dump
   ;
   
+  \ Write a block
+  : write-block ( x block -- )
+    my-buffer block-size $00 fill
+    >r my-buffer !
+    my-buffer block-size r> my-sd block!
+  ;
+  
   \ Read/write a block
   : rw-block ( x block -- )
     my-buffer block-size $00 fill

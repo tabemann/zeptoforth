@@ -22,10 +22,16 @@ begin-module block-dev
 
   oo import
   
+  \ Block out of range exception
+  : x-block-out-of-range ( -- ) ." block out of range" cr ;
+  
   \ Block device base class
   <object> begin-class <block-dev>
     \ Get block size
     method block-size ( dev -- bytes )
+    
+    \ Get block count
+    method block-count ( dev -- blocks )
 
     \ Write block
     method block! ( c-addr u block-index dev -- )
@@ -43,6 +49,7 @@ begin-module block-dev
   \ Implement block device base class
   <block-dev> begin-implement
     ' abstract-method define block-size
+    ' abstract-method define block-count
     ' abstract-method define block!
     ' abstract-method define block@
     ' abstract-method define flush-blocks
