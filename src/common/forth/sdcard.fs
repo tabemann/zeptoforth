@@ -285,39 +285,84 @@ begin-module sd
 
     :noname ( c-addr u block sd-card -- )
       2dup validate-block
-      [:
-	>r
-	dup 0= r@ sd-protect-block-zero @ and triggers x-block-zero-protected
-	dup r@ find-sd-buffer dup -1 <> if ( c-addr u block index )
-	  nip ( c-addr u index )
-	else
-	  drop r@ select-sd-buffer ( c-addr u block index )
-	  tuck cells r@ sd-buffer-assign + ! ( c-addr u index )
-	then
-	$FF over r@ sd-buffer-dirty + c! ( c-addr u index )
-	r> over >r >r ( c-addr u index )
-	sector-size * r@ sd-buffers + swap sector-size min move ( )
-	r@ age-sd-buffers ( )
-	r> r> cells swap sd-buffer-age + 0 swap ! ( )
-      ;] over sd-lock with-lock
+      2 pick sector-size <> if
+        0 -rot block-part!
+      else
+        [:
+          >r
+          dup 0= r@ sd-protect-block-zero @ and triggers x-block-zero-protected
+          dup r@ find-sd-buffer dup -1 <> if ( c-addr u block index )
+            nip ( c-addr u index )
+          else
+            drop r@ select-sd-buffer ( c-addr u block index )
+            tuck cells r@ sd-buffer-assign + ! ( c-addr u index )
+          then
+          $FF over r@ sd-buffer-dirty + c! ( c-addr u index )
+          r> over >r >r ( c-addr u index )
+          sector-size * r@ sd-buffers + swap sector-size min move ( )
+          r@ age-sd-buffers ( )
+          r> r> cells swap sd-buffer-age + 0 swap ! ( )
+        ;] over sd-lock with-lock
+      then
     ; define block!
+    
+    :noname ( c-addr u offset block sd-card -- )
+      2dup validate-block
+      [:
+        >r
+        dup 0= r@ sd-protect-block-zero @ and triggers x-block-zero-protected
+        dup r@ find-sd-buffer dup -1 <> if ( c-addr u offset block index )
+          nip ( c-addr u offset index )
+        else
+          drop r@ select-sd-buffer ( c-addr u offset block index )
+          2dup cells r@ sd-buffer-assign + ! ( c-addr u offset block index )
+          tuck swap r@ read-sd-block ( c-addr u offset index )
+        then
+        $FF over r@ sd-buffer-dirty + c! ( c-addr u offset index )
+        r> over >r >r ( c-addr u offset index )
+        sector-size * r@ sd-buffers + ( c-addr u offset buffer )
+        swap sector-size min dup >r + ( c-addr u buffer )
+        swap sector-size r> - 0 max min move ( )
+        r@ age-sd-buffers ( )
+        r> r> cells swap sd-buffer-age + 0 swap ! ( )
+      ;] over sd-lock with-lock
+    ; define block-part!
 
     :noname ( c-addr u block sd-card -- )
       2dup validate-block
       [:
 	>r dup r@ find-sd-buffer dup -1 <> if ( c-addr u block index )
-	  r> over >r >r nip ( c-addr u index )
-	else
-	  drop r@ select-sd-buffer ( c-addr u block index )
-	  2dup cells r@ sd-buffer-assign + ! ( c-addr u block index )
-	  tuck swap r@ read-sd-block ( c-addr u index )
-	  r> over >r >r ( c-addr u index )
-	then
-	sector-size * r@ sd-buffers + -rot sector-size min move ( )
-	r@ age-sd-buffers ( )
-	r> r> cells swap sd-buffer-age + 0 swap ! ( )
+          r> over >r >r nip ( c-addr u index )
+        else
+          drop r@ select-sd-buffer ( c-addr u block index )
+          2dup cells r@ sd-buffer-assign + ! ( c-addr u block index )
+          tuck swap r@ read-sd-block ( c-addr u index )
+          r> over >r >r ( c-addr u index )
+        then
+        sector-size * r@ sd-buffers + -rot sector-size min move ( )
+        r@ age-sd-buffers ( )
+        r> r> cells swap sd-buffer-age + 0 swap ! ( )
       ;] over sd-lock with-lock
     ; define block@
+    
+    :noname ( c-addr u offset block sd-card -- )
+      2dup validate-block
+      [:
+	>r dup r@ find-sd-buffer dup -1 <> if ( c-addr u offset block index )
+          r> over >r >r nip ( c-addr u offset index )
+        else
+          drop r@ select-sd-buffer ( c-addr u offset block index )
+          2dup cells r@ sd-buffer-assign + ! ( c-addr u offset block index )
+          tuck swap r@ read-sd-block ( c-addr u offset index )
+          r> over >r >r ( c-addr u offset index )
+        then
+        sector-size * r@ sd-buffers + ( c-addr u offset buffer )
+        swap sector-size min dup >r + ( c-addr u buffer )
+        -rot sector-size r> - 0 max min move ( )
+        r@ age-sd-buffers ( )
+        r> r> cells swap sd-buffer-age + 0 swap ! ( )
+      ;] over sd-lock with-lock
+    ; define block-part@
 
     :noname ( sd-card -- )
       [:

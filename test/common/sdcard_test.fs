@@ -60,11 +60,24 @@ begin-module sdcard-test
     my-buffer my-buffer block-size + dump
   ;
   
+  \ Read part of a block
+  : read-block-part ( offset block --  )
+    swap >r
+    my-buffer block-size $7F fill
+    my-buffer block-size r@ - rot r@ swap my-sd block-part@
+    my-buffer my-buffer block-size r> - + dump
+  ;
+  
   \ Write a block
   : write-block ( x block -- )
     my-buffer block-size $00 fill
     >r my-buffer !
     my-buffer block-size r> my-sd block!
+  ;
+  
+  \ Write part of a block
+  : write-block-part ( c-addr u offset block -- )
+    my-sd block-part!
   ;
   
   \ Read/write a block
@@ -77,6 +90,23 @@ begin-module sdcard-test
     my-buffer block-size $7F fill
     my-buffer block-size r> my-sd block@
     my-buffer my-buffer block-size + dump
+  ;
+  
+  \ Find the first non-zero block in a range, exclusive, return -1 if none found
+  : find-first-block ( start end -- first )
+    swap ?do
+      my-buffer block-size i my-sd block@
+      my-buffer block-size + my-buffer ?do
+        i c@ if j unloop unloop exit then
+      loop
+    loop
+    -1
+  ;
+  
+  \ Clear blocks in a range, exclusive
+  : clear-blocks ( start end -- )
+    my-buffer block-size $00 fill
+    swap ?do my-buffer block-size i my-sd block! loop
   ;
 
 end-module

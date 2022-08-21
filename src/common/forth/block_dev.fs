@@ -35,9 +35,15 @@ begin-module block-dev
 
     \ Write block
     method block! ( c-addr u block-index dev -- )
+    
+    \ Write part of a block
+    method block-part! ( c-addr u offset block-index dev -- )
 
     \ Read block
     method block@ ( c-addr u block-index dev -- )
+    
+    \ Read part of a block
+    method block-part@ ( c-addr u offset block-index dev -- )
 
     \ Flush blocks
     method flush-blocks ( dev -- )
@@ -51,7 +57,9 @@ begin-module block-dev
     ' abstract-method define block-size
     ' abstract-method define block-count
     ' abstract-method define block!
+    ' abstract-method define block-part!
     ' abstract-method define block@
+    ' abstract-method define block-part@
     ' abstract-method define flush-blocks
     ' abstract-method define clear-blocks
   end-implement
