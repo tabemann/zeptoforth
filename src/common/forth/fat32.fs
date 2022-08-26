@@ -214,6 +214,9 @@ begin-module fat32
     \ Get the size of a file
     method file-size@ ( file -- bytes )
     
+    \ Set the size of a file
+    method file-size! ( bytes file -- )
+    
     \ Get the current sector in a file
     method current-file-sector@ ( file -- sector )
     
