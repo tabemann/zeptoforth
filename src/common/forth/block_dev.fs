@@ -50,6 +50,12 @@ begin-module block-dev
     
     \ Clear cached blocks
     method clear-blocks ( dev -- )
+    
+    \ Set write-through cache mode
+    method write-through! ( write-through dev -- )
+    
+    \ Get write-through cache mode
+    method write-through@ ( dev -- write-through )
   end-class
 
   \ Implement block device base class
@@ -62,6 +68,8 @@ begin-module block-dev
     ' abstract-method define block-part@
     ' abstract-method define flush-blocks
     ' abstract-method define clear-blocks
+    ' abstract-method define write-through!
+    ' abstract-method define write-through@
   end-implement
   
 end-module

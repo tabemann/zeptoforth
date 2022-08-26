@@ -162,6 +162,9 @@ begin-module sd
       
       \ Maximum block count
       cell member max-block-count
+      
+      \ Write through mode
+      cell member write-through
 
     end-module
 
@@ -254,6 +257,7 @@ begin-module sd
       dup sd-lock init-lock
       tuck spi-device !
       tuck cs-pin !
+      false over write-through !
       true over sd-protect-block-zero !
       clear-blocks
     ; define new
@@ -301,7 +305,8 @@ begin-module sd
           r> over >r >r ( c-addr u index )
           sector-size * r@ sd-buffers + swap sector-size min move ( )
           r@ age-sd-buffers ( )
-          r> r> cells swap sd-buffer-age + 0 swap ! ( )
+          r> r> cells over sd-buffer-age + 0 swap ! ( sd-card )
+          dup write-through @ if flush-blocks else drop then ( )
         ;] over sd-lock with-lock
       then
     ; define block!
@@ -324,7 +329,8 @@ begin-module sd
         swap sector-size min dup >r + ( c-addr u buffer )
         swap sector-size r> - 0 max min move ( )
         r@ age-sd-buffers ( )
-        r> r> cells swap sd-buffer-age + 0 swap ! ( )
+        r> r> cells over sd-buffer-age + 0 swap ! ( sd-card )
+        dup write-through @ if flush-blocks else drop then ( )
       ;] over sd-lock with-lock
     ; define block-part!
 
@@ -391,6 +397,14 @@ begin-module sd
         2drop
       ;] over sd-lock with-lock
     ; define clear-blocks
+    
+    :noname ( write-through sd-card -- )
+      >r dup r@ write-through ! if r@ flush-blocks then rdrop
+    ; define write-through!
+    
+    :noname ( sd-card -- write-through )
+      write-through @
+    ; define write-through@
     
     :noname ( block sd-card -- )
       over 0 >= averts x-block-out-of-range
