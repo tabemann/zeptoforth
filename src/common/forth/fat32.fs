@@ -66,6 +66,9 @@ begin-module fat32
     \ The FAT32 device to which this filesystem belongs
     cell member fat32-device
     
+    \ The first sector of the filesystem
+    cell member first-sector
+    
     \ The number of sectors per cluster
     cell member cluster-sectors
     
@@ -115,6 +118,9 @@ begin-module fat32
     \ Get the starting sector of a cluster
     method cluster>sector ( cluster fs -- sector )
     
+    \ Get a sector containing an offset within a cluster
+    method cluster-offset>sector ( offset cluster fs -- sector )
+    
     \ Get the cluster of a sector
     method sector>cluster ( sector fs -- cluster )
     
@@ -135,6 +141,9 @@ begin-module fat32
     
     \ Free a cluster chain (for freeing a file/directory)
     method free-cluster-chain ( cluster fs -- )
+    
+    \ Free all the clusters in a cluster chain except the first (for truncating a file)
+    method free-cluster-tail ( cluster fs -- )
     
     \ Find the entry starting from a given cluster and index within the cluster
     method find-entry ( index cluster fs -- index cluster | -1 -1 )
@@ -175,11 +184,44 @@ begin-module fat32
     \ Starting cluster
     cell member file-start-cluster
     
-    \ File size
-    cell member file-size
+    \ Current offset in a file
+    cell member file-offset
+    
+    \ Current cluster in a file
+    cell member file-current-cluster
+    
+    \ Current cluster index in a file
+    cell member file-current-cluster-index
     
     \ Create a file
     method create-file ( c-addr u parent-dir file -- )
+    
+    \ Read data from a file
+    method read-file ( c-addr u file -- bytes )
+    
+    \ Write data to a file
+    method write-file ( c-addr u file -- bytes )
+    
+    \ Truncate a file
+    method truncate-file ( file -- )
+    
+    \ Read up to a sector in a file
+    method read-file-sector ( c-addr u file -- bytes )
+    
+    \ Write up to a sector in a file
+    method write-file-sector ( c-addr u file -- bytes )
+    
+    \ Get the size of a file
+    method file-size@ ( file -- bytes )
+    
+    \ Get the current sector in a file
+    method current-file-sector@ ( file -- sector )
+    
+    \ Advance the current cluster if at the end of the current cluster
+    method advance-cluster ( file -- )
+    
+    \ Expand a file
+    method expand-file ( file -- )
   end-class
   
   \ FAT32 directory class
@@ -500,11 +542,12 @@ begin-module fat32
   
   \ Implement FAT32 filesystem class
   <fat32-fs> begin-implement
-    :noname ( device fs -- )
+    :noname ( first-sector device fs -- )
       dup [ <fs> ] -> new
       tuck fat32-device !
+      tuck first-sector !
       [:
-        r> sector-scratchpad sector-size 0 r@ fat32-device @ block@
+        r> sector-scratchpad sector-size r@ first-sector @ r@ fat32-device @ block@
         sector-scratchpad $00B + unaligned-h@ 512 = averts x-sector-size-not-supported
         sector-scratchpad $00D + c@ r@ cluster-sectors !
         sector-scratchpad $00E + h@ r@ reserved-sectors !
@@ -564,18 +607,25 @@ begin-module fat32
     ; define all-fat!
     
     :noname ( cluster fat fs -- sector )
-      >r r@ reserved-sectors @ swap r> fat-sectors @ * + swap sector-size 4 / / +
+      >r r@ first-sector @ r@ reserved-sectors @ +
+      swap r> fat-sectors @ * + swap sector-size 4 / / +
     ; define cluster>fat-sector
     
     :noname ( cluster fs -- sector )
       >r
-      r@ reserved-sectors @
+      r@ first-sector @
+      r@ reserved-sectors @ +
       r@ fat-count @ r@ fat-sectors @ * +
       swap 2 - r> cluster-sectors @ * +
     ; define cluster>sector
     
+    :noname ( offset cluster fs -- sector )
+      cluster>sector swap sector-size / +
+    ; define cluster-offset>sector
+    
     :noname ( sector fs -- cluster )
       >r
+      r@ first-sector @ -
       r@ reserved-sectors @ -
       r@ fat-count @ r@ fat-sectors @ * -
       r> cluster-sectors @ /
@@ -633,6 +683,12 @@ begin-module fat32
       until
       rdrop
     ; define free-cluster-chain
+    
+    :noname ( cluster fs -- )
+      >r 0 r@ fat@
+      dup link-cluster? if cluster-link r@ free-cluster-chain else drop then
+      rdrop
+    ; define free-cluster-tail
     
     :noname ( index cluster fs -- index cluster | -1 -1 )
       begin 2 pick over dir-cluster-entry-count@ > while
@@ -750,7 +806,10 @@ begin-module fat32
       tuck file-fs !
       -1 over file-parent-index !
       -1 over file-parent-cluster !
-      -1 swap file-start-cluster !
+      -1 over file-start-cluster !
+      0 over file-offset !
+      -1 over file-current-cluster !
+      0 swap file-current-cluster-index !
     ; define new
     
     :noname ( c-addr u parent-dir file -- )
@@ -758,7 +817,9 @@ begin-module fat32
       2 pick file-parent-cluster ! ( c-addr u file parent-index )
       over file-parent-index ! ( c-addr u file )
       dup file-fs @ allocate-cluster ( c-addr u file dir-cluster )
-      over file-start-cluster ! ( c-addr u file )
+      2dup swap file-start-cluster ! ( c-addr u file dir-cluster )
+      over file-current-cluster ! ( c-addr u file )
+      0 over file-offset ! ( c-addr u file )
       <fat32-entry> [: ( c-addr u file entry )
         0 2 pick file-start-cluster @ rot ( c-addr u file 0 file-cluster entry )
         5 roll 5 roll rot ( file 0 file-cluster c-addr u entry )
@@ -768,6 +829,147 @@ begin-module fat32
         3 roll file-fs @ entry! ( )
       ;] with-object
     ; define create-file
+    
+    :noname ( c-addr u file -- bytes )
+      >r 0 ( c-addr u read-bytes )
+      begin ( c-addr u read-bytes )
+        over 0<> if ( c-addr u read-bytes )
+          -rot 2dup r@ read-file-sector ( read-bytes c-addr u part-bytes )
+          dup 0<> if ( read-bytes c-addr u part-bytes )
+            >r r@ - swap r@ + swap rot r> + ( c-addr' u' read-bytes' )
+          else
+            2drop drop true ( read-bytes flag )
+          then
+        else
+          nip nip true ( read-bytes flag )
+        then
+      until ( read-bytes )
+      rdrop ( read-bytes )
+    ; define read-file
+    
+    :noname ( c-addr u file -- bytes )
+      >r 0 ( c-addr u write-bytes )
+      begin ( c-addr u write-bytes )
+        over 0<> if ( c-addr u write-bytes )
+          -rot 2dup r@ write-file-sector ( write-bytes c-addr u part-bytes )
+          dup 0<> if ( write-bytes c-addr u part-bytes )
+            >r r@ - swap r@ + swap rot r> + ( c-addr' u' write-bytes' )
+            over 0<> if ( c-addr' u' write-bytes' )
+              r@ expand-file ( c-addr' u' write-bytes' )
+            then
+          else
+            2drop drop true ( write-bytes flag )
+          then
+        else
+          nip nip true ( write-bytes flag )
+        then
+      until ( read-bytes )
+      rdrop ( read-bytes )
+    ; define write-file
+    
+    :noname ( file -- )
+      >r ( )
+      r@ file-current-cluster @ r@ file-fs @ free-cluster-tail ( )
+      r@ file-offset @ r@ file-size! ( )
+      rdrop ( )
+    ; define truncate-file
+    
+    :noname ( c-addr u file -- bytes )
+      >r r@ current-file-sector@ ( c-addr u sector )
+      sector-size r@ r@ file-offset @ sector-size umod - ( c-addr u sector limit )
+      r@ file-size@ r@ file-offset @ - min ( c-addr u sector limit )
+      rot min ( c-addr sector u )
+      r> over >r >r swap ( c-addr u sector )
+      r@ file-offset @ sector-size umod swap ( c-addr u offset sector )
+      r@ file-fs @ fat32-device @ block-part@ ( )
+      r@ file-offset @ r> r> swap >r + ( new-offset )
+      dup r@ file-offset @ - ( new-offset bytes-read )
+      swap r@ file-offset ! ( bytes-read )
+      r> advance-cluster ( bytes-read )
+    ; define read-file-sector
+    
+    :noname ( c-addr u file -- bytes )
+      >r r@ current-file-sector@ ( c-addr u sector )
+      sector-size r@ r@ file-offset @ sector-size umod - ( c-addr u sector limit )
+      rot min ( c-addr sector u )
+      r> over >r >r swap ( c-addr u sector )
+      r@ file-offset @ sector-size umod swap ( c-addr u offset sector )
+      r@ file-fs @ fat32-device @ block-part! ( )
+      r@ file-offset @ r> r> swap >r + ( new-offset )
+      r@ file-size@ ( new-offset file-size )
+      over max r@ file-size! ( new-offset )
+      dup r@ file-offset @ - ( new-offset bytes-written )
+      swap r@ file-offset ! ( bytes-written )
+      r> advance-cluster ( bytes-written )
+    ; define write-file-sector
+    
+    :noname ( file -- bytes )
+      <fat32-entry> [: ( file entry )
+        dup rot dup file-parent-index @ ( entry entry file index )
+        swap dup file-parent-cluster @ ( entry entry index file cluster )
+        swap file-fs @ ( entry entry index cluster fs )
+        entry@ ( entry )
+        entry-file-size @ ( bytes )
+      ;] with-object
+    ; define file-size@
+    
+    :noname ( bytes file -- )
+      <fat32-entry> [: ( bytes file entry )
+        swap >r ( bytes entry )
+        dup r@ file-parent-index @ ( bytes entry entry index )
+        r@ file-parent-cluster @ ( bytes entry entry index cluster )
+        r@ file-fs @ ( bytes entry entry index cluster fs )
+        entry@ ( bytes entry )
+        tuck entry-file-size ! ( entry )
+        r@ file-parent-index @ ( entry index )
+        r@ file-parent-cluster @ ( entry index cluster )
+        r> file-fs @ ( entry index cluster fs )
+        entry! ( )
+      ;] with-object
+    ; define file-size!
+    
+    :noname ( file -- sector )
+      >r r@ file-offset @
+      r@ file-fs @ cluster-sectors @ sector-size * umod
+      r@ file-current-cluster @
+      r> file-fs @ cluster-offset>sector
+    ; define current-file-sector@
+    
+    :noname ( file -- )
+      >r
+      r@ file-offset @ r@ file-size@ < if
+        r@ file-offset @ ( offset )
+        r@ file-current-cluster-index @ ( offset index )
+        r@ file-fs @ cluster-sectors @ sector-size * ( offset index cluster-size )
+        dup >r * - r> = if ( )
+          r@ file-current-cluster @ 0 r@ file-fs @ fat@ ( link )
+          dup link-cluster? if ( link )
+            cluster-link r@ file-current-cluster ! ( )
+            1 r@ file-current-cluster-index +! ( )
+          else ( link )
+            drop ( )
+          then
+        then
+      then
+      rdrop
+    ; define advance-cluster
+    
+    :noname ( file -- )
+      >r
+      r@ file-offset @ ( offset )
+      r@ file-current-cluster-index @ ( offset index )
+      r@ file-fs @ cluster-sectors @ sector-size * * - ( offset' )
+      sector-size = if ( )
+        r@ file-current-cluster @ 0 r@ file-fs @ fat @ ( link )
+        end-cluster? if ( )
+          r@ file-current-cluster @ r@ file-fs @ allocate-link-cluster ( cluster )
+          r@ file-current-cluster ! ( )
+          1 r@ file-current-cluster-index +! ( )
+        then
+      then
+      rdrop
+    ; define expand-file
+    
   end-implement
   
   \ Implement FAT32 directory class
