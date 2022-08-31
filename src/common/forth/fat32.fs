@@ -21,7 +21,6 @@
 begin-module fat32
 
   oo import
-  file import
   lock import
   block-dev import
   
@@ -54,6 +53,24 @@ begin-module fat32
   
   \ Directory entry not found
   : x-entry-not-found ( -- ) ." directory entry not found" cr ;
+  
+  \ Directory entry already exists
+  : x-entry-already-exists ( -- ) ." directory entry already exists" cr ;
+  
+  \ Directory entry is not a file
+  : x-entry-not-file ( -- ) ." directory entry not file" cr ;
+  
+  \ Direcotry entry is not a directory
+  : x-entry-not-dir ( -- ) ." directory entry not directory" cr ;
+
+  \ Seek from the beginning of a file
+  0 constant seek-set
+
+  \ Seek from the current position in a file
+  1 constant seek-cur
+
+  \ Seek from the end of a file
+  2 constant seek-end
   
   \ Sector scratchpad buffer
   sector-size buffer: sector-scratchpad
@@ -193,9 +210,6 @@ begin-module fat32
     \ Current cluster index in a file
     cell member file-current-cluster-index
     
-    \ Create a file
-    method create-file ( c-addr u parent-dir file -- )
-    
     \ Read data from a file
     method read-file ( c-addr u file -- bytes )
     
@@ -205,11 +219,26 @@ begin-module fat32
     \ Truncate a file
     method truncate-file ( file -- )
     
+    \ Seek in a file
+    method seek-file ( offset whence file -- )
+    
+    \ Get the current offset in a file
+    method tell-file ( file -- offset )
+    
+    \ Do the work of creating a file
+    method do-create-file ( c-addr u parent-dir file -- )
+    
+    \ Do the work of opening a file
+    method do-open-file ( c-addr u parent-dir file -- )
+    
     \ Read up to a sector in a file
     method read-file-sector ( c-addr u file -- bytes )
     
     \ Write up to a sector in a file
     method write-file-sector ( c-addr u file -- bytes )
+    
+    \ Actually seek in a file
+    method do-seek-file ( offset file -- )
     
     \ Get the size of a file
     method file-size@ ( file -- bytes )
@@ -241,17 +270,53 @@ begin-module fat32
     \ Starting cluster
     cell member dir-start-cluster
     
-    \ Create a directory with . and .. entries
-    method create-dir ( c-addr u parent-dir dir -- )
+    \ Current offset in a directory in entries
+    cell member dir-offset
     
-    \ Create a directory without any . or .. entries
-    method create-dir-raw ( c-addr u parent-dir dir -- )
+    \ Current cluster in a directory
+    cell member dir-current-cluster
+    
+    \ Current cluster index in a directory
+    cell member dir-current-cluster-index
+    
+    \ Read an entry from a directory, and return whether an entry was read
+    method read-dir ( entry dir -- entry-read? )
+    
+    \ Create a file
+    method create-file ( c-addr u new-file dir -- )
+    
+    \ Open a file
+    method open-file ( c-addr u opened-file dir -- )
+    
+    \ Remove a file
+    method remove-file ( c-addr u dir -- )
+    
+    \ Create a directory
+    method create-dir ( c-addr u new-dir dir -- )
+    
+    \ Open a directory
+    method open-dir ( c-addr u opened-dir dir -- )
+    
+    \ Remove a directory
+    method remove-dir ( c-addr u dir -- )
+    
+    \ Get whether a directory is empty
+    method dir-empty? ( dir -- empty? )
+
+    \ Do the work of creating a directory with . and .. entries
+    method do-create-dir ( c-addr u parent-dir dir -- )
+    
+    \ Do the work of creating a directory without any . or .. entries
+    method do-create-dir-raw ( c-addr u parent-dir dir -- )
     
     \ Create . directory entry
-    method create-dot-entry ( dir -- )
+    method do-create-dot-entry ( dir -- )
     
     \ Create .. directory entry
-    method create-dot-dot-entry ( parent-dir dir -- )
+    method do-create-dot-dot-entry ( parent-dir dir -- )
+    
+    \ Do the work of opening a directory
+    method do-open-dir ( c-addr u parent-dir dir -- )
   end-class
   
   \ FAT32 directory entry class
@@ -745,14 +810,14 @@ begin-module fat32
             over -1 <> averts x-entry-not-found
             2over 2over entry@
             2 pick short-file-name c@ dup $00 <> averts x-entry-not-found
-            $35 <> if ( name entry index cluster fs )
+            $E5 <> if ( name entry index cluster fs )
               4 pick 8 5 pick short-file-name 8 equal-case-strings? if
                 4 pick 8 + 3 5 pick short-file-ext 3 equal-case-strings? if
                   drop 2swap 2drop exit
                 then
               then
             then
-            rot 1+ -rot false
+            rot 1+ -rot
           again
         ;] with-object
       ;] convert-name
@@ -814,25 +879,7 @@ begin-module fat32
       -1 over file-current-cluster !
       0 swap file-current-cluster-index !
     ; define new
-    
-    :noname ( c-addr u parent-dir file -- )
-      swap dir-start-cluster @ over file-fs @ allocate-entry ( c-addr u file parent-index parent-cluster )
-      2 pick file-parent-cluster ! ( c-addr u file parent-index )
-      over file-parent-index ! ( c-addr u file )
-      dup file-fs @ allocate-cluster ( c-addr u file dir-cluster )
-      2dup swap file-start-cluster ! ( c-addr u file dir-cluster )
-      over file-current-cluster ! ( c-addr u file )
-      0 over file-offset ! ( c-addr u file )
-      <fat32-entry> [: ( c-addr u file entry )
-        0 2 pick file-start-cluster @ rot ( c-addr u file 0 file-cluster entry )
-        5 roll 5 roll rot ( file 0 file-cluster c-addr u entry )
-        dup >r init-dir-entry r> ( file entry )
-        over file-parent-index @ ( file entry parent-index )
-        2 pick file-parent-cluster @ ( file entry parent-index parent-cluster )
-        3 roll file-fs @ entry! ( )
-      ;] with-object
-    ; define create-file
-    
+        
     :noname ( c-addr u file -- bytes )
       >r 0 ( c-addr u read-bytes )
       begin ( c-addr u read-bytes )
@@ -877,6 +924,51 @@ begin-module fat32
       rdrop ( )
     ; define truncate-file
     
+    :noname ( offset whence file -- )
+      >r case
+        seek-set of endof
+        seek-cur of r@ file-offset @ + endof
+        seek-end of r@ file-size@ + endof
+      endcase
+      r> do-seek-file
+    ; define seek-file
+    
+    :noname ( file -- offset ) file-offset @ ; define tell-file
+    
+    :noname ( c-addr u parent-dir file -- )
+      [: 3 pick 3 pick 3 pick dir-start-cluster @ 4 pick file-fs @ lookup-entry 2drop ;] try
+      ( c-addr u parent-dir file exception )
+      dup 0= triggers x-entry-already-exists
+      dup ['] x-entry-not-found = if drop 0 then ?raise
+      swap dir-start-cluster @ over file-fs @ allocate-entry ( c-addr u file parent-index parent-cluster )
+      2 pick file-parent-cluster ! ( c-addr u file parent-index )
+      over file-parent-index ! ( c-addr u file )
+      dup file-fs @ allocate-cluster ( c-addr u file dir-cluster )
+      2dup swap file-start-cluster ! ( c-addr u file dir-cluster )
+      over file-current-cluster ! ( c-addr u file )
+      0 over file-offset ! ( c-addr u file )
+      <fat32-entry> [: ( c-addr u file entry )
+        0 2 pick file-start-cluster @ rot ( c-addr u file 0 file-cluster entry )
+        5 roll 5 roll rot ( file 0 file-cluster c-addr u entry )
+        dup >r init-dir-entry r> ( file entry )
+        over file-parent-index @ ( file entry parent-index )
+        2 pick file-parent-cluster @ ( file entry parent-index parent-cluster )
+        3 roll file-fs @ entry! ( )
+      ;] with-object
+    ; define do-create-file
+    
+    :noname ( c-addr u parent-dir file -- )
+      2swap rot dir-start-cluster @ 2 pick file-fs @ lookup-entry ( file entry-index entry-cluster )
+      2 pick file-parent-cluster ! ( file entry-index )
+      2dup swap file-parent-index ! ( file entry-index )
+      <fat32-entry> [: ( file entry-index entry )
+        dup >r swap 2 pick dir-parent-cluster @ 3 pick dir-fs @ ( file entry entry-index entry-cluster fs )
+        entry@
+        r@ entry-file? averts x-entry-not-file
+        r> first-cluster@ swap 2dup file-start-cluster ! file-current-cluster ! ( )
+      ;] with-object
+    ; define do-open-file
+    
     :noname ( c-addr u file -- bytes )
       >r r@ current-file-sector@ ( c-addr u sector )
       sector-size r@ r@ file-offset @ sector-size umod - ( c-addr u sector limit )
@@ -905,6 +997,24 @@ begin-module fat32
       swap r@ file-offset ! ( bytes-written )
       r> advance-cluster ( bytes-written )
     ; define write-file-sector
+    
+    :noname ( offset file -- )
+      >r r@ file-size@ min 0 max dup r@ file-offset ! ( offset )
+      0 r@ file-current-cluster-index ! ( offset )
+      r@ file-start-cluster begin ( offset cluster )
+        over sector-size < if ( offset cluster )
+          r> file-current-cluster ! drop true ( flag )
+        else
+          dup 0 r@ fat@ dup link-cluster? if ( offset cluster link )
+            1 r@ file-current-cluster-index +! ( offset cluster link )
+            nip cluster-link ( offset cluster' )
+            swap sector-size - swap false ( offset' cluster' flag )
+          else
+            drop r> file-current-cluster ! drop true ( flag )
+          then
+        then
+      until
+    ; define do-seek-file
     
     :noname ( file -- bytes )
       <fat32-entry> [: ( file entry )
@@ -982,8 +1092,101 @@ begin-module fat32
       tuck dir-fs !
       -1 over dir-parent-index !
       -1 over dir-parent-cluster !
-      -1 swap dir-start-cluster !
+      -1 over dir-start-cluster !
+      0 over dir-offset !
+      -1 dir-current-cluster !
+      0 swap dir-current-cluster-index !
     ; define new
+    
+    :noname ( entry dir -- entry-read? )
+      >r begin
+        r@ dir-offset @ r@ dir-current-cluster-index @ 32 * < if
+          dup r@ dir-offset @ 32 umod r@ dir-current-cluster @ r@ dir-fs @ entry@
+          dup entry-end? if
+            drop false true
+          else
+            1 r@ dir-offset +!
+            dup entry-deleted? not if
+              drop true true
+            else
+              false
+            then
+          then
+        else
+          r@ dir-current-cluster@ 0 r@ fat@ dup link-cluster? if
+            cluster-link r@ dir-current-cluster !
+            1 r@ dir-current-cluster-index +!
+            false
+          else
+            2drop false true
+          then
+        then
+      until
+      rdrop
+    ; define read-dir 
+    
+    :noname ( c-addr u new-file dir -- )
+      dup dir-fs @ 2 pick <fat32-file> swap init-object
+      swap do-create-file
+    ; define create-file
+    
+    :noname ( c-addr u opened-file dir -- )
+      dup dir-fs @ 2 pick <fat32-file> swap init-object
+      swap do-open-file
+    ; define open-file
+        
+    :noname ( c-addr u dir -- )
+      dup dir-start-cluster @ swap dir-fs @ tuck lookup-entry ( fs entry-index entry-cluster )
+      <fat32-entry> [: ( fs entry-index entry-cluster entry )
+        dup 3 pick 3 pick 6 pick entry@ ( fs entry-index entry-cluster entry )
+        dup entry-file? averts x-entry-not-file ( fs entry-index entry-cluster entry )
+        dup first-cluster@ 4 pick free-cluster-chain ( fs entry-index entry-cluster entry )
+        dup mark-entry-deleted ( fs entry-index entry-cluster entry )
+        rot rot 3 roll entry! ( )
+      ;] with-object
+    : define remove-file
+    
+    :noname ( c-addr u new-dir dir -- )
+      dup dir-fs @ 2 pick <fat32-dir> swap init-object
+      swap do-create-dir
+    ; define create-dir
+        
+    :noname ( c-addr u opened-dir dir -- )
+      dup dir-fs @ 2 pick <fat32-dir> swap init-object
+      swap do-open-dir
+    ; define open-dir
+        
+    :noname ( c-addr u dir -- )
+      
+      \ ADD MORE HERE
+      
+      dup dir-start-cluster @ swap dir-fs @ tuck lookup-entry ( fs entry-index entry-cluster )
+      <fat32-entry> [: ( fs entry-index entry-cluster entry )
+        dup 3 pick 3 pick 6 pick entry@ ( fs entry-index entry-cluster entry )
+        dup entry-dir? averts x-entry-not-dir ( fs entry-index entry-cluster entry )
+        dup first-cluster@ 4 pick free-cluster-chain ( fs entry-index entry-cluster entry )
+        dup mark-entry-deleted ( fs entry-index entry-cluster entry )
+        rot rot 3 roll entry! ( )
+      ;] with-object
+    : define remove-dir
+    
+    :noname ( dir -- empty? )
+      <fat32-entry> [: ( dir entry )
+        swap 0 swap dup dir-start-cluster @ swap dir-fs @ begin ( entry index cluster fs )
+          dup >r find-entry r> ( entry index cluster fs )
+          over -1 = if 2dup 2dup true exit then ( entry index cluster fs )
+          2over 2over entry@ ( entry index cluster fs )
+          2 pick short-file-name c@ dup $00 = if 2dup 2dup true exit then ( entry index cluster fs )
+          $E5 <> if ( name entry index cluster fs )
+            s" .       " 5 pick short-file-name 8 equal-case-strings?
+            s" ..      " 6 pick short-file-name 8 equal-case-strings? or
+            s"    " 6 pick short-file-ext 3 equal-case-strings? and
+            not if 2dup 2dup false exit then
+          then
+          rot 1+ -rot
+        again
+      ;] with-object
+    ; define dir-empty?
     
     :noname ( c-addr u parent-dir dir -- )
       swap dir-start-cluster @ over dir-fs @ allocate-entry ( c-addr u dir parent-index parent-cluster )
@@ -999,13 +1202,17 @@ begin-module fat32
         2 pick dir-parent-cluster @ ( dir entry parent-index parent-cluster )
         3 roll dir-fs @ entry! ( )
       ;] with-object
-    ; define create-dir-raw
+    ; define do-create-dir-raw
     
     :noname ( c-addr u parent-dir dir -- )
-      2dup 2>r create-parent-raw 2r> ( parent-dir dir -- )
-      dup create-dot-entry
-      create-dot-dot-entry
-    ; define create-dir
+      [: 3 pick 3 pick 3 pick dir-start-cluster @ 4 pick file-fs @ lookup-entry 2drop ;] try
+      ( c-addr u parent-dir dir exception )
+      dup 0= triggers x-entry-already-exists
+      dup ['] x-entry-not-found = if drop 0 then ?raise
+      2dup 2>r do-create-parent-raw 2r> ( parent-dir dir -- )
+      dup do-create-dot-entry
+      do-create-dot-dot-entry
+    ; define do-create-dir
     
     \ Create . directory entry
     :noname ( dir -- )
@@ -1016,7 +1223,7 @@ begin-module fat32
         dup >r init-dir-entry r> ( dir child-index child-cluster entry )
         3 roll dir-fs @ entry! ( )
       ;] with-object    ;
-    ; define create-dot-entry
+    ; define do-create-dot-entry
     
     \ Create .. directory entry
     :noname ( parent-dir dir -- )
@@ -1027,7 +1234,19 @@ begin-module fat32
         dup >r init-dir-entry r> ( dir child-index child-cluster entry )
         3 roll dir-fs @ entry! ( )
       ;] with-object
-    ; define create-dot-dot-entry
+    ; define do-create-dot-dot-entry
+    
+    :noname ( c-addr u parent-dir dir -- )
+      2swap rot dir-start-cluster @ 2 pick dir-fs @ lookup-entry ( dir entry-index entry-cluster )
+      2 pick dir-parent-cluster ! ( dir entry-index )
+      2dup swap dir-parent-index ! ( dir entry-index )
+      <fat32-entry> [: ( dir entry-index entry )
+        dup >r swap 2 pick dir-parent-cluster @ 3 pick dir-fs @ ( dir entry entry-index entry-cluster fs )
+        entry@
+        r@ entry-dir? averts x-entry-not-dir
+        r> first-cluster@ swap dir-start-cluster ! ( )
+      ;] with-object
+    ; define do-open-dir
   end-implement
   
   \ Implement FAT32 directory entry class
@@ -1178,56 +1397,6 @@ begin-module fat32
         drop
       then
     ; define file-name@
-  end-implement
-
-  \ FAT32 directory class
-  <dir> begin-class <fat32-dir>
-    cell member fat32-fs
-  end-class
-  
-  \ Implement FAT32 directory class
-  <fat32-dir> begin-implement
-    \ Get the class of an entity ( c-addr u dir -- class )
-    :noname ['] x-method-not-implemented ? raise ; define entity-class@
-
-    \ Initialize the memory for an entity ( c-addr u addr dir -- )
-    :noname ['] x-method-not-implemented ? raise ; define init-entity
-
-    \ Get the class of a directory ( dir -- class )
-    :noname ['] x-method-not-implemented ? raise ; define dir-class@
-
-    \ Create a directory ( c-addr u addr dir -- )
-    :noname ['] x-method-not-implemented ? raise ; define create-dir
-
-    \ Get the class of a file ( dir -- class )
-    :noname ['] x-method-not-implemented ? raise ; define file-class@
-
-    \ Create an ordinary file ( c-addr u addr dir -- )
-    :noname ['] x-method-not-implemented ? raise ; define create-file
-  end-implement
-
-  \ FAT32 file class
-  <file> begin-class <fat32-file> end-class
-
-  \ Implement FAT32 file class
-  <fat32-file> begin-implement
-    \ Read from a file ( c-addr u file -- u )
-    :noname ['] x-method-not-implemented ?raise ; define read-file
-
-    \ Write to a file ( c-addr u file -- u )
-    :noname ['] x-method-not-implemented ?raise ; define write-file
-
-    \ Seek in a file ( offset whence file -- )
-    :noname ['] x-method-not-implemented ?raise ; define seek-file
-
-    \ Get the current offset in a file ( file -- offset )
-    :noname ['] x-method-not-implemented ?raise ; define tell-file
-
-    \ Flush a file ( file -- )
-    :noname ['] x-method-not-implemented ?raise ; define flush-file
-
-    \ Close a file ( file -- )
-    :noname ['] x-method-not-implemented ?raise ; define close-file
   end-implement
   
 end-module
