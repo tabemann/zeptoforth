@@ -24,15 +24,6 @@ begin-module fat32
   lock import
   block-dev import
   
-  \ The FAT32 lock
-  lock-size buffer: fat32-lock
-  
-  \ The only supported sector size
-  512 constant sector-size
-  
-  \ The only supported directory entry size
-  32 constant entry-size
-  
   \ Sector size exception
   : x-sector-size-not-supported ." sector sizes other than 512 are not supported" cr  ;
   
@@ -50,6 +41,9 @@ begin-module fat32
   
   \ Out of range directory entry index
   : x-out-of-range-entry ( -- ) ." out of range directory entry" cr ;
+  
+  \ Out of range partition index
+  : x-out-of-range-partition ( -- ) ." out of range partition" cr ;
   
   \ Directory entry not found
   : x-entry-not-found ( -- ) ." directory entry not found" cr ;
@@ -72,144 +66,213 @@ begin-module fat32
   \ Seek from the end of a file
   2 constant seek-end
   
-  \ Sector scratchpad buffer
-  sector-size buffer: sector-scratchpad
+  begin-module fat32-internal
+
+    \ The FAT32 lock
+    lock-size buffer: fat32-lock
+    
+    \ The only supported sector size
+    512 constant sector-size
+    
+    \ The only supported directory entry size
+    32 constant entry-size
+    
+    \ Sector scratchpad buffer
+    sector-size buffer: sector-scratchpad
+    
+    \ Unaligned halfword access
+    : unaligned-h@ ( addr -- h ) dup c@ swap 1+ c@ 8 lshift or ;
   
-  \ Unaligned halfword access
-  : unaligned-h@ ( addr -- h ) dup c@ swap 1+ c@ 8 lshift or ;
+  end-module> import
+    
+  \ Master boot record class
+  <object> begin-class <mbr>
+  
+    continue-module fat32-internal
+    
+      \ The device to which this master boot record belongs
+      cell member mbr-device
+      
+    end-module
+    
+    \ Is the MBR valid
+    method mbr-valid? ( mbr -- valid? )
+    
+    \ Read a partition entry
+    method partition@ ( partition index mbr -- )
+    
+    \ Write a partition entry
+    method partition! ( partition index mbr -- )
+  end-class
+  
+  \ Partition class
+  <object> begin-class <partition>
+    \ Partition active state
+    cell member partition-active
+    
+    \ Partition type
+    cell member partition-type
+    
+    \ Partition first sector index
+    cell member partition-first-sector
+    
+    \ Partition sectors
+    cell member partition-sectors
+    
+    \ Is the partition active
+    method partition-active? ( partition -- active? )
+  end-class
   
   \ FAT32 filesystem class
-  <fs> begin-class <fat32-fs>
-    \ The FAT32 device to which this filesystem belongs
-    cell member fat32-device
+  <object> begin-class <fat32-fs>
+  
+    continue-module fat32-internal
     
-    \ The first sector of the filesystem
-    cell member first-sector
+      \ The device to which this filesystem belongs
+      cell member fat32-device
+      
+      \ The first sector of the filesystem
+      cell member first-sector
+      
+      \ The number of sectors per cluster
+      cell member cluster-sectors
+      
+      \ The number of reserved sectors before the FAT's
+      cell member reserved-sectors
+      
+      \ The number of FAT's
+      cell member fat-count
+      
+      \ The total sector count
+      cell member sector-count
+      
+      \ The number of sectors per FAT
+      cell member fat-sectors
+      
+      \ The cluster to which the root directory belongs (usually 2)
+      cell member root-dir-cluster
+      
+      \ The FAT32 filesystem info sector (usually 1)
+      cell member info-sector
+      
+      \ The free cluster count (don't trust this value)
+      cell member free-cluster-count
+      
+      \ The most recently allocated cluster, -1 for all sectors free
+      \ (Don't trust this value)
+      cell member recent-allocated-cluster
+      
+    end-module
     
-    \ The number of sectors per cluster
-    cell member cluster-sectors
+    \ Get the root directory for a FAT32 filesystem
+    method root-dir@ ( dir fs -- )
     
-    \ The number of reserved sectors before the FAT's
-    cell member reserved-sectors
+    continue-module fat32-internal
+      
+      \ Read the FAT32 filesystem info sector
+      method read-info-sector ( fs -- )
+      
+      \ Write the FAT32 filesystem info sector
+      method write-info-sector ( fs -- )
+      
+      \ Read a cluster link value from a FAT
+      method fat@ ( cluster fat fs -- link )
+      
+      \ Write a cluster link value to a FAT
+      method fat! ( link cluster fat fs -- )
+      
+      \ Write a cluster link value to all FAT's
+      method all-fat! ( link cluster fs -- )
+      
+      \ Get the sector of a cluster in a FAT
+      method cluster>fat-sector ( cluster fat fs -- sector )
+      
+      \ Get the starting sector of a cluster
+      method cluster>sector ( cluster fs -- sector )
+      
+      \ Get a sector containing an offset within a cluster
+      method cluster-offset>sector ( offset cluster fs -- sector )
+      
+      \ Get the cluster of a sector
+      method sector>cluster ( sector fs -- cluster )
+      
+      \ Get the number of clusters
+      method cluster-count@ ( fs -- count )
+      
+      \ Find a free cluster
+      method find-free-cluster ( fs -- cluster )
+      
+      \ Allocate a free cluster
+      method allocate-cluster ( fs -- cluster )
+      
+      \ Allocate a free cluster and link it to an preceding cluster
+      method allocate-link-cluster ( cluster fs -- cluster' )
+      
+      \ Free a cluster
+      method free-cluster ( cluster fs -- )
+      
+      \ Free a cluster chain (for freeing a file/directory)
+      method free-cluster-chain ( cluster fs -- )
+      
+      \ Free all the clusters in a cluster chain except the first (for truncating a file)
+      method free-cluster-tail ( cluster fs -- )
+      
+      \ Find the entry starting from a given cluster and index within the cluster
+      method find-entry ( index cluster fs -- index cluster | -1 -1 )
+      
+      \ Read a directory entry at a cluster and index within the cluster
+      method entry@ ( entry index cluster fs -- )
+      
+      \ Write a directory entry at a cluster and index within the cluster
+      method entry! ( entry index cluster fs -- )
+      
+      \ Get the entry per directory cluster size
+      method dir-cluster-entry-count@ ( fs -- count )
+      
+      \ Look up a directory entry by name
+      method lookup-entry ( c-addr u cluster fs -- index cluster )
+      
+      \ Allocate a directory entry
+      method allocate-entry ( cluster fs -- index cluster )
+      
+      \ Delete a directory entry
+      method delete-entry ( index cluster fs -- )
+      
+      \ Expand a directory by one entry
+      method expand-dir ( index cluster fs -- )
     
-    \ The number of FAT's
-    cell member fat-count
+    end-module
     
-    \ The total sector count
-    cell member sector-count
-    
-    \ The number of sectors per FAT
-    cell member fat-sectors
-    
-    \ The cluster to which the root directory belongs (usually 2)
-    cell member root-dir-cluster
-    
-    \ The FAT32 filesystem info sector (usually 1)
-    cell member info-sector
-    
-    \ The free cluster count (don't trust this value)
-    cell member free-cluster-count
-    
-    \ The most recently allocated cluster, -1 for all sectors free
-    \ (Don't trust this value)
-    cell member recent-allocated-cluster
-    
-    \ Read the FAT32 filesystem info sector
-    method read-info-sector ( fs -- )
-    
-    \ Write the FAT32 filesystem info sector
-    method write-info-sector ( fs -- )
-    
-    \ Read a cluster link value from a FAT
-    method fat@ ( cluster fat fs -- link )
-    
-    \ Write a cluster link value to a FAT
-    method fat! ( link cluster fat fs -- )
-    
-    \ Write a cluster link value to all FAT's
-    method all-fat! ( link cluster fs -- )
-    
-    \ Get the sector of a cluster in a FAT
-    method cluster>fat-sector ( cluster fat fs -- sector )
-    
-    \ Get the starting sector of a cluster
-    method cluster>sector ( cluster fs -- sector )
-    
-    \ Get a sector containing an offset within a cluster
-    method cluster-offset>sector ( offset cluster fs -- sector )
-    
-    \ Get the cluster of a sector
-    method sector>cluster ( sector fs -- cluster )
-    
-    \ Get the number of clusters
-    method cluster-count@ ( fs -- count )
-    
-    \ Find a free cluster
-    method find-free-cluster ( fs -- cluster )
-    
-    \ Allocate a free cluster
-    method allocate-cluster ( fs -- cluster )
-    
-    \ Allocate a free cluster and link it to an preceding cluster
-    method allocate-link-cluster ( cluster fs -- cluster' )
-    
-    \ Free a cluster
-    method free-cluster ( cluster fs -- )
-    
-    \ Free a cluster chain (for freeing a file/directory)
-    method free-cluster-chain ( cluster fs -- )
-    
-    \ Free all the clusters in a cluster chain except the first (for truncating a file)
-    method free-cluster-tail ( cluster fs -- )
-    
-    \ Find the entry starting from a given cluster and index within the cluster
-    method find-entry ( index cluster fs -- index cluster | -1 -1 )
-    
-    \ Read a directory entry at a cluster and index within the cluster
-    method entry@ ( entry index cluster fs -- )
-    
-    \ Write a directory entry at a cluster and index within the cluster
-    method entry! ( entry index cluster fs -- )
-    
-    \ Get the entry per directory cluster size
-    method dir-cluster-entry-count@ ( fs -- count )
-    
-    \ Look up a directory entry by name
-    method lookup-entry ( c-addr u cluster fs -- index cluster )
-    
-    \ Allocate a directory entry
-    method allocate-entry ( cluster fs -- index cluster )
-    
-    \ Delete a directory entry
-    method delete-entry ( index cluster fs -- )
-    
-    \ Expand a directory by one entry
-    method expand-dir ( index cluster fs -- )
   end-class
   
   \ FAT32 file class
   <object> begin-class <fat32-file>
-    \ Filesystem
-    cell member file-fs
     
-    \ Parent directory index
-    cell member file-parent-index
+    continue-module fat32-internal
+      
+      \ Filesystem
+      cell member file-fs
+      
+      \ Parent directory index
+      cell member file-parent-index
+      
+      \ Parent directory cluster
+      cell member file-parent-cluster
+      
+      \ Starting cluster
+      cell member file-start-cluster
+      
+      \ Current offset in a file
+      cell member file-offset
+      
+      \ Current cluster in a file
+      cell member file-current-cluster
+      
+      \ Current cluster index in a file
+      cell member file-current-cluster-index
     
-    \ Parent directory cluster
-    cell member file-parent-cluster
-    
-    \ Starting cluster
-    cell member file-start-cluster
-    
-    \ Current offset in a file
-    cell member file-offset
-    
-    \ Current cluster in a file
-    cell member file-current-cluster
-    
-    \ Current cluster index in a file
-    cell member file-current-cluster-index
-    
+    end-module
+      
     \ Read data from a file
     method read-file ( c-addr u file -- bytes )
     
@@ -225,59 +288,69 @@ begin-module fat32
     \ Get the current offset in a file
     method tell-file ( file -- offset )
     
-    \ Do the work of creating a file
-    method do-create-file ( c-addr u parent-dir file -- )
+    continue-module fat32-internal
+      
+      \ Do the work of creating a file
+      method do-create-file ( c-addr u parent-dir file -- )
+      
+      \ Do the work of opening a file
+      method do-open-file ( c-addr u parent-dir file -- )
+      
+      \ Read up to a sector in a file
+      method read-file-sector ( c-addr u file -- bytes )
+      
+      \ Write up to a sector in a file
+      method write-file-sector ( c-addr u file -- bytes )
+      
+      \ Actually seek in a file
+      method do-seek-file ( offset file -- )
+      
+      \ Get the size of a file
+      method file-size@ ( file -- bytes )
+      
+      \ Set the size of a file
+      method file-size! ( bytes file -- )
+      
+      \ Get the current sector in a file
+      method current-file-sector@ ( file -- sector )
+      
+      \ Advance the current cluster if at the end of the current cluster
+      method advance-cluster ( file -- )
+      
+      \ Expand a file
+      method expand-file ( file -- )
+      
+    end-module
     
-    \ Do the work of opening a file
-    method do-open-file ( c-addr u parent-dir file -- )
-    
-    \ Read up to a sector in a file
-    method read-file-sector ( c-addr u file -- bytes )
-    
-    \ Write up to a sector in a file
-    method write-file-sector ( c-addr u file -- bytes )
-    
-    \ Actually seek in a file
-    method do-seek-file ( offset file -- )
-    
-    \ Get the size of a file
-    method file-size@ ( file -- bytes )
-    
-    \ Set the size of a file
-    method file-size! ( bytes file -- )
-    
-    \ Get the current sector in a file
-    method current-file-sector@ ( file -- sector )
-    
-    \ Advance the current cluster if at the end of the current cluster
-    method advance-cluster ( file -- )
-    
-    \ Expand a file
-    method expand-file ( file -- )
   end-class
   
   \ FAT32 directory class
-  <object> end-class <fat32-dir>
-    \ Filesystem
-    cell member dir-fs
-  
-    \ Parent directory index
-    cell member dir-parent-index
+  <object> begin-class <fat32-dir>
     
-    \ Parent directory cluster
-    cell member dir-parent-cluster
+    continue-module fat32-internal
     
-    \ Starting cluster
-    cell member dir-start-cluster
+      \ Filesystem
+      cell member dir-fs
     
-    \ Current offset in a directory in entries
-    cell member dir-offset
-    
-    \ Current cluster in a directory
-    cell member dir-current-cluster
-    
-    \ Current cluster index in a directory
-    cell member dir-current-cluster-index
+      \ Parent directory index
+      cell member dir-parent-index
+      
+      \ Parent directory cluster
+      cell member dir-parent-cluster
+      
+      \ Starting cluster
+      cell member dir-start-cluster
+      
+      \ Current offset in a directory in entries
+      cell member dir-offset
+      
+      \ Current cluster in a directory
+      cell member dir-current-cluster
+      
+      \ Current cluster index in a directory
+      cell member dir-current-cluster-index
+      
+    end-module
     
     \ Read an entry from a directory, and return whether an entry was read
     method read-dir ( entry dir -- entry-read? )
@@ -302,21 +375,26 @@ begin-module fat32
     
     \ Get whether a directory is empty
     method dir-empty? ( dir -- empty? )
-
-    \ Do the work of creating a directory with . and .. entries
-    method do-create-dir ( c-addr u parent-dir dir -- )
     
-    \ Do the work of creating a directory without any . or .. entries
-    method do-create-dir-raw ( c-addr u parent-dir dir -- )
+    continue-module fat32-internal
     
-    \ Create . directory entry
-    method do-create-dot-entry ( dir -- )
+      \ Do the work of creating a directory with . and .. entries
+      method do-create-dir ( c-addr u parent-dir dir -- )
+      
+      \ Do the work of creating a directory without any . or .. entries
+      method do-create-dir-raw ( c-addr u parent-dir dir -- )
+      
+      \ Create . directory entry
+      method do-create-dot-entry ( dir -- )
+      
+      \ Create .. directory entry
+      method do-create-dot-dot-entry ( parent-dir dir -- )
+      
+      \ Do the work of opening a directory
+      method do-open-dir ( c-addr u parent-dir dir -- )
+      
+    end-module
     
-    \ Create .. directory entry
-    method do-create-dot-dot-entry ( parent-dir dir -- )
-    
-    \ Do the work of opening a directory
-    method do-open-dir ( c-addr u parent-dir dir -- )
   end-class
   
   \ FAT32 directory entry class
@@ -402,6 +480,9 @@ begin-module fat32
     \ Export a directory entry as a buffer
     method entry>buffer ( addr entry -- )
     
+    \ Initialize a blank directory entry
+    method init-blank-entry ( entry -- )
+    
     \ Initialize a file directory entry
     method init-file-entry ( file-size first-cluster c-addr u entry -- )
     
@@ -429,6 +510,9 @@ begin-module fat32
     \ Get the first cluster index of a directory entry
     method first-cluster@ ( entry -- cluster )
     
+    \ Set the first cluster index of a directory entry
+    method first-cluster! ( cluster entry -- )
+    
     \ Set the file name of a directory entry, converted from a normal string
     method file-name! ( c-addr u entry -- )
     
@@ -437,185 +521,227 @@ begin-module fat32
     
     \ Get the file name of a directory entry, converted to a normal string
     method file-name@ ( c-addr u entry -- c-addr u' )
+  
   end-class
   
-  \ Is a cluster free?
-  : free-cluster? ( cluster-link -- free? ) $0FFFFFFF and 0= ;
-  
-  \ Is a cluster an end cluster?
-  : end-cluster? ( cluster-link -- end? ) $0FFFFFF8 and $0FFFFFF8 = ;
-  
-  \ Is cluster a linked cluster?
-  : link-cluster? ( cluster-link -- link? )
-    $0FFFFFFF and dup $00000002 >= swap $0FFFFFEF <= and
-  ;
-  
-  \ Get the link of a linked cluster
-  : cluster-link ( cluster-link -- cluster ) $0FFFFFFF and ;
-  
-  \ Free cluster marker
-  $00000000 constant free-cluster-mark
-  
-  \ End cluster marker
-  $0FFFFFF8 constant end-cluster-mark
-  
-  \ Count the number of spaces from the end of a string
-  : count-end-spaces ( c-addr u -- u' )
-    0 begin over 0> while ( c-addr u u' )
-      -rot 1- -rot dup c@ $20 = if ( u u' c-addr )
-        1+ rot rot 1+
-      else
-        1+ rot rot drop 0
-      then ( c-addr u u' )
-    repeat
-    nip nip
-  ;
-  
-  \ Strip the spaces from the end of a string
-  : strip-end-spaces ( c-addr u -- c-addr u' ) 2dup count-end-spaces - ;
-  
-  \ Write a string into another string, limited by its size, and return the remaining buffer
-  : >string ( c-addr u c-addr' u' -- c-addr'' u'' )
-    2dup 2>r rot min dup >r move r> 2r> 2 pick - swap rot + swap
-  ;
-  
-  \ Find the index of a dot in a string
-  : dot-index ( c-addr u -- u' | -1 )
-    0 begin over 0> while
-      2 pick c@ [char] . = if nip nip exit else 1+ rot 1+ rot 1- rot then
-    repeat
-    2drop drop -1
-  ;
-  
-  \ Get the dot count in a string
-  : dot-count ( c-addr u -- count )
-    0 begin over 0> while
-      2 pick c@ [char] . = if 1+ then rot 1+ rot 1- rot
-    repeat
-    nip nip
-  ;
-  
-  \ Validate a filename character
-  : validate-file-name-char ( c -- )
-    case
-      [char] " of true endof
-      [char] * of true endof
-      [char] / of true endof
-      [char] : of true endof
-      [char] < of true endof
-      [char] > of true endof
-      [char] ? of true endof
-      [char] \ of true endof
-      [char] | of true endof
-      swap false swap
-    endcase triggers x-file-name-format
-  ;
-  
-  \ Validate filename characters
-  : validate-file-name-chars ( c-addr u -- ) ['] validate-file-name-char citer ;
-  
-  \ Convert a character to uppercase
-  : upcase-char ( c -- c' )
-    dup [char] a >= over [char] z <= and if
-      [char] a - [char] A +
-    then
-  ;
-  
-  \ Convert a string to uppercase
-  : upcase-string ( c-addr u xt -- )
-    over [:
-      tuck 2>r
-      dup >r 0 ?do over i + c@ upcase-char over i + c! loop
-      2drop r> 2r> -rot swap rot execute
-    ;] with-allot
-  ;
-  
-  \ Validate a filename
-  : validate-file-name ( c-addr u -- )
-    2dup validate-file-name-chars
-    dup 12 <= averts x-file-name-format
-    2dup dot-count 1 = averts x-file-name-format
-    2dup dot-index dup 0 > averts x-file-name-format
-    dup 8 <= averts x-file-name-format
-    2dup swap 1- < averts x-file-name-format
-    swap 4 - >=  averts x-file-name-format
-    drop
-  ;
-  
-  \ Validate a directory name
-  : validate-dir-name ( c-addr u -- )
-    2dup validate-file-name-chars
-    2dup s" ." equal-strings? not if
-      2dup s" .." equal-strings? not if
-        2dup dot-count -1 = averts x-file-name-format
-        nip 8 <= averts x-file-name-format
+  continue-module fat32-internal
+    
+    \ Is a cluster free?
+    : free-cluster? ( cluster-link -- free? ) $0FFFFFFF and 0= ;
+    
+    \ Is a cluster an end cluster?
+    : end-cluster? ( cluster-link -- end? ) $0FFFFFF8 and $0FFFFFF8 = ;
+    
+    \ Is cluster a linked cluster?
+    : link-cluster? ( cluster-link -- link? )
+      $0FFFFFFF and dup $00000002 >= swap $0FFFFFEF <= and
+    ;
+    
+    \ Get the link of a linked cluster
+    : cluster-link ( cluster-link -- cluster ) $0FFFFFFF and ;
+    
+    \ Free cluster marker
+    $00000000 constant free-cluster-mark
+    
+    \ End cluster marker
+    $0FFFFFF8 constant end-cluster-mark
+    
+    \ Count the number of spaces from the end of a string
+    : count-end-spaces ( c-addr u -- u' )
+      0 begin over 0> while ( c-addr u u' )
+        -rot 1- -rot dup c@ $20 = if ( u u' c-addr )
+          1+ rot rot 1+
+        else
+          1+ rot rot drop 0
+        then ( c-addr u u' )
+      repeat
+      nip nip
+    ;
+    
+    \ Strip the spaces from the end of a string
+    : strip-end-spaces ( c-addr u -- c-addr u' ) 2dup count-end-spaces - ;
+    
+    \ Write a string into another string, limited by its size, and return the remaining buffer
+    : >string ( c-addr u c-addr' u' -- c-addr'' u'' )
+      2dup 2>r rot min dup >r move r> 2r> 2 pick - swap rot + swap
+    ;
+    
+    \ Find the index of a dot in a string
+    : dot-index ( c-addr u -- u' | -1 )
+      0 begin over 0> while
+        2 pick c@ [char] . = if nip nip exit else 1+ rot 1+ rot 1- rot then
+      repeat
+      2drop drop -1
+    ;
+    
+    \ Get the dot count in a string
+    : dot-count ( c-addr u -- count )
+      0 begin over 0> while
+        2 pick c@ [char] . = if 1+ then rot 1+ rot 1- rot
+      repeat
+      nip nip
+    ;
+    
+    \ Validate a filename character
+    : validate-file-name-char ( c -- )
+      s\" \"*/:<>?\\|" begin ?dup while
+        over c@ 3 pick <> averts x-file-name-format 1- swap 1+ swap
+      repeat
+      2drop
+    ;
+    
+    \ Validate filename characters
+    : validate-file-name-chars ( c-addr u -- )
+      begin ?dup while
+        over c@ validate-file-name-char 1- swap 1+ swap
+      repeat
+      drop
+    ;
+    
+    \ Convert a character to uppercase
+    : upcase-char ( c -- c' )
+      dup [char] a >= over [char] z <= and if
+        [char] a - [char] A +
       then
-    then
-  ;
-  
-  \ Copy to a buffer, padded with spaces
-  : copy-space-pad ( c-addr u c-addr' u' -- )
-    3dup >r >r >r
-    rot min move
-    r> r> r>
-    rot ?do $20 over i + c! loop drop
-  ;
-  
-  \ Get the used portion of a string
-  : used-string ( c-addr u c-addr' u' -- c-addr'' u'' ) rot - rot drop ;
-  
-  \ Convert a file name into a 8.3 uppercase format without a dot
-  : convert-file-name ( c-addr u xt -- )
-    >r 2dup validate-file-name
-    r> 11 [:
-      swap >r 3dup 8 copy-space-pad
-      dup c@ $E5 = if $05 over c! then
-      2 pick dot-index 1+ >r rot r@ + rot r> -
-      rot dup >r 8 + 3 copy-space-pad
-      r> 11
-      dup 0 ?do over i + c@ upcase-char 2 pick i + c! loop
-      r> execute
-    ;] with-allot
-  ;
-  
-  \ Convert a directory name into an 8 uppercase format
-  : convert-dir-name ( c-addr u xt )
-    >r 2dup validate-dir-name
-    r> 11 [:
-      swap >r -rot 2 pick 8 copy-space-pad
-      dup c@ $E5 = if $05 over c! then
-      dup 8 + $20 3 fill
-      11 dup 0 ?do over i + c@ upcase-char 2 pick i + c! loop
-      r> execute
-    ;] with-allot
-  ;
-  
-  \ Is name a directory name?
-  : dir-name? ( c-addr u -- )
-    s" ." 2over equal-strings? if
-      true
-    else
-      s" .." 2over equal-strings? if
-        true
-      else
-        dot-index 0=
+    ;
+    
+    \ Convert a string to uppercase
+    : upcase-string ( c-addr u xt -- )
+      over [:
+        tuck 2>r
+        dup >r 0 ?do over i + c@ upcase-char over i + c! loop
+        2drop r> 2r> -rot swap rot execute
+      ;] with-allot
+    ;
+    
+    \ Validate a filename
+    : validate-file-name ( c-addr u -- )
+      2dup validate-file-name-chars
+      dup 12 <= averts x-file-name-format
+      2dup dot-count 1 = averts x-file-name-format
+      2dup dot-index dup 0 > averts x-file-name-format
+      dup 8 <= averts x-file-name-format
+      2dup swap 1- < averts x-file-name-format
+      swap 4 - >=  averts x-file-name-format
+      drop
+    ;
+    
+    \ Validate a directory name
+    : validate-dir-name ( c-addr u -- )
+      2dup validate-file-name-chars
+      2dup s" ." equal-strings? not if
+        2dup s" .." equal-strings? not if
+          2dup dot-count -1 = averts x-file-name-format
+          nip 8 <= averts x-file-name-format
+        then
       then
-    then
-  ;
+    ;
+    
+    \ Copy to a buffer, padded with spaces
+    : copy-space-pad ( c-addr u c-addr' u' -- ) 2dup $20 fill rot min move ;
+    
+    \ Get the used portion of a string
+    : used-string ( c-addr u c-addr' u' -- c-addr'' u'' ) rot - rot drop ;
+    
+    \ Convert a file name into a 8.3 uppercase format without a dot
+    : convert-file-name ( c-addr u xt -- )
+      >r 2dup validate-file-name
+      r> 11 [:
+        dup 11 $20 fill
+        swap 2>r
+        2dup dot-index 2 pick swap r@ swap move
+        2dup dot-index 1+ rot over + -rot - r@ 8 + swap move
+        r@ c@ $E5 = if $05 r@ c! then
+        r> 11 0 ?do dup i + c@ upcase-char over i + c! loop
+        r> execute
+      ;] with-allot
+    ;
+    
+    \ Convert a directory name into an 8 uppercase format
+    : convert-dir-name ( c-addr u xt )
+      >r 2dup validate-dir-name
+      r> 11 [:
+        dup 11 $20 fill
+        swap 2>r
+        2dup r@ swap move
+        r@ c@ $E5 = if $05 r@ c! then
+        r> 11 0 ?do dup i + c@ upcase-char over i + c! loop
+        r> execute
+      ;] with-allot
+    ;
+    
+    \ Is name a directory name?
+    : dir-name? ( c-addr u -- )
+      s" ." 2over equal-strings? if
+        2drop true
+      else
+        s" .." 2over equal-strings? if
+          2drop true
+        else
+          dot-index -1 =
+        then
+      then
+    ;
+    
+    \ Convert a file name or directory name
+    : convert-name ( c-addr u xt )
+      >r 2dup dir-name? if r> convert-dir-name else r> convert-file-name then
+    ;
   
-  \ Convert a file name or directory name
-  : convert-name ( c-addr u xt )
-    >r 2dup dir-name? if r> convert-dir-name else r> convert-file-name then
-  ;
+  end-module
+    
+  \ Implement master boot record class
+  <mbr> begin-implement
+    :noname ( mbr-device mbr -- )
+      dup [ <object> ] -> new
+      mbr-device !
+    ; define new
+    
+    :noname ( mbr -- valid? )
+      [:
+        >r sector-scratchpad sector-size 0 r> mbr-device @ block@
+        sector-scratchpad $1FE + h@ $AA55 =
+      ;] fat32-lock with-lock
+    ; define mbr-valid?
+    
+    :noname ( partition index mbr -- )
+      over 0 >= 2 pick 4 < and averts x-out-of-range-partition
+      [:
+        >r sector-scratchpad $10 rot $10 * $1BE + 0 r> mbr-device @ block-part@
+        sector-scratchpad $00 + c@ over partition-active !
+        sector-scratchpad $04 + c@ over partition-type !
+        sector-scratchpad $08 + @ over partition-first-sector !
+        sector-scratchpad $0C + @ swap partition-sectors !
+      ;] fat32-lock with-lock
+    ; define partition@
+    
+    :noname ( partition index mbr -- )
+      over 0 >= 2 pick 4 < and averts x-out-of-range-partition
+      [:
+        sector-scratchpad $10 $00 fill
+        2 pick partition-active @ sector-scratchpad $00 + c!
+        2 pick partition-type @ sector-scratchpad $04 + c!
+        2 pick partition-first-sector @ sector-scratchpad $08 + !
+        rot partition-sectors @ sector-scratchpad $0C + !
+        >r sector-scratchpad $10 rot $10 * $1BE + 0 r> mbr-device @ block-part!
+      ;] fat32-lock with-lock
+    ; define partition!
+    
+  end-implement
+  
+  \ Implement partition class
+  <partition> begin-implement
+    :noname ( partition -- active? ) partition-active @ $80 >= ; define partition-active? 
+  end-implement
   
   \ Implement FAT32 filesystem class
   <fat32-fs> begin-implement
-    :noname ( first-sector device fs -- )
-      dup [ <fs> ] -> new
+    :noname ( partition device fs -- )
+      dup [ <object> ] -> new
       tuck fat32-device !
-      tuck first-sector !
+      tuck swap partition-first-sector @ swap first-sector !
       [:
-        r> sector-scratchpad sector-size r@ first-sector @ r@ fat32-device @ block@
+        >r sector-scratchpad sector-size r@ first-sector @ r@ fat32-device @ block@
         sector-scratchpad $00B + unaligned-h@ 512 = averts x-sector-size-not-supported
         sector-scratchpad $00D + c@ r@ cluster-sectors !
         sector-scratchpad $00E + h@ r@ reserved-sectors !
@@ -624,16 +750,27 @@ begin-module fat32
         sector-scratchpad $024 + @ r@ fat-sectors !
         sector-scratchpad $02A + h@ 0= averts x-fs-version-not-supported
         sector-scratchpad $02C + @ r@ root-dir-cluster !
-        sector-scratchpad $030 + @ r@ info-sector ! r>
+        sector-scratchpad $030 + h@ r@ info-sector ! r>
       ;] fat32-lock with-lock
       read-info-sector
     ; define new
     
+    :noname ( dir fs -- )
+      2dup swap <fat32-dir> swap init-object
+      2dup swap dir-fs !
+      root-dir-cluster @ over dir-start-cluster !
+      -1 over dir-parent-cluster !
+      -1 over dir-parent-index !
+      0 over dir-offset !
+      dup dir-start-cluster @ over dir-current-cluster !
+      0 swap dir-current-cluster-index !
+    ; define root-dir@
+    
     :noname ( fs -- )
       [:
-        r> sector-scratchpad sector-size r@ info-sector @ r@ fat32-device @ block@
+        >r sector-scratchpad sector-size r@ info-sector @ r@ first-sector @ + r@ fat32-device @ block@
         sector-scratchpad $000 + @ $41615252 = averts x-bad-info-sector
-        sector-scratchpad $1E4 + @ $61427272 = averts x-bad-info-sector
+        sector-scratchpad $1E4 + @ $61417272 = averts x-bad-info-sector
         sector-scratchpad $1FC + @ $AA550000 = averts x-bad-info-sector
         sector-scratchpad $1E8 + @ r@ cluster-count@ min r@ free-cluster-count !
         sector-scratchpad $1EC + @ r> recent-allocated-cluster !
@@ -642,7 +779,7 @@ begin-module fat32
     
     :noname ( fs -- )
       [:
-        r> sector-scratchpad sector-size r@ info-sector @ r@ fat32-device @ block@
+        >r sector-scratchpad sector-size r@ info-sector @ r@ first-sector @ + r@ fat32-device @ block@
         r@ free-cluster-count @ sector-scratchpad $1E8 + !
         r@ recent-allocated-cluster @ sector-scratchpad $1EC + !
         sector-scratchpad sector-size r@ info-sector @ r> fat32-device @ block!
@@ -652,18 +789,18 @@ begin-module fat32
     :noname ( cluster fat fs -- link )
       [:
         >r swap dup rot r@ cluster>fat-sector ( cluster sector )
-        swap sector-size 4 / mod swap ( index sector )
+        swap sector-size 4 / umod swap ( index sector )
         sector-scratchpad sector-size rot r> fat32-device @ block@ ( index )
-        cells sector-scratchpad + @
+        cells sector-scratchpad + @ 
       ;] fat32-lock with-lock
     ; define fat@
     
     :noname ( link cluster fat fs -- )
       [:
         >r swap dup rot r@ cluster>fat-sector ( link cluster sector )
-        swap sector-size 4 / mod swap ( link index sector )
+        swap sector-size 4 / umod swap ( link index sector )
         sector-scratchpad sector-size 2 pick r@ fat32-device @ block@ ( link index sector )
-        -rot dup cells scratchpad + @ ( sector link index old-link )
+        -rot dup cells sector-scratchpad + @ ( sector link index old-link )
         $F0000000 and rot $0FFFFFFF and or ( sector index new-link )
         swap cells sector-scratchpad + ! ( sector )
         sector-scratchpad sector-size rot r> fat32-device @ block!
@@ -712,12 +849,12 @@ begin-module fat32
       >r r@ recent-allocated-cluster @
       dup -1 = if drop 2 else 1+ then
       r> dup cluster-count@ 2 + 2 pick ?do
-        i over 0 swap fat@ cluster-free? if
+        i over 0 swap fat@ free-cluster? if
           2drop i unloop exit
         then
       loop
       swap 2 ?do
-        i over 0 swap fat@ cluster-free? if
+        i over 0 swap fat@ free-cluster? if
           drop i unloop exit
         then
       loop
@@ -772,6 +909,7 @@ begin-module fat32
     ; define find-entry 
     
     :noname ( entry index cluster fs -- )
+      <fat32-entry> 4 pick init-object
       dup >r find-entry r>
       over -1 <> averts x-out-of-range-entry
       [:
@@ -780,7 +918,7 @@ begin-module fat32
         over [ sector-size entry-size / ] literal u/ +
         sector-scratchpad sector-size rot r> fat32-device @ block@
         [ sector-size entry-size / ] literal umod entry-size *
-        sector-scratchpad + swap entry-size move
+        sector-scratchpad + swap buffer>entry
       ;] fat32-lock with-lock
     ; define entry@
     
@@ -793,7 +931,7 @@ begin-module fat32
         over [ sector-size entry-size / ] literal u/ + r> swap dup >r swap >r
         sector-scratchpad sector-size rot r@ fat32-device @ block@
         [ sector-size entry-size / ] literal umod entry-size *
-        sector-scratchpad + entry-size move
+        sector-scratchpad + swap entry>buffer
         sector-scratchpad sector-size >r >r swap fat32-device @ block@
       ;] fat32-lock with-lock
     ; define entry!
@@ -803,12 +941,12 @@ begin-module fat32
     ; define dir-cluster-entry-count@
 
     :noname ( c-addr u cluster fs -- index cluster )
-      2swap [:
-        <fat32-entry> [:
-          2swap 0 -rot begin ( name entry index cluster fs )
+      2swap ( cluster fs c-addr u ) [: ( cluster fs name )
+        <fat32-entry> [: ( cluster fs name entry )
+          2swap ( name entry cluster fs ) 0 -rot begin ( name entry index cluster fs )
             dup >r find-entry r> ( name entry index cluster fs )
             over -1 <> averts x-entry-not-found
-            2over 2over entry@
+            2over 2over entry@ 
             2 pick short-file-name c@ dup $00 <> averts x-entry-not-found
             $E5 <> if ( name entry index cluster fs )
               4 pick 8 5 pick short-file-name 8 equal-case-strings? if
@@ -830,16 +968,22 @@ begin-module fat32
         <fat32-entry> [: ( index cluster fs entry )
           dup 4 pick 4 pick 4 pick entry@
           dup short-file-name c@ $00 = if
-            drop 3dup expand-dir drop true
+            drop 3dup expand-dir true
           else
             short-file-name c@ $E5 = if
-              drop true
+              true
             else
               rot 1+ -rot false
             then
           then
         ;] with-object
-      until
+      until ( index cluster fs )
+      <fat32-entry> [: ( index cluster fs entry )
+        dup init-blank-entry ( index cluster fs entry )
+        swap 2swap rot ( entry index cluster fs )
+        2 pick 2 pick 2>r ( entry index cluster fs )
+        entry! 2r> ( index cluster )
+      ;] with-object
     ; define allocate-entry
     
     :noname ( index cluster fs -- )
@@ -880,13 +1024,13 @@ begin-module fat32
       0 swap file-current-cluster-index !
     ; define new
         
-    :noname ( c-addr u file -- bytes )
+    :noname ( c-addr u file -- bytes 
       >r 0 ( c-addr u read-bytes )
       begin ( c-addr u read-bytes )
         over 0<> if ( c-addr u read-bytes )
           -rot 2dup r@ read-file-sector ( read-bytes c-addr u part-bytes )
           dup 0<> if ( read-bytes c-addr u part-bytes )
-            >r r@ - swap r@ + swap rot r> + ( c-addr' u' read-bytes' )
+            >r r@ - swap r@ + swap rot r> + false ( c-addr' u' read-bytes' )
           else
             2drop drop true ( read-bytes flag )
           then
@@ -907,6 +1051,7 @@ begin-module fat32
             over 0<> if ( c-addr' u' write-bytes' )
               r@ expand-file ( c-addr' u' write-bytes' )
             then
+            false
           else
             2drop drop true ( write-bytes flag )
           then
@@ -958,7 +1103,7 @@ begin-module fat32
     ; define do-create-file
     
     :noname ( c-addr u parent-dir file -- )
-      2swap rot dir-start-cluster @ 2 pick file-fs @ lookup-entry ( file entry-index entry-cluster )
+      swap 2swap rot dir-start-cluster @ 3 pick file-fs @ lookup-entry ( file entry-index entry-cluster )
       2 pick file-parent-cluster ! ( file entry-index )
       2dup swap file-parent-index ! ( file entry-index )
       <fat32-entry> [: ( file entry-index entry )
@@ -971,7 +1116,7 @@ begin-module fat32
     
     :noname ( c-addr u file -- bytes )
       >r r@ current-file-sector@ ( c-addr u sector )
-      sector-size r@ r@ file-offset @ sector-size umod - ( c-addr u sector limit )
+      sector-size r@ file-offset @ sector-size umod - ( c-addr u sector limit )
       r@ file-size@ r@ file-offset @ - min ( c-addr u sector limit )
       rot min ( c-addr sector u )
       r> over >r >r swap ( c-addr u sector )
@@ -985,7 +1130,7 @@ begin-module fat32
     
     :noname ( c-addr u file -- bytes )
       >r r@ current-file-sector@ ( c-addr u sector )
-      sector-size r@ r@ file-offset @ sector-size umod - ( c-addr u sector limit )
+      sector-size r@ file-offset @ sector-size umod - ( c-addr u sector limit )
       rot min ( c-addr sector u )
       r> over >r >r swap ( c-addr u sector )
       r@ file-offset @ sector-size umod swap ( c-addr u offset sector )
@@ -1073,7 +1218,7 @@ begin-module fat32
       r@ file-current-cluster-index @ ( offset index )
       r@ file-fs @ cluster-sectors @ sector-size * * - ( offset' )
       sector-size = if ( )
-        r@ file-current-cluster @ 0 r@ file-fs @ fat @ ( link )
+        r@ file-current-cluster @ 0 r@ file-fs @ fat@ ( link )
         end-cluster? if ( )
           r@ file-current-cluster @ r@ file-fs @ allocate-link-cluster ( cluster )
           r@ file-current-cluster ! ( )
@@ -1094,13 +1239,13 @@ begin-module fat32
       -1 over dir-parent-cluster !
       -1 over dir-start-cluster !
       0 over dir-offset !
-      -1 dir-current-cluster !
+      -1 over dir-current-cluster !
       0 swap dir-current-cluster-index !
     ; define new
     
     :noname ( entry dir -- entry-read? )
       >r begin
-        r@ dir-offset @ r@ dir-current-cluster-index @ 32 * < if
+        r@ dir-offset @ r@ dir-current-cluster-index @ 1+ 32 * < if
           dup r@ dir-offset @ 32 umod r@ dir-current-cluster @ r@ dir-fs @ entry@
           dup entry-end? if
             drop false true
@@ -1113,7 +1258,7 @@ begin-module fat32
             then
           then
         else
-          r@ dir-current-cluster@ 0 r@ fat@ dup link-cluster? if
+          r@ dir-current-cluster @ 0 r@ dir-fs @ fat@ dup link-cluster? if
             cluster-link r@ dir-current-cluster !
             1 r@ dir-current-cluster-index +!
             false
@@ -1209,7 +1354,7 @@ begin-module fat32
       ( c-addr u parent-dir dir exception )
       dup 0= triggers x-entry-already-exists
       dup ['] x-entry-not-found = if drop 0 then ?raise
-      2dup 2>r do-create-parent-raw 2r> ( parent-dir dir -- )
+      2dup 2>r do-create-dir-raw 2r> ( parent-dir dir -- )
       dup do-create-dot-entry
       do-create-dot-dot-entry
     ; define do-create-dir
@@ -1222,7 +1367,7 @@ begin-module fat32
         s" ." rot ( dir child-index child-cluster start-cluster c-addr u entry )
         dup >r init-dir-entry r> ( dir child-index child-cluster entry )
         3 roll dir-fs @ entry! ( )
-      ;] with-object    ;
+      ;] with-object
     ; define do-create-dot-entry
     
     \ Create .. directory entry
@@ -1270,7 +1415,7 @@ begin-module fat32
     
     :noname ( addr entry -- )
       2dup short-file-name swap 0 + 8 move
-      2dup short-file-exit swap 8 + 3 move
+      2dup short-file-ext swap 8 + 3 move
       2dup file-attributes c@ swap 11 + c!
       2dup nt-vfat-case c@ swap 12 + c!
       2dup create-time-fine c@ swap 13 + c!
@@ -1283,6 +1428,23 @@ begin-module fat32
       2dup first-cluster-low h@ swap 26 + h!
       entry-file-size @ swap 28 + !
     ; define entry>buffer
+    
+    :noname ( entry -- )
+      >r
+      $E5 r@ short-file-name  c!
+      r@ short-file-name 1+ 7 $20 fill
+      r@ short-file-ext 3 $20 fill
+      0 r@ file-attributes c!
+      0 r@ first-cluster!
+      0 r@ entry-file-size !
+      0 r@ nt-vfat-case c!
+      0 r@ create-time-fine c!
+      0 r@ create-time-coarse h!
+      [ 0 9 lshift 1 5 lshift or 1 0 lshift or ] literal r@ create-date h!
+      [ 0 9 lshift 1 5 lshift or 1 0 lshift or ] literal r@ access-date h!
+      0 r@ modify-time-coarse h!
+      [ 0 9 lshift 1 5 lshift or 1 0 lshift or ] literal r> modify-date h!
+    ; define init-blank-entry
     
     :noname ( file-size first-cluster c-addr u entry -- )
       dup >r file-name!
@@ -1338,14 +1500,14 @@ begin-module fat32
     
     :noname ( entry -- dir? ) file-attributes c@ $10 and 0<> ; define entry-dir?
     
-    :noname ( cluster entry -- )
-      2dup swap $FFFF and swap first-cluster-low h@
-      swap 16 rshift swap first-cluster-high h!
-    ;
-    
     :noname ( entry -- cluster )
       dup first-cluster-low h@ swap first-cluster-high h@ 16 lshift or
     ; define first-cluster@
+    
+    :noname ( cluster entry -- )
+      2dup swap $FFFF and swap first-cluster-low h!
+      swap 16 rshift swap first-cluster-high h!
+    ; define first-cluster!
     
     :noname ( c-addr u entry -- )
       -rot 2dup validate-file-name
@@ -1399,4 +1561,8 @@ begin-module fat32
     ; define file-name@
   end-implement
   
+  : init-fat32 ( -- ) fat32-lock init-lock ;
+
 end-module
+
+: init ( -- ) [ fat32 ] :: init-fat32 ;
