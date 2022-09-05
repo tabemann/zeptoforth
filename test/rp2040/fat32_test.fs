@@ -19,8 +19,10 @@ begin-module fat32-test
   <fat32-entry> class-size buffer: my-entry
   <fat32-file> class-size buffer: my-file
   
-  16 constant my-read-size
+  384 constant my-read-size
   my-read-size buffer: my-read-buffer
+  
+  16 constant small-read-size
   
   0 constant my-spi
   
@@ -56,6 +58,7 @@ begin-module fat32-test
   ;
   
   : cat-test ( -- )
+    cr
     my-dir my-fs root-dir@
     s" TEST.TXT" my-file my-dir open-file
     begin
@@ -65,6 +68,27 @@ begin-module fat32-test
         drop true
       then
     until
+  ;
+  
+  : seek-test ( -- )
+    my-dir my-fs root-dir@
+    s" TEST.TXT" my-file my-dir open-file
+    cr ." Size : " my-file file-size@ .
+    my-file tell-file cr . ." : "
+    my-read-buffer small-read-size my-file read-file
+    my-read-buffer swap type
+    256 seek-cur my-file seek-file
+    my-file tell-file cr . ." : "
+    my-read-buffer small-read-size my-file read-file
+    my-read-buffer swap type
+    -256 seek-end my-file seek-file
+    my-file tell-file cr . ." : "
+    my-read-buffer my-read-size my-file read-file
+    my-read-buffer swap type
+    256 seek-set my-file seek-file
+    my-file tell-file cr . ." : "
+    my-read-buffer small-read-size my-file read-file
+    my-read-buffer swap type
   ;
 
 end-module

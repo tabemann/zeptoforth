@@ -287,6 +287,9 @@ begin-module fat32
     
     \ Get the current offset in a file
     method tell-file ( file -- offset )
+      
+    \ Get the size of a file
+    method file-size@ ( file -- bytes )
     
     continue-module fat32-internal
       
@@ -304,9 +307,6 @@ begin-module fat32
       
       \ Actually seek in a file
       method do-seek-file ( offset file -- )
-      
-      \ Get the size of a file
-      method file-size@ ( file -- bytes )
       
       \ Set the size of a file
       method file-size! ( bytes file -- )
@@ -1146,11 +1146,11 @@ begin-module fat32
     :noname ( offset file -- )
       >r r@ file-size@ min 0 max dup r@ file-offset ! ( offset )
       0 r@ file-current-cluster-index ! ( offset )
-      r@ file-start-cluster begin ( offset cluster )
+      r@ file-start-cluster @ begin ( offset cluster )
         over sector-size < if ( offset cluster )
           r> file-current-cluster ! drop true ( flag )
         else
-          dup 0 r@ fat@ dup link-cluster? if ( offset cluster link )
+          dup 0 r@ file-fs @ fat@ dup link-cluster? if ( offset cluster link )
             1 r@ file-current-cluster-index +! ( offset cluster link )
             nip cluster-link ( offset cluster' )
             swap sector-size - swap false ( offset' cluster' flag )
