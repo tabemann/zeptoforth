@@ -16,6 +16,7 @@ begin-module fat32-test
   <partition> class-size buffer: my-partition
   <fat32-fs> class-size buffer: my-fs
   <fat32-dir> class-size buffer: my-dir
+  <fat32-dir> class-size buffer: my-dir-1
   <fat32-entry> class-size buffer: my-entry
   <fat32-file> class-size buffer: my-file
   
@@ -47,6 +48,22 @@ begin-module fat32-test
     my-dir my-fs root-dir@
     begin
       my-entry my-dir read-dir if
+        12 [:
+          12 my-entry file-name@
+          cr type space false
+        ;] with-allot
+      else
+        true
+      then
+    until
+  ;
+
+  : ls-test-1 ( -- )
+    <fat32-entry> my-entry init-object
+    my-dir my-fs root-dir@
+    s" TEST1" my-dir-1 my-dir open-dir
+    begin
+      my-entry my-dir-1 read-dir if
         12 [:
           12 my-entry file-name@
           cr type space false

@@ -631,9 +631,13 @@ begin-module fat32
       2dup validate-file-name-chars
       2dup s" ." equal-strings? not if
         2dup s" .." equal-strings? not if
-          2dup dot-count -1 = averts x-file-name-format
+          2dup dot-count 0= averts x-file-name-format
           nip 8 <= averts x-file-name-format
+        else
+          2drop
         then
+      else
+        2drop
       then
     ;
     
@@ -663,7 +667,7 @@ begin-module fat32
       r> 11 [:
         dup 11 $20 fill
         swap 2>r
-        2dup r@ swap move
+        r@ swap move
         r@ c@ $E5 = if $05 r@ c! then
         r> 11 0 ?do dup i + c@ upcase-char over i + c! loop
         r> execute
@@ -946,8 +950,8 @@ begin-module fat32
           2swap ( name entry cluster fs ) 0 -rot begin ( name entry index cluster fs )
             dup >r find-entry r> ( name entry index cluster fs )
             over -1 <> averts x-entry-not-found
-            2over 2over entry@ 
-            2 pick short-file-name c@ dup $00 <> averts x-entry-not-found
+            2over 2over entry@
+            3 pick short-file-name c@ dup $00 <> averts x-entry-not-found
             $E5 <> if ( name entry index cluster fs )
               4 pick 8 5 pick short-file-name 8 equal-case-strings? if
                 4 pick 8 + 3 5 pick short-file-ext 3 equal-case-strings? if
@@ -1382,14 +1386,14 @@ begin-module fat32
     ; define do-create-dot-dot-entry
     
     :noname ( c-addr u parent-dir dir -- )
-      2swap rot dir-start-cluster @ 2 pick dir-fs @ lookup-entry ( dir entry-index entry-cluster )
+      swap 2swap rot dir-start-cluster @ 3 pick dir-fs @ lookup-entry ( dir entry-index entry-cluster )
       2 pick dir-parent-cluster ! ( dir entry-index )
       2dup swap dir-parent-index ! ( dir entry-index )
       <fat32-entry> [: ( dir entry-index entry )
         dup >r swap 2 pick dir-parent-cluster @ 3 pick dir-fs @ ( dir entry entry-index entry-cluster fs )
         entry@
         r@ entry-dir? averts x-entry-not-dir
-        r> first-cluster@ swap dir-start-cluster ! ( )
+        r> first-cluster@ swap 2dup dir-start-cluster ! dir-current-cluster ! ( )
       ;] with-object
     ; define do-open-dir
   end-implement
