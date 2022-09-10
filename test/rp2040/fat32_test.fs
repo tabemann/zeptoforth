@@ -36,6 +36,7 @@ begin-module fat32-test
     6 2 ?do i pull-up-pin loop
     5 my-spi <sd> my-sd init-object
     my-sd init-sd
+    true my-sd write-through!
     my-sd <mbr> my-mbr init-object
     <partition> my-partition init-object
     my-partition 0 my-mbr partition@
@@ -57,11 +58,22 @@ begin-module fat32-test
       then
     until
   ;
+  
+  : create-file ( data-addr data-u name-addr name-u )
+    my-dir my-fs root-dir@
+    my-file my-dir [ fat32 ] :: create-file
+    my-file write-file
+  ;
+  
+  : create-dir ( name-addr name-u )
+    my-dir my-fs root-dir@
+    my-dir-1 my-dir [ fat32 ] :: create-dir
+  ;
 
-  : ls-test-1 ( -- )
+  : ls ( name-addr name-u -- )
     <fat32-entry> my-entry init-object
     my-dir my-fs root-dir@
-    s" TEST1" my-dir-1 my-dir open-dir
+    my-dir-1 my-dir open-dir
     begin
       my-entry my-dir-1 read-dir if
         12 [:
@@ -74,10 +86,10 @@ begin-module fat32-test
     until
   ;
   
-  : cat-test ( -- )
+  : cat ( name-addr name-u -- )
     cr
     my-dir my-fs root-dir@
-    s" TEST.TXT" my-file my-dir open-file
+    my-file my-dir open-file
     begin
       my-read-buffer my-read-size my-file read-file dup 0> if
         my-read-buffer swap type false
@@ -85,6 +97,35 @@ begin-module fat32-test
         drop true
       then
     until
+  ;
+  
+  : cat2 ( name-addr name-u dir-addr dir-u -- )
+    cr
+    my-dir my-fs root-dir@
+    my-dir-1 my-dir open-dir
+    my-file my-dir-1 open-file
+    begin
+      my-read-buffer my-read-size my-file read-file dup 0> if
+        my-read-buffer swap type false
+      else
+        drop true
+      then
+    until
+  ;
+  
+  : remove-file ( name-addr name-u -- )
+    my-dir my-fs root-dir@
+    my-dir remove-file
+  ;
+  
+  : remove-dir ( name-addr name-u -- )
+    my-dir my-fs root-dir@
+    my-dir remove-dir
+  ;
+  
+  : rename ( new-name-addr new-name-u name-addr name-u -- )
+    my-dir my-fs root-dir@
+    my-dir rename
   ;
   
   : seek-test ( -- )

@@ -54,8 +54,14 @@ begin-module fat32
   \ Directory entry is not a file
   : x-entry-not-file ( -- ) ." directory entry not file" cr ;
   
-  \ Direcotry entry is not a directory
+  \ Directory entry is not a directory
   : x-entry-not-dir ( -- ) ." directory entry not directory" cr ;
+  
+  \ Directory is not empty
+  : x-dir-is-not-empty ( -- ) ." directory is not empty" cr ;
+  
+  \ Directory name being changed or set is forbidden
+  : x-forbidden-dir ( -- ) ." forbidden directory name" cr ;
 
   \ Seek from the beginning of a file
   0 constant seek-set
@@ -373,6 +379,9 @@ begin-module fat32
     \ Remove a directory
     method remove-dir ( c-addr u dir -- )
     
+    \ Rename a file or directory
+    method rename ( new-c-addr new-u c-addr u dir - )
+    
     \ Get whether a directory is empty
     method dir-empty? ( dir -- empty? )
     
@@ -607,11 +616,11 @@ begin-module fat32
     
     \ Convert a string to uppercase
     : upcase-string ( c-addr u xt -- )
-      over [:
-        tuck 2>r
-        dup >r 0 ?do over i + c@ upcase-char over i + c! loop
-        2drop r> 2r> -rot swap rot execute
-      ;] with-allot
+      over [: ( c-addr u xt buffer )
+        3 roll over 4 pick move ( u xt buffer )
+        2 pick 0 ?do dup i + c@ upcase-char over i + c! loop ( u xt buffer )
+        -rot execute ( )
+      ;] with-allot ( )
     ;
     
     \ Validate a filename
@@ -622,7 +631,7 @@ begin-module fat32
       2dup dot-index dup 0 > averts x-file-name-format
       dup 8 <= averts x-file-name-format
       2dup swap 1- < averts x-file-name-format
-      swap 4 - >=  averts x-file-name-format
+      swap 4 - >= averts x-file-name-format
       drop
     ;
     
@@ -691,7 +700,16 @@ begin-module fat32
     : convert-name ( c-addr u xt )
       >r 2dup dir-name? if r> convert-dir-name else r> convert-file-name then
     ;
-  
+    
+    \ Check whether a directory name is forbidden?
+    : forbidden-dir? ( c-addr u -- forbidden? )
+      s" ." 2over equal-strings? if
+        2drop true
+      else
+        s" .." equal-strings?
+      then
+    ;
+
   end-module
     
   \ Implement master boot record class
@@ -786,7 +804,7 @@ begin-module fat32
         >r sector-scratchpad sector-size r@ info-sector @ r@ first-sector @ + r@ fat32-device @ block@
         r@ free-cluster-count @ sector-scratchpad $1E8 + !
         r@ recent-allocated-cluster @ sector-scratchpad $1EC + !
-        sector-scratchpad sector-size r@ info-sector @ r> fat32-device @ block!
+        sector-scratchpad sector-size r@ info-sector @ r@ first-sector @ + r> fat32-device @ block!
       ;] fat32-lock with-lock
     ; define write-info-sector
     
@@ -927,17 +945,17 @@ begin-module fat32
     ; define entry@
     
     :noname ( entry index cluster fs -- )
-      dup >r find-entry r>
-      over -1 <> averts x-out-of-range-entry
-      [:
-        >r
-        r@ cluster>sector
-        over [ sector-size entry-size / ] literal u/ + r> swap dup >r swap >r
-        sector-scratchpad sector-size rot r@ fat32-device @ block@
-        [ sector-size entry-size / ] literal umod entry-size *
-        sector-scratchpad + swap entry>buffer
-        sector-scratchpad sector-size >r >r swap fat32-device @ block@
-      ;] fat32-lock with-lock
+      dup >r find-entry r> ( entry index' cluster' fs )
+      over -1 <> averts x-out-of-range-entry ( entry index' cluster' fs )
+      [: ( entry index' cluster' fs )
+        >r ( entry index' cluster' ) 
+        r@ cluster>sector ( entry index' sector )
+        over [ sector-size entry-size / ] literal u/ + r> swap dup >r swap >r ( entry index' sector' )
+        sector-scratchpad sector-size rot r@ fat32-device @ block@ ( entry index' )
+        [ sector-size entry-size / ] literal umod entry-size * ( entry offset )
+        sector-scratchpad + swap entry>buffer ( )
+        sector-scratchpad sector-size r> r> swap fat32-device @ block! ( )
+      ;] fat32-lock with-lock ( )
     ; define entry!
     
     :noname ( fs -- count )
@@ -1085,7 +1103,7 @@ begin-module fat32
     :noname ( file -- offset ) file-offset @ ; define tell-file
     
     :noname ( c-addr u parent-dir file -- )
-      [: 3 pick 3 pick 3 pick dir-start-cluster @ 4 pick file-fs @ lookup-entry 2drop ;] try
+      [: 3 pick 3 pick 3 pick dir-start-cluster @ 3 pick file-fs @ lookup-entry 2drop ;] try
       ( c-addr u parent-dir file exception )
       dup 0= triggers x-entry-already-exists
       dup ['] x-entry-not-found = if drop 0 then ?raise
@@ -1099,7 +1117,7 @@ begin-module fat32
       <fat32-entry> [: ( c-addr u file entry )
         0 2 pick file-start-cluster @ rot ( c-addr u file 0 file-cluster entry )
         5 roll 5 roll rot ( file 0 file-cluster c-addr u entry )
-        dup >r init-dir-entry r> ( file entry )
+        dup >r init-file-entry r> ( file entry )
         over file-parent-index @ ( file entry parent-index )
         2 pick file-parent-cluster @ ( file entry parent-index parent-cluster )
         3 roll file-fs @ entry! ( )
@@ -1275,17 +1293,19 @@ begin-module fat32
     ; define read-dir 
     
     :noname ( c-addr u new-file dir -- )
+      3 pick 3 pick validate-file-name
       dup dir-fs @ 2 pick <fat32-file> swap init-object
       swap do-create-file
     ; define create-file
     
     :noname ( c-addr u opened-file dir -- )
+      3 pick 3 pick validate-file-name
       dup dir-fs @ 2 pick <fat32-file> swap init-object
       swap do-open-file
     ; define open-file
         
     :noname ( c-addr u dir -- )
-      dup dir-start-cluster @ swap dir-fs @ tuck lookup-entry ( fs entry-index entry-cluster )
+      dup dir-start-cluster @ swap dir-fs @ dup >r lookup-entry r> -rot ( fs entry-index entry-cluster )
       <fat32-entry> [: ( fs entry-index entry-cluster entry )
         dup 3 pick 3 pick 6 pick entry@ ( fs entry-index entry-cluster entry )
         dup entry-file? averts x-entry-not-file ( fs entry-index entry-cluster entry )
@@ -1293,23 +1313,26 @@ begin-module fat32
         dup mark-entry-deleted ( fs entry-index entry-cluster entry )
         rot rot 3 roll entry! ( )
       ;] with-object
-    : define remove-file
+    ; define remove-file
     
     :noname ( c-addr u new-dir dir -- )
+      3 pick 3 pick validate-dir-name
       dup dir-fs @ 2 pick <fat32-dir> swap init-object
       swap do-create-dir
     ; define create-dir
         
     :noname ( c-addr u opened-dir dir -- )
+      3 pick 3 pick validate-dir-name
       dup dir-fs @ 2 pick <fat32-dir> swap init-object
       swap do-open-dir
     ; define open-dir
         
     :noname ( c-addr u dir -- )
-      
-      \ ADD MORE HERE
-      
-      dup dir-start-cluster @ swap dir-fs @ tuck lookup-entry ( fs entry-index entry-cluster )
+      3dup <fat32-dir> class-size [: ( c-addr u dir c-addr u dir dir' )
+        dup >r swap open-dir r> ( c-addr u dir dir' )
+        dir-empty? averts x-dir-is-not-empty
+      ;] with-aligned-allot
+      dup dir-start-cluster @ swap dir-fs @ dup >r lookup-entry r> -rot ( fs entry-index entry-cluster )
       <fat32-entry> [: ( fs entry-index entry-cluster entry )
         dup 3 pick 3 pick 6 pick entry@ ( fs entry-index entry-cluster entry )
         dup entry-dir? averts x-entry-not-dir ( fs entry-index entry-cluster entry )
@@ -1317,7 +1340,22 @@ begin-module fat32
         dup mark-entry-deleted ( fs entry-index entry-cluster entry )
         rot rot 3 roll entry! ( )
       ;] with-object
-    : define remove-dir
+    ; define remove-dir
+    
+    :noname ( c-addr' u' c-addr u dir - )
+      dup dir-start-cluster @ swap dir-fs @ dup >r lookup-entry r> -rot ( c-addr' u' fs entry-index entry-cluster )
+      <fat32-entry> [: ( c-addr' u' fs entry-index entry-cluster entry )
+        dup 3 pick 3 pick 6 pick entry@ ( c-addr' u' fs entry-index entry-cluster entry )
+        dup entry-dir? if ( c-addr' u' fs entry-index entry-cluster entry )
+          5 pick 5 pick forbidden-dir? triggers x-forbidden-dir
+          12 [: 12 2 pick file-name@ forbidden-dir? triggers x-forbidden-dir ;] with-allot
+          5 roll 5 roll 2 pick dir-name!
+        else
+          5 roll 5 roll 2 pick file-name!
+        then ( fs entry-index entry-cluster entry )
+        -rot 3 roll entry! ( )
+      ;] with-object
+    ; define rename
     
     :noname ( dir -- empty? )
       <fat32-entry> [: ( dir entry )
@@ -1325,12 +1363,12 @@ begin-module fat32
           dup >r find-entry r> ( entry index cluster fs )
           over -1 = if 2dup 2dup true exit then ( entry index cluster fs )
           2over 2over entry@ ( entry index cluster fs )
-          2 pick short-file-name c@ dup $00 = if 2dup 2dup true exit then ( entry index cluster fs )
+          3 pick short-file-name c@ dup $00 = if drop 2drop 2drop true exit then ( entry index cluster fs c )
           $E5 <> if ( name entry index cluster fs )
             s" .       " 5 pick short-file-name 8 equal-case-strings?
             s" ..      " 6 pick short-file-name 8 equal-case-strings? or
             s"    " 6 pick short-file-ext 3 equal-case-strings? and
-            not if 2dup 2dup false exit then
+            not if 2drop 2drop false exit then
           then
           rot 1+ -rot
         again
@@ -1342,6 +1380,10 @@ begin-module fat32
       2 pick dir-parent-cluster ! ( c-addr u dir parent-index )
       over dir-parent-index ! ( c-addr u dir )
       dup dir-fs @ allocate-cluster ( c-addr u dir dir-cluster )
+      <fat32-entry> [: ( c-addr u dir dir-cluster entry )
+        dup >r init-end-entry r> ( c-addr u dir dir-cluster entry )
+        0 2 pick 4 pick dir-fs @ entry! ( c-addr u dir dir-cluster )
+      ;] with-object ( c-addr u dir dir-cluster )
       over dir-start-cluster ! ( c-addr u dir )
       <fat32-entry> [: ( c-addr u dir entry )
         over dir-start-cluster @ swap ( c-addr u dir dir-cluster entry )
@@ -1354,7 +1396,7 @@ begin-module fat32
     ; define do-create-dir-raw
     
     :noname ( c-addr u parent-dir dir -- )
-      [: 3 pick 3 pick 3 pick dir-start-cluster @ 4 pick file-fs @ lookup-entry 2drop ;] try
+      [: 3 pick 3 pick 3 pick dir-start-cluster @ 4 pick dir-fs @ lookup-entry 2drop ;] try
       ( c-addr u parent-dir dir exception )
       dup 0= triggers x-entry-already-exists
       dup ['] x-entry-not-found = if drop 0 then ?raise
@@ -1367,10 +1409,10 @@ begin-module fat32
     :noname ( dir -- )
       dup dir-start-cluster @ over dir-fs @ allocate-entry ( dir child-index child-cluster )
       <fat32-entry> [: ( dir child-index child-cluster entry )
-        2 pick dir-start-cluster @ swap ( dir child-index child-cluster start-cluster entry )
+        3 pick dir-start-cluster @ swap ( dir child-index child-cluster start-cluster entry )
         s" ." rot ( dir child-index child-cluster start-cluster c-addr u entry )
         dup >r init-dir-entry r> ( dir child-index child-cluster entry )
-        3 roll dir-fs @ entry! ( )
+        -rot 3 roll dir-fs @ entry! ( )
       ;] with-object
     ; define do-create-dot-entry
     
@@ -1381,7 +1423,7 @@ begin-module fat32
         4 roll dir-start-cluster @ swap ( dir child-index child-cluster start-cluster entry )
         s" .." rot ( dir child-index child-cluster start-cluster c-addr u entry )
         dup >r init-dir-entry r> ( dir child-index child-cluster entry )
-        3 roll dir-fs @ entry! ( )
+        -rot 3 roll dir-fs @ entry! ( )
       ;] with-object
     ; define do-create-dot-dot-entry
     
@@ -1514,12 +1556,14 @@ begin-module fat32
     ; define first-cluster!
     
     :noname ( c-addr u entry -- )
-      -rot 2dup validate-file-name
-      [:
-        rot r>
-        2dup dot-index
-        2 pick over r@ short-file-name 8 copy-space-pad
-        1+ rot over + rot rot - r@ short-file-ext 3 copy-space-pad
+      -rot 2dup validate-file-name ( c-addr u entry )
+      [: ( entry c-addr' u' )
+        rot >r ( c-addr' u' )
+        r@ short-file-name 8 $20 fill ( c-addr' u' )
+        r@ short-file-ext 3 $20 fill ( c-addr' u' )
+        2dup dot-index ( c-addr' u' index )
+        2 pick r@ short-file-name 2 pick move ( c-addr' u' index )
+        1+ rot over + -rot r@ short-file-ext -rot - move ( )
         r@ short-file-name c@ $E5 = if
           $05 r@ short-file-name c!
         then
@@ -1528,11 +1572,12 @@ begin-module fat32
     ; define file-name!
     
     :noname ( c-addr u entry -- )
-      -rot 2dup validate-dir-name
-      [:
-        rot r>
-        r@ short-file-name 8 copy-space-pad
-        s" " r@ short-file-ext 3 copy-space-pad
+      -rot 2dup validate-dir-name ( c-addr u entry )
+      [: ( entry c-addr' u' )
+        rot >r ( c-addr' u' )
+        r@ short-file-name 8 $20 fill ( c-addr' u' )
+        r@ short-file-ext 3 $20 fill ( c-addr' u' )
+        r@ short-file-name swap move ( )
         r@ short-file-name c@ $E5 = if
           $05 r@ short-file-name c!
         then

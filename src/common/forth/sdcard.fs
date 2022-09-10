@@ -48,19 +48,19 @@ begin-module sd
   begin-module sd-internal
     
     \ SD Card init timeout
-    10000 systick-divisor * constant sd-init-timeout
+    $100000 constant sd-init-timeout
 
     \ SD Card erase timeout
-    10000 systick-divisor * constant sd-erase-timeout
+    $100000 constant sd-erase-timeout
 
     \ SD Card read timeout
-    300 systick-divisor * constant sd-read-timeout
+    $10000 constant sd-read-timeout
 
     \ SD Card write timeout
-    600 systick-divisor * constant sd-write-timeout
+    $10000 constant sd-write-timeout
     
     \ SD Card dummy timeout
-    10000 systick-divisor * constant sd-dummy-timeout
+    $10000 constant sd-dummy-timeout
 
     \ init card in spi mode if CS low
     $00 constant CMD_GO_IDLE_STATE
@@ -128,7 +128,10 @@ begin-module sd
 
     \ Sector size
     512 constant sector-size
-
+    
+    \ Execute an xt with interrupts off
+    : with-disable-int ( xt -- ) disable-int try enable-int ?raise ;
+    
   end-module> import
     
   \ SD Card block device class
@@ -178,6 +181,9 @@ begin-module sd
     
       \ Validate a block index
       method validate-block ( block sd-card -- )
+      
+      \ Implement flush-blocks
+      method do-flush-blocks ( sd-card -- )
       
       \ Assert CS
       method assert-cs ( sd-card -- )
@@ -306,7 +312,7 @@ begin-module sd
           sector-size * r@ sd-buffers + swap sector-size min move ( )
           r@ age-sd-buffers ( )
           r> r> cells over sd-buffer-age + 0 swap ! ( sd-card )
-          dup write-through @ if flush-blocks else drop then ( )
+          dup write-through @ if do-flush-blocks else drop then ( )
         ;] over sd-lock with-lock
       then
     ; define block!
@@ -330,7 +336,7 @@ begin-module sd
         swap sector-size r> - 0 max min move ( )
         r@ age-sd-buffers ( )
         r> r> cells over sd-buffer-age + 0 swap ! ( sd-card )
-        dup write-through @ if flush-blocks else drop then ( )
+        dup write-through @ if do-flush-blocks else drop then ( )
       ;] over sd-lock with-lock
     ; define block-part!
 
@@ -371,19 +377,7 @@ begin-module sd
     ; define block-part@
 
     :noname ( sd-card -- )
-      [:
-	>r
-	0 begin dup buffer-count < while
-	  dup cells r@ sd-buffer-assign + @ -1 <> if
-	    dup r@ sd-buffer-dirty + c@ if
-	      0 over r@ sd-buffer-dirty + c!
-	      dup dup cells r@ sd-buffer-assign + @ r@ write-sd-block
-	    then
-	  then
-	  1+
-	repeat
-	drop rdrop
-      ;] over sd-lock with-lock
+      [: do-flush-blocks ;] over sd-lock with-lock
     ; define flush-blocks
     
     :noname ( sd-card -- )
@@ -411,6 +405,20 @@ begin-module sd
       block-count < averts x-block-out-of-range
     ; define validate-block
     
+    :noname ( sd-card -- )
+      >r
+      0 begin dup buffer-count < while
+        dup cells r@ sd-buffer-assign + @ -1 <> if
+          dup r@ sd-buffer-dirty + c@ if
+            0 over r@ sd-buffer-dirty + c!
+            dup dup cells r@ sd-buffer-assign + @ r@ write-sd-block
+          then
+        then
+        1+
+      repeat
+      drop rdrop
+    ; define do-flush-blocks
+    
     :noname ( sd-card -- ) high swap cs-pin @ pin! ; define deassert-cs
 
     :noname ( sd-card -- ) low swap cs-pin @ pin! ; define assert-cs
@@ -433,11 +441,11 @@ begin-module sd
     :noname ( sd-card -- ) $FF swap send-get-byte drop ; define dummy-byte
     
     :noname ( sd-card -- )
-      ( display-red ) >r 8 begin ?dup while r@ dummy-byte 1- repeat rdrop ( display-normal )
+      ( display-red ) >r 16 begin ?dup while r@ dummy-byte 1- repeat rdrop ( display-normal )
     ; define dummy-bytes
     
     :noname ( argument command sd-card -- response )
-      [:
+\      [:
 	>r
 	r@ deassert-cs
 	r@ dummy-bytes
@@ -481,7 +489,7 @@ begin-module sd
 	  then
 	until
 	rdrop
-      ;] critical
+\      ;] critical
     ; define send-sd-cmd
     
     :noname ( sd-card -- )
@@ -494,9 +502,9 @@ begin-module sd
 
     :noname ( sd-card -- )
       [:
-        >r systick-counter
+        >r sd-init-timeout
         begin
-          systick-counter over - sd-init-timeout <= averts x-sd-init-error
+          dup 0> averts x-sd-init-error 1-
           0 CMD_GO_IDLE_STATE r@ send-simple-sd-cmd R1_IDLE_STATE =
         until
         drop
@@ -505,14 +513,14 @@ begin-module sd
         r@ get-word $FF and $AA = averts x-sd-init-error
         r@ end-sd-cmd
         0 CMD_CRC_ON_OFF r@ send-simple-sd-cmd R1_IDLE_STATE = averts x-sd-init-error
-        systick-counter
+        sd-init-timeout
         begin
-          systick-counter over - sd-init-timeout <= averts x-sd-init-error
+          dup 0> averts x-sd-init-error 1-
           0 CMD_APP_CMD r@ send-simple-sd-cmd drop
           $40000000 ACMD_SD_SEND_OP_CMD r@ send-simple-sd-cmd R1_READY_STATE =
         until
         drop
-        1000000 r@ spi-device @ spi-baud!
+        500000 r@ spi-device @ spi-baud!
         0 CMD_READ_OCR r@ send-sd-cmd R1_READY_STATE = averts x-sd-init-error
         r@ get-word r@ end-sd-cmd
         $C0000000 and averts x-sd-not-sdhc
@@ -521,22 +529,22 @@ begin-module sd
           dup 7 + c@ $3F and 16 lshift over 8 + c@ 8 lshift or swap 9 + c@ or 1+ 1024 *
           swap max-block-count !
         ;] with-aligned-allot
-      ;] critical
+      ;] with-disable-int
     ; define init-sd-card
 
     :noname ( sd-card -- )
-      [:
-	>r systick-counter
+\      [:
+	>r sd-read-timeout
 	begin
 	  r@ get-byte dup $FF = if
-	    drop systick-counter over - sd-read-timeout <= averts x-sd-timeout
+	    drop dup 0> averts x-sd-timeout 1-
 	    false
 	  else
 	    DATA_START_TOKEN = averts x-sd-read-error true
 	  then
 	until
 	drop rdrop
-      ;] critical
+\      ;] critical
     ; define wait-sd-start-block
 
     :noname ( index block sd-card -- )
@@ -550,11 +558,11 @@ begin-module sd
 	2drop
 	2 begin ?dup while r@ dummy-byte 1- repeat
 	r> end-sd-cmd
-      ;] critical
+      ;] with-disable-int
     ; define read-sd-block
 
     :noname ( addr cmd sd-card -- )
-      [:
+\      [:
 	>r
 	0 swap r@ send-sd-cmd triggers x-sd-read-error
 	r@ wait-sd-start-block
@@ -564,7 +572,7 @@ begin-module sd
 	2drop
 	2 begin ?dup while r@ dummy-byte 1- repeat
 	r> end-sd-cmd
-      ;] critical
+\      ;] critical
     ; define read-sd-register
 
     :noname ( index block sd-card -- )
@@ -582,19 +590,18 @@ begin-module sd
 	0 CMD_SEND_STATUS r@ send-sd-cmd triggers x-sd-write-error
 	r@ get-byte triggers x-sd-write-error
 	r> end-sd-cmd
-      ;] critical
+      ;] with-disable-int
     ; define write-sd-block
 
     :noname ( timeout sd-card -- )
-      [:
+\      [:
 	>r
-	systick-counter
 	begin
-          systick-counter over - 2 pick <= averts x-sd-timeout
+          dup 0> averts x-sd-timeout 1-
           r@ get-byte $FF =
 	until
-	2drop rdrop
-      ;] critical
+	drop rdrop
+\      ;] critical
     ; define wait-sd-not-busy
 
     :noname ( index sd-card -- )
