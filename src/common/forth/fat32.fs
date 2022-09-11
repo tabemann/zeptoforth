@@ -739,15 +739,53 @@ begin-module fat32
     
     \ Validate a path
     : validate-path ( c-addr u -- )
-      begin dup 0> while
+      dup 0> if
         over c@ [char] . = if
           1- swap 1+ swap
-          begin dup 0> while
-            over c@ [char] / <> averts x-invalid-path
-            1- swap 1+ swap
-          repeat
+          dup 0> if
+            over c@ [char] . = if
+              1- swap 1+ swap
+              dup 0> if
+                over c@ [char] / = averts x-invalid-path
+              then
+            else
+              over c@ [char] / = averts x-invalid-path
+            then
+          then
         else
           1- swap 1+ swap
+        then
+      then
+      begin dup 0> while
+        over c@ [char] / = if
+          1- swap 1+ swap
+          dup 0> if
+            over c@ [char] . = if
+              1- swap 1+ swap
+              dup 0> if
+                over c@ [char] . = if
+                  1- swap 1+ swap
+                  dup 0> if
+                    over c@ [char] / = averts x-invalid-path
+                  then
+                else
+                  over c@ [char] / = averts x-invalid-path
+                then
+              then
+            else
+              1- swap 1+ swap
+            then
+          then
+        else
+          over c@ [char] . = if
+            1- swap 1+ swap
+            begin dup 0> while
+              over c@ [char] / <> averts x-invalid-path
+              1- swap 1+ swap
+            repeat
+          else
+            1- swap 1+ swap
+          then
         then
       repeat
       2drop
