@@ -60,22 +60,18 @@ begin-module fat32-test
   ;
   
   : create-file ( data-addr data-u name-addr name-u )
-    my-dir my-fs root-dir@
-    my-file my-dir [ fat32 ] :: create-file
+    [: my-file swap create-dir ;] my-fs with-root-path
     my-file write-file
   ;
   
   : create-dir ( name-addr name-u )
-    my-dir my-fs root-dir@
-    my-dir-1 my-dir [ fat32 ] :: create-dir
+    [: my-dir swap create-dir ;] my-fs with-root-path
   ;
 
   : ls ( name-addr name-u -- )
-    <fat32-entry> my-entry init-object
-    my-dir my-fs root-dir@
-    my-dir-1 my-dir open-dir
+    [: my-dir swap open-dir ;] my-fs with-root-path
     begin
-      my-entry my-dir-1 read-dir if
+      my-entry my-dir read-dir if
         12 [:
           12 my-entry file-name@
           cr type space false
@@ -88,22 +84,7 @@ begin-module fat32-test
   
   : cat ( name-addr name-u -- )
     cr
-    my-dir my-fs root-dir@
-    my-file my-dir open-file
-    begin
-      my-read-buffer my-read-size my-file read-file dup 0> if
-        my-read-buffer swap type false
-      else
-        drop true
-      then
-    until
-  ;
-  
-  : cat2 ( name-addr name-u dir-addr dir-u -- )
-    cr
-    my-dir my-fs root-dir@
-    my-dir-1 my-dir open-dir
-    my-file my-dir-1 open-file
+    [: my-file swap open-file ;] my-fs with-root-path
     begin
       my-read-buffer my-read-size my-file read-file dup 0> if
         my-read-buffer swap type false
@@ -114,18 +95,15 @@ begin-module fat32-test
   ;
   
   : remove-file ( name-addr name-u -- )
-    my-dir my-fs root-dir@
-    my-dir remove-file
+    ['] remove-file my-fs with-root-path
   ;
   
   : remove-dir ( name-addr name-u -- )
-    my-dir my-fs root-dir@
-    my-dir remove-dir
+    ['] remove-dir my-fs with-root-path
   ;
   
   : rename ( new-name-addr new-name-u name-addr name-u -- )
-    my-dir my-fs root-dir@
-    my-dir rename
+    ['] rename my-fs with-root-path
   ;
   
   : seek-test ( -- )

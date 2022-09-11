@@ -39,29 +39,35 @@ begin-module fat32
   \ Unsupported file name format exception
   : x-file-name-format ( -- ) ." unsupported filename" cr ;
   
-  \ Out of range directory entry index
+  \ Out of range directory entry index exception
   : x-out-of-range-entry ( -- ) ." out of range directory entry" cr ;
   
-  \ Out of range partition index
+  \ Out of range partition index exception
   : x-out-of-range-partition ( -- ) ." out of range partition" cr ;
   
-  \ Directory entry not found
+  \ Directory entry not found exception
   : x-entry-not-found ( -- ) ." directory entry not found" cr ;
   
-  \ Directory entry already exists
+  \ Directory entry already exists exception
   : x-entry-already-exists ( -- ) ." directory entry already exists" cr ;
   
-  \ Directory entry is not a file
+  \ Directory entry is not a file exception
   : x-entry-not-file ( -- ) ." directory entry not file" cr ;
   
-  \ Directory entry is not a directory
+  \ Directory entry is not a directory exception
   : x-entry-not-dir ( -- ) ." directory entry not directory" cr ;
   
-  \ Directory is not empty
+  \ Directory is not empty exception
   : x-dir-is-not-empty ( -- ) ." directory is not empty" cr ;
   
-  \ Directory name being changed or set is forbidden
+  \ Directory name being changed or set is forbidden exception
   : x-forbidden-dir ( -- ) ." forbidden directory name" cr ;
+  
+  \ No file or directory referred to in path within directory exception
+  : x-empty-path ( -- ) ." empty path" cr ;
+  
+  \ Invalid path exception
+  : x-invalid-path ( -- ) ." invalid path" cr ;
 
   \ Seek from the beginning of a file
   0 constant seek-set
@@ -172,6 +178,9 @@ begin-module fat32
     
     \ Get the root directory for a FAT32 filesystem
     method root-dir@ ( dir fs -- )
+    
+    \ Find a file or directory in a path from the root directory
+    method with-root-path ( c-addr u xt fs -- ) ( xt: c-addr' u' dir -- )
     
     continue-module fat32-internal
       
@@ -358,6 +367,9 @@ begin-module fat32
       
     end-module
     
+    \ Find a file or directory in a path from a directory
+    method with-path ( c-addr u xt dir -- ) ( xt: c-addr' u' dir' -- )
+
     \ Read an entry from a directory, and return whether an entry was read
     method read-dir ( entry dir -- entry-read? )
     
@@ -709,6 +721,37 @@ begin-module fat32
         s" .." equal-strings?
       then
     ;
+    
+    \ Find a path separator
+    : find-path-separator ( c-addr u -- index | -1 )
+      0 begin over 0> while
+        2 pick c@ [char] / = if nip nip exit else 1+ rot 1+ rot 1- rot then
+      repeat
+      2drop drop -1
+    ;
+    
+    \ Strip a final path separator
+    : strip-final-path-separator ( c-addr u -- c-addr' u' )
+      begin dup 0> while
+        2dup 1- + c@ [char] / = if 1- else exit then
+      repeat
+    ;
+    
+    \ Validate a path
+    : validate-path ( c-addr u -- )
+      begin dup 0> while
+        over c@ [char] . = if
+          1- swap 1+ swap
+          begin dup 0> while
+            over c@ [char] / <> averts x-invalid-path
+            1- swap 1+ swap
+          repeat
+        else
+          1- swap 1+ swap
+        then
+      repeat
+      2drop
+    ;
 
   end-module
     
@@ -787,6 +830,10 @@ begin-module fat32
       dup dir-start-cluster @ over dir-current-cluster !
       0 swap dir-current-cluster-index !
     ; define root-dir@
+    
+    :noname ( c-addr u xt fs -- ) ( xt: c-addr' u' dir -- )
+      <fat32-dir> class-size [: tuck swap root-dir@ with-path ;] with-aligned-allot
+    ; define with-root-path
     
     :noname ( fs -- )
       [:
@@ -1264,6 +1311,26 @@ begin-module fat32
       -1 over dir-current-cluster !
       0 swap dir-current-cluster-index !
     ; define new
+    
+    :noname ( c-addr u xt dir -- ) ( xt: c-addr' u' dir' -- )
+      swap 2>r ( c-addr u )
+      2dup validate-path ( c-addr' u' )
+      strip-final-path-separator ( c-addr' u' )
+      dup 0<> averts x-empty-path ( c-addr' u' )
+      2dup find-path-separator ( c-addr' u' index )
+      dup 0<> if
+        dup -1 = if ( c-addr' u' index )
+          drop 2r> execute ( )
+        else
+          2 pick over 2r> <fat32-dir> class-size [: ( c-addr' u' index c-addr'' u'' dir xt dir' )
+            -rot >r over >r open-dir ( c-addr' u' index )
+            1+ tuck - -rot + swap 2r> swap with-path ( )
+          ;] with-aligned-allot
+        then
+      else ( c-addr' u' index )
+        drop 1- swap 1+ swap 2r> swap with-path ( )
+      then ( )
+    ; define with-path
     
     :noname ( entry dir -- entry-read? )
       >r begin
