@@ -146,5 +146,15 @@ begin-module fat32-test
     my-read-buffer small-read-size my-file read-file
     my-read-buffer swap type
   ;
+  
+  : create-big-file ( name-addr name-u -- )
+    false my-sd write-through!
+    [: my-file swap [ fat32 ] :: create-file ;] my-fs with-root-path
+    $10000 0 ?do key? if key drop leave then
+      hex i 0 <# # # # # # # # # #> decimal my-file write-file drop
+      i h.8
+    loop
+    true my-sd write-through!
+  ;
 
 end-module
