@@ -441,7 +441,7 @@ begin-module sd
     :noname ( sd-card -- ) $FF swap send-get-byte drop ; define dummy-byte
     
     :noname ( sd-card -- )
-      ( display-red ) >r 16 begin ?dup while r@ dummy-byte 1- repeat rdrop ( display-normal )
+      ( display-red ) >r 32 begin ?dup while r@ dummy-byte 1- repeat rdrop ( display-normal )
     ; define dummy-bytes
     
     :noname ( argument command sd-card -- response )

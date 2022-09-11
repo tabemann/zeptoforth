@@ -80,7 +80,7 @@ begin-module fat32-test
   ;
   
   : create-file ( data-addr data-u name-addr name-u )
-    [: my-file swap create-dir ;] my-fs with-root-path
+    [: my-file swap create-file ;] my-fs with-root-path
     my-file write-file
   ;
   
