@@ -152,7 +152,7 @@ begin-module fat32-test
     [: my-file swap [ fat32 ] :: create-file ;] my-fs with-root-path
     $10000 0 ?do key? if key drop leave then
       hex i 0 <# # # # # # # # # #> decimal my-file write-file drop
-      i h.8
+      i $FF and 0= if i h.8 then
     loop
     true my-sd write-through!
   ;

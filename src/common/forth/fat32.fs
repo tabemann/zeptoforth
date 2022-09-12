@@ -1155,9 +1155,7 @@ begin-module fat32
           -rot 2dup r@ write-file-sector ( write-bytes c-addr u part-bytes )
           dup 0<> if ( write-bytes c-addr u part-bytes )
             >r r@ - swap r@ + swap rot r> + ( c-addr' u' write-bytes' )
-            over 0<> if ( c-addr' u' write-bytes' )
-              r@ expand-file ( c-addr' u' write-bytes' )
-            then
+            r@ expand-file ( c-addr' u' write-bytes' )
             false
           else
             2drop drop true ( write-bytes flag )
@@ -1165,8 +1163,8 @@ begin-module fat32
         else
           nip nip true ( write-bytes flag )
         then
-      until ( read-bytes )
-      rdrop ( read-bytes )
+      until ( write-bytes )
+      rdrop ( write-bytes )
     ; define write-file
     
     :noname ( file -- )
@@ -1304,9 +1302,8 @@ begin-module fat32
       >r
       r@ file-offset @ r@ file-size@ < if
         r@ file-offset @ ( offset )
-        r@ file-current-cluster-index @ ( offset index )
-        r@ file-fs @ cluster-sectors @ sector-size * ( offset index cluster-size )
-        dup >r * - r> = if ( )
+        r@ file-current-cluster-index @ 1+ ( offset index )
+        r@ file-fs @ cluster-sectors @ sector-size * * = if ( )
           r@ file-current-cluster @ 0 r@ file-fs @ fat@ ( link )
           dup link-cluster? if ( link )
             cluster-link r@ file-current-cluster ! ( )
@@ -1322,9 +1319,8 @@ begin-module fat32
     :noname ( file -- )
       >r
       r@ file-offset @ ( offset )
-      r@ file-current-cluster-index @ ( offset index )
-      r@ file-fs @ cluster-sectors @ sector-size * * - ( offset' )
-      sector-size = if ( )
+      r@ file-current-cluster-index @ 1+ ( offset index )
+      r@ file-fs @ cluster-sectors @ sector-size * * = if ( )
         r@ file-current-cluster @ 0 r@ file-fs @ fat@ ( link )
         end-cluster? if ( )
           r@ file-current-cluster @ r@ file-fs @ allocate-link-cluster ( cluster )

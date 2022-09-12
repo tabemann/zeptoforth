@@ -523,7 +523,7 @@ begin-module sd
           $40000000 ACMD_SD_SEND_OP_CMD r@ send-simple-sd-cmd R1_READY_STATE =
         until
         drop
-        2000000 r@ spi-device @ spi-baud!
+        25000000 r@ spi-device @ spi-baud!
         0 CMD_READ_OCR r@ send-sd-cmd R1_READY_STATE = averts x-sd-init-error
         r@ get-word r@ end-sd-cmd
         $C0000000 and averts x-sd-not-sdhc
