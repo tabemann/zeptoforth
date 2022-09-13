@@ -18,10 +18,6 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-#include src/common/forth/block_dev.fs
-#include src/common/forth/sdcard.fs
-#include src/common/forth/fat32.fs
-
 begin-module fat32-test
 
   oo import

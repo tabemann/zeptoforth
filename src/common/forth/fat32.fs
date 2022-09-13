@@ -18,6 +18,8 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
+compile-to-flash
+
 begin-module fat32
 
   oo import
@@ -1715,4 +1717,7 @@ begin-module fat32
 
 end-module
 
-: init ( -- ) [ fat32 ] :: init-fat32 ;
+: init ( -- ) init [ fat32 ] :: init-fat32 ;
+
+reboot
+

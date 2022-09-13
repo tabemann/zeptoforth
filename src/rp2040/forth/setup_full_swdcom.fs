@@ -22,7 +22,6 @@
 \ executed from the root of the zeptoforth directory to initialize zeptoforth
 \ on an RP2040 device.
 
-\ #include src/rp2040/forth/clock.fs
 #include src/common/forth/basic.fs
 #include src/common/forth/module.fs
 #include src/common/forth/interrupt.fs
@@ -45,6 +44,7 @@
 #include src/rp2040/forth/uart.fs
 #include src/rp2040/forth/adc.fs
 #include src/rp2040/forth/spi.fs
+#include src/common/forth/full_extra.fs
 #include src/common/forth/swdcom.fs
 
 \ Set a cornerstone to enable deleting everything compiled after this code

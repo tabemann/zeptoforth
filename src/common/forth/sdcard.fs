@@ -18,6 +18,8 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
+compile-to-flash
+
 begin-module sd
 
   oo import
@@ -689,3 +691,5 @@ begin-module sd
   end-implement
   
 end-module
+
+compile-to-ram

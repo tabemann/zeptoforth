@@ -143,7 +143,7 @@ begin-module oo
     dup class-method-list @
     begin ?dup while
       dup method-index @ >r
-      r@ 2 pick class-method @ dup 2 pick >= swap here < and not if
+      r@ 2 pick class-method @ dup 0= compiling-to-flash? not and swap -1 = or if
 	r@ 2 pick class-superclass @ class-method @
 	r@ 3 pick class-method current!
       then
