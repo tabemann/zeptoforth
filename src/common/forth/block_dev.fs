@@ -76,4 +76,4 @@ begin-module block-dev
   
 end-module
 
-compile-to-ram
+reboot

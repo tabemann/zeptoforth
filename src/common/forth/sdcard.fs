@@ -692,4 +692,4 @@ begin-module sd
   
 end-module
 
-compile-to-ram
+reboot

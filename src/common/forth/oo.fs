@@ -55,6 +55,9 @@ begin-module oo
       \ The size of the members of a class
       field: members-size
       
+      \ The number of methods of a class
+      field: method-count
+      
     end-structure
 
     \ A method of a class
@@ -104,8 +107,8 @@ begin-module oo
   create object-method-table cell allot ' new , ' destroy ,
     
   \ Define the object class
-  create <object> object-method-table , <object> , destroy-method , 0 ,
-  <object> object-method-table current!
+  create <object> object-method-table , here cell - , destroy-method , 0 , 2 ,
+  here 5 cells - object-method-table current!
   
   \ This is the entry point to the new method
   : new ( object -- ) dup @ 4 + @ execute ;
@@ -115,18 +118,20 @@ begin-module oo
 
   \ Begin the declaration of a class
   : begin-class
-    ( super-class "name" -- class-header member-offset list )
+    ( super-class "name" -- class-header member-offset list method-count )
     <builds here cell allot over , over members-size @
-    2 cells allot rot class-method-list @
+    3 cells allot 2 pick class-method-list @ 3 roll method-count @
     does>
   ;
 
   \ Finish the declaration of a class
-  : end-class ( class-header member-offset list -- )
-    -rot over members-size current!
-    over method-index @ 2 + cells cell align, here swap allot
-    over class-methods current!
-    dup dup class-methods @ current!
+  : end-class ( class-header member-offset list method-count -- )
+    2swap over members-size current! ( list method-count class-header )
+    2dup method-count current!  ( list method-count class-header )
+    swap 1+ cells cell align,
+    flash-block-align, here swap allot flash-block-align, ( list class-header methods )
+    2dup swap class-methods current! ( list class-header methods )
+    over swap current! ( list class-header )
     class-method-list current!
   ;
 
@@ -153,23 +158,23 @@ begin-module oo
   ;
 
   \ Declare a member of a class
-  : member ( member-offset list size "name" -- member-offset list )
-    : 2 pick 65536 u< thumb-2 or if inlined then
-    rot dup cell+ lit, postpone + postpone ; + swap
+  : member ( member-offset list method-count size "name" -- member-offset list method-count )
+    swap >r : 2 pick 65536 u< thumb-2 or if inlined then
+    rot dup cell+ lit, postpone + postpone ; + swap r>
   ;
   
   \ Declare a method of a class
-  : method ( list "name" -- list )
+  : method ( list method-count "name" -- list method-count )
     :
-    dup method-index @ 1+ cells 65536 u< thumb-2 or if inlined then
-    postpone dup
-    postpone @ dup method-index @ 2 + cells lit,
-    postpone + postpone @ postpone inline-execute
-    postpone ;
-    cell align, here method-header-size allot
-    2dup prev-method current!
-    swap method-index @ 1+ over method-index current!
-    latest over method-word current!
+    dup cells 65536 u< thumb-2 or if inlined then ( list method-count )
+    postpone dup ( list method-count )
+    postpone @ dup 1+ cells lit, ( list method-count )
+    postpone + postpone @ postpone inline-execute ( list method-count )
+    postpone ; ( list method-count )
+    cell align, here method-header-size allot ( list method-count list' )
+    rot over prev-method current! ( method-count list' )
+    2dup method-index current! ( method-count list' )
+    latest over method-word current! swap 1+ flash-block-align, ( list' method-count' )
   ;
 
   \ Define a method of a class
