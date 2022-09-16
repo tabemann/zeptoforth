@@ -27,16 +27,16 @@ begin-module fat32
   block-dev import
   
   \ Sector size exception
-  : x-sector-size-not-supported ." sector sizes other than 512 are not supported" cr  ;
+  : x-sector-size-not-supported ( -- ) ." sector sizes other than 512 are not supported" cr  ;
   
   \ Filesystem version not supported exception
-  : x-fs-version-not-supported ." FAT32 version not supported" cr ;
+  : x-fs-version-not-supported ( -- ) ." FAT32 version not supported" cr ;
   
   \ Bad info sector exception
-  : x-bad-info-sector ." bad info sector" cr ;
+  : x-bad-info-sector ( -- ) ." bad info sector" cr ;
   
   \ No clusters free exception
-  : x-no-clusters-free ." no clusters free" cr ;
+  : x-no-clusters-free ( -- ) ." no clusters free" cr ;
   
   \ Unsupported file name format exception
   : x-file-name-format ( -- ) ." unsupported filename" cr ;
@@ -394,7 +394,7 @@ begin-module fat32
     method remove-dir ( c-addr u dir -- )
     
     \ Rename a file or directory
-    method rename ( new-c-addr new-u c-addr u dir - )
+    method rename ( new-c-addr new-u c-addr u dir -- )
     
     \ Get whether a directory is empty
     method dir-empty? ( dir -- empty? )

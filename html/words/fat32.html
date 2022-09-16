@@ -1,0 +1,625 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>FAT32 Support &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Interrupt Words" href="interrupt.html" />
+    <link rel="prev" title="SDHC/SDXC Card Support" href="sdcard.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="fat32-support">
+<h1>FAT32 Support<a class="headerlink" href="#fat32-support" title="Permalink to this headline">¶</a></h1>
+<p>zeptoforth includes FAT32 filesystem support combined with MBR partition table support on devices implementing the <code class="docutils literal notranslate"><span class="pre">&lt;block-dev&gt;</span></code> class defined in the module <code class="docutils literal notranslate"><span class="pre">block-dev</span></code> (currently only the <code class="docutils literal notranslate"><span class="pre">&lt;sd&gt;</span></code> class defined in the module <code class="docutils literal notranslate"><span class="pre">sd</span></code>). It supports creating files and directories, reading files and directories, writing files and (indirectly) directories, seeking in files, removing files and (empty) directories, and renaming (but currently not moving) files and directories. It also supports parsing paths within filesystems. It supports reading partition table entries from the MBR, and uses these when initializing FAT32 filesystems.</p>
+<section id="fat32">
+<h2><code class="docutils literal notranslate"><span class="pre">fat32</span></code><a class="headerlink" href="#fat32" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module contains the following words:</p>
+<section id="x-sector-size-not-supported">
+<h3><code class="docutils literal notranslate"><span class="pre">x-sector-size-not-supported</span></code><a class="headerlink" href="#x-sector-size-not-supported" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Sector size exception.</p>
+</section>
+<section id="x-fs-version-not-supported">
+<h3><code class="docutils literal notranslate"><span class="pre">x-fs-version-not-supported</span></code><a class="headerlink" href="#x-fs-version-not-supported" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Filesystem version not supported exception.</p>
+</section>
+<section id="x-bad-info-sector">
+<h3><code class="docutils literal notranslate"><span class="pre">x-bad-info-sector</span></code><a class="headerlink" href="#x-bad-info-sector" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Bad info sector exception.</p>
+</section>
+<section id="x-no-clusters-free">
+<h3><code class="docutils literal notranslate"><span class="pre">x-no-clusters-free</span></code><a class="headerlink" href="#x-no-clusters-free" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>No clusters free exception.</p>
+</section>
+<section id="x-file-name-format">
+<h3><code class="docutils literal notranslate"><span class="pre">x-file-name-format</span></code><a class="headerlink" href="#x-file-name-format" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Unsupported file name format exception.</p>
+</section>
+<section id="x-out-of-range-entry">
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-entry</span></code><a class="headerlink" href="#x-out-of-range-entry" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Out of range directory entry index exception.</p>
+</section>
+<section id="x-out-of-range-partition">
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-partition</span></code><a class="headerlink" href="#x-out-of-range-partition" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Out of range partition index exception.</p>
+</section>
+<section id="x-entry-not-found">
+<h3><code class="docutils literal notranslate"><span class="pre">x-entry-not-found</span></code><a class="headerlink" href="#x-entry-not-found" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Directory entry not found exception.</p>
+</section>
+<section id="x-entry-already-exists">
+<h3><code class="docutils literal notranslate"><span class="pre">x-entry-already-exists</span></code><a class="headerlink" href="#x-entry-already-exists" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Directory entry already exists exception.</p>
+</section>
+<section id="x-entry-not-file">
+<h3><code class="docutils literal notranslate"><span class="pre">x-entry-not-file</span></code><a class="headerlink" href="#x-entry-not-file" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Directory entry is not a file exception.</p>
+</section>
+<section id="x-entry-not-dir">
+<h3><code class="docutils literal notranslate"><span class="pre">x-entry-not-dir</span></code><a class="headerlink" href="#x-entry-not-dir" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Directory entry is not a directory exception.</p>
+</section>
+<section id="x-dir-is-not-empty">
+<h3><code class="docutils literal notranslate"><span class="pre">x-dir-is-not-empty</span></code><a class="headerlink" href="#x-dir-is-not-empty" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Directory is not empty exception.</p>
+</section>
+<section id="x-forbidden-dir">
+<h3><code class="docutils literal notranslate"><span class="pre">x-forbidden-dir</span></code><a class="headerlink" href="#x-forbidden-dir" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Directory name being changed or set is forbidden exception.</p>
+</section>
+<section id="x-empty-path">
+<h3><code class="docutils literal notranslate"><span class="pre">x-empty-path</span></code><a class="headerlink" href="#x-empty-path" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>No file or directory referred to in path within directory exception.</p>
+</section>
+<section id="x-invalid-path">
+<h3><code class="docutils literal notranslate"><span class="pre">x-invalid-path</span></code><a class="headerlink" href="#x-invalid-path" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Invalid path exception.</p>
+</section>
+<section id="seek-set">
+<h3><code class="docutils literal notranslate"><span class="pre">seek-set</span></code><a class="headerlink" href="#seek-set" title="Permalink to this headline">¶</a></h3>
+<p>( – whence )</p>
+<p>Seek from the beginning of a file.</p>
+</section>
+<section id="seek-cur">
+<h3><code class="docutils literal notranslate"><span class="pre">seek-cur</span></code><a class="headerlink" href="#seek-cur" title="Permalink to this headline">¶</a></h3>
+<p>( – whence )</p>
+<p>Seek from the current position in a file</p>
+</section>
+<section id="seek-end">
+<h3><code class="docutils literal notranslate"><span class="pre">seek-end</span></code><a class="headerlink" href="#seek-end" title="Permalink to this headline">¶</a></h3>
+<p>( – whence )</p>
+</section>
+<section id="mbr">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;mbr&gt;</span></code><a class="headerlink" href="#mbr" title="Permalink to this headline">¶</a></h3>
+<p>The master boot record class. This class is used to read a partition entry from for initializing a FAT32 filesystem.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;mbr&gt;</span></code> class includes the following constructor:</p>
+</section>
+<section id="new">
+<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#new" title="Permalink to this headline">¶</a></h3>
+<p>( mbr-device mbr – )</p>
+<p>Construct an <code class="docutils literal notranslate"><span class="pre">&lt;mbr&gt;</span></code> instance with the block device <em>mbr-device</em>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;mbr&gt;</span></code> class includes the following methods:</p>
+</section>
+<section id="mbr-valid">
+<h3><code class="docutils literal notranslate"><span class="pre">mbr-valid?</span></code><a class="headerlink" href="#mbr-valid" title="Permalink to this headline">¶</a></h3>
+<p>( mbr – valid? )</p>
+<p>Is the MBR valid?</p>
+</section>
+<section id="partition">
+<h3><code class="docutils literal notranslate"><span class="pre">partition&#64;</span></code><a class="headerlink" href="#partition" title="Permalink to this headline">¶</a></h3>
+<p>( partition index mbr – )</p>
+<p>Read a partition entry, with an index from 0 to 3.</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">partition!</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>( partition index mbr – )</p>
+<p>Write a partition entry, with an index from 0 to 3.</p>
+</section>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;partition&gt;</span></code><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>The master boot record partition entry class. This class is used to read partition entries from the MBR partition table for initializing FAT32 filesystems.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;partition&gt;</span></code> class includes the following members:</p>
+</section>
+<section id="partition-active">
+<h3><code class="docutils literal notranslate"><span class="pre">partition-active</span></code><a class="headerlink" href="#partition-active" title="Permalink to this headline">¶</a></h3>
+<p>( partition – partition-active )</p>
+<p>Partition active state.</p>
+</section>
+<section id="partition-type">
+<h3><code class="docutils literal notranslate"><span class="pre">partition-type</span></code><a class="headerlink" href="#partition-type" title="Permalink to this headline">¶</a></h3>
+<p>( partition – partition-type )</p>
+<p>Partition type.</p>
+</section>
+<section id="partition-first-sector">
+<h3><code class="docutils literal notranslate"><span class="pre">partition-first-sector</span></code><a class="headerlink" href="#partition-first-sector" title="Permalink to this headline">¶</a></h3>
+<p>( partition – partition-first-sector )</p>
+<p>Partition first sector index.</p>
+</section>
+<section id="partition-sectors">
+<h3><code class="docutils literal notranslate"><span class="pre">partition-sectors</span></code><a class="headerlink" href="#partition-sectors" title="Permalink to this headline">¶</a></h3>
+<p>( partition – partition-sectors )</p>
+<p>Partition sectors.</p>
+</section>
+<section id="id3">
+<h3><code class="docutils literal notranslate"><span class="pre">partition-active?</span></code><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p>( partition – active? )</p>
+<p>Is the partition active?</p>
+</section>
+<section id="fat32-fs">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;fat32-fs&gt;</span></code><a class="headerlink" href="#fat32-fs" title="Permalink to this headline">¶</a></h3>
+<p>( – class )</p>
+<p>The FAT32 filesystem class.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;fat32-fs&gt;</span></code> class includes the following constructor:</p>
+</section>
+<section id="id4">
+<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<p>( partition device fs – )</p>
+<p>Construct an instance of the <code class="docutils literal notranslate"><span class="pre">&lt;fat32-fs&gt;</span></code> class with block device <em>device</em> and MBR partition entry <em>partition</em>. Note that after executing this the filesystem will be ready for use, and the block device must be in working order at this time.</p>
+</section>
+<section id="root-dir">
+<h3><code class="docutils literal notranslate"><span class="pre">root-dir&#64;</span></code><a class="headerlink" href="#root-dir" title="Permalink to this headline">¶</a></h3>
+<p>( dir fs – )</p>
+<p>Initialize a root directory of a FAT32 filesystem; the directory object need not be initialized already, but if it is no harm will result.</p>
+</section>
+<section id="with-root-path">
+<h3><code class="docutils literal notranslate"><span class="pre">with-root-path</span></code><a class="headerlink" href="#with-root-path" title="Permalink to this headline">¶</a></h3>
+<p>( c-addr u xt fs ) ( xt: c-addr’ u’ dir – )</p>
+<p>Parse a path starting at the root directory of a FAT32 filesystem, and pass the leaf’s name along with a directory object containing that leaf (or which would contain said leaf if it did not exist already) to the passed in <em>xt</em>. Note that said directory object will be destroyed when <em>xt</em> returns.</p>
+</section>
+<section id="fat32-file">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;fat32-file&gt;</span></code><a class="headerlink" href="#fat32-file" title="Permalink to this headline">¶</a></h3>
+<p>( –  class )</p>
+<p>The FAT32 file class.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;fat32-file&gt;</span></code> class includes the following constructor:</p>
+</section>
+<section id="id5">
+<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<p>( fs file – )</p>
+<p>Construct an instance of <code class="docutils literal notranslate"><span class="pre">&lt;fat32-file&gt;</span></code> with the FAT32 filesystem <em>fs</em>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;fat32-file&gt;</span></code> class includes the following methods:</p>
+</section>
+<section id="read-file">
+<h3><code class="docutils literal notranslate"><span class="pre">read-file</span></code><a class="headerlink" href="#read-file" title="Permalink to this headline">¶</a></h3>
+<p>( c-addr u file – bytes )</p>
+<p>Read data from a file.</p>
+</section>
+<section id="write-file">
+<h3><code class="docutils literal notranslate"><span class="pre">write-file</span></code><a class="headerlink" href="#write-file" title="Permalink to this headline">¶</a></h3>
+<p>( c-addr u file – bytes )</p>
+<p>Write data to a file.</p>
+</section>
+<section id="truncate-file">
+<h3><code class="docutils literal notranslate"><span class="pre">truncate-file</span></code><a class="headerlink" href="#truncate-file" title="Permalink to this headline">¶</a></h3>
+<p>( file – )</p>
+<p>Truncate a file.</p>
+</section>
+<section id="seek-file">
+<h3><code class="docutils literal notranslate"><span class="pre">seek-file</span></code><a class="headerlink" href="#seek-file" title="Permalink to this headline">¶</a></h3>
+<p>( offset whence file – )</p>
+<p>Seek in a file.</p>
+</section>
+<section id="tell-file">
+<h3><code class="docutils literal notranslate"><span class="pre">tell-file</span></code><a class="headerlink" href="#tell-file" title="Permalink to this headline">¶</a></h3>
+<p>( file – offset )</p>
+<p>Get the current offset in a file.</p>
+</section>
+<section id="file-size">
+<h3><code class="docutils literal notranslate"><span class="pre">file-size&#64;</span></code><a class="headerlink" href="#file-size" title="Permalink to this headline">¶</a></h3>
+<p>( file – bytes )</p>
+<p>Get the size of a file.</p>
+</section>
+<section id="fat32-dir">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;fat32-dir&gt;</span></code><a class="headerlink" href="#fat32-dir" title="Permalink to this headline">¶</a></h3>
+<p>The FAT32 directory class.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;fat32-dir&gt;</span></code> class includes the following constructor:</p>
+</section>
+<section id="id6">
+<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<p>( fs file – )</p>
+<p>Construct an instance of <code class="docutils literal notranslate"><span class="pre">&lt;fat32-dir&gt;</span></code> with the FAT32 filesystem <em>fs</em>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;fat32-dir&gt;</span></code> class includes the following methods:</p>
+</section>
+<section id="with-path">
+<h3><code class="docutils literal notranslate"><span class="pre">with-path</span></code><a class="headerlink" href="#with-path" title="Permalink to this headline">¶</a></h3>
+<p>( c-addr u xt dir – ) ( xt: c-addr’ u’ dir’ – )</p>
+<p>Parse a path starting at a given directory, and pass the leaf’s name along with a directory object containing that leaf (or which would contain said leaf if it did not exist already) to the passed in <em>xt</em>. Note that said directory object will be destroyed when <em>xt</em> returns unless it was the original directory object passed in.</p>
+</section>
+<section id="read-dir">
+<h3><code class="docutils literal notranslate"><span class="pre">read-dir</span></code><a class="headerlink" href="#read-dir" title="Permalink to this headline">¶</a></h3>
+<p>( entry dir – entry-read? )</p>
+<p>Read an entry from a directory, and return whether an entry was read.</p>
+</section>
+<section id="create-file">
+<h3><code class="docutils literal notranslate"><span class="pre">create-file</span></code><a class="headerlink" href="#create-file" title="Permalink to this headline">¶</a></h3>
+<p>( c-addr u new-file dir – )</p>
+<p>Create a file. Note that <em>new-file</em> need not be initialized prior to use, but no harm is done if it is.</p>
+</section>
+<section id="open-file">
+<h3><code class="docutils literal notranslate"><span class="pre">open-file</span></code><a class="headerlink" href="#open-file" title="Permalink to this headline">¶</a></h3>
+<p>( c-addr u opened-file dir – )</p>
+<p>Open a file. Note that <em>opened-file</em> need not be initialized prior to use, but no harm is done if it is.</p>
+</section>
+<section id="remove-file">
+<h3><code class="docutils literal notranslate"><span class="pre">remove-file</span></code><a class="headerlink" href="#remove-file" title="Permalink to this headline">¶</a></h3>
+<p>( c-addr u dir – )</p>
+<p>Remove a file.</p>
+</section>
+<section id="create-dir">
+<h3><code class="docutils literal notranslate"><span class="pre">create-dir</span></code><a class="headerlink" href="#create-dir" title="Permalink to this headline">¶</a></h3>
+<p>( c-addr u new-dir dir – )</p>
+<p>Create a directory. Note that <em>new-dir</em> need not be initialized prior to use, but no harm is done if it is.</p>
+</section>
+<section id="open-dir">
+<h3><code class="docutils literal notranslate"><span class="pre">open-dir</span></code><a class="headerlink" href="#open-dir" title="Permalink to this headline">¶</a></h3>
+<p>( c-addr u opened-dir dir – )</p>
+<p>Open a directory. Note that <em>opened-dir</em> need not be initialized prior to use, but no harm is done if it is.</p>
+</section>
+<section id="remove-dir">
+<h3><code class="docutils literal notranslate"><span class="pre">remove-dir</span></code><a class="headerlink" href="#remove-dir" title="Permalink to this headline">¶</a></h3>
+<p>( c-addr u dir – )</p>
+<p>Remove a directory.</p>
+</section>
+<section id="rename">
+<h3><code class="docutils literal notranslate"><span class="pre">rename</span></code><a class="headerlink" href="#rename" title="Permalink to this headline">¶</a></h3>
+<p>( new-c-addr new-u c-addr u dir – )</p>
+<p>Rename a file or directory.</p>
+</section>
+<section id="dir-empty">
+<h3><code class="docutils literal notranslate"><span class="pre">dir-empty?</span></code><a class="headerlink" href="#dir-empty" title="Permalink to this headline">¶</a></h3>
+<p>( dir – empty? )</p>
+<p>Get whether a directory is empty.</p>
+</section>
+<section id="fat32-entry">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;fat32-entry&gt;</span></code><a class="headerlink" href="#fat32-entry" title="Permalink to this headline">¶</a></h3>
+<p>( – class )</p>
+<p>The FAT32 directory entry class.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;fat32-entry&gt;</span></code> class has no constructor.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;fat32-entry&gt;</span></code> class has the following members:</p>
+</section>
+<section id="short-file-name">
+<h3><code class="docutils literal notranslate"><span class="pre">short-file-name</span></code><a class="headerlink" href="#short-file-name" title="Permalink to this headline">¶</a></h3>
+<p>( entry – short-file-name-addr )</p>
+<p>This member is 8 bytes in size.</p>
+<p>The short file name component, padded with spaces.</p>
+<p>The first byte can have the special values:
+$00: final entry in the directory entry table
+$05: the initial byte is actually $35
+$2E: the dot entry
+$E5: the directory entry has been deleted</p>
+</section>
+<section id="short-file-ext">
+<h3><code class="docutils literal notranslate"><span class="pre">short-file-ext</span></code><a class="headerlink" href="#short-file-ext" title="Permalink to this headline">¶</a></h3>
+<p>( entry – short-file-ext-addr )</p>
+<p>This member is 3 bytes in size.</p>
+<p>The short file extension component, padded with spaces.</p>
+</section>
+<section id="file-attributes">
+<h3><code class="docutils literal notranslate"><span class="pre">file-attributes</span></code><a class="headerlink" href="#file-attributes" title="Permalink to this headline">¶</a></h3>
+<p>( entry – file-attributes-addr )</p>
+<p>This member is 1 bytes in size.</p>
+<p>The file attributes.</p>
+<p>There are the following bits:
+$01: read only
+$02: hidden
+$04: system (do not move in the filesystem)
+$08: volume label
+$10: subdirectory (subdirectories have a file size of zero)
+$20: archive
+$40: device
+$80: reserved</p>
+</section>
+<section id="nt-vfat-case">
+<h3><code class="docutils literal notranslate"><span class="pre">nt-vfat-case</span></code><a class="headerlink" href="#nt-vfat-case" title="Permalink to this headline">¶</a></h3>
+<p>( entry – nt-vfat-case-addr )</p>
+<p>This member is 1 bytes in size.</p>
+<p>Windows NT VFAT case information.</p>
+</section>
+<section id="create-time-fine">
+<h3><code class="docutils literal notranslate"><span class="pre">create-time-fine</span></code><a class="headerlink" href="#create-time-fine" title="Permalink to this headline">¶</a></h3>
+<p>( entry – create-time-fine-addr )</p>
+<p>This member is 1 bytes in size.</p>
+<p>Create time file resolution, 10 ms increments, from 0 to 199.</p>
+</section>
+<section id="create-time-coarse">
+<h3><code class="docutils literal notranslate"><span class="pre">create-time-coarse</span></code><a class="headerlink" href="#create-time-coarse" title="Permalink to this headline">¶</a></h3>
+<p>( entry – create-time-coarse-addr )</p>
+<p>This member is 2 bytes in size.</p>
+<p>Create time with coarse resolution, 2 s increments.</p>
+<p>bits 15-11: hours (0-23)
+bits 10-5: minutes (0-59)
+bits 4-0: seconds / 2 (0-29)</p>
+</section>
+<section id="create-date">
+<h3><code class="docutils literal notranslate"><span class="pre">create-date</span></code><a class="headerlink" href="#create-date" title="Permalink to this headline">¶</a></h3>
+<p>( entry – create-date-addr )</p>
+<p>This member is 2 bytes in size.</p>
+<p>Create date.</p>
+<p>bits 15-9: year (0 = 1980)
+bits 8-5: month (1-12)
+bits 4-0: day (1-31)</p>
+</section>
+<section id="access-date">
+<h3><code class="docutils literal notranslate"><span class="pre">access-date</span></code><a class="headerlink" href="#access-date" title="Permalink to this headline">¶</a></h3>
+<p>( entry – access-date-addr )</p>
+<p>This member is 2 bytes in size.</p>
+<p>Last access date.</p>
+<p>bits 15-9: year (0 = 1980)
+bits 8-5: month (1-12)
+bits 4-0: day (1-31)</p>
+</section>
+<section id="first-cluster-high">
+<h3><code class="docutils literal notranslate"><span class="pre">first-cluster-high</span></code><a class="headerlink" href="#first-cluster-high" title="Permalink to this headline">¶</a></h3>
+<p>( entry – first-cluster-high-addr )</p>
+<p>This member is 2 bytes in size.</p>
+<p>High two bytes of the first cluster number.</p>
+</section>
+<section id="modify-time-coarse">
+<h3><code class="docutils literal notranslate"><span class="pre">modify-time-coarse</span></code><a class="headerlink" href="#modify-time-coarse" title="Permalink to this headline">¶</a></h3>
+<p>( entry – modify-time-coarse-addr )</p>
+<p>This member is 2 bytes in size.</p>
+<p>Last modify time with coarse resolution, 2 s increments.</p>
+<p>bits 15-11: hours (0-23)
+bits 10-5: minutes (0-59)
+bits 4-0: seconds / 2 (0-29)</p>
+</section>
+<section id="modify-date">
+<h3><code class="docutils literal notranslate"><span class="pre">modify-date</span></code><a class="headerlink" href="#modify-date" title="Permalink to this headline">¶</a></h3>
+<p>( entry – modify-date-addr )</p>
+<p>This member is 2 bytes in size.</p>
+<p>Last modify date.</p>
+<p>bits 15-9: year (0 = 1980)
+bits 8-5: month (1-12)
+bits 4-0: day (1-31)</p>
+</section>
+<section id="first-cluster-low">
+<h3><code class="docutils literal notranslate"><span class="pre">first-cluster-low</span></code><a class="headerlink" href="#first-cluster-low" title="Permalink to this headline">¶</a></h3>
+<p>( entry – first-cluster-low-addr )</p>
+<p>This member is 2 bytes in size.</p>
+<p>Low two bytes of the first cluster number.</p>
+</section>
+<section id="entry-file-size">
+<h3><code class="docutils literal notranslate"><span class="pre">entry-file-size</span></code><a class="headerlink" href="#entry-file-size" title="Permalink to this headline">¶</a></h3>
+<p>( entry – entry-file-size-addr )</p>
+<p>This member is 4 bytes in size.</p>
+<p>The file size; is always 0 for subdirectories and volume labels.</p>
+</section>
+<section id="buffer-entry">
+<h3><code class="docutils literal notranslate"><span class="pre">buffer&gt;entry</span></code><a class="headerlink" href="#buffer-entry" title="Permalink to this headline">¶</a></h3>
+<p>( addr entry – )</p>
+<p>Import a buffer into a directory entry.</p>
+</section>
+<section id="entry-buffer">
+<h3><code class="docutils literal notranslate"><span class="pre">entry&gt;buffer</span></code><a class="headerlink" href="#entry-buffer" title="Permalink to this headline">¶</a></h3>
+<p>( addr entry – )</p>
+<p>Export a directory entry as a buffer.</p>
+</section>
+<section id="init-blank-entry">
+<h3><code class="docutils literal notranslate"><span class="pre">init-blank-entry</span></code><a class="headerlink" href="#init-blank-entry" title="Permalink to this headline">¶</a></h3>
+<p>( entry – )</p>
+<p>Initialize a blank directory entry.</p>
+</section>
+<section id="init-file-entry">
+<h3><code class="docutils literal notranslate"><span class="pre">init-file-entry</span></code><a class="headerlink" href="#init-file-entry" title="Permalink to this headline">¶</a></h3>
+<p>( file-size first-cluster c-addr u entry – )</p>
+<p>Initialize a file directory entry.</p>
+</section>
+<section id="init-dir-entry">
+<h3><code class="docutils literal notranslate"><span class="pre">init-dir-entry</span></code><a class="headerlink" href="#init-dir-entry" title="Permalink to this headline">¶</a></h3>
+<p>( first-cluster c-addr u entry – )</p>
+<p>Initialize a subdirectory directory entry.</p>
+</section>
+<section id="init-end-entry">
+<h3><code class="docutils literal notranslate"><span class="pre">init-end-entry</span></code><a class="headerlink" href="#init-end-entry" title="Permalink to this headline">¶</a></h3>
+<p>( entry – )</p>
+<p>Initialize an end directory entry.</p>
+</section>
+<section id="mark-entry-deleted">
+<h3><code class="docutils literal notranslate"><span class="pre">mark-entry-deleted</span></code><a class="headerlink" href="#mark-entry-deleted" title="Permalink to this headline">¶</a></h3>
+<p>( entry – )</p>
+<p>Mark a directory entry as deleted.</p>
+</section>
+<section id="entry-deleted">
+<h3><code class="docutils literal notranslate"><span class="pre">entry-deleted?</span></code><a class="headerlink" href="#entry-deleted" title="Permalink to this headline">¶</a></h3>
+<p>( entry – deleted? )</p>
+<p>Get whether a directory entry has been deleted.</p>
+</section>
+<section id="entry-end">
+<h3><code class="docutils literal notranslate"><span class="pre">entry-end?</span></code><a class="headerlink" href="#entry-end" title="Permalink to this headline">¶</a></h3>
+<p>( entry – end? )</p>
+<p>Get whether a directory entry is the last in a directory.</p>
+</section>
+<section id="entry-file">
+<h3><code class="docutils literal notranslate"><span class="pre">entry-file?</span></code><a class="headerlink" href="#entry-file" title="Permalink to this headline">¶</a></h3>
+<p>( entry – file? )</p>
+<p>Get whether a directory entry is for a file.</p>
+</section>
+<section id="entry-dir">
+<h3><code class="docutils literal notranslate"><span class="pre">entry-dir?</span></code><a class="headerlink" href="#entry-dir" title="Permalink to this headline">¶</a></h3>
+<p>( entry – subdir? )</p>
+<p>Get whether a directory entry is for a subdirectory.</p>
+</section>
+<section id="first-cluster">
+<h3><code class="docutils literal notranslate"><span class="pre">first-cluster&#64;</span></code><a class="headerlink" href="#first-cluster" title="Permalink to this headline">¶</a></h3>
+<p>( entry – cluster )</p>
+<p>Get the first cluster index of a directory entry.</p>
+</section>
+<section id="id7">
+<h3><code class="docutils literal notranslate"><span class="pre">first-cluster!</span></code><a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<p>( cluster entry – )</p>
+<p>Set the first cluster index of a directory entry.</p>
+</section>
+<section id="file-name">
+<h3><code class="docutils literal notranslate"><span class="pre">file-name!</span></code><a class="headerlink" href="#file-name" title="Permalink to this headline">¶</a></h3>
+<p>( c-addr u entry – )</p>
+<p>Set the file name of a directory entry, converted from a normal string.</p>
+</section>
+<section id="dir-name">
+<h3><code class="docutils literal notranslate"><span class="pre">dir-name!</span></code><a class="headerlink" href="#dir-name" title="Permalink to this headline">¶</a></h3>
+<p>( c-addr u entry – )</p>
+<p>Set the directory name of a directory entry, converted from a normal string.</p>
+</section>
+<section id="id8">
+<h3><code class="docutils literal notranslate"><span class="pre">file-name&#64;</span></code><a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<p>( c-addr u entry – c-addr u’ )</p>
+<p>Get the file name of a directory entry, converted to a normal string.</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="led.html">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pio.html">Programmable Input/Output Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uart.html">UART Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adc.html">Analog-Digital Converter Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spi.html">SPI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pool.html">Pool Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="map.html">Map Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oo.html">Object Orientation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schannel.html">Simple channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rchannel.html">Bidirectional Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="edit.html">Block Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="swd.html"><code class="docutils literal notranslate"><span class="pre">swdcom</span></code> Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test.html">Testing Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="sdcard.html" title="previous chapter">SDHC/SDXC Card Support</a></li>
+      <li>Next: <a href="interrupt.html" title="next chapter">Interrupt Words</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Travis Bemann.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/words/fat32.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

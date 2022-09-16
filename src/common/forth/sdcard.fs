@@ -41,7 +41,7 @@ begin-module sd
   \ SD Card write error
   : x-sd-write-error ( -- ) ." SD card write error" cr ;
 
-  \ SD Card is not SDHC error
+  \ SD Card is not SDHC/SDXC error
   : x-sd-not-sdhc ( -- ) ." SD card is not SDHC" cr ;
 
   \ Attempted to write to protected block zero

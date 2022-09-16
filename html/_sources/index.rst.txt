@@ -19,6 +19,8 @@ Zeptoforth Documentation
    words/uart
    words/adc
    words/spi
+   words/sdcard
+   words/fat32
    words/interrupt
    words/multicore
    words/dev_tools
