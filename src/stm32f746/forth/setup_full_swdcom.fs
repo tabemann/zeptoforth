@@ -45,6 +45,7 @@
 #include src/stm32f746/forth/qspi.fs
 #include src/common/forth/block.fs
 #include src/common/forth/edit.fs
+#include src/common/forth/full_extra.fs
 #include src/common/forth/swdcom.fs
 
 \ Set a cornerstone to enable deleting everything compiled after this code

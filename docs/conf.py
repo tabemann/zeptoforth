@@ -28,7 +28,7 @@ author = 'Travis Bemann'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'recommonmark'
+    'myst_parser'
 ]
 
 source_suffix = {

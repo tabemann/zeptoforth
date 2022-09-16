@@ -26,13 +26,13 @@ compress-flash
 
 \ Execute an xt based on whether a condition is true
 : qif ( f true-xt -- ) ( true-xt: ??? -- ??? )
-  swap if execute else drop then
+  [inlined] swap if inline-execute else drop then
 ;
 
 \ Execute one of two different xts based on whether a condition is true or false
 : qifelse ( f true-xt false-xt -- )
   ( true-xt: ??? -- ??? ) ( false-xt: ??? -- ??? )
-  2 pick if drop nip execute else nip nip execute then
+  [inlined] 2 pick if drop nip inline-execute else nip nip inline-execute then
 ;
 
 \ Execute an until loop with an xt

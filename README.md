@@ -40,6 +40,8 @@ The library of code included along with the zeptoforth kernel, which is present 
 * Temporary storage allocators (used to provide immediate string constants)
 * A line editor
 * LED drivers
+* SDHC/SDXC card support using SPI
+* FAT32 support on SDHC/SDXC cards
 * Quad SPI flash storage support (on the STM32F746 DISCOVERY board and the Raspberry Pi Pico)
 * A block editor (on the STM32F746 DISCOVERY board and the Raspberry Pi Pico)
 * Random number generator support (except on the STM32F411 "Black Pill" and STM32F411 Nucleo 64 boards)

@@ -779,7 +779,17 @@ _execute:
 	mov pc, r0
 	bx lr
 	end_inlined
-	
+
+	@@ Inline-execute an xt
+	define_word "inline-execute", visible_flag | inlined_flag
+_inline_execute:
+	movs r0, tos
+	pull_tos
+	adds r0, #1
+	blx r0
+	bx lr
+	end_inlined
+
 	@@ Execute an xt if it is non-zero
 	define_word "?execute", visible_flag
 _execute_nz:

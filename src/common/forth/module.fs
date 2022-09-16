@@ -211,11 +211,15 @@ commit-flash
 : :: ( module "word-name" -- )
   [immediate]
   >r get-order r> 1 set-order
-  [:
-    token dup 0<> averts x-token-expected
-    find dup 0<> averts x-unknown-word
-  ;] try 2>r set-order 2r> ?raise
-  apply
+  token dup 0<> if
+    find dup 0<> if
+      >r set-order r> apply
+    else
+      drop set-order ['] x-unknown-word ?raise
+    then
+  else
+    2drop set-order ['] x-token-expected ?raise
+  then
 ;
 
 \ Initialize
