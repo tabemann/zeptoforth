@@ -792,6 +792,9 @@ begin-module fat32
       repeat
       2drop
     ;
+    
+    \ Initialize the FAT32 layer
+    : init-fat32 ( -- ) fat32-lock init-lock ;
 
   end-module
     
@@ -1712,12 +1715,10 @@ begin-module fat32
       then
     ; define file-name@
   end-implement
-  
-  : init-fat32 ( -- ) fat32-lock init-lock ;
 
 end-module
 
-: init ( -- ) init [ fat32 ] :: init-fat32 ;
+: init ( -- ) init [ fat32 :: fat32-internal ] :: init-fat32 ;
 
 reboot
 

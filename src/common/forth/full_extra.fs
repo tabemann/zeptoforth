@@ -24,3 +24,4 @@
 #include src/common/forth/block_dev.fs
 #include src/common/forth/sdcard.fs
 #include src/common/forth/fat32.fs
+#include src/common/forth/include_fat32.fs
