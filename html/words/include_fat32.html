@@ -1,0 +1,197 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>FAT32 Code Including Support Words &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Interrupt Words" href="interrupt.html" />
+    <link rel="prev" title="FAT32 Support" href="fat32.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="fat32-code-including-support-words">
+<h1>FAT32 Code Including Support Words<a class="headerlink" href="#fat32-code-including-support-words" title="Permalink to this headline">¶</a></h1>
+<p>zeptoforth includes support for including code for execution within FAT32 filesystems. This includes support for handling nested included files, up to a maximum of eight included files. Note that including code is intended to only be done from within the main task, and undefined results may occur if done from within any other task.</p>
+<section id="include-fat32">
+<h2><code class="docutils literal notranslate"><span class="pre">include-fat32</span></code><a class="headerlink" href="#include-fat32" title="Permalink to this headline">¶</a></h2>
+<section id="x-include-fs-not-set">
+<h3><code class="docutils literal notranslate"><span class="pre">x-include-fs-not-set</span></code><a class="headerlink" href="#x-include-fs-not-set" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Include filesystem not set exception.</p>
+</section>
+<section id="x-include-stack-overflow">
+<h3><code class="docutils literal notranslate"><span class="pre">x-include-stack-overflow</span></code><a class="headerlink" href="#x-include-stack-overflow" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Include stack overflow exception, raised if the number of nested includes exceeds eight includes.</p>
+</section>
+<section id="include-fs">
+<h3><code class="docutils literal notranslate"><span class="pre">include-fs!</span></code><a class="headerlink" href="#include-fs" title="Permalink to this headline">¶</a></h3>
+<p>( fs – )</p>
+<p>Set the include FAT32 filesystem.</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">include-fs&#64;</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>( – fs )</p>
+<p>Get the include FAT32 filesystem.</p>
+</section>
+<section id="load-file">
+<h3><code class="docutils literal notranslate"><span class="pre">load-file</span></code><a class="headerlink" href="#load-file" title="Permalink to this headline">¶</a></h3>
+<p>( file – )</p>
+<p>Load code from a file in the FAT32 filesystem. Note that the file object will be duplicated in the process.</p>
+</section>
+<section id="included">
+<h3><code class="docutils literal notranslate"><span class="pre">included</span></code><a class="headerlink" href="#included" title="Permalink to this headline">¶</a></h3>
+<p>( c-addr u – )</p>
+<p>Load code from a file with the specified path in the current include FAT32 filesystem.</p>
+</section>
+<section id="include">
+<h3><code class="docutils literal notranslate"><span class="pre">include</span></code><a class="headerlink" href="#include" title="Permalink to this headline">¶</a></h3>
+<p>( “path” – )</p>
+<p>Load code from a file with the specified path as a token in the current include FAT32 filesystem.</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="led.html">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pio.html">Programmable Input/Output Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uart.html">UART Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adc.html">Analog-Digital Converter Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spi.html">SPI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">FAT32 Code Including Support Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pool.html">Pool Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="map.html">Map Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oo.html">Object Orientation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schannel.html">Simple channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rchannel.html">Bidirectional Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="edit.html">Block Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="swd.html"><code class="docutils literal notranslate"><span class="pre">swdcom</span></code> Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test.html">Testing Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="fat32.html" title="previous chapter">FAT32 Support</a></li>
+      <li>Next: <a href="interrupt.html" title="next chapter">Interrupt Words</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Travis Bemann.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/words/include_fat32.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

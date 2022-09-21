@@ -21,6 +21,7 @@ Zeptoforth Documentation
    words/spi
    words/sdcard
    words/fat32
+   words/include_fat32
    words/interrupt
    words/multicore
    words/dev_tools
