@@ -25,7 +25,7 @@ begin-module include-fat32
   oo import
   fat32 import
   
-  \ Include filesystem not set
+  \ Include filesystem not set exception
   : x-include-fs-not-set ( -- ) ." include filesystem not set" cr ;
   
   \ Include stack overflow exception
@@ -141,8 +141,8 @@ begin-module include-fat32
   : load-file ( file -- )
     include-fs @ averts x-include-fs-not-set
     frame-depth @ max-include-depth < averts x-include-stack-overflow
-    dup include-stack-next@ frame-file !
-    tell-file include-stack-next@ frame-offset !
+    include-stack-next@ frame-file <fat32-file> class-size move
+    include-stack-next@ frame-file tell-file include-stack-next@ frame-offset !
     1 frame-depth +!
     0 include-buffer-content-len !
     execute-file
