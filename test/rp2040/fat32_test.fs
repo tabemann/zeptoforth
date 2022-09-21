@@ -44,7 +44,6 @@ begin-module fat32-test
   0 constant my-spi
   
   : init-test ( -- )
-    init-fat32
     my-spi 2 spi-pin
     my-spi 3 spi-pin
     my-spi 4 spi-pin
