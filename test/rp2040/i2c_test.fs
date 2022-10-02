@@ -31,8 +31,6 @@ begin-module i2c-test
   recv-buffer-size buffer: recv-buffer
   
   : init-test ( -- )
-    0 [ i2c-internal ] :: init-i2c
-    1 [ i2c-internal ] :: init-i2c
     0 master-i2c
     1 slave-i2c
     0 10-bit-i2c-addr
@@ -96,6 +94,90 @@ begin-module i2c-test
     0 [:
       10000 timeout !
       1 wait-i2c-master
+    ;] my-task-pool spawn-from-task-pool run
+  ;
+  
+  : do-test-5 ( -- )
+    0 [:
+      750 ms
+      20000 timeout !
+      1 wait-i2c-master-send
+      recv-buffer recv-buffer-size 1 i2c>
+      recv-buffer swap type
+    ;] my-task-pool spawn-from-task-pool run
+    0 [:
+      [:
+        5000 timeout !
+        s" ABCDEFGHIJKLMNOPQRSTUVWXYZ" 0 >i2c .
+      ;] try ['] x-timed-out = if display-red ." timed out!" cr display-normal then
+      1000 ms
+      no-timeout timeout !
+      s" FOO" 0 >i2c .
+      s" BAR" 0 >i2c .
+      s" BAZ" 0 >i2c-stop .
+    ;] my-task-pool spawn-from-task-pool run
+  ;
+  
+  : do-test-6 ( -- )
+    0 [:
+      750 ms
+      20000 timeout !
+      1 wait-i2c-master-recv
+      s" FOO" 1 >i2c .
+      s" BAR" 1 >i2c .
+      s" BAZ" 1 >i2c .
+    ;] my-task-pool spawn-from-task-pool run
+    0 [:
+      [:
+        5000 timeout !
+        recv-buffer 9 0 i2c-stop> drop
+      ;] try ['] x-timed-out = if display-red ." timed out!" cr display-normal then
+      no-timeout timeout !
+      recv-buffer 9 0 i2c-stop>
+      recv-buffer swap type
+    ;] my-task-pool spawn-from-task-pool run
+  ;
+  
+  : do-test-7 ( -- )
+    0 [:
+      [:
+        5000 timeout !
+        1 wait-i2c-master-send
+        recv-buffer recv-buffer-size 1 i2c>
+        recv-buffer swap type
+      ;] try ['] x-timed-out = if display-red ." timed out!" cr display-normal then
+      no-timeout timeout !
+      1 wait-i2c-master-send
+      recv-buffer recv-buffer-size 1 i2c>
+      recv-buffer swap type
+    ;] my-task-pool spawn-from-task-pool run
+    0 [:
+      1000 ms
+      s" FOO" 0 >i2c .
+      s" BAR" 0 >i2c .
+      s" BAZ" 0 >i2c-stop .
+    ;] my-task-pool spawn-from-task-pool run
+  ;
+  
+  : do-test-8 ( -- )
+    0 [:
+      [:
+        5000 timeout !
+        1 wait-i2c-master-recv
+        s" FOO" 1 >i2c .
+        s" BAR" 1 >i2c .
+        s" BAZ" 1 >i2c .
+      ;] try ['] x-timed-out = if display-red ." timed out!" cr display-normal then
+      no-timeout timeout !
+      1 wait-i2c-master-recv
+      s" FOO" 1 >i2c .
+      s" BAR" 1 >i2c .
+      s" BAZ" 1 >i2c .
+    ;] my-task-pool spawn-from-task-pool run
+    0 [:
+      1000 ms
+      recv-buffer 9 0 i2c-stop>
+      recv-buffer swap type
     ;] my-task-pool spawn-from-task-pool run
   ;
 

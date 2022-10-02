@@ -44,6 +44,6 @@
 	.equ flash_end, 0x10200000
 	.equ input_buffer_size, 255
 	.equ pad_offset, 128
-	.equ flash_mini_dict_size, 4096 * 8 @ in bytes
+	.equ flash_mini_dict_size, 6144 * 8 @ in bytes
 	.equ cpu_count, 2
 	.equ const_count, 8

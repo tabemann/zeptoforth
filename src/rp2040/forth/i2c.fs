@@ -18,6 +18,8 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
+compile-to-flash
+
 begin-module i2c
 
   gpio import
@@ -664,7 +666,37 @@ begin-module i2c
       i2c-irq NVIC_ISER_SETENA!
       enable-int
     ;
-
+    
+    \ Wait for I2C completion or timeout
+    : wait-i2c-complete-or-timeout ( i2c-buffer -- )
+      timeout @ no-timeout = if
+        [: dup i2c-done c@ 0<> ;] wait
+      else
+        systick-counter
+        begin
+          over i2c-done c@ 0<> if
+            true
+          else
+            disable-int
+            systick-counter over - timeout @ >= if
+              over restore-int-mask
+              mode-not-active 2 pick i2c-mode c!
+              0 2 pick i2c-data-offset !
+              0 2 pick i2c-data-size !
+              $00 2 pick i2c-stop c!
+              $00 2 pick i2c-restart c!
+              $00 2 pick i2c-stop-det c!
+              $00 2 pick i2c-prev-stop c!
+              over i2c-lock release-lock
+              ['] x-timed-out ?raise
+            then
+            enable-int current-task block-wait false
+          then
+        until
+        drop
+      then
+    ;
+    
     \ Do I2C send
     : do-i2c-send ( c-addr u i2c -- bytes-sent )
       i2c-select
@@ -686,7 +718,7 @@ begin-module i2c
         over i2c-slave c@ if [ RD_REQ RX_DONE or ] literal or then
         over i2c-addr @ IC_INTR_MASK !
         enable-int
-        [: dup i2c-done c@ 0<> ;] wait
+        wait-i2c-complete-or-timeout
         mode-not-active over i2c-mode c!
         dup i2c-data-offset @
         over i2c-tx-error c@
@@ -726,7 +758,7 @@ begin-module i2c
           over i2c-addr @ IC_DATA_CMD !
         then
         enable-int
-        [: dup i2c-done c@ 0<> ;] wait
+        wait-i2c-complete-or-timeout
         mode-not-active over i2c-mode c!
         dup i2c-data-offset @
         over i2c-rx-over c@
@@ -879,135 +911,138 @@ begin-module i2c
     [: I2C_Base IC_SAR ! ;] swap with-i2c-disabled
   ;
   
-  \ Wait for master send or receive on I2C peripheral with a timeout
-  : wait-i2c-master-timeout ( ticks i2c -- accepted )
-    dup validate-i2c
-    systick-counter swap
-    dup i2c-select
-    begin
-      systick-counter 3 pick - 4 pick < averts x-timed-out
-      over claim-i2c
-      over validate-slave
-      dup i2c-pending c@ send-pending = if
-        not-pending over i2c-pending c! accept-send true
-      else
-        dup i2c-pending c@ recv-pending = if
-          not-pending over i2c-pending c! accept-recv true
+  continue-module i2c-internal
+    
+    \ Wait for master send or receive on I2C peripheral with a timeout
+    : wait-i2c-master-timeout ( ticks i2c -- accepted )
+      dup validate-i2c
+      systick-counter swap
+      dup i2c-select
+      begin
+        systick-counter 3 pick - 4 pick < averts x-timed-out
+        over claim-i2c
+        over validate-slave
+        dup i2c-pending c@ send-pending = if
+          not-pending over i2c-pending c! accept-send true
         else
-          0 false
+          dup i2c-pending c@ recv-pending = if
+            not-pending over i2c-pending c! accept-recv true
+          else
+            0 false
+          then
         then
-      then
-      3 pick release-i2c dup not if
-        nip pause current-task block-wait
-        current-task timed-out? triggers x-timed-out
-      then
-    until
-    nip nip nip nip
-  ;
-  
-  \ Wait for master send on I2C peripheral with a timeout
-  : wait-i2c-master-send-timeout ( ticks i2c -- )
-    dup validate-i2c
-    systick-counter swap
-    dup i2c-select
-    begin
-      systick-counter 3 pick - 4 pick < averts x-timed-out
-      over claim-i2c
-      over validate-slave
-      dup i2c-pending c@ send-pending = if
-        not-pending over i2c-pending c! true
-      else
-        false
-      then
-      2 pick release-i2c dup not if
-        pause current-task block-wait
-      then
-    until
-    2drop 2drop
-  ;
-
-  \ Wait for master receive on I2C peripheral with a timeout
-  : wait-i2c-master-recv-timeout ( ticks i2c -- )
-    dup validate-i2c
-    systick-counter swap
-    dup i2c-select
-    begin
-      systick-counter 3 pick - 4 pick < averts x-timed-out
-      over claim-i2c
-      over validate-slave
-      dup i2c-pending c@ recv-pending = if
-        not-pending over i2c-pending c! true
-      else
-        false
-      then
-      2 pick release-i2c dup not if
-        pause current-task block-wait
-      then
-    until
-    2drop 2drop
-  ;
-  
-  \ Wait for master send or receive on I2C peripheral without a timeout
-  : wait-i2c-master-indefinite ( i2c -- accepted )
-    dup validate-i2c
-    dup i2c-select
-    begin
-      over claim-i2c
-      over validate-slave
-      dup i2c-pending c@ send-pending = if
-        not-pending over i2c-pending c! accept-send true
-      else
-        dup i2c-pending c@ recv-pending = if
-          not-pending over i2c-pending c! accept-recv true
+        3 pick release-i2c dup not if
+          nip pause current-task block-wait
+        then
+      until
+      nip nip nip nip
+    ;
+    
+    \ Wait for master send on I2C peripheral with a timeout
+    : wait-i2c-master-send-timeout ( ticks i2c -- )
+      dup validate-i2c
+      systick-counter swap
+      dup i2c-select
+      begin
+        systick-counter 3 pick - 4 pick < averts x-timed-out
+        over claim-i2c
+        over validate-slave
+        dup i2c-pending c@ send-pending = if
+          not-pending over i2c-pending c! true
         else
-          0 false
+          false
         then
-      then
-      3 pick release-i2c dup not if
-        nip pause current-task block-wait
-      then
-    until
-    nip nip
-  ;
+        2 pick release-i2c dup not if
+          pause current-task block-wait
+        then
+      until
+      2drop 2drop
+    ;
   
-  \ Wait for master send on I2C peripheral without a timeout
-  : wait-i2c-master-send-indefinite ( i2c -- )
-    dup validate-i2c
-    dup i2c-select
-    begin
-      over claim-i2c
-      over validate-slave
-      dup i2c-pending c@ send-pending = if
-        not-pending over i2c-pending c! true
-      else
-        false
-      then
-      2 pick release-i2c dup not if
-        pause current-task block-wait
-      then
-    until
-    2drop
-  ;
-
-  \ Wait for master receive on I2C peripheral without a timeout
-  : wait-i2c-master-recv-indefinite ( i2c -- )
-    dup validate-i2c
-    dup i2c-select
-    begin
-      over claim-i2c
-      over validate-slave
-      dup i2c-pending c@ recv-pending = if
-        not-pending over i2c-pending c! true
-      else
-        false
-      then
-      2 pick release-i2c dup not if
-        pause current-task block-wait
-      then
-    until
-    2drop
-  ;
+    \ Wait for master receive on I2C peripheral with a timeout
+    : wait-i2c-master-recv-timeout ( ticks i2c -- )
+      dup validate-i2c
+      systick-counter swap
+      dup i2c-select
+      begin
+        systick-counter 3 pick - 4 pick < averts x-timed-out
+        over claim-i2c
+        over validate-slave
+        dup i2c-pending c@ recv-pending = if
+          not-pending over i2c-pending c! true
+        else
+          false
+        then
+        2 pick release-i2c dup not if
+          pause current-task block-wait
+        then
+      until
+      2drop 2drop
+    ;
+    
+    \ Wait for master send or receive on I2C peripheral without a timeout
+    : wait-i2c-master-indefinite ( i2c -- accepted )
+      dup validate-i2c
+      dup i2c-select
+      begin
+        over claim-i2c
+        over validate-slave
+        dup i2c-pending c@ send-pending = if
+          not-pending over i2c-pending c! accept-send true
+        else
+          dup i2c-pending c@ recv-pending = if
+            not-pending over i2c-pending c! accept-recv true
+          else
+            0 false
+          then
+        then
+        3 pick release-i2c dup not if
+          nip pause current-task block-wait
+        then
+      until
+      nip nip
+    ;
+    
+    \ Wait for master send on I2C peripheral without a timeout
+    : wait-i2c-master-send-indefinite ( i2c -- )
+      dup validate-i2c
+      dup i2c-select
+      begin
+        over claim-i2c
+        over validate-slave
+        dup i2c-pending c@ send-pending = if
+          not-pending over i2c-pending c! true
+        else
+          false
+        then
+        2 pick release-i2c dup not if
+          pause current-task block-wait
+        then
+      until
+      2drop
+    ;
   
+    \ Wait for master receive on I2C peripheral without a timeout
+    : wait-i2c-master-recv-indefinite ( i2c -- )
+      dup validate-i2c
+      dup i2c-select
+      begin
+        over claim-i2c
+        over validate-slave
+        dup i2c-pending c@ recv-pending = if
+          not-pending over i2c-pending c! true
+        else
+          false
+        then
+        2 pick release-i2c dup not if
+          pause current-task block-wait
+        then
+      until
+      2drop
+    ;
+  
+  end-module
+    
   \ Wait for master send or receive on I2C peripheral with or without a timeout
   : wait-i2c-master ( i2c -- accepted )
     dup validate-i2c
@@ -1102,4 +1137,13 @@ begin-module i2c
     do-i2c-recv
   ;
 
-end-module
+end-module> import
+
+\ Initialize I2C
+: init ( -- )
+  init
+  0 [ i2c-internal ] :: init-i2c
+  1 [ i2c-internal ] :: init-i2c
+;
+
+reboot
