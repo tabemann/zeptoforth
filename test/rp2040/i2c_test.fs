@@ -50,7 +50,7 @@ begin-module i2c-test
   
   : do-test-0 ( -- )
     0 [:
-      no-timeout timeout !
+      20000 timeout !
       1 wait-i2c-master-send
       recv-buffer recv-buffer-size 1 i2c>
       recv-buffer swap type
@@ -65,7 +65,7 @@ begin-module i2c-test
   
   : do-test-1 ( -- )
     0 [:
-      no-timeout timeout !
+      20000 timeout !
       1 wait-i2c-master-recv
       s" FOO" 1 >i2c .
       s" BAR" 1 >i2c .
