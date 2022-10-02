@@ -31,29 +31,20 @@ begin-module task
 
   begin-module task-internal
 
-    \ Task has timeout
-    $80 constant has-timeout
-    
     \ Task readied state
     0 constant readied
 
     \ Task delayed state
     1 constant delayed
 
-    \ Task is blocked without waiting for wake
-    2 constant blocked
-
     \ Task blocked with timeout
-    blocked has-timeout or constant blocked-timeout
+    2 constant blocked-timeout
 
     \ Task blocked until waking
     3 constant blocked-wait
 
-    \ Task is blocked until waking with timeout
-    blocked-wait has-timeout or constant blocked-wait-timeout
-
     \ Task blocked indefinitely
-    blocked constant blocked-indefinite
+    4 constant blocked-indefinite
 
     \ Task block timed out
     5 constant block-timed-out
@@ -686,37 +677,12 @@ begin-module task
   ;
 
   \ Mark a task as waiting
-  : block-wait-indefinite ( task -- )
+  : block-wait ( task -- )
     dup validate-not-terminated
     blocked-wait over task-state h!
     current-task @ = if pause-wo-reschedule then
   ;
-
-  \ Mark a task as waiting until a timeout
-  : block-wait-timeout ( ticks-delay ticks-start task -- )
-    [:
-      dup validate-not-terminated
-      tuck task-systick-start !
-      tuck task-systick-delay !
-      blocked-wait-timeout over task-state h!
-    ;] over task-core @ critical-with-other-core-spinlock
-    current-task @ = if pause-wo-reschedule then
-  ;
   
-  \ Block a task for the specified initialized timeout
-  : block-wait ( task -- )
-    [:
-      dup validate-not-terminated
-      dup ['] timeout for-task@ no-timeout <> if
-	dup timeout-systick-delay @
-	over timeout-systick-start @
-	rot block-wait-timeout
-      else
-	block-wait-indefinite
-      then
-    ;] over task-core @ critical-with-other-core-spinlock
-  ;
-
   \ Mark a task as waiting
   : block-wait-critical ( task -- )
     dup validate-not-terminated
@@ -1284,7 +1250,7 @@ begin-module task
     : waiting-task? ( task -- )
       dup task-state h@ task-state-mask and
       dup blocked-wait = over blocked-indefinite = or
-      over delayed = rot has-timeout and 0<> or
+      over delayed = rot blocked-timeout = or
       rot delayed? and or
     ;
 
@@ -1334,7 +1300,7 @@ begin-module task
     \ Actually wake tasks
     : actually-wake-tasks ( -- )
       first-task @ begin ?dup while
-	dup task-state h@ task-state-mask and has-timeout bic blocked-wait = if
+	dup task-state h@ task-state-mask and blocked-wait = if
 	  readied over task-state h!
 	then
 	task-prev @
@@ -1379,8 +1345,8 @@ begin-module task
 		then
 		dup schedule-with-spinlock and if
 		  over spinlock-to-claim @ claim-spinlock
-                then
-                has-timeout and if
+		then
+		task-state-mask and blocked-timeout = if
 		  block-timed-out over task-state h!
 		else
 		  readied over task-state h!
@@ -1448,13 +1414,12 @@ begin-module task
 	  s" to-notify"
 	else
 	  dup task-state h@ task-state-mask and case
-	    readied of              s" ready" endof
-	    delayed of              s" delayed" endof
-	    blocked-timeout of      s" timeout" endof
-            blocked-wait of         s" wait" endof
-            blocked-wait-timeout of s" wait-time" endof 
-	    blocked-indefinite of   s" indefinite" endof
-	    block-timed-out of      s" timed-out" endof
+	    readied of            s" ready" endof
+	    delayed of            s" delayed" endof
+	    blocked-timeout of    s" timeout" endof
+	    blocked-wait of       s" wait" endof
+	    blocked-indefinite of s" indefinite" endof
+	    block-timed-out of    s" timed-out" endof
 	  endcase
 	then
       then
@@ -1528,7 +1493,7 @@ begin-module task
     \ Wait the current thread
     : do-wait ( -- )
       pause-enabled @ 0> if
-	current-task @ block-wait-indefinite
+	current-task @ block-wait
       then
     ;
 

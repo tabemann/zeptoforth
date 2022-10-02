@@ -50,6 +50,7 @@ begin-module i2c-test
   
   : do-test-0 ( -- )
     0 [:
+      no-timeout timeout !
       1 wait-i2c-master-send
       recv-buffer recv-buffer-size 1 i2c>
       recv-buffer swap type
@@ -64,6 +65,7 @@ begin-module i2c-test
   
   : do-test-1 ( -- )
     0 [:
+      no-timeout timeout !
       1 wait-i2c-master-recv
       s" FOO" 1 >i2c .
       s" BAR" 1 >i2c .
@@ -73,6 +75,27 @@ begin-module i2c-test
     0 [:
       recv-buffer 9 0 i2c-stop>
       recv-buffer swap type
+    ;] my-task-pool spawn-from-task-pool run
+  ;
+  
+  : do-test-2 ( -- )
+    0 [:
+      10000 timeout !
+      1 wait-i2c-master-recv
+    ;] my-task-pool spawn-from-task-pool run
+  ;
+
+  : do-test-3 ( -- )
+    0 [:
+      10000 timeout !
+      1 wait-i2c-master-send
+    ;] my-task-pool spawn-from-task-pool run
+  ;
+
+  : do-test-4 ( -- )
+    0 [:
+      10000 timeout !
+      1 wait-i2c-master
     ;] my-task-pool spawn-from-task-pool run
   ;
 
