@@ -714,7 +714,7 @@ begin-module i2c
         not-pending over i2c-pending c!
         $00 over i2c-done c!
         0 over i2c-addr @ IC_RX_TL !
-        15 over i2c-addr @ IC_TX_TL !
+        0 over i2c-addr @ IC_TX_TL !
         [ TX_EMPTY TX_OVER or TX_ABRT or ] literal
         over i2c-slave c@ if [ RD_REQ RX_DONE or ] literal or then
         over i2c-addr @ IC_INTR_MASK !

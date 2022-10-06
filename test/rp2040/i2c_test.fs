@@ -217,7 +217,7 @@ begin-module i2c-test
     ;] my-task-pool spawn-from-task-pool run
     0 [:
       s" ABCDEFGHIJKLMNOPQRSTUVWXYZ" 0 >i2c .
-      s" ABCDEFGHIJKLMNOPQRSTUVWXYZ" 0 >i2c .
+      s" ABCDEFGHIJKLMNOPQRSTUVWXYZ" 0 >i2c-stop .
     ;] my-task-pool spawn-from-task-pool run
   ;
 
