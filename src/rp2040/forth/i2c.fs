@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-compile-to-flash
+\ compile-to-flash
 
 begin-module i2c
 
@@ -418,7 +418,7 @@ begin-module i2c
     \ Restore the interrupt mask
     : restore-int-mask ( i2c-buffer -- )
       dup i2c-slave c@ if
-        [ RX_FULL RX_OVER or RD_REQ or RX_DONE or STOP_DET or ] literal
+        0
       else
         STOP_DET
       then
@@ -496,6 +496,7 @@ begin-module i2c
             1 over i2c-data-offset +!
             dup i2c-data-offset @
             over i2c-data-size @ = if
+              $00 over i2c-stop-det c!
               mode-not-active over i2c-mode c!
               dup restore-int-mask
               dup signal-done
@@ -515,7 +516,7 @@ begin-module i2c
                 over i2c-addr @ IC_DATA_CMD !
               then
               dup i2c-addr @ IC_STATUS @ RFNE and 0=
-              over i2c-stop-det c@ if
+              over i2c-stop-det c@ 0<> over and if
                 $00 2 pick i2c-stop-det c!
                 over restore-int-mask
                 mode-not-active 2 pick i2c-mode c!
@@ -523,6 +524,7 @@ begin-module i2c
               then
             then
           else
+            $00 2 pick i2c-stop-det c!
             mode-not-active over i2c-mode c!
             dup restore-int-mask
             dup signal-done
@@ -533,8 +535,7 @@ begin-module i2c
         dup i2c-mode c@ mode-not-active = over i2c-slave c@ 0<> and if
           master-send over i2c-master-mode c!
           send-pending over i2c-pending c!
-          [ RX_FULL RX_OVER or ] literal
-          over i2c-addr @ IC_INTR_MASK bic!
+          0 over i2c-addr @ IC_INTR_MASK !
           wake
         then
       then
@@ -603,12 +604,12 @@ begin-module i2c
     : handle-i2c-interrupt ( i2c -- )
       i2c-select
       dup i2c-addr @ IC_INTR_STAT @
+      dup STOP_DET and if over handle-stop-det then
       dup TX_ABRT and if over handle-tx-abrt then
       dup TX_EMPTY and if over handle-tx-empty then
       dup RX_FULL and if over handle-rx-full then
       dup RX_OVER and if over handle-rx-over then
       dup RX_DONE and if over handle-rx-done then
-      dup STOP_DET and if over handle-stop-det then
       RD_REQ and if dup handle-rd-req then
       drop
     ;
@@ -918,6 +919,9 @@ begin-module i2c
       dup validate-i2c
       systick-counter swap
       dup i2c-select
+      
+      [ RX_FULL RD_REQ or ] literal over i2c-addr @ IC_INTR_MASK !
+      
       begin
         systick-counter 3 pick - 4 pick < averts x-timed-out
         over claim-i2c
@@ -943,6 +947,9 @@ begin-module i2c
       dup validate-i2c
       systick-counter swap
       dup i2c-select
+      
+      RX_FULL over i2c-addr @ IC_INTR_MASK !
+      
       begin
         systick-counter 3 pick - 4 pick < averts x-timed-out
         over claim-i2c
@@ -964,6 +971,9 @@ begin-module i2c
       dup validate-i2c
       systick-counter swap
       dup i2c-select
+      
+      RD_REQ over i2c-addr @ IC_INTR_MASK !
+      
       begin
         systick-counter 3 pick - 4 pick < averts x-timed-out
         over claim-i2c
@@ -984,6 +994,9 @@ begin-module i2c
     : wait-i2c-master-indefinite ( i2c -- accepted )
       dup validate-i2c
       dup i2c-select
+      
+      [ RX_FULL RD_REQ or ] literal over i2c-addr @ IC_INTR_MASK !
+      
       begin
         over claim-i2c
         over validate-slave
@@ -1007,6 +1020,9 @@ begin-module i2c
     : wait-i2c-master-send-indefinite ( i2c -- )
       dup validate-i2c
       dup i2c-select
+      
+      RX_FULL over i2c-addr @ IC_INTR_MASK !
+      
       begin
         over claim-i2c
         over validate-slave
@@ -1026,6 +1042,9 @@ begin-module i2c
     : wait-i2c-master-recv-indefinite ( i2c -- )
       dup validate-i2c
       dup i2c-select
+      
+      RD_REQ over i2c-addr @ IC_INTR_MASK !
+      
       begin
         over claim-i2c
         over validate-slave
@@ -1146,4 +1165,4 @@ end-module> import
   1 [ i2c-internal ] :: init-i2c
 ;
 
-reboot
+\ reboot

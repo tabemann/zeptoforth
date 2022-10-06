@@ -27,10 +27,12 @@ begin-module i2c-test
   2 constant task-count
   task-count task-pool-size buffer: my-task-pool
   
-  61 constant recv-buffer-size
+  16 constant recv-buffer-size
   recv-buffer-size buffer: recv-buffer
   
   : init-test ( -- )
+    0 [ i2c-internal ] :: init-i2c
+    1 [ i2c-internal ] :: init-i2c
     0 master-i2c
     1 slave-i2c
     0 10-bit-i2c-addr
@@ -178,6 +180,44 @@ begin-module i2c-test
       1000 ms
       recv-buffer 9 0 i2c-stop>
       recv-buffer swap type
+    ;] my-task-pool spawn-from-task-pool run
+  ;
+  
+  : do-test-9 ( -- )
+    0 [:
+      1 wait-i2c-master-send
+      recv-buffer recv-buffer-size 1 i2c>
+      recv-buffer swap type
+      recv-buffer recv-buffer-size 1 i2c>
+      recv-buffer swap type
+      recv-buffer recv-buffer-size 1 i2c>
+      recv-buffer swap type
+      recv-buffer recv-buffer-size 1 i2c>
+      recv-buffer swap type
+    ;] my-task-pool spawn-from-task-pool run
+    0 [:
+      s" 0123456789ABCDEF" 0 >i2c .
+      s" 0123456789ABCDEF" 0 >i2c .
+      s" 0123456789ABCDEF" 0 >i2c .
+      s" 0123456789ABCDEF" 0 >i2c-stop .
+    ;] my-task-pool spawn-from-task-pool run
+  ;
+  
+  : do-test-10 ( -- )
+    0 [:
+      1 wait-i2c-master-send
+      recv-buffer recv-buffer-size 1 i2c>
+      recv-buffer swap type
+      recv-buffer recv-buffer-size 1 i2c>
+      recv-buffer swap type
+      recv-buffer recv-buffer-size 1 i2c>
+      recv-buffer swap type
+      recv-buffer 4 1 i2c>
+      recv-buffer swap type
+    ;] my-task-pool spawn-from-task-pool run
+    0 [:
+      s" ABCDEFGHIJKLMNOPQRSTUVWXYZ" 0 >i2c .
+      s" ABCDEFGHIJKLMNOPQRSTUVWXYZ" 0 >i2c .
     ;] my-task-pool spawn-from-task-pool run
   ;
 
