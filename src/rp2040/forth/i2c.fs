@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ compile-to-flash
+compile-to-flash
 
 begin-module i2c
 
@@ -448,30 +448,25 @@ begin-module i2c
         begin
           dup i2c-data-offset @
           over i2c-data-size @ < if
-            dup i2c-data-offset @
-            over i2c-data-addr @ + c@
-            over i2c-slave c@ 0= if
-              over i2c-data-offset @ 0= if
-                over i2c-restart c@ if RESTART or then
+            dup i2c-addr @ IC_STATUS @ TFNF and if
+              dup i2c-data-offset @
+              over i2c-data-addr @ + c@
+              over i2c-slave c@ 0= if
+                over i2c-data-offset @ 0= if
+                  over i2c-restart c@ if RESTART or then
+                then
+                over i2c-data-offset @
+                2 pick i2c-data-size @ 1- =
+                2 pick i2c-stop c@ 0<> and if
+                  $FF 3 pick i2c-prev-stop c!
+                  STOP or
+                then
               then
-              over i2c-data-offset @
-              2 pick i2c-data-size @ 1- =
-              2 pick i2c-stop c@ 0<> and if
-                $FF 3 pick i2c-prev-stop c!
-                STOP or
-              then
-            then
-            over i2c-addr @ IC_DATA_CMD !
-            1 over i2c-data-offset +!
-            dup i2c-data-offset @
-            over i2c-data-size @ = if
-              mode-not-active over i2c-mode c!
-              dup restore-int-mask
-              0 over i2c-addr @ IC_TX_TL !
-              dup signal-done
-              true
+              over i2c-addr @ IC_DATA_CMD !
+              1 over i2c-data-offset +!
+              false
             else
-              dup i2c-addr @ IC_STATUS @ TFNF and 0<>
+              true
             then
           else
             mode-not-active over i2c-mode c!
@@ -572,18 +567,6 @@ begin-module i2c
       else
         $00 over i2c-prev-stop c!
       then
-\      dup i2c-mode c@ mode-not-active <> if
-\        dup i2c-mode c@ mode-recv = over i2c-slave c@ 0<> and if
-\          mode-recv-finish over i2c-mode c!
-\        else
-\          dup restore-int-mask
-\          0 over i2c-addr @ IC_RX_TL !
-\          0 over i2c-addr @ IC_TX_TL !
-\          mode-not-active over i2c-mode c!
-\          master-not-active over i2c-master-mode c!
-\          dup signal-done
-\        then
-\      then
       i2c-addr @ IC_CLR_STOP_DET @ drop
     ;
 
@@ -714,12 +697,13 @@ begin-module i2c
         not-pending over i2c-pending c!
         $00 over i2c-done c!
         0 over i2c-addr @ IC_RX_TL !
-        0 over i2c-addr @ IC_TX_TL !
+        7 over i2c-addr @ IC_TX_TL !
         [ TX_EMPTY TX_OVER or TX_ABRT or ] literal
         over i2c-slave c@ if [ RD_REQ RX_DONE or ] literal or then
         over i2c-addr @ IC_INTR_MASK !
         enable-int
         wait-i2c-complete-or-timeout
+        $00 over i2c-stop-det c!
         mode-not-active over i2c-mode c!
         dup i2c-data-offset @
         over i2c-tx-error c@
@@ -760,6 +744,7 @@ begin-module i2c
         then
         enable-int
         wait-i2c-complete-or-timeout
+        $00 over i2c-stop-det c!
         mode-not-active over i2c-mode c!
         dup i2c-data-offset @
         over i2c-rx-over c@
@@ -1155,6 +1140,27 @@ begin-module i2c
     $FF over i2c-select i2c-restart c!
     do-i2c-recv
   ;
+  
+  \ Clear I2C peripheral state
+  : clear-i2c ( i2c -- )
+    dup validate-i2c
+    dup claim-i2c
+    dup i2c-select
+    disable-int
+    dup i2c-addr @ IC_CLR_STOP_DET @ drop
+    dup i2c-addr @ IC_CLR_RX_DONE @ drop
+    dup i2c-addr @ IC_CLR_TX_ABRT @ drop
+    $00 over i2c-stop-det c!
+    $00 over i2c-prev-stop c!
+    $00 over i2c-tx-abort c!
+    $00 over i2c-tx-error c!
+    $00 over i2c-rx-over c!
+    mode-not-active over i2c-mode c!
+    master-not-active over i2c-master-mode c!
+    not-pending swap i2c-pending c!
+    enable-int
+    release-i2c
+  ;
 
 end-module> import
 
@@ -1165,4 +1171,4 @@ end-module> import
   1 [ i2c-internal ] :: init-i2c
 ;
 
-\ reboot
+reboot
