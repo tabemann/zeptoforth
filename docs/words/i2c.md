@@ -1,6 +1,6 @@
 # I2C Words
 
-zeptoforth includes support for I2C peripherals on the Raspberry Pi Pico. It supports both master and slave modes of operation on two different I2C peripheral devices, numbered 0 and 1.
+zeptoforth includes support for I2C peripherals on the Raspberry Pi Pico. It supports both master and slave modes of operation on two different I2C peripheral devices, numbered 0 and 1. It supports clocks up to 1 MHz, as that is the limit supported by the RP2040's I2C peripherals, and defaults to a clock of 400 kHz. Note that it does not currently support general calls or slaves sending NACK, and handling of interrupted sends when multiple masters are in use must be handled manually by the user.
 
 ### `i2c`
 
