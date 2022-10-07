@@ -52,14 +52,14 @@ begin-module i2c-test
       1 wait-i2c-master-send
       recv-buffer recv-buffer-size 1 i2c>
       recv-buffer swap type
-      1 clear-i2c
+\      1 clear-i2c
     ;] my-task-pool spawn-from-task-pool run
     pause 1000 ms
     0 [:
       s" FOO" 0 >i2c .
       s" BAR" 0 >i2c .
       s" BAZ" 0 >i2c-stop .
-      0 clear-i2c
+\      0 clear-i2c
     ;] my-task-pool spawn-from-task-pool run
   ;
   
@@ -70,13 +70,13 @@ begin-module i2c-test
       s" FOO" 1 >i2c .
       s" BAR" 1 >i2c .
       s" BAZ" 1 >i2c .
-      1 clear-i2c
+\      1 clear-i2c
     ;] my-task-pool spawn-from-task-pool run
     pause 1000 ms
     0 [:
       recv-buffer 9 0 i2c-stop>
       recv-buffer swap type
-      0 clear-i2c
+\      0 clear-i2c
     ;] my-task-pool spawn-from-task-pool run
   ;
   
@@ -108,7 +108,7 @@ begin-module i2c-test
       1 wait-i2c-master-send
       recv-buffer recv-buffer-size 1 i2c>
       recv-buffer swap type
-      1 clear-i2c
+\      1 clear-i2c
     ;] my-task-pool spawn-from-task-pool run
     0 [:
       [:
@@ -120,7 +120,7 @@ begin-module i2c-test
       s" FOO" 0 >i2c .
       s" BAR" 0 >i2c .
       s" BAZ" 0 >i2c-stop .
-      0 clear-i2c
+\      0 clear-i2c
     ;] my-task-pool spawn-from-task-pool run
   ;
   
@@ -132,7 +132,7 @@ begin-module i2c-test
       s" FOO" 1 >i2c .
       s" BAR" 1 >i2c .
       s" BAZ" 1 >i2c .
-      1 clear-i2c
+\      1 clear-i2c
     ;] my-task-pool spawn-from-task-pool run
     0 [:
       [:
@@ -142,7 +142,7 @@ begin-module i2c-test
       no-timeout timeout !
       recv-buffer 9 0 i2c-stop>
       recv-buffer swap type
-      0 clear-i2c
+\      0 clear-i2c
     ;] my-task-pool spawn-from-task-pool run
   ;
   
@@ -158,14 +158,14 @@ begin-module i2c-test
       1 wait-i2c-master-send
       recv-buffer recv-buffer-size 1 i2c>
       recv-buffer swap type
-      1 clear-i2c
+\      1 clear-i2c
     ;] my-task-pool spawn-from-task-pool run
     0 [:
       1000 ms
       s" FOO" 0 >i2c .
       s" BAR" 0 >i2c .
       s" BAZ" 0 >i2c-stop .
-      0 clear-i2c
+\      0 clear-i2c
     ;] my-task-pool spawn-from-task-pool run
   ;
   
@@ -183,13 +183,13 @@ begin-module i2c-test
       s" FOO" 1 >i2c .
       s" BAR" 1 >i2c .
       s" BAZ" 1 >i2c .
-      1 clear-i2c
+\      1 clear-i2c
     ;] my-task-pool spawn-from-task-pool run
     0 [:
       1000 ms
       recv-buffer 9 0 i2c-stop>
       recv-buffer swap type
-      0 clear-i2c
+\      0 clear-i2c
     ;] my-task-pool spawn-from-task-pool run
   ;
   
@@ -204,14 +204,14 @@ begin-module i2c-test
       recv-buffer swap type
       recv-buffer recv-buffer-size 1 i2c>
       recv-buffer swap type
-      1 clear-i2c
+\      1 clear-i2c
     ;] my-task-pool spawn-from-task-pool run
     0 [:
       s" 0123456789ABCDEF" 0 >i2c .
       s" 0123456789ABCDEF" 0 >i2c .
       s" 0123456789ABCDEF" 0 >i2c .
       s" 0123456789ABCDEF" 0 >i2c-stop .
-      0 clear-i2c
+\      0 clear-i2c
     ;] my-task-pool spawn-from-task-pool run
   ;
   
@@ -226,12 +226,12 @@ begin-module i2c-test
       recv-buffer swap type
       recv-buffer recv-buffer-size 1 i2c>
       recv-buffer swap type
-      1 clear-i2c
+\      1 clear-i2c
     ;] my-task-pool spawn-from-task-pool run
     0 [:
       s" ABCDEFGHIJKLMNOPQRSTUVWXYZ" 0 >i2c .
       s" ABCDEFGHIJKLMNOPQRSTUVWXYZ" 0 >i2c-stop .
-      0 clear-i2c
+\      0 clear-i2c
     ;] my-task-pool spawn-from-task-pool run
   ;
   
@@ -242,7 +242,7 @@ begin-module i2c-test
       s" 0123456789ABCDEF" 1 >i2c .
       s" 0123456789ABCDEF" 1 >i2c .
       s" 0123456789ABCDEF" 1 >i2c .
-      1 clear-i2c
+\      1 clear-i2c
     ;] my-task-pool spawn-from-task-pool run
     0 [:
       recv-buffer recv-buffer-size 0 i2c>
@@ -253,7 +253,7 @@ begin-module i2c-test
       recv-buffer swap type
       recv-buffer recv-buffer-size 0 i2c-stop>
       recv-buffer swap type
-      0 clear-i2c
+\      0 clear-i2c
     ;] my-task-pool spawn-from-task-pool run
   ;
   
@@ -262,7 +262,7 @@ begin-module i2c-test
       1 wait-i2c-master-recv
       s" ABCDEFGHIJKLMNOPQRSTUVWXYZ" 1 >i2c .
       s" ABCDEFGHIJKLMNOPQRSTUVWXYZ" 1 >i2c .
-      1 clear-i2c
+\      1 clear-i2c
     ;] my-task-pool spawn-from-task-pool run
     0 [:
       recv-buffer recv-buffer-size 0 i2c>
@@ -273,7 +273,7 @@ begin-module i2c-test
       recv-buffer swap type
       recv-buffer 4 0 i2c-stop>
       recv-buffer swap type
-      0 clear-i2c
+\      0 clear-i2c
     ;] my-task-pool spawn-from-task-pool run
   ;
 
