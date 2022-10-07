@@ -276,5 +276,36 @@ begin-module i2c-test
 \      0 clear-i2c
     ;] my-task-pool spawn-from-task-pool run
   ;
+  
+  : do-test-13 ( -- )
+    0 [:
+      10000 timeout !
+      2 0 ?do
+        1 wait-i2c-master case
+          accept-send of
+            recv-buffer recv-buffer-size 1 i2c>
+            recv-buffer swap type
+          endof
+          accept-recv of
+            s" ABCDEFGHIJKLMNOPQRSTUVWXYZ" 1 >i2c .
+            s" ABCDEFGHIJKLMNOPQRSTUVWXYZ" 1 >i2c .
+          endof
+        endcase
+      loop
+\      1 clear-i2c
+    ;] my-task-pool spawn-from-task-pool run
+    0 [:
+      recv-buffer recv-buffer-size 0 i2c>
+      recv-buffer swap type
+      recv-buffer recv-buffer-size 0 i2c>
+      recv-buffer swap type
+      recv-buffer recv-buffer-size 0 i2c>
+      recv-buffer swap type
+      recv-buffer 4 0 i2c-stop>
+      recv-buffer swap type
+      s" 0123456789ABCDEF" 0 >i2c-stop .
+\      0 clear-i2c
+    ;] my-task-pool spawn-from-task-pool run
+  ;
 
 end-module

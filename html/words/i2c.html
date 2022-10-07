@@ -1,0 +1,329 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>I2C Words &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="SDHC/SDXC Card Support" href="sdcard.html" />
+    <link rel="prev" title="SPI Words" href="spi.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="i2c-words">
+<h1>I2C Words<a class="headerlink" href="#i2c-words" title="Permalink to this headline">¶</a></h1>
+<p>zeptoforth includes support for I2C peripherals on the Raspberry Pi Pico. It supports both master and slave modes of operation on two different I2C peripheral devices, numbered 0 and 1.</p>
+<section id="i2c">
+<h2><code class="docutils literal notranslate"><span class="pre">i2c</span></code><a class="headerlink" href="#i2c" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">i2c</span></code> module contains the following words:</p>
+<section id="enable-i2c">
+<h3><code class="docutils literal notranslate"><span class="pre">enable-i2c</span></code><a class="headerlink" href="#enable-i2c" title="Permalink to this headline">¶</a></h3>
+<p>( i2c – )</p>
+<p>Enable an I2C peripheral. Note that multiple nested enablings are permitted.</p>
+</section>
+<section id="disable-i2c">
+<h3><code class="docutils literal notranslate"><span class="pre">disable-i2c</span></code><a class="headerlink" href="#disable-i2c" title="Permalink to this headline">¶</a></h3>
+<p>( i2c – )</p>
+<p>Disable an I2C peripheral. Note that multiple nested disablings are permitted.</p>
+</section>
+<section id="i2c-clock">
+<h3><code class="docutils literal notranslate"><span class="pre">i2c-clock!</span></code><a class="headerlink" href="#i2c-clock" title="Permalink to this headline">¶</a></h3>
+<p>( clock i2c – )</p>
+<p>Set the clock for an I2C peripheral. Note that for most purposes a clock of 4000000 is recommended, and it is this value to which the clock of an I2C peripheral defaults.</p>
+</section>
+<section id="i2c-alternate">
+<h3><code class="docutils literal notranslate"><span class="pre">i2c-alternate</span></code><a class="headerlink" href="#i2c-alternate" title="Permalink to this headline">¶</a></h3>
+<p>( i2c – alternate )</p>
+<p>Get the alternate function for an I2C peripheral.</p>
+</section>
+<section id="i2c-pin">
+<h3><code class="docutils literal notranslate"><span class="pre">i2c-pin</span></code><a class="headerlink" href="#i2c-pin" title="Permalink to this headline">¶</a></h3>
+<p>( i2c pin – )</p>
+<p>Configure a pin to be an I2C pin. Note that this does not set the pin to be pull-up even though an I2C pin must be pull-up so as to allow the user to provide their own pull-up resistor with a different resistance than the built-in pull up resistors in the RP2040 microcontroller.</p>
+</section>
+<section id="master-i2c">
+<h3><code class="docutils literal notranslate"><span class="pre">master-i2c</span></code><a class="headerlink" href="#master-i2c" title="Permalink to this headline">¶</a></h3>
+<p>( i2c – )</p>
+<p>Set an I2C peripheral to be a master.</p>
+</section>
+<section id="slave-i2c">
+<h3><code class="docutils literal notranslate"><span class="pre">slave-i2c</span></code><a class="headerlink" href="#slave-i2c" title="Permalink to this headline">¶</a></h3>
+<p>( i2c – )</p>
+<p>Set an I2C peripheral to be a slave.</p>
+</section>
+<section id="bit-i2c-addr">
+<h3><code class="docutils literal notranslate"><span class="pre">7-bit-i2c-addr</span></code><a class="headerlink" href="#bit-i2c-addr" title="Permalink to this headline">¶</a></h3>
+<p>( i2c – )</p>
+<p>Set an I2C peripheral to use 7-bit I2C addresses.</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">10-bit-i2c-addr</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>( i2c – )</p>
+<p>Set an I2C peripheral to use 10-bit I2C addresses.</p>
+</section>
+<section id="i2c-target-addr">
+<h3><code class="docutils literal notranslate"><span class="pre">i2c-target-addr!</span></code><a class="headerlink" href="#i2c-target-addr" title="Permalink to this headline">¶</a></h3>
+<p>( i2c-addr i2c – )</p>
+<p>Set the target address of an I2C peripheral.</p>
+</section>
+<section id="i2c-slave-addr">
+<h3><code class="docutils literal notranslate"><span class="pre">i2c-slave-addr!</span></code><a class="headerlink" href="#i2c-slave-addr" title="Permalink to this headline">¶</a></h3>
+<p>( i2c-addr i2c – )</p>
+<p>Set the address of a slave I2C peripheral.</p>
+</section>
+<section id="wait-i2c-master">
+<h3><code class="docutils literal notranslate"><span class="pre">wait-i2c-master</span></code><a class="headerlink" href="#wait-i2c-master" title="Permalink to this headline">¶</a></h3>
+<p>( i2c – accepted )</p>
+<p>Wait on a slave I2C peripheral for communication from an I2C master, and return either <code class="docutils literal notranslate"><span class="pre">accept-send</span></code> if the I2C master initiates sending data or <code class="docutils literal notranslate"><span class="pre">accept-recv</span></code> if the I2C master initiates receiving data. If <code class="docutils literal notranslate"><span class="pre">timeout</span></code> (in the <code class="docutils literal notranslate"><span class="pre">task</span></code> module) is set to a value other than <code class="docutils literal notranslate"><span class="pre">no-timeout</span></code> a timeout in ticks (usually 100 µs per tick) is waited for, where if no communication is initiated before the timeout expires, <code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code> is raised.</p>
+</section>
+<section id="wait-i2c-master-send">
+<h3><code class="docutils literal notranslate"><span class="pre">wait-i2c-master-send</span></code><a class="headerlink" href="#wait-i2c-master-send" title="Permalink to this headline">¶</a></h3>
+<p>( i2c – )</p>
+<p>Wait on a slave I2C peripheral for the initiation of sending data from an I2C master. If <code class="docutils literal notranslate"><span class="pre">timeout</span></code> (in the <code class="docutils literal notranslate"><span class="pre">task</span></code> module) is set to a value other than <code class="docutils literal notranslate"><span class="pre">no-timeout</span></code> a timeout in ticks (usually 100 µs per tick) is waited for, where if no send is initiated before the timeout expires, <code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code> is raised.</p>
+</section>
+<section id="wait-i2c-master-recv">
+<h3><code class="docutils literal notranslate"><span class="pre">wait-i2c-master-recv</span></code><a class="headerlink" href="#wait-i2c-master-recv" title="Permalink to this headline">¶</a></h3>
+<p>( i2c – )</p>
+<p>Wait on a slave I2C peripheral for the initiation of receiving data from an I2C master. If <code class="docutils literal notranslate"><span class="pre">timeout</span></code> (in the <code class="docutils literal notranslate"><span class="pre">task</span></code> module) is set to a value other than <code class="docutils literal notranslate"><span class="pre">no-timeout</span></code> a timeout in ticks (usually 100 µs per tick) is waited for, where if no receive is initiated before the timeout expires, <code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code> is raised.</p>
+</section>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">&gt;i2c</span></code><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>( c-addr u i2c – u’ )</p>
+<p>Send data from a buffer defined by <em>c-addr</em> and <em>u</em> bytes over an I2C peripheral. The number of bytes actually sent are returned. If <code class="docutils literal notranslate"><span class="pre">timeout</span></code> (in the <code class="docutils literal notranslate"><span class="pre">task</span></code> module) is set to a value other than <code class="docutils literal notranslate"><span class="pre">no-timeout</span></code> a timeout in ticks (usually 100 µs per tick) is waited for, where if sending is not complete before the timeout expires, <code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code> is raised.</p>
+</section>
+<section id="i2c-stop">
+<h3><code class="docutils literal notranslate"><span class="pre">&gt;i2c-stop</span></code><a class="headerlink" href="#i2c-stop" title="Permalink to this headline">¶</a></h3>
+<p>( c-addr u i2c – u’ )</p>
+<p>Send data from a buffer defined by <em>c-addr</em> and <em>u</em> bytes over an I2C peripheral and signal a STOP condition once sending is complete. The number of bytes actually sent are returned. If <code class="docutils literal notranslate"><span class="pre">timeout</span></code> (in the <code class="docutils literal notranslate"><span class="pre">task</span></code> module) is set to a value other than <code class="docutils literal notranslate"><span class="pre">no-timeout</span></code> a timeout in ticks (usually 100 µs per tick) is waited for, where if sending is not complete before the timeout expires, <code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code> is raised.</p>
+</section>
+<section id="i2c-restart">
+<h3><code class="docutils literal notranslate"><span class="pre">&gt;i2c-restart</span></code><a class="headerlink" href="#i2c-restart" title="Permalink to this headline">¶</a></h3>
+<p>( c-addr u i2c – u’ )</p>
+<p>Send data from a buffer defined by <em>c-addr</em> and <em>u</em> bytes over an I2C peripheral and signal a RESTART condition at the beginning of sending. The number of bytes actually sent are returned. If <code class="docutils literal notranslate"><span class="pre">timeout</span></code> (in the <code class="docutils literal notranslate"><span class="pre">task</span></code> module) is set to a value other than <code class="docutils literal notranslate"><span class="pre">no-timeout</span></code> a timeout in ticks (usually 100 µs per tick) is waited for, where if sending is not complete before the timeout expires, <code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code> is raised.</p>
+</section>
+<section id="i2c-restart-stop">
+<h3><code class="docutils literal notranslate"><span class="pre">&gt;i2c-restart-stop</span></code><a class="headerlink" href="#i2c-restart-stop" title="Permalink to this headline">¶</a></h3>
+<p>( c-addr u i2c – u’ )</p>
+<p>Send data from a buffer defined by <em>c-addr</em> and <em>u</em> bytes over an I2C peripheral, signaling a RESTART condition at the beginning of sending, and signal a STOP condition once sending is complete.The number of bytes actually sent are returned.  If <code class="docutils literal notranslate"><span class="pre">timeout</span></code> (in the <code class="docutils literal notranslate"><span class="pre">task</span></code> module) is set to a value other than <code class="docutils literal notranslate"><span class="pre">no-timeout</span></code> a timeout in ticks (usually 100 µs per tick) is waited for, where if sending is not complete before the timeout expires, <code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code> is raised.</p>
+</section>
+<section id="id3">
+<h3><code class="docutils literal notranslate"><span class="pre">i2c&gt;</span></code><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p>( c-addr u i2c – u’ )</p>
+<p>Receive data into a buffer defined by <em>c-addr</em> and <em>u</em> bytes from an I2C peripheral. The number of bytes actually received are returned. If <code class="docutils literal notranslate"><span class="pre">timeout</span></code> (in the <code class="docutils literal notranslate"><span class="pre">task</span></code> module) is set to a value other than <code class="docutils literal notranslate"><span class="pre">no-timeout</span></code> a timeout in ticks (usually 100 µs per tick) is waited for, where if receiving is not complete before the timeout expires, <code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code> is raised.</p>
+</section>
+<section id="id4">
+<h3><code class="docutils literal notranslate"><span class="pre">i2c-stop&gt;</span></code><a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<p>( c-addr u i2c – u’ )</p>
+<p>Receive data into a buffer defined by <em>c-addr</em> and <em>u</em> bytes from an I2C peripheral and signal a STOP condition once receiving is complete. The number of bytes actually received are returned. If <code class="docutils literal notranslate"><span class="pre">timeout</span></code> (in the <code class="docutils literal notranslate"><span class="pre">task</span></code> module) is set to a value other than <code class="docutils literal notranslate"><span class="pre">no-timeout</span></code> a timeout in ticks (usually 100 µs per tick) is waited for, where if receiving is not complete before the timeout expires, <code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code> is raised.</p>
+</section>
+<section id="id5">
+<h3><code class="docutils literal notranslate"><span class="pre">i2c-restart&gt;</span></code><a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<p>( c-addr u i2c – u’ )</p>
+<p>Receive data into a buffer defined by <em>c-addr</em> and <em>u</em> bytes from an I2C peripheral and signal a RESTART condition at the beginning of receiving. The number of bytes actually received are returned. If <code class="docutils literal notranslate"><span class="pre">timeout</span></code> (in the <code class="docutils literal notranslate"><span class="pre">task</span></code> module) is set to a value other than <code class="docutils literal notranslate"><span class="pre">no-timeout</span></code> a timeout in ticks (usually 100 µs per tick) is waited for, where if receiving is not complete before the timeout expires, <code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code> is raised.</p>
+</section>
+<section id="id6">
+<h3><code class="docutils literal notranslate"><span class="pre">i2c-restart-stop&gt;</span></code><a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<p>( c-addr u i2c – u’ )</p>
+<p>Receive data into a buffer defined by <em>c-addr</em> and <em>u</em> bytes from an I2C peripheral, signaling a RESTART condition at the beginning of receiving, and signal a STOP condition once receiving is complete. The number of bytes actually received are returned. If <code class="docutils literal notranslate"><span class="pre">timeout</span></code> (in the <code class="docutils literal notranslate"><span class="pre">task</span></code> module) is set to a value other than <code class="docutils literal notranslate"><span class="pre">no-timeout</span></code> a timeout in ticks (usually 100 µs per tick) is waited for, where if receiving is not complete before the timeout expires, <code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code> is raised.</p>
+</section>
+<section id="clear-i2c">
+<h3><code class="docutils literal notranslate"><span class="pre">clear-i2c</span></code><a class="headerlink" href="#clear-i2c" title="Permalink to this headline">¶</a></h3>
+<p>( i2c – )</p>
+<p>Reset the state of an I2C peripheral.</p>
+</section>
+<section id="accept-send">
+<h3><code class="docutils literal notranslate"><span class="pre">accept-send</span></code><a class="headerlink" href="#accept-send" title="Permalink to this headline">¶</a></h3>
+<p>( – constant )</p>
+<p>Constant returned by <code class="docutils literal notranslate"><span class="pre">wait-i2c-master</span></code> on accepting a send from an I2C master.</p>
+</section>
+<section id="accept-recv">
+<h3><code class="docutils literal notranslate"><span class="pre">accept-recv</span></code><a class="headerlink" href="#accept-recv" title="Permalink to this headline">¶</a></h3>
+<p>( – constant )</p>
+<p>Constant returned by <code class="docutils literal notranslate"><span class="pre">wait-i2c-master</span></code> on accepting a receive from an I2C master.</p>
+</section>
+<section id="x-out-of-range-clock">
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-clock</span></code><a class="headerlink" href="#x-out-of-range-clock" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Exception raised if an out of range clock is set with <code class="docutils literal notranslate"><span class="pre">i2c-clock!</span></code>.</p>
+</section>
+<section id="x-i2c-tx-error">
+<h3><code class="docutils literal notranslate"><span class="pre">x-i2c-tx-error</span></code><a class="headerlink" href="#x-i2c-tx-error" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Exception raised on transmission error during sending.</p>
+</section>
+<section id="x-i2c-rx-over">
+<h3><code class="docutils literal notranslate"><span class="pre">x-i2c-rx-over</span></code><a class="headerlink" href="#x-i2c-rx-over" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Exception raised on receive overflow; note that this should never happen, as this I2C driver configures the I2C peripherals to use clock stretching in case of RX FIFO full state.</p>
+</section>
+<section id="x-invalid-i2c">
+<h3><code class="docutils literal notranslate"><span class="pre">x-invalid-i2c</span></code><a class="headerlink" href="#x-invalid-i2c" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Exception raised on specifying an invalid I2C peripheral index (i.e. one other than 0 or 1).</p>
+</section>
+<section id="x-out-of-range-addr">
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-addr</span></code><a class="headerlink" href="#x-out-of-range-addr" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Exception raised on specifying an invalid I2C address.</p>
+</section>
+<section id="x-invalid-op-for-master-mode">
+<h3><code class="docutils literal notranslate"><span class="pre">x-invalid-op-for-master-mode</span></code><a class="headerlink" href="#x-invalid-op-for-master-mode" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Exception raised on a slave attempting to carry out an operation which is inappropriate for the state the master is in.</p>
+</section>
+<section id="x-invalid-op-for-slave">
+<h3><code class="docutils literal notranslate"><span class="pre">x-invalid-op-for-slave</span></code><a class="headerlink" href="#x-invalid-op-for-slave" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Exception raised on a slave attempting to carry out an operation not permitted for slaves.</p>
+</section>
+<section id="x-invalid-op-for-master">
+<h3><code class="docutils literal notranslate"><span class="pre">x-invalid-op-for-master</span></code><a class="headerlink" href="#x-invalid-op-for-master" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Exception raised on a master attempting to carry out an operation not permitted for masters.</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="led.html">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pio.html">Programmable Input/Output Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uart.html">UART Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adc.html">Analog-Digital Converter Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spi.html">SPI Words</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">I2C Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="include_fat32.html">FAT32 Code Including Support Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pool.html">Pool Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="map.html">Map Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oo.html">Object Orientation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schannel.html">Simple channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rchannel.html">Bidirectional Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="edit.html">Block Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="swd.html"><code class="docutils literal notranslate"><span class="pre">swdcom</span></code> Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test.html">Testing Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="spi.html" title="previous chapter">SPI Words</a></li>
+      <li>Next: <a href="sdcard.html" title="next chapter">SDHC/SDXC Card Support</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Travis Bemann.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/words/i2c.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
