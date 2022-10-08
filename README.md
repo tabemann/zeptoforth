@@ -32,6 +32,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 * General UART support (in addition to serial console support)
 * One-shot ADC support
 * SPI (both master and slave) support
+* I2C (both master and slave) support (on the Raspberry Pi Pico)
 * Maps, including counted string and integer-keyed maps
 * Heap allocators
 * Memory pool allocators
@@ -42,6 +43,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 * LED drivers
 * SDHC/SDXC card support using SPI
 * FAT32 support on SDHC/SDXC cards
+* Support for code loading from files in FAT32 filesystems
 * Quad SPI flash storage support (on the STM32F746 DISCOVERY board and the Raspberry Pi Pico)
 * A block editor (on the STM32F746 DISCOVERY board and the Raspberry Pi Pico)
 * Random number generator support (except on the STM32F411 "Black Pill" and STM32F411 Nucleo 64 boards)
