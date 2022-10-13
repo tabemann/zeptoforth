@@ -149,6 +149,11 @@
 <p>( c-addr u i2c – u’ )</p>
 <p>Receive data into a buffer defined by <em>c-addr</em> and <em>u</em> bytes from an I2C peripheral, signaling a RESTART condition at the beginning of receiving, and signal a STOP condition once receiving is complete. The number of bytes actually received are returned. If <code class="docutils literal notranslate"><span class="pre">timeout</span></code> (in the <code class="docutils literal notranslate"><span class="pre">task</span></code> module) is set to a value other than <code class="docutils literal notranslate"><span class="pre">no-timeout</span></code> a timeout in ticks (usually 100 µs per tick) is waited for, where if receiving is not complete before the timeout expires, <code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code> is raised.</p>
 </section>
+<section id="i2c-nack">
+<h3><code class="docutils literal notranslate"><span class="pre">i2c-nack</span></code><a class="headerlink" href="#i2c-nack" title="Permalink to this headline">¶</a></h3>
+<p>( i2c – )</p>
+<p>Set the next byte received by a slave I2C peripheral to be responded to with a NACK.</p>
+</section>
 <section id="clear-i2c">
 <h3><code class="docutils literal notranslate"><span class="pre">clear-i2c</span></code><a class="headerlink" href="#clear-i2c" title="Permalink to this headline">¶</a></h3>
 <p>( i2c – )</p>

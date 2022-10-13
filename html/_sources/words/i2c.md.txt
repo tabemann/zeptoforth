@@ -116,6 +116,11 @@ Receive data into a buffer defined by *c-addr* and *u* bytes from an I2C periphe
 
 Receive data into a buffer defined by *c-addr* and *u* bytes from an I2C peripheral, signaling a RESTART condition at the beginning of receiving, and signal a STOP condition once receiving is complete. The number of bytes actually received are returned. If `timeout` (in the `task` module) is set to a value other than `no-timeout` a timeout in ticks (usually 100 µs per tick) is waited for, where if receiving is not complete before the timeout expires, `x-timed-out` is raised.
 
+##### `i2c-nack`
+( i2c -- )
+
+Set the next byte received by a slave I2C peripheral to be responded to with a NACK.
+
 ##### `clear-i2c`
 ( i2c -- )
 
