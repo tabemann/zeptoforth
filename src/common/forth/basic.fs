@@ -2140,7 +2140,7 @@ flash-mini-dict-size [if]
   
   \ Clear the flash mini-dictionary
   : clear-flash-mini-dict ( -- )
-    flash-mini-dict-size 2 cells / flash-mini-dict-free !
+    flash-mini-dict-size 2 cells / 1- flash-mini-dict-free !
     flash-mini-dict flash-mini-dict-size 0 fill
   ;
   
@@ -2150,9 +2150,10 @@ flash-mini-dict-size [if]
   \ Commit to flash
   commit-flash
   
-  \ Validate there being enough room in the flash mini-dictionary
-  : validate-flash-mini-dict-space ( -- )
+  \ Register space being used in the flash mini-dictionary
+  : register-flash-mini-dict-space ( -- )
     flash-mini-dict-free @ averts x-flash-mini-dict-out-of-space
+    -1 flash-mini-dict-free +!
   ;
   
   \ Compare two different words
@@ -2170,8 +2171,6 @@ flash-mini-dict-size [if]
   \ Add an entry to the flash mini-dictionary when filling start to end
   : add-flash-mini-dict-end ( word -- )
     dup word-flags h@ visible-flag and 0= if drop exit then
-    validate-flash-mini-dict-space
-    -1 flash-mini-dict-free +!
     dup hash-word dup ( word hash index )
     begin
       [ flash-mini-dict-size 2 cells / ] literal umod ( word hash index )
@@ -2182,6 +2181,7 @@ flash-mini-dict-size [if]
           drop 1+ ( word hash index )
         then
       else ( word hash index addr )
+        register-flash-mini-dict-space
         nip tuck ! cell+ ! exit ( )
       then
     again
@@ -2190,8 +2190,6 @@ flash-mini-dict-size [if]
   \ Add an entry to the flash mini-dictionary when filling end to start
   : add-flash-mini-dict-start ( word -- )
     dup word-flags h@ visible-flag and 0= if drop exit then
-    validate-flash-mini-dict-space
-    -1 flash-mini-dict-free +!
     dup hash-word dup ( word hash index )
     begin
       [ flash-mini-dict-size 2 cells / ] literal umod ( word hash index )
@@ -2202,6 +2200,7 @@ flash-mini-dict-size [if]
           drop 1+ ( word hash index )
         then
       else ( word hash index addr )
+        register-flash-mini-dict-space
         nip tuck ! cell+ ! exit ( )
       then
     again
