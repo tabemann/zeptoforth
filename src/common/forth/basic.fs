@@ -2107,7 +2107,9 @@ commit-flash
 \ Create a variable to store the end of the flash mini-dictionary
 flash-mini-dict-size [if]
 
-  variable flash-mini-dict-end
+\  variable flash-mini-dict-end
+
+  variable flash-mini-dict-free
 
   \ Hash a counted string
   : hash-string ( b-addr bytes -- hash )
@@ -2119,7 +2121,7 @@ flash-mini-dict-size [if]
 
   \ Hash an identifier by wordlist
   : hash-string-and-wid ( b-addr bytes wid -- hash )
-    -rot hash-string xor
+    -rot hash-string xor dup 0= if 1+ then
   ;
   
   \ Commit to flash
@@ -2136,65 +2138,121 @@ flash-mini-dict-size [if]
   \ Commit to flash
   commit-flash
   
-  \ Initialize the flash mini-dictionary
-  : init-flash-mini-dict ( -- )
-    flash-latest
-    begin dup 0<> flash-mini-dict-end @ flash-mini-dict u> and while
-      -2 cells flash-mini-dict-end +!
-      dup hash-word flash-mini-dict-end @ !
-      dup flash-mini-dict-end @ cell+ !
-      next-word @
-    repeat
-    drop
-    flash-mini-dict-end @ flash-mini-dict u>= if
-      flash-mini-dict-end @ flash-mini-dict
-      [ flash-mini-dict-size flash-mini-dict + ] literal
-      flash-mini-dict-end @ - move
-      [ flash-mini-dict-size flash-mini-dict + ] literal
-      flash-mini-dict-end @ - flash-mini-dict + flash-mini-dict-end !
+  \ Clear the flash mini-dictionary
+  : clear-flash-mini-dict ( -- )
+    flash-mini-dict-size 2 cells / flash-mini-dict-free !
+    flash-mini-dict flash-mini-dict-size 0 fill
+  ;
+  
+  \ Flash mini-dictionary is out of space exception
+  : x-flash-mini-dict-out-of-space ." flash mini-dictionary is out of space" cr ;
+  
+  \ Commit to flash
+  commit-flash
+  
+  \ Validate there being enough room in the flash mini-dictionary
+  : validate-flash-mini-dict-space ( -- )
+    flash-mini-dict-free @ averts x-flash-mini-dict-out-of-space
+  ;
+  
+  \ Compare two different words
+  : equal-words? ( word0 word1 -- equal? )
+    2dup wordlist-id h@ swap wordlist-id h@ = if
+      word-name count rot word-name count equal-case-strings?
     else
-      -1 flash-mini-dict-end !
+      2drop false
     then
   ;
-
-  \ Add a word to the flash mini-dictionary
-  : add-flash-mini-dict ( -- )
-    compiling-to-flash? if
-      flash-mini-dict-end @ dup -1 <> if
-	[ flash-mini-dict flash-mini-dict-size + ] literal u< if
-	  flash-latest hash-word flash-mini-dict-end @ !
-	  flash-latest flash-mini-dict-end @ cell+ !
-	  8 flash-mini-dict-end +!
-	else
-	  -1 flash-mini-dict-end !
-	then
-      else
-	drop
+  
+  \ Commit to flash
+  commit-flash
+  
+  \ Add an entry to the flash mini-dictionary when filling start to end
+  : add-flash-mini-dict-end ( word -- )
+    dup word-flags h@ visible-flag and 0= if drop exit then
+    validate-flash-mini-dict-space
+    -1 flash-mini-dict-free +!
+    dup hash-word dup ( word hash index )
+    begin
+      [ flash-mini-dict-size 2 cells / ] literal umod ( word hash index )
+      dup 3 lshift flash-mini-dict + dup cell+ @ ?dup if ( word hash index addr word' )
+        4 pick equal-words? if ( word hash index addr )
+          nip tuck ! cell+ ! exit ( )
+        else
+          drop 1+ ( word hash index )
+        then
+      else ( word hash index addr )
+        nip tuck ! cell+ ! exit ( )
       then
-    then
+    again
+  ;
+  
+  \ Add an entry to the flash mini-dictionary when filling end to start
+  : add-flash-mini-dict-start ( word -- )
+    dup word-flags h@ visible-flag and 0= if drop exit then
+    validate-flash-mini-dict-space
+    -1 flash-mini-dict-free +!
+    dup hash-word dup ( word hash index )
+    begin
+      [ flash-mini-dict-size 2 cells / ] literal umod ( word hash index )
+      dup 3 lshift flash-mini-dict + dup cell+ @ ?dup if ( word hash index addr word' )
+        4 pick equal-words? if ( word hash index addr )
+          2drop 2drop exit ( )
+        else
+          drop 1+ ( word hash index )
+        then
+      else ( word hash index addr )
+        nip tuck ! cell+ ! exit ( )
+      then
+    again
+  ;
+  
+  \ Initialize the flash mini-dictionary
+  : init-flash-mini-dict ( -- )
+    clear-flash-mini-dict
+    flash-latest
+    begin ?dup while
+      dup add-flash-mini-dict-start
+      next-word @
+    repeat
   ;
 
   \ Find a word in the flash mini-dictionary
   : find-flash-mini-dict ( b-addr bytes wid -- addr|0 )
-    3dup hash-string-and-wid flash-mini-dict-end @ 
-    begin dup flash-mini-dict - while
-      8 -
-      2dup @ - if
-      else
-	dup cell+ @ wordlist-id h@ 3 pick = if
-	  dup cell+ @ word-flags h@ visible-flag and if
-	    4 pick 4 pick 2 pick cell+ @ word-name count equal-case-strings? if
-	      cell+ @ nip nip nip nip exit
-	    then
-	  then
-	then
+    3dup hash-string-and-wid dup ( b-addr bytes wid hash index )
+    begin
+      [ flash-mini-dict-size 2 cells / ] literal umod
+      dup 3 lshift flash-mini-dict + dup @ ( b-addr bytes wid hash index addr hash' )
+      3 pick over = if ( b-addr bytes wid hash index addr hash' )
+        drop cell+ @ dup wordlist-id h@ 4 pick = if ( b-addr bytes wid hash index word )
+          dup word-name count 7 pick 7 pick equal-case-strings? if ( b-addr bytes wid hash index word )
+            >r 2drop 2drop drop r> exit
+          else
+            drop ( b-addr bytes wid hash index )
+          then
+        else
+          drop ( b-addr bytes wid hash index )
+        then
+      else ( b-addr bytes wid hash index addr hash' )
+        0= if ( b-addr bytes wid hash index addr )
+          2drop 2drop 2drop 0 exit
+        else
+          drop ( b-addr bytes wid hash index )
+        then
       then
-    repeat
-    2drop 2drop drop 0
+      1+
+    again
   ;
 
   \ Commit to flash
   commit-flash
+
+  \ Add a word to the flash mini-dictionary
+  : add-flash-mini-dict ( -- )
+    compiling-to-flash? if
+      flash-latest add-flash-mini-dict-end
+    then
+  ;
 
   \ Find a word in a particular dictionary, while making use of the flash
   \ mini-dictionary
@@ -2215,16 +2273,12 @@ flash-mini-dict-size [if]
 
   \ Find a word using the flash mini-dictionary for optimization
   : find-optimized ( b-addr bytes -- addr|0 )
-    flash-mini-dict-end @ -1 <> if
-      order-count @ 1 lshift order + order ?do
-	2dup i h@ find-optimized-wid ?dup if
-	  nip nip unloop exit
-	then
-      2 +loop
-      2drop 0
-    else
-      do-find
-    then
+    order-count @ 1 lshift order + order ?do
+      2dup i h@ find-optimized-wid ?dup if
+        nip nip unloop exit
+      then
+    2 +loop
+    2drop 0
   ;
 
 [then]
@@ -2334,7 +2388,7 @@ forth set-current
   false flash-dict-warned !
   ['] do-flash-validate-dict validate-dict-hook !
   [ flash-mini-dict-size ] [if]
-    flash-mini-dict flash-mini-dict-size + flash-mini-dict-end !
+\    flash-mini-dict flash-mini-dict-size + flash-mini-dict-end !
     init-flash-mini-dict
     ['] add-flash-mini-dict finalize-hook !
     ['] find-optimized find-hook ! 
