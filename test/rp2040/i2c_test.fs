@@ -307,5 +307,20 @@ begin-module i2c-test
 \      0 clear-i2c
     ;] my-task-pool spawn-from-task-pool run
   ;
+  
+  : do-test-14 ( -- )
+    0 [:
+      1 wait-i2c-master-send
+      recv-buffer recv-buffer-size 1 i2c>
+      recv-buffer swap type
+      1 i2c-nack
+\      1 clear-i2c
+    ;] my-task-pool spawn-from-task-pool run
+    0 [:
+      s" ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ" 0 >i2c .
+      s" ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ" 0 >i2c .
+\      0 clear-i2c
+    ;] my-task-pool spawn-from-task-pool run
+  ;
 
 end-module
