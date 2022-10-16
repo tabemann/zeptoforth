@@ -87,7 +87,7 @@ begin-module include-fat32
     : execute-line-len ( -- bytes )
       include-buffer-content-len @ 0 ?do
         include-buffer i + c@ dup $0A = swap $0D = or if
-          i unloop exit
+          i 1+ unloop exit
         then
       loop
       include-buffer-content-len @
@@ -111,7 +111,7 @@ begin-module include-fat32
           read-file-into-buffer
           include-buffer-content-len @ 0> if
             include-buffer execute-line-len evaluate
-            execute-line-len 1+ dup include-stack-top@ frame-offset +!
+            execute-line-len dup include-stack-top@ frame-offset +!
             dup negate include-buffer-content-len +!
             include-buffer + include-buffer include-buffer-content-len @ move
             false
