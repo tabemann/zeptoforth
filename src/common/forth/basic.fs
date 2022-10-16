@@ -2172,13 +2172,14 @@ flash-mini-dict-size [if]
   : add-flash-mini-dict-end ( word -- )
     dup word-flags h@ visible-flag and 0= if drop exit then
     dup hash-word dup ( word hash index )
+    [ flash-mini-dict-size 2 cells / ] literal umod ( word hash index )
     begin
-      [ flash-mini-dict-size 2 cells / ] literal umod ( word hash index )
       dup 3 lshift flash-mini-dict + dup cell+ @ ?dup if ( word hash index addr word' )
         4 pick equal-words? if ( word hash index addr )
           nip tuck ! cell+ ! exit ( )
         else
           drop 1+ ( word hash index )
+          dup [ flash-mini-dict-size 2 cells / ] literal - 0= bic ( word hash index )
         then
       else ( word hash index addr )
         register-flash-mini-dict-space
@@ -2191,13 +2192,14 @@ flash-mini-dict-size [if]
   : add-flash-mini-dict-start ( word -- )
     dup word-flags h@ visible-flag and 0= if drop exit then
     dup hash-word dup ( word hash index )
+    [ flash-mini-dict-size 2 cells / ] literal umod ( word hash index )
     begin
-      [ flash-mini-dict-size 2 cells / ] literal umod ( word hash index )
       dup 3 lshift flash-mini-dict + dup cell+ @ ?dup if ( word hash index addr word' )
         4 pick equal-words? if ( word hash index addr )
           2drop 2drop exit ( )
         else
           drop 1+ ( word hash index )
+          dup [ flash-mini-dict-size 2 cells / ] literal - 0= bic ( word hash index )
         then
       else ( word hash index addr )
         register-flash-mini-dict-space
@@ -2219,8 +2221,8 @@ flash-mini-dict-size [if]
   \ Find a word in the flash mini-dictionary
   : find-flash-mini-dict ( b-addr bytes wid -- addr|0 )
     3dup hash-string-and-wid dup ( b-addr bytes wid hash index )
+    [ flash-mini-dict-size 2 cells / ] literal umod ( b-addr bytes wid hash index )
     begin
-      [ flash-mini-dict-size 2 cells / ] literal umod
       dup 3 lshift flash-mini-dict + dup @ ( b-addr bytes wid hash index addr hash' )
       3 pick over = if ( b-addr bytes wid hash index addr hash' )
         drop cell+ @ dup wordlist-id h@ 4 pick = if ( b-addr bytes wid hash index word )
@@ -2239,7 +2241,7 @@ flash-mini-dict-size [if]
           drop ( b-addr bytes wid hash index )
         then
       then
-      1+
+      1+ dup [ flash-mini-dict-size 2 cells / ] literal - 0= bic ( b-addr bytes wid hash index )
     again
   ;
 
