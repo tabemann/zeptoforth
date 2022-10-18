@@ -1371,11 +1371,41 @@ internal set-current
   [char] | emit drop
 ;
 
+\ EVALUATE refill word
+: evaluate-refill ( -- ) 0 eval-index-ptr @ ! 0 eval-count-ptr @ ! ;
+
 \ Set the forth module
 forth set-current
 
 \ Commit to flash
 commit-flash
+
+\ Evaluate code as a string
+: evaluate ( c-addr u -- )
+  eval-data @ >r
+  eval-refill @ >r
+  eval-eof @ >r
+  eval-index-ptr @ >r
+  eval-count-ptr @ >r
+  eval-ptr @ >r
+  0 >r >r
+  eval-ptr !
+  rp@ dup eval-count-ptr !
+  4 + eval-index-ptr !
+  ['] evaluate-refill eval-refill !
+  ['] true eval-eof !
+  1 prompt-disabled +!
+  ['] outer try
+  rdrop rdrop
+  r> eval-ptr !
+  r> eval-count-ptr !
+  r> eval-index-ptr !
+  r> eval-eof !
+  r> eval-refill !
+  r> eval-data !
+  -1 prompt-disabled +!
+  ?raise
+;
 
 \ Dump memory as ASCII between two addresses
 : dump-ascii ( start-addr end-addr -- )
