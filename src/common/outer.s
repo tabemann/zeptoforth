@@ -475,10 +475,38 @@ _to_xt:	push {lr}
 	pop {pc}
 	end_inlined
 
+        @@ Evaluate refill word
+        define_internal_word "evaluate-refill", visible_flag
+_evaluate_refill:
+        ldr r0, =eval_index_ptr
+        ldr r0, [r0]
+        movs r1, #0
+        str r1, [r0]
+        ldr r0, =eval_count_ptr
+        ldr r0, [r0]
+        str r1, [r0]
+        bx lr
+        end_inlined
+
+        @@ Evaluate EOF word
+        define_internal_word "evaluate-eof?", visible_flag
+_evaluate_eof:
+        push_tos
+        ldr tos, =-1
+        bx lr
+        end_inlined
+
 	@@ Evaluate a string
 	define_word "evaluate", visible_flag
 _evaluate:
 	push {lr}
+        ldr r0, =eval_data
+        ldr r0, [r0]
+        ldr r1, =eval_refill
+        ldr r1, [r1]
+        ldr r2, =eval_eof
+        ldr r2, [r2]
+        push {r0, r1, r2}
 	ldr r0, =eval_index_ptr
 	ldr r0, [r0]
 	ldr r1, =eval_count_ptr
@@ -486,6 +514,16 @@ _evaluate:
 	ldr r2, =eval_ptr
 	ldr r2, [r2]
 	push {r0, r1, r2}
+        ldr r0, =eval_refill
+        ldr r1, =_evaluate_refill
+        str r1, [r0]
+        ldr r0, =eval_eof
+        ldr r1, =_evaluate_eof
+        str r1, [r0]
+        ldr r1, =prompt_disabled
+        ldr r0, [r1]
+        adds r0, #1
+        str r0, [r1]
 	movs r0, #0
 	mov r3, sp
 	subs r3, #4
@@ -516,6 +554,17 @@ _evaluate:
 	str r1, [r3]
 	ldr r3, =eval_ptr
 	str r2, [r3]
+        pop {r0, r1, r2}
+        ldr r3, =eval_data
+        str r0, [r3]
+        ldr r3, =eval_refill
+        str r1, [r3]
+        ldr r3, =eval_eof
+        str r2, [r3]
+        ldr r1, =prompt_disabled
+        ldr r0, [r1]
+        subs r0, #1
+        str r0, [r1]
 	bl _raise
 	pop {pc}
 	end_inlined
@@ -530,11 +579,57 @@ _abort:	bl _stack_base
 	bx lr
 	end_inlined
 
-	@@ The outer loop of Forth
+        @@ Prepare the prompt
+        define_internal_word "prepare-prompt" visible_flag
+_prepare_prompt:
+	movs r1, #0
+        ldr r0, =prompt_disabled
+        str r1, [r0]
+        ldr r0, =eval_data
+        str r1, [r0]
+        ldr r1, =_quit_refill
+        ldr r0, =eval_refill
+        str r1, [r0]
+        ldr r1, =_quit_eof
+        ldr r0, =eval_eof
+        str r1, [r0]
+	ldr r0, =eval_index_ptr
+	ldr r1, =input_buffer_index
+	str r1, [r0]
+	ldr r0, =eval_count_ptr
+	ldr r1, =input_buffer_count
+	str r1, [r0]
+	ldr r0, =eval_ptr
+	ldr r1, =input_buffer
+	str r1, [r0]
+        bx lr
+        end_inlined
+        
+        @@ QUIT refill word
+        define_internal_word "quit-refill", visible_flag
+_quit_refill:
+        push {lr}
+        ldr r0, =refill_hook
+        push_tos
+        ldr tos, [r0]
+        bl _execute_nz
+        pop {pc}
+        end_inlined
+
+        @@ QUIT EOF word
+        define_internal_word "quit-eof?", visible_flag
+_quit_eof:
+        push_tos
+        movs tos, #0
+        bx lr
+        end_inlined
+
+        @@ The outer loop of Forth
 	define_word "quit", visible_flag
 _quit:	bl _rstack_base
 	ldr tos, [tos]
 	mov sp, tos
+        bl _prepare_prompt
 	ldr tos, =_main
 	bl _try
 	bl _display_red
@@ -578,18 +673,56 @@ _main:	push {lr}
 	movs r1, #0
 	str r1, [r0]
 	bl _refill
-1:	bl _space
-	bl _outer
+        bl _outer
+        pop {pc}
+
+        @@ The main loop of the outer interpreter
+        define_word "outer", visible_flag
+_outer: push {lr}
+1:	bl _display_entry_space
+	bl _interpret_line
+        bl _display_prompt
+        ldr r0, =eval_eof
+        push_tos
+        ldr tos, [r0]
+        bl _execute
+        cmp tos, #0
+        bne 2f
+        pull_tos
+	bl _refill
+	b 1b
+2:      pull_tos
+        pop {pc}
+
+        @@ Display the space after enry
+        define_word "display-entry-space", visible_flag
+_display_entry_space:   
+        push {lr}
+        ldr r0, =prompt_disabled
+        ldr r0, [r0]
+        cmp r0, #0
+        bgt 1f
+        bl _space
+1:      pop {pc}
+        
+        @@ Display the prompt
+        define_word "display-prompt", visible_flag
+_display_prompt:
+        push {lr}
+        ldr r0, =prompt_disabled
+        ldr r0, [r0]
+        cmp r0, #0
+        bgt 1f
 	ldr r0, =prompt_hook
 	push_tos
 	ldr tos, [r0]
 	bl _execute_nz
-	bl _refill
-	b 1b
-	
-	@@ The actual outer loop of Forth
-	define_internal_word "outer", visible_flag
-_outer:	push {lr}
+1:      pop {pc}
+        
+	@@ Interpret a line of Forth code
+	define_internal_word "interpret-line", visible_flag
+_interpret_line:
+        push {lr}
 1:	bl _validate
 	bl _token
 	cmp tos, #0
@@ -783,14 +916,11 @@ _parse_literal:
 	define_word "refill", visible_flag
 _refill:
 	push {lr}
-	ldr r0, =refill_hook
-	ldr r0, [r0]
-	cmp r0, #0
-	beq 1f
-	push_tos
-	movs tos, r0
-	bl _execute
-1:	pop {pc}
+	ldr r0, =eval_refill
+        push_tos
+	ldr tos, [r0]
+	bl _execute_nz
+	pop {pc}
 	end_inlined
 
 	.ltorg

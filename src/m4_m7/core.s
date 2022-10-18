@@ -2274,15 +2274,7 @@ _init_variables:
 	movs r1, #1
 	ldr r0, =order_count
 	str r1, [r0]
-	ldr r0, =eval_index_ptr
-	ldr r1, =input_buffer_index
-	str r1, [r0]
-	ldr r0, =eval_count_ptr
-	ldr r1, =input_buffer_count
-	str r1, [r0]
-	ldr r0, =eval_ptr
-	ldr r1, =input_buffer
-	str r1, [r0]
+        bl _prepare_prompt
 	pop {pc}
 	end_inlined
 	

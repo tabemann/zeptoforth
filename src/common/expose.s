@@ -357,6 +357,8 @@ _validate_dict_hook:
 	bx lr
 	end_inlined
 
+.ltorg
+        
 	@@ The find hook
 	define_word "find-hook", visible_flag
 _find_hook:
@@ -424,6 +426,61 @@ _cpu_count:
 	movs tos, #cpu_count
 	bx lr
 	end_inlined
-	
+
+        @@ Get the evaluation buffer index pointer address
+        define_word "eval-index-ptr", visible_flag
+_eval_index_ptr:
+        push_tos
+        ldr tos, =eval_index_ptr
+        bx lr
+        end_inlined
+
+        @@ Get the evaluation buffer count pointer address
+        define_word "eval-count-ptr", visible_flag
+_eval_count_ptr:
+        push_tos
+        ldr tos, =eval_count_ptr
+        bx lr
+        end_inlined
+
+        @@ Get the evaluatiaon buffer pointer address
+        define_word "eval-ptr", visible_flag
+_eval_ptr:
+        push_tos
+        ldr tos, =eval_ptr
+        bx lr
+        end_inlined
+
+        @@ Get the evaluation data value address
+        define_word "eval-data", visible_flag
+_eval_data:
+        push_tos
+        ldr tos, =eval_data
+        bx lr
+        end_inlined
+
+        @@ Get the evaluation refill word address
+        define_word "eval-refill", visible_flag
+_eval_refill:
+        push_tos
+        ldr tos, =eval_refill
+        bx lr
+        end_inlined
+
+        @@ Get the evaluation EOF word address
+        define_word "eval-eof", visible_flag
+_eval_eof:
+        push_tos
+        ldr tos, =eval_eof
+        bx lr
+        end_inlined
+
+        @@ Get the prompt disabled value address
+        define_word "prompt-disabled", visible_flag
+_prompt_disabled:
+        push_tos
+        ldr tos, =prompt_disabled
+        bx lr
+        
 	.ltorg
 	

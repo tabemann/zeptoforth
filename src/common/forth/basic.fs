@@ -1739,8 +1739,8 @@ commit-flash
       dup $5C = if
 	drop skip-escape false
       else
-	dup r@ = if
-	  drop true
+	r@ = if
+	  true
 	else
 	  1 advance-bytes false
 	then
@@ -1855,7 +1855,7 @@ commit-flash
       [else]-case
       dup 0= if drop exit then
     repeat 2drop
-    prompt-hook @ ?execute refill
+    display-prompt refill
   again
 ;
 

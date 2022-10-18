@@ -44,10 +44,34 @@ begin-module include-fat32
       
       \ Frame FAT32 file
       <fat32-file> class-size +field frame-file
-    
+
+      \ Evaluation index
+      field: frame-eval-index
+
+      \ Evaluation count
+      field: frame-eval-count
+
+      \ End of file condition
+      field: frame-eof
+      
       \ Frame offset
       field: frame-offset
     
+      \ Saved evaluation buffer index pointer
+      field: saved-eval-index-ptr
+
+      \ Saved evaluation buffer count pointer
+      field: saved-eval-count-ptr
+
+      \ Saved evaluation buffer pointer
+      field: saved-eval-ptr
+
+      \ Saved evaluation refill word
+      field: saved-eval-refill
+
+      \ Saved evaluation EOF word
+      field: saved-eval-eof
+
     end-structure
     
     \ The filesystem to include from
@@ -74,6 +98,24 @@ begin-module include-fat32
     : include-stack-next@ ( -- frame )
       include-stack frame-depth @ include-frame-size * +
     ;
+
+    \ Save evaluation state
+    : save-eval ( -- )
+      eval-index-ptr @ include-stack-top@ saved-eval-index-ptr !
+      eval-count-ptr @ include-stack-top@ saved-eval-count-ptr !
+      eval-ptr @ include-stack-top@ saved-eval-ptr !
+      eval-refill @ include-stack-top@ saved-eval-refill !
+      eval-eof @ include-stack-top@ saved-eval-eof !
+    ;
+
+    \ Restore evaluation state
+    : restore-eval ( -- )
+      include-stack-top@ saved-eval-index-ptr @ eval-index-ptr !
+      include-stack-top@ saved-eval-count-ptr @ eval-count-ptr !
+      include-stack-top@ saved-eval-ptr @ eval-ptr !
+      include-stack-top@ saved-eval-refill @ eval-refill !
+      include-stack-top@ saved-eval-eof @ eval-eof !
+    ;
     
     \ Read code from a file
     : read-file-into-buffer ( -- )
@@ -93,6 +135,39 @@ begin-module include-fat32
       include-buffer-content-len @
     ;
     
+    \ Update frame state
+    : update-frame ( -- )
+      0 include-stack-top@ frame-eval-index !
+      execute-line-len dup include-stack-top@ frame-offset @ +
+      include-stack-top@ frame-file file-size@ =
+      include-stack-top@ frame-eof !
+      dup dup 0> if
+        1- include-buffer + c@ dup $0A = swap $0D = or if 1- then
+      then
+      include-stack-top@ frame-eval-count !
+    ;
+
+    \ Refill file
+    : frame-eval-refill ( -- )
+      execute-line-len dup include-stack-top@ frame-offset +!
+      dup negate include-buffer-content-len +!
+      include-buffer + include-buffer include-buffer-content-len @ move
+      read-file-into-buffer
+      update-frame
+    ;
+    
+    \ Check end of file condition
+    : frame-eval-eof ( -- eof? ) include-stack-top@ frame-eof @ ;
+      
+    \ Set up interpreting from file
+    : setup-interpret ( -- )
+      include-stack-top@ frame-eval-index eval-index-ptr !
+      include-stack-top@ frame-eval-count eval-count-ptr !
+      include-buffer eval-ptr !
+      ['] frame-eval-refill eval-refill !
+      ['] frame-eval-eof eval-eof !
+    ;
+    
     \ Un-nest an include
     : unnest-include ( -- )
       frame-depth @ 1- 0 max frame-depth !
@@ -106,20 +181,19 @@ begin-module include-fat32
     
     \ Execute an included file
     : execute-file ( -- )
+      save-eval 1 prompt-disabled +!
       [:
-        begin
-          read-file-into-buffer
-          include-buffer-content-len @ 0> if
-            include-buffer execute-line-len evaluate
-            execute-line-len dup include-stack-top@ frame-offset +!
-            dup negate include-buffer-content-len +!
-            include-buffer + include-buffer include-buffer-content-len @ move
-            false
-          else
-            true
-          then
-        until
-      ;] try unnest-include ?raise
+        read-file-into-buffer
+        include-buffer-content-len @ 0> if
+          update-frame
+          setup-interpret 
+          outer
+        then
+      ;] try
+      -1 prompt-disabled +!
+      restore-eval
+      unnest-include
+      ?raise
     ;
     
     \ Initialize FAT32 including
@@ -168,6 +242,9 @@ begin-module include-fat32
 
 end-module> import
 
-: init ( -- ) init [ include-fat32 :: include-fat32-internal ] :: init-include-fat32 ;
+: init ( -- )
+  init
+  [ include-fat32 :: include-fat32-internal ] :: init-include-fat32
+;
 
 reboot

@@ -104,6 +104,15 @@
 	@@ The evaluation buffer pointer
 	allot eval_ptr, 4
 
+        @@ The evaluation data value
+        allot eval_data, 4
+
+        @@ The evaluation refill word
+        allot eval_refill, 4
+
+        @@ The evaluation EOF word
+        allot eval_eof, 4
+        
 	@@ The current input buffer index
 	allot input_buffer_index, 4
 
@@ -115,6 +124,9 @@
 
 	@@ Are we in compilation state
 	allot state, 4
+
+        @@ Is the prompt disabled (disabled > 0)
+        allot prompt_disabled, 4
 
 	@@ Is PAUSE enabled (enabled > 0)
 	allot pause_enabled, 4 * cpu_count
