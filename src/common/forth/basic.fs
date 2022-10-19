@@ -553,7 +553,7 @@ commit-flash
 internal set-current
 
 \ Get a deferred word's xt address
-: defer-xt@ ( deferred-xt -- ) dup h@ $FF and 2 lshift 2 + + 4 align ;
+: defer-xt@ ( deferred-xt -- addr ) dup h@ $FF and 2 lshift 2 + + 4 align ;
 
 forth set-current
 
@@ -1135,7 +1135,7 @@ commit-flash
 \ Set the internal wordlist
 internal set-current
 
-\ Is there a deferred context switch for a give CPU
+\ Is there a deferred context switch for a given CPU
 cpu-count cells buffer: cpus-deferred-context-switch
 
 \ Critical section state for a given CPU

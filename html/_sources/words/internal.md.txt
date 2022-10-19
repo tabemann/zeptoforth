@@ -19,10 +19,10 @@ Get the address of the flags for a word
 
 Get the address of the wordlist ID for a word
 
-##### `prev-word`
-( word -- h-addr )
+##### `next-word`
+( word -- addr-addr )
 
-Get the address of the previous word for a word
+Get the address of the address of the next word in the word specified;
 
 ##### `word-name`
 ( word -- b-addr )
@@ -88,7 +88,7 @@ Search for a word by its xt
 
 Create a word that executes code specified by DOES>
 
-##### `flash-align,`
+##### `block-align,`
 Align to flash block if compiling to flash
 
 ##### `next-user-space`
@@ -116,7 +116,7 @@ Specify next available RAM space
 
 Complete a USER variable word
 
-##### `ram-bvariable`
+##### `ram-cvariable`
 ( "name" -- )
 
 Allocate a byte variable in RAM
@@ -146,6 +146,19 @@ Allocate a buffer in RAM
 
 Allocate a cell-aligned buffer in RAM
 
+##### `cpus-deferred-context-switch`
+
+Is there a deferred context switch for a given CPU.
+
+##### `cpus-in-critical`
+
+Critical section state for a given CPU.
+
+##### `in-critical`
+( -- addr )
+
+Address of critical section state for the current CPU.
+
 ##### `set-current-flash-wordlist`
 ( wid -- )
 
@@ -156,25 +169,10 @@ Specify current flash wordlist
 
 Look up the current flash wordlist
 
-##### `decode-mov16`
-( h-addr -- h )
+##### `defer-xt@`
+( deferred-xt -- addr )
 
-Decode the immediate field from a MOVW or MOVT instruction
-
-##### `decode-literal`
-( h-addr -- x )
-
-Decode the immediate field from a pair of a MOVW instruction followed by a MOVT instruction
-
-##### `defer-ram@`
-( xt-deferred -- xt )
-
-Get the referred xt from a deferred word in RAM
-
-##### `defer-flash@`
-( xt-deferred -- xt )
-
-Get the referred xt from a deferred word in flash
+Get the address at which the xt for a deferred xt is stored.
 
 ##### `fraction-size`
 ( -- u )
@@ -279,3 +277,38 @@ Skip to the start of a token
 ##### `format-integer-inner`
 
 The inner portion of formatting an integer as a string
+
+##### `eval-index-ptr`
+( -- addr-addr )
+
+Get the address of the address of the evaluation buffer index value.
+
+##### `eval-count-ptr`
+( -- addr-addr )
+
+Get the address of the address of the evaluation buffer byte count value.
+
+##### `eval-ptr`
+( -- addr )
+
+Get the address of the evaluation buffer.
+
+##### `eval-data`
+( -- addr )
+
+Get address of a general-purpose data value to be used by the evaluation refill and EOF check routines.
+
+##### `eval-refill`
+( -- xt-addr ) ( xt: -- )
+
+Get address of the evaluation refill routine. This routine is called when `outer` has completed interpreting the entire contents of the evaluation buffer, and should update the evaluation buffer pointer, the evaluation index, and the evaluation byte count accordingly.
+
+##### `eval-eof`
+( -- xt-addr ) ( xt: -- eof? )
+
+Get address of the evaluation EOF check routine. `outer` exits if this routine returns non-zero when called.
+
+##### `prompt-disabled`
+( -- addr )
+
+Get the address of the prompt-disabled counter (positive values correspond to prompt display being disabled).
