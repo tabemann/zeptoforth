@@ -2137,8 +2137,6 @@ commit-flash
 \ Create a variable to store the end of the flash mini-dictionary
 flash-mini-dict-size [if]
 
-\  variable flash-mini-dict-end
-
   variable flash-mini-dict-free
 
   \ Hash a counted string

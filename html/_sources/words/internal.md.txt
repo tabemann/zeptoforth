@@ -228,6 +228,16 @@ Find a word in a specific wordlist or return zero for no word found
 
 Find a word in a dictionary by execution token or return zero for no word found; only words with headers will be found
 
+##### `min-ram-wordlist`
+( -- wid )
+
+The minimum RAM wordlist value.
+
+##### `current-ram-wordlist`
+( -- addr )
+
+Address of the current RAM wordlist value.
+
 ##### `main`
 
 The main functionality, within the main exception handler
@@ -312,3 +322,119 @@ Get address of the evaluation EOF check routine. `outer` exits if this routine r
 ( -- addr )
 
 Get the address of the prompt-disabled counter (positive values correspond to prompt display being disabled).
+
+##### `dump-ascii-16`
+( start-addr -- )
+
+Dump 16 bytets of ASCII.
+
+##### `picture-size`
+( -- bytes )
+
+The maximum pictures numeric output size.
+
+##### `picture-offset`
+( -- addr )
+
+The start of pictured numeric output user variable.
+
+##### `fraction-size-table`
+( -- addr )
+
+The fraction size lookup table.
+
+##### `flush-console-hook`
+( -- addr )
+
+The address of the flush console hook variable.
+
+##### `flash-dict-warned`
+( -- addr )
+
+The address of the user warned about flash dictionary space flag.
+
+##### `do-flash-validate-dict`
+( -- )
+
+Warn the user if flash space is running low.
+
+##### `flash-mini-dict`
+( -- addr )
+
+The base address of the flash mini-dictionary. (RP2040 only.)
+
+##### `flash-mini-dict-free`
+( -- addr )
+
+The address of the flash mini-dictionary entries left count. (RP2040 only.)
+
+##### `hash-string`
+( b-addr bytes -- hash )
+
+Hash a string as a 32-bit value. (RP2040 only.)
+
+##### `hash-string-and-wid`
+( b-addr bytes wid -- hash )
+
+Hash a string and a wordlist ID as a 32-bit value; note that this 32-bit value is guaranteed to not be zero. (RP2040 only.)
+
+##### `hash-word`
+( word -- hash )
+
+Hash the name and the wordlist ID of a word as a 32-bit value; note that this 32-bit value is guaranteed to not be zero. (RP2040 only.)
+
+##### `clear-flash-mini-dict`
+( -- )
+
+Clear the flash mini-dictionary. (RP2040 only.)
+
+##### `x-flash-mini-dict-out-of-space`
+( -- )
+
+Flash mini-dictionary is out of space exception. (RP2040 only.)
+
+##### `register-flash-mini-dict-space`
+( -- )
+
+Register a new entry is being added to the flash mini-dictionary (as opposed to replacing an existing entry). (RP2040 only.)
+
+##### `equal-words?`
+( word0 word1 -- equal? )
+
+Get whether two words have equal names and wordlist ID's. (RP2040 only.)
+
+##### `add-flash-mini-dict-end`
+( word -- )
+
+Add an entry to the flash mini-dictionary when filling from start to end. (RP2040 only.)
+
+##### `add-flash-mini-dict-start`
+( word -- )
+
+Add an entry to the flash mini-dictionary when filling from end to start. (RP2040 only.)
+
+##### `init-flash-mini-dict`
+( -- )
+
+Initialize the flash mini-dictionary, populating it with entries corresponding to the entire flash dictionary. (RP2040 only.)
+
+##### `find-flash-mini-dict`
+( b-addr bytes wid -- addr|0 )
+
+Find a word by name in the flash mini-dictionary for a given wordlist ID, returning the word's address or, if not found, 0. (RP2040 only.)
+
+##### `add-flash-mini-dict`
+( -- )
+
+Add the word compiled most recently to flash to the flash mini-dictionary, if currently compiling to flash. (RP2040 only.)
+
+##### `find-optimized-wid`
+( b-addr bytes wid -- addr|0 )
+
+Find a word by name with the specified wordlist ID making use of the flash mini-dictionary, using the RAM dictionary first if compiling to RAM, and if not found in the RAM dictionary or if currently compiling to flash then trying to find it in the flash mini-dictionary, returning the word's address or, if not found, 0. (RP2040 only.)
+
+##### `find-optimized`
+( b-addr bytes -- addr|0 )
+
+Find a word by name in the current wordlist order, making use of the RAM dictionary if compiling to RAM, and making use of the flash mini-dictionary, returning the word's address or, if not found, 0. (RP2040 only.)
+

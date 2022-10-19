@@ -263,6 +263,16 @@ the next column</p>
 <p>( xt dict – word|0 )</p>
 <p>Find a word in a dictionary by execution token or return zero for no word found; only words with headers will be found</p>
 </section>
+<section id="min-ram-wordlist">
+<h3><code class="docutils literal notranslate"><span class="pre">min-ram-wordlist</span></code><a class="headerlink" href="#min-ram-wordlist" title="Permalink to this headline">¶</a></h3>
+<p>( – wid )</p>
+<p>The minimum RAM wordlist value.</p>
+</section>
+<section id="current-ram-wordlist">
+<h3><code class="docutils literal notranslate"><span class="pre">current-ram-wordlist</span></code><a class="headerlink" href="#current-ram-wordlist" title="Permalink to this headline">¶</a></h3>
+<p>( – addr )</p>
+<p>Address of the current RAM wordlist value.</p>
+</section>
 <section id="main">
 <h3><code class="docutils literal notranslate"><span class="pre">main</span></code><a class="headerlink" href="#main" title="Permalink to this headline">¶</a></h3>
 <p>The main functionality, within the main exception handler</p>
@@ -347,6 +357,121 @@ the next column</p>
 <h3><code class="docutils literal notranslate"><span class="pre">prompt-disabled</span></code><a class="headerlink" href="#prompt-disabled" title="Permalink to this headline">¶</a></h3>
 <p>( – addr )</p>
 <p>Get the address of the prompt-disabled counter (positive values correspond to prompt display being disabled).</p>
+</section>
+<section id="dump-ascii-16">
+<h3><code class="docutils literal notranslate"><span class="pre">dump-ascii-16</span></code><a class="headerlink" href="#dump-ascii-16" title="Permalink to this headline">¶</a></h3>
+<p>( start-addr – )</p>
+<p>Dump 16 bytets of ASCII.</p>
+</section>
+<section id="picture-size">
+<h3><code class="docutils literal notranslate"><span class="pre">picture-size</span></code><a class="headerlink" href="#picture-size" title="Permalink to this headline">¶</a></h3>
+<p>( – bytes )</p>
+<p>The maximum pictures numeric output size.</p>
+</section>
+<section id="picture-offset">
+<h3><code class="docutils literal notranslate"><span class="pre">picture-offset</span></code><a class="headerlink" href="#picture-offset" title="Permalink to this headline">¶</a></h3>
+<p>( – addr )</p>
+<p>The start of pictured numeric output user variable.</p>
+</section>
+<section id="fraction-size-table">
+<h3><code class="docutils literal notranslate"><span class="pre">fraction-size-table</span></code><a class="headerlink" href="#fraction-size-table" title="Permalink to this headline">¶</a></h3>
+<p>( – addr )</p>
+<p>The fraction size lookup table.</p>
+</section>
+<section id="flush-console-hook">
+<h3><code class="docutils literal notranslate"><span class="pre">flush-console-hook</span></code><a class="headerlink" href="#flush-console-hook" title="Permalink to this headline">¶</a></h3>
+<p>( – addr )</p>
+<p>The address of the flush console hook variable.</p>
+</section>
+<section id="flash-dict-warned">
+<h3><code class="docutils literal notranslate"><span class="pre">flash-dict-warned</span></code><a class="headerlink" href="#flash-dict-warned" title="Permalink to this headline">¶</a></h3>
+<p>( – addr )</p>
+<p>The address of the user warned about flash dictionary space flag.</p>
+</section>
+<section id="do-flash-validate-dict">
+<h3><code class="docutils literal notranslate"><span class="pre">do-flash-validate-dict</span></code><a class="headerlink" href="#do-flash-validate-dict" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Warn the user if flash space is running low.</p>
+</section>
+<section id="flash-mini-dict">
+<h3><code class="docutils literal notranslate"><span class="pre">flash-mini-dict</span></code><a class="headerlink" href="#flash-mini-dict" title="Permalink to this headline">¶</a></h3>
+<p>( – addr )</p>
+<p>The base address of the flash mini-dictionary. (RP2040 only.)</p>
+</section>
+<section id="flash-mini-dict-free">
+<h3><code class="docutils literal notranslate"><span class="pre">flash-mini-dict-free</span></code><a class="headerlink" href="#flash-mini-dict-free" title="Permalink to this headline">¶</a></h3>
+<p>( – addr )</p>
+<p>The address of the flash mini-dictionary entries left count. (RP2040 only.)</p>
+</section>
+<section id="hash-string">
+<h3><code class="docutils literal notranslate"><span class="pre">hash-string</span></code><a class="headerlink" href="#hash-string" title="Permalink to this headline">¶</a></h3>
+<p>( b-addr bytes – hash )</p>
+<p>Hash a string as a 32-bit value. (RP2040 only.)</p>
+</section>
+<section id="hash-string-and-wid">
+<h3><code class="docutils literal notranslate"><span class="pre">hash-string-and-wid</span></code><a class="headerlink" href="#hash-string-and-wid" title="Permalink to this headline">¶</a></h3>
+<p>( b-addr bytes wid – hash )</p>
+<p>Hash a string and a wordlist ID as a 32-bit value; note that this 32-bit value is guaranteed to not be zero. (RP2040 only.)</p>
+</section>
+<section id="hash-word">
+<h3><code class="docutils literal notranslate"><span class="pre">hash-word</span></code><a class="headerlink" href="#hash-word" title="Permalink to this headline">¶</a></h3>
+<p>( word – hash )</p>
+<p>Hash the name and the wordlist ID of a word as a 32-bit value; note that this 32-bit value is guaranteed to not be zero. (RP2040 only.)</p>
+</section>
+<section id="clear-flash-mini-dict">
+<h3><code class="docutils literal notranslate"><span class="pre">clear-flash-mini-dict</span></code><a class="headerlink" href="#clear-flash-mini-dict" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Clear the flash mini-dictionary. (RP2040 only.)</p>
+</section>
+<section id="x-flash-mini-dict-out-of-space">
+<h3><code class="docutils literal notranslate"><span class="pre">x-flash-mini-dict-out-of-space</span></code><a class="headerlink" href="#x-flash-mini-dict-out-of-space" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Flash mini-dictionary is out of space exception. (RP2040 only.)</p>
+</section>
+<section id="register-flash-mini-dict-space">
+<h3><code class="docutils literal notranslate"><span class="pre">register-flash-mini-dict-space</span></code><a class="headerlink" href="#register-flash-mini-dict-space" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Register a new entry is being added to the flash mini-dictionary (as opposed to replacing an existing entry). (RP2040 only.)</p>
+</section>
+<section id="equal-words">
+<h3><code class="docutils literal notranslate"><span class="pre">equal-words?</span></code><a class="headerlink" href="#equal-words" title="Permalink to this headline">¶</a></h3>
+<p>( word0 word1 – equal? )</p>
+<p>Get whether two words have equal names and wordlist ID’s. (RP2040 only.)</p>
+</section>
+<section id="add-flash-mini-dict-end">
+<h3><code class="docutils literal notranslate"><span class="pre">add-flash-mini-dict-end</span></code><a class="headerlink" href="#add-flash-mini-dict-end" title="Permalink to this headline">¶</a></h3>
+<p>( word – )</p>
+<p>Add an entry to the flash mini-dictionary when filling from start to end. (RP2040 only.)</p>
+</section>
+<section id="add-flash-mini-dict-start">
+<h3><code class="docutils literal notranslate"><span class="pre">add-flash-mini-dict-start</span></code><a class="headerlink" href="#add-flash-mini-dict-start" title="Permalink to this headline">¶</a></h3>
+<p>( word – )</p>
+<p>Add an entry to the flash mini-dictionary when filling from end to start. (RP2040 only.)</p>
+</section>
+<section id="init-flash-mini-dict">
+<h3><code class="docutils literal notranslate"><span class="pre">init-flash-mini-dict</span></code><a class="headerlink" href="#init-flash-mini-dict" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Initialize the flash mini-dictionary, populating it with entries corresponding to the entire flash dictionary. (RP2040 only.)</p>
+</section>
+<section id="find-flash-mini-dict">
+<h3><code class="docutils literal notranslate"><span class="pre">find-flash-mini-dict</span></code><a class="headerlink" href="#find-flash-mini-dict" title="Permalink to this headline">¶</a></h3>
+<p>( b-addr bytes wid – addr|0 )</p>
+<p>Find a word by name in the flash mini-dictionary for a given wordlist ID, returning the word’s address or, if not found, 0. (RP2040 only.)</p>
+</section>
+<section id="add-flash-mini-dict">
+<h3><code class="docutils literal notranslate"><span class="pre">add-flash-mini-dict</span></code><a class="headerlink" href="#add-flash-mini-dict" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Add the word compiled most recently to flash to the flash mini-dictionary, if currently compiling to flash. (RP2040 only.)</p>
+</section>
+<section id="find-optimized-wid">
+<h3><code class="docutils literal notranslate"><span class="pre">find-optimized-wid</span></code><a class="headerlink" href="#find-optimized-wid" title="Permalink to this headline">¶</a></h3>
+<p>( b-addr bytes wid – addr|0 )</p>
+<p>Find a word by name with the specified wordlist ID making use of the flash mini-dictionary, using the RAM dictionary first if compiling to RAM, and if not found in the RAM dictionary or if currently compiling to flash then trying to find it in the flash mini-dictionary, returning the word’s address or, if not found, 0. (RP2040 only.)</p>
+</section>
+<section id="find-optimized">
+<h3><code class="docutils literal notranslate"><span class="pre">find-optimized</span></code><a class="headerlink" href="#find-optimized" title="Permalink to this headline">¶</a></h3>
+<p>( b-addr bytes – addr|0 )</p>
+<p>Find a word by name in the current wordlist order, making use of the RAM dictionary if compiling to RAM, and making use of the flash mini-dictionary, returning the word’s address or, if not found, 0. (RP2040 only.)</p>
 </section>
 </section>
 </section>
