@@ -22,6 +22,7 @@ compile-to-flash
 
 begin-module include-fat32
 
+  internal import
   oo import
   fat32 import
   

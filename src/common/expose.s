@@ -428,7 +428,7 @@ _cpu_count:
 	end_inlined
 
         @@ Get the evaluation buffer index pointer address
-        define_word "eval-index-ptr", visible_flag
+        define_internal_word "eval-index-ptr", visible_flag
 _eval_index_ptr:
         push_tos
         ldr tos, =eval_index_ptr
@@ -436,7 +436,7 @@ _eval_index_ptr:
         end_inlined
 
         @@ Get the evaluation buffer count pointer address
-        define_word "eval-count-ptr", visible_flag
+        define_internal_word "eval-count-ptr", visible_flag
 _eval_count_ptr:
         push_tos
         ldr tos, =eval_count_ptr
@@ -444,7 +444,7 @@ _eval_count_ptr:
         end_inlined
 
         @@ Get the evaluatiaon buffer pointer address
-        define_word "eval-ptr", visible_flag
+        define_internal_word "eval-ptr", visible_flag
 _eval_ptr:
         push_tos
         ldr tos, =eval_ptr
@@ -452,7 +452,7 @@ _eval_ptr:
         end_inlined
 
         @@ Get the evaluation data value address
-        define_word "eval-data", visible_flag
+        define_internal_word "eval-data", visible_flag
 _eval_data:
         push_tos
         ldr tos, =eval_data
@@ -460,7 +460,7 @@ _eval_data:
         end_inlined
 
         @@ Get the evaluation refill word address
-        define_word "eval-refill", visible_flag
+        define_internal_word "eval-refill", visible_flag
 _eval_refill:
         push_tos
         ldr tos, =eval_refill
@@ -468,7 +468,7 @@ _eval_refill:
         end_inlined
 
         @@ Get the evaluation EOF word address
-        define_word "eval-eof", visible_flag
+        define_internal_word "eval-eof", visible_flag
 _eval_eof:
         push_tos
         ldr tos, =eval_eof
@@ -476,7 +476,7 @@ _eval_eof:
         end_inlined
 
         @@ Get the prompt disabled value address
-        define_word "prompt-disabled", visible_flag
+        define_internal_word "prompt-disabled", visible_flag
 _prompt_disabled:
         push_tos
         ldr tos, =prompt_disabled
