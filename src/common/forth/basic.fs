@@ -1381,19 +1381,20 @@ forth set-current
 commit-flash
 
 \ Evaluate code as a string
-: evaluate ( c-addr u -- )
+: evaluate-with-input ( ? data c-addr u refill-xt eof-xt -- ? )
   eval-data @ >r
   eval-refill @ >r
   eval-eof @ >r
   eval-index-ptr @ >r
   eval-count-ptr @ >r
   eval-ptr @ >r
+  eval-eof !
+  eval-refill !
   0 >r >r
   eval-ptr !
   rp@ dup eval-count-ptr !
   4 + eval-index-ptr !
-  ['] evaluate-refill eval-refill !
-  ['] true eval-eof !
+  eval-data !
   1 prompt-disabled +!
   ['] outer try
   rdrop rdrop
@@ -1405,6 +1406,19 @@ commit-flash
   r> eval-data !
   -1 prompt-disabled +!
   ?raise
+;
+
+\ Feed an input string to be interpreted
+: feed-input ( c-addr u -- )
+  eval-count-ptr @ ! eval-ptr ! 0 eval-index-ptr @ !
+;
+
+\ Commit to flash
+commit-flash
+
+\ Evaluate code as a string
+: evaluate ( ? c-addr u -- ? )
+  0 -rot ['] evaluate-refill ['] true evaluate-with-input
 ;
 
 \ Dump memory as ASCII between two addresses

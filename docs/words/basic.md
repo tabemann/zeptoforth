@@ -1423,10 +1423,20 @@ Get an xt from a word
 Evaluate a word in the current interpretation/compilation context.
 
 ##### `evaluate`
-( b-addr u -- )
+( ? b-addr u -- ? )
 
-Evaluate a string
-	
+Evaluate a string. Note that only one task may interpret code at a time.
+
+##### `evaluate-with-input`
+( ? data input-addr input-bytes refill-xt eof-xt -- ? )
+
+Evaluate input, initialised to the buffer at *input-addr* and the buffer length of *input-bytes*, with a refill handler *refill-xt* with the signature ( -- ), an end-of-file test *eof-xt* with the signature ( -- eof? ), and an auxiliary dat value *data*.
+
+##### `feed-input`
+( input-addr input-bytes -- )
+
+Set the current input for evaluation to the buffer at *input-addr* and the buffer length of *input-bytes*, and the current evaluation index is reset to the start of the specified buffer.
+
 ##### `abort`
 ( -- )
 

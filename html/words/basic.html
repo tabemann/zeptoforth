@@ -1469,8 +1469,18 @@ otherwise passing the specified argument through.</p>
 </section>
 <section id="evaluate">
 <h3><code class="docutils literal notranslate"><span class="pre">evaluate</span></code><a class="headerlink" href="#evaluate" title="Permalink to this headline">¶</a></h3>
-<p>( b-addr u – )</p>
-<p>Evaluate a string</p>
+<p>( ? b-addr u – ? )</p>
+<p>Evaluate a string. Note that only one task may interpret code at a time.</p>
+</section>
+<section id="evaluate-with-input">
+<h3><code class="docutils literal notranslate"><span class="pre">evaluate-with-input</span></code><a class="headerlink" href="#evaluate-with-input" title="Permalink to this headline">¶</a></h3>
+<p>( ? data input-addr input-bytes refill-xt eof-xt – ? )</p>
+<p>Evaluate input, initialised to the buffer at <em>input-addr</em> and the buffer length of <em>input-bytes</em>, with a refill handler <em>refill-xt</em> with the signature ( – ), an end-of-file test <em>eof-xt</em> with the signature ( – eof? ), and an auxiliary dat value <em>data</em>.</p>
+</section>
+<section id="feed-input">
+<h3><code class="docutils literal notranslate"><span class="pre">feed-input</span></code><a class="headerlink" href="#feed-input" title="Permalink to this headline">¶</a></h3>
+<p>( input-addr input-bytes – )</p>
+<p>Set the current input for evaluation to the buffer at <em>input-addr</em> and the buffer length of <em>input-bytes</em>, and the current evaluation index is reset to the start of the specified buffer.</p>
 </section>
 <section id="abort">
 <h3><code class="docutils literal notranslate"><span class="pre">abort</span></code><a class="headerlink" href="#abort" title="Permalink to this headline">¶</a></h3>
@@ -1908,6 +1918,10 @@ otherwise passing the specified argument through.</p>
 <li class="toctree-l1"><a class="reference internal" href="uart.html">UART Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adc.html">Analog-Digital Converter Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="spi.html">SPI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="i2c.html">I2C Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="include_fat32.html">FAT32 Code Including Support Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
