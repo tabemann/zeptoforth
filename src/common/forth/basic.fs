@@ -1899,6 +1899,7 @@ commit-flash
       [else]-case
       dup 0= if drop exit then
     repeat 2drop
+    eval-eof @ ?dup if execute if drop exit then then
     display-prompt refill
   again
 ;
