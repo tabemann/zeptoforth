@@ -307,7 +307,7 @@ begin-module edit-internal
 
   \ Change buffers
   : change-buffer ( id -- )
-    dup dup highest-id u> if
+    dup highest-id u> if
       lowest-id save-buffer
       dup lowest-id buffer-of-id load-buffer
     else
