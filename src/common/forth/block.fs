@@ -560,12 +560,40 @@ begin-module block
     r> delete-blocks
   ;
   
+  continue-module block-internal
+
+    \ Get the current block being interpreted
+    : current-block ( -- addr ) eval-data @ @ find-block ;
+
+    \ Get the current line offset being interpreted
+    : current-line ( -- u ) eval-data @ cell+ @ ;
+
+    \ Advance the line being interpreted
+    : advance-line ( -- ) 64 eval-data @ cell+ +! ;
+
+    \ Refill from a block
+    : block-refill ( -- )
+      advance-line
+      current-block current-line + 64 truncate-invalid feed-input
+    ;
+
+    \ Get whether the current line is the end of a block
+    : block-eof ( -- eof? )
+      current-line [ 1024 64 - ] literal >=
+    ;
+    
+  end-module
+  
   \ Load a block
   : load ( id -- )
     dup block? averts x-block-not-found
-    find-block dup block-size + swap ?do
-      i 64 truncate-invalid evaluate
-    64 +loop
+    [:
+      0 >r >r rp@
+      dup @ find-block 64 truncate-invalid ['] block-refill ['] block-eof
+      evaluate-with-input
+      rdrop rdrop
+    ;] try
+    ?raise
   ;
 
   \ List a block
