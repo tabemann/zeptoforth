@@ -41,7 +41,6 @@ do
     sleep 1
 done
 screen -X log off
-screen -X stuff 'erase-all\n'
 screen -X quit
 sleep 1
 sed '1d' screenlog.0 > inter

@@ -174,5 +174,4 @@ which will build `bin/<version>/<platform>/zeptoforth_<build>-<version>.bin` and
 
     utils/make_uf2_image.sh <version> <platform> <TTY device> <build>
 
-which will build `bin/<version>/<platform>/zeptoforth_<build>-<version>.uf2` and the associated `.ihex` and `.bin` files. Note that `utils/make_uf2_image.sh` erases the contents of flash after it executes except for the zeptoforth kernel, as it is meant to be used with multiple different builds in a row; if one wants a particular build to be installed, execute `bootsel` at the console, mount the USB Mass Storage device, and the copies the desired build to the USB Mass Storage device.
-
+which will build `bin/<version>/<platform>/zeptoforth_<build>-<version>.uf2` and the associated `.ihex` and `.bin` files. Note that when using `utils/make_uf2_image.sh` multiple times in a row the user must manually execute `erase-all` at the console between them.
