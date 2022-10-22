@@ -873,7 +873,7 @@ begin-module i2c
       dup i2c-disabled @ 1 = if
         $000 over i2c-addr @ IC_INTR_MASK !
         IC_ENABLE_ENABLE over i2c-addr @ IC_ENABLE bic!
-        begin dup i2c-addr @ IC_ENABLE_STATUS @ IC_EN 0= until
+        begin dup i2c-addr @ IC_ENABLE_STATUS @ IC_EN and 0= until
       then
       drop
     ;] over i2c-inner-lock with-lock
