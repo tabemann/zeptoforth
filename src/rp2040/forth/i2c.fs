@@ -292,14 +292,14 @@ begin-module i2c
     \ IC_TAR bits
     11 bit constant SPECIAL
     10 bit constant GC_OR_START
-    $3F bit constant IC_TAR_ADDR
+    $3FF constant IC_TAR_ADDR
     
     \ IC_DATA_CMD bits
     11 bit constant FIRST_DATA_BYTE
     10 bit constant RESTART
     9 bit constant STOP
     8 bit constant CMD
-    $FF bit constant DAT
+    $FF constant DAT
 
     \ Interrupt bits
     12 bit constant RESTART_DET
