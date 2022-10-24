@@ -64,6 +64,9 @@ begin-module i2c
 
   \ Operation inappropriate for master
   : x-invalid-op-for-master ( -- ) ." invalid op for master" cr ;
+
+  \ Attempt to send data as slave with unready master
+  : x-master-not-ready ( -- ) ." master not ready" cr ;
   
   begin-module i2c-internal
 
@@ -297,7 +300,7 @@ begin-module i2c
     \ IC_DATA_CMD bits
     11 bit constant FIRST_DATA_BYTE
     10 bit constant RESTART
-    9 bit constant STOP
+    9 bit constant STOP_BIT
     8 bit constant CMD
     $FF constant DAT
 
@@ -535,7 +538,8 @@ begin-module i2c
         begin
           dup i2c-data-offset @
           over i2c-data-size @ < if
-            dup i2c-addr @ IC_STATUS @ TFNF and if
+            dup i2c-addr @ IC_STATUS @ TFE and
+            if
               dup i2c-data-offset @
               over i2c-data-addr @ + c@
               over i2c-slave c@ 0= if
@@ -545,8 +549,8 @@ begin-module i2c
                 over i2c-data-offset @
                 2 pick i2c-data-size @ 1- =
                 2 pick i2c-stop c@ 0<> and if
-                  $FF 3 pick i2c-prev-stop c!
-                  STOP or
+                  $FF 2 pick i2c-prev-stop c!
+                  STOP_BIT or
                 then
               then
               over i2c-addr @ IC_DATA_CMD !
@@ -588,7 +592,7 @@ begin-module i2c
                 dup i2c-data-offset @ over i2c-data-size @ 1- = if
                   dup i2c-stop c@ if
                     $FF over i2c-prev-stop c!
-                    [ CMD STOP or ] literal
+                    [ CMD STOP_BIT or ] literal
                   else
                     CMD
                   then
@@ -602,6 +606,9 @@ begin-module i2c
                 $00 2 pick i2c-stop-det c!
                 over restore-int-mask
                 mode-not-active 2 pick i2c-mode c!
+                over i2c-slave c@ <> if
+                  master-not-active 2 pick i2c-master-mode c!
+                then
                 over signal-done
               then
             then
@@ -654,7 +661,20 @@ begin-module i2c
       else
         $00 over i2c-prev-stop c!
       then
-      i2c-addr @ IC_CLR_STOP_DET @ drop
+      dup i2c-addr @ IC_CLR_STOP_DET @ drop
+      
+      dup i2c-mode c@ mode-recv =
+      over i2c-addr @ IC_STATUS @ RFNE and 0= and if
+        dup i2c-stop-det c@ if
+          $00 over i2c-stop-det c!
+          dup restore-int-mask
+          mode-not-active over i2c-mode c!
+          dup i2c-slave c@ if master-not-active over i2c-master-mode c! then
+          dup signal-done
+        then
+      then
+
+      drop
     ;
     
     \ Handle ACTIVITY
@@ -782,6 +802,9 @@ begin-module i2c
       i2c-select
       over if
         disable-int
+        dup i2c-slave c@ 0<> over i2c-master-mode c@ master-recv <> and if
+          enable-int ['] x-master-not-ready ?raise
+        then
         tuck i2c-data-size !
         tuck i2c-data-addr !
         0 over i2c-data-offset !
@@ -795,7 +818,7 @@ begin-module i2c
         not-pending over i2c-pending c!
         $00 over i2c-done c!
         0 over i2c-addr @ IC_RX_TL !
-        7 over i2c-addr @ IC_TX_TL !
+        dup i2c-slave c@ if 7 else 0 then over i2c-addr @ IC_TX_TL !
         [ TX_EMPTY TX_OVER or TX_ABRT or ] literal
         over i2c-slave c@ if [ RD_REQ RX_DONE or ] literal or then
         over i2c-addr @ IC_INTR_MASK !
@@ -821,6 +844,9 @@ begin-module i2c
       i2c-select
       over if
         disable-int
+        dup i2c-slave c@ 0<> over i2c-master-mode c@ master-send <> and if
+          enable-int ['] x-master-not-ready ?raise
+        then
         tuck i2c-data-size !
         tuck i2c-data-addr !
         0 over i2c-data-offset !
@@ -842,7 +868,7 @@ begin-module i2c
           CMD over i2c-restart c@ if RESTART or then
           over i2c-data-size @ 1 = 2 pick i2c-stop c@ 0<> and if
             $FF 2 pick i2c-prev-stop c!
-            STOP or
+            STOP_BIT or
           then
           over i2c-addr @ IC_DATA_CMD !
         then
@@ -1295,7 +1321,7 @@ begin-module i2c
     release-i2c
   ;
 
-end-module> import
+end-module import>
 
 \ Initialize I2C
 : init ( -- )
