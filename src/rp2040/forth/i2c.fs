@@ -435,11 +435,7 @@ begin-module i2c
     \ Restore the interrupt mask
     : restore-int-mask ( i2c-buffer -- )
       disable-int
-      dup i2c-slave c@ if
-        0
-      else
-        STOP_DET
-      then
+      STOP_DET
       over i2c-addr @ IC_INTR_MASK @ ACTIVITY and or
       swap i2c-addr @ IC_INTR_MASK !
       enable-int
@@ -613,8 +609,11 @@ begin-module i2c
               then
             then
           else
-            $00 2 pick i2c-stop-det c!
             mode-not-active over i2c-mode c!
+            dup i2c-slave c@ if
+              master-send over i2c-master-mode c!
+              send-pending over i2c-pending c!
+            then
             dup restore-int-mask
             dup signal-done
             true
@@ -624,7 +623,7 @@ begin-module i2c
         dup i2c-mode c@ mode-not-active = over i2c-slave c@ 0<> and if
           master-send over i2c-master-mode c!
           send-pending over i2c-pending c!
-          0 over i2c-addr @ IC_INTR_MASK !
+          dup restore-int-mask
           wake
         then
       then
@@ -864,7 +863,6 @@ begin-module i2c
         over i2c-slave c@ if RD_REQ or then
         over i2c-addr @ IC_INTR_MASK !
         dup i2c-slave c@ 0= if
-          $00 over i2c-stop-det c!
           CMD over i2c-restart c@ if RESTART or then
           over i2c-data-size @ 1 = 2 pick i2c-stop c@ 0<> and if
             $FF 2 pick i2c-prev-stop c!
@@ -1039,7 +1037,10 @@ begin-module i2c
       systick-counter swap
       dup i2c-select
       
+      disable-int
+      mode-not-active over i2c-mode c!
       [ RX_FULL RD_REQ or ] literal over i2c-addr @ IC_INTR_MASK !
+      enable-int
       
       begin
         systick-counter 3 pick - 4 pick < averts x-timed-out
@@ -1067,7 +1068,10 @@ begin-module i2c
       systick-counter swap
       dup i2c-select
       
+      disable-int
+      mode-not-active over i2c-mode c!
       RX_FULL over i2c-addr @ IC_INTR_MASK !
+      enable-int
       
       begin
         systick-counter 3 pick - 4 pick < averts x-timed-out
@@ -1091,7 +1095,10 @@ begin-module i2c
       systick-counter swap
       dup i2c-select
       
+      disable-int
+      mode-not-active over i2c-mode c!
       RD_REQ over i2c-addr @ IC_INTR_MASK !
+      enable-int
       
       begin
         systick-counter 3 pick - 4 pick < averts x-timed-out
@@ -1114,7 +1121,10 @@ begin-module i2c
       dup validate-i2c
       dup i2c-select
       
+      disable-int
+      mode-not-active over i2c-mode c!
       [ RX_FULL RD_REQ or ] literal over i2c-addr @ IC_INTR_MASK !
+      enable-int
       
       begin
         over claim-i2c
@@ -1140,7 +1150,10 @@ begin-module i2c
       dup validate-i2c
       dup i2c-select
       
+      disable-int
+      mode-not-active over i2c-mode c!
       RX_FULL over i2c-addr @ IC_INTR_MASK !
+      enable-int
       
       begin
         over claim-i2c
@@ -1162,7 +1175,10 @@ begin-module i2c
       dup validate-i2c
       dup i2c-select
       
+      disable-int
+      mode-not-active over i2c-mode c!
       RD_REQ over i2c-addr @ IC_INTR_MASK !
+      enable-int
       
       begin
         over claim-i2c
@@ -1310,7 +1326,7 @@ begin-module i2c
     mode-not-active over i2c-mode c!
     master-not-active over i2c-master-mode c!
     not-pending over i2c-pending c!
-    clear-nack    
+    dup clear-nack    
     enable-int
     
     dup i2c-disabled @ 0<= if
@@ -1318,10 +1334,10 @@ begin-module i2c
       begin dup i2c-addr @ IC_ENABLE_STATUS @ IC_EN and until
     then
     
-    release-i2c
+    drop release-i2c
   ;
 
-end-module import>
+end-module> import
 
 \ Initialize I2C
 : init ( -- )
