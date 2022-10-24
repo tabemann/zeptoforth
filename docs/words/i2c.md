@@ -175,3 +175,8 @@ Exception raised on a slave attempting to carry out an operation not permitted f
 ( -- )
 
 Exception raised on a master attempting to carry out an operation not permitted for masters.
+
+##### `x-master-not-ready`
+( -- )
+
+Exception for if a send or receive is attempted by a slave and the master is not in an appropriate state.
