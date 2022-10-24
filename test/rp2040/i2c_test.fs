@@ -35,8 +35,8 @@ begin-module i2c-test
     1 slave-i2c
     0 10-bit-i2c-addr
     1 10-bit-i2c-addr
-    $55 0 i2c-target-addr!
-    $55 1 i2c-slave-addr!
+    $3C 0 i2c-target-addr!
+    $3C 1 i2c-slave-addr!
     0 enable-i2c
     1 enable-i2c
     1 14 i2c-pin
@@ -52,7 +52,7 @@ begin-module i2c-test
       1 wait-i2c-master-send
       recv-buffer recv-buffer-size 1 i2c>
       recv-buffer swap type
-\      1 clear-i2c
+      1 clear-i2c
     ;] my-task-pool spawn-from-task-pool run
     pause 1000 ms
     0 [:
@@ -70,7 +70,7 @@ begin-module i2c-test
       s" FOO" 1 >i2c .
       s" BAR" 1 >i2c .
       s" BAZ" 1 >i2c .
-\      1 clear-i2c
+      1 clear-i2c
     ;] my-task-pool spawn-from-task-pool run
     pause 1000 ms
     0 [:
