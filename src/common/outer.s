@@ -20,14 +20,8 @@
 
 	@@ Test whether a character is whitespace.
 	define_word "ws?", visible_flag
-_ws_q:	cmp tos, #0x09
-	beq 1f
-	cmp tos, #0x0A
-	beq 1f
-	cmp tos, #0x0D
-	beq 1f
-	cmp tos, #0x20
-	beq 1f
+_ws_q:	cmp tos, #0x20
+	bls 1f
 	movs tos, #0
 	bx lr
 1:	ldr tos, =-1
@@ -184,9 +178,9 @@ _paren_comment:
 	define_word "to-upper-char", visible_flag
 _to_upper_char:
 	cmp tos, #0x61
-	blt 1f
+	blo 1f
 	cmp tos, #0x7A
-	bgt 1f
+	bhi 1f
 	subs tos, #0x20
 1:	bx lr
 	end_inlined
@@ -194,40 +188,33 @@ _to_upper_char:
 	@@ Compare whether two strings are equal
 	define_word "equal-case-strings?", visible_flag
 _equal_case_strings:
-	push {r4, lr}
 	movs r0, tos
-	pull_tos
-	movs r1, tos
-	pull_tos
-	movs r2, tos
-	pull_tos
-	movs r3, tos
+        ldmia dp!, {r1, r2, r3}
 	cmp r0, r2
 	bne 3f
 1:	cmp r0, #0
 	beq 2f
-	ldrb tos, [r1]
+	ldrb r2, [r1]
 	adds r1, #1
-	push {r0, r1, r2, r3}
-	bl _to_upper_char
-	@pop {r0, r1, r2¸ r3}
-	pop {r0, r1, r2}
-	pop {r3}
-	movs r4, tos
-	ldrb tos, [r3]
+        cmp r2, #0x61
+        blo 4f
+        cmp r2, #0x7A
+        bhi 4f
+        subs r2, #0x20
+4:      ldrb tos, [r3]
 	adds r3, #1
-	push {r0, r1, r2, r3}
-	bl _to_upper_char
-	pop {r0, r1, r2, r3}
-	subs r0, #1
-	cmp r4, tos
+        cmp tos, #0x61
+        blo 5f
+        cmp tos, #0x7A
+        bhi 5f
+        subs tos, #0x20
+5:      subs r0, #1
+        cmp r2, tos
 	beq 1b
-	movs tos, #0
-	pop {r4, pc}
+3:      movs tos, #0
+        bx lr
 2:	ldr tos, =-1
-	pop {r4, pc}
-3:	movs tos, #0
-	pop {r4, pc}
+        bx lr
 	end_inlined
 
 	@@ Find a word in a specific dictionary for a specific wordlist
