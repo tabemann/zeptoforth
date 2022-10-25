@@ -36,6 +36,22 @@ compress-flash
 \ Internal module constant
 1 constant internal
 
+\ Addition words
+: 1+ ( n -- n ) 1 + [inlined] ;
+: cell+ ( n -- n ) 4 + [inlined] ;
+
+\ Subtraction words
+: 1- ( n -- n ) 1 - [inlined] ;
+
+\ Multiplication words
+: 2* ( x -- x' ) 1 lshift [inlined] ;
+: 4* ( x -- x' ) 2 lshift [inlined] ;
+: cells ( n -- n ) 2 lshift [inlined] ;
+
+\ Division words
+: 2/ ( x -- x' ) 1 arshift ;
+: 4/ ( x -- x' ) 2 arshift ;
+
 \ Commit to flash
 commit-flash
 
@@ -57,12 +73,6 @@ forth set-current
 
 \ Cell size
 4 constant cell
-
-\ Multiple cells size
-: cells ( n -- n ) 4* [inlined] ;
-
-\ Add a cell to a value
-: cell+ ( n -- n ) 4+ [inlined] ;
 
 \ TOS register
 6 constant tos
@@ -242,10 +252,10 @@ internal set-current
 : word-flags ( word -- h-addr ) [inlined] ;
 
 \ Get the address of the wordlist id for a word
-: wordlist-id ( word -- h-addr ) 2+ [inlined] ;
+: wordlist-id ( word -- h-addr ) 2 + [inlined] ;
 
 \ Get the next word for a word
-: next-word ( word1 -- addr ) 4+ [inlined] ;
+: next-word ( word1 -- addr ) 4 + [inlined] ;
 
 \ Get the name of a word (a counted string)
 : word-name ( word -- b-addr ) 8 + [inlined] ;
@@ -679,7 +689,7 @@ commit-flash
 : hfield: ( offset "name" -- offset )
   : 2 align
     dup 65536 u< thumb-2 or if inlined then
-    dup lit, postpone + postpone ; 2+
+    dup lit, postpone + postpone ; 2 +
 ;
 
 \ Create a cell-sized field
@@ -881,7 +891,7 @@ commit-flash
   not if
     compile-to-ram
   then
-  2+
+  2 +
   set-next-user-space
 ;
 
@@ -896,7 +906,7 @@ commit-flash
   not if
     compile-to-ram
   then
-  4+
+  4 +
   set-next-user-space
 ;
 
@@ -987,7 +997,7 @@ internal set-current
   not if
     compile-to-ram
   then
-  2+
+  2 +
   set-next-ram-space
 ;
 
@@ -1002,7 +1012,7 @@ internal set-current
   not if
     compile-to-ram
   then
-  4+
+  4 +
   set-next-ram-space
 ;
 

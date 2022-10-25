@@ -99,7 +99,7 @@ compress-flash
     over 0>
   while
     dup >r swap >r swap dup >r h@ swap execute
-    r> 2+ r> 1- r>
+    r> 2 + r> 1- r>
   repeat
   drop 2drop
 ;
@@ -162,7 +162,7 @@ compress-flash
     dup >r swap dup >r h@ swap execute if
       rdrop rdrop i unloop exit
     else
-      r> 2+ r>
+      r> 2 + r>
     then
   loop
   drop drop -1
@@ -240,7 +240,7 @@ compress-flash
     dup >r swap >r swap dup >r h@ swap execute if
       r> h@ rdrop rdrop true exit
     else
-      r> 2+ r> 1- r>
+      r> 2 + r> 1- r>
     then
   repeat
   drop drop drop 0 false

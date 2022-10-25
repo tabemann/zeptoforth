@@ -258,10 +258,10 @@ begin-module disassemble-internal
   : extend ( u bits -- ) 32 swap - tuck lshift swap arshift ;
 
   \ Match 16-bit
-  : match16 ( u -- u f ) 2+ true ;
+  : match16 ( u -- u f ) 2 + true ;
 
   \ Match 32-bit
-  : match32 ( u -- u f ) 4+ true ;
+  : match32 ( u -- u f ) 4 + true ;
 
   \ Not match 16-bit
   : not-match16 ( u u -- f ) 2drop false ;
@@ -1897,9 +1897,9 @@ begin-module disassemble-internal
   \ Disassemble a 32-bit instruction
   : disassemble32 ( op-addr handler-addr -- match )
     over h@ over cell+ h@ and over 8 + h@ = if
-      over 2+ h@ over 6 + h@ and over 10 + h@ = if
-	current-cond 2 pick h@ 3 pick 2+ h@ instr32.
-	2 pick label. 2 pick h@ 3 pick 2+ h@ 3 roll @ execute true
+      over 2 + h@ over 6 + h@ and over 10 + h@ = if
+	current-cond 2 pick h@ 3 pick 2 + h@ instr32.
+	2 pick label. 2 pick h@ 3 pick 2 + h@ 3 roll @ execute true
       else
 	2drop false
       then
@@ -1925,10 +1925,10 @@ begin-module disassemble-internal
   \ Parse a 16-bit instruction to find local labels
   : parse-local16 ( op-addr low -- )
     dup %1111000000000000 and %1101000000000000 = if
-      0_8_bf 1 lshift swap 4+ swap 9 extend + add-local
+      0_8_bf 1 lshift swap 4 + swap 9 extend + add-local
     else
       dup %1111100000000000 and %1110000000000000 = if
-	0 11 bitfield 1 lshift swap 4+ swap 12 extend + add-local
+	0 11 bitfield 1 lshift swap 4 + swap 12 extend + add-local
       else
 	2drop
       then
@@ -1941,13 +1941,13 @@ begin-module disassemble-internal
       dup %1101000000000000 and %1000000000000000 = if
 	dup 0 11 bitfield 2 pick 0 6 bitfield 11 lshift or
 	over 13 1 bitfield 17 lshift or swap 11 1 bitfield 18 lshift or
-	swap 10_1_bf 19 lshift or 1 lshift swap 4+ swap 21 extend + add-local
+	swap 10_1_bf 19 lshift or 1 lshift swap 4 + swap 21 extend + add-local
       else
 	dup %1101000000000000 and %1001000000000000 = if
 	  dup 0 11 bitfield 2 pick 0 10 bitfield 11 lshift or
 	  over 11 1 bitfield 3 pick 10_1_bf xor not 1 and 21 lshift or
 	  swap 13 1 bitfield 2 pick 10_1_bf xor not 1 and 22 lshift or
-	  swap 10_1_bf 23 lshift or 1 lshift swap 4+ swap 25 extend + add-local
+	  swap 10_1_bf 23 lshift or 1 lshift swap 4 + swap 25 extend + add-local
 	else
 	  2drop drop
 	then
@@ -1969,8 +1969,8 @@ begin-module disassemble-internal
   \ Find a local label for a 32-bit instruction
   : find-local32 ( op-addr handler-addr -- match )
     over h@ over cell+ h@ and over 8 + h@ = if
-      over 2+ h@ over 6 + h@ and over 10 + h@ = if
-	drop dup h@ over 2+ h@ parse-local32 true
+      over 2 + h@ over 6 + h@ and over 10 + h@ = if
+	drop dup h@ over 2 + h@ parse-local32 true
       else
 	2drop false
       then
@@ -1987,7 +1987,7 @@ begin-module disassemble-internal
     all-ops16 begin
       dup @ 0<> if
 	2dup find-local16 if
-	  drop 2+ true true
+	  drop 2 + true true
 	else
 	  [ 2 cells ] literal + false
 	then
@@ -1999,7 +1999,7 @@ begin-module disassemble-internal
       all-ops32 begin
 	dup @ 0<> if
 	  2dup find-local32 if
-	    drop 4+ true true
+	    drop 4 + true true
 	  else
 	    [ 3 cells ] literal + false
 	  then
@@ -2008,7 +2008,7 @@ begin-module disassemble-internal
 	then
       until
       not if
-	2+
+	2 +
       then
     then
   ;
@@ -2019,7 +2019,7 @@ begin-module disassemble-internal
     all-ops16 begin
       dup @ 0<> if
 	2dup disassemble16 if
-	  drop 2+ true true
+	  drop 2 + true true
 	else
 	  [ 2 cells ] literal + false
 	then
@@ -2031,7 +2031,7 @@ begin-module disassemble-internal
       all-ops32 begin
 	dup @ 0<> if
 	  2dup disassemble32 if
-	    drop 4+ true true
+	    drop 4 + true true
 	  else
 	    [ 3 cells ] literal + false
 	  then
@@ -2040,7 +2040,7 @@ begin-module disassemble-internal
 	then
       until
       not if
-	dup h@ instr16. ." ????" 2+
+	dup h@ instr16. ." ????" 2 +
       then
     then
     cr
@@ -2051,7 +2051,7 @@ begin-module disassemble-internal
     dup h@ $003F <> if
       drop false
     else
-      2- h@ dup $FF00 and $BD00 = if
+      2 - h@ dup $FF00 and $BD00 = if
 	drop true
       else
 	$FF80 and $4700 =
