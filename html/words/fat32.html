@@ -15,7 +15,7 @@
     <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="FAT32 Code Including Support Words" href="include_fat32.html" />
+    <link rel="next" title="Simple FAT32 Support" href="simple_fat32.html" />
     <link rel="prev" title="SDHC/SDXC Card Support" href="sdcard.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -184,16 +184,11 @@
 <p>( partition – active? )</p>
 <p>Is the partition active?</p>
 </section>
-<section id="fat32-fs">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;fat32-fs&gt;</span></code><a class="headerlink" href="#fat32-fs" title="Permalink to this headline">¶</a></h3>
+<section id="base-fat32-fs">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;base-fat32-fs&gt;</span></code><a class="headerlink" href="#base-fat32-fs" title="Permalink to this headline">¶</a></h3>
 <p>( – class )</p>
-<p>The FAT32 filesystem class.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">&lt;fat32-fs&gt;</span></code> class includes the following constructor:</p>
-</section>
-<section id="id4">
-<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
-<p>( partition device fs – )</p>
-<p>Construct an instance of the <code class="docutils literal notranslate"><span class="pre">&lt;fat32-fs&gt;</span></code> class with block device <em>device</em> and MBR partition entry <em>partition</em>. Note that after executing this the filesystem will be ready for use, and the block device must be in working order at this time.</p>
+<p>The base FAT32 filesystem class. This class is not to be instantiated by itself.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;base-fat32-fs&gt;</span></code> class includes the following methods, which are implemented by its subclasses:</p>
 </section>
 <section id="root-dir">
 <h3><code class="docutils literal notranslate"><span class="pre">root-dir&#64;</span></code><a class="headerlink" href="#root-dir" title="Permalink to this headline">¶</a></h3>
@@ -204,6 +199,17 @@
 <h3><code class="docutils literal notranslate"><span class="pre">with-root-path</span></code><a class="headerlink" href="#with-root-path" title="Permalink to this headline">¶</a></h3>
 <p>( c-addr u xt fs ) ( xt: c-addr’ u’ dir – )</p>
 <p>Parse a path starting at the root directory of a FAT32 filesystem, and pass the leaf’s name along with a directory object containing that leaf (or which would contain said leaf if it did not exist already) to the passed in <em>xt</em>. Note that said directory object will be destroyed when <em>xt</em> returns.</p>
+</section>
+<section id="fat32-fs">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;fat32-fs&gt;</span></code><a class="headerlink" href="#fat32-fs" title="Permalink to this headline">¶</a></h3>
+<p>( – class )</p>
+<p>The FAT32 filesystem class. This class implements <code class="docutils literal notranslate"><span class="pre">&lt;base-fat32-fs&gt;</span></code>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;fat32-fs&gt;</span></code> class includes the following constructor:</p>
+</section>
+<section id="id4">
+<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<p>( partition device fs – )</p>
+<p>Construct an instance of the <code class="docutils literal notranslate"><span class="pre">&lt;fat32-fs&gt;</span></code> class with block device <em>device</em> and MBR partition entry <em>partition</em>. Note that after executing this the filesystem will be ready for use, and the block device must be in working order at this time.</p>
 </section>
 <section id="fat32-file">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;fat32-file&gt;</span></code><a class="headerlink" href="#fat32-file" title="Permalink to this headline">¶</a></h3>
@@ -538,8 +544,10 @@ bits 4-0: day (1-31)</p>
 <li class="toctree-l1"><a class="reference internal" href="uart.html">UART Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adc.html">Analog-Digital Converter Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="spi.html">SPI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="i2c.html">I2C Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="include_fat32.html">FAT32 Code Including Support Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
@@ -581,7 +589,7 @@ bits 4-0: day (1-31)</p>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
       <li>Previous: <a href="sdcard.html" title="previous chapter">SDHC/SDXC Card Support</a></li>
-      <li>Next: <a href="include_fat32.html" title="next chapter">FAT32 Code Including Support Words</a></li>
+      <li>Next: <a href="simple_fat32.html" title="next chapter">Simple FAT32 Support</a></li>
   </ul></li>
 </ul>
 </div>

@@ -22,6 +22,7 @@ Zeptoforth Documentation
    words/i2c
    words/sdcard
    words/fat32
+   words/simple_fat32
    words/include_fat32
    words/interrupt
    words/multicore

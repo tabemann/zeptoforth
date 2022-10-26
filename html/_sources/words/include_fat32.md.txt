@@ -17,12 +17,12 @@ Include stack overflow exception, raised if the number of nested includes exceed
 ##### `include-fs!`
 ( fs -- )
 
-Set the include FAT32 filesystem.
+Set the include FAT32 filesystem. This filesystem is a subclass of `<base-fat32-fs>` in the `fat32` module.
 
 ##### `include-fs@`
 ( -- fs )
 
-Get the include FAT32 filesystem.
+Get the include FAT32 filesystem. This filesystem is a subclass of `<base-fat32-fs>` in the `fat32` module.
 
 ##### `load-file`
 ( file -- )

@@ -153,17 +153,12 @@ Partition sectors.
 
 Is the partition active?
 
-##### `<fat32-fs>`
+##### `<base-fat32-fs>`
 ( -- class )
 
-The FAT32 filesystem class.
+The base FAT32 filesystem class. This class is not to be instantiated by itself.
 
-The `<fat32-fs>` class includes the following constructor:
-
-##### `new`
-( partition device fs -- )
-
-Construct an instance of the `<fat32-fs>` class with block device *device* and MBR partition entry *partition*. Note that after executing this the filesystem will be ready for use, and the block device must be in working order at this time.
+The `<base-fat32-fs>` class includes the following methods, which are implemented by its subclasses:
 
 ##### `root-dir@`
 ( dir fs -- )
@@ -174,6 +169,18 @@ Initialize a root directory of a FAT32 filesystem; the directory object need not
 ( c-addr u xt fs ) ( xt: c-addr' u' dir -- )
 
 Parse a path starting at the root directory of a FAT32 filesystem, and pass the leaf's name along with a directory object containing that leaf (or which would contain said leaf if it did not exist already) to the passed in *xt*. Note that said directory object will be destroyed when *xt* returns.
+
+##### `<fat32-fs>`
+( -- class )
+
+The FAT32 filesystem class. This class implements `<base-fat32-fs>`.
+
+The `<fat32-fs>` class includes the following constructor:
+
+##### `new`
+( partition device fs -- )
+
+Construct an instance of the `<fat32-fs>` class with block device *device* and MBR partition entry *partition*. Note that after executing this the filesystem will be ready for use, and the block device must be in working order at this time.
 
 ##### `<fat32-file>`
 ( --  class )

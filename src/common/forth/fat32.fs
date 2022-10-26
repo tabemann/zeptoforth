@@ -137,8 +137,25 @@ begin-module fat32
     method partition-active? ( partition -- active? )
   end-class
   
+  \ Base FAT32 filesystem class
+  <object> begin-class <base-fat32-fs>
+  
+    \ Get the root directory for a FAT32 filesystem
+    method root-dir@ ( dir fs -- )
+    
+    \ Find a file or directory in a path from the root directory
+    method with-root-path ( c-addr u xt fs -- ) ( xt: c-addr' u' dir -- )
+  
+  end-class
+  
+  \ Implement base FAT32 filesystem class
+  <base-fat32-fs> begin-implement
+    ' abstract-method define root-dir@
+    ' abstract-method define with-root-path
+  end-implement
+  
   \ FAT32 filesystem class
-  <object> begin-class <fat32-fs>
+  <base-fat32-fs> begin-class <fat32-fs>
   
     continue-module fat32-internal
     
@@ -175,16 +192,6 @@ begin-module fat32
       \ The most recently allocated cluster, -1 for all sectors free
       \ (Don't trust this value)
       cell member recent-allocated-cluster
-      
-    end-module
-    
-    \ Get the root directory for a FAT32 filesystem
-    method root-dir@ ( dir fs -- )
-    
-    \ Find a file or directory in a path from the root directory
-    method with-root-path ( c-addr u xt fs -- ) ( xt: c-addr' u' dir -- )
-    
-    continue-module fat32-internal
       
       \ Read the FAT32 filesystem info sector
       method read-info-sector ( fs -- )
