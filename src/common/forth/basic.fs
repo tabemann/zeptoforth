@@ -2159,6 +2159,22 @@ commit-flash
   then
 ;
 
+\ Find a word in a dictionary by execution tokey
+: find-dict-by-xt ( xt dict -- word|0 )
+  begin
+    dup 0<> if
+      dup >body 2 pick = if
+       true
+      else
+       next-word @ false
+      then
+    else
+      true
+    then
+  until
+  nip
+;
+
 \ Commit to flash
 commit-flash
 
