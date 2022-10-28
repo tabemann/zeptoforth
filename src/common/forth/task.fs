@@ -28,7 +28,8 @@ begin-module task
   multicore import
   systick import
   int-io import
-
+  armv6m import
+  
   begin-module task-internal
 
     \ Task readied state
@@ -1247,26 +1248,86 @@ begin-module task
     ;
 
     \ Get whether a task is waiting
-    : waiting-task? ( task -- )
-      dup task-state h@ task-state-mask and
-      dup blocked-wait = over blocked-indefinite = or
-      over delayed = rot blocked-timeout = or
-      rot delayed? and or
+    : waiting-task? ( task -- waiting? )
+      dup
+      task-state
+      task-state-mask
+      code[
+      r0 1 dp ldm
+      0 r0 r0 ldrh_,[_,#_]
+      r0 tos ands_,_
+      ]code
+      blocked-wait
+      code[
+      0 dp r0 ldr_,[_,#_]
+      r0 tos cmp_,_
+      ne bc>
+      0 tos movs_,#_
+      tos tos mvns_,_
+      8 dp adds_,#_
+      pc 1 pop
+      >mark
+      tos 1 dp ldm
+      ]code
+      blocked-indefinite
+      code[
+      0 dp r0 ldr_,[_,#_]
+      r0 tos cmp_,_
+      ne bc>
+      0 tos movs_,#_
+      tos tos mvns_,_
+      8 dp adds_,#_
+      pc 1 pop
+      >mark
+      tos 1 dp ldm
+      ]code
+      delayed
+      code[
+      0 dp r0 ldr_,[_,#_]
+      r0 tos cmp_,_
+      eq bc>
+      tos 1 dp ldm
+      ]code
+      blocked-timeout
+      code[
+      0 dp r0 ldr_,[_,#_]
+      r0 tos cmp_,_
+      eq bc>
+      8 dp adds_,#_
+      0 tos movs_,#_
+      pc 1 pop
+      >mark
+      >mark
+      tos r0 2 dp ldm
+      ]code
+      delayed?
     ;
 
     \ Find next task
     : find-next-task ( -- task )
-      first-task @ begin
-	dup 0<> if
-	  dup waiting-task? if
-	    task-prev @ false
-	  else
-	    true
-	  then
-	else
-	  true
-	then
-      until
+      first-task
+      code[
+      0 tos tos ldr_,[_,#_]
+      mark>
+      0 tos cmp_,#_
+      ne bc>
+      pc 1 pop
+      >mark
+      tos 1 push
+      ]code
+      waiting-task?
+      code[
+      0 tos cmp_,#_
+      ne bc>
+      pc tos 2 pop
+      >mark
+      tos 1 pop
+      ]code
+      task-prev
+      code[
+      0 tos tos ldr_,[_,#_]
+      b<
+      ]code
     ;
 
     \ PendSV return value
@@ -1299,12 +1360,46 @@ begin-module task
 
     \ Actually wake tasks
     : actually-wake-tasks ( -- )
-      first-task @ begin ?dup while
-	dup task-state h@ task-state-mask and blocked-wait = if
-	  readied over task-state h!
-	then
-	task-prev @
-      repeat
+      first-task
+      code[
+      0 tos tos ldr_,[_,#_]
+      mark>
+      0 tos cmp_,#_
+      ne bc>
+      tos 1 dp ldm
+      pc 1 pop
+      >mark
+      tos 1 push
+      ]code
+      task-state
+      code[
+      0 tos tos ldrh_,[_,#_]
+      ]code
+      task-state-mask
+      code[
+      r0 1 dp ldm
+      r0 tos ands_,_
+      ]code
+      blocked-wait
+      code[
+      r0 1 dp ldm
+      r0 tos cmp_,_
+      ne bc>
+      0 tos ldr_,[sp,#_]
+      ]code
+      task-state
+      readied
+      code[
+      r0 1 dp ldm
+      0 r0 tos strh_,[_,#_]
+      >mark
+      tos 1 pop
+      ]code
+      task-prev
+      code[
+      0 tos tos ldr_,[_,#_]
+      b<
+      ]code
     ;
 
     \ Handle task-switching
