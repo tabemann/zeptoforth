@@ -25,6 +25,7 @@ begin-module multicore
 
   internal import
   interrupt import
+  armv6m import
 
   \ Must be carried out from core 0 only
   : x-core-0-only ( -- ) ." core 0 only" cr ;
@@ -127,45 +128,155 @@ begin-module multicore
 
     \ Get the address of a spinlock lock count
     : spinlock-lock-count ( index -- addr )
-      1 lshift cpu-index + 2 lshift spinlock-lock-counts +
-\      cpu-count * cpu-index + cells spinlock-lock-counts +
+      cpu-index
+      spinlock-lock-counts
+      code[
+      r1 r0 2 dp ldm
+      1 r1 r1 lsls_,_,#_
+      r1 r0 r0 adds_,_,_
+      2 r0 r0 lsls_,_,#_
+      r0 tos tos adds_,_,_
+      ]code
     ;
+      
+\      1 lshift cpu-index + 2 lshift spinlock-lock-counts +
+\      cpu-count * cpu-index + cells spinlock-lock-counts +
+\    ;
     
   end-module
   
   \ Hardware spinlocks; reading will return 0 if already locked, or
   \ 1 lock-number lshift on success; writing any value will release the spinlock
-  : SPINLOCK ( index -- addr ) [ SIO_BASE $100 + ] literal swap 2 lshift + ;
+  : SPINLOCK ( index -- addr )
+    [ SIO_BASE $100 + ] literal
+    code[
+    r0 1 dp ldm
+    2 r0 r0 lsls_,_,#_
+    r0 tos tos adds_,_,_
+    ]code
+  ;
+  
+\    [ SIO_BASE $100 + ] literal swap 2 lshift + ;
 
   \ Just claim a spinlock
   : claim-spinlock-raw ( index -- )
-    dup spinlock-lock-count dup @ 1+ dup rot !
-    1 = if SPINLOCK begin dup @ until then drop
+    dup spinlock-lock-count
+    code[
+    0 tos r0 ldr_,[_,#_]
+    1 r0 adds_,#_
+    0 tos r0 str_,[_,#_]
+    1 r0 cmp_,#_
+    eq bc>
+    tos r0 2 dp ldm
+    pc 1 pop
+    >mark
+    tos 1 dp ldm
+    ]code
+    SPINLOCK
+    code[
+    mark>
+    0 tos r0 ldr_,[_,#_]
+    0 r0 cmp_,#_
+    eq bc<
+    tos 1 dp ldm
+    ]code
   ;
+
+  \   dup spinlock-lock-count dup @ 1+ dup rot !
+  \   1 = if SPINLOCK begin dup @ until then drop
+  \ ;
 
   \ Just release a spinlock ( index -- )
   : release-spinlock-raw ( index -- )
-    dup spinlock-lock-count dup @ 1- dup rot !
-    0= if SPINLOCK -1 swap ! else drop then
+    dup spinlock-lock-count
+    code[
+    0 tos r0 ldr_,[_,#_]
+    1 r0 subs_,#_
+    0 tos r0 str_,[_,#_]
+    0 r0 cmp_,#_
+    eq bc>
+    tos r0 2 dp ldm
+    pc 1 pop
+    >mark
+    tos 1 dp ldm
+    ]code
+    SPINLOCK
+    code[
+    0 r0 movs_,#_
+    r0 r0 mvns_,_
+    0 tos r0 str_,[_,#_]
+    tos 1 dp ldm
+    ]code
   ;
+  
+\    dup spinlock-lock-count dup @ 1- dup rot !
+\    0= if SPINLOCK -1 swap ! else drop then
+\  ;
 
   \ Claim a spinlock
   : claim-spinlock ( index -- )
-\    dup spinlock-count u< averts x-spinlock-out-of-range
-    disable-int
-    dup spinlock-lock-count dup @ 1+ dup rot !
-    enable-int
-    1 = if SPINLOCK begin dup @ until then drop
+    dup spinlock-lock-count
+    code[
+    cpsid
+    0 tos r0 ldr_,[_,#_]
+    1 r0 adds_,#_
+    0 tos r0 str_,[_,#_]
+    cpsie
+    1 r0 cmp_,#_
+    eq bc>
+    tos r0 2 dp ldm
+    pc 1 pop
+    >mark
+    tos 1 dp ldm
+    ]code
+    SPINLOCK
+    code[
+    mark>
+    0 tos r0 ldr_,[_,#_]
+    0 r0 cmp_,#_
+    eq bc<
+    tos 1 dp ldm
+    ]code
   ;
+  
+\    dup spinlock-count u< averts x-spinlock-out-of-range
+\    disable-int
+\    dup spinlock-lock-count dup @ 1+ dup rot !
+\    enable-int
+\    1 = if SPINLOCK begin dup @ until then drop
+\  ;
 
   \ Release a spinlock
   : release-spinlock ( index -- )
- \   dup spinlock-count u< averts x-spinlock-out-of-range
-    disable-int
-    dup spinlock-lock-count dup @ 1- dup rot !
-    0= if SPINLOCK -1 swap ! else drop then
-    enable-int
+    dup spinlock-lock-count
+    code[
+    cpsid
+    0 tos r0 ldr_,[_,#_]
+    1 r0 subs_,#_
+    0 tos r0 str_,[_,#_]
+    0 r0 cmp_,#_
+    eq bc>
+    tos r0 2 dp ldm
+    pc 1 pop
+    >mark
+    tos 1 dp ldm
+    ]code
+    SPINLOCK
+    code[
+    0 r0 movs_,#_
+    r0 r0 mvns_,_
+    0 tos r0 str_,[_,#_]
+    tos 1 dp ldm
+    cpsie
+    ]code
   ;
+
+\    dup spinlock-count u< averts x-spinlock-out-of-range
+\    disable-int
+\    dup spinlock-lock-count dup @ 1- dup rot !
+\    0= if SPINLOCK -1 swap ! else drop then
+\    enable-int
+\  ;
 
   \ Claim a spinlock for the current core's multitasker
   : claim-same-core-spinlock ( -- )
