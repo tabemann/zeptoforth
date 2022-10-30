@@ -146,7 +146,109 @@ begin-module armv6m
       dup 128 < over -129 > and averts x-out-of-range-pc-rel
       $FF and r> 8 lshift or $D000 or swap 4 - hcurrent!
     ;
-    
+
+    \ 16-bit constant instruction
+    : instr-16-const ( h "name" -- )
+      <builds , does> @ h,
+    ;
+
+    \ 32-bit constant instruction
+    : instr-32-const ( h0 h1 "name" -- )
+      <builds 16 lshift or , does> @ dup $FFFF and h, 16 rshift h,
+    ;
+
+    \ 16-bit two three-bit register instruction
+    : instr-2*3r ( h "name" -- )
+      <builds , does> @ >r 2dup validate-2-3reg swap 3 lshift or r> or h,
+    ;
+
+    \ 16-bit three three-bit register instruction
+    : instr-3*3r ( h "name" -- )
+      <builds , does> @ >r
+      3dup validate-3-3reg swap 3 lshift or swap 6 lshift or r> or h,
+    ;
+
+    \ 16-bit two three-bit register with imm3 immediate instruction
+    : instr-2*3r-3imm ( h "name" -- )
+      <builds , does> @ >r
+      2dup validate-2-3reg 2 pick 8 u< averts x-out-of-range-imm
+      swap 3 lshift or swap 6 lshift or r> or h,
+    ;
+
+    \ 16-bit one three-bit register with imm8 immediate instruction
+    : instr-3r-8imm ( h "name"  -- )
+      <builds , does> @ >r
+      dup validate-3reg over 256 u< averts x-out-of-range-imm
+      8 lshift or r> or h,
+    ;
+
+    \ 16-bit three-bit register load/store 4-byte-immediate instruction
+    : instr-3r-load/store-4byte-imm ( h "name" -- )
+      <builds , does> @ >r
+      2dup validate-2-3reg 2 pick validate-imm-4align
+      swap 3 lshift or swap 2 rshift dup 32 u< averts x-out-of-range-imm
+      6 lshift or r> or h,
+    ;
+
+    \ 16-bit three-bit register load/store SP-relative 4-byte-immediate
+    \ instruction
+    : instr-3r-load/store-sp-4byte-imm ( h "name" -- )
+      <builds , does> @ >r
+      dup validate-3reg over validate-imm-4align
+      8 lshift swap 2 rshift dup 256 u< averts x-out-of-range-imm
+      or r> or h,
+    ;
+
+    \ 16-bit three-bit register load/store relative instruction
+    : instr-3r-load/store-rel ( h "name" -- )
+      <builds , does> @ >r
+      3dup validate-3-3reg swap 3 lshift or swap 6 lshift or r> or h,
+    ;
+
+    \ 16-bit three-bit register load/store 1-byte-immediate instruction
+    : instr-3r-load/store-1byte-imm ( h "name" -- )
+      <builds , does> @ >r
+      2dup validate-2-3reg
+      swap 3 lshift or swap dup 32 u< averts x-out-of-range-imm
+      6 lshift or r> or h,
+    ;
+
+    \ 16-bit three-bit register load/store 2-byte-immediate instruction
+    : instr-3r-load/store-2byte-imm ( h "name" -- )
+      <builds , does> @ >r
+      2dup validate-2-3reg 2 pick validate-imm-2align
+      swap 3 lshift or swap 1 rshift dup 32 u< averts x-out-of-range-imm
+      6 lshift or r> or h,
+    ;
+
+    \ 16-bit three-bit register load/store multiple instruction
+    : instr-3r-load/store-multi ( h "name" -- )
+      <builds , does> @ >r
+      dup validate-3reg >r
+      0 begin over while rot dup validate-3reg bit or swap 1- swap repeat nip
+      r> 8 lshift or r> or h,
+    ;
+
+    \ 16-bit 8imm immediate instruction
+    : instr-8imm ( h "name" -- )
+      <builds , does> @ >r
+      dup 256 u< averts x-out-of-range-imm
+      r> or h,
+    ;
+
+    \ 16-bit one four-bit register instruction
+    : instr-4r ( h "name" -- )
+      <builds , does> @ >r
+      dup validate-4reg 3 lshift r> or h,
+    ;
+
+    \ 16-bit two four-bit register instruction
+    : instr-2*4r ( h "name" -- )
+      <builds , does> @ >r
+      2dup validate-2-4reg dup $7 and swap $8 and 4 lshift or swap 3 lshift or
+      r> or h,
+    ;
+
   end-module> import
 
   \ Commit to flash
@@ -197,32 +299,19 @@ begin-module armv6m
     $E constant al
 
     \ Assemble an ADCS instruction
-    : adcs_,_ ( rm rdn -- )
-      2dup validate-2-3reg swap 3 lshift or $4140 or h,
-    ;
+    $4140 instr-2*3r adcs_,_ ( rm rdn -- )
 
     \ Assemble a two-register ADDS immediate instruction
-    : adds_,_,#_ ( imm3 rn rd -- )
-      2dup validate-2-3reg 2 pick 8 u< averts x-out-of-range-imm
-      swap 3 lshift or swap 6 lshift or $1C00 or h,
-    ;
+    $1C00 instr-2*3r-3imm adds_,_,#_ ( imm3 rn rd -- )
 
     \ Assemble a one-register ADDS immediate instruction
-    : adds_,#_ ( imm8 rdn -- )
-      dup validate-3reg over 256 u< averts x-out-of-range-imm
-      8 lshift or $3000 or h,
-    ;
+    $3000 instr-3r-8imm adds_,#_ ( imm8 rdn -- )
 
     \ Assemble a three-register ADDS register instruction
-    : adds_,_,_ ( rm rn rd -- )
-      3dup validate-3-3reg swap 3 lshift or swap 6 lshift or $1800 or h,
-    ;
+    $1800 instr-3*3r adds_,_,_ ( rm rn rd -- )
 
     \ Assemble a two-4-bit register ADDS register instruction
-    : add4_,4_ ( rm4 rdn4 -- )
-      2dup validate-2-4reg dup $7 and swap $8 and 4 lshift or swap 3 lshift or
-      $4400 or h,
-    ;
+    $4400 instr-2*4r add4_,4_ ( rm4 rdn4 -- )
 
     \ Assemble an ADD (SP plus immediate) instruction
     : add_,sp,#_ ( imm8 rd -- )
@@ -253,9 +342,7 @@ begin-module armv6m
     ;
 
     \ Assemble an ANDS (register) instruction
-    : ands_,_ ( rm rdn -- )
-      2dup validate-2-3reg swap 3 lshift or $4000 or h,
-    ;
+    $4000 instr-2*3r ands_,_ ( rm rdn -- )
 
     \ Assemble an ASRS (immediate) instruction
     : asrs_,_,#_ ( imm5 rm rd -- )
@@ -266,9 +353,7 @@ begin-module armv6m
     ;
 
     \ Assemble an ASRS (register) instruction
-    : asrs_,_ ( rm rdn -- )
-      2dup validate-2-3reg swap 3 lshift or $4100 or h,
-    ;
+    $4100 instr-2*3r asrs_,_ ( rm rdn -- )
 
     \ Assemble an unconditional branch to a marker
     : b< ( mark-addr mark -- )
@@ -298,91 +383,58 @@ begin-module armv6m
     ;
 
     \ Assemble an BICS (register) instruction
-    : bics_,_ ( rm rdn -- )
-      2dup validate-2-3reg swap 3 lshift or $4380 or h,
-    ;
+    $4380 instr-2*3r bics_,_ ( rm rdn -- )
 
     \ Assemble a BKPT instruction
-    : bkpt#_ ( imm8 -- )
-      dup 256 u< averts x-out-of-range-imm
-      $BE00 or h,
-    ;
+    $BE00 instr-8imm bkpt#_ ( imm8 -- )
 
     \ We are not implementing BL; it is up to the user to use normal word calls
     \ for this
 
     \ Assemble a BLX (register) instruction
-    : blx_ ( rm -- )
-      dup validate-4reg 3 lshift $4780 or h,
-    ;
+    $4780 instr-4r blx_ ( rm -- )
 
     \ Assemble a BX instruction
-    : bx_ ( rm -- )
-      dup validate-4reg 3 lshift $4700 or h,
-    ;
+    $4700 instr-4r bx_ ( rm -- )
 
     \ Assemble an CMN (register) instruction
-    : cmn_,_ ( rm rn -- )
-      2dup validate-2-3reg swap 3 lshift or $42C0 or h,
-    ;
+    $42C0 instr-2*3r cmn_,_ ( rm rn -- )
 
     \ Assemble a CMP (immediate) instruction
-    : cmp_,#_ ( imm8 rn -- )
-      dup validate-3reg over 256 u< averts x-out-of-range-imm
-      8 lshift or $2800 or h,
-    ;
+    $2800 instr-3r-8imm cmp_,#_ ( imm8 rn -- )
 
     \ Assemble an CMP (register) instruction
-    : cmp_,_ ( rm rn -- )
-      2dup validate-2-3reg swap 3 lshift or $4280 or h,
-    ;
+    $4280 instr-2*3r cmp_,_ ( rm rn -- )
 
     \ Assemble an CMP (register) instruction
-    : cmp4_,4_ ( rm4 rdn4 -- )
-      2dup validate-2-4reg dup $7 and swap $8 and 4 lshift or swap 3 lshift or
-      $4500 or h,
-    ;
+    $4500 instr-2*4r cmp4_,4_ ( rm4 rdn4 -- )
 
     \ Assemble a CPSIE instruction
-    : cpsie ( -- ) $B662 h, ;
+    $B662 instr-16-const cpsie
 
     \ Assemble a CPSID instruction
-    : cpsid ( -- ) $B672 h, ;
+    $B672 instr-16-const cpsid ( -- )
 
     \ Assemble a DMB instruction
-    : dmb ( -- ) $F3BF h, $8F5F h, ;
+    $F3BF $8F5F instr-32-const dmb ( -- )
 
     \ Assemble a DSB instruction
-    : dsb ( -- ) $F3BF h, $8F4F h, ;
+    $F3BF $8F4F instr-32-const dsb ( -- )
 
     \ Assemble an EORS (register) instruction
-    : eors_,_ ( rm rdn -- )
-      2dup validate-2-3reg swap 3 lshift or $4040 or h,
-    ;
+    $4040 instr-2*3r eors_,_ ( rm rdn -- )
 
     \ Assemble an ISB instruction
-    : isb ( -- ) $F3BF h, $8F6F h, ;
+    $F3BF $8F6F instr-32-const isb ( -- )
 
     \ Assemble an LDM instruction
-    : ldm ( rx ... r0 count rn -- )
-      dup validate-3reg >r
-      0 begin over while rot dup validate-3reg bit or swap 1- swap repeat nip
-      r> 8 lshift or $C800 or h,
-    ;
+    $C800 instr-3r-load/store-multi ldm ( rx ... r0 count rn -- )
 
     \ Assemble an LDR (immediate) instruction
-    : ldr_,[_,#_] ( imm5 rn rt -- )
-      2dup validate-2-3reg 2 pick validate-imm-4align
-      swap 3 lshift or swap 2 rshift dup 32 u< averts x-out-of-range-imm
-      6 lshift or $6800 or h,
-    ;
+    $6800 instr-3r-load/store-4byte-imm ldr_,[_,#_] ( imm5 rn rt -- )
 
     \ Assemble an LDR (immediate) instruction
-    : ldr_,[sp,#_] ( imm8 rt -- )
-      dup validate-3reg over validate-imm-4align
-      8 lshift swap 2 rshift dup 256 u< averts x-out-of-range-imm
-      or $9800 or h,
-    ;
+    $9800 instr-3r-load/store-sp-4byte-imm ldr_,[sp,#_] ( imm8 rt -- )
 
     \ Mark an LDR (literal) instruction
     : ldr_,[pc] ( rd -- mark-addr mark )
@@ -390,43 +442,25 @@ begin-module armv6m
     ;
 
     \ Assemble an LDR (register) instruction
-    : ldr_,[_,_] ( rm rn rt -- )
-      3dup validate-3-3reg swap 3 lshift or swap 6 lshift or $5800 or h,
-    ;
+    $5800 instr-3r-load/store-rel ldr_,[_,_] ( rm rn rt -- )
 
     \ Assemble an LDRB (immediate) instruction
-    : ldrb_,[_,#_] ( imm5 rn rt -- )
-      2dup validate-2-3reg
-      swap 3 lshift or swap dup 32 u< averts x-out-of-range-imm
-      6 lshift or $7800 or h,
-    ;
+    $7800 instr-3r-load/store-1byte-imm ldrb_,[_,#_] ( imm5 rn rt -- )
 
     \ Assemble an LDRB (register) instruction
-    : ldrb_,[_,_] ( rm rn rt -- )
-      3dup validate-3-3reg swap 3 lshift or swap 6 lshift or $5C00 or h,
-    ;
+    $5C00 instr-3r-load/store-rel ldrb_,[_,_] ( rm rn rt -- )
 
     \ Assemble an LDRH (immediate) instruction
-    : ldrh_,[_,#_] ( imm5 rn rt -- )
-      2dup validate-2-3reg 2 pick validate-imm-2align
-      swap 3 lshift or swap 1 rshift dup 32 u< averts x-out-of-range-imm
-      6 lshift or $8800 or h,
-    ;
+    $8800 instr-3r-load/store-2byte-imm ldrh_,[_,#_] ( imm5 rn rt -- )
 
     \ Assemble an LDRH (register) instruction
-    : ldrh_,[_,_] ( rm rn rt -- )
-      3dup validate-3-3reg swap 3 lshift or swap 6 lshift or $5C00 or h,
-    ;
+    $5A00 instr-3r-load/store-rel ldrh_,[_,_] ( rm rn rt -- )
 
     \ Assemble an LDRSB (register) instruction
-    : ldrsb_,[_,_] ( rm rn rt -- )
-      3dup validate-3-3reg swap 3 lshift or swap 6 lshift or $5600 or h,
-    ;
+    $5600 instr-3r-load/store-rel ldrsb_,[_,_] ( rm rn rt -- )
 
     \ Assemble an LDRSH (register) instruction
-    : ldrsh_,[_,_] ( rm rn rt -- )
-      3dup validate-3-3reg swap 3 lshift or swap 6 lshift or $5E00 or h,
-    ;
+    $5E00 instr-3r-load/store-rel ldrsh_,[_,_] ( rm rn rt -- )
 
     \ Assemble an LSLS (immediate) instruction
     : lsls_,_,#_ ( imm5 rm rd -- )
@@ -435,10 +469,8 @@ begin-module armv6m
     ;
 
     \ Assemble an LSLS (register) instruction
-    : lsls_,_ ( rm rdn -- )
-      2dup validate-2-3reg swap 3 lshift or $4080 or h,
-    ;
-
+    $4080 instr-2*3r lsls_,_ ( rm rdn -- )
+    
     \ Assemble an LSRS (immediate) instruction
     : lsrs_,_,#_ ( imm5 rm rd -- )
       2dup validate-2-3reg
@@ -448,26 +480,16 @@ begin-module armv6m
     ;
 
     \ Assemble an LSRS (register) instruction
-    : lsrs_,_ ( rm rdn -- )
-      2dup validate-2-3reg swap 3 lshift or $40C0 or h,
-    ;
+    $40C0 instr-2*3r lsrs_,_ ( rm rdn -- )
 
     \ Assemble a MOVS (immediate) instruction
-    : movs_,#_ ( imm8 rdn -- )
-      dup validate-3reg over 256 u< averts x-out-of-range-imm
-      8 lshift or $2000 or h,
-    ;
+    $2000 instr-3r-8imm movs_,#_ ( imm8 rdn -- )
 
     \ Assemble a MOV (register) instruction
-    : mov4_,4_ ( rm4 rdn4 -- )
-      2dup validate-2-4reg dup $7 and swap $8 and 4 lshift or swap 3 lshift or
-      $4600 or h,
-    ;
+    $4600 instr-2*4r mov4_,4_ ( rm4 rdn4 -- )
 
     \ Assemble a MOVS (register) instruction
-    : movs_,_ ( rm rd -- )
-      2dup validate-2-3reg swap 3 lshift or $0000 or h,
-    ;
+    $0000 instr-2*3r movs_,_ ( rm rd -- )
 
     \ Assemble an MRS instruction
     : mrs_,_ ( sysm rd -- )
@@ -482,22 +504,16 @@ begin-module armv6m
     ;
     
     \ Assemble an MULS (register) instruction
-    : muls_,_ ( rn rdm -- )
-      2dup validate-2-3reg swap 3 lshift or $4340 or h,
-    ;
+    $4340 instr-2*3r muls_,_ ( rn rdm -- )
 
     \ Assemble an MVNS (register) instruction
-    : mvns_,_ ( rm rd -- )
-      2dup validate-2-3reg swap 3 lshift or $43C0 or h,
-    ;
+    $43C0 instr-2*3r mvns_,_ ( rm rd -- )
 
     \ Assemble a NOP instruction
-    : nop ( -- ) $BF00 h, ;
+    $BF00 instr-16-const nop ( -- )
 
     \ Assemble an ORRS (register) instruction
-    : orrs_,_ ( rm rdn -- )
-      2dup validate-2-3reg swap 3 lshift or $4300 or h,
-    ;
+    $4300 instr-2*3r orrs_,_ ( rm rdn -- )
 
     \ Assemble a POP instruction
     : pop ( rx ... r0 count -- )
@@ -526,104 +542,58 @@ begin-module armv6m
     ;
 
     \ Assemble an REV (register) instruction
-    : rev_,_ ( rm rd -- )
-      2dup validate-2-3reg swap 3 lshift or $BA00 or h,
-    ;
+    $BA00 instr-2*3r rev_,_ ( rm rd -- )
 
     \ Assemble an REV16 (register) instruction
-    : rev16_,_ ( rm rd -- )
-      2dup validate-2-3reg swap 3 lshift or $BA40 or h,
-    ;
+    $BA40 instr-2*3r rev16_,_ ( rm rd -- )
 
     \ Assemble an REVSH (register) instruction
-    : revsh_,_ ( rm rd -- )
-      2dup validate-2-3reg swap 3 lshift or $BAC0 or h,
-    ;
+    $BAC0 instr-2*3r revsh_,_ ( rm rd -- )
 
     \ Assemble an RORS (register) instruction
-    : rors_,_ ( rm rdn -- )
-      2dup validate-2-3reg swap 3 lshift or $41C0 or h,
-    ;
+    $41C0 instr-2*3r rors_,_ ( rm rdn -- )
 
     \ Assemble an RSBS (immediate) instruction
-    : rsbs_,_,#0 ( rn rd -- )
-      2dup validate-2-3reg swap 3 lshift or $4240 or h,
-    ;
+    $4240 instr-2*3r rsbs_,_,#0 ( rn rd -- )
 
     \ Assemble an SBC (register) instruction
-    : sbcs_,_ ( rm rdn -- )
-      2dup validate-2-3reg swap 3 lshift or $4180 or h,
-    ;
+    $4180 instr-2*3r sbcs_,_ ( rm rdn -- )
 
     \ Assemble an SEV instruction
-    : sev ( -- ) $BF40 h, ;
+    $BF40 instr-16-const sev ( -- )
 
     \ Assemble an STM instruction
-    : stm ( rx ... r0 count rn -- )
-      dup validate-3reg >r
-      0 begin over while rot dup validate-3reg bit or swap 1- swap repeat nip
-      r> 8 lshift or $C000 or h,
-    ;
+    $C000 instr-3r-load/store-multi stm ( rx ... r0 count rn -- )
 
     \ Assemble an STR (immediate) instruction
-    : str_,[_,#_] ( imm5 rn rt -- )
-      2dup validate-2-3reg 2 pick validate-imm-4align
-      swap 3 lshift or swap 2 rshift dup 32 u< averts x-out-of-range-imm
-      6 lshift or $6000 or h,
-    ;
+    $6000 instr-3r-load/store-4byte-imm str_,[_,#_] ( imm5 rn rt -- )
 
     \ Assemble an STR (immediate) instruction
-    : str_,[sp,#_] ( imm8 rt -- )
-      dup validate-3reg over validate-imm-4align
-      8 lshift swap 2 rshift dup 256 u< averts x-out-of-range-imm
-      or $9000 or h,
-    ;
+    $9000 instr-3r-load/store-sp-4byte-imm str_,[sp,#_] ( imm8 rt -- )
 
     \ Assemble an STR (register) instruction
-    : str_,[_,_] ( rm rn rt -- )
-      3dup validate-3-3reg swap 3 lshift or swap 6 lshift or $5000 or h,
-    ;
+    $5000 instr-3r-load/store-rel str_,[_,_] ( rm rn rt -- )
     
     \ Assemble an STRB (immediate) instruction
-    : strb_,[_,#_] ( imm5 rn rt -- )
-      2dup validate-2-3reg
-      swap 3 lshift or swap dup 32 u< averts x-out-of-range-imm
-      6 lshift or $7000 or h,
-    ;
+    $7000 instr-3r-load/store-1byte-imm strb_,[_,#_] ( imm5 rn rt -- )
 
     \ Assemble an STRB (register) instruction
-    : strb_,[_,_] ( rm rn rt -- )
-      3dup validate-3-3reg swap 3 lshift or swap 6 lshift or $5400 or h,
-    ;
+    $5400 instr-3r-load/store-rel strb_,[_,_] ( rm rn rt -- )
 
     \ Assemble an STRH (immediate) instruction
-    : strh_,[_,#_] ( imm5 rn rt -- )
-      2dup validate-2-3reg 2 pick validate-imm-2align
-      swap 3 lshift or swap 1 rshift dup 32 u< averts x-out-of-range-imm
-      6 lshift or $8000 or h,
-    ;
+    $8000 instr-3r-load/store-2byte-imm strh_,[_,#_] ( imm5 rn rt -- )
 
     \ Assemble an STRH (register) instruction
-    : strh_,[_,_] ( rm rn rt -- )
-      3dup validate-3-3reg swap 3 lshift or swap 6 lshift or $5200 or h,
-    ;
+    $5200 instr-3r-load/store-rel strh_,[_,_] ( rm rn rt -- )
 
     \ Assemble a two-register SUBS immediate instruction
-    : subs_,_,#_ ( imm3 rn rd -- )
-      2dup validate-2-3reg 2 pick 8 u< averts x-out-of-range-imm
-      swap 3 lshift or swap 6 lshift or $1E00 or h,
-    ;
+    $1E00 instr-2*3r-3imm subs_,_,#_ ( imm3 rn rd -- )
 
     \ Assemble a one-register SUBS immediate instruction
-    : subs_,#_ ( imm8 rdn -- )
-      dup validate-3reg over 256 u< averts x-out-of-range-imm
-      8 lshift or $3800 or h,
-    ;
+    $3800 instr-3r-8imm subs_,#_ ( imm8 rdn -- )
 
     \ Assemble a three-register SUBS register instruction
-    : subs_,_,_ ( rm rn rd -- )
-      3dup validate-3-3reg swap 3 lshift or swap 6 lshift or $1A00 or h,
-    ;
+    $1A00 instr-3*3r subs_,_,_ ( rm rn rd -- )
 
     \ Assemble an SUB (SP plus immediate to SP) instruction
     : subsp,sp,#_ ( imm7 -- )
@@ -632,31 +602,19 @@ begin-module armv6m
     ;
 
     \ Assemble an SVC instruction
-    : svc#_ ( imm8 -- )
-      dup 256 u< averts x-out-of-range-imm
-      $BF00 or h,
-    ;
+    $BF00 instr-8imm svc#_ ( imm8 -- )
 
     \ Assemble an SXTB instruction
-    : sxtb_,_ ( rm rd -- )
-      2dup validate-2-3reg swap 3 lshift or $B240 or h,
-    ;
-
+    $B240 instr-2*3r sxtb_,_ ( rm rd -- )
+    
     \ Assemble an SXTH instruction
-    : sxth_,_ ( rm rd -- )
-      2dup validate-2-3reg swap 3 lshift or $B200 or h,
-    ;
+    $B200 instr-2*3r sxth_,_ ( rm rd -- )
 
-    \ Assemble an tST (register) instruction
-    : tst_,_ ( rm rn -- )
-      2dup validate-2-3reg swap 3 lshift or $4200 or h,
-    ;
+    \ Assemble an TST (register) instruction
+    $4200 instr-2*3r tst_,_ ( rm rn -- )
 
     \ Assemble a UDF instruction
-    : udf#_ ( imm8 -- )
-      dup 256 u< averts x-out-of-range-imm
-      $DE00 or h,
-    ;
+    $DE00 instr-8imm udf#_ ( imm8 -- )
 
     \ Assemble a 32-bit UDF instruction
     : udf.w#_ ( imm16 -- )
@@ -666,23 +624,19 @@ begin-module armv6m
     ;
 
     \ Assemble an UXTB instruction
-    : uxtb_,_ ( rm rd -- )
-      2dup validate-2-3reg swap 3 lshift or $B2C0 or h,
-    ;
+    $B2C0 instr-2*3r uxtb_,_ ( rm rd -- )
 
     \ Assemble an UXTH instruction
-    : uxth_,_ ( rm rd -- )
-      2dup validate-2-3reg swap 3 lshift or $B280 or h,
-    ;
+    $B280 instr-2*3r uxth_,_ ( rm rd -- )
 
     \ Assemble a WFE instruction
-    : wfe ( -- ) $BF20 h, ;
+    $BF20 instr-16-const wfe ( -- )
 
     \ Assemble a WFI instruction
-    : wfi ( -- ) $BF30 h, ;
+    $BF30 instr-16-const wfi ( -- )
 
     \ Assemble a YIELD instruction
-    : yield ( -- ) $BF10 h, ;
+    $BF10 instr-16-const yield ( -- )
 
     \ Mark a backward destination
     : mark> ( -- mark-addr mark ) here mark-dest ;
