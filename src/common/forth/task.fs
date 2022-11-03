@@ -251,17 +251,57 @@ begin-module task
 
   \ Access a given user variable for a given task
   : for-task ( task xt -- addr )
-    execute dict-base @ - swap task-dict-base @ +
+    code[
+    1 r0 movs_,#_
+    r0 tos orrs_,_
+    tos blx_
+    ]code
+    dict-base
+    code[
+    r2 r1 r0 3 dp ldm
+    0 tos tos ldr_,[_,#_]
+    tos r0 r0 subs_,_,_
+    .task-dict-base r2 tos ldr_,[_,#_]
+    r0 tos tos adds_,_,_
+    ]code
+\    execute dict-base @ - swap task-dict-base @ +
   ;
 
   \ Set a given user variable for a given task
   : for-task! ( x task xt -- )
-    execute dict-base @ - swap task-dict-base @ + !
+    code[
+    1 r0 movs_,#_
+    r0 tos orrs_,_
+    tos blx_
+    ]code
+    dict-base
+    code[
+    r3 r2 r1 r0 4 dp ldm
+    0 tos tos ldr_,[_,#_]
+    tos r0 r0 subs_,_,_
+    .task-dict-base r2 tos ldr_,[_,#_]
+    r0 tos r3 str_,[_,_]
+    tos 1 dp ldm
+    ]code
+\    execute dict-base @ - swap task-dict-base @ + !
   ;
 
   \ Get a given user variable for a given task
   : for-task@ ( task xt -- x )
-    execute dict-base @ - swap task-dict-base @ + @
+    code[
+    1 r0 movs_,#_
+    r0 tos orrs_,_
+    tos blx_
+    ]code
+    dict-base
+    code[
+    r2 r1 r0 3 dp ldm
+    0 tos tos ldr_,[_,#_]
+    tos r0 r0 subs_,_,_
+    .task-dict-base r2 tos ldr_,[_,#_]
+    r0 tos tos ldr_,[_,_]
+    ]code
+\    execute dict-base @ - swap task-dict-base @ + @
   ;
 
   \ Pause a task without rescheduling it
