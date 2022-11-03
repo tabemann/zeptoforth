@@ -2133,7 +2133,7 @@ variable wait-hook
 variable wake-hook
 
 \ Wake all waiting tasks
-: wake ( -- ) wake-hook @ ?execute ;
+: wake ( -- ) wake-hook @ execute ;
 
 \ Set internal
 internal set-current
@@ -2259,7 +2259,7 @@ forth set-current
   cpu-count 0 ?do false cpus-deferred-context-switch i cells + ! loop
   cpu-count 0 ?do 0 cpus-in-critical i cells + ! loop
   0 wait-hook !
-  0 wake-hook !
+  [: ;] wake-hook !
   0 flush-console-hook !
   false flash-dict-warned !
   ['] do-flash-validate-dict validate-dict-hook !

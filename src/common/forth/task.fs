@@ -1365,9 +1365,19 @@ begin-module task
 
     \ Wake tasks
     : do-wake ( -- )
-      cpu-count begin ?dup while
-	1- true over cpu-wake-tasks !
-      repeat
+      [ 0 cpu-wake-tasks ] literal
+      cpu-count 2 lshift
+      code[
+      0 r0 movs_,#_
+      r0 r0 mvns_,_
+      tos r1 movs_,_
+      tos r2 2 dp ldm
+      mark>
+      4 r1 subs_,#_
+      r1 r2 r0 str_,[_,_]
+      0 r1 cmp_,#_
+      ne bc<
+      ]code
     ;
 
     \ Get whether a task is waiting

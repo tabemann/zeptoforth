@@ -81,7 +81,7 @@ begin-module systick
   : systick-handler ( -- )
     SYST_CSR @ SYST_CSR_COUNTFLAG and if
       cpu-index 0= if
-	systick-counter @ 1+ systick-counter !
+	1 systick-counter +!
       then
       wake
     then
