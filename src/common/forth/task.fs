@@ -258,7 +258,9 @@ begin-module task
     ]code
     dict-base
     code[
-    r2 r1 r0 3 dp ldm
+    r0 1 dp ldm
+    r1 1 dp ldm
+    r2 1 dp ldm
     0 tos tos ldr_,[_,#_]
     tos r0 r0 subs_,_,_
     .task-dict-base r2 tos ldr_,[_,#_]
@@ -276,7 +278,10 @@ begin-module task
     ]code
     dict-base
     code[
-    r3 r2 r1 r0 4 dp ldm
+    r0 1 dp ldm
+    r1 1 dp ldm
+    r2 1 dp ldm
+    r3 1 dp ldm
     0 tos tos ldr_,[_,#_]
     tos r0 r0 subs_,_,_
     .task-dict-base r2 tos ldr_,[_,#_]
@@ -295,7 +300,9 @@ begin-module task
     ]code
     dict-base
     code[
-    r2 r1 r0 3 dp ldm
+    r0 1 dp ldm
+    r1 1 dp ldm
+    r2 1 dp ldm
     0 tos tos ldr_,[_,#_]
     tos r0 r0 subs_,_,_
     .task-dict-base r2 tos ldr_,[_,#_]
@@ -432,7 +439,8 @@ begin-module task
       >mark
       .task-prev tos r1 str_,[_,#_]
       .task-next r1 tos str_,[_,#_]
-      tos r0 2 dp ldm
+      r0 1 dp ldm
+      tos 1 dp ldm
       ]code
     ;
 
@@ -511,7 +519,8 @@ begin-module task
       code[
       r4 1 push
       tos r2 movs_,_
-      tos r3 2 dp ldm
+      r3 1 dp ldm
+      tos 1 dp ldm
       .task-prev tos r0 ldr_,[_,#_]
       .task-next tos r1 ldr_,[_,#_]
       0 r1 cmp_,#_
@@ -1411,7 +1420,8 @@ begin-module task
       0 r0 movs_,#_
       r0 r0 mvns_,_
       tos r1 movs_,_
-      tos r2 2 dp ldm
+      r2 1 dp ldm
+      tos 1 dp ldm
       mark>
       4 r1 subs_,#_
       r1 r2 r0 str_,[_,_]
@@ -1471,7 +1481,8 @@ begin-module task
       pc 1 pop
       >mark
       >mark
-      tos r0 2 dp ldm
+      r0 1 dp ldm
+      tos 1 dp ldm
       ]code
       delayed?
     ;
