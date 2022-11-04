@@ -159,14 +159,14 @@ begin-module oo
 
   \ Declare a member of a class
   : member ( member-offset list method-count size "name" -- member-offset list method-count )
-    swap >r : 2 pick 65536 u< thumb-2 or if inlined then
+    swap >r : 2 pick 65536 u< thumb-2? or if inlined then
     rot dup cell+ lit, postpone + postpone ; + swap r>
   ;
   
   \ Declare a method of a class
   : method ( list method-count "name" -- list method-count )
     :
-    dup cells 65536 u< thumb-2 or if inlined then ( list method-count )
+    dup cells 65536 u< thumb-2? or if inlined then ( list method-count )
     postpone dup ( list method-count )
     postpone @ dup 1+ cells lit, ( list method-count )
     postpone + postpone @ postpone inline-execute ( list method-count )

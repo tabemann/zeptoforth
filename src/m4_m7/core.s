@@ -1908,8 +1908,8 @@ _rdrop:	adds sp, #4
 	define_word "2>r", visible_flag | inlined_flag
 _push_2r:
 	.ifdef cortex_m7
-	ldr r0, [dp], #4
-	ldr r1, [dp], #4
+	ldmia dp!, {r0}
+	ldmia dp!, {r1}
 	.else
 	ldmia dp!, {r0, r1}
 	.endif
@@ -2055,8 +2055,8 @@ _init_context:
 	movs r0, tos
 	@	adds r0, #1
 	.ifdef cortex_m7
-	ldr r1, [dp], #4
-	ldr r2, [dp], #4
+	ldmia dp!, {r1}
+	ldmia dp!, {r2}
 	.else
  	ldmia dp!, {r1, r2}
 	.endif

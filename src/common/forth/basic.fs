@@ -532,7 +532,7 @@ commit-flash
   dup 0= triggers x-token-expected
   start-compile-no-push
   6 push,
-  thumb-2 not if
+  thumb-2? not if
     6 hreserve set-const-end
   else
     reserve-literal
@@ -541,7 +541,7 @@ commit-flash
   $003F h,
   visible
   finalize,
-  thumb-2 if
+  thumb-2? if
     here 6 rot literal!
   then
 ;
@@ -608,7 +608,7 @@ internal set-current
 : <builds-with-name ( addr bytes -- )
   start-compile
   tos push,
-  thumb-2 not if
+  thumb-2? not if
     6 hreserve set-const-end
   else
     reserve-literal
@@ -618,7 +618,7 @@ internal set-current
   $003F h,
   visible
   finalize,
-  thumb-2 if
+  thumb-2? if
     here 6 rot literal!
   then
 ;
@@ -655,13 +655,13 @@ commit-flash
 
 \ Specify code for a word created wth <BUILDS
 : does> ( -- )
-  thumb-2 if
+  thumb-2? if
     block-align,
   then
   build-target @ 0= triggers x-no-word-being-built
   r>
   0 build-target @ literal!
-  thumb-2 not if consts, then
+  thumb-2? not if consts, then
   0 build-target !
 ;
 
@@ -675,34 +675,34 @@ commit-flash
 
 \ Create an arbitrary-sized field
 : +field ( offset size "name" -- offset )
-  : over 65536 u< thumb-2 or if inlined then
+  : over 65536 u< thumb-2? or if inlined then
     over lit, postpone + postpone ; +
 ;
 
 \ Create a byte-sized field
 : cfield: ( offset "name" -- offset )
-  : dup 65536 u< thumb-2 or if inlined then
+  : dup 65536 u< thumb-2? or if inlined then
     dup lit, postpone + postpone ; 1+
 ;
 
 \ Create a halfword-sized field
 : hfield: ( offset "name" -- offset )
   : 2 align
-    dup 65536 u< thumb-2 or if inlined then
+    dup 65536 u< thumb-2? or if inlined then
     dup lit, postpone + postpone ; 2 +
 ;
 
 \ Create a cell-sized field
 : field: ( offset "name" -- offset )
   : cell align
-    dup 65536 u< thumb-2 or if inlined then
+    dup 65536 u< thumb-2? or if inlined then
     dup lit, postpone + postpone ; cell+
 ;
 
 \ Create a double cell-sized field
 : 2field: ( offset "name" -- offset )
   : cell align
-    dup 65536 u< thumb-2 or if inlined then
+    dup 65536 u< thumb-2? or if inlined then
     dup lit, postpone + postpone ; 2 cells +
 ;
 

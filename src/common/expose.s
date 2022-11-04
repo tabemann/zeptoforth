@@ -408,16 +408,26 @@ _flash_mini_dict_size:
 	end_inlined
 
 	@@ Whether Thumb-2 is supported
-	define_word "thumb-2", visible_flag
+	define_word "thumb-2?", visible_flag
 _thumb_2:
 	push_tos
+	movs tos, #0
 	.if thumb2
-	ldr tos, =-1
-	.else
-	ldr tos, =0
+        mvns tos, tos
 	.endif
 	bx lr
 	end_inlined
+
+        @@ Whether the MCU is a Cortex-M7 MCU
+        define_word "cortex-m7?", visible_flag
+_cortex_m7:
+        push_tos
+        movs tos, #0
+        .if cortex_m7
+        mvns tos, tos
+        .endif
+        bx lr
+        end_inlined
 
 	@@ Get the CPU count
 	define_word "cpu-count", visible_flag | inlined_flag

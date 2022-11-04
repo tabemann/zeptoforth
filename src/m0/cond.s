@@ -187,7 +187,7 @@ _again:	push {lr}
 	@@ Implement the core of DO
 	define_internal_word "(do)", visible_flag
 _xdo:
-	.ifdef cortex_m7
+	.if cortex_m7
 	ldr r0, [dp], #4
 	ldr r1, [dp], #4
 	ldr r2, [dp], #4
@@ -205,7 +205,7 @@ _xdo:
 	@@ Implement the core of ?DO
 	define_internal_word "(?do)", visible_flag
 _xqdo:
-	.ifdef cortex_m7
+	.if cortex_m7
 	ldr r0, [dp], #4
 	ldr r1, [dp], #4
 	ldr r2, [dp], #4

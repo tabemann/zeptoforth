@@ -605,7 +605,7 @@ begin-module disassemble-internal
     0_3_bf reg. 4_2_bf ?dup if ." , LSL #" (udec.) then ." ]"
   ;
 
-  thumb-2 [if]
+  thumb-2? [if]
     
   \ Parse an ADC immediate instruction
     : p-adc-imm
@@ -619,7 +619,7 @@ begin-module disassemble-internal
     ." ADC" cssp. decode-and-reg-16 drop
   ;
 
-  thumb-2 [if]
+  thumb-2? [if]
     
     \ Parse an ADC register instruction
     : p-adc-reg-2
@@ -638,7 +638,7 @@ begin-module disassemble-internal
     ." ADD" cssp. decode-add-imm-2 drop
   ;
 
-  thumb-2 [if]
+  thumb-2? [if]
     
     \ Parse an ADD immediate instruction
     : p-add-imm-3
@@ -663,7 +663,7 @@ begin-module disassemble-internal
     dup 0_3_bf over 7 1 bitfield 3 lshift or reg-sep. 3_4_bf reg. drop
   ;
 
-  thumb-2 [if]
+  thumb-2? [if]
 
     \ Parse an ADD register instruction
     : p-add-reg-3
@@ -719,7 +719,7 @@ begin-module disassemble-internal
     0_8_bf 2 lshift val. drop
   ;
 
-  thumb-2 [if]  
+  thumb-2? [if]  
 
     \ Parse an ADR instruction
     : p-adr-2
@@ -747,7 +747,7 @@ begin-module disassemble-internal
     ." AND" cssp. decode-and-reg-16 drop
   ;
 
-  thumb-2 [if]
+  thumb-2? [if]
     
     \ Parse an AND register instruction
     : p-and-reg-2
@@ -761,7 +761,7 @@ begin-module disassemble-internal
     ." ASR" cssp. decode-asr-imm-16 drop
   ;
   
-  thumb-2 [if]
+  thumb-2? [if]
     
     \ Parse an ASR immediate instruction
     : p-asr-imm-2
@@ -775,7 +775,7 @@ begin-module disassemble-internal
     ." ASR" cssp. decode-and-reg-16 drop
   ;
 
-  thumb-2 [if]
+  thumb-2? [if]
     
     \ Parse an ASR register instruction
     : p-asr-reg-2
@@ -803,7 +803,7 @@ begin-module disassemble-internal
     ." B" csp. 0 11 bitfield 1 lshift 12 rel.
   ;
   
-  thumb-2 [if]
+  thumb-2? [if]
     
     \ Parse a B instruction
     : p-b-3
@@ -849,7 +849,7 @@ begin-module disassemble-internal
     ." BIC" cssp. decode-and-reg-16 drop
   ;
 
-  thumb-2 [if]
+  thumb-2? [if]
     
     \ Parse a BIC register instruction
     : p-bic-reg-2
@@ -889,7 +889,7 @@ begin-module disassemble-internal
   \ Parse a CBZ instruction
   : p-cbz ." CBZ" decode-cbz ;
 
-  thumb-2 [if]
+  thumb-2? [if]
     
     \ Parse a CMN immediate instruction
     : p-cmn-imm
@@ -903,7 +903,7 @@ begin-module disassemble-internal
     ." CMN" csp. decode-and-reg-16 drop
   ;
 
-  thumb-2 [if]
+  thumb-2? [if]
     
     \ Parse a CMN register instruction
     : p-cmn-reg-2
@@ -917,7 +917,7 @@ begin-module disassemble-internal
     ." CMP " nip decode-add-imm-2 drop
   ;
 
-  thumb-2 [if]
+  thumb-2? [if]
     
     \ Parse a CMP immediate instruction
     : p-cmp-imm-2
@@ -937,7 +937,7 @@ begin-module disassemble-internal
     3_4_bf reg. drop
   ;
 
-  thumb-2 [if]
+  thumb-2? [if]
     
     \ Parse a CMP register instruction
     : p-cmp-reg-3
@@ -971,7 +971,7 @@ begin-module disassemble-internal
   \ Parse an ISB instruction
   : p-isb ." ISB" 2drop 2drop ;
 
-  thumb-2 [if]
+  thumb-2? [if]
     
     \ Parse an EOR immediate instruction
     : p-eor-imm
@@ -985,7 +985,7 @@ begin-module disassemble-internal
     ." EOR" cssp. decode-and-reg-16 drop
   ;
 
-  thumb-2 [if]
+  thumb-2? [if]
     
     \ Parse an EOR register instruction
     : p-eor-reg-2
@@ -1010,7 +1010,7 @@ begin-module disassemble-internal
     ." LDR" size. csp. decode-ldr-imm-2 drop
   ;
 
-  thumb-2 [if]
+  thumb-2? [if]
     
     \ Parse an LDR immediate instruction
     : p-ldr-imm-3
@@ -1030,7 +1030,7 @@ begin-module disassemble-internal
     for-gas @ if ." [PC, #" (udec.) ." ]" drop else 2dup nrel4. nconst4. then
   ;
 
-  thumb-2 [if]
+  thumb-2? [if]
     
     \ Parse an LDR literal instruction
     : p-ldr-lit-2
@@ -1046,7 +1046,7 @@ begin-module disassemble-internal
     ." LDR" size. csp. decode-ldr-reg-1 drop
   ;
 
-  thumb-2 [if]
+  thumb-2? [if]
     
     \ Parse an LDR register instruction
     : p-ldr-reg-2
@@ -1060,7 +1060,7 @@ begin-module disassemble-internal
     ." LSL" cssp. decode-asr-imm-16 drop
   ;
 
-  thumb-2 [if]
+  thumb-2? [if]
     
     \ Parse an LSL immediate instruction
     : p-lsl-imm-2
@@ -1074,7 +1074,7 @@ begin-module disassemble-internal
     ." LSL" cssp. decode-and-reg-16 drop
   ;
 
-  thumb-2 [if]
+  thumb-2? [if]
     
     \ Parse an LSL register instruction
     : p-lsl-reg-2
@@ -1088,7 +1088,7 @@ begin-module disassemble-internal
     ." LSR" cssp. decode-asr-imm-16 drop
   ;
 
-  thumb-2 [if]
+  thumb-2? [if]
     
     \ Parse an LSR immediate instruction
     : p-lsr-imm-2
@@ -1102,7 +1102,7 @@ begin-module disassemble-internal
     ." LSR" cssp. decode-and-reg-16 drop
   ;
 
-  thumb-2 [if]
+  thumb-2? [if]
     
     \ Parse an LSR register instruction
     : p-lsr-reg-2
@@ -1122,7 +1122,7 @@ begin-module disassemble-internal
     ." MOV" cssp. decode-add-imm-2 drop
   ;
 
-  thumb-2 [if]
+  thumb-2? [if]
     
     \ Parse a MOV immediate instruction
     : p-mov-imm-2
@@ -1148,7 +1148,7 @@ begin-module disassemble-internal
     ." MOVS" space nip decode-and-reg-16 drop
   ;
 
-  thumb-2 [if]
+  thumb-2? [if]
     
     \ Parse a MOV register instruction
     : p-mov-reg-3
@@ -1167,7 +1167,7 @@ begin-module disassemble-internal
     ." MUL" cssp. decode-and-reg-16 drop
   ;
   
-  thumb-2 [if]
+  thumb-2? [if]
     
     \ Parse a MUL instruction
     : p-mul-2
@@ -1186,7 +1186,7 @@ begin-module disassemble-internal
     ." NOP" drop cond. drop
   ;
 
-  thumb-2 [if]
+  thumb-2? [if]
     
     \ Parse an ORR immediate instruction
     : p-orr-imm
@@ -1200,7 +1200,7 @@ begin-module disassemble-internal
     ." ORR" cssp. decode-and-reg-16 drop
   ;
 
-  thumb-2 [if]
+  thumb-2? [if]
     
     \ Parse an ORR register instruction
     : p-orr-reg-2
@@ -1214,7 +1214,7 @@ begin-module disassemble-internal
     ." POP" csp. dup 0_8_bf swap 8 1 bitfield 15 lshift or 16 reglist. drop
   ;
 
-  thumb-2 [if]
+  thumb-2? [if]
     
     \ Parse a POP instruction
     : p-pop-2
@@ -1229,7 +1229,7 @@ begin-module disassemble-internal
     ." PUSH" csp. dup 0_8_bf swap 8 1 bitfield 14 lshift or 16 reglist. drop
   ;
 
-  thumb-2 [if]  
+  thumb-2? [if]  
 
     \ Parse a PUSH instruction
     : p-push-2
@@ -1244,7 +1244,7 @@ begin-module disassemble-internal
     ." RSB " cssp. decode-and-reg-16 ." , #0" drop
   ;
 
-  thumb-2 [if]
+  thumb-2? [if]
     
     \ Parse an SBC immediate instruction
     : p-sbc-imm
@@ -1258,7 +1258,7 @@ begin-module disassemble-internal
     ." SBC" cssp. decode-and-reg-16 drop
   ;
 
-  thumb-2 [if]
+  thumb-2? [if]
     
     \ Parse an SBC register instruction
     : p-sbc-reg-2
@@ -1287,7 +1287,7 @@ begin-module disassemble-internal
     ." STR" size. csp. decode-ldr-imm-2 drop
   ;
 
-  thumb-2 [if]
+  thumb-2? [if]
 
     \ Parse an STR immediate instruction
     : p-str-imm-3
@@ -1306,7 +1306,7 @@ begin-module disassemble-internal
     ." STR" size. csp. decode-ldr-reg-1 drop
   ;
 
-  thumb-2 [if]
+  thumb-2? [if]
 
     \ Parse an STR register instruction
     : p-str-reg-2
@@ -1325,7 +1325,7 @@ begin-module disassemble-internal
     ." SUB" cssp. decode-add-imm-2 drop
   ;
 
-  thumb-2 [if]
+  thumb-2? [if]
 
     \ Parse an SUB immediate instruction
     : p-sub-imm-3
@@ -1344,7 +1344,7 @@ begin-module disassemble-internal
     ." SUB" cssp. decode-add-reg-16 drop
   ;
 
-  thumb-2 [if]
+  thumb-2? [if]
 
     \ Parse an SUB register instruction
     : p-sub-reg-2
@@ -1363,7 +1363,7 @@ begin-module disassemble-internal
     ." TST" csp. decode-and-reg-16 drop
   ;
 
-  thumb-2 [if]
+  thumb-2? [if]
 
     \ Parse a CMP register instruction
     : p-tst-reg-2
@@ -1393,7 +1393,7 @@ begin-module disassemble-internal
   0 ' p-ldr-imm-1 w-size p-ldr-imm-1-w
   0 ' p-ldr-imm-2 w-size p-ldr-imm-2-w
 
-  thumb-2 [if]
+  thumb-2? [if]
   
     0 ' p-ldr-imm-3 w-size p-ldr-imm-3-w
     0 ' p-ldr-imm-4 w-size p-ldr-imm-4-w
@@ -1402,7 +1402,7 @@ begin-module disassemble-internal
   
   0 ' p-ldr-lit-1 w-size p-ldr-lit-1-w
 
-  thumb-2 [if]
+  thumb-2? [if]
 
     0 ' p-ldr-lit-2 w-size p-ldr-lit-2-w
 
@@ -1410,7 +1410,7 @@ begin-module disassemble-internal
   
   0 ' p-ldr-reg-1 w-size p-ldr-reg-1-w
 
-  thumb-2 [if]
+  thumb-2? [if]
 
     0 ' p-ldr-reg-2 w-size p-ldr-reg-2-w
 
@@ -1418,13 +1418,13 @@ begin-module disassemble-internal
   
   char B ' p-ldr-imm-1 w-size p-ldr-imm-1-b
 
-  thumb-2 [if]
+  thumb-2? [if]
 
     char B ' p-ldr-imm-3 w-size p-ldr-imm-3-b
     char B ' p-ldr-imm-4 w-size p-ldr-imm-4-b
   [then]
   
-  thumb-2 [if]
+  thumb-2? [if]
     
     char B ' p-ldr-lit-2 w-size p-ldr-lit-2-b
 
@@ -1432,7 +1432,7 @@ begin-module disassemble-internal
   
   char B ' p-ldr-reg-1 w-size p-ldr-reg-1-b
 
-  thumb-2 [if]
+  thumb-2? [if]
 
     char B ' p-ldr-reg-2 w-size p-ldr-reg-2-b
 
@@ -1440,7 +1440,7 @@ begin-module disassemble-internal
   
   char H ' p-ldr-imm-1 w-size p-ldr-imm-1-h
 
-  thumb-2 [if]
+  thumb-2? [if]
 
     char H ' p-ldr-imm-3 w-size p-ldr-imm-3-h
     char H ' p-ldr-imm-4 w-size p-ldr-imm-4-h
@@ -1450,7 +1450,7 @@ begin-module disassemble-internal
   
   char H ' p-ldr-reg-1 w-size p-ldr-reg-1-h
 
-  thumb-2 [if]
+  thumb-2? [if]
 
     char H ' p-ldr-reg-2 w-size p-ldr-reg-2-h
 
@@ -1459,7 +1459,7 @@ begin-module disassemble-internal
   0 ' p-str-imm-1 w-size p-str-imm-1-w
   0 ' p-str-imm-2 w-size p-str-imm-2-w
 
-  thumb-2 [if]
+  thumb-2? [if]
 
     0 ' p-str-imm-3 w-size p-str-imm-3-w
     0 ' p-str-imm-4 w-size p-str-imm-4-w
@@ -1468,7 +1468,7 @@ begin-module disassemble-internal
   
   0 ' p-str-reg-1 w-size p-str-reg-1-w
 
-  thumb-2 [if]
+  thumb-2? [if]
 
     0 ' p-str-reg-2 w-size p-str-reg-2-w
 
@@ -1476,7 +1476,7 @@ begin-module disassemble-internal
   
   char B ' p-str-imm-1 w-size p-str-imm-1-b
 
-  thumb-2 [if]
+  thumb-2? [if]
 
     char B ' p-str-imm-3 w-size p-str-imm-3-b
     char B ' p-str-imm-4 w-size p-str-imm-4-b
@@ -1485,7 +1485,7 @@ begin-module disassemble-internal
   
   char B ' p-str-reg-1 w-size p-str-reg-1-b
 
-  thumb-2 [if]
+  thumb-2? [if]
   
     char B ' p-str-reg-2 w-size p-str-reg-2-b
 
@@ -1493,7 +1493,7 @@ begin-module disassemble-internal
   
   char H ' p-str-imm-1 w-size p-str-imm-1-h
 
-  thumb-2 [if]
+  thumb-2? [if]
   
     char H ' p-str-imm-3 w-size p-str-imm-3-h
     char H ' p-str-imm-4 w-size p-str-imm-4-h
@@ -1502,7 +1502,7 @@ begin-module disassemble-internal
   
   char H ' p-str-reg-1 w-size p-str-reg-1-h
 
-  thumb-2 [if]
+  thumb-2? [if]
 
     char H ' p-str-reg-2 w-size p-str-reg-2-h
 
@@ -1585,7 +1585,7 @@ begin-module disassemble-internal
   \ All the 32-bit ops
   create all-ops32
 
-  thumb-2 [if]
+  thumb-2? [if]
     
     ' p-adc-imm , %1111101111100000 h, highest h, %1111000101000000 h, 0 h,
     ' p-adc-reg-2 , %1111111111100000 h, 0 h, %1110101101000000 h, 0 h,
@@ -1617,7 +1617,7 @@ begin-module disassemble-internal
   ' p-bl-imm , %1111100000000000 h, %1101000000000000 h,
   %1111000000000000 h, %1101000000000000 h,
 
-  thumb-2 [if]
+  thumb-2? [if]
     
     \ ' p-cdp ,
     \ ' p-cdp2 ,
@@ -1641,7 +1641,7 @@ begin-module disassemble-internal
   ' p-dsb , %1111111111110000 h, %1101000011110000 h,
   %1111001110110000 h, %1000000001000000 h,
 
-  thumb-2 [if]
+  thumb-2? [if]
     
     ' p-eor-imm , %1111101111100000 h, highest h, %1111000010000000 h, 0 h,
     ' p-eor-reg-2 , %1111111111100000 h, 0 h, %1110101010000000 h, 0 h,
@@ -1651,7 +1651,7 @@ begin-module disassemble-internal
   ' p-isb , %1111111111110000 h, %1101000011110000 h,
   %1111001110110000 h, %1000000001100000 h,
 
-  thumb-2 [if]
+  thumb-2? [if]
     
     \ ' p-it ,
     \ ' p-ldc ,
