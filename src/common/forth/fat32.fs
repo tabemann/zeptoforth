@@ -145,6 +145,9 @@ begin-module fat32
     
     \ Find a file or directory in a path from the root directory
     method with-root-path ( c-addr u xt fs -- ) ( xt: c-addr' u' dir -- )
+
+    \ Flush the block device for a filesystem
+    method flush ( fs -- )
   
   end-class
   
@@ -152,6 +155,7 @@ begin-module fat32
   <base-fat32-fs> begin-implement
     ' abstract-method define root-dir@
     ' abstract-method define with-root-path
+    ' abstract-method define flush
   end-implement
   
   \ FAT32 filesystem class
@@ -884,6 +888,8 @@ begin-module fat32
     :noname ( c-addr u xt fs -- ) ( xt: c-addr' u' dir -- )
       <fat32-dir> class-size [: tuck swap root-dir@ with-path ;] with-aligned-allot
     ; define with-root-path
+
+    :noname ( fs -- ) fat32-device @ flush-blocks ; define flush
     
     :noname ( fs -- )
       [:

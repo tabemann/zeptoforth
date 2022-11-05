@@ -170,6 +170,11 @@ Initialize a root directory of a FAT32 filesystem; the directory object need not
 
 Parse a path starting at the root directory of a FAT32 filesystem, and pass the leaf's name along with a directory object containing that leaf (or which would contain said leaf if it did not exist already) to the passed in *xt*. Note that said directory object will be destroyed when *xt* returns.
 
+##### `flush`
+( fs -- )
+
+Flush any dirty blocks cached by the underlying block device.
+
 ##### `<fat32-fs>`
 ( -- class )
 

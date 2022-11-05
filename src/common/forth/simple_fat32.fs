@@ -48,9 +48,6 @@ begin-module simple-fat32
     \ Get write-through cache mode
     method write-through@ ( fs -- write-through )
     
-    \ Flush the underlying SD card cache
-    method flush ( fs -- )
-    
   end-class
   
   \ Simple FAT32 filesystem class implementation
@@ -88,7 +85,7 @@ begin-module simple-fat32
       simple-fat32-sd [ block-dev ] :: write-through@
     ; define write-through@
     
-    :noname ( fs -- ) simple-fat32-sd flush-blocks ; define flush
+    :noname ( fs -- ) simple-fat32-fs flush ; define flush
     
   end-implement
 

@@ -29,8 +29,3 @@ Set the underlying SD card interface to be either writethrough, i.e. write to bl
 ( fs -- writethrough )
 
 Get whether the underlying SD card interface is set to writethrough or not.
-
-##### `flush`
-( fs -- )
-
-Flush any dirty blocks cached by the underlying SD card interface to the SDHC/SDXC card.

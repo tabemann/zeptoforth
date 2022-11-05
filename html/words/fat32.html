@@ -200,6 +200,11 @@
 <p>( c-addr u xt fs ) ( xt: c-addr’ u’ dir – )</p>
 <p>Parse a path starting at the root directory of a FAT32 filesystem, and pass the leaf’s name along with a directory object containing that leaf (or which would contain said leaf if it did not exist already) to the passed in <em>xt</em>. Note that said directory object will be destroyed when <em>xt</em> returns.</p>
 </section>
+<section id="flush">
+<h3><code class="docutils literal notranslate"><span class="pre">flush</span></code><a class="headerlink" href="#flush" title="Permalink to this headline">¶</a></h3>
+<p>( fs – )</p>
+<p>Flush any dirty blocks cached by the underlying block device.</p>
+</section>
 <section id="fat32-fs">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;fat32-fs&gt;</span></code><a class="headerlink" href="#fat32-fs" title="Permalink to this headline">¶</a></h3>
 <p>( – class )</p>
@@ -548,7 +553,7 @@ bits 4-0: day (1-31)</p>
 <li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
-<li class="toctree-l1"><a class="reference internal" href="include_fat32.html">FAT32 Code Including Support Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fat32_tools.html">FAT32 Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>

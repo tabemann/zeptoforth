@@ -23,7 +23,7 @@ Zeptoforth Documentation
    words/sdcard
    words/fat32
    words/simple_fat32
-   words/include_fat32
+   words/fat32_tools
    words/interrupt
    words/multicore
    words/dev_tools
