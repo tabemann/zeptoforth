@@ -203,6 +203,43 @@ begin-module fat32-tools
       until
     ;
 
+    \ Hexdump data from a file
+    : hexdump-file-data ( buffer-addr buffer-u offset-u -- )
+      begin over 0> while
+        dup h.8 space
+        over 4 min 0 ?do
+          space 2 pick i + c@ h.2
+        loop
+        over 4 min 4 swap - 0 ?do
+          ."  --"
+        loop
+        space
+        over 8 min 4 max 4 ?do
+          space 2 pick i + c@ h.2
+        loop
+        over 8 min 4 max 8 swap - 0 ?do
+          ."  --"
+        loop
+        space
+        over 12 min 8 max 8 ?do
+          space 2 pick i + c@ h.2
+        loop
+        over 12 min 8 max 12 swap - 0 ?do
+          ."  --"
+        loop
+        space
+        over 16 min 12 max 12 ?do
+          space 2 pick i + c@ h.2
+        loop
+        over 16 min 12 max 16 swap - 0 ?do
+          ."  --"
+        loop
+        space space 2 pick dump-ascii-16 cr
+        16 + rot 16 + rot 16 - 0 max rot
+      repeat
+      2drop drop
+    ;
+
     \ Initialize FAT32 including
     : init-fat32-tools ( -- )
       fs-lock init-lock
@@ -324,6 +361,27 @@ begin-module fat32-tools
           then
         until
         drop
+      ;] with-aligned-allot
+    ;] fs-lock with-lock
+  ;
+
+  \ Dump the contents of a file to the console as hexadecimal plus ASCII
+  : hexdump-file ( path-addr path-u -- )
+    current-fs @ averts x-fs-not-set
+    [:
+      <fat32-file> class-size [:
+        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
+        cr
+        begin
+          dup tell-file >r
+          read-buffer read-buffer-size 0 fill
+          read-buffer read-buffer-size 2 pick read-file dup 0> if
+            read-buffer swap r> hexdump-file-data false
+          else
+            rdrop drop true
+          then
+        until
+        drop      
       ;] with-aligned-allot
     ;] fs-lock with-lock
   ;
