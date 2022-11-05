@@ -309,8 +309,8 @@ begin-module fat32-tools
       ;] with-aligned-allot
     ;] fs-lock with-lock
   ;
-  
-  \ Dump the contents of a file
+
+  \ Dump the contents of a file to the console
   : dump-file ( path-addr path-u -- )
     current-fs @ averts x-fs-not-set
     [:
@@ -328,6 +328,18 @@ begin-module fat32-tools
     ;] fs-lock with-lock
   ;
 
+  \ Read a file, from the start, to a fixed-sized buffer and return the length
+  \ actually read
+  : read-file ( buffer-addr buffer-u path-addr path-u -- read-u )
+    current-fs @ averts x-fs-not-set
+    [:
+      <fat32-file> class-size [:
+        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
+        read-file
+      ;] with-aligned-allot
+    ;] fs-lock with-lock
+  ;
+  
   \ Remove a file
   : remove-file ( path-addr path-u -- )
     current-fs @ averts x-fs-not-set

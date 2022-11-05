@@ -73,6 +73,11 @@ Overwrite a file at the specified path with data and then truncate it afterwards
 
 Dump the contents of a file at the specified path to the console.
 
+##### `read-file`
+( buffer-addr buffer-u path-addr path-u -- read-u )
+
+Read a file, from the start, to a fixed-sized buffer and return the length actually read.
+
 ##### `remove-file`
 ( path-addr path-u -- )
 
