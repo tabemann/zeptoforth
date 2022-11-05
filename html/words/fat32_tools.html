@@ -107,8 +107,13 @@
 </section>
 <section id="read-file">
 <h3><code class="docutils literal notranslate"><span class="pre">read-file</span></code><a class="headerlink" href="#read-file" title="Permalink to this headline">¶</a></h3>
-<p>( buffer-addr buffer-u path-addr path-u – read-u )</p>
-<p>Read a file, from the start, to a fixed-sized buffer and return the length actually read.</p>
+<p>( buffer-addr buffer-u offset-u path-addr path-u – read-u )</p>
+<p>Read a file at the specified path, from an offset from the start of the file, to a fixed-sized buffer and return the length in bytes actually read.</p>
+</section>
+<section id="file-size">
+<h3><code class="docutils literal notranslate"><span class="pre">file-size&#64;</span></code><a class="headerlink" href="#file-size" title="Permalink to this headline">¶</a></h3>
+<p>( path-addr path-u – size-u )</p>
+<p>Get the size in bytes of a file at the specified path.</p>
 </section>
 <section id="remove-file">
 <h3><code class="docutils literal notranslate"><span class="pre">remove-file</span></code><a class="headerlink" href="#remove-file" title="Permalink to this headline">¶</a></h3>

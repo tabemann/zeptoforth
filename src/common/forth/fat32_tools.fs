@@ -328,14 +328,26 @@ begin-module fat32-tools
     ;] fs-lock with-lock
   ;
 
-  \ Read a file, from the start, to a fixed-sized buffer and return the length
-  \ actually read
-  : read-file ( buffer-addr buffer-u path-addr path-u -- read-u )
+  \ Read a file, from an offset from the start of the file, to a fixed-sized
+  \ buffer and return the length actually read
+  : read-file ( buffer-addr buffer-u offset-u path-addr path-u -- read-u )
     current-fs @ averts x-fs-not-set
     [:
       <fat32-file> class-size [:
         -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
+        >r seek-set r@ seek-file r>
         read-file
+      ;] with-aligned-allot
+    ;] fs-lock with-lock
+  ;
+
+  \ Get the size of a file
+  : file-size@ ( path-addr path-u -- size-u )
+    current-fs @ averts x-fs-not-set
+    [:
+      <fat32-file> class-size [:
+        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
+        file-size@
       ;] with-aligned-allot
     ;] fs-lock with-lock
   ;
