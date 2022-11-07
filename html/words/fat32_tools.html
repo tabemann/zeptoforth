@@ -100,10 +100,60 @@
 <p>( data-addr data-u path-addr path-u – )</p>
 <p>Overwrite a file at the specified path with data and then truncate it afterwards.</p>
 </section>
+<section id="write-file-window">
+<h3><code class="docutils literal notranslate"><span class="pre">write-file-window</span></code><a class="headerlink" href="#write-file-window" title="Permalink to this headline">¶</a></h3>
+<p>( data-addr data-u offset-u path-addr path-u – )</p>
+<p>Write data at an offset to a file at the specified path without truncating it.</p>
+</section>
 <section id="dump-file">
 <h3><code class="docutils literal notranslate"><span class="pre">dump-file</span></code><a class="headerlink" href="#dump-file" title="Permalink to this headline">¶</a></h3>
 <p>( path-addr path-u – )</p>
-<p>Dump the contents of a file at the specified path to the console.</p>
+<p>Dump the contents of a file at the specified path to the console as hexadecimal bytes plus ASCII.</p>
+</section>
+<section id="dump-file-window">
+<h3><code class="docutils literal notranslate"><span class="pre">dump-file-window</span></code><a class="headerlink" href="#dump-file-window" title="Permalink to this headline">¶</a></h3>
+<p>( offset-u length-u path-addr path-u – )</p>
+<p>Dump the contents of a defined window in a file at the specified path to the console as hexadecimal bytes plus ASCII</p>
+</section>
+<section id="dump-file-raw">
+<h3><code class="docutils literal notranslate"><span class="pre">dump-file-raw</span></code><a class="headerlink" href="#dump-file-raw" title="Permalink to this headline">¶</a></h3>
+<p>( path-addr path-u – )</p>
+<p>Dump the contents of a file at the specified path to the console as raw data, without processing.</p>
+</section>
+<section id="dump-file-raw-window">
+<h3><code class="docutils literal notranslate"><span class="pre">dump-file-raw-window</span></code><a class="headerlink" href="#dump-file-raw-window" title="Permalink to this headline">¶</a></h3>
+<p>( offset-u length-u path-addr path-u – )</p>
+<p>Dump the contents of a defined window in a file at the specified path to the console as raw data, without processing.</p>
+</section>
+<section id="dump-file-ascii">
+<h3><code class="docutils literal notranslate"><span class="pre">dump-file-ascii</span></code><a class="headerlink" href="#dump-file-ascii" title="Permalink to this headline">¶</a></h3>
+<p>( path-addr path-u – )</p>
+<p>Dump the contents of a file at the specified path to the console as ASCII.</p>
+</section>
+<section id="dump-file-ascii-window">
+<h3><code class="docutils literal notranslate"><span class="pre">dump-file-ascii-window</span></code><a class="headerlink" href="#dump-file-ascii-window" title="Permalink to this headline">¶</a></h3>
+<p>( offset-u length-u path-addr path-u – )</p>
+<p>Dump the contents of a defined window in a file at the specified path to the console as ASCII.</p>
+</section>
+<section id="dump-file-halfs">
+<h3><code class="docutils literal notranslate"><span class="pre">dump-file-halfs</span></code><a class="headerlink" href="#dump-file-halfs" title="Permalink to this headline">¶</a></h3>
+<p>( path-addr path-u – )</p>
+<p>Dump the contents of a file at the specified path to the console as hexadecimal halfwords plus ASCII.</p>
+</section>
+<section id="dump-file-halfs-window">
+<h3><code class="docutils literal notranslate"><span class="pre">dump-file-halfs-window</span></code><a class="headerlink" href="#dump-file-halfs-window" title="Permalink to this headline">¶</a></h3>
+<p>( offset-u length-u path-addr path-u – )</p>
+<p>Dump the contents of a defined window in a file at the specified path to the console as hexadecimal halfwords plus ASCII</p>
+</section>
+<section id="dump-file-cells">
+<h3><code class="docutils literal notranslate"><span class="pre">dump-file-cells</span></code><a class="headerlink" href="#dump-file-cells" title="Permalink to this headline">¶</a></h3>
+<p>( path-addr path-u – )</p>
+<p>Dump the contents of a file at the specified path to the console as hexadecimal cells plus ASCII.</p>
+</section>
+<section id="dump-file-cells-window">
+<h3><code class="docutils literal notranslate"><span class="pre">dump-file-cells-window</span></code><a class="headerlink" href="#dump-file-cells-window" title="Permalink to this headline">¶</a></h3>
+<p>( offset-u length-u path-addr path-u – )</p>
+<p>Dump the contents of a defined window in a file at the specified path to the console as hexadecimal cells plus ASCII</p>
 </section>
 <section id="read-file">
 <h3><code class="docutils literal notranslate"><span class="pre">read-file</span></code><a class="headerlink" href="#read-file" title="Permalink to this headline">¶</a></h3>

@@ -1373,16 +1373,147 @@ commit-flash
 internal set-current
 
 \ Dump 16 bytes of ASCII
-: dump-ascii-16 ( start-addr -- )
+: dump-ascii-16 ( c-addr u -- )
   [char] | emit
-  16 0 do
-    dup i + c@ dup $20 >= over $7F < and if emit else drop [char] . emit then
+  dup 16 min 0 ?do
+    over i + c@ dup $20 >= over $7F < and if emit else drop [char] . emit then
   loop
-  [char] | emit drop
+  dup 16 min 16 swap - 0 ?do
+    [char] . emit
+  loop
+  [char] | emit 2drop
+;
+
+\ Dump 64 bytes of ASCII
+: dump-ascii-64 ( c-addr u -- )
+  [char] | emit
+  dup 64 min 0 ?do
+    over i + c@ dup $20 >= over $7F < and if emit else drop [char] . emit then
+  loop
+  dup 64 min 64 swap - 0 ?do
+    [char] . emit
+  loop
+  [char] | emit 2drop
 ;
 
 \ EVALUATE refill word
 : evaluate-refill ( -- ) 0 eval-index-ptr @ ! 0 eval-count-ptr @ ! ;
+
+\ Commit to flash
+commit-flash
+
+\ Dump data as ASCII
+: dump-ascii-with-offset ( buffer-addr buffer-u offset-u -- )
+  begin over 0> while
+    dup h.8 space space 2 pick 2 pick dump-ascii-64 cr
+    64 + rot 64 + rot 64 - 0 max rot
+  repeat
+  2drop drop
+;
+
+\ Dump data with an arbitrary offset
+: dump-with-offset ( buffer-addr buffer-u offset-u -- )
+  begin over 0> while
+    dup h.8 space
+    over 4 min 0 ?do
+      space 2 pick i + c@ h.2
+    loop
+    over 4 min 4 swap - 0 ?do
+      ."  --"
+    loop
+    space
+    over 8 min 4 max 4 ?do
+      space 2 pick i + c@ h.2
+    loop
+    over 8 min 4 max 8 swap - 0 ?do
+      ."  --"
+    loop
+    space
+    over 12 min 8 max 8 ?do
+      space 2 pick i + c@ h.2
+    loop
+    over 12 min 8 max 12 swap - 0 ?do
+      ."  --"
+    loop
+    space
+    over 16 min 12 max 12 ?do
+      space 2 pick i + c@ h.2
+    loop
+    over 16 min 12 max 16 swap - 0 ?do
+      ."  --"
+    loop
+    space space 2 pick 2 pick dump-ascii-16 cr
+    16 + rot 16 + rot 16 - 0 max rot
+  repeat
+  2drop drop
+;
+
+\ Dump halfwords with an arbitrary offset
+: dump-halfs-with-offset ( buffer-addr buffer-u offset-u -- )
+  begin over 0> while
+    dup h.8 space
+    over 4 min 0 ?do
+      space 2 pick i + h@ h.4
+    2 +loop
+    over 4 min 4 swap - 0 ?do
+      ."  ----"
+    2 +loop
+    space
+    over 8 min 4 max 4 ?do
+      space 2 pick i + h@ h.4
+    2 +loop
+    over 8 min 4 max 8 swap - 0 ?do
+      ."  ----"
+    2 +loop
+    space
+    over 12 min 8 max 8 ?do
+      space 2 pick i + h@ h.4
+    2 +loop
+    over 12 min 8 max 12 swap - 0 ?do
+      ."  ----"
+    2 +loop
+    space
+    over 16 min 12 max 12 ?do
+      space 2 pick i + h@ h.4
+    2 +loop
+    over 16 min 12 max 16 swap - 0 ?do
+      ."  ----"
+    2 +loop
+    space space 2 pick 2 pick dump-ascii-16 cr
+    16 + rot 16 + rot 16 - 0 max rot
+  repeat
+  2drop drop
+;
+
+\ Dump cells with an arbitrary offset
+: dump-cells-with-offset ( buffer-addr buffer-u offset-u -- )
+  begin over 0> while
+    dup h.8
+    over 0> if
+      space space 2 pick @ h.8
+    else
+      ."   --------"
+    then
+    over 4 > if
+      space space 2 pick 4 + @ h.8
+    else
+      ."   --------"
+    then
+    over 8 > if
+      space space 2 pick 8 + @ h.8
+    else
+      ."   --------"
+    then
+    over 12 > if
+      space space 2 pick 12 + @ h.8
+    else
+      ."   --------"
+    then
+    space space 2 pick 2 pick dump-ascii-16 cr
+    16 + rot 16 + rot 16 - 0 max rot
+  repeat
+  2drop drop
+;
 
 \ Set the forth module
 forth set-current
@@ -1433,95 +1564,22 @@ commit-flash
 
 \ Dump memory as ASCII between two addresses
 : dump-ascii ( start-addr end-addr -- )
-  cr
-  2dup < if
-    swap do
-      i h.8
-      space space [char] | emit
-      64 0 do
-	j i + c@ dup $20 >= over $7F < and if emit else drop [char] . emit then
-      loop
-      [char] | emit cr
-    64 +loop
-  else
-    2drop
-  then
+  cr over max over - over dump-ascii-with-offset
 ;
 
 \ Dump memory as bytes and ASCII between two addresses
 : dump ( start-addr end-addr -- )
-  cr
-  2dup < if
-    swap do
-      i h.8
-      space
-      4 0 do
-	space j i + c@ h.2
-      loop
-      space
-      8 4 do
-	space j i + c@ h.2
-      loop
-      space
-      12 8 do
-	space j i + c@ h.2
-      loop
-      space
-      16 12 do
-	space j i + c@ h.2
-      loop
-      space space i dump-ascii-16 cr
-    16 +loop
-  else
-    2drop
-  then
+  cr over max over - over dump-with-offset
 ;
 
 \ Dump memory as 16-bit values and ASCII between two addresses
 : dump-halfs ( start-addr end-addr -- )
-  2 align swap 2 align swap
-  cr
-  2dup < if
-    swap do
-      i h.8
-      space
-      4 0 do
-	space j i + h@ h.4
-      2 +loop
-      space
-      8 4 do
-	space j i + h@ h.4
-      2 +loop
-      space
-      12 8 do
-	space j i + h@ h.4
-      2 +loop
-      space
-      16 12 do
-	space j i + h@ h.4
-      2 +loop
-      space space i dump-ascii-16 cr
-    16 +loop
-  else
-    2drop
-  then
+  cr 1 bic over max swap 2 align swap over - over dump-halfs-with-offset
 ;
 
 \ Dump memory as 32-bit cells and ASCII between two addresses
 : dump-cells ( start-addr end-addr -- )
-  4 align swap 4 align swap
-  cr
-  2dup < if
-    swap do
-      i h.8
-      16 0 do
-	space space j i + @ h.8
-      4 +loop
-      space space i dump-ascii-16 cr
-    16 +loop
-  else
-    2drop
-  then
+  cr 3 bic over max swap 4 align swap over - over  dump-cells-with-offset
 ;
 
 \ Skip characters in the evaluation buffer until a predicate is met

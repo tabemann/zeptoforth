@@ -68,10 +68,60 @@ Write data to the end of a file at the specified path.
 
 Overwrite a file at the specified path with data and then truncate it afterwards.
 
+##### `write-file-window`
+( data-addr data-u offset-u path-addr path-u -- )
+
+Write data at an offset to a file at the specified path without truncating it.
+
 ##### `dump-file`
 ( path-addr path-u -- )
 
-Dump the contents of a file at the specified path to the console.
+Dump the contents of a file at the specified path to the console as hexadecimal bytes plus ASCII.
+
+##### `dump-file-window`
+( offset-u length-u path-addr path-u -- )
+
+Dump the contents of a defined window in a file at the specified path to the console as hexadecimal bytes plus ASCII
+
+##### `dump-file-raw`
+( path-addr path-u -- )
+
+Dump the contents of a file at the specified path to the console as raw data, without processing.
+
+##### `dump-file-raw-window`
+( offset-u length-u path-addr path-u -- )
+
+Dump the contents of a defined window in a file at the specified path to the console as raw data, without processing.
+
+##### `dump-file-ascii`
+( path-addr path-u -- )
+
+Dump the contents of a file at the specified path to the console as ASCII.
+
+##### `dump-file-ascii-window`
+( offset-u length-u path-addr path-u -- )
+
+Dump the contents of a defined window in a file at the specified path to the console as ASCII.
+
+##### `dump-file-halfs`
+( path-addr path-u -- )
+
+Dump the contents of a file at the specified path to the console as hexadecimal halfwords plus ASCII.
+
+##### `dump-file-halfs-window`
+( offset-u length-u path-addr path-u -- )
+
+Dump the contents of a defined window in a file at the specified path to the console as hexadecimal halfwords plus ASCII
+
+##### `dump-file-cells`
+( path-addr path-u -- )
+
+Dump the contents of a file at the specified path to the console as hexadecimal cells plus ASCII.
+
+##### `dump-file-cells-window`
+( offset-u length-u path-addr path-u -- )
+
+Dump the contents of a defined window in a file at the specified path to the console as hexadecimal cells plus ASCII
 
 ##### `read-file`
 ( buffer-addr buffer-u offset-u path-addr path-u -- read-u )

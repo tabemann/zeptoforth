@@ -74,10 +74,10 @@ begin-module fat32-tools
     variable include-buffer-content-len
     
     \ Include input buffer
-    include-buffer-size buffer: include-buffer
+    include-buffer-size aligned-buffer: include-buffer
 
     \ Read buffer
-    read-buffer-size buffer: read-buffer
+    read-buffer-size aligned-buffer: read-buffer
     
     \ Get the top frame of the include stack
     : include-stack-top@ ( -- frame )
@@ -203,43 +203,6 @@ begin-module fat32-tools
       until
     ;
 
-    \ Hexdump data from a file
-    : hexdump-file-data ( buffer-addr buffer-u offset-u -- )
-      begin over 0> while
-        dup h.8 space
-        over 4 min 0 ?do
-          space 2 pick i + c@ h.2
-        loop
-        over 4 min 4 swap - 0 ?do
-          ."  --"
-        loop
-        space
-        over 8 min 4 max 4 ?do
-          space 2 pick i + c@ h.2
-        loop
-        over 8 min 4 max 8 swap - 0 ?do
-          ."  --"
-        loop
-        space
-        over 12 min 8 max 8 ?do
-          space 2 pick i + c@ h.2
-        loop
-        over 12 min 8 max 12 swap - 0 ?do
-          ."  --"
-        loop
-        space
-        over 16 min 12 max 12 ?do
-          space 2 pick i + c@ h.2
-        loop
-        over 16 min 12 max 16 swap - 0 ?do
-          ."  --"
-        loop
-        space space 2 pick dump-ascii-16 cr
-        16 + rot 16 + rot 16 - 0 max rot
-      repeat
-      2drop drop
-    ;
-
     \ Initialize FAT32 including
     : init-fat32-tools ( -- )
       fs-lock init-lock
@@ -335,6 +298,19 @@ begin-module fat32-tools
     ;] fs-lock with-lock
   ;
 
+  \ Write data at an offset in a file without truncating it
+  : write-file-window ( data-addr data-u offset-u path-addr path-u -- )
+    current-fs @ averts x-fs-not-set
+    [:
+      <fat32-file> class-size [:
+        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
+        >r seek-set r@ seek-file r>
+        write-file
+        current-fs @ flush
+      ;] with-aligned-allot
+    ;] fs-lock with-lock
+  ;
+
   \ Overwrite a file and then truncate it afterwards
   : write-file ( data-addr data-u path-addr path-u -- )
     current-fs @ averts x-fs-not-set
@@ -347,8 +323,8 @@ begin-module fat32-tools
     ;] fs-lock with-lock
   ;
 
-  \ Dump the contents of a file to the console
-  : dump-file ( path-addr path-u -- )
+  \ Dump the contents of a file to the console as raw data
+  : dump-file-raw ( path-addr path-u -- )
     current-fs @ averts x-fs-not-set
     [:
       <fat32-file> class-size [:
@@ -364,9 +340,29 @@ begin-module fat32-tools
       ;] with-aligned-allot
     ;] fs-lock with-lock
   ;
+  
+  \ Dump the contents of a window in a file to the console as raw data
+  : dump-file-raw-window ( offset-u length-u path-addr path-u -- )
+    current-fs @ averts x-fs-not-set
+    [:
+      <fat32-file> class-size [:
+        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
+        >r swap seek-set r@ seek-file r>
+        begin
+          read-buffer read-buffer-size 3 pick min 2 pick read-file dup 0> if
+            rot over - -rot
+            read-buffer swap type over 0=
+          else
+            drop true
+          then
+        until
+        2drop
+      ;] with-aligned-allot
+    ;] fs-lock with-lock
+  ;
 
-  \ Dump the contents of a file to the console as hexadecimal plus ASCII
-  : hexdump-file ( path-addr path-u -- )
+  \ Dump the contents of a file to the console as bytes plus ASCII
+  : dump-file ( path-addr path-u -- )
     current-fs @ averts x-fs-not-set
     [:
       <fat32-file> class-size [:
@@ -376,12 +372,169 @@ begin-module fat32-tools
           dup tell-file >r
           read-buffer read-buffer-size 0 fill
           read-buffer read-buffer-size 2 pick read-file dup 0> if
-            read-buffer swap r> hexdump-file-data false
+            read-buffer swap r> dump-with-offset false
           else
             rdrop drop true
           then
         until
-        drop      
+        drop
+      ;] with-aligned-allot
+    ;] fs-lock with-lock
+  ;
+
+  \ Dump the contents of a window in a file to the console as bytes plus ASCII
+  : dump-file-window ( offset-u length-u path-addr path-u -- )
+    current-fs @ averts x-fs-not-set
+    [:
+      <fat32-file> class-size [:
+        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
+        >r swap seek-set r@ seek-file r>
+        cr
+        begin
+          dup tell-file >r
+          read-buffer read-buffer-size 0 fill
+          read-buffer read-buffer-size 3 pick min 2 pick read-file dup 0> if
+            rot over - -rot
+            read-buffer swap r> dump-with-offset over 0=
+          else
+            rdrop drop true
+          then
+        until
+        2drop
+      ;] with-aligned-allot
+    ;] fs-lock with-lock
+  ;
+
+  \ Dump the contents of a file to the console as ASCII
+  : dump-file-ascii ( path-addr path-u -- )
+    current-fs @ averts x-fs-not-set
+    [:
+      <fat32-file> class-size [:
+        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
+        cr
+        begin
+          dup tell-file >r
+          read-buffer read-buffer-size 0 fill
+          read-buffer read-buffer-size 2 pick read-file dup 0> if
+            read-buffer swap r> dump-ascii-with-offset false
+          else
+            rdrop drop true
+          then
+        until
+        drop
+      ;] with-aligned-allot
+    ;] fs-lock with-lock
+  ;
+  
+  \ Dump the contents of a window in a file to the console as ASCII
+  : dump-file-ascii-window ( offset-u length-u path-addr path-u -- )
+    current-fs @ averts x-fs-not-set
+    [:
+      <fat32-file> class-size [:
+        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
+        >r swap seek-set r@ seek-file r>
+        cr
+        begin
+          dup tell-file >r
+          read-buffer read-buffer-size 0 fill
+          read-buffer read-buffer-size 3 pick min 2 pick read-file dup 0> if
+            rot over - -rot
+            read-buffer swap r> dump-ascii-with-offset over 0=
+          else
+            rdrop drop true
+          then
+        until
+        2drop
+      ;] with-aligned-allot
+    ;] fs-lock with-lock
+  ;
+
+  \ Dump the contents of a file to the console as 16-bit values and ASCII
+  : dump-file-halfs ( path-addr path-u -- )
+    current-fs @ averts x-fs-not-set
+    [:
+      <fat32-file> class-size [:
+        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
+        cr
+        begin
+          dup tell-file >r
+          read-buffer read-buffer-size 0 fill
+          read-buffer read-buffer-size 2 pick read-file dup 0> if
+            read-buffer swap 1 bic r> dump-halfs-with-offset false
+          else
+            rdrop drop true
+          then
+        until
+        drop
+      ;] with-aligned-allot
+    ;] fs-lock with-lock
+  ;
+
+  \ Dump the contents of a window in a file to the console as 16-bit values
+  \ and ASCII
+  : dump-file-halfs-window ( offset-u length-u path-addr path-u -- )
+    current-fs @ averts x-fs-not-set
+    [:
+      <fat32-file> class-size [:
+        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
+        >r swap seek-set r@ seek-file r>
+        cr
+        begin
+          dup tell-file >r
+          read-buffer read-buffer-size 0 fill
+          read-buffer read-buffer-size 3 pick min 2 pick read-file dup 0> if
+            rot over - -rot
+            read-buffer swap 1 bic r> dump-halfs-with-offset over 0=
+          else
+            rdrop drop true
+          then
+        until
+        2drop
+      ;] with-aligned-allot
+    ;] fs-lock with-lock
+  ;
+
+  \ Dump the contents of a file to the console as 32-bit values and ASCII
+  : dump-file-cells ( path-addr path-u -- )
+    current-fs @ averts x-fs-not-set
+    [:
+      <fat32-file> class-size [:
+        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
+        cr
+        begin
+          dup tell-file >r
+          read-buffer read-buffer-size 0 fill
+          read-buffer read-buffer-size 2 pick read-file dup 0> if
+            read-buffer swap 3 bic r> dump-cells-with-offset false
+          else
+            rdrop drop true
+          then
+        until
+        drop
+      ;] with-aligned-allot
+    ;] fs-lock with-lock
+  ;
+
+  \ Dump the contents of a window in  file to the console as 32-bit values
+  \ and ASCII
+  : dump-file-cells-window ( offset-u length-u path-addr path-u -- )
+    current-fs @ averts x-fs-not-set
+    [:
+      <fat32-file> class-size [:
+        -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
+        >r swap seek-set r@ seek-file r>
+        cr
+        begin
+          dup tell-file >r
+          read-buffer read-buffer-size 0 fill
+          read-buffer read-buffer-size 3 pick min 2 pick read-file dup 0> if
+            rot over - -rot
+            read-buffer swap 3 bic r> dump-cells-with-offset over 0=
+          else
+            rdrop drop true
+          then
+        until
+        2drop
       ;] with-aligned-allot
     ;] fs-lock with-lock
   ;
