@@ -146,6 +146,9 @@ begin-module fat32
     \ Find a file or directory in a path from the root directory
     method with-root-path ( c-addr u xt fs -- ) ( xt: c-addr' u' dir -- )
 
+    \ Find whether a file or directory in a path from the root directory exists
+    method root-path-exists? ( c-addr u fs -- exists?  )
+    
     \ Flush the block device for a filesystem
     method flush ( fs -- )
   
@@ -155,6 +158,7 @@ begin-module fat32
   <base-fat32-fs> begin-implement
     ' abstract-method define root-dir@
     ' abstract-method define with-root-path
+    ' abstract-method define root-path-exists?
     ' abstract-method define flush
   end-implement
   
@@ -259,6 +263,9 @@ begin-module fat32
       
       \ Look up a directory entry by name
       method lookup-entry ( c-addr u cluster fs -- index cluster )
+
+      \ Check whether a directory entry exists by name
+      method entry-exists? ( c-addr u cluster fs -- exists? )
       
       \ Allocate a directory entry
       method allocate-entry ( cluster fs -- index cluster )
@@ -383,6 +390,9 @@ begin-module fat32
     \ Find a file or directory in a path from a directory
     method with-path ( c-addr u xt dir -- ) ( xt: c-addr' u' dir' -- )
 
+    \ Find whether a file or directory in a path from a directory exists
+    method path-exists? ( c-addr u dir -- exists? )
+
     \ Read an entry from a directory, and return whether an entry was read
     method read-dir ( entry dir -- entry-read? )
     
@@ -409,6 +419,15 @@ begin-module fat32
     
     \ Get whether a directory is empty
     method dir-empty? ( dir -- empty? )
+
+    \ Get whether a directory entry exists
+    method exists? ( c-addr u dir -- exists? )
+
+    \ Get whether a directory entry is a file
+    method file? ( c-addr u dir -- file? )
+
+    \ Get whether a directory entry is a directory
+    method dir? ( c-addr u dir -- dir? )
     
     continue-module fat32-internal
     
@@ -886,9 +905,15 @@ begin-module fat32
     ; define root-dir@
     
     :noname ( c-addr u xt fs -- ) ( xt: c-addr' u' dir -- )
-      <fat32-dir> class-size [: tuck swap root-dir@ with-path ;] with-aligned-allot
+      <fat32-dir> class-size
+      [: tuck swap root-dir@ with-path ;] with-aligned-allot
     ; define with-root-path
 
+    :noname ( c-addr u fs -- exists? )
+      <fat32-dir> class-size
+      [: tuck swap root-dir@ path-exists? ;] with-aligned-allot
+    ; define root-path-exists?
+    
     :noname ( fs -- ) fat32-device @ flush-blocks ; define flush
     
     :noname ( fs -- )
@@ -1085,7 +1110,32 @@ begin-module fat32
         ;] with-object
       ;] convert-name
     ; define lookup-entry
-    
+
+    :noname ( c-addr u cluster fs -- exists? )
+      2swap ( cluster fs c-addr u ) [: ( cluster fs name )
+        <fat32-entry> [: ( cluster fs name entry )
+          2swap ( name entry cluster fs ) 0 -rot begin ( name entry index cluster fs )
+            dup >r find-entry r> ( name entry index cluster fs )
+            over -1 = if
+              drop 2drop 2drop false exit
+            then
+            2over 2over entry@
+            3 pick short-file-name c@ dup $00 = if
+              2drop 2drop 2drop false exit
+            then
+            $E5 <> if ( name entry index cluster fs )
+              4 pick 8 5 pick short-file-name 8 equal-case-strings? if
+                4 pick 8 + 3 5 pick short-file-ext 3 equal-case-strings? if
+                  drop 2drop 2drop true exit
+                then
+              then
+            then
+            rot 1+ -rot
+          again
+        ;] with-object
+      ;] convert-name
+    ; define entry-exists?
+
     :noname ( cluster fs -- index cluster )
       0 -rot
       begin
@@ -1204,10 +1254,8 @@ begin-module fat32
     :noname ( file -- offset ) file-offset @ ; define tell-file
     
     :noname ( c-addr u parent-dir file -- )
-      [: 3 pick 3 pick 3 pick dir-start-cluster @ 3 pick file-fs @ lookup-entry 2drop ;] try
-      ( c-addr u parent-dir file exception )
-      dup 0= triggers x-entry-already-exists
-      dup ['] x-entry-not-found = if drop 0 then ?raise
+      3 pick 3 pick 3 pick dir-start-cluster @ 3 pick file-fs @ entry-exists?
+      triggers x-entry-already-exists
       swap dir-start-cluster @ over file-fs @ allocate-entry ( c-addr u file parent-index parent-cluster )
       2 pick file-parent-cluster ! ( c-addr u file parent-index )
       over file-parent-index ! ( c-addr u file )
@@ -1383,7 +1431,32 @@ begin-module fat32
         drop 1- swap 1+ swap 2r> swap with-path ( )
       then ( )
     ; define with-path
-    
+
+    :noname ( c-addr u dir -- exists? )
+      >r ( c-addr u )
+      2dup validate-path ( c-addr' u' )
+      strip-final-path-separator ( c-addr' u' )
+      dup 0<> averts x-empty-path ( c-addr' u' )
+      2dup find-path-separator ( c-addr' u' index )
+      dup 0<> if
+        dup -1 = if ( c-addr' u' index )
+          drop r> exists? ( exists? )
+        else
+          2 pick over r> <fat32-dir> class-size [: ( c-addr' u' index c-addr'' u'' dir dir' )
+            dup >r swap ( c-addr' u' index c-addr'' u'' dir' dir )
+            2over 2 pick exists? if ( c-addr' u' index c-addr'' u'' dir' dir )
+              open-dir ( c-addr' u' index )
+              1+ tuck - -rot + swap r> path-exists? ( exists? )
+            else
+              rdrop 2drop 2drop drop false ( exists? )
+            then
+          ;] with-aligned-allot
+        then
+      else ( c-addr' u' index )
+        drop 1- swap 1+ swap r> path-exists? ( exists? )
+      then ( exists? )
+    ; define path-exists?
+
     :noname ( entry dir -- entry-read? )
       >r begin
         r@ dir-offset @ r@ dir-current-cluster-index @ 1+ 32 * < if
@@ -1393,7 +1466,11 @@ begin-module fat32
           else
             1 r@ dir-offset +!
             dup entry-deleted? not if
-              drop true true
+              dup entry-file? over entry-dir? or if
+                drop true true
+              else
+                false
+              then
             else
               false
             then
@@ -1493,7 +1570,29 @@ begin-module fat32
         again
       ;] with-object
     ; define dir-empty?
+
+    :noname ( c-addr u dir -- exists? )
+      dup dir-start-cluster @ swap dir-fs @ entry-exists?
+    ; define exists?
+
+    :noname ( c-addr u dir -- file? )
+      <fat32-entry> [: ( c-addr u dir entry )
+        2swap 3 pick dir-start-cluster @ 4 pick dir-fs @ lookup-entry
+        ( dir entry index cluster )
+        2 pick >r 3 roll dir-fs @ entry@ r> ( entry )
+        entry-file?
+      ;] with-object
+    ; define file?
     
+    :noname ( c-addr u dir -- dir? )
+      <fat32-entry> [: ( c-addr u dir entry )
+        2swap 3 pick dir-start-cluster @ 4 pick dir-fs @ lookup-entry
+        ( dir entry index cluster )
+        2 pick >r 3 roll dir-fs @ entry@ r> ( entry )
+        entry-dir?
+      ;] with-object
+    ; define dir?
+
     :noname ( c-addr u parent-dir dir -- )
       swap dir-start-cluster @ over dir-fs @ allocate-entry ( c-addr u dir parent-index parent-cluster )
       2 pick dir-parent-cluster ! ( c-addr u dir parent-index )
@@ -1515,10 +1614,8 @@ begin-module fat32
     ; define do-create-dir-raw
     
     :noname ( c-addr u parent-dir dir -- )
-      [: 3 pick 3 pick 3 pick dir-start-cluster @ 4 pick dir-fs @ lookup-entry 2drop ;] try
-      ( c-addr u parent-dir dir exception )
-      dup 0= triggers x-entry-already-exists
-      dup ['] x-entry-not-found = if drop 0 then ?raise
+      3 pick 3 pick 3 pick dir-start-cluster @ 4 pick dir-fs @ entry-exists?
+      triggers x-entry-already-exists
       2dup 2>r do-create-dir-raw 2r> ( parent-dir dir -- )
       dup do-create-dot-entry
       do-create-dot-dot-entry

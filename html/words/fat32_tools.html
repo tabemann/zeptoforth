@@ -165,6 +165,11 @@
 <p>( path-addr path-u – size-u )</p>
 <p>Get the size in bytes of a file at the specified path.</p>
 </section>
+<section id="exists">
+<h3><code class="docutils literal notranslate"><span class="pre">exists?</span></code><a class="headerlink" href="#exists" title="Permalink to this headline">¶</a></h3>
+<p>( path-addr path-u – exists? )</p>
+<p>Get whether a file or directory exists at the specified path.</p>
+</section>
 <section id="remove-file">
 <h3><code class="docutils literal notranslate"><span class="pre">remove-file</span></code><a class="headerlink" href="#remove-file" title="Permalink to this headline">¶</a></h3>
 <p>( path-addr path-u – )</p>
@@ -179,6 +184,16 @@
 <h3><code class="docutils literal notranslate"><span class="pre">rename</span></code><a class="headerlink" href="#rename" title="Permalink to this headline">¶</a></h3>
 <p>( path-addr path-u new-name-addr new-name-u – )</p>
 <p>Rename a file or directory at the specified path to a new <em>name</em> (not path). Note that files’ and directories’ parent directories cannot be changed with this word.</p>
+</section>
+<section id="file">
+<h3><code class="docutils literal notranslate"><span class="pre">file?</span></code><a class="headerlink" href="#file" title="Permalink to this headline">¶</a></h3>
+<p>( path-addr path-u – file? )</p>
+<p>Get whether the entry at a specified path is a file.</p>
+</section>
+<section id="dir">
+<h3><code class="docutils literal notranslate"><span class="pre">dir?</span></code><a class="headerlink" href="#dir" title="Permalink to this headline">¶</a></h3>
+<p>( path-addr path-u – dir? )</p>
+<p>Get whether the entry at a specified path is a directory.</p>
 </section>
 </section>
 </section>

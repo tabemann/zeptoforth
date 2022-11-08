@@ -133,6 +133,11 @@ Read a file at the specified path, from an offset from the start of the file, to
 
 Get the size in bytes of a file at the specified path.
 
+##### `exists?`
+( path-addr path-u -- exists? )
+
+Get whether a file or directory exists at the specified path.
+
 ##### `remove-file`
 ( path-addr path-u -- )
 
@@ -147,3 +152,13 @@ Remove a directory at the specified path. Note that it must be empty aside from 
 ( path-addr path-u new-name-addr new-name-u -- )
 
 Rename a file or directory at the specified path to a new *name* (not path). Note that files' and directories' parent directories cannot be changed with this word.
+
+##### `file?`
+( path-addr path-u -- file? )
+
+Get whether the entry at a specified path is a file.
+
+##### `dir?`
+( path-addr path-u -- dir? )
+
+Get whether the entry at a specified path is a directory.

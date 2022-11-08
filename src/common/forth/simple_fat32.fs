@@ -76,6 +76,10 @@ begin-module simple-fat32
     :noname ( c-addr u xt fs -- ) ( xt: c-addr' u' dir )
       simple-fat32-fs with-root-path
     ; define with-root-path
+
+    :noname ( c-addr u fs -- exists? )
+      simple-fat32-fs root-path-exists?
+    ; define root-path-exists?
     
     :noname ( write-through fs -- )
       simple-fat32-sd [ block-dev ] :: write-through!

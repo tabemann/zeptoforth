@@ -161,13 +161,10 @@ begin-module fat32-tools
         swap
         begin
           2dup read-dir if
-            over entry-file? 2 pick entry-dir? or if
-              12 [:
-                12 3 pick file-name@
-                cr type space
-              ;] with-allot
-            then
-            false
+            12 [:
+              12 3 pick file-name@
+              cr type space false
+            ;] with-allot
           else
             2drop true
           then
@@ -588,6 +585,30 @@ begin-module fat32-tools
     [:
       ['] rename current-fs @ with-root-path
       current-fs @ flush
+    ;] fs-lock with-lock
+  ;
+
+  \ Get whether a file or directory at a given path exists
+  : exists? ( path-addr path-u -- exists? )
+    current-fs @ averts x-fs-not-set
+    [:
+      current-fs @ root-path-exists?
+    ;] fs-lock with-lock
+  ;
+
+  \ Get whether a directory entry is a file
+  : file? ( path-addr path-u -- file? )
+    current-fs @ averts x-fs-not-set
+    [:
+      ['] file? current-fs @ with-root-path
+    ;] fs-lock with-lock
+  ;
+
+  \ Get whether a directory entry is a directory
+  : dir? ( path-addr path-u -- dir? )
+    current-fs @ averts x-fs-not-set
+    [:
+      ['] dir? current-fs @ with-root-path
     ;] fs-lock with-lock
   ;
 

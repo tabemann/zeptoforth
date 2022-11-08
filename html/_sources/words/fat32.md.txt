@@ -170,6 +170,11 @@ Initialize a root directory of a FAT32 filesystem; the directory object need not
 
 Parse a path starting at the root directory of a FAT32 filesystem, and pass the leaf's name along with a directory object containing that leaf (or which would contain said leaf if it did not exist already) to the passed in *xt*. Note that said directory object will be destroyed when *xt* returns.
 
+##### `root-path-exists?`
+( c-addr u fs -- exists? )
+
+Get whether a file or directory exists at the specified path starting at the root directory of a FAT32 filesystem.
+
 ##### `flush`
 ( fs -- )
 
@@ -248,6 +253,26 @@ The `<fat32-dir>` class includes the following methods:
 ( c-addr u xt dir -- ) ( xt: c-addr' u' dir' -- )
 
 Parse a path starting at a given directory, and pass the leaf's name along with a directory object containing that leaf (or which would contain said leaf if it did not exist already) to the passed in *xt*. Note that said directory object will be destroyed when *xt* returns unless it was the original directory object passed in.
+
+##### `path-exists?`
+( c-addr u dir -- exists? )
+
+Get whether a file or directory exist at the specified path starting at a given directory.
+
+##### `exists?`
+( c-addr u dir -- exists? )
+
+Get whether a directory contains a file or directory of the specified name.
+
+##### `file?`
+( c-addr u -- file? )
+
+Get whether the entry in a directory with the specified name is a file.
+
+##### `dir?`
+( c-addr u -- dir? )
+
+Get whether the entry in a directory with the specified name is a directory.
 
 ##### `read-dir`
 ( entry dir -- entry-read? )
