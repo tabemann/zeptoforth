@@ -44,6 +44,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 * SDHC/SDXC card support using SPI
 * FAT32 support on SDHC/SDXC cards
 * Support for code loading from files in FAT32 filesystems
+* User-level FAT32 tools
 * Quad SPI flash storage support (on the STM32F746 DISCOVERY board and the Raspberry Pi Pico)
 * A block editor (on the STM32F746 DISCOVERY board and the Raspberry Pi Pico)
 * Random number generator support (except on the STM32F411 "Black Pill" and STM32F411 Nucleo 64 boards)

@@ -84,9 +84,9 @@ _2tuck:	ldr r0, [dp]
 	define_word "d=", visible_flag
 _deq:
 	.ifdef cortex_m7
-	ldmia dp!, {r0}
-	ldmia dp!, {r1}
-	ldmia dp!, {r2}
+	ldr r0, [dp], #4
+	ldr r1, [dp], #4
+	ldr r2, [dp], #4
 	.else
 	ldmia dp!, {r0, r1, r2}
 	.endif
@@ -103,9 +103,9 @@ _deq:
 	define_word "d<>", visible_flag
 _dne:
 	.ifdef cortex_m7
-	ldmia dp!, {r0}
-	ldmia dp!, {r1}
-	ldmia dp!, {r2}
+	ldr r0, [dp], #4
+	ldr r1, [dp], #4
+	ldr r2, [dp], #4
 	.else
 	ldmia dp!, {r0, r1, r2}
 	.endif
@@ -123,9 +123,9 @@ _dne:
 	define_word "du<", visible_flag | inlined_flag
 _dult:
 	.ifdef cortex_m7
-	ldmia dp!, {r0}
-	ldmia dp!, {r1}
-	ldmia dp!, {r2}
+	ldr r0, [dp], #4
+	ldr r1, [dp], #4
+	ldr r2, [dp], #4
 	.else
 	ldmia dp!, {r0, r1, r2}
 	.endif
@@ -140,9 +140,9 @@ _dult:
 	define_word "du>", visible_flag | inlined_flag
 _dugt:
 	.ifdef cortex_m7
-	ldmia dp!, {r0}
-	ldmia dp!, {r1}
-	ldmia dp!, {r2}
+	ldr r0, [dp], #4
+	ldr r1, [dp], #4
+	ldr r2, [dp], #4
 	.else
 	ldmia dp!, {r0, r1, r2}
 	.endif
@@ -157,9 +157,9 @@ _dugt:
 	define_word "du>=", visible_flag | inlined_flag
 _duge:
 	.ifdef cortex_m7
-	ldmia dp!, {r0}
-	ldmia dp!, {r1}
-	ldmia dp!, {r2}
+	ldr r0, [dp], #4
+	ldr r1, [dp], #4
+	ldr r2, [dp], #4
 	.else
 	ldmia dp!, {r0, r1, r2}
 	.endif
@@ -175,9 +175,9 @@ _duge:
 	define_word "du<=", visible_flag | inlined_flag
 _dule:
 	.ifdef cortex_m7
-	ldmia dp!, {r0}
-	ldmia dp!, {r1}
-	ldmia dp!, {r2}
+	ldr r0, [dp], #4
+	ldr r1, [dp], #4
+	ldr r2, [dp], #4
 	.else
 	ldmia dp!, {r0, r1, r2}
 	.endif
@@ -193,9 +193,9 @@ _dule:
 	define_word "d<", visible_flag
 _dlt:
 	.ifdef cortex_m7
-	ldmia dp!, {r0}
-	ldmia dp!, {r1}
-	ldmia dp!, {r2}
+	ldr r0, [dp], #4
+	ldr r1, [dp], #4
+	ldr r2, [dp], #4
 	.else
 	ldmia dp!, {r0, r1, r2}
 	.endif
@@ -214,9 +214,9 @@ _dlt:
 	define_word "d>", visible_flag
 _dgt:
 	.ifdef cortex_m7
-	ldmia dp!, {r0}
-	ldmia dp!, {r1}
-	ldmia dp!, {r2}
+	ldr r0, [dp], #4
+	ldr r1, [dp], #4
+	ldr r2, [dp], #4
 	.else
 	ldmia dp!, {r0, r1, r2}
 	.endif
@@ -235,9 +235,9 @@ _dgt:
 	define_word "d>=", visible_flag
 _dge:
 	.ifdef cortex_m7
-	ldmia dp!, {r0}
-	ldmia dp!, {r1}
-	ldmia dp!, {r2}
+	ldr r0, [dp], #4
+	ldr r1, [dp], #4
+	ldr r2, [dp], #4
 	.else
 	ldmia dp!, {r0, r1, r2}
 	.endif
@@ -256,9 +256,9 @@ _dge:
 	define_word "d<=", visible_flag
 _dle:
 	.ifdef cortex_m7
-	ldmia dp!, {r0}
-	ldmia dp!, {r1}
-	ldmia dp!, {r2}
+	ldr r0, [dp], #4
+	ldr r1, [dp], #4
+	ldr r2, [dp], #4
 	.else
 	ldmia dp!, {r0, r1, r2}
 	.endif
@@ -275,7 +275,7 @@ _dle:
 	
 	@@ Double equals zero
 	define_word "d0=", visible_flag | inlined_flag
-_d0eq:	ldmia dp!, {r0}
+_d0eq:	ldr r0, [dp], #4
 	subs r0, #1
 	sbcs tos, #0
 	sbcs tos, tos
@@ -284,7 +284,7 @@ _d0eq:	ldmia dp!, {r0}
 
 	@@ Double not equals zero
 	define_word "d0<>", visible_flag | inlined_flag
-_d0ne:	ldmia dp!, {r0}
+_d0ne:	ldr r0, [dp], #4
 	subs r0, #1
 	sbcs tos, #0
 	sbcs tos, tos
@@ -301,7 +301,7 @@ _d0lt:	adds dp, #4
 
 	@@ Double greater than zero
 	define_word "d0>", visible_flag
-_d0gt:	ldmia dp!, {r0}
+_d0gt:	ldr r0, [dp], #4
 	movs r1, tos
 	orrs r0, tos
 	movs tos, #0
@@ -315,7 +315,7 @@ _d0gt:	ldmia dp!, {r0}
 	
 	@@ Double less than or equal to zero
 	define_word "d0<=", visible_flag
-_d0le:	ldmia dp!, {r0}
+_d0le:	ldr r0, [dp], #4
 	movs r1, tos
 	orrs r0, tos
 	movs tos, #0
@@ -402,9 +402,9 @@ _dnegate:
 	define_word "d+", visible_flag | inlined_flag
 _dadd:
 	.ifdef cortex_m7
-	ldmia dp!, {r0}
-	ldmia dp!, {r1}
-	ldmia dp!, {r2}
+	ldr r0, [dp], #4
+	ldr r1, [dp], #4
+	ldr r2, [dp], #4
 	.else
 	ldmia dp!, {r0, r1, r2}
 	.endif
@@ -420,9 +420,9 @@ _dadd:
 	define_word "d-", visible_flag | inlined_flag
 _dsub:
 	.ifdef cortex_m7
-	ldmia dp!, {r0}
-	ldmia dp!, {r1}
-	ldmia dp!, {r2}
+	ldr r0, [dp], #4
+	ldr r1, [dp], #4
+	ldr r2, [dp], #4
 	.else
 	ldmia dp!, {r0, r1, r2}
 	.endif
@@ -466,9 +466,9 @@ _mmul:	ldr r0, [dp]
 _udmul:
 
 	.ifdef cortex_m7
-	ldmia dp!, {r0}
-	ldmia dp!, {r1}
-	ldmia dp!, {r2}
+	ldr r0, [dp], #4
+	ldr r1, [dp], #4
+	ldr r2, [dp], #4
 	.else
 	ldmia dp!, {r0, r1, r2}
 	.endif
@@ -844,7 +844,7 @@ _fmul:  push {lr}
 	bl _udmmul
 	@ ( LL L H HH )
 	pull_tos
-	ldmia dp!, {r0}
+	ldr r0, [dp], #4
 	str r0, [dp]
 	@ ( L H )
 	pop {pc}
@@ -860,7 +860,7 @@ _fmul:  push {lr}
 2:      bl _udmmul
 	@ ( LL L H HH )
 	pull_tos
-	ldmia dp!, {r0}
+	ldr r0, [dp], #4
 	str r0, [dp]
 	@ ( L H )
 	bl _dnegate

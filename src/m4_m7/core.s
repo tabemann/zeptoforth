@@ -201,7 +201,11 @@ _mul:	movs r0, tos
 
 	@@ Get the minimum of two values
 	define_word "min", visible_flag | inlined_flag
-_min:	ldmia dp!, {r0}
+_min:	.if cortex_m7
+        ldr r0, [dp], #4
+        .else
+        ldmia dp!, {r0}
+        .endif
 	cmp tos, r0
 	blt 1f
 	movs tos, r0
@@ -210,7 +214,11 @@ _min:	ldmia dp!, {r0}
 
 	@@ Get the maximum of two values
 	define_word "max", visible_flag | inlined_flag
-_max:	ldmia dp!, {r0}
+_max:	.if cortex_m7
+        ldr r0, [dp], #4
+        .else
+        ldmia dp!, {r0}
+        .endif
 	cmp tos, r0
 	bgt 1f
 	movs tos, r0
@@ -1908,8 +1916,8 @@ _rdrop:	adds sp, #4
 	define_word "2>r", visible_flag | inlined_flag
 _push_2r:
 	.ifdef cortex_m7
-	ldmia dp!, {r0}
-	ldmia dp!, {r1}
+	ldr r0, [dp], #4
+        ldr r1, [dp], #4
 	.else
 	ldmia dp!, {r0, r1}
 	.endif
@@ -2055,8 +2063,8 @@ _init_context:
 	movs r0, tos
 	@	adds r0, #1
 	.ifdef cortex_m7
-	ldmia dp!, {r1}
-	ldmia dp!, {r2}
+        ldr r1, [dp], #4
+        ldr r2, [dp], #4
 	.else
  	ldmia dp!, {r1, r2}
 	.endif
