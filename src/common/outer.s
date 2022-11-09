@@ -189,7 +189,13 @@ _to_upper_char:
 	define_word "equal-case-strings?", visible_flag
 _equal_case_strings:
 	movs r0, tos
+        .if cortex_m7
+        ldr r1, [dp], #4
+        ldr r2, [dp], #4
+        ldr r3, [dp], #4
+        .else
         ldmia dp!, {r1, r2, r3}
+        .endif
 	cmp r0, r2
 	bne 3f
 1:	cmp r0, #0
