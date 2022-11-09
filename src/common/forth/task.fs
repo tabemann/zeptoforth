@@ -129,82 +129,82 @@ begin-module task
     \ The task structure
     begin-structure task-size
       \ Return stack size
-      dup constant .task-rstack-size hfield: task-rstack-size
+      hfield: task-rstack-size
       
       \ Data stack size
-      dup constant .task-stack-size hfield: task-stack-size
+      hfield: task-stack-size
 
       \ Dictionary size
-      dup constant .task-dict-size field: task-dict-size
+      field: task-dict-size
 
       \ Current return stack adress
-      dup constant .task-rstack-current field: task-rstack-current
+      field: task-rstack-current
 
       \ Current dictionary base
-      dup constant .task-dict-base field: task-dict-base
+      field: task-dict-base
       
       \ Task priority
-      dup constant .task-priority hfield: task-priority
+      hfield: task-priority
       
       \ Task active state ( > 0 active, <= 0 inactive, $8000 terminated )
-      dup constant .task-active hfield: task-active
+      hfield: task-active
 
       \ Whether a task is waiting
-      dup constant .task-state hfield: task-state
+      hfield: task-state
 
       \ Task saved priority
-      dup constant .task-saved-priority hfield: task-saved-priority
+      hfield: task-saved-priority
 
       \ Prev task
-      dup constant .task-prev field: task-prev
+      field: task-prev
       
       \ Next task
-      dup constant .task-next field: task-next
+      field: task-next
 
       \ The saved multitasker SysTick counter
-      dup constant .task-saved-systick-counter field: task-saved-systick-counter
+      field: task-saved-systick-counter
     
       \ The task ready count
-      dup constant .task-ready-count field: task-ready-count
+      field: task-ready-count
       
       \ Task systick start time
-      dup constant .task-systick-start field: task-systick-start
+      field: task-systick-start
       
       \ Task systick delay
-      dup constant .task-systick-delay field: task-systick-delay
+      field: task-systick-delay
       
       \ A task's timeslice
-      dup constant .task-timeslice field: task-timeslice
+      field: task-timeslice
       
       \ A task's minimum timeslice
-      dup constant .task-min-timeslice field: task-min-timeslice
+      field: task-min-timeslice
 
       \ The current timeout start time in ticks
-      dup constant .timeout-systick-start field: timeout-systick-start
+      field: timeout-systick-start
       
       \ The current timeout delay time in ticks
-      dup constant .timeout-systick-delay field: timeout-systick-delay
+      field: timeout-systick-delay
   
       \ The task's name as a counted string
-      dup constant .task-name field: task-name
+      field: task-name
 
       \ The notification being waited on
-      dup constant .task-current-notify field: task-current-notify
+      field: task-current-notify
 
       \ The notified bitmap
-      dup constant .task-notified-bitmap field: task-notified-bitmap
+      field: task-notified-bitmap
 
       \ The current notification count
-      dup constant .task-notify-count field: task-notify-count
+      field: task-notify-count
 
       \ The current notification area pointer
-      dup constant .task-notify-area field: task-notify-area
+      field: task-notify-area
 
       \ Spinlock to claim
-      dup constant .spinlock-to-claim field: spinlock-to-claim
+      field: spinlock-to-claim
 
       \ The current core of a task
-      dup constant .task-core field: task-core
+      field: task-core
 
     end-structure
 
@@ -251,79 +251,17 @@ begin-module task
 
   \ Access a given user variable for a given task
   : for-task ( task xt -- addr )
-    code[
-    1 r0 movs_,#_
-    r0 tos orrs_,_
-    tos blx_
-    ]code
-    dict-base
-    code[
-    cortex-m7? [if]
-      0 dp r0 ldr_,[_,#_]
-      4 dp r1 ldr_,[_,#_]
-      8 dp r2 ldr_,[_,#_]
-      12 dp adds_,#_
-    [else]
-      r2 r1 r0 3 dp ldm
-    [then]
-    0 tos tos ldr_,[_,#_]
-    tos r0 r0 subs_,_,_
-    .task-dict-base r2 tos ldr_,[_,#_]
-    r0 tos tos adds_,_,_
-    ]code
-\    execute dict-base @ - swap task-dict-base @ +
+    execute dict-base @ - swap task-dict-base @ +
   ;
 
   \ Set a given user variable for a given task
   : for-task! ( x task xt -- )
-    code[
-    1 r0 movs_,#_
-    r0 tos orrs_,_
-    tos blx_
-    ]code
-    dict-base
-    code[
-    cortex-m7? [if]
-      0 dp r0 ldr_,[_,#_]
-      4 dp r1 ldr_,[_,#_]
-      8 dp r2 ldr_,[_,#_]
-      12 dp r3 ldr_,[_,#_]
-      16 dp adds_,#_
-    [else]
-      r3 r2 r1 r0 4 dp ldm
-    [then]
-    0 tos tos ldr_,[_,#_]
-    tos r0 r0 subs_,_,_
-    .task-dict-base r2 tos ldr_,[_,#_]
-    r0 tos r3 str_,[_,_]
-    tos 1 dp ldm
-    ]code
-\    execute dict-base @ - swap task-dict-base @ + !
+    execute dict-base @ - swap task-dict-base @ + !
   ;
 
   \ Get a given user variable for a given task
   : for-task@ ( task xt -- x )
-    code[
-    1 r0 movs_,#_
-    r0 tos orrs_,_
-    tos blx_
-    ]code
-    dict-base
-    code[
-    cortex-m7? [if]
-      0 dp r0 ldr_,[_,#_]
-      4 dp r1 ldr_,[_,#_]
-      8 dp r2 ldr_,[_,#_]
-      12 dp adds_,#_
-    [else]
-      r2 r1 r0 3 dp ldm
-    [then]
-    0 tos tos ldr_,[_,#_]
-    tos r0 r0 subs_,_,_
-    .task-dict-base r2 tos ldr_,[_,#_]
-    r0 tos tos ldr_,[_,_]
-    ]code
-\    execute dict-base @ - swap task-dict-base @ + @
+    execute dict-base @ - swap task-dict-base @ + @
   ;
 
   \ Pause a task without rescheduling it
@@ -390,138 +328,43 @@ begin-module task
     \ Find the next task with a higher priority; 0 returned indicates no task
     \ exists with a higher priority.
     : find-higher-priority ( task -- higher-task )
-      code[
-      .task-priority tos r0 ldrh_,[_,#_]
-      16 r0 r0 lsls_,_,#_
-      16 r0 r0 asrs_,_,#_
-      r0 1 push
-      .task-core tos tos ldr_,[_,#_]
-      ]code
-      cpu-last-task
-      code[
-      0 tos tos ldr_,[_,#_]
-      mark>
-      0 tos cmp_,#_
-      ne bc>
-      pc r0 2 pop
-      >mark
-      0 r0 ldr_,[sp,#_]
-      .task-priority tos r1 ldrh_,[_,#_]
-      16 r1 r1 lsls_,_,#_
-      16 r1 r1 asrs_,_,#_
-      r0 r1 cmp_,_
-      lt bc>
-      pc r0 2 pop
-      >mark
-      .task-next tos tos ldr_,[_,#_]
-      b<
-      ]code
+      task-priority@ >r
+      dup task-core @ cpu-last-task @ begin
+	dup 0<> if
+	  dup task-priority@ r@ < if task-next @ false else true then
+	else
+	  true
+	then
+      until
+      rdrop
     ;
-      
-    \   task-priority@ >r
-    \   dup task-core @ cpu-last-task @ begin
-    \     dup 0<> if
-    \       dup task-priority@ r@ < if task-next @ false else true then
-    \     else
-    \       true
-    \     then
-    \   until
-    \   rdrop
-    \ ;
 
     \ Insert a task before another task
     : insert-task-before ( task after-task -- )
-      code[
-      .task-prev tos r0 ldr_,[_,#_]
-      0 r0 cmp_,#_
-      eq bc>
-      0 dp r1 ldr_,[_,#_]
-      .task-next r0 r1 str_,[_,#_]
-      .task-prev r1 r0 str_,[_,#_]
-      b>
-      2swap >mark
-      0 dp r1 ldr_,[_,#_]
-      0 r2 movs_,#_
-      .task-prev r1 r2 str_,[_,#_]
-      tos 1 push
-      .task-core r1 tos ldr_,[_,#_]
-      ]code
-      cpu-last-task
-      code[
-      0 dp r1 ldr_,[_,#_]
-      0 tos r1 str_,[_,#_]
-      tos 1 pop
-      >mark
-      .task-prev tos r1 str_,[_,#_]
-      .task-next r1 tos str_,[_,#_]
-      cortex-m7? [if]
-        0 dp r0 ldr_,[_,#_]
-        4 dp tos ldr_,[_,#_]
-        8 dp adds_,#_
-      [else]
-        tos r0 2 dp ldm
-      [then]
-      ]code
+      dup task-prev @ 0<> if
+	2dup task-prev @ task-next !
+	2dup task-prev @ swap task-prev !
+      else
+	0 2 pick task-prev !
+	over dup task-core @ cpu-last-task !
+      then
+      2dup task-prev !
+      swap task-next !
     ;
-
-    \   dup task-prev @ 0<> if
-    \     2dup task-prev @ task-next !
-    \     2dup task-prev @ swap task-prev !
-    \   else
-    \     0 2 pick task-prev !
-    \     over dup task-core @ cpu-last-task !
-    \   then
-    \   2dup task-prev !
-    \   swap task-next !
-    \ ;
 
     \ Insert a task into first position
     : insert-task-first ( task -- )
-      code[
-      tos 1 push
-      .task-core tos tos ldr_,[_,#_]
-      tos 1 push
-      ]code
-      cpu-first-task
-      code[
-      0 tos tos ldr_,[_,#_]
-      0 tos cmp_,#_
-      eq bc>
-      4 r0 ldr_,[sp,#_]
-      .task-next tos r0 str_,[_,#_]
-      .task-prev r0 tos str_,[_,#_]
-      b>
-      2swap >mark
-      0 tos ldr_,[sp,#_]
-      ]code
-      cpu-last-task
-      code[
-      4 r0 ldr_,[sp,#_]
-      0 tos r0 str_,[_,#_]
-      >mark
-      tos 1 pop
-      ]code
-      cpu-first-task
-      code[
-      r0 1 pop
-      0 tos r0 str_,[_,#_]
-      0 tos movs_,#_
-      .task-next r0 tos str_,[_,#_]
-      tos 1 dp ldm
-      ]code
+      dup task-core @ >r
+      r@ cpu-first-task @ 0<> if
+	dup r@ cpu-first-task @ task-next !
+	r@ cpu-first-task @ over task-prev !
+      else
+	dup r@ cpu-last-task !
+	0 over task-prev !
+      then
+      dup r> cpu-first-task !
+      0 swap task-next !
     ;
-      
-    \   dup task-core @ >r
-    \   r@ cpu-first-task @ 0<> if
-    \     dup r@ cpu-first-task @ task-next !
-    \     r@ cpu-first-task @ over task-prev !
-    \   else
-    \     dup r@ cpu-last-task !
-    \     0 over task-prev !
-    \   then
-    \   dup r> cpu-first-task !
-    \   0 swap task-next !
-    \ ;
 
     \ Insert a task
     : insert-task ( task -- )
@@ -534,61 +377,21 @@ begin-module task
 
     \ Remove a task
     : remove-task ( task -- )
-      [ 0 cpu-last-task ] literal
-      [ 0 cpu-first-task ] literal
-      code[
-      r4 1 push
-      tos r2 movs_,_
-      cortex-m7? [if]
-        0 dp r3 ldr_,[_,#_]
-        4 dp tos ldr_,[_,#_]
-        8 dp adds_,#_
-      [else]
-        tos r3 2 dp ldm
-      [then]
-      .task-prev tos r0 ldr_,[_,#_]
-      .task-next tos r1 ldr_,[_,#_]
-      0 r1 cmp_,#_
-      eq bc>
-      .task-prev r1 r0 str_,[_,#_]
-      b>
-      2swap >mark
-      .task-core tos r4 ldr_,[_,#_]
-      2 r4 r4 lsls_,_,#_
-      r4 r2 r0 str_,[_,_]
-      >mark
-      0 r0 cmp_,#_
-      eq bc>
-      .task-next r0 r1 str_,[_,#_]
-      b>
-      2swap >mark
-      .task-core tos r4 ldr_,[_,#_]
-      2 r4 r4 lsls_,_,#_
-      r4 r3 r1 str_,[_,_]
-      >mark
-      0 r0 movs_,#_
-      .task-prev tos r0 str_,[_,#_]
-      .task-next tos r0 str_,[_,#_]
-      tos 1 dp ldm
-      pc r4 2 pop
-      ]code
+      dup task-core @ >r
+      dup task-next @ ?dup if
+	over task-prev @ swap task-prev !
+      else
+	dup task-prev @ r@ cpu-first-task !
+      then
+      dup task-prev @ ?dup if
+	over task-next @ swap task-next !
+      else
+	dup task-next @ r@ cpu-last-task !
+      then
+      0 over task-prev !
+      0 swap task-next !
+      rdrop
     ;
-
-    \   dup task-core @ >r
-    \   dup task-next @ ?dup if
-    \     over task-prev @ swap task-prev !
-    \   else
-    \     dup task-prev @ r@ cpu-first-task !
-    \   then
-    \   dup task-prev @ ?dup if
-    \     over task-next @ swap task-next !
-    \   else
-    \     dup task-next @ r@ cpu-last-task !
-    \   then
-    \   0 over task-prev !
-    \   0 swap task-next !
-    \   rdrop
-    \ ;
 
     \ Remove a task if it is scheduled
     : test-remove-task ( task -- )
@@ -1439,25 +1242,9 @@ begin-module task
 
     \ Wake tasks
     : do-wake ( -- )
-      [ 0 cpu-wake-tasks ] literal
-      cpu-count 2 lshift
-      code[
-      0 r0 movs_,#_
-      r0 r0 mvns_,_
-      tos r1 movs_,_
-      cortex-m7? [if]
-        0 dp r2 ldr_,[_,#_]
-        4 dp tos ldr_,[_,#_]
-        8 dp adds_,#_
-      [else]
-        tos r2 2 dp ldm
-      [then]
-      mark>
-      4 r1 subs_,#_
-      r1 r2 r0 str_,[_,_]
-      0 r1 cmp_,#_
-      ne bc<
-      ]code
+      cpu-count begin ?dup while
+	1- true over cpu-wake-tasks !
+      repeat
     ;
 
     \ Get whether a task is waiting
@@ -1511,13 +1298,7 @@ begin-module task
       pc 1 pop
       >mark
       >mark
-      cortex-m7? [if]
-        0 dp r0 ldr_,[_,#_]
-        4 dp tos ldr_,[_,#_]
-        8 dp adds_,#_
-      [else]
-        tos r0 2 dp ldm
-      [then]
+      tos r0 2 dp ldm
       ]code
       delayed?
     ;
@@ -1541,7 +1322,10 @@ begin-module task
       pc tos 2 pop
       >mark
       tos 1 pop
-      .task-prev tos tos ldr_,[_,#_]
+      ]code
+      task-prev
+      code[
+      0 tos tos ldr_,[_,#_]
       b<
       ]code
     ;
@@ -1586,7 +1370,10 @@ begin-module task
       pc 1 pop
       >mark
       tos 1 push
-      .task-state tos tos ldrh_,[_,#_]
+      ]code
+      task-state
+      code[
+      0 tos tos ldrh_,[_,#_]
       ]code
       task-state-mask
       code[
@@ -1600,13 +1387,17 @@ begin-module task
       ne bc>
       0 tos ldr_,[sp,#_]
       ]code
+      task-state
       readied
       code[
       r0 1 dp ldm
-      .task-state r0 tos strh_,[_,#_]
+      0 r0 tos strh_,[_,#_]
       >mark
       tos 1 pop
-      .task-prev tos tos ldr_,[_,#_]
+      ]code
+      task-prev
+      code[
+      0 tos tos ldr_,[_,#_]
       b<
       ]code
     ;
