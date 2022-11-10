@@ -265,7 +265,7 @@ begin-module fat32-tools
     [:
       <fat32-file> class-size [:
         -rot [: 3 pick swap create-file ;] current-fs @ with-root-path
-        write-file
+        write-file drop
         current-fs @ flush
       ;] with-aligned-allot
     ;] fs-lock with-lock
@@ -282,6 +282,32 @@ begin-module fat32-tools
     ;] fs-lock with-lock
   ;
 
+  \ Copy a file
+  : copy-file ( path-addr path-u new-path-addr new-path-u -- )
+    current-fs @ averts x-fs-not-set
+    [:
+      2swap
+      <fat32-file> class-size [:
+        <fat32-file> class-size [:
+          2swap [: 3 pick swap open-file ;] current-fs @ with-root-path
+          >r
+          -rot [: 3 pick swap [ fat32 ] :: create-file ;]
+          current-fs @ with-root-path
+          r>
+          begin
+            read-buffer read-buffer-size 2 pick read-file dup 0> if
+              read-buffer swap 3 pick write-file drop false
+            else
+              drop true
+            then
+          until
+          2drop
+          current-fs @ flush
+        ;] with-aligned-allot
+      ;] with-aligned-allot
+    ;] fs-lock with-lock
+  ;
+
   \ Append to a file
   : append-file ( data-addr data-u path-addr path-u -- )
     current-fs @ averts x-fs-not-set
@@ -289,7 +315,7 @@ begin-module fat32-tools
       <fat32-file> class-size [:
         -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
         0 seek-end 2 pick seek-file
-        write-file
+        write-file drop
         current-fs @ flush
       ;] with-aligned-allot
     ;] fs-lock with-lock
@@ -302,7 +328,7 @@ begin-module fat32-tools
       <fat32-file> class-size [:
         -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
         >r seek-set r@ seek-file r>
-        write-file
+        write-file drop
         current-fs @ flush
       ;] with-aligned-allot
     ;] fs-lock with-lock
@@ -314,7 +340,7 @@ begin-module fat32-tools
     [:
       <fat32-file> class-size [:
         -rot [: 3 pick swap open-file ;] current-fs @ with-root-path
-        dup >r write-file r> truncate-file
+        dup >r write-file drop r> truncate-file
         current-fs @ flush
       ;] with-aligned-allot
     ;] fs-lock with-lock

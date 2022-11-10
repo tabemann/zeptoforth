@@ -58,6 +58,11 @@ Create a file at the specified path and write data to it.
 
 Create a directory at the specified path.
 
+##### `copy-file`
+( path-addr path-u new-path-addr new-path-u -- )
+
+Copy a file from an existing path to a new path.
+
 ##### `append-file`
 ( data-addr data-u path-addr path-u -- )
 
