@@ -179,7 +179,7 @@ forth set-current
 : averts ( f "name" -- )
   [immediate]
   token-word
-  >body
+  >xt
   state @ if
     postpone 0=
     postpone if
@@ -199,7 +199,7 @@ forth set-current
 : triggers ( f "name" -- )
   [immediate]
   token-word
-  >body
+  >xt
   state @ if
     postpone 0<>
     postpone if
@@ -221,7 +221,7 @@ forth set-current
 : suppress ( exc|0 "name" -- exc|0 )
   [immediate]
   token-word
-  >body
+  >xt
   state @ if
     postpone dup
     lit,
@@ -242,7 +242,7 @@ forth set-current
 
 \ Get whether a word is defined, and if it is, execute it
 : execute-defined? ( "word" -- x )
-  token find-all ?dup if >body execute else 0 then
+  token find-all ?dup if >xt execute else 0 then
 ;
 
 \ Set internal
@@ -405,21 +405,21 @@ forth set-current
 : apply ( ? word -- ? )
   state @ if
     dup word-flags h@ dup immediate-flag and if
-      drop >body execute
+      drop >xt execute
     else
       dup inlined-flag and if
-	drop >body inline,
+	drop >xt inline,
       else
 	fold-flag and if
-	  >body fold,
+	  >xt fold,
 	else
-	  >body compile,
+	  >xt compile,
 	then
       then
     then
   else
     dup word-flags h@ compiled-flag and triggers x-not-compiling
-    >body execute
+    >xt execute
   then
 ;
 
@@ -464,7 +464,7 @@ internal set-current
 	." flash "
       then
       r@ h.8 space
-      r@ >body h.8 space
+      r@ >xt h.8 space
       r@ word-flags h@ h.4 space space
       r@ wordlist-id h@ h.4 cr
     then
@@ -476,7 +476,7 @@ internal set-current
 \ Search for a word by its xt
 : search-by-xt ( dict xt -- name|0 flag )
   begin over 0<> while
-    over >body over = if
+    over >xt over = if
       drop true exit
     then
     swap next-word @ swap
@@ -810,7 +810,7 @@ internal set-current
 \ Look up next available user space
 : next-user-space ( -- offset )
   s" *USER*" flash-latest find-all-dict dup if
-    >body execute
+    >xt execute
   else
     drop 0
   then
@@ -834,7 +834,7 @@ internal set-current
 \ Look up next available RAM space
 : next-ram-space ( -- addr )
   s" *RAM*" flash-latest find-all-dict dup if
-    >body execute
+    >xt execute
   else
     drop 0
   then
@@ -1271,7 +1271,7 @@ internal set-current
 \ Look up the current flash wordlist
 : get-current-flash-wordlist ( -- wid )
   s" *WORDLIST*" flash-latest find-all-dict dup if
-    >body execute
+    >xt execute
   else
     drop internal
   then
@@ -2229,7 +2229,7 @@ commit-flash
 : find-dict-by-xt ( xt dict -- word|0 )
   begin
     dup 0<> if
-      dup >body 2 pick = if
+      dup >xt 2 pick = if
        true
       else
        next-word @ false

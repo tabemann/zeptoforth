@@ -1412,7 +1412,7 @@ Find a word in the dictionary in any wordlist in order of definition
 
 Find a word in any dictionary by execution token or return zero for no word found; only words with headers will be found
 
-##### `>body`
+##### `>xt`
 ( word -- xt )
 
 Get an xt from a word

@@ -168,7 +168,7 @@ commit-flash
 : continue-module ( "name" -- )
   token dup 0<> averts x-token-expected
   2dup find ?dup if
-    nip nip >body execute
+    nip nip >xt execute
   else
     ['] x-not-found ?raise
   then

@@ -30,7 +30,7 @@ begin-module led
   
   \ Detect Nucleo64 boards
   : detect-nucleo64 ( -- flag )
-    s" platform-nucleo64" find dup if >body execute else drop false then
+    s" platform-nucleo64" find dup if >xt execute else drop false then
   ;
 
   \ LED is not supported exception

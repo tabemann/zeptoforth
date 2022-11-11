@@ -112,13 +112,13 @@ USART2_Base $0C + constant USART2_CR1
 : set-clock-100mhz
   RCC_CR_PLLON RCC_CR bic!
   s" platform-nucleo64" find dup if
-    >body execute if RCC_PLLCFGR_PLLM_Nucleo64_Value 0 else -1 then
+    >xt execute if RCC_PLLCFGR_PLLM_Nucleo64_Value 0 else -1 then
   else
     drop -1
   then
   if
     s" clock-pllm" find dup if
-      >body execute dup 2 < over 432 > or if drop RCC_PLLCFGR_PLLM_VALUE then
+      >xt execute dup 2 < over 432 > or if drop RCC_PLLCFGR_PLLM_VALUE then
     else
       drop RCC_PLLCFGR_PLLM_Value
     then

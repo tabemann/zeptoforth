@@ -2097,10 +2097,10 @@ end-module> import
 ;
 
 \ SEE a word
-: see ( "name" -- ) token-word >body see-xt ;
+: see ( "name" -- ) token-word >xt see-xt ;
 
 \ SEE a word for GAS
-: see-for-gas ( "name" -- ) token-word >body see-xt-for-gas ;
+: see-for-gas ( "name" -- ) token-word >xt see-xt-for-gas ;
 
 \ Finish compressing the code
 end-compress-flash
