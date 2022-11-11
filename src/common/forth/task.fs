@@ -68,9 +68,6 @@ begin-module task
     \ In task change
     cpu-variable cpu-in-task-change in-task-change
 
-    \ Wake tasks flag
-    cpu-variable cpu-wake-tasks wake-tasks
-    
     \ Main task
     cpu-variable cpu-main-task main-task
     
@@ -206,6 +203,9 @@ begin-module task
       \ The current core of a task
       dup constant .task-core field: task-core
 
+      \ The wake counter of a task
+      dup constant .task-wake-after field: task-wake-after
+      
     end-structure
 
   end-module> import
@@ -875,15 +875,17 @@ begin-module task
   ;
 
   \ Mark a task as waiting
-  : block-wait ( task -- )
+  : block-wait ( wake-count task -- )
     dup validate-not-terminated
+    tuck task-wake-after !
     blocked-wait over task-state h!
     current-task @ = if pause-wo-reschedule then
   ;
   
   \ Mark a task as waiting
-  : block-wait-critical ( task -- )
+  : block-wait-critical ( wake-count task -- )
     dup validate-not-terminated
+    tuck task-wake-after !
     [ blocked-wait schedule-critical or schedule-user-critical or ] literal
     over task-state h!
     current-task @ = if pause-wo-reschedule then
@@ -1264,6 +1266,7 @@ begin-module task
       0 over timeout-systick-delay !
       0 over task-systick-start !
       -1 over task-systick-delay !
+      wake-counter @ over task-wake-after !
       cpu-index over task-core !
       c" main" over task-name !
       -1 over task-current-notify !
@@ -1343,7 +1346,8 @@ begin-module task
 	0 over task-notified-bitmap !
 	0 over task-notify-count !
 	0 over task-notify-area !
-	-1 over task-systick-delay !
+        -1 over task-systick-delay !
+        wake-counter @ over task-wake-after !
 	c" aux-main" over task-name !
 	default-timeslice over task-timeslice !
 	default-min-timeslice over task-min-timeslice !
@@ -1391,6 +1395,7 @@ begin-module task
     0 over task-notify-count !
     0 over task-notify-area !
     -1 over task-systick-delay !
+    wake-counter @ over task-wake-after !
     default-timeslice over task-timeslice !
     default-min-timeslice over task-min-timeslice !
     default-timeslice over task-saved-systick-counter !
@@ -1437,87 +1442,46 @@ begin-module task
 
   continue-module task-internal
 
-    \ Wake tasks
-    : do-wake ( -- )
-      [ 0 cpu-wake-tasks ] literal
-      cpu-count 2 lshift
-      code[
-      0 r0 movs_,#_
-      r0 r0 mvns_,_
-      tos r1 movs_,_
-      cortex-m7? [if]
-        0 dp r2 ldr_,[_,#_]
-        4 dp tos ldr_,[_,#_]
-        8 dp adds_,#_
-      [else]
-        tos r2 2 dp ldm
-      [then]
-      mark>
-      4 r1 subs_,#_
-      r1 r2 r0 str_,[_,_]
-      0 r1 cmp_,#_
-      ne bc<
-      ]code
-    ;
-
     \ Get whether a task is waiting
     : waiting-task? ( task -- waiting? )
-      dup
-      task-state
       task-state-mask
-      code[
-      r0 1 dp ldm
-      0 r0 r0 ldrh_,[_,#_]
-      r0 tos ands_,_
+      code[ \ ( task tos: task-state-mask )
+      r3 1 dp ldm \ ( r3: task tos: task-state-mask )
+      .task-state r3 r0 ldrh_,[_,#_]
+      ( r3: task r0: *task-state tos: task-state-mask )
+      r0 tos ands_,_ ( r3: task tos: *task-state )
+      blocked-wait tos cmp_,#_ ( r3: task tos: *task-state )
+      ne bc>
+      r3 tos movs_,_
       ]code
-      blocked-wait
-      code[
-      0 dp r0 ldr_,[_,#_]
-      r0 tos cmp_,_
+      wake-counter
+      code[ ( task tos: wake-counter )
+      0 tos r1 ldr_,[_,#_] ( task r1: *wake-counter tos: wake-counter )
+      0 tos movs_,#_ ( task r1: *wake-counter tos: 0 )
+      r0 1 dp ldm ( r1: *wake-counter r0: task tos: 0 )
+      .task-wake-after r0 r0 ldr_,[_,#_]
+      ( r1: *wake-counter r0: *task-wake-after tos: 0 )
+      r0 r1 cmp_,_
+      ne bc>
+      tos tos mvns_,_
+      >mark
+      pc 1 pop
+      >mark ( r3: task tos: *task-state )
+      blocked-indefinite tos cmp_,#_
       ne bc>
       0 tos movs_,#_
       tos tos mvns_,_
-      8 dp adds_,#_
       pc 1 pop
       >mark
-      tos 1 dp ldm
-      ]code
-      blocked-indefinite
-      code[
-      0 dp r0 ldr_,[_,#_]
-      r0 tos cmp_,_
-      ne bc>
-      0 tos movs_,#_
-      tos tos mvns_,_
-      8 dp adds_,#_
-      pc 1 pop
-      >mark
-      tos 1 dp ldm
-      ]code
-      delayed
-      code[
-      0 dp r0 ldr_,[_,#_]
-      r0 tos cmp_,_
+      delayed tos cmp_,#_ ( r3: task tos: *task-state )
       eq bc>
-      tos 1 dp ldm
-      ]code
-      blocked-timeout
-      code[
-      0 dp r0 ldr_,[_,#_]
-      r0 tos cmp_,_
+      blocked-timeout tos cmp_,#_ ( r3: task tos: *task-state )
       eq bc>
-      8 dp adds_,#_
       0 tos movs_,#_
       pc 1 pop
       >mark
       >mark
-      cortex-m7? [if]
-        0 dp r0 ldr_,[_,#_]
-        4 dp tos ldr_,[_,#_]
-        8 dp adds_,#_
-      [else]
-        tos r0 2 dp ldm
-      [then]
+      r3 tos movs_,_ ( tos: task )
       ]code
       delayed?
     ;
@@ -1574,43 +1538,6 @@ begin-module task
       false in-task-change !
     ;
 
-    \ Actually wake tasks
-    : actually-wake-tasks ( -- )
-      first-task
-      code[
-      0 tos tos ldr_,[_,#_]
-      mark>
-      0 tos cmp_,#_
-      ne bc>
-      tos 1 dp ldm
-      pc 1 pop
-      >mark
-      tos 1 push
-      .task-state tos tos ldrh_,[_,#_]
-      ]code
-      task-state-mask
-      code[
-      r0 1 dp ldm
-      r0 tos ands_,_
-      ]code
-      blocked-wait
-      code[
-      r0 1 dp ldm
-      r0 tos cmp_,_
-      ne bc>
-      0 tos ldr_,[sp,#_]
-      ]code
-      readied
-      code[
-      r0 1 dp ldm
-      .task-state r0 tos strh_,[_,#_]
-      >mark
-      tos 1 pop
-      .task-prev tos tos ldr_,[_,#_]
-      b<
-      ]code
-    ;
-
     \ Handle task-switching
     : switch-tasks ( -- )
       r> pendsv-return !
@@ -1624,11 +1551,6 @@ begin-module task
 	
 	begin
 	  true in-task-change !
-	  wake-tasks @ if
-	    claim-same-core-spinlock
-	    actually-wake-tasks false wake-tasks !
-	    release-same-core-spinlock
-	  then
 	  begin
 	    claim-same-core-spinlock
 	    find-next-task
@@ -1795,9 +1717,11 @@ begin-module task
   continue-module task-internal
 
     \ Wait the current thread
-    : do-wait ( -- )
+    : do-wait ( wait-count -- )
       pause-enabled @ 0> if
-	current-task @ block-wait
+        current-task @ block-wait
+      else
+        drop
       then
     ;
 
@@ -1933,14 +1857,12 @@ begin-module task
     false ram-dict-warned !
     ['] do-pause pause-hook !
     ['] do-wait wait-hook !
-    ['] do-wake wake-hook !
     ['] do-validate-dict validate-dict-hook !
     cpu-count 0 ?do
       false i cpu-in-multitasker? !
       false i cpu-sleep-enabled? !
       false i cpu-trace-enabled? !
       false i cpu-in-task-change !
-      false i cpu-wake-tasks !
       true i cpu-reschedule? !
       0 i cpu-task-systick-counter !
       i 0= if

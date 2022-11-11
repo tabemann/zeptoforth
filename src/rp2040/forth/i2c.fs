@@ -789,7 +789,7 @@ begin-module i2c
               over i2c-lock release-lock
               ['] x-timed-out ?raise
             then
-            enable-int current-task block-wait false
+            enable-int wake-counter @ current-task block-wait false
           then
         until
         drop
@@ -1056,7 +1056,7 @@ begin-module i2c
           then
         then
         3 pick release-i2c dup not if
-          nip pause current-task block-wait
+          nip pause wake-counter @ current-task block-wait
         then
       until
       nip nip nip nip
@@ -1083,7 +1083,7 @@ begin-module i2c
           false
         then
         2 pick release-i2c dup not if
-          pause current-task block-wait
+          pause wake-counter @ current-task block-wait
         then
       until
       2drop 2drop
@@ -1110,7 +1110,7 @@ begin-module i2c
           false
         then
         2 pick release-i2c dup not if
-          pause current-task block-wait
+          pause wake-counter @ current-task block-wait
         then
       until
       2drop 2drop
@@ -1139,7 +1139,7 @@ begin-module i2c
           then
         then
         3 pick release-i2c dup not if
-          nip pause current-task block-wait
+          nip pause wake-counter @ current-task block-wait
         then
       until
       nip nip
@@ -1164,7 +1164,7 @@ begin-module i2c
           false
         then
         2 pick release-i2c dup not if
-          pause current-task block-wait
+          pause wake-counter @ current-task block-wait
         then
       until
       2drop
@@ -1189,7 +1189,7 @@ begin-module i2c
           false
         then
         2 pick release-i2c dup not if
-          pause current-task block-wait
+          pause wake-counter @ current-task block-wait
         then
       until
       2drop

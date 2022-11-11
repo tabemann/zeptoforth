@@ -2174,24 +2174,32 @@ commit-flash
 \ Wait hook variable
 variable wait-hook
 
+\ Wake counter
+variable wake-counter
+
+\ Commit to flash
+commit-flash
+
 \ Wait for a predicate to become true
 : wait ( xt -- )
+  wake-counter @ >r
   begin
     dup >r execute not r> swap
   while
+    r>
     in-critical @ 0= if
-      wait-hook @ ?execute
+      wait-hook @ execute
       pause
+    else
+      drop
     then
+    wake-counter @ >r
   repeat
-  drop
+  drop rdrop
 ;
 
-\ Wake hook variable
-variable wake-hook
-
 \ Wake all waiting tasks
-: wake ( -- ) wake-hook @ execute ;
+: wake ( -- ) 1 wake-counter +! ;
 
 \ Set internal
 internal set-current
@@ -2316,8 +2324,8 @@ forth set-current
   min-ram-wordlist current-ram-wordlist !
   cpu-count 0 ?do false cpus-deferred-context-switch i cells + ! loop
   cpu-count 0 ?do 0 cpus-in-critical i cells + ! loop
-  0 wait-hook !
-  [: ;] wake-hook !
+  0 wake-counter !
+  ['] drop wait-hook !
   0 flush-console-hook !
   false flash-dict-warned !
   ['] do-flash-validate-dict validate-dict-hook !
