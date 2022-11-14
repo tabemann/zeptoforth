@@ -115,7 +115,6 @@ begin-module bitmap
       tuck bitmap-rows !
       tuck bitmap-cols !
       tuck bitmap-buf  !
-      clear-bitmap
     ; define new
     
     \ Set the entire bitmap to be dirty
