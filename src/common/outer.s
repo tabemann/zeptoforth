@@ -472,7 +472,14 @@ _to_xt:	push {lr}
 	define_word "abort", visible_flag
 _abort:	bl _stack_base
 	ldr dp, [tos]
-	bl _bel
+        ldr r0, =word_reset_hook
+        ldr r0, [r0]
+        cmp r0, #0
+        beq 1f
+        movs r1, #1
+        orrs r0, r1
+        blx r0
+1:	bl _bel
 	bl _nak
 	b _quit
 	bx lr
@@ -629,7 +636,23 @@ _interpret_line:
 	movs r0, tos
 	ldr r1, [dp]
 	push {r0, r1}
-	bl _find
+        ldr r2, =parse_hook
+        ldr r2, [r2]
+        cmp r2, #0
+        beq 5f
+        movs r3, #1
+        orrs r2, r3
+        blx r2
+        cmp tos, #0
+        beq 3f
+        pop {r0, r1}
+        pull_tos
+        b 1b
+3:      subs dp, #4
+        ldr r1, [sp, #4]
+        str r1, [dp, #0]
+        ldr tos, [sp, #0]
+5:      bl _find
 	pop {r0, r1}
 	cmp tos, #0
 	beq 3f

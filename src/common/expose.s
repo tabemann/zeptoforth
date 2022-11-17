@@ -359,6 +359,14 @@ _validate_dict_hook:
 
 .ltorg
         
+        @@ The parse hook
+        define_word "parse-hook", visible_flag
+_parse_hook:
+        push_tos
+        ldr tos, =parse_hook
+        bx lr
+        end_inlined
+        
 	@@ The find hook
 	define_word "find-hook", visible_flag
 _find_hook:
@@ -367,6 +375,38 @@ _find_hook:
 	bx lr
 	end_inlined
 
+        @@ The word (including quotation) beginning hook
+        define_word "word-begin-hook", visible_flag
+_word_begin_hook:
+        push_tos
+        ldr tos, =word_begin_hook
+        bx lr
+        end_inlined
+
+        @@ The word exit hook
+        define_word "word-exit-hook", visible_flag
+_word_exit_hook:
+        push_tos
+        ldr tos, =word_exit_hook
+        bx lr
+        end_inlined
+
+        @@ The word end hook
+        define_word "word-end-hook", visible_flag
+_word_end_hook:
+        push_tos
+        ldr tos, =word_end_hook
+        bx lr
+        end_inlined
+
+        @@ The word reset hook
+        define_word "word-reset-hook", visible_flag
+_word_reset_hook:
+        push_tos
+        ldr tos, =word_reset_hook
+        bx lr
+        end_inlined
+        
 	@@ The finalize hook
 	define_word "finalize-hook", visible_flag
 _finalize_hook:

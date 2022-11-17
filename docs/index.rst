@@ -30,6 +30,7 @@ Zeptoforth Documentation
    words/armv6m
    words/line
    words/double
+   words/value
    words/temp
    words/task_pool
    words/action_pool

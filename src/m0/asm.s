@@ -18,9 +18,9 @@
 @ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 @ SOFTWARE.
 
-	@@ Compile the start of a word without the push {lr}
-	define_internal_word "start-compile-no-push", visible_flag
-_asm_start_no_push:
+	@@ Compile the header of a word
+	define_internal_word "start-compile-header", visible_flag
+_asm_start_header:
 	push {lr}
 	bl _asm_undefer_lit
 	movs r0, #0
@@ -51,20 +51,42 @@ _asm_start_no_push:
 	beq 1f
 	movs tos, #0
 	bl _current_comma_1
-	pop {pc}
-1:	pull_tos
-	pop {pc}
+        pop {pc}
+1:      pull_tos
+        pop {pc}
 	end_inlined
-	
+
+	@@ Compile the start of a word without the push {lr}
+        define_internal_word "start-compile-no-push", visible_flag
+_asm_start_no_push:
+        push {lr}
+	bl _asm_start_header
+        ldr r0, =word_begin_hook
+        ldr r0, [r0]
+        cmp r0, #0
+        beq 1f
+        movs r1, #1
+        orrs r0, r1
+        blx r0
+1:      pop {pc}
+        end_inlined
+        
 	@@ Compile the start of a word
 	define_internal_word "start-compile", visible_flag
 _asm_start:
 	push {lr}
-	bl _asm_start_no_push
+	bl _asm_start_header
 	push_tos
 	ldr tos, =0xB500	@@ push {lr}
 	bl _current_comma_2
-	pop {pc}
+        ldr r0, =word_begin_hook
+        ldr r0, [r0]
+        cmp r0, #0
+        beq 1f
+        movs r1, #1
+        orrs r0, r1
+        blx r0
+1:      pop {pc}
 	end_inlined
 
 	@@ Compile a link field
@@ -208,6 +230,21 @@ _asm_finalize_no_align:
 _asm_end:
 	push {lr}
 	bl _asm_undefer_lit
+        ldr r0, =word_exit_hook
+        ldr r0, [r0]
+        cmp r0, #0
+        beq 1f
+        movs r1, #1
+        orrs r0, r1
+        blx r0
+1:	ldr r0, =word_end_hook
+        ldr r0, [r0]
+        cmp r0, #0
+        beq 2f
+        movs r1, #1
+        orrs r0, r1
+        blx r0
+2:      bl _asm_undefer_lit
 	push_tos
 	ldr tos, =0xBD00	@@ pop {pc}
 	bl _current_comma_2

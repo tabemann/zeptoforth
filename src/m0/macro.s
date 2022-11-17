@@ -46,6 +46,9 @@ dp 	.req r7
 	@@ Fold-only word
 	.equ fold_flag, 0x0010
 
+        @@ Initialized value word
+        .equ init_value_flag, 0x0020
+
 	@@ The internal wordlist
 	.equ internal, 1
 

@@ -92,6 +92,9 @@ forth set-current
 \ Folded flag
 16 constant fold-flag
 
+\ Initialized value flag
+32 constant init-value-flag
+
 \ DMB instruction
 : dmb ( -- ) [inlined] [ undefer-lit $F3BF h, $8F5F h, ] ;
 
@@ -538,6 +541,8 @@ commit-flash
     reserve-literal
   then
   14 bx,
+  word-exit-hook @ ?execute
+  word-end-hook @ ?execute
   $003F h,
   visible
   finalize,
@@ -553,11 +558,13 @@ commit-flash
   start-compile-no-push
   hreserve
   0 bx,
+  word-exit-hook @ ?execute
+  word-end-hook @ ?execute
   $003F h,
   visible
   finalize-no-align,
   reserve 0 rot ldr-pc!
-  flash-block-align,
+  compiling-to-flash? if flash-block-align, then
 ;
 
 internal set-current
@@ -615,6 +622,8 @@ internal set-current
   then
   reserve-literal build-target !
   0 bx,
+  word-exit-hook @ ?execute
+  word-end-hook @ ?execute
   $003F h,
   visible
   finalize,
@@ -1129,11 +1138,17 @@ commit-flash
   else
     postpone drop dup lit,
   then
-  undefer-lit 14 bx, finalize,
+  undefer-lit 14 bx,
+  word-exit-hook @ ?execute
+  word-end-hook @ ?execute
+  finalize,
   cpu-count 1 > if
     token start-compile-no-push visible
     lit, postpone cpu-offset postpone +
-    undefer-lit 14 bx, finalize,
+    undefer-lit 14 bx,
+    word-exit-hook @ ?execute
+    word-end-hook @ ?execute
+    finalize,
   else
     constant
   then
@@ -1603,6 +1618,7 @@ commit-flash
   reserve-branch
   here
   $B500 h,
+  word-begin-hook @ ?execute
 ;
 
 \ End lambda
@@ -1610,6 +1626,8 @@ commit-flash
   [immediate]
   [compile-only]
   undefer-lit
+  word-exit-hook @ ?execute
+  word-end-hook @ ?execute
   $BD00 h,
   here rot branch-back!
   lit,
@@ -1617,21 +1635,6 @@ commit-flash
 
 \ Print out multiple spaces
 : spaces ( u -- ) begin dup 0> while space 1- repeat drop ;
-
-\ Create an anonymous word for an exception
-: x" ( <text>" -- )
-  [immediate]
-  [compile-only]
-  undefer-lit
-  reserve-branch
-  here
-  $B500 h,
-  postpone space
-  postpone ."
-  $BD00 h,
-  here rot branch-back!
-  lit,
-;
 
 \ Set up the wordlist
 wordlist constant esc-string

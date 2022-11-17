@@ -757,8 +757,20 @@ _do_nothing:
 	end_inlined
 	
 	@@ Exit a word
-	define_word "exit", visible_flag
-_exit:	pop {pc}
+	define_word "exit", visible_flag | immediate_flag | compiled_flag
+_exit:	push {lr}
+        bl _asm_undefer_lit
+        ldr r0, =word_exit_hook
+        ldr r0, [r0]
+        cmp r0, #0
+        beq 1f
+        movs r1, #1
+        orrs r0, r1
+        blx r0
+1:      push_tos
+        ldr tos, =0xBD00 @@ pop {pc}
+        bl _current_comma_2
+        pop {pc}
 	end_inlined
 
 	@@ Initialize the flash dictionary
@@ -944,6 +956,17 @@ _visible:
 	bx lr
 	end_inlined
 
+        @@ Set the currently-define word to be an initialized value
+        define_word "init-value", visible_flag
+_init_value:
+        ldr r0, =current_flags
+        ldr r1, [r0]
+        movs r2, #init_value_flag
+        orrs r1, r2
+        str r1, [r0]
+        bx lr
+        end_inlined
+        
 	@@ Switch to interpretation mode
 	define_word "[", visible_flag | immediate_flag
 _to_interpret:
@@ -2245,8 +2268,19 @@ _init_variables:
 	str r1, [r0]
 	ldr r0, =validate_dict_hook
 	str r1, [r0]
+        ldr r0, =word_begin_hook
+        str r1, [r0]
+        ldr r0, =word_exit_hook
+        str r1, [r0]
+        ldr r0, =word_end_hook
+        str r1, [r0]
+        ldr r0, =word_reset_hook
+        str r1, [r0]
 	ldr r0, =finalize_hook
 	str r1, [r0]
+        ldr r0, =parse_hook
+        movs r1, #0
+        str r1, [r0]
 	ldr r0, =find_hook
 	ldr r1, =_do_find
 	str r1, [r0]

@@ -21,6 +21,7 @@
 \ This is not actual Forth code, but rather setup directives for e4thcom to be
 \ executed to load a "big" configuration
 
+#include src/common/forth/value.fs
 #include src/common/forth/temp.fs
 #include src/common/forth/temp_str.fs
 #include src/common/forth/disassemble.fs

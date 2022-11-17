@@ -176,10 +176,25 @@
 	@@ The wordlist count
 	allot order_count, 4
 
+        @@ The parse hook
+        allot parse_hook, 4
+        
 	@@ The find hook
 	allot find_hook, 4
 
-	@@ The finalize hook
+        @@ The word (including quotation) beginning hook
+        allot word_begin_hook, 4
+
+        @@ The word exit hook
+        allot word_exit_hook, 4
+
+        @@ The word end hook
+        allot word_end_hook, 4
+
+        @@ The word reset hook
+        allot word_reset_hook, 4
+        
+        @@ The finalize hook
 	allot finalize_hook, 4
 	
 	@@ The wordlist order
