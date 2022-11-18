@@ -2177,6 +2177,9 @@ commit-flash
 \ Wait hook variable
 variable wait-hook
 
+\ Commit to flash
+commit-flash
+
 \ Wake counter
 variable wake-counter
 
