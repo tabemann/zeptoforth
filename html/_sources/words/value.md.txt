@@ -1,6 +1,6 @@
 # Value and Local Variable Words
 
-Full builds of zeptoforth include support for `value` and `2value` along with local variables. Unlike `variable` and `2variable`, `value` and `2value` variables are initialized, and retain their initialization across reboots. `value`s, `2value`s, and local variables are all set with `to`, which is a state-smart word that can be used both in interpretation and in compilation mode.
+Full builds of zeptoforth include support for `value` and `2value` along with local variables. Unlike `variable` and `2variable`, `value` and `2value` variables are initialized, and retain their initialization across reboots. `value`s, `2value`s, and local variables are all set with `to` or added to with `+to`, which are state-smart words that can be used both in interpretation and in compilation mode.
 
 All of these words are in the default `forth` module.
 
@@ -29,3 +29,8 @@ This compiles a set of single-cell local variables within a word that at runtime
 ( x|d "name" -- )
 
 This sets a value or local variable *name* to either a single-cell or double-cell on the stack depending on whether *name* refers to a `value`, `2value`, or local variable. This is state smart, and can be used both in interpretation mode and in compilation mode.
+
+##### `+to`
+( x|d "name" -- )
+
+This adds a single-cell or double-cell on the stack to a value or local variable *name* depending on whether *name* refers to a `value`, `2value`, or local variable. This is state smart, and can be used both in interpretation mode and in compilation mode.

@@ -1255,6 +1255,21 @@ _add_store_4:
 	bx lr
 	end_inlined
 
+        @@ Read a double word from an address, add a value, and write it back
+        define_word "2+!", visible_flag
+_add_store_8:
+        ldmia dp!, {r2}
+        ldmia dp!, {r3}
+        ldr r1, [tos, #4]
+        ldr r0, [tos]
+        adds r1, r3
+        adcs r0, r2
+        str r1, [tos, #4]
+        str r0, [tos]
+        pull_tos
+        bx lr
+        end_inlined
+        
 	@@ Specify a bit
 	define_word "bit", visible_flag
 _bit:	movs r0, tos

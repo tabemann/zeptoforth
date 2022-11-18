@@ -63,6 +63,7 @@ continue-module internal
   \ Fill the current set of locals
   : fill-locals ( u -- )
     dup 0> if
+      undefer-lit
       dup 4 * negate 0 literal,
       [ armv6m-instr import ]
       r0 addsp,sp,4_
@@ -88,6 +89,7 @@ continue-module internal
   \ Drop the current word's locals
   : drop-locals ( -- )
     local-count ?dup if
+      undefer-lit
       [ armv6m-instr import ]
       dup 128 < if
         4 * addsp,sp,#_
@@ -126,6 +128,7 @@ continue-module internal
     2>r 0 local-buf-top @ begin dup local-buf-bottom @ < while
       dup count 2r@ equal-case-strings? if
         rdrop rdrop drop
+        undefer-lit
         6 push,
         [ armv6m-instr import ]
         4 * r6 ldr_,[sp,#_]
@@ -144,10 +147,30 @@ continue-module internal
     2>r 0 local-buf-top @ begin dup local-buf-bottom @ < while
       dup count 2r@ equal-case-strings? if
         rdrop rdrop drop
+        undefer-lit
         [ armv6m-instr import ]
-        4 * r6 str_,[sp,#_]
+        4 * tos str_,[sp,#_]
         [ armv6m-instr unimport ]
-        \ $9600 or h, \ STR R6, [SP, #x]
+        6 pull,
+        true exit
+      else
+        dup c@ 1+ + swap 1+ swap
+      then
+    repeat
+    rdrop rdrop 2drop false
+  ;
+  
+  \ Add to a local variable
+  : parse-add-local ( c-addr u -- match? )
+    2>r 0 local-buf-top @ begin dup local-buf-bottom @ < while
+      dup count 2r@ equal-case-strings? if
+        rdrop rdrop drop
+        undefer-lit
+        [ armv6m-instr import ]
+        dup 4 * r0 ldr_,[sp,#_]
+        r0 tos tos adds_,_,_
+        4 * tos str_,[sp,#_]
+        [ armv6m-instr unimport ]
         6 pull,
         true exit
       else
@@ -174,6 +197,7 @@ continue-module internal
   
   \ Compile setting a VALUE
   : compile-to-value ( xt -- )
+    undefer-lit
     dup 2value? if
       value-addr@
       0 literal,
@@ -189,6 +213,34 @@ continue-module internal
       [ armv6m-instr import ]
       0 r0 r6 str_,[_,#_]
       6 pull,
+      [ armv6m-instr unimport ]
+    then
+  ;
+
+  \ Compile adding to a VALUE
+  : compile-+to-value ( xt -- )
+    undefer-lit
+    dup 2value? if
+      value-addr@
+      0 literal,
+      [ armv6m-instr import ]
+      4 r0 r1 ldr_,[_,#_]
+      0 r0 r2 ldr_,[_,#_]
+      r3 1 dp ldm
+      r3 r1 r1 adds_,_,_
+      tos r2 adcs_,_
+      4 r0 r1 str_,[_,#_]
+      0 r0 r2 str_,[_,#_]
+      tos 1 dp ldm
+      [ armv6m-instr unimport ]
+    else
+      value-addr@
+      0 literal,
+      [ armv6m-instr import ]
+      0 r0 r1 ldr_,[_,#_]
+      tos r1 r1 adds_,_,_
+      0 r0 r1 str_,[_,#_]
+      tos 1 dp ldm
       [ armv6m-instr unimport ]
     then
   ;
@@ -326,6 +378,22 @@ end-module> import
   else
     find dup 0<> averts x-unknown-word >xt
     dup 2value? if value-addr@ 2! else value-addr@ ! then
+  then
+;
+
+\ Add to a local or a VALUE
+: +to ( [x/d] "name" -- )
+  [immediate]
+  token dup 0<> averts x-token-expected
+  state @ if
+    2dup parse-add-local not if
+      find dup 0<> averts x-unknown-word >xt compile-+to-value
+    else
+      2drop
+    then
+  else
+    find dup 0<> averts x-unknown-word >xt
+    dup 2value? if value-addr@ 2+! else value-addr@ +! then
   then
 ;
 
