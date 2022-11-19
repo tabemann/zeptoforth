@@ -152,12 +152,10 @@ continue-module internal
     local-buf-bottom @ local-buf local-buf-size + < if
       local-buf-bottom @ 1+ local-buf-top !
       local-buf-bottom @ c@ local-buf-top @ + local-buf-bottom !
-      block-locals-bottom @ block-locals-top !
-      block-locals-bottom @ block-locals block-locals-size + < if
-        begin block-locals-bottom @ c@ $FF = 1 block-locals-bottom +! until
-      then
-    else
-      reset-local
+    then
+    block-locals-bottom @ block-locals-top !
+    block-locals-bottom @ block-locals block-locals-size + < if
+      begin block-locals-bottom @ c@ $FF = 1 block-locals-bottom +! until
     then
   ;
 
