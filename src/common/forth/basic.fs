@@ -755,11 +755,12 @@ commit-flash
   [immediate]
   [compile-only]
   undefer-lit
+  end-block
   rot ?dup if
     here swap branch-back!
   then
   reserve-branch
-  -rot postpone then
+  -rot postpone then-no-block
 ;
 
 \ End a CASE statement

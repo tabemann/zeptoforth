@@ -136,6 +136,30 @@ _then:	push {lr}
 	pop {pc}
 	end_inlined
 
+.ltorg
+        
+        @@ End an IF block without ending a block
+	define_internal_word "then-no-block", visible_flag | immediate_flag | compiled_flag
+_then_no_block:
+        push {lr}
+	bl _asm_undefer_lit
+	movs r1, tos
+	pull_tos
+	movs r0, tos
+	pull_tos
+	push {r0, r1}
+	bl _current_here
+	pop {r0, r1}
+	push_tos
+	movs tos, r0
+	cmp r1, #0
+	beq 1f
+	bl _asm_branch_zero_back
+	pop {pc}
+1:	bl _asm_branch_back
+	pop {pc}
+	end_inlined
+
 	@@ Start a BEGIN block
 	define_word "begin", visible_flag | immediate_flag | compiled_flag
 _begin:	push {lr}
