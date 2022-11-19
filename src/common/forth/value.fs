@@ -36,12 +36,26 @@ continue-module internal
   \ Current bottom of the local buffer
   variable local-buf-bottom
 
+  \ Block locals size
+  64 constant block-locals-size
+
+  \ Block locals
+  block-locals-size buffer: block-locals
+
+  \ Current top of the block locals
+  variable block-locals-top
+
+  \ Current bottom of the block locals
+  variable block-locals-bottom
+
   \ Out of local space exception
   : x-out-of-locals ( -- ) ." out of local space" cr ;
 
   \ Reset the local buffer
   : reset-local ( -- )
     local-buf local-buf-size + dup local-buf-top ! local-buf-bottom !
+    block-locals block-locals-size + dup
+    block-locals-top ! block-locals-bottom !
   ;
 
   \ Get the current word's local count
@@ -58,6 +72,7 @@ continue-module internal
     dup 1+ negate local-buf-top +!
     dup local-buf-top @ c!
     local-buf-top @ 1+ swap move
+    1 block-locals-top @ c+!
   ;
 
   \ Fill the current set of locals
@@ -84,6 +99,16 @@ continue-module internal
       local-buf-bottom @ local-buf-top @ - local-buf-top @ 1- c!
       local-buf-top @ 1- dup local-buf-bottom ! local-buf-top !
     then
+    block-locals-top @ block-locals 2 + >= averts x-out-of-locals
+    block-locals-top @ block-locals-bottom !
+    -1 block-locals-top +! $FF block-locals-top @ c!
+    -1 block-locals-top +! 0 block-locals-top @ c!
+  ;
+
+  \ Push a new block's set of locals
+  : push-block-locals ( -- )
+    block-locals-top @ block-locals > averts x-out-of-locals
+    -1 block-locals-top +! 0 block-locals-top @ c!
   ;
     
   \ Drop the current word's locals
@@ -101,13 +126,50 @@ continue-module internal
     then
   ;
 
+  \ Drop the current block's locals
+  : drop-block-locals ( -- )
+    block-locals-top @ block-locals block-locals-size + < if
+      block-locals-top @ c@ dup $FF <> if
+        ?dup if
+          undefer-lit
+          [ armv6m-instr import ]
+          dup 128 < if
+            4 * addsp,sp,#_
+          else
+            4 * 0 literal,
+            r0 addsp,sp,4_
+          then
+          [ armv6m-instr unimport ]
+        then
+      else
+        drop
+      then
+    then
+  ;
+
   \ Clear the current word's locals
   : clear-locals ( -- )
     local-buf-bottom @ local-buf local-buf-size + < if
       local-buf-bottom @ 1+ local-buf-top !
       local-buf-bottom @ c@ local-buf-top @ + local-buf-bottom !
+      block-locals-bottom @ block-locals-top !
+      block-locals-bottom @ block-locals block-locals-size + < if
+        begin block-locals-bottom @ c@ $FF = 1 block-locals-bottom +! until
+      then
     else
       reset-local
+    then
+  ;
+
+  \ Clear the current block's locals
+  : clear-block-locals ( -- )
+    block-locals-top @ c@ dup $FF <> if
+      begin ?dup while
+        local-buf-top @ c@ 1+ local-buf-top +! 1-
+      repeat
+      1 block-locals-top +!
+    else
+      drop
     then
   ;
 
@@ -267,9 +329,18 @@ continue-module internal
 
   \ The saved word end hook
   variable saved-word-end-hook
-  
+
   \ The saved word reset hook
   variable saved-word-reset-hook
+
+  \ The saved block begin hook
+  variable saved-block-begin-hook
+
+  \ The saved block exit hook
+  variable saved-block-exit-hook
+
+  \ The saved block end hook
+  variable saved-block-end-hook
 
   \ The saved parse hook
   variable saved-parse-hook
@@ -280,11 +351,17 @@ continue-module internal
     word-exit-hook @ saved-word-exit-hook !
     word-end-hook @ saved-word-end-hook !
     word-reset-hook @ saved-word-reset-hook !
+    block-begin-hook @ saved-block-begin-hook !
+    block-exit-hook @ saved-block-exit-hook !
+    block-end-hook @ saved-block-end-hook !
     parse-hook @ saved-parse-hook !
     [: saved-word-begin-hook @ ?execute push-locals ;] word-begin-hook !
     [: drop-locals saved-word-exit-hook @ ?execute ;] word-exit-hook !
     [: clear-locals saved-word-end-hook @ ?execute ;] word-end-hook !
     [: saved-word-reset-hook @ ?execute reset-local ;] word-reset-hook !
+    [: saved-block-begin-hook @ ?execute push-block-locals ;] block-begin-hook !
+    [: drop-block-locals saved-block-exit-hook @ ?execute ;] block-exit-hook !
+    [: clear-block-locals saved-block-end-hook @ ?execute ;] block-end-hook !
     [:
       state @ if
         2dup parse-get-local not if
@@ -401,14 +478,14 @@ end-module> import
 : { ( ... "name" ... -- )
   [immediate]
   [compile-only]
-  local-count
+  block-locals-top @ c@
   begin
     token dup if
       2dup s" --" equal-strings? if
-        2drop local-count swap - fill-locals ignore-local-comment true
+        2drop block-locals-top @ c@ swap - fill-locals ignore-local-comment true
       else
         2dup s" }" equal-strings? if
-          2drop local-count swap - fill-locals true
+          2drop block-locals-top @ c@ swap - fill-locals true
         else
           add-local false
         then

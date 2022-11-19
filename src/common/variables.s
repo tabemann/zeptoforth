@@ -193,6 +193,15 @@
 
         @@ The word reset hook
         allot word_reset_hook, 4
+
+        @@ The block beginning hook
+        allot block_begin_hook, 4
+
+        @@ The block exit hook
+        allot block_exit_hook, 4
+
+        @@ THe block end hook
+        allot block_end_hook, 4
         
         @@ The finalize hook
 	allot finalize_hook, 4

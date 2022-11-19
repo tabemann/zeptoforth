@@ -18,6 +18,41 @@
 @ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 @ SOFTWARE.
 
+        @@ Start a block
+        define_internal_word "begin-block", visible_flag
+_begin_block:
+        push {lr}
+        ldr r0, =block_begin_hook
+        ldr r0, [r0]
+        cmp r0, #0
+        beq 1f
+        movs r1, #1
+        orrs r0, r1
+        blx r0
+1:      pop {pc}
+        end_inlined
+        
+        @@ End a block
+        define_internal_word "end-block", visible_flag
+_end_block:
+        push {lr}
+        ldr r0, =block_exit_hook
+        ldr r0, [r0]
+        cmp r0, #0
+        beq 1f
+        movs r1, #1
+        orrs r0, r1
+        blx r0
+1:	ldr r0, =block_end_hook
+        ldr r0, [r0]
+        cmp r0, #0
+        beq 2f
+        movs r1, #1
+        orrs r0, r1
+        blx r0
+2:      pop {pc}
+        end_inlined
+        
 	@@ Start an IF block
 	define_word "if", visible_flag | immediate_flag | compiled_flag
 _if:	push {lr}
@@ -41,6 +76,7 @@ _if:	push {lr}
 	adds tos, #4
 	bl _asm_branch_not_zero
 	bl _asm_reserve_branch
+        bl _begin_block
 	push_tos
 	ldr tos, =-1
 	pop {pc}
@@ -53,6 +89,7 @@ _else:	push {lr}
 	cmp tos, #0
 	beq 1f
 	pull_tos
+        bl _end_block
 	movs r0, tos
 	pull_tos
 	push {r0}
@@ -62,6 +99,7 @@ _else:	push {lr}
 	push_tos
 	movs tos, r0
 	bl _asm_branch_back
+        bl _begin_block
 	push_tos
 	movs tos, #0
 	pop {pc}
@@ -83,6 +121,7 @@ _not_following_if:
 	define_word "then", visible_flag | immediate_flag | compiled_flag
 _then:	push {lr}
 	bl _asm_undefer_lit
+        bl _end_block
 	movs r1, tos
 	pull_tos
 	movs r0, tos
@@ -105,12 +144,14 @@ _then:	push {lr}
 _begin:	push {lr}
 	bl _asm_undefer_lit
 	bl _current_here
+        bl _begin_block
 	pop {pc}
 
 	@@ Start a WHILE block
 	define_word "while", visible_flag | immediate_flag | compiled_flag
 _while:	push {lr}
 	bl _asm_undefer_lit
+        bl _end_block
 	push_tos
 	movs tos, #0
 	push_tos
@@ -130,6 +171,7 @@ _while:	push {lr}
 	adds tos, #4
 	bl _asm_branch_not_zero
 	bl _asm_reserve_branch
+        bl _begin_block
 	pop {pc}
 	end_inlined
 
@@ -138,6 +180,7 @@ _while:	push {lr}
 _repeat:
 	push {lr}
 	bl _asm_undefer_lit
+        bl _end_block
 	movs r0, tos
 	pull_tos
 	push {r0}
@@ -154,6 +197,7 @@ _repeat:
 	define_word "until", visible_flag | immediate_flag | compiled_flag
 _until:	push {lr}
 	bl _asm_undefer_lit
+        bl _end_block
 	push_tos
 	movs tos, #0
 	push_tos
@@ -180,6 +224,7 @@ _until:	push {lr}
 	define_word "again", visible_flag | immediate_flag | compiled_flag
 _again:	push {lr}
 	bl _asm_undefer_lit
+        bl _end_block
 	bl _asm_branch
 	pop {pc}
 	end_inlined

@@ -2291,6 +2291,12 @@ _init_variables:
         str r1, [r0]
         ldr r0, =word_reset_hook
         str r1, [r0]
+        ldr r0, =block_begin_hook
+        str r1, [r0]
+        ldr r0, =block_exit_hook
+        str r1, [r0]
+        ldr r0, =block_end_hook
+        str r1, [r0]
 	ldr r0, =finalize_hook
 	str r1, [r0]
         ldr r0, =parse_hook

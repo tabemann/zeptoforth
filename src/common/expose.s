@@ -406,7 +406,31 @@ _word_reset_hook:
         ldr tos, =word_reset_hook
         bx lr
         end_inlined
+
+        @@ The block beginning hook
+        define_word "block-begin-hook", visible_flag
+_block_begin_hook:
+        push_tos
+        ldr tos, =block_begin_hook
+        bx lr
+        end_inlined
         
+        @@ The block exit hook
+        define_word "block-exit-hook", visible_flag
+_block_exit_hook:
+        push_tos
+        ldr tos, =block_exit_hook
+        bx lr
+        end_inlined
+
+        @@ The block end hook
+        define_word "block-end-hook", visible_flag
+_block_end_hook:
+        push_tos
+        ldr tos, =block_end_hook
+        bx lr
+        end_inlined
+
 	@@ The finalize hook
 	define_word "finalize-hook", visible_flag
 _finalize_hook:

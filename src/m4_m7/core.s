@@ -1410,6 +1410,8 @@ _get_8:	ldr r0, [tos]
 	bx lr
 	end_inlined
 
+.ltorg
+        
 	@@ Store a byte at the RAM HERE location
 	define_word "cram,", visible_flag
 _comma_1:
@@ -2228,6 +2230,12 @@ _init_variables:
         ldr r0, =word_end_hook
         str r1, [r0]
         ldr r0, =word_reset_hook
+        str r1, [r0]
+        ldr r0, =block_begin_hook
+        str r1, [r0]
+        ldr r0, =block_exit_hook
+        str r1, [r0]
+        ldr r0, =block_end_hook
         str r1, [r0]
 	ldr r0, =finalize_hook
 	str r1, [r0]
