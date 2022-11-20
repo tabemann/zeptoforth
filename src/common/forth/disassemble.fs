@@ -672,15 +672,15 @@ begin-module disassemble-internal
 
   [then]
 
-  \ \ Parse an ADD SP to immediate instruction
-  \ : p-add-sp-imm
-  \   ." ADD" csp. dup 8_3_bf reg. ." , SP, #" 0_8_bf val. drop
-  \ ;
+  \ Parse an ADD SP to immediate instruction
+  : p-add-sp-imm-1
+    ." ADD" csp. dup 8_3_bf reg. ." , SP, #" 0_8_bf 2 lshift val. drop
+  ;
 
-  \ \ Parse an ADD SP to immediate instruction
-  \ : p-add-sp-imm
-  \   ." ADD" csp. ." SP, SP, #" 0 7 bitfield val. drop
-  \ ;
+  \ Parse an ADD SP to immediate instruction
+  : p-add-sp-imm-2
+    ." ADD" csp. ." SP, SP, #" 0 7 bitfield 2 lshift val. drop
+  ;
 
   \ \ Parse an ADD SP to immediate instruction
   \ : p-add-sp-imm
@@ -702,10 +702,11 @@ begin-module disassemble-internal
   \   dup 0_3_bf over 7 1 bitfield 3 lshift or dup reg. ." , SP, " reg. drop
   \ ;
 
-  \ \ Parse an ADD SP to register instruction
-  \ : p-add-sp-reg-2
-  \   ." ADD" csp. ." SP, " 2 4 bitfield reg. drop
-  \ ;
+  \ Parse an ADD SP to register instruction
+  : p-add-sp-reg-2
+    ." ADD" csp. ." SP, " 2 4 bitfield reg. drop
+  ;
+  
   \ \ Parse an ADD SP to register instruction
   \ : p-add-sp-reg-3
   \   ." ADD" swap 4s?. swap cond. .w
@@ -1140,7 +1141,8 @@ begin-module disassemble-internal
 
   \ Parse a MOV register instruction
   : p-mov-reg-1
-    ." MOV" csp. dup 0_3_bf over 7 1 bitfield or reg-sep. 3_4_bf reg. drop
+    ." MOV" csp. dup 0_3_bf over 7 1 bitfield 3 lshift or reg-sep.
+    3_4_bf reg. drop
   ;
 
   \ Parse a MOV register instruction
@@ -1521,10 +1523,10 @@ begin-module disassemble-internal
   ' p-add-imm-2 ,    %1111100000000000 h, %0011000000000000 h,
   ' p-add-reg-1 ,    %1111111000000000 h, %0001100000000000 h,
   ' p-add-reg-2 ,    %1111111100000000 h, %0100010000000000 h,
-  \ ' p-add-sp-imm-1 , %1111100000000000 h, %1010100000000000 h,
-  \ ' p-add-sp-imm-2 , %1111111110000000 h, %1011000000000000 h,
+  ' p-add-sp-imm-1 , %1111100000000000 h, %1010100000000000 h,
+  ' p-add-sp-imm-2 , %1111111110000000 h, %1011000000000000 h,
   \ ' p-add-sp-reg-1 , %1111111101111000 h, %0100010001101000 h,
-  \ ' p-add-sp-reg-2 , %1111111110000111 h, %0100010010000101 h,
+  ' p-add-sp-reg-2 , %1111111110000111 h, %0100010010000101 h,
   ' p-adr-1 ,        %1111000000000000 h, %1010000000000000 h,
   ' p-and-reg-1 ,    %1111111111000000 h, %0100000000000000 h,
   ' p-asr-imm-1 ,    %1111100000000000 h, %0001000000000000 h,

@@ -2,7 +2,7 @@
 
 Full builds of zeptoforth include support for `value` and `2value` along with local variables. Unlike `variable` and `2variable`, `value` and `2value` variables are initialized, and retain their initialization across reboots. `value`s, `2value`s, and local variables are all set with `to` or added to with `+to`, which are state-smart words that can be used both in interpretation and in compilation mode.
 
-Note that local variables can be used inside `if` ... `else` ... `then`, `begin` ... `until`, `begin` ... `while` ... `repeat`, and `begin` ... `again`. Within such constructs they are scoped between `if` and `else`, `else` and `then`, `begin` and `until`, `begin` and `while`, `while` and `repeat`, and `begin` and `again`, and cannot be accessed outside these delimiters. They cannot be used inside do-loops or inside case constructs at the present.
+Note that local variables are lexically scoped, and are safe to use within `if` ... `then`, `if` ... `else` ... `then`, `begin` ... `until`, `begin` ... `while` ... `repeat`, `begin` ... `again`, `case` ... `endcase`/`endcasestr`, `of`/`ofstr`/`ofstrcase` ... `endof`,  and `do`/`?do` ... `loop`/`+loop` constructs. Local variables declared between these words are not accessible outside them, and do not retain their values between multiple iterations.
 
 All of these words are in the default `forth` module.
 

@@ -51,6 +51,39 @@ continue-module internal
   \ Out of local space exception
   : x-out-of-locals ( -- ) ." out of local space" cr ;
 
+  \ Loop variable not found
+  : x-loop-var-not-found ( -- ) ." loop variable not found" cr ;
+
+  \ Find a loop variable
+  : find-loop-var ( i addr -- i' addr' )
+    begin dup local-buf-bottom @ < while
+      dup c@ dup 0= if drop exit then 1+ + swap 1+ swap
+    repeat
+    2drop ['] x-loop-var-not-found ?raise
+  ;
+
+  \ Find the i loop variable
+  : find-i-var ( -- i )
+    0 local-buf-top @ find-loop-var drop
+  ;
+
+  \ Find the limit loop variable
+  : find-limit-var ( -- i )
+    0 local-buf-top @ find-loop-var 1+ swap 1+ swap find-loop-var drop
+  ;
+
+  \ Find the leave loop variable
+  : find-leave-var ( -- i )
+    0 local-buf-top @ find-loop-var 1+ swap 1+ swap find-loop-var
+    1+ swap 1+ swap find-loop-var drop
+  ;
+
+  \ Find the j loop variable
+  : find-j-var ( -- i )
+    0 local-buf-top @ find-loop-var 1+ swap 1+ swap find-loop-var
+    1+ swap 1+ swap find-loop-var 1+ swap 1+ swap find-loop-var drop
+  ;
+  
   \ Reset the local buffer
   : reset-local ( -- )
     local-buf local-buf-size + dup local-buf-top ! local-buf-bottom !
@@ -72,6 +105,14 @@ continue-module internal
     dup 1+ negate local-buf-top +!
     dup local-buf-top @ c!
     local-buf-top @ 1+ swap move
+    1 block-locals-top @ c+!
+  ;
+
+  \ Add an anomymous local
+  : add-noname-local ( -- )
+    local-buf-top @ 1- local-buf >= averts x-out-of-locals
+    -1 local-buf-top +!
+    0 local-buf-top @ c!
     1 block-locals-top @ c+!
   ;
 
@@ -494,6 +535,168 @@ end-module> import
     then
   until
 ;
+
+\ Start a DO LOOP
+: do ( compile: -- loop-addr leave-addr ) ( runtime: limit begin -- )
+  [immediate] [compile-only]
+  undefer-lit
+  begin-block add-noname-local add-noname-local add-noname-local
+  reserve-literal
+  [ armv6m-instr import ]
+  tos r2 movs_,_
+  [ cortex-m7? ] [if]
+    r3 1 dp ldm
+    tos 1 dp ldm
+  [else]
+    tos r3 2 dp ldm
+  [then]
+  sp r1 mov4_,4_
+  12 r1 subs_,#_
+  r1 sp mov4_,4_
+  8 r0 str_,[sp,#_]
+  0 r2 str_,[sp,#_]
+  4 r3 str_,[sp,#_]
+  [ armv6m-instr unimport ]
+  here swap
+  begin-block
+;
+
+\ Start a ?DO LOOP
+: ?do ( compile: -- loop-addr leave-addr ) ( runtime: limit begin -- )
+  [immediate] [compile-only]
+  undefer-lit
+  begin-block add-noname-local add-noname-local add-noname-local
+  reserve-literal
+  [ armv6m-instr import ]
+  tos r2 movs_,_
+  [ cortex-m7? ] [if]
+    r3 1 dp ldm
+    tos 1 dp ldm
+  [else]
+    tos r3 2 dp ldm
+  [then]
+  r3 r2 cmp_,_
+  ne bc>
+  r0 bx_
+  >mark
+  sp r1 mov4_,4_
+  12 r1 subs_,#_
+  r1 sp mov4_,4_
+  8 r0 str_,[sp,#_]
+  0 r2 str_,[sp,#_]
+  4 r3 str_,[sp,#_]
+  [ armv6m-instr unimport ]
+  here swap
+  begin-block
+;
+
+\ Close a DO LOOP
+: loop ( compile: loop-addr leave-addr -- ) ( runtime: -- )
+  [immediate] [compile-only]
+  undefer-lit
+  end-block
+  swap
+  [ armv6m-instr import ]
+  find-i-var 4 * r0 ldr_,[sp,#_]
+  1 r0 adds_,#_
+  find-limit-var 4 * r1 ldr_,[sp,#_]
+  r1 r0 cmp_,_
+  eq bc>
+  find-i-var 4 * r0 str_,[sp,#_]
+  rot branch,
+  >mark
+  [ armv6m-instr unimport ]
+  end-block
+  here 1 or 0 rot literal!
+;
+
+\ Close a DO +LOOP
+: +loop ( compile: loop-addr leave-addr -- ) ( runtime: -- )
+  [immediate] [compile-only]
+  undefer-lit
+  end-block
+  swap
+  [ armv6m-instr import ]
+  find-i-var 4 * r0 ldr_,[sp,#_]
+  r0 r2 movs_,_
+  tos r0 r0 adds_,_,_
+  find-i-var 4 * r0 str_,[sp,#_]
+  find-limit-var 4 * r1 ldr_,[sp,#_]
+
+  0 tos cmp_,#_
+  lt bc>
+
+  tos 1 dp ldm
+  
+  r1 r2 cmp_,_
+  le bc>
+  4 pick branch,
+  >mark
+
+  r0 r1 cmp_,_
+  le bc>
+  4 pick branch,
+
+  2swap >mark
+
+  tos 1 dp ldm
+
+  r1 r2 cmp_,_
+  ge bc>
+  4 pick branch,
+  >mark
+  
+  r0 r1 cmp_,_
+  gt bc>
+  4 pick branch,
+
+  >mark
+  >mark
+
+  drop
+  
+  [ armv6m-instr unimport ]
+  end-block
+  here 1 or 0 rot literal!
+;
+
+\ Get the I loop variable
+: i ( -- x )
+  [immediate] [compile-only]
+  undefer-lit
+  6 push,
+  [ armv6m-instr import ]
+  find-i-var 4 * tos ldr_,[sp,#_]
+  [ armv6m-instr unimport ]
+;
+
+\ Get the J loop variable
+: j ( -- x )
+  [immediate] [compile-only]
+  undefer-lit
+  6 push,
+  [ armv6m-instr import ]
+  find-j-var 4 * tos ldr_,[sp,#_]
+  [ armv6m-instr unimport ]
+;
+
+\ Leave a loop
+: leave ( -- )
+  [immediate] [compile-only]
+  undefer-lit
+  6 push,
+  [ armv6m-instr import ]
+  find-leave-var 4 * tos ldr_,[sp,#_]
+  block-exit-hook @ ?execute
+  block-exit-hook @ ?execute
+  tos r0 movs_,_
+  tos 1 dp ldm
+  r0 bx_
+  [ armv6m-instr unimport ]
+;
+
+\ Remove the loop variables (note that this is a no-op since EXIT does this now)
+: unloop ( -- ) ;
 
 \ Initialize
 : init ( -- ) init init-values ;

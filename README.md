@@ -23,6 +23,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 * Multicore support (on the Raspberry Pi Pico)
 * Double cell and fixed point numeric support
 * Lambda expressions
+* `value`s and lexically scoped local variables
 * Object orientation
 * A disassembler
 * SysTick support

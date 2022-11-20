@@ -737,6 +737,7 @@ commit-flash
 : case ( -- )
   [immediate]
   [compile-only]
+  begin-block
   0
 ;
 
@@ -772,6 +773,7 @@ commit-flash
   ?dup if
     here swap branch-back!
   then
+  end-block
 ;
 
 \ Commit changes to flash
@@ -812,6 +814,7 @@ commit-flash
   ?dup if
     here swap branch-back!
   then
+  end-block
 ;
 
 \ Set internal
