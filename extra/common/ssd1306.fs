@@ -65,7 +65,7 @@ begin-module ssd1306
   end-class
 
   \ Default I2C address
-  $3C constant SSD1306_I2C_ADDRESS
+  $3C constant SSD1306_I2C_ADDR
 
   continue-module ssd1306-internal
     
@@ -189,35 +189,35 @@ begin-module ssd1306
     $8D constant SSD1306_SETCHARGEPUMP
     
     \ Initialize I2C for an SSD1306 device
-    : init-i2c ( ssd1306 -- )
-      dup ssd1306-device @
-      2dup swap ssd1306-pin0 @ i2c-pin
-      2dup swap ssd1306-pin1 @ i2c-pin
-      dup master-i2c
-      dup 7-bit-i2c-addr
-      swap ssd1306-addr @ over i2c-target-addr!
-      enable-i2c
+    : init-i2c { self -- }
+      self ssd1306-device @ { device }
+      device self ssd1306-pin0 @ i2c-pin
+      device self ssd1306-pin1 @ i2c-pin
+      device master-i2c
+      device 7-bit-i2c-addr
+      self ssd1306-addr @ device i2c-target-addr!
+      device enable-i2c
     ;
 
     \ Begin constructing a command to send to the SSD1306
-    : begin-cmd ( ssd1306 -- )
-      ram-here swap ssd1306-cmd-base !
+    : begin-cmd { self -- }
+      ram-here self ssd1306-cmd-base !
     ;
     
     \ Write a byte to the current command being constructed
     : >cmd ( c -- ) cram, ;
     
     \ Send the current command that has been constructed
-    : send-cmd ( ssd1306 -- )
-      [:
-        dup ssd1306-cmd-base @ dup ram-here swap - 2 pick
-        ssd1306-device @ >i2c-stop
-      ;] try ssd1306-cmd-base @ ram-here! ?raise
+    : send-cmd { self -- }
+      self [: dup { self }
+        self ssd1306-cmd-base @ dup ram-here swap -
+        self ssd1306-device @ >i2c-stop drop
+      ;] try nip self ssd1306-cmd-base @ ram-here! ?raise
     ;
 
     \ Initialize an SSD1306 display
-    : init-display ( ssd1306 -- )
-      dup begin-cmd
+    : init-display { self -- }
+      self begin-cmd
       \ Begin a command
       SSD1306_CMD_START >cmd
       \ Turn off display
@@ -225,7 +225,7 @@ begin-module ssd1306
       \ Set the clock to Fosc = 8, divide ratio = 1
       SSD1306_SETDISPLAYCLOCKDIV >cmd $80 >cmd
       \ Set the display multiplexer to the number of rows - 1
-      SSD1306_SETMULTIPLEX >cmd dup bitmap-rows @ 1 - >cmd
+      SSD1306_SETMULTIPLEX >cmd self bitmap-rows @ 1 - >cmd
       \ Set the vertical offset to 0
       SSD1306_VERTICALOFFSET >cmd 0 >cmd
       \ RAM start line 0
@@ -237,11 +237,11 @@ begin-module ssd1306
       \ Set flip columns
       SSD1306_COLSCAN_DESCENDING >cmd
       \ Set to not flip pages
-      SSD1306_COMSCAN_ASCENDING >cmd
-      \ Set COM pins to sequential pin mode
-      SSD1306_SETCOMPINS >cmd $02 >cmd
+      SSD1306_COMSCAN_DESCENDING >cmd
+      \ Set COM pins to alternative COM pin mode
+      SSD1306_SETCOMPINS >cmd $12 >cmd
       \ Set contrast to minimal
-      SSD1306_SETCONTRAST >cmd $00 >cmd
+      SSD1306_SETCONTRAST >cmd $FF ( $00 ) >cmd
       \ Set precharge period to phase1 = 15, phase2 = 1
       SSD1306_SETPRECHARGE >cmd $F1 >cmd
       \ Set VCOMH deselect level to (0, 2, 3)
@@ -254,55 +254,32 @@ begin-module ssd1306
       SSD1306_SCROLL_DEACTIVATE >cmd
       \ Turn on display in normal mode
       SSD1306_SETDISPLAY_ON >cmd
-      send-cmd
+      self send-cmd
     ;
 
     \ Send a row of data to the SSD1305 device
-    : send-row ( start-col end-col page ssd1306 -- )
-      >r r@ begin-cmd
-      r@ page-addr -rot swap ?do dup i + c@ >cmd loop drop
-      r> send-cmd
+    : send-row { start-col end-col page self -- }
+      self begin-cmd SSD1306_DATA_START >cmd
+      page self page-addr dup end-col + swap start-col + ?do i c@ >cmd loop
+      self send-cmd
     ;
     
     \ Send an area of data to the SSD1306 device
-    : send-area ( start-col end-col start-page end-page ssd1306 -- )
-      -rot swap do 3dup i swap send-row loop 2drop drop
+    : send-area { start-col end-col start-page end-page self -- }
+      end-page start-page ?do start-col end-col i self send-row loop
     ;
     
     \ Update a rectangular space on the SSD1306 device
-    : update-area ( start-col end-col start-row end-row ssd1306 -- )
-      >r r@ begin-cmd
-      8 align 3 rshift swap 3 rshift swap
-      SSD1306_CMD_START >cmd
-      SSD1306_SETPAGERANGE >cmd 2dup swap >cmd 1- >cmd
-      SSD1306_SETCOLRANGE >cmd 2over swap >cmd 1- >cmd    
-      r@ send-cmd
-      r> send-area
-    ;
-
-    \ Dirty a pixel on an SSD1306 device
-    : dirty-pixel ( col row ssd1306 -- )
-      >r r@ dirty? if
-        dup r@ ssd1306-dirty-start-row @ min r@ ssd1306-dirty-start-row !
-        1+ r@ ssd1306-dirty-end-row @ max r@ ssd1306-dirty-end-row !
-        dup r@ ssd1306-dirty-start-col @ min r@ ssd1306-dirty-end-col !
-        1+ r@ ssd1306-dirty-end-col @ max r> ssd1306-dirty-end-col !
-      else
-        dup r@ ssd1306-dirty-start-row !
-        1+ r@ ssd1306-dirty-end-row !
-        dup r@ ssd1306-dirty-start-col !
-        1+ r> ssd1306-dirty-end-col !
-      then
-    ;
-
-    \ Dirty an area on an SSD1306 device
-    : dirty-area ( start-col end-col start-row end-row ssd1306 -- )
-      4 pick 4 pick < 3 pick 3 pick < and if
-        >r swap 2swap -rot swap ( end-row end-col start-col start-row )
-        r@ dirty-pixel ( end-row end-col )
-        1- swap 1- r> dirty-pixel ( )
-      else
-        drop 2drop 2drop
+    : update-area { start-col end-col start-row end-row self -- }
+      start-row 3 rshift { start-page }
+      end-row 8 align 3 rshift { end-page }
+      start-page end-page < if
+        self begin-cmd
+        SSD1306_CMD_START >cmd
+        SSD1306_SETPAGERANGE >cmd start-page >cmd end-page 1- >cmd
+        SSD1306_SETCOLRANGE >cmd start-col >cmd end-col 1- >cmd    
+        self send-cmd
+        start-col end-col start-page end-page self send-area
       then
     ;
     
@@ -311,49 +288,70 @@ begin-module ssd1306
   <ssd1306> begin-implement
   
     \ Initialize an SSD1306 device
-    :noname ( pin0 pin1 frame-buf cols rows i2c-addr i2c-device ssd1306 -- )
-      -rot 2>r >r r@ [ <bitmap> ] -> new r>
-      tuck ssd1306-device !
-      tuck ssd1306-addr !
-      tuck ssd1306-pin1 !
-      tuck ssd1306-pin0 !
-      dup init-i2c
-      init-display
+    :noname { pin0 pin1 buf cols rows i2c-addr i2c-device self -- }
+      buf cols rows self [ <bitmap> ] -> new
+      i2c-device self ssd1306-device !
+      i2c-addr self ssd1306-addr !
+      pin1 self ssd1306-pin1 !
+      pin0 self ssd1306-pin0 !
+      self init-i2c
+      self init-display
     ; define new
 
     \ Set the entire display to be dirty
-    :noname ( ssd1306 -- )
-      0 over ssd1306-dirty-start-col !
-      dup bitmap-cols @ over ssd1306-dirty-end-col !
-      0 over ssd1306-dirty-start-row !
-      dup bitmap-rows @ swap ssd1306-dirty-end-row !
+    :noname { self -- }
+      0 self ssd1306-dirty-start-col !
+      self bitmap-cols @ self ssd1306-dirty-end-col !
+      0 self ssd1306-dirty-start-row !
+      self bitmap-rows @ self ssd1306-dirty-end-row !
     ; define set-dirty
 
     \ Clear dirty rectangle
-    :noname ( ssd1306 -- )
-      0 over ssd1306-dirty-start-col !
-      0 over ssd1306-dirty-end-col !
-      0 over ssd1306-dirty-start-row !
-      0 swap ssd1306-dirty-end-row !
+    :noname { self -- }
+      0 self ssd1306-dirty-start-col !
+      0 self ssd1306-dirty-end-col !
+      0 self ssd1306-dirty-start-row !
+      0 self ssd1306-dirty-end-row !
     ; define clear-dirty
     
     \ Get whether an SSD1306 device is dirty
-    :noname ( ssd1306 -- dirty? )
-      >r r@ ssd1306-dirty-start-col @ r@ ssd1306-dirty-end-col @ <>
-      r@ ssd1306-dirty-start-row @ r> ssd1306-dirty-end-row @ <> and
+    :noname { self -- dirty? }
+      self ssd1306-dirty-start-col @ self ssd1306-dirty-end-col @ <>
+      self ssd1306-dirty-start-row @ self ssd1306-dirty-end-row @ <> and
     ; define dirty?
   
-    \ Update the SSD1306 device
-    :noname ( ssd1306 -- )
-      >r r@ dirty? if
-        r@ ssd1306-dirty-start-col @
-        r@ ssd1306-dirty-end-col @
-        r@ ssd1306-dirty-start-row @
-        r@ ssd1306-dirty-end-row @
-        r@ update-area
-        r> clear-dirty
+    \ Dirty a pixel on an SSD1306 device
+    :noname { col row self -- }
+      self dirty? if
+        row self ssd1306-dirty-start-row @ min self ssd1306-dirty-start-row !
+        row 1+ self ssd1306-dirty-end-row @ max self ssd1306-dirty-end-row !
+        col self ssd1306-dirty-start-col @ min self ssd1306-dirty-start-col !
+        col 1+ self ssd1306-dirty-end-col @ max self ssd1306-dirty-end-col !
       else
-        rdrop
+        row self ssd1306-dirty-start-row !
+        row 1+ self ssd1306-dirty-end-row !
+        col self ssd1306-dirty-start-col !
+        col 1+ self ssd1306-dirty-end-col !
+      then
+    ; define dirty-pixel
+
+    \ Dirty an area on an SSD1306 device
+    :noname { start-col end-col start-row end-row self -- }
+      start-col end-col < start-row end-row < and if
+        start-col start-row self dirty-pixel
+        end-col 1- end-row 1- self dirty-pixel
+      then
+    ; define dirty-area
+
+    \ Update the SSD1306 device
+    :noname { self -- }
+      self dirty? if
+        self ssd1306-dirty-start-col @
+        self ssd1306-dirty-end-col @
+        self ssd1306-dirty-start-row @
+        self ssd1306-dirty-end-row @
+        self update-area
+        self clear-dirty
       then
     ; define update
 
