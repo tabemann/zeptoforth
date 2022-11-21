@@ -60,7 +60,7 @@ begin-module ssd1306
     end-module> import
 
     \ Update the SSD1306 device
-    method update
+    method update-display
     
   end-class
 
@@ -353,7 +353,7 @@ begin-module ssd1306
         self update-area
         self clear-dirty
       then
-    ; define update
+    ; define update-display
 
   end-implement
   

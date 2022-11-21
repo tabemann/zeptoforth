@@ -60,6 +60,21 @@ begin-module bitmap
     \ Get whether a bitmap is dirty
     method dirty? ( bitmap -- dirty? )
       
+    \ Set a pixel with a constant value
+    method set-pixel-const ( const dst-col dst-row dst-bitmap -- )
+    
+    \ Or a pixel with a constant value
+    method or-pixel-const ( const dst-col dst-row dst-bitmap -- )
+
+    \ And a pixel with a constant value
+    method and-pixel-const ( const dst-col dst-row dst-bitmap -- )
+
+    \ Bit-clear a pixel with a constant value
+    method bic-pixel-const ( const dst-col dst-row dst-bitmap -- )
+
+    \ Exclusive-or a pixel with a constant value
+    method xor-pixel-const ( const dst-col dst-row dst-bitmap -- )
+
     \ Set a rectangle with a constant value
     method set-rect-const
     ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
@@ -805,6 +820,91 @@ begin-module bitmap
       ;
         
     end-module
+
+    \ Set a pixel with a constant value
+    :noname { const dst-col dst-row dst -- }
+      0 dst-col <= 0 dst-row <= and
+      dst-col dst bitmap-cols @ < dst-row dst bitmap-rows @ < and and if
+        dst-col dst-row dst dirty-pixel
+        const dst-row 1 1 dst-col dst set-strip-const
+      then
+    ; define set-pixel-const
+    
+    \ Or a pixel with a constant value
+    :noname { const dst-col dst-row dst -- }
+      0 dst-col <= 0 dst-row <= and
+      dst-col dst bitmap-cols @ < dst-row dst bitmap-rows @ < and and if
+        dst-col dst-row dst dirty-pixel
+        const dst-row 1 1 dst-col dst or-strip-const
+      then
+    ; define or-pixel-const
+
+    \ And a pixel with a constant value
+    :noname { const dst-col dst-row dst -- }
+      0 dst-col <= 0 dst-row <= and
+      dst-col dst bitmap-cols @ < dst-row dst bitmap-rows @ < and and if
+        dst-col dst-row dst dirty-pixel
+        const dst-row 1 1 dst-col dst and-strip-const
+      then
+    ; define and-pixel-const
+
+    \ Bit-clear a pixel with a constant value
+    :noname { const dst-col dst-row dst -- }
+      0 dst-col <= 0 dst-row <= and
+      dst-col dst bitmap-cols @ < dst-row dst bitmap-rows @ < and and if
+        dst-col dst-row dst dirty-pixel
+        const dst-row 1 1 dst-col dst bic-strip-const
+      then
+    ; define bic-pixel-const
+
+    \ Exclusive-or a pixel with a constant value
+    :noname { const dst-col dst-row dst -- }
+      0 dst-col <= 0 dst-row <= and
+      dst-col dst bitmap-cols @ < dst-row dst bitmap-rows @ < and and if
+        dst-col dst-row dst dirty-pixel
+        const dst-row 1 1 dst-col dst xor-strip-const
+      then
+    ; define xor-pixel-const
+
+    \ Or a rectangle with a constant value
+    :noname
+      ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
+      { dst } dst clip-dst-only
+      { const dst-col col-count dst-row row-count }
+      dst-col dup col-count + dst-row dup row-count + dst dirty-area
+      const dst-col col-count dst-row row-count dst
+      ['] or-strip-const blit-const
+    ; define or-rect-const
+
+    \ And a rectangle with a constant value
+    :noname
+      ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
+      { dst } dst clip-dst-only
+      { const dst-col col-count dst-row row-count }
+      dst-col dup col-count + dst-row dup row-count + dst dirty-area
+      const dst-col col-count dst-row row-count dst
+      ['] and-strip-const blit-const
+    ; define and-rect-const
+
+    \ Bit-clear a rectangle with a constant value
+    :noname
+      ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
+      { dst } dst clip-dst-only
+      { const dst-col col-count dst-row row-count }
+      dst-col dup col-count + dst-row dup row-count + dst dirty-area
+      const dst-col col-count dst-row row-count dst
+      ['] bic-strip-const blit-const
+    ; define bic-rect-const
+
+    \ Exclusive-or a rectangle with a constant value
+    :noname
+      ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
+      { dst } dst clip-dst-only
+      { const dst-col col-count dst-row row-count }
+      dst-col dup col-count + dst-row dup row-count + dst dirty-area
+      const dst-col col-count dst-row row-count dst
+      ['] xor-strip-const blit-const
+    ; define xor-rect-const
 
     \ Set a rectangle with a constant value
     :noname

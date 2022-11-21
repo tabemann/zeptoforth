@@ -80,7 +80,7 @@ begin-module ssd1306-test
     0 0 1 1 { column row delta-column delta-row }
     begin key? not while
       $FF column width row height my-ssd1306 xor-rect-const
-      my-ssd1306 update
+      my-ssd1306 update-display
       column width + my-cols >= if
         -1 to delta-column
       else
@@ -108,7 +108,7 @@ begin-module ssd1306-test
     0 0 1 1 { column row delta-column delta-row }
     begin key? not while
       0 column width 0 row height my-sprite my-ssd1306 or-rect
-      my-ssd1306 update
+      my-ssd1306 update-display
       column width + my-cols >= if
         -1 to delta-column
       else
@@ -130,6 +130,74 @@ begin-module ssd1306-test
     key drop
   ;
   
+  \ Bounce a pixel around the display
+  : bounce-pixel ( -- )
+    inited? not if init-test true to inited? then
+    my-cols 5 / 0 1 1 { column row delta-column delta-row }
+    begin key? not while
+      $FF column row my-ssd1306 xor-pixel-const
+      my-ssd1306 update-display
+      column my-cols >= if
+        -1 to delta-column
+      else
+        column 0 <= if
+          1 to delta-column
+        then
+      then
+      row my-rows >= if
+        -1 to delta-row
+      else
+        row 0 <= if
+          1 to delta-row
+        then
+      then
+      delta-column +to column
+      delta-row +to row
+      100 ms
+    repeat
+    key drop
+  ;
+  
+  \ Bounce a pixel around the display, displaying full cycles
+  : bounce-pixel-cycle ( -- )
+    inited? not if init-test true to inited? then
+    my-cols 5 / 1 { cycle delta-cycle }
+    cycle 0 1 1 { column row delta-column delta-row }
+    begin key? not while
+      $FF column row my-ssd1306 xor-pixel-const
+      column my-cols >= if
+        -1 to delta-column
+      else
+        column 0 <= if
+          1 to delta-column
+        then
+      then
+      row my-rows >= if
+        -1 to delta-row
+      else
+        row 0 <= if
+          1 to delta-row
+        then
+      then
+      delta-column +to column
+      delta-row +to row
+      column cycle = row 0= and if
+        my-ssd1306 update-display
+        cycle my-cols >= if
+          -1 to delta-cycle
+        else
+          cycle 0 <= if
+            1 to delta-cycle
+          then
+        then
+        delta-cycle +to cycle
+        cycle to column
+        100 ms
+      then
+    repeat
+    key drop
+  ;
+  
   \ XOR sprites at random coordinates
   : random-sprites ( -- )
     inited? not if init-test true to inited? then
@@ -137,7 +205,17 @@ begin-module ssd1306-test
       0 random my-cols width - umod width
       0 random my-rows height -  umod height
       my-sprite my-ssd1306 xor-rect
-      my-ssd1306 update
+      my-ssd1306 update-display
+    repeat
+    key drop
+  ;
+  
+  \ XOR pixels at random coordinates
+  : random-pixels ( -- )
+    inited? not if init-test true to inited? then
+    begin key? not while
+      256 0 do $FF random my-cols umod random my-rows umod my-ssd1306 xor-pixel-const loop
+      my-ssd1306 update-display
     repeat
     key drop
   ;
