@@ -58,3 +58,4 @@ Zeptoforth Documentation
    words/internal
    words/asm
    words/expose
+   extra/display
