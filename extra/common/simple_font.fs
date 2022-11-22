@@ -35,7 +35,7 @@ begin-module simple-font
     128 constant char-count
   
     \ Our font buffer
-    char-cols char-rows char-count font-buf-size 4 align buffer: a-font-buf
+    char-cols char-rows $20 $7E font-buf-size 4 align buffer: a-font-buf
 
     \ Parse a row the font
     : %% ( -- )
@@ -1009,8 +1009,7 @@ begin-module simple-font
   
   \ Initialize our font
   : init-simple-font ( -- )
-    a-font-buf $20 char-cols char-rows char-count
-    <font> a-simple-font init-object
+    a-font-buf $20 char-cols char-rows $20 $7E <font> a-simple-font init-object
     char-data load-simple-font
   ;
 

@@ -7,9 +7,9 @@ Under `extra/common/font.fs` there is optional code for supporting seven and eig
 The `font` module contains the following words:
 
 ##### `font-buf-size`
-( char-columns char-rows char-count -- bytes )
+( char-columns char-rows min-char-index max-char-index -- bytes )
 
-This gets the number of bytes needed for the buffer for a font with *char-count* glyphs of *char-columns* columns and *char-rows* rows.
+This gets the number of bytes needed for the buffer for a font with glyphs from character *min-char-index* to character *max-char-index*, inclusive, with glyphs of *char-columns* columns and *char-rows* rows.
 
 ##### `<font>`
 ( -- class )
@@ -19,9 +19,9 @@ This class constitutes a bitmap font. It is backed by a bitmap which is not dire
 The `<font>` class includes the following constructor:
 
 ##### `new`
-( buffer-addr default-char-index char-columns char-rows char-count font -- )
+( buffer-addr default-char-index char-columns char-rows min-char-index max-char-index font -- )
 
-This constructor initializes a `<font>` instance with *char-count* glyphs, glyphs of *char-columns* columns and *char-rows* rows, a default character *default-char-index* for out of range characters, and a backing bitmap buffer address *buffer-addr*. The backing bitmap buffer is set to zero at this time.
+This constructor initializes a `<font>` instance with a minimum character index of *min-char-index*, a maximum character index of *max-char-index*, glyphs of *char-columns* columns and *char-rows* rows, a default character *default-char-index* for out of range characters, and a backing bitmap buffer address *buffer-addr*. The backing bitmap buffer is set to zero at this time.
 
 The `<font>` class includes the following members:
 
@@ -35,10 +35,15 @@ The address of a cell containing the number of columns in each glyph in a font.
 
 The address of a cell containing the number of rows in each glyph in a font.
 
-##### `char-count`
+##### `min-char-index`
 ( font -- addr )
 
-The address of a cell containing the maximum character index in a font, equal to and above which the character and `default-char-index` will be substituted.
+The address of a cell containing the minimum character index in a font, below which the character specified by `default-char-index` is to be substituted.
+
+##### `max-char-index
+( font -- addr )
+
+The address of a cell containing the maximum character index in a font, above which the character specified by `default-char-index` is to be substituted.
 
 ##### `default-char-index`
 ( font -- addr )

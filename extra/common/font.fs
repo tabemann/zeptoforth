@@ -27,9 +27,10 @@ begin-module font
   : x-out-of-range-char ( -- ) ." out of range character" cr ;
 
   \ Get the size of a font buffer in bytes for a given number or of columns and
-  \ rows per character and a given number of characters
-  : font-buf-size { char-cols char-rows char-count -- bytes }
-    char-cols char-count * char-rows bitmap-buf-size
+  \ rows per character and a given minimum character index and a given maximum
+  \ character index
+  : font-buf-size { char-cols char-rows min-char max-char -- bytes }
+    char-cols max-char min-char - 1+ * char-rows bitmap-buf-size
   ;
 
   \ The <font> class
@@ -47,9 +48,12 @@ begin-module font
     
     \ Number of rows per character
     cell member char-rows
+
+    \ Minimum character index
+    cell member min-char-index
     
-    \ Number of characters in the font
-    cell member char-count
+    \ Maximum character index
+    cell member max-char-index
     
     \ The default character index for un-included characters
     cell member default-char-index
@@ -89,27 +93,39 @@ begin-module font
     
   end-class
 
+  continue-module font-internal
+    
+    \ Get the column of a character
+    : find-char-col { c self -- col }
+      c self min-char-index @ - self char-cols @ *
+    ;
+
+  end-module
+  
   \ Implement <font> class
   <font> begin-implement
 
     \ Our constructor
-    :noname { buf default cols rows count self -- }
+    :noname { buf default cols rows min-char max-char self -- }
       self [ <object> ] -> new
-      count self char-count !
+      min-char self min-char-index !
+      max-char self max-char-index !
       rows self char-rows !
       cols self char-cols !
       default self default-char-index !
-      buf cols count * rows <bitmap> self font-bitmap init-object
+      buf cols max-char min-char - 1+ * rows
+      <bitmap> self font-bitmap init-object
     ; define new
 
     \ Set a row in a character
     :noname ( xn ... x0 row c self -- )
       { row c self }
-      c self char-count @ u< averts x-out-of-range-char
+      c self min-char-index @ u>= averts x-out-of-range-char
+      c self max-char-index @ u<= averts x-out-of-range-char
       self char-cols @ 1- { col }
       begin col 0>= while
         dup 1 and if $FF else $00 then
-        c self char-cols @ * col + row self font-bitmap set-pixel-const
+        c self find-char-col col + row self font-bitmap set-pixel-const
         1 rshift
         self char-cols @ col - 32 umod 0= col 0<> and if drop then
         -1 +to col
@@ -119,40 +135,45 @@ begin-module font
 
     \ Set a character to a bitmap
     :noname { c col row bitmap self -- }
-      c self char-count @ u>= if self default-char-index @ to c then
-      c self char-cols @ * col self char-cols @
+      c self min-char-index @ u< if self default-char-index @ to c then
+      c self max-char-index @ u> if self default-char-index @ to c then
+      c self find-char-col col self char-cols @
       0 row self char-rows @
       self font-bitmap bitmap set-rect
     ; define set-char
 
     \ Or a character to a bitmap
     :noname { c col row bitmap self -- }
-      c self char-count @ u>= if self default-char-index @ to c then
-      c self char-cols @ * col self char-cols @
+      c self min-char-index @ u< if self default-char-index @ to c then
+      c self max-char-index @ u> if self default-char-index @ to c then
+      c self find-char-col col self char-cols @
       0 row self char-rows @
       self font-bitmap bitmap or-rect
     ; define or-char
 
     \ And a character to a bitmap
     :noname { c col row bitmap self -- }
-      c self char-count @ u>= if self default-char-index @ to c then
-      c self char-cols @ * col self char-cols @
+      c self min-char-index @ u< if self default-char-index @ to c then
+      c self max-char-index @ u> if self default-char-index @ to c then
+      c self find-char-col col self char-cols @
       0 row self char-rows @
       self font-bitmap bitmap and-rect
     ; define and-char
 
     \ Bit-clear a character to a bitmap
     :noname { c col row bitmap self -- }
-      c self char-count @ u>= if self default-char-index @ to c then
-      c self char-cols @ * col self char-cols @
+      c self min-char-index @ u< if self default-char-index @ to c then
+      c self max-char-index @ u> if self default-char-index @ to c then
+      c self find-char-col col self char-cols @
       0 row self char-rows @
       self font-bitmap bitmap bic-rect
     ; define bic-char
 
     \ Exclusive-or a character to a bitmap
     :noname { c col row bitmap self -- }
-      c self char-count @ u>= if self default-char-index @ to c then
-      c self char-cols @ * col self char-cols @
+      c self min-char-index @ u< if self default-char-index @ to c then
+      c self max-char-index @ u> if self default-char-index @ to c then
+      c self find-char-col col self char-cols @
       0 row self char-rows @
       self font-bitmap bitmap xor-rect
     ; define xor-char
