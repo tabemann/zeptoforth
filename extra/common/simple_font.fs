@@ -991,17 +991,21 @@ begin-module simple-font
   \ Our font
   <font> class-size buffer: a-simple-font
 
-  \ Load our simple font
-  : load-simple-font { char-data -- }
-    begin char-data c@ 0<> while
-      char-data c@ { c }
-      1 +to char-data
-      char-rows 0 ?do
-        char-data c@ i c a-simple-font char-row!
+  continue-module simple-font-internal
+    
+    \ Load our simple font
+    : load-simple-font { char-data -- }
+      begin char-data c@ 0<> while
+        char-data c@ { c }
         1 +to char-data
-      loop
-    repeat
-  ;
+        char-rows 0 ?do
+          char-data c@ i c a-simple-font char-row!
+          1 +to char-data
+        loop
+      repeat
+    ;
+
+  end-module
   
   \ Initialize our font
   : init-simple-font ( -- )

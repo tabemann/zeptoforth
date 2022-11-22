@@ -59,3 +59,5 @@ Zeptoforth Documentation
    words/asm
    words/expose
    extra/display
+   extra/font
+   
