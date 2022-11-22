@@ -57,4 +57,33 @@ begin-module ssd1306-test
     my-ssd1306 update-display
   ;
   
+  \ Bounce a pixel around the display
+  : bounce-text { c-addr u -- }
+    inited? not if init-test true to inited? then
+    0 0 1 1 { column row delta-column delta-row }
+    begin key? not while
+      c-addr u column row my-ssd1306 a-simple-font xor-string
+      my-ssd1306 update-display
+      c-addr u column row my-ssd1306 a-simple-font xor-string
+      column 7 u * + my-cols >= if
+        -1 to delta-column
+      else
+        column 0 <= if
+          1 to delta-column
+        then
+      then
+      row 8 + my-rows >= if
+        -1 to delta-row
+      else
+        row 0 <= if
+          1 to delta-row
+        then
+      then
+      delta-column +to column
+      delta-row +to row
+      100 ms
+    repeat
+    key drop
+  ;
+  
 end-module
