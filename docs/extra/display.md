@@ -10,6 +10,11 @@ The `<ssd1306>` class implements an SSD1306 device interface and supports all th
 
 The `bitmap` module contains the following words:
 
+##### `bitmap-buf-size
+( columns rows -- bytes )
+
+Get the size of a bitmap buffer in bytes for a given number of columsn and rows.
+
 ##### `<bitmap>`
 ( -- class )
 

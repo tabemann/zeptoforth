@@ -22,6 +22,10 @@ begin-module bitmap
 
   oo import
   armv6m import
+
+  \ Get the size of a bitmap buffer in bytes for a given number of columns and
+  \ rows
+  : bitmap-buf-size { cols rows --  bytes } rows 8 align 3 rshift cols * ;
   
   \ The <bitmap> class
   <object> begin-class <bitmap>
@@ -373,8 +377,9 @@ begin-module bitmap
         16 r1 ldr_,[sp,#_]
         20 r2 ldr_,[sp,#_]
         24 r3 ldr_,[sp,#_]
-        28 r4 ldr_,[sp,#_]        
-        r5 r4 2 push
+        r4 1 push
+        32 r4 ldr_,[sp,#_]
+        r5 1 push
         \ tos: dst-addr
         \ r0: src-addr
         \ r1: col-count
@@ -439,8 +444,9 @@ begin-module bitmap
         16 r1 ldr_,[sp,#_]
         20 r2 ldr_,[sp,#_]
         24 r3 ldr_,[sp,#_]
-        28 r4 ldr_,[sp,#_]        
-        r5 r4 2 push
+        r4 1 push
+        32 r4 ldr_,[sp,#_]
+        r5 1 push
         \ tos: dst-addr
         \ r0: src-addr
         \ r1: col-count
@@ -501,8 +507,9 @@ begin-module bitmap
         16 r1 ldr_,[sp,#_]
         20 r2 ldr_,[sp,#_]
         24 r3 ldr_,[sp,#_]
-        28 r4 ldr_,[sp,#_]        
-        r5 r4 2 push
+        r4 1 push
+        32 r4 ldr_,[sp,#_]
+        r5 1 push
         \ tos: dst-addr
         \ r0: src-addr
         \ r1: col-count
@@ -565,8 +572,9 @@ begin-module bitmap
         16 r1 ldr_,[sp,#_]
         20 r2 ldr_,[sp,#_]
         24 r3 ldr_,[sp,#_]
-        28 r4 ldr_,[sp,#_]        
-        r5 r4 2 push
+        r4 1 push
+        32 r4 ldr_,[sp,#_]
+        r5 1 push
         \ tos: dst-addr
         \ r0: src-addr
         \ r1: col-count
@@ -627,8 +635,9 @@ begin-module bitmap
         16 r1 ldr_,[sp,#_]
         20 r2 ldr_,[sp,#_]
         24 r3 ldr_,[sp,#_]
-        28 r4 ldr_,[sp,#_]        
-        r5 r4 2 push
+        r4 1 push
+        32 r4 ldr_,[sp,#_]
+        r5 1 push
         \ tos: dst-addr
         \ r0: src-addr
         \ r1: col-count
@@ -681,8 +690,8 @@ begin-module bitmap
       : next-page-row { row -- row' } row 8 align dup row = if 8 + then ;
     
       \ Get the number of rows for an iteration with no source
-      : strip-rows-single { dst-row total-row-count -- row-count }
-        dst-row total-row-count + dst-row next-page-row min dst-row -
+      : strip-rows-single { row total-row-count -- row-count }
+        row total-row-count + row next-page-row min row -
       ;
 
       \ Get the number of rows for an iteration
