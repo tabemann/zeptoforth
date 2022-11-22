@@ -37,24 +37,24 @@ begin-module font
 
     begin-module font-internal
       
-      \ Number of columns per character
-      cell member char-cols
-
-      \ Number of rows per character
-      cell member char-rows
-      
-      \ Number of characters in the font
-      cell member char-count
-      
-      \ The default character index for un-included characters
-      cell member default-char-index
-
       \ The backing bitmap
       <bitmap> class-size member font-bitmap
 
     end-module> import
 
-    \ Set a row in a character
+    \ Number of columns per character
+    cell member char-cols
+    
+    \ Number of rows per character
+    cell member char-rows
+    
+    \ Number of characters in the font
+    cell member char-count
+    
+    \ The default character index for un-included characters
+    cell member default-char-index
+
+      \ Set a row in a character
     method char-row! ( xn ... x0 row c font -- )
 
     \ Set a character to a bitmap

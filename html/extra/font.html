@@ -47,13 +47,34 @@
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;font&gt;</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
 <p>( – class )</p>
 <p>This class constitutes a bitmap font. It is backed by a bitmap which is not directly exposed to the user.</p>
-<p>It has the following constructor:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;font&gt;</span></code> class includes the following constructor:</p>
 </section>
 <section id="new">
 <h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#new" title="Permalink to this headline">¶</a></h3>
 <p>( buffer-addr default-char-index char-columns char-rows char-count font – )</p>
 <p>This constructor initializes a <code class="docutils literal notranslate"><span class="pre">&lt;font&gt;</span></code> instance with <em>char-count</em> glyphs, glyphs of <em>char-columns</em> columns and <em>char-rows</em> rows, a default character <em>default-char-index</em> for out of range characters, and a backing bitmap buffer address <em>buffer-addr</em>. The backing bitmap buffer is set to zero at this time.</p>
-<p>It has the following methods:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;font&gt;</span></code> class includes the following members:</p>
+</section>
+<section id="char-cols">
+<h3><code class="docutils literal notranslate"><span class="pre">char-cols</span></code><a class="headerlink" href="#char-cols" title="Permalink to this headline">¶</a></h3>
+<p>( font – addr )</p>
+<p>The address of a cell containing the number of columns in each glyph in a font.</p>
+</section>
+<section id="char-rows">
+<h3><code class="docutils literal notranslate"><span class="pre">char-rows</span></code><a class="headerlink" href="#char-rows" title="Permalink to this headline">¶</a></h3>
+<p>( font – addr )</p>
+<p>The address of a cell containing the number of rows in each glyph in a font.</p>
+</section>
+<section id="char-count">
+<h3><code class="docutils literal notranslate"><span class="pre">char-count</span></code><a class="headerlink" href="#char-count" title="Permalink to this headline">¶</a></h3>
+<p>( font – addr )</p>
+<p>The address of a cell containing the maximum character index in a font, equal to and above which the character and <code class="docutils literal notranslate"><span class="pre">default-char-index</span></code> will be substituted.</p>
+</section>
+<section id="default-char-index">
+<h3><code class="docutils literal notranslate"><span class="pre">default-char-index</span></code><a class="headerlink" href="#default-char-index" title="Permalink to this headline">¶</a></h3>
+<p>( font – addr )</p>
+<p>The address of a cell containing the default substituting character index.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;font&gt;</span></code> class includes the following methods:</p>
 </section>
 <section id="char-row">
 <h3><code class="docutils literal notranslate"><span class="pre">char-row!</span></code><a class="headerlink" href="#char-row" title="Permalink to this headline">¶</a></h3>

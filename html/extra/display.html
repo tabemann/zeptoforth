@@ -15,6 +15,7 @@
     <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Fonts" href="font.html" />
     <link rel="prev" title="Exposed Kernel Variables" href="../words/expose.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -41,7 +42,7 @@
 <h2><code class="docutils literal notranslate"><span class="pre">bitmap</span></code><a class="headerlink" href="#bitmap" title="Permalink to this headline">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">bitmap</span></code> module contains the following words:</p>
 <section id="bitmap-buf-size">
-<h3>`bitmap-buf-size<a class="headerlink" href="#bitmap-buf-size" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">bitmap-buf-size</span></code><a class="headerlink" href="#bitmap-buf-size" title="Permalink to this headline">¶</a></h3>
 <p>( columns rows – bytes )</p>
 <p>Get the size of a bitmap buffer in bytes for a given number of columsn and rows.</p>
 </section>
@@ -55,6 +56,17 @@
 <h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#new" title="Permalink to this headline">¶</a></h3>
 <p>( buffer-addr columns rows bitmap – )</p>
 <p>This constructor initializes a <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> instance to have <em>columns</em> columns, <em>rows</em> rows, and a bitmap buffer at address <em>buffer-addr</em>. Note that the buffer pointed to by <em>buffer-addr</em> must be of size <em>columns</em> times <em>rows</em> divided by eight rounded up to the next integer. When this is called, the buffer will be zeroed and the entire bitmap will be marked as dirty.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> class includes the following members:</p>
+</section>
+<section id="bitmap-cols">
+<h3><code class="docutils literal notranslate"><span class="pre">bitmap-cols</span></code><a class="headerlink" href="#bitmap-cols" title="Permalink to this headline">¶</a></h3>
+<p>( bitmap – addr )</p>
+<p>The address of a cell containing the number of columns in a bitmap.</p>
+</section>
+<section id="bitmap-rows">
+<h3><code class="docutils literal notranslate"><span class="pre">bitmap-rows</span></code><a class="headerlink" href="#bitmap-rows" title="Permalink to this headline">¶</a></h3>
+<p>( bitmap – addr )</p>
+<p>The address of a cell containing the number of rows in a bitmap.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> class includes the following methods:</p>
 </section>
 <section id="clear-bitmap">
@@ -244,6 +256,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="font.html">Fonts</a></li>
 </ul>
 
 <div class="relations">
@@ -251,6 +264,7 @@
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
       <li>Previous: <a href="../words/expose.html" title="previous chapter">Exposed Kernel Variables</a></li>
+      <li>Next: <a href="font.html" title="next chapter">Fonts</a></li>
   </ul></li>
 </ul>
 </div>

@@ -10,7 +10,7 @@ The `<ssd1306>` class implements an SSD1306 device interface and supports all th
 
 The `bitmap` module contains the following words:
 
-##### `bitmap-buf-size
+##### `bitmap-buf-size`
 ( columns rows -- bytes )
 
 Get the size of a bitmap buffer in bytes for a given number of columsn and rows.
@@ -26,6 +26,18 @@ The `<bitmap>` class includes the following constructor:
 ( buffer-addr columns rows bitmap -- )
 
 This constructor initializes a `<bitmap>` instance to have *columns* columns, *rows* rows, and a bitmap buffer at address *buffer-addr*. Note that the buffer pointed to by *buffer-addr* must be of size *columns* times *rows* divided by eight rounded up to the next integer. When this is called, the buffer will be zeroed and the entire bitmap will be marked as dirty.
+
+The `<bitmap>` class includes the following members:
+
+##### `bitmap-cols`
+( bitmap -- addr )
+
+The address of a cell containing the number of columns in a bitmap.
+
+##### `bitmap-rows`
+( bitmap -- addr )
+
+The address of a cell containing the number of rows in a bitmap.
 
 The `<bitmap>` class includes the following methods:
 

@@ -86,4 +86,44 @@ begin-module ssd1306-test
     key drop
   ;
   
+  \ Bounce a pixel around the display, rotating the string rightward one character every second
+  : bounce-text-rotate ( c-addr u -- )
+    dup [:
+      { c-addr u copy-addr }
+      c-addr copy-addr u move
+      inited? not if init-test true to inited? then
+      0 0 1 1 0 { column row delta-column delta-row cycle }
+      begin key? not while
+        copy-addr u column row my-ssd1306 a-simple-font xor-string
+        my-ssd1306 update-display
+        copy-addr u column row my-ssd1306 a-simple-font xor-string
+        column 7 u * + my-cols >= if
+          -1 to delta-column
+        else
+          column 0 <= if
+            1 to delta-column
+          then
+        then
+        row 8 + my-rows >= if
+          -1 to delta-row
+        else
+          row 0 <= if
+            1 to delta-row
+          then
+        then
+        delta-column +to column
+        delta-row +to row
+        1 +to cycle
+        cycle 10 umod 0= if
+          copy-addr u + 1- c@ { last-c }
+          copy-addr copy-addr 1+ u 1- move
+          last-c copy-addr c!
+          0 to cycle
+        then
+        100 ms
+      repeat
+      key drop
+    ;] with-allot
+  ;
+  
 end-module

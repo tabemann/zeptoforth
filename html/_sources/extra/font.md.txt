@@ -16,14 +16,36 @@ This gets the number of bytes needed for the buffer for a font with *char-count*
 
 This class constitutes a bitmap font. It is backed by a bitmap which is not directly exposed to the user.
 
-It has the following constructor:
+The `<font>` class includes the following constructor:
 
 ##### `new`
 ( buffer-addr default-char-index char-columns char-rows char-count font -- )
 
 This constructor initializes a `<font>` instance with *char-count* glyphs, glyphs of *char-columns* columns and *char-rows* rows, a default character *default-char-index* for out of range characters, and a backing bitmap buffer address *buffer-addr*. The backing bitmap buffer is set to zero at this time.
 
-It has the following methods:
+The `<font>` class includes the following members:
+
+##### `char-cols`
+( font -- addr )
+
+The address of a cell containing the number of columns in each glyph in a font.
+
+##### `char-rows`
+( font -- addr )
+
+The address of a cell containing the number of rows in each glyph in a font.
+
+##### `char-count`
+( font -- addr )
+
+The address of a cell containing the maximum character index in a font, equal to and above which the character and `default-char-index` will be substituted.
+
+##### `default-char-index`
+( font -- addr )
+
+The address of a cell containing the default substituting character index.
+
+The `<font>` class includes the following methods:
 
 ##### `char-row!`
 ( xn ... x0 row character font -- )
