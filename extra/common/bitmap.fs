@@ -727,7 +727,11 @@ begin-module bitmap
         { dst-col col-count dst-row row-count dst --
         new-dst-col new-col-count new-dst-row new-row-count }
         dst-col 0 < if
-          dst-col +to col-count
+          dst-col col-count + 0>= if
+            dst-col +to col-count
+          else
+            0 to col-count
+          then
           0 to dst-col
         then
         dst-col dst bitmap-cols @ < if
@@ -739,7 +743,11 @@ begin-module bitmap
           dst bitmap-cols @ to dst-col
         then
         dst-row 0 < if
-          dst-row +to row-count
+          dst-row row-count + 0>= if
+            dst-row +to row-count
+          else
+            0 to row-count
+          then
           0 to dst-row
         then
         dst-row dst bitmap-rows @ < if
@@ -760,7 +768,11 @@ begin-module bitmap
         new-row-count }
         src-col 0 < if
           src-col negate +to dst-col
-          src-col +to col-count
+          src-col col-count + 0>= if
+            src-col +to col-count
+          else
+            0 to col-count
+          then
           0 to src-col
         then
         src-col src bitmap-cols @ < if
@@ -773,7 +785,11 @@ begin-module bitmap
         then
         src-row 0 < if
           src-row negate +to dst-row
-          src-row +to row-count
+          src-row row-count + 0>= if
+            src-row +to row-count
+          else
+            0 to row-count
+          then
           0 to src-row
         then
         src-row src bitmap-rows @ < if
@@ -794,7 +810,11 @@ begin-module bitmap
         new-row-count }
         dst-col 0 < if
           dst-col negate +to src-col
-          dst-col +to col-count
+          dst-col col-count + 0>= if
+            dst-col +to col-count
+          else
+            0 to col-count
+          then
           0 to dst-col
         then
         dst-col dst bitmap-cols @ < if
@@ -807,7 +827,11 @@ begin-module bitmap
         then
         dst-row 0 < if
           dst-row negate +to src-row
-          dst-row +to row-count
+          dst-row row-count + 0>= if
+            dst-row +to row-count
+          else
+            0 to row-count
+          then
           0 to dst-row
         then
         dst-row dst bitmap-rows @ < if
