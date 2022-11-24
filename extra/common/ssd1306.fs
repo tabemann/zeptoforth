@@ -59,8 +59,11 @@ begin-module ssd1306
       
     end-module> import
 
+    \ Set the display contrast ( $FF highest, $00 lowest)
+    method display-contrast! ( contrast ssd1306 -- )
+    
     \ Update the SSD1306 device
-    method update-display
+    method update-display ( ssd1306 -- )
     
   end-class
 
@@ -342,6 +345,14 @@ begin-module ssd1306
         end-col 1- end-row 1- self dirty-pixel
       then
     ; define dirty-area
+
+    \ Change the SSD1306 device contrast
+    :noname { contrast self -- }
+      self begin-cmd
+      SSD1306_CMD_START >cmd
+      SSD1306_SETCONTRAST >cmd contrast $FF and >cmd
+      self send-cmd
+    ; define display-contrast!
 
     \ Update the SSD1306 device
     :noname { self -- }

@@ -30,6 +30,24 @@ begin-module life
   \ Life height
   64 constant life-height
 
+  \ Life start column
+  variable life-start-col
+
+  \ Life end column
+  variable life-end-col
+
+  \ Life start row
+  variable life-start-row
+
+  \ Life end row
+  variable life-end-row
+
+  \ Redraw all of life
+  variable redraw-life?
+
+  \ Magnify life
+  variable magnify-life?
+
   \ Value display initialized
   false value display-inited
 
@@ -53,6 +71,31 @@ begin-module life
 
   \ New buffer
   variable new-buffer
+
+  \ Draw an alive cell on the display
+  : draw-alive-cell { col row -- }
+    magnify-life? @ if
+      $FF col life-start-col @ - 2 * 2 row life-start-row @ - 2 * 2
+      my-ssd1306 set-rect-const
+    else
+      $FF col row my-ssd1306 set-pixel-const
+    then
+  ;
+
+  \ Draw a dead cell on the display
+  : draw-dead-cell { col row -- }
+    magnify-life? @ if
+      $00 col life-start-col @ - 2 * 2 row life-start-row @ - 2 * 2
+      my-ssd1306 set-rect-const
+    else
+      $00 col row my-ssd1306 set-pixel-const
+    then
+  ;
+
+  \ Display a cell on the display
+  : draw-cell { alive col row -- }
+    alive if col row draw-alive-cell else col row draw-dead-cell then
+  ;
   
   \ Wrap a life cell coordinate
   : wrap-coord ( x y -- x y )
@@ -81,9 +124,8 @@ begin-module life
     2dup 1- swap 1+ swap wrap-coord -alive
     2dup 1- swap 1- swap wrap-coord -alive
     2dup swap 1- swap wrap-coord -alive
-    2dup $00 -rot my-ssd1306 set-pixel-const
+    2dup draw-dead-cell
     life-width * + current-buffer @ + 16 swap cbic!
-    
   ;
 
   \ Set a life cell to be dead
@@ -96,7 +138,7 @@ begin-module life
     2dup 1- swap 1+ swap wrap-coord +alive
     2dup 1- swap 1- swap wrap-coord +alive
     2dup swap 1- swap wrap-coord +alive
-    2dup $FF -rot my-ssd1306 set-pixel-const
+    2dup draw-alive-cell
     life-width * + current-buffer @ + 16 swap cbis!
   ;
   
@@ -128,7 +170,7 @@ begin-module life
     2dup 1- swap 1+ swap wrap-coord -new-alive
     2dup 1- swap 1- swap wrap-coord -new-alive
     2dup swap 1- swap wrap-coord -new-alive
-    2dup $00 -rot my-ssd1306 set-pixel-const
+    2dup draw-dead-cell
     life-width * + new-buffer @ + 16 swap cbic!
   ;
 
@@ -142,7 +184,7 @@ begin-module life
     2dup 1- swap 1+ swap wrap-coord +new-alive
     2dup 1- swap 1- swap wrap-coord +new-alive
     2dup swap 1- swap wrap-coord +new-alive
-    2dup $FF -rot my-ssd1306 set-pixel-const
+    2dup draw-alive-cell
     life-width * + new-buffer @ + 16 swap cbis!
   ;
 
@@ -165,7 +207,7 @@ begin-module life
     2dup 1- swap 1+ swap -new-alive
     2dup 1- swap 1- swap -new-alive
     2dup swap 1- swap -new-alive
-    2dup $00 -rot my-ssd1306 set-pixel-const
+    2dup draw-dead-cell
     life-width * + new-buffer @ + 16 swap cbic!
   ;
 
@@ -179,7 +221,7 @@ begin-module life
     2dup 1- swap 1+ swap +new-alive
     2dup 1- swap 1- swap +new-alive
     2dup swap 1- swap +new-alive
-    2dup $FF -rot my-ssd1306 set-pixel-const
+    2dup draw-alive-cell
     life-width * + new-buffer @ + 16 swap cbis!
   ;
 
@@ -249,35 +291,74 @@ begin-module life
     switch-buffers
   ;
 
-  \ Run life until a key is pressed
-  : run-life ( -- )
-    begin
-      cycle-life my-ssd1306 update-display key?
-    until
-    key drop
+  \ Redraw life
+  : redraw-life ( -- )
+    redraw-life? @ if
+      life-end-row @ life-start-row @ ?do
+        life-end-col @ life-start-col @ ?do
+          i j alive? i j draw-cell
+        loop
+      loop
+      false redraw-life? !
+    then
   ;
+  
+  \ Display life
+  : display-life ( -- ) redraw-life my-ssd1306 update-display ;
+  
+  \ Run life until a key is pressed
+  : run-life ( -- ) begin cycle-life display-life key? until key drop ;
 
   \ Step life one cycle
-  : step-life ( -- )
-    cycle-life my-ssd1306 update-display
-  ;
+  : step-life ( -- ) cycle-life display-life ;
 
   \ Clear life
   : clear-life ( -- )
     current-buffer @ life-width life-height * 0 fill
-    $00 0 life-width 0 life-height my-ssd1306 set-rect-const
-    my-ssd1306 update-display
+    true redraw-life? !
+    display-life
   ;
-  
+
+  \ Zoom out life
+  : zoom-out-life ( -- )
+    0 life-start-col !
+    life-width life-end-col !
+    0 life-start-row !
+    life-height life-end-row !
+    true redraw-life? !
+    false magnify-life? !
+    display-life
+  ;
+
+  \ Zoom in life
+  : zoom-in-life { col row -- }
+    col 0 max life-width 2 / min to col
+    row 0 max life-height 2 / min to row
+    col life-start-col !
+    col life-width 2 / + life-end-col !
+    row life-start-row !
+    row life-height 2 / + life-end-row !
+    true redraw-life? !
+    true magnify-life? !
+    display-life
+  ;
+
   \ Initialize life
   : init-life ( -- )
+    life-buffer-0 current-buffer !
+    life-buffer-1 new-buffer !
+    0 life-start-col !
+    life-width life-end-col !
+    0 life-start-row !
+    life-height life-end-row !
+    false redraw-life? !
+    false magnify-life? !
     display-inited not if
       14 15 my-framebuffer life-width life-height SSD1306_I2C_ADDR 1
       <ssd1306> my-ssd1306 init-object
+      $01 my-ssd1306 display-contrast!
       true to display-inited
     then
-    life-buffer-0 current-buffer !
-    life-buffer-1 new-buffer !
     clear-life
   ;
 
@@ -307,6 +388,7 @@ begin-module life
       endcase
     repeat
     drop 2drop 2drop rdrop
+    display-life
   ;
   
   \ Add a block to the world
