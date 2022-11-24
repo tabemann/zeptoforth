@@ -126,4 +126,43 @@ begin-module ssd1306-test
     ;] with-allot
   ;
   
+  \ Bounce a counter around the display, incrementing the counter each second
+  : bounce-counter ( count -- )
+    10 [:
+      { count buffer }
+      inited? not if init-test true to inited? then
+      0 0 1 1 0 { column row delta-column delta-row cycle }
+      begin key? not while
+        count 0 <# #s #> { c-addr bytes }
+        c-addr buffer bytes move
+        buffer bytes column row my-ssd1306 a-simple-font xor-string
+        my-ssd1306 update-display
+        buffer bytes column row my-ssd1306 a-simple-font xor-string
+        column 7 bytes * + my-cols >= if
+          -1 to delta-column
+        else
+          column 0 <= if
+            1 to delta-column
+          then
+        then
+        row 8 + my-rows >= if
+          -1 to delta-row
+        else
+          row 0 <= if
+            1 to delta-row
+          then
+        then
+        delta-column +to column
+        delta-row +to row
+        1 +to cycle
+        cycle 10 umod 0= if
+          1 +to count
+          0 to cycle
+        then
+        100 ms
+      repeat
+      key drop
+    ;] with-allot
+  ;
+  
 end-module

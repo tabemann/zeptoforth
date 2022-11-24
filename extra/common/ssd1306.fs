@@ -244,7 +244,7 @@ begin-module ssd1306
       \ Set COM pins to alternative COM pin mode
       SSD1306_SETCOMPINS >cmd $12 >cmd
       \ Set contrast to minimal
-      SSD1306_SETCONTRAST >cmd $FF ( $00 ) >cmd
+      SSD1306_SETCONTRAST >cmd $01 >cmd
       \ Set precharge period to phase1 = 15, phase2 = 1
       SSD1306_SETPRECHARGE >cmd $F1 >cmd
       \ Set VCOMH deselect level to (0, 2, 3)
