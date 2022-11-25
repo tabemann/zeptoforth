@@ -898,47 +898,7 @@ begin-module bitmap
         const dst-row 1 1 dst-col dst xor-strip-const
       then
     ; define xor-pixel-const
-
-    \ Or a rectangle with a constant value
-    :noname
-      ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
-      { dst } dst clip-dst-only
-      { const dst-col col-count dst-row row-count }
-      dst-col dup col-count + dst-row dup row-count + dst dirty-area
-      const dst-col col-count dst-row row-count dst
-      ['] or-strip-const blit-const
-    ; define or-rect-const
-
-    \ And a rectangle with a constant value
-    :noname
-      ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
-      { dst } dst clip-dst-only
-      { const dst-col col-count dst-row row-count }
-      dst-col dup col-count + dst-row dup row-count + dst dirty-area
-      const dst-col col-count dst-row row-count dst
-      ['] and-strip-const blit-const
-    ; define and-rect-const
-
-    \ Bit-clear a rectangle with a constant value
-    :noname
-      ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
-      { dst } dst clip-dst-only
-      { const dst-col col-count dst-row row-count }
-      dst-col dup col-count + dst-row dup row-count + dst dirty-area
-      const dst-col col-count dst-row row-count dst
-      ['] bic-strip-const blit-const
-    ; define bic-rect-const
-
-    \ Exclusive-or a rectangle with a constant value
-    :noname
-      ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
-      { dst } dst clip-dst-only
-      { const dst-col col-count dst-row row-count }
-      dst-col dup col-count + dst-row dup row-count + dst dirty-area
-      const dst-col col-count dst-row row-count dst
-      ['] xor-strip-const blit-const
-    ; define xor-rect-const
-
+    
     \ Set a rectangle with a constant value
     :noname
       ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )

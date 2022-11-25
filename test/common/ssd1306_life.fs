@@ -319,8 +319,8 @@ begin-module life
     display-life
   ;
 
-  \ Zoom out life
-  : zoom-out-life ( -- )
+  \ Zoom out
+  : zoom-out ( -- )
     0 life-start-col !
     life-width life-end-col !
     0 life-start-row !
@@ -330,8 +330,8 @@ begin-module life
     display-life
   ;
 
-  \ Zoom in life
-  : zoom-in-life { col row -- }
+  \ Zoom in
+  : zoom-in { col row -- }
     col 0 max life-width 2 / min to col
     row 0 max life-height 2 / min to row
     col life-start-col !
@@ -388,6 +388,56 @@ begin-module life
       endcase
     repeat
     drop 2drop 2drop rdrop
+    display-life
+  ;
+
+  \ Flip an area vertically
+  : flip-vert { x cols y rows -- }
+    rows 2 u/ { rows2/ }
+    rows 2 umod 0= if
+      rows2/ 0 ?do
+        cols 0 ?do
+          x i + y rows2/ + 1- j - alive? { alive0? }
+          x i + y rows2/ + j + alive? { alive1? }
+          alive0? x i + y rows2/ + j + alive!
+          alive1? x i + y rows2/ + 1- j - alive!
+        loop
+      loop
+    else
+      rows2/ 0 ?do
+        cols 0 ?do
+          x i + y rows2/ + 1- j - alive? { alive0? }
+          x i + y rows2/ + 1+ j + alive? { alive1? }
+          alive0? x i + y rows2/ + 1+ j + alive!
+          alive1? x i + y rows2/ + 1- j - alive!
+        loop
+      loop
+    then
+    display-life
+  ;
+
+  \ Mirror an area horizontally
+  : flip-horiz { x cols y rows -- }
+    cols 2 u/ { cols2/ }
+    cols 2 umod 0= if
+      rows 0 ?do
+        cols2/ 0 ?do
+          x cols2/ + 1- i - y j + alive? { alive0? }
+          x cols2/ + i + y j + alive? { alive1? }
+          alive0? y cols2/ + i + y j + alive!
+          alive1? y cols2/ + 1- i - y j + alive!
+        loop
+      loop
+    else
+      rows 0 ?do
+        cols2/ 0 ?do
+          x cols2/ + 1- i - y j + alive? { alive0? }
+          x cols2/ + 1+ i + y j + alive? { alive1? }
+          alive0? y cols2/ + 1+ i + y j + alive!
+          alive1? y cols2/ + 1- i - y j + alive!
+        loop
+      loop
+    then
     display-life
   ;
   

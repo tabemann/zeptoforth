@@ -872,12 +872,11 @@ _init:	movs r0, #0
 	msr BASEPRI, r0
 	bx lr
 	end_inlined
-	
- 	@@ Run the initialization routine, if there is one
-	define_internal_word "do-init", visible_flag
-_do_init:
-	push {lr}
-	string "init"
+
+        @@ Execute a word in the dictionary if it exists
+        define_internal_word "find-execute", visible_flag
+_find_execute:
+        push {lr}
 	bl _find_all
 	cmp tos, #0
 	beq 1f
@@ -885,6 +884,17 @@ _do_init:
 	bl _execute
 	pop {pc}
 1:	pull_tos
+	pop {pc}
+	end_inlined
+
+ 	@@ Run the initialization and turnkeys routines, if they exist
+	define_internal_word "do-init", visible_flag
+_do_init:
+	push {lr}
+	string "init"
+        bl _find_execute
+        string "turnkey"
+        bl _find_execute
 	pop {pc}
 	end_inlined
 	
