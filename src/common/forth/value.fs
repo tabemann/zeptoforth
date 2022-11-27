@@ -442,7 +442,7 @@ end-module> import
   else
     swap
   then
-  here swap , 0 rot ldr-pc!
+  4 align, here swap , 0 rot ldr-pc!
   compiling-to-flash? if , then
   finalize,
   compiling-to-flash? if r> cell+ set-next-ram-space then
@@ -475,7 +475,7 @@ end-module> import
   else
     swap
   then
-  here swap , 0 rot ldr-pc!
+  4 align, here swap , 0 rot ldr-pc!
   compiling-to-flash? if 2, then
   finalize,
   compiling-to-flash? if r> 2 cells + set-next-ram-space then
