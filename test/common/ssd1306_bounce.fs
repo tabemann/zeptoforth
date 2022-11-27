@@ -44,13 +44,13 @@ begin-module ssd1306-test
   4 constant height
 
   \ My framebuffer size
-  my-cols my-rows * 8 / constant my-buf-size
+  my-cols my-rows bitmap-buf-size constant my-buf-size
 
   \ My framebuffer
   my-buf-size buffer: my-buf
   
   \ My sprite buffer size
-  width height 8 / 1 + * constant my-sprite-buf-size
+  width height bitmap-buf-size constant my-sprite-buf-size
   
   \ My sprite buffer
   my-sprite-buf-size buffer: my-sprite-buf
