@@ -24,6 +24,8 @@ begin-module balls
   bitmap import
   ssd1306 import
   rng import
+  systick import
+  task import
   
   \ An I2C SSD1306 device
   <ssd1306> class-size buffer: my-ssd1306
@@ -63,6 +65,9 @@ begin-module balls
 
   \ Our number of balls
   8 constant my-ball-count
+
+  \ Frame delay in ticks
+  500 constant my-frame-delay
   
   \ Our ball structure
   begin-structure ball-size
@@ -183,12 +188,15 @@ begin-module balls
       ['] init-ball for-all-balls
       true to inited?
     then
+    systick-counter { last-frame }
     begin key? not while
       ['] draw-ball for-all-balls
       my-ssd1306 update-display
       ['] draw-ball for-all-balls
       ['] move-ball for-all-balls
       ['] bounce-ball for-all-balls
+      my-frame-delay last-frame current-task delay
+      my-frame-delay +to last-frame
     repeat
     key drop
     my-ssd1306 clear-bitmap
