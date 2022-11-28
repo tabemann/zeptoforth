@@ -257,6 +257,7 @@ begin-module multicore
     0 r0 cmp_,#_
     eq bc>
     tos r0 2 dp ldm
+    cpsie
     pc 1 pop
     >mark
     tos 1 dp ldm
