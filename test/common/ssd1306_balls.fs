@@ -179,22 +179,32 @@ begin-module balls
       then
     then
   ;
-  
-  \ Run balls
-  : run-balls ( -- )
-    inited? not if
+
+  \ Initialize balls
+  : init-balls ( -- )
+      inited? not if
       init-display
       init-sprite
       ['] init-ball for-all-balls
       true to inited?
     then
+  ;
+
+  \ Execute a balls cycle
+  : cycle-balls ( -- )
+    ['] draw-ball for-all-balls
+    my-ssd1306 update-display
+    ['] draw-ball for-all-balls
+    ['] move-ball for-all-balls
+    ['] bounce-ball for-all-balls
+  ;
+  
+  \ Run balls
+  : run-balls ( -- )
+    init-balls
     systick-counter { last-frame }
     begin key? not while
-      ['] draw-ball for-all-balls
-      my-ssd1306 update-display
-      ['] draw-ball for-all-balls
-      ['] move-ball for-all-balls
-      ['] bounce-ball for-all-balls
+      cycle-balls
       my-frame-delay last-frame current-task delay
       my-frame-delay +to last-frame
     repeat
@@ -202,6 +212,18 @@ begin-module balls
     my-ssd1306 clear-bitmap
     my-ssd1306 update-display
   ;
-  
+
+  \ Run balls in the background
+  : run-balls-bkg ( -- )
+    init-balls
+    0 [:
+      systick-counter { last-frame }
+      begin key? not while
+        cycle-balls
+        my-frame-delay last-frame current-task delay
+        my-frame-delay +to last-frame
+      repeat
+    ;] 320 128 512 spawn run
+  ;
   
 end-module

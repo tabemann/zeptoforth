@@ -23,6 +23,9 @@ begin-module life
   oo import
   bitmap import
   ssd1306 import
+  lock import
+  task import
+  chan import
   
   \ Life width
   128 constant life-width
@@ -48,8 +51,14 @@ begin-module life
   \ Magnify life
   variable magnify-life?
 
-  \ Value display initialized
-  false value display-inited
+  \ Lock initialized?
+  false value lock-inited?
+  
+  \ Display initialized?
+  false value display-inited?
+
+  \ Task initialized?
+  false value task-inited?
 
   \ An I2C SSD1306 device
   <ssd1306> class-size buffer: my-ssd1306
@@ -71,6 +80,36 @@ begin-module life
 
   \ New buffer
   variable new-buffer
+
+  \ Life lock
+  lock-size buffer: life-lock
+  
+  \ Life command channel
+  cell 1 chan-size buffer: life-cmd-chan
+
+  \ Life response channel
+  cell 1 chan-size buffer: life-resp-chan
+  
+  \ Life task
+  variable life-task
+
+  \ Stop life command
+  0 constant cmd-stop-life
+
+  \ Step life command
+  1 constant cmd-step-life
+
+  \ Run life command
+  2 constant cmd-run-life
+
+  \ Pause life command
+  3 constant cmd-pause-life
+
+  \ Unpause life command
+  4 constant cmd-unpause-life
+
+  \ Pause life counter
+  variable pause-life-counter
 
   \ Draw an alive cell on the display
   : draw-alive-cell { col row -- }
@@ -268,27 +307,29 @@ begin-module life
   
   \ Execute a life cycle
   : cycle-life ( -- )
-    current-buffer @ new-buffer @ life-width life-height * move
-    0 begin dup life-height < while
-      0 over false -rot new-alive!
-      life-width 1- over false -rot new-alive!
-      1+
-    repeat
-    drop
-    0 begin dup life-width < while
-      dup 0 false -rot new-alive!
-      dup life-height 1- false -rot new-alive!
-      1+
-    repeat
-    drop
-    1 begin dup life-width 1- < while
-      1 begin dup life-height 1- < while
-	2dup cycle-cell 1+
+    [:
+      current-buffer @ new-buffer @ life-width life-height * move
+      0 begin dup life-height < while
+        0 over false -rot new-alive!
+        life-width 1- over false -rot new-alive!
+        1+
       repeat
-      drop 1+
-    repeat
-    drop
-    switch-buffers
+      drop
+      0 begin dup life-width < while
+        dup 0 false -rot new-alive!
+        dup life-height 1- false -rot new-alive!
+        1+
+      repeat
+      drop
+      1 begin dup life-width 1- < while
+        1 begin dup life-height 1- < while
+          2dup cycle-cell 1+
+        repeat
+        drop 1+
+      repeat
+      drop
+      switch-buffers
+    ;] life-lock with-lock
   ;
 
   \ Redraw life
@@ -306,58 +347,166 @@ begin-module life
   \ Display life
   : display-life ( -- ) redraw-life my-ssd1306 update-display ;
   
-  \ Run life until a key is pressed
-  : run-life ( -- ) begin cycle-life display-life key? until key drop ;
+  \ Send a command
+  : send-cmd ( cmd -- )
+    [: life-cmd-chan send-chan ;] provide-allot-cell
+    [: life-resp-chan recv-chan ;] extract-allot-cell drop
+  ;
+
+  \ Receive a command
+  : recv-cmd ( -- cmd ) [: life-cmd-chan recv-chan ;] extract-allot-cell ;
+
+  \ Acknowledge a command
+  : ack-cmd ( -- )
+    0 [: life-resp-chan send-chan ;] provide-allot-cell
+  ;
+
+  \ Actually step life
+  : do-step-life ( -- ) cycle-life display-life ;
+
+  \ Actually pause life
+  : do-pause-life ( -- )
+    begin
+      recv-cmd case
+        cmd-pause-life of 1 pause-life-counter +! endof
+        cmd-unpause-life of -1 pause-life-counter +! endof
+      endcase
+      ack-cmd
+      pause-life-counter @ 0<=
+      display-life
+    until
+  ;
+  
+  \ Actually run life
+  : do-run-life ( -- )
+    begin
+      life-cmd-chan chan-empty? if
+        cycle-life display-life false
+      else
+        recv-cmd case
+          cmd-stop-life of ack-cmd true endof
+          cmd-pause-life of
+            ack-cmd
+            1 pause-life-counter +!
+            pause-life-counter @ 0> if do-pause-life then
+            false
+          endof
+          cmd-unpause-life of
+            ack-cmd
+            -1 pause-life-counter +!
+            false
+          endof
+          ack-cmd false swap
+        endcase
+      then
+    until
+  ;
+  
+  \ Run the life task
+  : run-life-task ( -- )
+    begin
+      recv-cmd case
+        cmd-stop-life of ack-cmd endof
+        cmd-step-life of do-step-life ack-cmd endof
+        cmd-run-life of ack-cmd do-run-life endof
+        cmd-pause-life of
+          ack-cmd
+          1 pause-life-counter +!
+          pause-life-counter @ 0> if do-pause-life then
+        endof
+        cmd-unpause-life of
+          ack-cmd
+          -1 pause-life-counter +!
+        endof
+        ack-cmd
+      endcase
+    again
+  ;
+  
+  \ Run life
+  : run-life ( -- ) cmd-run-life send-cmd ;
 
   \ Step life one cycle
-  : step-life ( -- ) cycle-life display-life ;
+  : step-life ( -- ) cmd-step-life send-cmd ;
 
+  \ Stop life
+  : stop-life ( -- ) cmd-stop-life send-cmd ;
+
+  \ Pause life
+  : pause-life ( -- ) cmd-pause-life send-cmd ;
+  
+  \ Unpause life
+  : unpause-life ( -- ) cmd-unpause-life send-cmd ;
+
+  \ Execute code with life paused
+  : with-life-paused ( xt -- )
+    pause-life [: life-lock with-lock ;] try unpause-life ?raise
+  ;
+  
   \ Clear life
   : clear-life ( -- )
-    current-buffer @ life-width life-height * 0 fill
-    true redraw-life? !
-    display-life
+    [:
+      current-buffer @ life-width life-height * 0 fill
+      true redraw-life? !
+    ;] with-life-paused
   ;
 
   \ Zoom out
   : zoom-out ( -- )
-    0 life-start-col !
-    life-width life-end-col !
-    0 life-start-row !
-    life-height life-end-row !
-    true redraw-life? !
-    false magnify-life? !
-    display-life
+    [:
+      0 life-start-col !
+      life-width life-end-col !
+      0 life-start-row !
+      life-height life-end-row !
+      true redraw-life? !
+      false magnify-life? !
+    ;] with-life-paused
   ;
 
   \ Zoom in
-  : zoom-in { col row -- }
-    col 0 max life-width 2 / min to col
-    row 0 max life-height 2 / min to row
-    col life-start-col !
-    col life-width 2 / + life-end-col !
-    row life-start-row !
-    row life-height 2 / + life-end-row !
-    true redraw-life? !
-    true magnify-life? !
-    display-life
+  : zoom-in ( col row -- )
+    [:
+      { col row }
+      col 0 max life-width 2 / min to col
+      row 0 max life-height 2 / min to row
+      col life-start-col !
+      col life-width 2 / + life-end-col !
+      row life-start-row !
+      row life-height 2 / + life-end-row !
+      true redraw-life? !
+      true magnify-life? !
+    ;] with-life-paused
   ;
 
   \ Initialize life
   : init-life ( -- )
-    life-buffer-0 current-buffer !
-    life-buffer-1 new-buffer !
-    0 life-start-col !
-    life-width life-end-col !
-    0 life-start-row !
-    life-height life-end-row !
-    false redraw-life? !
-    false magnify-life? !
-    display-inited not if
+    lock-inited? not if
+      life-lock init-lock
+      true to lock-inited?
+    then
+    [:
+      life-buffer-0 current-buffer !
+      life-buffer-1 new-buffer !
+      0 life-start-col !
+      life-width life-end-col !
+      0 life-start-row !
+      life-height life-end-row !
+      false redraw-life? !
+      false magnify-life? !
+    ;] life-lock with-lock
+    display-inited? not if
       14 15 my-framebuffer life-width life-height SSD1306_I2C_ADDR 1
       <ssd1306> my-ssd1306 init-object
       $01 my-ssd1306 display-contrast!
-      true to display-inited
+      true to display-inited?
+    then
+    task-inited? not if
+      0 pause-life-counter !
+      cell 1 life-cmd-chan init-chan
+      cell 1 life-resp-chan init-chan
+      0 ['] run-life-task 320 128 512 spawn life-task !
+      life-task @ run
+      true to task-inited?
     then
     clear-life
   ;
@@ -380,65 +529,68 @@ begin-module life
   \ Set multiple cells with a string with the format "_" for an dead cell,
   \ "*" for a live cell, and a "/" for a newline
   : set-multiple ( addr bytes x y -- )
-    over >r 2swap begin get-char dup 0<> while
-      case
-	[char] _ of 2swap 2dup false -rot alive! swap 1 + swap 2swap endof
-	[char] * of 2swap 2dup true -rot alive! swap 1 + swap 2swap endof
-	[char] / of 2swap 1 + nip r@ swap 2swap endof
-      endcase
-    repeat
-    drop 2drop 2drop rdrop
-    display-life
+    [:
+      over >r 2swap begin get-char dup 0<> while
+        case
+          [char] _ of 2swap 2dup false -rot alive! swap 1 + swap 2swap endof
+          [char] * of 2swap 2dup true -rot alive! swap 1 + swap 2swap endof
+          [char] / of 2swap 1 + nip r@ swap 2swap endof
+        endcase
+      repeat
+      drop 2drop 2drop rdrop
+    ;] with-life-paused
   ;
 
   \ Flip an area vertically
-  : flip-vert { x cols y rows -- }
-    rows 2 u/ { rows2/ }
-    rows 2 umod 0= if
-      rows2/ 0 ?do
-        cols 0 ?do
-          x i + y rows2/ + 1- j - alive? { alive0? }
-          x i + y rows2/ + j + alive? { alive1? }
-          alive0? x i + y rows2/ + j + alive!
-          alive1? x i + y rows2/ + 1- j - alive!
+  : flip-vert ( x cols y rows -- )
+    [: { x cols y rows }
+      rows 2 u/ { rows2/ }
+      rows 2 umod 0= if
+        rows2/ 0 ?do
+          cols 0 ?do
+            x i + y rows2/ + 1- j - alive? { alive0? }
+            x i + y rows2/ + j + alive? { alive1? }
+            alive0? x i + y rows2/ + j + alive!
+            alive1? x i + y rows2/ + 1- j - alive!
+          loop
         loop
-      loop
-    else
-      rows2/ 0 ?do
-        cols 0 ?do
-          x i + y rows2/ + 1- j - alive? { alive0? }
-          x i + y rows2/ + 1+ j + alive? { alive1? }
-          alive0? x i + y rows2/ + 1+ j + alive!
-          alive1? x i + y rows2/ + 1- j - alive!
+      else
+        rows2/ 0 ?do
+          cols 0 ?do
+            x i + y rows2/ + 1- j - alive? { alive0? }
+            x i + y rows2/ + 1+ j + alive? { alive1? }
+            alive0? x i + y rows2/ + 1+ j + alive!
+            alive1? x i + y rows2/ + 1- j - alive!
+          loop
         loop
-      loop
-    then
-    display-life
+      then
+    ;] with-life-paused
   ;
 
   \ Mirror an area horizontally
-  : flip-horiz { x cols y rows -- }
-    cols 2 u/ { cols2/ }
-    cols 2 umod 0= if
-      rows 0 ?do
-        cols2/ 0 ?do
-          x cols2/ + 1- i - y j + alive? { alive0? }
-          x cols2/ + i + y j + alive? { alive1? }
-          alive0? y cols2/ + i + y j + alive!
-          alive1? y cols2/ + 1- i - y j + alive!
+  : flip-horiz ( x cols y rows -- )
+    [: { x cols y rows }
+      cols 2 u/ { cols2/ }
+      cols 2 umod 0= if
+        rows 0 ?do
+          cols2/ 0 ?do
+            x cols2/ + 1- i - y j + alive? { alive0? }
+            x cols2/ + i + y j + alive? { alive1? }
+            alive0? y cols2/ + i + y j + alive!
+            alive1? y cols2/ + 1- i - y j + alive!
+          loop
         loop
-      loop
-    else
-      rows 0 ?do
-        cols2/ 0 ?do
-          x cols2/ + 1- i - y j + alive? { alive0? }
-          x cols2/ + 1+ i + y j + alive? { alive1? }
-          alive0? y cols2/ + 1+ i + y j + alive!
-          alive1? y cols2/ + 1- i - y j + alive!
+      else
+        rows 0 ?do
+          cols2/ 0 ?do
+            x cols2/ + 1- i - y j + alive? { alive0? }
+            x cols2/ + 1+ i + y j + alive? { alive1? }
+            alive0? y cols2/ + 1+ i + y j + alive!
+            alive1? y cols2/ + 1- i - y j + alive!
+          loop
         loop
-      loop
-    then
-    display-life
+      then
+    ;] with-life-paused
   ;
   
   \ Add a block to the world
@@ -475,6 +627,16 @@ begin-module life
   \ Add an R-pentomino to the world
   : r-pentomino ( x y -- )
     s" _** / **_ / _*_" 2swap set-multiple
+  ;
+
+  \ Wrap alive! in a pause
+  : alive! ( alive? x y -- )
+    [: 3dup alive! ;] with-life-paused drop 2drop
+  ;
+
+  \ Wrap alive? in a lock
+  : alive? ( x y -- alive? )
+    [: 2dup alive? ;] with-life-paused >r 2drop r>
   ;
 
 end-module
