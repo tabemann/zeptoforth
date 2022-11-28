@@ -51,6 +51,11 @@ Set an entire bitmap to zero and mark it as dirty.
 
 Get whether a bitmap is dirty. Note that if a bitmap does not have support for dirty state tracking this will always return true.
 
+##### `pixel@`
+( column row bitmap -- state )
+
+Get whether a pixel at *column* and *row* in *bitmap* is on or off, returning true or false respectively. If the pixel is outside the bounds of *bitmap*, false is returned.
+
 ##### `set-pixel-const`
 ( constant dst-column dst-row dst-bitmap -- )
 

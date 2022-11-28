@@ -79,6 +79,11 @@
 <p>( bitmap – dirty? )</p>
 <p>Get whether a bitmap is dirty. Note that if a bitmap does not have support for dirty state tracking this will always return true.</p>
 </section>
+<section id="pixel">
+<h3><code class="docutils literal notranslate"><span class="pre">pixel&#64;</span></code><a class="headerlink" href="#pixel" title="Permalink to this headline">¶</a></h3>
+<p>( column row bitmap – state )</p>
+<p>Get whether a pixel at <em>column</em> and <em>row</em> in <em>bitmap</em> is on or off, returning true or false respectively. If the pixel is outside the bounds of <em>bitmap</em>, false is returned.</p>
+</section>
 <section id="set-pixel-const">
 <h3><code class="docutils literal notranslate"><span class="pre">set-pixel-const</span></code><a class="headerlink" href="#set-pixel-const" title="Permalink to this headline">¶</a></h3>
 <p>( constant dst-column dst-row dst-bitmap – )</p>
