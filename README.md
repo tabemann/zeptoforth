@@ -53,6 +53,13 @@ The library of code included along with the zeptoforth kernel, which is present 
 * Programmable input/output support (on the Raspberry Pi Pico)
 * Optional swdcom support
 
+There is also support for loadable extras not included in any builds:
+
+* Bitmaps (in `extra/common/bitmap.fs`)
+* SSD1306-based displays (in `extra/common/ssd1306.fs`)
+* Monospace, bitmap fonts (in `extra/common/font.fs`)
+* A simple monospace, bitmap ASCII font (in `extra/common/simple_font.fs`)
+
 To load the zeptoforth image (whether just the kernel or an image including precompiled Forth code) onto an STM32L476, STM32F407, or STM32F746 DISCOVERY board or an STM32F411 "Black Pill" board , first install st-flash, then attach the DISCOVERY board to one's PC via USB and execute:
 
     $ st-flash erase
