@@ -63,6 +63,9 @@ begin-module bitmap
 
     \ Get whether a bitmap is dirty
     method dirty? ( bitmap -- dirty? )
+
+    \ Get the state of a pixel
+    method pixel@ ( col row bitmap -- state )
       
     \ Set a pixel with a constant value
     method set-pixel-const ( const dst-col dst-row dst-bitmap -- )
@@ -853,6 +856,16 @@ begin-module bitmap
       ;
         
     end-module
+
+    \ Get the state of a pixel
+    :noname { col row self -- state }
+      0 col <= 0 row <= and
+      col self bitmap-cols @ < row self bitmap-rows @ < and and if
+        row 3 rshift self page-addr col + c@ row 7 and rshift 1 and 0<>
+      else
+        false
+      then
+    ; define pixel@
 
     \ Set a pixel with a constant value
     :noname { const dst-col dst-row dst -- }

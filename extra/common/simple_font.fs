@@ -984,7 +984,7 @@ begin-module simple-font
 
     0 c,
 
-    create end-data
+    variable align-this
     
   end-module> import
 
