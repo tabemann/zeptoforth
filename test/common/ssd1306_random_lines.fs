@@ -24,6 +24,7 @@ begin-module bitmap-line-test
   bitmap import
   ssd1306 import
   bitmap-utils import
+  rng import
   
   128 constant my-width
   64 constant my-height
@@ -46,18 +47,24 @@ begin-module bitmap-line-test
     $FF 0 4 1 2 my-sprite set-rect-const
     $FF 1 2 3 1 my-sprite set-rect-const
     
-    $FF 64 32 16 - 64 32 16 + ['] set-pixel-const my-ssd1306 draw-pixel-line
-    $FF 64 16 - 32 64 16 + 32 ['] set-pixel-const my-ssd1306 draw-pixel-line
+    0 { counter }
     
-    $FF 4 4 2 2 2 61 ['] set-rect-const my-ssd1306 draw-rect-line
-    $FF 4 4 2 61 125 61 ['] set-rect-const my-ssd1306 draw-rect-line
-    $FF 4 4 126 61 126 2 ['] set-rect-const my-ssd1306 draw-rect-line
-    $FF 4 4 126 2 2 2 ['] set-rect-const my-ssd1306 draw-rect-line
+    begin key? not while
+      random my-width umod { start-col }
+      random my-height umod { start-row }
+      random my-width umod { end-col }
+      random my-height umod { end-row }
+      0 0 4 4 start-col start-row end-col end-row ['] or-rect my-sprite my-ssd1306 draw-bitmap-line
+      my-ssd1306 update-display
+      100 ms
+      1 +to counter
+      counter 25 umod 0= if
+        0 to counter
+        my-ssd1306 clear-bitmap
+      then
+    repeat
     
-    0 0 4 4 64 16 - 32 16 - 64 16 + 32 16 + ['] or-rect my-sprite my-ssd1306 draw-bitmap-line
-    0 0 4 4 64 16 - 32 16 + 64 16 + 32 16 - ['] or-rect my-sprite my-ssd1306 draw-bitmap-line
-    
-    my-ssd1306 update-display
+    key drop
   ;
   
 end-module
