@@ -340,7 +340,7 @@ begin-module file
   \ Implement the file context class
   <file-context> begin-implement
     :noname ( working-dir root-fs context -- )
-      dup [ <object> ] -> new
+      dup <object>->new
       tuck root-fs !
       working-dir 2!
     ; define new

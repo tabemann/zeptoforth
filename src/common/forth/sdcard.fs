@@ -264,7 +264,7 @@ begin-module sd
   <sd> begin-implement
 
     :noname ( cs-pin spi-device sd-card -- )
-      dup >r [ <block-dev> ] -> new r>
+      dup >r <block-dev>->new r>
       dup sd-lock init-lock
       tuck spi-device !
       tuck cs-pin !

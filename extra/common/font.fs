@@ -107,7 +107,7 @@ begin-module font
 
     \ Our constructor
     :noname { buf default cols rows min-char max-char self -- }
-      self [ <object> ] -> new
+      self <object>->new
       min-char self min-char-index !
       max-char self max-char-index !
       rows self char-rows !

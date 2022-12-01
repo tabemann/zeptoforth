@@ -358,6 +358,21 @@ _find:	ldr r0, =find_hook
 	bx lr
 	end_inlined
 
+	@@ Invoke the find raw hook
+	@@ ( b-addr bytes -- addr|0 )
+	define_word "find-raw", visible_flag
+_find_raw:
+	ldr r0, =find_raw_hook
+	ldr r0, [r0]
+	cmp r0, #0
+	beq 1f
+	mov pc, r0
+1:	push_tos
+	ldr tos, =_hook_needed
+	bl _raise
+	bx lr
+	end_inlined
+
 	@@ Hook needed exception handler
 	define_word "x-hook-needed", visible_flag
 _hook_needed:

@@ -8,6 +8,8 @@ When modules are defined, they automatically add their wordlist definition as a 
 
 Within a given module, the user may import and unimport modules/wordlists, which pushes them on the wordlist order and removes them from that module's portion of the wordlist's order respectively. Note that all the wordlists imported with a module definition are automatically unimported when that module definition is ended.
 
+Words inside modules or inside nested modules may be used without importing the modules in question with *paths* specified with *module*`::`*word* or, mor generally, *module0*`::`...`::`*modulen*`::`*word*. These paths can be used not simply by the outer interpreter but also by any word which looks up another word by name, such as `'`, `[']`, `postpone`, `averts`, and `triggers`.
+
 Note that it is recommended that once `src/common/forth/module.fs` is loaded, the user should not manually use `set-order` or `set-current`, as the module system will not know about this and thus unexpected results may occur.
 
 ### `forth`
@@ -23,11 +25,6 @@ Module already defined exception.
 ( -- )
 
 Module not found exception.
-
-##### `::`
-( ? module "word-name" -- ? )
-
-Evaluate *word-name* in the context of *module* and execute it. Note that this is an immediate word, so while compiling one will probably want to bracket one's module with `[` and `]`.
 
 ##### `begin-module`
 ( "name" -- )

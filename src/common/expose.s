@@ -375,6 +375,14 @@ _find_hook:
 	bx lr
 	end_inlined
 
+        @@ The find raw hook
+        define_word "find-raw-hook", visible_flag
+_find_raw_hook:
+        push_tos
+        ldr tos, =find_raw_hook
+        bx lr
+        end_inlined
+
         @@ The word (including quotation) beginning hook
         define_word "word-begin-hook", visible_flag
 _word_begin_hook:

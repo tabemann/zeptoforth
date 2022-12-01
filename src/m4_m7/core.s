@@ -2253,8 +2253,11 @@ _init_variables:
         movs r1, #0
         str r1, [r0]
 	ldr r0, =find_hook
-	ldr r1, =_do_find
+	ldr r1, =_find_raw
 	str r1, [r0]
+        ldr r0, =find_raw_hook
+        ldr r1, =_do_find
+        str r1, [r0]
 	ldr r0, =compiling_to_flash
 	movs r1, #0
 	str r1, [r0]

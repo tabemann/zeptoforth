@@ -831,7 +831,7 @@ begin-module fat32
   \ Implement master boot record class
   <mbr> begin-implement
     :noname ( mbr-device mbr -- )
-      dup [ <object> ] -> new
+      dup <object>->new
       mbr-device !
     ; define new
     
@@ -875,7 +875,7 @@ begin-module fat32
   \ Implement FAT32 filesystem class
   <fat32-fs> begin-implement
     :noname ( partition device fs -- )
-      dup [ <object> ] -> new
+      dup <object>->new
       tuck fat32-device !
       tuck swap partition-first-sector @ swap first-sector !
       [:
@@ -1189,7 +1189,7 @@ begin-module fat32
   \ Implement FAT32 file class
   <fat32-file> begin-implement
     :noname ( fs file -- )
-      dup [ <object> ] -> new
+      dup <object>->new
       tuck file-fs !
       -1 over file-parent-index !
       -1 over file-parent-cluster !
@@ -1402,7 +1402,7 @@ begin-module fat32
   \ Implement FAT32 directory class
   <fat32-dir> begin-implement
     :noname ( fs dir -- )
-      dup [ <object> ] -> new
+      dup <object>->new
       tuck dir-fs !
       -1 over dir-parent-index !
       -1 over dir-parent-cluster !
@@ -1828,7 +1828,7 @@ begin-module fat32
 
 end-module
 
-: init ( -- ) init [ fat32 :: fat32-internal ] :: init-fat32 ;
+: init ( -- ) init fat32::fat32-internal::init-fat32 ;
 
 reboot
 

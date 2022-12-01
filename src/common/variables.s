@@ -182,6 +182,9 @@
 	@@ The find hook
 	allot find_hook, 4
 
+        @@ The find raw hook
+        allot find_raw_hook, 4
+
         @@ The word (including quotation) beginning hook
         allot word_begin_hook, 4
 

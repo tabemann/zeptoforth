@@ -462,8 +462,8 @@ end-module> import
 \ Initialize
 : init ( -- )
   init
-  0 [ spi-internal ] :: init-spi
-  1 [ spi-internal ] :: init-spi
+  0 spi-internal::init-spi
+  1 spi-internal::init-spi
 ;
 
 reboot

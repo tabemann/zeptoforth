@@ -147,6 +147,38 @@ commit-flash
   drop rdrop set-order
 ;
 
+\ The old find hook
+variable old-find-hook
+
+\ Find the first path separator in a name
+: find-path-sep ( c-addr u -- u'|-1 )
+  swap 1+ swap 1-
+  1 begin over 2 > while
+    2 pick c@ [char] : = if
+      2 pick 1+ c@ [char] : = if
+        nip nip exit
+      then
+    then
+    rot 1+ rot 1- rot 1+
+  repeat
+  2drop drop -1
+;
+
+\ Execute or compile a particular word in a provided module
+: do-find-with-module ( c-addr u -- word|0 )
+  2dup find-path-sep dup -1 <> if
+    2 pick over old-find-hook @ execute ?dup if
+      >r 2 + tuck - -rot + swap r> -rot 2>r
+      >r get-order r> >xt execute 1 set-order
+      2r> find >r set-order r>
+    else
+      2drop drop 0
+    then
+  else
+    drop old-find-hook @ execute
+  then
+;
+
 \ Switch wordlists
 forth set-current
 
@@ -207,27 +239,14 @@ commit-flash
   compile, end-compile,
 ;
 
-\ Execute or compile a particular word in a provided module
-: :: ( module "word-name" -- )
-  [immediate]
-  >r get-order r> 1 set-order
-  token dup 0<> if
-    find dup 0<> if
-      >r set-order r> apply
-    else
-      drop set-order ['] x-unknown-word ?raise
-    then
-  else
-    2drop set-order ['] x-token-expected ?raise
-  then
-;
-
 \ Initialize
 : init ( -- )
   init
   0 module-stack-index !
   forth push-stack
   forth add
+  find-hook @ old-find-hook !
+  ['] do-find-with-module find-hook !
 ;
 
 forth 1 set-order

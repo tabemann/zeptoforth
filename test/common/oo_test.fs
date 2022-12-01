@@ -34,8 +34,8 @@ begin-module oo-test
   
   <my-class> begin-implement
   
-    :noname dup [ <object> ] -> new 0 over foo# ! 0 swap bar# ! ; define new
-    :noname cr ." Destroying my-class" [ <object> ] -> destroy ; define destroy
+    :noname dup <object>->new 0 over foo# ! 0 swap bar# ! ; define new
+    :noname cr ." Destroying my-class" <object>->destroy ; define destroy
     :noname foo# @ ; define foo@
     :noname bar# @ ; define bar@
   
@@ -51,8 +51,8 @@ begin-module oo-test
   
   <my-subclass-0> begin-implement
   
-    :noname dup [ <my-class> ] -> new 2 over bar# ! 3 swap baz# ! ; define new
-    :noname cr ." Destroying my-subclass-0" [ <my-class> ] -> destroy ;
+    :noname dup <my-class>->new 2 over bar# ! 3 swap baz# ! ; define new
+    :noname cr ." Destroying my-subclass-0" <my-class>->destroy ;
     define destroy
     :noname baz# @ ; define baz@
   
@@ -62,7 +62,7 @@ begin-module oo-test
   
   <my-subclass-1> begin-implement
   
-    :noname cr ." Destroying my-subclass-1" [ <my-class> ] -> destroy ;
+    :noname cr ." Destroying my-subclass-1" <my-class>->destroy ;
     define destroy
     :noname drop 4 ; define bar@
     

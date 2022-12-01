@@ -556,7 +556,7 @@ begin-module spi
   \ Set a pin to be an SPI pin
   : spi-pin ( spi pin -- )
     over validate-spi
-    dup [ pin-internal ] :: validate-pin
+    dup pin-internal::validate-pin
     dup >r
     over >r find-spi-alternate ?dup if
       rdrop
@@ -637,11 +637,11 @@ end-module> import
 \ Initialize
 : init ( -- )
   init
-  1 [ spi-internal ] :: init-spi
-  2 [ spi-internal ] :: init-spi
-  3 [ spi-internal ] :: init-spi
-  4 [ spi-internal ] :: init-spi
-  5 [ spi-internal ] :: init-spi
+  1 spi-internal::init-spi
+  2 spi-internal::init-spi
+  3 spi-internal::init-spi
+  4 spi-internal::init-spi
+  5 spi-internal::init-spi
 ;
 
 reboot

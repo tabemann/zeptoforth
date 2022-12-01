@@ -291,7 +291,7 @@ begin-module fat32-tools
         <fat32-file> class-size [:
           2swap [: 3 pick swap open-file ;] current-fs @ with-root-path
           >r
-          -rot [: 3 pick swap [ fat32 ] :: create-file ;]
+          -rot [: 3 pick swap fat32::create-file ;]
           current-fs @ with-root-path
           r>
           begin
@@ -642,7 +642,7 @@ end-module> import
 
 : init ( -- )
   init
-  [ fat32-tools :: fat32-tools-internal ] :: init-fat32-tools
+  fat32-tools::fat32-tools-internal::init-fat32-tools
 ;
 
 reboot

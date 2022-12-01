@@ -292,7 +292,7 @@ begin-module ssd1306
   
     \ Initialize an SSD1306 device
     :noname { pin0 pin1 buf cols rows i2c-addr i2c-device self -- }
-      buf cols rows self [ <bitmap> ] -> new
+      buf cols rows self <bitmap>->new
       i2c-device self ssd1306-device !
       i2c-addr self ssd1306-addr !
       pin1 self ssd1306-pin1 !

@@ -631,11 +631,11 @@ end-module> import
 \ Init
 : init ( -- )
   init
-  [ uart-internal ] :: init-uart1
-  [ uart-internal ] :: init-uart3
-  [ uart-internal ] :: init-uart4
-  [ uart-internal ] :: init-uart5
-\  [ uart-internal ] :: init-lpuart1
+  uart-internal::init-uart1
+  uart-internal::init-uart3
+  uart-internal::init-uart4
+  uart-internal::init-uart5
+\  uart-internal::init-lpuart1
 ;
 
 \ Reboot

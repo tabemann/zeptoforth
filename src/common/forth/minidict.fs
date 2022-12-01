@@ -360,7 +360,7 @@ end-module> import
   init
   init-flash-mini-dict
   ['] add-flash-mini-dict finalize-hook !
-  ['] find-optimized find-hook !
+  ['] find-optimized find-raw-hook !
 ;
 
 reboot

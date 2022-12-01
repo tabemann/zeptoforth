@@ -54,7 +54,7 @@ begin-module simple-fat32
   <simple-fat32-fs> begin-implement
   
     :noname ( sck-pin tx-pin rx-pin cs-pin spi-device fs -- )
-      dup [ <base-fat32-fs> ] -> new ( sck-pin tx-pin rx-pin cs-pin spi-device fs )
+      dup <base-fat32-fs>->new ( sck-pin tx-pin rx-pin cs-pin spi-device fs )
       >r ( sck-pin tx-pin rx-pin cs-pin spi-device )
       rot dup pull-up-pin over swap spi-pin ( sck-pin tx-pin cs-pin spi-device )
       rot dup pull-up-pin over swap spi-pin ( sck-pin cs-pin spi-device )
@@ -82,11 +82,11 @@ begin-module simple-fat32
     ; define root-path-exists?
     
     :noname ( write-through fs -- )
-      simple-fat32-sd [ block-dev ] :: write-through!
+      simple-fat32-sd block-dev::write-through!
     ; define write-through! 
 
     :noname ( fs -- write-through )
-      simple-fat32-sd [ block-dev ] :: write-through@
+      simple-fat32-sd block-dev::write-through@
     ; define write-through@
     
     :noname ( fs -- ) simple-fat32-fs flush ; define flush

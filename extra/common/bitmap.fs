@@ -133,7 +133,7 @@ begin-module bitmap
 
     \ Initialize an BITMAP device
     :noname { buf cols rows self -- }
-      self [ <object> ] -> new
+      self <object>->new
       rows self bitmap-rows !
       cols self bitmap-cols !
       buf self bitmap-buf  !

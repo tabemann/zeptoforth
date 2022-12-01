@@ -417,7 +417,7 @@ end-module> import
 : init ( -- )
   init
   spinlock-count cpu-count * 0 ?do
-    0 [ multicore :: multicore-internal ] :: spinlock-lock-counts i cells + !
+    0 multicore::multicore-internal::spinlock-lock-counts i cells + !
   loop
 ;
 

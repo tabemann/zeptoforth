@@ -48,7 +48,7 @@ begin-module ramfs
   \ Implement RamFS filesystem real entity base class
   <ram-real-entity> begin-implement
     :noname ( next-ram-entity c-addr u entity -- )
-      dup [ <object> ] -> new
+      dup <object>->new
       dup >r ram-entity-name 2! r>
       next-ram-entity !
     ; define new
@@ -63,7 +63,7 @@ begin-module ramfs
   \ Implement RamFS filesystem real file class
   <ram-real-file> begin-implement
     :noname ( data-addr data-bytes next-ram-entity c-addr u entity -- )
-      dup >r [ <ram-real-entity> ] -> new
+      dup >r <ram-real-entity>->new
       r@ ram-data-size !
       r> ram-data-addr !
     ; define new
@@ -132,7 +132,7 @@ begin-module ramfs
   \ Implement RamFS filesystem directory class
   <ram-real-dir> begin-implement
     :noname ( first-real-dir-member next-ram-entity c-addr u entity -- )
-      dup >r [ <ram-real-entity> ] -> new
+      dup >r <ram-real-entity>->new
       r> first-real-dir-member !
     ; define new
     :noname ( c-addr u dir -- class )
@@ -177,7 +177,7 @@ begin-module ramfs
   \ Implement RamFS filesystem directory class
   <ram-real-mount> begin-implement
     :noname ( mounted-fs next-ram-entity c-addr u entity -- )
-      dup >r [ <ram-real-entity> ] -> new r>
+      dup >r <ram-real-entity>->new r>
       mounted-fs !
     ; define new
     :noname ( c-addr u dir -- class ) [: entity-class@ ;] swap execute-mount ;
@@ -205,7 +205,7 @@ begin-module ramfs
   \ Implement RamFS filesystem file proxy class
   <ram-file-proxy> begin-implement
     :noname ( ram-file-orig proxy -- )
-      dup [ <file> ] -> new
+      dup <file>->new
       tuck ram-file-orig !
       0 swap ram-file-offset !
     ; define new
@@ -236,7 +236,7 @@ begin-module ramfs
   \ Implement RamFS filesystem directory proxy class
   <ram-dir-proxy> begin-implement
     :noname ( ram-dir-orig proxy -- )
-      dup [ <dir> ] -> new
+      dup <dir>->new
       ram-dir-orig !
     ; define new
     :noname drop true ; define entity-dir?
@@ -252,7 +252,7 @@ begin-module ramfs
   \ Implement RamFS filesystem mount point proxy class
   <ram-mount-proxy> begin-implement
     :noname ( ram-mount-orig proxy -- )
-      dup [ <dir> ] -> new
+      dup <dir>->new
       ram-mount-orig !
     ; define new
     :noname drop true ; define entity-dir?
@@ -273,7 +273,7 @@ begin-module ramfs
   \ Implement RamFS filesystem class
   <ram-fs> begin-implement
     :noname ( first-real-dir-member fs -- )
-      dup [ <fs> ] -> new
+      dup <fs>->new
       ram-root-dir !
     ; define new
     :noname ( fs -- class ) drop <ram-dir-proxy> ; define base-dir-class@

@@ -1761,7 +1761,7 @@ begin-module task
 	$00 SIO_IRQ_PROC1 NVIC_IPR_IP!
 	SIO_IRQ_PROC1 NVIC_ISER_SETENA!
 	1 pause-enabled !
-	[ int-io ] :: enable-int-io
+	int-io::enable-int-io
 	init-systick-aux-core
 	pause try ?dup if display-red execute display-normal then
 	current-task @ kill

@@ -37,7 +37,7 @@ begin-module oo-heap-test
   
   <heap-object> begin-implement
     :noname
-      dup [ <object> ] -> new
+      dup <object>->new
       last-object @ swap
       2dup prev-object !
       over [:
@@ -50,7 +50,7 @@ begin-module oo-heap-test
       last-object !
     ; define new
     :noname
-      dup [ <object> ] -> destroy
+      dup <object>->destroy
       cr ." Destroying object "
       dup index @ .
       dup prev-object @ last-object !

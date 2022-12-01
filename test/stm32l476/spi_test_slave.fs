@@ -26,7 +26,7 @@ continue-module forth
 
   \ Initialize the test
   : init-test ( -- )
-\    1 [ spi-internal ] :: init-spi
+\    1 spi-internal::init-spi
     1 12 xe spi-pin \ SPI1_NSS
     1 13 xe spi-pin \ SPI1_SCK
     1 14 xe spi-pin \ SPI1_MISO

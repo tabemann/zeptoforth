@@ -94,14 +94,14 @@ begin-module adc
 
   \ Set a pin to be an ADC pin
   : adc-pin ( adc pin -- )
-    dup [ pin-internal ] :: validate-pin
+    dup pin-internal::validate-pin
     dup 26 >= over 29 <= and averts x-pin-has-no-adc-chan
     validate-adc
   ;
 
   \ Get the ADC channel for a pin
   : pin-adc-chan ( pin -- adc-chan )
-    dup [ pin-internal ] :: validate-pin
+    dup pin-internal::validate-pin
     dup 26 >= over 29 <= and averts x-pin-has-no-adc-chan
     26 -
   ;
@@ -134,6 +134,6 @@ begin-module adc
 end-module> import
 
 \ Initialize
-: init ( -- ) init [ adc-internal ] :: init-adc ;
+: init ( -- ) init adc-internal::init-adc ;
 
 reboot

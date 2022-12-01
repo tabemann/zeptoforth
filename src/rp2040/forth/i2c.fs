@@ -1342,8 +1342,8 @@ end-module> import
 \ Initialize I2C
 : init ( -- )
   init
-  0 [ i2c-internal ] :: init-i2c
-  1 [ i2c-internal ] :: init-i2c
+  0 i2c-internal::init-i2c
+  1 i2c-internal::init-i2c
 ;
 
 reboot

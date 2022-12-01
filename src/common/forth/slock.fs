@@ -61,7 +61,7 @@ begin-module slock
     begin
       dup slock-task @ ?dup if
 	task-waited-for !
-	slock-spinlock [ task-internal ] :: block-indefinite-self-release
+	slock-spinlock task-internal::block-indefinite-self-release
 	false
       else
 	current-task swap slock-task !
@@ -84,7 +84,7 @@ begin-module slock
       else
 	dup slock-task @ ?dup if
 	  task-waited-for !
-	  slock-spinlock [ task-internal ] :: block-indefinite-self-release
+	  slock-spinlock task-internal::block-indefinite-self-release
 	  false
 	else
 	  current-task swap slock-task !
@@ -100,7 +100,7 @@ begin-module slock
   : release-slock ( slock -- )
     disable-int
     claim-all-core-spinlock-raw
-    0 swap ! [ task-internal ] :: wake-other-tasks
+    0 swap ! task-internal::wake-other-tasks
     release-all-core-spinlock-raw
     enable-int
   ;
@@ -109,8 +109,8 @@ begin-module slock
   : release-slock-block ( slock -- )
     disable-int
     claim-all-core-spinlock-raw
-    0 swap ! [ task-internal ] :: wake-other-tasks
-    current-task [ task-internal ] :: block-raw
+    0 swap ! task-internal::wake-other-tasks
+    current-task task-internal::block-raw
     release-all-core-spinlock-raw
     enable-int
   ;

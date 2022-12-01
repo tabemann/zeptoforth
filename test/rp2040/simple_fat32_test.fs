@@ -131,7 +131,7 @@ begin-module fat32-test
   
   : create-big-file ( name-addr name-u -- )
     false my-fs write-through!
-    [: my-file swap [ fat32 ] :: create-file ;] my-fs with-root-path
+    [: my-file swap fat32::create-file ;] my-fs with-root-path
     $10000 0 ?do key? if key drop leave then
       hex i 0 <# # # # # # # # # #> decimal my-file write-file drop
       i $FF and 0= if i h.8 then

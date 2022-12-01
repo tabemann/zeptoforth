@@ -96,6 +96,9 @@ begin-module oo
   \ Method not implemented exception
   : x-method-not-implemented ( -- ) ." method not implemented" cr ;
 
+  \ Method not implemented yet exception
+  : x-method-not-implemented-yet ( -- ) ." method not implemented yet" cr ;
+
   \ Abstract method
   : abstract-method ( -- ) ['] x-method-not-implemented ?raise ;
   
@@ -194,19 +197,6 @@ begin-module oo
   \ Initialize an instance of a class
   : init-object ( ? class addr -- ) tuck swap @ swap ! new ;
 
-  \ Early-bind a method call
-  : -> ( ? class "name" -- ? )
-    [immediate]
-    token
-    dup 0= triggers x-token-expected
-    2 pick method-by-name dup -1 <> averts x-method-not-in-class
-    state @ if
-      swap class-method lit, postpone @ postpone inline-execute
-    else
-      swap class-method @ execute
-    then
-  ;
-  
   \ Allot an object and initialize it
   : with-object ( ? class xt -- )
     over class-size [:
@@ -215,7 +205,57 @@ begin-module oo
       r> destroy
     ;] with-aligned-allot
   ;
+
+  continue-module oo-internal
+
+    \ The old find hook
+    variable old-find-hook
+    
+    \ Find the arrow in a name
+    : find-arrow ( c-addr u -- u'|-1 )
+      swap 1+ swap 1-
+      1 begin over 2 > while
+        2 pick c@ [char] - = if
+          2 pick 1+ c@ [char] > = if
+            nip nip exit
+          then
+        then
+        rot 1+ rot 1- rot 1+
+      repeat
+      2drop drop -1
+    ;
+    
+    \ Execute or compile a particular word in a provided module
+    : do-find-with-arrow ( ? class "name" -- word|0 )
+      2dup find-arrow dup -1 <> if
+        2 pick over old-find-hook @ execute ?dup if
+          >r 2 + tuck - -rot + swap r> >xt execute >r
+          r@ method-by-name dup -1 <> if
+            r> class-method @ dup 0<> over -1 <> and if
+              find-by-xt
+            else
+              drop ['] x-method-not-implemented-yet ?raise
+            then
+          else
+            rdrop drop 0
+          then
+        else
+          2drop drop ['] x-unknown-word ?raise
+        then
+      else
+        drop old-find-hook @ execute
+      then
+    ;
+  
+  end-module
   
 end-module
 
-compile-to-ram
+\ Initialize
+: init ( -- )
+  init
+  find-hook @ oo::oo-internal::old-find-hook !
+  ['] oo::oo-internal::do-find-with-arrow find-hook !
+;
+
+reboot

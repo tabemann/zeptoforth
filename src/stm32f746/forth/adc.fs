@@ -196,9 +196,9 @@ begin-module adc
 
   \ Set a pin to be an ADC pin
   : adc-pin ( adc pin -- )
-    dup [ pin-internal ] :: validate-pin
+    dup pin-internal::validate-pin
     swap validate-adc
-    ANALOG_MODE swap [ pin-internal ] :: extract-both MODER!
+    ANALOG_MODE swap pin-internal::extract-both MODER!
   ;
 
   \ Default ADC
@@ -236,6 +236,6 @@ begin-module adc
 end-module> import
 
 \ Initialize
-: init ( -- ) init [ adc-internal ] :: init-adc ;
+: init ( -- ) init adc-internal::init-adc ;
 
 reboot

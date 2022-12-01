@@ -723,13 +723,13 @@ end-module> import
 \ Init
 : init ( -- )
   init
-  [ uart-internal ] :: init-uart2
-  [ uart-internal ] :: init-uart3
-  [ uart-internal ] :: init-uart4
-  [ uart-internal ] :: init-uart5
-  [ uart-internal ] :: init-uart6
-  [ uart-internal ] :: init-uart7
-  [ uart-internal ] :: init-uart8
+  uart-internal::init-uart2
+  uart-internal::init-uart3
+  uart-internal::init-uart4
+  uart-internal::init-uart5
+  uart-internal::init-uart6
+  uart-internal::init-uart7
+  uart-internal::init-uart8
 ;
 
 \ Reboot

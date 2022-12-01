@@ -39,6 +39,7 @@
 <p>At any given time once <code class="docutils literal notranslate"><span class="pre">src/forth/common/module.fs</span></code> is loaded there is a module stack which controls how module words manipulate the wordlist order. Initially there is one entry on the module stack, corresponding to the <code class="docutils literal notranslate"><span class="pre">forth</span></code> wordlist. When new entries are pushed onto the module stack, they save the state of <code class="docutils literal notranslate"><span class="pre">base</span></code> prior to their creation, and restore it once they are popped. Also, module stack entries specify the current wordlist for them, and when module stack entries immediately above them on the stack are popped, their wordlist is restored as the current wordlist.</p>
 <p>When modules are defined, they automatically add their wordlist definition as a constant to the containing module. Also, if so specified by using <code class="docutils literal notranslate"><span class="pre">begin-import</span></code> or <code class="docutils literal notranslate"><span class="pre">begin-import-once</span></code>, the modules may be imported in the containing module. Note that modules may be defined multiple times, each time adding onto the existing definition, unless the module is defined with <code class="docutils literal notranslate"><span class="pre">begin-module-once</span></code> or <code class="docutils literal notranslate"><span class="pre">begin-import-once</span></code>, where then it is checked such that the module already exists by the name specified, and if it does exist, <code class="docutils literal notranslate"><span class="pre">x-already-defined</span></code> is raised.</p>
 <p>Within a given module, the user may import and unimport modules/wordlists, which pushes them on the wordlist order and removes them from that module’s portion of the wordlist’s order respectively. Note that all the wordlists imported with a module definition are automatically unimported when that module definition is ended.</p>
+<p>Words inside modules or inside nested modules may be used without importing the modules in question with <em>paths</em> specified with <em>module</em><code class="docutils literal notranslate"><span class="pre">::</span></code><em>word</em> or, mor generally, <em>module0</em><code class="docutils literal notranslate"><span class="pre">::</span></code>…<code class="docutils literal notranslate"><span class="pre">::</span></code><em>modulen</em><code class="docutils literal notranslate"><span class="pre">::</span></code><em>word</em>. These paths can be used not simply by the outer interpreter but also by any word which looks up another word by name, such as <code class="docutils literal notranslate"><span class="pre">'</span></code>, <code class="docutils literal notranslate"><span class="pre">[']</span></code>, <code class="docutils literal notranslate"><span class="pre">postpone</span></code>, <code class="docutils literal notranslate"><span class="pre">averts</span></code>, and <code class="docutils literal notranslate"><span class="pre">triggers</span></code>.</p>
 <p>Note that it is recommended that once <code class="docutils literal notranslate"><span class="pre">src/common/forth/module.fs</span></code> is loaded, the user should not manually use <code class="docutils literal notranslate"><span class="pre">set-order</span></code> or <code class="docutils literal notranslate"><span class="pre">set-current</span></code>, as the module system will not know about this and thus unexpected results may occur.</p>
 <section id="forth">
 <h2><code class="docutils literal notranslate"><span class="pre">forth</span></code><a class="headerlink" href="#forth" title="Permalink to this headline">¶</a></h2>
@@ -52,11 +53,6 @@
 <h3><code class="docutils literal notranslate"><span class="pre">x-not-found</span></code><a class="headerlink" href="#x-not-found" title="Permalink to this headline">¶</a></h3>
 <p>( – )</p>
 <p>Module not found exception.</p>
-</section>
-<section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">::</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
-<p>( ? module “word-name” – ? )</p>
-<p>Evaluate <em>word-name</em> in the context of <em>module</em> and execute it. Note that this is an immediate word, so while compiling one will probably want to bracket one’s module with <code class="docutils literal notranslate"><span class="pre">[</span></code> and <code class="docutils literal notranslate"><span class="pre">]</span></code>.</p>
 </section>
 <section id="begin-module">
 <h3><code class="docutils literal notranslate"><span class="pre">begin-module</span></code><a class="headerlink" href="#begin-module" title="Permalink to this headline">¶</a></h3>
@@ -78,8 +74,8 @@
 <p>( – )</p>
 <p>End the definition of the module at the top of the module stack, removing each wordlist for each module imported within it from the wordlist order.</p>
 </section>
-<section id="id2">
-<h3><code class="docutils literal notranslate"><span class="pre">end-module&gt;</span></code><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">end-module&gt;</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
 <p>( –  module )</p>
 <p>End the definition of the module at the top of the module stack, removing each wordlist for each module imported within it from th e wordlist order, and then push the module whose definition had ended onto the data stack.</p>
 </section>
@@ -145,6 +141,7 @@
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
@@ -172,6 +169,8 @@
 <li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
 </ul>
 
 <div class="relations">
