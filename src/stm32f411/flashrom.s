@@ -543,6 +543,27 @@ _flash_block_size:
 _init_flash_buffers:
 	bx lr
 	end_inlined
+                        
+        @ Placeholder for cflash-buffer@ on other architectures, same as c@
+        define_internal_word "cflash-buffer@", visible_flag
+_get_flash_buffer_value_1:
+        ldrb tos, [tos]
+        bx lr
+        end_inlined
+        
+        @ Placeholder for hflash-buffer@ on other architectures, same as h@
+        define_internal_word "hflash-buffer@", visible_flag
+_get_flash_buffer_value_2:
+        ldrh tos, [tos]
+        bx lr
+        end_inlined
+
+        @ Placeholder for flash-buffer@ on other architectures, same as @
+        define_internal_word "flash-buffer@", visible_flag
+_get_flash_buffer_value_4:
+        ldr tos, [tos]
+        bx lr
+        end_inlined
 
 	.ltorg
 	

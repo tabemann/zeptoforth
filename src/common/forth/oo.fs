@@ -122,20 +122,26 @@ begin-module oo
   \ Begin the declaration of a class
   : begin-class
     ( super-class "name" -- class-header member-offset list method-count )
-    <builds here cell allot over , over members-size @
-    3 cells allot 2 pick class-method-list @ 3 roll method-count @
-    does>
+    { super-class }
+    create here cell allot super-class , 3 cells allot
+    super-class members-size @
+    super-class class-method-list @
+    super-class method-count @
+    compiling-to-flash? if flash-block-align, then
   ;
 
   \ Finish the declaration of a class
   : end-class ( class-header member-offset list method-count -- )
-    2swap over members-size current! ( list method-count class-header )
-    2dup method-count current!  ( list method-count class-header )
-    swap 1+ cells cell align,
-    flash-block-align, here swap allot flash-block-align, ( list class-header methods )
-    2dup swap class-methods current! ( list class-header methods )
-    over swap current! ( list class-header )
-    class-method-list current!
+    { class-header member-offset method-list #methods }
+    member-offset class-header members-size current!
+    #methods class-header method-count current!
+    cell align,
+    compiling-to-flash? if flash-block-align, then
+    here #methods 1+ cells allot { methods }
+    compiling-to-flash? if flash-block-align, then
+    methods class-header class-methods current!
+    class-header methods current!
+    method-list class-header class-method-list current!
   ;
 
   \ Begin the implementation of a class
@@ -147,37 +153,41 @@ begin-module oo
   ;
 
   \ End the implementation of a class
-  : end-implement ( class-header -- )
-    dup class-method-list @
-    begin ?dup while
-      dup method-index @ >r
-      r@ 2 pick class-method @ dup 0= compiling-to-flash? not and swap -1 = or if
-	r@ 2 pick class-superclass @ class-method @
-	r@ 3 pick class-method current!
+  : end-implement { class-header -- }
+    class-header class-method-list @ { current-method }
+    begin current-method while
+      current-method method-index @ { index }
+      index class-header class-method flash-buffer@
+      dup 0= compiling-to-flash? not and swap -1 = or if
+        index class-header class-superclass @ method-count @ < if
+          index class-header class-superclass @ class-method @
+          index class-header class-method current!
+        else
+          ['] abstract-method index class-header class-method current!
+        then
       then
-      rdrop prev-method @
+      current-method prev-method @ to current-method
     repeat
-    drop
   ;
 
   \ Declare a member of a class
   : member ( member-offset list method-count size "name" -- member-offset list method-count )
-    swap >r : 2 pick 65536 u< thumb-2? or if inlined then
-    rot dup cell+ lit, postpone + postpone ; + swap r>
+    { member-offset method-list #methods size }
+    : inlined member-offset cell+ lit, postpone + postpone ;
+    member-offset size + method-list #methods
   ;
   
   \ Declare a method of a class
   : method ( list method-count "name" -- list method-count )
-    :
-    dup cells 65536 u< thumb-2? or if inlined then ( list method-count )
-    postpone dup ( list method-count )
-    postpone @ dup 1+ cells lit, ( list method-count )
-    postpone + postpone @ postpone inline-execute ( list method-count )
-    postpone ; ( list method-count )
-    cell align, here method-header-size allot ( list method-count list' )
-    rot over prev-method current! ( method-count list' )
-    2dup method-index current! ( method-count list' )
-    latest over method-word current! swap 1+ flash-block-align, ( list' method-count' )
+    { method-list #methods }
+    : inlined postpone dup postpone @ #methods 1+ cells lit,
+    postpone + postpone @ postpone inline-execute postpone ;
+    cell align, here method-header-size allot { method-header }
+    method-list method-header prev-method current!
+    #methods method-header method-index current!
+    latest method-header method-word current!
+    compiling-to-flash? if flash-block-align, then
+    method-header #methods 1+
   ;
 
   \ Define a method of a class
@@ -226,21 +236,21 @@ begin-module oo
     ;
     
     \ Execute or compile a particular word in a provided module
-    : do-find-with-arrow ( ? class "name" -- word|0 )
+    : do-find-with-arrow ( name-addr name-bytes -- word|0 )
       2dup find-arrow dup -1 <> if
         2 pick over old-find-hook @ execute ?dup if
-          >r 2 + tuck - -rot + swap r> >xt execute >r
+          >r 2 + tuck - -rot + swap r> dup word-name count type space >xt execute >r
           r@ method-by-name dup -1 <> if
-            r> class-method @ dup 0<> over -1 <> and if
-              find-by-xt
+            r> class-method flash-buffer@ dup 0<> over -1 <> and if
+              ." C " .s find-by-xt .s
             else
               drop ['] x-method-not-implemented-yet ?raise
             then
           else
-            rdrop drop 0
+            rdrop drop 0 ." A " .s
           then
         else
-          2drop drop ['] x-unknown-word ?raise
+          2drop drop 0 ." B " .s
         then
       else
         drop old-find-hook @ execute

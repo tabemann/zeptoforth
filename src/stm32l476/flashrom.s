@@ -383,12 +383,101 @@ _get_free_flash_buffer:
 	movs r2, #16
 	str tos, [r0, #flash_buffer_addr]
 	movs tos, r0
+        movs r1, #0
+        mvns r1, r1
 	str r1, [r0], #4
 	str r1, [r0], #4
 	str r1, [r0], #4
 	str r1, [r0], #4
 	str r2, [r0]
 	pop {pc}
+	end_inlined
+
+        @@ Find an address in a flash buffer and get its value, else -1
+        @@ if not in a buffer
+        define_internal_word "cflash-buffer@", visible_flag
+_get_flash_buffer_value_1:
+	ldr r0, =flash_buffers_start
+	ldr r1, =flash_buffers_start + (flash_buffer_size * flash_buffer_count)
+	movs r2, #0xF
+        movs r3, tos
+	bics tos, r2
+        movs r2, r3
+1:	ldr r3, [r0, #flash_block_size]
+        cmp r3, #0
+        beq 3f
+        cmp r3, #16
+        beq 3f
+        ldr r3, [r0, #flash_buffer_addr]
+	cmp tos, r3
+	beq 2f
+3:      adds r0, #flash_buffer_size
+	cmp r0, r1
+	bne 1b
+	ldrb tos, [r2]
+        bx lr
+2:      movs r3, #0xF
+        ands r2, r3
+        ldrb tos, [r0, r2]
+        bx lr
+	end_inlined
+
+        @@ Find an address in a flash buffer and get its value, else -1
+        @@ if not in a buffer
+        define_internal_word "hflash-buffer@", visible_flag
+_get_flash_buffer_value_2:
+	ldr r0, =flash_buffers_start
+	ldr r1, =flash_buffers_start + (flash_buffer_size * flash_buffer_count)
+	movs r2, #0xF
+        movs r3, tos
+	bics tos, r2
+        movs r2, r3
+1:	ldr r3, [r0, #flash_block_size]
+        cmp r3, #0
+        beq 3f
+        cmp r3, #16
+        beq 3f
+        ldr r3, [r0, #flash_buffer_addr]
+	cmp tos, r3
+	beq 2f
+3:      adds r0, #flash_buffer_size
+	cmp r0, r1
+	bne 1b
+	ldrh tos, [r2]
+        bx lr
+2:      movs r3, #0xF
+        ands r2, r3
+        ldrh tos, [r0, r2]
+        bx lr
+	end_inlined
+
+        @@ Find an address in a flash buffer and get its value, else -1
+        @@ if not in a buffer
+        define_internal_word "flash-buffer@", visible_flag
+_get_flash_buffer_value_4:
+	ldr r0, =flash_buffers_start
+	ldr r1, =flash_buffers_start + (flash_buffer_size * flash_buffer_count)
+	movs r2, #0xF
+        movs r3, tos
+	bics tos, r2
+        movs r2, r3
+1:	ldr r3, [r0, #flash_block_size]
+        cmp r3, #0
+        beq 3f
+        cmp r3, #16
+        beq 3f
+        ldr r3, [r0, #flash_buffer_addr]
+	cmp tos, r3
+	beq 2f
+3:      adds r0, #flash_buffer_size
+	cmp r0, r1
+	bne 1b
+	ldr tos, [r2]
+        bx lr
+2:      movs r3, #0xF
+        ands r2, r3
+        ldr tos, [r0, r2]
+        bx lr
 	end_inlined
 
 	@@ Find a flash buffer for an address

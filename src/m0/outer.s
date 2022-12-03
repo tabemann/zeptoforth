@@ -466,7 +466,11 @@ _find_all:
 	@@ Get an xt from a word
 	define_word ">xt", visible_flag
 _to_xt:	push {lr}
-	ldrb r0, [tos, #8]
+        push_tos
+        adds tos, #8
+        bl _get_flash_buffer_value_1
+        movs r0, tos
+        pull_tos
 	adds tos, #9
 	adds tos, tos, r0
 	movs r0, #1
