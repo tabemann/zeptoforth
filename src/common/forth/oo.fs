@@ -239,18 +239,18 @@ begin-module oo
     : do-find-with-arrow ( name-addr name-bytes -- word|0 )
       2dup find-arrow dup -1 <> if
         2 pick over old-find-hook @ execute ?dup if
-          >r 2 + tuck - -rot + swap r> dup word-name count type space >xt execute >r
+          >r 2 + tuck - -rot + swap r> >xt execute >r
           r@ method-by-name dup -1 <> if
             r> class-method flash-buffer@ dup 0<> over -1 <> and if
-              ." C " .s find-by-xt .s
+              find-by-xt
             else
               drop ['] x-method-not-implemented-yet ?raise
             then
           else
-            rdrop drop 0 ." A " .s
+            rdrop drop 0
           then
         else
-          2drop drop 0 ." B " .s
+          2drop drop 0
         then
       else
         drop old-find-hook @ execute
