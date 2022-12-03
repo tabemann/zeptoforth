@@ -46,33 +46,60 @@ begin-module ssd1306-print
     
     variable cursor-col
     variable cursor-row
+    variable dirty-start-col
+    variable dirty-start-row
+    variable dirty-end-col
+    variable dirty-end-row
     
     false value inited?
+
+    : dirty-all-ssd1306-text ( -- )
+      0 dirty-start-col !
+      0 dirty-start-row !
+      my-chars-width dirty-end-col !
+      my-chars-height dirty-end-row !
+    ;
+
+    : clear-ssd1306-dirty ( -- )
+      0 dirty-start-col !
+      0 dirty-start-row !
+      0 dirty-end-col !
+      0 dirty-end-row !
+    ;
+    
+    : dirty-ssd1306-char { col row -- }
+      dirty-start-col @ col min dirty-start-col !
+      dirty-start-row @ row min dirty-start-row !
+      dirty-end-col @ col 1+ max dirty-end-col !
+      dirty-end-row @ row 1+ max dirty-end-row !
+    ;
 
     : init-ssd1306-text ( -- )
       14 15 my-buf my-width my-height SSD1306_I2C_ADDR 1 <ssd1306> my-ssd1306 init-object
       my-char-buf my-char-buf-size $20 fill
       0 cursor-col !
       0 cursor-row !
+      dirty-all-ssd1306-text
       init-simple-font
       true to inited?
     ;
     
     : render-ssd1306-text ( -- )
-      $00 0 my-width 0 my-height my-ssd1306 set-rect-const
-      my-chars-height 0 ?do
-        my-chars-width 0 ?do 
+      dirty-end-row @ dirty-start-row @ ?do
+        dirty-end-col @ dirty-start-col @ ?do 
           my-char-buf my-chars-width j * + i + c@
           my-char-width i * my-char-height j * my-ssd1306 a-simple-font set-char
         loop
       loop
       my-ssd1306 update-display
+      clear-ssd1306-dirty
     ;
     
     : scroll-ssd1306-text ( -- )
       my-char-buf my-chars-width + my-char-buf my-chars-width my-chars-height 1- * move
       my-char-buf my-chars-width my-chars-height 1- * + my-chars-width $20 fill
       cursor-row @ 1- 0 max cursor-row !
+      dirty-all-ssd1306-text
     ;
     
     : pre-advance-ssd1306-cursor ( -- )
@@ -93,12 +120,16 @@ begin-module ssd1306-print
     : add-ssd1306-char { c -- }
       c $0A = if
         cursor-row @ 1+ my-chars-height min cursor-row !
+        cursor-row @ my-chars-height = if
+          scroll-ssd1306-text
+        then
       else
         c $0D = if
           0 cursor-col !
         else
           pre-advance-ssd1306-cursor
           c my-char-buf my-chars-width cursor-row @ * + cursor-col @ + c!
+          cursor-col @ cursor-row @ dirty-ssd1306-char
           advance-ssd1306-cursor
         then
       then
@@ -111,6 +142,7 @@ begin-module ssd1306-print
     my-char-buf my-chars-width my-chars-height * $20 fill
     0 cursor-col !
     0 cursor-row !
+    dirty-all-ssd1306-text
     render-ssd1306-text
   ;
   
@@ -130,6 +162,9 @@ begin-module ssd1306-print
     inited? not if init-ssd1306-text then
     cursor-row @ 1+ my-chars-height min cursor-row !
     0 cursor-col !
+    cursor-row @ my-chars-height = if
+      scroll-ssd1306-text
+    then
     render-ssd1306-text
   ;
   
