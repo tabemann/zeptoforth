@@ -283,14 +283,6 @@ def upload(path):
                     commentEOF = True
 
                 # e4thcom style block comments (may not end in SkipToEOF section)
-                if (re.search('^{', line)):
-                    commentBlock = True
-
-                if (re.search('^}', line)):
-                    commentBlock = False
-                    vprint('\\ ' + line)
-                    continue
-
                 if (commentEOF or commentBlock):
                     vprint('\\ ' + line)
                     continue
