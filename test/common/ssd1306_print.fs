@@ -130,6 +130,18 @@ begin-module ssd1306-print
       1 cursor-col +!
     ;
     
+    : bs-ssd1306-cursor ( -- )
+      -1 cursor-col +!
+      cursor-col @ 0< if
+        my-chars-width 1- cursor-col !
+        cursor-row @ 0> if
+          -1 cursor-row +!
+        else
+          0 cursor-col !
+        then
+      then
+    ;
+    
     : add-ssd1306-char { c -- }
       c $0A = if
         cursor-row @ 1+ my-chars-height min cursor-row !
@@ -140,16 +152,8 @@ begin-module ssd1306-print
         c $0D = if
           0 cursor-col !
         else
-          c $08 = c $7F = or if
-            -1 cursor-col +!
-            cursor-col @ 0< if
-              my-chars-width 1- cursor-col !
-              cursor-row @ 0> if
-                -1 cursor-row +!
-              else
-                0 cursor-col !
-              then
-            then
+          c $08 = if
+            bs-ssd1306-cursor
           else
             pre-advance-ssd1306-cursor
             c my-char-buf my-chars-width cursor-row @ * + cursor-col @ + c!
@@ -161,6 +165,19 @@ begin-module ssd1306-print
     ;
     
   end-module> import
+  
+  : erase-ssd1306 ( -- )
+    inited? not if init-ssd1306-text then
+    my-char-buf my-chars-width my-chars-height * $20 fill
+    0 cursor-col !
+    0 cursor-row !
+    0 old-cursor-col !
+    0 old-cursor-row !
+    dirty-all-ssd1306-text
+    my-ssd1306 clear-bitmap
+    my-ssd1306 update-display
+    0 0 draw-cursor
+  ;
   
   : clear-ssd1306 ( -- )
     inited? not if init-ssd1306-text then
@@ -193,11 +210,19 @@ begin-module ssd1306-print
     render-ssd1306-text
   ;
   
+  : bs-ssd1306 ( -- )
+    inited? not if init-ssd1306-text then
+    bs-ssd1306-cursor
+    render-ssd1306-text
+  ;
+  
   : goto-ssd1306 { col row -- }
     inited? not if init-ssd1306-text then
     col 0 max my-chars-width min cursor-col !
     row 0 max my-chars-height min cursor-row !
     render-ssd1306-text
   ;
+  
+  : ssd1306-cursor@ ( -- col row ) cursor-col @ cursor-row @ ;
   
 end-module
