@@ -44,6 +44,8 @@ begin-module ssd1306-print
     my-chars-width my-chars-height * constant my-char-buf-size
     my-char-buf-size 4 align buffer: my-char-buf
     
+    variable old-cursor-col
+    variable old-cursor-row
     variable cursor-col
     variable cursor-row
     variable dirty-start-col
@@ -73,26 +75,37 @@ begin-module ssd1306-print
       dirty-end-col @ col 1+ max dirty-end-col !
       dirty-end-row @ row 1+ max dirty-end-row !
     ;
+    
+    : draw-cursor { col row -- }
+      $FF col my-char-width * my-char-width row my-char-height * my-char-height my-ssd1306 xor-rect-const
+    ;
 
     : init-ssd1306-text ( -- )
       14 15 my-buf my-width my-height SSD1306_I2C_ADDR 1 <ssd1306> my-ssd1306 init-object
       my-char-buf my-char-buf-size $20 fill
+      0 old-cursor-col !
+      0 old-cursor-row !
       0 cursor-col !
       0 cursor-row !
       dirty-all-ssd1306-text
       init-simple-font
+      0 0 draw-cursor
       true to inited?
     ;
     
     : render-ssd1306-text ( -- )
+      old-cursor-col @ old-cursor-row @ draw-cursor
       dirty-end-row @ dirty-start-row @ ?do
         dirty-end-col @ dirty-start-col @ ?do 
           my-char-buf my-chars-width j * + i + c@
           my-char-width i * my-char-height j * my-ssd1306 a-simple-font set-char
         loop
       loop
+      cursor-col @ cursor-row @ draw-cursor
       my-ssd1306 update-display
       clear-ssd1306-dirty
+      cursor-col @ old-cursor-col !
+      cursor-row @ old-cursor-row !
     ;
     
     : scroll-ssd1306-text ( -- )
@@ -172,6 +185,7 @@ begin-module ssd1306-print
     inited? not if init-ssd1306-text then
     col 0 max my-chars-width min cursor-col !
     row 0 max my-chars-height min cursor-row !
+    render-ssd1306-text
   ;
   
 end-module
