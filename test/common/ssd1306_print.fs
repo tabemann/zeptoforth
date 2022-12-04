@@ -140,10 +140,22 @@ begin-module ssd1306-print
         c $0D = if
           0 cursor-col !
         else
-          pre-advance-ssd1306-cursor
-          c my-char-buf my-chars-width cursor-row @ * + cursor-col @ + c!
-          cursor-col @ cursor-row @ dirty-ssd1306-char
-          advance-ssd1306-cursor
+          c $08 = c $7F = or if
+            -1 cursor-col +!
+            cursor-col @ 0< if
+              my-chars-width 1- cursor-col !
+              cursor-row @ 0> if
+                -1 cursor-row +!
+              else
+                0 cursor-col !
+              then
+            then
+          else
+            pre-advance-ssd1306-cursor
+            c my-char-buf my-chars-width cursor-row @ * + cursor-col @ + c!
+            cursor-col @ cursor-row @ dirty-ssd1306-char
+            advance-ssd1306-cursor
+          then
         then
       then
     ;
