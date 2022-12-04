@@ -25,6 +25,7 @@ begin-module ssd1306-print
   ssd1306 import
   font import
   simple-font import
+  lock import
   
   begin-module ssd1306-print-internal
   
@@ -52,6 +53,8 @@ begin-module ssd1306-print
     variable dirty-start-row
     variable dirty-end-col
     variable dirty-end-row
+    
+    lock-size buffer: my-lock
     
     false value inited?
 
@@ -81,16 +84,19 @@ begin-module ssd1306-print
     ;
 
     : init-ssd1306-text ( -- )
-      14 15 my-buf my-width my-height SSD1306_I2C_ADDR 1 <ssd1306> my-ssd1306 init-object
-      my-char-buf my-char-buf-size $20 fill
-      0 old-cursor-col !
-      0 old-cursor-row !
-      0 cursor-col !
-      0 cursor-row !
-      dirty-all-ssd1306-text
-      init-simple-font
-      0 0 draw-cursor
-      true to inited?
+      my-lock init-lock
+      [:
+        14 15 my-buf my-width my-height SSD1306_I2C_ADDR 1 <ssd1306> my-ssd1306 init-object
+        my-char-buf my-char-buf-size $20 fill
+        0 old-cursor-col !
+        0 old-cursor-row !
+        0 cursor-col !
+        0 cursor-row !
+        dirty-all-ssd1306-text
+        init-simple-font
+        0 0 draw-cursor
+        true to inited?
+      ;] my-lock with-lock
     ;
     
     : render-ssd1306-text ( -- )
@@ -168,61 +174,75 @@ begin-module ssd1306-print
   
   : erase-ssd1306 ( -- )
     inited? not if init-ssd1306-text then
-    my-char-buf my-chars-width my-chars-height * $20 fill
-    0 cursor-col !
-    0 cursor-row !
-    0 old-cursor-col !
-    0 old-cursor-row !
-    dirty-all-ssd1306-text
-    my-ssd1306 clear-bitmap
-    my-ssd1306 update-display
-    0 0 draw-cursor
+    [:
+      my-char-buf my-chars-width my-chars-height * $20 fill
+      0 cursor-col !
+      0 cursor-row !
+      0 old-cursor-col !
+      0 old-cursor-row !
+      dirty-all-ssd1306-text
+      my-ssd1306 clear-bitmap
+      my-ssd1306 update-display
+      0 0 draw-cursor
+    ;] my-lock with-lock
   ;
   
   : clear-ssd1306 ( -- )
     inited? not if init-ssd1306-text then
-    my-char-buf my-chars-width my-chars-height * $20 fill
-    0 cursor-col !
-    0 cursor-row !
-    dirty-all-ssd1306-text
-    render-ssd1306-text
+    [:
+      my-char-buf my-chars-width my-chars-height * $20 fill
+      0 cursor-col !
+      0 cursor-row !
+      dirty-all-ssd1306-text
+      render-ssd1306-text
+    ;] my-lock with-lock
   ;
   
-  : emit-ssd1306 { c -- }
+  : emit-ssd1306 ( c -- )
     inited? not if init-ssd1306-text then
-    c add-ssd1306-char
-    render-ssd1306-text
+    [:
+      add-ssd1306-char
+      render-ssd1306-text
+    ;] my-lock with-lock
   ;
   
-  : type-ssd1306 { c-addr u -- }
+  : type-ssd1306 ( c-addr u -- }
     inited? not if init-ssd1306-text then
-    u 0 ?do c-addr i + c@ add-ssd1306-char loop
-    render-ssd1306-text
+    [: { c-addr u }
+      u 0 ?do c-addr i + c@ add-ssd1306-char loop
+      render-ssd1306-text
+    ;] my-lock with-lock
   ;
   
   : cr-ssd1306 ( -- )
     inited? not if init-ssd1306-text then
-    cursor-row @ 1+ my-chars-height min cursor-row !
-    0 cursor-col !
-    cursor-row @ my-chars-height = if
-      scroll-ssd1306-text
-    then
-    render-ssd1306-text
+    [:
+      cursor-row @ 1+ my-chars-height min cursor-row !
+      0 cursor-col !
+      cursor-row @ my-chars-height = if
+        scroll-ssd1306-text
+      then
+      render-ssd1306-text
+    ;] my-lock with-lock
   ;
   
   : bs-ssd1306 ( -- )
     inited? not if init-ssd1306-text then
-    bs-ssd1306-cursor
-    render-ssd1306-text
+    [:
+      bs-ssd1306-cursor
+      render-ssd1306-text
+    ;] my-lock with-lock
   ;
   
-  : goto-ssd1306 { col row -- }
+  : goto-ssd1306 ( col row -- )
     inited? not if init-ssd1306-text then
-    col 0 max my-chars-width min cursor-col !
-    row 0 max my-chars-height min cursor-row !
-    render-ssd1306-text
+    [: { col row }
+      col 0 max my-chars-width min cursor-col !
+      row 0 max my-chars-height min cursor-row !
+      render-ssd1306-text
+    ;] my-lock with-lock
   ;
   
-  : ssd1306-cursor@ ( -- col row ) cursor-col @ cursor-row @ ;
+  : ssd1306-cursor@ ( -- col row ) [: cursor-col @ cursor-row @ ;] my-lock with-lock ;
   
 end-module
