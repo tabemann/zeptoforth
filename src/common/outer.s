@@ -966,7 +966,10 @@ _do_refill:
 	b 1b
 7:	pull_tos
 	b 6b
-4:	push {r0, r1}
+4:	ldr r2, =input_buffer
+	cmp r0, r2
+	beq 1b
+	push {r0, r1}
 	movs tos, #0x08
 	bl _emit
 	push_tos
