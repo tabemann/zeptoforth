@@ -26,7 +26,12 @@ begin-module ssd1306-emit
   
   : run-test
     emit-hook @ old-emit !
-    [: dup emit-ssd1306 old-emit @ execute ;] emit-hook !
+    [:
+      dup $20 >= over $0A = or over $0D = or over $08 = or over $09 = or if
+        dup emit-ssd1306
+      then
+      old-emit @ execute
+    ;] emit-hook !
   ;
   
   : stop-test
