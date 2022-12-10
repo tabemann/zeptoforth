@@ -1881,6 +1881,8 @@ begin-module task
     ['] execute svcall-vector vector!
     ['] switch-tasks pendsv-vector vector!
     ['] task-systick-handler systick-vector vector!
+    [: cpu-index 0= current-task main-task = and ;] in-main?-hook !
+    [: begin current-task kill again ;] bye-hook !
     1 pause-enabled !
     enable-int
   ;

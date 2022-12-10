@@ -2251,6 +2251,15 @@ commit-flash
   nip
 ;
 
+\ Hook for whether the current task is executing
+variable in-main?-hook
+
+\ Commit to flash
+commit-flash
+
+\ Hook for terminating the current task
+variable bye-hook
+
 \ Commit to flash
 commit-flash
 
@@ -2314,6 +2323,12 @@ forth set-current
 \ Flush the console
 : flush-console ( -- ) flush-console-hook @ ?execute ;
 
+\ Get whether the current task is the main task
+: in-main? ( -- main? ) in-main?-hook @ execute ;
+
+\ Terminate the current task
+: bye ( -- ) bye-hook @ execute ;
+
 \ Initialize the RAM variables
 : init ( -- )
   init
@@ -2339,6 +2354,8 @@ forth set-current
   0 flush-console-hook !
   false flash-dict-warned !
   ['] do-flash-validate-dict validate-dict-hook !
+  ['] true in-main?-hook !
+  [: begin pause again ;] bye-hook !
 ;
 
 \ Finish compressing the code

@@ -32,8 +32,9 @@ begin-module exception
   5 constant bus-fault-vector
   6 constant usage-fault-vector
 
-  \ The CFSR register
+  \ The CFSR and HFSR registers
   $E000ED28 constant CFSR
+  $E000ED2C constant HFSR
 
   \ Saved hooks
   variable saved-emit-hook
@@ -138,40 +139,64 @@ begin-module exception
   
   \ Recover from a fault
   : recover-from-fault ( -- )
-    CFSR @ CFSR !
-    ['] abort
     code[
-    $18 8 + r6 str_,[sp,#_]
-    r6 1 dp ldm
+    4 dp subs_,#_
+    0 dp tos str_,[_,#_]
+    $1C 8 + tos ldr_,[sp,#_]
+    tos r0 movs_,_
+    1 r1 movs_,#_
+    24 r1 r1 lsls_,_,#_
+    r1 r0 orrs_,_
+    $1C 8 + r0 str_,[sp,#_]
     ]code
+    $1FF and 0= if
+      CFSR @ CFSR !
+      HFSR @ HFSR !
+      in-main? if
+        display-red cr ." Returning main task to prompt" display-normal cr
+        ['] abort
+      else
+        display-red cr ." Terminating task" display-normal cr
+        ['] bye
+      then
+      code[
+      $18 8 + tos str_,[sp,#_]
+      tos 1 dp ldm
+      ]code
+      restore-hooks
+    else
+      display-red cr ." Exception in exception handler; "
+      ." environment limited" display-normal cr
+      abort
+    then
   ;
 
   \ Handle a hard fault
   : handle-hard-fault ( -- )
     collect-registers prepare-faulted-state
-    display-red cr ." *** HARD FAULT *** " dump-registers display-normal    
-    restore-hooks recover-from-fault
+    display-red cr ." *** HARD FAULT *** " dump-registers display-normal
+    recover-from-fault
   ;
 
   \ Handle a mem fault
   : handle-mem-fault ( -- )
     collect-registers prepare-faulted-state
     display-red cr ." *** MEM FAULT *** " dump-registers display-normal
-    restore-hooks recover-from-fault
+    recover-from-fault
   ;
 
   \ Handle a bus fault
   : handle-bus-fault ( -- )
     collect-registers prepare-faulted-state
     display-red cr ." *** BUS FAULT *** " dump-registers display-normal
-    restore-hooks recover-from-fault
+    recover-from-fault
   ;
 
   \ Handle a usage fault
   : handle-usage-fault ( -- )
     collect-registers prepare-faulted-state
     display-red cr ." *** USAGE FAULT *** " dump-registers display-normal
-    restore-hooks recover-from-fault
+    recover-from-fault
   ;
 
   \ Initialize processor exception handling
