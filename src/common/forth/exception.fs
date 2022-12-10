@@ -71,51 +71,54 @@ begin-module exception
     code[
     4 dp subs_,#_
     0 dp tos str_,[_,#_]
-    1 tos mrs_,_
+    5 tos mrs_,_
     ]code
-    cr ." IPSR:            " h.8
-    cr ." XPSR:            " h.8
-    cr ." Return: address: " h.8
-    cr ." LR:              " h.8
-    cr ." SP:              " h.8
-    cr ." R12:             " h.8
-    cr ." R11:             " h.8
-    cr ." R10:             " h.8
-    cr ." R9:              " h.8
-    cr ." R8:              " h.8
-    cr ." R7:              " h.8
-    cr ." R6:              " h.8
-    cr ." R5:              " h.8
-    cr ." R4:              " h.8
-    cr ." R3:              " h.8
-    cr ." R2:              " h.8
-    cr ." R1:              " h.8
-    cr ." R0:              " h.8
+    cr cr ." Exception state: "
+    cr ."     IPSR:           " h.8
+    cr ."     XPSR:           " h.8
+    cr ."     Return address: " h.8
+    cr ."     LR:             " h.8
+    cr ."     SP:             " h.8
+    cr ."     R12:            " h.8
+    cr ."     R11:            " h.8
+    cr ."     R10:            " h.8
+    cr ."     R9:             " h.8
+    cr ."     R8:             " h.8
+    cr ."     R7:             " h.8
+    cr ."     R6:             " h.8
+    cr ."     R5:             " h.8
+    cr ."     R4:             " h.8
+    cr ."     R3:             " h.8
+    cr ."     R2:             " h.8
+    cr ."     R1:             " h.8
+    cr ."     R0:             " h.8
   ;
 
   \ Collect fault registers ( -- )
   : collect-registers ( -- r0 .. r12 sp lr return-addr xpsr )
     code[
     r7 r0 movs_,_
-    64 dp subs_,#_
-    60 dp r6 str_,[_,#_]
-    28 dp r0 str_,[_,#_]
+    68 dp subs_,#_
+    64 dp r6 str_,[_,#_]
+    32 dp r0 str_,[_,#_]
     $0 8 + r0 ldr_,[sp,#_] \ R0
-    56 dp r0 str_,[_,#_]
+    60 dp r0 str_,[_,#_]
     $4 8 + r0 ldr_,[sp,#_] \ R1
-    52 dp r0 str_,[_,#_]
+    56 dp r0 str_,[_,#_]
     $8 8 + r0 ldr_,[sp,#_] \ R2
-    48 dp r0 str_,[_,#_]
+    52 dp r0 str_,[_,#_]
     $C 8 + r0 ldr_,[sp,#_] \ R3
-    44 dp r0 str_,[_,#_]
-    40 dp r4 str_,[_,#_]
-    36 dp r5 str_,[_,#_]
-    32 dp r6 str_,[_,#_]
+    48 dp r0 str_,[_,#_]
+    44 dp r4 str_,[_,#_]
+    40 dp r5 str_,[_,#_]
+    36 dp r6 str_,[_,#_]
     r8 r0 mov4_,4_
-    24 dp r0 str_,[_,#_]
+    28 dp r0 str_,[_,#_]
     r9 r0 mov4_,4_
-    20 dp r0 str_,[_,#_]
+    24 dp r0 str_,[_,#_]
     r10 r0 mov4_,4_
+    20 dp r0 str_,[_,#_]
+    r11 r0 mov4_,4_
     16 dp r0 str_,[_,#_]
     $10 8 + r0 ldr_,[sp,#_] \ R12
     12 dp r0 str_,[_,#_]
@@ -136,7 +139,36 @@ begin-module exception
     r1 r6 movs_,_
     ]code
   ;
-  
+
+  \ Dump the data stack
+  : dump-stack ( -- )
+    cr cr ." Data stack:"
+    cr ."     TOS:      " dup h.8
+    sp@ cell+ stack-base @ swap ?do
+      cr ."     " i h.8 ." : " i @ h.8
+    4 +loop
+  ;
+    
+  \ Dump the return statck
+  : dump-rstack ( -- )
+    cr cr ." Return stack:"
+    code[
+    4 dp subs_,#_
+    0 dp tos str_,[_,#_]
+    sp tos mov4_,4_
+    $1C 8 + r1 ldr_,[sp,#_] \ XPSR
+    1 r2 movs_,#_
+    9 r2 r2 lsls_,_,#_
+    r1 r2 tst_,_
+    eq bc>
+    4 tos adds_,#_
+    >mark
+    ]code
+    rstack-base @ swap $30 + ?do
+      cr ."     " i h.8 ." : " i @ h.8
+    4 +loop
+  ;
+    
   \ Recover from a fault
   : recover-from-fault ( -- )
     code[
@@ -153,10 +185,10 @@ begin-module exception
       CFSR @ CFSR !
       HFSR @ HFSR !
       in-main? if
-        display-red cr ." Returning main task to prompt" display-normal cr
+        display-red cr cr ." Returning main task to prompt" display-normal cr
         ['] abort
       else
-        display-red cr ." Terminating task" display-normal cr
+        display-red cr cr ." Terminating task" display-normal cr
         ['] bye
       then
       code[
@@ -165,7 +197,7 @@ begin-module exception
       ]code
       restore-hooks
     else
-      display-red cr ." Exception in exception handler; "
+      display-red cr cr ." Exception in exception handler; "
       ." environment limited" display-normal cr
       abort
     then
@@ -174,28 +206,32 @@ begin-module exception
   \ Handle a hard fault
   : handle-hard-fault ( -- )
     collect-registers prepare-faulted-state
-    display-red cr ." *** HARD FAULT *** " dump-registers display-normal
+    display-red cr ." *** HARD FAULT *** "
+    dump-registers dump-stack dump-rstack display-normal
     recover-from-fault
   ;
 
   \ Handle a mem fault
   : handle-mem-fault ( -- )
     collect-registers prepare-faulted-state
-    display-red cr ." *** MEM FAULT *** " dump-registers display-normal
+    display-red cr ." *** MEM FAULT *** "
+    dump-registers dump-stack dump-rstack display-normal
     recover-from-fault
   ;
 
   \ Handle a bus fault
   : handle-bus-fault ( -- )
     collect-registers prepare-faulted-state
-    display-red cr ." *** BUS FAULT *** " dump-registers display-normal
+    display-red cr ." *** BUS FAULT *** "
+    dump-registers dump-stack dump-rstack display-normal
     recover-from-fault
   ;
 
   \ Handle a usage fault
   : handle-usage-fault ( -- )
     collect-registers prepare-faulted-state
-    display-red cr ." *** USAGE FAULT *** " dump-registers display-normal
+    display-red cr ." *** USAGE FAULT *** "
+    dump-registers dump-stack dump-rstack display-normal
     recover-from-fault
   ;
 

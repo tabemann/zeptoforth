@@ -494,7 +494,7 @@ begin-module armv6m
     \ Assemble an MRS instruction
     : mrs_,_ ( sysm rd -- )
       dup validate-4reg over validate-special
-      $F3EF h, swap 8 lshift or $8000 or h,
+      $F3EF h, 8 lshift or $8000 or h,
     ;
 
     \ Assemble an MSR (register) instruction
