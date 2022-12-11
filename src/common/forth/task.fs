@@ -1883,6 +1883,7 @@ begin-module task
     ['] task-systick-handler systick-vector vector!
     [: cpu-index 0= current-task main-task = and ;] in-main?-hook !
     [: begin current-task kill again ;] bye-hook !
+    [: 0 cpu-main-task @ task-dict-current ;] main-here-hook !
     1 pause-enabled !
     enable-int
   ;
@@ -1902,7 +1903,7 @@ begin-module task
   
   \ Display space free for the main task and for flash in general
   : unused ( -- )
-    cr main-task
+    cr 0 cpu-main-task
     ." flash dictionary free:     "
     flash-end flash-here - 0 <# #s #> type cr
     ." main task dictionary free: "

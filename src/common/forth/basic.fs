@@ -2263,6 +2263,9 @@ variable bye-hook
 \ Commit to flash
 commit-flash
 
+\ Hook for getting top of main task RAM dictionary
+variable main-here-hook
+
 \ Set forth
 forth set-current
 
@@ -2329,6 +2332,45 @@ forth set-current
 \ Terminate the current task
 : bye ( -- ) bye-hook @ execute ;
 
+\ Get the top of the main task RAM dictionary
+: main-here ( -- addr ) main-here-hook @ execute ;
+
+\ Search for a word that contains an address in a particular dictionary
+: find-approx-addr-dict ( addr here-addr last-dict -- word|0 )
+  begin
+    dup 0<> if
+      [ rp2040? ] [if]
+        2dup < if
+          nip $20008000 swap
+        then
+      [then]
+      2 pick over >xt >= if
+        2 pick 2 pick < if
+          nip nip true
+        else
+          nip dup next-word @ false
+        then
+      else
+        nip dup next-word @ false
+      then
+    else
+      nip nip true
+    then
+  until
+;
+
+\ Commit to flash
+commit-flash
+
+\ Search for a word that contains an address
+: find-approx-addr ( addr -- word|0 )
+  dup flash-here flash-latest find-approx-addr-dict ?dup if
+    nip
+  else
+    main-here ram-latest find-approx-addr-dict
+  then
+;
+
 \ Initialize the RAM variables
 : init ( -- )
   init
@@ -2355,6 +2397,7 @@ forth set-current
   false flash-dict-warned !
   ['] do-flash-validate-dict validate-dict-hook !
   ['] true in-main?-hook !
+  ['] here main-here-hook !
   [: begin pause again ;] bye-hook !
 ;
 

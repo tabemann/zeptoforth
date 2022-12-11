@@ -65,6 +65,21 @@ begin-module exception
     saved-key?-hook @ key?-hook !
     saved-pause-hook @ pause-hook !
   ;
+
+  \ Output information on an address
+  : dump-addr-info ( addr -- )
+    dup find-approx-addr ?dup if
+      space
+      dup word-name c@ if
+        dup word-name count type
+      else
+        ." <no name>"
+      then
+      space >xt dup h.8 swap 1 bic swap - ."  +" h.8
+    else
+      drop
+    then
+  ;
   
   \ Dump registers
   : dump-registers ( many -- )
@@ -76,22 +91,22 @@ begin-module exception
     cr cr ." Exception state: "
     cr ."     IPSR:           " h.8
     cr ."     XPSR:           " h.8
-    cr ."     Return address: " h.8
-    cr ."     LR:             " h.8
+    cr ."     Return address: " dup h.8 dump-addr-info
+    cr ."     LR:             " dup h.8 dump-addr-info
     cr ."     SP:             " h.8
-    cr ."     R12:            " h.8
-    cr ."     R11:            " h.8
-    cr ."     R10:            " h.8
-    cr ."     R9:             " h.8
-    cr ."     R8:             " h.8
-    cr ."     R7:             " h.8
-    cr ."     R6:             " h.8
-    cr ."     R5:             " h.8
-    cr ."     R4:             " h.8
-    cr ."     R3:             " h.8
-    cr ."     R2:             " h.8
-    cr ."     R1:             " h.8
-    cr ."     R0:             " h.8
+    cr ."     R12:            " dup h.8 dump-addr-info
+    cr ."     R11:            " dup h.8 dump-addr-info
+    cr ."     R10:            " dup h.8 dump-addr-info
+    cr ."     R9:             " dup h.8 dump-addr-info
+    cr ."     R8:             " dup h.8 dump-addr-info
+    cr ."     R7:             " dup h.8 dump-addr-info
+    cr ."     R6:             " dup h.8 dump-addr-info
+    cr ."     R5:             " dup h.8 dump-addr-info
+    cr ."     R4:             " dup h.8 dump-addr-info
+    cr ."     R3:             " dup h.8 dump-addr-info
+    cr ."     R2:             " dup h.8 dump-addr-info
+    cr ."     R1:             " dup h.8 dump-addr-info
+    cr ."     R0:             " dup h.8 dump-addr-info
   ;
 
   \ Collect fault registers ( -- )
@@ -143,9 +158,9 @@ begin-module exception
   \ Dump the data stack
   : dump-stack ( -- )
     cr cr ." Data stack:"
-    cr ."     TOS:      " dup h.8
+    cr ."     TOS:      " dup h.8 dup dump-addr-info
     sp@ cell+ stack-base @ swap ?do
-      cr ."     " i h.8 ." : " i @ h.8
+      cr ."     " i h.8 ." : " i @ dup h.8 dump-addr-info
     4 +loop
   ;
     
@@ -165,7 +180,7 @@ begin-module exception
     >mark
     ]code
     rstack-base @ swap $30 + ?do
-      cr ."     " i h.8 ." : " i @ h.8
+      cr ."     " i h.8 ." : " i @ dup h.8 dump-addr-info
     4 +loop
   ;
     

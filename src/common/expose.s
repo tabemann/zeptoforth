@@ -501,6 +501,17 @@ _cortex_m7:
         bx lr
         end_inlined
 
+        @@ Get whether the CPU is an RP2040
+        define_word "rp2040?", visible_flag
+_rp2040:
+        push_tos
+        movs tos, #0
+        .ifdef rp2040
+        mvns tos, tos
+        .endif
+        bx lr
+        end_inlined
+
 	@@ Get the CPU count
 	define_word "cpu-count", visible_flag | inlined_flag
 _cpu_count:
