@@ -32,6 +32,9 @@ begin-module closure
       compiling-to-flash? { to-flash? }
       compile-to-ram
       here { here-saved }
+      4 align,
+      here { here-start }
+      0 h,
       $FEDCBA98 lit, $FEDCBA99 lit,
       undefer-lit
       [ armv6m-instr import ]
@@ -40,7 +43,7 @@ begin-module closure
       r0 bx_
       [ armv6m-instr unimport ]
       thumb-2? not if consts, then
-      here here-saved - 4 align
+      here here-start - 4 align
       here-saved ram-here!
       to-flash? if compile-to-flash then
     ;
@@ -50,6 +53,9 @@ begin-module closure
       compiling-to-flash? { to-flash? }
       compile-to-ram
       here { here-saved }
+      4 align,
+      here { here-start }
+      0 h,
       $FEDCBA98 lit, $FEDCBA99 lit, $FEDCBA9A lit,
       undefer-lit
       [ armv6m-instr import ]
@@ -58,7 +64,7 @@ begin-module closure
       r0 bx_
       [ armv6m-instr unimport ]
       thumb-2? not if consts, then
-      here here-saved - 4 align
+      here here-start - 4 align
       here-saved ram-here!
       to-flash? if compile-to-flash then
     ;
