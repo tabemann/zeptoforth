@@ -206,7 +206,7 @@ begin-module ssd1306-print
     ;] my-lock with-lock
   ;
   
-  : type-ssd1306 ( c-addr u -- }
+  : type-ssd1306 ( c-addr u -- )
     inited? not if init-ssd1306-text then
     [: { c-addr u }
       u 0 ?do c-addr i + c@ add-ssd1306-char loop

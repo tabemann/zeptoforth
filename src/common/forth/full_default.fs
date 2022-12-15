@@ -22,6 +22,7 @@
 \ executed to load a "big" configuration
 
 #include src/common/forth/value.fs
+#include src/common/forth/closure.fs
 #include src/common/forth/temp.fs
 #include src/common/forth/temp_str.fs
 #include src/common/forth/disassemble.fs
