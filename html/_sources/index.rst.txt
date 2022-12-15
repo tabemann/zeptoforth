@@ -31,6 +31,7 @@ Zeptoforth Documentation
    words/line
    words/double
    words/value
+   words/closure
    words/temp
    words/task_pool
    words/action_pool
