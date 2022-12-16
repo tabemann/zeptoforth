@@ -24,6 +24,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 * Double cell and fixed point numeric support
 * Lambda expressions
 * `value`s and lexically scoped local variables
+* Closures
 * Object orientation
 * A disassembler
 * SysTick support
