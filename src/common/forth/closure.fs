@@ -71,12 +71,15 @@ begin-module closure
 
   end-module> import
 
-  \ Closure size
+  \ Single-cell closure size
   find-closure-size constant closure-size
   
-  \ Closure size
+  \ Double-cell closure size
   find-2closure-size constant 2closure-size
-
+  
+  \ Multi-cell closure size
+  : nclosure-size ( count -- bytes ) 2 + cells closure-size + ;
+  
   \ Bind a closure
   : bind { data addr xt -- }
     compiling-to-flash? { to-flash? }
@@ -111,6 +114,24 @@ begin-module closure
     thumb-2? not if consts, then
     here-saved ram-here!
     to-flash? if compile-to-flash then
+  ;
+
+  \ Bind a multi-argument closure
+  : nbind { count addr xt -- }
+    addr closure-size + { data-addr }
+    xt data-addr !
+    count data-addr cell+ !
+    count 0> if
+      2 count 1+ ?do
+        i cells data-addr + !
+      -1 +loop
+    then
+    data-addr addr [: { data-addr }
+      data-addr cell+ @ 2 + 2 ?do
+        i cells data-addr + @
+      loop
+      data-addr @ execute
+    ;] bind
   ;
 
 end-module
