@@ -26,6 +26,7 @@ begin-module snow-wind
   font import
   simple-font import
   rng import
+  systick import
   
   begin-structure flake-size
     field: flake-active
@@ -40,15 +41,18 @@ begin-module snow-wind
   7 constant my-char-width
   8 constant my-char-height
   200 constant my-flake-count
-  1,0 2constant my-flake-chance
-  -0,25 2constant my-min-flake-x-delta-vary
-  0,25 2constant my-max-flake-x-delta-vary
-  -0,25 2constant my-min-flake-y-delta-vary
-  0,25 2constant my-max-flake-y-delta-vary
-  -0,75 2constant my-min-wind-x-delta
-  0,75 2constant my-max-wind-x-delta
-  -0,25 2constant my-min-wind-x-delta-vary
-  0,25 2constant my-max-wind-x-delta-vary
+  false constant my-accumulate
+  2,0 2constant my-divider
+  2,0 my-divider f/ 2constant my-flake-chance
+  50,0 my-divider f/ nip constant my-delay
+  -0,25 my-divider f/ 2constant my-min-flake-x-delta-vary
+  0,25 my-divider f/ 2constant my-max-flake-x-delta-vary
+  -0,25 my-divider f/ 2constant my-min-flake-y-delta-vary
+  0,25 my-divider f/ 2constant my-max-flake-y-delta-vary
+  -0,75 my-divider f/ 2constant my-min-wind-x-delta
+  0,75 my-divider f/ 2constant my-max-wind-x-delta
+  -0,25 my-divider f/ 2constant my-min-wind-x-delta-vary
+  0,25 my-divider f/ 2constant my-max-wind-x-delta-vary
   
   my-width my-height bitmap-buf-size constant my-buf-size
   my-buf-size 4 align buffer: my-buf
@@ -88,7 +92,7 @@ begin-module snow-wind
     my-ssd1306 clear-bitmap
     my-ssd1306 update-display
     0,0 new-flake-x-delta 2! vary-wind new-flake-x-delta 2+!
-    1,0 new-flake-y-delta 2!
+    1,0 my-divider f/ new-flake-y-delta 2!
   ;
 
   : free-flake? ( -- free? ) free-flake-count @ 0> ;
@@ -162,16 +166,38 @@ begin-module snow-wind
   : draw-snow-w/-wind ( -- )
     inited? not if init-snow then
     clear-snow
+    systick-counter { start-systick }
     begin key? not while
       draw-snow
-      free-snow
+      my-accumulate if free-snow then
       erase-snow
+      my-accumulate not if free-snow then
       snow-fall
       adjust-wind
       new-flake? if init-flake then
-      50 ms
+      my-delay start-systick task::current-task task::delay
+      my-delay +to start-systick
     repeat
     key drop
+  ;
+  
+  : run-snow-w/-wind ( -- )
+    inited? not if init-snow then
+    clear-snow
+    0 [:
+      systick-counter { start-systick }
+      begin
+        draw-snow
+        my-accumulate if free-snow then
+        erase-snow
+        my-accumulate not if free-snow then
+        snow-fall
+        adjust-wind
+        new-flake? if init-flake then
+        my-delay start-systick task::current-task task::delay
+        my-delay +to start-systick
+      again
+    ;] 320 128 512 task::spawn task::run
   ;
   
 end-module
