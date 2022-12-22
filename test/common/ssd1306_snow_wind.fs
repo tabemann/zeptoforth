@@ -27,6 +27,8 @@ begin-module snow-wind
   simple-font import
   rng import
   systick import
+  task import
+  task-pool import
   
   begin-structure flake-size
     field: flake-active
@@ -40,7 +42,7 @@ begin-module snow-wind
   64 constant my-height
   7 constant my-char-width
   8 constant my-char-height
-  200 constant my-flake-count
+  400 constant my-flake-count
   false constant my-accumulate
   2,0 2constant my-divider
   2,0 my-divider f/ 2constant my-flake-chance
@@ -58,9 +60,11 @@ begin-module snow-wind
   my-buf-size 4 align buffer: my-buf
   <ssd1306> class-size buffer: my-ssd1306
   flake-size my-flake-count * buffer: my-flakes
+  1 task-pool-size buffer: my-task-pool
   variable free-flake-count
   2variable new-flake-x-delta
   2variable new-flake-y-delta
+  variable continue-run?
 
   false value inited?
 
@@ -76,6 +80,7 @@ begin-module snow-wind
     14 15 my-buf my-width my-height SSD1306_I2C_ADDR 1
     <ssd1306> my-ssd1306 init-object
     init-simple-font
+    320 128 512 1 my-task-pool init-task-pool
     true to inited?
   ;
 
@@ -175,18 +180,20 @@ begin-module snow-wind
       snow-fall
       adjust-wind
       new-flake? if init-flake then
-      my-delay start-systick task::current-task task::delay
+      my-delay start-systick current-task delay
       my-delay +to start-systick
     repeat
+    clear-snow
     key drop
   ;
   
   : run-snow-w/-wind ( -- )
     inited? not if init-snow then
     clear-snow
+    true continue-run? !
     0 [:
       systick-counter { start-systick }
-      begin
+      begin continue-run? @ while
         draw-snow
         my-accumulate if free-snow then
         erase-snow
@@ -194,10 +201,13 @@ begin-module snow-wind
         snow-fall
         adjust-wind
         new-flake? if init-flake then
-        my-delay start-systick task::current-task task::delay
+        my-delay start-systick current-task delay
         my-delay +to start-systick
-      again
-    ;] 320 128 512 task::spawn task::run
+      repeat
+      clear-snow
+    ;] my-task-pool spawn-from-task-pool run
   ;
+  
+  : stop-snow-w/-wind ( -- ) false continue-run? ! ;
   
 end-module
