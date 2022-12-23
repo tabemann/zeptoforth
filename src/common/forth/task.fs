@@ -1414,14 +1414,14 @@ begin-module task
 
   \ Allot space for a task
   : task-allot ( dict-size stack-size rstack-size -- task )
-    claim-all-core-spinlock
-    2dup 4 align swap 4 align + task-size +
-    free-end @ swap -
-    swap 4 align swap tuck task-rstack-size h!
-    swap 4 align swap tuck task-stack-size h!
-    swap 4 align swap tuck task-dict-size !
-    dup dup task-dict-size @ - free-end !
-    release-all-core-spinlock
+    [:
+      2dup 4 align swap 4 align + task-size +
+      free-end @ swap -
+      swap 4 align swap tuck task-rstack-size h!
+      swap 4 align swap tuck task-stack-size h!
+      swap 4 align swap tuck task-dict-size !
+      dup dup task-dict-size @ - free-end !
+    ;] critical-with-all-core-spinlock
   ;
 
   \ Configure notification for a task; notify-count may be from 0 to 32, and
@@ -1763,6 +1763,7 @@ begin-module task
 	1 pause-enabled !
 	int-io::enable-int-io
 	init-systick-aux-core
+        true core-1-launched !
 	pause try ?dup if display-red execute display-normal then
 	current-task @ kill
       ;
@@ -1782,25 +1783,24 @@ begin-module task
       ( xn ... x0 count xt dict-size stack-size rstack-size core -- task )
       [ cpu-count 1 > ] [if]
 	cpu-index 0= averts x-core-can-only-be-launched-from-core-0
-	dup 1 = averts x-core-out-of-range
-	claim-all-core-spinlock
-	dup cpu-active? @ if
-	  release-all-core-spinlock
-	  ['] x-main-already-launched ?raise
-	else
-	  true over cpu-active? !
-	then
-	release-all-core-spinlock
-	>r task-allot >r
-	2r@ cpu-current-task !
-	2r@ cpu-main-task !
-	2r@ cpu-prev-task !
-	2r@ cpu-first-task !
-	2r@ cpu-last-task !
-	2r@ init-aux-task
-	['] init-aux-main-task -rot
-	2r> swap >r launch-aux-core r>
-	begin dup task-core @ cpu-current-task @ 0= until
+        dup 1 = averts x-core-out-of-range
+        [:
+          dup cpu-active? @ if
+            ['] x-main-already-launched ?raise
+          else
+            true over cpu-active? !
+          then
+          >r task-allot >r
+          2r@ cpu-current-task !
+          2r@ cpu-main-task !
+          2r@ cpu-prev-task !
+          2r@ cpu-first-task !
+          2r@ cpu-last-task !
+          2r@ init-aux-task
+          ['] init-aux-main-task -rot
+          2r> swap >r launch-aux-core r>
+          begin core-1-launched @ until
+        ;] critical
       [else]
 	['] x-core-out-of-range ?raise
       [then]
@@ -1961,9 +1961,9 @@ continue-module task
 
   \ Allot memory from the end of RAM
   : allot-end ( u -- addr )
-    claim-all-core-spinlock
-    negate free-end +! free-end @
-    release-all-core-spinlock
+    [:
+      negate free-end +! free-end @
+    ;] critical-with-all-core-spinlock
   ;
 
 end-module

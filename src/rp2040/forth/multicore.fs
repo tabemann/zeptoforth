@@ -394,7 +394,7 @@ begin-module multicore
       then
     +loop
     drop
-    true core-1-launched !
+\    true core-1-launched !
     $00 SIO_IRQ_PROC0 NVIC_IPR_IP!
     SIO_IRQ_PROC0 NVIC_ISER_SETENA!
   ;
