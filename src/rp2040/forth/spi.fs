@@ -284,6 +284,7 @@ begin-module spi
 
     \ Initialize an SPI entity
     : init-spi ( spi -- )
+      disable-int
       0 over spi-rx-read-index c!
       0 over spi-rx-write-index c!
       0 over spi-tx-read-index c!
@@ -291,7 +292,25 @@ begin-module spi
       0 over spi-irq NVIC_IPR_IP!
       0 over spi-rx-handler !
       dup if ['] handle-spi1 else ['] handle-spi0 then over spi-vector vector!
-      true swap SPI_SSPIMSC_RXIM!
+      true over SPI_SSPIMSC_RXIM!
+      spi-irq NVIC_ISER_SETENA!
+      enable-int
+    ;
+
+    variable core-init-hook-saved
+
+    \ Initialize SPI on the second core
+    : init-spi-core-1 ( -- )
+      task::core-init-hook @ core-init-hook-saved !
+      [:
+        core-init-hook-saved @ execute
+        disable-int
+        0 0 spi-irq NVIC_IPR_IP!
+        0 1 spi-irq NVIC_IPR_IP!
+        0 spi-irq NVIC_ISER_SETENA!
+        1 spi-irq NVIC_ISER_SETENA!
+        enable-int
+      ;] task::core-init-hook !
     ;
 
     \ Find a prescale for a baud rate
@@ -464,6 +483,7 @@ end-module> import
   init
   0 spi-internal::init-spi
   1 spi-internal::init-spi
+  spi-internal::init-spi-core-1
 ;
 
 reboot

@@ -210,6 +210,9 @@ begin-module task
 
   end-module> import
 
+  \ Initialize on core boot hook
+  variable core-init-hook
+  
   \ The currently waited-for lock
   user current-lock
   
@@ -221,7 +224,7 @@ begin-module task
 
   \ Task being waited for
   user task-waited-for
-
+  
   \ No timeout
   -1 constant no-timeout
   
@@ -1450,6 +1453,11 @@ begin-module task
       .task-state r3 r0 ldrh_,[_,#_]
       ( r3: task r0: *task-state tos: task-state-mask )
       r0 tos ands_,_ ( r3: task tos: *task-state )
+      readied tos cmp_,#_ ( r3: task tos: *task-state )
+      ne bc>
+      0 tos movs_,#_
+      pc 1 pop
+      >mark
       blocked-wait tos cmp_,#_ ( r3: task tos: *task-state )
       ne bc>
       r3 tos movs_,_
@@ -1526,15 +1534,15 @@ begin-module task
     \ Reschedule previous task
     : reschedule-task ( task -- )
       true in-task-change !
-      claim-same-core-spinlock
-      reschedule? @ if
+      reschedule? @ task-systick-counter @ 0<= or if
+        claim-same-core-spinlock
 	dup remove-task
 	dup task-active@ 0> if insert-task else drop then
+        release-same-core-spinlock
       else
 	drop
       then
       true reschedule? !
-      release-same-core-spinlock
       false in-task-change !
     ;
 
@@ -1761,8 +1769,7 @@ begin-module task
 	$00 SIO_IRQ_PROC1 NVIC_IPR_IP!
 	SIO_IRQ_PROC1 NVIC_ISER_SETENA!
 	1 pause-enabled !
-	int-io::enable-int-io
-	init-systick-aux-core
+        core-init-hook @ execute
         true core-1-launched !
 	pause try ?dup if display-red execute display-normal then
 	current-task @ kill
@@ -1798,8 +1805,9 @@ begin-module task
           2r@ cpu-last-task !
           2r@ init-aux-task
           ['] init-aux-main-task -rot
-          2r> swap >r launch-aux-core r>
+          2r> swap >r disable-int launch-aux-core r>
           begin core-1-launched @ until
+          enable-int
         ;] critical
       [else]
 	['] x-core-out-of-range ?raise
@@ -1858,6 +1866,7 @@ begin-module task
     ['] do-pause pause-hook !
     ['] do-wait wait-hook !
     ['] do-validate-dict validate-dict-hook !
+    [: int-io::enable-int-io init-systick-aux-core ;] core-init-hook !
     cpu-count 0 ?do
       false i cpu-in-multitasker? !
       false i cpu-sleep-enabled? !

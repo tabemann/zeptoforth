@@ -114,7 +114,6 @@ begin-module systick
     SYST_CALIB @ SYST_CALIB_TENMS and
     10 / systick-divisor / time-multiplier * time-divisor / SYST_RVR !
     0 SYST_CVR !
-    0 systick-counter !
     enable-systick
   ;
 

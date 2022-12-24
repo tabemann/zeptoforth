@@ -221,9 +221,9 @@ begin-module multicore
     0 tos r0 ldr_,[_,#_]
     1 r0 adds_,#_
     0 tos r0 str_,[_,#_]
-    cpsie
     1 r0 cmp_,#_
     eq bc>
+    cpsie
     tos r0 2 dp ldm
     pc 1 pop
     >mark
@@ -235,6 +235,7 @@ begin-module multicore
     0 tos r0 ldr_,[_,#_]
     0 r0 cmp_,#_
     eq bc<
+    cpsie
     tos 1 dp ldm
     ]code
   ;
