@@ -23,14 +23,16 @@ compile-to-flash
 
 begin-module multicore
 
+  armv6m import
+
   \ Spinlock count
   0 constant spinlock-count
 
   \ Serial spinlock index
   -1 constant serial-spinlock
 
-  \ Simple lock spinlock index
-  -1 constant slock-spinlock
+  \ Test and set spinlock index
+  -1 constant test-set-spinlock
 
   \ Spinlock out of range exception
   : x-spinlock-out-of-range ( -- ) ." spinlock out of range" cr ;
@@ -90,6 +92,25 @@ begin-module multicore
   \ Enter a critical section (and do not claim any spinlocks)
   : critical-with-all-core-spinlock ( xt -- ) critical ;
 
+  \ Test and set
+  : test-set ( value addr -- set? )
+    code[
+    cpsid
+    r0 1 dp ldm
+    0 tos r1 ldr_,[_,#_]
+    0 r1 cmp_,#_
+    ne bc>
+    0 tos r0 str_,[_,#_]
+    0 tos movs_,#_
+    tos tos mvns_,_
+    cpsie
+    pc 1 pop
+    >mark
+    0 tos movs_,#_
+    cpsie
+    ]code
+  ;
+  
   \ Drain a multicore FIFO
   : fifo-drain ( core -- ) ['] x-core-out-of-range ?raise ;
   

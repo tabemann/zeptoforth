@@ -118,8 +118,8 @@ begin-module multicore
   \ Serial spinlock index
   29 constant serial-spinlock
 
-  \ Simple lock spinlock index
-  28 constant slock-spinlock
+  \ Test and set spinlock index
+  28 constant test-set-spinlock
   
   continue-module multicore-internal
 
@@ -221,9 +221,10 @@ begin-module multicore
     0 tos r0 ldr_,[_,#_]
     1 r0 adds_,#_
     0 tos r0 str_,[_,#_]
+    cpsie \ DEBUG
     1 r0 cmp_,#_
     eq bc>
-    cpsie
+\    cpsie
     tos r0 2 dp ldm
     pc 1 pop
     >mark
@@ -235,7 +236,7 @@ begin-module multicore
     0 tos r0 ldr_,[_,#_]
     0 r0 cmp_,#_
     eq bc<
-    cpsie
+\    cpsie
     tos 1 dp ldm
     ]code
   ;
@@ -331,24 +332,53 @@ begin-module multicore
 
   \ Enter a critical section and claim a spinlock, releasing it afterwards
   : critical-with-spinlock ( xt spinlock -- )
-    >r r@ claim-spinlock begin-critical try
+    begin-critical >r r@ claim-spinlock try
     r> release-spinlock end-critical ?raise
   ;
   
   \ Enter a critical section and claim another core's multitasker's spinlock,
   \ releasing it afterwards
   : critical-with-other-core-spinlock ( xt core -- )
-    task-core-0-spinlock + >r r@ claim-spinlock begin-critical try
+    begin-critical task-core-0-spinlock + >r r@ claim-spinlock try
     r> release-spinlock end-critical ?raise
   ;
 
   \ Enter a critical section and claim both cores' spinlocks, releasing then
   \ afterwards
   : critical-with-all-core-spinlock ( xt -- )
-    claim-all-core-spinlock begin-critical try
+    begin-critical claim-all-core-spinlock try
     release-all-core-spinlock end-critical ?raise
   ;
 
+  \ Test and set
+  : test-set ( value addr -- set? )
+    [ test-set-spinlock SPINLOCK ] literal
+    code[
+    cpsid
+    r1 r0 2 dp ldm
+    mark>
+    0 tos r2 ldr_,[_,#_]
+    0 r2 cmp_,#_
+    eq bc<
+    0 r0 r2 ldr_,[_,#_]
+    0 r2 cmp_,#_
+    ne bc>
+    0 r0 r1 str_,[_,#_]
+    0 r2 movs_,#_
+    r2 r2 mvns_,_
+    0 tos r2 str_,[_,#_]
+    r2 tos movs_,_
+    cpsie
+    pc 1 pop
+    >mark
+    0 r2 movs_,#_
+    r2 r2 mvns_,_
+    0 tos r2 str_,[_,#_]
+    0 tos movs_,#_
+    cpsie
+    ]code
+  ;
+  
   \ Drain a multicore FIFO
   : fifo-drain ( core -- )
     validate-addressable-core

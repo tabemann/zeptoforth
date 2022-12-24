@@ -927,13 +927,15 @@ begin-module task
     \ Release the same core spinlock, release a spinlock, block indefinitely,
     \ and then claim the same core spinlock, and claim a spinlock.
     : block-indefinite-self-release ( spinlock -- )
-      -1 current-task @ task-ready-count !
-      blocked-indefinite current-task @ task-state h!
-      dup release-spinlock-raw
-      false reschedule? ! pause
-      enable-int
       disable-int
-      claim-spinlock-raw
+      claim-all-core-spinlock-raw
+      task-waited-for @ if
+        -1 current-task @ task-ready-count !
+        blocked-indefinite current-task @ task-state h!
+        false reschedule? ! pause
+      then
+      release-all-core-spinlock-raw
+      enable-int
     ;
 
   end-module
@@ -1217,10 +1219,13 @@ begin-module task
     \ argument
     : wake-other-tasks ( -- )
       cpu-count 0 do
-	i cpu-first-task @ begin ?dup while
-	  dup ['] task-waited-for for-task@ current-task @ = if
-	    0 over ['] task-waited-for for-task! dup do-ready
-	  then
+        i cpu-first-task @ begin ?dup while
+          dup ['] task-waited-for for-task@ current-task @ = if
+            0 over ['] task-waited-for for-task!
+            dup task-state h@ blocked-indefinite = if
+              dup do-ready
+            then
+          then
 	  task-prev @
 	repeat
       loop

@@ -43,76 +43,52 @@ begin-module slock
 
   \ Try to claim a simple lock
   : try-claim-slock ( slock -- success? )
-    disable-int
-    slock-spinlock claim-spinlock-raw
-    dup slock-task @ if
-      drop false
-    else
-      current-task swap slock-task ! true
-    then
-    slock-spinlock release-spinlock-raw
-    enable-int
+    current-task swap slock-task test-set
   ;
   
   \ Claim a simple lock
   : claim-slock ( slock -- )
-    disable-int
-    slock-spinlock claim-spinlock-raw
     begin
-      dup slock-task @ ?dup if
-	task-waited-for !
-	slock-spinlock task-internal::block-indefinite-self-release
-	false
-      else
-	current-task swap slock-task !
-	true
+\      dup slock-task @ task-waited-for !
+      current-task over slock-task test-set dup not if
+        pause
+\        task-internal::block-indefinite-self-release
       then
     until
-    slock-spinlock release-spinlock-raw
-    enable-int
+    drop
   ;
 
   \ Claim a simple lock with a timeout
   : claim-slock-timeout ( slock -- )
-    disable-int
-    slock-spinlock claim-spinlock-raw
     begin
       current-task compare-timeout if
-	slock-spinlock release-spinlock-raw
-	enable-int
-	['] x-timed-out ?raise
+        ['] x-timed-out ?raise
       else
-	dup slock-task @ ?dup if
-	  task-waited-for !
-	  slock-spinlock task-internal::block-indefinite-self-release
-	  false
-	else
-	  current-task swap slock-task !
-	  true
-	then
+\        dup slock-task @ task-waited-for !
+        current-task over slock-task test-set dup not if
+          pause
+\          task-internal::block-indefinite-self-release
+        then
       then
     until
-    slock-spinlock release-spinlock-raw
-    enable-int
+    drop
   ;
 
   \ Release a simple lock
   : release-slock ( slock -- )
-    disable-int
-    claim-all-core-spinlock-raw
-    0 swap ! task-internal::wake-other-tasks
-    release-all-core-spinlock-raw
-    enable-int
+\    disable-int
+\    claim-all-core-spinlock-raw
+    0 swap ! \ task-internal::wake-other-tasks
+\    release-all-core-spinlock-raw
+\    enable-int
   ;
 
   \ Release a simple lock and block atomically
   : release-slock-block ( slock -- )
-    disable-int
-    claim-all-core-spinlock-raw
-    0 swap ! task-internal::wake-other-tasks
-    current-task task-internal::block-raw
-    release-all-core-spinlock-raw
-    enable-int
+    [:
+      current-task task-internal::block-raw
+      0 swap !
+    ;] cpu-index critical-with-other-core-spinlock
   ;
 
   \ Claim and release a simple lock while properly handling exceptions
