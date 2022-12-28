@@ -535,6 +535,35 @@ begin-module spi
     begin dup spi>? while dup spi> drop repeat drop
   ;
   
+  \ Write a buffer to SPI
+  : buffer>spi { buffer bytes spi -- }
+    spi validate-spi
+    spi drain-spi
+    spi flush-spi
+    spi spi-irq NVIC_ICER_CLRENA!
+    bytes { bytes-to-recv }
+    begin bytes 0> bytes-to-recv 0> or while
+      buffer bytes bytes-to-recv spi [:
+        { buffer bytes bytes-to-recv spi }
+        0 { bytes-sent }
+        disable-int
+        spi SPI_SR_TXE@ spi SPI_SR_RXNE@ not and bytes-sent bytes < and if
+          buffer bytes-sent + c@ spi SPI_DR h!
+          1 +to bytes-sent
+        then
+        spi SPI_SR_RXNE@ bytes-to-recv 0> and if
+          spi SPI_DR h@ drop
+          -1 +to bytes-to-recv
+        then
+        enable-int
+        bytes-to-recv bytes-sent
+      ;] serial-spinlock critical-with-spinlock
+      dup +to buffer negate +to bytes
+      to bytes-to-recv
+    repeat
+    spi spi-irq NVIC_ISER_SETENA!
+  ;
+  
 end-module> import
 
 \ Initialize

@@ -25,6 +25,7 @@ begin-module spi
   interrupt import
   multicore import
   pin import
+  internal import
   
   \ Invalid SPI periperal exception
   : x-invalid-spi ( -- ) ." invalid SPI" cr ;
@@ -476,6 +477,64 @@ begin-module spi
     begin dup spi>? while dup spi> drop repeat drop
   ;
   
+  \ Write a buffer to SPI
+  : buffer>spi { buffer bytes spi -- }
+    spi validate-spi
+    spi drain-spi
+    spi flush-spi
+    spi spi-irq NVIC_ICER_CLRENA!
+    bytes { bytes-to-recv }
+    begin bytes 0> bytes-to-recv 0> or while
+      buffer bytes bytes-to-recv spi [:
+        { buffer bytes bytes-to-recv spi }
+        0 { bytes-sent }
+        disable-int
+        spi SPI_SSPSR_TNF@ spi SPI_SSPSR_RFF@ not and bytes-sent bytes < and if
+          buffer bytes-sent + c@ spi SPI_SSPDR h!
+          1 +to bytes-sent
+        then
+        spi SPI_SSPSR_RNE@ bytes-to-recv 0> and if
+          spi SPI_SSPDR h@ drop
+          -1 +to bytes-to-recv
+        then
+        enable-int
+        bytes-to-recv bytes-sent
+      ;] serial-spinlock critical-with-spinlock
+      dup +to buffer negate +to bytes
+      to bytes-to-recv
+    repeat
+    spi spi-irq NVIC_ISER_SETENA!
+  ;
+
+  \ Read a buffer from SPI
+  : spi>buffer { buffer bytes filler spi -- }
+    spi validate-spi
+    spi drain-spi
+    spi flush-spi
+    spi spi-irq NVIC_ICER_CLRENA!
+    bytes { bytes-to-send }
+    begin bytes 0> bytes-to-send 0> or while
+      buffer bytes bytes-to-send filler spi [:
+        { buffer bytes bytes-to-send filler spi }
+        0 { bytes-recvd }
+        disable-int
+        spi SPI_SSPSR_TNF@ spi SPI_SSPSR_RFF@ not and bytes-to-send 0> and if
+          filler spi SPI_SSPDR h!
+          -1 +to bytes-to-send
+        then
+        spi SPI_SSPSR_RNE@ bytes-recvd bytes < and if
+          spi SPI_SSPDR h@ buffer bytes-recvd + c!
+          1 +to bytes-recvd
+        then
+        enable-int
+        bytes-to-send bytes-recvd
+      ;] serial-spinlock critical-with-spinlock
+      dup +to buffer negate +to bytes
+      to bytes-to-send
+    repeat
+    spi spi-irq NVIC_ISER_SETENA!
+  ;
+
 end-module> import
 
 \ Initialize

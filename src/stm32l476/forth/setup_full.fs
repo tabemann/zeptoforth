@@ -22,6 +22,7 @@
 #include src/common/forth/basic.fs
 #include src/common/forth/module.fs
 #include src/common/forth/armv6m.fs
+#include src/common/forth/fast_basic.fs
 #include src/common/forth/interrupt.fs
 #include src/common/forth/exception.fs
 #include src/common/forth/multicore.fs
