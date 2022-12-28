@@ -564,6 +564,35 @@ begin-module spi
     spi spi-irq NVIC_ISER_SETENA!
   ;
   
+  \ Read a buffer from SPI
+  : spi>buffer { buffer bytes filler spi -- }
+    spi validate-spi
+    spi drain-spi
+    spi flush-spi
+    spi spi-irq NVIC_ICER_CLRENA!
+    bytes { bytes-to-send }
+    begin bytes 0> bytes-to-send 0> or while
+      buffer bytes bytes-to-send filler spi [:
+        { buffer bytes bytes-to-send filler spi }
+        0 { bytes-recvd }
+        disable-int
+        spi SPI_SR_TXE@ spi SPI_SR_RXNE@ not and bytes-to-send 0> and if
+          filler spi SPI_DR h!
+          -1 +to bytes-to-send
+        then
+        spi SPI_SR_RXNE@ bytes-recvd bytes < and if
+          spi SPI_DR h@ buffer bytes-recvd + c!
+          1 +to bytes-recvd
+        then
+        enable-int
+        bytes-to-send bytes-recvd
+      ;] serial-spinlock critical-with-spinlock
+      dup +to buffer negate +to bytes
+      to bytes-to-send
+    repeat
+    spi spi-irq NVIC_ISER_SETENA!
+  ;
+
 end-module> import
 
 \ Initialize
