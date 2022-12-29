@@ -354,6 +354,7 @@ begin-module spi
 
     \ Initialize an SPI entity
     : init-spi ( spi -- )
+      disable-int
       0 over spi-rx-read-index c!
       0 over spi-rx-write-index c!
       0 over spi-tx-read-index c!
@@ -377,7 +378,9 @@ begin-module spi
 	6 of ['] handle-spi6 endof
       endcase
       over spi-vector vector!
-      true swap SPI_CR2_RXNEIE!
+      true over SPI_CR2_RXNEIE!
+      spi-irq NVIC_ISER_SETENA!
+      enable-int
     ;
 
   end-module> import
