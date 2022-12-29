@@ -1284,7 +1284,7 @@ _colon_noname:
 	push_tos
 	ldr tos, =current_compile
 	ldr tos, [tos]
-	bl _to_xt
+        adds tos, #10
 	pop {pc}
 	end_inlined
 
