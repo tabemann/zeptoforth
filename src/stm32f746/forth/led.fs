@@ -25,6 +25,9 @@ begin-module led
 
   pin import
 
+  \ The LED constants
+  0 constant green
+
   \ The LED states
   low constant off
   high constant on
@@ -35,18 +38,19 @@ begin-module led
   begin-module led-internal
 
     \ The LED count
-    0 constant led-count
+    1 constant led-count
 
     \ Validate an LED
     : validate-led ( led -- ) led-count u< averts x-led-out-of-range ;
 
     \ Get the pin of an LED
-    : pin-of-led ( led -- pin ) ['] x-led-out-of-range ?raise ;
+    : pin-of-led ( led -- pin ) 0 u> ['] x-led-out-of-range ?raise 1 xi ;
 
   end-module> import
 
   \ Initialize the LEDs
   : led-init ( -- )
+    green pin-of-led output-pin
   ;
 
   \ Set an LED

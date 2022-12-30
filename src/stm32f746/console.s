@@ -76,6 +76,8 @@
 	.equ RCC_AHB1ENR     ,   RCC_Base + 0x30
 	.equ RCC_APB2ENR     ,   RCC_Base + 0x44
 
+        .equ CTRL_C          ,   3
+        
 	@@ Initialize UART
 	define_internal_word "uart-init", visible_flag
 _uart_init:
@@ -170,7 +172,10 @@ _serial_key:
 	push_tos
 	ldr r2, =CONSOLE_RDR
 	ldrb tos, [r2]
-	pop {pc}
+        cmp tos, #CTRL_C
+        bne 2f
+        bl _reboot
+2:      pop {pc}
 	end_inlined
 
 	@@ Test whether a character may be emitted ( -- flag )

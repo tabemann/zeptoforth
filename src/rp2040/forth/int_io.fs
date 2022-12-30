@@ -67,6 +67,9 @@ begin-module int-io
     \ UART0 vector index
     uart0-irq 16 + constant uart0-vector
 
+    \ Control-C
+    3 constant ctrl-c
+    
     : UART0_UARTDR_DATA! $FF and UART0_UARTDR c! ; \ Transmit data
     : UART0_UARTDR_DATA@ UART0_UARTDR c@ ; \ Receive data
     : UART0_UARTFR_TXFE@ 7 bit UART0_UARTFR bit@ ; \ Transmit FIFO empty
@@ -164,7 +167,11 @@ begin-module int-io
       begin
 	rx-full? not if
 	  UART0_UARTFR_RXFE@ not if
-	    UART0_UARTDR_DATA@ write-rx false
+            UART0_UARTDR_DATA@ dup ctrl-c = if
+              drop reboot false
+            else
+              write-rx false
+            then
 	  else
 	    true
 	  then

@@ -67,6 +67,9 @@ begin-module int-io
     \ USART1 vector index
     usart1-irq 16 + constant usart1-vector
 
+    \ Control-C
+    3 constant ctrl-c
+
     $40023800 constant RCC_Base
     RCC_Base $64 + constant RCC_APB2LPENR ( RCC_APB2LPENR )
     : RCC_APB2LPENR_USART1LPEN   %1 4 lshift RCC_APB2LPENR bis! ;  \ RCC_APB2LPENR_USART1LPEN    USART1 clocks enable during Sleep modes
@@ -156,7 +159,11 @@ begin-module int-io
       begin
 	rx-full? not if
 	  USART1_ISR @ RXNE and if
-	    USART1_RDR c@ write-rx false
+            USART1_RDR c@ dup ctrl-c = if
+              drop reboot false
+            else
+              write-rx false
+            then
 	  else
 	    true
 	  then

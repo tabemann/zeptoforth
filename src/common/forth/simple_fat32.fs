@@ -53,20 +53,19 @@ begin-module simple-fat32
   \ Simple FAT32 filesystem class implementation
   <simple-fat32-fs> begin-implement
   
-    :noname ( sck-pin tx-pin rx-pin cs-pin spi-device fs -- )
-      dup <base-fat32-fs>->new ( sck-pin tx-pin rx-pin cs-pin spi-device fs )
-      >r ( sck-pin tx-pin rx-pin cs-pin spi-device )
-      rot dup pull-up-pin over swap spi-pin ( sck-pin tx-pin cs-pin spi-device )
-      rot dup pull-up-pin over swap spi-pin ( sck-pin cs-pin spi-device )
-      rot dup pull-up-pin over swap spi-pin ( cs-pin spi-device )
-      over dup output-pin pull-up-pin ( cs-pin spi-device )
-      <sd> r@ simple-fat32-sd init-object ( )
-      r@ simple-fat32-sd init-sd ( )
-      r> ( fs )
-      dup simple-fat32-sd <mbr> [: ( fs mbr )
-        <partition> [: ( fs mbr partition )
-          dup rot 0 swap partition@ ( fs partition )
-          swap dup simple-fat32-sd <fat32-fs> rot simple-fat32-fs init-object ( )
+    :noname { sck-pin tx-pin rx-pin cs-pin spi-device self -- }
+      self <base-fat32-fs>->new
+      rx-pin pull-up-pin spi-device rx-pin spi-pin
+      tx-pin pull-up-pin spi-device tx-pin spi-pin
+      sck-pin pull-up-pin spi-device sck-pin spi-pin
+      cs-pin output-pin cs-pin pull-up-pin
+      cs-pin spi-device <sd> self simple-fat32-sd init-object
+      self simple-fat32-sd init-sd
+      self self simple-fat32-sd <mbr> [:
+        <partition> [: { self mbr partition }
+          partition 0 mbr partition@
+          partition self simple-fat32-sd
+          <fat32-fs> self simple-fat32-fs init-object
         ;] with-object
       ;] with-object
     ; define new

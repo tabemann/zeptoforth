@@ -21,7 +21,8 @@
 
 	.equ UARTFR_TX_FIFO_FULL, 5
 	.equ UARTFR_RX_FIFO_EMPTY, 4
-
+        .equ CTRL_C, 3
+        
 _uart_test:
 	ldr r0, =UART0_BASE
 	movs r2, #0x21
@@ -59,7 +60,10 @@ _serial_key:
 	push_tos
 	ldr r0, =UART0_BASE
 	ldrb tos, [r0, #UARTDR]
-	pop {pc}
+        cmp tos, #CTRL_C
+        bne 2f
+        bl _reboot
+2:      pop {pc}
 	end_inlined
 
 	@@ Test whether a character may be emitted ( -- flag )

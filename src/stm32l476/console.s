@@ -59,6 +59,8 @@
         .equ TC              ,   0x40
         .equ TXE             ,   0x80
 
+        .equ CTRL_C          ,   3
+        
 	@@ Initialize UART
 	define_internal_word "uart-init", visible_flag
 _uart_init:
@@ -127,7 +129,10 @@ _serial_key:
 	push_tos
 	ldr r2, =USART2_RDR
 	ldrb tos, [r2]
-	pop {pc}
+        cmp tos, #CTRL_C
+        bne 2f
+        bl _reboot
+2:      pop {pc}
 	end_inlined
 
 	@@ Test whether a character may be emitted ( -- flag )
