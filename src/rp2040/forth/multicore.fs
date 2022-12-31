@@ -432,9 +432,14 @@ begin-module multicore
 
   \ Prepare for rebooting the second core
   : prepare-reboot ( -- )
-    cpu-index 0 = averts x-core-0-only
-    hold-core
-    spinlock-count 0 ?do -1 i SPINLOCK ! loop
+    cpu-index 0= if
+      hold-core
+      spinlock-count 0 ?do -1 i SPINLOCK ! loop
+    else
+      disable-int
+      $B007B007 0 fifo-push-blocking
+      begin again
+    then
   ;    
 
   \ Reset an auxiliary core
@@ -450,6 +455,9 @@ end-module> import
   spinlock-count cpu-count * 0 ?do
     0 multicore::multicore-internal::spinlock-lock-counts i cells + !
   loop
+  [:
+    $B007B007 = if [: prepare-reboot reboot ;] critical then
+  ;] sio-hook !
 ;
 
 \ Set up reboot to reset the second core

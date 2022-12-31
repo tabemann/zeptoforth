@@ -44,7 +44,7 @@ begin-module led
     : validate-led ( led -- ) led-count u< averts x-led-out-of-range ;
 
     \ Get the pin of an LED
-    : pin-of-led ( led -- pin ) 0 u> ['] x-led-out-of-range ?raise 1 xi ;
+    : pin-of-led ( led -- pin ) drop 1 xi ;
 
   end-module> import
 

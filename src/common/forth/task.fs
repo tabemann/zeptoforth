@@ -1767,7 +1767,8 @@ begin-module task
       : init-aux-main-task ( -- )
 	0 fifo-drain
 	wait-current-core
-	current-task @ task-dict-base @ dict-base !
+        NVIC_ICPR_CLRPEND_All!
+        current-task @ task-dict-base @ dict-base !
 	$7F SHPR3_PRI_15!
 	$FF SHPR2_PRI_11!
 	$FF SHPR3_PRI_14!
@@ -1861,6 +1862,7 @@ begin-module task
   \ Initialize multitasking
   : init-tasker ( -- )
     disable-int
+    NVIC_ICPR_CLRPEND_All!
     0 pause-enabled !
     $7F SHPR3_PRI_15!
     $FF SHPR2_PRI_11!

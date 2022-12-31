@@ -697,6 +697,7 @@ begin-module i2c
       
     \ Handle an I2C interrupt
     : handle-i2c-interrupt ( i2c -- )
+      dup i2c-irq NVIC_ICPR_CLRPEND!
       i2c-select
       dup i2c-addr @ IC_INTR_STAT @
       dup STOP_DET and if over handle-stop-det then

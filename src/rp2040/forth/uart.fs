@@ -87,7 +87,7 @@ begin-module uart
     21 constant uart1-irq
 
     \ UART0 vector index
-    uart0-irq 16 + constant uart0-vectoor
+    uart0-irq 16 + constant uart0-vector
 
     \ UART1 vector index
     uart1-irq 16 + constant uart1-vector

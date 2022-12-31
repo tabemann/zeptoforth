@@ -274,7 +274,8 @@ begin-module spi
 	true 2 pick SPI_SSPICR_RORIC!
       ;] serial-spinlock critical-with-spinlock
       if dup spi-rx-handler @ ?execute then
-      dup spi-tx-empty? not swap SPI_SSPIMSC_TXIM!
+      dup spi-tx-empty? not over SPI_SSPIMSC_TXIM!
+      spi-irq NVIC_ICPR_CLRPEND!
     ;
 
     \ Handle an SPI interrupt for SPI0

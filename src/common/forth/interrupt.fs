@@ -164,6 +164,11 @@ begin-module interrupt
     dup 32 / cells NVIC_ICPR_Base + @ swap 32 mod 1 swap lshift swap bit@
   ;
 
+  \ Clear all pending interrupts
+  : NVIC_ICPR_CLRPEND_All! ( -- )
+    16 cells 0 do -1 NVIC_ICPR_Base i + ! cell +loop
+  ;
+
   \ Get NVIC interrupt active bit
   : NVIC_IABR_ACTIVE@ ( u -- bit )
     dup 32 / cells NVIC_IABR_Base + @ swap 32 mod 1 swap lshift swap bit@

@@ -48,8 +48,14 @@
 	@@ Read access to this core's RX FIFO
 	.equ FIFO_RD, SIO_BASE + 0x058
 
-	@@ The simple lock spinlock
-	.equ SLOCK_SPINLOCK, SIO_BASE + 0x100 + (28 * 4)
+        @@ SIO IRQ base
+        .equ SIO_IRQ_BASE, 15
+
+        @@ NVIC base address
+        .equ NVIC_BASE, 0xE000E100
+        
+        @@ NVIC Interrupt clear-pending register base address
+        .equ NVIC_ICPR_BASE, NVIC_BASE + 0x180
 
 	@@ Handle SIO interrupt
 _handle_sio:
@@ -86,7 +92,7 @@ _handle_sio:
 	ldr r0, =hold_core
 	ldr r0, [r0, r3]
 	cmp r0, #0
-	beq 3b
+	bne 3b
 	ldr r0, =sio_hook
 	ldr r2, [r0, r3]
 	cmp r2, #0
@@ -104,7 +110,15 @@ _handle_sio:
 	cmp r0, #0
 	beq 5f
 	bl _loop_forever_fifo
-5:	pop {pc}
+5:    	ldr r3, =SIO_CPUID
+	ldr r3, [r3]
+        adds r3, #SIO_IRQ_BASE
+        movs r0, #1
+        lsls r0, r3
+        ldr r1, =NVIC_ICPR_BASE
+        str r0, [r1]
+        pop {pc}
+        end_inlined
 
 	@@ Loop forever handling the FIFO
 	define_internal_word "loop-forever-fifo", visible_flag
