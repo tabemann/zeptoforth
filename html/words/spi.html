@@ -109,6 +109,16 @@
 <p>( spi – c )</p>
 <p>Read a word from an SPI peripheral.</p>
 </section>
+<section id="buffer-spi">
+<h4><code class="docutils literal notranslate"><span class="pre">buffer&gt;spi</span></code><a class="headerlink" href="#buffer-spi" title="Permalink to this headline">¶</a></h4>
+<p>( addr bytes spi – )</p>
+<p>Write a buffer of data to an SPI peripheral as a master, discarding the data returned by the slave. Note that this assumes that the SPI peripheral is in 8 bit mode.</p>
+</section>
+<section id="spi-buffer">
+<h4><code class="docutils literal notranslate"><span class="pre">spi&gt;buffer</span></code><a class="headerlink" href="#spi-buffer" title="Permalink to this headline">¶</a></h4>
+<p>( add bytes filler spi – )</p>
+<p>Read a buffer of data from an SPI peripheral as a master, transmitting a filler byte for each byte sent to the slave. Note that this assumes that the SPI peripheral is in 8 bit mode.</p>
+</section>
 <section id="id3">
 <h4><code class="docutils literal notranslate"><span class="pre">&gt;spi?</span></code><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h4>
 <p>( spi – flag )</p>
@@ -273,6 +283,8 @@
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
@@ -300,6 +312,8 @@
 <li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
 </ul>
 
 <div class="relations">

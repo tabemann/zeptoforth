@@ -76,6 +76,16 @@ Emit a word to an SPI peripheral.
 
 Read a word from an SPI peripheral.
 
+##### `buffer>spi`
+( addr bytes spi -- )
+
+Write a buffer of data to an SPI peripheral as a master, discarding the data returned by the slave. Note that this assumes that the SPI peripheral is in 8 bit mode.
+
+##### `spi>buffer`
+( add bytes filler spi -- )
+
+Read a buffer of data from an SPI peripheral as a master, transmitting a filler byte for each byte sent to the slave. Note that this assumes that the SPI peripheral is in 8 bit mode.
+
 ##### `>spi?`
 ( spi -- flag )
 
