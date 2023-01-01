@@ -59,14 +59,24 @@ This word dumps memory as sequences of 64 ASCII characters, starting from *start
 ##### `words`
 ( -- )
 
-This word simply lists every user-viewable word in RAM or in flash, organized as four columns.
+This word simply lists every user-viewable word in the current namespace in RAM or in flash, organized as four columns.
+
+##### `words-in`
+( module -- )
+
+This word list every user-viewable word in a selected module in RAM or in flash, organized as four columns.
 
 ##### `lookup`
 ( "name" -- )
 
-This word lists each word which has a prefix corresponding to the maximal prefix or the specified token which any word in RAM or in flash matches, organized as four columns.
+This word lists each word which has a prefix corresponding to the maximal prefix or the specified token which any word in the current namespace in RAM or in flash matches, organized as four columns.
+
+##### `lookup-in`
+( module "name" -- )
+
+This word lists each word which has a prefix corresponding to the maximal prefix or the specified token which any word in a selected module in RAM or in flash matches, organized as four columns.
 
 ##### `word-info`
 ( "name" -- )
 
-Dump all the words that go by a certain name
+Dump all the words that go by a certain name.

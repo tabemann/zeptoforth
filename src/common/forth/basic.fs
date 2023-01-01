@@ -428,7 +428,7 @@ forth set-current
 
 \ Lookup a word by its prefix
 : lookup ( "name" -- )
-  cr token
+  cr token dup 0<> averts x-token-expected
   2dup ram-latest find-prefix-len
   2 pick 2 pick flash-latest find-prefix-len
   rot drop max
@@ -439,6 +439,17 @@ forth set-current
     2 pick 2 pick flash-latest order r@ 2* + h@ 4 roll lookup-dict r> 1+
   repeat
   2drop 2drop cr
+;
+
+\ Lookup a word by its prefix in a wordlist
+: lookup-in ( wid "name" -- )
+  >r cr token dup 0<> averts x-token-expected
+  2dup ram-latest find-prefix-len
+  2 pick 2 pick flash-latest find-prefix-len
+  rot drop max
+  2dup ram-latest r@ 0 lookup-dict
+  flash-latest r> rot lookup-dict
+  drop cr
 ;
 
 \ Display all the words as four columns
@@ -452,6 +463,11 @@ forth set-current
     r> 1+
   repeat
   2drop cr
+;
+
+\ Display all the words as four columns in a wordlist
+: words-in ( wid -- )
+  cr >r ram-latest r@ 0 words-dict flash-latest r> rot words-dict drop cr
 ;
 
 \ Set internal
@@ -492,7 +508,8 @@ forth set-current
 
 \ Dump all the words that go by a certain name
 : word-info ( "name" -- )
-  cr token  ." dict  name     xt       flags wordlist" cr
+  cr token dup 0<> averts x-token-expected
+  ." dict  name     xt       flags wordlist" cr
   2dup ram-latest search-word-info
   flash-latest search-word-info
 ;

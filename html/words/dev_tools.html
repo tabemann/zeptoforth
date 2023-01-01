@@ -91,17 +91,27 @@
 <section id="words">
 <h3><code class="docutils literal notranslate"><span class="pre">words</span></code><a class="headerlink" href="#words" title="Permalink to this headline">¶</a></h3>
 <p>( – )</p>
-<p>This word simply lists every user-viewable word in RAM or in flash, organized as four columns.</p>
+<p>This word simply lists every user-viewable word in the current namespace in RAM or in flash, organized as four columns.</p>
+</section>
+<section id="words-in">
+<h3><code class="docutils literal notranslate"><span class="pre">words-in</span></code><a class="headerlink" href="#words-in" title="Permalink to this headline">¶</a></h3>
+<p>( module – )</p>
+<p>This word list every user-viewable word in a selected module in RAM or in flash, organized as four columns.</p>
 </section>
 <section id="lookup">
 <h3><code class="docutils literal notranslate"><span class="pre">lookup</span></code><a class="headerlink" href="#lookup" title="Permalink to this headline">¶</a></h3>
 <p>( “name” – )</p>
-<p>This word lists each word which has a prefix corresponding to the maximal prefix or the specified token which any word in RAM or in flash matches, organized as four columns.</p>
+<p>This word lists each word which has a prefix corresponding to the maximal prefix or the specified token which any word in the current namespace in RAM or in flash matches, organized as four columns.</p>
+</section>
+<section id="lookup-in">
+<h3><code class="docutils literal notranslate"><span class="pre">lookup-in</span></code><a class="headerlink" href="#lookup-in" title="Permalink to this headline">¶</a></h3>
+<p>( module “name” – )</p>
+<p>This word lists each word which has a prefix corresponding to the maximal prefix or the specified token which any word in a selected module in RAM or in flash matches, organized as four columns.</p>
 </section>
 <section id="word-info">
 <h3><code class="docutils literal notranslate"><span class="pre">word-info</span></code><a class="headerlink" href="#word-info" title="Permalink to this headline">¶</a></h3>
 <p>( “name” – )</p>
-<p>Dump all the words that go by a certain name</p>
+<p>Dump all the words that go by a certain name.</p>
 </section>
 </section>
 </section>
@@ -150,6 +160,8 @@
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
@@ -177,6 +189,8 @@
 <li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
 </ul>
 
 <div class="relations">
