@@ -93,6 +93,20 @@ In turn a task can be disabled with:
 
 which decrements the active counter for the *task*.
 
+To raise an exception in a task, one executes:
+
+##### `signal`
+( xt task -- )
+
+which readies the task and raises an exception within it, which may be caught by the task in question.
+
+To force a task to call an execution token next time it is scheduled, one executes:
+
+##### `force-call`
+( xt task -- )
+
+which sets control to be passed to the specified execution token. Note that said execution token must never return except by raising an exception or calling `abort`, `quit-reset`, or `quit` if it is the main task. The only other actions it may ultimately take are to enter into an infinite loop or to kill the task in question.
+
 To terminate a task, one executes:
 
 ##### `kill`

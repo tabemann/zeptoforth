@@ -68,7 +68,10 @@ begin-module int-io
     uart0-irq 16 + constant uart0-vector
 
     \ Control-C
-    3 constant ctrl-c
+    $03 constant ctrl-c
+
+    \ Control-T
+    $14 constant ctrl-t
     
     : UART0_UARTDR_DATA! $FF and UART0_UARTDR c! ; \ Transmit data
     : UART0_UARTDR_DATA@ UART0_UARTDR c@ ; \ Receive data
@@ -170,7 +173,15 @@ begin-module int-io
             UART0_UARTDR_DATA@ dup ctrl-c = if
               drop reboot false
             else
-              write-rx false
+              attention? @ if
+                attention-hook @ execute false
+              else
+                dup ctrl-t = if
+                  drop attention-start-hook @ execute false
+                else
+                  write-rx false
+                then
+              then
             then
 	  else
 	    true

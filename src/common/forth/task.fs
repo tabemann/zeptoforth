@@ -205,6 +205,12 @@ begin-module task
 
       \ The wake counter of a task
       dup constant .task-wake-after field: task-wake-after
+
+      \ Routine to call upon scheduling if non-zero
+      dup constant .task-force-call field: task-force-call
+
+      \ Exception to send to task
+      dup constant .task-raise field: task-raise
       
     end-structure
 
@@ -1275,6 +1281,8 @@ begin-module task
       0 over task-systick-start !
       -1 over task-systick-delay !
       wake-counter @ over task-wake-after !
+      0 over task-force-call !
+      0 over task-raise !
       cpu-index over task-core !
       c" main" over task-name !
       -1 over task-current-notify !
@@ -1356,6 +1364,8 @@ begin-module task
 	0 over task-notify-area !
         -1 over task-systick-delay !
         wake-counter @ over task-wake-after !
+        0 over task-force-call !
+        0 over task-raise !
 	c" aux-main" over task-name !
 	default-timeslice over task-timeslice !
 	default-min-timeslice over task-min-timeslice !
@@ -1404,6 +1414,8 @@ begin-module task
     0 over task-notify-area !
     -1 over task-systick-delay !
     wake-counter @ over task-wake-after !
+    0 over task-force-call !
+    0 over task-raise !
     default-timeslice over task-timeslice !
     default-min-timeslice over task-min-timeslice !
     default-timeslice over task-saved-systick-counter !
@@ -1624,6 +1636,16 @@ begin-module task
 
       pendsv-return @ >r
 
+      current-task @ task-force-call @ ?dup if
+        claim-same-core-spinlock
+        code[
+        $18 4 + tos str_,[sp,#_]
+        tos 1 dp ldm
+        ]code
+        0 current-task @ task-force-call !
+        release-same-core-spinlock
+      then
+      
       false in-multitasker? !
     ;
 
@@ -1847,7 +1869,7 @@ begin-module task
   : current-task ( -- task ) current-task @ ;
   
   \ Make main-task read-only
-  : main-task ( -- task ) main-task @ ;
+  : main-task ( -- task ) 0 cpu-main-task @ ;
   
   \ Call block if not in multitasker, and return whether in multitasker
   : exclude-multitasker ( xt -- flag )
@@ -1859,6 +1881,38 @@ begin-module task
     enable-int
   ;
 
+  \ Force a task to call a routine
+  : force-call ( xt task -- ) task-force-call ! ;
+
+  \ Signal a task to raise an exception
+  : signal ( xt task -- )
+    over 0<> if
+      disable-int
+      tuck task-raise !
+      [: current-task task-raise @ 0 current-task task-raise ! ?raise ;]
+      over force-call
+      readied swap task-state h!
+      enable-int
+    else
+      2drop
+    then
+  ;
+
+  \ Saved attention hook
+  variable saved-attention-hook
+
+  \ Main interrupt exception
+  : x-interrupt-main ." *** INTERRUPT MAIN ***" cr ;
+  
+  \ Handle attention
+  : do-attention ( c -- )
+    dup [char] z = if
+      drop false attention? ! ['] x-interrupt-main main-task signal
+    else
+      saved-attention-hook @ execute
+    then
+  ;
+  
   \ Initialize multitasking
   : init-tasker ( -- )
     disable-int
@@ -1869,11 +1923,13 @@ begin-module task
     $FF SHPR3_PRI_14!
     stack-end @ free-end !
     validate-dict-hook @ saved-validate-dict !
+    attention-hook @ saved-attention-hook !
+    ['] do-attention attention-hook !
     false ram-dict-warned !
     ['] do-pause pause-hook !
     ['] do-wait wait-hook !
     ['] do-validate-dict validate-dict-hook !
-    [: int-io::enable-int-io init-systick-aux-core ;] core-init-hook !
+    [: ( int-io::enable-int-io ) init-systick-aux-core ;] core-init-hook !
     cpu-count 0 ?do
       false i cpu-in-multitasker? !
       false i cpu-sleep-enabled? !

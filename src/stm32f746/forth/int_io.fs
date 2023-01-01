@@ -68,7 +68,10 @@ begin-module int-io
     usart1-irq 16 + constant usart1-vector
 
     \ Control-C
-    3 constant ctrl-c
+    $03 constant ctrl-c
+
+    \ Control-T
+    $14 constant ctrl-t
 
     $40023800 constant RCC_Base
     RCC_Base $64 + constant RCC_APB2LPENR ( RCC_APB2LPENR )
@@ -162,7 +165,15 @@ begin-module int-io
             USART1_RDR c@ dup ctrl-c = if
               drop reboot false
             else
-              write-rx false
+              attention? @ if
+                attention-hook @ execute false
+              else
+                dup ctrl-t = if
+                  drop attention-start-hook @ execute false
+                else
+                  write-rx false
+                then
+              then
             then
 	  else
 	    true

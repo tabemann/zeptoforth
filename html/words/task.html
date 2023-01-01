@@ -111,6 +111,18 @@
 <h3><code class="docutils literal notranslate"><span class="pre">stop</span></code><a class="headerlink" href="#stop" title="Permalink to this headline">¶</a></h3>
 <p>( task – )</p>
 <p>which decrements the active counter for the <em>task</em>.</p>
+<p>To raise an exception in a task, one executes:</p>
+</section>
+<section id="signal">
+<h3><code class="docutils literal notranslate"><span class="pre">signal</span></code><a class="headerlink" href="#signal" title="Permalink to this headline">¶</a></h3>
+<p>( xt task – )</p>
+<p>which readies the task and raises an exception within it, which may be caught by the task in question.</p>
+<p>To force a task to call an execution token next time it is scheduled, one executes:</p>
+</section>
+<section id="force-call">
+<h3><code class="docutils literal notranslate"><span class="pre">force-call</span></code><a class="headerlink" href="#force-call" title="Permalink to this headline">¶</a></h3>
+<p>( xt task – )</p>
+<p>which sets control to be passed to the specified execution token. Note that said execution token must never return except by raising an exception or calling <code class="docutils literal notranslate"><span class="pre">abort</span></code>, <code class="docutils literal notranslate"><span class="pre">quit-reset</span></code>, or <code class="docutils literal notranslate"><span class="pre">quit</span></code> if it is the main task. The only other actions it may ultimately take are to enter into an infinite loop or to kill the task in question.</p>
 <p>To terminate a task, one executes:</p>
 </section>
 <section id="kill">
@@ -433,6 +445,8 @@
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
@@ -460,6 +474,8 @@
 <li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
 </ul>
 
 <div class="relations">

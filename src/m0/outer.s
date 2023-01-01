@@ -543,6 +543,22 @@ _quit_eof:
         bx lr
         end_inlined
 
+	@@ QUIT while resetting the state
+	define_word "quit-reset", visible_flag
+_quit_reset:    
+        bl _stack_base
+	ldr dp, [tos]
+        ldr r0, =word_reset_hook
+        ldr r0, [r0]
+        cmp r0, #0
+        beq 1f
+        movs r1, #1
+        orrs r0, r1
+        blx r0
+1:      b _quit
+	bx lr
+	end_inlined
+
 	@@ The outer loop of Forth
 	define_word "quit", visible_flag
 _quit:	bl _rstack_base

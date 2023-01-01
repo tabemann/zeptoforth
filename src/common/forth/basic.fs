@@ -2376,6 +2376,21 @@ forth set-current
   until
 ;
 
+\ Attention hook
+variable attention-hook
+
+\ Commit to flash
+commit-flash
+
+\ Attention start hook
+variable attention-start-hook
+
+\ Commit to flash
+commit-flash
+
+\ Attention flag
+variable attention?
+
 \ Commit to flash
 commit-flash
 
@@ -2415,6 +2430,9 @@ commit-flash
   ['] do-flash-validate-dict validate-dict-hook !
   ['] true in-main?-hook !
   ['] here main-here-hook !
+  [: drop false attention? ! ;] attention-hook !
+  [: true attention? ! ;] attention-start-hook !
+  false attention? !
   [: begin pause again ;] bye-hook !
 ;
 
