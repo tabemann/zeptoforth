@@ -10,6 +10,8 @@ Task notifications are the lightest-weight of all these mechanisms; simple synch
 
 Multitasking is enabled by default once `src/common/forth/task.fs` has been loaded and the MCU has been rebooted; afterwards each time the MCU is booted a new task is created for the REPL, the main task, and multitasking is initiated.
 
+The "attention" key combination Control-T `z` sends the exception `x-interrupt-main` to the main task. The "attention" key combination Control-T `t`, after the task monitor has been started with `start-monitor` in the `monitor` module, displays information on all the tasks running.
+
 ### `forth`
 
 This word is in `forth`:
@@ -132,6 +134,11 @@ This exception is raised when executed displays the task terminated error messag
 ( -- )
 
 This exception is raised when an out of range notification mailbox index or count is specified.
+
+##### `x-interrupt-main`
+( -- )
+
+This exception is sent to the main task by issuing Control-T `z` at the console.
 
 ##### `timeout`
 ( -- addr )
@@ -360,6 +367,26 @@ Get the name of a task as a counted string; an address of zero indicates no name
 
 Set the name of a task as a counted string; an address of zero indicates to set no name.
 
+##### `task-terminate-hook!`
+( xt task -- )
+
+Set a task's termination hook, to be invoked in the context of the task when the task terminates. The execution token invoked as the hook has the stack signature ( data -- ) where *data* is the task termination data associated with the task. Note that the task is re-initialized, aside from being with the same name and on the same core, before the task's termination hook is invoked, and will have a priority of 32768 (the maximum priority). Also note that a task termination hook of 0, the default, means that no task termination hook is to be invoked.
+
+##### `task-terminate-hook@`
+( task -- xt )
+
+Get a task's termination hook.
+
+##### `task-terminate-data!`
+( data task -- )
+
+Set a task's termination data, to be passed to the task's termination hook when it is invoked.
+
+##### `task-terminate-data@`
+( task -- data )
+
+Get a task's termination data.
+
 ##### `dump-tasks`
 ( -- )
 
@@ -384,3 +411,12 @@ Get whether dumping trace information is enabled.
 ( c-addr bytes -- )
 
 Specify a trace point with the given name which is displayed when the trace point is reached.
+
+### `monitor`
+
+The following words are in the `monitor` module (note that this module is only present in full builds):
+
+##### `start-monitor`
+( -- )
+
+This word starts the task monitor in the current core; if the task monitor has already been started, it has no effect. Once started, Control-T `t` dumps information on all running tasks.

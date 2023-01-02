@@ -64,6 +64,9 @@ begin-module task
 
     \ Task state mask
     $0FFF constant task-state-mask
+
+    \ The maximum task priority
+    $7FFF constant max-priority
     
     \ In task change
     cpu-variable cpu-in-task-change in-task-change
@@ -114,6 +117,12 @@ begin-module task
     \ Whether to keep the current task at the head of the schedule
     cpu-variable cpu-reschedule? reschedule?
 
+    \ The current terminated task
+    cpu-variable cpu-terminated-task terminated-task
+
+    \ Extra task (for cleaning up after terminated tasks)
+    cpu-variable cpu-extra-task extra-task
+    
     \ SVCall vector index
     11 constant svcall-vector
 
@@ -211,6 +220,12 @@ begin-module task
 
       \ Exception to send to task
       dup constant .task-raise field: task-raise
+
+      \ Handler to invoke upon task termination
+      dup constant .task-terminate-hook field: task-terminate-hook
+
+      \ Data to pass to the task termination handler
+      dup constant .task-terminate-data field: task-terminate-data
       
     end-structure
 
@@ -702,8 +717,28 @@ begin-module task
 
   \ Set a task's name as a counted string; an address of zero indicates to set
   \ no name.
-  : task-name! ( addr -- task )
+  : task-name! ( addr task -- )
     dup validate-not-terminated task-name !
+  ;
+
+  \ Set a task's termination hook
+  : task-terminate-hook! ( xt task -- )
+    task-terminate-hook !
+  ;
+
+  \ Get a task's termination hook
+  : task-terminate-hook@ ( task -- xt )
+    task-terminate-hook @
+  ;
+
+  \ Set a task's termination hook data
+  : task-terminate-data! ( x task -- )
+    task-terminate-data !
+  ;
+
+  \ Get a task's termination data
+  : task-terminate-data@ ( task -- x )
+    task-terminate-data @
   ;
 
   \ Start a task's execution
@@ -730,12 +765,13 @@ begin-module task
     [:
       dup start-validate-task-change
       terminated over task-active h!
+      max-priority over task-priority h!
       dup current-task @ = if
-	task-core @ release-other-core-spinlock
-	end-critical
-	begin pause again
+        task-core @ release-other-core-spinlock
+        end-critical
+        begin pause again
       else
-	drop
+        drop
       then
     ;] over task-core @ critical-with-other-core-spinlock
   ;
@@ -1283,6 +1319,8 @@ begin-module task
       wake-counter @ over task-wake-after !
       0 over task-force-call !
       0 over task-raise !
+      0 over task-terminate-hook !
+      0 over task-terminate-data !
       cpu-index over task-core !
       c" main" over task-name !
       -1 over task-current-notify !
@@ -1366,6 +1404,8 @@ begin-module task
         wake-counter @ over task-wake-after !
         0 over task-force-call !
         0 over task-raise !
+        0 over task-terminate-hook !
+        0 over task-terminate-data !
 	c" aux-main" over task-name !
 	default-timeslice over task-timeslice !
 	default-min-timeslice over task-min-timeslice !
@@ -1380,6 +1420,30 @@ begin-module task
       ;
 
     [then]
+
+    \ Initialize a context
+    : init-context ( ctx dp xt -- ctx )
+      rot
+      dup 7 and if
+        2 cells - $01000200 over ! \ XPSR, alignment added
+      else
+        cell - $01000000 over ! \ XPSR, no alignment added
+      then
+      cell - swap over ! \ Return address
+      cell - $FFFFFFFE over ! \ LR
+      cell - $DEADBEEF over ! \ R12
+      cell - $DEADBEEF over ! \ R3
+      cell - $DEADBEEF over ! \ R2
+      cell - $DEADBEEF over ! \ R1
+      cell - $DEADBEEF over ! \ R0
+      cell - $DEADBEEF over ! \ R10
+      cell - $DEADBEEF over ! \ R9
+      cell - $DEADBEEF over ! \ R8
+      cell - swap over ! \ R7
+      cell - $FEDCBA98 over ! \ R6
+      cell - $DEADBEEF over ! \ R5
+      cell - $DEADBEEF over ! \ R4
+    ;
 
   end-module
 
@@ -1416,12 +1480,14 @@ begin-module task
     wake-counter @ over task-wake-after !
     0 over task-force-call !
     0 over task-raise !
+    0 over task-terminate-hook !
+    0 over task-terminate-data !
     default-timeslice over task-timeslice !
     default-min-timeslice over task-min-timeslice !
     default-timeslice over task-saved-systick-counter !
     dup ['] task-rstack-base for-task@
     over ['] task-stack-base for-task@ ['] task-entry
-    ['] init-context svc over task-rstack-current !
+    init-context over task-rstack-current !
     next-user-space over task-dict-base @ + over ['] task-ram-here for-task!
     0 over task-next !
     0 over task-prev !
@@ -1458,6 +1524,11 @@ begin-module task
       2 pick rot cells 0 fill
       task-notify-area !
     ;] critical
+  ;
+
+  \ Spawn a non-main task
+  : spawn ( xn...x0 count xt dict-size stack-size rstack-size -- task )
+    task-allot dup >r cpu-index init-task r>
   ;
 
   continue-module task-internal
@@ -1548,13 +1619,58 @@ begin-module task
       task-dict-base @ dict-base !
     ;
 
+    \ Handle task termination
+    : handle-task-terminated ( task -- )
+      >r r@ task-terminate-hook @ ?dup if
+        claim-same-core-spinlock
+        r@ task-name @ swap
+        r@ task-terminate-data @ 1 rot r@ cpu-index init-task
+        r@ task-name !
+        max-priority r@ task-priority h!
+        1 r@ task-active h!
+        r@ insert-task
+        release-same-core-spinlock
+      then
+      rdrop
+    ;
+
+    \ Body of extra task
+    : do-extra-task ( -- )
+      begin wake-counter 1+ current-task @ block-wait again
+    ;
+
+    \ Initialize the extra task
+    : init-extra-task ( -- )
+      extra-task @ if
+        0 ['] do-extra-task extra-task @ cpu-index init-task
+      else
+        0 ['] do-extra-task 320 128 512 spawn extra-task !
+      then
+      claim-same-core-spinlock
+      first-task @ 0= if
+        c" extra" extra-task @ task-name !
+        -1 extra-task @ task-priority h!
+        1 extra-task @ task-active h!
+        extra-task @ insert-task
+      then
+      release-same-core-spinlock
+    ;
+
     \ Reschedule previous task
     : reschedule-task ( task -- )
       true in-task-change !
       reschedule? @ task-systick-counter @ 0<= or if
         claim-same-core-spinlock
 	dup remove-task
-	dup task-active@ 0> if insert-task else drop then
+        dup task-active@ 0> if
+          insert-task
+        else
+          dup terminated? if
+            terminated-task !
+          else
+            drop
+          then
+        then
         release-same-core-spinlock
       else
 	drop
@@ -1573,12 +1689,13 @@ begin-module task
 
 	current-task @ dup prev-task !
 	?dup if dup save-task-state reschedule-task then
-	
+
 	begin
 	  true in-task-change !
 	  begin
+            first-task @ 0= if init-extra-task then
 	    claim-same-core-spinlock
-	    find-next-task
+            find-next-task
 	    release-same-core-spinlock
 	    dup 0<> if
 	      dup task-active@ 1 < if
@@ -1628,8 +1745,13 @@ begin-module task
 	  task-systick-counter !
 	else
 	  current-task @ task-saved-systick-counter @ task-systick-counter !
-	then
-	
+        then
+        
+        terminated-task @ if
+          terminated-task @ handle-task-terminated
+          0 terminated-task !
+        then
+
       else
 	true deferred-context-switch !
       then
@@ -1848,11 +1970,6 @@ begin-module task
 
   end-module
 
-  \ Spawn a non-main task
-  : spawn ( xn...x0 count xt dict-size stack-size rstack-size -- task )
-    task-allot dup >r cpu-index init-task r>
-  ;
-
   \ Spawn a task on a particular core
   : spawn-on-core
     ( xn...x0 count xt dict-size stack-size rstack-size core -- task )
@@ -1923,7 +2040,7 @@ begin-module task
     NVIC_ICPR_CLRPEND_All!
     0 pause-enabled !
     $7F SHPR3_PRI_15!
-    $FF SHPR2_PRI_11!
+    $00 SHPR2_PRI_11!
     $FF SHPR3_PRI_14!
     stack-end @ free-end !
     validate-dict-hook @ saved-validate-dict !
@@ -1941,6 +2058,8 @@ begin-module task
       false i cpu-in-task-change !
       true i cpu-reschedule? !
       0 i cpu-task-systick-counter !
+      0 i cpu-terminated-task !
+      0 i cpu-extra-task !
       i 0= if
 	true i cpu-active? !
 	init-main-task
@@ -1950,7 +2069,7 @@ begin-module task
 	0 i cpu-current-task !
 	0 i cpu-prev-task !
 	0 i cpu-first-task !
-	0 i cpu-last-task !
+        0 i cpu-last-task !
       then
       0 i cpu-pause-count !
     loop
