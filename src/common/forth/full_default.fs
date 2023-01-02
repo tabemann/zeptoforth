@@ -47,3 +47,4 @@
 #include src/common/forth/task_pool.fs
 #include src/common/forth/action_pool.fs
 #include src/common/forth/tinymt.fs
+#include src/common/forth/monitor.fs

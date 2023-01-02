@@ -1724,15 +1724,19 @@ begin-module task
   \ Dump task information for all tasks
   : dump-tasks ( -- )
     dump-task-header
-    [:
-      first-task @ begin dup 0<> while
-	dup
-	cr dup h.8 space dup dump-task-name space dup dump-task-priority space
-	dup dump-task-state space dump-task-until
-	task-prev @
-      repeat
-      drop
-    ;] critical
+    cpu-count 0 ?do
+      cpu-count 1 > if
+        cr ." cpu " i (.) ." :"
+      then
+      i [:
+        cpu-first-task @ begin ?dup while
+          dup
+          cr dup h.8 space dup dump-task-name space dup dump-task-priority space
+          dup dump-task-state space dump-task-until
+          task-prev @
+        repeat
+      ;] i critical-with-other-core-spinlock
+    loop
   ;
 
   \ Display tracing information
