@@ -129,7 +129,7 @@
 <section id="kill">
 <h3><code class="docutils literal notranslate"><span class="pre">kill</span></code><a class="headerlink" href="#kill" title="Permalink to this headline">¶</a></h3>
 <p>( task – )</p>
-<p>which immediately halts that task’s executing, including if it is the current task, and puts it in a terminated state.</p>
+<p>which immediately halts that task’s executing, including if it is the current task, and puts it in a terminated state. Note that the task’s termination reason is set to <code class="docutils literal notranslate"><span class="pre">terminated-killed</span></code>.</p>
 <p>To get whether a task is terminated, one executes:</p>
 </section>
 <section id="terminated">
@@ -382,7 +382,7 @@
 <section id="task-terminate-hook">
 <h3><code class="docutils literal notranslate"><span class="pre">task-terminate-hook!</span></code><a class="headerlink" href="#task-terminate-hook" title="Permalink to this headline">¶</a></h3>
 <p>( xt task – )</p>
-<p>Set a task’s termination hook, to be invoked in the context of the task when the task terminates. The execution token invoked as the hook has the stack signature ( data – ) where <em>data</em> is the task termination data associated with the task. Note that the task is re-initialized, aside from being with the same name and on the same core, before the task’s termination hook is invoked, and will have a priority of 32768 (the maximum priority). Also note that a task termination hook of 0, the default, means that no task termination hook is to be invoked.</p>
+<p>Set a task’s termination hook, to be invoked in the context of the task when the task terminates. The execution token invoked as the hook has the stack signature ( data reason – ) where <em>data</em> is the task termination data associated with the task. Note that the task is re-initialized, aside from being with the same name and on the same core, before the task’s termination hook is invoked, and will have a priority of 32768 (the maximum priority). Also note that a task termination hook of 0, the default, means that no task termination hook is to be invoked. <em>Reason</em> is the <em>immediate</em> task termination reason, which is overwritten with <code class="docutils literal notranslate"><span class="pre">not-terminated</span></code> due to the task being reinitialized when the task termination hook is called.</p>
 </section>
 <section id="id8">
 <h3><code class="docutils literal notranslate"><span class="pre">task-terminate-hook&#64;</span></code><a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
@@ -398,6 +398,37 @@
 <h3><code class="docutils literal notranslate"><span class="pre">task-terminate-data&#64;</span></code><a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
 <p>( task – data )</p>
 <p>Get a task’s termination data.</p>
+</section>
+<section id="task-terminate-immed-reason">
+<h3><code class="docutils literal notranslate"><span class="pre">task-terminate-immed-reason&#64;</span></code><a class="headerlink" href="#task-terminate-immed-reason" title="Permalink to this headline">¶</a></h3>
+<p>( task – reason )</p>
+<p>Get a task’s termination immediate reason. Note that this is set back to <code class="docutils literal notranslate"><span class="pre">not-terminated</span></code> if there is a task termination hook.</p>
+</section>
+<section id="task-terminate-reason">
+<h3><code class="docutils literal notranslate"><span class="pre">task-terminate-reason&#64;</span></code><a class="headerlink" href="#task-terminate-reason" title="Permalink to this headline">¶</a></h3>
+<p>( task – reason )</p>
+<p>Get a task’s termination reason.</p>
+<p>Task termination reasons are either uncaught exceptions or one of the following:</p>
+</section>
+<section id="not-terminated">
+<h3><code class="docutils literal notranslate"><span class="pre">not-terminated</span></code><a class="headerlink" href="#not-terminated" title="Permalink to this headline">¶</a></h3>
+<p>( – reason )</p>
+<p>Task has not been terminated.</p>
+</section>
+<section id="terminated-normally">
+<h3><code class="docutils literal notranslate"><span class="pre">terminated-normally</span></code><a class="headerlink" href="#terminated-normally" title="Permalink to this headline">¶</a></h3>
+<p>( – reason )</p>
+<p>Task terminated normally.</p>
+</section>
+<section id="terminated-killed">
+<h3><code class="docutils literal notranslate"><span class="pre">terminated-killed</span></code><a class="headerlink" href="#terminated-killed" title="Permalink to this headline">¶</a></h3>
+<p>( – reason )</p>
+<p>Task was killed.</p>
+</section>
+<section id="terminated-crashed">
+<h3><code class="docutils literal notranslate"><span class="pre">terminated-crashed</span></code><a class="headerlink" href="#terminated-crashed" title="Permalink to this headline">¶</a></h3>
+<p>( – reason )</p>
+<p>Task was terminated due to a hardware exception.</p>
 </section>
 <section id="dump-tasks">
 <h3><code class="docutils literal notranslate"><span class="pre">dump-tasks</span></code><a class="headerlink" href="#dump-tasks" title="Permalink to this headline">¶</a></h3>

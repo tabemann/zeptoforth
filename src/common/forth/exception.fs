@@ -204,7 +204,7 @@ begin-module exception
         ['] abort
       else
         display-red cr cr ." Terminating task" display-normal cr
-        ['] bye
+        ['] crash
       then
       code[
       $18 8 + tos str_,[sp,#_]

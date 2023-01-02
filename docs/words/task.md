@@ -114,7 +114,7 @@ To terminate a task, one executes:
 ##### `kill`
 ( task -- )
 
-which immediately halts that task's executing, including if it is the current task, and puts it in a terminated state.
+which immediately halts that task's executing, including if it is the current task, and puts it in a terminated state. Note that the task's termination reason is set to `terminated-killed`.
 
 To get whether a task is terminated, one executes:
 
@@ -370,7 +370,7 @@ Set the name of a task as a counted string; an address of zero indicates to set 
 ##### `task-terminate-hook!`
 ( xt task -- )
 
-Set a task's termination hook, to be invoked in the context of the task when the task terminates. The execution token invoked as the hook has the stack signature ( data -- ) where *data* is the task termination data associated with the task. Note that the task is re-initialized, aside from being with the same name and on the same core, before the task's termination hook is invoked, and will have a priority of 32768 (the maximum priority). Also note that a task termination hook of 0, the default, means that no task termination hook is to be invoked.
+Set a task's termination hook, to be invoked in the context of the task when the task terminates. The execution token invoked as the hook has the stack signature ( data reason -- ) where *data* is the task termination data associated with the task. Note that the task is re-initialized, aside from being with the same name and on the same core, before the task's termination hook is invoked, and will have a priority of 32768 (the maximum priority). Also note that a task termination hook of 0, the default, means that no task termination hook is to be invoked. *Reason* is the *immediate* task termination reason, which is overwritten with `not-terminated` due to the task being reinitialized when the task termination hook is called.
 
 ##### `task-terminate-hook@`
 ( task -- xt )
@@ -386,6 +386,38 @@ Set a task's termination data, to be passed to the task's termination hook when 
 ( task -- data )
 
 Get a task's termination data.
+
+##### `task-terminate-immed-reason@`
+( task -- reason )
+
+Get a task's termination immediate reason. Note that this is set back to `not-terminated` if there is a task termination hook.
+
+##### `task-terminate-reason@`
+( task -- reason )
+
+Get a task's termination reason.
+
+Task termination reasons are either uncaught exceptions or one of the following:
+
+##### `not-terminated`
+( -- reason )
+
+Task has not been terminated.
+
+##### `terminated-normally`
+( -- reason )
+
+Task terminated normally.
+
+##### `terminated-killed`
+( -- reason )
+
+Task was killed.
+
+##### `terminated-crashed`
+( -- reason )
+
+Task was terminated due to a hardware exception.
 
 ##### `dump-tasks`
 ( -- )

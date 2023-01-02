@@ -2274,8 +2274,8 @@ variable in-main?-hook
 \ Commit to flash
 commit-flash
 
-\ Hook for terminating the current task
-variable bye-hook
+\ Hook for terminating the current task due to a hardware exception
+variable crash-hook
 
 \ Commit to flash
 commit-flash
@@ -2346,8 +2346,8 @@ forth set-current
 \ Get whether the current task is the main task
 : in-main? ( -- main? ) in-main?-hook @ execute ;
 
-\ Terminate the current task
-: bye ( -- ) bye-hook @ execute ;
+\ Terminate the current task normally due to a hardware exception
+: crash ( -- ) crash-hook @ execute ;
 
 \ Get the top of the main task RAM dictionary
 : main-here ( -- addr ) main-here-hook @ execute ;
@@ -2433,7 +2433,7 @@ commit-flash
   [: drop false attention? ! ;] attention-hook !
   [: true attention? ! ;] attention-start-hook !
   false attention? !
-  [: begin pause again ;] bye-hook !
+  [: begin pause again ;] crash-hook !
 ;
 
 \ Finish compressing the code

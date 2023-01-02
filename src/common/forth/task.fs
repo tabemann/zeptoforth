@@ -67,6 +67,18 @@ begin-module task
 
     \ The maximum task priority
     $7FFF constant max-priority
+
+    \ Task has not terminated
+    0 constant not-terminated
+
+    \ Task has terminated normally
+    1 constant terminated-normally
+
+    \ Task has been killed
+    2 constant terminated-killed
+
+    \ Task has terminated due to a hardware exception
+    3 constant terminated-crashed
     
     \ In task change
     cpu-variable cpu-in-task-change in-task-change
@@ -226,6 +238,13 @@ begin-module task
 
       \ Data to pass to the task termination handler
       dup constant .task-terminate-data field: task-terminate-data
+
+      \ Task termination immediate reason
+      dup constant .task-terminate-immed-reason
+      field: task-terminate-immed-reason
+      
+      \ Task termination reason
+      dup constant .task-terminate-reason field: task-terminate-reason
       
     end-structure
 
@@ -643,7 +662,42 @@ begin-module task
 	( false in-task-change ! ) ?raise
       then
     ;
+
+    \ Set a task's termination reason
+    : task-terminate-reason! ( reason task -- )
+      2dup task-terminate-immed-reason !
+      dup task-terminate-reason @ terminated-crashed u< if
+        dup task-terminate-reason @ terminated-killed =
+        2 pick terminated-killed < and not if
+          task-terminate-reason !
+        else
+          2drop
+        then
+      else
+        2drop
+      then
+    ;
   
+    \ Terminate a task for any reason
+    : terminate ( reason task -- )
+      [:
+        dup task-active h@ terminated <> over current-task @ = or if
+          tuck task-terminate-reason!
+          terminated over task-active h!
+          max-priority over task-priority h!
+          dup current-task @ = if
+            task-core @ release-other-core-spinlock
+            end-critical
+            begin pause again
+          else
+            drop
+          then
+        else
+          2drop
+        then
+      ;] over task-core @ critical-with-other-core-spinlock
+    ;
+
   end-module
 
   \ Get whether a task has timed out
@@ -741,6 +795,16 @@ begin-module task
     task-terminate-data @
   ;
 
+  \ Get a task's termination immediate reason
+  : task-terminate-immed-reason@ ( task -- reason )
+    task-terminate-immed-reason @
+  ;
+
+  \ Get a task's termination reason
+  : task-terminate-reason@ ( task -- reason )
+    task-terminate-reason @
+  ;
+
   \ Start a task's execution
   : run ( task -- )
     [:
@@ -762,18 +826,7 @@ begin-module task
 
   \ Kill a task
   : kill ( task -- )
-    [:
-      dup start-validate-task-change
-      terminated over task-active h!
-      max-priority over task-priority h!
-      dup current-task @ = if
-        task-core @ release-other-core-spinlock
-        end-critical
-        begin pause again
-      else
-        drop
-      then
-    ;] over task-core @ critical-with-other-core-spinlock
+    terminated-killed swap terminate
   ;
 
   \ Get the last delay time
@@ -1321,6 +1374,8 @@ begin-module task
       0 over task-raise !
       0 over task-terminate-hook !
       0 over task-terminate-data !
+      not-terminated over task-terminate-immed-reason !
+      not-terminated over task-terminate-reason !
       cpu-index over task-core !
       c" main" over task-name !
       -1 over task-current-notify !
@@ -1347,8 +1402,8 @@ begin-module task
     : task-entry ( -- )
       rdrop
       try
-      ?dup if display-red execute display-normal then
-      current-task @ kill
+      dup if display-red dup execute display-normal then
+      dup 0= if drop terminated-normally then current-task @ terminate
     ;
 
     \ Get whether a task is finished with a delay or timeout
@@ -1406,6 +1461,8 @@ begin-module task
         0 over task-raise !
         0 over task-terminate-hook !
         0 over task-terminate-data !
+        not-terminated over task-terminate-immed-reason !
+        not-terminated over task-terminate-reason !
 	c" aux-main" over task-name !
 	default-timeslice over task-timeslice !
 	default-min-timeslice over task-min-timeslice !
@@ -1482,6 +1539,8 @@ begin-module task
     0 over task-raise !
     0 over task-terminate-hook !
     0 over task-terminate-data !
+    not-terminated over task-terminate-immed-reason !
+    not-terminated over task-terminate-reason !
     default-timeslice over task-timeslice !
     default-min-timeslice over task-min-timeslice !
     default-timeslice over task-saved-systick-counter !
@@ -1623,9 +1682,12 @@ begin-module task
     : handle-task-terminated ( task -- )
       >r r@ task-terminate-hook @ ?dup if
         claim-same-core-spinlock
+        r@ task-terminate-reason @ swap
         r@ task-name @ swap
-        r@ task-terminate-data @ 1 rot r@ cpu-index init-task
+        r@ task-terminate-data @ swap r@ task-terminate-immed-reason @ 2 rot
+        r@ cpu-index init-task
         r@ task-name !
+        r@ task-terminate-reason !
         max-priority r@ task-priority h!
         1 r@ task-active h!
         r@ insert-task
@@ -1925,8 +1987,8 @@ begin-module task
 	1 pause-enabled !
         core-init-hook @ execute
         true core-1-launched !
-	pause try ?dup if display-red execute display-normal then
-	current-task @ kill
+	pause try dup if display-red dup execute display-normal then
+        dup 0= if drop terminated-normally then current-task @ terminate
       ;
       
     [then]
@@ -2077,7 +2139,7 @@ begin-module task
     ['] switch-tasks pendsv-vector vector!
     ['] task-systick-handler systick-vector vector!
     [: cpu-index 0= current-task main-task = and ;] in-main?-hook !
-    [: begin current-task kill again ;] bye-hook !
+    [: terminated-crashed current-task terminate ;] crash-hook !
     [: 0 cpu-main-task @ task-dict-current ;] main-here-hook !
     1 pause-enabled !
     enable-int
