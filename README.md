@@ -55,6 +55,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 * Pseudorandom number generator support (using the TinyMT32 PRNG)
 * Programmable input/output support (on the Raspberry Pi Pico)
 * Optional swdcom support
+* Optional task monitor
 
 There is also support for loadable extras not included in any builds:
 
