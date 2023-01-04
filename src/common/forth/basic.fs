@@ -2195,6 +2195,18 @@ commit-flash
   (f.) space
 ;
 
+\ Convert a signed single-cell value to a signed double-cell value
+: s>d ( n -- d ) dup 0< if -1 else 0 then ;
+
+\ Convert a double-cell value to a single-cell value
+: d>s ( d -- n ) drop ;
+
+\ Convert a signed single-cell value to an S31.32 fixed-point value
+: s>f ( n -- f ) 0 swap ;
+
+\ Floor an S31.32 fixed-point value to a single-cell value
+: f>s ( f -- n ) nip ;
+
 \ Wait hook variable
 variable wait-hook
 
