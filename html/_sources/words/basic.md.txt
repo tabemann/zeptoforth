@@ -1647,6 +1647,26 @@ Type a fixed-point number without a leading space
 
 Type a fixed-point number with a leading space
 
+##### `s>d`
+( n -- d )
+
+Convert a signed single-cell number to a signed double-cell number.
+
+##### `d>s`
+( d -- n )
+
+Convert a double-cell number to a single-cell number.
+
+##### `s>f`
+( n -- f )
+
+Convert a signed single-cell number to a fixed-point number.
+
+##### `f>s`
+( f -- n )
+
+Convert a fixed point number to a signed single-cell number, flooring it in the process.
+
 ##### `wait`
 ( xt -- )
 
