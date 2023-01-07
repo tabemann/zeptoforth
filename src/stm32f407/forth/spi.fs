@@ -75,6 +75,9 @@ begin-module spi
       \ Receiver handler
       field: spi-rx-handler
 
+      \ Eight byte DR
+      field: spi-8-bit-dr
+
     end-structure
 
     spi-size spi-count * buffer: spi-buffers
@@ -219,6 +222,9 @@ begin-module spi
     \ SPI RX handler
     : spi-rx-handler ( spi -- addr ) spi-select spi-rx-handler ;
 
+    \ SPI 8-bit DR access
+    : spi-8-bit-dr ( spi -- addr ) spi-select spi-8-bit-dr ;
+    
     \ Get whether the rx buffer is full
     : spi-rx-full? ( spi -- f )
       dup spi-rx-write-index c@ swap spi-rx-read-index c@
@@ -285,13 +291,31 @@ begin-module spi
       then
     ;
 
+    \ Write a frame
+    : >frame { spi -- }
+      spi spi-8-bit-dr @ if
+        spi SPI_DR c!
+      else
+        spi SPI_DR h!
+      then
+    ;
+
+    \ Read a frame
+    : frame> { spi -- }
+      spi spi-8-bit-dr @ if
+        spi SPI_DR c@
+      else
+        spi SPI_DR h@
+      then
+    ;
+
     \ Handle an SPI interrupt
     : handle-spi ( spi -- )
       [:
 	begin
 	  dup spi-tx-empty? not if
 	    dup SPI_SR_TXE@ if
-	      dup spi-read-tx over SPI_DR h! false
+	      dup spi-read-tx over >frame false
 	    else
 	      true
 	    then
@@ -303,7 +327,7 @@ begin-module spi
 	begin
 	  over spi-rx-full? not if
 	    over SPI_SR_RXNE@ if
-	      over SPI_DR h@ 2 pick spi-write-rx drop true false
+	      over frame> 2 pick spi-write-rx drop true false
 	    else
 	      true
 	    then
@@ -334,6 +358,7 @@ begin-module spi
       0 over spi-tx-write-index c!
       0 over spi-irq NVIC_IPR_IP!
       0 over spi-rx-handler !
+      false over spi-8-bit-dr !
       dup case
 	1 of RCC_APB2ENR_SPI1EN RCC_APB2LPENR_SPI1LPEN endof
 	2 of RCC_APB1ENR_SPI2EN RCC_APB1LPENR_SPI2LPEN endof
@@ -353,19 +378,19 @@ begin-module spi
   end-module> import
 
   \ Set the SPI baud
-  : spi-baud! ( baud spi -- )
-    dup validate-spi dup -rot
-    case
+  : spi-baud! { baud spi -- }
+    spi validate-spi
+    spi case
       1 of 84000000 endof
       2 of 42000000 endof
       3 of 42000000 endof
-    endcase
-    2 8 do
-      dup i rshift 2 pick >= if
-	2drop i 1- swap SPI_CR1_BR! unloop exit
+    endcase { max-baud }
+    1 8 do
+      max-baud i rshift baud >= if
+        i 1- spi SPI_CR1_BR! unloop exit
       then
     -1 +loop
-    ['] x-invalid-spi-clock ?raise
+    0 spi SPI_CR1_BR!
   ;
 
   \ Set SPI to master
@@ -401,8 +426,8 @@ begin-module spi
   : spi-data-size! ( data-size spi -- )
     dup validate-spi swap
     case
-      8 of false swap SPI_CR1_DFF! endof
-      16 of true swap SPI_CR1_DFF! endof
+      8 of true over spi-8-bit-dr ! false swap SPI_CR1_DFF! endof
+      16 of false over spi-8-bit-dr ! true swap SPI_CR1_DFF! endof
       ['] x-invalid-spi-data-size ?raise
     endcase
   ;
@@ -476,7 +501,7 @@ begin-module spi
 	    true swap SPI_CR2_TXEIE!
 	  then
 	else
-	  SPI_DR h!
+          >frame
 	then
       else
 	dup spi-tx-full? not if
@@ -495,7 +520,7 @@ begin-module spi
 	disable-int
 	dup spi-rx-empty? if
 	  dup SPI_SR_RXNE@ if
-	    SPI_DR h@ enable-int false true
+	    frame> enable-int false true
 	  else
 	    enable-int false
 	  then
@@ -544,11 +569,11 @@ begin-module spi
         0 { bytes-sent }
         disable-int
         spi SPI_SR_TXE@ spi SPI_SR_RXNE@ not and bytes-sent bytes < and if
-          buffer bytes-sent + c@ spi SPI_DR h!
+          buffer bytes-sent + c@ spi >frame
           1 +to bytes-sent
         then
         spi SPI_SR_RXNE@ bytes-to-recv 0> and if
-          spi SPI_DR h@ drop
+          spi frame> drop
           -1 +to bytes-to-recv
         then
         enable-int
@@ -573,11 +598,11 @@ begin-module spi
         0 { bytes-recvd }
         disable-int
         spi SPI_SR_TXE@ spi SPI_SR_RXNE@ not and bytes-to-send 0> and if
-          filler spi SPI_DR h!
+          filler spi >frame
           -1 +to bytes-to-send
         then
         spi SPI_SR_RXNE@ bytes-recvd bytes < and if
-          spi SPI_DR h@ buffer bytes-recvd + c!
+          spi frame> buffer bytes-recvd + c!
           1 +to bytes-recvd
         then
         enable-int
