@@ -546,6 +546,106 @@ Get an edge low interrupt status for processor 0
 
 Get an edge high interrupt status for processor 0
 
+##### `PROC1_INTE_GPIO_LEVEL_LOW!`
+( enable index -- )
+
+Set a level low interrupt enable for processor 1
+
+##### `PROC1_INTE_GPIO_LEVEL_HIGH!`
+( enable index -- )
+
+Set a level high interrupt enable for processor 1
+
+##### `PROC1_INTE_GPIO_EDGE_LOW!`
+( enable index -- )
+
+Set an edge low interrupt enable for processor 1
+
+##### `PROC1_INTE_GPIO_EDGE_HIGH!`
+( enable index -- )
+
+Set an edge high interrupt enable for processor 1
+  
+##### `PROC1_INTE_GPIO_LEVEL_LOW@`
+( index -- enable )
+
+Get a level low interrupt enable for processor 1
+
+##### `PROC1_INTE_GPIO_LEVEL_HIGH@`
+( index -- enable )
+
+Get a level high interrupt enable for processor 1
+
+##### `PROC1_INTE_GPIO_EDGE_LOW@`
+( index -- enable )
+
+Get an edge low interrupt enable for processor 1
+
+##### `PROC1_INTE_GPIO_EDGE_HIGH@`
+( index -- enable )
+
+Get an edge high interrupt enable for processor 1
+
+##### `PROC1_INTF_GPIO_LEVEL_LOW!`
+( force index -- )
+
+Set a level low interrupt force for processor 1
+
+##### `PROC1_INTF_GPIO_LEVEL_HIGH!`
+( force index -- )
+
+Set a level high interrupt force for processor 1
+
+##### `PROC1_INTF_GPIO_EDGE_LOW!`
+( force index -- )
+
+Set an edge low interrupt force for processor 1
+
+##### `PROC1_INTF_GPIO_EDGE_HIGH!`
+( force index -- )
+
+Set an edge high interrupt force for processor 1
+  
+##### `PROC1_INTF_GPIO_LEVEL_LOW@`
+( index -- force )
+
+Get a level low interrupt force for processor 1
+
+##### `PROC1_INTF_GPIO_LEVEL_HIGH@`
+( index -- force )
+
+Get a level high interrupt force for processor 1
+
+##### `PROC1_INTF_GPIO_EDGE_LOW@`
+( index -- force )
+
+Get an edge low interrupt force for processor 1
+
+##### `PROC1_INTF_GPIO_EDGE_HIGH@`
+( index -- force )
+
+Get an edge high interrupt force for processor 1
+
+##### `PROC1_INTS_GPIO_LEVEL_LOW@`
+( index -- enable )
+
+Get a level low interrupt status for processor 1
+
+##### `PROC1_INTS_GPIO_LEVEL_HIGH@`
+( index -- enable )
+
+Get a level high interrupt status for processor 1
+
+##### `PROC1_INTS_GPIO_EDGE_LOW@`
+( index -- enable )
+
+Get an edge low interrupt status for processor 1
+
+##### `PROC1_INTS_GPIO_EDGE_HIGH@`
+( index -- enable )
+
+Get an edge high interrupt status for processor 1
+
 ##### `PADS_BANK0_VOLTAGE_SELECT!`
 ( voltage -- )
 
