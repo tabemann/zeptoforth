@@ -140,9 +140,9 @@ begin-module read-temp
     17 0 sensor!
     init-sensors
     ['] handle-gpio io-vector vector!
-    temp-pin PROC0_INTE_GPIO_EDGE_LOW!
+    true temp-pin PROC0_INTE_GPIO_EDGE_LOW!
     0 io-irq NVIC_IPR_IP!
-    io-irq NVIC_ISER_SETENA!
+    \ io-irq NVIC_ISER_SETENA!
     0 ['] temp-tracker 420 128 512 spawn temp-task !
     1 temp-task @ task-priority!
     temp-task @ run
