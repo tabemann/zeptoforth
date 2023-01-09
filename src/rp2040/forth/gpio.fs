@@ -55,8 +55,29 @@ begin-module gpio
     \ GPIO processor 0 interrupt status registers
     IO_BANK0_BASE $120 + constant PROC0_INTS0
 
+    \ GPIO processor 1 interrupt enable registers
+    IO_BANK0_BASE $130 + constant PROC1_INTE0
+
+    \ GPIO processor 1 interrupt force registers
+    IO_BANK0_BASE $140 + constant PROC1_INTF0
+
+    \ GPIO processor 1 interrupt status registers
+    IO_BANK0_BASE $150 + constant PROC1_INTS0
+
     \ Pads bank 0 voltage select register
     PADS_BANK0_BASE $00 + constant PADS_BANK0_VOLTAGE_SELECT
+
+    \ Level low bit offset
+    0 constant LEVEL_LOW
+
+    \ Level high bit offset
+    1 constant LEVEL_HIGH
+
+    \ Edge low bit offset
+    2 constant EDGE_LOW
+
+    \ Edge high bit offset
+    3 constant EDGE_HIGH
 
   end-module> import
 
@@ -217,140 +238,248 @@ begin-module gpio
 
   \ Clear a raw edge low interrupt
   : INTR_GPIO_EDGE_LOW! ( index -- )
-    dup 1 and 2 lshift 2 + bit swap 1 rshift INTR0 + bis!
+    dup 1 and 2 lshift 2 + bit swap 1 rshift INTR0 + cbis!
   ;
 
   \ Clear a raw edge high interrupt
   : INTR_GPIO_EDGE_HIGH! ( index -- )
-    dup 1 and 2 lshift 3 + bit swap 1 rshift INTR0 + bis!
+    dup 1 and 2 lshift 3 + bit swap 1 rshift INTR0 + cbis!
   ;
   
   \ Get a level low raw interrupt state
   : INTR_GPIO_LEVEL_LOW@ ( index -- state )
-    dup 1 and 2 lshift bit swap 1 rshift INTR0 + bit@
+    dup 1 and 2 lshift bit swap 1 rshift INTR0 + cbit@
   ;
 
   \ Get a level high raw interrupt state
   : INTR_GPIO_LEVEL_HIGH@ ( index -- state )
-    dup 1 and 2 lshift 1 + bit swap 1 rshift INTR0 + bit@
+    dup 1 and 2 lshift 1 + bit swap 1 rshift INTR0 + cbit@
   ;
 
   \ Get an edge low raw interrupt state
   : INTR_GPIO_EDGE_LOW@ ( index -- state )
-    dup 1 and 2 lshift 2 + bit swap 1 rshift INTR0 + bit@
+    dup 1 and 2 lshift 2 + bit swap 1 rshift INTR0 + cbit@
   ;
 
   \ Get an edge high raw interrupt state
   : INTR_GPIO_EDGE_HIGH@ ( index -- state )
-    dup 1 and 2 lshift 3 + bit swap 1 rshift INTR0 + bit@
+    dup 1 and 2 lshift 3 + bit swap 1 rshift INTR0 + cbit@
   ;
   
   \ Set a level low interrupt enable for processor 0
   : PROC0_INTE_GPIO_LEVEL_LOW! ( enable index -- )
     dup 1 and 2 lshift bit swap 1 rshift PROC0_INTE0 +
-    rot if bis! else bic! then
+    rot if cbis! else cbic! then
   ;
 
   \ Set a level high interrupt enable for processor 0
   : PROC0_INTE_GPIO_LEVEL_HIGH! ( enable index -- )
     dup 1 and 2 lshift 1 + bit swap 1 rshift PROC0_INTE0 +
-    rot if bis! else bic! then
+    rot if cbis! else cbic! then
   ;
 
   \ Set an edge low interrupt enable for processor 0
   : PROC0_INTE_GPIO_EDGE_LOW! ( enable index -- )
     dup 1 and 2 lshift 2 + bit swap 1 rshift PROC0_INTE0 +
-    rot if bis! else bic! then
+    rot if cbis! else cbic! then
   ;
 
   \ Set an edge high interrupt enable for processor 0
   : PROC0_INTE_GPIO_EDGE_HIGH! ( enable index -- )
     dup 1 and 2 lshift 3 + bit swap 1 rshift PROC0_INTE0 +
-    rot if bis! else bic! then
+    rot if cbis! else cbic! then
   ;
   
   \ Get a level low interrupt enable for processor 0
   : PROC0_INTE_GPIO_LEVEL_LOW@ ( index -- enable )
-    dup 1 and 2 lshift bit swap 1 rshift PROC0_INTE0 + bit@
+    dup 1 and 2 lshift bit swap 1 rshift PROC0_INTE0 + cbit@
   ;
 
   \ Get a level high interrupt enable for processor 0
   : PROC0_INTE_GPIO_LEVEL_HIGH@ ( index -- enable )
-    dup 1 and 2 lshift 1 + bit swap 1 rshift PROC0_INTE0 + bit@
+    dup 1 and 2 lshift 1 + bit swap 1 rshift PROC0_INTE0 + cbit@
   ;
 
   \ Get an edge low interrupt enable for processor 0
   : PROC0_INTE_GPIO_EDGE_LOW@ ( index -- enable )
-    dup 1 and 2 lshift 2 + bit swap 1 rshift PROC0_INTE0 + bit@
+    dup 1 and 2 lshift 2 + bit swap 1 rshift PROC0_INTE0 + cbit@
   ;
 
   \ Get an edge high interrupt enable for processor 0
   : PROC0_INTE_GPIO_EDGE_HIGH@ ( index -- enable )
-    dup 1 and 2 lshift 3 + bit swap 1 rshift PROC0_INTE0 + bit@
+    dup 1 and 2 lshift 3 + bit swap 1 rshift PROC0_INTE0 + cbit@
   ;
 
   \ Set a level low interrupt force for processor 0
   : PROC0_INTF_GPIO_LEVEL_LOW! ( force index -- )
     dup 1 and 2 lshift bit swap 1 rshift PROC0_INTF0 +
-    rot if bis! else bic! then
+    rot if cbis! else cbic! then
   ;
 
   \ Set a level high interrupt force for processor 0
   : PROC0_INTF_GPIO_LEVEL_HIGH! ( force index -- )
     dup 1 and 2 lshift 1 + bit swap 1 rshift PROC0_INTF0 +
-    rot if bis! else bic! then
+    rot if cbis! else cbic! then
   ;
 
   \ Set an edge low interrupt force for processor 0
   : PROC0_INTF_GPIO_EDGE_LOW! ( force index -- )
     dup 1 and 2 lshift 2 + bit swap 1 rshift PROC0_INTF0 +
-    rot if bis! else bic! then
+    rot if cbis! else cbic! then
   ;
 
   \ Set an edge high interrupt force for processor 0
   : PROC0_INTF_GPIO_EDGE_HIGH! ( force index -- )
     dup 1 and 2 lshift 3 + bit swap 1 rshift PROC0_INTF0 +
-    rot if bis! else bic! then
+    rot if cbis! else cbic! then
   ;
   
   \ Get a level low interrupt force for processor 0
   : PROC0_INTF_GPIO_LEVEL_LOW@ ( index -- force )
-    dup 1 and 2 lshift bit swap 1 rshift PROC0_INTF0 + bit@
+    dup 1 and 2 lshift bit swap 1 rshift PROC0_INTF0 + cbit@
   ;
 
   \ Get a level high interrupt force for processor 0
   : PROC0_INTF_GPIO_LEVEL_HIGH@ ( index -- force )
-    dup 1 and 2 lshift 1 + bit swap 1 rshift PROC0_INTF0 + bit@
+    dup 1 and 2 lshift 1 + bit swap 1 rshift PROC0_INTF0 + cbit@
   ;
 
   \ Get an edge low interrupt force for processor 0
   : PROC0_INTF_GPIO_EDGE_LOW@ ( index -- force )
-    dup 1 and 2 lshift 2 + bit swap 1 rshift PROC0_INTF0 + bit@
+    dup 1 and 2 lshift 2 + bit swap 1 rshift PROC0_INTF0 + cbit@
   ;
 
   \ Get an edge high interrupt force for processor 0
   : PROC0_INTF_GPIO_EDGE_HIGH@ ( index -- force )
-    dup 1 and 2 lshift 3 + bit swap 1 rshift PROC0_INTF0 + bit@
+    dup 1 and 2 lshift 3 + bit swap 1 rshift PROC0_INTF0 + cbit@
   ;
 
   \ Get a level low interrupt status for processor 0
   : PROC0_INTS_GPIO_LEVEL_LOW@ ( index -- enable )
-    dup 1 and 2 lshift bit swap 1 rshift PROC0_INTS0 + bit@
+    dup 1 and 2 lshift bit swap 1 rshift PROC0_INTS0 + cbit@
   ;
 
   \ Get a level high interrupt status for processor 0
   : PROC0_INTS_GPIO_LEVEL_HIGH@ ( index -- enable )
-    dup 1 and 2 lshift 1 + bit swap 1 rshift PROC0_INTS0 + bit@
+    dup 1 and 2 lshift 1 + bit swap 1 rshift PROC0_INTS0 + cbit@
   ;
 
   \ Get an edge low interrupt status for processor 0
   : PROC0_INTS_GPIO_EDGE_LOW@ ( index -- enable )
-    dup 1 and 2 lshift 2 + bit swap 1 rshift PROC0_INTS0 + bit@
+    dup 1 and 2 lshift 2 + bit swap 1 rshift PROC0_INTS0 + cbit@
   ;
 
   \ Get an edge high interrupt status for processor 0
   : PROC0_INTS_GPIO_EDGE_HIGH@ ( index -- enable )
-    dup 1 and 2 lshift 3 + bit swap 1 rshift PROC0_INTS0 + bit@
+    dup 1 and 2 lshift 3 + bit swap 1 rshift PROC0_INTS0 + cbit@
+  ;
+
+  \ Set a level low interrupt enable for processor 1
+  : PROC1_INTE_GPIO_LEVEL_LOW! ( enable index -- )
+    dup 1 and 2 lshift bit swap 1 rshift PROC1_INTE0 +
+    rot if cbis! else cbic! then
+  ;
+
+  \ Set a level high interrupt enable for processor 1
+  : PROC1_INTE_GPIO_LEVEL_HIGH! ( enable index -- )
+    dup 1 and 2 lshift 1 + bit swap 1 rshift PROC1_INTE0 +
+    rot if cbis! else cbic! then
+  ;
+
+  \ Set an edge low interrupt enable for processor 1
+  : PROC1_INTE_GPIO_EDGE_LOW! ( enable index -- )
+    dup 1 and 2 lshift 2 + bit swap 1 rshift PROC1_INTE0 +
+    rot if cbis! else cbic! then
+  ;
+
+  \ Set an edge high interrupt enable for processor 1
+  : PROC1_INTE_GPIO_EDGE_HIGH! ( enable index -- )
+    dup 1 and 2 lshift 3 + bit swap 1 rshift PROC1_INTE0 +
+    rot if cbis! else cbic! then
+  ;
+  
+  \ Get a level low interrupt enable for processor 1
+  : PROC1_INTE_GPIO_LEVEL_LOW@ ( index -- enable )
+    dup 1 and 2 lshift bit swap 1 rshift PROC1_INTE0 + cbit@
+  ;
+
+  \ Get a level high interrupt enable for processor 1
+  : PROC1_INTE_GPIO_LEVEL_HIGH@ ( index -- enable )
+    dup 1 and 2 lshift 1 + bit swap 1 rshift PROC1_INTE0 + cbit@
+  ;
+
+  \ Get an edge low interrupt enable for processor 1
+  : PROC1_INTE_GPIO_EDGE_LOW@ ( index -- enable )
+    dup 1 and 2 lshift 2 + bit swap 1 rshift PROC1_INTE0 + cbit@
+  ;
+
+  \ Get an edge high interrupt enable for processor 1
+  : PROC1_INTE_GPIO_EDGE_HIGH@ ( index -- enable )
+    dup 1 and 2 lshift 3 + bit swap 1 rshift PROC1_INTE0 + cbit@
+  ;
+
+  \ Set a level low interrupt force for processor 1
+  : PROC1_INTF_GPIO_LEVEL_LOW! ( force index -- )
+    dup 1 and 2 lshift bit swap 1 rshift PROC1_INTF0 +
+    rot if cbis! else cbic! then
+  ;
+
+  \ Set a level high interrupt force for processor 1
+  : PROC1_INTF_GPIO_LEVEL_HIGH! ( force index -- )
+    dup 1 and 2 lshift 1 + bit swap 1 rshift PROC1_INTF0 +
+    rot if cbis! else cbic! then
+  ;
+
+  \ Set an edge low interrupt force for processor 1
+  : PROC1_INTF_GPIO_EDGE_LOW! ( force index -- )
+    dup 1 and 2 lshift 2 + bit swap 1 rshift PROC1_INTF0 +
+    rot if cbis! else cbic! then
+  ;
+
+  \ Set an edge high interrupt force for processor 1
+  : PROC1_INTF_GPIO_EDGE_HIGH! ( force index -- )
+    dup 1 and 2 lshift 3 + bit swap 1 rshift PROC1_INTF0 +
+    rot if cbis! else cbic! then
+  ;
+  
+  \ Get a level low interrupt force for processor 1
+  : PROC1_INTF_GPIO_LEVEL_LOW@ ( index -- force )
+    dup 1 and 2 lshift bit swap 1 rshift PROC1_INTF0 + cbit@
+  ;
+
+  \ Get a level high interrupt force for processor 1
+  : PROC1_INTF_GPIO_LEVEL_HIGH@ ( index -- force )
+    dup 1 and 2 lshift 1 + bit swap 1 rshift PROC1_INTF0 + cbit@
+  ;
+
+  \ Get an edge low interrupt force for processor 1
+  : PROC1_INTF_GPIO_EDGE_LOW@ ( index -- force )
+    dup 1 and 2 lshift 2 + bit swap 1 rshift PROC1_INTF0 + cbit@
+  ;
+
+  \ Get an edge high interrupt force for processor 1
+  : PROC1_INTF_GPIO_EDGE_HIGH@ ( index -- force )
+    dup 1 and 2 lshift 3 + bit swap 1 rshift PROC1_INTF0 + cbit@
+  ;
+
+  \ Get a level low interrupt status for processor 1
+  : PROC1_INTS_GPIO_LEVEL_LOW@ ( index -- enable )
+    dup 1 and 2 lshift bit swap 1 rshift PROC1_INTS0 + cbit@
+  ;
+
+  \ Get a level high interrupt status for processor 1
+  : PROC1_INTS_GPIO_LEVEL_HIGH@ ( index -- enable )
+    dup 1 and 2 lshift 1 + bit swap 1 rshift PROC1_INTS0 + cbit@
+  ;
+
+  \ Get an edge low interrupt status for processor 1
+  : PROC1_INTS_GPIO_EDGE_LOW@ ( index -- enable )
+    dup 1 and 2 lshift 2 + bit swap 1 rshift PROC1_INTS0 + cbit@
+  ;
+
+  \ Get an edge high interrupt status for processor 1
+  : PROC1_INTS_GPIO_EDGE_HIGH@ ( index -- enable )
+    dup 1 and 2 lshift 3 + bit swap 1 rshift PROC1_INTS0 + cbit@
   ;
 
   \ Select voltage for pads
