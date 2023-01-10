@@ -1633,19 +1633,34 @@ Type a signed double-cell number with a leading space
 Type an unsigned double-cell number with a leading space
 
 ##### `format-fixed`
-( b-addr f -- b-addr bytes )
+( c-addr f -- c-addr bytes )
 
-Format an s31.32 number
+Format an S31.32 fixed-point number
+
+##### `format-fixed-truncate`
+( c-addr f places -- c-addr bytes )
+
+Format an S31.32 fixed-point number to *places* to the left of the decimal point
 
 ##### `(f.)`
 ( f -- )
 
-Type a fixed-point number without a leading space
+Type an S31.32 fixed-point number without a leading space
+
+##### `(f.n)`
+( f places -- )
+
+Type an S31.32 fixed-point number to *places* to the left of the decimal point without a leading space
 
 ##### `f.`
 ( f -- )
 
-Type a fixed-point number with a leading space
+Type an S31.32 fixed-point number with a leading space
+
+##### `f.n`
+( f places -- )
+
+Type an S31.32 fixed-point number to *places* to the left of the decimal point with a leading space
 
 ##### `s>d`
 ( n -- d )
@@ -1660,12 +1675,12 @@ Convert a double-cell number to a single-cell number.
 ##### `s>f`
 ( n -- f )
 
-Convert a signed single-cell number to a fixed-point number.
+Convert a signed single-cell number to an S31.32 fixed-point number.
 
 ##### `f>s`
 ( f -- n )
 
-Convert a fixed point number to a signed single-cell number, flooring it in the process.
+Convert an S31.32 fixed point number to a signed single-cell number, flooring it in the process.
 
 ##### `wait`
 ( xt -- )

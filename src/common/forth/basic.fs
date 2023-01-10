@@ -2206,8 +2206,8 @@ commit-flash
 ;
 
 \ Format a truncated S31.32 number
-: format-fixed-truncate ( places c-addr f -- c-addr bytes )
-  2swap swap 2swap
+: format-fixed-truncate ( c-addr f places -- c-addr bytes )
+  -rot
   base @ 2 >= base @ 16 <= and if
     2 pick 0> if
       2dup d0< if
@@ -2239,7 +2239,7 @@ commit-flash
 
 \ Type a truncated fixed-point number without a following space
 : (f.n) ( f places -- )
-  ram-here 2swap format-fixed-truncate dup >r dup ram-allot type r>
+  >r ram-here -rot r> format-fixed-truncate dup >r dup ram-allot type r>
   negate ram-allot
 ;
 
