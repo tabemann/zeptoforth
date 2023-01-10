@@ -152,8 +152,8 @@ begin-module read-temp
   : display-temp ( sensor -- )
     dup sensor-count u>= triggers x-sensor-out-of-range
     >r r@ read-temp-f r@ read-temp-c r@ read-temp
-    cr ." Temperature " r> (.) ." : " . space ." pulses "
-    f. ." °C " f. ." °F"
+    cr ." Temperature " r> (.) ." : " . ." pulses "
+    2 f.n ." °C " 2 f.n ." °F"
   ;
 
   \ Display temperatures repeatedly

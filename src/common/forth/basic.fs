@@ -2134,10 +2134,11 @@ commit-flash
 commit-flash
 
 \ Format digits to the right of the decimal point
-: format-fraction ( u b-addr bytes -- b-addr bytes )
+: format-fraction ( u c-addr bytes -- c-addr bytes )
+  >r >r fraction-size swap r> r>
   2dup swap >r >r + 0 >r >r dup 0<> if
     begin
-      r> r> dup swap >r swap >r fraction-size <> swap dup 0<> rot and if
+      r> r> dup swap >r swap >r 2 pick <> swap dup 0<> rot and if
 	base @ um* dup 10 < if
 	  [char] 0 +
 	else
@@ -2152,10 +2153,35 @@ commit-flash
   else
     drop [char] 0 r@ c! rdrop r> r> + 1+ r> swap
   then
+  rot drop
+;
+
+\ Format digits to the right of the decimal point truncated to a given number
+\ of places
+: format-fraction-truncate ( places u c-addr bytes -- c-addr bytes )
+  2swap swap fraction-size min swap 2swap
+  2dup swap >r >r + 0 >r >r dup 0<> if
+    begin
+      r> r> dup swap >r swap >r 2 pick <> swap dup 0<> rot and if
+	base @ um* dup 10 < if
+	  [char] 0 +
+	else
+	  10 - [char] A +
+	then
+	r@ c! r> 1+ r> 1+ >r >r false
+      else
+	true
+      then
+    until
+    drop rdrop r> r> + r> swap
+  else
+    drop [char] 0 r@ c! rdrop r> r> + 1+ r> swap
+  then
+  rot drop
 ;
 
 \ Add a decimal point
-: add-decimal ( b-addr bytes -- b-addr bytes )
+: add-decimal ( c-addr bytes -- c-addr bytes )
   2dup + [char] , swap c! 1+
 ;
 
@@ -2165,8 +2191,8 @@ forth set-current
 \ Commit to flash
 commit-flash
 
-\ Format an s31.32 number
-: format-fixed ( b-addr f -- b-addr bytes )
+\ Format an S31.32 number
+: format-fixed ( c-addr f -- c-addr bytes )
   base @ 2 >= base @ 16 <= and if
     2dup d0< if
       dnegate 0 <# #s -1 sign #> add-decimal format-fraction
@@ -2175,7 +2201,31 @@ commit-flash
     then
     dup >r rot dup >r swap move r> r>
   else
-    drop 0
+    2drop 0
+  then
+;
+
+\ Format a truncated S31.32 number
+: format-fixed-truncate ( places c-addr f -- c-addr bytes )
+  2swap swap 2swap
+  base @ 2 >= base @ 16 <= and if
+    2 pick 0> if
+      2dup d0< if
+        dnegate 0 <# #s -1 sign #> add-decimal format-fraction-truncate
+      else
+        0 <# #s #> add-decimal format-fraction-truncate
+      then
+    else
+      2swap drop -rot
+      2dup d0< if
+        nip 0 <# #s -1 sign #>
+      else
+        nip 0 <# #s #>
+      then
+    then
+    dup >r rot dup >r swap move r> r>
+  else
+    2drop drop 0
   then
 ;
 
@@ -2187,12 +2237,23 @@ commit-flash
   ram-here -rot format-fixed dup >r dup ram-allot type r> negate ram-allot
 ;
 
+\ Type a truncated fixed-point number without a following space
+: (f.n) ( f places -- )
+  ram-here 2swap format-fixed-truncate dup >r dup ram-allot type r>
+  negate ram-allot
+;
+
 \ Commit to flash
 commit-flash
 
 \ Type a fixed-point number with a following space
 : f. ( f -- )
   (f.) space
+;
+
+\ Type a truncated fixed-point number with a following space
+: f.n ( f places -- )
+  (f.n) space
 ;
 
 \ Convert a signed single-cell value to a signed double-cell value
