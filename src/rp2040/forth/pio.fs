@@ -1087,7 +1087,7 @@ begin-module pio
   ;
 
   \ Read from the RX FIFO of a state machine
-  : sm-rxf@ ( x state-machine pio -- )
+  : sm-rxf@ ( state-machine pio -- x )
     2dup validate-sm-pio
     RXF @
   ;

@@ -149,6 +149,12 @@ begin-module read-temp
     temp-task @ run
   ;
 
+  \ Display temperatures repeatedly task
+  0 value display-temps-task
+
+  \ Are we currently displaying temperatures?
+  false value display-temps?
+
   \ Display temperatures for a number of sensors
   : display-temp ( sensor -- )
     dup sensor-count u>= triggers x-sensor-out-of-range
@@ -163,20 +169,26 @@ begin-module read-temp
   ;
 
   \ Display temperatures repeatedly
-  : display-temps ( count -- )
-    dup sensor-count u> triggers x-sensor-out-of-range
-    begin dup 0 ?do i display-temp loop 1000 ms again
+  : display-temps ( -- )
+    begin
+      display-temps? if 0 display-temp else erase-ssd1306 then
+      1000 ms
+    again
   ;
 
-  \ Display temperatures repeatedly task
-  variable display-temps-task
-
   \ Start displaying temperatures repeatedly
-  : start-display-temps ( count -- )
-    dup sensor-count u> triggers x-sensor-out-of-range
-    1 ['] display-temps 512 128 512 spawn display-temps-task !
-    0 display-temps-task @ task-priority!
-    display-temps-task @ run
+  : start-display-temps ( -- )
+    true to display-temps?
+    display-temps-task 0= if
+      0 ['] display-temps 512 128 512 spawn to display-temps-task
+      0 display-temps-task task-priority!
+      display-temps-task run
+    then
+  ;
+  
+  \ Stop displaying temperatures repeatedly
+  : stop-display-temps ( -- )
+    false to display-temps?
   ;
 
 end-module

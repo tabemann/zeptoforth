@@ -221,7 +221,7 @@ Set ISR threshold before autopush or conditional push will take place; value may
 Write to the TX FIFO of a state machine.
 
 ##### `sm-rxf@`
-( x state-machine pio -- )
+( state-machine pio -- x )
 
 Read from the RX FIFO of a state machine.
 
