@@ -20,6 +20,7 @@ Zeptoforth Documentation
    words/adc
    words/spi
    words/i2c
+   words/pwm
    words/sdcard
    words/fat32
    words/simple_fat32

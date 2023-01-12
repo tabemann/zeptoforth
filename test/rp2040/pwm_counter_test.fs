@@ -91,18 +91,3 @@ begin-module pwm-test
   ;
 
 end-module
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      

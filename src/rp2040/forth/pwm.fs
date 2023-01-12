@@ -18,10 +18,27 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
+compile-to-flash
+
 begin-module pwm
 
   interrupt import
   pin import
+
+  \ Out of range PWM index
+  : x-out-of-range-pwm ." out of ramge PWM slice" cr ;
+
+  \ Out of range clock divisor
+  : x-out-of-range-clock-div ." out of range clock divisor" cr ;
+
+  \ Out of range counter value
+  : x-out-of-range-counter ." out of range counter value" cr ;
+
+  \ Out of range compare value
+  : x-out-of-range-compare ." out of range compare value" cr ;
+
+  \ Out of range top value
+  : x-out-of-range-top ." out of range top value" cr ;
 
   begin-module pwm-internal
 
@@ -157,6 +174,12 @@ begin-module pwm
       init-pwm-core-1
     ;
 
+    \ Validate a PWM slice
+    : validate-pwm-index ( index -- ) 8 u< averts x-out-of-range-pwm ;
+
+    \ Validate a PWM mask
+    : validate-pwm-mask ( index -- ) $FF bic 0= averts x-out-of-range-pwm ;
+    
   end-module> import
 
   \ Set a pin as a PWM pin
@@ -166,19 +189,19 @@ begin-module pwm
   : pwm-vector! ( xt -- ) pwm-vector vector! ;
 
   \ Enable any set of slices, expressed as bits from 0 to 7
-  : enable-pwm ( bits -- ) $FF and EN bis! ;
+  : enable-pwm ( bits -- ) dup validate-pwm-mask EN bis! ;
 
   \ Disable any set of slices, expressed as bits from 0 to 7
-  : disable-pwm ( bits -- ) $FF and EN bic! ;
+  : disable-pwm ( bits -- ) dup validate-pwm-mask EN bic! ;
 
   \ Enable interrupts for any set of slices, expressed as bits from 0 to 7
-  : enable-pwm-int ( bits -- ) $FF and INTE bis! ;
+  : enable-pwm-int ( bits -- ) dup validate-pwm-mask INTE bis! ;
 
   \ Disable interrupts for any set of slices, expressed as bits from 0 to 7
-  : disable-pwm-int ( bits -- ) $FF and INTE bic! ;
+  : disable-pwm-int ( bits -- ) dup validate-pwm-mask INTE bic! ;
 
   \ Clear an interrupt for any set of slices, expressed as bits from 0 to 7
-  : clear-pwm-int ( bits -- ) $FF and INTR bis! ;
+  : clear-pwm-int ( bits -- ) dup validate-pwm-mask INTR bis! ;
 
   \ Get the interrupt state for all slices, expressed as one bit per slice
   \ from 0 to 7
@@ -189,50 +212,84 @@ begin-module pwm
   
   \ Advance the phase of a running counter by 1 count
   : advance-pwm-phase { index -- }
+    index validate-pwm-index
     index CH_CSR_PH_ADV! begin index CH_CSR_PH_ADV@ 0= until
   ;
 
   \ Retard the phase of a running counter by 1 count
   : retard-pwm-phase { index -- }
+    index validate-pwm-index
     index CH_CSR_PH_RET! begin index CH_CSR_PH_RET@ = until
   ;
 
   \ Set a slice to be free-running
-  : free-running-pwm ( index -- ) DIVMODE_FREE_RUNNING swap CH_CSR_DIVMODE! ;
+  : free-running-pwm ( index -- )
+    dup validate-pwm-index DIVMODE_FREE_RUNNING swap CH_CSR_DIVMODE!
+  ;
 
   \ Set a slice to be gated by the PWM B pin
-  : gated-pwm ( index -- ) DIVMODE_GATED swap CH_CSR_DIVMODE! ;
+  : gated-pwm ( index -- )
+    dup validate-pwm-index DIVMODE_GATED swap CH_CSR_DIVMODE!
+  ;
 
   \ Set a slice to advance with each rising eddge of the PWM B pin
-  : rising-edge-pwm ( index -- ) DIVMODE_RISING_EDGE swap CH_CSR_DIVMODE! ;
+  : rising-edge-pwm ( index -- )
+    dup validate-pwm-index DIVMODE_RISING_EDGE swap CH_CSR_DIVMODE!
+  ;
 
   \ Set a slice to advance with each falling edge of the PWM B pin
-  : falling-edge-pwm ( index -- ) DIVMODE_FALLING_EDGE swap CH_CSR_DIVMODE! ;
+  : falling-edge-pwm ( index -- )
+    dup validate-pwm-index DIVMODE_FALLING_EDGE swap CH_CSR_DIVMODE!
+  ;
 
   \ Set invert PWM output B for a slice
-  : pwm-invert-b! ( state index -- ) CH_CSR_B_INV! ;
+  : pwm-invert-b! ( state index -- ) dup validate-pwm-index CH_CSR_B_INV! ;
 
   \ Set invert PWM output A for a slice
-  : pwm-invert-a! ( state index -- ) CH_CSR_A_INV! ;
+  : pwm-invert-a! ( state index -- ) dup validate-pwm-index CH_CSR_A_INV! ;
 
   \ Set phase-correct modulation for a slice
-  : pwm-phase-correct! ( state index -- ) CH_CSR_PH_CORRECT! ;
+  : pwm-phase-correct! ( state index -- )
+    dup validate-pwm-index CH_CSR_PH_CORRECT!
+  ;
 
   \ Set clock frequency divisor; int is the integral portion from 1 to 255
   \ and fract is the fractional portion from 0 to 15
-  : pwm-clock-div! ( fract int index -- ) CH_DIV! ;
+  : pwm-clock-div! ( fract int index -- )
+    dup validate-pwm-index
+    over 0 u> averts x-out-of-range-clock-div
+    over 256 u< averts x-out-of-range-clock-div
+    2 pick 16 u< averts x-out-of-range-clock-div
+    CH_DIV!
+  ;
 
   \ Set the PWM output B for a slice counter compare value
-  : pwm-counter-compare-b! ( value index -- ) CH_CC_B! ;
+  : pwm-counter-compare-b! ( value index -- )
+    dup validate-pwm-index
+    over 65536 u< averts x-out-of-range-compare
+    CH_CC_B!
+  ;
 
   \ Set the PWM output A for a slice counter compare value
-  : pwm-counter-compare-a! ( value index -- ) CH_CC_A! ;
+  : pwm-counter-compare-a! ( value index -- )
+    dup validate-pwm-index
+    over 65536 u< averts x-out-of-range-compare
+    CH_CC_A!
+  ;
 
   \ Set the slice counter wrap value
-  : pwm-top! ( value index -- ) CH_TOP ! ;
+  : pwm-top! ( value index -- )
+    dup validate-pwm-index
+    over 65536 u< averts x-out-of-range-top
+    CH_TOP !
+  ;
 
   \ Set the slice counter value
-  : pwm-counter! ( value index -- ) swap $FFFF and swap CH_CTR ! ;
+  : pwm-counter! ( value index -- )
+    dup validate-pwm-index
+    over 65536 u< averts x-out-of-range-counter
+    CH_CTR !
+  ;
 
   \ Get the slice counter value
   : pwm-counter@ ( index -- value ) CH_CTR @ ;
@@ -241,3 +298,5 @@ end-module
 
 \ Initialize
 : init init pwm::pwm-internal::init-pwm ;
+
+reboot
