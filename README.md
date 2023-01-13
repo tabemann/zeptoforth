@@ -36,6 +36,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 * One-shot ADC support
 * SPI (both master and slave) support
 * I2C (both master and slave) support (on the Raspberry Pi Pico)
+* PWM support (on the Raspberry Pi Pico)
 * Maps, including counted string and integer-keyed maps
 * Heap allocators
 * Memory pool allocators
