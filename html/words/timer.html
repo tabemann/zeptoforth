@@ -1,0 +1,228 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Hardware Timers &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="SDHC/SDXC Card Support" href="sdcard.html" />
+    <link rel="prev" title="Pulse Width Modulation Words" href="pwm.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="hardware-timers">
+<h1>Hardware Timers<a class="headerlink" href="#hardware-timers" title="Permalink to this headline">¶</a></h1>
+<p>zeptoforth on the RP2040 (i.e. the Raspberry Pi Pico) has support for hardware timers and delays at up to a microsecond precision. Note that in practice microsecond precision is not necessarily possible, due to interrupts being disabled, interrupt priorities, busy-waits having a limited time resolution, and the chance of busy-waits being preempted if interrupts are not disabled during them.</p>
+<p>The 64-bit microsecond timer can represent a sufficiently large range of values, i.e. it can represent thousands of years of time, such that it can be treated as effectively monotonic. Note that the user can change the value of the microsecond timer or pause it, but this is not recommended in most use cases.</p>
+<p>The hardware timer on the RP2040 has one shared 64-bit microsecond counter and four “alarms” which are triggered by a set value to be compared with the lower 32 bits of the microsecond counter. Alarm handlers execute at interrupt time, so they must be interrupt-safe. Alarms must be enabled for each time they are used and are disabled when they are triggered. However, the interrupt state must be disabled before leaving the alarm interrupt handler or else they will be triggered repeatedly in an infinite loop. Also note that alarm handlers always execute on core 0 even when core 1 has been booted.</p>
+<p>There are also busy-loop microsecond delays which wait until a given 64-bit microsecond time. Because the 64-bit microsecond counter can be reasonably treated as not wrapping, only a fixed 64-bit microsecond time is provided. On top of this, busy-loop microsecond delays which wait a given 64-bit microsecond interval are also available. This may be easier to use, but when waiting at repeated intervals maintaining a separate counter, incrementing it for each interval, and waiting until that time is likely to provide better behavior than waiting for intervals relative to the start of the wait.</p>
+<section id="timer">
+<h2><code class="docutils literal notranslate"><span class="pre">timer</span></code><a class="headerlink" href="#timer" title="Permalink to this headline">¶</a></h2>
+<p>The following words are in the <code class="docutils literal notranslate"><span class="pre">timer</span></code> module on the <code class="docutils literal notranslate"><span class="pre">rp2040</span></code> platform:</p>
+<section id="us-counter-lsb">
+<h3><code class="docutils literal notranslate"><span class="pre">us-counter-lsb</span></code><a class="headerlink" href="#us-counter-lsb" title="Permalink to this headline">¶</a></h3>
+<p>( – us )</p>
+<p>Get the lower 32 bits in the current time in microseconds.</p>
+</section>
+<section id="us-counter">
+<h3><code class="docutils literal notranslate"><span class="pre">us-counter</span></code><a class="headerlink" href="#us-counter" title="Permalink to this headline">¶</a></h3>
+<p>( – us-d )</p>
+<p>Get the current time in microseconds as a 64-bit value.</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">us-counter!</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>( us-d – )</p>
+<p>Set the microsecond counter to a 64-bit value.</p>
+</section>
+<section id="pause-us">
+<h3><code class="docutils literal notranslate"><span class="pre">pause-us</span></code><a class="headerlink" href="#pause-us" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Pause the microsecond counter.</p>
+</section>
+<section id="unpause-us">
+<h3><code class="docutils literal notranslate"><span class="pre">unpause-us</span></code><a class="headerlink" href="#unpause-us" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Unpause the microsecond counter.</p>
+</section>
+<section id="delay-until-us">
+<h3><code class="docutils literal notranslate"><span class="pre">delay-until-us</span></code><a class="headerlink" href="#delay-until-us" title="Permalink to this headline">¶</a></h3>
+<p>( us-d – )</p>
+<p>Delay until at least a 64-bit microsecond value, even though it may take longer considering the practical delay resolution, interrupts, and whether the microsecond counter is set or paused.</p>
+</section>
+<section id="delay-us">
+<h3><code class="docutils literal notranslate"><span class="pre">delay-us</span></code><a class="headerlink" href="#delay-us" title="Permalink to this headline">¶</a></h3>
+<p>( us-d – )</p>
+<p>Delay a given number of microseconds, even though it may take longer considering the practical delay resolution, interrupts, and whether the microsecond counter is set or paused.</p>
+</section>
+<section id="set-alarm">
+<h3><code class="docutils literal notranslate"><span class="pre">set-alarm</span></code><a class="headerlink" href="#set-alarm" title="Permalink to this headline">¶</a></h3>
+<p>( us xt alarm – )</p>
+<p>Set an alarm at a time. <em>alarm</em> is an alarm index from 0 to 3. <em>xt</em> is the execution token for the alarm handler. <em>us</em> is the lower 32 bits of the microsecond counter to trigger the alarm at.</p>
+</section>
+<section id="clear-alarm">
+<h3><code class="docutils literal notranslate"><span class="pre">clear-alarm</span></code><a class="headerlink" href="#clear-alarm" title="Permalink to this headline">¶</a></h3>
+<p>( alarm – )</p>
+<p>Clear an alarm. <em>alarm</em> is an alarm index from 0 to 3.</p>
+</section>
+<section id="clear-alarm-int">
+<h3><code class="docutils literal notranslate"><span class="pre">clear-alarm-int</span></code><a class="headerlink" href="#clear-alarm-int" title="Permalink to this headline">¶</a></h3>
+<p>( alarm – )</p>
+<p>Clear an alarm interrupt. <em>alarm</em> is an alarm index from 0 to 3. This must be called with the approriate alarm index inside an alarm handler for a given alarm or else the alarm handler will be called in an infinite loop.</p>
+</section>
+<section id="x-out-of-range-alarm">
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-alarm</span></code><a class="headerlink" href="#x-out-of-range-alarm" title="Permalink to this headline">¶</a></h3>
+<p>Out of range alarm index exception.</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="led.html">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pio.html">Programmable Input/Output Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uart.html">UART Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adc.html">Analog-Digital Converter Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spi.html">SPI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="i2c.html">I2C Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pwm.html">Pulse Width Modulation Words</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Hardware Timers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fat32_tools.html">FAT32 Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pool.html">Pool Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="map.html">Map Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oo.html">Object Orientation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schannel.html">Simple channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rchannel.html">Bidirectional Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="edit.html">Block Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="swd.html"><code class="docutils literal notranslate"><span class="pre">swdcom</span></code> Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test.html">Testing Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="pwm.html" title="previous chapter">Pulse Width Modulation Words</a></li>
+      <li>Next: <a href="sdcard.html" title="next chapter">SDHC/SDXC Card Support</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Travis Bemann.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/words/timer.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

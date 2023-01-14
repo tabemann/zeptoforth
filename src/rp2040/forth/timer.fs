@@ -111,7 +111,7 @@ begin-module timer
   \ Pause the microsecond counter
   : pause-us ( -- ) 0 bit TIME_PAUSE bis! ;
 
-  \ Unpaud the microsecond counter
+  \ Unpause the microsecond counter
   : unpause-us ( -- ) 0 bit TIME_PAUSE bic! ;
 
   \ Delay until a microsecond
