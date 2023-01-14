@@ -71,7 +71,7 @@ begin-module shade-led
       shade-level @ 0<= if
         shade-increment @ abs shade-increment !
       else
-        shade-level @ max-shade-level @ >= if
+        shade-level @ shade-max-input-shade @ >= if
           shade-increment @ abs negate shade-increment !
         then
       then
@@ -93,7 +93,7 @@ begin-module shade-led
     shade-max-input-shade @ convert-shade max-shade-level !
     25 pwm-pin
     0 pwm-slice pwm-counter!
-    max-shade-level @ convert-shade pwm-slice pwm-top!
+    max-shade-level @ pwm-slice pwm-top!
     0 255 pwm-slice pwm-clock-div!
     true pwm-slice pwm-phase-correct!
     pwm-slice bit enable-pwm
