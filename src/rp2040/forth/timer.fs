@@ -145,7 +145,8 @@ begin-module timer
   \ Clear an alarm interrupt
   : clear-alarm-int { index -- }
     index validate-alarm
-    index bit INTR bic!
+    index bit INTR !
+    index timer-irq NVIC_ICPR_CLRPEND!
   ;
   
 end-module

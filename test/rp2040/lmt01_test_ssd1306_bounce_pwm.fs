@@ -65,7 +65,7 @@ begin-module read-temp
   1 constant pwm-index
   
   \ The PWM wrap level
-  256 constant pwm-wrap
+  512 constant pwm-wrap
   
   \ The PWM GPIO pin
   19 constant pwm-gpio-pin
