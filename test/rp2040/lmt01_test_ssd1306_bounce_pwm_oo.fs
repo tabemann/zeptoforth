@@ -145,7 +145,7 @@ begin-module read-temp
   <sensor> begin-implement
 
     \ Initialize a sensor
-    :noname { self-pwm self-pin self }
+    :noname { self-pwm self-pin self -- }
       self <object>->new
       self-pin self sensor-pin !
       self-pwm self sensor-pwm !
@@ -155,7 +155,7 @@ begin-module read-temp
     ; define new
 
     \ Read a sensor
-    :noname { self }
+    :noname { self -- }
       0 self sensor-pwm @ pwm-slice-counter!
       self sensor-pin @ output-pin
       self sensor-pwm @ enable-pwm-slice
@@ -440,7 +440,7 @@ begin-module read-temp
   <readout-t> begin-implement
 
     \ Update the value of the readout
-    :noname
+    :noname ( self -- )
       32 [:
         { self buf }
         buf self readout-sensor @ sensor-temp@
@@ -458,7 +458,7 @@ begin-module read-temp
   <readout-c> begin-implement
 
     \ Update the value of the readout
-    :noname
+    :noname ( self -- )
       32 [:
         { self buf }
         buf self readout-sensor @ sensor-temp-c@
@@ -476,7 +476,7 @@ begin-module read-temp
   <readout-f> begin-implement
 
     \ Update the value of the readout
-    :noname
+    :noname ( self -- )
       32 [:
         { self buf }
         buf self readout-sensor @ sensor-temp-f@
