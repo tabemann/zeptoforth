@@ -120,6 +120,9 @@ begin-module multicore
 
   \ Test and set spinlock index
   28 constant test-set-spinlock
+
+  \ RTC spinlock index
+  27 constant rtc-spinlock
   
   continue-module multicore-internal
 

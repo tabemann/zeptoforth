@@ -475,13 +475,13 @@ Init_Clk_RTC:
 	bne  1b
 
 	// Select the USB PLL as auxiliary clock source (reuses the zero in r3)
-	str  r3, [r0, #CLK_ADC_CTRL]
+	str  r3, [r0, #CLK_RTC_CTRL]
 	// (Re-)start the ADC clock (only the enable flag is set)
-	str  r2, [r0, #CLK_ADC_CTRL]
+	str  r2, [r0, #CLK_RTC_CTRL]
 
 	// Divide the USB PLL by 1024
 	lsls r2, #5
-	str  r2, [r0, #CLK_ADC_DIV]
+	str  r2, [r0, #CLK_RTC_DIV]
 
 Init_Clk_Peri:
 	ldr  r2, =1<<11

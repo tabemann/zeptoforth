@@ -1,0 +1,558 @@
+\ Copyright (c) 2023 Travis Bemann
+\ 
+\ Permission is hereby granted, free of charge, to any person obtaining a copy
+\ of this software and associated documentation files (the "Software"), to deal
+\ in the Software without restriction, including without limitation the rights
+\ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+\ copies of the Software, and to permit persons to whom the Software is
+\ furnished to do so, subject to the following conditions:
+\ 
+\ The above copyright notice and this permission notice shall be included in
+\ all copies or substantial portions of the Software.
+\ 
+\ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+\ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+\ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+\ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+\ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+\ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+\ SOFTWARE.
+
+begin-module rtc
+
+  multicore import
+  interrupt import
+  
+  \ Invalid date/time exception
+  : x-invalid-date-time ( -- ) ." invalid date/time" cr ;
+
+  \ Our date-time structure; this is meant for user consumption
+  \
+  \ Each field, when set to $FFFFFFFF or $FF, means to ignore the field when
+  \ setting the date and time
+  begin-structure date-time-size
+    
+    \ The year; valid values are from 0 to 4095
+    field: date-time-year
+
+    \ The month; valid values are from 1 to 12
+    cfield: date-time-month
+
+    \ The day; valid values are from 1 to [28, 29, 30, 31] depending on the
+    \ month
+    cfield: date-time-day
+
+    \ The day of the week; valid values are from 0 to 6, 0 is Sunday
+    cfield: date-time-dotw
+
+    \ The hour; valid values are 0 to 23
+    cfield: date-time-hour
+
+    \ The minute; valid values are from 0 to 59
+    cfield: date-time-minute
+
+    \ The second; valid values are from 0 to 59
+    cfield: date-time-second
+
+    \ Align the size of the date/time
+    cell align
+    
+  end-structure
+
+  begin-module rtc-internal
+
+    \ Resets base
+    $4000C000 constant RESETS_Base
+
+    \ Set resets address
+    RESETS_Base 2 12 lshift or $00 + constant RESET_SET
+    
+    \ Clear resets address
+    RESETS_Base 3 12 lshift or $00 + constant RESET_CLR
+
+    \ Resets done address
+    RESETS_Base $08 + constant RESET_DONE
+    
+    \ Reset RTC bit
+    15 bit constant RESETS_RTC
+
+    \ RTC base
+    $4005C000 constant RTC_Base
+
+    \ RTC clock divider, minus 1
+    RTC_Base $00 + constant RTC_CLKDIV_M1
+
+    \ RTC setup register 0
+    RTC_Base $04 + constant RTC_SETUP_0
+
+    \ RTC setup register 1
+    RTC_Base $08 + constant RTC_SETUP_1
+
+    \ RTC control and status register
+    RTC_Base $0C + constant RTC_CTRL
+
+    \ RTC interrupt setup register 0
+    RTC_Base $10 + constant RTC_IRQ_SETUP_0
+
+    \ RTC interrupt setup register 1
+    RTC_Base $14 + constant RTC_IRQ_SETUP_1
+
+    \ RTC register 1
+    RTC_Base $18 + constant RTC_RTC_1
+
+    \ RTC register 0 - read this before RTC_RTC_1!
+    RTC_Base $1C + constant RTC_RTC_0
+
+    \ RTC raw interrupts register
+    RTC_Base $20 + constant RTC_INTR
+
+    \ RTC interrupt enable register
+    RTC_Base $24 + constant RTC_INTE
+
+    \ RTC interrupt force register
+    RTC_Base $28 + constant RTC_INTF
+
+    \ RTC interrupt status after masking and forcing register
+    RTC_Base $2C + constant RTC_INTS
+
+    \ RTC IRQ
+    25 constant rtc-irq
+
+    \ RTC exception vector
+    rtc-irq 16 + constant rtc-vector
+
+    \ Set the RTC year
+    : RTC_SETUP_0_YEAR! { year -- }
+      RTC_SETUP_0 @ $FFF000 bic year 12 lshift or RTC_SETUP_0 !
+    ;
+
+    \ Set the RTC month
+    : RTC_SETUP_0_MONTH! { month -- }
+      RTC_SETUP_0 @ $F00 bic month 8 lshift or RTC_SETUP_0 !
+    ;
+
+    \ Set the RTC day
+    : RTC_SETUP_0_DAY! { day -- }
+      RTC_SETUP_0 @ $1F bic day or RTC_SETUP_0 !
+    ;
+
+    \ Set the RTC day of the week
+    : RTC_SETUP_1_DOTW! { dotw -- }
+      RTC_SETUP_1 @ $7000000 bic dotw 24 lshift or RTC_SETUP_1 !
+    ;
+
+    \ Set the RTC hour
+    : RTC_SETUP_1_HOUR! { hour -- }
+      RTC_SETUP_1 @ $1F0000 bic hour 16 lshift or RTC_SETUP_1 !
+    ;
+
+    \ Set the RTC minute
+    : RTC_SETUP_1_MIN! { minute -- }
+      RTC_SETUP_1 @ $3F00 bic minute 8 lshift or RTC_SETUP_1 !
+    ;
+
+    \ Set the RTC second
+    : RTC_SETUP_1_SEC! { second -- }
+      RTC_SETUP_1 @ $3F bic second or RTC_SETUP_1 !
+    ;
+
+    \ Set forcing the leap year off
+    : RTC_CTRL_FORCE_NOTLEAPYEAR! { not-leap-year -- }
+      8 bit RTC_CTRL not-leap-year if bis! else bic! then
+    ;
+
+    \ Load the RTC date/time
+    : RTC_CTRL_LOAD! ( -- )
+      4 bit RTC_CTRL bis!
+    ;
+
+    \ Get whether the RTC is active
+    : RTC_CTRL_RTC_ACTIVE@ ( -- active )
+      1 bit RTC_CTRL bit@
+    ;
+
+    \ Set RTC enabled
+    : RTC_CTRL_RTC_ENABLE! { enable -- }
+      0 bit RTC_CTRL enable if bis! else bic! then
+    ;
+    
+    \ Get whether RTC matching is active
+    : RTC_IRQ_SETUP_0_MATCH_ACTIVE@ ( -- active )
+      29 bit RTC_IRQ_SETUP_0 bit@
+    ;
+
+    \ Set RTC matching enabled
+    : RTC_IRQ_SETUP_0_MATCH_ENA! { enable -- }
+      28 bit RTC_IRQ_SETUP_0 enable if bis! else bic! then
+    ;
+
+    \ Set year matching enabled
+    : RTC_IRQ_SETUP_0_YEAR_ENA! { enable -- }
+      26 bit RTC_IRQ_SETUP_0 enable if bis! else bic! then
+    ;
+
+    \ Set month matching enabled
+    : RTC_IRQ_SETUP_0_MONTH_ENA! { enable -- }
+      25 bit RTC_IRQ_SETUP_0 enable if bis! else bic! then
+    ;
+
+    \ Set day matching enabled
+    : RTC_IRQ_SETUP_0_DAY_ENA! { enable -- }
+      24 bit RTC_IRQ_SETUP_0 enable if bis! else bic! then
+    ;
+
+    \ Set the matched year
+    : RTC_IRQ_SETUP_0_YEAR! { year -- }
+      RTC_IRQ_SETUP_0 @ $FFF000 bic year 12 lshift or RTC_IRQ_SETUP_0 !
+    ;
+
+    \ Set the matched month
+    : RTC_IRQ_SETUP_0_MONTH! { month -- }
+      RTC_IRQ_SETUP_0 @ $F00 bic month 8 lshift or RTC_IRQ_SETUP_0 !
+    ;
+
+    \ Set the matched day
+    : RTC_IRQ_SETUP_0_DAY! { day -- }
+      RTC_IRQ_SETUP_0 @ $1F bic day or RTC_IRQ_SETUP_0 !
+    ;
+
+    \ Set day of the week matching enabled
+    : RTC_IRQ_SETUP_1_DOTW_ENA! { enable -- }
+      31 bit RTC_IRQ_SETUP_1 enable if bis! else bic! then
+    ;
+
+    \ Set hour matching enabled
+    : RTC_IRQ_SETUP_1_HOUR_ENA! { enable -- }
+      30 bit RTC_IRQ_SETUP_1 enable if bis! else bic! then
+    ;
+
+    \ Set minute matching enabled
+    : RTC_IRQ_SETUP_1_MIN_ENA! { enable -- }
+      29 bit RTC_IRQ_SETUP_1 enable if bis! else bic! then
+    ;
+
+    \ Set second matching enabled
+    : RTC_IRQ_SETUP_1_SEC_ENA! { enable -- }
+      28 bit RTC_IRQ_SETUP_1 enable if bis! else bic! then
+    ;
+    
+    \ Set the matched day of the week
+    : RTC_IRQ_SETUP_1_DOTW! { dotw -- }
+      RTC_IRQ_SETUP_1 @ $7000000 bic dotw 24 lshift or RTC_IRQ_SETUP_1 !
+    ;
+
+    \ Set the matched hour
+    : RTC_IRQ_SETUP_1_HOUR! { hour -- }
+      RTC_IRQ_SETUP_1 @ $1F0000 bic hour 16 lshift or RTC_IRQ_SETUP_1 !
+    ;
+
+    \ Set the matched minute
+    : RTC_IRQ_SETUP_1_MIN! { minute -- }
+      RTC_IRQ_SETUP_1 @ $3F00 bic minute 8 lshift or RTC_IRQ_SETUP_1 !
+    ;
+
+    \ Set the matched second
+    : RTC_IRQ_SETUP_1_SEC! { second -- }
+      RTC_IRQ_SETUP_1 @ $3F bic second or RTC_IRQ_SETUP_1 !
+    ;
+    
+    \ Get the current year
+    : RTC_RTC_1_YEAR@ ( -- year )
+      RTC_RTC_1 @ $FFF000 and 12 rshift
+    ;
+
+    \ Get the current month
+    : RTC_RTC_1_MONTH@ ( -- month )
+      RTC_RTC_1 @ $F00 and 8 rshift
+    ;
+
+    \ Get the current day
+    : RTC_RTC_1_DAY@ ( -- day )
+      RTC_RTC_1 @ $1F and
+    ;
+
+    \ Get the current day of the week
+    : RTC_RTC_0_DOTW@ ( -- dotw )
+      RTC_RTC_0 @ $7000000 and 24 rshift
+    ;
+
+    \ Get the current hour
+    : RTC_RTC_0_HOUR@ ( -- hour )
+      RTC_RTC_0 @ $1F0000 and 16 rshift
+    ;
+
+    \ Get the current minute
+    : RTC_RTC_0_MIN@ ( -- minute )
+      RTC_RTC_0 @ $3F00 and 8 rshift
+    ;
+
+    \ Get the current second
+    : RTC_RTC_0_SEC@ ( -- second )
+      RTC_RTC_0 @ $3F and
+    ;
+
+  end-module> import
+  
+  \ Get the current date and time
+  : date-time@ ( date-time -- )
+    [: { date-time }
+      RTC_RTC_0_SEC@ date-time date-time-second c!
+      RTC_RTC_0_MIN@ date-time date-time-minute c!
+      RTC_RTC_0_HOUR@ date-time date-time-hour c!
+      RTC_RTC_0_DOTW@ date-time date-time-dotw c!
+      RTC_RTC_1_DAY@ date-time date-time-day c!
+      RTC_RTC_1_MONTH@ date-time date-time-month c!
+      RTC_RTC_1_YEAR@ date-time date-time-year !
+    ;] rtc-spinlock critical-with-spinlock
+  ;
+
+  continue-module rtc-internal
+  
+    \ Test for a value in a range
+    : test-range { test-value min-value max-value -- }
+      test-value min-value >= averts x-invalid-date-time
+      test-value max-value <= averts x-invalid-date-time
+    ;
+
+    \ Get whether a year is a leap year
+    : leap-year? { year -- }
+      year 100 umod 0= if
+        year 400 umod 0=
+      else
+        year 4 umod 0=
+      then
+    ;
+
+    \ Number of days in a mont
+    create days-in-month 0 c, 31 c, 28 c, 31 c, 30 c, 31 c, 30 c, 31 c,
+    31 c, 30 c, 31 c, 30 c, 31 c,
+    
+    \ Validate a date/time
+    : validate-date-time ( date-time -- )
+      date-time-size [: { new-date-time old-date-time }
+        old-date-time date-time@
+        new-date-time date-time-year @ -1 <> if
+          new-date-time date-time-year @ 0 4095 test-range
+          new-date-time date-time-year @
+        else
+          old-date-time date-time-year @
+        then { test-year }
+        new-date-time date-time-month c@ $FF <> if
+          new-date-time date-time-month c@ 1 31 test-range
+          new-date-time date-time-month c@
+        else
+          old-date-time date-time-month c@
+        then { test-month }
+        new-date-time date-time-day c@ $FF <> if
+          test-month 2 <> if
+            new-date-time date-time-day c@ 1 days-in-month test-month + c@
+            test-range
+          else
+            new-date-time date-time-day c@ 1
+            test-year leap-year? if 29 else 28 then test-month
+          then
+        then
+        new-date-time date-time-dotw c@ $FF <> if
+          new-date-time date-time-dotw c@ 0 6 test-range
+        then
+        new-date-time date-time-hour c@ $FF <> if
+          new-date-time date-time-hour c@ 0 23 test-range
+        then
+        new-date-time date-time-minute c@ $FF <> if
+          new-date-time date-time-minute c@ 0 59 test-range
+        then
+        new-date-time date-time-second c@ $FF <> if
+          new-date-time date-time-second c@ 0 59 test-range
+        then
+      ;] with-aligned-allot
+    ;
+
+    \ Validate a date/time match
+    : validate-date-time-match { date-time -- }
+      date-time date-time-year @ -1 <> if
+        date-time date-time-year @ 0 4095 test-range
+      then
+      date-time date-time-month c@ $FF <> if
+        date-time date-time-month c@ 1 31 test-range
+      then
+      date-time date-time-day c@ $FF <> if
+        date-time date-time-month c@ $FF <> if
+          date-time date-time-month c@ 2 <> if
+            date-time date-time-day c@ 1
+            days-in-month date-time date-time-month c@ + c@
+            test-range
+          else
+            date-time date-time-day c@ 1
+            date-time date-time-year @ -1 <> if
+              date-time date-time-year @ leap-year? if 29 else 28 then
+            else
+              29
+            then
+            test-range
+          then
+        else
+          date-time date-time-day c@ 1 31 test-range
+        then
+      then
+      date-time date-time-dotw c@ $FF <> if
+        date-time date-time-dotw c@ 0 6 test-range
+      then
+      date-time date-time-hour c@ $FF <> if
+        date-time date-time-hour c@ 0 23 test-range
+      then
+      date-time date-time-minute c@ $FF <> if
+        date-time date-time-minute c@ 0 59 test-range
+      then
+      date-time date-time-second c@ $FF <> if
+        date-time date-time-second c@ 0 59 test-range
+      then
+    ;
+
+    \ Raw set the RTC
+    : raw-date-time! { date-time -- }
+      date-time date-time-year @ -1 <> if
+        date-time date-time-year @ RTC_SETUP_0_YEAR!
+      then
+      date-time date-time-month c@ $FF <> if
+        date-time date-time-month c@ RTC_SETUP_0_MONTH!
+      then
+      date-time date-time-day c@ $FF <> if
+        date-time date-time-day c@ RTC_SETUP_0_DAY!
+      then
+      date-time date-time-dotw c@ $FF <> if
+        date-time date-time-dotw c@ RTC_SETUP_1_DOTW!
+      then
+      date-time date-time-hour c@ $FF <> if
+        date-time date-time-hour c@ RTC_SETUP_1_HOUR!
+      then
+      date-time date-time-minute c@ $FF <> if
+        date-time date-time-minute c@ RTC_SETUP_1_MIN!
+      then
+      date-time date-time-second c@ $FF <> if
+        date-time date-time-second c@ RTC_SETUP_1_SEC!
+      then
+      RTC_CTRL_LOAD!
+    ;
+
+    \ Raw set the RTC matching
+    : raw-date-time-match! { date-time -- }
+      date-time date-time-year @ -1 <> if
+        date-time date-time-year @ RTC_IRQ_SETUP_0_YEAR!
+        true RTC_IRQ_SETUP_0_YEAR_ENA!
+      else
+        false RTC_IRQ_SETUP_0_YEAR_ENA!
+      then
+      date-time date-time-month c@ $FF <> if
+        date-time date-time-month c@ RTC_IRQ_SETUP_0_MONTH!
+        true RTC_IRQ_SETUP_0_MONTH_ENA!
+      else
+        false RTC_IRQ_SETUP_0_MONTH_ENA!
+      then
+      date-time date-time-day c@ $FF <> if
+        date-time date-time-day c@ RTC_IRQ_SETUP_0_DAY!
+        true RTC_IRQ_SETUP_0_DAY_ENA!
+      else
+        false RTC_IRQ_SETUP_0_DAY_ENA!
+      then
+      date-time date-time-dotw c@ $FF <> if
+        date-time date-time-dotw c@ RTC_IRQ_SETUP_1_DOTW!
+        true RTC_IRQ_SETUP_1_DOTW_ENA!
+      else
+        false RTC_IRQ_SETUP_1_DOTW_ENA!
+      then
+      date-time date-time-hour c@ $FF <> if
+        date-time date-time-hour c@ RTC_IRQ_SETUP_1_HOUR!
+        true RTC_IRQ_SETUP_1_HOUR_ENA!
+      else
+        false RTC_IRQ_SETUP_1_HOUR_ENA!
+      then
+      date-time date-time-minute c@ $FF <> if
+        date-time date-time-minute c@ RTC_IRQ_SETUP_1_MIN!
+        true RTC_IRQ_SETUP_1_MIN_ENA!
+      else
+        false RTC_IRQ_SETUP_1_MIN_ENA!
+      then
+      date-time date-time-second c@ $FF <> if
+        date-time date-time-second c@ RTC_IRQ_SETUP_1_SEC!
+        true RTC_IRQ_SETUP_1_SEC_ENA!
+      else
+        false RTC_IRQ_SETUP_1_SEC_ENA!
+      then
+    ;
+    
+    \ Reset the RTC
+    : reset-rtc ( -- )
+      RESETS_RTC RESET_SET !
+      begin RESET_DONE @ not RESETS_RTC and while repeat
+    ;
+
+  end-module> import
+
+  \ Disable the RTC
+  : disable-rtc ( -- )
+    false RTC_CTRL_RTC_ENABLE!
+    begin RTC_CTRL_RTC_ACTIVE@ not until
+  ;
+
+  \ Enable the RTC
+  : enable-rtc ( -- )
+    true RTC_CTRL_RTC_ENABLE!
+    begin RTC_CTRL_RTC_ACTIVE@ until
+  ;
+  
+  continue-module rtc-internal
+
+    \ Initialize the RTC
+    : init-rtc ( -- )
+      disable-rtc
+      46874 RTC_CLKDIV_M1 !
+      date-time-size [: { date-time }
+        1970 date-time date-time-year !
+        1 date-time date-time-month c!
+        1 date-time date-time-day c!
+        4 date-time date-time-dotw c! \ Thursday
+        0 date-time date-time-hour c!
+        0 date-time date-time-minute c!
+        0 date-time date-time-second c!
+        date-time raw-date-time!
+      ;] with-aligned-allot
+      enable-rtc
+    ;
+
+  end-module> import
+
+  \ Set the date/time; with this -1 year and $FF other value settings do not
+  \ change the date/time fields in question
+  : date-time! { date-time -- }
+    date-time validate-date-time
+    disable-rtc
+    date-time raw-date-time!
+    enable-rtc
+  ;
+
+  \ Set the RTC alarm; with this -1 year and $FF other value settings are
+  \ ignored for the set alarm (i.e. recurrent alarms can be set)
+  : set-rtc-alarm { date-time xt -- }
+    date-time validate-date-time-match
+    rtc-irq NVIC_ICER_CLRENA!
+    0 bit RTC_INTE bic!
+    false RTC_IRQ_SETUP_0_MATCH_ENA!
+    begin RTC_IRQ_SETUP_0_MATCH_ACTIVE@ not until
+    date-time raw-date-time-match!
+    xt rtc-vector vector!
+    true RTC_IRQ_SETUP_0_MATCH_ENA!
+    begin RTC_IRQ_SETUP_0_MATCH_ACTIVE@ until
+    0 bit RTC_INTE bis!
+    rtc-irq NVIC_ISER_SETENA!
+  ;
+
+  \ Clear the RTC alarm
+  : clear-rtc-alarm ( -- )
+    rtc-irq NVIC_ICER_CLRENA!
+    0 bit RTC_INTE bic!
+    false RTC_IRQ_SETUP_0_MATCH_ENA!
+    begin RTC_IRQ_SETUP_0_MATCH_ACTIVE@ not until
+    rtc-irq NVIC_ISER_SETENA!
+  ;
+  
+end-module
