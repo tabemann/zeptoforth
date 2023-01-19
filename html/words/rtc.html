@@ -35,7 +35,11 @@
             
   <section id="realtime-clock-rtc-words-on-the-raspberry-pi-pico">
 <h1>Realtime Clock (RTC) Words on the Raspberry Pi Pico<a class="headerlink" href="#realtime-clock-rtc-words-on-the-raspberry-pi-pico" title="Permalink to this headline">¶</a></h1>
-<p>zeptoforth has support for reading and setting the realtime clock (RTC) on the Raspberry Pi Pico, both for keeping track of the date and time and for triggering an alarm at a given combination of second, minute, hour, day of the week, day, month, and/or year values.</p>
+<p>zeptoforth has support for reading and setting the realtime clock (RTC) on the Raspberry Pi Pico, both for keeping track of the date and time and for triggering an alarm.</p>
+<p>Note that the Raspberry Pi Pico’s RTC’s value is not preserved across resets, even if power is applied, so each time it is reset the RTC’s value must be provided a value before it can be useful. It is initialized on bootup to Thursday, 1 January 1970 00:00:00, and is enabled on boot.</p>
+<p>The alarm functionality allows triggering an alarm interrupt at a given combination of second, minute, hour, day of the week, day, month, and/or year values. Note that the alarm interrupt must either reset the alarm date/time to a new one or clear the alarm or otherwise it will be repeatedly triggered, which in most use cases is undesirable.</p>
+<p>Date time values are validated when provided, except that year values of -1 and values for other fields of $FF are ignored during validation, as they are explicit non-values used for setting a subset of RTC fields or matching against a subset of RTC fields.</p>
+<p>Also provided is code for formatting date/times as strings and printing them to the console, for convenience’s sake.</p>
 <section id="rtc">
 <h2><code class="docutils literal notranslate"><span class="pre">rtc</span></code><a class="headerlink" href="#rtc" title="Permalink to this headline">¶</a></h2>
 <p>The following words are in the <code class="docutils literal notranslate"><span class="pre">rtc</span></code> module:</p>
@@ -47,7 +51,7 @@
 <section id="date-time-year">
 <h3><code class="docutils literal notranslate"><span class="pre">date-time-year</span></code><a class="headerlink" href="#date-time-year" title="Permalink to this headline">¶</a></h3>
 <p>( date-time – addr )</p>
-<p>This returns the address of a cell in a date/time containing a year, from 0 to 4095, or when not setting a year or not matching against a yaer, -1</p>
+<p>This returns the address of a cell in a date/time containing a year, from 0 to 4095, or when not setting a year or not matching against a year, -1</p>
 </section>
 <section id="date-time-month">
 <h3><code class="docutils literal notranslate"><span class="pre">date-time-month</span></code><a class="headerlink" href="#date-time-month" title="Permalink to this headline">¶</a></h3>

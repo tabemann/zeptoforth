@@ -1,6 +1,14 @@
 # Realtime Clock (RTC) Words on the Raspberry Pi Pico
 
-zeptoforth has support for reading and setting the realtime clock (RTC) on the Raspberry Pi Pico, both for keeping track of the date and time and for triggering an alarm at a given combination of second, minute, hour, day of the week, day, month, and/or year values.
+zeptoforth has support for reading and setting the realtime clock (RTC) on the Raspberry Pi Pico, both for keeping track of the date and time and for triggering an alarm.
+
+Note that the Raspberry Pi Pico's RTC's value is not preserved across resets, even if power is applied, so each time it is reset the RTC's value must be provided a value before it can be useful. It is initialized on bootup to Thursday, 1 January 1970 00:00:00, and is enabled on boot.
+
+The alarm functionality allows triggering an alarm interrupt at a given combination of second, minute, hour, day of the week, day, month, and/or year values. Note that the alarm interrupt must either reset the alarm date/time to a new one or clear the alarm or otherwise it will be repeatedly triggered, which in most use cases is undesirable.
+
+Date time values are validated when provided, except that year values of -1 and values for other fields of $FF are ignored during validation, as they are explicit non-values used for setting a subset of RTC fields or matching against a subset of RTC fields.
+
+Also provided is code for formatting date/times as strings and printing them to the console, for convenience's sake.
 
 ### `rtc`
 
@@ -14,7 +22,7 @@ This returns the size of a date/time structure in bytes.
 ##### `date-time-year`
 ( date-time -- addr )
 
-This returns the address of a cell in a date/time containing a year, from 0 to 4095, or when not setting a year or not matching against a yaer, -1
+This returns the address of a cell in a date/time containing a year, from 0 to 4095, or when not setting a year or not matching against a year, -1
 
 ##### `date-time-month`
 ( date-time -- c-addr )
