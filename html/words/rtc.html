@@ -1,0 +1,267 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Realtime Clock (RTC) Words on the Raspberry Pi Pico &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Hardware Timers" href="timer.html" />
+    <link rel="prev" title="Pulse Width Modulation Words" href="pwm.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="realtime-clock-rtc-words-on-the-raspberry-pi-pico">
+<h1>Realtime Clock (RTC) Words on the Raspberry Pi Pico<a class="headerlink" href="#realtime-clock-rtc-words-on-the-raspberry-pi-pico" title="Permalink to this headline">¶</a></h1>
+<p>zeptoforth has support for reading and setting the realtime clock (RTC) on the Raspberry Pi Pico, both for keeping track of the date and time and for triggering an alarm at a given combination of second, minute, hour, day of the week, day, month, and/or year values.</p>
+<section id="rtc">
+<h2><code class="docutils literal notranslate"><span class="pre">rtc</span></code><a class="headerlink" href="#rtc" title="Permalink to this headline">¶</a></h2>
+<p>The following words are in the <code class="docutils literal notranslate"><span class="pre">rtc</span></code> module:</p>
+<section id="date-time-size">
+<h3><code class="docutils literal notranslate"><span class="pre">date-time-size</span></code><a class="headerlink" href="#date-time-size" title="Permalink to this headline">¶</a></h3>
+<p>( – bytes )</p>
+<p>This returns the size of a date/time structure in bytes.</p>
+</section>
+<section id="date-time-year">
+<h3><code class="docutils literal notranslate"><span class="pre">date-time-year</span></code><a class="headerlink" href="#date-time-year" title="Permalink to this headline">¶</a></h3>
+<p>( date-time – addr )</p>
+<p>This returns the address of a cell in a date/time containing a year, from 0 to 4095, or when not setting a year or not matching against a yaer, -1</p>
+</section>
+<section id="date-time-month">
+<h3><code class="docutils literal notranslate"><span class="pre">date-time-month</span></code><a class="headerlink" href="#date-time-month" title="Permalink to this headline">¶</a></h3>
+<p>( date-time – c-addr )</p>
+<p>This returns the address of a byte in a date/time containing a month, from 1 to 12, or when not setting a month or not matching against a month, 255</p>
+</section>
+<section id="date-time-day">
+<h3><code class="docutils literal notranslate"><span class="pre">date-time-day</span></code><a class="headerlink" href="#date-time-day" title="Permalink to this headline">¶</a></h3>
+<p>( date-time – c-addr )</p>
+<p>This returns the address of a byte in a date/time containing a day, from 1 to any of 28, 29, 30, or 31 depending on the month and year, or when not setting a day or not matching against a day, 255</p>
+</section>
+<section id="date-time-dotw">
+<h3><code class="docutils literal notranslate"><span class="pre">date-time-dotw</span></code><a class="headerlink" href="#date-time-dotw" title="Permalink to this headline">¶</a></h3>
+<p>( date-time – c-addr )</p>
+<p>This returns the address of a byte in a date/time containing a day of the week, from 0 representing Sunday to 6 representing Saturday, or when not setting a day of the week or not matching against a day of the week, 255.</p>
+</section>
+<section id="date-time-hour">
+<h3><code class="docutils literal notranslate"><span class="pre">date-time-hour</span></code><a class="headerlink" href="#date-time-hour" title="Permalink to this headline">¶</a></h3>
+<p>( date-time – c-addr )</p>
+<p>This returns the address of a byte in a date/time containing an hour, from 0 to 23, or when not setting an hour or not matching against an hour, 255.</p>
+</section>
+<section id="date-time-minute">
+<h3><code class="docutils literal notranslate"><span class="pre">date-time-minute</span></code><a class="headerlink" href="#date-time-minute" title="Permalink to this headline">¶</a></h3>
+<p>( date-time – c-addr )</p>
+<p>This returns the address of a byte in a date/time containing a minute, from 0 to 59, or when not setting a minute or not matching against a minute, 255.</p>
+</section>
+<section id="date-time-second">
+<h3><code class="docutils literal notranslate"><span class="pre">date-time-second</span></code><a class="headerlink" href="#date-time-second" title="Permalink to this headline">¶</a></h3>
+<p>( date-time – c-addr )</p>
+<p>This returns the address of a byte in a date/time containing a second, from 0 to 59, or when not setting a second or not matching against a second, 255.</p>
+</section>
+<section id="enable-rtc">
+<h3><code class="docutils literal notranslate"><span class="pre">enable-rtc</span></code><a class="headerlink" href="#enable-rtc" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Enable the realtime clock. (Note that it is enabled by default.)</p>
+</section>
+<section id="disable-rtc">
+<h3><code class="docutils literal notranslate"><span class="pre">disable-rtc</span></code><a class="headerlink" href="#disable-rtc" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Disable the realtime clock.</p>
+</section>
+<section id="date-time">
+<h3><code class="docutils literal notranslate"><span class="pre">date-time&#64;</span></code><a class="headerlink" href="#date-time" title="Permalink to this headline">¶</a></h3>
+<p>( date-time – )</p>
+<p>Get the current date/time.</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">date-time!</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>( date-time – )</p>
+<p>Set the current date/time.</p>
+</section>
+<section id="set-rtc-alarm">
+<h3><code class="docutils literal notranslate"><span class="pre">set-rtc-alarm</span></code><a class="headerlink" href="#set-rtc-alarm" title="Permalink to this headline">¶</a></h3>
+<p>( date-time xt – )</p>
+<p>Set <em>xt</em> to execute as an RTC alarm interrupt handler at <em>date-time</em>, ignoring a year field of -1 and any of the other fields of 255. Note that when <em>xt</em> is executed it must reset the RTC alarm to a new date/time or clear the RTC alarm or else it will be triggered repeatedly.</p>
+</section>
+<section id="clear-rtc-alarm">
+<h3><code class="docutils literal notranslate"><span class="pre">clear-rtc-alarm</span></code><a class="headerlink" href="#clear-rtc-alarm" title="Permalink to this headline">¶</a></h3>
+<p>( – )</p>
+<p>Clear the RTC alarm.</p>
+</section>
+<section id="dotw-name">
+<h3><code class="docutils literal notranslate"><span class="pre">dotw-name</span></code><a class="headerlink" href="#dotw-name" title="Permalink to this headline">¶</a></h3>
+<p>( dotw – c-addr u )</p>
+<p>Get the name of a day of the week.</p>
+</section>
+<section id="month-name">
+<h3><code class="docutils literal notranslate"><span class="pre">month-name</span></code><a class="headerlink" href="#month-name" title="Permalink to this headline">¶</a></h3>
+<p>( month – c-addr u )</p>
+<p>Get the name of a month.</p>
+</section>
+<section id="max-date-time-format-size">
+<h3><code class="docutils literal notranslate"><span class="pre">max-date-time-format-size</span></code><a class="headerlink" href="#max-date-time-format-size" title="Permalink to this headline">¶</a></h3>
+<p>( – bytes )</p>
+<p>Get the maximum size in bytes of a date formated with <code class="docutils literal notranslate"><span class="pre">format-date-time</span></code>.</p>
+</section>
+<section id="format-date-time">
+<h3><code class="docutils literal notranslate"><span class="pre">format-date-time</span></code><a class="headerlink" href="#format-date-time" title="Permalink to this headline">¶</a></h3>
+<p>( c-addr date-time – c-addr u )</p>
+<p>Format <em>date-time</em> as a string starting at <em>c-addr</em>, and return the resulting string as the pair <em>c-addr</em> <em>u</em>.</p>
+</section>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">date-time.</span></code><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>( date-time – )</p>
+<p>Print a date/time as formatted with <code class="docutils literal notranslate"><span class="pre">format-date-time</span></code>.</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="led.html">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pio.html">Programmable Input/Output Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uart.html">UART Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adc.html">Analog-Digital Converter Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spi.html">SPI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="i2c.html">I2C Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pwm.html">Pulse Width Modulation Words</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Realtime Clock (RTC) Words on the Raspberry Pi Pico</a></li>
+<li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fat32_tools.html">FAT32 Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pool.html">Pool Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="map.html">Map Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oo.html">Object Orientation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schannel.html">Simple channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rchannel.html">Bidirectional Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="edit.html">Block Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="swd.html"><code class="docutils literal notranslate"><span class="pre">swdcom</span></code> Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test.html">Testing Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="pwm.html" title="previous chapter">Pulse Width Modulation Words</a></li>
+      <li>Next: <a href="timer.html" title="next chapter">Hardware Timers</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Travis Bemann.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/words/rtc.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

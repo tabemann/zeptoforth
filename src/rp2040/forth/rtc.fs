@@ -63,21 +63,6 @@ begin-module rtc
 
   begin-module rtc-internal
 
-    \ Resets base
-    $4000C000 constant RESETS_Base
-
-    \ Set resets address
-    RESETS_Base 2 12 lshift or $00 + constant RESET_SET
-    
-    \ Clear resets address
-    RESETS_Base 3 12 lshift or $00 + constant RESET_CLR
-
-    \ Resets done address
-    RESETS_Base $08 + constant RESET_DONE
-    
-    \ Reset RTC bit
-    15 bit constant RESETS_RTC
-
     \ RTC base
     $4005C000 constant RTC_Base
 
@@ -481,12 +466,6 @@ begin-module rtc
         false RTC_IRQ_SETUP_1_SEC_ENA!
       then
     ;
-    
-    \ Reset the RTC
-    : reset-rtc ( -- )
-      RESETS_RTC RESET_SET !
-      begin RESET_DONE @ not RESETS_RTC and while repeat
-    ;
 
   end-module
 
@@ -633,6 +612,6 @@ begin-module rtc
 end-module
 
 \ Initialize
-: init ( -- ) init rtc::rtc-internal::init-rc ;
+: init ( -- ) init rtc::rtc-internal::init-rtc ;
 
 reboot

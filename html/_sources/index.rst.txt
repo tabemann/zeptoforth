@@ -21,6 +21,7 @@ Zeptoforth Documentation
    words/spi
    words/i2c
    words/pwm
+   words/rtc
    words/timer
    words/sdcard
    words/fat32
