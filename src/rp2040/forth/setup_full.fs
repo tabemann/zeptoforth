@@ -51,6 +51,7 @@
 #include src/rp2040/forth/spi.fs
 #include src/rp2040/forth/i2c.fs
 #include src/rp2040/forth/pwm.fs
+#include src/rp2040/forth/rtc.fs
 #include src/common/forth/full_extra.fs
 
 \ Set a cornerstone to enable deleting everything compiled after this code

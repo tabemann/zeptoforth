@@ -18,6 +18,8 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
+compile-to-flash
+
 begin-module rtc
 
   multicore import
@@ -368,7 +370,7 @@ begin-module rtc
     ;
 
     \ Validate a date/time match
-    : validate-date-time-match { date-time -- }
+    : validate-date-time-not-current { date-time -- }
       date-time date-time-year @ -1 <> if
         date-time date-time-year @ 0 4095 test-range
       then
@@ -486,7 +488,7 @@ begin-module rtc
       begin RESET_DONE @ not RESETS_RTC and while repeat
     ;
 
-  end-module> import
+  end-module
 
   \ Disable the RTC
   : disable-rtc ( -- )
@@ -519,7 +521,7 @@ begin-module rtc
       enable-rtc
     ;
 
-  end-module> import
+  end-module
 
   \ Set the date/time; with this -1 year and $FF other value settings do not
   \ change the date/time fields in question
@@ -533,7 +535,7 @@ begin-module rtc
   \ Set the RTC alarm; with this -1 year and $FF other value settings are
   \ ignored for the set alarm (i.e. recurrent alarms can be set)
   : set-rtc-alarm { date-time xt -- }
-    date-time validate-date-time-match
+    date-time validate-date-time-not-current
     rtc-irq NVIC_ICER_CLRENA!
     0 bit RTC_INTE bic!
     false RTC_IRQ_SETUP_0_MATCH_ENA!
@@ -554,5 +556,83 @@ begin-module rtc
     begin RTC_IRQ_SETUP_0_MATCH_ACTIVE@ not until
     rtc-irq NVIC_ISER_SETENA!
   ;
+
+  \ Get the name of a day of the week
+  : dotw-name ( dotw -- c-addr u )
+    case
+      0 of s" Sun" endof
+      1 of s" Mon" endof
+      2 of s" Tue" endof
+      3 of s" Wed" endof
+      4 of s" Thu" endof
+      5 of s" Fri" endof
+      6 of s" Sat" endof
+      s" ???" rot
+    endcase
+  ;
+
+  \ Get the name of a month
+  : month-name ( month -- c-addr u )
+    case
+      1 of s" Jan" endof
+      2 of s" Feb" endof
+      3 of s" Mar" endof
+      4 of s" Apr" endof
+      5 of s" May" endof
+      6 of s" Jun" endof
+      7 of s" Jul" endof
+      8 of s" Aug" endof
+      9 of s" Sep" endof
+      10 of s" Oct" endof
+      11 of s" Nov" endof
+      12 of s" Dec" endof
+      s" ???" rot
+    endcase
+  ;
+
+  \ Maximum date/time format size
+  25 constant max-date-time-format-size
   
+  \ Format a date/time
+  : format-date-time { addr date-time -- addr bytes }
+    date-time validate-date-time-not-current
+    addr { cur-addr }
+    date-time date-time-dotw c@ $FF <> if
+      date-time date-time-dotw c@ dotw-name cur-addr swap move
+      s" , " cur-addr 3 + swap move
+      5 +to cur-addr
+    then
+    date-time date-time-day c@ s>d <# # # #> cur-addr swap move
+    $20 cur-addr 2 + c!
+    3 +to cur-addr
+    date-time date-time-month c@ month-name cur-addr swap move
+    $20 cur-addr 3 + c!
+    4 +to cur-addr
+    date-time date-time-year @ s>d <# # # # # #> cur-addr swap move
+    $20 cur-addr 4 + c!
+    5 +to cur-addr
+    date-time date-time-hour c@ s>d <# # # #> cur-addr swap move
+    [char] : cur-addr 2 + c!
+    3 +to cur-addr
+    date-time date-time-minute c@ s>d <# # # #> cur-addr swap move
+    2 +to cur-addr
+    date-time date-time-second c@ $FF <> if
+      [char] : cur-addr c!
+      1 +to cur-addr
+      date-time date-time-second c@ s>d <# # # #> cur-addr swap move
+      2 +to cur-addr
+    then
+    addr cur-addr over -
+  ;
+
+  \ Print the date and time
+  : date-time. ( date-time -- )
+    max-date-time-format-size [: swap format-date-time type ;] with-allot
+  ;
+    
 end-module
+
+\ Initialize
+: init ( -- ) init rtc::rtc-internal::init-rc ;
+
+reboot
