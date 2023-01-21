@@ -538,6 +538,26 @@ bits 4-0: day (1-31)</p>
 <p>( c-addr u entry – c-addr u’ )</p>
 <p>Get the file name of a directory entry, converted to a normal string.</p>
 </section>
+<section id="create-date-time">
+<h3><code class="docutils literal notranslate"><span class="pre">create-date-time!</span></code><a class="headerlink" href="#create-date-time" title="Permalink to this headline">¶</a></h3>
+<p>( date-time entry – )</p>
+<p>Set the creation date/time of a directory entry, with second resolution.</p>
+</section>
+<section id="id9">
+<h3><code class="docutils literal notranslate"><span class="pre">create-date-time&#64;</span></code><a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
+<p>( date-time entry – )</p>
+<p>Get the creation date/time of a directory entry, with second resolution and day-of-the-week calculation.</p>
+</section>
+<section id="modify-date-time">
+<h3><code class="docutils literal notranslate"><span class="pre">modify-date-time!</span></code><a class="headerlink" href="#modify-date-time" title="Permalink to this headline">¶</a></h3>
+<p>( date-time entry – )</p>
+<p>Set the modification date/time of a directory entry, with two second resolution.</p>
+</section>
+<section id="id10">
+<h3><code class="docutils literal notranslate"><span class="pre">modify-date-time&#64;</span></code><a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
+<p>( date-time entry – )</p>
+<p>Get the modification date/time of a directory entry, with two second resolution and day-of-the-week calculation.</p>
+</section>
 </section>
 </section>
 
@@ -575,6 +595,9 @@ bits 4-0: day (1-31)</p>
 <li class="toctree-l1"><a class="reference internal" href="adc.html">Analog-Digital Converter Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="spi.html">SPI Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="i2c.html">I2C Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pwm.html">Pulse Width Modulation Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rtc.html">Realtime Clock (RTC) Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
@@ -585,6 +608,8 @@ bits 4-0: day (1-31)</p>
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
@@ -612,6 +637,8 @@ bits 4-0: day (1-31)</p>
 <li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
 </ul>
 
 <div class="relations">

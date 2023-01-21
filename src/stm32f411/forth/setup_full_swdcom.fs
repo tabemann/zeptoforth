@@ -44,6 +44,7 @@
 #include src/stm32f411/forth/uart.fs
 #include src/stm32f411/forth/adc.fs
 #include src/stm32f411/forth/spi.fs
+#include src/common/forth/rtc.fs
 #include src/common/forth/full_extra.fs
 #include src/common/forth/swdcom.fs
 

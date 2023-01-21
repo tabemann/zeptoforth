@@ -474,13 +474,16 @@ Init_Clk_RTC:
 1:	subs r3, #1
 	bne  1b
 
-	// Select the USB PLL as auxiliary clock source (reuses the zero in r3)
-	str  r3, [r0, #CLK_RTC_CTRL]
-	// (Re-)start the ADC clock (only the enable flag is set)
-	str  r2, [r0, #CLK_RTC_CTRL]
+	// Select the XOSC as auxiliary clock source
+        movs r3, #3 << 5
+        str  r3, [r0, #CLK_RTC_CTRL]
 
-	// Divide the USB PLL by 1024
-	lsls r2, #5
+	// (Re-)start the RTC clock
+        ldr  r3, =CLOCKS_BASE|ALIAS_SET
+	str  r2, [r3, #CLK_RTC_CTRL]
+
+	// Divide the USB PLL by 256
+        ldr  r2, =256 << 8
 	str  r2, [r0, #CLK_RTC_DIV]
 
 Init_Clk_Peri:
@@ -489,6 +492,7 @@ Init_Clk_Peri:
 
 Unreset_All:
 	// We did the clock dance for a reason
+        movs r3, #0
 	ldr  r1, =RESETS_BASE
 	str  r3, [r1, #RESET]
 

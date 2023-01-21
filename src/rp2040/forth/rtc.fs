@@ -608,6 +608,34 @@ begin-module rtc
   : date-time. ( date-time -- )
     max-date-time-format-size [: swap format-date-time type ;] with-allot
   ;
+
+  continue-module rtc-internal
+
+    \ A set of constants needed for the day of the week calculation
+    create dotw-t 0 c, 3 c, 2 c, 5 c, 0 c, 3 c, 5 c, 1 c, 4 c, 6 c, 2 c, 4 c,
+
+  end-module
+
+  \ Calculate the day of the week for a date/time
+  : get-dotw { date-time -- dotw }
+    date-time validate-date-time-not-current
+    date-time date-time-year @ { year }
+    date-time date-time-month c@ { month }
+    month 3 < if -1 +to year then
+    year year 4 / +
+    year 100 / -
+    year 400 / +
+    dotw-t month 1- + c@ +
+    date-time date-time-day c@ +
+    7 umod
+  ;
+
+  \ Update the day of the week for a date/time
+  : update-dotw { date-time -- }
+    $FF date-time date-time-dotw c!
+    date-time validate-date-time-not-current
+    date-time get-dotw date-time date-time-dotw c!
+  ;
     
 end-module
 

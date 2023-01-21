@@ -534,3 +534,23 @@ Set the directory name of a directory entry, converted from a normal string.
 ( c-addr u entry -- c-addr u' )
 
 Get the file name of a directory entry, converted to a normal string.
+
+##### `create-date-time!`
+( date-time entry -- )
+
+Set the creation date/time of a directory entry, with second resolution.
+
+##### `create-date-time@`
+( date-time entry -- )
+
+Get the creation date/time of a directory entry, with second resolution and day-of-the-week calculation.
+
+##### `modify-date-time!`
+( date-time entry -- )
+
+Set the modification date/time of a directory entry, with two second resolution.
+
+##### `modify-date-time@`
+( date-time entry -- )
+
+Get the modification date/time of a directory entry, with two second resolution and day-of-the-week calculation.

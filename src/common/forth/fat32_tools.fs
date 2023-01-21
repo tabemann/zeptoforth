@@ -26,6 +26,7 @@ begin-module fat32-tools
   oo import
   fat32 import
   lock import
+  rtc import
   
   \ Filesystem not set exception
   : x-fs-not-set ( -- ) ." filesystem not set" cr ;
@@ -157,13 +158,24 @@ begin-module fat32-tools
 
     \ List a directory
     : list-dir ( dir -- )
+      cr ." filename      creation date              modification date"
+      cr ." ------------  -------------------------  -------------------------"
       <fat32-entry> class-size [:
         swap
         begin
           2dup read-dir if
             12 [:
-              12 3 pick file-name@
-              cr type space false
+              date-time-size [: { file-name-buf date-time }
+                file-name-buf 12 3 pick file-name@ { file-name-len } drop
+                cr file-name-buf file-name-len type
+                over entry-dir? if ." /" 1 +to file-name-len then
+                14 file-name-len - spaces
+                date-time 2 pick create-date-time@
+                date-time date-time. 2 spaces
+                date-time 2 pick modify-date-time@
+                date-time date-time.
+                false
+              ;] with-aligned-allot
             ;] with-allot
           else
             2drop true

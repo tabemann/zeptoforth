@@ -1,4 +1,4 @@
-# Realtime Clock (RTC) Words on the Raspberry Pi Pico
+# Realtime Clock (RTC) Words
 
 zeptoforth has support for reading and setting the realtime clock (RTC) on the Raspberry Pi Pico, both for keeping track of the date and time and for triggering an alarm.
 
@@ -9,6 +9,8 @@ The alarm functionality allows triggering an alarm interrupt at a given combinat
 Date time values are validated when provided, except that year values of -1 and values for other fields of $FF are ignored during validation, as they are explicit non-values used for setting a subset of RTC fields or matching against a subset of RTC fields.
 
 Also provided is code for formatting date/times as strings and printing them to the console, for convenience's sake.
+
+Note that a subset of these words are provided for platforms other than the Raspberry Pi Pico, specifically all of these words aside from `enable-rtc`, `disable-rtc`, `date-time!`, `set-rtc-alarm`, and `clear-rtc-alarm`.
 
 ### `rtc`
 
@@ -108,3 +110,13 @@ Format *date-time* as a string starting at *c-addr*, and return the resulting st
 ( date-time -- )
 
 Print a date/time as formatted with `format-date-time`.
+
+##### `get-dotw`
+( date-time -- dotw )
+
+Calculate the day of the week for a date/time, ignoring its day of the week field; 0 is Sunday and 6 is Saturday.
+
+##### `update-dotw`
+( date-time )
+
+Update the day of the week for a date/time, ignoring its preexisting day of the week field.

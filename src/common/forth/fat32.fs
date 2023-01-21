@@ -25,6 +25,7 @@ begin-module fat32
   oo import
   lock import
   block-dev import
+  rtc import
   
   \ Sector size exception
   : x-sector-size-not-supported ( -- ) ." sector sizes other than 512 are not supported" cr  ;
@@ -275,6 +276,9 @@ begin-module fat32
       
       \ Expand a directory by one entry
       method expand-dir ( index cluster fs -- )
+
+      \ Update a directory entry's modification date
+      method update-entry-date-time ( index cluster fs -- )
     
     end-module
     
@@ -445,6 +449,9 @@ begin-module fat32
       
       \ Do the work of opening a directory
       method do-open-dir ( c-addr u parent-dir dir -- )
+
+      \ Update directory modification date/time
+      method update-dir-date-time ( dir -- )
       
     end-module
     
@@ -574,7 +581,19 @@ begin-module fat32
     
     \ Get the file name of a directory entry, converted to a normal string
     method file-name@ ( c-addr u entry -- c-addr u' )
-  
+    
+    \ Set the creation date/time of an entry
+    method create-date-time! ( date-time entry -- )
+
+    \ Get the creation date/time of an entry
+    method create-date-time@ ( date-time entry -- )
+
+    \ Set the modification date/time of an entry
+    method modify-date-time! ( date-time entry -- )
+
+    \ Get the modification date/time of an entry
+    method modify-date-time@ ( date-time entry -- )
+    
   end-class
   
   continue-module fat32-internal
@@ -1184,6 +1203,20 @@ begin-module fat32
         ;] with-object
       then
     ; define expand-dir
+
+    :noname ( index cluster fs -- )
+      <fat32-entry> [:
+        date-time-size [:
+          { index cluster fs entry date-time }
+          index -1 <> cluster -1 <> and if
+            date-time date-time@
+            entry index cluster fs entry@
+            date-time entry modify-date-time!
+            entry index cluster fs entry!
+          then
+        ;] with-aligned-allot
+      ;] with-object
+    ; define update-entry-date-time
   end-implement
   
   \ Implement FAT32 file class
@@ -1343,17 +1376,21 @@ begin-module fat32
     ; define file-size@
     
     :noname ( bytes file -- )
-      <fat32-entry> [: ( bytes file entry )
-        swap >r ( bytes entry )
-        dup r@ file-parent-index @ ( bytes entry entry index )
-        r@ file-parent-cluster @ ( bytes entry entry index cluster )
-        r@ file-fs @ ( bytes entry entry index cluster fs )
-        entry@ ( bytes entry )
-        tuck entry-file-size ! ( entry )
-        r@ file-parent-index @ ( entry index )
-        r@ file-parent-cluster @ ( entry index cluster )
-        r> file-fs @ ( entry index cluster fs )
-        entry! ( )
+      <fat32-entry> [:
+        date-time-size [: >r ( bytes file entry )
+          swap >r ( bytes entry )
+          dup r@ file-parent-index @ ( bytes entry entry index )
+          r@ file-parent-cluster @ ( bytes entry entry index cluster )
+          r@ file-fs @ ( bytes entry entry index cluster fs )
+          entry@ ( bytes entry )
+          r> r> swap >r dup date-time@
+          over modify-date-time!
+          tuck entry-file-size ! ( entry )
+          r@ file-parent-index @ ( entry index )
+          r@ file-parent-cluster @ ( entry index cluster )
+          r> file-fs @ ( entry index cluster fs )
+          entry! ( )
+        ;] with-aligned-allot
       ;] with-object
     ; define file-size!
     
@@ -1489,9 +1526,11 @@ begin-module fat32
     ; define read-dir 
     
     :noname ( c-addr u new-file dir -- )
+      dup >r
       3 pick 3 pick validate-file-name
       dup dir-fs @ 2 pick <fat32-file> swap init-object
       swap do-create-file
+      r> update-dir-date-time
     ; define create-file
     
     :noname ( c-addr u opened-file dir -- )
@@ -1501,6 +1540,7 @@ begin-module fat32
     ; define open-file
         
     :noname ( c-addr u dir -- )
+      dup >r
       dup dir-start-cluster @ swap dir-fs @ dup >r lookup-entry r> -rot ( fs entry-index entry-cluster )
       <fat32-entry> [: ( fs entry-index entry-cluster entry )
         dup 3 pick 3 pick 6 pick entry@ ( fs entry-index entry-cluster entry )
@@ -1509,12 +1549,15 @@ begin-module fat32
         dup mark-entry-deleted ( fs entry-index entry-cluster entry )
         rot rot 3 roll entry! ( )
       ;] with-object
+      r> update-dir-date-time
     ; define remove-file
     
     :noname ( c-addr u new-dir dir -- )
+      dup >r
       3 pick 3 pick validate-dir-name
       dup dir-fs @ 2 pick <fat32-dir> swap init-object
       swap do-create-dir
+      r> update-dir-date-time
     ; define create-dir
         
     :noname ( c-addr u opened-dir dir -- )
@@ -1524,6 +1567,7 @@ begin-module fat32
     ; define open-dir
         
     :noname ( c-addr u dir -- )
+      dup >r
       3dup <fat32-dir> class-size [: ( c-addr u dir c-addr u dir dir' )
         dup >r swap open-dir r> ( c-addr u dir dir' )
         dir-empty? averts x-dir-is-not-empty
@@ -1536,9 +1580,11 @@ begin-module fat32
         dup mark-entry-deleted ( fs entry-index entry-cluster entry )
         rot rot 3 roll entry! ( )
       ;] with-object
+      r> update-dir-date-time
     ; define remove-dir
     
     :noname ( c-addr' u' c-addr u dir - )
+      dup >r
       dup dir-start-cluster @ swap dir-fs @ dup >r lookup-entry r> -rot ( c-addr' u' fs entry-index entry-cluster )
       <fat32-entry> [: ( c-addr' u' fs entry-index entry-cluster entry )
         dup 3 pick 3 pick 6 pick entry@ ( c-addr' u' fs entry-index entry-cluster entry )
@@ -1551,6 +1597,7 @@ begin-module fat32
         then ( fs entry-index entry-cluster entry )
         -rot 3 roll entry! ( )
       ;] with-object
+      r> update-dir-date-time
     ; define rename
     
     :noname ( dir -- empty? )
@@ -1654,6 +1701,11 @@ begin-module fat32
         r> first-cluster@ swap 2dup dir-start-cluster ! dir-current-cluster ! ( )
       ;] with-object
     ; define do-open-dir
+
+    :noname { dir -- }
+      dir dir-parent-index @ dir dir-parent-cluster @ dir dir-fs @
+      update-entry-date-time
+    ; define update-dir-date-time
   end-implement
   
   \ Implement FAT32 directory entry class
@@ -1714,12 +1766,13 @@ begin-module fat32
       r@ entry-file-size !
       0 r@ file-attributes c!
       0 r@ nt-vfat-case c!
-      0 r@ create-time-fine c!
-      0 r@ create-time-coarse h!
-      [ 0 9 lshift 1 5 lshift or 1 0 lshift or ] literal r@ create-date h!
       [ 0 9 lshift 1 5 lshift or 1 0 lshift or ] literal r@ access-date h!
-      0 r@ modify-time-coarse h!
-      [ 0 9 lshift 1 5 lshift or 1 0 lshift or ] literal r> modify-date h!
+      r> date-time-size [: swap tuck { date-time entry }
+        date-time date-time@
+        date-time entry create-date-time!
+        date-time entry modify-date-time!
+      ;] with-aligned-allot
+      drop
     ; define init-file-entry
 
     :noname ( first-cluster c-addr u entry -- )
@@ -1728,12 +1781,13 @@ begin-module fat32
       0 r@ entry-file-size !
       $10 r@ file-attributes c!
       0 r@ nt-vfat-case c!
-      0 r@ create-time-fine c!
-      0 r@ create-time-coarse h!
-      [ 0 9 lshift 1 5 lshift or 1 0 lshift or ] literal r@ create-date h!
       [ 0 9 lshift 1 5 lshift or 1 0 lshift or ] literal r@ access-date h!
-      0 r@ modify-time-coarse h!
-      [ 0 9 lshift 1 5 lshift or 1 0 lshift or ] literal r> modify-date h!
+      r> date-time-size [: swap tuck { date-time entry }
+        date-time date-time@
+        date-time entry create-date-time!
+        date-time entry modify-date-time!
+      ;] with-aligned-allot
+      drop
     ; define init-dir-entry
     
     :noname ( entry -- )
@@ -1824,6 +1878,61 @@ begin-module fat32
         drop
       then
     ; define file-name@
+
+    :noname { date-time entry -- }
+      date-time rtc-internal::validate-date-time-not-current
+      date-time date-time-year @ 1980 < if
+        0 9 lshift 1 5 lshift or 1 or entry create-date h!
+      else
+        date-time date-time-year @ 1980 - $7 and 9 lshift
+        date-time date-time-month c@ 5 lshift or
+        date-time date-time-day c@ or entry create-date h!
+      then
+      date-time date-time-hour c@ 11 lshift
+      date-time date-time-minute c@ 5 lshift or
+      date-time date-time-second c@ 2 / or entry create-time-coarse h!
+      date-time date-time-second c@ 2 umod 100 * entry create-time-fine c!
+    ; define create-date-time!
+
+    :noname { date-time entry -- }
+      entry create-date h@ { date-field }
+      date-field 9 rshift 1980 + date-time date-time-year !
+      date-field 5 rshift $F and date-time date-time-month c!
+      date-field $1F and date-time date-time-day c!
+      entry create-time-coarse h@ { time-field }
+      time-field 11 rshift date-time date-time-hour c!
+      time-field 5 rshift $3F and date-time date-time-minute c!
+      time-field $1F and 2 *
+      entry create-time-fine c@ 100 / + date-time date-time-second c!
+      date-time update-dotw
+    ; define create-date-time@
+
+    :noname { date-time entry -- }
+      date-time rtc-internal::validate-date-time-not-current
+      date-time date-time-year @ 1980 < if
+        0 9 lshift 1 5 lshift or 1 or entry modify-date h!
+      else
+        date-time date-time-year @ 1980 - $7 and 9 lshift
+        date-time date-time-month c@ 5 lshift or
+        date-time date-time-day c@ or entry modify-date h!
+      then
+      date-time date-time-hour c@ 11 lshift
+      date-time date-time-minute c@ 5 lshift or
+      date-time date-time-second c@ 2 / or entry modify-time-coarse h!
+    ; define modify-date-time!
+
+    :noname { date-time entry -- }
+      entry modify-date h@ { date-field }
+      date-field 9 rshift 1980 + date-time date-time-year !
+      date-field 5 rshift $F and date-time date-time-month c!
+      date-field $1F and date-time date-time-day c!
+      entry modify-time-coarse h@ { time-field }
+      time-field 11 rshift date-time date-time-hour c!
+      time-field 5 rshift $3F and date-time date-time-minute c!
+      time-field $1F and 2 * date-time date-time-second c!
+      date-time update-dotw
+    ; define modify-date-time@
+    
   end-implement
 
 end-module

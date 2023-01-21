@@ -45,9 +45,6 @@ continue-module internal
   \ Current top of the block locals
   variable block-locals-top
 
-  \ Current bottom of the block locals
-  variable block-locals-bottom
-
   \ Out of local space exception
   : x-out-of-locals ( -- ) ." out of local space" cr ;
 
@@ -88,7 +85,7 @@ continue-module internal
   : reset-local ( -- )
     local-buf local-buf-size + dup local-buf-top ! local-buf-bottom !
     block-locals block-locals-size + dup
-    block-locals-top ! block-locals-bottom !
+    block-locals-top !
   ;
 
   \ Get the current word's local count
@@ -141,7 +138,6 @@ continue-module internal
       local-buf-top @ 1- dup local-buf-bottom ! local-buf-top !
     then
     block-locals-top @ block-locals 2 + >= averts x-out-of-locals
-    block-locals-top @ block-locals-bottom !
     -1 block-locals-top +! $FF block-locals-top @ c!
     -1 block-locals-top +! 0 block-locals-top @ c!
   ;
@@ -193,10 +189,11 @@ continue-module internal
     local-buf-bottom @ local-buf local-buf-size + < if
       local-buf-bottom @ 1+ local-buf-top !
       local-buf-bottom @ c@ local-buf-top @ + local-buf-bottom !
+    else
+      local-buf-bottom @ local-buf-top !
     then
-    block-locals-bottom @ block-locals-top !
-    block-locals-bottom @ block-locals block-locals-size + < if
-      begin block-locals-bottom @ c@ $FF = 1 block-locals-bottom +! until
+    block-locals-top @ block-locals block-locals-size + < if
+      begin block-locals-top @ c@ $FF = 1 block-locals-top +! until
     then
   ;
 
