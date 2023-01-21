@@ -621,13 +621,17 @@ begin-module rtc
     date-time validate-date-time-not-current
     date-time date-time-year @ { year }
     date-time date-time-month c@ { month }
-    month 3 < if -1 +to year then
-    year year 4 / +
-    year 100 / -
-    year 400 / +
-    dotw-t month 1- + c@ +
-    date-time date-time-day c@ +
-    7 umod
+    year -1 <> month $FF <> and date-time date-time-day c@ $FF <> and if
+      month 3 < if -1 +to year then
+      year year 4 / +
+      year 100 / -
+      year 400 / +
+      dotw-t month 1- + c@ +
+      date-time date-time-day c@ +
+      7 umod
+    else
+      $FF
+    then
   ;
 
   \ Update the day of the week for a date/time
@@ -637,6 +641,52 @@ begin-module rtc
     date-time get-dotw date-time date-time-dotw c!
   ;
     
+  \ Convenience word for setting the date/time from the stack rather than a
+  \ date-time structure; with this -1 fields (and for fields other than the
+  \ year, $FF) do not change the date/time fields in question. Also note that
+  \ the day of the week is automatically calculated.
+  : simple-date-time! ( year month day hour minute second -- )
+    date-time-size [: { year month day hour minute second date-time }
+      year -1 <> if
+        year 0 4095 test-range
+      then
+      month -1 <> month $FF <> and if
+        month 1 12 test-range
+      else
+        $FF to month
+      then
+      day -1 <> day $FF <> and if
+        day 1 31 test-range
+      else
+        $FF to day
+      then
+      hour -1 <> hour $FF <> and if
+        hour 0 23 test-range
+      else
+        $FF to hour
+      then
+      minute -1 <> minute $FF <> and if
+        minute 0 59 test-range
+      else
+        $FF to minute
+      then
+      second -1 <> second $FF <> and if
+        second 0 59 test-range
+      else
+        $FF to second
+      then
+      year date-time date-time-year !
+      month date-time date-time-month c!
+      day date-time date-time-day c!
+      $FF date-time date-time-dotw c!
+      hour date-time date-time-hour c!
+      minute date-time date-time-minute c!
+      second date-time date-time-second c!
+      date-time update-dotw
+      date-time date-time!
+    ;] with-aligned-allot
+  ;
+  
 end-module
 
 \ Initialize

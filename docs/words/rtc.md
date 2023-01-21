@@ -10,7 +10,7 @@ Date time values are validated when provided, except that year values of -1 and 
 
 Also provided is code for formatting date/times as strings and printing them to the console, for convenience's sake.
 
-Note that a subset of these words are provided for platforms other than the Raspberry Pi Pico, specifically all of these words aside from `enable-rtc`, `disable-rtc`, `date-time!`, `set-rtc-alarm`, and `clear-rtc-alarm`.
+Note that a subset of these words are provided for platforms other than the Raspberry Pi Pico, specifically all of these words aside from `enable-rtc`, `disable-rtc`, `date-time!`, `simple-date-time!`, `set-rtc-alarm`, and `clear-rtc-alarm`.
 
 ### `rtc`
 
@@ -76,6 +76,11 @@ Get the current date/time.
 
 Set the current date/time.
 
+##### `simple-date-time!`
+( year month day hour minute second -- )
+
+A convenience word to the current date/time at once, automatically calculating the day of the week. The arguments have the same meanings, respectively, as the `date-time-year`, `date-time-month`, `date-time-day`, `date-time-hour`, `date-time-minute`, and `date-time-second` of a date/time structure except that for all of these, not just the *year*, may have values of -1 to indicate unchanged values. Also, note that if *year* is -1, *month* is -1 or 255, or *day* is -1 or 255, the day of the week is not changed.
+
 ##### `set-rtc-alarm`
 ( date-time xt -- )
 
@@ -114,9 +119,9 @@ Print a date/time as formatted with `format-date-time`.
 ##### `get-dotw`
 ( date-time -- dotw )
 
-Calculate the day of the week for a date/time, ignoring its day of the week field; 0 is Sunday and 6 is Saturday.
+Calculate the day of the week for a date/time, ignoring its day of the week field; 0 is Sunday and 6 is Saturday. Note that if the `date-time-year` field of *date-time* is -1, the `date-time-month` field of *date-time* is 255, or the `date-time-day` field of *date-time* is 255, 255 will be returned for the day of the week.
 
 ##### `update-dotw`
 ( date-time )
 
-Update the day of the week for a date/time, ignoring its preexisting day of the week field.
+Update the day of the week for a date/time, ignoring its preexisting day of the week field. Note that if the `date-time-year` field of *date-time* is -1, the `date-time-month` field of *date-time* is 255, or the `date-time-day` field of *date-time* is 255, 255 will be set for the day of the week.
