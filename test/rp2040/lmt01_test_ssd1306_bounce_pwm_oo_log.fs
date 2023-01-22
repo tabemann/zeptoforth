@@ -31,7 +31,11 @@ begin-module read-temp
   font import
   simple-font import
   rng import
-
+  rtc import
+  closure import
+  fat32 import
+  simple-fat32 import
+  
   \ The PWM peripheral index
   1 constant pwm-index
 
@@ -592,9 +596,161 @@ begin-module read-temp
 
   end-implement
 
+  \ Our maximum temperature log message size
+  64 constant temp-log-msg-size
+  
+  \ Our <temp-log> class
+  <object> begin-class <temp-log>
+
+    \ Our sensor
+    cell member temp-log-sensor
+
+    \ Our temperature log filesystem
+    <simple-fat32-fs> class-size member temp-log-fs
+  
+    \ Our temp log file
+    <fat32-file> class-size member temp-log-file
+
+    \ Our temp long file is open flag
+    cell member temp-log-open?
+    
+    \ Our log message buffer
+    temp-log-msg-size member temp-log-msg-buf
+
+    \ Our log current date/time
+    date-time-size member temp-log-current-date-time
+
+    \ Our log alarm date/time
+    date-time-size member temp-log-alarm-date-time
+    
+    \ Our log task
+    cell member temp-log-task
+
+    \ Our log is active
+    cell member temp-log-active?
+
+    \ Our log task's mailbox
+    cell member temp-log-mailbox
+
+    \ Our alarm handler closure
+    closure-size member temp-log-alarm-handler
+
+    \ Set the file to log to
+    method open-temp-log ( path-addr path-len self -- )
+
+    \ Start the log
+    method start-temp-log ( self -- )
+
+    \ Stop the log
+    method stop-temp-log ( self -- )
+
+    \ Carry out a logging event
+    method do-log ( self -- )
+
+    \ Initialize the alarm
+    method init-alarm ( self -- )
+    
+  end-class
+
+  \ Implement our <temp-log> class
+  <temp-log> begin-implement
+
+    \ Initialize our <temp-log> instance
+    :noname { sensor self -- }
+      self <object>->new
+      sensor self temp-log-sensor !
+      0 self temp-log-task !
+      false self temp-log-open? !
+      false self temp-log-active? !
+      2 3 4 5 0 <simple-fat32-fs> self temp-log-fs init-object
+      self temp-log-fs fat32-tools::current-fs!
+    ; define new
+
+    \ Set the file to log to
+    :noname { path-addr path-len self -- }
+      self temp-log-file path-addr path-len
+      [: 3 roll swap open-file ;] fat32-tools::current-fs@ with-root-path
+      0 seek-end self temp-log-file seek-file
+      true self temp-log-open? !
+    ; define open-temp-log
+
+    \ Start the log
+    :noname { self -- }
+      self temp-log-task @ 0= if
+        self 1 [: { self }
+          begin
+            self temp-log-active? @ self temp-log-open? @ and if
+              0 wait-notify drop
+              self temp-log-active? @ self temp-log-open? @ and if
+                self do-log
+              then
+            else
+              pause
+            then
+          again
+        ;] 320 128 512 spawn self temp-log-task !
+        self temp-log-mailbox 1 self temp-log-task @ config-notify
+        self temp-log-task @ run
+        self init-alarm
+      then
+      true self temp-log-active? !
+    ; define start-temp-log
+
+    \ Stop the log
+    :noname { self -- }
+      false self temp-log-active? !
+    ; define stop-temp-log
+    
+    \ Carry out a logging event
+    :noname { self -- }
+      self temp-log-sensor @ sensor-temp@ { temp-raw }
+      self temp-log-sensor @ sensor-temp-c@ { temp-c-lo temp-c-hi }
+      self temp-log-sensor @ sensor-temp-f@ { temp-f-lo temp-f-hi }
+      self temp-log-current-date-time date-time@
+      self temp-log-msg-buf self temp-log-current-date-time
+      format-date-time + { new-addr }
+      s"   " new-addr swap move 2 +to new-addr
+      new-addr temp-raw format-integer + to new-addr
+      s"  t  " new-addr swap move 4 +to new-addr
+      new-addr temp-c-lo temp-c-hi 2 format-fixed-truncate + to new-addr
+      s"  C  " new-addr swap move 4 +to new-addr
+      new-addr temp-f-lo temp-f-hi 2 format-fixed-truncate + to new-addr
+      s"  F" new-addr swap move 2 +to new-addr
+      $0D new-addr c! 1 +to new-addr
+      $0A new-addr c! 1 +to new-addr
+      self temp-log-msg-buf new-addr over - type
+      self temp-log-msg-buf new-addr over - self temp-log-file write-file drop
+      fat32-tools::current-fs@ flush
+    ; define do-log
+
+    \ Initialize the alarm
+    :noname { self -- }
+      self temp-log-alarm-date-time date-time@
+      -1 self temp-log-alarm-date-time date-time-year !
+      $FF self temp-log-alarm-date-time date-time-month c!
+      $FF self temp-log-alarm-date-time date-time-day c!
+      $FF self temp-log-alarm-date-time date-time-dotw c!
+      $FF self temp-log-alarm-date-time date-time-hour c!
+      self temp-log-alarm-date-time date-time-minute c@ 1+ 60 umod
+      self temp-log-alarm-date-time date-time-minute c!
+      $FF self temp-log-alarm-date-time date-time-second c!
+      self self temp-log-alarm-handler [: { self }
+        0 self temp-log-task @ notify
+        self temp-log-alarm-date-time date-time-minute c@ 1+ 60 umod
+        self temp-log-alarm-date-time date-time-minute c!
+        self temp-log-alarm-date-time self temp-log-alarm-handler set-rtc-alarm
+      ;] bind
+      self temp-log-alarm-date-time self temp-log-alarm-handler set-rtc-alarm
+    ; define init-alarm
+    
+  end-implement
+  
   \ Our temperature display
   <temp-display> class-size aligned-buffer: temp-display
 
+  \ Our temperature log
+  <temp-log> class-size aligned-buffer: temp-log
+  
   \ Initialize the temperature sensor
   : init-temp ( -- )
     pwm-wrap pwm-input-pin pwm-index <pwm-slice> pwm-slice init-object
@@ -603,6 +759,7 @@ begin-module read-temp
     sensor tracker add-tracker-sensor
     tracker run-tracker
     sensor <temp-display> temp-display init-object
+    sensor <temp-log> temp-log init-object
   ;
   
 end-module

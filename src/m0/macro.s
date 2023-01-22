@@ -53,7 +53,7 @@ dp 	.req r7
 	.equ internal, 1
 
 	@@ The maximum wordlist order size
-	.equ max_order_size, 16
+	.equ max_order_size, 32
 
 	@@ Initialize the current RAM pointer
 	.set ram_current, ram_start

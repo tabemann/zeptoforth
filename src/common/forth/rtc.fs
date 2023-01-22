@@ -220,13 +220,17 @@ begin-module rtc
     date-time validate-date-time-not-current
     date-time date-time-year @ { year }
     date-time date-time-month c@ { month }
-    month 3 < if -1 +to year then
-    year year 4 / +
-    year 100 / -
-    year 400 / +
-    dotw-t month 1- + c@ +
-    date-time date-time-day c@ +
-    7 umod
+    year -1 <> month $FF <> and date-time date-time-day c@ $FF <> and if
+      month 3 < if -1 +to year then
+      year year 4 / +
+      year 100 / -
+      year 400 / +
+      dotw-t month 1- + c@ +
+      date-time date-time-day c@ +
+      7 umod
+    else
+      $FF
+    then
   ;
 
   \ Update the day of the week for a date/time

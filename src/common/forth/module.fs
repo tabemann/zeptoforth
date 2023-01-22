@@ -33,7 +33,7 @@ internal set-current
 5 constant module-stack-count
 
 \ The maximum wordlist order
-16 constant max-order
+32 constant max-order
 
 \ The current module stack index
 variable module-stack-index
