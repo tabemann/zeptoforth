@@ -177,7 +177,7 @@ begin-module lock
 	until
 	2drop
       else
-	max-lock-wait-priority >r
+	rdrop max-lock-wait-priority >r
       then
       r>
     ;

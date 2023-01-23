@@ -1884,7 +1884,7 @@ begin-module fat32
       date-time date-time-year @ 1980 < if
         0 9 lshift 1 5 lshift or 1 or entry create-date h!
       else
-        date-time date-time-year @ 1980 - $7 and 9 lshift
+        date-time date-time-year @ 1980 - $7F and 9 lshift
         date-time date-time-month c@ 5 lshift or
         date-time date-time-day c@ or entry create-date h!
       then
@@ -1912,7 +1912,7 @@ begin-module fat32
       date-time date-time-year @ 1980 < if
         0 9 lshift 1 5 lshift or 1 or entry modify-date h!
       else
-        date-time date-time-year @ 1980 - $7 and 9 lshift
+        date-time date-time-year @ 1980 - $7F and 9 lshift
         date-time date-time-month c@ 5 lshift or
         date-time date-time-day c@ or entry modify-date h!
       then

@@ -25,7 +25,7 @@ armv6m import
 continue-module internal
 
   \ Local buffer size
-  256 constant local-buf-size
+  512 constant local-buf-size
 
   \ Local buffer
   local-buf-size buffer: local-buf

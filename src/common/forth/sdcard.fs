@@ -415,8 +415,8 @@ begin-module sd
       0 begin dup buffer-count < while
         dup cells r@ sd-buffer-assign + @ -1 <> if
           dup r@ sd-buffer-dirty + c@ if
-            0 over r@ sd-buffer-dirty + c!
             dup dup cells r@ sd-buffer-assign + @ r@ write-sd-block
+            0 over r@ sd-buffer-dirty + c!
           then
         then
         1+
@@ -638,8 +638,8 @@ begin-module sd
     :noname ( index sd-card -- )
       >r
       dup r@ sd-buffer-dirty + c@ if
-	0 over r@ sd-buffer-dirty + c!
 	dup dup cells r@ sd-buffer-assign + @ r@ write-sd-block
+	0 over r@ sd-buffer-dirty + c!
       then
       0 over cells r@ sd-buffer-age + !
       -1 swap cells r> sd-buffer-assign + !

@@ -719,8 +719,11 @@ begin-module read-temp
       $0D new-addr c! 1 +to new-addr
       $0A new-addr c! 1 +to new-addr
       self temp-log-msg-buf new-addr over - type
-      self temp-log-msg-buf new-addr over - self temp-log-file write-file drop
-      fat32-tools::current-fs@ flush
+      self new-addr [: 2dup { self new-addr }
+        self temp-log-msg-buf new-addr over - self temp-log-file write-file drop
+        fat32-tools::current-fs@ flush
+      ;] try ?dup if display-red execute display-normal then
+      2drop
     ; define do-log
 
     \ Initialize the alarm
