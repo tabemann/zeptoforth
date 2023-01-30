@@ -33,6 +33,10 @@ begin-module pio
   \ Direction constants
   true constant right
   false constant left
+
+  \ Pin direction constants
+  true constant out
+  false constant in
   
   \ PIO0 base register
   $50200000 constant PIO0
@@ -72,6 +76,9 @@ begin-module pio
 
   \ Bit out of range exception
   : x-bit-out-of-range ( -- ) ." bit out of range" cr ;
+
+  \ Relocation out of range exception
+  : x-relocate-out-of-range ( -- ) ." relocation out of range" cr ;
   
   begin-module pio-internal
 
@@ -1136,6 +1143,32 @@ begin-module pio
     SM_PINCTRL_IN_BASE!
   ;
 
+  \ Set the state of a pin
+  : sm-pin! ( on/off pin state-machine pio -- )
+    2dup validate-sm-pio
+    2 pick validate-pin
+    2dup SM_PINCTRL @ >r
+    2dup 0 -rot SM_PINCTRL !
+    rot 2 pick 2 pick SM_PINCTRL_SET_BASE!
+    2dup 1 -rot SM_PINCTRL_SET_COUNT!
+    rot if %00001 else %00000 then SET_PINS 5 lshift or $E000 or
+    2 pick 2 pick SM_INSTR !
+    r> -rot SM_PINCTRL !
+  ;
+  
+  \ Set the direction of a pin
+  : sm-pindir! ( out/in pin state-machine pio -- )
+    2dup validate-sm-pio
+    2 pick validate-pin
+    2dup SM_PINCTRL @ >r
+    2dup 0 -rot SM_PINCTRL !
+    rot 2 pick 2 pick SM_PINCTRL_SET_BASE!
+    2dup 1 -rot SM_PINCTRL_SET_COUNT!
+    rot if %00001 else %00000 then SET_PINDIRS 5 lshift or $E000 or
+    2 pick 2 pick SM_INSTR !
+    r> -rot SM_PINCTRL !
+  ;
+  
   \ Get a state machine RX FIFO level
   : sm-rx-fifo-level@ ( state-machine pio -- level )
     2dup validate-sm-pio
@@ -1199,6 +1232,30 @@ begin-module pio
     -rot 0 ?do 2dup h@ i rot INSTR_MEM ! 2 + loop 2drop
   ;
 
+  \ Write a number of halfwords to instruction memory at a given offset with
+  \ relocation
+  : pio-instr-relocate-mem! ( addr count offset pio -- )
+    dup validate-pio
+    2 pick 32 u<= averts x-too-many-instructions
+    2 pick 2 pick + 32 u<= averts x-address-out-of-range
+    2 pick 0 ?do
+      3 pick i 2 * + h@
+      dup $E000 and 0= if
+        $1F and 2 pick + 32 u< averts x-relocate-out-of-range
+      else
+        drop
+      then
+    loop
+    rot 0 ?do
+      2 pick i 2 * + h@
+      dup $E000 and 0= if
+        dup >r $1F and 2 pick + r> $1F bic or
+      then
+      i 2 pick INSTR_MEM !
+    loop
+    2drop drop
+  ;
+      
   \ Enable interrupts
   : pio-interrupt-enable ( interrupt-bits irq pio -- )
     dup validate-pio

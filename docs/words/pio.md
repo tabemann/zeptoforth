@@ -2,7 +2,7 @@
 
 Programmable input/output (PIO) on the RP2040 (i.e. the Raspberry Pi Pico) provides a means to input to or output from pins in a very high-speed fashion at some speed up to the system clock of 125 MHz. There are two PIO peripherals, `PIO0` and `PIO1`, each of which contain four *state machines*.
 
-PIO's may have up to 32 PIO instructions in their memory, which are 16 bits in size each. PIO state machines may be set to wrap from a *top* instruction to a *bottom* instruction automatically, unless a `jmp` instruction is executed at the *top* address. Instructions may be loaded into a PIO's instruction memory with `pio-instr-mem!`. Instructions may also be fed into a state machine to be executed immediately with `sm-instr!`. The address to execute PIO instructions at may be set for a state machine with `sm-addr!`
+PIO's may have up to 32 PIO instructions in their memory, which are 16 bits in size each. PIO state machines may be set to wrap from a *top* instruction to a *bottom* instruction automatically, unless a `jmp` instruction is executed at the *top* address. Instructions may be loaded into a PIO's instruction memory with `pio-instr-mem!` or `pio-instr-relocate-mem!`. Instructions may also be fed into a state machine to be executed immediately with `sm-instr!`. The address to execute PIO instructions at may be set for a state machine with `sm-addr!`
 
 Up to four PIO state machines may be enabled, disabled, or reset at a time with `sm-enable`, `sm-disable`, or `sm-restart` respectively. These take a bitset of four bits where the position of each bit corresponds to the index of the state machine to enable, disable, or restart.
 
@@ -96,7 +96,12 @@ However, this is necessary with `sm-in-pin-base!` because any number of pins may
 ##### `pio-instr-mem!`
 ( addr count pio -- )
 
-Write a number of halfwords to instruction memory.
+Write *count* halfwords starting at *addr* to instruction memory starting at instruction 0.
+
+##### `pio-instr-relocate-mem!`
+( addr count offset pio -- )
+
+Write *count* halfwords starting at *addr* to instruction memory starting at instruction *offset*, relocating any JMP instructions in the process so that a destination of 0 is relocated to *offset* and so on.
 
 ##### `pio-interrupt-enable`
 ( interrupt-bits irq pio -- )
@@ -230,25 +235,35 @@ Read from the RX FIFO of a state machine.
 
 Set pins to PIO mode.
 
-##### `sm-sideset-pins!`
-( pin-base pin-count state-matchine pio -- )
+##### `sm-pin!`
+( on/off pin state-machine pio -- )
 
-Set the sideset pins for a state machine.
+Set the on/off state of a pin for a state machine. Note that the state machine should be disabled.
+
+##### `sm-pindir!`
+( out/in pin state-machine pio -- )
+
+State the out/in state of a pin for a state machine. Note that the state machine should be disabled.
+
+##### `sm-sideset-pins!`
+( pin-base pin-count state-machine pio -- )
+
+Set the sideset pins for a state machine. Note that the state machine should be disabled.
 
 ##### `sm-set-pins!`
 ( pin-base pin-count state-machine pio -- )
 
-Set the SET pins for a state machine.
+Set the SET pins for a state machine. Note that the state machine should be disabled.
 
 ##### `sm-out-pins!`
 ( pin-base pin-count state-machine pio -- )
 
-Set the OUT pins for a state machine.
+Set the OUT pins for a state machine. Note that the state machine should be disabled.
 
 ##### `sm-in-pin-base!`
 ( pin-base state-machine pio -- )
 
-Set the IN pin base for a state machine.
+Set the IN pin base for a state machine. Note that the state machine should be disabled.
 
 ##### `sm-rx-fifo-level@`
 ( state-machine pio -- level )
@@ -729,7 +744,12 @@ Interrupt out of range exception.
 
 Buffer threshold out of range exception.
 
-##### `x-bit-out-of-range
+##### `x-bit-out-of-range`
 ( -- )
 
 Bit out of range exception.
+
+##### `x-relocate-out-of-range`
+( -- )
+
+Relocation out of range exception

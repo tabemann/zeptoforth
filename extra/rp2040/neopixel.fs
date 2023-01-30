@@ -126,17 +126,13 @@ begin-module neopixel
     left init-sm init-pio sm-out-shift-dir
     on init-sm init-pio sm-autopull!
     24 init-sm init-pio sm-pull-threshold!
-    init-sm init-pio SM_PINCTRL @ { saved-pinctrl }
-    0 init-sm init-pio SM_PINCTRL !
-    1 init-sm init-pio SM_PINCTRL_SET_COUNT!
-    init-pin init-sm init-pio SM_PINCTRL_SET_BASE!
-    neopixel-init-program 2 init-sm init-pio sm-instr!
-    saved-pinctrl init-sm init-pio SM_PINCTRL !
+    off init-pin init-sm init-pio sm-pin!
+    out init-pin init-sm init-pio sm-pindir!
     init-pin 1 init-sm init-pio sm-sideset-pins!
     off init-sm init-pio sm-sideset-high-enable!
     off init-sm init-pio sm-sideset-pindir!
     0 3 init-sm init-pio sm-wrap!
-    neopixel-program 4 init-pio pio-instr-mem!
+    neopixel-program 4 0 init-pio pio-instr-relocate-mem!
     0 init-sm init-pio sm-addr!
     init-sm bit init-pio sm-enable
   ;

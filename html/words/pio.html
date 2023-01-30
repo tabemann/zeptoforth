@@ -36,7 +36,7 @@
   <section id="programmable-input-output-words">
 <h1>Programmable Input/Output Words<a class="headerlink" href="#programmable-input-output-words" title="Permalink to this headline">¶</a></h1>
 <p>Programmable input/output (PIO) on the RP2040 (i.e. the Raspberry Pi Pico) provides a means to input to or output from pins in a very high-speed fashion at some speed up to the system clock of 125 MHz. There are two PIO peripherals, <code class="docutils literal notranslate"><span class="pre">PIO0</span></code> and <code class="docutils literal notranslate"><span class="pre">PIO1</span></code>, each of which contain four <em>state machines</em>.</p>
-<p>PIO’s may have up to 32 PIO instructions in their memory, which are 16 bits in size each. PIO state machines may be set to wrap from a <em>top</em> instruction to a <em>bottom</em> instruction automatically, unless a <code class="docutils literal notranslate"><span class="pre">jmp</span></code> instruction is executed at the <em>top</em> address. Instructions may be loaded into a PIO’s instruction memory with <code class="docutils literal notranslate"><span class="pre">pio-instr-mem!</span></code>. Instructions may also be fed into a state machine to be executed immediately with <code class="docutils literal notranslate"><span class="pre">sm-instr!</span></code>. The address to execute PIO instructions at may be set for a state machine with <code class="docutils literal notranslate"><span class="pre">sm-addr!</span></code></p>
+<p>PIO’s may have up to 32 PIO instructions in their memory, which are 16 bits in size each. PIO state machines may be set to wrap from a <em>top</em> instruction to a <em>bottom</em> instruction automatically, unless a <code class="docutils literal notranslate"><span class="pre">jmp</span></code> instruction is executed at the <em>top</em> address. Instructions may be loaded into a PIO’s instruction memory with <code class="docutils literal notranslate"><span class="pre">pio-instr-mem!</span></code> or <code class="docutils literal notranslate"><span class="pre">pio-instr-relocate-mem!</span></code>. Instructions may also be fed into a state machine to be executed immediately with <code class="docutils literal notranslate"><span class="pre">sm-instr!</span></code>. The address to execute PIO instructions at may be set for a state machine with <code class="docutils literal notranslate"><span class="pre">sm-addr!</span></code></p>
 <p>Up to four PIO state machines may be enabled, disabled, or reset at a time with <code class="docutils literal notranslate"><span class="pre">sm-enable</span></code>, <code class="docutils literal notranslate"><span class="pre">sm-disable</span></code>, or <code class="docutils literal notranslate"><span class="pre">sm-restart</span></code> respectively. These take a bitset of four bits where the position of each bit corresponds to the index of the state machine to enable, disable, or restart.</p>
 <p>Each PIO state machine has four 32-bit registers, an input shift register (ISR), an output shift register (OSR), an X register, and a Y register. They also have a 5-bit program counter (PC). These are all initialized to zero.</p>
 <p>Each PIO state machine has an RX FIFO and a TX FIFO of four 32-bit values each. These are initialized to empty. Note that the RX FIFO and TX FIFO on a PIO state machine may be joined into a single unidirectional FIFO consisting of eight 32-bit values. The RX FIFO for a state machine may be pushed to from a state machine’s ISR register, which is 32-bits in size. The TX FIFO for a state machine may be pulled from to a state machine’s OSR register, which is also 32-bits in size.</p>
@@ -121,7 +121,12 @@
 <section id="pio-instr-mem">
 <h4><code class="docutils literal notranslate"><span class="pre">pio-instr-mem!</span></code><a class="headerlink" href="#pio-instr-mem" title="Permalink to this headline">¶</a></h4>
 <p>( addr count pio – )</p>
-<p>Write a number of halfwords to instruction memory.</p>
+<p>Write <em>count</em> halfwords starting at <em>addr</em> to instruction memory starting at instruction 0.</p>
+</section>
+<section id="pio-instr-relocate-mem">
+<h4><code class="docutils literal notranslate"><span class="pre">pio-instr-relocate-mem!</span></code><a class="headerlink" href="#pio-instr-relocate-mem" title="Permalink to this headline">¶</a></h4>
+<p>( addr count offset pio – )</p>
+<p>Write <em>count</em> halfwords starting at <em>addr</em> to instruction memory starting at instruction <em>offset</em>, relocating any JMP instructions in the process so that a destination of 0 is relocated to <em>offset</em> and so on.</p>
 </section>
 <section id="pio-interrupt-enable">
 <h4><code class="docutils literal notranslate"><span class="pre">pio-interrupt-enable</span></code><a class="headerlink" href="#pio-interrupt-enable" title="Permalink to this headline">¶</a></h4>
@@ -256,25 +261,35 @@
 <p>( pin-base pin-count – )</p>
 <p>Set pins to PIO mode.</p>
 </section>
+<section id="sm-pin">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-pin!</span></code><a class="headerlink" href="#sm-pin" title="Permalink to this headline">¶</a></h4>
+<p>( on/off pin state-machine pio – )</p>
+<p>Set the on/off state of a pin for a state machine. Note that the state machine should be disabled.</p>
+</section>
+<section id="sm-pindir">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-pindir!</span></code><a class="headerlink" href="#sm-pindir" title="Permalink to this headline">¶</a></h4>
+<p>( out/in pin state-machine pio – )</p>
+<p>State the out/in state of a pin for a state machine. Note that the state machine should be disabled.</p>
+</section>
 <section id="sm-sideset-pins">
 <h4><code class="docutils literal notranslate"><span class="pre">sm-sideset-pins!</span></code><a class="headerlink" href="#sm-sideset-pins" title="Permalink to this headline">¶</a></h4>
-<p>( pin-base pin-count state-matchine pio – )</p>
-<p>Set the sideset pins for a state machine.</p>
+<p>( pin-base pin-count state-machine pio – )</p>
+<p>Set the sideset pins for a state machine. Note that the state machine should be disabled.</p>
 </section>
 <section id="sm-set-pins">
 <h4><code class="docutils literal notranslate"><span class="pre">sm-set-pins!</span></code><a class="headerlink" href="#sm-set-pins" title="Permalink to this headline">¶</a></h4>
 <p>( pin-base pin-count state-machine pio – )</p>
-<p>Set the SET pins for a state machine.</p>
+<p>Set the SET pins for a state machine. Note that the state machine should be disabled.</p>
 </section>
 <section id="sm-out-pins">
 <h4><code class="docutils literal notranslate"><span class="pre">sm-out-pins!</span></code><a class="headerlink" href="#sm-out-pins" title="Permalink to this headline">¶</a></h4>
 <p>( pin-base pin-count state-machine pio – )</p>
-<p>Set the OUT pins for a state machine.</p>
+<p>Set the OUT pins for a state machine. Note that the state machine should be disabled.</p>
 </section>
 <section id="sm-in-pin-base">
 <h4><code class="docutils literal notranslate"><span class="pre">sm-in-pin-base!</span></code><a class="headerlink" href="#sm-in-pin-base" title="Permalink to this headline">¶</a></h4>
 <p>( pin-base state-machine pio – )</p>
-<p>Set the IN pin base for a state machine.</p>
+<p>Set the IN pin base for a state machine. Note that the state machine should be disabled.</p>
 </section>
 <section id="sm-rx-fifo-level">
 <h4><code class="docutils literal notranslate"><span class="pre">sm-rx-fifo-level&#64;</span></code><a class="headerlink" href="#sm-rx-fifo-level" title="Permalink to this headline">¶</a></h4>
@@ -758,9 +773,14 @@
 <p>Buffer threshold out of range exception.</p>
 </section>
 <section id="x-bit-out-of-range">
-<h4>`x-bit-out-of-range<a class="headerlink" href="#x-bit-out-of-range" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">x-bit-out-of-range</span></code><a class="headerlink" href="#x-bit-out-of-range" title="Permalink to this headline">¶</a></h4>
 <p>( – )</p>
 <p>Bit out of range exception.</p>
+</section>
+<section id="x-relocate-out-of-range">
+<h4><code class="docutils literal notranslate"><span class="pre">x-relocate-out-of-range</span></code><a class="headerlink" href="#x-relocate-out-of-range" title="Permalink to this headline">¶</a></h4>
+<p>( – )</p>
+<p>Relocation out of range exception</p>
 </section>
 </section>
 </section>
@@ -801,6 +821,8 @@
 <li class="toctree-l1"><a class="reference internal" href="spi.html">SPI Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="i2c.html">I2C Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pwm.html">Pulse Width Modulation Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rtc.html">Realtime Clock (RTC) Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
@@ -842,6 +864,7 @@
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
 </ul>
 
 <div class="relations">
