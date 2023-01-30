@@ -49,11 +49,6 @@ begin-module neopixel
       
     end-structure
 
-    \ Neopixel initialization program
-    create neopixel-init-program
-    %00001 SET_PINDIRS set,
-    %00000 SET_PINS set,  
-    
     \ Neopixel program
     create neopixel-program
     1 %00000 2 or OUT_X out+,
