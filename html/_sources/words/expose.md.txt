@@ -28,6 +28,10 @@ Get the ACK/NAK enabled variable address; note that this variable defaults to -1
 
 Get the BEL enabled variable address; note that this variable defaults to -1 (enabled).
 
+##### `color-enabled`
+
+Get the color enabled variable address; note that this variable defaults to -1 (enabled).
+
 ##### `dict-base`
 
 Get the RAM dictionary base variable address
