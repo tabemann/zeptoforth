@@ -84,8 +84,7 @@ continue-module internal
   \ Reset the local buffer
   : reset-local ( -- )
     local-buf local-buf-size + dup local-buf-top ! local-buf-bottom !
-    block-locals block-locals-size + dup
-    block-locals-top !
+    block-locals block-locals-size + block-locals-top !
   ;
 
   \ Get the current word's local count

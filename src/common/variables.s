@@ -140,6 +140,9 @@
 	@@ Is ACK/NAK enabled
 	allot ack_nak_enabled, 4
 
+        @@ Is color enabled
+        allot color_enabled, 4
+        
 	@@ Is BEL enabled
 	allot bel_enabled, 4
 	

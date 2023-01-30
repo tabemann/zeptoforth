@@ -580,23 +580,27 @@ _quit:	bl _rstack_base
 	define_word "display-red", visible_flag
 _display_red:
 	push {lr}
-	push_tos
-	movs tos, #0x1B
-	bl _emit
-	string "[31;1m"
+        ldr r0, =color_enabled
+        ldr r0, [r0]
+        cmp r0, #0
+        beq 1f
+	string "\x1B[31;1m"
 	bl _type
-	pop {pc}
+1:      pop {pc}
+        end_inlined
 
 	@@ Display normal text
 	define_word "display-normal", visible_flag
 _display_normal:
 	push {lr}
-	push_tos
-	movs tos, #0x1B
-	bl _emit
-	string "[0m"
+        ldr r0, =color_enabled
+        ldr r0, [r0]
+        cmp r0, #0
+        beq 1f
+	string "\x1B[0m"
 	bl _type
-	pop {pc}
+1:      pop {pc}
+        end_inlined
 
 	.ltorg
 	

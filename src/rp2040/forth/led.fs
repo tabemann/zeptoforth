@@ -25,46 +25,75 @@ begin-module led
 
   pin import
 
-  \ The LED constants
-  0 constant green
-
   \ The LED states
   low constant off
   high constant on
+
+  \ The LED constants
+  0 constant green
+  1 constant red
+  2 constant blue
 
   \ Out of range LED exception
   : x-led-out-of-range ( -- ) ." led out of range" cr ;
 
   begin-module led-internal
 
+    \ Is this a Seeed XIAO RP2040 board
+    variable xiao?
+    
+    \ Detect Seeed XIAO RP2040 boards
+    : detect-xiao ( -- flag )
+      s" platform-xiao" find dup if >xt execute else drop false then
+    ;
+
     \ The LED count
-    1 constant led-count
+    : led-count ( -- count ) xiao? @ if 3 else 1 then ;
 
     \ Validate an LED
     : validate-led ( led -- ) led-count u< averts x-led-out-of-range ;
 
     \ Get the pin of an LED
     : pin-of-led ( led -- pin )
-      drop 25
+      xiao? @ if
+        case
+          0 of 16 endof
+          1 of 17 endof
+          2 of 25 endof
+        endcase
+      else
+        drop 25
+      then
     ;
     
   end-module> import
 
   \ Initialize the LEDs
   : led-init ( -- )
-    green pin-of-led output-pin
+    detect-xiao xiao? !
+    xiao? @ if
+      red pin-of-led output-pin
+      green pin-of-led output-pin
+      blue pin-of-led output-pin
+      high red pin-of-led pin!
+      high green pin-of-led pin!
+      high blue pin-of-led pin!
+    else
+      green pin-of-led output-pin
+      low green pin-of-led pin!
+    then
   ;
 
   \ Set an LED
   : led! ( state led -- )
     dup validate-led
-    pin-of-led pin!
+    swap xiao? @ xor swap pin-of-led pin!
   ;
 
   \ Get an LED
   : led@ ( led -- state )
     dup validate-led
-    pin-of-led pin-out@
+    pin-of-led pin-out@ xiao? @ xor
   ;
 
   \ Toggle an LED

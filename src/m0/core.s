@@ -2161,6 +2161,8 @@ _init_variables:
 	str r1, [r0]
 	ldr r0, =bel_enabled
 	str r1, [r0]
+        ldr r0, =color_enabled
+        str r1, [r0]
 	@@ Initialize the data stack base
 	ldr r0, =ram_current + stack_base_offset
 	ldr r1, =stack_top

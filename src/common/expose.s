@@ -62,6 +62,14 @@ _ack_nak_enabled:
 	bx lr
 	end_inlined
 
+        @@ Get the color enabled variable address
+        define_word "color-enabled", visible_flag
+_color_enabled:
+        push_tos
+        ldr tos, =color_enabled
+        bx lr
+	end_inlined
+
 	@@ Get the BEL enabled variable address
 	define_word "bel-enabled", visible_flag
 _bel_enabled:

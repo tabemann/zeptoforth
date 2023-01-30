@@ -64,4 +64,4 @@ Zeptoforth Documentation
    words/expose
    extra/display
    extra/font
-   
+   extra/neopixel
