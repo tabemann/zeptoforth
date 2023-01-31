@@ -54,7 +54,6 @@ begin-module neopixel-test
       angle-lo angle-hi pi 2,0 3,0 f/ f* d+ cos 255,0 f* nip 0 max 255 min abs { g }
       angle-lo angle-hi pi 2,0 3,0 f/ f* d- cos 255,0 f* nip 0 max 255 min abs { b }
       r g b 0 my-neopixel neopixel!
-      cr 0 my-neopixel neopixel@ rot . swap . .
       angle-lo angle-hi pi 0,0625 f* d+ 2dup pi 2,0 f* d>= if pi 2,0 f* d- then to angle-hi to angle-lo
       my-neopixel update-neopixel
       50 ms
