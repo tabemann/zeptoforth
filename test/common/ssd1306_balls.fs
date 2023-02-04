@@ -115,32 +115,20 @@ begin-module balls
   : init-sprite ( -- )
     my-sprite-buf my-sprite-cols my-sprite-rows
     <bitmap> my-sprite init-object
-    pi 2,0 f* { a-circle-lo a-circle-hi }
-    a-circle-lo a-circle-hi
-    0 my-sprite-cols 1,5 f* 0 my-sprite-rows 2,0 f* d+ f/
-    { incr-lo incr-hi }
-    0 my-sprite-cols 2,0 f/ { half-width-lo half-width-hi }
-    0 my-sprite-rows 2,0 f/ { half-height-lo half-height-hi }
-    0,0 { angle-lo angle-hi }
-\    $FF 0 my-sprite-cols 0 my-sprite-rows my-sprite or-rect-const
-    begin angle-lo angle-hi a-circle-lo a-circle-hi d<= while
-      angle-lo angle-hi cos half-width-lo half-width-hi 1,0 d- f*
-      half-width-lo half-width-hi d+ nip
+    pi 2,0 f* { D: a-circle }
+    a-circle
+    0 my-sprite-cols 1,5 f* 0 my-sprite-rows 2,0 f* d+ f/ { D: incr }
+    0 my-sprite-cols 2,0 f/ { D: half-width }
+    0 my-sprite-rows 2,0 f/ { D: half-height }
+    0,0 { D: angle }
+    begin angle a-circle d<= while
+      angle cos half-width 1,0 d- f* half-width d+ nip
       0 max my-sprite-cols min { pixel-col }
-      angle-lo angle-hi sin half-height-lo half-height-hi 1,0 d- f*
-      half-height-lo half-height-hi d+ nip
+      angle sin half-height 1,0 d- f* half-height d+ nip
       0 max my-sprite-cols min { pixel-row }
       $FF pixel-col pixel-row my-sprite set-pixel-const
-      \ cr ." angle: " angle-lo angle-hi f.
-      \ ." col: " pixel-col .
-      \ ." row: " pixel-row .
-      \ ." mag: " 0 pixel-col half-width-lo half-width-hi d- 2 fi**
-      \ 0 pixel-row half-height-lo half-height-hi d- 2 fi** d+ sqrt f.
-      \ ." atan2: " 0 pixel-row half-height-lo half-height-hi d-
-      \ 0 pixel-col half-width-lo half-width-hi d- atan2 f.
-      angle-lo angle-hi incr-lo incr-hi d+ to angle-hi to angle-lo
+      angle incr d+ to angle
     repeat
-\    $FF 0 my-sprite-cols 0 my-sprite-rows my-sprite xor-rect-const
   ;
 
   \ Execute code for each of the balls
