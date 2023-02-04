@@ -27,27 +27,30 @@ begin-module mandelbrot
   color c@ constant max-iteration
   
   \ Mandelbrot test
-  : mandelbrot-test ( -- )
+  : draw { D: xa D: xb D: ya D: yb -- }
+    xb xa d- { D: x-mult }
+    yb ya d- { D: y-mult }
     height 0 ?do
       cr
       width 0 ?do
-        i s>f width s>f f/ x-multiplier f* x-offset d+ { x0-lo x0-hi }
-        j s>f height s>f f/ y-multiplier f* y-offset d+ { y0-lo y0-hi }
-        0,0 0,0 { x-lo x-hi y-lo y-hi }
+        i s>f width s>f f/ x-mult f* xa d+ { D: x0 }
+        j s>f height s>f f/ y-mult f* ya d+ { D: y0 }
+        0,0 0,0 { D: x D: y }
         0 { iteration }
         begin
-          x-lo x-hi 2dup f* y-lo y-hi 2dup f* d+ 4,0 d<=
-          iteration max-iteration < and
+          x 2dup f* y 2dup f* d+ 4,0 d<= iteration max-iteration < and
         while
-          x-lo x-hi 2dup f* y-lo y-hi 2dup f* d- x0-lo x0-hi d+
-          { xtemp-lo xtemp-hi }
-          x-lo x-hi y-lo y-hi f* 2,0 f* y0-lo y0-hi d+ to y-hi to y-lo
-          xtemp-lo xtemp-hi to x-hi to x-lo
+          x 2dup f* y 2dup f* d- x0 d+ { D: xtemp }
+          x y f* 2,0 f* y0 d+ to y
+          xtemp to x
           1 +to iteration
         repeat
         color iteration + c@ emit
       loop
     loop
   ;
+
+  \ Draw a mandelbot set
+  : test ( -- ) -2,00 0,47 -1,12 1,12 draw ;
   
 end-module

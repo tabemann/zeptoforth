@@ -45,6 +45,15 @@ continue-module internal
   \ Current top of the block locals
   variable block-locals-top
 
+  \ Local variable types
+  0 constant cell-local
+  1 constant cell-addr-local
+  2 constant double-local
+  3 constant double-addr-local
+  4 constant do-i-local
+  5 constant do-limit-local
+  6 constant do-leave-local
+  
   \ Out of local space exception
   : x-out-of-locals ( -- ) ." out of local space" cr ;
 
@@ -52,33 +61,37 @@ continue-module internal
   : x-loop-var-not-found ( -- ) ." loop variable not found" cr ;
 
   \ Find a loop variable
-  : find-loop-var ( i addr -- i' addr' )
+  : find-loop-var ( i type addr -- i' addr' )
     begin dup local-buf-bottom @ < while
-      dup c@ dup 0= if drop exit then 1+ + swap 1+ swap
+      dup c@ 2 pick = if nip exit then
+      dup c@ dup double-local = swap double-addr-local = or if
+        1+ dup c@ 1+ + rot 2 + -rot
+      else
+        1+ dup c@ 1+ + rot 1+ -rot
+      then
     repeat
-    2drop ['] x-loop-var-not-found ?raise
+    drop 2drop ['] x-loop-var-not-found ?raise
   ;
 
   \ Find the i loop variable
   : find-i-var ( -- i )
-    0 local-buf-top @ find-loop-var drop
+    0 do-i-local local-buf-top @ find-loop-var drop
   ;
 
   \ Find the limit loop variable
   : find-limit-var ( -- i )
-    0 local-buf-top @ find-loop-var 1+ swap 1+ swap find-loop-var drop
+    0 do-limit-local local-buf-top @ find-loop-var drop
   ;
 
   \ Find the leave loop variable
   : find-leave-var ( -- i )
-    0 local-buf-top @ find-loop-var 1+ swap 1+ swap find-loop-var
-    1+ swap 1+ swap find-loop-var drop
+    0 do-leave-local local-buf-top @ find-loop-var drop
   ;
 
   \ Find the j loop variable
   : find-j-var ( -- i )
-    0 local-buf-top @ find-loop-var 1+ swap 1+ swap find-loop-var
-    1+ swap 1+ swap find-loop-var 1+ swap 1+ swap find-loop-var drop
+    0 do-i-local local-buf-top @ find-loop-var 2 + swap 1+ swap
+    do-i-local swap find-loop-var drop
   ;
   
   \ Reset the local buffer
@@ -90,26 +103,36 @@ continue-module internal
   \ Get the current word's local count
   : local-count ( -- u )
     0 local-buf-top @ begin dup local-buf-bottom @ < while
-      dup c@ 1+ + swap 1+ swap
+      dup c@ dup double-local = swap double-addr-local = or if
+        1+ dup c@ 1+ + swap 2 + swap
+      else
+        1+ dup c@ 1+ + swap 1+ swap
+      then
     repeat
     drop
   ;
 
   \ Add a local
-  : add-local ( c-addr u -- )
+  : add-local ( type c-addr u -- )
     dup 1+ local-buf-top @ swap - local-buf >= averts x-out-of-locals
     dup 1+ negate local-buf-top +!
     dup local-buf-top @ c!
     local-buf-top @ 1+ swap move
-    1 block-locals-top @ c+!
+    -1 local-buf-top +!
+    dup local-buf-top @ c!
+    dup double-local = swap double-addr-local = or if 2 else 1 then
+    block-locals-top @ c+!
   ;
 
   \ Add an anomymous local
-  : add-noname-local ( -- )
+  : add-noname-local ( type -- )
     local-buf-top @ 1- local-buf >= averts x-out-of-locals
     -1 local-buf-top +!
     0 local-buf-top @ c!
-    1 block-locals-top @ c+!
+    -1 local-buf-top +!
+    dup local-buf-top @ c!
+    dup double-local = swap double-addr-local = or if 2 else 1 then
+    block-locals-top @ c+!
   ;
 
   \ Fill the current set of locals
@@ -200,7 +223,9 @@ continue-module internal
   : clear-block-locals ( -- )
     block-locals-top @ c@ dup $FF <> if
       begin ?dup while
-        local-buf-top @ c@ 1+ local-buf-top +! 1-
+        local-buf-top @ dup c@ >r
+        1+ c@ 2 + local-buf-top +!
+        r@ double-local = r> double-addr-local = or if 2 - else 1- then
       repeat
       1 block-locals-top +!
     else
@@ -220,58 +245,145 @@ continue-module internal
     until
   ;
 
+  \ Compile getting a cell variable
+  : compile-get-cell-local ( u -- )
+    undefer-lit
+    6 push,
+    [ armv6m-instr import ]
+    4 * r6 ldr_,[sp,#_]
+    [ armv6m-instr unimport ]
+  ;
+
+  \ Compile getting a double cell variable
+  : compile-get-double-local ( u -- )
+    undefer-lit
+    6 push,
+    [ armv6m-instr import ]
+    dup 1+ 4 * r6 ldr_,[sp,#_]
+    [ armv6m-instr unimport ]
+    6 push,
+    [ armv6m-instr import ]
+    4 * r6 ldr_,[sp,#_]
+    [ armv6m-instr unimport ]
+  ;
+
+  \ Compile getting a cell or double cell variable address
+  : compile-get-cell-addr-local ( u -- )
+    undefer-lit
+    6 push,
+    [ armv6m-instr import ]
+    4 * r6 add_,sp,#_
+    [ armv6m-instr unimport ]
+  ;
+
   \ Parse a local variable
   : parse-get-local ( c-addr u -- match? )
     2>r 0 local-buf-top @ begin dup local-buf-bottom @ < while
-      dup count 2r@ equal-case-strings? if
-        rdrop rdrop drop
-        undefer-lit
-        6 push,
-        [ armv6m-instr import ]
-        4 * r6 ldr_,[sp,#_]
-        [ armv6m-instr unimport ]
-        \ $9E00 or h, \ LDR R6, [SP, #x]
+      dup 1+ count 2r@ equal-case-strings? if
+        rdrop rdrop c@ case
+          cell-local of compile-get-cell-local endof
+          cell-addr-local of compile-get-cell-addr-local endof
+          double-local of compile-get-double-local endof
+          double-addr-local of compile-get-cell-addr-local endof \ This is correct
+        endcase
         true exit
       else
-        dup c@ 1+ + swap 1+ swap
+        dup c@ dup double-local = swap double-addr-local = or if
+          1+ dup c@ 1+ + swap 2 + swap
+        else
+          1+ dup c@ 1+ + swap 1+ swap
+        then
       then
     repeat
     rdrop rdrop 2drop false
   ;
 
+  \ Compile setting a cell variable
+  : compile-set-cell-local ( u -- )
+    undefer-lit
+    [ armv6m-instr import ]
+    4 * tos str_,[sp,#_]
+    [ armv6m-instr unimport ]
+    6 pull,
+  ;
+
+  \ Compile setting a double cell variable
+  : compile-set-double-local ( u -- )
+    [ armv6m-instr import ]
+    dup 4 * tos str_,[sp,#_]
+    [ armv6m-instr unimport ]
+    6 pull,
+    [ armv6m-instr import ]
+    1+ 4 * tos str_,[sp,#_]
+    [ armv6m-instr unimport ]
+    6 pull,
+  ;
+
   \ Set a local variable
   : parse-set-local ( c-addr u -- match? )
     2>r 0 local-buf-top @ begin dup local-buf-bottom @ < while
-      dup count 2r@ equal-case-strings? if
-        rdrop rdrop drop
-        undefer-lit
-        [ armv6m-instr import ]
-        4 * tos str_,[sp,#_]
-        [ armv6m-instr unimport ]
-        6 pull,
+      dup 1+ count 2r@ equal-case-strings? if
+        rdrop rdrop c@ case
+          cell-local of compile-set-cell-local endof
+          cell-addr-local of compile-set-cell-local endof
+          double-local of compile-set-double-local endof
+          double-addr-local of compile-set-double-local endof
+        endcase
         true exit
       else
-        dup c@ 1+ + swap 1+ swap
+        dup c@ dup double-local = swap double-addr-local = or if
+          1+ dup c@ 1+ + swap 2 + swap
+        else
+          1+ dup c@ 1+ + swap 1+ swap
+        then
       then
     repeat
     rdrop rdrop 2drop false
+  ;
+
+  \ Compile adding to a cell variable
+  : compile-add-cell-local ( u -- )
+    undefer-lit
+    [ armv6m-instr import ]
+    dup 4 * r0 ldr_,[sp,#_]
+    r0 tos tos adds_,_,_
+    4 * tos str_,[sp,#_]
+    [ armv6m-instr unimport ]
+    6 pull,
+  ;
+
+  \ Compile adding to a double cell variable
+  : compile-add-double-local ( u -- )
+    undefer-lit
+    [ armv6m-instr import ]
+    dup 1+ 4 * r1 ldr_,[sp,#_]
+    dup 4 * r2 ldr_,[sp,#_]
+    r3 1 dp ldm
+    r3 r1 r1 adds_,_,_
+    tos r2 adcs_,_
+    dup 1+ 4 * r1 str_,[sp,#_]
+    4 * r2 str_,[sp,#_]
+    tos 1 dp ldm
+    [ armv6m-instr unimport ]
   ;
   
   \ Add to a local variable
   : parse-add-local ( c-addr u -- match? )
     2>r 0 local-buf-top @ begin dup local-buf-bottom @ < while
-      dup count 2r@ equal-case-strings? if
-        rdrop rdrop drop
-        undefer-lit
-        [ armv6m-instr import ]
-        dup 4 * r0 ldr_,[sp,#_]
-        r0 tos tos adds_,_,_
-        4 * tos str_,[sp,#_]
-        [ armv6m-instr unimport ]
-        6 pull,
+      dup 1+ count 2r@ equal-case-strings? if
+        rdrop rdrop c@ case
+          cell-local of compile-add-cell-local endof
+          cell-addr-local of compile-add-cell-local endof
+          double-local of compile-add-double-local endof
+          double-addr-local of compile-add-double-local endof
+        endcase
         true exit
       else
-        dup c@ 1+ + swap 1+ swap
+        dup c@ dup double-local = swap double-addr-local = or if
+          1+ dup c@ 1+ + swap 2 + swap
+        else
+          1+ dup c@ 1+ + swap 1+ swap
+        then
       then
     repeat
     rdrop rdrop 2drop false
@@ -411,6 +523,21 @@ continue-module internal
     reset-local
     init-flash-values
   ;
+
+  \ Parse a local variable with a type
+  : parse-local-with-type ( type -- )
+    begin
+      token dup if
+        add-local true
+      else
+        2drop eval-eof @ ?dup if
+          execute display-prompt refill false
+        else
+          drop clear-locals ['] x-token-expected ?raise
+        then
+      then
+    until
+  ;
   
 end-module> import
 
@@ -522,12 +649,40 @@ end-module> import
         2dup s" }" equal-strings? if
           2drop block-locals-top @ c@ swap - fill-locals true
         else
-          add-local false
+          2dup s" W:" equal-case-strings? if
+            2drop cell-local parse-local-with-type false
+          else
+            2dup s" W^" equal-case-strings? if
+              2drop cell-addr-local parse-local-with-type false
+            else
+              2dup s" D:" equal-case-strings? if
+                2drop double-local parse-local-with-type false
+              else
+                2dup s" D^" equal-case-strings? if
+                  2drop double-addr-local parse-local-with-type false
+                else
+                  2dup s" C:" equal-case-strings? if
+                    2drop cell-local parse-local-with-type false
+                  else
+                    2dup s" C^" equal-case-strings? if
+                      2drop cell-addr-local parse-local-with-type false
+                    else
+                      cell-local -rot add-local false
+                    then
+                  then
+                then
+              then
+            then
+          then
         then
       then
     else
-      2drop eval-eof @ ?dup if execute else true then
-      if drop clear-locals true else display-prompt refill false then
+      2drop eval-eof @ ?dup if execute false else true then
+      if
+        drop clear-locals ['] x-token-expected ?raise
+      else
+        display-prompt refill false
+      then
     then
   until
 ;
@@ -536,7 +691,10 @@ end-module> import
 : do ( compile: -- loop-addr leave-addr ) ( runtime: limit begin -- )
   [immediate] [compile-only]
   undefer-lit
-  begin-block add-noname-local add-noname-local add-noname-local
+  begin-block
+  do-leave-local add-noname-local
+  do-limit-local add-noname-local
+  do-i-local add-noname-local
   reserve-literal
   [ armv6m-instr import ]
   tos r2 movs_,_
@@ -561,7 +719,10 @@ end-module> import
 : ?do ( compile: -- loop-addr leave-addr ) ( runtime: limit begin -- )
   [immediate] [compile-only]
   undefer-lit
-  begin-block add-noname-local add-noname-local add-noname-local
+  begin-block
+  do-leave-local add-noname-local
+  do-limit-local add-noname-local
+  do-i-local add-noname-local
   reserve-literal
   [ armv6m-instr import ]
   tos r2 movs_,_
