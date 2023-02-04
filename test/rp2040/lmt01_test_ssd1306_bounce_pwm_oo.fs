@@ -354,9 +354,9 @@ begin-module read-temp
       init-chars self readout-string-len !
       my-width init-chars my-char-width * - s>f random-fixed self readout-x 2!
       my-height my-char-height - s>f random-fixed self readout-y 2!
-      pi 2,0 f* random-fixed { angle-lo angle-hi }
-      angle-lo angle-hi cos readout-speed f* self readout-x-delta 2!
-      angle-lo angle-hi sin readout-speed f* self readout-y-delta 2!
+      pi 2,0 f* random-fixed { D: angle }
+      angle cos readout-speed f* self readout-x-delta 2!
+      angle sin readout-speed f* self readout-y-delta 2!
       -1 self readout-last-systick !
     ; define new
 
@@ -380,11 +380,9 @@ begin-module read-temp
         new-systick self readout-last-systick !
       then
       new-systick self readout-last-systick @ - s>f 10000,0 f/
-      { systick-diff-lo systick-diff-hi }
-      self readout-x-delta 2@ systick-diff-lo systick-diff-hi f*
-      self readout-x 2+!
-      self readout-y-delta 2@ systick-diff-lo systick-diff-hi f*
-      self readout-y 2+!
+      { D: systick-diff }
+      self readout-x-delta 2@ systick-diff f* self readout-x 2+!
+      self readout-y-delta 2@ systick-diff f* self readout-y 2+!
       new-systick self readout-last-systick !
       self readout-x 2@ d0<= if
         self readout-x-delta 2@ dabs self readout-x-delta 2!
