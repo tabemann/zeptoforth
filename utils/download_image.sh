@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright (c) 2020 Travis Bemann
+# Copyright (c) 2020-2023 Travis Bemann
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,10 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-VERSION=$1
-PLATFORM=$2
-PORT=$3
-IMAGE=$4
+PORT=$1
+IMAGE=$2
 PROJECT=zeptoforth
 
 ./utils/codeload3.py -B 115200 -p $PORT serial src/common/forth/ihex.fs
@@ -41,7 +39,7 @@ sed '1d' screenlog.0 > inter
 sed '$d' inter > inter.1
 sed '$d' inter.1 > inter
 sed 's/:00000001FF clone_end/:00000001FF/' inter > inter.1
-mv inter.1 bin/$VERSION/$PLATFORM/zeptoforth_$IMAGE-$VERSION.ihex
-arm-none-eabi-objcopy -I ihex -O binary bin/$VERSION/$PLATFORM/zeptoforth_$IMAGE-$VERSION.ihex bin/$VERSION/$PLATFORM/zeptoforth_$IMAGE-$VERSION.bin
+mv inter.1 ${IMAGE}.ihex
+arm-none-eabi-objcopy -I ihex -O binary ${IMAGE}.ihex ${IMAGE}.bin
 rm screenlog.0
 rm inter
