@@ -48,13 +48,13 @@ begin-module neopixel-test
   neopixel-sm neopixel-pio neopixel-count neopixel-data my-neopixel init-neopixel
   
   : run-neopixel-test ( -- )
-    0,0 { angle-lo angle-hi }
+    0,0 { D: angle }
     begin key? not while
-      angle-lo angle-hi cos 255,0 f* nip 0 max 255 min abs { r }
-      angle-lo angle-hi pi 2,0 3,0 f/ f* d+ cos 255,0 f* nip 0 max 255 min abs { g }
-      angle-lo angle-hi pi 2,0 3,0 f/ f* d- cos 255,0 f* nip 0 max 255 min abs { b }
+      angle cos 255,0 f* nip 0 max 255 min abs { r }
+      angle pi 2,0 3,0 f/ f* d+ cos 255,0 f* nip 0 max 255 min abs { g }
+      angle pi 2,0 3,0 f/ f* d- cos 255,0 f* nip 0 max 255 min abs { b }
       r g b 0 my-neopixel neopixel!
-      angle-lo angle-hi pi 0,0625 f* d+ 2dup pi 2,0 f* d>= if pi 2,0 f* d- then to angle-hi to angle-lo
+      angle pi 0,0625 f* d+ 2dup pi 2,0 f* d>= if pi 2,0 f* d- then to angle
       my-neopixel update-neopixel
       50 ms
     repeat

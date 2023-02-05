@@ -15,7 +15,7 @@
     <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Temporary Buffer Words" href="temp.html" />
+    <link rel="next" title="Closures" href="closure.html" />
     <link rel="prev" title="Double-Cell Words" href="double.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -55,8 +55,8 @@
 <h2>Local Variables<a class="headerlink" href="#local-variables" title="Permalink to this headline">¶</a></h2>
 <section id="id2">
 <h3><code class="docutils literal notranslate"><span class="pre">{</span></code><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
-<p>( “xn” … “x0” [ “–” … ] “}” – )</p>
-<p>This compiles a set of single-cell local variables within a word that at runtime take their values off the top of the stack, with <em>x0</em> (the last local variable declared) taking its value off the very top of the stack. Local variable declarations can extend across multiple lines. <code class="docutils literal notranslate"><span class="pre">}</span></code> declares the end of a local variable declaration. <code class="docutils literal notranslate"><span class="pre">--</span></code> within a local variable declaration declares a comment that extends, across multiple lines, until <code class="docutils literal notranslate"><span class="pre">}</span></code> is reached. After this point each of these local variables evaluate to their set values until the function is completed. <em>to</em> may be used to change the values of these local variables after they are declared. Local variables may be used within quotations declared with <code class="docutils literal notranslate"><span class="pre">[:</span></code> and <code class="docutils literal notranslate"><span class="pre">;]</span></code>, including if local variables are used within the containing word, and are properly discarded when <code class="docutils literal notranslate"><span class="pre">exit</span></code> is used within a word. However, they cannot be used within <code class="docutils literal notranslate"><span class="pre">do</span></code> loops or while other words that access the return stack are in use, because local variables are stored on the return stack.</p>
+<p>( [“W:” / “W^” / “D:” / “D^”] “xn” … [“W:” / “W^” / “D:” / “D^”] “x0” [ “–” … ] “}” – )</p>
+<p>This compiles a set of single-cell and/or double-cell local variables, declared with either <code class="docutils literal notranslate"><span class="pre">W:</span></code> or <code class="docutils literal notranslate"><span class="pre">W^</span></code> (or no local variable type marker), or <code class="docutils literal notranslate"><span class="pre">D:</span></code> or <code class="docutils literal notranslate"><span class="pre">D^</span></code>, preceding the variable name, respectively, within a word that at runtime take their values off the top of the stack, with <em>x0</em> (the last local variable declared) taking its value off the very top of the stack. Local variable declarations can extend across multiple lines. <code class="docutils literal notranslate"><span class="pre">}</span></code> declares the end of a local variable declaration. <code class="docutils literal notranslate"><span class="pre">--</span></code> within a local variable declaration declares a comment that extends, across multiple lines, until <code class="docutils literal notranslate"><span class="pre">}</span></code> is reached. After this point each of these local variables either evaluate to their set values, if declared with <code class="docutils literal notranslate"><span class="pre">W:</span></code>, <code class="docutils literal notranslate"><span class="pre">D:</span></code>, or nothing at all, or to their addresses on the return stack, if declared with <code class="docutils literal notranslate"><span class="pre">W^</span></code> or <code class="docutils literal notranslate"><span class="pre">D^</span></code>, until containing code block is completed. <em>to</em> may be used to change the values of these local variables after they are declared. Local variables may be used within quotations declared with <code class="docutils literal notranslate"><span class="pre">[:</span></code> and <code class="docutils literal notranslate"><span class="pre">;]</span></code>, including if local variables are used within the containing word, and are properly discarded when <code class="docutils literal notranslate"><span class="pre">exit</span></code> is used within a word. They can be used alongside do loops but are not compatible with the use of <code class="docutils literal notranslate"><span class="pre">&gt;r</span></code>, <code class="docutils literal notranslate"><span class="pre">r&#64;</span></code>, or <code class="docutils literal notranslate"><span class="pre">r&gt;</span></code>.</p>
 </section>
 </section>
 <section id="setting-values-and-local-variables">
@@ -64,12 +64,12 @@
 <section id="to">
 <h3><code class="docutils literal notranslate"><span class="pre">to</span></code><a class="headerlink" href="#to" title="Permalink to this headline">¶</a></h3>
 <p>( x|d “name” – )</p>
-<p>This sets a value or local variable <em>name</em> to either a single-cell or double-cell on the stack depending on whether <em>name</em> refers to a <code class="docutils literal notranslate"><span class="pre">value</span></code>, <code class="docutils literal notranslate"><span class="pre">2value</span></code>, or local variable. This is state smart, and can be used both in interpretation mode and in compilation mode.</p>
+<p>This sets a value or local variable <em>name</em> to either a single-cell or double-cell on the stack depending on whether <em>name</em> refers to a <code class="docutils literal notranslate"><span class="pre">value</span></code>, <code class="docutils literal notranslate"><span class="pre">2value</span></code>, a single-cell local variable, or a double-cell local variable. This is state smart, and can be used both in interpretation mode and in compilation mode.</p>
 </section>
 <section id="id3">
 <h3><code class="docutils literal notranslate"><span class="pre">+to</span></code><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
 <p>( x|d “name” – )</p>
-<p>This adds a single-cell or double-cell on the stack to a value or local variable <em>name</em> depending on whether <em>name</em> refers to a <code class="docutils literal notranslate"><span class="pre">value</span></code>, <code class="docutils literal notranslate"><span class="pre">2value</span></code>, or local variable. This is state smart, and can be used both in interpretation mode and in compilation mode.</p>
+<p>This adds a single-cell or double-cell on the stack to a value or local variable <em>name</em> depending on whether <em>name</em> refers to a <code class="docutils literal notranslate"><span class="pre">value</span></code>, <code class="docutils literal notranslate"><span class="pre">2value</span></code>, a single-cell local variable, or a double-cell local variable. This is state smart, and can be used both in interpretation mode and in compilation mode.</p>
 </section>
 </section>
 </section>
@@ -108,6 +108,9 @@
 <li class="toctree-l1"><a class="reference internal" href="adc.html">Analog-Digital Converter Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="spi.html">SPI Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="i2c.html">I2C Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pwm.html">Pulse Width Modulation Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rtc.html">Realtime Clock (RTC) Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
@@ -119,6 +122,7 @@
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Value and Local Variable Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
@@ -147,6 +151,8 @@
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
 </ul>
 
 <div class="relations">
@@ -154,7 +160,7 @@
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
       <li>Previous: <a href="double.html" title="previous chapter">Double-Cell Words</a></li>
-      <li>Next: <a href="temp.html" title="next chapter">Temporary Buffer Words</a></li>
+      <li>Next: <a href="closure.html" title="next chapter">Closures</a></li>
   </ul></li>
 </ul>
 </div>
