@@ -41,17 +41,31 @@ begin-module led
 
     \ Is this a Seeed XIAO RP2040 board
     variable xiao?
+
+    \ Is this a Seeed WIO RP2040 board
+    variable wio?
     
     \ Detect Seeed XIAO RP2040 boards
     : detect-xiao ( -- flag )
       s" platform-xiao" find dup if >xt execute else drop false then
     ;
 
+    \ Detect Seeed WIO RP2040 boards
+    : detect-wio ( --  flag  )
+      s" platform-wio" find dup if >xt execute else drop false then
+    ;
+
     \ The LED count
     : led-count ( -- count ) xiao? @ if 3 else 1 then ;
 
     \ Validate an LED
-    : validate-led ( led -- ) led-count u< averts x-led-out-of-range ;
+    : validate-led ( led -- )
+      wio? @ not if
+        led-count u< averts x-led-out-of-range
+      else
+        dup 0= swap 2 = or averts x-led-out-of-range
+      then
+    ;
 
     \ Get the pin of an LED
     : pin-of-led ( led -- pin )
@@ -62,7 +76,8 @@ begin-module led
           2 of 25 endof
         endcase
       else
-        drop 25
+        drop
+        wio? @ if 13 else 25 then
       then
     ;
     
@@ -71,6 +86,7 @@ begin-module led
   \ Initialize the LEDs
   : led-init ( -- )
     detect-xiao xiao? !
+    detect-wio wio? !
     xiao? @ if
       red pin-of-led output-pin
       green pin-of-led output-pin
@@ -79,8 +95,13 @@ begin-module led
       high green pin-of-led pin!
       high blue pin-of-led pin!
     else
-      green pin-of-led output-pin
-      low green pin-of-led pin!
+      wio? @ if
+        blue pin-of-led output-pin
+        low blue pin-of-led pin!
+      else
+        green pin-of-led output-pin
+        low green pin-of-led pin!
+      then
     then
   ;
 
