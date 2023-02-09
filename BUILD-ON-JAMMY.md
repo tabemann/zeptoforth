@@ -8,14 +8,15 @@ Docker container obtained with
 
     and should run with any Ubuntu 22.04 LTS or later.
 
-2. Clone this repository:
+2. Open a terminal and `cd` into a working directory. Place a copy of
 
-    git clone https://github.com/AlgoCompSynth/zeptoforth.git
+    build-on-jammy.sh
 
-3. In a terminal, type:
+    in the directory and make it executable with `chmod +x build-on-jammy.sh`
 
-    cd zeptoforth
+3. Type:
+
     ./build-on-jammy.sh
 
-    The script will install any uninstalled dependencies and then
-    make the releases, and the HTML and EPUB documentation.
+    The script will install any uninstalled dependencies, download the repository,
+    and then make the releases, the HTML documentation and the EPUB documentation.
