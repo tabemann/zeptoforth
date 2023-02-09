@@ -17,7 +17,16 @@ sudo apt-get install -qqy --no-install-recommends \
   python3-sphinx \
   python3-myst-parser
 
+echo "Cloning zeptoforth if needed"
+if [ ! -d zeptoforth ]
+then
+  git clone https://github.com/AlgoCompSynth/zeptoforth.git
+else
+  echo "zeptoforth found - no clone needed"
+fi
+
 echo "Building fresh releases"
+cd zeptoforth
 make clean
 make
 
@@ -26,5 +35,8 @@ make html
 echo "Making EPUB documentation"
 mkdir -p epub
 make epub
+
+echo "git status"
+git status
 
 echo "Done!"

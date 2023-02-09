@@ -15,7 +15,7 @@
     <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="SDHC/SDXC Card Support" href="sdcard.html" />
+    <link rel="next" title="Pulse Width Modulation Words" href="pwm.html" />
     <link rel="prev" title="SPI Words" href="spi.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -33,7 +33,7 @@
 
           <div class="body" role="main">
             
-  <section id="i2c-words">
+  <section class="tex2jax_ignore mathjax_ignore" id="i2c-words">
 <h1>I2C Words<a class="headerlink" href="#i2c-words" title="Permalink to this headline">¶</a></h1>
 <p>zeptoforth includes support for I2C peripherals on the Raspberry Pi Pico. It supports both master and slave modes of operation on two different I2C peripheral devices, numbered 0 and 1. It supports clocks up to 1 MHz, as that is the limit supported by the RP2040’s I2C peripherals, and defaults to a clock of 400 kHz. Note that it does not currently support general calls or slaves sending NACK, and handling of interrupted sends when multiple masters are in use must be handled manually by the user.</p>
 <section id="i2c">
@@ -251,6 +251,9 @@
 <li class="toctree-l1"><a class="reference internal" href="adc.html">Analog-Digital Converter Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="spi.html">SPI Words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">I2C Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pwm.html">Pulse Width Modulation Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rtc.html">Realtime Clock (RTC) Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
@@ -261,6 +264,8 @@
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
@@ -288,6 +293,9 @@
 <li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
 </ul>
 
 <div class="relations">
@@ -295,7 +303,7 @@
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
       <li>Previous: <a href="spi.html" title="previous chapter">SPI Words</a></li>
-      <li>Next: <a href="sdcard.html" title="next chapter">SDHC/SDXC Card Support</a></li>
+      <li>Next: <a href="pwm.html" title="next chapter">Pulse Width Modulation Words</a></li>
   </ul></li>
 </ul>
 </div>
@@ -325,7 +333,7 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

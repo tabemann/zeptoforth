@@ -33,7 +33,7 @@
 
           <div class="body" role="main">
             
-  <section id="bitmaps-and-displays">
+  <section class="tex2jax_ignore mathjax_ignore" id="bitmaps-and-displays">
 <h1>Bitmaps and Displays<a class="headerlink" href="#bitmaps-and-displays" title="Permalink to this headline">¶</a></h1>
 <p>Under <code class="docutils literal notranslate"><span class="pre">extra/common/bitmap.fs</span></code> there is optional code for supporting bitmap operations, and under <code class="docutils literal notranslate"><span class="pre">extra/common/ssd1306.fs</span></code> there is optional code for supporting I2C SSD1306-based displays. The <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> class is defined under the <code class="docutils literal notranslate"><span class="pre">bitmap</span></code> module in <code class="docutils literal notranslate"><span class="pre">exttra/common/bitmap.fs</span></code>. The <code class="docutils literal notranslate"><span class="pre">&lt;ssd1306&gt;</span></code> class inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> class and is defined under the <code class="docutils literal notranslate"><span class="pre">ssd1306</span></code> module in <code class="docutils literal notranslate"><span class="pre">extra/common/ssd1306</span></code>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> class is a general class for bitmaps and supports both drawing (including setting, or-ing, and-ing, bit-clearing, and exclusive or-ing) individual pixels and rectangles to bitmaps and drawing (including setting, or-ing, and-ing, bit-clearing, and exclusive or-ing) image data from one bitmap onto another bitmap. For bitmaps with dirty state information, i.e. <code class="docutils literal notranslate"><span class="pre">&lt;ssd1306&gt;</span></code> objects, drawing operations on bitmaps automatically update their dirty state. Note that the user must provide their own backing bitmap buffer for bitmap objects, whose size must be the number of columns in the bitmap times the number of rows divided by eight (as eight bits are in a byte) rounded up to the next full byte.</p>
@@ -222,6 +222,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/adc.html">Analog-Digital Converter Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/spi.html">SPI Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/i2c.html">I2C Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pwm.html">Pulse Width Modulation Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/rtc.html">Realtime Clock (RTC) Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/sdcard.html">SDHC/SDXC Card Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/simple_fat32.html">Simple FAT32 Support</a></li>
@@ -233,6 +236,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/double.html">Double-Cell Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/value.html">Value and Local Variable Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/temp.html">Temporary Buffer Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/action_pool.html">Action Pool words</a></li>
@@ -262,6 +266,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Bitmaps and Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="font.html">Fonts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="neopixel.html">Neopixels on the RP2040</a></li>
 </ul>
 
 <div class="relations">
@@ -299,7 +304,7 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
