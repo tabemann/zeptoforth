@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Simple Lock Words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="simple-lock-words">
+<h1>Simple Lock Words</h1>
+<p>A simple lock enforces mutual exclusion, typically with regard to control of a resource, between multiple tasks. Unlike a normal lock, it does not establish a queue of multiple waiting tasks, but rather no particular order is established for which task claims the lock when multiple tasks are waiting on the lock to be released by another task. Simple locks are optimized for speed when claiming locks that are only held for very short periods of time, and particularly on multicore systems they should not be held for long because other tasks which attempt to claim them on other cores will spinwait until the lock is freed. Simple locks provide no means of avoiding priority inversion, which is another reason for avoiding holding them for long. Also, no means are provided to avoid double locking, so if a task double locks a simple lock it will hang forever until it is killed.</p>
+<section id="slock">
+<h2><code class="docutils literal notranslate"><span class="pre">slock</span></code></h2>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">slock</span></code>:</p>
+<section id="slock-size">
+<h3><code class="docutils literal notranslate"><span class="pre">slock-size</span></code></h3>
+<p>( – bytes )</p>
+<p>Get the size of a simple lock in bytes.</p>
+</section>
+<section id="init-slock">
+<h3><code class="docutils literal notranslate"><span class="pre">init-slock</span></code></h3>
+<p>( addr – )</p>
+<p>Initialize a simple lock starting at the specified address <em>addr</em>; note that it must be <code class="docutils literal notranslate"><span class="pre">slock-size</span></code> bytes in size.</p>
+</section>
+<section id="claim-slock">
+<h3><code class="docutils literal notranslate"><span class="pre">claim-slock</span></code></h3>
+<p>( slock – )</p>
+<p>Attempt to claim a simple lock <em>slock</em>; if the simple lock is already held, continually attempt to claim the simple lock until it can be successfully claimed. In that case, if the simple lock is held by another task on the same core as the task attempting to claim it, give up the processor after each unsuccessful attempt to claim the simple lock; if it is held by another task on a different core, spinwait instead.</p>
+</section>
+<section id="release-slock">
+<h3><code class="docutils literal notranslate"><span class="pre">release-slock</span></code></h3>
+<p>( slock – )</p>
+<p>Release a simple lock <em>slock</em>. If other tasks are waiting to claim the simple lock, the first one to attempt to claim it next will claim it.</p>
+</section>
+<section id="with-slock">
+<h3><code class="docutils literal notranslate"><span class="pre">with-slock</span></code></h3>
+<p>( xt slock – )</p>
+<p>Execute an xt <em>xt</em> with a given simple lock <em>slock</em> locked while it executes, unlocking it afterwards. If an exception is raised by <em>xt</em>, unlock <em>lock</em> and then re-raise the exception.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Block Editor</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="block-editor">
+<h1>Block Editor</h1>
+<p>The block editor provides a simple interface for allowing the user to edit blocks stored in the Quad SPI flash on supported devices, currently the STM32F746 DISCOVERY board and the Raspberry Pi Pico (along with other RP2040 boards with Quad SPI flash compatible with the Winbond Quad SPI flash used by the Raspberry Pi Pico). When in use, the following keys can be used to control editing:</p>
+<ul class="simple">
+<li><p>Backspace: delete the character to the left of the cursor</p></li>
+<li><p>Delete: delete the character under the cursor</p></li>
+<li><p>Tab: insert one or two spaces, depending on whether the cursor is on an odd or an even column (starting from column 0)</p></li>
+<li><p>Up: move the cursor one line up</p></li>
+<li><p>Down: move the cursor one line down</p></li>
+<li><p>Newline: move the cursor to the start of the next line, or if the cursor was at the last line, change to the next block and move the cursor to the start of the first line</p></li>
+<li><p>Left / Control-B: move the cursor one character to the left</p></li>
+<li><p>Right / ControlF: move the cursor one character to the right</p></li>
+<li><p>Control-A: move the cursor to the start of the input</p></li>
+<li><p>Control-E: move the cursor to the end of the input</p></li>
+<li><p>Control-N: change to the next block</p></li>
+<li><p>Control-P: change to the previous block</p></li>
+<li><p>Control-U: insert a line above the current line</p></li>
+<li><p>Control-K: if the current line is empty, delete it, else delete the current line’s contents</p></li>
+<li><p>Control-W: save the current block</p></li>
+<li><p>Control-X: revert the current block</p></li>
+<li><p>Control-V: exit the editor, saving all modified blocks</p></li>
+</ul>
+<p>Note that tabs (which are treated as being of two spaces wide due to the limited space available in blocks) and characters of code points greater than 127 are handled correctly. Also note that only nine blocks (currently) are stored in memory, and if a modified block is removed from memory it is automatically saved.</p>
+<p>Note that block ids start from zero, unlike on many Forths where they traditionally started from one.</p>
+<section id="forth">
+<h2><code class="docutils literal notranslate"><span class="pre">forth</span></code></h2>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">forth</span></code>:</p>
+<section id="edit">
+<h3><code class="docutils literal notranslate"><span class="pre">edit</span></code></h3>
+<p>( id – )</p>
+<p>Open the block editor for the given block; note that adjacent blocks are also automatically loaded into memory</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

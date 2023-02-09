@@ -1,0 +1,1911 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Basic Words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="basic-words">
+<h1>Basic Words</h1>
+<section id="forth">
+<h2><code class="docutils literal notranslate"><span class="pre">forth</span></code></h2>
+<p>These words are in <code class="docutils literal notranslate"><span class="pre">forth</span></code>.</p>
+<section id="drop">
+<h3><code class="docutils literal notranslate"><span class="pre">drop</span></code></h3>
+<p>( x – )</p>
+<p>Drop the top of the data stack</p>
+</section>
+<section id="dup">
+<h3><code class="docutils literal notranslate"><span class="pre">dup</span></code></h3>
+<p>( x1 – x1 x1 )</p>
+<p>Duplicate the top of the data stack</p>
+</section>
+<section id="swap">
+<h3><code class="docutils literal notranslate"><span class="pre">swap</span></code></h3>
+<p>( x1 x2 – x2 x1 )</p>
+<p>Swap the top two places on the data stack</p>
+</section>
+<section id="over">
+<h3><code class="docutils literal notranslate"><span class="pre">over</span></code></h3>
+<p>( x1 x2 – x1 x2 x1 )</p>
+<p>Copy the second place on the data stack onto the top of the stack,
+pushing the top of the data stack to the second place</p>
+</section>
+<section id="rot">
+<h3><code class="docutils literal notranslate"><span class="pre">rot</span></code></h3>
+<p>( x1 x2 x3 – x2 x3 x1 )</p>
+<p>Rotate the top three places on the data stack, so the third place
+moves to the first place</p>
+</section>
+<section id="pick">
+<h3><code class="docutils literal notranslate"><span class="pre">pick</span></code></h3>
+<p>( xi … x0 i – xi … x0 xi )</p>
+<p>Pick a value at a specified depth on the stack</p>
+</section>
+<section id="roll">
+<h3><code class="docutils literal notranslate"><span class="pre">roll</span></code></h3>
+<p>( xi … x0 i – xi-1 … x0 xi )</p>
+<p>Rotate a value at a given deph to the top of the stackk</p>
+</section>
+<section id="nip">
+<h3><code class="docutils literal notranslate"><span class="pre">nip</span></code></h3>
+<p>( x1 x2 – x2 )</p>
+<p>Remove the cell under that on the top of the stack</p>
+</section>
+<section id="tuck">
+<h3><code class="docutils literal notranslate"><span class="pre">tuck</span></code></h3>
+<p>( x1 x2 – x2 x1 x2 )</p>
+<p>Push the cell on top of the stack under the item beneath it</p>
+</section>
+<section id="lshift">
+<h3><code class="docutils literal notranslate"><span class="pre">lshift</span></code></h3>
+<p>( x1 u – x2 )</p>
+<p>Logical shift left</p>
+</section>
+<section id="rshift">
+<h3><code class="docutils literal notranslate"><span class="pre">rshift</span></code></h3>
+<p>( x1 u – x2 )</p>
+<p>Logical shift right</p>
+</section>
+<section id="arshift">
+<h3><code class="docutils literal notranslate"><span class="pre">arshift</span></code></h3>
+<p>( x1 u – x2 )</p>
+<p>Arithmetic shift right</p>
+</section>
+<section id="and">
+<h3><code class="docutils literal notranslate"><span class="pre">and</span></code></h3>
+<p>( x1 x2 – x3 )</p>
+<p>Binary and</p>
+</section>
+<section id="or">
+<h3><code class="docutils literal notranslate"><span class="pre">or</span></code></h3>
+<p>( x1 x2 – x3 )</p>
+<p>Binary or</p>
+</section>
+<section id="xor">
+<h3><code class="docutils literal notranslate"><span class="pre">xor</span></code></h3>
+<p>( x1 x2 – x3 )</p>
+<p>Binary xor</p>
+</section>
+<section id="bic">
+<h3><code class="docutils literal notranslate"><span class="pre">bic</span></code></h3>
+<p>( x1 x2 – x3 )</p>
+<p>Bit clear</p>
+</section>
+<section id="not">
+<h3><code class="docutils literal notranslate"><span class="pre">not</span></code></h3>
+<p>( x1 – x2 )</p>
+<p>Binary not</p>
+</section>
+<section id="negate">
+<h3><code class="docutils literal notranslate"><span class="pre">negate</span></code></h3>
+<p>( n1 – n2 )</p>
+<p>Negation</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">+</span></code></h3>
+<p>( x1 x2 – x3 )</p>
+<p>Addition of two integers</p>
+</section>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">-</span></code></h3>
+<p>( x1 x2 – x3 )</p>
+<p>Substraction of two integers</p>
+</section>
+<section id="id3">
+<h3><code class="docutils literal notranslate"><span class="pre">*</span></code></h3>
+<p>( x1 x2 – x3 )</p>
+<p>Multiplication of two integers</p>
+</section>
+<section id="id4">
+<h3><code class="docutils literal notranslate"><span class="pre">/</span></code></h3>
+<p>( n1 n2 – n3 )</p>
+<p>Signed division of two two’s complement integers</p>
+</section>
+<section id="u">
+<h3><code class="docutils literal notranslate"><span class="pre">u/</span></code></h3>
+<p>( u1 u2 – u3 )</p>
+<p>Unsigned division of two integers</p>
+</section>
+<section id="mod">
+<h3><code class="docutils literal notranslate"><span class="pre">mod</span></code></h3>
+<p>( n1 n2 – n3 )</p>
+<p>Signed modulus of two two’s complement integers</p>
+</section>
+<section id="umod">
+<h3><code class="docutils literal notranslate"><span class="pre">umod</span></code></h3>
+<p>( u1 u2 – u3 )</p>
+<p>Unsigned modulus of two unsigned integers</p>
+</section>
+<section id="id5">
+<h3><code class="docutils literal notranslate"><span class="pre">1+</span></code></h3>
+<p>( x1 – x2 )</p>
+<p>Add 1 to an integer</p>
+</section>
+<section id="id6">
+<h3><code class="docutils literal notranslate"><span class="pre">2+</span></code></h3>
+<p>( x1 – x2 )</p>
+<p>Add 2 to an integer</p>
+</section>
+<section id="id7">
+<h3><code class="docutils literal notranslate"><span class="pre">4+</span></code></h3>
+<p>( x1 – x2 )</p>
+<p>Add 4 to an integer</p>
+</section>
+<section id="id8">
+<h3><code class="docutils literal notranslate"><span class="pre">1-</span></code></h3>
+<p>( x1 – x2 )</p>
+<p>Subtract 1 from an integer</p>
+</section>
+<section id="id9">
+<h3><code class="docutils literal notranslate"><span class="pre">2-</span></code></h3>
+<p>( x1 – x2 )</p>
+<p>Subtract 2 from an integer</p>
+</section>
+<section id="id10">
+<h3><code class="docutils literal notranslate"><span class="pre">4-</span></code></h3>
+<p>( x1 – x2 )</p>
+<p>Subtract 4 from an integer</p>
+</section>
+<section id="id11">
+<h3><code class="docutils literal notranslate"><span class="pre">2*</span></code></h3>
+<p>( x1 – x2 )</p>
+<p>Multiply a value by 2</p>
+</section>
+<section id="id12">
+<h3><code class="docutils literal notranslate"><span class="pre">4*</span></code></h3>
+<p>( x1 – x2 )</p>
+<p>Multiply a value by 4</p>
+</section>
+<section id="id13">
+<h3><code class="docutils literal notranslate"><span class="pre">2/</span></code></h3>
+<p>( u1 – u2 )</p>
+<p>Divide a value by 2</p>
+</section>
+<section id="id14">
+<h3><code class="docutils literal notranslate"><span class="pre">4/</span></code></h3>
+<p>( u1 – u2 )</p>
+<p>Divide a value by 4</p>
+</section>
+<section id="id15">
+<h3><code class="docutils literal notranslate"><span class="pre">=</span></code></h3>
+<p>( x1 x2 – flag )</p>
+<p>Equals</p>
+</section>
+<section id="id16">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;&gt;</span></code></h3>
+<p>( x1 x2 – flag )</p>
+<p>Not equal</p>
+</section>
+<section id="id17">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;</span></code></h3>
+<p>( n1 n2 – flag )</p>
+<p>Less than</p>
+</section>
+<section id="id18">
+<h3><code class="docutils literal notranslate"><span class="pre">&gt;</span></code></h3>
+<p>( n1 n2 – flag )</p>
+<p>Greater than</p>
+</section>
+<section id="id19">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;=</span></code></h3>
+<p>( n1 n2 – flag )</p>
+<p>Less than or equal</p>
+</section>
+<section id="id20">
+<h3><code class="docutils literal notranslate"><span class="pre">0=</span></code></h3>
+<p>( x – flag )</p>
+<p>Equals zero</p>
+</section>
+<section id="id21">
+<h3><code class="docutils literal notranslate"><span class="pre">0&lt;&gt;</span></code></h3>
+<p>( x – flag )</p>
+<p>Not equal to zero</p>
+</section>
+<section id="id22">
+<h3><code class="docutils literal notranslate"><span class="pre">0&lt;</span></code></h3>
+<p>( n – flag )</p>
+<p>Less than zero</p>
+</section>
+<section id="id23">
+<h3><code class="docutils literal notranslate"><span class="pre">0&gt;</span></code></h3>
+<p>( n – flag )</p>
+<p>Greater than zero</p>
+</section>
+<section id="id24">
+<h3><code class="docutils literal notranslate"><span class="pre">0&lt;=</span></code></h3>
+<p>( n – flag )</p>
+<p>Less than or equal to zero</p>
+</section>
+<section id="id25">
+<h3><code class="docutils literal notranslate"><span class="pre">0&gt;=</span></code></h3>
+<p>( n – flag )</p>
+<p>Greater than or equal to zero</p>
+</section>
+<section id="id26">
+<h3><code class="docutils literal notranslate"><span class="pre">u&lt;</span></code></h3>
+<p>( u – flag )</p>
+<p>Unsigned less than</p>
+</section>
+<section id="id27">
+<h3><code class="docutils literal notranslate"><span class="pre">u&gt;</span></code></h3>
+<p>( u – flag )</p>
+<p>Unsigned greater than</p>
+</section>
+<section id="id28">
+<h3><code class="docutils literal notranslate"><span class="pre">u&lt;=</span></code></h3>
+<p>( u – flag )</p>
+<p>Unsigned less than or equal</p>
+</section>
+<section id="id29">
+<h3><code class="docutils literal notranslate"><span class="pre">u&gt;=</span></code></h3>
+<p>( u – flag )</p>
+<p>Unsigned greater than or equal</p>
+</section>
+<section id="ram-here">
+<h3><code class="docutils literal notranslate"><span class="pre">ram-here</span></code></h3>
+<p>( – addr )</p>
+<p>Get the RAM HERE pointer</p>
+</section>
+<section id="pad">
+<h3><code class="docutils literal notranslate"><span class="pre">pad</span></code></h3>
+<p>( – addr )</p>
+<p>Get the PAD pointer</p>
+</section>
+<section id="ram-allot">
+<h3><code class="docutils literal notranslate"><span class="pre">ram-allot</span></code></h3>
+<p>( u – )</p>
+<p>Allot space in RAM</p>
+</section>
+<section id="id30">
+<h3><code class="docutils literal notranslate"><span class="pre">ram-here!</span></code></h3>
+<p>( addr – )</p>
+<p>Set the RAM flash pointer</p>
+</section>
+<section id="flash-here">
+<h3><code class="docutils literal notranslate"><span class="pre">flash-here</span></code></h3>
+<p>( – addr )</p>
+<p>Get the flash HERE pointer</p>
+</section>
+<section id="flash-allot">
+<h3><code class="docutils literal notranslate"><span class="pre">flash-allot</span></code></h3>
+<p>( u – )</p>
+<p>Allot space in flash</p>
+</section>
+<section id="id31">
+<h3><code class="docutils literal notranslate"><span class="pre">flash-here!</span></code></h3>
+<p>( addr – )</p>
+<p>Set the flash HERE pointer</p>
+</section>
+<section id="latest">
+<h3><code class="docutils literal notranslate"><span class="pre">latest</span></code></h3>
+<p>( – word )</p>
+<p>Get the base address of the latest word</p>
+</section>
+<section id="ram-latest">
+<h3><code class="docutils literal notranslate"><span class="pre">ram-latest</span></code></h3>
+<p>( – word )</p>
+<p>Get the base address of the latest RAM word</p>
+</section>
+<section id="flash-latest">
+<h3><code class="docutils literal notranslate"><span class="pre">flash-latest</span></code></h3>
+<p>( – word )</p>
+<p>Get the base address of the latest flash word</p>
+</section>
+<section id="id32">
+<h3><code class="docutils literal notranslate"><span class="pre">latest!</span></code></h3>
+<p>( word – )</p>
+<p>Set the base address of the latest word</p>
+</section>
+<section id="id33">
+<h3><code class="docutils literal notranslate"><span class="pre">ram-latest!</span></code></h3>
+<p>( word – )</p>
+<p>Set the base address of the latest RAM word</p>
+</section>
+<section id="id34">
+<h3><code class="docutils literal notranslate"><span class="pre">flash-latest!</span></code></h3>
+<p>( word – )</p>
+<p>Set the base address of the latest flash word</p>
+</section>
+<section id="here">
+<h3><code class="docutils literal notranslate"><span class="pre">here</span></code></h3>
+<p>( – addr )</p>
+<p>Get either the HERE pointer or the flash HERE pointer, depending on
+compilation mode</p>
+</section>
+<section id="allot">
+<h3><code class="docutils literal notranslate"><span class="pre">allot</span></code></h3>
+<p>( u – )</p>
+<p>Allot space in RAM or in flash, depending on the compilation mode</p>
+</section>
+<section id="emit">
+<h3><code class="docutils literal notranslate"><span class="pre">emit</span></code></h3>
+<p>( b – )</p>
+<p>Emit a character</p>
+</section>
+<section id="id35">
+<h3><code class="docutils literal notranslate"><span class="pre">emit?</span></code></h3>
+<p>( – flag )</p>
+<p>Test for whether the system is ready to receive a character</p>
+</section>
+<section id="space">
+<h3><code class="docutils literal notranslate"><span class="pre">space</span></code></h3>
+<p>( – )</p>
+<p>Emit a space</p>
+</section>
+<section id="cr">
+<h3><code class="docutils literal notranslate"><span class="pre">cr</span></code></h3>
+<p>( – )</p>
+<p>Emit a newline</p>
+</section>
+<section id="type">
+<h3><code class="docutils literal notranslate"><span class="pre">type</span></code></h3>
+<p>( b-addr u – )</p>
+<p>Type a string</p>
+</section>
+<section id="serial-type">
+<h3><code class="docutils literal notranslate"><span class="pre">serial-type</span></code></h3>
+<p>( b-addr u – )</p>
+<p>Type a string using the native serial driver</p>
+</section>
+<section id="count">
+<h3><code class="docutils literal notranslate"><span class="pre">count</span></code></h3>
+<p>( b-addr1 – b-addr2 u )</p>
+<p>Convert a cstring to a string</p>
+</section>
+<section id="key">
+<h3><code class="docutils literal notranslate"><span class="pre">key</span></code></h3>
+<p>( – b )</p>
+<p>Receive a character</p>
+</section>
+<section id="id36">
+<h3><code class="docutils literal notranslate"><span class="pre">key?</span></code></h3>
+<p>( – flag )</p>
+<p>Test for whether the system is ready to receive a character</p>
+</section>
+<section id="enable-int">
+<h3><code class="docutils literal notranslate"><span class="pre">enable-int</span></code></h3>
+<p>( – )</p>
+<p>Enable interrupts</p>
+</section>
+<section id="disable-int">
+<h3><code class="docutils literal notranslate"><span class="pre">disable-int</span></code></h3>
+<p>( – )</p>
+<p>Disable interrupts</p>
+</section>
+<section id="sleep">
+<h3><code class="docutils literal notranslate"><span class="pre">sleep</span></code></h3>
+<p>( – )</p>
+<p>Enter sleep mode</p>
+</section>
+<section id="execute">
+<h3><code class="docutils literal notranslate"><span class="pre">execute</span></code></h3>
+<p>( xt – )</p>
+<p>Execute an xt</p>
+</section>
+<section id="id37">
+<h3><code class="docutils literal notranslate"><span class="pre">?execute</span></code></h3>
+<p>( xt|0 – )</p>
+<p>Execute an xt if it is non-zero</p>
+</section>
+<section id="pause">
+<h3><code class="docutils literal notranslate"><span class="pre">pause</span></code></h3>
+<p>( – )</p>
+<p>Execute a PAUSE word, if one is set</p>
+</section>
+<section id="exit">
+<h3><code class="docutils literal notranslate"><span class="pre">exit</span></code></h3>
+<p>( R: addr – )</p>
+<p>Exit a word</p>
+</section>
+<section id="init">
+<h3><code class="docutils literal notranslate"><span class="pre">init</span></code></h3>
+<p>( – )</p>
+<p>An empty init routine, to call if no other init routines are
+available, so as to enable any source file to call a preceding init</p>
+</section>
+<section id="immediate">
+<h3><code class="docutils literal notranslate"><span class="pre">[immediate]</span></code></h3>
+<p>( – )</p>
+<p>Set the currently-defined word to be immediate</p>
+</section>
+<section id="compile-only">
+<h3><code class="docutils literal notranslate"><span class="pre">[compile-only]</span></code></h3>
+<p>( – )</p>
+<p>Set the currently-defined word to be compile-only</p>
+</section>
+<section id="inlined">
+<h3><code class="docutils literal notranslate"><span class="pre">[inlined]</span></code></h3>
+<p>( – )</p>
+<p>Set the currently-defined word to be inlined</p>
+</section>
+<section id="id38">
+<h3><code class="docutils literal notranslate"><span class="pre">immediate</span></code></h3>
+<p>( – )</p>
+<p>Set the currently-defined word to be immediate</p>
+</section>
+<section id="id39">
+<h3><code class="docutils literal notranslate"><span class="pre">compile-only</span></code></h3>
+<p>( – )</p>
+<p>Set the currently-defined word to be compile-only</p>
+</section>
+<section id="id40">
+<h3><code class="docutils literal notranslate"><span class="pre">inlined</span></code></h3>
+<p>( – )</p>
+<p>Set the currently-defined word to be inlined</p>
+</section>
+<section id="visible">
+<h3><code class="docutils literal notranslate"><span class="pre">visible</span></code></h3>
+<p>( – )</p>
+<p>Set the currently-defined word to be visible</p>
+</section>
+<section id="id41">
+<h3><code class="docutils literal notranslate"><span class="pre">[</span></code></h3>
+<p>( – )</p>
+<p>Switch to interpretation mode</p>
+</section>
+<section id="id42">
+<h3><code class="docutils literal notranslate"><span class="pre">]</span></code></h3>
+<p>( – )</p>
+<p>Switch to compilation state</p>
+</section>
+<section id="compile-to-ram">
+<h3><code class="docutils literal notranslate"><span class="pre">compile-to-ram</span></code></h3>
+<p>( – )</p>
+<p>Set compilation to RAM</p>
+</section>
+<section id="compile-to-flash">
+<h3><code class="docutils literal notranslate"><span class="pre">compile-to-flash</span></code></h3>
+<p>( – )</p>
+<p>Set compilation to flash</p>
+</section>
+<section id="compiling-to-flash">
+<h3><code class="docutils literal notranslate"><span class="pre">compiling-to-flash?</span></code></h3>
+<p>( – flag )</p>
+<p>Get whether compilation is to flash</p>
+</section>
+<section id="begin-critical">
+<h3><code class="docutils literal notranslate"><span class="pre">begin-critical</span></code></h3>
+<p>( – )</p>
+<p>Begin a critical section, within which context switches will not take place; note that critical sections do nest.</p>
+</section>
+<section id="end-critical">
+<h3><code class="docutils literal notranslate"><span class="pre">end-critical</span></code></h3>
+<p>( – )</p>
+<p>End a critical section; if a context switch would have occurred within the critical section, it is initiated immediately upon executing this word.</p>
+</section>
+<section id="critical">
+<h3><code class="docutils literal notranslate"><span class="pre">critical</span></code></h3>
+<p>( xt – )</p>
+<p>Execute code within a critical section, properly handling exceptions.</p>
+</section>
+<section id="with-allot">
+<h3><code class="docutils literal notranslate"><span class="pre">with-allot</span></code></h3>
+<p>( bytes xt – ) ( xt: addr – )</p>
+<p>Allot RAM temporarily and clean it up afterwards, even if an exception occurs.</p>
+</section>
+<section id="with-ram">
+<h3><code class="docutils literal notranslate"><span class="pre">with-ram</span></code></h3>
+<p>( xt – ) ( xt: – )</p>
+<p>Switch to compile to RAM mode, and afterwards restore the compilation state, even if an exception occurs.</p>
+</section>
+<section id="with-aligned-allot">
+<h3><code class="docutils literal notranslate"><span class="pre">with-aligned-allot</span></code></h3>
+<p>( bytes xt – ) ( xt: addr – )</p>
+<p>Allot cell-aligned RAM temporarily and clean it up afterwards, even if an exception occurs.</p>
+</section>
+<section id="provide-allot-2cell">
+<h3><code class="docutils literal notranslate"><span class="pre">provide-allot-2cell</span></code></h3>
+<p>( xd xt – ) ( xt: addr bytes – )</p>
+<p>Allot double cell-sized cell-aligned RAM temporarily and write a double cell into it before executing the provided <em>xt</em> with the buffer’s address and size in bytes.</p>
+</section>
+<section id="provide-allot-cell">
+<h3><code class="docutils literal notranslate"><span class="pre">provide-allot-cell</span></code></h3>
+<p>( x xt – ) ( xt: addr bytes – )</p>
+<p>Allot cell-sized cell-aligned RAM temporarily and write a cell into it before executing the provided <em>xt</em> with the buffer’s address and size in bytes.</p>
+</section>
+<section id="provide-allot-half">
+<h3><code class="docutils literal notranslate"><span class="pre">provide-allot-half</span></code></h3>
+<p>( h xt – ) ( xt: addr bytes – )</p>
+<p>Allot halfword-sized cell-aligned RAM temporarily and write a halfword into it before executing the provided <em>xt</em> with the buffer’s address and size in bytes.</p>
+</section>
+<section id="provide-allot-byte">
+<h3><code class="docutils literal notranslate"><span class="pre">provide-allot-byte</span></code></h3>
+<p>( c xt – ) ( xt: addr bytes – )</p>
+<p>Allot byte-sized cell-aligned RAM temporarily and write a byte into it before executing the provided <em>xt</em> with the buffer’s address and size in bytes.</p>
+</section>
+<section id="x-insufficient-data">
+<h3><code class="docutils literal notranslate"><span class="pre">x-insufficient-data</span></code></h3>
+<p>( – )</p>
+<p>This is an exception raised by the <code class="docutils literal notranslate"><span class="pre">extract-allot-*</span></code> words if they do not receive a sufficient-sized buffer of data.</p>
+</section>
+<section id="extract-allot-2cell">
+<h3><code class="docutils literal notranslate"><span class="pre">extract-allot-2cell</span></code></h3>
+<p>( xt – xd ) ( xt: addr bytes – bytes’ )</p>
+<p>Allot double cell-sized cell-aligned RAM temporarily and provide its address and size in bytes to the <em>xt</em> that is executed, then read a double cell out of the buffer, unless the buffer length returned is shorter than a double cell, where then <code class="docutils literal notranslate"><span class="pre">x-insufficient-data</span></code> is raised.</p>
+</section>
+<section id="extract-allot-cell">
+<h3><code class="docutils literal notranslate"><span class="pre">extract-allot-cell</span></code></h3>
+<p>( xt – x ) ( xt: addr bytes – bytes’ )</p>
+<p>Allot cell-sized cell-aligned RAM temporarily and provide its address and size in bytes to the <em>xt</em> that is executed, then read a cell out of the buffer, unless the buffer length returned is shorter than a cell, where then <code class="docutils literal notranslate"><span class="pre">x-insufficient-data</span></code> is raised.</p>
+</section>
+<section id="extract-allot-half">
+<h3><code class="docutils literal notranslate"><span class="pre">extract-allot-half</span></code></h3>
+<p>( xt – h ) ( xt: addr bytes – bytes’ )</p>
+<p>Allot halfword-sized cell-aligned RAM temporarily and provide its address and size in bytes to the <em>xt</em> that is executed, then read a halfword out of the buffer, unless the buffer length returned is shorter than a halfword, where then <code class="docutils literal notranslate"><span class="pre">x-insufficient-data</span></code> is raised.</p>
+</section>
+<section id="extract-allot-byte">
+<h3><code class="docutils literal notranslate"><span class="pre">extract-allot-byte</span></code></h3>
+<p>( xt – c ) ( xt: addr bytes – addr’ bytes’ )</p>
+<p>Allot byte-sized cell-aligned RAM temporarily and provide its address and size in bytes to the <em>xt</em> that is executed, then read a byte out of the buffer, unless the buffer length returned is shorter than a byte, where then <code class="docutils literal notranslate"><span class="pre">x-insufficient-data</span></code> is raised.</p>
+</section>
+<section id="compress-flash">
+<h3><code class="docutils literal notranslate"><span class="pre">compress-flash</span></code></h3>
+<p>( – )</p>
+<p>Get whether to compress code compiled to flash</p>
+</section>
+<section id="end-compress-flash">
+<h3><code class="docutils literal notranslate"><span class="pre">end-compress-flash</span></code></h3>
+<p>( – )</p>
+<p>End flash compression</p>
+</section>
+<section id="commit-flash">
+<h3><code class="docutils literal notranslate"><span class="pre">commit-flash</span></code></h3>
+<p>( – )</p>
+<p>Commit code to flash without finishing compressing it</p>
+</section>
+<section id="compressing-flash">
+<h3><code class="docutils literal notranslate"><span class="pre">compressing-flash</span></code></h3>
+<p>( – flag )</p>
+<p>Get whether flash is being compressed</p>
+</section>
+<section id="word-align">
+<h3><code class="docutils literal notranslate"><span class="pre">word-align</span></code></h3>
+<p>( addr – a-addr )</p>
+<p>Word-align an address</p>
+</section>
+<section id="compile">
+<h3><code class="docutils literal notranslate"><span class="pre">compile,</span></code></h3>
+<p>( xt – )</p>
+<p>Compile an xt</p>
+</section>
+<section id="token-word">
+<h3><code class="docutils literal notranslate"><span class="pre">token-word</span></code></h3>
+<p>( “name” – name )</p>
+<p>Get the word corresponding to a token</p>
+</section>
+<section id="id43">
+<h3><code class="docutils literal notranslate"><span class="pre">'</span></code></h3>
+<p>( “name” – xt )</p>
+<p>Tick</p>
+</section>
+<section id="id44">
+<h3><code class="docutils literal notranslate"><span class="pre">[']</span></code></h3>
+<p>( compile-time: “name” – ) ( run-time: – xt )</p>
+<p>Compiled tick</p>
+</section>
+<section id="postpone">
+<h3><code class="docutils literal notranslate"><span class="pre">postpone</span></code></h3>
+<p>( compile-time: “name” – )</p>
+<p>Postpone a word</p>
+</section>
+<section id="lit">
+<h3><code class="docutils literal notranslate"><span class="pre">lit,</span></code></h3>
+<p>( x – )</p>
+<p>Compile a literal</p>
+</section>
+<section id="literal">
+<h3><code class="docutils literal notranslate"><span class="pre">literal</span></code></h3>
+<p>( compile-time: x – )</p>
+<p>Compile a literal</p>
+</section>
+<section id="recurse">
+<h3><code class="docutils literal notranslate"><span class="pre">recurse</span></code></h3>
+<p>( – )</p>
+<p>Recursively call a word</p>
+</section>
+<section id="unknown-word">
+<h3><code class="docutils literal notranslate"><span class="pre">unknown-word</span></code></h3>
+<p>( – )</p>
+<p>Unknown word exception</p>
+</section>
+<section id="c">
+<h3><code class="docutils literal notranslate"><span class="pre">c!</span></code></h3>
+<p>( b b-addr – )</p>
+<p>Store a byte</p>
+</section>
+<section id="h">
+<h3><code class="docutils literal notranslate"><span class="pre">h!</span></code></h3>
+<p>( h h-addr – )</p>
+<p>Store a halfword</p>
+</section>
+<section id="id45">
+<h3><code class="docutils literal notranslate"><span class="pre">!</span></code></h3>
+<p>( x a-addr – )</p>
+<p>Store a word</p>
+</section>
+<section id="id46">
+<h3><code class="docutils literal notranslate"><span class="pre">2!</span></code></h3>
+<p>( d a-addr – )</p>
+<p>Store a doubleword</p>
+</section>
+<section id="id47">
+<h3><code class="docutils literal notranslate"><span class="pre">c+!</span></code></h3>
+<p>( x b-addr – )</p>
+<p>Read a byte from an address, add a value, and write it back</p>
+</section>
+<section id="id48">
+<h3><code class="docutils literal notranslate"><span class="pre">h+!</span></code></h3>
+<p>( x h-addr – )</p>
+<p>Read a halfword from an address, add a value, and write it back</p>
+</section>
+<section id="id49">
+<h3><code class="docutils literal notranslate"><span class="pre">+!</span></code></h3>
+<p>( x a-addr – )</p>
+<p>Read a word from an address, add a value, and write it back</p>
+</section>
+<section id="id50">
+<h3><code class="docutils literal notranslate"><span class="pre">c&#64;</span></code></h3>
+<p>( b-addr – b )</p>
+<p>Get a byte</p>
+</section>
+<section id="id51">
+<h3><code class="docutils literal notranslate"><span class="pre">h&#64;</span></code></h3>
+<p>( h-addr – h )</p>
+<p>Get a halfword</p>
+</section>
+<section id="id52">
+<h3><code class="docutils literal notranslate"><span class="pre">&#64;</span></code></h3>
+<p>( a-addr – x )</p>
+<p>Get a word</p>
+</section>
+<section id="id53">
+<h3><code class="docutils literal notranslate"><span class="pre">2&#64;</span></code></h3>
+<p>( a-addr – d )</p>
+<p>Get a doubleword</p>
+</section>
+<section id="cram">
+<h3><code class="docutils literal notranslate"><span class="pre">cram,</span></code></h3>
+<p>( b – )</p>
+<p>Store a byte at the RAM HERE location</p>
+</section>
+<section id="hram">
+<h3><code class="docutils literal notranslate"><span class="pre">hram,</span></code></h3>
+<p>( h – )</p>
+<p>Store a halfword at the RAM HERE location</p>
+</section>
+<section id="ram">
+<h3><code class="docutils literal notranslate"><span class="pre">ram,</span></code></h3>
+<p>( x – )</p>
+<p>Store a word at the RAM HERE location</p>
+</section>
+<section id="id54">
+<h3><code class="docutils literal notranslate"><span class="pre">2ram,</span></code></h3>
+<p>( d – )</p>
+<p>Store a doubleword at the RAM HERE location</p>
+</section>
+<section id="cflash">
+<h3><code class="docutils literal notranslate"><span class="pre">cflash,</span></code></h3>
+<p>( b – )</p>
+<p>Store a byte at the flash HERE location</p>
+</section>
+<section id="hflash">
+<h3><code class="docutils literal notranslate"><span class="pre">hflash,</span></code></h3>
+<p>( h – )</p>
+<p>Store a halfword at the flash HERE location</p>
+</section>
+<section id="flash">
+<h3><code class="docutils literal notranslate"><span class="pre">flash,</span></code></h3>
+<p>( x – )</p>
+<p>Store a word at the flash HERE location</p>
+</section>
+<section id="id55">
+<h3><code class="docutils literal notranslate"><span class="pre">2flash,</span></code></h3>
+<p>( d – )</p>
+<p>Store a doubleword at the flash HERE location</p>
+</section>
+<section id="ccurrent">
+<h3><code class="docutils literal notranslate"><span class="pre">ccurrent!</span></code></h3>
+<p>( b b-addr – )</p>
+<p>Store a byte to RAM or to flash</p>
+</section>
+<section id="hcurrent">
+<h3><code class="docutils literal notranslate"><span class="pre">hcurrent!</span></code></h3>
+<p>( h h-addr – )</p>
+<p>Store a halfword to RAM or to flash</p>
+</section>
+<section id="current">
+<h3><code class="docutils literal notranslate"><span class="pre">current!</span></code></h3>
+<p>( x a-addr – )</p>
+<p>Store a word to RAM or to flash</p>
+</section>
+<section id="id56">
+<h3><code class="docutils literal notranslate"><span class="pre">2current!</span></code></h3>
+<p>( d a-addr – )</p>
+<p>Store a doubleword to RAM or to flash</p>
+</section>
+<section id="id57">
+<h3><code class="docutils literal notranslate"><span class="pre">c,</span></code></h3>
+<p>( b – )</p>
+<p>Store a byte to the RAM or flash HERE location</p>
+</section>
+<section id="id58">
+<h3><code class="docutils literal notranslate"><span class="pre">h,</span></code></h3>
+<p>( h – )</p>
+<p>Store a halfword to the RAM or flash HERE location</p>
+</section>
+<section id="id59">
+<h3><code class="docutils literal notranslate"><span class="pre">,</span></code></h3>
+<p>( x – )</p>
+<p>Store a word to the RAM or flash HERE location</p>
+</section>
+<section id="id60">
+<h3><code class="docutils literal notranslate"><span class="pre">2,</span></code></h3>
+<p>( d – )</p>
+<p>Store a doubleword to the RAM or flash HERE location</p>
+</section>
+<section id="cram-reserve">
+<h3><code class="docutils literal notranslate"><span class="pre">cram-reserve</span></code></h3>
+<p>( – addr )</p>
+<p>Reserve a byte at the RAM HERE location</p>
+</section>
+<section id="hram-reserve">
+<h3><code class="docutils literal notranslate"><span class="pre">hram-reserve</span></code></h3>
+<p>( – addr )</p>
+<p>Reserve a halfword at the RAM HERE location</p>
+</section>
+<section id="ram-reserve">
+<h3><code class="docutils literal notranslate"><span class="pre">ram-reserve</span></code></h3>
+<p>( – addr )</p>
+<p>Reserve a word at the RAM HERE location</p>
+</section>
+<section id="id61">
+<h3><code class="docutils literal notranslate"><span class="pre">2ram-reserve</span></code></h3>
+<p>( – addr )</p>
+<p>Reserve a doubleword at the RAM HERE location</p>
+</section>
+<section id="cflash-reserve">
+<h3><code class="docutils literal notranslate"><span class="pre">cflash-reserve</span></code></h3>
+<p>( – addr )</p>
+<p>Reserve a byte at the flash HERE location</p>
+</section>
+<section id="hflash-reserve">
+<h3><code class="docutils literal notranslate"><span class="pre">hflash-reserve</span></code></h3>
+<p>( – addr )</p>
+<p>Reserve a halfword at the flash HERE location</p>
+</section>
+<section id="flash-reserve">
+<h3><code class="docutils literal notranslate"><span class="pre">flash-reserve</span></code></h3>
+<p>( – addr )</p>
+<p>Reserve a word at the flash HERE location</p>
+</section>
+<section id="id62">
+<h3><code class="docutils literal notranslate"><span class="pre">2flash-reserve</span></code></h3>
+<p>( – addr )</p>
+<p>Reserve a doubleword at the flash HERE location</p>
+</section>
+<section id="creserve">
+<h3><code class="docutils literal notranslate"><span class="pre">creserve</span></code></h3>
+<p>( – addr )</p>
+<p>Reserve a byte at the RAM or flash HERE location</p>
+</section>
+<section id="hreserve">
+<h3><code class="docutils literal notranslate"><span class="pre">hreserve</span></code></h3>
+<p>( – addr )</p>
+<p>Reserve a halfword at the RAM or flash HERE location</p>
+</section>
+<section id="reserve">
+<h3><code class="docutils literal notranslate"><span class="pre">reserve</span></code></h3>
+<p>( – addr )</p>
+<p>Reserve a word at the RAM or flash HERE location</p>
+</section>
+<section id="id63">
+<h3><code class="docutils literal notranslate"><span class="pre">2reserve</span></code></h3>
+<p>( – addr )</p>
+<p>Reserve a doubleword at the RAM or flash HERE location</p>
+</section>
+<section id="align">
+<h3><code class="docutils literal notranslate"><span class="pre">align,</span></code></h3>
+<p>( u – )</p>
+<p>Align to a power of two</p>
+</section>
+<section id="flash-align">
+<h3><code class="docutils literal notranslate"><span class="pre">flash-align,</span></code></h3>
+<p>( u – )</p>
+<p>Align to a power of two</p>
+</section>
+<section id="ram-align">
+<h3><code class="docutils literal notranslate"><span class="pre">ram-align,</span></code></h3>
+<p>( u – )</p>
+<p>Align to a power of two</p>
+</section>
+<section id="cstring">
+<h3><code class="docutils literal notranslate"><span class="pre">cstring,</span></code></h3>
+<p>( b-addr u – )</p>
+<p>Compile a c-string</p>
+</section>
+<section id="r">
+<h3><code class="docutils literal notranslate"><span class="pre">&gt;r</span></code></h3>
+<p>( x1 – ) ( R: – x1 )</p>
+<p>Push a value onto the return stack</p>
+</section>
+<section id="id64">
+<h3><code class="docutils literal notranslate"><span class="pre">r&gt;</span></code></h3>
+<p>( R: x1 – ) ( – x1 )</p>
+<p>Pop a value off the return stack</p>
+</section>
+<section id="id65">
+<h3><code class="docutils literal notranslate"><span class="pre">r&#64;</span></code></h3>
+<p>( R: x1 – x1 ) ( – x1 )</p>
+<p>Get a value off the return stack without popping it</p>
+</section>
+<section id="rdrop">
+<h3><code class="docutils literal notranslate"><span class="pre">rdrop</span></code></h3>
+<p>( R: x – )</p>
+<p>Drop a value from the return stack</p>
+</section>
+<section id="rp">
+<h3><code class="docutils literal notranslate"><span class="pre">rp&#64;</span></code></h3>
+<p>( – a-addr )</p>
+<p>Get the return stack pointer</p>
+</section>
+<section id="id66">
+<h3><code class="docutils literal notranslate"><span class="pre">rp!</span></code></h3>
+<p>( a-addr – )</p>
+<p>Set the return stack pointer</p>
+</section>
+<section id="sp">
+<h3><code class="docutils literal notranslate"><span class="pre">sp&#64;</span></code></h3>
+<p>( – a-addr )</p>
+<p>Get the data stack pointer</p>
+</section>
+<section id="id67">
+<h3><code class="docutils literal notranslate"><span class="pre">sp!</span></code></h3>
+<p>( a-addr – )</p>
+<p>Set the data stack pointer</p>
+</section>
+<section id="reboot">
+<h3><code class="docutils literal notranslate"><span class="pre">reboot</span></code></h3>
+<p>( – )</p>
+<p>Reboot</p>
+</section>
+<section id="true">
+<h3><code class="docutils literal notranslate"><span class="pre">true</span></code></h3>
+<p>( – f )</p>
+</section>
+<section id="false">
+<h3><code class="docutils literal notranslate"><span class="pre">false</span></code></h3>
+<p>( – f )</p>
+</section>
+<section id="binary">
+<h3><code class="docutils literal notranslate"><span class="pre">binary</span></code></h3>
+<p>( – )</p>
+</section>
+<section id="octal">
+<h3><code class="docutils literal notranslate"><span class="pre">octal</span></code></h3>
+<p>( – )</p>
+</section>
+<section id="decimal">
+<h3><code class="docutils literal notranslate"><span class="pre">decimal</span></code></h3>
+<p>( – )</p>
+</section>
+<section id="hex">
+<h3><code class="docutils literal notranslate"><span class="pre">hex</span></code></h3>
+<p>( – )</p>
+</section>
+<section id="cell">
+<h3><code class="docutils literal notranslate"><span class="pre">cell</span></code></h3>
+<p>( – u )</p>
+</section>
+<section id="cells">
+<h3><code class="docutils literal notranslate"><span class="pre">cells</span></code></h3>
+<p>( n – n )</p>
+</section>
+<section id="id68">
+<h3><code class="docutils literal notranslate"><span class="pre">cell+</span></code></h3>
+<p>( n – n )</p>
+<p>Add a cell to a value</p>
+</section>
+<section id="tos">
+<h3><code class="docutils literal notranslate"><span class="pre">tos</span></code></h3>
+<p>( – u )</p>
+</section>
+<section id="visible-flag">
+<h3><code class="docutils literal notranslate"><span class="pre">visible-flag</span></code></h3>
+<p>( – u )</p>
+</section>
+<section id="immediate-flag">
+<h3><code class="docutils literal notranslate"><span class="pre">immediate-flag</span></code></h3>
+<p>( – u )</p>
+</section>
+<section id="compiled-flag">
+<h3><code class="docutils literal notranslate"><span class="pre">compiled-flag</span></code></h3>
+<p>( – u )</p>
+</section>
+<section id="inlined-flag">
+<h3><code class="docutils literal notranslate"><span class="pre">inlined-flag</span></code></h3>
+<p>( – u )</p>
+</section>
+<section id="id69">
+<h3><code class="docutils literal notranslate"><span class="pre">nip</span></code></h3>
+<p>( x1 x2 – x2 )</p>
+<p>Drop the cell under the top of the stack</p>
+</section>
+<section id="id70">
+<h3><code class="docutils literal notranslate"><span class="pre">tuck</span></code></h3>
+<p>( x1 x2 – x2 x1 x2 )</p>
+<p>Tuck a cell under the cell at he top of the stack</p>
+</section>
+<section id="min">
+<h3><code class="docutils literal notranslate"><span class="pre">min</span></code></h3>
+<p>( n1 n2 – n3 )</p>
+<p>Get the minimum of two numbers</p>
+</section>
+<section id="max">
+<h3><code class="docutils literal notranslate"><span class="pre">max</span></code></h3>
+<p>( n1 n2 – n3 )</p>
+<p>Get the maximum of two numbers</p>
+</section>
+<section id="id71">
+<h3><code class="docutils literal notranslate"><span class="pre">-rot</span></code></h3>
+<p>( x1 x2 x3 – x3 x1 x2 )</p>
+<p>Rotate three cells in reverse</p>
+</section>
+<section id="abs">
+<h3><code class="docutils literal notranslate"><span class="pre">abs</span></code></h3>
+<p>( n – u )</p>
+<p>Get the absolute value of a number</p>
+</section>
+<section id="id72">
+<h3><code class="docutils literal notranslate"><span class="pre">align</span></code></h3>
+<p>( a power – a )</p>
+<p>Align an address to a power of two</p>
+</section>
+<section id="id73">
+<h3><code class="docutils literal notranslate"><span class="pre">?dup</span></code></h3>
+<p>( x – x | 0 )</p>
+<p>Duplicate a cell if it is non-zero</p>
+</section>
+<section id="cbit">
+<h3><code class="docutils literal notranslate"><span class="pre">cbit&#64;</span></code></h3>
+<p>( mask b-addr – f )</p>
+<p>Test for bits in a byte being set</p>
+</section>
+<section id="hbit">
+<h3><code class="docutils literal notranslate"><span class="pre">hbit&#64;</span></code></h3>
+<p>( mask h-addr – f )</p>
+<p>Test for bits in a halfword being set</p>
+</section>
+<section id="bit">
+<h3><code class="docutils literal notranslate"><span class="pre">bit&#64;</span></code></h3>
+<p>( mask addr – f )</p>
+<p>Test for bits in a cell being set</p>
+</section>
+<section id="cbis">
+<h3><code class="docutils literal notranslate"><span class="pre">cbis!</span></code></h3>
+<p>( bits addr – )</p>
+<p>Set bits on a byte</p>
+</section>
+<section id="cbic">
+<h3><code class="docutils literal notranslate"><span class="pre">cbic!</span></code></h3>
+<p>( bits addr – )</p>
+<p>Clear bits on a byte</p>
+</section>
+<section id="hbis">
+<h3><code class="docutils literal notranslate"><span class="pre">hbis!</span></code></h3>
+<p>( bits addr – )</p>
+<p>Set bits on a halfword</p>
+</section>
+<section id="hbic">
+<h3><code class="docutils literal notranslate"><span class="pre">hbic!</span></code></h3>
+<p>( bits addr – )</p>
+<p>Clear bits on a halfword</p>
+</section>
+<section id="bis">
+<h3><code class="docutils literal notranslate"><span class="pre">bis!</span></code></h3>
+<p>( bits addr – )</p>
+<p>Set bits on a word</p>
+</section>
+<section id="id74">
+<h3><code class="docutils literal notranslate"><span class="pre">bic!</span></code></h3>
+<p>( bits addr – )</p>
+<p>Clear bits on a word</p>
+</section>
+<section id="depth">
+<h3><code class="docutils literal notranslate"><span class="pre">depth</span></code></h3>
+<p>( – u )</p>
+<p>Get the depth of the stack, not including the cell pushed onto it by this
+word</p>
+</section>
+<section id="h-1">
+<h3><code class="docutils literal notranslate"><span class="pre">h.1</span></code></h3>
+<p>( b – )</p>
+<p>Output a hexadecimal nibble</p>
+</section>
+<section id="h-2">
+<h3><code class="docutils literal notranslate"><span class="pre">h.2</span></code></h3>
+<p>( b – )</p>
+<p>Output a hexadecimal 8 bit value, padded with zeros</p>
+</section>
+<section id="h-4">
+<h3><code class="docutils literal notranslate"><span class="pre">h.4</span></code></h3>
+<p>( h – )</p>
+<p>Output a hexadecimal 16 bit value, padded with zeros</p>
+</section>
+<section id="h-8">
+<h3><code class="docutils literal notranslate"><span class="pre">h.8</span></code></h3>
+<p>( x – )</p>
+<p>Output a hexadecimal 32 bit value, padded with zeros</p>
+</section>
+<section id="h-16">
+<h3><code class="docutils literal notranslate"><span class="pre">h.16</span></code></h3>
+<p>( ud – )</p>
+<p>Output a hexadecimal 64 bit value, padded with zeros</p>
+</section>
+<section id="s">
+<h3><code class="docutils literal notranslate"><span class="pre">.s</span></code></h3>
+<p>( – )</p>
+<p>Dump the contents of the data stack</p>
+</section>
+<section id="raise">
+<h3><code class="docutils literal notranslate"><span class="pre">?raise</span></code></h3>
+<p>( xt|0 – | 0 )</p>
+<p>Raise an exception with the exception type in the TOS register</p>
+</section>
+<section id="try">
+<h3><code class="docutils literal notranslate"><span class="pre">try</span></code></h3>
+<p>( xt1 – xt2|0 )</p>
+<p>Try to see if an exception occurs</p>
+</section>
+<section id="averts">
+<h3><code class="docutils literal notranslate"><span class="pre">averts</span></code></h3>
+<p>( f “name” – )</p>
+<p>Assert that a value is true, otherwise raise a specified exception</p>
+</section>
+<section id="triggers">
+<h3><code class="docutils literal notranslate"><span class="pre">triggers</span></code></h3>
+<p>( f “name” – )</p>
+<p>Assert that a value is false, otherwise raise a specified exception</p>
+</section>
+<section id="suppress">
+<h3><code class="docutils literal notranslate"><span class="pre">suppress</span></code></h3>
+<p>( exc|0 “name” – exc|0 )</p>
+<p>Check whether an exception, typically returned by <code class="docutils literal notranslate"><span class="pre">try</span></code>, matches a specified
+exception and if it does, replace it with zero, marking no exception,
+otherwise passing the specified argument through.</p>
+</section>
+<section id="name">
+<h3><code class="docutils literal notranslate"><span class="pre">&gt;name</span></code></h3>
+<p>( xt – name )</p>
+<p>Search the dictionary for a word by its xt</p>
+</section>
+<section id="safe-type">
+<h3><code class="docutils literal notranslate"><span class="pre">safe-type</span></code></h3>
+<p>( b-addr bytes – )</p>
+<p>Safely type a string</p>
+</section>
+<section id="safe-type-integer">
+<h3><code class="docutils literal notranslate"><span class="pre">safe-type-integer</span></code></h3>
+<p>( n – )</p>
+<p>Safely type an integer</p>
+</section>
+<section id="safe-type-unsigned">
+<h3><code class="docutils literal notranslate"><span class="pre">safe-type-unsigned</span></code></h3>
+<p>( u – )</p>
+<p>Safely type an unsigned integer</p>
+</section>
+<section id="fill">
+<h3><code class="docutils literal notranslate"><span class="pre">fill</span></code></h3>
+<p>( b-addr u b – )</p>
+<p>Fill memory with a byte</p>
+</section>
+<section id="create">
+<h3><code class="docutils literal notranslate"><span class="pre">create</span></code></h3>
+<p>( “name” – )</p>
+<p>Create a word referring to memory after it</p>
+</section>
+<section id="builds">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;builds</span></code></h3>
+<p>( “name” – )</p>
+<p>Create a word that executes code specified by DOES&gt;</p>
+</section>
+<section id="does">
+<h3><code class="docutils literal notranslate"><span class="pre">does&gt;</span></code></h3>
+<p>( – )</p>
+<p>Specify code for a word created wth &lt;BUILDS</p>
+</section>
+<section id="defer">
+<h3><code class="docutils literal notranslate"><span class="pre">defer</span></code></h3>
+<p>( “name” – )</p>
+<p>Create a deferred word with the given name; note that executing it before it is set will result in a crash.</p>
+</section>
+<section id="id75">
+<h3><code class="docutils literal notranslate"><span class="pre">defer!</span></code></h3>
+<p>( xt deferred-xt – )</p>
+<p>Set the deferred word corresponding to the execution token <em>deferred-xt</em> to execute the execution token <em>xt</em> when it is executed. If the deferred word is compiled to flash this may only be done once. Also note that a crash will result if <em>deferred-xt</em> is in flash and <em>xt</em> is in RAM and one executes <em>deferred-xt</em> after rebooting.</p>
+</section>
+<section id="id76">
+<h3><code class="docutils literal notranslate"><span class="pre">defer&#64;</span></code></h3>
+<p>( deferred-xt – xt )</p>
+<p>Get the execution token <em>xt</em> executed when the deferred word corresponding to the execution token <em>deferred-xt</em> is executed.</p>
+</section>
+<section id="begin-structure">
+<h3><code class="docutils literal notranslate"><span class="pre">begin-structure</span></code></h3>
+<p>( “name” – offset )</p>
+<p>Begin declaring a structure</p>
+</section>
+<section id="end">
+<h3><code class="docutils literal notranslate"><span class="pre">end</span></code></h3>
+<p>( offset – )</p>
+<p>Finish declaring a structure</p>
+</section>
+<section id="field">
+<h3><code class="docutils literal notranslate"><span class="pre">+field</span></code></h3>
+<p>( offset size “name” – offset )</p>
+<p>Create an arbitrary-sized field</p>
+</section>
+<section id="cfield">
+<h3><code class="docutils literal notranslate"><span class="pre">cfield:</span></code></h3>
+<p>( offset “name” – offset )</p>
+<p>Create a byte-sized field</p>
+</section>
+<section id="hfield">
+<h3><code class="docutils literal notranslate"><span class="pre">hfield:</span></code></h3>
+<p>( offset “name” – offset )</p>
+<p>Create a halfword-sized field</p>
+</section>
+<section id="id77">
+<h3><code class="docutils literal notranslate"><span class="pre">field:</span></code></h3>
+<p>( offset “name” – offset )</p>
+<p>Create a cell-sized field</p>
+</section>
+<section id="id78">
+<h3><code class="docutils literal notranslate"><span class="pre">2field:</span></code></h3>
+<p>( offset “name” – offset )</p>
+<p>Create a double cell-sized field</p>
+</section>
+<section id="equal-strings">
+<h3><code class="docutils literal notranslate"><span class="pre">equal-strings?</span></code></h3>
+<p>( b-addr1 u1 b-addr2 u2 – f )</p>
+<p>Get whether two strings are equal</p>
+</section>
+<section id="case">
+<h3><code class="docutils literal notranslate"><span class="pre">case</span></code></h3>
+<p>( – )</p>
+<p>Start a CASE statement</p>
+</section>
+<section id="of">
+<h3><code class="docutils literal notranslate"><span class="pre">of</span></code></h3>
+<p>( x – )</p>
+<p>Start an OF clause</p>
+</section>
+<section id="endof">
+<h3><code class="docutils literal notranslate"><span class="pre">endof</span></code></h3>
+<p>( – )</p>
+<p>End an OF clause</p>
+</section>
+<section id="endcase">
+<h3><code class="docutils literal notranslate"><span class="pre">endcase</span></code></h3>
+<p>( x – )</p>
+<p>End a CASE statement</p>
+</section>
+<section id="ofstr">
+<h3><code class="docutils literal notranslate"><span class="pre">ofstr</span></code></h3>
+<p>( x – )</p>
+<p>Start an OFSTR clause</p>
+</section>
+<section id="ofstrcase">
+<h3><code class="docutils literal notranslate"><span class="pre">ofstrcase</span></code></h3>
+<p>( x – )</p>
+<p>Start an OFSTRCASE clause</p>
+</section>
+<section id="endcasestr">
+<h3><code class="docutils literal notranslate"><span class="pre">endcasestr</span></code></h3>
+<p>( x – )</p>
+<p>End a CASE statement comparing against a string</p>
+</section>
+<section id="cuser">
+<h3><code class="docutils literal notranslate"><span class="pre">cuser</span></code></h3>
+<p>( “name” – )</p>
+<p>Allocate a byte user variable</p>
+</section>
+<section id="huser">
+<h3><code class="docutils literal notranslate"><span class="pre">huser</span></code></h3>
+<p>( “name” – )</p>
+<p>Allocate a halfword variable in RAM</p>
+</section>
+<section id="user">
+<h3><code class="docutils literal notranslate"><span class="pre">user</span></code></h3>
+<p>( “name” – )</p>
+<p>Allocate a user variable</p>
+</section>
+<section id="id79">
+<h3><code class="docutils literal notranslate"><span class="pre">2user</span></code></h3>
+<p>( “name” – )</p>
+<p>Allocate a doubleword user variable</p>
+</section>
+<section id="user-buffer">
+<h3><code class="docutils literal notranslate"><span class="pre">user-buffer:</span></code></h3>
+<p>( bytes “name” – )</p>
+<p>Allocate a user buffer</p>
+</section>
+<section id="user-aligned-buffer">
+<h3><code class="docutils literal notranslate"><span class="pre">user-aligned-buffer:</span></code></h3>
+<p>( bytes “name” – )</p>
+<p>Allocate a cell-aligned user buffer</p>
+</section>
+<section id="cvariable">
+<h3><code class="docutils literal notranslate"><span class="pre">cvariable</span></code></h3>
+<p>( “name” – )</p>
+<p>Create a one-byte variable</p>
+</section>
+<section id="hvariable">
+<h3><code class="docutils literal notranslate"><span class="pre">hvariable</span></code></h3>
+<p>( “name” – )</p>
+<p>Create a two-byte variable</p>
+</section>
+<section id="variable">
+<h3><code class="docutils literal notranslate"><span class="pre">variable</span></code></h3>
+<p>( “name” – )</p>
+<p>Create a four-byte variable</p>
+</section>
+<section id="id80">
+<h3><code class="docutils literal notranslate"><span class="pre">2variable</span></code></h3>
+<p>( “name” – )</p>
+<p>Create an eight-byte variable</p>
+</section>
+<section id="buffer">
+<h3><code class="docutils literal notranslate"><span class="pre">buffer:</span></code></h3>
+<p>( # “name” – )</p>
+<p>Specify a buffer of a given size</p>
+</section>
+<section id="aligned-buffer">
+<h3><code class="docutils literal notranslate"><span class="pre">aligned-buffer:</span></code></h3>
+<p>( # “name” – )</p>
+<p>Specify a cell-aligned buffer of a given size</p>
+</section>
+<section id="flash-wordlist">
+<h3><code class="docutils literal notranslate"><span class="pre">flash-wordlist</span></code></h3>
+<p>( – wid )</p>
+<p>Create a flash wordlist</p>
+</section>
+<section id="ram-wordlist">
+<h3><code class="docutils literal notranslate"><span class="pre">ram-wordlist</span></code></h3>
+<p>( – wid )</p>
+<p>Create a RAM wordlist</p>
+</section>
+<section id="wordlist">
+<h3><code class="docutils literal notranslate"><span class="pre">wordlist</span></code></h3>
+<p>( – wid )</p>
+<p>Create a new wordlist</p>
+</section>
+<section id="do">
+<h3><code class="docutils literal notranslate"><span class="pre">do</span></code></h3>
+<p>( end start – ) ( R: – leave start end ) ( compile: – leave* loop )</p>
+<p>Begin a do loop</p>
+</section>
+<section id="id81">
+<h3><code class="docutils literal notranslate"><span class="pre">?do</span></code></h3>
+<p>( end start – ) ( R: – leave start end ) ( compile: – leave* loop )</p>
+<p>Begin a ?do loop</p>
+</section>
+<section id="loop">
+<h3><code class="docutils literal notranslate"><span class="pre">loop</span></code></h3>
+<p>( R leave current end – leave current end | )</p>
+<p>End a do loop</p>
+</section>
+<section id="id82">
+<h3><code class="docutils literal notranslate"><span class="pre">+loop</span></code></h3>
+<p>( increment – ) ( R: leave current end – leave current end | )</p>
+<p>End a do +loop</p>
+</section>
+<section id="i">
+<h3><code class="docutils literal notranslate"><span class="pre">i</span></code></h3>
+<p>( R current end – current end ) ( – current )</p>
+<p>Get the loop index</p>
+</section>
+<section id="j">
+<h3><code class="docutils literal notranslate"><span class="pre">j</span></code></h3>
+<p>( R cur1 end1 leave cur2 end2 – cur1 end1 leave cur2 end2 ) ( – cur1 )</p>
+<p>Get the loop index beneath the current loop</p>
+</section>
+<section id="leave">
+<h3><code class="docutils literal notranslate"><span class="pre">leave</span></code></h3>
+<p>( R leave current end – )</p>
+<p>Leave a do loop</p>
+</section>
+<section id="unloop">
+<h3><code class="docutils literal notranslate"><span class="pre">unloop</span></code></h3>
+<p>( R: leave current end – )</p>
+<p>Unloop from a do loop (to exit, e.g.)</p>
+</section>
+<section id="dump">
+<h3><code class="docutils literal notranslate"><span class="pre">dump</span></code></h3>
+<p>( start-addr end-addr – )</p>
+<p>Dump memory between two addresses</p>
+</section>
+<section id="skip-until">
+<h3><code class="docutils literal notranslate"><span class="pre">skip-until</span></code></h3>
+<p>( xt – )</p>
+<p>Skip characters in the evaluation buffer until a predicate is met</p>
+</section>
+<section id="id83">
+<h3><code class="docutils literal notranslate"><span class="pre">[:</span></code></h3>
+<p>( – )</p>
+<p>Begin lambda</p>
+</section>
+<section id="id84">
+<h3><code class="docutils literal notranslate"><span class="pre">;]</span></code></h3>
+<p>( – ) ( compiled: – xt )</p>
+<p>End lambda</p>
+</section>
+<section id="x">
+<h3><code class="docutils literal notranslate"><span class="pre">x&quot;</span></code></h3>
+<p>( <text>” – )</p>
+<p>Create an anonymous word for an exception</p>
+</section>
+<section id="ws">
+<h3><code class="docutils literal notranslate"><span class="pre">ws?</span></code></h3>
+<p>( b – flag )</p>
+<p>Test whether a character is whitespace.</p>
+</section>
+<section id="newline">
+<h3><code class="docutils literal notranslate"><span class="pre">newline?</span></code></h3>
+<p>( b – flag )</p>
+<p>Test whether a character is a newline.</p>
+</section>
+<section id="token-start">
+<h3><code class="docutils literal notranslate"><span class="pre">token-start</span></code></h3>
+<p>( – i )</p>
+<p>Parse the input buffer for the start of a token</p>
+</section>
+<section id="token-end">
+<h3><code class="docutils literal notranslate"><span class="pre">token-end</span></code></h3>
+<p>( i1 – i2 )</p>
+<p>Parse the input buffer for the end of a token</p>
+</section>
+<section id="token">
+<h3><code class="docutils literal notranslate"><span class="pre">token</span></code></h3>
+<p>( “token” – b-addr u )</p>
+<p>Parse a token</p>
+</section>
+<section id="id85">
+<h3><code class="docutils literal notranslate"><span class="pre">\</span></code></h3>
+<p>( “comment<NL>” – )</p>
+<p>Parse a line comment</p>
+</section>
+<section id="id86">
+<h3><code class="docutils literal notranslate"><span class="pre">(</span></code></h3>
+<p>( “comment)” – )</p>
+<p>Parse a paren coment</p>
+</section>
+<section id="to-upper-char">
+<h3><code class="docutils literal notranslate"><span class="pre">to-upper-char</span></code></h3>
+<p>( b – b )</p>
+<p>Convert a character to being uppercase</p>
+</section>
+<section id="equal-case-strings">
+<h3><code class="docutils literal notranslate"><span class="pre">equal-case-strings?</span></code></h3>
+<p>( b-addr1 u1 b-addr2 u2 – flag )</p>
+<p>Compare whether two strings are equal</p>
+</section>
+<section id="id87">
+<h3><code class="docutils literal notranslate"><span class="pre">3dup</span></code></h3>
+<p>( x1 x2 x3 – x1 x2 x3 x1 x2 x3 )</p>
+<p>Duplicate three items on the stack</p>
+</section>
+<section id="find">
+<h3><code class="docutils literal notranslate"><span class="pre">find</span></code></h3>
+<p>( b-addr u – word|0 )</p>
+<p>Find a word in the dictionary according to the word order list</p>
+</section>
+<section id="find-all">
+<h3><code class="docutils literal notranslate"><span class="pre">find-all</span></code></h3>
+<p>( b-addr u – word|0 )</p>
+<p>Find a word in the dictionary in any wordlist in order of definition</p>
+</section>
+<section id="find-by-xt">
+<h3><code class="docutils literal notranslate"><span class="pre">find-by-xt</span></code></h3>
+<p>( xt – word|0 )</p>
+<p>Find a word in any dictionary by execution token or return zero for no word found; only words with headers will be found</p>
+</section>
+<section id="xt">
+<h3><code class="docutils literal notranslate"><span class="pre">&gt;xt</span></code></h3>
+<p>( word – xt )</p>
+<p>Get an xt from a word</p>
+</section>
+<section id="apply">
+<h3><code class="docutils literal notranslate"><span class="pre">apply</span></code></h3>
+<p>( ? word – ? )</p>
+<p>Evaluate a word in the current interpretation/compilation context.</p>
+</section>
+<section id="evaluate">
+<h3><code class="docutils literal notranslate"><span class="pre">evaluate</span></code></h3>
+<p>( ? b-addr u – ? )</p>
+<p>Evaluate a string. Note that only one task may interpret code at a time.</p>
+</section>
+<section id="evaluate-with-input">
+<h3><code class="docutils literal notranslate"><span class="pre">evaluate-with-input</span></code></h3>
+<p>( ? data input-addr input-bytes refill-xt eof-xt – ? )</p>
+<p>Evaluate input, initialised to the buffer at <em>input-addr</em> and the buffer length of <em>input-bytes</em>, with a refill handler <em>refill-xt</em> with the signature ( – ), an end-of-file test <em>eof-xt</em> with the signature ( – eof? ), and an auxiliary dat value <em>data</em>.</p>
+</section>
+<section id="feed-input">
+<h3><code class="docutils literal notranslate"><span class="pre">feed-input</span></code></h3>
+<p>( input-addr input-bytes – )</p>
+<p>Set the current input for evaluation to the buffer at <em>input-addr</em> and the buffer length of <em>input-bytes</em>, and the current evaluation index is reset to the start of the specified buffer.</p>
+</section>
+<section id="abort">
+<h3><code class="docutils literal notranslate"><span class="pre">abort</span></code></h3>
+<p>( – )</p>
+<p>Abort</p>
+</section>
+<section id="quit">
+<h3><code class="docutils literal notranslate"><span class="pre">quit</span></code></h3>
+<p>( – )</p>
+<p>The outer loop of Forth</p>
+</section>
+<section id="stack-overflow">
+<h3><code class="docutils literal notranslate"><span class="pre">stack-overflow</span></code></h3>
+<p>( – )</p>
+<p>Stack overflow exception</p>
+</section>
+<section id="stack-underflow">
+<h3><code class="docutils literal notranslate"><span class="pre">stack-underflow</span></code></h3>
+<p>( – )</p>
+<p>Stack underflow exception</p>
+</section>
+<section id="rstack-overflow">
+<h3><code class="docutils literal notranslate"><span class="pre">rstack-overflow</span></code></h3>
+<p>( – )</p>
+<p>Return stack overflow exception</p>
+</section>
+<section id="rstack-underflow">
+<h3><code class="docutils literal notranslate"><span class="pre">rstack-underflow</span></code></h3>
+<p>( – )</p>
+<p>Return stack underflow exception</p>
+</section>
+<section id="xon">
+<h3><code class="docutils literal notranslate"><span class="pre">xon</span></code></h3>
+<p>( – )</p>
+<p>Send XON</p>
+</section>
+<section id="xoff">
+<h3><code class="docutils literal notranslate"><span class="pre">xoff</span></code></h3>
+<p>( – )</p>
+<p>Send XOFF</p>
+</section>
+<section id="ack">
+<h3><code class="docutils literal notranslate"><span class="pre">ack</span></code></h3>
+<p>( – )</p>
+<p>Send ACK</p>
+</section>
+<section id="nak">
+<h3><code class="docutils literal notranslate"><span class="pre">nak</span></code></h3>
+<p>( – )</p>
+<p>Send NAK</p>
+</section>
+<section id="bel">
+<h3><code class="docutils literal notranslate"><span class="pre">bel</span></code></h3>
+<p>( – )</p>
+<p>Send BEL</p>
+</section>
+<section id="failed-parse">
+<h3><code class="docutils literal notranslate"><span class="pre">failed-parse</span></code></h3>
+<p>( – )</p>
+<p>Failed parse exception</p>
+</section>
+<section id="parse-integer">
+<h3><code class="docutils literal notranslate"><span class="pre">parse-integer</span></code></h3>
+<p>( b-addr u –  n success )</p>
+<p>Parse an integer</p>
+</section>
+<section id="parse-unsigned">
+<h3><code class="docutils literal notranslate"><span class="pre">parse-unsigned</span></code></h3>
+<p>( b-addr u1 – u2 success )</p>
+<p>Parse an unsigned integer</p>
+</section>
+<section id="parse-base">
+<h3><code class="docutils literal notranslate"><span class="pre">parse-base</span></code></h3>
+<p>( b-addr1 u1 – b-addr2 u2 base )</p>
+<p>Actually parse an integer base</p>
+</section>
+<section id="parse-digit">
+<h3><code class="docutils literal notranslate"><span class="pre">parse-digit</span></code></h3>
+<p>( b base – u success  )</p>
+<p>Parse a digit</p>
+</section>
+<section id="id88">
+<h3><code class="docutils literal notranslate"><span class="pre">:</span></code></h3>
+<p>( – )</p>
+<p>Start a colon definition</p>
+</section>
+<section id="noname">
+<h3><code class="docutils literal notranslate"><span class="pre">:noname</span></code></h3>
+<p>( – xt )</p>
+<p>Start an anonymous colon definition</p>
+</section>
+<section id="id89">
+<h3><code class="docutils literal notranslate"><span class="pre">;</span></code></h3>
+<p>( – )</p>
+<p>End a colon definition</p>
+</section>
+<section id="constant">
+<h3><code class="docutils literal notranslate"><span class="pre">constant</span></code></h3>
+<p>( x “name” – )</p>
+<p>Create a constant</p>
+</section>
+<section id="id90">
+<h3><code class="docutils literal notranslate"><span class="pre">2constant</span></code></h3>
+<p>( d “name” – )</p>
+<p>Create a 2-word constant</p>
+</section>
+<section id="token-expected">
+<h3><code class="docutils literal notranslate"><span class="pre">token-expected</span></code></h3>
+<p>( – )</p>
+<p>Token expected exception handler</p>
+</section>
+<section id="not-compiling">
+<h3><code class="docutils literal notranslate"><span class="pre">not-compiling</span></code></h3>
+<p>( – )</p>
+<p>We are not currently compiling</p>
+</section>
+<section id="compile-to-ram-only">
+<h3><code class="docutils literal notranslate"><span class="pre">compile-to-ram-only</span></code></h3>
+<p>( – )</p>
+<p>We are currently compiling to flash</p>
+</section>
+<section id="else">
+<h3><code class="docutils literal notranslate"><span class="pre">[else]</span></code></h3>
+<p>( – )</p>
+<p>Implement the [else] in [if]/[else]/[then] for conditional execution/compilation</p>
+</section>
+<section id="if">
+<h3><code class="docutils literal notranslate"><span class="pre">[if]</span></code></h3>
+<p>( f – )</p>
+<p>Start conditional execution/compilation</p>
+</section>
+<section id="then">
+<h3><code class="docutils literal notranslate"><span class="pre">[then]</span></code></h3>
+<p>( – )</p>
+<p>Finish conditional execution/compilation</p>
+</section>
+<section id="hold">
+<h3><code class="docutils literal notranslate"><span class="pre">hold</span></code></h3>
+<p>( b – )</p>
+<p>Add a character to pictured numeric output</p>
+</section>
+<section id="id91">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;#</span></code></h3>
+<p>( – )</p>
+<p>Start pictured numeric output</p>
+</section>
+<section id="id92">
+<h3><code class="docutils literal notranslate"><span class="pre">#</span></code></h3>
+<p>( ud1 – ud2 )</p>
+<p>Add a digit to the pictured numeric output</p>
+</section>
+<section id="id93">
+<h3><code class="docutils literal notranslate"><span class="pre">#s</span></code></h3>
+<p>( ud – 0 0 )</p>
+<p>Add one or more digits to the pictured numeric output</p>
+</section>
+<section id="sign">
+<h3><code class="docutils literal notranslate"><span class="pre">sign</span></code></h3>
+<p>( n – )</p>
+<p>If n (a single number) is negative, append ‘-’ to the pictured numeric output</p>
+</section>
+<section id="id94">
+<h3><code class="docutils literal notranslate"><span class="pre">#&gt;</span></code></h3>
+<p>( xd – c-addr bytes )</p>
+<p>Finish pictured numeric output</p>
+</section>
+<section id="format-double">
+<h3><code class="docutils literal notranslate"><span class="pre">format-double</span></code></h3>
+<p>( b-addr nd – b-addr bytes )</p>
+<p>Format a signed double-cell number</p>
+</section>
+<section id="format-double-unsigned">
+<h3><code class="docutils literal notranslate"><span class="pre">format-double-unsigned</span></code></h3>
+<p>( b-addr ud – b-addr bytes )</p>
+<p>Format an unsigned double-cell number</p>
+</section>
+<section id="d">
+<h3><code class="docutils literal notranslate"><span class="pre">(d.)</span></code></h3>
+<p>( nd – )</p>
+<p>Type a signed double-cell number without a leading space</p>
+</section>
+<section id="ud">
+<h3><code class="docutils literal notranslate"><span class="pre">(ud.)</span></code></h3>
+<p>( ud – )</p>
+<p>Type an unsigned double-cell number without a leading space</p>
+</section>
+<section id="id95">
+<h3><code class="docutils literal notranslate"><span class="pre">d.</span></code></h3>
+<p>( nd – )</p>
+<p>Type a signed double-cell number with a leading space</p>
+</section>
+<section id="id96">
+<h3><code class="docutils literal notranslate"><span class="pre">ud.</span></code></h3>
+<p>( ud – )</p>
+<p>Type an unsigned double-cell number with a leading space</p>
+</section>
+<section id="format-fixed">
+<h3><code class="docutils literal notranslate"><span class="pre">format-fixed</span></code></h3>
+<p>( c-addr f – c-addr bytes )</p>
+<p>Format an S31.32 fixed-point number</p>
+</section>
+<section id="format-fixed-truncate">
+<h3><code class="docutils literal notranslate"><span class="pre">format-fixed-truncate</span></code></h3>
+<p>( c-addr f places – c-addr bytes )</p>
+<p>Format an S31.32 fixed-point number to <em>places</em> to the left of the decimal point</p>
+</section>
+<section id="f">
+<h3><code class="docutils literal notranslate"><span class="pre">(f.)</span></code></h3>
+<p>( f – )</p>
+<p>Type an S31.32 fixed-point number without a leading space</p>
+</section>
+<section id="f-n">
+<h3><code class="docutils literal notranslate"><span class="pre">(f.n)</span></code></h3>
+<p>( f places – )</p>
+<p>Type an S31.32 fixed-point number to <em>places</em> to the left of the decimal point without a leading space</p>
+</section>
+<section id="id97">
+<h3><code class="docutils literal notranslate"><span class="pre">f.</span></code></h3>
+<p>( f – )</p>
+<p>Type an S31.32 fixed-point number with a leading space</p>
+</section>
+<section id="id98">
+<h3><code class="docutils literal notranslate"><span class="pre">f.n</span></code></h3>
+<p>( f places – )</p>
+<p>Type an S31.32 fixed-point number to <em>places</em> to the left of the decimal point with a leading space</p>
+</section>
+<section id="s-d">
+<h3><code class="docutils literal notranslate"><span class="pre">s&gt;d</span></code></h3>
+<p>( n – d )</p>
+<p>Convert a signed single-cell number to a signed double-cell number.</p>
+</section>
+<section id="d-s">
+<h3><code class="docutils literal notranslate"><span class="pre">d&gt;s</span></code></h3>
+<p>( d – n )</p>
+<p>Convert a double-cell number to a single-cell number.</p>
+</section>
+<section id="s-f">
+<h3><code class="docutils literal notranslate"><span class="pre">s&gt;f</span></code></h3>
+<p>( n – f )</p>
+<p>Convert a signed single-cell number to an S31.32 fixed-point number.</p>
+</section>
+<section id="f-s">
+<h3><code class="docutils literal notranslate"><span class="pre">f&gt;s</span></code></h3>
+<p>( f – n )</p>
+<p>Convert an S31.32 fixed point number to a signed single-cell number, flooring it in the process.</p>
+</section>
+<section id="wait">
+<h3><code class="docutils literal notranslate"><span class="pre">wait</span></code></h3>
+<p>( xt – )</p>
+<p>Wait for a predicate to become true</p>
+</section>
+<section id="ms">
+<h3><code class="docutils literal notranslate"><span class="pre">ms</span></code></h3>
+<p>( u – )</p>
+<p>Wait for u milliseconds. Note that when multitasking is in use this automatically calls PAUSE. Also note that times are normally measured in 10ths of milliseconds, unlike this word.</p>
+</section>
+<section id="forget-ram">
+<h3><code class="docutils literal notranslate"><span class="pre">forget-ram</span></code></h3>
+<p>( – )</p>
+<p>Forget the contents of RAM except for RAM variables and buffers compiled from flash, user variables (which are compiled into flash), and kernel-level RAM variables. Note that this is actually implemented in <code class="docutils literal notranslate"><span class="pre">src/common/forth/task.fs</span></code> rather than <code class="docutils literal notranslate"><span class="pre">src/common/forth/basic.fs</span></code> because it relies upon code implemented for multitasking.</p>
+</section>
+<section id="task-free">
+<h3><code class="docutils literal notranslate"><span class="pre">task-free</span></code></h3>
+<p>( task – )</p>
+<p>Display space free for a given task</p>
+</section>
+<section id="free">
+<h3><code class="docutils literal notranslate"><span class="pre">free</span></code></h3>
+<p>( – )</p>
+<p>Display space free for the main task and for flash in general</p>
+</section>
+<section id="copyright">
+<h3><code class="docutils literal notranslate"><span class="pre">copyright</span></code></h3>
+<p>( – )</p>
+<p>Display the copyright notices</p>
+</section>
+<section id="license">
+<h3><code class="docutils literal notranslate"><span class="pre">license</span></code></h3>
+<p>( – )</p>
+<p>Display the license notice</p>
+</section>
+<section id="id99">
+<h3><code class="docutils literal notranslate"><span class="pre">.&quot;</span></code></h3>
+<p>( “text<quote>” – )</p>
+<p>Compile a string to be printed.</p>
+</section>
+<section id="id100">
+<h3><code class="docutils literal notranslate"><span class="pre">s&quot;</span></code></h3>
+<p>( “text<quote>” – ) ( compiled: – b-addr u )</p>
+<p>Compile a non-counted string</p>
+</section>
+<section id="id101">
+<h3><code class="docutils literal notranslate"><span class="pre">c&quot;</span></code></h3>
+<p>( “text<quote>” – ) ( compiled: – b-addr )</p>
+<p>Compile a counted-string</p>
+</section>
+<section id="id102">
+<h3><code class="docutils literal notranslate"><span class="pre">.(</span></code></h3>
+<p>( “text<close-paren>” – )</p>
+<p>Immediately print a string.</p>
+</section>
+<section id="id103">
+<h3><code class="docutils literal notranslate"><span class="pre">.\&quot;</span></code></h3>
+<p>( “text<quote>” – )</p>
+<p>Compile an escaped string to be printed.</p>
+</section>
+<section id="id104">
+<h3><code class="docutils literal notranslate"><span class="pre">s\&quot;</span></code></h3>
+<p>( “text<quote>” – ) ( compiled: – b-addr u )</p>
+<p>Compile an escaped non-counted string</p>
+</section>
+<section id="id105">
+<h3><code class="docutils literal notranslate"><span class="pre">c\&quot;</span></code></h3>
+<p>( “text<quote>” – ) ( compiled: – b-addr )</p>
+<p>Compile an escaped counted-string</p>
+</section>
+<section id="id106">
+<h3><code class="docutils literal notranslate"><span class="pre">.\(</span></code></h3>
+<p>( “text<close-paren>” – )</p>
+<p>Immediately print an escaped string.</p>
+</section>
+<section id="compile-cstring">
+<h3><code class="docutils literal notranslate"><span class="pre">compile-cstring</span></code></h3>
+<p>( b-addr u – ) ( compiled: – b-addr )</p>
+<p>Compile a counted-string</p>
+</section>
+<section id="char">
+<h3><code class="docutils literal notranslate"><span class="pre">char</span></code></h3>
+<p>( “char” – b )</p>
+<p>Parse a character and put it on the stack</p>
+</section>
+<section id="id107">
+<h3><code class="docutils literal notranslate"><span class="pre">[char]</span></code></h3>
+<p>( “char” – ) ( compiled: – b )</p>
+<p>Parse a character and compile it</p>
+</section>
+<section id="id108">
+<h3><code class="docutils literal notranslate"><span class="pre">(.)</span></code></h3>
+<p>( n – )</p>
+<p>Type an integer without a preceding space</p>
+</section>
+<section id="id109">
+<h3><code class="docutils literal notranslate"><span class="pre">(u.)</span></code></h3>
+<p>( u – )</p>
+<p>Type an unsigned integer without a preceding space</p>
+</section>
+<section id="debugu">
+<h3><code class="docutils literal notranslate"><span class="pre">debugu.</span></code></h3>
+<p>( u – )</p>
+<p>Type an unsigned hexadecimal integer safely without a preceding space</p>
+</section>
+<section id="id110">
+<h3><code class="docutils literal notranslate"><span class="pre">.</span></code></h3>
+<p>( n – )</p>
+<p>Type an integer with a preceding space</p>
+</section>
+<section id="id111">
+<h3><code class="docutils literal notranslate"><span class="pre">u.</span></code></h3>
+<p>( u – )</p>
+<p>Type an unsigned integer with a preceding space</p>
+</section>
+<section id="move">
+<h3><code class="docutils literal notranslate"><span class="pre">move</span></code></h3>
+<p>( b-addr1 b-addr2 u – )</p>
+<p>Copy bytes from one buffer to another one (which may overlap)</p>
+</section>
+<section id="reverse">
+<h3><code class="docutils literal notranslate"><span class="pre">reverse</span></code></h3>
+<p>( b-addr u – )</p>
+<p>Reverse bytes in place</p>
+</section>
+<section id="spaces">
+<h3><code class="docutils literal notranslate"><span class="pre">spaces</span></code></h3>
+<p>( u – )</p>
+<p>Emit a number of spaces.</p>
+</section>
+<section id="format-unsigned">
+<h3><code class="docutils literal notranslate"><span class="pre">format-unsigned</span></code></h3>
+<p>( b-addr u1 – b-addr u2 )</p>
+<p>Format an integer as a string</p>
+</section>
+<section id="format-integer">
+<h3><code class="docutils literal notranslate"><span class="pre">format-integer</span></code></h3>
+<p>( b-addr n – b-addr u )</p>
+<p>Format an integer as a string</p>
+</section>
+<section id="fix">
+<h3><code class="docutils literal notranslate"><span class="pre">fix</span></code></h3>
+<p>( b-addr bytes – b-addr bytes )</p>
+<p>Store a string in the RAM dictionary.</p>
+</section>
+<section id="cfix">
+<h3><code class="docutils literal notranslate"><span class="pre">cfix</span></code></h3>
+<p>( b-addr bytes – b-addr )</p>
+<p>Store a string as counted string in the RAM dictionary.</p>
+</section>
+<section id="marker">
+<h3><code class="docutils literal notranslate"><span class="pre">marker</span></code></h3>
+<p>( “name” – )</p>
+<p>Create a marker word named <em>name</em> to erase flash/return the flash dictionary to its prior state; note that the marker word that is created is erased when it is executed</p>
+</section>
+<section id="cornerstone">
+<h3><code class="docutils literal notranslate"><span class="pre">cornerstone</span></code></h3>
+<p>( “name” – )</p>
+<p>Create a cornerstone word named <em>name</em> to erase flash/return the flash dictionary to its state immediately after <code class="docutils literal notranslate"><span class="pre">cornerstone</span></code> was executed; unlike <code class="docutils literal notranslate"><span class="pre">marker</span></code> the word created does not erase itself when executed and may be executed multiple times</p>
+</section>
+<section id="vector-count">
+<h3><code class="docutils literal notranslate"><span class="pre">vector-count</span></code></h3>
+<p>( – count )</p>
+<p>Get the number of interrupt vectors.</p>
+</section>
+<section id="vector-table">
+<h3><code class="docutils literal notranslate"><span class="pre">vector-table</span></code></h3>
+<p>( – addr )</p>
+<p>Get the interrupt vector table address.</p>
+</section>
+<section id="id112">
+<h3><code class="docutils literal notranslate"><span class="pre">xon</span></code></h3>
+<p>( – )</p>
+<p>Emit an XON character if <code class="docutils literal notranslate"><span class="pre">xon-xoff-enabled</span></code> is set to non-zero.</p>
+</section>
+<section id="id113">
+<h3><code class="docutils literal notranslate"><span class="pre">xoff</span></code></h3>
+<p>( – )</p>
+<p>Emit an XOFF character if <code class="docutils literal notranslate"><span class="pre">xon-xoff-enabled</span></code> is seto to zero.</p>
+</section>
+<section id="id114">
+<h3><code class="docutils literal notranslate"><span class="pre">ack</span></code></h3>
+<p>( – )</p>
+<p>Emit an ACK character.</p>
+</section>
+<section id="id115">
+<h3><code class="docutils literal notranslate"><span class="pre">nak</span></code></h3>
+<p>( – )</p>
+<p>Emit a NAK character.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

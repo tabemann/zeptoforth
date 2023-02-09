@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Module Words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="module-words">
+<h1>Module Words</h1>
+<p>Modules in zeptoforth are built on top of wordlists, and form a user-friendly means of controlling word namespaces instead of manually manipulating wordlists. Modules and wordlists are one and the same, but by convention they are named with <code class="docutils literal notranslate"><span class="pre">*</span></code>.</p>
+<p>At any given time once <code class="docutils literal notranslate"><span class="pre">src/forth/common/module.fs</span></code> is loaded there is a module stack which controls how module words manipulate the wordlist order. Initially there is one entry on the module stack, corresponding to the <code class="docutils literal notranslate"><span class="pre">forth</span></code> wordlist. When new entries are pushed onto the module stack, they save the state of <code class="docutils literal notranslate"><span class="pre">base</span></code> prior to their creation, and restore it once they are popped. Also, module stack entries specify the current wordlist for them, and when module stack entries immediately above them on the stack are popped, their wordlist is restored as the current wordlist.</p>
+<p>When modules are defined, they automatically add their wordlist definition as a constant to the containing module. Also, if so specified by using <code class="docutils literal notranslate"><span class="pre">begin-import</span></code> or <code class="docutils literal notranslate"><span class="pre">begin-import-once</span></code>, the modules may be imported in the containing module. Note that modules may be defined multiple times, each time adding onto the existing definition, unless the module is defined with <code class="docutils literal notranslate"><span class="pre">begin-module-once</span></code> or <code class="docutils literal notranslate"><span class="pre">begin-import-once</span></code>, where then it is checked such that the module already exists by the name specified, and if it does exist, <code class="docutils literal notranslate"><span class="pre">x-already-defined</span></code> is raised.</p>
+<p>Within a given module, the user may import and unimport modules/wordlists, which pushes them on the wordlist order and removes them from that module’s portion of the wordlist’s order respectively. Note that all the wordlists imported with a module definition are automatically unimported when that module definition is ended.</p>
+<p>Words inside modules or inside nested modules may be used without importing the modules in question with <em>paths</em> specified with <em>module</em><code class="docutils literal notranslate"><span class="pre">::</span></code><em>word</em> or, mor generally, <em>module0</em><code class="docutils literal notranslate"><span class="pre">::</span></code>…<code class="docutils literal notranslate"><span class="pre">::</span></code><em>modulen</em><code class="docutils literal notranslate"><span class="pre">::</span></code><em>word</em>. These paths can be used not simply by the outer interpreter but also by any word which looks up another word by name, such as <code class="docutils literal notranslate"><span class="pre">'</span></code>, <code class="docutils literal notranslate"><span class="pre">[']</span></code>, <code class="docutils literal notranslate"><span class="pre">postpone</span></code>, <code class="docutils literal notranslate"><span class="pre">averts</span></code>, and <code class="docutils literal notranslate"><span class="pre">triggers</span></code>.</p>
+<p>Note that it is recommended that once <code class="docutils literal notranslate"><span class="pre">src/common/forth/module.fs</span></code> is loaded, the user should not manually use <code class="docutils literal notranslate"><span class="pre">set-order</span></code> or <code class="docutils literal notranslate"><span class="pre">set-current</span></code>, as the module system will not know about this and thus unexpected results may occur.</p>
+<section id="forth">
+<h2><code class="docutils literal notranslate"><span class="pre">forth</span></code></h2>
+<p>The following words are defined in <code class="docutils literal notranslate"><span class="pre">forth</span></code>:</p>
+<section id="x-already-defined">
+<h3><code class="docutils literal notranslate"><span class="pre">x-already-defined</span></code></h3>
+<p>( – )</p>
+<p>Module already defined exception.</p>
+</section>
+<section id="x-not-found">
+<h3><code class="docutils literal notranslate"><span class="pre">x-not-found</span></code></h3>
+<p>( – )</p>
+<p>Module not found exception.</p>
+</section>
+<section id="begin-module">
+<h3><code class="docutils literal notranslate"><span class="pre">begin-module</span></code></h3>
+<p>( “name” – )</p>
+<p>Begin the definition of module <em>name</em>; module <em>name</em> must not already exist or <code class="docutils literal notranslate"><span class="pre">x-already-defined</span></code> will be raised.</p>
+</section>
+<section id="continue-module">
+<h3><code class="docutils literal notranslate"><span class="pre">continue-module</span></code></h3>
+<p>( “name” – )</p>
+<p>Continue the definition of a preexisting module <em>name</em>; if module <em>name</em> does not exist <code class="docutils literal notranslate"><span class="pre">x-not-found</span></code> will be raised.</p>
+</section>
+<section id="private-module">
+<h3><code class="docutils literal notranslate"><span class="pre">private-module</span></code></h3>
+<p>( – )</p>
+<p>Begin the definition of a private module, i.e a module not bound to a word.</p>
+</section>
+<section id="end-module">
+<h3><code class="docutils literal notranslate"><span class="pre">end-module</span></code></h3>
+<p>( – )</p>
+<p>End the definition of the module at the top of the module stack, removing each wordlist for each module imported within it from the wordlist order.</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">end-module&gt;</span></code></h3>
+<p>( –  module )</p>
+<p>End the definition of the module at the top of the module stack, removing each wordlist for each module imported within it from th e wordlist order, and then push the module whose definition had ended onto the data stack.</p>
+</section>
+<section id="import">
+<h3><code class="docutils literal notranslate"><span class="pre">import</span></code></h3>
+<p>( module – )</p>
+<p>Import a specified module into the current module’s wordlist order; if the module does not exist <code class="docutils literal notranslate"><span class="pre">x-not-found</span></code> is raised.</p>
+</section>
+<section id="unimport">
+<h3><code class="docutils literal notranslate"><span class="pre">unimport</span></code></h3>
+<p>( module – )</p>
+<p>Remove a specified module from the current module’s wordlist order; note that it does not remove it from parent modules’ wordlist orders, so if it  had been imported within them they are still searchable.</p>
+</section>
+<section id="export">
+<h3><code class="docutils literal notranslate"><span class="pre">export</span></code></h3>
+<p>( xt “word-name” – )</p>
+<p>Export <em>xt</em> from the module currently being defined as <em>word-name</em>.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

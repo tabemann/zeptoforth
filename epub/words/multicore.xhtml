@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Multicore Words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="multicore-words">
+<h1>Multicore Words</h1>
+<p>Currently the only platform on which multicore execution is supported is the RP2040. On this platform cores communicate and synchronize via hardware spinlocks and hardware FIFO’s (i.e. mailboxes). On platforms other than the RP2040 multicore words exist in the dictionary but are merely stubs which will always raise exceptions when called.</p>
+<p>Note that prior limitations to multicore operation on the RP2040 have been resolved, with there being no need to disable interrupt-driven serial IO, with tasks being able to be started arbitrarily on any core from a task on any core, with multitasking constructs being able to be used across cores, and with writing and erasing flash functioning properly when both cores are operational.</p>
+<p>Multicore support in zeptoforth is largely implemented outside the zeptoforth kernel and is split between <code class="docutils literal notranslate"><span class="pre">src/rp2040/forth/multicore.fs</span></code> (on platforms other than RP2040 stubbed out in <code class="docutils literal notranslate"><span class="pre">src/common/forth/multicore.fs</span></code>) and <code class="docutils literal notranslate"><span class="pre">src/common/forth/task.fs</span></code>, with a bit of supporting functionality also in <code class="docutils literal notranslate"><span class="pre">src/common/forth/systick.fs</span></code> and <code class="docutils literal notranslate"><span class="pre">src/rp2040/forth/erase.fs</span></code>.</p>
+<section id="forth">
+<h2><code class="docutils literal notranslate"><span class="pre">forth</span></code></h2>
+<p>Built into the kernel exists:</p>
+<section id="cpu-count">
+<h3><code class="docutils literal notranslate"><span class="pre">cpu-count</span></code></h3>
+<p>( – count )</p>
+<p>Get the core count.</p>
+</section>
+<section id="cpu-index">
+<h3><code class="docutils literal notranslate"><span class="pre">cpu-index</span></code></h3>
+<p>( – index )</p>
+<p>Get the index of the core from which <code class="docutils literal notranslate"><span class="pre">cpu-index</span></code> was called.</p>
+</section>
+<section id="cpu-offset">
+<h3><code class="docutils literal notranslate"><span class="pre">cpu-offset</span></code></h3>
+<p>( – offset )</p>
+<p>Return 4 times <code class="docutils literal notranslate"><span class="pre">cpu-index</span></code>.</p>
+</section>
+<section id="sio-hook">
+<h3><code class="docutils literal notranslate"><span class="pre">sio-hook</span></code></h3>
+<p>( – addr )</p>
+<p>Get the address of a hook for the current core which may be set to an xt ( u – ) to handle values written to that core’s FIFO by the other core; note that a value of 0 (the default value) means that values read from the core’s FIFO are discarded.</p>
+<p>In <code class="docutils literal notranslate"><span class="pre">src/common/forth/basic.fs</span></code>, in <code class="docutils literal notranslate"><span class="pre">forth</span></code>, exists:</p>
+</section>
+<section id="cpu-variable">
+<h3><code class="docutils literal notranslate"><span class="pre">cpu-variable</span></code></h3>
+<p>( “global-name” “cpu-name” – )</p>
+<p>Compile a one-cell-per-core variable into flash that has two words referring to it, a <em>global-name</em> which takes a core index when called and outputs the address for that core, and a <em>cpu-name</em> which returns its address for the current core.</p>
+</section>
+</section>
+<section id="multicore">
+<h2><code class="docutils literal notranslate"><span class="pre">multicore</span></code></h2>
+<p>In both <code class="docutils literal notranslate"><span class="pre">src/rp2040/forth/multicore.fs</span></code> and <code class="docutils literal notranslate"><span class="pre">src/common/forth/multicore.fs</span></code>, in <code class="docutils literal notranslate"><span class="pre">multicore</span></code> on all platforms, exists:</p>
+<section id="x-spinlock-out-of-range">
+<h3><code class="docutils literal notranslate"><span class="pre">x-spinlock-out-of-range</span></code></h3>
+<p>( – )</p>
+<p>Spinlock out of range exception.</p>
+</section>
+<section id="x-core-out-of-range">
+<h3><code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code></h3>
+<p>( – )</p>
+<p>Core out of range exception, i.e. core index not in range 0 &lt;= core &lt; cpu-count.</p>
+</section>
+<section id="x-core-not-addressable">
+<h3><code class="docutils literal notranslate"><span class="pre">x-core-not-addressable</span></code></h3>
+<p>( – )</p>
+<p>Core not addressable exception, i.e. invalid core for an operation carried out ont the current core.</p>
+<p>In <code class="docutils literal notranslate"><span class="pre">src/rp2040/forth/multicore.fs</span></code>, in <code class="docutils literal notranslate"><span class="pre">multicore</span></code> on the <code class="docutils literal notranslate"><span class="pre">rp2040</span></code> platform, exists:</p>
+</section>
+<section id="sev">
+<h3><code class="docutils literal notranslate"><span class="pre">sev</span></code></h3>
+<p>( – )</p>
+<p>Signal an event to the other core.</p>
+</section>
+<section id="wfe">
+<h3><code class="docutils literal notranslate"><span class="pre">wfe</span></code></h3>
+<p>( – )</p>
+<p>Wait for an event.</p>
+</section>
+<section id="sio-irq-proc0">
+<h3><code class="docutils literal notranslate"><span class="pre">SIO_IRQ_PROC0</span></code></h3>
+<p>( – irq )</p>
+<p>SIO processor 0 IRQ index, i.e. 15.</p>
+</section>
+<section id="sio-irq-proc1">
+<h3><code class="docutils literal notranslate"><span class="pre">SIO_IRQ_PROC1</span></code></h3>
+<p>( – irq )</p>
+<p>SIO processor 1 RIQ index, i.e. 16.</p>
+</section>
+<section id="fifo-st">
+<h3><code class="docutils literal notranslate"><span class="pre">FIFO_ST</span></code></h3>
+<p>( – addr )</p>
+<p>FIFO status register; note that core 0 can see the read side of the 1 -&gt; 0
+FIFO and the write side of the 0 -&gt; 1 FIFO; the converse is true of core 1</p>
+</section>
+<section id="fifo-st-roe">
+<h3><code class="docutils literal notranslate"><span class="pre">FIFO_ST_ROE</span></code></h3>
+<p>( – bit )</p>
+<p>Sticky flag indicating the RX FIFO was read when empty; write to clear.</p>
+</section>
+<section id="fifo-st-wof">
+<h3><code class="docutils literal notranslate"><span class="pre">FIFO_ST_WOF</span></code></h3>
+<p>( – bit )</p>
+<p>Sticky flag indicating the TX FIFO was written when full; write to clear.</p>
+</section>
+<section id="fifo-st-vld">
+<h3><code class="docutils literal notranslate"><span class="pre">FIFO_ST_VLD</span></code></h3>
+<p>( – bit )</p>
+<p>Set if this core’s RX FIFO is not empty.</p>
+</section>
+<section id="fifo-wr">
+<h3><code class="docutils literal notranslate"><span class="pre">FIFO_WR</span></code></h3>
+<p>( – bit )</p>
+<p>Write access from this core’s TX FIFO.</p>
+</section>
+<section id="fifo-rd">
+<h3><code class="docutils literal notranslate"><span class="pre">FIFO_RD</span></code></h3>
+<p>( – bit )</p>
+<p>Read access to this core’s RX FIFO.</p>
+</section>
+<section id="spinlock">
+<h3><code class="docutils literal notranslate"><span class="pre">SPINLOCK</span></code></h3>
+<p>( index – addr )</p>
+<p>Returns the address of a spinlock with a given index. Note that reading from an spinlock claims it if a value other than 0 is read (which will be the index of the spinlock), with a value of 0 indicating that the spinlock is already held, and writing to a spinlock releases it.</p>
+</section>
+<section id="spinlock-count">
+<h3><code class="docutils literal notranslate"><span class="pre">spinlock-count</span></code></h3>
+<p>( – count )</p>
+<p>Returns the spinlock count, i.e. 32.</p>
+</section>
+<section id="claim-spinlock">
+<h3><code class="docutils literal notranslate"><span class="pre">claim-spinlock</span></code></h3>
+<p>( spinlock-index – )</p>
+<p>Claim a spinlock; no validation is carried out.</p>
+</section>
+<section id="release-spinlock">
+<h3><code class="docutils literal notranslate"><span class="pre">release-spinlock</span></code></h3>
+<p>( spinlock-index – )</p>
+<p>Release a spinlock; no validation is carried out.</p>
+</section>
+<section id="claim-same-core-spinlock">
+<h3><code class="docutils literal notranslate"><span class="pre">claim-same-core-spinlock</span></code></h3>
+<p>( – )</p>
+<p>Claim a multitasker spinlock for the current core.</p>
+</section>
+<section id="release-same-core-spinlock">
+<h3><code class="docutils literal notranslate"><span class="pre">release-same-core-spinlock</span></code></h3>
+<p>( – )</p>
+<p>Release a multitasker spinlock for the current core.</p>
+</section>
+<section id="claim-other-core-spinlock">
+<h3><code class="docutils literal notranslate"><span class="pre">claim-other-core-spinlock</span></code></h3>
+<p>( core – )</p>
+<p>Claim a multitasker spinlock for the specified core.</p>
+</section>
+<section id="release-other-core-spinlock">
+<h3><code class="docutils literal notranslate"><span class="pre">release-other-core-spinlock</span></code></h3>
+<p>( core – )</p>
+<p>Release a multitasker spinlock for the specified core.</p>
+</section>
+<section id="claim-all-core-spinlock">
+<h3><code class="docutils literal notranslate"><span class="pre">claim-all-core-spinlock</span></code></h3>
+<p>( – )</p>
+<p>Claim all the multitasker spinlocks.</p>
+</section>
+<section id="release-all-core-spinlock">
+<h3><code class="docutils literal notranslate"><span class="pre">release-all-core-spinlock</span></code></h3>
+<p>( – )</p>
+<p>Release all the multitasker spinlocks.</p>
+</section>
+<section id="with-spinlock">
+<h3><code class="docutils literal notranslate"><span class="pre">with-spinlock</span></code></h3>
+<p>( xt spinlock – )</p>
+<p>Claim a spinlock while executing <em>xt</em>, releasing it afterwards</p>
+</section>
+<section id="critical-with-spinlock">
+<h3><code class="docutils literal notranslate"><span class="pre">critical-with-spinlock</span></code></h3>
+<p>( xt spinlock – )</p>
+<p>Claim a spinlock, enter a critical section, execute <em>xt</em>, release the spinlock, and then exit the critical section.</p>
+</section>
+<section id="critical-with-other-core-spinlock">
+<h3><code class="docutils literal notranslate"><span class="pre">critical-with-other-core-spinlock</span></code></h3>
+<p>( xt core – )</p>
+<p>Claim a multitasker spinlock for the specified core, enter a critical section, execute <em>xt</em>, release the spinlock, and then exit the critical section.</p>
+</section>
+<section id="fifo-drain">
+<h3><code class="docutils literal notranslate"><span class="pre">fifo-drain</span></code></h3>
+<p>( core – )</p>
+<p>Drain a FIFO for inter-core communication; if <em>core</em> is outside the range 0 &lt;= x &lt; 2 <code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code> is raised; if <em>core</em> is equal to <code class="docutils literal notranslate"><span class="pre">cpu-index</span></code> <code class="docutils literal notranslate"><span class="pre">x-core-not-addressable</span></code> is raised.</p>
+</section>
+<section id="fifo-push-blocking">
+<h3><code class="docutils literal notranslate"><span class="pre">fifo-push-blocking</span></code></h3>
+<p>( x core – )</p>
+<p>Do a blocking push onto a FIFO for inter-core communication; if <em>core</em> is outside the range 0 &lt;= x &lt; 2 <code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code> is raised; if <em>core</em> is equal to <code class="docutils literal notranslate"><span class="pre">cpu-index</span></code> <code class="docutils literal notranslate"><span class="pre">x-core-not-addressable</span></code> is raised.</p>
+</section>
+<section id="fifo-pop-blocking">
+<h3><code class="docutils literal notranslate"><span class="pre">fifo-pop-blocking</span></code></h3>
+<p>( core – x )</p>
+<p>Do a blocking pop from a FIFO for inter-core communication; if <em>core</em> is outside the range 0 &lt;= x &lt; 2 <code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code> is raised; if <em>core</em> is equal to <code class="docutils literal notranslate"><span class="pre">cpu-index</span></code> <code class="docutils literal notranslate"><span class="pre">x-core-not-addressable</span></code> is raised.</p>
+</section>
+<section id="fifo-push-confirm">
+<h3><code class="docutils literal notranslate"><span class="pre">fifo-push-confirm</span></code></h3>
+<p>( x core – confirmed? )</p>
+<p>Do a blocking push onto a FIFO for inter-core communication; if <em>core</em> is outside the range 0 &lt;= x &lt; 2 <code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code> is raised; if <em>core</em> is equal to <code class="docutils literal notranslate"><span class="pre">cpu-index</span></code> <code class="docutils literal notranslate"><span class="pre">x-core-not-addressable</span></code> is raised. Afterwards do a blocking pop from the FIFO for receiving fromt he same core and return whether the value pushed is the same as the value popped.</p>
+</section>
+<section id="launch-aux-core">
+<h3><code class="docutils literal notranslate"><span class="pre">launch-aux-core</span></code></h3>
+<p>( vector-table stack-ptr rstack-ptr entry-xt core – )</p>
+<p>Launch an auxiliary core, i.e. a core <em>core</em> other than core 0 and execute <em>entry-xt</em> on it with the return stack pointer <em>rstack-ptr</em>, the data stack pointer <em>stack-ptr</em>, and the vector table base <em>vector-table</em>. Note that it is not recommended that this be used by the user, rather the user should use <code class="docutils literal notranslate"><span class="pre">spawn-aux-main</span></code> in <code class="docutils literal notranslate"><span class="pre">src/common/forth/task.fs</span></code>.</p>
+<p>In <code class="docutils literal notranslate"><span class="pre">src/common/forth/multicore.fs</span></code>, in <code class="docutils literal notranslate"><span class="pre">multicore</span></code> for all platforms other than rp2040, exists:</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">spinlock-count</span></code></h3>
+<p>( – count )</p>
+<p>Returns the spinlock count, i.e. 0.</p>
+</section>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">claim-spinlock</span></code></h3>
+<p>( spinlock-index – )</p>
+<p>Drop <em>spinlock-index</em>.</p>
+</section>
+<section id="id3">
+<h3><code class="docutils literal notranslate"><span class="pre">release-spinlock</span></code></h3>
+<p>( spinlock-index – )</p>
+<p>Drop <em>spinlock-index</em>.</p>
+</section>
+<section id="id4">
+<h3><code class="docutils literal notranslate"><span class="pre">claim-same-core-spinlock</span></code></h3>
+<p>( – )</p>
+<p>This is a no-op.</p>
+</section>
+<section id="id5">
+<h3><code class="docutils literal notranslate"><span class="pre">release-same-core-spinlock</span></code></h3>
+<p>( – )</p>
+<p>This is a no-op.</p>
+</section>
+<section id="id6">
+<h3><code class="docutils literal notranslate"><span class="pre">claim-other-core-spinlock</span></code></h3>
+<p>( core – )</p>
+<p>Drop <em>core</em>.</p>
+</section>
+<section id="id7">
+<h3><code class="docutils literal notranslate"><span class="pre">release-other-core-spinlock</span></code></h3>
+<p>( core – )</p>
+<p>Drop <em>core</em>.</p>
+</section>
+<section id="id8">
+<h3><code class="docutils literal notranslate"><span class="pre">claim-all-core-spinlock</span></code></h3>
+<p>( – )</p>
+<p>This is a no-op.</p>
+</section>
+<section id="id9">
+<h3><code class="docutils literal notranslate"><span class="pre">release-all-core-spinlock</span></code></h3>
+<p>( – )</p>
+<p>This is a no-op.</p>
+</section>
+<section id="id10">
+<h3><code class="docutils literal notranslate"><span class="pre">with-spinlock</span></code></h3>
+<p>( xt spinlock – )</p>
+<p>Drop <em>spinlock</em> and execute <em>xt</em>.</p>
+</section>
+<section id="id11">
+<h3><code class="docutils literal notranslate"><span class="pre">critical-with-spinlock</span></code></h3>
+<p>( xt spinlock – )</p>
+<p>Drop <em>spinlock</em> and execute <em>xt</em> in a critical section.</p>
+</section>
+<section id="id12">
+<h3><code class="docutils literal notranslate"><span class="pre">critical-with-other-core-spinlock</span></code></h3>
+<p>( xt core – )</p>
+<p>Drop <em>core</em> and execute <em>xt</em> in a critical section.</p>
+</section>
+<section id="id13">
+<h3><code class="docutils literal notranslate"><span class="pre">fifo-drain</span></code></h3>
+<p>( core – )</p>
+<p>Placeholder for draining a FIFO for inter-core communication; this will always raise <code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code>.</p>
+</section>
+<section id="id14">
+<h3><code class="docutils literal notranslate"><span class="pre">fifo-push-blocking</span></code></h3>
+<p>( x core – )</p>
+<p>Placeholder for doing a blocking push onto a FIFO for inter-core communication; this will always raise <code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code>.</p>
+</section>
+<section id="id15">
+<h3><code class="docutils literal notranslate"><span class="pre">fifo-pop-blocking</span></code></h3>
+<p>( core – x )</p>
+<p>Placeholder for doing a blocking pop from a FIFO for inter-core communication; this will always raise <code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code>.</p>
+</section>
+<section id="id16">
+<h3><code class="docutils literal notranslate"><span class="pre">fifo-push-confirm</span></code></h3>
+<p>( x core – confirmed? )</p>
+<p>Placeholder for attempting to send data on a FIFO and confirming that the same data is sent back; this will always raise <code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code>.</p>
+</section>
+<section id="id17">
+<h3><code class="docutils literal notranslate"><span class="pre">launch-aux-core</span></code></h3>
+<p>( xt stack-ptr rstack-ptr core – )</p>
+<p>Placeholder for attempting to launch an auxiliary core; this will always raise <code class="docutils literal notranslate"><span class="pre">x-core-out-of-range</span></code>.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

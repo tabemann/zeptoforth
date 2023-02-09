@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Pool Words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="pool-words">
+<h1>Pool Words</h1>
+<p>Pools in zeptoforth are created by the user and consist of discretes blocks that are allocated and freed individual as wholes. There is by default no global pool, and pools created by the user are specifically <em>not</em> concurrency-safe; to make them concurrency-safe one must wrap them in locks, and because of the overhead this would impose, this is not done so by default. Allocating and freeing blocks in pools occurs in constant time and are fast, unlike allocation, resizing, and freeing in heaps</p>
+<section id="pool">
+<h2><code class="docutils literal notranslate"><span class="pre">pool</span></code></h2>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">pool</span></code>:</p>
+<section id="pool-size">
+<h3><code class="docutils literal notranslate"><span class="pre">pool-size</span></code></h3>
+<p>( – bytes )</p>
+<p>Get the size of a pool header in bytes.</p>
+</section>
+<section id="init-pool">
+<h3><code class="docutils literal notranslate"><span class="pre">init-pool</span></code></h3>
+<p>( block-size addr – )</p>
+<p>Initialize a pool at <em>addr</em> with the given block size of <em>block-size</em> bytes. Note that no space for storing blocks is available in a pool when it is first initialized; to add memory to a pool use <code class="docutils literal notranslate"><span class="pre">add-pool</span></code>.</p>
+</section>
+<section id="add-pool">
+<h3><code class="docutils literal notranslate"><span class="pre">add-pool</span></code></h3>
+<p>( addr bytes pool – )</p>
+<p>Add memory starting at <em>addr</em> of size <em>bytes</em> to <em>pool</em> as discrete blocks; only a multiple of the block size of the pool will be added to the pool, so if <em>bytes</em> is not a multiple of said block size not all of the space in the memory provided will be used.</p>
+</section>
+<section id="allocate-pool">
+<h3><code class="docutils literal notranslate"><span class="pre">allocate-pool</span></code></h3>
+<p>( pool – addr )</p>
+<p>Allocate a block in <em>pool</em> and return its address. If no blocks are available in the pool, <code class="docutils literal notranslate"><span class="pre">x-allocate-failed</span></code> is raised.</p>
+</section>
+<section id="free-pool">
+<h3><code class="docutils literal notranslate"><span class="pre">free-pool</span></code></h3>
+<p>( addr pool – )</p>
+<p>Free a block at <em>addr</em> in <em>pool</em>, making it available to future allocation.</p>
+</section>
+<section id="pool-block-size">
+<h3><code class="docutils literal notranslate"><span class="pre">pool-block-size</span></code></h3>
+<p>( pool – bytes )</p>
+<p>Get the block size of a pool.</p>
+</section>
+<section id="pool-free-count">
+<h3><code class="docutils literal notranslate"><span class="pre">pool-free-count</span></code></h3>
+<p>( pool – count )</p>
+<p>Get the number of free blocks in a pool.</p>
+</section>
+<section id="pool-total-count">
+<h3><code class="docutils literal notranslate"><span class="pre">pool-total-count</span></code></h3>
+<p>( pool – count )</p>
+<p>Get the total number of blocks in a pool.</p>
+</section>
+<section id="x-allocate-failed">
+<h3><code class="docutils literal notranslate"><span class="pre">x-allocate-failed</span></code></h3>
+<p>( – )</p>
+<p>The exception raised if block allocation fails.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

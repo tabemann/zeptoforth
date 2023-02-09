@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Object Orientation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="object-orientation">
+<h1>Object Orientation</h1>
+<p>zeptoforth includes an object-orientation layer implemented by the <code class="docutils literal notranslate"><span class="pre">oo</span></code> module. Its object model involves each class having a single superclass (with the ultimatet superclass, <code class="docutils literal notranslate"><span class="pre">object</span></code>, being its own superclass), and methods and members being independent words which are tied to the class for which they are originally declared which may be applied to objects of that class or of any subclass of that class.</p>
+<p>Binding is late by default, but if one explicitly specifies a class to use early binding is also available, and is necessary in some use cases such as <code class="docutils literal notranslate"><span class="pre">new</span></code> or <code class="docutils literal notranslate"><span class="pre">destroy</span></code> method implementations calling <code class="docutils literal notranslate"><span class="pre">new</span></code> or <code class="docutils literal notranslate"><span class="pre">destroy</span></code> respectively in their super classes. Early binding is specified via <em>class</em><code class="docutils literal notranslate"><span class="pre">-&gt;</span></code><em>method</em>; note that <code class="docutils literal notranslate"><span class="pre">-&gt;</span></code> is not a word but is a special method lookup marker and cannot be separated from <em>class</em> or <em>method</em> by spaces. Note that <em>class</em> can contain a module lookup path specified with <code class="docutils literal notranslate"><span class="pre">::</span></code> delimiters.</p>
+<p>Outside of early binding, classes provide no sort of namespace mechanism; for that one must rely on modules or naming conventions.</p>
+<p>Declaring the methods and members associated with a class and all its subclasses is separate from providing implementations for classes’ methods, which may be inherited by subclasses. Methods and members of classes are declared between <code class="docutils literal notranslate"><span class="pre">begin-class</span></code> and <code class="docutils literal notranslate"><span class="pre">end-class</span></code> with <code class="docutils literal notranslate"><span class="pre">method</span></code> and <code class="docutils literal notranslate"><span class="pre">member</span></code> respectively, while method implementations are declared between <code class="docutils literal notranslate"><span class="pre">begin-implement</span></code> and <code class="docutils literal notranslate"><span class="pre">end-implement</span></code> with <code class="docutils literal notranslate"><span class="pre">define</span></code>. Note that no code may call any methods on a class until after <code class="docutils literal notranslate"><span class="pre">end-implement</span></code> is called matching the call to <code class="docutils literal notranslate"><span class="pre">begin-implement</span></code> for that class, but calls to methods on that class can be compiled before that.</p>
+<p>For a simple example of the definition of a class and a subclass of it, take the following example:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>oo import
+
+&lt;object&gt; begin-class &lt;my-class&gt;
+  cell member member-0
+  method member-0@
+  method display-msg
+end-class
+
+&lt;my-class&gt; begin-implement
+  :noname
+    dup &lt;object&gt;-&gt;new
+    1 swap member-0 !
+  ; define new
+  :noname
+    .&quot; Destroying &lt;my-class&gt; &quot;
+    &lt;object&gt;-&gt;destroy
+  ; define destroy
+  :noname member-0 @ ; define member-0@
+  :noname drop .&quot; foo&quot; ; define display-msg
+end-implement
+
+&lt;my-class&gt; begin-class &lt;my-subclass&gt;
+  cell member member-1
+  method member-1@
+end-class
+
+&lt;my-subclass&gt; begin-implement
+  :noname
+    dup &lt;my-class&gt;-&gt;new
+    -1 swap member-1 !
+  ; define new
+  :noname
+    .&quot; Destroying &lt;my-subclass&gt; &quot;
+    &lt;my-class&gt;-&gt;destroy
+  ; define destroy
+  :noname drop .&quot; bar&quot; ; define display-msg
+  :noname member-1 @ ; define member-1@
+end-implement
+</pre></div>
+</div>
+<p>Here we define two classes, <code class="docutils literal notranslate"><span class="pre">&lt;my-class&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;my-subclass&gt;</span></code>, which inherit from <code class="docutils literal notranslate"><span class="pre">&lt;object&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;my-class&gt;</span></code> respectively. <code class="docutils literal notranslate"><span class="pre">new</span></code> defined for <code class="docutils literal notranslate"><span class="pre">&lt;my-class&gt;</span></code>, which overrides <code class="docutils literal notranslate"><span class="pre">new</span></code> in <code class="docutils literal notranslate"><span class="pre">&lt;object&gt;</span></code>, first calls <code class="docutils literal notranslate"><span class="pre">new</span></code> on <code class="docutils literal notranslate"><span class="pre">&lt;object&gt;</span></code>, then initializes its member <code class="docutils literal notranslate"><span class="pre">my-member-0</span></code> to 1. <code class="docutils literal notranslate"><span class="pre">destroy</span></code> defined for <code class="docutils literal notranslate"><span class="pre">&lt;my-class&gt;</span></code>, which overrides <code class="docutils literal notranslate"><span class="pre">destroy</span></code> in <code class="docutils literal notranslate"><span class="pre">&lt;object&gt;</span></code>, first displays a message then calls <code class="docutils literal notranslate"><span class="pre">destroy</span></code> on <code class="docutils literal notranslate"><span class="pre">&lt;object&gt;</span></code>. <code class="docutils literal notranslate"><span class="pre">member-0&#64;</span></code> declared on and defined for <code class="docutils literal notranslate"><span class="pre">&lt;my-class&gt;</span></code> returns the value of <code class="docutils literal notranslate"><span class="pre">my-member-0</span></code>. <code class="docutils literal notranslate"><span class="pre">display-msg</span></code> declared on and defined for <code class="docutils literal notranslate"><span class="pre">&lt;my-class&gt;</span></code> prints <code class="docutils literal notranslate"><span class="pre">foo</span></code>. <code class="docutils literal notranslate"><span class="pre">new</span></code> defined for <code class="docutils literal notranslate"><span class="pre">&lt;my-subclass&gt;</span></code>, which overrides <code class="docutils literal notranslate"><span class="pre">new</span></code> in <code class="docutils literal notranslate"><span class="pre">&lt;my-class&gt;</span></code>, first calls <code class="docutils literal notranslate"><span class="pre">new</span></code> on <code class="docutils literal notranslate"><span class="pre">&lt;my-class&gt;</span></code>, then initializes its member <code class="docutils literal notranslate"><span class="pre">my-member-1</span></code> to -1. <code class="docutils literal notranslate"><span class="pre">destroy</span></code> defined for <code class="docutils literal notranslate"><span class="pre">&lt;my-subclass&gt;</span></code>, which overrides <code class="docutils literal notranslate"><span class="pre">destroy</span></code> in <code class="docutils literal notranslate"><span class="pre">&lt;my-class&gt;</span></code>, first displays a message then calls <code class="docutils literal notranslate"><span class="pre">destroy</span></code> on <code class="docutils literal notranslate"><span class="pre">&lt;my-class&gt;</span></code>. <code class="docutils literal notranslate"><span class="pre">member-0&#64;</span></code> is inherited by <code class="docutils literal notranslate"><span class="pre">&lt;my-subclass&gt;</span></code> from <code class="docutils literal notranslate"><span class="pre">&lt;my-class&gt;</span></code>. <code class="docutils literal notranslate"><span class="pre">display-msg</span></code> defined for <code class="docutils literal notranslate"><span class="pre">&lt;my-subclass&gt;</span></code> prints <code class="docutils literal notranslate"><span class="pre">bar</span></code>, overriding <code class="docutils literal notranslate"><span class="pre">display-msg</span></code> inherited from <code class="docutils literal notranslate"><span class="pre">&lt;my-class&gt;</span></code>. <code class="docutils literal notranslate"><span class="pre">member-1&#64;</span></code> declared on and defined for <code class="docutils literal notranslate"><span class="pre">&lt;my-subclass&gt;</span></code> returns the value of <code class="docutils literal notranslate"><span class="pre">my-member-1</span></code>.</p>
+<p>To practically use this object system, one has to consider how to create <object>s. The object system does not concern itself with memory management; it is up to the user to manage memory as they see fit. A <object> of a given class is a block of memory equal in size to <code class="docutils literal notranslate"><span class="pre">class-size</span></code> applied to the class in general. It may live in a task’s dictionary, in a heap, in an array, or like.</p>
+<p>Actually initializing an object is not normally done with calling <code class="docutils literal notranslate"><span class="pre">new</span></code> directly but rather through calling <code class="docutils literal notranslate"><span class="pre">init-object</span></code> with the object’s class and the starting address at which the <object> will live, because <code class="docutils literal notranslate"><span class="pre">init-object</span></code> does preliminary initialization before <code class="docutils literal notranslate"><span class="pre">new</span></code> can be called (which it calls itself).</p>
+<p>Note that it is good manners for <code class="docutils literal notranslate"><span class="pre">new</span></code> of a given class to call the <code class="docutils literal notranslate"><span class="pre">new</span></code> of its superclass before it does anything else with a new <object>, or else the <object> may not function as intended.</p>
+<p>Destroying an object is done through calling <code class="docutils literal notranslate"><span class="pre">destroy</span></code> on an object, which will carry out cleanup for an object. Note that actually freeing space for the <object> is up to the user. The normal convention is that each <code class="docutils literal notranslate"><span class="pre">destroy</span></code> of a given class calls the <code class="docutils literal notranslate"><span class="pre">destroy</span></code> of its superclass after it has cleaned up for itself; however, this should be broken with if a class handles freeing memory allocated for itself, e.g. in a heap, where this should be done after all superclasses’ <code class="docutils literal notranslate"><span class="pre">destroy</span></code> methods have been called.</p>
+<p>Early binding is carried out through <code class="docutils literal notranslate"><span class="pre">-&gt;</span></code>, an immediate state-sensitive word which takes the class to bind a method in off the top of the stack (including while compiling, so one will likely want to specify that class between <code class="docutils literal notranslate"><span class="pre">[</span></code> and <code class="docutils literal notranslate"><span class="pre">]</span></code>) and then either compiles that word (if compiling) or executes that word (if interpreting). The method definition used will be that defined closest in the chain of class definitions leading from that class to <code class="docutils literal notranslate"><span class="pre">&lt;object&gt;</span></code>. This can be used to call methods in superclasses explicitly, even if they are defined definitely in a given object’s class.</p>
+<section id="oo">
+<h2><code class="docutils literal notranslate"><span class="pre">oo</span></code></h2>
+<p>The following words are defined in this module:</p>
+<section id="object">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;object&gt;</span></code></h3>
+<p>( – class )</p>
+<p>The ultimate superclass of all classes.</p>
+</section>
+<section id="new">
+<h3><code class="docutils literal notranslate"><span class="pre">new</span></code></h3>
+<p>( object – )</p>
+<p>The class constructor method.</p>
+</section>
+<section id="destroy">
+<h3><code class="docutils literal notranslate"><span class="pre">destroy</span></code></h3>
+<p>( object – )</p>
+<p>The class destructor method.</p>
+</section>
+<section id="begin-class">
+<h3><code class="docutils literal notranslate"><span class="pre">begin-class</span></code></h3>
+<p>( superclass “name” – class member-offset method-list )</p>
+<p>Begin the declaration of class <em>name</em> inheriting from <em>superclass</em> as <em>class</em>, with an initial member offset <em>member-offset</em> and method list <em>method-list</em>.</p>
+</section>
+<section id="end-class">
+<h3><code class="docutils literal notranslate"><span class="pre">end-class</span></code></h3>
+<p>( class member-offset method-list – )</p>
+<p>Finish the declaration of <em>class</em> with a final member offset <em>member-offset</em> and method list <em>method-list</em>, alloting the method table for <em>class</em>.</p>
+</section>
+<section id="begin-implement">
+<h3><code class="docutils literal notranslate"><span class="pre">begin-implement</span></code></h3>
+<p>( class – class )</p>
+<p>Begin the definition of methods of <em>class</em>.</p>
+</section>
+<section id="end-implement">
+<h3><code class="docutils literal notranslate"><span class="pre">end-implement</span></code></h3>
+<p>( class – )</p>
+<p>End the defintion of methods of <em>class</em>, populating the method table for <em>class</em> with methods defined in the superclass if they are not defined for <em>class</em>.</p>
+</section>
+<section id="member">
+<h3><code class="docutils literal notranslate"><span class="pre">member</span></code></h3>
+<p>( member-offset method-list member-size “name” – member-offset method-list )</p>
+<p>Declare a member <em>name</em> of size <em>member-size</em> of the class currently being declared. Note that no automatic alignment is done, so the user must take care to properly align their members.</p>
+</section>
+<section id="method">
+<h3><code class="docutils literal notranslate"><span class="pre">method</span></code></h3>
+<p>( method-list “name” – method-list )</p>
+<p>Declare a method <em>name</em> of the class currently being declared.</p>
+</section>
+<section id="define">
+<h3><code class="docutils literal notranslate"><span class="pre">define</span></code></h3>
+<p>( class xt “name” – class )</p>
+<p>Define method <em>name</em> as being bound to <em>xt</em> for <em>class</em>.</p>
+</section>
+<section id="class-size">
+<h3><code class="docutils literal notranslate"><span class="pre">class-size</span></code></h3>
+<p>( class – bytes )</p>
+<p>Get the size <em>bytes</em> of an object of <em>class</em>.</p>
+</section>
+<section id="object-class">
+<h3><code class="docutils literal notranslate"><span class="pre">object-class</span></code></h3>
+<p>( object – class )</p>
+<p>Get the class of <em>object</em>.</p>
+</section>
+<section id="init-object">
+<h3><code class="docutils literal notranslate"><span class="pre">init-object</span></code></h3>
+<p>( class addr – )</p>
+<p>Initialize the memory at <em>addr</em> to be an object of <em>class</em> and then call <em>new</em> for that object.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Fonts</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="fonts">
+<h1>Fonts</h1>
+<p>Under <code class="docutils literal notranslate"><span class="pre">extra/common/font.fs</span></code> there is optional code for supporting seven and eight-bit bitmap fonts for use with the bitmaps implemented in <code class="docutils literal notranslate"><span class="pre">extra/common/bitmap.fs</span></code> and displays based upon such bitmaps. The <code class="docutils literal notranslate"><span class="pre">&lt;font&gt;</span></code> class is defined under the <code class="docutils literal notranslate"><span class="pre">font</span></code> module in <code class="docutils literal notranslate"><span class="pre">extra/common/font.fs</span></code> Under <code class="docutils literal notranslate"><span class="pre">extra/common/simple_font.fs</span></code> there is a simple seven-bit ASCII font, defined as <code class="docutils literal notranslate"><span class="pre">a-simple-font</span></code> in the <code class="docutils literal notranslate"><span class="pre">simple-font</span></code> module.</p>
+<section id="font">
+<h2><code class="docutils literal notranslate"><span class="pre">font</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">font</span></code> module contains the following words:</p>
+<section id="font-buf-size">
+<h3><code class="docutils literal notranslate"><span class="pre">font-buf-size</span></code></h3>
+<p>( char-columns char-rows min-char-index max-char-index – bytes )</p>
+<p>This gets the number of bytes needed for the buffer for a font with glyphs from character <em>min-char-index</em> to character <em>max-char-index</em>, inclusive, with glyphs of <em>char-columns</em> columns and <em>char-rows</em> rows.</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;font&gt;</span></code></h3>
+<p>( – class )</p>
+<p>This class constitutes a bitmap font. It is backed by a bitmap which is not directly exposed to the user.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;font&gt;</span></code> class includes the following constructor:</p>
+</section>
+<section id="new">
+<h3><code class="docutils literal notranslate"><span class="pre">new</span></code></h3>
+<p>( buffer-addr default-char-index char-columns char-rows min-char-index max-char-index font – )</p>
+<p>This constructor initializes a <code class="docutils literal notranslate"><span class="pre">&lt;font&gt;</span></code> instance with a minimum character index of <em>min-char-index</em>, a maximum character index of <em>max-char-index</em>, glyphs of <em>char-columns</em> columns and <em>char-rows</em> rows, a default character <em>default-char-index</em> for out of range characters, and a backing bitmap buffer address <em>buffer-addr</em>. The backing bitmap buffer is set to zero at this time.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;font&gt;</span></code> class includes the following members:</p>
+</section>
+<section id="char-cols">
+<h3><code class="docutils literal notranslate"><span class="pre">char-cols</span></code></h3>
+<p>( font – addr )</p>
+<p>The address of a cell containing the number of columns in each glyph in a font.</p>
+</section>
+<section id="char-rows">
+<h3><code class="docutils literal notranslate"><span class="pre">char-rows</span></code></h3>
+<p>( font – addr )</p>
+<p>The address of a cell containing the number of rows in each glyph in a font.</p>
+</section>
+<section id="min-char-index">
+<h3><code class="docutils literal notranslate"><span class="pre">min-char-index</span></code></h3>
+<p>( font – addr )</p>
+<p>The address of a cell containing the minimum character index in a font, below which the character specified by <code class="docutils literal notranslate"><span class="pre">default-char-index</span></code> is to be substituted.</p>
+</section>
+<section id="max-char-index">
+<h3>`max-char-index</h3>
+<p>( font – addr )</p>
+<p>The address of a cell containing the maximum character index in a font, above which the character specified by <code class="docutils literal notranslate"><span class="pre">default-char-index</span></code> is to be substituted.</p>
+</section>
+<section id="default-char-index">
+<h3><code class="docutils literal notranslate"><span class="pre">default-char-index</span></code></h3>
+<p>( font – addr )</p>
+<p>The address of a cell containing the default substituting character index.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;font&gt;</span></code> class includes the following methods:</p>
+</section>
+<section id="char-row">
+<h3><code class="docutils literal notranslate"><span class="pre">char-row!</span></code></h3>
+<p>( xn … x0 row character font – )</p>
+<p>This populates row <em>row</em> of the glyph <em>character</em> in font <em>font</em> with bits from one or more cells taken off the stack, where the bits are populated right to left from least significant bit to most significant bit of the cell on the top-most cell on the stack to the bottom-most cell on the stack, with extra bits being discarded. This is not meant for direct user use but by use by fonts to populate glyphs when they are initialized.</p>
+</section>
+<section id="set-char">
+<h3><code class="docutils literal notranslate"><span class="pre">set-char</span></code></h3>
+<p>( character column row bitmap font – )</p>
+<p>This sets a bitmap <em>bitmap</em> to a glyph <em>character</em> of font <em>font</em> with the top left corner of the glyph set to the bitmap being at column <em>column</em> and row <em>row</em>.</p>
+</section>
+<section id="or-char">
+<h3><code class="docutils literal notranslate"><span class="pre">or-char</span></code></h3>
+<p>( character column row bitmap font – )</p>
+<p>This ors a bitmap <em>bitmap</em> to a glyph <em>character</em> of font <em>font</em> with the top left corner of the glyph ored to the bitmap being at column <em>column</em> and row <em>row</em>.</p>
+</section>
+<section id="and-char">
+<h3><code class="docutils literal notranslate"><span class="pre">and-char</span></code></h3>
+<p>( character column row bitmap font – )</p>
+<p>This ands a bitmap <em>bitmap</em> to a glyph <em>character</em> of font <em>font</em> with the top left corner of the glyph anded on the bitmap being at column <em>column</em> and row <em>row</em>.</p>
+</section>
+<section id="bic-char">
+<h3><code class="docutils literal notranslate"><span class="pre">bic-char</span></code></h3>
+<p>( character column row bitmap font – )</p>
+<p>This bit-clears a bitmap <em>bitmap</em> to a glyph <em>character</em> of font <em>font</em> with the top left corner of the glyph bit-cleared on the bitmap being at column <em>column</em> and row <em>row</em>.</p>
+</section>
+<section id="xor-char">
+<h3><code class="docutils literal notranslate"><span class="pre">xor-char</span></code></h3>
+<p>( character column row bitmap font – )</p>
+<p>This exclusive-ors a bitmap <em>bitmap</em> to a glyph <em>character</em> of font <em>font</em> with the top left corner of the glyph exclusive-ored on the bitmap being at column <em>column</em> and row <em>row</em>.</p>
+</section>
+<section id="set-string">
+<h3><code class="docutils literal notranslate"><span class="pre">set-string</span></code></h3>
+<p>( c-addr bytes column row bitmap font – )</p>
+<p>This sets a bitmap <em>bitmap</em> to a string at address <em>c-addr</em> of size <em>bytes</em> of font <em>font</em> with the top left corner of the string’s glyphs set to the bitmap being at column <em>column</em> and row <em>row</em>.</p>
+</section>
+<section id="or-string">
+<h3><code class="docutils literal notranslate"><span class="pre">or-string</span></code></h3>
+<p>( c-addr bytes column row bitmap font – )</p>
+<p>This ors a bitmap <em>bitmap</em> to a string at address <em>c-addr</em> of size <em>bytes</em> of font <em>font</em> with the top left corner of the string’s glyphs ored to the bitmap being at column <em>column</em> and row <em>row</em>.</p>
+</section>
+<section id="and-string">
+<h3><code class="docutils literal notranslate"><span class="pre">and-string</span></code></h3>
+<p>( c-addr bytes column row bitmap font – )</p>
+<p>This ands a bitmap <em>bitmap</em> to a string at address <em>c-addr</em> of size <em>bytes</em> of font <em>font</em> with the top left corner of the string’s glyphs anded to the bitmap being at column <em>column</em> and row <em>row</em>.</p>
+</section>
+<section id="bic-string">
+<h3><code class="docutils literal notranslate"><span class="pre">bic-string</span></code></h3>
+<p>( c-addr bytes column row bitmap font – )</p>
+<p>This bit-clears a bitmap <em>bitmap</em> to a string at address <em>c-addr</em> of size <em>bytes</em> of font <em>font</em> with the top left corner of the string’s glyphs bit-cleared to the bitmap being at column <em>column</em> and row <em>row</em>.</p>
+</section>
+<section id="xor-string">
+<h3><code class="docutils literal notranslate"><span class="pre">xor-string</span></code></h3>
+<p>( c-addr bytes column row bitmap font – )</p>
+<p>This exclusive-ors a bitmap <em>bitmap</em> to a string at address <em>c-addr</em> of size <em>bytes</em> of font <em>font</em> with the top left corner of the string’s glyphs exclusive-ored to the bitmap being at column <em>column</em> and row <em>row</em>.</p>
+</section>
+</section>
+<section id="simple-font">
+<h2><code class="docutils literal notranslate"><span class="pre">simple-font</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">simple-font</span></code> module contains the following words:</p>
+<section id="a-simple-font">
+<h3><code class="docutils literal notranslate"><span class="pre">a-simple-font</span></code></h3>
+<p>( – font )</p>
+<p>This, once initialized, is an instance of <code class="docutils literal notranslate"><span class="pre">&lt;font&gt;</span></code> that provides a simple seven-bit ASCII font.</p>
+</section>
+<section id="init-simple-font">
+<h3><code class="docutils literal notranslate"><span class="pre">init-simple-font</span></code></h3>
+<p>( – )</p>
+<p>This initializes <code class="docutils literal notranslate"><span class="pre">a-simple-font</span></code>. It must be called before <code class="docutils literal notranslate"><span class="pre">a-simple-font</span></code> may be used.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

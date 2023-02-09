@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Compilation-specific words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="compilation-specific-words">
+<h1>Compilation-specific words</h1>
+<section id="internal">
+<h2><code class="docutils literal notranslate"><span class="pre">internal</span></code></h2>
+<p>These words are in <code class="docutils literal notranslate"><span class="pre">internal</span></code>.</p>
+<section id="start-compile-no-push">
+<h3><code class="docutils literal notranslate"><span class="pre">start-compile-no-push</span></code></h3>
+<p>Compile the start of a word without the push {lr}</p>
+</section>
+<section id="start-compile">
+<h3><code class="docutils literal notranslate"><span class="pre">start-compile</span></code></h3>
+<p>Compile the start of a word</p>
+</section>
+<section id="current-link">
+<h3><code class="docutils literal notranslate"><span class="pre">current-link,</span></code></h3>
+<p>Compile a link field</p>
+</section>
+<section id="finalize">
+<h3><code class="docutils literal notranslate"><span class="pre">finalize,</span></code></h3>
+<p>Finalize the compilation of a word</p>
+</section>
+<section id="finalize-no-align">
+<h3><code class="docutils literal notranslate"><span class="pre">finalize-no-align,</span></code></h3>
+<p>Finalize the compilation of a word without aligning</p>
+</section>
+<section id="end-compile">
+<h3><code class="docutils literal notranslate"><span class="pre">end-compile,</span></code></h3>
+<p>Compile the end of a word</p>
+</section>
+<section id="mov-imm">
+<h3><code class="docutils literal notranslate"><span class="pre">mov-imm,</span></code></h3>
+<p>Assemble a move immediate instruction</p>
+</section>
+<section id="neg">
+<h3><code class="docutils literal notranslate"><span class="pre">neg,</span></code></h3>
+<p>Assemble an reverse subtract immediate from zero instruction</p>
+</section>
+<section id="blx-reg">
+<h3><code class="docutils literal notranslate"><span class="pre">blx-reg,</span></code></h3>
+<p>Compile a blx (register) instruction</p>
+</section>
+<section id="branch">
+<h3><code class="docutils literal notranslate"><span class="pre">branch,</span></code></h3>
+<p>Compile an unconditional branch</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">0branch,</span></code></h3>
+<p>Compile a branch on equal to zero</p>
+</section>
+<section id="branch-back">
+<h3><code class="docutils literal notranslate"><span class="pre">branch-back!</span></code></h3>
+<p>Compile a back-referenced unconditional branch</p>
+</section>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">0branch-back!</span></code></h3>
+<p>Compile a back-referenced branch on equal to zero</p>
+</section>
+<section id="inline">
+<h3><code class="docutils literal notranslate"><span class="pre">inline,</span></code></h3>
+<p>Inline a word</p>
+</section>
+<section id="call">
+<h3><code class="docutils literal notranslate"><span class="pre">call,</span></code></h3>
+<p>Call a word at an address</p>
+</section>
+<section id="bl">
+<h3><code class="docutils literal notranslate"><span class="pre">bl,</span></code></h3>
+<p>Compile a bl instruction</p>
+</section>
+<section id="mov-16-imm">
+<h3><code class="docutils literal notranslate"><span class="pre">mov-16-imm,</span></code></h3>
+<p>Compile a move 16-bit immediate instruction</p>
+</section>
+<section id="id3">
+<h3><code class="docutils literal notranslate"><span class="pre">mov-16-imm!</span></code></h3>
+<p>Compile a move 16-bit immediate instruction</p>
+</section>
+<section id="movt-imm">
+<h3><code class="docutils literal notranslate"><span class="pre">movt-imm,</span></code></h3>
+<p>Compile a move top 16-bit immediate instruction</p>
+</section>
+<section id="id4">
+<h3><code class="docutils literal notranslate"><span class="pre">movt-imm!</span></code></h3>
+<p>Compile a move top 16-bit immediate instruction</p>
+</section>
+<section id="literal">
+<h3><code class="docutils literal notranslate"><span class="pre">literal,</span></code></h3>
+<p>Assemble a literal</p>
+</section>
+<section id="reserve-literal">
+<h3><code class="docutils literal notranslate"><span class="pre">reserve-literal</span></code></h3>
+<p>Reserve space for a literal</p>
+</section>
+<section id="id5">
+<h3><code class="docutils literal notranslate"><span class="pre">literal!</span></code></h3>
+<p>Store a literal ( x reg addr – )</p>
+</section>
+<section id="b">
+<h3><code class="docutils literal notranslate"><span class="pre">b,</span></code></h3>
+<p>Assemble an unconditional branch</p>
+</section>
+<section id="beq">
+<h3><code class="docutils literal notranslate"><span class="pre">beq,</span></code></h3>
+<p>Assemble a branch on equal zero instruction</p>
+</section>
+<section id="b-back">
+<h3><code class="docutils literal notranslate"><span class="pre">b-back!</span></code></h3>
+<p>Assemble an unconditional branch</p>
+</section>
+<section id="beq-back">
+<h3><code class="docutils literal notranslate"><span class="pre">beq-back!</span></code></h3>
+<p>Assemble a branch on equal zero instruction</p>
+</section>
+<section id="b-32">
+<h3><code class="docutils literal notranslate"><span class="pre">b-32,</span></code></h3>
+<p>Assemble an unconditional branch</p>
+</section>
+<section id="beq-32">
+<h3><code class="docutils literal notranslate"><span class="pre">beq-32,</span></code></h3>
+<p>Assemble a branch on equal zero instruction</p>
+</section>
+<section id="b-32-back">
+<h3><code class="docutils literal notranslate"><span class="pre">b-32-back!</span></code></h3>
+<p>Assemble an unconditional branch</p>
+</section>
+<section id="beq-32-back">
+<h3><code class="docutils literal notranslate"><span class="pre">beq-32-back!</span></code></h3>
+<p>Assemble a branch on equal zero instruction</p>
+</section>
+<section id="reserve-branch">
+<h3><code class="docutils literal notranslate"><span class="pre">reserve-branch</span></code></h3>
+<p>Reserve space for a branch</p>
+</section>
+<section id="out-of-range-branch">
+<h3><code class="docutils literal notranslate"><span class="pre">out-of-range-branch</span></code></h3>
+<p>Out of range branch exception</p>
+</section>
+<section id="not-building">
+<h3><code class="docutils literal notranslate"><span class="pre">not-building</span></code></h3>
+<p>Not building exception</p>
+</section>
+<section id="b-16">
+<h3><code class="docutils literal notranslate"><span class="pre">b-16,</span></code></h3>
+<p>Assemble an unconditional branch</p>
+</section>
+<section id="beq-16">
+<h3><code class="docutils literal notranslate"><span class="pre">beq-16,</span></code></h3>
+<p>Assemble a branch on equal zero instruction</p>
+</section>
+<section id="b-16-back">
+<h3><code class="docutils literal notranslate"><span class="pre">b-16-back!</span></code></h3>
+<p>Assemble an unconditional branch</p>
+</section>
+<section id="beq-16-back">
+<h3><code class="docutils literal notranslate"><span class="pre">beq-16-back!</span></code></h3>
+<p>Assemble a branch on equal zero instruction</p>
+</section>
+<section id="cmp-imm">
+<h3><code class="docutils literal notranslate"><span class="pre">cmp-imm,</span></code></h3>
+<p>Assemble a compare to immediate instruction</p>
+</section>
+<section id="lsl-imm">
+<h3><code class="docutils literal notranslate"><span class="pre">lsl-imm,</span></code></h3>
+<p>Assemble a logical shift left immediate instruction</p>
+</section>
+<section id="orr">
+<h3><code class="docutils literal notranslate"><span class="pre">orr,</span></code></h3>
+<p>Assemble an or instruction</p>
+</section>
+<section id="ldr-imm">
+<h3><code class="docutils literal notranslate"><span class="pre">ldr-imm,</span></code></h3>
+<p>Assemble an str immediate instruction</p>
+</section>
+<section id="str-imm">
+<h3><code class="docutils literal notranslate"><span class="pre">str-imm,</span></code></h3>
+<p>Assemble an str immediate instruction</p>
+</section>
+<section id="add-imm">
+<h3><code class="docutils literal notranslate"><span class="pre">add-imm,</span></code></h3>
+<p>Assemble a subtract immediate instruction</p>
+</section>
+<section id="sub-imm">
+<h3><code class="docutils literal notranslate"><span class="pre">sub-imm,</span></code></h3>
+<p>Assemble a subtract immediate instruction</p>
+</section>
+<section id="pull">
+<h3><code class="docutils literal notranslate"><span class="pre">pull,</span></code></h3>
+<p>Assemble instructions to pull a value from the stack</p>
+</section>
+<section id="push">
+<h3><code class="docutils literal notranslate"><span class="pre">push,</span></code></h3>
+<p>Assemble instructions to push a value onto the stack</p>
+</section>
+<section id="adr">
+<h3><code class="docutils literal notranslate"><span class="pre">adr,</span></code></h3>
+<p>Word-align an address</p>
+</section>
+<section id="word-align">
+<h3><code class="docutils literal notranslate"><span class="pre">word-align,</span></code></h3>
+<p>Assemble an instruction to generate a PC-relative address</p>
+</section>
+<section id="bx">
+<h3><code class="docutils literal notranslate"><span class="pre">bx,</span></code></h3>
+<p>Assemble a BX instruction</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

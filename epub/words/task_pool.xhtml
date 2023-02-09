@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Task Pool words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="task-pool-words">
+<h1>Task Pool words</h1>
+<p>Task pools provide a means of managing multiple tasks and dynamically creating and destroying them. Note that the total number of task that may exist at any one time is fixed, but the number of executing tasks may be of any number less than or equal to that at any point in time.</p>
+<section id="task-pool">
+<h2><code class="docutils literal notranslate"><span class="pre">task-pool</span></code></h2>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">task-pool</span></code>:</p>
+<section id="x-no-task-available">
+<h3><code class="docutils literal notranslate"><span class="pre">x-no-task-available</span></code></h3>
+<p>( – )</p>
+<p>Exception raised if one attempts to spawn a task from a task pool and no tasks are available.</p>
+</section>
+<section id="spawn-from-task-pool">
+<h3><code class="docutils literal notranslate"><span class="pre">spawn-from-task-pool</span></code></h3>
+<p>( xn … x0 count xt task-pool –  task )</p>
+<p>Spawn a task from a task pool, if a task is available, or raise <code class="docutils literal notranslate"><span class="pre">x-no-task-available</span></code> if no tasks are available. <em>xn</em> through <em>x0</em> are parameters to pass to the <em>xt</em> when executed, and <em>count</em> is the number of such parameters.</p>
+</section>
+<section id="task-pool-free">
+<h3><code class="docutils literal notranslate"><span class="pre">task-pool-free</span></code></h3>
+<p>( task-pool – count )</p>
+<p>Get the number of free tasks in a task pool.</p>
+</section>
+<section id="init-task-pool">
+<h3><code class="docutils literal notranslate"><span class="pre">init-task-pool</span></code></h3>
+<p>( dict-size stack-size rstack-size count addr – )</p>
+<p>Initialize a task pool at <em>addr</em>, with <em>count</em> tasks, each with <em>stack-size</em> stack size, <em>rstack-size</em> return stack size, and <em>dict-size</em> dictionary size; note that <em>stack-size</em>, <em>rstack-size</em>, and <em>dict-size</em> are rounded up to the nearest four bytes. These tasks are terminated initially, and are free to be spawned as needed.</p>
+</section>
+<section id="task-pool-size">
+<h3><code class="docutils literal notranslate"><span class="pre">task-pool-size</span></code></h3>
+<p>( count – bytes )</p>
+<p>Get the size (excluding the tasks themselves) taken up by a task pool with <em>count</em> tasks; this size should be used for alloting the block of memory to be passed to <code class="docutils literal notranslate"><span class="pre">init-task-pool</span></code></p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

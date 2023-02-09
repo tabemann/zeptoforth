@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Task Queue Words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="task-queue-words">
+<h1>Task Queue Words</h1>
+<p>A task queue is a queue of waiting tasks, which then can be woken up, in the order of highest priority first and then the order of their joining the task queue, by another task. Note that tasks can wake up any given number of tasks <em>before</em> they join the task queue, upon which they will not actually deschedule themselves but rather increment the count of waiting tasks (which was negative in this case).</p>
+<section id="tqueue">
+<h2><code class="docutils literal notranslate"><span class="pre">tqueue</span></code></h2>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">tqueue</span></code>:</p>
+<section id="tqueue-size">
+<h3><code class="docutils literal notranslate"><span class="pre">tqueue-size</span></code></h3>
+<p>( – bytes )</p>
+<p>Get the size of a task queue in memory.</p>
+</section>
+<section id="no-tqueue-limit">
+<h3><code class="docutils literal notranslate"><span class="pre">no-tqueue-limit</span></code></h3>
+<p>( – n )</p>
+<p>Magic value indicating no task queue counter limit.</p>
+</section>
+<section id="init-tqueue">
+<h3><code class="docutils literal notranslate"><span class="pre">init-tqueue</span></code></h3>
+<p>( slock addr – )</p>
+<p>Initialize a task queue with simple lock <em>slock</em> starting at the specified address; note that it must be <code class="docutils literal notranslate"><span class="pre">tqueue-size</span></code> bytes in size. It will have no counter limit, and its counter will be initialized to zero.</p>
+</section>
+<section id="init-tqueue-full">
+<h3><code class="docutils literal notranslate"><span class="pre">init-tqueue-full</span></code></h3>
+<p>( limit counter slock addr – )</p>
+<p>Initialize a task queue with simple lock <em>slock</em> starting at the specified address; note that it must be <code class="docutils literal notranslate"><span class="pre">tqueue-size</span></code> bytes in size. Its counter limit will be initialized to <em>limit</em> and its counter will be initialized to <em>counter</em>.</p>
+</section>
+<section id="wait-tqueue">
+<h3><code class="docutils literal notranslate"><span class="pre">wait-tqueue</span></code></h3>
+<p>( tqueue – )</p>
+<p>Decrement the task queue’s internal wait counter. If it is negative, block the current task and place it in the task queue after the last task with a greater or equal priority. Note that the simple lock for the task queue must be held by the task which calls this; this simple lock is released if this blocks, to be claimed again when the task is readied.</p>
+</section>
+<section id="wake-tqueue">
+<h3><code class="docutils literal notranslate"><span class="pre">wake-tqueue</span></code></h3>
+<p>( tqueue – )</p>
+<p>Increment the task queue’s internal wait counter. If a counter limit is set, the internal wait counter will not increase beyond it. If there is a task in the task queue, ready the task with the highest priority added first to the task queue. Note that the simple lock for the task queue must be held by the task which calls this.</p>
+</section>
+<section id="unwake-tqueue">
+<h3><code class="docutils literal notranslate"><span class="pre">unwake-tqueue</span></code></h3>
+<p>( tqueue – )</p>
+<p>Decrement the task queue’s internal wait counter.</p>
+</section>
+<section id="wake-tqueue-all">
+<h3><code class="docutils literal notranslate"><span class="pre">wake-tqueue-all</span></code></h3>
+<p>( tqueue – )</p>
+<p>Wake all the tasks waiting on a task queue.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

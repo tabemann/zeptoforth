@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Action Pool words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="action-pool-words">
+<h1>Action Pool words</h1>
+<p>Action pools provide a means allocating and reusing action scheduler actions out of a fixed sized pool. Actions that have not been added to a schedule or which have been removed from a schedule, whether manually or automatically (e.g. through failing to specify a continuation or through raising an uncaught exception) are considered free for allocation. Actions’ initial execution tokens and data are assigned at the time that they are added to an action, unlike when manually initializing actions and adding them to schedules where the two are separate operations.</p>
+<section id="action-pool">
+<h2><code class="docutils literal notranslate"><span class="pre">action-pool</span></code></h2>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">action-pool</span></code>:</p>
+<section id="x-no-action-available">
+<h3><code class="docutils literal notranslate"><span class="pre">x-no-action-available</span></code></h3>
+<p>( – )</p>
+<p>Exception raised if one attempts to allocate a action from a action pool and no actions are available.</p>
+</section>
+<section id="add-action-from-pool">
+<h3><code class="docutils literal notranslate"><span class="pre">add-action-from-pool</span></code></h3>
+<p>( schedule dat xt action-pool –  action )</p>
+<p>Initalize a action from a action pool with the initial execution token <em>xt</em> and data <em>data</em>, if a action is available, or raise <code class="docutils literal notranslate"><span class="pre">x-no-action-available</span></code> if no actions are available. The action is then added to the schedule <em>schedule</em> and is returned.</p>
+</section>
+<section id="action-pool-free">
+<h3><code class="docutils literal notranslate"><span class="pre">action-pool-free</span></code></h3>
+<p>( action-pool – count )</p>
+<p>Get the number of free actions in a action pool.</p>
+</section>
+<section id="init-action-pool">
+<h3><code class="docutils literal notranslate"><span class="pre">init-action-pool</span></code></h3>
+<p>( count addr – )</p>
+<p>Initialize a action pool at <em>addr</em>, with <em>count</em> actions. These actions are free initially to be initialized and added to a schedule with <code class="docutils literal notranslate"><span class="pre">add-action-from-pool</span></code>.</p>
+</section>
+<section id="action-pool-size">
+<h3><code class="docutils literal notranslate"><span class="pre">action-pool-size</span></code></h3>
+<p>( count – bytes )</p>
+<p>Get the size taken up by a action pool with <em>count</em> actions; this size should be used for alloting the block of memory to be passed to <code class="docutils literal notranslate"><span class="pre">init-action-pool</span></code></p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

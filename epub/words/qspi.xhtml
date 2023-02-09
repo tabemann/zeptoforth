@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Quad SPI words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="quad-spi-words">
+<h1>Quad SPI words</h1>
+<p>The Quad SPI interface is written for the STM32F746 DISCOVERY board. It maps Quad SPI flash to the addressing space at <code class="docutils literal notranslate"><span class="pre">qspi-base</span></code>. It also provides means for writing bytes, halfwords, words, and arbitrary buffers containing bytes to flash and erasing 4K and 32K subsectors, 64K sectors, and the entire flash. Note that even though internally they require turning off memory-mapped Quad SPI mode, it is automatically turned back on when they are complete, and they are hidden from all other tasks (however they significantly impact realtime performance due to being slow while requiring interrupts to be turned off).</p>
+<section id="qspi">
+<h2><code class="docutils literal notranslate"><span class="pre">qspi</span></code></h2>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">qspi</span></code>:</p>
+<section id="qspi-base">
+<h3><code class="docutils literal notranslate"><span class="pre">qspi-base</span></code></h3>
+<p>( – addr )</p>
+<p>Returns the base address of the Quad SPI memory mapped space.</p>
+</section>
+<section id="qspi-size">
+<h3><code class="docutils literal notranslate"><span class="pre">qspi-size</span></code></h3>
+<p>( – bytes )</p>
+<p>Returns the size of the Quad SPI flash space in bytes.</p>
+</section>
+<section id="qspi-inited">
+<h3><code class="docutils literal notranslate"><span class="pre">qspi-inited?</span></code></h3>
+<p>( – flag )</p>
+<p>Returns whether Quad SPI is initialized - should always be true after system initialization.</p>
+</section>
+<section id="map-qspi-enabled">
+<h3><code class="docutils literal notranslate"><span class="pre">map-qspi-enabled?</span></code></h3>
+<p>( – flag )</p>
+<p>Returns whether mapping Quad SPI to memory is enabled - should always be true after system initialization.</p>
+</section>
+<section id="x-invalid-qspi-addr">
+<h3><code class="docutils literal notranslate"><span class="pre">x-invalid-qspi-addr</span></code></h3>
+<p>( – )</p>
+<p>Invalid Quad SPI address exception.</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">qspi!</span></code></h3>
+<p>( x addr – )</p>
+<p>Writes a 32-bit value in little-endian order to Quad SPI flash at the address corresponding to the specified address in memory-mapped Quad SPI space; note that it has to be 32-bit aligned.</p>
+</section>
+<section id="hqspi">
+<h3><code class="docutils literal notranslate"><span class="pre">hqspi!</span></code></h3>
+<p>( h addr – )</p>
+<p>Writes a 16-bit value in little-endian order to Quad SPI flash at the address corresponding to the specified address in memory-mapped Quad SPI space; note that it has to be 16-bit aligned.</p>
+</section>
+<section id="bqspi">
+<h3><code class="docutils literal notranslate"><span class="pre">bqspi!</span></code></h3>
+<p>( b addr – )</p>
+<p>Writes a 8-bit value to Quad SPI flash at the address corresponding to the specified address in memory-mapped Quad SPI space; note that it has to be 16-bit aligned.</p>
+</section>
+<section id="mass-qspi">
+<h3><code class="docutils literal notranslate"><span class="pre">mass-qspi!</span></code></h3>
+<p>( data-addr bytes addr – )</p>
+<p>Writes an arbitrary number of bytes in the provided buffer to Quad SPIs starting at the specified address in memory-mapped Quad SPI space; note the data can be larger than a write page (and can therefore cross write page boundaries) despite the underlying hardware not allowing this due to this case being handled in sofotware.</p>
+</section>
+<section id="erase-qspi-4k-subsector">
+<h3><code class="docutils literal notranslate"><span class="pre">erase-qspi-4k-subsector</span></code></h3>
+<p>( addr – )</p>
+<p>Erase a 4K flash subsector containing the specified address in memory-mapped Quad SPI space.</p>
+</section>
+<section id="erase-qspi-32k-subsector">
+<h3><code class="docutils literal notranslate"><span class="pre">erase-qspi-32k-subsector</span></code></h3>
+<p>( addr – )</p>
+<p>Erase a 32K flash subsector containing the specified address in memory-mapped Quad SPI space.</p>
+</section>
+<section id="erase-qspi-sector">
+<h3><code class="docutils literal notranslate"><span class="pre">erase-qspi-sector</span></code></h3>
+<p>( addr – )</p>
+<p>Erase a 64K flash sector containing the specified address in memory-mapped Quad SPI space.</p>
+</section>
+<section id="erase-qspi-bulk">
+<h3><code class="docutils literal notranslate"><span class="pre">erase-qspi-bulk</span></code></h3>
+<p>( – )</p>
+<p>Erase the entire contents of Quad SPI flash.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

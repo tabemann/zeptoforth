@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Exposed Kernel Variables</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="exposed-kernel-variables">
+<h1>Exposed Kernel Variables</h1>
+<section id="forth">
+<h2><code class="docutils literal notranslate"><span class="pre">forth</span></code></h2>
+<p>Thes words are in <code class="docutils literal notranslate"><span class="pre">forth</span></code>.</p>
+<section id="state">
+<h3><code class="docutils literal notranslate"><span class="pre">state</span></code></h3>
+<p>Get the STATE variable address</p>
+</section>
+<section id="base">
+<h3><code class="docutils literal notranslate"><span class="pre">base</span></code></h3>
+<p>Get the BASE variable address</p>
+</section>
+<section id="pause-enabled">
+<h3><code class="docutils literal notranslate"><span class="pre">pause-enabled</span></code></h3>
+<p>Get the PAUSE enabled variable address.</p>
+</section>
+<section id="xon-xoff-enabled">
+<h3><code class="docutils literal notranslate"><span class="pre">xon-xoff-enabled</span></code></h3>
+<p>Get the XON/XOFF enabled variable address; note that this variable defaults to 0 (disabled).</p>
+</section>
+<section id="ack-nak-enabled">
+<h3><code class="docutils literal notranslate"><span class="pre">ack-nak-enabled</span></code></h3>
+<p>Get the ACK/NAK enabled variable address; note that this variable defaults to -1 (enabled).</p>
+</section>
+<section id="bel-enabled">
+<h3><code class="docutils literal notranslate"><span class="pre">bel-enabled</span></code></h3>
+<p>Get the BEL enabled variable address; note that this variable defaults to -1 (enabled).</p>
+</section>
+<section id="color-enabled">
+<h3><code class="docutils literal notranslate"><span class="pre">color-enabled</span></code></h3>
+<p>Get the color enabled variable address; note that this variable defaults to -1 (enabled).</p>
+</section>
+<section id="dict-base">
+<h3><code class="docutils literal notranslate"><span class="pre">dict-base</span></code></h3>
+<p>Get the RAM dictionary base variable address</p>
+</section>
+<section id="ram-base">
+<h3><code class="docutils literal notranslate"><span class="pre">ram-base</span></code></h3>
+<p>Get the RAM base</p>
+</section>
+<section id="ram-end">
+<h3><code class="docutils literal notranslate"><span class="pre">ram-end</span></code></h3>
+<p>Get the RAM end</p>
+</section>
+<section id="flash-base">
+<h3><code class="docutils literal notranslate"><span class="pre">flash-base</span></code></h3>
+<p>Get the flash base</p>
+</section>
+<section id="flash-end">
+<h3><code class="docutils literal notranslate"><span class="pre">flash-end</span></code></h3>
+<p>Get the flash end</p>
+</section>
+<section id="stack-base">
+<h3><code class="docutils literal notranslate"><span class="pre">stack-base</span></code></h3>
+<p>Get the current stack base variable address</p>
+</section>
+<section id="stack-end">
+<h3><code class="docutils literal notranslate"><span class="pre">stack-end</span></code></h3>
+<p>Get the current stack end variable address</p>
+</section>
+<section id="rstack-base">
+<h3><code class="docutils literal notranslate"><span class="pre">rstack-base</span></code></h3>
+<p>Get the current return stack base variable address</p>
+</section>
+<section id="rstack-end">
+<h3><code class="docutils literal notranslate"><span class="pre">rstack-end</span></code></h3>
+<p>Get the current returns stack end variable address</p>
+</section>
+<section id="handler">
+<h3><code class="docutils literal notranslate"><span class="pre">handler</span></code></h3>
+<p>Get the current exception handler variable address</p>
+</section>
+<section id="parse">
+<h3><code class="docutils literal notranslate"><span class="pre">&gt;parse</span></code></h3>
+<p>The parse index</p>
+</section>
+<section id="source">
+<h3><code class="docutils literal notranslate"><span class="pre">source</span></code></h3>
+<p>The source info</p>
+</section>
+<section id="build-target">
+<h3><code class="docutils literal notranslate"><span class="pre">build-target</span></code></h3>
+<p>Get the address to store a literal in for the word currently being
+built</p>
+</section>
+<section id="sys-ram-dict-base">
+<h3><code class="docutils literal notranslate"><span class="pre">sys-ram-dict-base</span></code></h3>
+<p>Get the base of the system RAM dictionary space</p>
+</section>
+<section id="in">
+<h3><code class="docutils literal notranslate"><span class="pre">&gt;in</span></code></h3>
+<p>The input buffer index</p>
+</section>
+<section id="input">
+<h3><code class="docutils literal notranslate"><span class="pre">input#</span></code></h3>
+<p>The input buffer count</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">input</span></code></h3>
+<p>The input buffer</p>
+</section>
+<section id="order-count">
+<h3><code class="docutils literal notranslate"><span class="pre">order-count</span></code></h3>
+<p>The wordlist count</p>
+</section>
+<section id="order">
+<h3><code class="docutils literal notranslate"><span class="pre">order</span></code></h3>
+<p>The wordlist order</p>
+</section>
+<section id="prompt-hook">
+<h3><code class="docutils literal notranslate"><span class="pre">prompt-hook</span></code></h3>
+<p>The prompt hook</p>
+</section>
+<section id="handle-number-hook">
+<h3><code class="docutils literal notranslate"><span class="pre">handle-number-hook</span></code></h3>
+<p>The handle number hook</p>
+</section>
+<section id="failed-parse-hook">
+<h3><code class="docutils literal notranslate"><span class="pre">failed-parse-hook</span></code></h3>
+<p>The failed parse hook</p>
+</section>
+<section id="emit-hook">
+<h3><code class="docutils literal notranslate"><span class="pre">emit-hook</span></code></h3>
+<p>The emit hook</p>
+</section>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">emit?-hook</span></code></h3>
+<p>The emit? hook</p>
+</section>
+<section id="key-hook">
+<h3><code class="docutils literal notranslate"><span class="pre">key-hook</span></code></h3>
+<p>The key hook</p>
+</section>
+<section id="id3">
+<h3><code class="docutils literal notranslate"><span class="pre">key?-hook</span></code></h3>
+<p>The key? hook</p>
+</section>
+<section id="refill-hook">
+<h3><code class="docutils literal notranslate"><span class="pre">refill-hook</span></code></h3>
+<p>The refill hook</p>
+</section>
+<section id="pause-hook">
+<h3><code class="docutils literal notranslate"><span class="pre">pause-hook</span></code></h3>
+<p>The pause hook</p>
+</section>
+<section id="validate-dict-hook">
+<h3><code class="docutils literal notranslate"><span class="pre">validate-dict-hook</span></code></h3>
+<p>The dictionary size validation hook</p>
+</section>
+<section id="fault-handler-hook">
+<h3><code class="docutils literal notranslate"><span class="pre">fault-handler-hook</span></code></h3>
+<p>Get the FAULT-HANDLER-HOOK variable address</p>
+</section>
+<section id="null-handler-hook">
+<h3><code class="docutils literal notranslate"><span class="pre">null-handler-hook</span></code></h3>
+<p>Get the NULL-HANDLER-HOOK variable address</p>
+</section>
+<section id="svcall-handler-hook">
+<h3><code class="docutils literal notranslate"><span class="pre">svcall-handler-hook</span></code></h3>
+<p>Get the SVCALL-HANDLER-HOOK variable address</p>
+</section>
+<section id="pendsv-handler-hook">
+<h3><code class="docutils literal notranslate"><span class="pre">pendsv-handler-hook</span></code></h3>
+<p>Get the PENDSV-HANDLER-HOOK variable address</p>
+</section>
+<section id="systick-handler-hook">
+<h3><code class="docutils literal notranslate"><span class="pre">systick-handler-hook</span></code></h3>
+<p>Get the SYSTICK-HANDLER-HOOK variable address</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>
