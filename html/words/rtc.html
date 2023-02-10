@@ -33,7 +33,7 @@
 
           <div class="body" role="main">
             
-  <section id="realtime-clock-rtc-words">
+  <section class="tex2jax_ignore mathjax_ignore" id="realtime-clock-rtc-words">
 <h1>Realtime Clock (RTC) Words<a class="headerlink" href="#realtime-clock-rtc-words" title="Permalink to this headline">¶</a></h1>
 <p>zeptoforth has support for reading and setting the realtime clock (RTC) on the Raspberry Pi Pico, both for keeping track of the date and time and for triggering an alarm.</p>
 <p>Note that the Raspberry Pi Pico’s RTC’s value is not preserved across resets, even if power is applied, so each time it is reset the RTC’s value must be provided a value before it can be useful. It is initialized on bootup to Thursday, 1 January 1970 00:00:00, and is enabled on boot.</p>
@@ -235,6 +235,7 @@
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
 </ul>
 
 <div class="relations">
@@ -272,7 +273,7 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

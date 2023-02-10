@@ -33,7 +33,7 @@
 
           <div class="body" role="main">
             
-  <section id="analog-digital-converter-words">
+  <section class="tex2jax_ignore mathjax_ignore" id="analog-digital-converter-words">
 <h1>Analog-Digital Converter Words<a class="headerlink" href="#analog-digital-converter-words" title="Permalink to this headline">¶</a></h1>
 <p>Analog-digital converter (ADC) support is implemented for each of the supported platforms. A given platform may have a number of ADC peripherals. On the RP2040 and STM32F411 there is only a single ADC peripheral, numbered 0 on the RP2040 and, using STMicroelectronics’ numbering, 1 on the STM32F411. On the STM32F407, STM32F746, and STM32L476 there are three ADC peripherals, numbered from 1 through 3.</p>
 <section id="adc">
@@ -208,6 +208,9 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Analog-Digital Converter Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="spi.html">SPI Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="i2c.html">I2C Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pwm.html">Pulse Width Modulation Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rtc.html">Realtime Clock (RTC) Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
@@ -218,6 +221,8 @@
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
@@ -245,6 +250,9 @@
 <li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
 </ul>
 
 <div class="relations">
@@ -282,7 +290,7 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

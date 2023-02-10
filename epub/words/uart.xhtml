@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>UART Words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="uart-words">
+<h1>UART Words</h1>
+<p>There are a number of words for controlling UART’s available on each of the supported microcontrollers on top of the console <code class="docutils literal notranslate"><span class="pre">emit</span></code>, <code class="docutils literal notranslate"><span class="pre">key</span></code>, <code class="docutils literal notranslate"><span class="pre">emit?</span></code>, and <code class="docutils literal notranslate"><span class="pre">key?</span></code> words. These are as follows:</p>
+<p>Note that <em>uart</em> values as mentioned below vary between the different supported platforms. The following applies:</p>
+<ul class="simple">
+<li><p>On the RP2040 the available <em>uart</em> values are 0 and 1, with 0 corresponding to the console.</p></li>
+<li><p>On the STM32F411 the available <em>uart</em> values are 1, 2, and 6, with 2 corresponding to the console.</p></li>
+<li><p>On the STM32F407 the available <em>uart</em> values are 1 through 6, with 2 corresponding to the console.</p></li>
+<li><p>On the STM32L476 the available <em>uart</em> values are 1 through 5, with 2 corresponding to the console. Note that LPUART1 is not currently supported.</p></li>
+<li><p>On the STM32F746 the available <em>uart</em> values are 1 through 8, with 1 corresponding to the console.</p></li>
+</ul>
+<section id="uart">
+<h2><code class="docutils literal notranslate"><span class="pre">uart</span></code></h2>
+<p>These words are in the <code class="docutils literal notranslate"><span class="pre">uart</span></code> module:</p>
+<section id="uart-enabled">
+<h3><code class="docutils literal notranslate"><span class="pre">uart-enabled?</span></code></h3>
+<p>( uart – flag )</p>
+<p>Get whether a UART is enabled.</p>
+</section>
+<section id="enable-uart">
+<h3><code class="docutils literal notranslate"><span class="pre">enable-uart</span></code></h3>
+<p>( uart – )</p>
+<p>Enable a UART.</p>
+</section>
+<section id="disable-uart">
+<h3><code class="docutils literal notranslate"><span class="pre">disable-uart</span></code></h3>
+<p>( uart – )</p>
+<p>Disable a UART.</p>
+</section>
+<section id="with-uart-disabled">
+<h3><code class="docutils literal notranslate"><span class="pre">with-uart-disabled</span></code></h3>
+<p>( xt uart – )</p>
+<p>Execute <em>xt</em> with a UART disabled, re-enabling it afterwards if it was previously enabled.</p>
+</section>
+<section id="uart-baud">
+<h3><code class="docutils literal notranslate"><span class="pre">uart-baud!</span></code></h3>
+<p>( baud uart – )</p>
+<p>Set the baud of a UART.</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">&gt;uart</span></code></h3>
+<p>( c uart – )</p>
+<p>Emit a byte to a UART.</p>
+</section>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">uart&gt;</span></code></h3>
+<p>( uart – c )</p>
+<p>Read a byte from a UART.</p>
+</section>
+<section id="id3">
+<h3><code class="docutils literal notranslate"><span class="pre">&gt;uart?</span></code></h3>
+<p>( uart – flag )</p>
+<p>Get whether a UART is ready to emit a byte.</p>
+</section>
+<section id="id4">
+<h3><code class="docutils literal notranslate"><span class="pre">uart&gt;?</span></code></h3>
+<p>( uart – flag )</p>
+<p>Get whether a byte is ready to be read from a UART.</p>
+</section>
+<section id="flush-uart">
+<h3><code class="docutils literal notranslate"><span class="pre">flush-uart</span></code></h3>
+<p>( uart – )</p>
+<p>Flush a UART’s transmit buffer.</p>
+</section>
+<section id="uart-alternate">
+<h3><code class="docutils literal notranslate"><span class="pre">uart-alternate</span></code></h3>
+<p>( uart – )</p>
+<p>The alternate function for a given UART.</p>
+</section>
+<section id="uart-pin">
+<h3><code class="docutils literal notranslate"><span class="pre">uart-pin</span></code></h3>
+<p>( uart pin – )</p>
+<p>Set the alternate function for <em>pin</em> to configure it for <em>uart</em>.</p>
+</section>
+<section id="x-invalid-uart">
+<h3><code class="docutils literal notranslate"><span class="pre">x-invalid-uart</span></code></h3>
+<p>( – )</p>
+<p>Invalid UART exception.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

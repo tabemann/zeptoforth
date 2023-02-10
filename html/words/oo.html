@@ -33,7 +33,7 @@
 
           <div class="body" role="main">
             
-  <section id="object-orientation">
+  <section class="tex2jax_ignore mathjax_ignore" id="object-orientation">
 <h1>Object Orientation<a class="headerlink" href="#object-orientation" title="Permalink to this headline">¶</a></h1>
 <p>zeptoforth includes an object-orientation layer implemented by the <code class="docutils literal notranslate"><span class="pre">oo</span></code> module. Its object model involves each class having a single superclass (with the ultimatet superclass, <code class="docutils literal notranslate"><span class="pre">object</span></code>, being its own superclass), and methods and members being independent words which are tied to the class for which they are originally declared which may be applied to objects of that class or of any subclass of that class.</p>
 <p>Binding is late by default, but if one explicitly specifies a class to use early binding is also available, and is necessary in some use cases such as <code class="docutils literal notranslate"><span class="pre">new</span></code> or <code class="docutils literal notranslate"><span class="pre">destroy</span></code> method implementations calling <code class="docutils literal notranslate"><span class="pre">new</span></code> or <code class="docutils literal notranslate"><span class="pre">destroy</span></code> respectively in their super classes. Early binding is specified via <em>class</em><code class="docutils literal notranslate"><span class="pre">-&gt;</span></code><em>method</em>; note that <code class="docutils literal notranslate"><span class="pre">-&gt;</span></code> is not a word but is a special method lookup marker and cannot be separated from <em>class</em> or <em>method</em> by spaces. Note that <em>class</em> can contain a module lookup path specified with <code class="docutils literal notranslate"><span class="pre">::</span></code> delimiters.</p>
@@ -191,6 +191,9 @@ end-implement
 <li class="toctree-l1"><a class="reference internal" href="adc.html">Analog-Digital Converter Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="spi.html">SPI Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="i2c.html">I2C Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pwm.html">Pulse Width Modulation Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rtc.html">Realtime Clock (RTC) Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
@@ -202,6 +205,7 @@ end-implement
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
@@ -231,6 +235,7 @@ end-implement
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
 </ul>
 
 <div class="relations">
@@ -268,7 +273,7 @@ end-implement
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

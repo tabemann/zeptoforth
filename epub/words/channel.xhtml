@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Channel Words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="channel-words">
+<h1>Channel Words</h1>
+<p>A channel is a monodirectional means of communicating data, as arbitrary-sized blocks of data, between two or more different tasks. Channels form a fixed-size queue onto which data is sent on one end and data is received on the other. Any task which attempts to send data on a full channel, or receive data on an empty channel, will be suspended until either data is received from the channel, or data is sent to the channel, respectively, unless non-blocking operations are used, where then <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> (declared in <code class="docutils literal notranslate"><span class="pre">task</span></code>) is raised instead of blocking.</p>
+<p>Channels can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put into alloted memory in the dictionary or into allocated memory in the heap. Note that the size of a channel for a given element size and element count may be calculated with <code class="docutils literal notranslate"><span class="pre">chan-size</span></code>.</p>
+<section id="chan">
+<h2><code class="docutils literal notranslate"><span class="pre">chan</span></code></h2>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">chan</span></code>:</p>
+<section id="x-chan-closed">
+<h3><code class="docutils literal notranslate"><span class="pre">x-chan-closed</span></code></h3>
+<p>( – )</p>
+<p>Channel closed exception. Raised on attempting to send to a closed channel or when trying to receive on an empty closed channel.</p>
+</section>
+<section id="chan-full">
+<h3><code class="docutils literal notranslate"><span class="pre">chan-full?</span></code></h3>
+<p>( chan – flag )</p>
+<p>Get whether a channel is full.</p>
+</section>
+<section id="chan-empty">
+<h3><code class="docutils literal notranslate"><span class="pre">chan-empty?</span></code></h3>
+<p>( chan – flag )</p>
+<p>Get whether a channel is empty.</p>
+</section>
+<section id="chan-size">
+<h3><code class="docutils literal notranslate"><span class="pre">chan-size</span></code></h3>
+<p>( element-bytes element-count – total-bytes )</p>
+<p>Get the size in memory for a channel with a specified element size in bytes and element count.</p>
+</section>
+<section id="init-chan">
+<h3><code class="docutils literal notranslate"><span class="pre">init-chan</span></code></h3>
+<p>( element-bytes element-count addr – )</p>
+<p>Initialize a channel starting at the specified address with the element size and element count. The <em>element-bytes</em> and <em>element-count</em> should be the same as when they were passed to <code class="docutils literal notranslate"><span class="pre">chan-size</span></code> when alloting or allocating the memory whose starting address is passed in.</p>
+</section>
+<section id="close-chan">
+<h3><code class="docutils literal notranslate"><span class="pre">close-chan</span></code></h3>
+<p>( chan – )</p>
+<p>Close a channel. Raise <code class="docutils literal notranslate"><span class="pre">x-chan-closed</span></code> for all pending sending tasks or for all pending receiving tasks if the channel is empty.</p>
+</section>
+<section id="reopen-chan">
+<h3><code class="docutils literal notranslate"><span class="pre">reopen-chan</span></code></h3>
+<p>( chan – )</p>
+<p>Reopen a channel.</p>
+</section>
+<section id="chan-closed">
+<h3><code class="docutils literal notranslate"><span class="pre">chan-closed?</span></code></h3>
+<p>( chan – closed )</p>
+<p>Get whether a channel is closed.</p>
+</section>
+<section id="send-chan">
+<h3><code class="docutils literal notranslate"><span class="pre">send-chan</span></code></h3>
+<p>( addr bytes chan – )</p>
+<p>Send message with a buffer as a payload over a channel. Block until another task receives the message if the channel is full. Note that the buffer is copied, and will be truncated if the buffer size of the channel is smaller than the data provided, and padded with zeros if it is larger. This is not safe to call within an interrupt service routine or a critical section.</p>
+</section>
+<section id="recv-chan">
+<h3><code class="docutils literal notranslate"><span class="pre">recv-chan</span></code></h3>
+<p>( addr bytes chan – recv-bytes )</p>
+<p>Receive message into a buffer from a channel. Block until another task sends a message if the channel is empty. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the number of bytes copied is returned. This is not safe to call within an interrupt service routine or a critical section.</p>
+</section>
+<section id="peek-chan">
+<h3><code class="docutils literal notranslate"><span class="pre">peek-chan</span></code></h3>
+<p>( addr bytes chan – addr peek-bytes )</p>
+<p>Peek the oldest message into a buffer from a channel, without popping it from the channel’s queue. Block until another task sends a message if the channel is empty. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the number of bytes copied is returned. This is not safe to call within an interrupt service routine or a critical section.</p>
+</section>
+<section id="skip-chan">
+<h3><code class="docutils literal notranslate"><span class="pre">skip-chan</span></code></h3>
+<p>( chan – )</p>
+<p>Skip the most oldest message in a channel. Block until another task sends a message if the channel is empty. Note that no copying takes place, making this faster than receiving a message. This is not safe to call within an interrupt service routine or a critical section.</p>
+</section>
+<section id="send-chan-no-block">
+<h3><code class="docutils literal notranslate"><span class="pre">send-chan-no-block</span></code></h3>
+<p>( addr bytes chan – )</p>
+<p>Send message with a buffer as a payload over a channel. If the channel is full, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. Note that the buffer is copied, and will be truncated if the buffer size of the channel is smaller than the data provided, and padded with zeros if it is larger. This is not safe to call within an interrupt service routine or a critical section.</p>
+</section>
+<section id="recv-chan-no-block">
+<h3><code class="docutils literal notranslate"><span class="pre">recv-chan-no-block</span></code></h3>
+<p>( addr bytes chan – recv-bytes )</p>
+<p>Receive message into a buffer from a channel. If the channel is empty, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the number of bytes copied is returned. This is not safe to call within an interrupt service routine or a critical section.</p>
+</section>
+<section id="peek-chan-no-block">
+<h3><code class="docutils literal notranslate"><span class="pre">peek-chan-no-block</span></code></h3>
+<p>( addr bytes chan – addr peek-bytes )</p>
+<p>Peek the oldest message into a buffer from a channel, without popping it from the channel’s queue. If the channel is empty, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the channel, and padded with zeros if it is larger; the number of bytes copied is returned. This is not safe to call within an interrupt service routine or a critical section.</p>
+</section>
+<section id="skip-chan-no-block">
+<h3><code class="docutils literal notranslate"><span class="pre">skip-chan-no-block</span></code></h3>
+<p>( chan – )</p>
+<p>Skip the most oldest message in a channel. If the channel is empty, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. Note that no copying takes place, making this faster than receiving a message. This is not safe to call within an interrupt service routine or a critical section.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

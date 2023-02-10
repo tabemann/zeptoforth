@@ -15,7 +15,7 @@
     <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Hardware Timers" href="timer.html" />
+    <link rel="next" title="Realtime Clock (RTC) Words" href="rtc.html" />
     <link rel="prev" title="I2C Words" href="i2c.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -33,7 +33,7 @@
 
           <div class="body" role="main">
             
-  <section id="pulse-width-modulation-words">
+  <section class="tex2jax_ignore mathjax_ignore" id="pulse-width-modulation-words">
 <h1>Pulse Width Modulation Words<a class="headerlink" href="#pulse-width-modulation-words" title="Permalink to this headline">¶</a></h1>
 <p>The RP2040 (which is in the Raspberry Pi Pico) has support for Pulse Width Modulation (PWM for short), which includes a counter capability. There are eight PWM “slices”, each of which have pair of GPIO pins as outputs, pins A and B, and pin B can also be used as an input. Also, each of the PWM slices, aside from PWM slice 7, maps to four separate GPIO pins, two of which are A pins and two of which are B pins (PWM slice 7 only maps to one A pin and one B pin).</p>
 <p>Each PWM slice is associated with a counter value and a top value at which the counter wraps back to zero. Also, the A and B outputs each have a compare value at which their output transitions from high to low. Note that PWM slices have a “phase correct” mode which modifies this functionality so that the phase of a PWM output does not change with changes to its compare value.</p>
@@ -227,6 +227,7 @@
 <li class="toctree-l1"><a class="reference internal" href="spi.html">SPI Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="i2c.html">I2C Words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Pulse Width Modulation Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rtc.html">Realtime Clock (RTC) Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
@@ -269,6 +270,7 @@
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
 </ul>
 
 <div class="relations">
@@ -276,7 +278,7 @@
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
       <li>Previous: <a href="i2c.html" title="previous chapter">I2C Words</a></li>
-      <li>Next: <a href="timer.html" title="next chapter">Hardware Timers</a></li>
+      <li>Next: <a href="rtc.html" title="next chapter">Realtime Clock (RTC) Words</a></li>
   </ul></li>
 </ul>
 </div>
@@ -306,7 +308,7 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

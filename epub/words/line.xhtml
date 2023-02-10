@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Line Editor</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="line-editor">
+<h1>Line Editor</h1>
+<p>The line editor provides a simple interface for allowing the user to edit input without the limitations in the normal <code class="docutils literal notranslate"><span class="pre">refill</span></code> mechanism. When enabled, the following keys can be used to control editing:</p>
+<ul class="simple">
+<li><p>Backspace: delete the character to the left of the cursor</p></li>
+<li><p>Delete: delete the character under the cursor</p></li>
+<li><p>Left / Control-B: move the cursor one character to the left</p></li>
+<li><p>Right / Control-F: move the cursor one character to the right</p></li>
+<li><p>Up: switch to the previous line in the history</p></li>
+<li><p>Down: switch to the next line in the history</p></li>
+<li><p>Control-A: move the cursor to the start of the input</p></li>
+<li><p>Control-E: move the cursor to the end of the input</p></li>
+<li><p>F1: enter upload mode, where line editing features are turned off</p></li>
+<li><p>F2: leave upload mode and re-enable line editing features; this must be entered as the first key entered on a line</p></li>
+</ul>
+<p>Note that tabs and characters of code points greater than 127 are handled correctly. Also note that it is not compatible with non-terminal operation except when in upload mode, i.e. with loading code automatically via serial or swdcom; before this is done one must be in upload mode or it must be disabled.</p>
+<p>After a reboot, it is initialized for the main task only, and if, when enabled, <code class="docutils literal notranslate"><span class="pre">refill</span></code> is used for a different task, it needs to have already been initialized for that task.</p>
+<section id="line">
+<h2><code class="docutils literal notranslate"><span class="pre">line</span></code></h2>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">line</span></code>:</p>
+<section id="init-line">
+<h3><code class="docutils literal notranslate"><span class="pre">init-line</span></code></h3>
+<p>( index-ptr count-ptr buffer-ptr buffer-size – )</p>
+<p>Enable the line editor for the current task, with a pointer to the index variable, a poiner to the count variable, a pointer to the input buffer, and a size of the input buffer provided. Note that it allots memory in the current task’s dictionary.</p>
+</section>
+</section>
+<section id="forth">
+<h2><code class="docutils literal notranslate"><span class="pre">forth</span></code></h2>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">forth</span></code>:</p>
+<section id="enable-line">
+<h3><code class="docutils literal notranslate"><span class="pre">enable-line</span></code></h3>
+<p>( – )</p>
+<p>Enable the line editor.</p>
+</section>
+<section id="disable-line">
+<h3><code class="docutils literal notranslate"><span class="pre">disable-line</span></code></h3>
+<p>( – )</p>
+<p>Disable the line editor. This must be done before loading code automatically.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

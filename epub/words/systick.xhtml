@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>SysTick Words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="systick-words">
+<h1>SysTick Words</h1>
+<p>There is not much to SysTick, so this will be short. In zeptoforth SysTicks are at 10ths of milliseconds intervals, so:</p>
+<section id="forth">
+<h2><code class="docutils literal notranslate"><span class="pre">forth</span></code></h2>
+<p>The following word is in <code class="docutils literal notranslate"><span class="pre">forth</span></code>.</p>
+<section id="ms">
+<h3><code class="docutils literal notranslate"><span class="pre">ms</span></code></h3>
+<p>( u – )</p>
+<p>where <em>u</em> is the number of milliseconds to wait. Note that this word is replaced with an outwardly equivalent word by <code class="docutils literal notranslate"><span class="pre">sys/common/forth/task.fs</span></code>; unlike that word this word does not take advantage of the timing capabilities provided by <code class="docutils literal notranslate"><span class="pre">sys/common/forth/task.fs</span></code>, even though it does call <code class="docutils literal notranslate"><span class="pre">PAUSE</span></code>.</p>
+</section>
+</section>
+<section id="systick">
+<h2><code class="docutils literal notranslate"><span class="pre">systick</span></code></h2>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">systick</span></code>.</p>
+<section id="systick-counter">
+<h3><code class="docutils literal notranslate"><span class="pre">systick-counter</span></code></h3>
+<p>( – u )</p>
+<p>returns the current SysTick count in 10ths of milliseconds. This value is an unsigned 32-bit value, and will wrap around.</p>
+<p>To wait a given number of milliseconds (not 10ths of milliseconds), one executes:</p>
+<p>To disable SysTicks, execute:</p>
+</section>
+<section id="disable-systick">
+<h3><code class="docutils literal notranslate"><span class="pre">disable-systick</span></code></h3>
+<p>( – )</p>
+<p>To enable SysTicks again, execute:</p>
+</section>
+<section id="enable-systick">
+<h3><code class="docutils literal notranslate"><span class="pre">enable-systick</span></code></h3>
+<p>( – )</p>
+<p>SysTicks are enabled by default once <code class="docutils literal notranslate"><span class="pre">sys/common/forth/systick.fs</span></code> has been loaded and the MCU has been rebooted.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

@@ -54,10 +54,13 @@ stm32f746:
 rp2040:
 	$(MAKE) -C src/rp2040
 
-.PHONY: all install stm32f407 stm32f411 stm32l746 stm32f746 clean html
+.PHONY: all install stm32f407 stm32f411 stm32l746 stm32f746 clean html epub
 
 html:
 	cd docs ; sphinx-build -b html . ../html
+
+epub:
+	cd docs ; sphinx-build -b epub . ../epub
 
 clean:
 	$(MAKE) -C src/stm32f407 clean

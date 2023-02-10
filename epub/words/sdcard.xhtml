@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>SDHC/SDXC Card Support</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="sdhc-sdxc-card-support">
+<h1>SDHC/SDXC Card Support</h1>
+<p>zeptoforth includes SDHC/SDXC card support using the SPI interface for the supported and a separate chip-select pin independent of the SPI interface. It is built upon zeptoforth’s object system, and involves an abstract block device <code class="docutils literal notranslate"><span class="pre">&lt;block-dev&gt;</span></code> in the <code class="docutils literal notranslate"><span class="pre">block-dev</span></code> module from which the <code class="docutils literal notranslate"><span class="pre">&lt;sd&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">sd</span></code> module inherits. It caches up to eight blocks in RAM at any given time, and has support for both write-through and non-write-through modes of operation, with the latter providing better performance at the expense of potential loss of data integrity in the event of unexpected resets or power loss. Note that the SPI pins used need to be configured appropriately and the chip-select pin must be configured as an output pin.</p>
+<section id="block-dev">
+<h2><code class="docutils literal notranslate"><span class="pre">block-dev</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">block-dev</span></code> module contains the following words:</p>
+<section id="x-block-out-of-range">
+<h3><code class="docutils literal notranslate"><span class="pre">x-block-out-of-range</span></code></h3>
+<p>( – )</p>
+<p>Block out of range exception.</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;block-dev&gt;</span></code></h3>
+<p>( – class )</p>
+<p>The block device class. Note that this class is not meant to be directly instantiated, and if any methods on it are called other than <code class="docutils literal notranslate"><span class="pre">new</span></code> or <code class="docutils literal notranslate"><span class="pre">destroy</span></code>, <code class="docutils literal notranslate"><span class="pre">abstract-method</span></code> will be called.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;block-dev&gt;</span></code> class has no constructor.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;block-dev&gt;</span></code> class includes the following methods:</p>
+</section>
+<section id="block-size">
+<h3><code class="docutils literal notranslate"><span class="pre">block-size</span></code></h3>
+<p>( dev – bytes )</p>
+<p>Get block size.</p>
+</section>
+<section id="block-count">
+<h3><code class="docutils literal notranslate"><span class="pre">block-count</span></code></h3>
+<p>( dev – blocks )</p>
+<p>Get block count.</p>
+</section>
+<section id="block">
+<h3><code class="docutils literal notranslate"><span class="pre">block!</span></code></h3>
+<p>( c-addr u block-index dev – )</p>
+<p>Write block.</p>
+</section>
+<section id="block-part">
+<h3><code class="docutils literal notranslate"><span class="pre">block-part!</span></code></h3>
+<p>( c-addr u offset block-index dev – )</p>
+<p>Write part of a block.</p>
+</section>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">block&#64;</span></code></h3>
+<p>( c-addr u block-index dev – )</p>
+<p>Read block.</p>
+</section>
+<section id="id3">
+<h3><code class="docutils literal notranslate"><span class="pre">block-part&#64;</span></code></h3>
+<p>( c-addr u offset block-index dev – )</p>
+<p>Read part of a block.</p>
+</section>
+<section id="flush-blocks">
+<h3><code class="docutils literal notranslate"><span class="pre">flush-blocks</span></code></h3>
+<p>( dev – )</p>
+<p>Flush blocks.</p>
+</section>
+<section id="clear-blocks">
+<h3><code class="docutils literal notranslate"><span class="pre">clear-blocks</span></code></h3>
+<p>( dev – )</p>
+<p>Clear cached blocks.</p>
+</section>
+<section id="write-through">
+<h3><code class="docutils literal notranslate"><span class="pre">write-through!</span></code></h3>
+<p>( write-through dev – )</p>
+<p>Set write-through cache mode.</p>
+</section>
+<section id="id4">
+<h3><code class="docutils literal notranslate"><span class="pre">write-through&#64;</span></code></h3>
+<p>( dev – write-through )</p>
+<p>Get write-through cache mode.</p>
+</section>
+</section>
+<section id="sd">
+<h2><code class="docutils literal notranslate"><span class="pre">sd</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">sd</span></code> module contains the following words:</p>
+<section id="x-sd-timeout">
+<h3><code class="docutils literal notranslate"><span class="pre">x-sd-timeout</span></code></h3>
+<p>( – )</p>
+<p>SD Card timeout.</p>
+</section>
+<section id="x-sd-init-error">
+<h3><code class="docutils literal notranslate"><span class="pre">x-sd-init-error</span></code></h3>
+<p>( – )</p>
+<p>SD Card init error.</p>
+</section>
+<section id="x-sd-read-error">
+<h3><code class="docutils literal notranslate"><span class="pre">x-sd-read-error</span></code></h3>
+<p>( – )</p>
+<p>SD Card read error.</p>
+</section>
+<section id="x-sd-write-error">
+<h3><code class="docutils literal notranslate"><span class="pre">x-sd-write-error</span></code></h3>
+<p>( – )</p>
+<p>SD Card write error.</p>
+</section>
+<section id="x-sd-not-sdhc">
+<h3><code class="docutils literal notranslate"><span class="pre">x-sd-not-sdhc</span></code></h3>
+<p>( – )</p>
+<p>SD Card is not SDHC/SDXC error.</p>
+</section>
+<section id="x-block-zero-protected">
+<h3><code class="docutils literal notranslate"><span class="pre">x-block-zero-protected</span></code></h3>
+<p>( - )</p>
+<p>Attempted to write to protected block zero.</p>
+</section>
+<section id="id5">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;sd&gt;</span></code></h3>
+<p>( – class )</p>
+<p>The SDHC/SDXC interface class.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;sd&gt;</span></code> class has the following constructor:</p>
+</section>
+<section id="new">
+<h3><code class="docutils literal notranslate"><span class="pre">new</span></code></h3>
+<p>( cs-pin spi-device sd-card – )</p>
+<p>This constructs a <code class="docutils literal notranslate"><span class="pre">&lt;sd&gt;</span></code> instance for SPI device <em>spi-device</em> and chip select pin <em>cs-pin</em>. Note that <code class="docutils literal notranslate"><span class="pre">init-sd</span></code> must be called to actually initialize communication with the SDHC/SDXC card connected via said SPI device and chip select line. Note that write-through is set to <code class="docutils literal notranslate"><span class="pre">false</span></code> by default and block zero protection is set to <code class="docutils literal notranslate"><span class="pre">true</span></code> by default.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;sd&gt;</span></code> class contains the following methods in addition to those in <code class="docutils literal notranslate"><span class="pre">&lt;block-dev&gt;</span></code>:</p>
+</section>
+<section id="init-sd">
+<h3><code class="docutils literal notranslate"><span class="pre">init-sd</span></code></h3>
+<p>( sd-card – )</p>
+<p>Init SDHC/SDXC card device.</p>
+</section>
+<section id="write-sd-block-zero">
+<h3><code class="docutils literal notranslate"><span class="pre">write-sd-block-zero!</span></code></h3>
+<p>( enabled sd-card – )</p>
+<p>Enable block zero writes.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

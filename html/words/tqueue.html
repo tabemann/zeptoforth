@@ -33,7 +33,7 @@
 
           <div class="body" role="main">
             
-  <section id="task-queue-words">
+  <section class="tex2jax_ignore mathjax_ignore" id="task-queue-words">
 <h1>Task Queue Words<a class="headerlink" href="#task-queue-words" title="Permalink to this headline">¶</a></h1>
 <p>A task queue is a queue of waiting tasks, which then can be woken up, in the order of highest priority first and then the order of their joining the task queue, by another task. Note that tasks can wake up any given number of tasks <em>before</em> they join the task queue, upon which they will not actually deschedule themselves but rather increment the count of waiting tasks (which was negative in this case).</p>
 <section id="tqueue">
@@ -116,6 +116,9 @@
 <li class="toctree-l1"><a class="reference internal" href="adc.html">Analog-Digital Converter Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="spi.html">SPI Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="i2c.html">I2C Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pwm.html">Pulse Width Modulation Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rtc.html">Realtime Clock (RTC) Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
@@ -126,6 +129,8 @@
 <li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
@@ -153,6 +158,9 @@
 <li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
 </ul>
 
 <div class="relations">
@@ -190,7 +198,7 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

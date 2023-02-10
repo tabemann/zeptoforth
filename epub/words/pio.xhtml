@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Programmable Input/Output Words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="programmable-input-output-words">
+<h1>Programmable Input/Output Words</h1>
+<p>Programmable input/output (PIO) on the RP2040 (i.e. the Raspberry Pi Pico) provides a means to input to or output from pins in a very high-speed fashion at some speed up to the system clock of 125 MHz. There are two PIO peripherals, <code class="docutils literal notranslate"><span class="pre">PIO0</span></code> and <code class="docutils literal notranslate"><span class="pre">PIO1</span></code>, each of which contain four <em>state machines</em>.</p>
+<p>PIO’s may have up to 32 PIO instructions in their memory, which are 16 bits in size each. PIO state machines may be set to wrap from a <em>top</em> instruction to a <em>bottom</em> instruction automatically, unless a <code class="docutils literal notranslate"><span class="pre">jmp</span></code> instruction is executed at the <em>top</em> address. Instructions may be loaded into a PIO’s instruction memory with <code class="docutils literal notranslate"><span class="pre">pio-instr-mem!</span></code> or <code class="docutils literal notranslate"><span class="pre">pio-instr-relocate-mem!</span></code>. Instructions may also be fed into a state machine to be executed immediately with <code class="docutils literal notranslate"><span class="pre">sm-instr!</span></code>. The address to execute PIO instructions at may be set for a state machine with <code class="docutils literal notranslate"><span class="pre">sm-addr!</span></code></p>
+<p>Up to four PIO state machines may be enabled, disabled, or reset at a time with <code class="docutils literal notranslate"><span class="pre">sm-enable</span></code>, <code class="docutils literal notranslate"><span class="pre">sm-disable</span></code>, or <code class="docutils literal notranslate"><span class="pre">sm-restart</span></code> respectively. These take a bitset of four bits where the position of each bit corresponds to the index of the state machine to enable, disable, or restart.</p>
+<p>Each PIO state machine has four 32-bit registers, an input shift register (ISR), an output shift register (OSR), an X register, and a Y register. They also have a 5-bit program counter (PC). These are all initialized to zero.</p>
+<p>Each PIO state machine has an RX FIFO and a TX FIFO of four 32-bit values each. These are initialized to empty. Note that the RX FIFO and TX FIFO on a PIO state machine may be joined into a single unidirectional FIFO consisting of eight 32-bit values. The RX FIFO for a state machine may be pushed to from a state machine’s ISR register, which is 32-bits in size. The TX FIFO for a state machine may be pulled from to a state machine’s OSR register, which is also 32-bits in size.</p>
+<p>PIO state machines may automatically <em>pull</em> from its TX FIFO after a threshold number of bits have been shifted out of its OSR register. They may also automatically <em>push</em> to its RX FIFO after a threshold number of bits have been shifted into its ISR register.</p>
+<p>The clock divider for a state machine is set with <code class="docutils literal notranslate"><span class="pre">sm-clkdiv!</span></code>, which takes a fractional component (from 0 to 255) and an integral component (from 0 to 65536) to divide the system clock by for the clock rate of the state machine in question. Note that if the integral clock divisor is 0 it is treated as 65536, and in those cases the fractional clock divisor must be 0.</p>
+<p>PIO state machines may either have an optional delay associated with each PIO instruction, or may have <em>sideset</em> enabled, where they may set the state of up to five output pins each cycle simultaneous with whatever other operations they are carrying out. <code class="docutils literal notranslate"><span class="pre">sm-sideset-pins!</span></code> sets the number of higher bits in this field will be used for sideset, with the remaining lower bits used for delay.</p>
+<p>PIO assembler words compile PIO instructions to <code class="docutils literal notranslate"><span class="pre">here</span></code> as 16 bits per instruction. There are two different basic types of PIO instructions - instructions without an associated delay or sideset, and instructions with an associated delay or sideset. The latter kind of instruction is marked with an <code class="docutils literal notranslate"><span class="pre">+</span></code> in its assembling word.</p>
+<section id="pio">
+<h2><code class="docutils literal notranslate"><span class="pre">pio</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">pio</span></code> module contains the following words:</p>
+<section id="constants">
+<h3>Constants</h3>
+<section id="on">
+<h4><code class="docutils literal notranslate"><span class="pre">on</span></code></h4>
+<p>( – state )</p>
+<p>On state.</p>
+</section>
+<section id="off">
+<h4><code class="docutils literal notranslate"><span class="pre">off</span></code></h4>
+<p>( – state )</p>
+<p>Off state.</p>
+</section>
+<section id="right">
+<h4><code class="docutils literal notranslate"><span class="pre">right</span></code></h4>
+<p>( – direction )</p>
+<p>Right direction.</p>
+</section>
+<section id="left">
+<h4><code class="docutils literal notranslate"><span class="pre">left</span></code></h4>
+<p>( – direction )</p>
+<p>Left direction.</p>
+</section>
+<section id="pio0">
+<h4><code class="docutils literal notranslate"><span class="pre">PIO0</span></code></h4>
+<p>( – pio )</p>
+<p>PIO0.</p>
+</section>
+<section id="pio1">
+<h4><code class="docutils literal notranslate"><span class="pre">PIO1</span></code></h4>
+<p>( – pio )</p>
+<p>PIO1.</p>
+</section>
+<section id="irq0">
+<h4><code class="docutils literal notranslate"><span class="pre">IRQ0</span></code></h4>
+<p>( – irq )</p>
+<p>IRQ0 index.</p>
+</section>
+<section id="irq1">
+<h4><code class="docutils literal notranslate"><span class="pre">IRQ1</span></code></h4>
+<p>( – irq )</p>
+<p>IRQ1 index.</p>
+</section>
+<section id="pio0-irq0">
+<h4><code class="docutils literal notranslate"><span class="pre">PIO0_IRQ0</span></code></h4>
+<p>( – irq )</p>
+<p>PIO0 IRQ0 index.</p>
+</section>
+<section id="pio0-irq1">
+<h4><code class="docutils literal notranslate"><span class="pre">PIO0_IRQ1</span></code></h4>
+<p>( – irq )</p>
+<p>PIO0 IRQ1 index.</p>
+</section>
+<section id="pio1-irq0">
+<h4><code class="docutils literal notranslate"><span class="pre">PIO1_IRQ0</span></code></h4>
+<p>( – irq )</p>
+<p>PIO1 IRQ0 index.</p>
+</section>
+<section id="pio1-irq1">
+<h4><code class="docutils literal notranslate"><span class="pre">PIO1_IRQ1</span></code></h4>
+<p>( – irq )</p>
+<p>PIO1 IRQ1 index.</p>
+</section>
+</section>
+<section id="pio-words">
+<h3>PIO Words</h3>
+<section id="pins-pio-alternate">
+<h4><code class="docutils literal notranslate"><span class="pre">pins-pio-alternate</span></code></h4>
+<p>( pin-base pin-count – )</p>
+<p>Configure GPIO pins starting from <em>pin-base</em> of a count up to <em>pin-count</em> to be in an alternate function state such that the PIO may make use to them. Note that the pins wrap around, e.g. <code class="docutils literal notranslate"><span class="pre">29</span> <span class="pre">3</span> <span class="pre">pins-pio-alternate</span></code> configures GPIO pins 29, 0, and 1. Note that this is unnecessary when configuring pins with <code class="docutils literal notranslate"><span class="pre">sm-sideset-pins!</span></code>, <code class="docutils literal notranslate"><span class="pre">sm-set-pins!</span></code>, or <code class="docutils literal notranslate"><span class="pre">sm-out-pins!</span></code> as these internally call this word.</p>
+<p>However, this is necessary with <code class="docutils literal notranslate"><span class="pre">sm-in-pin-base!</span></code> because any number of pins may be used by the <code class="docutils literal notranslate"><span class="pre">in</span></code> instruction and there exists no register to set specifying a number of pins to use with this instruction</p>
+</section>
+<section id="pio-instr-mem">
+<h4><code class="docutils literal notranslate"><span class="pre">pio-instr-mem!</span></code></h4>
+<p>( addr count pio – )</p>
+<p>Write <em>count</em> halfwords starting at <em>addr</em> to instruction memory starting at instruction 0.</p>
+</section>
+<section id="pio-instr-relocate-mem">
+<h4><code class="docutils literal notranslate"><span class="pre">pio-instr-relocate-mem!</span></code></h4>
+<p>( addr count offset pio – )</p>
+<p>Write <em>count</em> halfwords starting at <em>addr</em> to instruction memory starting at instruction <em>offset</em>, relocating any JMP instructions in the process so that a destination of 0 is relocated to <em>offset</em> and so on.</p>
+</section>
+<section id="pio-interrupt-enable">
+<h4><code class="docutils literal notranslate"><span class="pre">pio-interrupt-enable</span></code></h4>
+<p>( interrupt-bits irq pio – )</p>
+<p>Enable interrupts.</p>
+</section>
+<section id="pio-interrupt-disable">
+<h4><code class="docutils literal notranslate"><span class="pre">pio-interrupt-disable</span></code></h4>
+<p>( interrupt-bits irq pio – )</p>
+<p>Disable interrupts.</p>
+</section>
+<section id="pio-interrupt-enable-force">
+<h4><code class="docutils literal notranslate"><span class="pre">pio-interrupt-enable-force</span></code></h4>
+<p>( interrupt-bits irq pio – )</p>
+<p>Enable forcing interrupts.</p>
+</section>
+<section id="pio-interrupt-disable-force">
+<h4><code class="docutils literal notranslate"><span class="pre">pio-interrupt-disable-force</span></code></h4>
+<p>( interrupt-bits irq pio – )</p>
+<p>Disable forcing interrupts.</p>
+</section>
+<section id="pio-interrupt-raw">
+<h4><code class="docutils literal notranslate"><span class="pre">pio-interrupt-raw&#64;</span></code></h4>
+<p>( pio – interrupt-bits )</p>
+<p>Get raw interrupts.</p>
+</section>
+<section id="pio-interrupt">
+<h4><code class="docutils literal notranslate"><span class="pre">pio-interrupt&#64;</span></code></h4>
+<p>( irq pio – interrupt-bits )</p>
+<p>Get interrupt status.</p>
+</section>
+<section id="int-sm">
+<h4><code class="docutils literal notranslate"><span class="pre">INT_SM</span></code></h4>
+<p>( state-machine – index )</p>
+<p>Interrupt bits.</p>
+</section>
+<section id="int-sm-txnfull">
+<h4><code class="docutils literal notranslate"><span class="pre">INT_SM_TXNFULL</span></code></h4>
+<p>( state-machine – index )</p>
+<p>TXN not full interupt bits.</p>
+</section>
+<section id="int-sm-rxnempty">
+<h4><code class="docutils literal notranslate"><span class="pre">INT_SM_RXNEMPTY</span></code></h4>
+<p>( state-machine – index )</p>
+<p>RXN not empty interrupt bits.</p>
+</section>
+</section>
+<section id="state-machine-words">
+<h3>State Machine Words</h3>
+<section id="sm-enable">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-enable</span></code></h4>
+<p>( state-machine-bits pio – )</p>
+<p>Enable state machines.</p>
+</section>
+<section id="sm-disable">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-disable</span></code></h4>
+<p>( state-machine-bits pio – )</p>
+<p>Disable state machines.</p>
+</section>
+<section id="sm-restart">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-restart</span></code></h4>
+<p>( state-machine-bits pio – )</p>
+<p>Restart state machines.</p>
+</section>
+<section id="sm-clkdiv">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-clkdiv!</span></code></h4>
+<p>( fractional integral state-machine pio – )</p>
+<p>Set the clock divisor for a state machine.</p>
+</section>
+<section id="sm-addr">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-addr!</span></code></h4>
+<p>( address state-machine pio – )</p>
+<p>Set the address for a state machine.</p>
+</section>
+<section id="sm-wrap">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-wrap!</span></code></h4>
+<p>( bottom-address top-address state-machine pio – )</p>
+<p>Set the wrapping of a state machine.</p>
+</section>
+<section id="sm-out-sticky">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-out-sticky!</span></code></h4>
+<p>( sticky state-machine pio – )</p>
+<p>Set the sticky state of a state machine.</p>
+</section>
+<section id="sm-sideset-high-enable">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-sideset-high-enable!</span></code></h4>
+<p>( on/off state-machine pio – )</p>
+<p>Set sideset highest-bit enable for a state machine.</p>
+</section>
+<section id="sm-sideset-pindir">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-sideset-pindir!</span></code></h4>
+<p>( on/off state-machine pio – )</p>
+<p>Set sideset data assserted to pin directions pit.</p>
+</section>
+<section id="sm-jmp-pin">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-jmp-pin!</span></code></h4>
+<p>( pin state-machine pio – )</p>
+<p>Set GPIO number to use as condition for JMP PIN.</p>
+</section>
+<section id="sm-inline-out-enable">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-inline-out-enable!</span></code></h4>
+<p>( pin state-machine pio – )</p>
+<p>Set a bit of OUT data to use as an inline OUT enable.</p>
+</section>
+<section id="sm-inline-out-enable-clear">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-inline-out-enable-clear</span></code></h4>
+<p>( state-machine pio – )</p>
+<p>Disable using a bit of OUT data as an inline OUT enable.</p>
+</section>
+<section id="sm-pull-threshold">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-pull-threshold!</span></code></h4>
+<p>( threshold state-machine pio – )</p>
+<p>Set OSR threshold before autopull or conditional pull will take place; value may be from 1 to 32.</p>
+</section>
+<section id="sm-push-threshold">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-push-threshold!</span></code></h4>
+<p>( threshold state-machine pio – )</p>
+<p>Set ISR threshold before autopush or conditional push will take place; value may be from 1 to 32.</p>
+</section>
+<section id="sm-txf">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-txf!</span></code></h4>
+<p>( x state-machine pio – )</p>
+<p>Write to the TX FIFO of a state machine.</p>
+</section>
+<section id="sm-rxf">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-rxf&#64;</span></code></h4>
+<p>( state-machine pio – x )</p>
+<p>Read from the RX FIFO of a state machine.</p>
+</section>
+<section id="id1">
+<h4><code class="docutils literal notranslate"><span class="pre">pins-pio-alternate</span></code></h4>
+<p>( pin-base pin-count – )</p>
+<p>Set pins to PIO mode.</p>
+</section>
+<section id="sm-pin">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-pin!</span></code></h4>
+<p>( on/off pin state-machine pio – )</p>
+<p>Set the on/off state of a pin for a state machine. Note that the state machine should be disabled.</p>
+</section>
+<section id="sm-pindir">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-pindir!</span></code></h4>
+<p>( out/in pin state-machine pio – )</p>
+<p>State the out/in state of a pin for a state machine. Note that the state machine should be disabled.</p>
+</section>
+<section id="sm-sideset-pins">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-sideset-pins!</span></code></h4>
+<p>( pin-base pin-count state-machine pio – )</p>
+<p>Set the sideset pins for a state machine. Note that the state machine should be disabled.</p>
+</section>
+<section id="sm-set-pins">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-set-pins!</span></code></h4>
+<p>( pin-base pin-count state-machine pio – )</p>
+<p>Set the SET pins for a state machine. Note that the state machine should be disabled.</p>
+</section>
+<section id="sm-out-pins">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-out-pins!</span></code></h4>
+<p>( pin-base pin-count state-machine pio – )</p>
+<p>Set the OUT pins for a state machine. Note that the state machine should be disabled.</p>
+</section>
+<section id="sm-in-pin-base">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-in-pin-base!</span></code></h4>
+<p>( pin-base state-machine pio – )</p>
+<p>Set the IN pin base for a state machine. Note that the state machine should be disabled.</p>
+</section>
+<section id="sm-rx-fifo-level">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-rx-fifo-level&#64;</span></code></h4>
+<p>( state-machine pio – level )</p>
+<p>Get a state machine RX FIFO level.</p>
+</section>
+<section id="sm-tx-fifo-level">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-tx-fifo-level&#64;</span></code></h4>
+<p>( state-machine pio – level )</p>
+<p>Get a state machine TX FIFO level.</p>
+</section>
+<section id="sm-join-rx-fifo">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-join-rx-fifo!</span></code></h4>
+<p>( join? state-machine pio – )</p>
+<p>Set joining the RX FIFO and TX FIFO of a state machine into a single eight by 32-bit RX FIFO.</p>
+</section>
+<section id="sm-join-tx-fifo">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-join-tx-fifo!</span></code></h4>
+<p>( join? state-machine pio – )</p>
+<p>Set joining the RX FIFO and TX FIFO of a state machine into a single eight by 32-bit TX FIFO.</p>
+</section>
+<section id="sm-out-shift-dir">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-out-shift-dir</span></code></h4>
+<p>( direction state-machine pio – )</p>
+<p>Set the output shift register direction.</p>
+</section>
+<section id="sm-in-shift-dir">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-in-shift-dir</span></code></h4>
+<p>( direction state-machine pio – )</p>
+<p>Set the input shift register direction.</p>
+</section>
+<section id="sm-autopull">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-autopull!</span></code></h4>
+<p>( on/off state-machine pio – )</p>
+<p>Set autopull on/off.</p>
+</section>
+<section id="sm-autopush">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-autopush!</span></code></h4>
+<p>( on/off state-machine pio – )</p>
+<p>Set autopush on/off.</p>
+</section>
+<section id="sm-instr">
+<h4><code class="docutils literal notranslate"><span class="pre">sm-instr!</span></code></h4>
+<p>( addr count state-machine pio – )</p>
+<p>Manually write instructions to a state machine.</p>
+</section>
+</section>
+<section id="pio-assembler-words">
+<h3>PIO Assembler Words</h3>
+<section id="jmp">
+<h4><code class="docutils literal notranslate"><span class="pre">jmp,</span></code></h4>
+<p>( address condition – )</p>
+<p>PIO JMP instruction. Branch, conditionally or unconditionally. <em>Condition</em> is the condition, with or without a decrement, to apply to whether to branch. <em>Address</em> is the PIO instruction address to branch to.</p>
+</section>
+<section id="wait">
+<h4><code class="docutils literal notranslate"><span class="pre">wait,</span></code></h4>
+<p>( index source polarity – )</p>
+<p>PIO WAIT instruction. Wait for a condition to be true. <em>Polarity</em> is whether to wait for a 1 or a 0. <em>Source</em> is whether to wait for an absolute GPIO pin, a pin relative to the absolute <code class="docutils literal notranslate"><span class="pre">IN</span></code> pin base, or a PIO IRQ index. <em>Index</em> is the pin or PIO IRQ index to wait for.</p>
+</section>
+<section id="in">
+<h4><code class="docutils literal notranslate"><span class="pre">in,</span></code></h4>
+<p>( bit-count source – )</p>
+<p>PIO IN instruction. Input bits from a source into the current state machine’s ISR register. <em>Source</em> is the source to shift bits into the ISR register for the current state machine into, according to the configured shift in direction. <em>Bit-count</em> is how many bits to shift, a value from 1 to 32. The ISR bit shift count is increased by the bit count, saturating at 32.</p>
+</section>
+<section id="out">
+<h4><code class="docutils literal notranslate"><span class="pre">out,</span></code></h4>
+<p>( bit-count destination – )</p>
+<p>PIO OUT instruction. Output bits from the current state machine’s OSR register to a destination. <em>Destination</em> is the destination to shift bits into from the OSR register for the current state machine, according to the configured shift out direction. <em>Bit-count</em> is how many bits to shift, value from 1 to 32. The OSR bit shift count is increased by the bit count, saturating at 32.</p>
+</section>
+<section id="push">
+<h4><code class="docutils literal notranslate"><span class="pre">push,</span></code></h4>
+<p>( block if-full – )</p>
+<p>PIO PUSH instruction. Push the contents of the current state machine’s ISR register into the current state machine’s RX FIFO and reset the ISR register to all zeros. <em>If-full</em> is the condition as to whether to conditionally push. <em>Block</em> is whether to stall if pushing is not possible due to the RX FIFO being full.</p>
+</section>
+<section id="pull">
+<h4><code class="docutils literal notranslate"><span class="pre">pull,</span></code></h4>
+<p>( block if-empty – )</p>
+<p>PIO PULL instruction. Pull a 32-bit value from the current state machine’s TX FIFO into the current state machine’s OSR register. <em>If-empty</em> is the condition as to whether to conditionally pull. <em>Block</em> is whether to stall if pulling is not possible due to the TX FIFO being empty.</p>
+</section>
+<section id="mov">
+<h4><code class="docutils literal notranslate"><span class="pre">mov,</span></code></h4>
+<p>( source op destination – )</p>
+<p>PIO MOV instruction. Transfer a value from <em>source</em> to <em>destination</em>, applying <em>op</em> (which may be a no-op) to the value in the process.</p>
+</section>
+<section id="irq">
+<h4><code class="docutils literal notranslate"><span class="pre">irq,</span></code></h4>
+<p>( index set/wait – )</p>
+<p>PIO IRQ instruction. Set or wait on a PIO IRQ <em>index</em>, from 0 to 7 before <code class="docutils literal notranslate"><span class="pre">REL</span></code> is applied. Note that <code class="docutils literal notranslate"><span class="pre">REL</span></code> can be used to mark a PIO IRQ as relative to the current state machine ID by adding the state machine ID to the lower two bits of the IRQ index, by way of module-4 addition on the two LSB’s.</p>
+</section>
+<section id="set">
+<h4><code class="docutils literal notranslate"><span class="pre">set,</span></code></h4>
+<p>( data destination – )</p>
+<p>PIO SET instruction. Set <em>destination</em> to <em>data</em>, which is a value from <span class="math notranslate nohighlight">\(00 to \)</span>1F.</p>
+</section>
+<section id="id2">
+<h4><code class="docutils literal notranslate"><span class="pre">jmp+,</span></code></h4>
+<p>( address delay/side-set condition – )</p>
+<p>PIO JMP instruction with delay or side-set. Branch, conditionally or unconditionally. <em>Condition</em> is the condition, with or without a decrement, to apply to whether to branch. <em>Address</em> is the PIO instruction address to branch to. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
+</section>
+<section id="id3">
+<h4><code class="docutils literal notranslate"><span class="pre">wait+,</span></code></h4>
+<p>( index delay/side-set source polarity – )</p>
+<p>PIO WAIT instruction with delay or side-set. Wait for a condition to be true. <em>Polarity</em> is whether to wait for a 1 or a 0. <em>Source</em> is whether to wait for an absolute GPIO pin, a pin relative to the absolute <code class="docutils literal notranslate"><span class="pre">IN</span></code> pin base, or a PIO IRQ index. <em>Index</em> is the pin or PIO IRQ index to wait for. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
+</section>
+<section id="id4">
+<h4><code class="docutils literal notranslate"><span class="pre">in+,</span></code></h4>
+<p>( bit-count delay/side-set source – )</p>
+<p>PIO IN instruction with delay or side-set. Input bits from a source into the current state machine’s ISR register. <em>Source</em> is the source to shift bits into the ISR register for the current state machine into, according to the configured shift in direction. <em>Bit-count</em> is how many bits to shift, a value from 1 to 32. The ISR bit shift count is increased by the bit count, saturating at 32. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
+</section>
+<section id="id5">
+<h4><code class="docutils literal notranslate"><span class="pre">out+,</span></code></h4>
+<p>( bit-count delay/side-set destination – )</p>
+<p>PIO OUT instruction with delay or side-set. Output bits from the current state machine’s OSR register to a destination. <em>Destination</em> is the destination to shift bits into from the OSR register for the current state machine, according to the configured shift out direction. <em>Bit-count</em> is how many bits to shift, value from 1 to 32. The OSR bit shift count is increased by the bit count, saturating at 32. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
+</section>
+<section id="id6">
+<h4><code class="docutils literal notranslate"><span class="pre">push+,</span></code></h4>
+<p>( delay/side-set block if-full – )</p>
+<p>PIO PUSH instruction with delay or side-set. Push the contents of the current state machine’s ISR register into the current state machine’s RX FIFO and reset the ISR register to all zeros. <em>If-full</em> is the condition as to whether to conditionally push. <em>Block</em> is whether to stall if pushing is not possible due to the RX FIFO being full. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
+</section>
+<section id="id7">
+<h4><code class="docutils literal notranslate"><span class="pre">pull+,</span></code></h4>
+<p>( delay/side-set block if-empty – )</p>
+<p>PIO PULL instruction with delay or side-set. Pull a 32-bit value from the current state machine’s TX FIFO into the current state machine’s OSR register. <em>If-empty</em> is the condition as to whether to conditionally pull. <em>Block</em> is whether to stall if pulling is not possible due to the TX FIFO being empty.</p>
+</section>
+<section id="id8">
+<h4><code class="docutils literal notranslate"><span class="pre">mov+,</span></code></h4>
+<p>( source delay/side-set op destination – )</p>
+<p>PIO MOV instruction with delay or side-set. Transfer a value from <em>source</em> to <em>destination</em>, applying <em>op</em> (which may be a no-op) to the value in the process. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
+</section>
+<section id="id9">
+<h4><code class="docutils literal notranslate"><span class="pre">irq+,</span></code></h4>
+<p>( index delay/side-set set/wait – )</p>
+<p>PIO IRQ instruction with delay or side-set. Set or wait on a PIO IRQ <em>index</em>, from 0 to 7 before <code class="docutils literal notranslate"><span class="pre">REL</span></code> is applied. Note that <code class="docutils literal notranslate"><span class="pre">REL</span></code> can be used to mark a PIO IRQ as relative to the current state machine ID by adding the state machine ID to the lower two bits of the IRQ index, by way of module-4 addition on the two LSB’s. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
+</section>
+<section id="id10">
+<h4><code class="docutils literal notranslate"><span class="pre">set+,</span></code></h4>
+<p>( data delay/side-set destination – )</p>
+<p>PIO SET instruction with delay or side-set. Set <em>destination</em> to <em>data</em>, which is a value from <span class="math notranslate nohighlight">\(00 to \)</span>1F. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
+</section>
+<section id="cond-always">
+<h4><code class="docutils literal notranslate"><span class="pre">COND_ALWAYS</span></code></h4>
+<p>( – condition )</p>
+<p>Always jump.</p>
+</section>
+<section id="cond-x0">
+<h4><code class="docutils literal notranslate"><span class="pre">COND_X0=</span></code></h4>
+<p>( – condition )</p>
+<p>Jump if scratch X is zero.</p>
+</section>
+<section id="cond-x1">
+<h4><code class="docutils literal notranslate"><span class="pre">COND_X1-</span></code></h4>
+<p>( – condition )</p>
+<p>Jump if scratch X is non-zero, post-decrement.</p>
+</section>
+<section id="cond-y0">
+<h4><code class="docutils literal notranslate"><span class="pre">COND_Y0=</span></code></h4>
+<p>( – condition )</p>
+<p>Jump if scratch Y is zero.</p>
+</section>
+<section id="cond-y1">
+<h4><code class="docutils literal notranslate"><span class="pre">COND_Y1-</span></code></h4>
+<p>( – condition )</p>
+<p>Jump if scratch Y is non-zero, post-decrement.</p>
+</section>
+<section id="cond-xy">
+<h4><code class="docutils literal notranslate"><span class="pre">COND_XY&lt;&gt;</span></code></h4>
+<p>( – condition )</p>
+<p>Jump if scratch X not equal scratch Y.</p>
+</section>
+<section id="cond-pin">
+<h4><code class="docutils literal notranslate"><span class="pre">COND_PIN</span></code></h4>
+<p>( – condition )</p>
+<p>Jump on input pin.</p>
+</section>
+<section id="cond-iosre">
+<h4><code class="docutils literal notranslate"><span class="pre">COND_IOSRE</span></code></h4>
+<p>( – condition )</p>
+<p>Jump on output shift register not empty.</p>
+</section>
+<section id="wait-gpio">
+<h4><code class="docutils literal notranslate"><span class="pre">WAIT_GPIO</span></code></h4>
+<p>( – wait )</p>
+<p>Wait for GPIO.</p>
+</section>
+<section id="wait-pin">
+<h4><code class="docutils literal notranslate"><span class="pre">WAIT_PIN</span></code></h4>
+<p>( – wait )</p>
+<p>Wait for a pin.</p>
+</section>
+<section id="wait-irq">
+<h4><code class="docutils literal notranslate"><span class="pre">WAIT_IRQ</span></code></h4>
+<p>( – wait )</p>
+<p>Wait for an IRQ.</p>
+</section>
+<section id="in-pins">
+<h4><code class="docutils literal notranslate"><span class="pre">IN_PINS</span></code></h4>
+<p>( – in-source )</p>
+<p>Pins input.</p>
+</section>
+<section id="in-x">
+<h4><code class="docutils literal notranslate"><span class="pre">IN_X</span></code></h4>
+<p>( – in-source )</p>
+<p>Scratch register X input.</p>
+</section>
+<section id="in-y">
+<h4><code class="docutils literal notranslate"><span class="pre">IN_Y</span></code></h4>
+<p>( – in-source )</p>
+<p>Scratch register Y input.</p>
+</section>
+<section id="in-null">
+<h4><code class="docutils literal notranslate"><span class="pre">IN_NULL</span></code></h4>
+<p>( – in-source )</p>
+<p>NULL input (all zeros).</p>
+</section>
+<section id="in-isr">
+<h4><code class="docutils literal notranslate"><span class="pre">IN_ISR</span></code></h4>
+<p>( – in-source )</p>
+<p>ISR input.</p>
+</section>
+<section id="in-osr">
+<h4><code class="docutils literal notranslate"><span class="pre">IN_OSR</span></code></h4>
+<p>( – in-source )</p>
+<p>OSR input.</p>
+</section>
+<section id="out-pins">
+<h4><code class="docutils literal notranslate"><span class="pre">OUT_PINS</span></code></h4>
+<p>( – out-destination )</p>
+<p>Pins output.</p>
+</section>
+<section id="out-x">
+<h4><code class="docutils literal notranslate"><span class="pre">OUT_X</span></code></h4>
+<p>( – out-destination )</p>
+<p>Scratch register X output.</p>
+</section>
+<section id="out-y">
+<h4><code class="docutils literal notranslate"><span class="pre">OUT_Y</span></code></h4>
+<p>( – out-destination )</p>
+<p>Scratch register Y output.</p>
+</section>
+<section id="out-null">
+<h4><code class="docutils literal notranslate"><span class="pre">OUT_NULL</span></code></h4>
+<p>( – out-destination )</p>
+<p>NULL output (discard data).</p>
+</section>
+<section id="out-pindirs">
+<h4><code class="docutils literal notranslate"><span class="pre">OUT_PINDIRS</span></code></h4>
+<p>( – out-destination )</p>
+<p>PINDIRs output.</p>
+</section>
+<section id="out-pc">
+<h4><code class="docutils literal notranslate"><span class="pre">OUT_PC</span></code></h4>
+<p>( – out )</p>
+<p>PC output (unconditional jump to shifted address).</p>
+</section>
+<section id="out-isr">
+<h4><code class="docutils literal notranslate"><span class="pre">OUT_ISR</span></code></h4>
+<p>( – out )</p>
+<p>ISR output (also sets ISR shift counter to bit count).</p>
+</section>
+<section id="out-exec">
+<h4><code class="docutils literal notranslate"><span class="pre">OUT_EXEC</span></code></h4>
+<p>( – out )</p>
+<p>Execute OSR shift data as instruction.</p>
+</section>
+<section id="push-not-full">
+<h4><code class="docutils literal notranslate"><span class="pre">PUSH_NOT_FULL</span></code></h4>
+<p>( – push-if-full-option )</p>
+<p>Push data even if threshold is not met.</p>
+</section>
+<section id="push-if-full">
+<h4><code class="docutils literal notranslate"><span class="pre">PUSH_IF_FULL</span></code></h4>
+<p>( – push-if-full-option )</p>
+<p>Do nothing unless the total input shift count has reached its threshold.</p>
+</section>
+<section id="push-no-block">
+<h4><code class="docutils literal notranslate"><span class="pre">PUSH_NO_BLOCK</span></code></h4>
+<p>( – push-block-option )</p>
+<p>Do not stall execution if RX FIFO is full, instead drop data from ISR.</p>
+</section>
+<section id="push-block">
+<h4><code class="docutils literal notranslate"><span class="pre">PUSH_BLOCK</span></code></h4>
+<p>( – push-block-option )</p>
+<p>Stall execution if RX FIFO is full.</p>
+</section>
+<section id="pull-not-empty">
+<h4><code class="docutils literal notranslate"><span class="pre">PULL_NOT_EMPTY</span></code></h4>
+<p>( – pull-if-full-option )</p>
+<p>Pull data even if threshold is not met.</p>
+</section>
+<section id="pull-if-empty">
+<h4><code class="docutils literal notranslate"><span class="pre">PULL_IF_EMPTY</span></code></h4>
+<p>( – pull-if-full-option )</p>
+<p>Do nothing unless the total output shift count has reached its threshold.</p>
+</section>
+<section id="pull-no-block">
+<h4><code class="docutils literal notranslate"><span class="pre">PULL_NO_BLOCK</span></code></h4>
+<p>( – pull-block-option )</p>
+<p>Do not stall execution if TX FIFO is empty, instead copy from scratch X.</p>
+</section>
+<section id="pull-block">
+<h4><code class="docutils literal notranslate"><span class="pre">PULL_BLOCK</span></code></h4>
+<p>( – pull-block-option )</p>
+<p>Stall execution if TX FIFO is empty.</p>
+</section>
+<section id="mov-dest-pins">
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_DEST_PINS</span></code></h4>
+<p>( – mov-destination )</p>
+<p>Move to PINS.</p>
+</section>
+<section id="mov-dest-x">
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_DEST_X</span></code></h4>
+<p>( – mov-destination )</p>
+<p>Move to scratch register X.</p>
+</section>
+<section id="mov-dest-y">
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_DEST_Y</span></code></h4>
+<p>( – mov-destination )</p>
+<p>Move to scratch register Y.</p>
+</section>
+<section id="mov-dest-exec">
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_DEST_EXEC</span></code></h4>
+<p>( – mov-destination )</p>
+<p>Move to EXEC (execute data as instruction).</p>
+</section>
+<section id="mov-dest-pc">
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_DEST_PC</span></code></h4>
+<p>( – mov-destination )</p>
+<p>Move to PC (treat data as address for unconditional branch).</p>
+</section>
+<section id="mov-dest-isr">
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_DEST_ISR</span></code></h4>
+<p>( – mov-destination )</p>
+<p>Move to ISR (input shift counter is reset to 0, i.e. empty).</p>
+</section>
+<section id="mov-dest-osr">
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_DEST_OSR</span></code></h4>
+<p>( – mov-destination )</p>
+<p>Move to OSR (output shift counter is reset to 0, i.e. full).</p>
+</section>
+<section id="mov-op-none">
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_OP_NONE</span></code></h4>
+<p>( – mov-op )</p>
+<p>Move operation none.</p>
+</section>
+<section id="mov-op-invert">
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_OP_INVERT</span></code></h4>
+<p>( – mov-op )</p>
+<p>Move operation invert.</p>
+</section>
+<section id="mov-op-reverse">
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_OP_REVERSE</span></code></h4>
+<p>( – mov-op )</p>
+<p>Move operation bit-reverse.</p>
+</section>
+<section id="mov-src-pins">
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_SRC_PINS</span></code></h4>
+<p>( – mov-op )</p>
+<p>Move from PINS.</p>
+</section>
+<section id="mov-src-x">
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_SRC_X</span></code></h4>
+<p>( – mov-source )</p>
+<p>Move from scratch register X.</p>
+</section>
+<section id="mov-src-y">
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_SRC_Y</span></code></h4>
+<p>( – mov-source )</p>
+<p>Move from scratch register Y.</p>
+</section>
+<section id="mov-src-null">
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_SRC_NULL</span></code></h4>
+<p>( – mov-source )</p>
+<p>Move from NULL.</p>
+</section>
+<section id="mov-src-status">
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_SRC_STATUS</span></code></h4>
+<p>( – mov-source )</p>
+<p>Move from STATUS.</p>
+</section>
+<section id="mov-src-isr">
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_SRC_ISR</span></code></h4>
+<p>( – mov-source )</p>
+<p>Move from ISR.</p>
+</section>
+<section id="mov-src-osr">
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_SRC_OSR</span></code></h4>
+<p>( – mov-source )</p>
+<p>Move from OSR.</p>
+</section>
+<section id="irq-set">
+<h4><code class="docutils literal notranslate"><span class="pre">IRQ_SET</span></code></h4>
+<p>( – irq-op )</p>
+<p>Raise an IRQ.</p>
+</section>
+<section id="irq-clear">
+<h4><code class="docutils literal notranslate"><span class="pre">IRQ_CLEAR</span></code></h4>
+<p>( – irq-op )</p>
+<p>Clear an IRQ.</p>
+</section>
+<section id="irq-wait">
+<h4><code class="docutils literal notranslate"><span class="pre">IRQ_WAIT</span></code></h4>
+<p>( – irq-op )</p>
+<p>Wait for an IRQ to be lowered.</p>
+</section>
+<section id="set-pins">
+<h4><code class="docutils literal notranslate"><span class="pre">SET_PINS</span></code></h4>
+<p>( – set-destination )</p>
+<p>Set PINS.</p>
+</section>
+<section id="set-x">
+<h4><code class="docutils literal notranslate"><span class="pre">SET_X</span></code></h4>
+<p>( – set-destination )</p>
+<p>Set scratch register X (5 LSBs are set to data, all others are cleared).</p>
+</section>
+<section id="set-y">
+<h4><code class="docutils literal notranslate"><span class="pre">SET_Y</span></code></h4>
+<p>( – set-destination )</p>
+<p>Set scratch register Y (5 LSBs are set to data, all others are cleared).</p>
+</section>
+<section id="set-pindirs">
+<h4><code class="docutils literal notranslate"><span class="pre">SET_PINDIRS</span></code></h4>
+<p>( – set-destination )</p>
+<p>Set PINDIRS.</p>
+</section>
+<section id="rel">
+<h4><code class="docutils literal notranslate"><span class="pre">REL</span></code></h4>
+<p>( irq – irq-rel )</p>
+<p>Add the state machine ID to the lower two bits of the IRQ index, by way of module-4 addition on the two LSB’s.</p>
+</section>
+</section>
+<section id="exceptions">
+<h3>Exceptions</h3>
+<section id="x-sm-out-of-range">
+<h4><code class="docutils literal notranslate"><span class="pre">x-sm-out-of-range</span></code></h4>
+<p>( – )</p>
+<p>State machine out of range exception.</p>
+</section>
+<section id="x-pio-out-of-range">
+<h4><code class="docutils literal notranslate"><span class="pre">x-pio-out-of-range</span></code></h4>
+<p>( – )</p>
+<p>PIO out of range exception.</p>
+</section>
+<section id="x-too-many-instructions">
+<h4><code class="docutils literal notranslate"><span class="pre">x-too-many-instructions</span></code></h4>
+<p>( – )</p>
+<p>Too many instructions exception.</p>
+</section>
+<section id="x-address-out-of-range">
+<h4><code class="docutils literal notranslate"><span class="pre">x-address-out-of-range</span></code></h4>
+<p>( – )</p>
+<p>Address out of range exception.</p>
+</section>
+<section id="x-too-many-pins">
+<h4><code class="docutils literal notranslate"><span class="pre">x-too-many-pins</span></code></h4>
+<p>( – )</p>
+<p>Too many pins exception.</p>
+</section>
+<section id="x-pin-out-of-range">
+<h4><code class="docutils literal notranslate"><span class="pre">x-pin-out-of-range</span></code></h4>
+<p>( – )</p>
+<p>Pin out of range exception.</p>
+</section>
+<section id="x-clkdiv-out-of-range">
+<h4><code class="docutils literal notranslate"><span class="pre">x-clkdiv-out-of-range</span></code></h4>
+<p>( – )</p>
+<p>Clock divisor out of range exception.</p>
+</section>
+<section id="x-irq-out-of-range">
+<h4><code class="docutils literal notranslate"><span class="pre">x-irq-out-of-range</span></code></h4>
+<p>( – )</p>
+<p>IRQ out of range exception.</p>
+</section>
+<section id="x-interrupt-out-of-range">
+<h4><code class="docutils literal notranslate"><span class="pre">x-interrupt-out-of-range</span></code></h4>
+<p>( – )</p>
+<p>Interrupt out of range exception.</p>
+</section>
+<section id="x-threshold-out-of-range">
+<h4><code class="docutils literal notranslate"><span class="pre">x-threshold-out-of-range</span></code></h4>
+<p>( – )</p>
+<p>Buffer threshold out of range exception.</p>
+</section>
+<section id="x-bit-out-of-range">
+<h4><code class="docutils literal notranslate"><span class="pre">x-bit-out-of-range</span></code></h4>
+<p>( – )</p>
+<p>Bit out of range exception.</p>
+</section>
+<section id="x-relocate-out-of-range">
+<h4><code class="docutils literal notranslate"><span class="pre">x-relocate-out-of-range</span></code></h4>
+<p>( – )</p>
+<p>Relocation out of range exception</p>
+</section>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>
