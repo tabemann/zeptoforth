@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Analog-Digital Converter Words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="analog-digital-converter-words">
+<h1>Analog-Digital Converter Words</h1>
+<p>Analog-digital converter (ADC) support is implemented for each of the supported platforms. A given platform may have a number of ADC peripherals. On the RP2040 and STM32F411 there is only a single ADC peripheral, numbered 0 on the RP2040 and, using STMicroelectronics’ numbering, 1 on the STM32F411. On the STM32F407, STM32F746, and STM32L476 there are three ADC peripherals, numbered from 1 through 3.</p>
+<section id="adc">
+<h2><code class="docutils literal notranslate"><span class="pre">adc</span></code></h2>
+<section id="all-platforms">
+<h3>All Platforms</h3>
+<section id="id1">
+<h4><code class="docutils literal notranslate"><span class="pre">adc&#64;</span></code></h4>
+<p>( channel adc – value )</p>
+<p>Read <em>channel</em> on <em>adc</em>. Note that this is a blocking operation, and will also prevent use of <em>adc</em> by any other task until this operation completes.</p>
+</section>
+<section id="enable-adc">
+<h4><code class="docutils literal notranslate"><span class="pre">enable-adc</span></code></h4>
+<p>( adc – )</p>
+<p>Enable <em>adc</em>. Note that this is a blocking operation, and will also prevent use of <em>adc</em> by any other task until this operation completes.</p>
+</section>
+<section id="disable-adc">
+<h4><code class="docutils literal notranslate"><span class="pre">disable-adc</span></code></h4>
+<p>( adc – )</p>
+<p>Disable <em>adc</em>. Note that this is a blocking operation, and will also prevent use of <em>adc</em> by any other task until this operation completes.</p>
+</section>
+<section id="adc-pin">
+<h4><code class="docutils literal notranslate"><span class="pre">adc-pin</span></code></h4>
+<p>( adc pin – )</p>
+<p>Configure <em>pin</em> for use with <em>adc</em>.</p>
+</section>
+<section id="default-adc">
+<h4><code class="docutils literal notranslate"><span class="pre">default-adc</span></code></h4>
+<p>( – adc )</p>
+<p>The default ADC on a platform. On the RP2040 this is 0, on the other supported platforms it is 1.</p>
+</section>
+<section id="temp-adc-chan">
+<h4><code class="docutils literal notranslate"><span class="pre">temp-adc-chan</span></code></h4>
+<p>( – channel )</p>
+<p>The ADC channel, on the default ADC, for the microcontroller’s temperature sensor</p>
+</section>
+<section id="adc-min">
+<h4><code class="docutils literal notranslate"><span class="pre">adc-min</span></code></h4>
+<p>( – Value )</p>
+<p>The minimum value returned by <code class="docutils literal notranslate"><span class="pre">adc&#64;</span></code></p>
+</section>
+<section id="adc-max">
+<h4><code class="docutils literal notranslate"><span class="pre">adc-max</span></code></h4>
+<p>( – value )</p>
+<p>The maximum value returned by <code class="docutils literal notranslate"><span class="pre">adc&#64;</span></code></p>
+</section>
+<section id="x-invalid-adc">
+<h4><code class="docutils literal notranslate"><span class="pre">x-invalid-adc</span></code></h4>
+<p>( – )</p>
+<p>The invalid ADC exception.</p>
+</section>
+<section id="x-invalid-adc-chan">
+<h4><code class="docutils literal notranslate"><span class="pre">x-invalid-adc-chan</span></code></h4>
+<p>( – )</p>
+<p>The invalid ADC channel exception.</p>
+</section>
+</section>
+<section id="rp2040-only-words">
+<h3>RP2040 only words</h3>
+<section id="pin-adc-chan">
+<h4><code class="docutils literal notranslate"><span class="pre">pin-adc-chan</span></code></h4>
+<p>( pin – channel )</p>
+<p>Get the ADC channel for <em>pin</em>.</p>
+</section>
+</section>
+<section id="stm32f407-stm32f411-stm32f746-and-stm32l476-only-words">
+<h3>STM32F407, STM32F411, STM32F746, and STM32L476 only words</h3>
+<section id="adc-sampling-time">
+<h4><code class="docutils literal notranslate"><span class="pre">adc-sampling-time!</span></code></h4>
+<p>( sampling-time channel adc – )</p>
+<p>Set <em>sampling-time</em> for <em>channel</em> on <em>adc</em>. Note that this value is rounded up to the next valid sampling time for the microcontroller in question, and on the STM32L476 an additional 0.5 is added to the value. The maximum sampling time for STM32F407, STM32F411, and STM32F746 microcontrollers is 480, and the maximum sampling time for STM32L476 microcontrollers is 640 (before the 0.5 is added). For more information see the microcontroller’s reference manual. Also note that without sufficient sampling time, some channels, such as the temperature sensor, may provide erroneous data.</p>
+</section>
+<section id="vrefint-adc-chan">
+<h4><code class="docutils literal notranslate"><span class="pre">vrefint-adc-chan</span></code></h4>
+<p>( – channel )</p>
+<p>Channel on ADC 1 for the internal reference voltage.</p>
+</section>
+<section id="vbat-adc-chan">
+<h4><code class="docutils literal notranslate"><span class="pre">vbat-adc-chan</span></code></h4>
+<p>( – channel )</p>
+<p>Channel on ADC 1 for Vbat.</p>
+</section>
+<section id="x-out-of-range-sampling-time">
+<h4><code class="docutils literal notranslate"><span class="pre">x-out-of-range-sampling-time</span></code></h4>
+<p>( – )</p>
+<p>Out of range sampling time exception.</p>
+</section>
+</section>
+<section id="stm32f411-stm32f746-and-stm32l476-only-words">
+<h3>STM32F411, STM32F746, and STM32L476 only words</h3>
+<section id="enable-vbat">
+<h4><code class="docutils literal notranslate"><span class="pre">enable-vbat</span></code></h4>
+<p>( – )</p>
+<p>Enable the Vbat ADC channel.</p>
+</section>
+<section id="disable-vbat">
+<h4><code class="docutils literal notranslate"><span class="pre">disable-vbat</span></code></h4>
+<p>( – )</p>
+<p>Disable the Vbat ADC channel.</p>
+</section>
+</section>
+<section id="stm32f411-and-stm32f746-only-words">
+<h3>STM32F411 and STM32F746 only words</h3>
+<section id="enable-tsvref">
+<h4><code class="docutils literal notranslate"><span class="pre">enable-tsvref</span></code></h4>
+<p>( – )</p>
+<p>Enable the temperature sensor and Vrefint ADC channels.</p>
+</section>
+<section id="disable-tsvref">
+<h4><code class="docutils literal notranslate"><span class="pre">disable-tsvref</span></code></h4>
+<p>( – )</p>
+<p>Disable the temperature sensor and Vrefint ADC channels.</p>
+</section>
+</section>
+<section id="stm32l476-only-words">
+<h3>STM32L476 only words</h3>
+<section id="enable-vsense">
+<h4><code class="docutils literal notranslate"><span class="pre">enable-vsense</span></code></h4>
+<p>( – )</p>
+<p>Enable the temperature sensor ADC channel.</p>
+</section>
+<section id="disable-vesnse">
+<h4><code class="docutils literal notranslate"><span class="pre">disable-vesnse</span></code></h4>
+<p>( – )</p>
+<p>Disable the temperature sensor ADC channel.</p>
+</section>
+<section id="enable-vrefint">
+<h4><code class="docutils literal notranslate"><span class="pre">enable-vrefint</span></code></h4>
+<p>( – )</p>
+<p>Enable the Vrefint ADC channel.</p>
+</section>
+<section id="disable-vrefint">
+<h4><code class="docutils literal notranslate"><span class="pre">disable-vrefint</span></code></h4>
+<p>( – )</p>
+<p>Disable the Vrefint ADC channel.</p>
+</section>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

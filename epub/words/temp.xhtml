@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Temporary Buffer Words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="temporary-buffer-words">
+<h1>Temporary Buffer Words</h1>
+<p>Temporary buffers are circular buffers for allocating temporary data. Temporarily allocated space should not be relied upon to store data indefinitely, because they reallocate space allocated to old buffers when no more space for continguous blocks of memory are available.</p>
+<section id="temp">
+<h2><code class="docutils literal notranslate"><span class="pre">temp</span></code></h2>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">temp</span></code>.</p>
+<section id="x-data-too-big">
+<h3><code class="docutils literal notranslate"><span class="pre">x-data-too-big</span></code></h3>
+<p>( – )</p>
+<p>An exception raised when the size of the data requested to be allocated is larger than the size of the temporary buffer’s total space.</p>
+</section>
+<section id="temp-size">
+<h3><code class="docutils literal notranslate"><span class="pre">temp-size</span></code></h3>
+<p>( data-bytes – bytes )</p>
+<p>Get the size of a temporary buffer with a given data size.</p>
+</section>
+<section id="init-temp">
+<h3><code class="docutils literal notranslate"><span class="pre">init-temp</span></code></h3>
+<p>( data-bytes addr – )</p>
+<p>Initialize a temporary buffer with a given data size at the specified address. Note that the amount of space returned by <code class="docutils literal notranslate"><span class="pre">temp-size</span></code> for the given data size should be alloted or allocated for the temporary buffer.</p>
+</section>
+<section id="allocate-temp">
+<h3><code class="docutils literal notranslate"><span class="pre">allocate-temp</span></code></h3>
+<p>( bytes temp – addr )</p>
+<p>Allocate temporary space of a given data size for a given temporary buffer. If the data size is larger than the temporary buffer’s total data size, <code class="docutils literal notranslate"><span class="pre">x-data-too-big</span></code> is raised.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

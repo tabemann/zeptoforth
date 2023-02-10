@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>SPI Words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="spi-words">
+<h1>SPI Words</h1>
+<p>There are a number of words for controlling SPI peripherals available on each of the supported microcontrollers. These are as follows:</p>
+<p>Note that <em>spi</em> values as mentioned below vary between the different supported platforms. The following applies:</p>
+<ul class="simple">
+<li><p>On the RP2040 the available <em>spi</em> values are 0 and 1.</p></li>
+<li><p>On the STM32F411 the available <em>spi</em> values are 1 through 5.</p></li>
+<li><p>On the STM32F407 the available <em>spi</em> values are 1 through 3.</p></li>
+<li><p>On the STM32L476 the available <em>spi</em> values are 1 through 3.</p></li>
+<li><p>On the STM32F746 the available <em>spi</em> values are 1 through 6.</p></li>
+</ul>
+<section id="spi">
+<h2><code class="docutils literal notranslate"><span class="pre">spi</span></code></h2>
+<p>These words are in the <code class="docutils literal notranslate"><span class="pre">spi</span></code> module:</p>
+<section id="all-platforms">
+<h3>All platforms</h3>
+<section id="enable-spi">
+<h4><code class="docutils literal notranslate"><span class="pre">enable-spi</span></code></h4>
+<p>( spi – )</p>
+<p>Enable an SPI peripheral.</p>
+</section>
+<section id="disable-spi">
+<h4><code class="docutils literal notranslate"><span class="pre">disable-spi</span></code></h4>
+<p>( spi – )</p>
+<p>Disable an SPI peripheral. Note that SPI peripherals are disabled by default.</p>
+</section>
+<section id="enable-spi-tx">
+<h4><code class="docutils literal notranslate"><span class="pre">enable-spi-tx</span></code></h4>
+<p>( spi – )</p>
+<p>Enable SPI peripheral transmit.</p>
+</section>
+<section id="disable-spi-tx">
+<h4><code class="docutils literal notranslate"><span class="pre">disable-spi-tx</span></code></h4>
+<p>( spi – )</p>
+<p>Disable SPI peripheral transmit.</p>
+</section>
+<section id="master-spi">
+<h4><code class="docutils literal notranslate"><span class="pre">master-spi</span></code></h4>
+<p>( spi – )</p>
+<p>Set an SPI peripheral to be a master. This must be done with the SPI peripheral disabled.</p>
+</section>
+<section id="slave-spi">
+<h4><code class="docutils literal notranslate"><span class="pre">slave-spi</span></code></h4>
+<p>( spi – )</p>
+<p>Set an SPI peripheral to be a slave. This must be done with the SPI peripheral disabled.</p>
+</section>
+<section id="spi-baud">
+<h4><code class="docutils literal notranslate"><span class="pre">spi-baud!</span></code></h4>
+<p>( baud spi – )</p>
+<p>Set the baud of a master SPI peripheral. This must be done with the SPI peripheral disabled.</p>
+</section>
+<section id="motorola-spi">
+<h4><code class="docutils literal notranslate"><span class="pre">motorola-spi</span></code></h4>
+<p>( sph spo spi – )</p>
+<p>Set the protocol of an SPI peripheral to Motorola SPI, with SPO/CPOL set to <em>spo</em> and SPH/CPHA set to <em>sph</em>. This must be done with the SPI peripheral disabled.</p>
+</section>
+<section id="ti-ss-spi">
+<h4><code class="docutils literal notranslate"><span class="pre">ti-ss-spi</span></code></h4>
+<p>( spi – )</p>
+<p>Set the protocol of an SPI peripheral to TI synchronous serial. This must be done with the SPI peripheral disabled.</p>
+</section>
+<section id="spi-data-size">
+<h4><code class="docutils literal notranslate"><span class="pre">spi-data-size!</span></code></h4>
+<p>( data-size spi – )</p>
+<p>Set the word size of an SPI peripheral to <em>data-size</em> bits; on the RP2040, STM32L476, and STM32F746 any value from 4 to 16 is permitted, whereas on the STM32F407 and STM32F411 only 8 and 16 are permitted. This must be done with the SPI peripheral disabled.</p>
+</section>
+<section id="id1">
+<h4><code class="docutils literal notranslate"><span class="pre">&gt;spi</span></code></h4>
+<p>( c spi – )</p>
+<p>Emit a word to an SPI peripheral.</p>
+</section>
+<section id="id2">
+<h4><code class="docutils literal notranslate"><span class="pre">spi&gt;</span></code></h4>
+<p>( spi – c )</p>
+<p>Read a word from an SPI peripheral.</p>
+</section>
+<section id="buffer-spi">
+<h4><code class="docutils literal notranslate"><span class="pre">buffer&gt;spi</span></code></h4>
+<p>( addr bytes spi – )</p>
+<p>Write a buffer of data to an SPI peripheral as a master, discarding the data returned by the slave. Note that this assumes that the SPI peripheral is in 8 bit mode.</p>
+</section>
+<section id="spi-buffer">
+<h4><code class="docutils literal notranslate"><span class="pre">spi&gt;buffer</span></code></h4>
+<p>( add bytes filler spi – )</p>
+<p>Read a buffer of data from an SPI peripheral as a master, transmitting a filler byte for each byte sent to the slave. Note that this assumes that the SPI peripheral is in 8 bit mode.</p>
+</section>
+<section id="id3">
+<h4><code class="docutils literal notranslate"><span class="pre">&gt;spi?</span></code></h4>
+<p>( spi – flag )</p>
+<p>Get whether an SPI peripheral is ready to emit a word.</p>
+</section>
+<section id="id4">
+<h4><code class="docutils literal notranslate"><span class="pre">spi&gt;?</span></code></h4>
+<p>( spi – flag )</p>
+<p>Get whether a word is ready to be read from an SPI peripheral.</p>
+</section>
+<section id="drain-spi">
+<h4><code class="docutils literal notranslate"><span class="pre">drain-spi</span></code></h4>
+<p>( spi – )</p>
+<p>Empty an SPI peripheral’s receive buffer.</p>
+</section>
+<section id="flush-spi">
+<h4><code class="docutils literal notranslate"><span class="pre">flush-spi</span></code></h4>
+<p>( spi – )</p>
+<p>Flush an SPI peripheral’s transmit buffer.</p>
+</section>
+<section id="spi-alternate">
+<h4><code class="docutils literal notranslate"><span class="pre">spi-alternate</span></code></h4>
+<p>( spi – )</p>
+<p>The alternate function for a given SPI peripheral. Note that using <code class="docutils literal notranslate"><span class="pre">spi-pin</span></code> is recommended as some SPI peripherals may have multiple alternate functions in practice depending on the particular pin.</p>
+</section>
+<section id="spi-pin">
+<h4><code class="docutils literal notranslate"><span class="pre">spi-pin</span></code></h4>
+<p>( spi pin – )</p>
+<p>Set the alternate function for <em>pin</em> to configure it for <em>spi</em>.</p>
+</section>
+<section id="spi-rx-handler">
+<h4><code class="docutils literal notranslate"><span class="pre">spi-rx-handler!</span></code></h4>
+<p>( xt spi – )</p>
+<p>Set an SPI RX handler called when the SPI interrupt is called for RX data. Note that this may not be called if <code class="docutils literal notranslate"><span class="pre">spi&gt;</span></code> is called before the SPI interrupt has the chance to be invoked. A value of 0 indicates no handler.</p>
+</section>
+<section id="x-invalid-spi">
+<h4><code class="docutils literal notranslate"><span class="pre">x-invalid-spi</span></code></h4>
+<p>( – )</p>
+<p>Invalid SPI peripheral exception.</p>
+</section>
+<section id="x-invalid-spi-clock">
+<h4><code class="docutils literal notranslate"><span class="pre">x-invalid-spi-clock</span></code></h4>
+<p>( – )</p>
+<p>Invalid SPI clock setting exception.</p>
+</section>
+<section id="x-invalid-spi-data-size">
+<h4><code class="docutils literal notranslate"><span class="pre">x-invalid-spi-data-size</span></code></h4>
+<p>( – )</p>
+<p>Invalid SPI data size setting exception.</p>
+</section>
+</section>
+<section id="rp2040-only">
+<h3>RP2040 only</h3>
+<section id="enable-spi-loopback">
+<h4><code class="docutils literal notranslate"><span class="pre">enable-spi-loopback</span></code></h4>
+<p>( spi – )</p>
+<p>Enable SPI loopback mode for an SPI peripheral.</p>
+</section>
+<section id="disable-spi-loopback">
+<h4><code class="docutils literal notranslate"><span class="pre">disable-spi-loopback</span></code></h4>
+<p>( spi – )</p>
+<p>Disable SPI loopback mdoe for an SPI peripheral.</p>
+</section>
+<section id="natl-microwire-spi">
+<h4><code class="docutils literal notranslate"><span class="pre">natl-microwire-spi</span></code></h4>
+<p>( spi – )</p>
+<p>Set the protocol of the SPI peripheral to National Semiconductor Microwire.</p>
+</section>
+</section>
+<section id="stm32f407-stm32f411-stm32l476-and-stm32f746-only">
+<h3>STM32F407, STM32F411, STM32L476, and STM32F746 only</h3>
+<section id="msb-first-spi">
+<h4><code class="docutils literal notranslate"><span class="pre">msb-first-spi</span></code></h4>
+<p>( spi – )</p>
+<p>Set an SPI peripheral to have MSB-first data. This must be done with the SPI peripheral disabled.</p>
+</section>
+<section id="lsb-first-spi">
+<h4><code class="docutils literal notranslate"><span class="pre">lsb-first-spi</span></code></h4>
+<p>( spi – )</p>
+<p>Set an SPI peripheral to have LSB-first data. This must be done with the SPI peripheral disabled.</p>
+</section>
+<section id="enable-spi-ssm">
+<h4><code class="docutils literal notranslate"><span class="pre">enable-spi-ssm</span></code></h4>
+<p>( spi – )</p>
+<p>Enable SPI software slave management by master SPI peripherals. This must be done with the SPI peripheral disabled.</p>
+</section>
+<section id="disable-spi-ssm">
+<h4><code class="docutils literal notranslate"><span class="pre">disable-spi-ssm</span></code></h4>
+<p>( spi – )</p>
+<p>Disable SPI software slave management by master SPI peripherals. This must be done with the SPI peripheral disabled.</p>
+</section>
+<section id="spi-ssm">
+<h4><code class="docutils literal notranslate"><span class="pre">spi-ssm!</span></code></h4>
+<p>( ssi spi – )</p>
+<p>Set the software slave management selection for master SPI peripherals.</p>
+</section>
+<section id="line-spi">
+<h4><code class="docutils literal notranslate"><span class="pre">1-line-spi</span></code></h4>
+<p>( spi – )</p>
+<p>Set an SPI peripheral to one-wire mode.</p>
+</section>
+<section id="id5">
+<h4><code class="docutils literal notranslate"><span class="pre">2-line-spi</span></code></h4>
+<p>( spi – )</p>
+<p>Set an SPI peripheral to two-wire mode (the default).</p>
+</section>
+<section id="line-spi-in">
+<h4><code class="docutils literal notranslate"><span class="pre">1-line-spi-in</span></code></h4>
+<p>( spi – )</p>
+<p>Set the single wire in one-wire mode to be an input.</p>
+</section>
+<section id="line-spi-out">
+<h4><code class="docutils literal notranslate"><span class="pre">1-line-spi-out</span></code></h4>
+<p>( spi – )</p>
+<p>Set the single wire in one-wire mode to be an output.</p>
+</section>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

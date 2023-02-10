@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Wordlist Words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="wordlist-words">
+<h1>Wordlist Words</h1>
+<section id="forth-wordlist">
+<h2><code class="docutils literal notranslate"><span class="pre">forth-wordlist</span></code></h2>
+<p>These words are in <code class="docutils literal notranslate"><span class="pre">forth</span></code>:</p>
+<section id="forth">
+<h3><code class="docutils literal notranslate"><span class="pre">forth</span></code></h3>
+<p>( – wid )</p>
+<p>Get the default wordlist, which is both a flash and a RAM wordlist.</p>
+</section>
+<section id="internal">
+<h3><code class="docutils literal notranslate"><span class="pre">internal</span></code></h3>
+<p>( – wid )</p>
+<p>Get the internal wordlist, which includes both words defined in the kernel and words define outside the kernel</p>
+</section>
+<section id="wordlist">
+<h3><code class="docutils literal notranslate"><span class="pre">wordlist</span></code></h3>
+<p>( – wid )</p>
+<p>Create a wordlist, a RAM wordlist (starting at 32768) if the current compilation mode is RAM mode, or a flash wordlist (starting at 1) if the current compilation mode is flash mode.</p>
+</section>
+<section id="ram-wordlist">
+<h3><code class="docutils literal notranslate"><span class="pre">ram-wordlist</span></code></h3>
+<p>( – wid )</p>
+<p>Create a RAM wordlist, regardless of the current compilation mode.</p>
+</section>
+<section id="flash-wordlist">
+<h3><code class="docutils literal notranslate"><span class="pre">flash-wordlist</span></code></h3>
+<p>( – wid )</p>
+<p>Create a flash wordlist, regardless of the current compilation mode.</p>
+</section>
+<section id="set-current">
+<h3><code class="docutils literal notranslate"><span class="pre">set-current</span></code></h3>
+<p>( wid – )</p>
+<p>Set the current compilation wordlist, into which new words will be added.</p>
+</section>
+<section id="get-current">
+<h3><code class="docutils literal notranslate"><span class="pre">get-current</span></code></h3>
+<p>( – wid )</p>
+<p>Get the current compilation wordlist.</p>
+</section>
+<section id="set-order">
+<h3><code class="docutils literal notranslate"><span class="pre">set-order</span></code></h3>
+<p>( widn … wid1 u – )</p>
+<p>Pop the new wordlist order size off the stack, then pop that number of wordlist IDs off the stack and set the wordlist order to them, with the wordlist ID closest to the top of the stack being the first wordlist in the wordlist order and the wordlist ID furthest from the top of the stack being the last wordlist in the wordlist order.</p>
+</section>
+<section id="get-order">
+<h3><code class="docutils literal notranslate"><span class="pre">get-order</span></code></h3>
+<p>( – widn … wid1 u )</p>
+<p>Push the wordlist order onto the stack, with the last wordlist ID in the order being furthest from the top of the stack and the first wordlist ID in the order being closest to the top of the stack, followed by pushing the wordlist order size onto the top of the stack.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

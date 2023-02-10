@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Realtime Clock (RTC) Words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="realtime-clock-rtc-words">
+<h1>Realtime Clock (RTC) Words</h1>
+<p>zeptoforth has support for reading and setting the realtime clock (RTC) on the Raspberry Pi Pico, both for keeping track of the date and time and for triggering an alarm.</p>
+<p>Note that the Raspberry Pi Pico’s RTC’s value is not preserved across resets, even if power is applied, so each time it is reset the RTC’s value must be provided a value before it can be useful. It is initialized on bootup to Thursday, 1 January 1970 00:00:00, and is enabled on boot.</p>
+<p>The alarm functionality allows triggering an alarm interrupt at a given combination of second, minute, hour, day of the week, day, month, and/or year values. Note that the alarm interrupt must either reset the alarm date/time to a new one or clear the alarm or otherwise it will be repeatedly triggered, which in most use cases is undesirable.</p>
+<p>Date time values are validated when provided, except that year values of -1 and values for other fields of $FF are ignored during validation, as they are explicit non-values used for setting a subset of RTC fields or matching against a subset of RTC fields.</p>
+<p>Also provided is code for formatting date/times as strings and printing them to the console, for convenience’s sake.</p>
+<p>Note that a subset of these words are provided for platforms other than the Raspberry Pi Pico, specifically all of these words aside from <code class="docutils literal notranslate"><span class="pre">enable-rtc</span></code>, <code class="docutils literal notranslate"><span class="pre">disable-rtc</span></code>, <code class="docutils literal notranslate"><span class="pre">date-time!</span></code>, <code class="docutils literal notranslate"><span class="pre">simple-date-time!</span></code>, <code class="docutils literal notranslate"><span class="pre">set-rtc-alarm</span></code>, and <code class="docutils literal notranslate"><span class="pre">clear-rtc-alarm</span></code>.</p>
+<section id="rtc">
+<h2><code class="docutils literal notranslate"><span class="pre">rtc</span></code></h2>
+<p>The following words are in the <code class="docutils literal notranslate"><span class="pre">rtc</span></code> module:</p>
+<section id="date-time-size">
+<h3><code class="docutils literal notranslate"><span class="pre">date-time-size</span></code></h3>
+<p>( – bytes )</p>
+<p>This returns the size of a date/time structure in bytes.</p>
+</section>
+<section id="date-time-year">
+<h3><code class="docutils literal notranslate"><span class="pre">date-time-year</span></code></h3>
+<p>( date-time – addr )</p>
+<p>This returns the address of a cell in a date/time containing a year, from 0 to 4095, or when not setting a year or not matching against a year, -1</p>
+</section>
+<section id="date-time-month">
+<h3><code class="docutils literal notranslate"><span class="pre">date-time-month</span></code></h3>
+<p>( date-time – c-addr )</p>
+<p>This returns the address of a byte in a date/time containing a month, from 1 to 12, or when not setting a month or not matching against a month, 255</p>
+</section>
+<section id="date-time-day">
+<h3><code class="docutils literal notranslate"><span class="pre">date-time-day</span></code></h3>
+<p>( date-time – c-addr )</p>
+<p>This returns the address of a byte in a date/time containing a day, from 1 to any of 28, 29, 30, or 31 depending on the month and year, or when not setting a day or not matching against a day, 255</p>
+</section>
+<section id="date-time-dotw">
+<h3><code class="docutils literal notranslate"><span class="pre">date-time-dotw</span></code></h3>
+<p>( date-time – c-addr )</p>
+<p>This returns the address of a byte in a date/time containing a day of the week, from 0 representing Sunday to 6 representing Saturday, or when not setting a day of the week or not matching against a day of the week, 255.</p>
+</section>
+<section id="date-time-hour">
+<h3><code class="docutils literal notranslate"><span class="pre">date-time-hour</span></code></h3>
+<p>( date-time – c-addr )</p>
+<p>This returns the address of a byte in a date/time containing an hour, from 0 to 23, or when not setting an hour or not matching against an hour, 255.</p>
+</section>
+<section id="date-time-minute">
+<h3><code class="docutils literal notranslate"><span class="pre">date-time-minute</span></code></h3>
+<p>( date-time – c-addr )</p>
+<p>This returns the address of a byte in a date/time containing a minute, from 0 to 59, or when not setting a minute or not matching against a minute, 255.</p>
+</section>
+<section id="date-time-second">
+<h3><code class="docutils literal notranslate"><span class="pre">date-time-second</span></code></h3>
+<p>( date-time – c-addr )</p>
+<p>This returns the address of a byte in a date/time containing a second, from 0 to 59, or when not setting a second or not matching against a second, 255.</p>
+</section>
+<section id="enable-rtc">
+<h3><code class="docutils literal notranslate"><span class="pre">enable-rtc</span></code></h3>
+<p>( – )</p>
+<p>Enable the realtime clock. (Note that it is enabled by default.)</p>
+</section>
+<section id="disable-rtc">
+<h3><code class="docutils literal notranslate"><span class="pre">disable-rtc</span></code></h3>
+<p>( – )</p>
+<p>Disable the realtime clock.</p>
+</section>
+<section id="date-time">
+<h3><code class="docutils literal notranslate"><span class="pre">date-time&#64;</span></code></h3>
+<p>( date-time – )</p>
+<p>Get the current date/time.</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">date-time!</span></code></h3>
+<p>( date-time – )</p>
+<p>Set the current date/time.</p>
+</section>
+<section id="simple-date-time">
+<h3><code class="docutils literal notranslate"><span class="pre">simple-date-time!</span></code></h3>
+<p>( year month day hour minute second – )</p>
+<p>A convenience word to the current date/time at once, automatically calculating the day of the week. The arguments have the same meanings, respectively, as the <code class="docutils literal notranslate"><span class="pre">date-time-year</span></code>, <code class="docutils literal notranslate"><span class="pre">date-time-month</span></code>, <code class="docutils literal notranslate"><span class="pre">date-time-day</span></code>, <code class="docutils literal notranslate"><span class="pre">date-time-hour</span></code>, <code class="docutils literal notranslate"><span class="pre">date-time-minute</span></code>, and <code class="docutils literal notranslate"><span class="pre">date-time-second</span></code> of a date/time structure except that for all of these, not just the <em>year</em>, may have values of -1 to indicate unchanged values. Also, note that if <em>year</em> is -1, <em>month</em> is -1 or 255, or <em>day</em> is -1 or 255, the day of the week is not changed.</p>
+</section>
+<section id="set-rtc-alarm">
+<h3><code class="docutils literal notranslate"><span class="pre">set-rtc-alarm</span></code></h3>
+<p>( date-time xt – )</p>
+<p>Set <em>xt</em> to execute as an RTC alarm interrupt handler at <em>date-time</em>, ignoring a year field of -1 and any of the other fields of 255. Note that when <em>xt</em> is executed it must reset the RTC alarm to a new date/time or clear the RTC alarm or else it will be triggered repeatedly.</p>
+</section>
+<section id="clear-rtc-alarm">
+<h3><code class="docutils literal notranslate"><span class="pre">clear-rtc-alarm</span></code></h3>
+<p>( – )</p>
+<p>Clear the RTC alarm.</p>
+</section>
+<section id="dotw-name">
+<h3><code class="docutils literal notranslate"><span class="pre">dotw-name</span></code></h3>
+<p>( dotw – c-addr u )</p>
+<p>Get the name of a day of the week.</p>
+</section>
+<section id="month-name">
+<h3><code class="docutils literal notranslate"><span class="pre">month-name</span></code></h3>
+<p>( month – c-addr u )</p>
+<p>Get the name of a month.</p>
+</section>
+<section id="max-date-time-format-size">
+<h3><code class="docutils literal notranslate"><span class="pre">max-date-time-format-size</span></code></h3>
+<p>( – bytes )</p>
+<p>Get the maximum size in bytes of a date formated with <code class="docutils literal notranslate"><span class="pre">format-date-time</span></code>.</p>
+</section>
+<section id="format-date-time">
+<h3><code class="docutils literal notranslate"><span class="pre">format-date-time</span></code></h3>
+<p>( c-addr date-time – c-addr u )</p>
+<p>Format <em>date-time</em> as a string starting at <em>c-addr</em>, and return the resulting string as the pair <em>c-addr</em> <em>u</em>.</p>
+</section>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">date-time.</span></code></h3>
+<p>( date-time – )</p>
+<p>Print a date/time as formatted with <code class="docutils literal notranslate"><span class="pre">format-date-time</span></code>.</p>
+</section>
+<section id="get-dotw">
+<h3><code class="docutils literal notranslate"><span class="pre">get-dotw</span></code></h3>
+<p>( date-time – dotw )</p>
+<p>Calculate the day of the week for a date/time, ignoring its day of the week field; 0 is Sunday and 6 is Saturday. Note that if the <code class="docutils literal notranslate"><span class="pre">date-time-year</span></code> field of <em>date-time</em> is -1, the <code class="docutils literal notranslate"><span class="pre">date-time-month</span></code> field of <em>date-time</em> is 255, or the <code class="docutils literal notranslate"><span class="pre">date-time-day</span></code> field of <em>date-time</em> is 255, 255 will be returned for the day of the week.</p>
+</section>
+<section id="update-dotw">
+<h3><code class="docutils literal notranslate"><span class="pre">update-dotw</span></code></h3>
+<p>( date-time )</p>
+<p>Update the day of the week for a date/time, ignoring its preexisting day of the week field. Note that if the <code class="docutils literal notranslate"><span class="pre">date-time-year</span></code> field of <em>date-time</em> is -1, the <code class="docutils literal notranslate"><span class="pre">date-time-month</span></code> field of <em>date-time</em> is 255, or the <code class="docutils literal notranslate"><span class="pre">date-time-day</span></code> field of <em>date-time</em> is 255, 255 will be set for the day of the week.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

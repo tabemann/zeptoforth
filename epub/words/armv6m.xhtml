@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>ARMv6-M Assembler Words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="armv6-m-assembler-words">
+<h1>ARMv6-M Assembler Words</h1>
+<p>zeptoforth includes an ARMv6-M assembler, which can be used on all platforms, whether ARMv6-M or ARMv7-M. It supports all ARMv6-M instructions except for BL, as it is expected that the user will drop out of the assembler to call Forth words, which will be compiled to BL. It does not make use of labels as many assemblers do, but rather uses “marks”, which are double-cells on the data stack, for forward and backward references.</p>
+<section id="armv6m">
+<h2><code class="docutils literal notranslate"><span class="pre">armv6m</span></code></h2>
+<p>The following words are in the <code class="docutils literal notranslate"><span class="pre">armv6m</span></code> module:</p>
+<section id="code">
+<h3><code class="docutils literal notranslate"><span class="pre">code[</span></code></h3>
+<p>( – )</p>
+<p>Begin a block of assembled code, making the assembler wordlist available within and forcing any deferred literal to be compiled in place.</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">]code</span></code></h3>
+<p>( – )</p>
+<p>End a block of assembled code, removing the assembler wordlist from the wordlist order.</p>
+</section>
+<section id="x-out-of-range-3reg">
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-3reg</span></code></h3>
+<p>( – )</p>
+<p>Out of range 3-bit register exception.</p>
+</section>
+<section id="x-out-of-range-4reg">
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-4reg</span></code></h3>
+<p>( – )</p>
+<p>Out of range 4-bit register exception.</p>
+</section>
+<section id="x-out-of-range-imm">
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-imm</span></code></h3>
+<p>( – )</p>
+<p>Out of range immediate exception.</p>
+</section>
+<section id="x-unaligned-imm">
+<h3><code class="docutils literal notranslate"><span class="pre">x-unaligned-imm</span></code></h3>
+<p>( – )</p>
+<p>Unaligned immediate exception.</p>
+</section>
+<section id="x-out-of-range-pc-rel">
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-pc-rel</span></code></h3>
+<p>( – )</p>
+<p>Out of range PC-relative address exception.</p>
+</section>
+<section id="x-incorrect-mark-type">
+<h3><code class="docutils literal notranslate"><span class="pre">x-incorrect-mark-type</span></code></h3>
+<p>( – )</p>
+<p>Incorrect marker type exception.</p>
+</section>
+<section id="x-invalid-cond">
+<h3><code class="docutils literal notranslate"><span class="pre">x-invalid-cond</span></code></h3>
+<p>( – )</p>
+<p>Invalid condition exception.</p>
+</section>
+<section id="x-out-of-range-special">
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-special</span></code></h3>
+<p>( – )</p>
+<p>Out of range special register exception.</p>
+</section>
+</section>
+<section id="assembler-words">
+<h2>Assembler words</h2>
+<p>The following words are accessible between <code class="docutils literal notranslate"><span class="pre">code[</span></code> and <code class="docutils literal notranslate"><span class="pre">]code</span></code>:</p>
+<section id="registers">
+<h3>Registers</h3>
+<section id="r0">
+<h4><code class="docutils literal notranslate"><span class="pre">r0</span></code></h4>
+</section>
+<section id="r1">
+<h4><code class="docutils literal notranslate"><span class="pre">r1</span></code></h4>
+</section>
+<section id="r2">
+<h4><code class="docutils literal notranslate"><span class="pre">r2</span></code></h4>
+</section>
+<section id="r3">
+<h4><code class="docutils literal notranslate"><span class="pre">r3</span></code></h4>
+</section>
+<section id="r4">
+<h4><code class="docutils literal notranslate"><span class="pre">r4</span></code></h4>
+</section>
+<section id="r5">
+<h4><code class="docutils literal notranslate"><span class="pre">r5</span></code></h4>
+</section>
+<section id="r6">
+<h4><code class="docutils literal notranslate"><span class="pre">r6</span></code></h4>
+</section>
+<section id="r7">
+<h4><code class="docutils literal notranslate"><span class="pre">r7</span></code></h4>
+</section>
+<section id="r8">
+<h4><code class="docutils literal notranslate"><span class="pre">r8</span></code></h4>
+</section>
+<section id="r9">
+<h4><code class="docutils literal notranslate"><span class="pre">r9</span></code></h4>
+</section>
+<section id="r10">
+<h4><code class="docutils literal notranslate"><span class="pre">r10</span></code></h4>
+</section>
+<section id="r11">
+<h4><code class="docutils literal notranslate"><span class="pre">r11</span></code></h4>
+</section>
+<section id="r12">
+<h4><code class="docutils literal notranslate"><span class="pre">r12</span></code></h4>
+</section>
+<section id="r13">
+<h4><code class="docutils literal notranslate"><span class="pre">r13</span></code></h4>
+</section>
+<section id="r14">
+<h4><code class="docutils literal notranslate"><span class="pre">r14</span></code></h4>
+</section>
+<section id="r15">
+<h4><code class="docutils literal notranslate"><span class="pre">r15</span></code></h4>
+</section>
+<section id="tos">
+<h4><code class="docutils literal notranslate"><span class="pre">tos</span></code></h4>
+</section>
+<section id="dp">
+<h4><code class="docutils literal notranslate"><span class="pre">dp</span></code></h4>
+</section>
+<section id="sp">
+<h4><code class="docutils literal notranslate"><span class="pre">sp</span></code></h4>
+</section>
+<section id="lr">
+<h4><code class="docutils literal notranslate"><span class="pre">lr</span></code></h4>
+</section>
+<section id="pc">
+<h4><code class="docutils literal notranslate"><span class="pre">pc</span></code></h4>
+</section>
+</section>
+<section id="condition-codes">
+<h3>Condition codes</h3>
+<section id="eq">
+<h4><code class="docutils literal notranslate"><span class="pre">eq</span></code></h4>
+</section>
+<section id="ne">
+<h4><code class="docutils literal notranslate"><span class="pre">ne</span></code></h4>
+</section>
+<section id="cs">
+<h4><code class="docutils literal notranslate"><span class="pre">cs</span></code></h4>
+</section>
+<section id="hs">
+<h4><code class="docutils literal notranslate"><span class="pre">hs</span></code></h4>
+</section>
+<section id="cc">
+<h4><code class="docutils literal notranslate"><span class="pre">cc</span></code></h4>
+</section>
+<section id="lo">
+<h4><code class="docutils literal notranslate"><span class="pre">lo</span></code></h4>
+</section>
+<section id="mi">
+<h4><code class="docutils literal notranslate"><span class="pre">mi</span></code></h4>
+</section>
+<section id="pl">
+<h4><code class="docutils literal notranslate"><span class="pre">pl</span></code></h4>
+</section>
+<section id="vs">
+<h4><code class="docutils literal notranslate"><span class="pre">vs</span></code></h4>
+</section>
+<section id="vc">
+<h4><code class="docutils literal notranslate"><span class="pre">vc</span></code></h4>
+</section>
+<section id="hi">
+<h4><code class="docutils literal notranslate"><span class="pre">hi</span></code></h4>
+</section>
+<section id="ls">
+<h4><code class="docutils literal notranslate"><span class="pre">ls</span></code></h4>
+</section>
+<section id="ge">
+<h4><code class="docutils literal notranslate"><span class="pre">ge</span></code></h4>
+</section>
+<section id="lt">
+<h4><code class="docutils literal notranslate"><span class="pre">lt</span></code></h4>
+</section>
+<section id="gt">
+<h4><code class="docutils literal notranslate"><span class="pre">gt</span></code></h4>
+</section>
+<section id="le">
+<h4><code class="docutils literal notranslate"><span class="pre">le</span></code></h4>
+</section>
+<section id="al">
+<h4><code class="docutils literal notranslate"><span class="pre">al</span></code></h4>
+</section>
+<section id="adcs">
+<h4><code class="docutils literal notranslate"><span class="pre">adcs_,_</span></code></h4>
+<p>( rm rdn – )</p>
+<p>Assemble an ADCS instruction.</p>
+</section>
+<section id="adds">
+<h4><code class="docutils literal notranslate"><span class="pre">adds_,_,#_</span></code></h4>
+<p>( imm3 rn rd – )</p>
+<p>Assemble a two-register ADDS immediate instruction.</p>
+</section>
+<section id="id2">
+<h4><code class="docutils literal notranslate"><span class="pre">adds_,#_</span></code></h4>
+<p>( imm8 rdn – )</p>
+<p>Assemble a one-register ADDS immediate instruction.</p>
+</section>
+<section id="id3">
+<h4><code class="docutils literal notranslate"><span class="pre">adds_,_,_</span></code></h4>
+<p>( rm rn rd – )</p>
+<p>Assemble a three-register ADDS register instruction.</p>
+</section>
+<section id="add4-4">
+<h4><code class="docutils literal notranslate"><span class="pre">add4_,4_</span></code></h4>
+<p>( rm4 rdn4 – )</p>
+<p>Assemble a two-4-bit register ADDS register instruction.</p>
+</section>
+<section id="add-sp">
+<h4><code class="docutils literal notranslate"><span class="pre">add_,sp,#_</span></code></h4>
+<p>( imm8 rd – )</p>
+<p>Assemble an ADD (SP plus immediate) instruction.</p>
+</section>
+<section id="addsp-sp">
+<h4><code class="docutils literal notranslate"><span class="pre">addsp,sp,#_</span></code></h4>
+<p>( imm7 – )</p>
+<p>Assemble an ADD (SP plus immediate to SP) instruction.</p>
+</section>
+<section id="add4-sp">
+<h4><code class="docutils literal notranslate"><span class="pre">add4_,sp</span></code></h4>
+<p>( rdm4 – )</p>
+<p>Assemble an ADD (SP plus register) instruction.</p>
+</section>
+<section id="addsp-sp-4">
+<h4><code class="docutils literal notranslate"><span class="pre">addsp,sp,4_</span></code></h4>
+<p>( rm4 – )</p>
+<p>Assemble an ADD (SP plus register to SP) instruction.</p>
+</section>
+<section id="adr">
+<h4><code class="docutils literal notranslate"><span class="pre">adr_</span></code></h4>
+<p>( rd – mark-addr mark )</p>
+<p>Mark an ADR instruction.</p>
+</section>
+<section id="ands">
+<h4><code class="docutils literal notranslate"><span class="pre">ands_,_</span></code></h4>
+<p>( rm rdn – )</p>
+<p>Assemble an ANDS (register) instruction.</p>
+</section>
+<section id="asrs">
+<h4><code class="docutils literal notranslate"><span class="pre">asrs_,_,#_</span></code></h4>
+<p>( imm5 rm rd – )</p>
+<p>Assemble an ASRS (immediate) instruction.</p>
+</section>
+<section id="id4">
+<h4><code class="docutils literal notranslate"><span class="pre">asrs_,_</span></code></h4>
+<p>( rm rdn – )</p>
+<p>Assemble an ASRS (register) instruction.</p>
+</section>
+<section id="b">
+<h4><code class="docutils literal notranslate"><span class="pre">b&lt;</span></code></h4>
+<p>( mark-addr mark – )</p>
+<p>Assemble an unconditional branch to a marker.</p>
+</section>
+<section id="bc">
+<h4><code class="docutils literal notranslate"><span class="pre">bc&lt;</span></code></h4>
+<p>( mark-addr mark cond – )</p>
+<p>Assemble a conditional branch to a marker.</p>
+</section>
+<section id="id5">
+<h4><code class="docutils literal notranslate"><span class="pre">b&gt;</span></code></h4>
+<p>( – mark-addr mark )</p>
+<p>Mark an unconditional branch.</p>
+</section>
+<section id="id6">
+<h4><code class="docutils literal notranslate"><span class="pre">bc&gt;</span></code></h4>
+<p>( cond – mark-addr mark )</p>
+<p>Mark a conditional branch.</p>
+</section>
+<section id="bics">
+<h4><code class="docutils literal notranslate"><span class="pre">bics_,_</span></code></h4>
+<p>( rm rdn – )</p>
+<p>Assemble an BICS (register) instruction.</p>
+</section>
+<section id="bkpt">
+<h4><code class="docutils literal notranslate"><span class="pre">bkpt#_</span></code></h4>
+<p>( imm8 – )</p>
+<p>Assemble a BKPT instruction.</p>
+</section>
+<section id="blx">
+<h4><code class="docutils literal notranslate"><span class="pre">blx_</span></code></h4>
+<p>( rm – )</p>
+<p>Assemble a BLX (register) instruction.</p>
+</section>
+<section id="bx">
+<h4><code class="docutils literal notranslate"><span class="pre">bx_</span></code></h4>
+<p>( rm – )</p>
+<p>Assemble a BX instruction.</p>
+</section>
+<section id="cmn">
+<h4><code class="docutils literal notranslate"><span class="pre">cmn_,_</span></code></h4>
+<p>( rm rn – )</p>
+<p>Assemble an CMN (register) instruction.</p>
+</section>
+<section id="cmp">
+<h4><code class="docutils literal notranslate"><span class="pre">cmp_,#_</span></code></h4>
+<p>( imm8 rn – )</p>
+<p>Assemble a CMP (immediate) instruction.</p>
+</section>
+<section id="id7">
+<h4><code class="docutils literal notranslate"><span class="pre">cmp_,_</span></code></h4>
+<p>( rm rn – )</p>
+<p>Assemble an CMP (register) instruction.</p>
+</section>
+<section id="cmp4-4">
+<h4><code class="docutils literal notranslate"><span class="pre">cmp4_,4_</span></code></h4>
+<p>( rm4 rdn4 – )</p>
+<p>Assemble an CMP (register) instruction.</p>
+</section>
+<section id="cpsie">
+<h4><code class="docutils literal notranslate"><span class="pre">cpsie</span></code></h4>
+<p>( – )</p>
+<p>Assemble a CPSIE instruction.</p>
+</section>
+<section id="cpsid">
+<h4><code class="docutils literal notranslate"><span class="pre">cpsid</span></code></h4>
+<p>( – )</p>
+<p>Assemble a CPSID instruction.</p>
+</section>
+<section id="dmb">
+<h4><code class="docutils literal notranslate"><span class="pre">dmb</span></code></h4>
+<p>( – )</p>
+<p>Assemble a DMB instruction.</p>
+</section>
+<section id="dsb">
+<h4><code class="docutils literal notranslate"><span class="pre">dsb</span></code></h4>
+<p>( – )</p>
+<p>Assemble a DSB instruction.</p>
+</section>
+<section id="eors">
+<h4><code class="docutils literal notranslate"><span class="pre">eors_,_</span></code></h4>
+<p>( rm rdn – )</p>
+<p>Assemble an EORS (register) instruction.</p>
+</section>
+<section id="isb">
+<h4><code class="docutils literal notranslate"><span class="pre">isb</span></code></h4>
+<p>( – )</p>
+<p>Assemble an ISB instruction.</p>
+</section>
+<section id="ldm">
+<h4><code class="docutils literal notranslate"><span class="pre">ldm</span></code></h4>
+<p>( rx … r0 count rn – )</p>
+<p>Assemble an LDM instruction.</p>
+</section>
+<section id="ldr">
+<h4><code class="docutils literal notranslate"><span class="pre">ldr_,[_,#_]</span></code></h4>
+<p>( imm5 rn rt – )</p>
+<p>Assemble an LDR (immediate) instruction.</p>
+</section>
+<section id="ldr-sp">
+<h4><code class="docutils literal notranslate"><span class="pre">ldr_,[sp,#_]</span></code></h4>
+<p>( imm8 rt – )</p>
+<p>Assemble an LDR (immediate) instruction.</p>
+</section>
+<section id="ldr-pc">
+<h4><code class="docutils literal notranslate"><span class="pre">ldr_,[pc]</span></code></h4>
+<p>( rd – mark-addr mark )</p>
+<p>Mark an LDR (literal) instruction.</p>
+</section>
+<section id="id8">
+<h4><code class="docutils literal notranslate"><span class="pre">ldr_,[_,_]</span></code></h4>
+<p>( rm rn rt – )</p>
+<p>Assemble an LDR (register) instruction.</p>
+</section>
+<section id="ldrb">
+<h4><code class="docutils literal notranslate"><span class="pre">ldrb_,[_,#_]</span></code></h4>
+<p>( imm5 rn rt – )</p>
+<p>Assemble an LDRB (immediate) instruction.</p>
+</section>
+<section id="id9">
+<h4><code class="docutils literal notranslate"><span class="pre">ldrb_,[_,_]</span></code></h4>
+<p>( rm rn rt – )</p>
+<p>Assemble an LDRB (register) instruction.</p>
+</section>
+<section id="ldrh">
+<h4><code class="docutils literal notranslate"><span class="pre">ldrh_,[_,#_]</span></code></h4>
+<p>( imm5 rn rt – )</p>
+<p>Assemble an LDRH (immediate) instruction.</p>
+</section>
+<section id="id10">
+<h4><code class="docutils literal notranslate"><span class="pre">ldrh_,[_,_]</span></code></h4>
+<p>( rm rn rt – )</p>
+<p>Assemble an LDRH (register) instruction.</p>
+</section>
+<section id="ldrsb">
+<h4><code class="docutils literal notranslate"><span class="pre">ldrsb_,[_,_]</span></code></h4>
+<p>( rm rn rt – )</p>
+<p>Assemble an LDRSB (register) instruction.</p>
+</section>
+<section id="ldrsh">
+<h4><code class="docutils literal notranslate"><span class="pre">ldrsh_,[_,_]</span></code></h4>
+<p>( rm rn rt – )</p>
+<p>Assemble an LDRSH (register) instruction.</p>
+</section>
+<section id="lsls">
+<h4><code class="docutils literal notranslate"><span class="pre">lsls_,_,#_</span></code></h4>
+<p>( imm5 rm rd – )</p>
+<p>Assemble an LSLS (immediate) instruction.</p>
+</section>
+<section id="id11">
+<h4><code class="docutils literal notranslate"><span class="pre">lsls_,_</span></code></h4>
+<p>( rm rdn – )</p>
+<p>Assemble an LSLS (register) instruction.</p>
+</section>
+<section id="lsrs">
+<h4><code class="docutils literal notranslate"><span class="pre">lsrs_,_,#_</span></code></h4>
+<p>( imm5 rm rd – )</p>
+<p>Assemble an LSRS (immediate) instruction.</p>
+</section>
+<section id="id12">
+<h4><code class="docutils literal notranslate"><span class="pre">lsrs_,_</span></code></h4>
+<p>( rm rdn – )</p>
+<p>Assemble an LSRS (register) instruction.</p>
+</section>
+<section id="movs">
+<h4><code class="docutils literal notranslate"><span class="pre">movs_,#_</span></code></h4>
+<p>( imm8 rdn – )</p>
+<p>Assemble a MOVS (immediate) instruction.</p>
+</section>
+<section id="mov4-4">
+<h4><code class="docutils literal notranslate"><span class="pre">mov4_,4_</span></code></h4>
+<p>( rm4 rdn4 – )</p>
+<p>Assemble a MOV (register) instruction.</p>
+</section>
+<section id="id13">
+<h4><code class="docutils literal notranslate"><span class="pre">movs_,_</span></code></h4>
+<p>( rm rd – )</p>
+<p>Assemble a MOVS (register) instruction.</p>
+</section>
+<section id="mrs">
+<h4><code class="docutils literal notranslate"><span class="pre">mrs_,_</span></code></h4>
+<p>( sysm rd – )</p>
+<p>Assemble an MRS instruction.</p>
+</section>
+<section id="msr">
+<h4><code class="docutils literal notranslate"><span class="pre">msr_,_</span></code></h4>
+<p>( rn sysm – )</p>
+<p>Assemble an MSR (register) instruction.</p>
+</section>
+<section id="muls">
+<h4><code class="docutils literal notranslate"><span class="pre">muls_,_</span></code></h4>
+<p>( rn rdm – )</p>
+<p>Assemble an MULS (register) instruction.</p>
+</section>
+<section id="mvns">
+<h4><code class="docutils literal notranslate"><span class="pre">mvns_,_</span></code></h4>
+<p>( rm rd – )</p>
+<p>Assemble an MVNS (register) instruction.</p>
+</section>
+<section id="nop">
+<h4><code class="docutils literal notranslate"><span class="pre">nop</span></code></h4>
+<p>( – )</p>
+<p>Assemble a NOP instruction.</p>
+</section>
+<section id="orrs">
+<h4><code class="docutils literal notranslate"><span class="pre">orrs_,_</span></code></h4>
+<p>( rm rdn – )</p>
+<p>Assemble an ORRS (register) instruction.</p>
+</section>
+<section id="pop">
+<h4><code class="docutils literal notranslate"><span class="pre">pop</span></code></h4>
+<p>( rx … r0 count – )</p>
+<p>Assemble a POP instruction.</p>
+</section>
+<section id="push">
+<h4><code class="docutils literal notranslate"><span class="pre">push</span></code></h4>
+<p>( rx … r0 count – )</p>
+<p>Assemble a PUSH instruction.</p>
+</section>
+<section id="rev">
+<h4><code class="docutils literal notranslate"><span class="pre">rev_,_</span></code></h4>
+<p>( rm rd – )</p>
+<p>Assemble an REV (register) instruction.</p>
+</section>
+<section id="rev16">
+<h4><code class="docutils literal notranslate"><span class="pre">rev16_,_</span></code></h4>
+<p>( rm rd – )</p>
+<p>Assemble an REV16 (register) instruction.</p>
+</section>
+<section id="revsh">
+<h4><code class="docutils literal notranslate"><span class="pre">revsh_,_</span></code></h4>
+<p>( rm rd – )</p>
+<p>Assemble an REVSH (register) instruction.</p>
+</section>
+<section id="rors">
+<h4><code class="docutils literal notranslate"><span class="pre">rors_,_</span></code></h4>
+<p>( rm rdn – )</p>
+<p>Assemble an RORS (register) instruction.</p>
+</section>
+<section id="rsbs-0">
+<h4><code class="docutils literal notranslate"><span class="pre">rsbs_,_,#0</span></code></h4>
+<p>( rn rd – )</p>
+<p>Assemble an RSBS (immediate) instruction.</p>
+</section>
+<section id="sbcs">
+<h4><code class="docutils literal notranslate"><span class="pre">sbcs_,_</span></code></h4>
+<p>( rm rdn – )</p>
+<p>Assemble an SBC (register) instruction.</p>
+</section>
+<section id="sev">
+<h4><code class="docutils literal notranslate"><span class="pre">sev</span></code></h4>
+<p>( – )</p>
+<p>Assemble an SEV instruction.</p>
+</section>
+<section id="stm">
+<h4><code class="docutils literal notranslate"><span class="pre">stm</span></code></h4>
+<p>( rx … r0 count rn – )</p>
+<p>Assemble an STM instruction.</p>
+</section>
+<section id="str">
+<h4><code class="docutils literal notranslate"><span class="pre">str_,[_,#_]</span></code></h4>
+<p>( imm5 rn rt – )</p>
+<p>Assemble an STR (immediate) instruction.</p>
+</section>
+<section id="str-sp">
+<h4><code class="docutils literal notranslate"><span class="pre">str_,[sp,#_]</span></code></h4>
+<p>( imm8 rt – )</p>
+<p>Assemble an STR (immediate) instruction.</p>
+</section>
+<section id="id14">
+<h4><code class="docutils literal notranslate"><span class="pre">str_,[_,_]</span></code></h4>
+<p>( rm rn rt – )</p>
+<p>Assemble an STR (register) instruction.</p>
+</section>
+<section id="strb">
+<h4><code class="docutils literal notranslate"><span class="pre">strb_,[_,#_]</span></code></h4>
+<p>( imm5 rn rt – )</p>
+<p>Assemble an STRB (immediate) instruction.</p>
+</section>
+<section id="id15">
+<h4><code class="docutils literal notranslate"><span class="pre">strb_,[_,_]</span></code></h4>
+<p>( rm rn rt – )</p>
+<p>Assemble an STRB (register) instruction.</p>
+</section>
+<section id="strh">
+<h4><code class="docutils literal notranslate"><span class="pre">strh_,[_,#_]</span></code></h4>
+<p>( imm5 rn rt – )</p>
+<p>Assemble an STRH (immediate) instruction.</p>
+</section>
+<section id="id16">
+<h4><code class="docutils literal notranslate"><span class="pre">strh_,[_,_]</span></code></h4>
+<p>( rm rn rt – )</p>
+<p>Assemble an STRH (register) instruction.</p>
+</section>
+<section id="subs">
+<h4><code class="docutils literal notranslate"><span class="pre">subs_,_,#_</span></code></h4>
+<p>( imm3 rn rd – )</p>
+<p>Assemble a two-register SUBS immediate instruction.</p>
+</section>
+<section id="id17">
+<h4><code class="docutils literal notranslate"><span class="pre">subs_,#_</span></code></h4>
+<p>( imm8 rdn – )</p>
+<p>Assemble a one-register SUBS immediate instruction.</p>
+</section>
+<section id="id18">
+<h4><code class="docutils literal notranslate"><span class="pre">subs_,_,_</span></code></h4>
+<p>( rm rn rd – )</p>
+<p>Assemble a three-register SUBS register instruction.</p>
+</section>
+<section id="subsp-sp">
+<h4><code class="docutils literal notranslate"><span class="pre">subsp,sp,#_</span></code></h4>
+<p>( imm7 – )</p>
+<p>Assemble an SUB (SP plus immediate to SP) instruction.</p>
+</section>
+<section id="svc">
+<h4><code class="docutils literal notranslate"><span class="pre">svc#_</span></code></h4>
+<p>( imm8 – )</p>
+<p>Assemble an SVC instruction.</p>
+</section>
+<section id="sxtb">
+<h4><code class="docutils literal notranslate"><span class="pre">sxtb_,_</span></code></h4>
+<p>( rm rd – )</p>
+<p>Assemble an SXTB instruction.</p>
+</section>
+<section id="sxth">
+<h4><code class="docutils literal notranslate"><span class="pre">sxth_,_</span></code></h4>
+<p>( rm rd – )</p>
+<p>Assemble an SXTH instruction.</p>
+</section>
+<section id="tst">
+<h4><code class="docutils literal notranslate"><span class="pre">tst_,_</span></code></h4>
+<p>( rm rn – )</p>
+<p>Assemble an tST (register) instruction.</p>
+</section>
+<section id="udf">
+<h4><code class="docutils literal notranslate"><span class="pre">udf#_</span></code></h4>
+<p>( imm8 – )</p>
+<p>Assemble a UDF instruction.</p>
+</section>
+<section id="udf-w">
+<h4><code class="docutils literal notranslate"><span class="pre">udf.w#_</span></code></h4>
+<p>( imm16 – )</p>
+<p>Assemble a 32-bit UDF instruction.</p>
+</section>
+<section id="uxtb">
+<h4><code class="docutils literal notranslate"><span class="pre">uxtb_,_</span></code></h4>
+<p>( rm rd – )</p>
+<p>Assemble an UXTB instruction.</p>
+</section>
+<section id="uxth">
+<h4><code class="docutils literal notranslate"><span class="pre">uxth_,_</span></code></h4>
+<p>( rm rd – )</p>
+<p>Assemble an UXTH instruction.</p>
+</section>
+<section id="wfe">
+<h4><code class="docutils literal notranslate"><span class="pre">wfe</span></code></h4>
+<p>( – )</p>
+<p>Assemble a WFE instruction.</p>
+</section>
+<section id="wfi">
+<h4><code class="docutils literal notranslate"><span class="pre">wfi</span></code></h4>
+<p>( – )</p>
+<p>Assemble a WFI instruction.</p>
+</section>
+<section id="yield">
+<h4><code class="docutils literal notranslate"><span class="pre">yield</span></code></h4>
+<p>( – )</p>
+<p>Assemble a YIELD instruction.</p>
+</section>
+<section id="mark">
+<h4><code class="docutils literal notranslate"><span class="pre">mark&gt;</span></code></h4>
+<p>( – mark-addr mark )</p>
+<p>Mark a backward destination.</p>
+</section>
+<section id="id19">
+<h4><code class="docutils literal notranslate"><span class="pre">&gt;mark</span></code></h4>
+<p>( mark-addr mark – )</p>
+<p>Mark a forward destination.</p>
+</section>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

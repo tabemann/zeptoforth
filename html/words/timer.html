@@ -16,7 +16,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="SDHC/SDXC Card Support" href="sdcard.html" />
-    <link rel="prev" title="Realtime Clock (RTC) Words on the Raspberry Pi Pico" href="rtc.html" />
+    <link rel="prev" title="Realtime Clock (RTC) Words" href="rtc.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -33,7 +33,7 @@
 
           <div class="body" role="main">
             
-  <section id="hardware-timers">
+  <section class="tex2jax_ignore mathjax_ignore" id="hardware-timers">
 <h1>Hardware Timers<a class="headerlink" href="#hardware-timers" title="Permalink to this headline">¶</a></h1>
 <p>zeptoforth on the RP2040 (i.e. the Raspberry Pi Pico) has support for hardware timers and delays at up to a microsecond precision. Note that in practice microsecond precision is not necessarily possible, due to interrupts being disabled, interrupt priorities, busy-waits having a limited time resolution, and the chance of busy-waits being preempted if interrupts are not disabled during them.</p>
 <p>The 64-bit microsecond timer can represent a sufficiently large range of values, i.e. it can represent thousands of years of time, such that it can be treated as effectively monotonic. Note that the user can change the value of the microsecond timer or pause it, but this is not recommended in most use cases.</p>
@@ -134,7 +134,7 @@
 <li class="toctree-l1"><a class="reference internal" href="spi.html">SPI Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="i2c.html">I2C Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pwm.html">Pulse Width Modulation Words</a></li>
-<li class="toctree-l1"><a class="reference internal" href="rtc.html">Realtime Clock (RTC) Words on the Raspberry Pi Pico</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rtc.html">Realtime Clock (RTC) Words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Hardware Timers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
@@ -177,13 +177,14 @@
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="rtc.html" title="previous chapter">Realtime Clock (RTC) Words on the Raspberry Pi Pico</a></li>
+      <li>Previous: <a href="rtc.html" title="previous chapter">Realtime Clock (RTC) Words</a></li>
       <li>Next: <a href="sdcard.html" title="next chapter">SDHC/SDXC Card Support</a></li>
   </ul></li>
 </ul>
@@ -214,7 +215,7 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

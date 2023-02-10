@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Internal Words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="internal-words">
+<h1>Internal Words</h1>
+<section id="internal">
+<h2><code class="docutils literal notranslate"><span class="pre">internal</span></code></h2>
+<p>These words are in <code class="docutils literal notranslate"><span class="pre">internal</span></code>.</p>
+<section id="advance-here">
+<h3><code class="docutils literal notranslate"><span class="pre">advance-here</span></code></h3>
+<p>( a – )</p>
+<p>Fill memory with zeros up until a given address</p>
+</section>
+<section id="word-flags">
+<h3><code class="docutils literal notranslate"><span class="pre">word-flags</span></code></h3>
+<p>( word – h-addr )</p>
+<p>Get the address of the flags for a word</p>
+</section>
+<section id="wordlist-id">
+<h3><code class="docutils literal notranslate"><span class="pre">wordlist-id</span></code></h3>
+<p>( word – h-addr )</p>
+<p>Get the address of the wordlist ID for a word</p>
+</section>
+<section id="next-word">
+<h3><code class="docutils literal notranslate"><span class="pre">next-word</span></code></h3>
+<p>( word – addr-addr )</p>
+<p>Get the address of the address of the next word in the word specified;</p>
+</section>
+<section id="word-name">
+<h3><code class="docutils literal notranslate"><span class="pre">word-name</span></code></h3>
+<p>( word – b-addr )</p>
+<p>Get the name of a word (a counted word)</p>
+</section>
+<section id="common-prefix">
+<h3><code class="docutils literal notranslate"><span class="pre">common-prefix</span></code></h3>
+<p>( b-addr1 bytes1 b-addr2 bytes2 – bytes3 )</p>
+<p>Get the length of a common prefix to two strings</p>
+</section>
+<section id="prefix">
+<h3><code class="docutils literal notranslate"><span class="pre">prefix?</span></code></h3>
+<p>( b-addr1 bytes1 b-addr2 bytes2 – flag )</p>
+<p>Get whether a string has a prefix (the prefix is the first string)</p>
+</section>
+<section id="hidden">
+<h3><code class="docutils literal notranslate"><span class="pre">hidden?</span></code></h3>
+<p>( word – f )</p>
+<p>Get whether a word is hidden (note that this means whether a word is displayed by WORDS, not whether it will be found by <code class="docutils literal notranslate"><span class="pre">find</span></code> set to find visible words)</p>
+</section>
+<section id="words-column">
+<h3><code class="docutils literal notranslate"><span class="pre">words-column</span></code></h3>
+<p>( b-addr bytes column1 – column2 )</p>
+<p>Actually print a string in one out of four columns, taking up more than one
+column if necessary</p>
+</section>
+<section id="words-column-wrap">
+<h3><code class="docutils literal notranslate"><span class="pre">words-column-wrap</span></code></h3>
+<p>( b-addr bytes column1 – column2 )</p>
+<p>Print a string in one out of four columns, taking up more than one column
+if necessary</p>
+</section>
+<section id="words-dict">
+<h3><code class="docutils literal notranslate"><span class="pre">words-dict</span></code></h3>
+<p>( dict wid column1 – column2 )</p>
+<p>Display all the words in a dictionary starting at a given column, and
+returning the next column</p>
+</section>
+<section id="lookup-dict">
+<h3><code class="docutils literal notranslate"><span class="pre">lookup-dict</span></code></h3>
+<p>( b-addr bytes dict wid column1 – column2 )</p>
+<p>Display all the words in a dictionary starting at a given column and returning
+the next column</p>
+</section>
+<section id="find-prefix-len">
+<h3><code class="docutils literal notranslate"><span class="pre">find-prefix-len</span></code></h3>
+<p>( b-addr bytes dict – prefix-bytes )</p>
+<p>Find the common prefix length to a word</p>
+</section>
+<section id="search-word-info">
+<h3><code class="docutils literal notranslate"><span class="pre">search-word-info</span></code></h3>
+<p>( b-addr bytes dict – )</p>
+<p>Search for all the words that go by a certain name in a given dictionary</p>
+</section>
+<section id="search-by-xt">
+<h3><code class="docutils literal notranslate"><span class="pre">search-by-xt</span></code></h3>
+<p>( dict xt – name|0 flag )</p>
+<p>Search for a word by its xt</p>
+</section>
+<section id="builds-with-name">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;builds-with-name</span></code></h3>
+<p>( addr bytes – )</p>
+<p>Create a word that executes code specified by DOES&gt;</p>
+</section>
+<section id="block-align">
+<h3><code class="docutils literal notranslate"><span class="pre">block-align,</span></code></h3>
+<p>Align to flash block if compiling to flash</p>
+</section>
+<section id="next-user-space">
+<h3><code class="docutils literal notranslate"><span class="pre">next-user-space</span></code></h3>
+<p>( – addr )</p>
+<p>Look up next available user space</p>
+</section>
+<section id="set-next-user-space">
+<h3><code class="docutils literal notranslate"><span class="pre">set-next-user-space</span></code></h3>
+<p>( addr – )</p>
+<p>Specify next available user space</p>
+</section>
+<section id="next-ram-space">
+<h3><code class="docutils literal notranslate"><span class="pre">next-ram-space</span></code></h3>
+<p>( – addr )</p>
+<p>Look up next available RAM space</p>
+</section>
+<section id="set-next-ram-space">
+<h3><code class="docutils literal notranslate"><span class="pre">set-next-ram-space</span></code></h3>
+<p>( addr – )</p>
+<p>Specify next available RAM space</p>
+</section>
+<section id="user">
+<h3><code class="docutils literal notranslate"><span class="pre">user&gt;</span></code></h3>
+<p>( – )</p>
+<p>Complete a USER variable word</p>
+</section>
+<section id="ram-cvariable">
+<h3><code class="docutils literal notranslate"><span class="pre">ram-cvariable</span></code></h3>
+<p>( “name” – )</p>
+<p>Allocate a byte variable in RAM</p>
+</section>
+<section id="ram-hvariable">
+<h3><code class="docutils literal notranslate"><span class="pre">ram-hvariable</span></code></h3>
+<p>( “name” – )</p>
+<p>Allocate a halfword variable in RAM</p>
+</section>
+<section id="ram-variable">
+<h3><code class="docutils literal notranslate"><span class="pre">ram-variable</span></code></h3>
+<p>( “name” – )</p>
+<p>Allocate a variable in RAM</p>
+</section>
+<section id="ram-2variable">
+<h3><code class="docutils literal notranslate"><span class="pre">ram-2variable</span></code></h3>
+<p>( “name” – )</p>
+<p>Allocate a doubleword variable in RAM</p>
+</section>
+<section id="ram-buffer">
+<h3><code class="docutils literal notranslate"><span class="pre">ram-buffer:</span></code></h3>
+<p>( bytes “name” – )</p>
+<p>Allocate a buffer in RAM</p>
+</section>
+<section id="ram-aligned-buffer">
+<h3><code class="docutils literal notranslate"><span class="pre">ram-aligned-buffer:</span></code></h3>
+<p>( bytes “name” – )</p>
+<p>Allocate a cell-aligned buffer in RAM</p>
+</section>
+<section id="cpus-deferred-context-switch">
+<h3><code class="docutils literal notranslate"><span class="pre">cpus-deferred-context-switch</span></code></h3>
+<p>Is there a deferred context switch for a given CPU.</p>
+</section>
+<section id="cpus-in-critical">
+<h3><code class="docutils literal notranslate"><span class="pre">cpus-in-critical</span></code></h3>
+<p>Critical section state for a given CPU.</p>
+</section>
+<section id="in-critical">
+<h3><code class="docutils literal notranslate"><span class="pre">in-critical</span></code></h3>
+<p>( – addr )</p>
+<p>Address of critical section state for the current CPU.</p>
+</section>
+<section id="set-current-flash-wordlist">
+<h3><code class="docutils literal notranslate"><span class="pre">set-current-flash-wordlist</span></code></h3>
+<p>( wid – )</p>
+<p>Specify current flash wordlist</p>
+</section>
+<section id="get-current-flash-wordlist">
+<h3><code class="docutils literal notranslate"><span class="pre">get-current-flash-wordlist</span></code></h3>
+<p>( – wid )</p>
+<p>Look up the current flash wordlist</p>
+</section>
+<section id="defer-xt">
+<h3><code class="docutils literal notranslate"><span class="pre">defer-xt&#64;</span></code></h3>
+<p>( deferred-xt – addr )</p>
+<p>Get the address at which the xt for a deferred xt is stored.</p>
+</section>
+<section id="fraction-size">
+<h3><code class="docutils literal notranslate"><span class="pre">fraction-size</span></code></h3>
+<p>( – u )</p>
+<p>Get current fraction size</p>
+</section>
+<section id="format-fraction">
+<h3><code class="docutils literal notranslate"><span class="pre">format-fraction</span></code></h3>
+<p>( u b-addr bytes – b-addr bytes )</p>
+<p>Format digits to the right of the decimal point</p>
+</section>
+<section id="add-decimal">
+<h3><code class="docutils literal notranslate"><span class="pre">add-decimal</span></code></h3>
+<p>( b-addr bytes – b-addr bytes )</p>
+<p>Add a decimal point</p>
+</section>
+<section id="do-nothing">
+<h3><code class="docutils literal notranslate"><span class="pre">do-nothing</span></code></h3>
+<p>Do nothing</p>
+</section>
+<section id="init-flash-dict">
+<h3><code class="docutils literal notranslate"><span class="pre">init-flash-dict</span></code></h3>
+<p>Initialize the flash dictionary</p>
+</section>
+<section id="init-dict">
+<h3><code class="docutils literal notranslate"><span class="pre">init-dict</span></code></h3>
+<p>Initiatlize the dictionary</p>
+</section>
+<section id="find-last-visible-word">
+<h3><code class="docutils literal notranslate"><span class="pre">find-last-visible-word</span></code></h3>
+<p>Find the last visible word</p>
+</section>
+<section id="do-init">
+<h3><code class="docutils literal notranslate"><span class="pre">do-init</span></code></h3>
+<p>Run the initialization routine, if there is one</p>
+</section>
+<section id="init-variables">
+<h3><code class="docutils literal notranslate"><span class="pre">init-variables</span></code></h3>
+<p>Initialize the variables</p>
+</section>
+<section id="find-dict">
+<h3><code class="docutils literal notranslate"><span class="pre">find-dict</span></code></h3>
+<p>( addr bytes dict wid – word|0 )</p>
+<p>Find a word in a specific dictionary for a specific wordlist or return zero for no word found</p>
+</section>
+<section id="find-in-wordlist">
+<h3><code class="docutils literal notranslate"><span class="pre">find-in-wordlist</span></code></h3>
+<p>( addr bytes wid – word|0 )</p>
+<p>Find a word in a specific wordlist or return zero for no word found</p>
+</section>
+<section id="find-dict-by-xt">
+<h3><code class="docutils literal notranslate"><span class="pre">find-dict-by-xt</span></code></h3>
+<p>( xt dict – word|0 )</p>
+<p>Find a word in a dictionary by execution token or return zero for no word found; only words with headers will be found</p>
+</section>
+<section id="min-ram-wordlist">
+<h3><code class="docutils literal notranslate"><span class="pre">min-ram-wordlist</span></code></h3>
+<p>( – wid )</p>
+<p>The minimum RAM wordlist value.</p>
+</section>
+<section id="current-ram-wordlist">
+<h3><code class="docutils literal notranslate"><span class="pre">current-ram-wordlist</span></code></h3>
+<p>( – addr )</p>
+<p>Address of the current RAM wordlist value.</p>
+</section>
+<section id="main">
+<h3><code class="docutils literal notranslate"><span class="pre">main</span></code></h3>
+<p>The main functionality, within the main exception handler</p>
+</section>
+<section id="validate">
+<h3><code class="docutils literal notranslate"><span class="pre">validate</span></code></h3>
+<p>Validate the current state</p>
+</section>
+<section id="do-prompt">
+<h3><code class="docutils literal notranslate"><span class="pre">do-prompt</span></code></h3>
+<p>Display a prompt</p>
+</section>
+<section id="do-refill">
+<h3><code class="docutils literal notranslate"><span class="pre">do-refill</span></code></h3>
+<p>Implement the refill hook</p>
+</section>
+<section id="do-failed-parse">
+<h3><code class="docutils literal notranslate"><span class="pre">do-failed-parse</span></code></h3>
+<p>Implement the failed parse hook</p>
+</section>
+<section id="do-handle-number">
+<h3><code class="docutils literal notranslate"><span class="pre">do-handle-number</span></code></h3>
+<p>Implement the handle number hook</p>
+</section>
+<section id="parse-integer-core">
+<h3><code class="docutils literal notranslate"><span class="pre">parse-integer-core</span></code></h3>
+<p>( b-addr u base – n success )</p>
+<p>Actually parse an integer</p>
+</section>
+<section id="parse-unsigned-core">
+<h3><code class="docutils literal notranslate"><span class="pre">parse-unsigned-core</span></code></h3>
+<p>( b-addr u base – u success )</p>
+<p>Actually parse an unsigned integer</p>
+</section>
+<section id="constant-with-name">
+<h3><code class="docutils literal notranslate"><span class="pre">constant-with-name</span></code></h3>
+<p>Create a constant with a specified name as a string</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">2constant-with-name</span></code></h3>
+<p>Create a 2-word constant with a name specified as a string</p>
+</section>
+<section id="skip-to-token">
+<h3><code class="docutils literal notranslate"><span class="pre">skip-to-token</span></code></h3>
+<p>Skip to the start of a token</p>
+</section>
+<section id="format-integer-inner">
+<h3><code class="docutils literal notranslate"><span class="pre">format-integer-inner</span></code></h3>
+<p>The inner portion of formatting an integer as a string</p>
+</section>
+<section id="eval-index-ptr">
+<h3><code class="docutils literal notranslate"><span class="pre">eval-index-ptr</span></code></h3>
+<p>( – addr-addr )</p>
+<p>Get the address of the address of the evaluation buffer index value.</p>
+</section>
+<section id="eval-count-ptr">
+<h3><code class="docutils literal notranslate"><span class="pre">eval-count-ptr</span></code></h3>
+<p>( – addr-addr )</p>
+<p>Get the address of the address of the evaluation buffer byte count value.</p>
+</section>
+<section id="eval-ptr">
+<h3><code class="docutils literal notranslate"><span class="pre">eval-ptr</span></code></h3>
+<p>( – addr )</p>
+<p>Get the address of the evaluation buffer.</p>
+</section>
+<section id="eval-data">
+<h3><code class="docutils literal notranslate"><span class="pre">eval-data</span></code></h3>
+<p>( – addr )</p>
+<p>Get address of a general-purpose data value to be used by the evaluation refill and EOF check routines.</p>
+</section>
+<section id="eval-refill">
+<h3><code class="docutils literal notranslate"><span class="pre">eval-refill</span></code></h3>
+<p>( – xt-addr ) ( xt: – )</p>
+<p>Get address of the evaluation refill routine. This routine is called when <code class="docutils literal notranslate"><span class="pre">outer</span></code> has completed interpreting the entire contents of the evaluation buffer, and should update the evaluation buffer pointer, the evaluation index, and the evaluation byte count accordingly.</p>
+</section>
+<section id="eval-eof">
+<h3><code class="docutils literal notranslate"><span class="pre">eval-eof</span></code></h3>
+<p>( – xt-addr ) ( xt: – eof? )</p>
+<p>Get address of the evaluation EOF check routine. <code class="docutils literal notranslate"><span class="pre">outer</span></code> exits if this routine returns non-zero when called.</p>
+</section>
+<section id="prompt-disabled">
+<h3><code class="docutils literal notranslate"><span class="pre">prompt-disabled</span></code></h3>
+<p>( – addr )</p>
+<p>Get the address of the prompt-disabled counter (positive values correspond to prompt display being disabled).</p>
+</section>
+<section id="dump-ascii-16">
+<h3><code class="docutils literal notranslate"><span class="pre">dump-ascii-16</span></code></h3>
+<p>( start-addr – )</p>
+<p>Dump 16 bytets of ASCII.</p>
+</section>
+<section id="picture-size">
+<h3><code class="docutils literal notranslate"><span class="pre">picture-size</span></code></h3>
+<p>( – bytes )</p>
+<p>The maximum pictures numeric output size.</p>
+</section>
+<section id="picture-offset">
+<h3><code class="docutils literal notranslate"><span class="pre">picture-offset</span></code></h3>
+<p>( – addr )</p>
+<p>The start of pictured numeric output user variable.</p>
+</section>
+<section id="fraction-size-table">
+<h3><code class="docutils literal notranslate"><span class="pre">fraction-size-table</span></code></h3>
+<p>( – addr )</p>
+<p>The fraction size lookup table.</p>
+</section>
+<section id="flush-console-hook">
+<h3><code class="docutils literal notranslate"><span class="pre">flush-console-hook</span></code></h3>
+<p>( – addr )</p>
+<p>The address of the flush console hook variable.</p>
+</section>
+<section id="flash-dict-warned">
+<h3><code class="docutils literal notranslate"><span class="pre">flash-dict-warned</span></code></h3>
+<p>( – addr )</p>
+<p>The address of the user warned about flash dictionary space flag.</p>
+</section>
+<section id="do-flash-validate-dict">
+<h3><code class="docutils literal notranslate"><span class="pre">do-flash-validate-dict</span></code></h3>
+<p>( – )</p>
+<p>Warn the user if flash space is running low.</p>
+</section>
+<section id="flash-mini-dict">
+<h3><code class="docutils literal notranslate"><span class="pre">flash-mini-dict</span></code></h3>
+<p>( – addr )</p>
+<p>The base address of the flash mini-dictionary. (RP2040 only.)</p>
+</section>
+<section id="flash-mini-dict-free">
+<h3><code class="docutils literal notranslate"><span class="pre">flash-mini-dict-free</span></code></h3>
+<p>( – addr )</p>
+<p>The address of the flash mini-dictionary entries left count. (RP2040 only.)</p>
+</section>
+<section id="hash-string">
+<h3><code class="docutils literal notranslate"><span class="pre">hash-string</span></code></h3>
+<p>( b-addr bytes – hash )</p>
+<p>Hash a string as a 32-bit value. (RP2040 only.)</p>
+</section>
+<section id="hash-string-and-wid">
+<h3><code class="docutils literal notranslate"><span class="pre">hash-string-and-wid</span></code></h3>
+<p>( b-addr bytes wid – hash )</p>
+<p>Hash a string and a wordlist ID as a 32-bit value; note that this 32-bit value is guaranteed to not be zero. (RP2040 only.)</p>
+</section>
+<section id="hash-word">
+<h3><code class="docutils literal notranslate"><span class="pre">hash-word</span></code></h3>
+<p>( word – hash )</p>
+<p>Hash the name and the wordlist ID of a word as a 32-bit value; note that this 32-bit value is guaranteed to not be zero. (RP2040 only.)</p>
+</section>
+<section id="clear-flash-mini-dict">
+<h3><code class="docutils literal notranslate"><span class="pre">clear-flash-mini-dict</span></code></h3>
+<p>( – )</p>
+<p>Clear the flash mini-dictionary. (RP2040 only.)</p>
+</section>
+<section id="x-flash-mini-dict-out-of-space">
+<h3><code class="docutils literal notranslate"><span class="pre">x-flash-mini-dict-out-of-space</span></code></h3>
+<p>( – )</p>
+<p>Flash mini-dictionary is out of space exception. (RP2040 only.)</p>
+</section>
+<section id="register-flash-mini-dict-space">
+<h3><code class="docutils literal notranslate"><span class="pre">register-flash-mini-dict-space</span></code></h3>
+<p>( – )</p>
+<p>Register a new entry is being added to the flash mini-dictionary (as opposed to replacing an existing entry). (RP2040 only.)</p>
+</section>
+<section id="equal-words">
+<h3><code class="docutils literal notranslate"><span class="pre">equal-words?</span></code></h3>
+<p>( word0 word1 – equal? )</p>
+<p>Get whether two words have equal names and wordlist ID’s. (RP2040 only.)</p>
+</section>
+<section id="add-flash-mini-dict-end">
+<h3><code class="docutils literal notranslate"><span class="pre">add-flash-mini-dict-end</span></code></h3>
+<p>( word – )</p>
+<p>Add an entry to the flash mini-dictionary when filling from start to end. (RP2040 only.)</p>
+</section>
+<section id="add-flash-mini-dict-start">
+<h3><code class="docutils literal notranslate"><span class="pre">add-flash-mini-dict-start</span></code></h3>
+<p>( word – )</p>
+<p>Add an entry to the flash mini-dictionary when filling from end to start. (RP2040 only.)</p>
+</section>
+<section id="init-flash-mini-dict">
+<h3><code class="docutils literal notranslate"><span class="pre">init-flash-mini-dict</span></code></h3>
+<p>( – )</p>
+<p>Initialize the flash mini-dictionary, populating it with entries corresponding to the entire flash dictionary. (RP2040 only.)</p>
+</section>
+<section id="find-flash-mini-dict">
+<h3><code class="docutils literal notranslate"><span class="pre">find-flash-mini-dict</span></code></h3>
+<p>( b-addr bytes wid – addr|0 )</p>
+<p>Find a word by name in the flash mini-dictionary for a given wordlist ID, returning the word’s address or, if not found, 0. (RP2040 only.)</p>
+</section>
+<section id="add-flash-mini-dict">
+<h3><code class="docutils literal notranslate"><span class="pre">add-flash-mini-dict</span></code></h3>
+<p>( – )</p>
+<p>Add the word compiled most recently to flash to the flash mini-dictionary, if currently compiling to flash. (RP2040 only.)</p>
+</section>
+<section id="find-optimized-wid">
+<h3><code class="docutils literal notranslate"><span class="pre">find-optimized-wid</span></code></h3>
+<p>( b-addr bytes wid – addr|0 )</p>
+<p>Find a word by name with the specified wordlist ID making use of the flash mini-dictionary, using the RAM dictionary first if compiling to RAM, and if not found in the RAM dictionary or if currently compiling to flash then trying to find it in the flash mini-dictionary, returning the word’s address or, if not found, 0. (RP2040 only.)</p>
+</section>
+<section id="find-optimized">
+<h3><code class="docutils literal notranslate"><span class="pre">find-optimized</span></code></h3>
+<p>( b-addr bytes – addr|0 )</p>
+<p>Find a word by name in the current wordlist order, making use of the RAM dictionary if compiling to RAM, and making use of the flash mini-dictionary, returning the word’s address or, if not found, 0. (RP2040 only.)</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

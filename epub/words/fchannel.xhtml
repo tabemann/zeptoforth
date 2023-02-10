@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Rendezvous Channel Words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section class="tex2jax_ignore mathjax_ignore" id="rendezvous-channel-words">
+<h1>Rendezvous Channel Words</h1>
+<p>A rendezvous channel is a monodirectional means of communicating data between two different tasks. Rendezvous channels are not buffered queues; provided another task is listening to a rendezvous channel, sending on a rendezvous channel immediately transfers control to the receiving task and sends the sending task to the end of the scheduling ring. Only a single copy is done when transferring data from the sending task to the receiving task.</p>
+<p>Tasks attempting to send on rendezvous channels first check whether there is a queued task waiting to receive on the rendezvous channel; if there are tasks queued to receive, the first task queued is dequeued, the sending task’s buffer is copied into the receiving task’s buffer, and the receiving task is readied. If no tasks are queued to receive, the sending task is queued to send on the rendezvous channel and is blocked.</p>
+<p>Tasks attempting to receive on rendezvous channels first check whether there is a queued task waiting to send on the rendezvous channel; if there are tasks queued to send, the first task queued is dequeued, the sending task’s buffer is copied into the receiving task’s buffer, and the sending task is readied. If no tasks are queued to send, the receiving task is queued to receive on the rendezvous channel and is blocked.</p>
+<p>Both the send queues and receive queues are ordered first by task priority and second by the order in which tasks were added to them, with tasks of higher priority and tasks added earlier coming first.</p>
+<p>Rendezvous channels can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put into alloted memory in the dictionary or into allocated memory in the heap.</p>
+<section id="fchan">
+<h2><code class="docutils literal notranslate"><span class="pre">fchan</span></code></h2>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">fchan</span></code>:</p>
+<section id="x-fchan-closed">
+<h3><code class="docutils literal notranslate"><span class="pre">x-fchan-closed</span></code></h3>
+<p>( – )</p>
+<p>The rendezvous channel closed exception.</p>
+</section>
+<section id="fchan-size">
+<h3><code class="docutils literal notranslate"><span class="pre">fchan-size</span></code></h3>
+<p>( – bytes )</p>
+<p>Get the size of an rendezvous channel in bytes.</p>
+</section>
+<section id="init-fchan">
+<h3><code class="docutils literal notranslate"><span class="pre">init-fchan</span></code></h3>
+<p>( addr – )</p>
+<p>Initialize a rendezvous channel starting at the specified address.</p>
+</section>
+<section id="close-fchan">
+<h3><code class="docutils literal notranslate"><span class="pre">close-fchan</span></code></h3>
+<p>( fchan – )</p>
+<p>Close a rendezvous channel. Pending sends and receives will be aborted with the exception <code class="docutils literal notranslate"><span class="pre">x-fchan-closed</span></code>.</p>
+</section>
+<section id="reopen-fchan">
+<h3><code class="docutils literal notranslate"><span class="pre">reopen-fchan</span></code></h3>
+<p>( fchan – )</p>
+<p>Reopen a rendezvous channel.</p>
+</section>
+<section id="fchan-closed">
+<h3><code class="docutils literal notranslate"><span class="pre">fchan-closed?</span></code></h3>
+<p>( fchan – closed )</p>
+<p>Get whether a rendezvous channel is closed.</p>
+</section>
+<section id="send-fchan">
+<h3><code class="docutils literal notranslate"><span class="pre">send-fchan</span></code></h3>
+<p>( addr bytes fchan – )</p>
+<p>Send message with a buffer as a payload over a rendezvous channel. Block until another task receives the message; if a task is already waiting for a message, transfer control to it. Note that the buffer is copied, and will be truncated if the buffer size of the rendezvous channel is smaller than the data provided, and padded with zeros if it is larger. Note that this must not be called within a critical section.</p>
+</section>
+<section id="recv-fchan">
+<h3><code class="docutils literal notranslate"><span class="pre">recv-fchan</span></code></h3>
+<p>( addr bytes fchan – recv-bytes )</p>
+<p>Receive message with a buffer as a payload over a rendezvous channel. Block until another task sends a message. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the rendezvous channel; the number of bytes copied is returned. Note that this must not be called within a critical section.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

@@ -13,6 +13,8 @@
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Simple FAT32 Support" href="simple_fat32.html" />
@@ -33,7 +35,7 @@
 
           <div class="body" role="main">
             
-  <section id="fat32-support">
+  <section class="tex2jax_ignore mathjax_ignore" id="fat32-support">
 <h1>FAT32 Support<a class="headerlink" href="#fat32-support" title="Permalink to this headline">¶</a></h1>
 <p>zeptoforth includes FAT32 filesystem support combined with MBR partition table support on devices implementing the <code class="docutils literal notranslate"><span class="pre">&lt;block-dev&gt;</span></code> class defined in the module <code class="docutils literal notranslate"><span class="pre">block-dev</span></code> (currently only the <code class="docutils literal notranslate"><span class="pre">&lt;sd&gt;</span></code> class defined in the module <code class="docutils literal notranslate"><span class="pre">sd</span></code>). It supports creating files and directories, reading files and directories, writing files and (indirectly) directories, seeking in files, removing files and (empty) directories, and renaming (but currently not moving) files and directories. It also supports parsing paths within filesystems. It supports reading partition table entries from the MBR, and uses these when initializing FAT32 filesystems.</p>
 <section id="fat32">
@@ -357,9 +359,9 @@
 <p>This member is 8 bytes in size.</p>
 <p>The short file name component, padded with spaces.</p>
 <p>The first byte can have the special values:
-$00: final entry in the directory entry table
-$05: the initial byte is actually $35
-$2E: the dot entry
+<span class="math notranslate nohighlight">\(00: final entry in the directory entry table
+\)</span>05: the initial byte is actually <span class="math notranslate nohighlight">\(35
+\)</span>2E: the dot entry
 $E5: the directory entry has been deleted</p>
 </section>
 <section id="short-file-ext">
@@ -374,14 +376,14 @@ $E5: the directory entry has been deleted</p>
 <p>This member is 1 bytes in size.</p>
 <p>The file attributes.</p>
 <p>There are the following bits:
-$01: read only
-$02: hidden
-$04: system (do not move in the filesystem)
-$08: volume label
-$10: subdirectory (subdirectories have a file size of zero)
-$20: archive
-$40: device
-$80: reserved</p>
+<span class="math notranslate nohighlight">\(01: read only
+\)</span>02: hidden
+<span class="math notranslate nohighlight">\(04: system (do not move in the filesystem)
+\)</span>08: volume label
+<span class="math notranslate nohighlight">\(10: subdirectory (subdirectories have a file size of zero)
+\)</span>20: archive
+<span class="math notranslate nohighlight">\(40: device
+\)</span>80: reserved</p>
 </section>
 <section id="nt-vfat-case">
 <h3><code class="docutils literal notranslate"><span class="pre">nt-vfat-case</span></code><a class="headerlink" href="#nt-vfat-case" title="Permalink to this headline">¶</a></h3>
@@ -639,6 +641,7 @@ bits 4-0: day (1-31)</p>
 <li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
 </ul>
 
 <div class="relations">
@@ -676,7 +679,7 @@ bits 4-0: day (1-31)</p>
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
