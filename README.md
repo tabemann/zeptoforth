@@ -6,7 +6,7 @@ WARNING: If you want .bin or .uf2 files to install zeptoforth on your microcontr
 
 API documentation is available [on GitHub](https://github.com/tabemann/zeptoforth/tree/master/docs/words) and in the docs directory on the build tarballs (which is the same as the html directory in git and in the source tarballs available on GitHub generated from that, which is built from the API documentation in Markdown format in the docs directory in git). There is also a [wiki on GitHub](https://github.com/tabemann/zeptoforth/wiki) outlining zeptoforth and providing useful guides to it.
 
-The official zeptoforth IRC support channel is #zeptoforth on irc.hackint.org..
+The official zeptoforth IRC support channel is #zeptoforth on irc.hackint.org.
 
 Its kernel has versions written in Thumb-1 assembly, for the RP2040, and Thumb-2 assembly, for the STM32L476, STM32F407, and STM32F746 DISCOVERY boards, and the STM32F411 "Black Pill" board. and there is a body of other core code that is loaded after it is loaded which is written in Forth.
 
