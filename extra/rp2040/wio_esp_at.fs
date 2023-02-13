@@ -58,12 +58,6 @@ begin-module wio-esp-at
     \ Handshake pin
     21 constant handshake-pin
 
-    \ Reset pin
-    22 constant reset-pin
-
-    \ Power pin
-    25 constant power-pin
-
   end-module> import
 
   \ The WIO ESP-AT SPI interface class implementation
@@ -73,22 +67,27 @@ begin-module wio-esp-at
     :noname { self -- }
       false false spi-index motorola-spi
       spi-index master-spi
-      2000000 spi-index spi-baud!
+      1000000 spi-index spi-baud!
       8 spi-index spi-data-size!
       spi-index miso-pin spi-pin
       spi-index clk-pin spi-pin
       spi-index mosi-pin spi-pin
-      handshake-pin pull-down-pin
+      handshake-pin output-pin
+      22 output-pin
+      24 output-pin
+      25 output-pin
+      cs-pin output-pin
+      high handshake-pin pin!
+      high 21 pin!
+      high 24 pin!
+      high 22 pin!
+      low cs-pin pin!
+      low 25 pin!
       handshake-pin input-pin
+      high cs-pin pin!
       cs-pin spi-index self <esp-at-spi>->new
       spi-index enable-spi
-      reset-pin output-pin
-      low reset-pin pin!
-      100 ms
-      power-pin output-pin
-      high power-pin pin!
-      100 ms
-      high reset-pin pin!
+      
     ; define new
 
     \ Get whether the ESP-AT device is ready
