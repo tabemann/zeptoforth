@@ -87,7 +87,7 @@ begin-module wio-esp-at
       high cs-pin pin!
       cs-pin spi-index self <esp-at-spi>->new
       spi-index enable-spi
-      
+      100 ms
     ; define new
 
     \ Get whether the ESP-AT device is ready

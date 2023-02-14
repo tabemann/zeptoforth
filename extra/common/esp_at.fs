@@ -91,12 +91,15 @@ begin-module esp-at
     1 constant SPI_MASTER_WRITE_STATUS_TO_SLAVE_CMD
     4 constant SPI_MASTER_READ_STATUS_FROM_SLAVE_CMD
 
+    \ Clear timeout
+    1000 constant clear-timeout
+
     \ Emit a visible character
     : emit-visible { byte -- }
       byte $20 >= byte $0D = or byte $0A = or if byte emit then
     ;
 
-    \ Emit a visible string
+    \ Type a visible string
     : type-visible { c-addr u -- }
       c-addr u + c-addr ?do i c@ emit-visible loop
     ;
@@ -562,7 +565,6 @@ begin-module esp-at
     \ Send length message
     :noname { W^ len self -- }
       self begin-transact
-      200. delay-us
       SPI_MASTER_WRITE_STATUS_TO_SLAVE_CMD self byte>esp-at
       len 4 self buffer>esp-at
       self end-transact
@@ -571,7 +573,6 @@ begin-module esp-at
     \ Send data message
     :noname { data bytes self -- }
       self begin-transact
-      200. delay-us
       SPI_MASTER_WRITE_DATA_TO_SLAVE_CMD self byte>esp-at
       0 self byte>esp-at
       bytes 0> if
@@ -586,18 +587,16 @@ begin-module esp-at
     \ Receive length message
     :noname { self -- len }
       self begin-transact
-      200. delay-us
       SPI_MASTER_READ_STATUS_FROM_SLAVE_CMD self byte>esp-at
       0 { W^ len }
       len 4 self esp-at>buffer
       self end-transact
-      len @
+      len @ dup -1 = if drop 0 then
     ; define esp-at>trans-len
 
     \ Receive data message
     :noname { data bytes self -- }
       self begin-transact
-      200. delay-us
       SPI_MASTER_READ_DATA_FROM_SLAVE_CMD self byte>esp-at
       0 self byte>esp-at
       bytes 0> if
@@ -719,9 +718,15 @@ begin-module esp-at
     
     \ Clear an ESP-AT device's received messages
     method clear-esp-at ( self -- )
+
+    \ Clear an ESP-AT device's received messages without parsing data
+    method clear-esp-at-no-parse ( self -- )
     
     \ Send a message to an ESP-AT device
     method msg>esp-at ( c-addr bytes self -- )
+
+    \ End a command
+    method end>esp-at ( self -- )
 
     \ Send an integer to an ESP-AT device
     method integer>esp-at ( n self -- )
@@ -764,6 +769,9 @@ begin-module esp-at
     
     \ Connect to a WiFi AP
     method connect-esp-at-wifi ( D: password D: ssid self -- )
+
+    \ Disconnect from a WiFi AP
+    method disconnect-esp-at-wifi ( self -- )
 
     \ Resolve a domain name
     method resolve-esp-at-ip ( prefer D: domain -- c-addr bytes found )
@@ -826,7 +834,7 @@ begin-module esp-at
     ; define new
 
     \ Process data for received frames
-    :noname { c-addr bytes self -- c-addr' bytes' }
+    :noname { c-addr bytes self -- }
       begin
         self esp-at-frame? @ if
           c-addr bytes self process-esp-at-frame-body to bytes to c-addr
@@ -834,27 +842,7 @@ begin-module esp-at
         self esp-at-frame? @ not if
           c-addr bytes self process-esp-at-frame-header to bytes to c-addr
         then
-        self esp-at-frame? @ if
-          bytes 0> if
-            false
-          else
-            c-addr 0 true
-          then
-        else
-          bytes 0> if
-            self esp-at-frame-recv-size @ 0= c-addr c@ [char] + = and if
-              false
-            else
-              self esp-at-frame-recv-size @ 0= if
-                c-addr bytes true
-              else
-                false
-              then
-            then
-          else
-            c-addr 0 true
-          then
-        then
+        bytes 0=
       until
     ; define process-esp-at-frame
 
@@ -934,6 +922,8 @@ begin-module esp-at
                 drop 0 self esp-at-frame-recv-size !
               then
             then
+            1 +to c-addr
+            -1 +to bytes
           then
         then
       then
@@ -943,7 +933,7 @@ begin-module esp-at
     \ Process data for receive frame header intros
     :noname { c-addr bytes self -- c-addr' bytes' }
       bytes 0> self esp-at-frame-recv-size @ 0= and if
-        c-addr c@ [char] + = if
+        c-addr c@ [char] + = if ."  ==+== "
           [char] + self esp-at-frame-buffer c!
           1 self esp-at-frame-recv-size +!
         then
@@ -951,44 +941,44 @@ begin-module esp-at
         -1 +to bytes
       then
       bytes 0> self esp-at-frame-recv-size @ 1 = and if
-        c-addr c@ [char] I = if
+        c-addr c@ [char] I = if ."  ==I== "
           [char] I self esp-at-frame-buffer 1 + c!
           1 self esp-at-frame-recv-size +!
+          1 +to c-addr
+          -1 +to bytes
         else
           0 self esp-at-frame-recv-size !
         then
-        1 +to c-addr
-        -1 +to bytes
       then
       bytes 0> self esp-at-frame-recv-size @ 2 = and if
-        c-addr c@ [char] P = if
+        c-addr c@ [char] P = if ."  ==P== "
           [char] P self esp-at-frame-buffer 2 + c!
           1 self esp-at-frame-recv-size +!
+          1 +to c-addr
+          -1 +to bytes
         else
           0 self esp-at-frame-recv-size !
         then
-        1 +to c-addr
-        -1 +to bytes
       then
       bytes 0> self esp-at-frame-recv-size @ 3 = and if
-        c-addr c@ [char] D = if
+        c-addr c@ [char] D = if ."  ==D==  "
           [char] D self esp-at-frame-buffer 3 + c!
           1 self esp-at-frame-recv-size +!
-        else
+          1 +to c-addr
+          -1 +to bytes
+        else .
           0 self esp-at-frame-recv-size !
         then
-        1 +to c-addr
-        -1 +to bytes
       then
       bytes 0> self esp-at-frame-recv-size @ 4 = and if
-        c-addr c@ [char] , = if
+        c-addr c@ [char] , = if ."  ==,== "
           [char] , self esp-at-frame-buffer 4 + c!
           1 self esp-at-frame-recv-size +!
+          1 +to c-addr
+          -1 +to bytes
         else
           0 self esp-at-frame-recv-size !
         then
-        1 +to c-addr
-        -1 +to bytes
       then
       c-addr bytes
     ; define process-esp-at-frame-intro
@@ -1034,28 +1024,49 @@ begin-module esp-at
 
     \ Clear an ESP-AT device's received messages
     :noname { self -- }
+      systick-counter { start-systick }
       begin
         begin self esp-at-intf @ esp-at-ready? while
           self esp-at-intf @ esp-at>trans-len { len }
           0 { offset }
           begin offset len < while
-            50. delay-us
-            self esp-at-buffer offset +
-            esp-at-buffer-size offset - 64 min
-            self esp-at-intf @ esp-at>trans-data
-            180. delay-us
-            64 +to offset
+            200. delay-us
+            len offset - 64 min { recv-bytes }
+            self esp-at-buffer recv-bytes self esp-at-intf @ esp-at>trans-data
+            200. delay-us
+            recv-bytes +to offset
+            self esp-at-buffer recv-bytes self process-esp-at-frame
           repeat
-          log if self esp-at-buffer len type-visible then
-          self esp-at-buffer len self process-esp-at-frame 2drop
+          \ log if self esp-at-buffer len type-visible then
         repeat
+        systick-counter start-systick - clear-timeout > if
+          false self esp-at-frame? !
+          0 self esp-at-frame-size !
+          0 self esp-at-frame-recv-size !
+          -1 self esp-at-frame-mux !
+        then
         self esp-at-frame? @ not
       until
     ; define clear-esp-at
-    
+
+    \ Clear an ESP-AT device's received messages without parsing data
+    :noname { self -- }
+      begin self esp-at-intf @ esp-at-ready? while
+        self esp-at-intf @ esp-at>trans-len { len }
+        0 { offset }
+        begin offset len < while
+          200. delay-us
+          len offset - 64 min { recv-bytes }
+          self esp-at-buffer 64 self esp-at-intf @ esp-at>trans-data
+          200. delay-us
+          recv-bytes +to offset
+        repeat
+\        log if self esp-at-buffer len type-visible then
+      repeat
+    ; define clear-esp-at-no-parse
+
     \ Send a message to an ESP-AT device
     :noname { c-addr bytes self -- }
-      log if c-addr bytes type-visible then
       self validate-esp-at-owner
       systick-counter { start-systick }
       bytes self esp-at-intf @ trans-len>esp-at
@@ -1068,10 +1079,16 @@ begin-module esp-at
           self esp-at-intf @ esp-at-ready?
         until
         bytes offset - 0 max 64 min { send-bytes }
-        c-addr offset + send-bytes esp-at-intf @ trans-data>esp-at
+        c-addr offset + send-bytes self esp-at-intf @ trans-data>esp-at
         200. delay-us
         send-bytes +to offset
       repeat
+    ; define msg>esp-at
+
+    \ End a command
+    :noname { self -- }
+      systick-counter { start-systick }
+      s\" \r\n" self msg>esp-at
       begin
         systick-counter start-systick - self esp-at-timeout @ <
         averts x-esp-at-timeout
@@ -1079,8 +1096,8 @@ begin-module esp-at
       until
       0 self esp-at-intf @ trans-len>esp-at
       200. delay-us
-    ; define msg>esp-at
-
+    ; define end>esp-at
+    
     \ Send an integer to an ESP-AT device
     :noname ( n self -- )
       32 [: { n self buffer }
@@ -1095,13 +1112,13 @@ begin-module esp-at
       0 { offset }
       begin offset len < while
         200. delay-us
-        bytes offset - 0 max 64 min { recv-bytes }
+        len offset - 0 max 64 min { recv-bytes }
         c-addr offset + recv-bytes self esp-at-intf @ esp-at>trans-data
         200. delay-us
         recv-bytes +to offset
       repeat
       bytes len min
-      log if c-addr over type-visible then
+\      log if c-addr over type-visible then
     ; define esp-at>msg
 
     \ Receive a string from an ESP-AT device
@@ -1114,18 +1131,18 @@ begin-module esp-at
       0 { offset }
       systick-counter { start-systick }
       begin
-        begin
-          self esp-at-intf @ esp-at-ready? offset esp-at-buffer-size < and
-        while
+        self esp-at-intf @ esp-at-ready? offset esp-at-buffer-size < and
+        if
           systick-counter start-systick - self esp-at-timeout @ <
           averts x-esp-at-timeout
           self esp-at-buffer offset +
           esp-at-buffer-size offset - self esp-at>msg +to offset
-        repeat
+          200. delay-us
+        then
         self esp-at-buffer offset filter-xt execute dup -1 <> if
           { found-offset found-index }
           self esp-at-buffer found-offset + offset found-offset -
-          self process-esp-at-frame 2drop
+          self process-esp-at-frame
           self esp-at-buffer found-offset found-index true
         else
           2drop
@@ -1153,6 +1170,7 @@ begin-module esp-at
       s" AT+CIPMUX=" self msg>esp-at
       multi? if 1 else 0 then self integer>esp-at
       s\" \r\n" self msg>esp-at
+      self end>esp-at
       ['] filter-ok-error self esp-at>match 0= averts x-esp-at-error
     ; define esp-at-multi!
     
@@ -1160,7 +1178,9 @@ begin-module esp-at
     :noname { self -- multi? }
       self validate-esp-at-owner
       self clear-esp-at
-      s\" AT+CIPMUX?\r\n" self msg>esp-at
+      s" AT+CIPMUX?" self msg>esp-at
+      s\" \r\n" self msg>esp-at
+      self end>esp-at
       ['] filter-ok-error self esp-at>string 0= averts x-esp-at-error
       s" +CIPMUX:" find-data parse-decimal averts x-esp-at-error
       case 0 of false endof 1 of true endof ['] x-esp-at-error ?raise endcase
@@ -1173,6 +1193,7 @@ begin-module esp-at
       s" AT+CIPV6=" self msg>esp-at
       ipv6? if 1 else 0 then self integer>esp-at
       s\" \r\n" self msg>esp-at
+      self end>esp-at
       ['] filter-ok-error self esp-at>match 0= averts x-esp-at-error
     ; define esp-at-ipv6!
 
@@ -1180,7 +1201,9 @@ begin-module esp-at
     :noname { self -- ipv6? }
       self validate-esp-at-owner
       self clear-esp-at
-      s\" AT+CIPMUX?\r\n" self msg>esp-at
+      s" AT+CIPMUX?" self msg>esp-at
+      s\" \r\n" self msg>esp-at
+      self end>esp-at
       ['] filter-ok-error self esp-at>string 0= averts x-esp-at-error
       s" +CIPV6:" find-data parse-decimal averts x-esp-at-error
       case 0 of false endof 1 of true endof ['] x-esp-at-error ?raise endcase
@@ -1190,7 +1213,9 @@ begin-module esp-at
     :noname { status self -- }
       self validate-esp-at-owner
       self clear-esp-at
-      s\" AT+CIPSTATUS\r\n" self msg>esp-at
+      s" AT+CIPSTATUS" self msg>esp-at
+      s\" \r\n" self msg>esp-at
+      self end>esp-at
       ['] filter-ok-error self esp-at>string 0= averts x-esp-at-error
       { resp-addr resp-bytes }
       resp-addr resp-bytes s" +CIPSTATUS:" count-data
@@ -1232,13 +1257,16 @@ begin-module esp-at
       s" ," self msg>esp-at
       auto-connect-mode self integer>esp-at
       s\" \r\n" self msg>esp-at
+      self end>esp-at
       ['] filter-ok-error self esp-at>match 0= averts x-esp-at-error
     ; define esp-at-wifi-mode!
 
     \ Reset an ESP-AT device
     :noname { self -- }
       self validate-esp-at-owner
-      s\" AT+RST\r\n" self msg>esp-at
+      s" AT+RST" self msg>esp-at
+      s\" \r\n" self msg>esp-at
+      self end>esp-at
       ['] filter-ok self esp-at>wait
     ; define reset-esp-at
 
@@ -1247,7 +1275,7 @@ begin-module esp-at
       self validate-esp-at-owner
       self esp-at-intf @ esp-at-ready? if
         self esp-at-buffer esp-at-buffer-size self esp-at>msg { bytes }
-        self esp-at-buffer bytes self process-esp-at-frame 2drop
+        self esp-at-buffer bytes self process-esp-at-frame
       then
     ; define poll-esp-at
 
@@ -1260,8 +1288,18 @@ begin-module esp-at
       s\" \",\"" self msg>esp-at
       password self msg>esp-at
       s\" \"\r\n" self msg>esp-at
+      self end>esp-at
       ['] filter-ok-error self esp-at>match 0= averts x-esp-at-error
     ; define connect-esp-at-wifi
+    
+    \ Disconnect from a WiFi AP
+    :noname { self -- }
+      self validate-esp-at-owner
+      self clear-esp-at
+      s\" AT+CWQAP\r\n" self msg>esp-at
+      self end>esp-at
+      ['] filter-ok-error self esp-at>wait
+    ; define disconnect-esp-at-wifi
     
     \ Resolve a domain name
     :noname { prefer D: domain self -- c-addr bytes found }
@@ -1274,6 +1312,7 @@ begin-module esp-at
       s\" \"," self msg>esp-at
       prefer self integer>esp-at
       s\" \r\n" self msg>esp-at
+      self end>esp-at
       ['] filter-ok-error self esp-at>string 0<> if 0 0 false exit then
       { D: resp }
       resp s" +CIPDOMAIN:" self find-data parse-quote-field 2swap 2drop true
@@ -1298,6 +1337,7 @@ begin-module esp-at
       s" ," self msg>esp-at
       keep-alive self integer>esp-at
       s\" \r\n" self msg>esp-at
+      self end>esp-at
       ['] filter-ok-error self esp-at>match 0= averts x-esp-at-error
     ; define start-esp-at-single
     
@@ -1323,6 +1363,7 @@ begin-module esp-at
       s" ," self msg>esp-at
       keep-alive self integer>esp-at
       s\" \r\n" self msg>esp-at
+      self end>esp-at
       ['] filter-ok-error self esp-at>match 0= averts x-esp-at-error
     ; define start-esp-at-multi
 
@@ -1334,6 +1375,7 @@ begin-module esp-at
       s" AT+CIPSERVER=1,"
       port self integer>esp-at
       s\" \r\n" self msg>esp-at
+      self end>esp-at
       ['] filter-ok-error self esp-at>match 0= averts x-esp-at-error
     ; define start-esp-at-server
 
@@ -1345,6 +1387,7 @@ begin-module esp-at
       s" AT+CIPSERVER=0,"
       close-all? self integer>esp-at
       s\" \r\n" self msg>esp-at
+      self end>esp-at
       ['] filter-ok-error self esp-at>match 0= averts x-esp-at-error
     ; define delete-esp-at-server
 
@@ -1377,9 +1420,11 @@ begin-module esp-at
       s" AT+CIPSEND=" self msg>esp-at
       bytes self integer>esp-at
       s\" \r\n" self msg>esp-at
+      self end>esp-at
       ['] filter-gt self ['] esp-at>wait 50000 self with-esp-at-timeout
-      self clear-esp-at
+      self clear-esp-at-no-parse
       c-addr bytes self msg>esp-at
+      self end>esp-at
       ['] filter-send-ok self ['] esp-at>wait 100000 self with-esp-at-timeout
     ; define single-block>esp-at
       
@@ -1392,9 +1437,11 @@ begin-module esp-at
       s" ," self msg>esp-at
       bytes self integer>esp-at
       s\" \r\n" self msg>esp-at
+      self end>esp-at
       ['] filter-gt self ['] esp-at>wait 50000 self with-esp-at-timeout
-      self clear-esp-at
+      self clear-esp-at-no-parse
       c-addr bytes self msg>esp-at
+      self end>esp-at
       ['] filter-send-ok self ['] esp-at>wait 100000 self with-esp-at-timeout
     ; define multi-block>esp-at
 
@@ -1402,7 +1449,9 @@ begin-module esp-at
     :noname { self -- }
       self validate-esp-at-owner
       self clear-esp-at
-      s\" AT+CIPCLOSE\r\n" self msg>esp-at
+      s\" AT+CIPCLOSE" self msg>esp-at
+      s\" \r\n" self msg>esp-at
+      self end>esp-at
       ['] filter-ok-error self ['] esp-at>match 50000 self with-esp-at-timeout
       0= averts x-esp-at-error
     ; define close-esp-at-single
@@ -1414,6 +1463,7 @@ begin-module esp-at
       s" AT+CIPCLOSE=" self msg>esp-at
       mux self integer>esp-at
       s\" \r\n" self msg>esp-at
+      self end>esp-at
       [: { D: string -- index found }
         string s\" \r\nOK" find-string dup -1 <> if 0 exit else drop then
         string s\" link is not" find-string dup -1 <> if 1 else drop 0 -1 then
