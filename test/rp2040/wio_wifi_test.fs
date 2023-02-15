@@ -33,14 +33,15 @@ begin-module wifi-test
     <wio-esp-at-spi> intf init-object
     intf <esp-at> device init-object
     200000 device esp-at-timeout!
-    [: { device } ."  *A* "
-      not-auto-connect station-mode device esp-at-wifi-mode! ."  *B* "
-      s" 3149626775" s" ATT949" device connect-esp-at-wifi ."  *C* "
-      0 tcp 80 s\" google.com" device start-esp-at-single ."  *D* "
-      [: ."  *I* " drop type ;] device esp-at-recv-xt! ."  *E* "
-      s\" GET / HTTP/1.1\r\n" device single>esp-at ."  *F* "
-      s\" Host: google.com\r\n" device single>esp-at ."  *G* "
-      s\" Accept: */*\r\n\r\n" device single>esp-at ."  *H* "
+    [: { device }
+      device disconnect-esp-at-wifi
+      not-auto-connect station-mode device esp-at-wifi-mode!
+      s" 3149626775" s" ATT949" device connect-esp-at-wifi
+      0 tcp 80 s\" google.com" device start-esp-at-single
+      [: ."  *I* " drop type ;] device esp-at-recv-xt!
+      s\" GET / HTTP/1.1\r\n" device single>esp-at
+      s\" Host: google.com\r\n" device single>esp-at
+      s\" Accept: */*\r\n\r\n" device single>esp-at
       systick::systick-counter { start-time }
       begin
         device poll-esp-at

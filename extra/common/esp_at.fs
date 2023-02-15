@@ -563,49 +563,62 @@ begin-module esp-at
     ; define esp-at>buffer
 
     \ Send length message
-    :noname { W^ len self -- }
-      self begin-transact
-      SPI_MASTER_WRITE_STATUS_TO_SLAVE_CMD self byte>esp-at
-      len 4 self buffer>esp-at
-      self end-transact
+    :noname ( len self -- )
+      5 [: { len self buffer }
+        SPI_MASTER_WRITE_STATUS_TO_SLAVE_CMD buffer c!
+        len $FF and buffer 1 + c!
+        len 8 rshift $FF and buffer 2 + c!
+        len 16 rshift $FF and buffer 3 + c!
+        len 24 rshift $FF and buffer 4 + c!
+        self begin-transact
+        buffer 5 self buffer>esp-at
+        self end-transact
+      ;] with-allot
     ; define trans-len>esp-at
 
     \ Send data message
-    :noname { data bytes self -- }
-      self begin-transact
-      SPI_MASTER_WRITE_DATA_TO_SLAVE_CMD self byte>esp-at
-      0 self byte>esp-at
-      bytes 0> if
-        data bytes self buffer>esp-at
-      then
-      bytes 64 < if
-        64 bytes ?do 0 self byte>esp-at loop
-      then
-      self end-transact
+    :noname ( data bytes self -- )
+      66 [: { data bytes self buffer }
+        SPI_MASTER_WRITE_DATA_TO_SLAVE_CMD buffer c!
+        0 buffer 1 + c!
+        data buffer 2 + bytes 64 min move
+        buffer 2 + bytes + 64 bytes - 0 max 0 fill
+        self begin-transact
+        buffer 66 self buffer>esp-at
+        self end-transact
+        log if data bytes type-visible then \ DEBUG
+      ;] with-allot
     ; define trans-data>esp-at
 
     \ Receive length message
-    :noname { self -- len }
-      self begin-transact
-      SPI_MASTER_READ_STATUS_FROM_SLAVE_CMD self byte>esp-at
-      0 { W^ len }
-      len 4 self esp-at>buffer
-      self end-transact
-      len @ dup -1 = if drop 0 then
+    :noname ( self -- len )
+      5 [: { self buffer }
+        SPI_MASTER_READ_STATUS_FROM_SLAVE_CMD buffer c!
+        buffer 1 + 4 0 fill
+        self begin-transact
+        buffer 1 self buffer>esp-at
+        buffer 1 + 4 self esp-at>buffer
+        self end-transact
+        buffer 1 + c@
+        buffer 2 + c@ 8 lshift or
+        buffer 3 + c@ 16 lshift or
+        buffer 4 + c@ 24 lshift or
+        dup -1 = if drop 0 then
+      ;] with-allot
     ; define esp-at>trans-len
 
     \ Receive data message
-    :noname { data bytes self -- }
-      self begin-transact
-      SPI_MASTER_READ_DATA_FROM_SLAVE_CMD self byte>esp-at
-      0 self byte>esp-at
-      bytes 0> if
-        data bytes self esp-at>buffer
-      then
-      bytes 64 < if
-        64 bytes ?do self esp-at>byte drop loop
-      then
-      self end-transact
+    :noname ( data bytes self -- )
+      66 [: { data bytes self buffer }
+        SPI_MASTER_READ_DATA_FROM_SLAVE_CMD buffer c!
+        buffer 1 + 65 0 fill
+        self begin-transact
+        buffer 2 self buffer>esp-at
+        buffer 2 + 64 self esp-at>buffer
+        self end-transact
+        buffer 2 + data bytes 0 max 64 min move
+        log if data bytes type-visible then \ DEBUG
+      ;] with-allot
     ; define esp-at>trans-data
       
   end-implement
@@ -698,6 +711,9 @@ begin-module esp-at
 
       \ Process data for received frame header intros
       method process-esp-at-frame-intro ( c-addr bytes self -- c-addr' bytes' )
+
+      \ Wait for ready with timeout
+      method wait-ready ( start-systick self -- )
       
     end-module
 
@@ -933,7 +949,7 @@ begin-module esp-at
     \ Process data for receive frame header intros
     :noname { c-addr bytes self -- c-addr' bytes' }
       bytes 0> self esp-at-frame-recv-size @ 0= and if
-        c-addr c@ [char] + = if ."  ==+== "
+        c-addr c@ [char] + = if
           [char] + self esp-at-frame-buffer c!
           1 self esp-at-frame-recv-size +!
         then
@@ -941,7 +957,7 @@ begin-module esp-at
         -1 +to bytes
       then
       bytes 0> self esp-at-frame-recv-size @ 1 = and if
-        c-addr c@ [char] I = if ."  ==I== "
+        c-addr c@ [char] I = if
           [char] I self esp-at-frame-buffer 1 + c!
           1 self esp-at-frame-recv-size +!
           1 +to c-addr
@@ -951,7 +967,7 @@ begin-module esp-at
         then
       then
       bytes 0> self esp-at-frame-recv-size @ 2 = and if
-        c-addr c@ [char] P = if ."  ==P== "
+        c-addr c@ [char] P = if
           [char] P self esp-at-frame-buffer 2 + c!
           1 self esp-at-frame-recv-size +!
           1 +to c-addr
@@ -961,7 +977,7 @@ begin-module esp-at
         then
       then
       bytes 0> self esp-at-frame-recv-size @ 3 = and if
-        c-addr c@ [char] D = if ."  ==D==  "
+        c-addr c@ [char] D = if
           [char] D self esp-at-frame-buffer 3 + c!
           1 self esp-at-frame-recv-size +!
           1 +to c-addr
@@ -971,7 +987,7 @@ begin-module esp-at
         then
       then
       bytes 0> self esp-at-frame-recv-size @ 4 = and if
-        c-addr c@ [char] , = if ."  ==,== "
+        c-addr c@ [char] , = if
           [char] , self esp-at-frame-buffer 4 + c!
           1 self esp-at-frame-recv-size +!
           1 +to c-addr
@@ -982,7 +998,16 @@ begin-module esp-at
       then
       c-addr bytes
     ; define process-esp-at-frame-intro
-    
+
+    \ Wait for ready with timeout
+    :noname { start-systick self -- }
+      begin
+        systick-counter start-systick - self esp-at-timeout @ <
+        averts x-esp-at-timeout
+        self esp-at-intf @ esp-at-ready?
+      until
+    ; define wait-ready
+
     \ Execute code with an ESP-AT device
     :noname ( xt self -- ) ( xt: self -- )
       [:
@@ -1073,11 +1098,7 @@ begin-module esp-at
       0 { offset }
       begin offset bytes < while
         200. delay-us
-        begin
-          systick-counter start-systick - self esp-at-timeout @ <
-          averts x-esp-at-timeout
-          self esp-at-intf @ esp-at-ready?
-        until
+        start-systick self wait-ready
         bytes offset - 0 max 64 min { send-bytes }
         c-addr offset + send-bytes self esp-at-intf @ trans-data>esp-at
         200. delay-us
@@ -1087,15 +1108,8 @@ begin-module esp-at
 
     \ End a command
     :noname { self -- }
-      systick-counter { start-systick }
-      s\" \r\n" self msg>esp-at
-      begin
-        systick-counter start-systick - self esp-at-timeout @ <
-        averts x-esp-at-timeout
-        self esp-at-intf @ esp-at-ready?
-      until
+      systick-counter self wait-ready
       0 self esp-at-intf @ trans-len>esp-at
-      200. delay-us
     ; define end>esp-at
     
     \ Send an integer to an ESP-AT device
@@ -1114,8 +1128,8 @@ begin-module esp-at
         200. delay-us
         len offset - 0 max 64 min { recv-bytes }
         c-addr offset + recv-bytes self esp-at-intf @ esp-at>trans-data
-        200. delay-us
         recv-bytes +to offset
+        200. delay-us
       repeat
       bytes len min
 \      log if c-addr over type-visible then
@@ -1131,8 +1145,7 @@ begin-module esp-at
       0 { offset }
       systick-counter { start-systick }
       begin
-        self esp-at-intf @ esp-at-ready? offset esp-at-buffer-size < and
-        if
+        self esp-at-intf @ esp-at-ready? offset esp-at-buffer-size < and if
           systick-counter start-systick - self esp-at-timeout @ <
           averts x-esp-at-timeout
           self esp-at-buffer offset +
@@ -1146,6 +1159,7 @@ begin-module esp-at
           self esp-at-buffer found-offset found-index true
         else
           2drop
+          offset esp-at-buffer-size < averts x-esp-at-error
           systick-counter start-systick - self esp-at-timeout @ <
           averts x-esp-at-timeout
           false
