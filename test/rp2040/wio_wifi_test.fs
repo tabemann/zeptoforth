@@ -29,14 +29,14 @@ begin-module wifi-test
   
   : reset-wifi ( -- ) [: reset-esp-at ;] device with-esp-at ;
   
-  : run-test ( -- )
+  : run-test ( D: password D: ssid -- )
     <wio-esp-at-spi> intf init-object
     intf <esp-at> device init-object
     200000 device esp-at-timeout!
-    [: { device }
+    [: { D: password D: ssid device }
       device disconnect-esp-at-wifi
       not-auto-connect station-mode device esp-at-wifi-mode!
-      s" 3149626775" s" ATT949" device connect-esp-at-wifi
+      password ssid device connect-esp-at-wifi
       0 tcp 80 s\" google.com" device start-esp-at-single
       [: cr ." >>>>>" cr drop type ;] device esp-at-recv-xt!
       s\" GET / HTTP/1.1\r\n" device single>esp-at
