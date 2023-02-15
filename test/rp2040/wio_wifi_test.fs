@@ -38,7 +38,7 @@ begin-module wifi-test
       not-auto-connect station-mode device esp-at-wifi-mode!
       s" 3149626775" s" ATT949" device connect-esp-at-wifi
       0 tcp 80 s\" google.com" device start-esp-at-single
-      [: ."  *I* " drop type ;] device esp-at-recv-xt!
+      [: cr ." >>>>>" cr drop type ;] device esp-at-recv-xt!
       s\" GET / HTTP/1.1\r\n" device single>esp-at
       s\" Host: google.com\r\n" device single>esp-at
       s\" Accept: */*\r\n\r\n" device single>esp-at
