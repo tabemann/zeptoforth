@@ -140,7 +140,7 @@ begin-module esp-at
       else
         -2 +to field-end
       then
-      resp-addr head-end + resp-bytes head-end - field-end -
+      resp-addr head-end + field-end
     ;
 
     \ Find the nth index of data in a response with a given header
@@ -234,6 +234,28 @@ begin-module esp-at
         udpv6 of s" UDPv6" endof
         ssl of s" SSL" endof
         sslv6 of s" SSLv6" endof
+        ['] x-out-of-range-value ?raise
+      endcase
+    ;
+
+    \ Format a station status
+    : format-status-station ( status -- c-addr bytes )
+      case
+        station-not-inited of s" not inited" endof
+        station-not-connected of s" not connected" endof
+        station-connected of s" connected" endof
+        station-active of s" active" endof
+        station-disconnected of s" disconnected" endof
+        station-attempted-wifi of s" attempted wifi" endof
+        ['] x-out-of-range-value ?raise
+      endcase
+    ;
+
+    \ Format client/server
+    : format-client-server ( client/server -- c-addr bytes )
+      case
+        client of s" client" endof
+        server of s" server" endof
         ['] x-out-of-range-value ?raise
       endcase
     ;
@@ -361,7 +383,7 @@ begin-module esp-at
     method esp-at-status-tetype! ( tetype index self -- )
 
     \ Get the entry link server/client type
-    method esp-at-status-tetype@ ( index self tetype -- )
+    method esp-at-status-tetype@ ( index self -- tetype )
 
     \ Set the entry link remote IP
     method esp-at-status-remote-ip! ( ip-addr ip-len index self -- )
@@ -380,6 +402,9 @@ begin-module esp-at
 
     \ Get the entry link local port
     method esp-at-status-local-port@ ( index self -- port )
+
+    \ Print link status
+    method esp-at-status. ( self -- )
     
   end-class
 
@@ -389,7 +414,7 @@ begin-module esp-at
     \ Initialize an ESP-AT connection state info bject
     :noname { self -- }
       self <object>->new
-      station-not-inited esp-at-status-station !
+      station-not-inited self esp-at-status-station !
       0 self esp-at-status-count !
     ; define new
     
@@ -451,12 +476,12 @@ begin-module esp-at
     \ Set the entry link server/client type
     :noname { tetype index self -- }
       tetype server <= averts x-out-of-range-value
-      tetype index self esp-at-status-entry esp-at-status-entry-type c!
+      tetype index self esp-at-status-entry esp-at-status-entry-tetype c!
     ; define esp-at-status-tetype!
 
     \ Get the entry link server/client type
-    :noname { index self tetype -- }
-      index self esp-at-status-entry esp-at-status-entry-type c@
+    :noname { index self -- tetype }
+      index self esp-at-status-entry esp-at-status-entry-tetype c@
     ; define esp-at-status-tetype@
 
     \ Set the entry link remote IP
@@ -495,7 +520,22 @@ begin-module esp-at
     :noname { index self -- port }
       index self esp-at-status-entry esp-at-status-entry-local-port h@
     ; define esp-at-status-local-port@
-    
+
+    \ Print link status
+    :noname { self -- }
+      cr ." Station status: "
+      self esp-at-status-station@ format-status-station type
+      self esp-at-status-count@ 0 ?do
+        cr ." Link: " i self esp-at-status-mux@ .
+        ." Type: " i self esp-at-status-type@ format-connect-type type space
+        ." Remote IP: " i self esp-at-status-remote-ip@ type space
+        ." Remote port: " i self esp-at-status-remote-port@ .
+        ." Local port: " i self esp-at-status-local-port@ .
+        ." Client/server: " i self esp-at-status-tetype@
+        format-client-server type
+      loop
+    ; define esp-at-status.
+
   end-implement
 
   \ The ESP-AT SPI interface class
@@ -774,6 +814,12 @@ begin-module esp-at
     \ Get the connection state
     method esp-at-status@ ( status self -- )
 
+    \ Set the WiFi power
+    method esp-at-wifi-power! ( power self -- )
+
+    \ Get the WiFi power
+    method esp-at-wifi-power@ ( self -- power )
+    
     \ Set the WiFi mode
     method esp-at-wifi-mode! ( auto-connect-mode wifi-mode self -- )
 
@@ -1232,14 +1278,14 @@ begin-module esp-at
       self end>esp-at
       ['] filter-ok-error self esp-at>string 0= averts x-esp-at-error
       { resp-addr resp-bytes }
+      resp-addr resp-bytes s" STATUS:" find-data
+      parse-decimal averts x-esp-at-error
+      dup station-attempted-wifi u<= averts x-esp-at-error
+      status esp-at-status-station!
       resp-addr resp-bytes s" +CIPSTATUS:" count-data
       esp-at-status-max-count min { resp-count }
       resp-count status esp-at-status-count!
       resp-count 0 ?do
-        resp-addr resp-bytes s" STATUS:" find-data averts x-esp-at-error
-        parse-decimal averts x-esp-at-error
-        dup station-attempted-wifi u<= averts x-esp-at-error
-        status esp-at-status-station!
         resp-addr resp-bytes s" +CIPSTATUS:" i find-nth-data
         averts x-esp-at-error
         parse-field parse-decimal averts x-esp-at-error
@@ -1257,9 +1303,33 @@ begin-module esp-at
         parse-field parse-decimal averts x-esp-at-error
         dup server u<= averts x-esp-at-error
         i status esp-at-status-tetype!
+        2drop
       loop
     ; define esp-at-status@
 
+    \ Set the WiFi power
+    :noname { power self -- }
+      self validate-esp-at-owner
+      self clear-esp-at
+      s" AT+RFPOWER=" self msg>esp-at
+      power self integer>esp-at
+      s\" \r\n" self msg>esp-at
+      self end>esp-at
+      ['] filter-ok-error self esp-at>match 0= averts x-esp-at-error
+    ; define esp-at-wifi-power!
+
+    \ Get the WiFi power
+    :noname { self -- power }
+      self validate-esp-at-owner
+      self clear-esp-at
+      s" AT+RFPOWER?" self msg>esp-at
+      s\" \r\n" self msg>esp-at
+      self end>esp-at
+      ['] filter-ok-error self esp-at>string 0= averts x-esp-at-error
+      s" +RFPOWER:" find-data parse-field 2swap 2drop
+      parse-decimal averts x-esp-at-error
+    ; define esp-at-wifi-power@
+    
     \ Set the WiFi mode
     :noname { auto-connect-mode mode self -- }
       auto-connect-mode auto-connect u<= averts x-out-of-range-value
@@ -1278,6 +1348,7 @@ begin-module esp-at
     \ Reset an ESP-AT device
     :noname { self -- }
       self validate-esp-at-owner
+      self clear-esp-at
       s" AT+RST" self msg>esp-at
       s\" \r\n" self msg>esp-at
       self end>esp-at
@@ -1466,8 +1537,7 @@ begin-module esp-at
       s\" AT+CIPCLOSE" self msg>esp-at
       s\" \r\n" self msg>esp-at
       self end>esp-at
-      ['] filter-ok-error self ['] esp-at>match 50000 self with-esp-at-timeout
-      0= averts x-esp-at-error
+      ['] filter-ok-error self esp-at>match  0= averts x-esp-at-error
     ; define close-esp-at-single
 
     \ Close a multiple connection on an ESP-AT device
@@ -1481,7 +1551,7 @@ begin-module esp-at
       [: { D: string -- index found }
         string s\" \r\nOK" find-string dup -1 <> if 0 exit else drop then
         string s\" link is not" find-string dup -1 <> if 1 else drop 0 -1 then
-      ;] self ['] esp-at>wait 50000 self with-esp-at-timeout
+      ;] self esp-at>wait
     ; define close-esp-at-multi
 
   end-implement
