@@ -64,8 +64,9 @@ begin-module wifi-test
         then
       until
       
+      [: cr ." >>>>> " . ." >>>>>" cr type ;] device esp-at-recv-xt!
+      
 \      0 tcp 80 s\" google.com" device start-esp-at-single
-\      [: cr ." >>>>> " . ." >>>>>" cr type ;] device esp-at-recv-xt!
 \      s\" GET / HTTP/1.1\r\n" device single>esp-at
 \      s\" Host: google.com\r\n" device single>esp-at
 \      s\" Accept: */*\r\n" device single>esp-at

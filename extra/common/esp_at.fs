@@ -957,10 +957,10 @@ begin-module esp-at
             self esp-at-frame-buffer 5 +
             self esp-at-frame-recv-size @ 5 - s" ," find-string { offset }
             offset -1 <> if
-              self esp-at-frame-buffer 5 + offset 1- parse-decimal if
+              self esp-at-frame-buffer 5 + offset 1 - parse-decimal if
                 { mux }
-                self esp-at-frame-buffer offset +
-                self esp-at-frame-recv-size @ offset - parse-decimal if
+                self esp-at-frame-buffer 5 + offset +
+                self esp-at-frame-recv-size @ 5 - offset - parse-decimal if
                   { frame-bytes }
                   true self esp-at-frame? !
                   mux self esp-at-frame-mux !
