@@ -206,6 +206,20 @@ continue-module internal
     then
   ;
 
+  \ Drop the current loop's locals
+  : drop-loop-locals ( -- )
+    find-leave-var 1+
+    undefer-lit
+    [ armv6m-instr import ]
+    dup 128 < if
+      4 * addsp,sp,#_
+    else
+      4 * 0 literal,
+      r0 addsp,sp,4_
+    then
+    [ armv6m-instr unimport ]
+  ;
+  
   \ Clear the current word's locals
   : clear-locals ( -- )
     local-buf-bottom @ local-buf local-buf-size + < if
@@ -844,8 +858,7 @@ end-module> import
   6 push,
   [ armv6m-instr import ]
   find-leave-var 4 * tos ldr_,[sp,#_]
-  block-exit-hook @ ?execute
-  block-exit-hook @ ?execute
+  drop-loop-locals
   tos r0 movs_,_
   tos 1 dp ldm
   r0 bx_
