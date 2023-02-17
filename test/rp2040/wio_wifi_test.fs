@@ -36,9 +36,15 @@ begin-module wifi-test
     <esp-at-status> status init-object
     200000 device esp-at-timeout!
     [: { D: password D: ssid device }
-      device esp-at-wifi-power@ cr ." Old WiFi power: " .
-      82 device esp-at-wifi-power!
-      device esp-at-wifi-power@ cr ." New WiFi power: " .
+      device esp-at-wifi-power@ cr ." Old WiFi power: " dup .
+      
+      80 < if
+        10 0 ?do
+          82 device esp-at-wifi-power!
+          device esp-at-wifi-power@ cr ." New WiFi power: " dup .
+          80 >= if leave then
+        loop
+      then
       
       device disconnect-esp-at-wifi
       not-auto-connect station-mode device esp-at-wifi-mode!
@@ -46,24 +52,33 @@ begin-module wifi-test
       begin
         password ssid device [:
           4 pick 4 pick 4 pick 4 pick 4 pick connect-esp-at-wifi
-        ;] try 0= nip nip nip nip nip
+        ;] try nip nip nip nip nip
+        dup 0= if
+          drop true
+        else
+          dup ['] x-esp-at-error = if
+            drop false
+          else
+            ?raise
+          then
+        then
       until
       
-      0 tcp 80 s\" google.com" device start-esp-at-single
-      [: cr ." >>>>> " . ." >>>>>" cr type ;] device esp-at-recv-xt!
-      s\" GET / HTTP/1.1\r\n" device single>esp-at
-      s\" Host: google.com\r\n" device single>esp-at
-      s\" Accept: */*\r\n" device single>esp-at
-      s\" Connection: close\r\n\r\n" device single>esp-at
-      
-      systick::systick-counter { start-time }
-      begin
-        device poll-esp-at
-        systick::systick-counter start-time - 100000 >=
-      until
-      
-      status device esp-at-status@
-      status esp-at-status.
+\      0 tcp 80 s\" google.com" device start-esp-at-single
+\      [: cr ." >>>>> " . ." >>>>>" cr type ;] device esp-at-recv-xt!
+\      s\" GET / HTTP/1.1\r\n" device single>esp-at
+\      s\" Host: google.com\r\n" device single>esp-at
+\      s\" Accept: */*\r\n" device single>esp-at
+\      s\" Connection: close\r\n\r\n" device single>esp-at
+\      
+\      systick::systick-counter { start-time }
+\      begin
+\        device poll-esp-at
+\        systick::systick-counter start-time - 100000 >=
+\      until
+\      
+\      status device esp-at-status@
+\      status esp-at-status.
       
 \      600000 device esp-at-timeout!
 \      device close-esp-at-single
