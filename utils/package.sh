@@ -34,6 +34,7 @@ rm -rf `find . -name '*~'`
 rm -rf obj
 rm -rf upload.fs
 make html
+make epub
 rm -rf docs
 mv html docs
 cd ..
