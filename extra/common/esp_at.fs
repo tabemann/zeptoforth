@@ -77,6 +77,12 @@ begin-module esp-at
   0 constant not-auto-connect
   1 constant auto-connect
 
+  \ Sleep modes
+  0 constant disable-sleep-mode
+  1 constant modem-sleep-dtim-mode
+  2 constant light-sleep-mode
+  3 constant modem-sleep-listen-interval-mode
+  
   \ Close-all setting
   0 constant not-close-all
   1 constant close-all
@@ -141,6 +147,25 @@ begin-module esp-at
         -2 +to field-end
       then
       resp-addr head-end + field-end
+    ;
+
+    \ Find data in a response with a given header without raising an error
+    : find-data-no-error
+      { resp-addr resp-bytes head-addr head-bytes -- addr' bytes' found? }
+      resp-addr resp-bytes head-addr head-bytes find-string
+      dup -1 <> if
+        { head-end }
+        resp-addr head-end + resp-bytes head-end - s\" \r\n" find-string
+        { field-end }
+        field-end -1 = if
+          resp-bytes head-end - to field-end
+        else
+          -2 +to field-end
+        then
+        resp-addr head-end + field-end true
+      else
+        0 0 false
+      then
     ;
 
     \ Find the nth index of data in a response with a given header
@@ -811,6 +836,12 @@ begin-module esp-at
     \ Get IPv6 mode enabled/disabled
     method esp-at-ipv6@ ( self -- ipv6? )
 
+    \ Set the sleep mode
+    method esp-at-sleep! ( sleep-mode self -- )
+
+    \ Get the sleep mode
+    method esp-at-sleep@ ( self -- sleep-mode )
+
     \ Get the connection state
     method esp-at-status@ ( status self -- )
 
@@ -823,6 +854,30 @@ begin-module esp-at
     \ Set the WiFi mode
     method esp-at-wifi-mode! ( auto-connect-mode wifi-mode self -- )
 
+    \ Get the local softAP IPv4 address
+    method esp-at-ap-ipv4-addr@ ( self -- c-addr bytes found? )
+
+    \ Get the local softAP link-local IPv6 address
+    method esp-at-ap-ipv6-ll-addr@ ( self -- c-addr bytes found? )
+
+    \ Get the local softAP global IPv6 address
+    method esp-at-ap-ipv6-gl-addr@ ( self -- c-addr bytes found? )
+
+    \ Get the local softAP MAC address
+    method esp-at-ap-mac-addr@ ( self -- c-addr bytes found? )
+
+    \ Get the local station IPv4 address
+    method esp-at-station-ipv4-addr@ ( self -- c-addr bytes found? )
+
+    \ Get the local station link-local IPv6 address
+    method esp-at-station-ipv6-ll-addr@ ( self -- c-addr bytes found? )
+
+    \ Get the local station global IPv6 address
+    method esp-at-station-ipv6-gl-addr@ ( self -- c-addr bytes found? )
+
+    \ Get the local station MAC address
+    method esp-at-station-mac-addr@ ( self -- c-addr bytes found? )
+    
     \ Reset an ESP-AT device
     method reset-esp-at ( self -- )
     
@@ -1261,13 +1316,38 @@ begin-module esp-at
     :noname { self -- ipv6? }
       self validate-esp-at-owner
       self clear-esp-at
-      s" AT+CIPMUX?" self msg>esp-at
+      s" AT+CIPV6?" self msg>esp-at
       s\" \r\n" self msg>esp-at
       self end>esp-at
       ['] filter-ok-error self esp-at>string 0= averts x-esp-at-error
       s" +CIPV6:" find-data parse-decimal averts x-esp-at-error
       case 0 of false endof 1 of true endof ['] x-esp-at-error ?raise endcase
     ; define esp-at-ipv6@
+
+    \ Set the sleep mode
+    :noname { sleep-mode self -- }
+      self validate-esp-at-owner
+      sleep-mode modem-sleep-listen-interval-mode u<=
+      averts x-out-of-range-value
+      self clear-esp-at
+      s" AT+SLEEP=" self msg>esp-at
+      sleep-mode self integer>esp-at
+      s\" \r\n" self msg>esp-at
+      self end>esp-at
+      ['] filter-ok-error self esp-at>match 0= averts x-esp-at-error
+    ; define esp-at-sleep!
+
+    \ Get the sleep mode
+    :noname { self -- sleep-mode }
+      self validate-esp-at-owner
+      self clear-esp-at
+      s" AT+SLEEP?" self msg>esp-at
+      s\" \r\n" self msg>esp-at
+      self end>esp-at
+      ['] filter-ok-error self esp-at>string 0= averts x-esp-at-error
+      s" +SLEEP:" find-data parse-decimal averts x-esp-at-error
+      dup modem-sleep-listen-interval-mode u<= averts x-esp-at-error
+    ; define esp-at-sleep@
 
     \ Get the connection status
     :noname { status self -- }
@@ -1345,6 +1425,118 @@ begin-module esp-at
       ['] filter-ok-error self esp-at>match 0= averts x-esp-at-error
     ; define esp-at-wifi-mode!
 
+    \ Get the local softAP IPv4 address
+    :noname { self -- c-addr bytes found? }
+      self validate-esp-at-owner
+      self clear-esp-at
+      s\" AT+CIFSR\r\n" self msg>esp-at
+      self end>esp-at
+      ['] filter-ok-error self esp-at>string 0= averts x-esp-at-error
+      s" +CIFSR:APIP," find-data-no-error if
+        parse-quote-field 2swap 2drop true
+      else
+        2drop 0 0 false
+      then
+    ; define esp-at-ap-ipv4-addr@
+
+    \ Get the local softAP link-local IPv6 address
+    :noname { self -- c-addr bytes found? }
+      self validate-esp-at-owner
+      self clear-esp-at
+      s\" AT+CIFSR\r\n" self msg>esp-at
+      self end>esp-at
+      ['] filter-ok-error self esp-at>string 0= averts x-esp-at-error
+      s" +CIFSR:AP6LL," find-data-no-error if
+        parse-quote-field 2swap 2drop true
+      else
+        2drop 0 0 false
+      then
+    ; define esp-at-ap-ipv6-ll-addr@
+
+    \ Get the local softAP global IPv6 address
+    :noname { self -- c-addr bytes found? }
+      self validate-esp-at-owner
+      self clear-esp-at
+      s\" AT+CIFSR\r\n" self msg>esp-at
+      self end>esp-at
+      ['] filter-ok-error self esp-at>string 0= averts x-esp-at-error
+      s" +CIFSR:AP6GL," find-data-no-error if
+        parse-quote-field 2swap 2drop true
+      else
+        2drop 0 0 false
+      then
+    ; define esp-at-ap-ipv6-gl-addr@
+
+    \ Get the local softAP MAC address
+    :noname { self -- c-addr bytes found? }
+      self validate-esp-at-owner
+      self clear-esp-at
+      s\" AT+CIFSR\r\n" self msg>esp-at
+      self end>esp-at
+      ['] filter-ok-error self esp-at>string 0= averts x-esp-at-error
+      s" +CIFSR:APMAC," find-data-no-error if
+        parse-quote-field 2swap 2drop true
+      else
+        2drop 0 0 false
+      then
+    ; define esp-at-ap-mac-addr@
+
+    \ Get the local station IPv4 address
+    :noname { self -- c-addr bytes found? }
+      self validate-esp-at-owner
+      self clear-esp-at
+      s\" AT+CIFSR\r\n" self msg>esp-at
+      self end>esp-at
+      ['] filter-ok-error self esp-at>string 0= averts x-esp-at-error
+      s" +CIFSR:STAIP," find-data-no-error if
+        parse-quote-field 2swap 2drop true
+      else
+        2drop 0 0 false
+      then
+    ; define esp-at-station-ipv4-addr@
+
+    \ Get the local station link-local IPv6 address
+    :noname { self -- c-addr bytes found? }
+      self validate-esp-at-owner
+      self clear-esp-at
+      s\" AT+CIFSR\r\n" self msg>esp-at
+      self end>esp-at
+      ['] filter-ok-error self esp-at>string 0= averts x-esp-at-error
+      s" +CIFSR:STA6LL," find-data-no-error if
+        parse-quote-field 2swap 2drop true
+      else
+        2drop 0 0 false
+      then
+    ; define esp-at-station-ipv6-ll-addr@
+
+    \ Get the local station global IPv6 address
+    :noname { self -- c-addr bytes found? }
+      self validate-esp-at-owner
+      self clear-esp-at
+      s\" AT+CIFSR\r\n" self msg>esp-at
+      self end>esp-at
+      ['] filter-ok-error self esp-at>string 0= averts x-esp-at-error
+      s" +CIFSR:STA6GL," find-data-no-error if
+        parse-quote-field 2swap 2drop true
+      else
+        2drop 0 0 false
+      then
+    ; define esp-at-station-ipv6-gl-addr@
+
+    \ Get the local station MAC address
+    :noname { self -- c-addr bytes found? }
+      self validate-esp-at-owner
+      self clear-esp-at
+      s\" AT+CIFSR\r\n" self msg>esp-at
+      self end>esp-at
+      ['] filter-ok-error self esp-at>string 0= averts x-esp-at-error
+      s" +CIFSR:STAMAC," find-data-no-error if
+        parse-quote-field 2swap 2drop true
+      else
+        2drop 0 0 false
+      then
+    ; define esp-at-station-mac-addr@
+
     \ Reset an ESP-AT device
     :noname { self -- }
       self validate-esp-at-owner
@@ -1400,7 +1592,7 @@ begin-module esp-at
       self end>esp-at
       ['] filter-ok-error self esp-at>string 0<> if 0 0 false exit then
       { D: resp }
-      resp s" +CIPDOMAIN:" self find-data parse-quote-field 2swap 2drop true
+      resp s" +CIPDOMAIN:" find-data parse-quote-field 2swap 2drop true
     ; define resolve-esp-at-ip
 
     \ Start a single ESP-AT connection
@@ -1516,6 +1708,7 @@ begin-module esp-at
     \ Send a block of data for a multiple connection to an ESP-AT device
     :noname { c-addr bytes mux self -- }
       self validate-esp-at-owner
+      mux 4 <= averts x-out-of-range-value
       self clear-esp-at
       s" AT+CIPSEND=" self msg>esp-at
       mux self integer>esp-at
@@ -1543,6 +1736,7 @@ begin-module esp-at
     \ Close a multiple connection on an ESP-AT device
     :noname { mux self -- }
       self validate-esp-at-owner
+      mux 5 <= averts x-out-of-range-value
       self clear-esp-at
       s" AT+CIPCLOSE=" self msg>esp-at
       mux self integer>esp-at

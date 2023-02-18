@@ -36,6 +36,9 @@ begin-module wifi-test
     <esp-at-status> status init-object
     200000 device esp-at-timeout!
     [: { D: password D: ssid device }
+      
+      disable-sleep-mode device esp-at-sleep!
+      
       device esp-at-wifi-power@ cr ." Old WiFi power: " dup .
       
       80 < if
@@ -63,6 +66,18 @@ begin-module wifi-test
           then
         then
       until
+      
+      device esp-at-station-ipv4-addr@ if
+        cr ." Station IPv4 address: " type
+      else
+        2drop cr ." No station IPv4 address"
+      then
+
+      device esp-at-station-ipv6-gl-addr@ if
+        cr ." Station IPv6 global address: " type
+      else
+        2drop cr ." No station IPv6 global address"
+      then
       
       [: cr ." >>>>> " . ." >>>>>" cr type ;] device esp-at-recv-xt!
       
