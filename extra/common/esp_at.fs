@@ -87,9 +87,6 @@ begin-module esp-at
   0 constant not-close-all
   1 constant close-all
   
-  \ Are we logging input and output
-  true constant log
-
   begin-module esp-at-internal
 
     2 constant SPI_MASTER_WRITE_DATA_TO_SLAVE_CMD
@@ -210,7 +207,7 @@ begin-module esp-at
       c-addr bytes s" ," find-string dup -1 <> if
         { offset } c-addr offset + bytes offset - c-addr offset 1-
       else
-        c-addr bytes + 0 c-addr bytes
+        drop c-addr bytes + 0 c-addr bytes
       then
     ;
 
@@ -305,10 +302,23 @@ begin-module esp-at
   
     \ Default ESP-AT timeout in ticks
     50000 constant esp-at-default-timeout
-    
-    \ The ESP-AT interface parent class
-    <object> begin-class <esp-at-interface>
 
+    \ Default ESP-AT logging setting
+    false constant esp-at-default-log
+
+    \ Default ESP-AT communication delay in microseconds
+    300 constant esp-at-default-delay
+    
+  end-module> import
+    
+  \ The ESP-AT interface parent class
+  <object> begin-class <esp-at-interface>
+
+    continue-module esp-at-internal
+
+      \ Are we logging?
+      cell member esp-at-log
+      
       \ Begin transaction
       method begin-transact ( self -- )
 
@@ -342,13 +352,28 @@ begin-module esp-at
       \ Receive data message
       method esp-at>trans-data ( data self -- )
 
-    end-class
+    end-module
+    
+    \ Set logging
+    method esp-at-log! ( log? self -- )
 
-    \ This class is abstract so it has no method implementations
-    <esp-at-interface> begin-implement
-    end-implement
-  
-  end-module> import
+    \ Get logging
+    method esp-at-log? ( self -- log? )
+    
+  end-class
+
+  \ This class is abstract so it has no method implementations
+  <esp-at-interface> begin-implement
+
+    :noname { self }
+      self <object>->new
+      esp-at-default-log self esp-at-log !
+    ; define new
+    
+    :noname esp-at-log ! ; define esp-at-log!
+    :noname esp-at-log @ ; define esp-at-log?
+    
+  end-implement
 
   \ ESP-AT connection state info class
   <object> begin-class <esp-at-status>
@@ -651,7 +676,7 @@ begin-module esp-at
         self begin-transact
         buffer 66 self buffer>esp-at
         self end-transact
-        log if data bytes type-visible then \ DEBUG
+        self esp-at-log? if data bytes type-visible then
       ;] with-allot
     ; define trans-data>esp-at
 
@@ -682,7 +707,7 @@ begin-module esp-at
         buffer 2 + 64 self esp-at>buffer
         self end-transact
         buffer 2 + data bytes 0 max 64 min move
-        log if data bytes type-visible then \ DEBUG
+        self esp-at-log? if data bytes type-visible then
       ;] with-allot
     ; define esp-at>trans-data
       
@@ -741,6 +766,9 @@ begin-module esp-at
       \ Frame received callback
       cell member esp-at-recv-xt
 
+      \ Communication delay
+      cell member esp-at-delay
+
       \ Message buffer size
       4096 constant esp-at-buffer-size
 
@@ -779,8 +807,17 @@ begin-module esp-at
 
       \ Wait for ready with timeout
       method wait-ready ( start-systick self -- )
+
+      \ Delay a fixed amount for communication
+      method comm-delay ( self -- )
       
     end-module
+
+    \ Claim the ESP-AT device
+    method claim-esp-at ( self -- )
+
+    \ Release the ESP-AT device
+    method release-esp-at ( self -- )
 
     \ Execute code with an ESP-AT device
     method with-esp-at ( xt self -- )
@@ -796,6 +833,12 @@ begin-module esp-at
 
     \ Get the ESP-AT device timeout in ticks
     method esp-at-timeout@ ( self -- timeout )
+
+    \ Set the ESP-AT delay in microseconds
+    method esp-at-delay! ( delay self -- )
+
+    \ Get the ESP-AT delay in microseconds
+    method esp-at-delay@ ( self -- delay )
     
     \ Clear an ESP-AT device's received messages
     method clear-esp-at ( self -- )
@@ -942,6 +985,7 @@ begin-module esp-at
       intf self esp-at-intf !
       0 self esp-at-owner !
       esp-at-default-timeout self esp-at-timeout !
+      esp-at-default-delay self esp-at-delay !
       false self esp-at-frame? !
       -1 self esp-at-frame-mux !
       0 self esp-at-frame-size !
@@ -1109,6 +1153,24 @@ begin-module esp-at
       until
     ; define wait-ready
 
+    \ Delay a fixed amount for communication
+    :noname { self -- }
+      self esp-at-delay @ s>d delay-us
+    ; define comm-delay
+
+    \ Claim the ESP-AT device
+    :noname { self }
+      self esp-at-lock claim-lock
+      current-task self esp-at-owner !
+    ; define claim-esp-at
+
+    \ Release the ESP-AT device
+    :noname { self }
+      self validate-esp-at-owner
+      0 self esp-at-owner !
+      self esp-at-lock release-lock
+    ; define release-esp-at
+    
     \ Execute code with an ESP-AT device
     :noname ( xt self -- ) ( xt: self -- )
       [:
@@ -1143,6 +1205,16 @@ begin-module esp-at
       self esp-at-timeout @
     ; define esp-at-timeout@
     
+    \ Set the ESP-AT device delay in microseconds
+    :noname { delay self -- }
+      delay self esp-at-delay !
+    ; define esp-at-delay!
+
+    \ Get the ESP-AT device delay in microseconds
+    :noname { self -- delay }
+      self esp-at-delay @
+    ; define esp-at-delay@
+
     \ Validate the ESP-AT device owner
     :noname { self -- }
       self esp-at-owner @ current-task = averts x-esp-at-not-owned
@@ -1156,14 +1228,13 @@ begin-module esp-at
           self esp-at-intf @ esp-at>trans-len { len }
           0 { offset }
           begin offset len < while
-            200. delay-us
+            self comm-delay
             len offset - 64 min { recv-bytes }
             self esp-at-buffer recv-bytes self esp-at-intf @ esp-at>trans-data
-            200. delay-us
+            self comm-delay
             recv-bytes +to offset
             self esp-at-buffer recv-bytes self process-esp-at-frame
           repeat
-          \ log if self esp-at-buffer len type-visible then
         repeat
         systick-counter start-systick - clear-timeout > if
           false self esp-at-frame? !
@@ -1181,13 +1252,12 @@ begin-module esp-at
         self esp-at-intf @ esp-at>trans-len { len }
         0 { offset }
         begin offset len < while
-          200. delay-us
+          self comm-delay
           len offset - 64 min { recv-bytes }
           self esp-at-buffer 64 self esp-at-intf @ esp-at>trans-data
-          200. delay-us
+          self comm-delay
           recv-bytes +to offset
         repeat
-\        log if self esp-at-buffer len type-visible then
       repeat
     ; define clear-esp-at-no-parse
 
@@ -1198,11 +1268,11 @@ begin-module esp-at
       bytes self esp-at-intf @ trans-len>esp-at
       0 { offset }
       begin offset bytes < while
-        200. delay-us
+        self comm-delay
         start-systick self wait-ready
         bytes offset - 0 max 64 min { send-bytes }
         c-addr offset + send-bytes self esp-at-intf @ trans-data>esp-at
-        200. delay-us
+        self comm-delay
         send-bytes +to offset
       repeat
     ; define msg>esp-at
@@ -1226,14 +1296,13 @@ begin-module esp-at
       self esp-at-intf @ esp-at>trans-len { len }
       0 { offset }
       begin offset len < while
-        200. delay-us
+        self comm-delay
         len offset - 0 max 64 min { recv-bytes }
         c-addr offset + recv-bytes self esp-at-intf @ esp-at>trans-data
         recv-bytes +to offset
-        200. delay-us
+        self comm-delay
       repeat
       bytes len min
-\      log if c-addr over type-visible then
     ; define esp-at>msg
 
     \ Receive a string from an ESP-AT device
@@ -1251,7 +1320,7 @@ begin-module esp-at
           averts x-esp-at-timeout
           self esp-at-buffer offset +
           esp-at-buffer-size offset - self esp-at>msg +to offset
-          200. delay-us
+          self comm-delay
         then
         self esp-at-buffer offset filter-xt execute dup -1 <> if
           { found-offset found-index }
@@ -1649,7 +1718,7 @@ begin-module esp-at
       port 65536 u< averts x-out-of-range-value
       self validate-esp-at-owner
       self clear-esp-at
-      s" AT+CIPSERVER=1,"
+      s" AT+CIPSERVER=1," self msg>esp-at
       port self integer>esp-at
       s\" \r\n" self msg>esp-at
       self end>esp-at
@@ -1661,7 +1730,7 @@ begin-module esp-at
       close-all? close-all u<= averts x-out-of-range-value
       self validate-esp-at-owner
       self clear-esp-at
-      s" AT+CIPSERVER=0,"
+      s" AT+CIPSERVER=0," self msg>esp-at
       close-all? self integer>esp-at
       s\" \r\n" self msg>esp-at
       self end>esp-at

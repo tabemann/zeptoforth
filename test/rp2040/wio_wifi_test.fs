@@ -43,7 +43,7 @@ begin-module wifi-test
     then
   ;
   
-  : connect-to-ap { password ssid device -- }
+  : connect-to-ap { D: password D: ssid device -- }
     device disconnect-esp-at-wifi
     not-auto-connect station-mode device esp-at-wifi-mode!
       
@@ -128,9 +128,11 @@ begin-module wifi-test
     <wio-esp-at-spi> intf init-object
     intf <esp-at> device init-object
     <esp-at-status> status init-object
+    true intf esp-at-log!
     200000 device esp-at-timeout!
+    500 device esp-at-delay!
     [: { D: password D: ssid device }
-      device configure-power  
+      device configure-power
       password ssid device connect-to-ap
       device station-info
       device resolve-google
