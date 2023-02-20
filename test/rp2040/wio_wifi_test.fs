@@ -44,9 +44,6 @@ begin-module wifi-test
   ;
   
   : connect-to-ap { D: password D: ssid device -- }
-    device disconnect-esp-at-wifi
-    not-auto-connect station-mode device esp-at-wifi-mode!
-      
     begin
       password ssid device [:
         4 pick 4 pick 4 pick 4 pick 4 pick connect-esp-at-wifi
@@ -55,7 +52,7 @@ begin-module wifi-test
         drop true
       else
         dup ['] x-esp-at-error = if
-          drop false
+          drop cr ." RETRYING" 25 0 do 1000 ms ." ." loop cr false
         else
           ?raise
         then
@@ -105,6 +102,7 @@ begin-module wifi-test
   ;
   
   : multi-google-request { device -- }
+    [: cr ." >>>>> " . ." >>>>>" cr type ;] device esp-at-recv-xt!
     true device esp-at-multi!
     
     0 tcp 80 s\" google.com" 0 device start-esp-at-multi
@@ -131,7 +129,14 @@ begin-module wifi-test
     true intf esp-at-log!
     200000 device esp-at-timeout!
     500 device esp-at-delay!
+    
+    1 ms
+    intf power-wio-esp-at-off
+    1 ms
+    intf power-wio-esp-at-on
+    
     [: { D: password D: ssid device }
+      station-mode device init-esp-at
       device configure-power
       password ssid device connect-to-ap
       device station-info

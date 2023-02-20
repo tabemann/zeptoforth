@@ -34,6 +34,9 @@ begin-module esp-at
 
   \ ESP-AT timeout exception
   : x-esp-at-timeout ( -- ) ." ESP-AT device timed out" cr ;
+
+  \ ESP-AT device is not ready
+  : x-esp-at-not-ready ( -- ) ." ESP-AT device is not ready" cr ;
   
   \ General ESP-AT error
   : x-esp-at-error ( -- ) ." ESP-AT error" cr ;
@@ -810,6 +813,9 @@ begin-module esp-at
 
       \ Delay a fixed amount for communication
       method comm-delay ( self -- )
+
+      \ Set the transmission mode
+      method esp-at-tx-mode! ( passthrough? self -- )
       
     end-module
 
@@ -824,6 +830,10 @@ begin-module esp-at
 
     \ Execute code with a set timeout
     method with-esp-at-timeout ( xt timeout self -- )
+
+    \ Execute code with a set itmeout and return whether that timeout has been
+    \ reached
+    method catch-with-esp-at-timeout ( xt timeout self -- timed-out? )
 
     \ Set ESP-AT frame receive callback
     method esp-at-recv-xt! ( xt self -- ) ( xt: c-addr bytes mux -- )
@@ -920,6 +930,15 @@ begin-module esp-at
 
     \ Get the local station MAC address
     method esp-at-station-mac-addr@ ( self -- c-addr bytes found? )
+
+    \ Test an ESP-AT device
+    method test-esp-at ( self -- )
+
+    \ Set ESP-AT command echoing
+    method esp-at-echo! ( echo? self -- )
+
+    \ Initialize an ESP-AT device
+    method init-esp-at ( self -- )
     
     \ Reset an ESP-AT device
     method reset-esp-at ( self -- )
@@ -1158,6 +1177,17 @@ begin-module esp-at
       self esp-at-delay @ s>d delay-us
     ; define comm-delay
 
+    \ Set the transmission mode
+    :noname { passthrough? self -- }
+      self validate-esp-at-owner
+      self clear-esp-at
+      s" AT+CIPMODE=" self msg>esp-at
+      passthrough? if 1 else 0 then self integer>esp-at
+      s\" \r\n" self msg>esp-at
+      self end>esp-at
+      ['] filter-ok-error self esp-at>match 0= averts x-esp-at-error
+    ; define esp-at-tx-mode!
+    
     \ Claim the ESP-AT device
     :noname { self }
       self esp-at-lock claim-lock
@@ -1190,6 +1220,18 @@ begin-module esp-at
       ?raise
     ; define with-esp-at-timeout
 
+    \ Execute code with a set itmeout and return whether that timeout has been
+    \ reached
+    :noname { xt timeout self -- timed-out? }
+      self esp-at-timeout@ { saved-timeout }
+      timeout self esp-at-timeout!
+      xt try
+      saved-timeout self esp-at-timeout!
+      dup 0= if false swap then
+      dup ['] x-esp-at-timeout = if drop true 0 then
+      ?raise
+    ; define catch-with-esp-at-timeout
+    
     \ Set ESP-AT frame receive callback
     :noname { xt self -- } ( xt: c-addr bytes mux -- )
       xt self esp-at-recv-xt !
@@ -1606,6 +1648,50 @@ begin-module esp-at
       then
     ; define esp-at-station-mac-addr@
 
+    \ Issue a test command for an ESP-AT device
+    :noname { self -- }
+      self validate-esp-at-owner
+      self clear-esp-at
+      s\" AT\r\n" self msg>esp-at
+      self end>esp-at
+      ['] filter-ok self ['] esp-at>wait 10000 self catch-with-esp-at-timeout
+      not if exit then
+      self clear-esp-at
+      s\" AT\r\n" self msg>esp-at
+      self end>esp-at
+      ['] filter-ok self ['] esp-at>wait 10000 self catch-with-esp-at-timeout
+      not if exit then
+      self clear-esp-at
+      s\" AT\r\n" self msg>esp-at
+      self end>esp-at
+      ['] filter-ok self ['] esp-at>wait 10000 self catch-with-esp-at-timeout
+      triggers x-esp-at-not-ready
+    ; define test-esp-at
+
+    \ Set ESP-AT command echoing
+    :noname { echo? self -- }
+      self validate-esp-at-owner
+      self clear-esp-at
+      echo? if s\" ATE1\r\n" else s\" ATE0\r\n" then self msg>esp-at
+      self end>esp-at
+      ['] filter-ok-error self esp-at>match 0= averts x-esp-at-error
+    ; define esp-at-echo!
+
+    \ Initialize an ESP-AT device
+    :noname { mode self -- }
+      self validate-esp-at-owner
+      self test-esp-at
+      true self esp-at-echo!
+      false self esp-at-multi!
+      false self esp-at-tx-mode!
+      not-auto-connect mode self esp-at-wifi-mode!
+      mode softap-mode = mode softap-station-mode = or if
+        true self esp-at-multi!
+      else
+        self disconnect-esp-at-wifi
+      then
+    ; define init-esp-at
+    
     \ Reset an ESP-AT device
     :noname { self -- }
       self validate-esp-at-owner

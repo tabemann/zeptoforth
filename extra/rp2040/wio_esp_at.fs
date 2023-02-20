@@ -30,6 +30,13 @@ begin-module wio-esp-at
 
   \ The WIO ESP-AT SPI interface class
   <esp-at-spi> begin-class <wio-esp-at-spi>
+
+    \ Power on the ESP-AT device
+    method power-wio-esp-at-on ( self -- )
+
+    \ Power off the ESP-AT device
+    method power-wio-esp-at-off ( self -- )
+
   end-class
 
   begin-module wio-esp-at-internal
@@ -69,26 +76,40 @@ begin-module wio-esp-at
       spi-index master-spi
       2000000 spi-index spi-baud!
       8 spi-index spi-data-size!
+      cs-pin spi-index self <esp-at-spi>->new
       spi-index miso-pin spi-pin
       spi-index clk-pin spi-pin
       spi-index mosi-pin spi-pin
+      cs-pin output-pin
+      spi-index enable-spi      
+    ; define new
+
+    \ Power on the ESP-AT device
+    :noname { self -- }
       handshake-pin output-pin
       22 output-pin
       24 output-pin
       25 output-pin
-      cs-pin output-pin
       high handshake-pin pin!
       high 24 pin!
       high 22 pin!
       low cs-pin pin!
       low 25 pin!
-      handshake-pin pull-down-pin
       handshake-pin input-pin
       high cs-pin pin!
-      cs-pin spi-index self <esp-at-spi>->new
-      spi-index enable-spi
-      
-    ; define new
+    ; define power-wio-esp-at-on
+
+    \ Power off the ESP-AT device
+    :noname { self -- }
+      25 output-pin
+      handshake-pin output-pin
+      22 output-pin
+      24 output-pin
+      high 25 pin!
+      low handshake-pin pin!
+      low 24 pin!
+      low 22 pin!
+    ; define power-wio-esp-at-off
 
     \ Get whether the ESP-AT device is ready
     :noname { self -- }
