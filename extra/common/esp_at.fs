@@ -310,7 +310,7 @@ begin-module esp-at
     false constant esp-at-default-log
 
     \ Default ESP-AT communication delay in microseconds
-    300 constant esp-at-default-delay
+    500 constant esp-at-default-delay
     
   end-module> import
     
