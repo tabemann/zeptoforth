@@ -355,6 +355,12 @@ begin-module esp-at
       \ Receive data message
       method esp-at>trans-data ( data self -- )
 
+      \ Power on an ESP-AT device
+      method power-esp-at-on ( self -- )
+
+      \ Power off an ESP-AT device
+      method power-esp-at-off ( self -- )
+
     end-module
     
     \ Set logging
@@ -1680,6 +1686,10 @@ begin-module esp-at
     \ Initialize an ESP-AT device
     :noname { mode self -- }
       self validate-esp-at-owner
+      1 ms
+      self esp-at-intf @ power-esp-at-off
+      1 ms
+      self esp-at-intf @ power-esp-at-on
       self test-esp-at
       true self esp-at-echo!
       false self esp-at-multi!

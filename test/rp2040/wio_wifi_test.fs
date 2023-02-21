@@ -130,11 +130,6 @@ begin-module wifi-test
     200000 device esp-at-timeout!
     500 device esp-at-delay!
     
-    1 ms
-    intf power-wio-esp-at-off
-    1 ms
-    intf power-wio-esp-at-on
-    
     [: { D: password D: ssid device }
       station-mode device init-esp-at
       device configure-power
