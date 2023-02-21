@@ -310,7 +310,7 @@ begin-module esp-at
     false constant esp-at-default-log
 
     \ Default ESP-AT communication delay in microseconds
-    500 constant esp-at-default-delay
+    700 constant esp-at-default-delay
     
   end-module> import
     
@@ -1209,10 +1209,10 @@ begin-module esp-at
     
     \ Execute code with an ESP-AT device
     :noname ( xt self -- ) ( xt: self -- )
-      [:
-        current-task over esp-at-owner ! dup >r
-        [: swap execute ;] try
-        0 r> esp-at-owner !
+      [: { xt self }
+        current-task self esp-at-owner !
+        self xt try
+        0 self esp-at-owner !
         ?raise
       ;] over esp-at-lock with-lock
     ; define with-esp-at
@@ -1310,25 +1310,29 @@ begin-module esp-at
     ; define clear-esp-at-no-parse
 
     \ Send a message to an ESP-AT device
-    :noname { c-addr bytes self -- }
-      self validate-esp-at-owner
-      systick-counter { start-systick }
-      bytes self esp-at-intf @ trans-len>esp-at
-      0 { offset }
-      begin offset bytes < while
-        self comm-delay
-        start-systick self wait-ready
-        bytes offset - 0 max 64 min { send-bytes }
-        c-addr offset + send-bytes self esp-at-intf @ trans-data>esp-at
-        self comm-delay
-        send-bytes +to offset
-      repeat
+    :noname ( c-addr bytes self -- )
+      [: { c-addr bytes self }
+        self validate-esp-at-owner
+        systick-counter { start-systick }
+        bytes self esp-at-intf @ trans-len>esp-at
+        0 { offset }
+        begin offset bytes < while
+          self comm-delay
+          start-systick self wait-ready
+          bytes offset - 0 max 64 min { send-bytes }
+          c-addr offset + send-bytes self esp-at-intf @ trans-data>esp-at
+          self comm-delay
+          send-bytes +to offset
+        repeat
+      ;] critical
     ; define msg>esp-at
 
     \ End a command
-    :noname { self -- }
-      systick-counter self wait-ready
-      0 self esp-at-intf @ trans-len>esp-at
+    :noname ( self -- )
+      [: { self }
+        systick-counter self wait-ready
+        0 self esp-at-intf @ trans-len>esp-at
+      ;] critical
     ; define end>esp-at
     
     \ Send an integer to an ESP-AT device
@@ -1339,18 +1343,20 @@ begin-module esp-at
     ; define integer>esp-at
 
     \ Receive a message from an ESP-AT device
-    :noname { c-addr bytes self -- bytes' }
-      self validate-esp-at-owner
-      self esp-at-intf @ esp-at>trans-len { len }
-      0 { offset }
-      begin offset len < while
-        self comm-delay
-        len offset - 0 max 64 min { recv-bytes }
-        c-addr offset + recv-bytes self esp-at-intf @ esp-at>trans-data
-        recv-bytes +to offset
-        self comm-delay
-      repeat
-      bytes len min
+    :noname ( c-addr bytes self -- bytes' )
+      [: { c-addr bytes self }
+        self validate-esp-at-owner
+        self esp-at-intf @ esp-at>trans-len { len }
+        0 { offset }
+        begin offset len < while
+          self comm-delay
+          len offset - 0 max 64 min { recv-bytes }
+          c-addr offset + recv-bytes self esp-at-intf @ esp-at>trans-data
+          recv-bytes +to offset
+          self comm-delay
+        repeat
+        bytes len min
+      ;] critical
     ; define esp-at>msg
 
     \ Receive a string from an ESP-AT device

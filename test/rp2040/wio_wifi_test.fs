@@ -128,7 +128,7 @@ begin-module wifi-test
     <esp-at-status> status init-object
     true intf esp-at-log!
     200000 device esp-at-timeout!
-    500 device esp-at-delay!
+    700 device esp-at-delay!
     
     [: { D: password D: ssid device }
       station-mode device init-esp-at
