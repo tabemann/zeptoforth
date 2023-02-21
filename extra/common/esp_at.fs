@@ -669,9 +669,11 @@ begin-module esp-at
         len 8 rshift $FF and buffer 2 + c!
         len 16 rshift $FF and buffer 3 + c!
         len 24 rshift $FF and buffer 4 + c!
+        disable-int
         self begin-transact
         buffer 5 self buffer>esp-at
         self end-transact
+        enable-int
       ;] with-allot
     ; define trans-len>esp-at
 
@@ -682,9 +684,11 @@ begin-module esp-at
         0 buffer 1 + c!
         data buffer 2 + bytes 64 min move
         buffer 2 + bytes + 64 bytes - 0 max 0 fill
+        disable-int
         self begin-transact
         buffer 66 self buffer>esp-at
         self end-transact
+        enable-int
         self esp-at-log? if data bytes type-visible then
       ;] with-allot
     ; define trans-data>esp-at
@@ -694,10 +698,12 @@ begin-module esp-at
       5 [: { self buffer }
         SPI_MASTER_READ_STATUS_FROM_SLAVE_CMD buffer c!
         buffer 1 + 4 0 fill
+        disable-int
         self begin-transact
         buffer 1 self buffer>esp-at
         buffer 1 + 4 self esp-at>buffer
         self end-transact
+        enable-int
         buffer 1 + c@
         buffer 2 + c@ 8 lshift or
         buffer 3 + c@ 16 lshift or
@@ -711,10 +717,12 @@ begin-module esp-at
       66 [: { data bytes self buffer }
         SPI_MASTER_READ_DATA_FROM_SLAVE_CMD buffer c!
         buffer 1 + 65 0 fill
+        disable-int
         self begin-transact
         buffer 2 self buffer>esp-at
         buffer 2 + 64 self esp-at>buffer
         self end-transact
+        enable-int
         buffer 2 + data bytes 0 max 64 min move
         self esp-at-log? if data bytes type-visible then
       ;] with-allot
