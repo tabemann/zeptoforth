@@ -67,7 +67,7 @@ begin-module wio-esp-at
     :noname { self -- }
       false false spi-index motorola-spi
       spi-index master-spi
-      2000000 spi-index spi-baud!
+      20000000 spi-index spi-baud!
       8 spi-index spi-data-size!
       cs-pin spi-index self <esp-at-spi>->new
       spi-index miso-pin spi-pin

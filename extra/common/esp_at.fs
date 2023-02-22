@@ -1358,6 +1358,8 @@ begin-module esp-at
         0 { offset }
         begin offset len < while
           self comm-delay
+          self comm-delay
+          self comm-delay
           len offset - 0 max 64 min { recv-bytes }
           c-addr offset + recv-bytes self esp-at-intf @ esp-at>trans-data
           recv-bytes +to offset
