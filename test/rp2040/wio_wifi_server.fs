@@ -25,6 +25,7 @@ begin-module wifi-server-test
   wio-esp-at import
   task import
   multicore import
+  internal import
 
   \ Port to set server at
   6667 constant server-port
@@ -47,34 +48,40 @@ begin-module wifi-server-test
   variable server-rx-task
 
   \ Transmit delay
-  100 constant server-tx-delay
+  10 constant server-tx-delay
 
   \ Receive delay
-  100 constant server-rx-delay
+  10 constant server-rx-delay
 
   \ Server tx alarm
   0 constant server-tx-alarm
   
   \ RAM variable for rx buffer read-index
-  cvariable rx-read-index
+  variable rx-read-index
   
   \ RAM variable for rx buffer write-index
-  cvariable rx-write-index
+  variable rx-write-index
   
   \ Constant for number of bytes to buffer
-  128 constant rx-buffer-size
+  2048 constant rx-buffer-size
+  
+  \ Rx buffer index mask
+  $7FF constant rx-index-mask
   
   \ Rx buffer
   rx-buffer-size buffer: rx-buffer
   
   \ RAM variable for tx buffer read-index
-  cvariable tx-read-index
+  variable tx-read-index
   
   \ RAM variable for tx buffer write-index
-  cvariable tx-write-index
+  variable tx-write-index
   
   \ Constant for number of bytes to buffer
-  128 constant tx-buffer-size
+  2048 constant tx-buffer-size
+  
+  \ Tx buffer index mask
+  $7FF constant tx-index-mask
   
   \ Tx buffer
   tx-buffer-size buffer: tx-buffer
@@ -84,21 +91,21 @@ begin-module wifi-server-test
 
   \ Get whether the rx buffer is full
   : rx-full? ( -- f )
-    rx-write-index c@ rx-read-index c@
-    rx-buffer-size 1- + $7F and =
+    rx-write-index @ rx-read-index @
+    rx-buffer-size 1- + rx-index-mask and =
   ;
 
   \ Get whether the rx buffer is empty
   : rx-empty? ( -- f )
-    rx-read-index c@ rx-write-index c@ =
+    rx-read-index @ rx-write-index @ =
   ;
 
   \ Write a byte to the rx buffer
   : write-rx ( c -- )
     [:
       rx-full? not if
-        rx-write-index c@ rx-buffer + c!
-        rx-write-index c@ 1+ $7F and rx-write-index c!
+        rx-write-index @ rx-buffer + c!
+        rx-write-index @ 1+ rx-index-mask and rx-write-index !
       else
         drop
       then
@@ -109,8 +116,8 @@ begin-module wifi-server-test
   : read-rx ( -- c )
     [:
       rx-empty? not if
-        rx-read-index c@ rx-buffer + c@
-        rx-read-index c@ 1+ $7F and rx-read-index c!
+        rx-read-index @ rx-buffer + c@
+        rx-read-index @ 1+ rx-index-mask and rx-read-index !
       else
         0
       then
@@ -119,21 +126,21 @@ begin-module wifi-server-test
 
   \ Get whether the tx buffer is full
   : tx-full? ( -- f )
-    tx-write-index c@ tx-read-index c@
-    tx-buffer-size 1- + $7F and =
+    tx-write-index @ tx-read-index @
+    tx-buffer-size 1- + tx-index-mask and =
   ;
 
   \ Get whether the tx buffer is empty
   : tx-empty? ( -- f )
-    tx-read-index c@ tx-write-index c@ =
+    tx-read-index @ tx-write-index @ =
   ;
 
   \ Write a byte to the tx buffer
   : write-tx ( c -- )
     [:
       tx-full? not if
-        tx-write-index c@ tx-buffer + c!
-        tx-write-index c@ 1+ $7F and tx-write-index c!
+        tx-write-index @ tx-buffer + c!
+        tx-write-index @ 1+ tx-index-mask and tx-write-index !
       else
         drop
       then
@@ -144,8 +151,8 @@ begin-module wifi-server-test
   : read-tx ( -- c )
     [:
       tx-empty? not if
-        tx-read-index c@ tx-buffer + c@
-        tx-read-index c@ 1+ $7F and tx-read-index c!
+        tx-read-index @ tx-buffer + c@
+        tx-read-index @ 1+ tx-index-mask and tx-read-index !
       else
         0
       then
@@ -180,18 +187,15 @@ begin-module wifi-server-test
                   read-tx actual-tx-buffer count + c!
                   1 +to count
                 repeat
-                count mux [: { count mux }
-                  ( 1 current-task task-priority! )
-                  actual-tx-buffer count mux device multi>esp-at
-                ;] try ( 0 current-task task-priority! ) ?raise 
+                actual-tx-buffer count mux device multi>esp-at 
               else
                 drop
-                0 tx-read-index c!
-                0 tx-write-index c!
+                0 tx-read-index !
+                0 tx-write-index !
               then
             ;] device with-esp-at
           then
-        then
+        then 
       ;] try ?dup if display-red execute display-normal then
     again
   ;
@@ -202,10 +206,7 @@ begin-module wifi-server-test
       [:
         server-rx-delay ms
         server-active? @ if
-          [:
-            ( 1 current-task task-priority! )
-            [: poll-esp-at ;] device with-esp-at
-          ;] try ( 0 current-task task-priority! ) ?raise
+          [: poll-esp-at ;] device with-esp-at
         then
       ;] try ?dup if display-red execute display-normal then
     again
@@ -225,7 +226,14 @@ begin-module wifi-server-test
   \ EMIT for telnet
   : telnet-emit ( c -- )
     server-active? @ if
-      write-tx
+      begin
+        tx-full? not if
+          write-tx
+          true
+        else
+          false
+        then
+      until
     else
       drop
     then
@@ -272,10 +280,10 @@ begin-module wifi-server-test
 
   \ Initialize the test
   : init-test ( -- )
-    0 tx-read-index c!
-    0 tx-write-index c!
-    0 rx-read-index c!
-    0 rx-write-index c!
+    0 tx-read-index !
+    0 tx-write-index !
+    0 rx-read-index !
+    0 rx-write-index !
     -1 found-mux !
     <wio-esp-at-spi> intf init-object
     intf <esp-at> device init-object
@@ -330,6 +338,15 @@ begin-module wifi-server-test
         true server-active? !
       ;] device with-esp-at
     ;] try 0 current-task task-priority! ?raise
+  ;
+  
+  \ Set up telnet as a console
+  : telnet-console ( -- )
+    false intf esp-at-log!
+    ['] telnet-key key-hook !
+    ['] telnet-key? key?-hook !
+    ['] telnet-emit emit-hook !
+    ['] telnet-emit? emit?-hook
   ;
 
 end-module

@@ -679,11 +679,15 @@ begin-module esp-at
 
     \ Send data message
     :noname ( data bytes self -- )
-      66 [: { data bytes self buffer }
+      66 [: { data bytes self buffer } 
         SPI_MASTER_WRITE_DATA_TO_SLAVE_CMD buffer c!
         0 buffer 1 + c!
-        data buffer 2 + bytes 64 min move
-        buffer 2 + bytes + 64 bytes - 0 max 0 fill
+        bytes 0> if
+          data buffer 2 + bytes 64 min move
+        then
+        bytes 64 < if
+          buffer 2 + bytes + 64 bytes - 0 max 0 fill
+        then
         disable-int
         self begin-transact
         buffer 66 self buffer>esp-at
