@@ -48,10 +48,10 @@ begin-module wifi-server-test
   variable server-rx-task
 
   \ Transmit delay
-  50 constant server-tx-delay
+  10 constant server-tx-delay
 
   \ Receive delay
-  50 constant server-rx-delay
+  10 constant server-rx-delay
 
   \ Server tx alarm
   0 constant server-tx-alarm
