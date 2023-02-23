@@ -41,11 +41,20 @@ begin-module wifi-server-test
   \ Server active
   variable server-active?
 
-  \ Server tx and rx task
-  variable server-task
+  \ Server tx task
+  variable server-tx-task
 
-  \ Tx and rx delay
-  10 constant server-delay
+  \ Server rx task
+  variable server-rx-task
+
+  \ Transmit delay
+  10 constant server-tx-delay
+
+  \ Receive delay
+  10 constant server-rx-delay
+
+  \ Server tx alarm
+  0 constant server-tx-alarm
   
   \ RAM variable for rx buffer read-index
   variable rx-read-index
@@ -164,11 +173,11 @@ begin-module wifi-server-test
     then
   ;
 
-  \ Do server transmission and receiving
-  : do-server ( -- )
+  \ Do server transmission
+  : do-server-tx ( -- )
     begin
       [:
-        server-delay ms
+        server-tx-delay ms
         server-active? @ if
           tx-empty? not if
             [: { device }
@@ -186,12 +195,23 @@ begin-module wifi-server-test
               then
             ;] device with-esp-at
           then
-          [: poll-esp-at ;] device with-esp-at
         then 
       ;] try ?dup if display-red execute display-normal then
     again
   ;
-  
+
+  \ Do server receiving
+  : do-server-rx ( -- )
+    begin
+      [:
+        server-rx-delay ms
+        server-active? @ if
+          [: poll-esp-at ;] device with-esp-at
+        then
+      ;] try ?dup if display-red execute display-normal then
+    again
+  ;
+
   \ Actually handle received data
   : do-rx-data { c-addr bytes mux -- }
     c-addr bytes + c-addr ?do
@@ -272,8 +292,10 @@ begin-module wifi-server-test
     true intf esp-at-log!
     700 device esp-at-delay!
     [: { device } station-mode device init-esp-at ;] device with-esp-at
-    0 ['] do-server 320 128 768 spawn server-task !
-    server-task @ run
+    0 ['] do-server-tx 320 128 768 spawn server-tx-task !
+    server-tx-task @ run
+    0 ['] do-server-rx 320 128 768 spawn server-rx-task !
+    server-rx-task @ run
   ;
 
   \ Connect to WiFi
