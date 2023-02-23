@@ -273,7 +273,7 @@ begin-module wifi-server-test
     200000 device esp-at-timeout!
     true intf esp-at-log!
     700 device esp-at-delay!
-    4200 device esp-at-long-delay!
+    5600 device esp-at-long-delay!
     [: { device } station-mode device init-esp-at ;] device with-esp-at
     0 ['] do-server 320 128 768 spawn server-task !
     server-task @ run

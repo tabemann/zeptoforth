@@ -313,7 +313,7 @@ begin-module esp-at
     700 constant esp-at-default-delay
 
     \ Default ESP-AT long communication delay in microseconds
-    4200 constant esp-at-default-long-delay
+    5600 constant esp-at-default-long-delay
     
   end-module> import
     
