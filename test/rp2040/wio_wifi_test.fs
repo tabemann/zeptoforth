@@ -129,6 +129,7 @@ begin-module wifi-test
     true intf esp-at-log!
     200000 device esp-at-timeout!
     700 device esp-at-delay!
+    4200 device esp-at-long-delay!
     
     [: { D: password D: ssid device }
       station-mode device init-esp-at

@@ -54,10 +54,10 @@ begin-module wifi-server-test
   variable rx-write-index
   
   \ Constant for number of bytes to buffer
-  2048 constant rx-buffer-size
+  1024 constant rx-buffer-size
   
   \ Rx buffer index mask
-  $7FF constant rx-index-mask
+  $3FF constant rx-index-mask
   
   \ Rx buffer
   rx-buffer-size buffer: rx-buffer
@@ -69,10 +69,10 @@ begin-module wifi-server-test
   variable tx-write-index
   
   \ Constant for number of bytes to buffer
-  2048 constant tx-buffer-size
+  1024 constant tx-buffer-size
   
   \ Tx buffer index mask
-  $7FF constant tx-index-mask
+  $3FF constant tx-index-mask
   
   \ Tx buffer
   tx-buffer-size buffer: tx-buffer
@@ -170,6 +170,7 @@ begin-module wifi-server-test
       [:
         server-delay ms
         server-active? @ if
+          [: poll-esp-at ;] device with-esp-at
           tx-empty? not if
             [: { device }
               find-client if
@@ -178,7 +179,7 @@ begin-module wifi-server-test
                   read-tx actual-tx-buffer count + c!
                   1 +to count
                 repeat
-                actual-tx-buffer count mux device multi>esp-at 
+                actual-tx-buffer count mux device multi>esp-at
               else
                 drop
                 0 tx-read-index !
@@ -186,7 +187,6 @@ begin-module wifi-server-test
               then
             ;] device with-esp-at
           then
-          [: poll-esp-at ;] device with-esp-at
         then 
       ;] try ?dup if display-red execute display-normal then
     again
@@ -211,6 +211,7 @@ begin-module wifi-server-test
           write-tx
           true
         else
+          server-delay ms
           false
         then
       until
@@ -236,6 +237,7 @@ begin-module wifi-server-test
           read-rx
           true
         else
+          server-delay ms
           false
         then
       else
@@ -271,6 +273,7 @@ begin-module wifi-server-test
     200000 device esp-at-timeout!
     true intf esp-at-log!
     700 device esp-at-delay!
+    4200 device esp-at-long-delay!
     [: { device } station-mode device init-esp-at ;] device with-esp-at
     0 ['] do-server 320 128 768 spawn server-task !
     server-task @ run
@@ -278,44 +281,38 @@ begin-module wifi-server-test
 
   \ Connect to WiFi
   : connect-wifi ( D: password D: ssid -- )
-    [:
-      1 current-task task-priority!
-      [: { D: password D: ssid device }        
-        begin
-          password ssid device [:
-            4 pick 4 pick 4 pick 4 pick 4 pick connect-esp-at-wifi
-          ;] try nip nip nip nip nip
-          dup 0= if
-            drop true
-          else
-            dup ['] x-esp-at-error = if
-              drop cr ." RETRYING" 25 0 do 1000 ms ." ." loop cr false
-            else
-            ?raise
-            then
-          then
-        until
-  
-        device esp-at-station-ipv4-addr@ if
-          cr ." Station IPv4 address: " type 
+    [: { D: password D: ssid device }        
+      begin
+        password ssid device [:
+          4 pick 4 pick 4 pick 4 pick 4 pick connect-esp-at-wifi
+        ;] try nip nip nip nip nip
+        dup 0= if
+          drop true
         else
-          2drop cr ." No station IPv4 address"
+          dup ['] x-esp-at-error = if
+            drop cr ." RETRYING" 25 0 do 1000 ms ." ." loop cr false
+          else
+          ?raise
+          then
         then
-      ;] device with-esp-at
-    ;] try 0 current-task task-priority! ?raise
+      until
+
+      device esp-at-station-ipv4-addr@ if
+        cr ." Station IPv4 address: " type 
+      else
+        2drop cr ." No station IPv4 address"
+      then
+    ;] device with-esp-at
   ;
 
   \ Start the server
   : start-server ( -- )
-    [:
-      1 current-task task-priority!
-      [: { device }
-        true device esp-at-multi!
-        ['] do-rx-data device esp-at-recv-xt!
-        server-port device start-esp-at-server
-        true server-active? !
-      ;] device with-esp-at
-    ;] try 0 current-task task-priority! ?raise
+    [: { device }
+      true device esp-at-multi!
+      ['] do-rx-data device esp-at-recv-xt!
+      server-port device start-esp-at-server
+      true server-active? !
+    ;] device with-esp-at
   ;
   
   \ Set up telnet as a console

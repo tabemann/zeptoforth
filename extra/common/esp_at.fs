@@ -311,6 +311,9 @@ begin-module esp-at
 
     \ Default ESP-AT communication delay in microseconds
     700 constant esp-at-default-delay
+
+    \ Default ESP-AT long communication delay in microseconds
+    4200 constant esp-at-default-long-delay
     
   end-module> import
     
@@ -790,6 +793,9 @@ begin-module esp-at
       \ Communication delay
       cell member esp-at-delay
 
+      \ Long communication delay
+      cell member esp-at-long-delay
+
       \ Message buffer size
       4096 constant esp-at-buffer-size
 
@@ -832,6 +838,9 @@ begin-module esp-at
       \ Delay a fixed amount for communication
       method comm-delay ( self -- )
 
+      \ Delay a long fixed amount for communication
+      method long-comm-delay ( self -- )
+      
       \ Set the transmission mode
       method esp-at-tx-mode! ( passthrough? self -- )
       
@@ -867,7 +876,13 @@ begin-module esp-at
 
     \ Get the ESP-AT delay in microseconds
     method esp-at-delay@ ( self -- delay )
-    
+
+    \ Set the ESP-AT long delay in microseconds
+    method esp-at-long-delay! ( delay self -- )
+
+    \ Get the ESP-AT long delay in microseconds
+    method esp-at-long-delay@ ( self -- delay )
+
     \ Clear an ESP-AT device's received messages
     method clear-esp-at ( self -- )
 
@@ -1023,6 +1038,7 @@ begin-module esp-at
       0 self esp-at-owner !
       esp-at-default-timeout self esp-at-timeout !
       esp-at-default-delay self esp-at-delay !
+      esp-at-default-long-delay self esp-at-long-delay !
       false self esp-at-frame? !
       -1 self esp-at-frame-mux !
       0 self esp-at-frame-size !
@@ -1195,6 +1211,13 @@ begin-module esp-at
       self esp-at-delay @ s>d delay-us
     ; define comm-delay
 
+    \ Delay a long fixed amount for communication
+    :noname { self -- }
+      self esp-at-long-delay @ self esp-at-delay @ / 0 ?do
+        self comm-delay
+      loop
+    ; define long-comm-delay
+
     \ Set the transmission mode
     :noname { passthrough? self -- }
       self validate-esp-at-owner
@@ -1274,6 +1297,16 @@ begin-module esp-at
     :noname { self -- delay }
       self esp-at-delay @
     ; define esp-at-delay@
+    
+    \ Set the ESP-AT device long delay in microseconds
+    :noname { delay self -- }
+      delay self esp-at-long-delay !
+    ; define esp-at-long-delay!
+
+    \ Get the ESP-AT device long delay in microseconds
+    :noname { self -- delay }
+      self esp-at-long-delay @
+    ; define esp-at-long-delay@
 
     \ Validate the ESP-AT device owner
     :noname { self -- }
@@ -1288,7 +1321,7 @@ begin-module esp-at
           self esp-at-intf @ esp-at>trans-len { len }
           0 { offset }
           begin offset len < while
-            self comm-delay
+            self long-comm-delay
             len offset - 64 min { recv-bytes }
             self esp-at-buffer recv-bytes self esp-at-intf @ esp-at>trans-data
             self comm-delay
@@ -1312,7 +1345,7 @@ begin-module esp-at
         self esp-at-intf @ esp-at>trans-len { len }
         0 { offset }
         begin offset len < while
-          self comm-delay
+          self long-comm-delay
           len offset - 64 min { recv-bytes }
           self esp-at-buffer 64 self esp-at-intf @ esp-at>trans-data
           self comm-delay
@@ -1361,10 +1394,7 @@ begin-module esp-at
         self esp-at-intf @ esp-at>trans-len { len }
         0 { offset }
         begin offset len < while
-          self comm-delay
-          self comm-delay
-          self comm-delay
-          self comm-delay
+          self long-comm-delay
           len offset - 0 max 64 min { recv-bytes }
           c-addr offset + recv-bytes self esp-at-intf @ esp-at>trans-data
           recv-bytes +to offset
