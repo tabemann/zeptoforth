@@ -800,7 +800,7 @@ begin-module esp-at
       4096 constant esp-at-buffer-size
 
       \ ESP8285 max send once size
-      2048 constant esp-at-max-send-once-size
+      512 constant esp-at-max-send-once-size
 
       \ Frame buffer size
       4096 constant esp-at-frame-buffer-size
@@ -844,6 +844,33 @@ begin-module esp-at
       \ Set the transmission mode
       method esp-at-tx-mode! ( passthrough? self -- )
       
+      \ Clear an ESP-AT device's received messages
+      method clear-esp-at ( self -- )
+
+      \ Clear an ESP-AT device's received messages without parsing data
+      method clear-esp-at-no-parse ( self -- )
+      
+      \ Send a message to an ESP-AT device
+      method msg>esp-at ( c-addr bytes self -- )
+      
+      \ End a command
+      method end>esp-at ( self -- )
+      
+      \ Send an integer to an ESP-AT device
+      method integer>esp-at ( n self -- )
+      
+      \ Receive a message from an ESP-AT device
+      method esp-at>msg ( c-addr bytes self -- bytes' )
+      
+      \ Receive a string from an ESP-AT device
+      method esp-at>string ( filter-xt self -- c-addr bytes )
+      
+      \ Match a string in the output
+      method esp-at>match ( filter-xt self -- match )
+      
+      \ Wait for a string in the output
+      method esp-at>wait ( filter-xt self -- )
+
     end-module
 
     \ Claim the ESP-AT device
@@ -882,33 +909,6 @@ begin-module esp-at
 
     \ Get the ESP-AT long delay in microseconds
     method esp-at-long-delay@ ( self -- delay )
-
-    \ Clear an ESP-AT device's received messages
-    method clear-esp-at ( self -- )
-
-    \ Clear an ESP-AT device's received messages without parsing data
-    method clear-esp-at-no-parse ( self -- )
-    
-    \ Send a message to an ESP-AT device
-    method msg>esp-at ( c-addr bytes self -- )
-
-    \ End a command
-    method end>esp-at ( self -- )
-
-    \ Send an integer to an ESP-AT device
-    method integer>esp-at ( n self -- )
-
-    \ Receive a message from an ESP-AT device
-    method esp-at>msg ( c-addr bytes self -- bytes' )
-
-    \ Receive a string from an ESP-AT device
-    method esp-at>string ( filter-xt self -- c-addr bytes )
-
-    \ Match a string in the output
-    method esp-at>match ( filter-xt self -- match )
-
-    \ Wait for a string in the output
-    method esp-at>wait ( filter-xt self -- )
 
     \ Enable/disable multiple connections
     method esp-at-multi! ( multi? self -- )
@@ -1213,9 +1213,7 @@ begin-module esp-at
 
     \ Delay a long fixed amount for communication
     :noname { self -- }
-      self esp-at-long-delay @ self esp-at-delay @ / 0 ?do
-        self comm-delay
-      loop
+      self esp-at-long-delay @ s>d delay-us
     ; define long-comm-delay
 
     \ Set the transmission mode
@@ -1907,36 +1905,40 @@ begin-module esp-at
     ; define multi>esp-at
 
     \ Send a block of data for a single connection to an ESP-AT device
-    :noname { c-addr bytes self -- }
-      self validate-esp-at-owner
-      self clear-esp-at
-      s" AT+CIPSEND=" self msg>esp-at
-      bytes self integer>esp-at
-      s\" \r\n" self msg>esp-at
-      self end>esp-at
-      ['] filter-gt self ['] esp-at>wait 50000 self with-esp-at-timeout
-      self clear-esp-at-no-parse
-      c-addr bytes self msg>esp-at
-      self end>esp-at
-      ['] filter-send-ok self ['] esp-at>wait 100000 self with-esp-at-timeout
+    :noname
+      [: { c-addr bytes self -- }
+        self validate-esp-at-owner
+        self clear-esp-at
+        s" AT+CIPSEND=" self msg>esp-at
+        bytes self integer>esp-at
+        s\" \r\n" self msg>esp-at
+        self end>esp-at
+        ['] filter-gt self ['] esp-at>wait 50000 self with-esp-at-timeout
+        self clear-esp-at-no-parse
+        c-addr bytes self msg>esp-at
+        self end>esp-at
+        ['] filter-send-ok self ['] esp-at>wait 100000 self with-esp-at-timeout
+      ;] critical
     ; define single-block>esp-at
       
     \ Send a block of data for a multiple connection to an ESP-AT device
-    :noname { c-addr bytes mux self -- }
-      self validate-esp-at-owner
-      mux 4 <= averts x-out-of-range-value
-      self clear-esp-at
-      s" AT+CIPSEND=" self msg>esp-at
-      mux self integer>esp-at
-      s" ," self msg>esp-at
-      bytes self integer>esp-at
-      s\" \r\n" self msg>esp-at
-      self end>esp-at
-      ['] filter-gt self ['] esp-at>wait 50000 self with-esp-at-timeout
-      self clear-esp-at-no-parse
-      c-addr bytes self msg>esp-at
-      self end>esp-at
-      ['] filter-send-ok self ['] esp-at>wait 100000 self with-esp-at-timeout
+    :noname
+      [: { c-addr bytes mux self -- }
+        self validate-esp-at-owner
+        mux 4 <= averts x-out-of-range-value
+        self clear-esp-at
+        s" AT+CIPSEND=" self msg>esp-at
+        mux self integer>esp-at
+        s" ," self msg>esp-at
+        bytes self integer>esp-at
+        s\" \r\n" self msg>esp-at
+        self end>esp-at
+        ['] filter-gt self ['] esp-at>wait 50000 self with-esp-at-timeout
+        self clear-esp-at-no-parse
+        c-addr bytes self msg>esp-at
+        self end>esp-at
+        ['] filter-send-ok self ['] esp-at>wait 100000 self with-esp-at-timeout
+      ;] critical
     ; define multi-block>esp-at
 
     \ Close a single connection on an ESP-AT device
