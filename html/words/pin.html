@@ -1,7 +1,7 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
@@ -12,7 +12,9 @@
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="LED Words" href="led.html" />
@@ -33,125 +35,125 @@
 
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="pin-words">
-<h1>Pin Words<a class="headerlink" href="#pin-words" title="Permalink to this headline">¶</a></h1>
+  <section id="pin-words">
+<h1>Pin Words<a class="headerlink" href="#pin-words" title="Permalink to this heading">¶</a></h1>
 <p>Pins provide an abstraction layer over GPIO’s to greatly simplify their API interface and to unify them as far as possible across the supported platforms</p>
 <section id="pin">
-<h2><code class="docutils literal notranslate"><span class="pre">pin</span></code><a class="headerlink" href="#pin" title="Permalink to this headline">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">pin</span></code><a class="headerlink" href="#pin" title="Permalink to this heading">¶</a></h2>
 <p>The following words are in the <code class="docutils literal notranslate"><span class="pre">pin</span></code> module:</p>
 <section id="common-pin-words">
-<h3>Common Pin Words<a class="headerlink" href="#common-pin-words" title="Permalink to this headline">¶</a></h3>
+<h3>Common Pin Words<a class="headerlink" href="#common-pin-words" title="Permalink to this heading">¶</a></h3>
 <section id="low">
-<h4><code class="docutils literal notranslate"><span class="pre">low</span></code><a class="headerlink" href="#low" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">low</span></code><a class="headerlink" href="#low" title="Permalink to this heading">¶</a></h4>
 <p>( – state )</p>
 <p>The low pin state.</p>
 </section>
 <section id="high">
-<h4><code class="docutils literal notranslate"><span class="pre">high</span></code><a class="headerlink" href="#high" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">high</span></code><a class="headerlink" href="#high" title="Permalink to this heading">¶</a></h4>
 <p>( – state )</p>
 <p>The high pin state.</p>
 </section>
 <section id="x-pin-out-of-range">
-<h4><code class="docutils literal notranslate"><span class="pre">x-pin-out-of-range</span></code><a class="headerlink" href="#x-pin-out-of-range" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">x-pin-out-of-range</span></code><a class="headerlink" href="#x-pin-out-of-range" title="Permalink to this heading">¶</a></h4>
 <p>( – )</p>
 <p>The pin out of range exception.</p>
 </section>
 <section id="x-alternate-out-of-range">
-<h4><code class="docutils literal notranslate"><span class="pre">x-alternate-out-of-range</span></code><a class="headerlink" href="#x-alternate-out-of-range" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">x-alternate-out-of-range</span></code><a class="headerlink" href="#x-alternate-out-of-range" title="Permalink to this heading">¶</a></h4>
 <p>( – )</p>
 <p>The alternate function out of range exception.</p>
 </section>
 <section id="input-pin">
-<h4><code class="docutils literal notranslate"><span class="pre">input-pin</span></code><a class="headerlink" href="#input-pin" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">input-pin</span></code><a class="headerlink" href="#input-pin" title="Permalink to this heading">¶</a></h4>
 <p>( pin – )</p>
 <p>Set <em>pin</em> to an input state.</p>
 </section>
 <section id="output-pin">
-<h4><code class="docutils literal notranslate"><span class="pre">output-pin</span></code><a class="headerlink" href="#output-pin" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">output-pin</span></code><a class="headerlink" href="#output-pin" title="Permalink to this heading">¶</a></h4>
 <p>( pin – )</p>
 <p>Set <em>pin</em> to an output state.</p>
 </section>
 <section id="alternate-pin">
-<h4><code class="docutils literal notranslate"><span class="pre">alternate-pin</span></code><a class="headerlink" href="#alternate-pin" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">alternate-pin</span></code><a class="headerlink" href="#alternate-pin" title="Permalink to this heading">¶</a></h4>
 <p>( function pin – )</p>
 <p>Set <em>pin</em> to alternate function <em>function</em>.</p>
 </section>
 <section id="pull-up-pin">
-<h4><code class="docutils literal notranslate"><span class="pre">pull-up-pin</span></code><a class="headerlink" href="#pull-up-pin" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">pull-up-pin</span></code><a class="headerlink" href="#pull-up-pin" title="Permalink to this heading">¶</a></h4>
 <p>( pin – )</p>
 <p>Set <em>pin</em> to be pull-up.</p>
 </section>
 <section id="pull-down-pin">
-<h4><code class="docutils literal notranslate"><span class="pre">pull-down-pin</span></code><a class="headerlink" href="#pull-down-pin" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">pull-down-pin</span></code><a class="headerlink" href="#pull-down-pin" title="Permalink to this heading">¶</a></h4>
 <p>( pin – )</p>
 <p>Set <em>pin</em> to be pull-down.</p>
 </section>
 <section id="floating-pin">
-<h4><code class="docutils literal notranslate"><span class="pre">floating-pin</span></code><a class="headerlink" href="#floating-pin" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">floating-pin</span></code><a class="headerlink" href="#floating-pin" title="Permalink to this heading">¶</a></h4>
 <p>( pin – )</p>
 <p>Set <em>pin</em> to be floating.</p>
 </section>
 <section id="slow-pin">
-<h4><code class="docutils literal notranslate"><span class="pre">slow-pin</span></code><a class="headerlink" href="#slow-pin" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">slow-pin</span></code><a class="headerlink" href="#slow-pin" title="Permalink to this heading">¶</a></h4>
 <p>( pin – )</p>
 <p>Set <em>pin</em> to have a slow data rate.</p>
 </section>
 <section id="fast-pin">
-<h4><code class="docutils literal notranslate"><span class="pre">fast-pin</span></code><a class="headerlink" href="#fast-pin" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">fast-pin</span></code><a class="headerlink" href="#fast-pin" title="Permalink to this heading">¶</a></h4>
 <p>( pin – )</p>
 <p>Set <em>pin</em> to have a fast data rate.</p>
 </section>
 <section id="id1">
-<h4><code class="docutils literal notranslate"><span class="pre">pin!</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">pin!</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h4>
 <p>( state pin – )</p>
 <p>Set <em>pin</em> to output the high/low state <em>state</em>.</p>
 </section>
 <section id="id2">
-<h4><code class="docutils literal notranslate"><span class="pre">pin&#64;</span></code><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">pin&#64;</span></code><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h4>
 <p>( pin – state )</p>
 <p>Get the input high/low state of <em>pin</em>.</p>
 </section>
 <section id="pin-out">
-<h4><code class="docutils literal notranslate"><span class="pre">pin-out&#64;</span></code><a class="headerlink" href="#pin-out" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">pin-out&#64;</span></code><a class="headerlink" href="#pin-out" title="Permalink to this heading">¶</a></h4>
 <p>( pin – state )</p>
 <p>Get the output high/low state of <em>pin</em>.</p>
 </section>
 <section id="toggle-pin">
-<h4><code class="docutils literal notranslate"><span class="pre">toggle-pin</span></code><a class="headerlink" href="#toggle-pin" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">toggle-pin</span></code><a class="headerlink" href="#toggle-pin" title="Permalink to this heading">¶</a></h4>
 <p>( pin – )</p>
 <p>Toggle the high/low state of <em>pin</em>.</p>
 </section>
 </section>
 <section id="rp2040-notes">
-<h3>RP2040 Notes<a class="headerlink" href="#rp2040-notes" title="Permalink to this headline">¶</a></h3>
+<h3>RP2040 Notes<a class="headerlink" href="#rp2040-notes" title="Permalink to this heading">¶</a></h3>
 <p>On the RP2040, a pin is simply an integer from 0 to 29 corresponding to GPIO0 through GPIO29.</p>
 </section>
 <section id="stm32f407-stm32l476-stm32f746-and-stm32f411-pin-words">
-<h3>STM32F407, STM32L476, STM32F746, and STM32F411 Pin Words<a class="headerlink" href="#stm32f407-stm32l476-stm32f746-and-stm32f411-pin-words" title="Permalink to this headline">¶</a></h3>
+<h3>STM32F407, STM32L476, STM32F746, and STM32F411 Pin Words<a class="headerlink" href="#stm32f407-stm32l476-stm32f746-and-stm32f411-pin-words" title="Permalink to this heading">¶</a></h3>
 <p>On the STM32F407, STM32L476, STM32F746, or STM32F411, a pin is a value that combines a pin on a GPIO with a GPIO which is constructed on the STM32F407 or STM32L476 with <code class="docutils literal notranslate"><span class="pre">XA</span></code> through <code class="docutils literal notranslate"><span class="pre">XI</span></code>, on the STM32F746 with <code class="docutils literal notranslate"><span class="pre">XA</span></code> through <code class="docutils literal notranslate"><span class="pre">XK</span></code>, or on the STM32F411 with <code class="docutils literal notranslate"><span class="pre">XA</span></code> through <code class="docutils literal notranslate"><span class="pre">XE</span></code> or with <code class="docutils literal notranslate"><span class="pre">XH</span></code>.</p>
 <section id="x-gpio-out-of-range">
-<h4><code class="docutils literal notranslate"><span class="pre">x-gpio-out-of-range</span></code><a class="headerlink" href="#x-gpio-out-of-range" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">x-gpio-out-of-range</span></code><a class="headerlink" href="#x-gpio-out-of-range" title="Permalink to this heading">¶</a></h4>
 <p>( – )</p>
 <p>GPIO out of range exception.</p>
 </section>
 </section>
 <section id="stm32f407-and-stm32l476-pin-words">
-<h3>STM32F407 and STM32L476 Pin Words<a class="headerlink" href="#stm32f407-and-stm32l476-pin-words" title="Permalink to this headline">¶</a></h3>
+<h3>STM32F407 and STM32L476 Pin Words<a class="headerlink" href="#stm32f407-and-stm32l476-pin-words" title="Permalink to this heading">¶</a></h3>
 <section id="xa-through-xi">
-<h4><code class="docutils literal notranslate"><span class="pre">XA</span></code> through <code class="docutils literal notranslate"><span class="pre">XI</span></code><a class="headerlink" href="#xa-through-xi" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">XA</span></code> through <code class="docutils literal notranslate"><span class="pre">XI</span></code><a class="headerlink" href="#xa-through-xi" title="Permalink to this heading">¶</a></h4>
 <p>( index – pin )</p>
 <p>Take a pin index on a GPIO and return a pin on GPIOA through GPIOI.</p>
 </section>
 </section>
 <section id="stm32f746-pin-words">
-<h3>STM32F746 Pin Words<a class="headerlink" href="#stm32f746-pin-words" title="Permalink to this headline">¶</a></h3>
+<h3>STM32F746 Pin Words<a class="headerlink" href="#stm32f746-pin-words" title="Permalink to this heading">¶</a></h3>
 <section id="xa-through-xk">
-<h4><code class="docutils literal notranslate"><span class="pre">XA</span></code> through <code class="docutils literal notranslate"><span class="pre">XK</span></code><a class="headerlink" href="#xa-through-xk" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">XA</span></code> through <code class="docutils literal notranslate"><span class="pre">XK</span></code><a class="headerlink" href="#xa-through-xk" title="Permalink to this heading">¶</a></h4>
 <p>( index – pin )</p>
 <p>Take a pin index on a GPIO and return a pin on GPIOA through GPIOK.</p>
 </section>
 <section id="xa-through-xe-and-xh">
-<h4><code class="docutils literal notranslate"><span class="pre">XA</span></code> through <code class="docutils literal notranslate"><span class="pre">XE</span></code> and <code class="docutils literal notranslate"><span class="pre">XH</span></code><a class="headerlink" href="#xa-through-xe-and-xh" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">XA</span></code> through <code class="docutils literal notranslate"><span class="pre">XE</span></code> and <code class="docutils literal notranslate"><span class="pre">XH</span></code><a class="headerlink" href="#xa-through-xe-and-xh" title="Permalink to this heading">¶</a></h4>
 <p>( index – pin )</p>
 <p>Take a pin index on a GPIO and return a pin on GPIOA through GPIOE and GPIOH.</p>
 </section>
@@ -217,6 +219,7 @@
 <li class="toctree-l1"><a class="reference internal" href="oo.html">Object Orientation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_lock.html">Core Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="schannel.html">Simple channel Words</a></li>
@@ -258,7 +261,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -275,7 +278,7 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

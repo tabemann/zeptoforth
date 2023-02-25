@@ -1,7 +1,7 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
@@ -12,7 +12,9 @@
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Quad SPI words" href="qspi.html" />
@@ -33,124 +35,124 @@
 
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="ansi-terminal-words">
-<h1>ANSI Terminal words<a class="headerlink" href="#ansi-terminal-words" title="Permalink to this headline">¶</a></h1>
+  <section id="ansi-terminal-words">
+<h1>ANSI Terminal words<a class="headerlink" href="#ansi-terminal-words" title="Permalink to this heading">¶</a></h1>
 <p>These are a number of word used to manage interaction with ANSI terminals. Note that no other terminals are supported.</p>
 <section id="ansi-term">
-<h2><code class="docutils literal notranslate"><span class="pre">ansi-term</span></code><a class="headerlink" href="#ansi-term" title="Permalink to this headline">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">ansi-term</span></code><a class="headerlink" href="#ansi-term" title="Permalink to this heading">¶</a></h2>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">ansi-term</span></code>:</p>
 <section id="escape">
-<h3><code class="docutils literal notranslate"><span class="pre">escape</span></code><a class="headerlink" href="#escape" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">escape</span></code><a class="headerlink" href="#escape" title="Permalink to this heading">¶</a></h3>
 <p>( – b )</p>
 <p>The escape character.</p>
 </section>
 <section id="dec">
-<h3><code class="docutils literal notranslate"><span class="pre">(dec.)</span></code><a class="headerlink" href="#dec" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">(dec.)</span></code><a class="headerlink" href="#dec" title="Permalink to this heading">¶</a></h3>
 <p>( n – )</p>
 <p>Output a decimal number without any padding.</p>
 </section>
 <section id="csi">
-<h3><code class="docutils literal notranslate"><span class="pre">csi</span></code><a class="headerlink" href="#csi" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">csi</span></code><a class="headerlink" href="#csi" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Output the CSI sequence.</p>
 </section>
 <section id="show-cursor">
-<h3><code class="docutils literal notranslate"><span class="pre">show-cursor</span></code><a class="headerlink" href="#show-cursor" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">show-cursor</span></code><a class="headerlink" href="#show-cursor" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Show the cursor. Note that multiple <code class="docutils literal notranslate"><span class="pre">show-cursor</span></code> and <code class="docutils literal notranslate"><span class="pre">hide-cursor</span></code> pairs can be nested.</p>
 </section>
 <section id="hide-cursor">
-<h3><code class="docutils literal notranslate"><span class="pre">hide-cursor</span></code><a class="headerlink" href="#hide-cursor" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">hide-cursor</span></code><a class="headerlink" href="#hide-cursor" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Show the cursor. Note that multiple <code class="docutils literal notranslate"><span class="pre">show-cursor</span></code> and <code class="docutils literal notranslate"><span class="pre">hide-cursor</span></code> pairs can be nested.</p>
 </section>
 <section id="save-cursor">
-<h3><code class="docutils literal notranslate"><span class="pre">save-cursor</span></code><a class="headerlink" href="#save-cursor" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">save-cursor</span></code><a class="headerlink" href="#save-cursor" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Save the cursor position. Note that <code class="docutils literal notranslate"><span class="pre">save-cursor</span></code> / <code class="docutils literal notranslate"><span class="pre">restore-cursor</span></code> pairs <em>cannot</em> be nested.</p>
 </section>
 <section id="restore-cursor">
-<h3><code class="docutils literal notranslate"><span class="pre">restore-cursor</span></code><a class="headerlink" href="#restore-cursor" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">restore-cursor</span></code><a class="headerlink" href="#restore-cursor" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Restore the cursor position. Note that <code class="docutils literal notranslate"><span class="pre">save-cursor</span></code> / <code class="docutils literal notranslate"><span class="pre">restore-cursor</span></code> pairs <em>cannot</em> be nested.</p>
 </section>
 <section id="scroll-up">
-<h3><code class="docutils literal notranslate"><span class="pre">scroll-up</span></code><a class="headerlink" href="#scroll-up" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">scroll-up</span></code><a class="headerlink" href="#scroll-up" title="Permalink to this heading">¶</a></h3>
 <p>( lines – )</p>
 <p>Scroll up the screen by a given number of lines.</p>
 </section>
 <section id="go-to-coord">
-<h3><code class="docutils literal notranslate"><span class="pre">go-to-coord</span></code><a class="headerlink" href="#go-to-coord" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">go-to-coord</span></code><a class="headerlink" href="#go-to-coord" title="Permalink to this heading">¶</a></h3>
 <p>( row column – )</p>
 <p>Go to the specified row and column (each starting from zero).</p>
 </section>
 <section id="erase-end-of-line">
-<h3><code class="docutils literal notranslate"><span class="pre">erase-end-of-line</span></code><a class="headerlink" href="#erase-end-of-line" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">erase-end-of-line</span></code><a class="headerlink" href="#erase-end-of-line" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Erase from the cursor to the end of the current line.</p>
 </section>
 <section id="erase-down">
-<h3><code class="docutils literal notranslate"><span class="pre">erase-down</span></code><a class="headerlink" href="#erase-down" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">erase-down</span></code><a class="headerlink" href="#erase-down" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Erase the lines below the current line.</p>
 </section>
 <section id="query-cursor-position">
-<h3><code class="docutils literal notranslate"><span class="pre">query-cursor-position</span></code><a class="headerlink" href="#query-cursor-position" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">query-cursor-position</span></code><a class="headerlink" href="#query-cursor-position" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Output the sequence to query the cursor position. Note that this is used by <code class="docutils literal notranslate"><span class="pre">get-cursor-position</span></code> and is not intended for use by the user.</p>
 </section>
 <section id="execute-hide-cursor">
-<h3><code class="docutils literal notranslate"><span class="pre">execute-hide-cursor</span></code><a class="headerlink" href="#execute-hide-cursor" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">execute-hide-cursor</span></code><a class="headerlink" href="#execute-hide-cursor" title="Permalink to this heading">¶</a></h3>
 <p>( xt – )</p>
 <p>Hide the cursor, execute the given xt, then show the cursor. Note that calls to this can be nested. Also note that exceptions that occur within the xt will cause the cursor to be shown, if appropriate, again before the exceptions are re-raised.</p>
 </section>
 <section id="clear-key">
-<h3><code class="docutils literal notranslate"><span class="pre">clear-key</span></code><a class="headerlink" href="#clear-key" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">clear-key</span></code><a class="headerlink" href="#clear-key" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Clear the saved input byte.</p>
 </section>
 <section id="get-key">
-<h3><code class="docutils literal notranslate"><span class="pre">get-key</span></code><a class="headerlink" href="#get-key" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">get-key</span></code><a class="headerlink" href="#get-key" title="Permalink to this heading">¶</a></h3>
 <p>( – b )</p>
 <p>If there is a saved input byte, return it, clearing it in the process, otherwise get an input byte from the console.</p>
 </section>
 <section id="set-key">
-<h3><code class="docutils literal notranslate"><span class="pre">set-key</span></code><a class="headerlink" href="#set-key" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">set-key</span></code><a class="headerlink" href="#set-key" title="Permalink to this heading">¶</a></h3>
 <p>( b – )</p>
 <p>Save an input byte, overwriting any which has already been saved.</p>
 </section>
 <section id="wait-number">
-<h3><code class="docutils literal notranslate"><span class="pre">wait-number</span></code><a class="headerlink" href="#wait-number" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">wait-number</span></code><a class="headerlink" href="#wait-number" title="Permalink to this heading">¶</a></h3>
 <p>( – n matches )</p>
 <p>Attempt to read a number from the console, returning it and true if a parseable number is found, otherwise returning 0 and false.</p>
 </section>
 <section id="wait-char">
-<h3><code class="docutils literal notranslate"><span class="pre">wait-char</span></code><a class="headerlink" href="#wait-char" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">wait-char</span></code><a class="headerlink" href="#wait-char" title="Permalink to this heading">¶</a></h3>
 <p>( b – )</p>
 <p>Wait for the given byte to be inputted from the console.</p>
 </section>
 <section id="expect-char">
-<h3><code class="docutils literal notranslate"><span class="pre">expect-char</span></code><a class="headerlink" href="#expect-char" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">expect-char</span></code><a class="headerlink" href="#expect-char" title="Permalink to this heading">¶</a></h3>
 <p>( b – flag )</p>
 <p>Wait for a byte to be inputted from the console; if it is the given byte, drop it and return true, else save it and return false.</p>
 </section>
 <section id="get-cursor-position">
-<h3><code class="docutils literal notranslate"><span class="pre">get-cursor-position</span></code><a class="headerlink" href="#get-cursor-position" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">get-cursor-position</span></code><a class="headerlink" href="#get-cursor-position" title="Permalink to this heading">¶</a></h3>
 <p>( – row column  )</p>
 <p>Get the current cursor position.</p>
 </section>
 <section id="execute-preserve-cursor">
-<h3><code class="docutils literal notranslate"><span class="pre">execute-preserve-cursor</span></code><a class="headerlink" href="#execute-preserve-cursor" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">execute-preserve-cursor</span></code><a class="headerlink" href="#execute-preserve-cursor" title="Permalink to this heading">¶</a></h3>
 <p>( xt – )</p>
 <p>Save the cursor position, execute the given xt, then restore the cursor position. Note that calls to this can be nested. Also note that exceptions that occur within the xt will cause the cursor position to be restored before the exceptions are re-raised.</p>
 </section>
 <section id="get-terminal-size">
-<h3><code class="docutils literal notranslate"><span class="pre">get-terminal-size</span></code><a class="headerlink" href="#get-terminal-size" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">get-terminal-size</span></code><a class="headerlink" href="#get-terminal-size" title="Permalink to this heading">¶</a></h3>
 <p>( – rows columns )</p>
 <p>Get the terminal size in rows and columns.</p>
 </section>
 <section id="reset-ansi-term">
-<h3><code class="docutils literal notranslate"><span class="pre">reset-ansi-term</span></code><a class="headerlink" href="#reset-ansi-term" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">reset-ansi-term</span></code><a class="headerlink" href="#reset-ansi-term" title="Permalink to this heading">¶</a></h3>
 <p>Reset the state of the ANSI terminal. Note that if the cursor is currently hidden, it will not show it automatically.</p>
 </section>
 </section>
@@ -214,6 +216,7 @@
 <li class="toctree-l1"><a class="reference internal" href="oo.html">Object Orientation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_lock.html">Core Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="schannel.html">Simple channel Words</a></li>
@@ -255,7 +258,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -272,7 +275,7 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

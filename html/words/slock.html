@@ -1,7 +1,7 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
@@ -12,10 +12,12 @@
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Channel Words" href="channel.html" />
+    <link rel="next" title="Core Lock Words" href="core_lock.html" />
     <link rel="prev" title="Lock Words" href="lock.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -33,34 +35,39 @@
 
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="simple-lock-words">
-<h1>Simple Lock Words<a class="headerlink" href="#simple-lock-words" title="Permalink to this headline">¶</a></h1>
+  <section id="simple-lock-words">
+<h1>Simple Lock Words<a class="headerlink" href="#simple-lock-words" title="Permalink to this heading">¶</a></h1>
 <p>A simple lock enforces mutual exclusion, typically with regard to control of a resource, between multiple tasks. Unlike a normal lock, it does not establish a queue of multiple waiting tasks, but rather no particular order is established for which task claims the lock when multiple tasks are waiting on the lock to be released by another task. Simple locks are optimized for speed when claiming locks that are only held for very short periods of time, and particularly on multicore systems they should not be held for long because other tasks which attempt to claim them on other cores will spinwait until the lock is freed. Simple locks provide no means of avoiding priority inversion, which is another reason for avoiding holding them for long. Also, no means are provided to avoid double locking, so if a task double locks a simple lock it will hang forever until it is killed.</p>
 <section id="slock">
-<h2><code class="docutils literal notranslate"><span class="pre">slock</span></code><a class="headerlink" href="#slock" title="Permalink to this headline">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">slock</span></code><a class="headerlink" href="#slock" title="Permalink to this heading">¶</a></h2>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">slock</span></code>:</p>
 <section id="slock-size">
-<h3><code class="docutils literal notranslate"><span class="pre">slock-size</span></code><a class="headerlink" href="#slock-size" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">slock-size</span></code><a class="headerlink" href="#slock-size" title="Permalink to this heading">¶</a></h3>
 <p>( – bytes )</p>
 <p>Get the size of a simple lock in bytes.</p>
 </section>
 <section id="init-slock">
-<h3><code class="docutils literal notranslate"><span class="pre">init-slock</span></code><a class="headerlink" href="#init-slock" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">init-slock</span></code><a class="headerlink" href="#init-slock" title="Permalink to this heading">¶</a></h3>
 <p>( addr – )</p>
 <p>Initialize a simple lock starting at the specified address <em>addr</em>; note that it must be <code class="docutils literal notranslate"><span class="pre">slock-size</span></code> bytes in size.</p>
 </section>
+<section id="try-claim-slock">
+<h3><code class="docutils literal notranslate"><span class="pre">try-claim-slock</span></code><a class="headerlink" href="#try-claim-slock" title="Permalink to this heading">¶</a></h3>
+<p>( slock – success? )</p>
+<p>Attempt to claim a simple lock <em>slock</em> and return whether claiming it was successful.</p>
+</section>
 <section id="claim-slock">
-<h3><code class="docutils literal notranslate"><span class="pre">claim-slock</span></code><a class="headerlink" href="#claim-slock" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">claim-slock</span></code><a class="headerlink" href="#claim-slock" title="Permalink to this heading">¶</a></h3>
 <p>( slock – )</p>
 <p>Attempt to claim a simple lock <em>slock</em>; if the simple lock is already held, continually attempt to claim the simple lock until it can be successfully claimed. In that case, if the simple lock is held by another task on the same core as the task attempting to claim it, give up the processor after each unsuccessful attempt to claim the simple lock; if it is held by another task on a different core, spinwait instead.</p>
 </section>
 <section id="release-slock">
-<h3><code class="docutils literal notranslate"><span class="pre">release-slock</span></code><a class="headerlink" href="#release-slock" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">release-slock</span></code><a class="headerlink" href="#release-slock" title="Permalink to this heading">¶</a></h3>
 <p>( slock – )</p>
 <p>Release a simple lock <em>slock</em>. If other tasks are waiting to claim the simple lock, the first one to attempt to claim it next will claim it.</p>
 </section>
 <section id="with-slock">
-<h3><code class="docutils literal notranslate"><span class="pre">with-slock</span></code><a class="headerlink" href="#with-slock" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">with-slock</span></code><a class="headerlink" href="#with-slock" title="Permalink to this heading">¶</a></h3>
 <p>( xt slock – )</p>
 <p>Execute an xt <em>xt</em> with a given simple lock <em>slock</em> locked while it executes, unlocking it afterwards. If an exception is raised by <em>xt</em>, unlock <em>lock</em> and then re-raise the exception.</p>
 </section>
@@ -125,6 +132,7 @@
 <li class="toctree-l1"><a class="reference internal" href="oo.html">Object Orientation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_lock.html">Core Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="schannel.html">Simple channel Words</a></li>
@@ -153,7 +161,7 @@
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
       <li>Previous: <a href="lock.html" title="previous chapter">Lock Words</a></li>
-      <li>Next: <a href="channel.html" title="next chapter">Channel Words</a></li>
+      <li>Next: <a href="core_lock.html" title="next chapter">Core Lock Words</a></li>
   </ul></li>
 </ul>
 </div>
@@ -166,7 +174,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -183,7 +191,7 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

@@ -1,7 +1,7 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
@@ -12,7 +12,9 @@
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="ARMv6-M Assembler Words" href="armv6m.html" />
@@ -33,83 +35,83 @@
 
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="development-tools-words">
-<h1>Development Tools Words<a class="headerlink" href="#development-tools-words" title="Permalink to this headline">¶</a></h1>
+  <section id="development-tools-words">
+<h1>Development Tools Words<a class="headerlink" href="#development-tools-words" title="Permalink to this heading">¶</a></h1>
 <p>There are a number of useful words provided with zeptoforth’s development tools.</p>
 <p>These words are in <code class="docutils literal notranslate"><span class="pre">forth</span></code>.</p>
 <section id="disassembler">
-<h2>Disassembler<a class="headerlink" href="#disassembler" title="Permalink to this headline">¶</a></h2>
+<h2>Disassembler<a class="headerlink" href="#disassembler" title="Permalink to this heading">¶</a></h2>
 <p>A disassembler that covers (almost all of) the instructions utilized by zeptoforth is included with zeptoforth. It has two different orthogonal modes of operation; one is whether it disassembles instructions in a specified range of addresses or it disassembles just a selected word, the other is whether it disassembles user-friendly assembly including instruction addresses, instructions as hex, addresses to go along with labels, and in one set of cases computes absolute addresses from PC-relative instructions, or whether it disassembles assembler-friendly assembly without such niceities. In both modes it</p>
 <p>As a result there are four different words for invoking the disassembler:</p>
 <section id="disassemble">
-<h3><code class="docutils literal notranslate"><span class="pre">disassemble</span></code><a class="headerlink" href="#disassemble" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">disassemble</span></code><a class="headerlink" href="#disassemble" title="Permalink to this heading">¶</a></h3>
 <p>( start-addr end-addr – )</p>
 <p>This word disassembles instructions, for human consumption, starting from <em>start-addr</em> and ending at, non-inclusive, <em>end-addr</em>.</p>
 </section>
 <section id="disassemble-for-gas">
-<h3><code class="docutils literal notranslate"><span class="pre">disassemble-for-gas</span></code><a class="headerlink" href="#disassemble-for-gas" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">disassemble-for-gas</span></code><a class="headerlink" href="#disassemble-for-gas" title="Permalink to this heading">¶</a></h3>
 <p>( start-addr end-addr – )</p>
 <p>This word disassembles instructions, for feeding into an assembler, starting from <em>start-addr</em> and ending at, non-inclusive, <em>end-addr</em>.</p>
 </section>
 <section id="see">
-<h3><code class="docutils literal notranslate"><span class="pre">see</span></code><a class="headerlink" href="#see" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">see</span></code><a class="headerlink" href="#see" title="Permalink to this heading">¶</a></h3>
 <p>( “name” – )</p>
 <p>This word disassembles instructions, for human consumption, comprising the whole of the word whose name is specified afterwards.</p>
 </section>
 <section id="see-for-gas">
-<h3><code class="docutils literal notranslate"><span class="pre">see-for-gas</span></code><a class="headerlink" href="#see-for-gas" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">see-for-gas</span></code><a class="headerlink" href="#see-for-gas" title="Permalink to this heading">¶</a></h3>
 <p>( “name” – )</p>
 <p>This word disassembles instructions, for feeding into an assembler, comprising the whole of the word whose name is specified afterwards.</p>
 </section>
 </section>
 <section id="viewing-memory">
-<h2>Viewing Memory<a class="headerlink" href="#viewing-memory" title="Permalink to this headline">¶</a></h2>
+<h2>Viewing Memory<a class="headerlink" href="#viewing-memory" title="Permalink to this heading">¶</a></h2>
 <p>Memory can be viewed with the following word:</p>
 <section id="dump">
-<h3><code class="docutils literal notranslate"><span class="pre">dump</span></code><a class="headerlink" href="#dump" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">dump</span></code><a class="headerlink" href="#dump" title="Permalink to this heading">¶</a></h3>
 <p>( start-addr end-addr – )</p>
 <p>This word dumps memory as sequences of 16 bytes in hexadecimal, along with displaying each byte, if a valid ASCII character, starting from <em>start-addr</em> and ending at, non-inclusive, <em>end-addr</em>.</p>
 </section>
 <section id="dump-halfs">
-<h3><code class="docutils literal notranslate"><span class="pre">dump-halfs</span></code><a class="headerlink" href="#dump-halfs" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">dump-halfs</span></code><a class="headerlink" href="#dump-halfs" title="Permalink to this heading">¶</a></h3>
 <p>( start-addr end-addr – )</p>
 <p>This word dumps memory as sequences of 8 16-bit halfwords in hexadecimal, along with displaying each byte, if a valid ASCII character, starting from <em>start-addr</em> and ending at, non-inclusive, <em>end-addr</em>.</p>
 </section>
 <section id="dump-cells">
-<h3><code class="docutils literal notranslate"><span class="pre">dump-cells</span></code><a class="headerlink" href="#dump-cells" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">dump-cells</span></code><a class="headerlink" href="#dump-cells" title="Permalink to this heading">¶</a></h3>
 <p>( start-addr end-addr – )</p>
 <p>This word dumps memory as sequences of 4 32-bit cells in hexadecimal, along with displaying each byte, if a valid ASCII character, starting from <em>start-addr</em> and ending at, non-inclusive, <em>end-addr</em>.</p>
 </section>
 <section id="dump-ascii">
-<h3><code class="docutils literal notranslate"><span class="pre">dump-ascii</span></code><a class="headerlink" href="#dump-ascii" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">dump-ascii</span></code><a class="headerlink" href="#dump-ascii" title="Permalink to this heading">¶</a></h3>
 <p>( start-addr end-addr – )</p>
 <p>This word dumps memory as sequences of 64 ASCII characters, starting from <em>start-addr</em> and ending at, non-inclusing <em>end-addr</em>.</p>
 </section>
 </section>
 <section id="listing-words">
-<h2>Listing Words<a class="headerlink" href="#listing-words" title="Permalink to this headline">¶</a></h2>
+<h2>Listing Words<a class="headerlink" href="#listing-words" title="Permalink to this heading">¶</a></h2>
 <section id="words">
-<h3><code class="docutils literal notranslate"><span class="pre">words</span></code><a class="headerlink" href="#words" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">words</span></code><a class="headerlink" href="#words" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
 <p>This word simply lists every user-viewable word in the current namespace in RAM or in flash, organized as four columns.</p>
 </section>
 <section id="words-in">
-<h3><code class="docutils literal notranslate"><span class="pre">words-in</span></code><a class="headerlink" href="#words-in" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">words-in</span></code><a class="headerlink" href="#words-in" title="Permalink to this heading">¶</a></h3>
 <p>( module – )</p>
 <p>This word list every user-viewable word in a selected module in RAM or in flash, organized as four columns.</p>
 </section>
 <section id="lookup">
-<h3><code class="docutils literal notranslate"><span class="pre">lookup</span></code><a class="headerlink" href="#lookup" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">lookup</span></code><a class="headerlink" href="#lookup" title="Permalink to this heading">¶</a></h3>
 <p>( “name” – )</p>
 <p>This word lists each word which has a prefix corresponding to the maximal prefix or the specified token which any word in the current namespace in RAM or in flash matches, organized as four columns.</p>
 </section>
 <section id="lookup-in">
-<h3><code class="docutils literal notranslate"><span class="pre">lookup-in</span></code><a class="headerlink" href="#lookup-in" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">lookup-in</span></code><a class="headerlink" href="#lookup-in" title="Permalink to this heading">¶</a></h3>
 <p>( module “name” – )</p>
 <p>This word lists each word which has a prefix corresponding to the maximal prefix or the specified token which any word in a selected module in RAM or in flash matches, organized as four columns.</p>
 </section>
 <section id="word-info">
-<h3><code class="docutils literal notranslate"><span class="pre">word-info</span></code><a class="headerlink" href="#word-info" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">word-info</span></code><a class="headerlink" href="#word-info" title="Permalink to this heading">¶</a></h3>
 <p>( “name” – )</p>
 <p>Dump all the words that go by a certain name.</p>
 </section>
@@ -174,6 +176,7 @@
 <li class="toctree-l1"><a class="reference internal" href="oo.html">Object Orientation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_lock.html">Core Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="schannel.html">Simple channel Words</a></li>
@@ -215,7 +218,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -232,7 +235,7 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

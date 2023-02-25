@@ -1,7 +1,7 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
@@ -12,7 +12,9 @@
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="SDHC/SDXC Card Support" href="sdcard.html" />
@@ -33,67 +35,67 @@
 
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="hardware-timers">
-<h1>Hardware Timers<a class="headerlink" href="#hardware-timers" title="Permalink to this headline">¶</a></h1>
+  <section id="hardware-timers">
+<h1>Hardware Timers<a class="headerlink" href="#hardware-timers" title="Permalink to this heading">¶</a></h1>
 <p>zeptoforth on the RP2040 (i.e. the Raspberry Pi Pico) has support for hardware timers and delays at up to a microsecond precision. Note that in practice microsecond precision is not necessarily possible, due to interrupts being disabled, interrupt priorities, busy-waits having a limited time resolution, and the chance of busy-waits being preempted if interrupts are not disabled during them.</p>
 <p>The 64-bit microsecond timer can represent a sufficiently large range of values, i.e. it can represent thousands of years of time, such that it can be treated as effectively monotonic. Note that the user can change the value of the microsecond timer or pause it, but this is not recommended in most use cases.</p>
 <p>The hardware timer on the RP2040 has one shared 64-bit microsecond counter and four “alarms” which are triggered by a set value to be compared with the lower 32 bits of the microsecond counter. Alarm handlers execute at interrupt time, so they must be interrupt-safe. Alarms must be enabled for each time they are used and are disabled when they are triggered. However, the interrupt state must be disabled before leaving the alarm interrupt handler or else they will be triggered repeatedly in an infinite loop. Also note that alarm handlers always execute on core 0 even when core 1 has been booted.</p>
 <p>There are also busy-loop microsecond delays which wait until a given 64-bit microsecond time. Because the 64-bit microsecond counter can be reasonably treated as not wrapping, only a fixed 64-bit microsecond time is provided. On top of this, busy-loop microsecond delays which wait a given 64-bit microsecond interval are also available. This may be easier to use, but when waiting at repeated intervals maintaining a separate counter, incrementing it for each interval, and waiting until that time is likely to provide better behavior than waiting for intervals relative to the start of the wait.</p>
 <section id="timer">
-<h2><code class="docutils literal notranslate"><span class="pre">timer</span></code><a class="headerlink" href="#timer" title="Permalink to this headline">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">timer</span></code><a class="headerlink" href="#timer" title="Permalink to this heading">¶</a></h2>
 <p>The following words are in the <code class="docutils literal notranslate"><span class="pre">timer</span></code> module on the <code class="docutils literal notranslate"><span class="pre">rp2040</span></code> platform:</p>
 <section id="us-counter-lsb">
-<h3><code class="docutils literal notranslate"><span class="pre">us-counter-lsb</span></code><a class="headerlink" href="#us-counter-lsb" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">us-counter-lsb</span></code><a class="headerlink" href="#us-counter-lsb" title="Permalink to this heading">¶</a></h3>
 <p>( – us )</p>
 <p>Get the lower 32 bits in the current time in microseconds.</p>
 </section>
 <section id="us-counter">
-<h3><code class="docutils literal notranslate"><span class="pre">us-counter</span></code><a class="headerlink" href="#us-counter" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">us-counter</span></code><a class="headerlink" href="#us-counter" title="Permalink to this heading">¶</a></h3>
 <p>( – us-d )</p>
 <p>Get the current time in microseconds as a 64-bit value.</p>
 </section>
 <section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">us-counter!</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">us-counter!</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
 <p>( us-d – )</p>
 <p>Set the microsecond counter to a 64-bit value.</p>
 </section>
 <section id="pause-us">
-<h3><code class="docutils literal notranslate"><span class="pre">pause-us</span></code><a class="headerlink" href="#pause-us" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">pause-us</span></code><a class="headerlink" href="#pause-us" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Pause the microsecond counter.</p>
 </section>
 <section id="unpause-us">
-<h3><code class="docutils literal notranslate"><span class="pre">unpause-us</span></code><a class="headerlink" href="#unpause-us" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">unpause-us</span></code><a class="headerlink" href="#unpause-us" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Unpause the microsecond counter.</p>
 </section>
 <section id="delay-until-us">
-<h3><code class="docutils literal notranslate"><span class="pre">delay-until-us</span></code><a class="headerlink" href="#delay-until-us" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">delay-until-us</span></code><a class="headerlink" href="#delay-until-us" title="Permalink to this heading">¶</a></h3>
 <p>( us-d – )</p>
 <p>Delay until at least a 64-bit microsecond value, even though it may take longer considering the practical delay resolution, interrupts, and whether the microsecond counter is set or paused.</p>
 </section>
 <section id="delay-us">
-<h3><code class="docutils literal notranslate"><span class="pre">delay-us</span></code><a class="headerlink" href="#delay-us" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">delay-us</span></code><a class="headerlink" href="#delay-us" title="Permalink to this heading">¶</a></h3>
 <p>( us-d – )</p>
 <p>Delay a given number of microseconds, even though it may take longer considering the practical delay resolution, interrupts, and whether the microsecond counter is set or paused.</p>
 </section>
 <section id="set-alarm">
-<h3><code class="docutils literal notranslate"><span class="pre">set-alarm</span></code><a class="headerlink" href="#set-alarm" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">set-alarm</span></code><a class="headerlink" href="#set-alarm" title="Permalink to this heading">¶</a></h3>
 <p>( us xt alarm – )</p>
 <p>Set an alarm at a time. <em>alarm</em> is an alarm index from 0 to 3. <em>xt</em> is the execution token for the alarm handler. <em>us</em> is the lower 32 bits of the microsecond counter to trigger the alarm at.</p>
 </section>
 <section id="clear-alarm">
-<h3><code class="docutils literal notranslate"><span class="pre">clear-alarm</span></code><a class="headerlink" href="#clear-alarm" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">clear-alarm</span></code><a class="headerlink" href="#clear-alarm" title="Permalink to this heading">¶</a></h3>
 <p>( alarm – )</p>
 <p>Clear an alarm. <em>alarm</em> is an alarm index from 0 to 3.</p>
 </section>
 <section id="clear-alarm-int">
-<h3><code class="docutils literal notranslate"><span class="pre">clear-alarm-int</span></code><a class="headerlink" href="#clear-alarm-int" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">clear-alarm-int</span></code><a class="headerlink" href="#clear-alarm-int" title="Permalink to this heading">¶</a></h3>
 <p>( alarm – )</p>
 <p>Clear an alarm interrupt. <em>alarm</em> is an alarm index from 0 to 3. This must be called with the approriate alarm index inside an alarm handler for a given alarm or else the alarm handler will be called in an infinite loop.</p>
 </section>
 <section id="x-out-of-range-alarm">
-<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-alarm</span></code><a class="headerlink" href="#x-out-of-range-alarm" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-alarm</span></code><a class="headerlink" href="#x-out-of-range-alarm" title="Permalink to this heading">¶</a></h3>
 <p>Out of range alarm index exception.</p>
 </section>
 </section>
@@ -157,6 +159,7 @@
 <li class="toctree-l1"><a class="reference internal" href="oo.html">Object Orientation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_lock.html">Core Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="schannel.html">Simple channel Words</a></li>
@@ -198,7 +201,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -215,7 +218,7 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

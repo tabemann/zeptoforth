@@ -14,7 +14,7 @@
       <div class="documentwrapper">
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="module-words">
+  <section id="module-words">
 <h1>Module Words</h1>
 <p>Modules in zeptoforth are built on top of wordlists, and form a user-friendly means of controlling word namespaces instead of manually manipulating wordlists. Modules and wordlists are one and the same, but by convention they are named with <code class="docutils literal notranslate"><span class="pre">*</span></code>.</p>
 <p>At any given time once <code class="docutils literal notranslate"><span class="pre">src/forth/common/module.fs</span></code> is loaded there is a module stack which controls how module words manipulate the wordlist order. Initially there is one entry on the module stack, corresponding to the <code class="docutils literal notranslate"><span class="pre">forth</span></code> wordlist. When new entries are pushed onto the module stack, they save the state of <code class="docutils literal notranslate"><span class="pre">base</span></code> prior to their creation, and restore it once they are popped. Also, module stack entries specify the current wordlist for them, and when module stack entries immediately above them on the stack are popped, their wordlist is restored as the current wordlist.</p>

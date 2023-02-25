@@ -1,7 +1,7 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
@@ -12,7 +12,9 @@
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Simple channel Words" href="schannel.html" />
@@ -33,53 +35,53 @@
 
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="rendezvous-channel-words">
-<h1>Rendezvous Channel Words<a class="headerlink" href="#rendezvous-channel-words" title="Permalink to this headline">¶</a></h1>
+  <section id="rendezvous-channel-words">
+<h1>Rendezvous Channel Words<a class="headerlink" href="#rendezvous-channel-words" title="Permalink to this heading">¶</a></h1>
 <p>A rendezvous channel is a monodirectional means of communicating data between two different tasks. Rendezvous channels are not buffered queues; provided another task is listening to a rendezvous channel, sending on a rendezvous channel immediately transfers control to the receiving task and sends the sending task to the end of the scheduling ring. Only a single copy is done when transferring data from the sending task to the receiving task.</p>
 <p>Tasks attempting to send on rendezvous channels first check whether there is a queued task waiting to receive on the rendezvous channel; if there are tasks queued to receive, the first task queued is dequeued, the sending task’s buffer is copied into the receiving task’s buffer, and the receiving task is readied. If no tasks are queued to receive, the sending task is queued to send on the rendezvous channel and is blocked.</p>
 <p>Tasks attempting to receive on rendezvous channels first check whether there is a queued task waiting to send on the rendezvous channel; if there are tasks queued to send, the first task queued is dequeued, the sending task’s buffer is copied into the receiving task’s buffer, and the sending task is readied. If no tasks are queued to send, the receiving task is queued to receive on the rendezvous channel and is blocked.</p>
 <p>Both the send queues and receive queues are ordered first by task priority and second by the order in which tasks were added to them, with tasks of higher priority and tasks added earlier coming first.</p>
 <p>Rendezvous channels can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put into alloted memory in the dictionary or into allocated memory in the heap.</p>
 <section id="fchan">
-<h2><code class="docutils literal notranslate"><span class="pre">fchan</span></code><a class="headerlink" href="#fchan" title="Permalink to this headline">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">fchan</span></code><a class="headerlink" href="#fchan" title="Permalink to this heading">¶</a></h2>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">fchan</span></code>:</p>
 <section id="x-fchan-closed">
-<h3><code class="docutils literal notranslate"><span class="pre">x-fchan-closed</span></code><a class="headerlink" href="#x-fchan-closed" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-fchan-closed</span></code><a class="headerlink" href="#x-fchan-closed" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
 <p>The rendezvous channel closed exception.</p>
 </section>
 <section id="fchan-size">
-<h3><code class="docutils literal notranslate"><span class="pre">fchan-size</span></code><a class="headerlink" href="#fchan-size" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">fchan-size</span></code><a class="headerlink" href="#fchan-size" title="Permalink to this heading">¶</a></h3>
 <p>( – bytes )</p>
 <p>Get the size of an rendezvous channel in bytes.</p>
 </section>
 <section id="init-fchan">
-<h3><code class="docutils literal notranslate"><span class="pre">init-fchan</span></code><a class="headerlink" href="#init-fchan" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">init-fchan</span></code><a class="headerlink" href="#init-fchan" title="Permalink to this heading">¶</a></h3>
 <p>( addr – )</p>
 <p>Initialize a rendezvous channel starting at the specified address.</p>
 </section>
 <section id="close-fchan">
-<h3><code class="docutils literal notranslate"><span class="pre">close-fchan</span></code><a class="headerlink" href="#close-fchan" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">close-fchan</span></code><a class="headerlink" href="#close-fchan" title="Permalink to this heading">¶</a></h3>
 <p>( fchan – )</p>
 <p>Close a rendezvous channel. Pending sends and receives will be aborted with the exception <code class="docutils literal notranslate"><span class="pre">x-fchan-closed</span></code>.</p>
 </section>
 <section id="reopen-fchan">
-<h3><code class="docutils literal notranslate"><span class="pre">reopen-fchan</span></code><a class="headerlink" href="#reopen-fchan" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">reopen-fchan</span></code><a class="headerlink" href="#reopen-fchan" title="Permalink to this heading">¶</a></h3>
 <p>( fchan – )</p>
 <p>Reopen a rendezvous channel.</p>
 </section>
 <section id="fchan-closed">
-<h3><code class="docutils literal notranslate"><span class="pre">fchan-closed?</span></code><a class="headerlink" href="#fchan-closed" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">fchan-closed?</span></code><a class="headerlink" href="#fchan-closed" title="Permalink to this heading">¶</a></h3>
 <p>( fchan – closed )</p>
 <p>Get whether a rendezvous channel is closed.</p>
 </section>
 <section id="send-fchan">
-<h3><code class="docutils literal notranslate"><span class="pre">send-fchan</span></code><a class="headerlink" href="#send-fchan" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">send-fchan</span></code><a class="headerlink" href="#send-fchan" title="Permalink to this heading">¶</a></h3>
 <p>( addr bytes fchan – )</p>
 <p>Send message with a buffer as a payload over a rendezvous channel. Block until another task receives the message; if a task is already waiting for a message, transfer control to it. Note that the buffer is copied, and will be truncated if the buffer size of the rendezvous channel is smaller than the data provided, and padded with zeros if it is larger. Note that this must not be called within a critical section.</p>
 </section>
 <section id="recv-fchan">
-<h3><code class="docutils literal notranslate"><span class="pre">recv-fchan</span></code><a class="headerlink" href="#recv-fchan" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">recv-fchan</span></code><a class="headerlink" href="#recv-fchan" title="Permalink to this heading">¶</a></h3>
 <p>( addr bytes fchan – recv-bytes )</p>
 <p>Receive message with a buffer as a payload over a rendezvous channel. Block until another task sends a message. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the rendezvous channel; the number of bytes copied is returned. Note that this must not be called within a critical section.</p>
 </section>
@@ -144,6 +146,7 @@
 <li class="toctree-l1"><a class="reference internal" href="oo.html">Object Orientation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_lock.html">Core Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Rendezvous Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="schannel.html">Simple channel Words</a></li>
@@ -185,7 +188,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -202,7 +205,7 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

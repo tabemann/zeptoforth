@@ -44,6 +44,7 @@ Zeptoforth Documentation
    words/oo
    words/lock
    words/slock
+   words/core_lock
    words/channel
    words/fchannel
    words/schannel

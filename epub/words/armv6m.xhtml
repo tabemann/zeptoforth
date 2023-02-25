@@ -14,7 +14,7 @@
       <div class="documentwrapper">
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="armv6-m-assembler-words">
+  <section id="armv6-m-assembler-words">
 <h1>ARMv6-M Assembler Words</h1>
 <p>zeptoforth includes an ARMv6-M assembler, which can be used on all platforms, whether ARMv6-M or ARMv7-M. It supports all ARMv6-M instructions except for BL, as it is expected that the user will drop out of the assembler to call Forth words, which will be compiled to BL. It does not make use of labels as many assemblers do, but rather uses “marks”, which are double-cells on the data stack, for forward and backward references.</p>
 <section id="armv6m">

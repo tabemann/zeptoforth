@@ -1,7 +1,7 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
@@ -12,7 +12,9 @@
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Multitasking Words" href="task.html" />
@@ -33,53 +35,53 @@
 
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="wordlist-words">
-<h1>Wordlist Words<a class="headerlink" href="#wordlist-words" title="Permalink to this headline">¶</a></h1>
+  <section id="wordlist-words">
+<h1>Wordlist Words<a class="headerlink" href="#wordlist-words" title="Permalink to this heading">¶</a></h1>
 <section id="forth-wordlist">
-<h2><code class="docutils literal notranslate"><span class="pre">forth-wordlist</span></code><a class="headerlink" href="#forth-wordlist" title="Permalink to this headline">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">forth-wordlist</span></code><a class="headerlink" href="#forth-wordlist" title="Permalink to this heading">¶</a></h2>
 <p>These words are in <code class="docutils literal notranslate"><span class="pre">forth</span></code>:</p>
 <section id="forth">
-<h3><code class="docutils literal notranslate"><span class="pre">forth</span></code><a class="headerlink" href="#forth" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">forth</span></code><a class="headerlink" href="#forth" title="Permalink to this heading">¶</a></h3>
 <p>( – wid )</p>
 <p>Get the default wordlist, which is both a flash and a RAM wordlist.</p>
 </section>
 <section id="internal">
-<h3><code class="docutils literal notranslate"><span class="pre">internal</span></code><a class="headerlink" href="#internal" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">internal</span></code><a class="headerlink" href="#internal" title="Permalink to this heading">¶</a></h3>
 <p>( – wid )</p>
 <p>Get the internal wordlist, which includes both words defined in the kernel and words define outside the kernel</p>
 </section>
 <section id="wordlist">
-<h3><code class="docutils literal notranslate"><span class="pre">wordlist</span></code><a class="headerlink" href="#wordlist" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">wordlist</span></code><a class="headerlink" href="#wordlist" title="Permalink to this heading">¶</a></h3>
 <p>( – wid )</p>
 <p>Create a wordlist, a RAM wordlist (starting at 32768) if the current compilation mode is RAM mode, or a flash wordlist (starting at 1) if the current compilation mode is flash mode.</p>
 </section>
 <section id="ram-wordlist">
-<h3><code class="docutils literal notranslate"><span class="pre">ram-wordlist</span></code><a class="headerlink" href="#ram-wordlist" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">ram-wordlist</span></code><a class="headerlink" href="#ram-wordlist" title="Permalink to this heading">¶</a></h3>
 <p>( – wid )</p>
 <p>Create a RAM wordlist, regardless of the current compilation mode.</p>
 </section>
 <section id="flash-wordlist">
-<h3><code class="docutils literal notranslate"><span class="pre">flash-wordlist</span></code><a class="headerlink" href="#flash-wordlist" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">flash-wordlist</span></code><a class="headerlink" href="#flash-wordlist" title="Permalink to this heading">¶</a></h3>
 <p>( – wid )</p>
 <p>Create a flash wordlist, regardless of the current compilation mode.</p>
 </section>
 <section id="set-current">
-<h3><code class="docutils literal notranslate"><span class="pre">set-current</span></code><a class="headerlink" href="#set-current" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">set-current</span></code><a class="headerlink" href="#set-current" title="Permalink to this heading">¶</a></h3>
 <p>( wid – )</p>
 <p>Set the current compilation wordlist, into which new words will be added.</p>
 </section>
 <section id="get-current">
-<h3><code class="docutils literal notranslate"><span class="pre">get-current</span></code><a class="headerlink" href="#get-current" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">get-current</span></code><a class="headerlink" href="#get-current" title="Permalink to this heading">¶</a></h3>
 <p>( – wid )</p>
 <p>Get the current compilation wordlist.</p>
 </section>
 <section id="set-order">
-<h3><code class="docutils literal notranslate"><span class="pre">set-order</span></code><a class="headerlink" href="#set-order" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">set-order</span></code><a class="headerlink" href="#set-order" title="Permalink to this heading">¶</a></h3>
 <p>( widn … wid1 u – )</p>
 <p>Pop the new wordlist order size off the stack, then pop that number of wordlist IDs off the stack and set the wordlist order to them, with the wordlist ID closest to the top of the stack being the first wordlist in the wordlist order and the wordlist ID furthest from the top of the stack being the last wordlist in the wordlist order.</p>
 </section>
 <section id="get-order">
-<h3><code class="docutils literal notranslate"><span class="pre">get-order</span></code><a class="headerlink" href="#get-order" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">get-order</span></code><a class="headerlink" href="#get-order" title="Permalink to this heading">¶</a></h3>
 <p>( – widn … wid1 u )</p>
 <p>Push the wordlist order onto the stack, with the last wordlist ID in the order being furthest from the top of the stack and the first wordlist ID in the order being closest to the top of the stack, followed by pushing the wordlist order size onto the top of the stack.</p>
 </section>
@@ -144,6 +146,7 @@
 <li class="toctree-l1"><a class="reference internal" href="oo.html">Object Orientation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_lock.html">Core Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="schannel.html">Simple channel Words</a></li>
@@ -185,7 +188,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -202,7 +205,7 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

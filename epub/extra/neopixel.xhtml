@@ -14,7 +14,7 @@
       <div class="documentwrapper">
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="neopixels-on-the-rp2040">
+  <section id="neopixels-on-the-rp2040">
 <h1>Neopixels on the RP2040</h1>
 <p>There is optional support for Neopixels and Neopixel strips on the RP2040 using a PIO block to drive the Neopixel protocol.</p>
 <p>Configuring the Neopixel is as simple as alloting a Neopixel data structure for a given number of Neopixels and initializing it with a Neopixel data GPIO pin, a Neopixel count, a PIO state machine index, and a PIO. Once one has done that, <code class="docutils literal notranslate"><span class="pre">neopixel!</span></code> can be used to specify the colors of individual Neopixels (with RGB colors, with each element having values from 0 to 255), and once the colors have been specified one transmits them to the Neopixel strip with <code class="docutils literal notranslate"><span class="pre">update-neopixel</span></code>.</p>

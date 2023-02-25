@@ -1,7 +1,7 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
@@ -12,7 +12,9 @@
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="FAT32 Tools" href="fat32_tools.html" />
@@ -33,31 +35,31 @@
 
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="simple-fat32-support">
-<h1>Simple FAT32 Support<a class="headerlink" href="#simple-fat32-support" title="Permalink to this headline">¶</a></h1>
+  <section id="simple-fat32-support">
+<h1>Simple FAT32 Support<a class="headerlink" href="#simple-fat32-support" title="Permalink to this heading">¶</a></h1>
 <p>zeptoforth includes the <code class="docutils literal notranslate"><span class="pre">&lt;simple-fat32-fs&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">simple-fat32</span></code> module to simplify the usage of FAT32 filesystems on SDHC/SDXC cards in common use cases. Objects of this class are interchangeable with objects of the <code class="docutils literal notranslate"><span class="pre">&lt;fat32-fs&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module, the only differences being in its constructor and in that writethrough is set/gotten on it directly rather than through a separate <code class="docutils literal notranslate"><span class="pre">&lt;block-dev&gt;</span></code> (typically <code class="docutils literal notranslate"><span class="pre">&lt;sd&gt;</span></code>) instance.</p>
 <section id="simple-fat32">
-<h2><code class="docutils literal notranslate"><span class="pre">simple-fat32</span></code><a class="headerlink" href="#simple-fat32" title="Permalink to this headline">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">simple-fat32</span></code><a class="headerlink" href="#simple-fat32" title="Permalink to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">simple-fat32</span></code> module contains the following words:</p>
 <section id="simple-fat32-fs">
-<h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-fat32-fs&gt;</span></code><a class="headerlink" href="#simple-fat32-fs" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-fat32-fs&gt;</span></code><a class="headerlink" href="#simple-fat32-fs" title="Permalink to this heading">¶</a></h3>
 <p>( – class )</p>
 <p>This is the simple FAT32 filesystem class which inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;base-fat32-fs&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module.</p>
 <p>This class has the following constructor:</p>
 </section>
 <section id="new">
-<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#new" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#new" title="Permalink to this heading">¶</a></h3>
 <p>( sck-pin tx-pin rx-pin cs-pin spi-device fs – )</p>
 <p>Construct an <code class="docutils literal notranslate"><span class="pre">&lt;simple-fat32-fs&gt;</span></code> instance with the specified SCK (clock) pin <em>sck-pin</em>, TX (transmit) pin <em>tx-pin</em>, RX (receive) pin <em>rx-pin</em>, and CS (chip select) pin <em>cs-pin</em> on the SPI device <em>spi-device</em>. All of these will be configured for the user and require no prior initialization. Once the constructor is complete a working FAT32 filesystem will be ready for use.</p>
 <p>It also has the following methods in addition to the methods inherited from <code class="docutils literal notranslate"><span class="pre">&lt;base-fat32-fs&gt;</span></code>:</p>
 </section>
 <section id="writethrough">
-<h3><code class="docutils literal notranslate"><span class="pre">writethrough!</span></code><a class="headerlink" href="#writethrough" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">writethrough!</span></code><a class="headerlink" href="#writethrough" title="Permalink to this heading">¶</a></h3>
 <p>( writethrough fs – )</p>
 <p>Set the underlying SD card interface to be either writethrough, i.e. write to blocks are immediately written out to the SDHC/SDXC card, or not writethrough, i.e. blocks are not written out to the SDHC/SDXC card except when evicted to load other blocks or if explicitly flushed with <code class="docutils literal notranslate"><span class="pre">flush</span></code>.</p>
 </section>
 <section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">writethrough&#64;</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">writethrough&#64;</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
 <p>( fs – writethrough )</p>
 <p>Get whether the underlying SD card interface is set to writethrough or not.</p>
 </section>
@@ -122,6 +124,7 @@
 <li class="toctree-l1"><a class="reference internal" href="oo.html">Object Orientation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_lock.html">Core Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="schannel.html">Simple channel Words</a></li>
@@ -163,7 +166,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -180,7 +183,7 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

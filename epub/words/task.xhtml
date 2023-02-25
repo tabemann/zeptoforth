@@ -14,7 +14,7 @@
       <div class="documentwrapper">
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="multitasking-words">
+  <section id="multitasking-words">
 <h1>Multitasking Words</h1>
 <p>Multitasking in zeptoforth is not part of the zeptoforth kernel, but is provided by <code class="docutils literal notranslate"><span class="pre">src/common/forth/task.fs</span></code>, which in turn relies upon <code class="docutils literal notranslate"><span class="pre">src/&lt;platform&gt;/forth/int_io.fs</span></code> and <code class="docutils literal notranslate"><span class="pre">src/common/forth/systick.fs</span></code>. It is preemptive and priority-scheduled, but <code class="docutils literal notranslate"><span class="pre">PAUSE</span></code> may be called to explicitly relinquish control of the processor (which is highly recommended when possible); note that some words do this implicitly, such as <code class="docutils literal notranslate"><span class="pre">MS</span></code>, <code class="docutils literal notranslate"><span class="pre">KEY</span></code>, or <code class="docutils literal notranslate"><span class="pre">EMIT</span></code> (which are in turn called by words such as <code class="docutils literal notranslate"><span class="pre">REFILL</span></code> or <code class="docutils literal notranslate"><span class="pre">TYPE</span></code>).</p>
 <p>Note that tasks in zeptoforth are a relatively heavy-weight asynchronous computing means. For lighter-weight asynchronous computing, consider creating a single task for running a scheduler within (so the main task can be devoted to the REPL), and then put all asynchronous actions within that.</p>

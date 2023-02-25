@@ -14,7 +14,7 @@
       <div class="documentwrapper">
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="simple-fat32-support">
+  <section id="simple-fat32-support">
 <h1>Simple FAT32 Support</h1>
 <p>zeptoforth includes the <code class="docutils literal notranslate"><span class="pre">&lt;simple-fat32-fs&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">simple-fat32</span></code> module to simplify the usage of FAT32 filesystems on SDHC/SDXC cards in common use cases. Objects of this class are interchangeable with objects of the <code class="docutils literal notranslate"><span class="pre">&lt;fat32-fs&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module, the only differences being in its constructor and in that writethrough is set/gotten on it directly rather than through a separate <code class="docutils literal notranslate"><span class="pre">&lt;block-dev&gt;</span></code> (typically <code class="docutils literal notranslate"><span class="pre">&lt;sd&gt;</span></code>) instance.</p>
 <section id="simple-fat32">

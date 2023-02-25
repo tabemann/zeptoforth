@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Core Lock Words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="core-lock-words">
+<h1>Core Lock Words</h1>
+<p>Core locks provide a mutual exclusion mechanism between cores while allowing code executing on the same core to access the protected resource in a nested fashion. This is significant if one needs to protect access to a resource within a critical section on a single core, but one needs to ensure the ability to access that resource within an interrupt handler executing within the same resource. Unlike hardwære spinlocks such as that provided by the RP2040 core locks do not occupy any additional hardware resources, and do not require either some sort of allocation mechanism or a fixed set of pre-allocated hardware resources.</p>
+<section id="core-lock">
+<h2><code class="docutils literal notranslate"><span class="pre">core-lock</span></code></h2>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">core-lock</span></code>:</p>
+<section id="core-lock-size">
+<h3><code class="docutils literal notranslate"><span class="pre">core-lock-size</span></code></h3>
+<p>( – bytes )</p>
+<p>Get the size of a core lock in bytes.</p>
+</section>
+<section id="init-core-lock">
+<h3><code class="docutils literal notranslate"><span class="pre">init-core-lock</span></code></h3>
+<p>( addr – )</p>
+<p>Initialize a core lock starting at the specified address <em>addr</em>; note that it must be <code class="docutils literal notranslate"><span class="pre">core-lock-size</span></code> bytes in size.</p>
+</section>
+<section id="claim-core-lock">
+<h3><code class="docutils literal notranslate"><span class="pre">claim-core-lock</span></code></h3>
+<p>( core-lock – )</p>
+<p>Claim a core lock <em>core-lock</em> for the current core. If it is already claimed for a core other than the current core, relinquish control of the current core and try again later repeatly until claiming <em>core-lock</em> is successful. If, when claimed for the current core it had already been claimed for the current core, increment a nested claim counter. Note that this is not safe to execute within an interrupt handler.</p>
+</section>
+<section id="claim-core-lock-spin">
+<h3><code class="docutils literal notranslate"><span class="pre">claim-core-lock-spin</span></code></h3>
+<p>( core-lock – )</p>
+<p>Claim a core lock <em>core-lock</em> for the current core. If it is already claimed for a core other than the current core, spin until it is no longer claimed by any core other the current one, and then claim it. If, when claimed for the current core it had already been claimed for the current core, increment a nested claim counter. Note that this is strictly-speaking safe to execute within an interrupt handler, but that is only advisable if <em>core-lock</em> is only claimed for very short periods of time, because it will cause the interrupt handler to wait until it cain claim <em>corelock</em>.</p>
+</section>
+<section id="claim-core-lock-timeout">
+<h3><code class="docutils literal notranslate"><span class="pre">claim-core-lock-timeout</span></code></h3>
+<p>( core-lock – )</p>
+<p>Claim a core lock <em>core-lock</em> for the current core. If it is already claimed for a core other than the current core, relinquish control of the current core and try again later repeatly until claiming <em>core-lock</em> is successful or the current timeout is reached, where then <code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code> is raised. If, when claimed for the current core it had already been claimed for the current core, increment a nested claim counter. Note that this is not safe to execute within an interrupt handler.</p>
+</section>
+<section id="release-core-lock">
+<h3><code class="docutils literal notranslate"><span class="pre">release-core-lock</span></code></h3>
+<p>( core-lock – )</p>
+<p>Release a core lock <em>core-lock</em>, decrementing its nested claim counter until it reaches zero. If all previous claims have been balanced, the <em>core-lock</em> may now be claimed by a task on another core.</p>
+</section>
+<section id="with-core-lock">
+<h3><code class="docutils literal notranslate"><span class="pre">with-core-lock</span></code></h3>
+<p>( xt core-lock – )</p>
+<p>Execute an execution token <em>xt</em> with a given core lock <em>core-lock</em> claimed while it executes, releasing it afterwards. If an exception is raised by <em>xt</em>, release <em>core-lock</em> and then re-raise the exception. Note that this uses the mechanism implemented in <code class="docutils literal notranslate"><span class="pre">claim-core-lock</span></code>, with all of its associated caveats.</p>
+</section>
+<section id="with-core-lock-spin">
+<h3><code class="docutils literal notranslate"><span class="pre">with-core-lock-spin</span></code></h3>
+<p>( xt core-lock – )</p>
+<p>Execute an execution token <em>xt</em> with a given core lock <em>core-lock</em> claimed while it executes, releasing it afterwards. If an exception is raised by <em>xt</em>, release <em>core-lock</em> and then re-raise the exception. Note that this uses the mechanism implemented in <code class="docutils literal notranslate"><span class="pre">claim-core-lock-spin</span></code>, with all the associated caveats.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

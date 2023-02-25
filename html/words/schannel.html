@@ -1,7 +1,7 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
@@ -12,7 +12,9 @@
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Bidirectional Channel Words" href="rchannel.html" />
@@ -33,90 +35,90 @@
 
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="simple-channel-words">
-<h1>Simple channel Words<a class="headerlink" href="#simple-channel-words" title="Permalink to this headline">¶</a></h1>
+  <section id="simple-channel-words">
+<h1>Simple channel Words<a class="headerlink" href="#simple-channel-words" title="Permalink to this heading">¶</a></h1>
 <p>A simple channel is a monodirectional means of communicating data, as arbitrary-sized blocks of data, between two or more different tasks and/or interrupt service routines. Simple channels form a fixed-size queue onto which data is sent on one end and data is received on the other. Any task which attempts to send data on a full simple channel, or receive data on an empty simple channel, will be suspended until either data is received from the simple channel, or data is sent to the simple channel, respectively, unless non-blocking operations are used, where then <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> (declared in <code class="docutils literal notranslate"><span class="pre">task</span></code>) is raised instead of blocking. Note that non-blocking simple channel routines are specifically interrupt service routine-safe, unlike other channel constructs provided by zeptoforth.</p>
 <p>Simple channels can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put into alloted memory in the dictionary or into allocated memory in the heap. Note that the size of a simple channel for a given element size and element count may be calculated with <code class="docutils literal notranslate"><span class="pre">schan-size</span></code>.</p>
 <section id="schan">
-<h2><code class="docutils literal notranslate"><span class="pre">schan</span></code><a class="headerlink" href="#schan" title="Permalink to this headline">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">schan</span></code><a class="headerlink" href="#schan" title="Permalink to this heading">¶</a></h2>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">schan</span></code>:</p>
 <section id="x-schan-closed">
-<h3><code class="docutils literal notranslate"><span class="pre">x-schan-closed</span></code><a class="headerlink" href="#x-schan-closed" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-schan-closed</span></code><a class="headerlink" href="#x-schan-closed" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Simple channel closed exception. Raised on attempting to send to a closed simple channel or when trying to receive on an empty closed simple channel.</p>
 </section>
 <section id="schan-full">
-<h3><code class="docutils literal notranslate"><span class="pre">schan-full?</span></code><a class="headerlink" href="#schan-full" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">schan-full?</span></code><a class="headerlink" href="#schan-full" title="Permalink to this heading">¶</a></h3>
 <p>( schan – flag )</p>
 <p>Get whether a simple channel is full.</p>
 </section>
 <section id="schan-empty">
-<h3><code class="docutils literal notranslate"><span class="pre">schan-empty?</span></code><a class="headerlink" href="#schan-empty" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">schan-empty?</span></code><a class="headerlink" href="#schan-empty" title="Permalink to this heading">¶</a></h3>
 <p>( schan – flag )</p>
 <p>Get whether a simple channel is empty.</p>
 </section>
 <section id="schan-size">
-<h3><code class="docutils literal notranslate"><span class="pre">schan-size</span></code><a class="headerlink" href="#schan-size" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">schan-size</span></code><a class="headerlink" href="#schan-size" title="Permalink to this heading">¶</a></h3>
 <p>( element-bytes element-count – total-bytes )</p>
 <p>Get the size in memory for a simple channel with a specified element size in bytes and element count.</p>
 </section>
 <section id="init-schan">
-<h3><code class="docutils literal notranslate"><span class="pre">init-schan</span></code><a class="headerlink" href="#init-schan" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">init-schan</span></code><a class="headerlink" href="#init-schan" title="Permalink to this heading">¶</a></h3>
 <p>( element-bytes element-count addr – )</p>
 <p>Initialize a simple channel starting at the specified address with the element size and element count. The <em>element-bytes</em> and <em>element-count</em> should be the same as when they were passed to <code class="docutils literal notranslate"><span class="pre">schan-size</span></code> when alloting or allocating the memory whose starting address is passed in.</p>
 </section>
 <section id="close-schan">
-<h3><code class="docutils literal notranslate"><span class="pre">close-schan</span></code><a class="headerlink" href="#close-schan" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">close-schan</span></code><a class="headerlink" href="#close-schan" title="Permalink to this heading">¶</a></h3>
 <p>( schan – )</p>
 <p>Close a simple channel. Raise <code class="docutils literal notranslate"><span class="pre">x-schan-closed</span></code> for all pending sending tasks or for all pending receiving tasks if the simple channel is empty.</p>
 </section>
 <section id="reopen-schan">
-<h3><code class="docutils literal notranslate"><span class="pre">reopen-schan</span></code><a class="headerlink" href="#reopen-schan" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">reopen-schan</span></code><a class="headerlink" href="#reopen-schan" title="Permalink to this heading">¶</a></h3>
 <p>( schan – )</p>
 <p>Reopen a simple channel.</p>
 </section>
 <section id="schan-closed">
-<h3><code class="docutils literal notranslate"><span class="pre">schan-closed?</span></code><a class="headerlink" href="#schan-closed" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">schan-closed?</span></code><a class="headerlink" href="#schan-closed" title="Permalink to this heading">¶</a></h3>
 <p>( schan – closed )</p>
 <p>Get whether a simple channel is closed.</p>
 </section>
 <section id="send-schan">
-<h3><code class="docutils literal notranslate"><span class="pre">send-schan</span></code><a class="headerlink" href="#send-schan" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">send-schan</span></code><a class="headerlink" href="#send-schan" title="Permalink to this heading">¶</a></h3>
 <p>( addr bytes schan – )</p>
 <p>Send message with a buffer as a payload over a simple channel. Block until another task receives the message if the simple channel is full. Note that the buffer is copied, and will be truncated if the buffer size of the simple channel is smaller than the data provided, and padded with zeros if it is larger. This is not safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="recv-schan">
-<h3><code class="docutils literal notranslate"><span class="pre">recv-schan</span></code><a class="headerlink" href="#recv-schan" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">recv-schan</span></code><a class="headerlink" href="#recv-schan" title="Permalink to this heading">¶</a></h3>
 <p>( addr bytes schan – recv-bytes )</p>
 <p>Receive message into a buffer from a simple channel. Block until another task sends a message if the simple channel is empty. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the simple channel, and padded with zeros if it is larger; the number of bytes copied is returned. This is not safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="peek-schan">
-<h3><code class="docutils literal notranslate"><span class="pre">peek-schan</span></code><a class="headerlink" href="#peek-schan" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">peek-schan</span></code><a class="headerlink" href="#peek-schan" title="Permalink to this heading">¶</a></h3>
 <p>( addr bytes schan – addr peek-bytes )</p>
 <p>Peek the oldest message into a buffer from a simple channel, without popping it from the simple channel’s queue. Block until another task sends a message if the simple channel is empty. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the simple channel, and padded with zeros if it is larger; the number of bytes copied is returned. This is not safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="skip-schan">
-<h3><code class="docutils literal notranslate"><span class="pre">skip-schan</span></code><a class="headerlink" href="#skip-schan" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">skip-schan</span></code><a class="headerlink" href="#skip-schan" title="Permalink to this heading">¶</a></h3>
 <p>( schan – )</p>
 <p>Skip the most oldest message in a simple channel. Block until another task sends a message if the simple channel is empty. Note that no copying takes place, making this faster than receiving a message. This is not safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="send-schan-no-block">
-<h3><code class="docutils literal notranslate"><span class="pre">send-schan-no-block</span></code><a class="headerlink" href="#send-schan-no-block" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">send-schan-no-block</span></code><a class="headerlink" href="#send-schan-no-block" title="Permalink to this heading">¶</a></h3>
 <p>( addr bytes schan – )</p>
 <p>Send message with a buffer as a payload over a simple channel. If the simple channel is full, or if another task or interrupt service rouine is attempting to send on the same simple channel simultaneously, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. Note that the buffer is copied, and will be truncated if the buffer size of the simple channel is smaller than the data provided, and padded with zeros if it is larger. This is safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="recv-schan-no-block">
-<h3><code class="docutils literal notranslate"><span class="pre">recv-schan-no-block</span></code><a class="headerlink" href="#recv-schan-no-block" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">recv-schan-no-block</span></code><a class="headerlink" href="#recv-schan-no-block" title="Permalink to this heading">¶</a></h3>
 <p>( addr bytes schan – recv-bytes )</p>
 <p>Receive message into a buffer from a simple channel. If the simple channel is empty, or if another task or interrupt service rouine is attempting to receive on the same simple channel simultaneously, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the simple channel, and padded with zeros if it is larger; the number of bytes copied is returned. This is safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="peek-schan-no-block">
-<h3><code class="docutils literal notranslate"><span class="pre">peek-schan-no-block</span></code><a class="headerlink" href="#peek-schan-no-block" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">peek-schan-no-block</span></code><a class="headerlink" href="#peek-schan-no-block" title="Permalink to this heading">¶</a></h3>
 <p>( addr bytes schan – addr peek-bytes )</p>
 <p>Peek the oldest message into a buffer from a simple channel, without popping it from the simple channel’s queue. If the simple channel is empty, or if another task or interrupt service rouine is attempting to receive on the same simple channel simultaneously, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. Note that the buffer is copied, and will be truncated if the provided buffer is smaller than the buffer size of the simple channel, and padded with zeros if it is larger; the number of bytes copied is returned. This is safe to call within an interrupt service routine or a critical section.</p>
 </section>
 <section id="skip-schan-no-block">
-<h3><code class="docutils literal notranslate"><span class="pre">skip-schan-no-block</span></code><a class="headerlink" href="#skip-schan-no-block" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">skip-schan-no-block</span></code><a class="headerlink" href="#skip-schan-no-block" title="Permalink to this heading">¶</a></h3>
 <p>( schan – )</p>
 <p>Skip the most oldest message in a simple channel. If the simple channel is empty, or if another task or interrupt service rouine is attempting to receive on the same simple channel simultaneously, <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> is raised. Note that no copying takes place, making this faster than receiving a message. This is safe to call within an interrupt service routine or a critical section.</p>
 </section>
@@ -181,6 +183,7 @@
 <li class="toctree-l1"><a class="reference internal" href="oo.html">Object Orientation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_lock.html">Core Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Simple channel Words</a></li>
@@ -222,7 +225,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -239,7 +242,7 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

@@ -1,7 +1,7 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
@@ -12,7 +12,9 @@
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Block words" href="block.html" />
@@ -33,74 +35,74 @@
 
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="quad-spi-words">
-<h1>Quad SPI words<a class="headerlink" href="#quad-spi-words" title="Permalink to this headline">¶</a></h1>
+  <section id="quad-spi-words">
+<h1>Quad SPI words<a class="headerlink" href="#quad-spi-words" title="Permalink to this heading">¶</a></h1>
 <p>The Quad SPI interface is written for the STM32F746 DISCOVERY board. It maps Quad SPI flash to the addressing space at <code class="docutils literal notranslate"><span class="pre">qspi-base</span></code>. It also provides means for writing bytes, halfwords, words, and arbitrary buffers containing bytes to flash and erasing 4K and 32K subsectors, 64K sectors, and the entire flash. Note that even though internally they require turning off memory-mapped Quad SPI mode, it is automatically turned back on when they are complete, and they are hidden from all other tasks (however they significantly impact realtime performance due to being slow while requiring interrupts to be turned off).</p>
 <section id="qspi">
-<h2><code class="docutils literal notranslate"><span class="pre">qspi</span></code><a class="headerlink" href="#qspi" title="Permalink to this headline">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">qspi</span></code><a class="headerlink" href="#qspi" title="Permalink to this heading">¶</a></h2>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">qspi</span></code>:</p>
 <section id="qspi-base">
-<h3><code class="docutils literal notranslate"><span class="pre">qspi-base</span></code><a class="headerlink" href="#qspi-base" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">qspi-base</span></code><a class="headerlink" href="#qspi-base" title="Permalink to this heading">¶</a></h3>
 <p>( – addr )</p>
 <p>Returns the base address of the Quad SPI memory mapped space.</p>
 </section>
 <section id="qspi-size">
-<h3><code class="docutils literal notranslate"><span class="pre">qspi-size</span></code><a class="headerlink" href="#qspi-size" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">qspi-size</span></code><a class="headerlink" href="#qspi-size" title="Permalink to this heading">¶</a></h3>
 <p>( – bytes )</p>
 <p>Returns the size of the Quad SPI flash space in bytes.</p>
 </section>
 <section id="qspi-inited">
-<h3><code class="docutils literal notranslate"><span class="pre">qspi-inited?</span></code><a class="headerlink" href="#qspi-inited" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">qspi-inited?</span></code><a class="headerlink" href="#qspi-inited" title="Permalink to this heading">¶</a></h3>
 <p>( – flag )</p>
 <p>Returns whether Quad SPI is initialized - should always be true after system initialization.</p>
 </section>
 <section id="map-qspi-enabled">
-<h3><code class="docutils literal notranslate"><span class="pre">map-qspi-enabled?</span></code><a class="headerlink" href="#map-qspi-enabled" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">map-qspi-enabled?</span></code><a class="headerlink" href="#map-qspi-enabled" title="Permalink to this heading">¶</a></h3>
 <p>( – flag )</p>
 <p>Returns whether mapping Quad SPI to memory is enabled - should always be true after system initialization.</p>
 </section>
 <section id="x-invalid-qspi-addr">
-<h3><code class="docutils literal notranslate"><span class="pre">x-invalid-qspi-addr</span></code><a class="headerlink" href="#x-invalid-qspi-addr" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-invalid-qspi-addr</span></code><a class="headerlink" href="#x-invalid-qspi-addr" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Invalid Quad SPI address exception.</p>
 </section>
 <section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">qspi!</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">qspi!</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
 <p>( x addr – )</p>
 <p>Writes a 32-bit value in little-endian order to Quad SPI flash at the address corresponding to the specified address in memory-mapped Quad SPI space; note that it has to be 32-bit aligned.</p>
 </section>
 <section id="hqspi">
-<h3><code class="docutils literal notranslate"><span class="pre">hqspi!</span></code><a class="headerlink" href="#hqspi" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">hqspi!</span></code><a class="headerlink" href="#hqspi" title="Permalink to this heading">¶</a></h3>
 <p>( h addr – )</p>
 <p>Writes a 16-bit value in little-endian order to Quad SPI flash at the address corresponding to the specified address in memory-mapped Quad SPI space; note that it has to be 16-bit aligned.</p>
 </section>
 <section id="bqspi">
-<h3><code class="docutils literal notranslate"><span class="pre">bqspi!</span></code><a class="headerlink" href="#bqspi" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">bqspi!</span></code><a class="headerlink" href="#bqspi" title="Permalink to this heading">¶</a></h3>
 <p>( b addr – )</p>
 <p>Writes a 8-bit value to Quad SPI flash at the address corresponding to the specified address in memory-mapped Quad SPI space; note that it has to be 16-bit aligned.</p>
 </section>
 <section id="mass-qspi">
-<h3><code class="docutils literal notranslate"><span class="pre">mass-qspi!</span></code><a class="headerlink" href="#mass-qspi" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">mass-qspi!</span></code><a class="headerlink" href="#mass-qspi" title="Permalink to this heading">¶</a></h3>
 <p>( data-addr bytes addr – )</p>
 <p>Writes an arbitrary number of bytes in the provided buffer to Quad SPIs starting at the specified address in memory-mapped Quad SPI space; note the data can be larger than a write page (and can therefore cross write page boundaries) despite the underlying hardware not allowing this due to this case being handled in sofotware.</p>
 </section>
 <section id="erase-qspi-4k-subsector">
-<h3><code class="docutils literal notranslate"><span class="pre">erase-qspi-4k-subsector</span></code><a class="headerlink" href="#erase-qspi-4k-subsector" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">erase-qspi-4k-subsector</span></code><a class="headerlink" href="#erase-qspi-4k-subsector" title="Permalink to this heading">¶</a></h3>
 <p>( addr – )</p>
 <p>Erase a 4K flash subsector containing the specified address in memory-mapped Quad SPI space.</p>
 </section>
 <section id="erase-qspi-32k-subsector">
-<h3><code class="docutils literal notranslate"><span class="pre">erase-qspi-32k-subsector</span></code><a class="headerlink" href="#erase-qspi-32k-subsector" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">erase-qspi-32k-subsector</span></code><a class="headerlink" href="#erase-qspi-32k-subsector" title="Permalink to this heading">¶</a></h3>
 <p>( addr – )</p>
 <p>Erase a 32K flash subsector containing the specified address in memory-mapped Quad SPI space.</p>
 </section>
 <section id="erase-qspi-sector">
-<h3><code class="docutils literal notranslate"><span class="pre">erase-qspi-sector</span></code><a class="headerlink" href="#erase-qspi-sector" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">erase-qspi-sector</span></code><a class="headerlink" href="#erase-qspi-sector" title="Permalink to this heading">¶</a></h3>
 <p>( addr – )</p>
 <p>Erase a 64K flash sector containing the specified address in memory-mapped Quad SPI space.</p>
 </section>
 <section id="erase-qspi-bulk">
-<h3><code class="docutils literal notranslate"><span class="pre">erase-qspi-bulk</span></code><a class="headerlink" href="#erase-qspi-bulk" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">erase-qspi-bulk</span></code><a class="headerlink" href="#erase-qspi-bulk" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Erase the entire contents of Quad SPI flash.</p>
 </section>
@@ -165,6 +167,7 @@
 <li class="toctree-l1"><a class="reference internal" href="oo.html">Object Orientation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_lock.html">Core Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="schannel.html">Simple channel Words</a></li>
@@ -206,7 +209,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -223,7 +226,7 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

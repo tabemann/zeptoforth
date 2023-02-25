@@ -14,7 +14,7 @@
       <div class="documentwrapper">
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="simple-lock-words">
+  <section id="simple-lock-words">
 <h1>Simple Lock Words</h1>
 <p>A simple lock enforces mutual exclusion, typically with regard to control of a resource, between multiple tasks. Unlike a normal lock, it does not establish a queue of multiple waiting tasks, but rather no particular order is established for which task claims the lock when multiple tasks are waiting on the lock to be released by another task. Simple locks are optimized for speed when claiming locks that are only held for very short periods of time, and particularly on multicore systems they should not be held for long because other tasks which attempt to claim them on other cores will spinwait until the lock is freed. Simple locks provide no means of avoiding priority inversion, which is another reason for avoiding holding them for long. Also, no means are provided to avoid double locking, so if a task double locks a simple lock it will hang forever until it is killed.</p>
 <section id="slock">
@@ -29,6 +29,11 @@
 <h3><code class="docutils literal notranslate"><span class="pre">init-slock</span></code></h3>
 <p>( addr – )</p>
 <p>Initialize a simple lock starting at the specified address <em>addr</em>; note that it must be <code class="docutils literal notranslate"><span class="pre">slock-size</span></code> bytes in size.</p>
+</section>
+<section id="try-claim-slock">
+<h3><code class="docutils literal notranslate"><span class="pre">try-claim-slock</span></code></h3>
+<p>( slock – success? )</p>
+<p>Attempt to claim a simple lock <em>slock</em> and return whether claiming it was successful.</p>
 </section>
 <section id="claim-slock">
 <h3><code class="docutils literal notranslate"><span class="pre">claim-slock</span></code></h3>
