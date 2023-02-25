@@ -33,6 +33,7 @@
 #include src/common/forth/int_map.fs
 #include src/common/forth/oo.fs
 #include src/common/forth/slock.fs
+#include src/common/forth/core_lock.fs
 #include src/common/forth/action.fs
 #include src/common/forth/tqueue.fs
 #include src/common/forth/lock.fs

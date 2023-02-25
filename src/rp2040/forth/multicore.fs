@@ -381,6 +381,32 @@ begin-module multicore
     cpsie
     ]code
   ;
+
+  \ Test and set without touching interrupts
+  : test-set-raw ( value addr -- set? )
+    [ test-set-spinlock SPINLOCK ] literal
+    code[
+    r1 r0 2 dp ldm
+    mark>
+    0 tos r2 ldr_,[_,#_]
+    0 r2 cmp_,#_
+    eq bc<
+    0 r0 r2 ldr_,[_,#_]
+    0 r2 cmp_,#_
+    ne bc>
+    0 r0 r1 str_,[_,#_]
+    0 r2 movs_,#_
+    r2 r2 mvns_,_
+    0 tos r2 str_,[_,#_]
+    r2 tos movs_,_
+    pc 1 pop
+    >mark
+    0 r2 movs_,#_
+    r2 r2 mvns_,_
+    0 tos r2 str_,[_,#_]
+    0 tos movs_,#_
+    ]code
+  ;
   
   \ Drain a multicore FIFO
   : fifo-drain ( core -- )

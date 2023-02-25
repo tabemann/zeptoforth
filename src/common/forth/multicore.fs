@@ -111,6 +111,22 @@ begin-module multicore
     ]code
   ;
   
+  \ Test and set without touching interrupts
+  : test-set-raw ( value addr -- set? )
+    code[
+    r0 1 dp ldm
+    0 tos r1 ldr_,[_,#_]
+    0 r1 cmp_,#_
+    ne bc>
+    0 tos r0 str_,[_,#_]
+    0 tos movs_,#_
+    tos tos mvns_,_
+    pc 1 pop
+    >mark
+    0 tos movs_,#_
+    ]code
+  ;
+
   \ Drain a multicore FIFO
   : fifo-drain ( core -- ) ['] x-core-out-of-range ?raise ;
   

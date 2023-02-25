@@ -672,11 +672,11 @@ begin-module esp-at
         len 8 rshift $FF and buffer 2 + c!
         len 16 rshift $FF and buffer 3 + c!
         len 24 rshift $FF and buffer 4 + c!
-        disable-int
+        \ disable-int
         self begin-transact
         buffer 5 self buffer>esp-at
         self end-transact
-        enable-int
+        \ enable-int
       ;] with-allot
     ; define trans-len>esp-at
 
@@ -691,11 +691,11 @@ begin-module esp-at
         bytes 64 < if
           buffer 2 + bytes + 64 bytes - 0 max 0 fill
         then
-        disable-int
+        \ disable-int
         self begin-transact
         buffer 66 self buffer>esp-at
         self end-transact
-        enable-int
+        \ enable-int
         self esp-at-log? if data bytes type-visible then
       ;] with-allot
     ; define trans-data>esp-at
@@ -705,12 +705,12 @@ begin-module esp-at
       5 [: { self buffer }
         SPI_MASTER_READ_STATUS_FROM_SLAVE_CMD buffer c!
         buffer 1 + 4 0 fill
-        disable-int
+        \ disable-int
         self begin-transact
         buffer 1 self buffer>esp-at
         buffer 1 + 4 self esp-at>buffer
         self end-transact
-        enable-int
+        \ enable-int
         buffer 1 + c@
         buffer 2 + c@ 8 lshift or
         buffer 3 + c@ 16 lshift or
@@ -724,12 +724,12 @@ begin-module esp-at
       66 [: { data bytes self buffer }
         SPI_MASTER_READ_DATA_FROM_SLAVE_CMD buffer c!
         buffer 1 + 65 0 fill
-        disable-int
+        \ disable-int
         self begin-transact
         buffer 2 self buffer>esp-at
         buffer 2 + 64 self esp-at>buffer
         self end-transact
-        enable-int
+        \ enable-int
         buffer 2 + data bytes 0 max 64 min move
         self esp-at-log? if data bytes type-visible then
       ;] with-allot
@@ -748,14 +748,16 @@ begin-module esp-at
     string s\" \r\nERROR" find-string dup -1 <> if 1 else drop 0 -1 then
   ;
 
-  \ Filter for >
-  : filter-gt ( c-addr bytes -- index found )
-    s" >" find-string dup -1 <> if 0 else drop 0 -1 then
+  \ Filter for > and ERROR
+  : filter-gt-error { D: string -- index found }
+    string s" >" find-string dup -1 <> if 0 exit else drop then
+    string s" ERROR" find-string dup -1 <> if 1 else drop 0 -1 then
   ;
 
-  \ Filter for SEND OK
-  : filter-send-ok ( c-addr bytes -- index found )
-    s" SEND OK" find-string dup -1 <> if 0 else drop 0 -1 then
+  \ Filter for SEND OK and ERROR
+  : filter-send-ok-error { D: string -- index found }
+    string s" SEND OK" find-string dup -1 <> if 0 exit else drop then
+    string s" ERROR" find-string dup -1 <> if 1 else drop 0 -1 then
   ;
 
   \ The ESP-AT device class
@@ -1888,8 +1890,9 @@ begin-module esp-at
       0 { offset }
       begin offset bytes < while
         bytes offset - esp-at-max-send-once-size min { send-bytes }
-        c-addr offset + send-bytes self single-block>esp-at
-        send-bytes +to offset
+        c-addr offset + send-bytes self single-block>esp-at if
+          send-bytes +to offset
+        then
       repeat
     ; define single>esp-at
 
@@ -1899,31 +1902,35 @@ begin-module esp-at
       0 { offset }
       begin offset bytes < while
         bytes offset - esp-at-max-send-once-size min { send-bytes }
-        c-addr offset + send-bytes mux self multi-block>esp-at
-        send-bytes +to offset
+        c-addr offset + send-bytes mux self multi-block>esp-at if
+          send-bytes +to offset
+        then
       repeat
     ; define multi>esp-at
 
     \ Send a block of data for a single connection to an ESP-AT device
     :noname
-      [: { c-addr bytes self -- }
+      [: { c-addr bytes self -- success? }
         self validate-esp-at-owner
         self clear-esp-at
         s" AT+CIPSEND=" self msg>esp-at
         bytes self integer>esp-at
         s\" \r\n" self msg>esp-at
         self end>esp-at
-        ['] filter-gt self ['] esp-at>wait 50000 self with-esp-at-timeout
-        self clear-esp-at-no-parse
-        c-addr bytes self msg>esp-at
-        self end>esp-at
-        ['] filter-send-ok self ['] esp-at>wait 100000 self with-esp-at-timeout
+        ['] filter-gt-error self esp-at>match 0= if
+          self clear-esp-at-no-parse
+          c-addr bytes self msg>esp-at
+          self end>esp-at
+          ['] filter-send-ok-error self esp-at>match 0=
+        else
+          false
+        then
       ;] critical
     ; define single-block>esp-at
       
     \ Send a block of data for a multiple connection to an ESP-AT device
     :noname
-      [: { c-addr bytes mux self -- }
+      [: { c-addr bytes mux self -- success? }
         self validate-esp-at-owner
         mux 4 <= averts x-out-of-range-value
         self clear-esp-at
@@ -1933,11 +1940,14 @@ begin-module esp-at
         bytes self integer>esp-at
         s\" \r\n" self msg>esp-at
         self end>esp-at
-        ['] filter-gt self ['] esp-at>wait 50000 self with-esp-at-timeout
-        self clear-esp-at-no-parse
-        c-addr bytes self msg>esp-at
-        self end>esp-at
-        ['] filter-send-ok self ['] esp-at>wait 100000 self with-esp-at-timeout
+        ['] filter-gt-error self esp-at>match 0= if
+          self clear-esp-at-no-parse
+          c-addr bytes self msg>esp-at
+          self end>esp-at
+          ['] filter-send-ok-error self esp-at>match 0=
+        else
+          false
+        then
       ;] critical
     ; define multi-block>esp-at
 
