@@ -102,7 +102,7 @@ begin-module esp-at
 
     \ Emit a visible character
     : emit-visible { byte -- }
-      byte $20 >= byte $0D = or byte $0A = or if byte emit then
+      byte $20 >= byte $0D = or byte $0A = or if byte internal::serial-emit then
     ;
 
     \ Type a visible string
@@ -854,6 +854,9 @@ begin-module esp-at
       
       \ Send a message to an ESP-AT device
       method msg>esp-at ( c-addr bytes self -- )
+
+      \ Start a command
+      method start>esp-at ( self -- )
       
       \ End a command
       method end>esp-at ( self -- )
@@ -1221,7 +1224,7 @@ begin-module esp-at
     \ Set the transmission mode
     :noname { passthrough? self -- }
       self validate-esp-at-owner
-      self clear-esp-at
+      self start>esp-at
       s" AT+CIPMODE=" self msg>esp-at
       passthrough? if 1 else 0 then self integer>esp-at
       s\" \r\n" self msg>esp-at
@@ -1372,9 +1375,15 @@ begin-module esp-at
       ;] critical
     ; define msg>esp-at
 
+    \ Start a command
+    :noname { self -- }
+      self clear-esp-at
+    ; define start>esp-at
+    
     \ End a command
     :noname ( self -- )
       [: { self }
+        self comm-delay
         systick-counter self wait-ready
         0 self esp-at-intf @ trans-len>esp-at
       ;] critical
@@ -1417,6 +1426,7 @@ begin-module esp-at
         self esp-at-intf @ esp-at-ready? offset esp-at-buffer-size < and if
           systick-counter start-systick - self esp-at-timeout @ <
           averts x-esp-at-timeout
+          7000. delay-us \ DEBUG
           self esp-at-buffer offset +
           esp-at-buffer-size offset - self esp-at>msg +to offset
           self comm-delay
@@ -1449,7 +1459,7 @@ begin-module esp-at
     \ Enable disable multiple connections
     :noname { multi? self -- }
       self validate-esp-at-owner
-      self clear-esp-at
+      self start>esp-at
       s" AT+CIPMUX=" self msg>esp-at
       multi? if 1 else 0 then self integer>esp-at
       s\" \r\n" self msg>esp-at
@@ -1460,7 +1470,7 @@ begin-module esp-at
     \ Get multiple connections enabled/disabled
     :noname { self -- multi? }
       self validate-esp-at-owner
-      self clear-esp-at
+      self start>esp-at
       s" AT+CIPMUX?" self msg>esp-at
       s\" \r\n" self msg>esp-at
       self end>esp-at
@@ -1472,7 +1482,7 @@ begin-module esp-at
     \ Enable/disable IPv6 mode
     :noname { ipv6? self -- }
       self validate-esp-at-owner
-      self clear-esp-at
+      self start>esp-at
       s" AT+CIPV6=" self msg>esp-at
       ipv6? if 1 else 0 then self integer>esp-at
       s\" \r\n" self msg>esp-at
@@ -1483,7 +1493,7 @@ begin-module esp-at
     \ Get IPv6 mode enabled/disabled
     :noname { self -- ipv6? }
       self validate-esp-at-owner
-      self clear-esp-at
+      self start>esp-at
       s" AT+CIPV6?" self msg>esp-at
       s\" \r\n" self msg>esp-at
       self end>esp-at
@@ -1497,7 +1507,7 @@ begin-module esp-at
       self validate-esp-at-owner
       sleep-mode modem-sleep-listen-interval-mode u<=
       averts x-out-of-range-value
-      self clear-esp-at
+      self start>esp-at
       s" AT+SLEEP=" self msg>esp-at
       sleep-mode self integer>esp-at
       s\" \r\n" self msg>esp-at
@@ -1508,7 +1518,7 @@ begin-module esp-at
     \ Get the sleep mode
     :noname { self -- sleep-mode }
       self validate-esp-at-owner
-      self clear-esp-at
+      self start>esp-at
       s" AT+SLEEP?" self msg>esp-at
       s\" \r\n" self msg>esp-at
       self end>esp-at
@@ -1520,7 +1530,7 @@ begin-module esp-at
     \ Get the connection status
     :noname { status self -- }
       self validate-esp-at-owner
-      self clear-esp-at
+      self start>esp-at
       s" AT+CIPSTATUS" self msg>esp-at
       s\" \r\n" self msg>esp-at
       self end>esp-at
@@ -1558,7 +1568,7 @@ begin-module esp-at
     \ Set the WiFi power
     :noname { power self -- }
       self validate-esp-at-owner
-      self clear-esp-at
+      self start>esp-at
       s" AT+RFPOWER=" self msg>esp-at
       power self integer>esp-at
       s\" \r\n" self msg>esp-at
@@ -1569,7 +1579,7 @@ begin-module esp-at
     \ Get the WiFi power
     :noname { self -- power }
       self validate-esp-at-owner
-      self clear-esp-at
+      self start>esp-at
       s" AT+RFPOWER?" self msg>esp-at
       s\" \r\n" self msg>esp-at
       self end>esp-at
@@ -1583,7 +1593,7 @@ begin-module esp-at
       auto-connect-mode auto-connect u<= averts x-out-of-range-value
       mode softap-station-mode u<= averts x-out-of-range-value
       self validate-esp-at-owner
-      self clear-esp-at
+      self start>esp-at
       s" AT+CWMODE=" self msg>esp-at
       mode self integer>esp-at
       s" ," self msg>esp-at
@@ -1596,7 +1606,7 @@ begin-module esp-at
     \ Get the local softAP IPv4 address
     :noname { self -- c-addr bytes found? }
       self validate-esp-at-owner
-      self clear-esp-at
+      self start>esp-at
       s\" AT+CIFSR\r\n" self msg>esp-at
       self end>esp-at
       ['] filter-ok-error self esp-at>string 0= averts x-esp-at-error
@@ -1610,7 +1620,7 @@ begin-module esp-at
     \ Get the local softAP link-local IPv6 address
     :noname { self -- c-addr bytes found? }
       self validate-esp-at-owner
-      self clear-esp-at
+      self start>esp-at
       s\" AT+CIFSR\r\n" self msg>esp-at
       self end>esp-at
       ['] filter-ok-error self esp-at>string 0= averts x-esp-at-error
@@ -1624,7 +1634,7 @@ begin-module esp-at
     \ Get the local softAP global IPv6 address
     :noname { self -- c-addr bytes found? }
       self validate-esp-at-owner
-      self clear-esp-at
+      self start>esp-at
       s\" AT+CIFSR\r\n" self msg>esp-at
       self end>esp-at
       ['] filter-ok-error self esp-at>string 0= averts x-esp-at-error
@@ -1638,7 +1648,7 @@ begin-module esp-at
     \ Get the local softAP MAC address
     :noname { self -- c-addr bytes found? }
       self validate-esp-at-owner
-      self clear-esp-at
+      self start>esp-at
       s\" AT+CIFSR\r\n" self msg>esp-at
       self end>esp-at
       ['] filter-ok-error self esp-at>string 0= averts x-esp-at-error
@@ -1652,7 +1662,7 @@ begin-module esp-at
     \ Get the local station IPv4 address
     :noname { self -- c-addr bytes found? }
       self validate-esp-at-owner
-      self clear-esp-at
+      self start>esp-at
       s\" AT+CIFSR\r\n" self msg>esp-at
       self end>esp-at
       ['] filter-ok-error self esp-at>string 0= averts x-esp-at-error
@@ -1666,7 +1676,7 @@ begin-module esp-at
     \ Get the local station link-local IPv6 address
     :noname { self -- c-addr bytes found? }
       self validate-esp-at-owner
-      self clear-esp-at
+      self start>esp-at
       s\" AT+CIFSR\r\n" self msg>esp-at
       self end>esp-at
       ['] filter-ok-error self esp-at>string 0= averts x-esp-at-error
@@ -1680,7 +1690,7 @@ begin-module esp-at
     \ Get the local station global IPv6 address
     :noname { self -- c-addr bytes found? }
       self validate-esp-at-owner
-      self clear-esp-at
+      self start>esp-at
       s\" AT+CIFSR\r\n" self msg>esp-at
       self end>esp-at
       ['] filter-ok-error self esp-at>string 0= averts x-esp-at-error
@@ -1694,7 +1704,7 @@ begin-module esp-at
     \ Get the local station MAC address
     :noname { self -- c-addr bytes found? }
       self validate-esp-at-owner
-      self clear-esp-at
+      self start>esp-at
       s\" AT+CIFSR\r\n" self msg>esp-at
       self end>esp-at
       ['] filter-ok-error self esp-at>string 0= averts x-esp-at-error
@@ -1708,17 +1718,17 @@ begin-module esp-at
     \ Issue a test command for an ESP-AT device
     :noname { self -- }
       self validate-esp-at-owner
-      self clear-esp-at
+      self start>esp-at
       s\" AT\r\n" self msg>esp-at
       self end>esp-at
       ['] filter-ok self ['] esp-at>wait 10000 self catch-with-esp-at-timeout
       not if exit then
-      self clear-esp-at
+      self start>esp-at
       s\" AT\r\n" self msg>esp-at
       self end>esp-at
       ['] filter-ok self ['] esp-at>wait 10000 self catch-with-esp-at-timeout
       not if exit then
-      self clear-esp-at
+      self start>esp-at
       s\" AT\r\n" self msg>esp-at
       self end>esp-at
       ['] filter-ok self ['] esp-at>wait 10000 self catch-with-esp-at-timeout
@@ -1728,7 +1738,7 @@ begin-module esp-at
     \ Set ESP-AT command echoing
     :noname { echo? self -- }
       self validate-esp-at-owner
-      self clear-esp-at
+      self start>esp-at
       echo? if s\" ATE1\r\n" else s\" ATE0\r\n" then self msg>esp-at
       self end>esp-at
       ['] filter-ok-error self esp-at>match 0= averts x-esp-at-error
@@ -1756,7 +1766,7 @@ begin-module esp-at
     \ Reset an ESP-AT device
     :noname { self -- }
       self validate-esp-at-owner
-      self clear-esp-at
+      self start>esp-at
       s" AT+RST" self msg>esp-at
       s\" \r\n" self msg>esp-at
       self end>esp-at
@@ -1775,7 +1785,7 @@ begin-module esp-at
     \ Connect to a WiFi AP
     :noname { D: password D: ssid self -- }
       self validate-esp-at-owner
-      self clear-esp-at
+      self start>esp-at
       s\" AT+CWJAP=\"" self msg>esp-at
       ssid self msg>esp-at
       s\" \",\"" self msg>esp-at
@@ -1788,7 +1798,7 @@ begin-module esp-at
     \ Disconnect from a WiFi AP
     :noname { self -- }
       self validate-esp-at-owner
-      self clear-esp-at
+      self start>esp-at
       s\" AT+CWQAP\r\n" self msg>esp-at
       self end>esp-at
       ['] filter-ok-error self esp-at>wait
@@ -1799,7 +1809,7 @@ begin-module esp-at
       prefer prefer-resolve-ipv4 u>= averts x-out-of-range-value
       prefer resolve-ipv6-only u<= averts x-out-of-range-value
       self validate-esp-at-owner
-      self clear-esp-at
+      self start>esp-at
       s\" AT+CIPDOMAIN=\"" self msg>esp-at
       domain self msg>esp-at
       s\" \"," self msg>esp-at
@@ -1820,7 +1830,7 @@ begin-module esp-at
       remote-port 65536 u< averts x-out-of-range-value
       keep-alive 7200 u<= averts x-out-of-range-value
       self validate-esp-at-owner
-      self clear-esp-at
+      self start>esp-at
       s\" AT+CIPSTART=\"" self msg>esp-at
       type format-connect-type self msg>esp-at
       s\" \",\"" self msg>esp-at
@@ -1844,7 +1854,7 @@ begin-module esp-at
       remote-port 65536 u< averts x-out-of-range-value
       keep-alive 7200 u<= averts x-out-of-range-value
       self validate-esp-at-owner
-      self clear-esp-at
+      self start>esp-at
       s" AT+CIPSTART=" self msg>esp-at
       mux self integer>esp-at
       s\" ,\"" self msg>esp-at
@@ -1864,7 +1874,7 @@ begin-module esp-at
     :noname { port self -- }
       port 65536 u< averts x-out-of-range-value
       self validate-esp-at-owner
-      self clear-esp-at
+      self start>esp-at
       s" AT+CIPSERVER=1," self msg>esp-at
       port self integer>esp-at
       s\" \r\n" self msg>esp-at
@@ -1876,7 +1886,7 @@ begin-module esp-at
     :noname { close-all? self -- }
       close-all? close-all u<= averts x-out-of-range-value
       self validate-esp-at-owner
-      self clear-esp-at
+      self start>esp-at
       s" AT+CIPSERVER=0," self msg>esp-at
       close-all? self integer>esp-at
       s\" \r\n" self msg>esp-at
@@ -1909,10 +1919,10 @@ begin-module esp-at
     ; define multi>esp-at
 
     \ Send a block of data for a single connection to an ESP-AT device
-    :noname
-      [: { c-addr bytes self -- success? }
+    :noname ( c-addr bytes self -- success? )
+      [: { c-addr bytes self }
         self validate-esp-at-owner
-        self clear-esp-at
+        self start>esp-at
         s" AT+CIPSEND=" self msg>esp-at
         bytes self integer>esp-at
         s\" \r\n" self msg>esp-at
@@ -1929,11 +1939,11 @@ begin-module esp-at
     ; define single-block>esp-at
       
     \ Send a block of data for a multiple connection to an ESP-AT device
-    :noname
-      [: { c-addr bytes mux self -- success? }
+    :noname ( c-addr bytes mux self -- success? )
+      [: { c-addr bytes mux self }
         self validate-esp-at-owner
         mux 4 <= averts x-out-of-range-value
-        self clear-esp-at
+        self start>esp-at
         s" AT+CIPSEND=" self msg>esp-at
         mux self integer>esp-at
         s" ," self msg>esp-at
@@ -1954,7 +1964,7 @@ begin-module esp-at
     \ Close a single connection on an ESP-AT device
     :noname { self -- }
       self validate-esp-at-owner
-      self clear-esp-at
+      self start>esp-at
       s\" AT+CIPCLOSE" self msg>esp-at
       s\" \r\n" self msg>esp-at
       self end>esp-at
@@ -1965,7 +1975,7 @@ begin-module esp-at
     :noname { mux self -- }
       self validate-esp-at-owner
       mux 5 <= averts x-out-of-range-value
-      self clear-esp-at
+      self start>esp-at
       s" AT+CIPCLOSE=" self msg>esp-at
       mux self integer>esp-at
       s\" \r\n" self msg>esp-at

@@ -238,12 +238,12 @@ begin-module gpio
 
   \ Clear a raw edge low interrupt
   : INTR_GPIO_EDGE_LOW! ( index -- )
-    dup 1 and 2 lshift 2 + bit swap 1 rshift INTR0 + cbis!
+    dup 1 and 2 lshift 2 + bit swap 1 rshift INTR0 + c!
   ;
 
   \ Clear a raw edge high interrupt
   : INTR_GPIO_EDGE_HIGH! ( index -- )
-    dup 1 and 2 lshift 3 + bit swap 1 rshift INTR0 + cbis!
+    dup 1 and 2 lshift 3 + bit swap 1 rshift INTR0 + c!
   ;
   
   \ Get a level low raw interrupt state

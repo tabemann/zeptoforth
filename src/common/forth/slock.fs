@@ -49,10 +49,8 @@ begin-module slock
   \ Claim a simple lock
   : claim-slock ( slock -- )
     begin
-\      dup slock-task @ task-waited-for !
       current-task over slock-task test-set dup not if
-        pause
-\        task-internal::block-indefinite-self-release
+        pause-reschedule-last
       then
     until
     drop
@@ -64,10 +62,8 @@ begin-module slock
       current-task compare-timeout if
         ['] x-timed-out ?raise
       else
-\        dup slock-task @ task-waited-for !
         current-task over slock-task test-set dup not if
-          pause
-\          task-internal::block-indefinite-self-release
+          pause-reschedule-last
         then
       then
     until
@@ -76,11 +72,8 @@ begin-module slock
 
   \ Release a simple lock
   : release-slock ( slock -- )
-\    disable-int
-\    claim-all-core-spinlock-raw
-    0 swap ! \ task-internal::wake-other-tasks
-\    release-all-core-spinlock-raw
-\    enable-int
+    0 swap !
+    pause
   ;
 
   \ Release a simple lock and block atomically

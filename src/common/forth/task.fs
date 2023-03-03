@@ -129,6 +129,9 @@ begin-module task
     \ Whether to keep the current task at the head of the schedule
     cpu-variable cpu-reschedule? reschedule?
 
+    \ Whether to force a task to be rescheduled last in the schedule
+    cpu-variable cpu-reschedule-last? reschedule-last?
+    
     \ The current terminated task
     cpu-variable cpu-terminated-task terminated-task
 
@@ -374,6 +377,11 @@ begin-module task
     disable-int false reschedule? ! pause enable-int
   ;
 
+  \ Pause a task so as to force it be rescheduled last
+  : pause-reschedule-last ( -- )
+    disable-int true reschedule-last? ! pause enable-int
+  ;
+
   continue-module task-internal
 
     \ Get task dictionary end
@@ -572,6 +580,15 @@ begin-module task
 	insert-task-before
       else
 	insert-task-first
+      then
+    ;
+
+    \ Insert a task last
+    : insert-task-last ( task -- )
+      last-task @ ?dup if
+        insert-task-before
+      else
+        insert-task-first
       then
     ;
 
@@ -1721,11 +1738,11 @@ begin-module task
     \ Reschedule previous task
     : reschedule-task ( task -- )
       true in-task-change !
-      reschedule? @ task-systick-counter @ 0<= or if
+      reschedule-last? @ if
         claim-same-core-spinlock
-	dup remove-task
+        dup remove-task
         dup task-active@ 0> if
-          insert-task
+          insert-task-last
         else
           dup terminated? if
             terminated-task !
@@ -1735,8 +1752,24 @@ begin-module task
         then
         release-same-core-spinlock
       else
-	drop
+        reschedule? @ task-systick-counter @ 0<= or if
+          claim-same-core-spinlock
+          dup remove-task
+          dup task-active@ 0> if
+            insert-task
+          else
+            dup terminated? if
+              terminated-task !
+            else
+              drop
+            then
+          then
+          release-same-core-spinlock
+        else
+          drop
+        then
       then
+      false reschedule-last? !
       true reschedule? !
       false in-task-change !
     ;
@@ -2119,6 +2152,7 @@ begin-module task
       false i cpu-trace-enabled? !
       false i cpu-in-task-change !
       true i cpu-reschedule? !
+      false i cpu-reschedule-last? !
       0 i cpu-task-systick-counter !
       0 i cpu-terminated-task !
       0 i cpu-extra-task !

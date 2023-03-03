@@ -67,7 +67,12 @@ The same as applies to `spawn` applies here.
 ##### `pause-wo-reschedule`
 ( -- )
 
-Relinquish control of the current core without rescheduling the current task, i.e. reinserting it into the schedule. This ensures that once the task will not move in the schedule despite its giving up control ofthe current core.
+Relinquish control of the current core without rescheduling the current task, i.e. reinserting it into the schedule. This ensures that once the task will not move in the schedule despite its giving up control of the current core.
+
+##### `pause-reschedule-last`
+( -- )
+
+Relinquish control of the current core, rescheduling the current task to be last in the task queue regardless of its priority. This ensures that other tasks will be given the opportunity to execute on the current core even if they are of lower priority than the current task.
 
 ##### `config-notify`
 ( notify-area-addr notify-count task -- )
