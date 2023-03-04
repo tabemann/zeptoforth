@@ -313,7 +313,8 @@ begin-module esp-at
     700 constant esp-at-default-delay
 
     \ Default ESP-AT long communication delay in microseconds
-    5600 constant esp-at-default-long-delay
+    \ 5600 constant esp-at-default-long-delay
+    2100 constant esp-at-default-long-delay
     
   end-module> import
     
@@ -802,7 +803,7 @@ begin-module esp-at
       4096 constant esp-at-buffer-size
 
       \ ESP8285 max send once size
-      512 constant esp-at-max-send-once-size
+      2048 constant esp-at-max-send-once-size
 
       \ Frame buffer size
       4096 constant esp-at-frame-buffer-size
@@ -860,6 +861,9 @@ begin-module esp-at
       
       \ End a command
       method end>esp-at ( self -- )
+
+      \ End having received a response from a command
+      method esp-at>end ( self -- )
       
       \ Send an integer to an ESP-AT device
       method integer>esp-at ( n self -- )
@@ -1230,6 +1234,7 @@ begin-module esp-at
       s\" \r\n" self msg>esp-at
       self end>esp-at
       ['] filter-ok-error self esp-at>match 0= averts x-esp-at-error
+      self esp-at>end
     ; define esp-at-tx-mode!
     
     \ Claim the ESP-AT device
@@ -1323,14 +1328,16 @@ begin-module esp-at
         begin self esp-at-intf @ esp-at-ready? while
           self esp-at-intf @ esp-at>trans-len { len }
           0 { offset }
-          begin offset len < while
+          len 0> if
             self long-comm-delay
-            len offset - 64 min { recv-bytes }
-            self esp-at-buffer recv-bytes self esp-at-intf @ esp-at>trans-data
-            self comm-delay
-            recv-bytes +to offset
-            self esp-at-buffer recv-bytes self process-esp-at-frame
-          repeat
+            begin offset len < while
+              self comm-delay
+              len offset - 64 min { recv-bytes }
+              self esp-at-buffer recv-bytes self esp-at-intf @ esp-at>trans-data
+              recv-bytes +to offset
+              self esp-at-buffer recv-bytes self process-esp-at-frame
+            repeat
+          then
         repeat
         systick-counter start-systick - clear-timeout > if
           false self esp-at-frame? !
@@ -1347,13 +1354,15 @@ begin-module esp-at
       begin self esp-at-intf @ esp-at-ready? while
         self esp-at-intf @ esp-at>trans-len { len }
         0 { offset }
-        begin offset len < while
+        len 0> if
           self long-comm-delay
-          len offset - 64 min { recv-bytes }
-          self esp-at-buffer 64 self esp-at-intf @ esp-at>trans-data
-          self comm-delay
-          recv-bytes +to offset
-        repeat
+          begin offset len < while
+            self comm-delay
+            len offset - 64 min { recv-bytes }
+            self esp-at-buffer 64 self esp-at-intf @ esp-at>trans-data
+            recv-bytes +to offset
+          repeat
+        then
       repeat
     ; define clear-esp-at-no-parse
 
@@ -1364,12 +1373,12 @@ begin-module esp-at
         systick-counter { start-systick }
         bytes self esp-at-intf @ trans-len>esp-at
         0 { offset }
+        self long-comm-delay
         begin offset bytes < while
           self comm-delay
           start-systick self wait-ready
           bytes offset - 0 max 64 min { send-bytes }
           c-addr offset + send-bytes self esp-at-intf @ trans-data>esp-at
-          self comm-delay
           send-bytes +to offset
         repeat
       ;] critical
@@ -1383,11 +1392,15 @@ begin-module esp-at
     \ End a command
     :noname ( self -- )
       [: { self }
-        self comm-delay
         systick-counter self wait-ready
         0 self esp-at-intf @ trans-len>esp-at
       ;] critical
     ; define end>esp-at
+
+    \ End having received a response from a command
+    :noname { self -- }
+      \ Do nothing here
+    ; define esp-at>end
     
     \ Send an integer to an ESP-AT device
     :noname ( n self -- )
@@ -1402,13 +1415,15 @@ begin-module esp-at
         self validate-esp-at-owner
         self esp-at-intf @ esp-at>trans-len { len }
         0 { offset }
-        begin offset len < while
+        len 0> if
           self long-comm-delay
-          len offset - 0 max 64 min { recv-bytes }
-          c-addr offset + recv-bytes self esp-at-intf @ esp-at>trans-data
-          recv-bytes +to offset
-          self comm-delay
-        repeat
+          begin offset len < while
+            self comm-delay
+            len offset - 0 max 64 min { recv-bytes }
+            c-addr offset + recv-bytes self esp-at-intf @ esp-at>trans-data
+            recv-bytes +to offset
+          repeat
+        then
         bytes len min
       ;] critical
     ; define esp-at>msg
@@ -1426,10 +1441,9 @@ begin-module esp-at
         self esp-at-intf @ esp-at-ready? offset esp-at-buffer-size < and if
           systick-counter start-systick - self esp-at-timeout @ <
           averts x-esp-at-timeout
-          7000. delay-us \ DEBUG
+          3500. delay-us
           self esp-at-buffer offset +
           esp-at-buffer-size offset - self esp-at>msg +to offset
-          self comm-delay
         then
         self esp-at-buffer offset filter-xt execute dup -1 <> if
           { found-offset found-index }
@@ -1465,6 +1479,7 @@ begin-module esp-at
       s\" \r\n" self msg>esp-at
       self end>esp-at
       ['] filter-ok-error self esp-at>match 0= averts x-esp-at-error
+      self esp-at>end
     ; define esp-at-multi!
     
     \ Get multiple connections enabled/disabled
@@ -1477,6 +1492,7 @@ begin-module esp-at
       ['] filter-ok-error self esp-at>string 0= averts x-esp-at-error
       s" +CIPMUX:" find-data parse-decimal averts x-esp-at-error
       case 0 of false endof 1 of true endof ['] x-esp-at-error ?raise endcase
+      self esp-at>end
     ; define esp-at-multi@
 
     \ Enable/disable IPv6 mode
@@ -1488,6 +1504,7 @@ begin-module esp-at
       s\" \r\n" self msg>esp-at
       self end>esp-at
       ['] filter-ok-error self esp-at>match 0= averts x-esp-at-error
+      self esp-at>end
     ; define esp-at-ipv6!
 
     \ Get IPv6 mode enabled/disabled
@@ -1500,6 +1517,7 @@ begin-module esp-at
       ['] filter-ok-error self esp-at>string 0= averts x-esp-at-error
       s" +CIPV6:" find-data parse-decimal averts x-esp-at-error
       case 0 of false endof 1 of true endof ['] x-esp-at-error ?raise endcase
+      self esp-at>end
     ; define esp-at-ipv6@
 
     \ Set the sleep mode
@@ -1513,6 +1531,7 @@ begin-module esp-at
       s\" \r\n" self msg>esp-at
       self end>esp-at
       ['] filter-ok-error self esp-at>match 0= averts x-esp-at-error
+      self esp-at>end
     ; define esp-at-sleep!
 
     \ Get the sleep mode
@@ -1525,6 +1544,7 @@ begin-module esp-at
       ['] filter-ok-error self esp-at>string 0= averts x-esp-at-error
       s" +SLEEP:" find-data parse-decimal averts x-esp-at-error
       dup modem-sleep-listen-interval-mode u<= averts x-esp-at-error
+      self esp-at>end
     ; define esp-at-sleep@
 
     \ Get the connection status
@@ -1563,6 +1583,7 @@ begin-module esp-at
         i status esp-at-status-tetype!
         2drop
       loop
+      self esp-at>end
     ; define esp-at-status@
 
     \ Set the WiFi power
@@ -1574,6 +1595,7 @@ begin-module esp-at
       s\" \r\n" self msg>esp-at
       self end>esp-at
       ['] filter-ok-error self esp-at>match 0= averts x-esp-at-error
+      self esp-at>end
     ; define esp-at-wifi-power!
 
     \ Get the WiFi power
@@ -1586,6 +1608,7 @@ begin-module esp-at
       ['] filter-ok-error self esp-at>string 0= averts x-esp-at-error
       s" +RFPOWER:" find-data parse-field 2swap 2drop
       parse-decimal averts x-esp-at-error
+      self esp-at>end
     ; define esp-at-wifi-power@
     
     \ Set the WiFi mode
@@ -1601,6 +1624,7 @@ begin-module esp-at
       s\" \r\n" self msg>esp-at
       self end>esp-at
       ['] filter-ok-error self esp-at>match 0= averts x-esp-at-error
+      self esp-at>end
     ; define esp-at-wifi-mode!
 
     \ Get the local softAP IPv4 address
@@ -1615,6 +1639,7 @@ begin-module esp-at
       else
         2drop 0 0 false
       then
+      self esp-at>end
     ; define esp-at-ap-ipv4-addr@
 
     \ Get the local softAP link-local IPv6 address
@@ -1629,6 +1654,7 @@ begin-module esp-at
       else
         2drop 0 0 false
       then
+      self esp-at>end
     ; define esp-at-ap-ipv6-ll-addr@
 
     \ Get the local softAP global IPv6 address
@@ -1643,6 +1669,7 @@ begin-module esp-at
       else
         2drop 0 0 false
       then
+      self esp-at>end
     ; define esp-at-ap-ipv6-gl-addr@
 
     \ Get the local softAP MAC address
@@ -1657,6 +1684,7 @@ begin-module esp-at
       else
         2drop 0 0 false
       then
+      self esp-at>end
     ; define esp-at-ap-mac-addr@
 
     \ Get the local station IPv4 address
@@ -1671,6 +1699,7 @@ begin-module esp-at
       else
         2drop 0 0 false
       then
+      self esp-at>end
     ; define esp-at-station-ipv4-addr@
 
     \ Get the local station link-local IPv6 address
@@ -1685,6 +1714,7 @@ begin-module esp-at
       else
         2drop 0 0 false
       then
+      self esp-at>end
     ; define esp-at-station-ipv6-ll-addr@
 
     \ Get the local station global IPv6 address
@@ -1699,6 +1729,7 @@ begin-module esp-at
       else
         2drop 0 0 false
       then
+      self esp-at>end
     ; define esp-at-station-ipv6-gl-addr@
 
     \ Get the local station MAC address
@@ -1713,6 +1744,7 @@ begin-module esp-at
       else
         2drop 0 0 false
       then
+      self esp-at>end
     ; define esp-at-station-mac-addr@
 
     \ Issue a test command for an ESP-AT device
@@ -1733,6 +1765,7 @@ begin-module esp-at
       self end>esp-at
       ['] filter-ok self ['] esp-at>wait 10000 self catch-with-esp-at-timeout
       triggers x-esp-at-not-ready
+      self esp-at>end
     ; define test-esp-at
 
     \ Set ESP-AT command echoing
@@ -1742,6 +1775,7 @@ begin-module esp-at
       echo? if s\" ATE1\r\n" else s\" ATE0\r\n" then self msg>esp-at
       self end>esp-at
       ['] filter-ok-error self esp-at>match 0= averts x-esp-at-error
+      self esp-at>end
     ; define esp-at-echo!
 
     \ Initialize an ESP-AT device
@@ -1771,6 +1805,7 @@ begin-module esp-at
       s\" \r\n" self msg>esp-at
       self end>esp-at
       ['] filter-ok self esp-at>wait
+      self esp-at>end
     ; define reset-esp-at
 
     \ Poll an ESP-AT device for received data
@@ -1793,6 +1828,7 @@ begin-module esp-at
       s\" \"\r\n" self msg>esp-at
       self end>esp-at
       ['] filter-ok-error self esp-at>match 0= averts x-esp-at-error
+      self esp-at>end
     ; define connect-esp-at-wifi
     
     \ Disconnect from a WiFi AP
@@ -1802,6 +1838,7 @@ begin-module esp-at
       s\" AT+CWQAP\r\n" self msg>esp-at
       self end>esp-at
       ['] filter-ok-error self esp-at>wait
+      self esp-at>end
     ; define disconnect-esp-at-wifi
     
     \ Resolve a domain name
@@ -1819,6 +1856,7 @@ begin-module esp-at
       ['] filter-ok-error self esp-at>string 0<> if 0 0 false exit then
       { D: resp }
       resp s" +CIPDOMAIN:" find-data parse-quote-field 2swap 2drop true
+      self esp-at>end
     ; define resolve-esp-at-ip
 
     \ Start a single ESP-AT connection
@@ -1842,6 +1880,7 @@ begin-module esp-at
       s\" \r\n" self msg>esp-at
       self end>esp-at
       ['] filter-ok-error self esp-at>match 0= averts x-esp-at-error
+      self esp-at>end
     ; define start-esp-at-single
     
     \ Start a multiple ESP-AT connection
@@ -1868,6 +1907,7 @@ begin-module esp-at
       s\" \r\n" self msg>esp-at
       self end>esp-at
       ['] filter-ok-error self esp-at>match 0= averts x-esp-at-error
+      self esp-at>end
     ; define start-esp-at-multi
 
     \ Start a server
@@ -1880,6 +1920,7 @@ begin-module esp-at
       s\" \r\n" self msg>esp-at
       self end>esp-at
       ['] filter-ok-error self esp-at>match 0= averts x-esp-at-error
+      self esp-at>end
     ; define start-esp-at-server
 
     \ Delete a server
@@ -1892,6 +1933,7 @@ begin-module esp-at
       s\" \r\n" self msg>esp-at
       self end>esp-at
       ['] filter-ok-error self esp-at>match 0= averts x-esp-at-error
+      self esp-at>end
     ; define delete-esp-at-server
 
     \ Send data for a single connection to an ESP-AT device
@@ -1935,6 +1977,7 @@ begin-module esp-at
         else
           false
         then
+        self esp-at>end
       ;] critical
     ; define single-block>esp-at
       
@@ -1958,6 +2001,7 @@ begin-module esp-at
         else
           false
         then
+        self esp-at>end
       ;] critical
     ; define multi-block>esp-at
 
@@ -1969,6 +2013,7 @@ begin-module esp-at
       s\" \r\n" self msg>esp-at
       self end>esp-at
       ['] filter-ok-error self esp-at>match  0= averts x-esp-at-error
+      self esp-at>end
     ; define close-esp-at-single
 
     \ Close a multiple connection on an ESP-AT device
@@ -1984,6 +2029,7 @@ begin-module esp-at
         string s\" \r\nOK" find-string dup -1 <> if 0 exit else drop then
         string s\" link is not" find-string dup -1 <> if 1 else drop 0 -1 then
       ;] self esp-at>wait
+      self esp-at>end
     ; define close-esp-at-multi
 
   end-implement

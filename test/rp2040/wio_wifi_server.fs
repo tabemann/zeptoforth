@@ -196,8 +196,18 @@ begin-module wifi-server-test
             then
           then
         then 
-      ;] try ?dup if display-red execute display-normal then
-    again
+      ;] try if
+        [: ['] test-esp-at device with-esp-at ;] try ?dup if
+          int-io::serial-console
+          cr display-red execute display-normal
+          true
+        else
+          false
+        then
+      else
+        false
+      then
+    until
   ;
   
   \ Actually handle received data
@@ -287,8 +297,6 @@ begin-module wifi-server-test
     <esp-at-status> status init-object
     200000 device esp-at-timeout!
     true intf esp-at-log!
-    700 device esp-at-delay!
-    5600 device esp-at-long-delay!
     [: { device } station-mode device init-esp-at ;] device with-esp-at
     0 ['] do-server 320 128 768 1 spawn-on-core server-task !
     server-task @ run

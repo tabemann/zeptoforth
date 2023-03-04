@@ -33,30 +33,11 @@ begin-module wio-esp-at
   <esp-at-spi> begin-class <wio-esp-at-spi>
 
     begin-module wio-esp-at-internal
-
-      \ \ Handshake detected?
-      \ cell member handshake?
-
-      \ \ Handshake interrupt handler closure
-      \ closure-size member handshake-handler
-
-      \ \ Previous IO interrupt handler
-      \ cell member prev-io-handler
-      
-      \ \ Handle handshake
-      \ method handle-handshake ( intf -- )
-      
     end-module> import
     
   end-class
 
   continue-module wio-esp-at-internal
-    
-    \ \ The IO IRQ
-    \ 13 constant io-irq
-    
-    \ \ The IO IRQ vector
-    \ io-irq 16 + constant io-vector
 
     \ SPI peripheral
     1 constant spi-index
@@ -80,29 +61,13 @@ begin-module wio-esp-at
 
   \ The WIO ESP-AT SPI interface class implementation
   <wio-esp-at-spi> begin-implement
-
-\     \ IO interrupt handler
-\     :noname { self -- }
-\       self prev-io-handler @ ?execute
-\       handshake-pin PROC0_INTS_GPIO_LEVEL_HIGH@
-\       handshake-pin PROC1_INTS_GPIO_LEVEL_HIGH@ or
-\       if
-\         true self handshake? !
-\         false handshake-pin PROC0_INTE_GPIO_LEVEL_HIGH!
-\         false handshake-pin PROC1_INTE_GPIO_LEVEL_HIGH!
-\       then
-\ \      handshake-pin INTR_GPIO_EDGE_HIGH!
-\ \      [char] * internal::serial-emit
-\     ; define handle-handshake
     
     \ Constructor
     :noname { self -- }
-      \ io-vector vector@ self prev-io-handler !
-      \ self self handshake-handler ['] handle-handshake bind
-      \ self handshake-handler io-vector vector!
       false false spi-index motorola-spi
       spi-index master-spi
-      20000000 spi-index spi-baud!
+      \      20000000 spi-index spi-baud!
+      18000000 spi-index spi-baud!
       8 spi-index spi-data-size!
       cs-pin spi-index self <esp-at-spi>->new
       spi-index miso-pin spi-pin
@@ -114,7 +79,6 @@ begin-module wio-esp-at
 
     \ Power on an ESP-AT device
     :noname { self -- }
-      \ false self handshake? !
       handshake-pin output-pin
       22 output-pin
       24 output-pin
@@ -125,23 +89,11 @@ begin-module wio-esp-at
       low cs-pin pin!
       low 25 pin!
       handshake-pin input-pin
-      handshake-pin pull-down-pin
       high cs-pin pin!
-      true handshake-pin PADS_BANK0_SCHMITT!
-      \ cpu-index 0= if
-      \   true handshake-pin PROC0_INTE_GPIO_LEVEL_HIGH!
-      \ else
-      \   true handshake-pin PROC1_INTE_GPIO_LEVEL_HIGH!
-      \ then
-      \ 0 io-irq NVIC_IPR_IP!
-      \ io-irq NVIC_ISER_SETENA!
     ; define power-esp-at-on
 
     \ Power off an ESP-AT device
     :noname { self -- }
-      \ io-irq NVIC_ICER_CLRENA!
-      \ false handshake-pin PROC0_INTE_GPIO_LEVEL_HIGH!
-      \ false handshake-pin PROC1_INTE_GPIO_LEVEL_HIGH!
       25 output-pin
       handshake-pin output-pin
       22 output-pin
@@ -155,13 +107,6 @@ begin-module wio-esp-at
     \ Get whether the ESP-AT device is ready
     :noname { self -- }
       handshake-pin pin@
-      \ self handshake? @
-      \ false self handshake? !
-      \ cpu-index 0= if
-      \   true handshake-pin PROC0_INTE_GPIO_LEVEL_HIGH!
-      \ else
-      \   true handshake-pin PROC1_INTE_GPIO_LEVEL_HIGH!
-      \ then
     ; define esp-at-ready?
 
   end-implement
