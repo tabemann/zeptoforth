@@ -95,6 +95,8 @@ continue-module forth
           rot r@ + rot r> - rot recurse
         then
       then
+    else
+      2drop drop
     then
   ;
   

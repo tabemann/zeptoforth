@@ -34,9 +34,12 @@ continue-module forth
   : high ( -- )
     2000 ms
     begin
-      5000000 0 ?do loop
+      1000 ms
       my-lock claim-lock
-      5000000 0 ?do loop
+      5 0 ?do
+        ." * "
+        1000 ms
+      loop
       my-lock release-lock
     again
   ;
@@ -45,7 +48,7 @@ continue-module forth
   : low ( -- )
     begin
       my-lock claim-lock
-      10 0 ?do
+      5 0 ?do
 	5000000 0 ?do loop
 	current-task task-priority@ . space
       loop

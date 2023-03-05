@@ -1,8 +1,32 @@
 # Internal Words
 
+### `forth`
+
+These words are in the `forth` module.
+
+##### `welcome`
+( -- )
+
+Display the welcome message on the console.
+
+##### `kernel-platform`
+( -- c-addr bytes )
+
+Get the kernel platform.
+
+##### `kernel-version`
+( -- c-addr bytes )
+
+Get the kernel version.
+
+##### `kernel-date`
+( -- c-addr bytes )
+
+Get the kernel compilation date.
+
 ### `internal`
 
-These words are in `internal`.
+These words are in the `internal` module
 
 ##### `advance-here`
 ( a -- )
@@ -437,4 +461,3 @@ Find a word by name with the specified wordlist ID making use of the flash mini-
 ( b-addr bytes -- addr|0 )
 
 Find a word by name in the current wordlist order, making use of the RAM dictionary if compiling to RAM, and making use of the flash mini-dictionary, returning the word's address or, if not found, 0. (RP2040 only.)
-

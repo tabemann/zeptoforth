@@ -14,7 +14,7 @@
       <div class="documentwrapper">
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="realtime-clock-rtc-words">
+  <section id="realtime-clock-rtc-words">
 <h1>Realtime Clock (RTC) Words</h1>
 <p>zeptoforth has support for reading and setting the realtime clock (RTC) on the Raspberry Pi Pico, both for keeping track of the date and time and for triggering an alarm.</p>
 <p>Note that the Raspberry Pi Pico’s RTC’s value is not preserved across resets, even if power is applied, so each time it is reset the RTC’s value must be provided a value before it can be useful. It is initialized on bootup to Thursday, 1 January 1970 00:00:00, and is enabled on boot.</p>

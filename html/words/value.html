@@ -1,7 +1,7 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
@@ -12,7 +12,9 @@
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Closures" href="closure.html" />
@@ -33,41 +35,41 @@
 
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="value-and-local-variable-words">
-<h1>Value and Local Variable Words<a class="headerlink" href="#value-and-local-variable-words" title="Permalink to this headline">¶</a></h1>
+  <section id="value-and-local-variable-words">
+<h1>Value and Local Variable Words<a class="headerlink" href="#value-and-local-variable-words" title="Permalink to this heading">¶</a></h1>
 <p>Full builds of zeptoforth include support for <code class="docutils literal notranslate"><span class="pre">value</span></code> and <code class="docutils literal notranslate"><span class="pre">2value</span></code> along with local variables. Unlike <code class="docutils literal notranslate"><span class="pre">variable</span></code> and <code class="docutils literal notranslate"><span class="pre">2variable</span></code>, <code class="docutils literal notranslate"><span class="pre">value</span></code> and <code class="docutils literal notranslate"><span class="pre">2value</span></code> variables are initialized, and retain their initialization across reboots. <code class="docutils literal notranslate"><span class="pre">value</span></code>s, <code class="docutils literal notranslate"><span class="pre">2value</span></code>s, and local variables are all set with <code class="docutils literal notranslate"><span class="pre">to</span></code> or added to with <code class="docutils literal notranslate"><span class="pre">+to</span></code>, which are state-smart words that can be used both in interpretation and in compilation mode.</p>
 <p>Note that local variables are lexically scoped, and are safe to use within <code class="docutils literal notranslate"><span class="pre">if</span></code> … <code class="docutils literal notranslate"><span class="pre">then</span></code>, <code class="docutils literal notranslate"><span class="pre">if</span></code> … <code class="docutils literal notranslate"><span class="pre">else</span></code> … <code class="docutils literal notranslate"><span class="pre">then</span></code>, <code class="docutils literal notranslate"><span class="pre">begin</span></code> … <code class="docutils literal notranslate"><span class="pre">until</span></code>, <code class="docutils literal notranslate"><span class="pre">begin</span></code> … <code class="docutils literal notranslate"><span class="pre">while</span></code> … <code class="docutils literal notranslate"><span class="pre">repeat</span></code>, <code class="docutils literal notranslate"><span class="pre">begin</span></code> … <code class="docutils literal notranslate"><span class="pre">again</span></code>, <code class="docutils literal notranslate"><span class="pre">case</span></code> … <code class="docutils literal notranslate"><span class="pre">endcase</span></code>/<code class="docutils literal notranslate"><span class="pre">endcasestr</span></code>, <code class="docutils literal notranslate"><span class="pre">of</span></code>/<code class="docutils literal notranslate"><span class="pre">ofstr</span></code>/<code class="docutils literal notranslate"><span class="pre">ofstrcase</span></code> … <code class="docutils literal notranslate"><span class="pre">endof</span></code>,  and <code class="docutils literal notranslate"><span class="pre">do</span></code>/<code class="docutils literal notranslate"><span class="pre">?do</span></code> … <code class="docutils literal notranslate"><span class="pre">loop</span></code>/<code class="docutils literal notranslate"><span class="pre">+loop</span></code> constructs. Local variables declared between these words are not accessible outside them, and do not retain their values between multiple iterations.</p>
 <p>All of these words are in the default <code class="docutils literal notranslate"><span class="pre">forth</span></code> module.</p>
 <section id="values">
-<h2>Values<a class="headerlink" href="#values" title="Permalink to this headline">¶</a></h2>
+<h2>Values<a class="headerlink" href="#values" title="Permalink to this heading">¶</a></h2>
 <section id="value">
-<h3><code class="docutils literal notranslate"><span class="pre">value</span></code><a class="headerlink" href="#value" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">value</span></code><a class="headerlink" href="#value" title="Permalink to this heading">¶</a></h3>
 <p>( x “name” – )</p>
 <p>This compiles a word <em>name</em> for a single-cell value which is initialized to <em>x</em>, immediately when compiling to RAM and upon boot when compiling to flash. <em>name</em> evaluates to its current value when executed. <code class="docutils literal notranslate"><span class="pre">to</span></code> may be used to change the value of <em>name</em> at runtime, but this value reverts to the initialization value upon bootup for values compiled to flash.</p>
 </section>
 <section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">2value</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">2value</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
 <p>( d “name” – )</p>
 <p>This compiles a word <em>name</em> for a double-cell value which is initialized to <em>d</em>, immediately when compiling to RAM and upon boot when compiling to flash. <em>name</em> evaluates to its current value when executed. <code class="docutils literal notranslate"><span class="pre">to</span></code> may be used to change the value of <em>name</em> at runtime, but this value reverts to its initialization value upon bootup for values compiled to flash.</p>
 </section>
 </section>
 <section id="local-variables">
-<h2>Local Variables<a class="headerlink" href="#local-variables" title="Permalink to this headline">¶</a></h2>
+<h2>Local Variables<a class="headerlink" href="#local-variables" title="Permalink to this heading">¶</a></h2>
 <section id="id2">
-<h3><code class="docutils literal notranslate"><span class="pre">{</span></code><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">{</span></code><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
 <p>( [“W:” / “W^” / “D:” / “D^”] “xn” … [“W:” / “W^” / “D:” / “D^”] “x0” [ “–” … ] “}” – )</p>
 <p>This compiles a set of single-cell and/or double-cell local variables, declared with either <code class="docutils literal notranslate"><span class="pre">W:</span></code> or <code class="docutils literal notranslate"><span class="pre">W^</span></code> (or no local variable type marker), or <code class="docutils literal notranslate"><span class="pre">D:</span></code> or <code class="docutils literal notranslate"><span class="pre">D^</span></code>, preceding the variable name, respectively, within a word that at runtime take their values off the top of the stack, with <em>x0</em> (the last local variable declared) taking its value off the very top of the stack. Local variable declarations can extend across multiple lines. <code class="docutils literal notranslate"><span class="pre">}</span></code> declares the end of a local variable declaration. <code class="docutils literal notranslate"><span class="pre">--</span></code> within a local variable declaration declares a comment that extends, across multiple lines, until <code class="docutils literal notranslate"><span class="pre">}</span></code> is reached. After this point each of these local variables either evaluate to their set values, if declared with <code class="docutils literal notranslate"><span class="pre">W:</span></code>, <code class="docutils literal notranslate"><span class="pre">D:</span></code>, or nothing at all, or to their addresses on the return stack, if declared with <code class="docutils literal notranslate"><span class="pre">W^</span></code> or <code class="docutils literal notranslate"><span class="pre">D^</span></code>, until containing code block is completed. <em>to</em> may be used to change the values of these local variables after they are declared. Local variables may be used within quotations declared with <code class="docutils literal notranslate"><span class="pre">[:</span></code> and <code class="docutils literal notranslate"><span class="pre">;]</span></code>, including if local variables are used within the containing word, and are properly discarded when <code class="docutils literal notranslate"><span class="pre">exit</span></code> is used within a word. They can be used alongside do loops but are not compatible with the use of <code class="docutils literal notranslate"><span class="pre">&gt;r</span></code>, <code class="docutils literal notranslate"><span class="pre">r&#64;</span></code>, or <code class="docutils literal notranslate"><span class="pre">r&gt;</span></code>.</p>
 </section>
 </section>
 <section id="setting-values-and-local-variables">
-<h2>Setting Values and Local Variables<a class="headerlink" href="#setting-values-and-local-variables" title="Permalink to this headline">¶</a></h2>
+<h2>Setting Values and Local Variables<a class="headerlink" href="#setting-values-and-local-variables" title="Permalink to this heading">¶</a></h2>
 <section id="to">
-<h3><code class="docutils literal notranslate"><span class="pre">to</span></code><a class="headerlink" href="#to" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">to</span></code><a class="headerlink" href="#to" title="Permalink to this heading">¶</a></h3>
 <p>( x|d “name” – )</p>
 <p>This sets a value or local variable <em>name</em> to either a single-cell or double-cell on the stack depending on whether <em>name</em> refers to a <code class="docutils literal notranslate"><span class="pre">value</span></code>, <code class="docutils literal notranslate"><span class="pre">2value</span></code>, a single-cell local variable, or a double-cell local variable. This is state smart, and can be used both in interpretation mode and in compilation mode.</p>
 </section>
 <section id="id3">
-<h3><code class="docutils literal notranslate"><span class="pre">+to</span></code><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">+to</span></code><a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
 <p>( x|d “name” – )</p>
 <p>This adds a single-cell or double-cell on the stack to a value or local variable <em>name</em> depending on whether <em>name</em> refers to a <code class="docutils literal notranslate"><span class="pre">value</span></code>, <code class="docutils literal notranslate"><span class="pre">2value</span></code>, a single-cell local variable, or a double-cell local variable. This is state smart, and can be used both in interpretation mode and in compilation mode.</p>
 </section>
@@ -132,6 +134,7 @@
 <li class="toctree-l1"><a class="reference internal" href="oo.html">Object Orientation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_lock.html">Core Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="schannel.html">Simple channel Words</a></li>
@@ -173,7 +176,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -190,7 +193,7 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

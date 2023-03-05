@@ -1,0 +1,216 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Core Lock Words &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Channel Words" href="channel.html" />
+    <link rel="prev" title="Simple Lock Words" href="slock.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="core-lock-words">
+<h1>Core Lock Words<a class="headerlink" href="#core-lock-words" title="Permalink to this heading">¶</a></h1>
+<p>Core locks provide a mutual exclusion mechanism between cores while allowing code executing on the same core to access the protected resource in a nested fashion. This is significant if one needs to protect access to a resource within a critical section on a single core, but one needs to ensure the ability to access that resource within an interrupt handler executing within the same resource. Unlike hardwære spinlocks such as that provided by the RP2040 core locks do not occupy any additional hardware resources, and do not require either some sort of allocation mechanism or a fixed set of pre-allocated hardware resources.</p>
+<section id="core-lock">
+<h2><code class="docutils literal notranslate"><span class="pre">core-lock</span></code><a class="headerlink" href="#core-lock" title="Permalink to this heading">¶</a></h2>
+<p>The following words are in <code class="docutils literal notranslate"><span class="pre">core-lock</span></code>:</p>
+<section id="core-lock-size">
+<h3><code class="docutils literal notranslate"><span class="pre">core-lock-size</span></code><a class="headerlink" href="#core-lock-size" title="Permalink to this heading">¶</a></h3>
+<p>( – bytes )</p>
+<p>Get the size of a core lock in bytes.</p>
+</section>
+<section id="init-core-lock">
+<h3><code class="docutils literal notranslate"><span class="pre">init-core-lock</span></code><a class="headerlink" href="#init-core-lock" title="Permalink to this heading">¶</a></h3>
+<p>( addr – )</p>
+<p>Initialize a core lock starting at the specified address <em>addr</em>; note that it must be <code class="docutils literal notranslate"><span class="pre">core-lock-size</span></code> bytes in size.</p>
+</section>
+<section id="claim-core-lock">
+<h3><code class="docutils literal notranslate"><span class="pre">claim-core-lock</span></code><a class="headerlink" href="#claim-core-lock" title="Permalink to this heading">¶</a></h3>
+<p>( core-lock – )</p>
+<p>Claim a core lock <em>core-lock</em> for the current core. If it is already claimed for a core other than the current core, relinquish control of the current core and try again later repeatly until claiming <em>core-lock</em> is successful. If, when claimed for the current core it had already been claimed for the current core, increment a nested claim counter. Note that this is not safe to execute within an interrupt handler.</p>
+</section>
+<section id="claim-core-lock-spin">
+<h3><code class="docutils literal notranslate"><span class="pre">claim-core-lock-spin</span></code><a class="headerlink" href="#claim-core-lock-spin" title="Permalink to this heading">¶</a></h3>
+<p>( core-lock – )</p>
+<p>Claim a core lock <em>core-lock</em> for the current core. If it is already claimed for a core other than the current core, spin until it is no longer claimed by any core other the current one, and then claim it. If, when claimed for the current core it had already been claimed for the current core, increment a nested claim counter. Note that this is strictly-speaking safe to execute within an interrupt handler, but that is only advisable if <em>core-lock</em> is only claimed for very short periods of time, because it will cause the interrupt handler to wait until it cain claim <em>corelock</em>.</p>
+</section>
+<section id="claim-core-lock-timeout">
+<h3><code class="docutils literal notranslate"><span class="pre">claim-core-lock-timeout</span></code><a class="headerlink" href="#claim-core-lock-timeout" title="Permalink to this heading">¶</a></h3>
+<p>( core-lock – )</p>
+<p>Claim a core lock <em>core-lock</em> for the current core. If it is already claimed for a core other than the current core, relinquish control of the current core and try again later repeatly until claiming <em>core-lock</em> is successful or the current timeout is reached, where then <code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code> is raised. If, when claimed for the current core it had already been claimed for the current core, increment a nested claim counter. Note that this is not safe to execute within an interrupt handler.</p>
+</section>
+<section id="release-core-lock">
+<h3><code class="docutils literal notranslate"><span class="pre">release-core-lock</span></code><a class="headerlink" href="#release-core-lock" title="Permalink to this heading">¶</a></h3>
+<p>( core-lock – )</p>
+<p>Release a core lock <em>core-lock</em>, decrementing its nested claim counter until it reaches zero. If all previous claims have been balanced, the <em>core-lock</em> may now be claimed by a task on another core.</p>
+</section>
+<section id="with-core-lock">
+<h3><code class="docutils literal notranslate"><span class="pre">with-core-lock</span></code><a class="headerlink" href="#with-core-lock" title="Permalink to this heading">¶</a></h3>
+<p>( xt core-lock – )</p>
+<p>Execute an execution token <em>xt</em> with a given core lock <em>core-lock</em> claimed while it executes, releasing it afterwards. If an exception is raised by <em>xt</em>, release <em>core-lock</em> and then re-raise the exception. Note that this uses the mechanism implemented in <code class="docutils literal notranslate"><span class="pre">claim-core-lock</span></code>, with all of its associated caveats.</p>
+</section>
+<section id="with-core-lock-spin">
+<h3><code class="docutils literal notranslate"><span class="pre">with-core-lock-spin</span></code><a class="headerlink" href="#with-core-lock-spin" title="Permalink to this heading">¶</a></h3>
+<p>( xt core-lock – )</p>
+<p>Execute an execution token <em>xt</em> with a given core lock <em>core-lock</em> claimed while it executes, releasing it afterwards. If an exception is raised by <em>xt</em>, release <em>core-lock</em> and then re-raise the exception. Note that this uses the mechanism implemented in <code class="docutils literal notranslate"><span class="pre">claim-core-lock-spin</span></code>, with all the associated caveats.</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="basic.html">Basic Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module.html">Module Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wordlist.html">Wordlist Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="action.html">Action Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pin.html">Pin Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="led.html">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gpio.html">GPIO Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pio.html">Programmable Input/Output Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uart.html">UART Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adc.html">Analog-Digital Converter Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spi.html">SPI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="i2c.html">I2C Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pwm.html">Pulse Width Modulation Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rtc.html">Realtime Clock (RTC) Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="timer.html">Hardware Timers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sdcard.html">SDHC/SDXC Card Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fat32.html">FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simple_fat32.html">Simple FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fat32_tools.html">FAT32 Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multicore.html">Multicore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="armv6m.html">ARMv6-M Assembler Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="line.html">Line Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="value.html">Value and Local Variable Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="closure.html">Closures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="temp.html">Temporary Buffer Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="task_pool.html">Task Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="action_pool.html">Action Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="heap.html">Heap Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pool.html">Pool Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="map.html">Map Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oo.html">Object Orientation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Core Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schannel.html">Simple channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rchannel.html">Bidirectional Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stream.html">Stream Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tqueue.html">Task Queue Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rng.html">Random Number Generator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ansi_term.html">ANSI Terminal words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="qspi.html">Quad SPI words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="block.html">Block words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="edit.html">Block Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="swd.html"><code class="docutils literal notranslate"><span class="pre">swdcom</span></code> Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="test.html">Testing Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="internal.html">Internal Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="asm.html">Compilation-specific words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="slock.html" title="previous chapter">Simple Lock Words</a></li>
+      <li>Next: <a href="channel.html" title="next chapter">Channel Words</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Travis Bemann.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/words/core_lock.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

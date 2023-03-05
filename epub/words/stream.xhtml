@@ -14,7 +14,7 @@
       <div class="documentwrapper">
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="stream-words">
+  <section id="stream-words">
 <h1>Stream Words</h1>
 <p>A stream is a monodirectional means of communicating data, as a fixed-size queue of bytes which may be accessed without any kind of message boundaries. Streams can be sent to and received from using both blocking operations, which when sending may wait to send entire buffers at once or may allow sending data in parts until all the data is sent, and when receiving/peeking/skipping may wait until a non-zero amount of data is available, and non-blocking operations, which when sending may raise <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> (declared in <code class="docutils literal notranslate"><span class="pre">task</span></code>) if blocking would occur or maysend only part of the buffer provided, and when receiving/peeking/skipping may return a zero byte count.</p>
 <p>Streams can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put in alloted memory in the dictionary or into allocated memory in the heap. Note that the size of a stream for a given data size may be calculated with <code class="docutils literal notranslate"><span class="pre">stream-size</span></code>.</p>

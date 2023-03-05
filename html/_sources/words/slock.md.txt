@@ -16,6 +16,11 @@ Get the size of a simple lock in bytes.
 
 Initialize a simple lock starting at the specified address *addr*; note that it must be `slock-size` bytes in size.
 
+##### `try-claim-slock`
+( slock -- success? )
+
+Attempt to claim a simple lock *slock* and return whether claiming it was successful.
+
 ##### `claim-slock`
 ( slock -- )
 

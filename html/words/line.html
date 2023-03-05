@@ -1,7 +1,7 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
@@ -12,7 +12,9 @@
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Double-Cell Words" href="double.html" />
@@ -33,8 +35,8 @@
 
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="line-editor">
-<h1>Line Editor<a class="headerlink" href="#line-editor" title="Permalink to this headline">¶</a></h1>
+  <section id="line-editor">
+<h1>Line Editor<a class="headerlink" href="#line-editor" title="Permalink to this heading">¶</a></h1>
 <p>The line editor provides a simple interface for allowing the user to edit input without the limitations in the normal <code class="docutils literal notranslate"><span class="pre">refill</span></code> mechanism. When enabled, the following keys can be used to control editing:</p>
 <ul class="simple">
 <li><p>Backspace: delete the character to the left of the cursor</p></li>
@@ -51,24 +53,24 @@
 <p>Note that tabs and characters of code points greater than 127 are handled correctly. Also note that it is not compatible with non-terminal operation except when in upload mode, i.e. with loading code automatically via serial or swdcom; before this is done one must be in upload mode or it must be disabled.</p>
 <p>After a reboot, it is initialized for the main task only, and if, when enabled, <code class="docutils literal notranslate"><span class="pre">refill</span></code> is used for a different task, it needs to have already been initialized for that task.</p>
 <section id="line">
-<h2><code class="docutils literal notranslate"><span class="pre">line</span></code><a class="headerlink" href="#line" title="Permalink to this headline">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">line</span></code><a class="headerlink" href="#line" title="Permalink to this heading">¶</a></h2>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">line</span></code>:</p>
 <section id="init-line">
-<h3><code class="docutils literal notranslate"><span class="pre">init-line</span></code><a class="headerlink" href="#init-line" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">init-line</span></code><a class="headerlink" href="#init-line" title="Permalink to this heading">¶</a></h3>
 <p>( index-ptr count-ptr buffer-ptr buffer-size – )</p>
 <p>Enable the line editor for the current task, with a pointer to the index variable, a poiner to the count variable, a pointer to the input buffer, and a size of the input buffer provided. Note that it allots memory in the current task’s dictionary.</p>
 </section>
 </section>
 <section id="forth">
-<h2><code class="docutils literal notranslate"><span class="pre">forth</span></code><a class="headerlink" href="#forth" title="Permalink to this headline">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">forth</span></code><a class="headerlink" href="#forth" title="Permalink to this heading">¶</a></h2>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">forth</span></code>:</p>
 <section id="enable-line">
-<h3><code class="docutils literal notranslate"><span class="pre">enable-line</span></code><a class="headerlink" href="#enable-line" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">enable-line</span></code><a class="headerlink" href="#enable-line" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Enable the line editor.</p>
 </section>
 <section id="disable-line">
-<h3><code class="docutils literal notranslate"><span class="pre">disable-line</span></code><a class="headerlink" href="#disable-line" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">disable-line</span></code><a class="headerlink" href="#disable-line" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Disable the line editor. This must be done before loading code automatically.</p>
 </section>
@@ -133,6 +135,7 @@
 <li class="toctree-l1"><a class="reference internal" href="oo.html">Object Orientation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_lock.html">Core Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="schannel.html">Simple channel Words</a></li>
@@ -174,7 +177,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -191,7 +194,7 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

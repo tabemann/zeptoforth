@@ -14,7 +14,7 @@
       <div class="documentwrapper">
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="hardware-timers">
+  <section id="hardware-timers">
 <h1>Hardware Timers</h1>
 <p>zeptoforth on the RP2040 (i.e. the Raspberry Pi Pico) has support for hardware timers and delays at up to a microsecond precision. Note that in practice microsecond precision is not necessarily possible, due to interrupts being disabled, interrupt priorities, busy-waits having a limited time resolution, and the chance of busy-waits being preempted if interrupts are not disabled during them.</p>
 <p>The 64-bit microsecond timer can represent a sufficiently large range of values, i.e. it can represent thousands of years of time, such that it can be treated as effectively monotonic. Note that the user can change the value of the microsecond timer or pause it, but this is not recommended in most use cases.</p>

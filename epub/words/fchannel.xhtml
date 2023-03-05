@@ -14,7 +14,7 @@
       <div class="documentwrapper">
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="rendezvous-channel-words">
+  <section id="rendezvous-channel-words">
 <h1>Rendezvous Channel Words</h1>
 <p>A rendezvous channel is a monodirectional means of communicating data between two different tasks. Rendezvous channels are not buffered queues; provided another task is listening to a rendezvous channel, sending on a rendezvous channel immediately transfers control to the receiving task and sends the sending task to the end of the scheduling ring. Only a single copy is done when transferring data from the sending task to the receiving task.</p>
 <p>Tasks attempting to send on rendezvous channels first check whether there is a queued task waiting to receive on the rendezvous channel; if there are tasks queued to receive, the first task queued is dequeued, the sending task’s buffer is copied into the receiving task’s buffer, and the receiving task is readied. If no tasks are queued to receive, the sending task is queued to send on the rendezvous channel and is blocked.</p>

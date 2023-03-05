@@ -262,6 +262,16 @@ Drop *spinlock* and execute *xt* in a critical section.
 
 Drop *core* and execute *xt* in a critical section.
 
+##### `test-set`
+( value addr -- set? )
+
+Atomically test a value at *addr* and set it to *value* if it was previously 0, and return whether it was previously 0.
+
+##### `test-set-raw`
+( value addr -- set? )
+
+Atomically test a value at *addr* and set it to *value* if it was previously 0, and return whether it was previously 0. This is different from `test-set` in that it assumes that interrupts were already disabled, and does not enable interrupts.
+
 ##### `fifo-drain`
 ( core -- )
 

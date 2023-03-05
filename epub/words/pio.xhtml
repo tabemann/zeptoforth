@@ -14,7 +14,7 @@
       <div class="documentwrapper">
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="programmable-input-output-words">
+  <section id="programmable-input-output-words">
 <h1>Programmable Input/Output Words</h1>
 <p>Programmable input/output (PIO) on the RP2040 (i.e. the Raspberry Pi Pico) provides a means to input to or output from pins in a very high-speed fashion at some speed up to the system clock of 125 MHz. There are two PIO peripherals, <code class="docutils literal notranslate"><span class="pre">PIO0</span></code> and <code class="docutils literal notranslate"><span class="pre">PIO1</span></code>, each of which contain four <em>state machines</em>.</p>
 <p>PIO’s may have up to 32 PIO instructions in their memory, which are 16 bits in size each. PIO state machines may be set to wrap from a <em>top</em> instruction to a <em>bottom</em> instruction automatically, unless a <code class="docutils literal notranslate"><span class="pre">jmp</span></code> instruction is executed at the <em>top</em> address. Instructions may be loaded into a PIO’s instruction memory with <code class="docutils literal notranslate"><span class="pre">pio-instr-mem!</span></code> or <code class="docutils literal notranslate"><span class="pre">pio-instr-relocate-mem!</span></code>. Instructions may also be fed into a state machine to be executed immediately with <code class="docutils literal notranslate"><span class="pre">sm-instr!</span></code>. The address to execute PIO instructions at may be set for a state machine with <code class="docutils literal notranslate"><span class="pre">sm-addr!</span></code></p>
@@ -363,7 +363,7 @@
 <section id="set">
 <h4><code class="docutils literal notranslate"><span class="pre">set,</span></code></h4>
 <p>( data destination – )</p>
-<p>PIO SET instruction. Set <em>destination</em> to <em>data</em>, which is a value from <span class="math notranslate nohighlight">\(00 to \)</span>1F.</p>
+<p>PIO SET instruction. Set <em>destination</em> to <em>data</em>, which is a value from $00 to $1F.</p>
 </section>
 <section id="id2">
 <h4><code class="docutils literal notranslate"><span class="pre">jmp+,</span></code></h4>
@@ -408,7 +408,7 @@
 <section id="id10">
 <h4><code class="docutils literal notranslate"><span class="pre">set+,</span></code></h4>
 <p>( data delay/side-set destination – )</p>
-<p>PIO SET instruction with delay or side-set. Set <em>destination</em> to <em>data</em>, which is a value from <span class="math notranslate nohighlight">\(00 to \)</span>1F. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
+<p>PIO SET instruction with delay or side-set. Set <em>destination</em> to <em>data</em>, which is a value from $00 to $1F. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
 </section>
 <section id="cond-always">
 <h4><code class="docutils literal notranslate"><span class="pre">COND_ALWAYS</span></code></h4>

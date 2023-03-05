@@ -1,7 +1,7 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
@@ -12,7 +12,9 @@
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="prev" title="Fonts" href="font.html" />
@@ -32,52 +34,52 @@
 
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="neopixels-on-the-rp2040">
-<h1>Neopixels on the RP2040<a class="headerlink" href="#neopixels-on-the-rp2040" title="Permalink to this headline">¶</a></h1>
+  <section id="neopixels-on-the-rp2040">
+<h1>Neopixels on the RP2040<a class="headerlink" href="#neopixels-on-the-rp2040" title="Permalink to this heading">¶</a></h1>
 <p>There is optional support for Neopixels and Neopixel strips on the RP2040 using a PIO block to drive the Neopixel protocol.</p>
 <p>Configuring the Neopixel is as simple as alloting a Neopixel data structure for a given number of Neopixels and initializing it with a Neopixel data GPIO pin, a Neopixel count, a PIO state machine index, and a PIO. Once one has done that, <code class="docutils literal notranslate"><span class="pre">neopixel!</span></code> can be used to specify the colors of individual Neopixels (with RGB colors, with each element having values from 0 to 255), and once the colors have been specified one transmits them to the Neopixel strip with <code class="docutils literal notranslate"><span class="pre">update-neopixel</span></code>.</p>
 <p>Note that in some setups, such as the SeeedStudio XIAO RP2040, a separate GPIO pin may need to be set high to enable a Neopixel (e.g. GPIO pin 11 on the SeeedStudio XIAO RP2040, in addition to the data GPIO pin 12). Use the <code class="docutils literal notranslate"><span class="pre">pin!</span></code> word in the <code class="docutils literal notranslate"><span class="pre">pin</span></code> module for this.</p>
 <p>Neopixel support is in <code class="docutils literal notranslate"><span class="pre">extra/rp2040/neopixel.fs</span></code>, which can be compiled either to RAM or to flash as needed.</p>
 <section id="neopixel">
-<h2><code class="docutils literal notranslate"><span class="pre">neopixel</span></code><a class="headerlink" href="#neopixel" title="Permalink to this headline">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">neopixel</span></code><a class="headerlink" href="#neopixel" title="Permalink to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">neopixel</span></code> module contains the following words:</p>
 <section id="init-neopixel">
-<h3><code class="docutils literal notranslate"><span class="pre">init-neopixel</span></code><a class="headerlink" href="#init-neopixel" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">init-neopixel</span></code><a class="headerlink" href="#init-neopixel" title="Permalink to this heading">¶</a></h3>
 <p>( state-machine pio count pin addr – )</p>
 <p>Initialize a Neopixel structure at <em>addr</em> for <em>count</em> Neopixels, data GPIO pin <em>pin</em>, PIO block <em>pio</em> (<code class="docutils literal notranslate"><span class="pre">PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">PIO1</span></code> from the <code class="docutils literal notranslate"><span class="pre">pio</span></code> module), and state machine <em>state-machine</em> (from 0 to 3). This does not take into account any power GPIO pin that may need to be configured. It reprograms the specified PIO block and assumes that it has full control over said block. Note that it is safe to use if one wishes to use multiple state machines that are all controlling Neopixels in one PIO block, because it will only overwrite the PIO program with the very same PIO program.</p>
 </section>
 <section id="clear-neopixel">
-<h3><code class="docutils literal notranslate"><span class="pre">clear-neopixel</span></code><a class="headerlink" href="#clear-neopixel" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">clear-neopixel</span></code><a class="headerlink" href="#clear-neopixel" title="Permalink to this heading">¶</a></h3>
 <p>( neopixel – )</p>
 <p>Clear all the Neopixel states in Neopixel structure <em>neopixel</em>.</p>
 </section>
 <section id="update-neopixel">
-<h3><code class="docutils literal notranslate"><span class="pre">update-neopixel</span></code><a class="headerlink" href="#update-neopixel" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">update-neopixel</span></code><a class="headerlink" href="#update-neopixel" title="Permalink to this heading">¶</a></h3>
 <p>( neopixel – )</p>
 <p>Transmit all the stored Neopixel color data for the Neopixels in Neopixel structure <em>neopixel</em>.</p>
 </section>
 <section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">neopixel!</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">neopixel!</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
 <p>( red green blue index neopixel – )</p>
 <p>Specify the color of Neopixel <em>index</em> in the Neopixel structure <em>neopixel</em> as <em>red</em>, <em>green</em>, and <em>blue</em> color components from 0 to 255. Note that this does <em>not</em> transmit the color data to the Neopixel in question; rather one must call <code class="docutils literal notranslate"><span class="pre">update-neopixel</span></code> to do so.</p>
 </section>
 <section id="id2">
-<h3><code class="docutils literal notranslate"><span class="pre">neopixel&#64;</span></code><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">neopixel&#64;</span></code><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
 <p>( index neopixel – red green blue )</p>
 <p>Get the color of Neopixel <em>index</em> in the Neopixel structure <em>neopixel</em> as <em>red</em>, <em>green</em>, and <em>blue</em> color components from 0 to 255.</p>
 </section>
 <section id="neopixel-size">
-<h3><code class="docutils literal notranslate"><span class="pre">neopixel-size</span></code><a class="headerlink" href="#neopixel-size" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">neopixel-size</span></code><a class="headerlink" href="#neopixel-size" title="Permalink to this heading">¶</a></h3>
 <p>( count – bytes )</p>
 <p>Get the size of a Neopixel structure in bytes with <em>count</em> Neopixels.</p>
 </section>
 <section id="x-out-of-range-neopixel">
-<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-neopixel</span></code><a class="headerlink" href="#x-out-of-range-neopixel" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-neopixel</span></code><a class="headerlink" href="#x-out-of-range-neopixel" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Out of range Neopixel index exception.</p>
 </section>
 <section id="x-out-of-range-color">
-<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-color</span></code><a class="headerlink" href="#x-out-of-range-color" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-out-of-range-color</span></code><a class="headerlink" href="#x-out-of-range-color" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Out of range color component exception.</p>
 </section>
@@ -142,6 +144,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/oo.html">Object Orientation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/core_lock.html">Core Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/fchannel.html">Rendezvous Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../words/schannel.html">Simple channel Words</a></li>
@@ -182,7 +185,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -199,7 +202,7 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

@@ -14,7 +14,7 @@
       <div class="documentwrapper">
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="semaphore-words">
+  <section id="semaphore-words">
 <h1>Semaphore Words</h1>
 <p>A semaphore is a task synchronization construct which keeps a counter indicating some resource and, when the counter is negative, a queue of waiting tasks. Tasks can <em>give</em> a semaphore, which increments the counter, and if there one or more waiting tasks, readies the task that has been blocked the longest in an FIFO fashion. Note that a limit can be specified where <em>giving</em> a semaphore will not increase the counter beyond the specified limit. Tasks can also <em>take</em> a semaphore, which decrements the counter, and if afterwards the counter is negative, blocks the task and places it at the end of the queue of waiting tasks. Additionally there are operations for <em>ungiving</em> a semaphore, in the case where one needs to decrement the counter without potentially blocking the current task, and for <em>broadcasting</em> a semaphore, which is equivalent to <em>giving</em> each waiting task.</p>
 <section id="sema">

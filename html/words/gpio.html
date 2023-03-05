@@ -1,7 +1,7 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
@@ -12,7 +12,9 @@
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="EXTI Words" href="exti.html" />
@@ -33,695 +35,695 @@
 
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="gpio-words">
-<h1>GPIO Words<a class="headerlink" href="#gpio-words" title="Permalink to this headline">¶</a></h1>
+  <section id="gpio-words">
+<h1>GPIO Words<a class="headerlink" href="#gpio-words" title="Permalink to this heading">¶</a></h1>
 <p>A GPIO API is provided for STM32 microcontrollers, with slight variations between individual microcontrollers (primarily in the number of supported GPIO’s, along with internal differences in the registers used by the API). It provides a thin layer over the hardware registers that control GPIO’s, so as to make them more user-friendly while not limiting the programmer’s capabilities.</p>
 <p>A GPIO API is also provided for the RP2040; note that this API differs considerably from the GPIO API for STM32 microcontrollers and has no compatiblity with it. It exposes registers for manipulating GPIO input and output and for controlling GPIO interrupts.</p>
 <p>These words are in <code class="docutils literal notranslate"><span class="pre">gpio</span></code>.</p>
 <section id="stm32-words">
-<h2>STM32 Words<a class="headerlink" href="#stm32-words" title="Permalink to this headline">¶</a></h2>
+<h2>STM32 Words<a class="headerlink" href="#stm32-words" title="Permalink to this heading">¶</a></h2>
 <section id="gpio">
-<h3><code class="docutils literal notranslate"><span class="pre">gpio</span></code><a class="headerlink" href="#gpio" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">gpio</span></code><a class="headerlink" href="#gpio" title="Permalink to this heading">¶</a></h3>
 <section id="gpioa-through-gpiok">
-<h4><code class="docutils literal notranslate"><span class="pre">GPIOA</span></code> through <code class="docutils literal notranslate"><span class="pre">GPIOK</span></code><a class="headerlink" href="#gpioa-through-gpiok" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">GPIOA</span></code> through <code class="docutils literal notranslate"><span class="pre">GPIOK</span></code><a class="headerlink" href="#gpioa-through-gpiok" title="Permalink to this heading">¶</a></h4>
 <p>These are the memory addresses of the spaces for each of the the GPIO’s, from GPIOA to GPIOI on the STM32F407 and STM32L476, from GPIOA to GPIOK on the STM32F746, and from GPIOA to GPIOE as well as GPIOH on the STM32F411.</p>
 </section>
 <section id="moder">
-<h4><code class="docutils literal notranslate"><span class="pre">MODER</span></code><a class="headerlink" href="#moder" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">MODER</span></code><a class="headerlink" href="#moder" title="Permalink to this heading">¶</a></h4>
 <p>( gpio-addr – addr )</p>
 <p>This takes a base GPIOx address and outputs a GPIOx_MODER address.</p>
 </section>
 <section id="otyper">
-<h4><code class="docutils literal notranslate"><span class="pre">OTYPER</span></code><a class="headerlink" href="#otyper" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">OTYPER</span></code><a class="headerlink" href="#otyper" title="Permalink to this heading">¶</a></h4>
 <p>( gpio-addr – addr )</p>
 <p>This takes a base GPIOx address and outputs a GPIOx_OTYPER address.</p>
 </section>
 <section id="ospeedr">
-<h4><code class="docutils literal notranslate"><span class="pre">OSPEEDR</span></code><a class="headerlink" href="#ospeedr" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">OSPEEDR</span></code><a class="headerlink" href="#ospeedr" title="Permalink to this heading">¶</a></h4>
 <p>( gpio-addr – addr )</p>
 <p>This takes a base GPIOx address and outputs a GPIOx_OSPEEDR address.</p>
 </section>
 <section id="pupdr">
-<h4><code class="docutils literal notranslate"><span class="pre">PUPDR</span></code><a class="headerlink" href="#pupdr" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PUPDR</span></code><a class="headerlink" href="#pupdr" title="Permalink to this heading">¶</a></h4>
 <p>( gpio-addr – addr )</p>
 <p>This takes a base GPIOx address and outputs a GPIOx_PUPDR address.</p>
 </section>
 <section id="idr">
-<h4><code class="docutils literal notranslate"><span class="pre">IDR</span></code><a class="headerlink" href="#idr" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">IDR</span></code><a class="headerlink" href="#idr" title="Permalink to this heading">¶</a></h4>
 <p>( gpio-addr – addr )</p>
 <p>This takes a base GPIOx address and outputs a GPIOx_IDR address.</p>
 </section>
 <section id="odr">
-<h4><code class="docutils literal notranslate"><span class="pre">ODR</span></code><a class="headerlink" href="#odr" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">ODR</span></code><a class="headerlink" href="#odr" title="Permalink to this heading">¶</a></h4>
 <p>( gpio-addr – addr )</p>
 <p>This takes a base GPIOx address and outputs a GPIOx_ODR address.</p>
 </section>
 <section id="bsrr">
-<h4><code class="docutils literal notranslate"><span class="pre">BSRR</span></code><a class="headerlink" href="#bsrr" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">BSRR</span></code><a class="headerlink" href="#bsrr" title="Permalink to this heading">¶</a></h4>
 <p>( gpio-addr – addr )</p>
 <p>This takes a base GPIOx address and outputs a GPIOx_BSRR address.</p>
 </section>
 <section id="lckr">
-<h4><code class="docutils literal notranslate"><span class="pre">LCKR</span></code><a class="headerlink" href="#lckr" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">LCKR</span></code><a class="headerlink" href="#lckr" title="Permalink to this heading">¶</a></h4>
 <p>( gpio-addr – addr )</p>
 <p>This takes a base GPIOx address and outputs a GPIOx_LCKR address.</p>
 </section>
 <section id="afrl">
-<h4><code class="docutils literal notranslate"><span class="pre">AFRL</span></code><a class="headerlink" href="#afrl" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">AFRL</span></code><a class="headerlink" href="#afrl" title="Permalink to this heading">¶</a></h4>
 <p>( gpio-addr – addr )</p>
 <p>This takes a base GPIOx address and outputs a GPIOx_AFRL address.</p>
 </section>
 <section id="afrh">
-<h4><code class="docutils literal notranslate"><span class="pre">AFRH</span></code><a class="headerlink" href="#afrh" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">AFRH</span></code><a class="headerlink" href="#afrh" title="Permalink to this heading">¶</a></h4>
 <p>( gpio-addr – addr )</p>
 <p>This takes a base GPIOx address and outputs a GPIOx_AFRH address.</p>
 </section>
 <section id="input-mode">
-<h4><code class="docutils literal notranslate"><span class="pre">INPUT_MODE</span></code><a class="headerlink" href="#input-mode" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">INPUT_MODE</span></code><a class="headerlink" href="#input-mode" title="Permalink to this heading">¶</a></h4>
 <p>This is the input port mode.</p>
 </section>
 <section id="output-mode">
-<h4><code class="docutils literal notranslate"><span class="pre">OUTPUT_MODE</span></code><a class="headerlink" href="#output-mode" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">OUTPUT_MODE</span></code><a class="headerlink" href="#output-mode" title="Permalink to this heading">¶</a></h4>
 <p>This is the output port mode.</p>
 </section>
 <section id="alternate-mode">
-<h4><code class="docutils literal notranslate"><span class="pre">ALTERNATE_MODE</span></code><a class="headerlink" href="#alternate-mode" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">ALTERNATE_MODE</span></code><a class="headerlink" href="#alternate-mode" title="Permalink to this heading">¶</a></h4>
 <p>This is the alternate function port mode.</p>
 </section>
 <section id="analog-mode">
-<h4><code class="docutils literal notranslate"><span class="pre">ANALOG_MODE</span></code><a class="headerlink" href="#analog-mode" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">ANALOG_MODE</span></code><a class="headerlink" href="#analog-mode" title="Permalink to this heading">¶</a></h4>
 <p>This is the analog port mode.</p>
 </section>
 <section id="push-pull">
-<h4><code class="docutils literal notranslate"><span class="pre">PUSH_PULL</span></code><a class="headerlink" href="#push-pull" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PUSH_PULL</span></code><a class="headerlink" href="#push-pull" title="Permalink to this heading">¶</a></h4>
 <p>This is the push-pull output type.</p>
 </section>
 <section id="open-drain">
-<h4><code class="docutils literal notranslate"><span class="pre">OPEN_DRAIN</span></code><a class="headerlink" href="#open-drain" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">OPEN_DRAIN</span></code><a class="headerlink" href="#open-drain" title="Permalink to this heading">¶</a></h4>
 <p>This is the open drain output type.</p>
 </section>
 <section id="low-speed">
-<h4><code class="docutils literal notranslate"><span class="pre">LOW_SPEED</span></code><a class="headerlink" href="#low-speed" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">LOW_SPEED</span></code><a class="headerlink" href="#low-speed" title="Permalink to this heading">¶</a></h4>
 <p>This is the low speed output speed.</p>
 </section>
 <section id="medium-speed">
-<h4><code class="docutils literal notranslate"><span class="pre">MEDIUM_SPEED</span></code><a class="headerlink" href="#medium-speed" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">MEDIUM_SPEED</span></code><a class="headerlink" href="#medium-speed" title="Permalink to this heading">¶</a></h4>
 <p>This is the medium speed output speed.</p>
 </section>
 <section id="high-speed">
-<h4><code class="docutils literal notranslate"><span class="pre">HIGH_SPEED</span></code><a class="headerlink" href="#high-speed" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">HIGH_SPEED</span></code><a class="headerlink" href="#high-speed" title="Permalink to this heading">¶</a></h4>
 <p>This is the high speed output speed.</p>
 </section>
 <section id="very-high-speed">
-<h4><code class="docutils literal notranslate"><span class="pre">VERY_HIGH_SPEED</span></code><a class="headerlink" href="#very-high-speed" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">VERY_HIGH_SPEED</span></code><a class="headerlink" href="#very-high-speed" title="Permalink to this heading">¶</a></h4>
 <p>This is the very high speed output speed.</p>
 </section>
 <section id="no-pull-up-pull-down">
-<h4><code class="docutils literal notranslate"><span class="pre">NO_PULL_UP_PULL_DOWN</span></code><a class="headerlink" href="#no-pull-up-pull-down" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">NO_PULL_UP_PULL_DOWN</span></code><a class="headerlink" href="#no-pull-up-pull-down" title="Permalink to this heading">¶</a></h4>
 <p>This is the no pull up/pull down setting.</p>
 </section>
 <section id="pull-up">
-<h4><code class="docutils literal notranslate"><span class="pre">PULL_UP</span></code><a class="headerlink" href="#pull-up" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PULL_UP</span></code><a class="headerlink" href="#pull-up" title="Permalink to this heading">¶</a></h4>
 <p>This is the pull up setting.</p>
 </section>
 <section id="pull-down">
-<h4><code class="docutils literal notranslate"><span class="pre">PULL_DOWN</span></code><a class="headerlink" href="#pull-down" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PULL_DOWN</span></code><a class="headerlink" href="#pull-down" title="Permalink to this heading">¶</a></h4>
 <p>This is the pull down setting.</p>
 </section>
 <section id="gpio-clock-enable">
-<h4><code class="docutils literal notranslate"><span class="pre">gpio-clock-enable</span></code><a class="headerlink" href="#gpio-clock-enable" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">gpio-clock-enable</span></code><a class="headerlink" href="#gpio-clock-enable" title="Permalink to this heading">¶</a></h4>
 <p>( gpio-addr – )</p>
 <p>Enable the clock for the specified GPIO.</p>
 </section>
 <section id="gpio-lp-clock-enable">
-<h4><code class="docutils literal notranslate"><span class="pre">gpio-lp-clock-enable</span></code><a class="headerlink" href="#gpio-lp-clock-enable" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">gpio-lp-clock-enable</span></code><a class="headerlink" href="#gpio-lp-clock-enable" title="Permalink to this heading">¶</a></h4>
 <p>( gpio-addr – )</p>
 <p>Enable the low-power clock for the specified GPIO.</p>
 </section>
 <section id="gpio-clock-disable">
-<h4><code class="docutils literal notranslate"><span class="pre">gpio-clock-disable</span></code><a class="headerlink" href="#gpio-clock-disable" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">gpio-clock-disable</span></code><a class="headerlink" href="#gpio-clock-disable" title="Permalink to this heading">¶</a></h4>
 <p>( gpio-addr – )</p>
 <p>Disable the clock for the specified GPIO.</p>
 </section>
 <section id="gpio-lp-clock-disable">
-<h4><code class="docutils literal notranslate"><span class="pre">gpio-lp-clock-disable</span></code><a class="headerlink" href="#gpio-lp-clock-disable" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">gpio-lp-clock-disable</span></code><a class="headerlink" href="#gpio-lp-clock-disable" title="Permalink to this heading">¶</a></h4>
 <p>( gpio-addr – )</p>
 <p>Disable the low-power clock for the specified GPIO.</p>
 </section>
 <section id="id1">
-<h4><code class="docutils literal notranslate"><span class="pre">gpio-clock-enable?</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">gpio-clock-enable?</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h4>
 <p>( gpio-addr – enable )</p>
 <p>Get whether the clock for the specified GPIO is enabled.</p>
 </section>
 <section id="id2">
-<h4><code class="docutils literal notranslate"><span class="pre">gpio-lp-clock-enable?</span></code><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">gpio-lp-clock-enable?</span></code><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h4>
 <p>( gpio-addr – enable )</p>
 <p>Get whether the low-power clock for the specified GPIO is enabled.</p>
 </section>
 <section id="id3">
-<h4><code class="docutils literal notranslate"><span class="pre">MODER!</span></code><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">MODER!</span></code><a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h4>
 <p>( mode pin gpio-addr – )</p>
 <p>Set the specified mode for the specified pin (from 0 to 15) on the specified GPIO.</p>
 </section>
 <section id="id4">
-<h4><code class="docutils literal notranslate"><span class="pre">OTYPER!</span></code><a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">OTYPER!</span></code><a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h4>
 <p>( otype pin gpio-addr – )</p>
 <p>Set the specified output type for the specified pin (from 0 to 15) on the specified GPIO.</p>
 </section>
 <section id="id5">
-<h4><code class="docutils literal notranslate"><span class="pre">OSPEEDR!</span></code><a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">OSPEEDR!</span></code><a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h4>
 <p>( ospeed pin gpio-addr – )</p>
 <p>Set the specified output speed for the specified pin (from 0 to 15) on the specified GPIO.</p>
 </section>
 <section id="id6">
-<h4><code class="docutils literal notranslate"><span class="pre">PUPDR!</span></code><a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PUPDR!</span></code><a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h4>
 <p>( pupd pin gpio-addr – )</p>
 <p>Set the specified pull up/pull down setting for the specified pin (from 0 to 15) on the specified GPIO.</p>
 </section>
 <section id="id7">
-<h4><code class="docutils literal notranslate"><span class="pre">AFRL!</span></code><a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">AFRL!</span></code><a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h4>
 <p>( af pin gpio-addr – )</p>
 <p>Set the specified alternate function for the specified pin (from 0 to 7) on the specified GPIO.</p>
 </section>
 <section id="id8">
-<h4><code class="docutils literal notranslate"><span class="pre">AFRH!</span></code><a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">AFRH!</span></code><a class="headerlink" href="#id8" title="Permalink to this heading">¶</a></h4>
 <p>( af pin gpio-addr – )</p>
 <p>Set the specified alternate function for the specified pin (from 8 to 15) on the specified GPIO.</p>
 </section>
 <section id="afr">
-<h4><code class="docutils literal notranslate"><span class="pre">AFR!</span></code><a class="headerlink" href="#afr" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">AFR!</span></code><a class="headerlink" href="#afr" title="Permalink to this heading">¶</a></h4>
 <p>( af pin gpio-addr – )</p>
 <p>Set the specified alternate function for the specified pin (from 0 to 15) on the specified GPIO.</p>
 </section>
 <section id="bs">
-<h4><code class="docutils literal notranslate"><span class="pre">BS!</span></code><a class="headerlink" href="#bs" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">BS!</span></code><a class="headerlink" href="#bs" title="Permalink to this heading">¶</a></h4>
 <p>( pin gpio-addr – )</p>
 <p>Set the output for the specified pin (from 0 to 15) on the specified GPIO to on.</p>
 </section>
 <section id="br">
-<h4><code class="docutils literal notranslate"><span class="pre">BR!</span></code><a class="headerlink" href="#br" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">BR!</span></code><a class="headerlink" href="#br" title="Permalink to this heading">¶</a></h4>
 <p>( pin gpio-addr – )</p>
 <p>Set the output for the specified pin (from 0 to 15) on the specified GPIO to off.</p>
 </section>
 <section id="id9">
-<h4><code class="docutils literal notranslate"><span class="pre">BSRR!</span></code><a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">BSRR!</span></code><a class="headerlink" href="#id9" title="Permalink to this heading">¶</a></h4>
 <p>( output pin gpio-addr – )</p>
 <p>Set the output for the specified pin (from 0 to 15) on the specified GPIO to on or off.</p>
 </section>
 <section id="id10">
-<h4><code class="docutils literal notranslate"><span class="pre">MODER&#64;</span></code><a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">MODER&#64;</span></code><a class="headerlink" href="#id10" title="Permalink to this heading">¶</a></h4>
 <p>( pin gpio-addr – mode )</p>
 <p>Get the mode of the specified pin (from 0 to 15) on the specified GPIO.</p>
 </section>
 <section id="id11">
-<h4><code class="docutils literal notranslate"><span class="pre">OTYPER&#64;</span></code><a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">OTYPER&#64;</span></code><a class="headerlink" href="#id11" title="Permalink to this heading">¶</a></h4>
 <p>( pin gpio-addr – otype )</p>
 <p>Get the output type of the specified pin (from 0 to 15) on the specified GPIO.</p>
 </section>
 <section id="id12">
-<h4><code class="docutils literal notranslate"><span class="pre">OSPEEDR&#64;</span></code><a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">OSPEEDR&#64;</span></code><a class="headerlink" href="#id12" title="Permalink to this heading">¶</a></h4>
 <p>( pin gpio-addr – ospeed )</p>
 <p>Get the output speed of the specified pin (from 0 to 15) on the specified GPIO.</p>
 </section>
 <section id="id13">
-<h4><code class="docutils literal notranslate"><span class="pre">PUPDR&#64;</span></code><a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PUPDR&#64;</span></code><a class="headerlink" href="#id13" title="Permalink to this heading">¶</a></h4>
 <p>( pin gpio-addr – pupd )</p>
 <p>Get the pull up/pull down setting of the specified pin (from 0 to 15) on the specified GPIO.</p>
 </section>
 <section id="id14">
-<h4><code class="docutils literal notranslate"><span class="pre">AFRL&#64;</span></code><a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">AFRL&#64;</span></code><a class="headerlink" href="#id14" title="Permalink to this heading">¶</a></h4>
 <p>( pin gpio-addr – af )</p>
 <p>Get the alternate function for the specified pin (from 0 to 7) on the specified GPIO.</p>
 </section>
 <section id="id15">
-<h4><code class="docutils literal notranslate"><span class="pre">AFRH&#64;</span></code><a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">AFRH&#64;</span></code><a class="headerlink" href="#id15" title="Permalink to this heading">¶</a></h4>
 <p>( pin gpio-addr – af )</p>
 <p>Get the alternate function for the specified pin (from 8 to 15) on the specified GPIO.</p>
 </section>
 <section id="id16">
-<h4><code class="docutils literal notranslate"><span class="pre">AFR&#64;</span></code><a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">AFR&#64;</span></code><a class="headerlink" href="#id16" title="Permalink to this heading">¶</a></h4>
 <p>( pin gpio-addr – af )</p>
 <p>Get the alternate function for the specified pin (from 0 to 15) on the specified GPIO.</p>
 </section>
 <section id="id17">
-<h4><code class="docutils literal notranslate"><span class="pre">IDR&#64;</span></code><a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">IDR&#64;</span></code><a class="headerlink" href="#id17" title="Permalink to this heading">¶</a></h4>
 <p>( pin gpio-addr – input )</p>
 <p>Get the input for the specified pin (from 0 to 15) on the specified GPIO.</p>
 </section>
 </section>
 </section>
 <section id="rp2040-words">
-<h2>RP2040 Words<a class="headerlink" href="#rp2040-words" title="Permalink to this headline">¶</a></h2>
+<h2>RP2040 Words<a class="headerlink" href="#rp2040-words" title="Permalink to this heading">¶</a></h2>
 <section id="id18">
-<h3><code class="docutils literal notranslate"><span class="pre">gpio</span></code><a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">gpio</span></code><a class="headerlink" href="#id18" title="Permalink to this heading">¶</a></h3>
 <section id="ctrl-normal">
-<h4><code class="docutils literal notranslate"><span class="pre">CTRL_NORMAL</span></code><a class="headerlink" href="#ctrl-normal" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">CTRL_NORMAL</span></code><a class="headerlink" href="#ctrl-normal" title="Permalink to this heading">¶</a></h4>
 <p>Normal control state for GPIO control</p>
 </section>
 <section id="ctrl-invert">
-<h4><code class="docutils literal notranslate"><span class="pre">CTRL_INVERT</span></code><a class="headerlink" href="#ctrl-invert" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">CTRL_INVERT</span></code><a class="headerlink" href="#ctrl-invert" title="Permalink to this heading">¶</a></h4>
 <p>Inverse control state for GPIO control</p>
 </section>
 <section id="ctrl-force-low">
-<h4><code class="docutils literal notranslate"><span class="pre">CTRL_FORCE_LOW</span></code><a class="headerlink" href="#ctrl-force-low" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">CTRL_FORCE_LOW</span></code><a class="headerlink" href="#ctrl-force-low" title="Permalink to this heading">¶</a></h4>
 <p>Force low / disable control state for GPIO control</p>
 </section>
 <section id="ctrl-force-high">
-<h4><code class="docutils literal notranslate"><span class="pre">CTRL_FORCE_HIGH</span></code><a class="headerlink" href="#ctrl-force-high" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">CTRL_FORCE_HIGH</span></code><a class="headerlink" href="#ctrl-force-high" title="Permalink to this heading">¶</a></h4>
 <p>Force high / enable control state for GPIO control</p>
 </section>
 <section id="voltage-3-3v">
-<h4><code class="docutils literal notranslate"><span class="pre">VOLTAGE_3.3V</span></code><a class="headerlink" href="#voltage-3-3v" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">VOLTAGE_3.3V</span></code><a class="headerlink" href="#voltage-3-3v" title="Permalink to this heading">¶</a></h4>
 <p>Voltage set to 3.3V</p>
 </section>
 <section id="voltage-1-8v">
-<h4><code class="docutils literal notranslate"><span class="pre">VOLTAGE_1.8V</span></code><a class="headerlink" href="#voltage-1-8v" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">VOLTAGE_1.8V</span></code><a class="headerlink" href="#voltage-1-8v" title="Permalink to this heading">¶</a></h4>
 <p>Voltage set to 1.8V</p>
 </section>
 <section id="drive-2ma">
-<h4><code class="docutils literal notranslate"><span class="pre">DRIVE_2MA</span></code><a class="headerlink" href="#drive-2ma" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">DRIVE_2MA</span></code><a class="headerlink" href="#drive-2ma" title="Permalink to this heading">¶</a></h4>
 <p>Drive strength set to 2mA</p>
 </section>
 <section id="drive-4ma">
-<h4><code class="docutils literal notranslate"><span class="pre">DRIVE_4MA</span></code><a class="headerlink" href="#drive-4ma" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">DRIVE_4MA</span></code><a class="headerlink" href="#drive-4ma" title="Permalink to this heading">¶</a></h4>
 <p>Drive strength set to 4mA</p>
 </section>
 <section id="drive-8ma">
-<h4><code class="docutils literal notranslate"><span class="pre">DRIVE_8MA</span></code><a class="headerlink" href="#drive-8ma" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">DRIVE_8MA</span></code><a class="headerlink" href="#drive-8ma" title="Permalink to this heading">¶</a></h4>
 <p>Drive strength set to 8mA</p>
 </section>
 <section id="drive-12ma">
-<h4><code class="docutils literal notranslate"><span class="pre">DRIVE_12MA</span></code><a class="headerlink" href="#drive-12ma" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">DRIVE_12MA</span></code><a class="headerlink" href="#drive-12ma" title="Permalink to this heading">¶</a></h4>
 <p>Drive strength set to 12mA</p>
 </section>
 <section id="pad-swclk">
-<h4><code class="docutils literal notranslate"><span class="pre">PAD_SWCLK</span></code><a class="headerlink" href="#pad-swclk" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PAD_SWCLK</span></code><a class="headerlink" href="#pad-swclk" title="Permalink to this heading">¶</a></h4>
 <p>Pad index for SWCLK</p>
 </section>
 <section id="pad-swd">
-<h4><code class="docutils literal notranslate"><span class="pre">PAD_SWD</span></code><a class="headerlink" href="#pad-swd" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PAD_SWD</span></code><a class="headerlink" href="#pad-swd" title="Permalink to this heading">¶</a></h4>
 <p>Pad index for SWD</p>
 </section>
 <section id="gpio-in">
-<h4><code class="docutils literal notranslate"><span class="pre">GPIO_IN</span></code><a class="headerlink" href="#gpio-in" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_IN</span></code><a class="headerlink" href="#gpio-in" title="Permalink to this heading">¶</a></h4>
 <p>GPIO input register; each bit corresponds to the GPIO with an index equal to its position</p>
 </section>
 <section id="gpio-out">
-<h4><code class="docutils literal notranslate"><span class="pre">GPIO_OUT</span></code><a class="headerlink" href="#gpio-out" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_OUT</span></code><a class="headerlink" href="#gpio-out" title="Permalink to this heading">¶</a></h4>
 <p>GPIO output register; each bit corresponds to the GPIO with an index equal to its position</p>
 </section>
 <section id="gpio-out-set">
-<h4><code class="docutils literal notranslate"><span class="pre">GPIO_OUT_SET</span></code><a class="headerlink" href="#gpio-out-set" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_OUT_SET</span></code><a class="headerlink" href="#gpio-out-set" title="Permalink to this heading">¶</a></h4>
 <p>GPIO output atomic bit-set register; each bit corresponds to the GPIO with an index equal to its position</p>
 </section>
 <section id="gpio-out-clr">
-<h4><code class="docutils literal notranslate"><span class="pre">GPIO_OUT_CLR</span></code><a class="headerlink" href="#gpio-out-clr" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_OUT_CLR</span></code><a class="headerlink" href="#gpio-out-clr" title="Permalink to this heading">¶</a></h4>
 <p>GPIO output atomic bit-clear register; each bit corresponds to the GPIO with an index equal to its position</p>
 </section>
 <section id="gpio-out-xor">
-<h4><code class="docutils literal notranslate"><span class="pre">GPIO_OUT_XOR</span></code><a class="headerlink" href="#gpio-out-xor" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_OUT_XOR</span></code><a class="headerlink" href="#gpio-out-xor" title="Permalink to this heading">¶</a></h4>
 <p>GPIO output atomic bit-xor register; each bit corresponds to the GPIO with an index equal to its position</p>
 </section>
 <section id="gpio-oe">
-<h4><code class="docutils literal notranslate"><span class="pre">GPIO_OE</span></code><a class="headerlink" href="#gpio-oe" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_OE</span></code><a class="headerlink" href="#gpio-oe" title="Permalink to this heading">¶</a></h4>
 <p>GPIO output enable register; each bit corresponds to the GPIO with an index equal to its position</p>
 </section>
 <section id="gpio-oe-set">
-<h4><code class="docutils literal notranslate"><span class="pre">GPIO_OE_SET</span></code><a class="headerlink" href="#gpio-oe-set" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_OE_SET</span></code><a class="headerlink" href="#gpio-oe-set" title="Permalink to this heading">¶</a></h4>
 <p>GPIO output enable atomic bit-set register; each bit corresponds to the GPIO with an index equal to its position</p>
 </section>
 <section id="gpio-oe-clr">
-<h4><code class="docutils literal notranslate"><span class="pre">GPIO_OE_CLR</span></code><a class="headerlink" href="#gpio-oe-clr" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_OE_CLR</span></code><a class="headerlink" href="#gpio-oe-clr" title="Permalink to this heading">¶</a></h4>
 <p>GPIO output enable atomic bit-clear register; each bit corresponds to the GPIO with an index equal to its position</p>
 </section>
 <section id="gpio-oe-xor">
-<h4><code class="docutils literal notranslate"><span class="pre">GPIO_OE_XOR</span></code><a class="headerlink" href="#gpio-oe-xor" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_OE_XOR</span></code><a class="headerlink" href="#gpio-oe-xor" title="Permalink to this heading">¶</a></h4>
 <p>GPIO output enable atomic bit-xor register; each bit corresponds to the GPIO with an index equal to its position</p>
 </section>
 <section id="gpio-status-irqtoproc">
-<h4><code class="docutils literal notranslate"><span class="pre">GPIO_STATUS_IRQTOPROC&#64;</span></code><a class="headerlink" href="#gpio-status-irqtoproc" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_STATUS_IRQTOPROC&#64;</span></code><a class="headerlink" href="#gpio-status-irqtoproc" title="Permalink to this heading">¶</a></h4>
 <p>( index – flag )</p>
 <p>Get interrupt to processors, after override is applied</p>
 </section>
 <section id="gpio-status-irqfrompad">
-<h4><code class="docutils literal notranslate"><span class="pre">GPIO_STATUS_IRQFROMPAD&#64;</span></code><a class="headerlink" href="#gpio-status-irqfrompad" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_STATUS_IRQFROMPAD&#64;</span></code><a class="headerlink" href="#gpio-status-irqfrompad" title="Permalink to this heading">¶</a></h4>
 <p>( index – flag )</p>
 <p>Get interrupt from pad, before override is applied</p>
 </section>
 <section id="gpio-status-intoperi">
-<h4><code class="docutils literal notranslate"><span class="pre">GPIO_STATUS_INTOPERI&#64;</span></code><a class="headerlink" href="#gpio-status-intoperi" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_STATUS_INTOPERI&#64;</span></code><a class="headerlink" href="#gpio-status-intoperi" title="Permalink to this heading">¶</a></h4>
 <p>( index – flag )</p>
 <p>Get input signal to peripheral, after override is applied</p>
 </section>
 <section id="gpio-status-infrompad">
-<h4><code class="docutils literal notranslate"><span class="pre">GPIO_STATUS_INFROMPAD&#64;</span></code><a class="headerlink" href="#gpio-status-infrompad" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_STATUS_INFROMPAD&#64;</span></code><a class="headerlink" href="#gpio-status-infrompad" title="Permalink to this heading">¶</a></h4>
 <p>( index – flag )</p>
 <p>Get input signal from pad, before override is applied</p>
 </section>
 <section id="gpio-status-oetopad">
-<h4><code class="docutils literal notranslate"><span class="pre">GPIO_STATUS_OETOPAD&#64;</span></code><a class="headerlink" href="#gpio-status-oetopad" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_STATUS_OETOPAD&#64;</span></code><a class="headerlink" href="#gpio-status-oetopad" title="Permalink to this heading">¶</a></h4>
 <p>( index – flag )</p>
 <p>Get output enable to pad, after register override is applied</p>
 <p>\ applied</p>
 </section>
 <section id="gpio-status-oefromperi">
-<h4><code class="docutils literal notranslate"><span class="pre">GPIO_STATUS_OEFROMPERI&#64;</span></code><a class="headerlink" href="#gpio-status-oefromperi" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_STATUS_OEFROMPERI&#64;</span></code><a class="headerlink" href="#gpio-status-oefromperi" title="Permalink to this heading">¶</a></h4>
 <p>( index – flag )</p>
 <p>Get output enable from selected peripheral, before register override is</p>
 </section>
 <section id="gpio-status-outtopad">
-<h4><code class="docutils literal notranslate"><span class="pre">GPIO_STATUS_OUTTOPAD&#64;</span></code><a class="headerlink" href="#gpio-status-outtopad" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_STATUS_OUTTOPAD&#64;</span></code><a class="headerlink" href="#gpio-status-outtopad" title="Permalink to this heading">¶</a></h4>
 <p>( index – flag )</p>
 <p>Get output signal to pad, after register override is applied</p>
 <p>\ applied</p>
 </section>
 <section id="gpio-status-outfromperi">
-<h4><code class="docutils literal notranslate"><span class="pre">GPIO_STATUS_OUTFROMPERI&#64;</span></code><a class="headerlink" href="#gpio-status-outfromperi" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_STATUS_OUTFROMPERI&#64;</span></code><a class="headerlink" href="#gpio-status-outfromperi" title="Permalink to this heading">¶</a></h4>
 <p>( index – flag )</p>
 <p>Get output signal from selected peripheral, before register override is</p>
 </section>
 <section id="gpio-ctrl-irqover">
-<h4><code class="docutils literal notranslate"><span class="pre">GPIO_CTRL_IRQOVER!</span></code><a class="headerlink" href="#gpio-ctrl-irqover" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_CTRL_IRQOVER!</span></code><a class="headerlink" href="#gpio-ctrl-irqover" title="Permalink to this heading">¶</a></h4>
 <p>( control index – )</p>
 <p>Set interrupt state for GPIO</p>
 </section>
 <section id="gpio-ctrl-inover">
-<h4><code class="docutils literal notranslate"><span class="pre">GPIO_CTRL_INOVER!</span></code><a class="headerlink" href="#gpio-ctrl-inover" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_CTRL_INOVER!</span></code><a class="headerlink" href="#gpio-ctrl-inover" title="Permalink to this heading">¶</a></h4>
 <p>( control index – )</p>
 <p>Set peripheral input state for GPIO</p>
 </section>
 <section id="gpio-ctrl-oeover">
-<h4><code class="docutils literal notranslate"><span class="pre">GPIO_CTRL_OEOVER!</span></code><a class="headerlink" href="#gpio-ctrl-oeover" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_CTRL_OEOVER!</span></code><a class="headerlink" href="#gpio-ctrl-oeover" title="Permalink to this heading">¶</a></h4>
 <p>( control index – )</p>
 <p>Set output enable state for GPIO</p>
 </section>
 <section id="gpio-ctrl-outover">
-<h4><code class="docutils literal notranslate"><span class="pre">GPIO_CTRL_OUTOVER!</span></code><a class="headerlink" href="#gpio-ctrl-outover" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_CTRL_OUTOVER!</span></code><a class="headerlink" href="#gpio-ctrl-outover" title="Permalink to this heading">¶</a></h4>
 <p>( control index – )</p>
 <p>Set output state for GPIO</p>
 </section>
 <section id="gpio-ctrl-funcsel">
-<h4><code class="docutils literal notranslate"><span class="pre">GPIO_CTRL_FUNCSEL!</span></code><a class="headerlink" href="#gpio-ctrl-funcsel" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_CTRL_FUNCSEL!</span></code><a class="headerlink" href="#gpio-ctrl-funcsel" title="Permalink to this heading">¶</a></h4>
 <p>( function index – )</p>
 <p>Set the function select for GPIO</p>
 </section>
 <section id="id19">
-<h4><code class="docutils literal notranslate"><span class="pre">GPIO_CTRL_IRQOVER&#64;</span></code><a class="headerlink" href="#id19" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_CTRL_IRQOVER&#64;</span></code><a class="headerlink" href="#id19" title="Permalink to this heading">¶</a></h4>
 <p>( index – control )</p>
 <p>Get interrupt state for GPIO</p>
 </section>
 <section id="id20">
-<h4><code class="docutils literal notranslate"><span class="pre">GPIO_CTRL_INOVER&#64;</span></code><a class="headerlink" href="#id20" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_CTRL_INOVER&#64;</span></code><a class="headerlink" href="#id20" title="Permalink to this heading">¶</a></h4>
 <p>( index – control )</p>
 <p>Get peripheral input state for GPIO</p>
 </section>
 <section id="id21">
-<h4><code class="docutils literal notranslate"><span class="pre">GPIO_CTRL_OEOVER&#64;</span></code><a class="headerlink" href="#id21" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_CTRL_OEOVER&#64;</span></code><a class="headerlink" href="#id21" title="Permalink to this heading">¶</a></h4>
 <p>( index – control )</p>
 <p>Get output enable state for GPIO</p>
 </section>
 <section id="id22">
-<h4><code class="docutils literal notranslate"><span class="pre">GPIO_CTRL_OUTOVER&#64;</span></code><a class="headerlink" href="#id22" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_CTRL_OUTOVER&#64;</span></code><a class="headerlink" href="#id22" title="Permalink to this heading">¶</a></h4>
 <p>( index – control )</p>
 <p>Get output state for GPIO</p>
 </section>
 <section id="id23">
-<h4><code class="docutils literal notranslate"><span class="pre">GPIO_CTRL_FUNCSEL&#64;</span></code><a class="headerlink" href="#id23" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">GPIO_CTRL_FUNCSEL&#64;</span></code><a class="headerlink" href="#id23" title="Permalink to this heading">¶</a></h4>
 <p>( index – function )</p>
 <p>Set the function select for GPIO</p>
 </section>
 <section id="intr-gpio-edge-low">
-<h4><code class="docutils literal notranslate"><span class="pre">INTR_GPIO_EDGE_LOW!</span></code><a class="headerlink" href="#intr-gpio-edge-low" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">INTR_GPIO_EDGE_LOW!</span></code><a class="headerlink" href="#intr-gpio-edge-low" title="Permalink to this heading">¶</a></h4>
 <p>( index – )</p>
 <p>Clear a raw edge low interrupt</p>
 </section>
 <section id="intr-gpio-edge-high">
-<h4><code class="docutils literal notranslate"><span class="pre">INTR_GPIO_EDGE_HIGH!</span></code><a class="headerlink" href="#intr-gpio-edge-high" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">INTR_GPIO_EDGE_HIGH!</span></code><a class="headerlink" href="#intr-gpio-edge-high" title="Permalink to this heading">¶</a></h4>
 <p>( index – )</p>
 <p>Clear a raw edge high interrupt</p>
 </section>
 <section id="intr-gpio-level-low">
-<h4><code class="docutils literal notranslate"><span class="pre">INTR_GPIO_LEVEL_LOW&#64;</span></code><a class="headerlink" href="#intr-gpio-level-low" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">INTR_GPIO_LEVEL_LOW&#64;</span></code><a class="headerlink" href="#intr-gpio-level-low" title="Permalink to this heading">¶</a></h4>
 <p>( index – state )</p>
 <p>Get a level low raw interrupt state</p>
 </section>
 <section id="intr-gpio-level-high">
-<h4><code class="docutils literal notranslate"><span class="pre">INTR_GPIO_LEVEL_HIGH&#64;</span></code><a class="headerlink" href="#intr-gpio-level-high" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">INTR_GPIO_LEVEL_HIGH&#64;</span></code><a class="headerlink" href="#intr-gpio-level-high" title="Permalink to this heading">¶</a></h4>
 <p>( index – state )</p>
 <p>Get a level high raw interrupt state</p>
 </section>
 <section id="id24">
-<h4><code class="docutils literal notranslate"><span class="pre">INTR_GPIO_EDGE_LOW&#64;</span></code><a class="headerlink" href="#id24" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">INTR_GPIO_EDGE_LOW&#64;</span></code><a class="headerlink" href="#id24" title="Permalink to this heading">¶</a></h4>
 <p>( index – state )</p>
 <p>Get an edge low raw interrupt state</p>
 </section>
 <section id="id25">
-<h4><code class="docutils literal notranslate"><span class="pre">INTR_GPIO_EDGE_HIGH&#64;</span></code><a class="headerlink" href="#id25" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">INTR_GPIO_EDGE_HIGH&#64;</span></code><a class="headerlink" href="#id25" title="Permalink to this heading">¶</a></h4>
 <p>( index – state )</p>
 <p>Get an edge high raw interrupt state</p>
 </section>
 <section id="proc0-inte-gpio-level-low">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTE_GPIO_LEVEL_LOW!</span></code><a class="headerlink" href="#proc0-inte-gpio-level-low" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTE_GPIO_LEVEL_LOW!</span></code><a class="headerlink" href="#proc0-inte-gpio-level-low" title="Permalink to this heading">¶</a></h4>
 <p>( enable index – )</p>
 <p>Set a level low interrupt enable for processor 0</p>
 </section>
 <section id="proc0-inte-gpio-level-high">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTE_GPIO_LEVEL_HIGH!</span></code><a class="headerlink" href="#proc0-inte-gpio-level-high" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTE_GPIO_LEVEL_HIGH!</span></code><a class="headerlink" href="#proc0-inte-gpio-level-high" title="Permalink to this heading">¶</a></h4>
 <p>( enable index – )</p>
 <p>Set a level high interrupt enable for processor 0</p>
 </section>
 <section id="proc0-inte-gpio-edge-low">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTE_GPIO_EDGE_LOW!</span></code><a class="headerlink" href="#proc0-inte-gpio-edge-low" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTE_GPIO_EDGE_LOW!</span></code><a class="headerlink" href="#proc0-inte-gpio-edge-low" title="Permalink to this heading">¶</a></h4>
 <p>( enable index – )</p>
 <p>Set an edge low interrupt enable for processor 0</p>
 </section>
 <section id="proc0-inte-gpio-edge-high">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTE_GPIO_EDGE_HIGH!</span></code><a class="headerlink" href="#proc0-inte-gpio-edge-high" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTE_GPIO_EDGE_HIGH!</span></code><a class="headerlink" href="#proc0-inte-gpio-edge-high" title="Permalink to this heading">¶</a></h4>
 <p>( enable index – )</p>
 <p>Set an edge high interrupt enable for processor 0</p>
 </section>
 <section id="id26">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTE_GPIO_LEVEL_LOW&#64;</span></code><a class="headerlink" href="#id26" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTE_GPIO_LEVEL_LOW&#64;</span></code><a class="headerlink" href="#id26" title="Permalink to this heading">¶</a></h4>
 <p>( index – enable )</p>
 <p>Get a level low interrupt enable for processor 0</p>
 </section>
 <section id="id27">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTE_GPIO_LEVEL_HIGH&#64;</span></code><a class="headerlink" href="#id27" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTE_GPIO_LEVEL_HIGH&#64;</span></code><a class="headerlink" href="#id27" title="Permalink to this heading">¶</a></h4>
 <p>( index – enable )</p>
 <p>Get a level high interrupt enable for processor 0</p>
 </section>
 <section id="id28">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTE_GPIO_EDGE_LOW&#64;</span></code><a class="headerlink" href="#id28" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTE_GPIO_EDGE_LOW&#64;</span></code><a class="headerlink" href="#id28" title="Permalink to this heading">¶</a></h4>
 <p>( index – enable )</p>
 <p>Get an edge low interrupt enable for processor 0</p>
 </section>
 <section id="id29">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTE_GPIO_EDGE_HIGH&#64;</span></code><a class="headerlink" href="#id29" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTE_GPIO_EDGE_HIGH&#64;</span></code><a class="headerlink" href="#id29" title="Permalink to this heading">¶</a></h4>
 <p>( index – enable )</p>
 <p>Get an edge high interrupt enable for processor 0</p>
 </section>
 <section id="proc0-intf-gpio-level-low">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTF_GPIO_LEVEL_LOW!</span></code><a class="headerlink" href="#proc0-intf-gpio-level-low" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTF_GPIO_LEVEL_LOW!</span></code><a class="headerlink" href="#proc0-intf-gpio-level-low" title="Permalink to this heading">¶</a></h4>
 <p>( force index – )</p>
 <p>Set a level low interrupt force for processor 0</p>
 </section>
 <section id="proc0-intf-gpio-level-high">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTF_GPIO_LEVEL_HIGH!</span></code><a class="headerlink" href="#proc0-intf-gpio-level-high" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTF_GPIO_LEVEL_HIGH!</span></code><a class="headerlink" href="#proc0-intf-gpio-level-high" title="Permalink to this heading">¶</a></h4>
 <p>( force index – )</p>
 <p>Set a level high interrupt force for processor 0</p>
 </section>
 <section id="proc0-intf-gpio-edge-low">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTF_GPIO_EDGE_LOW!</span></code><a class="headerlink" href="#proc0-intf-gpio-edge-low" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTF_GPIO_EDGE_LOW!</span></code><a class="headerlink" href="#proc0-intf-gpio-edge-low" title="Permalink to this heading">¶</a></h4>
 <p>( force index – )</p>
 <p>Set an edge low interrupt force for processor 0</p>
 </section>
 <section id="proc0-intf-gpio-edge-high">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTF_GPIO_EDGE_HIGH!</span></code><a class="headerlink" href="#proc0-intf-gpio-edge-high" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTF_GPIO_EDGE_HIGH!</span></code><a class="headerlink" href="#proc0-intf-gpio-edge-high" title="Permalink to this heading">¶</a></h4>
 <p>( force index – )</p>
 <p>Set an edge high interrupt force for processor 0</p>
 </section>
 <section id="id30">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTF_GPIO_LEVEL_LOW&#64;</span></code><a class="headerlink" href="#id30" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTF_GPIO_LEVEL_LOW&#64;</span></code><a class="headerlink" href="#id30" title="Permalink to this heading">¶</a></h4>
 <p>( index – force )</p>
 <p>Get a level low interrupt force for processor 0</p>
 </section>
 <section id="id31">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTF_GPIO_LEVEL_HIGH&#64;</span></code><a class="headerlink" href="#id31" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTF_GPIO_LEVEL_HIGH&#64;</span></code><a class="headerlink" href="#id31" title="Permalink to this heading">¶</a></h4>
 <p>( index – force )</p>
 <p>Get a level high interrupt force for processor 0</p>
 </section>
 <section id="id32">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTF_GPIO_EDGE_LOW&#64;</span></code><a class="headerlink" href="#id32" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTF_GPIO_EDGE_LOW&#64;</span></code><a class="headerlink" href="#id32" title="Permalink to this heading">¶</a></h4>
 <p>( index – force )</p>
 <p>Get an edge low interrupt force for processor 0</p>
 </section>
 <section id="id33">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTF_GPIO_EDGE_HIGH&#64;</span></code><a class="headerlink" href="#id33" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTF_GPIO_EDGE_HIGH&#64;</span></code><a class="headerlink" href="#id33" title="Permalink to this heading">¶</a></h4>
 <p>( index – force )</p>
 <p>Get an edge high interrupt force for processor 0</p>
 </section>
 <section id="proc0-ints-gpio-level-low">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTS_GPIO_LEVEL_LOW&#64;</span></code><a class="headerlink" href="#proc0-ints-gpio-level-low" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTS_GPIO_LEVEL_LOW&#64;</span></code><a class="headerlink" href="#proc0-ints-gpio-level-low" title="Permalink to this heading">¶</a></h4>
 <p>( index – enable )</p>
 <p>Get a level low interrupt status for processor 0</p>
 </section>
 <section id="proc0-ints-gpio-level-high">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTS_GPIO_LEVEL_HIGH&#64;</span></code><a class="headerlink" href="#proc0-ints-gpio-level-high" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTS_GPIO_LEVEL_HIGH&#64;</span></code><a class="headerlink" href="#proc0-ints-gpio-level-high" title="Permalink to this heading">¶</a></h4>
 <p>( index – enable )</p>
 <p>Get a level high interrupt status for processor 0</p>
 </section>
 <section id="proc0-ints-gpio-edge-low">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTS_GPIO_EDGE_LOW&#64;</span></code><a class="headerlink" href="#proc0-ints-gpio-edge-low" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTS_GPIO_EDGE_LOW&#64;</span></code><a class="headerlink" href="#proc0-ints-gpio-edge-low" title="Permalink to this heading">¶</a></h4>
 <p>( index – enable )</p>
 <p>Get an edge low interrupt status for processor 0</p>
 </section>
 <section id="proc0-ints-gpio-edge-high">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTS_GPIO_EDGE_HIGH&#64;</span></code><a class="headerlink" href="#proc0-ints-gpio-edge-high" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC0_INTS_GPIO_EDGE_HIGH&#64;</span></code><a class="headerlink" href="#proc0-ints-gpio-edge-high" title="Permalink to this heading">¶</a></h4>
 <p>( index – enable )</p>
 <p>Get an edge high interrupt status for processor 0</p>
 </section>
 <section id="proc1-inte-gpio-level-low">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTE_GPIO_LEVEL_LOW!</span></code><a class="headerlink" href="#proc1-inte-gpio-level-low" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTE_GPIO_LEVEL_LOW!</span></code><a class="headerlink" href="#proc1-inte-gpio-level-low" title="Permalink to this heading">¶</a></h4>
 <p>( enable index – )</p>
 <p>Set a level low interrupt enable for processor 1</p>
 </section>
 <section id="proc1-inte-gpio-level-high">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTE_GPIO_LEVEL_HIGH!</span></code><a class="headerlink" href="#proc1-inte-gpio-level-high" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTE_GPIO_LEVEL_HIGH!</span></code><a class="headerlink" href="#proc1-inte-gpio-level-high" title="Permalink to this heading">¶</a></h4>
 <p>( enable index – )</p>
 <p>Set a level high interrupt enable for processor 1</p>
 </section>
 <section id="proc1-inte-gpio-edge-low">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTE_GPIO_EDGE_LOW!</span></code><a class="headerlink" href="#proc1-inte-gpio-edge-low" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTE_GPIO_EDGE_LOW!</span></code><a class="headerlink" href="#proc1-inte-gpio-edge-low" title="Permalink to this heading">¶</a></h4>
 <p>( enable index – )</p>
 <p>Set an edge low interrupt enable for processor 1</p>
 </section>
 <section id="proc1-inte-gpio-edge-high">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTE_GPIO_EDGE_HIGH!</span></code><a class="headerlink" href="#proc1-inte-gpio-edge-high" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTE_GPIO_EDGE_HIGH!</span></code><a class="headerlink" href="#proc1-inte-gpio-edge-high" title="Permalink to this heading">¶</a></h4>
 <p>( enable index – )</p>
 <p>Set an edge high interrupt enable for processor 1</p>
 </section>
 <section id="id34">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTE_GPIO_LEVEL_LOW&#64;</span></code><a class="headerlink" href="#id34" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTE_GPIO_LEVEL_LOW&#64;</span></code><a class="headerlink" href="#id34" title="Permalink to this heading">¶</a></h4>
 <p>( index – enable )</p>
 <p>Get a level low interrupt enable for processor 1</p>
 </section>
 <section id="id35">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTE_GPIO_LEVEL_HIGH&#64;</span></code><a class="headerlink" href="#id35" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTE_GPIO_LEVEL_HIGH&#64;</span></code><a class="headerlink" href="#id35" title="Permalink to this heading">¶</a></h4>
 <p>( index – enable )</p>
 <p>Get a level high interrupt enable for processor 1</p>
 </section>
 <section id="id36">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTE_GPIO_EDGE_LOW&#64;</span></code><a class="headerlink" href="#id36" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTE_GPIO_EDGE_LOW&#64;</span></code><a class="headerlink" href="#id36" title="Permalink to this heading">¶</a></h4>
 <p>( index – enable )</p>
 <p>Get an edge low interrupt enable for processor 1</p>
 </section>
 <section id="id37">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTE_GPIO_EDGE_HIGH&#64;</span></code><a class="headerlink" href="#id37" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTE_GPIO_EDGE_HIGH&#64;</span></code><a class="headerlink" href="#id37" title="Permalink to this heading">¶</a></h4>
 <p>( index – enable )</p>
 <p>Get an edge high interrupt enable for processor 1</p>
 </section>
 <section id="proc1-intf-gpio-level-low">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTF_GPIO_LEVEL_LOW!</span></code><a class="headerlink" href="#proc1-intf-gpio-level-low" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTF_GPIO_LEVEL_LOW!</span></code><a class="headerlink" href="#proc1-intf-gpio-level-low" title="Permalink to this heading">¶</a></h4>
 <p>( force index – )</p>
 <p>Set a level low interrupt force for processor 1</p>
 </section>
 <section id="proc1-intf-gpio-level-high">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTF_GPIO_LEVEL_HIGH!</span></code><a class="headerlink" href="#proc1-intf-gpio-level-high" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTF_GPIO_LEVEL_HIGH!</span></code><a class="headerlink" href="#proc1-intf-gpio-level-high" title="Permalink to this heading">¶</a></h4>
 <p>( force index – )</p>
 <p>Set a level high interrupt force for processor 1</p>
 </section>
 <section id="proc1-intf-gpio-edge-low">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTF_GPIO_EDGE_LOW!</span></code><a class="headerlink" href="#proc1-intf-gpio-edge-low" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTF_GPIO_EDGE_LOW!</span></code><a class="headerlink" href="#proc1-intf-gpio-edge-low" title="Permalink to this heading">¶</a></h4>
 <p>( force index – )</p>
 <p>Set an edge low interrupt force for processor 1</p>
 </section>
 <section id="proc1-intf-gpio-edge-high">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTF_GPIO_EDGE_HIGH!</span></code><a class="headerlink" href="#proc1-intf-gpio-edge-high" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTF_GPIO_EDGE_HIGH!</span></code><a class="headerlink" href="#proc1-intf-gpio-edge-high" title="Permalink to this heading">¶</a></h4>
 <p>( force index – )</p>
 <p>Set an edge high interrupt force for processor 1</p>
 </section>
 <section id="id38">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTF_GPIO_LEVEL_LOW&#64;</span></code><a class="headerlink" href="#id38" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTF_GPIO_LEVEL_LOW&#64;</span></code><a class="headerlink" href="#id38" title="Permalink to this heading">¶</a></h4>
 <p>( index – force )</p>
 <p>Get a level low interrupt force for processor 1</p>
 </section>
 <section id="id39">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTF_GPIO_LEVEL_HIGH&#64;</span></code><a class="headerlink" href="#id39" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTF_GPIO_LEVEL_HIGH&#64;</span></code><a class="headerlink" href="#id39" title="Permalink to this heading">¶</a></h4>
 <p>( index – force )</p>
 <p>Get a level high interrupt force for processor 1</p>
 </section>
 <section id="id40">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTF_GPIO_EDGE_LOW&#64;</span></code><a class="headerlink" href="#id40" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTF_GPIO_EDGE_LOW&#64;</span></code><a class="headerlink" href="#id40" title="Permalink to this heading">¶</a></h4>
 <p>( index – force )</p>
 <p>Get an edge low interrupt force for processor 1</p>
 </section>
 <section id="id41">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTF_GPIO_EDGE_HIGH&#64;</span></code><a class="headerlink" href="#id41" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTF_GPIO_EDGE_HIGH&#64;</span></code><a class="headerlink" href="#id41" title="Permalink to this heading">¶</a></h4>
 <p>( index – force )</p>
 <p>Get an edge high interrupt force for processor 1</p>
 </section>
 <section id="proc1-ints-gpio-level-low">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTS_GPIO_LEVEL_LOW&#64;</span></code><a class="headerlink" href="#proc1-ints-gpio-level-low" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTS_GPIO_LEVEL_LOW&#64;</span></code><a class="headerlink" href="#proc1-ints-gpio-level-low" title="Permalink to this heading">¶</a></h4>
 <p>( index – enable )</p>
 <p>Get a level low interrupt status for processor 1</p>
 </section>
 <section id="proc1-ints-gpio-level-high">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTS_GPIO_LEVEL_HIGH&#64;</span></code><a class="headerlink" href="#proc1-ints-gpio-level-high" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTS_GPIO_LEVEL_HIGH&#64;</span></code><a class="headerlink" href="#proc1-ints-gpio-level-high" title="Permalink to this heading">¶</a></h4>
 <p>( index – enable )</p>
 <p>Get a level high interrupt status for processor 1</p>
 </section>
 <section id="proc1-ints-gpio-edge-low">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTS_GPIO_EDGE_LOW&#64;</span></code><a class="headerlink" href="#proc1-ints-gpio-edge-low" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTS_GPIO_EDGE_LOW&#64;</span></code><a class="headerlink" href="#proc1-ints-gpio-edge-low" title="Permalink to this heading">¶</a></h4>
 <p>( index – enable )</p>
 <p>Get an edge low interrupt status for processor 1</p>
 </section>
 <section id="proc1-ints-gpio-edge-high">
-<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTS_GPIO_EDGE_HIGH&#64;</span></code><a class="headerlink" href="#proc1-ints-gpio-edge-high" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PROC1_INTS_GPIO_EDGE_HIGH&#64;</span></code><a class="headerlink" href="#proc1-ints-gpio-edge-high" title="Permalink to this heading">¶</a></h4>
 <p>( index – enable )</p>
 <p>Get an edge high interrupt status for processor 1</p>
 </section>
 <section id="pads-bank0-voltage-select">
-<h4><code class="docutils literal notranslate"><span class="pre">PADS_BANK0_VOLTAGE_SELECT!</span></code><a class="headerlink" href="#pads-bank0-voltage-select" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PADS_BANK0_VOLTAGE_SELECT!</span></code><a class="headerlink" href="#pads-bank0-voltage-select" title="Permalink to this heading">¶</a></h4>
 <p>( voltage – )</p>
 <p>Select voltage for pads</p>
 </section>
 <section id="id42">
-<h4><code class="docutils literal notranslate"><span class="pre">PADS_BANK0_VOLTAGE_SELECT&#64;</span></code><a class="headerlink" href="#id42" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PADS_BANK0_VOLTAGE_SELECT&#64;</span></code><a class="headerlink" href="#id42" title="Permalink to this heading">¶</a></h4>
 <p>( – voltage )</p>
 <p>Get voltage for pads</p>
 </section>
 <section id="pads-bank0-od">
-<h4><code class="docutils literal notranslate"><span class="pre">PADS_BANK0_OD!</span></code><a class="headerlink" href="#pads-bank0-od" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PADS_BANK0_OD!</span></code><a class="headerlink" href="#pads-bank0-od" title="Permalink to this heading">¶</a></h4>
 <p>( disable index – )</p>
 <p>Set output disable</p>
 </section>
 <section id="pads-bank0-ie">
-<h4><code class="docutils literal notranslate"><span class="pre">PADS_BANK0_IE!</span></code><a class="headerlink" href="#pads-bank0-ie" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PADS_BANK0_IE!</span></code><a class="headerlink" href="#pads-bank0-ie" title="Permalink to this heading">¶</a></h4>
 <p>( enable index – )</p>
 <p>Set input enable</p>
 </section>
 <section id="pads-bank0-drive">
-<h4><code class="docutils literal notranslate"><span class="pre">PADS_BANK0_DRIVE!</span></code><a class="headerlink" href="#pads-bank0-drive" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PADS_BANK0_DRIVE!</span></code><a class="headerlink" href="#pads-bank0-drive" title="Permalink to this heading">¶</a></h4>
 <p>( strength index – )</p>
 <p>Set drive strength</p>
 </section>
 <section id="pads-bank0-pue">
-<h4><code class="docutils literal notranslate"><span class="pre">PADS_BANK0_PUE!</span></code><a class="headerlink" href="#pads-bank0-pue" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PADS_BANK0_PUE!</span></code><a class="headerlink" href="#pads-bank0-pue" title="Permalink to this heading">¶</a></h4>
 <p>( enable index – )</p>
 <p>Set pull up enable</p>
 </section>
 <section id="pads-bank0-pde">
-<h4><code class="docutils literal notranslate"><span class="pre">PADS_BANK0_PDE!</span></code><a class="headerlink" href="#pads-bank0-pde" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PADS_BANK0_PDE!</span></code><a class="headerlink" href="#pads-bank0-pde" title="Permalink to this heading">¶</a></h4>
 <p>( enable index – )</p>
 <p>Set pull down enable</p>
 </section>
 <section id="pads-bank0-schmitt">
-<h4><code class="docutils literal notranslate"><span class="pre">PADS_BANK0_SCHMITT!</span></code><a class="headerlink" href="#pads-bank0-schmitt" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PADS_BANK0_SCHMITT!</span></code><a class="headerlink" href="#pads-bank0-schmitt" title="Permalink to this heading">¶</a></h4>
 <p>( enable index – )</p>
 <p>Set schmitt trigger</p>
 </section>
 <section id="pads-bank0-slewfast">
-<h4><code class="docutils literal notranslate"><span class="pre">PADS_BANK0_SLEWFAST!</span></code><a class="headerlink" href="#pads-bank0-slewfast" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PADS_BANK0_SLEWFAST!</span></code><a class="headerlink" href="#pads-bank0-slewfast" title="Permalink to this heading">¶</a></h4>
 <p>( fast index – )</p>
 <p>Set slew rate control</p>
 </section>
@@ -787,6 +789,7 @@
 <li class="toctree-l1"><a class="reference internal" href="oo.html">Object Orientation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_lock.html">Core Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="schannel.html">Simple channel Words</a></li>
@@ -828,7 +831,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -845,7 +848,7 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

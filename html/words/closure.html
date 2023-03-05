@@ -1,7 +1,7 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
@@ -12,7 +12,9 @@
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Temporary Buffer Words" href="temp.html" />
@@ -33,39 +35,39 @@
 
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="closures">
-<h1>Closures<a class="headerlink" href="#closures" title="Permalink to this headline">¶</a></h1>
+  <section id="closures">
+<h1>Closures<a class="headerlink" href="#closures" title="Permalink to this heading">¶</a></h1>
 <p>Closures in zeptoforth involve binding an execution token with a single-cell or double-cell value at a specified, arbitrary address in RAM; this address will then serve as an execution token itself which, when executed, pushes the bound value onto the stack and then execute the bound execution token. The only requirement for the address specified is that it is halfword-aligned.</p>
 <section id="closure">
-<h2><code class="docutils literal notranslate"><span class="pre">closure</span></code><a class="headerlink" href="#closure" title="Permalink to this headline">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">closure</span></code><a class="headerlink" href="#closure" title="Permalink to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">closure</span></code> module contains the following words:</p>
 <section id="closure-size">
-<h3><code class="docutils literal notranslate"><span class="pre">closure-size</span></code><a class="headerlink" href="#closure-size" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">closure-size</span></code><a class="headerlink" href="#closure-size" title="Permalink to this heading">¶</a></h3>
 <p>( – bytes )</p>
 <p>The size of a single-cell closure in bytes.</p>
 </section>
 <section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">2closure-size</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">2closure-size</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
 <p>( – bytes )</p>
 <p>The size of a double-cell closure in bytes.</p>
 </section>
 <section id="nclosure-size">
-<h3><code class="docutils literal notranslate"><span class="pre">nclosure-size</span></code><a class="headerlink" href="#nclosure-size" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">nclosure-size</span></code><a class="headerlink" href="#nclosure-size" title="Permalink to this heading">¶</a></h3>
 <p>( count – bytes )</p>
 <p>The size of a multi-cell closure containing <em>count</em> values in bytes.</p>
 </section>
 <section id="bind">
-<h3><code class="docutils literal notranslate"><span class="pre">bind</span></code><a class="headerlink" href="#bind" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">bind</span></code><a class="headerlink" href="#bind" title="Permalink to this heading">¶</a></h3>
 <p>( x addr xt – )</p>
 <p>Bind the execution token <em>xt</em> to single-cell value <em>x</em> at address <em>addr</em> in RAM, which will serve as a new execution token. <code class="docutils literal notranslate"><span class="pre">closure-size</span></code> bytes must be available at <em>addr</em>. When <em>addr</em> is executed as an execution token, the single-cell value <em>x</em> will be pushed onto the stack and then the execution token <em>xt</em> will be executed. <em>addr</em> can be arbitrarily reused and can be at any address in RAM.</p>
 </section>
 <section id="id2">
-<h3><code class="docutils literal notranslate"><span class="pre">2bind</span></code><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">2bind</span></code><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
 <p>( d addr xt – )</p>
 <p>Bind the execution token <em>xt</em> to double-cell data <em>d</em> at address <em>addr</em> in RAM, which will serve as a new execution token. <code class="docutils literal notranslate"><span class="pre">2closure-size</span></code> bytes must be available at <em>addr</em>. When <em>addr</em> is executed as an execution token, the double-cell value <em>x</em> will be pushed onto the stack and then the execution token <em>xt</em> will be executed. <em>addr</em> can be arbitrarily reused and can be at any address in RAM.</p>
 </section>
 <section id="nbind">
-<h3><code class="docutils literal notranslate"><span class="pre">nbind</span></code><a class="headerlink" href="#nbind" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">nbind</span></code><a class="headerlink" href="#nbind" title="Permalink to this heading">¶</a></h3>
 <p>( xn … x0 count addr xt – )</p>
 <p>Bind the execution token <em>xt</em> to <em>count</em> multiple values <em>xn</em> through <em>x0</em> at address <em>addr</em> in RAM, which will serve as a new execution token. <code class="docutils literal notranslate"><span class="pre">nclosure-size</span></code> (with <em>count</em> specified) bytes must be available at <em>addr</em>. When <em>addr</em> is executed as an execution token, multiple values <em>xn</em> through <em>x0</em> will be pushed onto the stack and then the execution token <em>xt</em> will be executed. <em>addr</em> can be arbitrarily reused and can be at any address in RAM.</p>
 </section>
@@ -130,6 +132,7 @@
 <li class="toctree-l1"><a class="reference internal" href="oo.html">Object Orientation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_lock.html">Core Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="schannel.html">Simple channel Words</a></li>
@@ -171,7 +174,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -188,7 +191,7 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

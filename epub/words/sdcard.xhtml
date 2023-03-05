@@ -14,7 +14,7 @@
       <div class="documentwrapper">
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="sdhc-sdxc-card-support">
+  <section id="sdhc-sdxc-card-support">
 <h1>SDHC/SDXC Card Support</h1>
 <p>zeptoforth includes SDHC/SDXC card support using the SPI interface for the supported and a separate chip-select pin independent of the SPI interface. It is built upon zeptoforth’s object system, and involves an abstract block device <code class="docutils literal notranslate"><span class="pre">&lt;block-dev&gt;</span></code> in the <code class="docutils literal notranslate"><span class="pre">block-dev</span></code> module from which the <code class="docutils literal notranslate"><span class="pre">&lt;sd&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">sd</span></code> module inherits. It caches up to eight blocks in RAM at any given time, and has support for both write-through and non-write-through modes of operation, with the latter providing better performance at the expense of potential loss of data integrity in the event of unexpected resets or power loss. Note that the SPI pins used need to be configured appropriately and the chip-select pin must be configured as an output pin.</p>
 <section id="block-dev">

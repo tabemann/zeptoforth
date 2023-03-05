@@ -1,7 +1,7 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
@@ -12,9 +12,9 @@
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
-    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="UART Words" href="uart.html" />
@@ -35,8 +35,8 @@
 
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="programmable-input-output-words">
-<h1>Programmable Input/Output Words<a class="headerlink" href="#programmable-input-output-words" title="Permalink to this headline">¶</a></h1>
+  <section id="programmable-input-output-words">
+<h1>Programmable Input/Output Words<a class="headerlink" href="#programmable-input-output-words" title="Permalink to this heading">¶</a></h1>
 <p>Programmable input/output (PIO) on the RP2040 (i.e. the Raspberry Pi Pico) provides a means to input to or output from pins in a very high-speed fashion at some speed up to the system clock of 125 MHz. There are two PIO peripherals, <code class="docutils literal notranslate"><span class="pre">PIO0</span></code> and <code class="docutils literal notranslate"><span class="pre">PIO1</span></code>, each of which contain four <em>state machines</em>.</p>
 <p>PIO’s may have up to 32 PIO instructions in their memory, which are 16 bits in size each. PIO state machines may be set to wrap from a <em>top</em> instruction to a <em>bottom</em> instruction automatically, unless a <code class="docutils literal notranslate"><span class="pre">jmp</span></code> instruction is executed at the <em>top</em> address. Instructions may be loaded into a PIO’s instruction memory with <code class="docutils literal notranslate"><span class="pre">pio-instr-mem!</span></code> or <code class="docutils literal notranslate"><span class="pre">pio-instr-relocate-mem!</span></code>. Instructions may also be fed into a state machine to be executed immediately with <code class="docutils literal notranslate"><span class="pre">sm-instr!</span></code>. The address to execute PIO instructions at may be set for a state machine with <code class="docutils literal notranslate"><span class="pre">sm-addr!</span></code></p>
 <p>Up to four PIO state machines may be enabled, disabled, or reset at a time with <code class="docutils literal notranslate"><span class="pre">sm-enable</span></code>, <code class="docutils literal notranslate"><span class="pre">sm-disable</span></code>, or <code class="docutils literal notranslate"><span class="pre">sm-restart</span></code> respectively. These take a bitset of four bits where the position of each bit corresponds to the index of the state machine to enable, disable, or restart.</p>
@@ -47,740 +47,740 @@
 <p>PIO state machines may either have an optional delay associated with each PIO instruction, or may have <em>sideset</em> enabled, where they may set the state of up to five output pins each cycle simultaneous with whatever other operations they are carrying out. <code class="docutils literal notranslate"><span class="pre">sm-sideset-pins!</span></code> sets the number of higher bits in this field will be used for sideset, with the remaining lower bits used for delay.</p>
 <p>PIO assembler words compile PIO instructions to <code class="docutils literal notranslate"><span class="pre">here</span></code> as 16 bits per instruction. There are two different basic types of PIO instructions - instructions without an associated delay or sideset, and instructions with an associated delay or sideset. The latter kind of instruction is marked with an <code class="docutils literal notranslate"><span class="pre">+</span></code> in its assembling word.</p>
 <section id="pio">
-<h2><code class="docutils literal notranslate"><span class="pre">pio</span></code><a class="headerlink" href="#pio" title="Permalink to this headline">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">pio</span></code><a class="headerlink" href="#pio" title="Permalink to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">pio</span></code> module contains the following words:</p>
 <section id="constants">
-<h3>Constants<a class="headerlink" href="#constants" title="Permalink to this headline">¶</a></h3>
+<h3>Constants<a class="headerlink" href="#constants" title="Permalink to this heading">¶</a></h3>
 <section id="on">
-<h4><code class="docutils literal notranslate"><span class="pre">on</span></code><a class="headerlink" href="#on" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">on</span></code><a class="headerlink" href="#on" title="Permalink to this heading">¶</a></h4>
 <p>( – state )</p>
 <p>On state.</p>
 </section>
 <section id="off">
-<h4><code class="docutils literal notranslate"><span class="pre">off</span></code><a class="headerlink" href="#off" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">off</span></code><a class="headerlink" href="#off" title="Permalink to this heading">¶</a></h4>
 <p>( – state )</p>
 <p>Off state.</p>
 </section>
 <section id="right">
-<h4><code class="docutils literal notranslate"><span class="pre">right</span></code><a class="headerlink" href="#right" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">right</span></code><a class="headerlink" href="#right" title="Permalink to this heading">¶</a></h4>
 <p>( – direction )</p>
 <p>Right direction.</p>
 </section>
 <section id="left">
-<h4><code class="docutils literal notranslate"><span class="pre">left</span></code><a class="headerlink" href="#left" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">left</span></code><a class="headerlink" href="#left" title="Permalink to this heading">¶</a></h4>
 <p>( – direction )</p>
 <p>Left direction.</p>
 </section>
 <section id="pio0">
-<h4><code class="docutils literal notranslate"><span class="pre">PIO0</span></code><a class="headerlink" href="#pio0" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PIO0</span></code><a class="headerlink" href="#pio0" title="Permalink to this heading">¶</a></h4>
 <p>( – pio )</p>
 <p>PIO0.</p>
 </section>
 <section id="pio1">
-<h4><code class="docutils literal notranslate"><span class="pre">PIO1</span></code><a class="headerlink" href="#pio1" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PIO1</span></code><a class="headerlink" href="#pio1" title="Permalink to this heading">¶</a></h4>
 <p>( – pio )</p>
 <p>PIO1.</p>
 </section>
 <section id="irq0">
-<h4><code class="docutils literal notranslate"><span class="pre">IRQ0</span></code><a class="headerlink" href="#irq0" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">IRQ0</span></code><a class="headerlink" href="#irq0" title="Permalink to this heading">¶</a></h4>
 <p>( – irq )</p>
 <p>IRQ0 index.</p>
 </section>
 <section id="irq1">
-<h4><code class="docutils literal notranslate"><span class="pre">IRQ1</span></code><a class="headerlink" href="#irq1" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">IRQ1</span></code><a class="headerlink" href="#irq1" title="Permalink to this heading">¶</a></h4>
 <p>( – irq )</p>
 <p>IRQ1 index.</p>
 </section>
 <section id="pio0-irq0">
-<h4><code class="docutils literal notranslate"><span class="pre">PIO0_IRQ0</span></code><a class="headerlink" href="#pio0-irq0" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PIO0_IRQ0</span></code><a class="headerlink" href="#pio0-irq0" title="Permalink to this heading">¶</a></h4>
 <p>( – irq )</p>
 <p>PIO0 IRQ0 index.</p>
 </section>
 <section id="pio0-irq1">
-<h4><code class="docutils literal notranslate"><span class="pre">PIO0_IRQ1</span></code><a class="headerlink" href="#pio0-irq1" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PIO0_IRQ1</span></code><a class="headerlink" href="#pio0-irq1" title="Permalink to this heading">¶</a></h4>
 <p>( – irq )</p>
 <p>PIO0 IRQ1 index.</p>
 </section>
 <section id="pio1-irq0">
-<h4><code class="docutils literal notranslate"><span class="pre">PIO1_IRQ0</span></code><a class="headerlink" href="#pio1-irq0" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PIO1_IRQ0</span></code><a class="headerlink" href="#pio1-irq0" title="Permalink to this heading">¶</a></h4>
 <p>( – irq )</p>
 <p>PIO1 IRQ0 index.</p>
 </section>
 <section id="pio1-irq1">
-<h4><code class="docutils literal notranslate"><span class="pre">PIO1_IRQ1</span></code><a class="headerlink" href="#pio1-irq1" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PIO1_IRQ1</span></code><a class="headerlink" href="#pio1-irq1" title="Permalink to this heading">¶</a></h4>
 <p>( – irq )</p>
 <p>PIO1 IRQ1 index.</p>
 </section>
 </section>
 <section id="pio-words">
-<h3>PIO Words<a class="headerlink" href="#pio-words" title="Permalink to this headline">¶</a></h3>
+<h3>PIO Words<a class="headerlink" href="#pio-words" title="Permalink to this heading">¶</a></h3>
 <section id="pins-pio-alternate">
-<h4><code class="docutils literal notranslate"><span class="pre">pins-pio-alternate</span></code><a class="headerlink" href="#pins-pio-alternate" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">pins-pio-alternate</span></code><a class="headerlink" href="#pins-pio-alternate" title="Permalink to this heading">¶</a></h4>
 <p>( pin-base pin-count – )</p>
 <p>Configure GPIO pins starting from <em>pin-base</em> of a count up to <em>pin-count</em> to be in an alternate function state such that the PIO may make use to them. Note that the pins wrap around, e.g. <code class="docutils literal notranslate"><span class="pre">29</span> <span class="pre">3</span> <span class="pre">pins-pio-alternate</span></code> configures GPIO pins 29, 0, and 1. Note that this is unnecessary when configuring pins with <code class="docutils literal notranslate"><span class="pre">sm-sideset-pins!</span></code>, <code class="docutils literal notranslate"><span class="pre">sm-set-pins!</span></code>, or <code class="docutils literal notranslate"><span class="pre">sm-out-pins!</span></code> as these internally call this word.</p>
 <p>However, this is necessary with <code class="docutils literal notranslate"><span class="pre">sm-in-pin-base!</span></code> because any number of pins may be used by the <code class="docutils literal notranslate"><span class="pre">in</span></code> instruction and there exists no register to set specifying a number of pins to use with this instruction</p>
 </section>
 <section id="pio-instr-mem">
-<h4><code class="docutils literal notranslate"><span class="pre">pio-instr-mem!</span></code><a class="headerlink" href="#pio-instr-mem" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">pio-instr-mem!</span></code><a class="headerlink" href="#pio-instr-mem" title="Permalink to this heading">¶</a></h4>
 <p>( addr count pio – )</p>
 <p>Write <em>count</em> halfwords starting at <em>addr</em> to instruction memory starting at instruction 0.</p>
 </section>
 <section id="pio-instr-relocate-mem">
-<h4><code class="docutils literal notranslate"><span class="pre">pio-instr-relocate-mem!</span></code><a class="headerlink" href="#pio-instr-relocate-mem" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">pio-instr-relocate-mem!</span></code><a class="headerlink" href="#pio-instr-relocate-mem" title="Permalink to this heading">¶</a></h4>
 <p>( addr count offset pio – )</p>
 <p>Write <em>count</em> halfwords starting at <em>addr</em> to instruction memory starting at instruction <em>offset</em>, relocating any JMP instructions in the process so that a destination of 0 is relocated to <em>offset</em> and so on.</p>
 </section>
 <section id="pio-interrupt-enable">
-<h4><code class="docutils literal notranslate"><span class="pre">pio-interrupt-enable</span></code><a class="headerlink" href="#pio-interrupt-enable" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">pio-interrupt-enable</span></code><a class="headerlink" href="#pio-interrupt-enable" title="Permalink to this heading">¶</a></h4>
 <p>( interrupt-bits irq pio – )</p>
 <p>Enable interrupts.</p>
 </section>
 <section id="pio-interrupt-disable">
-<h4><code class="docutils literal notranslate"><span class="pre">pio-interrupt-disable</span></code><a class="headerlink" href="#pio-interrupt-disable" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">pio-interrupt-disable</span></code><a class="headerlink" href="#pio-interrupt-disable" title="Permalink to this heading">¶</a></h4>
 <p>( interrupt-bits irq pio – )</p>
 <p>Disable interrupts.</p>
 </section>
 <section id="pio-interrupt-enable-force">
-<h4><code class="docutils literal notranslate"><span class="pre">pio-interrupt-enable-force</span></code><a class="headerlink" href="#pio-interrupt-enable-force" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">pio-interrupt-enable-force</span></code><a class="headerlink" href="#pio-interrupt-enable-force" title="Permalink to this heading">¶</a></h4>
 <p>( interrupt-bits irq pio – )</p>
 <p>Enable forcing interrupts.</p>
 </section>
 <section id="pio-interrupt-disable-force">
-<h4><code class="docutils literal notranslate"><span class="pre">pio-interrupt-disable-force</span></code><a class="headerlink" href="#pio-interrupt-disable-force" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">pio-interrupt-disable-force</span></code><a class="headerlink" href="#pio-interrupt-disable-force" title="Permalink to this heading">¶</a></h4>
 <p>( interrupt-bits irq pio – )</p>
 <p>Disable forcing interrupts.</p>
 </section>
 <section id="pio-interrupt-raw">
-<h4><code class="docutils literal notranslate"><span class="pre">pio-interrupt-raw&#64;</span></code><a class="headerlink" href="#pio-interrupt-raw" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">pio-interrupt-raw&#64;</span></code><a class="headerlink" href="#pio-interrupt-raw" title="Permalink to this heading">¶</a></h4>
 <p>( pio – interrupt-bits )</p>
 <p>Get raw interrupts.</p>
 </section>
 <section id="pio-interrupt">
-<h4><code class="docutils literal notranslate"><span class="pre">pio-interrupt&#64;</span></code><a class="headerlink" href="#pio-interrupt" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">pio-interrupt&#64;</span></code><a class="headerlink" href="#pio-interrupt" title="Permalink to this heading">¶</a></h4>
 <p>( irq pio – interrupt-bits )</p>
 <p>Get interrupt status.</p>
 </section>
 <section id="int-sm">
-<h4><code class="docutils literal notranslate"><span class="pre">INT_SM</span></code><a class="headerlink" href="#int-sm" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">INT_SM</span></code><a class="headerlink" href="#int-sm" title="Permalink to this heading">¶</a></h4>
 <p>( state-machine – index )</p>
 <p>Interrupt bits.</p>
 </section>
 <section id="int-sm-txnfull">
-<h4><code class="docutils literal notranslate"><span class="pre">INT_SM_TXNFULL</span></code><a class="headerlink" href="#int-sm-txnfull" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">INT_SM_TXNFULL</span></code><a class="headerlink" href="#int-sm-txnfull" title="Permalink to this heading">¶</a></h4>
 <p>( state-machine – index )</p>
 <p>TXN not full interupt bits.</p>
 </section>
 <section id="int-sm-rxnempty">
-<h4><code class="docutils literal notranslate"><span class="pre">INT_SM_RXNEMPTY</span></code><a class="headerlink" href="#int-sm-rxnempty" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">INT_SM_RXNEMPTY</span></code><a class="headerlink" href="#int-sm-rxnempty" title="Permalink to this heading">¶</a></h4>
 <p>( state-machine – index )</p>
 <p>RXN not empty interrupt bits.</p>
 </section>
 </section>
 <section id="state-machine-words">
-<h3>State Machine Words<a class="headerlink" href="#state-machine-words" title="Permalink to this headline">¶</a></h3>
+<h3>State Machine Words<a class="headerlink" href="#state-machine-words" title="Permalink to this heading">¶</a></h3>
 <section id="sm-enable">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-enable</span></code><a class="headerlink" href="#sm-enable" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-enable</span></code><a class="headerlink" href="#sm-enable" title="Permalink to this heading">¶</a></h4>
 <p>( state-machine-bits pio – )</p>
 <p>Enable state machines.</p>
 </section>
 <section id="sm-disable">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-disable</span></code><a class="headerlink" href="#sm-disable" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-disable</span></code><a class="headerlink" href="#sm-disable" title="Permalink to this heading">¶</a></h4>
 <p>( state-machine-bits pio – )</p>
 <p>Disable state machines.</p>
 </section>
 <section id="sm-restart">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-restart</span></code><a class="headerlink" href="#sm-restart" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-restart</span></code><a class="headerlink" href="#sm-restart" title="Permalink to this heading">¶</a></h4>
 <p>( state-machine-bits pio – )</p>
 <p>Restart state machines.</p>
 </section>
 <section id="sm-clkdiv">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-clkdiv!</span></code><a class="headerlink" href="#sm-clkdiv" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-clkdiv!</span></code><a class="headerlink" href="#sm-clkdiv" title="Permalink to this heading">¶</a></h4>
 <p>( fractional integral state-machine pio – )</p>
 <p>Set the clock divisor for a state machine.</p>
 </section>
 <section id="sm-addr">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-addr!</span></code><a class="headerlink" href="#sm-addr" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-addr!</span></code><a class="headerlink" href="#sm-addr" title="Permalink to this heading">¶</a></h4>
 <p>( address state-machine pio – )</p>
 <p>Set the address for a state machine.</p>
 </section>
 <section id="sm-wrap">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-wrap!</span></code><a class="headerlink" href="#sm-wrap" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-wrap!</span></code><a class="headerlink" href="#sm-wrap" title="Permalink to this heading">¶</a></h4>
 <p>( bottom-address top-address state-machine pio – )</p>
 <p>Set the wrapping of a state machine.</p>
 </section>
 <section id="sm-out-sticky">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-out-sticky!</span></code><a class="headerlink" href="#sm-out-sticky" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-out-sticky!</span></code><a class="headerlink" href="#sm-out-sticky" title="Permalink to this heading">¶</a></h4>
 <p>( sticky state-machine pio – )</p>
 <p>Set the sticky state of a state machine.</p>
 </section>
 <section id="sm-sideset-high-enable">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-sideset-high-enable!</span></code><a class="headerlink" href="#sm-sideset-high-enable" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-sideset-high-enable!</span></code><a class="headerlink" href="#sm-sideset-high-enable" title="Permalink to this heading">¶</a></h4>
 <p>( on/off state-machine pio – )</p>
 <p>Set sideset highest-bit enable for a state machine.</p>
 </section>
 <section id="sm-sideset-pindir">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-sideset-pindir!</span></code><a class="headerlink" href="#sm-sideset-pindir" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-sideset-pindir!</span></code><a class="headerlink" href="#sm-sideset-pindir" title="Permalink to this heading">¶</a></h4>
 <p>( on/off state-machine pio – )</p>
 <p>Set sideset data assserted to pin directions pit.</p>
 </section>
 <section id="sm-jmp-pin">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-jmp-pin!</span></code><a class="headerlink" href="#sm-jmp-pin" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-jmp-pin!</span></code><a class="headerlink" href="#sm-jmp-pin" title="Permalink to this heading">¶</a></h4>
 <p>( pin state-machine pio – )</p>
 <p>Set GPIO number to use as condition for JMP PIN.</p>
 </section>
 <section id="sm-inline-out-enable">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-inline-out-enable!</span></code><a class="headerlink" href="#sm-inline-out-enable" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-inline-out-enable!</span></code><a class="headerlink" href="#sm-inline-out-enable" title="Permalink to this heading">¶</a></h4>
 <p>( pin state-machine pio – )</p>
 <p>Set a bit of OUT data to use as an inline OUT enable.</p>
 </section>
 <section id="sm-inline-out-enable-clear">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-inline-out-enable-clear</span></code><a class="headerlink" href="#sm-inline-out-enable-clear" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-inline-out-enable-clear</span></code><a class="headerlink" href="#sm-inline-out-enable-clear" title="Permalink to this heading">¶</a></h4>
 <p>( state-machine pio – )</p>
 <p>Disable using a bit of OUT data as an inline OUT enable.</p>
 </section>
 <section id="sm-pull-threshold">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-pull-threshold!</span></code><a class="headerlink" href="#sm-pull-threshold" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-pull-threshold!</span></code><a class="headerlink" href="#sm-pull-threshold" title="Permalink to this heading">¶</a></h4>
 <p>( threshold state-machine pio – )</p>
 <p>Set OSR threshold before autopull or conditional pull will take place; value may be from 1 to 32.</p>
 </section>
 <section id="sm-push-threshold">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-push-threshold!</span></code><a class="headerlink" href="#sm-push-threshold" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-push-threshold!</span></code><a class="headerlink" href="#sm-push-threshold" title="Permalink to this heading">¶</a></h4>
 <p>( threshold state-machine pio – )</p>
 <p>Set ISR threshold before autopush or conditional push will take place; value may be from 1 to 32.</p>
 </section>
 <section id="sm-txf">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-txf!</span></code><a class="headerlink" href="#sm-txf" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-txf!</span></code><a class="headerlink" href="#sm-txf" title="Permalink to this heading">¶</a></h4>
 <p>( x state-machine pio – )</p>
 <p>Write to the TX FIFO of a state machine.</p>
 </section>
 <section id="sm-rxf">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-rxf&#64;</span></code><a class="headerlink" href="#sm-rxf" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-rxf&#64;</span></code><a class="headerlink" href="#sm-rxf" title="Permalink to this heading">¶</a></h4>
 <p>( state-machine pio – x )</p>
 <p>Read from the RX FIFO of a state machine.</p>
 </section>
 <section id="id1">
-<h4><code class="docutils literal notranslate"><span class="pre">pins-pio-alternate</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">pins-pio-alternate</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h4>
 <p>( pin-base pin-count – )</p>
 <p>Set pins to PIO mode.</p>
 </section>
 <section id="sm-pin">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-pin!</span></code><a class="headerlink" href="#sm-pin" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-pin!</span></code><a class="headerlink" href="#sm-pin" title="Permalink to this heading">¶</a></h4>
 <p>( on/off pin state-machine pio – )</p>
 <p>Set the on/off state of a pin for a state machine. Note that the state machine should be disabled.</p>
 </section>
 <section id="sm-pindir">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-pindir!</span></code><a class="headerlink" href="#sm-pindir" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-pindir!</span></code><a class="headerlink" href="#sm-pindir" title="Permalink to this heading">¶</a></h4>
 <p>( out/in pin state-machine pio – )</p>
 <p>State the out/in state of a pin for a state machine. Note that the state machine should be disabled.</p>
 </section>
 <section id="sm-sideset-pins">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-sideset-pins!</span></code><a class="headerlink" href="#sm-sideset-pins" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-sideset-pins!</span></code><a class="headerlink" href="#sm-sideset-pins" title="Permalink to this heading">¶</a></h4>
 <p>( pin-base pin-count state-machine pio – )</p>
 <p>Set the sideset pins for a state machine. Note that the state machine should be disabled.</p>
 </section>
 <section id="sm-set-pins">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-set-pins!</span></code><a class="headerlink" href="#sm-set-pins" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-set-pins!</span></code><a class="headerlink" href="#sm-set-pins" title="Permalink to this heading">¶</a></h4>
 <p>( pin-base pin-count state-machine pio – )</p>
 <p>Set the SET pins for a state machine. Note that the state machine should be disabled.</p>
 </section>
 <section id="sm-out-pins">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-out-pins!</span></code><a class="headerlink" href="#sm-out-pins" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-out-pins!</span></code><a class="headerlink" href="#sm-out-pins" title="Permalink to this heading">¶</a></h4>
 <p>( pin-base pin-count state-machine pio – )</p>
 <p>Set the OUT pins for a state machine. Note that the state machine should be disabled.</p>
 </section>
 <section id="sm-in-pin-base">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-in-pin-base!</span></code><a class="headerlink" href="#sm-in-pin-base" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-in-pin-base!</span></code><a class="headerlink" href="#sm-in-pin-base" title="Permalink to this heading">¶</a></h4>
 <p>( pin-base state-machine pio – )</p>
 <p>Set the IN pin base for a state machine. Note that the state machine should be disabled.</p>
 </section>
 <section id="sm-rx-fifo-level">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-rx-fifo-level&#64;</span></code><a class="headerlink" href="#sm-rx-fifo-level" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-rx-fifo-level&#64;</span></code><a class="headerlink" href="#sm-rx-fifo-level" title="Permalink to this heading">¶</a></h4>
 <p>( state-machine pio – level )</p>
 <p>Get a state machine RX FIFO level.</p>
 </section>
 <section id="sm-tx-fifo-level">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-tx-fifo-level&#64;</span></code><a class="headerlink" href="#sm-tx-fifo-level" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-tx-fifo-level&#64;</span></code><a class="headerlink" href="#sm-tx-fifo-level" title="Permalink to this heading">¶</a></h4>
 <p>( state-machine pio – level )</p>
 <p>Get a state machine TX FIFO level.</p>
 </section>
 <section id="sm-join-rx-fifo">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-join-rx-fifo!</span></code><a class="headerlink" href="#sm-join-rx-fifo" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-join-rx-fifo!</span></code><a class="headerlink" href="#sm-join-rx-fifo" title="Permalink to this heading">¶</a></h4>
 <p>( join? state-machine pio – )</p>
 <p>Set joining the RX FIFO and TX FIFO of a state machine into a single eight by 32-bit RX FIFO.</p>
 </section>
 <section id="sm-join-tx-fifo">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-join-tx-fifo!</span></code><a class="headerlink" href="#sm-join-tx-fifo" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-join-tx-fifo!</span></code><a class="headerlink" href="#sm-join-tx-fifo" title="Permalink to this heading">¶</a></h4>
 <p>( join? state-machine pio – )</p>
 <p>Set joining the RX FIFO and TX FIFO of a state machine into a single eight by 32-bit TX FIFO.</p>
 </section>
 <section id="sm-out-shift-dir">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-out-shift-dir</span></code><a class="headerlink" href="#sm-out-shift-dir" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-out-shift-dir</span></code><a class="headerlink" href="#sm-out-shift-dir" title="Permalink to this heading">¶</a></h4>
 <p>( direction state-machine pio – )</p>
 <p>Set the output shift register direction.</p>
 </section>
 <section id="sm-in-shift-dir">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-in-shift-dir</span></code><a class="headerlink" href="#sm-in-shift-dir" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-in-shift-dir</span></code><a class="headerlink" href="#sm-in-shift-dir" title="Permalink to this heading">¶</a></h4>
 <p>( direction state-machine pio – )</p>
 <p>Set the input shift register direction.</p>
 </section>
 <section id="sm-autopull">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-autopull!</span></code><a class="headerlink" href="#sm-autopull" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-autopull!</span></code><a class="headerlink" href="#sm-autopull" title="Permalink to this heading">¶</a></h4>
 <p>( on/off state-machine pio – )</p>
 <p>Set autopull on/off.</p>
 </section>
 <section id="sm-autopush">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-autopush!</span></code><a class="headerlink" href="#sm-autopush" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-autopush!</span></code><a class="headerlink" href="#sm-autopush" title="Permalink to this heading">¶</a></h4>
 <p>( on/off state-machine pio – )</p>
 <p>Set autopush on/off.</p>
 </section>
 <section id="sm-instr">
-<h4><code class="docutils literal notranslate"><span class="pre">sm-instr!</span></code><a class="headerlink" href="#sm-instr" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">sm-instr!</span></code><a class="headerlink" href="#sm-instr" title="Permalink to this heading">¶</a></h4>
 <p>( addr count state-machine pio – )</p>
 <p>Manually write instructions to a state machine.</p>
 </section>
 </section>
 <section id="pio-assembler-words">
-<h3>PIO Assembler Words<a class="headerlink" href="#pio-assembler-words" title="Permalink to this headline">¶</a></h3>
+<h3>PIO Assembler Words<a class="headerlink" href="#pio-assembler-words" title="Permalink to this heading">¶</a></h3>
 <section id="jmp">
-<h4><code class="docutils literal notranslate"><span class="pre">jmp,</span></code><a class="headerlink" href="#jmp" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">jmp,</span></code><a class="headerlink" href="#jmp" title="Permalink to this heading">¶</a></h4>
 <p>( address condition – )</p>
 <p>PIO JMP instruction. Branch, conditionally or unconditionally. <em>Condition</em> is the condition, with or without a decrement, to apply to whether to branch. <em>Address</em> is the PIO instruction address to branch to.</p>
 </section>
 <section id="wait">
-<h4><code class="docutils literal notranslate"><span class="pre">wait,</span></code><a class="headerlink" href="#wait" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">wait,</span></code><a class="headerlink" href="#wait" title="Permalink to this heading">¶</a></h4>
 <p>( index source polarity – )</p>
 <p>PIO WAIT instruction. Wait for a condition to be true. <em>Polarity</em> is whether to wait for a 1 or a 0. <em>Source</em> is whether to wait for an absolute GPIO pin, a pin relative to the absolute <code class="docutils literal notranslate"><span class="pre">IN</span></code> pin base, or a PIO IRQ index. <em>Index</em> is the pin or PIO IRQ index to wait for.</p>
 </section>
 <section id="in">
-<h4><code class="docutils literal notranslate"><span class="pre">in,</span></code><a class="headerlink" href="#in" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">in,</span></code><a class="headerlink" href="#in" title="Permalink to this heading">¶</a></h4>
 <p>( bit-count source – )</p>
 <p>PIO IN instruction. Input bits from a source into the current state machine’s ISR register. <em>Source</em> is the source to shift bits into the ISR register for the current state machine into, according to the configured shift in direction. <em>Bit-count</em> is how many bits to shift, a value from 1 to 32. The ISR bit shift count is increased by the bit count, saturating at 32.</p>
 </section>
 <section id="out">
-<h4><code class="docutils literal notranslate"><span class="pre">out,</span></code><a class="headerlink" href="#out" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">out,</span></code><a class="headerlink" href="#out" title="Permalink to this heading">¶</a></h4>
 <p>( bit-count destination – )</p>
 <p>PIO OUT instruction. Output bits from the current state machine’s OSR register to a destination. <em>Destination</em> is the destination to shift bits into from the OSR register for the current state machine, according to the configured shift out direction. <em>Bit-count</em> is how many bits to shift, value from 1 to 32. The OSR bit shift count is increased by the bit count, saturating at 32.</p>
 </section>
 <section id="push">
-<h4><code class="docutils literal notranslate"><span class="pre">push,</span></code><a class="headerlink" href="#push" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">push,</span></code><a class="headerlink" href="#push" title="Permalink to this heading">¶</a></h4>
 <p>( block if-full – )</p>
 <p>PIO PUSH instruction. Push the contents of the current state machine’s ISR register into the current state machine’s RX FIFO and reset the ISR register to all zeros. <em>If-full</em> is the condition as to whether to conditionally push. <em>Block</em> is whether to stall if pushing is not possible due to the RX FIFO being full.</p>
 </section>
 <section id="pull">
-<h4><code class="docutils literal notranslate"><span class="pre">pull,</span></code><a class="headerlink" href="#pull" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">pull,</span></code><a class="headerlink" href="#pull" title="Permalink to this heading">¶</a></h4>
 <p>( block if-empty – )</p>
 <p>PIO PULL instruction. Pull a 32-bit value from the current state machine’s TX FIFO into the current state machine’s OSR register. <em>If-empty</em> is the condition as to whether to conditionally pull. <em>Block</em> is whether to stall if pulling is not possible due to the TX FIFO being empty.</p>
 </section>
 <section id="mov">
-<h4><code class="docutils literal notranslate"><span class="pre">mov,</span></code><a class="headerlink" href="#mov" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">mov,</span></code><a class="headerlink" href="#mov" title="Permalink to this heading">¶</a></h4>
 <p>( source op destination – )</p>
 <p>PIO MOV instruction. Transfer a value from <em>source</em> to <em>destination</em>, applying <em>op</em> (which may be a no-op) to the value in the process.</p>
 </section>
 <section id="irq">
-<h4><code class="docutils literal notranslate"><span class="pre">irq,</span></code><a class="headerlink" href="#irq" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">irq,</span></code><a class="headerlink" href="#irq" title="Permalink to this heading">¶</a></h4>
 <p>( index set/wait – )</p>
 <p>PIO IRQ instruction. Set or wait on a PIO IRQ <em>index</em>, from 0 to 7 before <code class="docutils literal notranslate"><span class="pre">REL</span></code> is applied. Note that <code class="docutils literal notranslate"><span class="pre">REL</span></code> can be used to mark a PIO IRQ as relative to the current state machine ID by adding the state machine ID to the lower two bits of the IRQ index, by way of module-4 addition on the two LSB’s.</p>
 </section>
 <section id="set">
-<h4><code class="docutils literal notranslate"><span class="pre">set,</span></code><a class="headerlink" href="#set" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">set,</span></code><a class="headerlink" href="#set" title="Permalink to this heading">¶</a></h4>
 <p>( data destination – )</p>
-<p>PIO SET instruction. Set <em>destination</em> to <em>data</em>, which is a value from <span class="math notranslate nohighlight">\(00 to \)</span>1F.</p>
+<p>PIO SET instruction. Set <em>destination</em> to <em>data</em>, which is a value from $00 to $1F.</p>
 </section>
 <section id="id2">
-<h4><code class="docutils literal notranslate"><span class="pre">jmp+,</span></code><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">jmp+,</span></code><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h4>
 <p>( address delay/side-set condition – )</p>
 <p>PIO JMP instruction with delay or side-set. Branch, conditionally or unconditionally. <em>Condition</em> is the condition, with or without a decrement, to apply to whether to branch. <em>Address</em> is the PIO instruction address to branch to. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
 </section>
 <section id="id3">
-<h4><code class="docutils literal notranslate"><span class="pre">wait+,</span></code><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">wait+,</span></code><a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h4>
 <p>( index delay/side-set source polarity – )</p>
 <p>PIO WAIT instruction with delay or side-set. Wait for a condition to be true. <em>Polarity</em> is whether to wait for a 1 or a 0. <em>Source</em> is whether to wait for an absolute GPIO pin, a pin relative to the absolute <code class="docutils literal notranslate"><span class="pre">IN</span></code> pin base, or a PIO IRQ index. <em>Index</em> is the pin or PIO IRQ index to wait for. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
 </section>
 <section id="id4">
-<h4><code class="docutils literal notranslate"><span class="pre">in+,</span></code><a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">in+,</span></code><a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h4>
 <p>( bit-count delay/side-set source – )</p>
 <p>PIO IN instruction with delay or side-set. Input bits from a source into the current state machine’s ISR register. <em>Source</em> is the source to shift bits into the ISR register for the current state machine into, according to the configured shift in direction. <em>Bit-count</em> is how many bits to shift, a value from 1 to 32. The ISR bit shift count is increased by the bit count, saturating at 32. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
 </section>
 <section id="id5">
-<h4><code class="docutils literal notranslate"><span class="pre">out+,</span></code><a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">out+,</span></code><a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h4>
 <p>( bit-count delay/side-set destination – )</p>
 <p>PIO OUT instruction with delay or side-set. Output bits from the current state machine’s OSR register to a destination. <em>Destination</em> is the destination to shift bits into from the OSR register for the current state machine, according to the configured shift out direction. <em>Bit-count</em> is how many bits to shift, value from 1 to 32. The OSR bit shift count is increased by the bit count, saturating at 32. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
 </section>
 <section id="id6">
-<h4><code class="docutils literal notranslate"><span class="pre">push+,</span></code><a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">push+,</span></code><a class="headerlink" href="#id6" title="Permalink to this heading">¶</a></h4>
 <p>( delay/side-set block if-full – )</p>
 <p>PIO PUSH instruction with delay or side-set. Push the contents of the current state machine’s ISR register into the current state machine’s RX FIFO and reset the ISR register to all zeros. <em>If-full</em> is the condition as to whether to conditionally push. <em>Block</em> is whether to stall if pushing is not possible due to the RX FIFO being full. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
 </section>
 <section id="id7">
-<h4><code class="docutils literal notranslate"><span class="pre">pull+,</span></code><a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">pull+,</span></code><a class="headerlink" href="#id7" title="Permalink to this heading">¶</a></h4>
 <p>( delay/side-set block if-empty – )</p>
 <p>PIO PULL instruction with delay or side-set. Pull a 32-bit value from the current state machine’s TX FIFO into the current state machine’s OSR register. <em>If-empty</em> is the condition as to whether to conditionally pull. <em>Block</em> is whether to stall if pulling is not possible due to the TX FIFO being empty.</p>
 </section>
 <section id="id8">
-<h4><code class="docutils literal notranslate"><span class="pre">mov+,</span></code><a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">mov+,</span></code><a class="headerlink" href="#id8" title="Permalink to this heading">¶</a></h4>
 <p>( source delay/side-set op destination – )</p>
 <p>PIO MOV instruction with delay or side-set. Transfer a value from <em>source</em> to <em>destination</em>, applying <em>op</em> (which may be a no-op) to the value in the process. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
 </section>
 <section id="id9">
-<h4><code class="docutils literal notranslate"><span class="pre">irq+,</span></code><a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">irq+,</span></code><a class="headerlink" href="#id9" title="Permalink to this heading">¶</a></h4>
 <p>( index delay/side-set set/wait – )</p>
 <p>PIO IRQ instruction with delay or side-set. Set or wait on a PIO IRQ <em>index</em>, from 0 to 7 before <code class="docutils literal notranslate"><span class="pre">REL</span></code> is applied. Note that <code class="docutils literal notranslate"><span class="pre">REL</span></code> can be used to mark a PIO IRQ as relative to the current state machine ID by adding the state machine ID to the lower two bits of the IRQ index, by way of module-4 addition on the two LSB’s. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
 </section>
 <section id="id10">
-<h4><code class="docutils literal notranslate"><span class="pre">set+,</span></code><a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">set+,</span></code><a class="headerlink" href="#id10" title="Permalink to this heading">¶</a></h4>
 <p>( data delay/side-set destination – )</p>
-<p>PIO SET instruction with delay or side-set. Set <em>destination</em> to <em>data</em>, which is a value from <span class="math notranslate nohighlight">\(00 to \)</span>1F. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
+<p>PIO SET instruction with delay or side-set. Set <em>destination</em> to <em>data</em>, which is a value from $00 to $1F. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
 </section>
 <section id="cond-always">
-<h4><code class="docutils literal notranslate"><span class="pre">COND_ALWAYS</span></code><a class="headerlink" href="#cond-always" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">COND_ALWAYS</span></code><a class="headerlink" href="#cond-always" title="Permalink to this heading">¶</a></h4>
 <p>( – condition )</p>
 <p>Always jump.</p>
 </section>
 <section id="cond-x0">
-<h4><code class="docutils literal notranslate"><span class="pre">COND_X0=</span></code><a class="headerlink" href="#cond-x0" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">COND_X0=</span></code><a class="headerlink" href="#cond-x0" title="Permalink to this heading">¶</a></h4>
 <p>( – condition )</p>
 <p>Jump if scratch X is zero.</p>
 </section>
 <section id="cond-x1">
-<h4><code class="docutils literal notranslate"><span class="pre">COND_X1-</span></code><a class="headerlink" href="#cond-x1" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">COND_X1-</span></code><a class="headerlink" href="#cond-x1" title="Permalink to this heading">¶</a></h4>
 <p>( – condition )</p>
 <p>Jump if scratch X is non-zero, post-decrement.</p>
 </section>
 <section id="cond-y0">
-<h4><code class="docutils literal notranslate"><span class="pre">COND_Y0=</span></code><a class="headerlink" href="#cond-y0" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">COND_Y0=</span></code><a class="headerlink" href="#cond-y0" title="Permalink to this heading">¶</a></h4>
 <p>( – condition )</p>
 <p>Jump if scratch Y is zero.</p>
 </section>
 <section id="cond-y1">
-<h4><code class="docutils literal notranslate"><span class="pre">COND_Y1-</span></code><a class="headerlink" href="#cond-y1" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">COND_Y1-</span></code><a class="headerlink" href="#cond-y1" title="Permalink to this heading">¶</a></h4>
 <p>( – condition )</p>
 <p>Jump if scratch Y is non-zero, post-decrement.</p>
 </section>
 <section id="cond-xy">
-<h4><code class="docutils literal notranslate"><span class="pre">COND_XY&lt;&gt;</span></code><a class="headerlink" href="#cond-xy" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">COND_XY&lt;&gt;</span></code><a class="headerlink" href="#cond-xy" title="Permalink to this heading">¶</a></h4>
 <p>( – condition )</p>
 <p>Jump if scratch X not equal scratch Y.</p>
 </section>
 <section id="cond-pin">
-<h4><code class="docutils literal notranslate"><span class="pre">COND_PIN</span></code><a class="headerlink" href="#cond-pin" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">COND_PIN</span></code><a class="headerlink" href="#cond-pin" title="Permalink to this heading">¶</a></h4>
 <p>( – condition )</p>
 <p>Jump on input pin.</p>
 </section>
 <section id="cond-iosre">
-<h4><code class="docutils literal notranslate"><span class="pre">COND_IOSRE</span></code><a class="headerlink" href="#cond-iosre" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">COND_IOSRE</span></code><a class="headerlink" href="#cond-iosre" title="Permalink to this heading">¶</a></h4>
 <p>( – condition )</p>
 <p>Jump on output shift register not empty.</p>
 </section>
 <section id="wait-gpio">
-<h4><code class="docutils literal notranslate"><span class="pre">WAIT_GPIO</span></code><a class="headerlink" href="#wait-gpio" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">WAIT_GPIO</span></code><a class="headerlink" href="#wait-gpio" title="Permalink to this heading">¶</a></h4>
 <p>( – wait )</p>
 <p>Wait for GPIO.</p>
 </section>
 <section id="wait-pin">
-<h4><code class="docutils literal notranslate"><span class="pre">WAIT_PIN</span></code><a class="headerlink" href="#wait-pin" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">WAIT_PIN</span></code><a class="headerlink" href="#wait-pin" title="Permalink to this heading">¶</a></h4>
 <p>( – wait )</p>
 <p>Wait for a pin.</p>
 </section>
 <section id="wait-irq">
-<h4><code class="docutils literal notranslate"><span class="pre">WAIT_IRQ</span></code><a class="headerlink" href="#wait-irq" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">WAIT_IRQ</span></code><a class="headerlink" href="#wait-irq" title="Permalink to this heading">¶</a></h4>
 <p>( – wait )</p>
 <p>Wait for an IRQ.</p>
 </section>
 <section id="in-pins">
-<h4><code class="docutils literal notranslate"><span class="pre">IN_PINS</span></code><a class="headerlink" href="#in-pins" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">IN_PINS</span></code><a class="headerlink" href="#in-pins" title="Permalink to this heading">¶</a></h4>
 <p>( – in-source )</p>
 <p>Pins input.</p>
 </section>
 <section id="in-x">
-<h4><code class="docutils literal notranslate"><span class="pre">IN_X</span></code><a class="headerlink" href="#in-x" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">IN_X</span></code><a class="headerlink" href="#in-x" title="Permalink to this heading">¶</a></h4>
 <p>( – in-source )</p>
 <p>Scratch register X input.</p>
 </section>
 <section id="in-y">
-<h4><code class="docutils literal notranslate"><span class="pre">IN_Y</span></code><a class="headerlink" href="#in-y" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">IN_Y</span></code><a class="headerlink" href="#in-y" title="Permalink to this heading">¶</a></h4>
 <p>( – in-source )</p>
 <p>Scratch register Y input.</p>
 </section>
 <section id="in-null">
-<h4><code class="docutils literal notranslate"><span class="pre">IN_NULL</span></code><a class="headerlink" href="#in-null" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">IN_NULL</span></code><a class="headerlink" href="#in-null" title="Permalink to this heading">¶</a></h4>
 <p>( – in-source )</p>
 <p>NULL input (all zeros).</p>
 </section>
 <section id="in-isr">
-<h4><code class="docutils literal notranslate"><span class="pre">IN_ISR</span></code><a class="headerlink" href="#in-isr" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">IN_ISR</span></code><a class="headerlink" href="#in-isr" title="Permalink to this heading">¶</a></h4>
 <p>( – in-source )</p>
 <p>ISR input.</p>
 </section>
 <section id="in-osr">
-<h4><code class="docutils literal notranslate"><span class="pre">IN_OSR</span></code><a class="headerlink" href="#in-osr" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">IN_OSR</span></code><a class="headerlink" href="#in-osr" title="Permalink to this heading">¶</a></h4>
 <p>( – in-source )</p>
 <p>OSR input.</p>
 </section>
 <section id="out-pins">
-<h4><code class="docutils literal notranslate"><span class="pre">OUT_PINS</span></code><a class="headerlink" href="#out-pins" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">OUT_PINS</span></code><a class="headerlink" href="#out-pins" title="Permalink to this heading">¶</a></h4>
 <p>( – out-destination )</p>
 <p>Pins output.</p>
 </section>
 <section id="out-x">
-<h4><code class="docutils literal notranslate"><span class="pre">OUT_X</span></code><a class="headerlink" href="#out-x" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">OUT_X</span></code><a class="headerlink" href="#out-x" title="Permalink to this heading">¶</a></h4>
 <p>( – out-destination )</p>
 <p>Scratch register X output.</p>
 </section>
 <section id="out-y">
-<h4><code class="docutils literal notranslate"><span class="pre">OUT_Y</span></code><a class="headerlink" href="#out-y" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">OUT_Y</span></code><a class="headerlink" href="#out-y" title="Permalink to this heading">¶</a></h4>
 <p>( – out-destination )</p>
 <p>Scratch register Y output.</p>
 </section>
 <section id="out-null">
-<h4><code class="docutils literal notranslate"><span class="pre">OUT_NULL</span></code><a class="headerlink" href="#out-null" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">OUT_NULL</span></code><a class="headerlink" href="#out-null" title="Permalink to this heading">¶</a></h4>
 <p>( – out-destination )</p>
 <p>NULL output (discard data).</p>
 </section>
 <section id="out-pindirs">
-<h4><code class="docutils literal notranslate"><span class="pre">OUT_PINDIRS</span></code><a class="headerlink" href="#out-pindirs" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">OUT_PINDIRS</span></code><a class="headerlink" href="#out-pindirs" title="Permalink to this heading">¶</a></h4>
 <p>( – out-destination )</p>
 <p>PINDIRs output.</p>
 </section>
 <section id="out-pc">
-<h4><code class="docutils literal notranslate"><span class="pre">OUT_PC</span></code><a class="headerlink" href="#out-pc" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">OUT_PC</span></code><a class="headerlink" href="#out-pc" title="Permalink to this heading">¶</a></h4>
 <p>( – out )</p>
 <p>PC output (unconditional jump to shifted address).</p>
 </section>
 <section id="out-isr">
-<h4><code class="docutils literal notranslate"><span class="pre">OUT_ISR</span></code><a class="headerlink" href="#out-isr" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">OUT_ISR</span></code><a class="headerlink" href="#out-isr" title="Permalink to this heading">¶</a></h4>
 <p>( – out )</p>
 <p>ISR output (also sets ISR shift counter to bit count).</p>
 </section>
 <section id="out-exec">
-<h4><code class="docutils literal notranslate"><span class="pre">OUT_EXEC</span></code><a class="headerlink" href="#out-exec" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">OUT_EXEC</span></code><a class="headerlink" href="#out-exec" title="Permalink to this heading">¶</a></h4>
 <p>( – out )</p>
 <p>Execute OSR shift data as instruction.</p>
 </section>
 <section id="push-not-full">
-<h4><code class="docutils literal notranslate"><span class="pre">PUSH_NOT_FULL</span></code><a class="headerlink" href="#push-not-full" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PUSH_NOT_FULL</span></code><a class="headerlink" href="#push-not-full" title="Permalink to this heading">¶</a></h4>
 <p>( – push-if-full-option )</p>
 <p>Push data even if threshold is not met.</p>
 </section>
 <section id="push-if-full">
-<h4><code class="docutils literal notranslate"><span class="pre">PUSH_IF_FULL</span></code><a class="headerlink" href="#push-if-full" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PUSH_IF_FULL</span></code><a class="headerlink" href="#push-if-full" title="Permalink to this heading">¶</a></h4>
 <p>( – push-if-full-option )</p>
 <p>Do nothing unless the total input shift count has reached its threshold.</p>
 </section>
 <section id="push-no-block">
-<h4><code class="docutils literal notranslate"><span class="pre">PUSH_NO_BLOCK</span></code><a class="headerlink" href="#push-no-block" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PUSH_NO_BLOCK</span></code><a class="headerlink" href="#push-no-block" title="Permalink to this heading">¶</a></h4>
 <p>( – push-block-option )</p>
 <p>Do not stall execution if RX FIFO is full, instead drop data from ISR.</p>
 </section>
 <section id="push-block">
-<h4><code class="docutils literal notranslate"><span class="pre">PUSH_BLOCK</span></code><a class="headerlink" href="#push-block" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PUSH_BLOCK</span></code><a class="headerlink" href="#push-block" title="Permalink to this heading">¶</a></h4>
 <p>( – push-block-option )</p>
 <p>Stall execution if RX FIFO is full.</p>
 </section>
 <section id="pull-not-empty">
-<h4><code class="docutils literal notranslate"><span class="pre">PULL_NOT_EMPTY</span></code><a class="headerlink" href="#pull-not-empty" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PULL_NOT_EMPTY</span></code><a class="headerlink" href="#pull-not-empty" title="Permalink to this heading">¶</a></h4>
 <p>( – pull-if-full-option )</p>
 <p>Pull data even if threshold is not met.</p>
 </section>
 <section id="pull-if-empty">
-<h4><code class="docutils literal notranslate"><span class="pre">PULL_IF_EMPTY</span></code><a class="headerlink" href="#pull-if-empty" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PULL_IF_EMPTY</span></code><a class="headerlink" href="#pull-if-empty" title="Permalink to this heading">¶</a></h4>
 <p>( – pull-if-full-option )</p>
 <p>Do nothing unless the total output shift count has reached its threshold.</p>
 </section>
 <section id="pull-no-block">
-<h4><code class="docutils literal notranslate"><span class="pre">PULL_NO_BLOCK</span></code><a class="headerlink" href="#pull-no-block" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PULL_NO_BLOCK</span></code><a class="headerlink" href="#pull-no-block" title="Permalink to this heading">¶</a></h4>
 <p>( – pull-block-option )</p>
 <p>Do not stall execution if TX FIFO is empty, instead copy from scratch X.</p>
 </section>
 <section id="pull-block">
-<h4><code class="docutils literal notranslate"><span class="pre">PULL_BLOCK</span></code><a class="headerlink" href="#pull-block" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">PULL_BLOCK</span></code><a class="headerlink" href="#pull-block" title="Permalink to this heading">¶</a></h4>
 <p>( – pull-block-option )</p>
 <p>Stall execution if TX FIFO is empty.</p>
 </section>
 <section id="mov-dest-pins">
-<h4><code class="docutils literal notranslate"><span class="pre">MOV_DEST_PINS</span></code><a class="headerlink" href="#mov-dest-pins" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_DEST_PINS</span></code><a class="headerlink" href="#mov-dest-pins" title="Permalink to this heading">¶</a></h4>
 <p>( – mov-destination )</p>
 <p>Move to PINS.</p>
 </section>
 <section id="mov-dest-x">
-<h4><code class="docutils literal notranslate"><span class="pre">MOV_DEST_X</span></code><a class="headerlink" href="#mov-dest-x" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_DEST_X</span></code><a class="headerlink" href="#mov-dest-x" title="Permalink to this heading">¶</a></h4>
 <p>( – mov-destination )</p>
 <p>Move to scratch register X.</p>
 </section>
 <section id="mov-dest-y">
-<h4><code class="docutils literal notranslate"><span class="pre">MOV_DEST_Y</span></code><a class="headerlink" href="#mov-dest-y" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_DEST_Y</span></code><a class="headerlink" href="#mov-dest-y" title="Permalink to this heading">¶</a></h4>
 <p>( – mov-destination )</p>
 <p>Move to scratch register Y.</p>
 </section>
 <section id="mov-dest-exec">
-<h4><code class="docutils literal notranslate"><span class="pre">MOV_DEST_EXEC</span></code><a class="headerlink" href="#mov-dest-exec" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_DEST_EXEC</span></code><a class="headerlink" href="#mov-dest-exec" title="Permalink to this heading">¶</a></h4>
 <p>( – mov-destination )</p>
 <p>Move to EXEC (execute data as instruction).</p>
 </section>
 <section id="mov-dest-pc">
-<h4><code class="docutils literal notranslate"><span class="pre">MOV_DEST_PC</span></code><a class="headerlink" href="#mov-dest-pc" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_DEST_PC</span></code><a class="headerlink" href="#mov-dest-pc" title="Permalink to this heading">¶</a></h4>
 <p>( – mov-destination )</p>
 <p>Move to PC (treat data as address for unconditional branch).</p>
 </section>
 <section id="mov-dest-isr">
-<h4><code class="docutils literal notranslate"><span class="pre">MOV_DEST_ISR</span></code><a class="headerlink" href="#mov-dest-isr" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_DEST_ISR</span></code><a class="headerlink" href="#mov-dest-isr" title="Permalink to this heading">¶</a></h4>
 <p>( – mov-destination )</p>
 <p>Move to ISR (input shift counter is reset to 0, i.e. empty).</p>
 </section>
 <section id="mov-dest-osr">
-<h4><code class="docutils literal notranslate"><span class="pre">MOV_DEST_OSR</span></code><a class="headerlink" href="#mov-dest-osr" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_DEST_OSR</span></code><a class="headerlink" href="#mov-dest-osr" title="Permalink to this heading">¶</a></h4>
 <p>( – mov-destination )</p>
 <p>Move to OSR (output shift counter is reset to 0, i.e. full).</p>
 </section>
 <section id="mov-op-none">
-<h4><code class="docutils literal notranslate"><span class="pre">MOV_OP_NONE</span></code><a class="headerlink" href="#mov-op-none" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_OP_NONE</span></code><a class="headerlink" href="#mov-op-none" title="Permalink to this heading">¶</a></h4>
 <p>( – mov-op )</p>
 <p>Move operation none.</p>
 </section>
 <section id="mov-op-invert">
-<h4><code class="docutils literal notranslate"><span class="pre">MOV_OP_INVERT</span></code><a class="headerlink" href="#mov-op-invert" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_OP_INVERT</span></code><a class="headerlink" href="#mov-op-invert" title="Permalink to this heading">¶</a></h4>
 <p>( – mov-op )</p>
 <p>Move operation invert.</p>
 </section>
 <section id="mov-op-reverse">
-<h4><code class="docutils literal notranslate"><span class="pre">MOV_OP_REVERSE</span></code><a class="headerlink" href="#mov-op-reverse" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_OP_REVERSE</span></code><a class="headerlink" href="#mov-op-reverse" title="Permalink to this heading">¶</a></h4>
 <p>( – mov-op )</p>
 <p>Move operation bit-reverse.</p>
 </section>
 <section id="mov-src-pins">
-<h4><code class="docutils literal notranslate"><span class="pre">MOV_SRC_PINS</span></code><a class="headerlink" href="#mov-src-pins" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_SRC_PINS</span></code><a class="headerlink" href="#mov-src-pins" title="Permalink to this heading">¶</a></h4>
 <p>( – mov-op )</p>
 <p>Move from PINS.</p>
 </section>
 <section id="mov-src-x">
-<h4><code class="docutils literal notranslate"><span class="pre">MOV_SRC_X</span></code><a class="headerlink" href="#mov-src-x" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_SRC_X</span></code><a class="headerlink" href="#mov-src-x" title="Permalink to this heading">¶</a></h4>
 <p>( – mov-source )</p>
 <p>Move from scratch register X.</p>
 </section>
 <section id="mov-src-y">
-<h4><code class="docutils literal notranslate"><span class="pre">MOV_SRC_Y</span></code><a class="headerlink" href="#mov-src-y" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_SRC_Y</span></code><a class="headerlink" href="#mov-src-y" title="Permalink to this heading">¶</a></h4>
 <p>( – mov-source )</p>
 <p>Move from scratch register Y.</p>
 </section>
 <section id="mov-src-null">
-<h4><code class="docutils literal notranslate"><span class="pre">MOV_SRC_NULL</span></code><a class="headerlink" href="#mov-src-null" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_SRC_NULL</span></code><a class="headerlink" href="#mov-src-null" title="Permalink to this heading">¶</a></h4>
 <p>( – mov-source )</p>
 <p>Move from NULL.</p>
 </section>
 <section id="mov-src-status">
-<h4><code class="docutils literal notranslate"><span class="pre">MOV_SRC_STATUS</span></code><a class="headerlink" href="#mov-src-status" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_SRC_STATUS</span></code><a class="headerlink" href="#mov-src-status" title="Permalink to this heading">¶</a></h4>
 <p>( – mov-source )</p>
 <p>Move from STATUS.</p>
 </section>
 <section id="mov-src-isr">
-<h4><code class="docutils literal notranslate"><span class="pre">MOV_SRC_ISR</span></code><a class="headerlink" href="#mov-src-isr" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_SRC_ISR</span></code><a class="headerlink" href="#mov-src-isr" title="Permalink to this heading">¶</a></h4>
 <p>( – mov-source )</p>
 <p>Move from ISR.</p>
 </section>
 <section id="mov-src-osr">
-<h4><code class="docutils literal notranslate"><span class="pre">MOV_SRC_OSR</span></code><a class="headerlink" href="#mov-src-osr" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">MOV_SRC_OSR</span></code><a class="headerlink" href="#mov-src-osr" title="Permalink to this heading">¶</a></h4>
 <p>( – mov-source )</p>
 <p>Move from OSR.</p>
 </section>
 <section id="irq-set">
-<h4><code class="docutils literal notranslate"><span class="pre">IRQ_SET</span></code><a class="headerlink" href="#irq-set" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">IRQ_SET</span></code><a class="headerlink" href="#irq-set" title="Permalink to this heading">¶</a></h4>
 <p>( – irq-op )</p>
 <p>Raise an IRQ.</p>
 </section>
 <section id="irq-clear">
-<h4><code class="docutils literal notranslate"><span class="pre">IRQ_CLEAR</span></code><a class="headerlink" href="#irq-clear" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">IRQ_CLEAR</span></code><a class="headerlink" href="#irq-clear" title="Permalink to this heading">¶</a></h4>
 <p>( – irq-op )</p>
 <p>Clear an IRQ.</p>
 </section>
 <section id="irq-wait">
-<h4><code class="docutils literal notranslate"><span class="pre">IRQ_WAIT</span></code><a class="headerlink" href="#irq-wait" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">IRQ_WAIT</span></code><a class="headerlink" href="#irq-wait" title="Permalink to this heading">¶</a></h4>
 <p>( – irq-op )</p>
 <p>Wait for an IRQ to be lowered.</p>
 </section>
 <section id="set-pins">
-<h4><code class="docutils literal notranslate"><span class="pre">SET_PINS</span></code><a class="headerlink" href="#set-pins" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">SET_PINS</span></code><a class="headerlink" href="#set-pins" title="Permalink to this heading">¶</a></h4>
 <p>( – set-destination )</p>
 <p>Set PINS.</p>
 </section>
 <section id="set-x">
-<h4><code class="docutils literal notranslate"><span class="pre">SET_X</span></code><a class="headerlink" href="#set-x" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">SET_X</span></code><a class="headerlink" href="#set-x" title="Permalink to this heading">¶</a></h4>
 <p>( – set-destination )</p>
 <p>Set scratch register X (5 LSBs are set to data, all others are cleared).</p>
 </section>
 <section id="set-y">
-<h4><code class="docutils literal notranslate"><span class="pre">SET_Y</span></code><a class="headerlink" href="#set-y" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">SET_Y</span></code><a class="headerlink" href="#set-y" title="Permalink to this heading">¶</a></h4>
 <p>( – set-destination )</p>
 <p>Set scratch register Y (5 LSBs are set to data, all others are cleared).</p>
 </section>
 <section id="set-pindirs">
-<h4><code class="docutils literal notranslate"><span class="pre">SET_PINDIRS</span></code><a class="headerlink" href="#set-pindirs" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">SET_PINDIRS</span></code><a class="headerlink" href="#set-pindirs" title="Permalink to this heading">¶</a></h4>
 <p>( – set-destination )</p>
 <p>Set PINDIRS.</p>
 </section>
 <section id="rel">
-<h4><code class="docutils literal notranslate"><span class="pre">REL</span></code><a class="headerlink" href="#rel" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">REL</span></code><a class="headerlink" href="#rel" title="Permalink to this heading">¶</a></h4>
 <p>( irq – irq-rel )</p>
 <p>Add the state machine ID to the lower two bits of the IRQ index, by way of module-4 addition on the two LSB’s.</p>
 </section>
 </section>
 <section id="exceptions">
-<h3>Exceptions<a class="headerlink" href="#exceptions" title="Permalink to this headline">¶</a></h3>
+<h3>Exceptions<a class="headerlink" href="#exceptions" title="Permalink to this heading">¶</a></h3>
 <section id="x-sm-out-of-range">
-<h4><code class="docutils literal notranslate"><span class="pre">x-sm-out-of-range</span></code><a class="headerlink" href="#x-sm-out-of-range" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">x-sm-out-of-range</span></code><a class="headerlink" href="#x-sm-out-of-range" title="Permalink to this heading">¶</a></h4>
 <p>( – )</p>
 <p>State machine out of range exception.</p>
 </section>
 <section id="x-pio-out-of-range">
-<h4><code class="docutils literal notranslate"><span class="pre">x-pio-out-of-range</span></code><a class="headerlink" href="#x-pio-out-of-range" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">x-pio-out-of-range</span></code><a class="headerlink" href="#x-pio-out-of-range" title="Permalink to this heading">¶</a></h4>
 <p>( – )</p>
 <p>PIO out of range exception.</p>
 </section>
 <section id="x-too-many-instructions">
-<h4><code class="docutils literal notranslate"><span class="pre">x-too-many-instructions</span></code><a class="headerlink" href="#x-too-many-instructions" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">x-too-many-instructions</span></code><a class="headerlink" href="#x-too-many-instructions" title="Permalink to this heading">¶</a></h4>
 <p>( – )</p>
 <p>Too many instructions exception.</p>
 </section>
 <section id="x-address-out-of-range">
-<h4><code class="docutils literal notranslate"><span class="pre">x-address-out-of-range</span></code><a class="headerlink" href="#x-address-out-of-range" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">x-address-out-of-range</span></code><a class="headerlink" href="#x-address-out-of-range" title="Permalink to this heading">¶</a></h4>
 <p>( – )</p>
 <p>Address out of range exception.</p>
 </section>
 <section id="x-too-many-pins">
-<h4><code class="docutils literal notranslate"><span class="pre">x-too-many-pins</span></code><a class="headerlink" href="#x-too-many-pins" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">x-too-many-pins</span></code><a class="headerlink" href="#x-too-many-pins" title="Permalink to this heading">¶</a></h4>
 <p>( – )</p>
 <p>Too many pins exception.</p>
 </section>
 <section id="x-pin-out-of-range">
-<h4><code class="docutils literal notranslate"><span class="pre">x-pin-out-of-range</span></code><a class="headerlink" href="#x-pin-out-of-range" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">x-pin-out-of-range</span></code><a class="headerlink" href="#x-pin-out-of-range" title="Permalink to this heading">¶</a></h4>
 <p>( – )</p>
 <p>Pin out of range exception.</p>
 </section>
 <section id="x-clkdiv-out-of-range">
-<h4><code class="docutils literal notranslate"><span class="pre">x-clkdiv-out-of-range</span></code><a class="headerlink" href="#x-clkdiv-out-of-range" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">x-clkdiv-out-of-range</span></code><a class="headerlink" href="#x-clkdiv-out-of-range" title="Permalink to this heading">¶</a></h4>
 <p>( – )</p>
 <p>Clock divisor out of range exception.</p>
 </section>
 <section id="x-irq-out-of-range">
-<h4><code class="docutils literal notranslate"><span class="pre">x-irq-out-of-range</span></code><a class="headerlink" href="#x-irq-out-of-range" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">x-irq-out-of-range</span></code><a class="headerlink" href="#x-irq-out-of-range" title="Permalink to this heading">¶</a></h4>
 <p>( – )</p>
 <p>IRQ out of range exception.</p>
 </section>
 <section id="x-interrupt-out-of-range">
-<h4><code class="docutils literal notranslate"><span class="pre">x-interrupt-out-of-range</span></code><a class="headerlink" href="#x-interrupt-out-of-range" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">x-interrupt-out-of-range</span></code><a class="headerlink" href="#x-interrupt-out-of-range" title="Permalink to this heading">¶</a></h4>
 <p>( – )</p>
 <p>Interrupt out of range exception.</p>
 </section>
 <section id="x-threshold-out-of-range">
-<h4><code class="docutils literal notranslate"><span class="pre">x-threshold-out-of-range</span></code><a class="headerlink" href="#x-threshold-out-of-range" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">x-threshold-out-of-range</span></code><a class="headerlink" href="#x-threshold-out-of-range" title="Permalink to this heading">¶</a></h4>
 <p>( – )</p>
 <p>Buffer threshold out of range exception.</p>
 </section>
 <section id="x-bit-out-of-range">
-<h4><code class="docutils literal notranslate"><span class="pre">x-bit-out-of-range</span></code><a class="headerlink" href="#x-bit-out-of-range" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">x-bit-out-of-range</span></code><a class="headerlink" href="#x-bit-out-of-range" title="Permalink to this heading">¶</a></h4>
 <p>( – )</p>
 <p>Bit out of range exception.</p>
 </section>
 <section id="x-relocate-out-of-range">
-<h4><code class="docutils literal notranslate"><span class="pre">x-relocate-out-of-range</span></code><a class="headerlink" href="#x-relocate-out-of-range" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal notranslate"><span class="pre">x-relocate-out-of-range</span></code><a class="headerlink" href="#x-relocate-out-of-range" title="Permalink to this heading">¶</a></h4>
 <p>( – )</p>
 <p>Relocation out of range exception</p>
 </section>
@@ -846,6 +846,7 @@
 <li class="toctree-l1"><a class="reference internal" href="oo.html">Object Orientation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_lock.html">Core Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="schannel.html">Simple channel Words</a></li>
@@ -887,7 +888,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -904,7 +905,7 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

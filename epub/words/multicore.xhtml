@@ -14,7 +14,7 @@
       <div class="documentwrapper">
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="multicore-words">
+  <section id="multicore-words">
 <h1>Multicore Words</h1>
 <p>Currently the only platform on which multicore execution is supported is the RP2040. On this platform cores communicate and synchronize via hardware spinlocks and hardware FIFO’s (i.e. mailboxes). On platforms other than the RP2040 multicore words exist in the dictionary but are merely stubs which will always raise exceptions when called.</p>
 <p>Note that prior limitations to multicore operation on the RP2040 have been resolved, with there being no need to disable interrupt-driven serial IO, with tasks being able to be started arbitrarily on any core from a task on any core, with multitasking constructs being able to be used across cores, and with writing and erasing flash functioning properly when both cores are operational.</p>
@@ -269,6 +269,16 @@ FIFO and the write side of the 0 -&gt; 1 FIFO; the converse is true of core 1</p
 <h3><code class="docutils literal notranslate"><span class="pre">critical-with-other-core-spinlock</span></code></h3>
 <p>( xt core – )</p>
 <p>Drop <em>core</em> and execute <em>xt</em> in a critical section.</p>
+</section>
+<section id="test-set">
+<h3><code class="docutils literal notranslate"><span class="pre">test-set</span></code></h3>
+<p>( value addr – set? )</p>
+<p>Atomically test a value at <em>addr</em> and set it to <em>value</em> if it was previously 0, and return whether it was previously 0.</p>
+</section>
+<section id="test-set-raw">
+<h3><code class="docutils literal notranslate"><span class="pre">test-set-raw</span></code></h3>
+<p>( value addr – set? )</p>
+<p>Atomically test a value at <em>addr</em> and set it to <em>value</em> if it was previously 0, and return whether it was previously 0. This is different from <code class="docutils literal notranslate"><span class="pre">test-set</span></code> in that it assumes that interrupts were already disabled, and does not enable interrupts.</p>
 </section>
 <section id="id13">
 <h3><code class="docutils literal notranslate"><span class="pre">fifo-drain</span></code></h3>

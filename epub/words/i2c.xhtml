@@ -14,7 +14,7 @@
       <div class="documentwrapper">
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="i2c-words">
+  <section id="i2c-words">
 <h1>I2C Words</h1>
 <p>zeptoforth includes support for I2C peripherals on the Raspberry Pi Pico. It supports both master and slave modes of operation on two different I2C peripheral devices, numbered 0 and 1. It supports clocks up to 1 MHz, as that is the limit supported by the RP2040’s I2C peripherals, and defaults to a clock of 400 kHz. Note that it does not currently support general calls or slaves sending NACK, and handling of interrupted sends when multiple masters are in use must be handled manually by the user.</p>
 <section id="i2c">

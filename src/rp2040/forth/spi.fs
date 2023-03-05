@@ -25,6 +25,7 @@ begin-module spi
   interrupt import
   multicore import
   pin import
+  core-lock import
   internal import
   
   \ Invalid SPI periperal exception
@@ -73,6 +74,9 @@ begin-module spi
       \ Receiver handler
       field: spi-rx-handler
 
+      \ SPI core lock
+      core-lock-size +field spi-core-lock
+      
     end-structure
 
     spi-size spi-count * buffer: spi-buffers
@@ -178,6 +182,9 @@ begin-module spi
     \ SPI RX handler
     : spi-rx-handler ( spi -- addr ) spi-select spi-rx-handler ;
 
+    \ SPI core lock
+    : spi-core-lock ( spi -- addr ) spi-select spi-core-lock ;
+    
     \ Get whether the rx buffer is full
     : spi-rx-full? ( spi -- f )
       dup spi-rx-write-index c@ swap spi-rx-read-index c@
@@ -272,7 +279,7 @@ begin-module spi
 	until
 	true 2 pick SPI_SSPICR_RTIC!
 	true 2 pick SPI_SSPICR_RORIC!
-      ;] serial-spinlock critical-with-spinlock
+      ;] over spi-core-lock with-core-lock-spin
       if dup spi-rx-handler @ ?execute then
       dup spi-tx-empty? not over SPI_SSPIMSC_TXIM!
       spi-irq NVIC_ICPR_CLRPEND!
@@ -287,6 +294,7 @@ begin-module spi
     \ Initialize an SPI entity
     : init-spi ( spi -- )
       disable-int
+      dup spi-core-lock init-core-lock
       0 over spi-rx-read-index c!
       0 over spi-rx-write-index c!
       0 over spi-tx-read-index c!
@@ -416,22 +424,24 @@ begin-module spi
   : >spi ( h spi -- )
     dup validate-spi
     [:
+      disable-int
       dup spi-tx-empty? if
-	dup SPI_SSPSR_TNF@ not if
-	  dup spi-tx-full? not if
-	    tuck spi-write-tx
-	    true swap SPI_SSPIMSC_TXIM!
-	  then
-	else
-	  SPI_SSPDR h!
-	then
+        dup SPI_SSPSR_TNF@ not if
+          dup spi-tx-full? not if
+            tuck spi-write-tx
+            true swap SPI_SSPIMSC_TXIM!
+          then
+        else
+          SPI_SSPDR h!
+        then
       else
-	dup spi-tx-full? not if
-	  tuck spi-write-tx
-	  true swap SPI_SSPIMSC_TXIM!
-	then
+        dup spi-tx-full? not if
+          tuck spi-write-tx
+          true swap SPI_SSPIMSC_TXIM!
+        then
       then
-    ;] serial-spinlock critical-with-spinlock
+      enable-int
+    ;] over spi-core-lock with-core-lock-spin
   ;
 
   \ Read a halfword from SPI
@@ -449,7 +459,7 @@ begin-module spi
 	else
 	  enable-int true true
 	then
-      ;] serial-spinlock critical-with-spinlock
+      ;] over spi-core-lock with-core-lock-spin
       dup not if pause then
     until
     if spi-read-rx then
@@ -500,7 +510,7 @@ begin-module spi
         then
         enable-int
         bytes-to-recv bytes-sent
-      ;] serial-spinlock critical-with-spinlock
+      ;] over spi-core-lock with-core-lock-spin
       dup +to buffer negate +to bytes
       to bytes-to-recv
     repeat
@@ -529,7 +539,7 @@ begin-module spi
         then
         enable-int
         bytes-to-send bytes-recvd
-      ;] serial-spinlock critical-with-spinlock
+      ;] over spi-core-lock with-core-lock-spin
       dup +to buffer negate +to bytes
       to bytes-to-send
     repeat

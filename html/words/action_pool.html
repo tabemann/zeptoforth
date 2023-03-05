@@ -1,7 +1,7 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
@@ -12,7 +12,9 @@
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Heap Words" href="heap.html" />
@@ -33,34 +35,34 @@
 
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="action-pool-words">
-<h1>Action Pool words<a class="headerlink" href="#action-pool-words" title="Permalink to this headline">¶</a></h1>
+  <section id="action-pool-words">
+<h1>Action Pool words<a class="headerlink" href="#action-pool-words" title="Permalink to this heading">¶</a></h1>
 <p>Action pools provide a means allocating and reusing action scheduler actions out of a fixed sized pool. Actions that have not been added to a schedule or which have been removed from a schedule, whether manually or automatically (e.g. through failing to specify a continuation or through raising an uncaught exception) are considered free for allocation. Actions’ initial execution tokens and data are assigned at the time that they are added to an action, unlike when manually initializing actions and adding them to schedules where the two are separate operations.</p>
 <section id="action-pool">
-<h2><code class="docutils literal notranslate"><span class="pre">action-pool</span></code><a class="headerlink" href="#action-pool" title="Permalink to this headline">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">action-pool</span></code><a class="headerlink" href="#action-pool" title="Permalink to this heading">¶</a></h2>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">action-pool</span></code>:</p>
 <section id="x-no-action-available">
-<h3><code class="docutils literal notranslate"><span class="pre">x-no-action-available</span></code><a class="headerlink" href="#x-no-action-available" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">x-no-action-available</span></code><a class="headerlink" href="#x-no-action-available" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Exception raised if one attempts to allocate a action from a action pool and no actions are available.</p>
 </section>
 <section id="add-action-from-pool">
-<h3><code class="docutils literal notranslate"><span class="pre">add-action-from-pool</span></code><a class="headerlink" href="#add-action-from-pool" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">add-action-from-pool</span></code><a class="headerlink" href="#add-action-from-pool" title="Permalink to this heading">¶</a></h3>
 <p>( schedule dat xt action-pool –  action )</p>
 <p>Initalize a action from a action pool with the initial execution token <em>xt</em> and data <em>data</em>, if a action is available, or raise <code class="docutils literal notranslate"><span class="pre">x-no-action-available</span></code> if no actions are available. The action is then added to the schedule <em>schedule</em> and is returned.</p>
 </section>
 <section id="action-pool-free">
-<h3><code class="docutils literal notranslate"><span class="pre">action-pool-free</span></code><a class="headerlink" href="#action-pool-free" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">action-pool-free</span></code><a class="headerlink" href="#action-pool-free" title="Permalink to this heading">¶</a></h3>
 <p>( action-pool – count )</p>
 <p>Get the number of free actions in a action pool.</p>
 </section>
 <section id="init-action-pool">
-<h3><code class="docutils literal notranslate"><span class="pre">init-action-pool</span></code><a class="headerlink" href="#init-action-pool" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">init-action-pool</span></code><a class="headerlink" href="#init-action-pool" title="Permalink to this heading">¶</a></h3>
 <p>( count addr – )</p>
 <p>Initialize a action pool at <em>addr</em>, with <em>count</em> actions. These actions are free initially to be initialized and added to a schedule with <code class="docutils literal notranslate"><span class="pre">add-action-from-pool</span></code>.</p>
 </section>
 <section id="action-pool-size">
-<h3><code class="docutils literal notranslate"><span class="pre">action-pool-size</span></code><a class="headerlink" href="#action-pool-size" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">action-pool-size</span></code><a class="headerlink" href="#action-pool-size" title="Permalink to this heading">¶</a></h3>
 <p>( count – bytes )</p>
 <p>Get the size taken up by a action pool with <em>count</em> actions; this size should be used for alloting the block of memory to be passed to <code class="docutils literal notranslate"><span class="pre">init-action-pool</span></code></p>
 </section>
@@ -125,6 +127,7 @@
 <li class="toctree-l1"><a class="reference internal" href="oo.html">Object Orientation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_lock.html">Core Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="schannel.html">Simple channel Words</a></li>
@@ -166,7 +169,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -183,7 +186,7 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

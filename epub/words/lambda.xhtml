@@ -14,7 +14,7 @@
       <div class="documentwrapper">
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="lambda-words">
+  <section id="lambda-words">
 <h1>Lambda Words</h1>
 <p>In zeptoforth the user can define lightweight anonymous functions, known as lambdas, inline in other words with <code class="docutils literal notranslate"><span class="pre">[:</span></code> and <code class="docutils literal notranslate"><span class="pre">;]</span></code>, where <code class="docutils literal notranslate"><span class="pre">[:</span></code> starts compiling a lambda, and <code class="docutils literal notranslate"><span class="pre">;]</span></code> finishes it. compiling the <code class="docutils literal notranslate"><span class="pre">xt</span></code> for the lambda as a literal into the containing word. Multiple lambdas can be nested. Note that lambdas have no headers, making them lighter-weight than normal words. Provided that all words compiled into them are themselves inlined, they can be inlined into other words.</p>
 <p><code class="docutils literal notranslate"><span class="pre">[:</span></code> and <code class="docutils literal notranslate"><span class="pre">;]</span></code> are defined in <code class="docutils literal notranslate"><span class="pre">src/common/forth/basic.fs</span></code>, but the other words discussed here are defined in <code class="docutils literal notranslate"><span class="pre">src/common/forth/lambda.fs</span></code>.</p>

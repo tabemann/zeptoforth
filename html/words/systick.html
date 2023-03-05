@@ -1,7 +1,7 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
@@ -12,7 +12,9 @@
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Random Number Generator Words" href="rng.html" />
@@ -33,35 +35,35 @@
 
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="systick-words">
-<h1>SysTick Words<a class="headerlink" href="#systick-words" title="Permalink to this headline">¶</a></h1>
+  <section id="systick-words">
+<h1>SysTick Words<a class="headerlink" href="#systick-words" title="Permalink to this heading">¶</a></h1>
 <p>There is not much to SysTick, so this will be short. In zeptoforth SysTicks are at 10ths of milliseconds intervals, so:</p>
 <section id="forth">
-<h2><code class="docutils literal notranslate"><span class="pre">forth</span></code><a class="headerlink" href="#forth" title="Permalink to this headline">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">forth</span></code><a class="headerlink" href="#forth" title="Permalink to this heading">¶</a></h2>
 <p>The following word is in <code class="docutils literal notranslate"><span class="pre">forth</span></code>.</p>
 <section id="ms">
-<h3><code class="docutils literal notranslate"><span class="pre">ms</span></code><a class="headerlink" href="#ms" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">ms</span></code><a class="headerlink" href="#ms" title="Permalink to this heading">¶</a></h3>
 <p>( u – )</p>
 <p>where <em>u</em> is the number of milliseconds to wait. Note that this word is replaced with an outwardly equivalent word by <code class="docutils literal notranslate"><span class="pre">sys/common/forth/task.fs</span></code>; unlike that word this word does not take advantage of the timing capabilities provided by <code class="docutils literal notranslate"><span class="pre">sys/common/forth/task.fs</span></code>, even though it does call <code class="docutils literal notranslate"><span class="pre">PAUSE</span></code>.</p>
 </section>
 </section>
 <section id="systick">
-<h2><code class="docutils literal notranslate"><span class="pre">systick</span></code><a class="headerlink" href="#systick" title="Permalink to this headline">¶</a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">systick</span></code><a class="headerlink" href="#systick" title="Permalink to this heading">¶</a></h2>
 <p>The following words are in <code class="docutils literal notranslate"><span class="pre">systick</span></code>.</p>
 <section id="systick-counter">
-<h3><code class="docutils literal notranslate"><span class="pre">systick-counter</span></code><a class="headerlink" href="#systick-counter" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">systick-counter</span></code><a class="headerlink" href="#systick-counter" title="Permalink to this heading">¶</a></h3>
 <p>( – u )</p>
 <p>returns the current SysTick count in 10ths of milliseconds. This value is an unsigned 32-bit value, and will wrap around.</p>
 <p>To wait a given number of milliseconds (not 10ths of milliseconds), one executes:</p>
 <p>To disable SysTicks, execute:</p>
 </section>
 <section id="disable-systick">
-<h3><code class="docutils literal notranslate"><span class="pre">disable-systick</span></code><a class="headerlink" href="#disable-systick" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">disable-systick</span></code><a class="headerlink" href="#disable-systick" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
 <p>To enable SysTicks again, execute:</p>
 </section>
 <section id="enable-systick">
-<h3><code class="docutils literal notranslate"><span class="pre">enable-systick</span></code><a class="headerlink" href="#enable-systick" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">enable-systick</span></code><a class="headerlink" href="#enable-systick" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
 <p>SysTicks are enabled by default once <code class="docutils literal notranslate"><span class="pre">sys/common/forth/systick.fs</span></code> has been loaded and the MCU has been rebooted.</p>
 </section>
@@ -126,6 +128,7 @@
 <li class="toctree-l1"><a class="reference internal" href="oo.html">Object Orientation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lock.html">Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core_lock.html">Core Lock Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="channel.html">Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fchannel.html">Rendezvous Channel Words</a></li>
 <li class="toctree-l1"><a class="reference internal" href="schannel.html">Simple channel Words</a></li>
@@ -167,7 +170,7 @@
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
@@ -184,7 +187,7 @@
       &copy;2020, Travis Bemann.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

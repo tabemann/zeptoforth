@@ -14,7 +14,7 @@
       <div class="documentwrapper">
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="quad-spi-words">
+  <section id="quad-spi-words">
 <h1>Quad SPI words</h1>
 <p>The Quad SPI interface is written for the STM32F746 DISCOVERY board. It maps Quad SPI flash to the addressing space at <code class="docutils literal notranslate"><span class="pre">qspi-base</span></code>. It also provides means for writing bytes, halfwords, words, and arbitrary buffers containing bytes to flash and erasing 4K and 32K subsectors, 64K sectors, and the entire flash. Note that even though internally they require turning off memory-mapped Quad SPI mode, it is automatically turned back on when they are complete, and they are hidden from all other tasks (however they significantly impact realtime performance due to being slow while requiring interrupts to be turned off).</p>
 <section id="qspi">

@@ -14,7 +14,7 @@
       <div class="documentwrapper">
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="channel-words">
+  <section id="channel-words">
 <h1>Channel Words</h1>
 <p>A channel is a monodirectional means of communicating data, as arbitrary-sized blocks of data, between two or more different tasks. Channels form a fixed-size queue onto which data is sent on one end and data is received on the other. Any task which attempts to send data on a full channel, or receive data on an empty channel, will be suspended until either data is received from the channel, or data is sent to the channel, respectively, unless non-blocking operations are used, where then <code class="docutils literal notranslate"><span class="pre">x-would-block</span></code> (declared in <code class="docutils literal notranslate"><span class="pre">task</span></code>) is raised instead of blocking.</p>
 <p>Channels can be created anywhere in memory; they are not dependent upon any allocation mechanism. Therefore they can be put into alloted memory in the dictionary or into allocated memory in the heap. Note that the size of a channel for a given element size and element count may be calculated with <code class="docutils literal notranslate"><span class="pre">chan-size</span></code>.</p>

@@ -241,8 +241,8 @@ begin-module ssd1306
       SSD1306_COLSCAN_DESCENDING >cmd
       \ Set to not flip pages
       SSD1306_COMSCAN_DESCENDING >cmd
-      \ Set COM pins to alternative COM pin mode
-      SSD1306_SETCOMPINS >cmd $12 >cmd
+      \ Set COM pins mode
+      SSD1306_SETCOMPINS >cmd self bitmap-rows @ 32 > if $12 else $02 then >cmd
       \ Set contrast to minimal
       SSD1306_SETCONTRAST >cmd $01 >cmd
       \ Set precharge period to phase1 = 15, phase2 = 1

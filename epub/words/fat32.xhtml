@@ -14,7 +14,7 @@
       <div class="documentwrapper">
           <div class="body" role="main">
             
-  <section class="tex2jax_ignore mathjax_ignore" id="fat32-support">
+  <section id="fat32-support">
 <h1>FAT32 Support</h1>
 <p>zeptoforth includes FAT32 filesystem support combined with MBR partition table support on devices implementing the <code class="docutils literal notranslate"><span class="pre">&lt;block-dev&gt;</span></code> class defined in the module <code class="docutils literal notranslate"><span class="pre">block-dev</span></code> (currently only the <code class="docutils literal notranslate"><span class="pre">&lt;sd&gt;</span></code> class defined in the module <code class="docutils literal notranslate"><span class="pre">sd</span></code>). It supports creating files and directories, reading files and directories, writing files and (indirectly) directories, seeking in files, removing files and (empty) directories, and renaming (but currently not moving) files and directories. It also supports parsing paths within filesystems. It supports reading partition table entries from the MBR, and uses these when initializing FAT32 filesystems.</p>
 <section id="fat32">
@@ -338,9 +338,9 @@
 <p>This member is 8 bytes in size.</p>
 <p>The short file name component, padded with spaces.</p>
 <p>The first byte can have the special values:
-<span class="math notranslate nohighlight">\(00: final entry in the directory entry table
-\)</span>05: the initial byte is actually <span class="math notranslate nohighlight">\(35
-\)</span>2E: the dot entry
+$00: final entry in the directory entry table
+$05: the initial byte is actually $35
+$2E: the dot entry
 $E5: the directory entry has been deleted</p>
 </section>
 <section id="short-file-ext">
@@ -355,14 +355,14 @@ $E5: the directory entry has been deleted</p>
 <p>This member is 1 bytes in size.</p>
 <p>The file attributes.</p>
 <p>There are the following bits:
-<span class="math notranslate nohighlight">\(01: read only
-\)</span>02: hidden
-<span class="math notranslate nohighlight">\(04: system (do not move in the filesystem)
-\)</span>08: volume label
-<span class="math notranslate nohighlight">\(10: subdirectory (subdirectories have a file size of zero)
-\)</span>20: archive
-<span class="math notranslate nohighlight">\(40: device
-\)</span>80: reserved</p>
+$01: read only
+$02: hidden
+$04: system (do not move in the filesystem)
+$08: volume label
+$10: subdirectory (subdirectories have a file size of zero)
+$20: archive
+$40: device
+$80: reserved</p>
 </section>
 <section id="nt-vfat-case">
 <h3><code class="docutils literal notranslate"><span class="pre">nt-vfat-case</span></code></h3>
