@@ -212,7 +212,7 @@ Execute code with a set timeout and return whether that timeout has been reached
 
 Set ESP-AT frame receive callback.
 
-*mux* is the connection ID of the connection in question, or -1 if the ESP-AT device is in single connection mode.
+*mux* is the ID from 0 to 4 of the connection in question, or -1 if the ESP-AT device is in single connection mode.
 
 ##### `esp-at-timeout!`
 ( timeout self -- )

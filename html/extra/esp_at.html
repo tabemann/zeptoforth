@@ -251,7 +251,7 @@
 <h4><code class="docutils literal notranslate"><span class="pre">esp-at-recv-xt!</span></code><a class="headerlink" href="#esp-at-recv-xt" title="Permalink to this heading">¶</a></h4>
 <p>( xt self – ) ( xt: c-addr bytes mux – )</p>
 <p>Set ESP-AT frame receive callback.</p>
-<p><em>mux</em> is the connection ID of the connection in question, or -1 if the ESP-AT device is in single connection mode.</p>
+<p><em>mux</em> is the ID from 0 to 4 of the connection in question, or -1 if the ESP-AT device is in single connection mode.</p>
 </section>
 <section id="esp-at-timeout">
 <h4><code class="docutils literal notranslate"><span class="pre">esp-at-timeout!</span></code><a class="headerlink" href="#esp-at-timeout" title="Permalink to this heading">¶</a></h4>
