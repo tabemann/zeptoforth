@@ -66,3 +66,4 @@ Zeptoforth Documentation
    extra/display
    extra/font
    extra/neopixel
+   extra/esp_at
