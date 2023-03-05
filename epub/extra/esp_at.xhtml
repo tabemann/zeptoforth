@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>ESP-AT and Wio RP2040 ESP-AT Words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="esp-at-and-wio-rp2040-esp-at-words">
+<h1>ESP-AT and Wio RP2040 ESP-AT Words</h1>
+<p>zeptoforth has optional support for the SPI ESP-AT protocol for communicating with the ESP8285 WiFi radio on the Wio RP2040 board. This includes supporting outgoing TCP connections and starting a TCP server. It currently does not support UDP, but this may come in the future.</p>
+<section id="esp-at">
+<h2><code class="docutils literal notranslate"><span class="pre">esp-at</span></code></h2>
+<p>The ESP-AT module is defined in <code class="docutils literal notranslate"><span class="pre">extra/common/esp_at,fs</span></code> and defines the ESP-AT API for interfacing with ESP-AT devices such as the ESP8285 WiFi radio on the Wio RP2040 board.</p>
+<section id="exceptions">
+<h3>Exceptions</h3>
+<section id="x-esp-at-not-owned">
+<h4><code class="docutils literal notranslate"><span class="pre">x-esp-at-not-owned</span></code></h4>
+<p>( – )</p>
+<p>ESP-AT device not owned exception</p>
+</section>
+<section id="x-esp-at-timeout">
+<h4><code class="docutils literal notranslate"><span class="pre">x-esp-at-timeout</span></code></h4>
+<p>( – )</p>
+<p>ESP-AT timeout exception</p>
+</section>
+<section id="x-esp-at-not-ready">
+<h4><code class="docutils literal notranslate"><span class="pre">x-esp-at-not-ready</span></code></h4>
+<p>( – )</p>
+<p>ESP-AT device is not ready exception</p>
+</section>
+<section id="x-esp-at-error">
+<h4><code class="docutils literal notranslate"><span class="pre">x-esp-at-error</span></code></h4>
+<p>( – )</p>
+<p>General ESP-AT error exception</p>
+</section>
+<section id="x-out-of-range-value">
+<h4><code class="docutils literal notranslate"><span class="pre">x-out-of-range-value</span></code></h4>
+<p>( – )</p>
+<p>Out of range value exception</p>
+</section>
+</section>
+<section id="connection-types">
+<h3>Connection types</h3>
+<section id="no-connect">
+<h4><code class="docutils literal notranslate"><span class="pre">no-connect</span></code></h4>
+<p>No connection</p>
+</section>
+<section id="tcp">
+<h4><code class="docutils literal notranslate"><span class="pre">tcp</span></code></h4>
+<p>IPv4 TCP connection</p>
+</section>
+<section id="tcpv6">
+<h4><code class="docutils literal notranslate"><span class="pre">tcpv6</span></code></h4>
+<p>IPv6 TCP connection</p>
+</section>
+<section id="udp">
+<h4><code class="docutils literal notranslate"><span class="pre">udp</span></code></h4>
+<p>IPv4 UDP non-connection</p>
+</section>
+<section id="udpv6">
+<h4><code class="docutils literal notranslate"><span class="pre">udpv6</span></code></h4>
+<p>IPv6 UDP non-connection</p>
+</section>
+<section id="ssl">
+<h4><code class="docutils literal notranslate"><span class="pre">ssl</span></code></h4>
+<p>IPv4 TLS connection</p>
+</section>
+<section id="sslv6">
+<h4><code class="docutils literal notranslate"><span class="pre">sslv6</span></code></h4>
+<p>IPv6 TLS connection</p>
+</section>
+</section>
+<section id="connection-server-client-types">
+<h3>Connection server/client types</h3>
+<section id="client">
+<h4><code class="docutils literal notranslate"><span class="pre">client</span></code></h4>
+<p>ESP-AT device initiated connection</p>
+</section>
+<section id="server">
+<h4><code class="docutils literal notranslate"><span class="pre">server</span></code></h4>
+<p>ESP-AT device received connection</p>
+</section>
+</section>
+<section id="station-interface-statuses">
+<h3>Station interface statuses</h3>
+<section id="station-not-inited">
+<h4><code class="docutils literal notranslate"><span class="pre">station-not-inited</span></code></h4>
+<p>WiFi station is not initialized</p>
+</section>
+<section id="station-not-connected">
+<h4><code class="docutils literal notranslate"><span class="pre">station-not-connected</span></code></h4>
+<p>WiFi station is not connected</p>
+</section>
+<section id="station-connected">
+<h4><code class="docutils literal notranslate"><span class="pre">station-connected</span></code></h4>
+<p>WiFi station is connected</p>
+</section>
+<section id="station-active">
+<h4><code class="docutils literal notranslate"><span class="pre">station-active</span></code></h4>
+<p>WiFi station is active</p>
+</section>
+<section id="station-disconnected">
+<h4><code class="docutils literal notranslate"><span class="pre">station-disconnected</span></code></h4>
+<p>WiFi station is disconnected</p>
+</section>
+<section id="station-attempted-wifi">
+<h4><code class="docutils literal notranslate"><span class="pre">station-attempted-wifi</span></code></h4>
+<p>WiFi station attempted connection unsuccessfully</p>
+</section>
+</section>
+<section id="domain-name-resolution-preferences">
+<h3>Domain name resolution preferences</h3>
+<section id="prefer-resolve-ipv4">
+<h4><code class="docutils literal notranslate"><span class="pre">prefer-resolve-ipv4</span></code></h4>
+<p>Prefer IPv4 addresses when resolving hostname addresses</p>
+</section>
+<section id="resolve-ipv4-only">
+<h4><code class="docutils literal notranslate"><span class="pre">resolve-ipv4-only</span></code></h4>
+<p>Resolve IPv4 addresses only</p>
+</section>
+<section id="resolve-ipv6-only">
+<h4><code class="docutils literal notranslate"><span class="pre">resolve-ipv6-only</span></code></h4>
+<p>Resolve IPv6 addresses only</p>
+</section>
+</section>
+<section id="wifi-modes">
+<h3>WiFi modes</h3>
+<section id="null-mode">
+<h4><code class="docutils literal notranslate"><span class="pre">null-mode</span></code></h4>
+<p>No WiFi mode</p>
+</section>
+<section id="station-mode">
+<h4><code class="docutils literal notranslate"><span class="pre">station-mode</span></code></h4>
+<p>WiFi station mode</p>
+</section>
+<section id="softap-mode">
+<h4><code class="docutils literal notranslate"><span class="pre">softap-mode</span></code></h4>
+<p>WiFi softAP mode</p>
+</section>
+<section id="softap-station-mode">
+<h4><code class="docutils literal notranslate"><span class="pre">softap-station-mode</span></code></h4>
+<p>WiFi softAP/station mode</p>
+</section>
+</section>
+<section id="auto-connect-settings">
+<h3>Auto-connect settings</h3>
+<section id="not-auto-connect">
+<h4><code class="docutils literal notranslate"><span class="pre">not-auto-connect</span></code></h4>
+<p>Do not auto-connect</p>
+</section>
+<section id="auto-connect">
+<h4><code class="docutils literal notranslate"><span class="pre">auto-connect</span></code></h4>
+<p>Auto-connect</p>
+</section>
+</section>
+<section id="sleep-modes">
+<h3>Sleep modes</h3>
+<section id="disable-sleep-mode">
+<h4><code class="docutils literal notranslate"><span class="pre">disable-sleep-mode</span></code></h4>
+<p>Disable sleep mode</p>
+</section>
+<section id="modem-sleep-dtim-mode">
+<h4><code class="docutils literal notranslate"><span class="pre">modem-sleep-dtim-mode</span></code></h4>
+<p>Modem sleep DTIM mode</p>
+</section>
+<section id="light-sleep-mode">
+<h4><code class="docutils literal notranslate"><span class="pre">light-sleep-mode</span></code></h4>
+<p>Light sleep mode</p>
+</section>
+<section id="modem-sleep-listen-interval-mode">
+<h4><code class="docutils literal notranslate"><span class="pre">modem-sleep-listen-interval-mode</span></code></h4>
+<p>Modem interval listen sleep mode</p>
+</section>
+</section>
+<section id="close-all-setting">
+<h3>Close-all setting</h3>
+<section id="not-close-all">
+<h4><code class="docutils literal notranslate"><span class="pre">not-close-all</span></code></h4>
+<p>Do not close existing connections on closing a server</p>
+</section>
+<section id="close-all">
+<h4><code class="docutils literal notranslate"><span class="pre">close-all</span></code></h4>
+<p>Close existing connections on closing a server</p>
+</section>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;esp-at&gt;</span></code></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;esp-at&gt;</span></code> class implements the core of the zeptoforth ESP-AT API.</p>
+<p>It has the following constructor:</p>
+<section id="new">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
+<p>( interface self – )</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;esp-at&gt;</span></code> constructor takes an instance of <code class="docutils literal notranslate"><span class="pre">&lt;wio-esp-at-spi&gt;</span></code> when it is initialized.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;esp-at&gt;</span></code> class has the following methods:</p>
+</section>
+<section id="claim-esp-at">
+<h4><code class="docutils literal notranslate"><span class="pre">claim-esp-at</span></code></h4>
+<p>( self – )</p>
+<p>Claim the ESP-AT device. All other attempts to claim the ESP-AT device will block until the ESP-AT device is released.</p>
+</section>
+<section id="release-esp-at">
+<h4><code class="docutils literal notranslate"><span class="pre">release-esp-at</span></code></h4>
+<p>( self – )</p>
+<p>Release the ESP-AT device. The next task blocked on the ESP-AT device, if there is any, will then claim it.</p>
+</section>
+<section id="with-esp-at">
+<h4><code class="docutils literal notranslate"><span class="pre">with-esp-at</span></code></h4>
+<p>( xt self – ) ( xt: device – )</p>
+<p>Execute code with an ESP-AT device, claiming it beforehand and releasing it afterwards. The ESP-AT device will also be released if an exception occurs, which will be re-raised afterwards.</p>
+</section>
+<section id="with-esp-at-timeout">
+<h4><code class="docutils literal notranslate"><span class="pre">with-esp-at-timeout</span></code></h4>
+<p>( xt timeout self – ) ( xt: – )</p>
+<p>Execute code with a set timeout. The timeout will be restored afterwards, including if an exception ocurs, which will be re-raised?</p>
+</section>
+<section id="catch-with-esp-at-timeout">
+<h4><code class="docutils literal notranslate"><span class="pre">catch-with-esp-at-timeout</span></code></h4>
+<p>( xt timeout self – timed-out? ) ( xt: – )</p>
+<p>Execute code with a set timeout and return whether that timeout has been reached. The timeout will be restored afterwards, including if an exception ocurs, which will be re-raised?</p>
+</section>
+<section id="esp-at-recv-xt">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-recv-xt!</span></code></h4>
+<p>( xt self – ) ( xt: c-addr bytes mux – )</p>
+<p>Set ESP-AT frame receive callback.</p>
+<p><em>mux</em> is the connection ID of the connection in question, or -1 if the ESP-AT device is in single connection mode.</p>
+</section>
+<section id="esp-at-timeout">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-timeout!</span></code></h4>
+<p>( timeout self – )</p>
+<p>Set the ESP-AT device timeout in ticks.</p>
+</section>
+<section id="id2">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-timeout&#64;</span></code></h4>
+<p>( self – timeout )</p>
+<p>Get the ESP-AT device timeout in ticks.</p>
+</section>
+<section id="esp-at-delay">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-delay!</span></code></h4>
+<p>( delay self – )</p>
+<p>Set the ESP-AT delay in microseconds.</p>
+</section>
+<section id="id3">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-delay&#64;</span></code></h4>
+<p>( self – delay )</p>
+<p>Get the ESP-AT delay in microseconds.</p>
+</section>
+<section id="esp-at-long-delay">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-long-delay!</span></code></h4>
+<p>( delay self – )</p>
+<p>Set the ESP-AT long delay in microseconds.</p>
+</section>
+<section id="id4">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-long-delay&#64;</span></code></h4>
+<p>( self – delay )</p>
+<p>Get the ESP-AT long delay in microseconds.</p>
+</section>
+<section id="esp-at-multi">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-multi!</span></code></h4>
+<p>( multi? self – )</p>
+<p>Enable/disable multiple connections.</p>
+</section>
+<section id="id5">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-multi&#64;</span></code></h4>
+<p>( self – multi? )</p>
+<p>Get multiple connections enabled/disabled.</p>
+</section>
+<section id="esp-at-ipv6">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-ipv6!</span></code></h4>
+<p>( ipv6? self – )</p>
+<p>Enable/disable IPv6 mode.</p>
+</section>
+<section id="id6">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-ipv6&#64;</span></code></h4>
+<p>( self – ipv6? )</p>
+<p>Get IPv6 mode enabled/disabled.</p>
+</section>
+<section id="esp-at-sleep">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-sleep!</span></code></h4>
+<p>( sleep-mode self – )</p>
+<p>Set the sleep mode.</p>
+</section>
+<section id="id7">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-sleep&#64;</span></code></h4>
+<p>( self – sleep-mode )</p>
+<p>Get the sleep mode.</p>
+</section>
+<section id="esp-at-status">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-status&#64;</span></code></h4>
+<p>( status self – )</p>
+<p>Get the connection state.</p>
+<p><em>status</em> is an instance of the <code class="docutils literal notranslate"><span class="pre">&lt;esp-at-status&gt;</span></code> class that will be populated by this method.</p>
+</section>
+<section id="esp-at-wifi-power">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-wifi-power!</span></code></h4>
+<p>( power self – )</p>
+<p>Set the WiFi power.</p>
+</section>
+<section id="id8">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-wifi-power&#64;</span></code></h4>
+<p>( self – power )</p>
+<p>Get the WiFi power.</p>
+</section>
+<section id="esp-at-wifi-mode">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-wifi-mode!</span></code></h4>
+<p>( auto-connect-mode wifi-mode self – )</p>
+<p>Set the WiFi mode.</p>
+</section>
+<section id="esp-at-ap-ipv4-addr">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-ap-ipv4-addr&#64;</span></code></h4>
+<p>( self – c-addr bytes found? )</p>
+<p>Get the local softAP IPv4 address.</p>
+</section>
+<section id="esp-at-ap-ipv6-ll-addr">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-ap-ipv6-ll-addr&#64;</span></code></h4>
+<p>( self – c-addr bytes found? )</p>
+<p>Get the local softAP link-local IPv6 address.</p>
+</section>
+<section id="esp-at-ap-ipv6-gl-addr">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-ap-ipv6-gl-addr&#64;</span></code></h4>
+<p>( self – c-addr bytes found? )</p>
+<p>Get the local softAP global IPv6 address.</p>
+</section>
+<section id="esp-at-ap-mac-addr">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-ap-mac-addr&#64;</span></code></h4>
+<p>( self – c-addr bytes found? )</p>
+<p>Get the local softAP MAC address.</p>
+</section>
+<section id="esp-at-station-ipv4-addr">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-station-ipv4-addr&#64;</span></code></h4>
+<p>( self – c-addr bytes found? )</p>
+<p>Get the local station IPv4 address.</p>
+</section>
+<section id="esp-at-station-ipv6-ll-addr">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-station-ipv6-ll-addr&#64;</span></code></h4>
+<p>( self – c-addr bytes found? )</p>
+<p>Get the local station link-local IPv6 address.</p>
+</section>
+<section id="esp-at-station-ipv6-gl-addr">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-station-ipv6-gl-addr&#64;</span></code></h4>
+<p>( self – c-addr bytes found? )</p>
+<p>Get the local station global IPv6 address.</p>
+</section>
+<section id="esp-at-station-mac-addr">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-station-mac-addr&#64;</span></code></h4>
+<p>( self – c-addr bytes found? )</p>
+<p>Get the local station MAC address.</p>
+</section>
+<section id="test-esp-at">
+<h4><code class="docutils literal notranslate"><span class="pre">test-esp-at</span></code></h4>
+<p>( self – )</p>
+<p>Test an ESP-AT device. If the ESP-AT device does not respond <code class="docutils literal notranslate"><span class="pre">x-esp-at-not-ready</span></code> will be raised.</p>
+</section>
+<section id="esp-at-echo">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-echo!</span></code></h4>
+<p>( echo? self – )</p>
+<p>Set ESP-AT command echoing. This is relevant when logging to the serial console is enabled.</p>
+</section>
+<section id="init-esp-at">
+<h4><code class="docutils literal notranslate"><span class="pre">init-esp-at</span></code></h4>
+<p>( mode self – )</p>
+<p>Initialize an ESP-AT device. This must be executed before using an ESP-AT device. This also disconnects any prior connections, puts the ESP-AT device in single connection mode, and sets the WiFi mode to <em>mode</em>.</p>
+</section>
+<section id="reset-esp-at">
+<h4><code class="docutils literal notranslate"><span class="pre">reset-esp-at</span></code></h4>
+<p>( self – )</p>
+<p>Reset an ESP-AT device.</p>
+</section>
+<section id="poll-esp-at">
+<h4><code class="docutils literal notranslate"><span class="pre">poll-esp-at</span></code></h4>
+<p>( self – )</p>
+<p>Poll an ESP-AT device for received data. Any received data is passed to the xt that was specified with <code class="docutils literal notranslate"><span class="pre">esp-at-recv-xt!</span></code>.</p>
+</section>
+<section id="connect-esp-at-wifi">
+<h4><code class="docutils literal notranslate"><span class="pre">connect-esp-at-wifi</span></code></h4>
+<p>( D: password D: ssid self – )</p>
+<p>Connect to a WiFi AP.</p>
+</section>
+<section id="disconnect-esp-at-wifi">
+<h4><code class="docutils literal notranslate"><span class="pre">disconnect-esp-at-wifi</span></code></h4>
+<p>( self – )</p>
+<p>Disconnect from a WiFi AP.</p>
+</section>
+<section id="resolve-esp-at-ip">
+<h4><code class="docutils literal notranslate"><span class="pre">resolve-esp-at-ip</span></code></h4>
+<p>( prefer D: domain – c-addr bytes found )</p>
+<p>Resolve a domain name.</p>
+</section>
+<section id="start-esp-at-single">
+<h4><code class="docutils literal notranslate"><span class="pre">start-esp-at-single</span></code></h4>
+<p>( keep-alive type remote-port D: remote-host self – )</p>
+<p>Start a single ESP-AT TCP connection.</p>
+<p><em>remote-host</em> may be an IPv4 or IPv6 address or a hostname.</p>
+<p><em>keep-alive</em> is 0 for no TCP keep alive functionality, 1-7200 for detection interval in seconds.</p>
+</section>
+<section id="start-esp-at-multi">
+<h4><code class="docutils literal notranslate"><span class="pre">start-esp-at-multi</span></code></h4>
+<p>( keep-alive type remote-port D: remote-host mux self – )</p>
+<p>Start a multiple ESP-AT TCP connection.</p>
+<p><em>mux</em> is an ID from 0 to 4 to assign to the TCP connection.</p>
+<p><em>remote-host</em> may be an IPv4 or IPv6 address or a hostname.</p>
+<p><em>keep-alive</em> is 0 for no TCP keep alive functionality, 1-7200 for detection interval in seconds.</p>
+</section>
+<section id="start-esp-at-server">
+<h4><code class="docutils literal notranslate"><span class="pre">start-esp-at-server</span></code></h4>
+<p>( port self – )</p>
+<p>Start a TCP server.</p>
+<p>Note that prior to executing this multiple connection mode must be enabled with <code class="docutils literal notranslate"><span class="pre">esp-at-multi!</span></code>.</p>
+</section>
+<section id="delete-esp-at-server">
+<h4><code class="docutils literal notranslate"><span class="pre">delete-esp-at-server</span></code></h4>
+<p>( close-all self – )</p>
+<p>Delete a TCP server.</p>
+</section>
+<section id="single-esp-at">
+<h4><code class="docutils literal notranslate"><span class="pre">single&gt;esp-at</span></code></h4>
+<p>( c-addr bytes self – )</p>
+<p>Send data for a single TCP connection to an ESP-AT device.</p>
+</section>
+<section id="multi-esp-at">
+<h4><code class="docutils literal notranslate"><span class="pre">multi&gt;esp-at</span></code></h4>
+<p>( c-addr bytes mux self – )</p>
+<p><em>mux</em> is the ID from 0 to 4 of the TCP connection.</p>
+<p>Send data for a multiple TCP connection to an ESP-AT device.</p>
+</section>
+<section id="close-esp-at-single">
+<h4><code class="docutils literal notranslate"><span class="pre">close-esp-at-single</span></code></h4>
+<p>( self – )</p>
+<p>Close a single TCP connection on an ESP-AT device. Note that with some ESP8285 firmware this may cause a crash.</p>
+</section>
+<section id="close-esp-at-multi">
+<h4><code class="docutils literal notranslate"><span class="pre">close-esp-at-multi</span></code></h4>
+<p>( mux self – )</p>
+<p>Close a multiple TCP connection on an ESP-AT device. Note that with some ESP8285 firmware this may cause a crash.</p>
+<p><em>mux</em> is the ID from 0 to 4 of the TCP connection.</p>
+</section>
+</section>
+<section id="id9">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;esp-at-status&gt;</span></code></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;esp-at-status&gt;</span></code> class encapsulates the ESP-AT device status as reported by <code class="docutils literal notranslate"><span class="pre">esp-at-status&#64;</span></code>.</p>
+<section id="esp-at-status-station">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-status-station!</span></code></h4>
+<p>( station self – )</p>
+<p>Set the station status.</p>
+</section>
+<section id="id10">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-status-station&#64;</span></code></h4>
+<p>( self – station )</p>
+<p>Get the station status.</p>
+</section>
+<section id="esp-at-status-count">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-status-count!</span></code></h4>
+<p>( count self – )</p>
+<p>Set the entry count.</p>
+</section>
+<section id="id11">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-status-count&#64;</span></code></h4>
+<p>( self – count )</p>
+<p>Get the entry count.</p>
+</section>
+<section id="esp-at-status-mux">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-status-mux!</span></code></h4>
+<p>( mux index self – )</p>
+<p>Set the entry link ID.</p>
+</section>
+<section id="id12">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-status-mux&#64;</span></code></h4>
+<p>( index self – mux )</p>
+<p>Get the entry link ID.</p>
+</section>
+<section id="esp-at-status-type">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-status-type!</span></code></h4>
+<p>( type index self – )</p>
+<p>Set the entry link type.</p>
+</section>
+<section id="id13">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-status-type&#64;</span></code></h4>
+<p>( index self – type )</p>
+<p>Get the entry link type.</p>
+</section>
+<section id="esp-at-status-tetype">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-status-tetype!</span></code></h4>
+<p>( tetype index self – )</p>
+<p>Set the entry link server/client type.</p>
+</section>
+<section id="id14">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-status-tetype&#64;</span></code></h4>
+<p>( index self – tetype )</p>
+<p>Get the entry link server/client type.</p>
+</section>
+<section id="esp-at-status-remote-ip">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-status-remote-ip!</span></code></h4>
+<p>( ip-addr ip-len index self – )</p>
+<p>Set the entry link remote IP.</p>
+</section>
+<section id="id15">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-status-remote-ip&#64;</span></code></h4>
+<p>( index self – ip-addr ip-len )</p>
+<p>Get the entry link remove IP.</p>
+</section>
+<section id="esp-at-status-remote-port">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-status-remote-port!</span></code></h4>
+<p>( port index self – )</p>
+<p>Set the entry link remote port.</p>
+</section>
+<section id="id16">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-status-remote-port&#64;</span></code></h4>
+<p>( index self – port )</p>
+<p>Get the entry link remote port.</p>
+</section>
+<section id="esp-at-status-local-port">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-status-local-port!</span></code></h4>
+<p>( port index self – )</p>
+<p>Set the entry link local port.</p>
+</section>
+<section id="id17">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-status-local-port&#64;</span></code></h4>
+<p>( index self – port )</p>
+<p>Get the entry link local port.</p>
+</section>
+<section id="id18">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-status.</span></code></h4>
+<p>( self – )</p>
+<p>Print link status.</p>
+</section>
+</section>
+</section>
+<section id="wio-esp-at">
+<h2><code class="docutils literal notranslate"><span class="pre">wio-esp-at</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">wio-esp-at</span></code> module defined in <code class="docutils literal notranslate"><span class="pre">extra/rp2040/wio_esp_at.fs</span></code> defines the hardware configuration necessary to interface with the ESP8285 WiFi radio on the Wio RP2040 board.</p>
+<section id="wio-esp-at-spi">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;wio-esp-at-spi&gt;</span></code></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;wio-esp-at-spi&gt;</span></code> class provides an interface to the ESP8285 on the Wio RP2040 over SPI peripheral 1. It exposes the following API:</p>
+<section id="esp-at-log">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-log!</span></code></h4>
+<p>( log? self – )</p>
+<p>This sets whether logging is enabled for communications over SPI. Note that logging always goes to the serial console, even if the console has been redirected.</p>
+</section>
+<section id="id19">
+<h4><code class="docutils literal notranslate"><span class="pre">esp-at-log?</span></code></h4>
+<p>( self – log? )</p>
+<p>This gets whether logging is enabled for communications over SPI.</p>
+</section>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

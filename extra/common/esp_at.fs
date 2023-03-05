@@ -803,7 +803,7 @@ begin-module esp-at
       4096 constant esp-at-buffer-size
 
       \ ESP8285 max send once size
-      2048 constant esp-at-max-send-once-size
+      512 constant esp-at-max-send-once-size
 
       \ Frame buffer size
       4096 constant esp-at-frame-buffer-size
@@ -894,7 +894,7 @@ begin-module esp-at
     \ Execute code with a set timeout
     method with-esp-at-timeout ( xt timeout self -- )
 
-    \ Execute code with a set itmeout and return whether that timeout has been
+    \ Execute code with a set timeout and return whether that timeout has been
     \ reached
     method catch-with-esp-at-timeout ( xt timeout self -- timed-out? )
 
@@ -980,7 +980,7 @@ begin-module esp-at
     method esp-at-echo! ( echo? self -- )
 
     \ Initialize an ESP-AT device
-    method init-esp-at ( self -- )
+    method init-esp-at ( mode self -- )
     
     \ Reset an ESP-AT device
     method reset-esp-at ( self -- )
@@ -1010,12 +1010,6 @@ begin-module esp-at
     \ detection interval in seconds.
     method start-esp-at-multi
     ( keep-alive type remote-port D: remote-host mux self -- )
-
-    \ Start a server
-    method start-esp-at-server ( port self -- )
-
-    \ Delete a server
-    method delete-esp-at-server ( close-all? self -- )
 
     \ Start a server
     method start-esp-at-server ( port self -- )
@@ -1441,7 +1435,7 @@ begin-module esp-at
         self esp-at-intf @ esp-at-ready? offset esp-at-buffer-size < and if
           systick-counter start-systick - self esp-at-timeout @ <
           averts x-esp-at-timeout
-          3500. delay-us
+          7000. delay-us
           self esp-at-buffer offset +
           esp-at-buffer-size offset - self esp-at>msg +to offset
         then
