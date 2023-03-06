@@ -314,7 +314,8 @@ begin-module esp-at
 
     \ Default ESP-AT long communication delay in microseconds
     \ 5600 constant esp-at-default-long-delay
-    2100 constant esp-at-default-long-delay
+    5000 constant esp-at-default-long-delay \ DEBUG
+\    4500 constant esp-at-default-long-delay
     
   end-module> import
     
@@ -1435,7 +1436,7 @@ begin-module esp-at
         self esp-at-intf @ esp-at-ready? offset esp-at-buffer-size < and if
           systick-counter start-systick - self esp-at-timeout @ <
           averts x-esp-at-timeout
-          7000. delay-us
+          6500. delay-us
           self esp-at-buffer offset +
           esp-at-buffer-size offset - self esp-at>msg +to offset
         then
@@ -1955,48 +1956,62 @@ begin-module esp-at
     ; define multi>esp-at
 
     \ Send a block of data for a single connection to an ESP-AT device
-    :noname ( c-addr bytes self -- success? )
-      [: { c-addr bytes self }
-        self validate-esp-at-owner
-        self start>esp-at
-        s" AT+CIPSEND=" self msg>esp-at
-        bytes self integer>esp-at
-        s\" \r\n" self msg>esp-at
+    :noname { c-addr bytes self -- success? }
+      self validate-esp-at-owner
+      self start>esp-at
+      s" AT+CIPSEND=" self msg>esp-at
+      bytes self integer>esp-at
+      s\" \r\n" self msg>esp-at
+      self end>esp-at
+      self [: dup { self } ['] filter-gt-error self esp-at>match ;]
+      50000 self catch-with-esp-at-timeout if
+        drop
+        self clear-esp-at-no-parse
         self end>esp-at
-        ['] filter-gt-error self esp-at>match 0= if
+        false
+      else
+        nip 0= if
           self clear-esp-at-no-parse
           c-addr bytes self msg>esp-at
           self end>esp-at
-          ['] filter-send-ok-error self esp-at>match 0=
+          ['] filter-send-ok-error self ['] esp-at>match
+          1200000 self with-esp-at-timeout 0=
         else
           false
         then
-        self esp-at>end
-      ;] critical
+      then
+      self esp-at>end
     ; define single-block>esp-at
       
     \ Send a block of data for a multiple connection to an ESP-AT device
-    :noname ( c-addr bytes mux self -- success? )
-      [: { c-addr bytes mux self }
-        self validate-esp-at-owner
-        mux 4 <= averts x-out-of-range-value
-        self start>esp-at
-        s" AT+CIPSEND=" self msg>esp-at
-        mux self integer>esp-at
-        s" ," self msg>esp-at
-        bytes self integer>esp-at
-        s\" \r\n" self msg>esp-at
+    :noname { c-addr bytes mux self -- success? }
+      self validate-esp-at-owner
+      mux 4 <= averts x-out-of-range-value
+      self start>esp-at
+      s" AT+CIPSEND=" self msg>esp-at
+      mux self integer>esp-at
+      s" ," self msg>esp-at
+      bytes self integer>esp-at
+      s\" \r\n" self msg>esp-at
+      self end>esp-at
+      self [: dup { self } ['] filter-gt-error self esp-at>match ;]
+      50000 self catch-with-esp-at-timeout if
+        drop
+        self clear-esp-at-no-parse
         self end>esp-at
-        ['] filter-gt-error self esp-at>match 0= if
+        false
+      else
+        nip 0= if
           self clear-esp-at-no-parse
           c-addr bytes self msg>esp-at
           self end>esp-at
-          ['] filter-send-ok-error self esp-at>match 0=
+          ['] filter-send-ok-error self ['] esp-at>match
+          1200000 self with-esp-at-timeout 0=
         else
           false
         then
-        self esp-at>end
-      ;] critical
+      then
+      self esp-at>end
     ; define multi-block>esp-at
 
     \ Close a single connection on an ESP-AT device
