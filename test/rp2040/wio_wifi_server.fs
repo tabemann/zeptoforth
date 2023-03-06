@@ -344,7 +344,7 @@ begin-module wifi-server-test
     ['] telnet-key key-hook !
     ['] telnet-key? key?-hook !
     ['] telnet-emit emit-hook !
-    ['] telnet-emit? emit?-hook
+    ['] telnet-emit? emit?-hook !
   ;
 
 end-module
