@@ -309,12 +309,14 @@ begin-module esp-at
     \ Default ESP-AT logging setting
     false constant esp-at-default-log
 
-    \ Default ESP-AT communication delay in microseconds
-    700 constant esp-at-default-delay
+    \ Receive ESP-AT communication delay in microseconds
+    1200. 2constant esp-at-recv-delay
 
-    \ Default ESP-AT long communication delay in microseconds
-    \ 5600 constant esp-at-default-long-delay
-    6000 constant esp-at-default-long-delay
+    \ Short ESP-AT communication delay in microseconds
+    700. 2constant esp-at-short-delay
+    
+    \ Long ESP-AT communication delay in microseconds
+    6000. 2constant esp-at-long-delay
     
   end-module> import
     
@@ -793,12 +795,6 @@ begin-module esp-at
       \ Frame received callback
       cell member esp-at-recv-xt
 
-      \ Communication delay
-      cell member esp-at-delay
-
-      \ Long communication delay
-      cell member esp-at-long-delay
-
       \ Message buffer size
       4096 constant esp-at-buffer-size
 
@@ -839,7 +835,10 @@ begin-module esp-at
       method wait-ready ( start-systick self -- )
 
       \ Delay a fixed amount for communication
-      method comm-delay ( self -- )
+      method recv-comm-delay ( self -- )
+
+      \ Delay a short fixed amount for communication
+      method short-comm-delay ( self -- )
 
       \ Delay a long fixed amount for communication
       method long-comm-delay ( self -- )
@@ -906,18 +905,6 @@ begin-module esp-at
 
     \ Get the ESP-AT device timeout in ticks
     method esp-at-timeout@ ( self -- timeout )
-
-    \ Set the ESP-AT delay in microseconds
-    method esp-at-delay! ( delay self -- )
-
-    \ Get the ESP-AT delay in microseconds
-    method esp-at-delay@ ( self -- delay )
-
-    \ Set the ESP-AT long delay in microseconds
-    method esp-at-long-delay! ( delay self -- )
-
-    \ Get the ESP-AT long delay in microseconds
-    method esp-at-long-delay@ ( self -- delay )
 
     \ Enable/disable multiple connections
     method esp-at-multi! ( multi? self -- )
@@ -1040,8 +1027,6 @@ begin-module esp-at
       intf self esp-at-intf !
       0 self esp-at-owner !
       esp-at-default-timeout self esp-at-timeout !
-      esp-at-default-delay self esp-at-delay !
-      esp-at-default-long-delay self esp-at-long-delay !
       false self esp-at-frame? !
       -1 self esp-at-frame-mux !
       0 self esp-at-frame-size !
@@ -1211,12 +1196,17 @@ begin-module esp-at
 
     \ Delay a fixed amount for communication
     :noname { self -- }
-      self esp-at-delay @ s>d delay-us
-    ; define comm-delay
+      esp-at-recv-delay delay-us
+    ; define recv-comm-delay
 
+    \ Delay a short fixed amount for communication
+    :noname { self -- }
+      esp-at-short-delay delay-us
+    ; define short-comm-delay
+    
     \ Delay a long fixed amount for communication
     :noname { self -- }
-      self esp-at-long-delay @ s>d delay-us
+      esp-at-long-delay delay-us
     ; define long-comm-delay
 
     \ Set the transmission mode
@@ -1290,26 +1280,6 @@ begin-module esp-at
       self esp-at-timeout @
     ; define esp-at-timeout@
     
-    \ Set the ESP-AT device delay in microseconds
-    :noname { delay self -- }
-      delay self esp-at-delay !
-    ; define esp-at-delay!
-
-    \ Get the ESP-AT device delay in microseconds
-    :noname { self -- delay }
-      self esp-at-delay @
-    ; define esp-at-delay@
-    
-    \ Set the ESP-AT device long delay in microseconds
-    :noname { delay self -- }
-      delay self esp-at-long-delay !
-    ; define esp-at-long-delay!
-
-    \ Get the ESP-AT device long delay in microseconds
-    :noname { self -- delay }
-      self esp-at-long-delay @
-    ; define esp-at-long-delay@
-
     \ Validate the ESP-AT device owner
     :noname { self -- }
       self esp-at-owner @ current-task = averts x-esp-at-not-owned
@@ -1323,9 +1293,10 @@ begin-module esp-at
           self esp-at-intf @ esp-at>trans-len { len }
           0 { offset }
           len 0> if
-            self long-comm-delay
+\            self long-comm-delay
             begin offset len < while
-              self comm-delay
+              self recv-comm-delay
+              start-systick self wait-ready
               len offset - 64 min { recv-bytes }
               self esp-at-buffer recv-bytes self esp-at-intf @ esp-at>trans-data
               recv-bytes +to offset
@@ -1349,9 +1320,10 @@ begin-module esp-at
         self esp-at-intf @ esp-at>trans-len { len }
         0 { offset }
         len 0> if
-          self long-comm-delay
+\          self long-comm-delay
           begin offset len < while
-            self comm-delay
+            self recv-comm-delay
+            systick-counter self wait-ready
             len offset - 64 min { recv-bytes }
             self esp-at-buffer 64 self esp-at-intf @ esp-at>trans-data
             recv-bytes +to offset
@@ -1369,7 +1341,7 @@ begin-module esp-at
         0 { offset }
         self long-comm-delay
         begin offset bytes < while
-          self comm-delay
+          self short-comm-delay
           start-systick self wait-ready
           bytes offset - 0 max 64 min { send-bytes }
           c-addr offset + send-bytes self esp-at-intf @ trans-data>esp-at
@@ -1410,9 +1382,10 @@ begin-module esp-at
         self esp-at-intf @ esp-at>trans-len { len }
         0 { offset }
         len 0> if
-          self long-comm-delay
+\          self long-comm-delay
           begin offset len < while
-            self comm-delay
+            self recv-comm-delay
+            systick-counter self wait-ready
             len offset - 0 max 64 min { recv-bytes }
             c-addr offset + recv-bytes self esp-at-intf @ esp-at>trans-data
             recv-bytes +to offset
