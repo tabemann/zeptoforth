@@ -309,14 +309,17 @@ begin-module esp-at
     \ Default ESP-AT logging setting
     false constant esp-at-default-log
 
-    \ Receive ESP-AT communication delay in microseconds
-    1200. 2constant esp-at-recv-delay
+    \ Short receive ESP-AT communication delay in microseconds
+    1000. 2constant esp-at-recv-short-delay
 
-    \ Short ESP-AT communication delay in microseconds
-    700. 2constant esp-at-short-delay
+    \ Long receive ESP-AT communication delay in microseconds
+    1400. 2constant esp-at-recv-long-delay
+
+    \ Short send ESP-AT communication delay in microseconds
+    700. 2constant esp-at-send-short-delay
     
-    \ Long ESP-AT communication delay in microseconds
-    6000. 2constant esp-at-long-delay
+    \ Long send ESP-AT communication delay in microseconds
+    6000. 2constant esp-at-send-long-delay
     
   end-module> import
     
@@ -834,14 +837,17 @@ begin-module esp-at
       \ Wait for ready with timeout
       method wait-ready ( start-systick self -- )
 
-      \ Delay a fixed amount for communication
-      method recv-comm-delay ( self -- )
+      \ Delay a short fixed amount for communication for receiving
+      method recv-short-comm-delay ( self -- )
 
-      \ Delay a short fixed amount for communication
-      method short-comm-delay ( self -- )
+      \ Delay a long fixed amount for communication for receiving
+      method recv-long-comm-delay ( self -- )
 
-      \ Delay a long fixed amount for communication
-      method long-comm-delay ( self -- )
+      \ Delay a short fixed amount for communication for sending
+      method send-short-comm-delay ( self -- )
+
+      \ Delay a long fixed amount for communication for sending
+      method send-long-comm-delay ( self -- )
       
       \ Set the transmission mode
       method esp-at-tx-mode! ( passthrough? self -- )
@@ -1194,20 +1200,25 @@ begin-module esp-at
       until
     ; define wait-ready
 
-    \ Delay a fixed amount for communication
+    \ Delay a short fixed amount for communication for receiving
     :noname { self -- }
-      esp-at-recv-delay delay-us
-    ; define recv-comm-delay
+      esp-at-recv-short-delay delay-us
+    ; define recv-short-comm-delay
 
-    \ Delay a short fixed amount for communication
+    \ Delay a long fixed amount for communication for receiving
     :noname { self -- }
-      esp-at-short-delay delay-us
-    ; define short-comm-delay
+      esp-at-recv-long-delay delay-us
+    ; define recv-long-comm-delay
     
-    \ Delay a long fixed amount for communication
+    \ Delay a short fixed amount for communication for sending
     :noname { self -- }
-      esp-at-long-delay delay-us
-    ; define long-comm-delay
+      esp-at-send-short-delay delay-us
+    ; define send-short-comm-delay
+    
+    \ Delay a long fixed amount for communication for sending
+    :noname { self -- }
+      esp-at-send-long-delay delay-us
+    ; define send-long-comm-delay
 
     \ Set the transmission mode
     :noname { passthrough? self -- }
@@ -1293,10 +1304,10 @@ begin-module esp-at
           self esp-at-intf @ esp-at>trans-len { len }
           0 { offset }
           len 0> if
-\            self long-comm-delay
+            self recv-long-comm-delay
             begin offset len < while
-              self recv-comm-delay
               start-systick self wait-ready
+              self recv-short-comm-delay
               len offset - 64 min { recv-bytes }
               self esp-at-buffer recv-bytes self esp-at-intf @ esp-at>trans-data
               recv-bytes +to offset
@@ -1320,10 +1331,10 @@ begin-module esp-at
         self esp-at-intf @ esp-at>trans-len { len }
         0 { offset }
         len 0> if
-\          self long-comm-delay
+          self recv-long-comm-delay
           begin offset len < while
-            self recv-comm-delay
             systick-counter self wait-ready
+            self recv-short-comm-delay
             len offset - 64 min { recv-bytes }
             self esp-at-buffer 64 self esp-at-intf @ esp-at>trans-data
             recv-bytes +to offset
@@ -1339,9 +1350,9 @@ begin-module esp-at
         systick-counter { start-systick }
         bytes self esp-at-intf @ trans-len>esp-at
         0 { offset }
-        self long-comm-delay
+        self send-long-comm-delay
         begin offset bytes < while
-          self short-comm-delay
+          self send-short-comm-delay
           start-systick self wait-ready
           bytes offset - 0 max 64 min { send-bytes }
           c-addr offset + send-bytes self esp-at-intf @ trans-data>esp-at
@@ -1382,10 +1393,10 @@ begin-module esp-at
         self esp-at-intf @ esp-at>trans-len { len }
         0 { offset }
         len 0> if
-\          self long-comm-delay
+          self recv-long-comm-delay
           begin offset len < while
-            self recv-comm-delay
             systick-counter self wait-ready
+            self recv-short-comm-delay
             len offset - 0 max 64 min { recv-bytes }
             c-addr offset + recv-bytes self esp-at-intf @ esp-at>trans-data
             recv-bytes +to offset
