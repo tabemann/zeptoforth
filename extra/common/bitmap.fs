@@ -26,6 +26,26 @@ begin-module bitmap
   \ Get the size of a bitmap buffer in bytes for a given number of columns and
   \ rows
   : bitmap-buf-size { cols rows --  bytes } rows 8 align 3 rshift cols * ;
+
+  \ Pixel drawing operations
+
+  \ Set pixels
+  0 constant op-set
+
+  \ Or pixels
+  1 constant op-or
+
+  \ And pixels
+  2 constant op-and
+
+  \ Bit-clear pixels
+  3 constant op-bic
+
+  \ Exclusive-or pixels
+  4 constant op-xor
+
+  \ Invalid operation exception
+  : x-invalid-op ( -- ) ." invalid drawing operation" cr ;
   
   \ The <bitmap> class
   <object> begin-class <bitmap>
@@ -67,66 +87,18 @@ begin-module bitmap
     \ Get the state of a pixel
     method pixel@ ( col row bitmap -- state )
       
-    \ Set a pixel with a constant value
-    method set-pixel-const ( const dst-col dst-row dst-bitmap -- )
-    
-    \ Or a pixel with a constant value
-    method or-pixel-const ( const dst-col dst-row dst-bitmap -- )
+    \ Draw a constant pixel on a bitmap
+    method draw-pixel-const ( const dst-col dst-row op dst-bitmap -- )
 
-    \ And a pixel with a constant value
-    method and-pixel-const ( const dst-col dst-row dst-bitmap -- )
+    \ Draw a constant rectangle on a bitmap
+    method draw-rect-const
+    ( const start-dst-col cols start-dst-row rows op dst-bitmap -- )
 
-    \ Bit-clear a pixel with a constant value
-    method bic-pixel-const ( const dst-col dst-row dst-bitmap -- )
+    \ Draw a rectangle on a bitmap from another bitmap
+    method draw-rect
+    ( start-src-col start-dst-col cols start-src-row start-dst-row )
+    ( rows op src-bitmap dst-bitmap -- )
 
-    \ Exclusive-or a pixel with a constant value
-    method xor-pixel-const ( const dst-col dst-row dst-bitmap -- )
-
-    \ Set a rectangle with a constant value
-    method set-rect-const
-    ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
-
-    \ Or a rectangle with a constant value
-    method or-rect-const
-    ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
-
-    \ And a rectangle with a constant value
-    method and-rect-const
-    ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
-
-    \ Bit-clear a rectangle with a constant value
-    method bic-rect-const
-    ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
-
-    \ Exclusive-or a rectangle with a constant value
-    method xor-rect-const
-    ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
-
-    \ Set a rectangle
-    method set-rect
-    ( start-src-col start-dst-col col-count start-src-row start-dst-row )
-    ( row-count src-bitmap dst-bitmap -- )
-    
-    \ Or a rectangle
-    method or-rect
-    ( start-src-col start-dst-col col-count start-src-row start-dst-row )
-    ( row-count src-bitmap dst-bitmap -- )
-    
-    \ And a rectangle
-    method and-rect
-    ( start-src-col start-dst-col col-count start-src-row start-dst-row )
-    ( row-count src-bitmap dst-bitmap -- )
-
-    \ Bit-clear a rectangle
-    method bic-rect
-    ( start-src-col start-dst-col col-count start-src-row start-dst-row )
-    ( row-count src-bitmap dst-bitmap -- )
-
-    \ Exclusive-or a rectangle
-    method xor-rect
-    ( start-src-col start-dst-col col-count start-src-row start-dst-row )
-    ( row-count src-bitmap dst-bitmap -- )
-    
   end-class
 
   <bitmap> begin-implement
@@ -855,8 +827,158 @@ begin-module bitmap
         { src dst } src clip-src dst clip-dst
       ;
         
-    end-module
+      \ Set a pixel with a constant value
+      : set-pixel-const { const dst-col dst-row dst -- }
+        0 dst-col <= 0 dst-row <= and
+        dst-col dst bitmap-cols @ < dst-row dst bitmap-rows @ < and and if
+          dst-col dst-row dst dirty-pixel
+          const dst-row 1 1 dst-col dst set-strip-const
+        then
+      ;
+      
+      \ Or a pixel with a constant value
+      : or-pixel-const { const dst-col dst-row dst -- }
+        0 dst-col <= 0 dst-row <= and
+        dst-col dst bitmap-cols @ < dst-row dst bitmap-rows @ < and and if
+          dst-col dst-row dst dirty-pixel
+          const dst-row 1 1 dst-col dst or-strip-const
+        then
+      ;
 
+      \ And a pixel with a constant value
+      : and-pixel-const { const dst-col dst-row dst -- }
+        0 dst-col <= 0 dst-row <= and
+        dst-col dst bitmap-cols @ < dst-row dst bitmap-rows @ < and and if
+          dst-col dst-row dst dirty-pixel
+          const dst-row 1 1 dst-col dst and-strip-const
+        then
+      ;
+
+      \ Bit-clear a pixel with a constant value
+      : bic-pixel-const { const dst-col dst-row dst -- }
+        0 dst-col <= 0 dst-row <= and
+        dst-col dst bitmap-cols @ < dst-row dst bitmap-rows @ < and and if
+          dst-col dst-row dst dirty-pixel
+          const dst-row 1 1 dst-col dst bic-strip-const
+        then
+      ;
+
+      \ Exclusive-or a pixel with a constant value
+      : xor-pixel-const { const dst-col dst-row dst -- }
+        0 dst-col <= 0 dst-row <= and
+        dst-col dst bitmap-cols @ < dst-row dst bitmap-rows @ < and and if
+          dst-col dst-row dst dirty-pixel
+          const dst-row 1 1 dst-col dst xor-strip-const
+        then
+      ;
+      
+      \ Set a rectangle with a constant value
+      : set-rect-const
+        ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
+        { dst } dst clip-dst-only
+        { const dst-col col-count dst-row row-count }
+        dst-col dup col-count + dst-row dup row-count + dst dirty-area
+        const dst-col col-count dst-row row-count dst
+        ['] set-strip-const blit-const
+      ;
+
+      \ Or a rectangle with a constant value
+      : or-rect-const
+        ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
+        { dst } dst clip-dst-only
+        { const dst-col col-count dst-row row-count }
+        dst-col dup col-count + dst-row dup row-count + dst dirty-area
+        const dst-col col-count dst-row row-count dst
+        ['] or-strip-const blit-const
+      ;
+
+      \ And a rectangle with a constant value
+      : and-rect-const
+        ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
+        { dst } dst clip-dst-only
+        { const dst-col col-count dst-row row-count }
+        dst-col dup col-count + dst-row dup row-count + dst dirty-area
+        const dst-col col-count dst-row row-count dst
+        ['] and-strip-const blit-const
+      ;
+
+      \ Bit-clear a rectangle with a constant value
+      : bic-rect-const
+        ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
+        { dst } dst clip-dst-only
+        { const dst-col col-count dst-row row-count }
+        dst-col dup col-count + dst-row dup row-count + dst dirty-area
+        const dst-col col-count dst-row row-count dst
+        ['] bic-strip-const blit-const
+      ;
+
+      \ Exclusive-or a rectangle with a constant value
+      : xor-rect-const
+        ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
+        { dst } dst clip-dst-only
+        { const dst-col col-count dst-row row-count }
+        dst-col dup col-count + dst-row dup row-count + dst dirty-area
+        const dst-col col-count dst-row row-count dst
+        ['] xor-strip-const blit-const
+      ;
+
+      \ Set a rectangle
+      : set-rect
+        ( start-src-col start-dst-col col-count start-src-row start-dst-row )
+        ( row-count src-bitmap dst-bitmap -- )
+        { src dst } src dst clip
+        { src-col dst-col col-count src-row dst-row row-count }
+        dst-col dup col-count + dst-row dup row-count + dst dirty-area
+        src-col dst-col col-count src-row dst-row row-count src dst
+        ['] set-strip blit
+      ;
+      
+      \ Or a rectangle
+      : or-rect
+        ( start-src-col start-dst-col col-count start-src-row start-dst-row )
+        ( row-count src-bitmap dst-bitmap -- )
+        { src dst } src dst clip
+        { src-col dst-col col-count src-row dst-row row-count }
+        dst-col dup col-count + dst-row dup row-count + dst dirty-area
+        src-col dst-col col-count src-row dst-row row-count src dst
+        ['] or-strip blit
+      ;
+      
+      \ And a rectangle
+      : and-rect
+        ( start-src-col start-dst-col col-count start-src-row start-dst-row )
+        ( row-count src-bitmap dst-bitmap -- )
+        { src dst } src dst clip
+        { src-col dst-col col-count src-row dst-row row-count }
+        dst-col dup col-count + dst-row dup row-count + dst dirty-area
+        src-col dst-col col-count src-row dst-row row-count src dst
+        ['] and-strip blit
+      ;
+
+      \ Bit-clear a rectangle
+      : bic-rect
+        ( start-src-col start-dst-col col-count start-src-row start-dst-row )
+        ( row-count src-bitmap dst-bitmap -- )
+        { src dst } src dst clip
+        { src-col dst-col col-count src-row dst-row row-count }
+        dst-col dup col-count + dst-row dup row-count + dst dirty-area
+        src-col dst-col col-count src-row dst-row row-count src dst
+        ['] bic-strip blit
+      ;
+
+      \ Exclusive-or a rectangle
+      : xor-rect
+        ( start-src-col start-dst-col col-count start-src-row start-dst-row )
+        ( row-count src-bitmap dst-bitmap -- )
+        { src dst } src dst clip
+        { src-col dst-col col-count src-row dst-row row-count }
+        dst-col dup col-count + dst-row dup row-count + dst dirty-area
+        src-col dst-col col-count src-row dst-row row-count src dst
+        ['] xor-strip blit
+      ;
+
+    end-module
+    
     \ Get the state of a pixel
     :noname { col row self -- state }
       0 col <= 0 row <= and
@@ -867,155 +989,43 @@ begin-module bitmap
       then
     ; define pixel@
 
-    \ Set a pixel with a constant value
-    :noname { const dst-col dst-row dst -- }
-      0 dst-col <= 0 dst-row <= and
-      dst-col dst bitmap-cols @ < dst-row dst bitmap-rows @ < and and if
-        dst-col dst-row dst dirty-pixel
-        const dst-row 1 1 dst-col dst set-strip-const
-      then
-    ; define set-pixel-const
-    
-    \ Or a pixel with a constant value
-    :noname { const dst-col dst-row dst -- }
-      0 dst-col <= 0 dst-row <= and
-      dst-col dst bitmap-cols @ < dst-row dst bitmap-rows @ < and and if
-        dst-col dst-row dst dirty-pixel
-        const dst-row 1 1 dst-col dst or-strip-const
-      then
-    ; define or-pixel-const
+    \ Draw a constant pixel on a bitmap
+    :noname ( const dst-col dst-row op dst -- )
+      swap case
+        op-set of set-pixel-const endof
+        op-or of or-pixel-const endof
+        op-and of and-pixel-const endof
+        op-bic of bic-pixel-const endof
+        op-xor of xor-pixel-const endof
+        ['] x-invalid-op ?raise
+      endcase
+    ; define draw-pixel-const
 
-    \ And a pixel with a constant value
-    :noname { const dst-col dst-row dst -- }
-      0 dst-col <= 0 dst-row <= and
-      dst-col dst bitmap-cols @ < dst-row dst bitmap-rows @ < and and if
-        dst-col dst-row dst dirty-pixel
-        const dst-row 1 1 dst-col dst and-strip-const
-      then
-    ; define and-pixel-const
+    \ Draw a constant rectangle on a bitmap
+    :noname ( const start-dst-col cols start-dst-row rows op dst -- )
+      swap case
+        op-set of set-rect-const endof
+        op-or of or-rect-const endof
+        op-and of and-rect-const endof
+        op-bic of bic-rect-const endof
+        op-xor of xor-rect-const endof
+        ['] x-invalid-op ?raise
+      endcase
+    ; define draw-rect-const
 
-    \ Bit-clear a pixel with a constant value
-    :noname { const dst-col dst-row dst -- }
-      0 dst-col <= 0 dst-row <= and
-      dst-col dst bitmap-cols @ < dst-row dst bitmap-rows @ < and and if
-        dst-col dst-row dst dirty-pixel
-        const dst-row 1 1 dst-col dst bic-strip-const
-      then
-    ; define bic-pixel-const
-
-    \ Exclusive-or a pixel with a constant value
-    :noname { const dst-col dst-row dst -- }
-      0 dst-col <= 0 dst-row <= and
-      dst-col dst bitmap-cols @ < dst-row dst bitmap-rows @ < and and if
-        dst-col dst-row dst dirty-pixel
-        const dst-row 1 1 dst-col dst xor-strip-const
-      then
-    ; define xor-pixel-const
-    
-    \ Set a rectangle with a constant value
+    \ Draw a rectangle on a bitmap from another bitmap
     :noname
-      ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
-      { dst } dst clip-dst-only
-      { const dst-col col-count dst-row row-count }
-      dst-col dup col-count + dst-row dup row-count + dst dirty-area
-      const dst-col col-count dst-row row-count dst
-      ['] set-strip-const blit-const
-    ; define set-rect-const
-
-    \ Or a rectangle with a constant value
-    :noname
-      ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
-      { dst } dst clip-dst-only
-      { const dst-col col-count dst-row row-count }
-      dst-col dup col-count + dst-row dup row-count + dst dirty-area
-      const dst-col col-count dst-row row-count dst
-      ['] or-strip-const blit-const
-    ; define or-rect-const
-
-    \ And a rectangle with a constant value
-    :noname
-      ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
-      { dst } dst clip-dst-only
-      { const dst-col col-count dst-row row-count }
-      dst-col dup col-count + dst-row dup row-count + dst dirty-area
-      const dst-col col-count dst-row row-count dst
-      ['] and-strip-const blit-const
-    ; define and-rect-const
-
-    \ Bit-clear a rectangle with a constant value
-    :noname
-      ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
-      { dst } dst clip-dst-only
-      { const dst-col col-count dst-row row-count }
-      dst-col dup col-count + dst-row dup row-count + dst dirty-area
-      const dst-col col-count dst-row row-count dst
-      ['] bic-strip-const blit-const
-    ; define bic-rect-const
-
-    \ Exclusive-or a rectangle with a constant value
-    :noname
-      ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
-      { dst } dst clip-dst-only
-      { const dst-col col-count dst-row row-count }
-      dst-col dup col-count + dst-row dup row-count + dst dirty-area
-      const dst-col col-count dst-row row-count dst
-      ['] xor-strip-const blit-const
-    ; define xor-rect-const
-
-    \ Set a rectangle
-    :noname
-      ( start-src-col start-dst-col col-count start-src-row start-dst-row )
-      ( row-count src-bitmap dst-bitmap -- )
-      { src dst } src dst clip
-      { src-col dst-col col-count src-row dst-row row-count }
-      dst-col dup col-count + dst-row dup row-count + dst dirty-area
-      src-col dst-col col-count src-row dst-row row-count src dst
-      ['] set-strip blit
-    ; define set-rect
-    
-    \ Or a rectangle
-    :noname
-      ( start-src-col start-dst-col col-count start-src-row start-dst-row )
-      ( row-count src-bitmap dst-bitmap -- )
-      { src dst } src dst clip
-      { src-col dst-col col-count src-row dst-row row-count }
-      dst-col dup col-count + dst-row dup row-count + dst dirty-area
-      src-col dst-col col-count src-row dst-row row-count src dst
-      ['] or-strip blit
-    ; define or-rect
-    
-    \ And a rectangle
-    :noname
-      ( start-src-col start-dst-col col-count start-src-row start-dst-row )
-      ( row-count src-bitmap dst-bitmap -- )
-      { src dst } src dst clip
-      { src-col dst-col col-count src-row dst-row row-count }
-      dst-col dup col-count + dst-row dup row-count + dst dirty-area
-      src-col dst-col col-count src-row dst-row row-count src dst
-      ['] and-strip blit
-    ; define and-rect
-
-    \ Bit-clear a rectangle
-    :noname
-      ( start-src-col start-dst-col col-count start-src-row start-dst-row )
-      ( row-count src-bitmap dst-bitmap -- )
-      { src dst } src dst clip
-      { src-col dst-col col-count src-row dst-row row-count }
-      dst-col dup col-count + dst-row dup row-count + dst dirty-area
-      src-col dst-col col-count src-row dst-row row-count src dst
-      ['] bic-strip blit
-    ; define bic-rect
-
-    \ Exclusive-or a rectangle
-    :noname
-      ( start-src-col start-dst-col col-count start-src-row start-dst-row )
-      ( row-count src-bitmap dst-bitmap -- )
-      { src dst } src dst clip
-      { src-col dst-col col-count src-row dst-row row-count }
-      dst-col dup col-count + dst-row dup row-count + dst dirty-area
-      src-col dst-col col-count src-row dst-row row-count src dst
-      ['] xor-strip blit
-    ; define xor-rect
+      ( start-src-col start-dst-col cols start-src-row start-dst-row )
+      ( rows op src dst -- )
+      rot case
+        op-set of set-rect endof
+        op-or of or-rect endof
+        op-and of and-rect endof
+        op-bic of bic-rect endof
+        op-xor of xor-rect endof
+        ['] x-invalid-op ?raise
+      endcase
+    ; define draw-rect
 
   end-implement
   

@@ -68,55 +68,15 @@
 <p>( xn … x0 row character font – )</p>
 <p>This populates row <em>row</em> of the glyph <em>character</em> in font <em>font</em> with bits from one or more cells taken off the stack, where the bits are populated right to left from least significant bit to most significant bit of the cell on the top-most cell on the stack to the bottom-most cell on the stack, with extra bits being discarded. This is not meant for direct user use but by use by fonts to populate glyphs when they are initialized.</p>
 </section>
-<section id="set-char">
-<h3><code class="docutils literal notranslate"><span class="pre">set-char</span></code></h3>
-<p>( character column row bitmap font – )</p>
-<p>This sets a bitmap <em>bitmap</em> to a glyph <em>character</em> of font <em>font</em> with the top left corner of the glyph set to the bitmap being at column <em>column</em> and row <em>row</em>.</p>
+<section id="draw-char">
+<h3><code class="docutils literal notranslate"><span class="pre">draw-char</span></code></h3>
+<p>( character column row op bitmap font – )</p>
+<p>This draws a glyph <em>character</em> of font <em>font</em> with drawing operation <em>op</em> to <em>bitmap</em> with the top left corner of the glyph set to the bitmap being at column <em>column</em> and row <em>row</em>.</p>
 </section>
-<section id="or-char">
-<h3><code class="docutils literal notranslate"><span class="pre">or-char</span></code></h3>
-<p>( character column row bitmap font – )</p>
-<p>This ors a bitmap <em>bitmap</em> to a glyph <em>character</em> of font <em>font</em> with the top left corner of the glyph ored to the bitmap being at column <em>column</em> and row <em>row</em>.</p>
-</section>
-<section id="and-char">
-<h3><code class="docutils literal notranslate"><span class="pre">and-char</span></code></h3>
-<p>( character column row bitmap font – )</p>
-<p>This ands a bitmap <em>bitmap</em> to a glyph <em>character</em> of font <em>font</em> with the top left corner of the glyph anded on the bitmap being at column <em>column</em> and row <em>row</em>.</p>
-</section>
-<section id="bic-char">
-<h3><code class="docutils literal notranslate"><span class="pre">bic-char</span></code></h3>
-<p>( character column row bitmap font – )</p>
-<p>This bit-clears a bitmap <em>bitmap</em> to a glyph <em>character</em> of font <em>font</em> with the top left corner of the glyph bit-cleared on the bitmap being at column <em>column</em> and row <em>row</em>.</p>
-</section>
-<section id="xor-char">
-<h3><code class="docutils literal notranslate"><span class="pre">xor-char</span></code></h3>
-<p>( character column row bitmap font – )</p>
-<p>This exclusive-ors a bitmap <em>bitmap</em> to a glyph <em>character</em> of font <em>font</em> with the top left corner of the glyph exclusive-ored on the bitmap being at column <em>column</em> and row <em>row</em>.</p>
-</section>
-<section id="set-string">
-<h3><code class="docutils literal notranslate"><span class="pre">set-string</span></code></h3>
-<p>( c-addr bytes column row bitmap font – )</p>
-<p>This sets a bitmap <em>bitmap</em> to a string at address <em>c-addr</em> of size <em>bytes</em> of font <em>font</em> with the top left corner of the string’s glyphs set to the bitmap being at column <em>column</em> and row <em>row</em>.</p>
-</section>
-<section id="or-string">
-<h3><code class="docutils literal notranslate"><span class="pre">or-string</span></code></h3>
-<p>( c-addr bytes column row bitmap font – )</p>
-<p>This ors a bitmap <em>bitmap</em> to a string at address <em>c-addr</em> of size <em>bytes</em> of font <em>font</em> with the top left corner of the string’s glyphs ored to the bitmap being at column <em>column</em> and row <em>row</em>.</p>
-</section>
-<section id="and-string">
-<h3><code class="docutils literal notranslate"><span class="pre">and-string</span></code></h3>
-<p>( c-addr bytes column row bitmap font – )</p>
-<p>This ands a bitmap <em>bitmap</em> to a string at address <em>c-addr</em> of size <em>bytes</em> of font <em>font</em> with the top left corner of the string’s glyphs anded to the bitmap being at column <em>column</em> and row <em>row</em>.</p>
-</section>
-<section id="bic-string">
-<h3><code class="docutils literal notranslate"><span class="pre">bic-string</span></code></h3>
-<p>( c-addr bytes column row bitmap font – )</p>
-<p>This bit-clears a bitmap <em>bitmap</em> to a string at address <em>c-addr</em> of size <em>bytes</em> of font <em>font</em> with the top left corner of the string’s glyphs bit-cleared to the bitmap being at column <em>column</em> and row <em>row</em>.</p>
-</section>
-<section id="xor-string">
-<h3><code class="docutils literal notranslate"><span class="pre">xor-string</span></code></h3>
-<p>( c-addr bytes column row bitmap font – )</p>
-<p>This exclusive-ors a bitmap <em>bitmap</em> to a string at address <em>c-addr</em> of size <em>bytes</em> of font <em>font</em> with the top left corner of the string’s glyphs exclusive-ored to the bitmap being at column <em>column</em> and row <em>row</em>.</p>
+<section id="draw-string">
+<h3><code class="docutils literal notranslate"><span class="pre">draw-string</span></code></h3>
+<p>( c-addr bytes column row op bitmap font – )</p>
+<p>This draws a string at address <em>c-addr</em> of size <em>bytes</em> with glyphs from font <em>font</em> with drawing operation <em>op</em> to <em>bitmap</em> with the top left corner of the string’s glyphs set to the bitmap being at column <em>column</em> and row <em>row</em>.</p>
 </section>
 </section>
 <section id="simple-font">

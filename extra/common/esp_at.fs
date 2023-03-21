@@ -310,7 +310,8 @@ begin-module esp-at
     false constant esp-at-default-log
 
     \ Short receive ESP-AT communication delay in microseconds
-    1000. 2constant esp-at-recv-short-delay
+    \ 900. 2constant esp-at-recv-short-delay  \ Good
+    500. 2constant esp-at-recv-short-delay \ Better
 
     \ Long receive ESP-AT communication delay in microseconds
     1400. 2constant esp-at-recv-long-delay
@@ -1358,6 +1359,8 @@ begin-module esp-at
           c-addr offset + send-bytes self esp-at-intf @ trans-data>esp-at
           send-bytes +to offset
         repeat
+        500. delay-us \ New
+        start-systick self wait-ready \ New
       ;] critical
     ; define msg>esp-at
 

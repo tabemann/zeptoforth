@@ -10,6 +10,36 @@ The `<ssd1306>` class implements an SSD1306 device interface and supports all th
 
 The `bitmap` module contains the following words:
 
+##### `op-set`
+( -- operation )
+
+The set bits operation.
+
+##### `op-or`
+( -- operation )
+
+The or bits operation.
+
+##### `op-and`
+( -- operation )
+
+The and bits operation.
+
+##### `op-bic`
+( -- operation )
+
+The clear bits (i.e not-and) operation.
+
+##### `op-xor`
+( -- operation )
+
+The exclusive-or bits operation.
+
+##### `x-invalid-op`
+( -- )
+
+This exception is raised if an invalid drawing operation is specified.
+
 ##### `bitmap-buf-size`
 ( columns rows -- bytes )
 
@@ -56,80 +86,20 @@ Get whether a bitmap is dirty. Note that if a bitmap does not have support for d
 
 Get whether a pixel at *column* and *row* in *bitmap* is on or off, returning true or false respectively. If the pixel is outside the bounds of *bitmap*, false is returned.
 
-##### `set-pixel-const`
-( constant dst-column dst-row dst-bitmap -- )
+##### `draw-pixel-const`
+( constant dst-column dst-row op dst-bitmap -- )
 
-Set a pixel at *dst-column* and *dst-row* of *dst-bitmap* with a constant value consisting of the bit *dst-row* modulo eight of *constant* and mark that pixel as dirty.
+Apply an operation *op* to a pixel at *dst-column* and *dst-row* of *dst-bitmap* with a constant value consisting of the bit *dst-row* modulo eight of *constant* and mark that pixel as dirty.
 
-##### `or-pixel-const`
-( constant dst-column dst-row dst-bitmap -- )
+##### `draw-rect-const`
+( constant dst-column column-count dst-row row-count op dst-bitmap -- )
 
-Or a pixel at *dst-column* and *dst-row* of *dst-bitmap* with a constant value consisting of the bit *dst-row* modulo eight of *constant* and mark that pixel as dirty.
+Apply an operation *op* to a rectangle at *dst-column* to *dst-column* plus *column-count* minus one and *dst-row* to *dst-row* plus *row-count* minus one of *dst-bitmap* with a constant value consisting of the bit row modulo eight of *constant* and mark that pixel as dirty.
 
-##### `and-pixel-const`
-( constant dst-column dst-row dst-bitmap -- )
+##### `draw-rect`
+( src-column dst-column column-count src-row dst-row row-count op src-bitmap dst-bitmap -- )
 
-And a pixel at *dst-column* and *dst-row* of *dst-bitmap* with a constant value consisting of the bit *dst-row* modulo eight of *constant* and mark that pixel as dirty.
-
-##### `bic-pixel-const`
-( constant dst-column dst-row dst-bitmap -- )
-
-Bit-clear a pixel at *dst-column* and *dst-row* of *dst-bitmap* with a constant value consisting of the bit *dst-row* modulo eight of *constant* and mark that pixel as dirty.
-
-##### `xor-pixel-const`
-( constant dst-column dst-row dst-bitmap -- )
-
-Exclusive-or a pixel at *dst-column* and *dst-row* of *dst-bitmap* with a constant value consisting of the bit *dst-row* modulo eight of *constant* and mark that pixel as dirty.
-
-##### `set-rect-const`
-( constant dst-column column-count dst-row row-count dst-bitmap -- )
-
-Set a rectangle at *dst-column* to *dst-column* plus *column-count* minus one and *dst-row* to *dst-row* plus *row-count* minus one of *dst-bitmap* with a constant value consisting of the bit row modulo eight of *constant* and mark that pixel as dirty.
-
-##### `or-rect-const`
-( constant dst-column column-count dst-row row-count dst-bitmap -- )
-
-Or a rectangle at *dst-column* to *dst-column* plus *column-count* minus one and *dst-row* to *dst-row* plus *row-count* minus one of *dst-bitmap* with a constant value consisting of the bit row modulo eight of *constant* and mark that pixel as dirty.
-
-##### `and-rect-const`
-( constant dst-column column-count dst-row row-count dst-bitmap -- )
-
-And a rectangle at *dst-column* to *dst-column* plus *column-count* minus one and *dst-row* to *dst-row* plus *row-count* minus one of *dst-bitmap* with a constant value consisting of the bit row modulo eight of *constant* and mark that pixel as dirty.
-
-##### `bic-rect-const`
-( constant dst-column column-count dst-row row-count dst-bitmap -- )
-
-Bit-clear a rectangle at *dst-column* to *dst-column* plus *column-count* minus one and *dst-row* to *dst-row* plus *row-count* minus one of *dst-bitmap* with a constant value consisting of the bit row modulo eight of *constant* and mark that pixel as dirty.
-
-##### `xor-rect-const`
-( constant dst-column column-count dst-row row-count dst-bitmap -- )
-
-Exclusive-or a rectangle at *dst-column* to *dst-column* plus *column-count* minus one and *dst-row* to *dst-row* plus *row-count* minus one of *dst-bitmap* with a constant value consisting of the bit row modulo eight of *constant* and mark that pixel as dirty.
-
-##### `set-rect`
-( src-column dst-column column-count src-row dst-row row-count src-bitmap dst-bitmap -- )
-
-Set a rectangle in *dst-bitmap* at *dst-column* to *dst-column* plus *column-count* minus one and *dst-row* to *dst-row* plus *row-count* minus one of *dst-bitmap* with the contents of a rectangle in *src-bitmap* at *src-column* to *src-column* plus *column-count* minus one and *src-row* to *src-row* plus *row-count* minus one.
-
-##### `or-rect`
-( src-column dst-column column-count src-row dst-row row-count src-bitmap dst-bitmap -- )
-
-Or a rectangle in *dst-bitmap* at *dst-column* to *dst-column* plus *column-count* minus one and *dst-row* to *dst-row* plus *row-count* minus one of *dst-bitmap* with the contents of a rectangle in *src-bitmap* at *src-column* to *src-column* plus *column-count* minus one and *src-row* to *src-row* plus *row-count* minus one.
-
-##### `and-rect`
-( src-column dst-column column-count src-row dst-row row-count src-bitmap dst-bitmap -- )
-
-And a rectangle in *dst-bitmap* at *dst-column* to *dst-column* plus *column-count* minus one and *dst-row* to *dst-row* plus *row-count* minus one of *dst-bitmap* with the contents of a rectangle in *src-bitmap* at *src-column* to *src-column* plus *column-count* minus one and *src-row* to *src-row* plus *row-count* minus one.
-
-##### `bic-rect`
-( src-column dst-column column-count src-row dst-row row-count src-bitmap dst-bitmap -- )
-
-Bit-clear a rectangle in *dst-bitmap* at *dst-column* to *dst-column* plus *column-count* minus one and *dst-row* to *dst-row* plus *row-count* minus one of *dst-bitmap* with the contents of a rectangle in *src-bitmap* at *src-column* to *src-column* plus *column-count* minus one and *src-row* to *src-row* plus *row-count* minus one.
-
-##### `xor-rect`
-( src-column dst-column column-count src-row dst-row row-count src-bitmap dst-bitmap -- )
-
-Exclusive-or a rectangle in *dst-bitmap* at *dst-column* to *dst-column* plus *column-count* minus one and *dst-row* to *dst-row* plus *row-count* minus one of *dst-bitmap* with the contents of a rectangle in *src-bitmap* at *src-column* to *src-column* plus *column-count* minus one and *src-row* to *src-row* plus *row-count* minus one.
+Apply an operation *op* to a rectangle in *dst-bitmap* at *dst-column* to *dst-column* plus *column-count* minus one and *dst-row* to *dst-row* plus *row-count* minus one of *dst-bitmap* with the contents of a rectangle in *src-bitmap* at *src-column* to *src-column* plus *column-count* minus one and *src-row* to *src-row* plus *row-count* minus one.
 
 ### `ssd1306`
 

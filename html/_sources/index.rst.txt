@@ -65,5 +65,6 @@ Zeptoforth Documentation
    words/expose
    extra/display
    extra/font
+   extra/bitmap_utils
    extra/neopixel
    extra/esp_at

@@ -48,32 +48,32 @@ begin-module ssd1306-test
   \ Run the tests
 
   : set-test { const start-col end-col start-row end-row -- }
-    const start-col end-col over - start-row end-row over - my-ssd1306
-    set-rect-const
+    const start-col end-col over - start-row end-row over -
+    op-set my-ssd1306 draw-rect-const
     my-ssd1306 update-display
   ;
 
   : or-test { const start-col end-col start-row end-row -- }
-    const start-col end-col over - start-row end-row over - my-ssd1306
-    or-rect-const
+    const start-col end-col over - start-row end-row over -
+    op-or my-ssd1306 draw-rect-const
     my-ssd1306 update-display
   ;
   
   : and-test { const start-col end-col start-row end-row -- }
-    const start-col end-col over - start-row end-row over - my-ssd1306
-    and-rect-const
+    const start-col end-col over - start-row end-row over -
+    op-and my-ssd1306 draw-rect-const
     my-ssd1306 update-display
   ;
 
   : bic-test { const start-col end-col start-row end-row -- }
-    const start-col end-col over - start-row end-row over - my-ssd1306
-    bic-rect-const
+    const start-col end-col over - start-row end-row over -
+    op-bic my-ssd1306 draw-rect-const
     my-ssd1306 update-display
   ;
 
   : xor-test { const start-col end-col start-row end-row -- }
-    const start-col end-col over - start-row end-row over - my-ssd1306
-    xor-rect-const
+    const start-col end-col over - start-row end-row over -
+    op-xor my-ssd1306 draw-rect-const
     my-ssd1306 update-display
   ;
   

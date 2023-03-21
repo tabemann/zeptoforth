@@ -43,6 +43,36 @@
 <section id="bitmap">
 <h2><code class="docutils literal notranslate"><span class="pre">bitmap</span></code><a class="headerlink" href="#bitmap" title="Permalink to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">bitmap</span></code> module contains the following words:</p>
+<section id="op-set">
+<h3><code class="docutils literal notranslate"><span class="pre">op-set</span></code><a class="headerlink" href="#op-set" title="Permalink to this heading">¶</a></h3>
+<p>( – operation )</p>
+<p>The set bits operation.</p>
+</section>
+<section id="op-or">
+<h3><code class="docutils literal notranslate"><span class="pre">op-or</span></code><a class="headerlink" href="#op-or" title="Permalink to this heading">¶</a></h3>
+<p>( – operation )</p>
+<p>The or bits operation.</p>
+</section>
+<section id="op-and">
+<h3><code class="docutils literal notranslate"><span class="pre">op-and</span></code><a class="headerlink" href="#op-and" title="Permalink to this heading">¶</a></h3>
+<p>( – operation )</p>
+<p>The and bits operation.</p>
+</section>
+<section id="op-bic">
+<h3><code class="docutils literal notranslate"><span class="pre">op-bic</span></code><a class="headerlink" href="#op-bic" title="Permalink to this heading">¶</a></h3>
+<p>( – operation )</p>
+<p>The clear bits (i.e not-and) operation.</p>
+</section>
+<section id="op-xor">
+<h3><code class="docutils literal notranslate"><span class="pre">op-xor</span></code><a class="headerlink" href="#op-xor" title="Permalink to this heading">¶</a></h3>
+<p>( – operation )</p>
+<p>The exclusive-or bits operation.</p>
+</section>
+<section id="x-invalid-op">
+<h3><code class="docutils literal notranslate"><span class="pre">x-invalid-op</span></code><a class="headerlink" href="#x-invalid-op" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>This exception is raised if an invalid drawing operation is specified.</p>
+</section>
 <section id="bitmap-buf-size">
 <h3><code class="docutils literal notranslate"><span class="pre">bitmap-buf-size</span></code><a class="headerlink" href="#bitmap-buf-size" title="Permalink to this heading">¶</a></h3>
 <p>( columns rows – bytes )</p>
@@ -86,80 +116,20 @@
 <p>( column row bitmap – state )</p>
 <p>Get whether a pixel at <em>column</em> and <em>row</em> in <em>bitmap</em> is on or off, returning true or false respectively. If the pixel is outside the bounds of <em>bitmap</em>, false is returned.</p>
 </section>
-<section id="set-pixel-const">
-<h3><code class="docutils literal notranslate"><span class="pre">set-pixel-const</span></code><a class="headerlink" href="#set-pixel-const" title="Permalink to this heading">¶</a></h3>
-<p>( constant dst-column dst-row dst-bitmap – )</p>
-<p>Set a pixel at <em>dst-column</em> and <em>dst-row</em> of <em>dst-bitmap</em> with a constant value consisting of the bit <em>dst-row</em> modulo eight of <em>constant</em> and mark that pixel as dirty.</p>
+<section id="draw-pixel-const">
+<h3><code class="docutils literal notranslate"><span class="pre">draw-pixel-const</span></code><a class="headerlink" href="#draw-pixel-const" title="Permalink to this heading">¶</a></h3>
+<p>( constant dst-column dst-row op dst-bitmap – )</p>
+<p>Apply an operation <em>op</em> to a pixel at <em>dst-column</em> and <em>dst-row</em> of <em>dst-bitmap</em> with a constant value consisting of the bit <em>dst-row</em> modulo eight of <em>constant</em> and mark that pixel as dirty.</p>
 </section>
-<section id="or-pixel-const">
-<h3><code class="docutils literal notranslate"><span class="pre">or-pixel-const</span></code><a class="headerlink" href="#or-pixel-const" title="Permalink to this heading">¶</a></h3>
-<p>( constant dst-column dst-row dst-bitmap – )</p>
-<p>Or a pixel at <em>dst-column</em> and <em>dst-row</em> of <em>dst-bitmap</em> with a constant value consisting of the bit <em>dst-row</em> modulo eight of <em>constant</em> and mark that pixel as dirty.</p>
+<section id="draw-rect-const">
+<h3><code class="docutils literal notranslate"><span class="pre">draw-rect-const</span></code><a class="headerlink" href="#draw-rect-const" title="Permalink to this heading">¶</a></h3>
+<p>( constant dst-column column-count dst-row row-count op dst-bitmap – )</p>
+<p>Apply an operation <em>op</em> to a rectangle at <em>dst-column</em> to <em>dst-column</em> plus <em>column-count</em> minus one and <em>dst-row</em> to <em>dst-row</em> plus <em>row-count</em> minus one of <em>dst-bitmap</em> with a constant value consisting of the bit row modulo eight of <em>constant</em> and mark that pixel as dirty.</p>
 </section>
-<section id="and-pixel-const">
-<h3><code class="docutils literal notranslate"><span class="pre">and-pixel-const</span></code><a class="headerlink" href="#and-pixel-const" title="Permalink to this heading">¶</a></h3>
-<p>( constant dst-column dst-row dst-bitmap – )</p>
-<p>And a pixel at <em>dst-column</em> and <em>dst-row</em> of <em>dst-bitmap</em> with a constant value consisting of the bit <em>dst-row</em> modulo eight of <em>constant</em> and mark that pixel as dirty.</p>
-</section>
-<section id="bic-pixel-const">
-<h3><code class="docutils literal notranslate"><span class="pre">bic-pixel-const</span></code><a class="headerlink" href="#bic-pixel-const" title="Permalink to this heading">¶</a></h3>
-<p>( constant dst-column dst-row dst-bitmap – )</p>
-<p>Bit-clear a pixel at <em>dst-column</em> and <em>dst-row</em> of <em>dst-bitmap</em> with a constant value consisting of the bit <em>dst-row</em> modulo eight of <em>constant</em> and mark that pixel as dirty.</p>
-</section>
-<section id="xor-pixel-const">
-<h3><code class="docutils literal notranslate"><span class="pre">xor-pixel-const</span></code><a class="headerlink" href="#xor-pixel-const" title="Permalink to this heading">¶</a></h3>
-<p>( constant dst-column dst-row dst-bitmap – )</p>
-<p>Exclusive-or a pixel at <em>dst-column</em> and <em>dst-row</em> of <em>dst-bitmap</em> with a constant value consisting of the bit <em>dst-row</em> modulo eight of <em>constant</em> and mark that pixel as dirty.</p>
-</section>
-<section id="set-rect-const">
-<h3><code class="docutils literal notranslate"><span class="pre">set-rect-const</span></code><a class="headerlink" href="#set-rect-const" title="Permalink to this heading">¶</a></h3>
-<p>( constant dst-column column-count dst-row row-count dst-bitmap – )</p>
-<p>Set a rectangle at <em>dst-column</em> to <em>dst-column</em> plus <em>column-count</em> minus one and <em>dst-row</em> to <em>dst-row</em> plus <em>row-count</em> minus one of <em>dst-bitmap</em> with a constant value consisting of the bit row modulo eight of <em>constant</em> and mark that pixel as dirty.</p>
-</section>
-<section id="or-rect-const">
-<h3><code class="docutils literal notranslate"><span class="pre">or-rect-const</span></code><a class="headerlink" href="#or-rect-const" title="Permalink to this heading">¶</a></h3>
-<p>( constant dst-column column-count dst-row row-count dst-bitmap – )</p>
-<p>Or a rectangle at <em>dst-column</em> to <em>dst-column</em> plus <em>column-count</em> minus one and <em>dst-row</em> to <em>dst-row</em> plus <em>row-count</em> minus one of <em>dst-bitmap</em> with a constant value consisting of the bit row modulo eight of <em>constant</em> and mark that pixel as dirty.</p>
-</section>
-<section id="and-rect-const">
-<h3><code class="docutils literal notranslate"><span class="pre">and-rect-const</span></code><a class="headerlink" href="#and-rect-const" title="Permalink to this heading">¶</a></h3>
-<p>( constant dst-column column-count dst-row row-count dst-bitmap – )</p>
-<p>And a rectangle at <em>dst-column</em> to <em>dst-column</em> plus <em>column-count</em> minus one and <em>dst-row</em> to <em>dst-row</em> plus <em>row-count</em> minus one of <em>dst-bitmap</em> with a constant value consisting of the bit row modulo eight of <em>constant</em> and mark that pixel as dirty.</p>
-</section>
-<section id="bic-rect-const">
-<h3><code class="docutils literal notranslate"><span class="pre">bic-rect-const</span></code><a class="headerlink" href="#bic-rect-const" title="Permalink to this heading">¶</a></h3>
-<p>( constant dst-column column-count dst-row row-count dst-bitmap – )</p>
-<p>Bit-clear a rectangle at <em>dst-column</em> to <em>dst-column</em> plus <em>column-count</em> minus one and <em>dst-row</em> to <em>dst-row</em> plus <em>row-count</em> minus one of <em>dst-bitmap</em> with a constant value consisting of the bit row modulo eight of <em>constant</em> and mark that pixel as dirty.</p>
-</section>
-<section id="xor-rect-const">
-<h3><code class="docutils literal notranslate"><span class="pre">xor-rect-const</span></code><a class="headerlink" href="#xor-rect-const" title="Permalink to this heading">¶</a></h3>
-<p>( constant dst-column column-count dst-row row-count dst-bitmap – )</p>
-<p>Exclusive-or a rectangle at <em>dst-column</em> to <em>dst-column</em> plus <em>column-count</em> minus one and <em>dst-row</em> to <em>dst-row</em> plus <em>row-count</em> minus one of <em>dst-bitmap</em> with a constant value consisting of the bit row modulo eight of <em>constant</em> and mark that pixel as dirty.</p>
-</section>
-<section id="set-rect">
-<h3><code class="docutils literal notranslate"><span class="pre">set-rect</span></code><a class="headerlink" href="#set-rect" title="Permalink to this heading">¶</a></h3>
-<p>( src-column dst-column column-count src-row dst-row row-count src-bitmap dst-bitmap – )</p>
-<p>Set a rectangle in <em>dst-bitmap</em> at <em>dst-column</em> to <em>dst-column</em> plus <em>column-count</em> minus one and <em>dst-row</em> to <em>dst-row</em> plus <em>row-count</em> minus one of <em>dst-bitmap</em> with the contents of a rectangle in <em>src-bitmap</em> at <em>src-column</em> to <em>src-column</em> plus <em>column-count</em> minus one and <em>src-row</em> to <em>src-row</em> plus <em>row-count</em> minus one.</p>
-</section>
-<section id="or-rect">
-<h3><code class="docutils literal notranslate"><span class="pre">or-rect</span></code><a class="headerlink" href="#or-rect" title="Permalink to this heading">¶</a></h3>
-<p>( src-column dst-column column-count src-row dst-row row-count src-bitmap dst-bitmap – )</p>
-<p>Or a rectangle in <em>dst-bitmap</em> at <em>dst-column</em> to <em>dst-column</em> plus <em>column-count</em> minus one and <em>dst-row</em> to <em>dst-row</em> plus <em>row-count</em> minus one of <em>dst-bitmap</em> with the contents of a rectangle in <em>src-bitmap</em> at <em>src-column</em> to <em>src-column</em> plus <em>column-count</em> minus one and <em>src-row</em> to <em>src-row</em> plus <em>row-count</em> minus one.</p>
-</section>
-<section id="and-rect">
-<h3><code class="docutils literal notranslate"><span class="pre">and-rect</span></code><a class="headerlink" href="#and-rect" title="Permalink to this heading">¶</a></h3>
-<p>( src-column dst-column column-count src-row dst-row row-count src-bitmap dst-bitmap – )</p>
-<p>And a rectangle in <em>dst-bitmap</em> at <em>dst-column</em> to <em>dst-column</em> plus <em>column-count</em> minus one and <em>dst-row</em> to <em>dst-row</em> plus <em>row-count</em> minus one of <em>dst-bitmap</em> with the contents of a rectangle in <em>src-bitmap</em> at <em>src-column</em> to <em>src-column</em> plus <em>column-count</em> minus one and <em>src-row</em> to <em>src-row</em> plus <em>row-count</em> minus one.</p>
-</section>
-<section id="bic-rect">
-<h3><code class="docutils literal notranslate"><span class="pre">bic-rect</span></code><a class="headerlink" href="#bic-rect" title="Permalink to this heading">¶</a></h3>
-<p>( src-column dst-column column-count src-row dst-row row-count src-bitmap dst-bitmap – )</p>
-<p>Bit-clear a rectangle in <em>dst-bitmap</em> at <em>dst-column</em> to <em>dst-column</em> plus <em>column-count</em> minus one and <em>dst-row</em> to <em>dst-row</em> plus <em>row-count</em> minus one of <em>dst-bitmap</em> with the contents of a rectangle in <em>src-bitmap</em> at <em>src-column</em> to <em>src-column</em> plus <em>column-count</em> minus one and <em>src-row</em> to <em>src-row</em> plus <em>row-count</em> minus one.</p>
-</section>
-<section id="xor-rect">
-<h3><code class="docutils literal notranslate"><span class="pre">xor-rect</span></code><a class="headerlink" href="#xor-rect" title="Permalink to this heading">¶</a></h3>
-<p>( src-column dst-column column-count src-row dst-row row-count src-bitmap dst-bitmap – )</p>
-<p>Exclusive-or a rectangle in <em>dst-bitmap</em> at <em>dst-column</em> to <em>dst-column</em> plus <em>column-count</em> minus one and <em>dst-row</em> to <em>dst-row</em> plus <em>row-count</em> minus one of <em>dst-bitmap</em> with the contents of a rectangle in <em>src-bitmap</em> at <em>src-column</em> to <em>src-column</em> plus <em>column-count</em> minus one and <em>src-row</em> to <em>src-row</em> plus <em>row-count</em> minus one.</p>
+<section id="draw-rect">
+<h3><code class="docutils literal notranslate"><span class="pre">draw-rect</span></code><a class="headerlink" href="#draw-rect" title="Permalink to this heading">¶</a></h3>
+<p>( src-column dst-column column-count src-row dst-row row-count op src-bitmap dst-bitmap – )</p>
+<p>Apply an operation <em>op</em> to a rectangle in <em>dst-bitmap</em> at <em>dst-column</em> to <em>dst-column</em> plus <em>column-count</em> minus one and <em>dst-row</em> to <em>dst-row</em> plus <em>row-count</em> minus one of <em>dst-bitmap</em> with the contents of a rectangle in <em>src-bitmap</em> at <em>src-column</em> to <em>src-column</em> plus <em>column-count</em> minus one and <em>src-row</em> to <em>src-row</em> plus <em>row-count</em> minus one.</p>
 </section>
 </section>
 <section id="ssd1306">
@@ -269,7 +239,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../words/expose.html">Exposed Kernel Variables</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Bitmaps and Displays</a></li>
 <li class="toctree-l1"><a class="reference internal" href="font.html">Fonts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bitmap_utils.html">Bitmap Utiliteis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="neopixel.html">Neopixels on the RP2040</a></li>
+<li class="toctree-l1"><a class="reference internal" href="esp_at.html">ESP-AT and Wio RP2040 ESP-AT Words</a></li>
 </ul>
 
 <div class="relations">

@@ -36,7 +36,7 @@ begin-module bitmap-utils
       then
       2 dy * dx - { d }
       x1 1+ x0 ?do
-        const i y dst op execute
+        const i y op dst draw-pixel-const
         d 0> if
           yi +to y
           dy dx - 2 * +to d
@@ -55,7 +55,7 @@ begin-module bitmap-utils
       then
       2 dx * dy - { d }
       y1 1+ y0 ?do
-        const x i dst op execute
+        const x i op dst draw-pixel-const
         d 0> if
           xi +to x
           dx dy - 2 * +to d
@@ -76,7 +76,7 @@ begin-module bitmap-utils
       then
       2 dy * dx - { d }
       x1 1+ x0 ?do
-        const i width2/ - width y height2/ - height dst op execute
+        const i width2/ - width y height2/ - height op dst draw-rect-const
         d 0> if
           yi +to y
           dy dx - 2 * +to d
@@ -97,7 +97,7 @@ begin-module bitmap-utils
       then
       2 dx * dy - { d }
       y1 1+ y0 ?do
-        const x width2/ - width i height2/ - height dst op execute
+        const x width2/ - width i height2/ - height op dst draw-rect-const
         d 0> if
           xi +to x
           dx dy - 2 * +to d
@@ -119,7 +119,7 @@ begin-module bitmap-utils
       then
       2 dy * dx - { d }
       x1 1+ x0 ?do
-        src-x i width2/ - width src-y y height2/ - height src dst op execute
+        src-x i width2/ - width src-y y height2/ - height op src dst draw-rect
         d 0> if
           yi +to y
           dy dx - 2 * +to d
@@ -140,7 +140,7 @@ begin-module bitmap-utils
       then
       2 dx * dy - { d }
       y1 1+ y0 ?do
-        src-x x width2/ - width src-y i height2/ - height src dst op execute
+        src-x x width2/ - width src-y i height2/ - height op src dst draw-rect
         d 0> if
           xi +to x
           dx dy - 2 * +to d
@@ -207,10 +207,10 @@ begin-module bitmap-utils
   \ Draw an empty circle on a bitmap with a pixel operation
   : draw-pixel-circle { const x y radius op dst -- }
     1 radius - 0 radius 2* negate 0 radius { f ddx ddy dx dy }
-    const x y radius + dst op execute
-    const x y radius - dst op execute
-    const x radius + y dst op execute
-    const x radius - y dst op execute
+    const x y radius + op dst draw-pixel-const
+    const x y radius - op dst draw-pixel-const
+    const x radius + y op dst draw-pixel-const
+    const x radius - y op dst draw-pixel-const
     begin dx dy < while
       f 0>= if
         dy 1- to dy
@@ -220,14 +220,14 @@ begin-module bitmap-utils
       dx 1+ to dx
       ddx 2 + dup to ddx
       f 1+ + to f
-      const x dx + y dy + dst op execute
-      const x dx - y dy + dst op execute
-      const x dx + y dy - dst op execute
-      const x dx - y dy - dst op execute
-      const x dy + y dx + dst op execute
-      const x dy - y dx + dst op execute
-      const x dy + y dx - dst op execute
-      const x dy - y dx - dst op execute
+      const x dx + y dy + op dst draw-pixel-const
+      const x dx - y dy + op dst draw-pixel-const
+      const x dx + y dy - op dst draw-pixel-const
+      const x dx - y dy - op dst draw-pixel-const
+      const x dy + y dx + op dst draw-pixel-const
+      const x dy - y dx + op dst draw-pixel-const
+      const x dy + y dx - op dst draw-pixel-const
+      const x dy - y dx - op dst draw-pixel-const
     repeat
   ;
 
@@ -235,10 +235,10 @@ begin-module bitmap-utils
   : draw-rect-circle { const width height x y radius op dst -- }
     width 2 / height 2 / { width2/ height2/ }
     1 radius - 0 radius 2* negate 0 radius { f ddx ddy dx dy }
-    const x width2/ - width y radius + height2/ - height dst op execute
-    const x width2/ - width y radius - height2/ - height dst op execute
-    const x radius + width2/ - width y height2/ - height dst op execute
-    const x radius - width2/ - width y height2/ - height dst op execute
+    const x width2/ - width y radius + height2/ - height op dst draw-rect-const
+    const x width2/ - width y radius - height2/ - height op dst draw-rect-const
+    const x radius + width2/ - width y height2/ - height op dst draw-rect-const
+    const x radius - width2/ - width y height2/ - height op dst draw-rect-const
     begin dx dy < while
       f 0>= if
         dy 1- to dy
@@ -248,14 +248,22 @@ begin-module bitmap-utils
       dx 1+ to dx
       ddx 2 + dup to ddx
       f 1+ + to f
-      const x dx + width2/ - width y dy + height2/ - height dst op execute
-      const x dx - width2/ - width y dy + height2/ - height dst op execute
-      const x dx + width2/ - width y dy - height2/ - height dst op execute
-      const x dx - width2/ - width y dy - height2/ - height dst op execute
-      const x dy + width2/ - width y dx + height2/ - height dst op execute
-      const x dy - width2/ - width y dx + height2/ - height dst op execute
-      const x dy + width2/ - width y dx - height2/ - height dst op execute
-      const x dy - width2/ - width y dx - height2/ - height dst op execute
+      const x dx + width2/ - width y dy + height2/ - height
+      op dst draw-rect-const
+      const x dx - width2/ - width y dy + height2/ - height
+      op dst draw-rect-const
+      const x dx + width2/ - width y dy - height2/ - height
+      op dst draw-rect-const
+      const x dx - width2/ - width y dy - height2/ - height
+      op dst draw-rect-const
+      const x dy + width2/ - width y dx + height2/ - height
+      op dst draw-rect-const
+      const x dy - width2/ - width y dx + height2/ - height
+      op dst draw-rect-const
+      const x dy + width2/ - width y dx - height2/ - height
+      op dst draw-rect-const
+      const x dy - width2/ - width y dx - height2/ - height
+      op dst draw-rect-const
     repeat
   ;
   
@@ -264,13 +272,13 @@ begin-module bitmap-utils
     width 2 / height 2 / { width2/ height2/ }
     1 radius - 0 radius 2* negate 0 radius { f ddx ddy dx dy }
     src-x x width2/ - width src-y y radius + height2/ - height
-    src dst op execute
+    op src dst draw-rect
     src-x x width2/ - width src-y y radius - height2/ - height
-    src dst op execute
+    op src dst draw-rect
     src-x x radius + width2/ - width src-y y height2/ - height
-    src dst op execute
+    op src dst draw-rect
     src-x x radius - width2/ - width src-y y height2/ - height
-    src dst op execute
+    op src dst draw-rect
     begin dx dy < while
       f 0>= if
         dy 1- to dy
@@ -281,30 +289,30 @@ begin-module bitmap-utils
       ddx 2 + dup to ddx
       f 1+ + to f
       src-x x dx + width2/ - width src-y y dy + height2/ - height
-      src dst op execute
+      op src dst draw-rect
       src-x x dx - width2/ - width src-y y dy + height2/ - height
-      src dst op execute
+      op src dst draw-rect
       src-x x dx + width2/ - width src-y y dy - height2/ - height
-      src dst op execute
+      op src dst draw-rect
       src-x x dx - width2/ - width src-y y dy - height2/ - height
-      src dst op execute
+      op src dst draw-rect
       src-x x dy + width2/ - width src-y y dx + height2/ - height
-      src dst op execute
+      op src dst draw-rect
       src-x x dy - width2/ - width src-y y dx + height2/ - height
-      src dst op execute
+      op src dst draw-rect
       src-x x dy + width2/ - width src-y y dx - height2/ - height
-      src dst op execute
+      op src dst draw-rect
       src-x x dy - width2/ - width src-y y dx - height2/ - height
-      src dst op execute
+      op src dst draw-rect
     repeat
   ;
 
   \ Draw an filled circle on a bitmap with a rectangle operation
   : draw-filled-circle { const x y radius op dst -- }
     1 radius - 0 radius 2* negate 0 radius { f ddx ddy dx dy }
-    const x 1 y radius + 1 dst op execute
-    const x 1 y radius - 1 dst op execute
-    const x radius - radius 2* y 1 dst op execute
+    const x 1 y radius + 1 op dst draw-rect-const
+    const x 1 y radius - 1 op dst draw-rect-const
+    const x radius - radius 2* y 1 op dst draw-rect-const
     begin dx dy < while
       f 0>= if
         dy 1- to dy
@@ -314,10 +322,10 @@ begin-module bitmap-utils
       dx 1+ to dx
       ddx 2 + dup to ddx
       f 1+ + to f
-      const x dx - dx 2 * y dy + 1 dst op execute
-      const x dx - dx 2 * y dy - 1 dst op execute
-      const x dy - dy 2 * y dx + 1 dst op execute
-      const x dy - dy 2 * y dx - 1 dst op execute
+      const x dx - dx 2 * y dy + 1 op dst draw-rect-const
+      const x dx - dx 2 * y dy - 1 op dst draw-rect-const
+      const x dy - dy 2 * y dx + 1 op dst draw-rect-const
+      const x dy - dy 2 * y dx - 1 op dst draw-rect-const
     repeat
   ;
 

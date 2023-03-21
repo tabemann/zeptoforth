@@ -284,7 +284,7 @@ begin-module read-temp
     readout readout-string-len @
     readout readout-x 2@ f>s
     readout readout-y 2@ f>s
-    my-ssd1306 a-simple-font xor-string
+    op-xor my-ssd1306 a-simple-font draw-string
   ;
   
   \ Move a readout

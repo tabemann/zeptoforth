@@ -57,55 +57,15 @@ The `<font>` class includes the following methods:
 
 This populates row *row* of the glyph *character* in font *font* with bits from one or more cells taken off the stack, where the bits are populated right to left from least significant bit to most significant bit of the cell on the top-most cell on the stack to the bottom-most cell on the stack, with extra bits being discarded. This is not meant for direct user use but by use by fonts to populate glyphs when they are initialized.
 
-##### `set-char`
-( character column row bitmap font -- )
+##### `draw-char`
+( character column row op bitmap font -- )
 
-This sets a bitmap *bitmap* to a glyph *character* of font *font* with the top left corner of the glyph set to the bitmap being at column *column* and row *row*.
+This draws a glyph *character* of font *font* with drawing operation *op* to *bitmap* with the top left corner of the glyph set to the bitmap being at column *column* and row *row*.
 
-##### `or-char`
-( character column row bitmap font -- )
+##### `draw-string`
+( c-addr bytes column row op bitmap font -- )
 
-This ors a bitmap *bitmap* to a glyph *character* of font *font* with the top left corner of the glyph ored to the bitmap being at column *column* and row *row*.
-
-##### `and-char`
-( character column row bitmap font -- )
-
-This ands a bitmap *bitmap* to a glyph *character* of font *font* with the top left corner of the glyph anded on the bitmap being at column *column* and row *row*.
-
-##### `bic-char`
-( character column row bitmap font -- )
-
-This bit-clears a bitmap *bitmap* to a glyph *character* of font *font* with the top left corner of the glyph bit-cleared on the bitmap being at column *column* and row *row*.
-
-##### `xor-char`
-( character column row bitmap font -- )
-
-This exclusive-ors a bitmap *bitmap* to a glyph *character* of font *font* with the top left corner of the glyph exclusive-ored on the bitmap being at column *column* and row *row*.
-
-##### `set-string`
-( c-addr bytes column row bitmap font -- )
-
-This sets a bitmap *bitmap* to a string at address *c-addr* of size *bytes* of font *font* with the top left corner of the string's glyphs set to the bitmap being at column *column* and row *row*.
-
-##### `or-string`
-( c-addr bytes column row bitmap font -- )
-
-This ors a bitmap *bitmap* to a string at address *c-addr* of size *bytes* of font *font* with the top left corner of the string's glyphs ored to the bitmap being at column *column* and row *row*.
-
-##### `and-string`
-( c-addr bytes column row bitmap font -- )
-
-This ands a bitmap *bitmap* to a string at address *c-addr* of size *bytes* of font *font* with the top left corner of the string's glyphs anded to the bitmap being at column *column* and row *row*.
-
-##### `bic-string`
-( c-addr bytes column row bitmap font -- )
-
-This bit-clears a bitmap *bitmap* to a string at address *c-addr* of size *bytes* of font *font* with the top left corner of the string's glyphs bit-cleared to the bitmap being at column *column* and row *row*.
-
-##### `xor-string`
-( c-addr bytes column row bitmap font -- )
-
-This exclusive-ors a bitmap *bitmap* to a string at address *c-addr* of size *bytes* of font *font* with the top left corner of the string's glyphs exclusive-ored to the bitmap being at column *column* and row *row*.
+This draws a string at address *c-addr* of size *bytes* with glyphs from font *font* with drawing operation *op* to *bitmap* with the top left corner of the string's glyphs set to the bitmap being at column *column* and row *row*.
 
 ### `simple-font`
 

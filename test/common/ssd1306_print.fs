@@ -80,7 +80,7 @@ begin-module ssd1306-print
     ;
     
     : draw-cursor { col row -- }
-      $FF col my-char-width * my-char-width row my-char-height * my-char-height my-ssd1306 xor-rect-const
+      $FF col my-char-width * my-char-width row my-char-height * my-char-height op-xor my-ssd1306 draw-rect-const
     ;
 
     : init-ssd1306-text ( -- )
@@ -104,7 +104,8 @@ begin-module ssd1306-print
       dirty-end-row @ dirty-start-row @ ?do
         dirty-end-col @ dirty-start-col @ ?do 
           my-char-buf my-chars-width j * + i + c@
-          my-char-width i * my-char-height j * my-ssd1306 a-simple-font set-char
+          my-char-width i * my-char-height j *
+          op-set my-ssd1306 a-simple-font draw-char
         loop
       loop
       cursor-col @ cursor-row @ draw-cursor

@@ -95,16 +95,16 @@ begin-module snow
         
   : draw-snow ( -- )
     [: { flake }
-      [char] * flake flake-col @ flake flake-row @ my-ssd1306 a-simple-font
-      or-char
+      [char] * flake flake-col @ flake flake-row @
+      op-or my-ssd1306 a-simple-font draw-char
     ;] for-all-flakes
     my-ssd1306 update-display
   ;
 
   : erase-snow ( -- )
     [: { flake }
-      [char] * flake flake-col @ flake flake-row @ my-ssd1306 a-simple-font
-      bic-char
+      [char] * flake flake-col @ flake flake-row @
+      op-bic my-ssd1306 a-simple-font draw-char
     ;] for-all-flakes
   ;
 

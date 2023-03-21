@@ -22,6 +22,7 @@ begin-module balls
 
   oo import
   bitmap import
+  bitmap-utils import
   ssd1306 import
   rng import
   systick import
@@ -115,20 +116,8 @@ begin-module balls
   : init-sprite ( -- )
     my-sprite-buf my-sprite-cols my-sprite-rows
     <bitmap> my-sprite init-object
-    pi 2,0 f* { D: a-circle }
-    a-circle
-    0 my-sprite-cols 1,5 f* 0 my-sprite-rows 2,0 f* d+ f/ { D: incr }
-    0 my-sprite-cols 2,0 f/ { D: half-width }
-    0 my-sprite-rows 2,0 f/ { D: half-height }
-    0,0 { D: angle }
-    begin angle a-circle d<= while
-      angle cos half-width 1,0 d- f* half-width d+ nip
-      0 max my-sprite-cols min { pixel-col }
-      angle sin half-height 1,0 d- f* half-height d+ nip
-      0 max my-sprite-cols min { pixel-row }
-      $FF pixel-col pixel-row my-sprite set-pixel-const
-      angle incr d+ to angle
-    repeat
+    $FF my-sprite-cols 2 / my-sprite-rows 2 / my-sprite-rows 2 / 1-
+    op-set my-sprite draw-pixel-circle
   ;
 
   \ Execute code for each of the balls
@@ -141,7 +130,7 @@ begin-module balls
     ball ball-col 2@ nip my-sprite-cols 2 / - { sprite-col }
     ball ball-row 2@ nip my-sprite-rows 2 / - { sprite-row }
     0 sprite-col my-sprite-cols 0 sprite-row my-sprite-rows
-    my-sprite my-ssd1306 xor-rect
+    op-xor my-sprite my-ssd1306 draw-rect
   ;
 
   \ Move a ball

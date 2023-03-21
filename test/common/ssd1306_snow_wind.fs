@@ -133,16 +133,14 @@ begin-module snow-wind
         
   : draw-snow ( -- )
     [: { flake }
-      [char] * flake flake-coord@ my-ssd1306 a-simple-font
-      or-char
+      [char] * flake flake-coord@ op-or my-ssd1306 a-simple-font draw-char
     ;] for-all-flakes
     my-ssd1306 update-display
   ;
 
   : erase-snow ( -- )
     [: { flake }
-      [char] * flake flake-coord@ my-ssd1306 a-simple-font
-      bic-char
+      [char] * flake flake-coord@ op-bic my-ssd1306 a-simple-font draw-char
     ;] for-all-flakes
   ;
 

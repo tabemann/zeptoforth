@@ -53,7 +53,7 @@ begin-module ssd1306-test
   \ Draw text
   : draw-text { c-addr u col row -- }
     inited? not if init-test true to inited? then
-    c-addr u col row my-ssd1306 a-simple-font set-string
+    c-addr u col row op-set my-ssd1306 a-simple-font draw-string
     my-ssd1306 update-display
   ;
   
@@ -62,9 +62,9 @@ begin-module ssd1306-test
     inited? not if init-test true to inited? then
     0 0 1 1 { column row delta-column delta-row }
     begin key? not while
-      c-addr u column row my-ssd1306 a-simple-font xor-string
+      c-addr u column row op-xor my-ssd1306 a-simple-font draw-string
       my-ssd1306 update-display
-      c-addr u column row my-ssd1306 a-simple-font xor-string
+      c-addr u column row op-xor my-ssd1306 a-simple-font draw-string
       column 7 u * + my-cols >= if
         -1 to delta-column
       else
@@ -94,9 +94,9 @@ begin-module ssd1306-test
       inited? not if init-test true to inited? then
       0 0 1 1 0 { column row delta-column delta-row cycle }
       begin key? not while
-        copy-addr u column row my-ssd1306 a-simple-font xor-string
+        copy-addr u column row op-xor my-ssd1306 a-simple-font draw-string
         my-ssd1306 update-display
-        copy-addr u column row my-ssd1306 a-simple-font xor-string
+        copy-addr u column row op-xor my-ssd1306 a-simple-font draw-string
         column 7 u * + my-cols >= if
           -1 to delta-column
         else
@@ -135,9 +135,9 @@ begin-module ssd1306-test
       begin key? not while
         count 0 <# #s #> { c-addr bytes }
         c-addr buffer bytes move
-        buffer bytes column row my-ssd1306 a-simple-font xor-string
+        buffer bytes column row op-xor my-ssd1306 a-simple-font draw-string
         my-ssd1306 update-display
-        buffer bytes column row my-ssd1306 a-simple-font xor-string
+        buffer bytes column row op-xor my-ssd1306 a-simple-font draw-string
         column 7 bytes * + my-cols >= if
           -1 to delta-column
         else

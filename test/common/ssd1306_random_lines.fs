@@ -43,9 +43,9 @@ begin-module bitmap-line-test
   : run-test ( -- )
     14 15 my-buf my-width my-height SSD1306_I2C_ADDR 1 <ssd1306> my-ssd1306 init-object
     my-sprite-buf my-sprite-width my-sprite-height <bitmap> my-sprite init-object
-    $FF 1 2 0 1 my-sprite set-rect-const
-    $FF 0 4 1 2 my-sprite set-rect-const
-    $FF 1 2 3 1 my-sprite set-rect-const
+    $FF 1 2 0 1 op-set my-sprite draw-rect-const
+    $FF 0 4 1 2 op-set my-sprite draw-rect-const
+    $FF 1 2 3 1 op-set my-sprite draw-rect-const
     
     0 { counter }
     
@@ -54,7 +54,7 @@ begin-module bitmap-line-test
       random my-height umod { start-row }
       random my-width umod { end-col }
       random my-height umod { end-row }
-      0 0 4 4 start-col start-row end-col end-row ['] or-rect my-sprite my-ssd1306 draw-bitmap-line
+      0 0 4 4 start-col start-row end-col end-row op-or my-sprite my-ssd1306 draw-bitmap-line
       my-ssd1306 update-display
       100 ms
       1 +to counter

@@ -114,9 +114,9 @@ begin-module action-bounce
     my-sprite-buf my-sprite-width my-sprite-height
     <bitmap> my-sprite init-object
     my-sprite clear-bitmap
-    $FF 1 2 0 1 my-sprite set-rect-const
-    $FF 0 4 1 2 my-sprite set-rect-const
-    $FF 1 2 3 1 my-sprite set-rect-const
+    $FF 1 2 0 1 op-set my-sprite draw-rect-const
+    $FF 0 4 1 2 op-set my-sprite draw-rect-const
+    $FF 1 2 3 1 op-set my-sprite draw-rect-const
   ;
   
   \ Initialize the test overall
@@ -135,7 +135,7 @@ begin-module action-bounce
   : draw-particle ( -- )
     0 current-data particle-x 2@ nip my-sprite-width
     0 current-data particle-y 2@ nip my-sprite-height
-    my-sprite my-ssd1306 xor-rect
+    op-xor my-sprite my-ssd1306 draw-rect
   ;
   
   \ Bounce a particle off the edges of the display

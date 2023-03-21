@@ -62,9 +62,9 @@ begin-module ssd1306-test
   : init-sprite ( -- )
     my-sprite-buf width height <bitmap> my-sprite init-object
     my-sprite clear-bitmap
-    $FF 1 2 0 1 my-sprite set-rect-const
-    $FF 0 4 1 2 my-sprite set-rect-const
-    $FF 1 2 3 1 my-sprite set-rect-const
+    $FF 1 2 0 1 op-set my-sprite draw-rect-const
+    $FF 0 4 1 2 op-set my-sprite draw-rect-const
+    $FF 1 2 3 1 op-set my-sprite draw-rect-const
   ;
   
   \ Initialize the test
@@ -79,7 +79,7 @@ begin-module ssd1306-test
     inited? not if init-test true to inited? then
     0 0 1 1 { column row delta-column delta-row }
     begin key? not while
-      $FF column width row height my-ssd1306 xor-rect-const
+      $FF column width row height op-xor my-ssd1306 draw-rect-const
       my-ssd1306 update-display
       column width + my-cols >= if
         -1 to delta-column
@@ -107,7 +107,7 @@ begin-module ssd1306-test
     inited? not if init-test true to inited? then
     0 0 1 1 { column row delta-column delta-row }
     begin key? not while
-      0 column width 0 row height my-sprite my-ssd1306 or-rect
+      0 column width 0 row height op-or my-sprite my-ssd1306 draw-rect
       my-ssd1306 update-display
       column width + my-cols >= if
         -1 to delta-column
@@ -135,7 +135,7 @@ begin-module ssd1306-test
     inited? not if init-test true to inited? then
     my-cols 5 / 0 1 1 { column row delta-column delta-row }
     begin key? not while
-      $FF column row my-ssd1306 xor-pixel-const
+      $FF column row op-xor my-ssd1306 draw-pixel-const
       my-ssd1306 update-display
       column my-cols >= if
         -1 to delta-column
@@ -164,7 +164,7 @@ begin-module ssd1306-test
     my-cols 5 / 1 { cycle delta-cycle }
     cycle 0 1 1 { column row delta-column delta-row }
     begin key? not while
-      $FF column row my-ssd1306 xor-pixel-const
+      $FF column row op-xor my-ssd1306 draw-pixel-const
       column my-cols >= if
         -1 to delta-column
       else
@@ -204,7 +204,7 @@ begin-module ssd1306-test
     begin key? not while
       0 random my-cols width - umod width
       0 random my-rows height -  umod height
-      my-sprite my-ssd1306 xor-rect
+      op-xor my-sprite my-ssd1306 draw-rect
       my-ssd1306 update-display
     repeat
     key drop
@@ -214,7 +214,10 @@ begin-module ssd1306-test
   : random-pixels ( -- )
     inited? not if init-test true to inited? then
     begin key? not while
-      256 0 do $FF random my-cols umod random my-rows umod my-ssd1306 xor-pixel-const loop
+      256 0 do
+        $FF random my-cols umod random my-rows umod
+        op-xor my-ssd1306 draw-pixel-const
+      loop
       my-ssd1306 update-display
     repeat
     key drop

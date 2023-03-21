@@ -115,9 +115,9 @@ begin-module life
   : draw-alive-cell { col row -- }
     magnify-life? @ if
       $FF col life-start-col @ - 2 * 2 row life-start-row @ - 2 * 2
-      my-ssd1306 set-rect-const
+      op-set my-ssd1306 draw-rect-const
     else
-      $FF col row my-ssd1306 set-pixel-const
+      $FF col row op-set my-ssd1306 draw-pixel-const
     then
   ;
 
@@ -125,9 +125,9 @@ begin-module life
   : draw-dead-cell { col row -- }
     magnify-life? @ if
       $00 col life-start-col @ - 2 * 2 row life-start-row @ - 2 * 2
-      my-ssd1306 set-rect-const
+      op-set my-ssd1306 draw-rect-const
     else
-      $00 col row my-ssd1306 set-pixel-const
+      $00 col row op-set my-ssd1306 draw-pixel-const
     then
   ;
 

@@ -374,7 +374,7 @@ begin-module read-temp
       self readout-string-len @
       self readout-x 2@ f>s
       self readout-y 2@ f>s
-      self readout-display @ a-simple-font xor-string
+      op-xor self readout-display @ a-simple-font draw-string
     ; define draw-readout
   
     \ Move a readout
