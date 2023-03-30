@@ -142,6 +142,7 @@ begin-module elevator
 
     \ Constructor
     :noname { count elevator -- }
+      count 0> averts x-out-of-range-floor-count
       count max-floor-count <= averts x-out-of-range-floor-count
       elevator <object>->new
       count elevator floor-count !
@@ -224,7 +225,7 @@ begin-module elevator
       ."   LIFT SIMULATOR" cr
       ." #   UP DN STOPS  LIFT" cr
       ." ========================" cr
-      1 elevator floor-count @ ?do
+      1 elevator floor-count @ do
         i elevator draw-floor
         i 1 > if
           i 1- elevator draw-half-floor
@@ -423,7 +424,7 @@ begin-module elevator
     
   end-implement
 
-  \ Run the test
+  \ Run the test with a specified number of floors
   : init-test { count -- }
     count <elevator> [: { elevator }
       elevator run-world
