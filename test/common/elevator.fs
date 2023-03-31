@@ -155,6 +155,9 @@ begin-module elevator
 
     \ Run the world
     :noname { elevator -- }
+      0 0 go-to-coord
+      erase-end-of-line
+      erase-down
       begin
         elevator draw-world
         systick-counter { start-systick }
@@ -220,8 +223,6 @@ begin-module elevator
     \ Draw the the simulator
     :noname { elevator -- }
       0 0 go-to-coord
-      erase-end-of-line
-      erase-down
       ."   LIFT SIMULATOR" cr
       ." #   UP DN STOPS  LIFT" cr
       ." ========================" cr
