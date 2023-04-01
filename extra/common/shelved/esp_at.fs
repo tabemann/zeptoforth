@@ -312,14 +312,15 @@ begin-module esp-at
     \ Short receive ESP-AT communication delay in microseconds
     \ 900. 2constant esp-at-recv-short-delay  \ Good
     \ 500. 2constant esp-at-recv-short-delay \ Better
-    900. 2constant esp-at-recv-short-delay
+    800. 2constant esp-at-recv-short-delay
 
     \ Long receive ESP-AT communication delay in microseconds
     \ 1400. 2constant esp-at-recv-long-delay
     1400. 2constant esp-at-recv-long-delay
 
     \ Short send ESP-AT communication delay in microseconds
-    700. 2constant esp-at-send-short-delay
+    \ 700. 2constant esp-at-send-short-delay
+    1000. 2constant esp-at-send-short-delay
     
     \ Long send ESP-AT communication delay in microseconds
     \ 6000. 2constant esp-at-send-long-delay
@@ -811,7 +812,7 @@ begin-module esp-at
       4096 constant esp-at-buffer-size
 
       \ ESP8285 max send once size
-      512 constant esp-at-max-send-once-size
+      2048 constant esp-at-max-send-once-size
 
       \ Frame buffer size
       4096 constant esp-at-frame-buffer-size
