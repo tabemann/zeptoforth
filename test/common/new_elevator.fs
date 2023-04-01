@@ -322,18 +322,20 @@ begin-module elevator
       ; define recv-display-msg
 
       \ Draw the the simulator
-      :noname { display -- }
-        0 0 go-to-coord
-        ."   LIFT SIMULATOR" cr
-        ." #   UP DN STOPS  LIFT" cr
-        ." ========================" cr
-        1 display display-state floor-count @ do
-          i display draw-floor
-          i 1 > if
-            i 1- display draw-half-floor
-          then
-        -1 +loop
-        ." ========================" cr      
+      :noname ( display -- )
+        [: { display }
+          0 0 go-to-coord
+          ."   LIFT SIMULATOR" cr
+          ." #   UP DN STOPS  LIFT" cr
+          ." ========================" cr
+          1 display display-state floor-count @ do
+            i display draw-floor
+            i 1 > if
+              i 1- display draw-half-floor
+            then
+          -1 +loop
+          ." ========================" cr
+        ;] execute-hide-cursor
       ; define draw-world
 
       \ Draw a floor
@@ -835,6 +837,7 @@ begin-module elevator
 
     \ Run the world
     :noname { world -- }
+      reset-ansi-term
       0 0 go-to-coord
       erase-end-of-line
       erase-down

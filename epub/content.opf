@@ -12,8 +12,8 @@
     <dc:publisher>Travis Bemann</dc:publisher>
     <dc:rights>2020, Travis Bemann</dc:rights>
     <dc:identifier id="unknown">unknown</dc:identifier>
-    <dc:date>2023-03-20T22:21:09Z</dc:date>
-    <meta property="dcterms:modified">2023-03-20T22:21:09Z</meta>
+    <dc:date>2023-03-31T18:16:56Z</dc:date>
+    <meta property="dcterms:modified">2023-03-31T18:16:56Z</meta>
     <meta property="ibooks:version"></meta>
     <meta property="ibooks:specified-fonts">true</meta>
     <meta property="ibooks:binding">true</meta>
@@ -32,9 +32,9 @@
     <item id="epub-7" href="_static/pygments.css" media-type="text/css" />
     <item id="epub-8" href="extra/bitmap_utils.xhtml" media-type="application/xhtml+xml" />
     <item id="epub-9" href="extra/display.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-10" href="extra/esp_at.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-11" href="extra/font.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-12" href="extra/neopixel.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-10" href="extra/font.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-11" href="extra/neopixel.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-12" href="extra/shelved/esp_at.xhtml" media-type="application/xhtml+xml" />
     <item id="epub-13" href="words/action.xhtml" media-type="application/xhtml+xml" />
     <item id="epub-14" href="words/action_pool.xhtml" media-type="application/xhtml+xml" />
     <item id="epub-15" href="words/adc.xhtml" media-type="application/xhtml+xml" />
@@ -155,11 +155,11 @@
     <itemref idref="epub-18" />
     <itemref idref="epub-27" />
     <itemref idref="epub-9" />
-    <itemref idref="epub-11" />
-    <itemref idref="epub-8" />
-    <itemref idref="epub-12" />
     <itemref idref="epub-10" />
+    <itemref idref="epub-8" />
+    <itemref idref="epub-11" />
     <itemref idref="epub-0" />
+    <itemref idref="epub-12" linear="no" />
   </spine>
   <guide>
     <reference type="toc" title="Table of Contents" href="index.xhtml" />

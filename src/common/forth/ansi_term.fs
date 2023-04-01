@@ -48,48 +48,46 @@ begin-module ansi-term
 
   \ Type the CSI sequence
   : csi ( -- )
-    begin-critical $1B emit [char] [ emit end-critical
+    [: $1B emit [char] [ emit ;] critical
   ;
 
   commit-flash
 
   \ Show the cursor
   : show-cursor ( -- )
-    begin-critical csi [char] ? emit 25 (dec.) [char] h emit end-critical
+    [: csi [char] ? emit 25 (dec.) [char] h emit ;] critical
   ;
 
   \ Hide the cursor
   : hide-cursor ( -- )
-    begin-critical csi [char] ? emit 25 (dec.) [char] l emit end-critical
+    [: csi [char] ? emit 25 (dec.) [char] l emit ;] critical
   ;
 
   \ Save the cursor position
-  : save-cursor ( -- ) begin-critical csi [char] s emit end-critical ;
+  : save-cursor ( -- ) [: csi [char] s emit ;] critical ;
 
   \ Restore the cursor position
-  : restore-cursor ( -- ) begin-critical csi [char] u emit end-critical ;
+  : restore-cursor ( -- ) [: csi [char] u emit ;] critical ;
 
   \ Scroll up screen by a number of lines
   : scroll-up ( lines -- )
-    begin-critical csi (dec.) [char] S emit end-critical
+    [: csi (dec.) [char] S emit ;] critical
   ;
 
   \ Move the cursor to specified row and column coordinates
   : go-to-coord ( row column -- )
-    begin-critical
-    swap csi 1+ (dec.) [char] ; emit 1+ (dec.) [char] f emit
-    end-critical
+    [: swap csi 1+ (dec.) [char] ; emit 1+ (dec.) [char] f emit ;] critical
   ;
 
   \ Erase from the cursor to the end of the line
-  : erase-end-of-line ( -- ) begin-critical csi [char] K emit end-critical ;
+  : erase-end-of-line ( -- ) [: csi [char] K emit ;] critical ;
 
   \ Erase the lines below the current line
-  : erase-down ( -- ) begin-critical csi [char] J emit end-critical ;
+  : erase-down ( -- ) [: csi [char] J emit ;] critical ;
 
   \ Query for the cursor position
   : query-cursor-position ( -- )
-    begin-critical csi [char] 6 emit [char] n emit end-critical
+    [: csi [char] 6 emit [char] n emit ;] critical
   ;
 
   commit-flash

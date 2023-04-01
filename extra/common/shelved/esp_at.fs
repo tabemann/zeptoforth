@@ -311,15 +311,19 @@ begin-module esp-at
 
     \ Short receive ESP-AT communication delay in microseconds
     \ 900. 2constant esp-at-recv-short-delay  \ Good
-    500. 2constant esp-at-recv-short-delay \ Better
+    \ 500. 2constant esp-at-recv-short-delay \ Better
+    800. 2constant esp-at-recv-short-delay
 
     \ Long receive ESP-AT communication delay in microseconds
+    \ 1400. 2constant esp-at-recv-long-delay
     1400. 2constant esp-at-recv-long-delay
 
     \ Short send ESP-AT communication delay in microseconds
-    700. 2constant esp-at-send-short-delay
+    \ 700. 2constant esp-at-send-short-delay
+    1000. 2constant esp-at-send-short-delay
     
     \ Long send ESP-AT communication delay in microseconds
+    \ 6000. 2constant esp-at-send-long-delay
     6000. 2constant esp-at-send-long-delay
     
   end-module> import
@@ -617,7 +621,10 @@ begin-module esp-at
 
       \ The Chip Select pin
       cell member esp-at-cs-pin
-      
+
+      \ The SPI RX delay
+      15. 2constant spi-rx-delay
+
     end-module
 
   end-class
@@ -715,6 +722,7 @@ begin-module esp-at
         \ disable-int
         self begin-transact
         buffer 1 self buffer>esp-at
+        spi-rx-delay delay-us \ NEW
         buffer 1 + 4 self esp-at>buffer
         self end-transact
         \ enable-int
@@ -734,6 +742,7 @@ begin-module esp-at
         \ disable-int
         self begin-transact
         buffer 2 self buffer>esp-at
+        spi-rx-delay delay-us \ NEW
         buffer 2 + 64 self esp-at>buffer
         self end-transact
         \ enable-int
@@ -803,7 +812,7 @@ begin-module esp-at
       4096 constant esp-at-buffer-size
 
       \ ESP8285 max send once size
-      512 constant esp-at-max-send-once-size
+      2048 constant esp-at-max-send-once-size
 
       \ Frame buffer size
       4096 constant esp-at-frame-buffer-size
@@ -1353,8 +1362,9 @@ begin-module esp-at
         0 { offset }
         self send-long-comm-delay
         begin offset bytes < while
-          self send-short-comm-delay
+\          self send-short-comm-delay
           start-systick self wait-ready
+          self send-short-comm-delay \ New
           bytes offset - 0 max 64 min { send-bytes }
           c-addr offset + send-bytes self esp-at-intf @ trans-data>esp-at
           send-bytes +to offset
