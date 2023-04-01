@@ -55,12 +55,12 @@ begin-module ansi-term
 
   \ Show the cursor
   : show-cursor ( -- )
-    [: csi [char] ? emit 25 (dec.) [char] h emit ;] critical
+    [: csi [char] ? emit 25 (dec.) [char] h emit ;] critical ;
   ;
 
   \ Hide the cursor
   : hide-cursor ( -- )
-    [: csi [char] ? emit 25 (dec.) [char] l emit ;] critical
+    [: csi [char] ? emit 25 (dec.) [char] l emit ;] critical ;
   ;
 
   \ Save the cursor position
@@ -71,7 +71,7 @@ begin-module ansi-term
 
   \ Scroll up screen by a number of lines
   : scroll-up ( lines -- )
-    [: csi (dec.) [char] S emit ;] critical
+    [: csi (dec.) [char] S emit ;] critical ;
   ;
 
   \ Move the cursor to specified row and column coordinates
@@ -80,10 +80,10 @@ begin-module ansi-term
   ;
 
   \ Erase from the cursor to the end of the line
-  : erase-end-of-line ( -- ) [: csi [char] K emit ;] critical
+  : erase-end-of-line ( -- ) [: csi [char] K emit ;] critical ;
 
   \ Erase the lines below the current line
-  : erase-down ( -- ) [: csi [char] J emit ;] critical
+  : erase-down ( -- ) [: csi [char] J emit ;] critical ;
 
   \ Query for the cursor position
   : query-cursor-position ( -- )
