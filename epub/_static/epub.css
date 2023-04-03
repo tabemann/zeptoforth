@@ -244,6 +244,9 @@ p.sidebar-title {
 }
 
 /* -- topics ---------------------------------------------------------------- */
+nav.contents,
+aside.topic,
+
 div.topic {
     border: 1px solid #ccc;
     padding: 7px 7px 0 7px;

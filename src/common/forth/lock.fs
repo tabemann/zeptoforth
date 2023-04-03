@@ -47,6 +47,9 @@ begin-module lock
       
       \ The next lock held by the holder task
       field: lock-next-held
+
+      \ Lock nesting level
+      field: lock-nest-level
       
     end-structure
     
@@ -224,11 +227,9 @@ begin-module lock
     0 over lock-holder-task !
     0 over lock-first-wait !
     0 over lock-last-wait !
-    0 swap lock-next-held !
+    0 over lock-next-held !
+    0 swap lock-nest-level !
   ;
-
-  \ Double locking exception
-  : x-double-lock ( -- ) ." double locked" cr ;
 
   \ Attempted to unlock a lock not owned by the current task
   : x-not-currently-owned ( -- ) ." lock not owned by current task" cr ;
@@ -239,26 +240,29 @@ begin-module lock
   : claim-lock ( lock -- )
     [:
       s" BEGIN CLAIM LOCK" trace
-      dup lock-holder-task @ current-task = triggers x-double-lock
-      current-task prepare-block
-      dup lock-holder-task @ if
-	dup current-task ['] current-lock for-task !
-	init-lock-wait
-	2dup swap add-lock-wait
-	over update-hold-priority
-	over lock-slock release-slock-block
-	over lock-slock claim-slock
-	[: current-task validate-timeout ;] try ?dup if
-	  >r [:
-	    dup rot remove-lock-wait lock-wait-orig-here @ ram-here!
-	  ;] critical r> ?raise
-	then
-	lock-wait-orig-here @ ram-here!
-	drop
+      dup lock-holder-task @ current-task <> if
+        current-task prepare-block
+        dup lock-holder-task @ if
+          dup current-task ['] current-lock for-task !
+          init-lock-wait
+          2dup swap add-lock-wait
+          over update-hold-priority
+          over lock-slock release-slock-block
+          over lock-slock claim-slock
+          [: current-task validate-timeout ;] try ?dup if
+            >r [:
+              dup rot remove-lock-wait lock-wait-orig-here @ ram-here!
+            ;] critical r> ?raise
+          then
+          lock-wait-orig-here @ ram-here!
+          drop
+        else
+          dup current-task add-lock
+          current-task over lock-holder-task !
+          update-hold-priority
+        then
       else
-	dup current-task add-lock
-	current-task over lock-holder-task !
-	update-hold-priority
+        1 swap lock-nest-level +!
       then
       s" END CLAIM LOCK" trace
     ;] over lock-slock with-slock
@@ -269,19 +273,23 @@ begin-module lock
     [:
       s" BEGIN RELEASE LOCK" trace
       dup lock-holder-task @ current-task = averts x-not-currently-owned
-      dup update-release-priority
-      dup lock-first-wait @ ?dup if
-	dup lock-wait-next @ 2 pick lock-first-wait !
-	over lock-first-wait @ 0= if
-	  0 2 pick lock-last-wait !
-	then
-	lock-wait-task @
-	2dup add-lock
-	2dup swap lock-holder-task !
-	0 over ['] current-lock for-task !
-	swap update-hold-priority
+      dup lock-nest-level @ 0= if
+        dup update-release-priority
+        dup lock-first-wait @ ?dup if
+          dup lock-wait-next @ 2 pick lock-first-wait !
+          over lock-first-wait @ 0= if
+            0 2 pick lock-last-wait !
+          then
+          lock-wait-task @
+          2dup add-lock
+          2dup swap lock-holder-task !
+          0 over ['] current-lock for-task !
+          swap update-hold-priority
+        else
+          0 swap lock-holder-task ! 0     
+        then
       else
-	0 swap lock-holder-task ! 0     
+        -1 swap lock-nest-level +! 0
       then
       s" END RELEASE LOCK" trace
     ;] over lock-slock with-slock
