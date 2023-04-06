@@ -229,7 +229,7 @@ begin-module int-io
     ;
 
     : do-flush-console ( -- )
-      [: tx-empty? ;] wait
+      [: tx-empty? TXE USART2_ISR bit@ and ;] wait
     ;
 
     \ Set non-internal

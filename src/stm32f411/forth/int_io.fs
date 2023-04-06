@@ -222,7 +222,7 @@ begin-module int-io
     ;
 
     : do-flush-console ( -- )
-      [: tx-empty? ;] wait
+      [: tx-empty? TXE USART2_SR bit@ and ;] wait
     ;
 
   end-module> import
