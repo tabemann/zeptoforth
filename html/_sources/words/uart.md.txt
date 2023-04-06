@@ -62,7 +62,7 @@ Get whether a byte is ready to be read from a UART.
 ##### `flush-uart`
 ( uart -- )
 
-Flush a UART's transmit buffer.
+Flush a UART's transmit buffer. This flushes both the in-RAM transmit buffer and the UART's transmit FIFO. Note that this does not flush data in any bitwise shift register, so to truly guarantee every bit has been transmitted a delay of (1 / baud rate) * 10 (for 8 data bits, 1 start bit, and 1 stop bit) after executing this is necessary.
 
 ##### `uart-alternate`
 ( uart -- )
