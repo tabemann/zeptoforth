@@ -23,7 +23,7 @@ begin-module usb
   armv6m import
 
   \ Invalid packet size exception
-  : x-invalid-packet-size ( -- ) ." invalid USB packet size" cr ;
+  : x-invalid-pkt-size ( -- ) ." invalid USB packet size" cr ;
 
   \ Convert byte endianness of a word
   : rev ( x -- x' ) [inlined] code[ tos tos rev_,_ ]code ;
@@ -40,6 +40,36 @@ begin-module usb
 
   \ USB setup packet address
   USB_Base constant USB_SETUP_PACKET
+
+  \ USB endpoint in control
+  : USB_EP_IN_CONTROL ( endpoint -- ) 3 lshift USB_Base + ;
+
+  \ USB endpoint out control
+  : USP_EP_OUT_CONTROL ( endpoint -- ) 3 lshift [ USB_Base cell+ ] literal + ;
+
+  \ USB endpoint enable
+  31 bit constant USB_EP_ENABLE
+
+  \ USB double-buffered
+  30 bit constant USB_EP_DOUBLE_BUFFER
+
+  \ USB enable interrupt for every transferred buffer
+  29 bit constant USB_EP_ENABLE_INTERRUPT_PER_BUFFER
+
+  \ USB enable interrupt for every 2 transferred buffers (double-buffer only)
+  28 bit constant USB_EP_ENABLE_INTERRUPT_PER_2_BUFFERS
+
+  \ USB endpoint type bitshift
+  26 constant USB_EP_ENDPOINT_TYPE_LSB
+
+  \ USB endpoint interrupt on stall
+  17 bit constant USB_EP_INTERRUPT_ON_STALL
+
+  \ USB endpoint interrupt on NAK
+  16 bit constant USB_EP_INTERRUPT_ON_NAK
+
+  \ USB endpoint data buffer address bitshift
+  0 constant USB_EP_ADDRESS_BASE_OFFSET_LSB
   
   \ USB dual-ported RAM size
   4096 constant dpram-size
@@ -63,6 +93,22 @@ begin-module usb
   10 constant USB_REQUEST_GET_INTERFACE
   11 constant USB_REQUEST_SET_INTERFACE
   12 constant USB_REQUEST_SYNC_FRAME
+
+  \ Endpoint types
+  0 constant USB_EP_TYPE_CONTROL
+  1 constant USB_EP_TYPE_ISO
+  2 constant USB_EP_TYPE_BULK
+  3 constant USB_EP_TYPE_INTERRUPT
+
+  \ Configuration attributes
+  7 bit constant USB_CONFIG_BUS_POWERED
+  6 bit constant USB_CONFIG_SELF_POWERED
+  
+  \ Endpoint out address
+  : USB_EP_OUT_ADDR ( u -- addr ) ;
+
+  \ Endpoint in address
+  : USB_EP_IN_ADDR ( u -- addr ) 128 + ;
 
   \ Device descriptor data
   create dev-data
@@ -105,7 +151,7 @@ begin-module usb
   \ Configuration descriptor
   \ Descriptor length
   9 c,
-  \ Descriptor type (2 = configuration descriptor)
+  \ Descriptor type
   USB_DT_CONFIG c,
   \ Total length of all descriptors
   67 2c,
@@ -115,15 +161,15 @@ begin-module usb
   1 c,
   \ Configuration string descriptor index (0 = none)
   0 c,
-  \ Attribute bitmap (bit 7 = bus powered, bit 6 = self powered)
-  $C0 c,
+  \ Attribute bitmap
+  USB_CONFIG_BUS_POWERED USB_CONFIG_SELF_POWERED or c,
   \ Maximum power in steps of 2 mA
   100 2 / c,
 
   \ Interface descriptor
   \ Descriptor length
   9 c,
-  \ Descriptor type (4 = interface descriptor)
+  \ Descriptor type
   USB_DT_INTERFACE c,
   \ Interface number
   0 c,
@@ -152,12 +198,12 @@ begin-module usb
   \ Endpoint descriptor
   \ Descriptor length
   7 c,
-  \ Descriptor type (5 = endpoint descriptor)
+  \ Descriptor type
   USB_DT_ENDPOINT c,
-  \ Endpoint address (endpoint = 2, direction = in)
-  130 c,
-  \ Attributes (type = interrupt)
-  3 c,
+  \ Endpoint address
+  2 USB_EP_IN_ADDR c,
+  \ Attributes
+  USB_EP_TYPE_INTERRUPT c,
   \ Maximum packet size
   8 2c,
   \ Polling interval in ms (slow?)
@@ -166,7 +212,7 @@ begin-module usb
   \ Interface descriptor
   \ Descriptor length
   9 c,
-  \ Descriptor type (4 = interface descriptor)
+  \ Descriptor type
   USB_DT_INTERFACE c,
   \ Interface number
   1 c,
@@ -186,12 +232,12 @@ begin-module usb
   \ Endpoint descriptor
   \ Descriptor length
   7 c,
-  \ Descriptor type (5 = endpoint descriptor)
+  \ Descriptor type
   USB_DT_ENDPOINT c,
-  \ Endpoint address (endpoint = 1, direction = out)
-  1 c,
-  \ Attributes (type = bulk)
-  2 c,
+  \ Endpoint address
+  1 USB_EP_OUT_ADDR c,
+  \ Attributes
+  USB_EP_TYPE_BULK c,
   \ Maximum packet size
   64 c,
   \ Polling interval (ignored)
@@ -200,12 +246,12 @@ begin-module usb
   \ Endpoint descriptor
   \ Descriptor length
   7 c,
-  \ Descriptor type (5 = endpoint descriptor)
+  \ Descriptor type
   USB_DT_ENDPOINT c,
-  \ Endpoint address (endpoint = 1, direction = in)
-  129 c,
-  \ Attributes (type = bulk)
-  2 c,
+  \ Endpoint address
+  1 USB_EP_IN_ADDR c,
+  \ Attributes
+  USB_EP_TYPE_BULK c,
   \ Maximum packet size
   64 c,
   \ Polling interval
@@ -213,6 +259,15 @@ begin-module usb
 
   here cell align, swap - constant config-data-size
 
+  \ Global device address
+  variable usb-device-addr
+
+  \ Device address should be set
+  variable set-usb-device-addr
+
+  \ Device is configured
+  variable usb-device-configd
+  
   \ Endpoint control structure
   begin-structure endpoint-size
     
@@ -231,22 +286,22 @@ begin-module usb
   end-structure
 
   \ Setup packet structure
-  begin-structure setup-packet-size
+  begin-structure setup-pkt-size
 
     \ Setup packet request type
-    cfield: setup-packet-request-type
+    cfield: setup-pkt-request-type
 
     \ Setup packet request
-    cfield: setup-packet-request
+    cfield: setup-pkt-request
 
     \ Setup packet value
-    hfield: setup-packet-value
+    hfield: setup-pkt-value
 
     \ Setup packet index
-    hfield: setup-packet-index
+    hfield: setup-pkt-index
 
     \ Setup packet length
-    hfield: setup-packet-length
+    hfield: setup-pkt-length
     
   end-structure
 
@@ -266,7 +321,7 @@ begin-module usb
 
   \ Start a USB transfer
   : usb-start-transfer { c-addr bytes endpoint -- }
-    bytes 64 u<= averts x-invalid-packet-size
+    bytes 64 u<= averts x-invalid-pkt-size
     bytes USB_BUF_CTRL_AVAIL or { buffer-control-val }
     endpoint endpoint-tx? if
       c-addr bytes endpoint endpoint-buffer @ move
@@ -282,31 +337,49 @@ begin-module usb
     buffer-control-val endpoint endpoint-buffer-control @ !
   ;
 
+  \ Send a USB acknowledge out request
+  : usb-ack-out-request ( -- )
+    0 0 endpoint0-in usb-start-transfer
+  ;
+
+  \ Set a USB device address
+  : usb-set-device-addr ( -- )
+    setup-pkt setup-pkt-value h@ usb-device-address !
+    true set-usb-device-addr !
+    usb-ack-out-request
+  ;
+
+  \ Set a USB device configuration
+  : usb-set-device-config ( -- )
+    true usb-device-configd !
+    usb-ack-out-request
+  ;
+
   \ Transfer the configuration, interface, and endpoint descriptors
-  : usb-handle-config-descriptor ( -- )
+  : usb-handle-config-descr ( -- )
   ;
 
   \ Handle a USB setup packet
-  : usb-handle-setup-packet ( -- )
+  : usb-handle-setup-pkt ( -- )
     \ Reset PID to 1
     1 setup-endpoint endpoint-next-pid !
-    setup-packet setup-packet-request c@ { request }
-    setup-packet setup-packet-request-type c@ case
+    setup-pkt setup-pkt-request c@ { request }
+    setup-pkt setup-pkt-request-type c@ case
       USB_DIR_OUT of
-        setup-packet setup-packet-request c@ case
-          USB_REQUEST_SET_ADDRESS of usb-set-device-address endof
-          USB_REQUEST_SET_CONFIGURATION of usb-set-device-configuration endof
+        setup-pkt setup-pkt-request c@ case
+          USB_REQUEST_SET_ADDRESS of usb-set-device-addr endof
+          USB_REQUEST_SET_CONFIGURATION of usb-set-device-config endof
           endof
           usb-acknowledge-out-request
         endcase
       endof
       USB_DIR_IN of
-        setup-packet setup-packet-request c@ case
+        setup-pkt setup-pkt-request c@ case
           USB_REQUEST_GET_DESCRIPTOR of
-            setup-packet setup-packet-value h@ 8 rshift case
-              USB_DT_DEVICE of usb-handle-device-descriptor endof
-              USB_DT_CONFIG of usb-handle-config-descriptor endof
-              USB_DT_STRING of usb-handle-string-descriptor endof
+            setup-pkt setup-pkt-value h@ 8 rshift case
+              USB_DT_DEVICE of usb-handle-device-descr endof
+              USB_DT_CONFIG of usb-handle-config-descr endof
+              USB_DT_STRING of usb-handle-string-descr endof
             endcase
           endof
         endcase
@@ -318,8 +391,9 @@ begin-module usb
   : init-usb ( -- )
     \ Clear the DPSRAM just because
     USB_Base dpsram-size 0 fill
-
-    
+    0 usb-device-addr !
+    false set-usb-device-addr !
+    false usb-device-configd !
   ;
   
 end-module
