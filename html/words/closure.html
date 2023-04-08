@@ -4,7 +4,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
     <title>Closures &#8212; zeptoforth  documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
@@ -37,7 +37,7 @@
             
   <section id="closures">
 <h1>Closures<a class="headerlink" href="#closures" title="Permalink to this heading">¶</a></h1>
-<p>Closures in zeptoforth involve binding an execution token with a single-cell or double-cell value at a specified, arbitrary address in RAM; this address will then serve as an execution token itself which, when executed, pushes the bound value onto the stack and then execute the bound execution token. The only requirement for the address specified is that it is halfword-aligned.</p>
+<p>Closures in zeptoforth involve binding an execution token with a single-cell, double-cell, or multi-cell value at a specified, arbitrary address in RAM; this address will then serve as an execution token itself which, when executed, pushes the bound value onto the stack and then execute the bound execution token. The only requirement for the address specified is that it is halfword-aligned.</p>
 <section id="closure">
 <h2><code class="docutils literal notranslate"><span class="pre">closure</span></code><a class="headerlink" href="#closure" title="Permalink to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">closure</span></code> module contains the following words:</p>
@@ -70,6 +70,21 @@
 <h3><code class="docutils literal notranslate"><span class="pre">nbind</span></code><a class="headerlink" href="#nbind" title="Permalink to this heading">¶</a></h3>
 <p>( xn … x0 count addr xt – )</p>
 <p>Bind the execution token <em>xt</em> to <em>count</em> multiple values <em>xn</em> through <em>x0</em> at address <em>addr</em> in RAM, which will serve as a new execution token. <code class="docutils literal notranslate"><span class="pre">nclosure-size</span></code> (with <em>count</em> specified) bytes must be available at <em>addr</em>. When <em>addr</em> is executed as an execution token, multiple values <em>xn</em> through <em>x0</em> will be pushed onto the stack and then the execution token <em>xt</em> will be executed. <em>addr</em> can be arbitrarily reused and can be at any address in RAM.</p>
+</section>
+<section id="with-closure">
+<h3><code class="docutils literal notranslate"><span class="pre">with-closure</span></code><a class="headerlink" href="#with-closure" title="Permalink to this heading">¶</a></h3>
+<p>( ? x bound-xt scope-xt – ? ) scope-xt: ( ? closure-xt – ? )</p>
+<p>Create a closure binding the execution token <em>bound-xt</em> to single-cell data <em>x</em> in the current task’s dictionary, place it on the data stack, and execute <em>scope-xt</em>. When the closure is executed, <em>x</em> will be pushed onto the data stack and <em>bound-xt</em> will be executed. This closure is valid only within the scope of <em>scope-xt</em>, and will be de-alloted from the dictionary after it completes executing or if an exception is raised within it, after which it will re-raise said exception.</p>
+</section>
+<section id="with-2closure">
+<h3><code class="docutils literal notranslate"><span class="pre">with-2closure</span></code><a class="headerlink" href="#with-2closure" title="Permalink to this heading">¶</a></h3>
+<p>( ? d bound-xt scope-xt – ? ) scope-xt: ( ? closure-xt – ? )</p>
+<p>Create a closure binding the execution token <em>bound-xt</em> to double-cell data <em>d</em> in the current task’s dictionary, place it on the data stack, and execute <em>scope-xt</em>. When the closure is executed, <em>d</em> will be pushed onto the data stack and <em>bound-xt</em> will be executed. This closure is valid only within the scope of <em>scope-xt</em>, and will be de-alloted from the dictionary after it completes executing or if an exception is raised within it, after which it will re-raise said exception.</p>
+</section>
+<section id="with-nclosure">
+<h3><code class="docutils literal notranslate"><span class="pre">with-nclosure</span></code><a class="headerlink" href="#with-nclosure" title="Permalink to this heading">¶</a></h3>
+<p>( ? xn … x0 count bound-xt scope-xt – ? ) scope-xt: ( ? closure-xt – ? )</p>
+<p>Create a closure binding the execution token <em>bound-xt</em> to multi-cell data <em>xn</em> … <em>x0</em> consisting of <em>count</em> cells in the current task’s dictionary, place it on the data stack, and execute <em>scope-xt</em>. When the closure is executed, <em>xn</em> … <em>x0</em> will be pushed onto the data stack and <em>bound-xt</em> will be executed. This closure is valid only within the scope of <em>scope-xt</em>, and will be de-alloted from the dictionary after it completes executing or if an exception is raised within it, after which it will re-raise said exception.</p>
 </section>
 </section>
 </section>
