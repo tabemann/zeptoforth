@@ -4,7 +4,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
     <title>Basic Words &#8212; zeptoforth  documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
@@ -412,6 +412,11 @@ compilation mode</p>
 <h3><code class="docutils literal notranslate"><span class="pre">key?</span></code><a class="headerlink" href="#id36" title="Permalink to this heading">¶</a></h3>
 <p>( – flag )</p>
 <p>Test for whether the system is ready to receive a character</p>
+</section>
+<section id="flush-console">
+<h3><code class="docutils literal notranslate"><span class="pre">flush-console</span></code><a class="headerlink" href="#flush-console" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Flush the current console’s transmit buffer. Note that if the current console is a UART, this has the same considerations as <code class="docutils literal notranslate"><span class="pre">flush-uart</span></code> in the <code class="docutils literal notranslate"><span class="pre">uart</span></code> module, i.e. this will flush the in-RAM transmit buffer and the UART’s transmit fifo, but not any data in any bitwise shift register, so to truly guarantee every bit has been transmitted a delay of (1 / baud rate) * 10 (for 8 data bits, 1 start bit, and 1 stop bit) after executing this is necessary.</p>
 </section>
 <section id="enable-int">
 <h3><code class="docutils literal notranslate"><span class="pre">enable-int</span></code><a class="headerlink" href="#enable-int" title="Permalink to this heading">¶</a></h3>

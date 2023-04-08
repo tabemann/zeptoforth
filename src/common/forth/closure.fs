@@ -134,6 +134,27 @@ begin-module closure
     ;] bind
   ;
 
+  \ Create a one-argument closure in a set scope in the dictionary
+  : with-closure ( data bound-xt scope-xt -- )
+    closure-size [: swap >r >r
+      r@ swap bind r> r> execute
+    ;] with-aligned-allot
+  ;
+
+  \ Create a two-argument closure in a set scope in the dictionary
+  : with-2closure ( data1 data0 bound-xt scope-xt -- )
+    2closure-size [: swap >r >r
+      r@ swap 2bind r> r> execute
+    ;] with-aligned-allot
+  ;
+
+  \ Create a multi-argument closure in a set scope in the dictionary
+  : with-nclosure ( datan ... data0 count bound-xt scope-xt -- )
+    2 pick nclosure-size [: swap >r >r
+      r@ swap nbind r> r> execute
+    ;] with-aligned-allot
+  ;
+
 end-module
 
 reboot

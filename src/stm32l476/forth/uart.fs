@@ -593,7 +593,7 @@ begin-module uart
     dup 2 = if
       drop do-flush-console
     else
-      [: dup uart-tx-empty? ;] wait drop
+      [: dup uart-tx-empty? over TXE swap USART_ISR bit@ and ;] wait drop
     then
   ;
   

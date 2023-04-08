@@ -374,7 +374,7 @@ begin-module uart
     0= if
       do-flush-console
     else
-      [: uart1-tx-empty? ;] wait
+      [: uart1-tx-empty? UART1_UARTFR_TXFE@ and ;] wait
     then
   ;
 

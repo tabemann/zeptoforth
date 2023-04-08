@@ -377,6 +377,11 @@ Receive a character
 
 Test for whether the system is ready to receive a character
 
+##### `flush-console`
+( -- )
+
+Flush the current console's transmit buffer. Note that if the current console is a UART, this has the same considerations as `flush-uart` in the `uart` module, i.e. this will flush the in-RAM transmit buffer and the UART's transmit fifo, but not any data in any bitwise shift register, so to truly guarantee every bit has been transmitted a delay of (1 / baud rate) * 10 (for 8 data bits, 1 start bit, and 1 stop bit) after executing this is necessary.
+
 ##### `enable-int`
 ( -- )
 

@@ -4,7 +4,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
     <title>UART Words &#8212; zeptoforth  documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
@@ -97,7 +97,7 @@
 <section id="flush-uart">
 <h3><code class="docutils literal notranslate"><span class="pre">flush-uart</span></code><a class="headerlink" href="#flush-uart" title="Permalink to this heading">¶</a></h3>
 <p>( uart – )</p>
-<p>Flush a UART’s transmit buffer.</p>
+<p>Flush a UART’s transmit buffer. This flushes both the in-RAM transmit buffer and the UART’s transmit FIFO. Note that this does not flush data in any bitwise shift register, so to truly guarantee every bit has been transmitted a delay of (1 / baud rate) * 10 (for 8 data bits, 1 start bit, and 1 stop bit) after executing this is necessary.</p>
 </section>
 <section id="uart-alternate">
 <h3><code class="docutils literal notranslate"><span class="pre">uart-alternate</span></code><a class="headerlink" href="#uart-alternate" title="Permalink to this heading">¶</a></h3>

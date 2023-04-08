@@ -241,7 +241,7 @@ begin-module int-io
     ;
 
     : do-flush-console ( -- )
-      [: tx-empty? ;] wait
+      [: tx-empty? UART0_UARTFR_TXFE@ and ;] wait
     ;
 
   end-module> import
