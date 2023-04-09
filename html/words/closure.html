@@ -46,8 +46,8 @@
 <p>( – bytes )</p>
 <p>The size of a single-cell closure in bytes.</p>
 </section>
-<section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">2closure-size</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<section id="dclosure-size">
+<h3><code class="docutils literal notranslate"><span class="pre">dclosure-size</span></code><a class="headerlink" href="#dclosure-size" title="Permalink to this heading">¶</a></h3>
 <p>( – bytes )</p>
 <p>The size of a double-cell closure in bytes.</p>
 </section>
@@ -56,28 +56,78 @@
 <p>( count – bytes )</p>
 <p>The size of a multi-cell closure containing <em>count</em> values in bytes.</p>
 </section>
+<section id="ndclosure-size">
+<h3><code class="docutils literal notranslate"><span class="pre">ndclosure-size</span></code><a class="headerlink" href="#ndclosure-size" title="Permalink to this heading">¶</a></h3>
+<p>( count – bytes )</p>
+<p>The size of a multi-double cell closure containing <em>count</em> values in bytes.</p>
+</section>
+<section id="refclosure-size">
+<h3><code class="docutils literal notranslate"><span class="pre">refclosure-size</span></code><a class="headerlink" href="#refclosure-size" title="Permalink to this heading">¶</a></h3>
+<p>( – bytes )</p>
+<p>The size of a single-cell reference closure in bytes.</p>
+</section>
+<section id="drefclosure-size">
+<h3><code class="docutils literal notranslate"><span class="pre">drefclosure-size</span></code><a class="headerlink" href="#drefclosure-size" title="Permalink to this heading">¶</a></h3>
+<p>( – bytes )</p>
+<p>The size of a double-cell reference closure in bytes.</p>
+</section>
+<section id="nrefclosure-size">
+<h3><code class="docutils literal notranslate"><span class="pre">nrefclosure-size</span></code><a class="headerlink" href="#nrefclosure-size" title="Permalink to this heading">¶</a></h3>
+<p>( count – bytes )</p>
+<p>The size of a multi-cell reference closure containing <em>count</em> values in bytes.</p>
+</section>
+<section id="ndrefclosure-size">
+<h3><code class="docutils literal notranslate"><span class="pre">ndrefclosure-size</span></code><a class="headerlink" href="#ndrefclosure-size" title="Permalink to this heading">¶</a></h3>
+<p>( count – bytes )</p>
+<p>The size of a multi-double-cell reference closure containing <em>count</em> values in bytes.</p>
+</section>
 <section id="bind">
 <h3><code class="docutils literal notranslate"><span class="pre">bind</span></code><a class="headerlink" href="#bind" title="Permalink to this heading">¶</a></h3>
 <p>( x addr xt – )</p>
 <p>Bind the execution token <em>xt</em> to single-cell value <em>x</em> at address <em>addr</em> in RAM, which will serve as a new execution token. <code class="docutils literal notranslate"><span class="pre">closure-size</span></code> bytes must be available at <em>addr</em>. When <em>addr</em> is executed as an execution token, the single-cell value <em>x</em> will be pushed onto the stack and then the execution token <em>xt</em> will be executed. <em>addr</em> can be arbitrarily reused and can be at any address in RAM.</p>
 </section>
-<section id="id2">
-<h3><code class="docutils literal notranslate"><span class="pre">2bind</span></code><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h3>
+<section id="dbind">
+<h3><code class="docutils literal notranslate"><span class="pre">dbind</span></code><a class="headerlink" href="#dbind" title="Permalink to this heading">¶</a></h3>
 <p>( d addr xt – )</p>
-<p>Bind the execution token <em>xt</em> to double-cell data <em>d</em> at address <em>addr</em> in RAM, which will serve as a new execution token. <code class="docutils literal notranslate"><span class="pre">2closure-size</span></code> bytes must be available at <em>addr</em>. When <em>addr</em> is executed as an execution token, the double-cell value <em>x</em> will be pushed onto the stack and then the execution token <em>xt</em> will be executed. <em>addr</em> can be arbitrarily reused and can be at any address in RAM.</p>
+<p>Bind the execution token <em>xt</em> to double-cell data <em>d</em> at address <em>addr</em> in RAM, which will serve as a new execution token. <code class="docutils literal notranslate"><span class="pre">dclosure-size</span></code> bytes must be available at <em>addr</em>. When <em>addr</em> is executed as an execution token, the double-cell value <em>d</em> will be pushed onto the stack and then the execution token <em>xt</em> will be executed. <em>addr</em> can be arbitrarily reused and can be at any address in RAM.</p>
 </section>
 <section id="nbind">
 <h3><code class="docutils literal notranslate"><span class="pre">nbind</span></code><a class="headerlink" href="#nbind" title="Permalink to this heading">¶</a></h3>
 <p>( xn … x0 count addr xt – )</p>
 <p>Bind the execution token <em>xt</em> to <em>count</em> multiple values <em>xn</em> through <em>x0</em> at address <em>addr</em> in RAM, which will serve as a new execution token. <code class="docutils literal notranslate"><span class="pre">nclosure-size</span></code> (with <em>count</em> specified) bytes must be available at <em>addr</em>. When <em>addr</em> is executed as an execution token, multiple values <em>xn</em> through <em>x0</em> will be pushed onto the stack and then the execution token <em>xt</em> will be executed. <em>addr</em> can be arbitrarily reused and can be at any address in RAM.</p>
 </section>
+<section id="ndbind">
+<h3><code class="docutils literal notranslate"><span class="pre">ndbind</span></code><a class="headerlink" href="#ndbind" title="Permalink to this heading">¶</a></h3>
+<p>( dn … d0 count addr xt – )</p>
+<p>Bind the execution token <em>xt</em> to <em>count</em> multiple double-cell values <em>dn</em> through <em>d0</em> at address <em>addr</em> in RAM, which will serve as a new execution token. <code class="docutils literal notranslate"><span class="pre">nclosure-size</span></code> (with <em>count</em> specified) bytes must be available at <em>addr</em>. When <em>addr</em> is executed as an execution token, multiple values <em>dn</em> through <em>d0</em> will be pushed onto the stack and then the execution token <em>xt</em> will be executed. <em>addr</em> can be arbitrarily reused and can be at any address in RAM.</p>
+</section>
+<section id="refbind">
+<h3><code class="docutils literal notranslate"><span class="pre">refbind</span></code><a class="headerlink" href="#refbind" title="Permalink to this heading">¶</a></h3>
+<p>( x addr xt – )</p>
+<p>Bind the execution token <em>xt</em> to single-cell value <em>x</em> at address <em>addr</em> in RAM, which will serve as a new execution token. <code class="docutils literal notranslate"><span class="pre">closure-size</span></code> bytes must be available at <em>addr</em>. When <em>addr</em> is executed as an execution token, an address pointing to RAM containing the single-cell value <em>x</em> will be pushed onto the stack and then the execution token <em>xt</em> will be executed. <em>addr</em> can be arbitrarily reused and can be at any address in RAM.</p>
+</section>
+<section id="drefbind">
+<h3><code class="docutils literal notranslate"><span class="pre">drefbind</span></code><a class="headerlink" href="#drefbind" title="Permalink to this heading">¶</a></h3>
+<p>( d addr xt – )</p>
+<p>Bind the execution token <em>xt</em> to double-cell data <em>d</em> at address <em>addr</em> in RAM, which will serve as a new execution token. <code class="docutils literal notranslate"><span class="pre">dclosure-size</span></code> bytes must be available at <em>addr</em>. When <em>addr</em> is executed as an execution token, an address pointing to RAM containing the double-cell value <em>d</em> will be pushed onto the stack and then the execution token <em>xt</em> will be executed. <em>addr</em> can be arbitrarily reused and can be at any address in RAM.</p>
+</section>
+<section id="nrefbind">
+<h3><code class="docutils literal notranslate"><span class="pre">nrefbind</span></code><a class="headerlink" href="#nrefbind" title="Permalink to this heading">¶</a></h3>
+<p>( xn … x0 count addr xt – )</p>
+<p>Bind the execution token <em>xt</em> to <em>count</em> multiple values <em>xn</em> through <em>x0</em> at address <em>addr</em> in RAM, which will serve as a new execution token. <code class="docutils literal notranslate"><span class="pre">nclosure-size</span></code> (with <em>count</em> specified) bytes must be available at <em>addr</em>. When <em>addr</em> is executed as an execution token, multiple addresses pointing to RAM containing <em>xn</em> through <em>x0</em> will be pushed onto the stack and then the execution token <em>xt</em> will be executed. <em>addr</em> can be arbitrarily reused and can be at any address in RAM.</p>
+</section>
+<section id="ndrefbind">
+<h3><code class="docutils literal notranslate"><span class="pre">ndrefbind</span></code><a class="headerlink" href="#ndrefbind" title="Permalink to this heading">¶</a></h3>
+<p>( dn … d0 count addr xt – )</p>
+<p>Bind the execution token <em>xt</em> to <em>count</em> multiple double-cell values <em>dn</em> through <em>d0</em> at address <em>addr</em> in RAM, which will serve as a new execution token. <code class="docutils literal notranslate"><span class="pre">nclosure-size</span></code> (with <em>count</em> specified) bytes must be available at <em>addr</em>. When <em>addr</em> is executed as an execution token, multiple addresses pointing to RAM containing <em>dn</em> through <em>d0</em> will be pushed onto the stack and then the execution token <em>xt</em> will be executed. <em>addr</em> can be arbitrarily reused and can be at any address in RAM.</p>
+</section>
 <section id="with-closure">
 <h3><code class="docutils literal notranslate"><span class="pre">with-closure</span></code><a class="headerlink" href="#with-closure" title="Permalink to this heading">¶</a></h3>
 <p>( ? x bound-xt scope-xt – ? ) scope-xt: ( ? closure-xt – ? )</p>
 <p>Create a closure binding the execution token <em>bound-xt</em> to single-cell data <em>x</em> in the current task’s dictionary, place it on the data stack, and execute <em>scope-xt</em>. When the closure is executed, <em>x</em> will be pushed onto the data stack and <em>bound-xt</em> will be executed. This closure is valid only within the scope of <em>scope-xt</em>, and will be de-alloted from the dictionary after it completes executing or if an exception is raised within it, after which it will re-raise said exception.</p>
 </section>
-<section id="with-2closure">
-<h3><code class="docutils literal notranslate"><span class="pre">with-2closure</span></code><a class="headerlink" href="#with-2closure" title="Permalink to this heading">¶</a></h3>
+<section id="with-dclosure">
+<h3><code class="docutils literal notranslate"><span class="pre">with-dclosure</span></code><a class="headerlink" href="#with-dclosure" title="Permalink to this heading">¶</a></h3>
 <p>( ? d bound-xt scope-xt – ? ) scope-xt: ( ? closure-xt – ? )</p>
 <p>Create a closure binding the execution token <em>bound-xt</em> to double-cell data <em>d</em> in the current task’s dictionary, place it on the data stack, and execute <em>scope-xt</em>. When the closure is executed, <em>d</em> will be pushed onto the data stack and <em>bound-xt</em> will be executed. This closure is valid only within the scope of <em>scope-xt</em>, and will be de-alloted from the dictionary after it completes executing or if an exception is raised within it, after which it will re-raise said exception.</p>
 </section>
@@ -85,6 +135,31 @@
 <h3><code class="docutils literal notranslate"><span class="pre">with-nclosure</span></code><a class="headerlink" href="#with-nclosure" title="Permalink to this heading">¶</a></h3>
 <p>( ? xn … x0 count bound-xt scope-xt – ? ) scope-xt: ( ? closure-xt – ? )</p>
 <p>Create a closure binding the execution token <em>bound-xt</em> to multi-cell data <em>xn</em> … <em>x0</em> consisting of <em>count</em> cells in the current task’s dictionary, place it on the data stack, and execute <em>scope-xt</em>. When the closure is executed, <em>xn</em> … <em>x0</em> will be pushed onto the data stack and <em>bound-xt</em> will be executed. This closure is valid only within the scope of <em>scope-xt</em>, and will be de-alloted from the dictionary after it completes executing or if an exception is raised within it, after which it will re-raise said exception.</p>
+</section>
+<section id="with-ndclosure">
+<h3><code class="docutils literal notranslate"><span class="pre">with-ndclosure</span></code><a class="headerlink" href="#with-ndclosure" title="Permalink to this heading">¶</a></h3>
+<p>( ? dn … d0 count bound-xt scope-xt – ? ) scope-xt: ( ? closure-xt – ? )</p>
+<p>Create a closure binding the execution token <em>bound-xt</em> to multi-double-cell data <em>dn</em> … <em>d0</em> consisting of <em>count</em> cells in the current task’s dictionary, place it on the data stack, and execute <em>scope-xt</em>. When the closure is executed, <em>dn</em> … <em>d0</em> will be pushed onto the data stack and <em>bound-xt</em> will be executed. This closure is valid only within the scope of <em>scope-xt</em>, and will be de-alloted from the dictionary after it completes executing or if an exception is raised within it, after which it will re-raise said exception.</p>
+</section>
+<section id="with-refclosure">
+<h3><code class="docutils literal notranslate"><span class="pre">with-refclosure</span></code><a class="headerlink" href="#with-refclosure" title="Permalink to this heading">¶</a></h3>
+<p>( ? x bound-xt scope-xt – ? ) scope-xt: ( ? closure-xt – ? )</p>
+<p>Create a closure binding the execution token <em>bound-xt</em> to single-cell data <em>x</em> in the current task’s dictionary, place it on the data stack, and execute <em>scope-xt</em>. When the closure is executed, an address pointing to RAM containing <em>x</em> will be pushed onto the data stack and <em>bound-xt</em> will be executed. This closure is valid only within the scope of <em>scope-xt</em>, and will be de-alloted from the dictionary after it completes executing or if an exception is raised within it, after which it will re-raise said exception.</p>
+</section>
+<section id="with-drefclosure">
+<h3><code class="docutils literal notranslate"><span class="pre">with-drefclosure</span></code><a class="headerlink" href="#with-drefclosure" title="Permalink to this heading">¶</a></h3>
+<p>( ? d bound-xt scope-xt – ? ) scope-xt: ( ? closure-xt – ? )</p>
+<p>Create a closure binding the execution token <em>bound-xt</em> to double-cell data <em>d</em> in the current task’s dictionary, place it on the data stack, and execute <em>scope-xt</em>. When the closure is executed, an address pointing to RAM containing <em>d</em> will be pushed onto the data stack and <em>bound-xt</em> will be executed. This closure is valid only within the scope of <em>scope-xt</em>, and will be de-alloted from the dictionary after it completes executing or if an exception is raised within it, after which it will re-raise said exception.</p>
+</section>
+<section id="with-nrefclosure">
+<h3><code class="docutils literal notranslate"><span class="pre">with-nrefclosure</span></code><a class="headerlink" href="#with-nrefclosure" title="Permalink to this heading">¶</a></h3>
+<p>( ? xn … x0 count bound-xt scope-xt – ? ) scope-xt: ( ? closure-xt – ? )</p>
+<p>Create a closure binding the execution token <em>bound-xt</em> to multi-cell data <em>xn</em> … <em>x0</em> consisting of <em>count</em> cells in the current task’s dictionary, place it on the data stack, and execute <em>scope-xt</em>. When the closure is executed, addresses pointing to RAM containing <em>xn</em> … <em>x0</em> will be pushed onto the data stack and <em>bound-xt</em> will be executed. This closure is valid only within the scope of <em>scope-xt</em>, and will be de-alloted from the dictionary after it completes executing or if an exception is raised within it, after which it will re-raise said exception.</p>
+</section>
+<section id="with-ndrefclosure">
+<h3><code class="docutils literal notranslate"><span class="pre">with-ndrefclosure</span></code><a class="headerlink" href="#with-ndrefclosure" title="Permalink to this heading">¶</a></h3>
+<p>( ? dn … d0 count bound-xt scope-xt – ? ) scope-xt: ( ? closure-xt – ? )</p>
+<p>Create a closure binding the execution token <em>bound-xt</em> to multi-double-cell data <em>dn</em> … <em>d0</em> consisting of <em>count</em> cells in the current task’s dictionary, place it on the data stack, and execute <em>scope-xt</em>. When the closure is executed, addresses pointing to RAM containing <em>dn</em> … <em>d0</em> will be pushed onto the data stack and <em>bound-xt</em> will be executed. This closure is valid only within the scope of <em>scope-xt</em>, and will be de-alloted from the dictionary after it completes executing or if an exception is raised within it, after which it will re-raise said exception.</p>
 </section>
 </section>
 </section>

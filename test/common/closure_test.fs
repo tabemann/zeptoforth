@@ -22,20 +22,48 @@ begin-module closure-test
 
   closure import
 
-  \ Prints 2 using scoped one-argument closures
+  \ Prints 2 using scoped single-cell closures
   : test0 ( -- )
     1 ['] + [: 1 swap execute . ;] with-closure
   ;
 
-  \ Prints 6,0 using scoped two-argument closures
+  \ Prints 6,0 using scoped double-cell closures
   : test1 ( -- )
-    2,0 ['] f* [: 3,0 rot execute f. ;] with-2closure
+    2,0 ['] f* [: 3,0 rot execute f. ;] with-dclosure
   ;
 
-  \ Prints 9,0 using scoped multi-argument closures
+  \ Prints 9 using scoped multi-cell closures
   : test2 ( -- )
-    3,0 2,0 4 [: { D: x D: y } y f* x d+ ;]
-    [: 3,0 rot execute f. ;] with-nclosure
+    1 2 3 3 [: + + + ;]
+    [: 3 swap execute . ;] with-nclosure
+  ;
+
+  \ Prints 9,0 using scoped multi-double-cell closures
+  : test3 ( -- )
+    3,0 2,0 2 [: { D: x D: y } y f* x d+ ;]
+    [: 3,0 rot execute f. ;] with-ndclosure
+  ;
+
+  \ Prints 2 using scoped single-cell reference closures
+  : test4 ( -- )
+    1 [: @ + ;] [: 1 swap execute . ;] with-refclosure
+  ;
+
+  \ Prints 6,0 using scoped double-cell reference closures
+  : test5 ( -- )
+    2,0 [: 2@ f* ;] [: 3,0 rot execute f. ;] with-drefclosure
+  ;
+
+  \ Prints 9 using scoped multi-cell reference closures
+  : test6 ( -- )
+    1 2 3 3 [: { x y z } x @ + y @ + z @ + ;]
+    [: 3 swap execute . ;] with-nrefclosure
+  ;
+
+  \ Prints 9,0 using scoped multi-double-cell reference closures
+  : test7 ( -- )
+    3,0 2,0 2 [: { x y } y 2@ f* x 2@ d+ ;]
+    [: 3,0 rot execute f. ;] with-ndrefclosure
   ;
 
 end-module

@@ -528,6 +528,12 @@ available, so as to enable any source file to call a preceding init</p>
 <p>( bytes xt – ) ( xt: addr – )</p>
 <p>Allot cell-aligned RAM temporarily and clean it up afterwards, even if an exception occurs.</p>
 </section>
+<section id="with-here">
+<h3><code class="docutils literal notranslate"><span class="pre">with-here</span></code></h3>
+<p>( addr xt – ) ( xt: – )</p>
+<p>Set RAM here to an address and reset it once complete or if an exception is
+raised.</p>
+</section>
 <section id="provide-allot-2cell">
 <h3><code class="docutils literal notranslate"><span class="pre">provide-allot-2cell</span></code></h3>
 <p>( xd xt – ) ( xt: addr bytes – )</p>
