@@ -156,10 +156,10 @@
 <p>( ? xn … x0 count bound-xt scope-xt – ? ) scope-xt: ( ? closure-xt – ? )</p>
 <p>Create a closure binding the execution token <em>bound-xt</em> to multi-cell data <em>xn</em> … <em>x0</em> consisting of <em>count</em> cells in the current task’s dictionary, place it on the data stack, and execute <em>scope-xt</em>. When the closure is executed, addresses pointing to RAM containing <em>xn</em> … <em>x0</em> will be pushed onto the data stack and <em>bound-xt</em> will be executed. This closure is valid only within the scope of <em>scope-xt</em>, and will be de-alloted from the dictionary after it completes executing or if an exception is raised within it, after which it will re-raise said exception.</p>
 </section>
-<section id="id1">
-<h3><code class="docutils literal notranslate"><span class="pre">with-ndclosure</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<section id="with-ndrefclosure">
+<h3><code class="docutils literal notranslate"><span class="pre">with-ndrefclosure</span></code><a class="headerlink" href="#with-ndrefclosure" title="Permalink to this heading">¶</a></h3>
 <p>( ? dn … d0 count bound-xt scope-xt – ? ) scope-xt: ( ? closure-xt – ? )</p>
-<p>Create a closure binding the execution token <em>bound-xt</em> to multi-double-cell data <em>dn</em> … <em>d0</em> consisting of <em>count</em> cells in the current task’s dictionary, place it on the data stack, and execute <em>scope-xt</em>. When the closure is executed, addresses poitning to RAM containing <em>dn</em> … <em>d0</em> will be pushed onto the data stack and <em>bound-xt</em> will be executed. This closure is valid only within the scope of <em>scope-xt</em>, and will be de-alloted from the dictionary after it completes executing or if an exception is raised within it, after which it will re-raise said exception.</p>
+<p>Create a closure binding the execution token <em>bound-xt</em> to multi-double-cell data <em>dn</em> … <em>d0</em> consisting of <em>count</em> cells in the current task’s dictionary, place it on the data stack, and execute <em>scope-xt</em>. When the closure is executed, addresses pointing to RAM containing <em>dn</em> … <em>d0</em> will be pushed onto the data stack and <em>bound-xt</em> will be executed. This closure is valid only within the scope of <em>scope-xt</em>, and will be de-alloted from the dictionary after it completes executing or if an exception is raised within it, after which it will re-raise said exception.</p>
 </section>
 </section>
 </section>

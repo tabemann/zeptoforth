@@ -7174,9 +7174,9 @@
         </navPoint>
         <navPoint id="navPoint1195" playOrder="1124">
           <navLabel>
-            <text>with-ndclosure</text>
+            <text>with-ndrefclosure</text>
           </navLabel>
-          <content src="words/closure.xhtml#id1" />  
+          <content src="words/closure.xhtml#with-ndrefclosure" />  
         </navPoint>
       </navPoint>
     </navPoint>

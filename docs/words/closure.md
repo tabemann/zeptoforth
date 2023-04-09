@@ -121,7 +121,7 @@ Create a closure binding the execution token *bound-xt* to double-cell data *d* 
 
 Create a closure binding the execution token *bound-xt* to multi-cell data *xn* ... *x0* consisting of *count* cells in the current task's dictionary, place it on the data stack, and execute *scope-xt*. When the closure is executed, addresses pointing to RAM containing *xn* ... *x0* will be pushed onto the data stack and *bound-xt* will be executed. This closure is valid only within the scope of *scope-xt*, and will be de-alloted from the dictionary after it completes executing or if an exception is raised within it, after which it will re-raise said exception.
 
-##### `with-ndclosure`
+##### `with-ndrefclosure`
 ( ? dn ... d0 count bound-xt scope-xt -- ? ) scope-xt: ( ? closure-xt -- ? )
 
-Create a closure binding the execution token *bound-xt* to multi-double-cell data *dn* ... *d0* consisting of *count* cells in the current task's dictionary, place it on the data stack, and execute *scope-xt*. When the closure is executed, addresses poitning to RAM containing *dn* ... *d0* will be pushed onto the data stack and *bound-xt* will be executed. This closure is valid only within the scope of *scope-xt*, and will be de-alloted from the dictionary after it completes executing or if an exception is raised within it, after which it will re-raise said exception.
+Create a closure binding the execution token *bound-xt* to multi-double-cell data *dn* ... *d0* consisting of *count* cells in the current task's dictionary, place it on the data stack, and execute *scope-xt*. When the closure is executed, addresses pointing to RAM containing *dn* ... *d0* will be pushed onto the data stack and *bound-xt* will be executed. This closure is valid only within the scope of *scope-xt*, and will be de-alloted from the dictionary after it completes executing or if an exception is raised within it, after which it will re-raise said exception.
