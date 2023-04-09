@@ -513,6 +513,12 @@ Switch to compile to RAM mode, and afterwards restore the compilation state, eve
 
 Allot cell-aligned RAM temporarily and clean it up afterwards, even if an exception occurs.
 
+##### `with-here`
+( addr xt -- ) ( xt: -- )
+
+Set RAM here to an address and reset it once complete or if an exception is
+raised.
+
 ##### `provide-allot-2cell`
 ( xd xt -- ) ( xt: addr bytes -- )
 

@@ -1251,6 +1251,12 @@ commit-flash
   swap try r> ram-here! ?raise
 ;
 
+\ Set RAM here to an address and reset it once complete or if an exception is
+\ raised
+: with-here ( addr xt -- ) ( xt: -- )
+  ram-here >r swap ram-here! try r> ram-here! ?raise
+;
+
 \ Insufficient data exception
 : x-insufficient-data ( -- ) ." insufficient data" cr ;
 
