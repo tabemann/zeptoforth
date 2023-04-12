@@ -27,6 +27,7 @@
 #include src/common/forth/armv6m.fs
 #include src/common/forth/fast_basic.fs
 #include src/common/forth/minidict.fs
+#include src/common/forth/value.fs
 #include src/common/forth/interrupt.fs
 #include src/common/forth/exception.fs
 #include src/rp2040/forth/multicore.fs
