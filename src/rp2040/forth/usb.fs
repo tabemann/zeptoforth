@@ -34,7 +34,6 @@ begin-module usb
   \ Write a halfword to the dictionary without concern for endianness
   : 2c, ( h -- ) dup c, 8 rshift c, ;
 
-
   \ USB registers base address
   $50110000 constant USB_Base
 
@@ -47,6 +46,8 @@ begin-module usb
   \ USB endpoint out control
   : USP_EP_OUT_CONTROL ( endpoint -- ) 3 lshift [ USB_Base cell+ ] literal + ;
 
+  \ Endpoint control bits
+  
   \ USB endpoint enable
   31 bit constant USB_EP_ENABLE
 
@@ -70,6 +71,32 @@ begin-module usb
 
   \ USB endpoint data buffer address bitshift
   0 constant USB_EP_ADDRESS_BASE_OFFSET_LSB
+
+  \ Buffer control bits
+
+  \ USB buffer 0 full bit
+  15 bit constant USB_BUF_CTRL_FULL
+
+  \ USB last buffer of transfer for buffer 0
+  14 bit constant USB_BUF_CTRL_LAST
+
+  \ USB buffer data pid 1
+  13 bit constant USB_BUF_CTRL_DATA1_PID
+
+  \ USB buffer data pid 0
+  0 constant USB_BUF_CTRL_DATA0_PID
+
+  \ USB reset buffer select to buffer 0
+  12 bit constant USB_BUF_CTRL_RESET
+
+  \ USB buffer stall
+  11 bit constant USB_BUF_CTRL_STALL
+
+  \ USB buffer is available for transfer
+  10 bit constant USB_BUF_CTRL_AVAIL
+
+  \ USB buffer 0 transfer length
+  0 constant USB_BUF_CTRL_LENGTH0
   
   \ USB dual-ported RAM size
   4096 constant dpram-size
