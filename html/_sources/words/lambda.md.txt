@@ -4,21 +4,21 @@ In zeptoforth the user can define lightweight anonymous functions, known as lamb
 
 `[:` and `;]` are defined in `src/common/forth/basic.fs`, but the other words discussed here are defined in `src/common/forth/lambda.fs`.
 
-### `forth`
+### `lambda`
 
-These words are in `forth`.
+These words are in the `lambda` module`.
 
 There are two simple conditional combinators, namely:
 
 ##### `qif`
-( ??? f true-xt -- ??? )
+( ??? flag true-xt -- ??? )
 
 which takes *f* and *true-xt*, which is executed when *f* is non-zero; *true-xt* has the following signature:
 
 ( ??? -- ??? )
 
 ##### `qifelse`
-( ??? f true-xt false-xt -- ??? )
+( ??? flag true-xt false-xt -- ??? )
 
 which takes *f*, *true-xt*, and *false-xt*; *true-xt* is executed when *f* is non-zero and *false-xt* is executed when *f* is zero. These have the following signature:
 
@@ -31,7 +31,7 @@ There are three simple looping combinators:
 
 which takes *xt* and executes it repeatedly until it returns a non-zero value; *xt* has the following signature:
 
-( ??? -- ??? f )
+( ??? -- ??? flag )
 
 ##### `qagain`
 ( ??? xt -- ??? )
@@ -45,7 +45,7 @@ which takes *xt* and executes it repeatedly forever until an exception is raised
 
 which in a loop first executes *while-xt* and, if it returns a non-zero value, then it executes *body-xt* and continues looping, else it exits the loop; *while-xt* has the signature:
 
-( ??? -- ??? f )
+( ??? -- ??? flag )
 
 and *body-xt* has the signature:
 
@@ -70,11 +70,11 @@ which counts up or down with a variable increment from *init* until it reaches *
 There are the following combinators for iterating over arrays with with different-sized members:
 
 ##### `citer`
-( ??? b-addr count xt -- ??? )
+( ??? c-addr count xt -- ??? )
 
-which iterates over the byte array specified by *b-addr* and *count*, passing each byte from the lowest address to the highest to *xt*, which has the signature:
+which iterates over the byte array specified by *c-addr* and *count*, passing each byte from the lowest address to the highest to *xt*, which has the signature:
 
-( ??? b -- ??? )
+( ??? c -- ??? )
 
 ##### `hiter`
 ( ??? h-addr count xt -- ??? )
@@ -102,7 +102,7 @@ There are the following combinators for iterating over values from getters:
 ##### `iter-get`
 ( ??? get-xt count iter-xt -- ??? )
 
-which iterates over the cell values returned by *get-xt* when passed an index starting from 0 up to but not including *count*, passing them to *xt*; *get-xt* has the signature:
+which iterates over the cell values returned by *get-xt* when passed an index starting from 0 up to but not including *count*, passing them to *iter-xt*; *get-xt* has the signature:
 
 ( ??? i -- ??? x )
 
@@ -113,7 +113,7 @@ and *xt* has the signature:
 ##### `2iter-get`
 ( ??? get-xt count iter-xt -- ??? )
 
-which iterates over the double-cell values returned by *get-xt* when passed an index starting from 0 up to but not including *count*, passing them to *xt*; *get-xt* has the signature:
+which iterates over the double-cell values returned by *get-xt* when passed an index starting from 0 up to but not including *count*, passing them to *iter-xt*; *get-xt* has the signature:
 
 ( ??? i -- ??? d )
 
@@ -123,33 +123,323 @@ and *xt* has the signature:
 
 There are the following combinators for finding indices of values in arrays:
 
+##### `citeri`
+( ??? c-addr count xt -- ??? )
+
+which iterates over the byte array specified by *c-addr* and *count*, passing each byte from the lowest address to the highest along with its index to *xt*, which has the signature:
+
+( ??? c i -- ??? )
+
+##### `hiteri`
+( ??? h-addr count xt -- ??? )
+
+which iterates over the halfword array specified by *h-addr* and *count*, passing each halfword from the lowest address to the highest along with its index to *xt*, which has the signature:
+
+( ??? h i -- ??? )
+
+##### `iteri`
+( ??? addr count xt -- ??? )
+
+which iterates over the cell array specified by *addr* and *count*, passing each cell from the lowest address to the highest along with its index to *xt*, which as the signature:
+
+( ??? x i -- ??? )
+
+##### `2iteri`
+( ??? addr count xt -- ??? )
+
+which iterates over the double-cell array specified by *addr* and *count*, passing each double cell from the lowest address to the highest along with its index to *xt*, which as the signature:
+
+( ??? d i -- ??? )
+
+There are the following combinators for iterating over values from getters:
+
+##### `iteri-get`
+( ??? get-xt count iter-xt -- ??? )
+
+which iterates over the cell values returned by *get-xt* when passed an index starting from 0 up to but not including *count*, passing them along with their index to *iter-xt*; *get-xt* has the signature:
+
+( ??? i -- ??? x )
+
+and *xt* has the signature:
+
+( ??? x i -- ??? )
+
+##### `2iteri-get`
+( ??? get-xt count iter-xt -- ??? )
+
+which iterates over the double-cell values returned by *get-xt* when passed an index starting from 0 up to but not including *count*, passing them along with their index to *iter-xt*; *get-xt* has the signature:
+
+( ??? i -- ??? d )
+
+and *xt* has the signature:
+
+( ??? d i -- ??? )
+
+There are the following combinators for mapping from one array to another array with different-sized members; note that two arrays may be the same array:
+
+##### `cqmap`
+( ??? src-addr dst-addr count xt -- ??? )
+
+which maps from one byte array *src-addr* to another byte array *dst-addr* with *count* elements using *xt*, where *xt* has the signature:
+
+( ??? c -- ??? c' )
+
+##### `hqmap`
+( ??? src-addr dst-addr count xt -- ??? )
+
+which maps from one halfword array *src-addr* to another halfword array *dst-addr* with *count* elements using *xt*, where *xt* has the signature:
+
+( ??? h -- ??? h' )
+
+##### `map`
+( ??? src-addr dst-addr count xt -- ??? )
+
+which maps from one cell array *src-addr* to another cell array *dst-addr* with *count* elements using *xt*, where *xt* has the signature:
+
+( ??? x -- ??? x' )
+
+##### `2qmap`
+( ??? src-addr dst-addr count xt -- ??? )
+
+which maps from one double-cell array *src-addr* to another double-cell array *dst-addr* with *count* elements using *xt*, where *xt* has the signature:
+
+( ??? d -- ??? d' )
+
+##### `qmap-get-set`
+( ??? get-xt count map-xt set-xt -- ??? )
+
+which maps from *count* single-cell elements generated by the getter *get-xt* with *map-xt*, and then passing the resulting values and their indices to *set-xt*, where *get-xt* has the signature:
+
+( ??? i -- ??? x )
+
+and *map-xt* has the signature:
+
+( ??? x -- ??? x'  )
+
+and *set-xt* has the signature
+
+( ??? x' i -- ??? )
+
+##### `2qmap-get-set`
+( ??? get-xt count map-xt set-xt -- ??? )
+
+which maps from *count* double-cell elements generated by the getter *get-xt* with *map-xt*, and then passing the resulting values and their indices to *set-xt*, where *get-xt* has the signature:
+
+( ??? i -- ??? d )
+
+and *map-xt* has the signature:
+
+( ??? d -- ??? d'  )
+
+and *set-xt* has the signature
+
+( ??? d' i -- ??? )
+
+##### `cqmapi`
+( ??? src-addr dst-addr count xt -- ??? )
+
+which maps from one byte array *src-addr* to another byte array *dst-addr* with *count* elements using *xt* with both each element and its index, where *xt* has the signature:
+
+( ??? c i -- ??? c' )
+
+##### `hqmapi`
+( ??? src-addr dst-addr count xt -- ??? )
+
+which maps from one halfword array *src-addr* to another halfword array *dst-addr* with *count* elements using *xt* with both each element and its index, where *xt* has the signature:
+
+( ??? h i -- ??? h' )
+
+##### `mapi`
+( ??? src-addr dst-addr count xt -- ??? )
+
+which maps from one cell array *src-addr* to another cell array *dst-addr* with *count* elements using *xt* with both each element and its index, where *xt* has the signature:
+
+( ??? x i -- ??? x' )
+
+##### `2qmapi`
+( ??? src-addr dst-addr count xt -- ??? )
+
+which maps from one double-cell array *src-addr* to another double-cell array *dst-addr* with *count* elements using *xt* with both each element and its index, where *xt* has the signature:
+
+( ??? d i -- ??? d' )
+
+There are the following combinators for filtering from one array to another array with different-sized members; note that the two arrays may be the same array:
+
+##### `qmapi-get-set`
+( ??? get-xt count map-xt set-xt -- ??? )
+
+which maps from *count* single-cell elements generated by the getter *get-xt* and their indices with *map-xt*, and then passing the resulting values and their indices to *set-xt*, where *get-xt* has the signature:
+
+( ??? i -- ??? x )
+
+and *map-xt* has the signature:
+
+( ??? x i -- ??? x'  )
+
+and *set-xt* has the signature
+
+( ??? x' i -- ??? )
+
+##### `2qmapi-get-set`
+( ??? get-xt count map-xt set-xt -- ??? )
+
+which maps from *count* double-cell elements generated by the getter *get-xt* and their indices with *map-xt*, and then passing the resulting values and their indices to *set-xt*, where *get-xt* has the signature:
+
+( ??? i -- ??? d )
+
+and *map-xt* has the signature:
+
+( ??? d i -- ??? d'  )
+
+and *set-xt* has the signature
+
+( ??? d' i -- ??? )
+
+##### `cfilter`
+( ??? src-addr dst-addr count xt -- ??? count' )
+
+which filters from one byte array *src-addr* to another byte array *dst-addr* with *count* elements using *xt*, returning *count'* elements filtered, where *xt* has the signature:
+
+( ??? c -- ??? flag )
+
+##### `hfilter`
+( ??? src-addr dst-addr count xt -- ??? count' )
+
+which filters from one halfword array *src-addr* to another halfword array *dst-addr* with *count* elements using *xt*, returning *count'* elements filtered, where *xt* has the signature:
+
+( ??? h -- ??? flag )
+
+##### `filter`
+( ??? src-addr dst-addr count xt -- ??? count' )
+
+which filters from one cell array *src-addr* to another cell array *dst-addr* with *count* elements using *xt*, returning *count'* elements filtered, where *xt* has the signature:
+
+( ??? x -- ??? flag )
+
+##### `2filter`
+( ??? src-addr dst-addr count xt -- ??? count' )
+
+which filters from one double-cell array *src-addr* to another double-cell array *dst-addr* with *count* elements using *xt*, returning *count'* elements filtered, where *xt* has the signature:
+
+( ??? d -- ??? flag )
+
+##### `filter-get-set`
+( ??? get-xt count filter-xt set-xt -- ??? count' )
+
+which filters *count* single-cell elements from getter *get-xt* with *filter-xt*, and passes the filtered values and their ultimate indices to *set-xt*, returnining *count'* elements filtered, where *get-xt* has the signature:
+
+( ??? i -- ??? x )
+
+and *filter-xt* has the signature
+
+( ??? x -- ??? flag )
+
+and *set-xt* has the signature
+
+( ??? x i' -- ??? )
+
+##### `2filter-get-set`
+( ??? get-xt count filter-xt set-xt -- ??? count' )
+
+which filters *count* double-cell elements from getter *get-xt* with *filter-xt*, and passes the filtered values and their ultimate indices to *set-xt*, returnining *count'* elements filtered, where *get-xt* has the signature:
+
+( ??? i -- ??? d )
+
+and *filter-xt* has the signature
+
+( ??? d -- ??? flag )
+
+and *set-xt* has the signature
+
+( ??? d i' -- ??? )
+
+##### `cfilteri`
+( ??? src-addr dst-addr count xt -- ??? count' )
+
+which filters from one byte array *src-addr* to another byte array *dst-addr* with *count* elements using *xt* with both each element and its index, returning *count'* elements filtered, where *xt* has the signature:
+
+( ??? c i -- ??? flag )
+
+##### `hfilteri`
+( ??? src-addr dst-addr count xt -- ??? count' )
+
+which filters from one halfword array *src-addr* to another halfword array *dst-addr* with *count* elements using *xt* with both each element and its index, returning *count'* elements filtered, where *xt* has the signature:
+
+( ??? h i -- ??? flag )
+
+##### `filteri`
+( ??? src-addr dst-addr count xt -- ??? count' )
+
+which filters from one cell array *src-addr* to another cell array *dst-addr* with *count* elements using *xt* with both each element and its index, returning *count'* elements filtered, where *xt* has the signature:
+
+( ??? x i -- ??? flag )
+
+##### `2filteri`
+( ??? src-addr dst-addr count xt -- ??? count' )
+
+which filters from one double-cell array *src-addr* to another double-cell array *dst-addr* with *count* elements using *xt* with both each element and its index, returning *count'* elements filtered, where *xt* has the signature:
+
+( ??? d i -- ??? flag )
+
+##### `filteri-get-set`
+( ??? get-xt count filter-xt set-xt -- ??? count' )
+
+which filters *count* single-cell elements from getter *get-xt* along with their indices with *filter-xt*, and passes the filtered values and their ultimate indices to *set-xt*, returnining *count'* elements filtered, where *get-xt* has the signature:
+
+( ??? i -- ??? x )
+
+and *filter-xt* has the signature
+
+( ??? x i -- ??? flag )
+
+and *set-xt* has the signature
+
+( ??? x i' -- ??? )
+
+##### `2filteri-get-set`
+( ??? get-xt count filter-xt set-xt -- ??? count' )
+
+which filters *count* double-cell elements from getter *get-xt* along with their indices with *filter-xt*, and passes the filtered values and their ultimate indices to *set-xt*, returnining *count'* elements filtered, where *get-xt* has the signature:
+
+( ??? i -- ??? d )
+
+and *filter-xt* has the signature
+
+( ??? d i -- ??? flag )
+
+and *set-xt* has the signature
+
+( ??? d i' -- ??? )
+
+There are the following combinators for finding indices of values in arrays:
+
 ##### `cfind-index`
-( ??? b-addr count xt -- ??? i|-1 )
+( ??? c-addr count xt -- ??? i|-1 )
 
-which iterates over the byte array specified by *b-addr* and *count*, passing each byte from the lowest address to the highest to *xt*, until it either reaches a value for which it returns a non-zero value, where then it returns the index of that byte, or if it reaches the end of the array, where then it returns -1; *xt* as the signature:
+which iterates over the byte array specified by *c-addr* and *count*, passing each byte from the lowest address to the highest to *xt*, until it either reaches a value for which it returns a non-zero value, where then it returns the index of that byte, or if it reaches the end of the array, where then it returns -1; *xt* as the signature:
 
-( ??? b -- ??? f )
+( ??? c -- ??? flag )
 
 ##### `hfind-index`
 ( ??? h-addr count xt -- ??? i|-1 )
 
 which iterates over the halfword array specified by *h-addr* and *count*, passing each halfword from the lowest address to the highest to *xt*, until it either reaches a value for which it returns a non-zero value, where then it returns the index of that halfword, or if it reaches the end of the array, where then it returns -1; *xt* has the signature:
 
-( ??? h -- ??? f )
+( ??? h -- ??? flag )
 
 ##### `find-index`
 ( ??? addr count xt -- ??? i|-1 )
 
 which iterates over the cell array specified by *addr* and *count*, passing each cell from the lowest address to the highest to *xt*, until it either reaches a value for which it returns a non-zero value, where then it returns the index of that cell, or if it reaches the end of the array, where then it returns -1; *xt* has the signature:
 
-( ??? x -- ??? f )
+( ??? x -- ??? flag )
 
 ##### `2find-index`
 ( ??? addr count xt -- ??? i|-1 )
 
 which iterates over the double-cell array specified by *addr* and *count*, passing each double cell from the lowest address to the highest to *xt*, until it either reaches a value for which it returns a non-zero value, where then it returns the index of that double cell, or if it reaches the end of the array, where then it returns -1; *xt* has the signature:
 
-( ??? d -- ??? f )
+( ??? d -- ??? flag )
 
 There are the following combinators for finding indices of values from getters:
 
@@ -162,7 +452,7 @@ which iterates over the cell values returned by *get-xt* when passed indices sta
 
 and *pred-xt* has the signature:
 
-( ??? x -- ??? f )
+( ??? x -- ??? flag )
 
 ##### `2find-get-index`
 ( ??? get-xt count pred-xt -- ??? i|-1 )
@@ -173,42 +463,42 @@ which iterates over the double-cell values returned by *get-xt* when passed indi
 
 and *pred-xt* has the signature:
 
-( ??? d -- ??? f )
+( ??? d -- ??? flag )
 
 There are the following combinators for finding values in arrays:
 
 ##### `cfind-value`
-( ??? b-addr count xt -- ??? b|0 f )
+( ??? c-addr count xt -- ??? b|0 flag )
 
-which iterates over the byte array specified by *b-addr* and *count*, passing each byte from the lowest address to the highest to *xt*, until it either reaches a value for which it returns a non-zero value, where then it returns the value of that byte and true, or if it reaches the end of the array, where then it returns 0 and false; *xt* as the signature:
+which iterates over the byte array specified by *c-addr* and *count*, passing each byte from the lowest address to the highest to *xt*, until it either reaches a value for which it returns a non-zero value, where then it returns the value of that byte and true, or if it reaches the end of the array, where then it returns 0 and false; *xt* as the signature:
 
-( ??? b -- ??? f )
+( ??? c -- ??? flag )
 
 ##### `hfind-value`
-( ??? h-addr count xt -- ??? h|0 f )
+( ??? h-addr count xt -- ??? h|0 flag )
 
 which iterates over the halfword array specified by *h-addr* and *count*, passing each halfword from the lowest address to the highest to *xt*, until it either reaches a value for which it returns a non-zero value, where then it returns the value of that halfword and true, or if it reaches the end of the array, where then it returns 0 and false; *xt* has the signature:
 
-( ??? h -- ??? f )
+( ??? h -- ??? flag )
 
 ##### `find-value`
-( ??? addr count xt -- ??? x|0 f )
+( ??? addr count xt -- ??? x|0 flag )
 
 which iterates over the cell array specified by *addr* and *count*, passing each cell from the lowest address to the highest to *xt*, until it either reaches a value for which it returns a non-zero value, where then it returns the value of that cell and true, or if it reaches the end of the array, where then it returns 0 and false; *xt* has the signature:
 
-( ??? x -- ??? f )
+( ??? x -- ??? flag )
 
 ##### `2find-value`
-( ??? addr count xt -- ??? d|0 f )
+( ??? addr count xt -- ??? d|0 flag )
 
 which iterates over the double-cell array specified by *addr* and *count*, passing each double cell from the lowest address to the highest to *xt*, until it either reaches a value for which it returns a non-zero value, where then it returns the value of that double cell and true, or if it reaches the end of the array, where then it returns 0 and false; *xt* has the signature:
 
-( ??? d -- ??? f )
+( ??? d -- ??? flag )
 
 There are the following combinators for finding values from getters:
 
 ##### `find-get-value`
-( ??? get-xt count pred-xt -- ??? x|0 f )
+( ??? get-xt count pred-xt -- ??? x|0 flag )
 
 which iterates over the cell values returned by *get-xt* when passed indices starting from zero up to but not including *count*, passing each cell to *xt*, until it either reaches a value for which it returns a non-zero value, where then it returns the value of that cell and true, or if it reaches *count*, where then it returns 0 and false; *get-xt* has the signature:
 
@@ -216,10 +506,10 @@ which iterates over the cell values returned by *get-xt* when passed indices sta
 
 and *pred-xt* has the signature:
 
-( ??? x -- ??? f )
+( ??? x -- ??? flag )
 
 ##### `2find-get-value`
-( ??? get-xt count pred-xt -- ??? d|0 f )
+( ??? get-xt count pred-xt -- ??? d|0 flag )
 
 which iterates over the double-cell values returned by *get-xt* when passed indices starting from zero up to but not including *count*, passing each double cell to *xt*, until it either reaches a value for which it returns a non-zero value, where then it returns the value of that double cell and true, or if it reaches *count*, where then it returns 0 and false; *get-xt* has the signature:
 
@@ -227,4 +517,4 @@ which iterates over the double-cell values returned by *get-xt* when passed indi
 
 and *pred-xt* has the signature:
 
-( ??? d -- ??? f )
+( ??? d -- ??? flag )

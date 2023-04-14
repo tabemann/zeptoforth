@@ -198,6 +198,18 @@ continue-module forth
       90. d= s" test-2qmap" verify
     ;] with-aligned-allot
   ;
+
+  \ qmap-get-set test
+  : test-qmap-get-set ( -- )
+    0 [: ;] 10 [: 2* ;] [: + + ;] qmap-get-set
+    135 = s" test-qmap-get-set" verify
+  ;
+
+  \ 2qmap-get-set test
+  : test-2qmap-get-set ( -- )
+    0. [: s>d ;] 10 [: 2. d* ;] [: s>d d+ d+ ;] 2qmap-get-set
+    135. d= s" test-2qmap-get-set" verify
+  ;
   
   \ cqmapi test
   : test-cqmapi ( -- )
@@ -235,6 +247,18 @@ continue-module forth
     ;] with-aligned-allot
   ;
 
+  \ qmapi-get-set test
+  : test-qmapi-get-set ( -- )
+    0 [: ;] 10 [: + ;] [: + + ;] qmapi-get-set
+    135 = s" test-qmapi-get-set" verify
+  ;
+
+  \ 2qmapi-get-set test
+  : test-2qmapi-get-set ( -- )
+    0. [: s>d ;] 10 [: s>d d+ ;] [: s>d d+ d+ ;] 2qmapi-get-set
+    135. d= s" test-2qmapi-get-set" verify
+  ;
+  
   \ cfilter test
   : test-cfilter ( -- )
     10 [: { dst-array }
@@ -271,6 +295,19 @@ continue-module forth
     ;] with-aligned-allot
   ;
 
+  \ filter-get-set test
+  : test-filter-get-set ( -- )
+    0 [: ;] 10 [: 2 umod 0= ;] [: + + ;] filter-get-set { count' }
+    30 = count' 5 = and s" test-filter-get-set" verify
+  ;
+
+  \ 2filter-get-set test
+  : test-2filter-get-set ( -- )
+    0. [: s>d ;] 10 [: 2. ud/mod 2drop d0= ;]
+    [: s>d d+ d+ ;] 2filter-get-set { count' }
+    30. d= count' 5 = and s" test-2filter-get-set" verify
+  ;
+  
   \ cfilteri test
   : test-cfilteri ( -- )
     10 [: { dst-array }
@@ -307,6 +344,19 @@ continue-module forth
     ;] with-aligned-allot
   ;
 
+  \ filteri-get-set test
+  : test-filteri-get-set ( -- )
+    0 [: ;] 10 [: + 2 umod 0= ;] [: + + ;] filteri-get-set { count' }
+    90 = count' 10 = and s" test-filteri-get-set" verify
+  ;
+
+  \ 2filteri-get-set test
+  : test-2filteri-get-set ( -- )
+    0. [: s>d ;] 10 [: s>d d+ 2. ud/mod 2drop d0= ;]
+    [: s>d d+ d+ ;] 2filteri-get-set { count' }
+    90. d= count' 10 = and s" test-2filteri-get-set" verify
+  ;
+  
   \ Byte array to find a byte in
   create cfind-array 1 c, 3 c, 2 c, 5 c, 4 c, 7 c,
 
@@ -490,18 +540,26 @@ continue-module forth
     test-hqmap
     test-qmap
     test-2qmap
+    test-qmap-get-set
+    test-2qmap-get-set
     test-cqmapi
     test-hqmapi
     test-qmapi
     test-2qmapi
+    test-qmapi-get-set
+    test-2qmapi-get-set
     test-cfilter
     test-hfilter
     test-filter
     test-2filter
+    test-filter-get-set
+    test-2filter-get-set
     test-cfilteri
     test-hfilteri
     test-filteri
     test-2filteri
+    test-filteri-get-set
+    test-2filteri-get-set
     test-cfind-index
     test-cfind-index-fail
     test-hfind-index

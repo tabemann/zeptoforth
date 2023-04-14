@@ -173,6 +173,25 @@ begin-module lambda
     loop
   ;
 
+  \ Map over single-cell values retrieved from a getter, executing an xt
+  \ against each cell, and pass each resulting value and its index to a setter.
+  : qmap-get-set ( ??? get-xt count map-xt set-xt -- ??? )
+    ( get-xt: ??? i -- ??? x ) ( map-xt: ??? x -- ??? x' )
+    ( set-xt: ??? x' i -- ??? )
+    { get-xt count map-xt set-xt }
+    count 0 ?do i get-xt execute map-xt execute i set-xt execute loop
+  ;
+
+  \ Map over double-cell values retrieved from a getter, executing an xt
+  \ against each double-cell, and pass each resulting value and its index to a
+  \ setter.
+  : 2qmap-get-set ( ??? get-xt count map-xt set-xt -- ??? )
+    ( get-xt: ??? i -- ??? d ) ( map-xt: ??? d -- ??? d' )
+    ( set-xt: ??? d' i -- ??? )
+    { get-xt count map-xt set-xt }
+    count 0 ?do i get-xt execute map-xt execute i set-xt execute loop
+  ;
+
   \ Map over a byte array, executing an xt against each byte and its index, and
   \ storing the results into a byte array; note that the two byte arrays may be
   \ the same array
@@ -205,6 +224,25 @@ begin-module lambda
     count 0 ?do
       src-addr i 2* cells + 2@ i xt execute dst-addr i 2* cells + 2!
     loop
+  ;
+
+  \ Map over single-cell values retrieved from a getter, executing an xt
+  \ against each cell, and pass each resulting value and its index to a setter.
+  : qmapi-get-set ( ??? get-xt count map-xt set-xt -- ??? )
+    ( get-xt: ??? i -- ??? x ) ( map-xt: ??? x i -- ??? x' )
+    ( set-xt: ??? x' i -- ??? )
+    { get-xt count map-xt set-xt }
+    count 0 ?do i get-xt execute i map-xt execute i set-xt execute loop
+  ;
+
+  \ Map over double-cell values retrieved from a getter, executing an xt
+  \ against each double-cell, and pass each resulting value and its index to a
+  \ setter.
+  : 2qmapi-get-set ( ??? get-xt count map-xt set-xt -- ??? )
+    ( get-xt: ??? i -- ??? d ) ( map-xt: ??? d i -- ??? d' )
+    ( set-xt: ??? d' i -- ??? )
+    { get-xt count map-xt set-xt }
+    count 0 ?do i get-xt execute i map-xt execute i set-xt execute loop
   ;
 
   \ Filter a byte array, executing an xt against each byte, and store the
@@ -264,6 +302,36 @@ begin-module lambda
     total
   ;
 
+  \ Filter single-cell values from a getter, executing an xt against each cell,
+  \ and if filtered pass each resulting value and its ultimate index to a
+  \ setter, afterwards returning the total number of values accepted.
+  : filter-get-set ( ??? get-xt count filter-xt set-xt -- ??? count' )
+    ( get-xt: ??? i -- ??? x ) ( filter-xt: ??? x -- ??? f )
+    ( set-xt: ??? x i' -- ??? )
+    0 { get-xt count filter-xt set-xt total }
+    count 0 ?do
+      i get-xt execute dup { val } filter-xt execute if
+        val total set-xt execute 1 +to total
+      then
+    loop
+    total
+  ;
+
+  \ Filter double-cell values from a getter, executing an xt against each
+  \ double-cell, and if filtered pass each resulting value and its ultimate
+  \ index to a setter, afterwards returning the total number of values accepted.
+  : 2filter-get-set ( ??? get-xt count filter-xt set-xt -- ??? count' )
+    ( get-xt: ??? i -- ??? d ) ( filter-xt: ??? d -- ??? f )
+    ( set-xt: ??? d i' -- ??? )
+    0 { get-xt count filter-xt set-xt total }
+    count 0 ?do
+      i get-xt execute 2dup { D: val } filter-xt execute if
+        val total set-xt execute 1 +to total
+      then
+    loop
+    total
+  ;
+
   \ Filter a byte array, executing an xt against each byte and its index, and
   \ store the results in a byte array, afterwards returning the total number of
   \ bytes stored; note that the two byte arrays may be the same array
@@ -317,6 +385,37 @@ begin-module lambda
     count 0 ?do
       src-addr i 2* cells + 2@ 2dup { D: val } i xt execute if
         val dst-addr total 2* cells + 2! 1 +to total
+      then
+    loop
+    total
+  ;
+
+  \ Filter single-cell values from a getter, executing an xt against each cell
+  \ and its index, and if filtered pass each resulting value and its ultimate
+  \ index to a setter, afterwards returning the total number of values accepted.
+  : filteri-get-set ( ??? get-xt count filter-xt set-xt -- ??? count' )
+    ( get-xt: ??? i -- ??? x ) ( filter-xt: ??? x i -- ??? f )
+    ( set-xt: ??? x i' -- ??? )
+    0 { get-xt count filter-xt set-xt total }
+    count 0 ?do
+      i get-xt execute dup { val } i filter-xt execute if
+        val total set-xt execute 1 +to total
+      then
+    loop
+    total
+  ;
+
+  \ Filter double-cell values from a getter, executing an xt against each
+  \ double-cell and its index, and if filtered pass each resulting value and its
+  \ ultimate index to a setter, afterwards returning the total number of values
+  \ accepted.
+  : 2filteri-get-set ( ??? get-xt count filter-xt set-xt -- ??? count' )
+    ( get-xt: ??? i -- ??? d ) ( filter-xt: ??? d i -- ??? f )
+    ( set-xt: ??? d i' -- ??? )
+    0 { get-xt count filter-xt set-xt total }
+    count 0 ?do
+      i get-xt execute 2dup { D: val } i filter-xt execute if
+        val total set-xt execute 1 +to total
       then
     loop
     total
