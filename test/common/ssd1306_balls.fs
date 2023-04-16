@@ -195,11 +195,11 @@ begin-module balls
     init-balls
     0 [:
       systick-counter { last-frame }
-      begin key? not while
+      begin
         cycle-balls
         my-frame-delay last-frame current-task delay
         my-frame-delay +to last-frame
-      repeat
+      again
     ;] 320 128 512 spawn run
   ;
   

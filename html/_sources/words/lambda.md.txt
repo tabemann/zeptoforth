@@ -191,7 +191,7 @@ which maps from one halfword array *src-addr* to another halfword array *dst-add
 
 ( ??? h -- ??? h' )
 
-##### `map`
+##### `qmap`
 ( ??? src-addr dst-addr count xt -- ??? )
 
 which maps from one cell array *src-addr* to another cell array *dst-addr* with *count* elements using *xt*, where *xt* has the signature:
@@ -249,7 +249,7 @@ which maps from one halfword array *src-addr* to another halfword array *dst-add
 
 ( ??? h i -- ??? h' )
 
-##### `mapi`
+##### `qmapi`
 ( ??? src-addr dst-addr count xt -- ??? )
 
 which maps from one cell array *src-addr* to another cell array *dst-addr* with *count* elements using *xt* with both each element and its index, where *xt* has the signature:

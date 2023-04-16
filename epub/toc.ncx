@@ -2548,15 +2548,15 @@
         </navPoint>
         <navPoint id="navPoint424" playOrder="418">
           <navLabel>
-            <text>map</text>
+            <text>qmap</text>
           </navLabel>
-          <content src="words/lambda.xhtml#map" />  
+          <content src="words/lambda.xhtml#qmap" />  
         </navPoint>
         <navPoint id="navPoint425" playOrder="419">
           <navLabel>
             <text>2qmap</text>
           </navLabel>
-          <content src="words/lambda.xhtml#qmap" />  
+          <content src="words/lambda.xhtml#id6" />  
         </navPoint>
         <navPoint id="navPoint426" playOrder="420">
           <navLabel>
@@ -2568,7 +2568,7 @@
           <navLabel>
             <text>2qmap-get-set</text>
           </navLabel>
-          <content src="words/lambda.xhtml#id6" />  
+          <content src="words/lambda.xhtml#id7" />  
         </navPoint>
         <navPoint id="navPoint428" playOrder="422">
           <navLabel>
@@ -2584,15 +2584,15 @@
         </navPoint>
         <navPoint id="navPoint430" playOrder="424">
           <navLabel>
-            <text>mapi</text>
+            <text>qmapi</text>
           </navLabel>
-          <content src="words/lambda.xhtml#mapi" />  
+          <content src="words/lambda.xhtml#qmapi" />  
         </navPoint>
         <navPoint id="navPoint431" playOrder="425">
           <navLabel>
             <text>2qmapi</text>
           </navLabel>
-          <content src="words/lambda.xhtml#qmapi" />  
+          <content src="words/lambda.xhtml#id8" />  
         </navPoint>
         <navPoint id="navPoint432" playOrder="426">
           <navLabel>
@@ -2604,7 +2604,7 @@
           <navLabel>
             <text>2qmapi-get-set</text>
           </navLabel>
-          <content src="words/lambda.xhtml#id7" />  
+          <content src="words/lambda.xhtml#id9" />  
         </navPoint>
         <navPoint id="navPoint434" playOrder="428">
           <navLabel>
@@ -2628,7 +2628,7 @@
           <navLabel>
             <text>2filter</text>
           </navLabel>
-          <content src="words/lambda.xhtml#id8" />  
+          <content src="words/lambda.xhtml#id10" />  
         </navPoint>
         <navPoint id="navPoint438" playOrder="432">
           <navLabel>
@@ -2640,7 +2640,7 @@
           <navLabel>
             <text>2filter-get-set</text>
           </navLabel>
-          <content src="words/lambda.xhtml#id9" />  
+          <content src="words/lambda.xhtml#id11" />  
         </navPoint>
         <navPoint id="navPoint440" playOrder="434">
           <navLabel>
@@ -2664,7 +2664,7 @@
           <navLabel>
             <text>2filteri</text>
           </navLabel>
-          <content src="words/lambda.xhtml#id10" />  
+          <content src="words/lambda.xhtml#id12" />  
         </navPoint>
         <navPoint id="navPoint444" playOrder="438">
           <navLabel>
@@ -2676,7 +2676,7 @@
           <navLabel>
             <text>2filteri-get-set</text>
           </navLabel>
-          <content src="words/lambda.xhtml#id11" />  
+          <content src="words/lambda.xhtml#id13" />  
         </navPoint>
         <navPoint id="navPoint446" playOrder="440">
           <navLabel>
@@ -2700,7 +2700,7 @@
           <navLabel>
             <text>2find-index</text>
           </navLabel>
-          <content src="words/lambda.xhtml#id12" />  
+          <content src="words/lambda.xhtml#id14" />  
         </navPoint>
         <navPoint id="navPoint450" playOrder="444">
           <navLabel>
@@ -2712,7 +2712,7 @@
           <navLabel>
             <text>2find-get-index</text>
           </navLabel>
-          <content src="words/lambda.xhtml#id13" />  
+          <content src="words/lambda.xhtml#id15" />  
         </navPoint>
         <navPoint id="navPoint452" playOrder="446">
           <navLabel>
@@ -2736,7 +2736,7 @@
           <navLabel>
             <text>2find-value</text>
           </navLabel>
-          <content src="words/lambda.xhtml#id14" />  
+          <content src="words/lambda.xhtml#id16" />  
         </navPoint>
         <navPoint id="navPoint456" playOrder="450">
           <navLabel>
@@ -2748,7 +2748,7 @@
           <navLabel>
             <text>2find-get-value</text>
           </navLabel>
-          <content src="words/lambda.xhtml#id15" />  
+          <content src="words/lambda.xhtml#id17" />  
         </navPoint>
       </navPoint>
     </navPoint>
