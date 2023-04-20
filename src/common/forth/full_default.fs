@@ -42,6 +42,7 @@
 #include src/common/forth/schannel.fs
 #include src/common/forth/rchannel.fs
 #include src/common/forth/stream.fs
+#include src/common/forth/console.fs
 #include src/common/forth/ansi_term.fs
 #include src/common/forth/line.fs
 #include src/common/forth/task_pool.fs

@@ -18,6 +18,8 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
+compile-to-flash
+
 begin-module console
 
   stream import
@@ -47,7 +49,7 @@ begin-module console
 
     \ Initialize console stream data for input
     : init-console-stream-input { stream data -- }
-      data data console-stream !
+      stream data console-stream !
       data data console-io [: { data }
         data console-buffer 1 data console-stream @ recv-stream
         0> averts x-end-of-input
@@ -60,7 +62,7 @@ begin-module console
 
     \ Initialize console stream data for output
     : init-console-stream-output { stream data -- }
-      data data console-stream !
+      stream data console-stream !
       data data console-io [: { byte data }
         byte data console-buffer c!
         data console-buffer 1 data console-stream @ send-stream
@@ -108,7 +110,7 @@ begin-module console
   : with-stream-input ( stream xt -- )
     console-stream-data-size [: { data }
       swap data init-console-stream-input
-      data console-stream-io data console-stream-io? rot with-input
+      data console-io data console-io? rot with-input
     ;] with-aligned-allot
   ;
 
@@ -116,8 +118,10 @@ begin-module console
   : with-stream-output ( stream xt -- )
     console-stream-data-size [: { data }
       swap data init-console-stream-output
-      data console-stream-io data console-stream-io? rot with-output
+      data console-io data console-io? rot with-output
     ;] with-aligned-allot
   ;
 
 end-module
+
+compile-to-ram
