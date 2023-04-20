@@ -165,4 +165,51 @@ begin-module ssd1306-test
     ;] with-allot
   ;
   
+  rtc::date-time-size aligned-buffer: my-date-time
+  
+  \ Bounce a time around the display
+  : bounce-time ( -- )
+    10 [:
+      { buffer }
+      inited? not if init-test true to inited? then
+      0 0 1 1 { column row delta-column delta-row }
+      begin key? not while
+        my-date-time rtc::date-time@
+        buffer { cur-buffer }
+        my-date-time rtc::date-time-hour c@ s>d <# #s #> { c-addr bytes }
+        bytes 2 < if [char] 0 cur-buffer c! 1 +to cur-buffer then
+        c-addr cur-buffer bytes move bytes +to cur-buffer
+        [char] : cur-buffer c! 1 +to cur-buffer
+        my-date-time rtc::date-time-minute c@ s>d <# #s #> to bytes to c-addr
+        bytes 2 < if [char] 0 cur-buffer c! 1 +to cur-buffer then
+        c-addr cur-buffer bytes move bytes +to cur-buffer
+        [char] : cur-buffer c! 1 +to cur-buffer
+        my-date-time rtc::date-time-second c@ s>d <# #s #> to bytes to c-addr
+        bytes 2 < if [char] 0 cur-buffer c! 1 +to cur-buffer then
+        c-addr cur-buffer bytes move bytes +to cur-buffer
+        buffer 8 column row op-xor my-ssd1306 a-simple-font draw-string
+        my-ssd1306 update-display
+        buffer 8 column row op-xor my-ssd1306 a-simple-font draw-string
+        column 7 8 * + my-cols >= if
+          -1 to delta-column
+        else
+          column 0 <= if
+            1 to delta-column
+          then
+        then
+        row 8 + my-rows >= if
+          -1 to delta-row
+        else
+          row 0 <= if
+            1 to delta-row
+          then
+        then
+        delta-column +to column
+        delta-row +to row
+        100 ms
+      repeat
+      key drop
+    ;] with-allot
+  ;
+  
 end-module
