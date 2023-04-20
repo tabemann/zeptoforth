@@ -997,6 +997,10 @@ user task-rstack-end
 user task-ram-here
 user task-base
 user task-handler
+user task-key-hook
+user task-key?-hook
+user task-emit-hook
+user task-emit?-hook
 compress-flash
 
 \ Set internal
@@ -2491,7 +2495,15 @@ commit-flash
   task-rstack-end  @
   task-base @
   task-handler @
+  task-key-hook @
+  task-key?-hook @
+  task-emit-hook @
+  task-emit?-hook @
   next-ram-space dict-base !
+  task-emit?-hook !
+  task-emit-hook !
+  task-key?-hook !
+  task-key-hook !
   task-handler !
   task-base !
   task-rstack-end !

@@ -312,33 +312,49 @@ _failed_parse_hook:
 	@@ The emit hook
 	define_word "emit-hook", visible_flag
 _emit_hook:
-	push_tos
-	ldr tos, =emit_hook
-	bx lr
+	push {lr}
+	bl _cpu_offset
+	ldr r0, =dict_base
+	adds tos, r0
+	ldr tos, [tos]
+	adds tos, #emit_hook_offset
+	pop {pc}
 	end_inlined
 
 	@@ The emit? hook
 	define_word "emit?-hook", visible_flag
 _emit_q_hook:
-	push_tos
-	ldr tos, =emit_q_hook
-	bx lr
+	push {lr}
+	bl _cpu_offset
+	ldr r0, =dict_base
+	adds tos, r0
+	ldr tos, [tos]
+	adds tos, #emit_q_hook_offset
+	pop {pc}
 	end_inlined
 
 	@@ The key hook
 	define_word "key-hook", visible_flag
 _key_hook:
-	push_tos
-	ldr tos, =key_hook
-	bx lr
+	push {lr}
+	bl _cpu_offset
+	ldr r0, =dict_base
+	adds tos, r0
+	ldr tos, [tos]
+	adds tos, #key_hook_offset
+	pop {pc}
 	end_inlined
 
 	@@ The key? hook
 	define_word "key?-hook", visible_flag
 _key_q_hook:
-	push_tos
-	ldr tos, =key_q_hook
-	bx lr
+	push {lr}
+	bl _cpu_offset
+	ldr r0, =dict_base
+	adds tos, r0
+	ldr tos, [tos]
+	adds tos, #key_q_hook_offset
+	pop {pc}
 	end_inlined
 
 	@@ The refill hook

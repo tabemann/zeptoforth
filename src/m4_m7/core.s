@@ -559,8 +559,9 @@ _current_allot:
 	@@ Emit a character
 	define_word "emit", visible_flag
 _emit:	push {lr}
-	ldr r0, =emit_hook
-	ldr r0, [r0]
+        bl _emit_hook
+        ldr r0, [tos]
+        pull_tos
 	cmp r0, #0
 	beq 1f
 	push_tos
@@ -575,8 +576,9 @@ _emit:	push {lr}
 	define_word "emit?", visible_flag
 _emit_q:
 	push {lr}
-	ldr r0, =emit_q_hook
-	ldr r0, [r0]
+        bl _emit_q_hook
+        ldr r0, [tos]
+        pull_tos
 	cmp r0, #0
 	beq 1f
 	push_tos
@@ -662,8 +664,9 @@ _count:	ldrb r0, [tos]
 	@@ Receive a character
 	define_word "key", visible_flag
 _key:	push {lr}
-	ldr r0, =key_hook
-	ldr r0, [r0]
+        bl _key_hook
+        ldr r0, [tos]
+        pull_tos
 	cmp r0, #0
 	beq 1f
 	push_tos
@@ -678,8 +681,9 @@ _key:	push {lr}
 	@@ Test for whether the system is ready to receive a character
 	define_word "key?", visible_flag
 _key_q:	push {lr}
-	ldr r0, =key_q_hook
-	ldr r0, [r0]
+        bl _key_q_hook
+        ldr r0, [tos]
+        pull_tos
 	cmp r0, #0
 	beq 1f
 	push_tos
@@ -2138,26 +2142,34 @@ _init_variables:
 	str r1, [r0]
         ldr r0, =color_enabled
         str r1, [r0]
+        ldr r0, =ram_current
 	@@ Initialize the data stack base
-	ldr r0, =ram_current + stack_base_offset
 	ldr r1, =stack_top
-	str r1, [r0]
+	str r1, [r0, #stack_base_offset]
 	@@ Initialize the return stack base
-	ldr r0, =ram_current + rstack_base_offset
 	ldr r1, =rstack_top
-	str r1, [r0]
+	str r1, [r0, #rstack_base_offset]
 	@@ Initialize the data stack end
-	ldr r0, =ram_current + stack_end_offset
 	ldr r1, =stack_top - stack_size
-	str r1, [r0]
+	str r1, [r0, #stack_end_offset]
 	@@ Initialize the return stack end
-	ldr r0, =ram_current + rstack_end_offset
 	ldr r1, =rstack_top - rstack_size
-	str r1, [r0]
+	str r1, [r0, #rstack_end_offset]
 	@@ Initialize BASE
-	ldr r0, =ram_current + base_offset
 	movs r1, #10
-	str r1, [r0]
+	str r1, [r0, #base_offset]
+        @@ Initalize key-hook
+        ldr r1, =_serial_key
+        str r1, [r0, #key_hook_offset]
+        @@ Initialize key?-hook
+        ldr r1, =_serial_key_q
+        str r1, [r0, #key_q_hook_offset]
+        @@ Initialize emit-hook
+        ldr r1, =_serial_emit
+        str r1, [r0, #emit_hook_offset]
+        @@ Initialize emit?-hook
+        ldr r1, =_serial_emit_q
+        str r1, [r0, #emit_q_hook_offset]
 	ldr r2, =cpu_count * 4
 1:	cmp r2, #0
 	beq 2f
@@ -2174,18 +2186,6 @@ _init_variables:
 	str r1, [r0]
 	ldr r0, =failed_parse_hook
 	ldr r1, =_do_failed_parse
-	str r1, [r0]
-	ldr r0, =emit_hook
-	ldr r1, =_serial_emit
-	str r1, [r0]
-	ldr r0, =emit_q_hook
-	ldr r1, =_serial_emit_q
-	str r1, [r0]
-	ldr r0, =key_hook
-	ldr r1, =_serial_key
-	str r1, [r0]
-	ldr r0, =key_q_hook
-	ldr r1, =_serial_key_q
 	str r1, [r0]
 	ldr r0, =refill_hook
 	ldr r1, =_do_refill

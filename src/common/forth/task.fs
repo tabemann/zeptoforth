@@ -1538,6 +1538,10 @@ begin-module task
     0 over task-saved-priority h!
     0 over task-active h!
     base @ over ['] task-base for-task!
+    key-hook @ over ['] task-key-hook for-task!
+    key?-hook @ over ['] task-key?-hook for-task!
+    emit-hook @ over ['] task-emit-hook for-task!
+    emit?-hook @ over ['] task-emit?-hook for-task!
     0 over ['] current-lock for-task!
     0 over ['] current-lock-held for-task!
     readied over task-state h!

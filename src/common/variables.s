@@ -50,6 +50,18 @@
 	@@ The handler offset
 	.equ handler_offset, 24
 
+        @@ The key-hook offset
+        .equ key_hook_offset, 28
+
+        @@ The key?-hook offset
+        .equ key_q_hook_offset, 32
+
+        @@ The emit-hook offset
+        .equ emit_hook_offset, 36
+
+        @@ The emit?-hook offset
+        .equ emit_q_hook_offset, 40
+
 	@@ The initial USER offset
 	.equ user_offset, 28
 
@@ -154,18 +166,6 @@
 
 	@@ The failed parse hook
 	allot failed_parse_hook, 4
-
-	@@ The emit hook
-	allot emit_hook, 4
-
-	@@ The emit? hook
-	allot emit_q_hook, 4
-
-	@@ The key hook
-	allot key_hook, 4
-
-	@@ The key? hook
-	allot key_q_hook, 4
 
 	@@ The refill hook
 	allot refill_hook, 4
