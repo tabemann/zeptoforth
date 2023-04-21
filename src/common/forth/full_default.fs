@@ -36,6 +36,7 @@
 #include src/common/forth/action.fs
 #include src/common/forth/tqueue.fs
 #include src/common/forth/lock.fs
+#include src/common/forth/alarm.fs
 #include src/common/forth/semaphore.fs
 #include src/common/forth/fchannel.fs
 #include src/common/forth/channel.fs
