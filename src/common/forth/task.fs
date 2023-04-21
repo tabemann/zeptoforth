@@ -945,19 +945,19 @@ begin-module task
   : wait-notify-timeout ( ticks-delay ticks-start notify-index -- x )
     [:
       dup current-task @ validate-notify
-      swap task-systick-start !
-      swap task-systick-delay !
-      begin dup bit task-notified-bitmap bit@ not while
-	dup task-current-notify !
+      swap current-task @ task-systick-start !
+      swap current-task @ task-systick-delay !
+      begin dup bit current-task @ task-notified-bitmap bit@ not while
+	dup current-task @ task-current-notify !
 	[ blocked-timeout schedule-critical or ] literal
 	current-task @ task-state h!
 	release-same-core-spinlock end-critical pause-wo-reschedule
 	claim-same-core-spinlock
 	current-task @ validate-timeout
       repeat
-      task-notify-area @ over cells + @
-      swap bit task-notified-bitmap bic!
-      -1 task-current-notify !
+      current-task @ task-notify-area @ over cells + @
+      swap bit current-task @ task-notified-bitmap bic!
+      -1 current-task @ task-current-notify !
     ;] cpu-index critical-with-other-core-spinlock
   ;
 
@@ -971,10 +971,10 @@ begin-module task
       begin-critical
       [:
 	dup current-task @ validate-notify
-	swap task-systick-start !
-	swap task-systick-delay !
-	begin dup bit task-notified-bitmap bit@ not while
-	  dup task-current-notify !
+        swap current-task @ task-systick-start !
+	swap current-task @ task-systick-delay !
+	begin dup bit current-task @ task-notified-bitmap bit@ not while
+	  dup current-task @ task-current-notify !
 	  [ blocked-timeout schedule-critical or schedule-user-critical or ]
 	  literal
 	  current-task @ task-state h!
@@ -982,9 +982,9 @@ begin-module task
 	  claim-same-core-spinlock
 	  current-task @ validate-timeout
 	repeat
-	task-notify-area @ over cells + @
-	swap bit task-notified-bitmap bic!
-	-1 task-current-notify !
+	current-task @ task-notify-area @ over cells + @
+	swap bit current-task @ task-notified-bitmap bic!
+	-1 current-task @ task-current-notify !
       ;] try ?dup if end-critical ?raise then
     ;] cpu-index critical-with-other-core-spinlock
   ;
