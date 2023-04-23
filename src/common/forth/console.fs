@@ -34,7 +34,7 @@ begin-module console
   begin-module console-internal
 
     \ Console alarm delay in ticks
-    100 constant console-alarm-delay
+    500 constant console-alarm-delay
 
     \ Console buffer size
     128 constant console-buffer-size
