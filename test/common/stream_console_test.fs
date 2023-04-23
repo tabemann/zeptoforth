@@ -36,10 +36,10 @@ begin-module stream-console-test
     my-stream [:
       0 wait-notify drop
       begin
-        [char] Z 1+ [char] A ?do i emit loop
+       [char] Z 1+ [char] A ?do i emit loop \ 100 ms
       again
     ;] with-stream-output
-  ; 320 128 512 spawn constant out-task
+  ; 512 128 512 spawn constant out-task
   
   0 :noname
     my-stream [:
@@ -48,7 +48,7 @@ begin-module stream-console-test
         key emit
       again
     ;] with-stream-input
-  ; 320 128 512 spawn constant in-task
+  ; 512 128 512 spawn constant in-task
   
   out-notify-area 1 out-task config-notify
   in-notify-area 1 in-task config-notify

@@ -22,13 +22,22 @@ compile-to-flash
 
 begin-module console
 
+  task import
   stream import
   closure import
+  slock import
+  alarm import
 
   \ End of input exception
   : x-end-of-input ( -- ) ." end of input" cr ;
 
   begin-module console-internal
+
+    \ Console alarm delay in ticks
+    100 constant console-alarm-delay
+
+    \ Console buffer size
+    128 constant console-buffer-size
 
     \ Data associated with stream input and output
     begin-structure console-stream-data-size
@@ -42,33 +51,92 @@ begin-module console
       \ The stream associated with the input or output
       field: console-stream
 
+      \ Buffer start index
+      field: console-start
+
+      \ Buffer end index
+      field: console-end
+      
+      \ Console lock
+      slock-size +field console-slock
+
+      \ Console alarm
+      alarm-size +field console-alarm
+
+      \ Console alarm set
+      field: console-alarm-set?
+
       \ A buffer associated with the input or output
-      field: console-buffer
+      console-buffer-size +field console-buffer
 
     end-structure
 
     \ Initialize console stream data for input
     : init-console-stream-input { stream data -- }
+      data console-slock init-slock
+      0 data console-start !
+      0 data console-end !
+      false data console-alarm-set? !
       stream data console-stream !
-      data data console-io [: { data }
-        data console-buffer 1 data console-stream @ recv-stream
-        0> averts x-end-of-input
-        data console-buffer c@
+      data data console-io [:
+        [: { data }
+          data console-start @ data console-end @ = if
+            data console-buffer console-buffer-size
+            data console-stream @ recv-stream
+            dup 0> averts x-end-of-input
+            data console-end !
+            0 data console-start !
+          then
+          data console-buffer data console-start @ + c@
+          1 data console-start +!
+        ;] over console-slock with-slock
       ;] bind
       data data console-io? [: { data }
         data console-stream @ stream-empty? not
+        data console-start @ data console-end @ <> or
       ;] bind
     ;
 
     \ Initialize console stream data for output
     : init-console-stream-output { stream data -- }
+      data console-slock init-slock
+      0 data console-start !
+      0 data console-end !
+      false data console-alarm-set? !
       stream data console-stream !
-      data data console-io [: { byte data }
-        byte data console-buffer c!
-        data console-buffer 1 data console-stream @ send-stream
+      data data console-io [:
+        [: { byte data }
+          byte data console-buffer data console-end @ + c!
+          1 data console-end +!
+          data console-end @ console-buffer-size < if
+            data console-alarm-set? @ not if
+              true data console-alarm-set? !
+              console-alarm-delay
+              current-task task-priority@
+              data
+              [: drop
+                [: { data }
+                  data console-buffer data console-end @
+                  data console-stream @ send-stream-parts
+                  0 data console-end !
+                  false data console-alarm-set? !
+                ;] over console-slock with-slock
+              ;]
+              data console-alarm
+              set-alarm-delay-default
+            then
+          else
+            data console-alarm-set? @ if data console-alarm unset-alarm then
+            data console-buffer console-buffer-size
+            data console-stream @ send-stream-parts
+            0 data console-end !
+            false data console-alarm-set? !
+          then
+        ;] over console-slock with-slock
       ;] bind
       data data console-io? [: { data }
         data console-stream @ stream-full? not
+        data console-end @ console-buffer-size <> or
       ;] bind
     ;
 
@@ -104,6 +172,20 @@ begin-module console
     [:
       ['] true emit?-hook ! ['] drop emit-hook ! execute
     ;] try saved-output?-hook emit?-hook ! saved-output-hook emit-hook ! ?raise
+  ;
+
+  \ Set the curent input to serial within an xt
+  : with-serial-input ( xt -- )
+    ['] int-io::int-io-internal::do-key
+    ['] int-io::int-io-internal::do-key?
+    rot with-input
+  ;
+
+  \ Set the current output to serial within an xt
+  : with-serial-output ( xt -- )
+    ['] int-io::int-io-internal::do-emit
+    ['] int-io::int-io-internal::do-emit?
+    rot with-output
   ;
 
   \ Set the current input to a stream within an xt

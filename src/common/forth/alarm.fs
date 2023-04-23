@@ -24,7 +24,7 @@ begin-module alarm
 
   task import
   systick import
-  lock import
+  slock import
   
   \ Default alarm task has already been initialized
   : x-default-alarm-task-already-inited ( -- )
@@ -37,7 +37,7 @@ begin-module alarm
     variable default-alarm-task-inited?
 
     \ Default alarm task initialization lock
-    lock-size aligned-buffer: default-alarm-task-lock
+    slock-size aligned-buffer: default-alarm-task-slock
     
     begin-structure alarm-size
 
@@ -79,7 +79,7 @@ begin-module alarm
       field: alarm-task-last
 
       \ Alarm lock
-      lock-size +field alarm-task-lock
+      slock-size +field alarm-task-slock
 
       \ Alarm notification space
       field: alarm-task-notify-data
@@ -98,7 +98,7 @@ begin-module alarm
           alarm-next @
         repeat
         max-priority
-      ;] over alarm-task-lock with-lock
+      ;] over alarm-task-slock with-slock
     ;
 
     \ Compare two alarms times
@@ -142,7 +142,7 @@ begin-module alarm
         0 alarm alarm-next !
         alarm alarm-task alarm-task-last !
         alarm-task alarm alarm-parent !
-      ;] over alarm-task-lock with-lock
+      ;] over alarm-task-slock with-slock
     ;
 
     \ Remove an alarm
@@ -159,7 +159,7 @@ begin-module alarm
           else
             alarm alarm-prev @ alarm alarm-parent @ alarm-task-last !
           then
-        ;] alarm alarm-parent @ alarm-task-lock with-lock
+        ;] alarm alarm-parent @ alarm-task-slock with-slock
       then
       0 alarm alarm-parent !
     ;
@@ -174,7 +174,7 @@ begin-module alarm
             over alarm-ticks-start @
             true
           then
-        ;] alarm-task alarm-task-lock with-lock
+        ;] alarm-task alarm-task-slock with-slock
         if
           dup systick-counter swap - 2 pick < if
             rot drop
@@ -194,7 +194,7 @@ begin-module alarm
 
     \ Initialize alarms
     : init-alarms ( -- )
-      default-alarm-task-lock init-lock
+      default-alarm-task-slock init-slock
       false default-alarm-task-inited? !
     ;
 
@@ -214,7 +214,7 @@ begin-module alarm
   
   \ Initialize an alarm task
   : init-alarm-task { dict-size stack-size rstack-size core addr -- }
-    addr alarm-task-lock init-lock
+    addr alarm-task-slock init-slock
     0 addr alarm-task-first !
     0 addr alarm-task-last !
     addr 1 ['] run-alarm-task dict-size stack-size rstack-size core
@@ -224,13 +224,22 @@ begin-module alarm
     addr alarm-task-task @ run
   ;
 
+  continue-module alarm-internal
+  
+    \ Actually initialize the default alarm task
+    : init-default-alarm-task-impl { dict-size stack-size rstack-size core -- }
+      true default-alarm-task-inited? !
+      dict-size stack-size rstack-size core default-alarm-task init-alarm-task
+    ;
+
+  end-module
+
   \ Initialize the default alarm task
   : init-default-alarm-task ( dict-size stack-size rstack-size core -- )
     [: { dict-size stack-size rstack-size core }
       default-alarm-task-inited? @ triggers x-default-alarm-task-already-inited
-      true default-alarm-task-inited? !
-      dict-size stack-size rstack-size core default-alarm-task init-alarm-task
-    ;] default-alarm-task-lock with-lock
+      dict-size stack-size rstack-size core init-default-alarm-task-impl
+    ;] default-alarm-task-slock with-slock
   ;
 
   \ Get the default alarm task
@@ -238,10 +247,10 @@ begin-module alarm
     [:
       default-alarm-task-inited? @ not if
         default-dict-size default-stack-size default-rstack-size default-core
-        init-default-alarm-task
+        init-default-alarm-task-impl
       then
       default-alarm-task
-    ;] default-alarm-task-lock with-lock
+    ;] default-alarm-task-slock with-slock
   ;
   
   \ Set an alarm
@@ -254,7 +263,7 @@ begin-module alarm
     alarm alarm-task add-alarm
     current-task task-priority@ { saved-priority }
     alarm-task max-alarm-priority { target-priority }
-    target-priority current-task task-priority!
+    target-priority saved-priority max current-task task-priority!
     target-priority alarm-task alarm-task-task @ task-priority!
     0 alarm-task alarm-task-task @ notify
     saved-priority current-task task-priority!
@@ -281,7 +290,7 @@ begin-module alarm
     alarm-task if
       alarm remove-alarm
       alarm-task max-alarm-priority alarm-task alarm-task-task @ task-priority!
-      0 alarm-task alarm-task-task @ notify
+\      0 alarm-task alarm-task-task @ notify
     then
   ;
 

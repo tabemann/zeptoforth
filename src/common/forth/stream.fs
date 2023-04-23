@@ -99,53 +99,47 @@ begin-module stream
   continue-module stream-internal
 
     \ Wait to send on a stream
-    : wait-send-stream ( bytes stream -- )
-      begin 2dup stream-free > while
-	1 over stream-send-ready +!
-	dup stream-send-tqueue ['] wait-tqueue try
-	-1 2 pick stream-send-ready +!
+    : wait-send-stream { bytes stream -- }
+      begin bytes stream stream-free > while
+	1 stream stream-send-ready +!
+	stream stream-send-tqueue ['] wait-tqueue try
+	-1 stream stream-send-ready +!
 	?raise
-	dup stream-closed @ triggers x-stream-closed
+	stream stream-closed @ triggers x-stream-closed
       repeat
-      2drop
     ;
 
     \ Wait to send data as parts on a stream
-    : wait-send-stream-parts ( stream -- )
-      dup stream-full? if
-	1 over stream-send-ready +!
-	dup stream-send-tqueue ['] wait-tqueue try
-	-1 2 pick stream-send-ready +!
+    : wait-send-stream-parts { stream -- }
+      stream stream-full? if
+	1 stream stream-send-ready +!
+	stream stream-send-tqueue ['] wait-tqueue try
+	-1 stream stream-send-ready +!
 	?raise
-	stream-closed @ triggers x-stream-closed
-      else
-	drop
+	stream stream-closed @ triggers x-stream-closed
       then
     ;
 
     \ Wait to receive on a stream
-    : wait-recv-stream ( stream -- )
-      dup stream-empty? if
-	dup stream-closed @ triggers x-stream-closed
-	1 over stream-recv-ready +!
-	dup stream-recv-tqueue ['] wait-tqueue try
-	-1 rot stream-recv-ready +!
+    : wait-recv-stream { stream -- }
+      stream stream-empty? if
+	stream stream-closed @ triggers x-stream-closed
+	1 stream stream-recv-ready +!
+	stream stream-recv-tqueue ['] wait-tqueue try
+	-1 stream stream-recv-ready +!
 	?raise
-      else
-	drop
       then
     ;
 
     \ Wait to receive a minimum number of bytes on a stream
-    : wait-recv-stream-min ( min-bytes stream -- )
-      begin 2dup stream-current-count @ > while
-	dup stream-closed @ triggers x-stream-closed
-	1 over stream-recv-ready +!
-	dup stream-recv-tqueue ['] wait-tqueue try
-	-1 2 pick stream-recv-ready +!
+    : wait-recv-stream-min { min-bytes stream -- }
+      begin min-bytes stream stream-current-count @ > while
+	stream stream-closed @ triggers x-stream-closed
+	1 stream stream-recv-ready +!
+	stream stream-recv-tqueue ['] wait-tqueue try
+	-1 stream stream-recv-ready +!
 	?raise
       repeat
-      2drop
     ;
     
     \ Get the stream send address
@@ -243,9 +237,9 @@ begin-module stream
       current-task prepare-block
       begin over 0> while
 	dup wait-send-stream-parts
-	dup stream-free >r
-	2 pick 2 pick r@ min 2 pick write-stream
-	2dup swap r@ min swap advance-send-stream
+        2dup stream-free min 0 max >r
+	2 pick r@ 2 pick write-stream
+	r@ over advance-send-stream
 	rot r@ + rot r> - rot
 	dup stream-recv-ready @ 0> if
 	  dup stream-recv-tqueue wake-tqueue
