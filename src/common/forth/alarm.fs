@@ -296,6 +296,9 @@ begin-module alarm
 
   \ Alarm size
   ' alarm-size export alarm-size
+
+  \ Alarm task size
+  ' alarm-task-size export alarm-task-size
   
 end-module
 

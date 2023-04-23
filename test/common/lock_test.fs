@@ -36,13 +36,13 @@ continue-module forth
     <builds , does>
     @ begin
       50000 0 ?do loop
-      my-lock lock
+      my-lock claim-lock
       ." [ "
       25000 0 ?do loop
       dup .
       25000 0 ?do loop
       ." ] "
-      my-lock unlock
+      my-lock release-lock
     again
   ;
 
