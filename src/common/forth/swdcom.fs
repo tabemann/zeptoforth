@@ -86,6 +86,8 @@ begin-module swd
     ['] swd-key key-hook !
     ['] swd-emit? emit?-hook !
     ['] swd-emit emit-hook !
+    ['] swd-emit? error-emit?-hook !
+    ['] swd-emit error-emit-hook !
     ['] swd-flush-console flush-console-hook !
   ;
 

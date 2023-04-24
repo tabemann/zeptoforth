@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Software Alarm Words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="software-alarm-words">
+<h1>Software Alarm Words</h1>
+<p>Software alarms are time-based alarms that can be registered with an alarm task, which may be either automatically or explicitly created. Alarm tasks are tasks for which a list of alarms are associated which execute said alarms when the alarms’ times expire. At bootup no alarm tasks are created, but if a default alarm task has not been created at the time that an alarm is first set using a default alarm task, a default alarm task is automatically created with a dictionary size of 320 bytes, a data stack size of 128 bytes, a return stack size of 512 bytes, and a core (relevant to operation on the RP2040) of 0. If a different default alarm task configuration is desired, <code class="docutils literal notranslate"><span class="pre">init-default-alarm-task</span></code> is to be used.</p>
+<p>Alarms are created with a set delay after a start time, which can be set for convenience to the current time, after which they are triggered, calling their specified execution token, even if the trigger time was in the past when they were created. All times are measured in ticks, which are normally 100 microsecond intervals, with the current time corresponding to <code class="docutils literal notranslate"><span class="pre">systick::systick-counter</span></code>. Alarms are one-shot - they must always be manually set again after they are triggered. Alarms also have a set priority; an alarm task takes on the maximum of all the priorities of the currently active alarms associated with it. Alarms have an associated data value, to eliminate the memory cost and complexity of creating a closure for them in many cases. Their execution token has the signature ( data alarm – ) for convenience for accessing their associated data and resetting themselves, for repeated alarms.</p>
+<p>Alarms may be dynamically set and unset; note, however, that it is not safe to set an alarm that has already been set and which has not been triggered yet, as setting an alarm assumes that it is uninitialized and initializes it in the process. It is safe to set an alarm which has either been triggered or manually unset again. It is also safe to unset an alarm which has previously been set which has already been triggered or has previously been unset.</p>
+<p>Note that all operations are safe to execute from within software alarms, as they do not execute at interrupt time, unlike hardware timers. However, a given software alarm will block any further alarms from executing for the alarm task it is executing under while it executes. If multiple alarms are intended on executing simultaneously multiple alarm tasks are required. However note that alarm tasks are rather heavy-weight since each alarm task instantiates a separate task complete with dictionary, data stack, and return stack.</p>
+<section id="alarm">
+<h2><code class="docutils literal notranslate"><span class="pre">alarm</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">alarm</span></code> module contains the following words:</p>
+<section id="alarm-size">
+<h3><code class="docutils literal notranslate"><span class="pre">alarm-size</span></code></h3>
+<p>( – bytes )</p>
+<p>This returns the size of an alarm structure in bytes.</p>
+</section>
+<section id="alarm-task-size">
+<h3><code class="docutils literal notranslate"><span class="pre">alarm-task-size</span></code></h3>
+<p>( – bytes )</p>
+<p>This returns the size of an alarm task structure in bytes, not including the size of the associated task which is created when the alarm task structure is initialize.</p>
+</section>
+<section id="init-alarm-task">
+<h3><code class="docutils literal notranslate"><span class="pre">init-alarm-task</span></code></h3>
+<p>( dict-size stack-size rstack-size core alarm-task – )</p>
+<p>Initialize an alarm task <em>alarm-task</em>, of size <code class="docutils literal notranslate"><span class="pre">alarm-task-size</span></code>, with a dictionary size of <em>dict-size</em> bytes, a data stack size of <em>stack-size</em> bytes, a return stack size of <em>rstack-size</em>, a core of <em>core</em> (on non-RP2040 platforms this must be 0). This will create a task for the alarm task with the name <code class="docutils literal notranslate"><span class="pre">alarm</span></code>.</p>
+</section>
+<section id="init-default-alarm-task">
+<h3><code class="docutils literal notranslate"><span class="pre">init-default-alarm-task</span></code></h3>
+<p>( dict-size stack-size rstack-size core – )</p>
+<p>Initialize a default alarm task, with a dictionary size of <em>dict-size</em> bytes, a data stack size of <em>stack-size</em> bytes, a return stack size of <em>rstack-size</em>, and a core of <em>core</em> (on non-RP2040 platforms this must be 0). If a default alarm task has already been initialized, whether explicitly through this word or implicitly through calling <code class="docutils literal notranslate"><span class="pre">default-alarm-task&#64;</span></code>, <code class="docutils literal notranslate"><span class="pre">set-alarm-default</span></code>, or <code class="docutils literal notranslate"><span class="pre">set-alarm-delay-default</span></code>, <code class="docutils literal notranslate"><span class="pre">x-default-alarm-task-already-inited</span></code> will be raised.</p>
+</section>
+<section id="default-alarm-task">
+<h3><code class="docutils literal notranslate"><span class="pre">default-alarm-task&#64;</span></code></h3>
+<p>( – default-alarm-task )</p>
+<p>Get the default alarm task, initializing it (as mentioned above) if it has not already been initialized..</p>
+</section>
+<section id="set-alarm">
+<h3><code class="docutils literal notranslate"><span class="pre">set-alarm</span></code></h3>
+<p>( ticks-delay ticks-start priority data xt alarm alarm-task – )</p>
+<p>Set (and initialize) an alarm <em>alarm</em> for alarm-task <em>alarm-task</em> to execute <em>xt</em> with data <em>data</em> with priority <em>priority</em> at <em>ticks-delay</em> (or greater) ticks after <em>ticks-start</em>. It is assumed that <em>alarm</em> is not currently set, where if it is undefined results will occur.</p>
+</section>
+<section id="set-alarm-default">
+<h3><code class="docutils literal notranslate"><span class="pre">set-alarm-default</span></code></h3>
+<p>( ticks-delay ticks-start priority data xt alarm – )</p>
+<p>Set (and initialize) an alarm <em>alarm</em> for the default alarm task, which will be initialized as mentioned above if not already initialized, to execute <em>xt</em> with data <em>data</em> with priority <em>priority</em> at <em>ticks-delay</em> (or greater) ticks after <em>ticks-start</em>. It is assumed that <em>alarm</em> is not currently set, where if it is undefined results will occur.</p>
+</section>
+<section id="set-alarm-delay">
+<h3><code class="docutils literal notranslate"><span class="pre">set-alarm-delay</span></code></h3>
+<p>( ticks-delay priority data xt alarm alarm-task – )</p>
+<p>Set (and initialize) an alarm <em>alarm</em> for alarm-task <em>alarm-task</em> to execute <em>xt</em> with data <em>data</em> with priority <em>priority</em> at <em>ticks-delay</em> (or greater) ticks after the current value of <code class="docutils literal notranslate"><span class="pre">systick::systick-counter</span></code>. It is assumed that <em>alarm</em> is not currently set, where if it is undefined results will occur.</p>
+</section>
+<section id="set-alarm-delay-default">
+<h3><code class="docutils literal notranslate"><span class="pre">set-alarm-delay-default</span></code></h3>
+<p>( ticks-delay priority data xt alarm – )</p>
+<p>Set (and initialize) an alarm <em>alarm</em> for the default alarm task, which will be initialized as mentioned above if not already initialized, to execute <em>xt</em> with data <em>data</em> with priority <em>priority</em> at <em>ticks-delay</em> (or greater) ticks after the current value of <code class="docutils literal notranslate"><span class="pre">systick::systick-counter</span></code>. It is assumed that <em>alarm</em> is not currently set, where if it is undefined results will occur.</p>
+</section>
+<section id="unset-alarm">
+<h3><code class="docutils literal notranslate"><span class="pre">unset-alarm</span></code></h3>
+<p>( alarm – )</p>
+<p>Unset an alarm that has been previously set (and thus initialized). This is safe even if said alarm has previously been triggered or otherwise unset.</p>
+</section>
+<section id="x-default-alarm-task-already-inited">
+<h3><code class="docutils literal notranslate"><span class="pre">x-default-alarm-task-already-inited</span></code></h3>
+<p>( – )</p>
+<p>Default alarm task already initialized exception.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

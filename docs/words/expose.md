@@ -121,22 +121,6 @@ The handle number hook
 
 The failed parse hook
 
-##### `emit-hook`
-
-The emit hook
-
-##### `emit?-hook`
-
-The emit? hook
-
-##### `key-hook`
-
-The key hook
-
-##### `key?-hook`
-
-The key? hook
-
 ##### `refill-hook`
 
 The refill hook
@@ -168,4 +152,3 @@ Get the PENDSV-HANDLER-HOOK variable address
 ##### `systick-handler-hook`
 
 Get the SYSTICK-HANDLER-HOOK variable address
-	

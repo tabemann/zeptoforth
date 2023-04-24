@@ -91,26 +91,25 @@ begin-module chan
   continue-module chan-internal
     
     \ Wait to send on a channel
-    : wait-send-chan ( chan -- )
-      begin dup chan-full? while
-	1 over chan-send-ready +!
-	dup chan-send-tqueue ['] wait-tqueue try
-	-1 2 pick chan-send-ready +!
+    : wait-send-chan { chan -- }
+      begin chan chan-full? while
+	1 chan chan-send-ready +!
+	chan chan-send-tqueue ['] wait-tqueue try
+	-1 chan chan-send-ready +!
 	?raise
       repeat
-      chan-closed @ triggers x-chan-closed
+      chan chan-closed @ triggers x-chan-closed
     ;
 
     \ Wait to receive on a channel
-    : wait-recv-chan ( chan -- )
-      begin dup chan-empty? while
-	dup chan-closed @ triggers x-chan-closed
-	1 over chan-recv-ready +!
-	dup chan-recv-tqueue ['] wait-tqueue try
-	-1 2 pick chan-recv-ready +!
+    : wait-recv-chan { chan -- }
+      begin chan chan-empty? while
+	chan chan-closed @ triggers x-chan-closed
+	1 chan chan-recv-ready +!
+	chan chan-recv-tqueue ['] wait-tqueue try
+	-1 chan chan-recv-ready +!
 	?raise
       repeat
-      drop
     ;
 
     \ Get the channel send address

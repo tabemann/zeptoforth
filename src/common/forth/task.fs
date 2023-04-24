@@ -1419,7 +1419,9 @@ begin-module task
     : task-entry ( -- )
       rdrop
       try
-      dup if display-red dup execute display-normal then
+      dup if
+        [: display-red dup try drop display-normal ;] with-error-console
+      then
       dup 0= if drop terminated-normally then current-task @ terminate
     ;
 
@@ -1538,6 +1540,13 @@ begin-module task
     0 over task-saved-priority h!
     0 over task-active h!
     base @ over ['] task-base for-task!
+    key-hook @ over ['] task-key-hook for-task!
+    key?-hook @ over ['] task-key?-hook for-task!
+    emit-hook @ over ['] task-emit-hook for-task!
+    emit?-hook @ over ['] task-emit?-hook for-task!
+    error-emit-hook @ over ['] error-emit-hook for-task!
+    error-emit?-hook @ over ['] error-emit?-hook for-task!
+    flush-console-hook @ over ['] flush-console-hook for-task!
     0 over ['] current-lock for-task!
     0 over ['] current-lock-held for-task!
     readied over task-state h!
@@ -1996,10 +2005,12 @@ begin-module task
     : do-validate-dict ( -- )
       main-task @ task-dict-end main-task @ actual-here - 1024 <
       ram-dict-warned @ not and if
-	true ram-dict-warned !
-	display-red
-	." RAM dictionary space is running low (<1K left)" cr
-	display-normal
+        true ram-dict-warned !
+        [:
+          display-red
+          ." RAM dictionary space is running low (<1K left)" cr
+          display-normal
+        ;] with-error-console
       then
       saved-validate-dict @ ?execute
     ;
@@ -2020,7 +2031,8 @@ begin-module task
 	1 pause-enabled !
         core-init-hook @ execute
         true core-1-launched !
-	pause try dup if display-red dup execute display-normal then
+        pause try dup if
+          [: display-red dup try drop display-normal ;] with-error-console
         dup 0= if drop terminated-normally then current-task @ terminate
       ;
       
@@ -2194,7 +2206,7 @@ begin-module task
   
   \ Display space free for the main task and for flash in general
   : unused ( -- )
-    cr 0 cpu-main-task
+    cr 0 cpu-main-task @
     ." flash dictionary free:     "
     flash-end flash-here - 0 <# #s #> type cr
     ." main task dictionary free: "

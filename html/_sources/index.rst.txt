@@ -9,7 +9,9 @@ Zeptoforth Documentation
    words/module
    words/lambda
    words/wordlist
+   words/console
    words/task
+   words/alarm
    words/action
    words/pin
    words/led
