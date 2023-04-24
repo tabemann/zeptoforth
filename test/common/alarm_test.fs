@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2023 Travis Bemann
+\ Copyright (c) 2023 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -18,50 +18,28 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-continue-module forth
+begin-module alarm-test
 
-  task import
-  lock import
+  alarm import
+  
+  alarm-task-size aligned-buffer: my-alarm-task
+  alarm-size aligned-buffer: my-alarm0
+  alarm-size aligned-buffer: my-alarm1
+  alarm-size aligned-buffer: my-alarm2
+  
+  320 128 512 0 my-alarm-task init-alarm-task
+  
+  defer do-alarm0
+  :noname 2drop ." A" 5000 0 0 ['] do-alarm0 my-alarm0 my-alarm-task set-alarm-delay ; ' do-alarm0 defer!
 
-  \ Our lock
-  lock-size buffer: my-lock
+  defer do-alarm1
+  :noname 2drop ." B" 5000 1 0 ['] do-alarm1 my-alarm1 my-alarm-task set-alarm-delay ; ' do-alarm1 defer!
 
-  \ Our tasks
-  variable my-task-0
-  variable my-task-1
-  variable my-task-2
-
-  \ Create my loop
-  : make-loop ( u "name" -- )
-    <builds , does>
-    @ begin
-      50000 0 ?do loop
-      my-lock claim-lock
-      ." [ "
-      25000 0 ?do loop
-      dup .
-      25000 0 ?do loop
-      ." ] "
-      my-lock release-lock
-    again
-  ;
-
-  \ My loops
-  0 make-loop loop-0
-  1 make-loop loop-1
-  2 make-loop loop-2
-
-  \ Initialize the test
-  : init-test ( -- )
-    my-lock init-lock
-    0 ['] loop-0 420 128 512 spawn my-task-0 !
-    0 ['] loop-1 420 128 512 spawn my-task-1 !
-    0 ['] loop-2 420 128 512 spawn my-task-2 !
-    begin-critical
-    my-task-0 @ run
-    my-task-1 @ run
-    my-task-2 @ run
-    end-critical
-  ;
-
+  defer do-alarm2
+  :noname 2drop ." C" 5000 2 0 ['] do-alarm2 my-alarm2 my-alarm-task set-alarm-delay ; ' do-alarm2 defer!
+  
+  5000 0 0 ' do-alarm0 my-alarm0 my-alarm-task set-alarm-delay
+  5000 1 0 ' do-alarm1 my-alarm1 my-alarm-task set-alarm-delay
+  5000 2 0 ' do-alarm2 my-alarm2 my-alarm-task set-alarm-delay
+  
 end-module

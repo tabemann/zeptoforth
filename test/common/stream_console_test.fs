@@ -1,4 +1,4 @@
-\ Copyright (c) 2020-2023 Travis Bemann
+\ Copyright (c) 2023 Travis Bemann
 \
 \ Permission is hereby granted, free of charge, to any person obtaining a copy
 \ of this software and associated documentation files (the "Software"), to deal
@@ -18,50 +18,45 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-continue-module forth
-
+begin-module stream-console-test
+  
   task import
-  lock import
-
-  \ Our lock
-  lock-size buffer: my-lock
-
-  \ Our tasks
-  variable my-task-0
-  variable my-task-1
-  variable my-task-2
-
-  \ Create my loop
-  : make-loop ( u "name" -- )
-    <builds , does>
-    @ begin
-      50000 0 ?do loop
-      my-lock claim-lock
-      ." [ "
-      25000 0 ?do loop
-      dup .
-      25000 0 ?do loop
-      ." ] "
-      my-lock release-lock
-    again
-  ;
-
-  \ My loops
-  0 make-loop loop-0
-  1 make-loop loop-1
-  2 make-loop loop-2
-
-  \ Initialize the test
-  : init-test ( -- )
-    my-lock init-lock
-    0 ['] loop-0 420 128 512 spawn my-task-0 !
-    0 ['] loop-1 420 128 512 spawn my-task-1 !
-    0 ['] loop-2 420 128 512 spawn my-task-2 !
-    begin-critical
-    my-task-0 @ run
-    my-task-1 @ run
-    my-task-2 @ run
-    end-critical
-  ;
-
+  console import
+  stream import
+  
+  1024 constant data-size
+  data-size stream-size buffer: my-stream
+  
+  data-size my-stream init-stream
+  
+  1 cells buffer: out-notify-area
+  1 cells buffer: in-notify-area
+  
+  0 :noname
+    my-stream [:
+      0 wait-notify drop
+      begin
+       [char] Z 1+ [char] A ?do i emit loop \ 100 ms
+      again
+    ;] with-stream-output
+  ; 512 128 512 spawn constant out-task
+  
+  0 :noname
+    my-stream [:
+      0 wait-notify drop
+      begin
+        key emit
+      again
+    ;] with-stream-input
+  ; 512 128 512 spawn constant in-task
+  
+  out-notify-area 1 out-task config-notify
+  in-notify-area 1 in-task config-notify
+  
+  out-task run
+  in-task run
+  
+  0 out-task notify
+  0 in-task notify
+  
 end-module

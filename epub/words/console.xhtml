@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Console Redirection Words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="console-redirection-words">
+<h1>Console Redirection Words</h1>
+<p>These words concern redirecting the current console within a given task (each task has its own console configuration, which it inherits upon initialization from its parent task) within a given scope defined by an execution token. Console input and output may be independently redirected, including to arbitrary words called by <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> for input to <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> for output, to null inputs and outputs, to the standard serial console, or to streams. Also, error output can be redirected in the same fashion as normal output.</p>
+<p>Take care when redirecting the console to streams because the typical dictionary size used for tasks of 320 is insufficient for this due to buffer space that is alloted in the current task’s dictionary; rather, a dictionary size of 512 has found to work.</p>
+<section id="console">
+<h2><code class="docutils literal notranslate"><span class="pre">console</span></code></h2>
+<p>The following words are in the <code class="docutils literal notranslate"><span class="pre">console</span></code> module:</p>
+<section id="with-input">
+<h3><code class="docutils literal notranslate"><span class="pre">with-input</span></code></h3>
+<p>( input-hook input?-hook xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">key</span></code> redirected to call <em>input-hook</em> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> redirected to call <em>input?-hook</em>. The previous redirection of <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+<section id="with-output">
+<h3><code class="docutils literal notranslate"><span class="pre">with-output</span></code></h3>
+<p>( output-hook output?-hook xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> redirected to call <em>output-hook</em> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected to call <em>output?-hook</em>. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+<section id="with-error-output">
+<h3><code class="docutils literal notranslate"><span class="pre">with-error-output</span></code></h3>
+<p>( error-output-hook error-output?-hook xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> redirected to call <em>output-hook</em> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected to call <em>output?-hook</em> for error output. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> for error output is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+<section id="with-null-input">
+<h3><code class="docutils literal notranslate"><span class="pre">with-null-input</span></code></h3>
+<p>( xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">key</span></code> redirected to return 0 and <code class="docutils literal notranslate"><span class="pre">key?</span></code> redirected to return <code class="docutils literal notranslate"><span class="pre">false</span></code>. The previous redirection of <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+<section id="with-null-output">
+<h3><code class="docutils literal notranslate"><span class="pre">with-null-output</span></code></h3>
+<p>( xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> redirected to call <code class="docutils literal notranslate"><span class="pre">drop</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected to return <code class="docutils literal notranslate"><span class="pre">true</span></code>. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+<section id="with-null-error-output">
+<h3><code class="docutils literal notranslate"><span class="pre">with-null-error-output</span></code></h3>
+<p>( xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> redirected to call <code class="docutils literal notranslate"><span class="pre">drop</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected to return <code class="docutils literal notranslate"><span class="pre">true</span></code> for error output. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> for error output is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+<section id="with-serial-input">
+<h3><code class="docutils literal notranslate"><span class="pre">with-serial-input</span></code></h3>
+<p>( xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> redirected for serial console input. The previous redirection of <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+<section id="with-serial-output">
+<h3><code class="docutils literal notranslate"><span class="pre">with-serial-output</span></code></h3>
+<p>( xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for serial console output. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+<section id="with-serial-error-output">
+<h3><code class="docutils literal notranslate"><span class="pre">with-serial-error-output</span></code></h3>
+<p>( xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for serial console output for error output. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> for error output is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+<section id="with-stream-input">
+<h3><code class="docutils literal notranslate"><span class="pre">with-stream-input</span></code></h3>
+<p>( stream xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> redirected for input from stream <em>stream</em>. The previous redirection of <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+<section id="with-stream-output">
+<h3><code class="docutils literal notranslate"><span class="pre">with-stream-output</span></code></h3>
+<p>( stream xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for output to stream <em>stream</em>. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+<section id="with-stream-error-output">
+<h3><code class="docutils literal notranslate"><span class="pre">with-stream-error-output</span></code></h3>
+<p>( stream xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for output to stream <em>stream</em> for error output. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> for error output is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+<section id="with-output-as-error-output">
+<h3><code class="docutils literal notranslate"><span class="pre">with-output-as-error-output</span></code></h3>
+<p>( xt – )</p>
+<p>Call <em>xt</em> with error output redirected to the current output. The previous redirection of error output is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>
