@@ -158,20 +158,31 @@ begin-module console
     ;] try saved-output?-hook emit?-hook ! saved-output-hook emit-hook ! ?raise
   ;
 
+  \ Set the current error output within an xt
+  : with-error-output ( error-output-hook error-output?-hook xt -- )
+    error-emit-hook @ error-emit?-hook @
+    { saved-output-hook saved-output?-hook }
+    [:
+      swap error-emit?-hook ! swap error-emit-hook ! execute
+    ;] try
+    saved-output?-hook error-emit?-hook !
+    saved-output-hook error-emit-hook !
+    ?raise
+  ;
+
   \ Set the current input to null within an xt
   : with-null-input ( xt -- )
-    key-hook @ key?-hook @ { saved-input-hook saved-input?-hook }
-    [:
-      ['] false key?-hook ! ['] false key-hook ! execute
-    ;] try saved-input?-hook key?-hook ! saved-input-hook key-hook ! ?raise
+    ['] false ['] false rot with-input
   ;
 
   \ Set the current output to null within an xt
   : with-null-output ( xt -- )
-    emit-hook @ emit?-hook @ { saved-output-hook saved-output?-hook }
-    [:
-      ['] true emit?-hook ! ['] drop emit-hook ! execute
-    ;] try saved-output?-hook emit?-hook ! saved-output-hook emit-hook ! ?raise
+    ['] drop ['] true rot with-output
+  ;
+
+  \ Set the current error output to null within an xt
+  : with-null-error-output ( error-output-hook error-output?-hook xt -- )
+    ['] drop ['] true rot with-error-output
   ;
 
   \ Set the curent input to serial within an xt
@@ -188,6 +199,13 @@ begin-module console
     rot with-output
   ;
 
+  \ Set the current error output to serial within an xt
+  : with-serial-error-output ( xt -- )
+    ['] int-io::int-io-internal::do-emit
+    ['] int-io::int-io-internal::do-emit?
+    rot with-error-output
+  ;
+
   \ Set the current input to a stream within an xt
   : with-stream-input ( stream xt -- )
     console-stream-data-size [: { data }
@@ -202,6 +220,19 @@ begin-module console
       swap data init-console-stream-output
       data console-io data console-io? rot with-output
     ;] with-aligned-allot
+  ;
+
+  \ Set the current error output to a stream within an xt
+  : with-stream-error-output ( stream xt -- )
+    console-stream-data-size [: { data }
+      swap data init-console-stream-output
+      data console-io data console-io? rot with-error-output
+    ;] with-aligned-allot
+  ;
+
+  \ Set the current error output to the current output
+  : with-output-as-error-output ( xt -- )
+    emit-hook @ emit?-hook @ rot with-error-output
   ;
 
 end-module

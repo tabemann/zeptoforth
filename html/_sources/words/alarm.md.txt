@@ -6,6 +6,8 @@ Alarms are created with a set delay after a start time, which can be set for con
 
 Alarms may be dynamically set and unset; note, however, that it is not safe to set an alarm that has already been set and which has not been triggered yet, as setting an alarm assumes that it is uninitialized and initializes it in the process. It is safe to set an alarm which has either been triggered or manually unset again. It is also safe to unset an alarm which has previously been set which has already been triggered or has previously been unset.
 
+Note that all operations are safe to execute from within software alarms, as they do not execute at interrupt time, unlike hardware timers. However, a given software alarm will block any further alarms from executing for the alarm task it is executing under while it executes. If multiple alarms are intended on executing simultaneously multiple alarm tasks are required. However note that alarm tasks are rather heavy-weight since each alarm task instantiates a separate task complete with dictionary, data stack, and return stack.
+
 ### `alarm`
 
 The `alarm` module contains the following words:

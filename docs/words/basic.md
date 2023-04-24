@@ -1882,3 +1882,38 @@ Emit an ACK character.
 ( -- )
 
 Emit a NAK character.
+
+##### `emit-hook`
+( -- addr )
+
+The emit hook user variable
+
+##### `emit?-hook`
+( -- addr )
+
+The emit? hook user variable
+
+##### `key-hook`
+( -- addr )
+
+The key hook user variable
+
+##### `key?-hook`
+( -- addr )
+
+The key? hook user variable
+
+##### `error-emit-hook`
+( -- addr )
+
+The error emit hook user variable
+
+##### `error-emit?-hook`
+( -- addr )
+
+The error emit? hook user variable
+
+##### `flush-console-hook`
+( -- addr )
+
+The flush console hook user variable

@@ -357,6 +357,14 @@ _key_q_hook:
 	pop {pc}
 	end_inlined
 
+        @@ The error hook
+        define_word "error-hook", visible_flag
+_error_hook:
+        push_tos
+        ldr tos, =error_hook
+        bx lr
+        end_inlined
+        
 	@@ The refill hook
 	define_word "refill-hook", visible_flag
 _refill_hook:

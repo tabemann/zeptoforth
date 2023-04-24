@@ -424,7 +424,8 @@ begin-module action
     \ Execute a word and handle exceptions while continuing
     : execute-handle ( xt -- )
       try ?dup if
-	current-action @ remove-action display-red execute display-normal
+        current-action @ remove-action
+        [: display-red try drop display-normal ;] with-error-console
       then
     ;
 

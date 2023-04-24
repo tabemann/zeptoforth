@@ -1001,10 +1001,19 @@ user task-key-hook
 user task-key?-hook
 user task-emit-hook
 user task-emit?-hook
+user error-emit-hook
+user error-emit?-hook
 compress-flash
 
 \ Set internal
 internal set-current
+
+\ Handle with-error-console
+: do-with-error-console ( xt -- )
+  emit-hook @ emit?-hook @ 2>r
+  error-emit-hook @ emit-hook ! error-emit?-hook @ emit?-hook !
+  try 2r> emit?-hook ! emit-hook ! ?raise
+;
 
 \ Allocate a byte variable in RAM
 : ram-cvariable ( "name" -- )
@@ -2317,7 +2326,7 @@ internal set-current
 commit-flash
 
 \ Flush console hook variable
-variable flush-console-hook
+user flush-console-hook
 
 commit-flash
 
@@ -2516,6 +2525,9 @@ commit-flash
   cpu-count 0 ?do 0 cpus-in-critical i cells + ! loop
   0 wake-counter !
   ['] drop wait-hook !
+  ['] serial-emit error-emit-hook !
+  ['] serial-emit? error-emit?-hook !
+  ['] do-with-error-console error-hook !
   0 flush-console-hook !
   false flash-dict-warned !
   ['] do-flash-validate-dict validate-dict-hook !

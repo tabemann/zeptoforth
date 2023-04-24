@@ -567,6 +567,17 @@ _quit_reset:
 	bx lr
 	end_inlined
 
+        @@ Use error-emit and error-emit? hooks for an xt
+        define_word "with-error-console", visible_flag
+_with_error_console:
+        push {lr}
+        ldr r0, =error_hook
+        ldr r0, [r0]
+        adds r0, #1
+        blx r0
+        pop {pc}
+        end_inlined
+        
         @@ The outer loop of Forth
 	define_word "quit", visible_flag
 _quit:	bl _rstack_base
@@ -575,11 +586,23 @@ _quit:	bl _rstack_base
         bl _prepare_prompt
 	ldr tos, =_main
 	bl _try
+        push_tos
+        ldr tos, =_quit_error
+        bl _with_error_console
+        b _abort
+
+        @@ Display an error
+_quit_error:
+        push {lr}
 	bl _display_red
-	bl _execute_nz
+        cmp tos, #0
+        bne 1f
+        pull_tos
+        pop {pc}
+1:      bl _try
+        pull_tos
 	bl _display_normal
-	b _abort
-	bx lr
+        pop {pc}
 	end_inlined
 
 	.ltorg
@@ -1034,6 +1057,12 @@ _do_refill:
 	@@ Implement the failed parse hook
 	define_internal_word "do-failed-parse", visible_flag
 _do_failed_parse:
+	push {lr}
+        push_tos
+        ldr tos, =_really_do_failed_parse
+        bl _with_error_console
+        pop {pc}
+_really_do_failed_parse:
 	push {lr}
 	bl _display_red
 	string "unable to parse: "

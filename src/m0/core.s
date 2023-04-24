@@ -2203,7 +2203,10 @@ _init_variables:
 	ldr r0, =pause_enabled
 	str r1, [r0, r2]
 	b 1b
-2:	ldr r0, =prompt_hook
+2:	ldr r0, =error_hook
+        ldr r1, =_execute
+        str r1, [r0]
+        ldr r0, =prompt_hook
 	ldr r1, =_do_prompt
 	str r1, [r0]
 	ldr r0, =handle_number_hook
