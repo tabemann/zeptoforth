@@ -79,7 +79,7 @@ outer_exc_handled:
 	bl _uart_init
 	bl _init_flash_buffers
 	bl _do_init
-	bl _welcome
+	bl _do_welcome
 	bl _quit
 
 	.ltorg
