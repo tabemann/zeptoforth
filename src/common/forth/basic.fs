@@ -2495,6 +2495,9 @@ commit-flash
   then
 ;
 
+#include src/common/forth/welcome.fs
+#include src/common/forth/legal.fs
+
 \ Initialize the RAM variables
 : init ( -- )
   init

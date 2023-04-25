@@ -83,7 +83,7 @@ outer_exc_handled:
 	bl _init_dict
 	bl _init_flash_buffers
 	bl _do_init
-	bl _welcome
+        bl _do_welcome
 	bl _quit
 
 _init_platform_variables:

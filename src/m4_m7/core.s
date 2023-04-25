@@ -21,9 +21,6 @@
 	@ Include the kernel info, needed for welcome
 	.include "../common/kernel_info.s"
 
-	@ Include the legal info
-	.include "../common/legal.s"
-	
 	@@ Drop the top of the data stack
 	define_word "drop", visible_flag | inlined_flag
 _drop:	pull_tos
@@ -836,36 +833,6 @@ _find_last_visible_word:
 2:	bx lr
 	end_inlined
 
-	@@ Display a welcome message
-	define_word "welcome", visible_flag
-_welcome:
-	push {lr}
-	string_ln ""
-	bl _type
-	string_ln "Welcome to zeptoforth"
-	bl _type
-	string "Built for "
-	bl _type
-	bl _kernel_platform
-	bl _type
-	string ", version "
-	bl _type
-	bl _kernel_version
-	bl _type
-	string ", on "
-	bl _type
-	bl _kernel_date
-	bl _type
-	bl _cr
-	string "zeptoforth comes with ABSOLUTELY NO WARRANTY: "
-	bl _type
-	string_ln "for details type `license'"
-	bl _type
-	string_ln " ok"
-	bl _type
-	pop {pc}
-	end_inlined
-
 	.ltorg
 	
 	@@ An empty init routine, to call if no other init routines are
@@ -901,6 +868,17 @@ _do_init:
         bl _find_execute
 	pop {pc}
 	end_inlined
+
+        @@ Run the welcome routine
+        define_internal_word "do-welcome", visible_flag
+_do_welcome:
+        push {lr}
+        string "welcome"
+        bl _find_execute
+        string_ln " ok"
+        bl _type
+        pop {pc}
+        end_inlined
 	
 	@@ Set the currently-defined word to be immediate
 	define_word "[immediate]", visible_flag | immediate_flag | compiled_flag

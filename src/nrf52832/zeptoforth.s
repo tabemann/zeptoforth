@@ -75,7 +75,7 @@ outer_exc_handled:
 	bl _serial_115200_48mhz
 	bl _init_flash_buffers
 	bl _do_init
-	bl _welcome
+	bl _do_welcome
 	bl _quit
 
 	.ltorg
