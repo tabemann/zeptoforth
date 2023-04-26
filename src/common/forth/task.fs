@@ -1418,10 +1418,7 @@ begin-module task
     \ Task entry point
     : task-entry ( -- )
       rdrop
-      try
-      dup if
-        [: display-red dup try drop display-normal ;] with-error-console
-      then
+      try-and-display-error
       dup 0= if drop terminated-normally then current-task @ terminate
     ;
 
@@ -2031,8 +2028,7 @@ begin-module task
 	1 pause-enabled !
         core-init-hook @ execute
         true core-1-launched !
-        pause try dup if
-          [: display-red dup try drop display-normal ;] with-error-console
+        pause try-and-display-error
         dup 0= if drop terminated-normally then current-task @ terminate
       ;
       

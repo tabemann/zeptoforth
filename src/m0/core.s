@@ -2177,7 +2177,8 @@ _init_variables:
 1:	cmp r2, #0
 	beq 2f
 	subs r2, #4
-	ldr r1, =_do_nothing
+        movs r1, #0
+        mvns r1, r1
 	ldr r0, =pause_enabled
 	str r1, [r0, r2]
 	b 1b
