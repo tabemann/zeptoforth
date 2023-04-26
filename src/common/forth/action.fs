@@ -423,10 +423,7 @@ begin-module action
   
     \ Execute a word and handle exceptions while continuing
     : execute-handle ( xt -- )
-      try ?dup if
-        current-action @ remove-action
-        [: display-red try drop display-normal ;] with-error-console
-      then
+      try-and-display-error if current-action @ remove-action then
     ;
 
   end-module

@@ -2021,6 +2021,14 @@ commit-flash
 \ Finish conditional execution/compilation
 : [then] ( -- ) [immediate] ;
 
+\ Try and display an error
+: try-and-display-error ( xt -- exception-xt )
+  try dup >r ?dup if
+    [: display-red try drop display-normal bel ;] with-error-console
+  then
+  r>
+;
+
 \ Set internal
 internal set-current
 

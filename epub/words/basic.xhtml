@@ -1879,6 +1879,16 @@ otherwise passing the specified argument through.</p>
 <p>( “name” – )</p>
 <p>Create a cornerstone word named <em>name</em> to erase flash/return the flash dictionary to its state immediately after <code class="docutils literal notranslate"><span class="pre">cornerstone</span></code> was executed; unlike <code class="docutils literal notranslate"><span class="pre">marker</span></code> the word created does not erase itself when executed and may be executed multiple times</p>
 </section>
+<section id="with-error-console">
+<h3><code class="docutils literal notranslate"><span class="pre">with-error-console</span></code></h3>
+<p>( xt – )</p>
+<p>Execute <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit-hook</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?-hook</span></code> replaced with <code class="docutils literal notranslate"><span class="pre">error-emit-hook</span></code> and <code class="docutils literal notranslate"><span class="pre">error-emit?-hook</span></code>, resetting them afterwards even if an exception is raised.</p>
+</section>
+<section id="try-and-display-error">
+<h3><code class="docutils literal notranslate"><span class="pre">try-and-display-error</span></code></h3>
+<p>( xt – exception-xt )</p>
+<p>Execute <em>xt</em> and if an exception is raised, execute the exception with the console set to bright red (unless colors are disabled), and with <code class="docutils literal notranslate"><span class="pre">emit-hook</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?-hook</span></code> replaced with <code class="docutils literal notranslate"><span class="pre">error-emit-hook</span></code> and <code class="docutils literal notranslate"><span class="pre">error-emit?-hook</span></code>, resetting them afterwards even if an exception is raised. Note that if the exception raises an exception when executed, it is caught and ignored.</p>
+</section>
 <section id="vector-count">
 <h3><code class="docutils literal notranslate"><span class="pre">vector-count</span></code></h3>
 <p>( – count )</p>
@@ -1888,6 +1898,16 @@ otherwise passing the specified argument through.</p>
 <h3><code class="docutils literal notranslate"><span class="pre">vector-table</span></code></h3>
 <p>( – addr )</p>
 <p>Get the interrupt vector table address.</p>
+</section>
+<section id="display-red">
+<h3><code class="docutils literal notranslate"><span class="pre">display-red</span></code></h3>
+<p>( – )</p>
+<p>Set the console to display red unless colors are disabled.</p>
+</section>
+<section id="display-normal">
+<h3><code class="docutils literal notranslate"><span class="pre">display-normal</span></code></h3>
+<p>( – )</p>
+<p>Set the console to display normal colors unless colors are disabled.</p>
 </section>
 <section id="id112">
 <h3><code class="docutils literal notranslate"><span class="pre">xon</span></code></h3>
@@ -1943,6 +1963,31 @@ otherwise passing the specified argument through.</p>
 <h3><code class="docutils literal notranslate"><span class="pre">flush-console-hook</span></code></h3>
 <p>( – addr )</p>
 <p>The flush console hook user variable</p>
+</section>
+<section id="pause-enabled">
+<h3><code class="docutils literal notranslate"><span class="pre">pause-enabled</span></code></h3>
+<p>( – addr )</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">pause</span></code> enabled variable for the current core. This defaults to <code class="docutils literal notranslate"><span class="pre">true</span></code>.</p>
+</section>
+<section id="ack-nak-enabled">
+<h3><code class="docutils literal notranslate"><span class="pre">ack-nak-enabled</span></code></h3>
+<p>( – addr )</p>
+<p>The ACK/NAK flow control enabled variable. This defaults to <code class="docutils literal notranslate"><span class="pre">true</span></code>.</p>
+</section>
+<section id="bel-enabled">
+<h3><code class="docutils literal notranslate"><span class="pre">bel-enabled</span></code></h3>
+<p>( – addr )</p>
+<p>The BEL on error enabled variable. This defaults to <code class="docutils literal notranslate"><span class="pre">true</span></code>.</p>
+</section>
+<section id="color-enabled">
+<h3><code class="docutils literal notranslate"><span class="pre">color-enabled</span></code></h3>
+<p>( – addr )</p>
+<p>The console color enabled variable. This defaults to <code class="docutils literal notranslate"><span class="pre">true</span></code>.</p>
+</section>
+<section id="xon-xoff-error">
+<h3><code class="docutils literal notranslate"><span class="pre">xon-xoff-error</span></code></h3>
+<p>( – addr )</p>
+<p>The XON/XOFF flow control enabled variable. This defaults to <code class="docutils literal notranslate"><span class="pre">false</span></code>.</p>
 </section>
 </section>
 </section>

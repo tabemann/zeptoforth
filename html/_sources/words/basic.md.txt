@@ -1853,6 +1853,16 @@ Create a marker word named *name* to erase flash/return the flash dictionary to 
 
 Create a cornerstone word named *name* to erase flash/return the flash dictionary to its state immediately after `cornerstone` was executed; unlike `marker` the word created does not erase itself when executed and may be executed multiple times
 
+##### `with-error-console`
+( xt -- )
+
+Execute *xt* with `emit-hook` and `emit?-hook` replaced with `error-emit-hook` and `error-emit?-hook`, resetting them afterwards even if an exception is raised.
+
+##### `try-and-display-error`
+( xt -- exception-xt )
+
+Execute *xt* and if an exception is raised, execute the exception with the console set to bright red (unless colors are disabled), and with `emit-hook` and `emit?-hook` replaced with `error-emit-hook` and `error-emit?-hook`, resetting them afterwards even if an exception is raised. Note that if the exception raises an exception when executed, it is caught and ignored.
+
 ##### `vector-count`
 ( -- count )
 
@@ -1862,6 +1872,16 @@ Get the number of interrupt vectors.
 ( -- addr )
 
 Get the interrupt vector table address.
+
+##### `display-red`
+( -- )
+
+Set the console to display red unless colors are disabled.
+
+##### `display-normal`
+( -- )
+
+Set the console to display normal colors unless colors are disabled.
 
 ##### `xon`
 ( -- )
@@ -1917,3 +1937,28 @@ The error emit? hook user variable
 ( -- addr )
 
 The flush console hook user variable
+
+##### `pause-enabled`
+( -- addr )
+
+The `pause` enabled variable for the current core. This defaults to `true`.
+
+##### `ack-nak-enabled`
+( -- addr )
+
+The ACK/NAK flow control enabled variable. This defaults to `true`.
+
+##### `bel-enabled`
+( -- addr )
+
+The BEL on error enabled variable. This defaults to `true`.
+
+##### `color-enabled`
+( -- addr )
+
+The console color enabled variable. This defaults to `true`.
+
+##### `xon-xoff-error`
+( -- addr )
+
+The XON/XOFF flow control enabled variable. This defaults to `false`.
