@@ -48,5 +48,4 @@
 #include src/common/forth/rtc.fs
 #include src/common/forth/full_extra.fs
 
-\ Set a cornerstone to enable deleting everything compiled after this code
-cornerstone restore-state
+\ We are not setting a cornerstone so as to save some space for the user
