@@ -21,8 +21,10 @@ The library of code included along with the zeptoforth kernel, which is present 
 * Message-oriented rendezvous channels, aka "fchannels"
 * Message-oriented bidirectional synchronous reply channels, aka "rchannels"
 * Byte-oriented streams
+* Software alarms
 * Interrupt service handler-safe channels, aka "schannels"
 * Task notifications
+* Console redirection
 * Action scheduler support
 * Multicore support (on the RP2040)
 * Double cell and fixed point numeric support
