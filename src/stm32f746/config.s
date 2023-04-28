@@ -22,7 +22,7 @@
 	.equ cortex_m7, 1
 	.equ ram_start, 0x20000000
 	.equ ram_end, 0x20050000
-	.equ rstack_size, 0x0200
+	.equ rstack_size, 0x0400
 	.equ rstack_top, ram_end
 	.equ stack_size, 0x0200
 	.equ stack_top, ram_end - rstack_size

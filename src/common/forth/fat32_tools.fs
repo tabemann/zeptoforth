@@ -650,6 +650,39 @@ begin-module fat32-tools
     ;] fs-lock with-lock
   ;
 
+  \ Set the current input to a file within an xt
+  : with-file-input ( path-addr path-u xt -- )
+    current-fs @ averts x-fs-not-set
+    [:
+      <fat32-file> class-size [:
+        2swap [: 3 pick swap open-file ;] current-fs @ with-root-path
+        swap with-file-input
+      ;] with-aligned-allot
+    ;] fs-lock with-lock
+  ;
+  
+  \ Set the current output to a file within an xt
+  : with-file-output ( path-addr path-u xt -- )
+    current-fs @ averts x-fs-not-set
+    [:
+      <fat32-file> class-size [:
+        2swap [: 3 pick swap open-file ;] current-fs @ with-root-path
+        swap with-file-output
+      ;] with-aligned-allot
+    ;] fs-lock with-lock
+  ;
+
+  \ Set the current error output to a file within an xt
+  : with-file-error-output ( path-addr path-u xt -- )
+    current-fs @ averts x-fs-not-set
+    [:
+      <fat32-file> class-size [:
+        2swap [: 3 pick swap open-file ;] current-fs @ with-root-path
+        swap with-file-error-output
+      ;] with-aligned-allot
+    ;] fs-lock with-lock
+  ;
+
 end-module> import
 
 : init ( -- )

@@ -554,3 +554,18 @@ Set the modification date/time of a directory entry, with two second resolution.
 ( date-time entry -- )
 
 Get the modification date/time of a directory entry, with two second resolution and day-of-the-week calculation.
+
+##### `with-file-input`
+( file xt -- )
+
+Call *xt* with `key` and `key?` redirected for input from file *file*. The previous redirection of `key` and `key?` is restored after *xt* returns or an exception is raised.
+
+##### `with-file-output`
+( file xt -- )
+
+Call *xt* with `emit` and `emit?` redirected for output to file *file*. The previous redirection of `emit` and `emit?` is restored after *xt* returns or an exception is raised.
+
+##### `with-file-error-output`
+( file xt -- )
+
+Call *xt* with `emit` and `emit?` redirected for output to file *file* for error output. The previous redirection of `emit` and `emit?` for error output is restored after *xt* returns or an exception is raised.
