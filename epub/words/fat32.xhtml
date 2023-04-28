@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
     <title>FAT32 Support</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
@@ -538,6 +538,21 @@ bits 4-0: day (1-31)</p>
 <h3><code class="docutils literal notranslate"><span class="pre">modify-date-time&#64;</span></code></h3>
 <p>( date-time entry – )</p>
 <p>Get the modification date/time of a directory entry, with two second resolution and day-of-the-week calculation.</p>
+</section>
+<section id="with-file-input">
+<h3><code class="docutils literal notranslate"><span class="pre">with-file-input</span></code></h3>
+<p>( file xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> redirected for input from file <em>file</em>. The previous redirection of <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+<section id="with-file-output">
+<h3><code class="docutils literal notranslate"><span class="pre">with-file-output</span></code></h3>
+<p>( file xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for output to file <em>file</em>. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+<section id="with-file-error-output">
+<h3><code class="docutils literal notranslate"><span class="pre">with-file-error-output</span></code></h3>
+<p>( file xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for output to file <em>file</em> for error output. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> for error output is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 </section>
 </section>
