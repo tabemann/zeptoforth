@@ -140,6 +140,17 @@ begin-module console
       ;] bind
     ;
 
+    \ Flush the console stream output
+    : flush-console-stream-output ( data -- )
+      begin dup console-alarm-set? @ while pause repeat
+      [: { data }
+        data console-buffer console-buffer-size
+        data console-stream @ send-stream-parts
+        0 data console-end !
+        false data console-alarm-set? !
+      ;] over console-slock with-slock
+    ;
+
   end-module> import
   
   \ Set the current input within an xt
@@ -219,6 +230,7 @@ begin-module console
     console-stream-data-size [: { data }
       swap data init-console-stream-output
       data console-io data console-io? rot with-output
+      data flush-console-stream-output
     ;] with-aligned-allot
   ;
 
@@ -227,6 +239,7 @@ begin-module console
     console-stream-data-size [: { data }
       swap data init-console-stream-output
       data console-io data console-io? rot with-error-output
+      data flush-console-stream-output
     ;] with-aligned-allot
   ;
 

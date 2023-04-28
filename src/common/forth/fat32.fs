@@ -26,6 +26,10 @@ begin-module fat32
   lock import
   block-dev import
   rtc import
+  task import
+  closure import
+  slock import
+  alarm import
   
   \ Sector size exception
   : x-sector-size-not-supported ( -- ) ." sector sizes other than 512 are not supported" cr  ;
@@ -1934,6 +1938,199 @@ begin-module fat32
     ; define modify-date-time@
     
   end-implement
+
+  continue-module fat32-internal
+
+    \ Console alarm delay in ticks
+    2500 constant console-alarm-delay
+
+    \ Console buffer size
+    512 constant console-buffer-size
+
+    \ Data associated with stream input and output
+    begin-structure console-file-data-size
+      
+      \ A closure associated with KEY or EMIT
+      closure-size +field console-io
+
+      \ A closure associated with KEY? or EMIT?
+      closure-size +field console-io?
+      
+      \ The stream associated with the input or output
+      field: console-file
+
+      \ Buffer start index
+      field: console-start
+
+      \ Buffer end index
+      field: console-end
+      
+      \ Console lock
+      slock-size +field console-slock
+
+      \ Console alarm
+      alarm-size +field console-alarm
+
+      \ Console alarm set
+      field: console-alarm-set?
+
+      \ End of IO
+      field: console-io-end?
+
+      \ File size
+      field: console-file-size
+
+      \ A buffer associated with the input or output
+      console-buffer-size +field console-buffer
+
+    end-structure
+
+    \ Initialize console file data for input
+    : init-console-file-input { file data -- }
+      data console-slock init-slock
+      0 data console-start !
+      0 data console-end !
+      false data console-alarm-set? !
+      false data console-io-end? !
+      file data console-file !
+      file file-size@ data console-file-size !
+      data data console-io [:
+        [: { data }
+          data console-start @ data console-end @ = if
+            data console-buffer console-buffer-size
+            data console-file @ read-file
+            dup 0= if
+              true data console-io-end? !
+              ['] console::x-end-of-input ?raise
+            then
+            data console-end !
+            0 data console-start !
+          then
+          data console-buffer data console-start @ + c@
+          1 data console-start +!
+        ;] over console-slock with-slock
+      ;] bind
+      data data console-io? [:
+        [: { data }
+          data console-file @ tell-file data console-file-size @ <
+          data console-io-end? @ not and
+          data console-start @ data console-end @ <> or
+        ;] over console-slock with-slock
+      ;] bind
+    ;
+
+    \ Initialize console file data for output
+    : init-console-file-output { file data -- }
+      data console-slock init-slock
+      0 data console-start !
+      0 data console-end !
+      false data console-alarm-set? !
+      false data console-io-end? !
+      file data console-file !
+      data data console-io [:
+        [: { byte data }
+          byte data console-buffer data console-end @ + c!
+          1 data console-end +!
+          data console-end @ console-buffer-size < if
+            data console-alarm-set? @ not if
+              true data console-alarm-set? !
+              console-alarm-delay
+              current-task task-priority@
+              data
+              [: drop
+                [: { data }
+                  data console-buffer data console-start @ +
+                  data console-end @ data console-start @ -
+                  data console-file @ ['] write-file try
+                  dup ['] x-no-clusters-free = if
+                    true data console-io-end? !
+                  then
+                  ?raise
+                  data console-start +!
+                  data console-buffer data console-start @ +
+                  data console-buffer data console-end @ data console-start @ -
+                  move
+                  data console-start @ negate data console-end +!
+                  0 data console-start !
+                  false data console-alarm-set? !
+                ;] over console-slock with-slock
+              ;]
+              data console-alarm
+              set-alarm-delay-default
+            then
+          else
+            data console-alarm-set? @ if data console-alarm unset-alarm then
+            data console-buffer data console-start @ +
+            data console-end @ data console-start @ -
+            data console-file @ ['] write-file
+            try
+            dup ['] x-no-clusters-free = if
+              true data console-io-end? !
+            then
+            ?raise
+            data console-start +!
+            data console-buffer data console-start @ +
+            data console-buffer data console-end @ data console-start @ -
+            move
+            data console-start @ negate data console-end +!
+            0 data console-start !
+            false data console-alarm-set? !
+          then
+        ;] over console-slock with-slock
+      ;] bind
+      data data console-io? [: { data }
+        data console-io-end? @ not
+      ;] bind
+    ;
+
+    \ Flush the console file output
+    : flush-console-file-output ( data -- )
+      begin dup console-alarm-set? @ while pause repeat
+      [: { data }
+        data console-buffer data console-start @ +
+        data console-end @ data console-start @ -
+        data console-file @ ['] write-file try
+        dup ['] x-no-clusters-free = if
+          true data console-io-end? !
+        then
+        ?raise
+        data console-start +!
+        data console-buffer data console-start @ +
+        data console-buffer data console-end @ data console-start @ -
+        move
+        data console-start @ negate data console-end +!
+        0 data console-start !
+        false data console-alarm-set? !
+      ;] over console-slock with-slock
+    ;
+    
+  end-module
+
+  \ Set the current input to a file within an xt
+  : with-file-input ( file xt -- )
+    console-file-data-size [: { data }
+      swap data init-console-file-input
+      data console-io data console-io? rot console::with-input
+    ;] with-aligned-allot
+  ;
+
+  \ Set the current output to a file within an xt
+  : with-file-output ( file xt -- )
+    console-file-data-size [: { data }
+      swap data init-console-file-output
+      data console-io data console-io? rot console::with-output
+      data flush-console-file-output
+    ;] with-aligned-allot
+  ;
+
+  \ Set the current error output to a file within an xt
+  : with-file-error-output ( file xt -- )
+    console-file-data-size [: { data }
+      swap data init-console-file-output
+      data console-io data console-io? rot console::with-error-output
+      data flush-console-file-output
+    ;] with-aligned-allot
+  ;
 
 end-module
 
