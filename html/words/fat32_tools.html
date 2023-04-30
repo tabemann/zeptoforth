@@ -202,21 +202,6 @@
 <p>( path-addr path-u – dir? )</p>
 <p>Get whether the entry at a specified path is a directory.</p>
 </section>
-<section id="with-file-input">
-<h3><code class="docutils literal notranslate"><span class="pre">with-file-input</span></code><a class="headerlink" href="#with-file-input" title="Permalink to this heading">¶</a></h3>
-<p>( path-addr path-u xt – )</p>
-<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> redirected for input from the file at the specified path. The previous redirection of <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
-</section>
-<section id="with-file-output">
-<h3><code class="docutils literal notranslate"><span class="pre">with-file-output</span></code><a class="headerlink" href="#with-file-output" title="Permalink to this heading">¶</a></h3>
-<p>( path-addr path-u xt – )</p>
-<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for output to the file at the specified path. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
-</section>
-<section id="with-file-error-output">
-<h3><code class="docutils literal notranslate"><span class="pre">with-file-error-output</span></code><a class="headerlink" href="#with-file-error-output" title="Permalink to this heading">¶</a></h3>
-<p>( path-addr path-u xt – )</p>
-<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for output to the file at the specified path for error output. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> for error output is restored after <em>xt</em> returns or an exception is raised.</p>
-</section>
 </section>
 </section>
 

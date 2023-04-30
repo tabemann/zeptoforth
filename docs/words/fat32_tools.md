@@ -167,18 +167,3 @@ Get whether the entry at a specified path is a file.
 ( path-addr path-u -- dir? )
 
 Get whether the entry at a specified path is a directory.
-
-##### `with-file-input`
-( path-addr path-u xt -- )
-
-Call *xt* with `key` and `key?` redirected for input from the file at the specified path. The previous redirection of `key` and `key?` is restored after *xt* returns or an exception is raised.
-
-##### `with-file-output`
-( path-addr path-u xt -- )
-
-Call *xt* with `emit` and `emit?` redirected for output to the file at the specified path. The previous redirection of `emit` and `emit?` is restored after *xt* returns or an exception is raised.
-
-##### `with-file-error-output`
-( path-addr path-u xt -- )
-
-Call *xt* with `emit` and `emit?` redirected for output to the file at the specified path for error output. The previous redirection of `emit` and `emit?` for error output is restored after *xt* returns or an exception is raised.

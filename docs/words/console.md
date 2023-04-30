@@ -4,6 +4,8 @@ These words concern redirecting the current console within a given task (each ta
 
 Take care when redirecting the console to streams because the typical dictionary size used for tasks of 320 is insufficient for this due to buffer space that is alloted in the current task's dictionary; rather, a dictionary size of 512 has found to work.
 
+One should also take care, particularly when working with multiple tasks where one task inherits its console redirection from a parent task, to ensure that the redirected console is not accessed after the scope defined by the `with-*input`, `with-*output`, or `with-*error-output` word is defined. However, with the exceptions of `with-null-input`, `with-null-output`, `with-null-error-output`, `with-serial-input`, `with-serial-output`, `with-serial-error-output`, and `with-swd-input`, `with-swd-output`, and `with-swd-error-output`, accessing the redirected console is safe even after its original specification goes out of scope.
+
 ### `console`
 
 The following words are in the `console` module:
@@ -72,3 +74,79 @@ Call *xt* with `emit` and `emit?` redirected for output to stream *stream* for e
 ( xt -- )
 
 Call *xt* with error output redirected to the current output. The previous redirection of error output is restored after *xt* returns or an exception is raised.
+
+### `fat32`
+
+The following words are in the `fat32` module and pertain to direct access to instances of `fat32::<fat32-file>`. Note that there are identically named words in the `fat32-tools` module which pertain to files in the current FAT32 filesystem which are accessed by path.
+
+##### `with-file-input`
+( file xt -- )
+
+Call *xt* with `key` and `key?` redirected for input from file *file*. The previous redirection of `key` and `key?` is restored after *xt* returns or an exception is raised.
+
+##### `with-file-output`
+( file xt -- )
+
+Call *xt* with `emit` and `emit?` redirected for output to file *file*. The previous redirection of `emit` and `emit?` is restored after *xt* returns or an exception is raised.
+
+##### `with-file-error-output`
+( file xt -- )
+
+Call *xt* with `emit` and `emit?` redirected for output to file *file* for error output. The previous redirection of `emit` and `emit?` for error output is restored after *xt* returns or an exception is raised.
+
+### `fat32-tools`
+
+The following words are in the `fat32-tools` module and pertain to access to files in the current FAT32 filesystem by path. Note that there are identically named words in the `fat32` module, listed above, which pertain to direct access to instances of `fat32::<fat32-file>`.
+
+##### `with-file-input`
+( path-addr path-u xt -- )
+
+Call *xt* with `key` and `key?` redirected for input from the file at the specified path. The previous redirection of `key` and `key?` is restored after *xt* returns or an exception is raised.
+
+##### `with-file-output`
+( path-addr path-u xt -- )
+
+Call *xt* with `emit` and `emit?` redirected for output to the file at the specified path. The previous redirection of `emit` and `emit?` is restored after *xt* returns or an exception is raised.
+
+##### `with-file-error-output`
+( path-addr path-u xt -- )
+
+Call *xt* with `emit` and `emit?` redirected for output to the file at the specified path for error output. The previous redirection of `emit` and `emit?` for error output is restored after *xt* returns or an exception is raised.
+
+### `uart`
+
+The following words are in the `uart` module:
+
+##### `with-uart-input`
+( uart xt -- )
+
+Call *xt* with `key` and `key?` redirected for U(S)ART console input for U(S)ART *uart*. The previous redirection of `key` and `key?` is restored after *xt* returns or an exception is raised.
+
+##### `with-uart-output`
+( uart xt -- )
+
+Call *xt* with `emit` and `emit?` redirected for U(S)ART console output for U(S)ART *uart*. The previous redirection of `emit` and `emit?` is restored after *xt* returns or an exception is raised.
+
+##### `with-uart-error-output`
+( uart xt -- )
+
+Call *xt* with `emit` and `emit?` redirected for U(S)ART console output for error output for U(S)ART *uart*. The previous redirection of `emit` and `emit?` for error output is restored after *xt* returns or an exception is raised.
+
+### `swd`
+
+The following words are in the `swd` module; note that they are only available for `full_swdcom` and `mini_swdcom` builds:
+
+##### `with-swd-input`
+( xt -- )
+
+Call *xt* with `key` and `key?` redirected for swdcom console input. The previous redirection of `key` and `key?` is restored after *xt* returns or an exception is raised.
+
+##### `with-swd-output`
+( xt -- )
+
+Call *xt* with `emit` and `emit?` redirected for swdcom console output. The previous redirection of `emit` and `emit?` is restored after *xt* returns or an exception is raised.
+
+##### `with-swd-error-output`
+( xt -- )
+
+Call *xt* with `emit` and `emit?` redirected for swdcom console output for error output. The previous redirection of `emit` and `emit?` for error output is restored after *xt* returns or an exception is raised.

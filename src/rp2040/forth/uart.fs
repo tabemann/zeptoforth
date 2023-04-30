@@ -30,6 +30,7 @@ begin-module uart
   int-io import
   int-io-internal import
   pin import
+  closure import
 
   \ Invalid UART exception
   : x-invalid-uart ( -- ) ." invalid UART" cr ;
@@ -395,6 +396,73 @@ begin-module uart
     swap uart-alternate swap alternate-pin
   ;
 
+  continue-module uart-internal
+
+    \ Data associated with UART input and output
+    begin-structure console-uart-data-size
+      
+      \ A closure associated with KEY or EMIT
+      closure-size +field console-io
+
+      \ A closure associated with KEY? or EMIT?
+      closure-size +field console-io?
+      
+      \ The uart associated with the input or output
+      field: console-uart
+
+    end-structure
+
+    \ Initialize console UART data for input
+    : init-console-uart-input { uart data -- }
+      uart data console-uart !
+      data data console-io [: { data }
+        data console-uart @ uart>
+      ;] bind
+      data data console-io? [: { data }
+        data console-uart @ uart>?
+      ;] bind
+    ;
+
+    \ Initialize console UART data for output
+    : init-console-uart-output { uart data -- }
+      uart data console-uart !
+      data data console-io [: { byte data }
+        byte data console-uart @ >uart
+      ;] bind
+      data data console-io? [: { data }
+        data console-uart @ >uart?
+      ;] bind
+    ;
+    
+  end-module
+
+  \ Set the current input to a UART within an xt
+  : with-uart-input ( uart xt -- )
+    over validate-uart
+    console-uart-data-size [: { data }
+      swap data init-console-uart-input
+      data console-io data console-io? rot console::with-input
+    ;] with-aligned-allot
+  ;
+
+  \ Set the current output to a UART within an xt
+  : with-uart-output ( uart xt -- )
+    over validate-uart
+    console-uart-data-size [: { data }
+      swap data init-console-uart-output
+      data console-io data console-io? rot console::with-output
+    ;] with-aligned-allot
+  ;
+
+  \ Set the current error output to a UART within an xt
+  : with-uart-error-output ( uart xt -- )
+    over validate-uart
+    console-uart-data-size [: { data }
+      swap data init-console-uart-output
+      data console-io data console-io? rot console::with-error-output
+    ;] with-aligned-allot
+  ;
+  
 end-module> import
 
 \ Init
