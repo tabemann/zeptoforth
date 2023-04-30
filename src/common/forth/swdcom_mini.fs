@@ -93,21 +93,6 @@ begin-module swd
 
   : enable-sleep ( -- ) true use-sleep ! ;
   : disable-sleep ( -- ) false use-sleep ! ;
-
-  \ Set the curent input to SWD within an xt
-  : with-swd-input ( xt -- )
-    ['] swd-key ['] swd-key? rot console::with-input
-  ;
-
-  \ Set the current output to SWD within an xt
-  : with-swd-output ( xt -- )
-    ['] swd-emit ['] swd-emit? rot console::with-output
-  ;
-
-  \ Set the current error output to SWD within an xt
-  : with-swd-error-output ( xt -- )
-    ['] swd-emit ['] swd-emit? rot console::with-error-output
-  ;
   
 end-module> import
 

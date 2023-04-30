@@ -1947,7 +1947,7 @@ begin-module fat32
     \ Console buffer size
     512 constant console-buffer-size
 
-    \ Data associated with stream input and output
+    \ Data associated with file input and output
     begin-structure console-file-data-size
       
       \ A closure associated with KEY or EMIT
@@ -1956,7 +1956,7 @@ begin-module fat32
       \ A closure associated with KEY? or EMIT?
       closure-size +field console-io?
       
-      \ The stream associated with the input or output
+      \ The file associated with the input or output
       field: console-file
 
       \ Buffer start index
