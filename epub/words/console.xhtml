@@ -18,6 +18,7 @@
 <h1>Console Redirection Words</h1>
 <p>These words concern redirecting the current console within a given task (each task has its own console configuration, which it inherits upon initialization from its parent task) within a given scope defined by an execution token. Console input and output may be independently redirected, including to arbitrary words called by <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> for input to <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> for output, to null inputs and outputs, to the standard serial console, or to streams. Also, error output can be redirected in the same fashion as normal output.</p>
 <p>Take care when redirecting the console to streams because the typical dictionary size used for tasks of 320 is insufficient for this due to buffer space that is alloted in the current task’s dictionary; rather, a dictionary size of 512 has found to work.</p>
+<p>One should also take care, particularly when working with multiple tasks where one task inherits its console redirection from a parent task, to ensure that the redirected console is not accessed after the scope defined by the <code class="docutils literal notranslate"><span class="pre">with-*input</span></code>, <code class="docutils literal notranslate"><span class="pre">with-*output</span></code>, or <code class="docutils literal notranslate"><span class="pre">with-*error-output</span></code> word is defined. However, with the exceptions of <code class="docutils literal notranslate"><span class="pre">with-null-input</span></code>, <code class="docutils literal notranslate"><span class="pre">with-null-output</span></code>, <code class="docutils literal notranslate"><span class="pre">with-null-error-output</span></code>, <code class="docutils literal notranslate"><span class="pre">with-serial-input</span></code>, <code class="docutils literal notranslate"><span class="pre">with-serial-output</span></code>, <code class="docutils literal notranslate"><span class="pre">with-serial-error-output</span></code>, and <code class="docutils literal notranslate"><span class="pre">with-swd-input</span></code>, <code class="docutils literal notranslate"><span class="pre">with-swd-output</span></code>, and <code class="docutils literal notranslate"><span class="pre">with-swd-error-output</span></code>, accessing the redirected console is safe even after its original specification goes out of scope.</p>
 <section id="console">
 <h2><code class="docutils literal notranslate"><span class="pre">console</span></code></h2>
 <p>The following words are in the <code class="docutils literal notranslate"><span class="pre">console</span></code> module:</p>
@@ -85,6 +86,82 @@
 <h3><code class="docutils literal notranslate"><span class="pre">with-output-as-error-output</span></code></h3>
 <p>( xt – )</p>
 <p>Call <em>xt</em> with error output redirected to the current output. The previous redirection of error output is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+</section>
+<section id="fat32">
+<h2><code class="docutils literal notranslate"><span class="pre">fat32</span></code></h2>
+<p>The following words are in the <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module and pertain to direct access to instances of <code class="docutils literal notranslate"><span class="pre">fat32::&lt;fat32-file&gt;</span></code>. Note that there are identically named words in the <code class="docutils literal notranslate"><span class="pre">fat32-tools</span></code> module which pertain to files in the current FAT32 filesystem which are accessed by path.</p>
+<section id="with-file-input">
+<h3><code class="docutils literal notranslate"><span class="pre">with-file-input</span></code></h3>
+<p>( file xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> redirected for input from file <em>file</em>. The previous redirection of <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+<section id="with-file-output">
+<h3><code class="docutils literal notranslate"><span class="pre">with-file-output</span></code></h3>
+<p>( file xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for output to file <em>file</em>. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+<section id="with-file-error-output">
+<h3><code class="docutils literal notranslate"><span class="pre">with-file-error-output</span></code></h3>
+<p>( file xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for output to file <em>file</em> for error output. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> for error output is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+</section>
+<section id="fat32-tools">
+<h2><code class="docutils literal notranslate"><span class="pre">fat32-tools</span></code></h2>
+<p>The following words are in the <code class="docutils literal notranslate"><span class="pre">fat32-tools</span></code> module and pertain to access to files in the current FAT32 filesystem by path. Note that there are identically named words in the <code class="docutils literal notranslate"><span class="pre">fat32</span></code> module, listed above, which pertain to direct access to instances of <code class="docutils literal notranslate"><span class="pre">fat32::&lt;fat32-file&gt;</span></code>.</p>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">with-file-input</span></code></h3>
+<p>( path-addr path-u xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> redirected for input from the file at the specified path. The previous redirection of <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">with-file-output</span></code></h3>
+<p>( path-addr path-u xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for output to the file at the specified path. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+<section id="id3">
+<h3><code class="docutils literal notranslate"><span class="pre">with-file-error-output</span></code></h3>
+<p>( path-addr path-u xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for output to the file at the specified path for error output. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> for error output is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+</section>
+<section id="uart">
+<h2><code class="docutils literal notranslate"><span class="pre">uart</span></code></h2>
+<p>The following words are in the <code class="docutils literal notranslate"><span class="pre">uart</span></code> module:</p>
+<section id="with-uart-input">
+<h3><code class="docutils literal notranslate"><span class="pre">with-uart-input</span></code></h3>
+<p>( uart xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> redirected for U(S)ART console input for U(S)ART <em>uart</em>. The previous redirection of <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+<section id="with-uart-output">
+<h3><code class="docutils literal notranslate"><span class="pre">with-uart-output</span></code></h3>
+<p>( uart xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for U(S)ART console output for U(S)ART <em>uart</em>. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+<section id="with-uart-error-output">
+<h3><code class="docutils literal notranslate"><span class="pre">with-uart-error-output</span></code></h3>
+<p>( uart xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for U(S)ART console output for error output for U(S)ART <em>uart</em>. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> for error output is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+</section>
+<section id="swd">
+<h2><code class="docutils literal notranslate"><span class="pre">swd</span></code></h2>
+<p>The following words are in the <code class="docutils literal notranslate"><span class="pre">swd</span></code> module; note that they are only available for <code class="docutils literal notranslate"><span class="pre">full_swdcom</span></code> and <code class="docutils literal notranslate"><span class="pre">mini_swdcom</span></code> builds:</p>
+<section id="with-swd-input">
+<h3><code class="docutils literal notranslate"><span class="pre">with-swd-input</span></code></h3>
+<p>( xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> redirected for swdcom console input. The previous redirection of <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+<section id="with-swd-output">
+<h3><code class="docutils literal notranslate"><span class="pre">with-swd-output</span></code></h3>
+<p>( xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for swdcom console output. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+<section id="with-swd-error-output">
+<h3><code class="docutils literal notranslate"><span class="pre">with-swd-error-output</span></code></h3>
+<p>( xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for swdcom console output for error output. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> for error output is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 </section>
 </section>
