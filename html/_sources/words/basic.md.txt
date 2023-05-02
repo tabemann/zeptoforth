@@ -255,7 +255,12 @@ Unsigned less than or equal
 ( u -- flag )
 
 Unsigned greater than or equal
-	
+
+##### `goto`
+( "word" -- )
+
+Drop all local and loop variables and branch to the target word.
+
 ##### `ram-here`
 ( -- addr )
 

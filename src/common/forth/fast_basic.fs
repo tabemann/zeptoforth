@@ -99,6 +99,28 @@ continue-module forth
       2drop drop
     then
   ;
+
+  \ Go to a word, dropping any local variables or loop variables and pop the
+  \ current word's return address
+  : goto ( "target" -- )
+    [immediate] [compile-only]
+    token-word
+    undefer-lit
+    word-exit-hook @ ?execute
+    [ armv6m-instr import ]
+    0 r0 ldr_,[sp,#_]
+    4 addsp,sp,#_
+    r0 lr mov4_,4_
+    >xt
+    dup here 4 + - 1 arshift
+    dup 1024 < over -1025 > and if
+      nip $7FF and $E000 or h, \ Unconditional branch
+    else
+      drop 1 or r0 literal,
+      r0 bx_
+    then
+    [ armv6m-instr unimport ]
+  ;
   
 end-module
 
