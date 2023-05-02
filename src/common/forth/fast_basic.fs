@@ -108,8 +108,7 @@ continue-module forth
     undefer-lit
     word-exit-hook @ ?execute
     [ armv6m-instr import ]
-    0 r0 ldr_,[sp,#_]
-    4 addsp,sp,#_
+    r0 1 pop
     r0 lr mov4_,4_
     >xt
     dup here 4 + - 1 arshift
