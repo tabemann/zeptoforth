@@ -1138,6 +1138,11 @@ Specify code for a word created wth <BUILDS
 
 Create a deferred word with the given name; note that executing it before it is set will result in a crash.
 
+##### `is`
+( xt "deferred-word" -- )
+
+Set the deferred word named "deferred-word" to execute the execution token *xt* when it is executed. If the deferred word is compiled to flash this may only be done once. Also note that a crash will result if the deferred word is in flash and *xt* is in RAM and one executes the deferred word after rebooting.
+
 ##### `defer!`
 ( xt deferred-xt -- )
 

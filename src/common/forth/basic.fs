@@ -609,6 +609,9 @@ commit-flash
   then
 ;
 
+\ Set a deferred word referred to by name
+: is ( xt "deferred-word" -- ) token-word >xt defer! ;
+
 \ Get a deferred word
 : defer@ ( deferred-xt -- xt ) defer-xt@ @ 1 bic ;
 

@@ -1185,6 +1185,11 @@ otherwise passing the specified argument through.</p>
 <p>( “name” – )</p>
 <p>Create a deferred word with the given name; note that executing it before it is set will result in a crash.</p>
 </section>
+<section id="is">
+<h3><code class="docutils literal notranslate"><span class="pre">is</span></code><a class="headerlink" href="#is" title="Permalink to this heading">¶</a></h3>
+<p>( xt “deferred-word” – )</p>
+<p>Set the deferred word named “deferred-word” to execute the execution token <em>xt</em> when it is executed. If the deferred word is compiled to flash this may only be done once. Also note that a crash will result if the deferred word is in flash and <em>xt</em> is in RAM and one executes the deferred word after rebooting.</p>
+</section>
 <section id="id75">
 <h3><code class="docutils literal notranslate"><span class="pre">defer!</span></code><a class="headerlink" href="#id75" title="Permalink to this heading">¶</a></h3>
 <p>( xt deferred-xt – )</p>
