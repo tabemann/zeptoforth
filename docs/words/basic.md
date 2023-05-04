@@ -1723,15 +1723,10 @@ Forget the contents of RAM except for RAM variables and buffers compiled from fl
 
 Display space free for a given task
 
-##### `free`
+##### `unused`
 ( -- )
 
 Display space free for the main task and for flash in general
-
-##### `copyright`
-( -- )
-
-Display the copyright notices
 
 ##### `license`
 ( -- )
