@@ -259,7 +259,7 @@ Unsigned greater than or equal
 ##### `goto`
 ( "word" -- )
 
-Drop all local and loop variables and branch to the target word.
+Drop all local and loop variables and branch to the target word. Note that no new return address is pushed onto the return stack.
 
 ##### `ram-here`
 ( -- addr )
