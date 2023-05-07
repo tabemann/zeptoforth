@@ -309,6 +309,15 @@ begin-module usb
 
     \ Endpoint next PID
     field: endpoint-next-pid
+
+    \ Endpoint maximum packet size
+    field: endpoint-max-packet-size
+
+    \ Endpoint transmit data
+    field: endpoint-tx-data
+
+    \ Endpoint transmit length
+    field: endpoint-tx-len
     
   end-structure
 
@@ -346,21 +355,30 @@ begin-module usb
     then
   ;
 
-  \ Start a USB transfer
-  : usb-start-transfer { c-addr bytes endpoint -- }
-    bytes 64 u<= averts x-invalid-pkt-size
+  \ Transfer data
+  : usb-tx-next { endpoint -- }
+    endpoint endpoint-tx-len @ endpoint endpoint-max-packet-size @
+    min { bytes }
     bytes USB_BUF_CTRL_AVAIL or { buffer-control-val }
     endpoint endpoint-tx? if
-      c-addr bytes endpoint endpoint-buffer @ move
+      endpoint endpoint-tx-data bytes
+      endpoint endpoint-buffer @ move
+      bytes endpoint endpoint-tx-data +!
       buffer-control-val USB_BUF_CTRL_FULL or to buffer-control-val
     then
+    bytes negate endpoint endpoint-tx-len +!
     endpoint endpoint-next-pid @ if
       USB_BUF_CTRL_DATA1_PID
     else
       USB_BUF_CTRL_DATA0_PID
     then
     buffer-control-val or to buffer-control-val
+    endpoint endpoint-tx-len @ 0= if
+      USB_BUF_CTRL_LAST buffer-control-val or to buffer-control-val
+    then
     endpoint endpoint-next-pid @ 1 xor endpoint endpoint-next-pid !
+    USB_EP_ENABLE_INTERRUPT_PER_BUFFER { ep-control-val }
+    ep-control-val endpoint endpoint-control @ !
     buffer-control-val endpoint endpoint-buffer-control @ !
   ;
 
