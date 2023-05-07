@@ -127,14 +127,19 @@ continue-module forth
     token
     dup averts x-token-expected
     start-compile-no-push
+    [ armv6m-instr import ]
+    r6 r1 movs_,_
+    r6 1 r7 ldm
+    [ armv6m-instr unimport ]
   ;
 
   \ End a jump table
   : end-jumptable ( -- )
-    postpone drop
     word-exit-hook @ ?execute
     word-end-hook @ ?execute
-    14 bx,
+    [ armv6m-instr import ]
+    lr bx_
+    [ armv6m-instr unimport ]
     $003F h,
     visible
     finalize,
@@ -146,13 +151,12 @@ continue-module forth
     undefer-lit
     [ armv6m-instr import ]
     dup 0 >= over 255 <= and if
-      r6 cmp_,#_
+      r1 cmp_,#_
     else
       r0 literal,
-      r0 r6 cmp_,_
+      r0 r1 cmp_,_
     then
     ne bc> rot
-    r6 1 r7 ldm
     word-exit-hook @ ?execute
     >xt
     dup here 4 + - 1 arshift
@@ -171,7 +175,6 @@ continue-module forth
     token-word
     undefer-lit
     [ armv6m-instr import ]
-    r6 1 r7 ldm
     word-exit-hook @ ?execute
     >xt
     dup here 4 + - 1 arshift
