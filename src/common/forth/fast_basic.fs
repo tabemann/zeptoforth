@@ -23,7 +23,8 @@ compile-to-flash
 continue-module forth
 
   armv6m import
-
+  internal import
+  
   continue-module internal
     
     \ Fill memory with bytes, optimized for speed
@@ -120,7 +121,69 @@ continue-module forth
     then
     [ armv6m-instr unimport ]
   ;
-  
+
+  \ Compile a word that implements a jump table
+  : begin-jumptable ( "name" -- )
+    token
+    dup averts x-token-expected
+    start-compile-no-push
+  ;
+
+  \ End a jump table
+  : end-jumptable ( -- )
+    postpone drop
+    word-exit-hook @ ?execute
+    word-end-hook @ ?execute
+    14 bx,
+    $003F h,
+    visible
+    finalize,
+  ;
+
+  \ Compile a jump table entry
+  : => ( x "target" -- )
+    token-word swap
+    undefer-lit
+    [ armv6m-instr import ]
+    dup 0 >= over 255 <= and if
+      r6 cmp_,#_
+    else
+      r0 literal,
+      r0 r6 cmp_,_
+    then
+    ne bc> rot
+    r6 1 r7 ldm
+    word-exit-hook @ ?execute
+    >xt
+    dup here 4 + - 1 arshift
+    dup 1024 < over -1025 > and if
+      nip $7FF and $E000 or h,
+    else
+      drop 1 or r0 literal,
+      r0 bx_
+    then
+    >mark
+    [ armv6m-instr unimport ]
+  ;
+
+  \ Compile a default jump table entry
+  : default=> ( "target" -- )
+    token-word
+    undefer-lit
+    [ armv6m-instr import ]
+    r6 1 r7 ldm
+    word-exit-hook @ ?execute
+    >xt
+    dup here 4 + - 1 arshift
+    dup 1024 < over -1025 > and if
+      nip $7FF and $E000 or h,
+    else
+      drop 1 or r0 literal,
+      r0 bx_
+    then
+    [ armv6m-instr unimport ]
+  ;
+
 end-module
 
 compile-to-ram

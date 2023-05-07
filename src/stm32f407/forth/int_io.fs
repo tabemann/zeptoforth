@@ -238,7 +238,7 @@ begin-module int-io
     ['] do-emit error-emit-hook !
     ['] do-key? key?-hook !
     ['] do-emit? emit?-hook !
-    ['] do-emit? error-emit?-hook
+    ['] do-emit? error-emit?-hook !
     ['] do-flush-console flush-console-hook !
   ;
   

@@ -1158,7 +1158,7 @@ Get the execution token *xt* executed when the deferred word corresponding to th
 
 Begin declaring a structure
 
-##### `end`
+##### `end-structure`
 ( offset -- )
 
 Finish declaring a structure
@@ -1227,6 +1227,26 @@ Start an OFSTRCASE clause
 ( x -- )
 
 End a CASE statement comparing against a string
+
+##### `begin-jumptable`
+( "name" -- )
+
+Start defining a jump table, which is a word, when called, takes one argument and matches it against any number of `=>` clauses, where if it matches one it will branch to the referenced word, until it reaches the end of the jump table or a `default=>` clause which, when reached, it will unconditionally branch to the referenced word.
+
+##### `end-jumptable`
+( -- )
+
+End defining a jump table.
+
+##### `=>`
+( x "target" -- )
+
+Compile a jump table entry matching a value *x* which, if matched, will branch to *target*.
+
+##### `default=>`
+( "target" -- )
+
+Compile a jump table which will unconditionally branch to *target*.
 
 ##### `cuser`
 ( "name" -- )

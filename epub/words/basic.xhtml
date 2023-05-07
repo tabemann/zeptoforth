@@ -1184,8 +1184,8 @@ otherwise passing the specified argument through.</p>
 <p>( “name” – offset )</p>
 <p>Begin declaring a structure</p>
 </section>
-<section id="end">
-<h3><code class="docutils literal notranslate"><span class="pre">end</span></code></h3>
+<section id="end-structure">
+<h3><code class="docutils literal notranslate"><span class="pre">end-structure</span></code></h3>
 <p>( offset – )</p>
 <p>Finish declaring a structure</p>
 </section>
@@ -1254,6 +1254,26 @@ otherwise passing the specified argument through.</p>
 <p>( x – )</p>
 <p>End a CASE statement comparing against a string</p>
 </section>
+<section id="begin-jumptable">
+<h3><code class="docutils literal notranslate"><span class="pre">begin-jumptable</span></code></h3>
+<p>( “name” – )</p>
+<p>Start defining a jump table, which is a word, when called, takes one argument and matches it against any number of <code class="docutils literal notranslate"><span class="pre">=&gt;</span></code> clauses, where if it matches one it will branch to the referenced word, until it reaches the end of the jump table or a <code class="docutils literal notranslate"><span class="pre">default=&gt;</span></code> clause which, when reached, it will unconditionally branch to the referenced word.</p>
+</section>
+<section id="end-jumptable">
+<h3><code class="docutils literal notranslate"><span class="pre">end-jumptable</span></code></h3>
+<p>( – )</p>
+<p>End defining a jump table.</p>
+</section>
+<section id="id79">
+<h3><code class="docutils literal notranslate"><span class="pre">=&gt;</span></code></h3>
+<p>( x “target” – )</p>
+<p>Compile a jump table entry matching a value <em>x</em> which, if matched, will branch to <em>target</em>.</p>
+</section>
+<section id="default">
+<h3><code class="docutils literal notranslate"><span class="pre">default=&gt;</span></code></h3>
+<p>( “target” – )</p>
+<p>Compile a jump table which will unconditionally branch to <em>target</em>.</p>
+</section>
 <section id="cuser">
 <h3><code class="docutils literal notranslate"><span class="pre">cuser</span></code></h3>
 <p>( “name” – )</p>
@@ -1269,7 +1289,7 @@ otherwise passing the specified argument through.</p>
 <p>( “name” – )</p>
 <p>Allocate a user variable</p>
 </section>
-<section id="id79">
+<section id="id80">
 <h3><code class="docutils literal notranslate"><span class="pre">2user</span></code></h3>
 <p>( “name” – )</p>
 <p>Allocate a doubleword user variable</p>
@@ -1299,7 +1319,7 @@ otherwise passing the specified argument through.</p>
 <p>( “name” – )</p>
 <p>Create a four-byte variable</p>
 </section>
-<section id="id80">
+<section id="id81">
 <h3><code class="docutils literal notranslate"><span class="pre">2variable</span></code></h3>
 <p>( “name” – )</p>
 <p>Create an eight-byte variable</p>
@@ -1334,7 +1354,7 @@ otherwise passing the specified argument through.</p>
 <p>( end start – ) ( R: – leave start end ) ( compile: – leave* loop )</p>
 <p>Begin a do loop</p>
 </section>
-<section id="id81">
+<section id="id82">
 <h3><code class="docutils literal notranslate"><span class="pre">?do</span></code></h3>
 <p>( end start – ) ( R: – leave start end ) ( compile: – leave* loop )</p>
 <p>Begin a ?do loop</p>
@@ -1344,7 +1364,7 @@ otherwise passing the specified argument through.</p>
 <p>( R leave current end – leave current end | )</p>
 <p>End a do loop</p>
 </section>
-<section id="id82">
+<section id="id83">
 <h3><code class="docutils literal notranslate"><span class="pre">+loop</span></code></h3>
 <p>( increment – ) ( R: leave current end – leave current end | )</p>
 <p>End a do +loop</p>
@@ -1379,12 +1399,12 @@ otherwise passing the specified argument through.</p>
 <p>( xt – )</p>
 <p>Skip characters in the evaluation buffer until a predicate is met</p>
 </section>
-<section id="id83">
+<section id="id84">
 <h3><code class="docutils literal notranslate"><span class="pre">[:</span></code></h3>
 <p>( – )</p>
 <p>Begin lambda</p>
 </section>
-<section id="id84">
+<section id="id85">
 <h3><code class="docutils literal notranslate"><span class="pre">;]</span></code></h3>
 <p>( – ) ( compiled: – xt )</p>
 <p>End lambda</p>
@@ -1419,12 +1439,12 @@ otherwise passing the specified argument through.</p>
 <p>( “token” – b-addr u )</p>
 <p>Parse a token</p>
 </section>
-<section id="id85">
+<section id="id86">
 <h3><code class="docutils literal notranslate"><span class="pre">\</span></code></h3>
 <p>( “comment<NL>” – )</p>
 <p>Parse a line comment</p>
 </section>
-<section id="id86">
+<section id="id87">
 <h3><code class="docutils literal notranslate"><span class="pre">(</span></code></h3>
 <p>( “comment)” – )</p>
 <p>Parse a paren coment</p>
@@ -1439,7 +1459,7 @@ otherwise passing the specified argument through.</p>
 <p>( b-addr1 u1 b-addr2 u2 – flag )</p>
 <p>Compare whether two strings are equal</p>
 </section>
-<section id="id87">
+<section id="id88">
 <h3><code class="docutils literal notranslate"><span class="pre">3dup</span></code></h3>
 <p>( x1 x2 x3 – x1 x2 x3 x1 x2 x3 )</p>
 <p>Duplicate three items on the stack</p>
@@ -1564,7 +1584,7 @@ otherwise passing the specified argument through.</p>
 <p>( b base – u success  )</p>
 <p>Parse a digit</p>
 </section>
-<section id="id88">
+<section id="id89">
 <h3><code class="docutils literal notranslate"><span class="pre">:</span></code></h3>
 <p>( – )</p>
 <p>Start a colon definition</p>
@@ -1574,7 +1594,7 @@ otherwise passing the specified argument through.</p>
 <p>( – xt )</p>
 <p>Start an anonymous colon definition</p>
 </section>
-<section id="id89">
+<section id="id90">
 <h3><code class="docutils literal notranslate"><span class="pre">;</span></code></h3>
 <p>( – )</p>
 <p>End a colon definition</p>
@@ -1584,7 +1604,7 @@ otherwise passing the specified argument through.</p>
 <p>( x “name” – )</p>
 <p>Create a constant</p>
 </section>
-<section id="id90">
+<section id="id91">
 <h3><code class="docutils literal notranslate"><span class="pre">2constant</span></code></h3>
 <p>( d “name” – )</p>
 <p>Create a 2-word constant</p>
@@ -1624,17 +1644,17 @@ otherwise passing the specified argument through.</p>
 <p>( b – )</p>
 <p>Add a character to pictured numeric output</p>
 </section>
-<section id="id91">
+<section id="id92">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;#</span></code></h3>
 <p>( – )</p>
 <p>Start pictured numeric output</p>
 </section>
-<section id="id92">
+<section id="id93">
 <h3><code class="docutils literal notranslate"><span class="pre">#</span></code></h3>
 <p>( ud1 – ud2 )</p>
 <p>Add a digit to the pictured numeric output</p>
 </section>
-<section id="id93">
+<section id="id94">
 <h3><code class="docutils literal notranslate"><span class="pre">#s</span></code></h3>
 <p>( ud – 0 0 )</p>
 <p>Add one or more digits to the pictured numeric output</p>
@@ -1644,7 +1664,7 @@ otherwise passing the specified argument through.</p>
 <p>( n – )</p>
 <p>If n (a single number) is negative, append ‘-’ to the pictured numeric output</p>
 </section>
-<section id="id94">
+<section id="id95">
 <h3><code class="docutils literal notranslate"><span class="pre">#&gt;</span></code></h3>
 <p>( xd – c-addr bytes )</p>
 <p>Finish pictured numeric output</p>
@@ -1669,12 +1689,12 @@ otherwise passing the specified argument through.</p>
 <p>( ud – )</p>
 <p>Type an unsigned double-cell number without a leading space</p>
 </section>
-<section id="id95">
+<section id="id96">
 <h3><code class="docutils literal notranslate"><span class="pre">d.</span></code></h3>
 <p>( nd – )</p>
 <p>Type a signed double-cell number with a leading space</p>
 </section>
-<section id="id96">
+<section id="id97">
 <h3><code class="docutils literal notranslate"><span class="pre">ud.</span></code></h3>
 <p>( ud – )</p>
 <p>Type an unsigned double-cell number with a leading space</p>
@@ -1699,12 +1719,12 @@ otherwise passing the specified argument through.</p>
 <p>( f places – )</p>
 <p>Type an S31.32 fixed-point number to <em>places</em> to the left of the decimal point without a leading space</p>
 </section>
-<section id="id97">
+<section id="id98">
 <h3><code class="docutils literal notranslate"><span class="pre">f.</span></code></h3>
 <p>( f – )</p>
 <p>Type an S31.32 fixed-point number with a leading space</p>
 </section>
-<section id="id98">
+<section id="id99">
 <h3><code class="docutils literal notranslate"><span class="pre">f.n</span></code></h3>
 <p>( f places – )</p>
 <p>Type an S31.32 fixed-point number to <em>places</em> to the left of the decimal point with a leading space</p>
@@ -1759,42 +1779,42 @@ otherwise passing the specified argument through.</p>
 <p>( – )</p>
 <p>Display the license notice</p>
 </section>
-<section id="id99">
+<section id="id100">
 <h3><code class="docutils literal notranslate"><span class="pre">.&quot;</span></code></h3>
 <p>( “text<quote>” – )</p>
 <p>Compile a string to be printed.</p>
 </section>
-<section id="id100">
+<section id="id101">
 <h3><code class="docutils literal notranslate"><span class="pre">s&quot;</span></code></h3>
 <p>( “text<quote>” – ) ( compiled: – b-addr u )</p>
 <p>Compile a non-counted string</p>
 </section>
-<section id="id101">
+<section id="id102">
 <h3><code class="docutils literal notranslate"><span class="pre">c&quot;</span></code></h3>
 <p>( “text<quote>” – ) ( compiled: – b-addr )</p>
 <p>Compile a counted-string</p>
 </section>
-<section id="id102">
+<section id="id103">
 <h3><code class="docutils literal notranslate"><span class="pre">.(</span></code></h3>
 <p>( “text<close-paren>” – )</p>
 <p>Immediately print a string.</p>
 </section>
-<section id="id103">
+<section id="id104">
 <h3><code class="docutils literal notranslate"><span class="pre">.\&quot;</span></code></h3>
 <p>( “text<quote>” – )</p>
 <p>Compile an escaped string to be printed.</p>
 </section>
-<section id="id104">
+<section id="id105">
 <h3><code class="docutils literal notranslate"><span class="pre">s\&quot;</span></code></h3>
 <p>( “text<quote>” – ) ( compiled: – b-addr u )</p>
 <p>Compile an escaped non-counted string</p>
 </section>
-<section id="id105">
+<section id="id106">
 <h3><code class="docutils literal notranslate"><span class="pre">c\&quot;</span></code></h3>
 <p>( “text<quote>” – ) ( compiled: – b-addr )</p>
 <p>Compile an escaped counted-string</p>
 </section>
-<section id="id106">
+<section id="id107">
 <h3><code class="docutils literal notranslate"><span class="pre">.\(</span></code></h3>
 <p>( “text<close-paren>” – )</p>
 <p>Immediately print an escaped string.</p>
@@ -1809,17 +1829,17 @@ otherwise passing the specified argument through.</p>
 <p>( “char” – b )</p>
 <p>Parse a character and put it on the stack</p>
 </section>
-<section id="id107">
+<section id="id108">
 <h3><code class="docutils literal notranslate"><span class="pre">[char]</span></code></h3>
 <p>( “char” – ) ( compiled: – b )</p>
 <p>Parse a character and compile it</p>
 </section>
-<section id="id108">
+<section id="id109">
 <h3><code class="docutils literal notranslate"><span class="pre">(.)</span></code></h3>
 <p>( n – )</p>
 <p>Type an integer without a preceding space</p>
 </section>
-<section id="id109">
+<section id="id110">
 <h3><code class="docutils literal notranslate"><span class="pre">(u.)</span></code></h3>
 <p>( u – )</p>
 <p>Type an unsigned integer without a preceding space</p>
@@ -1829,12 +1849,12 @@ otherwise passing the specified argument through.</p>
 <p>( u – )</p>
 <p>Type an unsigned hexadecimal integer safely without a preceding space</p>
 </section>
-<section id="id110">
+<section id="id111">
 <h3><code class="docutils literal notranslate"><span class="pre">.</span></code></h3>
 <p>( n – )</p>
 <p>Type an integer with a preceding space</p>
 </section>
-<section id="id111">
+<section id="id112">
 <h3><code class="docutils literal notranslate"><span class="pre">u.</span></code></h3>
 <p>( u – )</p>
 <p>Type an unsigned integer with a preceding space</p>
@@ -1914,22 +1934,22 @@ otherwise passing the specified argument through.</p>
 <p>( – )</p>
 <p>Set the console to display normal colors unless colors are disabled.</p>
 </section>
-<section id="id112">
+<section id="id113">
 <h3><code class="docutils literal notranslate"><span class="pre">xon</span></code></h3>
 <p>( – )</p>
 <p>Emit an XON character if <code class="docutils literal notranslate"><span class="pre">xon-xoff-enabled</span></code> is set to non-zero.</p>
 </section>
-<section id="id113">
+<section id="id114">
 <h3><code class="docutils literal notranslate"><span class="pre">xoff</span></code></h3>
 <p>( – )</p>
 <p>Emit an XOFF character if <code class="docutils literal notranslate"><span class="pre">xon-xoff-enabled</span></code> is seto to zero.</p>
 </section>
-<section id="id114">
+<section id="id115">
 <h3><code class="docutils literal notranslate"><span class="pre">ack</span></code></h3>
 <p>( – )</p>
 <p>Emit an ACK character.</p>
 </section>
-<section id="id115">
+<section id="id116">
 <h3><code class="docutils literal notranslate"><span class="pre">nak</span></code></h3>
 <p>( – )</p>
 <p>Emit a NAK character.</p>
@@ -1939,7 +1959,7 @@ otherwise passing the specified argument through.</p>
 <p>( – addr )</p>
 <p>The emit hook user variable</p>
 </section>
-<section id="id116">
+<section id="id117">
 <h3><code class="docutils literal notranslate"><span class="pre">emit?-hook</span></code></h3>
 <p>( – addr )</p>
 <p>The emit? hook user variable</p>
@@ -1949,7 +1969,7 @@ otherwise passing the specified argument through.</p>
 <p>( – addr )</p>
 <p>The key hook user variable</p>
 </section>
-<section id="id117">
+<section id="id118">
 <h3><code class="docutils literal notranslate"><span class="pre">key?-hook</span></code></h3>
 <p>( – addr )</p>
 <p>The key? hook user variable</p>
@@ -1959,7 +1979,7 @@ otherwise passing the specified argument through.</p>
 <p>( – addr )</p>
 <p>The error emit hook user variable</p>
 </section>
-<section id="id118">
+<section id="id119">
 <h3><code class="docutils literal notranslate"><span class="pre">error-emit?-hook</span></code></h3>
 <p>( – addr )</p>
 <p>The error emit? hook user variable</p>
