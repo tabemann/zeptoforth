@@ -1,12 +1,14 @@
 # Multitasking Words
 
-Multitasking in zeptoforth is not part of the zeptoforth kernel, but is provided by `src/common/forth/task.fs`, which in turn relies upon `src/<platform>/forth/int_io.fs` and `src/common/forth/systick.fs`. It is preemptive and priority-scheduled, but `PAUSE` may be called to explicitly relinquish control of the processor (which is highly recommended when possible); note that some words do this implicitly, such as `MS`, `KEY`, or `EMIT` (which are in turn called by words such as `REFILL` or `TYPE`).
+Multitasking in zeptoforth is not part of the zeptoforth kernel, but is provided by `src/common/forth/task.fs`, which in turn relies upon `src/<platform>/forth/int_io.fs` and `src/common/forth/systick.fs`. It is preemptive and priority-scheduled, but `PAUSE` may be called to explicitly relinquish control of the processor (which is highly recommended when possible); note that some words do this implicitly, such as `MS`.
 
 Note that tasks in zeptoforth are a relatively heavy-weight asynchronous computing means. For lighter-weight asynchronous computing, consider creating a single task for running a scheduler within (so the main task can be devoted to the REPL), and then put all asynchronous actions within that.
 
 There are a number of intertask communication and synchronization constructs available in full builds, including semaphores, locks, message-oriented queue channels, message-oriented rendezvous channels, byte-oriented streams, and last but not least, task notifications. All of these except for task notifications are discussed in other documentation pages.
 
 Task notifications are the lightest-weight of all these mechanisms; simple synchronization between two tasks using task notifications take roughly 1/4 the time of using rendezvous channels, and task notifications have no extra memory overhead other than the mailboxes allocated by the user for each task, at one cell per mailbox whereas rendezvous channels take a minimum of 76 bytes of RAM. Mailboxes may only contain one cell each, and a task may have a maximum of 32 mailboxes for notifications. Notifications may set them to fixed values, update them with provided execution tokens, or leave them as-is. Note that improperly-written code using notifications may be subject to race conditions and data loss because no mechanism exists built-in to prevent a notification sent to a task in close succession after another notification from overwriting the contents of the mailbox in question. Also note that task notifications must be configured for a task `config-notify` before they may be used; the user must provide a pointer to a buffer containing a number of cells equal to the specified number of notification mailboxes.
+
+Pending operations are scheduled operations that are executed within the multitasker when `pause` or `force-pending-ops` are executed, except within a critical section, where then they are deferred. Pending operations can be added to the multitasker on and only on the current core through executing `add-pending-op`. A pending operation structure is taken by `add-pending-op` along with an execution token to execute and is of `pending-op-size` size in bytes. Note that a pending operation structure must not be reused within the execution of the associated execution token.
 
 Multitasking is enabled by default once `src/common/forth/task.fs` has been loaded and the MCU has been rebooted; afterwards each time the MCU is booted a new task is created for the REPL, the main task, and multitasking is initiated.
 
@@ -423,6 +425,21 @@ Task was killed.
 ( -- reason )
 
 Task was terminated due to a hardware exception.
+
+##### `pending-op-size`
+( -- bytes )
+
+Size of a pending operation structure in bytes.
+
+##### `add-pending-op`
+( xt pending-op -- )
+
+Initialize pending operation *pending-op* with execution token *xt* to execute and add it to the pending operation queue for the current core. *xt* will be executed next time `pause` or `force-pending-ops` is executed, unless it is within a critical section, where then it will be executed once the critical section is completed.
+
+##### `force-pending-ops`
+( -- )
+
+Force pending operations to execute immediately.
 
 ##### `dump-tasks`
 ( -- )
