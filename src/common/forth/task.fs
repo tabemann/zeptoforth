@@ -104,6 +104,9 @@ begin-module task
     \ Pause count
     cpu-variable cpu-pause-count pause-count
 
+    \ Do a pause
+    cpu-variable cpu-do-pause? do-pause?
+    
     \ Currently in multitasker
     cpu-variable cpu-in-multitasker? in-multitasker?
 
@@ -137,6 +140,12 @@ begin-module task
 
     \ Extra task (for cleaning up after terminated tasks)
     cpu-variable cpu-extra-task extra-task
+
+    \ Next pending operation
+    cpu-variable cpu-next-pending-op next-pending-op
+
+    \ Last pending operation
+    cpu-variable cpu-last-pending-op last-pending-op
     
     \ SVCall vector index
     11 constant svcall-vector
@@ -251,6 +260,17 @@ begin-module task
       
     end-structure
 
+    \ Pending operation structure
+    begin-structure pending-op-size
+
+      \ Pending operation to execute
+      dup constant .pending-op-xt field: pending-op-xt
+
+      \ Next pending operation
+      dup constant .pending-op-next field: pending-op-next
+      
+    end-structure
+    
   end-module> import
 
   \ Initialize on core boot hook
@@ -1687,7 +1707,7 @@ begin-module task
       b<
       ]code
     ;
-
+    
     \ PendSV return value
     variable pendsv-return
 
@@ -1780,77 +1800,114 @@ begin-module task
       false in-task-change !
     ;
 
+    \ Handle pending operations
+    : handle-pending-ops ( -- )
+      last-pending-op
+      next-pending-op
+      code[
+      r6 r0 movs_,_
+      cpsid
+      r6 r1 2 r7 ldm
+      0 r0 r2 ldr_,[_,#_]
+      mark>
+      0 r2 cmp_,#_
+      ne bc>
+      0 r1 r2 str_,[_,#_]
+      cpsie
+      pc 1 pop
+      >mark
+      cpsie
+      .pending-op-xt r2 r3 ldr_,[_,#_]
+      1 r3 adds_,#_
+      r2 r1 r0 3 push
+      r3 blx_
+      r2 r1 r0 3 pop
+      cpsid
+      .pending-op-next r2 r2 ldr_,[_,#_]
+      0 r0 r2 str_,[_,#_]
+      b<
+      ]code
+    ;
+    
     \ Handle task-switching
     : switch-tasks ( -- )
       r> pendsv-return !
 
       in-critical @ 0= in-task-change @ 0= and if
 
-	1 pause-count +!
+        handle-pending-ops
 
-	current-task @ dup prev-task !
-	?dup if dup save-task-state reschedule-task then
+        do-pause? @ if
+          
+          1 pause-count +!
 
-	begin
-	  true in-task-change !
-	  begin
-            first-task @ 0= if init-extra-task then
-	    claim-same-core-spinlock
-            find-next-task
-	    release-same-core-spinlock
-	    dup 0<> if
-	      dup task-active@ 1 < if
-		claim-same-core-spinlock
-		remove-task
-		release-same-core-spinlock
-		false
-	      else
-		dup task-state h@
-		dup schedule-with-same-core-spinlock and if
-		  claim-same-core-spinlock
-		then
-		dup schedule-critical and if
-		  1 in-critical !
-		then
-		dup schedule-with-spinlock and if
-		  over spinlock-to-claim @ claim-spinlock
-		then
-		task-state-mask and blocked-timeout = if
-		  block-timed-out over task-state h!
-		else
-		  readied over task-state h!
-		then
-		true
-	      then
-	    else
-	      true
-	    then
-	  until
-	  dup current-task !
-	  false in-task-change !
-	  0<> if true else sleep false then
-	until
+          current-task @ dup prev-task !
+          ?dup if dup save-task-state reschedule-task then
 
-	prev-task @ current-task @ <> if
-	  disable-int
-	  current-task @ task-rstack-current @ context-switch
-	  prev-task @ if prev-task @ task-rstack-current ! else drop then
-	  current-task @ restore-task-state
-	  enable-int
-	then
+          begin
+            true in-task-change !
+            begin
+              first-task @ 0= if init-extra-task then
+              claim-same-core-spinlock
+              find-next-task
+              release-same-core-spinlock
+              dup 0<> if
+                dup task-active@ 1 < if
+                  claim-same-core-spinlock
+                  remove-task
+                  release-same-core-spinlock
+                  false
+                else
+                  dup task-state h@
+                  dup schedule-with-same-core-spinlock and if
+                    claim-same-core-spinlock
+                  then
+                  dup schedule-critical and if
+                    1 in-critical !
+                  then
+                  dup schedule-with-spinlock and if
+                    over spinlock-to-claim @ claim-spinlock
+                  then
+                  task-state-mask and blocked-timeout = if
+                    block-timed-out over task-state h!
+                  else
+                    readied over task-state h!
+                  then
+                  true
+                then
+              else
+                true
+              then
+            until
+            dup current-task !
+            false in-task-change !
+            0<> if true else sleep false then
+          until
 
-	current-task @ task-saved-systick-counter @ 0<= if
-	  current-task @ task-saved-systick-counter @
-	  current-task @ task-timeslice @ +
-	  current-task @ task-min-timeslice @ max
-	  task-systick-counter !
-	else
-	  current-task @ task-saved-systick-counter @ task-systick-counter !
-        then
-        
-        terminated-task @ if
-          terminated-task @ handle-task-terminated
-          0 terminated-task !
+          prev-task @ current-task @ <> if
+            disable-int
+            current-task @ task-rstack-current @ context-switch
+            prev-task @ if prev-task @ task-rstack-current ! else drop then
+            current-task @ restore-task-state
+            enable-int
+          then
+
+          current-task @ task-saved-systick-counter @ 0<= if
+            current-task @ task-saved-systick-counter @
+            current-task @ task-timeslice @ +
+            current-task @ task-min-timeslice @ max
+            task-systick-counter !
+          else
+            current-task @ task-saved-systick-counter @ task-systick-counter !
+          then
+          
+          terminated-task @ if
+            terminated-task @ handle-task-terminated
+            0 terminated-task !
+          then
+
+          false do-pause? !
+          
         then
 
       else
@@ -1882,7 +1939,9 @@ begin-module task
     ;
 
     \ Handle PAUSE
-    : do-pause ( -- ) true in-multitasker? ! ICSR_PENDSVSET! dmb dsb isb ;
+    : do-pause ( -- )
+      true do-pause? ! true in-multitasker? ! ICSR_PENDSVSET! dmb dsb isb
+    ;
     
     \ Dump task name
     : dump-task-name ( task -- )
@@ -2159,11 +2218,14 @@ begin-module task
       false i cpu-sleep-enabled? !
       false i cpu-trace-enabled? !
       false i cpu-in-task-change !
+      false i cpu-do-pause? !
       true i cpu-reschedule? !
       false i cpu-reschedule-last? !
       0 i cpu-task-systick-counter !
       0 i cpu-terminated-task !
       0 i cpu-extra-task !
+      0 i cpu-next-pending-op !
+      0 i cpu-last-pending-op !
       i 0= if
 	true i cpu-active? !
 	init-main-task
@@ -2215,6 +2277,38 @@ begin-module task
     0 <# #s #> type
   ;
 
+  \ Force pending operations to execute
+  : force-pending-ops ( -- )
+    true in-multitasker? ! ICSR_PENDSVSET! dmb dsb isb
+  ;
+
+  \ Add pending operation on the current CPU
+  : add-pending-op ( xt pending-op -- )
+    last-pending-op
+    next-pending-op
+    code[
+    cpsid
+    r6 r0 movs_,_
+    r6 r3 r2 r1 4 r7 ldm
+    .pending-op-xt r2 r3 str_,[_,#_]
+    0 r3 movs_,#_
+    .pending-op-next r2 r3 str_,[_,#_]
+    0 r1 r3 ldr_,[_,#_]
+    0 r1 r2 str_,[_,#_]
+    0 r3 cmp_,#_
+    eq bc>
+    .pending-op-next r3 r2 str_,[_,#_]
+    cpsie
+    pc 1 pop
+    >mark
+    0 r0 r2 str_,[_,#_]
+    cpsie
+    ]code
+  ;
+  
+  \ Export pending operation size
+  ' pending-op-size export pending-op-size
+  
 end-module> import
 
 \ Display space free for a given task
