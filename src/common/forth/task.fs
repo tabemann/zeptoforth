@@ -141,12 +141,9 @@ begin-module task
     \ Extra task (for cleaning up after terminated tasks)
     cpu-variable cpu-extra-task extra-task
 
-    \ Next pending operation
-    cpu-variable cpu-next-pending-op next-pending-op
+    \ First pending operation
+    cpu-variable cpu-first-pending-op first-pending-op
 
-    \ Last pending operation
-    cpu-variable cpu-last-pending-op last-pending-op
-    
     \ SVCall vector index
     11 constant svcall-vector
 
@@ -268,6 +265,9 @@ begin-module task
 
       \ Next pending operation
       dup constant .pending-op-next field: pending-op-next
+
+      \ Pending operation priority
+      dup constant .pending-op-priority field: pending-op-priority
       
     end-structure
     
@@ -1802,29 +1802,25 @@ begin-module task
 
     \ Handle pending operations
     : handle-pending-ops ( -- )
-      last-pending-op
-      next-pending-op
+      first-pending-op @
       code[
       r6 r0 movs_,_
-      cpsid
-      r6 r1 2 r7 ldm
-      0 r0 r2 ldr_,[_,#_]
+      r6 1 r7 ldm
       mark>
-      0 r2 cmp_,#_
+      0 r0 cmp_,#_
       ne bc>
-      0 r1 r2 str_,[_,#_]
-      cpsie
       pc 1 pop
       >mark
-      cpsie
-      .pending-op-xt r2 r3 ldr_,[_,#_]
-      1 r3 adds_,#_
-      r2 r1 r0 3 push
-      r3 blx_
-      r2 r1 r0 3 pop
-      cpsid
-      .pending-op-next r2 r2 ldr_,[_,#_]
-      0 r0 r2 str_,[_,#_]
+      .pending-op-xt r0 r1 ldr_,[_,#_]
+      0 r2 movs_,#_
+      .pending-op-xt r0 r2 str_,[_,#_]
+      .pending-op-next r0 r0 ldr_,[_,#_]
+      0 r1 cmp_,#_
+      2dup eq bc<
+      1 r1 adds_,#_
+      r0 1 push
+      r1 blx_
+      r0 1 pop
       b<
       ]code
     ;
@@ -2224,8 +2220,7 @@ begin-module task
       0 i cpu-task-systick-counter !
       0 i cpu-terminated-task !
       0 i cpu-extra-task !
-      0 i cpu-next-pending-op !
-      0 i cpu-last-pending-op !
+      0 i cpu-first-pending-op !
       i 0= if
 	true i cpu-active? !
 	init-main-task
@@ -2282,29 +2277,41 @@ begin-module task
     true in-multitasker? ! ICSR_PENDSVSET! dmb dsb isb
   ;
 
-  \ Add pending operation on the current CPU
-  : add-pending-op ( xt pending-op -- )
-    last-pending-op
-    next-pending-op
-    code[
-    cpsid
-    r6 r0 movs_,_
-    r6 r3 r2 r1 4 r7 ldm
-    .pending-op-xt r2 r3 str_,[_,#_]
-    0 r3 movs_,#_
-    .pending-op-next r2 r3 str_,[_,#_]
-    0 r1 r3 ldr_,[_,#_]
-    0 r1 r2 str_,[_,#_]
-    0 r3 cmp_,#_
-    eq bc>
-    .pending-op-next r3 r2 str_,[_,#_]
-    cpsie
-    pc 1 pop
-    >mark
-    0 r0 r2 str_,[_,#_]
-    cpsie
-    ]code
+  \ Register pending operation on the current CPU
+  : register-pending-op ( priority pending-op -- )
+    [: { priority pending-op }
+      priority pending-op pending-op-priority !
+      0 pending-op pending-op-xt !
+      first-pending-op @ if
+        priority first-pending-op @ pending-op-priority @ > if
+          first-pending-op @ pending-op pending-op-next !
+          pending-op first-pending-op !
+        else
+          first-pending-op @ begin
+            dup pending-op-next @ ?dup if
+              priority over pending-op-priority @ > if
+                pending-op pending-op-next !
+                pending-op swap pending-op-next !
+                true
+              else
+                nip false
+              then
+            else
+              0 pending-op pending-op-next !
+              pending-op swap pending-op-next !
+              true
+            then
+          until
+        then
+      else
+        pending-op first-pending-op !
+        0 pending-op pending-op-next !
+      then
+    ;] critical
   ;
+
+  \ Set a pending operation
+  : set-pending-op ( xt pending-op -- ) pending-op-xt ! ;
   
   \ Export pending operation size
   ' pending-op-size export pending-op-size

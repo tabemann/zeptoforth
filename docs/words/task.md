@@ -8,7 +8,7 @@ There are a number of intertask communication and synchronization constructs ava
 
 Task notifications are the lightest-weight of all these mechanisms; simple synchronization between two tasks using task notifications take roughly 1/4 the time of using rendezvous channels, and task notifications have no extra memory overhead other than the mailboxes allocated by the user for each task, at one cell per mailbox whereas rendezvous channels take a minimum of 76 bytes of RAM. Mailboxes may only contain one cell each, and a task may have a maximum of 32 mailboxes for notifications. Notifications may set them to fixed values, update them with provided execution tokens, or leave them as-is. Note that improperly-written code using notifications may be subject to race conditions and data loss because no mechanism exists built-in to prevent a notification sent to a task in close succession after another notification from overwriting the contents of the mailbox in question. Also note that task notifications must be configured for a task `config-notify` before they may be used; the user must provide a pointer to a buffer containing a number of cells equal to the specified number of notification mailboxes.
 
-Pending operations are scheduled operations that are executed within the multitasker when `pause` or `force-pending-ops` are executed, except within a critical section, where then they are deferred. Pending operations can be added to the multitasker on and only on the current core through executing `add-pending-op`. A pending operation structure is taken by `add-pending-op` along with an execution token to execute and is of `pending-op-size` size in bytes. Note that a pending operation structure must not be reused within the execution of the associated execution token.
+Pending operations are scheduled operations that are executed within the multitasker when `pause` or `force-pending-ops` are executed, except within a critical section, where then they are defered. Pending operations are initialized and registered with `register-pending-op`, which gives them a fixed priority. Once registered, they can be set to execute with `set-pending-op`, which assigns an execution token to execute to them; this execution token will be cleared just prior to their execution. Pending operations are always of `pending-op-size` bytes. Note that it is safe to reuse a pending operation while it is executing, but if they are set again after they have already been set prior to their execution, their previously set execution token will be overwritten.
 
 Multitasking is enabled by default once `src/common/forth/task.fs` has been loaded and the MCU has been rebooted; afterwards each time the MCU is booted a new task is created for the REPL, the main task, and multitasking is initiated.
 
@@ -431,10 +431,15 @@ Task was terminated due to a hardware exception.
 
 Size of a pending operation structure in bytes.
 
-##### `add-pending-op`
+##### `register-pending-op`
+( priority pending-op -- )
+
+Initialize and register a pending operation *pending-op* with priority *priority* (greater values are higher priority).
+
+##### `set-pending-op`
 ( xt pending-op -- )
 
-Initialize pending operation *pending-op* with execution token *xt* to execute and add it to the pending operation queue for the current core. *xt* will be executed next time `pause` or `force-pending-ops` is executed, unless it is within a critical section, where then it will be executed once the critical section is completed.
+Set a pending operation to execute *xt*; note that if it has already been set and not yet executed, *xt* will overwrite whichever execution token had already been set.
 
 ##### `force-pending-ops`
 ( -- )
