@@ -72,7 +72,8 @@ dp 	.req r7
 	@@ Word header macro
 	.macro define_word name, flags
 	.p2align 2
-	.hword \flags
+	.byte \flags
+        .byte 0xFF
 	.hword 0
 	.word 10b - 8
 10:	.byte 12f - 11f
@@ -83,7 +84,8 @@ dp 	.req r7
 	@@ Internal word header macro
 	.macro define_internal_word name, flags
 	.p2align 2
-	.hword \flags
+	.byte \flags
+        .byte 0xFF
 	.hword internal
 	.word 10b - 8
 10:	.byte 12f - 11f
