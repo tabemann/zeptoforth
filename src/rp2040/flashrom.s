@@ -126,6 +126,8 @@ _init_flash:
 	beq 1f
 	push_tos
 	movs tos, r0
+        push_tos
+        ldr tos, =flash_main_end - flash_start
 	bl _erase_range
 	cpsie i
 	bl _release_core
@@ -506,6 +508,7 @@ _erase_qspi_sector:
 	bl _enable_flush_xip_cache
 	bl _enter_xip
 	cpsie i
+        bl _release_core
 	pop {pc}
 	end_inlined
 
@@ -516,48 +519,50 @@ _erase_range:
 	bl _force_core_wait
 	cpsid i
 	bl _exit_xip
-	ldr r0, =0xFFF
+	ldr r2, =0xFFF
+        movs r0, tos
+        pull_tos
 	movs r1, tos
 	pull_tos
-	bics r1, r0
-1:	ldr r0, =MAX_ERASE_ADDR
-	cmp r1, r0
+        bics r0, r2
+	bics r1, r2
+1:	cmp r1, r0
 	bhs 2f
-	ldr r0, =0xFFFF
-	tst r1, r0
+	ldr r2, =0xFFFF
+	tst r1, r2
 	bne 3f
 	push_tos
 	movs tos, r1
 	push_tos
 	ldr tos, =CMD_BLOCK_ERASE_64K
-	push {r1}
+	push {r0, r1}
 	bl _erase_flash
-	pop {r1}
-	ldr r0, =0x10000
-	adds r1, r0
+	pop {r0, r1}
+	ldr r2, =0x10000
+	adds r1, r2
 	b 1b
-3:	ldr r0, =0x7FFF
-	tst r1, r0
+3:	ldr r2, =0x7FFF
+	tst r1, r2
 	bne 4f
 	push_tos
 	movs tos, r1
 	push_tos
 	ldr tos, =CMD_BLOCK_ERASE_32K
-	push {r1}
+	push {r0, r1}
 	bl _erase_flash
-	pop {r1}
-	ldr r0, =0x8000
-	adds r1, r0
+	pop {r0, r1}
+	ldr r2, =0x8000
+	adds r1, r2
 	b 1b
 4:	push_tos
 	movs tos, r1
 	push_tos
 	ldr tos, =CMD_SECTOR_ERASE
-	push {r1}
+	push {r0, r1}
 	bl _erase_flash
-	pop {r1}
-	ldr r0, =0x1000
-	adds r1, r0
+	pop {r0, r1}
+	ldr r2, =0x1000
+	adds r1, r2
 	b 1b
 2:	bl _enable_flush_xip_cache
 	bl _enter_xip
@@ -574,6 +579,22 @@ _erase_after:
 	push {lr}
 	ldr r0, =flash_start
 	subs tos, r0
+        push_tos
+        ldr tos, =flash_main_end - flash_start
+	bl _erase_range
+	bl _reboot
+	pop {pc}
+	end_inlined
+
+	@ Erase the dictionary after a given address (including the sector the
+        @ address is in and reboot.
+	define_internal_word "erase-dict-after", visible_flag
+_erase_dict_after:
+	push {lr}
+	ldr r0, =flash_start
+	subs tos, r0
+        push_tos
+        ldr tos, =flash_dict_end - flash_start
 	bl _erase_range
 	bl _reboot
 	pop {pc}
@@ -585,6 +606,8 @@ _erase_all:
 	push {lr}
 	push_tos
 	ldr tos, =flash_min_address
+        push_tos
+        ldr tos, =flash_main_end - flash_start
 	bl _erase_after
 	pop {pc}
 	end_inlined

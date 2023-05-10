@@ -39,14 +39,14 @@ continue-module internal
   : erase-all ( -- ) prepare-reboot erase-all ;
 
   \ Erase after an address
-  : erase-after ( addr -- ) prepare-reboot erase-after ;
+  : erase-dict-after ( addr -- ) prepare-reboot erase-dict-after ;
 
   \ Commit to flash
   commit-flash
   
   \ Restore flash to a preexisting state
   : restore-flash ( flash-here -- )
-    erase-after rdrop
+    erase-dict-after rdrop
   ;
 
 end-module> import
@@ -79,7 +79,7 @@ continue-module internal
   : cornerstone-does> ( -- )
     does> @
     $1000 align
-    erase-after
+    erase-dict-after
   ;
 
 end-module

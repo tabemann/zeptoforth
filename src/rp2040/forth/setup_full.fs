@@ -54,6 +54,9 @@
 #include src/rp2040/forth/pwm.fs
 #include src/rp2040/forth/rtc.fs
 #include src/common/forth/full_extra.fs
+#include src/common/forth/save_minidict.fs
+
+reboot
 
 \ Set a cornerstone to enable deleting everything compiled after this code
 cornerstone restore-state

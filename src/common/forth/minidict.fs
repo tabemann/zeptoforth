@@ -25,6 +25,8 @@ internal import
 begin-module mini-dict
 
   armv6m import
+
+  variable save-flash-mini-dict-enabled?
   
   variable flash-mini-dict-free
 
@@ -229,14 +231,49 @@ begin-module mini-dict
     ]code
     register-flash-mini-dict-space
   ;
+
+  \ Compute the flash mini dictionary free value
+  : compute-flash-mini-dict-free ( -- )
+    flash-mini-dict-size 2 cells / 1- flash-mini-dict-free !
+    flash-mini-dict-free
+    flash-mini-dict flash-mini-dict-size +
+    flash-mini-dict
+    code[
+    r1 r0 2 dp ldm
+    0 r1 r2 ldr_,[_,#_]
+    mark>
+    r0 tos cmp_,_
+    ne bc>
+    0 r1 r2 str_,[_,#_]
+    tos 1 dp ldm
+    pc 1 pop
+    >mark
+    0 tos r3 ldr_,[_,#_]
+    0 r3 cmp_,#_
+    ne bc>
+    1 r2 subs_,#_
+    >mark
+    8 tos adds_,#_
+    b<
+    ]code
+  ;
   
   \ Initialize the flash mini-dictionary
   : init-flash-mini-dict ( -- )
-    clear-flash-mini-dict
+    flash-end flash-mini-dict flash-mini-dict-size move
+    flash-mini-dict cell+ @ -1 = if
+      clear-flash-mini-dict
+    else
+      compute-flash-mini-dict-free
+    then
     flash-latest
     begin ?dup while
-      dup add-flash-mini-dict-start
-      next-word @
+      dup word-flags 1+ c@ if
+        dup add-flash-mini-dict-start
+        next-word @
+      else
+        drop exit
+      then
     repeat
   ;
 
@@ -353,11 +390,34 @@ begin-module mini-dict
     ]code
   ;
 
+  \ Write out the minidictionary to flash
+  : save-flash-mini-dict ( -- )
+    flash-latest word-flags 1+ c@ if
+      flash-end erase-qspi-sector
+      flash-mini-dict flash-mini-dict-size flash-end mass-qspi!
+      flash-latest begin
+        dup if
+          dup word-flags 1+ c@ if
+            0 over word-flags 1+ cflash!
+            next-word @
+            false
+          else
+            true
+          then
+        else
+          true
+        then
+      until
+      drop
+    then
+  ;
+
 end-module> import
 
 \ Initialize the minidictionary
 : init ( -- )
   init
+  false mini-dict::save-flash-mini-dict-enabled? !
   init-flash-mini-dict
   ['] add-flash-mini-dict finalize-hook !
   ['] find-optimized find-raw-hook !

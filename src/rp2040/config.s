@@ -32,6 +32,7 @@
 	.equ VTOR_value, vector_table
 	.equ VTOR, 0xE000ED08
 	.equ stack_top, ram_end - rstack_size
+	.equ flash_mini_dict_size, 6144 * 8 @ in bytes
 	.equ flash_buffers_top, stack_top - stack_size
 	.equ flash_block_size, 1 @ in bytes
 	.equ flash_buffer_count, 0
@@ -41,10 +42,10 @@
 	.equ flash_min_address, 0x10009000
 	.equ flash_start, 0x10000000
 	.equ flash_dict_start, 0x10009000
-	.equ flash_dict_end, 0x10100000
+        .equ flash_main_end, 0x10100000
+	.equ flash_dict_end, flash_main_end - 65536
 	.equ flash_end, 0x10200000
 	.equ input_buffer_size, 255
 	.equ pad_offset, 128
-	.equ flash_mini_dict_size, 6144 * 8 @ in bytes
 	.equ cpu_count, 2
 	.equ const_count, 8
