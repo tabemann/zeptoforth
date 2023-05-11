@@ -21,6 +21,10 @@
 compile-to-flash
 
 \ Set the minidictionary to be enabled
-: init ( -- ) init true mini-dict::save-flash-mini-dict-enabled? ! ;
+: init ( -- )
+  init
+  true mini-dict::save-flash-mini-dict-enabled? !
+  flash-end cell+ @ -1 = if mini-dict::save-flash-mini-dict then
+;
 
 reboot
