@@ -26,8 +26,6 @@ begin-module mini-dict
 
   armv6m import
 
-  variable save-flash-mini-dict-enabled?
-  
   variable flash-mini-dict-free
 
   \ Flash mini-dictionary is out of space exception
@@ -417,7 +415,6 @@ end-module> import
 \ Initialize the minidictionary
 : init ( -- )
   init
-  false mini-dict::save-flash-mini-dict-enabled? !
   init-flash-mini-dict
   ['] add-flash-mini-dict finalize-hook !
   ['] find-optimized find-raw-hook !

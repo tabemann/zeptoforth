@@ -606,8 +606,6 @@ _erase_all:
 	push {lr}
 	push_tos
 	ldr tos, =flash_min_address
-        push_tos
-        ldr tos, =flash_main_end - flash_start
 	bl _erase_after
 	pop {pc}
 	end_inlined
