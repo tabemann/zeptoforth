@@ -38,5 +38,3 @@
 #include src/rp2040/forth/gpio.fs
 #include src/common/forth/task.fs
 #include src/common/forth/save_minidict.fs
-
-reboot
