@@ -66,10 +66,14 @@ def pack_image(buf, image, total_count, pad_count):
                    BLOCK_SIZE)
 
 # Write the coda (specifying the image size) to the output image
-def pack_coda(buf, total_count):
+def pack_coda(buf, total_count, erase_mini_dict):
     end_addr = ((((total_count - 1) * BLOCK_SIZE) - 1) | 4095) + 1
-    coda = struct.pack('<I', end_addr)
-    pack_block(buf, total_count - 1, total_count, CODA_ADDR, coda, 0, 4)
+    if erase_mini_dict:
+        erase_mini_dict_val = 0x00000000
+    else:
+        erase_mini_dict_val = 0xFFFFFFFF
+    coda = struct.pack('<II', end_addr, erase_mini_dict_val)
+    pack_block(buf, total_count - 1, total_count, CODA_ADDR, coda, 0, 8)
     
 # The main body of the code
 def main():
@@ -108,7 +112,7 @@ def main():
             pack_boot_block(output_image, boot_block, total_count)
         pack_image(output_image, image, total_count, pad_count)
         if CODA_COUNT == 1:
-            pack_coda(output_image, total_count)
+            pack_coda(output_image, total_count, len(sys.argv) == 4)
         output_file.write(output_image)
         output_file.close()
     else:
