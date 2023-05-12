@@ -127,10 +127,11 @@ _init_flash:
 	push_tos
 	movs tos, r0
         push_tos
-        ldr tos, =flash_main_end - flash_start
+        ldr tos, =flash_dict_end - flash_start
 	bl _erase_range
-	cpsie i
-	bl _release_core
+        push_tos
+        ldr tos, =FLASH_CODA_ADDR
+        bl _erase_qspi_4k_sector
 1:	pop {pc}
 	end_inlined
 
@@ -504,6 +505,29 @@ _erase_qspi_sector:
 	bics tos, r0
 	push_tos
 	ldr tos, =CMD_BLOCK_ERASE_64K
+	bl _erase_flash
+	bl _enable_flush_xip_cache
+	bl _enter_xip
+	cpsie i
+        bl _release_core
+	pop {pc}
+	end_inlined
+
+	@ Erase a QSPI 4K sector
+	define_internal_word "erase-qspi-4k-sector", visible_flag
+_erase_qspi_4k_sector:
+	push {lr}
+	bl _force_core_wait
+	cpsid i
+	dsb
+	isb
+	bl _exit_xip
+	ldr r0, =flash_start
+	subs tos, r0
+	ldr r0, =0xFFF
+	bics tos, r0
+	push_tos
+	ldr tos, =CMD_SECTOR_ERASE
 	bl _erase_flash
 	bl _enable_flush_xip_cache
 	bl _enter_xip

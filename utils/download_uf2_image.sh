@@ -44,3 +44,25 @@ arm-none-eabi-objcopy -I ihex -O binary ${IMAGE}.ihex ${IMAGE}.bin
 src/rp2040/make_uf2.py ${IMAGE}.bin ${IMAGE}.uf2
 rm screenlog.0
 rm inter
+
+./utils/codeload3.py -B 115200 -p $PORT serial src/common/forth/ihex_minidict.fs
+screen -d -m $PORT 115200
+screen -X log on
+screen -X stuff 'clone\n'
+until grep 'clone_end' screenlog.0
+do
+    sleep 1
+done
+screen -X log off
+screen -X quit
+sleep 1
+sed '1d' screenlog.0 > inter
+sed '$d' inter > inter.1
+sed '$d' inter.1 > inter
+sed 's/:00000001FF clone_end/:00000001FF/' inter > inter.1
+mv inter.1 ${IMAGE}.minidict.ihex
+arm-none-eabi-objcopy -I ihex -O binary ${IMAGE}.minidict.ihex ${IMAGE}.minidict.bin
+rm screenlog.0
+rm inter
+
+src/rp2040/make_uf2.py ${IMAGE}.bin ${IMAGE}.minidict.bin ${IMAGE}.uf2

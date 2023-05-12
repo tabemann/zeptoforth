@@ -33,10 +33,16 @@ RP2040_FAMILY_ID = 0xE48BFF56
 # Coda count
 CODA_COUNT = 1
 
+# Minidictionary size
+MINI_DICT_SIZE = 49152
+
+# Minidictionary address
+MINI_DICT_ADDR = 0xF0000
+
 # Get the block count
 def block_count(image_size):
     image_size = ((image_size - 1) | (BLOCK_SIZE - 1)) + 1
-    return (image_size // BLOCK_SIZE) + CODA_COUNT
+    return ((image_size + MINI_DICT_SIZE) // BLOCK_SIZE) + CODA_COUNT
 
 # Pack a block
 def pack_block(buf, index, total_count, addr, data, data_off, data_len):
@@ -65,17 +71,26 @@ def pack_image(buf, image, total_count, pad_count):
                    (i + pad_count) * BLOCK_SIZE, image, i * BLOCK_SIZE,
                    BLOCK_SIZE)
 
+# Write the minidictionary to the output image
+def pack_mini_dict(buf, mini_dict, total_count):
+    before_count = (total_count - (MINI_DICT_SIZE // BLOCK_SIZE)) - 1
+    for i in range(0, MINI_DICT_SIZE // BLOCK_SIZE):
+        pack_block(buf, i + before_count, total_count,
+                   (i * BLOCK_SIZE) + MINI_DICT_ADDR, mini_dict,
+                   i * BLOCK_SIZE, BLOCK_SIZE)
+
 # Write the coda (specifying the image size) to the output image
 def pack_coda(buf, total_count):
-    end_addr = ((((total_count - 1) * BLOCK_SIZE) - 1) | 4095) + 1
+    end_addr = (((((total_count - 1) * BLOCK_SIZE) - MINI_DICT_SIZE) - 1) \
+                | 4095) + 1
     coda = struct.pack('<I', end_addr)
     pack_block(buf, total_count - 1, total_count, CODA_ADDR, coda, 0, 4)
     
 # The main body of the code
 def main():
-    if len(sys.argv) == 3 or len(sys.argv) == 4:
+    if len(sys.argv) == 4 or len(sys.argv) == 5:
         boot_block = None
-        if len(sys.argv) == 4:
+        if len(sys.argv) == 5:
             try:
                 boot_block_file = open(sys.argv[1], 'rb')
             except:
@@ -86,12 +101,19 @@ def main():
             if len(boot_block) != 256:
                 sys.exit('Boot block is not 256 bytes in size')
         try:
-            image_file = open(sys.argv[len(sys.argv) - 2], 'rb')
+            image_file = open(sys.argv[len(sys.argv) - 3], 'rb')
+        except:
+            sys.exit('%s: %s: could not open file'
+                     % (sys.argv[0], sys.argv[len(sys.argv) - 3]))
+        image = image_file.read()
+        image_file.close()
+        try:
+            mini_dict_file = open(sys.argv[len(sys.argv) - 2], 'rb')
         except:
             sys.exit('%s: %s: could not open file'
                      % (sys.argv[0], sys.argv[len(sys.argv) - 2]))
-        image = image_file.read()
-        image_file.close()
+        mini_dict = mini_dict_file.read()
+        mini_dict_file.close()
         try:
             output_file = open(sys.argv[len(sys.argv) - 1], 'wb')
         except:
@@ -107,6 +129,7 @@ def main():
         if boot_block != None:
             pack_boot_block(output_image, boot_block, total_count)
         pack_image(output_image, image, total_count, pad_count)
+        pack_mini_dict(output_image, mini_dict, total_count)
         if CODA_COUNT == 1:
             pack_coda(output_image, total_count)
         output_file.write(output_image)
