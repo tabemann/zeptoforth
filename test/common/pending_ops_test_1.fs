@@ -38,9 +38,9 @@ begin-module pending-ops-test
   3 my-pending-op-1 register-pending-op
   2 my-pending-op-2 register-pending-op
   
-  0 :noname 0 wait-notify drop cr ." FOO" ; 320 128 512 spawn my-task-0 !
-  0 :noname 0 wait-notify drop cr ." BAR" ; 320 128 512 spawn my-task-1 !
-  0 :noname 0 wait-notify drop cr ." BAZ" ; 320 128 512 spawn my-task-2 !
+  0 :noname begin 0 wait-notify drop cr ." FOO" again ; 320 128 512 spawn my-task-0 !
+  0 :noname begin 0 wait-notify drop cr ." BAR" again ; 320 128 512 spawn my-task-1 !
+  0 :noname begin 0 wait-notify drop cr ." BAZ" again ; 320 128 512 spawn my-task-2 !
   
   my-mailboxes-0 1 my-task-0 @ config-notify
   my-mailboxes-1 1 my-task-1 @ config-notify
@@ -50,10 +50,28 @@ begin-module pending-ops-test
   my-task-1 @ run
   my-task-2 @ run
   
+  defer my-pending-routine-0
+  :noname
+    0 my-task-0 @ notify
+    ['] my-pending-routine-0 my-pending-op-0 set-pending-op
+  ; is my-pending-routine-0
+  
+  defer my-pending-routine-1
+  :noname
+    0 my-task-1 @ notify
+    ['] my-pending-routine-1 my-pending-op-1 set-pending-op
+  ; is my-pending-routine-1
+  
+  defer my-pending-routine-2
+  :noname
+    0 my-task-2 @ notify
+    ['] my-pending-routine-2 my-pending-op-2 set-pending-op
+  ; is my-pending-routine-2
+  
   : add-pending-ops ( -- )
-    [: 0 my-task-0 @ notify ;] my-pending-op-0 set-pending-op
-    [: 0 my-task-1 @ notify ;] my-pending-op-1 set-pending-op
-    [: 0 my-task-2 @ notify ;] my-pending-op-2 set-pending-op
+    ['] my-pending-routine-0 my-pending-op-0 set-pending-op
+    ['] my-pending-routine-1 my-pending-op-1 set-pending-op
+    ['] my-pending-routine-2 my-pending-op-2 set-pending-op
     force-pending-ops
   ;
   
