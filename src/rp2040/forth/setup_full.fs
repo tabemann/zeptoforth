@@ -58,3 +58,5 @@
 
 \ Set a cornerstone to enable deleting everything compiled after this code
 cornerstone restore-state
+
+mini-dict::save-flash-mini-dict

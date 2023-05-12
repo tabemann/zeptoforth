@@ -30,6 +30,7 @@ UF2=$(BASEDIR)/zeptoforth.$(PLATFORM).uf2
 IHEX=$(BASEDIR)/zeptoforth.$(PLATFORM).ihex
 LIST=$(BASEDIR)/zeptoforth.$(PLATFORM).list
 MAP=$(BASEDIR)/zeptoforth.$(PLATFORM).map
+MINI_DICT_FILLER=$(BASEDIR)/src/rp2040/mini_dict_filler
 MAKE_UF2=./make_uf2.py
 
 all: kernel_info $(UF2)
@@ -46,7 +47,7 @@ kernel_info:
 
 $(UF2): $(BIN)
 	$(MAKE) -C boot
-	$(MAKE_UF2) $(BOOT_BIN_WITH_CHECKSUM) $(BIN) $(UF2)
+	$(MAKE_UF2) $(BOOT_BIN_WITH_CHECKSUM) $(BIN) $(MINI_DICT_FILLER) $(UF2)
 
 $(BIN): $(OBJ)
 	$(LD) $(OBJ) -T zeptoforth.ld --cref -Map $(MAP) -o $(ELF)

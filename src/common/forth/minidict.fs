@@ -396,7 +396,9 @@ begin-module mini-dict
       flash-latest begin
         dup if
           dup word-flags 1+ c@ if
-            0 over word-flags 1+ cflash!
+            dup flash-base >= over flash-end < and if
+              0 over word-flags 1+ cflash!
+            then
             next-word @
             false
           else
