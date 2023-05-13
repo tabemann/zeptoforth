@@ -129,6 +129,8 @@ _init_flash:
         push_tos
         ldr tos, =flash_dict_end - flash_start
 	bl _erase_range
+        cpsie i
+        bl _release_core
         push_tos
         ldr tos, =FLASH_CODA_ADDR
         bl _erase_qspi_4k_sector
@@ -542,6 +544,8 @@ _erase_range:
 	push {lr}
 	bl _force_core_wait
 	cpsid i
+	dsb
+	isb
 	bl _exit_xip
 	ldr r2, =0xFFF
         movs r0, tos
