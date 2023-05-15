@@ -23,6 +23,8 @@ begin-module usb
   armv6m import
   interrupt import
   task import
+  systick import
+  core-lock import
 
   begin-module usb-internal
 
@@ -124,13 +126,31 @@ begin-module usb
     \ USB setup packet address
     USB_DPRAM_Base constant USB_SETUP_PACKET
 
-    \ USB endpoint in control
-    : USB_EP_IN_CONTROL ( endpoint -- ) 3 lshift USB_DPRAM_Base + ;
+    \ USB endpoint in endpoint control
+    : USB_EP_IN_ENDPOINT_CONTROL ( endpoint -- addr )
+      3 lshift USB_DPRAM_Base +
+    ;
 
-    \ USB endpoint out control
-    : USP_EP_OUT_CONTROL ( endpoint -- )
+    \ USB endpoint out endpoint control
+    : USB_EP_OUT_ENDPOINT_CONTROL ( endpoint -- addr )
       3 lshift [ USB_DPRAM_Base cell+ ] literal +
     ;
+
+    \ USB endpoint in buffer control
+    : USB_EP_IN_BUFFER_CONTROL ( endpoint -- addr )
+      3 lshift [ USB_DPRAM_Base $80 + ] literal +
+    ;
+
+    \ USB endpoint out buffer control
+    : USB_EP_OUT_BUFFER_CONTROL ( endpoint -- addr )
+      3 lshift [ USB_DPRAM_Base $80 + cell+ ] literal +
+    ;
+
+    \ USB endpoint 0 in/out buffer
+    USB_DPRAM_Base $100 + constant USB_EP0_BUFFER
+
+    \ USB data buffer base
+    USB_DPRAM_Base $180 + constant USB_BUFFER_Base
 
     \ Endpoint control bits
     
@@ -219,6 +239,10 @@ begin-module usb
     \ Configuration attributes
     7 bit constant USB_CONFIG_BUS_POWERED
     6 bit constant USB_CONFIG_SELF_POWERED
+
+    \ Configuration directions
+    $00 constant USB_DIR_OUT
+    $80 constant USB_DIR_IN
     
     \ Endpoint out address
     : USB_EP_OUT_ADDR ( u -- addr ) ;
@@ -227,7 +251,7 @@ begin-module usb
     : USB_EP_IN_ADDR ( u -- addr ) 128 + ;
 
     \ Device descriptor data
-    create dev-data
+    create device-data
     
     \ Device descriptor
     \ Descriptor length
@@ -259,7 +283,7 @@ begin-module usb
     \ Number of possible configurations
     1 c,
     
-    here cell align, swap - constant dev-data-size
+    here device-data - cell align, constant device-data-size
 
     \ Configuration data
     create config-data
@@ -373,7 +397,7 @@ begin-module usb
     \ Polling interval
     0 c,
 
-    here cell align, swap - constant config-data-size
+    here config-data - cell align, constant config-data-size
 
     \ Global device address
     variable usb-device-addr
@@ -384,14 +408,14 @@ begin-module usb
     \ Device is configured
     variable usb-device-configd
     
-    \ Endpoint control structure
-    begin-structure endpoint-size
+    \ Basic endpoint control structure
+    begin-structure basic-endpoint-size
       
       \ Endpoint buffer address
       field: endpoint-buffer
 
       \ Endpoint control register address
-      field: endpoint-control
+      field: endpoint-endpoint-control
 
       \ Endpoint buffer control register address
       field: endpoint-buffer-control
@@ -401,6 +425,16 @@ begin-module usb
 
       \ Endpoint maximum packet size
       field: endpoint-max-packet-size
+
+      \ Is endpoint transmit
+      field: endpoint-tx?
+
+    end-structure
+
+    \ Endpoint control structure
+    begin-structure endpoint-size
+
+      basic-endpoint-size +field endpoint-shared-info
 
       \ Endpoint tranfer data
       field: endpoint-data-buffer
@@ -433,31 +467,288 @@ begin-module usb
       
     end-structure
 
-    \ Setup endpoint
-    endpoint-size buffer: setup-endpoint
+    \ Endpoint 0 out
+    endpoint-size buffer: endpoint0-out
+
+    \ Endpoint 0 in
+    endpoint-size buffer: endpoint0-in
+
+    \ Endpoint 1 out
+    basic-endpoint-size buffer: endpoint1-out
+
+    \ Endpoint 1 in
+    basic-endpoint-size buffer: endpoint1-in
+
+    \ Endpoint 2 in
+    endpoint-size buffer: endpoint2-in
     
     \ USB handled interrupts
     variable usb-handled-interrupts
 
+    \ Endpoint 1 out ready
+    variable endpoint1-out-ready?
+
+    \ Endpoint 1 in ready
+    variable endpoint1-in-ready?
+
     \ USB pending operation
     pending-op-size buffer: usb-pending-op
 
+    \ USB transmit pending operation
+    pending-op-size buffer: usb-tx-pending-op
+
+    \ USB transmit pending operation enabled
+    variable usb-tx-pending-op-enabled?
+
+    \ USB transmit pending operation systick
+    variable usb-tx-pending-op-start
+
+    \ USB transmit pending operation delay
+    100 constant usb-tx-pending-op-delay
+
     \ USB pending operation priority
     0 constant usb-pending-op-priority
-    
-    \ Get the offset in USB dual-ported RAM
-    : usb-buffer-offset ( addr -- addr' ) USB_Base - ;
 
-    \ Set up a USB endpoint
-    : usb-setup-endpoint { endpoint -- }
-      endpoint endpoint-control @ if
-        [ EP_CTRL_ENABLE EP_CTRL_INTERRUPT_PER_BUFFER or ]
-        endpoint endpoint-buffer @ usb-buffer-offset or
+    \ USB out core lock
+    core-lock-size buffer: usb-out-core-lock
+
+    \ USB in core lock
+    core-lock-size buffer: usb-in-core-lock
+
+    \ RAM variable for rx buffer read-index
+    variable rx-read-index
+
+    \ RAM variable for rx buffer write-index
+    variable rx-write-index
+
+    \ Constant for number of bytes to buffer
+    128 constant rx-buffer-size
+
+    \ Rx buffer
+    rx-buffer-size buffer: rx-buffer
+
+    \ RAM variable for tx buffer read-index
+    variable tx-read-index
+
+    \ RAM variable for tx buffer write-index
+    variable tx-write-index
+
+    \ Constant for number of bytes to buffer
+    128 constant tx-buffer-size
+
+    \ Tx buffer
+    tx-buffer-size buffer: tx-buffer
+    
+    \ Get whether the rx buffer is full
+    : rx-full? ( -- f )
+      rx-write-index @ rx-read-index @
+      rx-buffer-size 1- + $7F and =
+    ;
+
+    \ Get whether the rx buffer is empty
+    : rx-empty? ( -- f )
+      rx-read-index @ rx-write-index @ =
+    ;
+
+    \ Get number of bytes available in the rx buffer
+    : rx-count ( -- u )
+      rx-read-index @ { read-index }
+      rx-write-index @ { write-index }
+      read-index write-index <= if
+        write-index read-index -
+      else
+        rx-buffer-size read-index - write-index +
       then
     ;
 
+    \ Write a byte to the rx buffer
+    : write-rx ( c -- )
+      rx-full? not if
+        rx-write-index @ rx-buffer + !
+        rx-write-index @ 1+ $7F and rx-write-index !
+      else
+        drop
+      then
+    ;
+
+    \ Read a byte from the rx buffer
+    : read-rx ( -- c )
+      rx-empty? not if
+        rx-read-index @ rx-buffer + @
+        rx-read-index @ 1+ $7F and rx-read-index !
+      else
+        0
+      then
+    ;
+
+    \ Get whether the tx buffer is full
+    : tx-full? ( -- f )
+      tx-write-index @ tx-read-index @
+      tx-buffer-size 1- + $7F and =
+    ;
+
+    \ Get whether the tx buffer is empty
+    : tx-empty? ( -- f )
+      tx-read-index @ tx-write-index @ =
+    ;
+
+    \ Get number of bytes available in the tx buffer
+    : tx-count ( -- u )
+      tx-read-index @ { read-index }
+      tx-write-index @ { write-index }
+      read-index write-index <= if
+        write-index read-index -
+      else
+        tx-buffer-size read-index - write-index +
+      then
+    ;
+
+    \ Write a byte to the tx buffer
+    : write-tx ( c -- )
+      tx-full? not if
+        tx-write-index @ tx-buffer + c!
+        tx-write-index @ 1+ $7F and tx-write-index !
+      else
+        drop
+      then
+    ;
+
+    \ Read a byte from the tx buffer
+    : read-tx ( -- c )
+      tx-empty? not if
+        tx-read-index @ tx-buffer + @
+        tx-read-index @ 1+ $7F and tx-read-index !
+      else
+        0
+      then
+    ;
+
+    \ Get the offset in USB dual-ported RAM
+    : usb-buffer-offset ( addr -- addr' ) USB_DPRAM_Base - ;
+
+    \ Initialize a USB endpoint
+    : init-usb-endpoint0
+      { buffer-ctrl max-pkt-size tx? endpoint -- }
+      0 endpoint endpoint-endpoint-control !
+      buffer-ctrl endpoint endpoint-buffer-control !
+      0 endpoint endpoint-next-pid !
+      max-pkt-size endpoint endpoint-max-packet-size !
+      USB_EP0_BUFFER endpoint endpoint-buffer !
+      0 endpoint endpoint-data-buffer !
+      0 endpoint endpoint-data-len !
+      0 endpoint endpoint-data-total-len !
+      tx? endpoint endpoint-tx? !
+    ;
+
+    \ Initialize a console USB endpoint
+    : init-usb-console-endpoint
+      { ep-ctrl buffer-ctrl data-buf max-pkt-size ep-type tx? endpoint -- }
+      ep-ctrl endpoint endpoint-endpoint-control !
+      buffer-ctrl endpoint endpoint-buffer-control !
+      0 endpoint endpoint-next-pid !
+      max-pkt-size endpoint endpoint-max-packet-size !
+      data-buf endpoint endpoint-buffer !
+      [ USB_EP_ENABLE USB_EP_ENABLE_INTERRUPT_PER_BUFFER or ]
+      ep-type USB_EP_ENDPOINT_TYPE_LSB lshift or
+      data-buf usb-buffer-offset or
+      ep-ctrl !
+      tx? endpoint endpoint-tx? !
+    ;
+
+    \ Initialize a USB endpoint
+    : init-usb-endpoint
+      { ep-ctrl buffer-ctrl data-buf max-pkt-size ep-type tx? endpoint -- }
+      ep-ctrl endpoint endpoint-endpoint-control !
+      buffer-ctrl endpoint endpoint-buffer-control !
+      0 endpoint endpoint-next-pid !
+      max-pkt-size endpoint endpoint-max-packet-size !
+      data-buf endpoint endpoint-buffer !
+      0 endpoint endpoint-data-buffer !
+      0 endpoint endpoint-data-len !
+      0 endpoint endpoint-data-total-len !
+      [ USB_EP_ENABLE USB_EP_ENABLE_INTERRUPT_PER_BUFFER or ]
+      ep-type USB_EP_ENDPOINT_TYPE_LSB lshift or
+      data-buf usb-buffer-offset or
+      ep-ctrl !
+      tx? endpoint endpoint-tx? !
+    ;
+
+    \ Initialize USB endpoints
+    : init-usb-endpoints ( -- )
+      0 USB_EP_IN_BUFFER_CONTROL 64 true endpoint0-in init-usb-endpoint0
+      0 USB_EP_OUT_BUFFER_CONTROL 64 false endpoint0-out init-usb-endpoint0
+      1 USB_EP_IN_ENDPOINT_CONTROL 1 USB_EP_IN_BUFFER_CONTROL
+      USB_BUFFER_Base $00 + 64 USB_EP_TYPE_BULK true endpoint1-in
+      init-usb-console-endpoint
+      1 USB_EP_OUT_ENDPOINT_CONTROL 1 USB_EP_OUT_BUFFER_CONTROL
+      USB_BUFFER_Base $40 + 64 USB_EP_TYPE_BULK false endpoint1-out
+      init-usb-console-endpoint
+      2 USB_EP_IN_ENDPOINT_CONTROL 2 USB_EP_IN_BUFFER_CONTROL
+      USB_BUFFER_Base $80 + 8 USB_EP_TYPE_INTERRUPT true endpoint2-in
+      init-usb-endpoint
+    ;
+
+    \ Get console endpoint data available
+    : usb-console-count { endpoint -- count }
+      endpoint endpoint-tx? @ if tx-count else rx-buffer-size rx-count - then
+    ;
+    
+    \ Carry out next transfer for console IO
+    : usb-console-continue-transfer { endpoint -- }
+      endpoint usb-console-count endpoint endpoint-max-packet-size @
+      min { bytes }
+      bytes USB_BUF_CTRL_AVAIL or { buffer-control-val }
+      endpoint endpoint-tx? @ if
+        endpoint endpoint-buffer @ bytes over + swap ?do
+          read-tx i c!
+        loop
+        buffer-control-val USB_BUF_CTRL_FULL or to buffer-control-val
+      then
+      endpoint endpoint-next-pid @ if
+        USB_BUF_CTRL_DATA1_PID
+      else
+        USB_BUF_CTRL_DATA0_PID
+      then
+      buffer-control-val or to buffer-control-val
+      USB_BUF_CTRL_LAST buffer-control-val or to buffer-control-val
+      endpoint endpoint-next-pid @ 1 xor endpoint endpoint-next-pid !
+      endpoint endpoint-endpoint-control @ if
+        USB_EP_ENABLE_INTERRUPT_PER_BUFFER
+        endpoint endpoint-endpoint-control @ !
+      then
+      buffer-control-val endpoint endpoint-buffer-control @ !
+    ;
+
+    \ Receive data for console IO
+    : usb-console-rx { endpoint -- }
+      endpoint endpoint-buffer-control @ @ { buffer-control-val }
+      buffer-control-val USB_BUF_CTRL_LEN_MASK and { bytes }
+      endpoint endpoint-tx? @ not if
+        endpoint endpoint-buffer @ bytes over + swap ?do
+          i c@ write-rx
+        loop
+      then
+    ;
+
+    \ Handle a USB endpoint for console IO
+    : usb-console-handle { endpoint -- }
+      endpoint endpoint-tx? @ if usb-in-core-lock else usb-out-core-lock then
+      endpoint [: { endpoint }
+        endpoint usb-console-rx
+        endpoint usb-console-continue-transfer
+      ;] rot with-core-lock
+    ;
+
+    \ Start a USB transfer for console IO
+    : usb-console-start-transfer { endpoint -- }
+      endpoint endpoint-tx? @ if usb-in-core-lock else usb-out-core-lock then
+      endpoint [: { endpoint }
+        endpoint usb-console-continue-transfer
+      ;] rot with-core-lock
+    ;
+
     \ Carry out next transfer
-    : usb-tx { endpoint -- }
+    : usb-continue-transfer { endpoint -- }
       endpoint endpoint-data-len @ endpoint endpoint-max-packet-size @
       min { bytes }
       bytes USB_BUF_CTRL_AVAIL or { buffer-control-val }
@@ -478,8 +769,10 @@ begin-module usb
         USB_BUF_CTRL_LAST buffer-control-val or to buffer-control-val
       then
       endpoint endpoint-next-pid @ 1 xor endpoint endpoint-next-pid !
-      USB_EP_ENABLE_INTERRUPT_PER_BUFFER { ep-control-val }
-      ep-control-val endpoint endpoint-control @ !
+      endpoint endpoint-endpoint-control @ if
+        USB_EP_ENABLE_INTERRUPT_PER_BUFFER
+        endpoint endpoint-endpoint-control @ !
+      then
       buffer-control-val endpoint endpoint-buffer-control @ !
     ;
 
@@ -500,14 +793,14 @@ begin-module usb
     \ Handle a USB endpoint
     : usb-handle { endpoint -- }
       endpoint usb-rx
-      endpoint usb-tx
+      endpoint usb-continue-transfer
     ;
     
     \ Start a USB transfer
     : usb-start-transfer { addr bytes endpoint -- }
       addr endpoint endpoint-data-buffer !
       bytes endpoint endpoint-data-len !
-      endpoint usb-tx
+      endpoint usb-continue-transfer
     ;
 
     \ Send a USB acknowledge out request
@@ -525,7 +818,8 @@ begin-module usb
     \ Set a USB device configuration
     : usb-set-device-config ( -- )
       true usb-device-configd !
-      
+      true endpoint1-out-ready? !
+      true endpoint1-in-ready? !
       usb-ack-out-request
     ;
 
@@ -539,17 +833,22 @@ begin-module usb
       config-data config-data-size endpoint0-in usb-start-transfer
     ;
 
+    \ Transfer the string descriptors
+    : usb-handle-string-descr ( -- )
+      usb-ack-out-request
+    ;
+
     \ Handle a USB setup packet
     : usb-handle-setup-pkt ( -- )
       \ Reset PID to 1
-      1 setup-endpoint endpoint-next-pid !
+      1 endpoint0-out endpoint-next-pid !
       USB_SETUP_PACKET setup-pkt-request c@ { request }
       USB_SETUP_PACKET setup-pkt-request-type c@ case
         USB_DIR_OUT of
           USB_SETUP_PACKET setup-pkt-request c@ case
             USB_REQUEST_SET_ADDRESS of usb-set-device-addr endof
             USB_REQUEST_SET_CONFIGURATION of usb-set-device-config endof
-            usb-acknowledge-out-request
+            usb-ack-out-request
           endcase
         endof
         USB_DIR_IN of
@@ -561,6 +860,7 @@ begin-module usb
                 USB_DT_STRING of usb-handle-string-descr endof
               endcase
             endof
+            usb-ack-out-request
           endcase
         endof
       endcase
@@ -587,10 +887,18 @@ begin-module usb
       USB_BUFF_STATUS @ 1 USB_BUFF_STATUS_EP_OUT and if
         1 USB_BUFF_STATUS_EP_OUT USB_BUFF_STATUS !
         endpoint1-out usb-handle
+        true endpoint1-out-ready? !
+        rx-count 64 >= if
+          false endpoint1-out-ready? !
+          endpoint1-out usb-console-start-transfer
+        else
+          true endpoint1-out-ready? !
+        then
       then
       USB_BUFF_STATUS @ 1 USB_BUFF_STATUS_EP_IN and if
         1 USB_BUFF_STATUS_EP_IN USB_BUFF_STATUS !
         endpoint1-in usb-handle
+        true endpoint1-in-ready? !
       then
       USB_BUFF_STATUS @ 2 USB_BUFF_STATUS_EP_IN and if
         2 USB_BUFF_STATUS_EP_IN USB_BUFF_STATUS !
@@ -604,20 +912,38 @@ begin-module usb
       ints usb-handled-interrupts @ or usb-handled-interrupts !
       ints USB_SIE_STATUS !
       ints if
-        ['] handle-usb-pending-op usb-pending-op set-pending-op
+        handle-usb-pending-op
+\        ['] handle-usb-pending-op usb-pending-op set-pending-op
       then
     ;
     
     \ Initialize USB
     : init-usb ( -- )
+      usb-out-core-lock init-core-lock
+      usb-in-core-lock init-core-lock
+
+      0 rx-read-index !
+      0 rx-write-index !
+      0 tx-read-index !
+      0 tx-write-index !
+      
       \ Clear the DPRAM just because
       USB_DPRAM_Base dpram-size 0 fill
+      
       0 USB_ADDR_ENDP !
       0 usb-device-addr !
       false set-usb-device-addr !
       false usb-device-configd !
+      false endpoint1-out-ready? !
+      false endpoint1-in-ready? !
+
+      init-usb-endpoints
+
+      false usb-tx-pending-op-enabled? !
+      0 usb-tx-pending-op-start !
 
       usb-pending-op-priority usb-pending-op register-pending-op
+      usb-pending-op-priority usb-tx-pending-op register-pending-op
 
       0 usbctrl-irq NVIC_IPR_IP!
       ['] handle-usb-irq usbctrl-vector vector!
@@ -625,7 +951,7 @@ begin-module usb
 
       [ USB_USB_MUXING_TO_PHY USB_USB_MUXING_SOFTCON or ] literal
       USB_USB_MUXING !
-      [ USB_USB_PWR_VBUS_DETECT USB_USB_PWR_VBUS_DETECT_OVERRIDE or ] literal
+      [ USB_USB_PWR_VBUS_DETECT USB_USB_PWR_VBUS_DETECT_OVERRIDE_EN or ] literal
       USB_USB_PWR !
       USB_MAIN_CTRL_CONTROLLER_EN USB_MAIN_CTRL !
       USB_SIE_CTRL_EP0_INT_1BUF USB_SIE_CTRL !
@@ -635,8 +961,95 @@ begin-module usb
       \ Put more here
       
       USB_SIE_CTRL @ USB_SIE_CTRL_PULLUP_EN or USB_SIE_CTRL !
+
+      endpoint1-out usb-console-start-transfer
+    ;
+
+    \ Partially send data
+    defer usb-partial-tx
+    :noname
+      usb-tx-pending-op-enabled? @ if
+        systick usb-tx-pending-op-start @ - usb-tx-pending-op-delay >
+        endpoint1-in-ready? @ and if
+          false usb-tx-pending-op-enabled? !
+          false endpoint1-in-ready? !
+          endpoint1-in usb-console-start-transfer
+        else
+          ['] usb-partial-tx usb-tx-pending-op set-pending-op
+        then
+      then
+    ; is usb-partial-tx
+    
+    \ Attempt to send data
+    : usb-attempt-tx ( -- )
+      tx-count 64 >= endpoint1-in-ready? @ and if
+        false usb-tx-pending-op-enabled? !
+        false endpoint1-in-ready? !
+        endpoint1-in usb-console-start-transfer
+      else
+        usb-tx-pending-op-enabled? @ not if
+          true usb-tx-pending-op-enabled? !
+          systick-counter usb-tx-pending-op-start !
+          ['] usb-partial-tx usb-tx-pending-op set-pending-op
+        then
+      then
+    ;
+
+    \ Attempt to receive data
+    : usb-attempt-rx ( -- )
+      rx-count rx-buffer-size 64 - <= endpoint1-out-ready? @ and if
+        endpoint1-out usb-console-start-transfer
+      then
+    ;
+
+    \ Get whether a byte is ready to be emitted
+    : usb-emit? ( -- emit? ) tx-full? not ;
+    
+    \ Emit a byte
+    : usb-emit ( c -- )
+      begin
+        [:
+          [:
+            tx-full? not if
+              write-tx usb-attempt-tx true
+            else
+              false
+            then
+          ;] critical
+        ;] usb-in-core-lock with-core-lock
+        dup not if pause then
+      until
+    ;
+
+    \ Get whether a byte is ready to be read
+    : usb-key? ( -- key? ) rx-empty? not ;
+
+    \ Read a byte
+    : usb-key ( -- c )
+      begin
+        [:
+          [:
+            rx-empty? not if
+              read-rx usb-attempt-rx true
+            else
+              false
+            then
+          ;] critical
+        ;] usb-out-core-lock with-core-lock
+        dup not if pause then
+      until
     ;
 
   end-module> import
+
+  \ Enable the usb console
+  : usb-console
+    ['] usb-key? key?-hook !
+    ['] usb-key key-hook !
+    ['] usb-emit? emit?-hook !
+    ['] usb-emit emit-hook !
+    ['] usb-emit? error-emit?-hook !
+    ['] usb-emit error-emit?-hook !
+  ;
   
 end-module
