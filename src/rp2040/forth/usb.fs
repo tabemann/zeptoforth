@@ -930,7 +930,7 @@ begin-module usb
         false endpoint1-in-ready? !
         endpoint1-in usb-console-start-transfer
       else
-        usb-tx-pending-op-enabled? @ not if
+        tx-count 0> usb-tx-pending-op-enabled? @ not and if
           true usb-tx-pending-op-enabled? !
           systick-counter usb-tx-pending-op-start !
           ['] usb-partial-tx usb-tx-pending-op set-pending-op
