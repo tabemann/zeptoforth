@@ -746,26 +746,14 @@ begin-module usb
     ;
 
     \ Receive data for console IO
-    : usb-console-rx { endpoint -- }
-      endpoint endpoint-buffer-control @ @ { buffer-control-val }
-      buffer-control-val USB_BUF_CTRL_LEN_MASK and { bytes }
-      endpoint endpoint-tx? @ not if
+    : usb-console-rx ( endpoint -- )
+      [: { endpoint }
+        endpoint endpoint-buffer-control @ @ { buffer-control-val }
+        buffer-control-val USB_BUF_CTRL_LEN_MASK and { bytes }
         endpoint endpoint-buffer @ bytes over + swap ?do
           i c@ write-rx
         loop
-      then
-    ;
-
-    \ Handle a USB endpoint for console IO
-    : usb-console-handle { endpoint -- }
-      endpoint endpoint-tx? @ if usb-in-core-lock else usb-out-core-lock then
-      endpoint [: { endpoint }
-        endpoint endpoint-tx? @ if
-          endpoint usb-console-continue-transfer
-        else
-          endpoint usb-console-rx
-        then
-      ;] rot with-core-lock
+      ;] usb-out-core-lock with-core-lock
     ;
 
     \ Start a USB transfer for console IO
@@ -963,14 +951,13 @@ begin-module usb
         usb-handle-setup-pkt
       then
       buff-status 1 USB_BUFF_STATUS_EP_OUT and if
-        endpoint1-out usb-console-handle
+        endpoint1-out usb-console-rx
         true endpoint1-out-ready? !
         rx-count rx-buffer-size 64 - <= if
           ['] usb-partial-rx usb-rx-pending-op set-pending-op
         then
       then
       buff-status 1 USB_BUFF_STATUS_EP_IN and if
-        endpoint1-in usb-console-handle
         true endpoint1-in-ready? !
         usb-attempt-tx
       then
