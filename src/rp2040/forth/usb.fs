@@ -722,7 +722,11 @@ begin-module usb
     : usb-console-continue-transfer { endpoint -- }
       endpoint usb-console-count endpoint endpoint-max-packet-size @
       min { bytes }
-      bytes [ USB_BUF_CTRL_AVAIL USB_BUF_CTRL_SEL or ] literal or
+      endpoint endpoint-tx? @ bytes 0<> or if
+        bytes [ USB_BUF_CTRL_AVAIL USB_BUF_CTRL_SEL or ] literal or
+      else
+        0
+      then
       { buffer-control-val }
       endpoint endpoint-tx? @ if
         endpoint endpoint-buffer @ bytes over + swap ?do
@@ -756,8 +760,11 @@ begin-module usb
     : usb-console-handle { endpoint -- }
       endpoint endpoint-tx? @ if usb-in-core-lock else usb-out-core-lock then
       endpoint [: { endpoint }
-        endpoint usb-console-rx
-        endpoint usb-console-continue-transfer
+        endpoint endpoint-tx? @ if
+          endpoint usb-console-continue-transfer
+        else
+          endpoint usb-console-rx
+        then
       ;] rot with-core-lock
     ;
 
