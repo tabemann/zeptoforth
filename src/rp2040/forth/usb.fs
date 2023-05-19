@@ -80,9 +80,6 @@ begin-module usb
     \ Main control register
     USB_Base $40 + constant USB_MAIN_CTRL
 
-    \ Last SOF (Start of Frame) numer received from host register
-    USB_Base $48 + constant USB_SOF_RD
-
     \ SIE control register
     USB_Base $4C + constant USB_SIE_CTRL
 
@@ -125,6 +122,18 @@ begin-module usb
     
     \ Setup packet received clear bit
     17 bit constant USB_SIE_STATUS_SETUP_REC
+
+    \ Data sequence error bit
+    31 bit constant USB_SIE_STATUS_DATA_SEQ_ERROR
+
+    \ Receive timeout bit
+    27 bit constant USB_SIE_STATUS_RX_TIMEOUT
+
+    \ Bit stuff error bit
+    25 bit constant USB_SIE_STATUS_BIT_STUFF_ERROR
+
+    \ CRC error bit
+    24 bit constant USB_SIE_STATUS_CRC_ERROR
 
     \ Enable interrupt endpoint bit
     : USB_INT_EP_CTRL_INT_EP_ACTIVE ( endpoint -- ) [inlined] bit ;
@@ -257,6 +266,7 @@ begin-module usb
     10 constant USB_REQUEST_GET_INTERFACE
     11 constant USB_REQUEST_SET_INTERFACE
     12 constant USB_REQUEST_SYNC_FRAME
+    $22 constant USB_REQUEST_SET_LINE
 
     \ Endpoint types
     0 constant USB_EP_TYPE_CONTROL
@@ -432,6 +442,9 @@ begin-module usb
 
     \ Device address should be set
     variable set-usb-device-addr
+
+    \ Current DTR
+    variable usb-dtr?
 
     \ Device is configured
     variable usb-device-configd?
@@ -671,6 +684,7 @@ begin-module usb
       buffer-ctrl endpoint endpoint-buffer-control !
       1 endpoint endpoint-next-pid !
       max-pkt-size endpoint endpoint-max-packet-size !
+      0 buffer-ctrl !
       USB_EP0_BUFFER endpoint endpoint-buffer !
       0 endpoint endpoint-data-buffer !
       0 endpoint endpoint-data-len !
@@ -686,6 +700,7 @@ begin-module usb
       0 endpoint endpoint-next-pid !
       max-pkt-size endpoint endpoint-max-packet-size !
       data-buf endpoint endpoint-buffer !
+      0 buffer-ctrl !
       [ USB_EP_ENABLE USB_EP_ENABLE_INTERRUPT_PER_BUFFER or ] literal
       ep-type USB_EP_ENDPOINT_TYPE_LSB lshift or
       data-buf usb-buffer-offset or
@@ -704,6 +719,7 @@ begin-module usb
       0 endpoint endpoint-data-buffer !
       0 endpoint endpoint-data-len !
       0 endpoint endpoint-data-total-len !
+      0 buffer-ctrl !
       [ USB_EP_ENABLE USB_EP_ENABLE_INTERRUPT_PER_BUFFER or ] literal
       ep-type USB_EP_ENDPOINT_TYPE_LSB lshift or
       data-buf usb-buffer-offset or
@@ -762,6 +778,7 @@ begin-module usb
         buffer-control-val or to buffer-control-val
         USB_BUF_CTRL_LAST buffer-control-val or to buffer-control-val
         endpoint endpoint-next-pid @ 1 xor endpoint endpoint-next-pid !
+\        USB_EP_ENABLE endpoint endpoint-endpoint-control @ bis!
         buffer-control-val endpoint usb-update-buffer-control
       then
     ;
@@ -770,30 +787,40 @@ begin-module usb
     : usb-console-rx ( endpoint -- )
       [: { endpoint }
         endpoint endpoint-buffer-control @ @ { buffer-control-val }
-        buffer-control-val USB_BUF_CTRL_FULL and if
-          buffer-control-val USB_BUF_CTRL_LEN_MASK and { bytes }
-          endpoint endpoint-buffer @ bytes over + swap ?do
-            i c@ dup ctrl-c = if
-              drop reboot
-            else
-              attention? @ if
-                usb-out-core-lock release-core-lock
-                [: attention-hook @ execute ;] try
-                usb-out-core-lock claim-core-lock
-                ?raise
+        [ USB_SIE_STATUS_DATA_SEQ_ERROR
+        USB_SIE_STATUS_RX_TIMEOUT or
+        USB_SIE_STATUS_BIT_STUFF_ERROR or
+        USB_SIE_STATUS_CRC_ERROR or
+        ] literal USB_SIE_STATUS bit@ not if
+          buffer-control-val USB_BUF_CTRL_FULL and if
+            buffer-control-val USB_BUF_CTRL_LEN_MASK and { bytes }
+            endpoint endpoint-buffer @ bytes over + swap ?do
+              i c@ dup ctrl-c = if
+                drop reboot
               else
-                dup ctrl-t = if
+                attention? @ if
                   usb-out-core-lock release-core-lock
-                  drop [: attention-start-hook @ execute ;] try
+                  [: attention-hook @ execute ;] try
                   usb-out-core-lock claim-core-lock
                   ?raise
                 else
-                  write-rx
+                  dup ctrl-t = if
+                    usb-out-core-lock release-core-lock
+                    drop [: attention-start-hook @ execute ;] try
+                    usb-out-core-lock claim-core-lock
+                    ?raise
+                  else
+                    write-rx
+                  then
                 then
               then
-            then
-          loop
+            loop
+          then
         then
+        USB_SIE_STATUS @ [ USB_SIE_STATUS_DATA_SEQ_ERROR
+        USB_SIE_STATUS_RX_TIMEOUT or
+        USB_SIE_STATUS_BIT_STUFF_ERROR or
+        USB_SIE_STATUS_CRC_ERROR or ] literal and USB_SIE_STATUS !
       ;] usb-out-core-lock with-core-lock
     ;
 
@@ -882,6 +909,12 @@ begin-module usb
       usb-ack-out-request
     ;
 
+    \ Set DTR
+    : usb-set-line ( -- )
+      USB_SETUP_PACKET setup-pkt-value h@ 1 and 0<> usb-dtr? !
+      usb-ack-out-request
+    ;
+
     \ Transfer the device descriptors
     : usb-handle-device-descr ( -- )
       device-data USB_SETUP_PACKET setup-pkt-length h@ device-data-size min
@@ -912,6 +945,12 @@ begin-module usb
             usb-ack-out-request
           endcase
         endof
+        %00100001 of
+          USB_SETUP_PACKET setup-pkt-request c@ case
+            USB_REQUEST_SET_LINE of usb-set-line endof
+            usb-ack-out-request
+          endcase
+        endof
         USB_DIR_IN of
           USB_SETUP_PACKET setup-pkt-request c@ case
             USB_REQUEST_GET_DESCRIPTOR of
@@ -924,6 +963,7 @@ begin-module usb
             usb-ack-out-request
           endcase
         endof
+        usb-ack-out-request
       endcase
     ;
 
@@ -938,6 +978,7 @@ begin-module usb
       false endpoint1-in-ready? !
       false usb-rx-pending-op-enabled? !
       false usb-tx-pending-op-enabled? !
+      false usb-dtr? !
       0 rx-read-index !
       0 rx-write-index !
       0 tx-read-index !
@@ -961,7 +1002,8 @@ begin-module usb
       usb-tx-pending-op-enabled? @ if
         systick-counter usb-tx-pending-op-start @ - usb-tx-pending-op-delay >
         tx-count 64 >= or
-        endpoint1-in-ready? @ and if
+        endpoint1-in-ready? @ and
+        usb-dtr? @ and if
           false usb-tx-pending-op-enabled? !
           false endpoint1-in-ready? !
           endpoint1-in usb-console-start-transfer
@@ -1013,6 +1055,7 @@ begin-module usb
           true endpoint1-in-ready? !
           usb-attempt-rx
           usb-attempt-tx
+          0 0 endpoint0-out usb-start-transfer
         else
           set-usb-device-addr @ if
             usb-device-addr @ USB_ADDR_ENDP !
@@ -1034,7 +1077,6 @@ begin-module usb
     
     \ Initialize USB
     : init-usb ( -- )
-
       usb-out-core-lock init-core-lock
       usb-in-core-lock init-core-lock
 
@@ -1044,7 +1086,7 @@ begin-module usb
       0 tx-write-index !
 
       reset-usb
-      
+
       \ Clear the DPRAM just because
       USB_DPRAM_Base dpram-size 0 fill
 
@@ -1055,7 +1097,8 @@ begin-module usb
       false usb-device-configd? !
       false endpoint1-out-ready? !
       false endpoint1-in-ready? !
-
+      false usb-dtr? !
+      
       false usb-rx-pending-op-enabled? !
       false usb-tx-pending-op-enabled? !
       0 usb-tx-pending-op-start !
@@ -1082,14 +1125,16 @@ begin-module usb
     ;
 
     \ Get whether a byte is ready to be emitted
-    : usb-emit? ( -- emit? ) usb-device-configd? @ tx-full? not and ;
+    : usb-emit? ( -- emit? )
+      usb-dtr? @ usb-device-configd? @ and tx-full? not and
+    ;
     
     \ Emit a byte
     : usb-emit ( c -- )
       begin
         [:
           [:
-            usb-device-configd? @ tx-full? not and if
+            usb-dtr? @ usb-device-configd? @ and tx-full? not and if
               write-tx usb-attempt-tx true
             else
               false
@@ -1101,7 +1146,9 @@ begin-module usb
     ;
 
     \ Get whether a byte is ready to be read
-    : usb-key? ( -- key? ) usb-device-configd? @ rx-empty? not and ;
+    : usb-key? ( -- key? )
+      usb-device-configd? 2 rx-empty? not and
+    ;
 
     \ Read a byte
     : usb-key ( -- c )
