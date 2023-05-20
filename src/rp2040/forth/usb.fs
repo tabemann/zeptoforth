@@ -25,7 +25,6 @@ begin-module usb
   armv6m import
   interrupt import
   task import
-  systick import
   core-lock import
   console import
 
@@ -547,12 +546,6 @@ begin-module usb
     \ USB transmit pending operation enabled
     variable usb-tx-pending-op-enabled?
 
-    \ USB transmit pending operation systick
-    variable usb-tx-pending-op-start
-
-    \ USB transmit pending operation delay
-    100 constant usb-tx-pending-op-delay
-
     \ USB pending operation priority
     0 constant usb-pending-op-priority
 
@@ -997,10 +990,7 @@ begin-module usb
     defer usb-partial-tx
     :noname
       usb-tx-pending-op-enabled? @ if
-        systick-counter usb-tx-pending-op-start @ - usb-tx-pending-op-delay >
-        tx-count 64 >= or
-        endpoint1-in-ready? @ and
-        usb-dtr? @ and if
+        endpoint1-in-ready? @ usb-dtr? @ and if
           false usb-tx-pending-op-enabled? !
           false endpoint1-in-ready? !
           endpoint1-in usb-console-start-transfer
@@ -1020,9 +1010,8 @@ begin-module usb
 
     \ Attempt to send data
     : usb-attempt-tx ( -- )
-      tx-count 0> usb-tx-pending-op-enabled? @ not and if
+      tx-count 0> if
         true usb-tx-pending-op-enabled? !
-        systick-counter usb-tx-pending-op-start !
         ['] usb-partial-tx usb-tx-pending-op set-pending-op
       then
     ;
@@ -1098,7 +1087,6 @@ begin-module usb
       
       false usb-rx-pending-op-enabled? !
       false usb-tx-pending-op-enabled? !
-      0 usb-tx-pending-op-start !
       usb-pending-op-priority usb-rx-pending-op register-pending-op
       usb-pending-op-priority usb-tx-pending-op register-pending-op
 
@@ -1131,8 +1119,13 @@ begin-module usb
       begin
         [:
           [:
-            usb-dtr? @ usb-device-configd? @ and tx-full? not and if
-              write-tx usb-attempt-tx true
+            usb-dtr? @ usb-device-configd? @ and if
+              tx-full? not if
+                write-tx true
+              else
+                false
+              then
+              usb-attempt-tx
             else
               false
             then
@@ -1156,8 +1149,9 @@ begin-module usb
               rx-empty? not if
                 read-rx true
               else
-                usb-attempt-rx false
+                false
               then
+              usb-attempt-rx
             else
               false
             then
