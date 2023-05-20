@@ -1008,14 +1008,25 @@ user error-emit-hook
 user error-emit?-hook
 compress-flash
 
+\ Flush console hook variable
+user flush-console-hook
+
+commit-flash
+
+\ Error flush console hook variable
+user error-flush-console-hook
+
+commit-flash
+
 \ Set internal
 internal set-current
 
 \ Handle with-error-console
 : do-with-error-console ( xt -- )
-  emit-hook @ emit?-hook @ 2>r
+  flush-console-hook @ >r emit-hook @ emit?-hook @ 2>r
+  error-flush-console-hook @ flush-console-hook !
   error-emit-hook @ emit-hook ! error-emit?-hook @ emit?-hook !
-  try 2r> emit?-hook ! emit-hook ! ?raise
+  try 2r> emit?-hook ! emit-hook ! r> flush-console-hook ! ?raise
 ;
 
 \ Allocate a byte variable in RAM
@@ -2336,11 +2347,6 @@ internal set-current
 
 commit-flash
 
-\ Flush console hook variable
-user flush-console-hook
-
-commit-flash
-
 \ Flash space warning has been displayed
 variable flash-dict-warned
 
@@ -2543,6 +2549,7 @@ commit-flash
   ['] serial-emit? error-emit?-hook !
   ['] do-with-error-console error-hook !
   0 flush-console-hook !
+  0 error-flush-console-hook !
   false flash-dict-warned !
   ['] do-flash-validate-dict validate-dict-hook !
   ['] true in-main?-hook !

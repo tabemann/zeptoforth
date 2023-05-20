@@ -16,14 +16,14 @@ The following words are in the `console` module:
 Call *xt* with `key` redirected to call *input-hook* and `key?` redirected to call *input?-hook*. The previous redirection of `key` and `key?` is restored after *xt* returns or an exception is raised.
 
 ##### `with-output`
-( output-hook output?-hook xt -- )
+( output-hook output?-hook flush-console-hook xt -- )
 
-Call *xt* with `emit` redirected to call *output-hook* and `emit?` redirected to call *output?-hook*. The previous redirection of `emit` and `emit?` is restored after *xt* returns or an exception is raised.
+Call *xt* with `emit` redirected to call *output-hook*, `emit?` redirected to call *output?-hook*, and `flush-console` redirected to call *flush-console-hook*. The previous redirection of `emit`, `emit?`, and `flush-console` is restored after *xt* returns or an exception is raised.
 
 ##### `with-error-output`
-( error-output-hook error-output?-hook xt -- )
+( error-output-hook error-output?-hook error-flush-console-hook xt -- )
 
-Call *xt* with `emit` redirected to call *output-hook* and `emit?` redirected to call *output?-hook* for error output. The previous redirection of `emit` and `emit?` for error output is restored after *xt* returns or an exception is raised.
+Call *xt* with `emit` redirected to call *error-output-hook*, `emit?` redirected to call *error-output?-hook*, and `flush-console` redirected to call *error-flush-console-hook* for error output. The previous redirection of `emit`, `emit?`, and `flush-console` for error output is restored after *xt* returns or an exception is raised.
 
 ##### `with-null-input`
 ( xt -- )
@@ -132,9 +132,50 @@ Call *xt* with `emit` and `emit?` redirected for U(S)ART console output for U(S)
 
 Call *xt* with `emit` and `emit?` redirected for U(S)ART console output for error output for U(S)ART *uart*. The previous redirection of `emit` and `emit?` for error output is restored after *xt* returns or an exception is raised.
 
+### `usb`
+
+The following words are in the `usb` module; note that they are only available for `full_usb` builds:
+
+##### `usb-console`
+( -- )
+
+Set the console to use USB.
+
+##### `with-usb-input`
+( xt -- )
+
+Call *xt* with `key` and `key?` redirected for USB console input. The previous redirection of `key` and `key?` is restored after *xt* returns or an exception is raised.
+
+##### `with-usb-output`
+( xt -- )
+
+Call *xt* with `emit` and `emit?` redirected for USB console output. The previous redirection of `emit` and `emit?` is restored after *xt* returns or an exception is raised.
+
+##### `with-usb-error-output`
+( xt -- )
+
+Call *xt* with `emit` and `emit?` redirected for USB console output for error output. The previous redirection of `emit` and `emit?` for error output is restored after *xt* returns or an exception is raised.
+
 ### `swd`
 
 The following words are in the `swd` module; note that they are only available for `full_swdcom` and `mini_swdcom` builds:
+
+##### `swd-console`
+( -- )
+
+Set the console to use `swdcom`.
+
+##### `enable-sleep`
+( -- )
+
+Set the console to sleep the CPU while waiting for input or output with
+`swdcom` and no other tasks are active.
+
+##### `disable-sleep`
+( -- )
+
+Set the console to not sleep the CPU while waiting for input or output with
+`swdcom` and no other tasks are active.
 
 ##### `with-swd-input`
 ( xt -- )
@@ -150,3 +191,19 @@ Call *xt* with `emit` and `emit?` redirected for swdcom console output. The prev
 ( xt -- )
 
 Call *xt* with `emit` and `emit?` redirected for swdcom console output for error output. The previous redirection of `emit` and `emit?` for error output is restored after *xt* returns or an exception is raised.
+
+### `int-io`
+
+These words are in the `int-io` module:
+
+##### `serial-console`
+
+Set the current task's console to use the interrupt-driven serial console.
+
+##### `enable-int-io`
+
+Enable interrupt-driven serial IO (enabled by default).
+
+##### `disable-int-io`
+
+Disable interrupt-driven serial IO.

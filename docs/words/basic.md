@@ -1963,6 +1963,11 @@ The error emit? hook user variable
 
 The flush console hook user variable
 
+##### `error-flush-console-hook`
+( -- addr )
+
+The error flush console hook user variable
+
 ##### `pause-enabled`
 ( -- addr )
 

@@ -333,6 +333,9 @@ begin-module fat32
       
     \ Get the size of a file
     method file-size@ ( file -- bytes )
+
+    \ Get the filesystem of a file
+    method file-fs@ ( file -- fs )
     
     continue-module fat32-internal
       
@@ -436,6 +439,9 @@ begin-module fat32
 
     \ Get whether a directory entry is a directory
     method dir? ( c-addr u dir -- dir? )
+    
+    \ Get the filesystem of a directory
+    method dir-fs@ ( dir -- fs )
     
     continue-module fat32-internal
     
@@ -1289,6 +1295,8 @@ begin-module fat32
     ; define seek-file
     
     :noname ( file -- offset ) file-offset @ ; define tell-file
+
+    :noname ( file -- fs ) file-fs @ ; define file-fs@
     
     :noname ( c-addr u parent-dir file -- )
       3 pick 3 pick 3 pick dir-start-cluster @ 3 pick file-fs @ entry-exists?
@@ -1644,6 +1652,8 @@ begin-module fat32
       ;] with-object
     ; define dir?
 
+    :noname ( dir -- fs ) dir-fs @ ; define dir-fs@
+    
     :noname ( c-addr u parent-dir dir -- )
       swap dir-start-cluster @ over dir-fs @ allocate-entry ( c-addr u dir parent-index parent-cluster )
       2 pick dir-parent-cluster ! ( c-addr u dir parent-index )
@@ -1985,6 +1995,38 @@ begin-module fat32
 
     end-structure
 
+    \ Data associated with file output
+    begin-structure console-out-file-data-size
+
+      console-file-data-size +field console-initial-part
+
+      \ Flush closure
+      closure-size +field console-io-flush
+      
+    end-structure
+    
+    \ Flush the console file output
+    : flush-console-file-output ( data -- )
+      begin dup console-alarm-set? @ while pause repeat
+      [: { data }
+        data console-buffer data console-start @ +
+        data console-end @ data console-start @ -
+        data console-file @ ['] write-file try
+        dup ['] x-no-clusters-free = if
+          true data console-io-end? !
+        then
+        ?raise
+        data console-start +!
+        data console-buffer data console-start @ +
+        data console-buffer data console-end @ data console-start @ -
+        move
+        data console-start @ negate data console-end +!
+        0 data console-start !
+        false data console-alarm-set? !
+        data console-file @ file-fs@ flush
+      ;] over console-slock with-slock
+    ;
+    
     \ Initialize console file data for input
     : init-console-file-input { file data -- }
       data console-slock init-slock
@@ -2081,29 +2123,9 @@ begin-module fat32
       data data console-io? [: { data }
         data console-io-end? @ not
       ;] bind
+      data data console-io-flush ['] flush-console-file-output bind
     ;
 
-    \ Flush the console file output
-    : flush-console-file-output ( data -- )
-      begin dup console-alarm-set? @ while pause repeat
-      [: { data }
-        data console-buffer data console-start @ +
-        data console-end @ data console-start @ -
-        data console-file @ ['] write-file try
-        dup ['] x-no-clusters-free = if
-          true data console-io-end? !
-        then
-        ?raise
-        data console-start +!
-        data console-buffer data console-start @ +
-        data console-buffer data console-end @ data console-start @ -
-        move
-        data console-start @ negate data console-end +!
-        0 data console-start !
-        false data console-alarm-set? !
-      ;] over console-slock with-slock
-    ;
-    
   end-module
 
   \ Set the current input to a file within an xt
@@ -2116,18 +2138,20 @@ begin-module fat32
 
   \ Set the current output to a file within an xt
   : with-file-output ( file xt -- )
-    console-file-data-size [: { data }
+    console-out-file-data-size [: { data }
       swap data init-console-file-output
-      data console-io data console-io? rot console::with-output
+      data console-io data console-io? rot data console-io-flush swap
+      console::with-output
       data flush-console-file-output
     ;] with-aligned-allot
   ;
 
   \ Set the current error output to a file within an xt
   : with-file-error-output ( file xt -- )
-    console-file-data-size [: { data }
+    console-out-file-data-size [: { data }
       swap data init-console-file-output
-      data console-io data console-io? rot console::with-error-output
+      data console-io data console-io? rot data console-io-flush swap
+      console::with-error-output
       data flush-console-file-output
     ;] with-aligned-allot
   ;

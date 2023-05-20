@@ -29,13 +29,13 @@
 </section>
 <section id="with-output">
 <h3><code class="docutils literal notranslate"><span class="pre">with-output</span></code></h3>
-<p>( output-hook output?-hook xt – )</p>
-<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> redirected to call <em>output-hook</em> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected to call <em>output?-hook</em>. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
+<p>( output-hook output?-hook flush-console-hook xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> redirected to call <em>output-hook</em>, <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected to call <em>output?-hook</em>, and <code class="docutils literal notranslate"><span class="pre">flush-console</span></code> redirected to call <em>flush-console-hook</em>. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code>, <code class="docutils literal notranslate"><span class="pre">emit?</span></code>, and <code class="docutils literal notranslate"><span class="pre">flush-console</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 <section id="with-error-output">
 <h3><code class="docutils literal notranslate"><span class="pre">with-error-output</span></code></h3>
-<p>( error-output-hook error-output?-hook xt – )</p>
-<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> redirected to call <em>output-hook</em> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected to call <em>output?-hook</em> for error output. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> for error output is restored after <em>xt</em> returns or an exception is raised.</p>
+<p>( error-output-hook error-output?-hook error-flush-console-hook xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> redirected to call <em>error-output-hook</em>, <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected to call <em>error-output?-hook</em>, and <code class="docutils literal notranslate"><span class="pre">flush-console</span></code> redirected to call <em>error-flush-console-hook</em> for error output. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code>, <code class="docutils literal notranslate"><span class="pre">emit?</span></code>, and <code class="docutils literal notranslate"><span class="pre">flush-console</span></code> for error output is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 <section id="with-null-input">
 <h3><code class="docutils literal notranslate"><span class="pre">with-null-input</span></code></h3>
@@ -145,9 +145,50 @@
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for U(S)ART console output for error output for U(S)ART <em>uart</em>. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> for error output is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
 </section>
+<section id="usb">
+<h2><code class="docutils literal notranslate"><span class="pre">usb</span></code></h2>
+<p>The following words are in the <code class="docutils literal notranslate"><span class="pre">usb</span></code> module; note that they are only available for <code class="docutils literal notranslate"><span class="pre">full_usb</span></code> builds:</p>
+<section id="usb-console">
+<h3><code class="docutils literal notranslate"><span class="pre">usb-console</span></code></h3>
+<p>( – )</p>
+<p>Set the console to use USB.</p>
+</section>
+<section id="with-usb-input">
+<h3><code class="docutils literal notranslate"><span class="pre">with-usb-input</span></code></h3>
+<p>( xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> redirected for USB console input. The previous redirection of <code class="docutils literal notranslate"><span class="pre">key</span></code> and <code class="docutils literal notranslate"><span class="pre">key?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+<section id="with-usb-output">
+<h3><code class="docutils literal notranslate"><span class="pre">with-usb-output</span></code></h3>
+<p>( xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for USB console output. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+<section id="with-usb-error-output">
+<h3><code class="docutils literal notranslate"><span class="pre">with-usb-error-output</span></code></h3>
+<p>( xt – )</p>
+<p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for USB console output for error output. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> for error output is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+</section>
 <section id="swd">
 <h2><code class="docutils literal notranslate"><span class="pre">swd</span></code></h2>
 <p>The following words are in the <code class="docutils literal notranslate"><span class="pre">swd</span></code> module; note that they are only available for <code class="docutils literal notranslate"><span class="pre">full_swdcom</span></code> and <code class="docutils literal notranslate"><span class="pre">mini_swdcom</span></code> builds:</p>
+<section id="swd-console">
+<h3><code class="docutils literal notranslate"><span class="pre">swd-console</span></code></h3>
+<p>( – )</p>
+<p>Set the console to use <code class="docutils literal notranslate"><span class="pre">swdcom</span></code>.</p>
+</section>
+<section id="enable-sleep">
+<h3><code class="docutils literal notranslate"><span class="pre">enable-sleep</span></code></h3>
+<p>( – )</p>
+<p>Set the console to sleep the CPU while waiting for input or output with
+<code class="docutils literal notranslate"><span class="pre">swdcom</span></code> and no other tasks are active.</p>
+</section>
+<section id="disable-sleep">
+<h3><code class="docutils literal notranslate"><span class="pre">disable-sleep</span></code></h3>
+<p>( – )</p>
+<p>Set the console to not sleep the CPU while waiting for input or output with
+<code class="docutils literal notranslate"><span class="pre">swdcom</span></code> and no other tasks are active.</p>
+</section>
 <section id="with-swd-input">
 <h3><code class="docutils literal notranslate"><span class="pre">with-swd-input</span></code></h3>
 <p>( xt – )</p>
@@ -162,6 +203,22 @@
 <h3><code class="docutils literal notranslate"><span class="pre">with-swd-error-output</span></code></h3>
 <p>( xt – )</p>
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for swdcom console output for error output. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> for error output is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+</section>
+<section id="int-io">
+<h2><code class="docutils literal notranslate"><span class="pre">int-io</span></code></h2>
+<p>These words are in the <code class="docutils literal notranslate"><span class="pre">int-io</span></code> module:</p>
+<section id="serial-console">
+<h3><code class="docutils literal notranslate"><span class="pre">serial-console</span></code></h3>
+<p>Set the current task’s console to use the interrupt-driven serial console.</p>
+</section>
+<section id="enable-int-io">
+<h3><code class="docutils literal notranslate"><span class="pre">enable-int-io</span></code></h3>
+<p>Enable interrupt-driven serial IO (enabled by default).</p>
+</section>
+<section id="disable-int-io">
+<h3><code class="docutils literal notranslate"><span class="pre">disable-int-io</span></code></h3>
+<p>Disable interrupt-driven serial IO.</p>
 </section>
 </section>
 </section>

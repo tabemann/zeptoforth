@@ -735,6 +735,16 @@ begin-module uart
 
     end-structure
 
+    \ Data associated with UART output only
+    begin-structure console-out-uart-data-size
+
+      console-uart-data-size +field console-initial-part
+
+      \ Flush console
+      closure-size +field console-io-flush
+      
+    end-structure
+
     \ Initialize console UART data for input
     : init-console-uart-input { uart data -- }
       uart data console-uart !
@@ -755,6 +765,9 @@ begin-module uart
       data data console-io? [: { data }
         data console-uart @ >uart?
       ;] bind
+      data data console-io-flush [: { data }
+        data console-uart @ flush-uart
+      ;] bind
     ;
     
   end-module
@@ -771,18 +784,20 @@ begin-module uart
   \ Set the current output to a UART within an xt
   : with-uart-output ( uart xt -- )
     over validate-uart
-    console-uart-data-size [: { data }
+    console-out-uart-data-size [: { data }
       swap data init-console-uart-output
-      data console-io data console-io? rot console::with-output
+      data console-io data console-io? rot data console-io-flush swap
+      console::with-output
     ;] with-aligned-allot
   ;
 
   \ Set the current error output to a UART within an xt
   : with-uart-error-output ( uart xt -- )
     over validate-uart
-    console-uart-data-size [: { data }
+    console-out-uart-data-size [: { data }
       swap data init-console-uart-output
-      data console-io data console-io? rot console::with-error-output
+      data console-io data console-io? rot data console-io-flush swap
+      console::with-error-output
     ;] with-aligned-allot
   ;
   

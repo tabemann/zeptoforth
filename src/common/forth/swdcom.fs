@@ -89,6 +89,7 @@ begin-module swd
     ['] swd-emit? error-emit?-hook !
     ['] swd-emit error-emit-hook !
     ['] swd-flush-console flush-console-hook !
+    ['] swd-flush-console error-flush-console-hook !
   ;
 
   : enable-sleep ( -- ) true use-sleep ! ;
@@ -101,12 +102,14 @@ begin-module swd
 
   \ Set the current output to SWD within an xt
   : with-swd-output ( xt -- )
-    ['] swd-emit ['] swd-emit? rot console::with-output
+    ['] swd-emit ['] swd-emit? rot ['] swd-flush-console swap
+    console::with-output
   ;
 
   \ Set the current error output to SWD within an xt
   : with-swd-error-output ( xt -- )
-    ['] swd-emit ['] swd-emit? rot console::with-error-output
+    ['] swd-emit ['] swd-emit? rot ['] swd-flush-console swap
+    console::with-error-output
   ;
   
 end-module> import

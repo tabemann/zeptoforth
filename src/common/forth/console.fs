@@ -71,6 +71,27 @@ begin-module console
 
     end-structure
 
+    \ Flush the console stream output
+    : flush-console-stream-output ( data -- )
+      begin dup console-alarm-set? @ while pause repeat
+      [: { data }
+        data console-buffer data console-end @
+        data console-stream @ send-stream-parts
+        0 data console-end !
+        false data console-alarm-set? !
+      ;] over console-slock with-slock
+    ;
+
+    \ Data associated with stream output only
+    begin-structure console-out-stream-data-size
+
+      console-stream-data-size +field console-initial-part
+
+      \ Flush closure
+      closure-size +field console-io-flush
+      
+    end-structure
+
     \ Initialize console stream data for input
     : init-console-stream-input { stream data -- }
       data console-slock init-slock
@@ -138,17 +159,7 @@ begin-module console
         data console-stream @ stream-full? not
         data console-end @ console-buffer-size <> or
       ;] bind
-    ;
-
-    \ Flush the console stream output
-    : flush-console-stream-output ( data -- )
-      begin dup console-alarm-set? @ while pause repeat
-      [: { data }
-        data console-buffer console-buffer-size
-        data console-stream @ send-stream-parts
-        0 data console-end !
-        false data console-alarm-set? !
-      ;] over console-slock with-slock
+      data data console-io-flush ['] flush-console-stream-output bind
     ;
 
   end-module> import
@@ -162,20 +173,28 @@ begin-module console
   ;
 
   \ Set the current output within an xt
-  : with-output ( output-hook output?-hook xt -- )
+  : with-output ( output-hook output?-hook flush-console-hook xt -- )
+    flush-console-hook @ { saved-flush-console-hook }
     emit-hook @ emit?-hook @ { saved-output-hook saved-output?-hook }
     [:
-      swap emit?-hook ! swap emit-hook ! execute
-    ;] try saved-output?-hook emit?-hook ! saved-output-hook emit-hook ! ?raise
+      swap flush-console-hook ! swap emit?-hook ! swap emit-hook ! execute
+    ;] try
+    saved-flush-console-hook flush-console-hook !
+    saved-output?-hook emit?-hook ! saved-output-hook emit-hook !
+    ?raise
   ;
 
   \ Set the current error output within an xt
-  : with-error-output ( error-output-hook error-output?-hook xt -- )
+  : with-error-output
+    ( error-output-hook error-output?-hook error-flush-console-hook xt -- )
+    error-flush-console-hook @ { saved-flush-console-hook }
     error-emit-hook @ error-emit?-hook @
     { saved-output-hook saved-output?-hook }
     [:
+      swap error-flush-console-hook !
       swap error-emit?-hook ! swap error-emit-hook ! execute
     ;] try
+    saved-flush-console-hook error-flush-console-hook !
     saved-output?-hook error-emit?-hook !
     saved-output-hook error-emit-hook !
     ?raise
@@ -188,12 +207,12 @@ begin-module console
 
   \ Set the current output to null within an xt
   : with-null-output ( xt -- )
-    ['] drop ['] true rot with-output
+    ['] drop ['] true [: ;] rot with-output
   ;
 
   \ Set the current error output to null within an xt
   : with-null-error-output ( error-output-hook error-output?-hook xt -- )
-    ['] drop ['] true rot with-error-output
+    ['] drop ['] true [: ;] rot with-error-output
   ;
 
   \ Set the curent input to serial within an xt
@@ -207,6 +226,7 @@ begin-module console
   : with-serial-output ( xt -- )
     ['] int-io::int-io-internal::do-emit
     ['] int-io::int-io-internal::do-emit?
+    ['] int-io::int-io-internal::do-flush-console
     rot with-output
   ;
 
@@ -214,6 +234,7 @@ begin-module console
   : with-serial-error-output ( xt -- )
     ['] int-io::int-io-internal::do-emit
     ['] int-io::int-io-internal::do-emit?
+    ['] int-io::int-io-internal::do-flush-console
     rot with-error-output
   ;
 
@@ -227,25 +248,27 @@ begin-module console
 
   \ Set the current output to a stream within an xt
   : with-stream-output ( stream xt -- )
-    console-stream-data-size [: { data }
+    console-out-stream-data-size [: { data }
       swap data init-console-stream-output
-      data console-io data console-io? rot with-output
+      data console-io data console-io? rot data console-io-flush swap
+      with-output
       data flush-console-stream-output
     ;] with-aligned-allot
   ;
 
   \ Set the current error output to a stream within an xt
   : with-stream-error-output ( stream xt -- )
-    console-stream-data-size [: { data }
+    console-out-stream-data-size [: { data }
       swap data init-console-stream-output
-      data console-io data console-io? rot with-error-output
+      data console-io data console-io? rot data console-io-flush swap
+      with-error-output
       data flush-console-stream-output
     ;] with-aligned-allot
   ;
 
   \ Set the current error output to the current output
   : with-output-as-error-output ( xt -- )
-    emit-hook @ emit?-hook @ rot with-error-output
+    emit-hook @ emit?-hook @ rot flush-console-hook @ swap with-error-output
   ;
 
 end-module

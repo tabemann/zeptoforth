@@ -12,8 +12,8 @@
     <dc:publisher>Travis Bemann</dc:publisher>
     <dc:rights>2020, Travis Bemann</dc:rights>
     <dc:identifier id="unknown">unknown</dc:identifier>
-    <dc:date>2023-05-08T20:14:12Z</dc:date>
-    <meta property="dcterms:modified">2023-05-08T20:14:12Z</meta>
+    <dc:date>2023-05-19T22:06:00Z</dc:date>
+    <meta property="dcterms:modified">2023-05-19T22:06:00Z</meta>
     <meta property="ibooks:version"></meta>
     <meta property="ibooks:specified-fonts">true</meta>
     <meta property="ibooks:binding">true</meta>
@@ -84,26 +84,25 @@
     <item id="epub-59" href="words/slock.xhtml" media-type="application/xhtml+xml" />
     <item id="epub-60" href="words/spi.xhtml" media-type="application/xhtml+xml" />
     <item id="epub-61" href="words/stream.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-62" href="words/swd.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-63" href="words/systick.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-64" href="words/task.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-65" href="words/task_pool.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-66" href="words/temp.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-67" href="words/test.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-68" href="words/timer.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-69" href="words/tqueue.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-70" href="words/uart.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-71" href="words/value.xhtml" media-type="application/xhtml+xml" />
-    <item id="epub-72" href="words/wordlist.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-62" href="words/systick.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-63" href="words/task.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-64" href="words/task_pool.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-65" href="words/temp.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-66" href="words/test.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-67" href="words/timer.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-68" href="words/tqueue.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-69" href="words/uart.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-70" href="words/value.xhtml" media-type="application/xhtml+xml" />
+    <item id="epub-71" href="words/wordlist.xhtml" media-type="application/xhtml+xml" />
   </manifest>
   <spine toc="ncx" page-progression-direction="ltr">
     <itemref idref="epub-1" />
     <itemref idref="epub-20" />
     <itemref idref="epub-44" />
     <itemref idref="epub-39" />
-    <itemref idref="epub-72" />
+    <itemref idref="epub-71" />
     <itemref idref="epub-24" />
-    <itemref idref="epub-64" />
+    <itemref idref="epub-63" />
     <itemref idref="epub-16" />
     <itemref idref="epub-13" />
     <itemref idref="epub-47" />
@@ -111,13 +110,13 @@
     <itemref idref="epub-34" />
     <itemref idref="epub-30" />
     <itemref idref="epub-48" />
-    <itemref idref="epub-70" />
+    <itemref idref="epub-69" />
     <itemref idref="epub-15" />
     <itemref idref="epub-60" />
     <itemref idref="epub-36" />
     <itemref idref="epub-50" />
     <itemref idref="epub-54" />
-    <itemref idref="epub-68" />
+    <itemref idref="epub-67" />
     <itemref idref="epub-56" />
     <itemref idref="epub-31" />
     <itemref idref="epub-58" />
@@ -128,10 +127,10 @@
     <itemref idref="epub-18" />
     <itemref idref="epub-41" />
     <itemref idref="epub-27" />
-    <itemref idref="epub-71" />
+    <itemref idref="epub-70" />
     <itemref idref="epub-23" />
-    <itemref idref="epub-66" />
     <itemref idref="epub-65" />
+    <itemref idref="epub-64" />
     <itemref idref="epub-14" />
     <itemref idref="epub-35" />
     <itemref idref="epub-49" />
@@ -146,15 +145,14 @@
     <itemref idref="epub-52" />
     <itemref idref="epub-57" />
     <itemref idref="epub-61" />
-    <itemref idref="epub-69" />
-    <itemref idref="epub-63" />
+    <itemref idref="epub-68" />
+    <itemref idref="epub-62" />
     <itemref idref="epub-53" />
     <itemref idref="epub-17" />
     <itemref idref="epub-51" />
     <itemref idref="epub-21" />
     <itemref idref="epub-28" />
-    <itemref idref="epub-62" />
-    <itemref idref="epub-67" />
+    <itemref idref="epub-66" />
     <itemref idref="epub-37" />
     <itemref idref="epub-19" />
     <itemref idref="epub-29" />

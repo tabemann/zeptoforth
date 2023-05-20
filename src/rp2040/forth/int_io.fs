@@ -259,6 +259,7 @@ begin-module int-io
     ['] do-emit? emit?-hook !
     ['] do-emit? error-emit?-hook !
     ['] do-flush-console flush-console-hook !
+    ['] do-flush-console error-flush-console-hook !
   ;
   
   \ Enable interrupt-driven IO

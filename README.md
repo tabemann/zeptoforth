@@ -12,7 +12,7 @@ Its kernel has versions written in Thumb-1 assembly, for the RP2040, and Thumb-2
 
 ## Features
 
-The library of code included along with the zeptoforth kernel, which is present in its full form in `full` and `full_swdcom` builds, includes the following:
+The library of code included along with the zeptoforth kernel, which is present in its full form in `full`, `full_usb`, and `full_swdcom` builds, includes the following:
 
 * A priority-scheduled preemptive multitasker
 * Semaphores
@@ -36,6 +36,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 * SysTick support
 * User-reconfigurable processor exception vector support
 * Interrupt-driven serial IO
+* Optional USB CDC console IO (on the RP2040)
 * Rebooting via control-C on the console
 * GPIO support (including EXTI support on STM32 microcontrollers)
 * General UART support (in addition to serial console support)
@@ -84,7 +85,7 @@ To load the zeptoforth image (whether just the kernel or an image including prec
 
 Note the address referred to above. This will also reboot the board. In the case of the STM32F411 "Black Pill" board, if it was wedged prior to this, it may be necessary to remove power, apply power while holding down the BOOT0 button, keep the button held down while executing `st-flash erase` and `st-flash write`, and then instead of executing `st-flash reset` release the BOOT0 button and press the NRST button.
 
-To activate SeeedStudio XIAO RP2040-specific features (e.g. properly configuring LED support), after loading the `full` RP2040 zeptoforth UF2 file execute the following:
+To activate SeeedStudio XIAO RP2040-specific features (e.g. properly configuring LED support), after loading the `full` or `full_usb` RP2040 zeptoforth UF2 file execute the following:
 
     compile-to-flash
     true constant platform-xiao
@@ -92,7 +93,7 @@ To activate SeeedStudio XIAO RP2040-specific features (e.g. properly configuring
 
 Afterwards the `led` module will function properly for the SeeedStudio XIAO RP2040 (e.g. the red, green, and blue LED's will be off on boot).
 
-To activate SeeedStudio WIO RP2040-specified features (e.g. properly configuring LED support), after loading the `full` RP2040 zeptoforth UF2 file execute the following:
+To activate SeeedStudio WIO RP2040-specified features (e.g. properly configuring LED support), after loading the `full` or `full_usb` RP2040 zeptoforth UF2 file execute the following:
 
     compile-to-flash
     true constant platform-wio
@@ -120,8 +121,9 @@ Prebuilt binaries are in `bin/<version>/<platform>/` in release tarballs. They a
 
 where \<type> is one of:
 
-* `full` (full functionality compiled in except for swdcom support with a cornerstone to enable resetting functionality back to "factory" settings)
-* `full_swdcom` (full functionality compiled in including swdcom support with a cornerstone to enable resetting functionality back to "factory" settings)
+* `full` (full functionality compiled in except for USB and swdcom support with a cornerstone* to enable resetting functionality back to "factory" settings)
+* `full_usb` (full functionality compiled in including USB, and without swdcom, support with a cornerstone( to enable resetting functionality back to "factory" settings)
+* `full_swdcom` (full functionality compiled in including swdcom support with a cornerstone* to enable resetting functionality back to "factory" settings)
 * `mini` (i.e. without fixed number, allocator, scheduler, or disassembler support, without swdcom support)
 * `mini_swdcom` (i.e. without fixed number, allocator, scheduler, or disassembler support, including swdcom support)
 
@@ -135,6 +137,8 @@ and where \<platform> is one of
 
 Note that for the `rp2040` platform, to load code with the bootloader onto an RP2040-based board one needs a `.uf2` file rather than a `.bin` file, unlike the other platforms, which will be located in the same location. Note that these files contain a boot block with a CRC32 checksum. Also note that from release 0.35.0 on the `rp2040` platform does not have the `full_swdcom` or `mini_swdcom` builds as swdcom does not properly function on this platform.
 
+\* There is no cornerstone for STM32F411 builds, because a cornerstone would exhaust all the remaining flash space on these targets.
+
 ## Building the Kernel
 
 To build the kernel for each of the supported platforms, one first needs to install the gas and binutils arm-none-eabi toolchain along with Python 3.9 or later, and then execute:
@@ -145,11 +149,11 @@ to use the default version or:
 
     $ make VERSION=<version>
 
-This build a `zeptoforth.<platform>.bin`, a `zeptoforth.<platform>.ihex`, and a `zeptoforth.<platform>.elf` file for each supported platform. Additionally a `zeptoforth.rp2040.uf2` file will be built for the rp2040 platform. The `zeptoforth.<platform>.elf` file is of use if one wishes to do source debugging with gdb of the zeptoforth kernel, otherwise disregard it.
+This build a `zeptoforth.<platform>.bin`, a `zeptoforth.<platform>.ihex`, and a `zeptoforth.<platform>.elf` file for each supported platform. Additionally a `zeptoforth.rp2040.uf2` file will be built for the `rp2040` platform. The `zeptoforth.<platform>.elf` file is of use if one wishes to do source debugging with gdb of the zeptoforth kernel, otherwise disregard it.
 
 ## Console Access
 
-If one has Chrome or Chromium installed, one can control zeptoforth using the Forth web terminal [zeptocom.js](https://tabemann.github.io/zeptocomjs/zeptocom.html) using its default settings of 115200 baud, 8 data bits, 1 stop bit, no parity, no flow control, a target type of 'zeptoforth', and a newline mode of CRLF. This has been tested successfully on Linux and Windows, but does not appear to work on FreeBSD. Note that in addition to its online hosting, it also has a [GitHub repository](https://github.com/tabemann/zeptocomjs/). zeptocom.js enables multiple serial or USB CDC connections to be used simultaneously and allows multiple edit tabs, whose contents as wholes or parts can be uploaded over the console connection, to be used as once. It has support for #include directives (note without quotes or angle brackets) and automatic symbol replacement. It also has the ability to forcibly reboot zeptoforth via the 'Reboot' button, which reboots zeptoforth even if the console cannot be used provided that zeptoforth has not been completely wedged. It also has an 'Attention' function, which puts the microcontroller in a state to receive a command to execute even when the console is not being listened to; the only such commands currently are `z`, which sends an exception to the main task which, if uncaught or re-raised, will return control of the main task to the REPL, and `t`, which, when the task monitor has been started with `start-monitor` in the `monitor` module, displays information on all running tasks. zeptocom.js provides automatic upload synchronization, so code will be uploaded only as fastas the target running zeptoforth can accept it. Also, zeptocom.js in zeptoforth mode has automatic error detection, and will automatically stop uploading upon error detection.
+If one has Chrome or Chromium installed, one can control zeptoforth using the Forth web terminal [zeptocom.js](https://tabemann.github.io/zeptocomjs/zeptocom.html) using its default settings of 115200 baud, 8 data bits, 1 stop bit, no parity, no flow control, a target type of 'zeptoforth', and a newline mode of CRLF. Note that if one is using a USB CDC console with a `full_usb` build these terminal settings will be ignored and data will be transferred as fast as possible. This has been tested successfully on Linux and Windows, but does not appear to work on FreeBSD. Note that in addition to its online hosting, it also has a [GitHub repository](https://github.com/tabemann/zeptocomjs/). zeptocom.js enables multiple serial or USB CDC connections to be used simultaneously and allows multiple edit tabs, whose contents as wholes or parts can be uploaded over the console connection, to be used as once. It has support for #include directives (note without quotes or angle brackets) and automatic symbol replacement. It also has the ability to forcibly reboot zeptoforth via the 'Reboot' button, which reboots zeptoforth even if the console cannot be used provided that zeptoforth has not been completely wedged. It also has an 'Attention' function, which puts the microcontroller in a state to receive a command to execute even when the console is not being listened to; the only such commands currently are `z`, which sends an exception to the main task which, if uncaught or re-raised, will return control of the main task to the REPL, and `t`, which, when the task monitor has been started with `start-monitor` in the `monitor` module, displays information on all running tasks. zeptocom.js provides automatic upload synchronization, so code will be uploaded only as fastas the target running zeptoforth can accept it. Also, zeptocom.js in zeptoforth mode has automatic error detection, and will automatically stop uploading upon error detection.
 
 In addition to the use of zeptocom.js, there are other means by which one can use zeptoforth. For instance, to use the board on Linux, download and install [e4thcom](https://wiki.forth-ev.de/doku.php/en:projects:e4thcom) or [swdcom](https://github.com/crest/swdcom). One may also use [GNU Screen](https://www.gnu.org/software/screen/), or [picocom](https://github.com/npat-efault/picocom), but note that no upload synchronization or automatic error detection is provided by either GNU Screen or picocom. To use the board on xBSD, the same applies, except that e4thcom does not work under xBSD. To use the board on Windows, the recommended approach is to use zeptocom.js. On Windows one may also use TeraTerm, but the same considerations apply to TeraTerm as to GNU Screen or picocom.
 
@@ -157,7 +161,7 @@ Note that in swdcom, GNU Screen, picocom, TeraTerm, and other ordinary terminal 
 
 Additionally, in swdcom, GNU Screen, picocom, TeraTerm, and other ordinary terminal emulators, Control-T serves as an "attention" key, which puts the microcontroller into a state to receive further input to carry out some function even when the console is unavailable. Currently the only such function is Control-T `z`, which serves to send an exception to the main task that, if uncaught or re-raised so as to reach the REPL, will return control of the main task to the REPL. Note that this requires a functional system to work, and may not work in cases where Control-C can successfully reboot the microcontroller. Note that the 'Attention' button in zeptocom.js sends Control-T internally; the user must then enter `z` manually at the REPL prompt.
 
-The following applies if one is using e4thcom: If one is using an STM32F407 DISCOVERY, STM32F411 "Black Pill", or an RP2040-based board, attach a USB-to-serial converter to your machine (make sure you have the proper permissions to access its device file) and, for the STM32F407 DISCOVERY and STM32F411 "Black Pill" boards, attach the RXD pin on the converter to PA2 on the board and the TXD pin on the converter to PA3 on the board or, for an RP2040-based board, attach the RXD pin on the converter to GPIO0 on the board and the TXD pin on the converter to GPIO1 on the board with jumper cables. Then, from the zeptoforth base directory execute:
+The following applies if one is using e4thcom: If one is using an STM32F407 DISCOVERY, STM32F411 "Black Pill", or an RP2040-based board (if one is not using an `full_usb` build), attach a USB-to-serial converter to your machine (make sure you have the proper permissions to access its device file) and, for the STM32F407 DISCOVERY and STM32F411 "Black Pill" boards, attach the RXD pin on the converter to PA2 on the board and the TXD pin on the converter to PA3 on the board or, for an RP2040-based board, attach the RXD pin on the converter to GPIO0 on the board and the TXD pin on the converter to GPIO1 on the board with jumper cables. Then, from the zeptoforth base directory execute:
 
     $ e4thcom -t noforth -b B115200 -d <device, typically one of ttyACM0 or ttyUSB0>
 

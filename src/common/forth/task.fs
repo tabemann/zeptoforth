@@ -1564,6 +1564,7 @@ begin-module task
     error-emit-hook @ over ['] error-emit-hook for-task!
     error-emit?-hook @ over ['] error-emit?-hook for-task!
     flush-console-hook @ over ['] flush-console-hook for-task!
+    error-flush-console-hook @ over ['] error-flush-console-hook for-task!
     0 over ['] current-lock for-task!
     0 over ['] current-lock-held for-task!
     readied over task-state h!

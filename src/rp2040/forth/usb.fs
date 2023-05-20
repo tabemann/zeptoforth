@@ -778,7 +778,6 @@ begin-module usb
         buffer-control-val or to buffer-control-val
         USB_BUF_CTRL_LAST buffer-control-val or to buffer-control-val
         endpoint endpoint-next-pid @ 1 xor endpoint endpoint-next-pid !
-\        USB_EP_ENABLE endpoint endpoint-endpoint-control @ bis!
         buffer-control-val endpoint usb-update-buffer-control
       then
     ;
@@ -787,9 +786,7 @@ begin-module usb
     : usb-console-rx ( endpoint -- )
       [: { endpoint }
         endpoint endpoint-buffer-control @ @ { buffer-control-val }
-        [ USB_SIE_STATUS_DATA_SEQ_ERROR
-        USB_SIE_STATUS_RX_TIMEOUT or
-        USB_SIE_STATUS_BIT_STUFF_ERROR or
+        [ USB_SIE_STATUS_BIT_STUFF_ERROR
         USB_SIE_STATUS_CRC_ERROR or
         ] literal USB_SIE_STATUS bit@ not if
           buffer-control-val USB_BUF_CTRL_FULL and if
@@ -1147,7 +1144,7 @@ begin-module usb
 
     \ Get whether a byte is ready to be read
     : usb-key? ( -- key? )
-      usb-device-configd? 2 rx-empty? not and
+      usb-device-configd? @ rx-empty? not and
     ;
 
     \ Read a byte
@@ -1170,6 +1167,16 @@ begin-module usb
       until
     ;
 
+    \ Flush the console
+    : usb-flush-console ( -- )
+      begin
+        [:
+          [: tx-empty? endpoint1-in-ready? @ and ;] critical
+        ;] usb-in-core-lock with-core-lock
+        dup not if pause then
+      until
+    ;
+
   end-module> import
 
   \ Enable the usb console
@@ -1180,6 +1187,8 @@ begin-module usb
     ['] usb-emit emit-hook !
     ['] usb-emit? error-emit?-hook !
     ['] usb-emit error-emit-hook !
+    ['] usb-flush-console flush-console-hook !
+    ['] usb-flush-console error-flush-console-hook !
   ;
 
   \ Set the curent input to usb within an xt
@@ -1189,12 +1198,12 @@ begin-module usb
 
   \ Set the current output to usb within an xt
   : with-usb-output ( xt -- )
-    ['] usb-emit ['] usb-emit? rot with-output
+    ['] usb-emit ['] usb-emit? rot ['] usb-flush-console swap with-output
   ;
 
   \ Set the current error output to usb within an xt
   : with-usb-error-output ( xt -- )
-    ['] usb-emit ['] usb-emit? rot with-error-output
+    ['] usb-emit ['] usb-emit? rot ['] usb-flush-console swap with-error-output
   ;
   
 end-module> import
@@ -1206,4 +1215,4 @@ end-module> import
   usb-console
 ;
 
-reboot
+compile-to-ram
