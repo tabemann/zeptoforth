@@ -357,6 +357,11 @@ Emit a space
 
 Emit a newline
 
+##### `bl`
+( -- c )
+
+A space character
+
 ##### `type`
 ( b-addr u -- )
 

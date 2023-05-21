@@ -95,6 +95,9 @@ forth set-current
 \ Initialized value flag
 32 constant init-value-flag
 
+\ A space
+$20 constant bl
+
 \ DMB instruction
 : dmb ( -- ) [inlined] [ undefer-lit $F3BF h, $8F5F h, ] ;
 
