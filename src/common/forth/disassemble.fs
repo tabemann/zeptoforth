@@ -1455,6 +1455,11 @@ begin-module disassemble-internal
     ." YIELD" swap cond. 2drop
   ;
 
+  \ Parse a string
+  : p-start-string
+    ." STRING: " 2drop 2 + dup c@ over + 2 align dump
+  ;
+
   \ Commit to flash
   commit-flash
 
@@ -1587,6 +1592,7 @@ begin-module disassemble-internal
 
   \ All the 16-bit ops
   create all-ops16
+  ' p-start-string , %1111111111111111 h, start-string h,
   ' p-adc-reg-1 ,    %1111111111000000 h, %0100000101000000 h,
   ' p-add-imm-1 ,    %1111111000000000 h, %0001110000000000 h,
   ' p-add-imm-2 ,    %1111100000000000 h, %0011000000000000 h,
@@ -2008,14 +2014,18 @@ begin-module disassemble-internal
 
   \ Parse a 16-bit instruction to find local labels
   : parse-local16 ( op-addr low -- )
-    dup %1111000000000000 and %1101000000000000 = if
-      0_8_bf 1 lshift swap 4 + swap 9 extend + add-local
-    else
-      dup %1111100000000000 and %1110000000000000 = if
-	0 11 bitfield 1 lshift swap 4 + swap 12 extend + add-local
+    dup start-string <> if
+      dup %1111000000000000 and %1101000000000000 = if
+        0_8_bf 1 lshift swap 4 + swap 9 extend + add-local
       else
-	2drop
+        dup %1111100000000000 and %1110000000000000 = if
+          0 11 bitfield 1 lshift swap 4 + swap 12 extend + add-local
+        else
+          2drop
+        then
       then
+    else
+      2drop
     then
   ;
 
@@ -2071,7 +2081,12 @@ begin-module disassemble-internal
     all-ops16 begin
       dup @ 0<> if
 	2dup find-local16 if
-	  drop 2 + true true
+          drop
+          dup h@ start-string <> if
+            2 + true true
+          else
+            2 + dup c@ + 2 align true true
+          then
 	else
 	  [ 2 cells ] literal + false
 	then
@@ -2103,7 +2118,12 @@ begin-module disassemble-internal
     all-ops16 begin
       dup @ 0<> if
 	2dup disassemble16 if
-	  drop 2 + true true
+          drop
+          dup h@ start-string <> if
+            2 + true true
+          else
+            2 + dup c@ + 2 align true true
+          then
 	else
 	  [ 2 cells ] literal + false
 	then

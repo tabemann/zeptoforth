@@ -98,6 +98,9 @@ forth set-current
 \ A space
 $20 constant bl
 
+\ String marker
+$DEFE constant start-string
+
 \ DMB instruction
 : dmb ( -- ) [inlined] [ undefer-lit $F3BF h, $8F5F h, ] ;
 
@@ -1931,6 +1934,7 @@ commit-flash
 : compile-esc-cstring ( end-byte -- )
   undefer-lit
   reserve-branch swap
+  start-string h,
   here dup 1+
   compiling-to-flash? if flash-here! else ram-here! then swap
   here swap parse-esc-string

@@ -142,7 +142,7 @@ _compile_cstring:
 	movs r0, tos
 	pull_tos
 	movs r1, tos
-	movs tos, #4
+	movs tos, #8
 	push_tos
 	movs tos, #6
 	push {r0, r1}
@@ -150,12 +150,18 @@ _compile_cstring:
 	bl _current_here
 	pop {r0, r1}  
 	adds tos, tos, r0
-	adds tos, #3
+	adds tos, #7
 	movs r2, #1
 	tst tos, r2
 	bne 1f
 	push {r0, r1}
 	bl _asm_branch
+        push_tos
+        ldr tos, =0xBF00 @@ NOP
+        bl _current_comma_2
+        push_tos
+        ldr tos, =start_string
+        bl _current_comma_2
 	pop {r0, r1}
 	push_tos
 	movs tos, r1
@@ -166,6 +172,12 @@ _compile_cstring:
 1:	adds tos, #1
 	push {r0, r1}
 	bl _asm_branch
+        push_tos
+        ldr tos, =0xBF00 @@ NOP
+        bl _current_comma_2
+        push_tos
+        ldr tos, =start_string
+        bl _current_comma_2
 	pop {r0, r1}
 	push_tos
 	movs tos, r1

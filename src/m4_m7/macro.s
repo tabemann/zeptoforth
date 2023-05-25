@@ -58,6 +58,9 @@ dp 	.req r7
 	@@ Initialize the current RAM pointer
 	.set ram_current, ram_start
 	
+        @@ String marker
+        .equ start_string, 0xDEFE
+        
 	@@ Allot space in RAM
 	.macro allot name, size
 	.equ \name, ram_current
