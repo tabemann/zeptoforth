@@ -1457,7 +1457,7 @@ begin-module disassemble-internal
 
   \ Parse a string
   : p-start-string
-    ." STRING: " 2drop 2 + dup c@ over + 2 align dump
+    ." STRING: " 2drop 2 + dup c@ 1+ over + 2 align dump
   ;
 
   \ Commit to flash
@@ -2085,7 +2085,7 @@ begin-module disassemble-internal
           dup h@ start-string <> if
             2 + true true
           else
-            2 + dup c@ + 2 align true true
+            2 + dup c@ 1+ + 2 align true true
           then
 	else
 	  [ 2 cells ] literal + false
@@ -2122,7 +2122,7 @@ begin-module disassemble-internal
           dup h@ start-string <> if
             2 + true true
           else
-            2 + dup c@ + 2 align true true
+            2 + dup c@ 1+ + 2 align true true
           then
 	else
 	  [ 2 cells ] literal + false
