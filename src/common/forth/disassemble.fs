@@ -53,6 +53,10 @@ begin-module disassemble-internal
     drop 0
   ;
 
+  \ SB and SH
+  char B negate constant SB
+  char H negate constant SH
+  
   \ Commit to flash
   commit-flash
 
@@ -102,7 +106,14 @@ begin-module disassemble-internal
   ;
 
   \ Type a bit size
-  : size. ( size -- ) ?dup if emit then ;
+  : size. ( size -- )
+    case
+      0 of endof
+      SB of ." SB" endof
+      SH of ." SH" endof
+      emit
+    endcase
+  ;
 
   \ Generate words with a given size specified
   : w-size ( xt size "name" -- )
@@ -790,6 +801,46 @@ begin-module disassemble-internal
     ." SVC" csp. 0_8_bf ." #" val. drop
   ;
 
+  \ Parse an SXTB register instruction
+  : p-sxtb-reg-1
+    ." SXTB" csp. decode-and-reg-16 drop
+  ;
+
+  \ Parse an SXTH register instruction
+  : p-sxth-reg-1
+    ." SXTH" csp. decode-and-reg-16 drop
+  ;
+
+  \ Parse an UXTB register instruction
+  : p-uxtb-reg-1
+    ." UXTB" csp. decode-and-reg-16 drop
+  ;
+
+  \ Parse an UXTH register instruction
+  : p-uxth-reg-1
+    ." UXTH" csp. decode-and-reg-16 drop
+  ;
+
+  \ Parse a REV register instruction
+  : p-rev-reg-1
+    ." REV" csp. decode-and-reg-16 drop
+  ;
+
+  \ Parse a REV16 register instruction
+  : p-rev16-reg-1
+    ." REV16" csp. decode-and-reg-16 drop
+  ;
+
+  \ Parse a REVSH register instruction
+  : p-revsh-reg-1
+    ." REVSH" csp. decode-and-reg-16 drop
+  ;
+
+  \ Parse a ROR register instruction
+  : p-ror-reg-1
+    ." ROR" cssp. decode-and-reg-16 drop
+  ;
+
   \ Parse a B instruction
   : p-b-1
     dup 8_4_bf $F = if
@@ -1279,6 +1330,11 @@ begin-module disassemble-internal
 
   [then]
 
+  \ Parse an SEV instruction
+  : p-sev-1
+    ." SEV" swap cond. 2drop
+  ;
+  
   \ Parse an STR immediate instruction
   : p-str-imm-1
     ." STR" size. csp. decode-ldr-imm-1 drop
@@ -1384,9 +1440,19 @@ begin-module disassemble-internal
 
   [then]
 
+  \ Parse an WFE instruction
+  : p-wfe-1
+    ." WFE" swap cond. 2drop
+  ;
+  
   \ Parse an WFI instruction
   : p-wfi-1
     ." WFI" swap cond. 2drop
+  ;
+
+  \ Parse a YIELD instruction
+  : p-yield-1
+    ." YIELD" swap cond. 2drop
   ;
 
   \ Commit to flash
@@ -1457,6 +1523,9 @@ begin-module disassemble-internal
     char H ' p-ldr-reg-2 w-size p-ldr-reg-2-h
 
   [then]
+
+  SB ' p-ldr-reg-1 w-size p-ldr-reg-1-sb
+  SH ' p-ldr-reg-1 w-size p-ldr-reg-1-sh
   
   0 ' p-str-imm-1 w-size p-str-imm-1-w
   0 ' p-str-imm-2 w-size p-str-imm-2-w
@@ -1554,6 +1623,8 @@ begin-module disassemble-internal
   ' p-ldr-reg-1-b ,  %1111111000000000 h, %0101110000000000 h,
   ' p-ldr-imm-1-h ,  %1111100000000000 h, %1000100000000000 h,
   ' p-ldr-reg-1-h ,  %1111111000000000 h, %0101101000000000 h,
+  ' p-ldr-reg-1-sb , %1111111000000000 h, $5600 h,
+  ' p-ldr-reg-1-sh , %1111111000000000 h, $5E00 h,
   ' p-mov-reg-2 ,    %1111111111000000 h, %0000000000000000 h,
   ' p-lsl-imm-1 ,    %1111100000000000 h, %0000000000000000 h,
   ' p-lsl-reg-1 ,    %1111111111000000 h, %0100000010000000 h,
@@ -1567,8 +1638,13 @@ begin-module disassemble-internal
   ' p-orr-reg-1 ,    %1111111111000000 h, %0100001100000000 h,
   ' p-pop-1 ,        %1111111000000000 h, %1011110000000000 h,
   ' p-push-1 ,       %1111111000000000 h, %1011010000000000 h,
+  ' p-rev-reg-1 ,    %1111111111000000 h, $BA00 h,
+  ' p-rev16-reg-1 ,  %1111111111000000 h, $BA40 h,
+  ' p-revsh-reg-1 ,  %1111111111000000 h, $BAC0 h,
+  ' p-ror-reg-1 ,    %1111111111000000 h, $41C0 h,
   ' p-rsb-imm-1 ,    %1111111111000000 h, %0100001001000000 h,
   ' p-sbc-reg-1 ,    %1111111111000000 h, %0100000110000000 h,
+  ' p-sev-1 ,        %1111111111111111 h, $BF40 h,
   ' p-str-imm-1-w ,  %1111100000000000 h, %0110000000000000 h,
   ' p-str-imm-2-w ,  %1111100000000000 h, %1001000000000000 h,
   ' p-str-reg-1-w ,  %1111111000000000 h, %0101000000000000 h,
@@ -1580,8 +1656,14 @@ begin-module disassemble-internal
   ' p-sub-imm-2 ,    %1111100000000000 h, %0011100000000000 h,
   ' p-sub-reg-1 ,    %1111111000000000 h, %0001101000000000 h,
   ' p-svc ,          %1111111100000000 h, %1101111100000000 h,
+  ' p-sxtb-reg-1 ,   %1111111111000000 h, $B240 h,
+  ' p-sxth-reg-1 ,   %1111111111000000 h, $B200 h,
   ' p-tst-reg-1 ,    %1111111111000000 h, %0100001000000000 h,
+  ' p-uxtb-reg-1 ,   %1111111111000000 h, $B2C0 h,
+  ' p-uxth-reg-1 ,   %1111111111000000 h, $B280 h,
+  ' p-wfe-1 ,        %1111111111111111 h, %1011111100100000 h,
   ' p-wfi-1 ,        %1111111111111111 h, %1011111100110000 h,
+  ' p-yield-1 ,      %1111111111111111 h, %1011111100010000 h,
   0 ,
 
   \ All the 32-bit ops
