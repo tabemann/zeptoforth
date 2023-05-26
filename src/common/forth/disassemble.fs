@@ -115,6 +115,26 @@ begin-module disassemble-internal
     endcase
   ;
 
+  \ Output data in hex and ASCII
+  : data. { current end -- }
+    begin current end u< while
+      cr current h.8 space
+      current 16 + end min current ?do i c@ h.2 space loop
+      current 16 + end u> if
+        current 16 + end ?do ."    " loop
+      then
+      ." |"
+      current 16 + end min current ?do
+        i c@ dup $20 < over $7E > or if drop [char] . then emit
+      loop
+      current 16 + end u> if
+        current 16 + end ?do [char] . emit loop
+      then
+      ." |"
+      16 +to current
+    repeat
+  ;
+  
   \ Generate words with a given size specified
   : w-size ( xt size "name" -- )
     <builds , , does> 2@ execute
@@ -1457,7 +1477,7 @@ begin-module disassemble-internal
 
   \ Parse a string
   : p-start-string
-    ." STRING: " 2drop 2 + dup c@ 1+ over + 2 align dump
+    ." STRING: " 2drop 2 + dup c@ 1+ over + 2 align data.
   ;
 
   \ Commit to flash
