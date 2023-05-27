@@ -157,7 +157,10 @@
         
 	@@ Is BEL enabled
 	allot bel_enabled, 4
-	
+
+        @@ Are UART special keys enabled
+        allot uart_special_enabled, 4
+
 	@@ The prompt hook
 	allot prompt_hook, 4
 

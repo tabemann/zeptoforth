@@ -60,6 +60,10 @@ _serial_key:
 	push_tos
 	ldr r0, =UART0_BASE
 	ldrb tos, [r0, #UARTDR]
+        ldr r0, =uart_special_enabled
+        ldr r0, [r0]
+        cmp r0, #0
+        beq 2f
         cmp tos, #CTRL_C
         bne 2f
         bl _reboot

@@ -78,6 +78,14 @@ _bel_enabled:
 	bx lr
 	end_inlined
 
+        @@ Get the UART special enabled variable address
+        define_word "uart-special-enabled", visible_flag
+_uart_special_enabled:
+        push_tos
+        ldr tos, =uart_special_enabled
+        bx lr
+        end_inlined
+        
 	@@ Get the RAM dictionary base variable address
 	define_word "dict-base", visible_flag
 _dict_base:

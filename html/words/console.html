@@ -189,6 +189,11 @@
 <p>( xt – )</p>
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for USB console output for error output. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> for error output is restored after <em>xt</em> returns or an exception is raised.</p>
 </section>
+<section id="usb-special-enabled">
+<h3><code class="docutils literal notranslate"><span class="pre">usb-special-enabled</span></code><a class="headerlink" href="#usb-special-enabled" title="Permalink to this heading">¶</a></h3>
+<p>( – addr )</p>
+<p>Get the variable address of the USB console special character (control-C and control-T) handling enabled flag. This flag is -1 (enabled) by default;</p>
+</section>
 </section>
 <section id="swd">
 <h2><code class="docutils literal notranslate"><span class="pre">swd</span></code><a class="headerlink" href="#swd" title="Permalink to this heading">¶</a></h2>
@@ -224,6 +229,15 @@
 <h3><code class="docutils literal notranslate"><span class="pre">with-swd-error-output</span></code><a class="headerlink" href="#with-swd-error-output" title="Permalink to this heading">¶</a></h3>
 <p>( xt – )</p>
 <p>Call <em>xt</em> with <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> redirected for swdcom console output for error output. The previous redirection of <code class="docutils literal notranslate"><span class="pre">emit</span></code> and <code class="docutils literal notranslate"><span class="pre">emit?</span></code> for error output is restored after <em>xt</em> returns or an exception is raised.</p>
+</section>
+</section>
+<section id="forth">
+<h2><code class="docutils literal notranslate"><span class="pre">forth</span></code><a class="headerlink" href="#forth" title="Permalink to this heading">¶</a></h2>
+<p>These words are in the <code class="docutils literal notranslate"><span class="pre">forth</span></code> module:</p>
+<section id="uart-special-enabled">
+<h3><code class="docutils literal notranslate"><span class="pre">uart-special-enabled</span></code><a class="headerlink" href="#uart-special-enabled" title="Permalink to this heading">¶</a></h3>
+<p>( – addr )</p>
+<p>Get the variable address of the UART console special character (control-C and control-T) handling enabled flag. This flag is -1 (enabled) by default;</p>
 </section>
 </section>
 <section id="int-io">

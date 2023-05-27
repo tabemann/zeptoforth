@@ -28,6 +28,9 @@ begin-module usb
   core-lock import
   console import
 
+  \ Are USB special characters enabled
+  variable usb-special-enabled
+  
   begin-module usb-internal
 
     \ Invalid packet size exception
@@ -785,24 +788,29 @@ begin-module usb
           buffer-control-val USB_BUF_CTRL_FULL and if
             buffer-control-val USB_BUF_CTRL_LEN_MASK and { bytes }
             endpoint endpoint-buffer @ bytes over + swap ?do
-              i c@ dup ctrl-c = if
-                drop reboot
-              else
-                attention? @ if
-                  usb-out-core-lock release-core-lock
-                  [: attention-hook @ execute ;] try
-                  usb-out-core-lock claim-core-lock
-                  ?raise
+              i c@
+              usb-special-enabled @ if
+                dup ctrl-c = if
+                  drop reboot
                 else
-                  dup ctrl-t = if
+                  attention? @ if
                     usb-out-core-lock release-core-lock
-                    drop [: attention-start-hook @ execute ;] try
+                    [: attention-hook @ execute ;] try
                     usb-out-core-lock claim-core-lock
                     ?raise
                   else
-                    write-rx
+                    dup ctrl-t = if
+                      usb-out-core-lock release-core-lock
+                      drop [: attention-start-hook @ execute ;] try
+                      usb-out-core-lock claim-core-lock
+                      ?raise
+                    else
+                      write-rx
+                    then
                   then
                 then
+              else
+                write-rx
               then
             loop
           then
@@ -1063,6 +1071,8 @@ begin-module usb
     
     \ Initialize USB
     : init-usb ( -- )
+      true usb-special-enabled !
+      
       usb-out-core-lock init-core-lock
       usb-in-core-lock init-core-lock
 

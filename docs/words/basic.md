@@ -1513,26 +1513,6 @@ Return stack overflow exception
 
 Return stack underflow exception
 
-##### `xon`
-( -- )
-
-Send XON
-
-##### `xoff`
-( -- )
-
-Send XOFF
-
-##### `ack`
-( -- )
-
-Send ACK
-
-##### `nak`
-( -- )
-
-Send NAK
-
 ##### `bel`
 ( -- )
 

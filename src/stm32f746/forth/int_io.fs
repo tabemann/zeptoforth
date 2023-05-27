@@ -162,18 +162,23 @@ begin-module int-io
       begin
 	rx-full? not if
 	  USART1_ISR @ RXNE and if
-            USART1_RDR c@ dup ctrl-c = if
-              drop reboot false
-            else
-              attention? @ if
-                attention-hook @ execute false
+            USART1_RDR c@
+            uart-special-enabled @ if
+              dup ctrl-c = if
+                drop reboot false
               else
-                dup ctrl-t = if
-                  drop attention-start-hook @ execute false
+                attention? @ if
+                  attention-hook @ execute false
                 else
-                  write-rx false
+                  dup ctrl-t = if
+                    drop attention-start-hook @ execute false
+                  else
+                    write-rx false
+                  then
                 then
               then
+            else
+              write-rx false
             then
 	  else
 	    true

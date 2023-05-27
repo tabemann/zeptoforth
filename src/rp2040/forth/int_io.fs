@@ -170,18 +170,23 @@ begin-module int-io
       begin
 	rx-full? not if
 	  UART0_UARTFR_RXFE@ not if
-            UART0_UARTDR_DATA@ dup ctrl-c = if
-              drop reboot false
-            else
-              attention? @ if
-                attention-hook @ execute false
+            UART0_UARTDR_DATA@
+            uart-special-enabled @ if
+              dup ctrl-c = if
+                drop reboot false
               else
-                dup ctrl-t = if
-                  drop attention-start-hook @ execute false
+                attention? @ if
+                  attention-hook @ execute false
                 else
-                  write-rx false
+                  dup ctrl-t = if
+                    drop attention-start-hook @ execute false
+                  else
+                    write-rx false
+                  then
                 then
               then
+            else
+              write-rx false
             then
 	  else
 	    true

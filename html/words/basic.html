@@ -1560,26 +1560,6 @@ otherwise passing the specified argument through.</p>
 <p>( – )</p>
 <p>Return stack underflow exception</p>
 </section>
-<section id="xon">
-<h3><code class="docutils literal notranslate"><span class="pre">xon</span></code><a class="headerlink" href="#xon" title="Permalink to this heading">¶</a></h3>
-<p>( – )</p>
-<p>Send XON</p>
-</section>
-<section id="xoff">
-<h3><code class="docutils literal notranslate"><span class="pre">xoff</span></code><a class="headerlink" href="#xoff" title="Permalink to this heading">¶</a></h3>
-<p>( – )</p>
-<p>Send XOFF</p>
-</section>
-<section id="ack">
-<h3><code class="docutils literal notranslate"><span class="pre">ack</span></code><a class="headerlink" href="#ack" title="Permalink to this heading">¶</a></h3>
-<p>( – )</p>
-<p>Send ACK</p>
-</section>
-<section id="nak">
-<h3><code class="docutils literal notranslate"><span class="pre">nak</span></code><a class="headerlink" href="#nak" title="Permalink to this heading">¶</a></h3>
-<p>( – )</p>
-<p>Send NAK</p>
-</section>
 <section id="bel">
 <h3><code class="docutils literal notranslate"><span class="pre">bel</span></code><a class="headerlink" href="#bel" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
@@ -1960,23 +1940,23 @@ otherwise passing the specified argument through.</p>
 <p>( – )</p>
 <p>Set the console to display normal colors unless colors are disabled.</p>
 </section>
-<section id="id113">
-<h3><code class="docutils literal notranslate"><span class="pre">xon</span></code><a class="headerlink" href="#id113" title="Permalink to this heading">¶</a></h3>
+<section id="xon">
+<h3><code class="docutils literal notranslate"><span class="pre">xon</span></code><a class="headerlink" href="#xon" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Emit an XON character if <code class="docutils literal notranslate"><span class="pre">xon-xoff-enabled</span></code> is set to non-zero.</p>
 </section>
-<section id="id114">
-<h3><code class="docutils literal notranslate"><span class="pre">xoff</span></code><a class="headerlink" href="#id114" title="Permalink to this heading">¶</a></h3>
+<section id="xoff">
+<h3><code class="docutils literal notranslate"><span class="pre">xoff</span></code><a class="headerlink" href="#xoff" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Emit an XOFF character if <code class="docutils literal notranslate"><span class="pre">xon-xoff-enabled</span></code> is seto to zero.</p>
 </section>
-<section id="id115">
-<h3><code class="docutils literal notranslate"><span class="pre">ack</span></code><a class="headerlink" href="#id115" title="Permalink to this heading">¶</a></h3>
+<section id="ack">
+<h3><code class="docutils literal notranslate"><span class="pre">ack</span></code><a class="headerlink" href="#ack" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Emit an ACK character.</p>
 </section>
-<section id="id116">
-<h3><code class="docutils literal notranslate"><span class="pre">nak</span></code><a class="headerlink" href="#id116" title="Permalink to this heading">¶</a></h3>
+<section id="nak">
+<h3><code class="docutils literal notranslate"><span class="pre">nak</span></code><a class="headerlink" href="#nak" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
 <p>Emit a NAK character.</p>
 </section>
@@ -1985,8 +1965,8 @@ otherwise passing the specified argument through.</p>
 <p>( – addr )</p>
 <p>The emit hook user variable</p>
 </section>
-<section id="id117">
-<h3><code class="docutils literal notranslate"><span class="pre">emit?-hook</span></code><a class="headerlink" href="#id117" title="Permalink to this heading">¶</a></h3>
+<section id="id113">
+<h3><code class="docutils literal notranslate"><span class="pre">emit?-hook</span></code><a class="headerlink" href="#id113" title="Permalink to this heading">¶</a></h3>
 <p>( – addr )</p>
 <p>The emit? hook user variable</p>
 </section>
@@ -1995,8 +1975,8 @@ otherwise passing the specified argument through.</p>
 <p>( – addr )</p>
 <p>The key hook user variable</p>
 </section>
-<section id="id118">
-<h3><code class="docutils literal notranslate"><span class="pre">key?-hook</span></code><a class="headerlink" href="#id118" title="Permalink to this heading">¶</a></h3>
+<section id="id114">
+<h3><code class="docutils literal notranslate"><span class="pre">key?-hook</span></code><a class="headerlink" href="#id114" title="Permalink to this heading">¶</a></h3>
 <p>( – addr )</p>
 <p>The key? hook user variable</p>
 </section>
@@ -2005,8 +1985,8 @@ otherwise passing the specified argument through.</p>
 <p>( – addr )</p>
 <p>The error emit hook user variable</p>
 </section>
-<section id="id119">
-<h3><code class="docutils literal notranslate"><span class="pre">error-emit?-hook</span></code><a class="headerlink" href="#id119" title="Permalink to this heading">¶</a></h3>
+<section id="id115">
+<h3><code class="docutils literal notranslate"><span class="pre">error-emit?-hook</span></code><a class="headerlink" href="#id115" title="Permalink to this heading">¶</a></h3>
 <p>( – addr )</p>
 <p>The error emit? hook user variable</p>
 </section>

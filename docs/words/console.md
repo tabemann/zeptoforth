@@ -156,6 +156,11 @@ Call *xt* with `emit` and `emit?` redirected for USB console output. The previou
 
 Call *xt* with `emit` and `emit?` redirected for USB console output for error output. The previous redirection of `emit` and `emit?` for error output is restored after *xt* returns or an exception is raised.
 
+##### `usb-special-enabled`
+( -- addr )
+
+Get the variable address of the USB console special character (control-C and control-T) handling enabled flag. This flag is -1 (enabled) by default;
+
 ### `swd`
 
 The following words are in the `swd` module; note that they are only available for `full_swdcom` and `mini_swdcom` builds:
@@ -191,6 +196,15 @@ Call *xt* with `emit` and `emit?` redirected for swdcom console output. The prev
 ( xt -- )
 
 Call *xt* with `emit` and `emit?` redirected for swdcom console output for error output. The previous redirection of `emit` and `emit?` for error output is restored after *xt* returns or an exception is raised.
+
+### `forth`
+
+These words are in the `forth` module:
+
+##### `uart-special-enabled`
+( -- addr )
+
+Get the variable address of the UART console special character (control-C and control-T) handling enabled flag. This flag is -1 (enabled) by default;
 
 ### `int-io`
 
