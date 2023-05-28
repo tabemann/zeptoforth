@@ -122,11 +122,17 @@ begin-module cyw43-spi
 
     \ Constructor
     :noname { clk dio pio-addr sm pio self -- }
+
+      \ Initialize the superclass
       self <object>->new
+
+      \ Set up fields
       pio self cyw43-pio !
       sm self cyw43-sm !
       dio self cyw43-dio !
       pio-addr self cyw43-pio-addr !
+
+      \ Set up the DIO pin
       false dio PADS_BANK0_PUE!
       false dio PADS_BANK0_PDE!
       true dio PADS_BANK0_SCHMITT!
@@ -134,37 +140,43 @@ begin-module cyw43-spi
       DRIVE_12MA dio PADS_BANK0_DRIVE!
       true dio PADS_BANK0_SLEWFAST!
 
+      \ Set up the CLK pin
       DRIVE_12MA clk PADS_BANK0_DRIVE!
       true clk PADS_BANK0_DRIVE!
 
-      sm pio sm-disable
+      \ Disable the PIO state machine
+      sm bit pio sm-disable
 
+      \ Set up the PIO program
       cyw43-pio-program 8 pio-addr pio pio-instr-relocate-mem!
       pio-addr sm pio sm-addr!
       pio-addr pio-addr 8 + sm pio sm-wrap!
 
-      dio 1 pins-pio-alternate
-      clk 1 pins-pio-alternate
-      
+      \ Configure the pins to be PIO output, input, set, and sidset pins
       dio 1 sm pio sm-out-pins!
       dio sm pio sm-in-pin-base!
       dio 1 sm pio sm-set-pins!
       clk 1 sm pio sm-sideset-pins!
-      
+
+      \ Set the output shift direction and autopush
       left sm pio sm-out-shift-dir
       on sm pio sm-autopush!
 
+      \ Set the input shift direction and autopull
       left sm pio sm-in-shift-dir
       on sm pio sm-autopull!
 
+      \ Set the clock divisor, i.e. 62.5 MHz
       0 2 sm pio sm-clkdiv!
 
+      \ Initialize the CLK and DIO pins' initial direction (to output) and value
       out clk sm pio sm-pindir!
       out dio sm pio sm-pindir!
       off clk sm pio sm-pin!
       off dio sm pio sm-pin!
 
-      sm pio sm-enable
+      \ Enable the PIO state machine
+      sm bit pio sm-enable
       
     ; define new
 
