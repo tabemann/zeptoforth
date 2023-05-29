@@ -22,9 +22,14 @@ begin-module cyw43-runner
 
   oo import
   cyw43-consts import
+  cyw43-structs import
   cyw43-bus import
+  cyw43-ioctl import
   cyw43-nvram import
-
+  chan import
+  lock import
+  task import
+  
   \ Core is not up exception
   : x-core-not-up ( -- ) cr ." core is not up" ;
 
@@ -33,6 +38,15 @@ begin-module cyw43-runner
 
   \ CYW43 log shared memory size
   1024 constant cyw43-log-shm-size
+
+  \ Receive MTU count
+  2 constant rx-mtu-count
+
+  \ Transmit MTU count
+  2 constant tx-mtu-count
+
+  \ CYW43 scratchpad buffer size
+  4096 constant cyw43-scratch-size
   
   \ CYW43 log class
   <object> begin-class <cyw43-log>
@@ -87,8 +101,38 @@ begin-module cyw43-runner
     \ CYW43 log
     <cyw43-log> class-size member cyw43-log
 
+    \ CYW43 receive lock
+    lock-size member cyw43-rx-lock
+
+    \ CYW43 transmit lock
+    lock-size member cyw43-tx-lock
+
     \ CYW43 shared memory log buffer
-    cyw43-log-shm-size member cyw43-log-shm-buf
+    cyw43-scratch-size member cyw43-scratch-buf
+
+    \ Receive MTU channel
+    mtu-size rx-mtu-count chan-size cell align member cyw43-rx-chan
+
+    \ Receive size channel
+    cell rx-mtu-count chan-size cell align member cyw43-rx-size-chan
+    
+    \ Transmit MTU channel
+    mtu-size tx-mtu-count chan-size cell align member cyw43-tx-chan
+
+    \ Transmit size channel
+    cell tx-mtu-count chan-size cell align member cyw43-tx-size-chan
+
+    \ CYW43 ioctl state
+    <cyw43-ioctl> class-size member cyw43-ioctl-state
+
+    \ ioctl id
+    2 member cyw43-ioctl-id
+
+    \ sdpcm sequence
+    1 member cyw43-sdpcm-seq
+
+    \ sdpcm sequence maximum
+    1 member cyw43-sdpcm-seq-max
     
     \ Initialize the CYW43
     method init-cyw43-runner ( fw-addr fw-bytes self -- )
@@ -97,8 +141,44 @@ begin-module cyw43-runner
     method init-cyw43-log-shm ( self -- )
 
     \ Read the CYW43 firmware log
-    method read-cyw43-log
+    method read-cyw43-log ( self -- )
 
+    \ Run the CYW43
+    method run-cyw43 ( self -- )
+
+    \ Handle CYW43 IRQ's
+    method handle-cyw43-irq ( buf self -- )
+
+    \ Handle F2 events while status register is set
+    method check-cyw43-status ( buf self -- )
+
+    \ Handle CYW43 received packet
+    method handle-cyw43-rx ( addr bytes self -- )
+
+    \ Handle CYW43 control packet
+    method handle-cyw43-control-pkt ( addr bytes self -- )
+
+    \ Handle CYW43 event packet
+    method handle-cyw43-event-pkt ( addr bytes self -- )
+
+    \ Handle CYW43 data packet
+    method handle-cyw43-data-pkt ( addr bytes self -- )
+
+    \ Enqueue received data
+    method put-cyw43-rx ( addr bytes self -- )
+
+    \ Dequeue received data
+    method get-cyw43-rx ( addr self -- bytes )
+
+    \ Poll for received data
+    method poll-cyw43-rx ( addr self -- bytes|0 )
+
+    \ Enqueue data to transmit
+    method put-cyw43-tx ( addr bytes self -- )
+
+    \ Poll for data to transmit
+    method poll-cyw43-tx ( addr self -- bytes|0 )
+    
   end-class
 
   \ Implement the CYW43 runner class
@@ -110,11 +190,33 @@ begin-module cyw43-runner
       \ Initialize the superclass
       self <object>-new
 
+      \ Initialize the receive lock
+      self cyw43-rx-lock init-lock
+
+      \ Initialize the transmit lock
+      self cyw43-tx-lock init-lock
+
+      \ Initialize the receive channels
+      mtu-size rx-mtu-count self cyw43-rx-chan init-chan
+      cell rx-mtu-count self cyw43-rx-size-chan init-chan
+
+      \ Initialize the transmit channels
+      mtu-size tx-mtu-count self cyw43-tx-chan init-chan
+      cell tx-mtu-count self cyw43-tx-size-chan init-chan
+
       \ Instantiate the bus
       pwr clk dio pio-addr sm pio <cyw43-bus> self cyw43-bus init-object
 
       \ Instantiate the log
       <cyw43-log> self cyw43-log init-object
+
+      \ Instantiate the ioctl state
+      <cyw43-ioctl> self cyw43-ioctl-state init-object
+
+      \ Initialize members
+      0 self cyw43-ioctl-id h!
+      0 self cyw43-sdpcm-seq c!
+      0 self cyw43-sdpcm-seq-max c!
       
     ; define new
 
@@ -224,13 +326,13 @@ begin-module cyw43-runner
 
         \ Read entire buf for now. We could read only what we need, but then
         \ we run into annoying alignment issues
-        self cyw43-log-shm-buf cyw43-log-shm-size log sml-buf @
+        self cyw43-scratch-buf cyw43-log-shm-size log sml-buf @
         self cyw43-bus cyw43-bp>
 
         begin log sml-idx @ self cyw43-log cyw43-log-last-idx @ <> while
 
           \ Read a byte from the buffer
-          self cyw43-log-shm-buf self cyw43-log cyw43-log-last-idx @ + c@ { b }
+          self cyw43-scratch-buf self cyw43-log cyw43-log-last-idx @ + c@ { b }
           
           b $0D = b $0A = if
             
@@ -263,6 +365,223 @@ begin-module cyw43-runner
       ;] with-aligned-allot
       
     ; define read-cyw43-log
+
+    \ Run the CYW43
+    :noname ( self -- )
+      1 [: { self }
+        begin
+          self read-cyw43-log
+          self cyw43-has-credit? if
+            self cyw43-ioctl-state cyw43-ioctl-pending? if
+
+              \ Handle a pending ioctl
+              self cyw43-ioctl-state pioctl-kind @
+              self cyw43-ioctl-state pioctl-cmd @
+              self cyw43-ioctl-state pioctl-iface @
+              self cyw43-ioctl-state pioctl-buf-addr @
+              self cyw43-ioctl-state pioctl-buf-size @
+              self send-cyw43-ioctl
+              self cyw43-scratch-buf self check-cyw43-status
+              
+            else
+              self cyw43-scratch-buf self poll-cyw43-tx { packet-bytes }
+              packet-bytes if
+
+                \ Handle a packet to transmit
+
+                \ First calculate the size and sequence number
+                sdpcm-header-size 2 + bdc-header-size + packet-bytes +
+                { total-len }
+                self cyw43-spdcm-seq c@ { seq }
+                seq 1+ self cyw43-spdcm-seq c!
+
+                \ First move the packet data in-buffer to avoid needing another
+                \ buffer
+                self cyw43-scratch-buf { buf }
+                buf dup total-len + packet-bytes - packet-bytes move
+
+                \ Fill the sdpcm header data
+                total-len buf sdpcmh-len h!
+                total-len not buf sdpcmh-len-inv h!
+                seq buf sdpcmh-hsequence c!
+                CHANNEL_TYPE_DATA buf sdpcmh-channel-and-flags c!
+                0 buf sdpcmh-next-length c!
+                sdpcm-header-size 2 + buf sdpcmh-header-length c!
+                0 buf sdpcmh-wireless-flow-control c!
+                0 buf sdpcmh-bus-data-credit c!
+                0 buf sdpcmh-reserved c!
+                0 buf sdpcmh-reserved 1+ c!
+
+                \ Then fill the bdc header data
+                buf sdpcm-header-size + 2 + { bdc-buf }
+                [ BDC_VERSION BDC_VERSION_SHIFT lshift ] literal
+                bdc-buf bdch-flags c!
+                0 bdc-buf bdch-priority c!
+                0 bdc-buf bdch-flags2 c!
+                0 bdc-buf bdch-data-offset c!
+
+                \ Now we transmit the data
+                buf total-len 4 align self cyw43-bus >cyw43-wlan
+
+                \ And now we check the status
+                buf self check-cyw43-status
+                
+              else
+                self cyw43-bus cyw43-event-ready? if
+                  self cyw43-scratch-buf self handle-cyw43-irq
+                else
+                  pause
+                then
+              then
+            then
+          else
+            cr ." TX stalled"
+            self cyw43-bus wait-cyw43-event
+            self cyw43-scratch-buf self handle-cyw43-irq
+          then
+        again
+      ;] 1024 512 512 spawn run
+    ; define run-cyw43
+
+    \ Handle CYW43 IRQ's
+    :noname { buf self -- }
+      FUNC_BUS REG_BUS_INTERRUPT self cyw43-bus cyw43-16> { irq }
+      cr ." irq " irq h.4
+      irq IRQ_FS_PACKET_AVAILABLE and if buf self check-cyw43-status then
+      irq IRQ_DATA_UNAVAILABLE and if
+        cr ." IRQ DATA_UNAVAILABLE, clearing..."
+        1 FUNC_BUS REG_BUS_INTERRUPT self cyw43-bus >cyw43-16
+      then
+    ; define handle-cyw43-irq
+
+    \ Handle F2 events while status register is set
+    :noname { buf self -- }
+      begin
+        self cyw43-bus cyw43-status@ { status }
+        cr ." check status " status h.8
+        status STATUS_F2_PKT_AVAILABLE and if
+          status STATUS_F2_PKT_LEN_MASK and
+          STATUS_F2_PKT_LEN_SHIFT lshift { len }
+          buf len self cyw43-bus cyw43-wlan>
+          buf len self handle-cyw43-rx
+          false
+        else
+          true
+        then
+      until
+    ; define check-cyw43-status
+
+    \ Handle CYW43 received packet
+    :noname { addr bytes self -- }
+
+      \ Validate the SDPCM header
+      bytes sdpcm-header-size < if
+        cr ." packet too short, len=" bytes . exit
+      then
+      addr sdpcmh-len h@ addr sdpcm-len-inv h@ not $FFFF and <> if
+        cr ." len inv mismatch" exit
+      then
+      addr sdpcmh-len h@ bytes <> if
+        cr ." len from header doesn't match len from spi"
+      then
+      
+      addr self update-cyw43-credit
+
+      \ Handle some channel types
+      addr sdpcmh-channel-and-flags c@ $0F and case
+        CHANNEL_TYPE_CONTROL of addr bytes self handle-cyw43-control-pkt endof
+        CHANNEL_TYPE_EVENT of addr bytes self handle-cyw43-event-pkt endof
+        CHANNEL_TYPE_DATA of addr bytes self handle-cyw43-data-pkt endof
+      endcase
+      
+    ; define handle-cyw43-rx
+    
+    \ Handle CYW43 control packet
+    :noname { addr bytes self -- }
+      bytes cdc-header-size < if exit then
+      addr cdch-id h@ self cyw43-ioctl-id h@ = if
+        addr cdch-status @ if
+          cr ." IOCTL error " addr cdch-status @ h.8
+        else
+          addr cdc-header-size + bytes cdc-header-size -
+          self cyw43-ioctl-state cyw43-ioctl-done
+        then
+      then
+    ; define handle-cyw43-control-pkt
+
+    \ Handle CYW43 event packet
+    :noname { addr bytes self -- }
+      bytes bdc-header-size < if
+        cr ." BDC event, incomplete header" exit
+      then
+      bdc-header-size +to addr
+      [ bdc-header-size negate ] literal +to bytes
+      bytes event-header-size < if
+        cr ." BDC event, incomplete data" exit
+      then
+      \ ADD MORE HERE
+    ; define handle-cyw43-event-pkt
+
+    \ Handle CYW43 data packet
+    :noname { addr bytes self -- }
+      bytes bdc-header-size < if exit then
+      addr bdch-data-offset c@ bdc-header-size + { data-offset }
+      addr data-offset + bytes data-offset - self put-cyw43-rx
+    ; define handle-cyw43-data-pkt
+
+    \ Enqueue received data
+    :noname ( addr bytes self -- )
+      [: { addr bytes self }
+        addr bytes self cyw43-rx-chan send-chan
+        bytes cell self cyw43-rx-size-chan send-chan
+      ;] over cyw43-rx-lock with-lock
+    ; define put-cyw43-rx
+
+    \ Dequeue received data
+    :noname ( addr self -- bytes )
+      [: { addr self }
+        addr mtu-size self cyw43-rx-chan recv-chan drop
+        0 { W^ bytes }
+        bytes cell self cyw43-rx-chan recv-chan drop
+        bytes @
+      ;] over cyw43-rx-lock with-lock
+    ; define get-cyw43-rx
+
+    \ Poll for received data
+    :noname ( addr self -- bytes|0 )
+      [: { addr self }
+        self cyw43-rx-chan chan-empty? not if
+          addr mtu-size self cyw43-rx-chan recv-chan drop
+          0 { W^ bytes }
+          bytes cell self cyw43-rx-chan recv-chan drop
+          bytes @
+        else
+          0
+        then
+      ;] over cyw43-rx-lock with-lock
+    ; define poll-cyw43-rx
+
+    \ Enqueue data to transmit
+    :noname ( addr self -- )
+      [: { addr bytes self }
+        addr bytes self cyw43-tx-chan send-chan
+        bytes cell self cyw43-tx-size-chan send-chan
+      ;] over cyw43-tx-lock with-lock
+    ; define put-cyw43-tx
+
+    \ Poll for data to transmit
+    :noname ( addr self -- bytes|0 )
+      [: { addr self }
+        self cyw43-tx-chan chan-empty? not if
+          addr mtu-size self cyw43-tx-chan recv-chan drop
+          0 { W^ bytes }
+          bytes cell self cyw43-tx-chan recv-chan drop
+          bytes @
+        else
+          0
+        then
+      ;] over cyw43-tx-lock with-lock
+    ; define poll-cyw43-tx
 
   end-class
   

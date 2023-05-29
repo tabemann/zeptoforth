@@ -126,13 +126,13 @@ begin-module cyw43-structs
     field: dh-crc
   end-structure
 
-  pub const DOWNLOAD_FLAG_NO_CRC: u16 = 0x0001;
-  pub const DOWNLOAD_FLAG_BEGIN: u16 = 0x0002;
-  pub const DOWNLOAD_FLAG_END: u16 = 0x0004;
-  pub const DOWNLOAD_FLAG_HANDLER_VER: u16 = 0x1000;
+  $0001 constant DOWNLOAD_FLAG_NO_CRC
+  $0002 constant DOWNLOAD_FLAG_BEGIN
+  $0004 constant DOWNLOAD_FLAG_END
+  $1000 constant DOWNLOAD_FLAG_HANDLER_VER
 
   \ Country Locale Matrix (CLM)
-  pub const DOWNLOAD_TYPE_CLM: u16 = 2;
+  2 constant DOWNLOAD_TYPE_CLM
 
   begin-structure country-info-size
     4 +field ci-country-abbrev

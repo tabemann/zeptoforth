@@ -20,6 +20,9 @@
 
 begin-module cyw43-consts
 
+  \ MTU size
+  1500 constant mtu-size
+
   0 constant FUNC_BUS
   1 constant FUNC_BACKPLANE
   2 constant FUNC_WLAN

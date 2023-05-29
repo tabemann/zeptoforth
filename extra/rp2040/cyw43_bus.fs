@@ -43,6 +43,9 @@ begin-module cyw43-bus
     addr $1FFFF and 11 lshift or
     len $7FF and or
   ;
+
+  \ Maximum WLAN transmit size
+  sdpcm-header-size bdc-header-size + mtu-size + 6 + 4 align constant wlan-size
   
   \ CYW43 bus class
   <object> begin-class <cyw43-bus>
@@ -59,11 +62,20 @@ begin-module cyw43-bus
     \ The CYW43 backplane window
     cell member cyw43-bp-window
 
+    \ WLAN transmit buffer
+    wlan-size member cyw43-wlan-tx-buf
+
     \ Initialize the CYW43 bus interface
     method init-cyw43-bus ( self -- )
 
     \ Get the CYW43 status
     method cyw43-status@ ( self -- status )
+
+    \ Is CYW43 event ready
+    method cyw43-event-ready? ( self -- ready? )
+
+    \ Wait for CYW43 event
+    method wait-cyw43-event ( self -- )
     
     \ Read bytes from the WLAN
     method cyw43-wlan> ( buffer bytes self -- )
@@ -206,6 +218,14 @@ begin-module cyw43-bus
     \ Get the CYW43 status
     :noname ( self -- status ) cyw43-status @ ; define cyw43-status@
     
+    \ Is CYW43 event ready
+    :noname { self -- ready? } false ; define cyw43-event-ready?
+
+    \ Wait for CYW43 event
+    :noname { self -- }
+      begin self cyw43-event-ready? until
+    ; define wait-cyw43-event
+
     \ Read bytes from the WLAN
     :noname ( buffer bytes self -- )
       bytes 3 and if
@@ -222,17 +242,16 @@ begin-module cyw43-bus
     ; define cyw43-wlan>
 
     \ Write bytes to the WLAN
-    :noname ( buffer bytes self -- )
-      over 4 align cell+ [: { buffer bytes self real-buffer }
-        CYW43_WRITE INC_ADDR FUNC_WLAN 0 bytes 4 align cyw43-cmd-word { cmd }
-        cmd real-buffer !
-        buffer real-buffer cell+ bytes move
-        bytes 3 and if
-          real-buffer cell+ bytes + bytes 4 align bytes - 0 fill
-        then
-        real-buffer bytes cell+ 4 align 2 rshift self cyw43-spi >cyw43-msg
-        self cyw43-status !
-      ;] with-aligned-allot
+    :noname { buffer bytes self -- }
+      CYW43_WRITE INC_ADDR FUNC_WLAN 0 bytes 4 align cyw43-cmd-word { cmd }
+      cmd self cyw43-wlan-tx-buf !
+      buffer self cyw43-wlan-tx-buf cell+ bytes move
+      bytes 3 and if
+        self cyw43-wlan-tx-buf cell+ bytes + bytes 4 align bytes - 0 fill
+      then
+      self cyw43-wlan-tx-buf bytes cell+ 4 align 2 rshift self cyw43-spi
+      >cyw43-msg
+      self cyw43-status !
     ; define >cyw43-wlan
     
     \ Read data from the backplane
