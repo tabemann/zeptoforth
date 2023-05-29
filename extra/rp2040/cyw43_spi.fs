@@ -24,6 +24,7 @@ begin-module cyw43-spi
   pio import
   dma import
   dma-pool import
+  cyw43-consts import
 
   begin-module cyw43-spi-internal
     
@@ -121,6 +122,9 @@ begin-module cyw43-spi
       method cyw43-dio-pindir! ( pindir self -- )
       
     end-module
+
+    \ Initialize the CYW43 SPI interface
+    method init-cyw43-spi ( self -- )
     
     \ Send a message
     method >cyw43-msg ( addr count self -- status )
@@ -147,6 +151,28 @@ begin-module cyw43-spi
 
       \ Allocate our DMA channel
       allocate-dma self cyw43-dma-channel !
+      
+    ; define new
+
+    \ Destroy an SPI device
+    :noname { self -- }
+
+      \ Free our DMA channel
+      self cyw43-dma-channel @ free-dma
+
+      \ Destroy our superclass
+      self <object>->destroy
+      
+    ; define destroy
+
+    \ Initialize the CYW43 SPI interface
+    :noname { self -- }
+
+      \ Get the values we need
+      self cyw43-pio @ { pio }
+      self cyw43-sm @ { sm }
+      self cyw43-dio @ { dio }
+      self cyw43-pio-addr @ { pio-addr }
 
       \ Set up the DIO pin
       false dio PADS_BANK0_PUE!
@@ -192,20 +218,9 @@ begin-module cyw43-spi
       off dio sm pio sm-pin!
 
       \ Enable the PIO state machine
-      sm bit pio sm-enable
+      sm bit pio sm-enable      
       
-    ; define new
-
-    \ Destroy an SPI device
-    :noname { self -- }
-
-      \ Free our DMA channel
-      self cyw43-dma-channel @ free-dma
-
-      \ Destroy our superclass
-      self <object>->destroy
-      
-    ; define destroy
+    ; define init-cyw43-spi
 
     \ Configure a transfer
     :noname { write-cells read-cells self -- }
