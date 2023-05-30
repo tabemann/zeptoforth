@@ -23,6 +23,7 @@ begin-module cyw43-runner
   oo import
   cyw43-consts import
   cyw43-structs import
+  cyw43-events import
   cyw43-bus import
   cyw43-ioctl import
   cyw43-nvram import
@@ -44,6 +45,9 @@ begin-module cyw43-runner
 
   \ Transmit MTU count
   2 constant tx-mtu-count
+
+  \ Event message count
+  2 constant event-count
 
   \ CYW43 scratchpad buffer size
   4096 constant cyw43-scratch-size
@@ -107,6 +111,9 @@ begin-module cyw43-runner
     \ CYW43 transmit lock
     lock-size member cyw43-tx-lock
 
+    \ CYW43 event lock
+    lock-size member cyw43-event-lock
+
     \ CYW43 shared memory log buffer
     cyw43-scratch-size member cyw43-scratch-buf
 
@@ -122,8 +129,17 @@ begin-module cyw43-runner
     \ Transmit size channel
     cell tx-mtu-count chan-size cell align member cyw43-tx-size-chan
 
+    \ Event message channel
+    event-message-size event-count chan-size cell align member cyw43-event-chan
+
     \ CYW43 ioctl state
     <cyw43-ioctl> class-size member cyw43-ioctl-state
+
+    \ CYW43 event mask
+    <cyw43-event-mask> class-size member cyw43-event-mask
+
+    \ Event message being constructed
+    event-message-size member cyw43-event-message-scratch
 
     \ ioctl id
     2 member cyw43-ioctl-id
@@ -164,6 +180,24 @@ begin-module cyw43-runner
     \ Handle CYW43 data packet
     method handle-cyw43-data-pkt ( addr bytes self -- )
 
+    \ Update credit
+    method update-cyw43-credit ( addr self -- )
+
+    \ Do we have credit
+    method cyw43-has-credit? ( self -- credit? )
+
+    \ Send an ioctl
+    method send-cyw43-ioctl ( kind cmd iface buf-addr buf-size self -- )
+
+    \ Disable a core
+    method disable-cyw43-core ( core self -- )
+
+    \ Reset a core
+    method reset-cyw43-core ( core self -- )
+
+    \ Get whether a core is up
+    method cyw43-core-up? ( core self -- up? )
+    
     \ Enqueue received data
     method put-cyw43-rx ( addr bytes self -- )
 
@@ -179,6 +213,15 @@ begin-module cyw43-runner
     \ Poll for data to transmit
     method poll-cyw43-tx ( addr self -- bytes|0 )
     
+    \ Enqueue event message
+    method put-cyw43-event ( addr self -- )
+
+    \ Dequeue event message
+    method get-cyw43-event ( addr self -- )
+
+    \ Poll for event message
+    method poll-cyw43-event ( addr self -- found? )
+
   end-class
 
   \ Implement the CYW43 runner class
@@ -195,6 +238,9 @@ begin-module cyw43-runner
 
       \ Initialize the transmit lock
       self cyw43-tx-lock init-lock
+
+      \ Initialize the event lock
+      self cyw43-event-lock init-lock
 
       \ Initialize the receive channels
       mtu-size rx-mtu-count self cyw43-rx-chan init-chan
@@ -213,6 +259,9 @@ begin-module cyw43-runner
       \ Instantiate the ioctl state
       <cyw43-ioctl> self cyw43-ioctl-state init-object
 
+      \ Instantiate the event mask
+      <cyw43-event-mask> self cyw43-event-mask init-object
+      
       \ Initialize members
       0 self cyw43-ioctl-id h!
       0 self cyw43-sdpcm-seq c!
@@ -511,15 +560,55 @@ begin-module cyw43-runner
 
     \ Handle CYW43 event packet
     :noname { addr bytes self -- }
+
+      \ Validate an event packet
       bytes bdc-header-size < if
         cr ." BDC event, incomplete header" exit
       then
       bdc-header-size +to addr
       [ bdc-header-size negate ] literal +to bytes
-      bytes event-header-size < if
+      bytes event-packet-size < if
         cr ." BDC event, incomplete data" exit
       then
-      \ ADD MORE HERE
+      addr evtp-eth ethh-ether-type h@ ETH_P_LINK_CTL <> if
+        cr ." unexpected ethernet type "
+        addr evtp-eth etth-ether-type h@ h.4
+        ." , expected Broadcom ether type " ETH_P_LINK_CTL h.4
+        exit
+      then
+      addr evtp-hdr evth-oui 3 BROADCOM_OUI 3 equal-strings? not if
+        cr ." unexpected ethernet OUI "
+        addr evtp-hdr evth-oui dup 3 + swap ?do i c@ h.2 loop
+        ." , expected Broadcom OUI "
+        BROADCOM_OUI dup 3 + swap ?do i c@ h.2 loop
+        exit
+      then
+      addr evtp-hdr evth-subtype h@ BCMILCP_SUBTYPE_VENDOR_LONG <> if
+        cr ." unexpected subtype " addr evtp-hdr evth-subtype h@ h.4 exit
+      then
+      addr evtp-hdr evth-user-subtype h@ BCMILCP_BCM_SUBTYPE_EVENT <> if
+        cr ." unexpected user_subtype " addr evtp-hdr evth-user-subtype h@ h.4
+        exit
+      then
+
+      \ Handle an event if enabled
+      addr evtp-msg emsg-event-type @ { event-type }
+      event-type self cyw43-event-mask cyw43-event-enabled? if
+        addr evtp-msg emsg-status @ { event-status }
+        event-type self event-message-scratch evt-event-type !
+        event-status self event-message-scratch evt-status !
+        event-type EVENT_ESCAN_RESULT =
+        event-status ESTATUS_PARTIAL = and if
+          bytes [ event-packet-size scan-results-size + ] literal < if exit then
+          [ event-packet-size scan-results-size + ] literal +to addr
+          [ event-packet-size scan-results-size + ] literal negate +to bytes
+          bytes bss-info-size < if exit then
+          addr self event-message-scratch evt-payload bss-info-size move
+        else
+          self event-message-scratch evt-payload bss-info-size 0 fill
+        then
+        self event-message-scratch self enqueue-cyw43-event
+      then
     ; define handle-cyw43-event-pkt
 
     \ Handle CYW43 data packet
@@ -529,22 +618,165 @@ begin-module cyw43-runner
       addr data-offset + bytes data-offset - self put-cyw43-rx
     ; define handle-cyw43-data-pkt
 
+    \ Update credit
+    :noname { addr self -- }
+      addr sdpcmh-channel-and-flags c@ $0F and 3 < if
+        addr sdpcmh-bus-data-credit c@ { sdpcm-seq-max }
+        sdpcm-seq-max self cyw43-sdpcm-seq c@ - $FF and $40 > if
+          self cyw43-sdpcm-seq c@ 2+
+        else
+          sdpcm-seq-max
+        then
+        self cyw43-sdpcm-seq-max c!
+      then
+    ; define update-cyw43-credit
+
+    \ Do we have credit
+    :noname { self -- credit? }
+      self cyw43-sdpcm-seq c@ self cyw43-sdpcm-seq-max c@ <>
+      self cyw43-sdpcm-seq-max c@ self cyw43-sdpcm-seq c@ - $80 and 0= and
+    ; define cyw43-has-credit?
+
+    \ Send an ioctl
+    :noname { kind cmd iface buf-addr buf-size self -- }
+
+      [ sdpcm-header-size cdc-header-size + ] literal buf-size + { total-len }
+      self cyw43-sdpcm-seq c@ { sdpcm-seq }
+      sdpcm-seq 1+ self cyw43-sdpcm-seq c!
+      1 self cyw43-ioctl-id c+!
+
+      \ Construct a SDPCM header
+      self cyw43-scratch-buf { sdpcm }
+      total-len sdpcm sdpcmh-len h!
+      total-len not sdpcm sdpcmh-len-inv h!
+      sdpcm-seq sdpcm sdpcmh-sequence c!
+      CHANNEL_TYPE_CONTROL sdpcm sdpcmh-channel-and-flags c!
+      0 sdpcm sdpcmh-next-length c!
+      sdpcm-header-size sdpcm sdpcmh-header-length c!
+      0 sdpcm sdpcmh-wireless-flow-control c!
+      0 sdpcm sdpcmh-bus-data-credit c!
+      0 sdpcm sdpcmh-reserved c!
+      0 sdpcm sdpcmh-reserved 1+ c!
+
+      \ Contruct a CDC header
+      sdpcm sdpcm-header-size + { cdc }
+      cmd cdc cdch-cmd !
+      buf-size cdc cdch-len !
+      kind iface 12 lshift or cdc cdch-flags h!
+      self cyw43-ioctl-id h@ cdc cdch-id h!
+      0 cdc cdch-status !
+
+      \ Populate the payload in the packet
+      cdc cdc-header-size + { payload }
+      buf-addr payload buf-size move
+      buf-size 3 and if
+        payload buf-size + buf-size 4 align buf-size - 0 fill
+      then
+
+      \ Send the packet
+      self cyw43-scratch-buf total-len 4 align self cyw43-bus >cyw43-wlan
+      
+    ; define send-cyw43-ioctl
+
+    \ Disable a core
+    :noname { core self -- }
+      
+      core CYW43_BASE_ADDR { base }
+
+      \ Dummy read?
+      base AI_RESETCTRL_OFFSET + self cyw43-bus cyw43-bp-8> drop
+
+      \ Check it isn't already reset
+      base AI_RESETCTRL_OFFSET + self cyw43-bus cyw43-bp-8>
+      AI_RESETCTRL_BIT_RESET and if exit then
+
+      0 base AI_IOCTRL_OFFSET + self cyw43-bus >cyw43-bp-8
+      base AI_IOCTRL_OFFSET + self cyw43-bus cyw43-bp-8> drop
+
+      1 ms
+
+      AI_RESETCTRL_BIT_RESET
+      base AI_RESETCTRL_OFFSET + self cyw43-bus >cyw43-bp-8
+      base AI_RESETCTRL_OFFSET + self cyw43-bus cyw43-bp-8> drop
+      
+    ; define disable-cyw43-core
+
+    \ Reset a core
+    :noname { core self -- }
+      
+      core self disable-cyw43-core
+
+      core CYW43_BASE_ADDR { base }
+
+      [ AI_IOCTRL_BIT_FGC AI_IOCTRL_BIT_CLOCK_EN or ] literal
+      base AI_IOCTRL_OFFSET + self cyw43-bus >cyw43-bp-8
+      base AI_IOCTRL_OFFSET + self cyw43-bus cyw43-bp-8> drop
+
+      0 base AI_RESETCTRL_OFFSET + self cyw43-bus >cyw43-bp-8
+
+      1 ms
+
+      AI_IOCTRL_BIT_CLOCK_EN base AI_IOCTRL_OFFSET + self cyw43-bus >cyw43-bp-8
+      base AI_IOCTRL_OFFSET + self cyw43-bus cyw43-bp-8> drop
+
+      1 ms
+      
+    ; define reset-cyw43-core
+
+    \ Get whether a core is up
+    :noname { core self -- up? }
+
+      core CYW43_BASE_ADDR { base }
+
+      base AI_IOCTRL_OFFSET + self cyw43-bus cyw43-bp-8> { io }
+      [ AI_IOCTRL_BIT_FGC AI_IOCTRL_BIT_CLOCK_EN or ] literal io and
+      AI_IOCTRL_BIT_CLOCK_EN <> if
+        cr ." cyw43-core-up?: returning false due to bad ioctrl " io h.2
+        false exit
+      then
+
+      base AI_RESETCTRL_OFFSET + self cyw43-bus cyw43-bp-8> { r }
+      AI_RESETCTRL_BIT_OFFSET r and if
+        cr ." cyw43-core-up?: returning false due to bad resetctrl " r h.2
+        false exit
+      then
+
+      true
+      
+    ; define cyw43-core-up?
+
     \ Enqueue received data
-    :noname ( addr bytes self -- )
-      [: { addr bytes self }
-        addr bytes self cyw43-rx-chan send-chan
-        bytes cell self cyw43-rx-size-chan send-chan
-      ;] over cyw43-rx-lock with-lock
+    :noname { addr bytes self -- }
+      begin
+        addr bytes self [: { addr bytes self }
+          self cyw43-rx-chan chan-full? not if
+            addr bytes self cyw43-rx-chan send-chan
+            bytes cell self cyw43-rx-size-chan send-chan
+            true
+          else
+            false
+          then
+        ;] self cyw43-rx-lock with-lock
+        dup not if pause then
+      until
     ; define put-cyw43-rx
 
     \ Dequeue received data
-    :noname ( addr self -- bytes )
-      [: { addr self }
-        addr mtu-size self cyw43-rx-chan recv-chan drop
-        0 { W^ bytes }
-        bytes cell self cyw43-rx-chan recv-chan drop
-        bytes @
-      ;] over cyw43-rx-lock with-lock
+    :noname { addr self -- bytes }
+      begin
+        addr self [: { addr self }
+          self cyw43-rx-chan chan-empty? not if
+            addr mtu-size self cyw43-rx-chan recv-chan drop
+            0 { W^ bytes }
+            bytes cell self cyw43-rx-chan recv-chan drop
+            bytes @
+            true
+          else
+            false
+          then
+        ;] self cyw43-rx-lock with-lock
+        dup not if pause then
+      until
     ; define get-cyw43-rx
 
     \ Poll for received data
@@ -562,11 +794,19 @@ begin-module cyw43-runner
     ; define poll-cyw43-rx
 
     \ Enqueue data to transmit
-    :noname ( addr self -- )
-      [: { addr bytes self }
-        addr bytes self cyw43-tx-chan send-chan
-        bytes cell self cyw43-tx-size-chan send-chan
-      ;] over cyw43-tx-lock with-lock
+    :noname { addr bytes self -- }
+      begin
+        addr bytes self [: { addr bytes self }
+          self cyw43-tx-chan chan-full? not if
+            addr bytes self cyw43-tx-chan send-chan
+            bytes cell self cyw43-tx-size-chan send-chan
+            true
+          else
+            false
+          then
+        ;] self cyw43-tx-lock with-lock
+        dup not if pause then
+      until
     ; define put-cyw43-tx
 
     \ Poll for data to transmit
@@ -582,6 +822,48 @@ begin-module cyw43-runner
         then
       ;] over cyw43-tx-lock with-lock
     ; define poll-cyw43-tx
+
+    \ Enqueue event message
+    :noname { addr self -- }
+      begin
+        addr self [: { addr self }
+          self cyw43-event-chan chan-full? not if
+            addr event-message-size self cyw43-rx-chan send-chan
+            true
+          else
+            false
+          then
+        ;] self cyw43-event-lock with-lock
+        dup not if pause then
+      until
+    ; define put-cyw43-event
+
+    \ Dequeue event message
+    :noname { addr self -- }
+      begin
+        addr self [: { addr self }
+          self cyw43-event-chan chan-empty? not if
+            addr event-message-size self cyw43-event-chan recv-chan drop
+            true
+          else
+            false
+          then
+        ;] self cyw43-event-lock with-lock
+        dup not if pause then
+      until
+    ; define get-cyw43-event
+
+    \ Poll for event message
+    :noname { addr self -- found? }
+      [: { addr self }
+        self cyw43-event-chan chan-empty? not if
+          addr event-message-size self cyw43-event-chan recv-chan drop
+          true
+        else
+          false
+        then
+      ;] over cyw43-event-lock with-lock
+    ; define poll-cyw43-event
 
   end-class
   

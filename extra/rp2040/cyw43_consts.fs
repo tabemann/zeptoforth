@@ -23,6 +23,15 @@ begin-module cyw43-consts
   \ MTU size
   1500 constant mtu-size
 
+  \ HPNA, wlan link local tunnel, according to linux if_ether.h
+  $886C constant ETH_P_LINK_CTL
+
+  \ Broadcom OUI
+  create BROADCOM_OUI $00 c, $10 c, $18 c,
+
+  32769 constant BCMILCP_SUBTYPE_VENDOR_LONG
+  1 constant BCMILCP_BCM_SUBTYPE_EVENT
+
   0 constant FUNC_BUS
   1 constant FUNC_BACKPLANE
   2 constant FUNC_WLAN
@@ -186,64 +195,64 @@ begin-module cyw43-consts
   2 constant SDIOD
 
   \ Wrapper regiser offset
-  $100000 constant CYW43_WRAPPER_REGISTER_OFFSET
+  $100000 constant WRAPPER_REGISTER_OFFSET
 
   \ SOCSRAM base address
-  $18004000 constant CYW43_SOCSRAM_BASE_ADDRESS
+  $18004000 constant SOCSRAM_BASE_ADDRESS
 
   \ SDIOD base address
-  $18002000 constant CYW43_SDIOD_BASE_ADDRESS
+  $18002000 constant SDIOD_BASE_ADDRESS
   
   \ PMU base address
-  $18000000 constant CYW43_PMU_BASE_ADDRESS 
+  $18000000 constant PMU_BASE_ADDRESS 
 
   \ Chip RAM size
-  512 1024 * constant CYW43_CHIP_RAM_SIZE
+  512 1024 * constant CHIP_RAM_SIZE
 
   \ ATCM RAM base address
-  0 constant CYW43_ATCM_RAM_BASE_ADDRESS
+  0 constant ATCM_RAM_BASE_ADDRESS
 
   \ SOCRAM SRMEM size
-  64 1024 * constant CYW43_SOCRAM_SRMEM_SIZE
+  64 1024 * constant SOCRAM_SRMEM_SIZE
 
   \ Chanspec band mask
-  $C000 constant CYW43_CHANSPEC_BAND_MASK
+  $C000 constant CHANSPEC_BAND_MASK
 
   \ Chanspec band 2G
-  $0000 constant CYW43_CHANSPEC_BAND_2G
+  $0000 constant CHANSPEC_BAND_2G
 
   \ Chanspec band 5G
-  $C000 constant CYW43_CHANSPEC_BAND_5G
+  $C000 constant CHANSPEC_BAND_5G
 
   \ Chanspec band shift
-  14 constant CYW43_CHANSPEC_BAND_SHIFT
+  14 constant CHANSPEC_BAND_SHIFT
 
   \ Chanspec BW 10
-  $0800 constant CYW43_CHANSPEC_BW_10
+  $0800 constant CHANSPEC_BW_10
 
   \ Chanspec BW 20
-  $1000 constant CYW43_CHANSPEC_BW_20
+  $1000 constant CHANSPEC_BW_20
 
   \ Chanspec BW 40
-  $1800 constant CYW43_CHANSPEC_BW_40
+  $1800 constant CHANSPEC_BW_40
 
   \ Chanspec BW mask
-  $3800 constant CYW43_CHANSPEC_BW_MASK
+  $3800 constant CHANSPEC_BW_MASK
 
   \ Chanspec BW shift
-  11 constant CYW43_CHANSPEC_BW_SHIFT
+  11 constant CHANSPEC_BW_SHIFT
 
   \ Chanspec CTL SB lower
-  $0000 constant CYW43_CHANSPEC_CTL_SB_LOWER
+  $0000 constant CHANSPEC_CTL_SB_LOWER
 
   \ Chanspec CTL SB upper
-  $0100 constant CYW43_CHANSPEC_CTL_SB_UPPER
+  $0100 constant CHANSPEC_CTL_SB_UPPER
 
   \ Chanspec CTL SB none
-  $0000 constant CYW43_CHANSPEC_CTL_SB_NONE
+  $0000 constant CHANSPEC_CTL_SB_NONE
 
   \ Chanspec CTL SB mask
-  $0700 constant CYW43_CHANSPEC_CTL_SB_MASK
+  $0700 constant CHANSPEC_CTL_SB_MASK
 
   \ Power management modes
 
@@ -276,12 +285,12 @@ begin-module cyw43-consts
   : CYW43_BASE_ADDR ( core -- addr )
     case
       WLAN of
-        [ $18003000 CYW43_WRAPPER_REGISTER_OFFSET + ] literal
+        [ $18003000 WRAPPER_REGISTER_OFFSET + ] literal
       endof
       SOCSRAM of
-        [ CYW43_SOCSRAM_BASE_ADDRESS CYW43_WRAPPER_REGISTER_OFFSET + ] literal
+        [ SOCSRAM_BASE_ADDRESS WRAPPER_REGISTER_OFFSET + ] literal
       endof
-      SDIOD of CYW43_SDIOD_BASE_ADDRESS endof
+      SDIOD of SDIOD_BASE_ADDRESS endof
     endcase
   ;
 
