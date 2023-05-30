@@ -244,11 +244,14 @@ begin-module cyw43-spi
     ; define cyw43-config-xfer
 
     \ Send a message
-    :noname { addr count self -- status }
+    :noname { cmd addr count self -- status }
 
       \ Configure a transfer of count words outgoing and one word incoming
-      count 1 self cyw43-config-xfer
+      count 1+ 1 self cyw43-config-xfer
 
+      \ Transfer the command word
+      cmd self cyw43-sm @ self cyw43-pio @ sm-txf!
+      
       \ Transmit out words
       addr count self >cyw43-dma
 

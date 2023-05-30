@@ -244,13 +244,12 @@ begin-module cyw43-bus
     \ Write bytes to the WLAN
     :noname { buffer bytes self -- }
       CYW43_WRITE INC_ADDR FUNC_WLAN 0 bytes 4 align cyw43-cmd-word { cmd }
-      cmd self cyw43-wlan-tx-buf !
-      buffer self cyw43-wlan-tx-buf cell+ bytes move
       bytes 3 and if
-        self cyw43-wlan-tx-buf cell+ bytes + bytes 4 align bytes - 0 fill
+        buffer self cyw43-wlan-tx-buf bytes move
+        self cyw43-wlan-tx-buf bytes + bytes 4 align bytes - 0 fill
+        cyw43-wlan-tx-buf to buffer
       then
-      self cyw43-wlan-tx-buf bytes cell+ 4 align 2 rshift self cyw43-spi
-      >cyw43-msg
+      cmd buffer bytes 4 align 2 rshift self cyw43-spi >cyw43-msg
       self cyw43-status !
     ; define >cyw43-wlan
     
@@ -373,13 +372,9 @@ begin-module cyw43-bus
     ; define cyw43-bytes>
 
     \ Write N bytes to the CYW43
-    :noname ( val func addr bytes self -- )
-      2 cells [: { val func addr bytes self buffer }
-        CYW43_WRITE INC_ADDR func addr bytes cyw43-cmd-word { cmd }
-        cmd buffer !
-        val buffer cell+ !
-        buffer 2 cells self cyw43-spi >cyw43-msg self cyw43-status !
-      ;] with-aligned-allot
+    :noname { W^ val func addr bytes self -- }
+      CYW43_WRITE INC_ADDR func addr bytes cyw43-cmd-word { cmd }
+      cmd val cell self cyw43-spi >cyw43-msg self cyw43-status !
     ; define >cyw43-bytes
 
     \ Read a halfword-swapped 32-bit value from the CYW43 bus
@@ -392,13 +387,10 @@ begin-module cyw43-bus
     ; define cyw43-32-swapped>
 
     \ Write a halfword-swapped 32-bit value to the CYW43 bus
-    :noname { val addr self -- }
-      2 cells [: { val addr self buffer }
-        CYW43_WRITE INC_ADDR FUNC_BUS addr 4 cyw43-cmd-word { cmd }
-        cmd rev16 buffer !
-        val rev16 buffer cell+ !
-        buffer 2 cells self cyw43-spi >cyw43-msg self cyw43-status !
-      ;] with-aligned-allot
+    :noname { W^ val addr self -- }
+      CYW43_WRITE INC_ADDR FUNC_BUS addr 4 cyw43-cmd-word rev16 { cmd }
+      val @ rev16 val !
+      cmd val cell self cyw43-spi >cyw43-msg self cyw43-status !
     ; define >cyw43-32-swapped
 
   end-class
