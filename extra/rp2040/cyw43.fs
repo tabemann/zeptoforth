@@ -197,6 +197,18 @@ begin-module cyw43
 
     \ Get whether a core is up
     method cyw43-core-up? ( core self -- up? )
+
+    \ Enable an event
+    method enable-cyw43-event ( event self -- )
+
+    \ Enable multiple events
+    method enable-cyw43-events ( event-addr event-count self -- )
+    
+    \ Disable an event
+    method disable-cyw43-event ( event self -- )
+
+    \ Disable multiple events
+    method disable-cyw43-events ( event-addr event-count self -- )
     
     \ Enqueue received data
     method put-cyw43-rx ( addr bytes self -- )
@@ -744,6 +756,26 @@ begin-module cyw43
       true
       
     ; define cyw43-core-up?
+
+    \ Enable an event
+    :noname ( event self -- )
+      cyw43-event-mask cyw43-events::enable-cyw43-event
+    ; define enable-cyw43-event
+
+    \ Enable multiple events
+    :noname ( event-addr event-count self -- )
+      cyw43-event-mask cyw43-events::enable-cyw43-events
+    ; define enable-cyw43-events
+    
+    \ Disable an event
+    :noname { event self -- }
+      cyw43-event-mask cyw43-events::disable-cyw43-event
+    ; define disable-cyw43-event
+
+    \ Disable multiple events
+    :noname { event-addr event-count self -- }
+      cyw43-event-mask cyw43-events::disable-cyw43-events
+    ; define disable-cyw43-events
 
     \ Enqueue received data
     :noname { addr bytes self -- }
