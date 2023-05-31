@@ -31,7 +31,7 @@ begin-module cyw43-nvram
     ;
 
     \ End string sequence
-    : end-nvram ( length -- length' ) 0 c, 0 c, 2+ 4 align 4 align, ;
+    : end-nvram ( length -- length' ) 0 c, 0 c, 2 + 4 align 4 align, ;
     
   end-module> import
 

@@ -64,7 +64,7 @@ begin-module dma
     : CH_CTRL_TRIG ( channel -- addr ) 6 lshift [ DMA_BASE $06 + ] literal + ;
 
     \ Timer
-    : DMA_TIMER ( timer -- ) 2 lshift [ DMA_BASE $420 + ] literal + ]
+    : DMA_TIMER ( timer -- ) 2 lshift [ DMA_BASE $420 + ] literal + ;
     
     \ Busy bit
     24 bit constant CH_CTRL_TRIG_BUSY

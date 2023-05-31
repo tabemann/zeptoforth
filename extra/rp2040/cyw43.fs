@@ -299,7 +299,7 @@ begin-module cyw43
       self cyw43-bus init-cyw43-bus
 
       \ Initialize ALP (Active Low Power) clock
-      BACKPLANE_ALP_AVAIL_REQ FUNC_BACKPLANE REG_BACKPLANE_CHIP_CLOCK_CR
+      BACKPLANE_ALP_AVAIL_REQ FUNC_BACKPLANE REG_BACKPLANE_CHIP_CLOCK_CSR
       self cyw43-bus >cyw43-8
       cr ." waiting for clock..."
       begin
@@ -320,7 +320,7 @@ begin-module cyw43
 
       \ Upload NVRAM
       cr ." loading nvram"
-      nvram mvram-bytes ATCM_RAM_BASE_ADDRESS CHIP_RAM_SIZE 4 - nvram-bytes -
+      nvram nvram-bytes ATCM_RAM_BASE_ADDRESS CHIP_RAM_SIZE 4 - nvram-bytes -
       self cyw43-bus >cyw43-bp
       nvram-bytes 2 rshift not 16 lshift nvram-bytes 2 rshift or
       ATCM_RAM_BASE_ADDRESS CHIP_RAM_SIZE 4 - self cyw43-bus >cyw43-bp-32
@@ -331,7 +331,7 @@ begin-module cyw43
       WLAN self cyw43-core-up? averts x-core-not-up
 
       begin
-        FUNC_BACKPLANE REG_BACKPLANE_CHIP_CLOCK_SCR
+        FUNC_BACKPLANE REG_BACKPLANE_CHIP_CLOCK_CSR
         self cyw43-bus cyw43-8> $80 and
       until
 
@@ -362,7 +362,7 @@ begin-module cyw43
 
       \ Get the log shared memory info address
       ATCM_RAM_BASE_ADDRESS CHIP_RAM_SIZE + 4 - SOCRAM_SRMEM_SIZE - { addr }
-      addr self cyw43-bus cyw430-bp-32> { shared-addr }
+      addr self cyw43-bus cyw43-bp-32> { shared-addr }
       cr ." shared_addr " shared-addr h.8
 
       \ Read the log shared memory info
@@ -453,8 +453,8 @@ begin-module cyw43
                 \ First calculate the size and sequence number
                 sdpcm-header-size 2 + bdc-header-size + packet-bytes +
                 { total-len }
-                self cyw43-spdcm-seq c@ { seq }
-                seq 1+ self cyw43-spdcm-seq c!
+                self cyw43-sdpcm-seq c@ { seq }
+                seq 1+ self cyw43-sdpcm-seq c!
 
                 \ First move the packet data in-buffer to avoid needing another
                 \ buffer
@@ -464,7 +464,7 @@ begin-module cyw43
                 \ Fill the sdpcm header data
                 total-len buf sdpcmh-len h!
                 total-len not buf sdpcmh-len-inv h!
-                seq buf sdpcmh-hsequence c!
+                seq buf sdpcmh-sequence c!
                 CHANNEL_TYPE_DATA buf sdpcmh-channel-and-flags c!
                 0 buf sdpcmh-next-length c!
                 sdpcm-header-size 2 + buf sdpcmh-header-length c!
@@ -508,7 +508,7 @@ begin-module cyw43
     :noname { buf self -- }
       FUNC_BUS REG_BUS_INTERRUPT self cyw43-bus cyw43-16> { irq }
       cr ." irq " irq h.4
-      irq IRQ_FS_PACKET_AVAILABLE and if buf self check-cyw43-status then
+      irq IRQ_F2_PACKET_AVAILABLE and if buf self check-cyw43-status then
       irq IRQ_DATA_UNAVAILABLE and if
         cr ." IRQ DATA_UNAVAILABLE, clearing..."
         1 FUNC_BUS REG_BUS_INTERRUPT self cyw43-bus >cyw43-16
@@ -539,7 +539,7 @@ begin-module cyw43
       bytes sdpcm-header-size < if
         cr ." packet too short, len=" bytes . exit
       then
-      addr sdpcmh-len h@ addr sdpcm-len-inv h@ not $FFFF and <> if
+      addr sdpcmh-len h@ addr sdpcmh-len-inv h@ not $FFFF and <> if
         cr ." len inv mismatch" exit
       then
       addr sdpcmh-len h@ bytes <> if
@@ -584,7 +584,7 @@ begin-module cyw43
       then
       addr evtp-eth ethh-ether-type h@ ETH_P_LINK_CTL <> if
         cr ." unexpected ethernet type "
-        addr evtp-eth etth-ether-type h@ h.4
+        addr evtp-eth ethh-ether-type h@ h.4
         ." , expected Broadcom ether type " ETH_P_LINK_CTL h.4
         exit
       then
@@ -607,19 +607,19 @@ begin-module cyw43
       addr evtp-msg emsg-event-type @ { event-type }
       event-type self cyw43-event-mask cyw43-event-enabled? if
         addr evtp-msg emsg-status @ { event-status }
-        event-type self event-message-scratch evt-event-type !
-        event-status self event-message-scratch evt-status !
+        event-type self cyw43-event-message-scratch evt-event-type !
+        event-status self cyw43-event-message-scratch evt-status !
         event-type EVENT_ESCAN_RESULT =
         event-status ESTATUS_PARTIAL = and if
           bytes [ event-packet-size scan-results-size + ] literal < if exit then
           [ event-packet-size scan-results-size + ] literal +to addr
           [ event-packet-size scan-results-size + ] literal negate +to bytes
           bytes bss-info-size < if exit then
-          addr self event-message-scratch evt-payload bss-info-size move
+          addr self cyw43-event-message-scratch evt-payload bss-info-size move
         else
-          self event-message-scratch evt-payload bss-info-size 0 fill
+          self cyw43-event-message-scratch evt-payload bss-info-size 0 fill
         then
-        self event-message-scratch self enqueue-cyw43-event
+        self cyw43-event-message-scratch self put-cyw43-event
       then
     ; define handle-cyw43-event-pkt
 
@@ -635,7 +635,7 @@ begin-module cyw43
       addr sdpcmh-channel-and-flags c@ $0F and 3 < if
         addr sdpcmh-bus-data-credit c@ { sdpcm-seq-max }
         sdpcm-seq-max self cyw43-sdpcm-seq c@ - $FF and $40 > if
-          self cyw43-sdpcm-seq c@ 2+
+          self cyw43-sdpcm-seq c@ 2 +
         else
           sdpcm-seq-max
         then
@@ -748,7 +748,7 @@ begin-module cyw43
       then
 
       base AI_RESETCTRL_OFFSET + self cyw43-bus cyw43-bp-8> { r }
-      AI_RESETCTRL_BIT_OFFSET r and if
+      AI_RESETCTRL_BIT_RESET r and if
         cr ." cyw43-core-up?: returning false due to bad resetctrl " r h.2
         false exit
       then
@@ -897,6 +897,6 @@ begin-module cyw43
       ;] over cyw43-event-lock with-lock
     ; define poll-cyw43-event
 
-  end-class
+  end-implement
   
 end-module

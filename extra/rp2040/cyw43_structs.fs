@@ -65,6 +65,9 @@ begin-module cyw43-structs
     field: cdch-status
   end-structure
 
+  2 constant BDC_VERSION
+  4 constant BDC_VERSION_SHIFT
+  
   begin-structure bdc-header-size
     cfield: bdch-flags
     \ 802.1d Priority (low 3 bits)

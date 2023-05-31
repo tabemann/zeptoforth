@@ -20,6 +20,9 @@
 
 begin-module cyw43-ioctl
 
+  oo import
+  cyw43-consts import
+  cyw43-structs import
   sema import
   lock import
 
@@ -205,7 +208,7 @@ begin-module cyw43-ioctl
         cmd self cyw43-ioctl-data pioctl-cmd !
         kind self cyw43-ioctl-data pioctl-kind !
       ;] over cyw43-ioctl-lock with-lock
-      self wait-cyw43-ioctl-complete
+      self wait-complete-cyw43-ioctl
     ; define do-cyw43-ioctl
 
     \ Mark an ioctl as done

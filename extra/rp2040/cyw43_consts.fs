@@ -264,8 +264,8 @@ begin-module cyw43-consts
   \ Aggressive power saving mode.
   1 constant PM_AGGRESSIVE
 
-  \ The default mode
-  2 constant PM_POWER_SAVE.
+  \ The default mode.
+  2 constant PM_POWER_SAVE
 
   \ Performance is preferred over power consumption but still some power is
   \ conserved as opposed to cyw43-pm-none.
@@ -315,19 +315,19 @@ begin-module cyw43-consts
       PM_PERFORMANCE of 1 endof
       PM_THROUGHPUT_THROTTLING of 0 endof \ value doesn't matter
       PM_NONE of 0 endof \ value doesn't matter
-    endof
+    endcase
   ;
 
   \ DTIM period
   : cyw43-pm-dtim-period ( mode -- period )
     case
       PM_SUPER_SAVE of 255 endof
-      cyw43-pm-aggresive of 1 endof
+      PM_AGGRESSIVE of 1 endof
       PM_POWER_SAVE of 1 endof
       PM_PERFORMANCE of 1 endof
       PM_THROUGHPUT_THROTTLING of 0 endof \ value doesn't matter
       PM_NONE of 0 endof \ value doesn't matter
-    endof
+    endcase
   ;
 
   \ Assoc
@@ -339,7 +339,7 @@ begin-module cyw43-consts
       PM_PERFORMANCE of 1 endof
       PM_THROUGHPUT_THROTTLING of 0 endof \ value doesn't matter
       PM_NONE of 0 endof \ value doesn't matter
-    endof
+    endcase
   ;
 
   \ Mode

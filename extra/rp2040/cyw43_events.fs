@@ -309,7 +309,7 @@ begin-module cyw43-events
   : x-invalid-event ( -- ) cr ." invalid event" ;
 
   \ Validate an event
-  : validate-event ( event -- ) event EVENT_LAST u< averts x-invalid-event ;
+  : validate-event ( event -- ) EVENT_LAST u< averts x-invalid-event ;
   
   \ Event mask class
   <object> begin-class <cyw43-event-mask>

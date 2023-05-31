@@ -21,6 +21,7 @@
 begin-module cyw43-spi
 
   oo import
+  gpio import
   pio import
   dma import
   dma-pool import
@@ -78,6 +79,9 @@ begin-module cyw43-spi
 
       \ SPI PIO DIO pin
       cell member cyw43-dio
+
+      \ SPI PIO CLK pin
+      cell member cyw43-clk
 
       \ SPI PIO start addr
       cell member cyw43-pio-addr
@@ -147,6 +151,7 @@ begin-module cyw43-spi
       pio self cyw43-pio !
       sm self cyw43-sm !
       dio self cyw43-dio !
+      clk self cyw43-clk !
       pio-addr self cyw43-pio-addr !
 
       \ Allocate our DMA channel
@@ -172,6 +177,7 @@ begin-module cyw43-spi
       self cyw43-pio @ { pio }
       self cyw43-sm @ { sm }
       self cyw43-dio @ { dio }
+      self cyw43-clk @ { clk }
       self cyw43-pio-addr @ { pio-addr }
 
       \ Set up the DIO pin
@@ -236,7 +242,7 @@ begin-module cyw43-spi
       out self cyw43-dio-pindir!
 
       \ Reset the execution address
-      pio-addr self cyw43-sm @ self cyw43-pio @ sm-addr!
+      self cyw43-pio-addr @ self cyw43-sm @ self cyw43-pio @ sm-addr!
 
       \ Enable the PIO state machine
       self cyw43-sm @ bit self cyw43-pio @ sm-enable
@@ -295,7 +301,7 @@ begin-module cyw43-spi
       self cyw43-dma-channel @ start-buffer>register-dma
 
       \ Spin until DMA completes
-      self cyw43-dma-channel @ spin-dma-wait
+      self cyw43-dma-channel @ spin-wait-dma
       
     ; define >cyw43-dma
 
@@ -309,7 +315,7 @@ begin-module cyw43-spi
       self cyw43-dma-channel @ start-register>buffer-dma
 
       \ Spin until DMA completes
-      self cyw43-dma-channel @ spin-dma-wait
+      self cyw43-dma-channel @ spin-wait-dma
       
     ; define cyw43-dma>
     

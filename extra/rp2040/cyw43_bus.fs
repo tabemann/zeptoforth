@@ -23,6 +23,7 @@ begin-module cyw43-bus
   oo import
   pin import
   cyw43-consts import
+  cyw43-structs import
   cyw43-spi import
   armv6m import
 
@@ -203,7 +204,7 @@ begin-module cyw43-bus
       TEST_PATTERN = averts x-cyw43-failed-init
 
       \ Set up 32-bit word length, little-endian
-      [ WORD_LENGTH_23 HIGH_SPEED or INTERRUPT_HIGH or WAKE_UP or
+      [ WORD_LENGTH_32 HIGH_SPEED or INTERRUPT_HIGH or WAKE_UP or
       STATUS_ENABLE or INTERRUPT_WITH_STATUS or ] literal
       REG_BUS_CTRL self >cyw43-32-swapped
 
@@ -227,7 +228,7 @@ begin-module cyw43-bus
     ; define wait-cyw43-event
 
     \ Read bytes from the WLAN
-    :noname ( buffer bytes self -- )
+    :noname { buffer bytes self -- }
       bytes 3 and if
         over 4 align [: { buffer bytes self real-buffer }
           CYW43_READ INC_ADDR FUNC_WLAN 0 bytes cyw43-cmd-word { cmd }
@@ -255,14 +256,14 @@ begin-module cyw43-bus
     
     \ Read data from the backplane
     :noname ( buffer bytes addr self -- )
-      bytes 3 and 0= averts x-buffer-size-not-aligned
+      2 pick 3 and 0= averts x-buffer-size-not-aligned
       BACKPLANE_MAX_TRANSFER_SIZE cell+ [: { buffer bytes addr self part }
         begin bytes while
           addr BACKPLANE_ADDRESS_MASK and { window-offs }
           BACKPLANE_WINDOW_SIZE window-offs -
           BACKPLANE_MAX_TRANSFER_SIZE min bytes min { len }
           addr self set-cyw43-bp-window
-          CYW43_READ INCR_ADDR FUNC_BACKPLANE window-offs len
+          CYW43_READ INC_ADDR FUNC_BACKPLANE window-offs len
           cyw43-cmd-word { cmd }
           cmd part len self cyw43-spi cyw43-msg>
           part buffer len move
@@ -274,7 +275,7 @@ begin-module cyw43-bus
 
     \ Write data to the backplane
     :noname ( buffer bytes addr self -- )
-      bytes 3 and 0= averts x-buffer-size-not-aligned
+      2 pick 3 and 0= averts x-buffer-size-not-aligned
       BACKPLANE_MAX_TRANSFER_SIZE cell+ [: { buffer bytes addr self part }
         begin bytes while
           addr BACKPLANE_ADDRESS_MASK and { window-offs }
@@ -282,7 +283,7 @@ begin-module cyw43-bus
           BACKPLANE_MAX_TRANSFER_SIZE min bytes min { len }
           buffer part cell+ len move
           addr self set-cyw43-bp-window
-          CYW43_WRITE INCR_ADDR FUNC_BACKPLANE window-offs len
+          CYW43_WRITE INC_ADDR FUNC_BACKPLANE window-offs len
           cyw43-cmd-word { cmd }
           cmd part len self cyw43-spi cyw43-msg>
           len +to buffer
@@ -393,6 +394,6 @@ begin-module cyw43-bus
       cmd val cell self cyw43-spi >cyw43-msg self cyw43-status !
     ; define >cyw43-32-swapped
 
-  end-class
+  end-implement
   
 end-module
