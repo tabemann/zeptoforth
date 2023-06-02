@@ -62,7 +62,7 @@ begin-module cyw43-bus
 
     \ The CYW43 backplane window
     cell member cyw43-bp-window
-
+    
     \ WLAN transmit buffer
     wlan-size member cyw43-wlan-tx-buf
 
@@ -153,7 +153,7 @@ begin-module cyw43-bus
   <cyw43-bus> begin-implement
 
     \ The constructor
-    :noname { pwr clk dio pio-addr sm pio self -- }
+    :noname { pwr clk dio cs pio-addr sm pio self -- }
 
       \ Initialize the superclass
       self <object>->new
@@ -164,7 +164,7 @@ begin-module cyw43-bus
       $AAAAAAAA self cyw43-bp-window !
 
       \ Instantiate the SPI interface
-      clk dio pio-addr sm pio <cyw43-spi> self cyw43-spi init-object
+      clk dio cs pio-addr sm pio <cyw43-spi> self cyw43-spi init-object
       
     ; define new
 
@@ -182,8 +182,12 @@ begin-module cyw43-bus
     \ Initialize the CYW43 bus interface
     :noname { self -- }
 
+      cr ." initializng SPI..." \ DEBUG
+
       \ Initialize the CYW43 SPI interface
       self cyw43-spi init-cyw43-spi
+
+      cr ." initializing PWR..." \ DEBUG
 
       \ Initialize the PWR pin
       self cyw43-pwr @ output-pin
@@ -195,6 +199,8 @@ begin-module cyw43-bus
       high self cyw43-pwr @ pin!
       250 ms
 
+      cr ." waiting for the CYW43 to come up..." \ DEBUG
+      
       \ Wait for the CYW43
       begin REG_BUS_TEST_RO self cyw43-32-swapped> FEEDBEAD = until
 
@@ -379,7 +385,7 @@ begin-module cyw43-bus
     ; define >cyw43-bytes
 
     \ Read a halfword-swapped 32-bit value from the CYW43 bus
-    :noname { addr self -- value }
+    :noname ( addr self -- value )
       2 cells [: { addr self buffer }
         CYW43_READ INC_ADDR FUNC_BUS addr 4 cyw43-cmd-word { cmd }
         cmd rev16 buffer 2 self cyw43-spi cyw43-msg> self cyw43-status !

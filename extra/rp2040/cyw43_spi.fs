@@ -23,6 +23,7 @@ begin-module cyw43-spi
   oo import
   gpio import
   pio import
+  pin import
   dma import
   dma-pool import
   cyw43-consts import
@@ -83,6 +84,9 @@ begin-module cyw43-spi
       \ SPI PIO CLK pin
       cell member cyw43-clk
 
+      \ SPI Chip Select pin
+      cell member cyw43-cs
+      
       \ SPI PIO start addr
       cell member cyw43-pio-addr
 
@@ -142,7 +146,7 @@ begin-module cyw43-spi
   <cyw43-spi> begin-implement
 
     \ Constructor
-    :noname { clk dio pio-addr sm pio self -- }
+    :noname { clk dio cs pio-addr sm pio self -- }
 
       \ Initialize the superclass
       self <object>->new
@@ -152,6 +156,7 @@ begin-module cyw43-spi
       sm self cyw43-sm !
       dio self cyw43-dio !
       clk self cyw43-clk !
+      cs self cyw43-cs !
       pio-addr self cyw43-pio-addr !
 
       \ Allocate our DMA channel
@@ -173,12 +178,17 @@ begin-module cyw43-spi
     \ Initialize the CYW43 SPI interface
     :noname { self -- }
 
+      ."  A" 10 ms \ DEBUG
+
       \ Get the values we need
       self cyw43-pio @ { pio }
       self cyw43-sm @ { sm }
       self cyw43-dio @ { dio }
       self cyw43-clk @ { clk }
+      self cyw43-cs @ { cs }
       self cyw43-pio-addr @ { pio-addr }
+
+      ."  B" 10 ms \ DEBUG
 
       \ Set up the DIO pin
       false dio PADS_BANK0_PUE!
@@ -188,17 +198,33 @@ begin-module cyw43-spi
       DRIVE_12MA dio PADS_BANK0_DRIVE!
       true dio PADS_BANK0_SLEWFAST!
 
+      ."  C" 10 ms \ DEBUG
+
       \ Set up the CLK pin
       DRIVE_12MA clk PADS_BANK0_DRIVE!
-      true clk PADS_BANK0_DRIVE!
+      true clk PADS_BANK0_SLEWFAST!
+
+      ."  D" 10 ms \ DEBUG
+
+      \ Set up the CS pin
+      DRIVE_12MA cs PADS_BANK0_DRIVE!
+      true cs PADS_BANK0_SLEWFAST!
+      cs output-pin
+      high cs pin!
+
+      ."  E" 10 ms \ DEBUG
 
       \ Disable the PIO state machine
       sm bit pio sm-disable
+
+      ."  F" 10 ms \ DEBUG
 
       \ Set up the PIO program
       cyw43-pio-program 8 pio-addr pio pio-instr-relocate-mem!
       pio-addr sm pio sm-addr!
       pio-addr pio-addr 8 + sm pio sm-wrap!
+
+      ."  G" 10 ms \ DEBUG
 
       \ Configure the pins to be PIO output, input, set, and sidset pins
       dio 1 sm pio sm-out-pins!
@@ -206,16 +232,24 @@ begin-module cyw43-spi
       dio 1 sm pio sm-set-pins!
       clk 1 sm pio sm-sideset-pins!
 
+      ."  H" 10 ms \ DEBUG
+
       \ Set the output shift direction and autopush
       left sm pio sm-out-shift-dir
       on sm pio sm-autopush!
+
+      ."  I" 10 ms \ DEBUG
 
       \ Set the input shift direction and autopull
       left sm pio sm-in-shift-dir
       on sm pio sm-autopull!
 
+      ."  J" 10 ms \ DEBUG
+
       \ Set the clock divisor, i.e. 62.5 MHz
       0 2 sm pio sm-clkdiv!
+
+      ."  K" 10 ms \ DEBUG
 
       \ Initialize the CLK and DIO pins' initial direction (to output) and value
       out clk sm pio sm-pindir!
@@ -223,13 +257,19 @@ begin-module cyw43-spi
       off clk sm pio sm-pin!
       off dio sm pio sm-pin!
 
+      ."  L" 10 ms \ DEBUG
+
       \ Enable the PIO state machine
       sm bit pio sm-enable      
       
+      ."  M" 10 ms \ DEBUG
+
     ; define init-cyw43-spi
 
     \ Configure a transfer
     :noname { write-cells read-cells self -- }
+
+      cr ." write-cells: " write-cells . ."  read-cells: " read-cells . \ DEBUG
       
       \ Disable the PIO state machine
       self cyw43-sm @ bit self cyw43-pio @ sm-disable
@@ -252,27 +292,40 @@ begin-module cyw43-spi
     \ Send a message
     :noname { cmd addr count self -- status }
 
+      cr ." > cmd: " cmd h.8 ."  addr: " addr h.8 ."  count: " count . \ DEBUG
+
       \ Configure a transfer of count words outgoing and one word incoming
       count 1+ 1 self cyw43-config-xfer
+
+      \ Assert chip select
+      low self cyw43-cs @ pin!
 
       \ Transfer the command word
       cmd self cyw43-sm @ self cyw43-pio @ sm-txf!
       
       \ Transmit out words
       addr count self >cyw43-dma
-
+      
       \ Receive a status word
       self cyw43-status>
+
+      \ Deassert chip select
+      high self cyw43-cs @ pin!
       
     ; define >cyw43-msg
 
     \ Receive a message
     :noname { W^ cmd addr count self -- status }
 
+      cr ." < cmd: " cmd h.8 ."  addr: " addr h.8 ."  count: " count . \ DEBUG
+      
       \ Configure a transfer of one word outgoing and count plus one (for status)
       \ words incoming
       1 count 1 + self cyw43-config-xfer
 
+      \ Assert chip select
+      low self cyw43-cs @ pin!
+      
       \ Transmit the command word
       cmd 1 self >cyw43-dma
 
@@ -281,6 +334,9 @@ begin-module cyw43-spi
 
       \ Receive a status word
       self cyw43-status>
+
+      \ Deassert chip select
+      high self cyw43-cs @ pin!
       
     ; define cyw43-msg>
 

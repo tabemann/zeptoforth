@@ -76,7 +76,7 @@ begin-module cyw43
   <cyw43-log> begin-implement
 
     \ Constructor
-    :noname { self }
+    :noname { self -- }
 
       \ Initialize the superclass
       self <object>->new
@@ -113,6 +113,12 @@ begin-module cyw43
 
     \ CYW43 event lock
     lock-size member cyw43-event-lock
+
+    \ CYW43 firmware address
+    cell member cyw43-fw-addr
+
+    \ CYW43 firmware size
+    cell member cyw43-fw-bytes
 
     \ CYW43 shared memory log buffer
     cyw43-scratch-size member cyw43-scratch-buf
@@ -151,7 +157,7 @@ begin-module cyw43
     1 member cyw43-sdpcm-seq-max
     
     \ Initialize the CYW43
-    method init-cyw43-runner ( fw-addr fw-bytes self -- )
+    method init-cyw43 ( self -- )
 
     \ Initialize the CYW43 firmware log shared memory
     method init-cyw43-log-shm ( self -- )
@@ -240,10 +246,10 @@ begin-module cyw43
   <cyw43> begin-implement
 
     \ The constructor
-    :noname { pwr clk dio pio-addr sm pio self -- )
+    :noname { fw-addr fw-bytes pwr clk dio cs pio-addr sm pio self -- )
 
       \ Initialize the superclass
-      self <object>-new
+      self <object>->new
 
       \ Initialize the receive lock
       self cyw43-rx-lock init-lock
@@ -263,7 +269,7 @@ begin-module cyw43
       cell tx-mtu-count self cyw43-tx-size-chan init-chan
 
       \ Instantiate the bus
-      pwr clk dio pio-addr sm pio <cyw43-bus> self cyw43-bus init-object
+      pwr clk dio cs pio-addr sm pio <cyw43-bus> self cyw43-bus init-object
 
       \ Instantiate the log
       <cyw43-log> self cyw43-log init-object
@@ -278,6 +284,8 @@ begin-module cyw43
       0 self cyw43-ioctl-id h!
       0 self cyw43-sdpcm-seq c!
       0 self cyw43-sdpcm-seq-max c!
+      fw-addr self cyw43-fw-addr !
+      fw-bytes self cyw43-fw-bytes !
       
     ; define new
 
@@ -293,10 +301,14 @@ begin-module cyw43
     ; define destroy
 
     \ Initialize the CYW43
-    :noname { fw-addr fw-bytes self -- }
+    :noname { self -- }
+
+      cr ." starting initialization..." \ DEBUG
 
       \ Initialize the bus
       self cyw43-bus init-cyw43-bus
+
+      cr ." initialized bus" \ DEBUG
 
       \ Initialize ALP (Active Low Power) clock
       BACKPLANE_ALP_AVAIL_REQ FUNC_BACKPLANE REG_BACKPLANE_CHIP_CLOCK_CSR
@@ -316,7 +328,8 @@ begin-module cyw43
       SOCSRAM self reset-cyw43-core
       3 SOCSRAM_BASE_ADDRESS $10 + self cyw43-bus >cyw43-bp-32
       0 SOCSRAM_BASE_ADDRESS $44 + self cyw43-bus >cyw43-bp-32
-      fw-addr fw-bytes ATCM_RAM_BASE_ADDRESS self cyw43-bus >cyw43-bp
+      self cyw43-fw-addr @ self cyw43-fw-bytes @
+      ATCM_RAM_BASE_ADDRESS self cyw43-bus >cyw43-bp
 
       \ Upload NVRAM
       cr ." loading nvram"
@@ -355,7 +368,7 @@ begin-module cyw43
       
       cr ." wifi init done"
       
-    ; define init-cyw43-runner
+    ; define init-cyw43
     
     \ Initialize the CYW43 firmware log shared memory
     :noname { self -- }
