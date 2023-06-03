@@ -155,6 +155,8 @@ begin-module cyw43-bus
     \ The constructor
     :noname { pwr clk dio cs pio-addr sm pio self -- }
 
+      cr ." INITIALIZING <cyw43-bus>" \ DEBUG
+
       \ Initialize the superclass
       self <object>->new
 
@@ -182,7 +184,7 @@ begin-module cyw43-bus
     \ Initialize the CYW43 bus interface
     :noname { self -- }
 
-      cr ." initializng SPI..." \ DEBUG
+      cr ." initializing SPI..." \ DEBUG
 
       \ Initialize the CYW43 SPI interface
       self cyw43-spi init-cyw43-spi

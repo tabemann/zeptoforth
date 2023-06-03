@@ -246,8 +246,10 @@ begin-module cyw43
   <cyw43> begin-implement
 
     \ The constructor
-    :noname { fw-addr fw-bytes pwr clk dio cs pio-addr sm pio self -- )
+    :noname { fw-addr fw-bytes pwr clk dio cs pio-addr sm pio self -- }
 
+      cr ." INITIALIZING <cyw43>" \ DEBUG
+      
       \ Initialize the superclass
       self <object>->new
 
@@ -303,7 +305,7 @@ begin-module cyw43
     \ Initialize the CYW43
     :noname { self -- }
 
-      cr ." starting initialization..." \ DEBUG
+      cr ." starting initialization... " \ DEBUG
 
       \ Initialize the bus
       self cyw43-bus init-cyw43-bus
