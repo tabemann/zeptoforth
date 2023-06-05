@@ -145,7 +145,7 @@ begin-module cyw43
     <cyw43-event-mask> class-size member cyw43-event-mask
 
     \ Event message being constructed
-    event-message-size member cyw43-event-message-scratch
+    event-message-size cell align member cyw43-event-message-scratch
 
     \ ioctl id
     2 member cyw43-ioctl-id
@@ -248,8 +248,6 @@ begin-module cyw43
     \ The constructor
     :noname { fw-addr fw-bytes pwr clk dio cs pio-addr sm pio self -- }
 
-      cr ." INITIALIZING <cyw43>" \ DEBUG
-      
       \ Initialize the superclass
       self <object>->new
 
@@ -269,16 +267,16 @@ begin-module cyw43
       \ Initialize the transmit channels
       mtu-size tx-mtu-count self cyw43-tx-chan init-chan
       cell tx-mtu-count self cyw43-tx-size-chan init-chan
-
+      
       \ Instantiate the bus
       pwr clk dio cs pio-addr sm pio <cyw43-bus> self cyw43-bus init-object
-
+      
       \ Instantiate the log
       <cyw43-log> self cyw43-log init-object
-
+      
       \ Instantiate the ioctl state
       <cyw43-ioctl> self cyw43-ioctl-state init-object
-
+      
       \ Instantiate the event mask
       <cyw43-event-mask> self cyw43-event-mask init-object
       

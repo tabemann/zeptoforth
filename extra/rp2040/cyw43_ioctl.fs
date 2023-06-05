@@ -99,7 +99,7 @@ begin-module cyw43-ioctl
   <object> begin-class <cyw43-ioctl>
 
     \ ioctl data
-    ioctl-state-size member cyw43-ioctl-data
+    ioctl-state-size cell align member cyw43-ioctl-data
 
     \ ioctl semaphore
     sema-size member cyw43-ioctl-sema

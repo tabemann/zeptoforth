@@ -46,8 +46,9 @@ begin-module cyw43-spi
     MOV_SRC_Y SIDE_0 MOV_OP_NONE MOV_DEST_Y mov+,
     1 SIDE_1 IN_PINS in+,
     4 SIDE_0 COND_Y1- jmp+,
-    0 SIDE_0 WAIT_PIN 1 wait+,
-    0 SIDE_0 IRQ_SET irq+,
+    MOV_SRC_Y SIDE_0 MOV_OP_NONE MOV_DEST_Y mov+,
+\    0 SIDE_0 WAIT_PIN 1 wait+,
+\    0 SIDE_0 IRQ_SET irq+,
 
     \ Program for setting X
     create cyw43-x!-program
@@ -128,7 +129,7 @@ begin-module cyw43-spi
       
       \ Set DIO PINDIR
       method cyw43-dio-pindir! ( pindir self -- )
-      
+
     end-module
 
     \ Initialize the CYW43 SPI interface
@@ -139,6 +140,12 @@ begin-module cyw43-spi
 
     \ Receive a message
     method cyw43-msg> ( cmd addr count self -- status )
+    
+    \ Wait for message completion
+    method wait-cyw43-msg ( self -- )
+
+    \ FIFO level debug message
+    method debug-cyw43-fifo ( self -- )
     
   end-class
 
@@ -178,8 +185,6 @@ begin-module cyw43-spi
     \ Initialize the CYW43 SPI interface
     :noname { self -- }
 
-      ."  A" 10 ms \ DEBUG
-
       \ Get the values we need
       self cyw43-pio @ { pio }
       self cyw43-sm @ { sm }
@@ -188,23 +193,18 @@ begin-module cyw43-spi
       self cyw43-cs @ { cs }
       self cyw43-pio-addr @ { pio-addr }
 
-      ."  B" 10 ms \ DEBUG
-
       \ Set up the DIO pin
       false dio PADS_BANK0_PUE!
       false dio PADS_BANK0_PDE!
       true dio PADS_BANK0_SCHMITT!
       dio bit PROC_IN_SYNC_BYPASS bis!
+      dio bit pio pio-registers::INPUT_SYNC_BYPASS bis!
       DRIVE_12MA dio PADS_BANK0_DRIVE!
       true dio PADS_BANK0_SLEWFAST!
-
-      ."  C" 10 ms \ DEBUG
 
       \ Set up the CLK pin
       DRIVE_12MA clk PADS_BANK0_DRIVE!
       true clk PADS_BANK0_SLEWFAST!
-
-      ."  D" 10 ms \ DEBUG
 
       \ Set up the CS pin
       DRIVE_12MA cs PADS_BANK0_DRIVE!
@@ -212,19 +212,14 @@ begin-module cyw43-spi
       cs output-pin
       high cs pin!
 
-      ."  E" 10 ms \ DEBUG
-
       \ Disable the PIO state machine
       sm bit pio sm-disable
 
-      ."  F" 10 ms \ DEBUG
-
       \ Set up the PIO program
-      cyw43-pio-program 8 pio-addr pio pio-instr-relocate-mem!
+      \      cyw43-pio-program 8 pio-addr pio pio-instr-relocate-mem!
+      cyw43-pio-program 7 pio-addr pio pio-instr-relocate-mem!
       pio-addr sm pio sm-addr!
-      pio-addr pio-addr 8 + sm pio sm-wrap!
-
-      ."  G" 10 ms \ DEBUG
+      pio-addr pio-addr 6 + sm pio sm-wrap!
 
       \ Configure the pins to be PIO output, input, set, and sidset pins
       dio 1 sm pio sm-out-pins!
@@ -232,24 +227,18 @@ begin-module cyw43-spi
       dio 1 sm pio sm-set-pins!
       clk 1 sm pio sm-sideset-pins!
 
-      ."  H" 10 ms \ DEBUG
-
       \ Set the output shift direction and autopush
       left sm pio sm-out-shift-dir
       on sm pio sm-autopush!
-
-      ."  I" 10 ms \ DEBUG
+      32 sm pio sm-push-threshold!
 
       \ Set the input shift direction and autopull
       left sm pio sm-in-shift-dir
       on sm pio sm-autopull!
-
-      ."  J" 10 ms \ DEBUG
+      32 sm pio sm-pull-threshold!
 
       \ Set the clock divisor, i.e. 62.5 MHz
       0 2 sm pio sm-clkdiv!
-
-      ."  K" 10 ms \ DEBUG
 
       \ Initialize the CLK and DIO pins' initial direction (to output) and value
       out clk sm pio sm-pindir!
@@ -257,19 +246,17 @@ begin-module cyw43-spi
       off clk sm pio sm-pin!
       off dio sm pio sm-pin!
 
-      ."  L" 10 ms \ DEBUG
-
       \ Enable the PIO state machine
       sm bit pio sm-enable      
       
-      ."  M" 10 ms \ DEBUG
-
     ; define init-cyw43-spi
 
     \ Configure a transfer
     :noname { write-cells read-cells self -- }
 
       cr ." write-cells: " write-cells . ."  read-cells: " read-cells . \ DEBUG
+
+      self debug-cyw43-fifo
       
       \ Disable the PIO state machine
       self cyw43-sm @ bit self cyw43-pio @ sm-disable
@@ -287,6 +274,8 @@ begin-module cyw43-spi
       \ Enable the PIO state machine
       self cyw43-sm @ bit self cyw43-pio @ sm-enable
       
+      self debug-cyw43-fifo
+      
     ; define cyw43-config-xfer
 
     \ Send a message
@@ -300,15 +289,23 @@ begin-module cyw43-spi
       \ Assert chip select
       low self cyw43-cs @ pin!
 
+      self debug-cyw43-fifo
+      
       \ Transfer the command word
       cmd self cyw43-sm @ self cyw43-pio @ sm-txf!
+      
+      self debug-cyw43-fifo
       
       \ Transmit out words
       addr count self >cyw43-dma
       
+      self debug-cyw43-fifo
+      
       \ Receive a status word
       self cyw43-status>
-
+      
+      self debug-cyw43-fifo
+      
       \ Deassert chip select
       high self cyw43-cs @ pin!
       
@@ -317,7 +314,7 @@ begin-module cyw43-spi
     \ Receive a message
     :noname { W^ cmd addr count self -- status }
 
-      cr ." < cmd: " cmd h.8 ."  addr: " addr h.8 ."  count: " count . \ DEBUG
+      cr ." < cmd: " cmd @ h.8 ."  addr: " addr h.8 ."  count: " count . \ DEBUG
       
       \ Configure a transfer of one word outgoing and count plus one (for status)
       \ words incoming
@@ -326,15 +323,23 @@ begin-module cyw43-spi
       \ Assert chip select
       low self cyw43-cs @ pin!
       
+      self debug-cyw43-fifo
+      
       \ Transmit the command word
       cmd 1 self >cyw43-dma
 
+      self debug-cyw43-fifo
+      
       \ Receive the data words
-      addr count cyw43-dma>
+      addr count self cyw43-dma>
 
+      self debug-cyw43-fifo
+      
       \ Receive a status word
       self cyw43-status>
-
+      
+      self debug-cyw43-fifo
+      
       \ Deassert chip select
       high self cyw43-cs @ pin!
       
@@ -353,7 +358,7 @@ begin-module cyw43-spi
       \ Transfer data from the buffer, one word a time, to the PIO state
       \ machine's TXF register
       addr self cyw43-sm @ self cyw43-pio @ pio-registers::TXF count 4
-      self cyw43-sm @ self cyw43-pio @ DREQ_PIO_TX
+      self cyw43-sm @ self cyw43-pio @ PIO0 = if 0 else 1 then DREQ_PIO_TX
       self cyw43-dma-channel @ start-buffer>register-dma
 
       \ Spin until DMA completes
@@ -367,7 +372,7 @@ begin-module cyw43-spi
       \ Transfer data from PIO state machine's RXF register, one word at a time,
       \ to the buffer
       self cyw43-sm @ self cyw43-pio @ pio-registers::RXF addr count 4
-      self cyw43-sm @ self cyw43-pio @ DREQ_PIO_RX
+      self cyw43-sm @ self cyw43-pio @ PIO0 = if 0 else 1 then DREQ_PIO_RX
       self cyw43-dma-channel @ start-register>buffer-dma
 
       \ Spin until DMA completes
@@ -376,8 +381,8 @@ begin-module cyw43-spi
     ; define cyw43-dma>
     
     \ Execute an instruction
-    :noname { instr self -- }
-      instr self cyw43-sm @ self cyw43-pio @ sm-instr!
+    :noname { W^ instr self -- }
+      instr 1 self cyw43-sm @ self cyw43-pio @ sm-instr!
     ; define cyw43-execute
 
     \ Write to FIFO
@@ -419,6 +424,20 @@ begin-module cyw43-spi
       pindir self cyw43-dio @ self cyw43-sm @ self cyw43-pio @ sm-pindir!
     ; define cyw43-dio-pindir!
 
+    \ Wait for message completion
+    :noname { self -- }
+      begin 0 self cyw43-pio @ pio-registers::IRQ bit@ until
+      0 bit self cyw43-pio @ pio-registers::IRQ bis!
+    ; define wait-cyw43-msg
+
+    \ FIFO level debug message
+    :noname { self -- }
+      cr ." FLEVEL_TX: "
+      self cyw43-sm @ self cyw43-pio @ pio-registers::FLEVEL_TX@ .
+      ."  FLEVEL_RX: "
+      self cyw43-sm @ self cyw43-pio @ pio-registers::FLEVEL_RX@ .
+    ; define debug-cyw43-fifo
+      
   end-implement
 
 end-module

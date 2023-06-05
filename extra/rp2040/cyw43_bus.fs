@@ -155,8 +155,6 @@ begin-module cyw43-bus
     \ The constructor
     :noname { pwr clk dio cs pio-addr sm pio self -- }
 
-      cr ." INITIALIZING <cyw43-bus>" \ DEBUG
-
       \ Initialize the superclass
       self <object>->new
 
@@ -236,12 +234,13 @@ begin-module cyw43-bus
     ; define wait-cyw43-event
 
     \ Read bytes from the WLAN
-    :noname { buffer bytes self -- }
-      bytes 3 and if
+    :noname ( buffer bytes self -- )
+     over 3 and if
         over 4 align [: { buffer bytes self real-buffer }
           CYW43_READ INC_ADDR FUNC_WLAN 0 bytes cyw43-cmd-word { cmd }
           cmd real-buffer bytes 4 align 2 rshift self cyw43-spi cyw43-msg>
           real-buffer buffer bytes move
+          self cyw43-status !
         ;] with-aligned-allot
       else { buffer bytes self }
         CYW43_READ INC_ADDR FUNC_WLAN 0 bytes cyw43-cmd-word { cmd }
@@ -274,6 +273,7 @@ begin-module cyw43-bus
           CYW43_READ INC_ADDR FUNC_BACKPLANE window-offs len
           cyw43-cmd-word { cmd }
           cmd part len self cyw43-spi cyw43-msg>
+          self cyw43-status !
           part buffer len move
           len +to buffer
           len negate +to bytes
@@ -294,6 +294,7 @@ begin-module cyw43-bus
           CYW43_WRITE INC_ADDR FUNC_BACKPLANE window-offs len
           cyw43-cmd-word { cmd }
           cmd part len self cyw43-spi cyw43-msg>
+          self cyw43-status !
           len +to buffer
           len negate +to bytes
         repeat

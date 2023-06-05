@@ -315,7 +315,7 @@ begin-module cyw43-events
   <object> begin-class <cyw43-event-mask>
     
     \ The event mask bits
-    event-mask-bytes member cyw43-event-bits
+    event-mask-bytes cell align member cyw43-event-bits
 
     \ Enable an event
     method enable-cyw43-event ( event self -- )
