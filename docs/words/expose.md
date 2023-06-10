@@ -32,6 +32,10 @@ Get the BEL enabled variable address; note that this variable defaults to -1 (en
 
 Get the color enabled variable address; note that this variable defaults to -1 (enabled).
 
+##### `uart-special-enabled`
+
+Get the UART special character (control-C and control-T) handling enabled variable address; note that this variable defaults to -1 (enabled).
+
 ##### `dict-base`
 
 Get the RAM dictionary base variable address
