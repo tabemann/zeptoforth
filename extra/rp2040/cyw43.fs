@@ -316,6 +316,7 @@ begin-module cyw43
       cr ." waiting for clock..."
       begin
         FUNC_BACKPLANE REG_BACKPLANE_CHIP_CLOCK_CSR self cyw43-bus cyw43-8>
+        self cyw43-bus wait-cyw43-event
       until
       cr ." clock ok"
 
@@ -501,7 +502,7 @@ begin-module cyw43
                 buf self check-cyw43-status
                 
               else
-                self cyw43-bus cyw43-event-ready? if
+                self cyw43-bus poll-cyw43-event if
                   self cyw43-scratch-buf self handle-cyw43-irq
                 else
                   pause

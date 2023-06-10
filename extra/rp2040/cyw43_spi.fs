@@ -46,9 +46,9 @@ begin-module cyw43-spi
     MOV_SRC_Y SIDE_0 MOV_OP_NONE MOV_DEST_Y mov+,
     1 SIDE_1 IN_PINS in+,
     4 SIDE_0 COND_Y1- jmp+,
-    MOV_SRC_Y SIDE_0 MOV_OP_NONE MOV_DEST_Y mov+,
-\    0 SIDE_0 WAIT_PIN 1 wait+,
-\    0 SIDE_0 IRQ_SET irq+,
+    0 SIDE_0 WAIT_PIN 1 wait+,
+    0 SIDE_0 IRQ_SET irq+,
+    8 SIDE_0 COND_ALWAYS jmp+, \ DEBUG
 
     \ Program for setting X
     create cyw43-x!-program
@@ -141,8 +141,8 @@ begin-module cyw43-spi
     \ Receive a message
     method cyw43-msg> ( cmd addr count self -- status )
     
-    \ Wait for message completion
-    method wait-cyw43-msg ( self -- )
+    \ Poll for message completion
+    method poll-cyw43-msg ( self -- completed? )
 
     \ FIFO level debug message
     method debug-cyw43-fifo ( self -- )
@@ -217,9 +217,9 @@ begin-module cyw43-spi
 
       \ Set up the PIO program
       \      cyw43-pio-program 8 pio-addr pio pio-instr-relocate-mem!
-      cyw43-pio-program 7 pio-addr pio pio-instr-relocate-mem!
+      cyw43-pio-program 9 pio-addr pio pio-instr-relocate-mem!
       pio-addr sm pio sm-addr!
-      pio-addr pio-addr 6 + sm pio sm-wrap!
+      pio-addr pio-addr 8 + sm pio sm-wrap!
 
       \ Configure the pins to be PIO output, input, set, and sidset pins
       dio 1 sm pio sm-out-pins!
@@ -275,7 +275,7 @@ begin-module cyw43-spi
       self cyw43-sm @ bit self cyw43-pio @ sm-enable
       
       self debug-cyw43-fifo
-      
+
     ; define cyw43-config-xfer
 
     \ Send a message
@@ -350,6 +350,7 @@ begin-module cyw43-spi
       0 { W^ buffer }
       buffer 1 self cyw43-dma>
       buffer @
+      cr ." STATUS: " dup h.8
     ; define cyw43-status>
 
     \ Transmit data via DMA
@@ -424,12 +425,15 @@ begin-module cyw43-spi
       pindir self cyw43-dio @ self cyw43-sm @ self cyw43-pio @ sm-pindir!
     ; define cyw43-dio-pindir!
 
-    \ Wait for message completion
-    :noname { self -- }
-      begin 0 self cyw43-pio @ pio-registers::IRQ bit@ until
-      0 bit self cyw43-pio @ pio-registers::IRQ bis!
-    ; define wait-cyw43-msg
-
+    \ Poll for message completion
+    :noname { self -- completed? }
+      0 self cyw43-pio @ pio-registers::IRQ bit@ if
+        0 bit self cyw43-pio @ pio-registers::IRQ bis! true
+      else
+        false
+      then
+    ; define poll-cyw43-msg
+    
     \ FIFO level debug message
     :noname { self -- }
       cr ." FLEVEL_TX: "

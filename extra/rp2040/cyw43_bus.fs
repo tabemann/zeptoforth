@@ -34,7 +34,7 @@ begin-module cyw43-bus
   : x-buffer-size-not-aligned ( -- ) cr ." buffer size not word-aligned" ;
 
   \ Convert halfword endianness of a word
-  : rev16 ( x -- x' ) [inlined] code[ tos tos rev16_,_ ]code ;
+  : rev16 ( x -- x' ) dup 16 lshift swap 16 rshift or ;
   
   \ Construct the command word
   : cyw43-cmd-word { write? incr? func addr len -- x }
@@ -72,8 +72,8 @@ begin-module cyw43-bus
     \ Get the CYW43 status
     method cyw43-status@ ( self -- status )
 
-    \ Is CYW43 event ready
-    method cyw43-event-ready? ( self -- ready? )
+    \ Poll for a CYW43 event
+    method poll-cyw43-event ( self -- event? )
 
     \ Wait for CYW43 event
     method wait-cyw43-event ( self -- )
@@ -225,12 +225,14 @@ begin-module cyw43-bus
     \ Get the CYW43 status
     :noname ( self -- status ) cyw43-status @ ; define cyw43-status@
     
-    \ Is CYW43 event ready
-    :noname { self -- ready? } false ; define cyw43-event-ready?
-
+    \ Poll for CYW43 event
+    :noname { self -- event? }
+      self cyw43-spi poll-cyw43-msg
+    ; define poll-cyw43-event
+    
     \ Wait for CYW43 event
     :noname { self -- }
-      begin self cyw43-event-ready? until
+      begin self poll-cyw43-event until
     ; define wait-cyw43-event
 
     \ Read bytes from the WLAN
@@ -393,6 +395,10 @@ begin-module cyw43-bus
         CYW43_READ INC_ADDR FUNC_BUS addr 4 cyw43-cmd-word { cmd }
         cmd rev16 buffer 2 self cyw43-spi cyw43-msg> self cyw43-status !
         buffer @ rev16
+
+        \ DEBUG
+        dup cr ." cyw43-32-swapped> " h.8
+        
       ;] with-aligned-allot
     ; define cyw43-32-swapped>
 
