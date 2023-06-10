@@ -193,6 +193,13 @@ begin-module cyw43-spi
       self cyw43-cs @ { cs }
       self cyw43-pio-addr @ { pio-addr }
 
+      cr ." pio: " pio .
+      cr ." sm: " sm .
+      cr ." dio: " dio .
+      cr ." clk: " clk .
+      cr ." cs: " cs .
+      cr ." pio-addr: " pio-addr .
+
       \ Set up the DIO pin
       false dio PADS_BANK0_PUE!
       false dio PADS_BANK0_PDE!
@@ -247,8 +254,8 @@ begin-module cyw43-spi
       off dio sm pio sm-pin!
 
       \ Enable the PIO state machine
-      sm bit pio sm-enable      
-      
+      sm bit pio sm-enable
+
     ; define init-cyw43-spi
 
     \ Configure a transfer

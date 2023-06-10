@@ -154,7 +154,7 @@ begin-module cyw43-bus
 
     \ The constructor
     :noname { pwr clk dio cs pio-addr sm pio self -- }
-
+      
       \ Initialize the superclass
       self <object>->new
 
@@ -279,6 +279,7 @@ begin-module cyw43-bus
           part buffer len move
           len +to buffer
           len negate +to bytes
+          len +to addr
         repeat
       ;] with-aligned-allot
     ; define cyw43-bp>
@@ -295,10 +296,11 @@ begin-module cyw43-bus
           addr self set-cyw43-bp-window
           CYW43_WRITE INC_ADDR FUNC_BACKPLANE window-offs len
           cyw43-cmd-word { cmd }
-          cmd part len self cyw43-spi cyw43-msg>
+          cmd part len self cyw43-spi >cyw43-msg
           self cyw43-status !
           len +to buffer
           len negate +to bytes
+          len +to addr
         repeat
       ;] with-aligned-allot
     ; define >cyw43-bp
@@ -344,11 +346,13 @@ begin-module cyw43-bus
         new-window 24 rshift
         FUNC_BACKPLANE REG_BACKPLANE_BACKPLANE_ADDRESS_HIGH self >cyw43-8
       then
-      new-window 16 rshift $FF and cyw43-bp-window @ 16 rshift $FF and <> if
+      new-window 16 rshift $FF and
+      self cyw43-bp-window @ 16 rshift $FF and <> if
         new-window 16 rshift $FF and
         FUNC_BACKPLANE REG_BACKPLANE_BACKPLANE_ADDRESS_MID self >cyw43-8
       then
-      new-window 8 rshift $FF and cyw43-bp-window @ 8 rshift $FF and <> if
+      new-window 8 rshift $FF and
+      self cyw43-bp-window @ 8 rshift $FF and <> if
         new-window 8 rshift $FF and
         FUNC_BACKPLANE REG_BACKPLANE_BACKPLANE_ADDRESS_LOW self >cyw43-8
       then
@@ -386,7 +390,8 @@ begin-module cyw43-bus
     \ Write N bytes to the CYW43
     :noname { W^ val func addr bytes self -- }
       CYW43_WRITE INC_ADDR func addr bytes cyw43-cmd-word { cmd }
-      cmd val cell self cyw43-spi >cyw43-msg self cyw43-status !
+      cmd val bytes cell align cell / self cyw43-spi >cyw43-msg
+      self cyw43-status !
     ; define >cyw43-bytes
 
     \ Read a halfword-swapped 32-bit value from the CYW43 bus

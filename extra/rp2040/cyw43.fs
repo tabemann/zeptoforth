@@ -316,7 +316,7 @@ begin-module cyw43
       cr ." waiting for clock..."
       begin
         FUNC_BACKPLANE REG_BACKPLANE_CHIP_CLOCK_CSR self cyw43-bus cyw43-8>
-        self cyw43-bus wait-cyw43-event
+        \ self cyw43-bus wait-cyw43-event
       until
       cr ." clock ok"
 
@@ -329,15 +329,15 @@ begin-module cyw43
       SOCSRAM self reset-cyw43-core
       3 SOCSRAM_BASE_ADDRESS $10 + self cyw43-bus >cyw43-bp-32
       0 SOCSRAM_BASE_ADDRESS $44 + self cyw43-bus >cyw43-bp-32
-      self cyw43-fw-addr @ self cyw43-fw-bytes @
+      self cyw43-fw-addr @ self cyw43-fw-bytes @ 4 align
       ATCM_RAM_BASE_ADDRESS self cyw43-bus >cyw43-bp
 
       \ Upload NVRAM
       cr ." loading nvram"
-      nvram nvram-bytes ATCM_RAM_BASE_ADDRESS CHIP_RAM_SIZE 4 - nvram-bytes -
+      nvram nvram-bytes ATCM_RAM_BASE_ADDRESS CHIP_RAM_SIZE 4 - nvram-bytes - +
       self cyw43-bus >cyw43-bp
       nvram-bytes 2 rshift not 16 lshift nvram-bytes 2 rshift or
-      ATCM_RAM_BASE_ADDRESS CHIP_RAM_SIZE 4 - self cyw43-bus >cyw43-bp-32
+      ATCM_RAM_BASE_ADDRESS CHIP_RAM_SIZE 4 - + self cyw43-bus >cyw43-bp-32
 
       \ Start core!
       cr ." starting up core..."
@@ -345,6 +345,7 @@ begin-module cyw43
       WLAN self cyw43-core-up? averts x-core-not-up
 
       begin
+        cr ." polling clock..."
         FUNC_BACKPLANE REG_BACKPLANE_CHIP_CLOCK_CSR
         self cyw43-bus cyw43-8> $80 and
       until
@@ -356,8 +357,8 @@ begin-module cyw43
       self cyw43-bus >cyw43-8
 
       \ Wait for WIFI startup
-      cr ." waiting for wifi init..."
       begin
+        cr ." waiting for wifi init..."
         FUNC_BUS REG_BUS_STATUS self cyw43-bus cyw43-32> STATUS_F2_RX_READY and
       until
 
