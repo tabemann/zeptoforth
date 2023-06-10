@@ -1019,7 +1019,7 @@ begin-module pio
   : sm-addr! ( address state-machine pio -- )
     2dup validate-sm-pio
     2 pick 32 u< averts x-address-out-of-range
-    SM_ADDR !
+    SM_INSTR ! \ This executes a JMP instruction
   ;
 
   \ Set the wrapping of a state machine
