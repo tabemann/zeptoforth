@@ -546,9 +546,6 @@ begin-module usb
     \ USB receiving pending operation enabled
     variable usb-rx-pending-op-enabled?
 
-    \ USB transmit pending operation enabled
-    variable usb-tx-pending-op-enabled?
-
     \ USB pending operation priority
     0 constant usb-pending-op-priority
 
@@ -975,7 +972,6 @@ begin-module usb
       false endpoint1-out-ready? !
       false endpoint1-in-ready? !
       false usb-rx-pending-op-enabled? !
-      false usb-tx-pending-op-enabled? !
       false usb-dtr? !
       0 rx-read-index !
       0 rx-write-index !
@@ -997,11 +993,14 @@ begin-module usb
     \ Partially send data
     defer usb-partial-tx
     :noname
-      usb-tx-pending-op-enabled? @ if
-        endpoint1-in-ready? @ usb-dtr? @ and if
-          false usb-tx-pending-op-enabled? !
-          false endpoint1-in-ready? !
-          endpoint1-in usb-console-start-transfer
+      tx-empty? not if
+        usb-dtr? @ if
+          endpoint1-in-ready? @ if
+            false endpoint1-in-ready? !
+            endpoint1-in usb-console-start-transfer
+          else
+            ['] usb-partial-tx usb-tx-pending-op set-pending-op
+          then
         else
           ['] usb-partial-tx usb-tx-pending-op set-pending-op
         then
@@ -1018,10 +1017,7 @@ begin-module usb
 
     \ Attempt to send data
     : usb-attempt-tx ( -- )
-      tx-count 0> if
-        true usb-tx-pending-op-enabled? !
-        ['] usb-partial-tx usb-tx-pending-op set-pending-op
-      then
+      ['] usb-partial-tx usb-tx-pending-op set-pending-op
     ;
 
     \ Handle USB interrupt
@@ -1096,7 +1092,6 @@ begin-module usb
       false usb-dtr? !
       
       false usb-rx-pending-op-enabled? !
-      false usb-tx-pending-op-enabled? !
       usb-pending-op-priority usb-rx-pending-op register-pending-op
       usb-pending-op-priority usb-tx-pending-op register-pending-op
 
@@ -1174,10 +1169,11 @@ begin-module usb
     \ Flush the console
     : usb-flush-console ( -- )
       begin
-        [:
-          [: tx-empty? endpoint1-in-ready? @ and ;] critical
-        ;] usb-in-core-lock with-core-lock
-        dup not if pause then
+        tx-empty? endpoint1-in-ready? @ and
+        dup not if
+          usb-dtr? @ usb-device-configd? @ and if usb-attempt-tx then
+          pause
+        then
       until
     ;
 
