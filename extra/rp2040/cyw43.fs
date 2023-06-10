@@ -345,13 +345,17 @@ begin-module cyw43
       WLAN self cyw43-core-up? averts x-core-not-up
 
       begin
-        cr ." polling clock..."
+        cr ." polling clock... "
         FUNC_BACKPLANE REG_BACKPLANE_CHIP_CLOCK_CSR
         self cyw43-bus cyw43-8> $80 and
       until
 
+      cr ." enabling interrupts..."
+
       IRQ_F2_PACKET_AVAILABLE FUNC_BUS REG_BUS_INTERRUPT_ENABLE
       self cyw43-bus >cyw43-16
+
+      cr ." setting the watermark..."
 
       32 FUNC_BACKPLANE REG_BACKPLANE_FUNCTION2_WATERMARK
       self cyw43-bus >cyw43-8
