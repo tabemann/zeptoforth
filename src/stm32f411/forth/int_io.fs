@@ -174,7 +174,7 @@ begin-module int-io
                 then
               then
             else
-              write-rfx false
+              write-rx false
             then
 	  else
 	    true
