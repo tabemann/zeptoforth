@@ -91,6 +91,9 @@ begin-module cyw43
     
     \ Initialize the log
     :noname { addr self -- }
+
+      cr ." log addr: " addr h.8 \ DEBUG
+      
       addr self cyw43-log-addr !
     ; define init-cyw43-log
     
@@ -387,8 +390,13 @@ begin-module cyw43
 
       \ Read the log shared memory info
       shared-addr self shared-mem-data-size [: { shared-addr self data }
-        data shared-mem-data-size shared-addr self cyw43-bus cyw43-bp>
+        data shared-mem-data-size shared-addr self cyw43-bus cyw43-bp>        
         data smd-console-addr @ 8 + self cyw43-log init-cyw43-log
+
+        \ DEBUG
+        data dup shared-mem-data-size + dump
+        \ DEBUG
+        
       ;] with-aligned-allot
       
     ; define init-cyw43-log-shm
@@ -401,6 +409,12 @@ begin-module cyw43
         \ Read log struct
         log shared-mem-log-size self cyw43-log cyw43-log-addr @
         self cyw43-bus cyw43-bp>
+
+        \ DEBUG
+        cr ." sml-idx: " log sml-idx @ h.8
+        log dup shared-mem-log-size + dump
+        exit
+        \ DEBUG
 
         \ If pointer hasn't moved, no need to do anything
         log sml-idx @ self cyw43-log cyw43-log-last-idx @ = if exit then
@@ -415,7 +429,7 @@ begin-module cyw43
           \ Read a byte from the buffer
           self cyw43-scratch-buf self cyw43-log cyw43-log-last-idx @ + c@ { b }
           
-          b $0D = b $0A = if
+          b $0D = b $0A = or if
             
             \ Print a line from the log on newline
             self cyw43-log cyw43-log-buf-count @ 0<> if
@@ -451,7 +465,7 @@ begin-module cyw43
     :noname ( self -- )
       1 [: { self }
         begin
-          self read-cyw43-log
+          \ self read-cyw43-log \ commented for DEBUG
           self cyw43-has-credit? if
             self cyw43-ioctl-state cyw43-ioctl-pending? if
 
@@ -517,7 +531,7 @@ begin-module cyw43
             then
           else
             cr ." TX stalled"
-            self cyw43-bus wait-cyw43-event
+            \ self cyw43-bus wait-cyw43-event
             self cyw43-scratch-buf self handle-cyw43-irq
           then
         again
@@ -542,7 +556,7 @@ begin-module cyw43
         cr ." check status " status h.8
         status STATUS_F2_PKT_AVAILABLE and if
           status STATUS_F2_PKT_LEN_MASK and
-          STATUS_F2_PKT_LEN_SHIFT lshift { len }
+          STATUS_F2_PKT_LEN_SHIFT rshift { len }
           buf len self cyw43-bus cyw43-wlan>
           buf len self handle-cyw43-rx
           false
@@ -568,8 +582,14 @@ begin-module cyw43
       
       addr self update-cyw43-credit
 
+      addr sdpcmh-channel-and-flags c@ { channel-and-flags }
+      addr sdpcmh-header-length c@ { header-length }
+      
+      header-length +to addr
+      header-length negate +to bytes
+
       \ Handle some channel types
-      addr sdpcmh-channel-and-flags c@ $0F and case
+      sdpcmh-channel-and-flags $0F and case
         CHANNEL_TYPE_CONTROL of addr bytes self handle-cyw43-control-pkt endof
         CHANNEL_TYPE_EVENT of addr bytes self handle-cyw43-event-pkt endof
         CHANNEL_TYPE_DATA of addr bytes self handle-cyw43-data-pkt endof
@@ -593,12 +613,15 @@ begin-module cyw43
     \ Handle CYW43 event packet
     :noname { addr bytes self -- }
 
+      addr dup bytes + dump \ DEBUG
+      
       \ Validate an event packet
       bytes bdc-header-size < if
         cr ." BDC event, incomplete header" exit
       then
-      bdc-header-size +to addr
-      [ bdc-header-size negate ] literal +to bytes
+      addr bdch-data-offset c@ cells bdc-header-size + { offset }
+      offset +to addr
+      offset negate +to bytes
       bytes event-packet-size < if
         cr ." BDC event, incomplete data" exit
       then
@@ -646,7 +669,7 @@ begin-module cyw43
     \ Handle CYW43 data packet
     :noname { addr bytes self -- }
       bytes bdc-header-size < if exit then
-      addr bdch-data-offset c@ bdc-header-size + { data-offset }
+      addr bdch-data-offset c@ cells bdc-header-size + { data-offset }
       addr data-offset + bytes data-offset - self put-cyw43-rx
     ; define handle-cyw43-data-pkt
 
