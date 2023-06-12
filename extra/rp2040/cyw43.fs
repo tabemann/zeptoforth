@@ -334,7 +334,8 @@ begin-module cyw43
 
       \ Upload NVRAM
       cr ." loading nvram"
-      nvram nvram-bytes ATCM_RAM_BASE_ADDRESS CHIP_RAM_SIZE 4 - nvram-bytes - +
+      nvram nvram-bytes
+      ATCM_RAM_BASE_ADDRESS CHIP_RAM_SIZE 4 - nvram-bytes - +
       self cyw43-bus >cyw43-bp
       nvram-bytes 2 rshift not 16 lshift nvram-bytes 2 rshift or
       ATCM_RAM_BASE_ADDRESS CHIP_RAM_SIZE 4 - + self cyw43-bus >cyw43-bp-32

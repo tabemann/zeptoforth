@@ -266,7 +266,7 @@ begin-module cyw43-bus
     \ Read data from the backplane
     :noname ( buffer bytes addr self -- )
       2 pick 3 and 0= averts x-buffer-size-not-aligned
-      BACKPLANE_MAX_TRANSFER_SIZE cell+ [: { buffer bytes addr self part }
+      BACKPLANE_MAX_TRANSFER_SIZE [: { buffer bytes addr self part }
         begin bytes while
           addr BACKPLANE_ADDRESS_MASK and { window-offs }
           BACKPLANE_WINDOW_SIZE window-offs -
@@ -285,24 +285,21 @@ begin-module cyw43-bus
     ; define cyw43-bp>
 
     \ Write data to the backplane
-    :noname ( buffer bytes addr self -- )
-      2 pick 3 and 0= averts x-buffer-size-not-aligned
-      BACKPLANE_MAX_TRANSFER_SIZE cell+ [: { buffer bytes addr self part }
-        begin bytes while
-          addr BACKPLANE_ADDRESS_MASK and { window-offs }
-          BACKPLANE_WINDOW_SIZE window-offs -
-          BACKPLANE_MAX_TRANSFER_SIZE min bytes min { len }
-          buffer part cell+ len move
-          addr self set-cyw43-bp-window
-          CYW43_WRITE INC_ADDR FUNC_BACKPLANE window-offs len
-          cyw43-cmd-word { cmd }
-          cmd part len self cyw43-spi >cyw43-msg
-          self cyw43-status !
-          len +to buffer
-          len negate +to bytes
-          len +to addr
-        repeat
-      ;] with-aligned-allot
+    :noname { buffer bytes addr self -- }
+      bytes 3 and 0= averts x-buffer-size-not-aligned
+      begin bytes while
+        addr BACKPLANE_ADDRESS_MASK and { window-offs }
+        BACKPLANE_WINDOW_SIZE window-offs -
+        BACKPLANE_MAX_TRANSFER_SIZE min bytes min { len }
+        addr self set-cyw43-bp-window
+        CYW43_WRITE INC_ADDR FUNC_BACKPLANE window-offs len
+        cyw43-cmd-word { cmd }
+        cmd buffer len self cyw43-spi >cyw43-msg
+        self cyw43-status !
+        len +to buffer
+        len negate +to bytes
+        len +to addr
+      repeat
     ; define >cyw43-bp
 
     \ Read 8 bits from the backplane
