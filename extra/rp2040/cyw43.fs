@@ -522,16 +522,11 @@ begin-module cyw43
                 buf self check-cyw43-status
                 
               else
-                self cyw43-bus poll-cyw43-event if
-                  self cyw43-scratch-buf self handle-cyw43-irq
-                else
-                  pause
-                then
+                self cyw43-scratch-buf self handle-cyw43-irq
               then
             then
           else
             cr ." TX stalled"
-            \ self cyw43-bus wait-cyw43-event
             self cyw43-scratch-buf self handle-cyw43-irq
           then
         again
@@ -583,13 +578,13 @@ begin-module cyw43
       addr self update-cyw43-credit
 
       addr sdpcmh-channel-and-flags c@ { channel-and-flags }
-      addr sdpcmh-header-length c@ { header-length }
+      addr sdpcmh-header-length c@ sdpcm-header-size max { header-length }
       
       header-length +to addr
       header-length negate +to bytes
 
       \ Handle some channel types
-      sdpcmh-channel-and-flags $0F and case
+      channel-and-flags $0F and case
         CHANNEL_TYPE_CONTROL of addr bytes self handle-cyw43-control-pkt endof
         CHANNEL_TYPE_EVENT of addr bytes self handle-cyw43-event-pkt endof
         CHANNEL_TYPE_DATA of addr bytes self handle-cyw43-data-pkt endof
