@@ -348,8 +348,8 @@ begin-module cyw43
       WLAN self reset-cyw43-core
       WLAN self cyw43-core-up? averts x-core-not-up
 
+      cr ." polling clock... "
       begin
-        cr ." polling clock... "
         FUNC_BACKPLANE REG_BACKPLANE_CHIP_CLOCK_CSR
         self cyw43-bus cyw43-8> $80 and
       until
@@ -365,8 +365,8 @@ begin-module cyw43
       self cyw43-bus >cyw43-8
 
       \ Wait for WIFI startup
+      cr ." waiting for wifi init..."
       begin
-        cr ." waiting for wifi init..."
         FUNC_BUS REG_BUS_STATUS self cyw43-bus cyw43-32> STATUS_F2_RX_READY and
       until
 
@@ -536,7 +536,7 @@ begin-module cyw43
     \ Handle CYW43 IRQ's
     :noname { buf self -- }
       FUNC_BUS REG_BUS_INTERRUPT self cyw43-bus cyw43-16> { irq }
-      cr ." irq " irq h.4
+\      cr ." irq " irq h.4
       irq IRQ_F2_PACKET_AVAILABLE and if buf self check-cyw43-status then
       irq IRQ_DATA_UNAVAILABLE and if
         cr ." IRQ DATA_UNAVAILABLE, clearing..."

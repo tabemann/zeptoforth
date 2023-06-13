@@ -261,7 +261,7 @@ begin-module cyw43-spi
     \ Configure a transfer
     :noname { write-cells read-cells self -- }
 
-      cr ." write-cells: " write-cells . ."  read-cells: " read-cells . \ DEBUG
+\      cr ." write-cells: " write-cells . ."  read-cells: " read-cells . \ DEBUG
 
       self debug-cyw43-fifo
       
@@ -288,7 +288,7 @@ begin-module cyw43-spi
     \ Send a message
     :noname { cmd addr count self -- status }
 
-      cr ." > cmd: " cmd h.8 ."  addr: " addr h.8 ."  count: " count . \ DEBUG
+\      cr ." > cmd: " cmd h.8 ."  addr: " addr h.8 ."  count: " count . \ DEBUG
 
       \ Configure a transfer of count words outgoing and one word incoming
       count 1+ 1 self cyw43-config-xfer
@@ -321,7 +321,7 @@ begin-module cyw43-spi
     \ Receive a message
     :noname { W^ cmd addr count self -- status }
 
-      cr ." < cmd: " cmd @ h.8 ."  addr: " addr h.8 ."  count: " count . \ DEBUG
+\      cr ." < cmd: " cmd @ h.8 ."  addr: " addr h.8 ."  count: " count . \ DEBUG
       
       \ Configure a transfer of one word outgoing and count plus one (for status)
       \ words incoming
@@ -357,7 +357,7 @@ begin-module cyw43-spi
       0 { W^ buffer }
       buffer 1 self cyw43-dma>
       buffer @
-      cr ." STATUS: " dup h.8
+\      cr ." STATUS: " dup h.8
     ; define cyw43-status>
 
     \ Transmit data via DMA
@@ -443,10 +443,10 @@ begin-module cyw43-spi
     
     \ FIFO level debug message
     :noname { self -- }
-      cr ." FLEVEL_TX: "
-      self cyw43-sm @ self cyw43-pio @ pio-registers::FLEVEL_TX@ .
-      ."  FLEVEL_RX: "
-      self cyw43-sm @ self cyw43-pio @ pio-registers::FLEVEL_RX@ .
+\      cr ." FLEVEL_TX: "
+\      self cyw43-sm @ self cyw43-pio @ pio-registers::FLEVEL_TX@ .
+\      ."  FLEVEL_RX: "
+\      self cyw43-sm @ self cyw43-pio @ pio-registers::FLEVEL_RX@ .
     ; define debug-cyw43-fifo
       
   end-implement
