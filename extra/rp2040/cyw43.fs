@@ -571,10 +571,14 @@ begin-module cyw43
       addr sdpcmh-len h@ addr sdpcmh-len-inv h@ not $FFFF and <> if
         cr ." len inv mismatch" exit
       then
-      addr sdpcmh-len h@ bytes <> if
-        cr ." len from header doesn't match len from spi"
+      addr sdpcmh-len h@ bytes > if
+        cr ." len from header is too large"
       then
       
+      addr sdpcmh-len h@ to bytes
+
+      cr ." packet len: " bytes .
+
       addr self update-cyw43-credit
 
       addr sdpcmh-channel-and-flags c@ { channel-and-flags }
@@ -583,6 +587,8 @@ begin-module cyw43
       header-length +to addr
       header-length negate +to bytes
 
+      bytes 0= if cr ." flow control packet" exit then
+      
       \ Handle some channel types
       channel-and-flags $0F and case
         CHANNEL_TYPE_CONTROL of addr bytes self handle-cyw43-control-pkt endof
