@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module cyw43
+begin-module cyw43-runner
 
   oo import
   cyw43-consts import
@@ -100,7 +100,7 @@ begin-module cyw43
   end-implement
   
   \ CYW43 runner class
-  <object> begin-class <cyw43>
+  <object> begin-class <cyw43-runner>
 
     \ CYW43 bus
     <cyw43-bus> class-size member cyw43-bus
@@ -160,7 +160,7 @@ begin-module cyw43
     1 member cyw43-sdpcm-seq-max
     
     \ Initialize the CYW43
-    method init-cyw43 ( self -- )
+    method init-cyw43-runner ( self -- )
 
     \ Initialize the CYW43 firmware log shared memory
     method init-cyw43-log-shm ( self -- )
@@ -196,7 +196,7 @@ begin-module cyw43
     method cyw43-has-credit? ( self -- credit? )
 
     \ Send an ioctl
-    method send-cyw43-ioctl ( kind cmd iface buf-addr buf-size self -- )
+    method handle-send-cyw43-ioctl ( kind cmd iface buf-addr buf-size self -- )
 
     \ Disable a core
     method disable-cyw43-core ( core self -- )
@@ -218,7 +218,7 @@ begin-module cyw43
 
     \ Disable multiple events
     method disable-cyw43-events ( event-addr event-count self -- )
-    
+
     \ Enqueue received data
     method put-cyw43-rx ( addr bytes self -- )
 
@@ -243,10 +243,25 @@ begin-module cyw43
     \ Poll for event message
     method poll-cyw43-event ( addr self -- found? )
 
+    \ Poll sending an ioctl
+    method poll-cyw43-ioctl ( kind cmd iface addr bytes self -- success? )
+
+    \ Block on an ioctl operation
+    method block-cyw43-ioctl ( kind cmd iface addr bytes self -- actual-bytes )
+    
+    \ Wait on ioctl completion
+    method wait-cyw43-ioctl ( self -- actual-bytes )
+
+    \ Test whether an ioctl is done
+    method cyw43-ioctl-done? ( self -- done? )
+
+    \ Cancel an ioctl (remember to wait on it to clear its state)
+    method cancel-cyw43-ioctl ( self -- )
+
   end-class
 
   \ Implement the CYW43 runner class
-  <cyw43> begin-implement
+  <cyw43-runner> begin-implement
 
     \ The constructor
     :noname { fw-addr fw-bytes pwr clk dio cs pio-addr sm pio self -- }
@@ -378,7 +393,7 @@ begin-module cyw43
       
       cr ." wifi init done"
       
-    ; define init-cyw43
+    ; define init-cyw43-runner
     
     \ Initialize the CYW43 firmware log shared memory
     :noname { self -- }
@@ -475,7 +490,7 @@ begin-module cyw43
               self cyw43-ioctl-state pioctl-iface @
               self cyw43-ioctl-state pioctl-buf-addr @
               self cyw43-ioctl-state pioctl-buf-size @
-              self send-cyw43-ioctl
+              self handle-send-cyw43-ioctl
               self cyw43-scratch-buf self check-cyw43-status
               
             else
@@ -731,8 +746,11 @@ begin-module cyw43
 
       \ Send the packet
       self cyw43-scratch-buf total-len 4 align self cyw43-bus >cyw43-wlan
+
+      \ Mark the packet as having been sent
+      self cyw43-ioctl-state mark-cyw43-ioctl-sent
       
-    ; define send-cyw43-ioctl
+    ; define handle-send-cyw43-ioctl
 
     \ Disable a core
     :noname { core self -- }
@@ -940,6 +958,31 @@ begin-module cyw43
         then
       ;] over cyw43-event-lock with-lock
     ; define poll-cyw43-event
+
+    \ Poll sending an ioctl
+    :noname ( kind cmd iface addr bytes self -- success? )
+      cyw43-ioctl-state cyw43-ioctl::poll-cyw43-ioctl
+    ; define poll-cyw43-ioctl
+
+    \ Block on an ioctl operation
+    :noname ( kind cmd iface addr bytes self -- actual-bytes )
+      cyw43-ioctl-state cyw43-ioctl::block-cyw43-ioctl
+    ; define block-cyw43-ioctl
+    
+    \ Wait on ioctl completion
+    :noname ( self -- actual-bytes )
+      cyw43-ioctl-state cyw43-ioctl::wait-cyw43-ioctl
+    ; define wait-cyw43-ioctl
+
+    \ Test whether an ioctl is done
+    :noname ( self -- done? )
+      cyw43-ioctl-state cyw43-ioctl::cyw43-ioctl-done?
+    ; define cyw43-ioctl-done?
+
+    \ Cancel an ioctl (remember to wait on it to clear its state)
+    :noname ( self -- )
+      cyw43-ioctl-state cyw43-ioctl::cancel-cyw43-ioctl
+    ; define cancel-cyw43-ioctl
 
   end-implement
   

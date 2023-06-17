@@ -21,7 +21,7 @@
 begin-module cyw43-test
   
   oo import
-  cyw43 import
+  cyw43-runner import
   
   23 constant pwr-pin
   24 constant dio-pin
@@ -32,14 +32,14 @@ begin-module cyw43-test
   0 constant sm-index
   pio::PIO0 constant pio-instance
   
-  <cyw43> class-size buffer: my-cyw43
+  <cyw43-runner> class-size buffer: my-cyw43-runner
   
   : init-test ( -- )
     dma-pool::init-dma-pool
     cyw43-fw::data cyw43-fw::size pwr-pin clk-pin dio-pin cs-pin pio-addr sm-index pio-instance
-    <cyw43> my-cyw43 init-object
-    my-cyw43 init-cyw43
-    my-cyw43 run-cyw43
+    <cyw43-runner> my-cyw43-runner init-object
+    my-cyw43-runner init-cyw43-runner
+    my-cyw43-runner run-cyw43
   ;
 
 end-module

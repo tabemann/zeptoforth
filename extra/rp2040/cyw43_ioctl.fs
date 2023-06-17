@@ -34,13 +34,14 @@ begin-module cyw43-ioctl
   0 constant ioctl-state-pending
   1 constant ioctl-state-sent
   2 constant ioctl-state-done
+  3 constant ioctl-state-ready
   
   \ ioctl state header
   begin-structure ioctl-state-header-size
 
     \ ioctl state type
     field: ioctl-state-type
-    
+
   end-structure
 
   \ Pending ioctl
@@ -109,6 +110,9 @@ begin-module cyw43-ioctl
 
     \ Test whether ioctl is pending
     method cyw43-ioctl-pending? ( self -- pending? )
+
+    \ Test whether ioctl is done
+    method cyw43-ioctl-done? ( self -- done? )
     
     \ Wake an ioctl
     method wake-cyw43-ioctl ( self -- )
@@ -116,17 +120,23 @@ begin-module cyw43-ioctl
     \ Wait for a ioctl state
     method wait-cyw43-ioctl-state ( xt state self -- )
     
-    \ Wait on a pending ioctl
-    method wait-pending-cyw43-ioctl ( self -- )
+    \ Mark a pending ioctl as having been sent
+    method mark-cyw43-ioctl-sent ( self -- )
 
     \ Wait for a complete ioctl
-    method wait-complete-cyw43-ioctl ( self -- )
+    method wait-cyw43-ioctl ( self -- bytes )
 
     \ Cancel an ioctl
     method cancel-cyw43-ioctl ( self -- )
 
     \ Execute an ioctl
     method do-cyw43-ioctl ( kind cmd iface addr bytes self -- )
+
+    \ Poll sending an ioctl
+    method poll-cyw43-ioctl ( kind cmd iface addr bytes self -- success? )
+
+    \ Blocking ioctl operation
+    method block-cyw43-ioctl ( kind cmd iface addr bytes self -- actual-bytes )
     
     \ Mark an ioctl as done
     method cyw43-ioctl-done ( addr bytes self -- )
@@ -138,16 +148,20 @@ begin-module cyw43-ioctl
     \ Constructor
     :noname { self -- }
       self <object>->new
-      ioctl-state-done self cyw43-ioctl-data ioctl-state-type !
-      0 self cyw43-ioctl-data dioctl-resp-len !
+      ioctl-state-ready self cyw43-ioctl-data ioctl-state-type !
       1 0 self cyw43-ioctl-sema init-sema
       self cyw43-ioctl-lock init-lock
     ; define new
-    
+
     \ Test whether ioctl is pending
     :noname { self -- pending? }
       self cyw43-ioctl-data ioctl-state-type @ ioctl-state-pending =
     ; define cyw43-ioctl-pending?
+
+    \ Test whether ioctl is done
+    :noname { self -- pending? }
+      self cyw43-ioctl-data ioctl-state-type @ ioctl-state-done =
+    ; define cyw43-ioctl-done?
 
     \ Wake an ioctl
     :noname { self -- }
@@ -169,23 +183,24 @@ begin-module cyw43-ioctl
       repeat      
     ; define wait-cyw43-ioctl-state
 
-    \ Wait on a pending ioctl
+    \ Mark a pending ioctl as having been sent
     :noname { self -- }
-      self [: { self }
-        self cyw43-ioctl-data ioctl-state-type @ ioctl-state-pending = if
-          self cyw43-ioctl-data pioctl-buf-addr @ { addr }
-          self cyw43-ioctl-data pioctl-buf-size @ { bytes }
-          ioctl-state-sent self cyw43-ioctl-data ioctl-state-type !
-          addr self cyw43-ioctl-data sioctl-buf-addr !
-          bytes self cyw43-ioctl-data sioctl-buf-size !
-        then
-      ;] ioctl-state-pending self wait-cyw43-ioctl-state
-    ; define wait-pending-cyw43-ioctl
+      self cyw43-ioctl-data ioctl-state-type @ ioctl-state-pending = if
+        self cyw43-ioctl-data pioctl-buf-addr @ { addr }
+        self cyw43-ioctl-data pioctl-buf-size @ { bytes }
+        ioctl-state-sent self cyw43-ioctl-data ioctl-state-type !
+        addr self cyw43-ioctl-data sioctl-buf-addr !
+        bytes self cyw43-ioctl-data sioctl-buf-size !
+      then
+    ; define mark-cyw43-ioctl-sent
 
     \ Wait for a complete ioctl
-    :noname { self -- }
-      [: ;] ioctl-state-done self wait-cyw43-ioctl-state
-    ; define wait-complete-cyw43-ioctl
+    :noname { self -- addr actual-bytes }
+      [: { self }
+        self cyw43-ioctl-data dioctl-resp-len @
+        ioctl-state-ready self cyw43-ioctl-data ioctl-state-type !
+      ;] ioctl-state-done over wait-cyw43-ioctl-state
+    ; define wait-cyw43-ioctl
 
     \ Cancel an ioctl
     :noname ( self -- )
@@ -197,26 +212,42 @@ begin-module cyw43-ioctl
       self wake-cyw43-ioctl
     ; define cancel-cyw43-ioctl
     
-    \ Execute an ioctl
-    :noname ( kind cmd iface addr bytes self -- )
-      dup { self }
-      [: { kind cmd iface addr bytes self }
-        ioctl-state-pending self cyw43-ioctl-data ioctl-state-type !
-        bytes self cyw43-ioctl-data pioctl-buf-size !
-        addr self cyw43-ioctl-data pioctl-buf-addr !
-        iface self cyw43-ioctl-data pioctl-iface !
-        cmd self cyw43-ioctl-data pioctl-cmd !
-        kind self cyw43-ioctl-data pioctl-kind !
-      ;] over cyw43-ioctl-lock with-lock
-      self wait-complete-cyw43-ioctl
+    \ Send an ioctl
+    :noname { kind cmd iface addr bytes self -- }
+      ioctl-state-pending self cyw43-ioctl-data ioctl-state-type !
+      bytes self cyw43-ioctl-data pioctl-buf-size !
+      addr self cyw43-ioctl-data pioctl-buf-addr !
+      iface self cyw43-ioctl-data pioctl-iface !
+      cmd self cyw43-ioctl-data pioctl-cmd !
+      kind self cyw43-ioctl-data pioctl-kind !
     ; define do-cyw43-ioctl
+
+    \ Polling sending an ioctl
+    :noname ( kind cmd iface addr bytes self -- success? )
+      [: dup { self }
+        self cyw43-ioctl-data ioctl-state-type @ ioctl-state-ready = if
+          do-cyw43-ioctl true
+        else
+          drop false
+        then
+      ;] over cyw43-ioctl-lock with-lock
+    ; define poll-cyw43-ioctl
+    
+    \ Blocking ioctl operation
+    :noname { kind cmd iface addr bytes self -- actual-bytes }
+      begin
+        kind cmd iface addr bytes self poll-cyw43-ioctl
+        dup not if pause then
+      until
+      self wait-cyw43-ioctl
+    ; define block-cyw43-ioctl
 
     \ Mark an ioctl as done
     :noname ( addr bytes self -- )
       dup { self }
       [: { addr bytes self }
         self cyw43-ioctl-data ioctl-state-type @ ioctl-state-sent = if
-          addr self cyw43-ioctl sioctl-buf-addr @
+          addr self cyw43-ioctl sioctl-buf-addr @ dup { buf-addr }
           bytes self cyw43-ioctl sioctl-buf-size @ min dup { actual-bytes } move
           ioctl-state-done self cyw43-ioctl-data ioctl-state-type !
           actual-bytes self cyw43-ioctl-data dioctl-resp-len !
