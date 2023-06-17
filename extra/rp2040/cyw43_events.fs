@@ -296,7 +296,7 @@ begin-module cyw43-events
   190 constant EVENT_LAST
 
   \ The event mask bytes
-  EVENT_LAST 32 align 8 / constant event-mask-bytes
+  24 constant event-mask-bytes
   
   \ Event message type
   begin-structure event-message-size
@@ -314,9 +314,9 @@ begin-module cyw43-events
   \ Event mask class
   <object> begin-class <cyw43-event-mask>
     
-    \ The event mask bits
-    event-mask-bytes cell align member cyw43-event-bits
-
+    \ The event mask structure
+    event-mask-size member cyw43-event-mask
+    
     \ Enable an event
     method enable-cyw43-event ( event self -- )
 
@@ -340,13 +340,14 @@ begin-module cyw43-events
     \ The constructor
     :noname { self -- }
       self <object>->new
-      self cyw43-event-bits event-mask-bytes 0 fill
+      0 self cyw43-event-mask emsk-iface !
+      self cyw43-event-mask emsk-events event-mask-bytes $FF fill
     ; define new
 
     \ Enable an event
     :noname { event self -- }
       event validate-event
-      event 7 and self cyw43-event-bits event 3 rshift + cbis!
+      event 7 and self cyw43-event-mask emsk-events event 3 rshift + cbis!
     ; define enable-cyw43-event
 
     \ Enable multiple events
@@ -358,7 +359,7 @@ begin-module cyw43-events
     \ Disable an event
     :noname { event self -- }
       event validate-event
-      event 7 and self cyw43-event-bits event 3 rshift + cbic!
+      event 7 and self cyw43-event-mask emsk-events event 3 rshift + cbic!
     ; define disable-cyw43-event
 
     \ Disable multiple events
@@ -370,7 +371,7 @@ begin-module cyw43-events
     \ Is an event enabled
     :noname { event self -- enabled? }
       event validate-event
-      event 7 and self cyw43-event-bits event 3 rshift + cbit@
+      event 7 and self cyw43-event-mask emsk-events event 3 rshift + cbit@
     ; define cyw43-event-enabled?
     
   end-implement

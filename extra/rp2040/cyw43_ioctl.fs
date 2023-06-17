@@ -130,16 +130,16 @@ begin-module cyw43-ioctl
     method cancel-cyw43-ioctl ( self -- )
 
     \ Execute an ioctl
-    method do-cyw43-ioctl ( kind cmd iface addr bytes self -- )
+    method do-cyw43-ioctl ( addr bytes kind cmd iface self -- )
 
     \ Poll sending an ioctl
-    method poll-cyw43-ioctl ( kind cmd iface addr bytes self -- success? )
+    method poll-cyw43-ioctl ( addr bytes kind cmd iface self -- success? )
 
     \ Blocking ioctl operation
-    method block-cyw43-ioctl ( kind cmd iface addr bytes self -- actual-bytes )
+    method block-cyw43-ioctl ( addr bytes kind cmd iface self -- actual-bytes )
     
     \ Mark an ioctl as done
-    method cyw43-ioctl-done ( addr bytes self -- )
+    method cyw43-ioctl-done ( self -- )
     
   end-class
 
@@ -213,17 +213,17 @@ begin-module cyw43-ioctl
     ; define cancel-cyw43-ioctl
     
     \ Send an ioctl
-    :noname { kind cmd iface addr bytes self -- }
+    :noname { addr bytes kind cmd iface self -- }
       ioctl-state-pending self cyw43-ioctl-data ioctl-state-type !
-      bytes self cyw43-ioctl-data pioctl-buf-size !
-      addr self cyw43-ioctl-data pioctl-buf-addr !
       iface self cyw43-ioctl-data pioctl-iface !
       cmd self cyw43-ioctl-data pioctl-cmd !
       kind self cyw43-ioctl-data pioctl-kind !
+      bytes self cyw43-ioctl-data pioctl-buf-size !
+      addr self cyw43-ioctl-data pioctl-buf-addr !
     ; define do-cyw43-ioctl
 
     \ Polling sending an ioctl
-    :noname ( kind cmd iface addr bytes self -- success? )
+    :noname ( addr bytes kind cmd iface self -- success? )
       [: dup { self }
         self cyw43-ioctl-data ioctl-state-type @ ioctl-state-ready = if
           do-cyw43-ioctl true
@@ -234,7 +234,7 @@ begin-module cyw43-ioctl
     ; define poll-cyw43-ioctl
     
     \ Blocking ioctl operation
-    :noname { kind cmd iface addr bytes self -- actual-bytes }
+    :noname { addr bytes kind cmd iface self -- actual-bytes }
       begin
         kind cmd iface addr bytes self poll-cyw43-ioctl
         dup not if pause then

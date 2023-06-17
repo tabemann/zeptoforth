@@ -196,7 +196,7 @@ begin-module cyw43-runner
     method cyw43-has-credit? ( self -- credit? )
 
     \ Send an ioctl
-    method handle-send-cyw43-ioctl ( kind cmd iface buf-addr buf-size self -- )
+    method handle-send-cyw43-ioctl ( buf-addr buf-size kind cmd iface self -- )
 
     \ Disable a core
     method disable-cyw43-core ( core self -- )
@@ -244,10 +244,10 @@ begin-module cyw43-runner
     method poll-cyw43-event ( addr self -- found? )
 
     \ Poll sending an ioctl
-    method poll-cyw43-ioctl ( kind cmd iface addr bytes self -- success? )
+    method poll-cyw43-ioctl ( addr bytes kind cmd iface self -- success? )
 
     \ Block on an ioctl operation
-    method block-cyw43-ioctl ( kind cmd iface addr bytes self -- actual-bytes )
+    method block-cyw43-ioctl ( addr bytes kind cmd iface self -- actual-bytes )
     
     \ Wait on ioctl completion
     method wait-cyw43-ioctl ( self -- actual-bytes )
@@ -485,11 +485,11 @@ begin-module cyw43-runner
             self cyw43-ioctl-state cyw43-ioctl-pending? if
 
               \ Handle a pending ioctl
+              self cyw43-ioctl-state pioctl-buf-addr @
+              self cyw43-ioctl-state pioctl-buf-size @
               self cyw43-ioctl-state pioctl-kind @
               self cyw43-ioctl-state pioctl-cmd @
               self cyw43-ioctl-state pioctl-iface @
-              self cyw43-ioctl-state pioctl-buf-addr @
-              self cyw43-ioctl-state pioctl-buf-size @
               self handle-send-cyw43-ioctl
               self cyw43-scratch-buf self check-cyw43-status
               
@@ -709,7 +709,7 @@ begin-module cyw43-runner
     ; define cyw43-has-credit?
 
     \ Send an ioctl
-    :noname { kind cmd iface buf-addr buf-size self -- }
+    :noname { buf-addr buf-size kind cmd iface self -- }
 
       [ sdpcm-header-size cdc-header-size + ] literal buf-size + { total-len }
       self cyw43-sdpcm-seq c@ { sdpcm-seq }
@@ -960,12 +960,12 @@ begin-module cyw43-runner
     ; define poll-cyw43-event
 
     \ Poll sending an ioctl
-    :noname ( kind cmd iface addr bytes self -- success? )
+    :noname ( addr bytes kind cmd iface self -- success? )
       cyw43-ioctl-state cyw43-ioctl::poll-cyw43-ioctl
     ; define poll-cyw43-ioctl
 
     \ Block on an ioctl operation
-    :noname ( kind cmd iface addr bytes self -- actual-bytes )
+    :noname ( addr bytes kind cmd iface self -- actual-bytes )
       cyw43-ioctl-state cyw43-ioctl::block-cyw43-ioctl
     ; define block-cyw43-ioctl
     
