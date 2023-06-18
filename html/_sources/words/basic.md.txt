@@ -1493,25 +1493,30 @@ Abort
 
 The outer loop of Forth
 
-##### `stack-overflow`
+##### `x-stack-overflow`
 ( -- )
 
 Stack overflow exception
 
-##### `stack-underflow`
+##### `x-stack-underflow`
 ( -- )
 
 Stack underflow exception
 
-##### `rstack-overflow`
+##### `x-rstack-overflow`
 ( -- )
 
 Return stack overflow exception
 
-##### `rstack-underflow`
+##### `x-rstack-underflow`
 ( -- )
 
 Return stack underflow exception
+
+##### `x-invalid-base`
+( -- )
+
+Invalid base (base < 2 or > 36) exception for numeric formatting.
 
 ##### `bel`
 ( -- )
