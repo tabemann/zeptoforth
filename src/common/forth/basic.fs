@@ -2075,7 +2075,10 @@ commit-flash
 commit-flash
 
 \ Start pictured numeric output
-: <# ( -- ) 0 picture-offset ! ;
+: <# ( -- )
+  base @ 2 >= base @ 36 <= and averts x-invalid-base
+  0 picture-offset !
+;
 
 \ Add a digit to the pictured numeric output
 : # ( ud1 -- ud2 )
@@ -2241,40 +2244,32 @@ commit-flash
 
 \ Format an S31.32 number
 : format-fixed ( c-addr f -- c-addr bytes )
-  base @ 2 >= base @ 16 <= and if
-    2dup d0< if
-      dnegate 0 <# #s -1 sign #> add-decimal format-fraction
-    else
-      0 <# #s #> add-decimal format-fraction
-    then
-    dup >r rot dup >r swap move r> r>
+  2dup d0< if
+    dnegate 0 <# #s -1 sign #> add-decimal format-fraction
   else
-    2drop 0
+    0 <# #s #> add-decimal format-fraction
   then
+  dup >r rot dup >r swap move r> r>
 ;
 
 \ Format a truncated S31.32 number
 : format-fixed-truncate ( c-addr f places -- c-addr bytes )
   -rot
-  base @ 2 >= base @ 16 <= and if
-    2 pick 0> if
-      2dup d0< if
-        dnegate 0 <# #s -1 sign #> add-decimal format-fraction-truncate
-      else
-        0 <# #s #> add-decimal format-fraction-truncate
-      then
+  2 pick 0> if
+    2dup d0< if
+      dnegate 0 <# #s -1 sign #> add-decimal format-fraction-truncate
     else
-      2swap drop -rot
-      2dup d0< if
-        nip 0 <# #s -1 sign #>
-      else
-        nip 0 <# #s #>
-      then
+      0 <# #s #> add-decimal format-fraction-truncate
     then
-    dup >r rot dup >r swap move r> r>
   else
-    2drop drop 0
+    2swap drop -rot
+    2dup d0< if
+      nip 0 <# #s -1 sign #>
+    else
+      nip 0 <# #s #>
+    then
   then
+  dup >r rot dup >r swap move r> r>
 ;
 
 \ Commit to flash

@@ -255,7 +255,7 @@ _store_flash_unaligned:
 	
 	@@ Exception handler for flash writes where flash has already been
 	@@ written
-	define_word "flash!-already-written", visible_flag
+	define_word "x-flash-already-written", visible_flag
 _store_flash_already_written:
 	push {lr}
 	string_ln "flash already written"
@@ -327,6 +327,7 @@ _erase_sector:
 
 	@@ Exception handler for flash writes where flash has already been
 	@@ written
+        define_word "x-write-core-flash", visible_flag
 _attempted_to_write_core_flash:
 	push {lr}
 	string_ln "attempted to write to core flash"
@@ -335,6 +336,7 @@ _attempted_to_write_core_flash:
 	end_inlined
 
 	@@ Exception handler for flash writes past the end of flash
+        define_word "x-write-past-flash-end", visible_flag
 _attempted_to_write_past_flash_end:
 	push {lr}
 	string_ln "attempted to write past flash end"

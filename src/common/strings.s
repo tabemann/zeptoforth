@@ -483,6 +483,10 @@ _format_integer_inner:
 	bl _base
 	ldr r1, [tos]
 	pull_tos
+        cmp r1, #2
+        blt 4f
+        cmp r1, #36
+        bgt 4f
 	push {r1}
 	bl _here
 	pop {r1}
@@ -523,6 +527,18 @@ _format_integer_inner:
 	pull_tos
 	subs tos, r0, r1
 	pop {pc}
+4:      ldr tos, =_invalid_base
+        bl _raise
+        bx lr
 	end_inlined
-	
+
+        @ Exception handler for invalid BASE values
+        define_word "x-invalid-base", visible_flag
+_invalid_base:
+        push {lr}
+        string_ln "invalid base (less than 2 or greater than 36)"
+        bl _type
+        pop {pc}
+        end_inlined
+        
 	.ltorg
