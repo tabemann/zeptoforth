@@ -354,7 +354,7 @@ compilation mode</p>
 </section>
 <section id="emit">
 <h3><code class="docutils literal notranslate"><span class="pre">emit</span></code></h3>
-<p>( b – )</p>
+<p>( c – )</p>
 <p>Emit a character</p>
 </section>
 <section id="id35">
@@ -379,22 +379,22 @@ compilation mode</p>
 </section>
 <section id="type">
 <h3><code class="docutils literal notranslate"><span class="pre">type</span></code></h3>
-<p>( b-addr u – )</p>
+<p>( c-addr u – )</p>
 <p>Type a string</p>
 </section>
 <section id="serial-type">
 <h3><code class="docutils literal notranslate"><span class="pre">serial-type</span></code></h3>
-<p>( b-addr u – )</p>
+<p>( c-addr u – )</p>
 <p>Type a string using the native serial driver</p>
 </section>
 <section id="count">
 <h3><code class="docutils literal notranslate"><span class="pre">count</span></code></h3>
-<p>( b-addr1 – b-addr2 u )</p>
+<p>( c-addr1 – c-addr2 u )</p>
 <p>Convert a cstring to a string</p>
 </section>
 <section id="key">
 <h3><code class="docutils literal notranslate"><span class="pre">key</span></code></h3>
-<p>( – b )</p>
+<p>( – c )</p>
 <p>Receive a character</p>
 </section>
 <section id="id36">
@@ -661,7 +661,7 @@ raised.</p>
 </section>
 <section id="c">
 <h3><code class="docutils literal notranslate"><span class="pre">c!</span></code></h3>
-<p>( b b-addr – )</p>
+<p>( c c-addr – )</p>
 <p>Store a byte</p>
 </section>
 <section id="h">
@@ -681,7 +681,7 @@ raised.</p>
 </section>
 <section id="id47">
 <h3><code class="docutils literal notranslate"><span class="pre">c+!</span></code></h3>
-<p>( x b-addr – )</p>
+<p>( x c-addr – )</p>
 <p>Read a byte from an address, add a value, and write it back</p>
 </section>
 <section id="id48">
@@ -696,7 +696,7 @@ raised.</p>
 </section>
 <section id="id50">
 <h3><code class="docutils literal notranslate"><span class="pre">c&#64;</span></code></h3>
-<p>( b-addr – b )</p>
+<p>( c-addr – c )</p>
 <p>Get a byte</p>
 </section>
 <section id="id51">
@@ -716,7 +716,7 @@ raised.</p>
 </section>
 <section id="cram">
 <h3><code class="docutils literal notranslate"><span class="pre">cram,</span></code></h3>
-<p>( b – )</p>
+<p>( c – )</p>
 <p>Store a byte at the RAM HERE location</p>
 </section>
 <section id="hram">
@@ -736,7 +736,7 @@ raised.</p>
 </section>
 <section id="cflash">
 <h3><code class="docutils literal notranslate"><span class="pre">cflash,</span></code></h3>
-<p>( b – )</p>
+<p>( c – )</p>
 <p>Store a byte at the flash HERE location</p>
 </section>
 <section id="hflash">
@@ -756,7 +756,7 @@ raised.</p>
 </section>
 <section id="ccurrent">
 <h3><code class="docutils literal notranslate"><span class="pre">ccurrent!</span></code></h3>
-<p>( b b-addr – )</p>
+<p>( c c-addr – )</p>
 <p>Store a byte to RAM or to flash</p>
 </section>
 <section id="hcurrent">
@@ -776,7 +776,7 @@ raised.</p>
 </section>
 <section id="id57">
 <h3><code class="docutils literal notranslate"><span class="pre">c,</span></code></h3>
-<p>( b – )</p>
+<p>( c – )</p>
 <p>Store a byte to the RAM or flash HERE location</p>
 </section>
 <section id="id58">
@@ -871,7 +871,7 @@ raised.</p>
 </section>
 <section id="cstring">
 <h3><code class="docutils literal notranslate"><span class="pre">cstring,</span></code></h3>
-<p>( b-addr u – )</p>
+<p>( c-addr u – )</p>
 <p>Compile a c-string</p>
 </section>
 <section id="r">
@@ -1018,7 +1018,7 @@ raised.</p>
 </section>
 <section id="cbit">
 <h3><code class="docutils literal notranslate"><span class="pre">cbit&#64;</span></code></h3>
-<p>( mask b-addr – f )</p>
+<p>( mask c-addr – f )</p>
 <p>Test for bits in a byte being set</p>
 </section>
 <section id="hbit">
@@ -1069,12 +1069,12 @@ word</p>
 </section>
 <section id="h-1">
 <h3><code class="docutils literal notranslate"><span class="pre">h.1</span></code></h3>
-<p>( b – )</p>
+<p>( c – )</p>
 <p>Output a hexadecimal nibble</p>
 </section>
 <section id="h-2">
 <h3><code class="docutils literal notranslate"><span class="pre">h.2</span></code></h3>
-<p>( b – )</p>
+<p>( c – )</p>
 <p>Output a hexadecimal 8 bit value, padded with zeros</p>
 </section>
 <section id="h-4">
@@ -1131,7 +1131,7 @@ otherwise passing the specified argument through.</p>
 </section>
 <section id="safe-type">
 <h3><code class="docutils literal notranslate"><span class="pre">safe-type</span></code></h3>
-<p>( b-addr bytes – )</p>
+<p>( c-addr bytes – )</p>
 <p>Safely type a string</p>
 </section>
 <section id="safe-type-integer">
@@ -1146,7 +1146,7 @@ otherwise passing the specified argument through.</p>
 </section>
 <section id="fill">
 <h3><code class="docutils literal notranslate"><span class="pre">fill</span></code></h3>
-<p>( b-addr u b – )</p>
+<p>( c-addr u c – )</p>
 <p>Fill memory with a byte</p>
 </section>
 <section id="create">
@@ -1221,7 +1221,7 @@ otherwise passing the specified argument through.</p>
 </section>
 <section id="equal-strings">
 <h3><code class="docutils literal notranslate"><span class="pre">equal-strings?</span></code></h3>
-<p>( b-addr1 u1 b-addr2 u2 – f )</p>
+<p>( c-addr1 u1 c-addr2 u2 – f )</p>
 <p>Get whether two strings are equal</p>
 </section>
 <section id="case">
@@ -1421,12 +1421,12 @@ otherwise passing the specified argument through.</p>
 </section>
 <section id="ws">
 <h3><code class="docutils literal notranslate"><span class="pre">ws?</span></code></h3>
-<p>( b – flag )</p>
+<p>( c – flag )</p>
 <p>Test whether a character is whitespace.</p>
 </section>
 <section id="newline">
 <h3><code class="docutils literal notranslate"><span class="pre">newline?</span></code></h3>
-<p>( b – flag )</p>
+<p>( c – flag )</p>
 <p>Test whether a character is a newline.</p>
 </section>
 <section id="token-start">
@@ -1441,7 +1441,7 @@ otherwise passing the specified argument through.</p>
 </section>
 <section id="token">
 <h3><code class="docutils literal notranslate"><span class="pre">token</span></code></h3>
-<p>( “token” – b-addr u )</p>
+<p>( “token” – c-addr u )</p>
 <p>Parse a token</p>
 </section>
 <section id="id86">
@@ -1456,12 +1456,12 @@ otherwise passing the specified argument through.</p>
 </section>
 <section id="to-upper-char">
 <h3><code class="docutils literal notranslate"><span class="pre">to-upper-char</span></code></h3>
-<p>( b – b )</p>
+<p>( c – c )</p>
 <p>Convert a character to being uppercase</p>
 </section>
 <section id="equal-case-strings">
 <h3><code class="docutils literal notranslate"><span class="pre">equal-case-strings?</span></code></h3>
-<p>( b-addr1 u1 b-addr2 u2 – flag )</p>
+<p>( c-addr1 u1 c-addr2 u2 – flag )</p>
 <p>Compare whether two strings are equal</p>
 </section>
 <section id="id88">
@@ -1471,12 +1471,12 @@ otherwise passing the specified argument through.</p>
 </section>
 <section id="find">
 <h3><code class="docutils literal notranslate"><span class="pre">find</span></code></h3>
-<p>( b-addr u – word|0 )</p>
+<p>( c-addr u – word|0 )</p>
 <p>Find a word in the dictionary according to the word order list</p>
 </section>
 <section id="find-all">
 <h3><code class="docutils literal notranslate"><span class="pre">find-all</span></code></h3>
-<p>( b-addr u – word|0 )</p>
+<p>( c-addr u – word|0 )</p>
 <p>Find a word in the dictionary in any wordlist in order of definition</p>
 </section>
 <section id="find-by-xt">
@@ -1496,7 +1496,7 @@ otherwise passing the specified argument through.</p>
 </section>
 <section id="evaluate">
 <h3><code class="docutils literal notranslate"><span class="pre">evaluate</span></code></h3>
-<p>( ? b-addr u – ? )</p>
+<p>( ? c-addr u – ? )</p>
 <p>Evaluate a string. Note that only one task may interpret code at a time.</p>
 </section>
 <section id="evaluate-with-input">
@@ -1519,25 +1519,30 @@ otherwise passing the specified argument through.</p>
 <p>( – )</p>
 <p>The outer loop of Forth</p>
 </section>
-<section id="stack-overflow">
-<h3><code class="docutils literal notranslate"><span class="pre">stack-overflow</span></code></h3>
+<section id="x-stack-overflow">
+<h3><code class="docutils literal notranslate"><span class="pre">x-stack-overflow</span></code></h3>
 <p>( – )</p>
 <p>Stack overflow exception</p>
 </section>
-<section id="stack-underflow">
-<h3><code class="docutils literal notranslate"><span class="pre">stack-underflow</span></code></h3>
+<section id="x-stack-underflow">
+<h3><code class="docutils literal notranslate"><span class="pre">x-stack-underflow</span></code></h3>
 <p>( – )</p>
 <p>Stack underflow exception</p>
 </section>
-<section id="rstack-overflow">
-<h3><code class="docutils literal notranslate"><span class="pre">rstack-overflow</span></code></h3>
+<section id="x-rstack-overflow">
+<h3><code class="docutils literal notranslate"><span class="pre">x-rstack-overflow</span></code></h3>
 <p>( – )</p>
 <p>Return stack overflow exception</p>
 </section>
-<section id="rstack-underflow">
-<h3><code class="docutils literal notranslate"><span class="pre">rstack-underflow</span></code></h3>
+<section id="x-rstack-underflow">
+<h3><code class="docutils literal notranslate"><span class="pre">x-rstack-underflow</span></code></h3>
 <p>( – )</p>
 <p>Return stack underflow exception</p>
+</section>
+<section id="x-invalid-base">
+<h3><code class="docutils literal notranslate"><span class="pre">x-invalid-base</span></code></h3>
+<p>( – )</p>
+<p>Invalid base (base &lt; 2 or &gt; 36) exception for numeric formatting.</p>
 </section>
 <section id="bel">
 <h3><code class="docutils literal notranslate"><span class="pre">bel</span></code></h3>
@@ -1551,22 +1556,37 @@ otherwise passing the specified argument through.</p>
 </section>
 <section id="parse-integer">
 <h3><code class="docutils literal notranslate"><span class="pre">parse-integer</span></code></h3>
-<p>( b-addr u –  n success )</p>
-<p>Parse an integer</p>
+<p>( c-addr bytes –  n success? )</p>
+<p>Parse a signed single-cell integer</p>
 </section>
 <section id="parse-unsigned">
 <h3><code class="docutils literal notranslate"><span class="pre">parse-unsigned</span></code></h3>
-<p>( b-addr u1 – u2 success )</p>
-<p>Parse an unsigned integer</p>
+<p>( c-addr bytes – u success? )</p>
+<p>Parse an unsigned single-cell integer</p>
+</section>
+<section id="parse-double">
+<h3><code class="docutils literal notranslate"><span class="pre">parse-double</span></code></h3>
+<p>( c-addr bytes – nd success? )</p>
+<p>Parse a signed double-cell integer</p>
+</section>
+<section id="parse-double-unsigned">
+<h3><code class="docutils literal notranslate"><span class="pre">parse-double-unsigned</span></code></h3>
+<p>( c-addr bytes – ud success? )</p>
+<p>Parse an unsigned double-cell integer</p>
+</section>
+<section id="parse-fixed">
+<h3><code class="docutils literal notranslate"><span class="pre">parse-fixed</span></code></h3>
+<p>( c-addr bytes – f success? )</p>
+<p>Parse an S31.32 fixed-point number</p>
 </section>
 <section id="parse-base">
 <h3><code class="docutils literal notranslate"><span class="pre">parse-base</span></code></h3>
-<p>( b-addr1 u1 – b-addr2 u2 base )</p>
+<p>( c-addr bytes – c-addr’ bytes’ base )</p>
 <p>Actually parse an integer base</p>
 </section>
 <section id="parse-digit">
 <h3><code class="docutils literal notranslate"><span class="pre">parse-digit</span></code></h3>
-<p>( b base – u success  )</p>
+<p>( c base – u success? )</p>
 <p>Parse a digit</p>
 </section>
 <section id="id89">
@@ -1626,7 +1646,7 @@ otherwise passing the specified argument through.</p>
 </section>
 <section id="hold">
 <h3><code class="docutils literal notranslate"><span class="pre">hold</span></code></h3>
-<p>( b – )</p>
+<p>( c – )</p>
 <p>Add a character to pictured numeric output</p>
 </section>
 <section id="id92">
@@ -1656,12 +1676,12 @@ otherwise passing the specified argument through.</p>
 </section>
 <section id="format-double">
 <h3><code class="docutils literal notranslate"><span class="pre">format-double</span></code></h3>
-<p>( b-addr nd – b-addr bytes )</p>
+<p>( c-addr nd – c-addr bytes )</p>
 <p>Format a signed double-cell number</p>
 </section>
 <section id="format-double-unsigned">
 <h3><code class="docutils literal notranslate"><span class="pre">format-double-unsigned</span></code></h3>
-<p>( b-addr ud – b-addr bytes )</p>
+<p>( c-addr ud – c-addr bytes )</p>
 <p>Format an unsigned double-cell number</p>
 </section>
 <section id="d">
@@ -1771,12 +1791,12 @@ otherwise passing the specified argument through.</p>
 </section>
 <section id="id101">
 <h3><code class="docutils literal notranslate"><span class="pre">s&quot;</span></code></h3>
-<p>( “text<quote>” – ) ( compiled: – b-addr u )</p>
+<p>( “text<quote>” – ) ( compiled: – c-addr u )</p>
 <p>Compile a non-counted string</p>
 </section>
 <section id="id102">
 <h3><code class="docutils literal notranslate"><span class="pre">c&quot;</span></code></h3>
-<p>( “text<quote>” – ) ( compiled: – b-addr )</p>
+<p>( “text<quote>” – ) ( compiled: – c-addr )</p>
 <p>Compile a counted-string</p>
 </section>
 <section id="id103">
@@ -1791,12 +1811,12 @@ otherwise passing the specified argument through.</p>
 </section>
 <section id="id105">
 <h3><code class="docutils literal notranslate"><span class="pre">s\&quot;</span></code></h3>
-<p>( “text<quote>” – ) ( compiled: – b-addr u )</p>
+<p>( “text<quote>” – ) ( compiled: – c-addr u )</p>
 <p>Compile an escaped non-counted string</p>
 </section>
 <section id="id106">
 <h3><code class="docutils literal notranslate"><span class="pre">c\&quot;</span></code></h3>
-<p>( “text<quote>” – ) ( compiled: – b-addr )</p>
+<p>( “text<quote>” – ) ( compiled: – c-addr )</p>
 <p>Compile an escaped counted-string</p>
 </section>
 <section id="id107">
@@ -1806,17 +1826,17 @@ otherwise passing the specified argument through.</p>
 </section>
 <section id="compile-cstring">
 <h3><code class="docutils literal notranslate"><span class="pre">compile-cstring</span></code></h3>
-<p>( b-addr u – ) ( compiled: – b-addr )</p>
+<p>( c-addr u – ) ( compiled: – c-addr )</p>
 <p>Compile a counted-string</p>
 </section>
 <section id="char">
 <h3><code class="docutils literal notranslate"><span class="pre">char</span></code></h3>
-<p>( “char” – b )</p>
+<p>( “char” – c )</p>
 <p>Parse a character and put it on the stack</p>
 </section>
 <section id="id108">
 <h3><code class="docutils literal notranslate"><span class="pre">[char]</span></code></h3>
-<p>( “char” – ) ( compiled: – b )</p>
+<p>( “char” – ) ( compiled: – c )</p>
 <p>Parse a character and compile it</p>
 </section>
 <section id="id109">
@@ -1846,12 +1866,12 @@ otherwise passing the specified argument through.</p>
 </section>
 <section id="move">
 <h3><code class="docutils literal notranslate"><span class="pre">move</span></code></h3>
-<p>( b-addr1 b-addr2 u – )</p>
+<p>( c-addr1 c-addr2 u – )</p>
 <p>Copy bytes from one buffer to another one (which may overlap)</p>
 </section>
 <section id="reverse">
 <h3><code class="docutils literal notranslate"><span class="pre">reverse</span></code></h3>
-<p>( b-addr u – )</p>
+<p>( c-addr u – )</p>
 <p>Reverse bytes in place</p>
 </section>
 <section id="spaces">
@@ -1861,22 +1881,22 @@ otherwise passing the specified argument through.</p>
 </section>
 <section id="format-unsigned">
 <h3><code class="docutils literal notranslate"><span class="pre">format-unsigned</span></code></h3>
-<p>( b-addr u1 – b-addr u2 )</p>
+<p>( c-addr u1 – c-addr u2 )</p>
 <p>Format an integer as a string</p>
 </section>
 <section id="format-integer">
 <h3><code class="docutils literal notranslate"><span class="pre">format-integer</span></code></h3>
-<p>( b-addr n – b-addr u )</p>
+<p>( c-addr n – c-addr u )</p>
 <p>Format an integer as a string</p>
 </section>
 <section id="fix">
 <h3><code class="docutils literal notranslate"><span class="pre">fix</span></code></h3>
-<p>( b-addr bytes – b-addr bytes )</p>
+<p>( c-addr bytes – c-addr bytes )</p>
 <p>Store a string in the RAM dictionary.</p>
 </section>
 <section id="cfix">
 <h3><code class="docutils literal notranslate"><span class="pre">cfix</span></code></h3>
-<p>( b-addr bytes – b-addr )</p>
+<p>( c-addr bytes – c-addr )</p>
 <p>Store a string as counted string in the RAM dictionary.</p>
 </section>
 <section id="marker">

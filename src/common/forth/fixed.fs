@@ -349,20 +349,20 @@ continue-module internal
 
   \ Handle s31.32 fixed-point double-cell numeric literals
   : handle-fixed ( b-addr bytes base -- flag )
-    >r over c@ [char] , <> if
-      2dup + 1- c@ [char] , <> if
+    >r over c@ dup [char] . <> swap [char] , <> and if
+      2dup + 1- c@ dup [char] . <> swap [char] , <> and if
 	0 begin over 0<> while
 	  2 pick c@ r@ parse-digit if
 	    swap r@ * + rot 1+ rot 1- rot
 	  else
-	    drop 2 pick c@ [char] , = if
+	    drop 2 pick c@ dup [char] . = swap [char] , = or if
 	      rot 1+ rot 1- rot 0 swap r> handle-fraction exit
 	    else
 	      drop 2drop rdrop false exit
 	    then
 	  then
 	repeat
-	nip nip rdrop true
+	nip nip 0 swap rdrop true
       else
 	rdrop 2drop false
       then
@@ -390,47 +390,97 @@ continue-module internal
 
   \ Handle numeric literals
   : do-handle-number ( b-addr bytes -- flag )
-    base @ 2 >= base @ 16 <= and if
-      2dup do-handle-number if
-	state @ not if
-	  rot rot
-	then
-	2drop true
-      else
-	parse-base >r
-	dup 0<> if
-	  over c@ [char] - = if
-	    1- swap 1+ swap
-	    dup 0<> if
-	      r> handle-unsigned-double
-	    else
-	      rdrop 2drop false
-	    then
-	    dup if
-	      state @ if
-		rot rot dnegate swap lit, lit,
-	      else
-		rot rot dnegate rot
-	      then
-	    then
-	  else
-	    r> handle-unsigned-double
-	    dup if
-	      state @ if
-		rot lit, swap lit,
-	      then
-	    then
-	  then
-	else
-	  rdrop 2drop false
-	then
+    2dup do-handle-number if
+      state @ not if
+        rot rot
       then
-    else
       2drop true
+    else
+      parse-base >r
+      dup 0<> if
+        over c@ [char] - = if
+          1- swap 1+ swap
+          dup 0<> if
+            r> handle-unsigned-double
+          else
+            rdrop 2drop false
+          then
+          dup if
+            state @ if
+              rot rot dnegate swap lit, lit,
+            else
+              rot rot dnegate rot
+            then
+          then
+        else
+          r> handle-unsigned-double
+          dup if
+            state @ if
+              rot lit, swap lit,
+            then
+          then
+        then
+      else
+        rdrop 2drop false
+      then
     then
   ;
 
 end-module
+
+\ Parse an unsigned double-cell integer
+: parse-double-unsigned ( c-addr bytes -- ud success? )
+  2dup [char] . char-count 2 u< if
+    parse-base >r
+    dup 0<> if
+      r> handle-double if true else 0 0 false then
+    else
+      rdrop 2drop 0 0 false
+    then
+  else
+    2drop 0 0 false
+  then
+;
+
+\ Parse a signed double-cell integer
+: parse-double ( c-addr bytes -- nd success? )
+  2dup [char] . char-count 2 u< if
+    parse-base >r
+    dup 0<> if
+      over c@ [char] - = if
+        1- swap 1+ swap
+        dup 0<> if r> handle-double else rdrop 2drop false then
+        if dnegate true else 0 0 false then
+      else
+        r> handle-double if true else 0 0 false then
+      then
+    else
+      rdrop 2drop 0 0 false
+    then
+  else
+    2drop 0 0 false
+  then
+;
+
+\ Parse a fixed-point number
+: parse-fixed ( c-addr bytes -- f success? )
+  2dup [char] , char-count >r 2dup [char] . char-count r> + 2 u< if
+    parse-base >r
+    dup 0<> if
+      over c@ [char] - = if
+        1- swap 1+ swap
+        dup 0<> if r> handle-fixed else rdrop 2drop false then
+        if dnegate true else 0 0 false then
+      else
+        r> handle-fixed if true else 0 0 false then
+      then
+    else
+      rdrop 2drop 0 0 false
+    then
+  else
+    2drop 0 0 false
+  then
+;
 
 commit-flash
 
