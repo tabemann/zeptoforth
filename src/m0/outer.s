@@ -1214,18 +1214,6 @@ _parse_unsigned_core:
 	movs r2, tos
 	pull_tos
 	movs r3, #0
-	cmp r0, #0
-	bgt 1f
-	movs tos, #0
-	push_tos
-	movs tos, #0
-	pop {pc}
-1:	cmp r0, #36
-	ble 1f
-	movs tos, #0
-	push_tos
-	movs tos, #0
-	pop {pc}
 1:	cmp r1, #0
 	beq 3f
 	push_tos
@@ -1262,6 +1250,10 @@ _parse_unsigned_core:
 	define_word "parse-digit", visible_flag
 _parse_digit:
 	push {lr}
+        cmp tos, #2
+        blt 1f
+        cmp tos, #36
+        bgt 1f
 	movs r0, tos
 	pull_tos
 	cmp tos, #0x30
@@ -1272,7 +1264,6 @@ _parse_digit:
 	b 3f
 1:	movs tos, #0
 	push_tos
-	movs tos, #0
 	pop {pc}
 2:	push {r0}
 	bl _to_upper_char

@@ -338,7 +338,7 @@ compilation mode
 Allot space in RAM or in flash, depending on the compilation mode
 
 ##### `emit`
-( b -- )
+( c -- )
 
 Emit a character
 
@@ -363,22 +363,22 @@ Emit a newline
 A space character
 
 ##### `type`
-( b-addr u -- )
+( c-addr u -- )
 
 Type a string
 
 ##### `serial-type`
-( b-addr u -- )
+( c-addr u -- )
 
 Type a string using the native serial driver
 
 ##### `count`
-( b-addr1 -- b-addr2 u )
+( c-addr1 -- c-addr2 u )
 
 Convert a cstring to a string
 	
 ##### `key`
-( -- b )
+( -- c )
 
 Receive a character
 
@@ -645,7 +645,7 @@ Recursively call a word
 Unknown word exception
 	
 ##### `c!`
-( b b-addr -- )
+( c c-addr -- )
 
 Store a byte
 
@@ -665,7 +665,7 @@ Store a word
 Store a doubleword
 
 ##### `c+!`
-( x b-addr -- )
+( x c-addr -- )
 
 Read a byte from an address, add a value, and write it back
 
@@ -680,7 +680,7 @@ Read a halfword from an address, add a value, and write it back
 Read a word from an address, add a value, and write it back
 
 ##### `c@`
-( b-addr -- b )
+( c-addr -- c )
 
 Get a byte
 
@@ -700,7 +700,7 @@ Get a word
 Get a doubleword
 
 ##### `cram,`
-( b -- )
+( c -- )
 
 Store a byte at the RAM HERE location
 
@@ -720,7 +720,7 @@ Store a word at the RAM HERE location
 Store a doubleword at the RAM HERE location
 
 ##### `cflash,`
-( b -- )
+( c -- )
 
 Store a byte at the flash HERE location
 
@@ -740,7 +740,7 @@ Store a word at the flash HERE location
 Store a doubleword at the flash HERE location
 
 ##### `ccurrent!`
-( b b-addr -- )
+( c c-addr -- )
 
 Store a byte to RAM or to flash
 
@@ -760,7 +760,7 @@ Store a word to RAM or to flash
 Store a doubleword to RAM or to flash
 
 ##### `c,`
-( b -- )
+( c -- )
 
 Store a byte to the RAM or flash HERE location
 
@@ -855,7 +855,7 @@ Align to a power of two
 Align to a power of two
 
 ##### `cstring,`
-( b-addr u -- )
+( c-addr u -- )
 
 Compile a c-string
 
@@ -989,7 +989,7 @@ Align an address to a power of two
 Duplicate a cell if it is non-zero
 
 ##### `cbit@`
-( mask b-addr -- f )
+( mask c-addr -- f )
 
 Test for bits in a byte being set
 
@@ -1040,12 +1040,12 @@ Get the depth of the stack, not including the cell pushed onto it by this
 word
 
 ##### `h.1`
-( b -- )
+( c -- )
 
 Output a hexadecimal nibble
 
 ##### `h.2`
-( b -- )
+( c -- )
 
 Output a hexadecimal 8 bit value, padded with zeros
 
@@ -1104,7 +1104,7 @@ otherwise passing the specified argument through.
 Search the dictionary for a word by its xt
 
 ##### `safe-type`
-( b-addr bytes -- )
+( c-addr bytes -- )
 
 Safely type a string
 
@@ -1119,7 +1119,7 @@ Safely type an integer
 Safely type an unsigned integer
 
 ##### `fill`
-( b-addr u b -- )
+( c-addr u c -- )
 
 Fill memory with a byte
 
@@ -1194,7 +1194,7 @@ Create a cell-sized field
 Create a double cell-sized field
 
 ##### `equal-strings?`
-( b-addr1 u1 b-addr2 u2 -- f )
+( c-addr1 u1 c-addr2 u2 -- f )
 
 Get whether two strings are equal
 
@@ -1394,12 +1394,12 @@ End lambda
 Create an anonymous word for an exception
 
 ##### `ws?`
-( b -- flag )
+( c -- flag )
 
 Test whether a character is whitespace.
 
 ##### `newline?`
-( b -- flag )
+( c -- flag )
 
 Test whether a character is a newline.
 
@@ -1414,7 +1414,7 @@ Parse the input buffer for the start of a token
 Parse the input buffer for the end of a token
 
 ##### `token`
-( "token" -- b-addr u )
+( "token" -- c-addr u )
 
 Parse a token
 
@@ -1429,12 +1429,12 @@ Parse a line comment
 Parse a paren coment
 	
 ##### `to-upper-char`
-( b -- b )
+( c -- c )
 
 Convert a character to being uppercase
 
 ##### `equal-case-strings?`
-( b-addr1 u1 b-addr2 u2 -- flag )
+( c-addr1 u1 c-addr2 u2 -- flag )
 
 Compare whether two strings are equal
 
@@ -1444,12 +1444,12 @@ Compare whether two strings are equal
 Duplicate three items on the stack
 	
 ##### `find`
-( b-addr u -- word|0 )
+( c-addr u -- word|0 )
 
 Find a word in the dictionary according to the word order list
 
 ##### `find-all`
-( b-addr u -- word|0 )
+( c-addr u -- word|0 )
 
 Find a word in the dictionary in any wordlist in order of definition
 
@@ -1469,7 +1469,7 @@ Get an xt from a word
 Evaluate a word in the current interpretation/compilation context.
 
 ##### `evaluate`
-( ? b-addr u -- ? )
+( ? c-addr u -- ? )
 
 Evaluate a string. Note that only one task may interpret code at a time.
 
@@ -1524,22 +1524,37 @@ Send BEL
 Failed parse exception	
 
 ##### `parse-integer`
-( b-addr u --  n success )
+( c-addr bytes --  n success? )
 
-Parse an integer
+Parse a signed single-cell integer
 
 ##### `parse-unsigned`
-( b-addr u1 -- u2 success )
+( c-addr bytes -- u success? )
 
-Parse an unsigned integer
+Parse an unsigned single-cell integer
+
+##### `parse-double`
+( c-addr bytes -- nd success? )
+
+Parse a signed double-cell integer
+
+##### `parse-double-unsigned`
+( c-addr bytes -- ud success? )
+
+Parse an unsigned double-cell integer
+
+##### `parse-fixed`
+( c-addr bytes -- f success? )
+
+Parse an S31.32 fixed-point number
 
 ##### `parse-base`
-( b-addr1 u1 -- b-addr2 u2 base )
+( c-addr bytes -- c-addr' bytes' base )
 
 Actually parse an integer base
 
 ##### `parse-digit`
-( b base -- u success  )
+( c base -- u success? )
 
 Parse a digit
 	
@@ -1599,7 +1614,7 @@ Start conditional execution/compilation
 Finish conditional execution/compilation
 
 ##### `hold`
-( b -- )
+( c -- )
 
 Add a character to pictured numeric output
 
@@ -1629,12 +1644,12 @@ If n (a single number) is negative, append '-' to the pictured numeric output
 Finish pictured numeric output
 
 ##### `format-double`
-( b-addr nd -- b-addr bytes )
+( c-addr nd -- c-addr bytes )
 
 Format a signed double-cell number
 
 ##### `format-double-unsigned`
-( b-addr ud -- b-addr bytes )
+( c-addr ud -- c-addr bytes )
 
 Format an unsigned double-cell number
 
@@ -1744,12 +1759,12 @@ Display the license notice
 Compile a string to be printed.
 	
 ##### `s"`
-( "text<quote>" -- ) ( compiled: -- b-addr u )
+( "text<quote>" -- ) ( compiled: -- c-addr u )
 
 Compile a non-counted string
 
 ##### `c"`
-( "text<quote>" -- ) ( compiled: -- b-addr )
+( "text<quote>" -- ) ( compiled: -- c-addr )
 
 Compile a counted-string
 
@@ -1764,12 +1779,12 @@ Immediately print a string.
 Compile an escaped string to be printed.
 	
 ##### `s\"`
-( "text<quote>" -- ) ( compiled: -- b-addr u )
+( "text<quote>" -- ) ( compiled: -- c-addr u )
 
 Compile an escaped non-counted string
 
 ##### `c\"`
-( "text<quote>" -- ) ( compiled: -- b-addr )
+( "text<quote>" -- ) ( compiled: -- c-addr )
 
 Compile an escaped counted-string
 
@@ -1779,17 +1794,17 @@ Compile an escaped counted-string
 Immediately print an escaped string.
 
 ##### `compile-cstring`
-( b-addr u -- ) ( compiled: -- b-addr )
+( c-addr u -- ) ( compiled: -- c-addr )
 
 Compile a counted-string
 
 ##### `char`
-( "char" -- b )
+( "char" -- c )
 
 Parse a character and put it on the stack
 
 ##### `[char]`
-( "char" -- ) ( compiled: -- b )
+( "char" -- ) ( compiled: -- c )
 
 Parse a character and compile it
 
@@ -1819,12 +1834,12 @@ Type an integer with a preceding space
 Type an unsigned integer with a preceding space
 	
 ##### `move`
-( b-addr1 b-addr2 u -- )
+( c-addr1 c-addr2 u -- )
 
 Copy bytes from one buffer to another one (which may overlap)
 
 ##### `reverse`
-( b-addr u -- )
+( c-addr u -- )
 
 Reverse bytes in place
 
@@ -1834,22 +1849,22 @@ Reverse bytes in place
 Emit a number of spaces.
 
 ##### `format-unsigned`
-( b-addr u1 -- b-addr u2 )
+( c-addr u1 -- c-addr u2 )
 
 Format an integer as a string
 
 ##### `format-integer`
-( b-addr n -- b-addr u )
+( c-addr n -- c-addr u )
 
 Format an integer as a string
 
 ##### `fix`
-( b-addr bytes -- b-addr bytes )
+( c-addr bytes -- c-addr bytes )
 
 Store a string in the RAM dictionary.
 
 ##### `cfix`
-( b-addr bytes -- b-addr )
+( c-addr bytes -- c-addr )
 
 Store a string as counted string in the RAM dictionary.
 
