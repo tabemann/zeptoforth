@@ -219,6 +219,9 @@ begin-module cyw43-runner
     \ Disable multiple events
     method disable-cyw43-events ( event-addr event-count self -- )
 
+    \ Disable all events
+    method disable-all-cyw43-events ( self -- )
+    
     \ Enqueue received data
     method put-cyw43-rx ( addr bytes self -- )
 
@@ -243,11 +246,16 @@ begin-module cyw43-runner
     \ Poll for event message
     method poll-cyw43-event ( addr self -- found? )
 
+    \ Clear event queue
+    method clear-cyw43-events ( self -- )
+    
     \ Poll sending an ioctl
-    method poll-cyw43-ioctl ( addr bytes kind cmd iface self -- success? )
+    method poll-cyw43-ioctl
+    ( tx-addr tx-bytes rx-addr rx-bytes kind cmd iface self -- success? )
 
     \ Block on an ioctl operation
-    method block-cyw43-ioctl ( addr bytes kind cmd iface self -- actual-bytes )
+    method block-cyw43-ioctl
+    ( tx-addr tx-bytes rx-addr rx-bytes kind cmd iface self -- actual-bytes )
     
     \ Wait on ioctl completion
     method wait-cyw43-ioctl ( self -- actual-bytes )
@@ -297,6 +305,7 @@ begin-module cyw43-runner
       
       \ Instantiate the event mask
       <cyw43-event-mask> self cyw43-event-mask init-object
+      self cyw43-event-mask cyw43-events::disable-all-cyw43-events
       
       \ Initialize members
       0 self cyw43-ioctl-id h!
@@ -485,11 +494,11 @@ begin-module cyw43-runner
             self cyw43-ioctl-state cyw43-ioctl-pending? if
 
               \ Handle a pending ioctl
-              self cyw43-ioctl-state pioctl-buf-addr @
-              self cyw43-ioctl-state pioctl-buf-size @
-              self cyw43-ioctl-state pioctl-kind @
-              self cyw43-ioctl-state pioctl-cmd @
-              self cyw43-ioctl-state pioctl-iface @
+              self cyw43-ioctl-state cyw43-ioctl-tx-buf @
+              self cyw43-ioctl-state cyw43-ioctl-tx-size @
+              self cyw43-ioctl-state cyw43-ioctl-kind @
+              self cyw43-ioctl-state cyw43-ioctl-cmd @
+              self cyw43-ioctl-state cyw43-ioctl-iface @
               self handle-send-cyw43-ioctl
               self cyw43-scratch-buf self check-cyw43-status
               
@@ -839,6 +848,11 @@ begin-module cyw43-runner
       cyw43-event-mask cyw43-events::disable-cyw43-events
     ; define disable-cyw43-events
 
+    \ Disable all events
+    :noname { self -- }
+      cyw43-event-mask cyw43-events::disable-all-cyw43-events
+    ; define disable-all-cyw43-events
+
     \ Enqueue received data
     :noname { addr bytes self -- }
       begin
@@ -948,7 +962,7 @@ begin-module cyw43-runner
     ; define get-cyw43-event
 
     \ Poll for event message
-    :noname { addr self -- found? }
+    :noname ( addr self -- found? )
       [: { addr self }
         self cyw43-event-chan chan-empty? not if
           addr event-message-size self cyw43-event-chan recv-chan drop
@@ -959,13 +973,24 @@ begin-module cyw43-runner
       ;] over cyw43-event-lock with-lock
     ; define poll-cyw43-event
 
+    \ Clear event queue
+    :noname ( self -- )
+      [: { self }
+        begin self cyw43-event-chan chan-empty? not while
+          self cyw43-event-chan skip-chan
+        repeat
+      ;] over cyw43-event-lock with-lock
+    ; define clear-cyw43-events
+
     \ Poll sending an ioctl
-    :noname ( addr bytes kind cmd iface self -- success? )
+    :noname
+      ( tx-addr tx-bytes rx-addr rx-bytes kind cmd iface self -- success? )
       cyw43-ioctl-state cyw43-ioctl::poll-cyw43-ioctl
     ; define poll-cyw43-ioctl
 
     \ Block on an ioctl operation
-    :noname ( addr bytes kind cmd iface self -- actual-bytes )
+    :noname
+      ( tx-addr tx-bytes rx-addr rx-bytes kind cmd iface self -- actual-bytes )
       cyw43-ioctl-state cyw43-ioctl::block-cyw43-ioctl
     ; define block-cyw43-ioctl
     

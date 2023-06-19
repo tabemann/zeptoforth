@@ -329,6 +329,9 @@ begin-module cyw43-events
     \ Disable multiple events
     method disable-cyw43-events ( event-addr event-count self -- )
 
+    \ Disable all events
+    method disable-all-cyw43-events ( self -- )
+    
     \ Is an event enabled?
     method cyw43-event-enabled? ( event self -- enabled? )
     
@@ -361,6 +364,11 @@ begin-module cyw43-events
       event validate-event
       event 7 and self cyw43-event-mask emsk-events event 3 rshift + cbic!
     ; define disable-cyw43-event
+
+    \ Disable all events
+    :noname { self -- }
+      self cyw43-event-mask emsk-events event-mask-bytes 0 fill      
+    ; define disable-all-cyw43-events
 
     \ Disable multiple events
     :noname { event-addr event-count self -- }

@@ -99,8 +99,29 @@ begin-module cyw43-ioctl
   \ CYW43 ioctl class
   <object> begin-class <cyw43-ioctl>
 
-    \ ioctl data
-    ioctl-state-size cell align member cyw43-ioctl-data
+    \ ioctl state
+    field: cyw43-ioctl-state
+
+    \ ioctl tx buffer address
+    field: cyw43-ioctl-tx-buf
+
+    \ ioctl tx size
+    field: cyw43-ioctl-tx-size
+
+    \ ioctl rx buffer address
+    field: cyw43-ioctl-rx-buf
+    
+    \ Ioctl rx size
+    field: cyw43-ioctl-rx-size
+
+    \ Pending ioctl type
+    field: cyw43-ioctl-kind
+
+    \ Pending ioctl command
+    field: cyw43-ioctl-cmd
+
+    \ Pending ioctl interface
+    field: cyw43-ioctl-iface
 
     \ ioctl semaphore
     sema-size member cyw43-ioctl-sema
@@ -130,13 +151,16 @@ begin-module cyw43-ioctl
     method cancel-cyw43-ioctl ( self -- )
 
     \ Execute an ioctl
-    method do-cyw43-ioctl ( addr bytes kind cmd iface self -- )
+    method do-cyw43-ioctl
+    ( tx-addr tx-bytes rx-addr rx-bytes kind cmd iface self -- )
 
     \ Poll sending an ioctl
-    method poll-cyw43-ioctl ( addr bytes kind cmd iface self -- success? )
+    method poll-cyw43-ioctl
+    ( tx-addr tx-bytes rx-addr rx-bytes kind cmd iface self -- success? )
 
     \ Blocking ioctl operation
-    method block-cyw43-ioctl ( addr bytes kind cmd iface self -- actual-bytes )
+    method block-cyw43-ioctl
+    ( tx-addr tx-bytes rx-addr rx-bytes kind cmd iface self -- actual-bytes )
     
     \ Mark an ioctl as done
     method cyw43-ioctl-done ( self -- )
@@ -148,19 +172,19 @@ begin-module cyw43-ioctl
     \ Constructor
     :noname { self -- }
       self <object>->new
-      ioctl-state-ready self cyw43-ioctl-data ioctl-state-type !
+      ioctl-state-ready self cyw43-ioctl-state !
       1 0 self cyw43-ioctl-sema init-sema
       self cyw43-ioctl-lock init-lock
     ; define new
 
     \ Test whether ioctl is pending
     :noname { self -- pending? }
-      self cyw43-ioctl-data ioctl-state-type @ ioctl-state-pending =
+      self cyw43-ioctl-state @ ioctl-state-pending =
     ; define cyw43-ioctl-pending?
 
     \ Test whether ioctl is done
     :noname { self -- pending? }
-      self cyw43-ioctl-data ioctl-state-type @ ioctl-state-done =
+      self cyw43-ioctl-state @ ioctl-state-done =
     ; define cyw43-ioctl-done?
 
     \ Wake an ioctl
@@ -172,7 +196,7 @@ begin-module cyw43-ioctl
     :noname { xt state self -- }
       begin
         xt state self [: { xt state self }
-          self cyw43-ioctl-data ioctl-state-type @ state = if
+          self cyw43-ioctl-state @ state = if
             xt execute false
           else
             true
@@ -185,20 +209,16 @@ begin-module cyw43-ioctl
 
     \ Mark a pending ioctl as having been sent
     :noname { self -- }
-      self cyw43-ioctl-data ioctl-state-type @ ioctl-state-pending = if
-        self cyw43-ioctl-data pioctl-buf-addr @ { addr }
-        self cyw43-ioctl-data pioctl-buf-size @ { bytes }
-        ioctl-state-sent self cyw43-ioctl-data ioctl-state-type !
-        addr self cyw43-ioctl-data sioctl-buf-addr !
-        bytes self cyw43-ioctl-data sioctl-buf-size !
+      self cyw43-ioctl-state @ ioctl-state-pending = if
+        ioctl-state-sent self cyw43-ioctl-state !
       then
     ; define mark-cyw43-ioctl-sent
 
     \ Wait for a complete ioctl
     :noname { self -- addr actual-bytes }
       [: { self }
-        self cyw43-ioctl-data dioctl-resp-len @
-        ioctl-state-ready self cyw43-ioctl-data ioctl-state-type !
+        self cyw43-ioctl-rx-size @
+        ioctl-state-ready self cyw43-ioctl-state !
       ;] ioctl-state-done over wait-cyw43-ioctl-state
     ; define wait-cyw43-ioctl
 
@@ -206,26 +226,30 @@ begin-module cyw43-ioctl
     :noname ( self -- )
       dup { self }
       [: { self }
-        ioctl-state-done self cyw43-ioctl-data ioctl-state-type !
-        0 self cyw43-ioctl-data dioctl-resp-len !
+        ioctl-state-done self cyw43-ioctl-state !
+        0 self cyw43-ioctl-rx-size !
       ;] over cyw43-ioctl-lock with-lock
       self wake-cyw43-ioctl
     ; define cancel-cyw43-ioctl
     
     \ Send an ioctl
-    :noname { addr bytes kind cmd iface self -- }
-      ioctl-state-pending self cyw43-ioctl-data ioctl-state-type !
-      iface self cyw43-ioctl-data pioctl-iface !
-      cmd self cyw43-ioctl-data pioctl-cmd !
-      kind self cyw43-ioctl-data pioctl-kind !
-      bytes self cyw43-ioctl-data pioctl-buf-size !
-      addr self cyw43-ioctl-data pioctl-buf-addr !
+    :noname ( tx-addr tx-bytes rx-addr rx-bytes kind cmd iface self -- )
+      { self }
+      ioctl-state-pending self cyw43-ioctl-state !
+      self cyw43-ioctl-iface !
+      self cyw43-ioctl-cmd !
+      self cyw43-ioctl-kind !
+      self cyw43-ioctl-rx-size !
+      self cyw43-ioctl-rx-buf !
+      self cyw43-ioctl-tx-size !
+      self cyw43-ioctl-tx-buf !
     ; define do-cyw43-ioctl
 
     \ Polling sending an ioctl
-    :noname ( addr bytes kind cmd iface self -- success? )
+    :noname
+      ( tx-addr tx-bytes rx-addr rx-bytes kind cmd iface self -- success? )
       [: dup { self }
-        self cyw43-ioctl-data ioctl-state-type @ ioctl-state-ready = if
+        self cyw43-ioctl-state @ ioctl-state-ready = if
           do-cyw43-ioctl true
         else
           drop false
@@ -234,9 +258,10 @@ begin-module cyw43-ioctl
     ; define poll-cyw43-ioctl
     
     \ Blocking ioctl operation
-    :noname { addr bytes kind cmd iface self -- actual-bytes }
+    :noname
+      { tx-addr tx-bytes rx-addr rx-bytes kind cmd iface self -- actual-bytes }
       begin
-        kind cmd iface addr bytes self poll-cyw43-ioctl
+        tx-addr tx-bytes rx-addr rx-bytes kind cmd iface self poll-cyw43-ioctl
         dup not if pause then
       until
       self wait-cyw43-ioctl
@@ -246,11 +271,11 @@ begin-module cyw43-ioctl
     :noname ( addr bytes self -- )
       dup { self }
       [: { addr bytes self }
-        self cyw43-ioctl-data ioctl-state-type @ ioctl-state-sent = if
-          addr self cyw43-ioctl sioctl-buf-addr @ dup { buf-addr }
-          bytes self cyw43-ioctl sioctl-buf-size @ min dup { actual-bytes } move
-          ioctl-state-done self cyw43-ioctl-data ioctl-state-type !
-          actual-bytes self cyw43-ioctl-data dioctl-resp-len !
+        self cyw43-ioctl-state @ ioctl-state-sent = if
+          addr self cyw43-ioctl-rx-buf @ dup { buf-addr }
+          bytes self cyw43-ioctl-rx-size @ min dup { actual-bytes } move
+          ioctl-state-done self cyw43-ioctl-state !
+          actual-bytes self cyw43-ioctl-rx-size !
         else
           cr ." ioctl response but no pending ioctl"
         then

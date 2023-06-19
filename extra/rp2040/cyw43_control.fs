@@ -38,6 +38,10 @@ begin-module cyw43-control
   \ Download chunk size
   1024 constant cyw43-download-chunk-size
 
+  \ Link state
+  0 constant cyw43-link-down
+  1 constant cyw43-link-up
+
   \ Scratchpad size
   cyw43-download-chunk-size 8 + download-header-size + cell align
   constant cyw43-scratch-size
@@ -57,12 +61,31 @@ begin-module cyw43-control
     \ CYW43 CLM firmware size
     cell member cyw43-clm-bytes
 
+    \ MAC address
+    6 cell align member cyw43-mac-addr
+
+    \ Link state
+    cell member cyw43-link-state
+
     \ CYW43 scratch size
     cyw43-scratch-size member cyw43-scratch-buf
 
     \ Initialize the CYW43
     method init-cyw43 ( self -- )
 
+    \ Set power management
+    method cyw43-power-management! ( pm self -- )
+
+    \ Join an open AP
+    method join-cyw43-open ( ssid-addr ssid-bytes self -- status success? )
+
+    \ Join a WPA2 AP
+    method join-cyw43-wpa2
+    ( ssid-addr ssid-bytes pass-addr pass-bytes self -- status success? )
+
+    \ Wait for joining an AP
+    method wait-for-cyw43-join ( ssid-info self -- )
+    
     \ Load the CLM
     method load-cyw43-clm ( self -- )
 
@@ -106,6 +129,8 @@ begin-module cyw43-control
       \ Set the locals
       self cyw43-clm-bytes !
       self cyw43-clm-addr !
+      6 0 ?do 0 self cyw43-mac-addr i + c! loop
+      cyw43-link-down self cyw43-link-state !
 
       \ Initialize our lock
       self cyw43-lock init-lock
@@ -130,12 +155,10 @@ begin-module cyw43-control
 
       cr ." Getting MAC address..."
       
-      self 6 [: { self buf }
-        buf 6 s" cur_etheraddr" self iovar-cyw43>
-        6 = averts x-unexpected-mac-addr-len
-        cr ." MAC address: "
-        6 0 ?do buf i + c@ h.2 i 5 <> if ." :" then loop
-      ;] with-aligned-allot
+      self cyw43-mac-addr 6 s" cur_etheraddr" self iovar-cyw43>
+      6 = averts x-unexpected-mac-addr-len
+      cr ." MAC address: "
+      6 0 ?do self cyw43-mac-addr i + c@ h.2 i 5 <> if ." :" then loop
 
       cr ." Setting country info..."
 
@@ -180,11 +203,134 @@ begin-module cyw43-control
 
       \ set wifi up
       cr ." Set wifi up"
-      0 0 cyw43-set IOCTL_CMD_UP 0 self ioctl-cyw43
+      0 0 0 0 cyw43-set IOCTL_CMD_UP 0 self ioctl-cyw43
+      100 ms
+
+      1 110 0 self >ioctl-cyw43-32 \ SET_GMODE = auto
+      0 142 0 self >ioctl-cyw43-32 \ SET_BAND = any
       100 ms
 
     ; define init-cyw43
+
+    \ Set power management
+    :noname { pm self -- }
+      pm cyw43-pm-mode 2 = if
+        pm cyw43-pm-sleep-rest-ms s" pm2_sleep_rest" self >iovar-cyw43-32
+        pm cyw43-pm-beacon-period s" bcn_li_bcn" self >iovar-cyw43-32
+        pm cyw43-pm-dtim-period s" bcn_li_dtim" self >iovar-cyw43-32
+        pm cyw43-pm-assoc s" assoc_listen" self >iovar-cyw43-32
+      then
+      pm cyw43-pm-mode 86 0 self >ioctl-cyw43-32
+    ; define cyw43-power-management!
     
+    \ Join an open AP
+    :noname ( ssid-addr ssid-bytes self -- status success? )
+      ssid-info-size [: { ssid-addr ssid-bytes self ssid-info }
+        
+        ssid-bytes 32 min 0 max to ssid-bytes
+        
+        8 s" ampdu_ba_wsize" self >iovar-cyw43-32
+        
+        0 134 0 self >ioctl-cyw43-32 \ wsec = open
+        0 0 s" bsscfg:sup_wpa" self >iovar-cyw43-32x2
+        1 20 0 self >ioctl-cyw43-32 \ set_infra = 1
+        0 22 0 self >ioctl-cyw43-32 \ set_auth = open (0)
+
+        ssid-bytes ssid-info si-len !
+        ssid-addr ssid-info si-ssid ssid-bytes move
+
+        ssid-info self wait-for-cyw43-join
+        
+      ;] with-aligned-allot
+    ; define join-cyw43-open
+
+    \ Join a WPA2 AP
+    :noname
+      ( ssid-addr ssid-bytes pass-addr pass-bytes self -- status success? )
+      ssid-info-size [:
+        passphrase-info-size [:
+          { ssid-addr ssid-bytes pass-addr pass-bytes self ssid-info pass-info }
+
+          ssid-bytes 32 min 0 max to ssid-bytes
+          pass-bytes 64 min 0 max to pass-bytes
+          
+          8 s" ampdu_ba_wsize" self >iovar-cyw43-32
+          
+          4 134 0 self >ioctl-cyw43-32 \ wsec = wpa2
+          1 0 s" bsscfg:sup_wpa" self >iovar-cyw43-32x2
+          0 $FFFFFFFF s" bsscfg:sup_wpa2_eapver" self >iovar-cyw43-32x2
+          0 2500 s" bsscfg:sup_wpa_tmo" self >iovar-cyw43-32x2
+
+          100 ms
+
+          pass-bytes pass-info pi-len h!
+          1 pass-info pi-flags h!
+          pass-addr pass-info pi-passphrase pass-bytes move
+
+          pass-info passphrase-info-size 0 0
+          cyw43-set IOCTL_CMD_SET_PASSPHRASE 0 self ioctl-cyw43 drop
+
+          1 20 0 self >ioctl-cyw43-32 \ set_infra = 1
+          0 22 0 self >ioctl-cyw43-32 \ set_auth = open (0)
+          $80 165 0 self >ioctl-cyw43-32 \ set_wpa_auth
+
+          ssid-bytes ssid-info si-len !
+          ssid-addr ssid-info si-ssid ssid-bytes move
+          
+          ssid-info self wait-for-cyw43-join
+
+        ;] with-aligned-allot
+      ;] with-aligned-allot
+    ; define join-cyw43-wpa2
+
+    \ Wait for joining an AP
+    :noname ( ssid-info self -- status success? )
+      
+      event-message-size [: { ssid-info self event }
+        
+        \ Enable events before joining so we don't lose any
+        EVENT_SET_SSID self cyw43-runner enable-cyw43-event
+        EVENT_AUTH self cyw43-runner enable-cyw43-event
+        
+        \ Set ssid
+        ssid-info ssid-info-size 0 0 cyw43-set IOCTL_CMD_SET_SSID 0
+        self ioctl-cyw43 drop
+        
+        0 0 { auth-status status }
+
+        begin
+          event self cyw43-runner get-cyw43-event
+          event emsg-event-type @ EVENT_AUTH =
+          event emsg-status @ ESTATUS_SUCCESS = and if
+            event emsg-status @ to auth-status
+            false
+          else
+            event emsg-event-type @ EVENT_SET_SSID = if
+              event emsg_status @ to status
+              true
+            else
+              false
+            then
+          then
+        until
+        
+        self cyw43-runner disable-all-cyw43-events
+        self cyw43-runner clear-cyw43-events
+
+        status ESTATUS_SUCCESS = if
+          cyw43-link-up self cyw43-link-state !
+          cr ." JOINED"
+          status true
+        else
+          cyw43-link-down self cyw43-link-state !
+          cr ." JOIN failed with status=" status . ."  auth=" auth-status .
+          status false
+        then
+
+      ;] with-aligned-allot
+      
+    ; define wait-for-cyw43-join
+
     \ Load the CLM
     :noname { self -- }
       
@@ -213,7 +359,7 @@ begin-module cyw43-control
         addr dh-header download-header-size + len move
 
         \ Download the chunk
-        cyw43-scratch-buf bytes [ 8 download-header-size + ] literal +
+        cyw43-scratch-buf bytes [ 8 download-header-size + ] literal + 0 0
         cyw43-set IOCTL_CMD_SET_VAR 0 self ioctl-cyw43 drop
         
         len +to addr
@@ -227,13 +373,13 @@ begin-module cyw43-control
     ; define load-cyw43-clm
 
     \ Execute an ioctl
-    :noname ( buf-addr buf-size kind cmd iface -- resp-len )
+    :noname ( tx-addr tx-bytes rx-addr rx-bytes kind cmd iface -- resp-len )
       self cyw43-runner block-cyw43-ioctl
     ; define ioctl-cyw43
 
     \ Set an ioctl to a 32-bit value
     :noname { W^ val cmd iface -- }
-      cyw43-set cmd iface val cell self ioctl-cyw43 drop
+      val cell 0 0 cyw43-set cmd iface self ioctl-cyw43 drop
     ; define >ioctl-cyw43-32
     
     \ Set a variable with an ioctl
@@ -244,7 +390,7 @@ begin-module cyw43-control
         name-addr ioctl-buf name-size move
         0 ioctl-buf name-size + c!
         buf-addr ioctl-buf name-size + 1+ buf-size move
-        cyw43-set IOCTL_CMD_SET_VAR 0 ioctl-buf name-size buf-size + 1+
+        ioctl-buf name-size buf-size + 1+ 0 0 cyw43-set IOCTL_CMD_SET_VAR 0
         self ioctl-cyw43 drop
       ;] with-aligned-allot
     ; define >iovar-cyw43
@@ -256,8 +402,8 @@ begin-module cyw43-control
         { buf-addr buf-size name-addr name-size self ioctl-buf }
         name-addr ioctl-buf name-size move
         0 ioctl-buf name-size + c!
-        cyw43-get IOCTL_CMD_GET_VAR 0 ioctl-buf name-size 1+ buf-size max 64 max
-        self ioctl-cyw43 { resp-len }
+        ioctl-buf name-size 1+ ioctl-buf buf-size 64 max
+        cyw43-get IOCTL_CMD_GET_VAR 0 self ioctl-cyw43 { resp-len }
         ioctl-buf buf-addr resp-len move
         resp-len
       ;] with-aligned-allot
