@@ -24,6 +24,8 @@ begin-module cyw43-control
   lock import
   cyw43-structs import
   cyw43-consts import
+  cyw43-events import
+  cyw43-ioctl import
   cyw43-runner import
   
   \ Unexpected ioctl data length exception
@@ -68,7 +70,7 @@ begin-module cyw43-control
     cell member cyw43-clm-addr
 
     \ CYW43 CLM firmware size
-    cell member cyw43-clm-bytes
+    cell member cyw43-clm-size
 
     \ MAC address
     6 cell align member cyw43-mac-addr
@@ -146,7 +148,7 @@ begin-module cyw43-control
     method load-cyw43-clm ( self -- )
 
     \ Execute an ioctl
-    method ioctl-cyw43 ( kind cmd iface buf-addr buf-size -- resp-len )
+    method ioctl-cyw43 ( kind cmd iface buf-addr buf-size self -- resp-len )
 
     \ Set an ioctl to a 32-bit value
     method >ioctl-cyw43-32 ( val cmd iface self -- )
@@ -183,7 +185,7 @@ begin-module cyw43-control
       <cyw43-runner> self cyw43-core init-object
 
       \ Set the locals
-      self cyw43-clm-bytes !
+      self cyw43-clm-size !
       self cyw43-clm-addr !
       6 0 ?do 0 self cyw43-mac-addr i + c! loop
       cyw43-link-down self cyw43-link-state !
@@ -250,7 +252,6 @@ begin-module cyw43-control
         EVENT_PROBREQ_MSG events disable-cyw43-event
         EVENT_PROBREQ_MSG_RX events disable-cyw43-event
         EVENT_PROBRESP_MSG events disable-cyw43-event
-        EVENT_PROBRESP_MSG_RX events disable-cyw43-event \ ???
         EVENT_ROAM events disable-cyw43-event
         events cyw43-event-mask event-mask-size s" bsscfg:event_msgs"
         self >iovar-cyw43
@@ -259,7 +260,7 @@ begin-module cyw43-control
 
       \ set wifi up
       cr ." Set wifi up"
-      0 0 0 0 cyw43-set IOCTL_CMD_UP 0 self ioctl-cyw43
+      0 0 0 0 ioctl-set IOCTL_CMD_UP 0 self ioctl-cyw43
       100 ms
 
       1 110 0 self >ioctl-cyw43-32 \ SET_GMODE = auto
@@ -325,7 +326,7 @@ begin-module cyw43-control
           pass-addr pass-info pi-passphrase pass-bytes move
 
           pass-info passphrase-info-size 0 0
-          cyw43-set IOCTL_CMD_SET_PASSPHRASE 0 self ioctl-cyw43 drop
+          ioctl-set IOCTL_CMD_SET_PASSPHRASE 0 self ioctl-cyw43 drop
 
           1 20 0 self >ioctl-cyw43-32 \ set_infra = 1
           0 22 0 self >ioctl-cyw43-32 \ set_auth = open (0)
@@ -423,7 +424,7 @@ begin-module cyw43-control
         EVENT_AUTH self cyw43-core enable-cyw43-event
         
         \ Set ssid
-        ssid-info ssid-info-size 0 0 cyw43-set IOCTL_CMD_SET_SSID 0
+        ssid-info ssid-info-size 0 0 ioctl-set IOCTL_CMD_SET_SSID 0
         self ioctl-cyw43 drop
         
         0 0 { auth-status status }
@@ -436,7 +437,7 @@ begin-module cyw43-control
             false
           else
             event emsg-event-type @ EVENT_SET_SSID = if
-              event emsg_status @ to status
+              event emsg-status @ to status
               true
             else
               false
@@ -469,18 +470,18 @@ begin-module cyw43-control
         ssid-bytes 0 u> ssid-bytes 32 u<= and averts x-invalid-ssid-len
 
         security SECURITY_OPEN <> if
-          pass-bytes MIN_PSK_LEN >= pass-bytes MAX_PSK_LEN <= anda
+          pass-bytes MIN_PSK_LEN >= pass-bytes MAX_PSK_LEN <= and
           averts x-invalid-pass-len
         then
         
         \ Temporarily set wifi down
-        0 0 0 0 cyw43-set IOCTL_CMD_DOWN 0 self ioctl-cyw43 drop
+        0 0 0 0 ioctl-set IOCTL_CMD_DOWN 0 self ioctl-cyw43 drop
         
         \ Turn off APSTA mode
         0 s" apsta" self >iovar-cyw43-32
         
         \ Set wifi up again
-        0 0 0 0 cyw43-set IOCTL_CMD_UP 0 self ioctl-cyw43 drop
+        0 0 0 0 ioctl-set IOCTL_CMD_UP 0 self ioctl-cyw43 drop
         
         \ Turn on AP mode
         1 IOCTL_CMD_SET_AP 0 self >ioctl-cyw43-32
@@ -510,7 +511,7 @@ begin-module cyw43-control
             pass-info pi-passphrase 64 0 fill
             pass-addr pass-info pi-passphrase pass-bytes move
             pass-info passphrase-info-size 0 0
-            cyw43-set IOCTL_CMD_SET_PASSPHRASE 0 self ioctl-cyw43 drop
+            ioctl-set IOCTL_CMD_SET_PASSPHRASE 0 self ioctl-cyw43 drop
           ;] with-aligned-allot
           
         then
@@ -554,7 +555,7 @@ begin-module cyw43-control
 
         \ Download the chunk
         cyw43-scratch-buf bytes [ 8 download-header-size + ] literal + 0 0
-        cyw43-set IOCTL_CMD_SET_VAR 0 self ioctl-cyw43 drop
+        ioctl-set IOCTL_CMD_SET_VAR 0 self ioctl-cyw43 drop
         
         len +to addr
         len negate +to bytes
@@ -567,13 +568,14 @@ begin-module cyw43-control
     ; define load-cyw43-clm
 
     \ Execute an ioctl
-    :noname ( tx-addr tx-bytes rx-addr rx-bytes kind cmd iface -- resp-len )
-      self cyw43-core block-cyw43-ioctl
+    :noname
+      ( tx-addr tx-bytes rx-addr rx-bytes kind cmd iface self -- resp-len )
+      cyw43-core block-cyw43-ioctl
     ; define ioctl-cyw43
 
     \ Set an ioctl to a 32-bit value
-    :noname { W^ val cmd iface -- }
-      val cell 0 0 cyw43-set cmd iface self ioctl-cyw43 drop
+    :noname { W^ val cmd iface self -- }
+      val cell 0 0 ioctl-set cmd iface self ioctl-cyw43 drop
     ; define >ioctl-cyw43-32
     
     \ Set a variable with an ioctl
@@ -584,7 +586,7 @@ begin-module cyw43-control
         name-addr ioctl-buf name-size move
         0 ioctl-buf name-size + c!
         buf-addr ioctl-buf name-size + 1+ buf-size move
-        ioctl-buf name-size buf-size + 1+ 0 0 cyw43-set IOCTL_CMD_SET_VAR 0
+        ioctl-buf name-size buf-size + 1+ 0 0 ioctl-set IOCTL_CMD_SET_VAR 0
         self ioctl-cyw43 drop
       ;] with-aligned-allot
     ; define >iovar-cyw43
@@ -597,7 +599,7 @@ begin-module cyw43-control
         name-addr ioctl-buf name-size move
         0 ioctl-buf name-size + c!
         ioctl-buf name-size 1+ ioctl-buf buf-size 64 max
-        cyw43-get IOCTL_CMD_GET_VAR 0 self ioctl-cyw43 { resp-len }
+        ioctl-get IOCTL_CMD_GET_VAR 0 self ioctl-cyw43 { resp-len }
         ioctl-buf buf-addr resp-len move
         resp-len
       ;] with-aligned-allot
@@ -612,7 +614,7 @@ begin-module cyw43-control
     :noname { val0 val1 name-addr name-size self -- }
       0 0 { D^ val } val0 val ! val1 val cell+ !
       val 2 cells name-addr name-size self >iovar-cyw43
-    ; define >iovar-cyw34-32x2
+    ; define >iovar-cyw43-32x2
 
     \ Get a 32-bit variable with an ioctl
     :noname { W^ val name-addr name-size self -- }

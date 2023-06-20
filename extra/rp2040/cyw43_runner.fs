@@ -723,7 +723,7 @@ begin-module cyw43-runner
       [ sdpcm-header-size cdc-header-size + ] literal buf-size + { total-len }
       self cyw43-sdpcm-seq c@ { sdpcm-seq }
       sdpcm-seq 1+ self cyw43-sdpcm-seq c!
-      1 self cyw43-ioctl-id c+!
+      1 self cyw43-ioctl-id h+!
 
       \ Construct a SDPCM header
       self cyw43-scratch-buf { sdpcm }

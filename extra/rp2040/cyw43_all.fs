@@ -27,4 +27,6 @@
 #include extra/rp2040/cyw43_spi.fs
 #include extra/rp2040/cyw43_bus.fs
 #include extra/rp2040/cyw43_ioctl.fs
-#include extra/rp2040/cyw43.fs
+#include extra/rp2040/cyw43_runner.fs
+#include extra/rp2040/cyw43_control.fs
+
