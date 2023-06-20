@@ -153,8 +153,8 @@ begin-module cyw43-consts
 
   \ Security type (authentication and encryption types are combined using bit
   \ mask)
-  0 constant CYW43_OPEN
-  WPA2_SECURITY AES_ENABLED or constant WPA_AES_PSK
+  0 constant SECURITY_OPEN
+  WPA2_SECURITY AES_ENABLED or constant WPA2_AES_PSK
 
   \ operation was successful
   0 constant ESTATUS_SUCCESS

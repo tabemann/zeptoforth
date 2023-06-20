@@ -34,6 +34,15 @@ begin-module cyw43-control
 
   \ Unexpected MAC address length
   : x-unexpected-mac-addr-len ( -- ) ." unexpected MAC address length" cr ;
+
+  \ Out of range GPIO
+  : x-out-of-range-gpio ( -- ) ." out of range GPIO" cr ;
+
+  \ SSID is too short or too long
+  : x-invalid-ssid-len ( -- ) ." SSID is too short or too long" cr ;
+  
+  \ Passphrase is too short or too long
+  : x-invalid-pass-len ( -- ) ." passphrase is too short or too long" cr ;
   
   \ Download chunk size
   1024 constant cyw43-download-chunk-size
@@ -50,7 +59,7 @@ begin-module cyw43-control
   <object> begin-class <cyw43-control>
 
     \ CYW43 runner
-    <cyw43-runner> class-size member cyw43-runner
+    <cyw43-runner> class-size member cyw43-core
     
     \ CYW43 control lock
     lock-size member cyw43-lock
@@ -83,8 +92,55 @@ begin-module cyw43-control
     method join-cyw43-wpa2
     ( ssid-addr ssid-bytes pass-addr pass-bytes self -- status success? )
 
+    \ Set a GPIO
+    method cyw43-gpio! ( val index self -- )
+
+    \ Start open AP
+    method start-cyw43-open ( ssid-addr ssid-bytes channel self -- )
+
+    \ Start WPA2 AP
+    method start-cyw43-wpa2
+    ( ssid-addr ssid-bytes pass-addr pass-bytes channel self -- )
+    
+    \ Enable an event
+    method enable-cyw43-event ( event self -- )
+
+    \ Enable multiple events
+    method enable-cyw43-events ( event-addr event-count self -- )
+    
+    \ Disable an event
+    method disable-cyw43-event ( event self -- )
+
+    \ Disable multiple events
+    method disable-cyw43-events ( event-addr event-count self -- )
+
+    \ Disable all events
+    method disable-all-cyw43-events ( self -- )
+    
+    \ Dequeue received data
+    method get-cyw43-rx ( addr self -- bytes )
+
+    \ Poll for received data
+    method poll-cyw43-rx ( addr self -- bytes|0 )
+
+    \ Enqueue data to transmit
+    method put-cyw43-tx ( addr bytes self -- )
+    
+    \ Dequeue event message
+    method get-cyw43-event ( addr self -- )
+
+    \ Poll for event message
+    method poll-cyw43-event ( addr self -- found? )
+
+    \ Clear event queue
+    method clear-cyw43-events ( self -- )
+    
     \ Wait for joining an AP
     method wait-for-cyw43-join ( ssid-info self -- )
+
+    \ Start an AP
+    method start-ap
+    ( ssid-addr ssid-bytes pass-addr pass-bytes security channel self -- )
     
     \ Load the CLM
     method load-cyw43-clm ( self -- )
@@ -124,7 +180,7 @@ begin-module cyw43-control
       self <object>->new
 
       \ Instantiate the runner
-      <cyw43-runner> self cyw43-runner init-object
+      <cyw43-runner> self cyw43-core init-object
 
       \ Set the locals
       self cyw43-clm-bytes !
@@ -141,8 +197,8 @@ begin-module cyw43-control
     :noname { self -- }
 
       \ Get the CYW43 runner up and, well, running
-      self cyw43-runner init-cyw43-runner
-      self cyw43-runner run-cyw43
+      self cyw43-core init-cyw43-runner
+      self cyw43-core run-cyw43
 
       \ Load the CLM
       self load-cyw43-clm
@@ -227,7 +283,7 @@ begin-module cyw43-control
     :noname ( ssid-addr ssid-bytes self -- status success? )
       ssid-info-size [: { ssid-addr ssid-bytes self ssid-info }
         
-        ssid-bytes 32 min 0 max to ssid-bytes
+        ssid-bytes 0 u> ssid-bytes 32 u<= and averts x-invalid-ssid-len
         
         8 s" ampdu_ba_wsize" self >iovar-cyw43-32
         
@@ -251,8 +307,8 @@ begin-module cyw43-control
         passphrase-info-size [:
           { ssid-addr ssid-bytes pass-addr pass-bytes self ssid-info pass-info }
 
-          ssid-bytes 32 min 0 max to ssid-bytes
-          pass-bytes 64 min 0 max to pass-bytes
+          ssid-bytes 0 u> ssid-bytes 32 u<= and averts x-invalid-ssid-len
+          pass-bytes 64 u<= averts x-invalid-pass-len
           
           8 s" ampdu_ba_wsize" self >iovar-cyw43-32
           
@@ -265,6 +321,7 @@ begin-module cyw43-control
 
           pass-bytes pass-info pi-len h!
           1 pass-info pi-flags h!
+          pass-info pi-passphrase 64 0 fill
           pass-addr pass-info pi-passphrase pass-bytes move
 
           pass-info passphrase-info-size 0 0
@@ -275,6 +332,7 @@ begin-module cyw43-control
           $80 165 0 self >ioctl-cyw43-32 \ set_wpa_auth
 
           ssid-bytes ssid-info si-len !
+          ssid-info si-ssid 32 0 fill
           ssid-addr ssid-info si-ssid ssid-bytes move
           
           ssid-info self wait-for-cyw43-join
@@ -283,14 +341,86 @@ begin-module cyw43-control
       ;] with-aligned-allot
     ; define join-cyw43-wpa2
 
+    \ Set a GPIO
+    :noname { val index self -- }
+      index 3 u< averts x-out-of-range-gpio
+      1 index lshift val if 1 else 0 then s" gpioout" self >iovar-cyw43-32x2
+    ; define cyw43-gpio!
+    
+    \ Start open AP
+    :noname { ssid-addr ssid-bytes channel self -- }
+      ssid-addr ssid-bytes 0 0 SECURITY_OPEN channel self start-ap
+    ; define start-cyw43-open
+
+    \ Start WPA2 AP
+    :noname { ssid-addr ssid-bytes pass-addr pass-bytes channel self -- }
+      ssid-addr ssid-bytes pass-addr pass-bytes WPA2_AES_PSK channel self
+      start-ap
+    ; define start-cyw43-wpa2
+
+    \ Enable an event
+    :noname ( event self -- )
+      cyw43-core cyw43-runner::enable-cyw43-event
+    ; define enable-cyw43-event
+
+    \ Enable multiple events
+    :noname ( event-addr event-count self -- )
+      cyw43-core cyw43-runner::enable-cyw43-events
+    ; define enable-cyw43-events
+    
+    \ Disable an event
+    :noname ( event self -- )
+      cyw43-core cyw43-runner::disable-cyw43-event
+    ; define disable-cyw43-event
+
+    \ Disable multiple events
+    :noname ( event-addr event-count self -- )
+      cyw43-core cyw43-runner::disable-cyw43-events
+    ; define disable-cyw43-events
+
+    \ Disable all events
+    :noname ( self -- )
+      cyw43-core cyw43-runner::disable-all-cyw43-events
+    ; define disable-all-cyw43-events
+    
+    \ Dequeue received data
+    :noname ( addr self -- bytes )
+      cyw43-core cyw43-runner::get-cyw43-rx
+    ; define get-cyw43-rx
+
+    \ Poll for received data
+    :noname ( addr self -- bytes|0 )
+      cyw43-core cyw43-runner::poll-cyw43-rx
+    ; define poll-cyw43-rx
+
+    \ Enqueue data to transmit
+    :noname ( addr bytes self -- )
+      cyw43-core cyw43-runner::put-cyw43-tx
+    ; define put-cyw43-tx
+    
+    \ Dequeue event message
+    :noname ( addr self -- )
+      cyw43-core cyw43-runner::get-cyw43-event
+    ; define get-cyw43-event
+
+    \ Poll for event message
+    :noname ( addr self -- found? )
+      cyw43-core cyw43-runner::poll-cyw43-event
+    ; define poll-cyw43-event
+
+    \ Clear event queue
+    :noname ( self -- )
+      cyw43-core cyw43-runner::clear-cyw43-events
+    ; define clear-cyw43-events
+
     \ Wait for joining an AP
     :noname ( ssid-info self -- status success? )
       
       event-message-size [: { ssid-info self event }
         
         \ Enable events before joining so we don't lose any
-        EVENT_SET_SSID self cyw43-runner enable-cyw43-event
-        EVENT_AUTH self cyw43-runner enable-cyw43-event
+        EVENT_SET_SSID self cyw43-core enable-cyw43-event
+        EVENT_AUTH self cyw43-core enable-cyw43-event
         
         \ Set ssid
         ssid-info ssid-info-size 0 0 cyw43-set IOCTL_CMD_SET_SSID 0
@@ -299,7 +429,7 @@ begin-module cyw43-control
         0 0 { auth-status status }
 
         begin
-          event self cyw43-runner get-cyw43-event
+          event self cyw43-core get-cyw43-event
           event emsg-event-type @ EVENT_AUTH =
           event emsg-status @ ESTATUS_SUCCESS = and if
             event emsg-status @ to auth-status
@@ -314,8 +444,8 @@ begin-module cyw43-control
           then
         until
         
-        self cyw43-runner disable-all-cyw43-events
-        self cyw43-runner clear-cyw43-events
+        self cyw43-core disable-all-cyw43-events
+        self cyw43-core clear-cyw43-events
 
         status ESTATUS_SUCCESS = if
           cyw43-link-up self cyw43-link-state !
@@ -330,6 +460,70 @@ begin-module cyw43-control
       ;] with-aligned-allot
       
     ; define wait-for-cyw43-join
+
+    \ Start an AP
+    :noname
+      ssid-info-size [: { ssid-info }
+        { ssid-addr ssid-bytes pass-addr pass-bytes security channel self -- }
+        
+        ssid-bytes 0 u> ssid-bytes 32 u<= and averts x-invalid-ssid-len
+
+        security SECURITY_OPEN <> if
+          pass-bytes MIN_PSK_LEN >= pass-bytes MAX_PSK_LEN <= anda
+          averts x-invalid-pass-len
+        then
+        
+        \ Temporarily set wifi down
+        0 0 0 0 cyw43-set IOCTL_CMD_DOWN 0 self ioctl-cyw43 drop
+        
+        \ Turn off APSTA mode
+        0 s" apsta" self >iovar-cyw43-32
+        
+        \ Set wifi up again
+        0 0 0 0 cyw43-set IOCTL_CMD_UP 0 self ioctl-cyw43 drop
+        
+        \ Turn on AP mode
+        1 IOCTL_CMD_SET_AP 0 self >ioctl-cyw43-32
+
+        \ Set SSID
+        ssid-bytes ssid-info si-len !
+        ssid-info si-ssid 32 0 fill
+        ssid-addr ssid-info si-ssid ssid-bytes move
+        ssid-info ssid-info-size s" bsscfg:ssid" self >iovar-cyw43
+
+        \ Set the channel number
+        channel IOCTL_CMD_SET_CHANNEL 0 self >ioctl-cyw43-32
+
+        \ Set security
+        0 security $FF and s" bsscfg:wec" self >iovar-cyw43-32x2
+
+        security SECURITY_OPEN <> if
+          \ wpa_auth = WPA2_AUTH_PSK | WPA_AUTH_PSK
+          0 $0084 s" bsscfg:wpa_auth" self >iovar-cyw43-32x2
+
+          100 ms
+
+          pass-addr pass-bytes self passphrase-info-size [:
+            { pass-addr pass-bytes self pass-info }
+            pass-bytes pass-info pi-len h!
+            1 pass-info pi-flags h! \ WSEC_PASSPHRASE
+            pass-info pi-passphrase 64 0 fill
+            pass-addr pass-info pi-passphrase pass-bytes move
+            pass-info passphrase-info-size 0 0
+            cyw43-set IOCTL_CMD_SET_PASSPHRASE 0 self ioctl-cyw43 drop
+          ;] with-aligned-allot
+          
+        then
+
+        \ Change multicast rate from 1 Mbps to 11 Mbps
+        11000000 500000 / s" 2g_mrate" self >iovar-cyw43-32
+
+        \ Start AP
+        0 1 s" bss" self >iovar-cyw43-32x2 \ bss = BSS_UP
+        
+      ;] with-aligned-allot
+      
+    ; define start-ap  
 
     \ Load the CLM
     :noname { self -- }
@@ -374,7 +568,7 @@ begin-module cyw43-control
 
     \ Execute an ioctl
     :noname ( tx-addr tx-bytes rx-addr rx-bytes kind cmd iface -- resp-len )
-      self cyw43-runner block-cyw43-ioctl
+      self cyw43-core block-cyw43-ioctl
     ; define ioctl-cyw43
 
     \ Set an ioctl to a 32-bit value

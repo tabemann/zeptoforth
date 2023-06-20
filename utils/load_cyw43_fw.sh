@@ -21,8 +21,12 @@
 # SOFTWARE.
 
 PORT=$1
-IMAGE=$2
+FW_IMAGE=$2
+CLM_IMAGE=$3
 
-./utils/convert_bin.py cyw43-fw $IMAGE cyw43_fw.fs
+./utils/convert_bin.py cyw43-fw $FW_IMAGE cyw43_fw.fs
 ./utils/codeload3.py -B 115200 -p $PORT serial cyw43_fw.fs
 rm cyw43_fw.fs
+./utils/convert_bin.py cyw43-clm $CLM_IMAGE cyw43_clm.fs
+./utils/codeload3.py -B 115200 -p $PORT serial cyw43_clm.fs
+rm cyw43_clm.fs
