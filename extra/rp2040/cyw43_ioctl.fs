@@ -248,22 +248,20 @@ begin-module cyw43-ioctl
     \ Polling sending an ioctl
     :noname
       ( tx-addr tx-bytes rx-addr rx-bytes kind cmd iface self -- success? )
-      [: dup { self }
+      [: { self }
         self cyw43-ioctl-state @ ioctl-state-ready = if
-          do-cyw43-ioctl true
+          self do-cyw43-ioctl true
         else
-          drop false
+          2drop 2drop 2drop drop false
         then
       ;] over cyw43-ioctl-lock with-lock
     ; define poll-cyw43-ioctl
     
     \ Blocking ioctl operation
     :noname
-      { tx-addr tx-bytes rx-addr rx-bytes kind cmd iface self -- actual-bytes }
-      begin
-        tx-addr tx-bytes rx-addr rx-bytes kind cmd iface self poll-cyw43-ioctl
-        dup not if pause then
-      until
+      ( tx-addr tx-bytes rx-addr rx-bytes kind cmd iface self -- actual-bytes )
+      { self } self ['] do-cyw43-ioctl
+      ioctl-state-ready self wait-cyw43-ioctl-state
       self wait-cyw43-ioctl
     ; define block-cyw43-ioctl
 

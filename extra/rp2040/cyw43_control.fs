@@ -147,6 +147,12 @@ begin-module cyw43-control
     \ Load the CLM
     method load-cyw43-clm ( self -- )
 
+    \ Set country info
+    method set-cyw43-country ( self -- )
+
+    \ Disable spammy events
+    method disable-spammy-cyw43-events ( self -- )
+
     \ Execute an ioctl
     method ioctl-cyw43 ( kind cmd iface buf-addr buf-size self -- resp-len )
 
@@ -202,6 +208,8 @@ begin-module cyw43-control
       self cyw43-core init-cyw43-runner
       self cyw43-core run-cyw43
 
+      100 ms
+      
       \ Load the CLM
       self load-cyw43-clm
 
@@ -218,19 +226,7 @@ begin-module cyw43-control
       cr ." MAC address: "
       6 0 ?do self cyw43-mac-addr i + c@ h.2 i 5 <> if ." :" then loop
 
-      cr ." Setting country info..."
-
-      self country-info-size [: { self buf }
-        buf ci-country-abbrev [char] X over c! 1+ [char] X over c!
-        1+ 0 over c! 1+ 0 swap c!
-        buf ci-country-code [char] X over c! 1+ [char] X over c!
-        1+ 0 over c! 1+ 0 swap c!
-        -1 buf ci-rev !
-        buf country-info-size s" country" self >iovar-cyw43
-      ;] with-aligned-allot
-
-      \ set country takes some time, next ioctls fail if we don't wait
-      100 ms
+      self set-cyw43-country
 
       \ set antenna to chip antenna
       cr ." Set antenna to chip antenna"
@@ -244,20 +240,8 @@ begin-module cyw43-control
       4 s" ampdu_mpdu" self >iovar-cyw43-32
       100 ms
 
-      \ Disable spammy uninteresting events
-      self <cyw43-event-mask> [: { self events }
-        cr ." Disable spammy uninteresting events"
-        EVENT_RADIO events disable-cyw43-event
-        EVENT_IF events disable-cyw43-event
-        EVENT_PROBREQ_MSG events disable-cyw43-event
-        EVENT_PROBREQ_MSG_RX events disable-cyw43-event
-        EVENT_PROBRESP_MSG events disable-cyw43-event
-        EVENT_ROAM events disable-cyw43-event
-        events cyw43-event-mask event-mask-size s" bsscfg:event_msgs"
-        self >iovar-cyw43
-        100 ms
-      ;] with-object
-
+      self disable-spammy-cyw43-events
+      
       \ set wifi up
       cr ." Set wifi up"
       0 0 0 0 ioctl-set IOCTL_CMD_UP 0 self ioctl-cyw43
@@ -537,13 +521,13 @@ begin-module cyw43-control
         cr ." Downloading CLM..."
         
         \ Get the size of an actual chunk being sent
-        bytes self cyw43-download-chunk-size min { len }
+        bytes cyw43-download-chunk-size min { len }
 
         \ Set the variable to be set
         s\" clmload\x00" self cyw43-scratch-buf 8 move
 
         \ Populate the download header
-        cyw43-scratch-buf 8 + { dh-header }
+        self cyw43-scratch-buf 8 + { dh-header }
         DOWNLOAD_FLAG_HANDLER_VER
         addr self cyw43-clm-addr @ = if DOWNLOAD_FLAG_BEGIN or then
         len bytes = if DOWNLOAD_FLAG_END or then
@@ -554,7 +538,7 @@ begin-module cyw43-control
         addr dh-header download-header-size + len move
 
         \ Download the chunk
-        cyw43-scratch-buf bytes [ 8 download-header-size + ] literal + 0 0
+        self cyw43-scratch-buf bytes [ 8 download-header-size + ] literal + 0 0
         ioctl-set IOCTL_CMD_SET_VAR 0 self ioctl-cyw43 drop
         
         len +to addr
@@ -566,6 +550,43 @@ begin-module cyw43-control
       s" clmload_status" self iovar-cyw43-32> 0= averts x-clmload-failed
       
     ; define load-cyw43-clm
+
+    \ Set country info
+    :noname { self -- }
+      
+      cr ." Setting country info..."
+
+      self country-info-size [: { self buf }
+        buf ci-country-abbrev [char] X over c! 1+ [char] X over c!
+        1+ 0 over c! 1+ 0 swap c!
+        buf ci-country-code [char] X over c! 1+ [char] X over c!
+        1+ 0 over c! 1+ 0 swap c!
+        -1 buf ci-rev !
+        buf country-info-size s" country" self >iovar-cyw43
+      ;] with-aligned-allot
+
+      \ set country takes some time, next ioctls fail if we don't wait
+      100 ms
+    ; define set-cyw43-country
+
+    \ Disable spammy events
+    :noname { self -- }
+
+      \ Disable spammy uninteresting events
+      self <cyw43-event-mask> [: { self events }
+        cr ." Disable spammy uninteresting events"
+        EVENT_RADIO events disable-cyw43-event
+        EVENT_IF events disable-cyw43-event
+        EVENT_PROBREQ_MSG events disable-cyw43-event
+        EVENT_PROBREQ_MSG_RX events disable-cyw43-event
+        EVENT_PROBRESP_MSG events disable-cyw43-event
+        EVENT_ROAM events disable-cyw43-event
+        events cyw43-event-mask event-mask-size s" bsscfg:event_msgs"
+        self >iovar-cyw43
+        100 ms
+      ;] with-object
+
+    ; define disable-spammy-cyw43-events
 
     \ Execute an ioctl
     :noname
