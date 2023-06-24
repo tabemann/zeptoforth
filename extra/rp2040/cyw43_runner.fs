@@ -59,7 +59,7 @@ begin-module cyw43-runner
   \ Switch byte order for a 32-bit value
   : rev ( -- ) code[ r6 r6 rev_,_ ]code ;
 
-  \ Do an alignment-save 32-bit load
+  \ Do an alignment-safe 32-bit load
   : unaligned@ { addr -- x }
     addr c@
     addr 1+ c@ 8 lshift or
