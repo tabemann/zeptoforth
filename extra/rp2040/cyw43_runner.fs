@@ -867,9 +867,9 @@ begin-module cyw43-runner
     \ Enqueue received data
     :noname { addr bytes self -- }
       begin
-        addr bytes self [: { addr bytes self }
+        addr bytes self [: { addr W^ bytes self }
           self cyw43-rx-chan chan-full? not if
-            addr bytes self cyw43-rx-chan send-chan
+            addr bytes @ self cyw43-rx-chan send-chan
             bytes cell self cyw43-rx-size-chan send-chan
             true
           else
@@ -915,9 +915,9 @@ begin-module cyw43-runner
     \ Enqueue data to transmit
     :noname { addr bytes self -- }
       begin
-        addr bytes self [: { addr bytes self }
+        addr bytes self [: { addr W^ bytes self }
           self cyw43-tx-chan chan-full? not if
-            addr bytes self cyw43-tx-chan send-chan
+            addr bytes @ self cyw43-tx-chan send-chan
             bytes cell self cyw43-tx-size-chan send-chan
             true
           else
