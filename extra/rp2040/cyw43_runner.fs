@@ -30,6 +30,7 @@ begin-module cyw43-runner
   chan import
   lock import
   task import
+  armv6m import
   
   \ Core is not up exception
   : x-core-not-up ( -- ) cr ." core is not up" ;
@@ -51,6 +52,20 @@ begin-module cyw43-runner
 
   \ CYW43 scratchpad buffer size
   4096 constant cyw43-scratch-size
+
+  \ Switch byte order for a 16-bit value
+  : rev16 ( -- ) code[ r6 r6 rev16_,_ ]code ;
+
+  \ Switch byte order for a 32-bit value
+  : rev ( -- ) code[ r6 r6 rev_,_ ]code ;
+
+  \ Do an alignment-save 32-bit load
+  : unaligned@ { addr -- x }
+    addr c@
+    addr 1+ c@ 8 lshift or
+    addr 2 + c@ 16 lshift or
+    addr 3 + c@ 24 lshift or
+  ;
   
   \ CYW43 log class
   <object> begin-class <cyw43-log>
@@ -280,6 +295,9 @@ begin-module cyw43-runner
       \ Initialize the transmit channels
       mtu-size tx-mtu-count self cyw43-tx-chan init-chan
       cell tx-mtu-count self cyw43-tx-size-chan init-chan
+
+      \ Initialize the vent channel
+      event-message-size event-count self cyw43-event-chan init-chan
       
       \ Instantiate the bus
       pwr clk dio cs pio-addr sm pio <cyw43-bus> self cyw43-bus init-object
@@ -639,9 +657,9 @@ begin-module cyw43-runner
       bytes event-packet-size < if
         cr ." BDC event, incomplete data" exit
       then
-      addr evtp-eth ethh-ether-type h@ ETH_P_LINK_CTL <> if
+      addr evtp-eth ethh-ether-type h@ rev16 ETH_P_LINK_CTL <> if
         cr ." unexpected ethernet type "
-        addr evtp-eth ethh-ether-type h@ h.4
+        addr evtp-eth ethh-ether-type h@ rev16 h.4
         ." , expected Broadcom ether type " ETH_P_LINK_CTL h.4
         exit
       then
@@ -652,18 +670,20 @@ begin-module cyw43-runner
         BROADCOM_OUI dup 3 + swap ?do i c@ h.2 loop
         exit
       then
-      addr evtp-hdr evth-subtype h@ BCMILCP_SUBTYPE_VENDOR_LONG <> if
-        cr ." unexpected subtype " addr evtp-hdr evth-subtype h@ h.4 exit
+      addr evtp-hdr evth-subtype h@ rev16 BCMILCP_SUBTYPE_VENDOR_LONG <> if
+        cr ." unexpected subtype " addr evtp-hdr evth-subtype h@ rev16 h.4 exit
       then
-      addr evtp-hdr evth-user-subtype h@ BCMILCP_BCM_SUBTYPE_EVENT <> if
-        cr ." unexpected user_subtype " addr evtp-hdr evth-user-subtype h@ h.4
+      addr evtp-hdr evth-user-subtype h@ rev16 BCMILCP_BCM_SUBTYPE_EVENT <> if
+        cr ." unexpected user_subtype "
+        addr evtp-hdr evth-user-subtype h@ rev16 h.4
         exit
       then
 
       \ Handle an event if enabled
-      addr evtp-msg emsg-event-type @ { event-type }
+      addr evtp-msg emsg-event-type unaligned@ rev { event-type }
+      addr evtp-msg emsg-status unaligned@ rev { event-status }
+      cr ." event type: " event-type h.8 ."  status: " event-status h.8
       event-type self cyw43-event-mask cyw43-event-enabled? if
-        addr evtp-msg emsg-status @ { event-status }
         event-type self cyw43-event-message-scratch evt-event-type !
         event-status self cyw43-event-message-scratch evt-status !
         event-type EVENT_ESCAN_RESULT =
@@ -830,17 +850,17 @@ begin-module cyw43-runner
     ; define enable-cyw43-events
     
     \ Disable an event
-    :noname { event self -- }
+    :noname ( event self -- )
       cyw43-event-mask cyw43-events::disable-cyw43-event
     ; define disable-cyw43-event
 
     \ Disable multiple events
-    :noname { event-addr event-count self -- }
+    :noname ( event-addr event-count self -- )
       cyw43-event-mask cyw43-events::disable-cyw43-events
     ; define disable-cyw43-events
 
     \ Disable all events
-    :noname { self -- }
+    :noname ( self -- )
       cyw43-event-mask cyw43-events::disable-all-cyw43-events
     ; define disable-all-cyw43-events
 
@@ -867,7 +887,7 @@ begin-module cyw43-runner
           self cyw43-rx-chan chan-empty? not if
             addr mtu-size self cyw43-rx-chan recv-chan drop
             0 { W^ bytes }
-            bytes cell self cyw43-rx-chan recv-chan drop
+            bytes cell self cyw43-rx-size-chan recv-chan drop
             bytes @
             true
           else
@@ -884,7 +904,7 @@ begin-module cyw43-runner
         self cyw43-rx-chan chan-empty? not if
           addr mtu-size self cyw43-rx-chan recv-chan drop
           0 { W^ bytes }
-          bytes cell self cyw43-rx-chan recv-chan drop
+          bytes cell self cyw43-rx-size-chan recv-chan drop
           bytes @
         else
           0
@@ -914,7 +934,7 @@ begin-module cyw43-runner
         self cyw43-tx-chan chan-empty? not if
           addr mtu-size self cyw43-tx-chan recv-chan drop
           0 { W^ bytes }
-          bytes cell self cyw43-tx-chan recv-chan drop
+          bytes cell self cyw43-tx-size-chan recv-chan drop
           bytes @
         else
           0
@@ -924,32 +944,12 @@ begin-module cyw43-runner
 
     \ Enqueue event message
     :noname { addr self -- }
-      begin
-        addr self [: { addr self }
-          self cyw43-event-chan chan-full? not if
-            addr event-message-size self cyw43-rx-chan send-chan
-            true
-          else
-            false
-          then
-        ;] self cyw43-event-lock with-lock
-        dup not if pause then
-      until
+      addr event-message-size self cyw43-event-chan send-chan
     ; define put-cyw43-event
 
     \ Dequeue event message
     :noname { addr self -- }
-      begin
-        addr self [: { addr self }
-          self cyw43-event-chan chan-empty? not if
-            addr event-message-size self cyw43-event-chan recv-chan drop
-            true
-          else
-            false
-          then
-        ;] self cyw43-event-lock with-lock
-        dup not if pause then
-      until
+      addr event-message-size self cyw43-event-chan recv-chan drop
     ; define get-cyw43-event
 
     \ Poll for event message
@@ -965,12 +965,10 @@ begin-module cyw43-runner
     ; define poll-cyw43-event
 
     \ Clear event queue
-    :noname ( self -- )
-      [: { self }
-        begin self cyw43-event-chan chan-empty? not while
-          self cyw43-event-chan skip-chan
-        repeat
-      ;] over cyw43-event-lock with-lock
+    :noname { self -- }
+      begin self cyw43-event-chan chan-empty? not while
+        self cyw43-event-chan skip-chan
+      repeat
     ; define clear-cyw43-events
 
     \ Block on an ioctl operation

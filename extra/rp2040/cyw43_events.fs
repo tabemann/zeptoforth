@@ -379,7 +379,7 @@ begin-module cyw43-events
 
     \ Is an event enabled
     :noname { event self -- enabled? }
-      event validate-event
+      event EVENT_LAST >= if false exit then
       event 7 and bit self cyw43-event-mask emsk-events event 3 rshift + cbit@
     ; define cyw43-event-enabled?
     

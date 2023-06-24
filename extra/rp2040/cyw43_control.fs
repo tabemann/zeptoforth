@@ -302,7 +302,7 @@ begin-module cyw43-control
           8 s" ampdu_ba_wsize" self >iovar-cyw43-32
           
           4 134 0 self >ioctl-cyw43-32 \ wsec = wpa2
-          1 0 s" bsscfg:sup_wpa" self >iovar-cyw43-32x2
+          0 1 s" bsscfg:sup_wpa" self >iovar-cyw43-32x2
           0 $FFFFFFFF s" bsscfg:sup_wpa2_eapver" self >iovar-cyw43-32x2
           0 2500 s" bsscfg:sup_wpa_tmo" self >iovar-cyw43-32x2
 
@@ -406,10 +406,12 @@ begin-module cyw43-control
     :noname ( ssid-info self -- status success? )
       
       event-message-size [: { ssid-info self event }
-        
+
+        self clear-cyw43-events
+
         \ Enable events before joining so we don't lose any
-        EVENT_SET_SSID self cyw43-core enable-cyw43-event
-        EVENT_AUTH self cyw43-core enable-cyw43-event
+        EVENT_SET_SSID self enable-cyw43-event
+        EVENT_AUTH self enable-cyw43-event
         
         \ Set ssid
         ssid-info ssid-info-size 0 0 ioctl-set IOCTL_CMD_SET_SSID 0
@@ -418,23 +420,29 @@ begin-module cyw43-control
         0 0 { auth-status status }
 
         begin
-          event self cyw43-core get-cyw43-event
-          event emsg-event-type @ EVENT_AUTH =
-          event emsg-status @ ESTATUS_SUCCESS = and if
-            event emsg-status @ to auth-status
+          event self get-cyw43-event
+
+          cr ." event-type: " event evt-event-type @ h.8
+          ."  status: " event evt-status @ h.8
+          
+          event evt-event-type @ EVENT_AUTH =
+          event evt-status @ ESTATUS_SUCCESS = and if
+            event evt-status @ to auth-status
             false
           else
-            event emsg-event-type @ EVENT_SET_SSID = if
-              event emsg-status @ to status
+            event evt-event-type @ EVENT_SET_SSID = if
+              event evt-status @ to status
               true
             else
               false
             then
           then
         until
+
+        cr ." got response"
         
-        self cyw43-core disable-all-cyw43-events
-        self cyw43-core clear-cyw43-events
+        self disable-all-cyw43-events cr ." disabled all events "
+        self clear-cyw43-events cr ." cleared event queue"
 
         status ESTATUS_SUCCESS = if
           cyw43-link-up self cyw43-link-state !
@@ -585,8 +593,8 @@ begin-module cyw43-control
         EVENT_PROBREQ_MSG_RX events cyw43-events::disable-cyw43-event
         EVENT_PROBRESP_MSG events cyw43-events::disable-cyw43-event
         EVENT_ROAM events cyw43-events::disable-cyw43-event
-        events cyw43-event-mask event-mask-size s" bsscfg:event_msgs"
-        self >iovar-cyw43
+        events cyw43-events::cyw43-event-mask event-mask-size
+        s" bsscfg:event_msgs" self >iovar-cyw43
         wait-a-moment
       ;] with-object
 
