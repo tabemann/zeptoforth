@@ -21,7 +21,8 @@
 begin-module cyw43-test
   
   oo import
-  cyw43-runner import
+  cyw43-control import
+  armv6m import
   
   23 constant pwr-pin
   24 constant dio-pin
@@ -32,14 +33,44 @@ begin-module cyw43-test
   0 constant sm-index
   pio::PIO0 constant pio-instance
   
-  <cyw43-runner> class-size buffer: my-cyw43-runner
+  <cyw43-control> class-size buffer: my-cyw43-control
+  
+  1500 constant mtu-size
+  mtu-size cell align aligned-buffer: frame
+  
+  : rev16 ( h -- h' ) code[ r6 r6 rev16_,_ ]code ;
   
   : init-test ( -- )
     dma-pool::init-dma-pool
-    cyw43-fw::data cyw43-fw::size pwr-pin clk-pin dio-pin cs-pin pio-addr sm-index pio-instance
-    <cyw43-runner> my-cyw43-runner init-object
-    my-cyw43-runner init-cyw43-runner
-    my-cyw43-runner run-cyw43
+    cyw43-clm::data cyw43-clm::size cyw43-fw::data cyw43-fw::size
+    pwr-pin clk-pin dio-pin cs-pin pio-addr sm-index pio-instance
+    <cyw43-control> my-cyw43-control init-object
+    my-cyw43-control init-cyw43
+  ;
+
+  : mac. { addr -- }
+    6 0 ?do addr i + c@ h.2 i 5 <> if ." :" then loop
+  ;
+  
+  : ethernet-header. { addr -- }
+    cr ." destination MAC: " addr cyw43-structs::ethh-destination-mac mac.
+    cr ." source MAC: " addr cyw43-structs::ethh-source-mac mac.
+    cr ." ethernet type " addr cyw43-structs::ethh-ether-type h@ rev16 h.4
+  ;
+  
+  : receive-data
+    begin key? not while
+      frame cyw43-test::my-cyw43-control cyw43-control::get-cyw43-rx { bytes }
+      cr ." bytes: " bytes .
+      frame ethernet-header.
+      frame frame bytes + dump
+    repeat
+  ;
+
+  : run-test { D: ssid D: pass -- }
+    init-test
+    ssid pass my-cyw43-control join-cyw43-wpa2
+    receive-data
   ;
 
 end-module
