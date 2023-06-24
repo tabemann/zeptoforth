@@ -43,7 +43,7 @@ begin-module cyw43-structs
     hfield: sdpcmh-len-inv
     \ Rx/Tx sequence number
     cfield: sdpcmh-sequence
-    \  4 MSB Channel number, 4 LSB arbitrary flag
+    \ 4 MSB Channel number, 4 LSB arbitrary flag
     cfield: sdpcmh-channel-and-flags
     \ Length of next data frame, reserved for Tx
     cfield: sdpcmh-next-length

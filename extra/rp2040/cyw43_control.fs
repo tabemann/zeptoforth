@@ -28,14 +28,8 @@ begin-module cyw43-control
   cyw43-ioctl import
   cyw43-runner import
   
-  \ Unexpected ioctl data length exception
-  : x-unexpected-ioctl-resp-len ( -- ) ." unexpected ioctl response length" cr ;
-
   \ clmload fialed
   : x-clmload-failed ( -- ) ." clmload failed" cr ;
-
-  \ Unexpected MAC address length
-  : x-unexpected-mac-addr-len ( -- ) ." unexpected MAC address length" cr ;
 
   \ Out of range GPIO
   : x-out-of-range-gpio ( -- ) ." out of range GPIO" cr ;
@@ -56,6 +50,9 @@ begin-module cyw43-control
   \ Scratchpad size
   cyw43-download-chunk-size 8 + download-header-size + cell align
   constant cyw43-scratch-size
+
+  \ Wait a moment
+  : wait-a-moment ( -- ) 100 ms ;
   
   \ CYW43 control class
   <object> begin-class <cyw43-control>
@@ -208,7 +205,7 @@ begin-module cyw43-control
       self cyw43-core init-cyw43-runner
       self cyw43-core run-cyw43
 
-      100 ms
+      wait-a-moment
       
       \ Load the CLM
       self load-cyw43-clm
@@ -221,8 +218,7 @@ begin-module cyw43-control
 
       cr ." Getting MAC address..."
       
-      self cyw43-mac-addr 6 s" cur_etheraddr" self iovar-cyw43>
-      6 = averts x-unexpected-mac-addr-len
+      self cyw43-mac-addr 6 s" cur_etheraddr" self iovar-cyw43> drop
       cr ." MAC address: "
       6 0 ?do self cyw43-mac-addr i + c@ h.2 i 5 <> if ." :" then loop
 
@@ -232,24 +228,32 @@ begin-module cyw43-control
       cr ." Set antenna to chip antenna"
       
       0 IOCTL_CMD_ANTDIV 0 self >ioctl-cyw43-32
+      cr ." IOCTL_CMD_ANTDIV=0" \ DEBUG
 
-      0 s" buf:txglom" self >iovar-cyw43-32
-      100 ms
+      
+      0 s" bus:txglom" self >iovar-cyw43-32
+      cr ." bus:txglom=0" \ DEBUG
+      
+      wait-a-moment
       8 s" ampdu_ba_wsize" self >iovar-cyw43-32
-      100 ms
+      cr ." ampdu_ba_wsize=8" \ DEBUG
+      
+      wait-a-moment
       4 s" ampdu_mpdu" self >iovar-cyw43-32
-      100 ms
+      cr ." ampdu_mpdu=4" \ DEBUG
+      
+      wait-a-moment
 
       self disable-spammy-cyw43-events
       
       \ set wifi up
       cr ." Set wifi up"
       0 0 0 0 ioctl-set IOCTL_CMD_UP 0 self ioctl-cyw43
-      100 ms
+      wait-a-moment
 
       1 110 0 self >ioctl-cyw43-32 \ SET_GMODE = auto
       0 142 0 self >ioctl-cyw43-32 \ SET_BAND = any
-      100 ms
+      wait-a-moment
 
     ; define init-cyw43
 
@@ -302,7 +306,7 @@ begin-module cyw43-control
           0 $FFFFFFFF s" bsscfg:sup_wpa2_eapver" self >iovar-cyw43-32x2
           0 2500 s" bsscfg:sup_wpa_tmo" self >iovar-cyw43-32x2
 
-          100 ms
+          wait-a-moment
 
           pass-bytes pass-info pi-len h!
           1 pass-info pi-flags h!
@@ -486,7 +490,7 @@ begin-module cyw43-control
           \ wpa_auth = WPA2_AUTH_PSK | WPA_AUTH_PSK
           0 $0084 s" bsscfg:wpa_auth" self >iovar-cyw43-32x2
 
-          100 ms
+          wait-a-moment
 
           pass-addr pass-bytes self passphrase-info-size [:
             { pass-addr pass-bytes self pass-info }
@@ -524,7 +528,7 @@ begin-module cyw43-control
         bytes cyw43-download-chunk-size min { len }
 
         \ Set the variable to be set
-        s\" clmload\x00" self cyw43-scratch-buf 8 move
+        s\" clmload\x00" self cyw43-scratch-buf swap move
 
         \ Populate the download header
         self cyw43-scratch-buf 8 + { dh-header }
@@ -538,7 +542,7 @@ begin-module cyw43-control
         addr dh-header download-header-size + len move
 
         \ Download the chunk
-        self cyw43-scratch-buf bytes [ 8 download-header-size + ] literal + 0 0
+        self cyw43-scratch-buf len [ 8 download-header-size + ] literal + 0 0
         ioctl-set IOCTL_CMD_SET_VAR 0 self ioctl-cyw43 drop
         
         len +to addr
@@ -566,7 +570,7 @@ begin-module cyw43-control
       ;] with-aligned-allot
 
       \ set country takes some time, next ioctls fail if we don't wait
-      100 ms
+      wait-a-moment
     ; define set-cyw43-country
 
     \ Disable spammy events
@@ -575,15 +579,15 @@ begin-module cyw43-control
       \ Disable spammy uninteresting events
       self <cyw43-event-mask> [: { self events }
         cr ." Disable spammy uninteresting events"
-        EVENT_RADIO events disable-cyw43-event
-        EVENT_IF events disable-cyw43-event
-        EVENT_PROBREQ_MSG events disable-cyw43-event
-        EVENT_PROBREQ_MSG_RX events disable-cyw43-event
-        EVENT_PROBRESP_MSG events disable-cyw43-event
-        EVENT_ROAM events disable-cyw43-event
+        EVENT_RADIO events cyw43-events::disable-cyw43-event
+        EVENT_IF events cyw43-events::disable-cyw43-event
+        EVENT_PROBREQ_MSG events cyw43-events::disable-cyw43-event
+        EVENT_PROBREQ_MSG_RX events cyw43-events::disable-cyw43-event
+        EVENT_PROBRESP_MSG events cyw43-events::disable-cyw43-event
+        EVENT_ROAM events cyw43-events::disable-cyw43-event
         events cyw43-event-mask event-mask-size s" bsscfg:event_msgs"
         self >iovar-cyw43
-        100 ms
+        wait-a-moment
       ;] with-object
 
     ; define disable-spammy-cyw43-events
@@ -601,7 +605,7 @@ begin-module cyw43-control
     
     \ Set a variable with an ioctl
     :noname { buf-addr buf-size name-addr name-size self -- }
-      name-addr name-size buf-addr buf-size self
+      buf-addr buf-size name-addr name-size self
       name-size buf-size + 1+ 64 max [:
         { buf-addr buf-size name-addr name-size self ioctl-buf }
         name-addr ioctl-buf name-size move
@@ -614,7 +618,7 @@ begin-module cyw43-control
 
     \ Get a variable with an ioctl
     :noname { buf-addr buf-size name-addr name-size self -- resp-len }
-      name-addr name-size buf-addr buf-size self
+      buf-addr buf-size name-addr name-size self
       name-size 1+ buf-size max 64 max [:
         { buf-addr buf-size name-addr name-size self ioctl-buf }
         name-addr ioctl-buf name-size move
@@ -638,9 +642,10 @@ begin-module cyw43-control
     ; define >iovar-cyw43-32x2
 
     \ Get a 32-bit variable with an ioctl
-    :noname { W^ val name-addr name-size self -- }
-      val cell name-addr name-size self iovar-cyw43>
-      cell = averts x-unexpected-ioctl-resp-len
+    :noname { name-addr name-size self -- val }
+      0 { W^ val }
+      val cell name-addr name-size self iovar-cyw43> drop
+      val @
     ; define iovar-cyw43-32>
 
   end-implement

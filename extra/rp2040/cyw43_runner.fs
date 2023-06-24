@@ -249,22 +249,9 @@ begin-module cyw43-runner
     \ Clear event queue
     method clear-cyw43-events ( self -- )
     
-    \ Poll sending an ioctl
-    method poll-cyw43-ioctl
-    ( tx-addr tx-bytes rx-addr rx-bytes kind cmd iface self -- success? )
-
     \ Block on an ioctl operation
     method block-cyw43-ioctl
     ( tx-addr tx-bytes rx-addr rx-bytes kind cmd iface self -- actual-bytes )
-    
-    \ Wait on ioctl completion
-    method wait-cyw43-ioctl ( self -- actual-bytes )
-
-    \ Test whether an ioctl is done
-    method cyw43-ioctl-done? ( self -- done? )
-
-    \ Cancel an ioctl (remember to wait on it to clear its state)
-    method cancel-cyw43-ioctl ( self -- )
 
   end-class
 
@@ -588,6 +575,8 @@ begin-module cyw43-runner
     \ Handle CYW43 received packet
     :noname { addr bytes self -- }
 
+      cr ." initial packet len: " bytes .
+
       \ Validate the SDPCM header
       bytes sdpcm-header-size < if
         cr ." packet too short, len=" bytes . exit
@@ -741,7 +730,7 @@ begin-module cyw43-runner
       \ Contruct a CDC header
       sdpcm sdpcm-header-size + { cdc }
       cmd cdc cdch-cmd !
-      buf-size cdc cdch-len !
+      buf-size $FFFF and cdc cdch-len !
       kind iface 12 lshift or cdc cdch-flags h!
       self cyw43-ioctl-id h@ cdc cdch-id h!
       0 cdc cdch-status !
@@ -756,6 +745,8 @@ begin-module cyw43-runner
       \ Send the packet
       self cyw43-scratch-buf total-len 4 align self cyw43-bus >cyw43-wlan
 
+      cr ." SENT IOCTL LEN: " total-len . \ DEBUG
+      
       \ Mark the packet as having been sent
       self cyw43-ioctl-state mark-cyw43-ioctl-sent
       
@@ -982,32 +973,11 @@ begin-module cyw43-runner
       ;] over cyw43-event-lock with-lock
     ; define clear-cyw43-events
 
-    \ Poll sending an ioctl
-    :noname
-      ( tx-addr tx-bytes rx-addr rx-bytes kind cmd iface self -- success? )
-      cyw43-ioctl-state cyw43-ioctl::poll-cyw43-ioctl
-    ; define poll-cyw43-ioctl
-
     \ Block on an ioctl operation
     :noname
       ( tx-addr tx-bytes rx-addr rx-bytes kind cmd iface self -- actual-bytes )
       cyw43-ioctl-state cyw43-ioctl::block-cyw43-ioctl
     ; define block-cyw43-ioctl
-    
-    \ Wait on ioctl completion
-    :noname ( self -- actual-bytes )
-      cyw43-ioctl-state cyw43-ioctl::wait-cyw43-ioctl
-    ; define wait-cyw43-ioctl
-
-    \ Test whether an ioctl is done
-    :noname ( self -- done? )
-      cyw43-ioctl-state cyw43-ioctl::cyw43-ioctl-done?
-    ; define cyw43-ioctl-done?
-
-    \ Cancel an ioctl (remember to wait on it to clear its state)
-    :noname ( self -- )
-      cyw43-ioctl-state cyw43-ioctl::cancel-cyw43-ioctl
-    ; define cancel-cyw43-ioctl
 
   end-implement
   

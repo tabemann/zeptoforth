@@ -344,13 +344,14 @@ begin-module cyw43-events
     :noname { self -- }
       self <object>->new
       0 self cyw43-event-mask emsk-iface !
-      self cyw43-event-mask emsk-events event-mask-bytes $FF fill
+      self disable-all-cyw43-events
+      EVENT_LAST 0 ?do i self enable-cyw43-event loop
     ; define new
 
     \ Enable an event
     :noname { event self -- }
       event validate-event
-      event 7 and self cyw43-event-mask emsk-events event 3 rshift + cbis!
+      event 7 and bit self cyw43-event-mask emsk-events event 3 rshift + cbis!
     ; define enable-cyw43-event
 
     \ Enable multiple events
@@ -362,7 +363,7 @@ begin-module cyw43-events
     \ Disable an event
     :noname { event self -- }
       event validate-event
-      event 7 and self cyw43-event-mask emsk-events event 3 rshift + cbic!
+      event 7 and bit self cyw43-event-mask emsk-events event 3 rshift + cbic!
     ; define disable-cyw43-event
 
     \ Disable all events
@@ -379,7 +380,7 @@ begin-module cyw43-events
     \ Is an event enabled
     :noname { event self -- enabled? }
       event validate-event
-      event 7 and self cyw43-event-mask emsk-events event 3 rshift + cbit@
+      event 7 and bit self cyw43-event-mask emsk-events event 3 rshift + cbit@
     ; define cyw43-event-enabled?
     
   end-implement
