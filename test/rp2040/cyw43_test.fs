@@ -165,7 +165,7 @@ begin-module cyw43-test
     cr ." fragment offset: " fragment-offset .
     cr ." ttl: " addr ipv4-ttl c@ .
     cr ." protocol: " addr ipv4-protocol c@ .
-    cr ." header checksum: " addr ipv4-header-checksum h@ rev16 dup h.4
+    cr ." header checksum: " addr ipv4-header-checksum h@ rev16 h.4
     addr compute-checksum ."  (computed: " h.4 ." )"
     cr ." source IP address: " addr ipv4-src-addr ip.
     cr ." destination IP address: " addr ipv4-dest-addr ip.
