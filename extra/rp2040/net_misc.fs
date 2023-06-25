@@ -126,5 +126,13 @@ begin-module net-misc
       not $FFFF and
     ;] with-aligned-allot
   ;
+
+  \ Make an IPv4 address
+  : make-ipv4-addr ( addr0 addr1 addr2 addr3 -- addr )
+    $FF and
+    swap $FF and 8 lshift or
+    swap $FF and 16 lshift or
+    swap $FF and 24 lshift or
+  ;
   
 end-module

@@ -27,9 +27,6 @@ begin-module net-diagnostic
   \ The parent diagnostic handler
   <net-handler> begin-class <diag-handler>
 
-    \ Handle a frame
-    method handle-net-frame ( addr bytes self -- )
-
     \ Match a frame type
     method diag-applies? ( addr bytes self -- applies? )
 
@@ -51,7 +48,7 @@ begin-module net-diagnostic
         cr ." source MAC: " addr ethh-source-mac mac.
         cr ." ethernet type " addr ethh-ether-type h@ rev16 h.4
 
-        addr byte self display-diag
+        addr bytes self display-diag
 
         addr addr bytes + dump
 
@@ -145,8 +142,8 @@ begin-module net-diagnostic
       cr ." protocol: " addr ipv4-protocol c@ .
       cr ." header checksum: " addr ipv4-header-checksum h@ rev16 h.4
       addr compute-ipv4-header-checksum ."  (computed: " h.4 ." )"
-      cr ." source IP address: " addr ipv4-src-addr unaligned@ rev ip.
-      cr ." destination IP address: " addr ipv4-dest-addr unaligned@ rev ip.
+      cr ." source IP address: " addr ipv4-src-addr unaligned@ rev ipv4.
+      cr ." destination IP address: " addr ipv4-dest-addr unaligned@ rev ipv4.
     ; define display-diag
 
   end-implement

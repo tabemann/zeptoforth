@@ -118,6 +118,7 @@ begin-module net
 
     \ Handle a frame
     :noname { addr bytes self -- }
+
       addr ethh-ether-type h@ [ ETHER_TYPE_ARP rev16 ] literal = if
         ethernet-header-size +to addr
         [ ethernet-header-size negate ] literal +to bytes
@@ -146,7 +147,7 @@ begin-module net
         [ ETHER_TYPE_IPV4 rev16 ] literal arp-buf arp-ptype h!
         6 arp-buf arp-hlen c!
         4 arp-buf arp-plen c!
-        [ OPER_RESPONSE rev16 ] literal arp-buf arp-oper h!
+        [ OPER_REPLY rev16 ] literal arp-buf arp-oper h!
         self arp-interface @ mac-addr@ arp-buf arp-sha 6 move
         self arp-interface @ ipv4-addr@ rev arp-buf arp-spa !
         addr arp-sha arp-buf arp-tha 6 move

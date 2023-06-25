@@ -23,6 +23,7 @@ begin-module net-process
   oo import
   task import
   cyw43-control import
+  net-misc import
 
   \ The frame handler class
   <object> begin-class <net-handler>
@@ -111,7 +112,7 @@ begin-module net-process
         repeat
         handler current next-net-handler!
       then
-    ;
+    ; define add-net-handler
 
     \ Process a frame
     :noname { bytes self -- }
