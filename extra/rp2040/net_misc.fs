@@ -25,6 +25,21 @@ begin-module net-misc
   \ The MTU size
   1500 constant mtu-size
 
+  \ The maximum fragment buffer size
+  1500 constant fragment-buf-size
+
+  \ The maximum IP payload size
+  1500 constant max-payload-size
+
+  \ The maximum fragment unit count
+  fragment-buf-size 8 align 8 /  constant max-fragment-units
+
+  \ Maximum endpoint count
+  4 constant max-endpoints
+
+  \ Maximum number of addresses to map
+  16 constant max-addresses
+
   \ The Ethernet header structure
   begin-structure ethernet-header-size
     6 +field ethh-destination-mac
@@ -32,12 +47,32 @@ begin-module net-misc
     hfield: ethh-ether-type
   end-structure
 
-  \ Some Ethernet constants
+  \ Some constants
   $0800 constant ETHER_TYPE_IPV4
   $0806 constant ETHER_TYPE_ARP
   $0001 constant HTYPE_ETHERNET
   $0001 constant OPER_REQUEST
   $0002 constant OPER_REPLY
+
+  \ IP flags
+  1 constant DF
+  2 constant MF
+
+  \ IP protocols
+  6 constant PROTOCOL_TCP
+  17 constant PROTOCOL_UDP
+
+  \ ICMP types
+  0 constant ICMP_TYPE_ECHO_REPLY
+  8 constant ICMP_TYPE_ECHO_REQUEST
+
+  \ ICMP codes
+  0 constant ICMP_CODE_UNUSED
+
+  \ Endpoint bitmask
+  0 bit constant endpoint-active
+  1 bit constant endpoint-connected
+  2 bit constant endpoint-rx-pending
 
   \ IPv4 ARP header structure
   begin-structure arp-ipv4-size
@@ -65,6 +100,33 @@ begin-module net-misc
     field: ipv4-src-addr
     field: ipv4-dest-addr
   end-structure
+
+  \ UDP header structure
+  begin-structure udp-header-size
+    hfield: udp-src-port
+    hfield: udp-dest-port
+    hfield: udp-total-len
+    hfield: udp-checksum
+  end-structure
+
+  \ ICMP header structure
+  begin-structure icmp-header-size
+    cfield: icmp-type
+    cfield: icmp-code
+    hfield: icmp-checksum
+    field: icmp-rest-of-header
+  end-structure
+
+  \ Get ICMP size for IPv4 packet
+  : icmp-error-size { addr bytes -- size }
+    addr ipv4-version-ihl c@ $F and 4 * { head-copy-size }
+    bytes head-copy-size > if
+      bytes head-copy-size - 8 min head-copy-size +
+    else
+      head-copy-size
+    then
+    icmp-header-size +
+  ;
 
   \ Reverse byte order in a 32-bit value
   : rev ( x -- x' ) code[ r6 r6 rev_,_ ]code ;
@@ -114,13 +176,12 @@ begin-module net-misc
     bytes cyw43-structs::ethernet-header-size - 0 max
   ;
 
-  \ Compute an IPv4 header checksum
-  : compute-ipv4-header-checksum ( addr -- h )
-    60 [: { addr buf }
-      addr ipv4-version-ihl c@ $F and { ihl }
-      addr buf ihl cells move
-      00 buf ipv4-header-checksum h!
-      0 buf ihl cells + buf ?do
+  \ Compute an Internet header checksum
+  : compute-inet-checksum ( addr bytes zero-offset -- h )
+    over [: { addr bytes zero-offset buf }
+      addr buf bytes move
+      0 buf zero-offset + h!
+      0 buf bytes + buf ?do
         i h@ rev16 + dup 16 rshift + $FFFF and
       2 +loop
       not $FFFF and
@@ -133,6 +194,24 @@ begin-module net-misc
     swap $FF and 8 lshift or
     swap $FF and 16 lshift or
     swap $FF and 24 lshift or
+  ;
+
+  \ Get whether an IPv4 packet is fragmented
+  : ipv4-fragment? ( addr -- fragmented? )
+    ipv4-flags-fragment-offset h@ rev16
+    dup $1FFF and { offset }
+    13 rshift { flags }
+    flags MF and 0<> offset 0<> or
+  ;
+
+  \ Load a MAC address as a double
+  : mac@ { addr -- D: mac-addr }
+    addr 2 + unaligned@ rev addr h@ rev16
+  ;
+
+  \ Store a double as a MAC address
+  : mac! { D: mac-addr addr -- }
+    mac-addr rev16 addr h! rev addr 2 + unaligned!
   ;
   
 end-module

@@ -141,7 +141,8 @@ begin-module net-diagnostic
       cr ." ttl: " addr ipv4-ttl c@ .
       cr ." protocol: " addr ipv4-protocol c@ .
       cr ." header checksum: " addr ipv4-header-checksum h@ rev16 h.4
-      addr compute-ipv4-header-checksum ."  (computed: " h.4 ." )"
+      addr ihl 4 * 0 ipv4-header-checksum compute-inet-checksum
+      ."  (computed: " h.4 ." )"
       cr ." source IP address: " addr ipv4-src-addr unaligned@ rev ipv4.
       cr ." destination IP address: " addr ipv4-dest-addr unaligned@ rev ipv4.
     ; define display-diag

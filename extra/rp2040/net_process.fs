@@ -68,7 +68,7 @@ begin-module net-process
     
   end-implement
 
-  \ frame processor class
+  \ Frame processor class
   <object> begin-class <net-process>
 
     \ The CYW43 driver control
