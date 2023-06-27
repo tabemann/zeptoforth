@@ -26,7 +26,7 @@ begin-module net-test
   frame-process import
   net import
   net-diagnostic import
-  ip-process import
+  endpoint-process import
   
   23 constant pwr-pin
   24 constant dio-pin
@@ -44,7 +44,7 @@ begin-module net-test
   <ipv4-diag-handler> class-size buffer: my-ipv4-diag-handler
   <arp-handler> class-size buffer: my-arp-handler
   <ip-handler> class-size buffer: my-ip-handler
-  <ip-process> class-size buffer: my-ip-process
+  <endpoint-process> class-size buffer: my-endpoint-process
   
   : init-test ( -- )
     dma-pool::init-dma-pool
@@ -64,13 +64,13 @@ begin-module net-test
     my-ipv4-diag-handler my-frame-process add-frame-handler
     my-arp-handler my-frame-process add-frame-handler
     my-ip-handler my-frame-process add-frame-handler
-    my-interface <ip-process> my-ip-process init-object
+    my-interface <endpoint-process> my-endpoint-process init-object
   ;
 
   : run-test { D: ssid D: pass -- }
     init-test
     ssid pass my-cyw43-control join-cyw43-wpa2
-    my-ip-process run-ip-process
+    my-endpoint-process run-endpoint-process
     my-frame-process run-frame-process
   ;
 

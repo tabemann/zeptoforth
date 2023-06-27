@@ -790,7 +790,6 @@ begin-module net
 
     \ Handle a frame
     :noname { addr bytes self -- }
-      cr ." IP-HANDLER BEFORE: " .s
       addr ethh-ether-type h@ [ ETHER_TYPE_IPV4 rev16 ] literal = if
         addr ethh-source-mac mac@ { D: src-mac-addr }
         ethernet-header-size +to addr
@@ -815,7 +814,6 @@ begin-module net
             then
           then
         then
-        ."  AFTER: " .s
       then
     ; define handle-frame
 
@@ -843,7 +841,6 @@ begin-module net
 
     \ Handle a frame
     :noname { addr bytes self -- }
-      cr ." ARP-HANDLER BEFORE: " .s
       addr ethh-ether-type h@ [ ETHER_TYPE_ARP rev16 ] literal = if
         ethernet-header-size +to addr
         [ ethernet-header-size negate ] literal +to bytes
@@ -863,7 +860,6 @@ begin-module net
           then
         then
       then
-      ."  AFTER: " .s
     ; define handle-frame
 
     \ Send an ARP response

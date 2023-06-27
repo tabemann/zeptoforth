@@ -23,5 +23,5 @@
 #include extra/rp2040/frame_process.fs
 #include extra/rp2040/net.fs
 #include extra/rp2040/net_diagnostic.fs
-#include extra/rp2040/ip_process.fs
+#include extra/rp2040/endpoint_process.fs
 
