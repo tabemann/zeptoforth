@@ -40,6 +40,9 @@ begin-module net-misc
   \ Maximum number of addresses to map
   16 constant max-addresses
 
+  \ Maximum resolution attempts
+  10 constant max-resolve-attempts
+
   \ The Ethernet header structure
   begin-structure ethernet-header-size
     6 +field ethh-destination-mac
@@ -73,6 +76,7 @@ begin-module net-misc
   0 bit constant endpoint-active
   1 bit constant endpoint-connected
   2 bit constant endpoint-rx-pending
+  3 bit constant endpoint-udp
 
   \ IPv4 ARP header structure
   begin-structure arp-ipv4-size

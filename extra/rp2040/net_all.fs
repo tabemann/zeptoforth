@@ -20,6 +20,6 @@
 
 #include extra/rp2040/cyw43_all.fs
 #include extra/rp2040/net_misc.fs
-#include extra/rp2040/net_process.fs
+#include extra/rp2040/frame_process.fs
 #include extra/rp2040/net.fs
 #include extra/rp2040/net_diagnostic.fs

@@ -18,73 +18,73 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-begin-module net-process
+begin-module frame-process
 
   oo import
   task import
-  cyw43-control import
+  frame-interface import
   net-misc import
 
   \ The frame handler class
-  <object> begin-class <net-handler>
+  <object> begin-class <frame-handler>
 
     \ The next frame handler
-    cell member next-net-handler
+    cell member next-frame-handler
 
     \ Get the next frame handler
-    method next-net-handler@ ( self -- handler | 0 )
+    method next-frame-handler@ ( self -- handler | 0 )
 
     \ Set the next frame handler
-    method next-net-handler! ( handler self -- )
+    method next-frame-handler! ( handler self -- )
 
     \ Handle a frame
-    method handle-net-frame ( addr bytes self -- )
+    method handle-frame ( addr bytes self -- )
     
   end-class
 
   \ Implement the frame handler class
-  <net-handler> begin-implement
+  <frame-handler> begin-implement
 
     \ Constructor
     :noname { self -- }
       self <object>->new
-      0 self next-net-handler !
+      0 self next-frame-handler !
     ; define new
 
     \ Get the next frame handler
     :noname ( self -- handler | 0 )
-      next-net-handler @
-    ; define next-net-handler@
+      next-frame-handler @
+    ; define next-frame-handler@
 
     \ Set the next frame handler
     :noname ( handler self -- )
-      next-net-handler !
-    ; define next-net-handler!
+      next-frame-handler !
+    ; define next-frame-handler!
 
     \ Handle a frame
     :noname ( addr bytes self -- )
       2drop drop
-    ; define handle-net-frame
+    ; define handle-frame
     
   end-implement
 
   \ Frame processor class
-  <object> begin-class <net-process>
+  <object> begin-class <frame-process>
 
-    \ The CYW43 driver control
-    cell member net-control
+    \ The frame interface
+    cell member in-frame-interface
 
     \ The first frame handler
-    cell member first-net-handler
+    cell member first-frame-handler
 
     \ The MTU buffer
     net-misc::mtu-size cell align member mtu-buf
 
     \ Add a frame handler
-    method add-net-handler ( handler self -- )
+    method add-frame-handler ( handler self -- )
 
     \ Process a frame
-    method process-net-frame ( bytes self -- )
+    method process-frame ( bytes self -- )
 
     \ Run frame processor
     method run-process-net ( self -- )
@@ -92,44 +92,44 @@ begin-module net-process
   end-class
 
   \ Implement the frame processor class
-  <net-process> begin-implement
+  <frame-process> begin-implement
 
     \ Constructor
-    :noname { control self -- }
+    :noname { frame-interface self -- }
       self <object>->new
-      control self net-control !
-      0 self first-net-handler !
+      frame-interface self in-frame-interface !
+      0 self first-frame-handler !
     ; define new
 
     \ Add a frame handler
     :noname { handler self -- }
-      self first-net-handler @ { current }
+      self first-frame-handler @ { current }
       current 0= if
-        handler self first-net-handler !
+        handler self first-frame-handler !
       else
-        begin current next-net-handler@ while
-          current next-net-handler@ to current
+        begin current next-frame-handler@ while
+          current next-frame-handler@ to current
         repeat
-        handler current next-net-handler!
+        handler current next-frame-handler!
       then
-    ; define add-net-handler
+    ; define add-frame-handler
 
     \ Process a frame
     :noname { bytes self -- }
-      self first-net-handler @ { current }
+      self first-frame-handler @ { current }
       begin current while
-        self mtu-buf bytes current handle-net-frame
-        current next-net-handler@ to current
+        self mtu-buf bytes current handle-frame
+        current next-frame-handler@ to current
       repeat
-    ; define process-net-frame
+    ; define process-frame
 
     \ Run frame processor
     :noname { self -- }
       self 1 [: { self }
         begin
-          self mtu-buf self net-control @ get-cyw43-rx
-          dup ethernet-header-size >= if
-            self process-net-frame
+          self mtu-buf self in-frame-interface @ get-rx-frame
+          dup etherframe-header-size >= if
+            self process-frame
           else
             drop
           then

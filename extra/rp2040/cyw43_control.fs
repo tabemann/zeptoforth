@@ -69,9 +69,6 @@ begin-module cyw43-control
     \ CYW43 CLM firmware size
     cell member cyw43-clm-size
 
-    \ MAC address
-    6 cell align member cyw43-mac-addr
-
     \ Link state
     cell member cyw43-link-state
 
@@ -116,14 +113,8 @@ begin-module cyw43-control
     \ Disable all events
     method disable-all-cyw43-events ( self -- )
     
-    \ Dequeue received data
-    method get-cyw43-rx ( addr self -- bytes )
-
-    \ Poll for received data
-    method poll-cyw43-rx ( addr self -- bytes|0 )
-
-    \ Enqueue data to transmit
-    method put-cyw43-tx ( addr bytes self -- )
+    \ Get the CYW43 frame interface
+    method cyw43-frame-interface@ ( self -- interface )
     
     \ Dequeue event message
     method get-cyw43-event ( addr self -- )
@@ -190,7 +181,6 @@ begin-module cyw43-control
       \ Set the locals
       self cyw43-clm-size !
       self cyw43-clm-addr !
-      6 0 ?do 0 self cyw43-mac-addr i + c! loop
       cyw43-link-down self cyw43-link-state !
 
       \ Initialize our lock
@@ -217,10 +207,14 @@ begin-module cyw43-control
       1 s" apsta" self >iovar-cyw43-32
 
       cr ." Getting MAC address..."
-      
-      self cyw43-mac-addr 6 s" cur_etheraddr" self iovar-cyw43> drop
-      cr ." MAC address: "
-      6 0 ?do self cyw43-mac-addr i + c@ h.2 i 5 <> if ." :" then loop
+
+      self 2 cells [: { self buf }
+        buf 6 s" cur_etheraddr" self iovar-cyw43> drop
+        cr ." MAC address: "
+        6 0 ?do buf i + c@ h.2 i 5 <> if ." :" then loop
+        buf 2 + unaligned@ rev buf h@ rev16
+        self cyw43-core cyw43-runner::cyw43-frame-interface@ mac-addr!
+      ;] aligned-allot
 
       self set-cyw43-country
 
@@ -372,20 +366,10 @@ begin-module cyw43-control
       cyw43-core cyw43-runner::disable-all-cyw43-events
     ; define disable-all-cyw43-events
     
-    \ Dequeue received data
-    :noname ( addr self -- bytes )
-      cyw43-core cyw43-runner::get-cyw43-rx
-    ; define get-cyw43-rx
-
-    \ Poll for received data
-    :noname ( addr self -- bytes|0 )
-      cyw43-core cyw43-runner::poll-cyw43-rx
-    ; define poll-cyw43-rx
-
-    \ Enqueue data to transmit
-    :noname ( addr bytes self -- )
-      cyw43-core cyw43-runner::put-cyw43-tx
-    ; define put-cyw43-tx
+    \ Get the CYW43 frame interface
+    :noname ( self -- interface )
+      cyw43-core cyw43-runner:cyw43-frame-interface@
+    ; define cyw43-frame-interface@
     
     \ Dequeue event message
     :noname ( addr self -- )

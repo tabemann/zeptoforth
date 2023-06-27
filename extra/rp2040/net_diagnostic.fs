@@ -21,11 +21,11 @@
 begin-module net-diagnostic
 
   oo import
-  net-process import
+  frame-process import
   net-misc import
 
   \ The parent diagnostic handler
-  <net-handler> begin-class <diag-handler>
+  <frame-handler> begin-class <diag-handler>
 
     \ Match a frame type
     method diag-applies? ( addr bytes self -- applies? )
@@ -54,7 +54,7 @@ begin-module net-diagnostic
 
       then
         
-    ; define handle-net-frame
+    ; define handle-frame
 
     \ Match a frame type
     :noname { addr bytes self -- applies? }

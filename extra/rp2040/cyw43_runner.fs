@@ -27,6 +27,7 @@ begin-module cyw43-runner
   cyw43-bus import
   cyw43-ioctl import
   cyw43-nvram import
+  frame-interface import
   chan import
   lock import
   task import
@@ -113,33 +114,15 @@ begin-module cyw43-runner
     ; define init-cyw43-log
     
   end-implement
-  
-  \ CYW43 runner class
-  <object> begin-class <cyw43-runner>
 
-    \ CYW43 bus
-    <cyw43-bus> class-size member cyw43-bus
+  \ The CYW43 frame interface
+  <frame-interface> begin-class <cyw43-frame-interface>
 
-    \ CYW43 log
-    <cyw43-log> class-size member cyw43-log
-
-    \ CYW43 receive lock
+    \ Receive lock
     lock-size member cyw43-rx-lock
 
-    \ CYW43 transmit lock
+    \ Transmit lock
     lock-size member cyw43-tx-lock
-
-    \ CYW43 event lock
-    lock-size member cyw43-event-lock
-
-    \ CYW43 firmware address
-    cell member cyw43-fw-addr
-
-    \ CYW43 firmware size
-    cell member cyw43-fw-bytes
-
-    \ CYW43 shared memory log buffer
-    cyw43-scratch-size member cyw43-scratch-buf
 
     \ Receive MTU channel
     mtu-size rx-mtu-count chan-size cell align member cyw43-rx-chan
@@ -153,9 +136,176 @@ begin-module cyw43-runner
     \ Transmit size channel
     cell tx-mtu-count chan-size cell align member cyw43-tx-size-chan
 
+    \ The MAC address
+    2 cells member cyw43-mac-addr
+    
+  end-class
+
+  \ Implement the CYW43 frame interface
+  <cyw43-frame-interface> begin-implement
+
+    \ Constructor
+    :noname { self -- }
+      self <frame-interface>->new
+
+      \ Initialize the receive lock
+      self cyw43-rx-lock init-lock
+
+      \ Initialize the transmit lock
+      self cyw43-tx-lock init-lock
+
+      \ Initialize the receive channels
+      mtu-size rx-mtu-count self cyw43-rx-chan init-chan
+      cell rx-mtu-count self cyw43-rx-size-chan init-chan
+
+      \ Initialize the transmit channels
+      mtu-size tx-mtu-count self cyw43-tx-chan init-chan
+      cell tx-mtu-count self cyw43-tx-size-chan init-chan
+
+      \ Initialize the MAC address
+      0. self cyw43-mac-addr 2!
+    ; define new
+    
+    \ Get the MTU size
+    :noname { self -- bytes }
+      mtu-size
+    ; define mtu-size@
+
+    \ Get the MAC address
+    :noname ( self -- D: mac-addr )
+      cyw43-mac-addr 2@
+    ; define mac-addr@
+
+    \ Set the MAC address
+    :noname ( D: mac-addr self -- )
+      cyw43-mac-addr 2!
+    ; define mac-addr!
+    
+    \ Put a received frame
+    :noname { addr bytes self -- }
+      begin
+        addr bytes self [: { addr W^ bytes self }
+          self cyw43-rx-chan chan-full? not if
+            addr bytes @ self cyw43-rx-chan send-chan
+            bytes cell self cyw43-rx-size-chan send-chan
+            true
+          else
+            false
+          then
+        ;] self cyw43-rx-lock with-lock
+        dup not if pause then
+      until
+    ; define put-rx-frame
+
+    \ Get a received frame
+    :noname { addr bytes self -- bytes' }
+      begin
+        addr bytes self [: { addr bytes self }
+          self cyw43-rx-chan chan-empty? not if
+            addr bytes self cyw43-rx-chan recv-chan drop
+            0 { W^ rx-bytes }
+            rx-bytes cell self cyw43-rx-size-chan recv-chan drop
+            rx-bytes @ bytes min
+            true
+          else
+            false
+          then
+        ;] self cyw43-rx-lock with-lock
+        dup not if pause then
+      until
+    ; define get-rx-frame
+
+    \ Poll a received frame
+    :noname ( addr bytes self -- bytes' found? )
+      [: { addr bytes self }
+        self cyw43-rx-chan chan-empty? not if
+          addr bytes self cyw43-rx-chan recv-chan drop
+          0 { W^ rx-bytes }
+          rx-bytes cell self cyw43-rx-size-chan recv-chan drop
+          rx-bytes @ bytes min true
+        else
+          0 false
+        then
+      ;] over cyw43-rx-lock with-lock
+    ; define poll-rx-frame
+
+    \ Put a frame to transmit
+    :noname { addr bytes self -- }
+      begin
+        addr bytes self [: { addr W^ bytes self }
+          self cyw43-tx-chan chan-full? not if
+            addr bytes @ self cyw43-tx-chan send-chan
+            bytes cell self cyw43-tx-size-chan send-chan
+            true
+          else
+            false
+          then
+        ;] self cyw43-tx-lock with-lock
+        dup not if pause then
+      until
+    ; define put-tx-frame
+
+    \ Get a frame to transmit
+    :noname { addr bytes self -- bytes' }
+      begin
+        addr bytes self [: { addr bytes self }
+          self cyw43-tx-chan chan-empty? not if
+            addr bytes self cyw43-tx-chan recv-chan drop
+            0 { W^ tx-bytes }
+            tx-bytes cell self cyw43-tx-size-chan recv-chan drop
+            tx-bytes @ bytes min
+            true
+          else
+            false
+          then
+        ;] self cyw43-tx-lock with-lock
+        dup not if pause then
+      until
+    ; define get-tx-frame
+
+    \ Poll a frame to transmit
+    :noname ( addr bytes self -- bytes' found? )
+      [: { addr bytes self }
+        self cyw43-tx-chan chan-empty? not if
+          addr bytes self cyw43-tx-chan recv-chan drop
+          0 { W^ tx-bytes }
+          tx-bytes cell self cyw43-tx-size-chan recv-chan drop
+          tx-bytes @ bytes min true
+        else
+          0 false
+        then
+      ;] over cyw43-tx-lock with-lock
+    ; define poll-tx-frame
+
+  end-implement
+  
+  \ CYW43 runner class
+  <object> begin-class <cyw43-runner>
+
+    \ CYW43 bus
+    <cyw43-bus> class-size member cyw43-bus
+
+    \ CYW43 log
+    <cyw43-log> class-size member cyw43-log
+
+    \ CYW43 event lock
+    lock-size member cyw43-event-lock
+
+    \ CYW43 firmware address
+    cell member cyw43-fw-addr
+
+    \ CYW43 firmware size
+    cell member cyw43-fw-bytes
+
+    \ CYW43 shared memory log buffer
+    cyw43-scratch-size member cyw43-scratch-buf
+
+    \ CYW43 frame interface
+    <cyw43-frame-interface> class-size member cyw43-frame-interface
+    
     \ Event message channel
     event-message-size event-count chan-size cell align member cyw43-event-chan
-
+    
     \ CYW43 ioctl state
     <cyw43-ioctl> class-size member cyw43-ioctl-state
 
@@ -236,21 +386,9 @@ begin-module cyw43-runner
 
     \ Disable all events
     method disable-all-cyw43-events ( self -- )
-    
-    \ Enqueue received data
-    method put-cyw43-rx ( addr bytes self -- )
 
-    \ Dequeue received data
-    method get-cyw43-rx ( addr self -- bytes )
-
-    \ Poll for received data
-    method poll-cyw43-rx ( addr self -- bytes|0 )
-
-    \ Enqueue data to transmit
-    method put-cyw43-tx ( addr bytes self -- )
-
-    \ Poll for data to transmit
-    method poll-cyw43-tx ( addr self -- bytes|0 )
+    \ Get the CYW43 frame interface
+    method cyw43-frame-interface@ ( self -- interface )
     
     \ Enqueue event message
     method put-cyw43-event ( addr self -- )
@@ -279,22 +417,11 @@ begin-module cyw43-runner
       \ Initialize the superclass
       self <object>->new
 
-      \ Initialize the receive lock
-      self cyw43-rx-lock init-lock
-
-      \ Initialize the transmit lock
-      self cyw43-tx-lock init-lock
+      \ Initialize the frame interface
+      <cyw43-frame-interface> self cyw43-frame-interface init-object
 
       \ Initialize the event lock
       self cyw43-event-lock init-lock
-
-      \ Initialize the receive channels
-      mtu-size rx-mtu-count self cyw43-rx-chan init-chan
-      cell rx-mtu-count self cyw43-rx-size-chan init-chan
-
-      \ Initialize the transmit channels
-      mtu-size tx-mtu-count self cyw43-tx-chan init-chan
-      cell tx-mtu-count self cyw43-tx-size-chan init-chan
 
       \ Initialize the vent channel
       event-message-size event-count self cyw43-event-chan init-chan
@@ -508,8 +635,10 @@ begin-module cyw43-runner
               self cyw43-scratch-buf self check-cyw43-status
               
             else
-              self cyw43-scratch-buf self poll-cyw43-tx { packet-bytes }
-              packet-bytes if
+              self cyw43-scratch-buf mtu-size
+              self cyw43-frame-interface poll-tx-frame if
+
+                { packet-bytes }
 
                 \ Handle a packet to transmit
 
@@ -551,7 +680,7 @@ begin-module cyw43-runner
                 buf self check-cyw43-status
                 
               else
-                self cyw43-scratch-buf self handle-cyw43-irq
+                drop self cyw43-scratch-buf self handle-cyw43-irq
               then
             then
           else
@@ -704,7 +833,8 @@ begin-module cyw43-runner
     :noname { addr bytes self -- }
       bytes bdc-header-size < if exit then
       addr bdch-data-offset c@ cells bdc-header-size + { data-offset }
-      addr data-offset + bytes data-offset - self put-cyw43-rx
+      addr data-offset + bytes data-offset -
+      self cyw43-frame-interface put-rx-frame
     ; define handle-cyw43-data-pkt
 
     \ Update credit
@@ -839,6 +969,11 @@ begin-module cyw43-runner
       
     ; define cyw43-core-up?
 
+    \ Get the CYW43 frame interface
+    :noname ( self -- interface )
+      cyw43-frame-interface
+    ; define cyw43-frame-interface@
+
     \ Enable an event
     :noname ( event self -- )
       cyw43-event-mask cyw43-events::enable-cyw43-event
@@ -863,84 +998,6 @@ begin-module cyw43-runner
     :noname ( self -- )
       cyw43-event-mask cyw43-events::disable-all-cyw43-events
     ; define disable-all-cyw43-events
-
-    \ Enqueue received data
-    :noname { addr bytes self -- }
-      begin
-        addr bytes self [: { addr W^ bytes self }
-          self cyw43-rx-chan chan-full? not if
-            addr bytes @ self cyw43-rx-chan send-chan
-            bytes cell self cyw43-rx-size-chan send-chan
-            true
-          else
-            false
-          then
-        ;] self cyw43-rx-lock with-lock
-        dup not if pause then
-      until
-    ; define put-cyw43-rx
-
-    \ Dequeue received data
-    :noname { addr self -- bytes }
-      begin
-        addr self [: { addr self }
-          self cyw43-rx-chan chan-empty? not if
-            addr mtu-size self cyw43-rx-chan recv-chan drop
-            0 { W^ bytes }
-            bytes cell self cyw43-rx-size-chan recv-chan drop
-            bytes @
-            true
-          else
-            false
-          then
-        ;] self cyw43-rx-lock with-lock
-        dup not if pause then
-      until
-    ; define get-cyw43-rx
-
-    \ Poll for received data
-    :noname ( addr self -- bytes|0 )
-      [: { addr self }
-        self cyw43-rx-chan chan-empty? not if
-          addr mtu-size self cyw43-rx-chan recv-chan drop
-          0 { W^ bytes }
-          bytes cell self cyw43-rx-size-chan recv-chan drop
-          bytes @
-        else
-          0
-        then
-      ;] over cyw43-rx-lock with-lock
-    ; define poll-cyw43-rx
-
-    \ Enqueue data to transmit
-    :noname { addr bytes self -- }
-      begin
-        addr bytes self [: { addr W^ bytes self }
-          self cyw43-tx-chan chan-full? not if
-            addr bytes @ self cyw43-tx-chan send-chan
-            bytes cell self cyw43-tx-size-chan send-chan
-            true
-          else
-            false
-          then
-        ;] self cyw43-tx-lock with-lock
-        dup not if pause then
-      until
-    ; define put-cyw43-tx
-
-    \ Poll for data to transmit
-    :noname ( addr self -- bytes|0 )
-      [: { addr self }
-        self cyw43-tx-chan chan-empty? not if
-          addr mtu-size self cyw43-tx-chan recv-chan drop
-          0 { W^ bytes }
-          bytes cell self cyw43-tx-size-chan recv-chan drop
-          bytes @
-        else
-          0
-        then
-      ;] over cyw43-tx-lock with-lock
-    ; define poll-cyw43-tx
 
     \ Enqueue event message
     :noname { addr self -- }
