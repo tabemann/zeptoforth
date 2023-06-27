@@ -625,7 +625,7 @@ begin-module net
             else
               false
             then
-            ;] endpoint endpoint-lock with-lock
+          ;] endpoint endpoint-lock with-lock
           if exit then
         loop
       then
@@ -791,7 +791,8 @@ begin-module net
           src-mac-addr addr ipv4-src-addr @ rev self ip-interface @
           process-ipv4-mac-addr
           bytes addr ipv4-total-len h@ rev16 =
-          addr ipv4-version-ihl $F and dup { ihl } 5 >= and if
+          addr ipv4-version-ihl c@ $F and dup { ihl } 5 >= and
+          ihl 4 * bytes <= and if
             addr ipv4-dest-addr @ rev
             dup self ip-interface @ intf-ipv4-addr@ =
             swap self ip-interface @ intf-ipv4-broadcast@ = or if
