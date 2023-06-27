@@ -127,7 +127,9 @@ begin-module frame-process
     :noname { self -- }
       self 1 [: { self }
         begin
+          cr ." RECEIVING FRAME... "
           self mtu-buf net-misc::mtu-size self in-frame-interface @ get-rx-frame
+          ." SIZE: " dup . ." DEBUG: " .s
           dup ethernet-header-size >= if
             self process-frame
           else

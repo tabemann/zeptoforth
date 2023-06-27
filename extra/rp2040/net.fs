@@ -86,8 +86,14 @@ begin-module net
     :noname ( D: mac-addr ipv4-addr self -- )
       [: { D: mac-addr ipv4-addr self }
         max-addresses 0 ?do
-          self mapped-mac-addrs i 2 cells + 2@ -1. = if
-            mac-addr self mapped-mac-addrs i 2 cells + 2!
+          self mapped-ipv4-addrs i cells + @ ipv4-addr = if
+            mac-addr self mapped-mac-addrs i 2 cells * + 2!
+            self newest-addr-age @ 1+ $FF and dup self newest-addr-age !
+            self mapped-addr-ages i + c!
+            unloop exit
+          then
+          self mapped-mac-addrs i 2 cells * + 2@ -1. d= if
+            mac-addr self mapped-mac-addrs i 2 cells * + 2!
             ipv4-addr self mapped-ipv4-addrs i cells + !
             self newest-addr-age @ 1+ $FF and dup self newest-addr-age !
             self mapped-addr-ages i + c!
@@ -604,6 +610,7 @@ begin-module net
       3 pick case
         PROTOCOL_UDP of process-ipv4-udp-packet endof
         PROTOCOL_ICMP of process-ipv4-icmp-packet endof
+        2drop 2drop drop
       endcase
     ; define process-ipv4-packet
 
@@ -783,6 +790,7 @@ begin-module net
 
     \ Handle a frame
     :noname { addr bytes self -- }
+      cr ." IP-HANDLER BEFORE: " .s
       addr ethh-ether-type h@ [ ETHER_TYPE_IPV4 rev16 ] literal = if
         addr ethh-source-mac mac@ { D: src-mac-addr }
         ethernet-header-size +to addr
@@ -807,6 +815,7 @@ begin-module net
             then
           then
         then
+        ."  AFTER: " .s
       then
     ; define handle-frame
 
@@ -834,6 +843,7 @@ begin-module net
 
     \ Handle a frame
     :noname { addr bytes self -- }
+      cr ." ARP-HANDLER BEFORE: " .s
       addr ethh-ether-type h@ [ ETHER_TYPE_ARP rev16 ] literal = if
         ethernet-header-size +to addr
         [ ethernet-header-size negate ] literal +to bytes
@@ -853,6 +863,7 @@ begin-module net
           then
         then
       then
+      ."  AFTER: " .s
     ; define handle-frame
 
     \ Send an ARP response
