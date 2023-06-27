@@ -61,7 +61,7 @@ begin-module net
     :noname { self -- }
       self <object>->new
       self mapped-ipv4-addrs [ max-addresses cells ] literal 0 fill
-      self mapped-mac-addrs [ max-addresses 2 cell * ] literal $FF fill
+      self mapped-mac-addrs [ max-addresses 2 cells * ] literal $FF fill
       self mapped-addr-ages max-addresses 0 fill
       0 self newest-addr-age !
       self address-map-lock init-lock
@@ -146,7 +146,7 @@ begin-module net
     method rx-ipv4-source! ( ipv4-addr port self -- )
 
     \ Get destination port
-    method rx-ipv4-dest@ ( self -- port )
+    method rx-dest-port@ ( self -- port )
     
     \ Retire a pending received packet
     method retire-rx-packet ( self -- )
@@ -214,7 +214,7 @@ begin-module net
     \ Get destination port
     :noname ( self -- port )
       endpoint-dest-port h@
-    ; define rx-ipv4-dest@
+    ; define rx-dest-port@
 
     \ Retire a pending received packet
     :noname ( self -- )
@@ -365,7 +365,7 @@ begin-module net
     :noname { self -- }
       false self fragment-active !
       0 self fragment-src-ipv4-addr !
-      0 self fragment-protcol !
+      0 self fragment-protocol !
       0 self fragment-ident !
       -1 self fragment-end-length !
       self fragment-bitmap max-fragment-units 8 align 8 / 0 fill
@@ -576,7 +576,7 @@ begin-module net
 
     \ Send a frame
     :noname ( addr bytes self -- )
-      intf-control @ put-cyw43-tx
+      out-frame-interface @ put-tx-frame
     ; define send-frame
     
     \ Process a MAC address for an IPv4 address
@@ -612,15 +612,14 @@ begin-module net
       bytes udp-header-size >= if
         addr udp-total-len h@ rev16 bytes <> if exit then
         max-endpoints 0 ?do
-          self intf-endpolnts <endpoint> class-size i * + { endpoint }
+          self intf-endpoints <endpoint> class-size i * + { endpoint }
           src-addr addr bytes endpoint self [:
             { src-addr addr bytes endpoint self }
             endpoint udp-endpoint?
             endpoint available-for-packet? and
-            endpoint endpoint-dest-port h@
-            addr udp-dest-port h@ rev16 = and if
+            endpoint rx-dest-port@ addr udp-dest-port h@ rev16 = and if
               src-addr addr udp-src-port h@ rev16 endpoint rx-ipv4-source!
-              addr udp-header-size +bytes udp-header-size - endpoint rx-packet!
+              addr udp-header-size + bytes udp-header-size - endpoint rx-packet!
               endpoint self put-ready-rx-endpoint
               true
             else
@@ -720,7 +719,7 @@ begin-module net
 
     \ Send an ARP request packet
     :noname ( dest-addr self -- )
-      [: { addr self buf }
+      [ ethernet-header-size arp-ipv4-size + ] literal [: { dest-addr self buf }
         $FFFFFFFFFF. buf ethh-destination-mac mac!
         self intf-mac-addr@ buf ethh-source-mac mac!
         [ ETHER_TYPE_ARP rev16 ] literal buf ethh-ether-type h!
@@ -735,13 +734,13 @@ begin-module net
         arp-buf arp-tha 6 0 fill
         dest-addr rev arp-buf arp-tpa !
         buf [ ethernet-header-size arp-ipv4-size + ] literal
-        self send-frame
-      ;] over construct-and-send-frame
+        true
+      ;] 2 pick construct-and-send-frame
     ; define send-arp-request
 
     \ Enqueue a ready receiving IP endpoint
     :noname { W^ endpoint self -- }
-      endpoint @ pending-x-packet? not if
+      endpoint @ pending-rx-packet? not if
         endpoint @ ready-rx-packet
         endpoint cell self endpoint-rx-queue send-chan
       then
@@ -845,7 +844,8 @@ begin-module net
             addr arp-sha mac@ addr arp-spa @ rev self arp-interface @
             process-ipv4-mac-addr
             addr arp-oper h@ [ OPER_REQUEST rev16 ] literal = if
-              addr arp-tpa unaligned@ rev self arp-interface @ ipv4-addr@ = if
+              addr arp-tpa unaligned@ rev
+              self arp-interface @ intf-ipv4-addr@ = if
                 addr self send-arp-response
               then
             then

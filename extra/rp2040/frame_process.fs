@@ -87,7 +87,7 @@ begin-module frame-process
     method process-frame ( bytes self -- )
 
     \ Run frame processor
-    method run-process-net ( self -- )
+    method run-frame-process ( self -- )
     
   end-class
 
@@ -127,15 +127,15 @@ begin-module frame-process
     :noname { self -- }
       self 1 [: { self }
         begin
-          self mtu-buf self in-frame-interface @ get-rx-frame
-          dup etherframe-header-size >= if
+          self mtu-buf net-misc::mtu-size self in-frame-interface @ get-rx-frame
+          dup ethernet-header-size >= if
             self process-frame
           else
             drop
           then
         again
       ;] 1024 256 1024 spawn run
-    ; define run-process-net
+    ; define run-frame-process
 
   end-implement
   

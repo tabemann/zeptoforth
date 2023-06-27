@@ -56,4 +56,4 @@ begin-module frame-interface
   <frame-interface> begin-implement
   end-implement
 
-end-class
+end-module

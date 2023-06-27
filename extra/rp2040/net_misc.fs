@@ -62,6 +62,7 @@ begin-module net-misc
   2 constant MF
 
   \ IP protocols
+  1 constant PROTOCOL_ICMP
   6 constant PROTOCOL_TCP
   17 constant PROTOCOL_UDP
 

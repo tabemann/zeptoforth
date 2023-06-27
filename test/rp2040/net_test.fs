@@ -23,9 +23,10 @@ begin-module net-test
   oo import
   cyw43-control import
   net-misc import
-  net-process import
+  frame-process import
   net import
   net-diagnostic import
+  ip-process import
   
   23 constant pwr-pin
   24 constant dio-pin
@@ -38,10 +39,12 @@ begin-module net-test
   
   <cyw43-control> class-size buffer: my-cyw43-control
   <interface> class-size buffer: my-interface
-  <net-process> class-size buffer: my-net-process
+  <frame-process> class-size buffer: my-frame-process
   <arp-diag-handler> class-size buffer: my-arp-diag-handler
   <ipv4-diag-handler> class-size buffer: my-ipv4-diag-handler
   <arp-handler> class-size buffer: my-arp-handler
+  <ip-handler> class-size buffer: my-ip-handler
+  <ip-process> class-size buffer: my-ip-process
   
   : init-test ( -- )
     dma-pool::init-dma-pool
@@ -49,21 +52,26 @@ begin-module net-test
     pwr-pin clk-pin dio-pin cs-pin pio-addr sm-index pio-instance
     <cyw43-control> my-cyw43-control init-object
     my-cyw43-control init-cyw43
-    my-cyw43-control <interface> my-interface init-object
-    192 168 1 44 make-ipv4-addr my-interface ipv4-addr!
-    my-cyw43-control <net-process> my-net-process init-object
+    my-cyw43-control cyw43-frame-interface@ <interface> my-interface init-object
+    192 168 1 44 make-ipv4-addr my-interface intf-ipv4-addr!
+    255 255 255 0 make-ipv4-addr my-interface intf-ipv4-netmask!
+    my-cyw43-control cyw43-frame-interface@ <frame-process> my-frame-process init-object
     <arp-diag-handler> my-arp-diag-handler init-object
     <ipv4-diag-handler> my-ipv4-diag-handler init-object
     my-interface <arp-handler> my-arp-handler init-object
-    my-arp-diag-handler my-net-process add-net-handler
-    my-ipv4-diag-handler my-net-process add-net-handler
-    my-arp-handler my-net-process add-net-handler
+    my-interface <ip-handler> my-ip-handler init-object
+    my-arp-diag-handler my-frame-process add-frame-handler
+    my-ipv4-diag-handler my-frame-process add-frame-handler
+    my-arp-handler my-frame-process add-frame-handler
+    my-ip-handler my-frame-process add-frame-handler
+    my-interface <ip-process> my-ip-process init-object
   ;
 
   : run-test { D: ssid D: pass -- }
     init-test
     ssid pass my-cyw43-control join-cyw43-wpa2
-    my-net-process run-process-net
+    my-ip-process run-ip-process
+    my-frame-process run-frame-process
   ;
 
 end-module

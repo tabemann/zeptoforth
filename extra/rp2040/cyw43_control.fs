@@ -27,6 +27,7 @@ begin-module cyw43-control
   cyw43-events import
   cyw43-ioctl import
   cyw43-runner import
+  frame-interface import
   
   \ clmload fialed
   : x-clmload-failed ( -- ) ." clmload failed" cr ;
@@ -214,7 +215,7 @@ begin-module cyw43-control
         6 0 ?do buf i + c@ h.2 i 5 <> if ." :" then loop
         buf 2 + unaligned@ rev buf h@ rev16
         self cyw43-core cyw43-runner::cyw43-frame-interface@ mac-addr!
-      ;] aligned-allot
+      ;] with-aligned-allot
 
       self set-cyw43-country
 
@@ -368,7 +369,7 @@ begin-module cyw43-control
     
     \ Get the CYW43 frame interface
     :noname ( self -- interface )
-      cyw43-core cyw43-runner:cyw43-frame-interface@
+      cyw43-core cyw43-runner::cyw43-frame-interface@
     ; define cyw43-frame-interface@
     
     \ Dequeue event message

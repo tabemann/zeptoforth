@@ -84,7 +84,7 @@ begin-module ip-process
     method process-ip ( endpoint self -- )
 
     \ Run IP processor
-    method run-process-ip ( self -- )
+    method run-ip-process ( self -- )
     
   end-class
 
@@ -128,7 +128,7 @@ begin-module ip-process
           self interface @ get-ready-rx-endpoint self process-ip
         again
       ;] 1024 256 1024 spawn run
-    ; define run-process-net
+    ; define run-ip-process
 
   end-implement
   
