@@ -72,7 +72,7 @@ begin-module net
       [: { ipv4-addr self }
         max-addresses 0 ?do
           self mapped-ipv4-addrs i cells + @ ipv4-addr = if
-            self mapped-mac-addrs i 2 cells + 2@
+            self mapped-mac-addrs i 2 cells * + 2@
             self newest-addr-age @ 1+ $FF and dup self newest-addr-age !
             self mapped-addr-ages i + c!
             true unloop exit
@@ -339,7 +339,7 @@ begin-module net
       offset 8 * len + fragment-buf-size <= if
         true self fragment-active !
         ident self fragment-ident !
-        addr ipv4-src-addr @ rev self fragment-src-ipv4-addr !
+        addr ipv4-src-addr unaligned@ rev self fragment-src-ipv4-addr !
         addr ipv4-protocol c@ self fragment-protocol !
         flags MF and 0= if
           offset 8 * len + self fragment-end-length !
@@ -479,6 +479,9 @@ begin-module net
 
     \ Process an IPv4 ICMP packet
     method process-ipv4-icmp-packet ( src-addr protocol addr bytes self -- )
+
+    \ Process an IPv4 ICMP echo request packet
+    method process-ipv4-echo-request-packet ( src-addr addr bytes self -- )
     
     \ Construct and send a frame
     method construct-and-send-frame
@@ -581,8 +584,10 @@ begin-module net
     ; define resolve-interval!
 
     \ Send a frame
-    :noname ( addr bytes self -- )
-      out-frame-interface @ put-tx-frame
+    :noname { addr bytes self -- }
+      cr ." SENT: "
+      addr addr bytes + dump
+      addr bytes self out-frame-interface @ put-tx-frame
     ; define send-frame
     
     \ Process a MAC address for an IPv4 address
@@ -633,7 +638,7 @@ begin-module net
               false
             then
           ;] endpoint endpoint-lock with-lock
-          if exit then
+          if unloop exit then
         loop
       then
     ; define process-ipv4-udp-packet
@@ -643,32 +648,36 @@ begin-module net
       bytes icmp-header-size >= if
         addr bytes 0 icmp-checksum compute-inet-checksum
         addr icmp-checksum h@ rev16 <> if exit then
-        addr icmp-type @ case
+        addr icmp-type c@ case
           ICMP_TYPE_ECHO_REQUEST of
-            addr self address-map lookup-mac-addr-by-ipv4 if
-              addr bytes self src-addr PROTOCOL_ICMP bytes [:
-                { addr bytes self buf }
-                buf [ ethernet-header-size ipv4-header-size + ] literal +
-                { icmp-buf }
-                ICMP_TYPE_ECHO_REPLY icmp-buf icmp-type c!
-                ICMP_CODE_UNUSED icmp-buf icmp-code c!
-                addr 4 + icmp-buf 4 + bytes 4 - move
-                icmp-buf bytes 0 icmp-checksum compute-inet-checksum rev16
-                icmp-buf icmp-checksum h!
-                true
-              ;] construct-and-send-ipv4-packet
-            else
-              2drop \ Should never hapen
-            then
+            src-addr addr bytes self process-ipv4-echo-request-packet
           endof
         endcase
       then
     ; define process-ipv4-icmp-packet
+
+    \ Process an IPv4 ICMP echo request packet
+    :noname { src-addr addr bytes self -- }
+      src-addr self address-map lookup-mac-addr-by-ipv4 if
+        { D: src-mac-addr }
+        addr bytes self src-mac-addr src-addr PROTOCOL_ICMP bytes [:
+          { addr bytes self buf }
+          ICMP_TYPE_ECHO_REPLY buf icmp-type c!
+          ICMP_CODE_UNUSED buf icmp-code c!
+          addr 4 + buf 4 + bytes 4 - move
+          buf bytes 0 icmp-checksum compute-inet-checksum rev16
+          buf icmp-checksum h!
+          true
+        ;] self construct-and-send-ipv4-packet drop
+      else
+        2drop \ Should never happen
+      then
+    ; define process-ipv4-echo-request-packet
     
     \ Construct and send a frame
     :noname ( ? bytes xt self -- ? sent? ) ( xt: ? buf -- ? send? )
-      [: { bytes self }
-        self outgoing-buf swap execute if
+      [: { bytes xt self }
+        self outgoing-buf xt execute if
           self outgoing-buf bytes self send-frame true
         else
           false
@@ -689,13 +698,14 @@ begin-module net
         0 ip-buf ipv4-tos c!
         bytes ipv4-header-size + rev16 ip-buf ipv4-total-len h!
         0 ip-buf ipv4-identification h!
+        [ DF 13 lshift rev16 ] literal ip-buf ipv4-flags-fragment-offset h!
         self intf-ttl c@ ip-buf ipv4-ttl c!
         protocol ip-buf ipv4-protocol c!
-        self intf-ipv4-addr@ rev ip-buf ipv4-src-addr !
-        dest-addr rev ip-buf ipv4-dest-addr !
+        self intf-ipv4-addr@ rev ip-buf ipv4-src-addr unaligned!
+        dest-addr rev ip-buf ipv4-dest-addr unaligned!
         ip-buf ipv4-header-size 0 ipv4-header-checksum compute-inet-checksum
         rev16 ip-buf ipv4-header-checksum h!
-        ip-buf xt execute
+        ip-buf ipv4-header-size + xt execute
       ;] swap construct-and-send-frame
     ; define construct-and-send-ipv4-packet
 
@@ -742,7 +752,7 @@ begin-module net
         dest-addr rev arp-buf arp-tpa !
         buf [ ethernet-header-size arp-ipv4-size + ] literal
         true
-      ;] 2 pick construct-and-send-frame
+      ;] 2 pick construct-and-send-frame drop
     ; define send-arp-request
 
     \ Enqueue a ready receiving IP endpoint
@@ -795,18 +805,19 @@ begin-module net
         ethernet-header-size +to addr
         [ ethernet-header-size negate ] literal +to bytes
         bytes ipv4-header-size >= if
-          src-mac-addr addr ipv4-src-addr @ rev self ip-interface @
+          src-mac-addr addr ipv4-src-addr unaligned@ rev
+          self ip-interface @
           process-ipv4-mac-addr
           bytes addr ipv4-total-len h@ rev16 =
           addr ipv4-version-ihl c@ $F and dup { ihl } 5 >= and
           ihl 4 * bytes <= and if
-            addr ipv4-dest-addr @ rev
+            addr ipv4-dest-addr unaligned@ rev
             dup self ip-interface @ intf-ipv4-addr@ =
             swap self ip-interface @ intf-ipv4-broadcast@ = or if
               addr ipv4-fragment? if
                 addr bytes self ip-interface @ process-fragment
               else
-                addr ipv4-src-addr @ rev
+                addr ipv4-src-addr unaligned@ rev
                 addr ipv4-protocol c@
                 addr ihl cells + bytes ihl cells -
                 self ip-interface @ process-ipv4-packet
@@ -849,7 +860,7 @@ begin-module net
           addr arp-ptype h@ [ ETHER_TYPE_IPV4 rev16 ] literal = and
           addr arp-hlen c@ 6 = and
           addr arp-plen c@ 4 = and if
-            addr arp-sha mac@ addr arp-spa @ rev self arp-interface @
+            addr arp-sha mac@ addr arp-spa unaligned@ rev self arp-interface @
             process-ipv4-mac-addr
             addr arp-oper h@ [ OPER_REQUEST rev16 ] literal = if
               addr arp-tpa unaligned@ rev
@@ -864,9 +875,9 @@ begin-module net
 
     \ Send an ARP response
     :noname ( addr self -- )
-      [ ethernet-header-size arp-ipv4-size + ] literal over
+      [ ethernet-header-size arp-ipv4-size + ] literal
       [: { addr self buf }
-        addr arp-sha buf ethh-destination-mac 6 move
+        addr arp-sha mac@ buf ethh-destination-mac mac!
         self arp-interface @ intf-mac-addr@ buf ethh-source-mac mac!
         [ ETHER_TYPE_ARP rev16 ] literal buf ethh-ether-type h!
         buf ethernet-header-size + { arp-buf }
@@ -875,12 +886,12 @@ begin-module net
         6 arp-buf arp-hlen c!
         4 arp-buf arp-plen c!
         [ OPER_REPLY rev16 ] literal arp-buf arp-oper h!
-        self arp-interface @ intf-mac-addr@ arp-buf arp-sha 6 move
-        self arp-interface @ intf-ipv4-addr@ rev arp-buf arp-spa !
-        addr arp-sha arp-buf arp-tha 6 move
-        addr arp-spa @ arp-buf arp-tpa !
+        self arp-interface @ intf-mac-addr@ arp-buf arp-sha mac!
+        self arp-interface @ intf-ipv4-addr@ rev arp-buf arp-spa unaligned!
+        addr arp-sha mac@ arp-buf arp-tha mac!
+        addr arp-spa unaligned@ arp-buf arp-tpa unaligned!
         true
-      ;] swap arp-interface @ construct-and-send-frame
+      ;] 2 pick arp-interface @ construct-and-send-frame drop
     ; define send-arp-response
     
   end-implement

@@ -58,8 +58,8 @@ begin-module net-misc
   $0002 constant OPER_REPLY
 
   \ IP flags
-  1 constant DF
-  2 constant MF
+  1 bit constant DF
+  2 bit constant MF
 
   \ IP protocols
   1 constant PROTOCOL_ICMP
