@@ -43,7 +43,7 @@ begin-module cyw43-runner
   1024 constant cyw43-log-shm-size
 
   \ Receive MTU count
-  2 constant rx-mtu-count
+  8 constant rx-mtu-count
 
   \ Transmit MTU count
   2 constant tx-mtu-count
@@ -182,19 +182,15 @@ begin-module cyw43-runner
     ; define mac-addr!
     
     \ Put a received frame
-    :noname { addr bytes self -- }
-      begin
-        addr bytes self [: { addr W^ bytes self }
-          self cyw43-rx-chan chan-full? not if
-            addr bytes @ self cyw43-rx-chan send-chan
-            bytes cell self cyw43-rx-size-chan send-chan
-            true
-          else
-            false
-          then
-        ;] self cyw43-rx-lock with-lock
-        dup not if pause then
-      until
+    :noname ( addr bytes self -- )
+      [: { addr W^ bytes self }
+        self cyw43-rx-chan chan-full? not if
+          addr bytes @ self cyw43-rx-chan send-chan
+          bytes cell self cyw43-rx-size-chan send-chan
+        else
+          cr ." DROPPED PACKET: " bytes . \ DEBUG
+        then
+      ;] over cyw43-rx-lock with-lock
     ; define put-rx-frame
 
     \ Get a received frame
