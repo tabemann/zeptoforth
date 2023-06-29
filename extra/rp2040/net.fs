@@ -28,6 +28,9 @@ begin-module net
   sema import
   chan import
 
+  \ Oversized frame exception
+  : x-oversized-frame ( -- ) cr ." oversized frame" ;
+  
   \ The IPv4 address map
   <object> begin-class <address-map>
 
@@ -271,7 +274,7 @@ begin-module net
 
     \ Set an endpoint to listen on UDP
     :noname ( port self -- )
-      [: endpoint-udp swap endpoint-state bis! ;]
+      [: endpoint-udp over endpoint-state bis! endpoint-dest-port h! ;]
       over endpoint-lock with-lock
     ; define listen-udp
 
@@ -402,17 +405,8 @@ begin-module net
     \ Current TTL
     cell member intf-ttl
 
-    \ Address resolution interval in ticks (100 us intervals)
+    \ Address resolution interval in milliseconds
     cell member resolve-interval
-
-    \ Address resolution count
-    cell member resolve-count
-
-    \ Address resolution semaphore
-    sema-size member resolve-sema
-
-    \ Address resolution lock
-    lock-size member resolve-lock
 
     \ The endpoints
     <endpoint> class-size max-endpoints * member intf-endpoints
@@ -456,11 +450,11 @@ begin-module net
     \ Set the TTL
     method intf-ttl! ( ttl self -- )
 
-    \ Get the address resolution interval in ticks (100 us intervals)
-    method resolve-interval@ ( self -- ticks )
+    \ Get the address resolution interval in milliseconds
+    method resolve-interval@ ( self -- ms )
     
-    \ Set the address resolution interval in ticks (100 us intervals)
-    method resolve-interval! ( ticks self -- )
+    \ Set the address resolution interval in milliseconds
+    method resolve-interval! ( ms self -- )
 
     \ Send a frame
     method send-frame ( addr bytes self -- )
@@ -496,8 +490,12 @@ begin-module net
     method resolve-ipv4-addr ( dest-addr self -- D: mac-addr success? )
 
     \ Send an ARP request packet
-    method send-arp-request ( dest-addr self -- )
+    method send-ipv4-arp-request ( dest-addr self -- )
 
+    \ Send a UDP packet
+    method send-ipv4-udp-packet
+    ( src-port dest-addr dest-port addr bytes self -- success? )
+    
     \ Enqueue a ready receiving IP endpoint
     method put-ready-rx-endpoint ( endpoint self -- )
 
@@ -506,7 +504,7 @@ begin-module net
 
     \ Allocate an endpoint
     method allocate-endpoint ( self -- endpoint success? )
-    
+
   end-class
 
   \ Implement the interface class
@@ -519,16 +517,13 @@ begin-module net
       0 self intf-ipv4-addr !
       $FFFFFF00 self intf-ipv4-netmask !
       32 self intf-ttl !
-      5000 self resolve-interval !
-      0 self resolve-count !
+      100 self resolve-interval !
       self outgoing-buf-lock init-lock
       max-endpoints 0 ?do
         <endpoint> self intf-endpoints <endpoint> class-size i * + init-object
       loop
       <fragment-collect> self fragment-collect init-object
       <address-map> self address-map init-object
-      no-sema-limit 0 self resolve-sema init-sema
-      self resolve-lock init-lock
       cell max-endpoints self endpoint-rx-queue init-chan
     ; define new
 
@@ -573,18 +568,19 @@ begin-module net
       ttl 255 min 1 max self intf-ttl !
     ; define intf-ttl!
 
-    \ Get the address resolution interval in ticks (100 us intervals)
-    :noname ( self -- ticks )
+    \ Get the address resolution interval in milliseconds
+    :noname ( self -- ms )
       resolve-interval @
     ; define resolve-interval@
     
-    \ Set the address resolution interval in ticks (100 us intervals)
-    :noname ( ticks self -- )
+    \ Set the address resolution interval in milliseconds
+    :noname ( ms self -- )
       resolve-interval !
     ; define resolve-interval!
 
     \ Send a frame
     :noname { addr bytes self -- }
+      bytes mtu-size u<= averts x-oversized-frame
       cr ." SENT: "
       addr addr bytes + dump
       addr bytes self out-frame-interface @ put-tx-frame
@@ -593,12 +589,6 @@ begin-module net
     \ Process a MAC address for an IPv4 address
     :noname ( D: mac-addr ipv4-addr self -- )
       dup { self } address-map save-mac-addr-by-ipv4
-      self [: { self }
-        begin self resolve-count @ while
-          self resolve-sema give
-          -1 self resolve-count +!
-        repeat
-      ;] over resolve-lock with-lock
     ; define process-ipv4-mac-addr
 
     \ Process a fragment
@@ -677,6 +667,7 @@ begin-module net
     \ Construct and send a frame
     :noname ( ? bytes xt self -- ? sent? ) ( xt: ? buf -- ? send? )
       [: { bytes xt self }
+        bytes mtu-size u<= averts x-oversized-frame
         self outgoing-buf xt execute if
           self outgoing-buf bytes self send-frame true
         else
@@ -711,24 +702,17 @@ begin-module net
 
     \ Resolve an IPv4 address
     :noname { dest-addr self -- D: mac-addr success? }
-      systick::systick-counter self resolve-interval @ - { start-systick }
       max-resolve-attempts { attempts }
       begin
         dest-addr self address-map lookup-mac-addr-by-ipv4 not
       while
         2drop
-        start-systick self resolve-interval @ + systick::systick-counter <= if
-          attempts 0> if
-            -1 +to attempts
-            self [: 1 swap resolve-count +! ;] over resolve-lock with-lock
-            dest-addr self send-arp-request
-            self resolve-sema take
-          else
-            0. false exit
-          then
+        attempts 0> if
+          -1 +to attempts
+          dest-addr self send-ipv4-arp-request
+          self resolve-interval @ ms
         else
-          self [: 1 swap resolve-count +! ;] over resolve-lock with-lock
-          self resolve-sema take
+          0. false exit
         then
       repeat
       true
@@ -737,7 +721,7 @@ begin-module net
     \ Send an ARP request packet
     :noname ( dest-addr self -- )
       [ ethernet-header-size arp-ipv4-size + ] literal [: { dest-addr self buf }
-        $FFFFFFFFFF. buf ethh-destination-mac mac!
+        $FFFFFFFFFFFF. buf ethh-destination-mac mac!
         self intf-mac-addr@ buf ethh-source-mac mac!
         [ ETHER_TYPE_ARP rev16 ] literal buf ethh-ether-type h!
         buf ethernet-header-size + { arp-buf }
@@ -747,13 +731,30 @@ begin-module net
         4 arp-buf arp-plen c!
         [ OPER_REQUEST rev16 ] literal arp-buf arp-oper h!
         self intf-mac-addr@ arp-buf arp-sha mac!
-        self intf-ipv4-addr@ rev arp-buf arp-spa !
-        arp-buf arp-tha 6 0 fill
-        dest-addr rev arp-buf arp-tpa !
-        buf [ ethernet-header-size arp-ipv4-size + ] literal
+        self intf-ipv4-addr@ rev arp-buf arp-spa unaligned!
+        0. arp-buf arp-tha mac!
+        dest-addr rev arp-buf arp-tpa unaligned!
         true
       ;] 2 pick construct-and-send-frame drop
-    ; define send-arp-request
+    ; define send-ipv4-arp-request
+
+    \ Send a UDP packet
+    :noname { src-port dest-addr dest-port addr bytes self -- success? }
+      dest-addr self resolve-ipv4-addr if
+        src-port -rot dest-port -rot addr -rot bytes -rot self -rot
+        dest-addr PROTOCOL_UDP bytes udp-header-size + [:
+          { src-port dest-port addr bytes self buf }
+          src-port rev16 buf udp-src-port h!
+          dest-port rev16 buf udp-dest-port h!
+          bytes udp-header-size + rev16 buf udp-total-len h!
+          addr buf udp-header-size + bytes move
+          0 buf udp-checksum h!
+          true
+        ;] self construct-and-send-ipv4-packet
+      else
+        2drop false
+      then
+    ; define send-ipv4-udp-packet
 
     \ Enqueue a ready receiving IP endpoint
     :noname { W^ endpoint self -- }

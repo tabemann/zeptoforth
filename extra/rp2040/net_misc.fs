@@ -184,9 +184,10 @@ begin-module net-misc
   \ Compute an Internet header checksum
   : compute-inet-checksum ( addr bytes zero-offset -- h )
     over [: { addr bytes zero-offset buf }
+      buf bytes 2 align 0 fill
       addr buf bytes move
       0 buf zero-offset + h!
-      0 buf bytes + buf ?do
+      0 buf bytes 2 align + buf ?do
         i h@ rev16 + dup 16 rshift + $FFFF and
       2 +loop
       not $FFFF and

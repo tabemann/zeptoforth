@@ -38,7 +38,7 @@ begin-module endpoint-process
     method next-endpoint-handler! ( handler self -- )
 
     \ Handle a endpoint packet
-    method handle-endpoint ( src-addr protocol addr bytes self -- )
+    method handle-endpoint ( endpoint self -- )
     
   end-class
 

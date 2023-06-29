@@ -46,6 +46,29 @@ begin-module net-test
   <ip-handler> class-size buffer: my-ip-handler
   <endpoint-process> class-size buffer: my-endpoint-process
   
+  \ Our port
+  4444 constant my-port
+  
+  <endpoint-handler> begin-class <udp-echo-handler>
+    
+  end-class
+
+  <udp-echo-handler> begin-implement
+  
+    \ Handle a endpoint packet
+    :noname { endpoint self -- }
+      endpoint rx-ipv4-source@ { src-addr src-port }
+      endpoint rx-packet@ { addr bytes }
+      cr ." SOURCE: " src-addr ipv4. space src-port .
+      addr addr bytes + dump
+      my-port src-addr src-port addr bytes my-interface send-ipv4-udp-packet drop
+    ; define handle-endpoint
+  
+  end-implement
+  
+  <udp-echo-handler> class-size buffer: my-udp-echo-handler
+  variable my-endpoint
+  
   : init-test ( -- )
     dma-pool::init-dma-pool
     cyw43-clm::data cyw43-clm::size cyw43-fw::data cyw43-fw::size
@@ -65,11 +88,15 @@ begin-module net-test
     my-arp-handler my-frame-process add-frame-handler
     my-ip-handler my-frame-process add-frame-handler
     my-interface <endpoint-process> my-endpoint-process init-object
+    <udp-echo-handler> my-udp-echo-handler init-object
+    my-udp-echo-handler my-endpoint-process add-endpoint-handler
+    my-interface allocate-endpoint drop my-endpoint !
+    my-port my-endpoint @ listen-udp
   ;
 
   : run-test { D: ssid D: pass -- }
     init-test
-    ssid pass my-cyw43-control join-cyw43-wpa2
+    begin ssid pass my-cyw43-control join-cyw43-wpa2 nip until
     my-endpoint-process run-endpoint-process
     my-frame-process run-frame-process
   ;
