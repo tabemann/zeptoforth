@@ -40,9 +40,24 @@ begin-module net-misc
   \ Maximum number of addresses to map
   16 constant max-addresses
 
-  \ Maximum resolution attempts
-  10 constant max-resolve-attempts
+  \ Maximum number of DNS addresses to cache
+  16 constant max-dns-cache
 
+  \ DNS address cache name heap block size
+  16 constant dns-cache-heap-block-size
+
+  \ DNS address cache name heap block count
+  64 constant dns-cache-heap-block-count
+
+  \ DNS port
+  53 constant dns-port
+
+  \ DNS source port
+  65535 constant dns-src-port
+
+  \ Parse DNS name depth
+  16 constant parse-dns-name-depth
+  
   \ The Ethernet header structure
   begin-structure ethernet-header-size
     6 +field ethh-destination-mac
@@ -122,6 +137,49 @@ begin-module net-misc
     field: icmp-rest-of-header
   end-structure
 
+  \ DNS header structure
+  begin-structure dns-header-size
+    hfield: dns-ident
+    hfield: dns-flags
+    hfield: dns-qdcount
+    hfield: dns-ancount
+    hfield: dns-nscount
+    hfield: dns-arcount
+  end-structure
+
+  \ DNS question body structure
+  begin-structure dns-qbody-size
+    hfield: dns-qbody-qtype
+    hfield: dns-qbody-qclass
+  end-structure
+
+  \ DNS answer body structure
+  begin-structure dns-abody-size
+    hfield: dns-abody-type
+    hfield: dns-abody-class
+    field: dns-abody-ttl
+    hfield: dns-abody-rdlength
+  end-structure
+
+  \ DNS flags
+  15 bit constant DNS_QR_RESPONSE
+  11 constant DNS_OPCODE_LSB
+  $F DNS_OPCODE_LSB lshift constant DNS_OPCODE_MASK
+  10 bit constant DNS_AA
+  9 bit constant DNS_TC
+  8 bit constant DNS_RD
+  7 bit constant DNS_RA
+  0 constant DNS_RCODE_LSB
+  $F DNS_RCODE_LSB lshift constant DNS_RCODE_MASK
+
+  \ DNS response codes
+  0 constant DNS_NO_ERROR
+  1 constant DNS_FORMAT_ERROR
+  2 constant DNS_SERVER_FAILURE
+  3 constant DNS_NAME_ERROR
+  4 constant DNS_NOT_IMPLEMENTED
+  5 constant DNS_REFUSED
+
   \ Get ICMP size for IPv4 packet
   : icmp-error-size { addr bytes -- size }
     addr ipv4-version-ihl c@ $F and 4 * { head-copy-size }
@@ -163,6 +221,18 @@ begin-module net-misc
     x 8 rshift addr 1+ c!
     x 16 rshift addr 2 + c!
     x 24 rshift addr 3 + c!
+  ;
+
+  \ Do an alignment-safe 16-bit load
+  : hunaligned@ { addr -- h }
+    addr c@
+    addr 1+ c@ 8 lshift or
+  ;
+
+  \ Do an alignment-safe 16-bit store
+  : hunaligned! { h addr -- }
+    h addr c!
+    h 8 rshift addr 1+ c!
   ;
 
   \ Print a MAC address
@@ -218,6 +288,97 @@ begin-module net-misc
   \ Store a double as a MAC address
   : mac! { D: mac-addr addr -- }
     mac-addr rev16 addr h! rev addr 2 + unaligned!
+  ;
+
+  \ Get the length of a DNS-formatted name
+  : dns-name-size ( bytes -- bytes' ) ?dup if 2 + else 1 then ;
+
+  \ Get the offset of the next dot
+  : next-dot-offset { name-addr name-bytes -- offset | 0 }
+    name-bytes 0 ?do name-addr i + c@ [char] . = if i unloop exit then loop 0
+  ;
+  
+  \ Format a DNS name
+  : format-dns-name { name-addr name-bytes dest-addr -- }
+    begin
+      name-bytes 0> if
+        name-addr name-bytes next-dot-offset ?dup if
+          dup dest-addr c!
+          1 +to dest-addr
+          name-addr dest-addr 2 pick move
+          dup +to dest-addr
+          1+ dup +to name-addr
+          negate +to name-bytes
+        else
+          name-bytes dest-addr c!
+          1 +to dest-addr
+          name-addr dest-addr name-bytes move
+          name-bytes +to dest-addr
+          0 +to name-bytes
+        then
+        false
+      else
+        0 dest-addr c! true
+      then
+    until
+  ;
+
+  \ Skip a DNS name
+  : skip-dns-name { addr bytes -- addr' bytes' }
+    begin
+      bytes 0> if
+        addr c@ $C0 and $C0 = if
+          2 +to addr -2 +to bytes true
+        else
+          addr c@ ?dup if
+            1+ dup +to addr negate +to bytes false
+          else
+            1 +to addr -1 +to bytes true
+          then
+        then
+      else
+        addr bytes true
+      then
+    until
+  ;
+
+  \ Parse a DNS name
+  : parse-dns-name { addr bytes all-addr all-bytes buf -- len success? }
+    0 { level }
+    0 { offset }
+    begin
+      addr all-addr u>=
+      addr all-addr all-bytes + u< and
+      addr bytes < and
+      offset 253 < and if
+        addr c@ { part-len }
+        part-len $C0 and $C0 = if
+          level parse-dns-name-depth = if 0 false exit then
+          addr hunaligned@ $C0 bic
+          dup all-bytes u>= if 0 false exit then
+          dup all-bytes - bytes !
+          all-addr + addr !
+          1 +to level
+        else
+          part-len 63 u>
+          part-len offset + 1+ 253 u> or if 0 false exit then
+          part-len 0= if offset true exit then
+          offset 0<> if
+            [char] . buf offset + c!
+            1 +to offset
+          then
+          1 +to addr
+          -1 +to bytes
+          part-len bytes u>= if 0 false exit then
+          addr buf offset + part-len move
+          part-len +to addr
+          part-len negate +to bytes
+          part-len +to offset
+        then
+      else
+        0 false exit
+      then
+    again
   ;
   
 end-module

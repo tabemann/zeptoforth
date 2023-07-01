@@ -27,10 +27,158 @@ begin-module net
   lock import
   sema import
   chan import
+  heap import
 
   \ Oversized frame exception
   : x-oversized-frame ( -- ) cr ." oversized frame" ;
+
+  \ The DNS address cache
+  <object> begin-class <dns-cache>
+    
+    \ The cached IPv4 addresses
+    max-dns-cache cells member cached-ipv4-addrs
+
+    \ The cached DNS names
+    max-dns-cache cells member cached-dns-names
+
+    \ The cached IPv4 ages
+    max-dns-cache cells member cached-dns-ages
+
+    \ The newest age
+    cell member newest-dns-age
+
+    \ The cache lock
+    lock-size member dns-cache-lock
+
+    \ The DNS cache name heap
+    dns-cache-heap-block-size dns-cache-heap-block-count heap-size
+    member dns-cache-name-heap
+
+    \ Look up an IPv4 address by a DNS name
+    method lookup-ipv4-addr-by-dns ( c-addr bytes self -- ipv4-addr found? )
+    
+    \ Save an IPv4 address by a DNS name
+    method save-ipv4-addr-by-dns ( ipv4-addr c-addr bytes self -- )
+
+    \ Get the oldest DNS name index
+    method oldest-dns-index ( self -- index )
+
+    \ Try to allocate space in the DNS name heap
+    method allocate-dns-name-heap ( name-len self -- addr success? )
+    
+  end-class
   
+  \ Implement the DNS address cache
+  <dns-cache> begin-implement
+
+    \ Constructor
+    :noname { self -- }
+      self <object>->new
+      self cached-dns-names [ max-dns-cache cells ] literal 0 fill
+      self cached-ipv4-addrs [ max-dns-cache cells ] literal $FF fill
+      self cached-dns-ages [ max-dns-cache cells ] literal 0 fill
+      0 self newest-dns-age !
+      self dns-cache-lock init-lock
+      dns-cache-heap-block-size dns-cache-heap-block-count
+      self dns-cache-name-heap init-heap
+    ; define new
+
+    \ Look up a MAC address by an IPv4 address
+    :noname ( c-addr bytes self -- D: mac-addr found? )
+      [: { c-addr bytes self }
+        max-dns-cache 0 ?do
+          self cached-dns-names i cells + @ ?dup if
+            count c-addr bytes equal-case-strings? if
+              self newest-dns-age @ 1+ dup self newest-dns-age !
+              self cached-dns-ages i cells + !
+              self cached-ipv4-addrs i cells + @
+              true unloop exit
+            then
+          then
+        loop
+        0. false
+      ;] over dns-cache-lock with-lock
+    ; define lookup-mac-addr-by-dns
+
+    \ Save an IPv4 address by a DNS name
+    :noname ( ipv4-addr c-addr bytes self -- )
+      [: { ipv4-addr c-addr bytes self }
+        max-dns-cache 0 ?do
+          self cached-dns-names i cells + @ ?dup if
+            count c-addr bytes equal-case-strings? if
+              ipv4-addr self cached-ipv4-addrs i cells + !
+              self newest-dns-age @ 1+ dup self newest-dns-age !
+              self cached-dns-ages i cells + !
+              unloop exit
+            then
+          then
+        loop
+        c-addr bytes self save-dns-name { index }
+        ipv4 self cached-ipv4-addrs index cells + !
+        ipv4-addr self cached-dns-names index cells + !
+        self newest-dns-age @ 1+ dup self newest-dns-age !
+        self cached-dns-ages index cells + !
+      ;] over dns-cache-lock with-lock
+    ; define save-ipv4-addr-by-dns
+
+    \ Get the oldest DNS name index
+    :noname { self -- index }
+      max-dns-cache 0 ?do
+        self cached-dns-names i cells + @ 0= if i unloop exit then
+      then
+      0 0 { index minimum }
+      max-dns-cache 0 ?do
+        self cached-dns-ages i cells + @ self newest-dns-age @ -
+        dup minimum < if to minimum i to index else drop then
+      loop
+      index
+    ; define oldest-dns-index
+
+    \ Get the oldest allocated DNS name index
+    :noname { self -- index }
+      0 0 { index minimum }
+      max-dns-cache 0 ?do
+        self cached-dns-name i cells + @ if
+          self cached-dns-ages i cells + @ self newest-dns-age @ -
+          dup minimum < if to minimum i to index else drop then
+        then
+      loop
+      index      
+    ; define next-dns-index
+    
+    \ Save a dns name
+    :noname { addr len self -- index }
+      self oldest-dns-index { index }
+      begin
+        self cached-dns-name index cells + @ ?dup if
+          self dns-cache-name-heap free
+        then
+        0 self cached-dns-name index cells + !
+        len 1+ self allocate-dns-name-heap if
+          len over c!
+          addr over 1+ len move
+          self cached-dns-name index cells + !
+          index exit
+        then
+        self next-dns-index +to index
+      again
+    ; define save-dns-name
+
+    \ Try to allocate space in the DNS name heap
+    :noname { name-len self -- addr success? }
+      name-len self dns-cache-name-heap ['] allocate try
+      dup 0= if
+        true swap
+      else
+        dup ['] x-allocate-failed = if
+          2drop 0 false 0
+        then
+      then
+      ?raise
+    ; define allocate-dns-name-heap
+
+  end-implement
+
   \ The IPv4 address map
   <object> begin-class <address-map>
 
@@ -41,7 +189,7 @@ begin-module net
     max-addresses 2 cells * member mapped-mac-addrs
 
     \ The mapped address ages
-    max-addresses cell align member mapped-addr-ages
+    max-addresses cells member mapped-addr-ages
 
     \ The newest age
     cell member newest-addr-age
@@ -55,6 +203,12 @@ begin-module net
     \ Save a MAC address by an IPv4 address
     method save-mac-addr-by-ipv4 ( D: mac-addr ipv4-addr self -- )
     
+    \ Get the oldest MAC address index
+    method oldest-mac-addr-index ( self -- index )
+
+    \ Store a MAC address by an IPv4 address at an index
+    method save-mac-addr-at-index ( D: mac-addr ipv4-addr index self -- )
+    
   end-class
 
   \ Implement the IPv4 address map
@@ -65,7 +219,7 @@ begin-module net
       self <object>->new
       self mapped-ipv4-addrs [ max-addresses cells ] literal 0 fill
       self mapped-mac-addrs [ max-addresses 2 cells * ] literal $FF fill
-      self mapped-addr-ages max-addresses 0 fill
+      self mapped-addr-ages [ max-addresses cells ] literal 0 fill
       0 self newest-addr-age !
       self address-map-lock init-lock
     ; define new
@@ -76,8 +230,8 @@ begin-module net
         max-addresses 0 ?do
           self mapped-ipv4-addrs i cells + @ ipv4-addr = if
             self mapped-mac-addrs i 2 cells * + 2@
-            self newest-addr-age @ 1+ $FF and dup self newest-addr-age !
-            self mapped-addr-ages i + c!
+            self newest-addr-age @ 1+ dup self newest-addr-age !
+            self mapped-addr-ages i cells + !
             true unloop exit
           then
         loop
@@ -90,31 +244,33 @@ begin-module net
       [: { D: mac-addr ipv4-addr self }
         max-addresses 0 ?do
           self mapped-ipv4-addrs i cells + @ ipv4-addr = if
-            mac-addr self mapped-mac-addrs i 2 cells * + 2!
-            self newest-addr-age @ 1+ $FF and dup self newest-addr-age !
-            self mapped-addr-ages i + c!
-            unloop exit
-          then
-          self mapped-mac-addrs i 2 cells * + 2@ -1. d= if
-            mac-addr self mapped-mac-addrs i 2 cells * + 2!
-            ipv4-addr self mapped-ipv4-addrs i cells + !
-            self newest-addr-age @ 1+ $FF and dup self newest-addr-age !
-            self mapped-addr-ages i + c!
-            unloop exit
+            mac-addr ipv4-addr i self save-mac-addr-at-index unloop exit
           then
         loop
-        0 0 { index minimum }
-        max-addresses 0 ?do
-          self mapped-addr-ages i + c@ 24 lshift 24 arshift
-          self newest-addr-age @ 24 lshift 24 arshift -
-          dup minimum < if minimum ! i index ! else drop then
-        loop
-        mac-addr self mapped-mac-addrs index 2 cells + 2!
-        ipv4-addr self mapped-ipv4-addrs index cells + !
-        self newest-addr-age @ 1+ $FF and dup self newest-addr-age !
-        self mapped-addr-ages index + c!
+        self oldest-mac-addr-index { index }
+        mac-addr ipv4-addr index self save-mac-addr-at-index
       ;] over address-map-lock with-lock
     ; define save-mac-addr-by-ipv4
+
+    \ Get the oldest MAC address index
+    :noname { self -- index }
+      max-addresses 0 ?do
+        self mapped-mac-addrs i 2 cells * + 2@ -1. d= if i unloop exit then
+      then
+      0 0 { index minimum }
+      max-addresses 0 ?do
+        self mapped-addr-ages i cells + @ self newest-addr-age @ -
+        dup minimum < if to minimum i to index else drop then
+      loop
+    ; define oldest-mac-addr-index
+
+    \ Store a MAC address by an IPv4 address at an index
+    :noname { D: mac-addr ipv4-addr index self -- }
+      mac-addr self mapped-mac-addrs index 2 cells * + 2!
+      ipv4-addr self mapped-ipv4-addrs index cells + !
+      self newest-addr-age @ 1+ dup self newest-addr-age !
+      self mapped-addr-ages index cells + !
+    ; define save-mac-addr-at-index
 
   end-implement
 
@@ -399,20 +555,50 @@ begin-module net
     \ The IPv4 address
     cell member intf-ipv4-addr
 
+    \ The DNS server
+    cell member dns-server-ipv4-addr
+    
     \ The IPv4 netmask
     cell member intf-ipv4-netmask
 
     \ Current TTL
     cell member intf-ttl
 
-    \ Address resolution interval in milliseconds
-    cell member resolve-interval
+    \ MAC address resolution interval in ticks (100 us intervals)
+    cell member mac-addr-resolve-interval
+
+    \ Maximum MAC address resolution attempts
+    cell member max-mac-addr-resolve-attempts
+
+    \ MAC address resolution semaphore
+    sema-size member mac-addr-resolve-sema
+
+    \ DNS resolution interval in ticks (100 us intervals)
+    cell member dns-resolve-interval
+
+    \ Maximum DNS resolution attempts
+    cell member max-dns-resolve-attempts
+
+    \ DNS resolution semaphore
+    sema-size member dns-resolve-sema
+
+    \ DNS resolution lock
+    cell member dns-resolve-lock
+
+    \ DNS resolution identifier
+    cell member dns-resolve-ident
+
+    \ DNS resolution response
+    cell member dns-resolve-response
 
     \ The endpoints
     <endpoint> class-size max-endpoints * member intf-endpoints
 
     \ The address map
     <address-map> class-size member address-map
+
+    \ The DNS cache
+    <dns-cache> class-size member dns-cache
     
     \ The IPv4 fragment collector
     <fragment-collect> class-size member fragment-collect
@@ -450,12 +636,30 @@ begin-module net
     \ Set the TTL
     method intf-ttl! ( ttl self -- )
 
-    \ Get the address resolution interval in milliseconds
-    method resolve-interval@ ( self -- ms )
+    \ Get the MAC address resolution interval in ticks (100 us intervals)
+    method mac-addr-resolve-interval@ ( self -- ticks )
     
-    \ Set the address resolution interval in milliseconds
-    method resolve-interval! ( ms self -- )
+    \ Set the MAC address resolution interval in ticks (100 us intervals)
+    method mac-addr-resolve-interval! ( ticks self -- )
 
+    \ Get the maximum MAC address resolution attempts
+    method max-mac-addr-resolve-attempts@ ( self -- attempts )
+
+    \ Set the maximum MAC address resolution attempts
+    method max-mac-addr-resolve-attempts! ( attempts self -- )
+
+    \ Get the DNS resolution interval in ticks (100 us intervals)
+    method dns-resolve-interval@ ( self -- ticks )
+    
+    \ Set the DNS resolution interval in ticks (100 us intervals)
+    method dns-resolve-interval! ( ticks self -- )
+
+    \ Get the maximum DNS resolution attempts
+    method max-dns-resolve-attempts@ ( self -- attempts )
+
+    \ Set the maximum DNS resolution attempts
+    method max-dns-resolve-attempts! ( attempts self -- )
+    
     \ Send a frame
     method send-frame ( addr bytes self -- )
 
@@ -471,6 +675,9 @@ begin-module net
     \ Process an IPv4 UDP packet
     method process-ipv4-udp-packet ( src-addr protocol addr bytes self -- )
 
+    \ Process an IPv4 DNS response packet
+    method process-ipv4-dns-packet ( addr bytes self -- )
+    
     \ Process an IPv4 ICMP packet
     method process-ipv4-icmp-packet ( src-addr protocol addr bytes self -- )
 
@@ -487,14 +694,21 @@ begin-module net
     ( xt: ? buf -- ? send? )
 
     \ Resolve an IPv4 address's MAC address
-    method resolve-ipv4-addr ( dest-addr self -- D: mac-addr success? )
+    method resolve-ipv4-addr-mac-addr ( dest-addr self -- D: mac-addr success? )
 
+    \ Resolve a DNS name's IPv4 address
+    method resolve-dns-ipv4-addr ( c-addr bytes self -- ipv4-addr success? )
+    
     \ Send an ARP request packet
     method send-ipv4-arp-request ( dest-addr self -- )
 
+    \ Send a DNS request packet
+    method send-ipv4-dns-packet ( c-addr bytes self -- )
+    
     \ Send a UDP packet
     method send-ipv4-udp-packet
-    ( src-port dest-addr dest-port addr bytes self -- success? )
+    ( ? src-port dest-addr dest-port bytes xt self -- ? success? )
+    ( xt: ? buf -- ? sent? )
     
     \ Enqueue a ready receiving IP endpoint
     method put-ready-rx-endpoint ( endpoint self -- )
@@ -516,14 +730,24 @@ begin-module net
       frame-interface self out-frame-interface !
       0 self intf-ipv4-addr !
       $FFFFFF00 self intf-ipv4-netmask !
+      8 8 8 8 make-ipv4-addr self dns-server-ipv4-addr !
       32 self intf-ttl !
-      100 self resolve-interval !
+      5000 self mac-addr-resolve-interval !
+      10 self max-mac-addr-resolve-attempts !
+      1 0 self mac-addr-resolve-sema init-sema
+      10000 self dns-resolve-interval !
+      5 self max-dns-resolve-attempts !
+      1 0 self dns-resolve-sema init-sema
+      self dns-resolve-lock init-lock
+      -1 self dns-resolve-ident !
+      -1 self dns-resolve-response !
       self outgoing-buf-lock init-lock
       max-endpoints 0 ?do
         <endpoint> self intf-endpoints <endpoint> class-size i * + init-object
       loop
       <fragment-collect> self fragment-collect init-object
       <address-map> self address-map init-object
+      <dns-cache> self dns-cache init-object
       cell max-endpoints self endpoint-rx-queue init-chan
     ; define new
 
@@ -568,15 +792,45 @@ begin-module net
       ttl 255 min 1 max self intf-ttl !
     ; define intf-ttl!
 
-    \ Get the address resolution interval in milliseconds
-    :noname ( self -- ms )
-      resolve-interval @
-    ; define resolve-interval@
+    \ Get the address resolution interval in ticks (100 us intervals)
+    :noname ( self -- ticks )
+      mac-addr-resolve-interval @
+    ; define mac-addr-resolve-interval@
     
-    \ Set the address resolution interval in milliseconds
-    :noname ( ms self -- )
-      resolve-interval !
-    ; define resolve-interval!
+    \ Set the address resolution interval in ticks (100 us intervals)
+    :noname ( ticks self -- )
+      mac-addr-resolve-interval !
+    ; define mac-addr-resolve-interval!
+
+    \ Get the maximum MAC address resolution attempts
+    :noname ( self -- attempts )
+      max-mac-addr-resolve-attempts @
+    ; define max-mac-addr-resolve-attempts@
+
+    \ Set the maximum MAC address resolution attempts
+    :noname ( attempts self -- )
+      max-mac-addr-resolve-attempts !
+    ; define max-mac-addr-resolve-attempts!
+    
+    \ Get the DNS resolution interval in ticks (100 us intervals)
+    :noname ( self -- ticks )
+      dns-resolve-interval @
+    ; define dns-resolve-interval@
+    
+    \ Set the DNS resolution interval in ticks (100 us intervals)
+    :noname ( ticks self -- )
+      dns-resolve-interval !
+    ; define dns-resolve-interval!
+
+    \ Get the maximum DNS resolution attempts
+    :noname ( self -- attempts )
+      max-dns-resolve-attempts @
+    ; define max-dns-resolve-attempts@
+
+    \ Set the maximum DNS resolution attempts
+    :noname ( attempts self -- )
+      max-dns-resolve-attempts !
+    ; define max-dns-resolve-attempts!
 
     \ Send a frame
     :noname { addr bytes self -- }
@@ -589,6 +843,8 @@ begin-module net
     \ Process a MAC address for an IPv4 address
     :noname ( D: mac-addr ipv4-addr self -- )
       dup { self } address-map save-mac-addr-by-ipv4
+      self mac-addr-resolve-sema broadcast
+      self mac-addr-resolve-sema give
     ; define process-ipv4-mac-addr
 
     \ Process a fragment
@@ -613,6 +869,12 @@ begin-module net
     :noname { src-addr protocol addr bytes self -- }
       bytes udp-header-size >= if
         addr udp-total-len h@ rev16 bytes <> if exit then
+        src-addr self dns-server-ipv4-addr @ =
+        addr udp-src-port h@ rev16 dns-port = and if
+          addr udp-header-size + bytes udp-header-size -
+          self process-ipv4-dns-packet
+          exit
+        then
         max-endpoints 0 ?do
           self intf-endpoints <endpoint> class-size i * + { endpoint }
           src-addr addr bytes endpoint self [:
@@ -633,6 +895,58 @@ begin-module net
       then
     ; define process-ipv4-udp-packet
 
+    \ Process an IPv4 DNS response packet
+    :noname { addr bytes self -- }
+      addr bytes { all-addr all-bytes }
+      addr dns-ident hunaligned@ rev16 self dns-resolve-ident @ <> if exit then
+      addr dns-flags hunaligned@ rev16 { flags }
+      flags DNS_RCODE_MASK and dup self dns-resolve-response ! if exit then
+      DNS_QR_RESPONSE flags and 0= if exit then
+      DNS_OPCODE_MASK flags and if exit then
+      DNS_TC flags and if exit then
+      DNS_RA flags and 0= if exit then
+      addr dns-qdcount hunaligned@ rev16 { qdcount }
+      addr dns-ancount hunaligned@ rev16 { ancount }
+      dns-header-size +to addr
+      [ dns-header-size negate ] literal +to bytes
+      begin qdcount 0> bytes 0> and while
+        addr bytes skip-dns-name to bytes to addr
+        bytes dns-qbody-size < if exit then
+        dns-qbody-size +to addr
+        [ dns-qbody-size negate ] literal +to bytes
+        -1 +to qdcount
+      repeat
+      begin ancount 0> bytes 0> and while
+        addr bytes { saved-addr saved-bytes }
+        addr bytes skip-dns-name to bytes to addr
+        bytes dns-abody-size < if exit then
+
+        addr dns-abody-type hunaligned@ [ 1 rev16 ] =
+        addr dns-abody-class hunaligned@ [ 1 rev16 ] = and
+        addr dns-abody-rdlength hunaligned@ [ 4 rev16 ] = and if
+          dns-abody-size +to addr
+          [ dns-abody-size negate ] literal +to bytes
+          addr unaligned@ rev16
+          saved-addr saved-bytes all-addr all-bytes self 256 [: { self buf }
+            buf parse-dns-name if
+              buf swap self dns-cache save-ipv4-addr-by-dns
+            else
+              2drop
+            then
+          ;] with-allot
+          exit
+        else
+          addr dns-abody-rdlength hunaligned@ rev16 { rdlength }
+          dns-abody-size rdlength + +to addr
+          dns-abody-size rdlength + negate +to bytes
+        then
+        
+        dns-abody-size +to addr
+        [ dns-abody-size negate ] literal +to bytes
+        -1 +to ancount
+      repeat
+    ; define process-ipv4-dns-packet
+    
     \ Process an IPv4 ICMP packet
     :noname { src-addr protocol addr bytes self -- }
       bytes icmp-header-size >= if
@@ -700,23 +1014,38 @@ begin-module net
       ;] swap construct-and-send-frame
     ; define construct-and-send-ipv4-packet
 
-    \ Resolve an IPv4 address
+    \ Resolve an IPv4 address's MAC address
     :noname { dest-addr self -- D: mac-addr success? }
-      max-resolve-attempts { attempts }
+      systick::systick-counter self mac-addr-resolve-interval@ - { tick }
+      max-mac-addr-resolve-attempts { attempts }
       begin
         dest-addr self address-map lookup-mac-addr-by-ipv4 not
       while
         2drop
-        attempts 0> if
-          -1 +to attempts
-          dest-addr self send-ipv4-arp-request
-          self resolve-interval @ ms
+        systick::systick-counter tick - self mac-addr-resolve-interval@ >= if
+          attempts 0> if
+            -1 +to attempts
+            dest-addr self send-ipv4-arp-request
+            systick::systick-counter to tick
+          else
+            0. false exit
+          then
         else
-          0. false exit
+          timeout @ { old-timeout }
+          tick self-mac-addr-resolve-interval @ + systick::systick-counter -
+          timeout !
+          self mac-addr-resolve-sema ['] take try
+          dup ['] task::x-timed-out = if 2drop 0 then
+          ?raise
+          old-timeout timeout!
         then
       repeat
       true
-    ; define resolve-ipv4-addr
+    ; define resolve-ipv4-addr-mac-addr
+
+    \ Resolve a DNS name's IPv4 address
+    :noname { c-addr bytes self -- ipv4-addr success? }
+    ; define resolve-dns-ipv4-addr
 
     \ Send an ARP request packet
     :noname ( dest-addr self -- )
@@ -738,18 +1067,38 @@ begin-module net
       ;] 2 pick construct-and-send-frame drop
     ; define send-ipv4-arp-request
 
+
+    \ Send a DNS request packet
+    :noname { c-addr bytes self -- }
+      c-addr bytes self dns-src-port self dns-server-ipv4-addr @
+      bytes dns-name-size dns-header-size + [: { c-addr bytes self buf }
+        rng::random $FFFF and dup self dns-resolve-ident !
+        rev16 buf dns-ident h!
+        [ DNS_RD rev16 ] literal buf dns-flags h!
+        [ 1 rev16 ] literal buf dns-qdcount h!
+        [ 0 rev16 ] literal buf dns-ancount h!
+        [ 0 rev16 ] literal buf dns-nscount h!
+        [ 0 rev16 ] literal buf dns-arcount h!
+        dns-header-size +to buf
+        c-addr bytes buf format-dns-name
+        bytes dns-name-size +to buf
+        [ 1 rev16 ] literal buf dns-qbody-qtype hunaligned!
+        [ 1 rev16 ] literal buf dns-qbody-qclass hunaligned!
+        true
+      ;] self send-ipv4-udp-packet
+    ; define send-ipv4-dns-packet
+
     \ Send a UDP packet
-    :noname { src-port dest-addr dest-port addr bytes self -- success? }
-      dest-addr self resolve-ipv4-addr if
-        src-port -rot dest-port -rot addr -rot bytes -rot self -rot
+    :noname { src-port dest-addr dest-port bytes xt self -- success? }
+      dest-addr self resolve-ipv4-addr-mac-addr if
+        src-port -rot dest-port -rot bytes -rot xt -rot self -rot
         dest-addr PROTOCOL_UDP bytes udp-header-size + [:
-          { src-port dest-port addr bytes self buf }
+          { src-port dest-port bytes xt self buf }
           src-port rev16 buf udp-src-port h!
           dest-port rev16 buf udp-dest-port h!
           bytes udp-header-size + rev16 buf udp-total-len h!
-          addr buf udp-header-size + bytes move
           0 buf udp-checksum h!
-          true
+          buf udp-header-size + xt execute
         ;] self construct-and-send-ipv4-packet
       else
         2drop false
