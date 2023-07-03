@@ -61,7 +61,9 @@ begin-module net-test
       endpoint rx-packet@ { addr bytes }
       cr ." SOURCE: " src-addr ipv4. space src-port .
       addr addr bytes + dump
-      my-port src-addr src-port addr bytes my-interface send-ipv4-udp-packet drop
+      addr bytes my-port src-addr src-port bytes [: { addr bytes buf }
+        addr buf bytes move true
+      ;] my-interface send-ipv4-udp-packet drop
     ; define handle-endpoint
   
   end-implement
