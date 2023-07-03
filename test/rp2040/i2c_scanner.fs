@@ -45,7 +45,7 @@ begin-module i2c-scanner
   ;
   
   : scan-i2c { pin0 pin1 i2c-periph -- }
-    cr $400 $000 ?do i pin0 pin1 i2c-periph test-i2c-addr loop
-    
+    cr $400 $000 ?do i pin0 pin1 i2c-periph test-i2c-addr loop 
   ;
+  
 end-module
