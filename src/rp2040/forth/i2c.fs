@@ -145,6 +145,9 @@ begin-module i2c
       \ I2C send or receive byte offset
       field: i2c-data-offset
 
+      \ I2C user abort count
+      field: i2c-user-abort-count
+
     end-structure
 
     \ An optimization
@@ -158,6 +161,9 @@ begin-module i2c
 
     \ Currently receiving
     2 constant mode-recv
+
+    \ Currently completed a send
+    3 constant mode-done-send
 
     \ Master is not active
     0 constant master-not-active
@@ -493,7 +499,7 @@ begin-module i2c
 
     \ Handle TX_ABRT
     : handle-tx-abrt ( i2c-buffer -- )
-      dup i2c-mode c@ mode-send = if
+      dup i2c-mode c@ dup mode-send = swap mode-done-send = or if
         dup i2c-addr @ IC_TX_ABRT_SOURCE @
         TX_FLUSH_CNT_MASK and TX_FLUSH_CNT_SHIFT rshift
         negate over i2c-data-offset @ + 0 max
@@ -501,24 +507,28 @@ begin-module i2c
       then
       dup i2c-addr @ IC_TX_ABRT_SOURCE @
       [ ABRT_SLVRD_INTX
-        ABRT_SLV_ARBLOST or
-        ABRT_MASTER_DIS or
-        ABRT_10B_RD_NORSTRT or
-        ABRT_SBYTE_NORSTRT or
-        ABRT_HS_NORSTRT or
-        ABRT_SBYTE_ACKDET or
-        ABRT_HS_ACKDET or
-        ABRT_GCALL_READ or ] literal and if
+      ABRT_SLV_ARBLOST or
+      ABRT_MASTER_DIS or
+      ABRT_10B_RD_NORSTRT or
+      ABRT_SBYTE_NORSTRT or
+      ABRT_HS_NORSTRT or
+      ABRT_SBYTE_ACKDET or
+      ABRT_HS_ACKDET or
+      ABRT_GCALL_READ or ] literal and if
         $FF over i2c-tx-error c!
       else
         dup i2c-addr @ IC_TX_ABRT_SOURCE @ ARB_LOST and if
           $FF over i2c-arb-lost c!
         else
-          dup i2c-addr @ IC_TX_ABRT_SOURCE @
-          [ ABRT_10ADDR2_NOACK
+          dup i2c-addr @ IC_TX_ABRT_SOURCE @ ABRT_USER_ABRT and if
+            1 over i2c-user-abort-count +!
+          else
+            dup i2c-addr @ IC_TX_ABRT_SOURCE @
+            [ ABRT_10ADDR2_NOACK
             ABRT_10ADDR1_NOACK or
             ABRT_7B_ADDR_NOACK or ] literal and if
-            $FF over i2c-tx-target-noack c!
+              $FF over i2c-tx-target-noack c!
+            then
           then
         then
       then
@@ -534,31 +544,34 @@ begin-module i2c
         begin
           dup i2c-data-offset @
           over i2c-data-size @ < if
-            dup i2c-addr @ IC_STATUS @ TFE and
-            if
-              dup i2c-data-offset @
-              over i2c-data-addr @ + c@
-              over i2c-slave c@ 0= if
-                over i2c-data-offset @ 0= if
-                  over i2c-restart c@ if RESTART or then
-                then
-                over i2c-data-offset @
-                2 pick i2c-data-size @ 1- =
-                2 pick i2c-stop c@ 0<> and if
-                  $FF 2 pick i2c-prev-stop c!
-                  STOP_BIT or
-                then
-              then
-              over i2c-addr @ IC_DATA_CMD !
-              1 over i2c-data-offset +!
-              false
-            else
+            dup i2c-addr @ IC_INTR_STAT @ TX_ABRT and if
+              dup handle-tx-abrt
               true
+            else
+              dup i2c-addr @ IC_STATUS @ TFE and
+              if
+                dup i2c-data-offset @
+                over i2c-data-addr @ + c@
+                over i2c-slave c@ 0= if
+                  over i2c-data-offset @ 0= if
+                    over i2c-restart c@ if RESTART or then
+                  then
+                  over i2c-data-offset @
+                  2 pick i2c-data-size @ 1- =
+                  2 pick i2c-stop c@ 0<> and if
+                    $FF 2 pick i2c-prev-stop c!
+                    STOP_BIT or
+                  then
+                then
+                over i2c-addr @ IC_DATA_CMD !
+                1 over i2c-data-offset +!
+                false
+              else
+                true
+              then
             then
           else
-            mode-not-active over i2c-mode c!
-            dup restore-int-mask
-            dup signal-done
+            mode-done-send over i2c-mode c!
             true
           then
         until
@@ -699,15 +712,22 @@ begin-module i2c
     : handle-i2c-interrupt ( i2c -- )
       dup i2c-irq NVIC_ICPR_CLRPEND!
       i2c-select
-      dup i2c-addr @ IC_INTR_STAT @
-      dup STOP_DET and if over handle-stop-det then
-      dup ACTIVITY and if over handle-activity then
-      dup TX_ABRT and if over handle-tx-abrt then
-      dup TX_EMPTY and if over handle-tx-empty then
-      dup RX_FULL and if over handle-rx-full then
-      dup RX_OVER and if over handle-rx-over then
-      dup RX_DONE and if over handle-rx-done then
-      RD_REQ and if dup handle-rd-req then
+      dup i2c-addr @ IC_INTR_STAT @ STOP_DET and if dup handle-stop-det then
+      dup i2c-addr @ IC_INTR_STAT @ ACTIVITY and if dup handle-activity then
+      dup i2c-addr @ IC_INTR_STAT @ TX_ABRT and if dup handle-tx-abrt then
+      dup i2c-addr @ IC_INTR_STAT @ TX_EMPTY and if dup handle-tx-empty then
+      dup i2c-addr @ IC_INTR_STAT @ RX_FULL and if dup handle-rx-full then
+      dup i2c-addr @ IC_INTR_STAT @ RX_OVER and if dup handle-rx-over then
+      dup i2c-addr @ IC_INTR_STAT @ RX_DONE and if dup handle-rx-done then
+      dup i2c-addr @ IC_INTR_STAT @ RD_REQ and if dup handle-rd-req then
+      dup i2c-mode c@ mode-done-send = if
+        begin dup i2c-addr @ IC_STATUS @ SLV_ACTIVITY and 0= until
+        begin dup i2c-addr @ IC_STATUS @ MST_ACTIVITY and 0= until
+        dup i2c-addr @ IC_INTR_STAT @ TX_ABRT and if dup handle-tx-abrt then
+        dup restore-int-mask
+        dup signal-done
+        mode-not-active over i2c-mode c!
+      then
       drop
     ;
     
@@ -745,6 +765,7 @@ begin-module i2c
       0 over i2c-data-addr !
       0 over i2c-data-size !
       0 over i2c-data-offset !
+      0 over i2c-user-abort-count !
       IC_ENABLE_ENABLE over i2c-addr @ IC_ENABLE bic!
       [ TX_EMPTY_CTRL RX_FIFO_FULL_HLD_CTRL or
       IC_RESTART_EN or
@@ -792,26 +813,40 @@ begin-module i2c
         systick-counter
         begin
           over i2c-done c@ 0<> if
-            true
+            drop true
           else
             disable-int
             systick-counter over - timeout @ >= if
-              over restore-int-mask
-              mode-not-active 2 pick i2c-mode c!
-              0 2 pick i2c-data-offset !
-              0 2 pick i2c-data-size !
-              $00 2 pick i2c-stop c!
-              $00 2 pick i2c-restart c!
-              $00 2 pick i2c-stop-det c!
-              $00 2 pick i2c-prev-stop c!
-              over i2c-lock release-lock
+              drop
+              dup i2c-slave c@ 0= if
+                IC_ENABLE_ABORT over i2c-addr @ IC_ENABLE bis!
+                begin dup i2c-addr @ IC_ENABLE @ IC_ENABLE_ABORT and 0= until
+              then
+              dup i2c-addr @ IC_CLR_STOP_DET @ drop
+              dup i2c-addr @ IC_CLR_RX_DONE @ drop
+              dup i2c-addr @ IC_CLR_TX_ABRT @ drop
+              mode-not-active over i2c-mode c!
+              0 over i2c-data-offset !
+              0 over i2c-data-size !
+              $00 over i2c-stop c!
+              $00 over i2c-restart c!
+              $00 over i2c-stop-det c!
+              $00 over i2c-prev-stop c!
+              $00 over i2c-tx-abort c!
+              $00 over i2c-tx-error c!
+              $00 over i2c-tx-target-noack c!
+              $00 over i2c-arb-lost c!
+              $00 over i2c-rx-over c!
+              $00 over i2c-stop-det c!
+              dup restore-int-mask \ This enables interrupts
+              dup i2c-lock release-lock
               ['] x-timed-out ?raise
             then
             enable-int wake-counter @ current-task block-wait false
           then
         until
-        drop
       then
+      drop
     ;
     
     \ Do I2C send
@@ -840,7 +875,7 @@ begin-module i2c
         over i2c-slave c@ if [ RD_REQ RX_DONE or ] literal or then
         over i2c-addr @ IC_INTR_MASK !
         enable-int
-        wait-i2c-complete-or-timeout
+        dup wait-i2c-complete-or-timeout
         $00 over i2c-stop-det c!
         mode-not-active over i2c-mode c!
         dup i2c-data-offset @
@@ -889,7 +924,7 @@ begin-module i2c
           over i2c-addr @ IC_DATA_CMD !
         then
         enable-int
-        wait-i2c-complete-or-timeout
+        dup wait-i2c-complete-or-timeout
         $00 over i2c-stop-det c!
         mode-not-active over i2c-mode c!
         dup i2c-data-offset @
@@ -1322,18 +1357,33 @@ begin-module i2c
     dup claim-i2c
     dup i2c-select
     disable-int
-    
-    dup i2c-disabled @ 0<= if
-      IC_ENABLE_ENABLE over i2c-addr @ IC_ENABLE bic!
-      begin dup i2c-addr @ IC_ENABLE_STATUS @ IC_EN and 0= until
+    TX_ABRT over i2c-addr @ IC_INTR_MASK !
+
+    dup i2c-disabled @ 0> if
+      IC_ENABLE_ENABLE over i2c-addr @ IC_ENABLE bis!
+      enable-int
+      begin dup i2c-addr @ IC_ENABLE_STATUS @ IC_EN and until
+    else
+      enable-int
     then
+
+    dup i2c-slave c@ 0= if
+      IC_ENABLE_ABORT over i2c-addr @ IC_ENABLE bis!
+      begin dup i2c-addr @ IC_ENABLE @ IC_ENABLE_ABORT and 0= until
+    then
+
+    IC_ENABLE_ENABLE over i2c-addr @ IC_ENABLE bic!
+    begin dup i2c-addr @ IC_ENABLE_STATUS @ IC_EN and 0= until
     
     begin dup i2c-addr @ IC_STATUS @ SLV_ACTIVITY and 0= until
     begin dup i2c-addr @ IC_STATUS @ MST_ACTIVITY and 0= until
-        
+    
+    disable-int
     dup i2c-addr @ IC_CLR_STOP_DET @ drop
     dup i2c-addr @ IC_CLR_RX_DONE @ drop
     dup i2c-addr @ IC_CLR_TX_ABRT @ drop
+    0 over i2c-data-offset !
+    0 over i2c-data-size !
     $00 over i2c-stop-det c!
     $00 over i2c-prev-stop c!
     $00 over i2c-tx-abort c!
@@ -1345,13 +1395,14 @@ begin-module i2c
     master-not-active over i2c-master-mode c!
     not-pending over i2c-pending c!
     dup clear-nack    
+    dup restore-int-mask
     enable-int
     
     dup i2c-disabled @ 0<= if
       IC_ENABLE_ENABLE over i2c-addr @ IC_ENABLE bis!
       begin dup i2c-addr @ IC_ENABLE_STATUS @ IC_EN and until
     then
-    
+
     drop release-i2c
   ;
 
