@@ -23,6 +23,7 @@ compile-to-flash
 begin-module oo
 
   internal import
+  armv6m import
 
   begin-module oo-internal
     
@@ -163,7 +164,7 @@ begin-module oo
           index class-header class-superclass @ class-method @
           index class-header class-method current!
         else
-          ['] abstract-method index class-header class-method current!
+          ['] abstract-method 1 and index class-header class-method current!
         then
       then
       current-method prev-method @ to current-method
@@ -180,8 +181,25 @@ begin-module oo
   \ Declare a method of a class
   : method ( list method-count "name" -- list method-count )
     { method-list #methods }
-    : inlined postpone dup postpone @ #methods 1+ cells lit,
-    postpone + postpone @ postpone inline-execute postpone ;
+    #methods 31 < if
+      :
+        inlined
+        [ armv6m-instr import ]
+        0 r6 r0 ldr_,[_,#_]
+        #methods 1+ cells r0 r0 ldr_,[_,#_]
+        r0 blx_
+        [ armv6m-instr unimport ]
+      postpone ;
+    else
+      :
+        [ armv6m-instr import ]
+        0 r6 r0 ldr_,[_,#_]
+        #methods 1+ cells r1 literal,
+        r1 r0 r0 adds_,_,_
+        r0 blx_
+        [ armv6m-instr unimport ]
+      postpone ;
+    then
     cell align, here method-header-size allot { method-header }
     method-list method-header prev-method current!
     #methods method-header method-index current!
@@ -192,6 +210,7 @@ begin-module oo
 
   \ Define a method of a class
   : define ( class-header xt "name" -- class-header )
+    1 and
     token
     dup 0= triggers x-token-expected
     3 pick method-by-name dup -1 <> averts x-method-not-in-class
@@ -242,7 +261,7 @@ begin-module oo
           >r 2 + tuck - -rot + swap r> >xt execute >r
           r@ method-by-name dup -1 <> if
             r> class-method flash-buffer@ dup 0<> over -1 <> and if
-              find-by-xt
+              1 bic find-by-xt
             else
               drop ['] x-method-not-implemented-yet ?raise
             then
