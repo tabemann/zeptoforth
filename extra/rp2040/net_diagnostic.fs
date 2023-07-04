@@ -44,8 +44,8 @@ begin-module net-diagnostic
       addr bytes self diag-applies? if
 
         cr ." bytes: " bytes .
-        cr ." destination MAC: " addr ethh-destination-mac mac.
-        cr ." source MAC: " addr ethh-source-mac mac.
+        cr ." destination MAC: " addr ethh-destination-mac mac@ mac.
+        cr ." source MAC: " addr ethh-source-mac mac@ mac.
         cr ." ethernet type " addr ethh-ether-type h@ rev16 h.4
 
         addr bytes self display-diag
@@ -99,9 +99,9 @@ begin-module net-diagnostic
         OPER_REPLY of ." (reply)" endof
       endcase
       htype HTYPE_ETHERNET = ptype ETHER_TYPE_IPV4 = and if
-        cr ." sha: " addr arp-sha mac.
+        cr ." sha: " addr arp-sha mac@ mac.
         cr ." spa: " addr arp-spa unaligned@ rev ipv4.
-        cr ." tha: " addr arp-tha mac.
+        cr ." tha: " addr arp-tha mac@ mac.
         cr ." tpa: " addr arp-tpa unaligned@ rev ipv4.
       then
     ; define display-diag

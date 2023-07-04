@@ -236,8 +236,10 @@ begin-module net-misc
   ;
 
   \ Print a MAC address
-  : mac. { addr -- }
-    6 0 ?do addr i + c@ h.2 i 5 <> if ." :" then loop
+  : mac. { D: addr -- }
+    0 5 ?do
+      addr i 0 ?do 256. d/ loop drop $FF and h.2 i if ." :" then
+    -1 +loop
   ;
 
   \ Print an IPv4 address
@@ -314,7 +316,7 @@ begin-module net-misc
           1 +to dest-addr
           name-addr dest-addr name-bytes move
           name-bytes +to dest-addr
-          0 +to name-bytes
+          0 to name-bytes
         then
         false
       else
@@ -337,9 +339,10 @@ begin-module net-misc
           then
         then
       else
-        addr bytes true
+        true
       then
     until
+    addr bytes
   ;
 
   \ Parse a DNS name
@@ -356,8 +359,8 @@ begin-module net-misc
           level parse-dns-name-depth = if 0 false exit then
           addr hunaligned@ $C0 bic
           dup all-bytes u>= if 0 false exit then
-          dup all-bytes - bytes !
-          all-addr + addr !
+          dup all-bytes - to bytes
+          all-addr + to addr
           1 +to level
         else
           part-len 63 u>
