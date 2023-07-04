@@ -108,17 +108,17 @@ begin-module oo
   create destroy-method new-method , 1 , s" destroy" find ,
 
   \ The object class's method table
-  create object-method-table cell allot ' new , ' destroy ,
+  create object-method-table cell allot ' new 1 or , ' destroy 1 or ,
     
   \ Define the object class
   create <object> object-method-table , here cell - , destroy-method , 0 , 2 ,
   here 5 cells - object-method-table current!
   
   \ This is the entry point to the new method
-  : new ( object -- ) dup @ 4 + @ execute ;
+  : new ( object -- ) dup @ 4 + @ 1 bic execute ;
 
   \ This is the entry point to the destroy method
-  : destroy ( object -- ) dup @ 8 + @ execute ;
+  : destroy ( object -- ) dup @ 8 + @ 1 bic execute ;
 
   \ Begin the declaration of a class
   : begin-class
@@ -164,7 +164,7 @@ begin-module oo
           index class-header class-superclass @ class-method @
           index class-header class-method current!
         else
-          ['] abstract-method 1 and index class-header class-method current!
+          ['] abstract-method 1 or index class-header class-method current!
         then
       then
       current-method prev-method @ to current-method
@@ -195,7 +195,7 @@ begin-module oo
         [ armv6m-instr import ]
         0 r6 r0 ldr_,[_,#_]
         #methods 1+ cells r1 literal,
-        r1 r0 r0 adds_,_,_
+        r1 r0 r0 ldr_,[_,#_]
         r0 blx_
         [ armv6m-instr unimport ]
       postpone ;
@@ -210,7 +210,7 @@ begin-module oo
 
   \ Define a method of a class
   : define ( class-header xt "name" -- class-header )
-    1 and
+    1 or
     token
     dup 0= triggers x-token-expected
     3 pick method-by-name dup -1 <> averts x-method-not-in-class
