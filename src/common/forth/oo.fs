@@ -195,7 +195,7 @@ begin-module oo
         [ armv6m-instr import ]
         0 r6 r0 ldr_,[_,#_]
         #methods 1+ cells r1 literal,
-        r1 r0 r0 ldr_,[_,#_]
+        r1 r0 r0 ldr_,[_,_]
         r0 blx_
         [ armv6m-instr unimport ]
       postpone ;
