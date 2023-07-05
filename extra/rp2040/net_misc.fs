@@ -192,10 +192,10 @@ begin-module net-misc
   ;
 
   \ Reverse byte order in a 32-bit value
-  : rev ( x -- x' ) code[ r6 r6 rev_,_ ]code ;
+  : rev ( x -- x' ) [inlined] code[ r6 r6 rev_,_ ]code ;
 
   \ Reverse byte order in a 16-bit value
-  : rev16 ( h -- h' ) code[ r6 r6 rev16_,_ ]code ;
+  : rev16 ( h -- h' ) [inlined] code[ r6 r6 rev16_,_ ]code ;
 
   \ Get whether two MAC addresses are the same
   : mac= { addr0 addr1 -- equal? }
@@ -352,20 +352,32 @@ begin-module net-misc
     begin
       addr all-addr u>=
       addr all-addr all-bytes + u< and
-      addr bytes < and
+      bytes all-bytes u< and
       offset 253 < and if
         addr c@ { part-len }
         part-len $C0 and $C0 = if
           level parse-dns-name-depth = if 0 false exit then
-          addr hunaligned@ $C0 bic
-          dup all-bytes u>= if 0 false exit then
-          dup all-bytes - to bytes
+          addr hunaligned@ rev16 $C000 bic
+
+          \ DEBUG
+          dup cr ." Redirect: " .
+          \ DEBUG
+          
+          dup all-bytes u>= if drop 0 false exit then
+          all-bytes over - to bytes
           all-addr + to addr
           1 +to level
         else
           part-len 63 u>
           part-len offset + 1+ 253 u> or if 0 false exit then
-          part-len 0= if offset true exit then
+          part-len 0= if
+
+            \ DEBUG
+            offset cr ." Length: " .
+            \ DEBUG
+            
+            offset true exit
+          then
           offset 0<> if
             [char] . buf offset + c!
             1 +to offset
@@ -374,6 +386,11 @@ begin-module net-misc
           -1 +to bytes
           part-len bytes u>= if 0 false exit then
           addr buf offset + part-len move
+
+          \ DEBUG
+          cr ." Part: " addr part-len type
+          \ DEBUG
+          
           part-len +to addr
           part-len negate +to bytes
           part-len +to offset

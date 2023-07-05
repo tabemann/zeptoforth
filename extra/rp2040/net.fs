@@ -105,7 +105,7 @@ begin-module net
     ; define new
 
     \ Look up an IPv4 address by a DNS name
-    :noname ( c-addr bytes self -- ipv4-addr response found? )
+    :noname ( c-addr bytes self -- ipv4-addr response found? ) cr ." ***lookup-ipv4-addr-by-dns*** " \ DEBUG
       [: { c-addr bytes self }
         max-dns-cache 0 ?do
           self cached-dns-names i cells + @ ?dup if
@@ -124,7 +124,7 @@ begin-module net
     ; define lookup-ipv4-addr-by-dns
 
     \ Save an IPv4 address by a DNS name
-    :noname ( ipv4-addr ident c-addr bytes self -- )
+    :noname ( ipv4-addr ident c-addr bytes self -- ) cr ." ***save-ipv4-addr-by-dns*** " \ DEBUG
       [: { ipv4-addr ident c-addr bytes self }
         max-dns-cache 0 ?do
           self cached-dns-names i cells + @ ?dup if
@@ -143,7 +143,7 @@ begin-module net
     ; define save-ipv4-addr-by-dns
 
     \ Reserve a DNS entry
-    :noname ( ident c-addr bytes self -- )
+    :noname ( ident c-addr bytes self -- ) cr ." ***reserve-dns*** " \ DEBUG
       [: { ident c-addr bytes self }
         max-dns-cache 0 ?do
           self cached-dns-names i cells + @ ?dup if
@@ -167,7 +167,7 @@ begin-module net
     ; define reserve-dns
 
     \ Save an abnormal response by a DNS name
-    :noname ( response ident self -- )
+    :noname ( response ident self -- ) cr ." ***save-response-by-dns*** " \ DEBUG
       [: { response ident self }
         max-dns-cache 0 ?do
           ident self cached-dns-idents i cells + @ = if
@@ -183,7 +183,7 @@ begin-module net
     ; define save-response-by-dns
 
     \ Get the oldest DNS name index
-    :noname { self -- index }
+    :noname { self -- index } cr ." ***oldest-dns-index*** " \ DEBUG
       max-dns-cache 0 ?do
         self cached-dns-names i cells + @ 0= if i unloop exit then
       loop
@@ -196,7 +196,7 @@ begin-module net
     ; define oldest-dns-index
 
     \ Get the oldest allocated DNS name index
-    :noname { self -- index }
+    :noname { self -- index } cr ." ***next-dns-index*** " \ DEBUG
       0 0 { index minimum }
       max-dns-cache 0 ?do
         self cached-dns-names i cells + @ if
@@ -208,9 +208,9 @@ begin-module net
     ; define next-dns-index
     
     \ Save a DNS name
-    :noname { addr len self -- index }
+    :noname { addr len self -- index } cr ." ***save-dns-name*** " \ DEBUG
       self oldest-dns-index { index }
-      begin
+      begin cr ." ***looping...*** " \ DEBUG
         self cached-dns-names index cells + @ ?dup if
           self dns-cache-name-heap free
         then
@@ -226,7 +226,7 @@ begin-module net
     ; define save-dns-name
 
     \ Try to allocate space in the DNS name heap
-    :noname { name-len self -- addr success? }
+    :noname { name-len self -- addr success? } cr ." ***allocate-dns-name-heap*** " \ DEBUG
       name-len self dns-cache-name-heap ['] allocate try
       dup 0= if
         true swap
@@ -761,6 +761,10 @@ begin-module net
     \ Resolve a DNS name's IPv4 address
     method resolve-dns-ipv4-addr ( c-addr bytes self -- ipv4-addr success? )
     
+    \ Process IPv4 DNS response packet answers
+    method process-ipv4-dns-answers
+    ( addr bytes all-addr all-bytes ancount ident self -- )
+
     \ Send an ARP request packet
     method send-ipv4-arp-request ( dest-addr self -- )
 
@@ -938,9 +942,19 @@ begin-module net
     \ Process an IPv4 UDP packet
     :noname { src-addr protocol addr bytes self -- }
       bytes udp-header-size >= if
+
+        \ DEBUG
+        cr ." Source address: " src-addr ipv4.
+        cr ." Total length: " addr udp-total-len h@ rev16 .
+        cr ." Actual length: " bytes .
+        cr ." Source port: " addr udp-src-port h@ rev16 .
+        cr ." Destination port: " addr udp-dest-port h@ rev16 .
+        \ DEBUG
+        
         addr udp-total-len h@ rev16 bytes <> if exit then
         src-addr self dns-server-ipv4-addr @ =
         addr udp-src-port h@ rev16 dns-port = and if
+          cr ." FOUND DNS PACKET" \ DEBUG
           addr udp-header-size + bytes udp-header-size -
           self process-ipv4-dns-packet
           exit
@@ -967,6 +981,7 @@ begin-module net
 
     \ Process an IPv4 DNS response packet
     :noname { addr bytes self -- }
+      bytes dns-header-size < if exit then
       addr bytes { all-addr all-bytes }
       addr dns-ident hunaligned@ rev16 { ident }
       addr dns-flags hunaligned@ rev16 { flags }
@@ -985,13 +1000,20 @@ begin-module net
       dns-header-size +to addr
       [ dns-header-size negate ] literal +to bytes
       begin qdcount 0> bytes 0> and while
+        cr ." Got question part" \ DEBUG
         addr bytes skip-dns-name to bytes to addr
         bytes dns-qbody-size < if exit then
         dns-qbody-size +to addr
         [ dns-qbody-size negate ] literal +to bytes
         -1 +to qdcount
       repeat
+      addr bytes all-addr all-bytes ancount ident self process-ipv4-dns-answers
+    ; define process-ipv4-dns-packet
+
+    \ Process IPv4 DNS response packet answers
+    :noname { addr bytes all-addr all-bytes ancount ident self -- }
       begin ancount 0> bytes 0> and while
+        cr ." Got answer part" \ DEBUG
         addr bytes { saved-addr saved-bytes }
         addr bytes skip-dns-name to bytes to addr
         bytes dns-abody-size < if exit then
@@ -1001,29 +1023,29 @@ begin-module net
         addr dns-abody-rdlength hunaligned@ [ 4 rev16 ] literal = and if
           dns-abody-size +to addr
           [ dns-abody-size negate ] literal +to bytes
+          bytes 4 < if exit then
+          cr ." Got address part" \ DEBUG
           addr unaligned@ rev
           saved-addr saved-bytes all-addr all-bytes ident self 256 [:
             { ident self buf }
             buf parse-dns-name if
+              cr ." Parsed DNS name: " buf over type \ DEBUG
               ident buf rot self dns-cache save-ipv4-addr-by-dns
               self dns-resolve-sema broadcast
               self dns-resolve-sema give
             else
+              cr ." Rejected DNS name" \ DEBUG
               2drop
             then
           ;] with-allot
           exit
         else
           addr dns-abody-rdlength hunaligned@ rev16 { rdlength }
-          dns-abody-size rdlength + +to addr
-          dns-abody-size rdlength + negate +to bytes
+          dns-abody-size rdlength + dup +to addr negate +to bytes
+          -1 +to ancount
         then
-        
-        dns-abody-size +to addr
-        [ dns-abody-size negate ] literal +to bytes
-        -1 +to ancount
       repeat
-    ; define process-ipv4-dns-packet
+    ; define process-ipv4-dns-answers
     
     \ Process an IPv4 ICMP packet
     :noname { src-addr protocol addr bytes self -- }
@@ -1156,7 +1178,7 @@ begin-module net
         c-addr bytes self dns-cache lookup-ipv4-addr-by-dns if
           0= true
         else
-          false
+          2drop false
         then
       until
     ; define resolve-dns-ipv4-addr

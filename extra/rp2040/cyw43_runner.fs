@@ -55,10 +55,10 @@ begin-module cyw43-runner
   4096 constant cyw43-scratch-size
 
   \ Switch byte order for a 16-bit value
-  : rev16 ( -- ) code[ r6 r6 rev16_,_ ]code ;
+  : rev16 ( -- ) [inlined] code[ r6 r6 rev16_,_ ]code ;
 
   \ Switch byte order for a 32-bit value
-  : rev ( -- ) code[ r6 r6 rev_,_ ]code ;
+  : rev ( -- ) [inlined] code[ r6 r6 rev_,_ ]code ;
 
   \ Do an alignment-safe 32-bit load
   : unaligned@ { addr -- x }
