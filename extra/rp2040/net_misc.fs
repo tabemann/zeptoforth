@@ -49,6 +49,9 @@ begin-module net-misc
   \ DNS address cache name heap block count
   64 constant dns-cache-heap-block-count
 
+  \ Maximum number of packets to send at a time
+  8 constant max-packets
+
   \ DNS port
   53 constant dns-port
 
@@ -90,9 +93,30 @@ begin-module net-misc
 
   \ Endpoint bitmask
   0 bit constant endpoint-active
-  1 bit constant endpoint-connected
-  2 bit constant endpoint-rx-pending
+  1 bit constant endpoint-pending
+  2 bit constant endpoint-dequeued
   3 bit constant endpoint-udp
+  4 bit constant endpoint-tcp
+  24 constant endpoint-tcp-state-lsb
+  $FF endpoint-tcp-state-lsb lshift constant endpoint-tcp-state-mask
+
+  \ TCP states
+  0 constant TCP_CLOSED
+  1 constant TCP_LISTEN
+  2 constant TCP_SYN_SENT
+  3 constant TCP_SYN_RECEIVED
+  4 constant TCP_ESTABLISHED
+  5 constant TCP_FIN_WAIT_1
+  6 constant TCP_FIN_WAIT_2
+  7 constant TCP_CLOSING
+  8 constant TCP_LAST_ACK
+  9 constant TCP_TIME_WAIT
+
+  \ TCP options
+  0 constant TCP_OPT_END
+  1 constant TCP_OPT_NOP
+  2 constant TCP_OPT_MSS
+  4 constant TCP_OPT_MSS_LEN
 
   \ IPv4 ARP header structure
   begin-structure arp-ipv4-size
@@ -161,6 +185,19 @@ begin-module net-misc
     hfield: dns-abody-rdlength
   end-structure
 
+  \ TCP header structure
+  begin-structure tcp-header-size
+    hfield: tcp-src-port
+    hfield: tcp-dest-port
+    field: tcp-seq-no
+    field: tcp-ack-no
+    cfield: tcp-data-offset
+    cfield: tcp-flags
+    hfield: tcp-window-size
+    hfield: tcp-checksum
+    hfield: tcp-urgent-ptr
+  end-structure
+
   \ DNS flags
   15 bit constant DNS_QR_RESPONSE
   11 constant DNS_OPCODE_LSB
@@ -179,6 +216,17 @@ begin-module net-misc
   3 constant DNS_NAME_ERROR
   4 constant DNS_NOT_IMPLEMENTED
   5 constant DNS_REFUSED
+
+  \ TCP flags
+  7 bit constant TCP_CWR
+  6 bit constant TCP_ECE
+  5 bit constant TCP_URG
+  4 bit constant TCP_ACK
+  3 bit constant TCP_PSH
+  2 bit constant TCP_RST
+  1 bit constant TCP_SYN
+  0 bit constant TCP_FIN
+  TCP_ACK TCP_SYN or TCP_FIN or TCP_RST or constant TCP_CONTROL
 
   \ Get ICMP size for IPv4 packet
   : icmp-error-size { addr bytes -- size }
@@ -253,19 +301,35 @@ begin-module net-misc
     bytes cyw43-structs::ethernet-header-size - 0 max
   ;
 
+  \ Compute a checksum
+  : compute-checksum ( start ) { addr bytes zero-offset -- h }
+    bytes 1 bic 0 ?do
+      i zero-offset <> if
+        addr i + h@ rev16 + dup 16 rshift + $FFFF and
+      then
+    2 +loop
+    bytes 1 and if
+      addr bytes 1- + c@ 8 lshift + dup 16 rshift + $FFFF and
+    then
+    not
+  ;
+  
   \ Compute an Internet header checksum
-  : compute-inet-checksum ( addr bytes zero-offset -- h )
-    over [: { addr bytes zero-offset buf }
-      buf bytes 2 align 0 fill
-      addr buf bytes move
-      0 buf zero-offset + h!
-      0 buf bytes 2 align + buf ?do
-        i h@ rev16 + dup 16 rshift + $FFFF and
-      2 +loop
-      not $FFFF and
-    ;] with-aligned-allot
+  : compute-inet-checksum { addr bytes zero-offset -- h }
+    0 addr bytes zero-offset compute-checksum
   ;
 
+  \ Compute a TCP checksum
+  : compute-tcp-checksum { src-addr dest-addr addr bytes zero-offset -- h }
+    src-addr 16 rshift rev16 + dup 16 rshift + $FFFF and
+    src-addr $FFFF and rev16 + dup 16 rshift + $FFFF and
+    dest-addr 16 rshift rev16 + dup 16 rshift + $FFFF and
+    dest-addr $FFFF and rev16 + dup 16 rshift + $FFFF and
+    PROTOCOL_TCP + dup 16 rshift + $FFFF and
+    bytes rev16 + dup 16 rshift + $FFFF and
+    addr bytes zero-offset compute-checksum
+  ;
+  
   \ Make an IPv4 address
   : make-ipv4-addr ( addr0 addr1 addr2 addr3 -- addr )
     $FF and
@@ -358,11 +422,6 @@ begin-module net-misc
         part-len $C0 and $C0 = if
           level parse-dns-name-depth = if 0 false exit then
           addr hunaligned@ rev16 $C000 bic
-
-          \ DEBUG
-          dup cr ." Redirect: " .
-          \ DEBUG
-          
           dup all-bytes u>= if drop 0 false exit then
           all-bytes over - to bytes
           all-addr + to addr
@@ -371,11 +430,6 @@ begin-module net-misc
           part-len 63 u>
           part-len offset + 1+ 253 u> or if 0 false exit then
           part-len 0= if
-
-            \ DEBUG
-            offset cr ." Length: " .
-            \ DEBUG
-            
             offset true exit
           then
           offset 0<> if
@@ -386,11 +440,6 @@ begin-module net-misc
           -1 +to bytes
           part-len bytes u>= if 0 false exit then
           addr buf offset + part-len move
-
-          \ DEBUG
-          cr ." Part: " addr part-len type
-          \ DEBUG
-          
           part-len +to addr
           part-len negate +to bytes
           part-len +to offset
@@ -399,6 +448,42 @@ begin-module net-misc
         0 false exit
       then
     again
+  ;
+
+  \ Get full TCP header size
+  : full-tcp-header-size ( addr -- size ) tcp-data-offset c@ 2 rshift ;
+
+  \ Get TCP data
+  : tcp-data ( addr bytes -- addr' bytes' )
+    over full-tcp-header-size dup { header-size } - swap header-size + swap
+  ;
+
+  \ Try to get MSS field from an TCP packet
+  : tcp-mss@ { addr bytes -- mss found? }
+    addr full-tcp-header-size dup { size } 5 cells > size bytes <= and if
+      0 false { mss found? }
+      5 cells +to addr
+      begin addr addr bytes + < while
+        addr c@ case
+          TCP_OPT_END of mss found? exit endof
+          TCP_OPT_NOP of 1 +to addr endof
+          TCP_OPT_MSS of
+            addr 4 + addr bytes + > if 0 false exit then
+            1 +to addr
+            addr c@ TCP_OPT_MSS_LEN <> if 0 false exit then
+            1 +to addr
+            addr hunaligned@ to mss true to found?
+          endof
+          addr 2 + addr bytes + > if 0 false exit then
+          addr 1+ c@ { len }
+          addr len + addr bytes + > if 0 false exit then
+          len +to addr
+        endcase
+      repeat
+      addr addr bytes + = if mss found? else 0 false then
+    else
+      0 false
+    then
   ;
   
 end-module

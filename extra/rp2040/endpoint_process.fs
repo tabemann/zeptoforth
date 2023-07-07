@@ -118,14 +118,13 @@ begin-module endpoint-process
         endpoint current handle-endpoint
         current next-endpoint-handler @ to current
       repeat
-      endpoint retire-rx-packet
     ; define process-endpoint
 
     \ Run endpoint processor
     :noname { self -- }
       self 1 [: { self }
         begin
-          self interface @ get-ready-rx-endpoint self process-endpoint
+          self interface @ get-ready-endpoint self process-endpoint
         again
       ;] 1024 256 1024 spawn run
     ; define run-endpoint-process
