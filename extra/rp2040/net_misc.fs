@@ -309,13 +309,13 @@ begin-module net-misc
   : compute-checksum ( start ) { addr bytes zero-offset -- h }
     bytes 1 bic 0 ?do
       i zero-offset <> if
-        addr i + h@ rev16 + dup 16 rshift + $FFFF and
+        addr i + hunaligned@ rev16 + dup 16 rshift + $FFFF and
       then
     2 +loop
     bytes 1 and if
       addr bytes 1- + c@ 8 lshift + dup 16 rshift + $FFFF and
     then
-    not
+    not $FFFF and
   ;
   
   \ Compute an Internet header checksum

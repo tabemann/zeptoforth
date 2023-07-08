@@ -57,13 +57,14 @@ begin-module net-test
   
     \ Handle a endpoint packet
     :noname { endpoint self -- }
-      endpoint rx-ipv4-source@ { src-addr src-port }
-      endpoint rx-packet@ { addr bytes }
+      endpoint endpoint-ipv4-remote@ { src-addr src-port }
+      endpoint endpoint-rx-data@ { addr bytes }
       cr ." SOURCE: " src-addr ipv4. space src-port .
       addr addr bytes + dump
       addr bytes my-port src-addr src-port bytes [: { addr bytes buf }
         addr buf bytes move true
       ;] my-interface send-ipv4-udp-packet drop
+      endpoint my-interface endpoint-done
     ; define handle-endpoint
   
   end-implement
