@@ -50,7 +50,10 @@ begin-module net-misc
   64 constant dns-cache-heap-block-count
 
   \ Maximum number of packets to send at a time
-  8 constant max-packets
+  8 constant max-out-packets
+
+  \ Maximum number of packets to receive at a time
+  8 constant max-in-packets
 
   \ DNS port
   53 constant dns-port
@@ -109,8 +112,9 @@ begin-module net-misc
   5 constant TCP_FIN_WAIT_1
   6 constant TCP_FIN_WAIT_2
   7 constant TCP_CLOSING
-  8 constant TCP_LAST_ACK
-  9 constant TCP_TIME_WAIT
+  8 constant TCP_CLOSE_WAIT
+  9 constant TCP_LAST_ACK
+  10 constant TCP_TIME_WAIT
 
   \ TCP options
   0 constant TCP_OPT_END
