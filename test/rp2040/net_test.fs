@@ -93,8 +93,11 @@ begin-module net-test
     my-interface <endpoint-process> my-endpoint-process init-object
     <udp-echo-handler> my-udp-echo-handler init-object
     my-udp-echo-handler my-endpoint-process add-endpoint-handler
-    my-interface allocate-endpoint drop my-endpoint !
-    my-port my-endpoint @ listen-udp
+    my-port my-interface allocate-udp-listen-endpoint if
+      my-endpoint !
+    else
+      [: ." unable to allocate UDP listen endpoint" cr ;] ?raise
+    then
   ;
 
   : run-test { D: ssid D: pass -- }

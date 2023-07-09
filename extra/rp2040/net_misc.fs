@@ -466,28 +466,52 @@ begin-module net-misc
   : tcp-mss@ { addr bytes -- mss found? }
     addr full-tcp-header-size dup { size } 5 cells > size bytes <= and if
       0 false { mss found? }
-      5 cells +to addr
-      begin addr addr bytes + < while
-        addr c@ case
+      addr 5 cells + { current-addr }
+      begin current-addr addr bytes + < while
+        current-addr c@ case
           TCP_OPT_END of mss found? exit endof
-          TCP_OPT_NOP of 1 +to addr endof
+          TCP_OPT_NOP of 1 +to current-addr endof
           TCP_OPT_MSS of
-            addr 4 + addr bytes + > if 0 false exit then
-            1 +to addr
-            addr c@ TCP_OPT_MSS_LEN <> if 0 false exit then
-            1 +to addr
-            addr hunaligned@ to mss true to found?
+            current-addr 4 + addr bytes + > if 0 false exit then
+            1 +to current-addr
+            current-addr c@ TCP_OPT_MSS_LEN <> if 0 false exit then
+            1 +to current-addr
+            current-addr hunaligned@ rev16 to mss true to found?
+            2 +to current-addr
           endof
-          addr 2 + addr bytes + > if 0 false exit then
-          addr 1+ c@ { len }
-          addr len + addr bytes + > if 0 false exit then
-          len +to addr
+          current-addr 2 + addr bytes + > if 0 false exit then
+          current-addr 1+ c@
+          dup current-addr + addr bytes + > if drop 0 false exit then
+          dup 2 < if drop 0 false exit then
+          +to current-addr
         endcase
       repeat
-      addr addr bytes + = if mss found? else 0 false then
+      current-addr addr bytes + = if mss found? else 0 false then
     else
       0 false
     then
   ;
   
+  \ Print a TCP packet
+  : tcp. { addr -- }
+    cr ." tcp-src-port: " addr tcp-src-port hunaligned@ rev16 .
+    cr ." tcp-dest-port: " addr tcp-dest-port hunaligned@ rev16 .
+    cr ." tcp-seq-no: " addr tcp-seq-no unaligned@ rev .
+    cr ." tcp-ack-no: " addr tcp-ack-no unaligned@ rev .
+    cr ." tcp-data-offset: " addr tcp-data-offset c@ dup .
+    ." (" 2 rshift . ." bytes)"
+    cr ." tcp-flags: " addr tcp-flags c@ dup .
+    dup TCP_CWR and if ." CWR " then
+    dup TCP_ECE and if ." ECE " then
+    dup TCP_URG and if ." URG " then
+    dup TCP_ACK and if ." ACK " then
+    dup TCP_PSH and if ." PSH " then
+    dup TCP_RST and if ." RST " then
+    dup TCP_SYN and if ." SYN " then
+    TCP_FIN and if ." FIN " then
+    cr ." tcp-window-size: " addr tcp-window-size hunaligned@ rev16 .
+    cr ." tcp-checksum: " addr tcp-checksum hunaligned@ rev16 h.4
+    cr ." tcp-urgent-ptr: " addr tcp-urgent-ptr hunaligned@ rev16 .
+  ;
+
 end-module
