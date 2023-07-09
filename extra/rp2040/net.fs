@@ -260,6 +260,9 @@ begin-module net
 
     \ Get TCP window
     method in-packets-window@ ( self -- )
+
+    \ Get whether there are waiting in packets
+    method waiting-in-packets? ( self -- waiting? )
     
     \ Add incoming TCP packet
     method add-in-tcp-packet ( addr bytes seq self -- )
@@ -287,6 +290,9 @@ begin-module net
     
     \ Clear contiguous packets
     method clear-in-packets ( self -- )
+
+    \ Print in packets
+    method in-packets. ( self -- )
     
   end-class
 
@@ -312,6 +318,7 @@ begin-module net
       seq self first-in-packet-seq !
       seq self in-packet-last-ack-sent !
       seq self current-in-packet-ack !
+      \ cr ." *** reset-in-tcp-packets: " self in-packets. \ DEBUG
     ; define reset-in-tcp-packets
 
     \ Reset the incoming UDP packet record
@@ -325,6 +332,7 @@ begin-module net
       0 self first-in-packet-seq !
       0 self in-packet-last-ack-sent !
       0 self current-in-packet-ack !
+      \ cr ." *** reset-in-udp-packets: " self in-packets. \ DEBUG
     ; define reset-in-udp-packets
 
     \ Get TCP window
@@ -335,8 +343,14 @@ begin-module net
       else
         0
       then
+      \ cr ." *** in-packets-window@: " self in-packets. \ DEBUG
     ; define in-packets-window@
 
+    \ Get whether there are waiting in packets
+    :noname ( self -- waiting? )
+      complete-in-packets drop 0>
+    ; define waiting-in-packets?
+      
     \ Add incoming TCP packet
     :noname { addr bytes seq self -- }
       seq bytes + self first-in-packet-seq @ - self pending-in-packet-offset @ +
@@ -376,6 +390,7 @@ begin-module net
         self complete-in-packets drop self first-in-packet-seq @ +
         self current-in-packet-ack !
       then
+      \ cr ." *** add-in-tcp-packet: " self in-packets. \ DEBUG
     ; define add-in-tcp-packet
 
     \ Insert a TCP packet entry
@@ -389,6 +404,7 @@ begin-module net
       1 self in-packet-count +!
       addr self in-packet-addr @ self pending-in-packet-offset @ +
       seq self first-in-packet-seq @ - + bytes move
+      \ cr ." *** insert-tcp-packet: " self in-packets. \ DEBUG
     ; define insert-tcp-packet
     
     \ Add incoming UDP packet
@@ -400,6 +416,7 @@ begin-module net
         bytes self in-packet-sizes self in-packet-count @ 1 lshift + h!
         1 self in-packet-count +!
       then
+      \ cr ." *** add-in-udp-packet: " self in-packets. \ DEBUG
     ; define add-in-udp-packet
     
     \ Get whether to send an ACK packet
@@ -420,16 +437,20 @@ begin-module net
     \ Promote incoming data to pending
     :noname { self -- bytes }
       self complete-in-packets { bytes count }
-      self in-packets-tcp @ if
-        self in-packet-seqs count cells +
-        self in-packet-seqs self in-packet-count @ count - cells move
+      count 0> if
+        self in-packet-count @ { total-count }
+        self in-packets-tcp @ if
+          self in-packet-seqs count cells +
+          self in-packet-seqs total-count count - cells move
+        then
+        self in-packet-sizes count 1 lshift +
+        self in-packet-sizes total-count count - 1 lshift move
+        count negate self in-packet-count +!
+        bytes self first-in-packet-seq +!
+        bytes self pending-in-packet-offset !
       then
-      self in-packet-sizes count 1 lshift +
-      self in-packet-sizes self in-packet-count @ count - 1 lshift move
-      count negate self in-packet-count +!
-      bytes self first-in-packet-seq +!
-      bytes self pending-in-packet-offset !
       bytes
+      \ cr ." *** promote-in-packets: " self in-packets. \ DEBUG
     ; define promote-in-packets
 
     \ Get the complete packet size and count
@@ -458,18 +479,42 @@ begin-module net
         then
       then
       current-bytes count
+      \ cr ." *** complete-in-packets: " self in-packets. \ DEBUG
     ; define complete-in-packets
     
     \ Clear pending packets
     :noname { self -- }
-      self complete-in-packets { bytes count }
-      self in-packet-addr @ self pending-in-packet-offset @ +
-      self in-packet-addr @
-      self in-packet-offset @ self pending-in-packet-offset - @ move
-      self pending-in-packet-offset @ negate self in-packet-offset +!
+      self complete-in-packets self pending-in-packet-offset @
+      { bytes count pending }
+      self in-packet-addr @ pending + self in-packet-addr @
+      self in-packet-offset @ pending - move
+      pending negate self in-packet-offset +!
       0 self pending-in-packet-offset !
+      \ cr ." *** clear-in-packets: " self in-packets. \ DEBUG
     ; define clear-in-packets
     
+    \ Print in packets
+    :noname { self -- }
+      cr ." in-packets-tcp: " self in-packets-tcp @ .
+      cr ." in-packet-count: " self in-packet-count @ .
+      self in-packets-tcp @ if
+        cr ." in-packet-seqs: "
+        self in-packet-count @ 0 ?do self in-packet-seqs i cells + @ . loop
+      then
+      cr ." in-packet-sizes: "
+      self in-packet-count @ 0 ?do self in-packet-sizes i 1 lshift + h@ . loop
+      cr ." in-packet-addr: " self in-packet-addr @ h.8
+      cr ." in-packet-bytes: " self in-packet-bytes @ .
+      cr ." in-packet-offset: " self in-packet-offset @ .
+      cr ." pending-in-packet-offset: " self pending-in-packet-offset @ .
+      self in-packets-tcp @ if
+        cr ." first-in-packet-seq: " self first-in-packet-seq @ .
+        cr ." in-packet-last-ack-sent: " self in-packet-last-ack-sent @ .
+        cr ." current-in-packet-ack: " self current-in-packet-ack @ .
+      then
+      cr
+    ; define in-packets.
+
   end-implement
 
   \ The DNS address cache
@@ -838,6 +883,9 @@ begin-module net
 
     \ Set endpoint TCP state
     method endpoint-tcp-state! ( tcp-state self -- )
+
+    \ Get waiting endpoint received data
+    method endpoint-waiting-data? ( self -- waiting? )
     
     \ Get endpoint received data
     method endpoint-rx-data@ ( self -- addr bytes )
@@ -877,6 +925,9 @@ begin-module net
 
     \ Ready an endpoint
     method ready-endpoint ( self -- )
+
+    \ Mark an endpoint as available
+    method endpoint-available ( self -- )
 
     \ Try to allocate an endpoint
     method try-allocate-endpoint ( self -- allocated? )
@@ -1001,6 +1052,11 @@ begin-module net
       tcp-state endpoint-tcp-state-lsb lshift or self endpoint-state !
     ; define endpoint-tcp-state!
 
+    \ Get waiting endpoint received data
+    :noname ( self -- waiting? )
+      [: endpoint-in-packets waiting-in-packets? ;] over endpoint-lock with-lock
+    ; define endpoint-waiting-data?
+    
     \ Get endpoint received data
     :noname ( self -- addr bytes )
       dup endpoint-buf swap endpoint-rx-size @
@@ -1062,6 +1118,12 @@ begin-module net
       [: endpoint-pending swap endpoint-state bis! ;]
       over endpoint-lock with-lock
     ; define ready-endpoint
+
+    \ Mark an endpoint as available
+    :noname ( self -- )
+      [: endpoint-pending swap endpoint-state bic! ;]
+      over endpoint-lock with-lock
+    ; define endpoint-available
 
     \ Endpoint is a UDP endpoint
     :noname ( self -- udp? )
@@ -2434,7 +2496,8 @@ begin-module net
     \ Mark an endpoint as done
     :noname { endpoint self -- }
       endpoint retire-rx-data
-      endpoint endpoint-rx-data@ nip if endpoint self put-ready-endpoint then
+      endpoint endpoint-available
+      endpoint endpoint-waiting-data? if endpoint self put-ready-endpoint then
     ; define endpoint-done
     
     \ Get a UDP endpoint to listen on
