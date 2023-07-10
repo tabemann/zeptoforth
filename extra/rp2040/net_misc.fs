@@ -55,6 +55,15 @@ begin-module net-misc
   \ Maximum number of packets to receive at a time
   8 constant max-in-packets
 
+  \ The maximum retransmit count
+  8 constant max-retransmits
+
+  \ The initial timeout time
+  1000 constant init-timeout
+
+  \ The timeout multiplication factor
+  4 constant timeout-multiplier
+
   \ DNS port
   53 constant dns-port
 
@@ -304,7 +313,7 @@ begin-module net-misc
     addr cyw43-structs::ethernet-header-size +
     bytes cyw43-structs::ethernet-header-size - 0 max
   ;
-
+  
   \ Compute a checksum
   : compute-checksum ( start ) { addr bytes zero-offset -- h }
     bytes 1 bic 0 ?do
@@ -325,12 +334,12 @@ begin-module net-misc
 
   \ Compute a TCP checksum
   : compute-tcp-checksum { src-addr dest-addr addr bytes zero-offset -- h }
-    src-addr 16 rshift rev16 + dup 16 rshift + $FFFF and
-    src-addr $FFFF and rev16 + dup 16 rshift + $FFFF and
-    dest-addr 16 rshift rev16 + dup 16 rshift + $FFFF and
-    dest-addr $FFFF and rev16 + dup 16 rshift + $FFFF and
+    src-addr 16 rshift
+    src-addr $FFFF and + dup 16 rshift + $FFFF and
+    dest-addr 16 rshift + dup 16 rshift + $FFFF and
+    dest-addr $FFFF and + dup 16 rshift + $FFFF and
     PROTOCOL_TCP + dup 16 rshift + $FFFF and
-    bytes rev16 + dup 16 rshift + $FFFF and
+    bytes + dup 16 rshift + $FFFF and
     addr bytes zero-offset compute-checksum
   ;
   
