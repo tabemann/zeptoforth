@@ -503,31 +503,31 @@ begin-module net
     ; define promote-in-packets
 
     \ Get the complete packet size and count
-    :noname { self -- bytes packet-count } \ ." *aaa* "
-      0 0 { current-bytes count } \ ." *bbb* "
-      self in-packet-offset @ self pending-in-packet-offset @ - { bytes } \ ." *ccc* "
-      self in-packets-tcp @ if \ ." *ddd* "
-        true { continue } \ ." *eee* "
-        begin bytes current-bytes > continue and while \ ." *fff* "
-          self in-packet-seqs count cells + @ { seq } \ ." *ggg* "
-          self in-packet-sizes count 1 lshift + h@ { size } \ ." *aaa* "
-          seq self first-in-packet-seq @ - current-bytes = if \ ." *hhh* "
-            size +to current-bytes \ ." *iii* "
-            1 +to count \ ." *jjj* "
-          else \ ." *kkk* "
-            false to continue \ ." *lll* "
-          then \ ." *mmm* "
-        repeat \ ." *nnn* "
-      else \ ." *ooo* "
-        bytes 0> if \ ." *ppp* "
-          self in-packet-sizes h@ to current-bytes \ ." *qqq* "
-          1 to count \ ." *rrr* "
-        else \ ." *sss* "
-          0 to current-bytes \ ." *ttt* "
-          0 to count \ ." *uuu* "
-        then \ ." *vvv* "
-      then \ ." *www* "
-      current-bytes count \ ." *xxx* "
+    :noname { self -- bytes packet-count }
+      0 0 { current-bytes count }
+      self in-packet-offset @ self pending-in-packet-offset @ - { bytes }
+      self in-packets-tcp @ if
+        true { continue }
+        begin bytes current-bytes > continue and while
+          self in-packet-seqs count cells + @ { seq }
+          self in-packet-sizes count 1 lshift + h@ { size }
+          seq self first-in-packet-seq @ - current-bytes = if
+            size +to current-bytes
+            1 +to count
+          else
+            false to continue
+          then
+        repeat
+      else
+        bytes 0> if
+          self in-packet-sizes h@ to current-bytes
+          1 to count
+        else
+          0 to current-bytes
+          0 to count
+        then
+      then
+      current-bytes count
       cr ." @@@ complete-in-packets: " self in-packets. \ DEBUG
     ; define complete-in-packets
     
@@ -1249,22 +1249,22 @@ begin-module net
     ; define try-allocate-endpoint
 
     \ Try to accept a connection on an endpoint
-    :noname ( src-ipv4-addr src-port dest-port D: mac-addr self -- accepted? ) \ ." *AA* "
-      [: { src-ipv4-addr src-port dest-port D: mac-addr self } \ ." *BB* "
-        self endpoint-tcp-state@ dup TCP_LISTEN = swap TCP_SYN_RECEIVED = or \ ." *CC* "
-        dest-port self endpoint-local-port@ = and if \ ." *DD* "
+    :noname ( src-ipv4-addr src-port dest-port D: mac-addr self -- accepted? )
+      [: { src-ipv4-addr src-port dest-port D: mac-addr self }
+        self endpoint-tcp-state@ dup TCP_LISTEN = swap TCP_SYN_RECEIVED = or
+        dest-port self endpoint-local-port@ = and if
           self endpoint-tcp-state@ TCP_LISTEN = if
-            src-ipv4-addr src-port self endpoint-ipv4-remote! \ ." *EE* "
-            TCP_SYN_RECEIVED self endpoint-tcp-state! \ ." *FF* "
-            mac-addr self endpoint-remote-mac-addr 2! \ ." *GG* "
-            true \ ." *HH* "
-          else \ ." *HI* "
+            src-ipv4-addr src-port self endpoint-ipv4-remote!
+            TCP_SYN_RECEIVED self endpoint-tcp-state!
+            mac-addr self endpoint-remote-mac-addr 2!
+            true
+          else
             self endpoint-ipv4-remote@ src-port = src-ipv4-addr = and
           then
-        else \ ." *II* "
+        else
           false
-        then \ ." *JJ* "
-      ;] over endpoint-lock with-lock \ ." *KK* "
+        then
+      ;] over endpoint-lock with-lock
     ; define try-ipv4-accept-endpoint
 
     \ Try to open a connection on an endpoint
@@ -1282,15 +1282,15 @@ begin-module net
     ; define try-ipv4-connect-endpoint
 
     \ Match an endpoint with an IPv4 TCP connection
-    :noname ( src-ipv4-addr src-port dest-port self -- match? )
-      [: { src-ipv4-addr src-port dest-port self }
-        self endpoint-tcp-state@ dup TCP_CLOSED <> swap TCP_LISTEN <> and if
-          self endpoint-ipv4-remote@ src-port = swap src-ipv4-addr = and
-          self endpoint-local-port@ dest-port = and
-        else
+    :noname ( src-ipv4-addr src-port dest-port self -- match? ) ." *0* "
+      [: { src-ipv4-addr src-port dest-port self } ." *1* "
+        self endpoint-tcp-state@ dup TCP_CLOSED <> swap TCP_LISTEN <> and if ." *2* "
+          self endpoint-ipv4-remote@ src-port = swap src-ipv4-addr = and ." *3* "
+          self endpoint-local-port@ dest-port = and ." *4* "
+        else ." *5* "
           false
         then
-      ;] over endpoint-lock with-lock
+      ;] over endpoint-lock with-lock ." *6* "
     ; define match-ipv4-connect?
 
     \ Free an endpoint
@@ -1990,40 +1990,40 @@ begin-module net
     ; define process-ipv4-tcp-packet
 
     \ Find a listening IPv4 TCP endpoint
-    :noname { src-addr addr bytes self -- endpoint found? } \ ." *A* "
-      max-endpoints 0 ?do \ ." *B* "
-        self intf-endpoints <endpoint> class-size i * + { endpoint } \ ." *C* "
-        src-addr \ ." *D* "
-        addr tcp-src-port hunaligned@ rev16 \ ." *E* "
-        addr tcp-dest-port hunaligned@ rev16 \ ." *F* "
-        src-addr self address-map lookup-mac-addr-by-ipv4 if \ ." *G* "
-          endpoint try-ipv4-accept-endpoint if endpoint true unloop exit then \ ." *H* "
-        else \ ." *I* "
-          2drop 2drop drop \ Should never happen
-        then \ ." *J* "
-      loop \ ." *K* "
-      0 false
-    ; define find-listen-ipv4-endpoint
-
-    \ Find a connecting/connected IPv4 TCP endpoint
     :noname { src-addr addr bytes self -- endpoint found? }
       max-endpoints 0 ?do
         self intf-endpoints <endpoint> class-size i * + { endpoint }
         src-addr
         addr tcp-src-port hunaligned@ rev16
         addr tcp-dest-port hunaligned@ rev16
-        endpoint match-ipv4-connect? if endpoint true unloop exit then
+        src-addr self address-map lookup-mac-addr-by-ipv4 if
+          endpoint try-ipv4-accept-endpoint if endpoint true unloop exit then
+        else
+          2drop 2drop drop \ Should never happen
+        then
       loop
       0 false
+    ; define find-listen-ipv4-endpoint
+
+    \ Find a connecting/connected IPv4 TCP endpoint
+    :noname { src-addr addr bytes self -- endpoint found? } ." *A* "
+      max-endpoints 0 ?do ." *B* "
+        self intf-endpoints <endpoint> class-size i * + { endpoint } ." *C* "
+        src-addr ." *D* "
+        addr tcp-src-port hunaligned@ rev16 ." *E* "
+        addr tcp-dest-port hunaligned@ rev16 ." *F* "
+        endpoint match-ipv4-connect? if ." *G* " endpoint true unloop exit then ." *H* "
+      loop ." *I* "
+      0 false ." *J* "
     ; define find-connect-ipv4-endpoint
     
     \ Process an IPv4 TCP SYN packet
-    :noname ( src-addr addr bytes self -- ) \ ." *0* "
-      2over 2over find-listen-ipv4-endpoint if \ ." *1* "
-        [: swap send-ipv4-syn-ack ;] over with-endpoint \ ." *2* "
-      else \ ." *3* "
-        drop send-ipv4-rst-for-packet \ ." *4* "
-      then \ ." *5* "
+    :noname ( src-addr addr bytes self -- )
+      2over 2over find-listen-ipv4-endpoint if
+        [: swap send-ipv4-syn-ack ;] over with-endpoint
+      else
+        drop send-ipv4-rst-for-packet
+      then
     ; define process-ipv4-syn-packet
 
     \ Send a TCP SYN packet
@@ -2041,26 +2041,26 @@ begin-module net
     ; define send-syn
 
     \ Send an IPv4 TCP SYN+ACK packet
-    :noname { src-addr addr bytes endpoint self -- } \ ." *a* "
-      rng::random endpoint endpoint-init-local-seq! \ ." *b* "
-      addr tcp-seq-no unaligned@ rev 1+ \ ." *c* "
-      addr bytes tcp-mss@ not if \ ." *d* "
+    :noname { src-addr addr bytes endpoint self -- }
+      rng::random endpoint endpoint-init-local-seq!
+      addr tcp-seq-no unaligned@ rev 1+
+      addr bytes tcp-mss@ not if
         drop [ mtu-size ethernet-header-size - ipv4-header-size -
         tcp-header-size - ] literal
-      then \ ." *e* "
-      addr tcp-window-size hunaligned@ rev16 \ ." *f* "
-      endpoint init-tcp-stream \ ." *g* "
-      endpoint endpoint-ipv4-remote@ \ ." *h* "
-      endpoint endpoint-local-port@ \ ." *i* "
-      endpoint endpoint-local-seq@ \ ." *j* "
-      1 endpoint +endpoint-local-seq! \ ." *k* "
-      endpoint endpoint-ack@ \ ." *l* "
-      endpoint endpoint-local-window@ \ ." *m* "
-      [ TCP_SYN TCP_ACK or ] literal \ ." *n* "
-      endpoint endpoint-remote-mac-addr@ \ ." *o* "
-      self send-ipv4-basic-tcp \ ." *p* "
-      TCP_SYN_RECEIVED endpoint endpoint-tcp-state! \ ." *q* "
-      endpoint endpoint-ack-sent \ ." *r* "
+      then
+      addr tcp-window-size hunaligned@ rev16
+      endpoint init-tcp-stream
+      endpoint endpoint-ipv4-remote@
+      endpoint endpoint-local-port@
+      endpoint endpoint-local-seq@
+      1 endpoint +endpoint-local-seq!
+      endpoint endpoint-ack@
+      endpoint endpoint-local-window@
+      [ TCP_SYN TCP_ACK or ] literal
+      endpoint endpoint-remote-mac-addr@
+      self send-ipv4-basic-tcp
+      TCP_SYN_RECEIVED endpoint endpoint-tcp-state!
+      endpoint endpoint-ack-sent
     ; define send-ipv4-syn-ack
 
     \ Send an IPv4 TCP RST packet in response to a packet
