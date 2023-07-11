@@ -59,10 +59,10 @@ begin-module net-misc
   8 constant max-retransmits
 
   \ The initial timeout time
-  1000 constant init-timeout
+  5000 constant init-timeout
 
   \ The timeout multiplication factor
-  4 constant timeout-multiplier
+  8 constant timeout-multiplier
 
   \ DNS port
   53 constant dns-port

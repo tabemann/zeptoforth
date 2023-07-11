@@ -87,6 +87,7 @@ begin-module lock
 
     \ Add a lock wait record
     : add-lock-wait ( wait lock -- )
+      0 2 pick lock-wait-next !
       dup lock-first-wait @ if
 	2dup lock-last-wait @ lock-wait-next !
       else
