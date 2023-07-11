@@ -2785,7 +2785,7 @@ begin-module net
               endpoint endpoint-send-outstanding? [char] l echo
               systick::systick-counter endpoint endpoint-timeout-start@ - [char] m echo
               endpoint endpoint-timeout@ > and if [char] n echo
-                endpoint increase-endpoint-timeout averts x-send-timed-out [char] o echo
+                endpoint increase-endpoint-timeout drop [char] o echo
                 endpoint resend-endpoint [char] p echo
               else [char] q echo
                 endpoint endpoint-send-outstanding? not if [char] r echo
@@ -2843,6 +2843,7 @@ begin-module net
         endpoint endpoint-ipv4-remote@ drop ." =p= "
         buf tcp-header-size bytes + 0 tcp-checksum ." =q= "
         compute-tcp-checksum rev16 buf tcp-checksum hunaligned! ." =r= "
+        cr ." @@@@@ SENDING TCP WITH DATA:" buf tcp. \ DEBUG
         true ." =s= "
       ;] 6 pick construct-and-send-ipv4-packet drop ." *** ENDING *** "
     ; define send-data-ack

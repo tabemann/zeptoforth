@@ -46,7 +46,7 @@ begin-module cyw43-runner
   8 constant rx-mtu-count
 
   \ Transmit MTU count
-  4 constant tx-mtu-count
+  8 constant tx-mtu-count
 
   \ Event message count
   2 constant event-count
@@ -226,13 +226,19 @@ begin-module cyw43-runner
     ; define poll-rx-frame
 
     \ Put a frame to transmit
-    :noname ( addr bytes self -- )
-      [: { addr W^ bytes self }
-        self cyw43-tx-chan chan-full? not if
-          addr bytes @ self cyw43-tx-chan send-chan
-          bytes cell self cyw43-tx-size-chan send-chan
-        then
-      ;] over cyw43-tx-lock with-lock
+    :noname { addr bytes self -- }
+      begin
+        addr bytes self [: { addr W^ bytes self }
+          self cyw43-tx-chan chan-full? not if
+            addr bytes @ self cyw43-tx-chan send-chan
+            bytes cell self cyw43-tx-size-chan send-chan
+            true
+          else
+            false
+          then
+        ;] self cyw43-tx-lock with-lock
+        dup not if pause then
+      until
     ; define put-tx-frame
 
     \ Get a frame to transmit

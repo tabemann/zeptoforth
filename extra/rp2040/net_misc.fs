@@ -56,13 +56,13 @@ begin-module net-misc
   8 constant max-in-packets
 
   \ The maximum retransmit count
-  8 constant max-retransmits
+  4 constant max-retransmits
 
   \ The initial timeout time
-  5000 constant init-timeout
+  2500 constant init-timeout
 
   \ The timeout multiplication factor
-  8 constant timeout-multiplier
+  2 constant timeout-multiplier
 
   \ DNS port
   53 constant dns-port
