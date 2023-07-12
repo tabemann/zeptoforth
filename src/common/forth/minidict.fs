@@ -261,18 +261,23 @@ begin-module mini-dict
     flash-end flash-mini-dict flash-mini-dict-size move
     flash-mini-dict cell+ @ -1 = if
       clear-flash-mini-dict
-    else
-      compute-flash-mini-dict-free
-    then
-    flash-latest
-    begin ?dup while
-      dup word-flags 1+ c@ if
+      flash-latest
+      begin ?dup while
         dup add-flash-mini-dict-start
         next-word @
-      else
-        drop exit
-      then
-    repeat
+      repeat
+    else
+      compute-flash-mini-dict-free
+      flash-latest
+      begin ?dup while
+        dup word-flags 1+ c@ if
+          dup add-flash-mini-dict-start
+          next-word @
+        else
+          drop exit
+        then
+      repeat
+    then
   ;
 
   \ Find a word in the flash mini-dictionary

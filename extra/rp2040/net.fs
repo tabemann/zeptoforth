@@ -143,7 +143,7 @@ begin-module net
     :noname { window ack self -- }
       window self out-packet-window !
       self first-out-packet-seq @ { first }
-      0 first 0 { count seq bytes }
+      0 first self acked-out-packet-offset @ { count seq bytes }
       self out-packet-count @ 0 ?do
         self out-packet-seqs i cells + @ first - ack first - <= if
           self out-packet-sizes i 1 lshift + h@ +to bytes
@@ -154,7 +154,7 @@ begin-module net
         then
       loop
       seq self first-out-packet-seq !
-      bytes self acked-out-packet-offset +!
+      bytes self acked-out-packet-offset !
       self out-packet-sizes count 1 lshift + self out-packet-sizes
       self out-packet-count @ count - 1 lshift move
       self out-packet-seqs count cells + self out-packet-seqs
@@ -2195,6 +2195,7 @@ begin-module net
           TCP_LAST_ACK of process-ipv4-ack-last-ack endof
           send-ipv4-rst-for-ack
         endcase
+        addr bytes endpoint self
         state case
           TCP_ESTABLISHED of process-ipv4-fin-established endof
           TCP_FIN_WAIT_2 of process-ipv4-fin-fin-wait-2 endof
@@ -2216,7 +2217,7 @@ begin-module net
       addr tcp-window-size hunaligned@ rev16
       addr tcp-ack-no unaligned@ rev
       endpoint endpoint-ack-in
-      endpoint endpoint-send-ack? if
+      bytes header-size > if
         endpoint endpoint-ipv4-remote@
         endpoint endpoint-local-port@
         endpoint endpoint-local-seq@
@@ -2836,7 +2837,7 @@ begin-module net
         endpoint endpoint-ack@ rev buf tcp-ack-no unaligned! ." =i= "
         [ 5 4 lshift ] literal buf tcp-data-offset c! ." =j= "
         [ TCP_ACK TCP_PSH or ] literal buf tcp-flags c! ." =k= "
-        endpoint endpoint-local-window@ buf tcp-window-size hunaligned! ." =l= "
+        endpoint endpoint-local-window@ rev16 buf tcp-window-size hunaligned! ." =l= "
         0 buf tcp-urgent-ptr hunaligned! ." =m= "
         addr buf tcp-header-size + bytes move ." =n= "
         self intf-ipv4-addr@ ." =o= "
