@@ -32,6 +32,8 @@ begin-module cyw43-runner
   lock import
   task import
   armv6m import
+  sema import
+  slock import
   
   \ Core is not up exception
   : x-core-not-up ( -- ) cr ." core is not up" ;
@@ -118,23 +120,47 @@ begin-module cyw43-runner
   \ The CYW43 frame interface
   <frame-interface> begin-class <cyw43-frame-interface>
 
-    \ Receive lock
-    lock-size member cyw43-rx-lock
+    \ Receive slock
+    slock-size member cyw43-rx-slock
 
-    \ Transmit lock
-    lock-size member cyw43-tx-lock
+    \ Transmit slock
+    slock-size member cyw43-tx-slock
 
     \ Receive MTU channel
-    mtu-size rx-mtu-count chan-size cell align member cyw43-rx-chan
+    mtu-size rx-mtu-count * cell align member cyw43-rx-buf
 
     \ Receive size channel
-    cell rx-mtu-count chan-size cell align member cyw43-rx-size-chan
-    
+    rx-mtu-count cells member cyw43-rx-sizes
+
+    \ Receive semaphore
+    sema-size member cyw43-rx-sema
+
+    \ Receive read index
+    cell member cyw43-rx-get-index
+
+    \ Receive write index
+    cell member cyw43-rx-put-index
+
+    \ Receive count
+    cell member cyw43-rx-count
+
     \ Transmit MTU channel
-    mtu-size tx-mtu-count chan-size cell align member cyw43-tx-chan
+    mtu-size tx-mtu-count * cell align member cyw43-tx-buf
 
     \ Transmit size channel
-    cell tx-mtu-count chan-size cell align member cyw43-tx-size-chan
+    tx-mtu-count cells member cyw43-tx-sizes
+
+    \ Transmit semaphore
+    sema-size member cyw43-tx-sema
+
+    \ Transmit read index
+    cell member cyw43-tx-get-index
+
+    \ Transmit write index
+    cell member cyw43-tx-put-index
+
+    \ Transmit count
+    cell member cyw43-tx-count
 
     \ The MAC address
     2 cells member cyw43-mac-addr
@@ -148,19 +174,23 @@ begin-module cyw43-runner
     :noname { self -- }
       self <frame-interface>->new
 
-      \ Initialize the receive lock
-      self cyw43-rx-lock init-lock
+      \ Initialize the receive slock
+      self cyw43-rx-slock init-slock
 
-      \ Initialize the transmit lock
-      self cyw43-tx-lock init-lock
+      \ Initialize the transmit slock
+      self cyw43-tx-slock init-slock
 
-      \ Initialize the receive channels
-      mtu-size rx-mtu-count self cyw43-rx-chan init-chan
-      cell rx-mtu-count self cyw43-rx-size-chan init-chan
+      \ Initialize the receive circular buffer
+      no-sema-limit 0 self cyw43-rx-sema init-sema
+      0 self cyw43-rx-get-index !
+      0 self cyw43-rx-put-index !
+      0 self cyw43-rx-count !
 
-      \ Initialize the transmit channels
-      mtu-size tx-mtu-count self cyw43-tx-chan init-chan
-      cell tx-mtu-count self cyw43-tx-size-chan init-chan
+      \ Initialize the transmit circular buffer
+      no-sema-limit 0 self cyw43-tx-sema init-sema
+      0 self cyw43-tx-get-index !
+      0 self cyw43-tx-put-index !
+      0 self cyw43-tx-count !
 
       \ Initialize the MAC address
       0. self cyw43-mac-addr 2!
@@ -182,91 +212,121 @@ begin-module cyw43-runner
     ; define mac-addr!
     
     \ Put a received frame
-    :noname ( addr bytes self -- )
-      [: { addr W^ bytes self }
-        self cyw43-rx-chan chan-full? not if
-          addr bytes @ self cyw43-rx-chan send-chan
-          bytes cell self cyw43-rx-size-chan send-chan
+    :noname ( addr bytes self -- ) { self }
+      cr ." ### BEGIN put-rx-frame"
+      self [: { addr bytes self }
+        self cyw43-rx-count @ rx-mtu-count < if
+          addr self cyw43-rx-buf self cyw43-rx-put-index @ mtu-size * + bytes
+          move
+          bytes self cyw43-rx-sizes self cyw43-rx-put-index @ cells + !
+          self cyw43-rx-put-index @ 1+ rx-mtu-count umod
+          self cyw43-rx-put-index !
+          1 self cyw43-rx-count +! true
         else
-          cr ." DROPPED RX PACKET: " bytes . \ DEBUG
+          cr ." DROPPED RX PACKET: " bytes . false \ DEBUG
         then
-      ;] over cyw43-rx-lock with-lock
+      ;] self cyw43-rx-slock with-slock
+      if self cyw43-rx-sema give then
+      cr ." ### END put-rx-frame"
     ; define put-rx-frame
 
     \ Get a received frame
-    :noname { addr bytes self -- bytes' }
-      begin
-        addr bytes self [: { addr bytes self }
-          self cyw43-rx-chan chan-empty? not if
-            addr bytes self cyw43-rx-chan recv-chan drop
-            0 { W^ rx-bytes }
-            rx-bytes cell self cyw43-rx-size-chan recv-chan drop
-            rx-bytes @ bytes min
-            true
-          else
-            false
-          then
-        ;] self cyw43-rx-lock with-lock
-        dup not if pause then
-      until
+    :noname ( addr bytes self -- bytes' ) { self }
+      cr ." ### BEGIN get-rx-frame"
+      self cyw43-rx-sema take
+      self [: { addr bytes self }
+        self cyw43-rx-count @ 0> if
+          self cyw43-rx-sizes self cyw43-rx-get-index @ cells + @ { actual }
+          self cyw43-rx-buf self cyw43-rx-get-index @ mtu-size * + addr actual
+          move
+          self cyw43-rx-get-index @ 1+ rx-mtu-count umod
+          self cyw43-rx-get-index !
+          -1 self cyw43-rx-count +!
+          actual
+        else
+          cr ." MISSING RX PACKET" 0 \ DEBUG
+        then
+      ;] self cyw43-rx-slock with-slock
+      cr ." ### END get-rx-frame"
     ; define get-rx-frame
 
     \ Poll a received frame
-    :noname ( addr bytes self -- bytes' found? )
-      [: { addr bytes self }
-        self cyw43-rx-chan chan-empty? not if
-          addr bytes self cyw43-rx-chan recv-chan drop
-          0 { W^ rx-bytes }
-          rx-bytes cell self cyw43-rx-size-chan recv-chan drop
-          rx-bytes @ bytes min true
+    :noname ( addr bytes self -- bytes' found? ) { self }
+      self [: { addr bytes self }
+        self cyw43-rx-count @ 0> if
+          cr ." ### BEGIN poll-rx-frame"
+          self cyw43-rx-sema take
+          self cyw43-rx-sizes self cyw43-rx-get-index @ cells + @ { actual }
+          self cyw43-rx-buf self cyw43-rx-get-index @ mtu-size * + addr actual
+          move
+          self cyw43-rx-get-index @ 1+ rx-mtu-count umod
+          self cyw43-rx-get-index !
+          -1 self cyw43-rx-count +!
+          actual true
+          cr ." ### END poll-rx-frame"
         else
           0 false
         then
-      ;] over cyw43-rx-lock with-lock
+      ;] self cyw43-rx-slock with-slock
     ; define poll-rx-frame
 
     \ Put a frame to transmit
-    :noname ( addr bytes self -- )
-      [: { addr W^ bytes self }
-        self cyw43-tx-chan chan-full? not if
-          addr bytes @ self cyw43-tx-chan send-chan
-          bytes cell self cyw43-tx-size-chan send-chan
+    :noname ( addr bytes self -- ) { self }
+      cr ." ### BEGIN put-tx-frame"
+      self [: { addr bytes self }
+        self cyw43-tx-count @ tx-mtu-count < if
+          addr self cyw43-tx-buf self cyw43-tx-put-index @ mtu-size * + bytes
+          move
+          bytes self cyw43-tx-sizes self cyw43-tx-put-index @ cells + !
+          self cyw43-tx-put-index @ 1+ tx-mtu-count umod
+          self cyw43-tx-put-index !
+          1 self cyw43-tx-count +! true
         else
-          cr ." DROPPED TX PACKET: " bytes . \ DEBUG
+          cr ." DROPPED TX PACKET: " bytes . false \ DEBUG
         then
-      ;] over cyw43-tx-lock with-lock
+      ;] self cyw43-tx-slock with-slock
+      if self cyw43-tx-sema give then
+      cr ." ### END put-tx-frame"
     ; define put-tx-frame
 
     \ Get a frame to transmit
-    :noname { addr bytes self -- bytes' }
-      begin
-        addr bytes self [: { addr bytes self }
-          self cyw43-tx-chan chan-empty? not if
-            addr bytes self cyw43-tx-chan recv-chan drop
-            0 { W^ tx-bytes }
-            tx-bytes cell self cyw43-tx-size-chan recv-chan drop
-            tx-bytes @ bytes min
-            true
-          else
-            false
-          then
-        ;] self cyw43-tx-lock with-lock
-        dup not if pause then
-      until
+    :noname ( addr bytes self -- bytes' ) { self }
+      cr ." ### BEGIN get-tx-frame"
+      self cyw43-tx-sema take
+      self [: { addr bytes self }
+        self cyw43-tx-count @ 0> if
+          self cyw43-tx-sizes self cyw43-tx-get-index @ cells + @ { actual }
+          self cyw43-tx-buf self cyw43-tx-get-index @ mtu-size * + addr actual
+          move
+          self cyw43-tx-get-index @ 1+ tx-mtu-count umod
+          self cyw43-tx-get-index !
+          -1 self cyw43-tx-count +!
+          actual
+        else
+          cr ." MISSING TX PACKET" 0 \ DEBUG
+        then
+      ;] self cyw43-tx-slock with-slock
+      cr ." ### END get-tx-frame"
     ; define get-tx-frame
 
     \ Poll a frame to transmit
-    :noname ( addr bytes self -- bytes' found? )
-      [: { addr bytes self }
-        self cyw43-tx-chan chan-empty? not if
-          addr bytes self cyw43-tx-chan recv-chan drop
-          0 { W^ tx-bytes }
-          tx-bytes cell self cyw43-tx-size-chan recv-chan drop
-          tx-bytes @ bytes min true
+    :noname ( addr bytes self -- bytes' found? ) { self }
+      self [: { addr bytes self }
+        self cyw43-tx-count @ 0> if
+          cr ." ### BEGIN poll-tx-frame"
+          self cyw43-tx-sema take
+          self cyw43-tx-sizes self cyw43-tx-get-index @ cells + @ { actual }
+          self cyw43-tx-buf self cyw43-tx-get-index @ mtu-size * + addr actual
+          move
+          self cyw43-tx-get-index @ 1+ tx-mtu-count umod
+          self cyw43-tx-get-index !
+          -1 self cyw43-tx-count +!
+          actual true
+          cr ." ### END poll-tx-frame"
         else
           0 false
         then
-      ;] over cyw43-tx-lock with-lock
+      ;] self cyw43-tx-slock with-slock
     ; define poll-tx-frame
 
   end-implement
@@ -833,11 +893,11 @@ begin-module cyw43-runner
     :noname { addr self -- }
       addr sdpcmh-channel-and-flags c@ $0F and 3 < if
         addr sdpcmh-bus-data-credit c@ { sdpcm-seq-max }
-        sdpcm-seq-max self cyw43-sdpcm-seq c@ - $FF and $40 > if
-          self cyw43-sdpcm-seq c@ 2 +
-        else
+\        sdpcm-seq-max self cyw43-sdpcm-seq c@ - $FF and $40 > if
+\          self cyw43-sdpcm-seq c@ 2 +
+\        else
           sdpcm-seq-max
-        then
+\        then
         self cyw43-sdpcm-seq-max c!
       then
     ; define update-cyw43-credit
@@ -845,7 +905,7 @@ begin-module cyw43-runner
     \ Do we have credit
     :noname { self -- credit? }
       self cyw43-sdpcm-seq c@ self cyw43-sdpcm-seq-max c@ <>
-      self cyw43-sdpcm-seq-max c@ self cyw43-sdpcm-seq c@ - $80 and 0= and
+\      self cyw43-sdpcm-seq-max c@ self cyw43-sdpcm-seq c@ - $80 and 0= and
     ; define cyw43-has-credit?
 
     \ Send an ioctl

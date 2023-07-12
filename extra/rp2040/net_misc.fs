@@ -56,10 +56,10 @@ begin-module net-misc
   8 constant max-in-packets
 
   \ The maximum retransmit count
-  4 constant max-retransmits
+  6 constant max-retransmits
 
   \ The initial timeout time
-  5000 constant init-timeout
+  2500 constant init-timeout
 
   \ The timeout multiplication factor
   2 constant timeout-multiplier

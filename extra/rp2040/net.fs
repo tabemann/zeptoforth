@@ -1107,8 +1107,8 @@ begin-module net
 
     \ Increase timeout
     :noname ( self -- retransmit? )
-      dup endpoint-retransmits @ max-retransmits >= if drop false exit then
       systick::systick-counter over endpoint-timeout-start !
+      dup endpoint-retransmits @ max-retransmits >= if drop false exit then
       dup endpoint-timeout @ timeout-multiplier * over endpoint-timeout !
       1 swap endpoint-retransmits +!
       true
