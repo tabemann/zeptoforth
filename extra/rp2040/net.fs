@@ -398,7 +398,9 @@ begin-module net
     :noname { addr bytes seq self -- }
       bytes 0> if
         seq self first-in-packet-seq @ - { diff }
-        diff bytes + self pending-in-packet-offset @ + self in-packet-bytes @ <=
+        diff 0>=
+        diff bytes + self pending-in-packet-offset @ +
+        self in-packet-bytes @ <= and
         self in-packet-count @ max-in-packets < and if
           diff bytes + self pending-in-packet-offset @ +
           self in-packet-offset @ max self in-packet-offset !
@@ -1234,8 +1236,10 @@ begin-module net
 
     \ Promote received data to pending
     :noname ( self -- )
-      [: dup endpoint-in-packets promote-in-packets swap endpoint-rx-size ! ;]
-      over endpoint-lock with-lock
+      [:
+        dup endpoint-in-packets promote-in-packets
+        swap endpoint-rx-size !
+      ;] over endpoint-lock with-lock
     ; define promote-rx-data
 
     \ Endpoint is a UDP endpoint
@@ -1458,7 +1462,7 @@ begin-module net
 
     \ Endpoint is ready for a refresh
     :noname ( self -- refresh? )
-      endpoint-last-refresh @ systick::systick-counter - refresh-timeout >=
+      systick::systick-counter swap endpoint-last-refresh @ - refresh-timeout >=
     ; define endpoint-refresh-ready?
 
     \ Reset endpoint refresh
@@ -1860,7 +1864,7 @@ begin-module net
     method close-tcp-endpoint ( endpoint self -- )
 
     \ Wait for a TCP endpoint to close
-    method wait-endpoint-closed ( endpoint -- )
+    method wait-endpoint-closed ( endpoint self -- )
 
     \ Close an established conection
     method close-tcp-established ( endpoint self -- )
@@ -2243,8 +2247,6 @@ begin-module net
         drop send-ipv4-rst-for-packet exit
       then
       [: { src-addr addr bytes self endpoint }
-        endpoint endpoint-tcp-state@ { prev-state }
-        endpoint endpoint-rx-data@ nip { prev-size }
         addr bytes endpoint self
         endpoint endpoint-tcp-state@ { state }
         state case
@@ -2260,8 +2262,8 @@ begin-module net
           TCP_ESTABLISHED of process-ipv4-fin-established endof
           TCP_FIN_WAIT_2 of process-ipv4-fin-fin-wait-2 endof
         endcase
-        endpoint endpoint-rx-data@ nip prev-size <>
-        endpoint endpoint-tcp-state@ prev-state <> or if
+        endpoint endpoint-waiting-data?
+        endpoint endpoint-tcp-state@ state <> or if
           endpoint self put-ready-endpoint
         else
           endpoint broadcast-endpoint
@@ -2344,11 +2346,17 @@ begin-module net
       then
       [: { src-addr addr bytes self endpoint }
         addr bytes endpoint self
-        endpoint endpoint-tcp-state@ case
+        endpoint endpoint-tcp-state@ { state }
+        state case
           TCP_ESTABLISHED of process-ipv4-fin-established endof
           TCP_FIN_WAIT_2 of process-ipv4-fin-fin-wait-2 endof
           process-ipv4-unexpected-fin
         endcase
+        endpoint endpoint-tcp-state@ state <> or if
+          endpoint self put-ready-endpoint
+        else
+          endpoint broadcast-endpoint
+        then
       ;] over with-endpoint
     ; define process-ipv4-fin-packet
 
@@ -2783,7 +2791,7 @@ begin-module net
 
     \ Close a UDP endpoint
     :noname ( endpoint self -- )
-      free-endpoint
+      drop free-endpoint
     ; define close-udp-endpoint
 
     \ Close a TCP endpoint
@@ -2797,27 +2805,40 @@ begin-module net
           TCP_FIN_WAIT_2 of endpoint wait-endpoint-closed then
           TCP_CLOSE_WAIT of endpoint self send-fin-reply then
         endcase
-        endpoint free-endpoint
       ;] 2 pick with-ctrl-endpoint
     ; define close-tcp-endpoint
 
     \ Wait for a TCP endpoint to close
-    :noname { endpoint -- }
+    :noname { endpoint self -- }
+      systick::systick-counter { start }
       begin
         endpoint endpoint-tcp-state@ case
           TCP_FIN_WAIT_1 of true endof
           TCP_FIN_WAIT_2 of true endof
           TCP_LAST_ACK of true endof
-          false
+          false swap
         endcase
       while
-        endpoint wait-endpoint
+        start close-timeout + systick::systick-counter - 0 max { timeout }
+        task::timeout @ { old-timeout }
+        timeout task::timeout !
+        endpoint ['] wait-endpoint try
+        old-timeout task::timeout !
+        dup ['] task::x-timed-out = if 2drop true 0 else false swap then
+        ?raise
+        if
+          TCP_CLOSED endpoint endpoint-tcp-state!
+          endpoint free-endpoint
+          exit
+        then
       repeat
+      TCP_CLOSED endpoint endpoint-tcp-state!
+      endpoint free-endpoint
     ; define wait-endpoint-closed
 
     \ Close an established conection
-    :noname ( endpoint self -- )
-      over [: { self endpoint }
+    :noname { endpoint self -- }
+      endpoint self [: { endpoint self }
         endpoint endpoint-ipv4-remote@
         endpoint endpoint-local-port@
         endpoint endpoint-local-seq@
@@ -2827,13 +2848,13 @@ begin-module net
         endpoint endpoint-remote-mac-addr@
         self send-ipv4-basic-tcp
         TCP_FIN_WAIT_1 endpoint endpoint-tcp-state!
-      ;] over with-endpoint
-      wait-endpoint-closed
+      ;] endpoint with-endpoint
+      endpoint self wait-endpoint-closed
     ; define close-tcp-established
 
     \ Send a reply FIN packet
-    :noname ( endpoint self -- )
-      over [: { self endpoint }
+    :noname { endpoint self -- }
+      endpoint self [: { endpoint self }
         endpoint endpoint-ipv4-remote@
         endpoint endpoint-local-port@
         endpoint endpoint-local-seq@
@@ -2843,8 +2864,8 @@ begin-module net
         endpoint endpoint-remote-mac-addr@
         self send-ipv4-basic-tcp
         TCP_LAST_ACK endpoint endpoint-tcp-state!
-      ;] over with-endpoint
-      wait-endpoint-closed
+      ;] endpoint with-endpoint
+      endpoint self wait-endpoint-closed
     ; define send-fin-reply
 
     \ Print a character
@@ -2935,24 +2956,26 @@ begin-module net
     ; define send-data-ack
 
     \ Refresh an interface
-    :noname { self -- } ." &a& "
-      max-endpoints 0 ?do ." &b& "
-        self intf-endpoints <endpoint> class-size i * + ." &c& "
-        dup endpoint-in-use? not over endpoint-refresh-ready? and if
-          self [: { endpoint self } ." &d& "
-            endpoint endpoint-tcp-state@ TCP_ESTABLISHED = if ." &e& "
-              endpoint endpoint-ipv4-remote@ ." &f& "
-              endpoint endpoint-local-port@ ." &g& "
-              endpoint endpoint-local-seq@ ." &h& "
-              endpoint endpoint-ack@ ." &i& "
-              endpoint endpoint-local-window@ ." &j& "
-              TCP_ACK ." &k& "
-              endpoint endpoint-remote-mac-addr@ ." &l& "
-              self send-ipv4-basic-tcp ." &m& "
-              endpoint endpoint-ack-sent ." &n& "
+    :noname { self -- }
+      max-endpoints 0 ?do
+        self intf-endpoints <endpoint> class-size i * +
+        dup endpoint-refresh-ready? if
+          self [: { endpoint self }
+            endpoint endpoint-tcp-state@
+            cr ." ENDPOINT " endpoint h.8 ."  STATE: " dup . \ DEBUG
+            TCP_ESTABLISHED = if
+              endpoint endpoint-ipv4-remote@
+              endpoint endpoint-local-port@
+              endpoint endpoint-local-seq@
+              endpoint endpoint-ack@
+              endpoint endpoint-local-window@
+              TCP_ACK
+              endpoint endpoint-remote-mac-addr@
+              self send-ipv4-basic-tcp
+              endpoint endpoint-ack-sent
               endpoint reset-endpoint-refresh
-            then ." &o& "
-          ;] 2 pick with-endpoint ." &p& "
+            then
+          ;] 2 pick with-endpoint
         else
           drop
         then

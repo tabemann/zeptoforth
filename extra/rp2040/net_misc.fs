@@ -56,7 +56,7 @@ begin-module net-misc
   8 constant max-in-packets
 
   \ The maximum retransmit count
-  6 constant max-retransmits
+  3 constant max-retransmits
 
   \ The initial timeout time
   2500 constant init-timeout
@@ -75,6 +75,9 @@ begin-module net-misc
 
   \ Refresh timeout
   5000 constant refresh-timeout
+
+  \ Close timeout
+  100000 constant close-timeout
   
   \ The Ethernet header structure
   begin-structure ethernet-header-size
