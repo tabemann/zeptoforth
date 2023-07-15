@@ -307,6 +307,9 @@ begin-module net
     \ Get whether there are waiting in packets
     method waiting-in-packets? ( self -- waiting? )
     
+    \ Get the amount of waiting data for an endpoint
+    method waiting-in-bytes@ ( self -- bytes )
+
     \ Add incoming TCP packet
     method add-in-tcp-packet ( addr bytes seq self -- )
 
@@ -393,6 +396,11 @@ begin-module net
     :noname ( self -- waiting? )
       complete-in-packets drop 0>
     ; define waiting-in-packets?
+
+    \ Get the amount of waiting data for an endpoint
+    :noname ( self -- bytes )
+      complete-in-packets drop
+    ; define waiting-in-bytes@
       
     \ Add incoming TCP packet
     :noname { addr bytes seq self -- }
@@ -400,8 +408,7 @@ begin-module net
         seq self first-in-packet-seq @ - { diff }
         diff 0>=
         diff bytes + self pending-in-packet-offset @ +
-        self in-packet-bytes @ <= and
-        self in-packet-count @ max-in-packets < and if
+        self in-packet-bytes @ <= and if
           diff bytes + self pending-in-packet-offset @ +
           self in-packet-offset @ max self in-packet-offset !
           0 { index }
@@ -449,15 +456,30 @@ begin-module net
 
     \ Insert a TCP packet entry
     :noname { addr bytes seq index self -- }
-      self in-packet-seqs index cells +
-      self in-packet-seqs index 1+ cells + cell move
-      self in-packet-sizes index 1 lshift +
-      self in-packet-sizes index 1+ 1 lshift + 2 move
-      seq self in-packet-seqs index cells + !
-      bytes self in-packet-sizes index 1 lshift + h!
-      1 self in-packet-count +!
-      addr self in-packet-addr @ self pending-in-packet-offset @ +
-      seq self first-in-packet-seq @ - + bytes move
+      self in-packet-count @ max-in-packets < if
+        self in-packet-seqs index cells +
+        self in-packet-seqs index 1+ cells +
+        self in-packet-count @ index - cells move
+        self in-packet-sizes index 1 lshift +
+        self in-packet-sizes index 1+ 1 lshift +
+        self in-packet-count @ index - 1 lshift move
+        seq self in-packet-seqs index cells + !
+        bytes self in-packet-sizes index 1 lshift + h!
+        1 self in-packet-count +!
+        addr self in-packet-addr @ self pending-in-packet-offset @ +
+        seq self first-in-packet-seq @ - + bytes move
+      else
+        self in-packet-seqs index cells +
+        self in-packet-seqs index 1+ cells +
+        self in-packet-count @ index - 1- cells move
+        self in-packet-sizes index 1 lshift +
+        self in-packet-sizes index 1+ 1 lshift +
+        self in-packet-count @ index - 1- 1 lshift move
+        seq self in-packet-seqs index cells + !
+        bytes self in-packet-sizes index 1 lshift + h!
+        addr self in-packet-addr @ self pending-in-packet-offset @ +
+        seq self first-in-packet-seq @ - + bytes move        
+      then
       [ debug? ] [if] cr ." @@@ insert-tcp-packet: " self in-packets. [then]
     ; define insert-tcp-packet
     
@@ -967,6 +989,9 @@ begin-module net
     \ Get waiting endpoint received data
     method endpoint-waiting-data? ( self -- waiting? )
     
+    \ Get the number of bytes waiting on an endpoint
+    method endpoint-waiting-bytes@ ( self -- bytes )
+
     \ Get endpoint received data
     method endpoint-rx-data@ ( self -- addr bytes )
 
@@ -1195,6 +1220,11 @@ begin-module net
     :noname ( self -- waiting? )
       [: endpoint-in-packets waiting-in-packets? ;] over endpoint-lock with-lock
     ; define endpoint-waiting-data?
+
+    \ Get the number of bytes waiting on an endpoint
+    :noname ( self -- bytes )
+      [: endpoint-in-packets waiting-in-bytes@ ;] over endpoint-lock with-lock
+    ; define endpoint-waiting-bytes@
     
     \ Get endpoint received data
     :noname ( self -- addr bytes )
@@ -1439,7 +1469,7 @@ begin-module net
 
     \ Signal endpoint event
     :noname ( self -- )
-      [: 1 swap endpoint-event-count ! ;] over endpoint-lock with-lock
+      [: 1 swap endpoint-event-count +! ;] over endpoint-lock with-lock
     ; define signal-endpoint-event
 
     \ Get endpoint event
@@ -2226,6 +2256,7 @@ begin-module net
       then
       [: { src-addr addr bytes self endpoint }
         endpoint endpoint-tcp-state@ { state }
+        endpoint endpoint-waiting-bytes@ { waiting-bytes }
         addr bytes endpoint self
         state case
           TCP_SYN_RECEIVED of process-ipv4-ack-syn-received endof
@@ -2236,7 +2267,7 @@ begin-module net
           TCP_LAST_ACK of process-ipv4-ack-last-ack endof
           send-ipv4-rst-for-ack exit
         endcase
-        endpoint endpoint-waiting-data?
+        endpoint endpoint-waiting-bytes@ waiting-bytes <>
         endpoint endpoint-tcp-state@ state <> or if
           endpoint self put-ready-endpoint
         else
@@ -2252,6 +2283,7 @@ begin-module net
       then
       [: { src-addr addr bytes self endpoint }
         addr bytes endpoint self
+        endpoint endpoint-waiting-bytes@ { waiting-bytes }
         endpoint endpoint-tcp-state@ { state }
         state case
           TCP_ESTABLISHED of process-ipv4-ack-established endof
@@ -2266,7 +2298,7 @@ begin-module net
           TCP_ESTABLISHED of process-ipv4-fin-established endof
           TCP_FIN_WAIT_2 of process-ipv4-fin-fin-wait-2 endof
         endcase
-        endpoint endpoint-waiting-data?
+        endpoint endpoint-waiting-bytes@ waiting-bytes <>
         endpoint endpoint-tcp-state@ state <> or if
           endpoint self put-ready-endpoint
         else
@@ -2962,15 +2994,18 @@ begin-module net
         self intf-endpoints <endpoint> class-size i * +
         dup endpoint-refresh-ready? if
           self [: { endpoint self }
-            endpoint endpoint-tcp-state@
-            [ debug? ] [if] cr ." ENDPOINT " endpoint h.8 ."  STATE: " dup . [then]
-            TCP_ESTABLISHED = if
+            endpoint endpoint-tcp-state@ { state }
+            [ debug? ] [if] cr ." ENDPOINT " endpoint h.8 ."  STATE: " state . [then]
+            state TCP_ESTABLISHED = state TCP_SYN_RECEIVED = or if
               endpoint endpoint-ipv4-remote@
               endpoint endpoint-local-port@
               endpoint endpoint-local-seq@
               endpoint endpoint-ack@
               endpoint endpoint-local-window@
-              TCP_ACK
+              state case
+                TCP_ESTABLISHED of TCP_ACK endof
+                TCP_SYN_RECEIVED of [ TCP_SYN TCP_ACK or ] literal endof
+              endcase
               endpoint endpoint-remote-mac-addr@
               self send-ipv4-basic-tcp
               endpoint endpoint-ack-sent
