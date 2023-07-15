@@ -126,7 +126,7 @@ begin-module net
       mss self out-packet-mss !
       window self out-packet-window !
       0 self out-packet-count !
-      cr ." === reset-out-packets:" self out-packets.
+      [ debug? ] [if] cr ." === reset-out-packets:" self out-packets. [then]
     ; define reset-out-packets
     
     \ Start sending outgoing packets
@@ -136,7 +136,7 @@ begin-module net
       0 self acked-out-packet-offset !
       0 self out-packet-offset !
       0 self out-packet-count !
-      cr ." === start-out-packets:" self out-packets.
+      [ debug? ] [if] cr ." === start-out-packets:" self out-packets. [then]
     ; define start-out-packets
 
     \ Acknowledge packets
@@ -160,7 +160,7 @@ begin-module net
       self out-packet-seqs count cells + self out-packet-seqs
       self out-packet-count @ count - cells move
       count negate self out-packet-count +!
-      cr ." === ack-packets:" self out-packets.
+      [ debug? ] [if] cr ." === ack-packets:" self out-packets. [then]
     ; define ack-packets
 
     \ Get info on packet to send
@@ -179,18 +179,18 @@ begin-module net
       1 self out-packet-count +!
       self out-packet-addr @ self out-packet-offset @ + out-packet-size -
       out-packet-size
-      cr ." === get-packet-to-send:" self out-packets.
+      [ debug? ] [if] cr ." === get-packet-to-send:" self out-packets. [then]
     ; define get-packet-to-send
 
     \ Get the current sequence number
     :noname ( self -- seq )
-      dup \ DEBUG
+      [ debug? ] [if] dup [then]
       dup out-packet-count @ 1 > if
         dup out-packet-seqs swap out-packet-count @ 1- cells + @
       else
         first-out-packet-seq @
       then
-      swap cr ." === current-out-packet-seq:" out-packets.
+      [ debug? ] [if] cr ." === current-out-packet-seq:" swap out-packets. [then]
     ; define current-out-packet-seq@
 
     \ Increment the bare minimum current sequence number
@@ -203,13 +203,13 @@ begin-module net
       dup out-packet-bytes @ over out-packet-offset @ - over
       out-packet-window @ min
       swap out-packet-mss @ min
-      cr ." === next-packet-size: " dup . \ DEBUG
+      [ debug? ] [if] cr ." === next-packet-size: " dup . [then]
     ; define next-packet-size@
 
     \ Are there outstanding packets?
     :noname ( self -- outstanding? )
       dup acked-out-packet-offset @ swap out-packet-offset @ <>
-      cr ." === packets-outstanding?: " dup . \ DEBUG
+      [ debug? ] [if] cr ." === packets-outstanding?: " dup . [then]
     ; define packets-outstanding?
     
     \ Are we done sending packets?
@@ -217,7 +217,7 @@ begin-module net
       dup out-packet-count @ 0=
       swap dup acked-out-packet-offset @
       swap out-packet-bytes @ = and
-      cr ." === packets-done?: " dup . \ DEBUG
+      [ debug? ] [if] cr ." === packets-done?: " dup . [then]
     ; define packets-done?
 
     \ Can we issue a new packet?
@@ -226,15 +226,15 @@ begin-module net
       over out-packet-window @ <
       over out-packet-offset @ 2 pick out-packet-bytes @ < and
       swap out-packet-count @ max-out-packets < and
-      cr ." === send-packet?: " dup . \ DEBUG
+      [ debug? ] [if] cr ." === send-packet?: " dup . [then]
     ; define send-packet?
 
     \ Mark packets as to be resent
     :noname ( self -- )
-      dup \ DEBUG
+      [ debug? ] [if] dup [then]
       dup acked-out-packet-offset @ over out-packet-offset !
       0 swap out-packet-count !
-      cr ." === resend-packets: " out-packets. \ DEBUG
+      [ debug? ] [if] cr ." === resend-packets: " out-packets. [then]
     ; define resend-packets
 
     \ Print out packets
@@ -361,7 +361,7 @@ begin-module net
       seq self first-in-packet-seq !
       seq self in-packet-last-ack-sent !
       seq self current-in-packet-ack !
-      cr ." @@@ reset-in-tcp-packets: " self in-packets. \ DEBUG
+      [ debug? ] [if] cr ." @@@ reset-in-tcp-packets: " self in-packets. [then]
     ; define reset-in-tcp-packets
 
     \ Reset the incoming UDP packet record
@@ -375,7 +375,7 @@ begin-module net
       0 self first-in-packet-seq !
       0 self in-packet-last-ack-sent !
       0 self current-in-packet-ack !
-      cr ." @@@ reset-in-udp-packets: " self in-packets. \ DEBUG
+      [ debug? ] [if] cr ." @@@ reset-in-udp-packets: " self in-packets. [then]
     ; define reset-in-udp-packets
 
     \ Get TCP window
@@ -386,7 +386,7 @@ begin-module net
       else
         0
       then
-      cr ." @@@ in-packets-window@: " self in-packets. \ DEBUG
+      [ debug? ] [if] cr ." @@@ in-packets-window@: " self in-packets. [then]
     ; define in-packets-window@
 
     \ Get whether there are waiting in packets
@@ -444,7 +444,7 @@ begin-module net
           self current-in-packet-ack !
         then
       then
-      cr ." @@@ add-in-tcp-packet: " self in-packets. \ DEBUG
+      [ debug? ] [if] cr ." @@@ add-in-tcp-packet: " self in-packets. [then]
     ; define add-in-tcp-packet
 
     \ Insert a TCP packet entry
@@ -458,7 +458,7 @@ begin-module net
       1 self in-packet-count +!
       addr self in-packet-addr @ self pending-in-packet-offset @ +
       seq self first-in-packet-seq @ - + bytes move
-      cr ." @@@ insert-tcp-packet: " self in-packets. \ DEBUG
+      [ debug? ] [if] cr ." @@@ insert-tcp-packet: " self in-packets. [then]
     ; define insert-tcp-packet
     
     \ Add incoming UDP packet
@@ -470,7 +470,7 @@ begin-module net
         bytes self in-packet-sizes self in-packet-count @ 1 lshift + h!
         1 self in-packet-count +!
       then
-      cr ." @@@ add-in-udp-packet: " self in-packets. \ DEBUG
+      [ debug? ] [if] cr ." @@@ add-in-udp-packet: " self in-packets. [then]
     ; define add-in-udp-packet
     
     \ Get whether to send an ACK packet
@@ -504,7 +504,7 @@ begin-module net
         bytes self pending-in-packet-offset !
       then
       bytes
-      cr ." @@@ promote-in-packets: " self in-packets. \ DEBUG
+      [ debug? ] [if] cr ." @@@ promote-in-packets: " self in-packets. [then]
     ; define promote-in-packets
 
     \ Get the complete packet size and count
@@ -533,7 +533,7 @@ begin-module net
         then
       then
       current-bytes count
-      cr ." @@@ complete-in-packets: " 2dup . . self in-packets. \ DEBUG
+      [ debug? ] [if] cr ." @@@ complete-in-packets: " 2dup . . self in-packets. [then]
     ; define complete-in-packets
     
     \ Clear pending packets
@@ -543,7 +543,7 @@ begin-module net
       self in-packet-offset @ pending - move
       pending negate self in-packet-offset +!
       0 self pending-in-packet-offset !
-      cr ." @@@ clear-in-packets: " self in-packets. \ DEBUG
+      [ debug? ] [if] cr ." @@@ clear-in-packets: " self in-packets. [then]
     ; define clear-in-packets
     
     \ Print in packets
@@ -1300,15 +1300,15 @@ begin-module net
     ; define try-ipv4-connect-endpoint
 
     \ Match an endpoint with an IPv4 TCP connection
-    :noname ( src-ipv4-addr src-port dest-port self -- match? ) ." *0* "
-      [: { src-ipv4-addr src-port dest-port self } ." *1* "
-        self endpoint-tcp-state@ dup TCP_CLOSED <> swap TCP_LISTEN <> and if ." *2* "
-          self endpoint-ipv4-remote@ src-port = swap src-ipv4-addr = and ." *3* "
-          self endpoint-local-port@ dest-port = and ." *4* "
-        else ." *5* "
+    :noname ( src-ipv4-addr src-port dest-port self -- match? )
+      [: { src-ipv4-addr src-port dest-port self }
+        self endpoint-tcp-state@ dup TCP_CLOSED <> swap TCP_LISTEN <> and if
+          self endpoint-ipv4-remote@ src-port = swap src-ipv4-addr = and
+          self endpoint-local-port@ dest-port = and
+        else
           false
         then
-      ;] over endpoint-lock with-lock ." *6* "
+      ;] over endpoint-lock with-lock
     ; define match-ipv4-connect?
 
     \ Free an endpoint
@@ -2007,8 +2007,10 @@ begin-module net
     \ Send a frame
     :noname { addr bytes self -- }
       bytes mtu-size u<= averts x-oversized-frame
-      cr ." SENT: "
-      addr addr bytes + dump
+      [ debug? ] [if]
+        cr ." SENT: "
+        addr addr bytes + dump
+      [then]
       addr bytes self out-frame-interface @ put-tx-frame
     ; define send-frame
     
@@ -2042,7 +2044,9 @@ begin-module net
     :noname { src-addr protocol addr bytes self -- }
       bytes tcp-header-size >= if
         addr full-tcp-header-size bytes > if exit then
-        addr tcp. \ DEBUG
+
+        [ debug? ] [if] addr tcp. [then]
+        
         src-addr addr bytes self
         addr tcp-flags c@ TCP_CONTROL and
         case
@@ -2073,15 +2077,15 @@ begin-module net
     ; define find-listen-ipv4-endpoint
 
     \ Find a connecting/connected IPv4 TCP endpoint
-    :noname { src-addr addr bytes self -- endpoint found? } ." *A* "
-      max-endpoints 0 ?do ." *B* "
-        self intf-endpoints <endpoint> class-size i * + { endpoint } ." *C* "
-        src-addr ." *D* "
-        addr tcp-src-port hunaligned@ rev16 ." *E* "
-        addr tcp-dest-port hunaligned@ rev16 ." *F* "
-        endpoint match-ipv4-connect? if ." *G* " endpoint true unloop exit then ." *H* "
-      loop ." *I* "
-      0 false ." *J* "
+    :noname { src-addr addr bytes self -- endpoint found? }
+      max-endpoints 0 ?do
+        self intf-endpoints <endpoint> class-size i * + { endpoint }
+        src-addr
+        addr tcp-src-port hunaligned@ rev16
+        addr tcp-dest-port hunaligned@ rev16
+        endpoint match-ipv4-connect? if endpoint true unloop exit then
+      loop
+      0 false
     ; define find-connect-ipv4-endpoint
     
     \ Process an IPv4 TCP SYN packet
@@ -2176,7 +2180,7 @@ begin-module net
         0 buf tcp-urgent-ptr hunaligned!
         self intf-ipv4-addr@ remote-addr buf tcp-header-size 0 tcp-checksum
         compute-tcp-checksum rev16 buf tcp-checksum hunaligned!
-        cr ." @@@@@ SENDING TCP:" buf tcp. \ DEBUG
+        [ debug? ] [if] cr ." @@@@@ SENDING TCP:" buf tcp. [then]
         true
       ;] 6 pick construct-and-send-ipv4-packet drop
     ; define send-ipv4-basic-tcp
@@ -2216,29 +2220,29 @@ begin-module net
     ; define process-ipv4-syn-ack-packet
 
     \ Process an IPv4 ACK packet
-    :noname ( src-addr addr bytes self -- ) ." *a* "
-      2over 2over find-connect-ipv4-endpoint not if ." *b* "
-        drop send-ipv4-rst-for-packet ." *bb* " exit
-      then ." *c* "
-      [: { src-addr addr bytes self endpoint } ." *d* "
-        endpoint endpoint-tcp-state@ { state } ." *e* "
-        addr bytes endpoint self ." *f* "
+    :noname ( src-addr addr bytes self -- )
+      2over 2over find-connect-ipv4-endpoint not if
+        drop send-ipv4-rst-for-packet exit
+      then
+      [: { src-addr addr bytes self endpoint }
+        endpoint endpoint-tcp-state@ { state }
+        addr bytes endpoint self
         state case
-          TCP_SYN_RECEIVED of process-ipv4-ack-syn-received ." *g* " endof
-          TCP_ESTABLISHED of process-ipv4-ack-established ." *h* " endof
-          TCP_FIN_WAIT_1 of process-ipv4-ack-fin-wait-1 ." *i* " endof
-          TCP_FIN_WAIT_2 of process-ipv4-ack-fin-wait-2 ." *j* " endof
-          TCP_CLOSE_WAIT of process-ipv4-ack-close-wait ." *k* " endof
-          TCP_LAST_ACK of process-ipv4-ack-last-ack ." *l* " endof
-          send-ipv4-rst-for-ack ." *m* " exit
-        endcase ." *n* "
-        endpoint endpoint-waiting-data? ." *o* "
-        endpoint endpoint-tcp-state@ state <> or if ." *p* "
-          endpoint self put-ready-endpoint ." *q* "
-        else ." *r* "
-          endpoint broadcast-endpoint ." *s* "
-        then ." *t* "
-      ;] over with-endpoint ." *u* "
+          TCP_SYN_RECEIVED of process-ipv4-ack-syn-received endof
+          TCP_ESTABLISHED of process-ipv4-ack-established endof
+          TCP_FIN_WAIT_1 of process-ipv4-ack-fin-wait-1 endof
+          TCP_FIN_WAIT_2 of process-ipv4-ack-fin-wait-2 endof
+          TCP_CLOSE_WAIT of process-ipv4-ack-close-wait endof
+          TCP_LAST_ACK of process-ipv4-ack-last-ack endof
+          send-ipv4-rst-for-ack exit
+        endcase
+        endpoint endpoint-waiting-data?
+        endpoint endpoint-tcp-state@ state <> or if
+          endpoint self put-ready-endpoint
+        else
+          endpoint broadcast-endpoint
+        then
+      ;] over with-endpoint
     ; define process-ipv4-ack-packet
 
     \ Process an IPv4 FIN+ACK packet
@@ -2415,13 +2419,13 @@ begin-module net
     :noname { src-addr protocol addr bytes self -- }
       bytes udp-header-size >= if
 
-        \ DEBUG
-        cr ." Source address: " src-addr ipv4.
-        cr ." Total length: " addr udp-total-len h@ rev16 .
-        cr ." Actual length: " bytes .
-        cr ." Source port: " addr udp-src-port h@ rev16 .
-        cr ." Destination port: " addr udp-dest-port h@ rev16 .
-        \ DEBUG
+        [ debug? ] [if]
+          cr ." Source address: " src-addr ipv4.
+          cr ." Total length: " addr udp-total-len h@ rev16 .
+          cr ." Actual length: " bytes .
+          cr ." Source port: " addr udp-src-port h@ rev16 .
+          cr ." Destination port: " addr udp-dest-port h@ rev16 .
+        [then]
         
         addr udp-total-len h@ rev16 bytes <> if exit then
         src-addr self dns-server-ipv4-addr @ =
@@ -2709,41 +2713,41 @@ begin-module net
     ; define send-ipv4-udp-packet
 
     \ Enqueue a ready receiving IP endpoint
-    :noname ( endpoint self -- ) ." #A# "
+    :noname ( endpoint self -- )
       [:
         [: { endpoint self }
-          endpoint endpoint-has-event? not if ." #B# "
-            endpoint signal-endpoint-event ." #C# "
-            self endpoint-loop-sema give ." #G# "
-          else ." #H# "
-          then ." #I# "
-          endpoint broadcast-endpoint ." #J# "
-        ;] 2 pick with-endpoint ." #K# "
-      ;] over endpoint-loop-lock with-lock ." #L# "
+          endpoint endpoint-has-event? not if
+            endpoint signal-endpoint-event
+            self endpoint-loop-sema give
+          else
+          then
+          endpoint broadcast-endpoint
+        ;] 2 pick with-endpoint
+      ;] over endpoint-loop-lock with-lock
       pause
     ; define put-ready-endpoint
 
     \ Dequeue a ready receiving IP endpoint
-    :noname ( self -- endpoint ) ." ^A^ "
-      dup endpoint-loop-sema take ." ^B^ "
-      [: { self } ." ^C^ "
-        self next-endpoint-index @ { index } ." ^D^ "
-        begin ." ^E^ "
-          self intf-endpoints <endpoint> class-size index * + { endpoint } ." ^F^ "
+    :noname ( self -- endpoint )
+      dup endpoint-loop-sema take
+      [: { self }
+        self next-endpoint-index @ { index }
+        begin
+          self intf-endpoints <endpoint> class-size index * + { endpoint }
           endpoint [: { endpoint }
-            endpoint endpoint-has-event? if ." ^G^ "
-              endpoint get-endpoint-event ." ^H^ "
-              endpoint promote-rx-data ." ^I^ "
+            endpoint endpoint-has-event? if
+              endpoint get-endpoint-event
+              endpoint promote-rx-data
               endpoint true
-            else ." ^K^ "
+            else
               false
-            then ." ^M^ "
+            then
           ;] over with-endpoint
-          dup not if index 1+ max-endpoints umod to index then ." ^L^ "
-        until ." ^N^ "
-        self next-endpoint-index @ 1+ max-endpoints umod ." ^O^ "
-        self next-endpoint-index ! ." ^P^ "
-      ;] over endpoint-loop-lock with-lock ." ^Q^ "
+          dup not if index 1+ max-endpoints umod to index then
+        until
+        self next-endpoint-index @ 1+ max-endpoints umod
+        self next-endpoint-index !
+      ;] over endpoint-loop-lock with-lock
     ; define get-ready-endpoint
 
     \ Allocate an endpoint
@@ -2756,12 +2760,12 @@ begin-module net
     ; define allocate-endpoint
 
     \ Mark an endpoint as done
-    :noname ( endpoint self -- ) ." %A% "
-      [: ." %B% "
-        [: { endpoint self } ." %C% "
-          endpoint retire-rx-data ." %D% "
-        ;] 2 pick with-endpoint ." %I% "
-      ;] over endpoint-loop-lock with-lock ." %J% "
+    :noname ( endpoint self -- )
+      [:
+        [: { endpoint self }
+          endpoint retire-rx-data
+        ;] 2 pick with-endpoint
+      ;] over endpoint-loop-lock with-lock
     ; define endpoint-done
     
     \ Get a UDP endpoint to listen on
@@ -2868,91 +2872,88 @@ begin-module net
       endpoint self wait-endpoint-closed
     ; define send-fin-reply
 
-    \ Print a character
-    : echo ." **" emit ." ** " ;
-    
     \ Send data on a TCP endpoint
     :noname ( addr bytes endpoint self -- )
       2 pick 0= if 2drop 2drop exit then
-      [: { addr bytes endpoint self } [char] a echo
-        addr bytes endpoint [: [char] b echo
-          dup endpoint-tcp-state@ [char] c echo
-          dup TCP_ESTABLISHED = swap TCP_CLOSE_WAIT = or if [char] d echo
-            start-endpoint-send true [char] e echo
-          else [char] f echo
+      [: { addr bytes endpoint self }
+        addr bytes endpoint [:
+          dup endpoint-tcp-state@
+          dup TCP_ESTABLISHED = swap TCP_CLOSE_WAIT = or if
+            start-endpoint-send true
+          else
             2drop drop false
-          then [char] g echo
-        ;] over with-endpoint if [char] h echo
-          endpoint start-endpoint-timeout [char] i echo
-          begin [char] j echo
-            endpoint self [: { endpoint self } [char] k echo
-              endpoint endpoint-send-done? not if [char] v echo
-                endpoint endpoint-send-outstanding? [char] l echo
-                systick::systick-counter endpoint endpoint-timeout-start@ - [char] m echo
-                endpoint endpoint-timeout@ > and if [char] n echo
-                  endpoint increase-endpoint-timeout drop [char] o echo
-                  endpoint resend-endpoint [char] p echo
-                else [char] q echo
-                  endpoint endpoint-send-outstanding? not if [char] r echo
-                    endpoint start-endpoint-timeout [char] s echo
-                  then [char] t echo
-                then [char] u echo
-                endpoint endpoint-tcp-state@ [char] w echo
-                dup TCP_ESTABLISHED = swap TCP_CLOSE_WAIT = or if [char] x echo
-                  endpoint endpoint-send-ready? if [char] y echo
-                    endpoint get-endpoint-send-packet [char] z echo
-                    endpoint self send-data-ack [char] A echo
-                    false true [char] B echo
-                  else [char] C echo
+          then
+        ;] over with-endpoint if
+          endpoint start-endpoint-timeout
+          begin
+            endpoint self [: { endpoint self }
+              endpoint endpoint-send-done? not if
+                endpoint endpoint-send-outstanding?
+                systick::systick-counter endpoint endpoint-timeout-start@ -
+                endpoint endpoint-timeout@ > and if
+                  endpoint increase-endpoint-timeout drop
+                  endpoint resend-endpoint
+                else
+                  endpoint endpoint-send-outstanding? not if
+                    endpoint start-endpoint-timeout
+                  then
+                then
+                endpoint endpoint-tcp-state@
+                dup TCP_ESTABLISHED = swap TCP_CLOSE_WAIT = or if
+                  endpoint endpoint-send-ready? if
+                    endpoint get-endpoint-send-packet
+                    endpoint self send-data-ack
+                    false true
+                  else
                     true true
-                  then [char] D echo
-                else [char] E echo
+                  then
+                else
                   false
-                then [char] F echo
+                then
               else
                 false
               then
-            ;] endpoint with-endpoint [char] G echo
-          while [char] H echo
-            if [char] I echo
-              task::timeout @ { old-timeout } [char] J echo
-              endpoint endpoint-timeout@ [char] K echo
-              systick::systick-counter endpoint endpoint-timeout-start@ - - [char] L echo
-              0 max task::timeout ! [char] M echo
-              endpoint ['] wait-endpoint try [char] N echo
-              dup ['] task::x-timed-out = if 2drop 0 then [char] O echo
-              old-timeout task::timeout ! [char] P echo
-              ?raise [char] Q echo
-            then [char] R echo
-          repeat [char] S echo
-        then [char] T echo
-      ;] 2 pick with-ctrl-endpoint [char] U echo
+            ;] endpoint with-endpoint
+          while
+            if
+              task::timeout @ { old-timeout }
+              endpoint endpoint-timeout@
+              systick::systick-counter endpoint endpoint-timeout-start@ - -
+              0 max task::timeout !
+              endpoint ['] wait-endpoint try
+              dup ['] task::x-timed-out = if 2drop 0 then
+              old-timeout task::timeout !
+              ?raise
+            then
+          repeat
+        then
+      ;] 2 pick with-ctrl-endpoint
     ; define send-tcp-endpoint
 
     \ Send a data ACK packet
-    :noname ( addr bytes endpoint self -- ) ." *** BEGINNING *** "
-      over endpoint-remote-mac-addr@ ." =a= "
-      3 pick endpoint-ipv4-remote@ drop ." =b= "
-      PROTOCOL_TCP ." =c= "
-      6 pick tcp-header-size + ." =d= "
+    :noname ( addr bytes endpoint self -- )
+      over endpoint-remote-mac-addr@
+      3 pick endpoint-ipv4-remote@ drop
+      PROTOCOL_TCP
+      6 pick tcp-header-size +
       ( addr bytes endpoint self D: mac-addr remote-addr protocol bytes )
-      [: { addr bytes endpoint self buf } ." =e= "
-        endpoint endpoint-local-port@ rev16 buf tcp-src-port hunaligned! ." =f= "
-        endpoint endpoint-ipv4-remote@ nip rev16 buf tcp-dest-port hunaligned! ." =g= "
-        endpoint endpoint-local-seq@ rev buf tcp-seq-no unaligned! ." =h= "
-        endpoint endpoint-ack@ rev buf tcp-ack-no unaligned! ." =i= "
-        [ 5 4 lshift ] literal buf tcp-data-offset c! ." =j= "
-        [ TCP_ACK TCP_PSH or ] literal buf tcp-flags c! ." =k= "
-        endpoint endpoint-local-window@ rev16 buf tcp-window-size hunaligned! ." =l= "
-        0 buf tcp-urgent-ptr hunaligned! ." =m= "
-        addr buf tcp-header-size + bytes move ." =n= "
-        self intf-ipv4-addr@ ." =o= "
-        endpoint endpoint-ipv4-remote@ drop ." =p= "
-        buf tcp-header-size bytes + 0 tcp-checksum ." =q= "
-        compute-tcp-checksum rev16 buf tcp-checksum hunaligned! ." =r= "
-        cr ." @@@@@ SENDING TCP WITH DATA:" buf tcp. \ DEBUG
-        true ." =s= "
-      ;] 6 pick construct-and-send-ipv4-packet drop ." *** ENDING *** "
+      [: { addr bytes endpoint self buf }
+        endpoint endpoint-local-port@ rev16 buf tcp-src-port hunaligned!
+        endpoint endpoint-ipv4-remote@ nip rev16 buf tcp-dest-port hunaligned!
+        endpoint endpoint-local-seq@ rev buf tcp-seq-no unaligned!
+        endpoint endpoint-ack@ rev buf tcp-ack-no unaligned!
+        [ 5 4 lshift ] literal buf tcp-data-offset c!
+        [ TCP_ACK TCP_PSH or ] literal buf tcp-flags c!
+        endpoint endpoint-local-window@ rev16 buf tcp-window-size hunaligned!
+        0 buf tcp-urgent-ptr hunaligned!
+        addr buf tcp-header-size + bytes move
+        self intf-ipv4-addr@
+        endpoint endpoint-ipv4-remote@ drop
+        buf tcp-header-size bytes + 0 tcp-checksum
+        compute-tcp-checksum rev16 buf tcp-checksum hunaligned!
+        [ debug? ] [if] cr ." @@@@@ SENDING TCP WITH DATA:" buf tcp. [then]
+        true
+      ;] 6 pick construct-and-send-ipv4-packet drop
     ; define send-data-ack
 
     \ Refresh an interface
@@ -2962,7 +2963,7 @@ begin-module net
         dup endpoint-refresh-ready? if
           self [: { endpoint self }
             endpoint endpoint-tcp-state@
-            cr ." ENDPOINT " endpoint h.8 ."  STATE: " dup . \ DEBUG
+            [ debug? ] [if] cr ." ENDPOINT " endpoint h.8 ."  STATE: " dup . [then]
             TCP_ESTABLISHED = if
               endpoint endpoint-ipv4-remote@
               endpoint endpoint-local-port@
@@ -2979,7 +2980,7 @@ begin-module net
         else
           drop
         then
-      loop ." &q& "
+      loop
     ; define refresh-interface
 
   end-implement

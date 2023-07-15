@@ -109,7 +109,7 @@ begin-module cyw43-runner
     \ Initialize the log
     :noname { addr self -- }
 
-      cr ." log addr: " addr h.8 \ DEBUG
+      [ debug? ] [if] cr ." log addr: " addr h.8 [then] \ DEBUG
       
       addr self cyw43-log-addr !
     ; define init-cyw43-log
@@ -212,7 +212,7 @@ begin-module cyw43-runner
     
     \ Put a received frame
     :noname ( addr bytes self -- ) { self }
-      cr ." ### BEGIN put-rx-frame"
+      [ debug? ] [if] cr ." ### BEGIN put-rx-frame" [then]
       self [: { addr bytes self }
         self cyw43-rx-count @ rx-mtu-count < if
           addr self cyw43-rx-buf self cyw43-rx-put-index @ mtu-size * + bytes
@@ -222,16 +222,17 @@ begin-module cyw43-runner
           self cyw43-rx-put-index !
           1 self cyw43-rx-count +! true
         else
-          cr ." DROPPED RX PACKET: " bytes . false \ DEBUG
+          [ debug? ] [if] cr ." DROPPED RX PACKET: " bytes . [then]
+          false
         then
       ;] self cyw43-rx-lock with-lock
       if self cyw43-rx-sema give then
-      cr ." ### END put-rx-frame"
+      [ debug? ] [if] cr ." ### END put-rx-frame" [then]
     ; define put-rx-frame
 
     \ Get a received frame
     :noname ( addr bytes self -- bytes' ) { self }
-      cr ." ### BEGIN get-rx-frame"
+      [ debug? ] [if] cr ." ### BEGIN get-rx-frame" [then]
       self cyw43-rx-sema take
       self [: { addr bytes self }
         self cyw43-rx-count @ 0> if
@@ -243,17 +244,18 @@ begin-module cyw43-runner
           -1 self cyw43-rx-count +!
           actual
         else
-          cr ." MISSING RX PACKET" 0 \ DEBUG
+          [ debug? ] [if] cr ." MISSING RX PACKET" [then]
+          0
         then
       ;] self cyw43-rx-lock with-lock
-      cr ." ### END get-rx-frame"
+      [ debug? ] [if] cr ." ### END get-rx-frame" [then]
     ; define get-rx-frame
 
     \ Poll a received frame
     :noname ( addr bytes self -- bytes' found? ) { self }
       self [: { addr bytes self }
         self cyw43-rx-count @ 0> if
-          cr ." ### BEGIN poll-rx-frame"
+          [ debug? ] [if] cr ." ### BEGIN poll-rx-frame" [then]
           self cyw43-rx-sema take
           self cyw43-rx-sizes self cyw43-rx-get-index @ cells + @ { actual }
           self cyw43-rx-buf self cyw43-rx-get-index @ mtu-size * + addr actual
@@ -262,7 +264,7 @@ begin-module cyw43-runner
           self cyw43-rx-get-index !
           -1 self cyw43-rx-count +!
           actual true
-          cr ." ### END poll-rx-frame"
+          [ debug? ] [if] cr ." ### END poll-rx-frame" [then]
         else
           0 false
         then
@@ -271,7 +273,7 @@ begin-module cyw43-runner
 
     \ Put a frame to transmit
     :noname ( addr bytes self -- ) { self }
-      cr ." ### BEGIN put-tx-frame"
+      [ debug? ] [if] cr ." ### BEGIN put-tx-frame" [then]
       self [: { addr bytes self }
         self cyw43-tx-count @ tx-mtu-count < if
           addr self cyw43-tx-buf self cyw43-tx-put-index @ mtu-size * + bytes
@@ -281,16 +283,17 @@ begin-module cyw43-runner
           self cyw43-tx-put-index !
           1 self cyw43-tx-count +! true
         else
-          cr ." DROPPED TX PACKET: " bytes . false \ DEBUG
+          [ debug? ] [if] cr ." DROPPED TX PACKET: " bytes . [then]
+          false
         then
       ;] self cyw43-tx-lock with-lock
       if self cyw43-tx-sema give then
-      cr ." ### END put-tx-frame"
+      [ debug? ] [if] cr ." ### END put-tx-frame" [then]
     ; define put-tx-frame
 
     \ Get a frame to transmit
     :noname ( addr bytes self -- bytes' ) { self }
-      cr ." ### BEGIN get-tx-frame"
+      [ debug? ] [if] cr ." ### BEGIN get-tx-frame" [then]
       self cyw43-tx-sema take
       self [: { addr bytes self }
         self cyw43-tx-count @ 0> if
@@ -302,17 +305,18 @@ begin-module cyw43-runner
           -1 self cyw43-tx-count +!
           actual
         else
-          cr ." MISSING TX PACKET" 0 \ DEBUG
+          [ debug? ] [if] cr ." MISSING TX PACKET" [then]
+          0
         then
       ;] self cyw43-tx-lock with-lock
-      cr ." ### END get-tx-frame"
+      [ debug? ] [if] cr ." ### END get-tx-frame" [then]
     ; define get-tx-frame
 
     \ Poll a frame to transmit
     :noname ( addr bytes self -- bytes' found? ) { self }
       self [: { addr bytes self }
         self cyw43-tx-count @ 0> if
-          cr ." ### BEGIN poll-tx-frame"
+          [ debug? ] [if] cr ." ### BEGIN poll-tx-frame" [then]
           self cyw43-tx-sema take
           self cyw43-tx-sizes self cyw43-tx-get-index @ cells + @ { actual }
           self cyw43-tx-buf self cyw43-tx-get-index @ mtu-size * + addr actual
@@ -321,7 +325,7 @@ begin-module cyw43-runner
           self cyw43-tx-get-index !
           -1 self cyw43-tx-count +!
           actual true
-          cr ." ### END poll-tx-frame"
+          [ debug? ] [if] cr ." ### END poll-tx-frame" [then]
         else
           0 false
         then
@@ -513,28 +517,30 @@ begin-module cyw43-runner
     \ Initialize the CYW43
     :noname { self -- }
 
-      cr ." starting initialization... " \ DEBUG
+      [ debug? ] [if] cr ." starting initialization... " [then]
 
       \ Initialize the bus
       self cyw43-bus init-cyw43-bus
 
-      cr ." initialized bus" \ DEBUG
+      [ debug? ] [if] cr ." initialized bus" [then]
 
       \ Initialize ALP (Active Low Power) clock
       BACKPLANE_ALP_AVAIL_REQ FUNC_BACKPLANE REG_BACKPLANE_CHIP_CLOCK_CSR
       self cyw43-bus >cyw43-8
-      cr ." waiting for clock..."
+      
+      [ debug? ] [if] cr ." waiting for clock..." [then]
+      
       begin
         FUNC_BACKPLANE REG_BACKPLANE_CHIP_CLOCK_CSR self cyw43-bus cyw43-8>
-        \ self cyw43-bus wait-cyw43-event
       until
-      cr ." clock ok"
+
+      [ debug? ] [if] cr ." clock ok" [then]
 
       $18000000 self cyw43-bus cyw43-bp-16>
-      cr ." chip ID: " h.4
+      [ debug? ] [if] cr ." chip ID: " h.4 [then]
 
       \ Upload firmware
-      cr ." loading fw"
+      [ debug? ] [if] cr ." loading fw" [then]
       WLAN self disable-cyw43-core
       SOCSRAM self reset-cyw43-core
       3 SOCSRAM_BASE_ADDRESS $10 + self cyw43-bus >cyw43-bp-32
@@ -543,7 +549,7 @@ begin-module cyw43-runner
       ATCM_RAM_BASE_ADDRESS self cyw43-bus >cyw43-bp
 
       \ Upload NVRAM
-      cr ." loading nvram"
+      [ debug? ] [if] cr ." loading nvram" [then]
       nvram nvram-bytes
       ATCM_RAM_BASE_ADDRESS CHIP_RAM_SIZE 4 - nvram-bytes - +
       self cyw43-bus >cyw43-bp
@@ -551,28 +557,28 @@ begin-module cyw43-runner
       ATCM_RAM_BASE_ADDRESS CHIP_RAM_SIZE 4 - + self cyw43-bus >cyw43-bp-32
 
       \ Start core!
-      cr ." starting up core..."
+      [ debug? ] [if] cr ." starting up core..." [then]
       WLAN self reset-cyw43-core
       WLAN self cyw43-core-up? averts x-core-not-up
 
-      cr ." polling clock... "
+      [ debug? ] [if] cr ." polling clock... " [then]
       begin
         FUNC_BACKPLANE REG_BACKPLANE_CHIP_CLOCK_CSR
         self cyw43-bus cyw43-8> $80 and
       until
 
-      cr ." enabling interrupts..."
+      [ debug? ] [if] cr ." enabling interrupts..." [then]
 
       IRQ_F2_PACKET_AVAILABLE FUNC_BUS REG_BUS_INTERRUPT_ENABLE
       self cyw43-bus >cyw43-16
 
-      cr ." setting the watermark..."
+      [ debug? ] [if] cr ." setting the watermark..." [then]
 
       32 FUNC_BACKPLANE REG_BACKPLANE_FUNCTION2_WATERMARK
       self cyw43-bus >cyw43-8
 
       \ Wait for WIFI startup
-      cr ." waiting for wifi init..."
+      [ debug? ] [if] cr ." waiting for wifi init..." [then]
       begin
         FUNC_BUS REG_BUS_STATUS self cyw43-bus cyw43-32> STATUS_F2_RX_READY and
       until
@@ -583,7 +589,7 @@ begin-module cyw43-runner
 
       self init-cyw43-log-shm
       
-      cr ." wifi init done"
+      [ debug? ] [if] cr ." wifi init done" [then]
       
     ; define init-cyw43-runner
     
@@ -593,7 +599,7 @@ begin-module cyw43-runner
       \ Get the log shared memory info address
       ATCM_RAM_BASE_ADDRESS CHIP_RAM_SIZE + 4 - SOCRAM_SRMEM_SIZE - { addr }
       addr self cyw43-bus cyw43-bp-32> { shared-addr }
-      cr ." shared_addr " shared-addr h.8
+      [ debug? ] [if] cr ." shared_addr " shared-addr h.8 [then]
 
       \ Read the log shared memory info
       shared-addr self shared-mem-data-size [: { shared-addr self data }
@@ -601,7 +607,7 @@ begin-module cyw43-runner
         data smd-console-addr @ 8 + self cyw43-log init-cyw43-log
 
         \ DEBUG
-        data dup shared-mem-data-size + dump
+        [ debug? ] [if] data dup shared-mem-data-size + dump [then]
         \ DEBUG
         
       ;] with-aligned-allot
@@ -618,8 +624,10 @@ begin-module cyw43-runner
         self cyw43-bus cyw43-bp>
 
         \ DEBUG
-        cr ." sml-idx: " log sml-idx @ h.8
-        log dup shared-mem-log-size + dump
+        [ debug? ] [if]
+          cr ." sml-idx: " log sml-idx @ h.8
+          log dup shared-mem-log-size + dump
+        [then]
         exit
         \ DEBUG
 
@@ -640,7 +648,7 @@ begin-module cyw43-runner
             
             \ Print a line from the log on newline
             self cyw43-log cyw43-log-buf-count @ 0<> if
-              cr ." LOGS: " self cyw43-log cyw43-log-buf
+              [ debug? ] [if] cr ." LOGS: " self cyw43-log cyw43-log-buf [then]
               self cyw43-log cyw43-log-buf-count @ type
               0 self cyw43-log cyw43-log-buf-count !
             then
@@ -735,7 +743,7 @@ begin-module cyw43-runner
               then
             then
           else
-            cr ." TX stalled"
+            [ debug? ] [if] cr ." TX stalled" [then]
             self cyw43-scratch-buf self handle-cyw43-irq
           then
         again
@@ -745,10 +753,10 @@ begin-module cyw43-runner
     \ Handle CYW43 IRQ's
     :noname { buf self -- }
       FUNC_BUS REG_BUS_INTERRUPT self cyw43-bus cyw43-16> { irq }
-\      cr ." irq " irq h.4
+\      [ debug? ] [if] cr ." irq " irq h.4 [then]
       irq IRQ_F2_PACKET_AVAILABLE and if buf self check-cyw43-status then
       irq IRQ_DATA_UNAVAILABLE and if
-        cr ." IRQ DATA_UNAVAILABLE, clearing..."
+        [ debug? ] [if] cr ." IRQ DATA_UNAVAILABLE, clearing..." [then]
         1 FUNC_BUS REG_BUS_INTERRUPT self cyw43-bus >cyw43-16
       then
     ; define handle-cyw43-irq
@@ -757,7 +765,7 @@ begin-module cyw43-runner
     :noname { buf self -- }
       begin
         self cyw43-bus cyw43-status@ { status }
-        cr ." check status " status h.8
+        [ debug? ] [if] cr ." check status " status h.8 [then]
         status STATUS_F2_PKT_AVAILABLE and if
           status STATUS_F2_PKT_LEN_MASK and
           STATUS_F2_PKT_LEN_SHIFT rshift { len }
@@ -773,22 +781,24 @@ begin-module cyw43-runner
     \ Handle CYW43 received packet
     :noname { addr bytes self -- }
 
-      cr ." initial packet len: " bytes .
+      [ debug? ] [if] cr ." initial packet len: " bytes . [then]
 
       \ Validate the SDPCM header
       bytes sdpcm-header-size < if
-        cr ." packet too short, len=" bytes . exit
+        [ debug? ] [if] cr ." packet too short, len=" bytes . [then]
+        exit
       then
       addr sdpcmh-len h@ addr sdpcmh-len-inv h@ not $FFFF and <> if
-        cr ." len inv mismatch" exit
+        [ debug? ] [if] cr ." len inv mismatch" [then]
+        exit
       then
       addr sdpcmh-len h@ bytes > if
-        cr ." len from header is too large"
+        [ debug? ] [if] cr ." len from header is too large" [then]
       then
       
       addr sdpcmh-len h@ to bytes
 
-      cr ." packet len: " bytes .
+      [ debug? ] [if] cr ." packet len: " bytes . [then]
 
       addr self update-cyw43-credit
 
@@ -798,7 +808,10 @@ begin-module cyw43-runner
       header-length +to addr
       header-length negate +to bytes
 
-      bytes 0= if cr ." flow control packet" exit then
+      bytes 0= if
+        [ debug? ] [if] cr ." flow control packet" [then]
+        exit
+      then
       
       \ Handle some channel types
       channel-and-flags $0F and case
@@ -814,7 +827,7 @@ begin-module cyw43-runner
       bytes cdc-header-size < if exit then
       addr cdch-id h@ self cyw43-ioctl-id h@ = if
         addr cdch-status @ if
-          cr ." IOCTL error " addr cdch-status @ h.8
+          [ debug? ] [if] cr ." IOCTL error " addr cdch-status @ h.8 [then]
         else
           addr cdc-header-size + bytes cdc-header-size -
           self cyw43-ioctl-state cyw43-ioctl-done
@@ -829,40 +842,53 @@ begin-module cyw43-runner
       
       \ Validate an event packet
       bytes bdc-header-size < if
-        cr ." BDC event, incomplete header" exit
+        [ debug? ] [if] cr ." BDC event, incomplete header" [then]
+        exit
       then
       addr bdch-data-offset c@ cells bdc-header-size + { offset }
       offset +to addr
       offset negate +to bytes
       bytes event-packet-size < if
-        cr ." BDC event, incomplete data" exit
+        [ debug? ] [if] cr ." BDC event, incomplete data" [then]
+        exit
       then
       addr evtp-eth ethh-ether-type h@ rev16 ETH_P_LINK_CTL <> if
-        cr ." unexpected ethernet type "
-        addr evtp-eth ethh-ether-type h@ rev16 h.4
-        ." , expected Broadcom ether type " ETH_P_LINK_CTL h.4
+        [ debug? ] [if]
+          cr ." unexpected ethernet type "
+          addr evtp-eth ethh-ether-type h@ rev16 h.4
+          ." , expected Broadcom ether type " ETH_P_LINK_CTL h.4
+        [then]
         exit
       then
       addr evtp-hdr evth-oui 3 BROADCOM_OUI 3 equal-strings? not if
-        cr ." unexpected ethernet OUI "
-        addr evtp-hdr evth-oui dup 3 + swap ?do i c@ h.2 loop
-        ." , expected Broadcom OUI "
-        BROADCOM_OUI dup 3 + swap ?do i c@ h.2 loop
+        [ debug? ] [if]
+          cr ." unexpected ethernet OUI "
+          addr evtp-hdr evth-oui dup 3 + swap ?do i c@ h.2 loop
+          ." , expected Broadcom OUI "
+          BROADCOM_OUI dup 3 + swap ?do i c@ h.2 loop
+        [then]
         exit
       then
       addr evtp-hdr evth-subtype h@ rev16 BCMILCP_SUBTYPE_VENDOR_LONG <> if
-        cr ." unexpected subtype " addr evtp-hdr evth-subtype h@ rev16 h.4 exit
+        [ debug? ] [if]
+          cr ." unexpected subtype " addr evtp-hdr evth-subtype h@ rev16 h.4
+        [then]
+        exit
       then
       addr evtp-hdr evth-user-subtype h@ rev16 BCMILCP_BCM_SUBTYPE_EVENT <> if
-        cr ." unexpected user_subtype "
-        addr evtp-hdr evth-user-subtype h@ rev16 h.4
+        [ debug? ] [if]
+          cr ." unexpected user_subtype "
+          addr evtp-hdr evth-user-subtype h@ rev16 h.4
+        [then]
         exit
       then
 
       \ Handle an event if enabled
       addr evtp-msg emsg-event-type unaligned@ rev { event-type }
       addr evtp-msg emsg-status unaligned@ rev { event-status }
-      cr ." event type: " event-type h.8 ."  status: " event-status h.8
+      [ debug? ] [if]
+        cr ." event type: " event-type h.8 ."  status: " event-status h.8
+      [then]
       event-type self cyw43-event-mask cyw43-event-enabled? if
         event-type self cyw43-event-message-scratch evt-event-type !
         event-status self cyw43-event-message-scratch evt-status !
@@ -946,7 +972,7 @@ begin-module cyw43-runner
       \ Send the packet
       self cyw43-scratch-buf total-len 4 align self cyw43-bus >cyw43-wlan
 
-      cr ." SENT IOCTL LEN: " total-len . \ DEBUG
+      [ debug? ] [if] cr ." SENT IOCTL LEN: " total-len . [then]
       
       \ Mark the packet as having been sent
       self cyw43-ioctl-state mark-cyw43-ioctl-sent
@@ -1006,13 +1032,17 @@ begin-module cyw43-runner
       base AI_IOCTRL_OFFSET + self cyw43-bus cyw43-bp-8> { io }
       [ AI_IOCTRL_BIT_FGC AI_IOCTRL_BIT_CLOCK_EN or ] literal io and
       AI_IOCTRL_BIT_CLOCK_EN <> if
-        cr ." cyw43-core-up?: returning false due to bad ioctrl " io h.2
+        [ debug? ] [if]
+          cr ." cyw43-core-up?: returning false due to bad ioctrl " io h.2
+        [then]
         false exit
       then
 
       base AI_RESETCTRL_OFFSET + self cyw43-bus cyw43-bp-8> { r }
       AI_RESETCTRL_BIT_RESET r and if
-        cr ." cyw43-core-up?: returning false due to bad resetctrl " r h.2
+        [ debug? ] [if]
+          cr ." cyw43-core-up?: returning false due to bad resetctrl " r h.2
+        [then]
         false exit
       then
 

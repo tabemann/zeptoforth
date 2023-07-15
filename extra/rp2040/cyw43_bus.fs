@@ -182,12 +182,12 @@ begin-module cyw43-bus
     \ Initialize the CYW43 bus interface
     :noname { self -- }
 
-      cr ." initializing SPI..." \ DEBUG
+      [ debug? ] [if] cr ." initializing SPI..." [then]
 
       \ Initialize the CYW43 SPI interface
       self cyw43-spi init-cyw43-spi
 
-      cr ." initializing PWR..." \ DEBUG
+      [ debug? ] [if] cr ." initializing PWR..." [then]
 
       \ Initialize the PWR pin
       self cyw43-pwr @ output-pin
@@ -199,7 +199,7 @@ begin-module cyw43-bus
       high self cyw43-pwr @ pin!
       250 ms
 
-      cr ." waiting for the CYW43 to come up..." \ DEBUG
+      [ debug? ] [if] cr ." waiting for the CYW43 to come up..." [then]
       
       \ Wait for the CYW43
       begin REG_BUS_TEST_RO self cyw43-32-swapped> FEEDBEAD = until
@@ -402,7 +402,7 @@ begin-module cyw43-bus
         buffer @ rev16
 
         \ DEBUG
-        dup cr ." cyw43-32-swapped> " h.8
+        [ debug? ] [if] cr ." cyw43-32-swapped> " dup h.8 [then]
         
       ;] with-aligned-allot
     ; define cyw43-32-swapped>

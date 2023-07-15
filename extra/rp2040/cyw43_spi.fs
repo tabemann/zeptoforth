@@ -193,13 +193,6 @@ begin-module cyw43-spi
       self cyw43-cs @ { cs }
       self cyw43-pio-addr @ { pio-addr }
 
-      cr ." pio: " pio .
-      cr ." sm: " sm .
-      cr ." dio: " dio .
-      cr ." clk: " clk .
-      cr ." cs: " cs .
-      cr ." pio-addr: " pio-addr .
-
       \ Set up the DIO pin
       false dio PADS_BANK0_PUE!
       false dio PADS_BANK0_PDE!
@@ -261,8 +254,6 @@ begin-module cyw43-spi
     \ Configure a transfer
     :noname { write-cells read-cells self -- }
 
-\      cr ." write-cells: " write-cells . ."  read-cells: " read-cells . \ DEBUG
-
       self debug-cyw43-fifo
       
       \ Disable the PIO state machine
@@ -287,8 +278,6 @@ begin-module cyw43-spi
 
     \ Send a message
     :noname { cmd addr count self -- status }
-
-\      cr ." > cmd: " cmd h.8 ."  addr: " addr h.8 ."  count: " count . \ DEBUG
 
       \ Configure a transfer of count words outgoing and one word incoming
       count 1+ 1 self cyw43-config-xfer
@@ -321,8 +310,6 @@ begin-module cyw43-spi
     \ Receive a message
     :noname { W^ cmd addr count self -- status }
 
-\      cr ." < cmd: " cmd @ h.8 ."  addr: " addr h.8 ."  count: " count . \ DEBUG
-      
       \ Configure a transfer of one word outgoing and count plus one (for status)
       \ words incoming
       1 count 1 + self cyw43-config-xfer
@@ -443,10 +430,6 @@ begin-module cyw43-spi
     
     \ FIFO level debug message
     :noname { self -- }
-\      cr ." FLEVEL_TX: "
-\      self cyw43-sm @ self cyw43-pio @ pio-registers::FLEVEL_TX@ .
-\      ."  FLEVEL_RX: "
-\      self cyw43-sm @ self cyw43-pio @ pio-registers::FLEVEL_RX@ .
     ; define debug-cyw43-fifo
       
   end-implement

@@ -43,14 +43,16 @@ begin-module net-diagnostic
 
       addr bytes self diag-applies? if
 
-        cr ." bytes: " bytes .
-        cr ." destination MAC: " addr ethh-destination-mac mac@ mac.
-        cr ." source MAC: " addr ethh-source-mac mac@ mac.
-        cr ." ethernet type " addr ethh-ether-type h@ rev16 h.4
+        [ debug? ] [if]
+          cr ." bytes: " bytes .
+          cr ." destination MAC: " addr ethh-destination-mac mac@ mac.
+          cr ." source MAC: " addr ethh-source-mac mac@ mac.
+          cr ." ethernet type " addr ethh-ether-type h@ rev16 h.4
+        [then]
 
         addr bytes self display-diag
 
-        addr addr bytes + dump
+        [ debug? ] [if] addr addr bytes + dump [then]
 
       then
         

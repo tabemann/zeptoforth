@@ -21,6 +21,9 @@
 begin-module net-misc
 
   armv6m import
+
+  \ Are we debugging?
+  false constant debug?
   
   \ The MTU size
   1500 constant mtu-size

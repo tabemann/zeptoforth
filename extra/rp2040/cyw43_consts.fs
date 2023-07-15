@@ -20,6 +20,9 @@
 
 begin-module cyw43-consts
 
+  \ Are we debugging?
+  false constant debug?
+  
   \ MTU size
   1500 constant mtu-size
 

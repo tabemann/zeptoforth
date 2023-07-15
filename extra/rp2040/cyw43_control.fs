@@ -28,7 +28,7 @@ begin-module cyw43-control
   cyw43-ioctl import
   cyw43-runner import
   frame-interface import
-  
+
   \ clmload fialed
   : x-clmload-failed ( -- ) ." clmload failed" cr ;
 
@@ -201,18 +201,20 @@ begin-module cyw43-control
       \ Load the CLM
       self load-cyw43-clm
 
-      cr ." Configuring misc stuff..."
+      [ debug? ] [if] cr ." Configuring misc stuff..." [then]
 
       \ Disable tx gloming which transfers multiple packets in one request.
       0 s" bus:txglom" self >iovar-cyw43-32
       1 s" apsta" self >iovar-cyw43-32
 
-      cr ." Getting MAC address..."
+      [ debug? ] [if] cr ." Getting MAC address..." [then]
 
       self 2 cells [: { self buf }
         buf 6 s" cur_etheraddr" self iovar-cyw43> drop
-        cr ." MAC address: "
-        6 0 ?do buf i + c@ h.2 i 5 <> if ." :" then loop
+        [ debug? ] [if]
+          cr ." MAC address: "
+          6 0 ?do buf i + c@ h.2 i 5 <> if ." :" then loop
+        [then]
         buf 2 + unaligned@ rev buf h@ rev16
         self cyw43-core cyw43-runner::cyw43-frame-interface@ mac-addr!
       ;] with-aligned-allot
@@ -220,29 +222,29 @@ begin-module cyw43-control
       self set-cyw43-country
 
       \ set antenna to chip antenna
-      cr ." Set antenna to chip antenna"
+      [ debug? ] [if] cr ." Set antenna to chip antenna" [then]
       
       0 IOCTL_CMD_ANTDIV 0 self >ioctl-cyw43-32
-      cr ." IOCTL_CMD_ANTDIV=0" \ DEBUG
+      [ debug? ] [if] cr ." IOCTL_CMD_ANTDIV=0" [then]
 
       
       0 s" bus:txglom" self >iovar-cyw43-32
-      cr ." bus:txglom=0" \ DEBUG
+      [ debug? ] [if] cr ." bus:txglom=0" [then]
       
       wait-a-moment
       8 s" ampdu_ba_wsize" self >iovar-cyw43-32
-      cr ." ampdu_ba_wsize=8" \ DEBUG
+      [ debug? ] [if] cr ." ampdu_ba_wsize=8" [then]
       
       wait-a-moment
       4 s" ampdu_mpdu" self >iovar-cyw43-32
-      cr ." ampdu_mpdu=4" \ DEBUG
+      [ debug? ] [if] cr ." ampdu_mpdu=4" [then]
       
       wait-a-moment
 
       self disable-spammy-cyw43-events
       
       \ set wifi up
-      cr ." Set wifi up"
+      [ debug? ] [if] cr ." Set wifi up" [then]
       0 0 0 0 ioctl-set IOCTL_CMD_UP 0 self ioctl-cyw43
       wait-a-moment
 
@@ -407,8 +409,10 @@ begin-module cyw43-control
         begin
           event self get-cyw43-event
 
-          cr ." event-type: " event evt-event-type @ h.8
-          ."  status: " event evt-status @ h.8
+          [ debug? ] [if]
+            cr ." event-type: " event evt-event-type @ h.8
+            ."  status: " event evt-status @ h.8
+          [then]
           
           event evt-event-type @ EVENT_AUTH =
           event evt-status @ ESTATUS_SUCCESS = and if
@@ -424,18 +428,22 @@ begin-module cyw43-control
           then
         until
 
-        cr ." got response"
+        [ debug? ] [if] cr ." got response" [then]
         
-        self disable-all-cyw43-events cr ." disabled all events "
-        self clear-cyw43-events cr ." cleared event queue"
+        self disable-all-cyw43-events
+        [ debug? ] [if] cr ." disabled all events " [then]
+        self clear-cyw43-events
+        [ debug? ] [if] cr ." cleared event queue" [then]
 
         status ESTATUS_SUCCESS = if
           cyw43-link-up self cyw43-link-state !
-          cr ." JOINED"
+          [ debug? ] [if] cr ." JOINED" [then]
           status true
         else
           cyw43-link-down self cyw43-link-state !
-          cr ." JOIN failed with status=" status . ."  auth=" auth-status .
+          [ debug? ] [if]
+            cr ." JOIN failed with status=" status . ."  auth=" auth-status .
+          [then]
           status false
         then
 
@@ -515,7 +523,7 @@ begin-module cyw43-control
       
       begin bytes 0> while
 
-        cr ." Downloading CLM..."
+        [ debug? ] [if] cr ." Downloading CLM..." [then]
         
         \ Get the size of an actual chunk being sent
         bytes cyw43-download-chunk-size min { len }
@@ -551,7 +559,7 @@ begin-module cyw43-control
     \ Set country info
     :noname { self -- }
       
-      cr ." Setting country info..."
+      [ debug? ] [if] cr ." Setting country info..." [then]
 
       self country-info-size [: { self buf }
         buf ci-country-abbrev [char] X over c! 1+ [char] X over c!
@@ -571,7 +579,7 @@ begin-module cyw43-control
 
       \ Disable spammy uninteresting events
       self <cyw43-event-mask> [: { self events }
-        cr ." Disable spammy uninteresting events"
+        [ debug? ] [if] cr ." Disable spammy uninteresting events" [then]
         EVENT_RADIO events cyw43-events::disable-cyw43-event
         EVENT_IF events cyw43-events::disable-cyw43-event
         EVENT_PROBREQ_MSG events cyw43-events::disable-cyw43-event
