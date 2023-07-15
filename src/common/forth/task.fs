@@ -1383,7 +1383,7 @@ begin-module task
 	  blocked-indefinite over task-state h!
 	then
       then
-      current-task @ = if false reschedule? ! pause then
+      current-task @ = if true reschedule? ! pause then
     ;
 
     \ Initialize the main task
@@ -1847,6 +1847,7 @@ begin-module task
               first-task @ 0= if init-extra-task then
               claim-same-core-spinlock
               find-next-task
+              dup task-ready-count @ 0 max over task-ready-count !
               release-same-core-spinlock
               dup 0<> if
                 dup task-active@ 1 < if
@@ -1865,7 +1866,8 @@ begin-module task
                   dup schedule-with-spinlock and if
                     over spinlock-to-claim @ claim-spinlock
                   then
-                  task-state-mask and blocked-timeout = if
+                  task-state-mask and
+                  dup blocked-timeout = swap block-timed-out = or if
                     block-timed-out over task-state h!
                   else
                     readied over task-state h!

@@ -39,6 +39,9 @@ begin-module frame-process
 
     \ Handle a frame
     method handle-frame ( addr bytes self -- )
+
+    \ Handle a refresh
+    method handle-refresh ( self -- )
     
   end-class
 
@@ -66,6 +69,11 @@ begin-module frame-process
       2drop drop
     ; define handle-frame
     
+    \ Handle a refresh
+    :noname ( self -- )
+      drop
+    ; define handle-refresh
+
   end-implement
 
   \ Frame processor class
@@ -86,6 +94,9 @@ begin-module frame-process
     \ Process a frame
     method process-frame ( bytes self -- )
 
+    \ Do a refresh
+    method process-refresh ( self -- )
+    
     \ Run frame processor
     method run-frame-process ( self -- )
     
@@ -123,16 +134,38 @@ begin-module frame-process
       repeat
     ; define process-frame
 
+    \ Do a refresh
+    :noname { self -- }
+      self first-frame-handler @ { current }
+      begin current while
+        current handle-refresh
+        current next-frame-handler@ to current
+      repeat
+    ; define process-refresh
+    
     \ Run frame processor
     :noname { self -- }
       self 1 [: { self }
         begin
-          self mtu-buf net-misc::mtu-size self in-frame-interface @ get-rx-frame
-          dup ethernet-header-size >= if
-            self process-frame
-          else
-            drop
+          self [: { self }
+            refresh-timeout task::timeout !
+            self mtu-buf net-misc::mtu-size self in-frame-interface @
+            get-rx-frame
+            no-timeout task::timeout !
+            dup ethernet-header-size >= if
+              self process-frame
+              self process-refresh
+            else
+              drop
+            then
+          ;] try
+          dup ['] task::x-timed-out = if
+            2drop
+            no-timeout task::timeout !
+            self process-refresh
+            0
           then
+          ?raise
         again
       ;] 1024 256 1024 spawn run
     ; define run-frame-process

@@ -33,7 +33,6 @@ begin-module cyw43-runner
   task import
   armv6m import
   sema import
-  slock import
   
   \ Core is not up exception
   : x-core-not-up ( -- ) cr ." core is not up" ;
@@ -120,11 +119,11 @@ begin-module cyw43-runner
   \ The CYW43 frame interface
   <frame-interface> begin-class <cyw43-frame-interface>
 
-    \ Receive slock
-    slock-size member cyw43-rx-slock
+    \ Receive lock
+    lock-size member cyw43-rx-lock
 
-    \ Transmit slock
-    slock-size member cyw43-tx-slock
+    \ Transmit lock
+    lock-size member cyw43-tx-lock
 
     \ Receive MTU channel
     mtu-size rx-mtu-count * cell align member cyw43-rx-buf
@@ -174,11 +173,11 @@ begin-module cyw43-runner
     :noname { self -- }
       self <frame-interface>->new
 
-      \ Initialize the receive slock
-      self cyw43-rx-slock init-slock
+      \ Initialize the receive lock
+      self cyw43-rx-lock init-lock
 
-      \ Initialize the transmit slock
-      self cyw43-tx-slock init-slock
+      \ Initialize the transmit lock
+      self cyw43-tx-lock init-lock
 
       \ Initialize the receive circular buffer
       no-sema-limit 0 self cyw43-rx-sema init-sema
@@ -225,7 +224,7 @@ begin-module cyw43-runner
         else
           cr ." DROPPED RX PACKET: " bytes . false \ DEBUG
         then
-      ;] self cyw43-rx-slock with-slock
+      ;] self cyw43-rx-lock with-lock
       if self cyw43-rx-sema give then
       cr ." ### END put-rx-frame"
     ; define put-rx-frame
@@ -246,7 +245,7 @@ begin-module cyw43-runner
         else
           cr ." MISSING RX PACKET" 0 \ DEBUG
         then
-      ;] self cyw43-rx-slock with-slock
+      ;] self cyw43-rx-lock with-lock
       cr ." ### END get-rx-frame"
     ; define get-rx-frame
 
@@ -267,7 +266,7 @@ begin-module cyw43-runner
         else
           0 false
         then
-      ;] self cyw43-rx-slock with-slock
+      ;] self cyw43-rx-lock with-lock
     ; define poll-rx-frame
 
     \ Put a frame to transmit
@@ -284,7 +283,7 @@ begin-module cyw43-runner
         else
           cr ." DROPPED TX PACKET: " bytes . false \ DEBUG
         then
-      ;] self cyw43-tx-slock with-slock
+      ;] self cyw43-tx-lock with-lock
       if self cyw43-tx-sema give then
       cr ." ### END put-tx-frame"
     ; define put-tx-frame
@@ -305,7 +304,7 @@ begin-module cyw43-runner
         else
           cr ." MISSING TX PACKET" 0 \ DEBUG
         then
-      ;] self cyw43-tx-slock with-slock
+      ;] self cyw43-tx-lock with-lock
       cr ." ### END get-tx-frame"
     ; define get-tx-frame
 
@@ -326,7 +325,7 @@ begin-module cyw43-runner
         else
           0 false
         then
-      ;] self cyw43-tx-slock with-slock
+      ;] self cyw43-tx-lock with-lock
     ; define poll-tx-frame
 
   end-implement

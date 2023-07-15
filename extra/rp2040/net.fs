@@ -531,7 +531,7 @@ begin-module net
         then
       then
       current-bytes count
-      cr ." @@@ complete-in-packets: " self in-packets. \ DEBUG
+      cr ." @@@ complete-in-packets: " 2dup . . self in-packets. \ DEBUG
     ; define complete-in-packets
     
     \ Clear pending packets
@@ -925,7 +925,13 @@ begin-module net
 
     \ The retransmit count
     cell member endpoint-retransmits
+    
+    \ Endpoint event count
+    cell member endpoint-event-count
 
+    \ Last refresh time
+    cell member endpoint-last-refresh
+    
     \ Start timeout
     method start-endpoint-timeout ( self -- )
 
@@ -1076,6 +1082,24 @@ begin-module net
     \ Resend packets
     method resend-endpoint ( self -- )
 
+    \ Signal endpoint event
+    method signal-endpoint-event ( self -- )
+
+    \ Decrement endpoint event
+    method get-endpoint-event ( self -- )
+    
+    \ Does an endpoint have an event
+    method endpoint-has-event? ( self -- event? )
+
+    \ Is endpoint in use
+    method endpoint-in-use? ( self -- in-use? )
+
+    \ Endpoint is ready for a refresh
+    method endpoint-refresh-ready? ( self -- refresh? )
+
+    \ Reset endpoint refresh
+    method reset-endpoint-refresh ( self -- )
+    
   end-class
 
   \ Implement the endpoint class
@@ -1096,6 +1120,8 @@ begin-module net
       self endpoint-lock init-lock
       self endpoint-ctrl-lock init-lock
       1 0 self endpoint-sema init-sema
+      0 self endpoint-event-count !
+      systick::systick-counter self endpoint-last-refresh !
     ; define new
 
     \ Start timeout
@@ -1137,7 +1163,14 @@ begin-module net
 
     \ Claim control of an endpoint
     :noname ( xt self -- )
-      endpoint-ctrl-lock with-lock
+      [: { xt self }
+        self [: endpoint-in-use swap endpoint-state bis! ;]
+        self endpoint-lock with-lock
+        xt try
+        self [: endpoint-in-use swap endpoint-state bic! ;]
+        self endpoint-lock with-lock
+        ?raise
+      ;] over endpoint-ctrl-lock with-lock
     ; define with-ctrl-endpoint
 
     \ Lock an endpoint
@@ -1205,30 +1238,6 @@ begin-module net
       over endpoint-lock with-lock
     ; define promote-rx-data
 
-    \ Endpoint has pending received packet
-    :noname ( self -- pending? )
-      endpoint-state @ [ endpoint-active endpoint-pending or ] literal
-      tuck and =
-    ; define pending-endpoint?
-
-    \ Endpoint is active but not pending
-    :noname ( self -- available? )
-      endpoint-state @ [ endpoint-active endpoint-pending or ] literal
-      and endpoint-active =
-    ; define available-for-packet?
-
-    \ Ready an endpoint
-    :noname ( self -- )
-      [: endpoint-pending swap endpoint-state bis! ;]
-      over endpoint-lock with-lock
-    ; define ready-endpoint
-
-    \ Mark an endpoint as available
-    :noname ( self -- )
-      [: endpoint-pending swap endpoint-state bic! ;]
-      over endpoint-lock with-lock
-    ; define endpoint-available
-
     \ Endpoint is a UDP endpoint
     :noname ( self -- udp? )
       endpoint-state @ [ endpoint-active endpoint-udp or ] literal
@@ -1260,6 +1269,7 @@ begin-module net
             src-ipv4-addr src-port self endpoint-ipv4-remote!
             TCP_SYN_RECEIVED self endpoint-tcp-state!
             mac-addr self endpoint-remote-mac-addr 2!
+            0 self endpoint-event-count !
             true
           else
             self endpoint-ipv4-remote@ src-port = src-ipv4-addr = and
@@ -1278,6 +1288,7 @@ begin-module net
           dest-ipv4-addr dest-port endpoint-ipv4-remote!
           TCP_SYN_SENT self endpoint-tcp-state!
           mac-addr self endpoint-remote-mac-addr 2!
+          0 self endpoint-event-count !
         else
           false
         then
@@ -1298,13 +1309,16 @@ begin-module net
 
     \ Free an endpoint
     :noname ( self -- )
-      [: endpoint-active swap endpoint-state bic! ;]
-      over endpoint-lock with-lock
+      [:
+        0 over endpoint-event-count !
+        endpoint-active swap endpoint-state bic!
+      ;] over endpoint-lock with-lock
     ; define free-endpoint
 
     \ Set an endpoint to listen on UDP
     :noname ( port self -- )
       [:
+        0 over endpoint-event-count !
         dup endpoint-in-packets reset-in-udp-packets
         endpoint-udp over endpoint-state bis! endpoint-local-port h!
       ;] over endpoint-lock with-lock
@@ -1313,6 +1327,7 @@ begin-module net
     \ Set an endpoint to listen on TCP
     :noname ( port self -- )
       [: { port self }
+        0 self endpoint-event-count !
         endpoint-tcp self endpoint-state bis!
         TCP_LISTEN self endpoint-tcp-state!
         port self endpoint-local-port h!
@@ -1322,6 +1337,7 @@ begin-module net
     \ Init the TCP data stream
     :noname ( seq mss window self -- )
       [: { seq mss window self }
+        0 self endpoint-event-count !
         self endpoint-init-local-seq @
         mss window self endpoint-out-packets reset-out-packets
         seq self endpoint-in-packets reset-in-tcp-packets
@@ -1417,6 +1433,39 @@ begin-module net
       [: endpoint-out-packets resend-packets ;] over endpoint-lock with-lock
     ; define resend-endpoint
 
+    \ Signal endpoint event
+    :noname ( self -- )
+      [: 1 swap endpoint-event-count ! ;] over endpoint-lock with-lock
+    ; define signal-endpoint-event
+
+    \ Get endpoint event
+    :noname ( self -- event? )
+      [:
+        dup endpoint-event-count @
+        1- 0 max swap endpoint-event-count !
+      ;] over endpoint-lock with-lock
+    ; define get-endpoint-event
+
+    \ Does an endpoint have an event
+    :noname ( self -- event? )
+      endpoint-event-count @ 0>
+    ; define endpoint-has-event?
+
+    \ Is endpoint in use
+    :noname ( self -- in-use? )
+      endpoint-in-use swap endpoint-state bit@
+    ; define endpoint-in-use?
+
+    \ Endpoint is ready for a refresh
+    :noname ( self -- refresh? )
+      endpoint-last-refresh @ systick::systick-counter - refresh-timeout >=
+    ; define endpoint-refresh-ready?
+
+    \ Reset endpoint refresh
+    :noname ( self -- )
+      systick::systick-counter swap endpoint-last-refresh !
+    ; define reset-endpoint-refresh
+    
   end-implement
   
   \ The fragment collector class
@@ -1580,14 +1629,20 @@ begin-module net
     \ The IPv4 fragment collector
     <fragment-collect> class-size member fragment-collect
 
-    \ The receive endpoint queue
-    cell max-endpoints chan-size member endpoint-queue
-
     \ Outgoing buffer lock
     lock-size member outgoing-buf-lock
 
     \ The outgoing frame buffer
     mtu-size cell align member outgoing-buf
+
+    \ Next endpoint index
+    cell member next-endpoint-index
+
+    \ Endpoint loop lock
+    lock-size member endpoint-loop-lock
+
+    \ Endpoint loop semaphore
+    sema-size member endpoint-loop-sema
 
     \ Get the IPv4 address
     method intf-ipv4-addr@ ( self -- addr )
@@ -1818,6 +1873,9 @@ begin-module net
 
     \ Send a data ACK packet
     method send-data-ack ( addr bytes endpoint self -- )
+
+    \ Refresh an interface
+    method refresh-interface ( self -- )
     
   end-class
 
@@ -1843,10 +1901,12 @@ begin-module net
       max-endpoints 0 ?do
         <endpoint> self intf-endpoints <endpoint> class-size i * + init-object
       loop
+      0 self next-endpoint-index !
+      self endpoint-loop-lock init-lock
+      max-endpoints 0 self endpoint-loop-sema init-sema
       <fragment-collect> self fragment-collect init-object
       <address-map> self address-map init-object
       <dns-cache> self dns-cache init-object
-      cell max-endpoints self endpoint-queue init-chan
     ; define new
 
     \ Get the IPv4 address
@@ -2367,7 +2427,6 @@ begin-module net
           src-addr addr bytes endpoint self [:
             { src-addr addr bytes endpoint self }
             endpoint udp-endpoint?
-            endpoint available-for-packet? and
             endpoint endpoint-local-port@ addr udp-dest-port h@ rev16 = and if
               src-addr addr udp-src-port h@ rev16 endpoint endpoint-ipv4-remote!
               addr udp-header-size + bytes udp-header-size -
@@ -2642,20 +2701,41 @@ begin-module net
     ; define send-ipv4-udp-packet
 
     \ Enqueue a ready receiving IP endpoint
-    :noname { W^ endpoint self -- }
-      endpoint @ pending-endpoint? not if
-        endpoint @ ready-endpoint
-        endpoint cell self endpoint-queue send-chan
-        endpoint @ broadcast-endpoint
-      then
+    :noname ( endpoint self -- ) ." #A# "
+      [:
+        [: { endpoint self }
+          endpoint endpoint-has-event? not if ." #B# "
+            endpoint signal-endpoint-event ." #C# "
+            self endpoint-loop-sema give ." #G# "
+          else ." #H# "
+          then ." #I# "
+          endpoint broadcast-endpoint ." #J# "
+        ;] 2 pick with-endpoint ." #K# "
+      ;] over endpoint-loop-lock with-lock ." #L# "
+      pause
     ; define put-ready-endpoint
 
     \ Dequeue a ready receiving IP endpoint
-    :noname { self -- endpoint }
-      0 { W^ endpoint }
-      endpoint cell self endpoint-queue recv-chan drop
-      endpoint @
-      dup promote-rx-data
+    :noname ( self -- endpoint ) ." ^A^ "
+      dup endpoint-loop-sema take ." ^B^ "
+      [: { self } ." ^C^ "
+        self next-endpoint-index @ { index } ." ^D^ "
+        begin ." ^E^ "
+          self intf-endpoints <endpoint> class-size index * + { endpoint } ." ^F^ "
+          endpoint [: { endpoint }
+            endpoint endpoint-has-event? if ." ^G^ "
+              endpoint get-endpoint-event ." ^H^ "
+              endpoint promote-rx-data ." ^I^ "
+              endpoint true
+            else ." ^K^ "
+              false
+            then ." ^M^ "
+          ;] over with-endpoint
+          dup not if index 1+ max-endpoints umod to index then ." ^L^ "
+        until ." ^N^ "
+        self next-endpoint-index @ 1+ max-endpoints umod ." ^O^ "
+        self next-endpoint-index ! ." ^P^ "
+      ;] over endpoint-loop-lock with-lock ." ^Q^ "
     ; define get-ready-endpoint
 
     \ Allocate an endpoint
@@ -2668,10 +2748,12 @@ begin-module net
     ; define allocate-endpoint
 
     \ Mark an endpoint as done
-    :noname { endpoint self -- }
-      endpoint retire-rx-data
-      endpoint endpoint-available
-      endpoint endpoint-waiting-data? if endpoint self put-ready-endpoint then
+    :noname ( endpoint self -- ) ." %A% "
+      [: ." %B% "
+        [: { endpoint self } ." %C% "
+          endpoint retire-rx-data ." %D% "
+        ;] 2 pick with-endpoint ." %I% "
+      ;] over endpoint-loop-lock with-lock ." %J% "
     ; define endpoint-done
     
     \ Get a UDP endpoint to listen on
@@ -2783,29 +2865,32 @@ begin-module net
           endpoint start-endpoint-timeout [char] i echo
           begin [char] j echo
             endpoint self [: { endpoint self } [char] k echo
-              endpoint endpoint-send-outstanding? [char] l echo
-              systick::systick-counter endpoint endpoint-timeout-start@ - [char] m echo
-              endpoint endpoint-timeout@ > and if [char] n echo
-                endpoint increase-endpoint-timeout drop [char] o echo
-                endpoint resend-endpoint [char] p echo
-              else [char] q echo
-                endpoint endpoint-send-outstanding? not if [char] r echo
-                  endpoint start-endpoint-timeout [char] s echo
-                then [char] t echo
-              then [char] u echo
-              endpoint endpoint-send-done? not [char] v echo
-              endpoint endpoint-tcp-state@ [char] w echo
-              dup TCP_ESTABLISHED = swap TCP_CLOSE_WAIT = or and if [char] x echo
-                endpoint endpoint-send-ready? if [char] y echo
-                  endpoint get-endpoint-send-packet [char] z echo
-                  endpoint self send-data-ack [char] A echo
-                  false true [char] B echo
-                else [char] C echo
-                  true true
-                then [char] D echo
-              else [char] E echo
+              endpoint endpoint-send-done? not if [char] v echo
+                endpoint endpoint-send-outstanding? [char] l echo
+                systick::systick-counter endpoint endpoint-timeout-start@ - [char] m echo
+                endpoint endpoint-timeout@ > and if [char] n echo
+                  endpoint increase-endpoint-timeout drop [char] o echo
+                  endpoint resend-endpoint [char] p echo
+                else [char] q echo
+                  endpoint endpoint-send-outstanding? not if [char] r echo
+                    endpoint start-endpoint-timeout [char] s echo
+                  then [char] t echo
+                then [char] u echo
+                endpoint endpoint-tcp-state@ [char] w echo
+                dup TCP_ESTABLISHED = swap TCP_CLOSE_WAIT = or if [char] x echo
+                  endpoint endpoint-send-ready? if [char] y echo
+                    endpoint get-endpoint-send-packet [char] z echo
+                    endpoint self send-data-ack [char] A echo
+                    false true [char] B echo
+                  else [char] C echo
+                    true true
+                  then [char] D echo
+                else [char] E echo
+                  false
+                then [char] F echo
+              else
                 false
-              then [char] F echo
+              then
             ;] endpoint with-endpoint [char] G echo
           while [char] H echo
             if [char] I echo
@@ -2848,6 +2933,31 @@ begin-module net
         true ." =s= "
       ;] 6 pick construct-and-send-ipv4-packet drop ." *** ENDING *** "
     ; define send-data-ack
+
+    \ Refresh an interface
+    :noname { self -- } ." &a& "
+      max-endpoints 0 ?do ." &b& "
+        self intf-endpoints <endpoint> class-size i * + ." &c& "
+        dup endpoint-in-use? not over endpoint-refresh-ready? and if
+          self [: { endpoint self } ." &d& "
+            endpoint endpoint-tcp-state@ TCP_ESTABLISHED = if ." &e& "
+              endpoint endpoint-ipv4-remote@ ." &f& "
+              endpoint endpoint-local-port@ ." &g& "
+              endpoint endpoint-local-seq@ ." &h& "
+              endpoint endpoint-ack@ ." &i& "
+              endpoint endpoint-local-window@ ." &j& "
+              TCP_ACK ." &k& "
+              endpoint endpoint-remote-mac-addr@ ." &l& "
+              self send-ipv4-basic-tcp ." &m& "
+              endpoint endpoint-ack-sent ." &n& "
+              endpoint reset-endpoint-refresh
+            then ." &o& "
+          ;] 2 pick with-endpoint ." &p& "
+        else
+          drop
+        then
+      loop ." &q& "
+    ; define refresh-interface
 
   end-implement
 
@@ -2898,6 +3008,11 @@ begin-module net
       then
     ; define handle-frame
 
+    \ Handle a refresh
+    :noname ( self -- )
+      ip-interface @ refresh-interface
+    ; define handle-refresh
+    
   end-implement
   
   \ The ARP packet handler

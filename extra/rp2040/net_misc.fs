@@ -72,6 +72,9 @@ begin-module net-misc
 
   \ Parse DNS name depth
   16 constant parse-dns-name-depth
+
+  \ Refresh timeout
+  5000 constant refresh-timeout
   
   \ The Ethernet header structure
   begin-structure ethernet-header-size
@@ -105,10 +108,9 @@ begin-module net-misc
 
   \ Endpoint bitmask
   0 bit constant endpoint-active
-  1 bit constant endpoint-pending
-  2 bit constant endpoint-dequeued
-  3 bit constant endpoint-udp
-  4 bit constant endpoint-tcp
+  1 bit constant endpoint-in-use
+  2 bit constant endpoint-udp
+  3 bit constant endpoint-tcp
   24 constant endpoint-tcp-state-lsb
   $FF endpoint-tcp-state-lsb lshift constant endpoint-tcp-state-mask
 
