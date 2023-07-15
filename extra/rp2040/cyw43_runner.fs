@@ -838,7 +838,7 @@ begin-module cyw43-runner
     \ Handle CYW43 event packet
     :noname { addr bytes self -- }
 
-      addr dup bytes + dump \ DEBUG
+      [ debug? ] [if] addr dup bytes + dump [then]
       
       \ Validate an event packet
       bytes bdc-header-size < if
