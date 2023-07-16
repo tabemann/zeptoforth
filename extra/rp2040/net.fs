@@ -409,8 +409,6 @@ begin-module net
         diff 0>=
         diff bytes + self pending-in-packet-offset @ +
         self in-packet-bytes @ <= and if
-          diff bytes + self pending-in-packet-offset @ +
-          self in-packet-offset @ max self in-packet-offset !
           0 { index }
           self in-packet-count @ 0 ?do
             self in-packet-seqs i cells + @
@@ -457,29 +455,43 @@ begin-module net
     \ Insert a TCP packet entry
     :noname { addr bytes seq index self -- }
       self in-packet-count @ max-in-packets < if
-        self in-packet-seqs index cells +
-        self in-packet-seqs index 1+ cells +
-        self in-packet-count @ index - cells move
-        self in-packet-sizes index 1 lshift +
-        self in-packet-sizes index 1+ 1 lshift +
-        self in-packet-count @ index - 1 lshift move
+        index self in-packet-count @ < if
+          self in-packet-seqs index cells +
+          self in-packet-seqs index 1+ cells +
+          self in-packet-count @ index - cells move
+          self in-packet-sizes index 1 lshift +
+          self in-packet-sizes index 1+ 1 lshift +
+          self in-packet-count @ index - 1 lshift move
+        then
         seq self in-packet-seqs index cells + !
         bytes self in-packet-sizes index 1 lshift + h!
         1 self in-packet-count +!
         addr self in-packet-addr @ self pending-in-packet-offset @ +
         seq self first-in-packet-seq @ - + bytes move
       else
-        self in-packet-seqs index cells +
-        self in-packet-seqs index 1+ cells +
-        self in-packet-count @ index - 1- cells move
-        self in-packet-sizes index 1 lshift +
-        self in-packet-sizes index 1+ 1 lshift +
-        self in-packet-count @ index - 1- 1 lshift move
-        seq self in-packet-seqs index cells + !
-        bytes self in-packet-sizes index 1 lshift + h!
-        addr self in-packet-addr @ self pending-in-packet-offset @ +
-        seq self first-in-packet-seq @ - + bytes move        
+        index self in-packet-count @ < if
+          index self in-packet-count @ 1- < if
+            self in-packet-seqs index cells +
+            self in-packet-seqs index 1+ cells +
+            self in-packet-count @ index - 1- cells move
+            self in-packet-sizes index 1 lshift +
+            self in-packet-sizes index 1+ 1 lshift +
+            self in-packet-count @ index - 1- 1 lshift move
+          then
+          seq self in-packet-seqs index cells + !
+          bytes self in-packet-sizes index 1 lshift + h!
+          addr self in-packet-addr @ self pending-in-packet-offset @ +
+          seq self first-in-packet-seq @ - + bytes move
+        then
       then
+      0 { max-bytes }
+      self in-packet-count @ 0 ?do
+        self in-packet-seqs i cells + @ { current-seq }
+        self in-packet-sizes i 1 lshift + h@ { current-bytes }
+        current-seq self first-in-packet-seq @ - current-bytes +
+        max-bytes max to max-bytes
+      loop
+      max-bytes self pending-in-packet-offset @ + self in-packet-offset !
       [ debug? ] [if] cr ." @@@ insert-tcp-packet: " self in-packets. [then]
     ; define insert-tcp-packet
     
@@ -535,7 +547,11 @@ begin-module net
       self in-packet-offset @ self pending-in-packet-offset @ - { bytes }
       self in-packets-tcp @ if
         true { continue }
-        begin bytes current-bytes > continue and while
+        begin
+          count self in-packet-count @ <
+          bytes current-bytes > and
+          continue and
+        while
           self in-packet-seqs count cells + @ { seq }
           self in-packet-sizes count 1 lshift + h@ { size }
           seq self first-in-packet-seq @ - current-bytes = if
@@ -1473,7 +1489,7 @@ begin-module net
     ; define signal-endpoint-event
 
     \ Get endpoint event
-    :noname ( self -- event? )
+    :noname ( self -- )
       [:
         dup endpoint-event-count @
         1- 0 max swap endpoint-event-count !
@@ -2315,7 +2331,7 @@ begin-module net
       addr tcp-window-size hunaligned@ rev16
       addr tcp-ack-no unaligned@ rev
       endpoint endpoint-ack-in
-      bytes header-size > if
+      endpoint endpoint-send-ack? if
         endpoint endpoint-ipv4-remote@
         endpoint endpoint-local-port@
         endpoint endpoint-local-seq@
@@ -2746,17 +2762,14 @@ begin-module net
 
     \ Enqueue a ready receiving IP endpoint
     :noname ( endpoint self -- )
-      [:
-        [: { endpoint self }
-          endpoint endpoint-has-event? not if
-            endpoint signal-endpoint-event
-            self endpoint-loop-sema give
-          else
-          then
-          endpoint broadcast-endpoint
-        ;] 2 pick with-endpoint
-      ;] over endpoint-loop-lock with-lock
-      pause
+      [: { endpoint self }
+        endpoint endpoint-has-event? not if
+          endpoint signal-endpoint-event
+          self endpoint-loop-sema give
+        else
+        then
+        endpoint broadcast-endpoint
+      ;] 2 pick with-endpoint
     ; define put-ready-endpoint
 
     \ Dequeue a ready receiving IP endpoint
