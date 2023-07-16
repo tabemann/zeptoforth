@@ -45,29 +45,34 @@ begin-module net-test
   <endpoint-process> class-size buffer: my-endpoint-process
   
   \ Our port
-  4444 constant my-port
+  65534 constant my-port
   
-  <endpoint-handler> begin-class <udp-echo-handler>
+  \ Have we sent the header
+  false value sent-header?
+
+  <endpoint-handler> begin-class <tcp-echo-handler>
     
   end-class
 
-  <udp-echo-handler> begin-implement
+  <tcp-echo-handler> begin-implement
   
     \ Handle a endpoint packet
     :noname { endpoint self -- }
-      endpoint endpoint-ipv4-remote@ { src-addr src-port }
-      endpoint endpoint-rx-data@ { addr bytes }
-      cr ." SOURCE: " src-addr ipv4. space src-port .
-      addr addr bytes + dump
-      addr bytes my-port src-addr src-port bytes [: { addr bytes buf }
-        addr buf bytes move true
-      ;] my-interface send-ipv4-udp-packet drop
+      sent-header? not endpoint endpoint-tcp-state@ TCP_ESTABLISHED = and if
+        cr ." SENDING HEADER"
+        true to sent-header?
+        s\" GET / HTTP/1.1\r\n" endpoint my-interface send-tcp-endpoint
+        s\" Host: www.google.com\r\n" endpoint my-interface send-tcp-endpoint
+        s\" Accept: */*\r\n" endpoint my-interface send-tcp-endpoint
+        s\" Connection: close\r\n\r\n" endpoint my-interface send-tcp-endpoint
+      then
+      endpoint endpoint-rx-data@ type
       endpoint my-interface endpoint-done
     ; define handle-endpoint
   
   end-implement
   
-  <udp-echo-handler> class-size buffer: my-udp-echo-handler
+  <tcp-echo-handler> class-size buffer: my-tcp-echo-handler
   variable my-endpoint
   
   : init-test ( -- )
@@ -85,20 +90,22 @@ begin-module net-test
     my-arp-handler my-frame-process add-frame-handler
     my-ip-handler my-frame-process add-frame-handler
     my-interface <endpoint-process> my-endpoint-process init-object
-    <udp-echo-handler> my-udp-echo-handler init-object
-    my-udp-echo-handler my-endpoint-process add-endpoint-handler
-    my-port my-interface allocate-udp-listen-endpoint if
-      my-endpoint !
-    else
-      [: ." unable to allocate UDP listen endpoint" cr ;] ?raise
-    then
+    <tcp-echo-handler> my-tcp-echo-handler init-object
+    my-tcp-echo-handler my-endpoint-process add-endpoint-handler
   ;
 
   : run-test { D: ssid D: pass -- }
     init-test
     begin ssid pass my-cyw43-control join-cyw43-wpa2 nip until
+    my-cyw43-control disable-all-cyw43-events
     my-endpoint-process run-endpoint-process
     my-frame-process run-frame-process
+    s" www.google.com" my-interface resolve-dns-ipv4-addr if { addr }
+      cr ." RESOLVED: " addr ipv4.
+      my-port 192 168 1 75 make-ipv4-addr 8080 my-interface allocate-tcp-connect-ipv4-endpoint 2drop
+    else
+      drop
+    then
   ;
 
 end-module

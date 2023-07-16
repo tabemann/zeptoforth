@@ -1335,10 +1335,11 @@ begin-module net
       [: { src-port dest-ipv4-addr dest-port D: mac-addr self }
         self try-allocate-endpoint if
           src-port self endpoint-local-port h!
-          dest-ipv4-addr dest-port endpoint-ipv4-remote!
+          dest-ipv4-addr dest-port self endpoint-ipv4-remote!
           TCP_SYN_SENT self endpoint-tcp-state!
           mac-addr self endpoint-remote-mac-addr 2!
           0 self endpoint-event-count !
+          true
         else
           false
         then
@@ -2082,7 +2083,7 @@ begin-module net
         PROTOCOL_UDP of process-ipv4-udp-packet endof
         PROTOCOL_TCP of process-ipv4-tcp-packet endof
         PROTOCOL_ICMP of process-ipv4-icmp-packet endof
-        2drop 2drop drop
+        >r 2drop 2drop drop r>
       endcase
     ; define process-ipv4-packet
 
@@ -2144,14 +2145,15 @@ begin-module net
     ; define process-ipv4-syn-packet
 
     \ Send a TCP SYN packet
-    :noname send-syn { endpoint self -- }
+    :noname { endpoint self -- }
       TCP_SYN_SENT endpoint endpoint-tcp-state!
       rng::random endpoint endpoint-init-local-seq!
       endpoint endpoint-ipv4-remote@
       endpoint endpoint-local-port@
       endpoint endpoint-local-seq@ 1-
       0
-      max-payload-size
+      [ mtu-size ethernet-header-size - ipv4-header-size - tcp-header-size - ]
+      literal
       TCP_SYN
       endpoint endpoint-remote-mac-addr@
       self send-ipv4-basic-tcp
@@ -2254,7 +2256,6 @@ begin-module net
         endpoint endpoint-ipv4-remote@
         endpoint endpoint-local-port@
         endpoint endpoint-local-seq@
-        1 endpoint +endpoint-local-seq!
         endpoint endpoint-ack@
         endpoint endpoint-local-window@
         TCP_ACK
@@ -2281,7 +2282,7 @@ begin-module net
           TCP_FIN_WAIT_2 of process-ipv4-ack-fin-wait-2 endof
           TCP_CLOSE_WAIT of process-ipv4-ack-close-wait endof
           TCP_LAST_ACK of process-ipv4-ack-last-ack endof
-          send-ipv4-rst-for-ack exit
+          drop send-ipv4-rst-for-ack exit
         endcase
         endpoint endpoint-waiting-bytes@ waiting-bytes <>
         endpoint endpoint-tcp-state@ state <> or if
@@ -2307,7 +2308,7 @@ begin-module net
           TCP_FIN_WAIT_2 of process-ipv4-ack-fin-wait-2 endof
           TCP_CLOSE_WAIT of process-ipv4-ack-close-wait endof
           TCP_LAST_ACK of process-ipv4-ack-last-ack endof
-          send-ipv4-rst-for-ack
+          >r send-ipv4-rst-for-ack r>
         endcase
         addr bytes endpoint self
         state case
@@ -2832,7 +2833,10 @@ begin-module net
         self intf-endpoints <endpoint> class-size i * + { endpoint }
         src-port dest-ipv4-addr dest-port mac-addr endpoint
         try-ipv4-connect-endpoint if
-          endpoint self send-syn endpoint true unloop
+          endpoint self [: { endpoint self }
+            endpoint self send-syn
+          ;] endpoint with-endpoint
+          endpoint true unloop exit
         then
       loop
       0 false
