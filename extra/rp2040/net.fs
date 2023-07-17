@@ -75,6 +75,9 @@ begin-module net
     \ Start sending outgoing packets
     method start-out-packets ( addr bytes self -- )
 
+    \ Clear sending outgoing packets
+    method clear-out-packets ( self -- )
+    
     \ Acknowledge packets
     method ack-packets ( window ack self -- )
 
@@ -139,6 +142,16 @@ begin-module net
       [ debug? ] [if] cr ." === start-out-packets:" self out-packets. [then]
     ; define start-out-packets
 
+    \ Clear sending outgoing packets
+    :noname { self -- }
+      0 self out-packet-addr !
+      0 self out-packet-bytes !
+      0 self acked-out-packet-offset !
+      0 self out-packet-offset !
+      0 self out-packet-count !
+      [ debug? ] [if] cr ." === clear-out-packets:" self out-packets. [then]
+    ; define clear-out-packets
+    
     \ Acknowledge packets
     :noname { window ack self -- }
       window self out-packet-window !
@@ -153,6 +166,14 @@ begin-module net
           leave
         then
       loop
+      ( [ debug? ] [if] )
+      cr ." FIRST: " self first-out-packet-seq @ .
+      ." ACK: " ack .
+      ." SEQ: " seq .
+      ." BYTES: " bytes .
+      ." TOTAL-COUNt: " self out-packet-count @ .
+      ." COUNT: " count .
+      ( [then] )
       seq self first-out-packet-seq !
       bytes self acked-out-packet-offset !
       self out-packet-sizes count 1 lshift + self out-packet-sizes
@@ -160,7 +181,7 @@ begin-module net
       self out-packet-seqs count cells + self out-packet-seqs
       self out-packet-count @ count - cells move
       count negate self out-packet-count +!
-      [ debug? ] [if] cr ." === ack-packets:" self out-packets. [then]
+      ( [ debug? ] [if] ) cr ." === ack-packets:" self out-packets. ( [then] )
     ; define ack-packets
 
     \ Get info on packet to send
@@ -922,10 +943,10 @@ begin-module net
     cell member endpoint-remote-ipv4-addr
 
     \ The remote port
-    2 member endpoint-remote-port
+    cell member endpoint-remote-port
     
     \ The local port
-    2 member endpoint-local-port
+    cell member endpoint-local-port
 
     \ The processed data size
     cell member endpoint-rx-size
@@ -1023,8 +1044,14 @@ begin-module net
     \ Get endpoint remote MAC address
     method endpoint-remote-mac-addr@ ( self -- D: mac-addr )
 
-    \ Get destination port
+    \ Set local port
+    method endpoint-local-port! ( port self -- )
+    
+    \ Get local port
     method endpoint-local-port@ ( self -- port )
+
+    \ Reset local port
+    method reset-endpoint-local-port ( self -- )
     
     \ Retire a pending received data
     method retire-rx-data ( self -- )
@@ -1079,6 +1106,9 @@ begin-module net
 
     \ Set the initial local seq number
     method endpoint-init-local-seq! ( seq self -- )
+
+    \ Get the initial local seq number
+    method endpoint-init-local-seq@ ( self -- seq )
     
     \ Get local seq number
     method endpoint-local-seq@ ( self -- seq )
@@ -1110,6 +1140,9 @@ begin-module net
     \ Start endpoint send
     method start-endpoint-send ( addr bytes self -- )
 
+    \ Clear endpoint send
+    method clear-endpoint-send ( self -- )
+    
     \ Get endpoint outstanding packets
     method endpoint-send-outstanding? ( self -- outstanding? )
 
@@ -1153,8 +1186,8 @@ begin-module net
       self <object>->new
       0 self endpoint-state !
       0 self endpoint-remote-ipv4-addr !
-      0 self endpoint-remote-port h!
-      0 self endpoint-local-port h!
+      0 self endpoint-remote-port !
+      0 self endpoint-local-port !
       0 self endpoint-rx-size !
       0 self endpoint-delayed-size !
       self endpoint-buf max-payload-size
@@ -1228,8 +1261,10 @@ begin-module net
     
     \ Set endpoint TCP state
     :noname { tcp-state self -- }
-      self endpoint-state @ endpoint-tcp-state-mask bic
-      tcp-state endpoint-tcp-state-lsb lshift or self endpoint-state !
+      tcp-state self [: { tcp-state self }
+        self endpoint-state @ endpoint-tcp-state-mask bic
+        tcp-state endpoint-tcp-state-lsb lshift or self endpoint-state !
+      ;] self endpoint-lock with-lock
     ; define endpoint-tcp-state!
 
     \ Get waiting endpoint received data
@@ -1256,25 +1291,43 @@ begin-module net
     \ Get endpoint source
     :noname ( self -- ipv4-addr port )
       dup endpoint-remote-ipv4-addr @
-      swap endpoint-remote-port h@
+      swap endpoint-remote-port @
     ; define endpoint-ipv4-remote@
     
     \ Set endpoint source
     :noname { ipv4-addr port self -- }
       ipv4-addr self endpoint-remote-ipv4-addr !
-      port self endpoint-remote-port h!
+      port self endpoint-remote-port !
     ; define endpoint-ipv4-remote!
 
     \ Get endpoint remote MAC address
     :noname ( self -- D: mac-addr )
       endpoint-remote-mac-addr 2@
     ; define endpoint-remote-mac-addr@
+    
+    \ Set local port
+    :noname { port self -- }
+      port 0> if
+        port self endpoint-local-port !
+      else
+        get-ephemeral-port negate self endpoint-local-port !
+      then
+    ; define endpoint-local-port!
 
-    \ Get destination port
+    \ Get local port
     :noname ( self -- port )
-      endpoint-local-port h@
+      endpoint-local-port @ abs
     ; define endpoint-local-port@
 
+    \ Reset local port
+    :noname ( self -- )
+      [: { self }
+        self endpoint-local-port @ 0< if
+          get-ephemeral-port negate self endpoint-local-port !
+        then
+      ;] over endpoint-lock with-lock
+    ; define reset-endpoint-local-port
+    
     \ Retire a pending received data
     :noname ( self -- )
       [: endpoint-in-packets clear-in-packets ;] over endpoint-lock with-lock
@@ -1334,7 +1387,7 @@ begin-module net
     :noname ( src-port dest-ipv4-addr dest-port D: mac-addr self -- allocated? )
       [: { src-port dest-ipv4-addr dest-port D: mac-addr self }
         self try-allocate-endpoint if
-          src-port self endpoint-local-port h!
+          src-port self endpoint-local-port!
           dest-ipv4-addr dest-port self endpoint-ipv4-remote!
           TCP_SYN_SENT self endpoint-tcp-state!
           mac-addr self endpoint-remote-mac-addr 2!
@@ -1371,7 +1424,7 @@ begin-module net
       [:
         0 over endpoint-event-count !
         dup endpoint-in-packets reset-in-udp-packets
-        endpoint-udp over endpoint-state bis! endpoint-local-port h!
+        endpoint-udp over endpoint-state bis! endpoint-local-port!
       ;] over endpoint-lock with-lock
     ; define listen-udp
 
@@ -1381,7 +1434,7 @@ begin-module net
         0 self endpoint-event-count !
         endpoint-tcp self endpoint-state bis!
         TCP_LISTEN self endpoint-tcp-state!
-        port self endpoint-local-port h!
+        port self endpoint-local-port!
       ;] over endpoint-lock with-lock
     ; define listen-tcp
 
@@ -1397,9 +1450,14 @@ begin-module net
 
     \ Set the inital local seq number
     :noname ( seq self -- )
-      [: endpoint-init-local-seq ! ;] over endpoint-lock with-lock
+      endpoint-init-local-seq !
     ; define endpoint-init-local-seq!
-    
+
+    \ Get the initial local seq number
+    :noname ( self -- seq )
+      endpoint-init-local-seq @
+    ; define endpoint-init-local-seq@
+
     \ Get local seq number
     :noname ( self -- seq )
       [:
@@ -1457,6 +1515,11 @@ begin-module net
     :noname ( addr bytes self -- )
       [: endpoint-out-packets start-out-packets ;] over endpoint-lock with-lock
     ; define start-endpoint-send
+
+    \ Clear endpoint send
+    :noname ( self -- )
+      [: endpoint-out-packets clear-out-packets ;] over endpoint-lock with-lock
+    ; define clear-endpoint-send
 
     \ Get endpoint outstanding packets
     :noname ( self -- outstanding? )
@@ -1804,6 +1867,9 @@ begin-module net
     \ Process an IPv4 ACK packet in the general case
     method process-ipv4-basic-ack ( addr bytes endpoint self -- )
 
+    \ Process an IPv4 ACK packet in TCP_SYN_SENT state
+    method process-ipv4-ack-syn-sent ( addr bytes endpoint self -- )
+
     \ Process an IPv4 ACK packet in TCP_SYN_RECEIVED state
     method process-ipv4-ack-syn-received ( addr bytes endpoint self -- )
     
@@ -1941,7 +2007,7 @@ begin-module net
       255 255 255 0 make-ipv4-addr self intf-ipv4-netmask !
       192 168 1 254 make-ipv4-addr self gateway-ipv4-addr !
       8 8 8 8 make-ipv4-addr self dns-server-ipv4-addr !
-      32 self intf-ttl !
+      64 self intf-ttl !
       50000 self mac-addr-resolve-interval !
       5 self max-mac-addr-resolve-attempts !
       1 0 self mac-addr-resolve-sema init-sema
@@ -2103,6 +2169,7 @@ begin-module net
           TCP_FIN of process-ipv4-fin-packet endof
           [ TCP_FIN TCP_ACK or ] literal of process-ipv4-fin-ack-packet endof
           TCP_RST of process-ipv4-rst-packet endof
+          nip nip nip nip
         endcase
       then
     ; define process-ipv4-tcp-packet
@@ -2147,7 +2214,6 @@ begin-module net
     \ Send a TCP SYN packet
     :noname { endpoint self -- }
       TCP_SYN_SENT endpoint endpoint-tcp-state!
-      rng::random endpoint endpoint-init-local-seq!
       endpoint endpoint-ipv4-remote@
       endpoint endpoint-local-port@
       endpoint endpoint-local-seq@ 1-
@@ -2203,12 +2269,13 @@ begin-module net
     :noname { endpoint self -- }
       endpoint endpoint-ipv4-remote@
       endpoint endpoint-local-port@
-      0
-      0
+      endpoint endpoint-local-seq@
+      endpoint endpoint-ack@
       0
       TCP_RST
       endpoint endpoint-remote-mac-addr @
       self send-ipv4-basic-tcp
+      endpoint reset-endpoint-local-port
     ; define send-ipv4-rst
 
     \ Send a basic IPv4 TCP packet
@@ -2228,7 +2295,7 @@ begin-module net
         0 buf tcp-urgent-ptr hunaligned!
         self intf-ipv4-addr@ remote-addr buf tcp-header-size 0 tcp-checksum
         compute-tcp-checksum rev16 buf tcp-checksum hunaligned!
-        [ debug? ] [if] cr ." @@@@@ SENDING TCP:" buf tcp. [then]
+        ( [ debug? ] [if] ) cr ." @@@@@ SENDING TCP:" buf tcp. ( [then] )
         true
       ;] 6 pick construct-and-send-ipv4-packet drop
     ; define send-ipv4-basic-tcp
@@ -2239,20 +2306,20 @@ begin-module net
         drop send-ipv4-rst-for-packet exit
       then
       [: { src-addr addr bytes self endpoint }
-        endpoint endpoint-tcp-state@ TCP_SYN_SENT <> if
-          src-addr addr bytes self send-ipv4-rst-for-packet exit
+        addr tcp-dest-port hunaligned@ rev16 endpoint endpoint-local-port@ <> if
+          exit
         then
-        addr tcp-ack-no unaligned@ rev
-        endpoint endpoint-local-seq@ <> if
-          src-addr addr bytes self send-ipv4-rst-for-packet exit
+        endpoint endpoint-tcp-state@ TCP_SYN_SENT = if
+          addr tcp-ack-no unaligned@ rev
+          endpoint endpoint-init-local-seq@ <> if exit then
+          addr tcp-seq-no unaligned@ rev 1+
+          addr bytes tcp-mss@ not if
+            drop [ mtu-size ethernet-header-size - ipv4-header-size -
+            tcp-header-size - ] literal
+          then
+          addr tcp-window-size hunaligned@ rev16
+          endpoint init-tcp-stream
         then
-        addr tcp-seq-no unaligned@ rev 1+
-        addr bytes tcp-mss@ not if
-          drop [ mtu-size ethernet-header-size - ipv4-header-size -
-          tcp-header-size - ] literal
-        then
-        addr tcp-window-size hunaligned@ rev16
-        endpoint init-tcp-stream
         endpoint endpoint-ipv4-remote@
         endpoint endpoint-local-port@
         endpoint endpoint-local-seq@
@@ -2269,13 +2336,17 @@ begin-module net
     \ Process an IPv4 ACK packet
     :noname ( src-addr addr bytes self -- )
       2over 2over find-connect-ipv4-endpoint not if
-        drop send-ipv4-rst-for-packet exit
+        2drop 2drop drop exit
       then
       [: { src-addr addr bytes self endpoint }
+        addr tcp-dest-port hunaligned@ rev16 endpoint endpoint-local-port@ <> if
+          exit
+        then
         endpoint endpoint-tcp-state@ { state }
         endpoint endpoint-waiting-bytes@ { waiting-bytes }
         addr bytes endpoint self
         state case
+          TCP_SYN_SENT of process-ipv4-ack-syn-sent endof
           TCP_SYN_RECEIVED of process-ipv4-ack-syn-received endof
           TCP_ESTABLISHED of process-ipv4-ack-established endof
           TCP_FIN_WAIT_1 of process-ipv4-ack-fin-wait-1 endof
@@ -2299,6 +2370,9 @@ begin-module net
         drop send-ipv4-rst-for-packet exit
       then
       [: { src-addr addr bytes self endpoint }
+        addr tcp-dest-port hunaligned@ rev16 endpoint endpoint-local-port@ <> if
+          exit
+        then
         addr bytes endpoint self
         endpoint endpoint-waiting-bytes@ { waiting-bytes }
         endpoint endpoint-tcp-state@ { state }
@@ -2344,6 +2418,30 @@ begin-module net
         endpoint endpoint-ack-sent
       then
     ; define process-ipv4-basic-ack
+
+    \ Process an IPv4 ACK packet in TCP_SYN_SENT state
+    :noname ( addr bytes endpoint self -- )
+      [: { addr bytes endpoint self }
+        addr tcp-seq-no unaligned@ rev 1+
+        addr bytes tcp-mss@ not if
+          drop [ mtu-size ethernet-header-size - ipv4-header-size -
+          tcp-header-size - ] literal
+        then
+        addr tcp-window-size hunaligned@ rev16
+        endpoint init-tcp-stream
+        endpoint endpoint-ipv4-remote@
+        endpoint endpoint-local-port@
+        endpoint endpoint-local-seq@
+        endpoint endpoint-ack@
+        endpoint endpoint-local-window@
+        TCP_ACK
+        endpoint endpoint-remote-mac-addr@
+        self send-ipv4-basic-tcp
+        TCP_ESTABLISHED endpoint endpoint-tcp-state!
+        addr bytes endpoint self process-ipv4-basic-ack
+        endpoint self put-ready-endpoint
+      ;] 2 pick with-endpoint
+    ; define process-ipv4-ack-syn-sent
     
     \ Process an IPv4 ACK packet in TCP_SYN_RECEIVED state
     :noname { addr bytes endpoint self -- }
@@ -2398,6 +2496,9 @@ begin-module net
         drop send-ipv4-rst-for-packet exit
       then
       [: { src-addr addr bytes self endpoint }
+        addr tcp-dest-port hunaligned@ rev16 endpoint endpoint-local-port@ <> if
+          exit
+        then
         addr bytes endpoint self
         endpoint endpoint-tcp-state@ { state }
         state case
@@ -2456,8 +2557,15 @@ begin-module net
     :noname ( src-addr addr bytes self -- )
       2over 2over find-connect-ipv4-endpoint if
         [: { src-addr addr bytes self endpoint }
-          TCP_CLOSED endpoint endpoint-tcp-state!
-          self put-ready-endpoint
+          addr tcp-dest-port hunaligned@ rev16
+          endpoint endpoint-local-port@ <> if
+            exit
+          then
+          endpoint endpoint-tcp-state@ TCP_SYN_SENT <> if
+            TCP_CLOSED endpoint endpoint-tcp-state!
+          then
+          endpoint reset-endpoint-local-port
+          endpoint self put-ready-endpoint
         ;] over with-endpoint
       else
         drop 2drop 2drop
@@ -2834,6 +2942,8 @@ begin-module net
         src-port dest-ipv4-addr dest-port mac-addr endpoint
         try-ipv4-connect-endpoint if
           endpoint self [: { endpoint self }
+            rng::random endpoint endpoint-init-local-seq!
+            endpoint reset-endpoint-local-port
             endpoint self send-syn
           ;] endpoint with-endpoint
           endpoint true unloop exit
@@ -2975,6 +3085,7 @@ begin-module net
               ?raise
             then
           repeat
+          endpoint clear-endpoint-send
         then
       ;] 2 pick with-ctrl-endpoint
     ; define send-tcp-endpoint
@@ -3000,7 +3111,10 @@ begin-module net
         endpoint endpoint-ipv4-remote@ drop
         buf tcp-header-size bytes + 0 tcp-checksum
         compute-tcp-checksum rev16 buf tcp-checksum hunaligned!
-        [ debug? ] [if] cr ." @@@@@ SENDING TCP WITH DATA:" buf tcp. [then]
+        ( [ debug? ] [if] )
+        cr ." @@@@@ SENDING TCP WITH DATA:" buf tcp.
+        buf buf tcp-header-size + bytes + dump
+        ( [then] )
         true
       ;] 6 pick construct-and-send-ipv4-packet drop
     ; define send-data-ack
@@ -3020,13 +3134,29 @@ begin-module net
               endpoint endpoint-ack@
               endpoint endpoint-local-window@
               state case
-                TCP_ESTABLISHED of TCP_ACK endof
+                TCP_ESTABLISHED of [ TCP_ACK TCP_PSH or ] literal endof
                 TCP_SYN_RECEIVED of [ TCP_SYN TCP_ACK or ] literal endof
               endcase
               endpoint endpoint-remote-mac-addr@
               self send-ipv4-basic-tcp
               endpoint endpoint-ack-sent
               endpoint reset-endpoint-refresh
+            else
+              state TCP_SYN_SENT = if
+                endpoint reset-endpoint-local-port
+                endpoint endpoint-ipv4-remote@
+                endpoint endpoint-local-port@
+                endpoint endpoint-init-local-seq@ 1+
+                endpoint endpoint-init-local-seq!
+                endpoint endpoint-local-seq@ 1-
+                0
+                [ mtu-size ethernet-header-size -
+                ipv4-header-size - tcp-header-size - ] literal
+                TCP_SYN
+                endpoint endpoint-remote-mac-addr@
+                self send-ipv4-basic-tcp
+                endpoint reset-endpoint-refresh
+              then
             then
           ;] 2 pick with-endpoint
         else

@@ -59,13 +59,13 @@ begin-module net-misc
   8 constant max-in-packets
 
   \ The maximum retransmit count
-  3 constant max-retransmits
+  3 value max-retransmits
 
   \ The initial timeout time
-  2500 constant init-timeout
+  2500 value init-timeout
 
   \ The timeout multiplication factor
-  2 constant timeout-multiplier
+  2 value timeout-multiplier
 
   \ DNS port
   53 constant dns-port
@@ -77,10 +77,10 @@ begin-module net-misc
   16 constant parse-dns-name-depth
 
   \ Refresh timeout
-  5000 constant refresh-timeout
+  5000 value refresh-timeout
 
   \ Close timeout
-  100000 constant close-timeout
+  100000 value close-timeout
   
   \ The Ethernet header structure
   begin-structure ethernet-header-size
@@ -138,6 +138,11 @@ begin-module net-misc
   1 constant TCP_OPT_NOP
   2 constant TCP_OPT_MSS
   4 constant TCP_OPT_MSS_LEN
+
+  \ Ephemeral ports
+  49152 constant MIN_EPHEMERAL_PORT
+  65535 constant MAX_EPHEMERAL_PORT
+  -1 constant EPHEMERAL_PORT
 
   \ IPv4 ARP header structure
   begin-structure arp-ipv4-size
@@ -531,4 +536,32 @@ begin-module net-misc
     cr ." tcp-urgent-ptr: " addr tcp-urgent-ptr hunaligned@ rev16 .
   ;
 
+  \ The current ephemeral port
+  variable current-ephemeral-port
+
+  \ Ephemeral port lock
+  lock::lock-size aligned-buffer: ephemeral-port-lock
+  
+  \ Get an ephemeral port
+  : get-ephemeral-port ( -- port )
+    [:
+      current-ephemeral-port @
+      dup 1+ MIN_EPHEMERAL_PORT - MAX_EPHEMERAL_PORT MIN_EPHEMERAL_PORT - umod
+      MIN_EPHEMERAL_PORT + current-ephemeral-port !
+    ;] ephemeral-port-lock lock::with-lock
+  ;
+
+  \ Initialize ephemeral ports
+  : init-ephemeral-ports ( -- )
+    ephemeral-port-lock lock::init-lock
+    rng::random MAX_EPHEMERAL_PORT MIN_EPHEMERAL_PORT - umod
+    MIN_EPHEMERAL_PORT + current-ephemeral-port !
+  ;
+
 end-module
+
+\ Initialize
+: init ( -- )
+  init
+  net-misc::init-ephemeral-ports
+;

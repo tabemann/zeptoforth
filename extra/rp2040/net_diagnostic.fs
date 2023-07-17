@@ -147,6 +147,18 @@ begin-module net-diagnostic
       ."  (computed: " h.4 ." )"
       cr ." source IP address: " addr ipv4-src-addr unaligned@ rev ipv4.
       cr ." destination IP address: " addr ipv4-dest-addr unaligned@ rev ipv4.
+      addr ipv4-protocol c@ case
+        PROTOCOL_TCP of
+          addr ihl cells + { tcp-addr }
+          bytes ihl cells - { tcp-bytes }
+          tcp-addr full-tcp-header-size { header-size }
+          tcp-bytes header-size >= if
+            tcp-addr tcp.
+            tcp-addr tcp-bytes tcp-data over + dump
+          then
+        endof
+        addr addr bytes + dump
+      endcase
     ; define display-diag
 
   end-implement
