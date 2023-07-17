@@ -42,10 +42,15 @@ begin-module net-test
   <frame-process> class-size buffer: my-frame-process
   <arp-handler> class-size buffer: my-arp-handler
   <ip-handler> class-size buffer: my-ip-handler
+  
+  <ipv4-diag-handler> class-size buffer: my-ipv4-diag-handler \ DEBUG
+  
   <endpoint-process> class-size buffer: my-endpoint-process
   
-  \ Our port
-  65534 constant my-port
+  \ Configure our code
+  3 to max-retransmits
+  2500 to init-timeout
+  50000 to refresh-timeout
   
   \ Have we sent the header
   false value sent-header?
@@ -59,7 +64,7 @@ begin-module net-test
     \ Handle a endpoint packet
     :noname { endpoint self -- }
       sent-header? not endpoint endpoint-tcp-state@ TCP_ESTABLISHED = and if
-        cr ." SENDING HEADER"
+        cr ." SENDING HEADER" cr
         true to sent-header?
         s\" GET / HTTP/1.1\r\n" endpoint my-interface send-tcp-endpoint
         s\" Host: www.google.com\r\n" endpoint my-interface send-tcp-endpoint
@@ -87,8 +92,14 @@ begin-module net-test
     my-cyw43-control cyw43-frame-interface@ <frame-process> my-frame-process init-object
     my-interface <arp-handler> my-arp-handler init-object
     my-interface <ip-handler> my-ip-handler init-object
+    
+    <ipv4-diag-handler> my-ipv4-diag-handler init-object \ DEBUG
+    
     my-arp-handler my-frame-process add-frame-handler
     my-ip-handler my-frame-process add-frame-handler
+    
+    my-ipv4-diag-handler my-frame-process add-frame-handler \ DEBUG
+    
     my-interface <endpoint-process> my-endpoint-process init-object
     <tcp-echo-handler> my-tcp-echo-handler init-object
     my-tcp-echo-handler my-endpoint-process add-endpoint-handler
@@ -102,7 +113,21 @@ begin-module net-test
     my-frame-process run-frame-process
     s" www.google.com" my-interface resolve-dns-ipv4-addr if { addr }
       cr ." RESOLVED: " addr ipv4.
-      my-port 192 168 1 75 make-ipv4-addr 8080 my-interface allocate-tcp-connect-ipv4-endpoint 2drop
+\      my-port 192 168 1 75 make-ipv4-addr 8000 my-interface allocate-tcp-connect-ipv4-endpoint 2drop
+      EPHEMERAL_PORT addr 80 my-interface allocate-tcp-connect-ipv4-endpoint if
+        1 [: { endpoint }
+          begin
+            cr ." ENDPOINT STATUS: " endpoint endpoint-tcp-state@ .
+            endpoint [: { endpoint }
+              endpoint endpoint-out-packets out-packets.
+              endpoint endpoint-in-packets in-packets.
+            ;] endpoint with-endpoint
+            500 ms
+          again
+        ;] 512 320 1024 task::spawn task::run
+      else
+        drop
+      then
     else
       drop
     then
