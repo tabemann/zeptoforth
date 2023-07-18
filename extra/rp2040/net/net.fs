@@ -144,6 +144,10 @@ begin-module net
 
     \ Clear sending outgoing packets
     :noname { self -- }
+      self out-packet-count @ 0> if
+        self out-packet-seqs self out-packet-count @ cells + @
+        self first-out-packet-seq !
+      then
       0 self out-packet-addr !
       0 self out-packet-bytes !
       0 self acked-out-packet-offset !
@@ -166,14 +170,14 @@ begin-module net
           leave
         then
       loop
-      ( [ debug? ] [if] )
-      cr ." FIRST: " self first-out-packet-seq @ .
-      ." ACK: " ack .
-      ." SEQ: " seq .
-      ." BYTES: " bytes .
-      ." TOTAL-COUNt: " self out-packet-count @ .
-      ." COUNT: " count .
-      ( [then] )
+      [ debug? ] [if]
+        cr ." FIRST: " self first-out-packet-seq @ .
+        ." ACK: " ack .
+        ." SEQ: " seq .
+        ." BYTES: " bytes .
+        ." TOTAL-COUNt: " self out-packet-count @ .
+        ." COUNT: " count .
+      [then]
       seq self first-out-packet-seq !
       bytes self acked-out-packet-offset !
       self out-packet-sizes count 1 lshift + self out-packet-sizes
@@ -181,7 +185,7 @@ begin-module net
       self out-packet-seqs count cells + self out-packet-seqs
       self out-packet-count @ count - cells move
       count negate self out-packet-count +!
-      ( [ debug? ] [if] ) cr ." === ack-packets:" self out-packets. ( [then] )
+      [ debug? ] [if] cr ." === ack-packets:" self out-packets. [then]
     ; define ack-packets
 
     \ Get info on packet to send
@@ -2295,7 +2299,7 @@ begin-module net
         0 buf tcp-urgent-ptr hunaligned!
         self intf-ipv4-addr@ remote-addr buf tcp-header-size 0 tcp-checksum
         compute-tcp-checksum rev16 buf tcp-checksum hunaligned!
-        ( [ debug? ] [if] ) cr ." @@@@@ SENDING TCP:" buf tcp. ( [then] )
+        [ debug? ] [if] cr ." @@@@@ SENDING TCP:" buf tcp. [then]
         true
       ;] 6 pick construct-and-send-ipv4-packet drop
     ; define send-ipv4-basic-tcp
@@ -3111,10 +3115,10 @@ begin-module net
         endpoint endpoint-ipv4-remote@ drop
         buf tcp-header-size bytes + 0 tcp-checksum
         compute-tcp-checksum rev16 buf tcp-checksum hunaligned!
-        ( [ debug? ] [if] )
+        [ debug? ] [if]
         cr ." @@@@@ SENDING TCP WITH DATA:" buf tcp.
         buf buf tcp-header-size + bytes + dump
-        ( [then] )
+        [then]
         true
       ;] 6 pick construct-and-send-ipv4-packet drop
     ; define send-data-ack
@@ -3134,7 +3138,7 @@ begin-module net
               endpoint endpoint-ack@
               endpoint endpoint-local-window@
               state case
-                TCP_ESTABLISHED of [ TCP_ACK TCP_PSH or ] literal endof
+                TCP_ESTABLISHED of TCP_ACK endof
                 TCP_SYN_RECEIVED of [ TCP_SYN TCP_ACK or ] literal endof
               endcase
               endpoint endpoint-remote-mac-addr@
@@ -3194,8 +3198,8 @@ begin-module net
           src-mac-addr addr ipv4-src-addr unaligned@ rev
           self ip-interface @
           process-ipv4-mac-addr
-          bytes addr ipv4-total-len h@ rev16 =
-          addr ipv4-version-ihl c@ $F and dup { ihl } 5 >= and
+          bytes addr ipv4-total-len h@ rev16 min to bytes
+          addr ipv4-version-ihl c@ $F and dup { ihl } 5 >=
           ihl 4 * bytes <= and if
             addr ipv4-dest-addr unaligned@ rev
             dup self ip-interface @ intf-ipv4-addr@ =

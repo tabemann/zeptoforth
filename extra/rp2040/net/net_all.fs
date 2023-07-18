@@ -22,11 +22,11 @@ compile-to-flash
 
 marker erase-net
 
-#include extra/rp2040/cyw43_all.fs
-#include extra/rp2040/net_misc.fs
-#include extra/rp2040/frame_process.fs
-#include extra/rp2040/net.fs
-#include extra/rp2040/net_diagnostic.fs
-#include extra/rp2040/endpoint_process.fs
+#include extra/rp2040/cyw43/cyw43_all.fs
+#include extra/rp2040/net/net_misc.fs
+#include extra/rp2040/net/frame_process.fs
+#include extra/rp2040/net/net.fs
+#include extra/rp2040/net/net_diagnostic.fs
+#include extra/rp2040/net/endpoint_process.fs
 
 compile-to-ram

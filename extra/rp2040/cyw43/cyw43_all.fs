@@ -20,14 +20,14 @@
 
 #include extra/rp2040/dma.fs
 #include extra/rp2040/dma_pool.fs
-#include extra/rp2040/cyw43_consts.fs
-#include extra/rp2040/cyw43_structs.fs
-#include extra/rp2040/cyw43_events.fs
-#include extra/rp2040/cyw43_nvram.fs
-#include extra/rp2040/cyw43_spi.fs
-#include extra/rp2040/cyw43_bus.fs
-#include extra/rp2040/cyw43_ioctl.fs
-#include extra/rp2040/frame_interface.fs
-#include extra/rp2040/cyw43_runner.fs
-#include extra/rp2040/cyw43_control.fs
+#include extra/rp2040/cyw43/cyw43_consts.fs
+#include extra/rp2040/cyw43/cyw43_structs.fs
+#include extra/rp2040/cyw43/cyw43_events.fs
+#include extra/rp2040/cyw43/cyw43_nvram.fs
+#include extra/rp2040/cyw43/cyw43_spi.fs
+#include extra/rp2040/cyw43/cyw43_bus.fs
+#include extra/rp2040/cyw43/cyw43_ioctl.fs
+#include extra/rp2040/net/frame_interface.fs
+#include extra/rp2040/cyw43/cyw43_runner.fs
+#include extra/rp2040/cyw43/cyw43_control.fs
 

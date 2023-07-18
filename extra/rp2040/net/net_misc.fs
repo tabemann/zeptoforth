@@ -77,7 +77,7 @@ begin-module net-misc
   16 constant parse-dns-name-depth
 
   \ Refresh timeout
-  5000 value refresh-timeout
+  50000 value refresh-timeout
 
   \ Close timeout
   100000 value close-timeout
