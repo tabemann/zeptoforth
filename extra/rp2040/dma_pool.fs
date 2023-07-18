@@ -68,3 +68,9 @@ begin-module dma-pool
   ;
   
 end-module
+
+\ Initialize
+: init ( -- )
+  init
+  dma-pool::init-dma-pool
+;
