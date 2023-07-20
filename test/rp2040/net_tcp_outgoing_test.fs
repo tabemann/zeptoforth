@@ -72,7 +72,6 @@ begin-module net-test
   variable my-endpoint
   
   : init-test ( -- )
-    dma-pool::init-dma-pool
     cyw43-clm::data cyw43-clm::size cyw43-fw::data cyw43-fw::size
     pwr-pin clk-pin dio-pin cs-pin pio-addr sm-index pio-instance
     <cyw43-control> my-cyw43-control init-object

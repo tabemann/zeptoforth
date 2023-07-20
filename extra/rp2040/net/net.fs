@@ -358,6 +358,9 @@ begin-module net
 
     \ Get the complete packet size and count
     method complete-in-packets ( self -- bytes packet-count )
+
+    \ Get whether there are missing packets
+    method missing-in-packets? ( self -- missing-packets? )
     
     \ Clear contiguous packets
     method clear-in-packets ( self -- )
@@ -598,6 +601,12 @@ begin-module net
       current-bytes count
       [ debug? ] [if] cr ." @@@ complete-in-packets: " 2dup . . self in-packets. [then]
     ; define complete-in-packets
+
+    \ Get whether there are missing packets
+    :noname { self -- missing-packets? }
+      self in-packet-offset @ self pending-in-packet-offset @ -
+      self complete-in-packets drop <>
+    ; define missing-in-packets?
     
     \ Clear pending packets
     :noname { self -- }
@@ -996,6 +1005,12 @@ begin-module net
 
     \ Last refresh time
     cell member endpoint-last-refresh
+
+    \ Endpoint refresh timeout
+    cell member endpoint-refresh-timeout
+
+    \ Endpoint refresh count
+    cell member endpoint-refreshes
     
     \ Start timeout
     method start-endpoint-timeout ( self -- )
@@ -1179,6 +1194,18 @@ begin-module net
 
     \ Reset endpoint refresh
     method reset-endpoint-refresh ( self -- )
+
+    \ Advance last endpoint refresh
+    method advance-endpoint-refresh ( self -- )
+    
+    \ Get whether there are missing packets
+    method missing-endpoint-packets? ( self -- missing-packets? )
+
+    \ Get next endpoint refresh timeout
+    method next-endpoint-refresh-timeout@ ( self -- timeout )
+
+    \ Escalate the next endpoint refresh
+    method escalate-endpoint-refresh ( self -- )
     
   end-class
 
@@ -1377,6 +1404,7 @@ begin-module net
             TCP_SYN_RECEIVED self endpoint-tcp-state!
             mac-addr self endpoint-remote-mac-addr 2!
             0 self endpoint-event-count !
+            self reset-endpoint-refresh
             true
           else
             self endpoint-ipv4-remote@ src-port = src-ipv4-addr = and
@@ -1396,6 +1424,7 @@ begin-module net
           TCP_SYN_SENT self endpoint-tcp-state!
           mac-addr self endpoint-remote-mac-addr 2!
           0 self endpoint-event-count !
+          self reset-endpoint-refresh
           true
         else
           false
@@ -1576,14 +1605,111 @@ begin-module net
 
     \ Endpoint is ready for a refresh
     :noname ( self -- refresh? )
-      systick::systick-counter swap endpoint-last-refresh @ - refresh-timeout >=
+      [: { self }
+        self endpoint-tcp-state@ case
+          TCP_ESTABLISHED of true endof
+          TCP_CLOSE_WAIT of true endof
+          TCP_SYN_SENT of true endof
+          TCP_SYN_RECEIVED of true endof
+          false swap
+        endcase if
+          systick::systick-counter self endpoint-last-refresh @ -
+          self next-endpoint-refresh-timeout@ >=
+        else
+          false
+        then
+      ;] over endpoint-lock with-lock
     ; define endpoint-refresh-ready?
 
     \ Reset endpoint refresh
     :noname ( self -- )
-      systick::systick-counter swap endpoint-last-refresh !
+      [:
+        systick::systick-counter over endpoint-last-refresh !
+        0 swap endpoint-refreshes !
+      ;] over endpoint-lock with-lock
     ; define reset-endpoint-refresh
+
+    \ Advance last endpoint refresh
+    :noname ( self -- )
+      systick::systick-counter swap endpoint-last-refresh !
+    ; define advance-endpoint-refresh
     
+    \ Get whether there are missing packets
+    :noname ( self -- missing-packets? )
+      [: endpoint-in-packets missing-in-packets? ;] over endpoint-lock with-lock
+    ; define missing-endpoint-packets?
+
+    \ Get next endpoint refresh timeout
+    :noname ( self -- timeout )
+      [: { self }
+        self endpoint-tcp-state@ case
+          TCP_ESTABLISHED of
+            self missing-endpoint-packets? if
+              self reset-endpoint-refresh
+              established-no-missing-refresh-timeout
+            else
+              established-init-refresh-timeout s>f
+              established-refresh-timeout-multiplier s>f
+              self endpoint-refreshes @ fi** f* f>s
+            then
+          endof
+          TCP_CLOSE_WAIT of
+            self missing-endpoint-packets? if
+              self reset-endpoint-refresh
+              established-no-missing-refresh-timeout
+            else
+              established-init-refresh-timeout s>f
+              established-refresh-timeout-multiplier s>f
+              self endpoint-refreshes @ fi** f* f>s
+            then
+          endof
+          TCP_SYN_SENT of
+            syn-sent-init-refresh-timeout s>f
+            syn-sent-refresh-timeout-multiplier s>f
+            self endpoint-refreshes @ fi** f* f>s
+          endof
+          TCP_SYN_RECEIVED of
+            syn-ack-sent-init-refresh-timeout s>f
+            syn-ack-sent-refresh-timeout-multiplier s>f
+            self endpoint-refreshes @ fi** f* f>s
+          endof
+          0 swap
+        endcase
+      ;] over endpoint-lock with-lock
+    ; define next-endpoint-refresh-timeout@
+
+    \ Escalate the next endpoint refresh
+    :noname ( self -- )
+      [: { self }
+        self endpoint-tcp-state@ case
+          TCP_ESTABLISHED of
+            self missing-endpoint-packets? if
+              self reset-endpoint-refresh
+            else
+              self endpoint-refreshes @ 1+ established-max-refreshes min
+              self endpoint-refreshes !
+            then
+          endof
+          TCP_CLOSE_WAIT of
+            self missing-endpoint-packets? if
+              self reset-endpoint-refresh
+            else
+              self endpoint-refreshes @ 1+ established-max-refreshes min
+              self endpoint-refreshes !
+            then
+          endof
+          TCP_SYN_SENT of
+            self endpoint-refreshes @ 1+ syn-sent-max-refreshes min
+            self endpoint-refreshes !
+          endof
+          TCP_SYN_RECEIVED of
+            self endpoint-refreshes @ 1+ syn-ack-sent-max-refreshes min
+            self endpoint-refreshes !
+          endof
+        endcase
+      ;] over endpoint-lock with-lock
+    ; define escalate-endpoint-refresh
+
   end-implement
   
   \ The fragment collector class
@@ -2250,6 +2376,7 @@ begin-module net
       self send-ipv4-basic-tcp
       TCP_SYN_RECEIVED endpoint endpoint-tcp-state!
       endpoint endpoint-ack-sent
+      endpoint reset-endpoint-refresh
     ; define send-ipv4-syn-ack
 
     \ Send an IPv4 TCP RST packet in response to a packet
@@ -2333,6 +2460,7 @@ begin-module net
         endpoint endpoint-remote-mac-addr@
         self send-ipv4-basic-tcp
         TCP_ESTABLISHED endpoint endpoint-tcp-state!
+        endpoint reset-endpoint-refresh
         endpoint self put-ready-endpoint
       ;] over with-endpoint
     ; define process-ipv4-syn-ack-packet
@@ -2420,6 +2548,7 @@ begin-module net
         endpoint endpoint-remote-mac-addr@
         self send-ipv4-basic-tcp
         endpoint endpoint-ack-sent
+        endpoint reset-endpoint-refresh
       then
     ; define process-ipv4-basic-ack
 
@@ -3127,11 +3256,13 @@ begin-module net
     :noname { self -- }
       max-endpoints 0 ?do
         self intf-endpoints <endpoint> class-size i * +
-        dup endpoint-refresh-ready? if
-          self [: { endpoint self }
+        self [: { endpoint self }
+          endpoint endpoint-refresh-ready? if
             endpoint endpoint-tcp-state@ { state }
             [ debug? ] [if] cr ." ENDPOINT " endpoint h.8 ."  STATE: " state . [then]
-            state TCP_ESTABLISHED = state TCP_SYN_RECEIVED = or if
+            state TCP_ESTABLISHED =
+            state TCP_SYN_RECEIVED = or
+            state TCP_CLOSE_WAIT = or if
               endpoint endpoint-ipv4-remote@
               endpoint endpoint-local-port@
               endpoint endpoint-local-seq@
@@ -3140,11 +3271,12 @@ begin-module net
               state case
                 TCP_ESTABLISHED of TCP_ACK endof
                 TCP_SYN_RECEIVED of [ TCP_SYN TCP_ACK or ] literal endof
+                TCP_CLOSE_WAIT of TCP_ACK endof
               endcase
               endpoint endpoint-remote-mac-addr@
               self send-ipv4-basic-tcp
               endpoint endpoint-ack-sent
-              endpoint reset-endpoint-refresh
+              endpoint advance-endpoint-refresh
             else
               state TCP_SYN_SENT = if
                 endpoint reset-endpoint-local-port
@@ -3159,13 +3291,12 @@ begin-module net
                 TCP_SYN
                 endpoint endpoint-remote-mac-addr@
                 self send-ipv4-basic-tcp
-                endpoint reset-endpoint-refresh
+                endpoint advance-endpoint-refresh
               then
             then
-          ;] 2 pick with-endpoint
-        else
-          drop
-        then
+            endpoint escalate-endpoint-refresh
+          then
+        ;] 2 pick with-endpoint
       loop
     ; define refresh-interface
 

@@ -76,8 +76,38 @@ begin-module net-misc
   \ Parse DNS name depth
   16 constant parse-dns-name-depth
 
-  \ Refresh timeout
-  10000 value refresh-timeout
+  \ Refresh interval
+  500 value refresh-interval
+
+  \ SYN_SENT initial refresh timeout
+  2500 value syn-sent-init-refresh-timeout
+
+  \ SYN_SENT refresh timeout multiplication factor
+  2 value syn-sent-refresh-timeout-multiplier
+
+  \ SYN_SENT maximum refresh count
+  3 value syn-sent-max-refreshes
+
+  \ SYN_RECEIVED initial refresh timeout
+  2500 value syn-ack-sent-init-refresh-timeout
+
+  \ SYN_RECEIVED refresh timeout multiplication factor
+  2 value syn-ack-sent-refresh-timeout-multiplier
+
+  \ SYN_RECEIVED maximum refresh count
+  3 value syn-ack-sent-max-refreshes
+
+  \ ESTABLISHED initial refresh timeout
+  2500 value established-init-refresh-timeout
+
+  \ ESTABLISHED refresh timeout multplication factor
+  2 value established-refresh-timeout-multiplier
+
+  \ ESTABLISHED maximum refresh count
+  3 value established-max-refreshes
+
+  \ ESTABLISHED no missing packets refresh timeout
+  5000 value established-no-missing-refresh-timeout
 
   \ Close timeout
   100000 value close-timeout

@@ -148,7 +148,7 @@ begin-module frame-process
       self 1 [: { self }
         begin
           self [: { self }
-            refresh-timeout task::timeout !
+            refresh-interval task::timeout !
             self mtu-buf net-misc::mtu-size self in-frame-interface @
             get-rx-frame
             no-timeout task::timeout !
