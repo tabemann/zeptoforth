@@ -171,7 +171,7 @@ begin-module net-misc
 
   \ Ephemeral ports
   49152 constant MIN_EPHEMERAL_PORT
-  65535 constant MAX_EPHEMERAL_PORT
+  65534 constant MAX_EPHEMERAL_PORT
   -1 constant EPHEMERAL_PORT
 
   \ IPv4 ARP header structure
