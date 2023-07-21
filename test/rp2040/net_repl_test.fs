@@ -94,7 +94,7 @@ begin-module wifi-server-test
   tx-buffer-size buffer: actual-tx-buffer
   
   \ Tx timeout
-  1000 constant tx-timeout
+  100 constant tx-timeout
   
   \ Tx timeout start
   variable tx-timeout-start
