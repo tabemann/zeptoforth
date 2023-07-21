@@ -228,6 +228,8 @@ begin-module net
       dup out-packet-bytes @ over out-packet-offset @ - over
       out-packet-window @ min
       swap out-packet-mss @ min
+      [ mtu-size ethernet-header-size - ipv4-header-size - tcp-header-size - ]
+      literal min
       [ debug? ] [if] cr ." === next-packet-size: " dup . [then]
     ; define next-packet-size@
 
