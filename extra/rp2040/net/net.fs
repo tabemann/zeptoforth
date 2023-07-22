@@ -129,7 +129,10 @@ begin-module net
       mss self out-packet-mss !
       window self out-packet-window !
       0 self out-packet-count !
-      [ debug? ] [if] cr ." === reset-out-packets:" self out-packets. [then]
+      [ debug? ] [if]
+        self [: cr ." === reset-out-packets:" out-packets. ;]
+        usb::with-usb-output
+      [then]
     ; define reset-out-packets
     
     \ Start sending outgoing packets
@@ -139,7 +142,10 @@ begin-module net
       0 self acked-out-packet-offset !
       0 self out-packet-offset !
       0 self out-packet-count !
-      [ debug? ] [if] cr ." === start-out-packets:" self out-packets. [then]
+      [ debug? ] [if]
+        self [: cr ." === start-out-packets:" out-packets. ;]
+        usb::with-usb-output
+      [then]
     ; define start-out-packets
 
     \ Clear sending outgoing packets
@@ -153,7 +159,10 @@ begin-module net
       0 self acked-out-packet-offset !
       0 self out-packet-offset !
       0 self out-packet-count !
-      [ debug? ] [if] cr ." === clear-out-packets:" self out-packets. [then]
+      [ debug? ] [if]
+        self [: cr ." === clear-out-packets:" out-packets. ;]
+        usb::with-usb-output
+      [then]
     ; define clear-out-packets
     
     \ Acknowledge packets
@@ -171,12 +180,14 @@ begin-module net
         then
       loop
       [ debug? ] [if]
-        cr ." FIRST: " self first-out-packet-seq @ .
-        ." ACK: " ack .
-        ." SEQ: " seq .
-        ." BYTES: " bytes .
-        ." TOTAL-COUNt: " self out-packet-count @ .
-        ." COUNT: " count .
+        self ack seq bytes count [: { self ack seq bytes count }
+          cr ." FIRST: " self first-out-packet-seq @ .
+          ." ACK: " ack .
+          ." SEQ: " seq .
+          ." BYTES: " bytes .
+          ." TOTAL-COUNt: " self out-packet-count @ .
+          ." COUNT: " count .
+        ;] usb::with-usb-output
       [then]
       seq self first-out-packet-seq !
       bytes self acked-out-packet-offset !
@@ -185,7 +196,9 @@ begin-module net
       self out-packet-seqs count cells + self out-packet-seqs
       self out-packet-count @ count - cells move
       count negate self out-packet-count +!
-      [ debug? ] [if] cr ." === ack-packets:" self out-packets. [then]
+      [ debug? ] [if]
+        self [: cr ." === ack-packets:" out-packets. ;] usb::with-usb-output
+      [then]
     ; define ack-packets
 
     \ Get info on packet to send
@@ -204,7 +217,10 @@ begin-module net
       1 self out-packet-count +!
       self out-packet-addr @ self out-packet-offset @ + out-packet-size -
       out-packet-size
-      [ debug? ] [if] cr ." === get-packet-to-send:" self out-packets. [then]
+      [ debug? ] [if]
+        self [: cr ." === get-packet-to-send:" out-packets. ;]
+        usb::with-usb-output
+      [then]
     ; define get-packet-to-send
 
     \ Get the current sequence number
@@ -215,7 +231,10 @@ begin-module net
       else
         first-out-packet-seq @
       then
-      [ debug? ] [if] cr ." === current-out-packet-seq:" swap out-packets. [then]
+      [ debug? ] [if]
+        [: cr ." === current-out-packet-seq:" swap out-packets. ;]
+        usb::with-usb-output
+      [then]
     ; define current-out-packet-seq@
 
     \ Increment the bare minimum current sequence number
@@ -226,17 +245,21 @@ begin-module net
     \ Get the size of a packet to send
     :noname ( self -- bytes )
       dup out-packet-bytes @ over out-packet-offset @ - over
-      out-packet-window @ min
+      out-packet-window @ small-send-bytes max min
       swap out-packet-mss @ min
       [ mtu-size ethernet-header-size - ipv4-header-size - tcp-header-size - ]
       literal min
-      [ debug? ] [if] cr ." === next-packet-size: " dup . [then]
+      [ debug? ] [if]
+        [: cr ." === next-packet-size: " dup . ;] usb::with-usb-output
+      [then]
     ; define next-packet-size@
 
     \ Are there outstanding packets?
     :noname ( self -- outstanding? )
       dup acked-out-packet-offset @ swap out-packet-offset @ <>
-      [ debug? ] [if] cr ." === packets-outstanding?: " dup . [then]
+      [ debug? ] [if]
+        [: cr ." === packets-outstanding?: " dup . ;] usb::with-usb-output
+      [then]
     ; define packets-outstanding?
     
     \ Are we done sending packets?
@@ -244,7 +267,9 @@ begin-module net
       dup out-packet-count @ 0=
       swap dup acked-out-packet-offset @
       swap out-packet-bytes @ = and
-      [ debug? ] [if] cr ." === packets-done?: " dup . [then]
+      [ debug? ] [if]
+        [: cr ." === packets-done?: " dup . ;] usb::with-usb-output
+      [then]
     ; define packets-done?
 
     \ Can we issue a new packet?
@@ -253,7 +278,9 @@ begin-module net
       over out-packet-window @ <
       over out-packet-offset @ 2 pick out-packet-bytes @ < and
       swap out-packet-count @ max-out-packets < and
-      [ debug? ] [if] cr ." === send-packet?: " dup . [then]
+      [ debug? ] [if]
+        [: cr ." === send-packet?: " dup . ;] usb::with-usb-output
+      [then]
     ; define send-packet?
 
     \ Mark packets as to be resent
@@ -261,7 +288,9 @@ begin-module net
       [ debug? ] [if] dup [then]
       dup acked-out-packet-offset @ over out-packet-offset !
       0 swap out-packet-count !
-      [ debug? ] [if] cr ." === resend-packets: " out-packets. [then]
+      [ debug? ] [if]
+        [: cr ." === resend-packets: " out-packets. ;] usb::with-usb-output
+      [then]
     ; define resend-packets
 
     \ Print out packets
@@ -1026,8 +1055,8 @@ begin-module net
     \ Get current timeout end
     method endpoint-timeout@ ( self -- end )
     
-    \ Broadcast an endpoint event
-    method broadcast-endpoint ( self -- )
+    \ Wake an endpoint
+    method wake-endpoint ( self -- )
 
     \ Wait for an endpoint event
     method wait-endpoint ( self -- )
@@ -1259,11 +1288,10 @@ begin-module net
       endpoint-timeout @
     ; define endpoint-timeout@
 
-    \ Broadcast an endpoint event
+    \ Wake an endpoint
     :noname ( self -- )
-      dup endpoint-sema broadcast
       endpoint-sema give
-    ; define broadcast-endpoint
+    ; define wake-endpoint
 
     \ Wait for an endpoint event
     :noname ( self -- )
@@ -2480,20 +2508,34 @@ begin-module net
         endpoint endpoint-waiting-bytes@ { waiting-bytes }
         addr bytes endpoint self
         state case
-          TCP_SYN_SENT of process-ipv4-ack-syn-sent endof
-          TCP_SYN_RECEIVED of process-ipv4-ack-syn-received endof
-          TCP_ESTABLISHED of process-ipv4-ack-established endof
-          TCP_FIN_WAIT_1 of process-ipv4-ack-fin-wait-1 endof
-          TCP_FIN_WAIT_2 of process-ipv4-ack-fin-wait-2 endof
-          TCP_CLOSE_WAIT of process-ipv4-ack-close-wait endof
-          TCP_LAST_ACK of process-ipv4-ack-last-ack endof
+          TCP_SYN_SENT of
+            process-ipv4-ack-syn-sent
+          endof
+          TCP_SYN_RECEIVED of
+            process-ipv4-ack-syn-received
+          endof
+          TCP_ESTABLISHED of
+            process-ipv4-ack-established
+          endof
+          TCP_FIN_WAIT_1 of
+            process-ipv4-ack-fin-wait-1
+          endof
+          TCP_FIN_WAIT_2 of
+            process-ipv4-ack-fin-wait-2
+          endof
+          TCP_CLOSE_WAIT of
+            process-ipv4-ack-close-wait
+          endof
+          TCP_LAST_ACK of
+            process-ipv4-ack-last-ack
+          endof
           drop send-ipv4-rst-for-ack exit
         endcase
         endpoint endpoint-waiting-bytes@ waiting-bytes <>
         endpoint endpoint-tcp-state@ state <> or if
           endpoint self put-ready-endpoint
         else
-          endpoint broadcast-endpoint
+          endpoint wake-endpoint
         then
       ;] over with-endpoint
     ; define process-ipv4-ack-packet
@@ -2527,7 +2569,7 @@ begin-module net
         endpoint endpoint-tcp-state@ state <> or if
           endpoint self put-ready-endpoint
         else
-          endpoint broadcast-endpoint
+          endpoint wake-endpoint
         then
       ;] over with-endpoint
     ; define process-ipv4-fin-ack-packet
@@ -2644,7 +2686,7 @@ begin-module net
         endpoint endpoint-tcp-state@ state <> or if
           endpoint self put-ready-endpoint
         else
-          endpoint broadcast-endpoint
+          endpoint wake-endpoint
         then
       ;] over with-endpoint
     ; define process-ipv4-fin-packet
@@ -3012,7 +3054,7 @@ begin-module net
           self endpoint-loop-sema give
         else
         then
-        endpoint broadcast-endpoint
+        endpoint wake-endpoint
       ;] 2 pick with-endpoint
     ; define put-ready-endpoint
 
@@ -3213,7 +3255,7 @@ begin-module net
               task::timeout @ { old-timeout }
               endpoint endpoint-timeout@
               systick::systick-counter endpoint endpoint-timeout-start@ - -
-              0 max task::timeout !
+              send-check-interval max task::timeout !
               endpoint ['] wait-endpoint try
               dup ['] task::x-timed-out = if 2drop 0 then
               old-timeout task::timeout !

@@ -367,6 +367,9 @@ begin-module cyw43-runner
     \ CYW43 event mask
     <cyw43-event-mask> class-size member cyw43-event-mask
 
+    \ Event mask lock
+    lock-size member cyw43-event-mask-lock
+
     \ Event message being constructed
     event-message-size cell align member cyw43-event-message-scratch
 
@@ -489,6 +492,9 @@ begin-module cyw43-runner
       
       \ Instantiate the ioctl state
       <cyw43-ioctl> self cyw43-ioctl-state init-object
+
+      \ Initalize the event mask lock
+      self cyw43-event-mask-lock init-lock
       
       \ Instantiate the event mask
       <cyw43-event-mask> self cyw43-event-mask init-object
@@ -883,27 +889,34 @@ begin-module cyw43-runner
         exit
       then
 
-      \ Handle an event if enabled
-      addr evtp-msg emsg-event-type unaligned@ rev { event-type }
-      addr evtp-msg emsg-status unaligned@ rev { event-status }
-      [ debug? ] [if]
-        cr ." event type: " event-type h.8 ."  status: " event-status h.8
-      [then]
-      event-type self cyw43-event-mask cyw43-event-enabled? if
-        event-type self cyw43-event-message-scratch evt-event-type !
-        event-status self cyw43-event-message-scratch evt-status !
-        event-type EVENT_ESCAN_RESULT =
-        event-status ESTATUS_PARTIAL = and if
-          bytes [ event-packet-size scan-results-size + ] literal < if exit then
-          [ event-packet-size scan-results-size + ] literal +to addr
-          [ event-packet-size scan-results-size + ] literal negate +to bytes
-          bytes bss-info-size < if exit then
-          addr self cyw43-event-message-scratch evt-payload bss-info-size move
-        else
-          self cyw43-event-message-scratch evt-payload bss-info-size 0 fill
+      addr bytes self [: { addr bytes self }
+        
+        \ Handle an event if enabled
+        addr evtp-msg emsg-event-type unaligned@ rev { event-type }
+        addr evtp-msg emsg-status unaligned@ rev { event-status }
+        [ debug? ] [if]
+          cr ." event type: " event-type h.8 ."  status: " event-status h.8
+        [then]
+        event-type self cyw43-event-mask cyw43-event-enabled? if
+          event-type self cyw43-event-message-scratch evt-event-type !
+          event-status self cyw43-event-message-scratch evt-status !
+          event-type EVENT_ESCAN_RESULT =
+          event-status ESTATUS_PARTIAL = and if
+            bytes [ event-packet-size scan-results-size + ] literal < if
+              exit
+            then
+            [ event-packet-size scan-results-size + ] literal +to addr
+            [ event-packet-size scan-results-size + ] literal negate +to bytes
+            bytes bss-info-size < if exit then
+            addr self cyw43-event-message-scratch evt-payload bss-info-size move
+          else
+            self cyw43-event-message-scratch evt-payload bss-info-size 0 fill
+          then
+          self cyw43-event-message-scratch self put-cyw43-event
         then
-        self cyw43-event-message-scratch self put-cyw43-event
-      then
+
+      ;] self cyw43-event-mask-lock with-lock
+
     ; define handle-cyw43-event-pkt
 
     \ Handle CYW43 data packet
@@ -1057,27 +1070,32 @@ begin-module cyw43-runner
 
     \ Enable an event
     :noname ( event self -- )
-      cyw43-event-mask cyw43-events::enable-cyw43-event
+      [: cyw43-event-mask cyw43-events::enable-cyw43-event ;]
+      over cyw43-event-mask-lock with-lock
     ; define enable-cyw43-event
 
     \ Enable multiple events
     :noname ( event-addr event-count self -- )
-      cyw43-event-mask cyw43-events::enable-cyw43-events
+      [: cyw43-event-mask cyw43-events::enable-cyw43-events ;]
+      over cyw43-event-mask-lock with-lock
     ; define enable-cyw43-events
     
     \ Disable an event
     :noname ( event self -- )
-      cyw43-event-mask cyw43-events::disable-cyw43-event
+      [: cyw43-event-mask cyw43-events::disable-cyw43-event ;]
+      over cyw43-event-mask-lock with-lock
     ; define disable-cyw43-event
 
     \ Disable multiple events
     :noname ( event-addr event-count self -- )
-      cyw43-event-mask cyw43-events::disable-cyw43-events
+      [: cyw43-event-mask cyw43-events::disable-cyw43-events ;]
+      over cyw43-event-mask-lock with-lock
     ; define disable-cyw43-events
 
     \ Disable all events
     :noname ( self -- )
-      cyw43-event-mask cyw43-events::disable-all-cyw43-events
+      [: cyw43-event-mask cyw43-events::disable-all-cyw43-events ;]
+      over cyw43-event-mask-lock with-lock
     ; define disable-all-cyw43-events
 
     \ Enqueue event message

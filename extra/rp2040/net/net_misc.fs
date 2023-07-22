@@ -58,15 +58,21 @@ begin-module net-misc
   \ Maximum number of packets to receive at a time
   8 constant max-in-packets
 
+  \ Minimum number of bytes to send if more bytes are available
+  16 value small-send-bytes
+
   \ The maximum retransmit count
-  3 value max-retransmits
+  2 value max-retransmits
 
   \ The initial timeout time
-  1000 value init-timeout
+  500 value init-timeout
 
   \ The timeout multiplication factor
   2 value timeout-multiplier
 
+  \ Send check interval
+  1000 value send-check-interval
+  
   \ DNS port
   53 constant dns-port
 

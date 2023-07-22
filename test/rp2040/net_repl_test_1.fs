@@ -29,7 +29,8 @@ begin-module wifi-server-test
   net import
   endpoint-process import
   sema import
-  slock import
+  lock import
+  core-lock import
   
   23 constant pwr-pin
   24 constant dio-pin
@@ -51,7 +52,10 @@ begin-module wifi-server-test
   6667 constant server-port
   
   \ Server lock
-  slock-size buffer: server-slock
+  lock-size buffer: server-lock
+  
+  \ Server core lock
+  core-lock-size buffer: server-core-lock
   
   \ Server active
   variable server-active?
@@ -77,23 +81,17 @@ begin-module wifi-server-test
   \ Rx buffer
   rx-buffer-size buffer: rx-buffer
   
-  \ RAM variable for tx buffer read-index
-  variable tx-read-index
-  
-  \ RAM variable for tx buffer write-index
-  variable tx-write-index
+  \ Tx buffer write indices
+  2variable tx-write-index
   
   \ Constant for number of bytes to buffer
   2048 constant tx-buffer-size
   
-  \ Tx buffer index mask
-  $7FF constant tx-index-mask
-  
   \ Tx buffer
-  tx-buffer-size buffer: tx-buffer
-
-  \ Send tx buffer
-  tx-buffer-size buffer: actual-tx-buffer
+  tx-buffer-size 2 * buffer: tx-buffers
+  
+  \ Current tx buffer
+  variable current-tx-buffer
   
   \ Tx timeout
   500 constant tx-timeout
@@ -103,6 +101,9 @@ begin-module wifi-server-test
   
   \ Tx semaphore
   sema-size aligned-buffer: tx-sema
+  
+  \ Tx block semaphore
+  sema-size aligned-buffer: tx-block-sema
     
   \ The TCP endpoint
   variable my-endpoint
@@ -140,35 +141,17 @@ begin-module wifi-server-test
 
   \ Get whether the tx buffer is full
   : tx-full? ( -- f )
-    tx-write-index @ tx-read-index @
-    tx-buffer-size 1- + tx-index-mask and =
-  ;
-
-  \ Get whether the tx buffer is empty
-  : tx-empty? ( -- f )
-    tx-read-index @ tx-write-index @ =
+    tx-write-index current-tx-buffer @ cells + @ tx-buffer-size >=
   ;
 
   \ Write a byte to the tx buffer
   : write-tx ( c -- )
-    tx-full? not if
-      tx-write-index @ tx-buffer + c!
-      tx-write-index @ 1+ tx-index-mask and tx-write-index !
-    else
-      drop
-    then
+    current-tx-buffer @ { index }
+    tx-write-index index cells + { offset-var }
+    tx-buffers index tx-buffer-size * + offset-var @ + c!
+    1 offset-var +!
   ;
-
-  \ Read a byte from the tx buffer
-  : read-tx ( -- c )
-    tx-empty? not if
-      tx-read-index @ tx-buffer + c@
-      tx-read-index @ 1+ tx-index-mask and tx-read-index !
-    else
-      0
-    then
-  ;
-
+  
   \ Do server transmission and receiving
   : do-server ( -- )
     begin
@@ -178,32 +161,15 @@ begin-module wifi-server-test
       dup ['] task::x-timed-out = if 2drop 0 then
       task::no-timeout task::timeout !
       ?raise
-      server-active? @ if
-        [:
-          0 { count }
-          tx-read-index @ tx-write-index @ < if
-            tx-write-index @ tx-read-index @ - to count
-            tx-buffer tx-read-index @ + actual-tx-buffer count move
-          else
-            tx-read-index @ tx-write-index @ > if
-              tx-buffer-size tx-read-index @ - { first-count }
-              tx-buffer tx-read-index @ + actual-tx-buffer first-count move
-              tx-buffer actual-tx-buffer first-count + tx-write-index @ move
-              first-count tx-write-index @ + to count
-            then
-          then
-          0 tx-read-index !
-          0 tx-write-index !
-          count
-        ;] server-slock with-slock { count }
-        my-endpoint @ if
-          actual-tx-buffer count my-endpoint @ my-interface ['] send-tcp-endpoint try
-          ?dup if nip nip nip nip [: display-red execute display-normal ;] usb::with-usb-output then
-        else
-          [: cr ." NO ENDPOINT " ;] usb::with-usb-output
-        then
+      server-active? @ 0<> my-endpoint @ 0<> and if
+        current-tx-buffer @ dup { old-tx-buffer } 1+ 2 umod current-tx-buffer !
+        tx-buffers old-tx-buffer tx-buffer-size * +
+        tx-write-index old-tx-buffer cells + @
+        my-endpoint @ my-interface send-tcp-endpoint
+        0 tx-write-index old-tx-buffer cells + !
       then
       systick::systick-counter tx-timeout-start !
+      tx-block-sema give
     again
   ;
   
@@ -217,7 +183,7 @@ begin-module wifi-server-test
           leave
         then
       loop
-    ;] server-slock with-slock
+    ;] server-lock with-lock
   ;
   
   \ EMIT for telnet
@@ -225,15 +191,16 @@ begin-module wifi-server-test
     server-active? @ if
       begin
         [:
-          tx-full? not if
-            write-tx
-            true
-          else
-            tx-sema give
-            false
-          then
-        ;] server-slock with-slock
-        dup not if server-delay ms then
+          [:
+            tx-full? not if
+              write-tx
+              true
+            else
+              false
+            then
+          ;] critical
+        ;] server-core-lock with-core-lock
+        dup not if tx-sema give tx-block-sema take then
       until
     else
       drop
@@ -243,7 +210,7 @@ begin-module wifi-server-test
   \ EMIT? for telnet
   : telnet-emit? ( -- emit? )
     server-active? @ if
-      [: tx-full? not ;] server-slock with-slock
+      [: [: tx-full? not ;] critical ;] server-core-lock with-core-lock
     else
       false
     then
@@ -260,7 +227,7 @@ begin-module wifi-server-test
           else
             false
           then
-        ;] server-slock with-slock
+        ;] server-lock with-lock
         dup not if server-delay ms then
       else
         false
@@ -271,7 +238,7 @@ begin-module wifi-server-test
   \ KEY? for telnet
   : telnet-key? ( -- key? )
     server-active? @ if
-      [: rx-empty? not ;] server-slock with-slock
+      [: rx-empty? not ;] server-lock with-lock
     else
       false
     then
@@ -311,15 +278,18 @@ begin-module wifi-server-test
 
   \ Initialize the test
   : init-test ( -- )
-    server-slock init-slock
-    0 tx-read-index !
-    0 tx-write-index !
+    server-lock init-lock
+    server-core-lock init-core-lock
+    0 current-tx-buffer !
+    0 tx-write-index 0 cells + !
+    0 tx-write-index 1 cells + !
     0 rx-read-index !
     0 rx-write-index !
     systick::systick-counter tx-timeout-start !
     false server-active? !
     0 my-endpoint !
     no-sema-limit 0 tx-sema init-sema
+    no-sema-limit 0 tx-block-sema init-sema
     cyw43-clm::data cyw43-clm::size cyw43-fw::data cyw43-fw::size
     pwr-pin clk-pin dio-pin cs-pin pio-addr sm-index pio-instance
     <cyw43-control> my-cyw43-control init-object
