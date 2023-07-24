@@ -183,7 +183,7 @@ begin-module tqueue
       over tqueue-slock @ release-slock-block
       over tqueue-slock @ claim-slock
       swap tuck remove-wait-queue
-      current-task timed-out? if
+      current-task check-timeout if
         dup tqueue-limit @ 0> if
           dup tqueue-counter @ 1+ over tqueue-limit @ min swap tqueue-counter !
         else

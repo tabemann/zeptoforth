@@ -73,15 +73,12 @@ begin-module slock
   \ Release a simple lock
   : release-slock ( slock -- )
     0 swap !
-    pause
+\    pause
   ;
 
   \ Release a simple lock and block atomically
   : release-slock-block ( slock -- )
-    [:
-      current-task task-internal::block-raw
-      0 swap !
-    ;] cpu-index critical-with-other-core-spinlock
+    0 swap current-task block-set
   ;
 
   \ Claim and release a simple lock while properly handling exceptions

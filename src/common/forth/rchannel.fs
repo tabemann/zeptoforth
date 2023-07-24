@@ -236,7 +236,7 @@ begin-module rchan
 	r@ rchan-reply-buf-size @ ( r-bytes' )
 	r@ rchan-reply-task @ 1 bic ( r-bytes' task )
 	current-task = if 0 r@ rchan-reply-task ! then ( r-bytes' )
-	current-task timed-out? triggers x-timed-out
+	current-task check-timeout triggers x-timed-out
 	r> rchan-closed @ triggers x-rchan-closed ( r-bytes' )
 	false
       else
@@ -254,7 +254,7 @@ begin-module rchan
 	tuck rchan-wait-buf ! ( wait )
 	dup r@ rchan-send-queue push-rchan-queue ( wait )
 	r@ rchan-slock release-slock-block ( wait )
-	current-task timed-out? if
+	current-task check-timeout if
 	  r@ rchan-slock claim-slock ( wait )
 	  r@ rchan-reply-task @ 1 bic ( wait task )
 	  current-task = if 0 r@ rchan-reply-task ! then ( wait )
@@ -294,7 +294,7 @@ begin-module rchan
 	tuck rchan-wait-buf ! ( wait )
 	dup r@ rchan-recv-queue push-rchan-queue ( wait )
 	r@ rchan-slock release-slock-block ( wait )
-	current-task timed-out? if
+	current-task check-timeout if
 	  r@ rchan-slock claim-slock ( wait )
 	  r@ rchan-recv-queue remove-rchan-queue ( )
 	  r> rchan-slock release-slock ( )

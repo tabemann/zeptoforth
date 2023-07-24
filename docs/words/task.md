@@ -305,7 +305,12 @@ An exception raised when timeout validation fails.
 ##### `validate-timeout`
 ( task -- )
 
-Validate whether a task has timed out, raising `x-timed-out` if it has.
+Validate whether a task has timed out, raising `x-timed-out` if it has. Note that this clears the timeout state of the task.
+
+##### `check-timeout`
+( task -- timed-out? )
+
+Get whether a task has timed out, clearing the timeout state of the task if it has.
 
 ##### `x-would-block`
 ( -- )

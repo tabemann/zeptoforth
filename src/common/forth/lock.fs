@@ -52,10 +52,16 @@ begin-module lock
     
     \ Lock wait structure
     begin-structure lock-wait-size
+
+      \ In list
+      field: lock-wait-in-list
+      
+      \ Lock wait previous record
+      field: lock-wait-prev
       
       \ Lock wait next record
       field: lock-wait-next
-
+      
       \ Lock wait task
       field: lock-wait-task
       
@@ -70,8 +76,10 @@ begin-module lock
     : init-lock-wait ( -- wait )
       ram-here 4 ram-align, ram-here lock-wait-size ram-allot
       tuck lock-wait-orig-here !
+      0 over lock-wait-prev !
       0 over lock-wait-next !
       current-task over lock-wait-task !
+      false over lock-wait-in-list !
     ;
 
     \ Get maximum lock wait priority
@@ -83,39 +91,30 @@ begin-module lock
     ;
 
     \ Add a lock wait record
-    : add-lock-wait ( wait lock -- )
-      0 2 pick lock-wait-next !
-      dup lock-first-wait @ if
-	2dup lock-last-wait @ lock-wait-next !
-      else
-	2dup lock-first-wait !
-      then
-      lock-last-wait !
+    : add-lock-wait { wait lock -- }
+      0 wait lock-wait-next !
+      lock lock-last-wait @ { last-wait }
+      last-wait wait lock-wait-prev !
+      wait lock lock-last-wait !
+      last-wait 0= if wait lock lock-first-wait ! then
+      true wait lock-wait-in-list !
     ;
 
     \ Remove a lock wait record
-    : remove-lock-wait ( wait lock -- )
-      dup lock-first-wait @ 2 pick = if
-	dup lock-last-wait @ 2 pick = if
-	  0 over lock-last-wait !
-	then
-	swap lock-wait-next @ swap lock-first-wait !
-      else
-	dup lock-first-wait @ begin
-	  dup if
-	    dup lock-wait-next @ 3 pick = if
-	      over lock-last-wait @ 3 pick = if
-		0 over lock-wait-next ! swap lock-last-wait ! drop true
-	      else
-		rot lock-wait-next @ swap lock-wait-next ! drop true
-	      then
-	    else
-	      lock-wait-next @ false
-	    then
-	  else
-	    2drop drop true
-	  then
-	until
+    : remove-lock-wait { wait lock -- }
+      wait lock-wait-in-list @ if
+        wait lock-wait-prev @ wait lock-wait-next @ { prev-wait next-wait }
+        next-wait if
+          prev-wait next-wait lock-wait-prev !
+        else
+          prev-wait lock lock-last-wait !
+        then
+        prev-wait if
+          next-wait prev-wait lock-wait-next !
+        else
+          next-wait lock lock-first-wait !
+        then
+        false wait lock-wait-in-list !
       then
     ;
 
@@ -149,6 +148,11 @@ begin-module lock
         current lock-wait-next @ to current
       repeat
     ;
+
+    \ Restore a task's priority
+    : restore-priority ( task -- )
+      dup task-saved-priority@ swap task-priority!
+    ;
     
   end-module> import
 
@@ -179,12 +183,13 @@ begin-module lock
           over update-hold-priority
           over lock-slock release-slock-block
           over lock-slock claim-slock
-          [: current-task validate-timeout ;] try ?dup if
-            >r [:
+          current-task check-timeout if
+            [:
               2dup swap remove-lock-wait
               lock-wait-orig-here @ ram-here!
               update-hold-priority
-            ;] critical r> ?raise
+              current-task restore-priority
+            ;] critical ['] x-timed-out ?raise
           then
           lock-wait-orig-here @ ram-here!
           drop
@@ -206,15 +211,14 @@ begin-module lock
       dup lock-holder-task @ current-task = averts x-not-currently-owned
       dup lock-nest-level @ 0= if
         dup lock-first-wait @ ?dup if
-          dup lock-wait-next @ 2 pick lock-first-wait !
-          over lock-first-wait @ 0= if
-            0 2 pick lock-last-wait !
-          then
+          2dup swap remove-lock-wait
           lock-wait-task @
           2dup swap lock-holder-task !
           swap update-hold-priority
+          dup restore-priority
         else
-          0 swap lock-holder-task ! 0     
+          0 swap lock-holder-task !
+          current-task restore-priority 0     
         then
       else
         -1 swap lock-nest-level +! 0

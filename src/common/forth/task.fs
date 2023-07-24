@@ -289,7 +289,7 @@ begin-module task
   user task-waited-for
   
   \ No timeout
-  -1 constant no-timeout
+  $80000000 constant no-timeout
   
   \ Attempted to use a terminated task
   : x-terminated ( -- ) ." task has been terminated" cr ;
@@ -743,8 +743,22 @@ begin-module task
     block-timed-out =
   ;
 
+  \ Get whether a task has timed out and clear the timeout status
+  : check-timeout ( task -- timed-out? )
+    [:
+      dup validate-not-terminated dup task-state h@ task-state-mask and
+      block-timed-out = if
+        readied swap task-state h! true
+      else
+        drop false
+      then
+    ;] over task-core @ critical-with-other-core-spinlock
+  ;
+
   \ Validate not timing out
-  : validate-timeout ( task -- ) timed-out? triggers x-timed-out ;
+  : validate-timeout ( task -- )
+    check-timeout triggers x-timed-out
+  ;
 
   \ Get task active state
   : task-active@ ( task -- active )
@@ -1152,8 +1166,8 @@ begin-module task
     \ Core of readying a task
     : do-ready ( task -- )
       dup task-current-notify @ -1 = if
-	1 over task-ready-count +!
-	dup task-ready-count @ 0>= if
+        dup task-ready-count @ 1+ 0 min dup 2 pick task-ready-count !
+	0>= if
 	  dup task-state h@
 	  [ schedule-critical schedule-user-critical or
 	  schedule-with-spinlock or schedule-with-same-core-spinlock or ]
@@ -1335,7 +1349,7 @@ begin-module task
       dup validate-not-terminated
       dup ['] timeout for-task@ no-timeout <> if
 	systick-counter over timeout-systick-start !
-	dup ['] timeout for-task@ swap timeout-systick-delay !
+	dup ['] timeout for-task@ 0 max swap timeout-systick-delay !
       else
 	drop
       then
@@ -1383,7 +1397,7 @@ begin-module task
 	  blocked-indefinite over task-state h!
 	then
       then
-      current-task @ = if true reschedule? ! pause then
+      current-task @ = if false reschedule? ! pause then
     ;
 
     \ Initialize the main task
@@ -1539,6 +1553,33 @@ begin-module task
     ;
 
   end-module
+
+  \ Block a task, setting an address to a value
+  : block-set ( value addr task -- )
+    [:
+      dup validate-not-terminated
+      dup ['] timeout for-task@ no-timeout <> if
+        dup timeout-systick-delay @
+        over timeout-systick-start @
+        rot -1 over task-ready-count +!
+        dup task-ready-count @ 0< if
+          tuck task-systick-start !
+          tuck task-systick-delay !
+          blocked-timeout swap task-state h!
+        else
+          2drop drop
+        then
+      else
+        -1 over task-ready-count +!
+        dup task-ready-count @ 0< if
+          blocked-indefinite swap task-state h!
+        else
+          drop
+        then
+      then
+      ! false reschedule? ! pause
+    ;] over task-core @ critical-with-other-core-spinlock
+  ;
 
   \ Initialize a task
   : init-task ( xn...x0 count xt task core -- )
