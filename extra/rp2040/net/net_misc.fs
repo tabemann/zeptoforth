@@ -53,10 +53,10 @@ begin-module net-misc
   64 constant dns-cache-heap-block-count
 
   \ Maximum number of packets to send at a time
-  8 constant max-out-packets
+  16 constant max-out-packets
 
   \ Maximum number of packets to receive at a time
-  8 constant max-in-packets
+  16 constant max-in-packets
 
   \ Minimum number of bytes to send if more bytes are available
   16 value small-send-bytes
@@ -86,7 +86,7 @@ begin-module net-misc
   500 value refresh-interval
 
   \ SYN_SENT initial refresh timeout
-  2500 value syn-sent-init-refresh-timeout
+  1000 value syn-sent-init-refresh-timeout
 
   \ SYN_SENT refresh timeout multiplication factor
   2 value syn-sent-refresh-timeout-multiplier
@@ -95,7 +95,7 @@ begin-module net-misc
   3 value syn-sent-max-refreshes
 
   \ SYN_RECEIVED initial refresh timeout
-  2500 value syn-ack-sent-init-refresh-timeout
+  1000 value syn-ack-sent-init-refresh-timeout
 
   \ SYN_RECEIVED refresh timeout multiplication factor
   2 value syn-ack-sent-refresh-timeout-multiplier
@@ -104,7 +104,7 @@ begin-module net-misc
   3 value syn-ack-sent-max-refreshes
 
   \ ESTABLISHED initial refresh timeout
-  2500 value established-init-refresh-timeout
+  500 value established-init-refresh-timeout
 
   \ ESTABLISHED refresh timeout multplication factor
   2 value established-refresh-timeout-multiplier

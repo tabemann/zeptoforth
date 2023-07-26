@@ -62,6 +62,16 @@ begin-module net-test
         s\" Accept: */*\r\n" endpoint my-interface send-tcp-endpoint
         s\" Connection: close\r\n\r\n" endpoint my-interface send-tcp-endpoint
       then
+      endpoint endpoint-tcp-state@ TCP_CLOSE_WAIT = if
+        cr ." CLOSING CONNECTION" cr
+        endpoint my-interface close-tcp-endpoint
+      then
+      endpoint endpoint-tcp-state@ TCP_LAST_ACK = if
+        cr ." WAITING FOR LAST ACK" cr
+      then
+      endpoint endpoint-tcp-state@ TCP_CLOSED = if
+        cr ." CONNECTION CLOSED" cr
+      then
       endpoint endpoint-rx-data@ type
       endpoint my-interface endpoint-done
     ; define handle-endpoint

@@ -447,7 +447,6 @@ begin-module net
     :noname { self -- }
       self in-packet-count @ max-in-packets < if
         self in-packet-bytes @ self in-packet-offset @ -
-        self pending-in-packet-offset @ -
       else
         0
       then
@@ -1716,7 +1715,7 @@ begin-module net
       [: { self }
         self endpoint-tcp-state@ case
           TCP_ESTABLISHED of
-            self missing-endpoint-packets? if
+            self missing-endpoint-packets? not if
               self reset-endpoint-refresh
             else
               self endpoint-refreshes @ 1+ established-max-refreshes min
@@ -1724,7 +1723,7 @@ begin-module net
             then
           endof
           TCP_CLOSE_WAIT of
-            self missing-endpoint-packets? if
+            self missing-endpoint-packets? not if
               self reset-endpoint-refresh
             else
               self endpoint-refreshes @ 1+ established-max-refreshes min
