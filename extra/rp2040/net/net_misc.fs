@@ -115,6 +115,24 @@ begin-module net-misc
   \ ESTABLISHED no missing packets refresh timeout
   5000 value established-no-missing-refresh-timeout
 
+  \ FIN_WAIT_1 initial refresh timeout
+  1000 value fin-wait-1-init-refresh-timeout
+
+  \ FIN_WAIT_1 refresh timeout multiplication factor
+  2 value fin-wait-1-refresh-timeout-multiplier
+
+  \ FIN_WAIT_1 maximum refresh count
+  3 value fin-wait-1-max-refreshes
+
+  \ LAST_ACK initial refresh timeout
+  1000 value last-ack-init-refresh-timeout
+
+  \ LAST_ACK refresh timeout multiplication factor
+  2 value last-ack-refresh-timeout-multiplier
+
+  \ LAST_ACK maximum refresh count
+  3 value last-ack-max-refreshes
+  
   \ Close timeout
   100000 value close-timeout
   

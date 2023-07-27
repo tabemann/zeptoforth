@@ -1643,6 +1643,8 @@ begin-module net
           TCP_CLOSE_WAIT of true endof
           TCP_SYN_SENT of true endof
           TCP_SYN_RECEIVED of true endof
+          TCP_FIN_WAIT_1 of true endof
+          TCP_LAST_ACK of true endof
           false swap
         endcase if
           systick::systick-counter self endpoint-last-refresh @ -
@@ -1705,6 +1707,16 @@ begin-module net
             syn-ack-sent-refresh-timeout-multiplier s>f
             self endpoint-refreshes @ fi** f* f>s
           endof
+          TCP_FIN_WAIT_1 of
+            fin-wait-1-init-refresh-timeout s>f
+            fin-wait-1-refresh-timeout-multiplier s>f
+            self endpoint-refreshes @ fi** f* f>s
+          endof
+          TCP_LAST_ACK of
+            last-ack-init-refresh-timeout s>f
+            last-ack-refresh-timeout-multiplier s>f
+            self endpoint-refreshes @ fi** f* f>s
+          endof
           0 swap
         endcase
       ;] over endpoint-lock with-lock
@@ -1736,6 +1748,14 @@ begin-module net
           endof
           TCP_SYN_RECEIVED of
             self endpoint-refreshes @ 1+ syn-ack-sent-max-refreshes min
+            self endpoint-refreshes !
+          endof
+          TCP_FIN_WAIT_1 of
+            self endpoint-refreshes @ 1+ fin-wait-1-max-refreshes min
+            self endpoint-refreshes !
+          endof
+          TCP_LAST_ACK of
+            self endpoint-refreshes @ 1+ last-ack-max-refreshes min
             self endpoint-refreshes !
           endof
         endcase
@@ -2065,6 +2085,9 @@ begin-module net
     \ Process an unexpected IPv4 FIN packet
     method process-ipv4-unexpected-fin ( addr bytes endpoint self -- )
 
+    \ Send an ACK in response to a FIN packet
+    method send-ipv4-fin-reply-ack ( addr bytes endpoint self -- )
+    
     \ Process an IPv4 RST packet
     method process-ipv4-rst-packet ( src-addr addr bytes self -- )
     
@@ -2140,6 +2163,9 @@ begin-module net
 
     \ Wait for a TCP endpoint to close
     method wait-endpoint-closed ( endpoint self -- )
+
+    \ Send a FIN packet
+    method send-fin ( state endpoint self -- )
 
     \ Close an established conection
     method close-tcp-established ( endpoint self -- )
@@ -2656,7 +2682,7 @@ begin-module net
     \ Process an IPv4 ACK packet in TCP_LAST_ACK state
     :noname { addr bytes endpoint self -- }
       addr tcp-ack-no hunaligned@ rev
-      endpoint endpoint-local-seq@ = if
+      endpoint endpoint-local-seq@ 1+ = if
         TCP_CLOSED endpoint endpoint-tcp-state!
       else
         addr bytes endpoint self process-ipv4-basic-ack
@@ -2695,43 +2721,34 @@ begin-module net
 
     \ Process an IPv4 FIN packet for a TCP_ESTABLISHED state
     :noname { addr bytes endpoint self -- }
-      endpoint endpoint-ipv4-remote@
-      endpoint endpoint-local-port@
-      endpoint endpoint-local-seq@
-      addr tcp-seq-no unaligned@ rev
-      endpoint endpoint-local-window@
-      TCP_ACK
-      endpoint endpoint-remote-mac-addr@
-      self send-ipv4-basic-tcp
+      addr bytes endpoint self send-ipv4-fin-reply-ack
       TCP_CLOSE_WAIT endpoint endpoint-tcp-state!
     ; define process-ipv4-fin-established
 
     \ Process an IPv4 FIN packet for a TCP_FIN_WAIT_2 state
     :noname { addr bytes endpoint self -- }
-      endpoint endpoint-ipv4-remote@
-      endpoint endpoint-local-port@
-      endpoint endpoint-local-seq@
-      addr tcp-seq-no unaligned@ rev
-      endpoint endpoint-local-window@
-      TCP_ACK
-      endpoint endpoint-remote-mac-addr@
-      self send-ipv4-basic-tcp
+      addr bytes endpoint self send-ipv4-fin-reply-ack
       TCP_TIME_WAIT endpoint endpoint-tcp-state!
     ; define process-ipv4-fin-fin-wait-2
 
     \ Process an unexpected IPv4 FIN packet
     :noname { addr bytes endpoint self -- }
+      addr bytes endpoint self send-ipv4-fin-reply-ack
+      TCP_CLOSING endpoint endpoint-tcp-state!
+    ; define process-ipv4-unexpected-fin
+
+    \ Send an ACK in response to a FIN packet
+    :noname { addr bytes endpoint self -- }
       endpoint endpoint-ipv4-remote@
       endpoint endpoint-local-port@
       endpoint endpoint-local-seq@
-      addr tcp-seq-no unaligned@ rev
+      addr tcp-seq-no unaligned@ rev 1+
       endpoint endpoint-local-window@
       TCP_ACK
       endpoint endpoint-remote-mac-addr@
       self send-ipv4-basic-tcp
-      TCP_CLOSING endpoint endpoint-tcp-state!
-    ; define process-ipv4-unexpected-fin
-
+    ; define send-ipv4-fin-reply-ack
+      
     \ Process an IPv4 RST packet
     :noname ( src-addr addr bytes self -- )
       2over 2over find-connect-ipv4-endpoint if
@@ -3178,9 +3195,9 @@ begin-module net
       endpoint free-endpoint
     ; define wait-endpoint-closed
 
-    \ Close an established conection
-    :noname { endpoint self -- }
-      endpoint self [: { endpoint self }
+    \ Send a FIN packet
+    :noname ( state endpoint self -- )
+      [: { state endpoint self }
         endpoint endpoint-ipv4-remote@
         endpoint endpoint-local-port@
         endpoint endpoint-local-seq@
@@ -3189,84 +3206,79 @@ begin-module net
         TCP_FIN
         endpoint endpoint-remote-mac-addr@
         self send-ipv4-basic-tcp
-        TCP_FIN_WAIT_1 endpoint endpoint-tcp-state!
-      ;] endpoint with-endpoint
+        state endpoint endpoint-tcp-state!
+      ;] 2 pick with-endpoint
+    ; define send-fin
+    
+    \ Close an established conection
+    :noname { endpoint self -- }
+      TCP_FIN_WAIT_1 endpoint self send-fin
       endpoint self wait-endpoint-closed
     ; define close-tcp-established
 
     \ Send a reply FIN packet
     :noname { endpoint self -- }
-      endpoint self [: { endpoint self }
-        endpoint endpoint-ipv4-remote@
-        endpoint endpoint-local-port@
-        endpoint endpoint-local-seq@
-        0
-        endpoint endpoint-local-window@
-        TCP_FIN
-        endpoint endpoint-remote-mac-addr@
-        self send-ipv4-basic-tcp
-        TCP_LAST_ACK endpoint endpoint-tcp-state!
-      ;] endpoint with-endpoint
+      TCP_LAST_ACK endpoint self send-fin
       endpoint self wait-endpoint-closed
     ; define send-fin-reply
 
     \ Send data on a TCP endpoint
-    :noname ( addr bytes endpoint self -- ) ( [char] a echo ) \ DEBUG
-      2 pick 0= if 2drop 2drop exit then ( [char] b echo ) \ DEBUG
-      [: { addr bytes endpoint self } ( [char] c echo ) \ DEBUG
-        addr bytes endpoint [: ( [char] d echo ) \ DEBUG
-          dup endpoint-tcp-state@ ( [char] e echo ) \ DEBUG
-          dup TCP_ESTABLISHED = swap TCP_CLOSE_WAIT = or if ( [char] f echo ) \ DEBUG
-            start-endpoint-send true ( [char] g echo ) \ DEBUG
-          else ( [char] h echo ) \ DEBUG
+    :noname ( addr bytes endpoint self -- )
+      2 pick 0= if 2drop 2drop exit then
+      [: { addr bytes endpoint self }
+        addr bytes endpoint [:
+          dup endpoint-tcp-state@
+          dup TCP_ESTABLISHED = swap TCP_CLOSE_WAIT = or if
+            start-endpoint-send true
+          else
             2drop drop false
-          then ( [char] i echo ) \ DEBUG
-        ;] over with-endpoint if ( [char] j echo ) \ DEBUG
-          endpoint start-endpoint-timeout ( [char] k echo ) \ DEBUG
-          begin ( [char] l echo ) \ DEBUG
-            endpoint self [: { endpoint self } ( [char] m echo ) \ DEBUG
-              endpoint endpoint-send-done? not if ( [char] n echo ) \ DEBUG
-                endpoint endpoint-send-outstanding? ( [char] o echo ) \ DEBUG
-                systick::systick-counter endpoint endpoint-timeout-start@ - ( [char] p echo ) \ DEBUG
-                endpoint endpoint-timeout@ > and if ( [char] q echo ) \ DEBUG
-                  endpoint increase-endpoint-timeout drop ( [char] r echo ) \ DEBUG
-                  endpoint resend-endpoint ( [char] s echo ) \ DEBUG
-                else ( [char] t echo ) \ DEBUG
-                  endpoint endpoint-send-outstanding? not if ( [char] u echo ) \ DEBUG
-                    endpoint start-endpoint-timeout ( [char] v echo ) \ DEBUG
-                  then ( [char] w echo ) \ DEBUG
-                then ( [char] x echo ) \ DEBUG
-                endpoint endpoint-tcp-state@ ( [char] y echo ) \ DEBUG
-                dup TCP_ESTABLISHED = swap TCP_CLOSE_WAIT = or if ( [char] z echo ) \ DEBUG
-                  endpoint endpoint-send-ready? if ( [char] A echo ) \ DEBUG
-                    endpoint get-endpoint-send-packet ( [char] B echo ) \ DEBUG
-                    endpoint self send-data-ack ( [char] C echo ) \ DEBUG
+          then
+        ;] over with-endpoint if
+          endpoint start-endpoint-timeout
+          begin
+            endpoint self [: { endpoint self }
+              endpoint endpoint-send-done? not if
+                endpoint endpoint-send-outstanding?
+                systick::systick-counter endpoint endpoint-timeout-start@ -
+                endpoint endpoint-timeout@ > and if
+                  endpoint increase-endpoint-timeout drop
+                  endpoint resend-endpoint
+                else
+                  endpoint endpoint-send-outstanding? not if
+                    endpoint start-endpoint-timeout
+                  then
+                then
+                endpoint endpoint-tcp-state@
+                dup TCP_ESTABLISHED = swap TCP_CLOSE_WAIT = or if
+                  endpoint endpoint-send-ready? if
+                    endpoint get-endpoint-send-packet
+                    endpoint self send-data-ack
                     false true
-                  else ( [char] D echo ) \ DEBUG
+                  else
                     true true
-                  then ( [char] E echo ) \ DEBUG
-                else ( [char] F echo ) \ DEBUG
+                  then
+                else
                   false
-                then ( [char] G echo ) \ DEBUG
-              else ( [char] H echo ) \ DEBUG
+                then
+              else
                 false 
-              then ( [char] I echo ) \ DEBUG
-            ;] endpoint with-endpoint ( [char] J echo ) \ DEBUG
-          while ( [char] K echo ) \ DEBUG
-            if ( [char] L echo ) \ DEBUG
-              task::timeout @ { old-timeout } ( [char] M echo ) \ DEBUG
-              endpoint endpoint-timeout@ ( [char] N echo ) \ DEBUG
-              systick::systick-counter endpoint endpoint-timeout-start@ - - ( [char] O echo ) \ DEBUG
-              send-check-interval max task::timeout ! ( [char] P echo ) \ DEBUG
-              endpoint ['] wait-endpoint try ( [char] Q echo ) \ DEBUG
-              dup ['] task::x-timed-out = if 2drop 0 then ( [char] R echo ) \ DEBUG
-              old-timeout task::timeout ! ( [char] S echo ) \ DEBUG
-              ?raise ( [char] T echo ) \ DEBUG
-            then ( [char] U echo ) \ DEBUG
-          repeat ( [char] V echo ) \ DEBUG
-          endpoint clear-endpoint-send ( [char] W echo ) \ DEBUG
-        then ( [char] X echo ) \ DEBUG
-      ;] 2 pick with-ctrl-endpoint ( [char] Y echo ) \ DEBUG
+              then
+            ;] endpoint with-endpoint
+          while
+            if
+              task::timeout @ { old-timeout }
+              endpoint endpoint-timeout@
+              systick::systick-counter endpoint endpoint-timeout-start@ - -
+              send-check-interval max task::timeout !
+              endpoint ['] wait-endpoint try
+              dup ['] task::x-timed-out = if 2drop 0 then
+              old-timeout task::timeout !
+              ?raise
+            then
+          repeat
+          endpoint clear-endpoint-send
+        then
+      ;] 2 pick with-ctrl-endpoint
     ; define send-tcp-endpoint
 
     \ Send a data ACK packet
@@ -3338,6 +3350,11 @@ begin-module net
                 endpoint endpoint-remote-mac-addr@
                 self send-ipv4-basic-tcp
                 endpoint advance-endpoint-refresh
+              else
+                state TCP_FIN_WAIT_1 = state TCP_LAST_ACK = or if
+                  state endpoint self send-fin
+                  endpoint advance-endpoint-refresh
+                then
               then
             then
             endpoint escalate-endpoint-refresh
