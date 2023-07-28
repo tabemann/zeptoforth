@@ -262,6 +262,12 @@ begin-module wifi-server-test
       then
       endpoint my-interface endpoint-done
       endpoint endpoint-tcp-state@ TCP_CLOSE_WAIT = if
+        [: cr ." *** CLOSING ***" ;] usb::with-usb-output
+        false server-active? !
+        endpoint my-interface close-tcp-endpoint
+      then
+      endpoint endpoint-tcp-state@ TCP_CLOSED = if
+        [: cr ." *** CLOSED ***" ;] usb::with-usb-output
         false server-active? !
         endpoint my-interface close-tcp-endpoint
         server-port my-interface allocate-tcp-listen-endpoint if
@@ -349,6 +355,21 @@ begin-module wifi-server-test
     ['] telnet-key? key?-hook !
     ['] telnet-emit emit-hook !
     ['] telnet-emit? emit?-hook !
+  ;
+  
+  \ Disconnect a session
+  : disconnect-server ( -- )
+    my-endpoint @ if
+      my-endpoint @ my-interface close-tcp-endpoint
+      [: cr ." *** CLOSED ***" ;] usb::with-usb-output
+      false server-active? !
+      my-endpoint @ my-interface close-tcp-endpoint
+      server-port my-interface allocate-tcp-listen-endpoint if
+        my-endpoint !
+      else
+        drop
+      then
+    then
   ;
 
 end-module

@@ -984,6 +984,9 @@ begin-module net
 
     \ Is the endpoint state
     cell member endpoint-state
+
+    \ The current endpoint ID
+    cell member endpoint-id
     
     \ The remote IPv4 address
     cell member endpoint-remote-ipv4-addr
@@ -1044,6 +1047,9 @@ begin-module net
 
     \ Endpoint refresh count
     cell member endpoint-refreshes
+
+    \ Get the current endpoint ID
+    method endpoint-id@ ( self -- id )
     
     \ Start timeout
     method start-endpoint-timeout ( self -- )
@@ -1261,8 +1267,14 @@ begin-module net
       self endpoint-ctrl-lock init-lock
       1 0 self endpoint-sema init-sema
       0 self endpoint-event-count !
+      0 self endpoint-id !
       systick::systick-counter self endpoint-last-refresh !
     ; define new
+
+    \ Get the current endpoint ID
+    :noname ( self -- id )
+       endpoint-id @
+    ; define endpoint-id@
 
     \ Start timeout
     :noname ( self -- )
@@ -1480,6 +1492,7 @@ begin-module net
     :noname ( self -- )
       [:
         0 over endpoint-event-count !
+        1 over endpoint-id +!
         endpoint-active swap endpoint-state bic!
       ;] over endpoint-lock with-lock
     ; define free-endpoint
@@ -2589,7 +2602,7 @@ begin-module net
           >r send-ipv4-rst-for-ack r>
         endcase
         addr bytes endpoint self
-        state case
+        endpoint endpoint-tcp-state@ case
           TCP_ESTABLISHED of process-ipv4-fin-established endof
           TCP_FIN_WAIT_2 of process-ipv4-fin-fin-wait-2 endof
         endcase
@@ -2681,8 +2694,8 @@ begin-module net
     
     \ Process an IPv4 ACK packet in TCP_LAST_ACK state
     :noname { addr bytes endpoint self -- }
-      addr tcp-ack-no hunaligned@ rev
-      endpoint endpoint-local-seq@ 1+ = if
+      addr tcp-ack-no unaligned@ rev
+      endpoint endpoint-local-seq@ = if
         TCP_CLOSED endpoint endpoint-tcp-state!
       else
         addr bytes endpoint self process-ipv4-basic-ack
@@ -3160,8 +3173,8 @@ begin-module net
           TCP_SYN_SENT of endpoint self send-ipv4-rst then
           TCP_SYN_RECEIVED of endpoint self close-tcp-established then
           TCP_ESTABLISHED of endpoint self close-tcp-established then
-          TCP_FIN_WAIT_1 of endpoint wait-endpoint-closed then
-          TCP_FIN_WAIT_2 of endpoint wait-endpoint-closed then
+          TCP_FIN_WAIT_1 of endpoint self wait-endpoint-closed then
+          TCP_FIN_WAIT_2 of endpoint self wait-endpoint-closed then
           TCP_CLOSE_WAIT of endpoint self send-fin-reply then
         endcase
       ;] 2 pick with-ctrl-endpoint
@@ -3226,30 +3239,33 @@ begin-module net
     :noname ( addr bytes endpoint self -- )
       2 pick 0= if 2drop 2drop exit then
       [: { addr bytes endpoint self }
-        addr bytes endpoint [:
-          dup endpoint-tcp-state@
-          dup TCP_ESTABLISHED = swap TCP_CLOSE_WAIT = or if
-            start-endpoint-send true
+        endpoint endpoint-id@ { id }
+        id addr bytes endpoint [: { id addr bytes endpoint }
+          endpoint endpoint-tcp-state@
+          dup TCP_ESTABLISHED = swap TCP_CLOSE_WAIT = or
+          id endpoint endpoint-id@ = and if
+            addr bytes endpoint start-endpoint-send true
           else
-            2drop drop false
+            false
           then
         ;] over with-endpoint if
           endpoint start-endpoint-timeout
           begin
-            endpoint self [: { endpoint self }
-              endpoint endpoint-send-done? not if
-                endpoint endpoint-send-outstanding?
-                systick::systick-counter endpoint endpoint-timeout-start@ -
-                endpoint endpoint-timeout@ > and if
-                  endpoint increase-endpoint-timeout drop
-                  endpoint resend-endpoint
-                else
-                  endpoint endpoint-send-outstanding? not if
-                    endpoint start-endpoint-timeout
+            id endpoint self [: { id endpoint self }
+              endpoint endpoint-tcp-state@
+              dup TCP_ESTABLISHED = swap TCP_CLOSE_WAIT = or
+              id endpoint endpoint-id@ = and if
+                endpoint endpoint-send-done? not if
+                  endpoint endpoint-send-outstanding?
+                  systick::systick-counter endpoint endpoint-timeout-start@ -
+                  endpoint endpoint-timeout@ > and if
+                    endpoint increase-endpoint-timeout drop
+                    endpoint resend-endpoint
+                  else
+                    endpoint endpoint-send-outstanding? not if
+                      endpoint start-endpoint-timeout
+                    then
                   then
-                then
-                endpoint endpoint-tcp-state@
-                dup TCP_ESTABLISHED = swap TCP_CLOSE_WAIT = or if
                   endpoint endpoint-send-ready? if
                     endpoint get-endpoint-send-packet
                     endpoint self send-data-ack
