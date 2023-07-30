@@ -26,6 +26,7 @@ begin-module net-test
   frame-process import
   net import
   endpoint-process import
+  alarm import
   
   23 constant pwr-pin
   24 constant dio-pin
@@ -42,9 +43,13 @@ begin-module net-test
   <arp-handler> class-size buffer: my-arp-handler
   <ip-handler> class-size buffer: my-ip-handler
   <endpoint-process> class-size buffer: my-endpoint-process
+  alarm-size buffer: my-close-alarm
   
   \ Have we sent the header
   false value sent-header?
+  
+  \ Are we closing?
+  false value closing?
 
   <endpoint-handler> begin-class <tcp-echo-handler>
     
@@ -65,7 +70,14 @@ begin-module net-test
       endpoint endpoint-rx-data@ type
       endpoint endpoint-tcp-state@ TCP_CLOSE_WAIT = if
         cr ." CLOSING CONNECTION" cr
-        endpoint my-interface close-tcp-endpoint
+        closing? not if
+          true to closing?
+          cr ." REGISTERING CLOSE ALARM" cr
+          500 0 endpoint [:
+            drop my-interface close-tcp-endpoint
+            cr ." close-tcp-endpoint RETURNED" cr
+          ;] my-close-alarm set-alarm-delay-default
+        then
       then
       endpoint endpoint-tcp-state@ TCP_LAST_ACK = if
         cr ." WAITING FOR LAST ACK" cr

@@ -987,7 +987,10 @@ begin-module task
 	current-task @ task-state h!
 	release-same-core-spinlock end-critical pause-wo-reschedule
 	claim-same-core-spinlock
-	current-task @ validate-timeout
+        current-task @ check-timeout if
+          -1 current-task @ task-current-notify !
+          ['] x-timed-out ?raise
+        then
       repeat
       current-task @ task-notify-area @ over cells + @
       swap bit current-task @ task-notified-bitmap bic!
@@ -1014,7 +1017,10 @@ begin-module task
 	  current-task @ task-state h!
 	  release-same-core-spinlock end-critical pause-wo-reschedule
 	  claim-same-core-spinlock
-	  current-task @ validate-timeout
+          current-task @ check-timeout if
+            -1 current-task @ task-current-notify !
+            ['] x-timed-out ?raise
+          then
 	repeat
 	current-task @ task-notify-area @ over cells + @
 	swap bit current-task @ task-notified-bitmap bic!

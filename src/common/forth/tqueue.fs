@@ -70,13 +70,13 @@ begin-module tqueue
     commit-flash
 
     \ Get last higher priority wait in queue
-    : find-wait-queue-next ( priority queue -- wait|0 )
+    : find-wait-queue-prev ( priority queue -- wait|0 )
       tqueue-last @ ( priority current )
       begin dup while ( priority current )
 	dup wait-task @ task-priority@
 	( priority current current-priority )
 	2 pick >= if nip ( current ) exit then
-	wait-next @ ( priority next )
+	wait-prev @ ( priority prev )
       repeat
       nip ( 0 )
     ;
@@ -84,26 +84,27 @@ begin-module tqueue
     \ Insert a wait into a queue
     : push-wait-queue { wait queue -- }
       false wait wait-popped !
-      wait wait-task @ task-priority@ queue find-wait-queue-next { next-wait }
-      next-wait 0= if
-        0 wait wait-next !
+      wait wait-task @ task-priority@ queue find-wait-queue-prev { prev-wait }
+      prev-wait 0= if
+        0 wait wait-prev !
         queue tqueue-first @ { first-wait }
         first-wait if
-          first-wait wait wait-prev !
-          wait first-wait wait-next !
+          wait first-wait wait-prev !
         else
-          0 wait wait-prev !
           wait queue tqueue-last !
         then
+        first-wait wait wait-next !
         wait queue tqueue-first !
       else
-        next-wait wait-prev @ { prev-wait }
-        prev-wait wait wait-prev !
-        prev-wait if
-          wait prev-wait wait-next !
-        then
-        wait next-wait wait-prev !
+        prev-wait wait-next @ { next-wait }
         next-wait wait wait-next !
+        next-wait if
+          wait next-wait wait-prev !
+        else
+          wait queue tqueue-last !
+        then
+        wait prev-wait wait-next !
+        prev-wait wait wait-prev !
       then
     ;
       
@@ -112,13 +113,13 @@ begin-module tqueue
       queue tqueue-first @ { first-wait }
       first-wait if
         true first-wait wait-popped !
-        first-wait wait-prev @ { prev-wait }
-        prev-wait if
-          0 prev-wait wait-next !
+        first-wait wait-next @ { next-wait }
+        next-wait if
+          0 next-wait wait-prev !
         else
           0 queue tqueue-last !
         then
-        prev-wait queue tqueue-first !
+        next-wait queue tqueue-first !
         first-wait
       else
         0
@@ -133,13 +134,22 @@ begin-module tqueue
         next-wait if
           prev-wait next-wait wait-prev !
         else
-          prev-wait queue tqueue-first !
+          prev-wait queue tqueue-last !
         then
         prev-wait if
           next-wait prev-wait wait-next !
         else
-          next-wait queue tqueue-last !
+          next-wait queue tqueue-first !
         then
+      then
+    ;
+
+    \ Increment counter
+    : +tqueue-counter ( tqueue -- )
+      dup tqueue-limit @ 0> if
+        dup tqueue-counter @ 1+ over tqueue-limit @ min swap tqueue-counter !
+      else
+        1 swap tqueue-counter +!
       then
     ;
 
@@ -182,17 +192,9 @@ begin-module tqueue
       2dup swap push-wait-queue
       over tqueue-slock @ release-slock-block
       over tqueue-slock @ claim-slock
-      swap tuck remove-wait-queue
-      current-task check-timeout if
-        dup tqueue-limit @ 0> if
-          dup tqueue-counter @ 1+ over tqueue-limit @ min swap tqueue-counter !
-        else
-          1 swap tqueue-counter +!
-        then
-	['] x-timed-out ?raise
-      else
-        drop
-      then
+      dup wait-popped @ not if over +tqueue-counter then
+      swap remove-wait-queue
+      current-task validate-timeout
     ;] with-aligned-allot
     s" END WAIT-TQUEUE" trace
   ;
@@ -201,14 +203,12 @@ begin-module tqueue
   \ Note that this must be called within a critical section
   : wake-tqueue ( tqueue -- )
     s" BEGIN WAKE-TQUEUE" trace
-    dup tqueue-limit @ 0> if
-      dup tqueue-counter @ 1+ over tqueue-limit @ min over tqueue-counter !
-    else
-      1 over tqueue-counter +!
+    dup tqueue-counter @ 0< if
+      dup pop-wait-queue ?dup if
+        wait-task @ ready
+      then
     then
-    pop-wait-queue ?dup if
-      wait-task @ ready
-    then
+    +tqueue-counter
     s" END WAKE-TQUEUE" trace
   ;
 

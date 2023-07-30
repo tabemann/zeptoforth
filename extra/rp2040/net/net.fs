@@ -36,7 +36,7 @@ begin-module net
   : x-send-timed-out ( -- ) cr ." send timed out" ;
 
   \ Make a debugging print
-  : echo ['] emit usb::with-usb-output ;
+  : echo [: ." *" emit ." * " ;] usb::with-usb-output ;
 
   \ Outstanding packet record
   <object> begin-class <out-packets>
@@ -1069,6 +1069,15 @@ begin-module net
     \ Wait for an endpoint event
     method wait-endpoint ( self -- )
 
+    \ Is an endpoint dequeued
+    method endpoint-dequeued? ( self -- dequeued? )
+
+    \ Mark endpoint as dequeued
+    method mark-endpoint-dequeued ( self -- )
+
+    \ Clear endpoint dequeued status
+    method clear-endpoint-dequeued ( self -- )
+
     \ Claim control of an endpoint
     method with-ctrl-endpoint ( xt self -- )
 
@@ -1273,7 +1282,7 @@ begin-module net
 
     \ Get the current endpoint ID
     :noname ( self -- id )
-       endpoint-id @
+      endpoint-id @
     ; define endpoint-id@
 
     \ Start timeout
@@ -1311,6 +1320,23 @@ begin-module net
     :noname ( self -- )
       endpoint-sema take
     ; define wait-endpoint
+
+    \ Is an endpoint dequeued
+    :noname ( self -- dequeued? )
+      endpoint-dequeued swap endpoint-state bit@
+    ; define endpoint-dequeued?
+
+    \ Mark endpoint as dequeued
+    :noname ( self -- )
+      [: endpoint-dequeued swap endpoint-state bis! ;]
+      over endpoint-lock with-lock
+    ; define mark-endpoint-dequeued
+
+    \ Clear endpoint dequeued status
+    :noname ( self -- )
+      [: endpoint-dequeued swap endpoint-state bic! ;]
+      over endpoint-lock with-lock
+    ; define clear-endpoint-dequeued
 
     \ Claim control of an endpoint
     :noname ( xt self -- )
@@ -1502,6 +1528,7 @@ begin-module net
       [:
         0 over endpoint-event-count !
         dup endpoint-in-packets reset-in-udp-packets
+        endpoint-tcp over endpoint-state bic!
         endpoint-udp over endpoint-state bis! endpoint-local-port!
       ;] over endpoint-lock with-lock
     ; define listen-udp
@@ -1510,6 +1537,7 @@ begin-module net
     :noname ( port self -- )
       [: { port self }
         0 self endpoint-event-count !
+        endpoint-udp self endpoint-state bic!
         endpoint-tcp self endpoint-state bis!
         TCP_LISTEN self endpoint-tcp-state!
         port self endpoint-local-port!
@@ -3098,9 +3126,10 @@ begin-module net
         begin
           self intf-endpoints <endpoint> class-size index * + { endpoint }
           endpoint [: { endpoint }
-            endpoint endpoint-has-event? if
+            endpoint endpoint-has-event? endpoint endpoint-dequeued? not and if
               endpoint get-endpoint-event
               endpoint promote-rx-data
+              endpoint mark-endpoint-dequeued
               endpoint true
             else
               false
@@ -3127,6 +3156,7 @@ begin-module net
       [:
         [: { endpoint self }
           endpoint retire-rx-data
+          endpoint clear-endpoint-dequeued
         ;] 2 pick with-endpoint
       ;] over endpoint-loop-lock with-lock
     ; define endpoint-done
@@ -3170,12 +3200,13 @@ begin-module net
     :noname ( endpoint self -- )
       [: { endpoint self }
         endpoint endpoint-tcp-state@ case
-          TCP_SYN_SENT of endpoint self send-ipv4-rst then
-          TCP_SYN_RECEIVED of endpoint self close-tcp-established then
-          TCP_ESTABLISHED of endpoint self close-tcp-established then
-          TCP_FIN_WAIT_1 of endpoint self wait-endpoint-closed then
-          TCP_FIN_WAIT_2 of endpoint self wait-endpoint-closed then
-          TCP_CLOSE_WAIT of endpoint self send-fin-reply then
+          TCP_SYN_SENT of endpoint self send-ipv4-rst endof
+          TCP_SYN_RECEIVED of endpoint self close-tcp-established endof
+          TCP_ESTABLISHED of endpoint self close-tcp-established endof
+          TCP_FIN_WAIT_1 of endpoint self wait-endpoint-closed endof
+          TCP_FIN_WAIT_2 of endpoint self wait-endpoint-closed endof
+          TCP_CLOSE_WAIT of endpoint self send-fin-reply endof
+          TCP_LAST_ACK of endpoint self wait-endpoint-closed endof
         endcase
       ;] 2 pick with-ctrl-endpoint
     ; define close-tcp-endpoint
@@ -3211,6 +3242,7 @@ begin-module net
     \ Send a FIN packet
     :noname ( state endpoint self -- )
       [: { state endpoint self }
+        state endpoint endpoint-tcp-state!
         endpoint endpoint-ipv4-remote@
         endpoint endpoint-local-port@
         endpoint endpoint-local-seq@
@@ -3219,7 +3251,6 @@ begin-module net
         TCP_FIN
         endpoint endpoint-remote-mac-addr@
         self send-ipv4-basic-tcp
-        state endpoint endpoint-tcp-state!
       ;] 2 pick with-endpoint
     ; define send-fin
     
