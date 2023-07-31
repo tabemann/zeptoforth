@@ -65,7 +65,7 @@ begin-module net-misc
   2 value max-retransmits
 
   \ The initial timeout time
-  500 value init-timeout
+  1000 value init-timeout
 
   \ The timeout multiplication factor
   2 value timeout-multiplier

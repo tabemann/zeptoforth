@@ -31,6 +31,7 @@ begin-module wifi-server-test
   sema import
   lock import
   core-lock import
+  stream import
   
   23 constant pwr-pin
   24 constant dio-pin
@@ -66,20 +67,11 @@ begin-module wifi-server-test
   \ Tx and rx delay
   50 constant server-delay
   
-  \ RAM variable for rx buffer read-index
-  variable rx-read-index
-  
-  \ RAM variable for rx buffer write-index
-  variable rx-write-index
-  
   \ Constant for number of bytes to buffer
   2048 constant rx-buffer-size
   
-  \ Rx buffer index mask
-  $7FF constant rx-index-mask
-  
-  \ Rx buffer
-  rx-buffer-size buffer: rx-buffer
+  \ Rx stream
+  rx-buffer-size stream-size buffer: rx-stream
   
   \ Tx buffer write indices
   2variable tx-write-index
@@ -94,7 +86,7 @@ begin-module wifi-server-test
   variable current-tx-buffer
   
   \ Tx timeout
-  500 constant tx-timeout
+  1000 constant tx-timeout
   
   \ Tx timeout start
   variable tx-timeout-start
@@ -107,37 +99,9 @@ begin-module wifi-server-test
     
   \ The TCP endpoint
   variable my-endpoint
-
-  \ Get whether the rx buffer is full
-  : rx-full? ( -- f )
-    rx-write-index @ rx-read-index @
-    rx-buffer-size 1- + rx-index-mask and =
-  ;
-
-  \ Get whether the rx buffer is empty
-  : rx-empty? ( -- f )
-    rx-read-index @ rx-write-index @ =
-  ;
-
-  \ Write a byte to the rx buffer
-  : write-rx ( c -- )
-    rx-full? not if
-      rx-write-index @ rx-buffer + c!
-      rx-write-index @ 1+ rx-index-mask and rx-write-index !
-    else
-      drop
-    then
-  ;
-
-  \ Read a byte from the rx buffer
-  : read-rx ( -- c )
-    rx-empty? not if
-      rx-read-index @ rx-buffer + c@
-      rx-read-index @ 1+ rx-index-mask and rx-read-index !
-    else
-      0
-    then
-  ;
+  
+  \ DEBUG
+  500 to init-timeout
 
   \ Get whether the tx buffer is full
   : tx-full? ( -- f )
@@ -162,28 +126,25 @@ begin-module wifi-server-test
       task::no-timeout task::timeout !
       ?raise
       server-active? @ 0<> my-endpoint @ 0<> and if
-        current-tx-buffer @ dup { old-tx-buffer } 1+ 2 umod current-tx-buffer !
-        tx-buffers old-tx-buffer tx-buffer-size * +
-        tx-write-index old-tx-buffer cells + @
+        [:
+          [:
+            current-tx-buffer @ dup { old-tx-buffer } 1+ 2 umod current-tx-buffer !
+            tx-buffers old-tx-buffer tx-buffer-size * +
+            tx-write-index old-tx-buffer cells + @
+            0 tx-write-index old-tx-buffer cells + !
+          ;] critical
+        ;] server-core-lock with-core-lock
         my-endpoint @ my-interface send-tcp-endpoint
-        0 tx-write-index old-tx-buffer cells + !
       then
       systick::systick-counter tx-timeout-start !
+      tx-block-sema broadcast
       tx-block-sema give
     again
   ;
   
   \ Actually handle received data
   : do-rx-data ( c-addr bytes -- )
-    [: { c-addr bytes }
-      c-addr bytes + c-addr ?do
-        rx-full? not if
-          i c@ write-rx
-        else
-          leave
-        then
-      loop
-    ;] server-lock with-lock
+    rx-stream send-stream-partial-no-block drop
   ;
   
   \ EMIT for telnet
@@ -200,7 +161,11 @@ begin-module wifi-server-test
             then
           ;] critical
         ;] server-core-lock with-core-lock
-        dup not if tx-sema give tx-block-sema take then
+        dup not if
+          tx-sema give
+          tx-block-sema take
+          tx-block-sema take
+        then
       until
     else
       drop
@@ -218,30 +183,14 @@ begin-module wifi-server-test
 
   \ KEY for telnet
   : telnet-key ( -- c )
-    begin
-      server-active? @ if
-        [:
-          rx-empty? not if
-            read-rx
-            true
-          else
-            false
-          then
-        ;] server-lock with-lock
-        dup not if server-delay ms then
-      else
-        false
-      then
-    until
+    0 { W^ buffer }
+    buffer 1 1 rx-stream recv-stream-min drop
+    buffer c@
   ;
 
   \ KEY? for telnet
   : telnet-key? ( -- key? )
-    server-active? @ if
-      [: rx-empty? not ;] server-lock with-lock
-    else
-      false
-    then
+    rx-stream stream-empty? not
   ;
   
   \ Type data over telnet
@@ -289,11 +238,10 @@ begin-module wifi-server-test
     0 current-tx-buffer !
     0 tx-write-index 0 cells + !
     0 tx-write-index 1 cells + !
-    0 rx-read-index !
-    0 rx-write-index !
     systick::systick-counter tx-timeout-start !
     false server-active? !
     0 my-endpoint !
+    rx-buffer-size rx-stream init-stream
     no-sema-limit 0 tx-sema init-sema
     no-sema-limit 0 tx-block-sema init-sema
     cyw43-clm::data cyw43-clm::size cyw43-fw::data cyw43-fw::size
@@ -355,6 +303,8 @@ begin-module wifi-server-test
     ['] telnet-key? key?-hook !
     ['] telnet-emit emit-hook !
     ['] telnet-emit? emit?-hook !
+    ['] telnet-emit error-emit-hook !
+    ['] telnet-emit? error-emit?-hook !
   ;
   
   \ Disconnect a session
@@ -363,7 +313,6 @@ begin-module wifi-server-test
       my-endpoint @ my-interface close-tcp-endpoint
       [: cr ." *** CLOSED ***" ;] usb::with-usb-output
       false server-active? !
-      my-endpoint @ my-interface close-tcp-endpoint
       server-port my-interface allocate-tcp-listen-endpoint if
         my-endpoint !
       else

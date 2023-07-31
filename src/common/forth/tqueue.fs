@@ -70,15 +70,16 @@ begin-module tqueue
     commit-flash
 
     \ Get last higher priority wait in queue
-    : find-wait-queue-prev ( priority queue -- wait|0 )
-      tqueue-last @ ( priority current )
-      begin dup while ( priority current )
-	dup wait-task @ task-priority@
-	( priority current current-priority )
-	2 pick >= if nip ( current ) exit then
-	wait-prev @ ( priority prev )
+    : find-wait-queue-prev { priority queue -- wait|0 }
+      queue tqueue-last @ { current }
+      begin current while
+        current wait-task @ task-priority@ priority < if
+          current wait-prev @ to current
+        else
+          current exit
+        then
       repeat
-      nip ( 0 )
+      0
     ;
 
     \ Insert a wait into a queue

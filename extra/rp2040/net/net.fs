@@ -174,10 +174,13 @@ begin-module net
       self first-out-packet-seq @ { first }
       0 first self acked-out-packet-offset @ { count seq bytes }
       self out-packet-count @ 0 ?do
-        self out-packet-seqs i cells + @ first - ack first - <= if
-          self out-packet-sizes i 1 lshift + h@ +to bytes
-          self out-packet-seqs i cells + @ to seq
-          i 1+ to count
+        self out-packet-seqs i cells + @ { current-seq }
+        self out-packet-sizes i 1 lshift + h@ { current-size }
+        current-seq seq current-size + =
+        current-seq first - ack first - <= and if
+          current-size +to bytes
+          current-seq to seq
+          1 +to count
         else
           leave
         then
@@ -466,7 +469,17 @@ begin-module net
     \ Add incoming TCP packet
     :noname { addr bytes seq self -- }
       bytes 0> if
+
+        bytes { init-bytes }
+        
         seq self first-in-packet-seq @ - { diff }
+        
+        diff 0< diff negate bytes < and if
+          diff negate +to addr
+          diff +to bytes
+          0 to diff
+        then
+        
         diff 0>=
         diff bytes + self pending-in-packet-offset @ +
         self in-packet-bytes @ <= and if
@@ -482,26 +495,32 @@ begin-module net
             self in-packet-seqs index cells + @ { current-seq }
             current-seq self first-in-packet-seq @ - { current-diff }
             self in-packet-sizes index 1 lshift + h@ { current-size }
-            diff current-diff < if
-              current-seq seq - bytes min { part-bytes }
-              addr part-bytes seq index self insert-tcp-packet
-              part-bytes +to seq
-              part-bytes +to diff
-              part-bytes +to addr
-              part-bytes negate +to bytes
+            diff current-diff <
+            diff bytes + current-diff <= if
+              addr bytes seq index self insert-tcp-packet
+              0 to bytes
             else
-              diff bytes + current-diff current-size + > if
-                diff bytes + current-diff current-size +
-                min diff - { part-bytes }
+              diff current-diff <
+              diff bytes + current-diff > and if
+                current-seq seq - bytes min { part-bytes }
+                addr part-bytes seq index self insert-tcp-packet
                 part-bytes +to seq
                 part-bytes +to diff
                 part-bytes +to addr
                 part-bytes negate +to bytes
               else
-                0 to bytes
+                diff bytes + current-diff current-size + >=
+                diff current-diff current-size + <= and if
+                  diff bytes + current-diff current-size +
+                  min diff - { part-bytes }
+                  part-bytes +to seq
+                  part-bytes +to diff
+                  part-bytes +to addr
+                  part-bytes negate +to bytes
+                then
+                1 +to index
               then
             then
-            1 +to index
           repeat
           bytes 0> if
             addr bytes seq index self insert-tcp-packet
@@ -509,6 +528,25 @@ begin-module net
           self complete-in-packets drop self first-in-packet-seq @ +
           self current-in-packet-ack !
         then
+
+        \ DEBUG
+        self in-packet-offset @
+        self pending-in-packet-offset @
+        self current-in-packet-ack @
+        self in-packet-count @
+        self first-in-packet-seq @
+        init-bytes
+        [:
+          cr
+          ." bytes: " .
+          ." first-seq: " .
+          ." count: " .
+          ." current-ack: " .
+          ." pending-offset: " .
+          ." offset: " .
+        ;] usb::with-usb-output
+        \ DEBUG
+        
       then
       [ debug? ] [if] cr ." @@@ add-in-tcp-packet: " self in-packets. [then]
     ; define add-in-tcp-packet
@@ -570,12 +608,12 @@ begin-module net
     
     \ Get whether to send an ACK packet
     :noname ( self -- send? )
-      dup in-packet-last-ack-sent @ swap current-in-packet-ack @ <>
+      dup in-packet-last-ack-sent @ swap in-packet-ack@ <>
     ; define in-packet-send-ack?
 
     \ Mark an ACK as having been sent
     :noname ( self -- )
-      dup current-in-packet-ack @ swap in-packet-last-ack-sent !
+      dup in-packet-ack@ swap in-packet-last-ack-sent !
     ; define in-packet-ack-sent
 
     \ Get the packet to ACK
@@ -1719,7 +1757,7 @@ begin-module net
       [: { self }
         self endpoint-tcp-state@ case
           TCP_ESTABLISHED of
-            self missing-endpoint-packets? if
+            self missing-endpoint-packets? not if
               self reset-endpoint-refresh
               established-no-missing-refresh-timeout
             else
@@ -1729,7 +1767,7 @@ begin-module net
             then
           endof
           TCP_CLOSE_WAIT of
-            self missing-endpoint-packets? if
+            self missing-endpoint-packets? not if
               self reset-endpoint-refresh
               established-no-missing-refresh-timeout
             else
