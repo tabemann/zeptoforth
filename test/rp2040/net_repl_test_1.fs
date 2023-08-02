@@ -71,7 +71,7 @@ begin-module wifi-server-test
   2048 constant rx-buffer-size
   
   \ Rx stream
-  rx-buffer-size stream-size buffer: rx-stream
+  rx-buffer-size stream-size aligned-buffer: rx-stream
   
   \ Tx buffer write indices
   2variable tx-write-index
@@ -102,6 +102,7 @@ begin-module wifi-server-test
   
   \ DEBUG
   500 to init-timeout
+  500 to established-init-refresh-timeout
 
   \ Get whether the tx buffer is full
   : tx-full? ( -- f )

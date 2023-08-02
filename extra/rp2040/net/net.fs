@@ -102,6 +102,9 @@ begin-module net
     \ Are we done sending packets?
     method packets-done? ( self -- done? )
 
+    \ Should we push packets?
+    method packets-push? ( self -- push? )
+    
     \ Can we issue a new packet?
     method send-packet? ( self -- send? )
 
@@ -278,6 +281,16 @@ begin-module net
       [then]
     ; define packets-done?
 
+    \ Should we push packets?
+    :noname { self -- push? }
+      self out-packet-count @ 1 = if
+        self acked-out-packet-offset @ self out-packet-sizes h@ +
+        self out-packet-bytes @ =
+      else
+        self packets-done?
+      then
+    ; define packets-push?
+    
     \ Can we issue a new packet?
     :noname ( self -- send? )
       dup out-packet-offset @ over acked-out-packet-offset @ -
@@ -345,6 +358,9 @@ begin-module net
     \ The pending packet buffer offset
     cell member pending-in-packet-offset
 
+    \ The pushed packet buffer offset
+    cell member pushed-in-packet-offset
+
     \ The sequence number of the first incoming packet
     cell member first-in-packet-seq
 
@@ -372,8 +388,14 @@ begin-module net
     \ Get the amount of waiting data for an endpoint
     method waiting-in-bytes@ ( self -- bytes )
 
+    \ Push data
+    method push-packets ( seq self -- )
+
+    \ Join complete packets
+    method join-complete-packets ( self -- )
+    
     \ Add incoming TCP packet
-    method add-in-tcp-packet ( addr bytes seq self -- )
+    method add-in-tcp-packet ( addr bytes push? seq self -- )
 
     \ Insert a TCP packet entry
     method insert-tcp-packet ( addr bytes seq index self -- )
@@ -426,6 +448,7 @@ begin-module net
       self in-packet-sizes max-in-packets 1 lshift 0 fill
       0 self in-packet-offset !
       0 self pending-in-packet-offset !
+      0 self pushed-in-packet-offset !
       seq self first-in-packet-seq !
       seq self in-packet-last-ack-sent !
       seq self current-in-packet-ack !
@@ -440,6 +463,7 @@ begin-module net
       self in-packet-sizes max-in-packets 1 lshift 0 fill
       0 self in-packet-offset !
       0 self pending-in-packet-offset !
+      0 self pushed-in-packet-offset !
       0 self first-in-packet-seq !
       0 self in-packet-last-ack-sent !
       0 self current-in-packet-ack !
@@ -458,30 +482,97 @@ begin-module net
 
     \ Get whether there are waiting in packets
     :noname ( self -- waiting? )
-      complete-in-packets drop 0>
+      pushed-in-packet-offset @ 0>
     ; define waiting-in-packets?
 
     \ Get the amount of waiting data for an endpoint
     :noname ( self -- bytes )
-      complete-in-packets drop
+      pushed-in-packet-offset @
     ; define waiting-in-bytes@
-      
-    \ Add incoming TCP packet
-    :noname { addr bytes seq self -- }
-      bytes 0> if
 
-        bytes { init-bytes }
+    \ Push data
+    :noname { seq self -- }
+      self in-packet-count @ 0 { total-count count }
+      total-count 0 ?do
+        self first-in-packet-seq @ { first-seq }
+        self in-packet-seqs i cells + @ { current-seq }
+        self in-packet-sizes i 1 lshift + h@ { current-size }
+        current-seq first-seq - { diff }
+        diff seq first-seq - <= if
+          self pushed-in-packet-offset @ { pushed-offset }
+          self in-packet-addr @ pushed-offset + dup diff + swap
+          self in-packet-offset @ pushed-offset - diff -
+          current-seq self first-in-packet-seq !
+          current-size self pushed-in-packet-offset +!
+          diff negate self in-packet-offset +!
+          1 +to count
+        then
+      loop
+      self in-packet-seqs count cells + self in-packet-seqs
+      total-count count - cells move
+      self in-packet-sizes count 1 lshift + self in-packet-sizes
+      total-count count - 1 lshift move
+      count negate self in-packet-count +!
+    ; define push-packets
+
+    \ Join complete packets
+    :noname { self -- }
+      self in-packet-count @ 0 { total-count count }
+      total-count 0 ?do
+        self in-packet-seqs i cells + @ { current-seq }
+        self in-packet-sizes i 1 lshift + h@ { current-size }
+        current-seq self first-in-packet-seq @ = if
+          current-size self first-in-packet-seq +!
+          current-size self pushed-in-packet-offset +!
+
+          \ DEBUG
+          current-size current-seq i self first-in-packet-seq @
+          [: cr ." first: " . ." i: " . ." seq: " . ." size: " . ;]
+          usb::with-usb-output
+          
+          1 +to count
+        else
+          leave
+        then
+      loop
+      self in-packet-seqs count cells + self in-packet-seqs count cells move
+      self in-packet-sizes count 1 lshift + self in-packet-sizes count 1 lshift
+      move
+      count negate self in-packet-count +!
+
+      \ DEBUG
+      self in-packet-offset @ self pushed-in-packet-offset @
+      self in-packet-count @
+      [: cr ." count: " . ." pushed: " . ." total: " . ;]
+      usb::with-usb-output
+      
+    ; define join-complete-packets
+
+    \ Add incoming TCP packet
+    :noname { addr bytes push? seq self -- }
+      bytes seq { init-bytes init-seq }
         
-        seq self first-in-packet-seq @ - { diff }
-        
-        diff 0< diff negate bytes < and if
+      seq self first-in-packet-seq @ - { diff }
+
+      diff seq self first-in-packet-seq @
+      [: cr ." first: " . ." seq: " . ." diff: " . ;] usb::with-usb-output
+
+      diff 0< if
+        self first-in-packet-seq @ diff + self in-packet-last-ack-sent !
+        diff negate bytes <= if
           diff negate +to addr
           diff +to bytes
+          self first-in-packet-seq @ to seq
           0 to diff
+        else
+          exit
         then
+      then
+
+      bytes 0> if
         
         diff 0>=
-        diff bytes + self pending-in-packet-offset @ +
+        diff bytes + self pushed-in-packet-offset @ +
         self in-packet-bytes @ <= and if
           0 { index }
           self in-packet-count @ 0 ?do
@@ -525,13 +616,23 @@ begin-module net
           bytes 0> if
             addr bytes seq index self insert-tcp-packet
           then
-          self complete-in-packets drop self first-in-packet-seq @ +
-          self current-in-packet-ack !
-        then
+          self join-complete-packets
+        then        
+      then
 
+      push? if
+        init-seq self push-packets
+      then
+
+      self complete-in-packets drop self first-in-packet-seq @ +
+      self current-in-packet-ack !
+
+      push? init-bytes 0<> or if
         \ DEBUG
         self in-packet-offset @
+        self pushed-in-packet-offset @
         self pending-in-packet-offset @
+        self in-packet-last-ack-sent @
         self current-in-packet-ack @
         self in-packet-count @
         self first-in-packet-seq @
@@ -542,12 +643,14 @@ begin-module net
           ." first-seq: " .
           ." count: " .
           ." current-ack: " .
-          ." pending-offset: " .
+          ." last-ack: " .
+          ." pending: " .
+          ." pushed: " .
           ." offset: " .
         ;] usb::with-usb-output
         \ DEBUG
-        
       then
+      
       [ debug? ] [if] cr ." @@@ add-in-tcp-packet: " self in-packets. [then]
     ; define add-in-tcp-packet
 
@@ -565,7 +668,7 @@ begin-module net
         seq self in-packet-seqs index cells + !
         bytes self in-packet-sizes index 1 lshift + h!
         1 self in-packet-count +!
-        addr self in-packet-addr @ self pending-in-packet-offset @ +
+        addr self in-packet-addr @ self pushed-in-packet-offset @ +
         seq self first-in-packet-seq @ - + bytes move
       else
         index self in-packet-count @ < if
@@ -579,7 +682,7 @@ begin-module net
           then
           seq self in-packet-seqs index cells + !
           bytes self in-packet-sizes index 1 lshift + h!
-          addr self in-packet-addr @ self pending-in-packet-offset @ +
+          addr self in-packet-addr @ self pushed-in-packet-offset @ +
           seq self first-in-packet-seq @ - + bytes move
         then
       then
@@ -590,7 +693,7 @@ begin-module net
         current-seq self first-in-packet-seq @ - current-bytes +
         max-bytes max to max-bytes
       loop
-      max-bytes self pending-in-packet-offset @ + self in-packet-offset !
+      max-bytes self pushed-in-packet-offset @ + self in-packet-offset !
       [ debug? ] [if] cr ." @@@ insert-tcp-packet: " self in-packets. [then]
     ; define insert-tcp-packet
     
@@ -608,42 +711,51 @@ begin-module net
     
     \ Get whether to send an ACK packet
     :noname ( self -- send? )
-      dup in-packet-last-ack-sent @ swap in-packet-ack@ <>
+      dup in-packet-last-ack-sent @ swap current-in-packet-ack @ <>
     ; define in-packet-send-ack?
 
     \ Mark an ACK as having been sent
     :noname ( self -- )
-      dup in-packet-ack@ swap in-packet-last-ack-sent !
+      dup current-in-packet-ack @ swap in-packet-last-ack-sent !
     ; define in-packet-ack-sent
 
     \ Get the packet to ACK
     :noname ( self -- ack )
-      dup complete-in-packets drop swap first-in-packet-seq @ +
+      current-in-packet-ack @
     ; define in-packet-ack@
 
     \ Promote incoming data to pending
     :noname { self -- bytes }
-      self complete-in-packets { bytes count }
-      count 0> if
-        self in-packet-count @ { total-count }
-        self in-packets-tcp @ if
-          self in-packet-seqs count cells +
-          self in-packet-seqs total-count count - cells move
+      self clear-in-packets
+      self in-packets-tcp @ if
+        self pushed-in-packet-offset @ self pending-in-packet-offset !
+      else
+        self in-packet-count @ 0> if
+          self in-packet-sizes h@ self pending-in-packet-offset !
+          -1 self in-packet-count +!
+          self in-packet-count @ 0> if
+            self in-packet-sizes 2 + self in-packet-sizes
+            self in-packet-count @ 1 lshift move
+          then
         then
-        self in-packet-sizes count 1 lshift +
-        self in-packet-sizes total-count count - 1 lshift move
-        count negate self in-packet-count +!
-        bytes self first-in-packet-seq +!
-        bytes self pending-in-packet-offset !
       then
-      bytes
+      self pending-in-packet-offset @
+
+      \ DEBUG
+      self in-packet-offset @
+      self pushed-in-packet-offset @
+      self pending-in-packet-offset @
+      [: cr ." promote pending: " . ." pushed: " . ." total: " . ;]
+      usb::with-usb-output
+
+
       [ debug? ] [if] cr ." @@@ promote-in-packets: " self in-packets. [then]
     ; define promote-in-packets
 
     \ Get the complete packet size and count
     :noname { self -- bytes packet-count }
       0 0 { current-bytes count }
-      self in-packet-offset @ self pending-in-packet-offset @ - { bytes }
+      self in-packet-offset @ self pushed-in-packet-offset @ - { bytes }
       self in-packets-tcp @ if
         true { continue }
         begin
@@ -675,17 +787,27 @@ begin-module net
 
     \ Get whether there are missing packets
     :noname { self -- missing-packets? }
-      self in-packet-offset @ self pending-in-packet-offset @ -
+      self in-packet-offset @ self pushed-in-packet-offset @ -
       self complete-in-packets drop <>
     ; define missing-in-packets?
     
     \ Clear pending packets
     :noname { self -- }
       self pending-in-packet-offset @ { pending }
+      self in-packets-tcp @ if
+        pending negate self pushed-in-packet-offset +!
+      then
       self in-packet-addr @ pending + self in-packet-addr @
       self in-packet-offset @ pending - move
       pending negate self in-packet-offset +!
       0 self pending-in-packet-offset !
+
+      \ DEBUG
+      self in-packet-offset @
+      self pushed-in-packet-offset @
+      [: cr ." clear-pending pushed: " . ." total: " . ;]
+      usb::with-usb-output
+      
       [ debug? ] [if] cr ." @@@ clear-in-packets: " self in-packets. [then]
     ; define clear-in-packets
     
@@ -703,6 +825,7 @@ begin-module net
       cr ." in-packet-bytes: " self in-packet-bytes @ .
       cr ." in-packet-offset: " self in-packet-offset @ .
       cr ." pending-in-packet-offset: " self pending-in-packet-offset @ .
+      cr ." pushed-in-packet-offset: " self pushed-in-packet-offset @ .
       self in-packets-tcp @ if
         cr ." first-in-packet-seq: " self first-in-packet-seq @ .
         cr ." in-packet-last-ack-sent: " self in-packet-last-ack-sent @ .
@@ -1225,7 +1348,7 @@ begin-module net
     method endpoint-local-window@ ( self -- bytes )
 
     \ Add data to a TCP endpoint if possible
-    method add-endpoint-tcp-data ( addr bytes seq self -- )
+    method add-endpoint-tcp-data ( addr bytes push? seq self -- )
 
     \ Add data to a UDP endpoint if possible
     method add-endpoint-udp-data ( addr bytes self -- )
@@ -1254,6 +1377,9 @@ begin-module net
     \ Get endpoint sending completion
     method endpoint-send-done? ( self -- done? )
 
+    \ Get endpoint push state
+    method endpoint-send-push? ( self -- push? )
+    
     \ Get endpoint sending readiness
     method endpoint-send-ready? ( self -- ready? )
     
@@ -1626,7 +1752,7 @@ begin-module net
     ; define endpoint-local-window@
 
     \ Add data to a TCP endpoint if possible
-    :noname ( addr bytes seq self -- )
+    :noname ( addr bytes push? seq self -- )
       [: endpoint-in-packets add-in-tcp-packet ;] over endpoint-lock with-lock
     ; define add-endpoint-tcp-data
 
@@ -1675,6 +1801,11 @@ begin-module net
     :noname ( self -- done? )
       [: endpoint-out-packets packets-done? ;] over endpoint-lock with-lock
     ; define endpoint-send-done?
+
+    \ Get endpoint push state
+    :noname ( self -- push? )
+      [: endpoint-out-packets packets-push? ;] over endpoint-lock with-lock
+    ; define endpoint-send-push?
 
     \ Get endpoint sending readiness
     :noname ( self -- ready? )
@@ -2256,7 +2387,7 @@ begin-module net
     method send-tcp-endpoint ( addr bytes endpoint self -- )
 
     \ Send a data ACK packet
-    method send-data-ack ( addr bytes endpoint self -- )
+    method send-data-ack ( addr bytes push? endpoint self -- )
 
     \ Refresh an interface
     method refresh-interface ( self -- )
@@ -2425,6 +2556,7 @@ begin-module net
       bytes tcp-header-size >= if
         addr full-tcp-header-size bytes > if exit then
 
+        addr [: cr ." RECEIVING TCP:" tcp. ;] usb::with-usb-output \ DEBUG
         [ debug? ] [if] addr tcp. [then]
         
         src-addr addr bytes self
@@ -2510,6 +2642,7 @@ begin-module net
       endpoint endpoint-local-window@
       [ TCP_SYN TCP_ACK or ] literal
       endpoint endpoint-remote-mac-addr@
+
       self send-ipv4-basic-tcp
       TCP_SYN_RECEIVED endpoint endpoint-tcp-state!
       endpoint endpoint-ack-sent
@@ -2563,6 +2696,7 @@ begin-module net
         0 buf tcp-urgent-ptr hunaligned!
         self intf-ipv4-addr@ remote-addr buf tcp-header-size 0 tcp-checksum
         compute-tcp-checksum rev16 buf tcp-checksum hunaligned!
+        buf [: cr ." SENDING TCP:" tcp. ;] usb::with-usb-output \ DEBUG
         [ debug? ] [if] cr ." @@@@@ SENDING TCP:" buf tcp. [then]
         true
       ;] 6 pick construct-and-send-ipv4-packet drop
@@ -2684,7 +2818,9 @@ begin-module net
     \ Process an IPv4 ACK packet in the general case
     :noname { addr bytes endpoint self -- }
       addr full-tcp-header-size { header-size }
-      addr header-size + bytes header-size - addr tcp-seq-no unaligned@ rev
+      addr header-size + bytes header-size -
+      addr tcp-flags c@ TCP_PSH and 0<>
+      addr tcp-seq-no unaligned@ rev
       endpoint add-endpoint-tcp-data
       addr tcp-window-size hunaligned@ rev16
       addr tcp-ack-no unaligned@ rev
@@ -3337,12 +3473,14 @@ begin-module net
                   then
                   endpoint endpoint-send-ready? if
                     endpoint get-endpoint-send-packet
+                    endpoint endpoint-send-push?
                     endpoint self send-data-ack
                     false true
                   else
                     true true
                   then
                 else
+                  0 0 true endpoint self send-data-ack
                   false
                 then
               else
@@ -3367,19 +3505,20 @@ begin-module net
     ; define send-tcp-endpoint
 
     \ Send a data ACK packet
-    :noname ( addr bytes endpoint self -- )
+    :noname ( addr bytes push? endpoint self -- )
       over endpoint-remote-mac-addr@
       3 pick endpoint-ipv4-remote@ drop
       PROTOCOL_TCP
       6 pick tcp-header-size +
       ( addr bytes endpoint self D: mac-addr remote-addr protocol bytes )
-      [: { addr bytes endpoint self buf }
+      [: { addr bytes push? endpoint self buf }
         endpoint endpoint-local-port@ rev16 buf tcp-src-port hunaligned!
         endpoint endpoint-ipv4-remote@ nip rev16 buf tcp-dest-port hunaligned!
         endpoint endpoint-local-seq@ rev buf tcp-seq-no unaligned!
         endpoint endpoint-ack@ rev buf tcp-ack-no unaligned!
         [ 5 4 lshift ] literal buf tcp-data-offset c!
-        [ TCP_ACK TCP_PSH or ] literal buf tcp-flags c!
+        push? if [ TCP_ACK TCP_PSH or ] literal else TCP_ACK then
+        buf tcp-flags c!
         endpoint endpoint-local-window@ rev16 buf tcp-window-size hunaligned!
         0 buf tcp-urgent-ptr hunaligned!
         addr buf tcp-header-size + bytes move
