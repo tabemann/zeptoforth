@@ -169,7 +169,7 @@ begin-module net-misc
   \ Endpoint bitmask
   0 bit constant endpoint-active
   1 bit constant endpoint-in-use
-  2 bit constant endpoint-dequeued
+  2 bit constant endpoint-pending
   3 bit constant endpoint-udp
   4 bit constant endpoint-tcp
   24 constant endpoint-tcp-state-lsb

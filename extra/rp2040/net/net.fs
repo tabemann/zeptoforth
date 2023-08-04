@@ -1230,14 +1230,14 @@ begin-module net
     \ Wait for an endpoint event
     method wait-endpoint ( self -- )
 
-    \ Is an endpoint dequeued
-    method endpoint-dequeued? ( self -- dequeued? )
+    \ Is an endpoint pending
+    method endpoint-pending? ( self -- pending? )
 
-    \ Mark endpoint as dequeued
-    method mark-endpoint-dequeued ( self -- )
+    \ Mark endpoint as pending
+    method mark-endpoint-pending ( self -- )
 
-    \ Clear endpoint dequeued status
-    method clear-endpoint-dequeued ( self -- )
+    \ Clear endpoint pending status
+    method clear-endpoint-pending ( self -- )
 
     \ Claim control of an endpoint
     method with-ctrl-endpoint ( xt self -- )
@@ -1389,15 +1389,6 @@ begin-module net
     \ Resend packets
     method resend-endpoint ( self -- )
 
-    \ Signal endpoint event
-    method signal-endpoint-event ( self -- )
-
-    \ Decrement endpoint event
-    method get-endpoint-event ( self -- )
-    
-    \ Does an endpoint have an event
-    method endpoint-has-event? ( self -- event? )
-
     \ Is endpoint in use
     method endpoint-in-use? ( self -- in-use? )
 
@@ -1418,6 +1409,15 @@ begin-module net
 
     \ Escalate the next endpoint refresh
     method escalate-endpoint-refresh ( self -- )
+
+    \ Signal an endpoint event
+    method signal-endpoint-event ( self -- )
+
+    \ Clear an endpoint event
+    method clear-endpoint-event ( self -- )
+
+    \ Does an endpoint have an event?
+    method endpoint-has-event? ( self -- has-event? )
     
   end-class
 
@@ -1485,22 +1485,22 @@ begin-module net
       endpoint-sema take
     ; define wait-endpoint
 
-    \ Is an endpoint dequeued
-    :noname ( self -- dequeued? )
-      endpoint-dequeued swap endpoint-state bit@
-    ; define endpoint-dequeued?
+    \ Is an endpoint pending
+    :noname ( self -- pending? )
+      endpoint-pending swap endpoint-state bit@
+    ; define endpoint-pending?
 
-    \ Mark endpoint as dequeued
+    \ Mark endpoint as pending
     :noname ( self -- )
-      [: endpoint-dequeued swap endpoint-state bis! ;]
+      [: endpoint-pending swap endpoint-state bis! ;]
       over endpoint-lock with-lock
-    ; define mark-endpoint-dequeued
+    ; define mark-endpoint-pending
 
-    \ Clear endpoint dequeued status
+    \ Clear endpoint pending status
     :noname ( self -- )
-      [: endpoint-dequeued swap endpoint-state bic! ;]
+      [: endpoint-pending swap endpoint-state bic! ;]
       over endpoint-lock with-lock
-    ; define clear-endpoint-dequeued
+    ; define clear-endpoint-pending
 
     \ Claim control of an endpoint
     :noname ( xt self -- )
@@ -1827,13 +1827,10 @@ begin-module net
       [: 1 swap endpoint-event-count +! ;] over endpoint-lock with-lock
     ; define signal-endpoint-event
 
-    \ Get endpoint event
+    \ Clear endpoint event
     :noname ( self -- )
-      [:
-        dup endpoint-event-count @
-        1- 0 max swap endpoint-event-count !
-      ;] over endpoint-lock with-lock
-    ; define get-endpoint-event
+      0 swap endpoint-event-count !
+    ; define clear-endpoint-event
 
     \ Does an endpoint have an event
     :noname ( self -- event? )
@@ -2141,15 +2138,9 @@ begin-module net
     \ The outgoing frame buffer
     mtu-size cell align member outgoing-buf
 
-    \ Next endpoint index
-    cell member next-endpoint-index
-
-    \ Endpoint loop lock
-    lock-size member endpoint-loop-lock
-
-    \ Endpoint loop semaphore
-    sema-size member endpoint-loop-sema
-
+    \ Endpoint queue
+    cell max-endpoints chan-size member endpoint-chan
+    
     \ Get the IPv4 address
     method intf-ipv4-addr@ ( self -- addr )
     
@@ -2416,9 +2407,7 @@ begin-module net
       max-endpoints 0 ?do
         <endpoint> self intf-endpoints <endpoint> class-size i * + init-object
       loop
-      0 self next-endpoint-index !
-      self endpoint-loop-lock init-lock
-      max-endpoints 0 self endpoint-loop-sema init-sema
+      cell max-endpoints self endpoint-chan init-chan
       <fragment-collect> self fragment-collect init-object
       <address-map> self address-map init-object
       <dns-cache> self dns-cache init-object
@@ -2556,8 +2545,9 @@ begin-module net
       bytes tcp-header-size >= if
         addr full-tcp-header-size bytes > if exit then
 
-        addr [: cr ." RECEIVING TCP:" tcp. ;] usb::with-usb-output \ DEBUG
-        [ debug? ] [if] addr tcp. [then]
+        [ debug? ] [if]
+          addr [: cr ." @@@@@ RECEIVING TCP:" tcp. ;] usb::with-usb-output
+        [then]
         
         src-addr addr bytes self
         addr tcp-flags c@ TCP_CONTROL and
@@ -2696,8 +2686,9 @@ begin-module net
         0 buf tcp-urgent-ptr hunaligned!
         self intf-ipv4-addr@ remote-addr buf tcp-header-size 0 tcp-checksum
         compute-tcp-checksum rev16 buf tcp-checksum hunaligned!
-        buf [: cr ." SENDING TCP:" tcp. ;] usb::with-usb-output \ DEBUG
-        [ debug? ] [if] cr ." @@@@@ SENDING TCP:" buf tcp. [then]
+        [ debug? ] [if]
+          buf [: cr ." @@@@@ SENDING TCP:" tcp. ;] usb::with-usb-output
+        [then]
         true
       ;] 6 pick construct-and-send-ipv4-packet drop
     ; define send-ipv4-basic-tcp
@@ -2778,6 +2769,7 @@ begin-module net
         else
           endpoint wake-endpoint
         then
+        endpoint start-endpoint-timeout
       ;] over with-endpoint
     ; define process-ipv4-ack-packet
 
@@ -3282,38 +3274,26 @@ begin-module net
 
     \ Enqueue a ready receiving IP endpoint
     :noname ( endpoint self -- )
-      [: { endpoint self }
-        endpoint endpoint-has-event? not if
-          endpoint signal-endpoint-event
-          self endpoint-loop-sema give
+      [: { W^ endpoint self }
+        endpoint @ endpoint-pending? not if
+          endpoint @ mark-endpoint-pending
+          endpoint cell self endpoint-chan send-chan
         else
+          endpoint @ signal-endpoint-event
         then
-        endpoint wake-endpoint
+        endpoint @ wake-endpoint
       ;] 2 pick with-endpoint
     ; define put-ready-endpoint
 
     \ Dequeue a ready receiving IP endpoint
-    :noname ( self -- endpoint )
-      dup endpoint-loop-sema take
-      [: { self }
-        self next-endpoint-index @ { index }
-        begin
-          self intf-endpoints <endpoint> class-size index * + { endpoint }
-          endpoint [: { endpoint }
-            endpoint endpoint-has-event? endpoint endpoint-dequeued? not and if
-              endpoint get-endpoint-event
-              endpoint promote-rx-data
-              endpoint mark-endpoint-dequeued
-              endpoint true
-            else
-              false
-            then
-          ;] over with-endpoint
-          dup not if index 1+ max-endpoints umod to index then
-        until
-        self next-endpoint-index @ 1+ max-endpoints umod
-        self next-endpoint-index !
-      ;] over endpoint-loop-lock with-lock
+    :noname { self -- endpoint }
+      0 { W^ endpoint }
+      endpoint cell self endpoint-chan recv-chan drop
+      endpoint @ [: { endpoint }
+        endpoint clear-endpoint-event
+        endpoint promote-rx-data
+      ;] endpoint @ with-endpoint
+      endpoint @
     ; define get-ready-endpoint
 
     \ Allocate an endpoint
@@ -3327,12 +3307,14 @@ begin-module net
 
     \ Mark an endpoint as done
     :noname ( endpoint self -- )
-      [:
-        [: { endpoint self }
-          endpoint retire-rx-data
-          endpoint clear-endpoint-dequeued
-        ;] 2 pick with-endpoint
-      ;] over endpoint-loop-lock with-lock
+      [: { endpoint self }
+        endpoint retire-rx-data
+        endpoint clear-endpoint-pending
+        endpoint endpoint-has-event? if
+          endpoint clear-endpoint-event
+          endpoint self put-ready-endpoint
+        then
+      ;] 2 pick with-endpoint
     ; define endpoint-done
     
     \ Get a UDP endpoint to listen on
@@ -3509,8 +3491,8 @@ begin-module net
       over endpoint-remote-mac-addr@
       3 pick endpoint-ipv4-remote@ drop
       PROTOCOL_TCP
-      6 pick tcp-header-size +
-      ( addr bytes endpoint self D: mac-addr remote-addr protocol bytes )
+      7 pick tcp-header-size +
+      ( addr bytes push? endpoint self D: mac-addr remote-addr protocol bytes )
       [: { addr bytes push? endpoint self buf }
         endpoint endpoint-local-port@ rev16 buf tcp-src-port hunaligned!
         endpoint endpoint-ipv4-remote@ nip rev16 buf tcp-dest-port hunaligned!
