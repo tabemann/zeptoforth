@@ -62,7 +62,7 @@ begin-module net-misc
   16 value small-send-bytes
 
   \ The maximum retransmit count
-  2 value max-retransmits
+  4 value max-retransmits
 
   \ The initial timeout time
   1000 value init-timeout

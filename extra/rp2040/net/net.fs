@@ -102,8 +102,8 @@ begin-module net
     \ Are we done sending packets?
     method packets-done? ( self -- done? )
 
-    \ Should we push packets?
-    method packets-push? ( self -- push? )
+    \ Have we sent our last packet?
+    method packets-last? ( self -- last? )
     
     \ Can we issue a new packet?
     method send-packet? ( self -- send? )
@@ -157,7 +157,7 @@ begin-module net
     \ Clear sending outgoing packets
     :noname { self -- }
       self out-packet-count @ 0> if
-        self out-packet-seqs self out-packet-count @ cells + @
+        self out-packet-seqs self out-packet-count @ 1- cells + @
         self first-out-packet-seq !
       then
       0 self out-packet-addr !
@@ -175,6 +175,7 @@ begin-module net
     :noname { window ack self -- }
       window self out-packet-window !
       self first-out-packet-seq @ { first }
+      ack first - 0< if exit then
       0 first self acked-out-packet-offset @ { count seq bytes }
       self out-packet-count @ 0 ?do
         self out-packet-seqs i cells + @ { current-seq }
@@ -281,15 +282,16 @@ begin-module net
       [then]
     ; define packets-done?
 
-    \ Should we push packets?
-    :noname { self -- push? }
-      self out-packet-count @ 1 = if
-        self acked-out-packet-offset @ self out-packet-sizes h@ +
-        self out-packet-bytes @ =
-      else
-        self packets-done?
-      then
-    ; define packets-push?
+    \ Have we sent our last packet
+    :noname ( self -- last? )
+      [ debug? ] [if]
+      dup [:
+        cr ." === packets-last?: bytes: " dup out-packet-bytes @ .
+        ." offset: " out-packet-offset @ .
+      ;] usb::with-usb-output
+      [then]
+      dup out-packet-bytes @ swap out-packet-offset @ =
+    ; define packets-last?
     
     \ Can we issue a new packet?
     :noname ( self -- send? )
@@ -525,10 +527,11 @@ begin-module net
           current-size self first-in-packet-seq +!
           current-size self pushed-in-packet-offset +!
 
-          \ DEBUG
-          current-size current-seq i self first-in-packet-seq @
-          [: cr ." first: " . ." i: " . ." seq: " . ." size: " . ;]
-          usb::with-usb-output
+          [ debug? ] [if]
+            current-size current-seq i self first-in-packet-seq @
+            [: cr ." first: " . ." i: " . ." seq: " . ." size: " . ;]
+            usb::with-usb-output
+          [then]
           
           1 +to count
         else
@@ -540,22 +543,23 @@ begin-module net
       move
       count negate self in-packet-count +!
 
-      \ DEBUG
-      self in-packet-offset @ self pushed-in-packet-offset @
-      self in-packet-count @
-      [: cr ." count: " . ." pushed: " . ." total: " . ;]
-      usb::with-usb-output
+      [ debug? ] [if]
+        self in-packet-offset @ self pushed-in-packet-offset @
+        self in-packet-count @
+        [: cr ." count: " . ." pushed: " . ." total: " . ;]
+        usb::with-usb-output
+      [then]
       
     ; define join-complete-packets
 
     \ Add incoming TCP packet
-    :noname { addr bytes push? seq self -- }
-      bytes seq { init-bytes init-seq }
-        
+    :noname { addr bytes push? seq self -- }        
       seq self first-in-packet-seq @ - { diff }
 
-      diff seq self first-in-packet-seq @
-      [: cr ." first: " . ." seq: " . ." diff: " . ;] usb::with-usb-output
+      [ debug? ] [if]
+        diff seq self first-in-packet-seq @
+        [: cr ." first: " . ." seq: " . ." diff: " . ;] usb::with-usb-output
+      [then]
 
       diff 0< if
         self first-in-packet-seq @ diff + self in-packet-last-ack-sent !
@@ -568,6 +572,8 @@ begin-module net
           exit
         then
       then
+
+      bytes seq { init-bytes init-seq }
 
       bytes 0> if
         
@@ -627,29 +633,32 @@ begin-module net
       self complete-in-packets drop self first-in-packet-seq @ +
       self current-in-packet-ack !
 
-      push? init-bytes 0<> or if
-        \ DEBUG
-        self in-packet-offset @
-        self pushed-in-packet-offset @
-        self pending-in-packet-offset @
-        self in-packet-last-ack-sent @
-        self current-in-packet-ack @
-        self in-packet-count @
-        self first-in-packet-seq @
-        init-bytes
-        [:
-          cr
-          ." bytes: " .
-          ." first-seq: " .
-          ." count: " .
-          ." current-ack: " .
-          ." last-ack: " .
-          ." pending: " .
-          ." pushed: " .
-          ." offset: " .
-        ;] usb::with-usb-output
-        \ DEBUG
-      then
+      [ debug? ] [if]
+        push? init-bytes 0<> or if
+
+          self in-packet-offset @
+          self pushed-in-packet-offset @
+          self pending-in-packet-offset @
+          self in-packet-last-ack-sent @
+          self current-in-packet-ack @
+          self in-packet-count @
+          self first-in-packet-seq @
+          init-bytes
+          [:
+            cr
+            ." bytes: " .
+            ." first-seq: " .
+            ." count: " .
+            ." current-ack: " .
+            ." last-ack: " .
+            ." pending: " .
+            ." pushed: " .
+            ." offset: " .
+          ;] usb::with-usb-output
+
+        then
+      [then]
+        
       
       [ debug? ] [if] cr ." @@@ add-in-tcp-packet: " self in-packets. [then]
     ; define add-in-tcp-packet
@@ -741,13 +750,13 @@ begin-module net
       then
       self pending-in-packet-offset @
 
-      \ DEBUG
-      self in-packet-offset @
-      self pushed-in-packet-offset @
-      self pending-in-packet-offset @
-      [: cr ." promote pending: " . ." pushed: " . ." total: " . ;]
-      usb::with-usb-output
-
+      [ debug? ] [if]
+        self in-packet-offset @
+        self pushed-in-packet-offset @
+        self pending-in-packet-offset @
+        [: cr ." promote pending: " . ." pushed: " . ." total: " . ;]
+        usb::with-usb-output
+      [then]
 
       [ debug? ] [if] cr ." @@@ promote-in-packets: " self in-packets. [then]
     ; define promote-in-packets
@@ -802,11 +811,12 @@ begin-module net
       pending negate self in-packet-offset +!
       0 self pending-in-packet-offset !
 
-      \ DEBUG
-      self in-packet-offset @
-      self pushed-in-packet-offset @
-      [: cr ." clear-pending pushed: " . ." total: " . ;]
-      usb::with-usb-output
+      [ debug? ] [if]
+        self in-packet-offset @
+        self pushed-in-packet-offset @
+        [: cr ." clear-pending pushed: " . ." total: " . ;]
+        usb::with-usb-output
+      [then]
       
       [ debug? ] [if] cr ." @@@ clear-in-packets: " self in-packets. [then]
     ; define clear-in-packets
@@ -1197,8 +1207,8 @@ begin-module net
     \ The retransmit count
     cell member endpoint-retransmits
     
-    \ Endpoint event count
-    cell member endpoint-event-count
+    \ Endpoint event signaled?
+    cell member endpoint-event
 
     \ Last refresh time
     cell member endpoint-last-refresh
@@ -1377,8 +1387,8 @@ begin-module net
     \ Get endpoint sending completion
     method endpoint-send-done? ( self -- done? )
 
-    \ Get endpoint push state
-    method endpoint-send-push? ( self -- push? )
+    \ Have we sent our last packet?
+    method endpoint-send-last? ( self -- last? )
     
     \ Get endpoint sending readiness
     method endpoint-send-ready? ( self -- ready? )
@@ -1439,7 +1449,7 @@ begin-module net
       self endpoint-lock init-lock
       self endpoint-ctrl-lock init-lock
       1 0 self endpoint-sema init-sema
-      0 self endpoint-event-count !
+      false self endpoint-event !
       0 self endpoint-id !
       systick::systick-counter self endpoint-last-refresh !
     ; define new
@@ -1457,12 +1467,12 @@ begin-module net
     ; define start-endpoint-timeout
 
     \ Increase timeout
-    :noname ( self -- retransmit? )
-      systick::systick-counter over endpoint-timeout-start !
-      dup endpoint-retransmits @ max-retransmits >= if drop false exit then
-      dup endpoint-timeout @ timeout-multiplier * over endpoint-timeout !
-      1 swap endpoint-retransmits +!
-      true
+    :noname { self -- }
+      systick::systick-counter self endpoint-timeout-start !
+      self endpoint-retransmits @ 1+ max-retransmits min
+      self endpoint-retransmits !
+      init-timeout s>f timeout-multiplier s>f
+      self endpoint-retransmits @ fi** f* f>s self endpoint-timeout !
     ; define increase-endpoint-timeout
 
     \ Get current timeout start
@@ -1637,7 +1647,7 @@ begin-module net
             src-ipv4-addr src-port self endpoint-ipv4-remote!
             TCP_SYN_RECEIVED self endpoint-tcp-state!
             mac-addr self endpoint-remote-mac-addr 2!
-            0 self endpoint-event-count !
+            false self endpoint-event !
             self reset-endpoint-refresh
             true
           else
@@ -1657,7 +1667,7 @@ begin-module net
           dest-ipv4-addr dest-port self endpoint-ipv4-remote!
           TCP_SYN_SENT self endpoint-tcp-state!
           mac-addr self endpoint-remote-mac-addr 2!
-          0 self endpoint-event-count !
+          false self endpoint-event !
           self reset-endpoint-refresh
           true
         else
@@ -1681,7 +1691,7 @@ begin-module net
     \ Free an endpoint
     :noname ( self -- )
       [:
-        0 over endpoint-event-count !
+        0 over endpoint-event !
         1 over endpoint-id +!
         endpoint-active swap endpoint-state bic!
       ;] over endpoint-lock with-lock
@@ -1690,7 +1700,7 @@ begin-module net
     \ Set an endpoint to listen on UDP
     :noname ( port self -- )
       [:
-        0 over endpoint-event-count !
+        0 over endpoint-event !
         dup endpoint-in-packets reset-in-udp-packets
         endpoint-tcp over endpoint-state bic!
         endpoint-udp over endpoint-state bis! endpoint-local-port!
@@ -1700,7 +1710,7 @@ begin-module net
     \ Set an endpoint to listen on TCP
     :noname ( port self -- )
       [: { port self }
-        0 self endpoint-event-count !
+        false self endpoint-event !
         endpoint-udp self endpoint-state bic!
         endpoint-tcp self endpoint-state bis!
         TCP_LISTEN self endpoint-tcp-state!
@@ -1711,7 +1721,7 @@ begin-module net
     \ Init the TCP data stream
     :noname ( seq mss window self -- )
       [: { seq mss window self }
-        0 self endpoint-event-count !
+        false self endpoint-event !
         self endpoint-init-local-seq @
         mss window self endpoint-out-packets reset-out-packets
         seq self endpoint-in-packets reset-in-tcp-packets
@@ -1802,10 +1812,10 @@ begin-module net
       [: endpoint-out-packets packets-done? ;] over endpoint-lock with-lock
     ; define endpoint-send-done?
 
-    \ Get endpoint push state
-    :noname ( self -- push? )
-      [: endpoint-out-packets packets-push? ;] over endpoint-lock with-lock
-    ; define endpoint-send-push?
+    \ Get endpoint last packet state
+    :noname ( self -- last? )
+      [: endpoint-out-packets packets-last? ;] over endpoint-lock with-lock
+    ; define endpoint-send-last?
 
     \ Get endpoint sending readiness
     :noname ( self -- ready? )
@@ -1824,17 +1834,17 @@ begin-module net
 
     \ Signal endpoint event
     :noname ( self -- )
-      [: 1 swap endpoint-event-count +! ;] over endpoint-lock with-lock
+      true swap endpoint-event !
     ; define signal-endpoint-event
 
     \ Clear endpoint event
     :noname ( self -- )
-      0 swap endpoint-event-count !
+      false swap endpoint-event !
     ; define clear-endpoint-event
 
     \ Does an endpoint have an event
     :noname ( self -- event? )
-      endpoint-event-count @ 0>
+      endpoint-event @
     ; define endpoint-has-event?
 
     \ Is endpoint in use
@@ -1845,19 +1855,29 @@ begin-module net
     \ Endpoint is ready for a refresh
     :noname ( self -- refresh? )
       [: { self }
-        self endpoint-tcp-state@ case
-          TCP_ESTABLISHED of true endof
-          TCP_CLOSE_WAIT of true endof
-          TCP_SYN_SENT of true endof
-          TCP_SYN_RECEIVED of true endof
-          TCP_FIN_WAIT_1 of true endof
-          TCP_LAST_ACK of true endof
-          false swap
-        endcase if
-          systick::systick-counter self endpoint-last-refresh @ -
-          self next-endpoint-refresh-timeout@ >=
+        self endpoint-tcp-state@ { state }
+        state TCP_ESTABLISHED = if
+          self endpoint-in-packets in-packet-send-ack? if
+            true
+          else
+            systick::systick-counter self endpoint-last-refresh @ -
+            self next-endpoint-refresh-timeout@ >=
+          then
         else
-          false
+          state case
+            TCP_ESTABLISHED of true endof
+            TCP_CLOSE_WAIT of true endof
+            TCP_SYN_SENT of true endof
+            TCP_SYN_RECEIVED of true endof
+            TCP_FIN_WAIT_1 of true endof
+            TCP_LAST_ACK of true endof
+            false swap
+          endcase if
+            systick::systick-counter self endpoint-last-refresh @ -
+            self next-endpoint-refresh-timeout@ >=
+          else
+            false
+          then
         then
       ;] over endpoint-lock with-lock
     ; define endpoint-refresh-ready?
@@ -2140,6 +2160,12 @@ begin-module net
 
     \ Endpoint queue
     cell max-endpoints chan-size member endpoint-chan
+
+    \ Endpoint queue lock
+    lock-size member endpoint-chan-lock
+
+    \ Endpoint queue semaphore
+    sema-size member endpoint-chan-sema
     
     \ Get the IPv4 address
     method intf-ipv4-addr@ ( self -- addr )
@@ -2408,6 +2434,8 @@ begin-module net
         <endpoint> self intf-endpoints <endpoint> class-size i * + init-object
       loop
       cell max-endpoints self endpoint-chan init-chan
+      self endpoint-chan-lock init-lock
+      max-endpoints 0 self endpoint-chan-sema init-sema
       <fragment-collect> self fragment-collect init-object
       <address-map> self address-map init-object
       <dns-cache> self dns-cache init-object
@@ -2686,9 +2714,11 @@ begin-module net
         0 buf tcp-urgent-ptr hunaligned!
         self intf-ipv4-addr@ remote-addr buf tcp-header-size 0 tcp-checksum
         compute-tcp-checksum rev16 buf tcp-checksum hunaligned!
+
         [ debug? ] [if]
           buf [: cr ." @@@@@ SENDING TCP:" tcp. ;] usb::with-usb-output
         [then]
+        
         true
       ;] 6 pick construct-and-send-ipv4-packet drop
     ; define send-ipv4-basic-tcp
@@ -3272,28 +3302,112 @@ begin-module net
       then
     ; define send-ipv4-udp-packet
 
+    true constant debug? \ DEBUG
+    
     \ Enqueue a ready receiving IP endpoint
-    :noname ( endpoint self -- )
-      [: { W^ endpoint self }
-        endpoint @ endpoint-pending? not if
-          endpoint @ mark-endpoint-pending
-          endpoint cell self endpoint-chan send-chan
-        else
-          endpoint @ signal-endpoint-event
-        then
-        endpoint @ wake-endpoint
-      ;] 2 pick with-endpoint
+    :noname ( endpoint self -- ) { self }
+
+      [ debug? ] [if]
+        [: cr ." +++ Pre-enqueue" ;] usb::with-usb-output
+      [then]
+      
+      self [: { endpoint self }
+        
+        endpoint self [: { W^ endpoint self }
+          endpoint @ endpoint-pending? not if
+            endpoint @ mark-endpoint-pending
+
+            [ debug? ] [if]
+              [: cr ." +++ Enqueuing endpoint" ;] usb::with-usb-output
+            [then]
+            
+            endpoint cell self endpoint-chan send-chan
+            true
+            
+            [ debug? ] [if]
+              [: cr ." +++ Done enqueuing endpoint" ;] usb::with-usb-output
+            [then]
+
+          else
+
+            [ debug? ] [if]
+              [: cr ." +++ Signaling endpoint" ;] usb::with-usb-output
+            [then]
+
+            endpoint @ signal-endpoint-event
+            false
+
+            [ debug? ] [if]
+              [: cr ." +++ Done signaling endpoint" ;] usb::with-usb-output
+            [then]
+
+          then
+          endpoint @ wake-endpoint
+        ;] endpoint with-endpoint
+
+      ;] self endpoint-chan-lock with-lock
+
+      if self endpoint-chan-sema give then
+      
+      [ debug? ] [if]
+        [: cr ." +++ Post-enqueue" ;] usb::with-usb-output
+      [then]
+
     ; define put-ready-endpoint
 
     \ Dequeue a ready receiving IP endpoint
-    :noname { self -- endpoint }
-      0 { W^ endpoint }
-      endpoint cell self endpoint-chan recv-chan drop
-      endpoint @ [: { endpoint }
-        endpoint clear-endpoint-event
-        endpoint promote-rx-data
-      ;] endpoint @ with-endpoint
-      endpoint @
+    :noname ( self -- endpoint )
+
+      [ debug? ] [if]
+        [: cr ." +++ Pre-dequeue" ;] usb::with-usb-output
+      [then]
+
+      dup endpoint-chan-sema take
+      
+      [: { self }
+        0 { W^ endpoint }
+        
+        [ debug? ] [if]
+          [: cr ." +++ Dequeuing endpoint" ;] usb::with-usb-output
+        [then]
+        
+        endpoint cell self endpoint-chan recv-chan drop
+        
+        [ debug? ] [if]
+          [: cr ." +++ Done dequeuing endpoint" ;] usb::with-usb-output
+        [then]
+        
+        endpoint @ [: { endpoint }
+          
+          [ debug? ] [if]
+            [: cr ." +++ Inside lock" ;] usb::with-usb-output
+          [then]
+          
+          endpoint clear-endpoint-event
+          
+          [ debug? ] [if]
+            [: cr ." +++ Cleared endpoint event" ;] usb::with-usb-output
+          [then]
+          
+          endpoint promote-rx-data
+          
+          [ debug? ] [if]
+            [: cr ." +++ Promoted RX data" ;] usb::with-usb-output
+          [then]
+          
+        ;] endpoint @ with-endpoint
+        endpoint @
+        
+        [ debug? ] [if]
+          [: cr ." +++ Really done dequeuing endpoint" ;] usb::with-usb-output
+        [then]
+
+      ;] over endpoint-chan-lock with-lock
+
+      [ debug? ] [if]
+        [: cr ." +++ Post-dequeue" ;] usb::with-usb-output
+      [then]
+
     ; define get-ready-endpoint
 
     \ Allocate an endpoint
@@ -3306,16 +3420,81 @@ begin-module net
     ; define allocate-endpoint
 
     \ Mark an endpoint as done
-    :noname ( endpoint self -- )
-      [: { endpoint self }
-        endpoint retire-rx-data
-        endpoint clear-endpoint-pending
-        endpoint endpoint-has-event? if
-          endpoint clear-endpoint-event
-          endpoint self put-ready-endpoint
-        then
-      ;] 2 pick with-endpoint
+    :noname { endpoint self -- }
+
+      [ debug? ] [if]
+        [: cr ." +++ Pre-done" ;] usb::with-usb-output
+      [then]
+      
+      endpoint self [:
+
+        [ debug? ] [if]
+          [: cr ." +++ Inside chan lock for done" ;] usb::with-usb-output
+        [then]
+        
+        [: { W^ endpoint self }
+
+          [ debug? ] [if]
+            [: cr ." +++ Inside endpoint lock for done" ;] usb::with-usb-output
+          [then]
+
+          endpoint @ retire-rx-data
+
+          [ debug? ] [if]
+            [: cr ." +++ Retired RX data for done" ;] usb::with-usb-output
+          [then]
+
+          endpoint @ endpoint-has-event? if
+
+            [ debug? ] [if]
+              [: cr ." +++ Re-readying endpoint" ;] usb::with-usb-output
+            [then]
+
+            endpoint @ clear-endpoint-event
+
+            [ debug? ] [if]
+              [: cr ." +++ Cleared endpoint event for re-ready" ;] usb::with-usb-output
+            [then]
+
+            endpoint cell self endpoint-chan send-chan
+            true
+            
+            [ debug? ] [if]
+              [: cr ." +++ Re-readied endpoint " ;] usb::with-usb-output
+            [then]
+            
+          else
+
+            endpoint @ clear-endpoint-pending
+            false
+
+            [ debug? ] [if]
+              [: cr ." +++ Cleared endpoint event for non-re-ready" ;] usb::with-usb-output
+            [then]
+
+          then
+
+        ;] 2 pick with-endpoint
+
+        [ debug? ] [if]
+          [: cr ." +++ Past endpoint lock for done" ;] usb::with-usb-output
+        [then]
+
+      ;] self endpoint-chan-lock with-lock
+
+      [ debug? ] [if]
+        [: cr ." +++ Past chan lock for done" ;] usb::with-usb-output
+      [then]
+
+      if self endpoint-chan-sema give then
+
+      [ debug? ] [if]
+        [: cr ." +++ Post-done" ;] usb::with-usb-output
+      [then]
+
     ; define endpoint-done
+    
+    false constant debug? \ DEBUG
     
     \ Get a UDP endpoint to listen on
     :noname ( port self -- endpoint success? )
@@ -3443,30 +3622,28 @@ begin-module net
               dup TCP_ESTABLISHED = swap TCP_CLOSE_WAIT = or
               id endpoint endpoint-id@ = and if
                 endpoint endpoint-send-done? not if
-                  endpoint endpoint-send-outstanding?
-                  systick::systick-counter endpoint endpoint-timeout-start@ -
-                  endpoint endpoint-timeout@ > and if
-                    endpoint increase-endpoint-timeout drop
-                    endpoint resend-endpoint
-                  else
-                    endpoint endpoint-send-outstanding? not if
-                      endpoint start-endpoint-timeout
+                  endpoint endpoint-send-outstanding? if
+                    systick::systick-counter endpoint endpoint-timeout-start@ -
+                    endpoint endpoint-timeout@ > if
+                      endpoint increase-endpoint-timeout
+                      endpoint resend-endpoint
                     then
+                  else
+                    endpoint start-endpoint-timeout
                   then
                   endpoint endpoint-send-ready? if
                     endpoint get-endpoint-send-packet
-                    endpoint endpoint-send-push?
+                    endpoint endpoint-send-last?
                     endpoint self send-data-ack
-                    false true
+                    endpoint endpoint-send-ready? not true
                   else
                     true true
                   then
                 else
-                  0 0 true endpoint self send-data-ack
-                  false
+                  endpoint clear-endpoint-send false
                 then
               else
-                false 
+                endpoint clear-endpoint-send false 
               then
             ;] endpoint with-endpoint
           while
@@ -3481,7 +3658,6 @@ begin-module net
               ?raise
             then
           repeat
-          endpoint clear-endpoint-send
         then
       ;] 2 pick with-ctrl-endpoint
     ; define send-tcp-endpoint
@@ -3509,8 +3685,11 @@ begin-module net
         buf tcp-header-size bytes + 0 tcp-checksum
         compute-tcp-checksum rev16 buf tcp-checksum hunaligned!
         [ debug? ] [if]
-        cr ." @@@@@ SENDING TCP WITH DATA:" buf tcp.
-        buf buf tcp-header-size + bytes + dump
+          buf bytes
+          [: { buf bytes }
+            cr ." @@@@@ SENDING TCP WITH DATA:" buf tcp.
+            buf buf tcp-header-size + bytes + dump
+          ;] usb::with-usb-output
         [then]
         true
       ;] 6 pick construct-and-send-ipv4-packet drop

@@ -209,10 +209,10 @@ begin-module cyw43-runner
     :noname ( D: mac-addr self -- )
       cyw43-mac-addr 2!
     ; define mac-addr!
-    
+
     \ Put a received frame
     :noname ( addr bytes self -- ) { self }
-      [ debug? ] [if] cr ." ### BEGIN put-rx-frame" [then]
+      [ debug? ] [if] [: cr ." ### BEGIN put-rx-frame" ;] usb::with-usb-output [then]
       self [: { addr bytes self }
         self cyw43-rx-count @ rx-mtu-count < if
           addr self cyw43-rx-buf self cyw43-rx-put-index @ mtu-size * + bytes
@@ -222,17 +222,17 @@ begin-module cyw43-runner
           self cyw43-rx-put-index !
           1 self cyw43-rx-count +! true
         else
-          [ debug? ] [if] cr ." DROPPED RX PACKET: " bytes . [then]
+          [ debug? ] [if] bytes [: cr ." DROPPED RX PACKET: " . ;] usb::with-usb-output [then]
           false
         then
       ;] self cyw43-rx-lock with-lock
       if self cyw43-rx-sema give then
-      [ debug? ] [if] cr ." ### END put-rx-frame" [then]
+      [ debug? ] [if] [: cr ." ### END put-rx-frame" ;] usb::with-usb-output [then]
     ; define put-rx-frame
 
     \ Get a received frame
     :noname ( addr bytes self -- bytes' ) { self }
-      [ debug? ] [if] cr ." ### BEGIN get-rx-frame" [then]
+      [ debug? ] [if] [: cr ." ### BEGIN get-rx-frame" ;] usb::with-usb-output [then]
       self cyw43-rx-sema take
       self [: { addr bytes self }
         self cyw43-rx-count @ 0> if
@@ -244,18 +244,18 @@ begin-module cyw43-runner
           -1 self cyw43-rx-count +!
           actual
         else
-          [ debug? ] [if] cr ." MISSING RX PACKET" [then]
+          [ debug? ] [if] [: cr ." MISSING RX PACKET" ;] usb::with-usb-output [then]
           0
         then
       ;] self cyw43-rx-lock with-lock
-      [ debug? ] [if] cr ." ### END get-rx-frame" [then]
+      [ debug? ] [if] [: cr ." ### END get-rx-frame" ;] usb::with-usb-output [then]
     ; define get-rx-frame
 
     \ Poll a received frame
     :noname ( addr bytes self -- bytes' found? ) { self }
       self [: { addr bytes self }
         self cyw43-rx-count @ 0> if
-          [ debug? ] [if] cr ." ### BEGIN poll-rx-frame" [then]
+          [ debug? ] [if] [: cr ." ### BEGIN poll-rx-frame" ;] usb::with-usb-output [then]
           self cyw43-rx-sema take
           self cyw43-rx-sizes self cyw43-rx-get-index @ cells + @ { actual }
           self cyw43-rx-buf self cyw43-rx-get-index @ mtu-size * + addr actual
@@ -264,7 +264,7 @@ begin-module cyw43-runner
           self cyw43-rx-get-index !
           -1 self cyw43-rx-count +!
           actual true
-          [ debug? ] [if] cr ." ### END poll-rx-frame" [then]
+          [ debug? ] [if] [: cr ." ### END poll-rx-frame" ;] usb::with-usb-output [then]
         else
           0 false
         then
@@ -273,7 +273,7 @@ begin-module cyw43-runner
 
     \ Put a frame to transmit
     :noname ( addr bytes self -- ) { self }
-      [ debug? ] [if] cr ." ### BEGIN put-tx-frame" [then]
+      [ debug? ] [if] [: cr ." ### BEGIN put-tx-frame" ;] usb::with-usb-output [then]
       self [: { addr bytes self }
         self cyw43-tx-count @ tx-mtu-count < if
           addr self cyw43-tx-buf self cyw43-tx-put-index @ mtu-size * + bytes
@@ -283,17 +283,17 @@ begin-module cyw43-runner
           self cyw43-tx-put-index !
           1 self cyw43-tx-count +! true
         else
-          [ debug? ] [if] cr ." DROPPED TX PACKET: " bytes . [then]
+          [ debug? ] [if] bytes [: cr ." DROPPED TX PACKET: " . ;] usb::with-usb-output [then]
           false
         then
       ;] self cyw43-tx-lock with-lock
       if self cyw43-tx-sema give then
-      [ debug? ] [if] cr ." ### END put-tx-frame" [then]
+      [ debug? ] [if] [: cr ." ### END put-tx-frame" ;] usb::with-usb-output [then]
     ; define put-tx-frame
 
     \ Get a frame to transmit
     :noname ( addr bytes self -- bytes' ) { self }
-      [ debug? ] [if] cr ." ### BEGIN get-tx-frame" [then]
+      [ debug? ] [if] [: cr ." ### BEGIN get-tx-frame" ;] usb::with-usb-output [then]
       self cyw43-tx-sema take
       self [: { addr bytes self }
         self cyw43-tx-count @ 0> if
@@ -305,18 +305,18 @@ begin-module cyw43-runner
           -1 self cyw43-tx-count +!
           actual
         else
-          [ debug? ] [if] cr ." MISSING TX PACKET" [then]
+          [ debug? ] [if] [: cr ." MISSING TX PACKET" ;] usb::with-usb-output [then]
           0
         then
       ;] self cyw43-tx-lock with-lock
-      [ debug? ] [if] cr ." ### END get-tx-frame" [then]
+      [ debug? ] [if] [: cr ." ### END get-tx-frame" ;] usb::with-usb-output [then]
     ; define get-tx-frame
 
     \ Poll a frame to transmit
     :noname ( addr bytes self -- bytes' found? ) { self }
       self [: { addr bytes self }
         self cyw43-tx-count @ 0> if
-          [ debug? ] [if] cr ." ### BEGIN poll-tx-frame" [then]
+          [ debug? ] [if] [: cr ." ### BEGIN poll-tx-frame" ;] usb::with-usb-output [then]
           self cyw43-tx-sema take
           self cyw43-tx-sizes self cyw43-tx-get-index @ cells + @ { actual }
           self cyw43-tx-buf self cyw43-tx-get-index @ mtu-size * + addr actual
@@ -325,7 +325,7 @@ begin-module cyw43-runner
           self cyw43-tx-get-index !
           -1 self cyw43-tx-count +!
           actual true
-          [ debug? ] [if] cr ." ### END poll-tx-frame" [then]
+          [ debug? ] [if] [: cr ." ### END poll-tx-frame" ;] usb::with-usb-output [then]
         else
           0 false
         then
@@ -333,7 +333,7 @@ begin-module cyw43-runner
     ; define poll-tx-frame
 
   end-implement
-  
+
   \ CYW43 runner class
   <object> begin-class <cyw43-runner>
 
