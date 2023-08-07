@@ -56,11 +56,14 @@ begin-module net
     \ The packet buffer size
     cell member out-packet-bytes
 
-    \ The ACKed packet buffer offset
-    cell member acked-out-packet-offset
-
     \ The packet buffer offset
     cell member out-packet-offset
+
+    \ The last sent packet buffer sequence number
+    cell member last-out-packet-seq
+
+    \ The initial sent packet buffer sequence number
+    cell member init-out-packet-seq
 
     \ The sequence number of the first outstanding packet (or the first one to
     \ be sent)
@@ -83,6 +86,9 @@ begin-module net
     
     \ Acknowledge packets
     method ack-packets ( window ack self -- )
+
+    \ The ACKed packet buffer offset
+    method acked-out-packet-offset@ ( self -- offset )
 
     \ Get info on packet to send
     method get-packet-to-send ( self -- addr bytes )
@@ -116,6 +122,8 @@ begin-module net
     
   end-class
 
+  true constant debug? \ DEBUG
+  
   \ Implement the outstanding packet record
   <out-packets> begin-implement
 
@@ -129,9 +137,10 @@ begin-module net
     :noname { seq mss window self -- }
       0 self out-packet-addr !
       0 self out-packet-bytes !
-      0 self acked-out-packet-offset !
       0 self out-packet-offset !
       seq self first-out-packet-seq !
+      seq self init-out-packet-seq !
+      seq self last-out-packet-seq !
       mss self out-packet-mss !
       window self out-packet-window !
       0 self out-packet-count !
@@ -145,9 +154,9 @@ begin-module net
     :noname { addr bytes self -- }
       addr self out-packet-addr !
       bytes self out-packet-bytes !
-      0 self acked-out-packet-offset !
       0 self out-packet-offset !
       0 self out-packet-count !
+      self first-out-packet-seq @ self init-out-packet-seq !
       [ debug? ] [if]
         self [: cr ." === start-out-packets:" out-packets. ;]
         usb::with-usb-output
@@ -162,9 +171,9 @@ begin-module net
       then
       0 self out-packet-addr !
       0 self out-packet-bytes !
-      0 self acked-out-packet-offset !
       0 self out-packet-offset !
       0 self out-packet-count !
+      self first-out-packet-seq @ self init-out-packet-seq !
       [ debug? ] [if]
         self [: cr ." === clear-out-packets:" out-packets. ;]
         usb::with-usb-output
@@ -176,40 +185,39 @@ begin-module net
       window self out-packet-window !
       self first-out-packet-seq @ { first }
       ack first - 0< if exit then
-      0 first self acked-out-packet-offset @ { count seq bytes }
-      self out-packet-count @ 0 ?do
-        self out-packet-seqs i cells + @ { current-seq }
-        self out-packet-sizes i 1 lshift + h@ { current-size }
-        current-seq seq current-size + =
-        current-seq first - ack first - <= and if
-          current-size +to bytes
-          current-seq to seq
-          1 +to count
+      self last-out-packet-seq @ { last }
+      self init-out-packet-seq @ { init }
+      last ack - last first - < ack init - last init - <= and if
+        0 { count }
+        self out-packet-count @ 0 ?do
+          self out-packet-seqs i cells + @ { current-seq }
+          last current-seq - last ack - >= if
+            1 +to count
+          else
+            leave
+          then
+        loop
+        self out-packet-sizes count 1 lshift + self out-packet-sizes
+        self out-packet-count @ count - 1 lshift move
+        self out-packet-seqs count cells + self out-packet-seqs
+        self out-packet-count @ count - cells move
+        count negate self out-packet-count +!
+        self out-packet-count @ 0> if
+          self out-packet-seqs @ self out-packet-sizes h@ -
+          self first-out-packet-seq !
         else
-          leave
+          ack self first-out-packet-seq !
         then
-      loop
-      [ debug? ] [if]
-        self ack seq bytes count [: { self ack seq bytes count }
-          cr ." FIRST: " self first-out-packet-seq @ .
-          ." ACK: " ack .
-          ." SEQ: " seq .
-          ." BYTES: " bytes .
-          ." TOTAL-COUNt: " self out-packet-count @ .
-          ." COUNT: " count .
-        ;] usb::with-usb-output
-      [then]
-      seq self first-out-packet-seq !
-      bytes self acked-out-packet-offset !
-      self out-packet-sizes count 1 lshift + self out-packet-sizes
-      self out-packet-count @ count - 1 lshift move
-      self out-packet-seqs count cells + self out-packet-seqs
-      self out-packet-count @ count - cells move
-      count negate self out-packet-count +!
+      then
       [ debug? ] [if]
         self [: cr ." === ack-packets:" out-packets. ;] usb::with-usb-output
       [then]
     ; define ack-packets
+
+    \ The ACKed packet buffer offset
+    :noname ( self -- offset )
+      dup first-out-packet-seq @ swap init-out-packet-seq @ -
+    ; define acked-out-packet-offset@
 
     \ Get info on packet to send
     :noname { self -- addr bytes }
@@ -224,6 +232,10 @@ begin-module net
       out-packet-size self out-packet-sizes
       self out-packet-count @ 1 lshift + h!
       this-seq self out-packet-seqs self out-packet-count @ cells + !
+      self first-out-packet-seq @ { first }
+      self last-out-packet-seq @ first - this-seq first - < if
+        this-seq self last-out-packet-seq !
+      then
       1 self out-packet-count +!
       self out-packet-addr @ self out-packet-offset @ + out-packet-size -
       out-packet-size
@@ -234,15 +246,16 @@ begin-module net
     ; define get-packet-to-send
 
     \ Get the current sequence number
-    :noname ( self -- seq )
-      [ debug? ] [if] dup [then]
-      dup out-packet-count @ 1 > if
-        dup out-packet-seqs swap out-packet-count @ 1- cells + @
+    :noname { self -- seq }
+      self out-packet-count @ { count }
+      count 0> if
+        self out-packet-seqs count 1- cells + @
+        self out-packet-sizes count 1- 1 lshift + h@ -
       else
-        first-out-packet-seq @
+        self first-out-packet-seq @
       then
       [ debug? ] [if]
-        [: cr ." === current-out-packet-seq:" swap out-packets. ;]
+        self [: cr ." === current-out-packet-seq:" out-packets. ;]
         usb::with-usb-output
       [then]
     ; define current-out-packet-seq@
@@ -266,7 +279,7 @@ begin-module net
 
     \ Are there outstanding packets?
     :noname ( self -- outstanding? )
-      dup acked-out-packet-offset @ swap out-packet-offset @ <>
+      dup acked-out-packet-offset@ swap out-packet-offset @ <>
       [ debug? ] [if]
         [: cr ." === packets-outstanding?: " dup . ;] usb::with-usb-output
       [then]
@@ -275,7 +288,7 @@ begin-module net
     \ Are we done sending packets?
     :noname ( self -- done? )
       dup out-packet-count @ 0=
-      swap dup acked-out-packet-offset @
+      swap dup acked-out-packet-offset@
       swap out-packet-bytes @ = and
       [ debug? ] [if]
         [: cr ." === packets-done?: " dup . ;] usb::with-usb-output
@@ -295,7 +308,7 @@ begin-module net
     
     \ Can we issue a new packet?
     :noname ( self -- send? )
-      dup out-packet-offset @ over acked-out-packet-offset @ -
+      dup out-packet-offset @ over acked-out-packet-offset@ -
       over out-packet-window @ <
       over out-packet-offset @ 2 pick out-packet-bytes @ < and
       swap out-packet-count @ max-out-packets < and
@@ -307,7 +320,7 @@ begin-module net
     \ Mark packets as to be resent
     :noname ( self -- )
       [ debug? ] [if] dup [then]
-      dup acked-out-packet-offset @ over out-packet-offset !
+      dup acked-out-packet-offset@ over out-packet-offset !
       0 swap out-packet-count !
       [ debug? ] [if]
         [: cr ." === resend-packets: " out-packets. ;] usb::with-usb-output
@@ -323,7 +336,7 @@ begin-module net
       self out-packet-count @ 0 ?do self out-packet-sizes i 1 lshift + h@ . loop
       cr ." out-packet-addr: " self out-packet-addr @ h.8
       cr ." out-packet-bytes: " self out-packet-bytes @ .
-      cr ." acked-out-packet-offset: " self acked-out-packet-offset @ .
+      cr ." acked-out-packet-offset: " self acked-out-packet-offset@ .
       cr ." out-packet-offset: " self out-packet-offset @ .
       cr ." first-out-packet-seq: " self first-out-packet-seq @ .
       cr ." out-packet-mss: " self out-packet-mss @ .
@@ -333,6 +346,8 @@ begin-module net
     
   end-implement
 
+  false constant debug? \ DEBUG
+  
   \ The incoming packet record
   <object> begin-class <in-packets>
 
@@ -3302,50 +3317,44 @@ begin-module net
       then
     ; define send-ipv4-udp-packet
 
-    true constant debug? \ DEBUG
-    
     \ Enqueue a ready receiving IP endpoint
-    :noname ( endpoint self -- ) { self }
+    :noname { endpoint self -- }
 
       [ debug? ] [if]
         [: cr ." +++ Pre-enqueue" ;] usb::with-usb-output
       [then]
       
-      self [: { endpoint self }
-        
-        endpoint self [: { W^ endpoint self }
-          endpoint @ endpoint-pending? not if
-            endpoint @ mark-endpoint-pending
-
-            [ debug? ] [if]
-              [: cr ." +++ Enqueuing endpoint" ;] usb::with-usb-output
-            [then]
+      endpoint self [: { W^ endpoint self }
+        endpoint @ endpoint-pending? not if
+          endpoint @ mark-endpoint-pending
+          
+          [ debug? ] [if]
+            [: cr ." +++ Enqueuing endpoint" ;] usb::with-usb-output
+          [then]
+          
+          endpoint cell self endpoint-chan send-chan
+          true
             
-            endpoint cell self endpoint-chan send-chan
-            true
-            
-            [ debug? ] [if]
-              [: cr ." +++ Done enqueuing endpoint" ;] usb::with-usb-output
-            [then]
-
-          else
-
-            [ debug? ] [if]
-              [: cr ." +++ Signaling endpoint" ;] usb::with-usb-output
-            [then]
-
-            endpoint @ signal-endpoint-event
-            false
-
-            [ debug? ] [if]
-              [: cr ." +++ Done signaling endpoint" ;] usb::with-usb-output
-            [then]
-
-          then
-          endpoint @ wake-endpoint
-        ;] endpoint with-endpoint
-
-      ;] self endpoint-chan-lock with-lock
+          [ debug? ] [if]
+            [: cr ." +++ Done enqueuing endpoint" ;] usb::with-usb-output
+          [then]
+          
+        else
+          
+          [ debug? ] [if]
+            [: cr ." +++ Signaling endpoint" ;] usb::with-usb-output
+          [then]
+          
+          endpoint @ signal-endpoint-event
+          false
+          
+          [ debug? ] [if]
+            [: cr ." +++ Done signaling endpoint" ;] usb::with-usb-output
+          [then]
+          
+        then
+        endpoint @ wake-endpoint
+      ;] endpoint with-endpoint
 
       if self endpoint-chan-sema give then
       
@@ -3356,53 +3365,46 @@ begin-module net
     ; define put-ready-endpoint
 
     \ Dequeue a ready receiving IP endpoint
-    :noname ( self -- endpoint )
+    :noname { self -- endpoint }
 
       [ debug? ] [if]
         [: cr ." +++ Pre-dequeue" ;] usb::with-usb-output
       [then]
 
-      dup endpoint-chan-sema take
+      self endpoint-chan-sema take
       
-      [: { self }
-        0 { W^ endpoint }
+      0 { W^ endpoint }
+        
+      [ debug? ] [if]
+        [: cr ." +++ Dequeuing endpoint" ;] usb::with-usb-output
+      [then]
+      
+      endpoint cell self endpoint-chan recv-chan drop
+      
+      [ debug? ] [if]
+        [: cr ." +++ Done dequeuing endpoint" ;] usb::with-usb-output
+      [then]
+      
+      endpoint @ [: { endpoint }
         
         [ debug? ] [if]
-          [: cr ." +++ Dequeuing endpoint" ;] usb::with-usb-output
+          [: cr ." +++ Inside lock" ;] usb::with-usb-output
         [then]
         
-        endpoint cell self endpoint-chan recv-chan drop
+        endpoint clear-endpoint-event
         
         [ debug? ] [if]
-          [: cr ." +++ Done dequeuing endpoint" ;] usb::with-usb-output
+          [: cr ." +++ Cleared endpoint event" ;] usb::with-usb-output
         [then]
-        
-        endpoint @ [: { endpoint }
           
-          [ debug? ] [if]
-            [: cr ." +++ Inside lock" ;] usb::with-usb-output
-          [then]
-          
-          endpoint clear-endpoint-event
-          
-          [ debug? ] [if]
-            [: cr ." +++ Cleared endpoint event" ;] usb::with-usb-output
-          [then]
-          
-          endpoint promote-rx-data
-          
-          [ debug? ] [if]
-            [: cr ." +++ Promoted RX data" ;] usb::with-usb-output
-          [then]
-          
-        ;] endpoint @ with-endpoint
-        endpoint @
+        endpoint promote-rx-data
         
         [ debug? ] [if]
-          [: cr ." +++ Really done dequeuing endpoint" ;] usb::with-usb-output
+          [: cr ." +++ Promoted RX data" ;] usb::with-usb-output
         [then]
-
-      ;] over endpoint-chan-lock with-lock
+        
+      ;] endpoint @ with-endpoint
+      endpoint @
 
       [ debug? ] [if]
         [: cr ." +++ Post-dequeue" ;] usb::with-usb-output
@@ -3426,64 +3428,52 @@ begin-module net
         [: cr ." +++ Pre-done" ;] usb::with-usb-output
       [then]
       
-      endpoint self [:
+      endpoint self [: { W^ endpoint self }
 
         [ debug? ] [if]
-          [: cr ." +++ Inside chan lock for done" ;] usb::with-usb-output
+          [: cr ." +++ Inside endpoint lock for done" ;] usb::with-usb-output
         [then]
-        
-        [: { W^ endpoint self }
 
-          [ debug? ] [if]
-            [: cr ." +++ Inside endpoint lock for done" ;] usb::with-usb-output
-          [then]
-
-          endpoint @ retire-rx-data
-
-          [ debug? ] [if]
-            [: cr ." +++ Retired RX data for done" ;] usb::with-usb-output
-          [then]
-
-          endpoint @ endpoint-has-event? if
-
-            [ debug? ] [if]
-              [: cr ." +++ Re-readying endpoint" ;] usb::with-usb-output
-            [then]
-
-            endpoint @ clear-endpoint-event
-
-            [ debug? ] [if]
-              [: cr ." +++ Cleared endpoint event for re-ready" ;] usb::with-usb-output
-            [then]
-
-            endpoint cell self endpoint-chan send-chan
-            true
-            
-            [ debug? ] [if]
-              [: cr ." +++ Re-readied endpoint " ;] usb::with-usb-output
-            [then]
-            
-          else
-
-            endpoint @ clear-endpoint-pending
-            false
-
-            [ debug? ] [if]
-              [: cr ." +++ Cleared endpoint event for non-re-ready" ;] usb::with-usb-output
-            [then]
-
-          then
-
-        ;] 2 pick with-endpoint
+        endpoint @ retire-rx-data
 
         [ debug? ] [if]
-          [: cr ." +++ Past endpoint lock for done" ;] usb::with-usb-output
+          [: cr ." +++ Retired RX data for done" ;] usb::with-usb-output
         [then]
 
-      ;] self endpoint-chan-lock with-lock
+        endpoint @ endpoint-has-event? if
 
+          [ debug? ] [if]
+            [: cr ." +++ Re-readying endpoint" ;] usb::with-usb-output
+          [then]
+
+          endpoint @ clear-endpoint-event
+
+          [ debug? ] [if]
+            [: cr ." +++ Cleared endpoint event for re-ready" ;] usb::with-usb-output
+          [then]
+
+          endpoint cell self endpoint-chan send-chan
+          true
+          
+          [ debug? ] [if]
+            [: cr ." +++ Re-readied endpoint " ;] usb::with-usb-output
+          [then]
+          
+        else
+
+          endpoint @ clear-endpoint-pending
+          false
+
+          [ debug? ] [if]
+            [: cr ." +++ Cleared endpoint event for non-re-ready" ;] usb::with-usb-output
+          [then]
+
+        then
+
+      ;] endpoint with-endpoint
+      
       [ debug? ] [if]
-        [: cr ." +++ Past chan lock for done" ;] usb::with-usb-output
+        [: cr ." +++ Past endpoint lock for done" ;] usb::with-usb-output
       [then]
 
       if self endpoint-chan-sema give then
@@ -3493,8 +3483,6 @@ begin-module net
       [then]
 
     ; define endpoint-done
-    
-    false constant debug? \ DEBUG
     
     \ Get a UDP endpoint to listen on
     :noname ( port self -- endpoint success? )
@@ -3612,6 +3600,12 @@ begin-module net
           id endpoint endpoint-id@ = and if
             addr bytes endpoint start-endpoint-send true
           else
+
+            [ debug? ] [if]
+              endpoint endpoint-tcp-state@
+              [: cr ." *** TCP STATE: " . ;] usb::with-usb-output
+            [then]
+            
             false
           then
         ;] over with-endpoint if
@@ -3643,6 +3637,12 @@ begin-module net
                   endpoint clear-endpoint-send false
                 then
               else
+                
+                [ debug? ] [if]
+                  endpoint endpoint-tcp-state@
+                  [: cr ." *** TCP STATE: " . ;] usb::with-usb-output
+                [then]
+
                 endpoint clear-endpoint-send false 
               then
             ;] endpoint with-endpoint
