@@ -30,7 +30,6 @@ begin-module wifi-server-test
   endpoint-process import
   sema import
   lock import
-  core-lock import
   stream import
   
   23 constant pwr-pin
@@ -52,12 +51,6 @@ begin-module wifi-server-test
   \ Port to set server at
   6667 constant server-port
   
-  \ Server lock
-  lock-size buffer: server-lock
-  
-  \ Server core lock
-  core-lock-size buffer: server-core-lock
-  
   \ Server active
   variable server-active?
 
@@ -73,23 +66,17 @@ begin-module wifi-server-test
   \ Rx stream
   rx-buffer-size stream-size aligned-buffer: rx-stream
   
-  \ Tx buffer write indices
-  2variable tx-write-index
-  
   \ Constant for number of bytes to buffer
   2048 constant tx-buffer-size
   
   \ Tx buffer
-  tx-buffer-size 2 * buffer: tx-buffers
-  
-  \ Current tx buffer
-  variable current-tx-buffer
+  tx-buffer-size stream-size aligned-buffer: tx-stream
+
+  \ Outgoing tx buffer
+  tx-buffer-size buffer: outgoing-tx-buffer
   
   \ Tx timeout
-  1000 constant tx-timeout
-  
-  \ Tx timeout start
-  variable tx-timeout-start
+  500 constant tx-timeout
   
   \ Tx semaphore
   sema-size aligned-buffer: tx-sema
@@ -101,43 +88,24 @@ begin-module wifi-server-test
   variable my-endpoint
   
   \ DEBUG
-  500 to init-timeout
-  500 to established-init-refresh-timeout
+  1000 to init-timeout
+  1000 to established-init-refresh-timeout
+  1000 to send-check-interval
 
-  \ Get whether the tx buffer is full
-  : tx-full? ( -- f )
-    tx-write-index current-tx-buffer @ cells + @ tx-buffer-size >=
-  ;
-
-  \ Write a byte to the tx buffer
-  : write-tx ( c -- )
-    current-tx-buffer @ { index }
-    tx-write-index index cells + { offset-var }
-    tx-buffers index tx-buffer-size * + offset-var @ + c!
-    1 offset-var +!
-  ;
-  
   \ Do server transmission and receiving
   : do-server ( -- )
     begin
-      tx-timeout systick::systick-counter tx-timeout-start @ - - 0 max { my-timeout }
-      my-timeout task::timeout !
+      tx-timeout task::timeout !
       tx-sema ['] take try
       dup ['] task::x-timed-out = if 2drop 0 then
       task::no-timeout task::timeout !
       ?raise
       server-active? @ 0<> my-endpoint @ 0<> and if
-        [:
-          [:
-            current-tx-buffer @ dup { old-tx-buffer } 1+ 2 umod current-tx-buffer !
-            tx-buffers old-tx-buffer tx-buffer-size * +
-            tx-write-index old-tx-buffer cells + @
-            0 tx-write-index old-tx-buffer cells + !
-          ;] critical
-        ;] server-core-lock with-core-lock
-        my-endpoint @ my-interface send-tcp-endpoint
+        outgoing-tx-buffer tx-buffer-size tx-stream recv-stream-no-block { len }
+        len [: cr ." *** SEND LENGTH: " . ." *** " ;] usb::with-usb-output
+        outgoing-tx-buffer len my-endpoint @ my-interface send-tcp-endpoint
+        [: cr ." *** SENT DATA *** " ;] usb::with-usb-output
       then
-      systick::systick-counter tx-timeout-start !
       tx-block-sema broadcast
       tx-block-sema give
     again
@@ -145,38 +113,31 @@ begin-module wifi-server-test
   
   \ Actually handle received data
   : do-rx-data ( c-addr bytes -- )
+    2dup [: cr ." DATA: " over + dump ;] usb::with-usb-output
     rx-stream send-stream-partial-no-block drop
+    [: cr ." PROCESSED DATA" ;] usb::with-usb-output
   ;
   
   \ EMIT for telnet
-  : telnet-emit ( c -- )
+  : telnet-emit { W^ c -- }
     server-active? @ if
       begin
-        [:
-          [:
-            tx-full? not if
-              write-tx
-              true
-            else
-              false
-            then
-          ;] critical
-        ;] server-core-lock with-core-lock
-        dup not if
+        tx-stream stream-full? not if
+          c 1 tx-stream send-stream
+          true
+        else
           tx-sema give
           tx-block-sema take
-          tx-block-sema take
+          false
         then
       until
-    else
-      drop
     then
   ;
 
   \ EMIT? for telnet
   : telnet-emit? ( -- emit? )
     server-active? @ if
-      [: [: tx-full? not ;] critical ;] server-core-lock with-core-lock
+      tx-stream stream-full? not
     else
       false
     then
@@ -185,8 +146,9 @@ begin-module wifi-server-test
   \ KEY for telnet
   : telnet-key ( -- c )
     0 { W^ buffer }
-    buffer 1 1 rx-stream recv-stream-min drop
+    buffer 1 rx-stream recv-stream drop
     buffer c@
+    dup [: ." ===" h.2 ." === " ;] usb::with-usb-output
   ;
 
   \ KEY? for telnet
@@ -209,8 +171,11 @@ begin-module wifi-server-test
       endpoint endpoint-tcp-state@ TCP_ESTABLISHED = if
         true server-active? !
         endpoint endpoint-rx-data@ do-rx-data
+      else
+        endpoint endpoint-tcp-state@ [: cr ." *** STATE " . ." *** " ;] usb::with-usb-output
       then
       endpoint my-interface endpoint-done
+      [: cr ." *** ENDPOINT DONE ***" cr ;] usb::with-usb-output
       endpoint endpoint-tcp-state@ TCP_CLOSE_WAIT = if
         [: cr ." *** CLOSING ***" ;] usb::with-usb-output
         false server-active? !
@@ -234,15 +199,10 @@ begin-module wifi-server-test
 
   \ Initialize the test
   : init-test ( -- )
-    server-lock init-lock
-    server-core-lock init-core-lock
-    0 current-tx-buffer !
-    0 tx-write-index 0 cells + !
-    0 tx-write-index 1 cells + !
-    systick::systick-counter tx-timeout-start !
     false server-active? !
     0 my-endpoint !
     rx-buffer-size rx-stream init-stream
+    tx-buffer-size tx-stream init-stream
     no-sema-limit 0 tx-sema init-sema
     no-sema-limit 0 tx-block-sema init-sema
     cyw43-clm::data cyw43-clm::size cyw43-fw::data cyw43-fw::size
@@ -260,7 +220,7 @@ begin-module wifi-server-test
     my-interface <endpoint-process> my-endpoint-process init-object
     <tcp-session-handler> my-tcp-session-handler init-object
     my-tcp-session-handler my-endpoint-process add-endpoint-handler
-    0 ['] do-server 512 128 1024 1 task::spawn-on-core server-task !
+    0 ['] do-server 512 128 1024 0 task::spawn-on-core server-task !
     server-task @ task::run
   ;
 

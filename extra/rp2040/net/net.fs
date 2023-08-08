@@ -3590,9 +3590,9 @@ begin-module net
     ; define send-fin-reply
 
     \ Send data on a TCP endpoint
-    :noname ( addr bytes endpoint self -- )
-      2 pick 0= if 2drop 2drop exit then
-      [: { addr bytes endpoint self }
+    :noname ( addr bytes endpoint self -- ) [char] A echo
+      2 pick 0= if 2drop 2drop [char] B echo exit then
+      [: { addr bytes endpoint self } [char] C echo
         endpoint endpoint-id@ { id }
         id addr bytes endpoint [: { id addr bytes endpoint }
           endpoint endpoint-tcp-state@
@@ -3608,13 +3608,13 @@ begin-module net
             
             false
           then
-        ;] over with-endpoint if
+        ;] over with-endpoint [char] D echo if [char] E echo
           endpoint start-endpoint-timeout
-          begin
-            id endpoint self [: { id endpoint self }
+          begin [char] F echo
+            id endpoint self [: { id endpoint self } [char] G echo
               endpoint endpoint-tcp-state@
               dup TCP_ESTABLISHED = swap TCP_CLOSE_WAIT = or
-              id endpoint endpoint-id@ = and if
+              id endpoint endpoint-id@ = and if [char] H echo
                 endpoint endpoint-send-done? not if
                   endpoint endpoint-send-outstanding? if
                     systick::systick-counter endpoint endpoint-timeout-start@ -
@@ -3624,19 +3624,19 @@ begin-module net
                     then
                   else
                     endpoint start-endpoint-timeout
-                  then
-                  endpoint endpoint-send-ready? if
+                  then [char] I echo
+                  endpoint endpoint-send-ready? if [char] J echo
                     endpoint get-endpoint-send-packet
                     endpoint endpoint-send-last?
                     endpoint self send-data-ack
-                    endpoint endpoint-send-ready? not true
+                    endpoint endpoint-send-ready? not true [char] K echo
                   else
-                    true true
+                    true true [char] L echo
                   then
-                else
+                else [char] M echo
                   endpoint clear-endpoint-send false
                 then
-              else
+              else [char] N echo
                 
                 [ debug? ] [if]
                   endpoint endpoint-tcp-state@
@@ -3645,9 +3645,9 @@ begin-module net
 
                 endpoint clear-endpoint-send false 
               then
-            ;] endpoint with-endpoint
-          while
-            if
+            ;] endpoint with-endpoint [char] O echo
+          while [char] P echo
+            if [char] Q echo
               task::timeout @ { old-timeout }
               endpoint endpoint-timeout@
               systick::systick-counter endpoint endpoint-timeout-start@ - -
@@ -3655,11 +3655,11 @@ begin-module net
               endpoint ['] wait-endpoint try
               dup ['] task::x-timed-out = if 2drop 0 then
               old-timeout task::timeout !
-              ?raise
+              ?raise [char] R echo
             then
-          repeat
-        then
-      ;] 2 pick with-ctrl-endpoint
+          repeat [char] S echo
+        then [char] T echo
+      ;] 2 pick with-ctrl-endpoint [char] U echo
     ; define send-tcp-endpoint
 
     \ Send a data ACK packet
