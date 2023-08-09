@@ -210,6 +210,8 @@ begin-module cyw43-runner
       cyw43-mac-addr 2!
     ; define mac-addr!
 
+    true constant debug? \ DEBUG
+
     \ Put a received frame
     :noname ( addr bytes self -- ) { self }
       [ debug? ] [if] [: cr ." ### BEGIN put-rx-frame" ;] usb::with-usb-output [then]
@@ -332,6 +334,8 @@ begin-module cyw43-runner
       ;] self cyw43-tx-lock with-lock
     ; define poll-tx-frame
 
+    false constant debug? \ DEBUG
+    
   end-implement
 
   \ CYW43 runner class

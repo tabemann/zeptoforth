@@ -346,7 +346,7 @@ begin-module net
     
   end-implement
 
-  false constant debug? \ DEBUG
+  true constant debug? \ DEBUG
   
   \ The incoming packet record
   <object> begin-class <in-packets>
@@ -469,7 +469,10 @@ begin-module net
       seq self first-in-packet-seq !
       seq self in-packet-last-ack-sent !
       seq self current-in-packet-ack !
-      [ debug? ] [if] cr ." @@@ reset-in-tcp-packets: " self in-packets. [then]
+      [ debug? ] [if]
+        self [: cr ." @@@ reset-in-tcp-packets: " in-packets. ;]
+        usb::with-usb-output
+      [then]
     ; define reset-in-tcp-packets
 
     \ Reset the incoming UDP packet record
@@ -484,7 +487,10 @@ begin-module net
       0 self first-in-packet-seq !
       0 self in-packet-last-ack-sent !
       0 self current-in-packet-ack !
-      [ debug? ] [if] cr ." @@@ reset-in-udp-packets: " self in-packets. [then]
+      [ debug? ] [if]
+        self [: cr ." @@@ reset-in-udp-packets: " in-packets. ;]
+        usb::with-usb-output
+      [then]
     ; define reset-in-udp-packets
 
     \ Get TCP window
@@ -494,17 +500,28 @@ begin-module net
       else
         0
       then
-      [ debug? ] [if] cr ." @@@ in-packets-window@: " self in-packets. [then]
+      [ debug? ] [if]
+        self [: cr ." @@@ in-packets-window@: " in-packets. ;]
+        usb::with-usb-output
+      [then]
     ; define in-packets-window@
 
     \ Get whether there are waiting in packets
     :noname ( self -- waiting? )
       pushed-in-packet-offset @ 0>
+      [ debug? ] [if]
+        dup [: cr ." @@@ waiting-in-packets?: " . ;]
+        usb::with-usb-output
+      [then]
     ; define waiting-in-packets?
 
     \ Get the amount of waiting data for an endpoint
     :noname ( self -- bytes )
       pushed-in-packet-offset @
+      [ debug? ] [if]
+        dup [: cr ." @@@ waiting-in-bytes@: " . ;]
+        usb::with-usb-output
+      [then]
     ; define waiting-in-bytes@
 
     \ Push data
@@ -530,6 +547,10 @@ begin-module net
       self in-packet-sizes count 1 lshift + self in-packet-sizes
       total-count count - 1 lshift move
       count negate self in-packet-count +!
+      [ debug? ] [if]
+        self [: cr ." @@@ push-packets: " in-packets. ;]
+        usb::with-usb-output
+      [then]
     ; define push-packets
 
     \ Join complete packets
@@ -718,7 +739,10 @@ begin-module net
         max-bytes max to max-bytes
       loop
       max-bytes self pushed-in-packet-offset @ + self in-packet-offset !
-      [ debug? ] [if] cr ." @@@ insert-tcp-packet: " self in-packets. [then]
+      [ debug? ] [if]
+        self [: cr ." @@@ insert-tcp-packet: " in-packets. ;]
+        usb::with-usb-output
+      [then]
     ; define insert-tcp-packet
     
     \ Add incoming UDP packet
@@ -730,22 +754,35 @@ begin-module net
         bytes self in-packet-sizes self in-packet-count @ 1 lshift + h!
         1 self in-packet-count +!
       then
-      [ debug? ] [if] cr ." @@@ add-in-udp-packet: " self in-packets. [then]
+      [ debug? ] [if]
+        self [: cr ." @@@ add-in-udp-packet: " in-packets. ;]
+        usb::with-usb-output
+      [then]
     ; define add-in-udp-packet
     
     \ Get whether to send an ACK packet
     :noname ( self -- send? )
       dup in-packet-last-ack-sent @ swap current-in-packet-ack @ <>
+      [ debug? ] [if]
+        dup [: cr ." @@@ in-packet-send-ack: " . ;]
+        usb::with-usb-output
+      [then]
     ; define in-packet-send-ack?
 
     \ Mark an ACK as having been sent
     :noname ( self -- )
       dup current-in-packet-ack @ swap in-packet-last-ack-sent !
+      [ debug? ] [if]
+        [: cr ." @@@ in-packet-ack-sent" ;] usb::with-usb-output
+      [then]
     ; define in-packet-ack-sent
 
     \ Get the packet to ACK
     :noname ( self -- ack )
       current-in-packet-ack @
+      [ debug? ] [if]
+        dup [: ." @@@ in-packet-ack@: " . ;] usb::with-usb-output
+      [then]
     ; define in-packet-ack@
 
     \ Promote incoming data to pending
@@ -773,7 +810,10 @@ begin-module net
         usb::with-usb-output
       [then]
 
-      [ debug? ] [if] cr ." @@@ promote-in-packets: " self in-packets. [then]
+      [ debug? ] [if]
+        self [: cr ." @@@ promote-in-packets: " in-packets. ;]
+        usb::with-usb-output
+      [then]
     ; define promote-in-packets
 
     \ Get the complete packet size and count
@@ -806,13 +846,20 @@ begin-module net
         then
       then
       current-bytes count
-      [ debug? ] [if] cr ." @@@ complete-in-packets: " 2dup . . self in-packets. [then]
+      [ debug? ] [if]
+        2dup self -rot [: cr ." @@@ complete-in-packets: " . . in-packets. ;]
+        usb::with-usb-output
+      [then]
     ; define complete-in-packets
 
     \ Get whether there are missing packets
     :noname { self -- missing-packets? }
       self in-packet-offset @ self pushed-in-packet-offset @ -
       self complete-in-packets drop <>
+      [ debug? ] [if]
+        dup [: cr ." @@@ missing-in-packets?: " . ;]
+        usb::with-usb-output
+      [then]
     ; define missing-in-packets?
     
     \ Clear pending packets
@@ -833,7 +880,10 @@ begin-module net
         usb::with-usb-output
       [then]
       
-      [ debug? ] [if] cr ." @@@ clear-in-packets: " self in-packets. [then]
+      [ debug? ] [if]
+        self [: cr ." @@@ clear-in-packets: " in-packets. ;]
+        usb::with-usb-output
+      [then]
     ; define clear-in-packets
     
     \ Print in packets
@@ -861,6 +911,8 @@ begin-module net
 
   end-implement
 
+  false constant debug? \ DEBUG
+  
   \ The DNS address cache
   <object> begin-class <dns-cache>
     
@@ -1529,14 +1581,7 @@ begin-module net
 
     \ Claim control of an endpoint
     :noname ( xt self -- )
-      [: { xt self }
-        self [: endpoint-in-use swap endpoint-state bis! ;]
-        self endpoint-lock with-lock
-        xt try
-        self [: endpoint-in-use swap endpoint-state bic! ;]
-        self endpoint-lock with-lock
-        ?raise
-      ;] over endpoint-ctrl-lock with-lock
+      endpoint-ctrl-lock with-lock
     ; define with-ctrl-endpoint
 
     \ Lock an endpoint
@@ -1871,14 +1916,14 @@ begin-module net
     :noname ( self -- refresh? )
       [: { self }
         self endpoint-tcp-state@ { state }
-        state TCP_ESTABLISHED = if
-          self endpoint-in-packets in-packet-send-ack? if
-            true
-          else
-            systick::systick-counter self endpoint-last-refresh @ -
-            self next-endpoint-refresh-timeout@ >=
-          then
-        else
+        \ state TCP_ESTABLISHED = if
+        \   self endpoint-in-packets in-packet-send-ack? if
+        \     true
+        \   else
+        \     systick::systick-counter self endpoint-last-refresh @ -
+        \     self next-endpoint-refresh-timeout@ >=
+        \   then
+        \ else
           state case
             TCP_ESTABLISHED of true endof
             TCP_CLOSE_WAIT of true endof
@@ -1893,7 +1938,7 @@ begin-module net
           else
             false
           then
-        then
+        \ then
       ;] over endpoint-lock with-lock
     ; define endpoint-refresh-ready?
 
@@ -1920,24 +1965,24 @@ begin-module net
       [: { self }
         self endpoint-tcp-state@ case
           TCP_ESTABLISHED of
-            self missing-endpoint-packets? not if
-              self reset-endpoint-refresh
-              established-no-missing-refresh-timeout
-            else
+            \ self missing-endpoint-packets? not if
+            \   self reset-endpoint-refresh
+            \   established-no-missing-refresh-timeout
+            \ else
               established-init-refresh-timeout s>f
               established-refresh-timeout-multiplier s>f
               self endpoint-refreshes @ fi** f* f>s
-            then
+            \ then
           endof
           TCP_CLOSE_WAIT of
-            self missing-endpoint-packets? not if
-              self reset-endpoint-refresh
-              established-no-missing-refresh-timeout
-            else
+            \ self missing-endpoint-packets? not if
+            \   self reset-endpoint-refresh
+            \   established-no-missing-refresh-timeout
+            \ else
               established-init-refresh-timeout s>f
               established-refresh-timeout-multiplier s>f
               self endpoint-refreshes @ fi** f* f>s
-            then
+            \ then
           endof
           TCP_SYN_SENT of
             syn-sent-init-refresh-timeout s>f
@@ -1969,20 +2014,20 @@ begin-module net
       [: { self }
         self endpoint-tcp-state@ case
           TCP_ESTABLISHED of
-            self missing-endpoint-packets? not if
-              self reset-endpoint-refresh
-            else
+            \ self missing-endpoint-packets? not if
+            \   self reset-endpoint-refresh
+            \ else
               self endpoint-refreshes @ 1+ established-max-refreshes min
               self endpoint-refreshes !
-            then
+            \ then
           endof
           TCP_CLOSE_WAIT of
-            self missing-endpoint-packets? not if
-              self reset-endpoint-refresh
-            else
+            \ self missing-endpoint-packets? not if
+            \   self reset-endpoint-refresh
+            \ else
               self endpoint-refreshes @ 1+ established-max-refreshes min
               self endpoint-refreshes !
-            then
+            \ then
           endof
           TCP_SYN_SENT of
             self endpoint-refreshes @ 1+ syn-sent-max-refreshes min
