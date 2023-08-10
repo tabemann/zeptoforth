@@ -535,7 +535,7 @@ begin-module net
         diff seq first-seq - <= if
           self pushed-in-packet-offset @ { pushed-offset }
           self in-packet-addr @ pushed-offset + dup diff + swap
-          self in-packet-offset @ pushed-offset - diff -
+          self in-packet-offset @ pushed-offset - diff - move
           current-seq self first-in-packet-seq !
           current-size self pushed-in-packet-offset +!
           diff negate self in-packet-offset +!
