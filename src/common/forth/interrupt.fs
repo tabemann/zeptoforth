@@ -131,7 +131,7 @@ begin-module interrupt
 
   \ Get NVIC interrupt set-enable
   : NVIC_ISER_SETENA@ ( u -- bit )
-    dup 32 / cells NVIC_ISER_Base + @ swap 32 mod 1 swap lshift swap bit@
+    dup 32 / cells NVIC_ISER_Base + swap 32 mod 1 swap lshift swap bit@
   ;
 
   \ Set NVIC interrupt clear-enable
@@ -141,7 +141,7 @@ begin-module interrupt
 
   \ Get NVIC interrupt clear-enable
   : NVIC_ICER_CLRENA@ ( u -- bit )
-    dup 32 / cells NVIC_ICER_Base + @ swap 32 mod 1 swap lshift swap bit@
+    dup 32 / cells NVIC_ICER_Base + swap 32 mod 1 swap lshift swap bit@
   ;
 
   \ Set NVIC interrupt set-pending
@@ -151,7 +151,7 @@ begin-module interrupt
 
   \ Get NVIC interrupt set-pending
   : NVIC_ISPR_SETPEND@ ( u -- bit )
-    dup 32 / cells NVIC_ISPR_Base + @ swap 32 mod 1 swap lshift swap bit@
+    dup 32 / cells NVIC_ISPR_Base + swap 32 mod 1 swap lshift swap bit@
   ;
 
   \ Set NVIC interrupt clear-pending
@@ -161,7 +161,7 @@ begin-module interrupt
 
   \ Get NVIC interrupt clear-pending
   : NVIC_ICPR_CLRPEND@ ( u -- bit )
-    dup 32 / cells NVIC_ICPR_Base + @ swap 32 mod 1 swap lshift swap bit@
+    dup 32 / cells NVIC_ICPR_Base + swap 32 mod 1 swap lshift swap bit@
   ;
 
   \ Clear all pending interrupts
@@ -171,7 +171,7 @@ begin-module interrupt
 
   \ Get NVIC interrupt active bit
   : NVIC_IABR_ACTIVE@ ( u -- bit )
-    dup 32 / cells NVIC_IABR_Base + @ swap 32 mod 1 swap lshift swap bit@
+    dup 32 / cells NVIC_IABR_Base + swap 32 mod 1 swap lshift swap bit@
   ;
 
   \ Set NVIC interrupt priority register field
