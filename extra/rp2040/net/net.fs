@@ -1310,12 +1310,18 @@ begin-module net
     \ Is an endpoint pending
     method endpoint-pending? ( self -- pending? )
 
+    \ Is an endpoint enqueued
+    method endpoint-enqueued? ( self -- enqueued? )
+
     \ Mark endpoint as pending
     method mark-endpoint-pending ( self -- )
 
     \ Clear endpoint pending status
     method clear-endpoint-pending ( self -- )
 
+    \ Clear endpoint enqueued status
+    method clear-endpoint-enqueued ( self -- )
+    
     \ Claim control of an endpoint
     method with-ctrl-endpoint ( xt self -- )
 
@@ -1567,9 +1573,17 @@ begin-module net
       endpoint-pending swap endpoint-state bit@
     ; define endpoint-pending?
 
+    \ Is an endpoint enqueued
+    :noname ( self -- enqueued? )
+      endpoint-enqueued swap endpoint-state bit@
+    ; define endpoint-enqueued?
+    
     \ Mark endpoint as pending
     :noname ( self -- )
-      [: endpoint-pending swap endpoint-state bis! ;]
+      [:
+        [ endpoint-pending endpoint-enqueued or ] literal
+        swap endpoint-state bis!
+      ;]
       over endpoint-lock with-lock
     ; define mark-endpoint-pending
 
@@ -1579,6 +1593,12 @@ begin-module net
       over endpoint-lock with-lock
     ; define clear-endpoint-pending
 
+    \ Clear endpoint enqueued status
+    :noname ( self -- )
+      [: endpoint-enqueued swap endpoint-state bic! ;]
+      over endpoint-lock with-lock
+    ; define clear-endpoint-enqueued
+    
     \ Claim control of an endpoint
     :noname ( xt self -- )
       endpoint-ctrl-lock with-lock
@@ -2218,14 +2238,14 @@ begin-module net
     \ The outgoing frame buffer
     mtu-size cell align member outgoing-buf
 
-    \ Endpoint queue
-    cell max-endpoints chan-size member endpoint-chan
-
     \ Endpoint queue lock
-    lock-size member endpoint-chan-lock
+    lock-size member endpoint-queue-lock
 
     \ Endpoint queue semaphore
-    sema-size member endpoint-chan-sema
+    sema-size member endpoint-queue-sema
+
+    \ Endpoint queue index
+    cell member endpoint-queue-index
     
     \ Get the IPv4 address
     method intf-ipv4-addr@ ( self -- addr )
@@ -2493,9 +2513,9 @@ begin-module net
       max-endpoints 0 ?do
         <endpoint> self intf-endpoints <endpoint> class-size i * + init-object
       loop
-      cell max-endpoints self endpoint-chan init-chan
-      self endpoint-chan-lock init-lock
-      max-endpoints 0 self endpoint-chan-sema init-sema
+      self endpoint-queue-lock init-lock
+      no-sema-limit 0 self endpoint-queue-sema init-sema
+      0 self endpoint-queue-index !
       <fragment-collect> self fragment-collect init-object
       <address-map> self address-map init-object
       <dns-cache> self dns-cache init-object
@@ -3362,49 +3382,31 @@ begin-module net
       then
     ; define send-ipv4-udp-packet
 
+    true constant debug? \ DEBUG
+    
     \ Enqueue a ready receiving IP endpoint
-    :noname { endpoint self -- }
+    :noname ( endpoint self -- ) { self }
 
       [ debug? ] [if]
-        [: cr ." +++ Pre-enqueue" ;] usb::with-usb-output
+        [: cr ." +++ Begin enqueue endpoint" ;] usb::with-usb-output
       [then]
       
-      endpoint self [: { W^ endpoint self }
-        endpoint @ endpoint-pending? not if
-          endpoint @ mark-endpoint-pending
-          
-          [ debug? ] [if]
-            [: cr ." +++ Enqueuing endpoint" ;] usb::with-usb-output
-          [then]
-          
-          endpoint cell self endpoint-chan send-chan
-          true
-            
-          [ debug? ] [if]
-            [: cr ." +++ Done enqueuing endpoint" ;] usb::with-usb-output
-          [then]
-          
-        else
-          
-          [ debug? ] [if]
-            [: cr ." +++ Signaling endpoint" ;] usb::with-usb-output
-          [then]
-          
-          endpoint @ signal-endpoint-event
-          false
-          
-          [ debug? ] [if]
-            [: cr ." +++ Done signaling endpoint" ;] usb::with-usb-output
-          [then]
-          
-        then
-        endpoint @ wake-endpoint
-      ;] endpoint with-endpoint
+      self [: { endpoint self }
+        endpoint [: { endpoint }
+          endpoint endpoint-enqueued? not if
+            endpoint mark-endpoint-pending
+            true
+          else
+            endpoint signal-endpoint-event
+            false
+          then
+        ;] endpoint with-endpoint
+        endpoint wake-endpoint
+      ;] self endpoint-queue-lock with-lock
+      if self endpoint-queue-sema give then
 
-      if self endpoint-chan-sema give then
-      
       [ debug? ] [if]
-        [: cr ." +++ Post-enqueue" ;] usb::with-usb-output
+        [: cr ." +++ End enqueue endpoint" ;] usb::with-usb-output
       [then]
 
     ; define put-ready-endpoint
@@ -3413,46 +3415,31 @@ begin-module net
     :noname { self -- endpoint }
 
       [ debug? ] [if]
-        [: cr ." +++ Pre-dequeue" ;] usb::with-usb-output
+        [: cr ." +++ Begin dequeue endpoint" ;] usb::with-usb-output
       [then]
 
-      self endpoint-chan-sema take
-      
-      0 { W^ endpoint }
-        
-      [ debug? ] [if]
-        [: cr ." +++ Dequeuing endpoint" ;] usb::with-usb-output
-      [then]
-      
-      endpoint cell self endpoint-chan recv-chan drop
-      
-      [ debug? ] [if]
-        [: cr ." +++ Done dequeuing endpoint" ;] usb::with-usb-output
-      [then]
-      
-      endpoint @ [: { endpoint }
-        
-        [ debug? ] [if]
-          [: cr ." +++ Inside lock" ;] usb::with-usb-output
-        [then]
-        
-        endpoint clear-endpoint-event
-        
-        [ debug? ] [if]
-          [: cr ." +++ Cleared endpoint event" ;] usb::with-usb-output
-        [then]
-          
-        endpoint promote-rx-data
-        
-        [ debug? ] [if]
-          [: cr ." +++ Promoted RX data" ;] usb::with-usb-output
-        [then]
-        
-      ;] endpoint @ with-endpoint
-      endpoint @
+      self endpoint-queue-sema take
+      self [: { self }
+        self endpoint-queue-index @ { index }
+        begin
+          self intf-endpoints <endpoint> class-size index * + { endpoint }
+          endpoint [: { endpoint }
+            endpoint endpoint-enqueued? if
+              endpoint clear-endpoint-enqueued
+              endpoint clear-endpoint-event
+              endpoint promote-rx-data
+              endpoint true
+            else
+              false
+            then
+          ;] endpoint with-endpoint
+          index 1+ max-endpoints umod to index
+        until
+        index self endpoint-queue-index !
+      ;] self endpoint-queue-lock with-lock
 
       [ debug? ] [if]
-        [: cr ." +++ Post-dequeue" ;] usb::with-usb-output
+        [: cr ." +++ End dequeue endpoint" ;] usb::with-usb-output
       [then]
 
     ; define get-ready-endpoint
@@ -3467,67 +3454,38 @@ begin-module net
     ; define allocate-endpoint
 
     \ Mark an endpoint as done
-    :noname { endpoint self -- }
+    :noname ( endpoint self -- ) { self }
 
       [ debug? ] [if]
-        [: cr ." +++ Pre-done" ;] usb::with-usb-output
-      [then]
-      
-      endpoint self [: { W^ endpoint self }
-
-        [ debug? ] [if]
-          [: cr ." +++ Inside endpoint lock for done" ;] usb::with-usb-output
-        [then]
-
-        endpoint @ retire-rx-data
-
-        [ debug? ] [if]
-          [: cr ." +++ Retired RX data for done" ;] usb::with-usb-output
-        [then]
-
-        endpoint @ endpoint-has-event? if
-
-          [ debug? ] [if]
-            [: cr ." +++ Re-readying endpoint" ;] usb::with-usb-output
-          [then]
-
-          endpoint @ clear-endpoint-event
-
-          [ debug? ] [if]
-            [: cr ." +++ Cleared endpoint event for re-ready" ;] usb::with-usb-output
-          [then]
-
-          endpoint cell self endpoint-chan send-chan
-          true
-          
-          [ debug? ] [if]
-            [: cr ." +++ Re-readied endpoint " ;] usb::with-usb-output
-          [then]
-          
-        else
-
-          endpoint @ clear-endpoint-pending
-          false
-
-          [ debug? ] [if]
-            [: cr ." +++ Cleared endpoint event for non-re-ready" ;] usb::with-usb-output
-          [then]
-
-        then
-
-      ;] endpoint with-endpoint
-      
-      [ debug? ] [if]
-        [: cr ." +++ Past endpoint lock for done" ;] usb::with-usb-output
+        [: cr ." +++ Begin endpoint done" ;] usb::with-usb-output
       [then]
 
-      if self endpoint-chan-sema give then
+      self [: { endpoint self }
+        endpoint [: { endpoint }
+          endpoint endpoint-pending? if
+            endpoint retire-rx-data
+            endpoint endpoint-has-event? if
+              endpoint clear-endpoint-event
+              endpoint mark-endpoint-pending
+              true
+            else
+              endpoint clear-endpoint-pending
+              false
+            then
+          else
+            false
+          then
+        ;] endpoint with-endpoint
+      ;] self endpoint-queue-lock with-lock
+      if self endpoint-queue-sema give then
 
       [ debug? ] [if]
-        [: cr ." +++ Post-done" ;] usb::with-usb-output
+        [: cr ." +++ End endpoint done" ;] usb::with-usb-output
       [then]
 
     ; define endpoint-done
+
+    false constant debug? \ DEBUG
     
     \ Get a UDP endpoint to listen on
     :noname ( port self -- endpoint success? )

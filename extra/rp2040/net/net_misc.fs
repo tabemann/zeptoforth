@@ -170,8 +170,9 @@ begin-module net-misc
   0 bit constant endpoint-active
   1 bit constant endpoint-in-use
   2 bit constant endpoint-pending
-  3 bit constant endpoint-udp
-  4 bit constant endpoint-tcp
+  3 bit constant endpoint-enqueued
+  4 bit constant endpoint-udp
+  5 bit constant endpoint-tcp
   24 constant endpoint-tcp-state-lsb
   $FF endpoint-tcp-state-lsb lshift constant endpoint-tcp-state-mask
 
