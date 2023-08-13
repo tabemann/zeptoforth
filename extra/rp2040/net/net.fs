@@ -122,7 +122,7 @@ begin-module net
     
   end-class
 
-  true constant debug? \ DEBUG
+  \ true constant debug? \ DEBUG
   
   \ Implement the outstanding packet record
   <out-packets> begin-implement
@@ -346,7 +346,7 @@ begin-module net
     
   end-implement
 
-  true constant debug? \ DEBUG
+  \ true constant debug? \ DEBUG
   
   \ The incoming packet record
   <object> begin-class <in-packets>
@@ -911,7 +911,7 @@ begin-module net
 
   end-implement
 
-  false constant debug? \ DEBUG
+  \ false constant debug? \ DEBUG
   
   \ The DNS address cache
   <object> begin-class <dns-cache>
@@ -1223,6 +1223,9 @@ begin-module net
     \ Is the endpoint state
     cell member endpoint-state
 
+    \ The endpoint queue state
+    cell member endpoint-queue-state
+
     \ The current endpoint ID
     cell member endpoint-id
     
@@ -1511,6 +1514,7 @@ begin-module net
     :noname { self -- }
       self <object>->new
       0 self endpoint-state !
+      0 self endpoint-queue-state !
       0 self endpoint-remote-ipv4-addr !
       0 self endpoint-remote-port !
       0 self endpoint-local-port !
@@ -1570,33 +1574,28 @@ begin-module net
 
     \ Is an endpoint pending
     :noname ( self -- pending? )
-      endpoint-pending swap endpoint-state bit@
+      endpoint-pending swap endpoint-queue-state bit@
     ; define endpoint-pending?
 
     \ Is an endpoint enqueued
     :noname ( self -- enqueued? )
-      endpoint-enqueued swap endpoint-state bit@
+      endpoint-enqueued swap endpoint-queue-state bit@
     ; define endpoint-enqueued?
     
     \ Mark endpoint as pending
     :noname ( self -- )
-      [:
-        [ endpoint-pending endpoint-enqueued or ] literal
-        swap endpoint-state bis!
-      ;]
-      over endpoint-lock with-lock
+      [ endpoint-pending endpoint-enqueued or ] literal
+      swap endpoint-queue-state bis!
     ; define mark-endpoint-pending
 
     \ Clear endpoint pending status
     :noname ( self -- )
-      [: endpoint-pending swap endpoint-state bic! ;]
-      over endpoint-lock with-lock
+      endpoint-pending swap endpoint-queue-state bic!
     ; define clear-endpoint-pending
 
     \ Clear endpoint enqueued status
     :noname ( self -- )
-      [: endpoint-enqueued swap endpoint-state bic! ;]
-      over endpoint-lock with-lock
+      endpoint-enqueued swap endpoint-queue-state bic!
     ; define clear-endpoint-enqueued
     
     \ Claim control of an endpoint
@@ -3392,18 +3391,16 @@ begin-module net
       [then]
       
       self [: { endpoint self }
-        endpoint [: { endpoint }
-          endpoint endpoint-enqueued? not if
-            endpoint mark-endpoint-pending
-            true
-          else
-            endpoint signal-endpoint-event
-            false
-          then
-        ;] endpoint with-endpoint
+        endpoint endpoint-enqueued? not if
+          endpoint mark-endpoint-pending
+          true
+        else
+          endpoint signal-endpoint-event
+          false
+        then
         endpoint wake-endpoint
       ;] self endpoint-queue-lock with-lock
-      if self endpoint-queue-sema give then
+      if self endpoint-queue-sema give pause then
 
       [ debug? ] [if]
         [: cr ." +++ End enqueue endpoint" ;] usb::with-usb-output
@@ -3419,25 +3416,26 @@ begin-module net
       [then]
 
       self endpoint-queue-sema take
-      self [: { self }
-        self endpoint-queue-index @ { index }
-        begin
-          self intf-endpoints <endpoint> class-size index * + { endpoint }
-          endpoint [: { endpoint }
-            endpoint endpoint-enqueued? if
-              endpoint clear-endpoint-enqueued
-              endpoint clear-endpoint-event
-              endpoint promote-rx-data
-              endpoint true
-            else
-              false
-            then
-          ;] endpoint with-endpoint
-          index 1+ max-endpoints umod to index
-        until
-        index self endpoint-queue-index !
-      ;] self endpoint-queue-lock with-lock
 
+      self endpoint-queue-index @ { init-index }
+      
+      begin
+        self [: { self }
+          self endpoint-queue-index @ { index }
+          self intf-endpoints <endpoint> class-size index * + { endpoint }
+          endpoint endpoint-enqueued? if
+            endpoint clear-endpoint-enqueued
+            endpoint clear-endpoint-event
+            endpoint true
+          else
+            false
+          then
+          index 1+ max-endpoints umod self endpoint-queue-index !
+        ;] self endpoint-queue-lock with-lock
+      until
+
+      dup promote-rx-data
+      
       [ debug? ] [if]
         [: cr ." +++ End dequeue endpoint" ;] usb::with-usb-output
       [then]
@@ -3454,30 +3452,31 @@ begin-module net
     ; define allocate-endpoint
 
     \ Mark an endpoint as done
-    :noname ( endpoint self -- ) { self }
+    :noname { endpoint self -- }
 
       [ debug? ] [if]
         [: cr ." +++ Begin endpoint done" ;] usb::with-usb-output
       [then]
 
-      self [: { endpoint self }
-        endpoint [: { endpoint }
-          endpoint endpoint-pending? if
-            endpoint retire-rx-data
-            endpoint endpoint-has-event? if
-              endpoint clear-endpoint-event
-              endpoint mark-endpoint-pending
-              true
-            else
-              endpoint clear-endpoint-pending
-              false
-            then
+      endpoint endpoint-pending? if
+        endpoint retire-rx-data
+      then
+      
+      endpoint self [: { endpoint self }
+        endpoint endpoint-pending? if
+          endpoint endpoint-has-event? if
+            endpoint clear-endpoint-event
+            endpoint mark-endpoint-pending
+            true
           else
+            endpoint clear-endpoint-pending
             false
           then
-        ;] endpoint with-endpoint
+        else
+          false
+        then
       ;] self endpoint-queue-lock with-lock
-      if self endpoint-queue-sema give then
+      if self endpoint-queue-sema give pause then
 
       [ debug? ] [if]
         [: cr ." +++ End endpoint done" ;] usb::with-usb-output

@@ -210,7 +210,7 @@ begin-module cyw43-runner
       cyw43-mac-addr 2!
     ; define mac-addr!
 
-    true constant debug? \ DEBUG
+    \ true constant debug? \ DEBUG
 
     \ Put a received frame
     :noname ( addr bytes self -- ) { self }
@@ -334,7 +334,7 @@ begin-module cyw43-runner
       ;] self cyw43-tx-lock with-lock
     ; define poll-tx-frame
 
-    false constant debug? \ DEBUG
+    \ false constant debug? \ DEBUG
     
   end-implement
 
@@ -935,11 +935,11 @@ begin-module cyw43-runner
     :noname { addr self -- }
       addr sdpcmh-channel-and-flags c@ $0F and 3 < if
         addr sdpcmh-bus-data-credit c@ { sdpcm-seq-max }
-\        sdpcm-seq-max self cyw43-sdpcm-seq c@ - $FF and $40 > if
-\          self cyw43-sdpcm-seq c@ 2 +
-\        else
+        sdpcm-seq-max self cyw43-sdpcm-seq c@ - $FF and $40 > if
+          self cyw43-sdpcm-seq c@ 2 +
+        else
           sdpcm-seq-max
-\        then
+        then
         self cyw43-sdpcm-seq-max c!
       then
     ; define update-cyw43-credit
@@ -947,7 +947,7 @@ begin-module cyw43-runner
     \ Do we have credit
     :noname { self -- credit? }
       self cyw43-sdpcm-seq c@ self cyw43-sdpcm-seq-max c@ <>
-\      self cyw43-sdpcm-seq-max c@ self cyw43-sdpcm-seq c@ - $80 and 0= and
+      self cyw43-sdpcm-seq-max c@ self cyw43-sdpcm-seq c@ - $80 and 0= and
     ; define cyw43-has-credit?
 
     \ Send an ioctl

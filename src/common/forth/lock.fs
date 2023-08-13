@@ -216,16 +216,16 @@ begin-module lock
           2dup swap lock-holder-task !
           swap update-hold-priority
           dup restore-priority
+          ready
         else
           0 swap lock-holder-task !
-          current-task restore-priority 0     
+          current-task restore-priority
         then
       else
-        -1 swap lock-nest-level +! 0
+        -1 swap lock-nest-level +!
       then
       s" END RELEASE LOCK" trace
     ;] over lock-slock with-slock
-    ?dup if ready then
   ;
 
   \ Update the priorities of tasks holding locks
