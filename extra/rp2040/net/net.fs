@@ -536,7 +536,7 @@ begin-module net
           self pushed-in-packet-offset @ { pushed-offset }
           self in-packet-addr @ pushed-offset + dup diff + swap
           self in-packet-offset @ pushed-offset - diff - move
-          current-seq self first-in-packet-seq !
+          current-seq current-size + self first-in-packet-seq !
           current-size self pushed-in-packet-offset +!
           diff negate self in-packet-offset +!
           1 +to count
@@ -658,7 +658,6 @@ begin-module net
           bytes 0> if
             addr bytes seq index self insert-tcp-packet
           then
-          self join-complete-packets
         then        
       then
 
@@ -666,9 +665,14 @@ begin-module net
         init-seq self push-packets
       then
 
-      self complete-in-packets drop self first-in-packet-seq @ +
-      self current-in-packet-ack !
+      self join-complete-packets
 
+      self first-in-packet-seq @ self current-in-packet-ack !
+
+      push? if
+        self current-in-packet-ack @ 1- self in-packet-last-ack-sent !
+      then
+      
       [ debug? ] [if]
         push? init-bytes 0<> or if
 
@@ -861,9 +865,15 @@ begin-module net
         usb::with-usb-output
       [then]
     ; define missing-in-packets?
-    
+
     \ Clear pending packets
     :noname { self -- }
+
+      [ debug? ] [if]
+        self [: cr ." @@@ BEFORE clear-in-packets: " in-packets. ;]
+        usb::with-usb-output
+      [then]
+      
       self pending-in-packet-offset @ { pending }
       self in-packets-tcp @ if
         pending negate self pushed-in-packet-offset +!
@@ -885,7 +895,7 @@ begin-module net
         usb::with-usb-output
       [then]
     ; define clear-in-packets
-    
+
     \ Print in packets
     :noname { self -- }
       cr ." in-packets-tcp: " self in-packets-tcp @ .
@@ -3391,7 +3401,7 @@ begin-module net
       [then]
       
       self [: { endpoint self }
-        endpoint endpoint-enqueued? not if
+        endpoint endpoint-pending? not if
           endpoint mark-endpoint-pending
           true
         else
@@ -3400,7 +3410,16 @@ begin-module net
         then
         endpoint wake-endpoint
       ;] self endpoint-queue-lock with-lock
-      if self endpoint-queue-sema give pause then
+      if
+        self endpoint-queue-sema give
+
+        [ debug? ] [if]
+          [: cr ." +++ GAVE SEMAPHORE FOR PUT-READY-ENDPOINT" ;]
+          usb::with-usb-output
+        [then]
+        
+        pause
+      then
 
       [ debug? ] [if]
         [: cr ." +++ End enqueue endpoint" ;] usb::with-usb-output
@@ -3417,22 +3436,50 @@ begin-module net
 
       self endpoint-queue-sema take
 
+      [ debug? ] [if]
+        [: cr ." +++ Got queue semaphore" ;] usb::with-usb-output
+      [then]
+      
       self endpoint-queue-index @ { init-index }
       
       begin
+
+        [ debug? ] [if]
+          [: cr ." +++ Trying to get endpoint" ;] usb::with-usb-output
+        [then]
+        
         self [: { self }
           self endpoint-queue-index @ { index }
           self intf-endpoints <endpoint> class-size index * + { endpoint }
           endpoint endpoint-enqueued? if
+
+            [ debug? ] [if]
+              index [: cr ." Got endpoint: " . ;] usb::with-usb-output
+            [then]
+            
             endpoint clear-endpoint-enqueued
             endpoint clear-endpoint-event
             endpoint true
           else
+            
+            [ debug? ] [if]
+              index [: cr ." Skipped endpoint: " . ;] usb::with-usb-output
+            [then]
+
             false
           then
           index 1+ max-endpoints umod self endpoint-queue-index !
+
+          [ debug? ] [if]
+            [: cr ." Releasing endpoint queue lock" ;] usb::with-usb-output
+          [then]
+          
         ;] self endpoint-queue-lock with-lock
       until
+
+      [ debug? ] [if]
+        [: cr ." Promoting RX data" ;] usb::with-usb-output
+      [then]
 
       dup promote-rx-data
       
@@ -3462,7 +3509,16 @@ begin-module net
         endpoint retire-rx-data
       then
       
+      [ debug? ] [if]
+        [: cr ." +++ Retired RX data" ;] usb::with-usb-output
+      [then]
+
       endpoint self [: { endpoint self }
+
+        [ debug? ] [if]
+          [: cr ." +++ In endpoint done" ;] usb::with-usb-output
+        [then]
+
         endpoint endpoint-pending? if
           endpoint endpoint-has-event? if
             endpoint clear-endpoint-event
@@ -3475,8 +3531,21 @@ begin-module net
         else
           false
         then
+
+        [ debug? ] [if]
+          [: cr ." +++ After endpoint done" ;] usb::with-usb-output
+        [then]
+
       ;] self endpoint-queue-lock with-lock
-      if self endpoint-queue-sema give pause then
+      if
+        self endpoint-queue-sema give
+
+        [ debug? ] [if]
+          [: cr ." +++ GAVE SEMAPHORE FOR ENDPOINT-DONE" ;] usb::with-usb-output
+        [then]
+
+        pause
+      then
 
       [ debug? ] [if]
         [: cr ." +++ End endpoint done" ;] usb::with-usb-output

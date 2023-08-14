@@ -101,7 +101,7 @@ begin-module lock
     ;
 
     \ Remove a lock wait record
-    : remove-lock-wait { wait lock -- }
+    : remove-lock-wait { wait lock -- removed? }
       wait lock-wait-in-list @ if
         wait lock-wait-prev @ wait lock-wait-next @ { prev-wait next-wait }
         next-wait if
@@ -115,6 +115,9 @@ begin-module lock
           next-wait lock lock-first-wait !
         then
         false wait lock-wait-in-list !
+        true
+      else
+        false
       then
     ;
 
@@ -172,33 +175,32 @@ begin-module lock
   
   \ Lock a lock
   : claim-lock ( lock -- )
-    [:
+    [: { lock }
       s" BEGIN CLAIM LOCK" trace
-      dup lock-holder-task @ current-task <> if
+      lock lock-holder-task @ current-task <> if
         current-task prepare-block
-        dup lock-holder-task @ if
-          dup current-task ['] current-lock for-task !
-          init-lock-wait
-          2dup swap add-lock-wait
-          over update-hold-priority
-          over lock-slock release-slock-block
-          over lock-slock claim-slock
+        lock lock-holder-task @ if
+          init-lock-wait { wait }
+          wait lock add-lock-wait
+          lock update-hold-priority
+          lock lock-slock release-slock-block
+          lock lock-slock claim-slock
           current-task check-timeout if
-            [:
-              2dup swap remove-lock-wait
-              lock-wait-orig-here @ ram-here!
-              update-hold-priority
+            wait lock remove-lock-wait if
+              lock update-hold-priority
+              wait lock-wait-orig-here @ ram-here!
               current-task restore-priority
-            ;] critical ['] x-timed-out ?raise
+              ['] x-timed-out ?raise
+            then
           then
-          lock-wait-orig-here @ ram-here!
-          drop
+          current-task lock lock-holder-task !
+          wait lock-wait-orig-here @ ram-here!
         else
-          current-task over lock-holder-task !
-          update-hold-priority
+          current-task lock lock-holder-task !
+          lock update-hold-priority
         then
       else
-        1 swap lock-nest-level +!
+        1 lock lock-nest-level +!
       then
       s" END CLAIM LOCK" trace
     ;] over lock-slock with-slock
@@ -206,23 +208,23 @@ begin-module lock
 
   \ Unlock a lock
   : release-lock ( lock -- )
-    [:
+    [: { lock }
       s" BEGIN RELEASE LOCK" trace
-      dup lock-holder-task @ current-task = averts x-not-currently-owned
-      dup lock-nest-level @ 0= if
-        dup lock-first-wait @ ?dup if
-          2dup swap remove-lock-wait
-          lock-wait-task @
-          2dup swap lock-holder-task !
-          swap update-hold-priority
-          dup restore-priority
-          ready
+      lock lock-holder-task @ current-task = averts x-not-currently-owned
+      lock lock-nest-level @ 0= if
+        lock lock-first-wait @ ?dup if { wait }
+          wait lock-wait-task @ { task }
+          wait lock remove-lock-wait if
+            lock update-hold-priority
+            task lock lock-holder-task !
+            task ready
+          then
         else
-          0 swap lock-holder-task !
+          0 lock lock-holder-task !
           current-task restore-priority
         then
       else
-        -1 swap lock-nest-level +!
+        -1 lock lock-nest-level +!
       then
       s" END RELEASE LOCK" trace
     ;] over lock-slock with-slock
