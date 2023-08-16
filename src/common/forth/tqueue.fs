@@ -70,81 +70,88 @@ begin-module tqueue
     commit-flash
 
     \ Get last higher priority wait in queue
-    : find-wait-queue-next ( priority queue -- wait|0 )
-      tqueue-last @ ( priority current )
-      begin dup while ( priority current )
-	dup wait-task @ task-priority@
-	( priority current current-priority )
-	2 pick >= if nip ( current ) exit then
-	wait-next @ ( priority next )
+    : find-wait-queue-prev { priority queue -- wait|0 }
+      queue tqueue-last @ { current }
+      begin current while
+        current wait-task @ task-priority@ priority < if
+          current wait-prev @ to current
+        else
+          current exit
+        then
       repeat
-      nip ( 0 )
+      0
     ;
 
     \ Insert a wait into a queue
-    : push-wait-queue ( wait queue -- )
-      over false swap wait-popped ! ( wait queue )
-      2dup swap wait-task @ task-priority@ swap find-wait-queue-next
-      dup 0= if
-	drop over 0 swap wait-next ! ( wait queue )
-	2dup tqueue-first @ ( wait queue wait first )
-	?dup if
-	  2dup swap wait-prev ! ( wait queue wait first )
-	  wait-next ! ( wait queue )
-	else
-	  0 swap wait-prev ! ( wait queue )
-	  2dup tqueue-last ! ( wait queue )
-	then
-	tqueue-first ! ( )
-      else ( wait queue next )
-	dup wait-prev @ ( wait queue next prev )
-	dup 4 pick wait-prev ! ( wait queue next prev )
-	?dup if
-	  3 pick swap wait-next ! ( wait queue next )
-	else
-	  2 pick 2 pick tqueue-last ! ( wait queue next )
-	then
-	dup 3 pick wait-next ! ( wait queue next )
-	nip wait-prev ! ( )
+    : push-wait-queue { wait queue -- }
+      false wait wait-popped !
+      wait wait-task @ task-priority@ queue find-wait-queue-prev { prev-wait }
+      prev-wait 0= if
+        0 wait wait-prev !
+        queue tqueue-first @ { first-wait }
+        first-wait if
+          wait first-wait wait-prev !
+        else
+          wait queue tqueue-last !
+        then
+        first-wait wait wait-next !
+        wait queue tqueue-first !
+      else
+        prev-wait wait-next @ { next-wait }
+        next-wait wait wait-next !
+        next-wait if
+          wait next-wait wait-prev !
+        else
+          wait queue tqueue-last !
+        then
+        wait prev-wait wait-next !
+        prev-wait wait wait-prev !
       then
     ;
-
+      
     \ Pop a wait from a queue or return null if no queue is available
-    : pop-wait-queue ( queue -- wait|0 )
-      dup tqueue-first @ dup if ( queue first )
-	true over wait-popped ! ( queue first )
-	dup wait-prev @ ( queue first prev )
-	dup 3 pick tqueue-first ! ( queue first prev )
-	?dup if
-	  0 swap wait-next ! ( queue first )
-	  nip ( first )
-	else
-	  0 rot tqueue-last ! ( first )
-	then
+    : pop-wait-queue { queue -- wait|0 }
+      queue tqueue-first @ { first-wait }
+      first-wait if
+        true first-wait wait-popped !
+        first-wait wait-next @ { next-wait }
+        next-wait if
+          0 next-wait wait-prev !
+        else
+          0 queue tqueue-last !
+        then
+        next-wait queue tqueue-first !
+        first-wait
       else
-	nip ( 0 )
+        0
       then
     ;
 
     \ Remove a wait from a queue if it has not already been popped
-    : remove-wait-queue ( wait queue -- )
-      over wait-popped @ not if ( wait queue )
-	over wait-next @ ?dup if ( wait queue next )
-	  2 pick wait-prev @ ( wait queue next prev )
-	  swap wait-prev ! ( wait queue )
-	else
-	  over wait-prev @ ( wait queue prev )
-	  over tqueue-first ! ( wait queue )
-	then
-	over wait-prev @ ?dup if ( wait queue prev )
-	  2 pick wait-next @ ( wait queue prev next )
-	  swap wait-next ! ( wait queue )
-	else
-	  over wait-next @ ( wait queue next )
-	  over tqueue-last ! ( wait queue )
-	then
+    : remove-wait-queue { wait queue -- }
+      wait wait-popped @ not if
+        true wait wait-popped !
+        wait wait-next @ wait wait-prev @ { next-wait prev-wait }
+        next-wait if
+          prev-wait next-wait wait-prev !
+        else
+          prev-wait queue tqueue-last !
+        then
+        prev-wait if
+          next-wait prev-wait wait-next !
+        else
+          next-wait queue tqueue-first !
+        then
       then
-      2drop ( )
+    ;
+
+    \ Increment counter
+    : +tqueue-counter ( tqueue -- )
+      dup tqueue-limit @ 0> if
+        dup tqueue-counter @ 1+ over tqueue-limit @ min swap tqueue-counter !
+      else
+        1 swap tqueue-counter +!
+      then
     ;
 
   end-module> import
@@ -186,12 +193,9 @@ begin-module tqueue
       2dup swap push-wait-queue
       over tqueue-slock @ release-slock-block
       over tqueue-slock @ claim-slock
-      current-task timed-out? if
-	swap remove-wait-queue
-	['] x-timed-out ?raise
-      else
-	2drop
-      then
+      dup wait-popped @ not if over +tqueue-counter then
+      swap remove-wait-queue
+      current-task validate-timeout
     ;] with-aligned-allot
     s" END WAIT-TQUEUE" trace
   ;
@@ -200,14 +204,12 @@ begin-module tqueue
   \ Note that this must be called within a critical section
   : wake-tqueue ( tqueue -- )
     s" BEGIN WAKE-TQUEUE" trace
-    dup tqueue-limit @ 0> if
-      dup tqueue-counter @ 1+ over tqueue-limit @ min over tqueue-counter !
-    else
-      1 over tqueue-counter +!
+    dup tqueue-counter @ 0< if
+      dup pop-wait-queue ?dup if
+        wait-task @ ready
+      then
     then
-    pop-wait-queue ?dup if
-      wait-task @ ready
-    then
+    +tqueue-counter
     s" END WAKE-TQUEUE" trace
   ;
 

@@ -45,9 +45,6 @@ begin-module lock
       \ Last lock wait
       field: lock-last-wait
       
-      \ The next lock held by the holder task
-      field: lock-next-held
-
       \ Lock nesting level
       field: lock-nest-level
       
@@ -55,10 +52,16 @@ begin-module lock
     
     \ Lock wait structure
     begin-structure lock-wait-size
+
+      \ In list
+      field: lock-wait-in-list
+      
+      \ Lock wait previous record
+      field: lock-wait-prev
       
       \ Lock wait next record
       field: lock-wait-next
-
+      
       \ Lock wait task
       field: lock-wait-task
       
@@ -73,8 +76,10 @@ begin-module lock
     : init-lock-wait ( -- wait )
       ram-here 4 ram-align, ram-here lock-wait-size ram-allot
       tuck lock-wait-orig-here !
+      0 over lock-wait-prev !
       0 over lock-wait-next !
       current-task over lock-wait-task !
+      false over lock-wait-in-list !
     ;
 
     \ Get maximum lock wait priority
@@ -86,139 +91,93 @@ begin-module lock
     ;
 
     \ Add a lock wait record
-    : add-lock-wait ( wait lock -- )
-      dup lock-first-wait @ if
-	2dup lock-last-wait @ lock-wait-next !
-      else
-	2dup lock-first-wait !
-      then
-      lock-last-wait !
+    : add-lock-wait { wait lock -- }
+      0 wait lock-wait-next !
+      lock lock-last-wait @ { last-wait }
+      last-wait wait lock-wait-prev !
+      last-wait if wait last-wait lock-wait-next ! then
+      wait lock lock-last-wait !
+      last-wait 0= if wait lock lock-first-wait ! then
+      true wait lock-wait-in-list !
     ;
 
     \ Remove a lock wait record
-    : remove-lock-wait ( wait lock -- )
-      dup lock-first-wait @ 2 pick = if
-	dup lock-last-wait @ 2 pick = if
-	  0 over lock-last-wait !
-	then
-	swap lock-wait-next @ swap lock-first-wait !
+    : remove-lock-wait { wait lock -- removed? }
+      wait lock-wait-in-list @ if
+        wait lock-wait-prev @ wait lock-wait-next @ { prev-wait next-wait }
+        next-wait if
+          prev-wait next-wait lock-wait-prev !
+        else
+          prev-wait lock lock-last-wait !
+        then
+        prev-wait if
+          next-wait prev-wait lock-wait-next !
+        else
+          next-wait lock lock-first-wait !
+        then
+        false wait lock-wait-in-list !
+        true
       else
-	dup lock-first-wait @ begin
-	  dup if
-	    dup lock-wait-next @ 3 pick = if
-	      over lock-last-wait @ 3 pick = if
-		0 over lock-wait-next ! swap lock-last-wait ! drop true
-	      else
-		rot lock-wait-next @ swap lock-wait-next ! drop true
-	      then
-	    else
-	      lock-wait-next @ false
-	    then
-	  else
-	    2drop drop true
-	  then
-	until
+        false
       then
     ;
 
-    \ Get the last lock held in a loop
-    : get-last-lock ( lock -- )
-      dup lock-next-held @ if
-	dup begin
-	  dup lock-next-held @ 2 pick <> if
-	    lock-next-held @ false
-	  else
-	    true
-	  then
-	until
-	nip
-      then
-    ;
-
-    \ Add a holder to a lock loop
-    : add-lock ( lock task -- )
-      dup task-priority@ over task-saved-priority!
-      swap over ['] current-lock-held for-task @ ?dup if
-	over 3 roll ['] current-lock-held for-task !
-	dup get-last-lock
-	2 pick swap lock-next-held !
-	swap lock-next-held !
+    \ Adjust the priority of a task
+    : adjust-priority { priority task -- }
+      task task-priority@ priority <= if
+        task task-saved-priority@ task task-priority!
       else
-	tuck swap ['] current-lock-held for-task !
-	dup lock-next-held !
+        task task-priority@ task task-saved-priority!
+        priority task task-priority!
       then
     ;
-
-    \ Remove a lock from a lock loop
-    : remove-lock ( lock -- )
-      dup lock-next-held @ if
-	dup get-last-lock dup 2 pick <> if
-	  over lock-next-held @ swap lock-next-held !
-	  dup lock-next-held @ over lock-holder-task @
-	  ['] current-lock-held for-task !
-	  0 swap lock-next-held !
-	else
-	  drop 0 over lock-next-held !
-	  0 swap lock-holder-task @ ['] current-lock-held for-task !
-	then
-      then
-    ;
-
-    commit-flash
-
-    \ Get group maximum lock wait priority
-    : group-max-lock-wait-priority ( lock -- priority )
-      -32768 >r
-      dup lock-next-held @ if
-	dup begin
-	  r> over max-lock-wait-priority max >r
-	  dup lock-next-held @ 2 pick <> if
-	    lock-next-held @ false
-	  else
-	    true
-	  then
-	until
-	2drop
-      else
-	rdrop max-lock-wait-priority >r
-      then
-      r>
-    ;
-
+    
     commit-flash
     
-    \ Resolve task priority on holding a lock
-    : update-hold-priority ( lock -- )
-      dup lock-next-held @ if
-	dup group-max-lock-wait-priority
-	over lock-holder-task @ task-saved-priority@ max
-	over lock-holder-task @ task-priority!
-	lock-holder-task @ ['] current-lock for-task @ ?dup if
-	  recurse
-	then
-      else
-	drop
+    \ Update the priority of the tasks holding a lock including the current task
+    : update-hold-priority { lock -- }
+      current-task task-priority@ current-task task-saved-priority@ min
+      { priority }
+      lock lock-first-wait @ { current }
+      begin current while
+        current lock-wait-task @
+        dup task-priority@ swap task-saved-priority@ min
+        priority max to priority
+        current lock-wait-next @ to current
+      repeat
+      priority current-task adjust-priority
+      lock lock-first-wait @ to current
+      begin current while
+        priority current lock-wait-task @ adjust-priority
+        current lock-wait-next @ to current
+      repeat
+    ;
+    
+    \ Update the priority of the tasks holding a lock other than current task
+    : update-other-priority { lock -- }
+      lock lock-first-wait @ { current }
+      current if
+        current lock-wait-task @
+        dup task-priority@ swap task-saved-priority@ min { priority }
+        begin current while
+          current lock-wait-task @
+          dup task-priority@ swap task-saved-priority@ min
+          priority max to priority
+          current lock-wait-next @ to current
+        repeat
+        lock lock-first-wait @ to current
+        begin current while
+          priority current lock-wait-task @ adjust-priority
+          current lock-wait-next @ to current
+        repeat
       then
     ;
 
-    \ Resolve task priority on releasing a lock
-    : update-release-priority ( lock -- )
-      dup lock-next-held @ if
-	dup get-last-lock over <> if
-	  dup lock-next-held @ swap remove-lock
-	  dup group-max-lock-wait-priority
-	  over lock-holder-task @ task-saved-priority@ max
-	  swap lock-holder-task @ task-priority!
-	else
-	  dup remove-lock lock-holder-task @ dup task-saved-priority@
-	  swap task-priority!
-	then
-      else
-	lock-holder-task @ dup task-saved-priority@
-	swap task-priority!
-      then
+    \ Restore a task's priority
+    : restore-priority ( task -- )
+      dup task-saved-priority@ swap task-priority!
     ;
-
+    
   end-module> import
 
   \ Initialize a lock
@@ -227,7 +186,6 @@ begin-module lock
     0 over lock-holder-task !
     0 over lock-first-wait !
     0 over lock-last-wait !
-    0 over lock-next-held !
     0 swap lock-nest-level !
   ;
 
@@ -236,64 +194,78 @@ begin-module lock
 
   commit-flash
   
-  \ Lock a lock
-  : claim-lock ( lock -- )
-    [:
-      s" BEGIN CLAIM LOCK" trace
-      dup lock-holder-task @ current-task <> if
-        current-task prepare-block
-        dup lock-holder-task @ if
-          dup current-task ['] current-lock for-task !
-          init-lock-wait
-          2dup swap add-lock-wait
-          over update-hold-priority
-          over lock-slock release-slock-block
-          over lock-slock claim-slock
-          [: current-task validate-timeout ;] try ?dup if
-            >r [:
-              dup rot remove-lock-wait lock-wait-orig-here @ ram-here!
-            ;] critical r> ?raise
-          then
-          lock-wait-orig-here @ ram-here!
-          drop
-        else
-          dup current-task add-lock
-          current-task over lock-holder-task !
-          update-hold-priority
-        then
-      else
-        1 swap lock-nest-level +!
-      then
-      s" END CLAIM LOCK" trace
-    ;] over lock-slock with-slock
-  ;
-
   \ Unlock a lock
   : release-lock ( lock -- )
-    [:
+    [: { lock }
       s" BEGIN RELEASE LOCK" trace
-      dup lock-holder-task @ current-task = averts x-not-currently-owned
-      dup lock-nest-level @ 0= if
-        dup update-release-priority
-        dup lock-first-wait @ ?dup if
-          dup lock-wait-next @ 2 pick lock-first-wait !
-          over lock-first-wait @ 0= if
-            0 2 pick lock-last-wait !
+      lock lock-holder-task @ current-task = averts x-not-currently-owned
+      lock lock-nest-level @ 0= if
+        lock lock-first-wait @ ?dup if { wait }
+          wait lock-wait-task @ { task }
+          wait lock remove-lock-wait if
+            lock update-other-priority
+            task lock lock-holder-task !
+            task ready
+            current-task restore-priority
           then
-          lock-wait-task @
-          2dup add-lock
-          2dup swap lock-holder-task !
-          0 over ['] current-lock for-task !
-          swap update-hold-priority
         else
-          0 swap lock-holder-task ! 0     
+          current-task restore-priority
+          0 lock lock-holder-task !
         then
       else
-        -1 swap lock-nest-level +! 0
+        -1 lock lock-nest-level +!
       then
       s" END RELEASE LOCK" trace
     ;] over lock-slock with-slock
-    ?dup if ready then
+  ;
+
+  commit-flash
+  
+  \ Lock a lock
+  : claim-lock ( lock -- )
+    [: { lock }
+      s" BEGIN CLAIM LOCK" trace
+      lock lock-holder-task @ current-task <> if
+        current-task prepare-block
+        lock lock-holder-task @ if
+          init-lock-wait { wait }
+          wait lock add-lock-wait
+          lock update-hold-priority
+          lock lock-slock release-slock-block
+          lock lock-slock claim-slock
+          current-task check-timeout if
+            wait lock remove-lock-wait if
+              lock update-other-priority
+              wait lock-wait-orig-here @ ram-here!
+              current-task restore-priority
+              ['] x-timed-out ?raise
+            else
+              lock lock-first-wait @ ?dup if { wait }
+                wait lock-wait-task @ { task }
+                wait lock remove-lock-wait if
+                  lock update-other-priority
+                  task lock lock-holder-task !
+                  task ready
+                  current-task restore-priority
+                then
+              else
+                current-task restore-priority
+                0 lock lock-holder-task !
+              then              
+            then
+          else
+            current-task lock lock-holder-task !
+          then
+          wait lock-wait-orig-here @ ram-here!
+        else
+          current-task lock lock-holder-task !
+          lock update-hold-priority
+        then
+      else
+        1 lock lock-nest-level +!
+      then
+      s" END CLAIM LOCK" trace
+    ;] over lock-slock with-slock
   ;
 
   \ Update the priorities of tasks holding locks

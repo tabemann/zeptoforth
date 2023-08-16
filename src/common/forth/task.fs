@@ -289,7 +289,7 @@ begin-module task
   user task-waited-for
   
   \ No timeout
-  -1 constant no-timeout
+  $80000000 constant no-timeout
   
   \ Attempted to use a terminated task
   : x-terminated ( -- ) ." task has been terminated" cr ;
@@ -743,8 +743,22 @@ begin-module task
     block-timed-out =
   ;
 
+  \ Get whether a task has timed out and clear the timeout status
+  : check-timeout ( task -- timed-out? )
+    [:
+      dup validate-not-terminated dup task-state h@ task-state-mask and
+      block-timed-out = if
+        readied swap task-state h! true
+      else
+        drop false
+      then
+    ;] over task-core @ critical-with-other-core-spinlock
+  ;
+
   \ Validate not timing out
-  : validate-timeout ( task -- ) timed-out? triggers x-timed-out ;
+  : validate-timeout ( task -- )
+    check-timeout triggers x-timed-out
+  ;
 
   \ Get task active state
   : task-active@ ( task -- active )
@@ -973,7 +987,10 @@ begin-module task
 	current-task @ task-state h!
 	release-same-core-spinlock end-critical pause-wo-reschedule
 	claim-same-core-spinlock
-	current-task @ validate-timeout
+        current-task @ check-timeout if
+          -1 current-task @ task-current-notify !
+          ['] x-timed-out ?raise
+        then
       repeat
       current-task @ task-notify-area @ over cells + @
       swap bit current-task @ task-notified-bitmap bic!
@@ -1000,7 +1017,10 @@ begin-module task
 	  current-task @ task-state h!
 	  release-same-core-spinlock end-critical pause-wo-reschedule
 	  claim-same-core-spinlock
-	  current-task @ validate-timeout
+          current-task @ check-timeout if
+            -1 current-task @ task-current-notify !
+            ['] x-timed-out ?raise
+          then
 	repeat
 	current-task @ task-notify-area @ over cells + @
 	swap bit current-task @ task-notified-bitmap bic!
@@ -1152,15 +1172,16 @@ begin-module task
     \ Core of readying a task
     : do-ready ( task -- )
       dup task-current-notify @ -1 = if
-	1 over task-ready-count +!
-	dup task-ready-count @ 0>= if
+        0 over task-ready-count !
+\        dup task-ready-count @ 1+ 0 min dup 2 pick task-ready-count !
+\	0>= if
 	  dup task-state h@
 	  [ schedule-critical schedule-user-critical or
 	  schedule-with-spinlock or schedule-with-same-core-spinlock or ]
 	  literal and readied or swap task-state h!
-	else
-	  drop
-	then
+\	else
+\	  drop
+\	then
       else
 	drop
       then
@@ -1335,7 +1356,7 @@ begin-module task
       dup validate-not-terminated
       dup ['] timeout for-task@ no-timeout <> if
 	systick-counter over timeout-systick-start !
-	dup ['] timeout for-task@ swap timeout-systick-delay !
+	dup ['] timeout for-task@ 0 max swap timeout-systick-delay !
       else
 	drop
       then
@@ -1539,6 +1560,33 @@ begin-module task
     ;
 
   end-module
+
+  \ Block a task, setting an address to a value
+  : block-set ( value addr task -- )
+    [:
+      dup validate-not-terminated
+      dup ['] timeout for-task@ no-timeout <> if
+        dup timeout-systick-delay @
+        over timeout-systick-start @
+        rot -1 over task-ready-count +!
+        dup task-ready-count @ 0< if
+          tuck task-systick-start !
+          tuck task-systick-delay !
+          blocked-timeout swap task-state h!
+        else
+          2drop drop
+        then
+      else
+        -1 over task-ready-count +!
+        dup task-ready-count @ 0< if
+          blocked-indefinite swap task-state h!
+        else
+          drop
+        then
+      then
+      ! false reschedule? ! pause
+    ;] over task-core @ critical-with-other-core-spinlock
+  ;
 
   \ Initialize a task
   : init-task ( xn...x0 count xt task core -- )
@@ -1847,6 +1895,7 @@ begin-module task
               first-task @ 0= if init-extra-task then
               claim-same-core-spinlock
               find-next-task
+              dup task-ready-count @ 0 max over task-ready-count !
               release-same-core-spinlock
               dup 0<> if
                 dup task-active@ 1 < if
@@ -1865,7 +1914,8 @@ begin-module task
                   dup schedule-with-spinlock and if
                     over spinlock-to-claim @ claim-spinlock
                   then
-                  task-state-mask and blocked-timeout = if
+                  task-state-mask and
+                  dup blocked-timeout = swap block-timed-out = or if
                     block-timed-out over task-state h!
                   else
                     readied over task-state h!
