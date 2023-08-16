@@ -102,9 +102,7 @@ begin-module wifi-server-test
       ?raise
       server-active? @ 0<> my-endpoint @ 0<> and if
         outgoing-tx-buffer tx-buffer-size tx-stream recv-stream-no-block { len }
-        len [: cr ." *** SEND LENGTH: " . ." *** " ;] usb::with-usb-output
         outgoing-tx-buffer len my-endpoint @ my-interface send-tcp-endpoint
-        [: cr ." *** SENT DATA *** " ;] usb::with-usb-output
       then
       tx-block-sema broadcast
       tx-block-sema give
@@ -113,9 +111,7 @@ begin-module wifi-server-test
   
   \ Actually handle received data
   : do-rx-data ( c-addr bytes -- )
-    2dup [: cr ." DATA: " over + dump ;] usb::with-usb-output
     rx-stream send-stream-partial-no-block drop
-    [: cr ." PROCESSED DATA" ;] usb::with-usb-output
   ;
   
   \ EMIT for telnet
@@ -148,7 +144,6 @@ begin-module wifi-server-test
     0 { W^ buffer }
     buffer 1 rx-stream recv-stream drop
     buffer c@
-    dup [: ." ===" h.2 ." === " ;] usb::with-usb-output
   ;
 
   \ KEY? for telnet
@@ -171,11 +166,8 @@ begin-module wifi-server-test
       endpoint endpoint-tcp-state@ TCP_ESTABLISHED = if
         true server-active? !
         endpoint endpoint-rx-data@ do-rx-data
-      else
-        endpoint endpoint-tcp-state@ [: cr ." *** STATE " . ." *** " ;] usb::with-usb-output
       then
       endpoint my-interface endpoint-done
-      [: cr ." *** ENDPOINT DONE ***" cr ;] usb::with-usb-output
       endpoint endpoint-tcp-state@ TCP_CLOSE_WAIT = if
         [: cr ." *** CLOSING ***" ;] usb::with-usb-output
         false server-active? !

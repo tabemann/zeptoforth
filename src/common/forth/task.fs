@@ -1172,15 +1172,16 @@ begin-module task
     \ Core of readying a task
     : do-ready ( task -- )
       dup task-current-notify @ -1 = if
-        dup task-ready-count @ 1+ 0 min dup 2 pick task-ready-count !
-	0>= if
+        0 over task-ready-count !
+\        dup task-ready-count @ 1+ 0 min dup 2 pick task-ready-count !
+\	0>= if
 	  dup task-state h@
 	  [ schedule-critical schedule-user-critical or
 	  schedule-with-spinlock or schedule-with-same-core-spinlock or ]
 	  literal and readied or swap task-state h!
-	else
-	  drop
-	then
+\	else
+\	  drop
+\	then
       else
 	drop
       then

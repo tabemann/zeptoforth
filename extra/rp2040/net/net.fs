@@ -35,9 +35,6 @@ begin-module net
   \ Send timed out
   : x-send-timed-out ( -- ) cr ." send timed out" ;
 
-  \ Make a debugging print
-  : echo [: ." *" emit ." * " ;] usb::with-usb-output ;
-
   \ Outstanding packet record
   <object> begin-class <out-packets>
 
@@ -122,8 +119,6 @@ begin-module net
     
   end-class
 
-  \ true constant debug? \ DEBUG
-  
   \ Implement the outstanding packet record
   <out-packets> begin-implement
 
@@ -187,7 +182,7 @@ begin-module net
       ack first - 0< if exit then
       self last-out-packet-seq @ { last }
       self init-out-packet-seq @ { init }
-      last ack - last first - < ack init - last init - <= and if
+      last ack - last first - <= ack init - last init - <= and if
         0 { count }
         self out-packet-count @ 0 ?do
           self out-packet-seqs i cells + @ { current-seq }
@@ -329,25 +324,23 @@ begin-module net
 
     \ Print out packets
     :noname { self -- }
-      cr ." out-packet-count: " self out-packet-count @ .
-      cr ." out-packet-seqs: "
-      self out-packet-count @ 0 ?do self out-packet-seqs i cells + @ . loop
-      cr ." out-packet-sizes: "
-      self out-packet-count @ 0 ?do self out-packet-sizes i 1 lshift + h@ . loop
-      cr ." out-packet-addr: " self out-packet-addr @ h.8
-      cr ." out-packet-bytes: " self out-packet-bytes @ .
-      cr ." acked-out-packet-offset: " self acked-out-packet-offset@ .
-      cr ." out-packet-offset: " self out-packet-offset @ .
-      cr ." first-out-packet-seq: " self first-out-packet-seq @ .
-      cr ." out-packet-mss: " self out-packet-mss @ .
-      cr ." out-packet-window: " self out-packet-window @ .
-      cr
+      \ cr ." out-packet-count: " self out-packet-count @ .
+      \ cr ." out-packet-seqs: "
+      \ self out-packet-count @ 0 ?do self out-packet-seqs i cells + @ . loop
+      \ cr ." out-packet-sizes: "
+      \ self out-packet-count @ 0 ?do self out-packet-sizes i 1 lshift + h@ . loop
+      \ cr ." out-packet-addr: " self out-packet-addr @ h.8
+      \ cr ." out-packet-bytes: " self out-packet-bytes @ .
+      \ cr ." acked-out-packet-offset: " self acked-out-packet-offset@ .
+      \ cr ." out-packet-offset: " self out-packet-offset @ .
+      \ cr ." first-out-packet-seq: " self first-out-packet-seq @ .
+      \ cr ." out-packet-mss: " self out-packet-mss @ .
+      \ cr ." out-packet-window: " self out-packet-window @ .
+      \ cr
     ; define out-packets.
     
   end-implement
 
-  \ true constant debug? \ DEBUG
-  
   \ The incoming packet record
   <object> begin-class <in-packets>
 
@@ -643,7 +636,7 @@ begin-module net
                 part-bytes negate +to bytes
               else
                 diff bytes + current-diff current-size + >=
-                diff current-diff current-size + <= and if
+                diff current-diff current-size + < and if
                   diff bytes + current-diff current-size +
                   min diff - { part-bytes }
                   part-bytes +to seq
@@ -898,31 +891,29 @@ begin-module net
 
     \ Print in packets
     :noname { self -- }
-      cr ." in-packets-tcp: " self in-packets-tcp @ .
-      cr ." in-packet-count: " self in-packet-count @ .
-      self in-packets-tcp @ if
-        cr ." in-packet-seqs: "
-        self in-packet-count @ 0 ?do self in-packet-seqs i cells + @ . loop
-      then
-      cr ." in-packet-sizes: "
-      self in-packet-count @ 0 ?do self in-packet-sizes i 1 lshift + h@ . loop
-      cr ." in-packet-addr: " self in-packet-addr @ h.8
-      cr ." in-packet-bytes: " self in-packet-bytes @ .
-      cr ." in-packet-offset: " self in-packet-offset @ .
-      cr ." pending-in-packet-offset: " self pending-in-packet-offset @ .
-      cr ." pushed-in-packet-offset: " self pushed-in-packet-offset @ .
-      self in-packets-tcp @ if
-        cr ." first-in-packet-seq: " self first-in-packet-seq @ .
-        cr ." in-packet-last-ack-sent: " self in-packet-last-ack-sent @ .
-        cr ." current-in-packet-ack: " self current-in-packet-ack @ .
-      then
-      cr
+      \ cr ." in-packets-tcp: " self in-packets-tcp @ .
+      \ cr ." in-packet-count: " self in-packet-count @ .
+      \ self in-packets-tcp @ if
+      \   cr ." in-packet-seqs: "
+      \   self in-packet-count @ 0 ?do self in-packet-seqs i cells + @ . loop
+      \ then
+      \ cr ." in-packet-sizes: "
+      \ self in-packet-count @ 0 ?do self in-packet-sizes i 1 lshift + h@ . loop
+      \ cr ." in-packet-addr: " self in-packet-addr @ h.8
+      \ cr ." in-packet-bytes: " self in-packet-bytes @ .
+      \ cr ." in-packet-offset: " self in-packet-offset @ .
+      \ cr ." pending-in-packet-offset: " self pending-in-packet-offset @ .
+      \ cr ." pushed-in-packet-offset: " self pushed-in-packet-offset @ .
+      \ self in-packets-tcp @ if
+      \   cr ." first-in-packet-seq: " self first-in-packet-seq @ .
+      \   cr ." in-packet-last-ack-sent: " self in-packet-last-ack-sent @ .
+      \   cr ." current-in-packet-ack: " self current-in-packet-ack @ .
+      \ then
+      \ cr
     ; define in-packets.
 
   end-implement
 
-  \ false constant debug? \ DEBUG
-  
   \ The DNS address cache
   <object> begin-class <dns-cache>
     
@@ -1694,7 +1685,10 @@ begin-module net
     
     \ Retire a pending received data
     :noname ( self -- )
-      [: endpoint-in-packets clear-in-packets ;] over endpoint-lock with-lock
+      [:
+        dup endpoint-in-packets clear-in-packets
+        0 swap endpoint-rx-size !
+      ;] over endpoint-lock with-lock
     ; define retire-rx-data
 
     \ Promote received data to pending
@@ -2856,7 +2850,7 @@ begin-module net
           exit
         then
         endpoint endpoint-tcp-state@ { state }
-        endpoint endpoint-waiting-bytes@ { waiting-bytes }
+\        endpoint endpoint-waiting-bytes@ { waiting-bytes }
         addr bytes endpoint self
         state case
           TCP_SYN_SENT of
@@ -2882,7 +2876,7 @@ begin-module net
           endof
           drop send-ipv4-rst-for-ack exit
         endcase
-        endpoint endpoint-waiting-bytes@ waiting-bytes <>
+        endpoint endpoint-waiting-bytes@ 0>
         endpoint endpoint-tcp-state@ state <> or if
           endpoint self put-ready-endpoint
         else
@@ -2902,7 +2896,7 @@ begin-module net
           exit
         then
         addr bytes endpoint self
-        endpoint endpoint-waiting-bytes@ { waiting-bytes }
+\        endpoint endpoint-waiting-bytes@ { waiting-bytes }
         endpoint endpoint-tcp-state@ { state }
         state case
           TCP_ESTABLISHED of process-ipv4-ack-established endof
@@ -2917,7 +2911,7 @@ begin-module net
           TCP_ESTABLISHED of process-ipv4-fin-established endof
           TCP_FIN_WAIT_2 of process-ipv4-fin-fin-wait-2 endof
         endcase
-        endpoint endpoint-waiting-bytes@ waiting-bytes <>
+        endpoint endpoint-waiting-bytes@ 0>
         endpoint endpoint-tcp-state@ state <> or if
           endpoint self put-ready-endpoint
         else
@@ -3391,8 +3385,6 @@ begin-module net
       then
     ; define send-ipv4-udp-packet
 
-    true constant debug? \ DEBUG
-    
     \ Enqueue a ready receiving IP endpoint
     :noname ( endpoint self -- ) { self }
 
@@ -3553,8 +3545,6 @@ begin-module net
 
     ; define endpoint-done
 
-    false constant debug? \ DEBUG
-    
     \ Get a UDP endpoint to listen on
     :noname ( port self -- endpoint success? )
       allocate-endpoint if tuck listen-udp true else nip false then
@@ -3661,9 +3651,9 @@ begin-module net
     ; define send-fin-reply
 
     \ Send data on a TCP endpoint
-    :noname ( addr bytes endpoint self -- ) [char] A echo
-      2 pick 0= if 2drop 2drop [char] B echo exit then
-      [: { addr bytes endpoint self } [char] C echo
+    :noname ( addr bytes endpoint self -- )
+      2 pick 0= if 2drop 2drop exit then
+      [: { addr bytes endpoint self }
         endpoint endpoint-id@ { id }
         id addr bytes endpoint [: { id addr bytes endpoint }
           endpoint endpoint-tcp-state@
@@ -3679,13 +3669,13 @@ begin-module net
             
             false
           then
-        ;] over with-endpoint [char] D echo if [char] E echo
+        ;] over with-endpoint if
           endpoint start-endpoint-timeout
-          begin [char] F echo
-            id endpoint self [: { id endpoint self } [char] G echo
+          begin
+            id endpoint self [: { id endpoint self }
               endpoint endpoint-tcp-state@
               dup TCP_ESTABLISHED = swap TCP_CLOSE_WAIT = or
-              id endpoint endpoint-id@ = and if [char] H echo
+              id endpoint endpoint-id@ = and if
                 endpoint endpoint-send-done? not if
                   endpoint endpoint-send-outstanding? if
                     systick::systick-counter endpoint endpoint-timeout-start@ -
@@ -3695,19 +3685,19 @@ begin-module net
                     then
                   else
                     endpoint start-endpoint-timeout
-                  then [char] I echo
-                  endpoint endpoint-send-ready? if [char] J echo
+                  then
+                  endpoint endpoint-send-ready? if
                     endpoint get-endpoint-send-packet
                     endpoint endpoint-send-last?
                     endpoint self send-data-ack
-                    endpoint endpoint-send-ready? not true [char] K echo
+                    endpoint endpoint-send-ready? not true
                   else
-                    true true [char] L echo
+                    true true
                   then
-                else [char] M echo
+                else
                   endpoint clear-endpoint-send false
                 then
-              else [char] N echo
+              else
                 
                 [ debug? ] [if]
                   endpoint endpoint-tcp-state@
@@ -3716,9 +3706,9 @@ begin-module net
 
                 endpoint clear-endpoint-send false 
               then
-            ;] endpoint with-endpoint [char] O echo
-          while [char] P echo
-            if [char] Q echo
+            ;] endpoint with-endpoint
+          while
+            if
               task::timeout @ { old-timeout }
               endpoint endpoint-timeout@
               systick::systick-counter endpoint endpoint-timeout-start@ - -
@@ -3726,11 +3716,11 @@ begin-module net
               endpoint ['] wait-endpoint try
               dup ['] task::x-timed-out = if 2drop 0 then
               old-timeout task::timeout !
-              ?raise [char] R echo
+              ?raise
             then
-          repeat [char] S echo
-        then [char] T echo
-      ;] 2 pick with-ctrl-endpoint [char] U echo
+          repeat
+        then
+      ;] 2 pick with-ctrl-endpoint
     ; define send-tcp-endpoint
 
     \ Send a data ACK packet

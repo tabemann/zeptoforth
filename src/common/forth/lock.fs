@@ -95,6 +95,7 @@ begin-module lock
       0 wait lock-wait-next !
       lock lock-last-wait @ { last-wait }
       last-wait wait lock-wait-prev !
+      last-wait if wait last-wait lock-wait-next ! then
       wait lock lock-last-wait !
       last-wait 0= if wait lock lock-first-wait ! then
       true wait lock-wait-in-list !
@@ -133,7 +134,7 @@ begin-module lock
     
     commit-flash
     
-    \ Update the priority of the tasks holding a lock
+    \ Update the priority of the tasks holding a lock including the current task
     : update-hold-priority { lock -- }
       current-task task-priority@ current-task task-saved-priority@ min
       { priority }
@@ -150,6 +151,26 @@ begin-module lock
         priority current lock-wait-task @ adjust-priority
         current lock-wait-next @ to current
       repeat
+    ;
+    
+    \ Update the priority of the tasks holding a lock other than current task
+    : update-other-priority { lock -- }
+      lock lock-first-wait @ { current }
+      current if
+        current lock-wait-task @
+        dup task-priority@ swap task-saved-priority@ min { priority }
+        begin current while
+          current lock-wait-task @
+          dup task-priority@ swap task-saved-priority@ min
+          priority max to priority
+          current lock-wait-next @ to current
+        repeat
+        lock lock-first-wait @ to current
+        begin current while
+          priority current lock-wait-task @ adjust-priority
+          current lock-wait-next @ to current
+        repeat
+      then
     ;
 
     \ Restore a task's priority
@@ -173,6 +194,33 @@ begin-module lock
 
   commit-flash
   
+  \ Unlock a lock
+  : release-lock ( lock -- )
+    [: { lock }
+      s" BEGIN RELEASE LOCK" trace
+      lock lock-holder-task @ current-task = averts x-not-currently-owned
+      lock lock-nest-level @ 0= if
+        lock lock-first-wait @ ?dup if { wait }
+          wait lock-wait-task @ { task }
+          wait lock remove-lock-wait if
+            lock update-other-priority
+            task lock lock-holder-task !
+            task ready
+            current-task restore-priority
+          then
+        else
+          current-task restore-priority
+          0 lock lock-holder-task !
+        then
+      else
+        -1 lock lock-nest-level +!
+      then
+      s" END RELEASE LOCK" trace
+    ;] over lock-slock with-slock
+  ;
+
+  commit-flash
+  
   \ Lock a lock
   : claim-lock ( lock -- )
     [: { lock }
@@ -187,13 +235,27 @@ begin-module lock
           lock lock-slock claim-slock
           current-task check-timeout if
             wait lock remove-lock-wait if
-              lock update-hold-priority
+              lock update-other-priority
               wait lock-wait-orig-here @ ram-here!
               current-task restore-priority
               ['] x-timed-out ?raise
+            else
+              lock lock-first-wait @ ?dup if { wait }
+                wait lock-wait-task @ { task }
+                wait lock remove-lock-wait if
+                  lock update-other-priority
+                  task lock lock-holder-task !
+                  task ready
+                  current-task restore-priority
+                then
+              else
+                current-task restore-priority
+                0 lock lock-holder-task !
+              then              
             then
+          else
+            current-task lock lock-holder-task !
           then
-          current-task lock lock-holder-task !
           wait lock-wait-orig-here @ ram-here!
         else
           current-task lock lock-holder-task !
@@ -203,30 +265,6 @@ begin-module lock
         1 lock lock-nest-level +!
       then
       s" END CLAIM LOCK" trace
-    ;] over lock-slock with-slock
-  ;
-
-  \ Unlock a lock
-  : release-lock ( lock -- )
-    [: { lock }
-      s" BEGIN RELEASE LOCK" trace
-      lock lock-holder-task @ current-task = averts x-not-currently-owned
-      lock lock-nest-level @ 0= if
-        lock lock-first-wait @ ?dup if { wait }
-          wait lock-wait-task @ { task }
-          wait lock remove-lock-wait if
-            lock update-hold-priority
-            task lock lock-holder-task !
-            task ready
-          then
-        else
-          0 lock lock-holder-task !
-          current-task restore-priority
-        then
-      else
-        -1 lock lock-nest-level +!
-      then
-      s" END RELEASE LOCK" trace
     ;] over lock-slock with-slock
   ;
 
