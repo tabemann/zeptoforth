@@ -1526,7 +1526,7 @@ begin-module net
       <out-packets> self endpoint-out-packets init-object
       self endpoint-lock init-lock
       self endpoint-ctrl-lock init-lock
-      1 0 self endpoint-sema init-sema
+      no-sema-limit 0 self endpoint-sema init-sema
       false self endpoint-event !
       0 self endpoint-id !
       systick::systick-counter self endpoint-last-refresh !
