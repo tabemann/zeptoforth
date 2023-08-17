@@ -183,11 +183,12 @@ begin-module net
       self last-out-packet-seq @ { last }
       self init-out-packet-seq @ { init }
       last ack - last first - <= ack init - last init - <= and if
-        0 { count }
+        0 first { count new-first }
         self out-packet-count @ 0 ?do
           self out-packet-seqs i cells + @ { current-seq }
           last current-seq - last ack - >= if
             1 +to count
+            current-seq to new-first
           else
             leave
           then
@@ -197,9 +198,8 @@ begin-module net
         self out-packet-seqs count cells + self out-packet-seqs
         self out-packet-count @ count - cells move
         count negate self out-packet-count +!
-        self out-packet-count @ 0> if
-          self out-packet-seqs @ self out-packet-sizes h@ -
-          self first-out-packet-seq !
+        count 0> if
+          new-first self first-out-packet-seq !
         else
           ack self first-out-packet-seq !
         then
@@ -3690,7 +3690,7 @@ begin-module net
                     endpoint get-endpoint-send-packet
                     endpoint endpoint-send-last?
                     endpoint self send-data-ack
-                    false true
+                    endpoint endpoint-send-ready? not true
                   else
                     true true
                   then

@@ -86,11 +86,6 @@ begin-module wifi-server-test
     
   \ The TCP endpoint
   variable my-endpoint
-  
-  \ DEBUG
-  1000 to init-timeout
-  1000 to established-init-refresh-timeout
-  1000 to send-check-interval
 
   \ Do server transmission and receiving
   : do-server ( -- )
