@@ -3690,7 +3690,7 @@ begin-module net
                     endpoint get-endpoint-send-packet
                     endpoint endpoint-send-last?
                     endpoint self send-data-ack
-                    endpoint endpoint-send-ready? not true
+                    false true
                   else
                     true true
                   then
