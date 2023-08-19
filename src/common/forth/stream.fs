@@ -111,24 +111,24 @@ begin-module stream
 
     \ Wait to send data as parts on a stream
     : wait-send-stream-parts { stream -- }
-      stream stream-full? if
+      begin stream stream-full? while
 	1 stream stream-send-ready +!
 	stream stream-send-tqueue ['] wait-tqueue try
 	-1 stream stream-send-ready +!
 	?raise
 	stream stream-closed @ triggers x-stream-closed
-      then
+      repeat
     ;
 
     \ Wait to receive on a stream
     : wait-recv-stream { stream -- }
-      stream stream-empty? if
+      begin stream stream-empty? while
 	stream stream-closed @ triggers x-stream-closed
 	1 stream stream-recv-ready +!
 	stream stream-recv-tqueue ['] wait-tqueue try
 	-1 stream stream-recv-ready +!
 	?raise
-      then
+      repeat
     ;
 
     \ Wait to receive a minimum number of bytes on a stream
@@ -169,24 +169,24 @@ begin-module stream
     commit-flash
 
     \ Write bytes to a stream
-    : write-stream ( addr bytes stream -- )
-      dup stream-send-index @ 2 pick + over stream-data-size @ > if
-	dup stream-data-size @ over stream-send-index @ - >r
-	2 pick over send-stream-addr r@ move
-	rot r@ + rot r> - rot stream-size + swap move
+    : write-stream { addr bytes stream -- }
+      stream stream-send-index @ bytes + stream stream-data-size @ > if
+        stream stream-data-size @ stream stream-send-index @ - { first-bytes }
+        addr stream send-stream-addr first-bytes move
+        addr first-bytes + stream stream-size + bytes first-bytes - move
       else
-	send-stream-addr swap move
+        addr stream send-stream-addr bytes move
       then
     ;
 
     \ Read bytes from a stream
-    : read-stream ( addr bytes stream -- )
-      dup stream-recv-index @ 2 pick + over stream-data-size @ > if
-	dup stream-data-size @ over stream-recv-index @ - >r
-	dup recv-stream-addr 3 pick r@ move
-	stream-size + rot r@ + rot r> - move
+    : read-stream { addr bytes stream -- }
+      stream stream-recv-index @ bytes + stream stream-data-size @ > if
+        stream stream-data-size @ stream stream-recv-index @ - { first-bytes }
+        stream recv-stream-addr addr first-bytes move
+        stream stream-size + addr first-bytes + bytes first-bytes - move
       else
-	recv-stream-addr -rot move
+        stream recv-stream-addr addr bytes move
       then
     ;
 
