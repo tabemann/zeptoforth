@@ -96,7 +96,15 @@ begin-module wifi-server-test
       task::no-timeout task::timeout !
       ?raise
       server-active? @ 0<> my-endpoint @ 0<> and if
+        tx-stream stream-free ?dup if
+          [: cr ." INIT STREAM FREE: " . ;] usb::with-usb-output
+        then
         outgoing-tx-buffer tx-buffer-size tx-stream recv-stream-no-block { len }
+        len 0> len 35 <= and if
+          outgoing-tx-buffer len [:
+            cr ." STREAM FREE: " tx-stream stream-free . ." DATA " dup (.) ." : " type
+          ;] usb::with-usb-output
+        then
         outgoing-tx-buffer len my-endpoint @ my-interface send-tcp-endpoint
       then
       tx-block-sema broadcast
@@ -113,8 +121,7 @@ begin-module wifi-server-test
   : telnet-emit { W^ c -- }
     server-active? @ if
       begin
-        tx-stream stream-full? not if
-          c 1 tx-stream send-stream
+        c 1 tx-stream send-stream-partial-no-block 1 = if
           true
         else
           tx-sema give
