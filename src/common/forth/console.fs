@@ -207,12 +207,12 @@ begin-module console
 
   \ Set the current output to null within an xt
   : with-null-output ( xt -- )
-    ['] drop ['] true [: ;] rot with-output
+    ['] drop ['] true rot [: ;] swap with-output
   ;
 
   \ Set the current error output to null within an xt
   : with-null-error-output ( error-output-hook error-output?-hook xt -- )
-    ['] drop ['] true [: ;] rot with-error-output
+    ['] drop ['] true rot [: ;] swap with-error-output
   ;
 
   \ Set the curent input to serial within an xt
@@ -226,16 +226,18 @@ begin-module console
   : with-serial-output ( xt -- )
     ['] int-io::int-io-internal::do-emit
     ['] int-io::int-io-internal::do-emit?
+    rot
     ['] int-io::int-io-internal::do-flush-console
-    rot with-output
+    swap with-output
   ;
 
   \ Set the current error output to serial within an xt
   : with-serial-error-output ( xt -- )
     ['] int-io::int-io-internal::do-emit
     ['] int-io::int-io-internal::do-emit?
+    rot
     ['] int-io::int-io-internal::do-flush-console
-    rot with-error-output
+    swap with-error-output
   ;
 
   \ Set the current input to a stream within an xt

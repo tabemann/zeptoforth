@@ -310,7 +310,7 @@ begin-module wifi-server-test
   <tcp-session-handler> class-size buffer: my-tcp-session-handler
 
   \ Initialize the test
-  : init-test ( -- )
+  : init-test { addr netmask -- }
     server-slock init-slock
     0 tx-read-index !
     0 tx-write-index !
@@ -325,8 +325,8 @@ begin-module wifi-server-test
     <cyw43-control> my-cyw43-control init-object
     my-cyw43-control init-cyw43
     my-cyw43-control cyw43-frame-interface@ <interface> my-interface init-object
-    192 168 1 44 make-ipv4-addr my-interface intf-ipv4-addr!
-    255 255 255 0 make-ipv4-addr my-interface intf-ipv4-netmask!
+    addr my-interface intf-ipv4-addr!
+    netmask my-interface intf-ipv4-netmask!
     my-cyw43-control cyw43-frame-interface@ <frame-process> my-frame-process init-object
     my-interface <arp-handler> my-arp-handler init-object
     my-interface <ip-handler> my-ip-handler init-object
@@ -373,12 +373,58 @@ begin-module wifi-server-test
     then
   ;
   
+  \ Flush the telnet console
+  : telnet-flush-console ( -- )
+    server-active? @ if
+      begin
+        [:
+          tx-empty? if
+            true
+          else
+            tx-sema give
+            false
+          then
+        ;] server-slock with-slock
+        dup not if server-delay ms then
+      until
+    else
+      drop
+    then
+  ;
+  
   \ Set up telnet as a console
   : telnet-console ( -- )
     ['] telnet-key key-hook !
     ['] telnet-key? key?-hook !
     ['] telnet-emit emit-hook !
     ['] telnet-emit? emit?-hook !
+    ['] telnet-emit error-emit-hook !
+    ['] telnet-emit? error-emit?-hook !
+  ;
+  
+  \ Set the curent input to telnet within an xt
+  : with-telnet-input ( xt -- )
+    ['] telnet-key
+    ['] telnet-key?
+    rot console::with-input
+  ;
+  
+  \ Set the current output to telnet within an xt
+  : with-telnet-output ( xt -- )
+    ['] telnet-emit
+    ['] telnet-emit?
+    rot
+    ['] telnet-flush-console
+    swap console::with-output
+  ;
+
+  \ Set the current error output to telnet within an xt
+  : with-telnet-error-output ( xt -- )
+    ['] telnet-emit
+    ['] telnet-emit?
+    rot
+    ['] telnet-flush-console
+    swap console::with-error-output
   ;
 
 end-module
