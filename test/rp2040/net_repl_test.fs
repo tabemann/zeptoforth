@@ -101,8 +101,14 @@ begin-module wifi-server-test
   \ Tx timeout start
   variable tx-timeout-start
   
+  \ Rx semaphore
+  sema-size aligned-buffer: rx-sema
+  
   \ Tx semaphore
   sema-size aligned-buffer: tx-sema
+  
+  \ Tx block semaphore
+  sema-size aligned-buffer: tx-block-sema
     
   \ The TCP endpoint
   variable my-endpoint
@@ -196,28 +202,36 @@ begin-module wifi-server-test
           0 tx-write-index !
           count
         ;] server-slock with-slock { count }
-        my-endpoint @ if
-          actual-tx-buffer count my-endpoint @ my-interface ['] send-tcp-endpoint try
-          ?dup if nip nip nip nip [: display-red execute display-normal ;] usb::with-usb-output then
-        else
-          [: cr ." NO ENDPOINT " ;] usb::with-usb-output
+        count 0> if
+          my-endpoint @ if
+            actual-tx-buffer count my-endpoint @ my-interface ['] send-tcp-endpoint try
+            ?dup if nip nip nip nip [: display-red execute display-normal ;] usb::with-usb-output then
+          else
+            [: cr ." NO ENDPOINT " ;] usb::with-usb-output
+          then
         then
       then
       systick::systick-counter tx-timeout-start !
+      tx-block-sema broadcast
+      tx-block-sema give
     again
   ;
   
   \ Actually handle received data
   : do-rx-data ( c-addr bytes -- )
-    [: { c-addr bytes }
-      c-addr bytes + c-addr ?do
-        rx-full? not if
-          i c@ write-rx
-        else
-          leave
-        then
-      loop
-    ;] server-slock with-slock
+    dup 0> if
+      [: { c-addr bytes }
+        c-addr bytes + c-addr ?do
+          rx-full? not if
+            i c@ write-rx
+          else
+            leave
+          then
+        loop
+      ;] server-slock with-slock
+      rx-sema broadcast
+      rx-sema give
+    then
   ;
   
   \ EMIT for telnet
@@ -233,7 +247,15 @@ begin-module wifi-server-test
             false
           then
         ;] server-slock with-slock
-        dup not if server-delay ms then
+        dup not if
+          task::timeout @ { old-timeout }
+          server-delay 10 * task::timeout !
+          tx-block-sema ['] take try dup ['] task::x-timed-out = if
+            2drop 0
+          then
+          old-timeout task::timeout !
+          ?raise
+        then
       until
     else
       drop
@@ -261,7 +283,15 @@ begin-module wifi-server-test
             false
           then
         ;] server-slock with-slock
-        dup not if server-delay ms then
+        dup not if
+          task::timeout @ { old-timeout }
+          server-delay 10 * task::timeout !
+          rx-sema ['] take try dup ['] task::x-timed-out = if
+            2drop 0
+          then
+          old-timeout task::timeout !
+          ?raise
+        then
       else
         false
       then
@@ -319,7 +349,9 @@ begin-module wifi-server-test
     systick::systick-counter tx-timeout-start !
     false server-active? !
     0 my-endpoint !
-    no-sema-limit 0 tx-sema init-sema
+    1 0 rx-sema init-sema
+    1 0 tx-sema init-sema
+    1 0 tx-block-sema init-sema
     cyw43-clm::data cyw43-clm::size cyw43-fw::data cyw43-fw::size
     pwr-pin clk-pin dio-pin cs-pin pio-addr sm-index pio-instance
     <cyw43-control> my-cyw43-control init-object
