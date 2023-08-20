@@ -50,6 +50,9 @@ begin-module wifi-server-test
   \ Port to set server at
   6667 constant server-port
   
+  \ My MAC address
+  default-mac-addr 2constant my-mac-addr
+  
   \ Server lock
   slock-size buffer: server-slock
   
@@ -352,7 +355,7 @@ begin-module wifi-server-test
     1 0 rx-sema init-sema
     1 0 tx-sema init-sema
     1 0 tx-block-sema init-sema
-    cyw43-clm::data cyw43-clm::size cyw43-fw::data cyw43-fw::size
+    my-mac-addr cyw43-clm::data cyw43-clm::size cyw43-fw::data cyw43-fw::size
     pwr-pin clk-pin dio-pin cs-pin pio-addr sm-index pio-instance
     <cyw43-control> my-cyw43-control init-object
     my-cyw43-control init-cyw43

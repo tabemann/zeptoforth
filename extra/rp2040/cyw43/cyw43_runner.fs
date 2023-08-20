@@ -68,6 +68,14 @@ begin-module cyw43-runner
     addr 2 + c@ 16 lshift or
     addr 3 + c@ 24 lshift or
   ;
+
+  \ Do an alignment-safe 32-bit store
+  : unaligned! { x addr -- }
+    x addr c!
+    x 8 rshift addr 1+ c!
+    x 16 rshift addr 2 + c!
+    x 24 rshift addr 3 + c!
+  ;
   
   \ CYW43 log class
   <object> begin-class <cyw43-log>
@@ -524,6 +532,8 @@ begin-module cyw43-runner
 
     ; define destroy
 
+    true constant debug? \ DEBUG
+    
     \ Initialize the CYW43
     :noname { self -- }
 
@@ -602,7 +612,9 @@ begin-module cyw43-runner
       [ debug? ] [if] cr ." wifi init done" [then]
       
     ; define init-cyw43-runner
-    
+
+    false constant debug? \ DEBUG
+
     \ Initialize the CYW43 firmware log shared memory
     :noname { self -- }
 

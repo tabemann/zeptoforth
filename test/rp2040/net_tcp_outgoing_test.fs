@@ -27,6 +27,7 @@ begin-module net-test
   net import
   endpoint-process import
   alarm import
+  net-diagnostic import
   
   23 constant pwr-pin
   24 constant dio-pin
@@ -44,12 +45,17 @@ begin-module net-test
   <ip-handler> class-size buffer: my-ip-handler
   <endpoint-process> class-size buffer: my-endpoint-process
   alarm-size buffer: my-close-alarm
+  <arp-diag-handler> class-size buffer: my-arp-diag-handler
+  <ipv4-diag-handler> class-size buffer: my-ipv4-diag-handler
   
   \ Have we sent the header
   false value sent-header?
   
   \ Are we closing?
   false value closing?
+    
+  \ Our MAC address
+  default-mac-addr 2constant my-mac-addr
 
   <endpoint-handler> begin-class <tcp-echo-handler>
     
@@ -63,7 +69,7 @@ begin-module net-test
         cr ." SENDING HEADER" cr
         true to sent-header?
         s\" GET / HTTP/1.1\r\n" endpoint my-interface send-tcp-endpoint
-        s\" Host: www.google.com\r\n" endpoint my-interface send-tcp-endpoint
+        s\" Host: google.com\r\n" endpoint my-interface send-tcp-endpoint
         s\" Accept: */*\r\n" endpoint my-interface send-tcp-endpoint
         s\" Connection: close\r\n\r\n" endpoint my-interface send-tcp-endpoint
       then
@@ -94,14 +100,19 @@ begin-module net-test
   variable my-endpoint
   
   : init-test ( -- )
-    cyw43-clm::data cyw43-clm::size cyw43-fw::data cyw43-fw::size
+    my-mac-addr cyw43-clm::data cyw43-clm::size cyw43-fw::data cyw43-fw::size
     pwr-pin clk-pin dio-pin cs-pin pio-addr sm-index pio-instance
     <cyw43-control> my-cyw43-control init-object
     my-cyw43-control init-cyw43
     my-cyw43-control cyw43-frame-interface@ <interface> my-interface init-object
-    192 168 1 44 make-ipv4-addr my-interface intf-ipv4-addr!
+    192 168 86 51 make-ipv4-addr my-interface intf-ipv4-addr!
     255 255 255 0 make-ipv4-addr my-interface intf-ipv4-netmask!
+    192 168 86 1 make-ipv4-addr my-interface dns-server-ipv4-addr !
     my-cyw43-control cyw43-frame-interface@ <frame-process> my-frame-process init-object
+    <arp-diag-handler> my-arp-diag-handler init-object
+    <ipv4-diag-handler> my-ipv4-diag-handler init-object
+    my-arp-diag-handler my-frame-process add-frame-handler
+    my-ipv4-diag-handler my-frame-process add-frame-handler
     my-interface <arp-handler> my-arp-handler init-object
     my-interface <ip-handler> my-ip-handler init-object
     my-arp-handler my-frame-process add-frame-handler
@@ -113,20 +124,21 @@ begin-module net-test
 
   : run-test { D: ssid D: pass -- }
     init-test
-    begin ssid pass my-cyw43-control join-cyw43-wpa2 nip until
+    begin ssid pass my-cyw43-control join-cyw43-wpa2 .s nip until
     my-cyw43-control disable-all-cyw43-events
     my-endpoint-process run-endpoint-process
     my-frame-process run-frame-process
-    s" www.google.com" my-interface resolve-dns-ipv4-addr if { addr }
-      cr ." RESOLVED: " addr ipv4.
-      EPHEMERAL_PORT addr 80 my-interface allocate-tcp-connect-ipv4-endpoint if
-        drop cr ." CONNECTED" cr
-      else
-        drop
-      then
-    else
-      drop
-    then
+\    cr ." DNS LOOKUP"
+\    s" google.com" my-interface resolve-dns-ipv4-addr if { addr }
+\      cr ." RESOLVED: " addr ipv4.
+\      EPHEMERAL_PORT addr 80 my-interface allocate-tcp-connect-ipv4-endpoint if
+\        drop cr ." CONNECTED" cr
+\      else
+\        cr ." NOT CONNECTED" drop
+\      then
+\    else
+\      cr ." NOT RESOLVED" drop
+\    then
   ;
 
 end-module

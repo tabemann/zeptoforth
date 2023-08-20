@@ -51,6 +51,9 @@ begin-module wifi-server-test
   \ Port to set server at
   6667 constant server-port
   
+  \ My MAC address
+  default-mac-addr 2constant my-mac-addr
+  
   \ Server active
   variable server-active?
 
@@ -199,7 +202,7 @@ begin-module wifi-server-test
     tx-buffer-size tx-stream init-stream
     no-sema-limit 0 tx-sema init-sema
     no-sema-limit 0 tx-block-sema init-sema
-    cyw43-clm::data cyw43-clm::size cyw43-fw::data cyw43-fw::size
+    my-mac-addr cyw43-clm::data cyw43-clm::size cyw43-fw::data cyw43-fw::size
     pwr-pin clk-pin dio-pin cs-pin pio-addr sm-index pio-instance
     <cyw43-control> my-cyw43-control init-object
     my-cyw43-control init-cyw43

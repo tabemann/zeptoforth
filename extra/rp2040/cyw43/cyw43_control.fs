@@ -29,6 +29,9 @@ begin-module cyw43-control
   cyw43-runner import
   frame-interface import
 
+  \ Use default MAC address
+  -1. 2constant default-mac-addr
+  
   \ clmload fialed
   : x-clmload-failed ( -- ) ." clmload failed" cr ;
 
@@ -54,7 +57,7 @@ begin-module cyw43-control
 
   \ Wait a moment
   : wait-a-moment ( -- ) 100 ms ;
-  
+
   \ CYW43 control class
   <object> begin-class <cyw43-control>
 
@@ -76,6 +79,9 @@ begin-module cyw43-control
     \ CYW43 scratch size
     cyw43-scratch-size member cyw43-scratch-buf
 
+    \ MAC address ( default-mac-addr )
+    2 cells member cyw43-mac-addr
+    
     \ Initialize the CYW43
     method init-cyw43 ( self -- )
 
@@ -171,7 +177,8 @@ begin-module cyw43-control
 
     \ Constructor
     :noname { self }
-      ( clm-addr clm-bytes fw-addr fw-bytes pwr clk dio pio-addr sm pio )
+      ( D: mac-addr clm-addr clm-bytes fw-addr fw-bytes pwr clk dio pio-addr )
+      ( sm pio )
 
       \ Initialize the superclass
       self <object>->new
@@ -187,6 +194,9 @@ begin-module cyw43-control
       \ Initialize our lock
       self cyw43-lock init-lock
 
+      \ Set the MAC address
+      self cyw43-mac-addr 2!
+      
     ; define new
 
     \ Initialize the CYW43
@@ -194,6 +204,7 @@ begin-module cyw43-control
 
       \ Get the CYW43 runner up and, well, running
       self cyw43-core init-cyw43-runner
+
       self cyw43-core run-cyw43
 
       wait-a-moment
@@ -210,13 +221,32 @@ begin-module cyw43-control
       [ debug? ] [if] cr ." Getting MAC address..." [then]
 
       self 2 cells [: { self buf }
-        buf 6 s" cur_etheraddr" self iovar-cyw43> drop
-        [ debug? ] [if]
-          cr ." MAC address: "
-          6 0 ?do buf i + c@ h.2 i 5 <> if ." :" then loop
-        [then]
-        buf 2 + unaligned@ rev buf h@ rev16
-        self cyw43-core cyw43-runner::cyw43-frame-interface@ mac-addr!
+        self cyw43-mac-addr 2@ default-mac-addr d= if
+
+          buf 6 s" cur_etheraddr" self iovar-cyw43> drop
+          [ debug? ] [if]
+            cr ." MAC address: "
+            6 0 ?do buf i + c@ h.2 i 5 <> if ." :" then loop
+          [then]
+          buf 2 + unaligned@ rev buf h@ rev16
+          2dup self cyw43-core cyw43-runner::cyw43-frame-interface@ mac-addr!
+          self cyw43-mac-addr 2!
+
+        else
+
+          self cyw43-mac-addr 2@
+          $FFFF and rev16 buf h!
+          rev buf 2 + unaligned!
+          buf 6 s" cur_etheraddr" self >iovar-cyw43
+
+          [ debug? ] [if]
+            cr ." MAC address: "
+            6 0 ?do buf i + c@ h.2 i 5 <> if ." :" then loop
+          [then]
+          self cyw43-mac-addr 2@
+          self cyw43-core cyw43-runner::cyw43-frame-interface@ mac-addr!
+
+        then
       ;] with-aligned-allot
 
       self set-cyw43-country
@@ -227,29 +257,29 @@ begin-module cyw43-control
       0 IOCTL_CMD_ANTDIV 0 self >ioctl-cyw43-32
       [ debug? ] [if] cr ." IOCTL_CMD_ANTDIV=0" [then]
 
-      
       0 s" bus:txglom" self >iovar-cyw43-32
       [ debug? ] [if] cr ." bus:txglom=0" [then]
-      
+
       wait-a-moment
       8 s" ampdu_ba_wsize" self >iovar-cyw43-32
       [ debug? ] [if] cr ." ampdu_ba_wsize=8" [then]
-      
+
       wait-a-moment
       4 s" ampdu_mpdu" self >iovar-cyw43-32
       [ debug? ] [if] cr ." ampdu_mpdu=4" [then]
-      
+
       wait-a-moment
 
       self disable-spammy-cyw43-events
-      
+
       \ set wifi up
       [ debug? ] [if] cr ." Set wifi up" [then]
-      0 0 0 0 ioctl-set IOCTL_CMD_UP 0 self ioctl-cyw43
+      0 0 0 0 ioctl-set IOCTL_CMD_UP 0 self ioctl-cyw43 drop
       wait-a-moment
 
       1 110 0 self >ioctl-cyw43-32 \ SET_GMODE = auto
       0 142 0 self >ioctl-cyw43-32 \ SET_BAND = any
+
       wait-a-moment
 
     ; define init-cyw43

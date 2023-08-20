@@ -48,6 +48,9 @@ begin-module net-test
   
   \ Our port
   4444 constant my-port
+  
+  \ Our MAC address
+  default-mac-addr 2constant my-mac-addr
 
   <endpoint-handler> begin-class <tcp-echo-handler>
     
@@ -81,7 +84,7 @@ begin-module net-test
   
   : init-test ( -- )
     dma-pool::init-dma-pool
-    cyw43-clm::data cyw43-clm::size cyw43-fw::data cyw43-fw::size
+    my-mac-addr cyw43-clm::data cyw43-clm::size cyw43-fw::data cyw43-fw::size
     pwr-pin clk-pin dio-pin cs-pin pio-addr sm-index pio-instance
     <cyw43-control> my-cyw43-control init-object
     my-cyw43-control init-cyw43
