@@ -203,9 +203,9 @@ To do a restart by itself (which now does a full reset of the hardware), execute
 
 Note that e4thcom is Linux-specific. Another terminal emulator to use with zeptoforth is GNU Screen. One must configure it to use 115200 baud, 8 data bits, 1 stop bit, and currently there is no support for flow control with GNU Screen. Note that zeptoforth uses ACK and NAK for flow control, with ACK indicating readiness to accept a new line of input, and NAK indicating an error; these are not supported by GNU Screen. As a result, one would  have to use `slowpaste 5` with screen to set a proper paste speed. (This is far slower than the ACK/NAK method used with e4thcom.) Additionally, as screen does not honor directives to load files automatically, one will need to use `readbuf <path>` and `paste <path>` to paste files into the terminal manually.
 
-A better approach than using `slowpaste`, `readbuf`, and `paste` with screen is to use `codeload3.py`, which is in the `utils` directory and which honors the e4thcom directives, so it can be used with the included `setup.fs` files without modification. It is invoked as follows:
+A better approach than using `slowpaste`, `readbuf`, and `paste` with screen is to use `codeload3.sh`, which is in the `utils` directory and which honors the e4thcom directives, so it can be used with the included `setup.fs` files without modification. It is invoked as follows:
 
-    $ ./utils/codeload3.py [-p <device>] -B 115200 serial <Forth source file>
+    $ ./utils/codeload3.sh [-p <device>] -B 115200 serial <Forth source file>
 
 It has significantly better performance and functionality than screen with `slowpaste` and is the recommended method of code uploading if e4thcom is not available. Note that it requires Python 3 and pySerial, and it must be given executable permissions before it may be executed.
 
@@ -213,7 +213,7 @@ To build a complete image for zeptoforth, one uses `utils/make_image.sh` or, for
 
 In the case of an RP2040-based board one must then flash one's board with `bin/<version>/<platform>/rp2040/zeptoforth_kernel-<version>.uf2` using the USB Mass Storage device, for which one either presses the BOOTSEL button while power cycling the board, or, if one already had zeptoforth installed, one enters `bootsel` at the console, after which one mounts the USB Mass Storage device.
 
-Afterwards, one executes:
+For STM based boards one executes:
 
     utils/make_image.sh <version> <platform> <TTY device> <build>
 
@@ -221,11 +221,12 @@ which will build `bin/<version>/<platform>/zeptoforth_<build>-<version>.bin` and
 
     utils/make_uf2_image.sh <version> <platform> <TTY device> <build>
 
-which will build `bin/<version>/<platform>/zeptoforth_<build>-<version>.uf2` and the associated `.ihex` and `.bin` files. Note that when using `utils/make_uf2_image.sh` multiple times in a row the user must manually execute `erase-all` at the console between them.
+which will build `bin/<version>/<platform>/zeptoforth_<build>-<version>.uf2` and the associated `.ihex` and `.bin` files. Note that when using `utils/make_uf2_image.sh` multiple times in a row the user must manually execute `erase-all` at the console between them. If you are building a USB console based image, there `make_uf2_image.sh` will mention an extra reboot step and recommend using `download_uf2_image.sh` to avoid problems with the USB console takikng over in the middle of
+the build operation.
 
 ## Other Terminal Emulators
 
-Another terminal emulator one may use is picocom, which has many of the same considerations here as GNU Screen. For this reason it is not recommended for mass code uploads, for which `codeload3.py` is a better choice, and rather is limited in practice to interactive usage.
+Another terminal emulator one may use is picocom, which has many of the same considerations here as GNU Screen. For this reason it is not recommended for mass code uploads, for which `codeload3.sh` is a better choice, and rather is limited in practice to interactive usage.
 
 If one is using swdcom (assuming one has already built it and installed `swd2` in some suitable location such as `/usr/local/bin` and that one has already written the `zeptoforth_swdcom-<version>.bin` binary to the board), simply execute `swd2`. This will provide a terminal session with zeptoforth. To upload Forth code to execute to the board, execute in the directory from which `swd2` was executed:
 

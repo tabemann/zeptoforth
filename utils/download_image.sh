@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/usr/bin/env bash 
+set -e
 
 # Copyright (c) 2020-2023 Travis Bemann
 #
@@ -24,22 +25,22 @@ PORT=$1
 IMAGE=$2
 PROJECT=zeptoforth
 
-./utils/codeload3.py -B 115200 -p $PORT serial src/common/forth/ihex.fs
-screen -d -m $PORT 115200
-screen -X log on
-screen -X stuff 'clone\n'
-until grep 'clone_end' screenlog.0
-do
-    sleep 1
-done
-screen -X log off
-screen -X quit
-sleep 1
-sed '1d' screenlog.0 > inter
-sed '$d' inter > inter.1
-sed '$d' inter.1 > inter
-sed 's/:00000001FF clone_end/:00000001FF/' inter > inter.1
-mv inter.1 ${IMAGE}.ihex
-arm-none-eabi-objcopy -I ihex -O binary ${IMAGE}.ihex ${IMAGE}.bin
-rm screenlog.0
-rm inter
+# Get the directory of this script, we need this for the venv setup.
+# See: https://stackoverflow.com/a/20434740
+DIR="$( cd "$( dirname "$0" )" && pwd )"
+
+# Handle some non-tivial common code.
+source "${DIR}/common.sh"
+
+check_screen
+
+if [ ! $# -eq 2 ]; then
+  cat 2>&1 <<EOD
+Usage:
+    ${0} <port> <image>
+EOD
+  exit 1
+fi
+
+screen_download_ihex ${PORT} ${IMAGE} 
+
