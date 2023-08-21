@@ -532,8 +532,6 @@ begin-module cyw43-runner
 
     ; define destroy
 
-    true constant debug? \ DEBUG
-    
     \ Initialize the CYW43
     :noname { self -- }
 
@@ -612,8 +610,6 @@ begin-module cyw43-runner
       [ debug? ] [if] cr ." wifi init done" [then]
       
     ; define init-cyw43-runner
-
-    false constant debug? \ DEBUG
 
     \ Initialize the CYW43 firmware log shared memory
     :noname { self -- }
