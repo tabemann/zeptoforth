@@ -51,6 +51,9 @@ begin-module net-test
   
   \ Our MAC address
   default-mac-addr 2constant my-mac-addr
+  \ $28CDC1034612. 2constant my-mac-addr
+  
+  100000 to dhcp-discover-timeout
 
   <endpoint-handler> begin-class <tcp-echo-handler>
     
@@ -88,9 +91,11 @@ begin-module net-test
     pwr-pin clk-pin dio-pin cs-pin pio-addr sm-index pio-instance
     <cyw43-control> my-cyw43-control init-object
     my-cyw43-control init-cyw43
+    cyw43-consts::PM_NONE my-cyw43-control cyw43-power-management!
     my-cyw43-control cyw43-frame-interface@ <interface> my-interface init-object
-    192 168 1 44 make-ipv4-addr my-interface intf-ipv4-addr!
-    255 255 255 0 make-ipv4-addr my-interface intf-ipv4-netmask!
+    \ 192 168 86 54 make-ipv4-addr my-interface intf-ipv4-addr!
+    \ 192 168 86 1 make-ipv4-addr my-interface gateway-ipv4-addr !
+    \ 255 255 255 0 make-ipv4-addr my-interface intf-ipv4-netmask!
     my-cyw43-control cyw43-frame-interface@ <frame-process> my-frame-process init-object
     \ <arp-diag-handler> my-arp-diag-handler init-object
     \ <ipv4-diag-handler> my-ipv4-diag-handler init-object
@@ -112,10 +117,16 @@ begin-module net-test
 
   : run-test { D: ssid D: pass -- }
     init-test
-    begin ssid pass my-cyw43-control join-cyw43-wpa2 nip until
+    begin ssid pass my-cyw43-control join-cyw43-wpa2 swap . until
     my-cyw43-control disable-all-cyw43-events
     my-endpoint-process run-endpoint-process
     my-frame-process run-frame-process
+    cr ." Discovering IPv4 address..."
+    my-interface discover-ipv4-addr
+    my-interface intf-ipv4-addr@ cr ." IPv4 address: " ipv4.
+    my-interface intf-ipv4-netmask@ cr ." IPv4 netmask: " ipv4.
+    my-interface gateway-ipv4-addr@ cr ." Gateway IPv4 address: " ipv4.
+    my-interface dns-server-ipv4-addr@ cr ." DNS server IPv4 address: " ipv4.
   ;
 
 end-module

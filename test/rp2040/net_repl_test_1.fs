@@ -207,8 +207,6 @@ begin-module wifi-server-test
     <cyw43-control> my-cyw43-control init-object
     my-cyw43-control init-cyw43
     my-cyw43-control cyw43-frame-interface@ <interface> my-interface init-object
-    192 168 1 44 make-ipv4-addr my-interface intf-ipv4-addr!
-    255 255 255 0 make-ipv4-addr my-interface intf-ipv4-netmask!
     my-cyw43-control cyw43-frame-interface@ <frame-process> my-frame-process init-object
     my-interface <arp-handler> my-arp-handler init-object
     my-interface <ip-handler> my-ip-handler init-object
@@ -244,6 +242,12 @@ begin-module wifi-server-test
     EVENT_DISASSOC_IND my-cyw43-control cyw43-control::enable-cyw43-event
     my-endpoint-process run-endpoint-process
     my-frame-process run-frame-process
+    cr ." Discovering IPv4 address..."
+    my-interface discover-ipv4-addr
+    my-interface intf-ipv4-addr@ cr ." IPv4 address: " ipv4.
+    my-interface intf-ipv4-netmask@ cr ." IPv4 netmask: " ipv4.
+    my-interface gateway-ipv4-addr@ cr ." Gateway IPv4 address: " ipv4.
+    my-interface dns-server-ipv4-addr@ cr ." DNS server IPv4 address: " ipv4.
   ;
 
   \ Start the server

@@ -25,6 +25,14 @@ begin-module net-misc
   \ Are we debugging?
   false constant debug?
   
+  \ Make an IPv4 address
+  : make-ipv4-addr ( addr0 addr1 addr2 addr3 -- addr )
+    $FF and
+    swap $FF and 8 lshift or
+    swap $FF and 16 lshift or
+    swap $FF and 24 lshift or
+  ;
+
   \ The MTU size
   1500 constant mtu-size
 
@@ -78,6 +86,12 @@ begin-module net-misc
 
   \ DNS source port
   65535 constant dns-src-port
+
+  \ DHCP client port
+  68 constant dhcp-client-port
+
+  \ DHCP server port
+  67 constant dhcp-server-port
 
   \ Parse DNS name depth
   16 constant parse-dns-name-depth
@@ -135,6 +149,22 @@ begin-module net-misc
   
   \ Close timeout
   100000 value close-timeout
+
+  \ IPv4 discover attempts
+  50000 value dhcp-discover-timeout
+
+  \ Default DHCP renewal time
+  86400 10000 * 2 / value default-dhcp-renew-interval
+  
+  \ DHCP renewal retry divisor
+  60 value dhcp-renew-retry-divisor
+  
+  \ DHCP discovery state
+  0 constant dhcp-not-discovering
+  1 constant dhcp-wait-offer
+  2 constant dhcp-wait-ack
+  3 constant dhcp-discovered
+  4 constant dhcp-renewing
   
   \ The Ethernet header structure
   begin-structure ethernet-header-size
@@ -280,6 +310,65 @@ begin-module net-misc
     hfield: tcp-urgent-ptr
   end-structure
 
+  \ DHCP header structure
+  begin-structure dhcp-header-size
+    cfield: dhcp-op
+    cfield: dhcp-htype
+    cfield: dhcp-hlen
+    cfield: dhcp-hops
+    field: dhcp-xid
+    hfield: dhcp-secs
+    hfield: dhcp-flags
+    field: dhcp-ciaddr
+    field: dhcp-yiaddr
+    field: dhcp-siaddr
+    field: dhcp-giaddr
+    16 +field dhcp-chaddr
+    192 +field dhcp-filler
+    field: dhcp-magic
+  end-structure
+
+  \ DHCP magic cookie
+  $63825363 constant DHCP_MAGIC_COOKIE
+
+  \ DHCP HTYPE (i.e. Ethernet)
+  1 constant DHCP_HTYPE
+
+  \ DHCP HLEN (i.e. Ethernet)
+  6 constant DHCP_HLEN
+
+  \ DHCP OP
+  1 constant DHCP_OP_CLIENT
+  2 constant DHCP_OP_SERVER
+
+  \ DHCP message types
+  1 constant DHCPDISCOVER
+  2 constant DHCPOFFER
+  3 constant DHCPREQUEST
+  4 constant DHCPDECLINE
+  5 constant DHCPACK
+  6 constant DHCPNAK
+  7 constant DHCPRELEASE
+
+  \ DHCP option types
+  50 constant DHCP_REQ_IPV4_ADDR \ 4 byte payload
+  51 constant DHCP_IPV4_ADDR_LEASE_TIME \ 4 byte payload, in seconds
+  53 constant DHCP_MESSAGE_TYPE \ 1 byte payload
+  54 constant DHCP_SERVER_IPV4_ADDR \ 4 byte payload
+  55 constant DHCP_PARAM_REQ_LIST \ At least 1 byte
+  255 constant DHCP_END \ 0 bytes
+  0 constant DHCP_PAD \ 0 bytes
+
+  \ DHCP services
+  1 constant DHCP_SERVICE_SUBNET_MASK
+  3 constant DHCP_SERVICE_ROUTER
+  6 constant DHCP_SERVICE_DNS_SERVER
+  15 constant DHCP_SERVICE_DNS_NAME
+
+  \ Default requested IP address
+  0 0 0 0 make-ipv4-addr constant DEFAULT_IPV4_ADDR
+\  192 168 1 100 make-ipv4-addr constant DEFAULT_IPV4_ADDR
+  
   \ DNS flags
   15 bit constant DNS_QR_RESPONSE
   11 constant DNS_OPCODE_LSB
@@ -412,14 +501,6 @@ begin-module net-misc
     addr bytes zero-offset compute-checksum
   ;
   
-  \ Make an IPv4 address
-  : make-ipv4-addr ( addr0 addr1 addr2 addr3 -- addr )
-    $FF and
-    swap $FF and 8 lshift or
-    swap $FF and 16 lshift or
-    swap $FF and 24 lshift or
-  ;
-
   \ Get whether an IPv4 packet is fragmented
   : ipv4-fragment? ( addr -- fragmented? )
     ipv4-flags-fragment-offset h@ rev16
@@ -612,6 +693,72 @@ begin-module net-misc
     ephemeral-port-lock lock::init-lock
     rng::random MAX_EPHEMERAL_PORT MIN_EPHEMERAL_PORT - umod
     MIN_EPHEMERAL_PORT + current-ephemeral-port !
+  ;
+
+  \ Get a fixed size DHCP option
+  : find-fixed-dhcp-opt { opt len addr bytes -- addr' found? }
+    dhcp-header-size +to addr
+    [ dhcp-header-size negate ] literal +to bytes
+    begin
+      bytes 0> if
+        addr c@ DHCP_END = if
+          0 false true
+        else
+          addr c@ DHCP_PAD = if
+            1 +to addr
+            -1 +to bytes
+            false
+          else
+            bytes 1 > if
+              addr 1+ c@ { len' }
+              bytes len' 2 + < if 0 false true then
+              addr c@ opt = if
+                len len' = if addr 2 + true true else 0 false true then
+              else
+                len' 2 + +to addr
+                len' 2 + negate +to bytes
+                false
+              then
+            else
+              0 false true
+            then
+          then
+        then
+      then
+    until
+  ;
+
+  \ Get a variable size DHCP option
+  : find-var-dhcp-opt { opt addr bytes -- addr' len found? }
+    dhcp-header-size +to addr
+    [ dhcp-header-size negate ] literal +to bytes
+    begin
+      bytes 0> if
+        addr c@ DHCP_END = if
+          0 0 false true
+        else
+          addr c@ DHCP_PAD = if
+            1 +to addr
+            -1 +to bytes
+            false
+          else
+            bytes 1 > if
+              addr 1+ c@ { len' }
+              bytes len' 2 + < if 0 0 false true then
+              addr c@ opt = if
+                addr 2 + len' true true
+              else
+                len' 2 + +to addr
+                len' 2 + negate +to bytes
+                false
+              then
+            else
+              0 0 false true
+            then
+          then
+        then
+      then
+    until
   ;
 
 end-module

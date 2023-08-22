@@ -285,14 +285,14 @@ begin-module cyw43-control
     ; define init-cyw43
 
     \ Set power management
-    :noname { pm self -- } ." *A* "
-      pm cyw43-pm-mode 2 = if ." *B* "
-        pm cyw43-pm-sleep-rest-ms s" pm2_sleep_ret" self >iovar-cyw43-32 ." *C* "
-        pm cyw43-pm-beacon-period s" bcn_li_bcn" self >iovar-cyw43-32 ." *D* "
-        pm cyw43-pm-dtim-period s" bcn_li_dtim" self >iovar-cyw43-32 ." *E* "
-        pm cyw43-pm-assoc s" assoc_listen" self >iovar-cyw43-32 ." *F* "
+    :noname { pm self -- }
+      pm cyw43-pm-mode 2 = if
+        pm cyw43-pm-sleep-rest-ms s" pm2_sleep_ret" self >iovar-cyw43-32
+        pm cyw43-pm-beacon-period s" bcn_li_bcn" self >iovar-cyw43-32
+        pm cyw43-pm-dtim-period s" bcn_li_dtim" self >iovar-cyw43-32
+        pm cyw43-pm-assoc s" assoc_listen" self >iovar-cyw43-32
       then
-      pm cyw43-pm-mode 86 0 self >ioctl-cyw43-32 ." *G* "
+      pm cyw43-pm-mode 86 0 self >ioctl-cyw43-32
     ; define cyw43-power-management!
     
     \ Join an open AP

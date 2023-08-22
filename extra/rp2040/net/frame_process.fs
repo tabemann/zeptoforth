@@ -142,7 +142,7 @@ begin-module frame-process
         current next-frame-handler@ to current
       repeat
     ; define process-refresh
-    
+
     \ Run frame processor
     :noname { self -- }
       self 1 [: { self }
@@ -153,6 +153,12 @@ begin-module frame-process
             get-rx-frame
             no-timeout task::timeout !
             dup ethernet-header-size >= if
+
+              [ debug? ] [if]
+                self mtu-buf over [: cr ." INCOMING: " over + dump ;]
+                usb::with-usb-output
+              [then]
+              
               self process-frame
               self process-refresh
             else

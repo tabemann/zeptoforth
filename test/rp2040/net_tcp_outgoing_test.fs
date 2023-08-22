@@ -69,7 +69,7 @@ begin-module net-test
         cr ." SENDING HEADER" cr
         true to sent-header?
         s\" GET / HTTP/1.1\r\n" endpoint my-interface send-tcp-endpoint
-        s\" Host: google.com\r\n" endpoint my-interface send-tcp-endpoint
+        s\" Host: www.google.com\r\n" endpoint my-interface send-tcp-endpoint
         s\" Accept: */*\r\n" endpoint my-interface send-tcp-endpoint
         s\" Connection: close\r\n\r\n" endpoint my-interface send-tcp-endpoint
       then
@@ -104,15 +104,17 @@ begin-module net-test
     pwr-pin clk-pin dio-pin cs-pin pio-addr sm-index pio-instance
     <cyw43-control> my-cyw43-control init-object
     my-cyw43-control init-cyw43
+    cyw43-consts::PM_NONE my-cyw43-control cyw43-power-management!
     my-cyw43-control cyw43-frame-interface@ <interface> my-interface init-object
-    192 168 86 51 make-ipv4-addr my-interface intf-ipv4-addr!
-    255 255 255 0 make-ipv4-addr my-interface intf-ipv4-netmask!
-    192 168 86 1 make-ipv4-addr my-interface dns-server-ipv4-addr !
+    \ 192 168 86 49 make-ipv4-addr my-interface intf-ipv4-addr!
+    \ 192 168 86 1 make-ipv4-addr my-interface gateway-ipv4-addr !
+    \ 255 255 255 0 make-ipv4-addr my-interface intf-ipv4-netmask!
+    \ 192 168 86 1 make-ipv4-addr my-interface dns-server-ipv4-addr !
     my-cyw43-control cyw43-frame-interface@ <frame-process> my-frame-process init-object
-    <arp-diag-handler> my-arp-diag-handler init-object
-    <ipv4-diag-handler> my-ipv4-diag-handler init-object
-    my-arp-diag-handler my-frame-process add-frame-handler
-    my-ipv4-diag-handler my-frame-process add-frame-handler
+    \ <arp-diag-handler> my-arp-diag-handler init-object
+    \ <ipv4-diag-handler> my-ipv4-diag-handler init-object
+    \ my-arp-diag-handler my-frame-process add-frame-handler
+    \ my-ipv4-diag-handler my-frame-process add-frame-handler
     my-interface <arp-handler> my-arp-handler init-object
     my-interface <ip-handler> my-ip-handler init-object
     my-arp-handler my-frame-process add-frame-handler
@@ -128,17 +130,23 @@ begin-module net-test
     my-cyw43-control disable-all-cyw43-events
     my-endpoint-process run-endpoint-process
     my-frame-process run-frame-process
-\    cr ." DNS LOOKUP"
-\    s" google.com" my-interface resolve-dns-ipv4-addr if { addr }
-\      cr ." RESOLVED: " addr ipv4.
-\      EPHEMERAL_PORT addr 80 my-interface allocate-tcp-connect-ipv4-endpoint if
-\        drop cr ." CONNECTED" cr
-\      else
-\        cr ." NOT CONNECTED" drop
-\      then
-\    else
-\      cr ." NOT RESOLVED" drop
-\    then
+    cr ." Discovering IPv4 address..."
+    my-interface discover-ipv4-addr
+    my-interface intf-ipv4-addr@ cr ." IPv4 address: " ipv4.
+    my-interface intf-ipv4-netmask@ cr ." IPv4 netmask: " ipv4.
+    my-interface gateway-ipv4-addr@ cr ." Gateway IPv4 address: " ipv4.
+    my-interface dns-server-ipv4-addr@ cr ." DNS server IPv4 address: " ipv4.
+    cr ." DNS LOOKUP"
+    s" www.google.com" my-interface resolve-dns-ipv4-addr if { addr }
+      cr ." RESOLVED: " addr ipv4.
+      EPHEMERAL_PORT addr 80 my-interface allocate-tcp-connect-ipv4-endpoint if
+        drop cr ." CONNECTED" cr
+      else
+        cr ." NOT CONNECTED" drop
+      then
+    else
+      cr ." NOT RESOLVED" drop
+    then
   ;
 
 end-module

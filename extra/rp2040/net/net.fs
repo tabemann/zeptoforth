@@ -2220,6 +2220,27 @@ begin-module net
     \ Maximum DNS resolution attempts
     cell member max-dns-resolve-attempts
 
+    \ Curreht DHCP xid
+    cell member current-dhcp-xid
+
+    \ Current DHCP server IPv4 address
+    cell member dhcp-server-ipv4-addr
+
+    \ Current DHCP requested IPv4 address
+    cell member dhcp-req-ipv4-addr
+    
+    \ DHCP discovery state
+    cell member dhcp-discover-state
+
+    \ DHCP renewal interval
+    cell member dhcp-renew-interval
+
+    \ DHCP renewal start time
+    cell member dhcp-renew-start
+    
+    \ DHCP semaphore
+    sema-size member dhcp-sema
+    
     \ DNS resolution semaphore
     sema-size member dns-resolve-sema
 
@@ -2267,6 +2288,12 @@ begin-module net
 
     \ Set the gateway IPv4 address
     method gateway-ipv4-addr! ( addr self -- )
+
+    \ Get the DNS server IPv4 address
+    method dns-server-ipv4-addr@ ( self -- addr )
+
+    \ Set the DNS server IPv4 address
+    method dns-server-ipv4-addr! ( addr self -- )
     
     \ Get the IPv4 broadcast address
     method intf-ipv4-broadcast@ ( self -- addr )
@@ -2417,6 +2444,11 @@ begin-module net
     method construct-and-send-frame
     ( ? bytes xt self -- ? sent? ) ( xt: ? buf -- ? send? )
 
+    \ Construct and send a IPv4 packet with a specified source IPv4 address
+    method construct-and-send-ipv4-packet-with-src-addr
+    ( ? D: mac-addr src-addr dest-addr protocol bytes xt self -- ? sent? )
+    ( xt: ? buf -- ? send? )
+
     \ Construct an IPv4 packet
     method construct-and-send-ipv4-packet
     ( ? D: mac-addr dest-addr protocol bytes xt self -- ? sent? )
@@ -2437,6 +2469,13 @@ begin-module net
 
     \ Send a DNS request packet
     method send-ipv4-dns-request ( c-addr bytes self -- )
+
+    \ Send a UDP packet with a specified source IPv4 address and destination
+    \ MAC address
+    method send-ipv4-udp-packet-raw
+    ( ? D: mac-addr src-addr src-port dest-addr dest-port bytes xt self -- )
+    ( ? success? )
+    ( xt: ? buf -- ? sent? )    
     
     \ Send a UDP packet
     method send-ipv4-udp-packet
@@ -2492,6 +2531,24 @@ begin-module net
     \ Refresh an interface
     method refresh-interface ( self -- )
     
+    \ Start DHCP discovery
+    method discover-ipv4-addr ( self -- )
+
+    \ Send a DHCPDISCOVER packet
+    method send-dhcpdiscover ( self -- )
+
+    \ Send a DHCPREQUEST packet
+    method send-dhcprequest ( self -- )
+
+    \ Process an IPv4 DHCP packet
+    method process-ipv4-dhcp-packet ( addr bytes self -- )
+
+    \ Process an IPv4 DHCPOFFER packet
+    method process-ipv4-dhcpoffer ( addr bytes self -- )
+
+    \ Process an IPv4 DHCPACK packet
+    method process-ipv4-dhcpack ( addr bytes self -- )
+    
   end-class
 
   \ Implement the interface class
@@ -2501,7 +2558,7 @@ begin-module net
     :noname { frame-interface self -- }
       self <object>->new
       frame-interface self out-frame-interface !
-      0 self intf-ipv4-addr !
+      DEFAULT_IPV4_ADDR self intf-ipv4-addr !
       255 255 255 0 make-ipv4-addr self intf-ipv4-netmask !
       192 168 1 254 make-ipv4-addr self gateway-ipv4-addr !
       8 8 8 8 make-ipv4-addr self dns-server-ipv4-addr !
@@ -2512,6 +2569,13 @@ begin-module net
       50000 self dns-resolve-interval !
       5 self max-dns-resolve-attempts !
       1 0 self dns-resolve-sema init-sema
+      0 self current-dhcp-xid !
+      0 self dhcp-server-ipv4-addr !
+      DEFAULT_IPV4_ADDR self dhcp-req-ipv4-addr !
+      dhcp-not-discovering self dhcp-discover-state !
+      systick::systick-counter self dhcp-renew-start !
+      default-dhcp-renew-interval self dhcp-renew-interval !
+      no-sema-limit 0 self dhcp-sema init-sema
       self outgoing-buf-lock init-lock
       max-endpoints 0 ?do
         <endpoint> self intf-endpoints <endpoint> class-size i * + init-object
@@ -2553,6 +2617,16 @@ begin-module net
     :noname ( addr self -- )
       gateway-ipv4-addr !
     ; define gateway-ipv4-addr!
+
+    \ Get the DNS server IPv4 address
+    :noname ( self -- addr )
+      dns-server-ipv4-addr @
+    ; define dns-server-ipv4-addr@
+    
+    \ Set the DNS server IPv4 address
+    :noname ( addr self -- )
+      dns-server-ipv4-addr !
+    ; define dns-server-ipv4-addr!
 
     \ Get the IPv4 broadcast address
     :noname { self -- addr }
@@ -3087,7 +3161,7 @@ begin-module net
         drop 2drop 2drop
       then
     ; define process-ipv4-rst-packet
-          
+
     \ Process an IPv4 UDP packet
     :noname { src-addr protocol addr bytes self -- }
       bytes udp-header-size >= if
@@ -3105,6 +3179,12 @@ begin-module net
         addr udp-src-port h@ rev16 dns-port = and if
           addr udp-header-size + bytes udp-header-size -
           self process-ipv4-dns-packet
+          exit
+        then
+        addr udp-src-port h@ rev16 dhcp-server-port =
+        addr udp-dest-port h@ rev16 dhcp-client-port = and if
+          addr udp-header-size + bytes udp-header-size -
+          self process-ipv4-dhcp-packet
           exit
         then
         max-endpoints 0 ?do
@@ -3234,11 +3314,11 @@ begin-module net
       ;] over outgoing-buf-lock with-lock
     ; define construct-and-send-frame
 
-    \ Construct and send a IPv4 packet
-    :noname ( ? D: mac-addr dest-addr protocol bytes xt self -- ? sent? )
-      ( xt: ? buf -- ? send? )
+    \ Construct and send a IPv4 packet with a specified source IPv4 address
+    :noname ( ? D: mac-addr src-addr dest-addr protocol bytes xt self -- )
+      ( ? sent? ) ( xt: ? buf -- ? send? )
       2 pick [ ethernet-header-size ipv4-header-size + ] literal + over
-      [: { D: mac-addr dest-addr protocol bytes xt self buf }
+      [: { D: mac-addr src-addr dest-addr protocol bytes xt self buf }
         mac-addr buf ethh-destination-mac mac!
         self intf-mac-addr@ buf ethh-source-mac mac!
         [ ETHER_TYPE_IPV4 rev16 ] literal buf ethh-ether-type h!
@@ -3250,12 +3330,26 @@ begin-module net
         [ DF 13 lshift rev16 ] literal ip-buf ipv4-flags-fragment-offset h!
         self intf-ttl c@ ip-buf ipv4-ttl c!
         protocol ip-buf ipv4-protocol c!
-        self intf-ipv4-addr@ rev ip-buf ipv4-src-addr unaligned!
+        src-addr rev ip-buf ipv4-src-addr unaligned!
         dest-addr rev ip-buf ipv4-dest-addr unaligned!
         ip-buf ipv4-header-size 0 ipv4-header-checksum compute-inet-checksum
         rev16 ip-buf ipv4-header-checksum h!
         ip-buf ipv4-header-size + xt execute
+
+        [ debug? ] [if]
+          buf bytes [ ethernet-header-size ipv4-header-size + ] literal +
+          [: over + dump ;] usb::with-usb-output
+        [then]
+        
       ;] swap construct-and-send-frame
+    ; define construct-and-send-ipv4-packet-with-src-addr
+
+    \ Construct and send a IPv4 packet
+    :noname ( ? D: mac-addr dest-addr protocol bytes xt self -- ? sent? )
+      ( xt: ? buf -- ? send? )
+      dup intf-ipv4-addr @
+      swap >r swap >r swap >r swap >r swap r> r> r> r>
+      construct-and-send-ipv4-packet-with-src-addr
     ; define construct-and-send-ipv4-packet
 
     \ Resolve an IPv4 address's MAC address
@@ -3367,6 +3461,21 @@ begin-module net
         true
       ;] self send-ipv4-udp-packet drop
     ; define send-ipv4-dns-request
+
+    \ Send a UDP packet with a specified source IPv4 address
+    :noname
+      { D: mac-addr src-addr src-port dest-addr dest-port bytes xt self -- }
+      ( success? ) ( xt: ? buf -- ? sent? )
+      src-port dest-port bytes xt self
+      mac-addr src-addr dest-addr PROTOCOL_UDP bytes udp-header-size + [:
+        { src-port dest-port bytes xt self buf }
+        src-port rev16 buf udp-src-port h!
+        dest-port rev16 buf udp-dest-port h!
+        bytes udp-header-size + rev16 buf udp-total-len h!
+        0 buf udp-checksum h!
+        buf udp-header-size + xt execute
+      ;] self construct-and-send-ipv4-packet-with-src-addr
+    ; define send-ipv4-udp-packet-raw
 
     \ Send a UDP packet
     :noname { src-port dest-addr dest-port bytes xt self -- success? }
@@ -3756,8 +3865,289 @@ begin-module net
       ;] 6 pick construct-and-send-ipv4-packet drop
     ; define send-data-ack
 
+    \ Start DHCP discovery
+    :noname { self -- }
+      \ rng::random self current-dhcp-xid !
+      self send-dhcpdiscover
+      begin
+        task::timeout @ { old-timeout }
+        dhcp-discover-timeout task::timeout !
+        self dhcp-sema ['] take try dup ['] task::x-timed-out = if
+          2drop 0
+        then
+        old-timeout task::timeout !
+        ?raise
+        self dhcp-discover-state @ dhcp-discovered = if
+          true
+        else
+          self dhcp-discover-state @ case
+            dhcp-wait-offer of self send-dhcpdiscover endof
+            dhcp-wait-ack of self send-dhcprequest endof
+          endcase
+          false
+        then
+      until
+    ; define discover-ipv4-addr
+
+    \ Send a DHCPDISCOVER packet
+    :noname { self -- }
+      [ debug? ] [if]
+        [: cr ." Sending DHCPDISCOVER" ;] usb::with-usb-output
+      [then]
+      rng::random self current-dhcp-xid !
+      dhcp-wait-offer self dhcp-discover-state !
+      self
+      $FFFFFFFFFFFF.
+      $00000000 dhcp-client-port
+      $FFFFFFFF dhcp-server-port
+      [ dhcp-header-size 3 + 6 + 6 + 1 + ] literal [: { self buf }
+        [ debug? ] [if]
+          [: cr ." Constructing DHCPDISCOVER" ;] usb::with-usb-output
+        [then]
+        DHCP_OP_CLIENT buf dhcp-op c!
+        DHCP_HTYPE buf dhcp-htype c!
+        DHCP_HLEN buf dhcp-hlen c!
+        0 buf dhcp-hops c!
+        self current-dhcp-xid @ rev buf dhcp-xid unaligned!
+        [ 0 rev16 ] literal buf dhcp-secs hunaligned!
+        [ 0 rev16 ] literal buf dhcp-flags hunaligned!
+        [ 0 rev ] literal buf dhcp-ciaddr unaligned!
+        [ 0 rev ] literal buf dhcp-yiaddr unaligned!
+        [ 0 rev ] literal buf dhcp-siaddr unaligned!
+        [ 0 rev ] literal buf dhcp-giaddr unaligned!
+        buf dhcp-chaddr 16 0 fill
+        self intf-mac-addr@
+        rev16 buf dhcp-chaddr hunaligned!
+        rev buf dhcp-chaddr 2 + unaligned!
+        buf dhcp-filler 192 0 fill
+        [ DHCP_MAGIC_COOKIE rev ] literal buf dhcp-magic unaligned!
+        dhcp-header-size +to buf
+        DHCP_MESSAGE_TYPE buf c!
+        1 buf 1 + c!
+        DHCPDISCOVER buf 2 + c!
+        3 +to buf
+        DHCP_REQ_IPV4_ADDR buf c!
+        4 buf 1 + c!
+        [ DEFAULT_IPV4_ADDR rev ] literal buf 2 + unaligned!
+        6 +to buf
+        DHCP_PARAM_REQ_LIST buf c!
+        4 buf 1 + c!
+        DHCP_SERVICE_SUBNET_MASK buf 2 + c!
+        DHCP_SERVICE_ROUTER buf 3 + c!
+        DHCP_SERVICE_DNS_NAME buf 4 + c!
+        DHCP_SERVICE_DNS_SERVER buf 5 + c!
+        6 +to buf
+        DHCP_END buf c!
+        true
+        [ debug? ] [if]
+          [: cr ." Constructed DHCPDISCOVER packet" ;] usb::with-usb-output
+        [then]
+      ;] self send-ipv4-udp-packet-raw drop
+      [ debug? ] [if]
+        [: cr ." Waiting for DHCPOFFER" ;] usb::with-usb-output
+      [then]
+    ; define send-dhcpdiscover
+
+    \ Send a DHCPREQUEST packet
+    :noname { self -- }
+      [ debug? ] [if]
+        [: cr ." Sending DHCPREQUEST" ;] usb::with-usb-output
+      [then]
+      self
+      $FFFFFFFFFFFF.
+      $00000000 dhcp-client-port
+      $FFFFFFFF dhcp-server-port
+      [ dhcp-header-size 3 + 6 + 6 + 1 + ] literal [: { self buf }
+        [ debug? ] [if]
+          [: cr ." Constructing DHCPREQUEST" ;] usb::with-usb-output
+        [then]
+        DHCP_OP_CLIENT buf dhcp-op c!
+        DHCP_HTYPE buf dhcp-htype c!
+        DHCP_HLEN buf dhcp-hlen c!
+        0 buf dhcp-hops c!
+        self current-dhcp-xid @ rev buf dhcp-xid unaligned!
+        [ 0 rev16 ] literal buf dhcp-secs hunaligned!
+        [ 0 rev16 ] literal buf dhcp-flags hunaligned!
+        [ 0 rev ] literal buf dhcp-ciaddr unaligned!
+        [ 0 rev ] literal buf dhcp-yiaddr unaligned!
+        self dhcp-server-ipv4-addr @ rev buf dhcp-siaddr unaligned!
+        [ 0 rev ] literal buf dhcp-giaddr unaligned!
+        buf dhcp-chaddr 16 0 fill
+        self intf-mac-addr@
+        rev16 buf dhcp-chaddr hunaligned!
+        rev buf dhcp-chaddr 2 + unaligned!
+        buf dhcp-filler 192 0 fill
+        [ DHCP_MAGIC_COOKIE rev ] literal buf dhcp-magic unaligned!
+        dhcp-header-size +to buf
+        DHCP_MESSAGE_TYPE buf c!
+        1 buf 1 + c!
+        DHCPREQUEST buf 2 + c!
+        3 +to buf
+        DHCP_REQ_IPV4_ADDR buf c!
+        4 buf 1 + c!
+        self dhcp-req-ipv4-addr @ rev buf 2 + unaligned!
+        6 +to buf
+        DHCP_SERVER_IPV4_ADDR buf c!
+        4 buf 1 + c!
+        self dhcp-server-ipv4-addr @ rev buf 2 + unaligned!
+        6 +to buf
+        DHCP_END buf c!
+        true
+        [ debug? ] [if]
+          [: cr ." Constructed DHCPREQUEST packet" ;] usb::with-usb-output
+        [then]
+      ;] self send-ipv4-udp-packet-raw drop
+      [ debug? ] [if]
+        [: cr ." Waiting for DHCPACK" ;] usb::with-usb-output
+      [then]
+      self dhcp-discover-state @
+      dup dhcp-discovered <> swap dhcp-renewing <> and if
+        dhcp-wait-ack self dhcp-discover-state !
+      then
+    ; define send-dhcprequest
+
+    \ Process an IPv4 DHCP packet
+    :noname { addr bytes self -- }
+      [ debug? ] [if]
+        [: cr ." Receiving DHCP packet" ;] usb::with-usb-output
+      [then]
+      bytes dhcp-header-size < if
+        [ debug? ] [if]
+          [: cr ." DHCP packet too small" ;] usb::with-usb-output
+        [then]
+        exit
+      then
+      addr dhcp-op c@ DHCP_OP_SERVER <> if
+        [ debug? ] [if]
+          [: cr ." DHCP packet is not a server packet" ;] usb::with-usb-output
+        [then]
+        exit
+      then
+      addr dhcp-xid unaligned@ rev self current-dhcp-xid @ <> if
+        [ debug? ] [if]
+          [: cr ." DHCP packet XID does not match" ;] usb::with-usb-output
+        [then]
+        exit
+      then
+      DHCP_MESSAGE_TYPE 1 addr bytes find-fixed-dhcp-opt if
+        [ debug? ] [if]
+          [: cr ." Got DHCP message type: " dup c@ . ;] usb::with-usb-output
+        [then]
+        c@ case
+          DHCPOFFER of addr bytes self process-ipv4-dhcpoffer endof
+          DHCPACK of addr bytes self process-ipv4-dhcpack endof
+        endcase
+      else
+        [ debug? ] [if]
+          [: cr ." Did not get message type" ;] usb::with-usb-output
+        [then]
+        drop exit
+      then
+    ; define process-ipv4-dhcp-packet
+
+    \ Process an IPv4 DHCPOFFER packet
+    :noname { addr bytes self -- }
+      [ debug? ] [if]
+        [: cr ." Sending DHCPREQUEST" ;] usb::with-usb-output
+      [then]
+      addr dhcp-yiaddr unaligned@ rev self dhcp-req-ipv4-addr !
+      addr dhcp-siaddr unaligned@ rev self dhcp-server-ipv4-addr !
+      self send-dhcprequest
+    ; define process-ipv4-dhcpoffer
+
+    \ Process an IPv4 DHCPACK packet
+    :noname { addr bytes self -- }
+      addr dhcp-yiaddr unaligned@ rev self dhcp-req-ipv4-addr @ = if
+        self dhcp-req-ipv4-addr @ { ipv4-addr }
+        DHCP_IPV4_ADDR_LEASE_TIME 4 addr bytes find-fixed-dhcp-opt if
+          [ debug? ] [if]
+            [: cr ." Got DHCP lease time" ;] usb::with-usb-output
+          [then]
+          unaligned@ rev
+        else
+          [ debug? ] [if]
+            [: cr ." Did not find lease time" ;] usb::with-usb-output
+          [then]
+          drop 86400
+        then
+        { renew-interval }
+        DHCP_SERVICE_SUBNET_MASK 4 addr bytes find-fixed-dhcp-opt if
+          [ debug? ] [if]
+            [: cr ." Got DHCP netmask" ;] usb::with-usb-output
+          [then]
+          unaligned@ rev { ipv4-netmask }
+          DHCP_SERVICE_ROUTER 4 addr bytes find-fixed-dhcp-opt if
+            [ debug? ] [if]
+              [: cr ." Got DHCP gateway" ;] usb::with-usb-output
+            [then]
+            unaligned@ rev { gateway-ipv4-addr }
+            DHCP_SERVICE_DNS_SERVER addr bytes find-var-dhcp-opt if
+              [ debug? ] [if]
+                [: cr ." Got DHCP DNS server(s)" ;] usb::with-usb-output
+              [then]
+              4 >= if
+                [ debug? ] [if]
+                  [: cr ." Found DHCPACK fields" ;] usb::with-usb-output
+                [then]
+                unaligned@ rev { dns-server-ipv4-addr }
+                ipv4-addr self intf-ipv4-addr!
+                ipv4-netmask self intf-ipv4-netmask!
+                gateway-ipv4-addr self gateway-ipv4-addr!
+                dns-server-ipv4-addr self dns-server-ipv4-addr!
+                systick::systick-counter self dhcp-renew-start !
+                renew-interval 10 * self dhcp-renew-interval !
+                dhcp-discovered self dhcp-discover-state !
+                self dhcp-sema broadcast
+                self dhcp-sema give
+                [ debug? ] [if]
+                  [: cr ." Processed DHCPACK" ;] usb::with-usb-output
+                [then]
+              else
+                [ debug? ] [if]
+                  [: cr ." Insufficient DNS servers" ;] usb::with-usb-output
+                [then]
+                drop
+              then
+            else
+              [ debug? ] [if]
+                [: cr ." Did not find DNS server" ;] usb::with-usb-output
+              [then]
+              drop
+            then
+          else
+            [ debug? ] [if]
+              [: cr ." Did not find router" ;] usb::with-usb-output
+            [then]
+            drop
+          then
+        else
+          [ debug? ] [if]
+            [: cr ." Did not find netmask" ;] usb::with-usb-output
+          [then]
+          drop
+        then
+      else
+        [ debug? ] [if]
+          [: cr ." yiaddr does not match" ;] usb::with-usb-output
+        [then]
+      then
+    ; define process-ipv4-dhcpack
+
     \ Refresh an interface
     :noname { self -- }
+      self dhcp-discover-state @ { state }
+      state dhcp-discovered = state dhcp-renewing = or if
+        systick::systick-counter self dhcp-renew-start @ -
+        self dhcp-renew-interval @ > if
+          state dhcp-discovered = if
+            dhcp-renewing self dhcp-discover-state !
+            self dhcp-renew-interval @ dhcp-renew-retry-divisor /
+            self dhcp-renew-interval !
+          then
+          self send-dhcprequest
+        then
+        systick::systick-counter self dhcp-renew-start !
+      then
       max-endpoints 0 ?do
         self intf-endpoints <endpoint> class-size i * +
         self [: { endpoint self }
@@ -3843,7 +4233,11 @@ begin-module net
           ihl 4 * bytes <= and if
             addr ipv4-dest-addr unaligned@ rev
             dup self ip-interface @ intf-ipv4-addr@ =
-            swap self ip-interface @ intf-ipv4-broadcast@ = or if
+            over self ip-interface @ intf-ipv4-broadcast@ = or
+            over $FFFFFFFF = or
+            self ip-interface @ dhcp-discover-state @ dhcp-wait-ack =
+            rot self ip-interface @ dhcp-req-ipv4-addr @ = and or
+            self ip-interface @ dhcp-discover-state @ dhcp-wait-offer = or if
               addr ipv4-fragment? if
                 addr bytes self ip-interface @ process-fragment
               else
