@@ -141,7 +141,7 @@ Note that for the `rp2040` platform, to load code with the bootloader onto an RP
 
 ## Building the Kernel
 
-To build the kernel for each of the supported platforms, one first needs to install the gas and binutils arm-none-eabi toolchain along with Python 3.9 or later, and then execute:
+To build the kernel for each of the supported platforms, one first needs to install the gas and binutils arm-none-eabi toolchain along with Python 3.9 or later and the dependencies necessary for Python Venv (e.g. the package `python3.11-venv` for Python 3.11 on Debian or Ubuntu), and then execute:
 
     $ make
 
@@ -207,7 +207,7 @@ A better approach than using `slowpaste`, `readbuf`, and `paste` with screen is 
 
     $ ./utils/codeload3.sh [-p <device>] -B 115200 serial <Forth source file>
 
-It has significantly better performance and functionality than screen with `slowpaste` and is the recommended method of code uploading if e4thcom is not available. Note that it requires Python 3 and pySerial, and it must be given executable permissions before it may be executed.
+It has significantly better performance and functionality than screen with `slowpaste` and is the recommended method of code uploading if e4thcom is not available. Note that it requires Python 3 and support for Python Venv (e.g. as the package `python3.11-venv` for Python 3.11 on Debian or Ubuntu), and it must be given executable permissions before it may be executed.
 
 To build a complete image for zeptoforth, one uses `utils/make_image.sh` or, for an RP2040-based board, `utils/make_uf2_image.sh` after using `make clean`, `make VERSION=<version>`, and `make install VERSION=<version>` to install binaries for all platforms in the `bin/<version>/<platform>` directories (which it creates if they do not exist).
 
