@@ -24,6 +24,9 @@ begin-module net-misc
 
   \ Are we debugging?
   false constant debug?
+
+  \ DHCP logging
+  true value dhcp-log?
   
   \ Make an IPv4 address
   : make-ipv4-addr ( addr0 addr1 addr2 addr3 -- addr )

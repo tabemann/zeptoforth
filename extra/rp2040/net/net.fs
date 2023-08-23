@@ -3501,9 +3501,9 @@ begin-module net
     :noname ( dest-addr self -- )
       [ ethernet-header-size arp-ipv4-size + ] literal [: { dest-addr self buf }
 
-        [ debug? ] [if]
+        dhcp-log? if
           [: cr ." Sending DHCP ARP request packet" ;] usb::with-usb-output
-        [then]
+        then
         
         $FFFFFFFFFFFF. buf ethh-destination-mac mac!
         self intf-mac-addr@ buf ethh-source-mac mac!
@@ -3521,9 +3521,9 @@ begin-module net
         true
       ;] 2 pick construct-and-send-frame drop
 
-      [ debug? ] [if]
+      dhcp-log? if
         [: cr ." Sent DHCP ARP request packet" ;] usb::with-usb-output
-      [then]
+      then
       
     ; define send-ipv4-dhcp-arp-request
 
@@ -3956,9 +3956,9 @@ begin-module net
     :noname { self -- }
       begin
 
-        [ debug? ] [if]
+        dhcp-log? if
           [: cr ." Starting DHCP discovery" ;] usb::with-usb-output
-        [then]
+        then
         
         self send-dhcpdiscover
         begin
@@ -3971,35 +3971,35 @@ begin-module net
           ?raise
           self dhcp-discover-state @ dhcp-wait-confirm = if
 
-            [ debug? ] [if]
+            dhcp-log? if
               [: cr ." Waiting for DHCP ARP confirmation" ;]
               usb::with-usb-output
-            [then]
+            then
 
             true true
           else
             self dhcp-discover-state @ dhcp-got-nak = if
 
-              [ debug? ] [if]
+              dhcp-log? if
                 [: cr ." Got DHCP NAK" ;] usb::with-usb-output
-              [then]
+              then
               
               false true
             else
               self dhcp-discover-state @ case
                 dhcp-wait-offer of
 
-                  [ debug? ] [if]
+                  dhcp-log? if
                     [: cr ." Waiting for DHCPOFFER" ;] usb::with-usb-output
-                  [then]
+                  then
 
                   self send-dhcpdiscover
                 endof
                 dhcp-wait-ack of
 
-                  [ debug? ] [if]
+                  dhcp-log? if
                     [: cr ." Waiting for DHCPACK" ;] usb::with-usb-output
-                  [then]
+                  then
 
                   self send-dhcprequest
                 endof
@@ -4012,17 +4012,17 @@ begin-module net
           dhcp-wait-confirm self dhcp-discover-state !
           self dhcp-req-ipv4-addr @ self attempt-ipv4-dhcp-arp if
 
-            [ debug? ] [if]
+            dhcp-log? if
               [: cr ." Will DHCPDECLINE" ;] usb::with-usb-output
-            [then]
+            then
 
             self send-dhcpdecline
             dhcpdecline-delay systick::systick-counter
             task::current-task task::delay
 
-            [ debug? ] [if]
+            dhcp-log? if
               [: cr ." Done with DHCPDECLINE wait" ;] usb::with-usb-output
-            [then]
+            then
 
             false
           else
@@ -4034,9 +4034,9 @@ begin-module net
             systick::systick-counter self dhcp-renew-start !
             dhcp-discovered self dhcp-discover-state !
             
-            [ debug? ] [if]
+            dhcp-log? if
               [: cr ." DHCP DISCOVER!" ;] usb::with-usb-output
-            [then]
+            then
             
             true
           then
@@ -4048,9 +4048,9 @@ begin-module net
     
     \ Send a DHCPDISCOVER packet
     :noname { self -- }
-      [ debug? ] [if]
+      dhcp-log? if
         [: cr ." Sending DHCPDISCOVER" ;] usb::with-usb-output
-      [then]
+      then
       rng::random self current-dhcp-xid !
       dhcp-wait-offer self dhcp-discover-state !
       self
@@ -4058,9 +4058,9 @@ begin-module net
       $00000000 dhcp-client-port
       $FFFFFFFF dhcp-server-port
       [ dhcp-header-size 3 + 6 + 6 + 1 + ] literal [: { self buf }
-        [ debug? ] [if]
+        dhcp-log? if
           [: cr ." Constructing DHCPDISCOVER" ;] usb::with-usb-output
-        [then]
+        then
         DHCP_OP_CLIENT buf dhcp-op c!
         DHCP_HTYPE buf dhcp-htype c!
         DHCP_HLEN buf dhcp-hlen c!
@@ -4096,28 +4096,28 @@ begin-module net
         6 +to buf
         DHCP_END buf c!
         true
-        [ debug? ] [if]
+        dhcp-log? if
           [: cr ." Constructed DHCPDISCOVER packet" ;] usb::with-usb-output
-        [then]
+        then
       ;] self send-ipv4-udp-packet-raw drop
-      [ debug? ] [if]
+      dhcp-log? if
         [: cr ." Waiting for DHCPOFFER" ;] usb::with-usb-output
-      [then]
+      then
     ; define send-dhcpdiscover
 
     \ Send a DHCPREQUEST packet
     :noname { self -- }
-      [ debug? ] [if]
+      dhcp-log? if
         [: cr ." Sending DHCPREQUEST" ;] usb::with-usb-output
-      [then]
+      then
       self
       $FFFFFFFFFFFF.
       $00000000 dhcp-client-port
       $FFFFFFFF dhcp-server-port
       [ dhcp-header-size 3 + 6 + 6 + 1 + ] literal [: { self buf }
-        [ debug? ] [if]
+        dhcp-log? if
           [: cr ." Constructing DHCPREQUEST" ;] usb::with-usb-output
-        [then]
+        then
         DHCP_OP_CLIENT buf dhcp-op c!
         DHCP_HTYPE buf dhcp-htype c!
         DHCP_HLEN buf dhcp-hlen c!
@@ -4150,13 +4150,13 @@ begin-module net
         6 +to buf
         DHCP_END buf c!
         true
-        [ debug? ] [if]
+        dhcp-log? if
           [: cr ." Constructed DHCPREQUEST packet" ;] usb::with-usb-output
-        [then]
+        then
       ;] self send-ipv4-udp-packet-raw drop
-      [ debug? ] [if]
+      dhcp-log? if
         [: cr ." Waiting for DHCPACK" ;] usb::with-usb-output
-      [then]
+      then
       self dhcp-discover-state @
       dup dhcp-discovered <> swap dhcp-renewing <> and if
         dhcp-wait-ack self dhcp-discover-state !
@@ -4165,17 +4165,17 @@ begin-module net
 
     \ Send a DHCPDECLINE packet
     :noname { self -- }
-      [ debug? ] [if]
+      dhcp-log? if
         [: cr ." Sending DHCPDECLINE" ;] usb::with-usb-output
-      [then]
+      then
       self
       $FFFFFFFFFFFF.
       $00000000 dhcp-client-port
       $FFFFFFFF dhcp-server-port
       [ dhcp-header-size 3 + 6 + 6 + 1 + ] literal [: { self buf }
-        [ debug? ] [if]
+        dhcp-log? if
           [: cr ." Constructing DHCPDECLINE" ;] usb::with-usb-output
-        [then]
+        then
         DHCP_OP_CLIENT buf dhcp-op c!
         DHCP_HTYPE buf dhcp-htype c!
         DHCP_HLEN buf dhcp-hlen c!
@@ -4208,61 +4208,61 @@ begin-module net
         6 +to buf
         DHCP_END buf c!
         true
-        [ debug? ] [if]
+        dhcp-log? if
           [: cr ." Constructed DHCPDECLINE packet" ;] usb::with-usb-output
-        [then]
+        then
       ;] self send-ipv4-udp-packet-raw drop
-      [ debug? ] [if]
+      dhcp-log? if
         [: cr ." Sent DHCPDECLINE" ;] usb::with-usb-output
-      [then]
+      then
       dhcp-not-discovering self dhcp-discover-state !
     ; define send-dhcpdecline
 
     \ Process an IPv4 DHCP packet
     :noname { addr bytes self -- }
-      [ debug? ] [if]
+      dhcp-log? if
         [: cr ." Receiving DHCP packet" ;] usb::with-usb-output
-      [then]
+      then
       bytes dhcp-header-size < if
-        [ debug? ] [if]
+        dhcp-log? if
           [: cr ." DHCP packet too small" ;] usb::with-usb-output
-        [then]
+        then
         exit
       then
       addr dhcp-op c@ DHCP_OP_SERVER <> if
-        [ debug? ] [if]
+        dhcp-log? if
           [: cr ." DHCP packet is not a server packet" ;] usb::with-usb-output
-        [then]
+        then
         exit
       then
       addr dhcp-xid unaligned@ rev self current-dhcp-xid @ <> if
-        [ debug? ] [if]
+        dhcp-log? if
           [: cr ." DHCP packet XID does not match" ;] usb::with-usb-output
-        [then]
+        then
         exit
       then
       DHCP_MESSAGE_TYPE 1 addr bytes find-fixed-dhcp-opt if
-        [ debug? ] [if]
+        dhcp-log? if
           [: cr ." Got DHCP message type: " dup c@ . ;] usb::with-usb-output
-        [then]
+        then
         c@ case
           DHCPOFFER of addr bytes self process-ipv4-dhcpoffer endof
           DHCPACK of addr bytes self process-ipv4-dhcpack endof
           DHCPNAK of addr bytes self process-ipv4-dhcpnak endof
         endcase
       else
-        [ debug? ] [if]
+        dhcp-log? if
           [: cr ." Did not get message type" ;] usb::with-usb-output
-        [then]
+        then
         drop exit
       then
     ; define process-ipv4-dhcp-packet
 
     \ Process an IPv4 DHCPOFFER packet
     :noname { addr bytes self -- }
-      [ debug? ] [if]
+      dhcp-log? if
         [: cr ." Sending DHCPREQUEST" ;] usb::with-usb-output
-      [then]
+      then
       addr dhcp-yiaddr unaligned@ rev self dhcp-req-ipv4-addr !
       addr dhcp-siaddr unaligned@ rev self dhcp-server-ipv4-addr !
       self send-dhcprequest
@@ -4273,82 +4273,82 @@ begin-module net
       addr dhcp-yiaddr unaligned@ rev self dhcp-req-ipv4-addr @ = if
         self dhcp-req-ipv4-addr @ { ipv4-addr }
         DHCP_IPV4_ADDR_LEASE_TIME 4 addr bytes find-fixed-dhcp-opt if
-          [ debug? ] [if]
+          dhcp-log? if
             [: cr ." Got DHCP lease time" ;] usb::with-usb-output
-          [then]
+          then
           unaligned@ rev
         else
-          [ debug? ] [if]
+          dhcp-log? if
             [: cr ." Did not find lease time" ;] usb::with-usb-output
-          [then]
+          then
           drop 86400
         then
         { renew-interval }
         DHCP_SERVICE_SUBNET_MASK 4 addr bytes find-fixed-dhcp-opt if
-          [ debug? ] [if]
+          dhcp-log? if
             [: cr ." Got DHCP netmask" ;] usb::with-usb-output
-          [then]
+          then
           unaligned@ rev { ipv4-netmask }
           DHCP_SERVICE_ROUTER 4 addr bytes find-fixed-dhcp-opt if
-            [ debug? ] [if]
+            dhcp-log? if
               [: cr ." Got DHCP gateway" ;] usb::with-usb-output
-            [then]
+            then
             unaligned@ rev { gateway-ipv4-addr }
             DHCP_SERVICE_DNS_SERVER addr bytes find-var-dhcp-opt if
-              [ debug? ] [if]
+              dhcp-log? if
                 [: cr ." Got DHCP DNS server(s)" ;] usb::with-usb-output
-              [then]
+              then
               4 >= if
-                [ debug? ] [if]
+                dhcp-log? if
                   [: cr ." Found DHCPACK fields" ;] usb::with-usb-output
-                [then]
+                then
                 unaligned@ rev { dns-server-ipv4-addr }
                 ipv4-netmask self prov-ipv4-netmask !
                 gateway-ipv4-addr self prov-gateway-ipv4-addr !
                 dns-server-ipv4-addr self prov-dns-server-ipv4-addr !
-                renew-interval 10 * self prov-dhcp-renew-interval !
+                renew-interval 10000 * 2 / self prov-dhcp-renew-interval !
                 dhcp-wait-confirm self dhcp-discover-state !
                 self dhcp-sema broadcast
                 self dhcp-sema give
-                [ debug? ] [if]
+                dhcp-log? if
                   [: cr ." Processed DHCPACK" ;] usb::with-usb-output
-                [then]
+                then
               else
-                [ debug? ] [if]
+                dhcp-log? if
                   [: cr ." Insufficient DNS servers" ;] usb::with-usb-output
-                [then]
+                then
                 drop
               then
             else
-              [ debug? ] [if]
+              dhcp-log? if
                 [: cr ." Did not find DNS server" ;] usb::with-usb-output
-              [then]
+              then
               drop
             then
           else
-            [ debug? ] [if]
+            dhcp-log? if
               [: cr ." Did not find router" ;] usb::with-usb-output
-            [then]
+            then
             drop
           then
         else
-          [ debug? ] [if]
+          dhcp-log? if
             [: cr ." Did not find netmask" ;] usb::with-usb-output
-          [then]
+          then
           drop
         then
       else
-        [ debug? ] [if]
+        dhcp-log? if
           [: cr ." yiaddr does not match" ;] usb::with-usb-output
-        [then]
+        then
       then
     ; define process-ipv4-dhcpack
 
     \ Process an IPv4 DHCPACK packet
     :noname { addr bytes self -- }
-      [ debug? ] [if]
+      dhcp-log? if
         [: cr ." Got DHCPNAK" ;] usb::with-usb-output
-      [then]
+      then
       0 self dhcp-req-ipv4-addr !
       0 self dhcp-server-ipv4-addr !
       dhcp-got-nak self dhcp-discover-state !
