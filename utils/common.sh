@@ -98,14 +98,14 @@ EOD
 # IHEX functions
 #
 
-codeloader() {
+codeloader() ( 
   PORT=$1
   SRC=$2
 
   ${DIR}/codeload3.sh -B 115200 -p ${PORT} serial ${SRC}
-}
+)
 
-screen_download() {
+screen_download() (
   PORT=$1
   SRC=$2
   TARGET=$3
@@ -132,20 +132,20 @@ screen_download() {
   arm-none-eabi-objcopy -I ihex -O binary ${TARGET}.ihex ${TARGET}.bin
   rm screenlog.0
   rm inter
-}
+)
 
-screen_download_ihex() {
+screen_download_ihex() ( 
   PORT=$1
   TARGET=$2
 
   screen_download ${PORT} src/common/forth/ihex.fs ${TARGET}
-}
+)
 
 
-screen_download_ihex_minidict() {
+screen_download_ihex_minidict() (
   PORT=$1
   TARGET=$2
 
   screen_download ${PORT} src/common/forth/ihex_minidict.fs ${TARGET}
-}
+)
 

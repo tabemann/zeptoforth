@@ -53,17 +53,6 @@ TARGET="bin/${VERSION}/${PLATFORM}/zeptoforth_${IMAGE}-${VERSION}"
 
 codeloader ${PORT} src/$PLATFORM/forth/setup_$IMAGE.fs
 
-# The usb console forces a port change in the middle of things.
-if [ "${IMAGE}" == *usb ]; then
-  cat <<EOD
-USB console images require switching ports to download.
-Please reboot the device and change <port> to the value of the USB console port
-in the following command:
-    ./utils/download_uf2_image.sh <port> ${TARGET}
-EOD
-  exit
-fi
-
 screen_download_ihex ${PORT} ${TARGET} 
 screen_download_ihex_minidict ${PORT} ${TARGET}.minidict 
 
