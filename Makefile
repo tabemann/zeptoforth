@@ -43,7 +43,6 @@ install:
 	$(MAKE) -C src/rp2040 install
 
 stm32f407:
-	echo `pwd`
 	$(MAKE) -C src/stm32f407
 
 stm32f411:

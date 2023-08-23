@@ -102,8 +102,7 @@ codeloader() {
   PORT=$1
   SRC=$2
 
-  # ${DIR}/codeload3.sh -B 115200 -p ${PORT} serial ${SRC}
-  ${DIR}/codeload3.sh -B 57600 -p ${PORT} serial ${SRC}
+  ${DIR}/codeload3.sh -B 115200 -p ${PORT} serial ${SRC}
 }
 
 screen_download() {
