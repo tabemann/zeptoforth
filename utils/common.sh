@@ -1,6 +1,7 @@
 #!/bin/sh
 
 # Copyright (c) 2020-2023 Travis Bemann
+# Copyright (c) 2023 Chris Salch
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +24,7 @@
 
 # This script should only be sourced.
 # See: https://superuser.com/a/731431
-if [ $(basename -- "$0") == "common.sh" ]; then
+if [ "$(basename -- "$0")" = "common.sh" ]; then
     >&2 echo "Don't run $0, source it"
     exit 1
 fi
@@ -39,7 +40,7 @@ cleanup() {
 
 # macOs screen will send the \n as \n instead of a newline.
 check_screen() {
-  if [ "$(uname -s)" == "Darwin" ] && (screen -v | grep '4.00.* (FAU)' >/dev/null); then
+  if [ "$(uname -s)" = "Darwin" ] && (screen -v | grep '4.00.* (FAU)' >/dev/null); then
     cat 2>&1 <<EOD
 The version of screen pacakged with macOs is known to not send newlines
 correctly when using stuff. Please install GNU screen via Hombrew.

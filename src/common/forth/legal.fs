@@ -24,6 +24,7 @@
   cr ." Copyright (c) 2013, 2021 Matthias Koch"
   cr ." Copyright (c) 2021 Jan Bramkamp"
   cr ." Copyright (c) 2023 Rob Probin"
+  cr ." Copyright (c) 2023 Chris Salch"
   cr
   cr ." Permission is hereby granted, free of charge, to any person obtaining a copy"
   cr .\" of this software and associated documentation files (the \"Software\"), to deal"

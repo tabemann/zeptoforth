@@ -2,6 +2,7 @@
 set -e
 
 # Copyright (c) 2020-2021 Travis Bemann
+# Copyright (c) 2023 Chris Salch
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal

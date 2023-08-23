@@ -31,7 +31,7 @@ IHEX=$(BASEDIR)/zeptoforth.$(PLATFORM).ihex
 LIST=$(BASEDIR)/zeptoforth.$(PLATFORM).list
 MAP=$(BASEDIR)/zeptoforth.$(PLATFORM).map
 MINI_DICT_FILLER=$(BASEDIR)/src/rp2040/mini_dict_filler
-MAKE_UF2=./make_uf2.py
+MAKE_UF2=./make_uf2.sh
 
 all: kernel_info $(UF2)
 
