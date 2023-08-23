@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 set -e
 
 # Copyright (c) 2020-2023 Travis Bemann
@@ -27,7 +27,7 @@ REAL_DIR="$( cd "$( dirname "$0" )" && pwd )"
 
 # The common code needs DIR to point to utils
 DIR="$(realpath ${REAL_DIR}/../../utils)"
-source "${DIR}/common.sh"
+. "${DIR}/common.sh"
 activate_venv  
 
 # Run codeload3

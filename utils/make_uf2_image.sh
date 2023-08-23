@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 set -e
 
 # Copyright (c) 2020-2021 Travis Bemann
@@ -32,7 +32,7 @@ PROJECT=zeptoforth
 DIR="$( cd "$( dirname "$0" )" && pwd )"
 
 # Handle some non-tivial common code.
-source "${DIR}/common.sh"
+. "${DIR}/common.sh"
 
 check_screen
 
@@ -54,7 +54,7 @@ TARGET="bin/${VERSION}/${PLATFORM}/zeptoforth_${IMAGE}-${VERSION}"
 codeloader ${PORT} src/$PLATFORM/forth/setup_$IMAGE.fs
 
 # The usb console forces a port change in the middle of things.
-if [[ "${IMAGE}" == *usb ]]; then
+if [ "${IMAGE}" == *usb ]; then
   cat <<EOD
 USB console images require switching ports to download.
 Please reboot the device and change <port> to the value of the USB console port
@@ -67,4 +67,4 @@ fi
 screen_download_ihex ${PORT} ${TARGET} 
 screen_download_ihex_minidict ${PORT} ${TARGET}.minidict 
 
-src/rp2040/make_uf2.sh ${TARGET}.bin ${TARGET}.minidict.bin ${TARGET}.uf2
+${DIR}/../src/rp2040/make_uf2.sh ${TARGET}.bin ${TARGET}.minidict.bin ${TARGET}.uf2

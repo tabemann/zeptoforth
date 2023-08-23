@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 set -e 
 
 # Copyright (c) 2020-2023 Travis Bemann
@@ -30,7 +30,7 @@ PROJECT=zeptoforth
 DIR="$( cd "$( dirname "$0" )" && pwd )"
 
 # Handle some non-tivial common code.
-source "${DIR}/common.sh"
+. "${DIR}/common.sh"
 
 check_screen
 
@@ -45,5 +45,5 @@ fi
 screen_download_ihex ${PORT} ${IMAGE} 
 screen_download_ihex_minidict ${PORT} ${IMAGE}.minidict
 
-src/rp2040/make_uf2.sh ${IMAGE}.bin ${IMAGE}.minidict.bin ${IMAGE}.uf2
+${DIR}/../src/rp2040/make_uf2.sh ${IMAGE}.bin ${IMAGE}.minidict.bin ${IMAGE}.uf2
 

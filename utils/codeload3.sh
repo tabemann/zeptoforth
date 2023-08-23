@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 set -e
 
 # Copyright (c) 2020-2023 Travis Bemann
@@ -25,7 +25,7 @@ set -e
 # See: https://stackoverflow.com/a/20434740
 DIR="$( cd "$( dirname "$0" )" && pwd )"
 
-source "${DIR}/common.sh"
+. "${DIR}/common.sh"
 activate_venv
 
 # This will be needed until telnetlib is removed/updated

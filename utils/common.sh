@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 # Copyright (c) 2020-2023 Travis Bemann
 #
@@ -23,7 +23,7 @@
 
 # This script should only be sourced.
 # See: https://superuser.com/a/731431
-if [[ "$(basename -- "$0")" == "common.sh" ]]; then
+if [ $(basename -- "$0") == "common.sh" ]; then
     >&2 echo "Don't run $0, source it"
     exit 1
 fi
@@ -33,12 +33,12 @@ fi
 #
 
 # Make sure there is not screen session running
-function cleanup() {
+cleanup() {
   screen -X quit || true
 }
 
 # macOs screen will send the \n as \n instead of a newline.
-function check_screen() {
+check_screen() {
   if [ "$(uname -s)" == "Darwin" ] && (screen -v | grep '4.00.* (FAU)' >/dev/null); then
     cat 2>&1 <<EOD
 The version of screen pacakged with macOs is known to not send newlines
@@ -61,20 +61,21 @@ EOD
 ZEPTOFORTH_VENV="${DIR}/zeptoforth_venv"
 
 # Make sure the virtual environment is setup.
-function make_venv() {
+make_venv() {
   (
     cd ${DIR}
 
     if [ ! -d "${ZEPTOFORTH_VENV}" ] || [ ! -e "${ZEPTOFORTH_VENV}/bin/activate" ]; then
+      echo "Creating zeptoforth virtual environment."
       python3 -m venv "${ZEPTOFORTH_VENV}"
-      source "${ZEPTOFORTH_VENV}/bin/activate"
+      . "${ZEPTOFORTH_VENV}/bin/activate"
       pip install -r ./requirements.txt
     fi 
   )
 }
 
 # Make sure we have a virtual environment
-function activate_venv() {
+activate_venv() {
 
   if ! make_venv; then
     cat 2>&1 <<EOD
@@ -90,21 +91,22 @@ EOD
   fi
 
   # Activate the virtualenvironment
-  source "${ZEPTOFORTH_VENV}/bin/activate"
+  . "${ZEPTOFORTH_VENV}/bin/activate"
 }
 
 ######
 # IHEX functions
 #
 
-function codeloader() {
+codeloader() {
   PORT=$1
   SRC=$2
 
-  ${DIR}/codeload3.sh -B 115200 -p ${PORT} serial ${SRC}
+  # ${DIR}/codeload3.sh -B 115200 -p ${PORT} serial ${SRC}
+  ${DIR}/codeload3.sh -B 57600 -p ${PORT} serial ${SRC}
 }
 
-function screen_download() {
+screen_download() {
   PORT=$1
   SRC=$2
   TARGET=$3
@@ -113,6 +115,7 @@ function screen_download() {
   
   rm screenlog.0 || true
   screen -d -m ${PORT} 115200
+  screen -X logtstamp off
   screen -X log on
   screen -X stuff 'clone\n'
   until grep 'clone_end' screenlog.0
@@ -132,7 +135,7 @@ function screen_download() {
   rm inter
 }
 
-function screen_download_ihex() {
+screen_download_ihex() {
   PORT=$1
   TARGET=$2
 
@@ -140,7 +143,7 @@ function screen_download_ihex() {
 }
 
 
-function screen_download_ihex_minidict() {
+screen_download_ihex_minidict() {
   PORT=$1
   TARGET=$2
 

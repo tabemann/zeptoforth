@@ -18,6 +18,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# Without this make can start in the wrong source directory
+.OBJDIR: ./
+
 export IDIR=src/include
 export AS=arm-none-eabi-as
 export LD=arm-none-eabi-ld
@@ -40,6 +43,7 @@ install:
 	$(MAKE) -C src/rp2040 install
 
 stm32f407:
+	echo `pwd`
 	$(MAKE) -C src/stm32f407
 
 stm32f411:
