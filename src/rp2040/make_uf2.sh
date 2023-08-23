@@ -1,4 +1,4 @@
-#!/bin/sh 
+#!/bin/sh
 set -e
 
 # Copyright (c) 2020-2023 Travis Bemann
@@ -21,26 +21,14 @@ set -e
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-PORT=$1
-IMAGE=$2
-PROJECT=zeptoforth
-
 # Get the directory of this script, we need this for the venv setup.
 # See: https://stackoverflow.com/a/20434740
-DIR="$( cd "$( dirname "$0" )" && pwd )"
+REAL_DIR="$( cd "$( dirname "$0" )" && pwd )"
 
-# Handle some non-tivial common code.
+# The common code needs DIR to point to utils
+DIR="$(realpath ${REAL_DIR}/../../utils)"
 . "${DIR}/common.sh"
+activate_venv  
 
-check_screen
-
-if [ ! $# -eq 2 ]; then
-  cat 2>&1 <<EOD
-Usage:
-    ${0} <port> <image>
-EOD
-  exit 1
-fi
-
-screen_download_ihex ${PORT} ${IMAGE} 
-
+# Run codeload3
+exec "${REAL_DIR}/make_uf2.py" "${@}"
