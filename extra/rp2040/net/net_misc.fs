@@ -158,13 +158,24 @@ begin-module net-misc
   
   \ DHCP renewal retry divisor
   60 value dhcp-renew-retry-divisor
+
+  \ Default DHCP ARP interval
+  10000 value dhcp-arp-interval
+
+  \ DHCP ARP attempt count
+  5 value dhcp-arp-attempt-count
+
+  \ DHCPDECLINE delay
+  100000 value dhcpdecline-delay
   
   \ DHCP discovery state
   0 constant dhcp-not-discovering
   1 constant dhcp-wait-offer
   2 constant dhcp-wait-ack
-  3 constant dhcp-discovered
-  4 constant dhcp-renewing
+  3 constant dhcp-got-nak
+  4 constant dhcp-wait-confirm
+  5 constant dhcp-discovered
+  6 constant dhcp-renewing
   
   \ The Ethernet header structure
   begin-structure ethernet-header-size

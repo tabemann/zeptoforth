@@ -1185,13 +1185,15 @@ begin-module net
     \ Save a MAC address by an IPv4 address
     :noname ( D: mac-addr ipv4-addr self -- )
       [: { D: mac-addr ipv4-addr self }
-        max-addresses 0 ?do
-          self mapped-ipv4-addrs i cells + @ ipv4-addr = if
-            mac-addr ipv4-addr i self save-mac-addr-at-index  unloop exit
-          then
-        loop
-        self oldest-mac-addr-index { index }
-        mac-addr ipv4-addr index self save-mac-addr-at-index
+        ipv4-addr 0<> if
+          max-addresses 0 ?do
+            self mapped-ipv4-addrs i cells + @ ipv4-addr = if
+              mac-addr ipv4-addr i self save-mac-addr-at-index  unloop exit
+            then
+          loop
+          self oldest-mac-addr-index { index }
+          mac-addr ipv4-addr index self save-mac-addr-at-index
+        then
       ;] over address-map-lock with-lock
     ; define save-mac-addr-by-ipv4
 
@@ -2237,6 +2239,18 @@ begin-module net
 
     \ DHCP renewal start time
     cell member dhcp-renew-start
+
+    \ Provisional DHCP IPv4 netmask
+    cell member prov-ipv4-netmask
+
+    \ Provisional DHCP IPv4 gateway
+    cell member prov-gateway-ipv4-addr
+
+    \ Provisional DHCP DNS server
+    cell member prov-dns-server-ipv4-addr
+
+    \ Provisional DHCP renewal time
+    cell member prov-dhcp-renew-interval
     
     \ DHCP semaphore
     sema-size member dhcp-sema
@@ -2457,6 +2471,9 @@ begin-module net
     \ Resolve an IPv4 address's MAC address
     method resolve-ipv4-addr-mac-addr ( dest-addr self -- D: mac-addr success? )
 
+    \ Attempt IPv4 DHCP ARP
+    method attempt-ipv4-dhcp-arp ( dest-addr self -- found? )
+    
     \ Resolve a DNS name's IPv4 address
     method resolve-dns-ipv4-addr ( c-addr bytes self -- ipv4-addr success? )
     
@@ -2466,6 +2483,9 @@ begin-module net
 
     \ Send an ARP request packet
     method send-ipv4-arp-request ( dest-addr self -- )
+
+    \ Send a DHCP ARP request packet
+    method send-ipv4-dhcp-arp-request ( dest-addr self -- )
 
     \ Send a DNS request packet
     method send-ipv4-dns-request ( c-addr bytes self -- )
@@ -2540,6 +2560,9 @@ begin-module net
     \ Send a DHCPREQUEST packet
     method send-dhcprequest ( self -- )
 
+    \ Send a DHCPDECLINE packet
+    method send-dhcpdecline ( self -- )
+
     \ Process an IPv4 DHCP packet
     method process-ipv4-dhcp-packet ( addr bytes self -- )
 
@@ -2548,6 +2571,9 @@ begin-module net
 
     \ Process an IPv4 DHCPACK packet
     method process-ipv4-dhcpack ( addr bytes self -- )
+
+    \ Process an IPv4 DHCPNAK packet
+    method process-ipv4-dhcpnak ( addr bytes self -- )
     
   end-class
 
@@ -2700,8 +2726,8 @@ begin-module net
     ; define send-frame
     
     \ Process a MAC address for an IPv4 address
-    :noname ( D: mac-addr ipv4-addr self -- )
-      dup { self } address-map save-mac-addr-by-ipv4
+    :noname { D: mac-addr ipv4-addr self -- }
+      mac-addr ipv4-addr self address-map save-mac-addr-by-ipv4
       self mac-addr-resolve-sema broadcast
       self mac-addr-resolve-sema give
     ; define process-ipv4-mac-addr
@@ -3385,6 +3411,37 @@ begin-module net
       true
     ; define resolve-ipv4-addr-mac-addr
 
+    \ Test for DHCP ARP
+    :noname { dest-addr self -- success? }
+      dest-addr self intf-ipv4-netmask@ and
+      192 168 1 0 make-ipv4-addr self intf-ipv4-netmask@ and <> if
+        self gateway-ipv4-addr@ to dest-addr
+      then
+      systick::systick-counter dhcp-arp-interval - { tick }
+      dhcp-arp-attempt-count { attempts }
+      begin
+        dest-addr self address-map lookup-mac-addr-by-ipv4 not -rot 2drop
+      while
+        systick::systick-counter tick - dhcp-arp-interval >= if
+          attempts 0> if
+            -1 +to attempts
+            dest-addr self send-ipv4-dhcp-arp-request
+            systick::systick-counter to tick
+          else
+            false exit
+          then
+        else
+          task::timeout @ { old-timeout }
+          tick dhcp-arp-interval + systick::systick-counter - task::timeout !
+          self mac-addr-resolve-sema ['] take try
+          dup ['] task::x-timed-out = if 2drop 0 then
+          ?raise
+          old-timeout task::timeout !
+        then
+      repeat
+      true
+    ; define attempt-ipv4-dhcp-arp
+
     \ Resolve a DNS name's IPv4 address
     :noname { c-addr bytes self -- ipv4-addr success? }
       systick::systick-counter self dns-resolve-interval@ - { tick }
@@ -3439,6 +3496,36 @@ begin-module net
         true
       ;] 2 pick construct-and-send-frame drop
     ; define send-ipv4-arp-request
+
+    \ Send a DHCP ARP request packet
+    :noname ( dest-addr self -- )
+      [ ethernet-header-size arp-ipv4-size + ] literal [: { dest-addr self buf }
+
+        [ debug? ] [if]
+          [: cr ." Sending DHCP ARP request packet" ;] usb::with-usb-output
+        [then]
+        
+        $FFFFFFFFFFFF. buf ethh-destination-mac mac!
+        self intf-mac-addr@ buf ethh-source-mac mac!
+        [ ETHER_TYPE_ARP rev16 ] literal buf ethh-ether-type h!
+        buf ethernet-header-size + { arp-buf }
+        [ HTYPE_ETHERNET rev16 ] literal arp-buf arp-htype h!
+        [ ETHER_TYPE_IPV4 rev16 ] literal arp-buf arp-ptype h!
+        6 arp-buf arp-hlen c!
+        4 arp-buf arp-plen c!
+        [ OPER_REQUEST rev16 ] literal arp-buf arp-oper h!
+        self intf-mac-addr@ arp-buf arp-sha mac!
+        [ $00000000 rev ] literal arp-buf arp-spa unaligned!
+        0. arp-buf arp-tha mac!
+        dest-addr rev arp-buf arp-tpa unaligned!
+        true
+      ;] 2 pick construct-and-send-frame drop
+
+      [ debug? ] [if]
+        [: cr ." Sent DHCP ARP request packet" ;] usb::with-usb-output
+      [then]
+      
+    ; define send-ipv4-dhcp-arp-request
 
     \ Send a DNS request packet
     :noname { c-addr bytes self -- }
@@ -3867,28 +3954,98 @@ begin-module net
 
     \ Start DHCP discovery
     :noname { self -- }
-      \ rng::random self current-dhcp-xid !
-      self send-dhcpdiscover
       begin
-        task::timeout @ { old-timeout }
-        dhcp-discover-timeout task::timeout !
-        self dhcp-sema ['] take try dup ['] task::x-timed-out = if
-          2drop 0
-        then
-        old-timeout task::timeout !
-        ?raise
-        self dhcp-discover-state @ dhcp-discovered = if
-          true
+
+        [ debug? ] [if]
+          [: cr ." Starting DHCP discovery" ;] usb::with-usb-output
+        [then]
+        
+        self send-dhcpdiscover
+        begin
+          task::timeout @ { old-timeout }
+          dhcp-discover-timeout task::timeout !
+          self dhcp-sema ['] take try dup ['] task::x-timed-out = if
+            2drop 0
+          then
+          old-timeout task::timeout !
+          ?raise
+          self dhcp-discover-state @ dhcp-wait-confirm = if
+
+            [ debug? ] [if]
+              [: cr ." Waiting for DHCP ARP confirmation" ;]
+              usb::with-usb-output
+            [then]
+
+            true true
+          else
+            self dhcp-discover-state @ dhcp-got-nak = if
+
+              [ debug? ] [if]
+                [: cr ." Got DHCP NAK" ;] usb::with-usb-output
+              [then]
+              
+              false true
+            else
+              self dhcp-discover-state @ case
+                dhcp-wait-offer of
+
+                  [ debug? ] [if]
+                    [: cr ." Waiting for DHCPOFFER" ;] usb::with-usb-output
+                  [then]
+
+                  self send-dhcpdiscover
+                endof
+                dhcp-wait-ack of
+
+                  [ debug? ] [if]
+                    [: cr ." Waiting for DHCPACK" ;] usb::with-usb-output
+                  [then]
+
+                  self send-dhcprequest
+                endof
+              endcase
+              false
+            then
+          then
+        until
+        if
+          dhcp-wait-confirm self dhcp-discover-state !
+          self dhcp-req-ipv4-addr @ self attempt-ipv4-dhcp-arp if
+
+            [ debug? ] [if]
+              [: cr ." Will DHCPDECLINE" ;] usb::with-usb-output
+            [then]
+
+            self send-dhcpdecline
+            dhcpdecline-delay systick::systick-counter
+            task::current-task task::delay
+
+            [ debug? ] [if]
+              [: cr ." Done with DHCPDECLINE wait" ;] usb::with-usb-output
+            [then]
+
+            false
+          else
+            self dhcp-req-ipv4-addr @ self intf-ipv4-addr!
+            self prov-ipv4-netmask @ self intf-ipv4-netmask!
+            self prov-gateway-ipv4-addr @ self gateway-ipv4-addr!
+            self prov-dns-server-ipv4-addr @ self dns-server-ipv4-addr!
+            self prov-dhcp-renew-interval @ self dhcp-renew-interval !
+            systick::systick-counter self dhcp-renew-start !
+            dhcp-discovered self dhcp-discover-state !
+            
+            [ debug? ] [if]
+              [: cr ." DHCP DISCOVER!" ;] usb::with-usb-output
+            [then]
+            
+            true
+          then
         else
-          self dhcp-discover-state @ case
-            dhcp-wait-offer of self send-dhcpdiscover endof
-            dhcp-wait-ack of self send-dhcprequest endof
-          endcase
           false
         then
       until
     ; define discover-ipv4-addr
-
+    
     \ Send a DHCPDISCOVER packet
     :noname { self -- }
       [ debug? ] [if]
@@ -4006,6 +4163,61 @@ begin-module net
       then
     ; define send-dhcprequest
 
+    \ Send a DHCPDECLINE packet
+    :noname { self -- }
+      [ debug? ] [if]
+        [: cr ." Sending DHCPDECLINE" ;] usb::with-usb-output
+      [then]
+      self
+      $FFFFFFFFFFFF.
+      $00000000 dhcp-client-port
+      $FFFFFFFF dhcp-server-port
+      [ dhcp-header-size 3 + 6 + 6 + 1 + ] literal [: { self buf }
+        [ debug? ] [if]
+          [: cr ." Constructing DHCPDECLINE" ;] usb::with-usb-output
+        [then]
+        DHCP_OP_CLIENT buf dhcp-op c!
+        DHCP_HTYPE buf dhcp-htype c!
+        DHCP_HLEN buf dhcp-hlen c!
+        0 buf dhcp-hops c!
+        self current-dhcp-xid @ rev buf dhcp-xid unaligned!
+        [ 0 rev16 ] literal buf dhcp-secs hunaligned!
+        [ 0 rev16 ] literal buf dhcp-flags hunaligned!
+        [ 0 rev ] literal buf dhcp-ciaddr unaligned!
+        [ 0 rev ] literal buf dhcp-yiaddr unaligned!
+        self dhcp-server-ipv4-addr @ rev buf dhcp-siaddr unaligned!
+        [ 0 rev ] literal buf dhcp-giaddr unaligned!
+        buf dhcp-chaddr 16 0 fill
+        self intf-mac-addr@
+        rev16 buf dhcp-chaddr hunaligned!
+        rev buf dhcp-chaddr 2 + unaligned!
+        buf dhcp-filler 192 0 fill
+        [ DHCP_MAGIC_COOKIE rev ] literal buf dhcp-magic unaligned!
+        dhcp-header-size +to buf
+        DHCP_MESSAGE_TYPE buf c!
+        1 buf 1 + c!
+        DHCPDECLINE buf 2 + c!
+        3 +to buf
+        DHCP_REQ_IPV4_ADDR buf c!
+        4 buf 1 + c!
+        self dhcp-req-ipv4-addr @ rev buf 2 + unaligned!
+        6 +to buf
+        DHCP_SERVER_IPV4_ADDR buf c!
+        4 buf 1 + c!
+        self dhcp-server-ipv4-addr @ rev buf 2 + unaligned!
+        6 +to buf
+        DHCP_END buf c!
+        true
+        [ debug? ] [if]
+          [: cr ." Constructed DHCPDECLINE packet" ;] usb::with-usb-output
+        [then]
+      ;] self send-ipv4-udp-packet-raw drop
+      [ debug? ] [if]
+        [: cr ." Sent DHCPDECLINE" ;] usb::with-usb-output
+      [then]
+      dhcp-not-discovering self dhcp-discover-state !
+    ; define send-dhcpdecline
+
     \ Process an IPv4 DHCP packet
     :noname { addr bytes self -- }
       [ debug? ] [if]
@@ -4036,6 +4248,7 @@ begin-module net
         c@ case
           DHCPOFFER of addr bytes self process-ipv4-dhcpoffer endof
           DHCPACK of addr bytes self process-ipv4-dhcpack endof
+          DHCPNAK of addr bytes self process-ipv4-dhcpnak endof
         endcase
       else
         [ debug? ] [if]
@@ -4090,13 +4303,11 @@ begin-module net
                   [: cr ." Found DHCPACK fields" ;] usb::with-usb-output
                 [then]
                 unaligned@ rev { dns-server-ipv4-addr }
-                ipv4-addr self intf-ipv4-addr!
-                ipv4-netmask self intf-ipv4-netmask!
-                gateway-ipv4-addr self gateway-ipv4-addr!
-                dns-server-ipv4-addr self dns-server-ipv4-addr!
-                systick::systick-counter self dhcp-renew-start !
-                renew-interval 10 * self dhcp-renew-interval !
-                dhcp-discovered self dhcp-discover-state !
+                ipv4-netmask self prov-ipv4-netmask !
+                gateway-ipv4-addr self prov-gateway-ipv4-addr !
+                dns-server-ipv4-addr self prov-dns-server-ipv4-addr !
+                renew-interval 10 * self prov-dhcp-renew-interval !
+                dhcp-wait-confirm self dhcp-discover-state !
                 self dhcp-sema broadcast
                 self dhcp-sema give
                 [ debug? ] [if]
@@ -4132,6 +4343,18 @@ begin-module net
         [then]
       then
     ; define process-ipv4-dhcpack
+
+    \ Process an IPv4 DHCPACK packet
+    :noname { addr bytes self -- }
+      [ debug? ] [if]
+        [: cr ." Got DHCPNAK" ;] usb::with-usb-output
+      [then]
+      0 self dhcp-req-ipv4-addr !
+      0 self dhcp-server-ipv4-addr !
+      dhcp-got-nak self dhcp-discover-state !
+      self dhcp-sema broadcast
+      self dhcp-sema give
+    ; define process-ipv4-dhcpnak
 
     \ Refresh an interface
     :noname { self -- }

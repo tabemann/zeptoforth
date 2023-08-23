@@ -206,6 +206,7 @@ begin-module wifi-server-test
     pwr-pin clk-pin dio-pin cs-pin pio-addr sm-index pio-instance
     <cyw43-control> my-cyw43-control init-object
     my-cyw43-control init-cyw43
+    cyw43-consts::PM_NONE my-cyw43-control cyw43-power-management!
     my-cyw43-control cyw43-frame-interface@ <interface> my-interface init-object
     my-cyw43-control cyw43-frame-interface@ <frame-process> my-frame-process init-object
     my-interface <arp-handler> my-arp-handler init-object

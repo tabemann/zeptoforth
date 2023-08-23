@@ -48,9 +48,9 @@ begin-module wifi-server-test
   <endpoint-process> class-size buffer: my-endpoint-process
 
   \ Port to set server at
-  6667 constant server-port
+  6668 constant server-port
   
-  \ My MAC address
+  \ Our MAC address
   default-mac-addr 2constant my-mac-addr
   
   \ Server lock
@@ -80,23 +80,17 @@ begin-module wifi-server-test
   \ Rx buffer
   rx-buffer-size buffer: rx-buffer
   
-  \ RAM variable for tx buffer read-index
-  variable tx-read-index
+  \ Variables for tx buffer write-index
+  2variable tx-write-index
   
-  \ RAM variable for tx buffer write-index
-  variable tx-write-index
-  
+  \ Tx buffer index
+  variable tx-buffer-index
+    
   \ Constant for number of bytes to buffer
   2048 constant tx-buffer-size
   
-  \ Tx buffer index mask
-  $7FF constant tx-index-mask
-  
-  \ Tx buffer
-  tx-buffer-size buffer: tx-buffer
-
-  \ Send tx buffer
-  tx-buffer-size buffer: actual-tx-buffer
+  \ Tx buffers
+  tx-buffer-size 2 * buffer: tx-buffers
   
   \ Tx timeout
   500 constant tx-timeout
@@ -149,32 +143,22 @@ begin-module wifi-server-test
 
   \ Get whether the tx buffer is full
   : tx-full? ( -- f )
-    tx-write-index @ tx-read-index @
-    tx-buffer-size 1- + tx-index-mask and =
+    tx-write-index tx-buffer-index @ cells + @ tx-buffer-size =
   ;
-
+  
   \ Get whether the tx buffer is empty
   : tx-empty? ( -- f )
-    tx-read-index @ tx-write-index @ =
+    tx-write-index @ 0= tx-write-index cell+ @ 0= and
   ;
 
   \ Write a byte to the tx buffer
-  : write-tx ( c -- )
-    tx-full? not if
-      tx-write-index @ tx-buffer + c!
-      tx-write-index @ 1+ tx-index-mask and tx-write-index !
-    else
-      drop
-    then
-  ;
-
-  \ Read a byte from the tx buffer
-  : read-tx ( -- c )
-    tx-empty? not if
-      tx-read-index @ tx-buffer + c@
-      tx-read-index @ 1+ tx-index-mask and tx-read-index !
-    else
-      0
+  : write-tx { c -- }
+    tx-buffer-index @ { buffer-index }
+    tx-write-index buffer-index cells + { write-var }
+    write-var @ { write-index }
+    write-index tx-buffer-size <> if
+      c tx-buffers buffer-index tx-buffer-size * + write-index + c!
+      1 write-var +!
     then
   ;
 
@@ -186,28 +170,18 @@ begin-module wifi-server-test
       tx-sema ['] take try
       dup ['] task::x-timed-out = if 2drop 0 then
       task::no-timeout task::timeout !
-      ?raise
+      ?raise 
       server-active? @ if
-        [:
-          0 { count }
-          tx-read-index @ tx-write-index @ < if
-            tx-write-index @ tx-read-index @ - to count
-            tx-buffer tx-read-index @ + actual-tx-buffer count move
-          else
-            tx-read-index @ tx-write-index @ > if
-              tx-buffer-size tx-read-index @ - { first-count }
-              tx-buffer tx-read-index @ + actual-tx-buffer first-count move
-              tx-buffer actual-tx-buffer first-count + tx-write-index @ move
-              first-count tx-write-index @ + to count
-            then
-          then
-          0 tx-read-index !
-          0 tx-write-index !
-          count
-        ;] server-slock with-slock { count }
+        [: 
+          tx-buffer-index @ { buffer-index }
+          tx-buffers buffer-index tx-buffer-size * +
+          tx-write-index buffer-index cells + @
+          buffer-index 1+ 1 and dup { new-buffer-index } tx-buffer-index ! 
+          0 tx-write-index new-buffer-index cells + !
+        ;] server-slock with-slock { buffer count }
         count 0> if
           my-endpoint @ if
-            actual-tx-buffer count my-endpoint @ my-interface ['] send-tcp-endpoint try
+            buffer count my-endpoint @ my-interface ['] send-tcp-endpoint try
             ?dup if nip nip nip nip [: display-red execute display-normal ;] usb::with-usb-output then
           else
             [: cr ." NO ENDPOINT " ;] usb::with-usb-output
@@ -345,8 +319,9 @@ begin-module wifi-server-test
   \ Initialize the test
   : init-test ( -- )
     server-slock init-slock
-    0 tx-read-index !
+    0 tx-buffer-index !
     0 tx-write-index !
+    0 tx-write-index cell+ !
     0 rx-read-index !
     0 rx-write-index !
     systick::systick-counter tx-timeout-start !
