@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-# Copyright (c) 2020-2021 Travis Bemann
+# Copyright (c) 2020-2023 Travis Bemann
 # Copyright (c) 2023 Chris Salch
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,39 +22,15 @@ set -e
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-VERSION=$1
-PLATFORM=$2
-PORT=$3
-IMAGE=$4
-PROJECT=zeptoforth
-
 # Get the directory of this script, we need this for the venv setup.
 # See: https://stackoverflow.com/a/20434740
 DIR="$( cd "$( dirname "$0" )" && pwd )"
 
-# Handle some non-tivial common code.
 . "${DIR}/common.sh"
+activate_venv
 
-check_screen
+# This will be needed until telnetlib is removed/updated
+export PYTHONWARNINGS=ignore
 
-if [ ! $# -eq 4 ]; then
-  cat 2>&1 <<EOD
-Usage:
-    ${0} <version> <platform> <port> <image>
-EOD
-  exit 1
-fi
-
-TARGET="bin/${VERSION}/${PLATFORM}/zeptoforth_${IMAGE}-${VERSION}"
-
-#st-flash erase
-#st-flash write bin/$VERSION/$PLATFORM/zeptoforth_kernel-$VERSION.bin 0x08000000
-#st-flash reset
-#sleep 3
-
-codeloader ${PORT} src/$PLATFORM/forth/setup_$IMAGE.fs
-
-screen_download_ihex ${PORT} ${TARGET} 
-screen_download_ihex_minidict ${PORT} ${TARGET}.minidict 
-
-${DIR}/../src/rp2040/make_uf2.sh ${TARGET}.bin ${TARGET}.minidict.bin ${TARGET}.uf2
+# Run codeload3
+exec "${DIR}/codeload3.py" "${@}"
