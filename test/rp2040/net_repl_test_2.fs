@@ -109,6 +109,12 @@ begin-module wifi-server-test
     
   \ The TCP endpoint
   variable my-endpoint
+  
+  \ The LED state
+  variable led-state
+  
+  \ Enable DHCP logging
+  true to dhcp-log? \ DEBUG
 
   \ Get whether the rx buffer is full
   : rx-full? ( -- f )
@@ -183,6 +189,8 @@ begin-module wifi-server-test
           my-endpoint @ if
             buffer count my-endpoint @ my-interface ['] send-tcp-endpoint try
             ?dup if nip nip nip nip [: display-red execute display-normal ;] usb::with-usb-output then
+            led-state @ not led-state !
+            led-state @ 0 my-cyw43-control cyw43-gpio!
           else
             [: cr ." NO ENDPOINT " ;] usb::with-usb-output
           then
@@ -335,6 +343,8 @@ begin-module wifi-server-test
     <cyw43-control> my-cyw43-control init-object
     my-cyw43-control init-cyw43
     cyw43-consts::PM_NONE my-cyw43-control cyw43-power-management!
+    false led-state !
+    led-state @ 0 my-cyw43-control cyw43-gpio!
     my-cyw43-control cyw43-frame-interface@ <interface> my-interface init-object
     my-cyw43-control cyw43-frame-interface@ <frame-process> my-frame-process init-object
     my-interface <arp-handler> my-arp-handler init-object
