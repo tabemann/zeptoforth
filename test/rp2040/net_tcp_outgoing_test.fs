@@ -24,6 +24,8 @@ begin-module net-test
   cyw43-control import
   net-misc import
   frame-process import
+  net-consts import
+  net-config import
   net import
   endpoint-process import
   alarm import

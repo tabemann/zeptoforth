@@ -23,6 +23,7 @@ begin-module frame-process
   oo import
   task import
   frame-interface import
+  net-config import
   net-misc import
 
   \ The frame handler class
@@ -86,7 +87,7 @@ begin-module frame-process
     cell member first-frame-handler
 
     \ The MTU buffer
-    net-misc::mtu-size cell align member mtu-buf
+    mtu-size cell align member mtu-buf
 
     \ Add a frame handler
     method add-frame-handler ( handler self -- )
@@ -149,7 +150,7 @@ begin-module frame-process
         begin
           self [: { self }
             refresh-interval task::timeout !
-            self mtu-buf net-misc::mtu-size self in-frame-interface @
+            self mtu-buf mtu-size self in-frame-interface @
             get-rx-frame
             no-timeout task::timeout !
             dup ethernet-header-size >= if

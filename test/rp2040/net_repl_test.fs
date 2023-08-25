@@ -26,6 +26,8 @@ begin-module wifi-server-test
   cyw43-structs import
   net-misc import
   frame-process import
+  net-consts import
+  net-config import
   net import
   endpoint-process import
   sema import

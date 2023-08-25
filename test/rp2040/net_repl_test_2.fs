@@ -26,6 +26,8 @@ begin-module wifi-server-test
   cyw43-structs import
   net-misc import
   frame-process import
+  net-consts import
+  net-config import
   net import
   endpoint-process import
   sema import
@@ -342,7 +344,7 @@ begin-module wifi-server-test
     pwr-pin clk-pin dio-pin cs-pin pio-addr sm-index pio-instance
     <cyw43-control> my-cyw43-control init-object
     my-cyw43-control init-cyw43
-    cyw43-consts::PM_NONE my-cyw43-control cyw43-power-management!
+    cyw43-consts::PM_AGGRESSIVE my-cyw43-control cyw43-power-management!
     false led-state !
     led-state @ 0 my-cyw43-control cyw43-gpio!
     my-cyw43-control cyw43-frame-interface@ <interface> my-interface init-object

@@ -22,6 +22,8 @@ begin-module net-diagnostic
 
   oo import
   frame-process import
+  net-consts import
+  net-config import
   net-misc import
 
   \ The parent diagnostic handler

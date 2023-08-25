@@ -21,6 +21,7 @@
 begin-module net-misc
 
   net-consts import
+  net-config import
   armv6m import
 
   \ Make an IPv4 address
