@@ -35,8 +35,3 @@ Attempt to release a lock *lock* if it is not recursively locked; if the current
 ( xt lock -- )
 
 Execute an xt with a given lock *lock* locked while it executes, unlocking it afterwards. If an exception is raised by *xt*, unlock *lock* and then re-raise the exception.
-
-##### `update-lock-priority`
-( lock -- )
-
-Update the priority of the holder of a lock, and the priority of the holder of a lock waited on by the holder of this lock, and so on, in order to avoid priority inversion. Note that this must not be called within a critical section.

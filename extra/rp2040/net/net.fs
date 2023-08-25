@@ -2504,6 +2504,9 @@ begin-module net
       \ Send a DHCPREQUEST packet
       method send-dhcprequest ( self -- )
 
+      \ Send a renewal DHCPREQUEST packet
+      method send-renew-dhcprequest ( self -- )
+
       \ Send a DHCPDECLINE packet
       method send-dhcpdecline ( self -- )
 
@@ -3970,22 +3973,8 @@ begin-module net
               false true
             else
               self dhcp-discover-state @ case
-                dhcp-wait-offer of
-
-                  dhcp-log? if
-                    [: cr ." Waiting for DHCPOFFER" ;] usb::with-usb-output
-                  then
-
-                  self send-dhcpdiscover
-                endof
-                dhcp-wait-ack of
-
-                  dhcp-log? if
-                    [: cr ." Waiting for DHCPACK" ;] usb::with-usb-output
-                  then
-
-                  self send-dhcprequest
-                endof
+                dhcp-wait-offer of self send-dhcpdiscover endof
+                dhcp-wait-ack of self send-dhcprequest endof
               endcase
               false
             then
@@ -4145,6 +4134,65 @@ begin-module net
         dhcp-wait-ack self dhcp-discover-state !
       then
     ; define send-dhcprequest
+
+    \ Send a renewal DHCPREQUEST packet
+    :noname { self -- }
+      dhcp-log? if
+        [: cr ." Sending renewal DHCPREQUEST" ;] usb::with-usb-output
+      then
+      self
+      $FFFFFFFFFFFF.
+      $00000000 dhcp-client-port
+      $FFFFFFFF dhcp-server-port
+      [ dhcp-header-size 3 + 6 + ( 6 + ) 1 + ] literal [: { self buf }
+        dhcp-log? if
+          [: cr ." Constructing renewal DHCPREQUEST" ;] usb::with-usb-output
+        then
+        DHCP_OP_CLIENT buf dhcp-op c!
+        DHCP_HTYPE buf dhcp-htype c!
+        DHCP_HLEN buf dhcp-hlen c!
+        0 buf dhcp-hops c!
+        self current-dhcp-xid @ rev buf dhcp-xid unaligned!
+        [ 0 rev16 ] literal buf dhcp-secs hunaligned!
+        [ 0 rev16 ] literal buf dhcp-flags hunaligned!
+        self dhcp-req-ipv4-addr @ rev buf dhcp-ciaddr unaligned!
+        self dhcp-req-ipv4-addr @ rev buf dhcp-yiaddr unaligned!
+        [ 0 rev ] literal buf dhcp-siaddr unaligned!
+\        self dhcp-server-ipv4-addr @ rev buf dhcp-siaddr unaligned!
+        [ 0 rev ] literal buf dhcp-giaddr unaligned!
+        buf dhcp-chaddr 16 0 fill
+        self intf-mac-addr@
+        rev16 buf dhcp-chaddr hunaligned!
+        rev buf dhcp-chaddr 2 + unaligned!
+        buf dhcp-filler 192 0 fill
+        [ DHCP_MAGIC_COOKIE rev ] literal buf dhcp-magic unaligned!
+        dhcp-header-size +to buf
+        DHCP_MESSAGE_TYPE buf c!
+        1 buf 1 + c!
+        DHCPREQUEST buf 2 + c!
+        3 +to buf
+        DHCP_REQ_IPV4_ADDR buf c!
+        4 buf 1 + c!
+        self dhcp-req-ipv4-addr @ rev buf 2 + unaligned!
+        6 +to buf
+\        DHCP_SERVER_IPV4_ADDR buf c!
+\        4 buf 1 + c!
+\        self dhcp-server-ipv4-addr @ rev buf 2 + unaligned!
+\        6 +to buf
+        DHCP_END buf c!
+        true
+        dhcp-log? if
+          [: cr ." Constructed renewal DHCPREQUEST packet" ;] usb::with-usb-output
+        then
+      ;] self send-ipv4-udp-packet-raw drop
+      dhcp-log? if
+        [: cr ." Waiting for DHCPACK" ;] usb::with-usb-output
+      then
+      self dhcp-discover-state @
+      dup dhcp-discovered <> swap dhcp-renewing <> and if
+        dhcp-wait-ack self dhcp-discover-state !
+      then
+    ; define send-renew-dhcprequest
 
     \ Send a DHCPDECLINE packet
     :noname { self -- }
@@ -4350,7 +4398,7 @@ begin-module net
             self dhcp-renew-interval @ dhcp-renew-retry-divisor /
             self dhcp-renew-interval !
           then
-          self send-dhcprequest
+          self send-renew-dhcprequest
         then
         systick::systick-counter self dhcp-renew-start !
       then
