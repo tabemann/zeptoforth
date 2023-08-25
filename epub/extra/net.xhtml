@@ -186,6 +186,48 @@
 <p>Get whether an endpoint is a UDP endpoint; note that if this returns false it means the endpoint is a TCP endpoint (by default endpoints are TCP endpoints).</p>
 </section>
 </section>
+<section id="ip-handler">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;ip-handler&gt;</span></code></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ip-handler&gt;</span></code> class handles receiving IP frames from a frame interface and passing them on to an instance of <code class="docutils literal notranslate"><span class="pre">&lt;interface&gt;</span></code>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ip-handler&gt;</span></code> class has the following constructor:</p>
+<section id="id6">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
+<p>( interface self – )</p>
+<p>Construct an IP frame handler for <em>interface</em>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ip-handler&gt;</span></code> class has the following methods:</p>
+</section>
+<section id="handle-frame">
+<h4><code class="docutils literal notranslate"><span class="pre">handle-frame</span></code></h4>
+<p>( addr bytes self – )</p>
+<p>Handle a received frame.</p>
+</section>
+<section id="handle-refresh">
+<h4><code class="docutils literal notranslate"><span class="pre">handle-refresh</span></code></h4>
+<p>( self – )</p>
+<p>Handle periodic housekeeping activities.</p>
+</section>
+</section>
+<section id="arp-handler">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;arp-handler&gt;</span></code></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;arp-handler&gt;</span></code> class handles receiving ARP frames from a frame interface and passing them onto an instance of <code class="docutils literal notranslate"><span class="pre">&lt;interface&gt;</span></code>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;arp-handler&gt;</span></code> class has the following constructor:</p>
+<section id="id7">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
+<p>( interface self – )</p>
+<p>Construct an ARP frame handler for <em>interface</em>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;arp-handler&gt;</span></code> class has the following methods:</p>
+</section>
+<section id="id8">
+<h4><code class="docutils literal notranslate"><span class="pre">handle-frame</span></code></h4>
+<p>( addr bytes self – )</p>
+<p>Handle a received frame.</p>
+</section>
+<section id="id9">
+<h4><code class="docutils literal notranslate"><span class="pre">handle-refresh</span></code></h4>
+<p>( self – )</p>
+<p>Handle periodic housekeeping activities.</p>
+</section>
+</section>
 </section>
 <section id="net-consts">
 <h2><code class="docutils literal notranslate"><span class="pre">net-consts</span></code></h2>
@@ -240,6 +282,126 @@
 <section id="ephemeral-port">
 <h4><code class="docutils literal notranslate"><span class="pre">EPHEMERAL_PORT</span></code></h4>
 <p>A token indicating that for a source port an ephemeral port is to be used. Ephemeral ports are chosen by choosing a random port between <code class="docutils literal notranslate"><span class="pre">MIN_EPHEMERAL_PORT</span></code> and <code class="docutils literal notranslate"><span class="pre">MAX_EPHEMERAL_PORT</span></code>, inclusive, on initialization, and then incrementing the ephemeral port each time an ephemeral port is needed, wrapping around within this range.</p>
+</section>
+</section>
+</section>
+<section id="endpoint-process">
+<h2><code class="docutils literal notranslate"><span class="pre">endpoint-process</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">endpoint-process</span></code> module contains the following classes:</p>
+<section id="endpoint-handler">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;endpoint-handler&gt;</span></code></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;endpoint-handler&gt;</span></code> class is meant to be subclassed by the user, who shall provide an implementation of the <code class="docutils literal notranslate"><span class="pre">handle-endpoint</span></code> method.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;endpoint-handler&gt;</span></code> class contains the following method:</p>
+<section id="handle-endpoint">
+<h4><code class="docutils literal notranslate"><span class="pre">handle-endpoint</span></code></h4>
+<p>( endpoint process – )</p>
+<p>Handle a ready <em>endpoint</em>; note that <em>endpoint</em> should be marked as done before it is available for furthe processing. The user shall provide their own implementation of this method.</p>
+</section>
+</section>
+<section id="id10">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;endpoint-process&gt;</span></code></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;endpoint-process&gt;</span></code> class encapsulates a task carrying out the core loop of handling input and state changes on endpoints associated with a interface.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;endpoint-process&gt;</span></code> class has the following constructor:</p>
+<section id="id11">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
+<p>( interface self – )</p>
+<p>This constructor sets the interface for the endpoint processor to <em>interface</em>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;endpoint-process&gt;</span></code> class has the following methods:</p>
+</section>
+<section id="run-endpoint-process">
+<h4><code class="docutils literal notranslate"><span class="pre">run-endpoint-process</span></code></h4>
+<p>( self – )</p>
+<p>This starts the task for processing endpoints on the chosen interface.</p>
+</section>
+</section>
+</section>
+<section id="frame-process">
+<h2><code class="docutils literal notranslate"><span class="pre">frame-process</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">frame-process</span></code> module contains the following classes:</p>
+<section id="frame-handler">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;frame-handler&gt;</span></code></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;frame-handler&gt;</span></code> class is meant to be subclassed by the user, who shall provide an implementation of the <code class="docutils literal notranslate"><span class="pre">handle-frame</span></code> and <code class="docutils literal notranslate"><span class="pre">handle-refresh</span></code> methods.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;frame-handler&gt;</span></code> class contains the following method:</p>
+<section id="id12">
+<h4><code class="docutils literal notranslate"><span class="pre">handle-frame</span></code></h4>
+<p>( addr bytes process – )</p>
+<p>Handle a frame of <em>bytes</em> at <em>addr</em>.</p>
+</section>
+<section id="id13">
+<h4><code class="docutils literal notranslate"><span class="pre">handle-refresh</span></code></h4>
+<p>( self – )</p>
+<p>Carry out periodic housekeeeping activities.</p>
+</section>
+</section>
+<section id="id14">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;frame-process&gt;</span></code></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;frame-process&gt;</span></code> class encapsulates receiving frames from a frame interface and handling periodic housekeeping activties.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;frame-process&gt;</span></code> class has the following constructor:</p>
+<section id="id15">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
+<p>( interface self – )</p>
+<p>This constructor sets the frame interface for the frame processor to <em>interface</em>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;frame-process&gt;</span></code> class has the following methods:</p>
+</section>
+<section id="run-frame-process">
+<h4><code class="docutils literal notranslate"><span class="pre">run-frame-process</span></code></h4>
+<p>( self – )</p>
+<p>This starts the task for processing frames and doing periodic housekeeping on the chosen frame interface.</p>
+</section>
+</section>
+</section>
+<section id="frame-interface">
+<h2><code class="docutils literal notranslate"><span class="pre">frame-interface</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">frame-interface</span></code> module encapsulates the interface between a network and zeptoIP, by providing a means of receiving and sending frames.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">frame-interface</span></code> module contains the following class:</p>
+<section id="id16">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;frame-interface&gt;</span></code></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;frame-interface&gt;</span></code> class is meant to be subclassed by implementors of interfaces to external networks.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;frame-interface&gt;</span></code> class contains the following abstract methods:</p>
+<section id="mtu-size">
+<h4><code class="docutils literal notranslate"><span class="pre">mtu-size&#64;</span></code></h4>
+<p>( self – bytes )</p>
+<p>Get the MTU size.</p>
+</section>
+<section id="mac-addr">
+<h4><code class="docutils literal notranslate"><span class="pre">mac-addr&#64;</span></code></h4>
+<p>( self – D: mac-addr )</p>
+<p>Get the MAC address.</p>
+</section>
+<section id="id17">
+<h4><code class="docutils literal notranslate"><span class="pre">mac-addr!</span></code></h4>
+<p>( D: mac-addr self – )</p>
+<p>Set the MAC address.</p>
+</section>
+<section id="put-rx-frame">
+<h4><code class="docutils literal notranslate"><span class="pre">put-rx-frame</span></code></h4>
+<p>( addr bytes self – )</p>
+<p>Put a received frame.</p>
+</section>
+<section id="get-rx-frame">
+<h4><code class="docutils literal notranslate"><span class="pre">get-rx-frame</span></code></h4>
+<p>( addr bytes self – bytes’ )</p>
+<p>Get a received frame.</p>
+</section>
+<section id="poll-rx-frame">
+<h4><code class="docutils literal notranslate"><span class="pre">poll-rx-frame</span></code></h4>
+<p>( addr bytes self – bytes’ found? )</p>
+<p>Poll a received frame.</p>
+</section>
+<section id="put-tx-frame">
+<h4><code class="docutils literal notranslate"><span class="pre">put-tx-frame</span></code></h4>
+<p>( addr bytes self – )</p>
+<p>Put a frame to transmit.</p>
+</section>
+<section id="get-tx-frame">
+<h4><code class="docutils literal notranslate"><span class="pre">get-tx-frame</span></code></h4>
+<p>( addr bytes self – bytes’ )</p>
+<p>Get a frame to transmit.</p>
+</section>
+<section id="poll-tx-frame">
+<h4><code class="docutils literal notranslate"><span class="pre">poll-tx-frame</span></code></h4>
+<p>( addr bytes self – bytes’ found? )</p>
+<p>Poll a frame to transmit.</p>
 </section>
 </section>
 </section>

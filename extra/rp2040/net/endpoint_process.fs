@@ -28,15 +28,19 @@ begin-module endpoint-process
   \ The endpoint packet handler class
   <object> begin-class <endpoint-handler>
 
-    \ The next endpoint packet handler
-    cell member next-endpoint-handler
+    begin-module endpoint-process-internal
+      
+      \ The next endpoint packet handler
+      cell member next-endpoint-handler
+      
+      \ Get the next endpoint packet handler
+      method next-endpoint-handler@ ( self -- handler | 0 )
+      
+      \ Set the next endpoint packet handler
+      method next-endpoint-handler! ( handler self -- )
 
-    \ Get the next endpoint packet handler
-    method next-endpoint-handler@ ( self -- handler | 0 )
-
-    \ Set the next endpoint packet handler
-    method next-endpoint-handler! ( handler self -- )
-
+    end-module> import
+      
     \ Handle a endpoint packet
     method handle-endpoint ( endpoint self -- )
     
@@ -71,17 +75,21 @@ begin-module endpoint-process
   \ endpoint processor class
   <object> begin-class <endpoint-process>
 
-    \ The CYW43 driver control
-    cell member interface
+    continue-module endpoint-process-internal
+      
+      \ The CYW43 driver control
+      cell member interface
+      
+      \ The first endpoint handler
+      cell member first-endpoint-handler
+      
+      \ Add a endpoint handler
+      method add-endpoint-handler ( handler self -- )
+      
+      \ Process a endpoint
+      method process-endpoint ( endpoint self -- )
 
-    \ The first endpoint handler
-    cell member first-endpoint-handler
-
-    \ Add a endpoint handler
-    method add-endpoint-handler ( handler self -- )
-
-    \ Process a endpoint
-    method process-endpoint ( endpoint self -- )
+    end-module
 
     \ Run endpoint processor
     method run-endpoint-process ( self -- )

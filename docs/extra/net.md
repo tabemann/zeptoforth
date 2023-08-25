@@ -180,6 +180,52 @@ This word returns the IPv4 address and port of, for a TCP endpoint, the peer of 
 
 Get whether an endpoint is a UDP endpoint; note that if this returns false it means the endpoint is a TCP endpoint (by default endpoints are TCP endpoints).
 
+#### `<ip-handler>`
+
+The `<ip-handler>` class handles receiving IP frames from a frame interface and passing them on to an instance of `<interface>`.
+
+The `<ip-handler>` class has the following constructor:
+
+##### `new`
+( interface self -- )
+
+Construct an IP frame handler for *interface*.
+
+The `<ip-handler>` class has the following methods:
+
+##### `handle-frame`
+( addr bytes self -- )
+
+Handle a received frame.
+
+##### `handle-refresh`
+( self -- )
+
+Handle periodic housekeeping activities.
+
+#### `<arp-handler>`
+
+The `<arp-handler>` class handles receiving ARP frames from a frame interface and passing them onto an instance of `<interface>`.
+
+The `<arp-handler>` class has the following constructor:
+
+##### `new`
+( interface self -- )
+
+Construct an ARP frame handler for *interface*.
+
+The `<arp-handler>` class has the following methods:
+
+##### `handle-frame`
+( addr bytes self -- )
+
+Handle a received frame.
+
+##### `handle-refresh`
+( self -- )
+
+Handle periodic housekeeping activities.
+
 ### `net-consts`
 
 The `net-consts` module contains the following words:
@@ -213,3 +259,131 @@ The maximum ephemeral port, 65534 (port 65535 is use by zeptoIP for DNS).
 ##### `EPHEMERAL_PORT`
 
 A token indicating that for a source port an ephemeral port is to be used. Ephemeral ports are chosen by choosing a random port between `MIN_EPHEMERAL_PORT` and `MAX_EPHEMERAL_PORT`, inclusive, on initialization, and then incrementing the ephemeral port each time an ephemeral port is needed, wrapping around within this range.
+
+### `endpoint-process`
+
+The `endpoint-process` module contains the following classes:
+
+#### `<endpoint-handler>`
+
+The `<endpoint-handler>` class is meant to be subclassed by the user, who shall provide an implementation of the `handle-endpoint` method.
+
+The `<endpoint-handler>` class contains the following method:
+
+##### `handle-endpoint`
+( endpoint process -- )
+
+Handle a ready *endpoint*; note that *endpoint* should be marked as done before it is available for furthe processing. The user shall provide their own implementation of this method.
+
+#### `<endpoint-process>`
+
+The `<endpoint-process>` class encapsulates a task carrying out the core loop of handling input and state changes on endpoints associated with a interface.
+
+The `<endpoint-process>` class has the following constructor:
+
+##### `new`
+( interface self -- )
+
+This constructor sets the interface for the endpoint processor to *interface*.
+
+The `<endpoint-process>` class has the following methods:
+
+##### `run-endpoint-process`
+( self -- )
+
+This starts the task for processing endpoints on the chosen interface.
+
+### `frame-process`
+
+The `frame-process` module contains the following classes:
+
+#### `<frame-handler>`
+
+The `<frame-handler>` class is meant to be subclassed by the user, who shall provide an implementation of the `handle-frame` and `handle-refresh` methods.
+
+The `<frame-handler>` class contains the following method:
+
+##### `handle-frame`
+( addr bytes process -- )
+
+Handle a frame of *bytes* at *addr*.
+
+##### `handle-refresh`
+( self -- )
+
+Carry out periodic housekeeeping activities.
+
+#### `<frame-process>`
+
+The `<frame-process>` class encapsulates receiving frames from a frame interface and handling periodic housekeeping activties.
+
+The `<frame-process>` class has the following constructor:
+
+##### `new`
+( interface self -- )
+
+This constructor sets the frame interface for the frame processor to *interface*.
+
+The `<frame-process>` class has the following methods:
+
+##### `run-frame-process`
+( self -- )
+
+This starts the task for processing frames and doing periodic housekeeping on the chosen frame interface.
+
+### `frame-interface`
+
+The `frame-interface` module encapsulates the interface between a network and zeptoIP, by providing a means of receiving and sending frames.
+
+The `frame-interface` module contains the following class:
+
+#### `<frame-interface>`
+
+The `<frame-interface>` class is meant to be subclassed by implementors of interfaces to external networks.
+
+The `<frame-interface>` class contains the following abstract methods:
+
+##### `mtu-size@`
+( self -- bytes )
+
+Get the MTU size.
+
+##### `mac-addr@`
+( self -- D: mac-addr )
+
+Get the MAC address.
+
+##### `mac-addr!`
+( D: mac-addr self -- )
+
+Set the MAC address.
+
+##### `put-rx-frame`
+( addr bytes self -- )
+
+Put a received frame.
+
+##### `get-rx-frame`
+( addr bytes self -- bytes' )
+
+Get a received frame.
+
+##### `poll-rx-frame`
+( addr bytes self -- bytes' found? )
+
+Poll a received frame.
+
+##### `put-tx-frame`
+( addr bytes self -- )
+
+Put a frame to transmit.
+
+##### `get-tx-frame`
+( addr bytes self -- bytes' )
+
+Get a frame to transmit.
+
+##### `poll-tx-frame`
+( addr bytes self -- bytes' found? )
+
+Poll a frame to transmit.
