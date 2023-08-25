@@ -288,6 +288,11 @@ This constructor sets the interface for the endpoint processor to *interface*.
 
 The `<endpoint-process>` class has the following methods:
 
+##### `add-endpoint-handler`
+( handler self -- )
+
+Add a endpoint handler.
+
 ##### `run-endpoint-process`
 ( self -- )
 
@@ -325,6 +330,11 @@ The `<frame-process>` class has the following constructor:
 This constructor sets the frame interface for the frame processor to *interface*.
 
 The `<frame-process>` class has the following methods:
+
+##### `add-frame-handler`
+( handler self -- )
+
+Add a frame handler.
 
 ##### `run-frame-process`
 ( self -- )

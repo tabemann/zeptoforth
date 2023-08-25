@@ -83,14 +83,14 @@ begin-module endpoint-process
       \ The first endpoint handler
       cell member first-endpoint-handler
       
-      \ Add a endpoint handler
-      method add-endpoint-handler ( handler self -- )
-      
       \ Process a endpoint
       method process-endpoint ( endpoint self -- )
 
     end-module
 
+    \ Add a endpoint handler
+    method add-endpoint-handler ( handler self -- )
+      
     \ Run endpoint processor
     method run-endpoint-process ( self -- )
     

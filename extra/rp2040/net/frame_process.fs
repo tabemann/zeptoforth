@@ -29,14 +29,18 @@ begin-module frame-process
   \ The frame handler class
   <object> begin-class <frame-handler>
 
-    \ The next frame handler
-    cell member next-frame-handler
+    begin-module frame-process-internal
+      
+      \ The next frame handler
+      cell member next-frame-handler
+      
+      \ Get the next frame handler
+      method next-frame-handler@ ( self -- handler | 0 )
+      
+      \ Set the next frame handler
+      method next-frame-handler! ( handler self -- )
 
-    \ Get the next frame handler
-    method next-frame-handler@ ( self -- handler | 0 )
-
-    \ Set the next frame handler
-    method next-frame-handler! ( handler self -- )
+    end-module> import
 
     \ Handle a frame
     method handle-frame ( addr bytes self -- )
@@ -80,24 +84,28 @@ begin-module frame-process
   \ Frame processor class
   <object> begin-class <frame-process>
 
-    \ The frame interface
-    cell member in-frame-interface
+    continue-module frame-process-internal
+      
+      \ The frame interface
+      cell member in-frame-interface
+      
+      \ The first frame handler
+      cell member first-frame-handler
+      
+      \ The MTU buffer
+      mtu-size cell align member mtu-buf
+      
+      \ Process a frame
+      method process-frame ( bytes self -- )
+      
+      \ Do a refresh
+      method process-refresh ( self -- )
 
-    \ The first frame handler
-    cell member first-frame-handler
-
-    \ The MTU buffer
-    mtu-size cell align member mtu-buf
-
+    end-module
+    
     \ Add a frame handler
     method add-frame-handler ( handler self -- )
 
-    \ Process a frame
-    method process-frame ( bytes self -- )
-
-    \ Do a refresh
-    method process-refresh ( self -- )
-    
     \ Run frame processor
     method run-frame-process ( self -- )
     
