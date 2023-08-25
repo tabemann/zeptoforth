@@ -34,9 +34,6 @@ begin-module net
   \ Oversized frame exception
   : x-oversized-frame ( -- ) cr ." oversized frame" ;
 
-  \ Send timed out
-  : x-send-timed-out ( -- ) cr ." send timed out" ;
-
   \ zeptoIP internals
   begin-module net-internal
   
@@ -361,6 +358,18 @@ begin-module net
     \ The sizes of the incoming packets
     max-in-packets 1 lshift member in-packet-sizes
 
+    \ The incoming UDP packets source IP address
+    max-in-packets cells member in-packet-ipv4-addrs
+
+    \ The incoming UDP packets source ports
+    max-in-packets 1 lshift member in-packet-ports
+
+    \ The pending UDP packet source IP address
+    cell member in-packet-current-ipv4-addr
+
+    \ The pending UDP packet source port
+    cell member in-packet-current-port
+
     \ The buffer incoming packets are being written to
     cell member in-packet-addr
 
@@ -403,6 +412,9 @@ begin-module net
     \ Get the amount of waiting data for an endpoint
     method waiting-in-bytes@ ( self -- bytes )
 
+    \ Get the incoming packets UDP remote address and port
+    method in-packets-udp-remote@ ( self -- ipv4-addr port )
+    
     \ Push data
     method push-packets ( seq self -- )
 
@@ -416,7 +428,7 @@ begin-module net
     method insert-tcp-packet ( addr bytes seq index self -- )
 
     \ Add incoming UDP packet
-    method add-in-udp-packet ( addr bytes self -- )
+    method add-in-udp-packet ( addr bytes src-addr src-port self -- )
     
     \ Get whether to send an ACK packet
     method in-packet-send-ack? ( self -- send? )
@@ -461,6 +473,10 @@ begin-module net
       0 self in-packet-count !
       self in-packet-seqs max-in-packets cells 0 fill
       self in-packet-sizes max-in-packets 1 lshift 0 fill
+      self in-packet-ipv4-addrs max-in-packets cells 0 fill
+      self in-packet-ports max-in-packets 1 lshift 0 fill
+      0 self in-packet-current-ipv4-addr !
+      0 self in-packet-current-port h!
       0 self in-packet-offset !
       0 self pending-in-packet-offset !
       0 self pushed-in-packet-offset !
@@ -479,6 +495,10 @@ begin-module net
       0 self in-packet-count !
       self in-packet-seqs max-in-packets cells 0 fill
       self in-packet-sizes max-in-packets 1 lshift 0 fill
+      self in-packet-ipv4-addrs max-in-packets cells 0 fill
+      self in-packet-ports max-in-packets 1 lshift 0 fill
+      0 self in-packet-current-ipv4-addr !
+      0 self in-packet-current-port h!
       0 self in-packet-offset !
       0 self pending-in-packet-offset !
       0 self pushed-in-packet-offset !
@@ -748,12 +768,14 @@ begin-module net
     ; define insert-tcp-packet
     
     \ Add incoming UDP packet
-    :noname { addr bytes self -- }
+    :noname { addr bytes src-addr src-port self -- }
       self in-packet-offset @ bytes + self in-packet-bytes @ <=
       self in-packet-count @ max-in-packets < and if
         addr self in-packet-addr @ self in-packet-offset @ + bytes move
         bytes self in-packet-offset +!
         bytes self in-packet-sizes self in-packet-count @ 1 lshift + h!
+        src-addr self in-packet-ipv4-addrs self in-packet-count @ cells + !
+        src-port self in-packet-ports self in-packet-count @ 1 lshift + h!
         1 self in-packet-count +!
       then
       [ debug? ] [if]
@@ -762,6 +784,12 @@ begin-module net
       [then]
     ; define add-in-udp-packet
     
+    \ Get the incoming packets UDP remote address and port
+    :noname ( self -- ipv4-addr port )
+      dup in-packet-current-ipv4-addr @
+      swap in-packet-current-port h@
+    ; define in-packets-udp-remote@
+
     \ Get whether to send an ACK packet
     :noname ( self -- send? )
       dup in-packet-last-ack-sent @ swap current-in-packet-ack @ <>
@@ -795,11 +823,21 @@ begin-module net
       else
         self in-packet-count @ 0> if
           self in-packet-sizes h@ self pending-in-packet-offset !
+          self in-packet-ipv4-addrs @ self in-packet-current-ipv4-addr !
+          self in-packet-ports h@ self in-packet-current-port !
           -1 self in-packet-count +!
           self in-packet-count @ 0> if
             self in-packet-sizes 2 + self in-packet-sizes
             self in-packet-count @ 1 lshift move
+            self in-packet-ipv4-addrs cell+ self in-packet-ipv4-addrs
+            self in-packet-count @ cells move
+            self in-packet-ports 2 + self in-packet-ports
+            self in-packet-count @ 1 lshift move
           then
+        else
+          0 self pending-in-packet-offset !
+          0 self in-packet-current-ipv4-addr !
+          0 self in-packet-current-port !
         then
       then
       self pending-in-packet-offset @
@@ -880,6 +918,8 @@ begin-module net
       self in-packet-offset @ pending - move
       pending negate self in-packet-offset +!
       0 self pending-in-packet-offset !
+      0 self in-packet-current-ipv4-addr !
+      0 self in-packet-current-port h!
 
       [ debug? ] [if]
         self in-packet-offset @
@@ -1434,7 +1474,7 @@ begin-module net
       method add-endpoint-tcp-data ( addr bytes push? seq self -- )
 
       \ Add data to a UDP endpoint if possible
-      method add-endpoint-udp-data ( addr bytes self -- )
+      method add-endpoint-udp-data ( addr bytes src-addr src-port self -- )
 
       \ Handle an incoming ACK
       method endpoint-ack-in ( window ack self -- )
@@ -1658,8 +1698,12 @@ begin-module net
 
     \ Get endpoint source
     :noname ( self -- ipv4-addr port )
-      dup endpoint-remote-ipv4-addr @
-      swap endpoint-remote-port @
+      dup udp-endpoint? not if
+        dup endpoint-remote-ipv4-addr @
+        swap endpoint-remote-port @
+      else
+        endpoint-in-packets in-packets-udp-remote@
+      then
     ; define endpoint-ipv4-remote@
     
     \ Set endpoint source
@@ -2475,6 +2519,12 @@ begin-module net
       \ Process an IPv4 DHCPNAK packet
       method process-ipv4-dhcpnak ( addr bytes self -- )
 
+      \ Enqueue a ready receiving IP endpoint
+      method put-ready-endpoint ( endpoint self -- )
+
+      \ Allocate an endpoint
+      method allocate-endpoint ( self -- endpoint success? )
+
     end-module
     
     \ Get the IPv4 address
@@ -2505,7 +2555,7 @@ begin-module net
     method intf-ipv4-broadcast@ ( self -- addr )
     
     \ Get the MAC address
-    method intf-mac-addr@ ( self -- addr )
+    method intf-mac-addr@ ( self -- D: addr )
 
     \ Get the TTL
     method intf-ttl@ ( self -- ttl )
@@ -2530,14 +2580,8 @@ begin-module net
     \ Resolve a DNS name's IPv4 address
     method resolve-dns-ipv4-addr ( c-addr bytes self -- ipv4-addr success? )
     
-    \ Enqueue a ready receiving IP endpoint
-    method put-ready-endpoint ( endpoint self -- )
-
     \ Dequeue a ready receiving IP endpoint
     method get-ready-endpoint ( self -- endpoint )
-
-    \ Allocate an endpoint
-    method allocate-endpoint ( self -- endpoint success? )
 
     \ Mark an endpoint as done
     method endpoint-done ( endpoint self -- )
@@ -3158,8 +3202,8 @@ begin-module net
             { src-addr addr bytes endpoint self }
             endpoint udp-endpoint?
             endpoint endpoint-local-port@ addr udp-dest-port h@ rev16 = and if
-              src-addr addr udp-src-port h@ rev16 endpoint endpoint-ipv4-remote!
               addr udp-header-size + bytes udp-header-size -
+              src-addr addr udp-src-port h@ rev16
               endpoint add-endpoint-udp-data
               endpoint self put-ready-endpoint
               true

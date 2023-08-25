@@ -55,6 +55,9 @@ begin-module net-test
   
   \ Are we closing?
   false value closing?
+  
+  \ The LED state
+  variable led-state
     
   \ Our MAC address
   default-mac-addr 2constant my-mac-addr
@@ -67,6 +70,8 @@ begin-module net-test
   
     \ Handle a endpoint packet
     :noname { endpoint self -- }
+      led-state @ not led-state !
+      led-state @ 0 my-cyw43-control cyw43-gpio!
       sent-header? not endpoint endpoint-tcp-state@ TCP_ESTABLISHED = and if
         cr ." SENDING HEADER" cr
         true to sent-header?
@@ -106,7 +111,9 @@ begin-module net-test
     pwr-pin clk-pin dio-pin cs-pin pio-addr sm-index pio-instance
     <cyw43-control> my-cyw43-control init-object
     my-cyw43-control init-cyw43
-    cyw43-consts::PM_NONE my-cyw43-control cyw43-power-management!
+    cyw43-consts::PM_AGGRESSIVE  my-cyw43-control cyw43-power-management!
+    false led-state !
+    led-state @ 0 my-cyw43-control cyw43-gpio!
     my-cyw43-control cyw43-frame-interface@ <interface> my-interface init-object
     \ 192 168 86 49 make-ipv4-addr my-interface intf-ipv4-addr!
     \ 192 168 86 1 make-ipv4-addr my-interface gateway-ipv4-addr !
@@ -128,7 +135,7 @@ begin-module net-test
 
   : run-test { D: ssid D: pass -- }
     init-test
-    begin ssid pass my-cyw43-control join-cyw43-wpa2 .s nip until
+    begin ssid pass my-cyw43-control join-cyw43-wpa2 nip until
     my-cyw43-control disable-all-cyw43-events
     my-endpoint-process run-endpoint-process
     my-frame-process run-frame-process
@@ -138,8 +145,12 @@ begin-module net-test
     my-interface intf-ipv4-netmask@ cr ." IPv4 netmask: " ipv4.
     my-interface gateway-ipv4-addr@ cr ." Gateway IPv4 address: " ipv4.
     my-interface dns-server-ipv4-addr@ cr ." DNS server IPv4 address: " ipv4.
+    led-state @ not led-state !
+    led-state @ 0 my-cyw43-control cyw43-gpio!
     cr ." DNS LOOKUP"
     s" www.google.com" my-interface resolve-dns-ipv4-addr if { addr }
+      led-state @ not led-state !
+      led-state @ 0 my-cyw43-control cyw43-gpio!
       cr ." RESOLVED: " addr ipv4.
       EPHEMERAL_PORT addr 80 my-interface allocate-tcp-connect-ipv4-endpoint if
         drop cr ." CONNECTED" cr

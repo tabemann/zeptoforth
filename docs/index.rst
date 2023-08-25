@@ -69,3 +69,4 @@ Zeptoforth Documentation
    extra/font
    extra/bitmap_utils
    extra/neopixel
+   extra/net

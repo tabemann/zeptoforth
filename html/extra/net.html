@@ -1,0 +1,399 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>zeptoIP Words &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Neopixels on the RP2040" href="neopixel.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="zeptoip-words">
+<h1>zeptoIP Words<a class="headerlink" href="#zeptoip-words" title="Permalink to this heading">¶</a></h1>
+<p>zeptoIP is an Internet Protocol stack for zeptoforth. Currently it supports the Raspberry Pi Pico W’s CYW43439 WiFi chip. By design it can be extended to any WiFi or Ethernet interface which exposes receiving and sending Ethernet frames. It expressly does not support WiFi interfaces such as the ESP8285 on the Wio RP2040 which operate by using their own protocols such as the “AT” protocol. Note that currently zeptoIP only supports IPv4.</p>
+<p>zeptoIP is centered around one or more <em>interfaces</em>, instances of <code class="docutils literal notranslate"><span class="pre">net::&lt;interface&gt;</span></code>each of which has its own IP address, netmask, gateway IP address, and DNS server IP address. With interfaces sources of incoming (and in the case of TCP data, outgoing) data, known as <em>endpoints</em>, instances of <code class="docutils literal notranslate"><span class="pre">net::&lt;endpoint&gt;</span></code> may be created, endpoints with ready data or state changes can be fetched, UDP packets may be sent, IP addresses of hostnames can be resolved via DNS, and IP addresses may be acquired via DHCP.</p>
+<p>Endpoints encapsulate connection state in the case of TCP, and received packet state in the case of UDP. Reading received data from an endpoint need not require copying the data; the received data associated with an endpoint is valid until the endpoint is marked as <em>done</em>, at which the received data is cleared from the endpoint’s buffer and the room it took up in the endpoint’s buffer is made available for more received data. Note that data continues to be received even between the time that ready endpoint is fetched with <code class="docutils literal notranslate"><span class="pre">net::get-ready-endpoint</span></code> and it is marked as done with <code class="docutils literal notranslate"><span class="pre">net::endpoint-done</span></code>. Also note that with UDP endpoints the ready data at any one data comprises only a single received UDP packet’s data.</p>
+<p>The typical means by which endpoints are serviced is by creating an <em>endpoint processor</em>, an instance of <code class="docutils literal notranslate"><span class="pre">endpoint-process::&lt;endpoint-process&gt;</span></code>, and registering an <em>endpoint handler</em>, an instance of <code class="docutils literal notranslate"><span class="pre">endpoint-process::&lt;endpoint-handler&gt;</span></code> with it. The endpoint processor involves a task which fetches ready endpoints one at a time from an interface, and then applies it to each register endpoint handler. Once all the endpoint handlers have processed the endpoint, it should be marked as done to make it available for new data or state changes.</p>
+<p>Sending data is done differently with regard to TCP and UDP. With TCP sending data requires a TCP endpoint, gotten through either receiving an incoming connection on a listening TCP endpoint, started with <code class="docutils literal notranslate"><span class="pre">net::allocate-tcp-listen-endpoint</span></code>, which will result in the endpoint being readied with the appropriate state change(s), or starting a TCP connection with <code class="docutils literal notranslate"><span class="pre">net::allocate-tcp-connect-ipv4-endpoint</span></code>, at which an TCP endpoint will be provided to the user. Once one has done this, all that one must do is call <code class="docutils literal notranslate"><span class="pre">send-tcp-endpoint</span></code>, which will send the provided data unless the connection is closed or reset, where then it will exit prematurely. With UDP sending data simply requires executing <code class="docutils literal notranslate"><span class="pre">net::send-ipv4-udp-packet</span></code>.</p>
+<p>Closing an endpoint is accomplished through <code class="docutils literal notranslate"><span class="pre">net::close-tcp-endpoint</span></code>, for TCP endpoints, and <code class="docutils literal notranslate"><span class="pre">net::close-udp-endpoint</span></code>, for UDP endpoints. Closing UDP endpoints is immediate, while closing TCP endpoints involves waiting for the endpoint to be closed after a four-way handshake.</p>
+<p>If the user wishes to listen to multiple connections on the same point they must allocate multiple endpoints to listen on; incoming connections will be alloted to each of these endpoints.</p>
+<p>Note that there is a fixed number of available endpoints which is set at compile-time, specified by the constant <code class="docutils literal notranslate"><span class="pre">net-config::max-endpoints</span></code>. This is set to four by default.</p>
+<section id="net">
+<h2><code class="docutils literal notranslate"><span class="pre">net</span></code><a class="headerlink" href="#net" title="Permalink to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">net</span></code> module contains the following words:</p>
+<section id="x-oversized-frame">
+<h3><code class="docutils literal notranslate"><span class="pre">x-oversized-frame</span></code><a class="headerlink" href="#x-oversized-frame" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>This exception is raised if a frame larger than the MTU would be raised.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">net</span></code> module contains the following classes:</p>
+</section>
+<section id="interface">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;interface&gt;</span></code><a class="headerlink" href="#interface" title="Permalink to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;interface&gt;</span></code> class has the following constructor:</p>
+<section id="new">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#new" title="Permalink to this heading">¶</a></h4>
+<p>( frame-interface self – )</p>
+<p>This constructs an <code class="docutils literal notranslate"><span class="pre">&lt;interface&gt;</span></code> instance for a given <em>frame interface</em>, an instance of <code class="docutils literal notranslate"><span class="pre">frame-interface::&lt;frame-interface&gt;</span></code>, which encapsulates a connection to the hardware network interface.</p>
+</section>
+<section id="intf-ipv4-addr">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-ipv4-addr&#64;</span></code><a class="headerlink" href="#intf-ipv4-addr" title="Permalink to this heading">¶</a></h4>
+<p>( self – addr )</p>
+<p>Get an interface’s IPv4 address.</p>
+</section>
+<section id="id1">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-ipv4-addr!</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h4>
+<p>( addr self – )</p>
+<p>Manually set an interface’s IPv4 address.</p>
+</section>
+<section id="intf-ipv4-netmask">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-ipv4-netmask&#64;</span></code><a class="headerlink" href="#intf-ipv4-netmask" title="Permalink to this heading">¶</a></h4>
+<p>( self – netmask )</p>
+<p>Get an interface’s IPv4 netmask.</p>
+</section>
+<section id="id2">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-ipv4-netmask!</span></code><a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h4>
+<p>( netmask self – )</p>
+<p>Manually set an interface’s IPv4 netmask.</p>
+</section>
+<section id="gateway-ipv4-addr">
+<h4><code class="docutils literal notranslate"><span class="pre">gateway-ipv4-addr&#64;</span></code><a class="headerlink" href="#gateway-ipv4-addr" title="Permalink to this heading">¶</a></h4>
+<p>( self – addr )</p>
+<p>Get an interface’s gateway’s IPv4 address.</p>
+</section>
+<section id="id3">
+<h4><code class="docutils literal notranslate"><span class="pre">gateway-ipv4-addr!</span></code><a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h4>
+<p>( addr self – )</p>
+<p>Manually set an interface’s gateway’s IPv4 address.</p>
+</section>
+<section id="dns-server-ipv4-addr">
+<h4><code class="docutils literal notranslate"><span class="pre">dns-server-ipv4-addr&#64;</span></code><a class="headerlink" href="#dns-server-ipv4-addr" title="Permalink to this heading">¶</a></h4>
+<p>( self – addr )</p>
+<p>Get an interface’s DNS server’s IPv4 address.</p>
+</section>
+<section id="id4">
+<h4><code class="docutils literal notranslate"><span class="pre">dns-server-ipv4-addr!</span></code><a class="headerlink" href="#id4" title="Permalink to this heading">¶</a></h4>
+<p>( addr self – )</p>
+<p>Manually set an interface’s gateway’s IPv4 address.</p>
+</section>
+<section id="intf-ipv4-broadcast">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-ipv4-broadcast&#64;</span></code><a class="headerlink" href="#intf-ipv4-broadcast" title="Permalink to this heading">¶</a></h4>
+<p>( self – addr )</p>
+<p>Get an interface’s IPv4 broadcast address.</p>
+</section>
+<section id="intf-mac-addr">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-mac-addr&#64;</span></code><a class="headerlink" href="#intf-mac-addr" title="Permalink to this heading">¶</a></h4>
+<p>( self – D: mac-addr )</p>
+<p>Get an interface’s MAC address.</p>
+</section>
+<section id="intf-ttl">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-ttl&#64;</span></code><a class="headerlink" href="#intf-ttl" title="Permalink to this heading">¶</a></h4>
+<p>( self – tll )</p>
+<p>Get an interface’s TTL.</p>
+</section>
+<section id="id5">
+<h4><code class="docutils literal notranslate"><span class="pre">intf-ttl!</span></code><a class="headerlink" href="#id5" title="Permalink to this heading">¶</a></h4>
+<p>( ttl self – )</p>
+<p>Set an interface’s TTL.</p>
+</section>
+<section id="discover-ipv4-addr">
+<h4><code class="docutils literal notranslate"><span class="pre">discover-ipv4-addr</span></code><a class="headerlink" href="#discover-ipv4-addr" title="Permalink to this heading">¶</a></h4>
+<p>( self – )</p>
+<p>Discover an interface’s IPv4 address, IPv4 netmask, gateway IPv4 address, and DNS server IPv4 address via DHCP.</p>
+</section>
+<section id="send-tcp-endpoint">
+<h4><code class="docutils literal notranslate"><span class="pre">send-tcp-endpoint</span></code><a class="headerlink" href="#send-tcp-endpoint" title="Permalink to this heading">¶</a></h4>
+<p>( addr bytes endpoint self – )</p>
+<p>Send <em>bytes</em> at <em>addr</em> to the peer of <em>endpoint</em>. This will return when sending data is complete or if the connection is closed or its connection is not yet established.</p>
+</section>
+<section id="send-ipv4-udp-packet">
+<h4><code class="docutils literal notranslate"><span class="pre">send-ipv4-udp-packet</span></code><a class="headerlink" href="#send-ipv4-udp-packet" title="Permalink to this heading">¶</a></h4>
+<p>( ? src-port dest-addr dest-port bytes xt self – ? success? )</p>
+<p>This will call <em>xt</em> with a signature of ( ? buffer – ? send? ) with an address of a buffer guaranteed to be of size <em>bytes</em> to construct a UDP packet with a payload consisting of that buffer from <em>src-port</em> (which may be any port from <code class="docutils literal notranslate"><span class="pre">net-consts::MIN_EPHEMERAL_PORT</span></code> to <code class="docutils literal notranslate"><span class="pre">net-consts::MAX_EPHEMERAL_PORT</span></code> if <code class="docutils literal notranslate"><span class="pre">net-consts::EPHEMERAL_PORT</span></code> is provided) to <em>dest-addr</em> at <em>dest-port</em>; if true is returned the packet is sent, and true will be returned afterwards, else the packet is not sent and false is returned. Note that false may be returned if the MAC address corresponding to <em>dest-addr</em> cannot be resolved.</p>
+</section>
+<section id="resolve-ipv4-addr-mac-addr">
+<h4><code class="docutils literal notranslate"><span class="pre">resolve-ipv4-addr-mac-addr</span></code><a class="headerlink" href="#resolve-ipv4-addr-mac-addr" title="Permalink to this heading">¶</a></h4>
+<p>( dest-addr self – D: mac-addr success? )</p>
+<p>Attempt to resolve the MAC address of an IPv4 address; if successful, true and the MAC address are returned, else false and padding cells are returned.</p>
+</section>
+<section id="resolve-dns-ipv4-addr">
+<h4><code class="docutils literal notranslate"><span class="pre">resolve-dns-ipv4-addr</span></code><a class="headerlink" href="#resolve-dns-ipv4-addr" title="Permalink to this heading">¶</a></h4>
+<p>( c-addr bytes self – ipv4-addr success? )</p>
+<p>Attempt to resolve the IPv4 address of a hostname via DNS; if successful, true and the IPv4 address are returned, else false and a apdding cell is returned.</p>
+</section>
+<section id="get-ready-endpoint">
+<h4><code class="docutils literal notranslate"><span class="pre">get-ready-endpoint</span></code><a class="headerlink" href="#get-ready-endpoint" title="Permalink to this heading">¶</a></h4>
+<p>( self – endpoint )</p>
+<p>Do a blocking wait to get the next ready endpoint; note that the user may use <code class="docutils literal notranslate"><span class="pre">task::timeout</span></code> to apply a timeout to this.</p>
+</section>
+<section id="endpoint-done">
+<h4><code class="docutils literal notranslate"><span class="pre">endpoint-done</span></code><a class="headerlink" href="#endpoint-done" title="Permalink to this heading">¶</a></h4>
+<p>( endpoint self – )</p>
+<p>Retire the current pending data for an endpoint and allow the endpoint to be readied again; if there is data already available, the endpoint will be readied again immediately.</p>
+</section>
+<section id="allocate-udp-listen-endpoint">
+<h4><code class="docutils literal notranslate"><span class="pre">allocate-udp-listen-endpoint</span></code><a class="headerlink" href="#allocate-udp-listen-endpoint" title="Permalink to this heading">¶</a></h4>
+<p>( port self – endpoint success? )</p>
+<p>Attempt to allocate a UDP endpoint listening on <em>port</em> (which may be any port from <code class="docutils literal notranslate"><span class="pre">net-consts::MIN_EPHEMERAL_PORT</span></code> to <code class="docutils literal notranslate"><span class="pre">net-consts::MAX_EPHEMERAL_PORT</span></code> if <code class="docutils literal notranslate"><span class="pre">net-consts::EPHEMERAL_PORT</span></code> is provided) and return true along with the endpoint, unless no endpoints are free, where then false is returned along with a padding cell.</p>
+</section>
+<section id="allocate-tcp-listen-endpoint">
+<h4><code class="docutils literal notranslate"><span class="pre">allocate-tcp-listen-endpoint</span></code><a class="headerlink" href="#allocate-tcp-listen-endpoint" title="Permalink to this heading">¶</a></h4>
+<p>( port self – endpoint success? )</p>
+<p>Attempt to allocate a TCP endpoint listening on <em>port</em> (which may be any port from <code class="docutils literal notranslate"><span class="pre">net-consts::MIN_EPHEMERAL_PORT</span></code> to <code class="docutils literal notranslate"><span class="pre">net-consts::MAX_EPHEMERAL_PORT</span></code> if <code class="docutils literal notranslate"><span class="pre">net-consts::EPHEMERAL_PORT</span></code> is provided) and return true along with the endpoint, unless no endpoints are free, where then false is returned along with a padding cell.</p>
+</section>
+<section id="allocate-tcp-connect-ipv4-endpoint">
+<h4><code class="docutils literal notranslate"><span class="pre">allocate-tcp-connect-ipv4-endpoint</span></code><a class="headerlink" href="#allocate-tcp-connect-ipv4-endpoint" title="Permalink to this heading">¶</a></h4>
+<p>( src-port dest-addr dest-port self – endpoint success? )</p>
+<p>Attempt to allocate a TCP endpoint connected to the IPv4 address <em>dest-addr</em> at <em>dest-port</em> from <em>src-port</em> (which may be any port from <code class="docutils literal notranslate"><span class="pre">net-consts::MIN_EPHEMERAL_PORT</span></code> to <code class="docutils literal notranslate"><span class="pre">net-consts::MAX_EPHEMERAL_PORT</span></code> if <code class="docutils literal notranslate"><span class="pre">net-consts::EPHEMERAL_PORT</span></code> is provided) and return true along with the endpoint, unless no endpoints are free, wheree then false is returned along with a padding cell.</p>
+</section>
+<section id="close-udp-endpoint">
+<h4><code class="docutils literal notranslate"><span class="pre">close-udp-endpoint</span></code><a class="headerlink" href="#close-udp-endpoint" title="Permalink to this heading">¶</a></h4>
+<p>( endpoint self – )</p>
+<p>Close a UDP endpoint. This is immediate, and any queued UDP packets will be lost.</p>
+</section>
+<section id="close-tcp-endpoint">
+<h4><code class="docutils literal notranslate"><span class="pre">close-tcp-endpoint</span></code><a class="headerlink" href="#close-tcp-endpoint" title="Permalink to this heading">¶</a></h4>
+<p>( endpoint self – )</p>
+<p>Close a TCP endpoint. This waits until the connection is normally closed or the connection is reset.</p>
+</section>
+</section>
+<section id="endpoint">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;endpoint&gt;</span></code><a class="headerlink" href="#endpoint" title="Permalink to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;endpoint&gt;</span></code> class has the following methods:</p>
+<section id="endpoint-tcp-state">
+<h4><code class="docutils literal notranslate"><span class="pre">endpoint-tcp-state&#64;</span></code><a class="headerlink" href="#endpoint-tcp-state" title="Permalink to this heading">¶</a></h4>
+<p>( self – tcp-state )</p>
+<p>This word returns the current TCP state of an endpoint.</p>
+</section>
+<section id="endpoint-rx-data">
+<h4><code class="docutils literal notranslate"><span class="pre">endpoint-rx-data&#64;</span></code><a class="headerlink" href="#endpoint-rx-data" title="Permalink to this heading">¶</a></h4>
+<p>( self – addr bytes )</p>
+<p>This word returns the address and size in bytes of the current pending data for an endpoint.</p>
+</section>
+<section id="endpoint-ipv4-remote">
+<h4><code class="docutils literal notranslate"><span class="pre">endpoint-ipv4-remote&#64;</span></code><a class="headerlink" href="#endpoint-ipv4-remote" title="Permalink to this heading">¶</a></h4>
+<p>( self – ipv4-addr port )</p>
+<p>This word returns the IPv4 address and port of, for a TCP endpoint, the peer of a connection, and for a UDP endpoint, the packet for the current pending data.</p>
+</section>
+<section id="udp-endpoint">
+<h4><code class="docutils literal notranslate"><span class="pre">udp-endpoint?</span></code><a class="headerlink" href="#udp-endpoint" title="Permalink to this heading">¶</a></h4>
+<p>( self – udp? )</p>
+<p>Get whether an endpoint is a UDP endpoint; note that if this returns false it means the endpoint is a TCP endpoint (by default endpoints are TCP endpoints).</p>
+</section>
+</section>
+</section>
+<section id="net-consts">
+<h2><code class="docutils literal notranslate"><span class="pre">net-consts</span></code><a class="headerlink" href="#net-consts" title="Permalink to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">net-consts</span></code> module contains the following words:</p>
+<section id="tcp-states">
+<h3>TCP states<a class="headerlink" href="#tcp-states" title="Permalink to this heading">¶</a></h3>
+<p>There are the following TCP states:</p>
+<section id="tcp-closed">
+<h4><code class="docutils literal notranslate"><span class="pre">TCP_CLOSED</span></code><a class="headerlink" href="#tcp-closed" title="Permalink to this heading">¶</a></h4>
+</section>
+<section id="tcp-listen">
+<h4><code class="docutils literal notranslate"><span class="pre">TCP_LISTEN</span></code><a class="headerlink" href="#tcp-listen" title="Permalink to this heading">¶</a></h4>
+</section>
+<section id="tcp-syn-sent">
+<h4><code class="docutils literal notranslate"><span class="pre">TCP_SYN_SENT</span></code><a class="headerlink" href="#tcp-syn-sent" title="Permalink to this heading">¶</a></h4>
+</section>
+<section id="tcp-syn-received">
+<h4><code class="docutils literal notranslate"><span class="pre">TCP_SYN_RECEIVED</span></code><a class="headerlink" href="#tcp-syn-received" title="Permalink to this heading">¶</a></h4>
+</section>
+<section id="tcp-established">
+<h4><code class="docutils literal notranslate"><span class="pre">TCP_ESTABLISHED</span></code><a class="headerlink" href="#tcp-established" title="Permalink to this heading">¶</a></h4>
+</section>
+<section id="tcp-fin-wait-1">
+<h4><code class="docutils literal notranslate"><span class="pre">TCP_FIN_WAIT_1</span></code><a class="headerlink" href="#tcp-fin-wait-1" title="Permalink to this heading">¶</a></h4>
+</section>
+<section id="tcp-fin-wait-2">
+<h4><code class="docutils literal notranslate"><span class="pre">TCP_FIN_WAIT_2</span></code><a class="headerlink" href="#tcp-fin-wait-2" title="Permalink to this heading">¶</a></h4>
+</section>
+<section id="tcp-closing">
+<h4><code class="docutils literal notranslate"><span class="pre">TCP_CLOSING</span></code><a class="headerlink" href="#tcp-closing" title="Permalink to this heading">¶</a></h4>
+</section>
+<section id="tcp-close-wait">
+<h4><code class="docutils literal notranslate"><span class="pre">TCP_CLOSE_WAIT</span></code><a class="headerlink" href="#tcp-close-wait" title="Permalink to this heading">¶</a></h4>
+</section>
+<section id="tcp-last-ack">
+<h4><code class="docutils literal notranslate"><span class="pre">TCP_LAST_ACK</span></code><a class="headerlink" href="#tcp-last-ack" title="Permalink to this heading">¶</a></h4>
+</section>
+<section id="tcp-time-wait">
+<h4><code class="docutils literal notranslate"><span class="pre">TCP_TIME_WAIT</span></code><a class="headerlink" href="#tcp-time-wait" title="Permalink to this heading">¶</a></h4>
+</section>
+</section>
+<section id="ports">
+<h3>Ports<a class="headerlink" href="#ports" title="Permalink to this heading">¶</a></h3>
+<section id="min-ephemeral-port">
+<h4><code class="docutils literal notranslate"><span class="pre">MIN_EPHEMERAL_PORT</span></code><a class="headerlink" href="#min-ephemeral-port" title="Permalink to this heading">¶</a></h4>
+<p>The minimum ephemeral port, 49152.</p>
+</section>
+<section id="max-ephemeral-port">
+<h4><code class="docutils literal notranslate"><span class="pre">MAX_EPHEMERAL_PORT</span></code><a class="headerlink" href="#max-ephemeral-port" title="Permalink to this heading">¶</a></h4>
+<p>The maximum ephemeral port, 65534 (port 65535 is use by zeptoIP for DNS).</p>
+</section>
+<section id="ephemeral-port">
+<h4><code class="docutils literal notranslate"><span class="pre">EPHEMERAL_PORT</span></code><a class="headerlink" href="#ephemeral-port" title="Permalink to this heading">¶</a></h4>
+<p>A token indicating that for a source port an ephemeral port is to be used. Ephemeral ports are chosen by choosing a random port between <code class="docutils literal notranslate"><span class="pre">MIN_EPHEMERAL_PORT</span></code> and <code class="docutils literal notranslate"><span class="pre">MAX_EPHEMERAL_PORT</span></code>, inclusive, on initialization, and then incrementing the ephemeral port each time an ephemeral port is needed, wrapping around within this range.</p>
+</section>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../words/basic.html">Basic Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/module.html">Module Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/wordlist.html">Wordlist Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/console.html">Console Redirection Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/alarm.html">Software Alarm Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/action.html">Action Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pin.html">Pin Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/led.html">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/gpio.html">GPIO Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pio.html">Programmable Input/Output Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/uart.html">UART Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/adc.html">Analog-Digital Converter Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/spi.html">SPI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/i2c.html">I2C Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pwm.html">Pulse Width Modulation Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/rtc.html">Realtime Clock (RTC) Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/timer.html">Hardware Timers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/sdcard.html">SDHC/SDXC Card Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/fat32.html">FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/simple_fat32.html">Simple FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/fat32_tools.html">FAT32 Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/multicore.html">Multicore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/armv6m.html">ARMv6-M Assembler Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/line.html">Line Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/value.html">Value and Local Variable Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/closure.html">Closures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/temp.html">Temporary Buffer Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/task_pool.html">Task Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/action_pool.html">Action Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/heap.html">Heap Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pool.html">Pool Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/map.html">Map Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/oo.html">Object Orientation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/core_lock.html">Core Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/channel.html">Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/fchannel.html">Rendezvous Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/schannel.html">Simple channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/rchannel.html">Bidirectional Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/stream.html">Stream Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/tqueue.html">Task Queue Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/rng.html">Random Number Generator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/ansi_term.html">ANSI Terminal words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/qspi.html">Quad SPI words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/block.html">Block words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/edit.html">Block Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/test.html">Testing Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/internal.html">Internal Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/asm.html">Compilation-specific words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="font.html">Fonts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bitmap_utils.html">Bitmap Utiliteis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="neopixel.html">Neopixels on the RP2040</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">zeptoIP Words</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="neopixel.html" title="previous chapter">Neopixels on the RP2040</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Travis Bemann.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/extra/net.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

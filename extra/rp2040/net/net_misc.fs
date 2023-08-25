@@ -552,7 +552,8 @@ begin-module net-misc
   : get-ephemeral-port ( -- port )
     [:
       current-ephemeral-port @
-      dup 1+ MIN_EPHEMERAL_PORT - MAX_EPHEMERAL_PORT MIN_EPHEMERAL_PORT - umod
+      1+ MIN_EPHEMERAL_PORT -
+      [ MAX_EPHEMERAL_PORT MIN_EPHEMERAL_PORT - ] literal umod
       MIN_EPHEMERAL_PORT + current-ephemeral-port !
     ;] ephemeral-port-lock lock::with-lock
   ;
@@ -560,7 +561,7 @@ begin-module net-misc
   \ Initialize ephemeral ports
   : init-ephemeral-ports ( -- )
     ephemeral-port-lock lock::init-lock
-    rng::random MAX_EPHEMERAL_PORT MIN_EPHEMERAL_PORT - umod
+    rng::random [ MAX_EPHEMERAL_PORT MIN_EPHEMERAL_PORT - ] literal umod
     MIN_EPHEMERAL_PORT + current-ephemeral-port !
   ;
 

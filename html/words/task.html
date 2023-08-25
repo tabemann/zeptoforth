@@ -319,7 +319,12 @@
 <section id="validate-timeout">
 <h3><code class="docutils literal notranslate"><span class="pre">validate-timeout</span></code><a class="headerlink" href="#validate-timeout" title="Permalink to this heading">¶</a></h3>
 <p>( task – )</p>
-<p>Validate whether a task has timed out, raising <code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code> if it has.</p>
+<p>Validate whether a task has timed out, raising <code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code> if it has. Note that this clears the timeout state of the task.</p>
+</section>
+<section id="check-timeout">
+<h3><code class="docutils literal notranslate"><span class="pre">check-timeout</span></code><a class="headerlink" href="#check-timeout" title="Permalink to this heading">¶</a></h3>
+<p>( task – timed-out? )</p>
+<p>Get whether a task has timed out, clearing the timeout state of the task if it has.</p>
 </section>
 <section id="x-would-block">
 <h3><code class="docutils literal notranslate"><span class="pre">x-would-block</span></code><a class="headerlink" href="#x-would-block" title="Permalink to this heading">¶</a></h3>
@@ -577,6 +582,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utiliteis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
 </ul>
 
 <div class="relations">

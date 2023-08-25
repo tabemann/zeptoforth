@@ -298,7 +298,12 @@
 <section id="validate-timeout">
 <h3><code class="docutils literal notranslate"><span class="pre">validate-timeout</span></code></h3>
 <p>( task – )</p>
-<p>Validate whether a task has timed out, raising <code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code> if it has.</p>
+<p>Validate whether a task has timed out, raising <code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code> if it has. Note that this clears the timeout state of the task.</p>
+</section>
+<section id="check-timeout">
+<h3><code class="docutils literal notranslate"><span class="pre">check-timeout</span></code></h3>
+<p>( task – timed-out? )</p>
+<p>Get whether a task has timed out, clearing the timeout state of the task if it has.</p>
 </section>
 <section id="x-would-block">
 <h3><code class="docutils literal notranslate"><span class="pre">x-would-block</span></code></h3>
