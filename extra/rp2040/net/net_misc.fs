@@ -20,14 +20,9 @@
 
 begin-module net-misc
 
+  net-consts import
   armv6m import
 
-  \ Are we debugging?
-  false constant debug?
-
-  \ DHCP logging
-  true value dhcp-log?
-  
   \ Make an IPv4 address
   : make-ipv4-addr ( addr0 addr1 addr2 addr3 -- addr )
     $FF and
@@ -35,54 +30,6 @@ begin-module net-misc
     swap $FF and 16 lshift or
     swap $FF and 24 lshift or
   ;
-
-  \ The MTU size
-  1500 constant mtu-size
-
-  \ The maximum fragment buffer size
-  1500 constant fragment-buf-size
-
-  \ The maximum IP payload size
-  1500 constant max-payload-size
-
-  \ The maximum fragment unit count
-  fragment-buf-size 8 align 8 /  constant max-fragment-units
-
-  \ Maximum endpoint count
-  4 constant max-endpoints
-
-  \ Maximum number of addresses to map
-  16 constant max-addresses
-
-  \ Maximum number of DNS addresses to cache
-  16 constant max-dns-cache
-
-  \ DNS address cache name heap block size
-  16 constant dns-cache-heap-block-size
-
-  \ DNS address cache name heap block count
-  64 constant dns-cache-heap-block-count
-
-  \ Maximum number of packets to send at a time
-  16 constant max-out-packets
-
-  \ Maximum number of packets to receive at a time
-  16 constant max-in-packets
-
-  \ Minimum number of bytes to send if more bytes are available
-  16 value small-send-bytes
-
-  \ The maximum retransmit count
-  2 value max-retransmits
-
-  \ The initial timeout time
-  500 value init-timeout
-
-  \ The timeout multiplication factor
-  2 value timeout-multiplier
-
-  \ Send check interval
-  500 value send-check-interval
   
   \ DNS port
   53 constant dns-port
@@ -96,81 +43,6 @@ begin-module net-misc
   \ DHCP server port
   67 constant dhcp-server-port
 
-  \ Parse DNS name depth
-  16 constant parse-dns-name-depth
-
-  \ Refresh interval
-  500 value refresh-interval
-
-  \ SYN_SENT initial refresh timeout
-  1000 value syn-sent-init-refresh-timeout
-
-  \ SYN_SENT refresh timeout multiplication factor
-  2 value syn-sent-refresh-timeout-multiplier
-
-  \ SYN_SENT maximum refresh count
-  3 value syn-sent-max-refreshes
-
-  \ SYN_RECEIVED initial refresh timeout
-  1000 value syn-ack-sent-init-refresh-timeout
-
-  \ SYN_RECEIVED refresh timeout multiplication factor
-  2 value syn-ack-sent-refresh-timeout-multiplier
-
-  \ SYN_RECEIVED maximum refresh count
-  3 value syn-ack-sent-max-refreshes
-
-  \ ESTABLISHED initial refresh timeout
-  500 value established-init-refresh-timeout
-
-  \ ESTABLISHED refresh timeout multplication factor
-  2 value established-refresh-timeout-multiplier
-
-  \ ESTABLISHED maximum refresh count
-  3 value established-max-refreshes
-
-  \ ESTABLISHED no missing packets refresh timeout
-  5000 value established-no-missing-refresh-timeout
-
-  \ FIN_WAIT_1 initial refresh timeout
-  1000 value fin-wait-1-init-refresh-timeout
-
-  \ FIN_WAIT_1 refresh timeout multiplication factor
-  2 value fin-wait-1-refresh-timeout-multiplier
-
-  \ FIN_WAIT_1 maximum refresh count
-  3 value fin-wait-1-max-refreshes
-
-  \ LAST_ACK initial refresh timeout
-  1000 value last-ack-init-refresh-timeout
-
-  \ LAST_ACK refresh timeout multiplication factor
-  2 value last-ack-refresh-timeout-multiplier
-
-  \ LAST_ACK maximum refresh count
-  3 value last-ack-max-refreshes
-  
-  \ Close timeout
-  100000 value close-timeout
-
-  \ IPv4 discover attempts
-  50000 value dhcp-discover-timeout
-
-  \ Default DHCP renewal time
-  86400 10000 * 2 / value default-dhcp-renew-interval
-  
-  \ DHCP renewal retry divisor
-  60 value dhcp-renew-retry-divisor
-
-  \ Default DHCP ARP interval
-  10000 value dhcp-arp-interval
-
-  \ DHCP ARP attempt count
-  5 value dhcp-arp-attempt-count
-
-  \ DHCPDECLINE delay
-  100000 value dhcpdecline-delay
-  
   \ DHCP discovery state
   0 constant dhcp-not-discovering
   1 constant dhcp-wait-offer
@@ -220,29 +92,11 @@ begin-module net-misc
   24 constant endpoint-tcp-state-lsb
   $FF endpoint-tcp-state-lsb lshift constant endpoint-tcp-state-mask
 
-  \ TCP states
-  0 constant TCP_CLOSED
-  1 constant TCP_LISTEN
-  2 constant TCP_SYN_SENT
-  3 constant TCP_SYN_RECEIVED
-  4 constant TCP_ESTABLISHED
-  5 constant TCP_FIN_WAIT_1
-  6 constant TCP_FIN_WAIT_2
-  7 constant TCP_CLOSING
-  8 constant TCP_CLOSE_WAIT
-  9 constant TCP_LAST_ACK
-  10 constant TCP_TIME_WAIT
-
   \ TCP options
   0 constant TCP_OPT_END
   1 constant TCP_OPT_NOP
   2 constant TCP_OPT_MSS
   4 constant TCP_OPT_MSS_LEN
-
-  \ Ephemeral ports
-  49152 constant MIN_EPHEMERAL_PORT
-  65534 constant MAX_EPHEMERAL_PORT
-  -1 constant EPHEMERAL_PORT
 
   \ IPv4 ARP header structure
   begin-structure arp-ipv4-size

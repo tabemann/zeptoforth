@@ -23,6 +23,8 @@ begin-module net
   oo import
   frame-interface import
   frame-process import
+  net-consts import
+  net-config import
   net-misc import
   lock import
   sema import
@@ -35,6 +37,9 @@ begin-module net
   \ Send timed out
   : x-send-timed-out ( -- ) cr ." send timed out" ;
 
+  \ zeptoIP internals
+  begin-module net-internal
+  
   \ Outstanding packet record
   <object> begin-class <out-packets>
 
@@ -1220,294 +1225,300 @@ begin-module net
 
   end-implement
 
+  end-module> import
+  
   \ The endpoint class
   <object> begin-class <endpoint>
 
-    \ Is the endpoint state
-    cell member endpoint-state
+    continue-module net-internal
+      
+      \ Is the endpoint state
+      cell member endpoint-state
 
-    \ The endpoint queue state
-    cell member endpoint-queue-state
+      \ The endpoint queue state
+      cell member endpoint-queue-state
 
-    \ The current endpoint ID
-    cell member endpoint-id
+      \ The current endpoint ID
+      cell member endpoint-id
+      
+      \ The remote IPv4 address
+      cell member endpoint-remote-ipv4-addr
+
+      \ The remote port
+      cell member endpoint-remote-port
+      
+      \ The local port
+      cell member endpoint-local-port
+
+      \ The processed data size
+      cell member endpoint-rx-size
+
+      \ The delayed data size
+      cell member endpoint-delayed-size
+
+      \ The remote MAC address
+      2 cells member endpoint-remote-mac-addr
+
+      \ Endpoint lock
+      lock-size member endpoint-lock
+
+      \ Endpoint control lock
+      lock-size member endpoint-ctrl-lock
+
+      \ The received packet semaphore
+      sema-size member endpoint-sema
+
+      \ Incoming packet manager
+      <in-packets> class-size member endpoint-in-packets
+
+      \ Outgoing packet manager
+      <out-packets> class-size member endpoint-out-packets
+      
+      \ The endpoint buffer
+      max-payload-size cell align member endpoint-buf
+
+      \ The initial local sequence number
+      cell member endpoint-init-local-seq
+
+      \ The timeout start
+      cell member endpoint-timeout-start
+
+      \ The timeout end
+      cell member endpoint-timeout
+
+      \ The retransmit count
+      cell member endpoint-retransmits
+      
+      \ Endpoint event signaled?
+      cell member endpoint-event
+
+      \ Last refresh time
+      cell member endpoint-last-refresh
+
+      \ Endpoint refresh timeout
+      cell member endpoint-refresh-timeout
+
+      \ Endpoint refresh count
+      cell member endpoint-refreshes
+
+      \ Get the current endpoint ID
+      method endpoint-id@ ( self -- id )
+      
+      \ Start timeout
+      method start-endpoint-timeout ( self -- )
+
+      \ Increase timeout
+      method increase-endpoint-timeout ( self -- retransmit? )
+
+      \ Get current timeout start
+      method endpoint-timeout-start@ ( self -- start )
+      
+      \ Get current timeout end
+      method endpoint-timeout@ ( self -- end )
+      
+      \ Wake an endpoint
+      method wake-endpoint ( self -- )
+
+      \ Wait for an endpoint event
+      method wait-endpoint ( self -- )
+
+      \ Is an endpoint pending
+      method endpoint-pending? ( self -- pending? )
+
+      \ Is an endpoint enqueued
+      method endpoint-enqueued? ( self -- enqueued? )
+
+      \ Mark endpoint as pending
+      method mark-endpoint-pending ( self -- )
+
+      \ Clear endpoint pending status
+      method clear-endpoint-pending ( self -- )
+
+      \ Clear endpoint enqueued status
+      method clear-endpoint-enqueued ( self -- )
+      
+      \ Claim control of an endpoint
+      method with-ctrl-endpoint ( xt self -- )
+
+      \ Lock an endpoint
+      method with-endpoint ( xt self -- )
+      
+      \ Set endpoint TCP state
+      method endpoint-tcp-state! ( tcp-state self -- )
+
+      \ Get waiting endpoint received data
+      method endpoint-waiting-data? ( self -- waiting? )
+      
+      \ Get the number of bytes waiting on an endpoint
+      method endpoint-waiting-bytes@ ( self -- bytes )
+
+      \ Set endpoint received data
+      method endpoint-rx-data! ( addr bytes self -- )
+
+      \ Set endpoint source
+      method endpoint-ipv4-remote! ( ipv4-addr port self -- )
+
+      \ Get endpoint remote MAC address
+      method endpoint-remote-mac-addr@ ( self -- D: mac-addr )
+
+      \ Set local port
+      method endpoint-local-port! ( port self -- )
+      
+      \ Get local port
+      method endpoint-local-port@ ( self -- port )
+
+      \ Reset local port
+      method reset-endpoint-local-port ( self -- )
+      
+      \ Retire a pending received data
+      method retire-rx-data ( self -- )
+
+      \ Promote received data to pending
+      method promote-rx-data ( self -- )
+
+      \ Endpoint has pending received packet
+      method pending-endpoint? ( self -- pending? )
+
+      \ Endpoint is active but not pending
+      method available-for-packet? ( self -- available? )
+
+      \ Data is available for endpoint
+      method endpoint-data-available? ( self -- available? )
+
+      \ Ready an endpoint
+      method ready-endpoint ( self -- )
+
+      \ Mark an endpoint as available
+      method endpoint-available ( self -- )
+
+      \ Try to allocate an endpoint
+      method try-allocate-endpoint ( self -- allocated? )
+
+      \ Try to accepting on an endpoint
+      method try-ipv4-accept-endpoint
+      ( src-ipv4-addr src-port dest-port D: mac-addr self -- accepted? )
+
+      \ Try to open a connection on an endpoint
+      method try-ipv4-connect-endpoint
+      ( src-port dest-ipv4-addr dest-port D: mac-addr self -- allocated? )
+
+      \ Match an endpoint with an IPv4 TCP connection
+      method match-ipv4-connect?
+      ( src-ipv4-addr src-port dest-port self -- match? )
+      
+      \ Set an endpoint to listen on UDP
+      method listen-udp ( port self -- )
+
+      \ Set an endpoint to listen on TCP
+      method listen-tcp ( port self -- )
+
+      \ Init the TCP data stream
+      method init-tcp-stream ( seq self -- )
+
+      \ Set the initial local seq number
+      method endpoint-init-local-seq! ( seq self -- )
+
+      \ Get the initial local seq number
+      method endpoint-init-local-seq@ ( self -- seq )
+      
+      \ Get local seq number
+      method endpoint-local-seq@ ( self -- seq )
+      
+      \ Add to local seq number
+      method +endpoint-local-seq! ( increment self -- )
+
+      \ Endpoint window size
+      method endpoint-local-window@ ( self -- bytes )
+
+      \ Add data to a TCP endpoint if possible
+      method add-endpoint-tcp-data ( addr bytes push? seq self -- )
+
+      \ Add data to a UDP endpoint if possible
+      method add-endpoint-udp-data ( addr bytes self -- )
+
+      \ Handle an incoming ACK
+      method endpoint-ack-in ( window ack self -- )
+      
+      \ Get the ACK for an endpoint
+      method endpoint-ack@ ( self -- ack )
+
+      \ Get whether to send an ACK packet
+      method endpoint-send-ack? ( self -- send? )
+
+      \ Mark an ACK as having been sent
+      method endpoint-ack-sent ( self -- )
+
+      \ Start endpoint send
+      method start-endpoint-send ( addr bytes self -- )
+
+      \ Clear endpoint send
+      method clear-endpoint-send ( self -- )
+      
+      \ Get endpoint outstanding packets
+      method endpoint-send-outstanding? ( self -- outstanding? )
+
+      \ Get endpoint sending completion
+      method endpoint-send-done? ( self -- done? )
+
+      \ Have we sent our last packet?
+      method endpoint-send-last? ( self -- last? )
+      
+      \ Get endpoint sending readiness
+      method endpoint-send-ready? ( self -- ready? )
+      
+      \ Get packet to send
+      method get-endpoint-send-packet ( self -- addr bytes )
+
+      \ Resend packets
+      method resend-endpoint ( self -- )
+
+      \ Is endpoint in use
+      method endpoint-in-use? ( self -- in-use? )
+
+      \ Endpoint is ready for a refresh
+      method endpoint-refresh-ready? ( self -- refresh? )
+
+      \ Reset endpoint refresh
+      method reset-endpoint-refresh ( self -- )
+
+      \ Advance last endpoint refresh
+      method advance-endpoint-refresh ( self -- )
+      
+      \ Get whether there are missing packets
+      method missing-endpoint-packets? ( self -- missing-packets? )
+
+      \ Get next endpoint refresh timeout
+      method next-endpoint-refresh-timeout@ ( self -- timeout )
+
+      \ Escalate the next endpoint refresh
+      method escalate-endpoint-refresh ( self -- )
+
+      \ Signal an endpoint event
+      method signal-endpoint-event ( self -- )
+
+      \ Clear an endpoint event
+      method clear-endpoint-event ( self -- )
+
+      \ Does an endpoint have an event?
+      method endpoint-has-event? ( self -- has-event? )
     
-    \ The remote IPv4 address
-    cell member endpoint-remote-ipv4-addr
+      \ Free an endpoint
+      method free-endpoint ( self -- )
 
-    \ The remote port
-    cell member endpoint-remote-port
-    
-    \ The local port
-    cell member endpoint-local-port
-
-    \ The processed data size
-    cell member endpoint-rx-size
-
-    \ The delayed data size
-    cell member endpoint-delayed-size
-
-    \ The remote MAC address
-    2 cells member endpoint-remote-mac-addr
-
-    \ Endpoint lock
-    lock-size member endpoint-lock
-
-    \ Endpoint control lock
-    lock-size member endpoint-ctrl-lock
-
-    \ The received packet semaphore
-    sema-size member endpoint-sema
-
-    \ Incoming packet manager
-    <in-packets> class-size member endpoint-in-packets
-
-    \ Outgoing packet manager
-    <out-packets> class-size member endpoint-out-packets
-    
-    \ The endpoint buffer
-    max-payload-size cell align member endpoint-buf
-
-    \ The initial local sequence number
-    cell member endpoint-init-local-seq
-
-    \ The timeout start
-    cell member endpoint-timeout-start
-
-    \ The timeout end
-    cell member endpoint-timeout
-
-    \ The retransmit count
-    cell member endpoint-retransmits
-    
-    \ Endpoint event signaled?
-    cell member endpoint-event
-
-    \ Last refresh time
-    cell member endpoint-last-refresh
-
-    \ Endpoint refresh timeout
-    cell member endpoint-refresh-timeout
-
-    \ Endpoint refresh count
-    cell member endpoint-refreshes
-
-    \ Get the current endpoint ID
-    method endpoint-id@ ( self -- id )
-    
-    \ Start timeout
-    method start-endpoint-timeout ( self -- )
-
-    \ Increase timeout
-    method increase-endpoint-timeout ( self -- retransmit? )
-
-    \ Get current timeout start
-    method endpoint-timeout-start@ ( self -- start )
-    
-    \ Get current timeout end
-    method endpoint-timeout@ ( self -- end )
-    
-    \ Wake an endpoint
-    method wake-endpoint ( self -- )
-
-    \ Wait for an endpoint event
-    method wait-endpoint ( self -- )
-
-    \ Is an endpoint pending
-    method endpoint-pending? ( self -- pending? )
-
-    \ Is an endpoint enqueued
-    method endpoint-enqueued? ( self -- enqueued? )
-
-    \ Mark endpoint as pending
-    method mark-endpoint-pending ( self -- )
-
-    \ Clear endpoint pending status
-    method clear-endpoint-pending ( self -- )
-
-    \ Clear endpoint enqueued status
-    method clear-endpoint-enqueued ( self -- )
-    
-    \ Claim control of an endpoint
-    method with-ctrl-endpoint ( xt self -- )
-
-    \ Lock an endpoint
-    method with-endpoint ( xt self -- )
+    end-module
     
     \ Get endpoint TCP state
     method endpoint-tcp-state@ ( self -- tcp-state )
 
-    \ Set endpoint TCP state
-    method endpoint-tcp-state! ( tcp-state self -- )
-
-    \ Get waiting endpoint received data
-    method endpoint-waiting-data? ( self -- waiting? )
-    
-    \ Get the number of bytes waiting on an endpoint
-    method endpoint-waiting-bytes@ ( self -- bytes )
-
     \ Get endpoint received data
     method endpoint-rx-data@ ( self -- addr bytes )
 
-    \ Set endpoint received data
-    method endpoint-rx-data! ( addr bytes self -- )
-
     \ Get endpoint source
     method endpoint-ipv4-remote@ ( self -- ipv4-addr port )
-    
-    \ Set endpoint source
-    method endpoint-ipv4-remote! ( ipv4-addr port self -- )
-
-    \ Get endpoint remote MAC address
-    method endpoint-remote-mac-addr@ ( self -- D: mac-addr )
-
-    \ Set local port
-    method endpoint-local-port! ( port self -- )
-    
-    \ Get local port
-    method endpoint-local-port@ ( self -- port )
-
-    \ Reset local port
-    method reset-endpoint-local-port ( self -- )
-    
-    \ Retire a pending received data
-    method retire-rx-data ( self -- )
-
-    \ Promote received data to pending
-    method promote-rx-data ( self -- )
-
-    \ Endpoint has pending received packet
-    method pending-endpoint? ( self -- pending? )
-
-    \ Endpoint is active but not pending
-    method available-for-packet? ( self -- available? )
-
+      
     \ Endpoint is a UDP endpoint
     method udp-endpoint? ( self -- udp? )
 
-    \ Data is available for endpoint
-    method endpoint-data-available? ( self -- available? )
-
-    \ Ready an endpoint
-    method ready-endpoint ( self -- )
-
-    \ Mark an endpoint as available
-    method endpoint-available ( self -- )
-
-    \ Try to allocate an endpoint
-    method try-allocate-endpoint ( self -- allocated? )
-
-    \ Try to accepting on an endpoint
-    method try-ipv4-accept-endpoint
-    ( src-ipv4-addr src-port dest-port D: mac-addr self -- accepted? )
-
-    \ Try to open a connection on an endpoint
-    method try-ipv4-connect-endpoint
-    ( src-port dest-ipv4-addr dest-port D: mac-addr self -- allocated? )
-
-    \ Match an endpoint with an IPv4 TCP connection
-    method match-ipv4-connect?
-    ( src-ipv4-addr src-port dest-port self -- match? )
-    
-    \ Free an endpoint
-    method free-endpoint ( self -- )
-
-    \ Set an endpoint to listen on UDP
-    method listen-udp ( port self -- )
-
-    \ Set an endpoint to listen on TCP
-    method listen-tcp ( port self -- )
-
-    \ Init the TCP data stream
-    method init-tcp-stream ( seq self -- )
-
-    \ Set the initial local seq number
-    method endpoint-init-local-seq! ( seq self -- )
-
-    \ Get the initial local seq number
-    method endpoint-init-local-seq@ ( self -- seq )
-    
-    \ Get local seq number
-    method endpoint-local-seq@ ( self -- seq )
-    
-    \ Add to local seq number
-    method +endpoint-local-seq! ( increment self -- )
-
-    \ Endpoint window size
-    method endpoint-local-window@ ( self -- bytes )
-
-    \ Add data to a TCP endpoint if possible
-    method add-endpoint-tcp-data ( addr bytes push? seq self -- )
-
-    \ Add data to a UDP endpoint if possible
-    method add-endpoint-udp-data ( addr bytes self -- )
-
-    \ Handle an incoming ACK
-    method endpoint-ack-in ( window ack self -- )
-    
-    \ Get the ACK for an endpoint
-    method endpoint-ack@ ( self -- ack )
-
-    \ Get whether to send an ACK packet
-    method endpoint-send-ack? ( self -- send? )
-
-    \ Mark an ACK as having been sent
-    method endpoint-ack-sent ( self -- )
-
-    \ Start endpoint send
-    method start-endpoint-send ( addr bytes self -- )
-
-    \ Clear endpoint send
-    method clear-endpoint-send ( self -- )
-    
-    \ Get endpoint outstanding packets
-    method endpoint-send-outstanding? ( self -- outstanding? )
-
-    \ Get endpoint sending completion
-    method endpoint-send-done? ( self -- done? )
-
-    \ Have we sent our last packet?
-    method endpoint-send-last? ( self -- last? )
-    
-    \ Get endpoint sending readiness
-    method endpoint-send-ready? ( self -- ready? )
-    
-    \ Get packet to send
-    method get-endpoint-send-packet ( self -- addr bytes )
-
-    \ Resend packets
-    method resend-endpoint ( self -- )
-
-    \ Is endpoint in use
-    method endpoint-in-use? ( self -- in-use? )
-
-    \ Endpoint is ready for a refresh
-    method endpoint-refresh-ready? ( self -- refresh? )
-
-    \ Reset endpoint refresh
-    method reset-endpoint-refresh ( self -- )
-
-    \ Advance last endpoint refresh
-    method advance-endpoint-refresh ( self -- )
-    
-    \ Get whether there are missing packets
-    method missing-endpoint-packets? ( self -- missing-packets? )
-
-    \ Get next endpoint refresh timeout
-    method next-endpoint-refresh-timeout@ ( self -- timeout )
-
-    \ Escalate the next endpoint refresh
-    method escalate-endpoint-refresh ( self -- )
-
-    \ Signal an endpoint event
-    method signal-endpoint-event ( self -- )
-
-    \ Clear an endpoint event
-    method clear-endpoint-event ( self -- )
-
-    \ Does an endpoint have an event?
-    method endpoint-has-event? ( self -- has-event? )
-    
   end-class
 
   \ Implement the endpoint class
@@ -2075,215 +2086,396 @@ begin-module net
     ; define escalate-endpoint-refresh
 
   end-implement
-  
-  \ The fragment collector class
-  <object> begin-class <fragment-collect>
 
-    \ Is the fragment collector active
-    cell member fragment-active
+  continue-module net-internal
     
-    \ The fragment source IP address
-    cell member fragment-src-ipv4-addr
+    \ The fragment collector class
+    <object> begin-class <fragment-collect>
+      
+      \ Is the fragment collector active
+      cell member fragment-active
+      
+      \ The fragment source IP address
+      cell member fragment-src-ipv4-addr
+      
+      \ The fragment protocol
+      cell member fragment-protocol
+      
+      \ The fragment identification field
+      cell member fragment-ident
+      
+      \ Maximum fragment length
+      cell member fragment-end-length
+      
+      \ The fragment bitmap
+      max-fragment-units 8 align 8 / member fragment-bitmap
+      
+      \ The fragment buffer
+      fragment-buf-size cell align member fragment-buf
+      
+      \ Apply a fragment
+      method apply-fragment ( addr byte self -- complete? )
+      
+      \ Clear the fragment
+      method clear-fragment ( self -- )
+      
+      \ Get the completed packet
+      method get-completed-packet ( self -- src-ipv4-addr protocol addr bytes )
+      
+    end-class
 
-    \ The fragment protocol
-    cell member fragment-protocol
+    \ Implement the fragment collector class
+    <fragment-collect> begin-implement
 
-    \ The fragment identification field
-    cell member fragment-ident
-
-    \ Maximum fragment length
-    cell member fragment-end-length
-    
-    \ The fragment bitmap
-    max-fragment-units 8 align 8 / member fragment-bitmap
-    
-    \ The fragment buffer
-    fragment-buf-size cell align member fragment-buf
-
-    \ Apply a fragment
-    method apply-fragment ( addr byte self -- complete? )
-
-    \ Clear the fragment
-    method clear-fragment ( self -- )
-
-    \ Get the completed packet
-    method get-completed-packet ( self -- src-ipv4-addr protocol addr bytes )
-    
-  end-class
-
-  \ Implement the fragment collector class
-  <fragment-collect> begin-implement
-
-    \ Constructor
-    :noname { self -- }
-      self <object>->new
-      self clear-fragment
-    ; define new
-    
-    \ Apply a fragment
-    :noname { addr bytes self -- complete? }
-      addr ipv4-fragment? not if false exit then
-      addr ipv4-identification h@ rev16 { ident }
-      ident self fragment-ident @ <> if self clear-fragment then
-      addr ipv4-protocol c@ self fragment-protocol @ <> if
+      \ Constructor
+      :noname { self -- }
+        self <object>->new
         self clear-fragment
-      then
-      addr ipv4-version-ihl c@ $F 5 max and 4 * { header-size }
-      addr ipv4-total-len h@ rev16
-      dup bytes <> if false exit then
-      header-size - { len }
-      addr ipv4-flags-fragment-offset h@ rev16
-      dup $1FFF and { offset }
-      13 rshift { flags }
-      offset 8 * len + fragment-buf-size <= if
-        true self fragment-active !
-        ident self fragment-ident !
-        addr ipv4-src-addr unaligned@ rev self fragment-src-ipv4-addr !
-        addr ipv4-protocol c@ self fragment-protocol !
-        flags MF and 0= if
-          offset 8 * len + self fragment-end-length !
+      ; define new
+      
+      \ Apply a fragment
+      :noname { addr bytes self -- complete? }
+        addr ipv4-fragment? not if false exit then
+        addr ipv4-identification h@ rev16 { ident }
+        ident self fragment-ident @ <> if self clear-fragment then
+        addr ipv4-protocol c@ self fragment-protocol @ <> if
+          self clear-fragment
         then
-        len 8 align 8 / offset + offset ?do
-          i 7 and bit i 3 rshift self fragment-bitmap + 2dup cbit@ not if
-            cbis!
-          else
-            2drop self clear-fragment false unloop exit
+        addr ipv4-version-ihl c@ $F 5 max and 4 * { header-size }
+        addr ipv4-total-len h@ rev16
+        dup bytes <> if false exit then
+        header-size - { len }
+        addr ipv4-flags-fragment-offset h@ rev16
+        dup $1FFF and { offset }
+        13 rshift { flags }
+        offset 8 * len + fragment-buf-size <= if
+          true self fragment-active !
+          ident self fragment-ident !
+          addr ipv4-src-addr unaligned@ rev self fragment-src-ipv4-addr !
+          addr ipv4-protocol c@ self fragment-protocol !
+          flags MF and 0= if
+            offset 8 * len + self fragment-end-length !
           then
-        loop
-        addr header-size + self fragment-buf offset 8 * + len move
-        self fragment-end-length @ -1 <> if
-          self fragment-end-length @ 8 align 8 / 0 ?do
-            i 7 and bit i 3 rshift self fragment-bitmap + cbit@ not if
-              false unloop exit
+          len 8 align 8 / offset + offset ?do
+            i 7 and bit i 3 rshift self fragment-bitmap + 2dup cbit@ not if
+              cbis!
+            else
+              2drop self clear-fragment false unloop exit
             then
           loop
-          true
+          addr header-size + self fragment-buf offset 8 * + len move
+          self fragment-end-length @ -1 <> if
+            self fragment-end-length @ 8 align 8 / 0 ?do
+              i 7 and bit i 3 rshift self fragment-bitmap + cbit@ not if
+                false unloop exit
+              then
+            loop
+            true
+          else
+            false
+          then
         else
-          false
+          self clear-fragment false
         then
-      else
-        self clear-fragment false
-      then
-    ; define apply-fragment
+      ; define apply-fragment
 
-    \ Clear the fragment
-    :noname { self -- }
-      false self fragment-active !
-      0 self fragment-src-ipv4-addr !
-      0 self fragment-protocol !
-      0 self fragment-ident !
-      -1 self fragment-end-length !
-      self fragment-bitmap max-fragment-units 8 align 8 / 0 fill
-    ; define clear-fragment
+      \ Clear the fragment
+      :noname { self -- }
+        false self fragment-active !
+        0 self fragment-src-ipv4-addr !
+        0 self fragment-protocol !
+        0 self fragment-ident !
+        -1 self fragment-end-length !
+        self fragment-bitmap max-fragment-units 8 align 8 / 0 fill
+      ; define clear-fragment
 
-    \ Get the completed packet
-    :noname { self -- src-ipv4-addr protocol addr bytes }
-      self fragment-src-ipv4-addr @
-      self fragment-protocol @
-      self fragment-buf
-      self fragment-end-length @
-    ; define get-completed-packet
+      \ Get the completed packet
+      :noname { self -- src-ipv4-addr protocol addr bytes }
+        self fragment-src-ipv4-addr @
+        self fragment-protocol @
+        self fragment-buf
+        self fragment-end-length @
+      ; define get-completed-packet
 
-  end-implement
+    end-implement
+
+  end-module
 
   \ The interface class
   <object> begin-class <interface>
 
-    \ The output frame interface
-    cell member out-frame-interface
-    
-    \ The IPv4 address
-    cell member intf-ipv4-addr
+    continue-module net-internal
+      
+      \ The output frame interface
+      cell member out-frame-interface
+      
+      \ The IPv4 address
+      cell member intf-ipv4-addr
 
-    \ The DNS server
-    cell member dns-server-ipv4-addr
+      \ The DNS server
+      cell member dns-server-ipv4-addr
 
-    \ The gateway IPv4 address
-    cell member gateway-ipv4-addr
-    
-    \ The IPv4 netmask
-    cell member intf-ipv4-netmask
+      \ The gateway IPv4 address
+      cell member gateway-ipv4-addr
+      
+      \ The IPv4 netmask
+      cell member intf-ipv4-netmask
 
-    \ Current TTL
-    cell member intf-ttl
+      \ Current TTL
+      cell member intf-ttl
 
-    \ MAC address resolution interval in ticks (100 us intervals)
-    cell member mac-addr-resolve-interval
+      \ MAC address resolution semaphore
+      sema-size member mac-addr-resolve-sema
 
-    \ Maximum MAC address resolution attempts
-    cell member max-mac-addr-resolve-attempts
+      \ Curreht DHCP xid
+      cell member current-dhcp-xid
 
-    \ MAC address resolution semaphore
-    sema-size member mac-addr-resolve-sema
+      \ Current DHCP server IPv4 address
+      cell member dhcp-server-ipv4-addr
 
-    \ DNS resolution interval in ticks (100 us intervals)
-    cell member dns-resolve-interval
+      \ Current DHCP requested IPv4 address
+      cell member dhcp-req-ipv4-addr
+      
+      \ DHCP discovery state
+      cell member dhcp-discover-state
 
-    \ Maximum DNS resolution attempts
-    cell member max-dns-resolve-attempts
+      \ DHCP renewal interval
+      cell member dhcp-renew-interval
 
-    \ Curreht DHCP xid
-    cell member current-dhcp-xid
+      \ DHCP renewal start time
+      cell member dhcp-renew-start
 
-    \ Current DHCP server IPv4 address
-    cell member dhcp-server-ipv4-addr
+      \ Provisional DHCP IPv4 netmask
+      cell member prov-ipv4-netmask
 
-    \ Current DHCP requested IPv4 address
-    cell member dhcp-req-ipv4-addr
-    
-    \ DHCP discovery state
-    cell member dhcp-discover-state
+      \ Provisional DHCP IPv4 gateway
+      cell member prov-gateway-ipv4-addr
 
-    \ DHCP renewal interval
-    cell member dhcp-renew-interval
+      \ Provisional DHCP DNS server
+      cell member prov-dns-server-ipv4-addr
 
-    \ DHCP renewal start time
-    cell member dhcp-renew-start
+      \ Provisional DHCP renewal time
+      cell member prov-dhcp-renew-interval
+      
+      \ DHCP semaphore
+      sema-size member dhcp-sema
+      
+      \ DNS resolution semaphore
+      sema-size member dns-resolve-sema
 
-    \ Provisional DHCP IPv4 netmask
-    cell member prov-ipv4-netmask
+      \ The endpoints
+      <endpoint> class-size max-endpoints * member intf-endpoints
 
-    \ Provisional DHCP IPv4 gateway
-    cell member prov-gateway-ipv4-addr
+      \ The address map
+      <address-map> class-size member address-map
 
-    \ Provisional DHCP DNS server
-    cell member prov-dns-server-ipv4-addr
+      \ The DNS cache
+      <dns-cache> class-size member dns-cache
+      
+      \ The IPv4 fragment collector
+      <fragment-collect> class-size member fragment-collect
 
-    \ Provisional DHCP renewal time
-    cell member prov-dhcp-renew-interval
-    
-    \ DHCP semaphore
-    sema-size member dhcp-sema
-    
-    \ DNS resolution semaphore
-    sema-size member dns-resolve-sema
+      \ Outgoing buffer lock
+      lock-size member outgoing-buf-lock
 
-    \ The endpoints
-    <endpoint> class-size max-endpoints * member intf-endpoints
+      \ The outgoing frame buffer
+      mtu-size cell align member outgoing-buf
 
-    \ The address map
-    <address-map> class-size member address-map
+      \ Endpoint queue lock
+      lock-size member endpoint-queue-lock
 
-    \ The DNS cache
-    <dns-cache> class-size member dns-cache
-    
-    \ The IPv4 fragment collector
-    <fragment-collect> class-size member fragment-collect
+      \ Endpoint queue semaphore
+      sema-size member endpoint-queue-sema
 
-    \ Outgoing buffer lock
-    lock-size member outgoing-buf-lock
+      \ Endpoint queue index
+      cell member endpoint-queue-index
 
-    \ The outgoing frame buffer
-    mtu-size cell align member outgoing-buf
+      \ Send a frame
+      method send-frame ( addr bytes self -- )
 
-    \ Endpoint queue lock
-    lock-size member endpoint-queue-lock
+      \ Process a MAC address for an IPv4 address
+      method process-ipv4-mac-addr ( D: mac-addr ipv4-addr self -- )
+      
+      \ Process a fragment
+      method process-fragment ( addr bytes self -- )
 
-    \ Endpoint queue semaphore
-    sema-size member endpoint-queue-sema
+      \ Process an IPv4 packet
+      method process-ipv4-packet ( src-addr protocol addr bytes self -- )
 
-    \ Endpoint queue index
-    cell member endpoint-queue-index
+      \ Find a listening IPv4 TCP endpoint
+      method find-listen-ipv4-endpoint
+      ( src-addr addr bytes self -- endpoint found? )
+
+      \ Find a connecting/connected IPv4 TCP endpoint
+      method find-connect-ipv4-endpoint
+      ( src-addr addr bytes self -- endpoint found? )
+      
+      \ Process an IPv4 TCP packet
+      method process-ipv4-tcp-packet ( src-addr protocol addr bytes self -- )
+
+      \ Process an IPv4 TCP SYN packet
+      method process-ipv4-syn-packet ( src-addr addr bytes self -- )
+
+      \ Send a TCP SYN packet
+      method send-syn ( endpoint self -- )
+      
+      \ Send an IPv4 TCP SYN+ACK packet
+      method send-ipv4-syn-ack ( src-addr addr bytes endpoint self -- ) 
+
+      \ Send an IPv4 TCP RST packet in response to a packet
+      method send-ipv4-rst-for-packet ( src-addr addr bytes self -- )
+
+      \ Send a generic IPv4 TCP RST packet
+      method send-ipv4-rst ( endpoint self -- )
+      
+      \ Send a basic IPv4 TCP packet
+      method send-ipv4-basic-tcp
+      ( remote-addr remote-port local-port seq ack window flags D: mac-addr )
+      ( self -- )
+      
+      \ Process an IPv4 TCP SYN+ACK packet
+      method process-ipv4-syn-ack-packet ( src-addr addr bytes self -- )
+
+      \ Process an IPv4 ACK packet
+      method process-ipv4-ack-packet ( src-addr addr bytes self -- )
+
+      \ Process an IPv4 FIN+ACK packet
+      method process-ipv4-fin-ack-packet ( src-addr addr bytes self -- )
+
+      \ Process an IPv4 ACK packet in the general case
+      method process-ipv4-basic-ack ( addr bytes endpoint self -- )
+
+      \ Process an IPv4 ACK packet in TCP_SYN_SENT state
+      method process-ipv4-ack-syn-sent ( addr bytes endpoint self -- )
+
+      \ Process an IPv4 ACK packet in TCP_SYN_RECEIVED state
+      method process-ipv4-ack-syn-received ( addr bytes endpoint self -- )
+      
+      \ Process an IPv4 ACK packet in TCP_ESTABLISHED state
+      method process-ipv4-ack-established ( addr bytes endpoint self -- )
+      
+      \ Process an IPv4 ACK packet in TCP_FIN_WAIT_1 state
+      method process-ipv4-ack-fin-wait-1 ( addr bytes endpoint self -- )
+      
+      \ Process an IPv4 ACK packet in TCP_FIN_WAIT_2 state
+      method process-ipv4-ack-fin-wait-2 ( addr bytes endpoint self -- )
+      
+      \ Process an IPv4 ACK packet in TCP_CLOSE_WAIT state
+      method process-ipv4-ack-close-wait ( addr bytes endpoint self -- )
+      
+      \ Process an IPv4 ACK packet in TCP_LAST_ACK state
+      method process-ipv4-ack-last-ack ( addr bytes endpoint self -- )
+
+      \ Process an errant IPv4 ACK packet
+      method send-ipv4-rst-for-ack ( addr bytes endpoint self -- )
+      
+      \ Process an IPv4 FIN packet
+      method process-ipv4-fin-packet ( src-addr addr bytes self -- )
+
+      \ Process an IPv4 FIN packet for a TCP_ESTABLISHED state
+      method process-ipv4-fin-established ( addr bytes endpoint self -- )
+
+      \ Process an IPv4 FIN packet for a TCP_FIN_WAIT_2 state
+      method process-ipv4-fin-fin-wait-2 ( addr bytes endpoint self -- )
+
+      \ Process an unexpected IPv4 FIN packet
+      method process-ipv4-unexpected-fin ( addr bytes endpoint self -- )
+
+      \ Send an ACK in response to a FIN packet
+      method send-ipv4-fin-reply-ack ( addr bytes endpoint self -- )
+      
+      \ Process an IPv4 RST packet
+      method process-ipv4-rst-packet ( src-addr addr bytes self -- )
+      
+      \ Process an IPv4 UDP packet
+      method process-ipv4-udp-packet ( src-addr protocol addr bytes self -- )
+
+      \ Process an IPv4 DNS response packet
+      method process-ipv4-dns-packet ( addr bytes self -- )
+      
+      \ Process an IPv4 ICMP packet
+      method process-ipv4-icmp-packet ( src-addr protocol addr bytes self -- )
+
+      \ Process an IPv4 ICMP echo request packet
+      method process-ipv4-echo-request-packet ( src-addr addr bytes self -- )
+      
+      \ Construct and send a frame
+      method construct-and-send-frame
+      ( ? bytes xt self -- ? sent? ) ( xt: ? buf -- ? send? )
+
+      \ Construct and send a IPv4 packet with a specified source IPv4 address
+      method construct-and-send-ipv4-packet-with-src-addr
+      ( ? D: mac-addr src-addr dest-addr protocol bytes xt self -- ? sent? )
+      ( xt: ? buf -- ? send? )
+
+      \ Construct an IPv4 packet
+      method construct-and-send-ipv4-packet
+      ( ? D: mac-addr dest-addr protocol bytes xt self -- ? sent? )
+      ( xt: ? buf -- ? send? )
+
+      \ Attempt IPv4 DHCP ARP
+      method attempt-ipv4-dhcp-arp ( dest-addr self -- found? )
+      
+      \ Process IPv4 DNS response packet answers
+      method process-ipv4-dns-answers
+      ( addr bytes all-addr all-bytes ancount ident self -- )
+
+      \ Send an ARP request packet
+      method send-ipv4-arp-request ( dest-addr self -- )
+
+      \ Send a DHCP ARP request packet
+      method send-ipv4-dhcp-arp-request ( dest-addr self -- )
+
+      \ Send a DNS request packet
+      method send-ipv4-dns-request ( c-addr bytes self -- )
+
+      \ Send a UDP packet with a specified source IPv4 address and destination
+      \ MAC address
+      method send-ipv4-udp-packet-raw
+      ( ? D: mac-addr src-addr src-port dest-addr dest-port bytes xt self -- )
+      ( ? success? )
+      ( xt: ? buf -- ? sent? )    
+      
+      \ Wait for a TCP endpoint to close
+      method wait-endpoint-closed ( endpoint self -- )
+
+      \ Send a FIN packet
+      method send-fin ( state endpoint self -- )
+
+      \ Close an established conection
+      method close-tcp-established ( endpoint self -- )
+
+      \ Send a reply FIN packet
+      method send-fin-reply ( endpoint self -- )
+      
+      \ Send a data ACK packet
+      method send-data-ack ( addr bytes push? endpoint self -- )
+
+      \ Refresh an interface
+      method refresh-interface ( self -- )
+      
+      \ Send a DHCPDISCOVER packet
+      method send-dhcpdiscover ( self -- )
+
+      \ Send a DHCPREQUEST packet
+      method send-dhcprequest ( self -- )
+
+      \ Send a DHCPDECLINE packet
+      method send-dhcpdecline ( self -- )
+
+      \ Process an IPv4 DHCP packet
+      method process-ipv4-dhcp-packet ( addr bytes self -- )
+
+      \ Process an IPv4 DHCPOFFER packet
+      method process-ipv4-dhcpoffer ( addr bytes self -- )
+
+      \ Process an IPv4 DHCPACK packet
+      method process-ipv4-dhcpack ( addr bytes self -- )
+
+      \ Process an IPv4 DHCPNAK packet
+      method process-ipv4-dhcpnak ( addr bytes self -- )
+
+    end-module
     
     \ Get the IPv4 address
     method intf-ipv4-addr@ ( self -- addr )
@@ -2321,186 +2513,22 @@ begin-module net
     \ Set the TTL
     method intf-ttl! ( ttl self -- )
 
-    \ Get the MAC address resolution interval in ticks (100 us intervals)
-    method mac-addr-resolve-interval@ ( self -- ticks )
-    
-    \ Set the MAC address resolution interval in ticks (100 us intervals)
-    method mac-addr-resolve-interval! ( ticks self -- )
+    \ Start DHCP discovery
+    method discover-ipv4-addr ( self -- )
 
-    \ Get the maximum MAC address resolution attempts
-    method max-mac-addr-resolve-attempts@ ( self -- attempts )
+    \ Send data on a TCP endpoint
+    method send-tcp-endpoint ( addr bytes endpoint self -- )
 
-    \ Set the maximum MAC address resolution attempts
-    method max-mac-addr-resolve-attempts! ( attempts self -- )
-
-    \ Get the DNS resolution interval in ticks (100 us intervals)
-    method dns-resolve-interval@ ( self -- ticks )
-    
-    \ Set the DNS resolution interval in ticks (100 us intervals)
-    method dns-resolve-interval! ( ticks self -- )
-
-    \ Get the maximum DNS resolution attempts
-    method max-dns-resolve-attempts@ ( self -- attempts )
-
-    \ Set the maximum DNS resolution attempts
-    method max-dns-resolve-attempts! ( attempts self -- )
-    
-    \ Send a frame
-    method send-frame ( addr bytes self -- )
-
-    \ Process a MAC address for an IPv4 address
-    method process-ipv4-mac-addr ( D: mac-addr ipv4-addr self -- )
-    
-    \ Process a fragment
-    method process-fragment ( addr bytes self -- )
-
-    \ Process an IPv4 packet
-    method process-ipv4-packet ( src-addr protocol addr bytes self -- )
-
-    \ Find a listening IPv4 TCP endpoint
-    method find-listen-ipv4-endpoint
-    ( src-addr addr bytes self -- endpoint found? )
-
-    \ Find a connecting/connected IPv4 TCP endpoint
-    method find-connect-ipv4-endpoint
-    ( src-addr addr bytes self -- endpoint found? )
-    
-    \ Process an IPv4 TCP packet
-    method process-ipv4-tcp-packet ( src-addr protocol addr bytes self -- )
-
-    \ Process an IPv4 TCP SYN packet
-    method process-ipv4-syn-packet ( src-addr addr bytes self -- )
-
-    \ Send a TCP SYN packet
-    method send-syn ( endpoint self -- )
-    
-    \ Send an IPv4 TCP SYN+ACK packet
-    method send-ipv4-syn-ack ( src-addr addr bytes endpoint self -- ) 
-
-    \ Send an IPv4 TCP RST packet in response to a packet
-    method send-ipv4-rst-for-packet ( src-addr addr bytes self -- )
-
-    \ Send a generic IPv4 TCP RST packet
-    method send-ipv4-rst ( endpoint self -- )
-      
-    \ Send a basic IPv4 TCP packet
-    method send-ipv4-basic-tcp
-    ( remote-addr remote-port local-port seq ack window flags D: mac-addr )
-    ( self -- )
-    
-    \ Process an IPv4 TCP SYN+ACK packet
-    method process-ipv4-syn-ack-packet ( src-addr addr bytes self -- )
-
-    \ Process an IPv4 ACK packet
-    method process-ipv4-ack-packet ( src-addr addr bytes self -- )
-
-    \ Process an IPv4 FIN+ACK packet
-    method process-ipv4-fin-ack-packet ( src-addr addr bytes self -- )
-
-    \ Process an IPv4 ACK packet in the general case
-    method process-ipv4-basic-ack ( addr bytes endpoint self -- )
-
-    \ Process an IPv4 ACK packet in TCP_SYN_SENT state
-    method process-ipv4-ack-syn-sent ( addr bytes endpoint self -- )
-
-    \ Process an IPv4 ACK packet in TCP_SYN_RECEIVED state
-    method process-ipv4-ack-syn-received ( addr bytes endpoint self -- )
-    
-    \ Process an IPv4 ACK packet in TCP_ESTABLISHED state
-    method process-ipv4-ack-established ( addr bytes endpoint self -- )
-    
-    \ Process an IPv4 ACK packet in TCP_FIN_WAIT_1 state
-    method process-ipv4-ack-fin-wait-1 ( addr bytes endpoint self -- )
-    
-    \ Process an IPv4 ACK packet in TCP_FIN_WAIT_2 state
-    method process-ipv4-ack-fin-wait-2 ( addr bytes endpoint self -- )
-    
-    \ Process an IPv4 ACK packet in TCP_CLOSE_WAIT state
-    method process-ipv4-ack-close-wait ( addr bytes endpoint self -- )
-    
-    \ Process an IPv4 ACK packet in TCP_LAST_ACK state
-    method process-ipv4-ack-last-ack ( addr bytes endpoint self -- )
-
-    \ Process an errant IPv4 ACK packet
-    method send-ipv4-rst-for-ack ( addr bytes endpoint self -- )
-    
-    \ Process an IPv4 FIN packet
-    method process-ipv4-fin-packet ( src-addr addr bytes self -- )
-
-    \ Process an IPv4 FIN packet for a TCP_ESTABLISHED state
-    method process-ipv4-fin-established ( addr bytes endpoint self -- )
-
-    \ Process an IPv4 FIN packet for a TCP_FIN_WAIT_2 state
-    method process-ipv4-fin-fin-wait-2 ( addr bytes endpoint self -- )
-
-    \ Process an unexpected IPv4 FIN packet
-    method process-ipv4-unexpected-fin ( addr bytes endpoint self -- )
-
-    \ Send an ACK in response to a FIN packet
-    method send-ipv4-fin-reply-ack ( addr bytes endpoint self -- )
-    
-    \ Process an IPv4 RST packet
-    method process-ipv4-rst-packet ( src-addr addr bytes self -- )
-    
-    \ Process an IPv4 UDP packet
-    method process-ipv4-udp-packet ( src-addr protocol addr bytes self -- )
-
-    \ Process an IPv4 DNS response packet
-    method process-ipv4-dns-packet ( addr bytes self -- )
-    
-    \ Process an IPv4 ICMP packet
-    method process-ipv4-icmp-packet ( src-addr protocol addr bytes self -- )
-
-    \ Process an IPv4 ICMP echo request packet
-    method process-ipv4-echo-request-packet ( src-addr addr bytes self -- )
-    
-    \ Construct and send a frame
-    method construct-and-send-frame
-    ( ? bytes xt self -- ? sent? ) ( xt: ? buf -- ? send? )
-
-    \ Construct and send a IPv4 packet with a specified source IPv4 address
-    method construct-and-send-ipv4-packet-with-src-addr
-    ( ? D: mac-addr src-addr dest-addr protocol bytes xt self -- ? sent? )
-    ( xt: ? buf -- ? send? )
-
-    \ Construct an IPv4 packet
-    method construct-and-send-ipv4-packet
-    ( ? D: mac-addr dest-addr protocol bytes xt self -- ? sent? )
-    ( xt: ? buf -- ? send? )
-
-    \ Resolve an IPv4 address's MAC address
-    method resolve-ipv4-addr-mac-addr ( dest-addr self -- D: mac-addr success? )
-
-    \ Attempt IPv4 DHCP ARP
-    method attempt-ipv4-dhcp-arp ( dest-addr self -- found? )
-    
-    \ Resolve a DNS name's IPv4 address
-    method resolve-dns-ipv4-addr ( c-addr bytes self -- ipv4-addr success? )
-    
-    \ Process IPv4 DNS response packet answers
-    method process-ipv4-dns-answers
-    ( addr bytes all-addr all-bytes ancount ident self -- )
-
-    \ Send an ARP request packet
-    method send-ipv4-arp-request ( dest-addr self -- )
-
-    \ Send a DHCP ARP request packet
-    method send-ipv4-dhcp-arp-request ( dest-addr self -- )
-
-    \ Send a DNS request packet
-    method send-ipv4-dns-request ( c-addr bytes self -- )
-
-    \ Send a UDP packet with a specified source IPv4 address and destination
-    \ MAC address
-    method send-ipv4-udp-packet-raw
-    ( ? D: mac-addr src-addr src-port dest-addr dest-port bytes xt self -- )
-    ( ? success? )
-    ( xt: ? buf -- ? sent? )    
-    
     \ Send a UDP packet
     method send-ipv4-udp-packet
     ( ? src-port dest-addr dest-port bytes xt self -- ? success? )
     ( xt: ? buf -- ? sent? )
+    
+    \ Resolve an IPv4 address's MAC address
+    method resolve-ipv4-addr-mac-addr ( dest-addr self -- D: mac-addr success? )
+
+    \ Resolve a DNS name's IPv4 address
+    method resolve-dns-ipv4-addr ( c-addr bytes self -- ipv4-addr success? )
     
     \ Enqueue a ready receiving IP endpoint
     method put-ready-endpoint ( endpoint self -- )
@@ -2530,51 +2558,6 @@ begin-module net
     \ Close a TCP endpoint
     method close-tcp-endpoint ( endpoint self -- )
 
-    \ Wait for a TCP endpoint to close
-    method wait-endpoint-closed ( endpoint self -- )
-
-    \ Send a FIN packet
-    method send-fin ( state endpoint self -- )
-
-    \ Close an established conection
-    method close-tcp-established ( endpoint self -- )
-
-    \ Send a reply FIN packet
-    method send-fin-reply ( endpoint self -- )
-    
-    \ Send data on a TCP endpoint
-    method send-tcp-endpoint ( addr bytes endpoint self -- )
-
-    \ Send a data ACK packet
-    method send-data-ack ( addr bytes push? endpoint self -- )
-
-    \ Refresh an interface
-    method refresh-interface ( self -- )
-    
-    \ Start DHCP discovery
-    method discover-ipv4-addr ( self -- )
-
-    \ Send a DHCPDISCOVER packet
-    method send-dhcpdiscover ( self -- )
-
-    \ Send a DHCPREQUEST packet
-    method send-dhcprequest ( self -- )
-
-    \ Send a DHCPDECLINE packet
-    method send-dhcpdecline ( self -- )
-
-    \ Process an IPv4 DHCP packet
-    method process-ipv4-dhcp-packet ( addr bytes self -- )
-
-    \ Process an IPv4 DHCPOFFER packet
-    method process-ipv4-dhcpoffer ( addr bytes self -- )
-
-    \ Process an IPv4 DHCPACK packet
-    method process-ipv4-dhcpack ( addr bytes self -- )
-
-    \ Process an IPv4 DHCPNAK packet
-    method process-ipv4-dhcpnak ( addr bytes self -- )
-    
   end-class
 
   \ Implement the interface class
@@ -2589,11 +2572,7 @@ begin-module net
       192 168 1 254 make-ipv4-addr self gateway-ipv4-addr !
       8 8 8 8 make-ipv4-addr self dns-server-ipv4-addr !
       64 self intf-ttl !
-      50000 self mac-addr-resolve-interval !
-      5 self max-mac-addr-resolve-attempts !
       1 0 self mac-addr-resolve-sema init-sema
-      50000 self dns-resolve-interval !
-      5 self max-dns-resolve-attempts !
       1 0 self dns-resolve-sema init-sema
       0 self current-dhcp-xid !
       0 self dhcp-server-ipv4-addr !
@@ -2674,47 +2653,7 @@ begin-module net
     :noname { ttl self -- }
       ttl 255 min 1 max self intf-ttl !
     ; define intf-ttl!
-
-    \ Get the address resolution interval in ticks (100 us intervals)
-    :noname ( self -- ticks )
-      mac-addr-resolve-interval @
-    ; define mac-addr-resolve-interval@
     
-    \ Set the address resolution interval in ticks (100 us intervals)
-    :noname ( ticks self -- )
-      mac-addr-resolve-interval !
-    ; define mac-addr-resolve-interval!
-
-    \ Get the maximum MAC address resolution attempts
-    :noname ( self -- attempts )
-      max-mac-addr-resolve-attempts @
-    ; define max-mac-addr-resolve-attempts@
-
-    \ Set the maximum MAC address resolution attempts
-    :noname ( attempts self -- )
-      max-mac-addr-resolve-attempts !
-    ; define max-mac-addr-resolve-attempts!
-    
-    \ Get the DNS resolution interval in ticks (100 us intervals)
-    :noname ( self -- ticks )
-      dns-resolve-interval @
-    ; define dns-resolve-interval@
-    
-    \ Set the DNS resolution interval in ticks (100 us intervals)
-    :noname ( ticks self -- )
-      dns-resolve-interval !
-    ; define dns-resolve-interval!
-
-    \ Get the maximum DNS resolution attempts
-    :noname ( self -- attempts )
-      max-dns-resolve-attempts @
-    ; define max-dns-resolve-attempts@
-
-    \ Set the maximum DNS resolution attempts
-    :noname ( attempts self -- )
-      max-dns-resolve-attempts !
-    ; define max-dns-resolve-attempts!
-
     \ Send a frame
     :noname { addr bytes self -- }
       bytes mtu-size u<= averts x-oversized-frame
@@ -3384,13 +3323,13 @@ begin-module net
       192 168 1 0 make-ipv4-addr self intf-ipv4-netmask@ and <> if
         self gateway-ipv4-addr@ to dest-addr
       then
-      systick::systick-counter self mac-addr-resolve-interval@ - { tick }
-      self max-mac-addr-resolve-attempts @ { attempts }
+      systick::systick-counter mac-addr-resolve-interval - { tick }
+      max-mac-addr-resolve-attempts { attempts }
       begin
         dest-addr self address-map lookup-mac-addr-by-ipv4 not
       while
         2drop
-        systick::systick-counter tick - self mac-addr-resolve-interval@ >= if
+        systick::systick-counter tick - mac-addr-resolve-interval >= if
           attempts 0> if
             -1 +to attempts
             dest-addr self send-ipv4-arp-request
@@ -3400,7 +3339,7 @@ begin-module net
           then
         else
           task::timeout @ { old-timeout }
-          tick self mac-addr-resolve-interval @ + systick::systick-counter -
+          tick mac-addr-resolve-interval + systick::systick-counter -
           task::timeout !
           self mac-addr-resolve-sema ['] take try
           dup ['] task::x-timed-out = if 2drop 0 then
@@ -3444,15 +3383,15 @@ begin-module net
 
     \ Resolve a DNS name's IPv4 address
     :noname { c-addr bytes self -- ipv4-addr success? }
-      systick::systick-counter self dns-resolve-interval@ - { tick }
-      self max-dns-resolve-attempts @ { attempts }
+      systick::systick-counter dns-resolve-interval - { tick }
+      max-dns-resolve-attempts { attempts }
       c-addr bytes self dns-cache lookup-ipv4-addr-by-dns if
         0= if true exit then
       else
         2drop
       then
       begin
-        systick::systick-counter tick - self dns-resolve-interval@ >= if
+        systick::systick-counter tick - dns-resolve-interval >= if
           attempts 0> if
             -1 +to attempts
             c-addr bytes self send-ipv4-dns-request
@@ -3462,7 +3401,7 @@ begin-module net
           then
         else
           task::timeout @ { old-timeout }
-          tick self dns-resolve-interval @ + systick::systick-counter -
+          tick dns-resolve-interval + systick::systick-counter -
           task::timeout !
           self dns-resolve-sema ['] take try
           dup ['] task::x-timed-out = if 2drop 0 then
@@ -4427,8 +4366,12 @@ begin-module net
   \ The IP protocol handler
   <frame-handler> begin-class <ip-handler>
 
-    \ The IP interface
-    cell member ip-interface
+    continue-module net-internal
+    
+      \ The IP interface
+      cell member ip-interface
+
+    end-module
 
   end-class
 
@@ -4485,11 +4428,15 @@ begin-module net
   \ The ARP packet handler
   <frame-handler> begin-class <arp-handler>
 
-    \ The ARP IP interface
-    cell member arp-interface
-
-    \ Send an ARP response
-    method send-arp-response ( addr self -- )
+    continue-module net-internal
+      
+      \ The ARP IP interface
+      cell member arp-interface
+      
+      \ Send an ARP response
+      method send-arp-response ( addr self -- )
+      
+    end-module
     
   end-class
   
