@@ -11733,6 +11733,42 @@
           <content src="extra/net.xhtml#id16" />  
         </navPoint>
       </navPoint>
+      <navPoint id="navPoint1955" playOrder="1797">
+        <navLabel>
+          <text>simple-cyw43-net</text>
+        </navLabel>
+        <content src="extra/net.xhtml#simple-cyw43-net" />  
+        <navPoint id="navPoint1956" playOrder="1797">
+          <navLabel>
+            <text>simple-cyw43-net</text>
+          </navLabel>
+          <content src="extra/net.xhtml#simple-cyw43-net" />  
+        </navPoint>
+        <navPoint id="navPoint1957" playOrder="1798">
+          <navLabel>
+            <text>&lt;simple-cyw43-net&gt;</text>
+          </navLabel>
+          <content src="extra/net.xhtml#id18" />  
+        </navPoint>
+      </navPoint>
+      <navPoint id="navPoint1958" playOrder="1799">
+        <navLabel>
+          <text>pico-w-cyw43-net</text>
+        </navLabel>
+        <content src="extra/net.xhtml#pico-w-cyw43-net" />  
+        <navPoint id="navPoint1959" playOrder="1799">
+          <navLabel>
+            <text>pico-w-cyw43-net</text>
+          </navLabel>
+          <content src="extra/net.xhtml#pico-w-cyw43-net" />  
+        </navPoint>
+        <navPoint id="navPoint1960" playOrder="1800">
+          <navLabel>
+            <text>&lt;pico-w-cyw43-net&gt;</text>
+          </navLabel>
+          <content src="extra/net.xhtml#id20" />  
+        </navPoint>
+      </navPoint>
     </navPoint>
   </navMap>
 </ncx>

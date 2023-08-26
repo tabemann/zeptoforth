@@ -397,3 +397,82 @@ Get a frame to transmit.
 ( addr bytes self -- bytes' found? )
 
 Poll a frame to transmit.
+
+### `simple-cyw43-net`
+
+The `simple-cyw43-net` module contains the following class:
+
+#### `<simple-cyw43-net>`
+
+The `<simple-cyw43-net>` class encapsulates a CYW43439 driver and a zeptoIP network stack while simplifying their configuration.
+
+It has the following constructor:
+
+##### `new`
+( pwr-pin dio-pin cs-pin clk-pin pio-addr sm-index pio-instance self -- )
+
+This instantiates an instance with *pwr-pin*, *dio-pin*, *cs-pin*, and *pio-pin* being specified as the GPIO pins for communication with the CYW43439, and a base PIO instruction address *pio-addr*, a PIO state machine *sm-index*, and a PIO instance (`pio::PIO0` or `pio::PIO1`) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43439.
+
+It has the following methods:
+
+##### `init-cyw43-net`
+( self -- )
+
+This initializes a `<simple-cyw43-net>` instance.
+
+##### `cyw43-gpio!`
+( state gpio self -- )
+
+This sets a GPIO pin on the CYW43439.
+
+##### `cyw43-control@`
+( self -- control )
+
+This gets the CYW43439 controller instance.
+
+##### `net-interface@`
+( self -- interface )
+
+This gets the zeptoIP interface instance.
+
+##### `net-endpoint-process@`
+( self -- endpoint-processor )
+
+This gets the zeptoIP endpoint processor instance.
+
+##### `run-net-process`
+( self -- )
+
+This starts the zeptoIP frame and endpoint processors.
+
+### `pico-w-cyw43-net`
+
+This `pico-w-cyw43-net` class has the following class:
+
+#### `<pico-w-cyw43-net>`
+
+The `<pico-w-cyw43-net>` class inherits from the `<simple-cyw43-net>` class, providing functionality specific to the Raspberry Pi Pico W.
+
+It has the following constructor:
+
+##### `new`
+( pio-addr sm-index pio-instance self -- )
+
+This instantiates an instance with a base PIO instruction address *pio-addr*, a PIO state machine *sm-index*, and a PIO instance (`pio::PIO0` or `pio::PIO1`) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43439.
+
+It has the following methods:
+
+##### `pico-w-led!`
+( state self -- )
+
+This sets the LED on the Raspberry Pi Pico W to *state*.
+
+##### `pico-w-led@`
+( self -- state )
+
+This gets the state of the LED on the Raspberry Pi Pico W.
+
+##### `toggle-pico-w-led`
+( self -- )
+
+This toggles the state of the LED on the Raspberry Pi Pico W.
