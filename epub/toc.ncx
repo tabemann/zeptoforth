@@ -11770,5 +11770,41 @@
         </navPoint>
       </navPoint>
     </navPoint>
+    <navPoint id="navPoint1961" playOrder="1801">
+      <navLabel>
+        <text>CYW43xxx Words</text>
+      </navLabel>
+      <content src="extra/cyw43.xhtml" />  
+      <navPoint id="navPoint1962" playOrder="1801">
+        <navLabel>
+          <text>CYW43xxx Words</text>
+        </navLabel>
+        <content src="extra/cyw43.xhtml" />  
+      </navPoint>
+      <navPoint id="navPoint1963" playOrder="1802">
+        <navLabel>
+          <text>cyw43-control</text>
+        </navLabel>
+        <content src="extra/cyw43.xhtml#cyw43-control" />  
+        <navPoint id="navPoint1964" playOrder="1802">
+          <navLabel>
+            <text>cyw43-control</text>
+          </navLabel>
+          <content src="extra/cyw43.xhtml#cyw43-control" />  
+        </navPoint>
+        <navPoint id="navPoint1965" playOrder="1803">
+          <navLabel>
+            <text>default-mac-addr</text>
+          </navLabel>
+          <content src="extra/cyw43.xhtml#default-mac-addr" />  
+        </navPoint>
+        <navPoint id="navPoint1966" playOrder="1804">
+          <navLabel>
+            <text>&lt;cyw43-control&gt;</text>
+          </navLabel>
+          <content src="extra/cyw43.xhtml#id1" />  
+        </navPoint>
+      </navPoint>
+    </navPoint>
   </navMap>
 </ncx>

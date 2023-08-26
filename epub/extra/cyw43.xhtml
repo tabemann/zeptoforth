@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>CYW43xxx Words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="cyw43xxx-words">
+<h1>CYW43xxx Words</h1>
+<p>A driver for CYW43xxx WiFi chips is included with zeptoforth. The external API for controlling them is provided by the <code class="docutils literal notranslate"><span class="pre">&lt;cyw43-control&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">cyw43-control</span></code> module. This class exposes a frame interface and a means of retrieving WiFi interface events.</p>
+<section id="cyw43-control">
+<h2><code class="docutils literal notranslate"><span class="pre">cyw43-control</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">cyw43-control</span></code> module contains the following constant:</p>
+<section id="default-mac-addr">
+<h3><code class="docutils literal notranslate"><span class="pre">default-mac-addr</span></code></h3>
+<p>( – D: default-mac-addr )</p>
+<p>This is a token when provided to the <code class="docutils literal notranslate"><span class="pre">&lt;cyw43-control&gt;</span></code> class when instatiated indicates that the default MAC address is to be used.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">cyw43-control</span></code> module contains the following class:</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;cyw43-control&gt;</span></code></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;cyw43-control&gt;</span></code> class has the constructor:</p>
+<section id="new">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
+<p>( D: mac-addr clm-addr clm-bytes fw-addr fw-bytes pwr clk dio cs pio-addr sm pio – )</p>
+<p>This instantiates a <code class="docutils literal notranslate"><span class="pre">&lt;cyw43-control&gt;</span></code> instance to use the MAC address <em>mac-addr</em> (which if <code class="docutils literal notranslate"><span class="pre">default-mac-addr</span></code> indicates that the default MAC address is to be used<code class="docutils literal notranslate"><span class="pre">),</span> <span class="pre">CLM</span> <span class="pre">firmware</span> <span class="pre">of</span> <span class="pre">*clm-bytes*</span> <span class="pre">at</span> <span class="pre">*clm-addr*,</span> <span class="pre">main</span> <span class="pre">firmware</span> <span class="pre">of</span> <span class="pre">*fw-bytes*</span> <span class="pre">at</span> <span class="pre">*fw-addr*,</span> <span class="pre">*pwr*,</span> <span class="pre">*clk*,</span> <span class="pre">*dio*,</span> <span class="pre">and</span> <span class="pre">*cs*</span> <span class="pre">GPIO</span> <span class="pre">pins</span> <span class="pre">for</span> <span class="pre">communication</span> <span class="pre">with</span> <span class="pre">the</span> <span class="pre">CYW43xxx,</span> <span class="pre">and</span> <span class="pre">PIO</span> <span class="pre">instruction</span> <span class="pre">base</span> <span class="pre">address</span> <span class="pre">*pio-addr*,</span> <span class="pre">PIO</span> <span class="pre">state</span> <span class="pre">machine</span> <span class="pre">index</span> <span class="pre">*sm*,</span> <span class="pre">and</span> <span class="pre">PIO</span> <span class="pre">instance</span> <span class="pre">*pio*</span> <span class="pre">(</span></code>pio::PIO0<code class="docutils literal notranslate"><span class="pre">or</span></code>pio::PIO1`).</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;cyw43-control&gt;</span></code> class has the following methods:</p>
+</section>
+<section id="init-cyw43">
+<h4><code class="docutils literal notranslate"><span class="pre">init-cyw43</span></code></h4>
+<p>( self – )</p>
+<p>Initialize the CYW43.</p>
+</section>
+<section id="cyw43-power-management">
+<h4><code class="docutils literal notranslate"><span class="pre">cyw43-power-management!</span></code></h4>
+<p>( pm self – )</p>
+<p>Set power management to <em>pm</em>, defined in the module <code class="docutils literal notranslate"><span class="pre">cyw43-consts</span></code>.</p>
+</section>
+<section id="join-cyw43-open">
+<h4><code class="docutils literal notranslate"><span class="pre">join-cyw43-open</span></code></h4>
+<p>( ssid-addr ssid-bytes self – status success? )</p>
+<p>Join an open AP. <em>ssid-addr</em> and <em>ssid-bytes</em> comprise the SSID of the AP being connected to. On success <em>success?</em> of true and <em>status</em> of 0 will be returned.</p>
+</section>
+<section id="join-cyw43-wpa2">
+<h4>`join-cyw43-wpa2</h4>
+<p>( ssid-addr ssid-bytes pass-addr pass-bytes self – status success? )</p>
+<p>Join a WPA2 AP. <em>ssid-addr</em> and <em>ssid-bytes</em> comprise the SSID of the AP being connected to. <em>pass-addr</em> and <em>pass-bytes</em> comprise the password of the AP being connected to. On success <em>success?</em> of true and <em>status</em> of 0 will be returned.</p>
+</section>
+<section id="start-cyw43-open">
+<h4><code class="docutils literal notranslate"><span class="pre">start-cyw43-open</span></code></h4>
+<p>( ssid-addr ssid-bytes channel self – )</p>
+<p>Start open AP. <em>ssid-addr</em> and <em>ssid-bytes</em> comprise the SSID of the AP being started. <em>channel</em> comprises the channel of the AP being started.</p>
+</section>
+<section id="start-cyw43-wpa2">
+<h4><code class="docutils literal notranslate"><span class="pre">start-cyw43-wpa2</span></code></h4>
+<p>( ssid-addr ssid-bytes pass-addr pass-bytes channel self – )</p>
+<p>Start WPA2 AP. <em>ssid-addr</em> and <em>ssid-bytes</em> comprise the SSID of the AP being started. <em>pass-addr</em> and <em>pass-bytes</em> comprise the password of the AP being started. <em>channel</em> comprises the channel of the AP being started.</p>
+</section>
+<section id="cyw43-gpio">
+<h4><code class="docutils literal notranslate"><span class="pre">cyw43-gpio!</span></code></h4>
+<p>( val index self – )</p>
+<p>Set a GPIO on the CYW43xxx.</p>
+</section>
+<section id="enable-cyw43-event">
+<h4><code class="docutils literal notranslate"><span class="pre">enable-cyw43-event</span></code></h4>
+<p>( event self – )</p>
+<p>Enable an event. <em>event</em> is an <code class="docutils literal notranslate"><span class="pre">EVENT_*</span></code> value found in the <code class="docutils literal notranslate"><span class="pre">cyw43-events</span></code> module.</p>
+</section>
+<section id="enable-cyw43-events">
+<h4><code class="docutils literal notranslate"><span class="pre">enable-cyw43-events</span></code></h4>
+<p>( event-addr event-count self – )</p>
+<p>Enable multiple events. <em>event-addr</em> is an array of <em>event-count</em> bytes, each being an <code class="docutils literal notranslate"><span class="pre">EVENT_*</span></code> value found in the <code class="docutils literal notranslate"><span class="pre">cyw43-events</span></code> module.</p>
+</section>
+<section id="disable-cyw43-event">
+<h4><code class="docutils literal notranslate"><span class="pre">disable-cyw43-event</span></code></h4>
+<p>( event self – )</p>
+<p>Disable an event. <em>event</em> is an <code class="docutils literal notranslate"><span class="pre">EVENT_*</span></code> value found in the <code class="docutils literal notranslate"><span class="pre">cyw43-events</span></code> module.</p>
+</section>
+<section id="disable-cyw43-events">
+<h4><code class="docutils literal notranslate"><span class="pre">disable-cyw43-events</span></code></h4>
+<p>( event-addr event-count self – )</p>
+<p>Disable multiple events. <em>event-addr</em> is an array of <em>event-count</em> bytes, each being an <code class="docutils literal notranslate"><span class="pre">EVENT_*</span></code> value found in the <code class="docutils literal notranslate"><span class="pre">cyw43-events</span></code> module.</p>
+</section>
+<section id="disable-all-cyw43-events">
+<h4><code class="docutils literal notranslate"><span class="pre">disable-all-cyw43-events</span></code></h4>
+<p>( self – )</p>
+<p>Disable all events.</p>
+</section>
+<section id="cyw43-frame-interface">
+<h4><code class="docutils literal notranslate"><span class="pre">cyw43-frame-interface&#64;</span></code></h4>
+<p>( self – interface )</p>
+<p>Get the CYW43 frame interface.</p>
+</section>
+<section id="get-cyw43-event">
+<h4><code class="docutils literal notranslate"><span class="pre">get-cyw43-event</span></code></h4>
+<p>( addr self – )</p>
+<p>Carry out a blocking dequeue of an event message. <em>addr</em> points to a block of memory for an event message of <code class="docutils literal notranslate"><span class="pre">cyw43-events::event-message-size</span></code> size.</p>
+</section>
+<section id="poll-cyw43-event">
+<h4><code class="docutils literal notranslate"><span class="pre">poll-cyw43-event</span></code></h4>
+<p>( addr self – found? )</p>
+<p>Poll for an event message. <em>addr</em> points to a block of memory for an event message of <code class="docutils literal notranslate"><span class="pre">cyw43-events::event-message-size</span></code> size. Its contents are only valid if <em>found?</em> is true, indicating that an event was found.</p>
+</section>
+<section id="clear-cyw43-events">
+<h4><code class="docutils literal notranslate"><span class="pre">clear-cyw43-events</span></code></h4>
+<p>( self – )</p>
+<p>Clear the event queue.</p>
+</section>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

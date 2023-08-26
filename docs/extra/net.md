@@ -404,14 +404,14 @@ The `simple-cyw43-net` module contains the following class:
 
 #### `<simple-cyw43-net>`
 
-The `<simple-cyw43-net>` class encapsulates a CYW43439 driver and a zeptoIP network stack while simplifying their configuration.
+The `<simple-cyw43-net>` class encapsulates a CYW43xxx driver and a zeptoIP network stack while simplifying their configuration.
 
 It has the following constructor:
 
 ##### `new`
 ( pwr-pin dio-pin cs-pin clk-pin pio-addr sm-index pio-instance self -- )
 
-This instantiates an instance with *pwr-pin*, *dio-pin*, *cs-pin*, and *pio-pin* being specified as the GPIO pins for communication with the CYW43439, and a base PIO instruction address *pio-addr*, a PIO state machine *sm-index*, and a PIO instance (`pio::PIO0` or `pio::PIO1`) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43439.
+This instantiates an instance with *pwr-pin*, *dio-pin*, *cs-pin*, and *pio-pin* being specified as the GPIO pins for communication with the CYW43xxx, and a base PIO instruction address *pio-addr*, a PIO state machine *sm-index*, and a PIO instance (`pio::PIO0` or `pio::PIO1`) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.
 
 It has the following methods:
 
@@ -423,12 +423,12 @@ This initializes a `<simple-cyw43-net>` instance.
 ##### `cyw43-gpio!`
 ( state gpio self -- )
 
-This sets a GPIO pin on the CYW43439.
+This sets a GPIO pin on the CYW43xxx.
 
 ##### `cyw43-control@`
 ( self -- control )
 
-This gets the CYW43439 controller instance.
+This gets the CYW43xxx controller instance.
 
 ##### `net-interface@`
 ( self -- interface )
@@ -458,7 +458,7 @@ It has the following constructor:
 ##### `new`
 ( pio-addr sm-index pio-instance self -- )
 
-This instantiates an instance with a base PIO instruction address *pio-addr*, a PIO state machine *sm-index*, and a PIO instance (`pio::PIO0` or `pio::PIO1`) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43439.
+This instantiates an instance with a base PIO instruction address *pio-addr*, a PIO state machine *sm-index*, and a PIO instance (`pio::PIO0` or `pio::PIO1`) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.
 
 It has the following methods:
 

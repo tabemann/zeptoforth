@@ -70,3 +70,4 @@ Zeptoforth Documentation
    extra/bitmap_utils
    extra/neopixel
    extra/net
+   extra/cyw43

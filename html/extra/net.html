@@ -17,6 +17,7 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="CYW43xxx Words" href="cyw43.html" />
     <link rel="prev" title="Neopixels on the RP2040" href="neopixel.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -440,12 +441,12 @@
 <p>The <code class="docutils literal notranslate"><span class="pre">simple-cyw43-net</span></code> module contains the following class:</p>
 <section id="id18">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net&gt;</span></code><a class="headerlink" href="#id18" title="Permalink to this heading">¶</a></h3>
-<p>The <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net&gt;</span></code> class encapsulates a CYW43439 driver and a zeptoIP network stack while simplifying their configuration.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net&gt;</span></code> class encapsulates a CYW43xxx driver and a zeptoIP network stack while simplifying their configuration.</p>
 <p>It has the following constructor:</p>
 <section id="id19">
 <h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id19" title="Permalink to this heading">¶</a></h4>
 <p>( pwr-pin dio-pin cs-pin clk-pin pio-addr sm-index pio-instance self – )</p>
-<p>This instantiates an instance with <em>pwr-pin</em>, <em>dio-pin</em>, <em>cs-pin</em>, and <em>pio-pin</em> being specified as the GPIO pins for communication with the CYW43439, and a base PIO instruction address <em>pio-addr</em>, a PIO state machine <em>sm-index</em>, and a PIO instance (<code class="docutils literal notranslate"><span class="pre">pio::PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">pio::PIO1</span></code>) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43439.</p>
+<p>This instantiates an instance with <em>pwr-pin</em>, <em>dio-pin</em>, <em>cs-pin</em>, and <em>pio-pin</em> being specified as the GPIO pins for communication with the CYW43xxx, and a base PIO instruction address <em>pio-addr</em>, a PIO state machine <em>sm-index</em>, and a PIO instance (<code class="docutils literal notranslate"><span class="pre">pio::PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">pio::PIO1</span></code>) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.</p>
 <p>It has the following methods:</p>
 </section>
 <section id="init-cyw43-net">
@@ -456,12 +457,12 @@
 <section id="cyw43-gpio">
 <h4><code class="docutils literal notranslate"><span class="pre">cyw43-gpio!</span></code><a class="headerlink" href="#cyw43-gpio" title="Permalink to this heading">¶</a></h4>
 <p>( state gpio self – )</p>
-<p>This sets a GPIO pin on the CYW43439.</p>
+<p>This sets a GPIO pin on the CYW43xxx.</p>
 </section>
 <section id="cyw43-control">
 <h4><code class="docutils literal notranslate"><span class="pre">cyw43-control&#64;</span></code><a class="headerlink" href="#cyw43-control" title="Permalink to this heading">¶</a></h4>
 <p>( self – control )</p>
-<p>This gets the CYW43439 controller instance.</p>
+<p>This gets the CYW43xxx controller instance.</p>
 </section>
 <section id="net-interface">
 <h4><code class="docutils literal notranslate"><span class="pre">net-interface&#64;</span></code><a class="headerlink" href="#net-interface" title="Permalink to this heading">¶</a></h4>
@@ -490,7 +491,7 @@
 <section id="id21">
 <h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#id21" title="Permalink to this heading">¶</a></h4>
 <p>( pio-addr sm-index pio-instance self – )</p>
-<p>This instantiates an instance with a base PIO instruction address <em>pio-addr</em>, a PIO state machine <em>sm-index</em>, and a PIO instance (<code class="docutils literal notranslate"><span class="pre">pio::PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">pio::PIO1</span></code>) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43439.</p>
+<p>This instantiates an instance with a base PIO instruction address <em>pio-addr</em>, a PIO state machine <em>sm-index</em>, and a PIO instance (<code class="docutils literal notranslate"><span class="pre">pio::PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">pio::PIO1</span></code>) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.</p>
 <p>It has the following methods:</p>
 </section>
 <section id="pico-w-led">
@@ -595,6 +596,7 @@
 <li class="toctree-l1"><a class="reference internal" href="bitmap_utils.html">Bitmap Utiliteis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="neopixel.html">Neopixels on the RP2040</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">zeptoIP Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cyw43.html">CYW43xxx Words</a></li>
 </ul>
 
 <div class="relations">
@@ -602,6 +604,7 @@
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
       <li>Previous: <a href="neopixel.html" title="previous chapter">Neopixels on the RP2040</a></li>
+      <li>Next: <a href="cyw43.html" title="next chapter">CYW43xxx Words</a></li>
   </ul></li>
 </ul>
 </div>

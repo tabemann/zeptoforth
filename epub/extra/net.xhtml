@@ -420,12 +420,12 @@
 <p>The <code class="docutils literal notranslate"><span class="pre">simple-cyw43-net</span></code> module contains the following class:</p>
 <section id="id18">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net&gt;</span></code></h3>
-<p>The <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net&gt;</span></code> class encapsulates a CYW43439 driver and a zeptoIP network stack while simplifying their configuration.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net&gt;</span></code> class encapsulates a CYW43xxx driver and a zeptoIP network stack while simplifying their configuration.</p>
 <p>It has the following constructor:</p>
 <section id="id19">
 <h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
 <p>( pwr-pin dio-pin cs-pin clk-pin pio-addr sm-index pio-instance self – )</p>
-<p>This instantiates an instance with <em>pwr-pin</em>, <em>dio-pin</em>, <em>cs-pin</em>, and <em>pio-pin</em> being specified as the GPIO pins for communication with the CYW43439, and a base PIO instruction address <em>pio-addr</em>, a PIO state machine <em>sm-index</em>, and a PIO instance (<code class="docutils literal notranslate"><span class="pre">pio::PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">pio::PIO1</span></code>) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43439.</p>
+<p>This instantiates an instance with <em>pwr-pin</em>, <em>dio-pin</em>, <em>cs-pin</em>, and <em>pio-pin</em> being specified as the GPIO pins for communication with the CYW43xxx, and a base PIO instruction address <em>pio-addr</em>, a PIO state machine <em>sm-index</em>, and a PIO instance (<code class="docutils literal notranslate"><span class="pre">pio::PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">pio::PIO1</span></code>) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.</p>
 <p>It has the following methods:</p>
 </section>
 <section id="init-cyw43-net">
@@ -436,12 +436,12 @@
 <section id="cyw43-gpio">
 <h4><code class="docutils literal notranslate"><span class="pre">cyw43-gpio!</span></code></h4>
 <p>( state gpio self – )</p>
-<p>This sets a GPIO pin on the CYW43439.</p>
+<p>This sets a GPIO pin on the CYW43xxx.</p>
 </section>
 <section id="cyw43-control">
 <h4><code class="docutils literal notranslate"><span class="pre">cyw43-control&#64;</span></code></h4>
 <p>( self – control )</p>
-<p>This gets the CYW43439 controller instance.</p>
+<p>This gets the CYW43xxx controller instance.</p>
 </section>
 <section id="net-interface">
 <h4><code class="docutils literal notranslate"><span class="pre">net-interface&#64;</span></code></h4>
@@ -470,7 +470,7 @@
 <section id="id21">
 <h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
 <p>( pio-addr sm-index pio-instance self – )</p>
-<p>This instantiates an instance with a base PIO instruction address <em>pio-addr</em>, a PIO state machine <em>sm-index</em>, and a PIO instance (<code class="docutils literal notranslate"><span class="pre">pio::PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">pio::PIO1</span></code>) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43439.</p>
+<p>This instantiates an instance with a base PIO instruction address <em>pio-addr</em>, a PIO state machine <em>sm-index</em>, and a PIO instance (<code class="docutils literal notranslate"><span class="pre">pio::PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">pio::PIO1</span></code>) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.</p>
 <p>It has the following methods:</p>
 </section>
 <section id="pico-w-led">

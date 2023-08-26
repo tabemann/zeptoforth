@@ -44,44 +44,90 @@ begin-module cyw43-control
   \ Passphrase is too short or too long
   : x-invalid-pass-len ( -- ) ." passphrase is too short or too long" cr ;
   
-  \ Download chunk size
-  1024 constant cyw43-download-chunk-size
-
   \ Link state
   0 constant cyw43-link-down
   1 constant cyw43-link-up
 
-  \ Scratchpad size
-  cyw43-download-chunk-size 8 + download-header-size + cell align
-  constant cyw43-scratch-size
+  begin-module cyw43-control-internal
+    
+    \ Download chunk size
+    1024 constant cyw43-download-chunk-size
+    
+    \ Scratchpad size
+    cyw43-download-chunk-size 8 + download-header-size + cell align
+    constant cyw43-scratch-size
+    
+    \ Wait a moment
+    : wait-a-moment ( -- ) 100 ms ;
 
-  \ Wait a moment
-  : wait-a-moment ( -- ) 100 ms ;
-
+  end-module> import
+  
   \ CYW43 control class
   <object> begin-class <cyw43-control>
 
-    \ CYW43 runner
-    <cyw43-runner> class-size member cyw43-core
+    continue-module cyw43-control-internal
+      
+      \ CYW43 runner
+      <cyw43-runner> class-size member cyw43-core
+      
+      \ CYW43 control lock
+      lock-size member cyw43-lock
+      
+      \ CYW43 CLM firmware address
+      cell member cyw43-clm-addr
+
+      \ CYW43 CLM firmware size
+      cell member cyw43-clm-size
+
+      \ Link state
+      cell member cyw43-link-state
+
+      \ CYW43 scratch size
+      cyw43-scratch-size member cyw43-scratch-buf
+
+      \ MAC address ( default-mac-addr )
+      2 cells member cyw43-mac-addr
     
-    \ CYW43 control lock
-    lock-size member cyw43-lock
-    
-    \ CYW43 CLM firmware address
-    cell member cyw43-clm-addr
+      \ Wait for joining an AP
+      method wait-for-cyw43-join ( ssid-info self -- )
 
-    \ CYW43 CLM firmware size
-    cell member cyw43-clm-size
+      \ Start an AP
+      method start-ap
+      ( ssid-addr ssid-bytes pass-addr pass-bytes security channel self -- )
+      
+      \ Load the CLM
+      method load-cyw43-clm ( self -- )
 
-    \ Link state
-    cell member cyw43-link-state
+      \ Set country info
+      method set-cyw43-country ( self -- )
 
-    \ CYW43 scratch size
-    cyw43-scratch-size member cyw43-scratch-buf
+      \ Disable spammy events
+      method disable-spammy-cyw43-events ( self -- )
 
-    \ MAC address ( default-mac-addr )
-    2 cells member cyw43-mac-addr
-    
+      \ Execute an ioctl
+      method ioctl-cyw43 ( kind cmd iface buf-addr buf-size self -- resp-len )
+
+      \ Set an ioctl to a 32-bit value
+      method >ioctl-cyw43-32 ( val cmd iface self -- )
+
+      \ Set a variable with an ioctl
+      method >iovar-cyw43 ( buf-addr buf-size name-addr name-size self -- )
+
+      \ Get a variable with an ioctl
+      method iovar-cyw43>
+      ( buf-addr buf-size name-addr name-size self -- resp-len )
+      
+      \ Set a 32-bit variable with an ioctl
+      method >iovar-cyw43-32 ( val name-addr name-size self -- )
+
+      \ Set a double 32-bit variable with an ioctl
+      method >iovar-cyw43-32x2 ( val0 val1 name-addr name-size self -- )
+
+      \ Get a 32-bit variable with an ioctl
+      method iovar-cyw43-32> ( val name-addr name-size self -- resp-len )
+
+    end-module
+      
     \ Initialize the CYW43
     method init-cyw43 ( self -- )
 
@@ -95,16 +141,16 @@ begin-module cyw43-control
     method join-cyw43-wpa2
     ( ssid-addr ssid-bytes pass-addr pass-bytes self -- status success? )
 
-    \ Set a GPIO
-    method cyw43-gpio! ( val index self -- )
-
     \ Start open AP
     method start-cyw43-open ( ssid-addr ssid-bytes channel self -- )
 
     \ Start WPA2 AP
     method start-cyw43-wpa2
     ( ssid-addr ssid-bytes pass-addr pass-bytes channel self -- )
-    
+
+    \ Set a GPIO
+    method cyw43-gpio! ( val index self -- )
+
     \ Enable an event
     method enable-cyw43-event ( event self -- )
 
@@ -131,45 +177,7 @@ begin-module cyw43-control
 
     \ Clear event queue
     method clear-cyw43-events ( self -- )
-    
-    \ Wait for joining an AP
-    method wait-for-cyw43-join ( ssid-info self -- )
-
-    \ Start an AP
-    method start-ap
-    ( ssid-addr ssid-bytes pass-addr pass-bytes security channel self -- )
-    
-    \ Load the CLM
-    method load-cyw43-clm ( self -- )
-
-    \ Set country info
-    method set-cyw43-country ( self -- )
-
-    \ Disable spammy events
-    method disable-spammy-cyw43-events ( self -- )
-
-    \ Execute an ioctl
-    method ioctl-cyw43 ( kind cmd iface buf-addr buf-size self -- resp-len )
-
-    \ Set an ioctl to a 32-bit value
-    method >ioctl-cyw43-32 ( val cmd iface self -- )
-
-    \ Set a variable with an ioctl
-    method >iovar-cyw43 ( buf-addr buf-size name-addr name-size self -- )
-
-    \ Get a variable with an ioctl
-    method iovar-cyw43>
-    ( buf-addr buf-size name-addr name-size self -- resp-len )
-    
-    \ Set a 32-bit variable with an ioctl
-    method >iovar-cyw43-32 ( val name-addr name-size self -- )
-
-    \ Set a double 32-bit variable with an ioctl
-    method >iovar-cyw43-32x2 ( val0 val1 name-addr name-size self -- )
-
-    \ Get a 32-bit variable with an ioctl
-    method iovar-cyw43-32> ( val name-addr name-size self -- resp-len )
-    
+        
   end-class
 
   \ Implement the CYW43 control class
@@ -177,8 +185,8 @@ begin-module cyw43-control
 
     \ Constructor
     :noname { self }
-      ( D: mac-addr clm-addr clm-bytes fw-addr fw-bytes pwr clk dio pio-addr )
-      ( sm pio )
+      ( D: mac-addr clm-addr clm-bytes fw-addr fw-bytes pwr clk dio cs )
+      ( pio-addr sm pio )
 
       \ Initialize the superclass
       self <object>->new
