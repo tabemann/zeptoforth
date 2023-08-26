@@ -489,43 +489,48 @@ begin-module cyw43-control
       
     ; define wait-for-cyw43-join
 
+    \ Echo a character
+    : echo [: ." *" emit ." * " ;] usb::with-usb-output ;
+    
     \ Start an AP
     :noname
-      ssid-info-size [: { ssid-info }
+      ssid-info-with-index-size [: { siwi }
         { ssid-addr ssid-bytes pass-addr pass-bytes security channel self -- }
-        
+
         ssid-bytes 0 u> ssid-bytes 32 u<= and averts x-invalid-ssid-len
 
         security SECURITY_OPEN <> if
           pass-bytes MIN_PSK_LEN >= pass-bytes MAX_PSK_LEN <= and
           averts x-invalid-pass-len
         then
-        
+
         \ Temporarily set wifi down
         0 0 0 0 ioctl-set IOCTL_CMD_DOWN 0 self ioctl-cyw43 drop
-        
+
         \ Turn off APSTA mode
         0 s" apsta" self >iovar-cyw43-32
-        
+
         \ Set wifi up again
         0 0 0 0 ioctl-set IOCTL_CMD_UP 0 self ioctl-cyw43 drop
-        
+
         \ Turn on AP mode
         1 IOCTL_CMD_SET_AP 0 self >ioctl-cyw43-32
 
         \ Set SSID
-        ssid-bytes ssid-info si-len !
-        ssid-info si-ssid 32 0 fill
-        ssid-addr ssid-info si-ssid ssid-bytes move
-        ssid-info ssid-info-size s" bsscfg:ssid" self >iovar-cyw43
+        0 siwi siwi-index !
+        ssid-bytes siwi siwi-ssid-info si-len !
+        siwi siwi-ssid-info si-ssid 32 0 fill
+        ssid-addr siwi siwi-ssid-info si-ssid ssid-bytes move
+        siwi ssid-info-with-index-size s" bsscfg:ssid" self >iovar-cyw43
 
         \ Set the channel number
         channel IOCTL_CMD_SET_CHANNEL 0 self >ioctl-cyw43-32
 
         \ Set security
-        0 security $FF and s" bsscfg:wec" self >iovar-cyw43-32x2
+        0 security $FF and s" bsscfg:wsec" self >iovar-cyw43-32x2
 
         security SECURITY_OPEN <> if
+
           \ wpa_auth = WPA2_AUTH_PSK | WPA_AUTH_PSK
           0 $0084 s" bsscfg:wpa_auth" self >iovar-cyw43-32x2
 
@@ -548,7 +553,7 @@ begin-module cyw43-control
 
         \ Start AP
         0 1 s" bss" self >iovar-cyw43-32x2 \ bss = BSS_UP
-        
+
       ;] with-aligned-allot
       
     ; define start-ap  
