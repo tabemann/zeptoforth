@@ -18,8 +18,6 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-#include extra/rp2040/dma.fs
-#include extra/rp2040/dma_pool.fs
 #include extra/rp2040/cyw43/cyw43_consts.fs
 #include extra/rp2040/cyw43/cyw43_structs.fs
 #include extra/rp2040/cyw43/cyw43_events.fs

@@ -18,6 +18,8 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
+compile-to-flash
+
 begin-module dma
 
   \ Out of range DMA index
@@ -258,3 +260,5 @@ begin-module dma
   ;
 
 end-module
+
+compile-to-ram

@@ -18,10 +18,11 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-#include extra/rp2040/net/net_consts.fs
-#include extra/rp2040/net/net_config.fs
-#include extra/rp2040/net/net_misc.fs
-#include extra/rp2040/net/frame_process.fs
-#include extra/rp2040/net/net.fs
-#include extra/rp2040/net/net_diagnostic.fs
-#include extra/rp2040/net/endpoint_process.fs
+compile-to-flash
+
+marker erase-net
+
+#include extra/rp2040/cyw43_net_all.fs
+#include extra/rp2040/pico_w_cyw43_net.fs
+
+compile-to-ram

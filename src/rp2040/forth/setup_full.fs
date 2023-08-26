@@ -47,6 +47,8 @@
 #include src/rp2040/forth/qspi.fs
 #include src/common/forth/block.fs
 #include src/common/forth/edit.fs
+#include src/rp2040/forth/dma.fs
+#include src/rp2040/forth/dma_pool.fs
 #include src/rp2040/forth/uart.fs
 #include src/rp2040/forth/adc.fs
 #include src/rp2040/forth/spi.fs
