@@ -134,14 +134,19 @@ begin-module lock
         priority task task-priority!
       then
     ;
+    
+    \ Save a task's priority
+    : save-priority { task -- }
+      task ['] current-lock-held for-task@ 0= if
+        task task-priority@ task task-saved-priority!
+      then
+    ;
 
     \ Update the priorities of a task waiting for another task
     : set-wait-priority { task lock -- }
       lock lock-holder-task @ ?dup if
-        task ['] current-lock-held for-task@ 0= if
-          task task-priority@ task task-saved-priority!
-        then
-        task-priority@ task task-priority!
+        task save-priority
+        task-priority@ task task-priority@ max task task-priority!
       then
     ;
 
@@ -165,10 +170,7 @@ begin-module lock
     \ Register a task as holding a task
     : register-holder { task lock -- }
       task ['] current-lock-held for-task@ { last-held }
-      last-held 0= if
-        task task-priority@ task task-saved-priority!
-      then
-      task lock get-priority current-task task-priority!
+      task lock get-priority task task-priority!
       last-held lock lock-prev-held !
       lock task ['] current-lock-held for-task!
       task lock lock-holder-task !
@@ -176,12 +178,37 @@ begin-module lock
 
     \ Restore a task's priority
     : restore-priority { task lock -- }
-      lock lock-prev-held @ task ['] current-lock-held for-task!
-      task ['] current-lock-held for-task@ ?dup if
-       task swap get-priority task task-priority!
+      task ['] current-lock-held for-task@ dup { first-lock current-lock }
+      current-lock lock = if
+        lock lock-prev-held @ task ['] current-lock-held for-task!
+        task ['] current-lock-held for-task@ ?dup if
+          task swap get-priority task task-priority!
+        else
+          task task-saved-priority@ task task-priority!
+        then
       else
-        task task-saved-priority@ task task-priority!
-      then      
+        begin
+          current-lock lock = if
+            0 task ['] current-lock-held for-task!
+            task task-saved-priority@ task task-priority!
+            true
+          else
+            current-lock lock-prev-held @ { prev-held }
+            prev-held lock = if
+              prev-held lock-prev-held @ current-lock lock-prev-held !
+              task first-lock get-priority task task-priority!
+              true
+            else
+              prev-held 0<> if
+                prev-held to current-lock
+                false
+              else
+                true
+              then
+            then
+          then
+        until
+      then
     ;
 
     commit-flash
@@ -189,7 +216,6 @@ begin-module lock
     \ Clear a lock hold
     : clear-lock-hold { lock -- }
       current-task lock restore-priority
-      lock lock-prev-held @ current-lock-held !
       0 lock lock-holder-task !
       0 lock lock-prev-held !
     ;
@@ -197,7 +223,6 @@ begin-module lock
     \ Pass a lock hold onto the next task
     : next-lock-hold { task lock -- }
       current-task lock restore-priority
-      lock lock-prev-held @ current-lock-held !
       task lock lock-holder-task !
       task lock register-holder
     ;
@@ -276,6 +301,7 @@ begin-module lock
           then
           wait lock-wait-orig-here @ ram-here!
         else
+          current-task save-priority
           current-task lock register-holder
         then
       else
@@ -295,7 +321,7 @@ begin-module lock
 
 end-module
 
-end-compress-flash
+\ end-compress-flash
     
 \ Reboot
 reboot

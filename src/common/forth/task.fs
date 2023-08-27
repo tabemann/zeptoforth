@@ -764,7 +764,7 @@ begin-module task
 
   \ Get saved task priority
   : task-saved-priority@ ( task -- priority )
-    task-saved-priority h@
+    task-saved-priority h@ 16 lshift 16 arshift
   ;
 
   \ Get the core of a task
