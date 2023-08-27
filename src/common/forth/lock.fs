@@ -321,7 +321,7 @@ begin-module lock
 
 end-module
 
-\ end-compress-flash
+end-compress-flash
     
 \ Reboot
 reboot
