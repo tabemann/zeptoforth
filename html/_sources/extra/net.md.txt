@@ -180,6 +180,11 @@ This word returns the IPv4 address and port of, for a TCP endpoint, the peer of 
 
 Get whether an endpoint is a UDP endpoint; note that if this returns false it means the endpoint is a TCP endpoint (by default endpoints are TCP endpoints).
 
+##### `endpoint-local-port@`
+( self -- port )
+
+Get the local port of an endpoint.
+
 #### `<ip-handler>`
 
 The `<ip-handler>` class handles receiving IP frames from a frame interface and passing them on to an instance of `<interface>`.

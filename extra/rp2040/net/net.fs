@@ -1404,9 +1404,6 @@ begin-module net
       \ Set local port
       method endpoint-local-port! ( port self -- )
       
-      \ Get local port
-      method endpoint-local-port@ ( self -- port )
-
       \ Reset local port
       method reset-endpoint-local-port ( self -- )
       
@@ -1558,6 +1555,9 @@ begin-module net
       
     \ Endpoint is a UDP endpoint
     method udp-endpoint? ( self -- udp? )
+
+    \ Get local port
+    method endpoint-local-port@ ( self -- port )
 
   end-class
 
