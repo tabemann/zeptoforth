@@ -276,9 +276,6 @@ begin-module task
   \ Initialize on core boot hook
   variable core-init-hook
   
-  \ The currently waited-for lock
-  user current-lock
-  
   \ The latest lock currently held by a tack
   user current-lock-held
 
@@ -1443,7 +1440,6 @@ begin-module task
       default-timeslice over task-timeslice !
       default-min-timeslice over task-min-timeslice !
       default-timeslice over task-saved-systick-counter !
-      0 current-lock !
       0 current-lock-held !
       0 over task-next !
       0 over task-prev !
@@ -1500,7 +1496,6 @@ begin-module task
 	0 over task-saved-priority h!
 	0 over task-active h!
 	base @ over ['] task-base for-task!
-	0 over ['] current-lock for-task!
 	0 over ['] current-lock-held for-task!
 	readied over task-state h!
 	no-timeout over ['] timeout for-task!
@@ -1613,7 +1608,6 @@ begin-module task
     error-emit?-hook @ over ['] error-emit?-hook for-task!
     flush-console-hook @ over ['] flush-console-hook for-task!
     error-flush-console-hook @ over ['] error-flush-console-hook for-task!
-    0 over ['] current-lock for-task!
     0 over ['] current-lock-held for-task!
     readied over task-state h!
     no-timeout over ['] timeout for-task!
