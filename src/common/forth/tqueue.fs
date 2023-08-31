@@ -147,7 +147,7 @@ begin-module tqueue
 
     \ Increment counter
     : +tqueue-counter ( tqueue -- )
-      dup tqueue-limit @ 0>= if
+      dup tqueue-limit @ 0> if
         dup tqueue-counter @ 1+ over tqueue-limit @ min swap tqueue-counter !
       else
         1 swap tqueue-counter +!

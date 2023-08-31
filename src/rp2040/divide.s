@@ -60,13 +60,11 @@ _umod:	push {lr}
 	@@ Unsigned division with modulus ( u1 u2 -- remainder quotient )
 	define_word "u/mod", visible_flag
 _udivmod:
-        push {r4}
-        mrs r4, primask
-	cpsid i
-	dmb
-	dsb
-	isb
 	ldr r0, =SIO_BASE
+@	cpsid i
+@	dmb
+@	dsb
+@	isb
 	ldr r1, [dp]
 	@@ Wait eight cycles
 	b 1f
@@ -87,24 +85,21 @@ _udivmod:
 	str r3, [r0, #SIO_DIV_REMAINDER_OFFSET]
 	str r2, [r0, #SIO_DIV_QUOTIENT_OFFSET]
 	str r1, [dp]
-	dmb
-	dsb
-	isb
-        msr primask, r4
-        pop {r4}
+@	dmb
+@	dsb
+@	isb
+@	cpsie i
 	bx lr
 	end_inlined
 
 	@@ Signed division with modulus ( n1 n2 -- remainder quotient )
 	define_word "/mod", visible_flag
 _divmod:
-        push {r4}
-        mrs r4, primask
-	cpsid i
-	dmb
-	dsb
-	isb
 	ldr r0, =SIO_BASE
+@	cpsid i
+@	dmb
+@	dsb
+@	isb
 	ldr r1, [dp]
 	@@ Wait eight cycles
 	b 1f
@@ -125,11 +120,10 @@ _divmod:
 	str r3, [r0, #SIO_DIV_REMAINDER_OFFSET]
 	str r2, [r0, #SIO_DIV_QUOTIENT_OFFSET]
 	str r1, [dp]
-	dmb
-	dsb
-	isb
-        msr primask, r4
-        pop {r4}
+@	dmb
+@	dsb
+@	isb
+@	cpsie i
 	bx lr
 	end_inlined
 
