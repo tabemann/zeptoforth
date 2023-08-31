@@ -22,8 +22,9 @@ set -e
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-PORT=$1
-IMAGE=$2
+PLATFORM=$1
+PORT=$2
+IMAGE=$3
 PROJECT=zeptoforth
 
 # Get the directory of this script, we need this for the venv setup.
@@ -35,10 +36,10 @@ DIR="$( cd "$( dirname "$0" )" && pwd )"
 
 check_screen
 
-if [ ! $# -eq 2 ]; then
+if [ ! $# -eq 3 ]; then
   cat 2>&1 <<EOD
 Usage:
-    ${0} <port> <image>
+    ${0} <platform> <port> <image>
 EOD
   exit 1
 fi
@@ -46,5 +47,8 @@ fi
 screen_download_ihex ${PORT} ${IMAGE} 
 screen_download_ihex_minidict ${PORT} ${IMAGE}.minidict
 
-${DIR}/../src/rp2040/make_uf2.sh ${IMAGE}.bin ${IMAGE}.minidict.bin ${IMAGE}.uf2
-
+if [ ${PLATFORM} = 'rp2040_big' ]; then
+    ${DIR}/../src/rp2040/make_uf2.sh --big ${IMAGE}.bin ${IMAGE}.minidict.bin ${IMAGE}.uf2
+else
+    ${DIR}/../src/rp2040/make_uf2.sh ${IMAGE}.bin ${IMAGE}.minidict.bin ${IMAGE}.uf2
+fi
