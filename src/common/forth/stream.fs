@@ -52,12 +52,6 @@ begin-module stream
       \ Stream current count
       field: stream-current-count
 
-      \ Stream send ready
-      field: stream-send-ready
-
-      \ Stream receive ready
-      field: stream-recv-ready
-
       \ Stream send task queue
       tqueue-size +field stream-send-tqueue
 
@@ -101,44 +95,32 @@ begin-module stream
     \ Wait to send on a stream
     : wait-send-stream { bytes stream -- }
       begin bytes stream stream-free > while
-	1 stream stream-send-ready +!
-	stream stream-send-tqueue ['] wait-tqueue try
-	-1 stream stream-send-ready +!
-	?raise
+	stream stream-send-tqueue wait-tqueue
 	stream stream-closed @ triggers x-stream-closed
       repeat
     ;
 
     \ Wait to send data as parts on a stream
     : wait-send-stream-parts { stream -- }
-      stream stream-full? if
-	1 stream stream-send-ready +!
-	stream stream-send-tqueue ['] wait-tqueue try
-	-1 stream stream-send-ready +!
-	?raise
+      begin stream stream-full? while
+	stream stream-send-tqueue wait-tqueue
 	stream stream-closed @ triggers x-stream-closed
-      then
+      repeat
     ;
 
     \ Wait to receive on a stream
     : wait-recv-stream { stream -- }
-      stream stream-empty? if
+      begin stream stream-empty? while
 	stream stream-closed @ triggers x-stream-closed
-	1 stream stream-recv-ready +!
-	stream stream-recv-tqueue ['] wait-tqueue try
-	-1 stream stream-recv-ready +!
-	?raise
-      then
+	stream stream-recv-tqueue wait-tqueue
+      repeat
     ;
 
     \ Wait to receive a minimum number of bytes on a stream
     : wait-recv-stream-min { min-bytes stream -- }
       begin min-bytes stream stream-current-count @ > while
 	stream stream-closed @ triggers x-stream-closed
-	1 stream stream-recv-ready +!
-	stream stream-recv-tqueue ['] wait-tqueue try
-	-1 stream stream-recv-ready +!
-	?raise
+	stream stream-recv-tqueue wait-tqueue
       repeat
     ;
     
@@ -169,24 +151,24 @@ begin-module stream
     commit-flash
 
     \ Write bytes to a stream
-    : write-stream ( addr bytes stream -- )
-      dup stream-send-index @ 2 pick + over stream-data-size @ > if
-	dup stream-data-size @ over stream-send-index @ - >r
-	2 pick over send-stream-addr r@ move
-	rot r@ + rot r> - rot stream-size + swap move
+    : write-stream { addr bytes stream -- }
+      stream stream-data-size @ stream stream-send-index @ - { first-bytes }
+      bytes first-bytes > if
+        addr stream stream-data stream stream-send-index @ + first-bytes move
+        addr first-bytes + stream stream-data bytes first-bytes - move
       else
-	send-stream-addr swap move
+        addr stream stream-data stream stream-send-index @ + bytes move
       then
     ;
 
     \ Read bytes from a stream
-    : read-stream ( addr bytes stream -- )
-      dup stream-recv-index @ 2 pick + over stream-data-size @ > if
-	dup stream-data-size @ over stream-recv-index @ - >r
-	dup recv-stream-addr 3 pick r@ move
-	stream-size + rot r@ + rot r> - move
+    : read-stream { addr bytes stream -- }
+      stream stream-data-size @ stream stream-recv-index @ - { first-bytes }
+      bytes first-bytes > if
+        stream stream-data stream stream-recv-index @ + addr first-bytes move
+        stream stream-data addr first-bytes + bytes first-bytes - move
       else
-	recv-stream-addr -rot move
+        stream stream-data stream stream-recv-index @ + addr bytes move
       then
     ;
 
@@ -200,10 +182,10 @@ begin-module stream
     0 over stream-send-index !
     false over stream-closed !
     0 over stream-current-count !
-    0 over stream-send-ready !
-    0 over stream-recv-ready !
-    dup stream-slock over stream-send-tqueue init-tqueue
-    dup stream-slock swap stream-recv-tqueue init-tqueue
+    no-tqueue-limit 0 2 pick dup stream-slock
+    swap stream-send-tqueue init-tqueue-full
+    no-tqueue-limit 0 rot dup stream-slock
+    swap stream-recv-tqueue init-tqueue-full
   ;
 
   commit-flash
@@ -218,11 +200,11 @@ begin-module stream
       2dup wait-send-stream
       rot 2 pick 2 pick write-stream
       dup >r advance-send-stream r>
-      dup stream-recv-ready @ 0> if
+\      dup stream-recv-ready @ 0> if
 	stream-recv-tqueue wake-tqueue
-      else
-	drop
-      then
+\      else
+\	drop
+\      then
       s" END SEND-STREAM" trace
     ;] over stream-slock with-slock
   ;
@@ -241,9 +223,7 @@ begin-module stream
 	2 pick r@ 2 pick write-stream
 	r@ over advance-send-stream
 	rot r@ + rot r> - rot
-	dup stream-recv-ready @ 0> if
-	  dup stream-recv-tqueue wake-tqueue
-	then
+        dup stream-recv-tqueue wake-tqueue
       repeat
       2drop drop
       s" END SEND-STREAM-PARTS" trace
@@ -259,11 +239,7 @@ begin-module stream
       dup stream-current-count @ rot min swap
       rot 2 pick 2 pick read-stream
       2dup advance-recv-stream
-      dup stream-send-ready @ 0> if
-	stream-send-tqueue wake-tqueue
-      else
-	drop
-      then
+      stream-send-tqueue wake-tqueue
       s" END RECV-STREAM" trace
     ;] over stream-slock with-slock
   ;
@@ -277,11 +253,7 @@ begin-module stream
       dup stream-current-count @ rot min swap
       rot 2 pick 2 pick read-stream
       2dup advance-recv-stream
-      dup stream-send-ready @ 0> if
-	stream-send-tqueue wake-tqueue
-      else
-	drop
-      then
+      stream-send-tqueue wake-tqueue
       s" END RECV-STREAM-MIN" trace
     ;] over stream-slock with-slock
   ;
@@ -318,11 +290,7 @@ begin-module stream
       dup wait-recv-stream
       dup stream-current-count @ rot min swap
       2dup advance-recv-stream
-      dup stream-send-ready @ 0> if
-	stream-send-tqueue wake-tqueue
-      else
-	drop
-      then
+      stream-send-tqueue wake-tqueue
       s" END SKIP-STREAM" trace
     ;] over stream-slock with-slock
   ;
@@ -335,11 +303,7 @@ begin-module stream
       tuck wait-recv-stream-min
       dup stream-current-count @ rot min swap
       2dup advance-recv-stream
-      dup stream-send-ready @ 0> if
-	stream-send-tqueue wake-tqueue
-      else
-	drop
-      then
+      stream-send-tqueue wake-tqueue
       s" END SKIP-STREAM-MIN" trace
     ;] over stream-slock with-slock
   ;
@@ -353,11 +317,7 @@ begin-module stream
       dup stream-free 2 pick < triggers x-would-block
       rot 2 pick 2 pick write-stream
       dup >r advance-send-stream r>
-      dup stream-recv-ready @ 0> if
-	stream-recv-tqueue wake-tqueue
-      else
-	drop
-      then
+      stream-recv-tqueue wake-tqueue
       s" END SEND-STREAM-NO-BLOCK" trace
     ;] over stream-slock with-slock
   ;
@@ -371,11 +331,7 @@ begin-module stream
       dup stream-free rot min swap
       rot 2 pick 2 pick write-stream
       2dup advance-send-stream
-      dup stream-recv-ready @ 0> if
-	stream-recv-tqueue wake-tqueue
-      else
-	drop
-      then
+      stream-recv-tqueue wake-tqueue
       s" END SEND-STREAM-PARTIAL-NO-BLOCK" trace
     ;] over stream-slock with-slock
   ;
@@ -388,11 +344,7 @@ begin-module stream
       dup stream-current-count @ rot min swap
       rot 2 pick 2 pick read-stream
       2dup advance-recv-stream
-      dup stream-send-ready @ 0> if
-	stream-send-tqueue wake-tqueue
-      else
-	drop
-      then
+      stream-send-tqueue wake-tqueue
       s" END RECV-STREAM-NO-BLOCK" trace
     ;] over stream-slock with-slock
   ;
@@ -406,11 +358,7 @@ begin-module stream
 	dup stream-current-count @ rot min swap
 	rot 2 pick 2 pick read-stream
 	2dup advance-recv-stream
-	dup stream-send-ready @ 0> if
-	  stream-send-tqueue wake-tqueue
-	else
-	  drop
-	then
+        stream-send-tqueue wake-tqueue
       else
 	2drop drop 0
       then
@@ -452,11 +400,7 @@ begin-module stream
       tuck stream-current-count @ <= if
 	dup stream-current-count @ rot min swap
 	2dup advance-recv-stream
-	dup stream-send-ready @ 0> if
-	  stream-send-tqueue wake-tqueue
-	else
-	  drop
-	then
+        stream-send-tqueue wake-tqueue
       else
 	2drop 0
       then
