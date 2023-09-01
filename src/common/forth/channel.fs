@@ -97,7 +97,6 @@ begin-module chan
       begin chan chan-empty? while
 	chan chan-closed @ triggers x-chan-closed
 	chan chan-recv-tqueue wait-tqueue
-	?raise
       repeat
     ;
 
