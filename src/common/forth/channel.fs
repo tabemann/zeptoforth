@@ -55,12 +55,6 @@ begin-module chan
       \ Channel is closed
       field: chan-closed
       
-      \ Channel send ready
-      field: chan-send-ready
-
-      \ Channel receive ready
-      field: chan-recv-ready
-
       \ Channel send task queue
       tqueue-size +field chan-send-tqueue
       
@@ -93,10 +87,7 @@ begin-module chan
     \ Wait to send on a channel
     : wait-send-chan { chan -- }
       begin chan chan-full? while
-	1 chan chan-send-ready +!
-	chan chan-send-tqueue ['] wait-tqueue try
-	-1 chan chan-send-ready +!
-	?raise
+	chan chan-send-tqueue wait-tqueue
       repeat
       chan chan-closed @ triggers x-chan-closed
     ;
@@ -105,9 +96,7 @@ begin-module chan
     : wait-recv-chan { chan -- }
       begin chan chan-empty? while
 	chan chan-closed @ triggers x-chan-closed
-	1 chan chan-recv-ready +!
-	chan chan-recv-tqueue ['] wait-tqueue try
-	-1 chan chan-recv-ready +!
+	chan chan-recv-tqueue wait-tqueue
 	?raise
       repeat
     ;
@@ -151,10 +140,10 @@ begin-module chan
     0 over chan-current-count !
     0 over chan-recv-index !
     0 over chan-send-index !
-    0 over chan-recv-ready !
-    0 over chan-send-ready !
-    dup chan-slock over chan-recv-tqueue 1 -rot 0 -rot init-tqueue-full
-    dup chan-slock over chan-send-tqueue 1 -rot 0 -rot init-tqueue-full
+    dup chan-slock over chan-recv-tqueue
+    no-tqueue-limit -rot 0 -rot init-tqueue-full
+    dup chan-slock over chan-send-tqueue
+    no-tqueue-limit -rot 0 -rot init-tqueue-full
     false swap chan-closed !
   ;
 
@@ -170,11 +159,7 @@ begin-module chan
       dup send-chan-addr over chan-data-size @ 0 fill
       dup >r chan-data-size @ min r@ send-chan-addr swap move r>
       dup advance-send-chan
-      dup chan-recv-ready @ 0> if
-	chan-recv-tqueue wake-tqueue
-      else
-	drop
-      then
+      chan-recv-tqueue wake-tqueue
       s" END SEND-CHAN" trace
     ;] over chan-slock with-slock
   ;
@@ -188,11 +173,7 @@ begin-module chan
       >r 2dup 0 fill
       r@ chan-data-size @ min r@ recv-chan-addr -rot dup >r move 2r>
       dup advance-recv-chan
-      dup chan-send-ready @ 0> if
-	chan-send-tqueue wake-tqueue
-      else
-	drop
-      then
+      chan-send-tqueue wake-tqueue
       s" END RECV-CHAN" trace
     ;] over chan-slock with-slock
   ;
@@ -216,11 +197,7 @@ begin-module chan
       current-task prepare-block
       dup wait-recv-chan
       dup advance-recv-chan
-      dup chan-send-ready @ 0> if
-	chan-send-tqueue wake-tqueue
-      else
-	drop
-      then
+      chan-send-tqueue wake-tqueue
       s" END SKIP-CHAN" trace
     ;] over chan-slock with-slock
   ;
@@ -235,11 +212,7 @@ begin-module chan
       dup send-chan-addr over chan-data-size @ 0 fill
       dup >r chan-data-size @ min r@ send-chan-addr swap move r>
       dup advance-send-chan
-      dup chan-recv-ready @ 0> if
-	chan-recv-tqueue wake-tqueue
-      else
-	drop
-      then
+      chan-recv-tqueue wake-tqueue
       s" END SEND-CHAN-NO-BLOCK" trace
     ;] over chan-slock with-slock
   ;
@@ -253,11 +226,7 @@ begin-module chan
       >r 2dup 0 fill
       r@ chan-data-size @ min r@ recv-chan-addr -rot dup >r move 2r>
       dup advance-recv-chan
-      dup chan-send-ready @ 0> if
-	chan-send-tqueue wake-tqueue
-      else
-	drop
-      then
+      chan-send-tqueue wake-tqueue
       s" END RECV-CHAN-NO-BLOCK" trace
     ;] over chan-slock with-slock
   ;
@@ -281,11 +250,7 @@ begin-module chan
       s" BEGIN SKIP-CHAN-NO-BLOCK" trace
       dup chan-empty? triggers x-would-block
       dup advance-recv-chan
-      dup chan-send-ready @ 0> if
-	chan-send-tqueue wake-tqueue
-      else
-	drop
-      then
+      chan-send-tqueue wake-tqueue
       s" END SKIP-CHAN-NO-BLOCK" trace
     ;] over chan-slock with-slock
   ;
