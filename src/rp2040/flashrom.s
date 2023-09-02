@@ -624,7 +624,7 @@ _erase_dict_after:
 	ldr r0, =flash_start
 	subs tos, r0
         push_tos
-        ldr tos, =flash_dict_end - flash_start
+        ldr tos, =flash_main_end - flash_start
 	bl _erase_range
 	bl _reboot
 	pop {pc}
