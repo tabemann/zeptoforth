@@ -915,13 +915,13 @@ begin-module task
     [:
       dup validate-not-terminated
       -1 over task-ready-count !
-      dup task-ready-count @ 0< if
+\       dup task-ready-count @ 0< if
 	tuck task-systick-start !
 	tuck task-systick-delay !
 	blocked-timeout over task-state h!
-      else
-	nip nip
-      then
+\       else
+\ 	nip nip
+\       then
     ;] over task-core @ critical-with-other-core-spinlock
     current-task @ = if pause-wo-reschedule then
   ;
@@ -931,18 +931,18 @@ begin-module task
     [:
       dup validate-not-terminated
       -1 over task-ready-count !
-      dup task-ready-count @ 0< if
+\       dup task-ready-count @ 0< if
 	tuck task-systick-start !
 	tuck task-systick-delay !
 	[ blocked-timeout schedule-critical or schedule-user-critical or ]
 	literal
 	over task-state h!
-      else
-	nip nip
-	[ readied schedule-critical or schedule-user-critical or ]
-	literal
-	over task-state h!
-      then
+      \ else
+      \   nip nip
+      \   [ readied schedule-critical or schedule-user-critical or ]
+      \   literal
+      \   over task-state h!
+      \ then
     ;] over task-core @ critical-with-other-core-spinlock
     current-task @ = if pause-wo-reschedule then
   ;
@@ -953,19 +953,19 @@ begin-module task
     [:
       dup validate-not-terminated
       -1 over task-ready-count !
-      dup task-ready-count @ 0< if
+\      dup task-ready-count @ 0< if
 	tuck task-systick-start !
 	tuck task-systick-delay !
 	tuck spinlock-to-claim !
 	[ blocked-timeout schedule-critical or schedule-user-critical or
 	schedule-with-spinlock or ] literal
 	over task-state h!
-      else
-	nip nip
-	[ readied schedule-critical or schedule-user-critical or ]
-	literal
-	over task-state h!
-      then
+      \ else
+      \   nip nip
+      \   [ readied schedule-critical or schedule-user-critical or ]
+      \   literal
+      \   over task-state h!
+      \ then
     ;] over task-core @ critical-with-other-core-spinlock
     current-task @ = if pause-wo-reschedule then
   ;
@@ -1043,9 +1043,9 @@ begin-module task
     [:
       dup validate-not-terminated
       -1 over task-ready-count !
-      dup task-ready-count @ 0< if
+\      dup task-ready-count @ 0< if
 	blocked-indefinite over task-state h!
-      then
+\      then
     ;] over task-core @ critical-with-other-core-spinlock
     current-task @ = if pause-wo-reschedule then
   ;
@@ -1055,13 +1055,13 @@ begin-module task
     [:
       dup validate-not-terminated
       -1 over task-ready-count !
-      dup task-ready-count @ 0< if
+\      dup task-ready-count @ 0< if
 	[ blocked-indefinite schedule-critical or schedule-user-critical or ]
 	literal over task-state h!
-      else
-	[ readied schedule-critical or schedule-user-critical or ]
-	literal over task-state h!
-      then
+      \ else
+      \   [ readied schedule-critical or schedule-user-critical or ]
+      \   literal over task-state h!
+      \ then
     ;] over task-core @ critical-with-other-core-spinlock
     current-task @ = if pause-wo-reschedule then
   ;
@@ -1101,15 +1101,15 @@ begin-module task
       dup validate-not-terminated
       -1 over task-ready-count !
       tuck spinlock-to-claim !
-      dup task-ready-count @ 0< if
+      \ dup task-ready-count @ 0< if
 	[ blocked-indefinite schedule-critical or schedule-user-critical or
 	schedule-with-spinlock or ]
 	literal over task-state h!
-      else
-	[ readied schedule-critical or schedule-user-critical or
-	schedule-with-spinlock or ]
-	literal over task-state h!
-      then
+      \ else
+      \   [ readied schedule-critical or schedule-user-critical or
+      \   schedule-with-spinlock or ]
+      \   literal over task-state h!
+      \ then
     ;] over task-core @ critical-with-other-core-spinlock
     current-task @ = if pause-wo-reschedule then
   ;
@@ -1383,18 +1383,18 @@ begin-module task
 	dup timeout-systick-delay @
 	over timeout-systick-start @
 	rot -1 over task-ready-count !
-	dup task-ready-count @ 0< if
+\	dup task-ready-count @ 0< if
 	  tuck task-systick-start !
 	  tuck task-systick-delay !
 	  blocked-timeout over task-state h!
-	else
-	  nip nip
-	then
+	\ else
+	\   nip nip
+	\ then
       else
 	-1 over task-ready-count !
-	dup task-ready-count @ 0< if
-	  blocked-indefinite over task-state h!
-	then
+	\ dup task-ready-count @ 0< if
+        blocked-indefinite over task-state h!
+	\ then
       then
       current-task @ = if false reschedule? ! pause then
     ;
