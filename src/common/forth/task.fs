@@ -984,8 +984,11 @@ begin-module task
 	[ blocked-timeout schedule-critical or ] literal
 	current-task @ task-state h!
 	release-same-core-spinlock end-critical pause-wo-reschedule
-	claim-same-core-spinlock
-	current-task @ validate-timeout
+        claim-same-core-spinlock
+        current-task @ check-timeout if
+          -1 current-task @ task-current-notify !
+          ['] x-timed-out ?raise
+        then
       repeat
       current-task @ task-notify-area @ over cells + @
       swap bit current-task @ task-notified-bitmap bic!
@@ -1012,7 +1015,10 @@ begin-module task
 	  current-task @ task-state h!
 	  release-same-core-spinlock end-critical pause-wo-reschedule
 	  claim-same-core-spinlock
-	  current-task @ validate-timeout
+          current-task @ check-timeout if
+            -1 current-task @ task-current-notify !
+            ['] x-timed-out ?raise
+          then
 	repeat
 	current-task @ task-notify-area @ over cells + @
 	swap bit current-task @ task-notified-bitmap bic!
@@ -1348,7 +1354,7 @@ begin-module task
       dup validate-not-terminated
       dup ['] timeout for-task@ no-timeout <> if
 	systick-counter over timeout-systick-start !
-	dup ['] timeout for-task@ swap timeout-systick-delay !
+	dup ['] timeout for-task@ 0 max swap timeout-systick-delay !
       else
 	drop
       then
@@ -1887,6 +1893,9 @@ begin-module task
               first-task @ 0= if init-extra-task then
               claim-same-core-spinlock
               find-next-task
+              dup 0<> if
+                dup task-ready-count @ 0 max over task-ready-count !
+              then
               release-same-core-spinlock
               dup 0<> if
                 dup task-active@ 1 < if
