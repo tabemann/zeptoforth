@@ -224,10 +224,10 @@ begin-module multicore
     0 tos r0 ldr_,[_,#_]
     1 r0 adds_,#_
     0 tos r0 str_,[_,#_]
-    cpsie \ DEBUG
+\    cpsie \ DEBUG
     1 r0 cmp_,#_
     eq bc>
-\    cpsie
+    cpsie \ Trying this
     tos r0 2 dp ldm
     pc 1 pop
     >mark
@@ -239,7 +239,7 @@ begin-module multicore
     0 tos r0 ldr_,[_,#_]
     0 r0 cmp_,#_
     eq bc<
-\    cpsie
+    cpsie \ Trying this
     tos 1 dp ldm
     ]code
   ;
@@ -283,6 +283,27 @@ begin-module multicore
 \    0= if SPINLOCK -1 swap ! else drop then
 \    enable-int
 \  ;
+
+  \ Claim a spinlock and begin critical
+  : claim-spinlock-begin-critical ( index -- )
+    disable-int
+    claim-spinlock-raw
+    1 internal::in-critical +!
+    enable-int
+  ;
+
+  \ Release a spinlock and end critical
+  : release-spinlock-end-critical ( index -- )
+    disable-int
+    release-spinlock-raw
+    internal::in-critical @ 1- 0 max dup internal::in-critical !
+    0= if
+      internal::deferred-context-switch @
+      false internal::deferred-context-switch !
+      if pause then
+    then
+    enable-int
+  ;
 
   \ Claim a spinlock for the current core's multitasker
   : claim-same-core-spinlock ( -- )
@@ -328,6 +349,29 @@ begin-module multicore
     task-core-1-spinlock release-spinlock
   ;
 
+  \ Claim all core's multitasker's spinlocks and begin critcal
+  : claim-all-core-spinlock-begin-critical ( -- )
+    disable-int
+    task-core-0-spinlock claim-spinlock-raw
+    task-core-1-spinlock claim-spinlock-raw
+    1 internal::in-critical +!
+    enable-int
+  ;
+
+  \ Release all core's multitasker's spinlocks and end critical
+  : release-all-core-spinlock-end-critical ( -- )
+    disable-int
+    task-core-0-spinlock release-spinlock-raw
+    task-core-1-spinlock release-spinlock-raw
+    internal::in-critical @ 1- 0 max dup internal::in-critical !
+    0= if
+      internal::deferred-context-switch @
+      false internal::deferred-context-switch !
+      if pause then
+    then
+    enable-int
+  ;
+
   \ Claim a spinlock, releasing it afterwards
   : with-spinlock ( xt spinlock -- )
     >r r@ claim-spinlock try r> release-spinlock ?raise
@@ -335,22 +379,22 @@ begin-module multicore
 
   \ Enter a critical section and claim a spinlock, releasing it afterwards
   : critical-with-spinlock ( xt spinlock -- )
-    begin-critical >r r@ claim-spinlock try
-    r> release-spinlock end-critical ?raise
+    >r r@ claim-spinlock-begin-critical try
+    r> release-spinlock-end-critical ?raise
   ;
   
   \ Enter a critical section and claim another core's multitasker's spinlock,
   \ releasing it afterwards
   : critical-with-other-core-spinlock ( xt core -- )
-    begin-critical task-core-0-spinlock + >r r@ claim-spinlock try
-    r> release-spinlock end-critical ?raise
+    >r r@ claim-spinlock-begin-critical try
+    r> release-spinlock-end-critical ?raise
   ;
 
   \ Enter a critical section and claim both cores' spinlocks, releasing then
   \ afterwards
   : critical-with-all-core-spinlock ( xt -- )
-    begin-critical claim-all-core-spinlock try
-    release-all-core-spinlock end-critical ?raise
+    claim-all-core-spinlock-begin-critical try
+    release-all-core-spinlock-end-critical ?raise
   ;
 
   \ Test and set

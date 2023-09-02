@@ -211,7 +211,7 @@ begin-module fchan
 	tuck fchan-wait-buf ! ( wait )
 	dup r@ fchan-send-queue push-fchan-queue ( wait )
 	r@ fchan-slock release-slock-block ( wait )
-	current-task timed-out? if
+	current-task check-timeout if
 	  r@ fchan-slock claim-slock ( wait )
 	  r@ fchan-send-queue remove-fchan-queue ( )
 	  r> fchan-slock release-slock ( )
@@ -245,7 +245,7 @@ begin-module fchan
 	tuck fchan-wait-buf ! ( wait )
 	dup r@ fchan-recv-queue push-fchan-queue ( wait )
 	r@ fchan-slock release-slock-block ( wait )
-	current-task timed-out? if
+	current-task check-timeout if
 	  r@ fchan-slock claim-slock ( wait )
 	  r@ fchan-recv-queue remove-fchan-queue ( )
 	  r> fchan-slock release-slock ( )

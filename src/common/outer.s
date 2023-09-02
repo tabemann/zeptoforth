@@ -321,7 +321,7 @@ _find_in_wordlist:
 	
 	@@ Find a word in the dictionary according to the word order list
 	@@ ( addr bytes -- addr|0 )
-	define_internal_word "do-find", visible_flag
+	define_word "do-find", visible_flag
 _do_find:
 	push {lr}
 	ldr r0, =order_count
@@ -561,9 +561,7 @@ _quit_reset:
         movs r1, #1
         orrs r0, r1
         blx r0
-1:	bl _bel
-	bl _nak
-	b _quit
+1:	b _quit
 	bx lr
 	end_inlined
 
