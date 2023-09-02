@@ -914,7 +914,7 @@ begin-module task
   : block-timeout ( ticks-delay ticks-start task -- )
     [:
       dup validate-not-terminated
-      -1 over task-ready-count +!
+      -1 over task-ready-count !
       dup task-ready-count @ 0< if
 	tuck task-systick-start !
 	tuck task-systick-delay !
@@ -930,7 +930,7 @@ begin-module task
   : block-timeout-critical ( ticks-delay ticks-start task -- )
     [:
       dup validate-not-terminated
-      -1 over task-ready-count +!
+      -1 over task-ready-count !
       dup task-ready-count @ 0< if
 	tuck task-systick-start !
 	tuck task-systick-delay !
@@ -952,7 +952,7 @@ begin-module task
   : block-timeout-with-spinlock ( spinlock ticks-delay ticks-start task -- )
     [:
       dup validate-not-terminated
-      -1 over task-ready-count +!
+      -1 over task-ready-count !
       dup task-ready-count @ 0< if
 	tuck task-systick-start !
 	tuck task-systick-delay !
@@ -1042,7 +1042,7 @@ begin-module task
   : block-indefinite ( task -- )
     [:
       dup validate-not-terminated
-      -1 over task-ready-count +!
+      -1 over task-ready-count !
       dup task-ready-count @ 0< if
 	blocked-indefinite over task-state h!
       then
@@ -1054,7 +1054,7 @@ begin-module task
   : block-indefinite-critical ( task -- )
     [:
       dup validate-not-terminated
-      -1 over task-ready-count +!
+      -1 over task-ready-count !
       dup task-ready-count @ 0< if
 	[ blocked-indefinite schedule-critical or schedule-user-critical or ]
 	literal over task-state h!
@@ -1099,7 +1099,7 @@ begin-module task
   : block-indefinite-with-spinlock ( spinlock task -- )
     [:
       dup validate-not-terminated
-      -1 over task-ready-count +!
+      -1 over task-ready-count !
       tuck spinlock-to-claim !
       dup task-ready-count @ 0< if
 	[ blocked-indefinite schedule-critical or schedule-user-critical or
@@ -1382,7 +1382,7 @@ begin-module task
       dup ['] timeout for-task@ no-timeout <> if
 	dup timeout-systick-delay @
 	over timeout-systick-start @
-	rot -1 over task-ready-count +!
+	rot -1 over task-ready-count !
 	dup task-ready-count @ 0< if
 	  tuck task-systick-start !
 	  tuck task-systick-delay !
@@ -1391,7 +1391,7 @@ begin-module task
 	  nip nip
 	then
       else
-	-1 over task-ready-count +!
+	-1 over task-ready-count !
 	dup task-ready-count @ 0< if
 	  blocked-indefinite over task-state h!
 	then
