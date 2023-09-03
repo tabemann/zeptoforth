@@ -111,7 +111,7 @@ begin-module disassemble-internal
       0 of endof
       SB of ." SB" endof
       SH of ." SH" endof
-      emit
+      dup emit
     endcase
   ;
 
@@ -489,6 +489,15 @@ begin-module disassemble-internal
   \ 0 12 bitfield
   : 0_12_bf ( data -- field ) 0 12 bitfield ;
 
+  \ Size bitshift
+  : size-bitshift ( value type -- value' )
+    case
+      0 of 2 lshift endof
+      [char] H of 1 lshift endof
+      [char] B of endof
+    endcase
+  ;
+  
   \ Commit to flash
   commit-flash
 
@@ -585,11 +594,11 @@ begin-module disassemble-internal
   : decode-smull ( low high -- )
     dup 12_4_bf reg-sep. dup 8_4_bf reg-sep. swap 0_4_bf reg-sep. 0_4_bf reg.
   ;
-
+  
   \ Decode an LDR immediate instruction
   : decode-ldr-imm-1
-    dup 0_3_bf reg-sep. ." [" dup 3_3_bf reg.
-    6 5 bitfield 2 lshift ?dup if
+    >r dup 0_3_bf reg-sep. ." [" dup 3_3_bf reg.
+    6 5 bitfield r> size-bitshift ?dup if
       sep-imm. val.
     then
     ." ]"
@@ -1074,7 +1083,7 @@ begin-module disassemble-internal
 
   \ Parse an LDR immediate instruction
   : p-ldr-imm-1
-    ." LDR" size. csp. decode-ldr-imm-1 drop
+    ." LDR" dup >r size. csp. r> decode-ldr-imm-1 drop
   ;
 
   \ Parse an LDR immediate instruction
@@ -1357,7 +1366,7 @@ begin-module disassemble-internal
   
   \ Parse an STR immediate instruction
   : p-str-imm-1
-    ." STR" size. csp. decode-ldr-imm-1 drop
+    ." STR" dup >r size. csp. r> decode-ldr-imm-1 drop
   ;
 
   \ Parse an STR immediate instruction
