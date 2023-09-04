@@ -420,22 +420,59 @@ begin-module mini-dict
   \ Find a word in the flash dictionary by execution token
   : find-mini-by-xt ( xt dict -- word|0 )
     drop
-    flash-mini-dict begin
-      dup [ flash-mini-dict flash-mini-dict-size + ] literal < if
-        dup cell+ @ dup 0<> over -1 <> and if
-          word-name dup c@ + 1+ 2 align 2 pick = if
-            nip cell+ @ true
-          else
-            2 cells + false
-          then
-        else
-          drop 2 cells + false
-        then
-      else
-        2drop 0 true
-      then
-    until
+    [ flash-mini-dict flash-mini-dict-size + ] literal
+    flash-mini-dict
+    code[
+    r4 1 push
+    1 r4 movs_,#_
+    r1 r0 2 dp ldm
+    mark>
+    r0 tos cmp_,_
+    ne bc>
+    0 tos movs_,#_
+    pc r4 2 pop
+    >mark
+    4 tos r2 ldr_,[_,#_]
+    0 r3 movs_,#_
+    r3 r2 cmp_,_
+    eq bc>
+    r3 r3 mvns_,_
+    r3 r2 cmp_,_
+    eq bc>
+    8 r2 r3 ldrb_,[_,#_]
+    r2 r3 r3 adds_,_,_
+    8 r3 adds_,#_
+    r4 r3 orrs_,_
+    1 r3 adds_,#_
+    r1 r3 cmp_,_
+    ne bc>
+    r2 tos movs_,_
+    pc r4 2 pop
+    >mark >mark >mark
+    8 tos adds_,#_
+    b<
+    ]code
   ;
+    
+  \ Find a word in the flash dictionary by execution token
+  \ : find-mini-by-xt ( xt dict -- word|0 )
+  \   drop
+  \   flash-mini-dict begin
+  \     dup [ flash-mini-dict flash-mini-dict-size + ] literal < if
+  \       dup cell+ @ dup 0<> over -1 <> and if
+  \         word-name dup c@ + 1+ 2 align 2 pick = if
+  \           nip cell+ @ true
+  \         else
+  \           2 cells + false
+  \         then
+  \       else
+  \         drop 2 cells + false
+  \       then
+  \     else
+  \       2drop 0 true
+  \     then
+  \   until
+  \ ;
 
 end-module> import
 
