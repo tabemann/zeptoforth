@@ -182,7 +182,7 @@ begin-module frame-process
           then
           ?raise
         again
-      ;] 1024 256 1024 spawn run
+      ;] 1024 256 1024 1 spawn-on-core run
     ; define run-frame-process
 
   end-implement
