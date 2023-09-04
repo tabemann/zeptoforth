@@ -261,7 +261,11 @@ begin-module oo
           >r 2 + tuck - -rot + swap r> >xt execute >r
           r@ method-by-name dup -1 <> if
             r> class-method flash-buffer@ dup 0<> over -1 <> and if
-              1 bic find-by-xt
+              1 bic dup 2 - c@ 0= if
+                10 - \ Get word header
+              else
+                find-by-xt
+              then
             else
               drop ['] x-method-not-implemented-yet ?raise
             then

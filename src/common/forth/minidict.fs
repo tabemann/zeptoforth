@@ -417,6 +417,26 @@ begin-module mini-dict
     then
   ;
 
+  \ Find a word in the flash dictionary by execution token
+  : find-mini-by-xt ( xt dict -- word|0 )
+    drop
+    flash-mini-dict begin
+      dup [ flash-mini-dict flash-mini-dict-size + ] literal < if
+        dup cell+ @ dup 0<> over -1 <> and if
+          word-name dup c@ + 1+ 2 align 2 pick = if
+            nip cell+ @ true
+          else
+            2 cells + false
+          then
+        else
+          drop 2 cells + false
+        then
+      else
+        2drop 0 true
+      then
+    until
+  ;
+
 end-module> import
 
 \ Initialize the minidictionary
@@ -425,6 +445,7 @@ end-module> import
   init-flash-mini-dict
   ['] add-flash-mini-dict finalize-hook !
   ['] find-optimized find-raw-hook !
+  ['] find-mini-by-xt flash-find-dict-by-xt-hook !
 ;
 
 reboot
