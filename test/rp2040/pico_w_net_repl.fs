@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE
 
-begin-module wifi-server-test
+begin-module pico-w-net-repl
 
   oo import
   cyw43-events import
@@ -409,8 +409,6 @@ begin-module wifi-server-test
         ;] server-tx-slock with-slock
         dup not if server-delay ms then
       until
-    else
-      drop
     then
   ;
   
