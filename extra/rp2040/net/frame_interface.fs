@@ -50,6 +50,9 @@ begin-module frame-interface
 
     \ Poll a frame to transmit
     method poll-tx-frame ( addr bytes self -- bytes' found? )
+
+    \ Frame transmission is full?
+    method tx-full? ( self -- full? )
     
   end-class
 

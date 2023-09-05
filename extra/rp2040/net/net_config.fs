@@ -63,10 +63,10 @@ begin-module net-config
   16 value small-send-bytes
 
   \ The maximum retransmit count
-  2 value max-retransmits
+  1 value max-retransmits
 
   \ The initial timeout time
-  500 value init-timeout
+  1500 value init-timeout
 
   \ The timeout multiplication factor
   2 value timeout-multiplier

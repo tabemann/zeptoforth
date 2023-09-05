@@ -3868,11 +3868,13 @@ begin-module net
                   else
                     endpoint start-endpoint-timeout
                   then
-                  endpoint endpoint-send-ready? if
+                  endpoint endpoint-send-ready?
+                  self out-frame-interface @ tx-full? not and if
                     endpoint get-endpoint-send-packet
                     endpoint endpoint-send-last?
                     endpoint self send-data-ack
-                    endpoint endpoint-send-ready? not true
+                    endpoint endpoint-send-ready? not
+                    self out-frame-interface @ tx-full? or true
                   else
                     true true
                   then

@@ -45,8 +45,11 @@ begin-module wifi-server-test
   \ Port to set server at
   6668 constant server-port
   
-  \ Server lock
-  slock-size buffer: server-slock
+  \ Server Rx lock
+  slock-size buffer: server-rx-slock
+  
+  \ Server Tx lock
+  slock-size buffer: server-tx-slock
   
   \ Server active
   variable server-active?
@@ -173,7 +176,7 @@ begin-module wifi-server-test
           tx-write-index buffer-index cells + @
           buffer-index 1+ 1 and dup { new-buffer-index } tx-buffer-index ! 
           0 tx-write-index new-buffer-index cells + !
-        ;] server-slock with-slock { buffer count }
+        ;] server-tx-slock with-slock { buffer count }
         count 0> if
           my-endpoint @ if
             buffer count my-endpoint @ my-interface @ ['] send-tcp-endpoint try
@@ -204,7 +207,7 @@ begin-module wifi-server-test
             leave
           then
         loop
-      ;] server-slock with-slock
+      ;] server-rx-slock with-slock
       rx-sema broadcast
       rx-sema give
     then
@@ -222,7 +225,7 @@ begin-module wifi-server-test
             tx-sema give
             false
           then
-        ;] server-slock with-slock
+        ;] server-tx-slock with-slock
         dup not if
           task::timeout @ { old-timeout }
           server-delay 10 * task::timeout !
@@ -241,7 +244,7 @@ begin-module wifi-server-test
   \ EMIT? for telnet
   : telnet-emit? ( -- emit? )
     server-active? @ if
-      [: tx-full? not ;] server-slock with-slock
+      [: tx-full? not ;] server-tx-slock with-slock
     else
       false
     then
@@ -258,7 +261,7 @@ begin-module wifi-server-test
           else
             false
           then
-        ;] server-slock with-slock
+        ;] server-rx-slock with-slock
         dup not if
           task::timeout @ { old-timeout }
           server-delay 10 * task::timeout !
@@ -277,7 +280,7 @@ begin-module wifi-server-test
   \ KEY? for telnet
   : telnet-key? ( -- key? )
     server-active? @ if
-      [: rx-empty? not ;] server-slock with-slock
+      [: rx-empty? not ;] server-rx-slock with-slock
     else
       false
     then
@@ -317,7 +320,8 @@ begin-module wifi-server-test
 
   \ Initialize the test
   : init-test ( -- )
-    server-slock init-slock
+    server-tx-slock init-slock
+    server-rx-slock init-slock
     0 tx-buffer-index !
     0 tx-write-index !
     0 tx-write-index cell+ !
@@ -376,6 +380,16 @@ begin-module wifi-server-test
   : start-server ( -- )
     server-port my-interface @ allocate-tcp-listen-endpoint if
       my-endpoint !
+      \ 0 [:
+      \   begin
+      \     my-endpoint @ if
+      \       my-endpoint @ net-internal::endpoint-out-packets
+      \       net-internal::out-packet-window @ dup cr ." Window: " .
+      \       0< if display-red cr ." BAD WINDOW" display-normal [: ;] task::main-task task::signal exit then
+      \     then
+      \     1000 ms
+      \   again
+      \ ;] 320 128 1024 task::spawn task::run
     else
       drop
     then
@@ -392,7 +406,7 @@ begin-module wifi-server-test
             tx-sema give
             false
           then
-        ;] server-slock with-slock
+        ;] server-tx-slock with-slock
         dup not if server-delay ms then
       until
     else
