@@ -416,7 +416,7 @@ begin-module net
     method in-packets-udp-remote@ ( self -- ipv4-addr port )
     
     \ Push data
-    method push-packets ( seq self -- )
+    \ method push-packets ( seq self -- )
 
     \ Join complete packets
     method join-complete-packets ( self -- )
@@ -543,33 +543,33 @@ begin-module net
     ; define waiting-in-bytes@
 
     \ Push data
-    :noname { seq self -- }
-      self in-packet-count @ 0 { total-count count }
-      total-count 0 ?do
-        self first-in-packet-seq @ { first-seq }
-        self in-packet-seqs i cells + @ { current-seq }
-        self in-packet-sizes i 1 lshift + h@ { current-size }
-        current-seq first-seq - { diff }
-        diff seq first-seq - <= if
-          self pushed-in-packet-offset @ { pushed-offset }
-          self in-packet-addr @ pushed-offset + dup diff + swap
-          self in-packet-offset @ pushed-offset - diff - move
-          current-seq current-size + self first-in-packet-seq !
-          current-size self pushed-in-packet-offset +!
-          diff negate self in-packet-offset +!
-          1 +to count
-        then
-      loop
-      self in-packet-seqs count cells + self in-packet-seqs
-      total-count count - cells move
-      self in-packet-sizes count 1 lshift + self in-packet-sizes
-      total-count count - 1 lshift move
-      count negate self in-packet-count +!
-      [ debug? ] [if]
-        self [: cr ." @@@ push-packets: " in-packets. ;]
-        usb::with-usb-output
-      [then]
-    ; define push-packets
+    \ :noname { seq self -- }
+    \   self in-packet-count @ 0 { total-count count }
+    \   total-count 0 ?do
+    \     self first-in-packet-seq @ { first-seq }
+    \     self in-packet-seqs i cells + @ { current-seq }
+    \     self in-packet-sizes i 1 lshift + h@ { current-size }
+    \     current-seq first-seq - { diff }
+    \     diff seq first-seq - <= if
+    \       self pushed-in-packet-offset @ { pushed-offset }
+    \       self in-packet-addr @ pushed-offset + dup diff + swap
+    \       self in-packet-offset @ pushed-offset - diff - move
+    \       current-seq current-size + self first-in-packet-seq !
+    \       current-size self pushed-in-packet-offset +!
+    \       diff negate self in-packet-offset +!
+    \       1 +to count
+    \     then
+    \   loop
+    \   self in-packet-seqs count cells + self in-packet-seqs
+    \   total-count count - cells move
+    \   self in-packet-sizes count 1 lshift + self in-packet-sizes
+    \   total-count count - 1 lshift move
+    \   count negate self in-packet-count +!
+    \   [ debug? ] [if]
+    \     self [: cr ." @@@ push-packets: " in-packets. ;]
+    \     usb::with-usb-output
+    \   [then]
+    \ ; define push-packets
 
     \ Join complete packets
     :noname { self -- }
@@ -679,9 +679,9 @@ begin-module net
         then        
       then
 
-      push? if
-        init-seq self push-packets
-      then
+      \ push? if
+      \   init-seq self push-packets
+      \ then
 
       self join-complete-packets
 
