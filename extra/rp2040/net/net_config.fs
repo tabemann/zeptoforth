@@ -72,7 +72,7 @@ begin-module net-config
   2 value timeout-multiplier
 
   \ Send check interval
-  500 value send-check-interval
+  100 value send-check-interval
   
   \ DNS port
   53 constant dns-port

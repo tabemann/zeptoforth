@@ -342,6 +342,11 @@ begin-module cyw43-runner
       ;] self cyw43-tx-lock with-lock
     ; define poll-tx-frame
 
+    \ Frame receiving is full?
+    :noname ( self -- full? )
+      cyw43-rx-count @ rx-mtu-count =
+    ; define rx-full?
+    
     \ Frame transmission is full?
     :noname ( self -- full? )
       cyw43-tx-count @ tx-mtu-count =
