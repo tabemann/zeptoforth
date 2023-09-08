@@ -47,9 +47,6 @@ begin-module pico-w-net-http
   
   \ Are we closing?
   false value closing?
-  
-  \ The LED state
-  variable led-state
     
   \ Our MAC address
   default-mac-addr 2constant my-mac-addr
@@ -97,7 +94,7 @@ begin-module pico-w-net-http
   <tcp-echo-handler> class-size buffer: my-tcp-echo-handler
   
   \ Initialize the test
-  : init-test ( -- )
+  : init-test { D: ssid D: pass -- }
     pio-addr sm-index pio-instance <pico-w-cyw43-net> my-cyw43-net init-object
     my-cyw43-net cyw43-control@ my-cyw43-control !
     my-cyw43-net net-interface@ my-interface !
@@ -105,11 +102,6 @@ begin-module pico-w-net-http
     <tcp-echo-handler> my-tcp-echo-handler init-object
     my-tcp-echo-handler
     my-cyw43-net net-endpoint-process@ add-endpoint-handler
-  ;
-
-  \ Run the test
-  : run-test { D: ssid D: pass -- }
-    init-test
     cyw43-consts::PM_AGGRESSIVE my-cyw43-control @ cyw43-power-management!
     begin ssid pass my-cyw43-control @ join-cyw43-wpa2 nip until
     my-cyw43-net run-net-process
@@ -120,6 +112,10 @@ begin-module pico-w-net-http
     my-interface @ gateway-ipv4-addr@ cr ." Gateway IPv4 address: " ipv4.
     my-interface @ dns-server-ipv4-addr@ cr ." DNS server IPv4 address: " ipv4.
     my-cyw43-net toggle-pico-w-led
+  ;
+
+  \ Run the test
+  : run-test ( -- )
     cr ." DNS LOOKUP"
     s" www.google.com" my-interface @ resolve-dns-ipv4-addr if { addr }
       my-cyw43-net toggle-pico-w-led

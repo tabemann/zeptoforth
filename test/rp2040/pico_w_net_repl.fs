@@ -88,7 +88,7 @@ begin-module pico-w-net-repl
   tx-buffer-size 2 * buffer: tx-buffers
   
   \ Tx timeout
-  500 constant tx-timeout
+  100 value tx-timeout
   
   \ Tx timeout start
   variable tx-timeout-start
@@ -107,6 +107,9 @@ begin-module pico-w-net-repl
   
   \ Enable DHCP logging
   true to dhcp-log? \ DEBUG
+  
+  \ Set the minimum send wait time
+  250 to send-check-interval \ DEBUG
 
   \ Get whether the rx buffer is full
   : rx-full? ( -- f )
@@ -380,16 +383,16 @@ begin-module pico-w-net-repl
   : start-server ( -- )
     server-port my-interface @ allocate-tcp-listen-endpoint if
       my-endpoint !
-      \ 0 [:
-      \   begin
-      \     my-endpoint @ if
-      \       my-endpoint @ net-internal::endpoint-out-packets
-      \       net-internal::out-packet-window @ dup cr ." Window: " .
-      \       0< if display-red cr ." BAD WINDOW" display-normal [: ;] task::main-task task::signal exit then
-      \     then
-      \     1000 ms
-      \   again
-      \ ;] 320 128 1024 task::spawn task::run
+\      0 [:
+\        begin
+\          my-endpoint @ if
+\            my-endpoint @ net-internal::endpoint-out-packets
+\            net-internal::out-packet-window @ dup cr ." Window: " .
+\            0< if display-red cr ." BAD WINDOW" display-normal [: ;] task::main-task task::signal exit then
+\          then
+\          1000 ms
+\        again
+\      ;] 320 128 1024 task::spawn task::run
     else
       drop
     then
