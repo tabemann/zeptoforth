@@ -200,20 +200,10 @@
 <p>( delay start notify-index – x )</p>
 <p>If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until <em>delay</em> ticks after the time represented by <em>start</em> ticks, and raise <code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code> if this time is reached without the task being notified for that notification first. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.</p>
 </section>
-<section id="wait-notify-timeout-critical">
-<h3><code class="docutils literal notranslate"><span class="pre">wait-notify-timeout-critical</span></code></h3>
-<p>( delay start notify-index – x )</p>
-<p>If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until <em>delay</em> ticks after the time represented by <em>start</em> ticks, and raise <code class="docutils literal notranslate"><span class="pre">x-timed-out</span></code> if this time is reached without the task being notified for that notification first; after blocking finishes, immediately start a critical section unless an exception has been raised. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.</p>
-</section>
 <section id="wait-notify-indefinite">
 <h3><code class="docutils literal notranslate"><span class="pre">wait-notify-indefinite</span></code></h3>
 <p>( notify-index – x )</p>
 <p>If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until the task is notified for that notification. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.</p>
-</section>
-<section id="wait-notify-indefinite-critical">
-<h3><code class="docutils literal notranslate"><span class="pre">wait-notify-indefinite-critical</span></code></h3>
-<p>( notify-index – x )</p>
-<p>If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until the task is notified for that notification; after blocking finishes, immediately start a critical section unless an exception has been raised. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.</p>
 </section>
 <section id="ready">
 <h3><code class="docutils literal notranslate"><span class="pre">ready</span></code></h3>
@@ -265,21 +255,6 @@
 <p>( notify-index – x )</p>
 <p>If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification that may be blockign or indefinite depending on how blocking has been prepared. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.</p>
 </section>
-<section id="wait-notify-critical">
-<h3><code class="docutils literal notranslate"><span class="pre">wait-notify-critical</span></code></h3>
-<p>( notify-index – x )</p>
-<p>If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification that may be blockign or indefinite depending on how blocking has been prepared; after blocking finishes, immediately start a critical section unless an exception has been raised. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.</p>
-</section>
-<section id="id2">
-<h3><code class="docutils literal notranslate"><span class="pre">wait-notify</span></code></h3>
-<p>( task – )</p>
-<p>If a task has not been notified, set the task in an awaiting notification state for which blocking has been prepared. If the task has already been notified, clear its notification state.</p>
-</section>
-<section id="id3">
-<h3><code class="docutils literal notranslate"><span class="pre">wait-notify-critical</span></code></h3>
-<p>( task – )</p>
-<p>If a task has not been notified, set the task in an awaiting notification state for blocking has been prepared, and immediately start a new critical section once it finishes blocking. If the task has already been notified, clear its notification state.</p>
-</section>
 <section id="prepare-block">
 <h3><code class="docutils literal notranslate"><span class="pre">prepare-block</span></code></h3>
 <p>( task – )</p>
@@ -320,7 +295,7 @@
 <p>( priority task – )</p>
 <p>Set the priority of a task, from -32768 to 32767, with higher numbers being greater task priorities.</p>
 </section>
-<section id="id4">
+<section id="id2">
 <h3><code class="docutils literal notranslate"><span class="pre">task-priority&#64;</span></code></h3>
 <p>( task – priority )</p>
 <p>Get the priority of a task.</p>
@@ -335,7 +310,7 @@
 <p>( priority task – )</p>
 <p>Set the saved priority of a task, from -32768 to 32767, with higher numbers being greater task priorities.</p>
 </section>
-<section id="id5">
+<section id="id3">
 <h3><code class="docutils literal notranslate"><span class="pre">task-saved-priority&#64;</span></code></h3>
 <p>( task – priority )</p>
 <p>Get the saved priority of a task.</p>
@@ -345,7 +320,7 @@
 <p>( timeslice task – )</p>
 <p>Set the timeslice, in ticks (usually 100 us increments), of a task, indicating the minimum amount of time a task will run before being preempted. If a task does not use up all of its timeslice before it gives up control of the processor, it will start off with the remainder of its timeslice next time it has control of the processor, unless it exhausted its timeslice, where then the timeslice value is added onto the tick counter (which may be negative) to yield the new timeslice (but which may not be less than the task’s minimum timeslice). Note that the default setting for this for a newly initialized task is 10.</p>
 </section>
-<section id="id6">
+<section id="id4">
 <h3><code class="docutils literal notranslate"><span class="pre">task-timeslice&#64;</span></code></h3>
 <p>( task – timeslice )</p>
 <p>Get the timeslice, in ticks (usually 100 us increments), of a task.</p>
@@ -366,7 +341,7 @@
 <p>( task – addr )</p>
 <p>Get the name of a task as a counted string; an address of zero indicates no name is set.</p>
 </section>
-<section id="id7">
+<section id="id5">
 <h3><code class="docutils literal notranslate"><span class="pre">task-name!</span></code></h3>
 <p>( addr task – )</p>
 <p>Set the name of a task as a counted string; an address of zero indicates to set no name.</p>
@@ -376,7 +351,7 @@
 <p>( xt task – )</p>
 <p>Set a task’s termination hook, to be invoked in the context of the task when the task terminates. The execution token invoked as the hook has the stack signature ( data reason – ) where <em>data</em> is the task termination data associated with the task. Note that the task is re-initialized, aside from being with the same name and on the same core, before the task’s termination hook is invoked, and will have a priority of 32768 (the maximum priority). Also note that a task termination hook of 0, the default, means that no task termination hook is to be invoked. <em>Reason</em> is the <em>immediate</em> task termination reason, which is overwritten with <code class="docutils literal notranslate"><span class="pre">not-terminated</span></code> due to the task being reinitialized when the task termination hook is called.</p>
 </section>
-<section id="id8">
+<section id="id6">
 <h3><code class="docutils literal notranslate"><span class="pre">task-terminate-hook&#64;</span></code></h3>
 <p>( task – xt )</p>
 <p>Get a task’s termination hook.</p>
@@ -386,7 +361,7 @@
 <p>( data task – )</p>
 <p>Set a task’s termination data, to be passed to the task’s termination hook when it is invoked.</p>
 </section>
-<section id="id9">
+<section id="id7">
 <h3><code class="docutils literal notranslate"><span class="pre">task-terminate-data&#64;</span></code></h3>
 <p>( task – data )</p>
 <p>Get a task’s termination data.</p>
