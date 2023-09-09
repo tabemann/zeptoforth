@@ -980,10 +980,9 @@ begin-module task
       swap current-task @ task-systick-delay !
       begin dup bit current-task @ task-notified-bitmap bit@ not while
 	dup current-task @ task-current-notify !
-	[ blocked-timeout schedule-critical or ] literal
-	current-task @ task-state h!
-	release-same-core-spinlock end-critical pause-wo-reschedule
-	claim-same-core-spinlock
+        blocked-timeout current-task @ task-state h!
+	cpu-index end-critical-with-other-core-spinlock pause-wo-reschedule
+        cpu-index begin-critical-with-other-core-spinlock
         current-task @ check-timeout if
           -1 current-task @ task-current-notify !
           ['] x-timed-out ?raise
@@ -992,37 +991,6 @@ begin-module task
       current-task @ task-notify-area @ over cells + @
       swap bit current-task @ task-notified-bitmap bic!
       -1 current-task @ task-current-notify !
-    ;] cpu-index critical-with-other-core-spinlock
-  ;
-
-  \ Wait until a timeout on the specified notification index and return the
-  \ value for that notification index once notified, unless already notified,
-  \ where then that value will be returned and the notified state will be
-  \ cleared immediately. x-timed-outo is raised if the timeout is reached.
-  \ This word will leave the system in a critical section once completed.
-  : wait-notify-timeout-critical ( ticks-delay ticks-start notify-index -- x )
-    [:
-      begin-critical
-      [:
-	dup current-task @ validate-notify
-        swap current-task @ task-systick-start !
-	swap current-task @ task-systick-delay !
-	begin dup bit current-task @ task-notified-bitmap bit@ not while
-	  dup current-task @ task-current-notify !
-	  [ blocked-timeout schedule-critical or schedule-user-critical or ]
-	  literal
-	  current-task @ task-state h!
-	  release-same-core-spinlock end-critical pause-wo-reschedule
-	  claim-same-core-spinlock
-          current-task @ check-timeout if
-            -1 current-task @ task-current-notify !
-            ['] x-timed-out ?raise
-          then
-	repeat
-	current-task @ task-notify-area @ over cells + @
-	swap bit current-task @ task-notified-bitmap bic!
-	-1 current-task @ task-current-notify !
-      ;] try ?dup if end-critical ?raise then
     ;] cpu-index critical-with-other-core-spinlock
   ;
 
@@ -1127,40 +1095,14 @@ begin-module task
     [:
       dup current-task @ validate-notify
       begin dup bit current-task @ task-notified-bitmap bit@ not while
-	dup current-task @ task-current-notify !
-	[ blocked-indefinite schedule-critical or ] literal
-	current-task @ task-state h!
-	release-same-core-spinlock end-critical pause-wo-reschedule
-	claim-same-core-spinlock
+        dup current-task @ task-current-notify !
+        blocked-indefinite current-task @ task-state h!
+	cpu-index end-critical-with-other-core-spinlock pause-wo-reschedule
+        cpu-index begin-critical-with-other-core-spinlock
       repeat
       current-task @ task-notify-area @ over cells + @
       swap bit current-task @ task-notified-bitmap bic!
       -1 current-task @ task-current-notify !
-    ;] cpu-index critical-with-other-core-spinlock
-  ;
-
-  \ Wait indefinitely on the specified notification index and return the value
-  \ for that notification index once notified, unless already notified, where
-  \ then that value will be returned and the notified state will be cleared
-  \ immediately. This word will leave the system in a critical section once
-  \ completed.
-  : wait-notify-indefinite-critical ( notify-index -- x )
-    [:
-      begin-critical
-      [:
-	dup current-task @ validate-notify
-	begin dup bit current-task @ task-notified-bitmap bit@ not while
-	  dup current-task @ task-current-notify !
-	  [ blocked-indefinite schedule-critical or schedule-user-critical or ]
-	  literal
-	  current-task @ task-state h!
-	  release-same-core-spinlock end-critical pause-wo-reschedule
-	  claim-same-core-spinlock
-	repeat
-	current-task @ task-notify-area @ over cells + @
-	swap bit current-task @ task-notified-bitmap bic!
-	-1 current-task @ task-current-notify !
-      ;] try ?dup if end-critical ?raise then
     ;] cpu-index critical-with-other-core-spinlock
   ;
 
@@ -1200,8 +1142,7 @@ begin-module task
       2dup validate-notify
       2dup swap bit swap task-notified-bitmap bis!
       dup task-current-notify @ rot = if
-	dup task-state h@ schedule-user-critical and
-	[ schedule-critical readied or ] literal or swap task-state h! true
+	readied swap task-state h! true
       else
 	drop false
       then
@@ -1218,8 +1159,7 @@ begin-module task
       dup task-notify-area @ 2 pick cells + >r rot r> !
       2dup swap bit swap task-notified-bitmap bis!
       dup task-current-notify @ rot = if
-	dup task-state h@ schedule-user-critical and
-	[ schedule-critical readied or ] literal or swap task-state h! true
+	readied swap task-state h! true
       else
 	drop false
       then
@@ -1238,8 +1178,7 @@ begin-module task
       r> rot >r rot >r swap dup >r @ swap execute r> ! ( )
       r> r> 2dup swap bit swap task-notified-bitmap bis!
       dup task-current-notify @ rot = if
-	dup task-state h@ schedule-user-critical and
-	[ schedule-critical readied or ] literal or swap task-state h! true
+        readied swap task-state h! true
       else
 	drop false
       then
@@ -1321,30 +1260,16 @@ begin-module task
   \ Wait for a notification at a specified notification index with a specified
   \ initialized timeout and return the notification value
   : wait-notify ( notify-index -- x )
-    claim-same-core-spinlock
-    begin-critical
-    timeout @ no-timeout <> if
-      current-task @ timeout-systick-delay @
-      current-task @ timeout-systick-start @ rot
-      end-critical release-same-core-spinlock wait-notify-timeout
-    else
-      end-critical release-same-core-spinlock wait-notify-indefinite
-    then
-  ;
-
-  \ Wait for a notification at a specified notification index with a specified
-  \ initialized timeout and return the notification value and schedule as
-  \ critical once done
-  : wait-notify-critical ( task -- )
-    claim-same-core-spinlock
-    begin-critical
-    timeout @ no-timeout <> if
-      current-task @ timeout-systick-delay @
-      current-task @ timeout-systick-start @ rot
-      end-critical release-same-core-spinlock wait-notify-timeout-critical
-    else
-      end-critical release-same-core-spinlock wait-notify-indefinite-critical
-    then
+    [:
+      timeout @ no-timeout <> if
+        current-task @ timeout-systick-delay @
+        current-task @ timeout-systick-start @ rot
+        true
+      else
+        false
+      then
+    ;] cpu-index critical-with-other-core-spinlock
+    if wait-notify-timeout else wait-notify-indefinite then
   ;
 
   \ Prepare blocking for a task

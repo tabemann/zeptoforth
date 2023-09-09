@@ -207,20 +207,10 @@ Block a task indefinitely until the task is readied, and then immediately start 
 
 If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until *delay* ticks after the time represented by *start* ticks, and raise `x-timed-out` if this time is reached without the task being notified for that notification first. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.
 
-##### `wait-notify-timeout-critical`
-( delay start notify-index -- x )
-
-If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until *delay* ticks after the time represented by *start* ticks, and raise `x-timed-out` if this time is reached without the task being notified for that notification first; after blocking finishes, immediately start a critical section unless an exception has been raised. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.
-
 ##### `wait-notify-indefinite`
 ( notify-index -- x )
 
 If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until the task is notified for that notification. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.
-
-##### `wait-notify-indefinite-critical`
-( notify-index -- x )
-
-If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification until the task is notified for that notification; after blocking finishes, immediately start a critical section unless an exception has been raised. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.
 
 ##### `ready`
 ( task -- )
@@ -272,21 +262,6 @@ Set the value for a mailbox at notification index *notify-index* for task *task*
 
 If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification that may be blockign or indefinite depending on how blocking has been prepared. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.
 
-##### `wait-notify-critical`
-( notify-index -- x )
-
-If the current task has not been notified for the specified notification, set the task in an awaiting notification state for that notification that may be blockign or indefinite depending on how blocking has been prepared; after blocking finishes, immediately start a critical section unless an exception has been raised. If successful, the notified state for the specified notification is cleared and the contents of the notification mailbox in question is returned.
-
-##### `wait-notify`
-( task -- )
-
-If a task has not been notified, set the task in an awaiting notification state for which blocking has been prepared. If the task has already been notified, clear its notification state.
-
-##### `wait-notify-critical`
-( task -- )
-
-If a task has not been notified, set the task in an awaiting notification state for blocking has been prepared, and immediately start a new critical section once it finishes blocking. If the task has already been notified, clear its notification state.
-
 ##### `prepare-block`
 ( task -- )
 
@@ -305,7 +280,12 @@ An exception raised when timeout validation fails.
 ##### `validate-timeout`
 ( task -- )
 
-Validate whether a task has timed out, raising `x-timed-out` if it has.
+Validate whether a task has timed out, raising `x-timed-out` if it has. Note that this clears the timeout state of the task.
+
+##### `check-timeout`
+( task -- timed-out? )
+
+Get whether a task has timed out, clearing the timeout state of the task if it has.
 
 ##### `x-would-block`
 ( -- )
