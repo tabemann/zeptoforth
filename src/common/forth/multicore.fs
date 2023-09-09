@@ -89,6 +89,18 @@ begin-module multicore
   \ spinlock)
   : critical-with-other-core-spinlock ( xt core -- ) drop critical ;
 
+  \ Enter a critical section (and not claim another core's multitasker's
+  \ spinlock)
+  : begin-critical-with-other-core-spinlock ( core -- )
+    drop begin-critical
+  ;
+
+  \ Leave a critical section (and not release another core's multitasker's
+  \ spinlock)
+  : end-critical-with-other-core-spinlock ( core -- )
+    drop end-critical
+  ;
+
   \ Enter a critical section (and do not claim any spinlocks)
   : critical-with-all-core-spinlock ( xt -- ) critical ;
 
