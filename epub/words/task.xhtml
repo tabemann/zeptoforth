@@ -160,40 +160,20 @@
 <p>( delay start task – )</p>
 <p>Delay a task until <em>delay</em> ticks after the time represented by <em>start</em> ticks.</p>
 </section>
-<section id="delay-critical">
-<h3><code class="docutils literal notranslate"><span class="pre">delay-critical</span></code></h3>
-<p>( delay start task – )</p>
-<p>Delay a task until <em>delay</em> ticks after the time represented by <em>start</em> ticks, and afterwards immediately start a critical section.</p>
-</section>
 <section id="block-timeout">
 <h3><code class="docutils literal notranslate"><span class="pre">block-timeout</span></code></h3>
 <p>( delay start task – )</p>
 <p>Block a task until <em>delay</em> ticks after the time represented by <em>start</em> ticks, and signal timed out if this time is reached without the task being readied first.</p>
-</section>
-<section id="block-timeout-critical">
-<h3><code class="docutils literal notranslate"><span class="pre">block-timeout-critical</span></code></h3>
-<p>( delay start task – )</p>
-<p>Block a task until <em>delay</em> ticks after the time represented by <em>start</em> ticks, and signal timed out if this time is reached without the task being readied first; after blocking finishes, immediately start a critical section.</p>
 </section>
 <section id="block-wait">
 <h3><code class="docutils literal notranslate"><span class="pre">block-wait</span></code></h3>
 <p>( task – )</p>
 <p>Block a task until all waiting task are woken with <code class="docutils literal notranslate"><span class="pre">wake</span></code>.</p>
 </section>
-<section id="block-wait-critical">
-<h3><code class="docutils literal notranslate"><span class="pre">block-wait-critical</span></code></h3>
-<p>( task – )</p>
-<p>Block a task until all waiting task are woken with <code class="docutils literal notranslate"><span class="pre">wake</span></code>, and then immediately start a critical section.</p>
-</section>
 <section id="block-indefinite">
 <h3><code class="docutils literal notranslate"><span class="pre">block-indefinite</span></code></h3>
 <p>( task – )</p>
 <p>Block a task indefinitely until the task is readied.</p>
-</section>
-<section id="block-indefinite-critical">
-<h3><code class="docutils literal notranslate"><span class="pre">block-indefinite-critical</span></code></h3>
-<p>( task – )</p>
-<p>Block a task indefinitely until the task is readied, and then immediately start a critical section.</p>
 </section>
 <section id="wait-notify-timeout">
 <h3><code class="docutils literal notranslate"><span class="pre">wait-notify-timeout</span></code></h3>
@@ -234,11 +214,6 @@
 <h3><code class="docutils literal notranslate"><span class="pre">block</span></code></h3>
 <p>( task – )</p>
 <p>Block a task for which blocking has been prepared.</p>
-</section>
-<section id="block-critical">
-<h3><code class="docutils literal notranslate"><span class="pre">block-critical</span></code></h3>
-<p>( task – )</p>
-<p>Block a task for which blocking has been prepared, and immediately start a new critical section once it finishes blocking.</p>
 </section>
 <section id="mailbox">
 <h3><code class="docutils literal notranslate"><span class="pre">mailbox&#64;</span></code></h3>
