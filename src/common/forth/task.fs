@@ -50,21 +50,6 @@ begin-module task
     \ Task block timed out
     5 constant block-timed-out
 
-    \ Claim same core spinlock on schedule bit
-    $1000 constant schedule-with-same-core-spinlock
-
-    \ Claim arbitrary spinlock on schedule bit
-    $2000 constant schedule-with-spinlock
-    
-    \ User schedule into critical section bit
-    $4000 constant schedule-user-critical
-    
-    \ Schedule into critical section bit
-    $8000 constant schedule-critical
-
-    \ Task state mask
-    $0FFF constant task-state-mask
-
     \ The maximum task priority
     $7FFF constant max-priority
 
@@ -736,15 +721,13 @@ begin-module task
 
   \ Get whether a task has timed out
   : timed-out? ( task -- timed-out )
-    dup validate-not-terminated task-state h@ task-state-mask and
-    block-timed-out =
+    dup validate-not-terminated task-state h@ block-timed-out =
   ;
 
   \ Get whether a task has timed out and clear the timeout status
   : check-timeout ( task -- timed-out? )
     [:
-      dup validate-not-terminated dup task-state h@ task-state-mask and
-      block-timed-out = if
+      dup validate-not-terminated dup task-state h@ block-timed-out = if
         readied swap task-state h! true
       else
         drop false
@@ -897,18 +880,6 @@ begin-module task
     current-task @ = if pause-wo-reschedule then
   ;
 
-  \ Delay a task and schedule as critcal once done
-  : delay-critical ( ticks-delay ticks-start task -- )
-    [:
-      dup validate-not-terminated
-      tuck task-systick-start !
-      tuck task-systick-delay !
-      [ delayed schedule-critical or schedule-user-critical or ] literal
-      over task-state h!
-    ;] over task-core @ critical-with-other-core-spinlock
-    current-task @ = if pause-wo-reschedule then
-  ;
-
   \ Mark a task as blocked until a timeout
   : block-timeout ( ticks-delay ticks-start task -- )
     [:
@@ -920,50 +891,6 @@ begin-module task
 	blocked-timeout over task-state h!
       else
 	nip nip
-      then
-    ;] over task-core @ critical-with-other-core-spinlock
-    current-task @ = if pause-wo-reschedule then
-  ;
-
-  \ Mark a task as blocked until a timeout and schedule as critical once done
-  : block-timeout-critical ( ticks-delay ticks-start task -- )
-    [:
-      dup validate-not-terminated
-      -1 over task-ready-count +!
-      dup task-ready-count @ 0< if
-	tuck task-systick-start !
-	tuck task-systick-delay !
-	[ blocked-timeout schedule-critical or schedule-user-critical or ]
-	literal
-	over task-state h!
-      else
-	nip nip
-	[ readied schedule-critical or schedule-user-critical or ]
-	literal
-	over task-state h!
-      then
-    ;] over task-core @ critical-with-other-core-spinlock
-    current-task @ = if pause-wo-reschedule then
-  ;
-
-  \ Mark a task as blocked until a timeout and schedule as critical along with
-  \ claiming a spinlock once done
-  : block-timeout-with-spinlock ( spinlock ticks-delay ticks-start task -- )
-    [:
-      dup validate-not-terminated
-      -1 over task-ready-count +!
-      dup task-ready-count @ 0< if
-	tuck task-systick-start !
-	tuck task-systick-delay !
-	tuck spinlock-to-claim !
-	[ blocked-timeout schedule-critical or schedule-user-critical or
-	schedule-with-spinlock or ] literal
-	over task-state h!
-      else
-	nip nip
-	[ readied schedule-critical or schedule-user-critical or ]
-	literal
-	over task-state h!
       then
     ;] over task-core @ critical-with-other-core-spinlock
     current-task @ = if pause-wo-reschedule then
@@ -1002,15 +929,6 @@ begin-module task
     current-task @ = if pause-wo-reschedule then
   ;
   
-  \ Mark a task as waiting
-  : block-wait-critical ( wake-count task -- )
-    dup validate-not-terminated
-    tuck task-wake-after !
-    [ blocked-wait schedule-critical or schedule-user-critical or ] literal
-    over task-state h!
-    current-task @ = if pause-wo-reschedule then
-  ;
-
   \ Mark a task as blocked indefinitely
   : block-indefinite ( task -- )
     [:
@@ -1018,22 +936,6 @@ begin-module task
       -1 over task-ready-count +!
       dup task-ready-count @ 0< if
 	blocked-indefinite over task-state h!
-      then
-    ;] over task-core @ critical-with-other-core-spinlock
-    current-task @ = if pause-wo-reschedule then
-  ;
-
-  \ Mark a task as blocked indefinitely and schedule as critical when done
-  : block-indefinite-critical ( task -- )
-    [:
-      dup validate-not-terminated
-      -1 over task-ready-count +!
-      dup task-ready-count @ 0< if
-	[ blocked-indefinite schedule-critical or schedule-user-critical or ]
-	literal over task-state h!
-      else
-	[ readied schedule-critical or schedule-user-critical or ]
-	literal over task-state h!
       then
     ;] over task-core @ critical-with-other-core-spinlock
     current-task @ = if pause-wo-reschedule then
@@ -1067,26 +969,6 @@ begin-module task
     then
   ;
 
-  \ Mark a task as blocked indefinitely and schedule as critical and claim a
-  \ spinlock when done
-  : block-indefinite-with-spinlock ( spinlock task -- )
-    [:
-      dup validate-not-terminated
-      -1 over task-ready-count +!
-      tuck spinlock-to-claim !
-      dup task-ready-count @ 0< if
-	[ blocked-indefinite schedule-critical or schedule-user-critical or
-	schedule-with-spinlock or ]
-	literal over task-state h!
-      else
-	[ readied schedule-critical or schedule-user-critical or
-	schedule-with-spinlock or ]
-	literal over task-state h!
-      then
-    ;] over task-core @ critical-with-other-core-spinlock
-    current-task @ = if pause-wo-reschedule then
-  ;
-
   \ Wait indefinitely on the specified notification index and return the value
   \ for that notification index once notified, unless already notified, where
   \ then that value will be returned and the notified state will be cleared
@@ -1114,10 +996,7 @@ begin-module task
         0 over task-ready-count !
 \        dup task-ready-count @ 1+ 0 min dup 2 pick task-ready-count !
 \	0>= if
-	  dup task-state h@
-	  [ schedule-critical schedule-user-critical or
-	  schedule-with-spinlock or schedule-with-same-core-spinlock or ]
-	  literal and readied or swap task-state h!
+	  readied swap task-state h!
 \	else
 \	  drop
 \	then
@@ -1223,36 +1102,6 @@ begin-module task
 	rot block-timeout
       else
 	block-indefinite
-      then
-    ;] over task-core @ critical-with-other-core-spinlock
-  ;
-
-  \ Block a task for the specified initialized timeout and schedule as critical
-  \ once done
-  : block-critical ( task -- )
-    [:
-      dup validate-not-terminated
-      dup ['] timeout for-task@ no-timeout <> if
-	dup timeout-systick-delay @
-	over timeout-systick-start @
-	rot block-timeout-critical
-      else
-	block-indefinite-critical
-      then
-    ;] over task-core @ critical-with-other-core-spinlock
-  ;
-
-  \ Block a task for the specified initialized timeout and schedule as critical
-  \ and claim a spinlock once done
-  : block-with-spinlock ( spinlock task -- )
-    [:
-      dup validate-not-terminated
-      dup ['] timeout for-task@ no-timeout <> if
-	dup timeout-systick-delay @
-	over timeout-systick-start @
-	rot block-timeout-with-spinlock
-      else
-	block-indefinite-with-spinlock
       then
     ;] over task-core @ critical-with-other-core-spinlock
   ;
@@ -1605,20 +1454,16 @@ begin-module task
 
     \ Get whether a task is waiting
     : waiting-task? ( task -- waiting? )
-      task-state-mask
       code[ \ ( task tos: task-state-mask )
-      r3 1 dp ldm \ ( r3: task tos: task-state-mask )
-      .task-state r3 r0 ldrh_,[_,#_]
-      ( r3: task r0: *task-state tos: task-state-mask )
-      r0 tos ands_,_ ( r3: task tos: *task-state )
-      readied tos cmp_,#_ ( r3: task tos: *task-state )
+      .task-state tos r0 ldrh_,[_,#_]
+      ( tos: task r0: *task-state )
+      readied r0 cmp_,#_ ( tos: task r0: *task-state )
       ne bc>
       0 tos movs_,#_
       pc 1 pop
       >mark
-      blocked-wait tos cmp_,#_ ( r3: task tos: *task-state )
+      blocked-wait tos cmp_,#_ ( tos: task r0: *task-state )
       ne bc>
-      r3 tos movs_,_
       ]code
       wake-counter
       code[ ( task tos: wake-counter )
@@ -1632,22 +1477,21 @@ begin-module task
       tos tos mvns_,_
       >mark
       pc 1 pop
-      >mark ( r3: task tos: *task-state )
-      blocked-indefinite tos cmp_,#_
+      >mark ( tos: task r0: *task-state )
+      blocked-indefinite r0 cmp_,#_
       ne bc>
       0 tos movs_,#_
       tos tos mvns_,_
       pc 1 pop
       >mark
-      delayed tos cmp_,#_ ( r3: task tos: *task-state )
+      delayed r0 cmp_,#_ ( tos: task r0: *task-state )
       eq bc>
-      blocked-timeout tos cmp_,#_ ( r3: task tos: *task-state )
+      blocked-timeout r0 cmp_,#_ ( tos: task r0: *task-state )
       eq bc>
       0 tos movs_,#_
       pc 1 pop
       >mark
       >mark
-      r3 tos movs_,_ ( tos: task )
       ]code
       delayed?
     ;
@@ -1826,16 +1670,6 @@ begin-module task
                   false
                 else
                   dup task-state h@
-                  dup schedule-with-same-core-spinlock and if
-                    claim-same-core-spinlock
-                  then
-                  dup schedule-critical and if
-                    1 in-critical !
-                  then
-                  dup schedule-with-spinlock and if
-                    over spinlock-to-claim @ claim-spinlock
-                  then
-                  task-state-mask and
                   dup blocked-timeout = swap block-timed-out = or if
                     block-timed-out over task-state h!
                   else
@@ -1924,7 +1758,7 @@ begin-module task
 	dup task-current-notify @ -1 <> if
 	  s" to-notify"
 	else
-	  dup task-state h@ task-state-mask and case
+	  dup task-state h@ case
 	    readied of            s" ready" endof
 	    delayed of            s" delayed" endof
 	    blocked-timeout of    s" timeout" endof
@@ -1934,12 +1768,7 @@ begin-module task
 	  endcase
 	then
       then
-      tuck type 11 swap - spaces
-      task-state h@ schedule-user-critical and if
-	." yes     "
-      else
-	." no      "
-      then
+      tuck type 11 swap - spaces drop
     ;
     
     \ Dump task priority
@@ -1949,7 +1778,7 @@ begin-module task
     
     \ Dump task until time
     : dump-task-until ( task -- )
-      dup task-state h@ task-state-mask and case
+      dup task-state h@ case
 	delayed of true endof
 	blocked-timeout of true endof
 	false swap
