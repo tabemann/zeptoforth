@@ -116,6 +116,8 @@ begin-module pico-w-net-http
 
   \ Run the test
   : run-test ( -- )
+    false to sent-header?
+    false to closing?
     cr ." DNS LOOKUP"
     s" www.google.com" my-interface @ resolve-dns-ipv4-addr if { addr }
       my-cyw43-net toggle-pico-w-led

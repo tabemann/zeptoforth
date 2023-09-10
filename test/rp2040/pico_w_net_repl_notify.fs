@@ -85,7 +85,7 @@ begin-module pico-w-net-repl
   variable tx-buffer-index
     
   \ Constant for number of bytes to buffer
-  1024 constant tx-buffer-size
+  2048 constant tx-buffer-size
   
   \ Tx buffers
   tx-buffer-size 2 * buffer: tx-buffers
