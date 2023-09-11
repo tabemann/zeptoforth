@@ -2849,7 +2849,7 @@ begin-module net
       src-addr self address-map lookup-mac-addr-by-ipv4 if
         self send-ipv4-basic-tcp
       else
-        2drop 2drop 2drop 2drop \ Should never happen
+        2drop 2drop 2drop 2drop drop \ Should never happen
       then
     ; define send-ipv4-rst-for-packet
 
@@ -2996,6 +2996,7 @@ begin-module net
         endpoint endpoint-tcp-state@ case
           TCP_ESTABLISHED of process-ipv4-fin-established endof
           TCP_FIN_WAIT_2 of process-ipv4-fin-fin-wait-2 endof
+          >r 2drop 2drop r>
         endcase
         endpoint endpoint-waiting-bytes@ 0>
         endpoint endpoint-tcp-state@ state <> or if
@@ -3115,7 +3116,7 @@ begin-module net
         state case
           TCP_ESTABLISHED of process-ipv4-fin-established endof
           TCP_FIN_WAIT_2 of process-ipv4-fin-fin-wait-2 endof
-          process-ipv4-unexpected-fin
+          >r process-ipv4-unexpected-fin r>
         endcase
         endpoint endpoint-tcp-state@ state <> or if
           endpoint self put-ready-endpoint
