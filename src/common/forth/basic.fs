@@ -2352,6 +2352,9 @@ commit-flash
 \ Flash space warning has been displayed
 variable flash-dict-warned
 
+\ Variable flash find-dict-by-xt hook
+variable flash-find-dict-by-xt-hook
+
 \ Commit to flash
 commit-flash
 
@@ -2363,20 +2366,25 @@ commit-flash
   then
 ;
 
-\ Find a word in a dictionary by execution tokey
+\ Find a word in a dictionary by execution token
 : find-dict-by-xt ( xt dict -- word|0 )
-  begin
-    dup 0<> if
-      dup >xt 2 pick = if
-       true
+  over flash-base >= 2 pick flash-end < and
+  flash-find-dict-by-xt-hook @ 0<> and if
+    flash-find-dict-by-xt-hook @ execute
+  else
+    begin
+      dup 0<> if
+        dup >xt 2 pick = if
+          true
+        else
+          next-word @ false
+        then
       else
-       next-word @ false
+        true
       then
-    else
-      true
-    then
-  until
-  nip
+    until
+    nip
+  then
 ;
 
 \ Hook for whether the current task is executing
@@ -2552,6 +2560,7 @@ commit-flash
   ['] do-with-error-console error-hook !
   0 flush-console-hook !
   0 error-flush-console-hook !
+  0 flash-find-dict-by-xt-hook !
   false flash-dict-warned !
   ['] do-flash-validate-dict validate-dict-hook !
   ['] true in-main?-hook !
