@@ -2352,6 +2352,8 @@ commit-flash
 \ Flash space warning has been displayed
 variable flash-dict-warned
 
+commit-flash
+
 \ Variable flash find-dict-by-xt hook
 variable flash-find-dict-by-xt-hook
 
