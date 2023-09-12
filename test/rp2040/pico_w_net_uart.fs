@@ -197,6 +197,7 @@ begin-module pico-w-net-uart
 
   \ Initialize the test
   : init-test ( -- )
+    false uart-special-enabled !
     tx-slock init-slock
     0 tx-buffer-index !
     0 tx-write-index !
