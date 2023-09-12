@@ -18,7 +18,7 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE
 
-begin-module pico-w-net-repl
+begin-module pico-w-net-uart
 
   oo import
   cyw43-events import
@@ -33,6 +33,7 @@ begin-module pico-w-net-repl
   slock import
   simple-cyw43-net import
   pico-w-cyw43-net import
+  uart import
   
   0 constant pio-addr
   0 constant sm-index
@@ -42,41 +43,26 @@ begin-module pico-w-net-repl
   variable my-cyw43-control
   variable my-interface
 
+  \ UART index
+  0 constant uart-index
+  
   \ Port to set server at
   6668 constant server-port
   
-  \ Server Rx lock
-  slock-size buffer: server-rx-slock
-  
-  \ Server Tx lock
-  slock-size buffer: server-tx-slock
-
-  \ Tx notify area
-  variable tx-notify-area
+  \ Tx lock
+  slock-size buffer: tx-slock
   
   \ Server active
   variable server-active?
 
   \ Server tx and rx task
-  variable server-task
+  variable tx-task
 
   \ Tx and rx delay
   50 constant server-delay
   
-  \ RAM variable for rx buffer read-index
-  variable rx-read-index
-  
   \ RAM variable for rx buffer write-index
   variable rx-write-index
-  
-  \ Constant for number of bytes to buffer
-  2048 constant rx-buffer-size
-  
-  \ Rx buffer index mask
-  $7FF constant rx-index-mask
-  
-  \ Rx buffer
-  rx-buffer-size buffer: rx-buffer
   
   \ Variables for tx buffer write-index
   2variable tx-write-index
@@ -90,55 +76,21 @@ begin-module pico-w-net-repl
   \ Tx buffers
   tx-buffer-size 2 * buffer: tx-buffers
   
-  \ Tx timeout
-  100 value tx-timeout
-  
-  \ Tx timeout start
-  \ variable tx-timeout-start
-  
-  \ Rx semaphore
-  sema-size aligned-buffer: rx-sema
-  
-  \ Tx block semaphore
-  sema-size aligned-buffer: tx-block-sema
-    
   \ The TCP endpoint
   variable my-endpoint
+
+  \ The transmission notification area
+  variable tx-notify-area
+
+  \ The UART receiving notifcation area
+  variable uart-rx-notify-area
+
+  \ The transmission task
+  variable tx-task
+
+  \ The UART receiving task
+  variable uart-rx-task
   
-  \ Enable DHCP logging
-  true to dhcp-log? \ DEBUG
-
-  \ Get whether the rx buffer is full
-  : rx-full? ( -- f )
-    rx-write-index @ rx-read-index @
-    rx-buffer-size 1- + rx-index-mask and =
-  ;
-
-  \ Get whether the rx buffer is empty
-  : rx-empty? ( -- f )
-    rx-read-index @ rx-write-index @ =
-  ;
-
-  \ Write a byte to the rx buffer
-  : write-rx ( c -- )
-    rx-full? not if
-      rx-write-index @ rx-buffer + c!
-      rx-write-index @ 1+ rx-index-mask and rx-write-index !
-    else
-      drop
-    then
-  ;
-
-  \ Read a byte from the rx buffer
-  : read-rx ( -- c )
-    rx-empty? not if
-      rx-read-index @ rx-buffer + c@
-      rx-read-index @ 1+ rx-index-mask and rx-read-index !
-    else
-      0
-    then
-  ;
-
   \ Get whether the tx buffer is full
   : tx-full? ( -- f )
     tx-write-index tx-buffer-index @ cells + @ tx-buffer-size =
@@ -161,12 +113,9 @@ begin-module pico-w-net-repl
   ;
 
   \ Do server transmission
-  : do-server ( -- )
+  : do-tx-data ( -- )
     begin
-      \ 0 task::wait-notify drop
-      [: server-delay 10 * systick::systick-counter 0 task::wait-notify-timeout drop ;] try
-      dup ['] task::x-timed-out = if drop 0 then
-      ?raise
+      0 task::wait-notify-indefinite drop
       server-active? @ if
         [: 
           tx-buffer-index @ { buffer-index }
@@ -174,7 +123,7 @@ begin-module pico-w-net-repl
           tx-write-index buffer-index cells + @
           buffer-index 1+ 1 and dup { new-buffer-index } tx-buffer-index ! 
           0 tx-write-index new-buffer-index cells + !
-        ;] server-tx-slock with-slock { buffer count }
+        ;] tx-slock with-slock { buffer count }
         count 0> if
           my-endpoint @ if
             buffer count my-endpoint @ my-interface @ ['] send-tcp-endpoint try
@@ -188,102 +137,35 @@ begin-module pico-w-net-repl
           then
         then
       then
-      tx-block-sema broadcast
-      tx-block-sema give
+      0 uart-rx-task @ task::notify
+    again
+  ;
+
+  \ Do receiving data from the UART
+  : do-uart-rx ( -- )
+    begin
+      server-active? @ my-endpoint @ 0<> and if
+        uart-index uart>
+        begin
+          [:
+            tx-full? not if
+              write-tx true
+            else
+              false
+            then
+          ;] tx-slock with-slock
+          0 tx-task @ task::notify
+          dup not if 0 task::wait-notify-indefinite drop then
+        until
+      then
     again
   ;
   
   \ Actually handle received data
-  : do-rx-data ( c-addr bytes -- )
-    dup 0> if
-      [: { c-addr bytes }
-        c-addr bytes + c-addr ?do
-          rx-full? not if
-            i c@ write-rx
-          else
-            leave
-          then
-        loop
-      ;] server-rx-slock with-slock
-      rx-sema broadcast
-      rx-sema give
-    then
-  ;
-  
-  \ EMIT for telnet
-  : telnet-emit ( c -- )
-    server-active? @ if
-      begin
-        [:
-          tx-full? not if
-            write-tx
-            true
-          else
-            false
-          then
-        ;] server-tx-slock with-slock
-        0 server-task @ task::notify
-        dup not if
-          task::timeout @ { old-timeout }
-          server-delay 10 * task::timeout !
-          [: tx-block-sema take ;] try
-          dup ['] task::x-timed-out = if drop 0 then
-          old-timeout task::timeout !
-          ?raise
-        then
-      until
-    else
-      drop
-    then
-  ;
-
-  \ EMIT? for telnet
-  : telnet-emit? ( -- emit? )
-    server-active? @ if
-      [: tx-full? not ;] server-tx-slock with-slock
-    else
-      false
-    then
-  ;
-
-  \ KEY for telnet
-  : telnet-key ( -- c )
-    begin
-      server-active? @ if
-        [:
-          rx-empty? not if
-            read-rx
-            true
-          else
-            false
-          then
-        ;] server-rx-slock with-slock
-        dup not if
-          task::timeout @ { old-timeout }
-          server-delay 10 * task::timeout !
-          [: rx-sema take ;] try
-          dup ['] task::x-timed-out = if drop 0 then
-          old-timeout task::timeout !
-          ?raise
-        then
-      else
-        false
-      then
-    until
-  ;
-
-  \ KEY? for telnet
-  : telnet-key? ( -- key? )
-    server-active? @ if
-      [: rx-empty? not ;] server-rx-slock with-slock
-    else
-      false
-    then
-  ;
-  
-  \ Type data over telnet
-  : telnet-type { c-addr bytes -- }
-    c-addr bytes + c-addr ?do i c@ telnet-emit loop
+  : do-endpoint-rx { c-addr bytes -- }
+    c-addr bytes + c-addr ?do
+      i c@ uart-index >uart
+    loop
   ;
   
   <endpoint-handler> begin-class <tcp-session-handler>
@@ -295,7 +177,7 @@ begin-module pico-w-net-repl
     :noname { endpoint self -- }
       endpoint endpoint-tcp-state@ TCP_ESTABLISHED = if
         true server-active? !
-        endpoint endpoint-rx-data@ do-rx-data
+        endpoint endpoint-rx-data@ do-endpoint-rx
       then
       endpoint my-interface @ endpoint-done
       endpoint endpoint-tcp-state@ TCP_CLOSE_WAIT = if
@@ -315,17 +197,12 @@ begin-module pico-w-net-repl
 
   \ Initialize the test
   : init-test ( -- )
-    server-tx-slock init-slock
-    server-rx-slock init-slock
+    tx-slock init-slock
     0 tx-buffer-index !
     0 tx-write-index !
     0 tx-write-index cell+ !
-    0 rx-read-index !
-    0 rx-write-index !
     false server-active? !
     0 my-endpoint !
-    1 0 rx-sema init-sema
-    1 0 tx-block-sema init-sema
     pio-addr sm-index pio-instance <pico-w-cyw43-net> my-cyw43-net init-object
     my-cyw43-net cyw43-control@ my-cyw43-control !
     my-cyw43-net net-interface@ my-interface !
@@ -333,9 +210,12 @@ begin-module pico-w-net-repl
     <tcp-session-handler> my-tcp-session-handler init-object
     my-tcp-session-handler
     my-cyw43-net net-endpoint-process@ add-endpoint-handler
-    0 ['] do-server 512 128 1024 1 task::spawn-on-core server-task !
-    tx-notify-area 1 server-task @ task::config-notify
-    server-task @ task::run
+    0 ['] do-tx-data 512 128 1024 1 task::spawn-on-core tx-task !
+    0 ['] do-uart-rx 512 128 512 1 task::spawn-on-core uart-rx-task !
+    tx-notify-area 1 tx-task @ task::config-notify
+    uart-rx-notify-area 1 uart-rx-task @ task::config-notify
+    tx-task @ task::run
+    uart-rx-task @ task::run
   ;
 
   \ Event message buffer
@@ -374,80 +254,9 @@ begin-module pico-w-net-repl
   : start-server ( -- )
     server-port my-interface @ allocate-tcp-listen-endpoint if
       my-endpoint !
-\      0 [:
-\        begin
-\          my-endpoint @ if
-\            my-endpoint @ net-internal::endpoint-out-packets
-\            net-internal::out-packet-window @ dup cr ." Window: " .
-\            0< if display-red cr ." BAD WINDOW" display-normal [: ;] task::main-task task::signal exit then
-\          then
-\          1000 ms
-\        again
-\      ;] 320 128 1024 task::spawn task::run
     else
       drop
     then
-  ;
-  
-  \ Flush the telnet console
-  : telnet-flush-console ( -- )
-    server-active? @ if
-      begin
-        [:
-          tx-empty? if
-            true
-          else
-\            tx-sema give
-            false
-          then
-        ;] server-tx-slock with-slock
-        0 server-task @ task::notify
-        dup not if
-          task::timeout @ { old-timeout }
-          server-delay 10 * task::timeout !
-          tx-block-sema ['] take try dup ['] task::x-timed-out = if
-            2drop 0
-          then
-          old-timeout task::timeout !
-          ?raise
-        then
-      until
-    then
-  ;
-  
-  \ Set up telnet as a console
-  : telnet-console ( -- )
-    ['] telnet-key key-hook !
-    ['] telnet-key? key?-hook !
-    ['] telnet-emit emit-hook !
-    ['] telnet-emit? emit?-hook !
-    ['] telnet-emit error-emit-hook !
-    ['] telnet-emit? error-emit?-hook !
-  ;
-  
-  \ Set the curent input to telnet within an xt
-  : with-telnet-input ( xt -- )
-    ['] telnet-key
-    ['] telnet-key?
-    rot console::with-input
-  ;
-  
-  \ Set the current output to telnet within an xt
-  : with-telnet-output ( xt -- )
-    ['] telnet-emit
-    ['] telnet-emit?
-    rot
-    ['] telnet-flush-console
-    swap console::with-output
-  ;
-
-  \ Set the current error output to telnet within an xt
-  : with-telnet-error-output ( xt -- )
-    ['] telnet-emit
-    ['] telnet-emit?
-    rot
-    ['] telnet-flush-console
-    swap console::with-error-output
   ;
 
 end-module

@@ -163,7 +163,7 @@ begin-module pico-w-net-repl
     then
   ;
 
-  \ Do server transmission and receiving
+  \ Do server transmission
   : do-server ( -- )
     begin
       tx-timeout systick::systick-counter tx-timeout-start @ - - 0 max { my-timeout }
