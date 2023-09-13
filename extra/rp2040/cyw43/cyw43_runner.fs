@@ -44,7 +44,7 @@ begin-module cyw43-runner
   1024 constant cyw43-log-shm-size
 
   \ Receive MTU count
-  16 constant rx-mtu-count
+  24 constant rx-mtu-count
 
   \ Transmit MTU count
   16 constant tx-mtu-count
