@@ -24,7 +24,7 @@ begin-module net-config
   false constant debug?
   
   \ DHCP logging
-  true value dhcp-log?
+  false value dhcp-log?
   
   \ The MTU size
   1500 constant mtu-size
