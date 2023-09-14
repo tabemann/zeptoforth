@@ -41,25 +41,25 @@ begin-module uart
     : validate-uart ( uart -- ) 2 u< averts x-invalid-uart ;
 
     \ RAM variable for rx buffer read-index
-    cvariable uart1-rx-read-index
+    variable uart1-rx-read-index
 
     \ RAM variable for rx buffer write-index
-    cvariable uart1-rx-write-index
+    variable uart1-rx-write-index
 
     \ Constant for number of bytes to buffer
-    128 constant uart1-rx-buffer-size
+    256 constant uart1-rx-buffer-size
 
     \ Rx buffer
     uart1-rx-buffer-size buffer: uart1-rx-buffer
 
     \ RAM variable for tx buffer read-index
-    cvariable uart1-tx-read-index
+    variable uart1-tx-read-index
 
     \ RAM variable for tx buffer write-index
-    cvariable uart1-tx-write-index
+    variable uart1-tx-write-index
 
     \ Constant for number of bytes to buffer
-    128 constant uart1-tx-buffer-size
+    256 constant uart1-tx-buffer-size
 
     \ Tx buffer
     uart1-tx-buffer-size buffer: uart1-tx-buffer
@@ -122,21 +122,21 @@ begin-module uart
 
     \ Get whether the rx buffer is full
     : uart1-rx-full? ( -- f )
-      uart1-rx-write-index c@ uart1-rx-read-index c@
-      rx-buffer-size 1- + $7F and =
+      uart1-rx-write-index @ uart1-rx-read-index @
+      rx-buffer-size 1- + $FF and =
     ;
 
     \ Get whether the rx buffer is empty
     : uart1-rx-empty? ( -- f )
-      uart1-rx-read-index c@ uart1-rx-write-index c@ =
+      uart1-rx-read-index @ uart1-rx-write-index @ =
     ;
 
     \ Write a byte to the rx buffer
     : write-uart1-rx ( c -- )
       [:
 	uart1-rx-full? not if
-	  uart1-rx-write-index c@ uart1-rx-buffer + c!
-	  uart1-rx-write-index c@ 1+ $7F and uart1-rx-write-index c!
+	  uart1-rx-write-index @ uart1-rx-buffer + c!
+	  uart1-rx-write-index @ 1+ $FF and uart1-rx-write-index !
 	else
 	  drop
 	then
@@ -147,8 +147,8 @@ begin-module uart
     : read-uart1-rx ( -- c )
       [:
 	uart1-rx-empty? not if
-	  uart1-rx-read-index c@ uart1-rx-buffer + c@
-	  uart1-rx-read-index c@ 1+ $7F and uart1-rx-read-index c!
+	  uart1-rx-read-index @ uart1-rx-buffer + c@
+	  uart1-rx-read-index @ 1+ $FF and uart1-rx-read-index !
 	else
 	  0
 	then
@@ -157,21 +157,21 @@ begin-module uart
 
     \ Get whether the tx buffer is full
     : uart1-tx-full? ( -- f )
-      uart1-tx-write-index c@ uart1-tx-read-index c@
-      uart1-tx-buffer-size 1- + $7F and =
+      uart1-tx-write-index @ uart1-tx-read-index @
+      uart1-tx-buffer-size 1- + $FF and =
     ;
 
     \ Get whether the tx buffer is empty
     : uart1-tx-empty? ( -- f )
-      uart1-tx-read-index c@ uart1-tx-write-index c@ =
+      uart1-tx-read-index @ uart1-tx-write-index @ =
     ;
 
     \ Write a byte to the tx buffer
     : write-uart1-tx ( c -- )
       [:
 	uart1-tx-full? not if
-	  uart1-tx-write-index c@ uart1-tx-buffer + c!
-	  uart1-tx-write-index c@ 1+ $7F and uart1-tx-write-index c!
+	  uart1-tx-write-index @ uart1-tx-buffer + c!
+	  uart1-tx-write-index @ 1+ $FF and uart1-tx-write-index !
 	else
 	  drop
 	then
@@ -182,8 +182,8 @@ begin-module uart
     : read-uart1-tx ( -- c )
       [:
 	uart1-tx-empty? not if
-	  uart1-tx-read-index c@ uart1-tx-buffer + c@
-	  uart1-tx-read-index c@ 1+ $7F and uart1-tx-read-index c!
+	  uart1-tx-read-index @ uart1-tx-buffer + c@
+	  uart1-tx-read-index @ 1+ $FF and uart1-tx-read-index !
 	else
 	  0
 	then
@@ -294,10 +294,10 @@ begin-module uart
     
     \ Initialize interrupt-driven IO on UART1
     : init-uart1 ( -- )
-      0 uart1-rx-read-index c!
-      0 uart1-rx-write-index c!
-      0 uart1-tx-read-index c!
-      0 uart1-tx-write-index c!
+      0 uart1-rx-read-index !
+      0 uart1-rx-write-index !
+      0 uart1-tx-read-index !
+      0 uart1-tx-write-index !
       115200 1 uart-baud!
       1 enable-uart
       enable-uart1-int-io
