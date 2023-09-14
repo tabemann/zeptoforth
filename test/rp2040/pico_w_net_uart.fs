@@ -59,19 +59,16 @@ begin-module pico-w-net-uart
   variable tx-task
 
   \ Tx and rx delay
-  50 constant server-delay
+  100 constant server-delay
   
-  \ RAM variable for rx buffer write-index
-  variable rx-write-index
+  \ Current tx buffer address
+  variable tx-buffer-addr
   
-  \ Variables for tx buffer write-index
-  2variable tx-write-index
+  \ Write tx count
+  variable tx-count
   
-  \ Tx buffer index
-  variable tx-buffer-index
-    
   \ Constant for number of bytes to buffer
-  2048 constant tx-buffer-size
+  8192 constant tx-buffer-size
   
   \ Tx buffers
   tx-buffer-size 2 * buffer: tx-buffers
@@ -90,40 +87,48 @@ begin-module pico-w-net-uart
 
   \ The UART receiving task
   variable uart-rx-task
+
+  \ Tx next char index
+  : tx-next@ ( -- c-addr )
+    tx-buffer-addr @ dup @ cell+ +
+  ;
   
   \ Get whether the tx buffer is full
   : tx-full? ( -- f )
-    tx-write-index tx-buffer-index @ cells + @ tx-buffer-size =
+    tx-buffer-addr @ @ tx-buffer-size =
   ;
   
   \ Get whether the tx buffer is empty
   : tx-empty? ( -- f )
-    tx-write-index @ 0= tx-write-index cell+ @ 0= and
+    tx-buffers @ 0= [ tx-buffers cell + tx-buffer-size + ] literal @ 0= and
   ;
 
   \ Write a byte to the tx buffer
-  : write-tx { c -- }
-    tx-buffer-index @ { buffer-index }
-    tx-write-index buffer-index cells + { write-var }
-    write-var @ { write-index }
-    write-index tx-buffer-size <> if
-      c tx-buffers buffer-index tx-buffer-size * + write-index + c!
-      1 write-var +!
-    then
+  : write-tx ( c -- )
+    tx-buffer-addr @ dup @ cell+ + c!
+    1 tx-buffer-addr @ +!
   ;
 
+  \ Swap tx buffers and get the selected buffer addr and size
+  : swap-tx ( -- c-addr bytes )
+    [:
+      tx-buffer-addr @ dup cell+ swap @
+      tx-buffer-addr @ tx-buffers = if
+        [ tx-buffers cell + tx-buffer-size + ] literal tx-buffer-addr !
+      else
+        tx-buffers tx-buffer-addr !
+      then
+      0 tx-buffers !
+      0 [ tx-buffers cell + tx-buffer-size + ] literal !
+    ;] critical
+  ;
+  
   \ Do server transmission
   : do-tx-data ( -- )
     begin
       0 task::wait-notify-indefinite drop
       server-active? @ if
-        [: 
-          tx-buffer-index @ { buffer-index }
-          tx-buffers buffer-index tx-buffer-size * +
-          tx-write-index buffer-index cells + @
-          buffer-index 1+ 1 and dup { new-buffer-index } tx-buffer-index ! 
-          0 tx-write-index new-buffer-index cells + !
-        ;] tx-slock with-slock { buffer count }
+        tx-buffer-addr @ tx-count @ { buffer count }
         count 0> if
           my-endpoint @ if
             buffer count my-endpoint @ my-interface @ ['] send-tcp-endpoint try
@@ -131,7 +136,8 @@ begin-module pico-w-net-uart
               nip nip nip nip
               [: display-red execute display-normal ;] usb::with-usb-output
             then
-            my-cyw43-net toggle-pico-w-led
+            \ my-cyw43-net toggle-pico-w-led
+            0 tx-count !
           else
             [: cr ." NO ENDPOINT " ;] usb::with-usb-output
           then
@@ -143,20 +149,37 @@ begin-module pico-w-net-uart
 
   \ Do receiving data from the UART
   : do-uart-rx ( -- )
+    true tx-buffers 0 systick::systick-counter { first buffer index start }
     begin
       server-active? @ my-endpoint @ 0<> and if
-        uart-index uart>
-        begin
-          [:
-            tx-full? not if
-              write-tx true
-            else
-              false
-            then
-          ;] tx-slock with-slock
-          0 tx-task @ task::notify
-          dup not if 0 task::wait-notify-indefinite drop then
-        until
+        index tx-buffer-size < if
+          first if true else uart-index uart>? then if
+            uart-index uart> buffer index + c!
+            1 +to index
+            systick::systick-counter to start
+            false to first
+            false
+          else
+            systick::systick-counter start - server-delay >
+            tx-count @ 0= and
+          then
+        else
+          true
+        then
+        if
+          tx-count @ 0= if
+            tx-buffer-addr @
+            buffer tx-buffer-addr !
+            to buffer
+            index tx-count !
+            0 to index
+            0 tx-task @ task::notify
+          else
+            0 task::wait-notify-indefinite drop
+          then
+        then
+      else
+        true to first
       then
     again
   ;
@@ -176,18 +199,28 @@ begin-module pico-w-net-uart
     \ Handle a endpoint packet
     :noname { endpoint self -- }
       endpoint endpoint-tcp-state@ TCP_ESTABLISHED = if
+        not server-active? @ if
+          endpoint [: cr ." Got ESTABLISHED on " h.8 ;] usb::with-usb-output
+        then
         true server-active? !
         endpoint endpoint-rx-data@ do-endpoint-rx
       then
       endpoint my-interface @ endpoint-done
       endpoint endpoint-tcp-state@ TCP_CLOSE_WAIT = if
+        endpoint [: cr ." Got CLOSE_WAIT on " h.8 ;] usb::with-usb-output
         false server-active? !
         endpoint my-interface @ close-tcp-endpoint
-        server-port my-interface @ allocate-tcp-listen-endpoint if
+        endpoint endpoint-tcp-state@ TCP_CLOSED = if
+          endpoint [: cr ." Got CLOSED after close-tcp-endpoint on " h.8 ;] usb::with-usb-output
+        then
+          server-port my-interface @ allocate-tcp-listen-endpoint if
           my-endpoint !
         else
           drop
         then
+      then
+      endpoint endpoint-tcp-state@ TCP_CLOSED = if
+        endpoint [: cr ." Got CLOSED on " h.8 ;] usb::with-usb-output
       then
     ; define handle-endpoint
   
@@ -199,9 +232,8 @@ begin-module pico-w-net-uart
   : init-test ( -- )
     false uart-special-enabled !
     tx-slock init-slock
-    0 tx-buffer-index !
-    0 tx-write-index !
-    0 tx-write-index cell+ !
+    tx-buffers tx-buffer-size + tx-buffer-addr !
+    0 tx-count !
     false server-active? !
     0 my-endpoint !
     pio-addr sm-index pio-instance <pico-w-cyw43-net> my-cyw43-net init-object
