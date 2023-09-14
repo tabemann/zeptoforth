@@ -303,21 +303,6 @@ begin-module uart
       enable-uart1-int-io
     ;
 
-    \ Saved second core hook
-    variable core-init-hook-saved
-
-    \ Initalize UART on the second core
-    : init-uart-core-1 ( -- )
-      task::core-init-hook @ core-init-hook-saved !
-      [:
-        core-init-hook-saved @ execute
-        disable-int
-        0 uart1-irq NVIC_IPR_IP!
-        uart1-irq NVIC_ISER_SETENA!
-        enable-int
-      ;] task::core-init-hook !
-    ;
-
   end-module
 
   \ Emit a byte to a UART
@@ -484,7 +469,6 @@ end-module> import
 : init ( -- )
   init
   uart-internal::init-uart1
-  uart-internal::init-uart-core-1
 ;
 
 \ Reboot
