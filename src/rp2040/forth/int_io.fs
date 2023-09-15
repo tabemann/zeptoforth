@@ -31,25 +31,25 @@ begin-module int-io
   begin-module int-io-internal
 
     \ RAM variable for rx buffer read-index
-    cvariable rx-read-index
+    variable rx-read-index
 
     \ RAM variable for rx buffer write-index
-    cvariable rx-write-index
+    variable rx-write-index
 
     \ Constant for number of bytes to buffer
-    128 constant rx-buffer-size
+    256 constant rx-buffer-size
 
     \ Rx buffer
     rx-buffer-size buffer: rx-buffer
 
     \ RAM variable for tx buffer read-index
-    cvariable tx-read-index
+    variable tx-read-index
 
     \ RAM variable for tx buffer write-index
-    cvariable tx-write-index
+    variable tx-write-index
 
     \ Constant for number of bytes to buffer
-    128 constant tx-buffer-size
+    256 constant tx-buffer-size
 
     \ Tx buffer
     tx-buffer-size buffer: tx-buffer
@@ -97,21 +97,21 @@ begin-module int-io
 
     \ Get whether the rx buffer is full
     : rx-full? ( -- f )
-      rx-write-index c@ rx-read-index c@
-      rx-buffer-size 1- + $7F and =
+      rx-write-index @ rx-read-index @
+      rx-buffer-size 1- + $FF and =
     ;
 
     \ Get whether the rx buffer is empty
     : rx-empty? ( -- f )
-      rx-read-index c@ rx-write-index c@ =
+      rx-read-index @ rx-write-index @ =
     ;
 
     \ Write a byte to the rx buffer
     : write-rx ( c -- )
       [:
 	rx-full? not if
-	  rx-write-index c@ rx-buffer + c!
-	  rx-write-index c@ 1+ $7F and rx-write-index c!
+	  rx-write-index @ rx-buffer + c!
+	  rx-write-index @ 1+ $FF and rx-write-index !
 	else
 	  drop
 	then
@@ -122,8 +122,8 @@ begin-module int-io
     : read-rx ( -- c )
       [:
 	rx-empty? not if
-	  rx-read-index c@ rx-buffer + c@
-	  rx-read-index c@ 1+ $7F and rx-read-index c!
+	  rx-read-index @ rx-buffer + c@
+	  rx-read-index @ 1+ $FF and rx-read-index !
 	else
 	  0
 	then
@@ -132,21 +132,21 @@ begin-module int-io
 
     \ Get whether the tx buffer is full
     : tx-full? ( -- f )
-      tx-write-index c@ tx-read-index c@
-      tx-buffer-size 1- + $7F and =
+      tx-write-index @ tx-read-index @
+      tx-buffer-size 1- + $FF and =
     ;
 
     \ Get whether the tx buffer is empty
     : tx-empty? ( -- f )
-      tx-read-index c@ tx-write-index c@ =
+      tx-read-index @ tx-write-index @ =
     ;
 
     \ Write a byte to the tx buffer
     : write-tx ( c -- )
       [:
 	tx-full? not if
-	  tx-write-index c@ tx-buffer + c!
-	  tx-write-index c@ 1+ $7F and tx-write-index c!
+	  tx-write-index @ tx-buffer + c!
+	  tx-write-index @ 1+ $FF and tx-write-index !
 	else
 	  drop
 	then
@@ -157,8 +157,8 @@ begin-module int-io
     : read-tx ( -- c )
       [:
 	tx-empty? not if
-	  tx-read-index c@ tx-buffer + c@
-	  tx-read-index c@ 1+ $7F and tx-read-index c!
+	  tx-read-index @ tx-buffer + c@
+	  tx-read-index @ 1+ $FF and tx-read-index !
 	else
 	  0
 	then
@@ -299,10 +299,10 @@ begin-module int-io
 
   \ Initialize interrupt-driven IO
   : init-int-io ( -- )
-    0 rx-read-index c!
-    0 rx-write-index c!
-    0 tx-read-index c!
-    0 tx-write-index c!
+    0 rx-read-index !
+    0 rx-write-index !
+    0 tx-read-index !
+    0 tx-write-index !
     enable-int-io
   ;
   
