@@ -88,41 +88,6 @@ begin-module pico-w-net-uart
   \ The UART receiving task
   variable uart-rx-task
 
-  \ Tx next char index
-  : tx-next@ ( -- c-addr )
-    tx-buffer-addr @ dup @ cell+ +
-  ;
-  
-  \ Get whether the tx buffer is full
-  : tx-full? ( -- f )
-    tx-buffer-addr @ @ tx-buffer-size =
-  ;
-  
-  \ Get whether the tx buffer is empty
-  : tx-empty? ( -- f )
-    tx-buffers @ 0= [ tx-buffers cell + tx-buffer-size + ] literal @ 0= and
-  ;
-
-  \ Write a byte to the tx buffer
-  : write-tx ( c -- )
-    tx-buffer-addr @ dup @ cell+ + c!
-    1 tx-buffer-addr @ +!
-  ;
-
-  \ Swap tx buffers and get the selected buffer addr and size
-  : swap-tx ( -- c-addr bytes )
-    [:
-      tx-buffer-addr @ dup cell+ swap @
-      tx-buffer-addr @ tx-buffers = if
-        [ tx-buffers cell + tx-buffer-size + ] literal tx-buffer-addr !
-      else
-        tx-buffers tx-buffer-addr !
-      then
-      0 tx-buffers !
-      0 [ tx-buffers cell + tx-buffer-size + ] literal !
-    ;] critical
-  ;
-  
   \ Do server transmission
   : do-tx-data ( -- )
     begin
@@ -203,8 +168,8 @@ begin-module pico-w-net-uart
           endpoint [: cr ." Got ESTABLISHED on " h.8 ;] usb::with-usb-output
         then
         true server-active? !
-        endpoint endpoint-rx-data@ do-endpoint-rx
       then
+      endpoint endpoint-rx-data@ do-endpoint-rx
       endpoint my-interface @ endpoint-done
       endpoint endpoint-tcp-state@ TCP_CLOSE_WAIT = if
         endpoint [: cr ." Got CLOSE_WAIT on " h.8 ;] usb::with-usb-output
