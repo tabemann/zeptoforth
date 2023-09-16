@@ -180,11 +180,10 @@ begin-module pico-w-net-uart
         then
         true server-active? !
       then
-      endpoint endpoint-rx-data@ nip 0=
-      endpoint endpoint-tcp-state@ TCP_CLOSE_WAIT = and if
+      endpoint endpoint-tcp-state@ TCP_CLOSE_WAIT = if
         closing? @ not if
           true closing? !
-          5000 0 endpoint [: drop { endpoint }
+          0 0 endpoint [: drop { endpoint }
             false server-active? !
             endpoint my-interface @ close-tcp-endpoint
             cr ." Got " rx-byte-count @ . ." bytes"
