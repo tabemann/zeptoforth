@@ -34,6 +34,7 @@ begin-module pico-w-net-uart
   simple-cyw43-net import
   pico-w-cyw43-net import
   uart import
+  alarm import
   
   0 constant pio-addr
   0 constant sm-index
@@ -88,6 +89,15 @@ begin-module pico-w-net-uart
   \ The UART receiving task
   variable uart-rx-task
 
+  \ Are we closing?
+  variable closing?
+
+  \ Closing alarm
+  alarm-size buffer: my-close-alarm
+
+  \ The received byte count
+  variable rx-byte-count
+  
   \ Do server transmission
   : do-tx-data ( -- )
     begin
@@ -151,6 +161,7 @@ begin-module pico-w-net-uart
   
   \ Actually handle received data
   : do-endpoint-rx { c-addr bytes -- }
+    bytes rx-byte-count +!
     c-addr bytes + c-addr ?do
       i c@ uart-index >uart
     loop
@@ -164,29 +175,39 @@ begin-module pico-w-net-uart
     \ Handle a endpoint packet
     :noname { endpoint self -- }
       endpoint endpoint-tcp-state@ TCP_ESTABLISHED = if
-        not server-active? @ if
-          endpoint [: cr ." Got ESTABLISHED on " h.8 ;] usb::with-usb-output
+        server-active? @ not if
+          0 rx-byte-count !
+\          endpoint [: cr ." Got ESTABLISHED on " h.8 ;] usb::with-usb-output
         then
         true server-active? !
+      else
+        endpoint endpoint-tcp-state@ TCP_CLOSE_WAIT = if
+\          endpoint [: cr ." Got CLOSE_WAIT on " h.8 ;] usb::with-usb-output
+          closing? @ not if
+            true closing? !
+            5000 0 endpoint [: drop { endpoint }
+              false server-active? !
+              endpoint my-interface @ close-tcp-endpoint
+              cr ." Got " rx-byte-count @ . ." bytes"
+              endpoint endpoint-tcp-state@ TCP_CLOSED = if
+                false closing? !
+                endpoint
+                [:
+                  cr ." Got CLOSED after close-tcp-endpoint on " h.8
+                ;] usb::with-usb-output
+              then
+              0 rx-byte-count !
+              server-port my-interface @ allocate-tcp-listen-endpoint if
+                my-endpoint !
+              else
+                drop
+              then
+            ;] my-close-alarm set-alarm-delay-default
+          then
+        then
       then
       endpoint endpoint-rx-data@ do-endpoint-rx
       endpoint my-interface @ endpoint-done
-      endpoint endpoint-tcp-state@ TCP_CLOSE_WAIT = if
-        endpoint [: cr ." Got CLOSE_WAIT on " h.8 ;] usb::with-usb-output
-        false server-active? !
-        endpoint my-interface @ close-tcp-endpoint
-        endpoint endpoint-tcp-state@ TCP_CLOSED = if
-          endpoint [: cr ." Got CLOSED after close-tcp-endpoint on " h.8 ;] usb::with-usb-output
-        then
-          server-port my-interface @ allocate-tcp-listen-endpoint if
-          my-endpoint !
-        else
-          drop
-        then
-      then
-      endpoint endpoint-tcp-state@ TCP_CLOSED = if
-        endpoint [: cr ." Got CLOSED on " h.8 ;] usb::with-usb-output
-      then
     ; define handle-endpoint
   
   end-implement
@@ -201,6 +222,8 @@ begin-module pico-w-net-uart
     0 tx-count !
     false server-active? !
     0 my-endpoint !
+    false closing? !
+    0 rx-byte-count !
     pio-addr sm-index pio-instance <pico-w-cyw43-net> my-cyw43-net init-object
     my-cyw43-net cyw43-control@ my-cyw43-control !
     my-cyw43-net net-interface@ my-interface !

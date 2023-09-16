@@ -451,6 +451,9 @@ begin-module net
     \ Clear contiguous packets
     method clear-in-packets ( self -- )
 
+    \ Get whether there is waiting data
+    method in-packets-waiting? ( self -- waiting? )
+
     \ Print in packets
     method in-packets. ( self -- )
     
@@ -541,35 +544,6 @@ begin-module net
         usb::with-usb-output
       [then]
     ; define waiting-in-bytes@
-
-    \ Push data
-    \ :noname { seq self -- }
-    \   self in-packet-count @ 0 { total-count count }
-    \   total-count 0 ?do
-    \     self first-in-packet-seq @ { first-seq }
-    \     self in-packet-seqs i cells + @ { current-seq }
-    \     self in-packet-sizes i 1 lshift + h@ { current-size }
-    \     current-seq first-seq - { diff }
-    \     diff seq first-seq - <= if
-    \       self pushed-in-packet-offset @ { pushed-offset }
-    \       self in-packet-addr @ pushed-offset + dup diff + swap
-    \       self in-packet-offset @ pushed-offset - diff - move
-    \       current-seq current-size + self first-in-packet-seq !
-    \       current-size self pushed-in-packet-offset +!
-    \       diff negate self in-packet-offset +!
-    \       1 +to count
-    \     then
-    \   loop
-    \   self in-packet-seqs count cells + self in-packet-seqs
-    \   total-count count - cells move
-    \   self in-packet-sizes count 1 lshift + self in-packet-sizes
-    \   total-count count - 1 lshift move
-    \   count negate self in-packet-count +!
-    \   [ debug? ] [if]
-    \     self [: cr ." @@@ push-packets: " in-packets. ;]
-    \     usb::with-usb-output
-    \   [then]
-    \ ; define push-packets
 
     \ Join complete packets
     :noname { self -- }
@@ -678,10 +652,6 @@ begin-module net
           then
         then        
       then
-
-      \ push? if
-      \   init-seq self push-packets
-      \ then
 
       self join-complete-packets
 
@@ -814,6 +784,11 @@ begin-module net
         dup [: ." @@@ in-packet-ack@: " . ;] usb::with-usb-output
       [then]
     ; define in-packet-ack@
+
+    \ Get whether there is waiting data
+    :noname ( self -- waiting? )
+      dup pending-in-packet-offset @ swap in-packet-offset @ <>
+    ; define in-packets-waiting?
 
     \ Promote incoming data to pending
     :noname { self -- bytes }
@@ -1559,6 +1534,9 @@ begin-module net
     \ Get local port
     method endpoint-local-port@ ( self -- port )
 
+    \ Get whether there is waiting data
+    method waiting-rx-data? ( self -- waiting? )
+
   end-class
 
   \ Implement the endpoint class
@@ -2128,6 +2106,11 @@ begin-module net
         endcase
       ;] over endpoint-lock with-lock
     ; define escalate-endpoint-refresh
+
+    \ Get whether there is waiting data
+    :noname ( self -- waiting? )
+      [: endpoint-in-packets in-packets-waiting? ;] over endpoint-lock with-lock
+    ; define waiting-rx-data?
 
   end-implement
 
@@ -3088,11 +3071,10 @@ begin-module net
     
     \ Process an IPv4 ACK packet in TCP_LAST_ACK state
     :noname { addr bytes endpoint self -- }
+      addr bytes endpoint self process-ipv4-basic-ack
       addr tcp-ack-no unaligned@ rev
       endpoint endpoint-local-seq@ = if
         TCP_CLOSED endpoint endpoint-tcp-state!
-      else
-        addr bytes endpoint self process-ipv4-basic-ack
       then
     ; define process-ipv4-ack-last-ack
 
@@ -3813,11 +3795,12 @@ begin-module net
         endpoint endpoint-ipv4-remote@
         endpoint endpoint-local-port@
         endpoint endpoint-local-seq@
-        0
+        endpoint endpoint-ack@
         endpoint endpoint-local-window@
-        TCP_FIN
+        TCP_FIN endpoint endpoint-send-ack? if TCP_ACK or then
         endpoint endpoint-remote-mac-addr@
         self send-ipv4-basic-tcp
+        endpoint endpoint-ack-sent
       ;] 2 pick with-endpoint
     ; define send-fin
     
