@@ -177,33 +177,31 @@ begin-module pico-w-net-uart
       endpoint endpoint-tcp-state@ TCP_ESTABLISHED = if
         server-active? @ not if
           0 rx-byte-count !
-\          endpoint [: cr ." Got ESTABLISHED on " h.8 ;] usb::with-usb-output
         then
         true server-active? !
-      else
-        endpoint endpoint-tcp-state@ TCP_CLOSE_WAIT = if
-\          endpoint [: cr ." Got CLOSE_WAIT on " h.8 ;] usb::with-usb-output
-          closing? @ not if
-            true closing? !
-            0 0 endpoint [: drop { endpoint }
-              false server-active? !
-              endpoint my-interface @ close-tcp-endpoint
-              cr ." Got " rx-byte-count @ . ." bytes"
-              endpoint endpoint-tcp-state@ TCP_CLOSED = if
-                false closing? !
-                endpoint
-                [:
-                  cr ." Got CLOSED after close-tcp-endpoint on " h.8
-                ;] usb::with-usb-output
-              then
-              0 rx-byte-count !
-              server-port my-interface @ allocate-tcp-listen-endpoint if
-                my-endpoint !
-              else
-                drop
-              then
-            ;] my-close-alarm set-alarm-delay-default
-          then
+      then
+      endpoint endpoint-rx-data@ nip 0=
+      endpoint endpoint-tcp-state@ TCP_CLOSE_WAIT = and if
+        closing? @ not if
+          true closing? !
+          5000 0 endpoint [: drop { endpoint }
+            false server-active? !
+            endpoint my-interface @ close-tcp-endpoint
+            cr ." Got " rx-byte-count @ . ." bytes"
+            endpoint endpoint-tcp-state@ TCP_CLOSED = if
+              false closing? !
+              endpoint
+              [:
+                cr ." Got CLOSED after close-tcp-endpoint on " h.8
+              ;] usb::with-usb-output
+            then
+            0 rx-byte-count !
+            server-port my-interface @ allocate-tcp-listen-endpoint if
+              my-endpoint !
+            else
+              drop
+            then
+          ;] my-close-alarm set-alarm-delay-default
         then
       then
       endpoint endpoint-rx-data@ do-endpoint-rx
