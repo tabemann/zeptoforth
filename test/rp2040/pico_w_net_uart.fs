@@ -185,7 +185,7 @@ begin-module pico-w-net-uart
 \          endpoint [: cr ." Got CLOSE_WAIT on " h.8 ;] usb::with-usb-output
           closing? @ not if
             true closing? !
-            5000 0 endpoint [: drop { endpoint }
+            0 0 endpoint [: drop { endpoint }
               false server-active? !
               endpoint my-interface @ close-tcp-endpoint
               cr ." Got " rx-byte-count @ . ." bytes"
