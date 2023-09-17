@@ -32,127 +32,127 @@ The `net` module contains the following classes:
 The `<interface>` class has the following constructor:
 
 ##### `new`
-( frame-interface self -- )
+( frame-interface interface -- )
 
 This constructs an `<interface>` instance for a given _frame interface_, an instance of `frame-interface::<frame-interface>`, which encapsulates a connection to the hardware network interface.
 
 ##### `intf-ipv4-addr@`
-( self -- addr )
+( interface -- addr )
 
 Get an interface's IPv4 address.
 
 ##### `intf-ipv4-addr!`
-( addr self -- )
+( addr interface -- )
 
 Manually set an interface's IPv4 address.
 
 ##### `intf-ipv4-netmask@`
-( self -- netmask )
+( interface -- netmask )
 
 Get an interface's IPv4 netmask.
 
 ##### `intf-ipv4-netmask!`
-( netmask self -- )
+( netmask interface -- )
 
 Manually set an interface's IPv4 netmask.
 
 ##### `gateway-ipv4-addr@`
-( self -- addr )
+( interface -- addr )
 
 Get an interface's gateway's IPv4 address.
 
 ##### `gateway-ipv4-addr!`
-( addr self -- )
+( addr interface -- )
 
 Manually set an interface's gateway's IPv4 address.
 
 ##### `dns-server-ipv4-addr@`
-( self -- addr )
+( interface -- addr )
 
 Get an interface's DNS server's IPv4 address.
 
 ##### `dns-server-ipv4-addr!`
-( addr self -- )
+( addr interface -- )
 
 Manually set an interface's gateway's IPv4 address.
 
 ##### `intf-ipv4-broadcast@`
-( self -- addr )
+( interface -- addr )
 
 Get an interface's IPv4 broadcast address.
 
 ##### `intf-mac-addr@`
-( self -- D: mac-addr )
+( interface -- D: mac-addr )
 
 Get an interface's MAC address.
 
 ##### `intf-ttl@`
-( self -- tll )
+( interface -- tll )
 
 Get an interface's TTL.
 
 ##### `intf-ttl!`
-( ttl self -- )
+( ttl interface -- )
 
 Set an interface's TTL.
 
 ##### `discover-ipv4-addr`
-( self -- )
+( interface -- )
 
 Discover an interface's IPv4 address, IPv4 netmask, gateway IPv4 address, and DNS server IPv4 address via DHCP.
 
 ##### `send-tcp-endpoint`
-( addr bytes endpoint self -- )
+( addr bytes endpoint interface -- )
 
 Send *bytes* at *addr* to the peer of *endpoint*. This will return when sending data is complete or if the connection is closed or its connection is not yet established.
 
 ##### `send-ipv4-udp-packet`
-( ? src-port dest-addr dest-port bytes xt self -- ? success? )
+( ? src-port dest-addr dest-port bytes xt interface -- ? success? )
 
 This will call *xt* with a signature of ( ? buffer -- ? send? ) with an address of a buffer guaranteed to be of size *bytes* to construct a UDP packet with a payload consisting of that buffer from *src-port* (which may be any port from `net-consts::MIN_EPHEMERAL_PORT` to `net-consts::MAX_EPHEMERAL_PORT` if `net-consts::EPHEMERAL_PORT` is provided) to *dest-addr* at *dest-port*; if true is returned the packet is sent, and true will be returned afterwards, else the packet is not sent and false is returned. Note that false may be returned if the MAC address corresponding to *dest-addr* cannot be resolved.
 
 ##### `resolve-ipv4-addr-mac-addr`
-( dest-addr self -- D: mac-addr success? )
+( dest-addr interface -- D: mac-addr success? )
 
 Attempt to resolve the MAC address of an IPv4 address; if successful, true and the MAC address are returned, else false and padding cells are returned.
 
 ##### `resolve-dns-ipv4-addr`
-( c-addr bytes self -- ipv4-addr success? )
+( c-addr bytes interface -- ipv4-addr success? )
 
 Attempt to resolve the IPv4 address of a hostname via DNS; if successful, true and the IPv4 address are returned, else false and a apdding cell is returned.
 
 ##### `get-ready-endpoint`
-( self -- endpoint )
+( interface -- endpoint )
 
 Do a blocking wait to get the next ready endpoint; note that the user may use `task::timeout` to apply a timeout to this.
 
 ##### `endpoint-done`
-( endpoint self -- )
+( endpoint interface -- )
 
 Retire the current pending data for an endpoint and allow the endpoint to be readied again; if there is data already available, the endpoint will be readied again immediately.
 
 ##### `allocate-udp-listen-endpoint`
-( port self -- endpoint success? )
+( port interface -- endpoint success? )
 
 Attempt to allocate a UDP endpoint listening on *port* (which may be any port from `net-consts::MIN_EPHEMERAL_PORT` to `net-consts::MAX_EPHEMERAL_PORT` if `net-consts::EPHEMERAL_PORT` is provided) and return true along with the endpoint, unless no endpoints are free, where then false is returned along with a padding cell.
 
 ##### `allocate-tcp-listen-endpoint`
-( port self -- endpoint success? )
+( port interface -- endpoint success? )
 
 Attempt to allocate a TCP endpoint listening on *port* (which may be any port from `net-consts::MIN_EPHEMERAL_PORT` to `net-consts::MAX_EPHEMERAL_PORT` if `net-consts::EPHEMERAL_PORT` is provided) and return true along with the endpoint, unless no endpoints are free, where then false is returned along with a padding cell.
 
 ##### `allocate-tcp-connect-ipv4-endpoint`
-( src-port dest-addr dest-port self -- endpoint success? )
+( src-port dest-addr dest-port interface -- endpoint success? )
 
 Attempt to allocate a TCP endpoint connected to the IPv4 address *dest-addr* at *dest-port* from *src-port* (which may be any port from `net-consts::MIN_EPHEMERAL_PORT` to `net-consts::MAX_EPHEMERAL_PORT` if `net-consts::EPHEMERAL_PORT` is provided) and return true along with the endpoint, unless no endpoints are free, wheree then false is returned along with a padding cell.
 
 ##### `close-udp-endpoint`
-( endpoint self -- )
+( endpoint interface -- )
 
 Close a UDP endpoint. This is immediate, and any queued UDP packets will be lost.
 
 ##### `close-tcp-endpoint`
-( endpoint self -- )
+( endpoint interface -- )
 
 Close a TCP endpoint. This waits until the connection is normally closed or the connection is reset.
 
@@ -161,29 +161,34 @@ Close a TCP endpoint. This waits until the connection is normally closed or the 
 The `<endpoint>` class has the following methods:
 
 ##### `endpoint-tcp-state@`
-( self -- tcp-state )
+( endpoint -- tcp-state )
 
 This word returns the current TCP state of an endpoint.
 
 ##### `endpoint-rx-data@`
-( self -- addr bytes )
+( endpoint -- addr bytes )
 
 This word returns the address and size in bytes of the current pending data for an endpoint.
 
 ##### `endpoint-ipv4-remote@`
-( self -- ipv4-addr port )
+( endpoint -- ipv4-addr port )
 
 This word returns the IPv4 address and port of, for a TCP endpoint, the peer of a connection, and for a UDP endpoint, the packet for the current pending data.
 
 ##### `udp-endpoint?`
-( self -- udp? )
+( endpoint -- udp? )
 
 Get whether an endpoint is a UDP endpoint; note that if this returns false it means the endpoint is a TCP endpoint (by default endpoints are TCP endpoints).
 
 ##### `endpoint-local-port@`
-( self -- port )
+( endpoint -- port )
 
-Get the local port of an endpoint.
+Get the local port for *endpoint*. Note that if the local port for an endpoint had been specified as `net-consts::EPHEMERAL_PORT` this will be the actual local port.
+
+#### `waiting-rx-data?`
+( endpoint -- waiting? )
+
+Get whether there is any data waiting on endpoint beyond the currently pending data.
 
 #### `<ip-handler>`
 
@@ -192,19 +197,19 @@ The `<ip-handler>` class handles receiving IP frames from a frame interface and 
 The `<ip-handler>` class has the following constructor:
 
 ##### `new`
-( interface self -- )
+( interface handler -- )
 
 Construct an IP frame handler for *interface*.
 
 The `<ip-handler>` class has the following methods:
 
 ##### `handle-frame`
-( addr bytes self -- )
+( addr bytes handler -- )
 
 Handle a received frame.
 
 ##### `handle-refresh`
-( self -- )
+( handler -- )
 
 Handle periodic housekeeping activities.
 
@@ -215,19 +220,19 @@ The `<arp-handler>` class handles receiving ARP frames from a frame interface an
 The `<arp-handler>` class has the following constructor:
 
 ##### `new`
-( interface self -- )
+( interface handler -- )
 
 Construct an ARP frame handler for *interface*.
 
 The `<arp-handler>` class has the following methods:
 
 ##### `handle-frame`
-( addr bytes self -- )
+( addr bytes handler -- )
 
 Handle a received frame.
 
 ##### `handle-refresh`
-( self -- )
+( handler -- )
 
 Handle periodic housekeeping activities.
 
@@ -287,19 +292,19 @@ The `<endpoint-process>` class encapsulates a task carrying out the core loop of
 The `<endpoint-process>` class has the following constructor:
 
 ##### `new`
-( interface self -- )
+( interface process -- )
 
 This constructor sets the interface for the endpoint processor to *interface*.
 
 The `<endpoint-process>` class has the following methods:
 
 ##### `add-endpoint-handler`
-( handler self -- )
+( handler process -- )
 
 Add a endpoint handler.
 
 ##### `run-endpoint-process`
-( self -- )
+( process -- )
 
 This starts the task for processing endpoints on the chosen interface.
 
@@ -319,7 +324,7 @@ The `<frame-handler>` class contains the following method:
 Handle a frame of *bytes* at *addr*.
 
 ##### `handle-refresh`
-( self -- )
+( process -- )
 
 Carry out periodic housekeeeping activities.
 
@@ -330,19 +335,19 @@ The `<frame-process>` class encapsulates receiving frames from a frame interface
 The `<frame-process>` class has the following constructor:
 
 ##### `new`
-( interface self -- )
+( frame-interface process -- )
 
-This constructor sets the frame interface for the frame processor to *interface*.
+This constructor sets the frame interface for the frame processor to *frame-interface*.
 
 The `<frame-process>` class has the following methods:
 
 ##### `add-frame-handler`
-( handler self -- )
+( handler process -- )
 
 Add a frame handler.
 
 ##### `run-frame-process`
-( self -- )
+( process -- )
 
 This starts the task for processing frames and doing periodic housekeeping on the chosen frame interface.
 
@@ -359,47 +364,47 @@ The `<frame-interface>` class is meant to be subclassed by implementors of inter
 The `<frame-interface>` class contains the following abstract methods:
 
 ##### `mtu-size@`
-( self -- bytes )
+( frame-interface -- bytes )
 
 Get the MTU size.
 
 ##### `mac-addr@`
-( self -- D: mac-addr )
+( frame-interface -- D: mac-addr )
 
 Get the MAC address.
 
 ##### `mac-addr!`
-( D: mac-addr self -- )
+( D: mac-addr frame-interface -- )
 
 Set the MAC address.
 
 ##### `put-rx-frame`
-( addr bytes self -- )
+( addr bytes frame-interface -- )
 
 Put a received frame.
 
 ##### `get-rx-frame`
-( addr bytes self -- bytes' )
+( addr bytes frame-interface -- bytes' )
 
 Get a received frame.
 
 ##### `poll-rx-frame`
-( addr bytes self -- bytes' found? )
+( addr bytes frame-interface -- bytes' found? )
 
 Poll a received frame.
 
 ##### `put-tx-frame`
-( addr bytes self -- )
+( addr bytes frame-interface -- )
 
 Put a frame to transmit.
 
 ##### `get-tx-frame`
-( addr bytes self -- bytes' )
+( addr bytes frame-interface -- bytes' )
 
 Get a frame to transmit.
 
 ##### `poll-tx-frame`
-( addr bytes self -- bytes' found? )
+( addr bytes frame-interface -- bytes' found? )
 
 Poll a frame to transmit.
 
@@ -414,39 +419,39 @@ The `<simple-cyw43-net>` class encapsulates a CYW43xxx driver and a zeptoIP netw
 It has the following constructor:
 
 ##### `new`
-( pwr-pin dio-pin cs-pin clk-pin pio-addr sm-index pio-instance self -- )
+( pwr-pin dio-pin cs-pin clk-pin pio-addr sm-index pio-instance driver -- )
 
 This instantiates an instance with *pwr-pin*, *dio-pin*, *cs-pin*, and *pio-pin* being specified as the GPIO pins for communication with the CYW43xxx, and a base PIO instruction address *pio-addr*, a PIO state machine *sm-index*, and a PIO instance (`pio::PIO0` or `pio::PIO1`) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.
 
 It has the following methods:
 
 ##### `init-cyw43-net`
-( self -- )
+( driver -- )
 
 This initializes a `<simple-cyw43-net>` instance.
 
 ##### `cyw43-gpio!`
-( state gpio self -- )
+( state gpio driver -- )
 
 This sets a GPIO pin on the CYW43xxx.
 
 ##### `cyw43-control@`
-( self -- control )
+( driver -- control )
 
 This gets the CYW43xxx controller instance.
 
 ##### `net-interface@`
-( self -- interface )
+( driver -- interface )
 
 This gets the zeptoIP interface instance.
 
 ##### `net-endpoint-process@`
-( self -- endpoint-processor )
+( driver -- endpoint-processor )
 
 This gets the zeptoIP endpoint processor instance.
 
 ##### `run-net-process`
-( self -- )
+( driver -- )
 
 This starts the zeptoIP frame and endpoint processors.
 
@@ -461,23 +466,23 @@ The `<pico-w-cyw43-net>` class inherits from the `<simple-cyw43-net>` class, pro
 It has the following constructor:
 
 ##### `new`
-( pio-addr sm-index pio-instance self -- )
+( pio-addr sm-index pio-instance driver -- )
 
 This instantiates an instance with a base PIO instruction address *pio-addr*, a PIO state machine *sm-index*, and a PIO instance (`pio::PIO0` or `pio::PIO1`) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.
 
 It has the following methods:
 
 ##### `pico-w-led!`
-( state self -- )
+( state driver -- )
 
 This sets the LED on the Raspberry Pi Pico W to *state*.
 
 ##### `pico-w-led@`
-( self -- state )
+( driver -- state )
 
 This gets the state of the LED on the Raspberry Pi Pico W.
 
 ##### `toggle-pico-w-led`
-( self -- )
+( driver -- )
 
 This toggles the state of the LED on the Raspberry Pi Pico W.
