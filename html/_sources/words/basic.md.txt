@@ -594,11 +594,6 @@ Commit code to flash without finishing compressing it
 
 Get whether flash is being compressed
 
-##### `word-align`
-( addr -- a-addr )
-
-Word-align an address
-
 ##### `compile,`
 ( xt -- )
 
