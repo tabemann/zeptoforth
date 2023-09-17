@@ -69,7 +69,7 @@ begin-module pico-w-net-uart
   variable tx-count
   
   \ Constant for number of bytes to buffer
-  8192 constant tx-buffer-size
+  16384 constant tx-buffer-size
   
   \ Tx buffers
   tx-buffer-size 2 * buffer: tx-buffers
