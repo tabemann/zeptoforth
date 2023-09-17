@@ -39,7 +39,7 @@ Set power management to *pm*, defined in the module `cyw43-consts`.
 
 Join an open AP. *ssid-addr* and *ssid-bytes* comprise the SSID of the AP being connected to. On success *success?* of true and *status* of 0 will be returned.
 
-##### `join-cyw43-wpa2
+##### `join-cyw43-wpa2`
 ( ssid-addr ssid-bytes pass-addr pass-bytes self -- status success? )
 
 Join a WPA2 AP. *ssid-addr* and *ssid-bytes* comprise the SSID of the AP being connected to. *pass-addr* and *pass-bytes* comprise the password of the AP being connected to. On success *success?* of true and *status* of 0 will be returned.
