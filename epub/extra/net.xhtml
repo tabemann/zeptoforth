@@ -38,127 +38,127 @@
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;interface&gt;</span></code> class has the following constructor:</p>
 <section id="new">
 <h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
-<p>( frame-interface self – )</p>
+<p>( frame-interface interface – )</p>
 <p>This constructs an <code class="docutils literal notranslate"><span class="pre">&lt;interface&gt;</span></code> instance for a given <em>frame interface</em>, an instance of <code class="docutils literal notranslate"><span class="pre">frame-interface::&lt;frame-interface&gt;</span></code>, which encapsulates a connection to the hardware network interface.</p>
 </section>
 <section id="intf-ipv4-addr">
 <h4><code class="docutils literal notranslate"><span class="pre">intf-ipv4-addr&#64;</span></code></h4>
-<p>( self – addr )</p>
+<p>( interface – addr )</p>
 <p>Get an interface’s IPv4 address.</p>
 </section>
 <section id="id1">
 <h4><code class="docutils literal notranslate"><span class="pre">intf-ipv4-addr!</span></code></h4>
-<p>( addr self – )</p>
+<p>( addr interface – )</p>
 <p>Manually set an interface’s IPv4 address.</p>
 </section>
 <section id="intf-ipv4-netmask">
 <h4><code class="docutils literal notranslate"><span class="pre">intf-ipv4-netmask&#64;</span></code></h4>
-<p>( self – netmask )</p>
+<p>( interface – netmask )</p>
 <p>Get an interface’s IPv4 netmask.</p>
 </section>
 <section id="id2">
 <h4><code class="docutils literal notranslate"><span class="pre">intf-ipv4-netmask!</span></code></h4>
-<p>( netmask self – )</p>
+<p>( netmask interface – )</p>
 <p>Manually set an interface’s IPv4 netmask.</p>
 </section>
 <section id="gateway-ipv4-addr">
 <h4><code class="docutils literal notranslate"><span class="pre">gateway-ipv4-addr&#64;</span></code></h4>
-<p>( self – addr )</p>
+<p>( interface – addr )</p>
 <p>Get an interface’s gateway’s IPv4 address.</p>
 </section>
 <section id="id3">
 <h4><code class="docutils literal notranslate"><span class="pre">gateway-ipv4-addr!</span></code></h4>
-<p>( addr self – )</p>
+<p>( addr interface – )</p>
 <p>Manually set an interface’s gateway’s IPv4 address.</p>
 </section>
 <section id="dns-server-ipv4-addr">
 <h4><code class="docutils literal notranslate"><span class="pre">dns-server-ipv4-addr&#64;</span></code></h4>
-<p>( self – addr )</p>
+<p>( interface – addr )</p>
 <p>Get an interface’s DNS server’s IPv4 address.</p>
 </section>
 <section id="id4">
 <h4><code class="docutils literal notranslate"><span class="pre">dns-server-ipv4-addr!</span></code></h4>
-<p>( addr self – )</p>
+<p>( addr interface – )</p>
 <p>Manually set an interface’s gateway’s IPv4 address.</p>
 </section>
 <section id="intf-ipv4-broadcast">
 <h4><code class="docutils literal notranslate"><span class="pre">intf-ipv4-broadcast&#64;</span></code></h4>
-<p>( self – addr )</p>
+<p>( interface – addr )</p>
 <p>Get an interface’s IPv4 broadcast address.</p>
 </section>
 <section id="intf-mac-addr">
 <h4><code class="docutils literal notranslate"><span class="pre">intf-mac-addr&#64;</span></code></h4>
-<p>( self – D: mac-addr )</p>
+<p>( interface – D: mac-addr )</p>
 <p>Get an interface’s MAC address.</p>
 </section>
 <section id="intf-ttl">
 <h4><code class="docutils literal notranslate"><span class="pre">intf-ttl&#64;</span></code></h4>
-<p>( self – tll )</p>
+<p>( interface – tll )</p>
 <p>Get an interface’s TTL.</p>
 </section>
 <section id="id5">
 <h4><code class="docutils literal notranslate"><span class="pre">intf-ttl!</span></code></h4>
-<p>( ttl self – )</p>
+<p>( ttl interface – )</p>
 <p>Set an interface’s TTL.</p>
 </section>
 <section id="discover-ipv4-addr">
 <h4><code class="docutils literal notranslate"><span class="pre">discover-ipv4-addr</span></code></h4>
-<p>( self – )</p>
+<p>( interface – )</p>
 <p>Discover an interface’s IPv4 address, IPv4 netmask, gateway IPv4 address, and DNS server IPv4 address via DHCP.</p>
 </section>
 <section id="send-tcp-endpoint">
 <h4><code class="docutils literal notranslate"><span class="pre">send-tcp-endpoint</span></code></h4>
-<p>( addr bytes endpoint self – )</p>
+<p>( addr bytes endpoint interface – )</p>
 <p>Send <em>bytes</em> at <em>addr</em> to the peer of <em>endpoint</em>. This will return when sending data is complete or if the connection is closed or its connection is not yet established.</p>
 </section>
 <section id="send-ipv4-udp-packet">
 <h4><code class="docutils literal notranslate"><span class="pre">send-ipv4-udp-packet</span></code></h4>
-<p>( ? src-port dest-addr dest-port bytes xt self – ? success? )</p>
+<p>( ? src-port dest-addr dest-port bytes xt interface – ? success? )</p>
 <p>This will call <em>xt</em> with a signature of ( ? buffer – ? send? ) with an address of a buffer guaranteed to be of size <em>bytes</em> to construct a UDP packet with a payload consisting of that buffer from <em>src-port</em> (which may be any port from <code class="docutils literal notranslate"><span class="pre">net-consts::MIN_EPHEMERAL_PORT</span></code> to <code class="docutils literal notranslate"><span class="pre">net-consts::MAX_EPHEMERAL_PORT</span></code> if <code class="docutils literal notranslate"><span class="pre">net-consts::EPHEMERAL_PORT</span></code> is provided) to <em>dest-addr</em> at <em>dest-port</em>; if true is returned the packet is sent, and true will be returned afterwards, else the packet is not sent and false is returned. Note that false may be returned if the MAC address corresponding to <em>dest-addr</em> cannot be resolved.</p>
 </section>
 <section id="resolve-ipv4-addr-mac-addr">
 <h4><code class="docutils literal notranslate"><span class="pre">resolve-ipv4-addr-mac-addr</span></code></h4>
-<p>( dest-addr self – D: mac-addr success? )</p>
+<p>( dest-addr interface – D: mac-addr success? )</p>
 <p>Attempt to resolve the MAC address of an IPv4 address; if successful, true and the MAC address are returned, else false and padding cells are returned.</p>
 </section>
 <section id="resolve-dns-ipv4-addr">
 <h4><code class="docutils literal notranslate"><span class="pre">resolve-dns-ipv4-addr</span></code></h4>
-<p>( c-addr bytes self – ipv4-addr success? )</p>
+<p>( c-addr bytes interface – ipv4-addr success? )</p>
 <p>Attempt to resolve the IPv4 address of a hostname via DNS; if successful, true and the IPv4 address are returned, else false and a apdding cell is returned.</p>
 </section>
 <section id="get-ready-endpoint">
 <h4><code class="docutils literal notranslate"><span class="pre">get-ready-endpoint</span></code></h4>
-<p>( self – endpoint )</p>
+<p>( interface – endpoint )</p>
 <p>Do a blocking wait to get the next ready endpoint; note that the user may use <code class="docutils literal notranslate"><span class="pre">task::timeout</span></code> to apply a timeout to this.</p>
 </section>
 <section id="endpoint-done">
 <h4><code class="docutils literal notranslate"><span class="pre">endpoint-done</span></code></h4>
-<p>( endpoint self – )</p>
+<p>( endpoint interface – )</p>
 <p>Retire the current pending data for an endpoint and allow the endpoint to be readied again; if there is data already available, the endpoint will be readied again immediately.</p>
 </section>
 <section id="allocate-udp-listen-endpoint">
 <h4><code class="docutils literal notranslate"><span class="pre">allocate-udp-listen-endpoint</span></code></h4>
-<p>( port self – endpoint success? )</p>
+<p>( port interface – endpoint success? )</p>
 <p>Attempt to allocate a UDP endpoint listening on <em>port</em> (which may be any port from <code class="docutils literal notranslate"><span class="pre">net-consts::MIN_EPHEMERAL_PORT</span></code> to <code class="docutils literal notranslate"><span class="pre">net-consts::MAX_EPHEMERAL_PORT</span></code> if <code class="docutils literal notranslate"><span class="pre">net-consts::EPHEMERAL_PORT</span></code> is provided) and return true along with the endpoint, unless no endpoints are free, where then false is returned along with a padding cell.</p>
 </section>
 <section id="allocate-tcp-listen-endpoint">
 <h4><code class="docutils literal notranslate"><span class="pre">allocate-tcp-listen-endpoint</span></code></h4>
-<p>( port self – endpoint success? )</p>
+<p>( port interface – endpoint success? )</p>
 <p>Attempt to allocate a TCP endpoint listening on <em>port</em> (which may be any port from <code class="docutils literal notranslate"><span class="pre">net-consts::MIN_EPHEMERAL_PORT</span></code> to <code class="docutils literal notranslate"><span class="pre">net-consts::MAX_EPHEMERAL_PORT</span></code> if <code class="docutils literal notranslate"><span class="pre">net-consts::EPHEMERAL_PORT</span></code> is provided) and return true along with the endpoint, unless no endpoints are free, where then false is returned along with a padding cell.</p>
 </section>
 <section id="allocate-tcp-connect-ipv4-endpoint">
 <h4><code class="docutils literal notranslate"><span class="pre">allocate-tcp-connect-ipv4-endpoint</span></code></h4>
-<p>( src-port dest-addr dest-port self – endpoint success? )</p>
+<p>( src-port dest-addr dest-port interface – endpoint success? )</p>
 <p>Attempt to allocate a TCP endpoint connected to the IPv4 address <em>dest-addr</em> at <em>dest-port</em> from <em>src-port</em> (which may be any port from <code class="docutils literal notranslate"><span class="pre">net-consts::MIN_EPHEMERAL_PORT</span></code> to <code class="docutils literal notranslate"><span class="pre">net-consts::MAX_EPHEMERAL_PORT</span></code> if <code class="docutils literal notranslate"><span class="pre">net-consts::EPHEMERAL_PORT</span></code> is provided) and return true along with the endpoint, unless no endpoints are free, wheree then false is returned along with a padding cell.</p>
 </section>
 <section id="close-udp-endpoint">
 <h4><code class="docutils literal notranslate"><span class="pre">close-udp-endpoint</span></code></h4>
-<p>( endpoint self – )</p>
+<p>( endpoint interface – )</p>
 <p>Close a UDP endpoint. This is immediate, and any queued UDP packets will be lost.</p>
 </section>
 <section id="close-tcp-endpoint">
 <h4><code class="docutils literal notranslate"><span class="pre">close-tcp-endpoint</span></code></h4>
-<p>( endpoint self – )</p>
+<p>( endpoint interface – )</p>
 <p>Close a TCP endpoint. This waits until the connection is normally closed or the connection is reset.</p>
 </section>
 </section>
@@ -167,29 +167,34 @@
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;endpoint&gt;</span></code> class has the following methods:</p>
 <section id="endpoint-tcp-state">
 <h4><code class="docutils literal notranslate"><span class="pre">endpoint-tcp-state&#64;</span></code></h4>
-<p>( self – tcp-state )</p>
+<p>( endpoint – tcp-state )</p>
 <p>This word returns the current TCP state of an endpoint.</p>
 </section>
 <section id="endpoint-rx-data">
 <h4><code class="docutils literal notranslate"><span class="pre">endpoint-rx-data&#64;</span></code></h4>
-<p>( self – addr bytes )</p>
+<p>( endpoint – addr bytes )</p>
 <p>This word returns the address and size in bytes of the current pending data for an endpoint.</p>
 </section>
 <section id="endpoint-ipv4-remote">
 <h4><code class="docutils literal notranslate"><span class="pre">endpoint-ipv4-remote&#64;</span></code></h4>
-<p>( self – ipv4-addr port )</p>
+<p>( endpoint – ipv4-addr port )</p>
 <p>This word returns the IPv4 address and port of, for a TCP endpoint, the peer of a connection, and for a UDP endpoint, the packet for the current pending data.</p>
 </section>
 <section id="udp-endpoint">
 <h4><code class="docutils literal notranslate"><span class="pre">udp-endpoint?</span></code></h4>
-<p>( self – udp? )</p>
+<p>( endpoint – udp? )</p>
 <p>Get whether an endpoint is a UDP endpoint; note that if this returns false it means the endpoint is a TCP endpoint (by default endpoints are TCP endpoints).</p>
 </section>
 <section id="endpoint-local-port">
 <h4><code class="docutils literal notranslate"><span class="pre">endpoint-local-port&#64;</span></code></h4>
-<p>( self – port )</p>
-<p>Get the local port of an endpoint.</p>
+<p>( endpoint – port )</p>
+<p>Get the local port for <em>endpoint</em>. Note that if the local port for an endpoint had been specified as <code class="docutils literal notranslate"><span class="pre">net-consts::EPHEMERAL_PORT</span></code> this will be the actual local port.</p>
 </section>
+</section>
+<section id="waiting-rx-data">
+<h3><code class="docutils literal notranslate"><span class="pre">waiting-rx-data?</span></code></h3>
+<p>( endpoint – waiting? )</p>
+<p>Get whether there is any data waiting on endpoint beyond the currently pending data.</p>
 </section>
 <section id="ip-handler">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;ip-handler&gt;</span></code></h3>
@@ -197,18 +202,18 @@
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;ip-handler&gt;</span></code> class has the following constructor:</p>
 <section id="id6">
 <h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
-<p>( interface self – )</p>
+<p>( interface handler – )</p>
 <p>Construct an IP frame handler for <em>interface</em>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;ip-handler&gt;</span></code> class has the following methods:</p>
 </section>
 <section id="handle-frame">
 <h4><code class="docutils literal notranslate"><span class="pre">handle-frame</span></code></h4>
-<p>( addr bytes self – )</p>
+<p>( addr bytes handler – )</p>
 <p>Handle a received frame.</p>
 </section>
 <section id="handle-refresh">
 <h4><code class="docutils literal notranslate"><span class="pre">handle-refresh</span></code></h4>
-<p>( self – )</p>
+<p>( handler – )</p>
 <p>Handle periodic housekeeping activities.</p>
 </section>
 </section>
@@ -218,18 +223,18 @@
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;arp-handler&gt;</span></code> class has the following constructor:</p>
 <section id="id7">
 <h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
-<p>( interface self – )</p>
+<p>( interface handler – )</p>
 <p>Construct an ARP frame handler for <em>interface</em>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;arp-handler&gt;</span></code> class has the following methods:</p>
 </section>
 <section id="id8">
 <h4><code class="docutils literal notranslate"><span class="pre">handle-frame</span></code></h4>
-<p>( addr bytes self – )</p>
+<p>( addr bytes handler – )</p>
 <p>Handle a received frame.</p>
 </section>
 <section id="id9">
 <h4><code class="docutils literal notranslate"><span class="pre">handle-refresh</span></code></h4>
-<p>( self – )</p>
+<p>( handler – )</p>
 <p>Handle periodic housekeeping activities.</p>
 </section>
 </section>
@@ -309,18 +314,18 @@
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;endpoint-process&gt;</span></code> class has the following constructor:</p>
 <section id="id11">
 <h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
-<p>( interface self – )</p>
+<p>( interface process – )</p>
 <p>This constructor sets the interface for the endpoint processor to <em>interface</em>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;endpoint-process&gt;</span></code> class has the following methods:</p>
 </section>
 <section id="add-endpoint-handler">
 <h4><code class="docutils literal notranslate"><span class="pre">add-endpoint-handler</span></code></h4>
-<p>( handler self – )</p>
+<p>( handler process – )</p>
 <p>Add a endpoint handler.</p>
 </section>
 <section id="run-endpoint-process">
 <h4><code class="docutils literal notranslate"><span class="pre">run-endpoint-process</span></code></h4>
-<p>( self – )</p>
+<p>( process – )</p>
 <p>This starts the task for processing endpoints on the chosen interface.</p>
 </section>
 </section>
@@ -339,7 +344,7 @@
 </section>
 <section id="id13">
 <h4><code class="docutils literal notranslate"><span class="pre">handle-refresh</span></code></h4>
-<p>( self – )</p>
+<p>( process – )</p>
 <p>Carry out periodic housekeeeping activities.</p>
 </section>
 </section>
@@ -349,18 +354,18 @@
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;frame-process&gt;</span></code> class has the following constructor:</p>
 <section id="id15">
 <h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
-<p>( interface self – )</p>
-<p>This constructor sets the frame interface for the frame processor to <em>interface</em>.</p>
+<p>( frame-interface process – )</p>
+<p>This constructor sets the frame interface for the frame processor to <em>frame-interface</em>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;frame-process&gt;</span></code> class has the following methods:</p>
 </section>
 <section id="add-frame-handler">
 <h4><code class="docutils literal notranslate"><span class="pre">add-frame-handler</span></code></h4>
-<p>( handler self – )</p>
+<p>( handler process – )</p>
 <p>Add a frame handler.</p>
 </section>
 <section id="run-frame-process">
 <h4><code class="docutils literal notranslate"><span class="pre">run-frame-process</span></code></h4>
-<p>( self – )</p>
+<p>( process – )</p>
 <p>This starts the task for processing frames and doing periodic housekeeping on the chosen frame interface.</p>
 </section>
 </section>
@@ -375,47 +380,47 @@
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;frame-interface&gt;</span></code> class contains the following abstract methods:</p>
 <section id="mtu-size">
 <h4><code class="docutils literal notranslate"><span class="pre">mtu-size&#64;</span></code></h4>
-<p>( self – bytes )</p>
+<p>( frame-interface – bytes )</p>
 <p>Get the MTU size.</p>
 </section>
 <section id="mac-addr">
 <h4><code class="docutils literal notranslate"><span class="pre">mac-addr&#64;</span></code></h4>
-<p>( self – D: mac-addr )</p>
+<p>( frame-interface – D: mac-addr )</p>
 <p>Get the MAC address.</p>
 </section>
 <section id="id17">
 <h4><code class="docutils literal notranslate"><span class="pre">mac-addr!</span></code></h4>
-<p>( D: mac-addr self – )</p>
+<p>( D: mac-addr frame-interface – )</p>
 <p>Set the MAC address.</p>
 </section>
 <section id="put-rx-frame">
 <h4><code class="docutils literal notranslate"><span class="pre">put-rx-frame</span></code></h4>
-<p>( addr bytes self – )</p>
+<p>( addr bytes frame-interface – )</p>
 <p>Put a received frame.</p>
 </section>
 <section id="get-rx-frame">
 <h4><code class="docutils literal notranslate"><span class="pre">get-rx-frame</span></code></h4>
-<p>( addr bytes self – bytes’ )</p>
+<p>( addr bytes frame-interface – bytes’ )</p>
 <p>Get a received frame.</p>
 </section>
 <section id="poll-rx-frame">
 <h4><code class="docutils literal notranslate"><span class="pre">poll-rx-frame</span></code></h4>
-<p>( addr bytes self – bytes’ found? )</p>
+<p>( addr bytes frame-interface – bytes’ found? )</p>
 <p>Poll a received frame.</p>
 </section>
 <section id="put-tx-frame">
 <h4><code class="docutils literal notranslate"><span class="pre">put-tx-frame</span></code></h4>
-<p>( addr bytes self – )</p>
+<p>( addr bytes frame-interface – )</p>
 <p>Put a frame to transmit.</p>
 </section>
 <section id="get-tx-frame">
 <h4><code class="docutils literal notranslate"><span class="pre">get-tx-frame</span></code></h4>
-<p>( addr bytes self – bytes’ )</p>
+<p>( addr bytes frame-interface – bytes’ )</p>
 <p>Get a frame to transmit.</p>
 </section>
 <section id="poll-tx-frame">
 <h4><code class="docutils literal notranslate"><span class="pre">poll-tx-frame</span></code></h4>
-<p>( addr bytes self – bytes’ found? )</p>
+<p>( addr bytes frame-interface – bytes’ found? )</p>
 <p>Poll a frame to transmit.</p>
 </section>
 </section>
@@ -429,38 +434,38 @@
 <p>It has the following constructor:</p>
 <section id="id19">
 <h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
-<p>( pwr-pin dio-pin cs-pin clk-pin pio-addr sm-index pio-instance self – )</p>
+<p>( pwr-pin dio-pin cs-pin clk-pin pio-addr sm-index pio-instance driver – )</p>
 <p>This instantiates an instance with <em>pwr-pin</em>, <em>dio-pin</em>, <em>cs-pin</em>, and <em>pio-pin</em> being specified as the GPIO pins for communication with the CYW43xxx, and a base PIO instruction address <em>pio-addr</em>, a PIO state machine <em>sm-index</em>, and a PIO instance (<code class="docutils literal notranslate"><span class="pre">pio::PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">pio::PIO1</span></code>) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.</p>
 <p>It has the following methods:</p>
 </section>
 <section id="init-cyw43-net">
 <h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net</span></code></h4>
-<p>( self – )</p>
+<p>( driver – )</p>
 <p>This initializes a <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net&gt;</span></code> instance.</p>
 </section>
 <section id="cyw43-gpio">
 <h4><code class="docutils literal notranslate"><span class="pre">cyw43-gpio!</span></code></h4>
-<p>( state gpio self – )</p>
+<p>( state gpio driver – )</p>
 <p>This sets a GPIO pin on the CYW43xxx.</p>
 </section>
 <section id="cyw43-control">
 <h4><code class="docutils literal notranslate"><span class="pre">cyw43-control&#64;</span></code></h4>
-<p>( self – control )</p>
+<p>( driver – control )</p>
 <p>This gets the CYW43xxx controller instance.</p>
 </section>
 <section id="net-interface">
 <h4><code class="docutils literal notranslate"><span class="pre">net-interface&#64;</span></code></h4>
-<p>( self – interface )</p>
+<p>( driver – interface )</p>
 <p>This gets the zeptoIP interface instance.</p>
 </section>
 <section id="net-endpoint-process">
 <h4><code class="docutils literal notranslate"><span class="pre">net-endpoint-process&#64;</span></code></h4>
-<p>( self – endpoint-processor )</p>
+<p>( driver – endpoint-processor )</p>
 <p>This gets the zeptoIP endpoint processor instance.</p>
 </section>
 <section id="run-net-process">
 <h4><code class="docutils literal notranslate"><span class="pre">run-net-process</span></code></h4>
-<p>( self – )</p>
+<p>( driver – )</p>
 <p>This starts the zeptoIP frame and endpoint processors.</p>
 </section>
 </section>
@@ -474,23 +479,23 @@
 <p>It has the following constructor:</p>
 <section id="id21">
 <h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
-<p>( pio-addr sm-index pio-instance self – )</p>
+<p>( pio-addr sm-index pio-instance driver – )</p>
 <p>This instantiates an instance with a base PIO instruction address <em>pio-addr</em>, a PIO state machine <em>sm-index</em>, and a PIO instance (<code class="docutils literal notranslate"><span class="pre">pio::PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">pio::PIO1</span></code>) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.</p>
 <p>It has the following methods:</p>
 </section>
 <section id="pico-w-led">
 <h4><code class="docutils literal notranslate"><span class="pre">pico-w-led!</span></code></h4>
-<p>( state self – )</p>
+<p>( state driver – )</p>
 <p>This sets the LED on the Raspberry Pi Pico W to <em>state</em>.</p>
 </section>
 <section id="id22">
 <h4><code class="docutils literal notranslate"><span class="pre">pico-w-led&#64;</span></code></h4>
-<p>( self – state )</p>
+<p>( driver – state )</p>
 <p>This gets the state of the LED on the Raspberry Pi Pico W.</p>
 </section>
 <section id="toggle-pico-w-led">
 <h4><code class="docutils literal notranslate"><span class="pre">toggle-pico-w-led</span></code></h4>
-<p>( self – )</p>
+<p>( driver – )</p>
 <p>This toggles the state of the LED on the Raspberry Pi Pico W.</p>
 </section>
 </section>
