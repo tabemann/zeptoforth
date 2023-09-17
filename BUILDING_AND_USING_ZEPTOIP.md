@@ -32,7 +32,7 @@ Once one has built the CYW43439 driver and zeptoIP and rebooted, the simplest an
 
 ```
 oo import
-simple-w-cyw43-net import
+simple-cyw43-net import
 pico-w-cyw43-net import
 cyw43-control import
 net import
