@@ -46,7 +46,7 @@ pio::PIO0 constant pio-instance
 0 value my-interface
 
 pio-addr sm-index pio-instance <pico-w-cyw43-net> my-cyw43-net init-object
-my-cyw43-net init-cyw32-net
+my-cyw43-net init-cyw43-net
 my-cyw43-net cyw43-control@ to my-cyw43-control
 my-cyw43-net net-interface@ to my-interface
 
