@@ -56,7 +56,7 @@ my-cyw43-net net-interface@ to my-interface
 Afterwards, we will probably want to connect to an access point (AP), typically an WPA2 AP:
 
 ```
-: connect-wpa2-ap { D: ssid D: pass - }
+: connect-wpa2-ap { D: ssid D: pass -- }
   begin ssid pass my-cyw43-control join-cyw43-wpa2 nip until
   my-cyw43-control disable-all-cyw43-events
   my-cyw43-control clear-cyw43-events
@@ -71,7 +71,7 @@ Where "my-ssid-here" and "my-password-here" are the SSID and the password you wi
 If one instead wishes to connect to an open AP, execute the following instead:
 
 ```
-: connect-open-ap { D: ssid - }
+: connect-open-ap { D: ssid -- }
   begin ssid my-cyw43-control join-cyw43-open nip until
   my-cyw43-control disable-all-cyw43-events
   my-cyw43-control clear-cyw43-events
