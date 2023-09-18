@@ -174,6 +174,23 @@ begin-module interrupt
     dup 32 / cells NVIC_IABR_Base + swap 32 mod 1 swap lshift swap bit@
   ;
 
+  begin-module interrupt-internal
+
+    \ Create an address for a priority index
+    : NVIC_IPR_IP_addr ( u -- addr ) 3 bic NVIC_IPR_Base + ;
+    
+    \ Create a bitshift for a priority index
+    : NVIC_IPR_IP_shift ( u -- bitshift ) 3 and 3 lshift ;
+
+    commit-flash
+    
+    \ Create a mask for a priority index
+    : NVIC_IPR_IP_mask ( u -- mask ) NVIC_IPR_IP_shift $FF swap lshift ;
+
+  end-module> import
+
+  commit-flash
+  
   \ Set NVIC interrupt priority register field
   : NVIC_IPR_IP! ( priority u -- ) NVIC_IPR_Base + c! ;
 
