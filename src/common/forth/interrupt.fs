@@ -182,7 +182,7 @@ begin-module interrupt
     \ Create a bitshift for a priority index
     : NVIC_IPR_IP_shift ( u -- bitshift ) 3 and 3 lshift ;
 
-    commmit-flash
+    commit-flash
     
     \ Create a mask for a priority index
     : NVIC_IPR_IP_mask ( u -- mask ) NVIC_IPR_IP_shift $FF swap lshift ;
