@@ -192,10 +192,16 @@ begin-module interrupt
   commit-flash
   
   \ Set NVIC interrupt priority register field
-  : NVIC_IPR_IP! ( priority u -- ) NVIC_IPR_Base + c! ;
+  : NVIC_IPR_IP! ( priority u -- )
+    dup NVIC_IPR_IP_addr dup >r @ over NVIC_IPR_IP_mask bic
+    swap NVIC_IPR_IP_shift rot $FF and swap lshift or r> !
+  ;
 
   \ Get NVIC interrupt priority register field
-  : NVIC_IPR_IP@ ( u -- priority ) NVIC_IPR_Base + c@ ;
+  : NVIC_IPR_IP@ ( u -- priority )
+    dup NVIC_IPR_IP_addr @ over NVIC_IPR_IP_mask and
+    swap NVIC_IPR_IP_shift rshift
+  ;
 
 end-module
 
