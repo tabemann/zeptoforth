@@ -148,6 +148,9 @@ begin-module net-config
 
   \ Default DHCP renewal time
   86400 10000 * 2 / value default-dhcp-renew-interval
+
+  \ Initial DHCP renewal divisor
+  2 value dhcp-renew-init-divisor
   
   \ DHCP renewal retry divisor
   60 value dhcp-renew-retry-divisor

@@ -2262,7 +2262,7 @@ begin-module net
 
       \ Current DHCP requested IPv4 address
       cell member dhcp-req-ipv4-addr
-      
+
       \ DHCP discovery state
       cell member dhcp-discover-state
 
@@ -2478,6 +2478,9 @@ begin-module net
       \ Send a data ACK packet
       method send-data-ack ( addr bytes push? endpoint self -- )
 
+      \ Apply DHCP dat
+      method apply-dhcp ( self -- )
+      
       \ Refresh an interface
       method refresh-interface ( self -- )
       
@@ -3926,6 +3929,17 @@ begin-module net
       ;] 6 pick construct-and-send-ipv4-packet drop
     ; define send-data-ack
 
+    \ Apply DHCP data
+    :noname { self -- }
+      self dhcp-req-ipv4-addr @ self intf-ipv4-addr!
+      self prov-ipv4-netmask @ self intf-ipv4-netmask!
+      self prov-gateway-ipv4-addr @ self gateway-ipv4-addr!
+      self prov-dns-server-ipv4-addr @ self dns-server-ipv4-addr!
+      self prov-dhcp-renew-interval @ self dhcp-renew-interval !
+      systick::systick-counter self dhcp-renew-start !
+      dhcp-discovered self dhcp-discover-state !
+    ; define apply-dhcp
+
     \ Start DHCP discovery
     :noname { self -- }
       begin
@@ -3986,13 +4000,7 @@ begin-module net
 
             false
           else
-            self dhcp-req-ipv4-addr @ self intf-ipv4-addr!
-            self prov-ipv4-netmask @ self intf-ipv4-netmask!
-            self prov-gateway-ipv4-addr @ self gateway-ipv4-addr!
-            self prov-dns-server-ipv4-addr @ self dns-server-ipv4-addr!
-            self prov-dhcp-renew-interval @ self dhcp-renew-interval !
-            systick::systick-counter self dhcp-renew-start !
-            dhcp-discovered self dhcp-discover-state !
+            self apply-dhcp
             
             dhcp-log? if
               [: cr ." DHCP DISCOVER!" ;] usb::with-usb-output
@@ -4296,6 +4304,9 @@ begin-module net
             [: cr ." Got DHCP lease time" ;] usb::with-usb-output
           then
           unaligned@ rev
+          dhcp-log? if
+            [: ." : " dup . ;] usb::with-usb-output
+          then
         else
           dhcp-log? if
             [: cr ." Did not find lease time" ;] usb::with-usb-output
@@ -4325,10 +4336,15 @@ begin-module net
                 ipv4-netmask self prov-ipv4-netmask !
                 gateway-ipv4-addr self prov-gateway-ipv4-addr !
                 dns-server-ipv4-addr self prov-dns-server-ipv4-addr !
-                renew-interval 10000 * 2 / self prov-dhcp-renew-interval !
-                dhcp-wait-confirm self dhcp-discover-state !
-                self dhcp-sema broadcast
-                self dhcp-sema give
+                renew-interval 10000 * dhcp-renew-init-divisor /
+                self prov-dhcp-renew-interval !
+                self dhcp-discover-state @ dhcp-renewing = if
+                  self apply-dhcp
+                else
+                  dhcp-wait-confirm self dhcp-discover-state !
+                  self dhcp-sema broadcast
+                  self dhcp-sema give
+                then
                 dhcp-log? if
                   [: cr ." Processed DHCPACK" ;] usb::with-usb-output
                 then
@@ -4386,9 +4402,9 @@ begin-module net
             self dhcp-renew-interval @ dhcp-renew-retry-divisor /
             self dhcp-renew-interval !
           then
+          systick::systick-counter self dhcp-renew-start !
           self send-renew-dhcprequest
         then
-        systick::systick-counter self dhcp-renew-start !
       then
       max-endpoints 0 ?do
         self intf-endpoints <endpoint> class-size i * +
