@@ -36,7 +36,7 @@ begin-module net
 
   \ zeptoIP internals
   begin-module net-internal
-  
+
   \ Outstanding packet record
   <object> begin-class <out-packets>
 
@@ -143,7 +143,7 @@ begin-module net
       0 self out-packet-count !
       [ debug? ] [if]
         self [: cr ." === reset-out-packets:" out-packets. ;]
-        usb::with-usb-output
+        debug-hook execute
       [then]
     ; define reset-out-packets
     
@@ -156,7 +156,7 @@ begin-module net
       self first-out-packet-seq @ self init-out-packet-seq !
       [ debug? ] [if]
         self [: cr ." === start-out-packets:" out-packets. ;]
-        usb::with-usb-output
+        debug-hook execute
       [then]
     ; define start-out-packets
 
@@ -173,7 +173,7 @@ begin-module net
       self first-out-packet-seq @ self init-out-packet-seq !
       [ debug? ] [if]
         self [: cr ." === clear-out-packets:" out-packets. ;]
-        usb::with-usb-output
+        debug-hook execute
       [then]
     ; define clear-out-packets
     
@@ -207,7 +207,7 @@ begin-module net
         then
       then
       [ debug? ] [if]
-        self [: cr ." === ack-packets:" out-packets. ;] usb::with-usb-output
+        self [: cr ." === ack-packets:" out-packets. ;] debug-hook execute
       [then]
     ; define ack-packets
 
@@ -238,7 +238,7 @@ begin-module net
       out-packet-size
       [ debug? ] [if]
         self [: cr ." === get-packet-to-send:" out-packets. ;]
-        usb::with-usb-output
+        debug-hook execute
       [then]
     ; define get-packet-to-send
 
@@ -253,7 +253,7 @@ begin-module net
       then
       [ debug? ] [if]
         self [: cr ." === current-out-packet-seq:" out-packets. ;]
-        usb::with-usb-output
+        debug-hook execute
       [then]
     ; define current-out-packet-seq@
 
@@ -270,7 +270,7 @@ begin-module net
       [ mtu-size ethernet-header-size - ipv4-header-size - tcp-header-size - ]
       literal min
       [ debug? ] [if]
-        [: cr ." === next-packet-size: " dup . ;] usb::with-usb-output
+        [: cr ." === next-packet-size: " dup . ;] debug-hook execute
       [then]
     ; define next-packet-size@
 
@@ -278,7 +278,7 @@ begin-module net
     :noname ( self -- outstanding? )
       dup acked-out-packet-offset@ swap out-packet-offset @ <>
       [ debug? ] [if]
-        [: cr ." === packets-outstanding?: " dup . ;] usb::with-usb-output
+        [: cr ." === packets-outstanding?: " dup . ;] debug-hook execute
       [then]
     ; define packets-outstanding?
     
@@ -288,7 +288,7 @@ begin-module net
       swap dup acked-out-packet-offset@
       swap out-packet-bytes @ = and
       [ debug? ] [if]
-        [: cr ." === packets-done?: " dup . ;] usb::with-usb-output
+        [: cr ." === packets-done?: " dup . ;] debug-hook execute
       [then]
     ; define packets-done?
 
@@ -298,7 +298,7 @@ begin-module net
       dup [:
         cr ." === packets-last?: bytes: " dup out-packet-bytes @ .
         ." offset: " out-packet-offset @ .
-      ;] usb::with-usb-output
+      ;] debug-hook execute
       [then]
       dup out-packet-bytes @ swap out-packet-offset @ =
     ; define packets-last?
@@ -310,7 +310,7 @@ begin-module net
       over out-packet-offset @ 2 pick out-packet-bytes @ < and
       swap out-packet-count @ max-out-packets < and
       [ debug? ] [if]
-        [: cr ." === send-packet?: " dup . ;] usb::with-usb-output
+        [: cr ." === send-packet?: " dup . ;] debug-hook execute
       [then]
     ; define send-packet?
 
@@ -320,7 +320,7 @@ begin-module net
       dup acked-out-packet-offset@ over out-packet-offset !
       0 swap out-packet-count !
       [ debug? ] [if]
-        [: cr ." === resend-packets: " out-packets. ;] usb::with-usb-output
+        [: cr ." === resend-packets: " out-packets. ;] debug-hook execute
       [then]
     ; define resend-packets
 
@@ -488,7 +488,7 @@ begin-module net
       seq self current-in-packet-ack !
       [ debug? ] [if]
         self [: cr ." @@@ reset-in-tcp-packets: " in-packets. ;]
-        usb::with-usb-output
+        debug-hook execute
       [then]
     ; define reset-in-tcp-packets
 
@@ -510,7 +510,7 @@ begin-module net
       0 self current-in-packet-ack !
       [ debug? ] [if]
         self [: cr ." @@@ reset-in-udp-packets: " in-packets. ;]
-        usb::with-usb-output
+        debug-hook execute
       [then]
     ; define reset-in-udp-packets
 
@@ -523,7 +523,7 @@ begin-module net
       then
       [ debug? ] [if]
         self [: cr ." @@@ in-packets-window@: " in-packets. ;]
-        usb::with-usb-output
+        debug-hook execute
       [then]
     ; define in-packets-window@
 
@@ -532,7 +532,7 @@ begin-module net
       pushed-in-packet-offset @ 0>
       [ debug? ] [if]
         dup [: cr ." @@@ waiting-in-packets?: " . ;]
-        usb::with-usb-output
+        debug-hook execute
       [then]
     ; define waiting-in-packets?
 
@@ -541,7 +541,7 @@ begin-module net
       pushed-in-packet-offset @
       [ debug? ] [if]
         dup [: cr ." @@@ waiting-in-bytes@: " . ;]
-        usb::with-usb-output
+        debug-hook execute
       [then]
     ; define waiting-in-bytes@
 
@@ -558,7 +558,7 @@ begin-module net
           [ debug? ] [if]
             current-size current-seq i self first-in-packet-seq @
             [: cr ." first: " . ." i: " . ." seq: " . ." size: " . ;]
-            usb::with-usb-output
+            debug-hook execute
           [then]
           
           1 +to count
@@ -575,7 +575,7 @@ begin-module net
         self in-packet-offset @ self pushed-in-packet-offset @
         self in-packet-count @
         [: cr ." count: " . ." pushed: " . ." total: " . ;]
-        usb::with-usb-output
+        debug-hook execute
       [then]
       
     ; define join-complete-packets
@@ -586,7 +586,7 @@ begin-module net
 
       [ debug? ] [if]
         diff seq self first-in-packet-seq @
-        [: cr ." first: " . ." seq: " . ." diff: " . ;] usb::with-usb-output
+        [: cr ." first: " . ." seq: " . ." diff: " . ;] debug-hook execute
       [then]
 
       diff 0< if
@@ -682,7 +682,7 @@ begin-module net
             ." pending: " .
             ." pushed: " .
             ." offset: " .
-          ;] usb::with-usb-output
+          ;] debug-hook execute
 
         then
       [then]
@@ -733,7 +733,7 @@ begin-module net
       max-bytes self pushed-in-packet-offset @ + self in-packet-offset !
       [ debug? ] [if]
         self [: cr ." @@@ insert-tcp-packet: " in-packets. ;]
-        usb::with-usb-output
+        debug-hook execute
       [then]
     ; define insert-tcp-packet
     
@@ -750,7 +750,7 @@ begin-module net
       then
       [ debug? ] [if]
         self [: cr ." @@@ add-in-udp-packet: " in-packets. ;]
-        usb::with-usb-output
+        debug-hook execute
       [then]
     ; define add-in-udp-packet
     
@@ -765,7 +765,7 @@ begin-module net
       dup in-packet-last-ack-sent @ swap current-in-packet-ack @ <>
       [ debug? ] [if]
         dup [: cr ." @@@ in-packet-send-ack: " . ;]
-        usb::with-usb-output
+        debug-hook execute
       [then]
     ; define in-packet-send-ack?
 
@@ -773,7 +773,7 @@ begin-module net
     :noname ( self -- )
       dup current-in-packet-ack @ swap in-packet-last-ack-sent !
       [ debug? ] [if]
-        [: cr ." @@@ in-packet-ack-sent" ;] usb::with-usb-output
+        [: cr ." @@@ in-packet-ack-sent" ;] debug-hook execute
       [then]
     ; define in-packet-ack-sent
 
@@ -781,7 +781,7 @@ begin-module net
     :noname ( self -- ack )
       current-in-packet-ack @
       [ debug? ] [if]
-        dup [: ." @@@ in-packet-ack@: " . ;] usb::with-usb-output
+        dup [: ." @@@ in-packet-ack@: " . ;] debug-hook execute
       [then]
     ; define in-packet-ack@
 
@@ -822,12 +822,12 @@ begin-module net
         self pushed-in-packet-offset @
         self pending-in-packet-offset @
         [: cr ." promote pending: " . ." pushed: " . ." total: " . ;]
-        usb::with-usb-output
+        debug-hook execute
       [then]
 
       [ debug? ] [if]
         self [: cr ." @@@ promote-in-packets: " in-packets. ;]
-        usb::with-usb-output
+        debug-hook execute
       [then]
     ; define promote-in-packets
 
@@ -863,7 +863,7 @@ begin-module net
       current-bytes count
       [ debug? ] [if]
         2dup self -rot [: cr ." @@@ complete-in-packets: " . . in-packets. ;]
-        usb::with-usb-output
+        debug-hook execute
       [then]
     ; define complete-in-packets
 
@@ -873,7 +873,7 @@ begin-module net
       self complete-in-packets drop <>
       [ debug? ] [if]
         dup [: cr ." @@@ missing-in-packets?: " . ;]
-        usb::with-usb-output
+        debug-hook execute
       [then]
     ; define missing-in-packets?
 
@@ -882,7 +882,7 @@ begin-module net
 
       [ debug? ] [if]
         self [: cr ." @@@ BEFORE clear-in-packets: " in-packets. ;]
-        usb::with-usb-output
+        debug-hook execute
       [then]
       
       self pending-in-packet-offset @ { pending }
@@ -900,12 +900,12 @@ begin-module net
         self in-packet-offset @
         self pushed-in-packet-offset @
         [: cr ." clear-pending pushed: " . ." total: " . ;]
-        usb::with-usb-output
+        debug-hook execute
       [then]
       
       [ debug? ] [if]
         self [: cr ." @@@ clear-in-packets: " in-packets. ;]
-        usb::with-usb-output
+        debug-hook execute
       [then]
     ; define clear-in-packets
 
@@ -2257,6 +2257,9 @@ begin-module net
       \ Curreht DHCP xid
       cell member current-dhcp-xid
 
+      \ Current DHCP server MAC address
+      2 cells member dhcp-server-mac-addr
+      
       \ Current DHCP server IPv4 address
       cell member dhcp-server-ipv4-addr
 
@@ -2266,11 +2269,29 @@ begin-module net
       \ DHCP discovery state
       cell member dhcp-discover-state
 
+      \ DHCP remaining ARP attempt count
+      cell member dhcp-remaining-arp-attempts
+      
+      \ DHCP discovery stage start
+      cell member dhcp-discover-stage-start
+
+      \ DHCP real renewal interval
+      cell member dhcp-real-renew-interval
+      
       \ DHCP renewal interval
       cell member dhcp-renew-interval
 
+      \ DHCP rebinding interval
+      cell member dhcp-rebind-interval
+
+      \ DHCP real renewal start time
+      cell member dhcp-real-renew-start
+      
       \ DHCP renewal start time
       cell member dhcp-renew-start
+
+      \ DHCP rebinding start time
+      cell member dhcp-rebind-start
 
       \ Provisional DHCP IPv4 netmask
       cell member prov-ipv4-netmask
@@ -2281,7 +2302,7 @@ begin-module net
       \ Provisional DHCP DNS server
       cell member prov-dns-server-ipv4-addr
 
-      \ Provisional DHCP renewal time
+      \ Provisional DHCP renewal interval
       cell member prov-dhcp-renew-interval
       
       \ DHCP semaphore
@@ -2316,6 +2337,9 @@ begin-module net
 
       \ Endpoint queue index
       cell member endpoint-queue-index
+
+      \ DHCP lock
+      lock-size member dhcp-lock
 
       \ Send a frame
       method send-frame ( addr bytes self -- )
@@ -2478,8 +2502,23 @@ begin-module net
       \ Send a data ACK packet
       method send-data-ack ( addr bytes push? endpoint self -- )
 
-      \ Apply DHCP dat
+      \ Apply DHCP state
       method apply-dhcp ( self -- )
+
+      \ Refresh DHCP renewal
+      method refresh-dhcp-renew ( self -- )
+    
+      \ Refresh DHCP discovery
+      method refresh-dhcp-discovery ( self -- )
+
+      \ Refresh DHCP wait confirm
+      method refresh-dhcp-wait-confirm ( self -- )
+
+      \ Refresh DHCP declined
+      method refresh-dhcp-declined ( self -- )
+    
+      \ Refresh DHCP
+      method refresh-dhcp ( self -- )
       
       \ Refresh an interface
       method refresh-interface ( self -- )
@@ -2493,17 +2532,20 @@ begin-module net
       \ Send a renewal DHCPREQUEST packet
       method send-renew-dhcprequest ( self -- )
 
+      \ Send a rebinding DHCPREQUEST packet
+      method send-rebind-dhcprequest ( self -- )
+
       \ Send a DHCPDECLINE packet
       method send-dhcpdecline ( self -- )
 
       \ Process an IPv4 DHCP packet
-      method process-ipv4-dhcp-packet ( addr bytes self -- )
+      method process-ipv4-dhcp-packet ( addr bytes src-addr self -- )
 
       \ Process an IPv4 DHCPOFFER packet
       method process-ipv4-dhcpoffer ( addr bytes self -- )
 
       \ Process an IPv4 DHCPACK packet
-      method process-ipv4-dhcpack ( addr bytes self -- )
+      method process-ipv4-dhcpack ( addr bytes src-addr self -- )
 
       \ Process an IPv4 DHCPNAK packet
       method process-ipv4-dhcpnak ( addr bytes self -- )
@@ -2609,16 +2651,25 @@ begin-module net
       1 0 self dns-resolve-sema init-sema
       0 self current-dhcp-xid !
       0 self dhcp-server-ipv4-addr !
+      $FFFFFFFFFF. self dhcp-server-mac-addr 2!
       DEFAULT_IPV4_ADDR self dhcp-req-ipv4-addr !
       dhcp-not-discovering self dhcp-discover-state !
-      systick::systick-counter self dhcp-renew-start !
+      systick::systick-counter
+      dhcp-arp-attempt-count self dhcp-remaining-arp-attempts !
+      dup self dhcp-discover-stage-start !
+      dup self dhcp-renew-start !
+      dup self dhcp-rebind-start !
+      self dhcp-real-renew-start !
+      default-dhcp-renew-interval self dhcp-real-renew-interval !
       default-dhcp-renew-interval self dhcp-renew-interval !
+      default-dhcp-renew-interval self dhcp-rebind-interval !
       no-sema-limit 0 self dhcp-sema init-sema
       self outgoing-buf-lock init-lock
       max-endpoints 0 ?do
         <endpoint> self intf-endpoints <endpoint> class-size i * + init-object
       loop
       self endpoint-queue-lock init-lock
+      self dhcp-lock init-lock
       no-sema-limit 0 self endpoint-queue-sema init-sema
       0 self endpoint-queue-index !
       <fragment-collect> self fragment-collect init-object
@@ -2729,7 +2780,7 @@ begin-module net
         addr full-tcp-header-size bytes > if exit then
 
         [ debug? ] [if]
-          addr [: cr ." @@@@@ RECEIVING TCP:" tcp. ;] usb::with-usb-output
+          addr [: cr ." @@@@@ RECEIVING TCP:" tcp. ;] debug-hook execute
         [then]
         
         src-addr addr bytes self
@@ -2871,7 +2922,7 @@ begin-module net
         compute-tcp-checksum rev16 buf tcp-checksum hunaligned!
 
         [ debug? ] [if]
-          buf [: cr ." @@@@@ SENDING TCP:" tcp. ;] usb::with-usb-output
+          buf [: cr ." @@@@@ SENDING TCP:" tcp. ;] debug-hook execute
         [then]
         
         true
@@ -3182,7 +3233,7 @@ begin-module net
         addr udp-src-port h@ rev16 dhcp-server-port =
         addr udp-dest-port h@ rev16 dhcp-client-port = and if
           addr udp-header-size + bytes udp-header-size -
-          self process-ipv4-dhcp-packet
+          src-addr self process-ipv4-dhcp-packet
           exit
         then
         max-endpoints 0 ?do
@@ -3336,7 +3387,7 @@ begin-module net
 
         [ debug? ] [if]
           buf bytes [ ethernet-header-size ipv4-header-size + ] literal +
-          [: over + dump ;] usb::with-usb-output
+          [: over + dump ;] debug-hook execute
         [then]
         
       ;] swap construct-and-send-frame
@@ -3474,7 +3525,7 @@ begin-module net
       [ ethernet-header-size arp-ipv4-size + ] literal [: { dest-addr self buf }
 
         dhcp-log? if
-          [: cr ." Sending DHCP ARP request packet" ;] usb::with-usb-output
+          [: cr ." Sending DHCP ARP request packet" ;] debug-hook execute
         then
         
         $FFFFFFFFFFFF. buf ethh-destination-mac mac!
@@ -3494,7 +3545,7 @@ begin-module net
       ;] 2 pick construct-and-send-frame drop
 
       dhcp-log? if
-        [: cr ." Sent DHCP ARP request packet" ;] usb::with-usb-output
+        [: cr ." Sent DHCP ARP request packet" ;] debug-hook execute
       then
       
     ; define send-ipv4-dhcp-arp-request
@@ -3557,7 +3608,7 @@ begin-module net
     :noname ( endpoint self -- ) { self }
 
       [ debug? ] [if]
-        [: cr ." +++ Begin enqueue endpoint" ;] usb::with-usb-output
+        [: cr ." +++ Begin enqueue endpoint" ;] debug-hook execute
       [then]
       
       self [: { endpoint self }
@@ -3575,14 +3626,14 @@ begin-module net
 
         [ debug? ] [if]
           [: cr ." +++ GAVE SEMAPHORE FOR PUT-READY-ENDPOINT" ;]
-          usb::with-usb-output
+          debug-hook execute
         [then]
         
         pause
       then
 
       [ debug? ] [if]
-        [: cr ." +++ End enqueue endpoint" ;] usb::with-usb-output
+        [: cr ." +++ End enqueue endpoint" ;] debug-hook execute
       [then]
 
     ; define put-ready-endpoint
@@ -3591,13 +3642,13 @@ begin-module net
     :noname { self -- endpoint }
 
       [ debug? ] [if]
-        [: cr ." +++ Begin dequeue endpoint" ;] usb::with-usb-output
+        [: cr ." +++ Begin dequeue endpoint" ;] debug-hook execute
       [then]
 
       self endpoint-queue-sema take
 
       [ debug? ] [if]
-        [: cr ." +++ Got queue semaphore" ;] usb::with-usb-output
+        [: cr ." +++ Got queue semaphore" ;] debug-hook execute
       [then]
       
       self endpoint-queue-index @ { init-index }
@@ -3605,7 +3656,7 @@ begin-module net
       begin
 
         [ debug? ] [if]
-          [: cr ." +++ Trying to get endpoint" ;] usb::with-usb-output
+          [: cr ." +++ Trying to get endpoint" ;] debug-hook execute
         [then]
         
         self [: { self }
@@ -3614,7 +3665,7 @@ begin-module net
           endpoint endpoint-enqueued? if
 
             [ debug? ] [if]
-              index [: cr ." Got endpoint: " . ;] usb::with-usb-output
+              index [: cr ." Got endpoint: " . ;] debug-hook execute
             [then]
             
             endpoint clear-endpoint-enqueued
@@ -3623,7 +3674,7 @@ begin-module net
           else
             
             [ debug? ] [if]
-              index [: cr ." Skipped endpoint: " . ;] usb::with-usb-output
+              index [: cr ." Skipped endpoint: " . ;] debug-hook execute
             [then]
 
             false
@@ -3631,20 +3682,20 @@ begin-module net
           index 1+ max-endpoints umod self endpoint-queue-index !
 
           [ debug? ] [if]
-            [: cr ." Releasing endpoint queue lock" ;] usb::with-usb-output
+            [: cr ." Releasing endpoint queue lock" ;] debug-hook execute
           [then]
           
         ;] self endpoint-queue-lock with-lock
       until
 
       [ debug? ] [if]
-        [: cr ." Promoting RX data" ;] usb::with-usb-output
+        [: cr ." Promoting RX data" ;] debug-hook execute
       [then]
 
       dup promote-rx-data
       
       [ debug? ] [if]
-        [: cr ." +++ End dequeue endpoint" ;] usb::with-usb-output
+        [: cr ." +++ End dequeue endpoint" ;] debug-hook execute
       [then]
 
     ; define get-ready-endpoint
@@ -3662,7 +3713,7 @@ begin-module net
     :noname { endpoint self -- }
 
       [ debug? ] [if]
-        [: cr ." +++ Begin endpoint done" ;] usb::with-usb-output
+        [: cr ." +++ Begin endpoint done" ;] debug-hook execute
       [then]
 
       endpoint endpoint-pending? if
@@ -3670,13 +3721,13 @@ begin-module net
       then
       
       [ debug? ] [if]
-        [: cr ." +++ Retired RX data" ;] usb::with-usb-output
+        [: cr ." +++ Retired RX data" ;] debug-hook execute
       [then]
 
       endpoint self [: { endpoint self }
 
         [ debug? ] [if]
-          [: cr ." +++ In endpoint done" ;] usb::with-usb-output
+          [: cr ." +++ In endpoint done" ;] debug-hook execute
         [then]
 
         endpoint endpoint-pending? if
@@ -3693,7 +3744,7 @@ begin-module net
         then
 
         [ debug? ] [if]
-          [: cr ." +++ After endpoint done" ;] usb::with-usb-output
+          [: cr ." +++ After endpoint done" ;] debug-hook execute
         [then]
 
       ;] self endpoint-queue-lock with-lock
@@ -3701,14 +3752,14 @@ begin-module net
         self endpoint-queue-sema give
 
         [ debug? ] [if]
-          [: cr ." +++ GAVE SEMAPHORE FOR ENDPOINT-DONE" ;] usb::with-usb-output
+          [: cr ." +++ GAVE SEMAPHORE FOR ENDPOINT-DONE" ;] debug-hook execute
         [then]
 
         pause
       then
 
       [ debug? ] [if]
-        [: cr ." +++ End endpoint done" ;] usb::with-usb-output
+        [: cr ." +++ End endpoint done" ;] debug-hook execute
       [then]
 
     ; define endpoint-done
@@ -3833,7 +3884,7 @@ begin-module net
 
             [ debug? ] [if]
               endpoint endpoint-tcp-state@
-              [: cr ." *** TCP STATE: " . ;] usb::with-usb-output
+              [: cr ." *** TCP STATE: " . ;] debug-hook execute
             [then]
             
             false
@@ -3874,7 +3925,7 @@ begin-module net
                 
                 [ debug? ] [if]
                   endpoint endpoint-tcp-state@
-                  [: cr ." *** TCP STATE: " . ;] usb::with-usb-output
+                  [: cr ." *** TCP STATE: " . ;] debug-hook execute
                 [then]
 
                 endpoint clear-endpoint-send false 
@@ -3923,7 +3974,7 @@ begin-module net
           [: { buf bytes }
             cr ." @@@@@ SENDING TCP WITH DATA:" buf tcp.
             buf buf tcp-header-size + bytes + dump
-          ;] usb::with-usb-output
+          ;] debug-hook execute
         [then]
         true
       ;] 6 pick construct-and-send-ipv4-packet drop
@@ -3935,99 +3986,42 @@ begin-module net
       self prov-ipv4-netmask @ self intf-ipv4-netmask!
       self prov-gateway-ipv4-addr @ self gateway-ipv4-addr!
       self prov-dns-server-ipv4-addr @ self dns-server-ipv4-addr!
-      self prov-dhcp-renew-interval @ self dhcp-renew-interval !
-      systick::systick-counter self dhcp-renew-start !
+      self prov-dhcp-renew-interval @
+      dup self dhcp-real-renew-interval !
+      dup dhcp-renew-init-divisor / self dhcp-renew-interval !
+      dhcp-rebind-multiplier * dhcp-rebind-divisor / self dhcp-rebind-interval !
+      systick::systick-counter
+      dup self dhcp-real-renew-start !
+      dup self dhcp-renew-start !
+      self dhcp-rebind-start !
       dhcp-discovered self dhcp-discover-state !
+      self dhcp-sema broadcast
+      self dhcp-sema give
     ; define apply-dhcp
 
     \ Start DHCP discovery
-    :noname { self -- }
-      begin
-
-        dhcp-log? if
-          [: cr ." Starting DHCP discovery" ;] usb::with-usb-output
-        then
-        
-        self send-dhcpdiscover
-        begin
-          task::timeout @ { old-timeout }
-          dhcp-discover-timeout task::timeout !
-          self dhcp-sema ['] take try dup ['] task::x-timed-out = if
-            2drop 0
-          then
-          old-timeout task::timeout !
-          ?raise
-          self dhcp-discover-state @ dhcp-wait-confirm = if
-
-            dhcp-log? if
-              [: cr ." Waiting for DHCP ARP confirmation" ;]
-              usb::with-usb-output
-            then
-
-            true true
-          else
-            self dhcp-discover-state @ dhcp-got-nak = if
-
-              dhcp-log? if
-                [: cr ." Got DHCP NAK" ;] usb::with-usb-output
-              then
-              
-              false true
-            else
-              self dhcp-discover-state @ case
-                dhcp-wait-offer of self send-dhcpdiscover endof
-                dhcp-wait-ack of self send-dhcprequest endof
-              endcase
-              false
-            then
-          then
-        until
-        if
-          dhcp-wait-confirm self dhcp-discover-state !
-          self dhcp-req-ipv4-addr @ self attempt-ipv4-dhcp-arp if
-
-            dhcp-log? if
-              [: cr ." Will DHCPDECLINE" ;] usb::with-usb-output
-            then
-
-            self send-dhcpdecline
-            dhcpdecline-delay systick::systick-counter
-            task::current-task task::delay
-
-            dhcp-log? if
-              [: cr ." Done with DHCPDECLINE wait" ;] usb::with-usb-output
-            then
-
-            false
-          else
-            self apply-dhcp
-            
-            dhcp-log? if
-              [: cr ." DHCP DISCOVER!" ;] usb::with-usb-output
-            then
-            
-            true
-          then
-        else
-          false
-        then
-      until
+    :noname ( self -- )
+      dup ['] send-dhcpdiscover over dhcp-lock with-lock dhcp-sema take
     ; define discover-ipv4-addr
     
     \ Send a DHCPDISCOVER packet
     :noname { self -- }
       dhcp-log? if
-        [: cr ." Sending DHCPDISCOVER" ;] usb::with-usb-output
+        [: cr ." Sending DHCPDISCOVER" ;] debug-hook execute
       then
+      $FFFFFFFFFFFF. self dhcp-server-mac-addr 2!
+      $00000000 self dhcp-req-ipv4-addr !
+      $FFFFFFFF self dhcp-server-ipv4-addr !
       rng::random self current-dhcp-xid !
       dhcp-wait-offer self dhcp-discover-state !
+      systick::systick-counter self dhcp-discover-stage-start !
       self
       $FFFFFFFFFFFF.
       $00000000 dhcp-client-port
       $FFFFFFFF dhcp-server-port
       [ dhcp-header-size 3 + 6 + 6 + 1 + ] literal [: { self buf }
         dhcp-log? if
-          [: cr ." Constructing DHCPDISCOVER" ;] usb::with-usb-output
+          [: cr ." Constructing DHCPDISCOVER" ;] debug-hook execute
         then
         DHCP_OP_CLIENT buf dhcp-op c!
         DHCP_HTYPE buf dhcp-htype c!
@@ -4065,18 +4059,18 @@ begin-module net
         DHCP_END buf c!
         true
         dhcp-log? if
-          [: cr ." Constructed DHCPDISCOVER packet" ;] usb::with-usb-output
+          [: cr ." Constructed DHCPDISCOVER packet" ;] debug-hook execute
         then
       ;] self send-ipv4-udp-packet-raw drop
       dhcp-log? if
-        [: cr ." Waiting for DHCPOFFER" ;] usb::with-usb-output
+        [: cr ." Waiting for DHCPOFFER" ;] debug-hook execute
       then
     ; define send-dhcpdiscover
 
     \ Send a DHCPREQUEST packet
     :noname { self -- }
       dhcp-log? if
-        [: cr ." Sending DHCPREQUEST" ;] usb::with-usb-output
+        [: cr ." Sending DHCPREQUEST" ;] debug-hook execute
       then
       self
       $FFFFFFFFFFFF.
@@ -4084,7 +4078,7 @@ begin-module net
       $FFFFFFFF dhcp-server-port
       [ dhcp-header-size 3 + 6 + 6 + 1 + ] literal [: { self buf }
         dhcp-log? if
-          [: cr ." Constructing DHCPREQUEST" ;] usb::with-usb-output
+          [: cr ." Constructing DHCPREQUEST" ;] debug-hook execute
         then
         DHCP_OP_CLIENT buf dhcp-op c!
         DHCP_HTYPE buf dhcp-htype c!
@@ -4119,30 +4113,31 @@ begin-module net
         DHCP_END buf c!
         true
         dhcp-log? if
-          [: cr ." Constructed DHCPREQUEST packet" ;] usb::with-usb-output
+          [: cr ." Constructed DHCPREQUEST packet" ;] debug-hook execute
         then
       ;] self send-ipv4-udp-packet-raw drop
       dhcp-log? if
-        [: cr ." Waiting for DHCPACK" ;] usb::with-usb-output
+        [: cr ." Waiting for DHCPACK" ;] debug-hook execute
       then
       self dhcp-discover-state @
       dup dhcp-discovered <> swap dhcp-renewing <> and if
         dhcp-wait-ack self dhcp-discover-state !
+        systick::systick-counter self dhcp-discover-stage-start !
       then
     ; define send-dhcprequest
 
     \ Send a renewal DHCPREQUEST packet
     :noname { self -- }
       dhcp-log? if
-        [: cr ." Sending renewal DHCPREQUEST" ;] usb::with-usb-output
+        [: cr ." Sending renewal DHCPREQUEST" ;] debug-hook execute
       then
       self
-      $FFFFFFFFFFFF.
-      $00000000 dhcp-client-port
-      $FFFFFFFF dhcp-server-port
+      self dhcp-server-mac-addr 2@
+      self intf-ipv4-addr @ dhcp-client-port
+      self dhcp-server-ipv4-addr @ dhcp-server-port
       [ dhcp-header-size 3 + 6 + ( 6 + ) 1 + ] literal [: { self buf }
         dhcp-log? if
-          [: cr ." Constructing renewal DHCPREQUEST" ;] usb::with-usb-output
+          [: cr ." Constructing renewal DHCPREQUEST" ;] debug-hook execute
         then
         DHCP_OP_CLIENT buf dhcp-op c!
         DHCP_HTYPE buf dhcp-htype c!
@@ -4154,7 +4149,7 @@ begin-module net
         self dhcp-req-ipv4-addr @ rev buf dhcp-ciaddr unaligned!
         self dhcp-req-ipv4-addr @ rev buf dhcp-yiaddr unaligned!
         [ 0 rev ] literal buf dhcp-siaddr unaligned!
-\        self dhcp-server-ipv4-addr @ rev buf dhcp-siaddr unaligned!
+        self dhcp-server-ipv4-addr @ rev buf dhcp-siaddr unaligned!
         [ 0 rev ] literal buf dhcp-giaddr unaligned!
         buf dhcp-chaddr 16 0 fill
         self intf-mac-addr@
@@ -4178,11 +4173,11 @@ begin-module net
         DHCP_END buf c!
         true
         dhcp-log? if
-          [: cr ." Constructed renewal DHCPREQUEST packet" ;] usb::with-usb-output
+          [: cr ." Constructed renewal DHCPREQUEST packet" ;] debug-hook execute
         then
       ;] self send-ipv4-udp-packet-raw drop
       dhcp-log? if
-        [: cr ." Waiting for DHCPACK" ;] usb::with-usb-output
+        [: cr ." Waiting for DHCPACK" ;] debug-hook execute
       then
       self dhcp-discover-state @
       dup dhcp-discovered <> swap dhcp-renewing <> and if
@@ -4190,10 +4185,69 @@ begin-module net
       then
     ; define send-renew-dhcprequest
 
+    \ Send a rebinding DHCPREQUEST packet
+    :noname { self -- }
+      dhcp-log? if
+        [: cr ." Sending rebinding DHCPREQUEST" ;] debug-hook execute
+      then
+      self
+      $FFFFFFFFFFFF.
+      self intf-ipv4-addr @ dhcp-client-port
+      $FFFFFFFF dhcp-server-port
+      [ dhcp-header-size 3 + 6 + ( 6 + ) 1 + ] literal [: { self buf }
+        dhcp-log? if
+          [: cr ." Constructing rebinding DHCPREQUEST" ;] debug-hook execute
+        then
+        DHCP_OP_CLIENT buf dhcp-op c!
+        DHCP_HTYPE buf dhcp-htype c!
+        DHCP_HLEN buf dhcp-hlen c!
+        0 buf dhcp-hops c!
+        self current-dhcp-xid @ rev buf dhcp-xid unaligned!
+        [ 0 rev16 ] literal buf dhcp-secs hunaligned!
+        [ 0 rev16 ] literal buf dhcp-flags hunaligned!
+        self dhcp-req-ipv4-addr @ rev buf dhcp-ciaddr unaligned!
+        self dhcp-req-ipv4-addr @ rev buf dhcp-yiaddr unaligned!
+        [ 0 rev ] literal buf dhcp-siaddr unaligned!
+        [ 0 rev ] literal buf dhcp-siaddr unaligned!
+        [ 0 rev ] literal buf dhcp-giaddr unaligned!
+        buf dhcp-chaddr 16 0 fill
+        self intf-mac-addr@
+        rev16 buf dhcp-chaddr hunaligned!
+        rev buf dhcp-chaddr 2 + unaligned!
+        buf dhcp-filler 192 0 fill
+        [ DHCP_MAGIC_COOKIE rev ] literal buf dhcp-magic unaligned!
+        dhcp-header-size +to buf
+        DHCP_MESSAGE_TYPE buf c!
+        1 buf 1 + c!
+        DHCPREQUEST buf 2 + c!
+        3 +to buf
+        DHCP_REQ_IPV4_ADDR buf c!
+        4 buf 1 + c!
+        self dhcp-req-ipv4-addr @ rev buf 2 + unaligned!
+        6 +to buf
+\        DHCP_SERVER_IPV4_ADDR buf c!
+\        4 buf 1 + c!
+\        self dhcp-server-ipv4-addr @ rev buf 2 + unaligned!
+\        6 +to buf
+        DHCP_END buf c!
+        true
+        dhcp-log? if
+          [: cr ." Constructed rebinding DHCPREQUEST packet" ;] debug-hook execute
+        then
+      ;] self send-ipv4-udp-packet-raw drop
+      dhcp-log? if
+        [: cr ." Waiting for DHCPACK" ;] debug-hook execute
+      then
+      self dhcp-discover-state @
+      dup dhcp-discovered <> swap dhcp-renewing <> and if
+        dhcp-wait-ack self dhcp-discover-state !
+      then
+    ; define send-rebind-dhcprequest
+
     \ Send a DHCPDECLINE packet
     :noname { self -- }
       dhcp-log? if
-        [: cr ." Sending DHCPDECLINE" ;] usb::with-usb-output
+        [: cr ." Sending DHCPDECLINE" ;] debug-hook execute
       then
       self
       $FFFFFFFFFFFF.
@@ -4201,7 +4255,7 @@ begin-module net
       $FFFFFFFF dhcp-server-port
       [ dhcp-header-size 3 + 6 + 6 + 1 + ] literal [: { self buf }
         dhcp-log? if
-          [: cr ." Constructing DHCPDECLINE" ;] usb::with-usb-output
+          [: cr ." Constructing DHCPDECLINE" ;] debug-hook execute
         then
         DHCP_OP_CLIENT buf dhcp-op c!
         DHCP_HTYPE buf dhcp-htype c!
@@ -4236,59 +4290,62 @@ begin-module net
         DHCP_END buf c!
         true
         dhcp-log? if
-          [: cr ." Constructed DHCPDECLINE packet" ;] usb::with-usb-output
+          [: cr ." Constructed DHCPDECLINE packet" ;] debug-hook execute
         then
       ;] self send-ipv4-udp-packet-raw drop
       dhcp-log? if
-        [: cr ." Sent DHCPDECLINE" ;] usb::with-usb-output
+        [: cr ." Sent DHCPDECLINE" ;] debug-hook execute
       then
-      dhcp-not-discovering self dhcp-discover-state !
+      dhcp-declined self dhcp-discover-state !
+      systick::systick-counter self dhcp-discover-stage-start !
     ; define send-dhcpdecline
 
     \ Process an IPv4 DHCP packet
-    :noname { addr bytes self -- }
-      dhcp-log? if
-        [: cr ." Receiving DHCP packet" ;] usb::with-usb-output
-      then
-      bytes dhcp-header-size < if
+    :noname ( addr bytes src-addr self -- )
+      [: { addr bytes src-addr self }
         dhcp-log? if
-          [: cr ." DHCP packet too small" ;] usb::with-usb-output
+          [: cr ." Receiving DHCP packet" ;] debug-hook execute
         then
-        exit
-      then
-      addr dhcp-op c@ DHCP_OP_SERVER <> if
-        dhcp-log? if
-          [: cr ." DHCP packet is not a server packet" ;] usb::with-usb-output
+        bytes dhcp-header-size < if
+          dhcp-log? if
+            [: cr ." DHCP packet too small" ;] debug-hook execute
+          then
+          exit
         then
-        exit
-      then
-      addr dhcp-xid unaligned@ rev self current-dhcp-xid @ <> if
-        dhcp-log? if
-          [: cr ." DHCP packet XID does not match" ;] usb::with-usb-output
+        addr dhcp-op c@ DHCP_OP_SERVER <> if
+          dhcp-log? if
+            [: cr ." DHCP packet is not a server packet" ;] debug-hook execute
+          then
+          exit
         then
-        exit
-      then
-      DHCP_MESSAGE_TYPE 1 addr bytes find-fixed-dhcp-opt if
-        dhcp-log? if
-          [: cr ." Got DHCP message type: " dup c@ . ;] usb::with-usb-output
+        addr dhcp-xid unaligned@ rev self current-dhcp-xid @ <> if
+          dhcp-log? if
+            [: cr ." DHCP packet XID does not match" ;] debug-hook execute
+          then
+          exit
         then
-        c@ case
-          DHCPOFFER of addr bytes self process-ipv4-dhcpoffer endof
-          DHCPACK of addr bytes self process-ipv4-dhcpack endof
-          DHCPNAK of addr bytes self process-ipv4-dhcpnak endof
-        endcase
-      else
-        dhcp-log? if
-          [: cr ." Did not get message type" ;] usb::with-usb-output
+        DHCP_MESSAGE_TYPE 1 addr bytes find-fixed-dhcp-opt if
+          dhcp-log? if
+            [: cr ." Got DHCP message type: " dup c@ . ;] debug-hook execute
+          then
+          c@ case
+            DHCPOFFER of addr bytes self process-ipv4-dhcpoffer endof
+            DHCPACK of addr bytes src-addr self process-ipv4-dhcpack endof
+            DHCPNAK of addr bytes self process-ipv4-dhcpnak endof
+          endcase
+        else
+          dhcp-log? if
+            [: cr ." Did not get message type" ;] debug-hook execute
+          then
+          drop exit
         then
-        drop exit
-      then
+      ;] over dhcp-lock with-lock
     ; define process-ipv4-dhcp-packet
 
     \ Process an IPv4 DHCPOFFER packet
     :noname { addr bytes self -- }
       dhcp-log? if
-        [: cr ." Sending DHCPREQUEST" ;] usb::with-usb-output
+        [: cr ." Sending DHCPREQUEST" ;] debug-hook execute
       then
       addr dhcp-yiaddr unaligned@ rev self dhcp-req-ipv4-addr !
       addr dhcp-siaddr unaligned@ rev self dhcp-server-ipv4-addr !
@@ -4296,116 +4353,237 @@ begin-module net
     ; define process-ipv4-dhcpoffer
 
     \ Process an IPv4 DHCPACK packet
-    :noname { addr bytes self -- }
+    :noname { addr bytes src-addr self -- }
+      src-addr self address-map lookup-mac-addr-by-ipv4 if
+        self dhcp-server-mac-addr 2!
+      else
+        2drop $FFFFFFFFFFFF. self dhcp-server-mac-addr 2!
+      then
       addr dhcp-yiaddr unaligned@ rev self dhcp-req-ipv4-addr @ = if
         self dhcp-req-ipv4-addr @ { ipv4-addr }
         DHCP_IPV4_ADDR_LEASE_TIME 4 addr bytes find-fixed-dhcp-opt if
           dhcp-log? if
-            [: cr ." Got DHCP lease time" ;] usb::with-usb-output
+            [: cr ." Got DHCP lease time" ;] debug-hook execute
           then
           unaligned@ rev
           dhcp-log? if
-            [: ." : " dup . ;] usb::with-usb-output
+            [: ." : " dup . ;] debug-hook execute
           then
         else
           dhcp-log? if
-            [: cr ." Did not find lease time" ;] usb::with-usb-output
+            [: cr ." Did not find lease time" ;] debug-hook execute
           then
           drop 86400
         then
         { renew-interval }
         DHCP_SERVICE_SUBNET_MASK 4 addr bytes find-fixed-dhcp-opt if
           dhcp-log? if
-            [: cr ." Got DHCP netmask" ;] usb::with-usb-output
+            [: cr ." Got DHCP netmask" ;] debug-hook execute
           then
           unaligned@ rev { ipv4-netmask }
           DHCP_SERVICE_ROUTER 4 addr bytes find-fixed-dhcp-opt if
             dhcp-log? if
-              [: cr ." Got DHCP gateway" ;] usb::with-usb-output
+              [: cr ." Got DHCP gateway" ;] debug-hook execute
             then
             unaligned@ rev { gateway-ipv4-addr }
             DHCP_SERVICE_DNS_SERVER addr bytes find-var-dhcp-opt if
               dhcp-log? if
-                [: cr ." Got DHCP DNS server(s)" ;] usb::with-usb-output
+                [: cr ." Got DHCP DNS server(s)" ;] debug-hook execute
               then
               4 >= if
                 dhcp-log? if
-                  [: cr ." Found DHCPACK fields" ;] usb::with-usb-output
+                  [: cr ." Found DHCPACK fields" ;] debug-hook execute
                 then
                 unaligned@ rev { dns-server-ipv4-addr }
                 ipv4-netmask self prov-ipv4-netmask !
                 gateway-ipv4-addr self prov-gateway-ipv4-addr !
                 dns-server-ipv4-addr self prov-dns-server-ipv4-addr !
-                renew-interval 10000 * dhcp-renew-init-divisor /
-                self prov-dhcp-renew-interval !
-                self dhcp-discover-state @ dhcp-renewing = if
+                renew-interval 10000 * self prov-dhcp-renew-interval !
+                self dhcp-discover-state @ dhcp-renewing =
+                self dhcp-discover-state @ dhcp-rebinding = or if
                   self apply-dhcp
                 else
+                  dhcp-arp-attempt-count self dhcp-remaining-arp-attempts !
                   dhcp-wait-confirm self dhcp-discover-state !
-                  self dhcp-sema broadcast
-                  self dhcp-sema give
+                  systick::systick-counter self dhcp-discover-stage-start !
                 then
                 dhcp-log? if
-                  [: cr ." Processed DHCPACK" ;] usb::with-usb-output
+                  [: cr ." Processed DHCPACK" ;] debug-hook execute
                 then
               else
                 dhcp-log? if
-                  [: cr ." Insufficient DNS servers" ;] usb::with-usb-output
+                  [: cr ." Insufficient DNS servers" ;] debug-hook execute
                 then
                 drop
               then
             else
               dhcp-log? if
-                [: cr ." Did not find DNS server" ;] usb::with-usb-output
+                [: cr ." Did not find DNS server" ;] debug-hook execute
               then
               drop
             then
           else
             dhcp-log? if
-              [: cr ." Did not find router" ;] usb::with-usb-output
+              [: cr ." Did not find router" ;] debug-hook execute
             then
             drop
           then
         else
           dhcp-log? if
-            [: cr ." Did not find netmask" ;] usb::with-usb-output
+            [: cr ." Did not find netmask" ;] debug-hook execute
           then
           drop
         then
       else
         dhcp-log? if
-          [: cr ." yiaddr does not match" ;] usb::with-usb-output
+          [: cr ." yiaddr does not match" ;] debug-hook execute
         then
       then
     ; define process-ipv4-dhcpack
 
-    \ Process an IPv4 DHCPACK packet
+    \ Process an IPv4 DHCPNAK packet
     :noname { addr bytes self -- }
       dhcp-log? if
-        [: cr ." Got DHCPNAK" ;] usb::with-usb-output
+        [: cr ." Got DHCPNAK" ;] debug-hook execute
       then
       0 self dhcp-req-ipv4-addr !
+      $FFFFFFFFFFFF. self dhcp-server-mac-addr 2!
       0 self dhcp-server-ipv4-addr !
       dhcp-got-nak self dhcp-discover-state !
-      self dhcp-sema broadcast
-      self dhcp-sema give
     ; define process-ipv4-dhcpnak
 
-    \ Refresh an interface
+    \ Refresh DHCP renewal
     :noname { self -- }
       self dhcp-discover-state @ { state }
-      state dhcp-discovered = state dhcp-renewing = or if
-        systick::systick-counter self dhcp-renew-start @ -
-        self dhcp-renew-interval @ > if
-          state dhcp-discovered = if
-            dhcp-renewing self dhcp-discover-state !
-            self dhcp-renew-interval @ dhcp-renew-retry-divisor /
-            self dhcp-renew-interval !
+      systick::systick-counter self dhcp-real-renew-start @ -
+      self dhcp-real-renew-interval @ >
+      state dhcp-rebinding = and if
+        dhcp-log? if
+          [: cr ." Rebinding faied, issuing DHCPDISCOVER" ;]
+          debug-hook execute
+        then
+        self send-dhcpdiscover
+      else
+        systick::systick-counter self dhcp-rebind-start @ -
+        self dhcp-rebind-interval @ >
+        state dhcp-renewing = and if
+          state dhcp-renewing = if
+            dhcp-rebinding self dhcp-discover-state !
+            dhcp-rebind-retry-interval self dhcp-rebind-interval !
           then
-          systick::systick-counter self dhcp-renew-start !
-          self send-renew-dhcprequest
+          dhcp-log? if
+            [: cr ." Attempting rebinding, issuing DHCPREQUEST" ;]
+            debug-hook execute
+          then
+          systick::systick-counter self dhcp-rebind-start !
+          self send-rebind-dhcprequest
+        else
+          systick::systick-counter self dhcp-renew-start @ -
+          self dhcp-renew-interval @ > if
+            state dhcp-discovered = if
+              dhcp-renewing self dhcp-discover-state !
+              self dhcp-renew-interval @ dhcp-renew-retry-divisor /
+              self dhcp-renew-interval !
+            then
+            dhcp-log? if
+              [: cr ." Attempting renewing, issuing DHCPREQUEST" ;]
+              debug-hook execute
+            then
+            systick::systick-counter self dhcp-renew-start !
+            self send-renew-dhcprequest
+          then
         then
       then
+    ; define refresh-dhcp-renew
+    
+    \ Refresh DHCP discovery
+    :noname { self -- }
+      self dhcp-discover-state @ { state }
+      state dhcp-got-nak = if
+        dhcp-log? if
+          [: cr ." Got DHCPNAK, retrying DHCPDISCOVER" ;] debug-hook execute
+        then
+        self send-dhcpdiscover
+      else
+        systick::systick-counter self dhcp-discover-stage-start @ -
+        dhcp-discover-timeout > if
+          systick::systick-counter self dhcp-discover-stage-start !
+          state case
+            dhcp-wait-offer of
+              dhcp-log? if
+                [: cr ." Timeout, retrying DHCPDISCOVER" ;] debug-hook execute
+              then
+              self send-dhcpdiscover
+            endof
+            dhcp-wait-ack of
+              dhcp-log? if
+                [: cr ." TImeout, retrying DHCPREQUEST" ;] debug-hook execute
+              then
+              self send-dhcprequest
+            endof
+          endcase
+        then
+      then
+    ; define refresh-dhcp-discovery
+
+    \ Refresh DHCP wait confirm
+    :noname { self -- }
+      systick::systick-counter self dhcp-discover-stage-start @ -
+      dhcp-arp-interval > if
+        dhcp-log? if
+          [: cr ." Trying to confirm DHCP with ARP..." ;] debug-hook execute
+        then
+        self dhcp-req-ipv4-addr @ self address-map
+        lookup-mac-addr-by-ipv4 not -rot 2drop if
+          -1 self dhcp-remaining-arp-attempts +!
+          self dhcp-remaining-arp-attempts @ 0> if
+            self dhcp-req-ipv4-addr @ self send-ipv4-dhcp-arp-request
+            systick::systick-counter self dhcp-discover-stage-start !
+          else
+            dhcp-log? if
+              [: cr ." DHCP is now accepted" ;] debug-hook execute
+            then
+            self apply-dhcp
+          then
+        else
+          dhcp-log? if
+            [: cr ." DHCP is declined" ;] debug-hook execute
+          then
+          self send-dhcpdecline
+        then
+      then      
+    ; define refresh-dhcp-wait-confirm
+
+    \ Refresh DHCP declined
+    :noname { self -- }
+      systick::systick-counter self dhcp-discover-stage-start @ -
+      dhcpdecline-delay > if
+        dhcp-log? if
+          [: cr ." Retrying DHCP discovery" ;] debug-hook execute
+        then
+        self send-dhcpdiscover
+      then
+    ; define refresh-dhcp-declined
+    
+    \ Refresh DHCP
+    :noname ( self -- )
+      [: { self }
+        self dhcp-discover-state @ case
+          dhcp-discovered of self refresh-dhcp-renew endof
+          dhcp-renewing of self refresh-dhcp-renew endof
+          dhcp-rebinding of self refresh-dhcp-renew endof
+          dhcp-got-nak of self refresh-dhcp-discovery endof
+          dhcp-wait-offer of self refresh-dhcp-discovery endof
+          dhcp-wait-ack of self refresh-dhcp-discovery endof
+          dhcp-wait-confirm of self refresh-dhcp-wait-confirm endof
+          dhcp-declined of self refresh-dhcp-declined endof
+        endcase
+      ;] over dhcp-lock with-lock
+    ; define refresh-dhcp
+    
+    \ Refresh an interface
+    :noname { self -- }
+      self refresh-dhcp
       max-endpoints 0 ?do
         self intf-endpoints <endpoint> class-size i * +
         self [: { endpoint self }

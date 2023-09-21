@@ -20,6 +20,9 @@
 
 begin-module net-config
 
+  \ Debugging print hook
+  ' console::with-serial-output value debug-hook
+
   \ Are we debugging?
   false constant debug?
   
@@ -154,6 +157,15 @@ begin-module net-config
   
   \ DHCP renewal retry divisor
   60 value dhcp-renew-retry-divisor
+
+  \ DHCP rebind multiplier
+  7 value dhcp-rebind-multiplier
+  
+  \ DHCP rebind divisor
+  8 value dhcp-rebind-divisor
+
+  \ DHCP rebind interval
+  10 10000 * value dhcp-rebind-retry-interval
 
   \ Default DHCP ARP interval
   10000 value dhcp-arp-interval

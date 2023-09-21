@@ -52,6 +52,8 @@ begin-module net-misc
   4 constant dhcp-wait-confirm
   5 constant dhcp-discovered
   6 constant dhcp-renewing
+  7 constant dhcp-rebinding
+  8 constant dhcp-declined
   
   \ The Ethernet header structure
   begin-structure ethernet-header-size
