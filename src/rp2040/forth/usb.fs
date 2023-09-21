@@ -537,6 +537,9 @@ begin-module usb
     \ Endpoint 1 in ready
     variable endpoint1-in-ready?
 
+    \ Endpoint 1 in refill
+    variable endpoint1-in-refill?
+
     \ USB receive pending operation
     pending-op-size buffer: usb-rx-pending-op
 
@@ -971,6 +974,7 @@ begin-module usb
       false usb-device-configd? !
       false endpoint1-out-ready? !
       false endpoint1-in-ready? !
+      true endpoint1-in-refill? !
       false usb-rx-pending-op-enabled? !
       false usb-dtr? !
       0 rx-read-index !
@@ -998,6 +1002,7 @@ begin-module usb
           endpoint1-in-ready? @ if
             false endpoint1-in-ready? !
             endpoint1-in usb-console-start-transfer
+            true endpoint1-in-refill? !
           else
             ['] usb-partial-tx usb-tx-pending-op set-pending-op
           then
@@ -1089,6 +1094,7 @@ begin-module usb
       false usb-device-configd? !
       false endpoint1-out-ready? !
       false endpoint1-in-ready? !
+      true endpoint1-in-refill? !
       false usb-dtr? !
       
       false usb-rx-pending-op-enabled? !
@@ -1128,7 +1134,7 @@ begin-module usb
               tx-full? not if
                 write-tx true
               else
-                false
+                false endpoint1-in-refill? ! false
               then
               usb-attempt-tx
             else
@@ -1136,7 +1142,7 @@ begin-module usb
             then
           ;] critical
         ;] usb-in-core-lock with-core-lock
-        dup not if pause then
+        dup not if begin endpoint1-in-refill? @ not while pause repeat then
       until
     ;
 
@@ -1175,6 +1181,7 @@ begin-module usb
           pause
         then
       until
+      true endpoint1-in-refill? !
     ;
 
   end-module> import

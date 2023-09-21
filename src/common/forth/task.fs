@@ -1683,7 +1683,7 @@ begin-module task
             until
             dup current-task !
             false in-task-change !
-            0<> if true else sleep false then
+            0<> if true else handle-pending-ops sleep false then
           until
 
           prev-task @ current-task @ <> if
