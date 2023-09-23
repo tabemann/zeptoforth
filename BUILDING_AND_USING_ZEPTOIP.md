@@ -60,7 +60,7 @@ The line above:
 s" XX" s" XX" -1 my-cyw43-net cyw43-net-country! \ This is optional
 ```
 
-specifies the default country settings, but under some circumstances one might to specify a different setting. Take, for instance, the settings for the UK, which would be:
+specifies the default country settings, but under some circumstances one might to specify a different setting. In particular, the default country code/abbreviation, `XX`, which is a catch-all international country code, excludes the use of 802.11n, and some routers are 802.11n-only. Take, for instance, the settings for the UK, which would be:
 
 
 ```
