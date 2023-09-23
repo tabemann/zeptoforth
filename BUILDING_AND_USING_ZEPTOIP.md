@@ -47,11 +47,27 @@ pio::PIO0 constant pio-instance
 0 value my-interface
 
 pio-addr sm-index pio-instance <pico-w-cyw43-net> my-cyw43-net init-object
+s" XX" s" XX" -1 my-cyw43-net cyw43-net-country! \ This is optional
 my-cyw43-net init-cyw43-net
 my-cyw43-net cyw43-control@ to my-cyw43-control
 my-cyw43-net net-interface@ to my-interface
 
 ```
+
+The line above:
+
+```
+s" XX" s" XX" -1 my-cyw43-net cyw43-net-country! \ This is optional
+```
+
+specifies the default country settings, but under some circumstances one might to specify a different setting. Take, for instance, the settings for the UK, which would be:
+
+
+```
+s" GB" s" GB" 0 my-cyw43-net cyw43-net-country!
+```
+
+For a list of abbreviations and codes (which are normally identical) and revisions see `extra/rp2040/cyw43/COUNTRIES.md`.
 
 Afterwards, we will probably want to connect to an access point (AP), typically an WPA2 AP:
 

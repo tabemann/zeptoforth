@@ -87,6 +87,15 @@ begin-module cyw43-control
 
       \ MAC address ( default-mac-addr )
       2 cells member cyw43-mac-addr
+
+      \ Country abbreviation
+      4 member cyw43-country-abbrev
+
+      \ Country code
+      4 member cyw43-country-code
+
+      \ Country revision
+      cell member cyw43-country-rev
     
       \ Wait for joining an AP
       method wait-for-cyw43-join ( ssid-info self -- )
@@ -134,6 +143,11 @@ begin-module cyw43-control
     \ Set power management
     method cyw43-power-management! ( pm self -- )
 
+    \ Set country - must be set prior to executing init-cyw43, and if not set
+    \ defaults to an abbreviation and code of XX\x00\x00 and a revision of -1
+    method cyw43-country!
+    ( abbrev-addr abbrev-bytes code-addr code-bytes country-rev self -- )
+    
     \ Join an open AP
     method join-cyw43-open ( ssid-addr ssid-bytes self -- status success? )
 
@@ -204,6 +218,9 @@ begin-module cyw43-control
 
       \ Set the MAC address
       self cyw43-mac-addr 2!
+
+      \ Set the default country
+      s" XX" 2dup -1 self cyw43-country!
       
     ; define new
 
@@ -302,6 +319,17 @@ begin-module cyw43-control
       then
       pm cyw43-pm-mode 86 0 self >ioctl-cyw43-32
     ; define cyw43-power-management!
+
+    \ Set country - must be set prior to executing init-cyw43, and if not set
+    \ defaults to an abbreviation and code of XX\x00\x00 and a revision of -1
+    :noname
+      { abbrev-addr abbrev-bytes code-addr code-bytes country-rev self -- }
+      self cyw43-country-abbrev 4 0 fill
+      self cyw43-country-code 4 0 fill
+      abbrev-addr self cyw43-country-abbrev abbrev-bytes 4 min 0 max move
+      code-addr self cyw43-country-code code-bytes 4 min 0 max move
+      country-rev self cyw43-country-rev !
+    ; define cyw43-country!
     
     \ Join an open AP
     :noname ( ssid-addr ssid-bytes self -- status success? )
@@ -605,11 +633,9 @@ begin-module cyw43-control
       [ debug? ] [if] cr ." Setting country info..." [then]
 
       self country-info-size [: { self buf }
-        buf ci-country-abbrev [char] X over c! 1+ [char] X over c!
-        1+ 0 over c! 1+ 0 swap c!
-        buf ci-country-code [char] X over c! 1+ [char] X over c!
-        1+ 0 over c! 1+ 0 swap c!
-        -1 buf ci-rev !
+        self cyw43-country-abbrev buf ci-country-abbrev 4 move
+        self cyw43-country-code buf ci-country-code 4 move
+        self cyw43-country-rev @ buf ci-rev !
         buf country-info-size s" country" self >iovar-cyw43
       ;] with-aligned-allot
 

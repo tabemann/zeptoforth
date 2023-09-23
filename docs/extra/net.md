@@ -430,6 +430,11 @@ It has the following methods:
 
 This initializes a `<simple-cyw43-net>` instance.
 
+##### `cyw43-net-country!`
+( abbrev-addr abbrev-bytes code-addr code-bytes country-rev self -- )
+
+Initialize the country abbrevation, code, and revision; these default to `XX`, `XX`, and -1. Note that this must be called before `init-cyw43-net`, if it called at all.
+
 ##### `cyw43-gpio!`
 ( state gpio driver -- )
 

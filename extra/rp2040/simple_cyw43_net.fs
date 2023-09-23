@@ -54,8 +54,14 @@ begin-module simple-cyw43-net
 
     \ Initialize a CYW43439 networking and interface class instance
     method init-cyw43-net ( self -- )
-    
-    \ Set a GPIO on the CYW43439
+
+    \ Set country - must be set prior to executing init-cyw43-net, and if not
+    \ set defaults to an abbreviation and code of XX\x00\x00 and a revision of
+    \ -1
+    method cyw43-net-country!
+    ( abbrev-addr abbrev-bytes code-addr code-bytes country-rev self -- )
+
+      \ Set a GPIO on the CYW43439
     method cyw43-gpio! ( state gpio self -- ) 
 
     \ Get the CYW43439 controller
@@ -88,6 +94,14 @@ begin-module simple-cyw43-net
       pio-addr sm-index pio-instance
       <cyw43-control> self my-cyw43-control init-object
     ; define new
+
+    \ Set country - must be set prior to executing init-cyw43-net, and if not
+    \ set defaults to an abbreviation and code of XX\x00\x00 and a revision of
+    \ -1
+    :noname
+      ( abbrev-addr abbrev-bytes code-addr code-bytes country-rev self -- )
+      my-cyw43-control cyw43-country!
+    ; define cyw43-net-country!
 
     \ Initialize the CYW43439 network and interface object
     :noname { self -- }

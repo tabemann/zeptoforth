@@ -464,6 +464,11 @@
 <p>( driver – )</p>
 <p>This initializes a <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net&gt;</span></code> instance.</p>
 </section>
+<section id="cyw43-net-country">
+<h4><code class="docutils literal notranslate"><span class="pre">cyw43-net-country!</span></code><a class="headerlink" href="#cyw43-net-country" title="Permalink to this heading">¶</a></h4>
+<p>( abbrev-addr abbrev-bytes code-addr code-bytes country-rev self – )</p>
+<p>Initialize the country abbrevation, code, and revision; these default to <code class="docutils literal notranslate"><span class="pre">XX</span></code>, <code class="docutils literal notranslate"><span class="pre">XX</span></code>, and -1. Note that this must be called before <code class="docutils literal notranslate"><span class="pre">init-cyw43-net</span></code>, if it called at all.</p>
+</section>
 <section id="cyw43-gpio">
 <h4><code class="docutils literal notranslate"><span class="pre">cyw43-gpio!</span></code><a class="headerlink" href="#cyw43-gpio" title="Permalink to this heading">¶</a></h4>
 <p>( state gpio driver – )</p>

@@ -29,6 +29,11 @@ The `<cyw43-control>` class has the following methods:
 
 Initialize the CYW43.
 
+##### `cyw43-country!`
+( abbrev-addr abbrev-bytes code-addr code-bytes country-rev self -- )
+
+Initialize the country abbrevation, code, and revision; these default to `XX`, `XX`, and -1. Note that this must be called before `init-cyw43`, if it called at all.
+
 ##### `cyw43-power-management!`
 ( pm self -- )
 

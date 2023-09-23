@@ -60,6 +60,11 @@
 <p>( self – )</p>
 <p>Initialize the CYW43.</p>
 </section>
+<section id="cyw43-country">
+<h4><code class="docutils literal notranslate"><span class="pre">cyw43-country!</span></code><a class="headerlink" href="#cyw43-country" title="Permalink to this heading">¶</a></h4>
+<p>( abbrev-addr abbrev-bytes code-addr code-bytes country-rev self – )</p>
+<p>Initialize the country abbrevation, code, and revision; these default to <code class="docutils literal notranslate"><span class="pre">XX</span></code>, <code class="docutils literal notranslate"><span class="pre">XX</span></code>, and -1. Note that this must be called before <code class="docutils literal notranslate"><span class="pre">init-cyw43</span></code>, if it called at all.</p>
+</section>
 <section id="cyw43-power-management">
 <h4><code class="docutils literal notranslate"><span class="pre">cyw43-power-management!</span></code><a class="headerlink" href="#cyw43-power-management" title="Permalink to this heading">¶</a></h4>
 <p>( pm self – )</p>
