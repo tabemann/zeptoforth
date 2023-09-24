@@ -135,7 +135,7 @@ begin-module pico-w-net-repl
   \ KEY for telnet
   : telnet-key ( -- c )
     0 { W^ buffer }
-    buffer 1 rx-stream recv-stream
+    buffer 1 rx-stream recv-stream drop
     buffer c@
   ;
 
