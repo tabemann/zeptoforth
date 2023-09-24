@@ -2505,11 +2505,23 @@ begin-module net
       \ Apply DHCP state
       method apply-dhcp ( self -- )
 
+      \ Refresh DHCP rebinding
+      method refresh-dhcp-rebinding ( self -- )
+      
       \ Refresh DHCP renewal
-      method refresh-dhcp-renew ( self -- )
+      method refresh-dhcp-renewing ( self -- )
+
+      \ Refresh DHCP discovered
+      method refresh-dhcp-discovered ( self -- )
     
-      \ Refresh DHCP discovery
-      method refresh-dhcp-discovery ( self -- )
+      \ Refresh DHCP got NAK
+      method refresh-dhcp-got-nak ( self -- )
+
+      \ Refresh DHCP wait offer
+      method refresh-dhcp-wait-offer ( self -- )
+
+      \ Refresh DHCP wait ACK
+      method refresh-dhcp-wait-ack ( self -- )
 
       \ Refresh DHCP wait confirm
       method refresh-dhcp-wait-confirm ( self -- )
@@ -4452,79 +4464,90 @@ begin-module net
       dhcp-got-nak self dhcp-discover-state !
     ; define process-ipv4-dhcpnak
 
-    \ Refresh DHCP renewal
+    \ Refresh DHCP rebinding
     :noname { self -- }
-      self dhcp-discover-state @ { state }
       systick::systick-counter self dhcp-real-renew-start @ -
-      self dhcp-real-renew-interval @ >
-      state dhcp-rebinding = and if
+      self dhcp-real-renew-interval @ > if
         dhcp-log? if
           [: cr ." Rebinding faied, issuing DHCPDISCOVER" ;]
           debug-hook execute
         then
         self send-dhcpdiscover
+      then
+    ; define refresh-dhcp-rebinding
+    
+    \ Refresh DHCP renewal
+    :noname { self -- }
+      systick::systick-counter self dhcp-rebind-start @ -
+      self dhcp-rebind-interval @ > if
+        dhcp-rebinding self dhcp-discover-state !
+        dhcp-rebind-retry-interval self dhcp-rebind-interval !
+        dhcp-log? if
+          [: cr ." Attempting rebinding, issuing DHCPREQUEST" ;]
+          debug-hook execute
+        then
+        systick::systick-counter self dhcp-rebind-start !
+        self send-rebind-dhcprequest
       else
-        systick::systick-counter self dhcp-rebind-start @ -
-        self dhcp-rebind-interval @ >
-        state dhcp-renewing = and if
-          state dhcp-renewing = if
-            dhcp-rebinding self dhcp-discover-state !
-            dhcp-rebind-retry-interval self dhcp-rebind-interval !
-          then
+        systick::systick-counter self dhcp-renew-start @ -
+        self dhcp-renew-interval @ > if
           dhcp-log? if
-            [: cr ." Attempting rebinding, issuing DHCPREQUEST" ;]
+            [: cr ." Attempting renewing, issuing DHCPREQUEST" ;]
             debug-hook execute
           then
-          systick::systick-counter self dhcp-rebind-start !
-          self send-rebind-dhcprequest
-        else
-          systick::systick-counter self dhcp-renew-start @ -
-          self dhcp-renew-interval @ > if
-            state dhcp-discovered = if
-              dhcp-renewing self dhcp-discover-state !
-              self dhcp-renew-interval @ dhcp-renew-retry-divisor /
-              self dhcp-renew-interval !
-            then
-            dhcp-log? if
-              [: cr ." Attempting renewing, issuing DHCPREQUEST" ;]
-              debug-hook execute
-            then
-            systick::systick-counter self dhcp-renew-start !
-            self send-renew-dhcprequest
-          then
+          systick::systick-counter self dhcp-renew-start !
+          self send-renew-dhcprequest
         then
       then
-    ; define refresh-dhcp-renew
-    
-    \ Refresh DHCP discovery
+    ; define refresh-dhcp-renewing
+
+    \ Refresh DHCP discovered
     :noname { self -- }
-      self dhcp-discover-state @ { state }
-      state dhcp-got-nak = if
+      systick::systick-counter self dhcp-renew-start @ -
+      self dhcp-renew-interval @ > if
+        dhcp-renewing self dhcp-discover-state !
+        self dhcp-renew-interval @ dhcp-renew-retry-divisor /
+        self dhcp-renew-interval !
         dhcp-log? if
-          [: cr ." Got DHCPNAK, retrying DHCPDISCOVER" ;] debug-hook execute
+          [: cr ." Attempting renewing, issuing DHCPREQUEST" ;]
+          debug-hook execute
+        then
+        systick::systick-counter self dhcp-renew-start !
+        self send-renew-dhcprequest
+      then
+    ; define refresh-dhcp-discovered
+
+    \ Refresh DHCP got nak
+    :noname { self -- }
+      dhcp-log? if
+        [: cr ." Got DHCPNAK, retrying DHCPDISCOVER" ;] debug-hook execute
+      then
+      self send-dhcpdiscover
+    ; define refresh-dhcp-got-nak
+
+    \ Refresh DHCP wait offer
+    :noname { self -- }
+      systick::systick-counter self dhcp-discover-stage-start @ -
+      dhcp-discover-timeout > if
+        systick::systick-counter self dhcp-discover-stage-start !
+        dhcp-log? if
+          [: cr ." Timeout, retrying DHCPDISCOVER" ;] debug-hook execute
         then
         self send-dhcpdiscover
-      else
-        systick::systick-counter self dhcp-discover-stage-start @ -
-        dhcp-discover-timeout > if
-          systick::systick-counter self dhcp-discover-stage-start !
-          state case
-            dhcp-wait-offer of
-              dhcp-log? if
-                [: cr ." Timeout, retrying DHCPDISCOVER" ;] debug-hook execute
-              then
-              self send-dhcpdiscover
-            endof
-            dhcp-wait-ack of
-              dhcp-log? if
-                [: cr ." TImeout, retrying DHCPREQUEST" ;] debug-hook execute
-              then
-              self send-dhcprequest
-            endof
-          endcase
-        then
       then
-    ; define refresh-dhcp-discovery
+    ; define refresh-dhcp-wait-offer
+
+    \ Refresh DHCP wait ACK
+    :noname { self -- }
+      systick::systick-counter self dhcp-discover-stage-start @ -
+      dhcp-discover-timeout > if
+        systick::systick-counter self dhcp-discover-stage-start !
+        dhcp-log? if
+          [: cr ." TImeout, retrying DHCPREQUEST" ;] debug-hook execute
+        then
+        self send-dhcprequest
+      then
+    ; define refresh-dhcp-wait-ack
 
     \ Refresh DHCP wait confirm
     :noname { self -- }
@@ -4564,20 +4587,23 @@ begin-module net
         self send-dhcpdiscover
       then
     ; define refresh-dhcp-declined
+
+    \ Implement a jumptable for DHCP states
+    create dhcp-jumptable
+    ' drop ,
+    ' refresh-dhcp-wait-offer ,
+    ' refresh-dhcp-wait-ack ,
+    ' refresh-dhcp-got-nak ,
+    ' refresh-dhcp-wait-confirm ,
+    ' refresh-dhcp-discovered ,
+    ' refresh-dhcp-renewing ,
+    ' refresh-dhcp-rebinding ,
+    ' refresh-dhcp-declined ,
     
     \ Refresh DHCP
     :noname ( self -- )
-      [: { self }
-        self dhcp-discover-state @ case
-          dhcp-discovered of self refresh-dhcp-renew endof
-          dhcp-renewing of self refresh-dhcp-renew endof
-          dhcp-rebinding of self refresh-dhcp-renew endof
-          dhcp-got-nak of self refresh-dhcp-discovery endof
-          dhcp-wait-offer of self refresh-dhcp-discovery endof
-          dhcp-wait-ack of self refresh-dhcp-discovery endof
-          dhcp-wait-confirm of self refresh-dhcp-wait-confirm endof
-          dhcp-declined of self refresh-dhcp-declined endof
-        endcase
+      [:
+        dup dhcp-discover-state @ cells dhcp-jumptable + @ execute
       ;] over dhcp-lock with-lock
     ; define refresh-dhcp
     
