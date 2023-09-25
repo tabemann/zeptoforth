@@ -249,7 +249,7 @@ begin-module pico-w-net-http-server
 
   \ Send output
   : send-output { endpoint -- }
-    out-buffer out-buffer-offset @ type
+\    out-buffer out-buffer-offset @ type
     out-buffer out-buffer-offset @ endpoint my-interface @ send-tcp-endpoint
     0 out-buffer-offset !
   ;
@@ -368,7 +368,7 @@ begin-module pico-w-net-http-server
 
   \ Add data to the HTTP buffer
   : add-http-buffer { in-buffer in-size -- }
-    in-buffer in-size type
+\    in-buffer in-size type
     in-size http-buffer-size http-buffer-offset @ - min { accept-size }
     in-buffer http-buffer http-buffer-offset @ + accept-size move
     accept-size http-buffer-offset +!
@@ -421,11 +421,11 @@ begin-module pico-w-net-http-server
               endpoint serve-corrupt
             else
               http-dest @ case
-                dest-invalid of endpoint serve-invalid then
-                dest-home of endpoint serve-home then
-                dest-led-on of endpoint serve-led-on then
-                dest-led-off of endpoint serve-led-off then
-                dest-toggle-led of endpoint serve-toggle-led then
+                dest-invalid of endpoint serve-invalid endof
+                dest-home of endpoint serve-home endof
+                dest-led-on of endpoint serve-led-on endof
+                dest-led-off of endpoint serve-led-off endof
+                dest-toggle-led of endpoint serve-toggle-led endof
               endcase
             then
             endpoint send-output
@@ -461,6 +461,10 @@ begin-module pico-w-net-http-server
     my-interface @ dns-server-ipv4-addr@ cr ." DNS server IPv4 address: " ipv4.
     my-cyw43-net toggle-pico-w-led
     init-http-state
+  ;
+
+  \ Run the test
+  : run-test ( -- )
     server-port my-interface @ allocate-tcp-listen-endpoint 2drop
   ;
 
