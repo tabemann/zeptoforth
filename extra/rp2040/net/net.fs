@@ -3183,13 +3183,13 @@ begin-module net
     \ Process an IPv4 FIN packet for a TCP_FIN_WAIT_2 state
     :noname { addr bytes endpoint self -- }
       addr bytes endpoint self send-ipv4-fin-reply-ack
-      TCP_TIME_WAIT endpoint endpoint-tcp-state!
+      TCP_CLOSED endpoint endpoint-tcp-state! \ Formerly TCP_TIME_WAIT
     ; define process-ipv4-fin-fin-wait-2
 
     \ Process an unexpected IPv4 FIN packet
     :noname { addr bytes endpoint self -- }
       addr bytes endpoint self send-ipv4-fin-reply-ack
-      TCP_CLOSING endpoint endpoint-tcp-state!
+      TCP_CLOSED endpoint endpoint-tcp-state! \ Formerly TCP_CLOSING
     ; define process-ipv4-unexpected-fin
 
     \ Send an ACK in response to a FIN packet
@@ -3199,7 +3199,7 @@ begin-module net
       endpoint endpoint-local-seq@
       addr tcp-seq-no unaligned@ rev 1+
       endpoint endpoint-local-window@
-      TCP_ACK
+      [ TCP_FIN TCP_ACK or ] literal
       endpoint endpoint-remote-mac-addr@
       self send-ipv4-basic-tcp
     ; define send-ipv4-fin-reply-ack
@@ -3863,7 +3863,7 @@ begin-module net
         endpoint endpoint-local-seq@
         endpoint endpoint-ack@
         endpoint endpoint-local-window@
-        TCP_FIN endpoint endpoint-send-ack? if TCP_ACK or then
+        [ TCP_FIN TCP_ACK or ] literal
         endpoint endpoint-remote-mac-addr@
         self send-ipv4-basic-tcp
         endpoint endpoint-ack-sent

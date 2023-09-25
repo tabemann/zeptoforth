@@ -144,7 +144,7 @@ begin-module net-config
   3 value last-ack-max-refreshes
   
   \ Close timeout
-  100000 value close-timeout
+  1000 value close-timeout
 
   \ IPv4 discover attempts
   50000 value dhcp-discover-timeout
