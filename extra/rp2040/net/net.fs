@@ -34,6 +34,9 @@ begin-module net
   \ Oversized frame exception
   : x-oversized-frame ( -- ) cr ." oversized frame" ;
 
+  \ Echo
+  : echo ( c -- ) ( [: ." *" emit ." * " ;] debug-hook execute ) drop ;
+
   \ zeptoIP internals
   begin-module net-internal
 
@@ -2113,9 +2116,69 @@ begin-module net
     ; define waiting-rx-data?
 
   end-implement
+  
+  \ TCP_WAIT class
+  <object> begin-class <time-wait>
+
+    continue-module net-internal
+      
+      \ TCP wait remote MAC address
+      2 cells member time-wait-remote-mac-addr
+      
+      \ TCP wait remote IPv4 address
+      cell member time-wait-remote-ipv4-addr
+      
+      \ Local port
+      2 member time-wait-local-port
+      
+      \ Remote port
+      2 member time-wait-remote-port
+
+      \ Start time
+      cell member time-wait-start-time
+
+      \ Local seq
+      cell member time-wait-local-seq
+
+      \ Remote ack
+      cell member time-wait-ack
+
+      \ Local window
+      cell member time-wait-local-window
+      
+      \ Set a TCP_WAIT record
+      method time-wait! ( endpoint self -- )
+
+    end-module
+    
+  end-class
+
+  <time-wait> begin-implement
+
+    \ Constructor
+    :noname { self -- }
+      self <object>->new
+    ; define new
+
+    \ Set a TIME_WAIT record
+    :noname ( endpoint self -- ) [char] A echo
+      [: { endpoint self } [char] B echo
+        endpoint endpoint-ipv4-remote@ [char] C echo
+        self time-wait-remote-port h! [char] D echo
+        self time-wait-remote-ipv4-addr ! [char] E echo
+        endpoint endpoint-local-port@ self time-wait-local-port h! [char] F echo
+        endpoint endpoint-remote-mac-addr@ self time-wait-remote-mac-addr 2! [char] G echo
+        endpoint endpoint-local-seq@ self time-wait-local-seq ! [char] H echo
+        endpoint endpoint-ack@ self time-wait-ack ! [char] I echo
+        endpoint endpoint-local-window@ self time-wait-local-window ! [char] J echo
+        systick::systick-counter self time-wait-start-time ! [char] K echo
+      ;] 2 pick with-endpoint [char] L echo
+    ; define time-wait!
+
+  end-implement
 
   continue-module net-internal
-    
+
     \ The fragment collector class
     <object> begin-class <fragment-collect>
       
@@ -2338,6 +2401,24 @@ begin-module net
       \ Endpoint queue index
       cell member endpoint-queue-index
 
+      \ TIME_WAIT interval start
+      cell member time-wait-interval-start
+      
+      \ TIME_WAIT list lock
+      lock-size member time-wait-list-lock
+
+      \ TIME_WAIT list start
+      cell member time-wait-list-start
+
+      \ TIME_WAIT list end
+      cell member time-wait-list-end
+
+      \ TIME_WAIT list count
+      cell member time-wait-list-count
+
+      \ TIME_WAIT list
+      <time-wait> class-size time-wait-count * member time-wait-list
+      
       \ DHCP lock
       lock-size member dhcp-lock
 
@@ -2490,6 +2571,12 @@ begin-module net
       \ Wait for a TCP endpoint to close
       method wait-endpoint-closed ( endpoint self -- )
 
+      \ Add an endpoint time wait
+      method add-time-wait ( endpoint self -- )
+
+      \ Refresh endpoint time waits
+      method refresh-time-wait ( self -- )
+      
       \ Send a FIN packet
       method send-fin ( state endpoint self -- )
 
@@ -2684,6 +2771,11 @@ begin-module net
       self dhcp-lock init-lock
       no-sema-limit 0 self endpoint-queue-sema init-sema
       0 self endpoint-queue-index !
+      systick::systick-counter self time-wait-interval-start !
+      self time-wait-list-lock init-lock
+      0 self time-wait-list-start !
+      0 self time-wait-list-end !
+      0 self time-wait-list-count !
       <fragment-collect> self fragment-collect init-object
       <address-map> self address-map init-object
       <dns-cache> self dns-cache init-object
@@ -3178,18 +3270,23 @@ begin-module net
     :noname { addr bytes endpoint self -- }
       addr bytes endpoint self send-ipv4-fin-reply-ack
       TCP_CLOSE_WAIT endpoint endpoint-tcp-state!
+      endpoint wake-endpoint
     ; define process-ipv4-fin-established
 
     \ Process an IPv4 FIN packet for a TCP_FIN_WAIT_2 state
     :noname { addr bytes endpoint self -- }
       addr bytes endpoint self send-ipv4-fin-reply-ack
       TCP_CLOSED endpoint endpoint-tcp-state! \ Formerly TCP_TIME_WAIT
+      endpoint self add-time-wait
+      endpoint wake-endpoint
     ; define process-ipv4-fin-fin-wait-2
 
     \ Process an unexpected IPv4 FIN packet
     :noname { addr bytes endpoint self -- }
       addr bytes endpoint self send-ipv4-fin-reply-ack
       TCP_CLOSED endpoint endpoint-tcp-state! \ Formerly TCP_CLOSING
+      endpoint self add-time-wait
+      endpoint wake-endpoint
     ; define process-ipv4-unexpected-fin
 
     \ Send an ACK in response to a FIN packet
@@ -3199,7 +3296,7 @@ begin-module net
       endpoint endpoint-local-seq@
       addr tcp-seq-no unaligned@ rev 1+
       endpoint endpoint-local-window@
-      [ TCP_FIN TCP_ACK or ] literal
+      TCP_ACK
       endpoint endpoint-remote-mac-addr@
       self send-ipv4-basic-tcp
     ; define send-ipv4-fin-reply-ack
@@ -3810,6 +3907,65 @@ begin-module net
     :noname ( endpoint self -- )
       drop free-endpoint
     ; define close-udp-endpoint
+
+    \ Add an endpoint to wait
+    :noname ( endpoint self -- ) \ [char] a echo
+      [: { endpoint self } \ [char] b echo
+        self time-wait-list \ [char] c echo
+        self time-wait-list-end @ <time-wait> class-size * + { time-wait } \ [char] d echo
+        endpoint time-wait time-wait! \ [char] e echo
+        self time-wait-list-end @ 1+ time-wait-count umod \ [char] f echo
+        self time-wait-list-end ! \ [char] g echo
+        self time-wait-list-count @ 0= if \ [char] h echo
+          systick::systick-counter self time-wait-interval-start ! \ [char] i echo
+        then \ [char] j echo
+        self time-wait-list-count @ time-wait-count < if \ [char] k echo
+          1 self time-wait-list-count +! \ [char] l echo
+        else \ [char] m echo
+          self time-wait-list-start @ 1+ time-wait-count umod \ [char] n echo
+          self time-wait-list-start ! \ [char] o echo
+        then \ [char] p echo
+      ;] over time-wait-list-lock with-lock \ [char] q echo
+    ; define add-time-wait
+    
+    \ Refresh endpoint time waits
+    :noname ( self -- )
+      [: { self }
+        self time-wait-list-start @
+        self time-wait-list-count @ { current count }
+        count 0> if
+          systick::systick-counter
+          self time-wait-interval-start @ time-wait-interval-start + < if
+            exit
+          else
+            systick::systick-counter self time-wait-interval-start !
+          then
+        else
+          systick::systick-counter self time-wait-interval-start !
+          exit
+        then
+        begin count 0> while
+          self time-wait-list current <time-wait> class-size * + { time-wait }
+          current 1+ time-wait-count umod to current
+          -1 +to count
+          systick::systick-counter
+          time-wait time-wait-start-time @ time-wait-timeout + < if
+            time-wait time-wait-remote-ipv4-addr @
+            time-wait time-wait-remote-port h@
+            time-wait time-wait-local-port h@
+            time-wait time-wait-local-seq @
+            time-wait time-wait-ack @
+            time-wait time-wait-local-window @
+            TCP_ACK
+            time-wait time-wait-remote-mac-addr 2@
+            self send-ipv4-basic-tcp
+          else
+            current self time-wait-list-start !
+            count self time-wait-list-count !
+          then
+        repeat
+      ;] over time-wait-list-lock with-lock
+    ; define refresh-time-wait
 
     \ Close a TCP endpoint
     :noname ( endpoint self -- )
@@ -4610,6 +4766,7 @@ begin-module net
     \ Refresh an interface
     :noname { self -- }
       self refresh-dhcp
+      self refresh-time-wait
       max-endpoints 0 ?do
         self intf-endpoints <endpoint> class-size i * +
         self [: { endpoint self }

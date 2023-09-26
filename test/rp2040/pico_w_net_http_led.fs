@@ -99,7 +99,7 @@ begin-module pico-w-net-http-server
 
   \ Output buffer offset
   variable out-buffer-offset
-  
+
   \ Find HTTP header newline
   : find-http-newline ( -- offset | -1 )
     http-buffer-offset @ 0 ?do
