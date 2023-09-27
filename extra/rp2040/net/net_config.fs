@@ -152,8 +152,8 @@ begin-module net-config
   \ TIME_WAIT timeout
   50000 value time-wait-timeout
 
-  \ TIME_WAIT interval ti meout
-  5000 value time-wait-interval-timeout
+  \ TIME_WAIT interval timeout
+  10000 value time-wait-interval-timeout
   
   \ IPv4 discover attempts
   50000 value dhcp-discover-timeout
