@@ -147,7 +147,7 @@ begin-module net-config
   1000 value close-timeout
 
   \ TIME_WAIT count
-  16 constant time-wait-count
+  8 constant time-wait-count
 
   \ TIME_WAIT timeout
   50000 value time-wait-timeout
