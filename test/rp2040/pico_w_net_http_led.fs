@@ -249,7 +249,6 @@ begin-module pico-w-net-http-server
 
   \ Send output
   : send-output { endpoint -- }
-\    out-buffer out-buffer-offset @ type
     out-buffer out-buffer-offset @ endpoint my-interface @ send-tcp-endpoint
     0 out-buffer-offset !
   ;
@@ -465,6 +464,7 @@ begin-module pico-w-net-http-server
 
   \ Run the test
   : run-test ( -- )
+    init-http-state
     server-port my-interface @ allocate-tcp-listen-endpoint 2drop
   ;
 

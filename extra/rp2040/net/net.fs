@@ -95,9 +95,6 @@ begin-module net
     \ Get the current sequence number
     method current-out-packet-seq@ ( self -- seq )
 
-    \ Increment the bare minimum current sequence number
-    method +current-out-packet-seq! ( increment self -- )
-
     \ Get the size of a packet to send
     method next-packet-size@ ( self -- bytes )
 
@@ -256,11 +253,6 @@ begin-module net
         debug-hook execute
       [then]
     ; define current-out-packet-seq@
-
-    \ Increment the bare minimum current sequence number
-    :noname ( increment self -- )
-      dup out-packet-count @ 0= if first-out-packet-seq +! else 2drop then
-    ; define +current-out-packet-seq!
 
     \ Get the size of a packet to send
     :noname ( self -- bytes )
@@ -1436,9 +1428,6 @@ begin-module net
       \ Get local seq number
       method endpoint-local-seq@ ( self -- seq )
       
-      \ Add to local seq number
-      method +endpoint-local-seq! ( increment self -- )
-
       \ Endpoint window size
       method endpoint-local-window@ ( self -- bytes )
 
@@ -1866,13 +1855,6 @@ begin-module net
         then
       ;] over endpoint-lock with-lock
     ; define endpoint-local-seq@
-
-    \ Add to local seq number
-    :noname ( increment self -- )
-      [:
-        endpoint-out-packets +current-out-packet-seq!
-      ;] over endpoint-lock with-lock
-    ; define +endpoint-local-seq!
 
     \ Endpoint window size
     :noname ( self -- bytes )
@@ -2967,8 +2949,7 @@ begin-module net
       endpoint init-tcp-stream
       endpoint endpoint-ipv4-remote@
       endpoint endpoint-local-port@
-      endpoint endpoint-local-seq@
-      1 endpoint +endpoint-local-seq!
+      endpoint endpoint-local-seq@ 1-
       endpoint endpoint-ack@
       endpoint endpoint-local-window@
       [ TCP_SYN TCP_ACK or ] literal
@@ -4789,6 +4770,7 @@ begin-module net
               endpoint endpoint-ipv4-remote@
               endpoint endpoint-local-port@
               endpoint endpoint-local-seq@
+              state TCP_SYN_RECEIVED = if 1- then
               endpoint endpoint-ack@
               endpoint endpoint-local-window@
               state case
