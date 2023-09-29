@@ -275,40 +275,53 @@ begin-module pico-w-net-http-server
     endpoint add-output
   ;
 
+  \ Serve header fields
+  : serve-header-fields { endpoint -- }
+    s\" Content-Type: text/html\r\n" endpoint add-output
+    s\" Connection: close\r\n\r\n" endpoint add-output
+  ;
+
   \ Serve a corrupt HTTP response
   : serve-corrupt { endpoint -- }
     endpoint serve-protocol
-    s\" 400 Bad Request\r\n\r\n" endpoint add-output
+    s\" 400 Bad Request\r\n" endpoint add-output
+    endpoint serve-header-fields
+    s" <html><head><title>400 Bad Request</title></head>"
+    endpoint add-output
+    s" <body><h1>400 Bad Request</h1></body>" endpoint add-output
+    s" </html>" endpoint add-output
+
   ;
 
   \ Serve an invalid destination
   : serve-invalid { endpoint -- }
     endpoint serve-protocol
-    s\" 404 Not Found\r\n\r\n" endpoint add-output
+    s\" 404 Not Found\r\n" endpoint add-output
+    endpoint serve-header-fields
+    s" <html><head><title>404 Not Found</title></head>"
+    endpoint add-output
+    s" <body><h1>404 Not Found</h1></body>" endpoint add-output
+    s" </html>" endpoint add-output
   ;
 
   \ Serve an unsupported method
   : serve-method-not-allowed { endpoint -- }
     endpoint serve-protocol
-    s\" 405 Method Not Allowed\r\n\r\n" endpoint add-output
+    s\" 405 Method Not Allowed\r\n" endpoint add-output
+    endpoint serve-header-fields
+    s" <html><head><title>405 Method Not Allowed</title></head>"
+    endpoint add-output
+    s" <body><h1>405 Method Not Allowed</h1></body>" endpoint add-output
+    s" </html>" endpoint add-output
   ;
   
   \ Serve an OK destination
   : serve-ok { endpoint -- }
     endpoint serve-protocol
     s\" 200 OK\r\n" endpoint add-output
+    endpoint serve-header-fields
   ;
 
-  \ Serve content-type
-  : serve-content-type { endpoint -- }
-    s\" Content-Type: text/html\r\n" endpoint add-output
-  ;
-
-  \ Begin content
-  : serve-content { endpoint -- }
-    s\" \r\n" endpoint add-output
-  ;
-  
   \ Generate a button with a label
   : serve-button { D: label D: path endpoint -- }
     s\" <form method=\"post\" action=\"" endpoint add-output
@@ -321,17 +334,16 @@ begin-module pico-w-net-http-server
   \ Serve HTML content
   : serve-home-content { endpoint -- }
     s" <html><head><title>Control the LED</title></head>" endpoint add-output
+    s" <body>" endpoint add-output
     s" LED On" s" led-on" endpoint serve-button
     s" LED Off" s" led-off" endpoint serve-button
     s" Toggle LED" s" toggle-led" endpoint serve-button
-    s" </html>" endpoint add-output
+    s" </body></html>" endpoint add-output
   ;
 
   \ Serve the home page
   : serve-home { endpoint -- }
     endpoint serve-ok
-    endpoint serve-content-type
-    endpoint serve-content
     endpoint serve-home-content
   ;
 
