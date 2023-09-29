@@ -422,6 +422,7 @@ begin-module pico-w-net-http-server
     :noname { endpoint self -- }
       endpoint endpoint-tcp-state@ { state }
       state TCP_SYN_RECEIVED = if
+        cr ." OPENING....!"
         init-http-state
       else
         state TCP_ESTABLISHED = state TCP_CLOSE_WAIT = or if

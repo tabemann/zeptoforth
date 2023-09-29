@@ -2894,7 +2894,10 @@ begin-module net
         addr tcp-src-port hunaligned@ rev16
         addr tcp-dest-port hunaligned@ rev16
         src-addr self address-map lookup-mac-addr-by-ipv4 if
-          endpoint try-ipv4-accept-endpoint if endpoint true unloop exit then
+          endpoint try-ipv4-accept-endpoint if
+            endpoint self put-ready-endpoint
+            endpoint true unloop exit
+          then
         else
           2drop 2drop drop \ Should never happen
         then
