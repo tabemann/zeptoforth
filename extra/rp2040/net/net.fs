@@ -3922,14 +3922,15 @@ begin-module net
     \ Refresh endpoint time waits
     :noname ( self -- )
       dup time-wait-list-count @ 0= if drop exit then
-      systick::systick-counter over time-wait-list-start @ -
-      time-wait-interval-timeout < if
-        drop exit
-      then
       [: { self }
         self time-wait-list-start @
         self time-wait-list-count @ { current count }
-        systick::systick-counter self time-wait-interval-start !
+        systick::systick-counter
+        self time-wait-interval-start @ time-wait-interval-timeout + < if
+          exit
+        else
+          systick::systick-counter self time-wait-interval-start !
+        then
         begin count 0> while
           self time-wait-list current <time-wait> class-size * + { time-wait }
           current 1+ time-wait-count umod to current
