@@ -67,6 +67,9 @@ begin-module pico-w-net-http-server
   \ Output buffer size
   1024 constant out-buffer-size
 
+  \ Close delay in ticks
+  5000 constant close-delay
+  
   \ HTTP server class
   <object> begin-class <http-server>
     
@@ -523,24 +526,24 @@ begin-module pico-w-net-http-server
     ; define add-http-buffer
 
     \ Handle HTTP input
-    :noname { in-buffer in-size self -- } ." *A* "
-      self schedule-close ." *B* "
-      in-buffer in-size self add-http-buffer ." *C* "
-      self parse-http-headers if ." *D* "
-        self http-corrupt? @ if ." *E* "
-          self serve-corrupt ." *F* "
-        else ." *G* "
-          self http-dest @ case ." *H* "
-            dest-invalid of ." *I* " self serve-invalid ." *J* " endof
-            dest-home of ." *K* " self serve-home ." *L* " endof
-            dest-led-on of ." *M* " self serve-led-on ." *N* " endof
-            dest-led-off of ." *O* " self serve-led-off ." *P* " endof
-            dest-toggle-led of ." *Q* " self serve-toggle-led ." *R* "  endof
+    :noname { in-buffer in-size self -- }
+\      self schedule-close
+      in-buffer in-size self add-http-buffer
+      self parse-http-headers if
+        self http-corrupt? @ if
+          self serve-corrupt
+        else
+          self http-dest @ case
+            dest-invalid of self serve-invalid endof
+            dest-home of self serve-home endof
+            dest-led-on of self serve-led-on endof
+            dest-led-off of self serve-led-off endof
+            dest-toggle-led of self serve-toggle-led  endof
           endcase
-        then ." *S* "
-        self send-output ." *T* "
-        self force-close ." *U* "
-      then ." *V* "
+        then
+        self send-output
+        self force-close
+      then
     ; define handle-http-input
     
     \ Do a connection close
@@ -557,7 +560,7 @@ begin-module pico-w-net-http-server
     :noname { self -- }
       self closing? @ not if
         true self closing? !
-        1000000 0 self [: drop actually-close ;]
+        close-delay 0 self [: drop actually-close ;]
         self my-close-alarm set-alarm-delay-default
       then
     ; define schedule-close
@@ -570,8 +573,9 @@ begin-module pico-w-net-http-server
     ; define force-close
 
     \ Start HTTP connection
-    :noname ( self -- )
-      false swap actually-closed? !
+    :noname { self -- }
+      false self actually-closed? !
+      self schedule-close
     ; define start-connection
 
   end-implement
