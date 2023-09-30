@@ -40,26 +40,11 @@ begin-module pico-w-net-http-server
   0 constant sm-index
   pio::PIO0 constant pio-instance
   
-  \ Our close alarm
-  alarm-size buffer: my-close-alarm
-
-  \ Our closing state
-  variable closing?
-
   \ Server port
   80 constant server-port
   
   \ The HTTP input buffer size
   1024 constant http-buffer-size
-
-  \ The HTTP buffer
-  http-buffer-size buffer: http-buffer
-
-  \ The HTTP buffer offset
-  variable http-buffer-offset
-
-  \ Are we on the first HTTP header
-  variable first-http-header?
 
   \ HTTP method types
   0 constant method-not-set
@@ -67,9 +52,6 @@ begin-module pico-w-net-http-server
   2 constant method-post
   3 constant method-other
   
-  \ HTTP method
-  variable http-method
-
   \ The HTTP destination types
   0 constant dest-invalid
   1 constant dest-home
@@ -77,373 +59,560 @@ begin-module pico-w-net-http-server
   3 constant dest-led-off
   4 constant dest-toggle-led
 
-  \ HTTP destination
-  variable http-dest
-
   \ THe HTTP protocol types
   0 constant protocol-unsupported
   1 constant protocol-http1.0
   2 constant protocol-http1.1
 
-  \ HTTP protocol
-  variable http-protocol
-
-  \ HTTP corrupt
-  variable http-corrupt?
-
   \ Output buffer size
   1024 constant out-buffer-size
 
-  \ Output buffer
-  out-buffer-size buffer: out-buffer
-
-  \ Output buffer offset
-  variable out-buffer-offset
-
-  \ Find HTTP header newline
-  : find-http-newline ( -- offset | -1 )
-    http-buffer-offset @ 0 ?do
-      http-buffer i + c@ $0D = if
-        i 1+ http-buffer-offset @ < if
-          http-buffer i 1+ + c@ $0A = if
-            i unloop exit
-          then
-        else
-          -1 unloop exit
-        then
-      then
-    loop
-    -1
-  ;
-
-  \ Get the token end from a header
-  : find-token-end { offset length -- offset' }
-    length offset ?do
-      http-buffer i + c@ bl = if i unloop exit then
-    loop
-    length
-  ;
-
-  \ Get the next token from a header
-  : find-next-token { offset length -- offset' | -1 }
-    offset length < if
-      length offset ?do
-        http-buffer i + c@ bl <> if i unloop exit then
-      loop
-    then
-    -1
-  ;
-
-  \ Remove text after ?
-  : remove-extra { offset length -- offset' }
-    length offset ?do
-      http-buffer i + c@ [char] ? = if i unloop exit then
-    loop
-    offset
-  ;
-
-  \ Parse HTTP method
-  : parse-http-method { D: header-method -- }
-    header-method s" GET" equal-strings? if
-      method-get
-    else
-      header-method s" POST" equal-strings? if
-        method-post
-      else
-        method-other
-      then
-    then
-    http-method !
-  ;
-
-  \ Parse HTTP destination
-  : parse-http-dest { D: dest -- }
-    dest s" /" equal-strings? if
-      dest-home
-    else
-      dest s" /led-on" equal-strings? if
-        dest-led-on
-      else
-        dest s" /led-off" equal-strings? if
-          dest-led-off
-        else
-          dest s" /toggle-led" equal-strings? if
-            dest-toggle-led
-          else
-            dest-invalid
-          then
-        then
-      then
-    then
-    http-dest !
-  ;
-
-  \ Parse HTTP protocol
-  : parse-http-protocol { D: protocol -- }
-    protocol s" HTTP/1.0" equal-strings? if
-      protocol-http1.0
-    else
-      protocol s" HTTP/1.1" equal-strings? if
-        protocol-http1.1
-      else
-        protocol 5 min s" HTTP/" equal-strings? not http-corrupt? !
-        protocol-unsupported
-      then
-    then
-    http-protocol !
-  ;
-
-  \ Initialize state
-  : init-http-state ( -- )
-    false closing? !
-    false http-corrupt? !
-    true first-http-header? !
-    method-other http-method !
-    dest-invalid http-dest !
-    protocol-unsupported http-protocol !
-    0 http-buffer-offset !
-    0 out-buffer-offset !
-  ;
-  
-  \ Process the first HTTP header
-  : http-first-header { length -- }
-    false first-http-header? !
-    false http-corrupt? !
-    0 { offset }
-    offset length find-token-end { end-offset }
-    http-buffer offset + end-offset offset - parse-http-method
-    end-offset length find-next-token to offset
-    offset -1 <> if
-      offset length find-token-end to end-offset
-      end-offset length remove-extra { path-end-offset }
-      http-buffer offset + path-end-offset offset - parse-http-dest
-      end-offset length find-next-token to offset
-      offset -1 <> if
-        offset length find-token-end to end-offset
-        http-buffer offset + end-offset offset - parse-http-protocol
-        end-offset length find-next-token -1 <> http-corrupt? !
-      else
-        true http-corrupt? !
-      then
-    else
-      dest-invalid http-dest !
-    then
-  ;
-
-  \ Parse HTTP headers
-  : parse-http-headers ( endpoint -- done? )
-    begin
-      find-http-newline dup -1 <> if { offset }
-        first-http-header? @ if
-          offset http-first-header http-corrupt? @ if true true else false then
-        else
-          offset 0= if true true else false then
-        then
-        offset 2 + negate http-buffer-offset +!
-        http-buffer offset 2 + + http-buffer http-buffer-offset @ move
-      else
-        drop false true
-      then
-    until
-  ;
-
-  \ Send output
-  : send-output { endpoint -- }
-    out-buffer out-buffer-offset @ endpoint my-interface @ send-tcp-endpoint
-    0 out-buffer-offset !
-  ;
-
-  \ Add text to the output buffer
-  : add-output { addr bytes endpoint -- }
-    begin bytes 0> while
-      out-buffer-size out-buffer-offset @ - bytes min { bytes-to-send }
-      addr out-buffer out-buffer-offset @ + bytes-to-send move
-      bytes-to-send out-buffer-offset +!
-      out-buffer-offset @ out-buffer-size = if endpoint send-output then
-      bytes-to-send negate +to bytes
-      bytes-to-send +to addr
-    repeat
-  ;
-
-  \ Serve an HTTP protocol indicator
-  : serve-protocol { endpoint -- }
-    http-protocol @ case
-      protocol-http1.0 of s" HTTP/1.0 " endof
-      protocol-http1.1 of s" HTTP/1.1 " endof
-      protocol-unsupported of s" HTTP/1.1 " endof
-    endcase
-    endpoint add-output
-  ;
-
-  \ Serve header fields
-  : serve-header-fields { endpoint -- }
-    s\" Content-Type: text/html\r\n" endpoint add-output
-    s\" Connection: close\r\n\r\n" endpoint add-output
-  ;
-
-  \ Serve a corrupt HTTP response
-  : serve-corrupt { endpoint -- }
-    endpoint serve-protocol
-    s\" 400 Bad Request\r\n" endpoint add-output
-    endpoint serve-header-fields
-    s" <html><head><title>400 Bad Request</title></head>"
-    endpoint add-output
-    s" <body><h1>400 Bad Request</h1></body>" endpoint add-output
-    s" </html>" endpoint add-output
-
-  ;
-
-  \ Serve an invalid destination
-  : serve-invalid { endpoint -- }
-    endpoint serve-protocol
-    s\" 404 Not Found\r\n" endpoint add-output
-    endpoint serve-header-fields
-    s" <html><head><title>404 Not Found</title></head>"
-    endpoint add-output
-    s" <body><h1>404 Not Found</h1></body>" endpoint add-output
-    s" </html>" endpoint add-output
-  ;
-
-  \ Serve an unsupported method
-  : serve-method-not-allowed { endpoint -- }
-    endpoint serve-protocol
-    s\" 405 Method Not Allowed\r\n" endpoint add-output
-    endpoint serve-header-fields
-    s" <html><head><title>405 Method Not Allowed</title></head>"
-    endpoint add-output
-    s" <body><h1>405 Method Not Allowed</h1></body>" endpoint add-output
-    s" </html>" endpoint add-output
-  ;
-  
-  \ Serve an OK destination
-  : serve-ok { endpoint -- }
-    endpoint serve-protocol
-    s\" 200 OK\r\n" endpoint add-output
-    endpoint serve-header-fields
-  ;
-
-  \ Generate a button with a label
-  : serve-button { D: label D: path endpoint -- }
-    s\" <form method=\"post\" action=\"" endpoint add-output
-    path endpoint add-output
-    s\" \"><button type=\"submit\">" endpoint add-output
-    label endpoint add-output
-    s" </button></form>" endpoint add-output
-  ;
-
-  \ Serve HTML content
-  : serve-home-content { endpoint -- }
-    s" <html><head><title>Control the LED</title></head>" endpoint add-output
-    s" <body>" endpoint add-output
-    s" LED On" s" led-on" endpoint serve-button
-    s" LED Off" s" led-off" endpoint serve-button
-    s" Toggle LED" s" toggle-led" endpoint serve-button
-    s" </body></html>" endpoint add-output
-  ;
-
-  \ Serve the home page
-  : serve-home { endpoint -- }
-    endpoint serve-ok
-    endpoint serve-home-content
-  ;
-
-  \ Serve the LED on page
-  : serve-led-on { endpoint -- }
-    http-method @ method-post = if
-      true my-cyw43-net pico-w-led!
-      endpoint serve-home
-    else
-      endpoint serve-method-not-allowed
-    then
-  ;
-
-  \ Serve the LED off page
-  : serve-led-off { endpoint -- }
-    http-method @ method-post = if
-      false my-cyw43-net pico-w-led!
-      endpoint serve-home
-    else
-      endpoint serve-method-not-allowed
-    then
-  ;
-
-  \ Serve the toggle LED page
-  : serve-toggle-led { endpoint -- }
-    http-method @ method-post = if
-      my-cyw43-net toggle-pico-w-led
-      endpoint serve-home
-    else
-      endpoint serve-method-not-allowed
-    then
-  ;
-
-  \ Add data to the HTTP buffer
-  : add-http-buffer { in-buffer in-size -- }
-\    in-buffer in-size type
-    in-size http-buffer-size http-buffer-offset @ - min { accept-size }
-    in-buffer http-buffer http-buffer-offset @ + accept-size move
-    accept-size http-buffer-offset +!
-  ;
-
-  \ Do a connection close
-  : actually-close ( endpoint -- )
-    cr ." CLOSING....!"
-    my-interface @ close-tcp-endpoint
-    cr ." CLOSED!"
-    init-http-state
-    server-port my-interface @ allocate-tcp-listen-endpoint 2drop
-  ;
-
-  \ Schedule a connection close
-  : schedule-close ( endpoint -- )
-    closing? @ not if
-      true closing? !
-      1000000 0 rot [: drop actually-close ;]
-      my-close-alarm set-alarm-delay-default
-    else
-      drop
-    then
-  ;
-
-  \ Force a connection close
-  : force-close ( endpoint -- )
-    my-close-alarm unset-alarm
-    0 0 rot [: drop actually-close ;]
-    my-close-alarm set-alarm-delay-default
-  ;
-
-  <endpoint-handler> begin-class <tcp-echo-handler>
+  \ HTTP server class
+  <object> begin-class <http-server>
     
+    \ HTTP server endpoint
+    cell member http-endpoint
+    
+    \ Our close alarm
+    alarm-size member my-close-alarm
+    
+    \ Our closing state
+    cell member closing?
+
+    \ Our connection has been closed
+    cell member actually-closed?
+    
+    \ The HTTP buffer
+    http-buffer-size cell align member http-buffer
+
+    \ The HTTP buffer offset
+    cell member http-buffer-offset
+
+    \ Are we on the first HTTP header
+    cell member first-http-header?
+
+    \ HTTP method
+    cell member http-method
+
+    \ HTTP destination
+    cell member http-dest
+
+    \ HTTP protocol
+    cell member http-protocol
+
+    \ HTTP corrupt
+    cell member http-corrupt?
+
+    \ Output buffer
+    out-buffer-size cell align member out-buffer
+
+    \ Output buffer offset
+    cell member out-buffer-offset
+
+    \ Match HTTP server
+    method match-http-server ( endpoint self -- match? ) 
+
+    \ Find HTTP header newline
+    method find-http-newline ( self -- offset | -1 ) 
+
+    \ Get the token end from a header
+    method find-token-end ( offset length self -- offset' ) 
+
+    \ Get the next token from a header
+    method find-next-token ( offset length self -- offset' | -1 ) 
+
+    \ Remove text after ?
+    method remove-extra ( offset length self -- offset' ) 
+
+    \ Parse HTTP method
+    method parse-http-method ( D: header-method self -- ) 
+    
+    \ Parse HTTP destination
+    method parse-http-dest ( D: dest self -- ) 
+    
+    \ Parse HTTP protocol
+    method parse-http-protocol ( D: protocol self -- ) 
+
+    \ Initialize state
+    method init-http-state ( self -- ) 
+    
+    \ Process the first HTTP header
+    method http-first-header ( length self -- ) 
+
+    \ Parse HTTP headers
+    method parse-http-headers ( self -- done? ) 
+
+    \ Send output
+    method send-output ( self -- ) 
+
+    \ Add text to the output buffer
+    method add-output ( addr bytes self -- ) 
+
+    \ Serve an HTTP protocol indicator
+    method serve-protocol ( self -- ) 
+
+    \ Serve header fields
+    method serve-header-fields ( self -- ) 
+
+    \ Serve a corrupt HTTP response
+    method serve-corrupt ( self -- ) 
+
+    \ Serve an invalid destination
+    method serve-invalid ( self -- ) 
+
+    \ Serve an unsupported method
+    method serve-method-not-allowed ( self -- ) 
+    
+    \ Serve an OK destination
+    method serve-ok ( self -- ) 
+
+    \ Generate a button with a label
+    method serve-button ( D: label D: path self -- ) 
+
+    \ Serve HTML content
+    method serve-home-content ( self -- ) 
+
+    \ Serve the home page
+    method serve-home ( self -- ) 
+
+    \ Serve the LED on page
+    method serve-led-on ( self -- ) 
+
+    \ Serve the LED off page
+    method serve-led-off ( self -- ) 
+
+    \ Serve the toggle LED page
+    method serve-toggle-led ( self -- ) 
+
+    \ Add data to the HTTP buffer
+    method add-http-buffer ( in-buffer in-size self -- ) 
+
+    \ Handle HTTP input
+    method handle-http-input ( in-buffer in-size self -- )
+    
+    \ Do a connection close
+    method actually-close ( self -- ) 
+
+    \ Schedule a connection close
+    method schedule-close ( self -- ) 
+
+    \ Force a connection close
+    method force-close ( self -- ) 
+
+    \ Start HTTP connection
+    method start-connection ( self -- )
+
+  end-class
+
+  <http-server> begin-implement
+
+    \ Construct HTTP server
+    :noname { self -- }
+      self <object>->new
+      false self closing? !
+      false self http-corrupt? !
+      true self first-http-header? !
+      method-other self http-method !
+      dest-invalid self http-dest !
+      protocol-unsupported self http-protocol !
+      0 self http-buffer-offset !
+      0 self out-buffer-offset !
+      0 self http-endpoint !
+      true self actually-closed? !
+    ; define new
+
+    \ Match HTTP server
+    :noname ( endpoint self -- match? )
+      http-endpoint @ =
+    ; define match-http-server
+    
+    \ Find HTTP header newline
+    :noname { self -- offset | -1 }
+      self http-buffer-offset @ 0 ?do
+        self http-buffer i + c@ $0D = if
+          i 1+ self http-buffer-offset @ < if
+            self http-buffer i 1+ + c@ $0A = if
+              i unloop exit
+            then
+          else
+            -1 unloop exit
+          then
+        then
+      loop
+      -1
+    ; define find-http-newline
+
+    \ Get the token end from a header
+    :noname { offset length self -- offset' }
+      length offset ?do
+        self http-buffer i + c@ bl = if i unloop exit then
+      loop
+      length
+    ; define find-token-end
+
+    \ Get the next token from a header
+    :noname { offset length self -- offset' | -1 }
+      offset length < if
+        length offset ?do
+          self http-buffer i + c@ bl <> if i unloop exit then
+        loop
+      then
+      -1
+    ; define find-next-token
+
+    \ Remove text after ?
+    :noname { offset length self -- offset' }
+      length offset ?do
+        self http-buffer i + c@ [char] ? = if i unloop exit then
+      loop
+      offset
+    ; define remove-extra
+
+    \ Parse HTTP method
+    :noname { D: header-method self -- }
+      header-method s" GET" equal-strings? if
+        method-get
+      else
+        header-method s" POST" equal-strings? if
+          method-post
+        else
+          method-other
+        then
+      then
+      self http-method !
+    ; define parse-http-method
+    
+    \ Parse HTTP destination
+    :noname { D: dest self -- }
+      dest s" /" equal-strings? if
+        dest-home
+      else
+        dest s" /led-on" equal-strings? if
+          dest-led-on
+        else
+          dest s" /led-off" equal-strings? if
+            dest-led-off
+          else
+            dest s" /toggle-led" equal-strings? if
+              dest-toggle-led
+            else
+              dest-invalid
+            then
+          then
+        then
+      then
+      self http-dest !
+    ; define parse-http-dest
+    
+    \ Parse HTTP protocol
+    :noname { D: protocol self -- }
+      protocol s" HTTP/1.0" equal-strings? if
+        protocol-http1.0
+      else
+        protocol s" HTTP/1.1" equal-strings? if
+          protocol-http1.1
+        else
+          protocol 5 min s" HTTP/" equal-strings? not self http-corrupt? !
+          protocol-unsupported
+        then
+      then
+      self http-protocol !
+    ; define parse-http-protocol
+
+    \ Initialize state
+    :noname { self -- }
+      false self closing? !
+      false self http-corrupt? !
+      true self first-http-header? !
+      method-other self http-method !
+      dest-invalid self http-dest !
+      protocol-unsupported self http-protocol !
+      0 self http-buffer-offset !
+      0 self out-buffer-offset !
+      server-port my-interface @ allocate-tcp-listen-endpoint if
+        self http-endpoint !
+      else
+        drop 0 self http-endpoint !
+      then
+      true self actually-closed? !
+    ; define init-http-state
+    
+    \ Process the first HTTP header
+    :noname { length self -- }
+      false self first-http-header? !
+      false self http-corrupt? !
+      0 { offset }
+      offset length self find-token-end { end-offset }
+      self http-buffer offset + end-offset offset - self parse-http-method
+      end-offset length self find-next-token to offset
+      offset -1 <> if
+        offset length self find-token-end to end-offset
+        end-offset length self remove-extra { path-end-offset }
+        self http-buffer offset + path-end-offset offset - self parse-http-dest
+        end-offset length self find-next-token to offset
+        offset -1 <> if
+          offset length self find-token-end to end-offset
+          self http-buffer offset + end-offset offset - self parse-http-protocol
+          end-offset length self find-next-token -1 <> self http-corrupt? !
+        else
+          true self http-corrupt? !
+        then
+      else
+        dest-invalid self http-dest !
+      then
+    ; define http-first-header
+
+    \ Parse HTTP headers
+    :noname { self -- done? }
+      begin
+        self find-http-newline dup -1 <> if { offset }
+          self first-http-header? @ if
+            offset self http-first-header self http-corrupt? @ if
+              true true
+            else
+              false
+            then
+          else
+            offset 0= if true true else false then
+          then
+          offset 2 + negate self http-buffer-offset +!
+          self http-buffer offset 2 + +
+          self http-buffer self http-buffer-offset @ move
+        else
+          drop false true
+        then
+      until
+    ; define parse-http-headers
+
+    \ Send output
+    :noname { self -- }
+      self out-buffer self out-buffer-offset @
+      self http-endpoint @ my-interface @ send-tcp-endpoint
+      0 self out-buffer-offset !
+    ; define send-output
+
+    \ Add text to the output buffer
+    :noname { addr bytes self -- }
+      begin bytes 0> while
+        out-buffer-size self out-buffer-offset @ - bytes min { bytes-to-send }
+        addr self out-buffer self out-buffer-offset @ + bytes-to-send move
+        bytes-to-send self out-buffer-offset +!
+        self out-buffer-offset @ out-buffer-size = if self send-output then
+        bytes-to-send negate +to bytes
+        bytes-to-send +to addr
+      repeat
+    ; define add-output
+
+    \ Serve an HTTP protocol indicator
+    :noname { self -- }
+      self http-protocol @ case
+        protocol-http1.0 of s" HTTP/1.0 " endof
+        protocol-http1.1 of s" HTTP/1.1 " endof
+        protocol-unsupported of s" HTTP/1.1 " endof
+      endcase
+      self add-output
+    ; define serve-protocol
+
+    \ Serve header fields
+    :noname { self -- }
+      s\" Content-Type: text/html\r\n" self add-output
+      s\" Connection: close\r\n\r\n" self add-output
+    ; define serve-header-fields
+
+    \ Serve a corrupt HTTP response
+    :noname { self -- }
+      self serve-protocol
+      s\" 400 Bad Request\r\n" self add-output
+      self serve-header-fields
+      s" <html><head><title>400 Bad Request</title></head>"
+      self add-output
+      s" <body><h1>400 Bad Request</h1></body>" self add-output
+      s" </html>" self add-output
+    ; define serve-corrupt
+
+    \ Serve an invalid destination
+    :noname { self -- }
+      self serve-protocol
+      s\" 404 Not Found\r\n" self add-output
+      self serve-header-fields
+      s" <html><head><title>404 Not Found</title></head>"
+      self add-output
+      s" <body><h1>404 Not Found</h1></body>" self add-output
+      s" </html>" self add-output
+    ; define serve-invalid
+
+    \ Serve an unsupported method
+    :noname { self -- }
+      self serve-protocol
+      s\" 405 Method Not Allowed\r\n" self add-output
+      self serve-header-fields
+      s" <html><head><title>405 Method Not Allowed</title></head>"
+      self add-output
+      s" <body><h1>405 Method Not Allowed</h1></body>" self add-output
+      s" </html>" self add-output
+    ; define serve-method-not-allowed
+    
+    \ Serve an OK destination
+    :noname { self -- }
+      self serve-protocol
+      s\" 200 OK\r\n" self add-output
+      self serve-header-fields
+    ; define serve-ok
+
+    \ Generate a button with a label
+    :noname { D: label D: path self -- }
+      s\" <form method=\"post\" action=\"" self add-output
+      path self add-output
+      s\" \"><button type=\"submit\">" self add-output
+      label self add-output
+      s" </button></form>" self add-output
+    ; define serve-button
+
+    \ Serve HTML content
+    :noname { self -- }
+      s" <html><head><title>Control the LED</title></head>" self add-output
+      s" <body>" self add-output
+      s" LED On" s" led-on" self serve-button
+      s" LED Off" s" led-off" self serve-button
+      s" Toggle LED" s" toggle-led" self serve-button
+      s" </body></html>" self add-output
+    ; define serve-home-content
+
+    \ Serve the home page
+    :noname { self -- }
+      self serve-ok
+      self serve-home-content
+    ; define serve-home
+
+    \ Serve the LED on page
+    :noname { self -- }
+      self http-method @ method-post = if
+        true my-cyw43-net pico-w-led!
+        self serve-home
+      else
+        self serve-method-not-allowed
+      then
+    ; define serve-led-on
+
+    \ Serve the LED off page
+    :noname { self -- }
+      self http-method @ method-post = if
+        false my-cyw43-net pico-w-led!
+        self serve-home
+      else
+        self serve-method-not-allowed
+      then
+    ; define serve-led-off
+
+    \ Serve the toggle LED page
+    :noname { self -- }
+      self http-method @ method-post = if
+        my-cyw43-net toggle-pico-w-led
+        self serve-home
+      else
+        self serve-method-not-allowed
+      then
+    ; define serve-toggle-led
+
+    \ Add data to the HTTP buffer
+    :noname { in-buffer in-size self -- }
+      \    in-buffer in-size type
+      in-size http-buffer-size self http-buffer-offset @ - min { accept-size }
+      in-buffer self http-buffer self http-buffer-offset @ + accept-size move
+      accept-size self http-buffer-offset +!
+    ; define add-http-buffer
+
+    \ Handle HTTP input
+    :noname { in-buffer in-size self -- } ." *A* "
+      self schedule-close ." *B* "
+      in-buffer in-size self add-http-buffer ." *C* "
+      self parse-http-headers if ." *D* "
+        self http-corrupt? @ if ." *E* "
+          self serve-corrupt ." *F* "
+        else ." *G* "
+          self http-dest @ case ." *H* "
+            dest-invalid of ." *I* " self serve-invalid ." *J* " endof
+            dest-home of ." *K* " self serve-home ." *L* " endof
+            dest-led-on of ." *M* " self serve-led-on ." *N* " endof
+            dest-led-off of ." *O* " self serve-led-off ." *P* " endof
+            dest-toggle-led of ." *Q* " self serve-toggle-led ." *R* "  endof
+          endcase
+        then ." *S* "
+        self send-output ." *T* "
+        self force-close ." *U* "
+      then ." *V* "
+    ; define handle-http-input
+    
+    \ Do a connection close
+    :noname { self -- }
+      self actually-closed? @ not if
+        cr ." CLOSING....!"
+        self http-endpoint @ my-interface @ close-tcp-endpoint
+        cr ." CLOSED!"
+        self init-http-state
+      then
+    ; define actually-close
+
+    \ Schedule a connection close
+    :noname { self -- }
+      self closing? @ not if
+        true self closing? !
+        1000000 0 self [: drop actually-close ;]
+        self my-close-alarm set-alarm-delay-default
+      then
+    ; define schedule-close
+
+    \ Force a connection close
+    :noname { self -- }
+      self my-close-alarm unset-alarm
+      0 0 self [: drop actually-close ;]
+      self my-close-alarm set-alarm-delay-default
+    ; define force-close
+
+    \ Start HTTP connection
+    :noname ( self -- )
+      false swap actually-closed? !
+    ; define start-connection
+
+  end-implement
+
+  \ Our HTTP servers
+  net-config::max-endpoints <http-server> class-size * buffer: http-servers
+
+  \ Initialize our HTTP servers
+  : init-http-servers ( -- )
+    net-config::max-endpoints 0 ?do
+      <http-server> http-servers <http-server> class-size i * + init-object
+    loop
+    net-config::max-endpoints 0 ?do
+      http-servers <http-server> class-size i * + init-http-state
+    loop
+  ;
+
+  \ Find our HTTP server
+  : find-http-server { endpoint -- server found? }
+    net-config::max-endpoints 0 ?do
+      http-servers <http-server> class-size i * + { http-server }
+      endpoint http-server match-http-server if http-server true exit then
+    loop
+    0 false
+  ;
+  
+  <endpoint-handler> begin-class <tcp-echo-handler>
   end-class
 
   <tcp-echo-handler> begin-implement
     
     \ Handle an HTTP request
     :noname { endpoint self -- }
+      endpoint find-http-server not if drop exit then { http-server }
       endpoint endpoint-tcp-state@ { state }
       state TCP_SYN_RECEIVED = if
+        http-server start-connection
         cr ." OPENING....!"
-        init-http-state
       else
         state TCP_ESTABLISHED = state TCP_CLOSE_WAIT = or if
-          endpoint schedule-close
-          endpoint endpoint-rx-data@ add-http-buffer
-          parse-http-headers if
-            http-corrupt? @ if
-              endpoint serve-corrupt
-            else
-              http-dest @ case
-                dest-invalid of endpoint serve-invalid endof
-                dest-home of endpoint serve-home endof
-                dest-led-on of endpoint serve-led-on endof
-                dest-led-off of endpoint serve-led-off endof
-                dest-toggle-led of endpoint serve-toggle-led endof
-              endcase
-            then
-            endpoint send-output
-            endpoint force-close
-          then
-        else
+          endpoint endpoint-rx-data@ http-server handle-http-input
         then
       then
       endpoint my-interface @ endpoint-done
@@ -472,13 +641,7 @@ begin-module pico-w-net-http-server
     my-interface @ gateway-ipv4-addr@ cr ." Gateway IPv4 address: " ipv4.
     my-interface @ dns-server-ipv4-addr@ cr ." DNS server IPv4 address: " ipv4.
     my-cyw43-net toggle-pico-w-led
-    init-http-state
-  ;
-
-  \ Run the test
-  : run-test ( -- )
-    init-http-state
-    server-port my-interface @ allocate-tcp-listen-endpoint 2drop
+    init-http-servers
   ;
 
 end-module
