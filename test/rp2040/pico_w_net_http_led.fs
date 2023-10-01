@@ -68,7 +68,7 @@ begin-module pico-w-net-http-server
   1024 constant out-buffer-size
 
   \ Close delay in ticks
-  5000 constant close-delay
+  10000 constant close-delay
   
   \ HTTP server class
   <object> begin-class <http-server>
@@ -575,7 +575,6 @@ begin-module pico-w-net-http-server
     \ Start HTTP connection
     :noname { self -- }
       false self actually-closed? !
-      self schedule-close
     ; define start-connection
 
   end-implement
@@ -616,6 +615,7 @@ begin-module pico-w-net-http-server
         cr ." OPENING....!"
       else
         state TCP_ESTABLISHED = state TCP_CLOSE_WAIT = or if
+          http-server schedule-close
           endpoint endpoint-rx-data@ http-server handle-http-input
         then
       then
