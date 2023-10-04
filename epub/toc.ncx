@@ -11726,37 +11726,43 @@
           </navLabel>
           <content src="extra/net.xhtml#make-ipv4-addr" />  
         </navPoint>
+        <navPoint id="navPoint1954" playOrder="1793">
+          <navLabel>
+            <text>ipv4.</text>
+          </navLabel>
+          <content src="extra/net.xhtml#ipv4" />  
+        </navPoint>
       </navPoint>
     </navPoint>
-    <navPoint id="navPoint1954" playOrder="1793">
+    <navPoint id="navPoint1955" playOrder="1794">
       <navLabel>
         <text>CYW43xxx Words</text>
       </navLabel>
       <content src="extra/cyw43.xhtml" />  
-      <navPoint id="navPoint1955" playOrder="1793">
+      <navPoint id="navPoint1956" playOrder="1794">
         <navLabel>
           <text>CYW43xxx Words</text>
         </navLabel>
         <content src="extra/cyw43.xhtml" />  
       </navPoint>
-      <navPoint id="navPoint1956" playOrder="1794">
+      <navPoint id="navPoint1957" playOrder="1795">
         <navLabel>
           <text>cyw43-control</text>
         </navLabel>
         <content src="extra/cyw43.xhtml#cyw43-control" />  
-        <navPoint id="navPoint1957" playOrder="1794">
+        <navPoint id="navPoint1958" playOrder="1795">
           <navLabel>
             <text>cyw43-control</text>
           </navLabel>
           <content src="extra/cyw43.xhtml#cyw43-control" />  
         </navPoint>
-        <navPoint id="navPoint1958" playOrder="1795">
+        <navPoint id="navPoint1959" playOrder="1796">
           <navLabel>
             <text>default-mac-addr</text>
           </navLabel>
           <content src="extra/cyw43.xhtml#default-mac-addr" />  
         </navPoint>
-        <navPoint id="navPoint1959" playOrder="1796">
+        <navPoint id="navPoint1960" playOrder="1797">
           <navLabel>
             <text>&lt;cyw43-control&gt;</text>
           </navLabel>

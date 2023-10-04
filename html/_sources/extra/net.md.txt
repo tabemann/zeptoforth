@@ -504,3 +504,7 @@ Construct an IPv4 address, in the typical order, e.g.:
 ```
 192 168 1 1 net-misc::make-ipv4-addr
 ```
+##### `ipv4.`
+( addr -- )
+
+Print an IPv4 address formatted in the typical x.y.z.w format to the console.
