@@ -11709,36 +11709,54 @@
           <content src="extra/net.xhtml#id20" />  
         </navPoint>
       </navPoint>
+      <navPoint id="navPoint1951" playOrder="1791">
+        <navLabel>
+          <text>net-misc</text>
+        </navLabel>
+        <content src="extra/net.xhtml#net-misc" />  
+        <navPoint id="navPoint1952" playOrder="1791">
+          <navLabel>
+            <text>net-misc</text>
+          </navLabel>
+          <content src="extra/net.xhtml#net-misc" />  
+        </navPoint>
+        <navPoint id="navPoint1953" playOrder="1792">
+          <navLabel>
+            <text>make-ipv4-addr</text>
+          </navLabel>
+          <content src="extra/net.xhtml#make-ipv4-addr" />  
+        </navPoint>
+      </navPoint>
     </navPoint>
-    <navPoint id="navPoint1951" playOrder="1791">
+    <navPoint id="navPoint1954" playOrder="1793">
       <navLabel>
         <text>CYW43xxx Words</text>
       </navLabel>
       <content src="extra/cyw43.xhtml" />  
-      <navPoint id="navPoint1952" playOrder="1791">
+      <navPoint id="navPoint1955" playOrder="1793">
         <navLabel>
           <text>CYW43xxx Words</text>
         </navLabel>
         <content src="extra/cyw43.xhtml" />  
       </navPoint>
-      <navPoint id="navPoint1953" playOrder="1792">
+      <navPoint id="navPoint1956" playOrder="1794">
         <navLabel>
           <text>cyw43-control</text>
         </navLabel>
         <content src="extra/cyw43.xhtml#cyw43-control" />  
-        <navPoint id="navPoint1954" playOrder="1792">
+        <navPoint id="navPoint1957" playOrder="1794">
           <navLabel>
             <text>cyw43-control</text>
           </navLabel>
           <content src="extra/cyw43.xhtml#cyw43-control" />  
         </navPoint>
-        <navPoint id="navPoint1955" playOrder="1793">
+        <navPoint id="navPoint1958" playOrder="1795">
           <navLabel>
             <text>default-mac-addr</text>
           </navLabel>
           <content src="extra/cyw43.xhtml#default-mac-addr" />  
         </navPoint>
-        <navPoint id="navPoint1956" playOrder="1794">
+        <navPoint id="navPoint1959" playOrder="1796">
           <navLabel>
             <text>&lt;cyw43-control&gt;</text>
           </navLabel>

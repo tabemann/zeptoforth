@@ -491,3 +491,16 @@ This gets the state of the LED on the Raspberry Pi Pico W.
 ( driver -- )
 
 This toggles the state of the LED on the Raspberry Pi Pico W.
+
+### `net-misc`
+
+The `net-misc` module contains a number of internal and convenience words, notably:
+
+##### `make-ipv4-addr`
+( addr0 addr1 addr2 addr3 -- addr )
+
+Construct an IPv4 address, in the typical order, e.g.:
+
+```
+192 168 1 1 net-misc::make-ipv4-addr
+```
