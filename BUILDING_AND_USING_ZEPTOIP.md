@@ -115,6 +115,17 @@ my-cyw43-net toggle-pico-w-led
 
 Printing out the addresses is not necessary, but is helpful if it is not known what IP address will be assigned. Likewise, toggling the LED is unnecessary, but is helpful if connectivity over the WiFi link is poor, and discovery of an IPv4 address is not necessarily immediate.
 
+To manually set a static IPv4 address, IPv4 netmask, gateway IPv4 address, and DNS server IPv4 address one can execute something like the following in the place of the code above:
+
+```
+192 168 1 1 net-misc::make-ipv4-addr my-interface intf-ipv4-addr!
+255 255 255 0 net-misc::make-ipv4-addr my-interface intf-ipv4-netmask!
+192 168 1 254 net-misc::make-ipv4-addr my-interface gateway-ipv4-addr!
+8 8 8 8 net-misc::make-ipv4-addr my-interface dns-server-ipv4-addr!
+```
+
+Replace the values with those for your configuration.
+
 ## Using zeptoIP
 
 Once you have initialized zeptoIP you will probably want to actually use it. This encompasses resolving IP addresses with DNS, sending UDP packets, listening for and receiving IP packets, connecting to TCP endpoints, listening for incoming TCP connections, sending data over TCP, and receiving data from TCP.
