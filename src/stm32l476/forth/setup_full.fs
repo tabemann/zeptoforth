@@ -32,6 +32,7 @@
 #include src/common/forth/fixed.fs
 #include src/common/forth/systick.fs
 #include src/stm32l476/forth/int_io.fs
+#include src/common/forth/compat.fs
 #include src/stm32l476/forth/gpio.fs
 #include src/stm32l476/forth/pin.fs
 #include src/stm32l476/forth/exti.fs
