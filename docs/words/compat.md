@@ -76,3 +76,8 @@ Transfer N items and count to the return stack.
 ( -- xn .. x1 N ; R: x1 .. xn N -- )
 
 Pull N items and count off the return stack.
+
+##### `abort"`
+( "message" -- ) ( Runtime: flag -- )
+
+Raise an exception that displays a message and a following newline if the value on the stack at runtime is non-zero.
