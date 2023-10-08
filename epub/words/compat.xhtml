@@ -26,8 +26,13 @@
 <p>The <code class="docutils literal notranslate"><span class="pre">compat</span></code> module contains the following words:</p>
 <section id="word">
 <h3><code class="docutils literal notranslate"><span class="pre">word</span></code></h3>
-<p>( delim “<delims>word<delims>” – c-addr )</p>
-<p>Parse a word delimited by a given character; note that this is not reentrant because the returned counted string is stored in a single global buffer; for new code TOKEN / PARSE-NAME is recommended when possible. Also, this word does not properly handle all sorts of whitespace, such as tabs and values less than $20.</p>
+<p>( delim “<delims>word<delim>” – c-addr )</p>
+<p>Parse a toke ndelimited by a given character; note that this is not reentrant because the returned counted string is stored in a single global buffer; for new code <code class="docutils literal notranslate"><span class="pre">token</span></code> / <code class="docutils literal notranslate"><span class="pre">parse-name</span></code> is recommended when possible. Also, this word does not properly handle all sorts of whitespace, such as tabs and values less than $20.</p>
+</section>
+<section id="parse">
+<h3><code class="docutils literal notranslate"><span class="pre">parse</span></code></h3>
+<p>( delim “text<delim>” – c-addr u )</p>
+<p>Parse text up to a given character; the the returned string is in the input buffer and thus avoids the reentrancy problems of <code class="docutils literal notranslate"><span class="pre">word</span></code>.</p>
 </section>
 <section id="find">
 <h3><code class="docutils literal notranslate"><span class="pre">find</span></code></h3>
@@ -37,12 +42,12 @@
 <section id="cmove">
 <h3><code class="docutils literal notranslate"><span class="pre">cmove</span></code></h3>
 <p>( c-addr1 c-addr2 u – )</p>
-<p>Implement the traditional Forth string copying word CMOVE - for new code using MOVE is recommended.</p>
+<p>Implement the traditional Forth string copying word <code class="docutils literal notranslate"><span class="pre">cmove</span></code> - for new code using <code class="docutils literal notranslate"><span class="pre">move</span></code> is recommended.</p>
 </section>
 <section id="id1">
 <h3><code class="docutils literal notranslate"><span class="pre">cmove&gt;</span></code></h3>
 <p>( c-add1 c-addr2 u – )</p>
-<p>Implement the traditional Forth string copying word CMOVE&gt; - for new code using MOVE is recommended.</p>
+<p>Implement the traditional Forth string copying word <code class="docutils literal notranslate"><span class="pre">cmove&gt;</span></code> - for new code using <code class="docutils literal notranslate"><span class="pre">move</span></code> is recommended.</p>
 </section>
 <section id="within">
 <h3><code class="docutils literal notranslate"><span class="pre">within</span></code></h3>
