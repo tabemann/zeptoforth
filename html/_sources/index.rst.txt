@@ -8,6 +8,7 @@ Zeptoforth Documentation
    words/basic
    words/module
    words/lambda
+   words/compat
    words/wordlist
    words/console
    words/task
@@ -69,3 +70,5 @@ Zeptoforth Documentation
    extra/font
    extra/bitmap_utils
    extra/neopixel
+   extra/net
+   extra/cyw43
