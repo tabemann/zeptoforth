@@ -13,9 +13,14 @@ One important note is that when this is done within the default module, the word
 The `compat` module contains the following words:
 
 ##### `word`
-( delim "<delims>word<delims>" -- c-addr )
+( delim "<delims>word<delim>" -- c-addr )
 
-Parse a word delimited by a given character; note that this is not reentrant because the returned counted string is stored in a single global buffer; for new code TOKEN / PARSE-NAME is recommended when possible. Also, this word does not properly handle all sorts of whitespace, such as tabs and values less than $20.
+Parse a toke ndelimited by a given character; note that this is not reentrant because the returned counted string is stored in a single global buffer; for new code `token` / `parse-name` is recommended when possible. Also, this word does not properly handle all sorts of whitespace, such as tabs and values less than $20.
+
+##### `parse`
+( delim "text<delim>" -- c-addr u )
+
+Parse text up to a given character; the the returned string is in the input buffer and thus avoids the reentrancy problems of `word`.
 
 ##### `find`
 ( c-addr -- c-addr 0 | xt 1 | xt -1 )
@@ -25,12 +30,12 @@ Find a word's xt and whether it is immediate (signaled by 1) or non-immediate (s
 ##### `cmove`
 ( c-addr1 c-addr2 u -- )
 
-Implement the traditional Forth string copying word CMOVE - for new code using MOVE is recommended.
+Implement the traditional Forth string copying word `cmove` - for new code using `move` is recommended.
 
 ##### `cmove>`
 ( c-add1 c-addr2 u -- )
 
-Implement the traditional Forth string copying word CMOVE> - for new code using MOVE is recommended.
+Implement the traditional Forth string copying word `cmove>` - for new code using `move` is recommended.
 
 ##### `within`
 ( test low high -- flag )

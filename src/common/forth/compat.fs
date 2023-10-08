@@ -30,12 +30,12 @@ begin-module compat
     
   end-module> import
 
-  \ Parse a word delimited by a given character; note that this is not
+  \ Parse a token delimited by a given character; note that this is not
   \ reentrant because the returned counted string is stored in a single global
   \ buffer; for new code TOKEN / PARSE-NAME is recommended when possible. Also,
   \ this word does not properly handle all sorts of whitespace, such as tabs
   \ and values less than $20.
-  : word ( delim "<delims>word<delims>" -- c-addr ) { delim }
+  : word ( delim "<delims>word<delim>" -- c-addr ) { delim }
     source { c-addr u }
     begin
       >in @ u < if
@@ -52,6 +52,12 @@ begin-module compat
     u' word-buffer c!
     c-addr' word-buffer 1+ u' move
     word-buffer
+  ;
+
+  \ Parse text up to a given character; the the returned string is in the
+  \ input buffer and thus avoids the reentrancy problems of WORD.
+  : parse ( delim "text<delim>" -- c-addr u )
+    internal::parse-to-char
   ;
 
   \ Find a word's xt and whether it is immediate (signaled by 1) or

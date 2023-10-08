@@ -111,6 +111,7 @@ _token:	push {lr}
 	ldr r0, =eval_index_ptr
 	ldr r0, [r0]
 	str r1, [r0]
+        bl _advance_once
 	pop {pc}
 	end_inlined
 

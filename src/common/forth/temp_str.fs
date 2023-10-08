@@ -45,7 +45,6 @@ continue-module forth
     state @ if
       postpone c"
     else
-      advance-once
       compiling-to-flash? dup if
 	compile-to-ram
       then
@@ -65,7 +64,6 @@ continue-module forth
     state @ if
       postpone s"
     else
-      advance-once
       compiling-to-flash? dup if
 	compile-to-ram
       then
@@ -84,7 +82,6 @@ continue-module forth
     state @ if
       postpone ."
     else
-      advance-once
       [char] " parse-to-char
       type
     then
@@ -97,13 +94,11 @@ continue-module forth
       postpone c\"
     else
       [:
-	advance-once
 	here [char] " parse-esc-string
 	here over - dup 1+ temp-str ['] allocate-temp critical
 	2dup c!
 	2 pick over 1+ 3 roll move
 	swap ram-here!
-	1 advance-bytes
       ;] with-ram
     then
   ;
@@ -115,12 +110,10 @@ continue-module forth
       postpone s\"
     else
       [:
-	advance-once
 	here [char] " parse-esc-string
 	here over - dup temp-str ['] allocate-temp critical
 	2 pick over 3 pick move
 	rot ram-here! swap
-	1 advance-bytes
       ;] with-ram
     then
   ;
@@ -131,10 +124,8 @@ continue-module forth
     state @ if
       postpone .\"
     else
-      advance-once
       here [char] " parse-esc-string
       dup dup here swap - type ram-here!
-      1 advance-bytes
     then
   ;
 
