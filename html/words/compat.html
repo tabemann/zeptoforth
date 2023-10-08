@@ -120,10 +120,25 @@
 <p>( “message” – ) ( Runtime: flag – )</p>
 <p>Raise an exception that displays a message and a following newline if the value on the stack at runtime is non-zero.</p>
 </section>
+<section id="catch">
+<h3><code class="docutils literal notranslate"><span class="pre">catch</span></code><a class="headerlink" href="#catch" title="Permalink to this heading">¶</a></h3>
+<p>( xt – except|0 )</p>
+<p>Catch an exception; a synonym for <code class="docutils literal notranslate"><span class="pre">try</span></code>.</p>
+</section>
+<section id="throw">
+<h3><code class="docutils literal notranslate"><span class="pre">throw</span></code><a class="headerlink" href="#throw" title="Permalink to this heading">¶</a></h3>
+<p>( except – )</p>
+<p>Throw an exception, converting standard exceptions to zeptoforth exceptions. Note that -2 is not handled in a standard way because there is no fixed message buffer for <code class="docutils literal notranslate"><span class="pre">abort&quot;</span></code>.</p>
+</section>
 <section id="x-abort">
 <h3><code class="docutils literal notranslate"><span class="pre">x-abort</span></code><a class="headerlink" href="#x-abort" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
 <p>An exception which displays a message <code class="docutils literal notranslate"><span class="pre">aborted</span></code>.</p>
+</section>
+<section id="x-unknown">
+<h3><code class="docutils literal notranslate"><span class="pre">x-unknown</span></code><a class="headerlink" href="#x-unknown" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>An unknown exception, corresponding to exception numbers &lt; 0 which do not have standard meanings.</p>
 </section>
 <section id="id3">
 <h3><code class="docutils literal notranslate"><span class="pre">?</span></code><a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
