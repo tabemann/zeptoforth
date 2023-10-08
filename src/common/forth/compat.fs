@@ -184,6 +184,12 @@ begin-module compat
     drop
   ;
 
+  \ An exception which displays a message `aborted`.
+  : x-abort ( -- ) ." aborted" cr ;
+  
+  \ Raise an exception X-ABORT.
+  : abort ( -- ) ['] x-abort ?raise ;
+
   \ Raise an exception that displays a message and a following newline if the
   \ value on the stack at runtime is non-zero.
   : abort" ( "message" -- ) ( Runtime: flag -- )
