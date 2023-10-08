@@ -26,7 +26,7 @@ begin-module compat
 
     \ Temporary buffer for WORD
     256 constant word-buffer-size
-    word-buffer-size buffer: word-buffer
+    word-buffer-size buffer: word-buffer    
     
   end-module> import
 
@@ -187,6 +187,329 @@ begin-module compat
   \ An exception which displays a message `aborted`.
   : x-abort ( -- ) ." aborted" cr ;
   
+  \ An unknown exception, corresponding to exception numbers < 0 which do not
+  \ have standard meanings.
+  : x-unknown ( -- ) ." unknown exception" cr ;
+  
+  continue-module compat-internal
+
+    \ Standard exception -7
+    : x-std-7 ." do-loops nested too deeply during execution" cr ;
+    
+    \ Standard exception -8
+    : x-std-8 ." dictionary overflow" cr ;
+    
+    \ Standard exception -9
+    : x-std-9 ." invalid memory address" cr ;
+    
+    \ Standard exception -10
+    : x-std-10 ." division by zero" cr ;
+    
+    \ Standard exception -11
+    : x-std-11 ." result out of range" cr ;
+    
+    \ Standard exception -12
+    : x-std-12 ." argument type mismatch" cr ;
+    
+    \ Standard exception -13
+    : x-std-13 ." undefined word" cr ;
+    
+    \ Standard exception -14
+    : x-std-14 ." interpreting a compile-only word" cr ;
+    
+    \ Standard exception -15
+    : x-std-15 ." invalid FORGET" cr ;
+    
+    \ Standard exception -16
+    : x-std-16 ." attempt to use zero-length string as a name" cr ;
+    
+    \ Standard exception -17
+    : x-std-17 ." pictured numeric output string overflow" cr ;
+    
+    \ Standard exception -18
+    : x-std-18 ." parsed string overflow" cr ;
+    
+    \ Standard exception -19
+    : x-std-19 ." definition name too long" cr ;
+    
+    \ Standard exception -20
+    : x-std-20 ." write to a read-only location" cr ;
+    
+    \ Standard exception -21
+    : x-std-21 ." unsupported operation" cr ;
+    
+    \ Standard exception -22
+    : x-std-22 ." control structure mismatch" cr ;
+    
+    \ Standard exception -23
+    : x-std-23 ." address alignment exception" cr ;
+    
+    \ Standard exception -24
+    : x-std-24 ." invalid numeric argument" cr ;
+    
+    \ Standard exception -25
+    : x-std-25 ." return stack imbalance" cr ;
+    
+    \ Standard exception -26
+    : x-std-26 ." loop parameters unavailable" cr ;
+    
+    \ Standard exception -27
+    : x-std-27 ." invalid recursion" cr ;
+    
+    \ Standard exception -28
+    : x-std-28 ." user interrupt" cr ;
+    
+    \ Standard exception -29
+    : x-std-29 ." compiler nesting" cr ;
+    
+    \ Standard exception -30
+    : x-std-30 ." obsolescent feature" cr ;
+    
+    \ Standard exception -31
+    : x-std-31 ." >BODY used on non-CREATEd definition" cr ;
+    
+    \ Standard exception -32
+    : x-std-32 ." invalid name argument (e.g., TO name)" cr ;
+    
+    \ Standard exception -33
+    : x-std-33 ." block read exception" cr ;
+    
+    \ Standard exception -34
+    : x-std-34 ." block write exception" cr ;
+    
+    \ Standard exception -35
+    : x-std-35 ." invalid block number" cr ;
+    
+    \ Standard exception -36
+    : x-std-36 ." invalid file position" cr ;
+    
+    \ Standard exception -37
+    : x-std-37 ." file I/O exception" cr ;
+    
+    \ Standard exception -38
+    : x-std-38 ." non-existent file" cr ;
+    
+    \ Standard exception -39
+    : x-std-39 ." unexpected end of file" cr ;
+    
+    \ Standard exception -40
+    : x-std-40 ." invalid BASE for floating point conversion" cr ;
+    
+    \ Standard exception -41
+    : x-std-41 ." loss of precision" cr ;
+    
+    \ Standard exception -42
+    : x-std-42 ." floating-point divide by zero" cr ;
+    
+    \ Standard exception -43
+    : x-std-43 ." floating-point result out of range" cr ;
+    
+    \ Standard exception -44
+    : x-std-44 ." floating-point stack overflow" cr ;
+    
+    \ Standard exception -45
+    : x-std-45 ." floating-point stack underflow" cr ;
+    
+    \ Standard exception -46
+    : x-std-46 ." floating-point invalid argument" cr ;
+    
+    \ Standard exception -47
+    : x-std-47 ." compilation word list deleted" cr ;
+    
+    \ Standard exception -48
+    : x-std-48 ." invalid POSTPONE" cr ;
+    
+    \ Standard exception -49
+    : x-std-49 ." search-order overflow" cr ;
+    
+    \ Standard exception -50
+    : x-std-50 ." search-order underflow" cr ;
+    
+    \ Standard exception -51
+    : x-std-51 ." compilation word list changed" cr ;
+    
+    \ Standard exception -52
+    : x-std-52 ." control-flow stack overflow" cr ;
+    
+    \ Standard exception -53
+    : x-std-53 ." exception stack overflow" cr ;
+    
+    \ Standard exception -54
+    : x-std-54 ." floating-point underflow" cr ;
+    
+    \ Standard exception -55
+    : x-std-55 ." floating-point unidentified fault" cr ;
+    
+    \ Standard exception -56
+    : x-std-56 ." QUIT" cr ;
+    
+    \ Standard exception -57
+    : x-std-57 ." exception in sending or receiving a character" cr ;
+    
+    \ Standard exception -58
+    : x-std-58 ." [IF], [ELSE], or [THEN] exception" cr ;
+    
+    \ Standard exception -59
+    : x-std-59 ." ALLOCATE" cr ;
+    
+    \ Standard exception -60
+    : x-std-60 ." FREE" cr ;
+    
+    \ Standard exception -61
+    : x-std-61 ." RESIZE" cr ;
+    
+    \ Standard exception -62
+    : x-std-62 ." CLOSE-FILE" cr ;
+    
+    \ Standard exception -63
+    : x-std-63 ." CREATE-FILE" cr ;
+    
+    \ Standard exception -64
+    : x-std-64 ." DELETE-FILE" cr ;
+    
+    \ Standard exception -65
+    : x-std-65 ." FILE-POSITION" cr ;
+    
+    \ Standard exception -66
+    : x-std-66 ." FILE-SIZE" cr ;
+    
+    \ Standard exception -67
+    : x-std-67 ." FILE-STATUS" cr ;
+    
+    \ Standard exception -68
+    : x-std-68 ." FLUSH-FILE" cr ;
+    
+    \ Standard exception -69
+    : x-std-69 ." OPEN-FILE" cr ;
+    
+    \ Standard exception -70
+    : x-std-70 ." READ-FILE" cr ;
+    
+    \ Standard exception -71
+    : x-std-71 ." READ-LINE" cr ;
+    
+    \ Standard exception -72
+    : x-std-72 ." RENAME-FILE" cr ;
+    
+    \ Standard exception -73
+    : x-std-73 ." REPOSITION-FILE" cr ;
+    
+    \ Standard exception -74
+    : x-std-74 ." RESIZE-FILE" cr ;
+    
+    \ Standard exception -75
+    : x-std-75 ." WRITE-FILE" cr ;
+    
+    \ Standard exception -76
+    : x-std-76 ." WRITE-LINE" cr ;
+    
+    \ Standard exception -77
+    : x-std-77 ." Malformed xchar" cr ;
+    
+    \ Standard exception -78
+    : x-std-78 ." SUBSTITUTE" cr ;
+    
+    \ Standard exception -79
+    : x-std-79 ." REPLACES" cr ;
+
+    \ Standard exception count
+    80 constant std-except-count
+    
+    create std-excepts
+    0 ,
+    ' x-abort ,
+    ' x-abort ,
+    ' stack-overflow ,
+    ' stack-underflow ,
+    ' rstack-overflow ,
+    ' rstack-underflow ,
+    ' x-std-7 ,
+    ' x-std-8 ,
+    ' x-std-9 ,
+    ' x-std-10 ,
+    ' x-std-11 ,
+    ' x-std-12 ,
+    ' x-std-13 ,
+    ' x-std-14 ,
+    ' x-std-15 ,
+    ' x-std-16 ,
+    ' x-std-17 ,
+    ' x-std-18 ,
+    ' x-std-19 ,
+    ' x-std-20 ,
+    ' x-std-21 ,
+    ' x-std-22 ,
+    ' x-std-23 ,
+    ' x-std-24 ,
+    ' x-std-25 ,
+    ' x-std-26 ,
+    ' x-std-27 ,
+    ' x-std-28 ,
+    ' x-std-29 ,
+    ' x-std-30 ,
+    ' x-std-31 ,
+    ' x-std-32 ,
+    ' x-std-33 ,
+    ' x-std-34 ,
+    ' x-std-35 ,
+    ' x-std-36 ,
+    ' x-std-37 ,
+    ' x-std-38 ,
+    ' x-std-39 ,
+    ' x-std-40 ,
+    ' x-std-41 ,
+    ' x-std-42 ,
+    ' x-std-43 ,
+    ' x-std-44 ,
+    ' x-std-45 ,
+    ' x-std-46 ,
+    ' x-std-47 ,
+    ' x-std-48 ,
+    ' x-std-49 ,
+    ' x-std-50 ,
+    ' x-std-51 ,
+    ' x-std-52 ,
+    ' x-std-53 ,
+    ' x-std-54 ,
+    ' x-std-55 ,
+    ' x-std-56 ,
+    ' x-std-57 ,
+    ' x-std-58 ,
+    ' x-std-59 ,
+    ' x-std-60 ,
+    ' x-std-61 ,
+    ' x-std-62 ,
+    ' x-std-63 ,
+    ' x-std-64 ,
+    ' x-std-65 ,
+    ' x-std-66 ,
+    ' x-std-67 ,
+    ' x-std-68 ,
+    ' x-std-69 ,
+    ' x-std-70 ,
+    ' x-std-71 ,
+    ' x-std-72 ,
+    ' x-std-73 ,
+    ' x-std-74 ,
+    ' x-std-75 ,
+    ' x-std-76 ,
+    ' x-std-77 ,
+    ' x-std-78 ,
+    ' x-std-79 ,
+
+    \ Convert an exception
+    : convert-except ( std-except -- except )
+      dup negate dup 0>= swap std-except-count < and if
+        negate cells std-excepts + @
+      else
+        dup 0< if
+          drop ['] x-unknown
+        then
+      then
+    ;
+    
+  end-module
+  
   \ Raise an exception X-ABORT.
   : abort ( -- ) ['] x-abort ?raise ;
 
@@ -202,6 +525,14 @@ begin-module compat
     postpone ?raise
     postpone then
   ;
+
+  \ Catch an exception; a synonym for TRY.
+  : catch ( xt -- except|0 ) try ;
+
+  \ Throw an exception, converting standard exceptions to zeptoforth exceptions.
+  \ Note that -2 is not handled in a standard way because there is no fixed
+  \ message buffer for ABORT" .
+  : throw ( except -- ) convert-except ?raise ;
   
   \ Fetch a value from an address and print it as an integer.
   : ? ( addr -- ) @ . ;
