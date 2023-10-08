@@ -182,7 +182,20 @@ begin-module compat
       1-
    repeat
    drop
-;
+ ;
+
+ \ Raise an exception that displays a message and a following newline if the
+ \ value on the stack at runtime is non-zero.
+ : abort" ( "message" -- ) ( Runtime: flag -- )
+   [immediate]
+   postpone if
+   postpone [:
+   postpone ."
+   postpone cr
+   postpone ;]
+   postpone ?raise
+   postpone then
+ ;
   
 end-module
 
