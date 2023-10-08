@@ -83,13 +83,12 @@ _parse_to_char:
 	beq 3f
 	adds r1, #1
 	str r1, [r0]
-3:	bx lr
+3:      bx lr
 
 	@@ Immediately type a string in the input stream
 	define_word ".(", visible_flag | immediate_flag
 _type_to_paren:
 	push {lr}
-	bl _advance_once
 	push_tos
 	movs tos, #0x29
 	bl _parse_to_char
@@ -123,7 +122,6 @@ _compile_imm_string:
 	define_word "c\"", visible_flag | immediate_flag | compiled_flag
 _compile_imm_cstring:
 	push {lr}
-	bl _advance_once
 	push_tos
 	movs tos, #0x22
 	bl _parse_to_char

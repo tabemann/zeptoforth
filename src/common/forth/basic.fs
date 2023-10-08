@@ -1914,11 +1914,7 @@ commit-flash
       dup $5C = if
 	drop skip-escape false
       else
-	r@ = if
-	  true
-	else
-	  1 advance-bytes false
-	then
+	r@ =
       then
     else
       drop true
@@ -1943,7 +1939,6 @@ commit-flash
   here %1 and if 0 c, then
   swap here swap branch-back!
   lit,
-  1 advance-bytes
 ;
 
 \ Commit to flash
@@ -1956,7 +1951,6 @@ forth set-current
 : c\" ( -- )
   [immediate]
   [compile-only]
-  advance-once
   [char] " compile-esc-cstring
 ;
 
@@ -1964,7 +1958,6 @@ forth set-current
 : s\" ( -- )
   [immediate]
   [compile-only]
-  advance-once
   [char] " compile-esc-cstring
   postpone count
 ;
@@ -1973,7 +1966,6 @@ forth set-current
 : .\" ( -- )
   [immediate]
   [compile-only]
-  advance-once
   [char] " compile-esc-cstring
   postpone count
   postpone type
@@ -1982,14 +1974,12 @@ forth set-current
 \ Immediately type an escaped string
 : .\( ( -- )
   [immediate]
-  advance-once
   compiling-to-flash? dup if
     compile-to-ram
   then
   here [char] ) parse-esc-string
   dup dup here swap - type
   ram-here! swap if compile-to-flash then
-  1 advance-bytes
 ;
 
 \ Set forth
