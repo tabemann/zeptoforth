@@ -174,28 +174,31 @@ begin-module compat
 
   \ Pull N items and count off the return stack.
   : nr> ( -- xn .. x1 N ; R: x1 .. xn N -- )
-   r> r> swap >r dup
-   begin
+    r> r> swap >r dup
+    begin
       dup
-   while
+    while
       r> r> swap >r -rot
       1-
-   repeat
-   drop
- ;
+    repeat
+    drop
+  ;
 
- \ Raise an exception that displays a message and a following newline if the
- \ value on the stack at runtime is non-zero.
- : abort" ( "message" -- ) ( Runtime: flag -- )
-   [immediate]
-   postpone if
-   postpone [:
-   postpone ."
-   postpone cr
-   postpone ;]
-   postpone ?raise
-   postpone then
- ;
+  \ Raise an exception that displays a message and a following newline if the
+  \ value on the stack at runtime is non-zero.
+  : abort" ( "message" -- ) ( Runtime: flag -- )
+    [immediate]
+    postpone if
+    postpone [:
+    postpone ."
+    postpone cr
+    postpone ;]
+    postpone ?raise
+    postpone then
+  ;
+  
+  \ Fetch a value from an address and print it as an integer.
+  : ? ( addr -- ) @ . ;
   
 end-module
 
