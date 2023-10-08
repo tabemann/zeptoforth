@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>ANS Forth / Forth 2012 Compatibility Words</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="ans-forth-forth-2012-compatibility-words">
+<h1>ANS Forth / Forth 2012 Compatibility Words</h1>
+<p>This is a collection of assorted words added for compatibility with ANS Forth and Forth 2012. Because there may be conflicts with existing words, particularly in the case of <code class="docutils literal notranslate"><span class="pre">find</span></code>, these words are placed in a <code class="docutils literal notranslate"><span class="pre">compat</span></code> module from which they may be imported.</p>
+<p>One important note is that when this is done within the default module, the word <code class="docutils literal notranslate"><span class="pre">find</span></code> provided by this module will be shadowed by the existing <code class="docutils literal notranslate"><span class="pre">find</span></code> word in the <code class="docutils literal notranslate"><span class="pre">forth</span></code> module; in this case one will have to either refer to it as <code class="docutils literal notranslate"><span class="pre">compat::find</span></code> or shadow the <code class="docutils literal notranslate"><span class="pre">find</span></code> in the <code class="docutils literal notranslate"><span class="pre">forth</span></code> module with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">:</span> <span class="n">find</span> <span class="n">compat</span><span class="p">::</span><span class="n">find</span> <span class="p">;</span>
+</pre></div>
+</div>
+<section id="compat">
+<h2><code class="docutils literal notranslate"><span class="pre">compat</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">compat</span></code> module contains the following words:</p>
+<section id="word">
+<h3><code class="docutils literal notranslate"><span class="pre">word</span></code></h3>
+<p>( delim “<delims>word<delims>” – c-addr )</p>
+<p>Parse a word delimited by a given character; note that this is not reentrant because the returned counted string is stored in a single global buffer; for new code TOKEN / PARSE-NAME is recommended when possible. Also, this word does not properly handle all sorts of whitespace, such as tabs and values less than $20.</p>
+</section>
+<section id="find">
+<h3><code class="docutils literal notranslate"><span class="pre">find</span></code></h3>
+<p>( c-addr – c-addr 0 | xt 1 | xt -1 )</p>
+<p>Find a word’s xt and whether it is immediate (signaled by 1) or non-immediate (signaled by 0)</p>
+</section>
+<section id="cmove">
+<h3><code class="docutils literal notranslate"><span class="pre">cmove</span></code></h3>
+<p>( c-addr1 c-addr2 u – )</p>
+<p>Implement the traditional Forth string copying word CMOVE - for new code using MOVE is recommended.</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">cmove&gt;</span></code></h3>
+<p>( c-add1 c-addr2 u – )</p>
+<p>Implement the traditional Forth string copying word CMOVE&gt; - for new code using MOVE is recommended.</p>
+</section>
+<section id="within">
+<h3><code class="docutils literal notranslate"><span class="pre">within</span></code></h3>
+<p>( test low high – flag )</p>
+<p>Determine whether a value is between ‘low’, inclusive, and ‘high’, exclusive.</p>
+</section>
+<section id="number">
+<h3><code class="docutils literal notranslate"><span class="pre">&gt;number</span></code></h3>
+<p>( D: acc c-addr u – acc’ c-addr’ u’ )</p>
+<p>Parse a number in a string ‘c-addr u’ with an accumulator initialized as a double-cell value ‘acc’ using the base stored in BASE</p>
+</section>
+<section id="compare">
+<h3><code class="docutils literal notranslate"><span class="pre">compare</span></code></h3>
+<p>( c-addr1 u1 c-addr2 u2 – n )</p>
+<p>Compare two strings for both content and length using the numeric values of bytes compared within and shorter common length.</p>
+</section>
+<section id="erase">
+<h3><code class="docutils literal notranslate"><span class="pre">erase</span></code></h3>
+<p>( c-addr u – )</p>
+<p>Fill a buffer with zero bytes.</p>
+</section>
+<section id="parse-name">
+<h3><code class="docutils literal notranslate"><span class="pre">parse-name</span></code></h3>
+<p>( “token” – c-addr u )</p>
+<p>Parse a single token from the input.</p>
+</section>
+<section id="u-r">
+<h3><code class="docutils literal notranslate"><span class="pre">u.r</span></code></h3>
+<p>( u width – )</p>
+<p>Output a right-justified unsigned value in a specified field width; note that if the value is wider than the specified field width the whole value will be output but no padding spaces will be added.</p>
+</section>
+<section id="holds">
+<h3><code class="docutils literal notranslate"><span class="pre">holds</span></code></h3>
+<p>( c-addr u – )</p>
+<p>Add multiple characters to &lt;# # #&gt; numeric formatting.</p>
+</section>
+<section id="n-r">
+<h3><code class="docutils literal notranslate"><span class="pre">n&gt;r</span></code></h3>
+<p>( xn .. x1 N – ; R: – x1 .. xn n )</p>
+<p>Transfer N items and count to the return stack.</p>
+</section>
+<section id="nr">
+<h3><code class="docutils literal notranslate"><span class="pre">nr&gt;</span></code></h3>
+<p>( – xn .. x1 N ; R: x1 .. xn N – )</p>
+<p>Pull N items and count off the return stack.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>
