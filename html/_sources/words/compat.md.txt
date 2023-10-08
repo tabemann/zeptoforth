@@ -87,10 +87,25 @@ Raise an exception `x-abort`.
 
 Raise an exception that displays a message and a following newline if the value on the stack at runtime is non-zero.
 
+##### `catch`
+( xt -- except|0 )
+
+Catch an exception; a synonym for `try`.
+
+##### `throw`
+( except -- )
+
+Throw an exception, converting standard exceptions to zeptoforth exceptions. Note that -2 is not handled in a standard way because there is no fixed message buffer for `abort"`.
+
 ##### `x-abort`
 ( -- )
 
 An exception which displays a message `aborted`.
+
+##### `x-unknown`
+( -- )
+
+An unknown exception, corresponding to exception numbers < 0 which do not have standard meanings.
 
 ##### `?`
 ( addr -- )
