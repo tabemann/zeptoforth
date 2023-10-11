@@ -1472,7 +1472,7 @@ internal set-current
 ;
 
 \ EVALUATE refill word
-: evaluate-refill ( -- ) 0 eval-index-ptr @ ! 0 eval-count-ptr @ ! ;
+: evaluate-refill ( -- ) ;
 
 \ Commit to flash
 commit-flash

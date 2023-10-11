@@ -82,6 +82,26 @@ Transfer N items and count to the return stack.
 
 Pull N items and count off the return stack.
 
+##### `x-invalid-input-spec`
+( -- )
+
+Invalid input specification exception.
+
+##### `save-input`
+( -- xn ... x1 n )
+
+Save input specification.
+
+##### `restore-input`
+( xn ... x1 n -- )
+
+Restore input specification.
+
+##### `refill`
+( -- flag )
+
+Refill the input buffer (and return whether EOF has not been reached)
+
 ##### `sm/rem`
 ( d n -- rem quot )
 
