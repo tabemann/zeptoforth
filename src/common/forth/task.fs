@@ -387,7 +387,9 @@ begin-module task
   continue-module task-internal
 
     \ Get task dictionary end
-    : task-dict-end ( task -- addr ) ;
+    : task-dict-end ( task -- addr )
+      dup main-task @ = if drop free-end @ then
+    ;
 
     \ Get task current stack address
     : task-stack-current ( task -- addr )
