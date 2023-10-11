@@ -137,6 +137,11 @@ Symmetric division.
 
 Floored division.
 
+##### `unused`
+( -- u )
+
+Get the amount of remainign dictionary space in the current task's RAM dictionary
+
 ##### `abort`
 ( -- )
 
