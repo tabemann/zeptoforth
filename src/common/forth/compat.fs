@@ -190,6 +190,22 @@ begin-module compat
     drop
   ;
 
+  \ Symmetric division (just a renaming of M/MOD)
+  : sm/rem ( d n -- rem quot ) m/mod ;
+
+  \ Floored division (I don't know why anyone would want this but supposedly
+  \ having this is standard)
+  : fm/mod ( d n -- rem quot )
+    dup >r
+    m/mod
+    ( if the remainder is not zero and has a different sign than the divisor )
+    over dup 0<> swap 0< r@ 0< xor and if
+    1- swap r> + swap
+    else
+      rdrop
+    then
+  ;
+
   \ An exception which displays a message `aborted`.
   : x-abort ( -- ) ." aborted" cr ;
   

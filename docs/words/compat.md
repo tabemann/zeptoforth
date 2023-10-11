@@ -82,6 +82,16 @@ Transfer N items and count to the return stack.
 
 Pull N items and count off the return stack.
 
+##### `sm/rem`
+( d n -- rem quot )
+
+Symmetric division.
+
+##### `fm/mod`
+( d n -- rem quot )
+
+Floored division.
+
 ##### `abort`
 ( -- )
 
