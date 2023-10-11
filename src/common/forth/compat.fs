@@ -264,6 +264,12 @@ begin-module compat
     then
   ;
 
+  \ Get the amount of remaining dictionary space in the current task's RAM
+  \ dictionary
+  : unused ( -- u )
+    task::current-task task::task-internal::task-dict-end ram-here -
+  ;
+
   \ An exception which displays a message `aborted`.
   : x-abort ( -- ) ." aborted" cr ;
   
