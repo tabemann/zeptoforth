@@ -190,6 +190,39 @@ begin-module compat
     drop
   ;
 
+  \ Invalid input specification exception.
+  : x-invalid-input-spec ( -- ) cr ." invalid input specification" cr ;
+
+  \ Save input specification.
+  : save-input ( -- xn ... x1 n )
+    internal::eval-data @
+    internal::eval-refill @
+    internal::eval-eof @
+    internal::prompt-disabled @
+    internal::eval-index-ptr @
+    internal::eval-count-ptr @
+    internal::eval-ptr @
+    7
+  ;
+
+  \ Restore input specification.
+  : restore-input ( xn ... x1 n -- )
+    7 = averts x-invalid-input-spec
+    internal::eval-ptr !
+    internal::eval-count-ptr !
+    internal::eval-index-ptr !
+    internal::prompt-disabled !
+    internal::eval-eof !
+    internal::eval-refill !
+    internal::eval-data !
+  ;
+
+  \ Refill the input buffer (and return whether EOF has not been reached)
+  : refill ( -- flag )
+    internal::eval-eof @ ?dup if execute if false exit then then
+    display-prompt refill true
+  ;
+
   \ Symmetric division (just a renaming of M/MOD)
   : sm/rem ( d n -- rem quot ) m/mod ;
 
