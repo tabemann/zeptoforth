@@ -57,10 +57,35 @@ Compare two strings for both content and length using the numeric values of byte
 
 Fill a buffer with zero bytes.
 
+##### `align`
+( -- )
+
+Align the current `here` pointer to the next closest cell.
+
+##### `aligned`
+( a-addr -- a-addr' )
+
+Align an address to the next closest cell.
+
+##### `char+`
+( c-addr -- c-addr' )
+
+Increment an address by the size of one character, i.e. one byte.
+
+##### `chars`
+( n -- n' )
+
+Get the size of *n* characters in bytes; this is a no-op.
+
 ##### `parse-name`
 ( "token" -- c-addr u )
 
 Parse a single token from the input.
+
+##### `.r`
+( n width -- )
+
+Output a right-justified signed value in a specified field width; note that if the value is wider than the specified field width the whole value will be output but no padding spaces will be added.
 
 ##### `u.r`
 ( u width -- )
