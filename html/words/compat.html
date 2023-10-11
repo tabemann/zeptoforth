@@ -90,10 +90,35 @@
 <p>( c-addr u – )</p>
 <p>Fill a buffer with zero bytes.</p>
 </section>
+<section id="align">
+<h3><code class="docutils literal notranslate"><span class="pre">align</span></code><a class="headerlink" href="#align" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Align the current <code class="docutils literal notranslate"><span class="pre">here</span></code> pointer to the next closest cell.</p>
+</section>
+<section id="aligned">
+<h3><code class="docutils literal notranslate"><span class="pre">aligned</span></code><a class="headerlink" href="#aligned" title="Permalink to this heading">¶</a></h3>
+<p>( a-addr – a-addr’ )</p>
+<p>Align an address to the next closest cell.</p>
+</section>
+<section id="char">
+<h3><code class="docutils literal notranslate"><span class="pre">char+</span></code><a class="headerlink" href="#char" title="Permalink to this heading">¶</a></h3>
+<p>( c-addr – c-addr’ )</p>
+<p>Increment an address by the size of one character, i.e. one byte.</p>
+</section>
+<section id="chars">
+<h3><code class="docutils literal notranslate"><span class="pre">chars</span></code><a class="headerlink" href="#chars" title="Permalink to this heading">¶</a></h3>
+<p>( n – n’ )</p>
+<p>Get the size of <em>n</em> characters in bytes; this is a no-op.</p>
+</section>
 <section id="parse-name">
 <h3><code class="docutils literal notranslate"><span class="pre">parse-name</span></code><a class="headerlink" href="#parse-name" title="Permalink to this heading">¶</a></h3>
 <p>( “token” – c-addr u )</p>
 <p>Parse a single token from the input.</p>
+</section>
+<section id="r">
+<h3><code class="docutils literal notranslate"><span class="pre">.r</span></code><a class="headerlink" href="#r" title="Permalink to this heading">¶</a></h3>
+<p>( n width – )</p>
+<p>Output a right-justified signed value in a specified field width; note that if the value is wider than the specified field width the whole value will be output but no padding spaces will be added.</p>
 </section>
 <section id="u-r">
 <h3><code class="docutils literal notranslate"><span class="pre">u.r</span></code><a class="headerlink" href="#u-r" title="Permalink to this heading">¶</a></h3>
