@@ -144,8 +144,33 @@ begin-module compat
   \ Fill a buffer with zero bytes.
   : erase ( c-addr u -- ) 0 fill ;
 
+  \ Align the current HERE pointer to the next closest cell.
+  : align ( -- ) cell align, ;
+
+  \ Align an address to the next closest cell
+  : aligned ( a-addr -- a-addr' ) cell align ;
+
+  \ Increment an address by the size of one character, i.e. one byte.
+  : char+ ( c-addr -- c-addr' ) 1+ ;
+
+  \ Get the size of n characters in bytes; this is a no-nop.
+  : chars ( n -- n' )
+
   \ Parse a single token from the input.
   : parse-name ( "token" -- c-addr u ) token ;
+
+  \ Output a right-justified signed value in a specified field width; note that
+  \ if the value is wider than the specified field width the whole value will
+  \ be output but no padding spaces will be added.
+  : .r { n width -- }
+    n 0< if n negate 1 else n 0 then { current bytes }
+    begin current while
+      1 +to bytes
+      current base @ u/ to current
+    repeat
+    width bytes u> if width bytes - spaces then
+    n (.)
+  ;
 
   \ Output a right-justified unsigned value in a specified field width; note
   \ that if the value is wider than the specified field width the whole value
@@ -157,7 +182,7 @@ begin-module compat
       current base @ u/ to current
     repeat
     width bytes u> if width bytes - spaces then
-    u u.
+    u (u.)
   ;
 
   \ Add multiple characters to <# # #> numeric formatting.
