@@ -154,7 +154,7 @@ begin-module compat
   : char+ ( c-addr -- c-addr' ) 1+ ;
 
   \ Get the size of n characters in bytes; this is a no-nop.
-  : chars ( n -- n' )
+  : chars ( n -- n' ) ;
 
   \ Parse a single token from the input.
   : parse-name ( "token" -- c-addr u ) token ;
