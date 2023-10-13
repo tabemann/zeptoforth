@@ -25,7 +25,7 @@ Parse text up to a given character; the the returned string is in the input buff
 ##### `find`
 ( c-addr -- c-addr 0 | xt 1 | xt -1 )
 
-Find a word's xt and whether it is immediate (signaled by 1) or non-immediate (signaled by 0)
+Find a word's xt using a counted string for its name and whether it is immediate (signaled by 1) or non-immediate (signaled by 0); return the name as a counted string if it is not found.
 
 ##### `cmove`
 ( c-addr1 c-addr2 u -- )
@@ -176,3 +176,43 @@ An unknown exception, corresponding to exception numbers < 0 which do not have s
 ( addr -- )
 
 Fetch a value from an address and print it as an integer.
+
+##### `also`
+( -- )
+
+Duplicate the first entry on the search order.
+
+##### `definitions`
+( -- )
+
+Make the compilation wordlist the same as the first entry on the search order.
+
+##### `forth-wordlist`
+( -- wid )
+
+A synonym for zeptoforth FORTH.
+
+##### `forth`
+( -- )
+
+Set the topmost wordlist with the FORTH wordlist.
+
+##### `only`
+( -- )
+
+Set the wordlist order to the minimum default wordlist order.
+
+##### `order`
+( -- )
+
+Display the searchlist order.
+
+##### `previous`
+( -- ) get-order ?dup if nip 1- set-order then ;
+
+Remove the topmost entry of the wordlist order.
+
+##### `search-wordlist`
+( c-addr u wid -- 0 | xt 1 | xt -1 )
+
+Search the wordlist order; unlike ANS FIND it does not return the string being search for if no string is found.
