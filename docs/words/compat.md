@@ -25,7 +25,7 @@ Parse text up to a given character; the the returned string is in the input buff
 ##### `find`
 ( c-addr -- c-addr 0 | xt 1 | xt -1 )
 
-Find a word's xt using a counted string for its name and whether it is immediate (signaled by 1) or non-immediate (signaled by 0); return the name as a counted string if it is not found.
+Find a word's xt using a counted string for its name and whether it is immediate (signaled by 1) or non-immediate (signaled by -1); return the name as a counted string and 0 if it is not found.
 
 ##### `cmove`
 ( c-addr1 c-addr2 u -- )
@@ -215,4 +215,4 @@ Remove the topmost entry of the wordlist order.
 ##### `search-wordlist`
 ( c-addr u wid -- 0 | xt 1 | xt -1 )
 
-Search the wordlist order; unlike ANS FIND it does not return the string being search for if no string is found.
+Find a word in a wordlist's xt using a string for its name and whether it is immediate (signaled by 1) or non-immediate (signaled by -1); return 0 if it is not found. Unlike ANS FIND it does not used a counted string and does not return the string being searched for if no word is found.
