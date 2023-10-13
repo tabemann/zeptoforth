@@ -58,7 +58,7 @@
 <section id="find">
 <h3><code class="docutils literal notranslate"><span class="pre">find</span></code><a class="headerlink" href="#find" title="Permalink to this heading">¶</a></h3>
 <p>( c-addr – c-addr 0 | xt 1 | xt -1 )</p>
-<p>Find a word’s xt and whether it is immediate (signaled by 1) or non-immediate (signaled by 0)</p>
+<p>Find a word’s xt using a counted string for its name and whether it is immediate (signaled by 1) or non-immediate (signaled by -1); return the name as a counted string and 0 if it is not found.</p>
 </section>
 <section id="cmove">
 <h3><code class="docutils literal notranslate"><span class="pre">cmove</span></code><a class="headerlink" href="#cmove" title="Permalink to this heading">¶</a></h3>
@@ -209,6 +209,46 @@
 <h3><code class="docutils literal notranslate"><span class="pre">?</span></code><a class="headerlink" href="#id3" title="Permalink to this heading">¶</a></h3>
 <p>( addr – )</p>
 <p>Fetch a value from an address and print it as an integer.</p>
+</section>
+<section id="also">
+<h3><code class="docutils literal notranslate"><span class="pre">also</span></code><a class="headerlink" href="#also" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Duplicate the first entry on the search order.</p>
+</section>
+<section id="definitions">
+<h3><code class="docutils literal notranslate"><span class="pre">definitions</span></code><a class="headerlink" href="#definitions" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Make the compilation wordlist the same as the first entry on the search order.</p>
+</section>
+<section id="forth-wordlist">
+<h3><code class="docutils literal notranslate"><span class="pre">forth-wordlist</span></code><a class="headerlink" href="#forth-wordlist" title="Permalink to this heading">¶</a></h3>
+<p>( – wid )</p>
+<p>A synonym for zeptoforth FORTH.</p>
+</section>
+<section id="forth">
+<h3><code class="docutils literal notranslate"><span class="pre">forth</span></code><a class="headerlink" href="#forth" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Set the topmost wordlist with the FORTH wordlist.</p>
+</section>
+<section id="only">
+<h3><code class="docutils literal notranslate"><span class="pre">only</span></code><a class="headerlink" href="#only" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Set the wordlist order to the minimum default wordlist order.</p>
+</section>
+<section id="order">
+<h3><code class="docutils literal notranslate"><span class="pre">order</span></code><a class="headerlink" href="#order" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>Display the searchlist order.</p>
+</section>
+<section id="previous">
+<h3><code class="docutils literal notranslate"><span class="pre">previous</span></code><a class="headerlink" href="#previous" title="Permalink to this heading">¶</a></h3>
+<p>( – ) get-order ?dup if nip 1- set-order then ;</p>
+<p>Remove the topmost entry of the wordlist order.</p>
+</section>
+<section id="search-wordlist">
+<h3><code class="docutils literal notranslate"><span class="pre">search-wordlist</span></code><a class="headerlink" href="#search-wordlist" title="Permalink to this heading">¶</a></h3>
+<p>( c-addr u wid – 0 | xt 1 | xt -1 )</p>
+<p>Find a word in a wordlist’s xt using a string for its name and whether it is immediate (signaled by 1) or non-immediate (signaled by -1); return 0 if it is not found. Unlike ANS FIND it does not used a counted string and does not return the string being searched for if no word is found.</p>
 </section>
 </section>
 </section>
