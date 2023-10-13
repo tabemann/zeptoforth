@@ -60,8 +60,9 @@ begin-module compat
     internal::parse-to-char
   ;
 
-  \ Find a word's xt and whether it is immediate (signaled by 1) or
-  \ non-immediate (signaled by 0)
+  \ Find a word's xt using a counted string for its name and whether it is
+  \ immediate (signaled by 1) or non-immediate (signaled by 0); return the name
+  \ as a coutned string if it is not found.
   : find ( c-addr -- c-addr 0 | xt 1 | xt -1 )
     dup count find { counted word }
     word if
@@ -622,6 +623,61 @@ begin-module compat
   
   \ Fetch a value from an address and print it as an integer.
   : ? ( addr -- ) @ . ;
+
+  \ Duplicate the first entry on the search order.
+  : also ( -- )
+    get-order over swap 1+ set-order
+  ; 
+
+  \ Make the compilation wordlist the same as the first entry on the search
+  \ order.
+  : definitions ( -- )
+    get-order swap set-current 0 ?do drop loop
+  ;
+
+  \ A synonym for zeptoforth FORTH.
+  forth constant forth-wordlist
+
+  continue-module compat-internal
+
+    \ Create a word which takes the topmost wordlist and replaces it with a
+    \ given wordlist.
+    : (wordlist) ( wid "<name>" -- ; )
+      <builds ,
+      does>
+      @ >r
+      get-order nip
+      r> swap set-order
+    ;
+
+  end-module
+
+  \ Set the topmost wordlist with the FORTH wordlist.
+  forth-wordlist (wordlist) forth
+
+  \ Set the wordlist order to the minimum default wordlist order.
+  : only ( -- ) -1 set-order ;
+
+  \ Display the searchlist order.
+  : order ( -- )
+    cr ." current compilation wordlist: " get-current .
+    cr ." current wordlist order:"
+    get-order 0 ?do cr i (.) ." : " . loop
+  ;
+
+  \ Remove the topmost entry of the wordlist order.
+  : previous ( -- ) get-order ?dup if nip 1- set-order then ;
+
+  \ Search the wordlist order; unlike ANS FIND it does not return the string
+  \ being search for if no string is found.
+  : search-wordlist ( c-addr u wid -- 0 | xt 1 | xt -1 )
+    internal::find-in-wordlist { word }
+    word if
+      word >xt word internal::word-flags h@ immediate-flag and if 1 else -1 then
+    else
+      0
+    then
+  ;
   
 end-module
 

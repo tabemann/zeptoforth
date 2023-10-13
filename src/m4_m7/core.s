@@ -2061,6 +2061,8 @@ _get_order:
 _set_order:
 	ldr r0, =order
 	ldr r1, =order_count
+        cmp tos, #0
+        blt 5f
 2:	str tos, [r1]
 	movs r1, tos
 	pull_tos
@@ -2071,6 +2073,11 @@ _set_order:
 	pull_tos
 	adds r0, #2
 	b 3b
+5:      movs tos, #1
+        subs dp, #4
+        movs r2, #0
+        str r2, [dp]
+        b 2b
 4:	bx lr
 	end_inlined
 
