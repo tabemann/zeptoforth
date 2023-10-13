@@ -61,8 +61,8 @@ begin-module compat
   ;
 
   \ Find a word's xt using a counted string for its name and whether it is
-  \ immediate (signaled by 1) or non-immediate (signaled by 0); return the name
-  \ as a coutned string if it is not found.
+  \ immediate (signaled by 1) or non-immediate (signaled by -1); return the name
+  \ as a counted string and 0 if it is not found.
   : find ( c-addr -- c-addr 0 | xt 1 | xt -1 )
     dup count find { counted word }
     word if
@@ -668,8 +668,10 @@ begin-module compat
   \ Remove the topmost entry of the wordlist order.
   : previous ( -- ) get-order ?dup if nip 1- set-order then ;
 
-  \ Search the wordlist order; unlike ANS FIND it does not return the string
-  \ being search for if no string is found.
+  \ Find a word in a wordlist's xt using a string for its name and whether it is
+  \ immediate (signaled by 1) or non-immediate (signaled by -1); return 0 if it
+  \ is not found. Unlike ANS FIND it does not used a counted string and does
+  \ not return the string being searched for if no word is found.
   : search-wordlist ( c-addr u wid -- 0 | xt 1 | xt -1 )
     internal::find-in-wordlist { word }
     word if
