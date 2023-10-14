@@ -145,6 +145,55 @@ begin-module compat
   \ Fill a buffer with zero bytes.
   : erase ( c-addr u -- ) 0 fill ;
 
+  \ Fill a buffer with spaces.
+  : blank ( c-addr u -- ) bl fill ;
+
+  \ Truncate the first n bytes of a string.
+  : /string ( c-addr u n -- c-addr' u' ) tuck - -rot + swap ;
+
+  \ Remove spaces at the end of a string.
+  : -trailing { c-addr u -- c-addr' u' }
+    begin u 0> while
+      c-addr u 1- + c@ bl <> if
+        c-addr u exit
+      else
+        -1 +to u
+      then
+    repeat
+    c-addr 0
+  ;
+
+  \ Search a string from its start for a second string; if it is found, return
+  \ the remainder of the first string starting from where the second string was
+  \ found along with true; else return the whole first string and false.
+  : search { c-addr1 u1 c-addr2 u2 -- c-addr3 u3 flag }
+    c-addr1 u1 { current-addr current-len }
+    begin current-len u2 >= while
+      current-addr u2 c-addr2 u2 equal-strings? if
+        current-addr current-len true exit
+      else
+        1 +to current-addr
+        -1 +to current-len
+      then
+    repeat
+    c-addr1 u1 false
+  ;
+
+  \ Compile a string literal.
+  : sliteral ( compilation: c-addr1 u -- ) ( runtime: -- c-addr2 u )
+    { c-addr1 u }
+    [immediate]
+    [compile-only]
+    undefer-lit
+    internal::reserve-branch { the-branch }
+    here { start }
+    c-addr1 u + c-addr1 ?do i c@ c, loop
+    2 align,
+    here the-branch internal::branch-back!
+    start lit,
+    u lit,
+  ;
+
   \ Align the current HERE pointer to the next closest cell.
   : align ( -- ) cell align, ;
 
