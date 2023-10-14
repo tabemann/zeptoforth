@@ -90,6 +90,31 @@
 <p>( c-addr u – )</p>
 <p>Fill a buffer with zero bytes.</p>
 </section>
+<section id="blank">
+<h3><code class="docutils literal notranslate"><span class="pre">blank</span></code><a class="headerlink" href="#blank" title="Permalink to this heading">¶</a></h3>
+<p>( c-addr u – )</p>
+<p>Fill a buffer with spaces.</p>
+</section>
+<section id="string">
+<h3><code class="docutils literal notranslate"><span class="pre">/string</span></code><a class="headerlink" href="#string" title="Permalink to this heading">¶</a></h3>
+<p>( c-addr u n – c-addr’ u’ )</p>
+<p>Truncate the first n bytes of a string.</p>
+</section>
+<section id="trailing">
+<h3><code class="docutils literal notranslate"><span class="pre">-trailing</span></code><a class="headerlink" href="#trailing" title="Permalink to this heading">¶</a></h3>
+<p>( c-addr u – c-addr’ u’ )</p>
+<p>Remove spaces at the end of a string.</p>
+</section>
+<section id="search">
+<h3><code class="docutils literal notranslate"><span class="pre">search</span></code><a class="headerlink" href="#search" title="Permalink to this heading">¶</a></h3>
+<p>( c-addr1 u1 c-addr2 u2 – c-addr3 u3 flag )</p>
+<p>Search a string from its start for a second string; if it is found, return the remainder of the first string starting from where the second string was found along with true; else return the whole first string and false.</p>
+</section>
+<section id="sliteral">
+<h3><code class="docutils literal notranslate"><span class="pre">sliteral</span></code><a class="headerlink" href="#sliteral" title="Permalink to this heading">¶</a></h3>
+<p>( compilation: c-addr1 u – ) ( runtime: – c-addr2 u )</p>
+<p>Compile a string literal.</p>
+</section>
 <section id="align">
 <h3><code class="docutils literal notranslate"><span class="pre">align</span></code><a class="headerlink" href="#align" title="Permalink to this heading">¶</a></h3>
 <p>( – )</p>
