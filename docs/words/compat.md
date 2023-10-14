@@ -57,6 +57,31 @@ Compare two strings for both content and length using the numeric values of byte
 
 Fill a buffer with zero bytes.
 
+##### `blank`
+( c-addr u -- )
+
+Fill a buffer with spaces.
+
+##### `/string`
+( c-addr u n -- c-addr' u' )
+
+Truncate the first n bytes of a string.
+
+##### `-trailing`
+( c-addr u -- c-addr' u' )
+
+Remove spaces at the end of a string.
+
+##### `search`
+( c-addr1 u1 c-addr2 u2 -- c-addr3 u3 flag )
+
+Search a string from its start for a second string; if it is found, return the remainder of the first string starting from where the second string was found along with true; else return the whole first string and false.
+
+##### `sliteral`
+( compilation: c-addr1 u -- ) ( runtime: -- c-addr2 u )
+
+Compile a string literal.
+
 ##### `align`
 ( -- )
 
