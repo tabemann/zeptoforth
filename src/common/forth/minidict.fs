@@ -33,27 +33,40 @@ begin-module mini-dict
     ." flash mini-dictionary is out of space" cr
   ;
 
-  \ Hash a counted string
+  \ Our 32-bit FNV-1 prime
+  $01000193 constant FNV-prime
+
+  \ Our 32-bit FNV-1 offset basis
+  $811C9DC5 constant FNV-offset-basis
+  
+  \ A better hash function, 32-bit FNV-1, modified to be case-insensitive
   : hash-string ( c-addr bytes -- hash )
+    FNV-prime
+    FNV-offset-basis
     code[
-    r0 1 dp ldm
-    tos r0 r1 adds_,_,_
+    r0 1 dp ldm \ r0: prime
+    r1 1 dp ldm \ r1: bytes
+    r2 1 dp ldm \ r2: c-addr
     mark>
-    tos r2 movs_,_
-    7 tos tos lsls_,_,#_
-    25 r2 r2 lsrs_,_,#_
-    r2 tos orrs_,_
-    0 r0 r2 ldrb_,[_,#_]
-    $61 r2 cmp_,#_
+    0 r1 cmp_,#_
+    eq bc> 2swap
+    r0 tos muls_,_
+    0 r2 r3 ldrb_,[_,#_]
+
+    \ This code is not part of FNV-1 but to make this case-insensitive
+    $61 r3 cmp_,#_
     lo bc>
-    $7A r2 cmp_,#_
+    $7A r3 cmp_,#_
     hi bc>
-    $20 r2 subs_,#_
+    $20 r3 subs_,#_
     >mark
     >mark
-    r2 tos eors_,_
-    r1 r0 cmp_,_
-    eq bc<
+    
+    r3 tos eors_,_
+    1 r2 adds_,#_
+    1 r1 subs_,#_
+    b<
+    >mark
     ]code
   ;
 
