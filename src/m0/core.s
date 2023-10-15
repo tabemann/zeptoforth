@@ -1344,6 +1344,42 @@ _bit_clear_4:
 	bx lr
 	end_inlined
 
+        @ Load, exclusive-or, and store a byte
+        define_word "cxor!", visible_flag
+_xor_set_1:
+        movs r0, tos
+        pull_tos
+        ldrb r1, [r0]
+        eors r1, tos
+        strb r1, [r0]
+        pull_tos
+        bx lr
+        end_inlined
+
+        @ Load, exclusive-or, and store a halfword
+        define_word "hxor!", visible_flag
+_xor_set_2:
+        movs r0, tos
+        pull_tos
+        ldrh r1, [r0]
+        eors r1, tos
+        strh r1, [r0]
+        pull_tos
+        bx lr
+        end_inlined
+        
+        @ Load, exclusive-or, and store a word
+        define_word "xor!", visible_flag
+_xor_set_4:
+        movs r0, tos
+        pull_tos
+        ldr r1, [r0]
+        eors r1, tos
+        str r1, [r0]
+        pull_tos
+        bx lr
+        end_inlined
+
 	@ Test for bits in a byte
 	define_word "cbit@", visible_flag
 _bit_test_1:
