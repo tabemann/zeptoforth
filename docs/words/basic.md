@@ -1008,6 +1008,11 @@ Set bits on a byte
 
 Clear bits on a byte
 
+##### `cxor!`
+( bits addr -- )
+
+Exclusive-or bits on a byte
+
 ##### `hbis!`
 ( bits addr -- )
 
@@ -1018,6 +1023,11 @@ Set bits on a halfword
 
 Clear bits on a halfword
 
+##### `hxor!`
+( bits addr -- )
+
+Exclusive-or bits on a halfword
+
 ##### `bis!`
 ( bits addr -- )
 
@@ -1027,6 +1037,11 @@ Set bits on a word
 ( bits addr -- )
 
 Clear bits on a word
+
+##### `xor!`
+( bits addr -- )
+
+Exclusive-or bits on a word
 
 ##### `depth`
 ( -- u )
