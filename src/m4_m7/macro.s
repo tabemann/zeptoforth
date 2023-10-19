@@ -165,3 +165,32 @@ dp 	.req r7
 	ldrb tos, [r0]
 	pop {r0}
 	.endm
+
+        @ Clear and set bits on a register
+        .macro clear_set_bits addr, bits_to_clear, bits_to_set
+        ldr r0, =\addr
+        ldr r1, [r0]
+        ldr r2, =\bits_to_clear
+        bics r1, r2
+        ldr r2, =\bits_to_set
+        orrs r1, r2
+        str r1, [r0]
+        .endm
+
+        @ Set bits on a register
+        .macro set_bits addr, bits_to_set
+        ldr r0, =\addr
+        ldr r1, [r0]
+        ldr r2, =\bits_to_set
+        orrs r1, r2
+        str r1, [r0]
+        .endm
+
+        @ Clear bits on a register
+        .macro clear_bits addr, bits_to_clear
+        ldr r0, =\addr
+        ldr r1, [r0]
+        ldr r2, =\bits_to_clear
+        bics r1, r2
+        str r1, [r0]
+        .endm
