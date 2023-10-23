@@ -112,43 +112,46 @@ begin-module uart
     \ USART vector number
     : uart-vector ( usart -- vector ) uart-irq 16 + ;
 
-    $40023800 constant RCC_Base
-    RCC_Base $40 + constant RCC_APB1ENR ( RCC_APB1ENR )
-    RCC_Base $44 + constant RCC_APB2ENR ( RCC_APB2ENR )
-    RCC_Base $60 + constant RCC_APB1LPENR ( RCC_APB1LPENR )
-    RCC_Base $64 + constant RCC_APB2LPENR ( RCC_APB2LPENR )
-    : RCC_APB1ENR_USART2EN 17 bit RCC_APB1ENR bis! ;
-    : RCC_APB1ENR_USART2EN_Clear 17 bit RCC_APB1ENR bic! ;
-    : RCC_APB1ENR_USART3EN 18 bit RCC_APB1ENR bis! ;
-    : RCC_APB1ENR_USART3EN_Clear 18 bit RCC_APB1ENR bic! ;
-    : RCC_APB1ENR_UART4EN 19 bit RCC_APB1ENR bis! ;
-    : RCC_APB1ENR_UART4EN_Clear 19 bit RCC_APB1ENR bic! ;
-    : RCC_APB1ENR_UART5EN 20 bit RCC_APB1ENR bis! ;
-    : RCC_APB1ENR_UART5EN_Clear 20 bit RCC_APB1ENR bic! ;
+    $58024400 constant RCC_Base
+    RCC_Base $E8 + constant RCC_APB1LENR ( RCC_APB1LENR )
+    RCC_Base $F0 + constant RCC_APB2ENR ( RCC_APB2ENR )
+    
+    RCC_Base $110 + constant RCC_APB1LLPENR ( RCC_APB1LLPENR )
+    RCC_Base $118 + constant RCC_APB2LPENR ( RCC_APB2LPENR )
     : RCC_APB2ENR_USART1EN 4 bit RCC_APB2ENR bis! ;
-    : RCC_APB2ENR_USART1EN_Clear 4 RCC_APB2ENR bic! ;
+    : RCC_APB2ENR_USART1EN_Clear 4 bit RCC_APB2ENR bic! ;
+    : RCC_APB1LENR_USART2EN 17 bit RCC_APB1LENR bis! ;
+    : RCC_APB1LENR_USART2EN_Clear 17 bit RCC_APB1LENR bic! ;
+    : RCC_APB1LENR_USART3EN 18 bit RCC_APB1LENR bis! ;
+    : RCC_APB1LENR_USART3EN_Clear 18 bit RCC_APB1LENR bic! ;
+    : RCC_APB1LENR_UART4EN 19 bit RCC_APB1LENR bis! ;
+    : RCC_APB1LENR_UART4EN_Clear 19 bit RCC_APB1LENR bic! ;
+    : RCC_APB1LENR_UART5EN 20 bit RCC_APB1LENR bis! ;
+    : RCC_APB1LENR_UART5EN_Clear 20 bit RCC_APB1LENR bic! ;
     : RCC_APB2ENR_USART6EN 5 bit RCC_APB2ENR bis! ;
-    : RCC_APB2ENR_USART6EN_Clear 5 RCC_APB2ENR bic! ;
-    : RCC_APB1ENR_UART7EN 30 bit RCC_APB1ENR bis! ;
-    : RCC_APB1ENR_UART7EN_Clear 30 bit RCC_APB1ENR bic! ;
-    : RCC_APB1ENR_UART8EN 31 bit RCC_APB1ENR bis! ;
-    : RCC_APB1ENR_UART8EN_Clear 31 bit RCC_APB1ENR bic! ;
-    : RCC_APB1LPENR_USART2LPEN 17 bit RCC_APB1LPENR bis! ;
-    : RCC_APB1LPENR_USART2LPEN_Clear 17 bit RCC_APB1LPENR bic! ;
-    : RCC_APB1LPENR_USART3LPEN 18 bit RCC_APB1LPENR bis! ;
-    : RCC_APB1LPENR_USART3LPEN_Clear 18 bit RCC_APB1LPENR bic! ;
-    : RCC_APB1LPENR_UART4LPEN 19 bit RCC_APB1LPENR bis! ;
-    : RCC_APB1LPENR_UART4LPEN_Clear 19 bit RCC_APB1LPENR bic! ;
-    : RCC_APB1LPENR_UART5LPEN 20 bit RCC_APB1LPENR bis! ;
-    : RCC_APB1LPENR_UART5LPEN_Clear 20 bit RCC_APB1LPENR bic! ;
-    : RCC_APB2LPENR_USART1LPEN 4 bit RCC_APB2LPENR bis! ;
-    : RCC_APB2LPENR_USART1LPEN_Clear 4 RCC_APB2LPENR bic! ;
-    : RCC_APB2LPENR_USART6LPEN 5 bit RCC_APB2LPENR bis! ;
-    : RCC_APB2LPENR_USART6LPEN_Clear 5 RCC_APB2LPENR bic! ;
-    : RCC_APB1LPENR_UART7LPEN 30 bit RCC_APB1LPENR bis! ;
-    : RCC_APB1LPENR_UART7LPEN_Clear 30 bit RCC_APB1LPENR bic! ;
-    : RCC_APB1LPENR_UART8LPEN 31 bit RCC_APB1LPENR bis! ;
-    : RCC_APB1LPENR_UART8LPEN_Clear 31 bit RCC_APB1LPENR bic! ;
+    : RCC_APB2ENR_USART6EN_Clear 5 bit RCC_APB2ENR bic! ;
+    : RCC_APB1LENR_UART7EN 30 bit RCC_APB1LENR bis! ;
+    : RCC_APB1LENR_UART7EN_Clear 30 bit RCC_APB1LENR bic! ;
+    : RCC_APB1LENR_UART8EN 31 bit RCC_APB1LENR bis! ;
+    : RCC_APB1LENR_UART8EN_Clear 31 bit RCC_APB1LENR bic! ;
+
+    : RCC_APB2LPENR_USART1EN 4 bit RCC_APB2LPENR bis! ;
+    : RCC_APB2LPENR_USART1EN_Clear 4 bit RCC_APB2LPENR bic! ;
+    : RCC_APB1LLPENR_USART2EN 17 bit RCC_APB1LLPENR bis! ;
+    : RCC_APB1LLPENR_USART2EN_Clear 17 bit RCC_APB1LLPENR bic! ;
+    : RCC_APB1LLPENR_USART3EN 18 bit RCC_APB1LLPENR bis! ;
+    : RCC_APB1LLPENR_USART3EN_Clear 18 bit RCC_APB1LLPENR bic! ;
+    : RCC_APB1LLPENR_UART4EN 19 bit RCC_APB1LLPENR bis! ;
+    : RCC_APB1LLPENR_UART4EN_Clear 19 bit RCC_APB1LLPENR bic! ;
+    : RCC_APB1LLPENR_UART5EN 20 bit RCC_APB1LLPENR bis! ;
+    : RCC_APB1LLPENR_UART5EN_Clear 20 bit RCC_APB1LLPENR bic! ;
+    : RCC_APB2LPENR_USART6EN 5 bit RCC_APB2LPENR bis! ;
+    : RCC_APB2LPENR_USART6EN_Clear 5 bit RCC_APB2LPENR bic! ;
+    : RCC_APB1LLPENR_UART7EN 30 bit RCC_APB1LLPENR bis! ;
+    : RCC_APB1LLPENR_UART7EN_Clear 30 bit RCC_APB1LLPENR bic! ;
+    : RCC_APB1LLPENR_UART8EN 31 bit RCC_APB1LLPENR bis! ;
+    : RCC_APB1LLPENR_UART8EN_Clear 31 bit RCC_APB1LLPENR bic! ;
+
     : USART_CR1_TXEIE   %1 7 lshift swap USART_CR1 bis! ;  \ USART_CR1_TXEIE    interrupt enable
     : USART_CR1_RXNEIE   %1 5 lshift swap USART_CR1 bis! ;  \ USART_CR1_RXNEIE    RXNE interrupt enable
     : USART_CR1_TXEIE_Clear   %1 7 lshift swap USART_CR1 bic! ;  \ USART_CR1_TXEIE    interrupt disable
@@ -482,8 +485,8 @@ begin-module uart
       3 of 7 endof
       4 of 8 endof
       5 of 8 endof
-      6 of 8 endof
-      7 of 8 endof
+      6 of 7 endof
+      7 of 7 endof
       8 of 8 endof
     endcase
   ;
@@ -711,12 +714,13 @@ begin-module uart
   
   \ Set a pin to be a UART pin
   : uart-pin ( uart pin -- )
-    over 5 = if
-      dup 8 xc = over 9 xc = or if nip 7 else swap uart-alternate then
-    else
-      swap uart-alternate
+    over 4 = if
+      dup 11 xa = over 12 xa = or if nip 6 swap alternate-pin exit then
     then
-    swap alternate-pin
+    over 1 = if
+      dup 14 xb = over 15 xb = or if nip 4 swap alternate-pin exit then
+    then
+    swap uart-alternate swap alternate-pin
   ;
   
   continue-module uart-internal

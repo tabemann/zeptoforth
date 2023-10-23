@@ -31,15 +31,15 @@
 	.equ VTOR, 0xE000ED08
 	.equ VTOR_value, vector_table
 	.equ flash_buffers_top, stack_top - stack_size
-	.equ flash_block_size, 1 @ in bytes
-	.equ flash_buffer_count, 0
-	.equ flash_buffer_size, 0
-	.equ flash_buffer_space, 0
-	.equ flash_buffer_addr, 0
-	.equ flash_min_address, 0x00208000
-	.equ flash_start, 0x00200000
-	.equ flash_dict_start, 0x00208000
-	.equ flash_dict_end, 0x00300000
+	.equ flash_block_size, 32 @ in bytes
+	.equ flash_buffer_count, 32
+	.equ flash_buffer_size, flash_block_size + 8
+	.equ flash_buffer_space, flash_block_size
+	.equ flash_buffer_addr, flash_block_size + 4
+	.equ flash_min_address, 0x08008000
+	.equ flash_start, 0x08000000
+	.equ flash_dict_start, 0x08008000
+	.equ flash_dict_end, 0x08200000
 	.equ input_buffer_size, 255
 	.equ pad_offset, 128
 	.equ flash_mini_dict_size, 0 @ in bytes

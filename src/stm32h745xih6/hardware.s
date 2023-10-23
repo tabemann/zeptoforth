@@ -88,6 +88,10 @@
 	.equ RCC_AHB4ENR, RCC_BASE + 0xE0
 	.equ RCC_APB1ENR, RCC_BASE + 0xE8
 	.equ RCC_APB2ENR, RCC_BASE + 0xF0
+        .equ RCC_APB1LLPENR, RCC_BASE + 0x110
+
+        .equ RCC_APB1ENR_USART3EN, 1 << 18
+        .equ RCC_APB1LLPENR_USART3LPEN, 1 << 18
 
         .equ RCC_CR_HSEON, 1 << 16
         .equ RCC_CR_HSERDY, 1 << 17
@@ -175,13 +179,14 @@
         .equ CONSOLE_RDR, CONSOLE_USART_Base + 0x24
         .equ CONSOLE_TDR, CONSOLE_USART_Base + 0x28
 
+        .equ USART_CR1_FIFOEN, 1 << 29
         .equ USART_CR1_UE, 1 << 0
         .equ USART_CR1_TE, 1 << 3
         .equ USART_CR1_RE, 1 << 2
 
-        .equ USART_ISR_RXNE, 1 << 5
+        .equ USART_ISR_RXFNE, 1 << 5
         .equ USART_ISR_TC, 1 << 6
-        .equ USART_ISR_TXE, 1 << 7
+        .equ USART_ISR_TXFNF, 1 << 7
 
         .equ USART_CR3_OVRDIS, 1 << 12
         

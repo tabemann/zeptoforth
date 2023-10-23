@@ -44,7 +44,8 @@ _config_af_pd8_pd9:
 
         @ Enable the USART3 clock
 _enable_usart3_clock:
-        set_bits RCC_APB1ENR, 0x00040000
+        set_bits RCC_APB1ENR, RCC_APB1ENR_USART3EN
+        set_bits RCC_APB1LLPENR, RCC_APB1LLPENR_USART3LPEN
         bx lr
         end_inlined
 
@@ -54,6 +55,7 @@ _config_console_usart:
         ldr r1, =0x22C @ (64000000 + (115200 / 2)) / 115200
         str r1, [r0]
         set_bits Console_CR3, USART_CR3_OVDIS
+        set_bits Console_CR1, USART_CR1_FIFOEN
         set_bits Console_CR1, (USART_CR1_UE | USART_CR1_TE | USART_CR1_RE)
         bx lr
         end_inlined
@@ -114,7 +116,7 @@ _serial_emit_q:
 	movs tos, #0
 	ldr r0, =CONSOLE_ISR
 	ldr r1, [r0]
-	movs r0, #USART_ISR_TXE
+	movs r0, #USART_ISR_TXFNF
 	ands r1, r0
 	beq 1f
 	movs tos, #-1
@@ -130,7 +132,7 @@ _serial_key_q:
 	movs tos, #0
 	ldr r0, =CONSOLE_ISR
 	ldr r1, [r0]
-	movs r0, #USART_ISR_RXNE
+	movs r0, #USART_ISR_RXFNE
 	ands r1, r0
 	beq 1f
 	movs tos, #-1

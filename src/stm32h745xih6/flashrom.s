@@ -17,20 +17,40 @@
 @ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 @ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 @ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-@ SOFTWARE.
+        @ SOFTWARE.
+
+        .equ FLASH_Bank2_Base, 0x08100000 @ Base address of bank 2 of flash
+        .equ FLASH_Sector_Mask, 0x000F0000 @ Mask for flash sector
+        .equ FLASH_Sector_Shift, 16
 
 	.equ FLASH_Base, 0x40022000	      @ Base address
 	.equ FLASH_ACR, FLASH_Base + 0x00     @ Access control register
-	.equ FLASH_PDKEYR, FLASH_Base + 0x04  @ Power-down key register
-	.equ FLASH_KEYR, FLASH_Base + 0x08    @ Key register
-	.equ FLASH_OPTKEYR, FLASH_Base + 0x0C @	Option key register
-	.equ FLASH_SR, FLASH_Base + 0x10      @ Status register
-	.equ FLASH_CR, FLASH_Base + 0x14      @ Control register
-	.equ FLASH_ECCR, FLASH_Base + 0x18    @ ECC register
-	.equ FLASH_PCROP1SR, FLASH_Base + 0x1C @ B1 PCROP start address register
-	.equ FLASH_OPTR, FLASH_Base + 0x20    @ Option register
-	
+	.equ FLASH_KEYR1, FLASH_Base + 0x04   @ Key register
+	.equ FLASH_OPTKEYR, FLASH_Base + 0x08 @	Option key register
+	.equ FLASH_CR1, FLASH_Base + 0x0C     @ Control register
+	.equ FLASH_SR1, FLASH_Base + 0x10     @ Status register
+	.equ FLASH_OPTCR, FLASH_Base + 0x18   @ Option Control register
+
+        .equ FLASH_KEYR2, FLASH_Base + 0x104
+        .equ FLASH_CR2, FLASH_Base + 0x10C
+        .equ FLASH_SR1, FLASH_Base + 0x110
+
+        .equ FLASH_KEY1, 0x45670123
+        .equ FLASH_KEY2, 0xCDEF89AB
+        .equ FLASH_OPTKEY1, 0x08192A3B
+        .equ FLASH_OPTKEY2, 0x4C5D6E7F
+
+        .equ FLASH_CR_SNB_Shift, 8
+        .equ FLASH_CR_SNB_Mask, 7 << FLASH_SNB_Shift
+        .equ FLASH_CR_START, 1 << 7
+        .equ FLASH_CR_SER, 1 << 2
+        .equ FLASH_CR_PG, 1 << 1
+        .equ FLASH_CR_LOCK, 1 << 0
+
+        .equ FLASH_SR_QW, 1 << 2
+
 	@@ Write 32 bytes starting at a 16-bit-aligned address in flash
+        @@ ( data-addr addr -- )
 	define_internal_word "32flash!", visible_flag
 _store_flash_32:
 	push {lr}
@@ -44,117 +64,191 @@ _store_flash_32:
 	blt 1f
 	ldr tos, =_attempted_to_write_past_flash_end
 	bl _raise
-1:	tst tos, #0xf
+1:	tst tos, #0x1f
 	beq 1f
-	ldr tos, =_store_flash_16_unaligned
+	ldr tos, =_store_flash_32_unaligned
 	bl _raise
 1:	ldr r0, [tos]
 	adds r0, #1
 	beq 1f
-	ldr tos, =_store_flash_16_already_written
+	ldr tos, =_store_flash_32_already_written
 	bl _raise
 1:	ldr r0, [tos, #0x04]
 	adds r0, #1
 	beq 1f
-	ldr tos, =_store_flash_16_already_written
+	ldr tos, =_store_flash_32_already_written
 	bl _raise
 1:	ldr r0, [tos, #0x08]
 	adds r0, #1
 	beq 1f
-	ldr tos, =_store_flash_16_already_written
+	ldr tos, =_store_flash_32_already_written
 	bl _raise
 1:	ldr r0, [tos, #0x0c]
 	adds r0, #1
 	beq 1f
-	ldr tos, =_store_flash_16_already_written
+	ldr tos, =_store_flash_32_already_written
 	bl _raise
 1:	ldr r0, [tosm #0x10]
 	adds r0, #1
 	beq 1f
-	ldr tos, =_store_flash_16_already_written
+	ldr tos, =_store_flash_32_already_written
 	bl _raise
 1:	ldr r0, [tos, #0x14]
 	adds r0, #1
 	beq 1f
-	ldr tos, =_store_flash_16_already_written
+	ldr tos, =_store_flash_32_already_written
 	bl _raise
 1:	ldr r0, [tos, #0x18]
 	adds r0, #1
 	beq 1f
-	ldr tos, =_store_flash_16_already_written
+	ldr tos, =_store_flash_32_already_written
 	bl _raise
 1:	ldr r0, [tos, #0x1c]
 	adds r0, #1
 	beq 1f
-	ldr tos, =_store_flash_16_already_written
+	ldr tos, =_store_flash_32_already_written
 	bl _raise
-@1:	ldr r0, =flash_here
-@	ldr r1, [r0]
-@	cmp tos, r1
-@	bls 1f
-@	movs r1, tos
-@	adds r1, #16
-@	str r1, [r0]
-1:	ldr r0, =0x08000000
-	adds tos, tos, r0
-	cpsid i
-	@@ Flash needs to be unlocked
-	ldr r0, =FLASH_KEYR
-	ldr r1, =0x45670123
-	str r1, [r0]
-	ldr r1, =0xCDEF89AB
-	str r1, [r0]
-	@@ Enable writing to the flash
-	ldr r0, =FLASH_CR
-	movs r1, #0x01
-	str r1, [r0]
+
+1:      cpsid i
+        bl _disable_caches
+
+        push_tos
+        bl _unlock_flash
+
+        push_tos
+        bl _enable_flash
+
 	@@ Write the flash
-	ldr r3, [dp, #0]
-	ldr r2, [dp, #4]
-	ldr r1, [dp, #8]
-	ldr r0, [dp, #12]
-	adds dp, #16
-	str r0, [tos, #0]
-	str r1, [tos, #4]
-	push {r0, r1, r2, r3}
-	bl wait_for_flash
-	pop {r0, r1, r2, r3}
-	str r2, [tos, #8]
-	str r3, [tos, #12]
-	push {r0, r1, r2, r3}
-	bl wait_for_flash
-	pop {r0, r1, r2, r3}
-	@@ Disable writing to the flash
-	ldr r0, =FLASH_CR
-	ldrh r1, [r0]
-	movs r2, #1
-	bics r1, r2
-	strh r1, [r0]
-	ldr r1, [r0]
-	ldr r2, =0x80000000
-	orrs r1, r2
-	str r1, [r0]
-	@@ Get the next value on the stack to put in the TOS
-	pull_tos
+        ldm dp!, {r0}
+        ldr r1, [r0, #0x00]
+        str r1, [tos, #0x00]
+        ldr r1, [r0, #0x04]
+        str r1, [tos, #0x04]
+        ldr r1, [r0, #0x08]
+        str r1, [tos, #0x08]
+        ldr r1, [r0, #0x0C]
+        str r1, [tos, #0x0C]
+        ldr r1, [r0, #0x10]
+        str r1, [tos, #0x10]
+        ldr r1, [r0, #0x14]
+        str r1, [tos, #0x14]
+        ldr r1, [r0, #0x18]
+        str r1, [tos, #0x18]
+        ldr r1, [r0, #0x1C]
+        str r1, [tos, #0x1C]
+
+        push_tos
+	bl _wait_for_flash
+
+        push_tos
+        bl _disable_flash
+
+        bl _lock_flash
+
+        bl _invalidate_instr_cache
+        bl _invalidate_data_cache
+        bl _enable_caches
 	cpsie i
+        
 	pop {pc}
 	end_inlined
 
+        @@ Enable writing to flash
+        @@ ( base-addr -- )
+_enable_flash:   
+        ldr r3, =FLASH_Bank2_Base
+        cmp tos, r3
+        blo 2f
+        ldr r0, =FLASH_CR2
+2:      ldr r0, =FLASH_CR1
+        ldr r1, [r0]
+        movs r2, #FLASH_CR_PG
+        orrs r1, r2
+        str r1, [r0]
+        pull_tos
+        bx lr
+
+        @@ Disable writing to flash
+        @@ ( base-addr -- )
+_disable_flash:   
+        ldr r3, =FLASH_Bank2_Base
+        cmp tos, r3
+        blo 2f
+        ldr r0, =FLASH_CR2
+2:      ldr r0, =FLASH_CR1
+        ldr r1, [r0]
+        movs r2, #FLASH_CR_PG
+        bics r1, r2
+        str r1, [r0]
+        pull_tos
+        bx lr
+
+        @@ Unlock flash
+        @@ ( base-addr -- )
+_unlock_flash:
+        ldr r3, =FLASH_Bank2_Base
+        cmp tos, r3
+        blo 2f
+        ldr r0, =FLASH_CR2
+2:      ldr r0, =FLASH_CR1
+        ldr r1, [r0]
+        movs r2, #FLASH_CR_LOCK
+        tst r1, r2
+        bne 3f
+        pull_tos
+        bx lr
+3:      cmp tos, r3
+        blo 1f
+        ldr r0, =FLASH_KEYR2
+1:      ldr r0, =FLASH_KEYR1
+        pull_tos
+	ldr r1, =FLASH_KEY1
+	str r1, [r0]
+	ldr r1, =FLASH_KEY2
+	str r1, [r0]
+        bx lr
+        end_inlined
+        
+        @@ Lock flash
+        @@ ( base-addr -- )
+_lock_flash:   
+        ldr r3, =FLASH_Bank2_Base
+        cmp tos, r3
+        blo 2f
+        ldr r0, =FLASH_CR2
+2:      ldr r0, =FLASH_CR1
+        ldr r1, [r0]
+        movs r2, #FLASH_CR_LOCK
+        orrs r1, r2
+        str r1, [r0]
+        pull_tos
+        bx lr
+        end_inlined
+
 	@@ Wait for flash opeartions to complete
-wait_for_flash:
-1:	ldr r0, =FLASH_SR+2
-	ldrh r1, [r0]
-	movs r2, #0x01
-	ands r1, r2
-	bne 1b
-	bx lr
+        @@ ( base-addr -- )
+_wait_for_flash:
+        ldr r3, =FLASH_Bank2_Base
+        cmp tos, r3
+        blo 2f
+        ldr r0, =FLASH_SR2
+2:      ldr r0, =FLASH_SR1
+        pull_tos
+        movs r2, #FLASH_SR_QW
+1:      ldr r1, [r0]
+        tst r1, r2
+        beq 1b
+2:      ldr r1, [r0]
+        tst r1, r2
+        bne 2b
+        bx lr
 	end_inlined
 	
-	@@ Exception handler for unaligned 16-byte flash writes
-	define_internal_word "16flash!-unaligned", visible_flag
-_store_flash_16_unaligned:
+	@@ Exception handler for unaligned 32-byte flash writes
+	define_internal_word "32flash!-unaligned", visible_flag
+_store_flash_32_unaligned:
 	push {lr}
-	string_ln "unaligned 16-byte flash write"
+	string_ln "unaligned 32-byte flash write"
 	bl _type
 	pop {pc}
 	end_inlined
@@ -162,91 +256,65 @@ _store_flash_16_unaligned:
 	@@ Exception handler for flash writes where flash has already been
 	@@ written
 	define_word "x-flash-already-written", visible_flag
-_store_flash_16_already_written:
+_store_flash_32_already_written:
 	push {lr}
 	string_ln "flash already written"
 	bl _type
 	pop {pc}
 	end_inlined
 	
-	@@ Delete a 2K page of flash
+	@@ Delete a 128K page of flash
 	define_internal_word "erase-page", visible_flag
 _erase_page:	
 	push {lr}
 	
-	movs r0, tos
-	pull_tos
-
 	@@ Protect the zeptoforth runtime!
 	ldr r1, =flash_min_address
-	cmp r0, r1
+	cmp tos, r1
 	blo 2f
 	ldr r1, =flash_dict_end
-	cmp r0, r1
+	cmp tos, r1
 	bhs 2f
 
-  	ldr r2, =FLASH_KEYR
-	ldr r3, =0x45670123
-	str r3, [r2]
-	ldr r3, =0xCDEF89AB
-	str r3, [r2]
+        cpsid i
+        bl _disable_caches
+
+        push_tos
+        bl _unlock_flash
+
+        ldr r1, =FLASH_Bank2_Base
+        cmp tos, r1
+        blo 1f
+
+        ldr r2, =FLASH_CR2
+1:      ldr r2, =FLASH_CR1
+
+        @ Configure sector erase and the target sector number
+        ldr r1, [r2]
+        ldr r3, =FLASH_CR_SNB_Mask
+        bics r1, r3
+        ldr r3, =FLASH_Sector_Mask
+        ands r3, r0
+        lsrs r3, r3, #FLASH_Sector_Shift - FLASH_CR_SNB_Shift
+        orrs r1, r3
+        ldr r3, =FLASH_CR_SER
+        orrs r1, r3
+        str r1, [r2]
+
+        @ Start erasing
+        ldr r3, =FLASH_CR_START
+        orrs r1, r3
+        str r1, [r2]
+
+        push_tos
+        bl _wait_for_flash
+
+        bl _lock_flash
 	
-	@ Enable erase
-	ldr r2, =FLASH_CR
-	movs r3, #2 @ Set Erase bit
-	str r3, [r2]
-	
-	@ page size 2048 byte
-	@ bit 10:0 byte address
-	@ bit 18:11 page number
-	@ bit 19 bank number
-	@ Set page to erase
-	@ shift down bits 19:11 -> bit 11:3
-	movs r1, #11-3
-	lsrs r0, r1      @ shift down bankNr and address address to BKER, PNB[7:0]
-	ldr r2, =0xFF8   @ bank and page mask
-	ands r0, r2      @ mask out other bits
-	movs r1 ,#2
-	orrs r0, r1      @ select page erase  
-	ldr r2, =FLASH_CR
-	strh r0, [r2]    @ write page and erase page
-	
-	@ start erasing
-	movs r0,#1     @ select start
-	ldr r2, =FLASH_CR+2 
-	strh r0, [r2]  @ start page erase
-	
-	@ Wait for Flash BUSY Flag to be cleared
-	ldr r2, =FLASH_SR+2
-1:	ldrh r3, [r2]
-	movs r0, #1
-	ands r0, r3
-	bne 1b
-	
-	@ Lock Flash after finishing this
-	ldr r2, =FLASH_CR + 3
-	movs r3, #0x80
-	strb r3, [r2]
-	
-	@ clear cache
-	@ save old cache settings
-	ldr r2, =FLASH_ACR
-	ldr r1, [r2]
-	push {r1}
-	
-	@ turn cache off
-	ldr r0,=0x600
-	bics r1, r0
-	str r1, [r2]
-	
-	@ reset cache
-	ldr r0, =0x1800
-	orrs r1, r0
-	str r1, [r2]
-	
-	@ restore flash settings
-	pop {r1}  
-	str r1, [r2]
+        bl _invalidate_instr_cache
+        bl _invalidate_data_cache
+        bl _enable_caches
+        cpsie i
 
 2:	pop {pc}
 	end_inlined
@@ -274,23 +342,30 @@ _attempted_to_write_past_flash_end:
 	define_internal_word "erase-after", visible_flag
 _erase_after:
 	push {lr}
-	movs r0, tos
-	pull_tos
+        movs r0, #0
 	ldr r1, =flash_dict_end
-	ldr r2, =0xFFFF
+	ldr r2, =0xFFFFFFFF
 	cpsid i
-1:	ldrh r3, [r0]
-	cmp r3, r2
-	beq 2f
-	push_tos
-	movs tos, r0
-	push {r0, r1, r2}
-	bl _erase_page
-	pop {r0, r1, r2}
-2:	adds r0, #2
-	cmp r0, r1
-	bne 1b
-	bl _reboot
+1:      ldr r3, [tos, r0]
+        cmp r3, r2
+        bne 2f
+        adds r0, r0, #4
+        ldr r3, =0x20000
+        cmp r0, r3
+        blo 1b
+        adds tos, r0
+        cmp tos, r1
+        bne 1b
+        b 3f
+2:      push_tos
+        push {r1, r2, r3}
+        bl _erase_page
+        pop {r1, r2, r3}
+        adds tos, r3
+        cmp tos, r1
+        bne 1b
+3:      pull_tos
+        bl _reboot
 	pop {pc}
 	end_inlined
 
@@ -331,7 +406,7 @@ _find_flash_end:
 	@@ Find the next flash block
 	define_internal_word "next-flash-block", visible_flag
 _next_flash_block:
-	movs r0, #0xF
+	movs r0, #0x1F
 	bics tos, r0
 	movs r0, #0x10
 	adds tos, tos, r0
@@ -368,6 +443,10 @@ _init_flash_buffers:
 	str r1, [r0], #4
 	str r1, [r0], #4
 	str r1, [r0], #4
+1:	str r1, [r0], #4
+	str r1, [r0], #4
+	str r1, [r0], #4
+	str r1, [r0], #4
 	str r1, [r0], #4
 	str r1, [r0], #4
 	cmp r0, r2
@@ -400,13 +479,17 @@ _get_free_flash_buffer:
 	bne 1b
 	ldr tos, =_no_flash_buffers_free
 	bl _raise
-2:	ldr r2, =0xF
+2:	ldr r2, =0x1F
 	bics tos, r2
-	movs r2, #16
+	movs r2, #32
 	str tos, [r0, #flash_buffer_addr]
 	movs tos, r0
         movs r1, #0
         mvns r1, r1
+	str r1, [r0], #4
+	str r1, [r0], #4
+	str r1, [r0], #4
+	str r1, [r0], #4
 	str r1, [r0], #4
 	str r1, [r0], #4
 	str r1, [r0], #4
@@ -421,14 +504,14 @@ _get_free_flash_buffer:
 _get_flash_buffer_value_1:
 	ldr r0, =flash_buffers_start
 	ldr r1, =flash_buffers_start + (flash_buffer_size * flash_buffer_count)
-	movs r2, #0xF
+	movs r2, #0x1F
         movs r3, tos
 	bics tos, r2
         movs r2, r3
 1:	ldr r3, [r0, #flash_block_size]
         cmp r3, #0
         beq 3f
-        cmp r3, #16
+        cmp r3, #32
         beq 3f
         ldr r3, [r0, #flash_buffer_addr]
 	cmp tos, r3
@@ -438,7 +521,7 @@ _get_flash_buffer_value_1:
 	bne 1b
 	ldrb tos, [r2]
         bx lr
-2:      movs r3, #0xF
+2:      movs r3, #0x1F
         ands r2, r3
         ldrb tos, [r0, r2]
         bx lr
@@ -450,14 +533,14 @@ _get_flash_buffer_value_1:
 _get_flash_buffer_value_2:
 	ldr r0, =flash_buffers_start
 	ldr r1, =flash_buffers_start + (flash_buffer_size * flash_buffer_count)
-	movs r2, #0xF
+	movs r2, #0x1F
         movs r3, tos
 	bics tos, r2
         movs r2, r3
 1:	ldr r3, [r0, #flash_block_size]
         cmp r3, #0
         beq 3f
-        cmp r3, #16
+        cmp r3, #32
         beq 3f
         ldr r3, [r0, #flash_buffer_addr]
 	cmp tos, r3
@@ -467,7 +550,7 @@ _get_flash_buffer_value_2:
 	bne 1b
 	ldrh tos, [r2]
         bx lr
-2:      movs r3, #0xF
+2:      movs r3, #0x1F
         ands r2, r3
         ldrh tos, [r0, r2]
         bx lr
@@ -479,14 +562,14 @@ _get_flash_buffer_value_2:
 _get_flash_buffer_value_4:
 	ldr r0, =flash_buffers_start
 	ldr r1, =flash_buffers_start + (flash_buffer_size * flash_buffer_count)
-	movs r2, #0xF
+	movs r2, #0x1F
         movs r3, tos
 	bics tos, r2
         movs r2, r3
 1:	ldr r3, [r0, #flash_block_size]
         cmp r3, #0
         beq 3f
-        cmp r3, #16
+        cmp r3, #32
         beq 3f
         ldr r3, [r0, #flash_buffer_addr]
 	cmp tos, r3
@@ -496,7 +579,7 @@ _get_flash_buffer_value_4:
 	bne 1b
 	ldr tos, [r2]
         bx lr
-2:      movs r3, #0xF
+2:      movs r3, #0x1F
         ands r2, r3
         ldr tos, [r0, r2]
         bx lr
@@ -615,17 +698,9 @@ _store_flash_8:
 	define_internal_word "store-flash-buffer", visible_flag
 _store_flash_buffer:
 	push {lr}
-	movs r0, tos
-	ldr tos, [r0]
-	push_tos
-	ldr tos, [r0, #4]
-	push_tos
-	ldr tos, [r0, #8]
-	push_tos
-	ldr tos, [r0, #12]
 	push_tos
 	ldr tos, [r0, #flash_buffer_addr]
-	bl _store_flash_16
+	bl _store_flash_32
 	pop {pc}
 	end_inlined
 
@@ -635,7 +710,7 @@ _flush_flash:
 	push {lr}
 	bl _get_flash_buffer
 	ldr r0, [tos, #flash_buffer_space]
-	cmp r0, #16
+	cmp r0, #32
 	beq 1f
 	cmp r0, #0
 	beq 1f
@@ -665,12 +740,12 @@ _flush_all_flash:
 2:	pop {pc}
 	end_inlined
 
-	@@ Fill flash until it is aligned to a 16-byte block
+	@@ Fill flash until it is aligned to a 32-byte block
 	define_word "flash-block-align,", visible_flag
 _flash_block_align:
 	push {lr}
 1:	bl _flash_here
-	tst tos, #0xF
+	tst tos, #0x1F
 	beq 2f
 	movs tos, #0
 	bl _flash_comma_1

@@ -53,19 +53,19 @@ begin-module int-io
     \ Tx buffer
     tx-buffer-size buffer: tx-buffer
 
-    \ USART1
-    $40011000 constant USART1_Base
-    USART1_Base $00 + constant USART1_CR1
-    USART1_Base $1C + constant USART1_ISR
-    USART1_Base $20 + constant USART1_ICR ( Interrupt flag clear register ) 
-    USART1_Base $24 + constant USART1_RDR
-    USART1_Base $28 + constant USART1_TDR
+    \ USART3
+    $40004800 constant USART3_Base
+    USART3_Base $00 + constant USART3_CR1
+    USART3_Base $1C + constant USART3_ISR
+    USART3_Base $20 + constant USART3_ICR ( Interrupt flag clear register ) 
+    USART3_Base $24 + constant USART3_RDR
+    USART3_Base $28 + constant USART3_TDR
 
-    \ USART1 IRQ number
-    37 constant usart1-irq
+    \ USART3 IRQ number
+    39 constant usart3-irq
     
-    \ USART1 vector index
-    usart1-irq 16 + constant usart1-vector
+    \ USART3 vector index
+    usart3-irq 16 + constant usart3-vector
 
     \ Control-C
     $03 constant ctrl-c
@@ -73,19 +73,17 @@ begin-module int-io
     \ Control-T
     $14 constant ctrl-t
 
-    $40023800 constant RCC_Base
+    $58024400 constant RCC_Base
     RCC_Base $64 + constant RCC_APB2LPENR ( RCC_APB2LPENR )
-    : RCC_APB2LPENR_USART1LPEN   %1 4 lshift RCC_APB2LPENR bis! ;  \ RCC_APB2LPENR_USART1LPEN    USART1 clocks enable during Sleep modes
-    : RCC_APB2LPENR_USART1LPEN_Clear   %1 4 lshift RCC_APB2LPENR bic! ;  \ RCC_APB2LPENR_USART1LPEN    USART1 clocks enable during Sleep modes
-    : USART1_CR1_TXEIE   %1 7 lshift USART1_CR1 bis! ;  \ USART1_CR1_TXEIE    interrupt enable
-    : USART1_CR1_RXNEIE   %1 5 lshift USART1_CR1 bis! ;  \ USART1_CR1_RXNEIE    RXNE interrupt enable
-    : USART1_CR1_TXEIE_Clear   %1 7 lshift USART1_CR1 bic! ;  \ USART1_CR1_TXEIE    interrupt disable
-    : USART1_CR1_RXNEIE_Clear   %1 5 lshift USART1_CR1 bic! ;  \ USART1_CR1_RXNEIE    RXNE interrupt enable
-    : USART1_ICR_ORECF %1 3 lshift USART1_ICR bis! ; ( Overrun error clear flag )  
+    : USART3_CR1_TXFNFIE   %1 7 lshift USART3_CR1 bis! ;  \ USART3_CR1_TXFNEIE    interrupt enable
+    : USART3_CR1_RXFNEIE   %1 5 lshift USART3_CR1 bis! ;  \ USART3_CR1_RXNEIE    RXNE interrupt enable
+    : USART3_CR1_TXFNFIE_Clear   %1 7 lshift USART3_CR1 bic! ;  \ USART3_CR1_TXFNEIE    interrupt disable
+    : USART3_CR1_RXFNEIE_Clear   %1 5 lshift USART3_CR1 bic! ;  \ USART3_CR1_RXNEIE    RXNE interrupt enable
+    : USART3_ICR_ORECF %1 3 lshift USART3_ICR bis! ; ( Overrun error clear flag )  
 
-    $20 constant RXNE
-    $80 constant TXE
-    $08 constant ORE
+    %1 5 lshift constant RXFNE
+    %1 7 lshift constant TXFNE
+    %1 3 lshift constant ORE
 
     \ Get whether the rx buffer is full
     : rx-full? ( -- f )
@@ -161,8 +159,8 @@ begin-module int-io
     : handle-io ( -- )
       begin
 	rx-full? not if
-	  USART1_ISR @ RXNE and if
-            USART1_RDR c@
+	  USART3_ISR @ RXFNE and if
+            USART3_RDR c@
             uart-special-enabled @ if
               dup ctrl-c = if
                 drop reboot false
@@ -188,12 +186,12 @@ begin-module int-io
 	then
       until
       rx-full? if
-	USART1_CR1_RXNEIE_Clear
+	USART3_CR1_RXFNEIE_Clear
       then
       begin
 	tx-empty? not if
-	  USART1_ISR @ TXE and if
-	    read-tx USART1_TDR c! false
+	  USART3_ISR @ TXFNE and if
+	    read-tx USART3_TDR c! false
 	  else
 	    true
 	  then
@@ -202,12 +200,12 @@ begin-module int-io
 	then
       until
       tx-empty? if
-	USART1_CR1_TXEIE_Clear
+	USART3_CR1_TXFNEIE_Clear
       then
-      USART1_ISR @ ORE and if
-	USART1_ICR_ORECF
+      USART3_ISR @ ORE and if
+	USART3_ICR_ORECF
       then
-      usart1-irq NVIC_ICPR_CLRPEND!
+      usart3-irq NVIC_ICPR_CLRPEND!
       wake
     ;
 
@@ -216,11 +214,11 @@ begin-module int-io
     : do-emit ( c -- )
       [: tx-full? not ;] wait
       write-tx
-      USART1_CR1_TXEIE
+      USART3_CR1_TXFNEIE
     ; 
 
     : do-key ( -- c )
-      USART1_CR1_RXNEIE
+      USART3_CR1_RXFNEIE
       [: rx-empty? not ;] wait
       read-rx
     ;
@@ -234,7 +232,7 @@ begin-module int-io
     ;
 
     : do-flush-console ( -- )
-      [: tx-empty? TXE USART1_ISR bit@ and ;] wait
+      [: tx-empty? TXFNE USART3_ISR bit@ and ;] wait
     ;
 
   end-module> import
@@ -258,12 +256,12 @@ begin-module int-io
   \ Enable interrupt-driven IO
   : enable-int-io ( -- )
     disable-int
-    0 usart1-irq NVIC_IPR_IP!
-    ['] handle-io usart1-vector vector!
+    0 usart3-irq NVIC_IPR_IP!
+    ['] handle-io usart3-vector vector!
     serial-console
-    RCC_APB2LPENR_USART1LPEN
-    usart1-irq NVIC_ISER_SETENA!
-    USART1_CR1_RXNEIE
+    RCC_APB2LPENR_USART3LPEN
+    usart3-irq NVIC_ISER_SETENA!
+    USART3_CR1_RXFNEIE
     enable-int
   ;
 
@@ -275,11 +273,10 @@ begin-module int-io
     ['] serial-key? key?-hook !
     ['] serial-emit? emit?-hook !
     0 flush-console-hook !
-    ['] handle-null usart1-vector vector!
-    USART1_CR1_RXNEIE_Clear
-    USART1_CR1_TXEIE_Clear
-    usart1-irq NVIC_ICER_CLRENA!
-    RCC_APB2LPENR_USART1LPEN_Clear
+    ['] handle-null usart3-vector vector!
+    USART3_CR1_RXFNEIE_Clear
+    USART3_CR1_TXFNEIE_Clear
+    usart3-irq NVIC_ICER_CLRENA!
     enable-int
   ;
 
