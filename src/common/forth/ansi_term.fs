@@ -233,6 +233,16 @@ begin-module ansi-term
   
 end-module
 
+commit-flash
+
+\ Clear the console
+: page ( -- )
+  [:
+    ansi-term::csi [char] 2 emit [char] J emit
+    ansi-term::csi [char] H emit
+  ;] critical
+;
+
 end-compress-flash
 
 \ Reboot
