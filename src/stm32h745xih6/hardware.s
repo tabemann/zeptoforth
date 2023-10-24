@@ -111,6 +111,7 @@
         .equ RCC_D1CFGR_D1PPRE_APB3_DIV_2, 2 << 5 @ 240 MHz / 2
         .equ RCC_D3CFGR_D3PPRE_MASK, 7 << 4
         .equ RCC_D3CFGR_D3PPRE_APB4_DIV_2, 2 << 5 @ 240 MHz / 2
+        .equ RCC_USART16_CLKSOURCE_HSI, 3 << 3 @ 64 MHz
         .equ RCC_USART234578_CLKSOURCE_HSI, 3 << 0 @ 64 MHz
 
         .equ RCC_PLLCKSELR_PLLSRC_MASK, 3

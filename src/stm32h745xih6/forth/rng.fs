@@ -26,16 +26,16 @@ begin-module rng
   begin-module rng-internal
 
     \ RCC base
-    $40023800 constant RCC_Base
+    $x58024400 constant RCC_Base
     
     \ RCC AHB2 peripheral clock enable register
-    RCC_Base $34 + constant RCC_AHB2ENR
+    RCC_Base $DC + constant RCC_AHB2ENR
 
     \ RCC AHB2 peripheral clock low power enable register
-    RCC_Base $54 + constant RCC_AHB2LPENR
+    RCC_Base $104 + constant RCC_AHB2LPENR
 
     \ Random number generator base address
-    $50060800 constant RNG_Base
+    $48021800 constant RNG_Base
 
     \ Random number generator registers
     RNG_Base $00 + constant RNG_CR
@@ -107,9 +107,11 @@ begin-module rng
     : random-raw ( -- random )
       begin
 	RNG_SR_SECS@ RNG_SR_SEIS@ or if
-	  false RNG_SR_SEIS!
-	  false RNG_CR_RNGEN!
-	  true RNG_CR_RNGEN!
+          begin
+            false RNG_SR_SEIS!
+            12 0 do RNG_SR_DRDY@ drop loop
+            RNG_SR_SEIS@ not
+          until
 	then
 	RNG_SR_CECS@ RNG_SR_CEIS@ or triggers x-rng-error
 	RNG_SR_DRDY@

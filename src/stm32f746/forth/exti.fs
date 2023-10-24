@@ -148,7 +148,7 @@ begin-module exti
   : EXTI_SWIER! ( exti -- ) bit EXTI_SWIER bis! ;
 
   \ Set the EXTI pending register (to clear it)
-  : EXTI_PR! ( exti -- ) bit EXTI_PR bis! ;
+  : EXTI_PR! ( exti -- ) bit EXTI_PR ! ;
 
   \ Get the EXTI input port
   : SYSCFG_EXTICRx@ ( exti -- port )

@@ -26,7 +26,7 @@ begin-module gpio
   begin-module gpio-internal
     
     \ GPIO base
-    $40020000 constant GPIO_Base
+    $58020000 constant GPIO_Base
     
     \ GPIO index base
     : GPIO_Index ( index "name" -- )
@@ -39,13 +39,13 @@ begin-module gpio
     ;
     
     \ RCC base
-    $40023800 constant RCC_Base
+    $50024400 constant RCC_Base
     
     \ RCC AHB1 peripheral clock enable register
-    RCC_Base $30 + constant RCC_AHB1ENR
+    RCC_Base $E0 + constant RCC_AHB4ENR
     
     \ RCC AHB1 peripheral clock enable in low-power mode register
-    RCC_Base $50 + constant RCC_AHB1LPENR
+    RCC_Base $108 + constant RCC_AHB4LPENR
 
   end-module> import
 
@@ -97,32 +97,32 @@ begin-module gpio
 
   \ Enable a GPIO peripheral clock
   : gpio-clock-enable ( gpio -- )
-    GPIO_Base - $400 / bit RCC_AHB1ENR bis!
+    GPIO_Base - $400 / bit RCC_AHB4ENR bis!
   ;
 
   \ Enable a low-power GPIO peripheral clock
   : gpio-lp-clock-enable ( gpio -- )
-    GPIO_Base - $400 / bit RCC_AHB1LPENR bis!
+    GPIO_Base - $400 / bit RCC_AHB4LPENR bis!
   ;
 
   \ Disable a GPIO peripheral clock
   : gpio-clock-disable ( gpio -- )
-    GPIO_Base - $400 / bit RCC_AHB1ENR bic!
+    GPIO_Base - $400 / bit RCC_AHB4ENR bic!
   ;
 
   \ Disable a low-power GPIO peripheral clock
   : gpio-lp-clock-disable ( gpio -- )
-    GPIO_Base - $400 / bit RCC_AHB1LPENR bic!
+    GPIO_Base - $400 / bit RCC_AHB4LPENR bic!
   ;
 
   \ Get whether a GPIO peripheral clock is enabled
   : gpio-clock-enable? ( gpio -- enable )
-    GPIO_Base - $400 / bit RCC_AHB1ENR bit@
+    GPIO_Base - $400 / bit RCC_AHB4ENR bit@
   ;
 
   \ Get whether a low-power GPIO peripheral clock is enabled
   : gpio-lp-clock-enable? ( gpio -- enable )
-    GPIO_Base - $400 / bit RCC_AHB1LPENR bit@
+    GPIO_Base - $400 / bit RCC_AHB4LPENR bit@
   ;
 
   \ Set a GPIOx_MODER field

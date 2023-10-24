@@ -22,7 +22,7 @@
         @ Set USART3 to use the HSI clock at 64 MHz
 _config_usart3_hsi:
         ldr r0, =RCC_D2CCIP2R
-        ldr r1, =RCC_USART234578_CLKSOURCE_HSI
+        ldr r1, =RCC_USART16_CLKSOURCE_HSI | RCC_USART234578_CLKSOURCE_HSI
         str r1, [r0]
         bx lr
         end_inlined

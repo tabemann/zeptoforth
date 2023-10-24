@@ -183,7 +183,7 @@ begin-module exti
 
   \ Set the EXTI pending register (to clear it)
   : EXTI_PR! ( exti -- )
-    dup 32 < if bit EXTI_PR1 bis! else 32 - bit EXTI_PR2 bis! then
+    dup 32 < if bit EXTI_PR1 ! else 32 - bit EXTI_PR2 ! then
   ;
 
   \ Get the EXTI input port

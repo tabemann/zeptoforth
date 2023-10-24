@@ -33,14 +33,22 @@ continue-module internal
 
   \ Get the start of the next flash sector
   : next-flash-sector ( -- addr )
-    $300000
-    $208000 $20FFFF check-flash-sector
-    $210000 $217FFF check-flash-sector
-    $218000 $21FFFF check-flash-sector
-    $220000 $23FFFF check-flash-sector
-    $240000 $27FFFF check-flash-sector
-    $280000 $2BFFFF check-flash-sector
-    $2C0000 $2FFFFF check-flash-sector
+    $8200000
+    $8020000 $803FFFF check-flash-sector
+    $8040000 $805FFFF check-flash-sector
+    $8060000 $807FFFF check-flash-sector
+    $8080000 $809FFFF check-flash-sector
+    $80A0000 $80BFFFF check-flash-sector
+    $80C0000 $80DFFFF check-flash-sector
+    $80E0000 $80FFFFF check-flash-sector
+    $8100000 $811FFFF check-flash-sector
+    $8120000 $813FFFF check-flash-sector
+    $8140000 $815FFFF check-flash-sector
+    $8160000 $817FFFF check-flash-sector
+    $8180000 $819FFFF check-flash-sector
+    $81A0000 $81BFFFF check-flash-sector
+    $81C0000 $81DFFFF check-flash-sector
+    $81E0000 $81FFFFF check-flash-sector
   ;
 
   \ Test for next flash sector
@@ -50,14 +58,22 @@ continue-module internal
 
   \ Align an address for a following flash sector
   : erase-align ( addr -- addr )
-    >r $300000
-    r@ swap $208000 $20FFFF check-flash-sector-for-addr
-    r@ swap $210000 $217FFF check-flash-sector-for-addr
-    r@ swap $218000 $21FFFF check-flash-sector-for-addr
-    r@ swap $220000 $23FFFF check-flash-sector-for-addr
-    r@ swap $240000 $27FFFF check-flash-sector-for-addr
-    r@ swap $280000 $2BFFFF check-flash-sector-for-addr
-    r> swap $2C0000 $2FFFFF check-flash-sector-for-addr
+    >r $8200000
+    r@ swap $8020000 $803FFFF check-flash-sector-for-addr
+    r@ swap $8040000 $805FFFF check-flash-sector-for-addr
+    r@ swap $8060000 $807FFFF check-flash-sector-for-addr
+    r@ swap $8080000 $809FFFF check-flash-sector-for-addr
+    r@ swap $80A0000 $80BFFFF check-flash-sector-for-addr
+    r@ swap $80C0000 $80DFFFF check-flash-sector-for-addr
+    r@ swap $80E0000 $80FFFFF check-flash-sector-for-addr
+    r@ swap $8100000 $811FFFF check-flash-sector-for-addr
+    r@ swap $8120000 $813FFFF check-flash-sector-for-addr
+    r@ swap $8140000 $815FFFF check-flash-sector-for-addr
+    r@ swap $8160000 $817FFFF check-flash-sector-for-addr
+    r@ swap $8180000 $819FFFF check-flash-sector-for-addr
+    r@ swap $81A0000 $81BFFFF check-flash-sector-for-addr
+    r@ swap $81C0000 $81DFFFF check-flash-sector-for-addr
+    r> swap $81E0000 $81FFFFF check-flash-sector-for-addr
   ;
 
   \ Pad flash to a sector boundary
