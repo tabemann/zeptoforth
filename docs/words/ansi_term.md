@@ -2,6 +2,15 @@
 
 These are a number of word used to manage interaction with ANSI terminals. Note that no other terminals are supported.
 
+### `forth`
+
+The following words are in the `forth` (i.e. default) module:
+
+##### `page`
+( -- )
+
+Clear the console and return the cursor to the home position.
+
 ### `ansi-term`
 
 The following words are in `ansi-term`:
