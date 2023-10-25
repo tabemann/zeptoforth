@@ -20,9 +20,9 @@
 
 \ This is not actual Forth code, but rather setup directives for e4thcom to be
 \ executed from the root of the zeptoforth directory to initialize zeptoforth
-\ on an STM32F746 device.
+\ on an STM32H745XIH6 device.
 
-#include src/stm32f746/forth/clock.fs
+#include src/stm32h745xih6/forth/clock.fs
 #include src/common/forth/basic.fs
 #include src/common/forth/module.fs
 #include src/common/forth/armv6m.fs
@@ -31,8 +31,8 @@
 #include src/common/forth/interrupt.fs
 #include src/common/forth/exception.fs
 #include src/common/forth/multicore.fs
-#include src/stm32f746/forth/erase.fs
+#include src/stm32h745xih6/forth/erase.fs
 #include src/common/forth/systick.fs
-#include src/stm32f746/forth/int_io.fs
-#include src/stm32f746/forth/gpio.fs
+#include src/stm32h745xih6/forth/int_io.fs
+#include src/stm32h745xih6/forth/gpio.fs
 #include src/common/forth/task.fs

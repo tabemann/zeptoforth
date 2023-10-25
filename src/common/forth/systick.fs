@@ -103,7 +103,7 @@ begin-module systick
   : init-systick ( -- )
     ['] systick-handler systick-vector vector!
     SYST_CALIB @ SYST_CALIB_TENMS and
-    10 / systick-divisor / time-multiplier * time-divisor / SYST_RVR !
+    10 / systick-divisor / time-multiplier * time-divisor / 1- SYST_RVR !
     0 SYST_CVR !
     0 systick-counter !
     enable-systick
@@ -112,7 +112,7 @@ begin-module systick
   \ Initialize SysTick for an auxiliary core
   : init-systick-aux-core ( -- )
     SYST_CALIB @ SYST_CALIB_TENMS and
-    10 / systick-divisor / time-multiplier * time-divisor / SYST_RVR !
+    10 / systick-divisor / time-multiplier * time-divisor / 1- SYST_RVR !
     0 SYST_CVR !
     enable-systick
   ;
