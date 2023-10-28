@@ -110,4 +110,40 @@
 	.word _handle_null+1 @ 118:
 	.word _handle_null+1 @ 119:
 	.word _handle_null+1 @ 120:
+	.word _handle_null+1 @ 121:
+	.word _handle_null+1 @ 122:
+	.word _handle_null+1 @ 123:
+	.word _handle_null+1 @ 124:
+	.word _handle_null+1 @ 125:
+	.word _handle_null+1 @ 126:
+	.word _handle_null+1 @ 127:
+	.word _handle_null+1 @ 128:
+	.word _handle_null+1 @ 129:
+	.word _handle_null+1 @ 130:
+	.word _handle_null+1 @ 131:
+	.word _handle_null+1 @ 132:
+	.word _handle_null+1 @ 133:
+	.word _handle_null+1 @ 134:
+	.word _handle_null+1 @ 135:
+	.word _handle_null+1 @ 136:
+	.word _handle_null+1 @ 137:
+	.word _handle_null+1 @ 138:
+	.word _handle_null+1 @ 139:
+	.word _handle_null+1 @ 140:
+	.word _handle_null+1 @ 141:
+	.word _handle_null+1 @ 142:
+	.word _handle_null+1 @ 143:
+	.word _handle_null+1 @ 144:
+	.word _handle_null+1 @ 145:
+	.word _handle_null+1 @ 146:
+	.word _handle_null+1 @ 147:
+	.word _handle_null+1 @ 148:
+	.word _handle_null+1 @ 149:
+	.word _handle_null+1 @ 150:
+	.word _handle_null+1 @ 151:
+	.word _handle_null+1 @ 152:
+	.word _handle_null+1 @ 153:
+	.word _handle_null+1 @ 154:
+	.word _handle_null+1 @ 155:
+	.word _handle_null+1 @ 156:
 	

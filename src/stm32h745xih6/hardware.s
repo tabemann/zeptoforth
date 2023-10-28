@@ -135,16 +135,6 @@
 
         @ GPIO registers
         .equ GPIOA_BASE, 0x58020000 + (0 * 0x400)
-        .equ GPIOA_MODER, GPIOA_BASE + 0x00
-        .equ GPIOA_OTYPER, GPIOA_BASE + 0x04
-        .equ GPIOA_OSPEEDR, GPIOA_BASE + 0x08
-        .equ GPIOA_PUPDR, GPIOA_BASE + 0x0C
-        .equ GPIOA_IDR, GPIOA_BASE + 0x10
-        .equ GPIOA_ODR, GPIOA_BASE + 0x14
-        .equ GPIOA_BSRR, GPIOA_BASE + 0x18
-        .equ GPIOA_LCKR, GPIOA_BASE + 0x1C
-        .equ GPIOA_AFRL, GPIOA_BASE + 0x20
-        .equ GPIOA_AFRH, GPIOA_BASE + 0x24
 
         .equ GPIOB_BASE, GPIOA_BASE + (1 * 0x400)
         .equ GPIOB_MODER, GPIOB_BASE + 0x00
@@ -157,12 +147,6 @@
         .equ GPIOB_LCKR, GPIOB_BASE + 0x1C
         .equ GPIOB_AFRL, GPIOB_BASE + 0x20
         .equ GPIOB_AFRH, GPIOB_BASE + 0x24
-  
-        .equ GPIOC_BASE, GPIOA_BASE + (2 * 0x400)
-
-        .equ GPIOD_BASE, GPIOA_BASE + (3 * 0x400)
-        .equ GPIOD_MODER, GPIOD_BASE + 0x00
-        .equ GPIOD_AFRH, GPIOD_BASE + 0x24
 
         .equ GPIOK_MODER, GPIOA_BASE + (10*0x400))
 

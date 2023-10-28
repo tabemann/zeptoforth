@@ -33,12 +33,12 @@ _enable_gpio_clocks:
         bx lr
         end_inlined
 
-        @ Set alternate function mode 7 for PD8 and PD9
+        @ Set alternate function mode 7 for PB10 and PB11
 _config_af_pd8_pd9:
-        clear_set_bits GPIOD_MODER, 0x00030000, 0x00020000 @ AF for PD8
-        clear_set_bits GPIOD_MODER, 0x000C0000, 0x00080000 @ AF for PD9
-        clear_set_bits GPIOD_AFRH, 0x0000000F, 0x00000007 @ AF 7 on PD8
-        clear_set_bits GPIOD_AFRH, 0x000000F0, 0x00000070 @ AF 7 on PD9
+        clear_set_bits GPIOB_MODER, 0x00300000, 0x00200000 @ AF for PB10
+        clear_set_bits GPIOB_MODER, 0x00C00000, 0x00800000 @ AF for PB11
+        clear_set_bits GPIOB_AFRH, 0x00000F00, 0x00000700 @ AF 7 on PB10
+        clear_set_bits GPIOB_AFRH, 0x0000F000, 0x00007000 @ AF 7 on PB11
         bx lr
         end_inlined
 
