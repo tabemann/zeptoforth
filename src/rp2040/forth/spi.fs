@@ -27,6 +27,8 @@ begin-module spi
   pin import
   core-lock import
   internal import
+  dma import
+  dma-pool import
   
   \ Invalid SPI periperal exception
   : x-invalid-spi ( -- ) ." invalid SPI" cr ;
@@ -112,6 +114,9 @@ begin-module spi
     : SPI_SSPCR0_DSS! ( dss spi -- )
       SPI_SSPCR0 dup >r @ $F bic swap $F and or r> !
     ;
+    : SPI_SSPCR0_DSS@ ( spi -- dss )
+      SPI_SSPCR0 @ $F and
+    ;
     : SPI_SSPCR1_SOD! ( sod spi -- )
       3 bit swap SPI_SSPCR1 rot if bis! else bic! then
     ;
@@ -150,6 +155,12 @@ begin-module spi
     ;
     : SPI_SSPICR_RORIC! ( roric spi -- )
       0 bit swap SPI_SSPICR rot if bis! else bic! then
+    ;
+    : SPI_SSPDMACR_TXDMAE! ( txdmae spi -- addr )
+      1 bit swap SPI_SSPDMACR rot if bis! else bic! then
+    ;
+    : SPI_SSPDMACR_RXDMAE! ( txdmae spi -- addr )
+      0 bit swap SPI_SSPDMACR rot if bis! else bic! then
     ;
 
     \ SPI IRQ
@@ -494,25 +505,25 @@ begin-module spi
     spi drain-spi
     spi flush-spi
     spi spi-irq NVIC_ICER_CLRENA!
-    bytes { bytes-to-recv }
-    begin bytes 0> bytes-to-recv 0> or while
-      buffer bytes bytes-to-recv spi [:
-        { buffer bytes bytes-to-recv spi }
-        0 { bytes-sent }
-        disable-int
-        spi SPI_SSPSR_TNF@ spi SPI_SSPSR_RFF@ not and bytes-sent bytes < and if
-          buffer bytes-sent + c@ spi SPI_SSPDR h!
-          1 +to bytes-sent
+    spi SPI_SSPCR0_DSS@ 1+ 8 align 8 / { unit }
+    unit 1 = { byte }
+    0 { tx-offset }
+    bytes unit align unit / { rx-count }
+    spi SPI_SSPDR { port }
+    spi SPI_SSPSR { flags }
+    begin tx-offset bytes < rx-count 0> or while
+      flags @ [ 0 bit ] literal and if
+        tx-offset bytes < if
+          buffer tx-offset + byte if c@ else h@ then port h!
+          unit +to tx-offset
         then
-        spi SPI_SSPSR_RNE@ bytes-to-recv 0> and if
-          spi SPI_SSPDR h@ drop
-          -1 +to bytes-to-recv
+      then
+      flags @ [ 2 bit ] literal and if
+        rx-count if
+          port h@ drop
+          -1 +to rx-count
         then
-        enable-int
-        bytes-to-recv bytes-sent
-      ;] over spi-core-lock with-core-lock-spin
-      dup +to buffer negate +to bytes
-      to bytes-to-recv
+      then
     repeat
     spi spi-irq NVIC_ISER_SETENA!
   ;
@@ -523,25 +534,25 @@ begin-module spi
     spi drain-spi
     spi flush-spi
     spi spi-irq NVIC_ICER_CLRENA!
-    bytes { bytes-to-send }
-    begin bytes 0> bytes-to-send 0> or while
-      buffer bytes bytes-to-send filler spi [:
-        { buffer bytes bytes-to-send filler spi }
-        0 { bytes-recvd }
-        disable-int
-        spi SPI_SSPSR_TNF@ spi SPI_SSPSR_RFF@ not and bytes-to-send 0> and if
-          filler spi SPI_SSPDR h!
-          -1 +to bytes-to-send
+    spi SPI_SSPCR0_DSS@ 1+ 8 align 8 / { unit }
+    unit 1 = { byte }
+    0 { rx-offset }
+    bytes unit align unit / { tx-count }
+    spi SPI_SSPDR { port }
+    spi SPI_SSPSR { flags }
+    begin tx-count 0> rx-offset bytes < or while
+      flags @ [ 0 bit ] literal and if
+        tx-count if
+          filler port h!
+          -1 +to tx-count
         then
-        spi SPI_SSPSR_RNE@ bytes-recvd bytes < and if
-          spi SPI_SSPDR h@ buffer bytes-recvd + c!
-          1 +to bytes-recvd
+      then
+      flags @ [ 2 bit ] literal and if
+        rx-offset bytes < if
+          port h@ buffer rx-offset + byte if c! 1 else h! 2 then
+          +to rx-offset
         then
-        enable-int
-        bytes-to-send bytes-recvd
-      ;] over spi-core-lock with-core-lock-spin
-      dup +to buffer negate +to bytes
-      to bytes-to-send
+      then
     repeat
     spi spi-irq NVIC_ISER_SETENA!
   ;
