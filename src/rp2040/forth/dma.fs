@@ -67,6 +67,9 @@ begin-module dma
 
     \ Timer
     : DMA_TIMER ( timer -- ) 2 lshift [ DMA_BASE $420 + ] literal + ;
+
+    \ Abort register
+    : CHAN_ABORT ( -- ) [ DMA_BASE $444 + ] literal ;
     
     \ Busy bit
     24 bit constant CH_CTRL_TRIG_BUSY
@@ -259,6 +262,32 @@ begin-module dma
     begin CH_CTRL_TRIG_BUSY channel CH_CTRL_TRIG bit@ while pause repeat
   ;
 
+  \ Halt DMA
+  : halt-dma ( channel -- )
+    CH_CTRL_TRIG_EN swap CH_CTRL_TRIG bic!
+  ;
+
+  \ Abort DMA
+  : abort-dma ( channel -- )
+    bit CHAN_ABORT bis!
+    begin CHAN_ABORT @ 0= until
+  ;
+
+  \ Get DMA source address
+  : dma-src-addr@ ( channel -- addr )
+    CH_READ_ADDR @
+  ;
+
+  \ Get DMA destination address
+  : dma-dest-addr@ ( channel -- addr )
+    CH_WRITE_ADDR @
+  ;
+  
+  \ Get outstanding bytes transferred
+  : dma-remaining@ ( channel -- remaining )
+    CH_TRANS_COUNT @
+  ;
+  
 end-module
 
 compile-to-ram
