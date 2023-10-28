@@ -132,83 +132,210 @@ begin-module spi
     \ SPI registers
     : SPI_CR1 ( spi -- addr ) SPI_Base $000 + ;
     : SPI_CR2 ( spi -- addr ) SPI_Base $004 + ;
-    : SPI_SR ( spi -- addr ) SPI_Base $008 + ;
-    : SPI_DR ( spi -- addr ) SPI_Base $00C + ;
-    : SPI_CRCPR ( spi -- addr ) SPI_Base $010 + ;
-    : SPI_RXCRCR ( spi -- addr ) SPI_Base $014 + ;
-    : SPI_TXCRCR ( spi -- addr ) SPI_Base $018 + ;
+    : SPI_CFG1 ( spi -- addr ) SPI_Base $008 + ;
+    : SPI_CFG2 ( spi -- addr ) SPI_Base $00C + ;
+    \ : SPI_CRCPR ( spi -- addr ) SPI_Base $010 + ;
+    \ : SPI_RXCRCR ( spi -- addr ) SPI_Base $014 + ;
+    \ : SPI_TXCRCR ( spi -- addr ) SPI_Base $018 + ;
 
     \ SPI fields
-    : SPI_CR1_BIDIMODE! ( bidimode spi -- )
+
+    : SPI_CR1_IOLOCK@ ( spi -- iolock )
+      16 bit swap SPI_CR1 bit@
+    ;
+    : SPI_CR1_IOLOCK! ( iolock spi -- )
+      16 bit swap SPI_CR1 rot if bis! else bic! then
+    ;
+    : SPI_CR1_TCRCINI ( tcrcini spi -- )
       15 bit swap SPI_CR1 rot if bis! else bic! then
     ;
-    : SPI_CR1_BIDIOE! ( bidioe spi -- )
+    : SPI_CR1_RCRCINI ( rcrcini spi -- )
       14 bit swap SPI_CR1 rot if bis! else bic! then
     ;
-    : SPI_CR1_CRCEN! ( crcen spi -- )
+    : SPI_CR1_CRC33_17 ( crc33_17 spi -- )
       13 bit swap SPI_CR1 rot if bis! else bic! then
     ;
-    : SPI_CR1_CRCNEXT! ( crcnext spi -- )
+    : SPI_CR1_SSI ( ssi spi -- )
       12 bit swap SPI_CR1 rot if bis! else bic! then
     ;
-    : SPI_CR1_CRCL! ( crcl spi -- )
+    : SPI_CR1_HDDIR ( hddir spi -- )
       11 bit swap SPI_CR1 rot if bis! else bic! then
     ;
-    : SPI_CR1_RXONLY! ( rxonly spi -- )
+    : SPI_CR1_CSUSP ( csusp spi -- )
       10 bit swap SPI_CR1 rot if bis! else bic! then
     ;
-    : SPI_CR1_SSM! ( ssm spi -- )
+    : SPI_CR1_CSTART ( cstart spi -- )
       9 bit swap SPI_CR1 rot if bis! else bic! then
     ;
-    : SPI_CR1_SSI! ( ssi spi -- )
+    : SPI_CR1_MASRX ( masrx spi -- )
       8 bit swap SPI_CR1 rot if bis! else bic! then
     ;
-    : SPI_CR1_LSBFIRST! ( lsbfirst spi -- )
-      7 bit swap SPI_CR1 rot if bis! else bic! then
-    ;
-    : SPI_CR1_SPE! ( spe spi -- )
-      6 bit swap SPI_CR1 rot if bis! else bic! then
-    ;
-    : SPI_CR1_BR! ( br spi -- )
-      SPI_CR1 dup >r @ $38 bic swap $7 and 3 lshift or r> !
-    ;
-    : SPI_CR1_MSTR! ( mstr spi -- )
-      2 bit swap SPI_CR1 rot if bis! else bic! then
-    ;
-    : SPI_CR1_CPOL! ( cpol spi -- )
-      1 bit swap SPI_CR1 rot if bis! else bic! then
-    ;
-    : SPI_CR1_CPHA! ( cpha spi -- )
+    : SPI_CR1_SPE ( spe spi -- )
       0 bit swap SPI_CR1 rot if bis! else bic! then
     ;
-    : SPI_CR2_DS! ( ds spi -- )
-      SPI_CR2 dup >r @ $F00 bic swap $F and 8 lshift or r> !
+
+    : SPI_CR2_TSER@ ( spi -- tser )
+      SPI_CR2 @ 16 rshift
     ;
-    : SPI_CR2_FRXTH! ( frxth spi -- )
-      12 bit swap SPI_CR2 rot if bis! else bic! then
+    : SPI_CR2_TSER! ( tser spi -- )
+      SPI_CR2 dup >r @ $FFFF0000 bic swap 16 lshift or r> !
     ;
-    : SPI_CR2_TXEIE! ( txeie spi -- )
-      7 bit swap SPI_CR2 rot if bis! else bic! then
+    : SPI_CR2_TSIZE@ ( spi -- tsize )
+      SPI_CR2 @ $FFFF and
     ;
-    : SPI_CR2_RXNEIE! ( rxneie spi -- )
-      6 bit swap SPI_CR2 rot if bis! else bic! then
+    : SPI_CR2_TSIZE! ( tsize spi -- )
+      SPI_CR2 dup >r @ $FFFF bic or r> !
     ;
-    : SPI_CR2_ERRIE! ( errie spi -- )
-      5 bit swap SPI_CR2 rot if bis! else bic! then
+
+    : SPI_CFG1_MBR! ( mbr spi -- )
+      SPI_CFG1 dup >r @ [ $7 28 lshift ] literal bic swap $7 and 28 lshift or
+      r> !
     ;
-    : SPI_CR2_FRF! ( frf spi -- )
-      4 bit swap SPI_CR2 rot if bis! else bic! then
+    : SPI_CFG1_CRCEN! ( crcen spi -- )
+      22 bit swap SPI_CFG1 rot if bis! else bic! then
     ;
-    : SPI_CR2_SSOE! ( ssoe spi -- )
-      2 bit swap SPI_CR2 rot if bis! else bic! then
+    : SPI_CFG1_CRCSIZE! ( crcsize spi -- )
+      SPI_CFG1 dup >r @ [ $1F 16 lshift ] literal bic swap $1F and 16 lshift or
+      r> !
     ;
-    : SPI_SR_FRE@ ( spi -- fre ) 8 bit swap SPI_SR bit@ ;
-    : SPI_SR_BSY@ ( spi -- bsy ) 7 bit swap SPI_SR bit@ ;
-    : SPI_SR_OVR@ ( spi -- ovr ) 6 bit swap SPI_SR bit@ ;
-    : SPI_SR_MODF@ ( spi -- modf ) 5 bit swap SPI_SR bit@ ;
-    : SPI_SR_CRCERR@ ( spi -- crcerr ) 4 bit swap SPI_SR bit@ ;
-    : SPI_SR_TXE@ ( spi -- txe ) 1 bit swap SPI_SR bit@ ;
-    : SPI_SR_RXNE@ ( spi -- rxne ) 0 bit swap SPI_SR bit@ ;
+    : SPI_CFG1_TXDMAEN! ( txmdaen spi -- )
+      15 bit swap SPI_CFG1 rot if bis! else bic! then
+    ;
+    : SPI_CFG1_RXDMAEN! ( rxdmaen spi -- )
+      14 bit swap SPI_CFG1 rot if bis! else bic! then
+    ;
+    : SPI_CFG1_UDRDET! ( udrdet spi -- )
+      SPI_CFG1 dup >r @ [ $3 11 lshift ] literal bic swap $3 and 11 lshift or
+      >r !
+    ;
+    : SPI_CFG1_UDRCFG! ( udrcfg spi -- )
+      SPI_CFG1 dup >r @ [ $3 9 lshift ] literal bic swap $3 and 9 lshift or
+      >r !
+    ;
+    : SPI_CFG1_FTHLV! ( fthlv spi -- )
+      SPI_CFG1 dup >r @ [ $F 5 lshift ] literal bic swap $F and 5 lshift or
+      >r !
+    ;
+    : SPI_CFG1_DSIZE! ( dsize spi -- )
+      SPI_CFG1 dup >r @ $1F bic swap $1F and or >r !
+    ;
+    : SPI_CFG2_AFCNTR! ( afcntr spi -- )
+      31 bit swap SPI_CFG2 rot if bis! else bic! then
+    ;
+    : SPI_CFG2_SSOM! ( ssom spi -- )
+      30 bit swap SPI_CFG2 rot if bis! else bic! then
+    ;
+    : SPI_CFG2_SSOE! ( ssoe spi -- )
+      29 bit swap SPI_CFG2 rot if bis! else bic! then
+    ;
+    : SPI_CFG2_SSOIP! ( ssoip spi -- )
+      28 bit swap SPI_CFG2 rot if bis! else bic! then
+    ;
+    : SPI_CFG2_SSM! ( ssm spi -- )
+      26 bit swap SPI_CFG2 rot if bis! else bic! then
+    ;
+    : SPI_CFG2_CPOL! ( cpol spi -- )
+      25 bit swap SPI_CFG2 rot if bis! else bic! then
+    ;
+    : SPI_CFG2_CPHA! ( cpha spi -- )
+      24 bit swap SPI_CFG2 rot if bis! else bic! then
+    ;
+    : SPI_CFG2_LSBFRST! ( lsbfrst spi -- )
+      23 bit swap SPI_CFG2 rot if bis! else bic! then
+    ;
+    : SPI_CFG2_MASTER! ( master spi -- )
+      22 bit swap SPI_CFG2 rot if bis! else bic! then
+    ;
+    : SPI_CFG2_SP! ( sp spi -- )
+      SPI_CFG2 dup >r @ [ $7 19 lshift ] literal bic swap $7 and 19 lshift or
+      >r !
+    ;
+    : SPI_CFG2_COMM! ( comm spi -- )
+      SPI_CFG2 dup >r @ [ $3 17 lshift ] literal bic swap $3 and 17 lshift or
+      >r !
+    ;
+    : SPI_CFG2_IOSWP! ( ioswp spi -- )
+      15 bit swap SPI_CFG2 rot if bis! else bic! then
+    ;
+    : SPI_CFG2_MIDI! ( midi spi -- )
+      SPI_CFG2 dup >r @ [ $F 4 lshift ] literal bic swap $F and 4 lshift or
+      >r !
+    ;
+    : SPI_CFG2_MSSI! ( mssi spi -- )
+      SPI_CFG2 dup >r @ $F bic swap $F and or >r !
+    ;
+
+
+    \ : SPI_CR1_BIDIMODE! ( bidimode spi -- )
+    \   15 bit swap SPI_CR1 rot if bis! else bic! then
+    \ ;
+    \ : SPI_CR1_BIDIOE! ( bidioe spi -- )
+    \   14 bit swap SPI_CR1 rot if bis! else bic! then
+    \ ;
+    \ : SPI_CR1_CRCEN! ( crcen spi -- )
+    \   13 bit swap SPI_CR1 rot if bis! else bic! then
+    \ ;
+    \ : SPI_CR1_CRCNEXT! ( crcnext spi -- )
+    \   12 bit swap SPI_CR1 rot if bis! else bic! then
+    \ ;
+    \ : SPI_CR1_CRCL! ( crcl spi -- )
+    \   11 bit swap SPI_CR1 rot if bis! else bic! then
+    \ ;
+    \ : SPI_CR1_RXONLY! ( rxonly spi -- )
+    \   10 bit swap SPI_CR1 rot if bis! else bic! then
+    \ ;
+    \ : SPI_CR1_SSM! ( ssm spi -- )
+    \   9 bit swap SPI_CR1 rot if bis! else bic! then
+    \ ;
+    \ : SPI_CR1_SSI! ( ssi spi -- )
+    \   8 bit swap SPI_CR1 rot if bis! else bic! then
+    \ ;
+    \ : SPI_CR1_LSBFIRST! ( lsbfirst spi -- )
+    \   7 bit swap SPI_CR1 rot if bis! else bic! then
+    \ ;
+    \ : SPI_CR1_SPE! ( spe spi -- )
+    \   6 bit swap SPI_CR1 rot if bis! else bic! then
+    \ ;
+    \ : SPI_CR1_BR! ( br spi -- )
+    \   SPI_CR1 dup >r @ $38 bic swap $7 and 3 lshift or r> !
+    \ ;
+    \ : SPI_CR1_MSTR! ( mstr spi -- )
+    \   2 bit swap SPI_CR1 rot if bis! else bic! then
+    \ ;
+    \ : SPI_CR1_CPOL! ( cpol spi -- )
+    \   1 bit swap SPI_CR1 rot if bis! else bic! then
+    \ ;
+    \ : SPI_CR1_CPHA! ( cpha spi -- )
+    \   0 bit swap SPI_CR1 rot if bis! else bic! then
+    \ ;
+    \ : SPI_CR2_DS! ( ds spi -- )
+    \   SPI_CR2 dup >r @ $F00 bic swap $F and 8 lshift or r> !
+    \ ;
+    \ : SPI_CR2_FRXTH! ( frxth spi -- )
+    \   12 bit swap SPI_CR2 rot if bis! else bic! then
+    \ ;
+    \ : SPI_CR2_TXEIE! ( txeie spi -- )
+    \   7 bit swap SPI_CR2 rot if bis! else bic! then
+    \ ;
+    \ : SPI_CR2_RXNEIE! ( rxneie spi -- )
+    \   6 bit swap SPI_CR2 rot if bis! else bic! then
+    \ ;
+    \ : SPI_CR2_ERRIE! ( errie spi -- )
+    \   5 bit swap SPI_CR2 rot if bis! else bic! then
+    \ ;
+    \ : SPI_CR2_FRF! ( frf spi -- )
+    \   4 bit swap SPI_CR2 rot if bis! else bic! then
+    \ ;
+    \ : SPI_CR2_SSOE! ( ssoe spi -- )
+    \   2 bit swap SPI_CR2 rot if bis! else bic! then
+    \ ;
+    \ : SPI_SR_FRE@ ( spi -- fre ) 8 bit swap SPI_SR bit@ ;
+    \ : SPI_SR_BSY@ ( spi -- bsy ) 7 bit swap SPI_SR bit@ ;
+    \ : SPI_SR_OVR@ ( spi -- ovr ) 6 bit swap SPI_SR bit@ ;
+    \ : SPI_SR_MODF@ ( spi -- modf ) 5 bit swap SPI_SR bit@ ;
+    \ : SPI_SR_CRCERR@ ( spi -- crcerr ) 4 bit swap SPI_SR bit@ ;
+    \ : SPI_SR_TXE@ ( spi -- txe ) 1 bit swap SPI_SR bit@ ;
+    \ : SPI_SR_RXNE@ ( spi -- rxne ) 0 bit swap SPI_SR bit@ ;
 
     \ SPI IRQ table
     create spi-irq-table 35 h, 36 h, 51 h, 84 h, 85 h, 86 h,
@@ -619,25 +746,25 @@ begin-module spi
     spi drain-spi
     spi flush-spi
     spi spi-irq NVIC_ICER_CLRENA!
-    bytes { bytes-to-recv }
-    begin bytes 0> bytes-to-recv 0> or while
-      buffer bytes bytes-to-recv spi [:
-        { buffer bytes bytes-to-recv spi }
-        0 { bytes-sent }
-        disable-int
-        spi SPI_SR_TXE@ spi SPI_SR_RXNE@ not and bytes-sent bytes < and if
-          buffer bytes-sent + c@ spi >frame
-          1 +to bytes-sent
+    spi spi-8-bit-dr @ { byte }
+    byte if 1 else 2 then { unit }
+    0 { tx-offset }
+    bytes unit align unit / { rx-count }
+    spi SPI_DR { port }
+    spi SPI_SR { flags }
+    begin tx-offset bytes < rx-count 0> or while
+      flags @ [ 1 bit ] literal and if
+        tx-offset bytes < if
+          buffer tx-offset + byte if c@ port c! 1 else h@ port h! 2 then
+          +to tx-offset
         then
-        spi SPI_SR_RXNE@ bytes-to-recv 0> and if
-          spi frame> drop
-          -1 +to bytes-to-recv
+      then
+      flags @ [ 0 bit ] literal and if
+        rx-count if
+          byte if port c@ else port h! then drop
+          -1 +to rx-count
         then
-        enable-int
-        bytes-to-recv bytes-sent
-      ;] serial-spinlock critical-with-spinlock
-      dup +to buffer negate +to bytes
-      to bytes-to-recv
+      then
     repeat
     spi spi-irq NVIC_ISER_SETENA!
   ;
@@ -648,25 +775,29 @@ begin-module spi
     spi drain-spi
     spi flush-spi
     spi spi-irq NVIC_ICER_CLRENA!
-    bytes { bytes-to-send }
-    begin bytes 0> bytes-to-send 0> or while
-      buffer bytes bytes-to-send filler spi [:
-        { buffer bytes bytes-to-send filler spi }
-        0 { bytes-recvd }
-        disable-int
-        spi SPI_SR_TXE@ spi SPI_SR_RXNE@ not and bytes-to-send 0> and if
-          filler spi >frame
-          -1 +to bytes-to-send
+    spi spi-8-bit-dr @ { byte }
+    byte if 1 else 2 then { unit }
+    0 { rx-offset }
+    bytes unit align unit / { tx-count }
+    spi SPI_DR { port }
+    spi SPI_SR { flags }
+    begin tx-count 0> rx-offset bytes < or while
+      flags @ [ 1 bit ] literal and if
+        tx-count if
+          filler port byte if c! else h! then
+          -1 +to tx-count
         then
-        spi SPI_SR_RXNE@ bytes-recvd bytes < and if
-          spi frame> buffer bytes-recvd + c!
-          1 +to bytes-recvd
+      then
+      flags @ [ 0 bit ] literal and if
+        rx-offset bytes < if
+          byte if
+            port c@ buffer rx-offset + c! 1
+          else
+            port h@ buffer rx-offset + h! 2
+          then
+          +to rx-offset
         then
-        enable-int
-        bytes-to-send bytes-recvd
-      ;] serial-spinlock critical-with-spinlock
-      dup +to buffer negate +to bytes
-      to bytes-to-send
+      then
     repeat
     spi spi-irq NVIC_ISER_SETENA!
   ;
