@@ -574,25 +574,25 @@ begin-module spi
     spi drain-spi
     spi flush-spi
     spi spi-irq NVIC_ICER_CLRENA!
-    bytes { bytes-to-recv }
-    begin bytes 0> bytes-to-recv 0> or while
-      buffer bytes bytes-to-recv spi [:
-        { buffer bytes bytes-to-recv spi }
-        0 { bytes-sent }
-        disable-int
-        spi SPI_SR_TXE@ spi SPI_SR_RXNE@ not and bytes-sent bytes < and if
-          buffer bytes-sent + c@ spi >frame
-          1 +to bytes-sent
+    spi spi-8-bit-dr @ { byte }
+    byte if 1 else 2 then { unit }
+    0 { tx-offset }
+    bytes unit align unit / { rx-count }
+    spi SPI_DR { port }
+    spi SPI_SR { flags }
+    begin tx-offset bytes < rx-count 0> or while
+      flags @ [ 1 bit ] literal and if
+        tx-offset bytes < if
+          buffer tx-offset + byte if c@ port c! 1 else h@ port h! 2 then
+          +to tx-offset
         then
-        spi SPI_SR_RXNE@ bytes-to-recv 0> and if
-          spi frame> drop
-          -1 +to bytes-to-recv
+      then
+      flags @ [ 0 bit ] literal and if
+        rx-count if
+          byte if port c@ else port h! then drop
+          -1 +to rx-count
         then
-        enable-int
-        bytes-to-recv bytes-sent
-      ;] serial-spinlock critical-with-spinlock
-      dup +to buffer negate +to bytes
-      to bytes-to-recv
+      then
     repeat
     spi spi-irq NVIC_ISER_SETENA!
   ;
@@ -603,25 +603,29 @@ begin-module spi
     spi drain-spi
     spi flush-spi
     spi spi-irq NVIC_ICER_CLRENA!
-    bytes { bytes-to-send }
-    begin bytes 0> bytes-to-send 0> or while
-      buffer bytes bytes-to-send filler spi [:
-        { buffer bytes bytes-to-send filler spi }
-        0 { bytes-recvd }
-        disable-int
-        spi SPI_SR_TXE@ spi SPI_SR_RXNE@ not and bytes-to-send 0> and if
-          filler spi >frame
-          -1 +to bytes-to-send
+    spi spi-8-bit-dr @ { byte }
+    byte if 1 else 2 then { unit }
+    0 { rx-offset }
+    bytes unit align unit / { tx-count }
+    spi SPI_DR { port }
+    spi SPI_SR { flags }
+    begin tx-count 0> rx-offset bytes < or while
+      flags @ [ 1 bit ] literal and if
+        tx-count if
+          filler port byte if c! else h! then
+          -1 +to tx-count
         then
-        spi SPI_SR_RXNE@ bytes-recvd bytes < and if
-          spi frame> buffer bytes-recvd + c!
-          1 +to bytes-recvd
+      then
+      flags @ [ 0 bit ] literal and if
+        rx-offset bytes < if
+          byte if
+            port c@ buffer rx-offset + c! 1
+          else
+            port h@ buffer rx-offset + h! 2
+          then
+          +to rx-offset
         then
-        enable-int
-        bytes-to-send bytes-recvd
-      ;] serial-spinlock critical-with-spinlock
-      dup +to buffer negate +to bytes
-      to bytes-to-send
+      then
     repeat
     spi spi-irq NVIC_ISER_SETENA!
   ;
