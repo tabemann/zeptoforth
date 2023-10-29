@@ -1,6 +1,6 @@
 # Building and Using zeptoIP
 
-zeptoIP is an IP stack for zeptoforth, which at the present is layered on top of a CYW43439 driver for the Raspberry Pi Pico W. This is currently in an alpha state, and is being made available for testing prior to becoming part of the zeptoforth master branch. Note that it cannot be used on top of any currently existing build of zeptoforth but rather requires the latest code in the `devel` branch.
+zeptoIP is an IP stack for zeptoforth, which at the present is layered on top of a CYW43439 driver for the Raspberry Pi Pico W. This is currently in an beta state, and is being made available for testing prior to becoming part of the zeptoforth master branch. Note that it can be used with with zeptoforth in the `master` branch and the pre-built binaries.
 
 zeptoIP, the CYW43439 driver, and the CYW43439 firmware on the Raspberry Pi Pico W require a `rp2040_big` platform build, because there is barely enough space with them on a standard `rp2040` platform build. This is at the expense of 512 KB of space for blocks, and leaves approximately 571 KB (at last check) of space available for code in flash (assuming 2 MB of flash). Note that for boards that do have more than 2 MB of flash available custom builds are needed to take advantage of this space.
 
