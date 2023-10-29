@@ -292,7 +292,7 @@ continue-module internal
 	3 pick c@ r@ parse-digit if
 	  rot rot r@ 0 ud* rot 0 d+
 	else
-	  drop 3 pick c@ [char] . <> if
+	  drop 3 pick c@ dup [char] _ <> swap [char] . <> and if
 	    2drop 2drop rdrop false exit
 	  then
 	then
@@ -331,18 +331,26 @@ continue-module internal
 
   commit-flash
   
-  \ Handle the portion of a s31.32 fixed-point double-cell numeric literal to the
-  \ right of the decimal point
-  : handle-fraction ( b-addr bytes d base -- d -1 | 0 )
-    >r rot max-fraction-chars r@ 2 - cells + @ min -rot
-    2swap 0 0 0 begin 3 pick 0<> while
-      4 pick c@ r@ parse-digit if
-	2swap r@ 0 ud* rot 0 d+ rot 1+ >r >r >r 1- swap 1+ swap r> r> r>
+  \ Handle the portion of a s31.32 fixed-point double-cell numeric literal to
+  \ the right of the decimal point
+  : handle-fraction { c-addr bytes D: d base -- d -1 | 0 }
+    bytes max-fraction-chars base 2 - cells + @ min { max-places }
+    0 0 { places accum }
+    begin bytes 0> places max-places < and while
+      c-addr c@ dup [char] _ <> if
+        base parse-digit if
+          accum base * swap + to accum
+          1 +to places
+        else
+          drop 0 exit
+        then
       else
-	drop 2drop 2drop 2drop rdrop false exit
+        drop
       then
+      1 +to c-addr
+      -1 +to bytes
     repeat
-    nip 0 -rot 0 r> rot 0 swap f** f/ 2swap 2drop d+ true
+    0 accum 0 base places fi** f/ d d+ true
   ;
 
   commit-flash
@@ -355,11 +363,16 @@ continue-module internal
 	  2 pick c@ r@ parse-digit if
 	    swap r@ * + rot 1+ rot 1- rot
 	  else
-	    drop 2 pick c@ dup [char] . = swap [char] , = or if
-	      rot 1+ rot 1- rot 0 swap r> handle-fraction exit
-	    else
-	      drop 2drop rdrop false exit
-	    then
+            drop
+            2 pick c@ dup [char] _ = if
+              drop rot 1+ rot 1- rot
+            else
+              dup [char] . = swap [char] , = or if
+                rot 1+ rot 1- rot 0 swap r> handle-fraction exit
+              else
+                drop 2drop rdrop false exit
+              then
+            then
 	  then
 	repeat
 	nip nip 0 swap rdrop true

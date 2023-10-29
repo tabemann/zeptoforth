@@ -1221,7 +1221,11 @@ _parse_unsigned_core:
 	ldrb tos, [r2]
 	subs r1, #1
 	adds r2, #1
-	muls r3, r0, r3
+        cmp tos, #0x5F @ underscore
+        bne 4f
+        pull_tos
+        b 1b
+4:      muls r3, r0, r3
 	push_tos
 	movs tos, r0
 	push {r0, r1, r2, r3}
