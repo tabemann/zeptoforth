@@ -987,7 +987,7 @@ begin-module usb
     : usb-partial-rx ( -- )
       usb-rx-pending-op-enabled? @ if
         false usb-rx-pending-op-enabled? !
-        rx-count rx-buffer-size 64 - <= endpoint1-out-ready? @ and if
+        rx-count rx-buffer-size 64 - < endpoint1-out-ready? @ and if
           false endpoint1-out-ready? !
           endpoint1-out usb-console-start-transfer
         then
