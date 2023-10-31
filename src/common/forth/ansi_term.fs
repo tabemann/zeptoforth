@@ -48,46 +48,46 @@ begin-module ansi-term
 
   \ Type the CSI sequence
   : csi ( -- )
-    [: $1B emit [char] [ emit ;] critical
+     $1B emit [char] [ emit
   ;
 
   commit-flash
 
   \ Show the cursor
   : show-cursor ( -- )
-    [: csi [char] ? emit 25 (dec.) [char] h emit ;] critical
+    csi [char] ? emit 25 (dec.) [char] h emit
   ;
 
   \ Hide the cursor
   : hide-cursor ( -- )
-    [: csi [char] ? emit 25 (dec.) [char] l emit ;] critical
+    csi [char] ? emit 25 (dec.) [char] l emit
   ;
 
   \ Save the cursor position
-  : save-cursor ( -- ) [: csi [char] s emit ;] critical ;
+  : save-cursor ( -- ) csi [char] s emit ;
 
   \ Restore the cursor position
-  : restore-cursor ( -- ) [: csi [char] u emit ;] critical ;
+  : restore-cursor ( -- ) csi [char] u emit ;
 
   \ Scroll up screen by a number of lines
   : scroll-up ( lines -- )
-    [: csi (dec.) [char] S emit ;] critical
+    csi (dec.) [char] S emit
   ;
 
   \ Move the cursor to specified row and column coordinates
   : go-to-coord ( row column -- )
-    [: swap csi 1+ (dec.) [char] ; emit 1+ (dec.) [char] f emit ;] critical
+    swap csi 1+ (dec.) [char] ; emit 1+ (dec.) [char] f emit
   ;
 
   \ Erase from the cursor to the end of the line
-  : erase-end-of-line ( -- ) [: csi [char] K emit ;] critical ;
+  : erase-end-of-line ( -- ) csi [char] K emit ;
 
   \ Erase the lines below the current line
-  : erase-down ( -- ) [: csi [char] J emit ;] critical ;
+  : erase-down ( -- ) csi [char] J emit ;
 
   \ Query for the cursor position
   : query-cursor-position ( -- )
-    [: csi [char] 6 emit [char] n emit ;] critical
+    csi [char] 6 emit [char] n emit
   ;
 
   commit-flash
@@ -237,10 +237,8 @@ commit-flash
 
 \ Clear the console
 : page ( -- )
-  [:
-    ansi-term::csi [char] 2 emit [char] J emit
-    ansi-term::csi [char] H emit
-  ;] critical
+  ansi-term::csi [char] 2 emit [char] J emit
+  ansi-term::csi [char] H emit
 ;
 
 end-compress-flash
