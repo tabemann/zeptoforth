@@ -19,8 +19,7 @@
 @ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 @ SOFTWARE.
 
-	.equ MAX_ERASE_ADDR, 0x00100000
-	.equ FLASH_CODA_ADDR, 0x100FFF00
+	.equ FLASH_CODA_ADDR, flash_main_end - 256
 	
 	.equ XIP_CTRL_BASE, 0x14000000
 	.equ XIP_CTRL_OFFSET, 0x00
@@ -29,6 +28,11 @@
 
 	.equ XIP_SSI_BASE, 0x18000000
 
+        .equ TIMER_BASE, 0x40054000
+        .equ TIMERAWL, TIMER_BASE + 0x28
+
+        .equ RESET_TIME_US, 40
+        
 	.equ RAM_BASE, 0x20000000
 	.equ FLASH_IMAGE_BASE, 0x10001000
 	.equ IMAGE_SIZE, 0x8000
@@ -54,6 +58,8 @@
 	.equ CMD_BLOCK_ERASE_32K, 0x52
 	.equ CMD_BLOCK_ERASE_64K, 0xD8
 	.equ CMD_PAGE_PROGRAM, 0x02
+        .equ CMD_ENABLE_RESET, 0x66
+        .equ CMD_RESET, 0x99
 
 	@ QSPI Enable state
 	.equ QSPI_ENABLE_STATE, 0x02
@@ -119,6 +125,7 @@
 	define_internal_word "init-flash", visible_flag
 _init_flash:
 	push {lr}
+        bl _reset_flash
 	ldr r0, =FLASH_CODA_ADDR
 	ldr r1, =0xFFFFFFFF
 	ldr r0, [r0]
@@ -135,6 +142,51 @@ _init_flash:
         ldr tos, =FLASH_CODA_ADDR
         bl _erase_qspi_4k_sector
 1:	pop {pc}
+	end_inlined
+
+_reset_flash:
+	push {lr}
+	bl _force_core_wait
+	cpsid i
+	dsb
+	isb
+	bl _exit_xip
+        bl _enable_flash_cmd
+        bl _force_flash_cs_low
+        ldr r0, =XIP_SSI_BASE
+        movs r1, #CMD_ENABLE_RESET
+        str r1, [r0, #SSI_DR0_OFFSET]
+        bl _wait_ssi_busy
+        ldr r0, =XIP_SSI_BASE
+        ldr r1, [r0, #SSI_DR0_OFFSET]
+        bl _force_flash_cs_high
+        b 1f
+1:      b 1f
+1:      b 1f
+1:      b 1f
+1:      b 1f
+1:      b 1f
+1:      b 1f
+1:      b 1f
+1:      bl _force_flash_cs_low
+        ldr r0, =XIP_SSI_BASE
+        movs r1, #CMD_RESET
+        str r1, [r0, #SSI_DR0_OFFSET]
+        bl _wait_ssi_busy
+        ldr r0, =XIP_SSI_BASE
+        ldr r1, [r0, #SSI_DR0_OFFSET]
+        bl _force_flash_cs_high
+        ldr r0, =TIMERAWL
+        ldr r1, [r0]
+        adds r1, #RESET_TIME_US
+1:      ldr r2, [r0]
+        cmp r3, r2
+        bgt 1b
+	bl _enable_flush_xip_cache
+	bl _enter_xip
+	cpsie i
+        bl _release_core
+	pop {pc}
 	end_inlined
 
 	@ Force the CS pin HIGH

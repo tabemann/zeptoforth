@@ -19,7 +19,11 @@ BLOCK_SIZE = 256
 UF2_BLOCK_SIZE = 512
 
 # The coda flash address
-CODA_ADDR = 0x000FFF00
+def CODA_ADDR(big):
+    if big:
+        return 0x0017FF00
+    else:
+        return 0x000FFF00
 
 # Block flags
 FLAGS = 0x00002000
@@ -105,7 +109,7 @@ def pack_coda(buf, total_count, big):
                   - mini_dict_size(big)) - 1) \
                 | 4095) + 1
     coda = struct.pack('<I', end_addr)
-    pack_block(buf, total_count - 1, total_count, CODA_ADDR, coda, 0, 4)
+    pack_block(buf, total_count - 1, total_count, CODA_ADDR(big), coda, 0, 4)
 
 # Display the usage message
 def usage():
