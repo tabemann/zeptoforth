@@ -92,6 +92,11 @@ commit-flash
   then
 ;
 
+\ Compute the symmetric modulus of two S31.32 fixed point numbers
+: fmod { D: a D: b -- D: c }
+  a a b f/ f>s dup 0< if 1+ then s>f b f* d-
+;
+  
 continue-module internal
   
   \ Calculate whether a square root is close enough
