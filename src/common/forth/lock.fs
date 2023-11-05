@@ -249,7 +249,6 @@ begin-module lock
   \ Unlock a lock
   : release-lock ( lock -- )
     [: { lock }
-      s" BEGIN RELEASE LOCK" trace
       lock lock-holder-task @ current-task = averts x-not-currently-owned
       lock lock-nest-level @ 0= if
         lock lock-first-wait @ ?dup if { wait }
@@ -264,7 +263,6 @@ begin-module lock
       else
         -1 lock lock-nest-level +!
       then
-      s" END RELEASE LOCK" trace
     ;] over lock-slock with-slock
   ;
 
@@ -273,7 +271,6 @@ begin-module lock
   \ Lock a lock
   : claim-lock ( lock -- )
     [: { lock }
-      s" BEGIN CLAIM LOCK" trace
       lock lock-holder-task @ current-task <> if
         current-task prepare-block
         lock lock-holder-task @ if
@@ -307,7 +304,6 @@ begin-module lock
       else
         1 lock lock-nest-level +!
       then
-      s" END CLAIM LOCK" trace
     ;] over lock-slock with-slock
   ;
 

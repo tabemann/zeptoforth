@@ -163,7 +163,6 @@ begin-module chan
   \ Send data to a channel
   : send-chan ( addr bytes chan -- )
     [:
-      s" BEGIN SEND-CHAN" trace
       dup chan-closed @ triggers x-chan-closed
       current-task prepare-block
       dup wait-send-chan
@@ -175,14 +174,12 @@ begin-module chan
       else
 	drop
       then
-      s" END SEND-CHAN" trace
     ;] over chan-slock with-slock
   ;
 
   \ Receive data from a channel
   : recv-chan ( addr bytes chan -- recv-bytes )
     [:
-      s" BEGIN RECV-CHAN" trace
       current-task prepare-block
       dup wait-recv-chan
       >r 2dup 0 fill
@@ -193,26 +190,22 @@ begin-module chan
       else
 	drop
       then
-      s" END RECV-CHAN" trace
     ;] over chan-slock with-slock
   ;
 
   \ Peek data from a channel
   : peek-chan ( addr bytes chan -- peek-bytes )
     [:
-      s" BEGIN PEEK-CHAN" trace
       current-task prepare-block
       dup wait-recv-chan
       >r 2dup 0 fill
       r@ chan-data-size @ min r> recv-chan-addr -rot dup >r move r>
-      s" END PEEK-CHAN" trace
     ;] over chan-slock with-slock
   ;
 
   \ Skip data on a channel
   : skip-chan ( chan -- )
     [:
-      s" BEGIN SKIP-CHAN" trace
       current-task prepare-block
       dup wait-recv-chan
       dup advance-recv-chan
@@ -221,7 +214,6 @@ begin-module chan
       else
 	drop
       then
-      s" END SKIP-CHAN" trace
     ;] over chan-slock with-slock
   ;
 
@@ -229,7 +221,6 @@ begin-module chan
   \ would normally occur)
   : send-chan-no-block ( addr bytes chan -- )
     [:
-      s" BEGIN SEND-CHAN-NO-BLOCK" trace
       dup chan-closed @ triggers x-chan-closed
       dup chan-full? triggers x-would-block
       dup send-chan-addr over chan-data-size @ 0 fill
@@ -240,7 +231,6 @@ begin-module chan
       else
 	drop
       then
-      s" END SEND-CHAN-NO-BLOCK" trace
     ;] over chan-slock with-slock
   ;
 
@@ -248,7 +238,6 @@ begin-module chan
   \ blocking would normally occur)
   : recv-chan-no-block ( addr bytes chan -- addr recv-bytes )
     [:
-      s" BEGIN RECV-CHAN-NO-BLOCK" trace
       dup chan-empty? triggers x-would-block
       >r 2dup 0 fill
       r@ chan-data-size @ min r@ recv-chan-addr -rot dup >r move 2r>
@@ -258,7 +247,6 @@ begin-module chan
       else
 	drop
       then
-      s" END RECV-CHAN-NO-BLOCK" trace
     ;] over chan-slock with-slock
   ;
   
@@ -266,11 +254,9 @@ begin-module chan
   \ would normally occur)
   : peek-chan-no-block ( addr bytes chan -- addr peek-bytes )
     [:
-      s" BEGIN PEEK-CHAN-NO-BLOCK" trace
       dup chan-empty? triggers x-would-block
       >r 2dup 0 fill
       r@ chan-data-size @ min r> recv-chan-addr -rot dup >r move r>
-      s" END PEEK-CHAN-NO-BLOCK" trace
     ;] over chan-slock with-slock
   ;
   
@@ -278,7 +264,6 @@ begin-module chan
   \ would normally occur)
   : skip-chan-no-block ( chan -- )
     [:
-      s" BEGIN SKIP-CHAN-NO-BLOCK" trace
       dup chan-empty? triggers x-would-block
       dup advance-recv-chan
       dup chan-send-ready @ 0> if
@@ -286,7 +271,6 @@ begin-module chan
       else
 	drop
       then
-      s" END SKIP-CHAN-NO-BLOCK" trace
     ;] over chan-slock with-slock
   ;
   

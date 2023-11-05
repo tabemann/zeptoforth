@@ -107,9 +107,6 @@ begin-module task
     \ Sleep is enabled
     cpu-variable cpu-sleep-enabled? sleep-enabled?
 
-    \ Tracing is enabled
-    cpu-variable cpu-trace-enabled? trace-enabled?
-
     \ CPU is active
     cpu-count cells buffer: cpu-active?
     : cpu-active? ( index -- addr ) cells cpu-active? + ;
@@ -1746,21 +1743,84 @@ begin-module task
     : do-pause ( -- )
       true do-pause? ! true in-multitasker? ! ICSR_PENDSVSET! dmb dsb isb
     ;
+
+    \ Task info structure
+    begin-structure task-info-size
+
+      field: task-info-task
+      hfield: task-info-running
+      hfield: task-info-state
+      field: task-info-current-notify
+      field: task-info-ticks-delay
+      field: task-info-ticks-start
+      field: task-info-priority
+      field: task-info-name-len
+      28 +field task-info-name-bytes
+      
+    end-structure
+
+    \ Get the task count
+    : get-cpu-task-count ( cpu -- count )
+      0 swap cpu-first-task @ begin ?dup while
+        swap 1+ swap task-prev @
+      repeat
+    ;
+
+    \ Copy a task name into a task info structure
+    : copy-task-name-for-info { info task -- }
+      task task-name@ ?dup if
+        count dup info task-info-name-len !
+        info task-info-name-bytes swap 24 min move
+      else
+        0 info task-info-name-len !
+      then
+    ;
+
+    \ Copy a task delay info a task info structure
+    : copy-task-delay-for-info { info task -- }
+      task task-state h@ case
+	delayed of true endof
+	blocked-timeout of true endof
+	false swap
+      endcase
+      if
+        task last-delay
+      else
+        0 0
+      then
+      info task-info-ticks-start !
+      info task-info-ticks-delay !
+    ;
+
+    \ Copy task info into a task info structure
+    : copy-task-info { info task -- }
+      task info task-info-task !
+      task current-task @ = info task-info-running h!
+      task task-state h@ info task-info-state h!
+      task task-current-notify @ info task-info-current-notify !
+      task task-priority@ info task-info-priority !
+      info task copy-task-name-for-info
+      info task copy-task-delay-for-info
+    ;
     
     \ Dump task name
-    : dump-task-name ( task -- )
-      task-name@ ?dup if count tuck type 16 swap - 0 max else 16 then spaces
+    : dump-task-name { info -- }
+      info task-info-name-len @ ?dup if
+        info task-info-name-bytes over type 25 swap - 0 max spaces
+      else
+        25 spaces
+      then
     ;
     
     \ Dump task state
-    : dump-task-state ( task -- )
-      dup current-task @ = if
+    : dump-task-state { info -- }
+      info task-info-running h@ if
 	s" running"
       else
-	dup task-current-notify @ -1 <> if
+	info task-info-current-notify @ -1 <> if
 	  s" to-notify"
 	else
-	  dup task-state h@ case
+	  info task-info-state h@ case
 	    readied of            s" ready" endof
 	    delayed of            s" delayed" endof
 	    blocked-timeout of    s" timeout" endof
@@ -1770,34 +1830,37 @@ begin-module task
 	  endcase
 	then
       then
-      tuck type 11 swap - spaces drop
+      tuck type 11 swap - spaces
     ;
     
     \ Dump task priority
-    : dump-task-priority ( task -- )
-      task-priority@ here swap format-integer dup 8 swap - spaces type
+    : dump-task-priority { info -- }
+      info task-info-priority @ here swap format-integer
+      dup 8 swap - spaces type
     ;
     
     \ Dump task until time
-    : dump-task-until ( task -- )
-      dup task-state h@ case
+    : dump-task-until { info -- }
+      info task-info-state h@ case
 	delayed of true endof
 	blocked-timeout of true endof
 	false swap
       endcase
       if
-	last-delay + dup here swap format-unsigned
+        info task-info-ticks-delay @
+        info task-info-ticks-start @
+        + dup here swap format-unsigned
 	dup 10 swap - spaces type space
 	systick-counter - here swap format-integer dup 11 swap - spaces type
       else
-	drop 22 spaces
+	22 spaces
       then
     ;
     
     \ Dump task ehader
     : dump-task-header ( -- )
-      cr ." task     name             priority state      critical "
-      ." until      delay"
+      cr ." task     name                      priority state      "
+      ." until       delay"
     ;
 
   end-module
@@ -1810,25 +1873,26 @@ begin-module task
         cr ." cpu " i (.) ." :"
       then
       i [:
-        cpu-first-task @ begin ?dup while
-          dup
-          cr dup h.8 space dup dump-task-name space dup dump-task-priority space
-          dup dump-task-state space dump-task-until
-          task-prev @
-        repeat
+        dup get-cpu-task-count dup task-info-size * [: { cpu count info }
+          info { current-info }
+          cpu cpu-first-task @ begin ?dup while
+            current-info over copy-task-info
+            task-prev @
+            task-info-size +to current-info
+          repeat
+          count info cpu [: { count info }
+            count 0 ?do
+              cr info task-info-task @ h.8
+              space info dump-task-name
+              space info dump-task-priority
+              space info dump-task-state
+              space info dump-task-until
+              task-info-size +to info
+            loop
+          ;] swap outside-critical-with-other-core-spinlock
+        ;] with-aligned-allot
       ;] i critical-with-other-core-spinlock
     loop
-  ;
-
-  \ Display tracing information
-  : trace ( c-addr u -- )
-    trace-enabled? @ if
-      [:
-	cr type space ." critical: " in-critical @ 1- . .s dump-tasks
-      ;] critical
-    else
-      2drop
-    then
   ;
 
   \ Wait for n milliseconds with multitasking support
@@ -2015,7 +2079,6 @@ begin-module task
     cpu-count 0 ?do
       false i cpu-in-multitasker? !
       false i cpu-sleep-enabled? !
-      false i cpu-trace-enabled? !
       false i cpu-in-task-change !
       false i cpu-do-pause? !
       true i cpu-reschedule? !
@@ -2152,15 +2215,6 @@ continue-module task
 
   \ Get whether sleep is enabled
   : sleep-enabled? ( -- flag ) sleep-enabled? @ ;
-
-  \ Enable tracing
-  : enable-trace ( -- ) true trace-enabled? ! ;
-
-  \ Disable tracing
-  : disable-trace ( -- ) false trace-enabled? ! ;
-
-  \ Get whether tracing is enabled
-  : trace-enable? ( -- flag ) trace-enabled? @ ;
 
   \ Allot memory from the end of RAM
   : allot-end ( u -- addr )

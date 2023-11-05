@@ -182,7 +182,6 @@ begin-module tqueue
   \ Wait on a task queue
   \ Note that this must be called within a critical section
   : wait-tqueue ( tqueue -- )
-    s" BEGIN WAIT-TQUEUE" trace
     -1 over tqueue-counter +!
     dup tqueue-counter @ 0>= if
       drop exit
@@ -197,20 +196,17 @@ begin-module tqueue
       swap remove-wait-queue
       current-task validate-timeout
     ;] with-aligned-allot
-    s" END WAIT-TQUEUE" trace
   ;
 
   \ Wake up a task in a task queue
   \ Note that this must be called within a critical section
   : wake-tqueue ( tqueue -- )
-    s" BEGIN WAKE-TQUEUE" trace
     dup tqueue-counter @ 0< if
       dup pop-wait-queue ?dup if
         wait-task @ ready
       then
     then
     +tqueue-counter
-    s" END WAKE-TQUEUE" trace
   ;
 
   \ Un-wake a task queue
