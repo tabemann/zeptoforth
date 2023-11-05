@@ -196,7 +196,6 @@ begin-module fchan
     >r
     r@ fchan-closed @ triggers x-fchan-closed
     r@ fchan-slock claim-slock
-    s" BEGIN SEND-FCHAN" trace
     current-task prepare-block
     r@ fchan-recv-queue pop-fchan-queue ?dup if ( addr bytes wait )
       swap over fchan-wait-buf-size @ min ( addr wait bytes )
@@ -222,7 +221,6 @@ begin-module fchan
 	then
       ;] with-aligned-allot
     then
-    s" END SEND-FCHAN" trace
   ;
 
   \ Receive data on a rendezvous channel
@@ -230,7 +228,6 @@ begin-module fchan
     >r
     r@ fchan-closed @ triggers x-fchan-closed
     r@ fchan-slock claim-slock
-    s" BEGIN RECV-FCHAN" trace
     current-task prepare-block
     r@ fchan-send-queue pop-fchan-queue ?dup if ( addr bytes wait )
       swap over fchan-wait-buf-size @ min ( addr wait bytes )
@@ -256,7 +253,6 @@ begin-module fchan
 	then
       ;] with-aligned-allot
     then
-    s" END RECV-FCHAN" trace
   ;
 
   \ Close a rendezvous channel

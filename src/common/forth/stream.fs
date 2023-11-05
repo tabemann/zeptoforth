@@ -212,7 +212,6 @@ begin-module stream
   : send-stream ( addr bytes stream -- )
     2dup stream-data-size @ > triggers x-stream-data-too-big
     [:
-      s" BEGIN SEND-STREAM" trace
       dup stream-closed @ triggers x-stream-closed
       current-task prepare-block
       2dup wait-send-stream
@@ -223,7 +222,6 @@ begin-module stream
       else
 	drop
       then
-      s" END SEND-STREAM" trace
     ;] over stream-slock with-slock
   ;
 
@@ -232,7 +230,6 @@ begin-module stream
   \ later); note that if a timeout occurs, the data may be left partially sent
   : send-stream-parts ( addr bytes stream -- )
     [:
-      s" BEGIN SEND-STREAM-PARTS" trace
       dup stream-closed @ triggers x-stream-closed
       current-task prepare-block
       begin over 0> while
@@ -246,14 +243,12 @@ begin-module stream
 	then
       repeat
       2drop drop
-      s" END SEND-STREAM-PARTS" trace
     ;] over stream-slock with-slock
   ;
 
   \ Receive data from a stream
   : recv-stream ( addr bytes stream -- recv-bytes )
     [:
-      s" BEGIN RECV-STREAM" trace
       current-task prepare-block
       dup wait-recv-stream
       dup stream-current-count @ rot min swap
@@ -264,14 +259,12 @@ begin-module stream
       else
 	drop
       then
-      s" END RECV-STREAM" trace
     ;] over stream-slock with-slock
   ;
   
   \ Receive data at least a minimum number of bytes from a stream
   : recv-stream-min ( addr bytes min-bytes stream -- recv-bytes )
     [:
-      s" BEGIN RECV-STREAM-MIN" trace
       current-task prepare-block
       tuck wait-recv-stream-min
       dup stream-current-count @ rot min swap
@@ -282,38 +275,32 @@ begin-module stream
       else
 	drop
       then
-      s" END RECV-STREAM-MIN" trace
     ;] over stream-slock with-slock
   ;
 
   \ Peek data from a stream
   : peek-stream ( addr bytes stream -- peek-bytes )
     [:
-      s" BEGIN PEEK-STREAM" trace
       current-task prepare-block
       dup wait-recv-stream
       dup stream-current-count @ rot min swap
       rot 2 pick rot read-stream
-      s" END PEEK-STREAM" trace
     ;] over stream-slock with-slock
   ;
 
   \ Peek data at least a minimum number of bytes from a stream
   : peek-stream-min ( addr bytes min-bytes stream -- peek-bytes )
     [:
-      s" BEGIN PEEK-STREAM-MIN" trace
       current-task prepare-block
       tuck wait-recv-stream-min
       dup stream-current-count @ rot min swap
       rot 2 pick rot read-stream
-      s" END PEEK-STREAM-MIN" trace
     ;] over stream-slock with-slock
   ;
 
   \ Skip data on a stream
   : skip-stream ( bytes stream -- skip-bytes )
     [:
-      s" BEGIN SKIP-STREAM" trace
       current-task prepare-block
       dup wait-recv-stream
       dup stream-current-count @ rot min swap
@@ -323,14 +310,12 @@ begin-module stream
       else
 	drop
       then
-      s" END SKIP-STREAM" trace
     ;] over stream-slock with-slock
   ;
 
   \ Skip at least a minimum number of bytes on a stream
   : skip-stream-min ( bytes min-bytes stream -- skip-bytes )
     [:
-      s" BEGIN SKIP-STREAM-MIN" trace
       current-task prepare-block
       tuck wait-recv-stream-min
       dup stream-current-count @ rot min swap
@@ -340,7 +325,6 @@ begin-module stream
       else
 	drop
       then
-      s" END SKIP-STREAM-MIN" trace
     ;] over stream-slock with-slock
   ;
 
@@ -348,7 +332,6 @@ begin-module stream
   \ would normally occur)
   : send-stream-no-block ( addr bytes stream -- )
     [:
-      s" BEGIN SEND-STREAM-NO-BLOCK" trace
       dup stream-closed @ triggers x-stream-closed
       dup stream-free 2 pick < triggers x-would-block
       rot 2 pick 2 pick write-stream
@@ -358,7 +341,6 @@ begin-module stream
       else
 	drop
       then
-      s" END SEND-STREAM-NO-BLOCK" trace
     ;] over stream-slock with-slock
   ;
 
@@ -366,7 +348,6 @@ begin-module stream
   \ would occur
   : send-stream-partial-no-block ( addr bytes stream -- send-bytes )
     [:
-      s" BEGIN SEND-STREAM-PARTIAL-NO-BLOCK" trace
       dup stream-closed @ triggers x-stream-closed
       dup stream-free rot min swap
       rot 2 pick 2 pick write-stream
@@ -376,7 +357,6 @@ begin-module stream
       else
 	drop
       then
-      s" END SEND-STREAM-PARTIAL-NO-BLOCK" trace
     ;] over stream-slock with-slock
   ;
 
@@ -384,7 +364,6 @@ begin-module stream
   \ raised, rather a count of 0 is returned)
   : recv-stream-no-block ( addr bytes stream -- recv-bytes )
     [:
-      s" BEGIN RECV-STREAM-NO-BLOCK" trace
       dup stream-current-count @ rot min swap
       rot 2 pick 2 pick read-stream
       2dup advance-recv-stream
@@ -393,7 +372,6 @@ begin-module stream
       else
 	drop
       then
-      s" END RECV-STREAM-NO-BLOCK" trace
     ;] over stream-slock with-slock
   ;
 
@@ -401,7 +379,6 @@ begin-module stream
   \ (note that no exception is raised, rather a count of 0 is returned)
   : recv-stream-min-no-block ( addr bytes min-bytes stream -- recv-bytes )
     [:
-      s" BEGIN RECV-STREAM-MIN-NO-BLOCK" trace
       tuck stream-current-count @ <= if
 	dup stream-current-count @ rot min swap
 	rot 2 pick 2 pick read-stream
@@ -414,7 +391,6 @@ begin-module stream
       else
 	2drop drop 0
       then
-      s" END RECV-STREAM-MIN-NO-BLOCK" trace
     ;] over stream-slock with-slock
   ;
 
@@ -422,10 +398,8 @@ begin-module stream
   \ rather a count of 0 is returned)
   : peek-stream-no-block ( addr bytes stream -- peek-bytes )
     [:
-      s" BEGIN PEEK-STREAM-NO-BLOCK" trace
       dup stream-current-count @ rot min swap
       rot 2 pick rot read-stream
-      s" END PEEK-STREAM-NO-BLOCK" trace
     ;] over stream-slock with-slock
   ;
 
@@ -433,14 +407,12 @@ begin-module stream
   \ (note that no exception is raised, rather a count of 0 is returned)
   : peek-stream-min-no-block ( addr bytes min-bytes stream -- peek-bytes )
     [:
-      s" BEGIN PEEK-STREAM-MIN-NO-BLOCK" trace
       tuck stream-current-count @ <= if
 	dup stream-current-count @ rot min swap
 	rot 2 pick rot read-stream
       else
 	2drop drop 0
       then
-      s" END PEEK-STREAM-MIN-NO-BLOCK" trace
     ;] over stream-slock with-slock
   ;
   
@@ -448,7 +420,6 @@ begin-module stream
   \ that no exception is raised, rather a count of 0 is returned)
   : skip-stream-min-no-block ( bytes min-bytes stream -- skip-bytes )
     [:
-      s" BEGIN SKIP-STREAM-MIN-NO-BLOCK" trace
       tuck stream-current-count @ <= if
 	dup stream-current-count @ rot min swap
 	2dup advance-recv-stream
@@ -460,7 +431,6 @@ begin-module stream
       else
 	2drop 0
       then
-      s" END SKIP-STREAM-MIN-NO-BLOCK" trace
     ;] over stream-slock with-slock
   ;
   
