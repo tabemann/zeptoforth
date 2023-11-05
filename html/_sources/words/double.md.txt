@@ -254,6 +254,11 @@ Multiply two 64-bit double-cell numbers into a single 128-bit quadruple-cell num
 
 Exponentiation of a fixed point number by an unsigned integer
 
+##### `fmod`
+( f1 f2 -- f3 )
+
+Compute the symmetric modulus of two S31.32 fixed point numbers.
+
 ##### `sqrt`
 ( f1 -- f2 )
 
