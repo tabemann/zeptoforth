@@ -1259,11 +1259,19 @@ forth set-current
 \ End a critical section and pause
 : end-critical-pause ( -- ) disable-int 0 in-critical ! pause enable-int ;
 
+\ End a critical section and then call an xt
+: end-critical-execute ( xt -- ) end-critical execute ;
+
 \ Commit to flash
 commit-flash
 
-\ Execute code within a critcal section, properly handling exceptions
+\ Execute code within a critical section, properly handling exceptions
 : critical ( xt -- ) begin-critical try end-critical ?raise ;
+
+\ Execute code outside a critical section, properly handling exceptions
+: outside-critical ( xt -- )
+  ['] end-critical-execute try begin-critical ?raise
+;
 
 \ Allot RAM temporarily and clean it up afterwards, even after an exception
 : with-allot ( bytes xt -- ) ( xt: addr -- )

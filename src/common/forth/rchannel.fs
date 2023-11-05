@@ -216,7 +216,6 @@ begin-module rchan
     >r
     r@ rchan-closed @ triggers x-rchan-closed
     r@ rchan-slock claim-slock
-    s" BEGIN SEND-RCHAN" trace
     current-task prepare-block
     r@ rchan-reply-task @ 0= if
       r@ rchan-recv-queue pop-rchan-queue ?dup if
@@ -269,7 +268,6 @@ begin-module rchan
 	then
       ;] with-aligned-allot
     then
-    s" END SEND-RCHAN" trace
   ;
 
   \ Receive data on a bidirectional channel
@@ -277,7 +275,6 @@ begin-module rchan
     >r
     r@ rchan-closed @ triggers x-rchan-closed
     r@ rchan-slock claim-slock
-    s" BEGIN RECV-RCHAN" trace
     current-task prepare-block
     r@ rchan-send-queue pop-rchan-queue ?dup if ( addr bytes wait )
       swap over rchan-wait-buf-size @ min ( addr wait bytes )
@@ -305,7 +302,6 @@ begin-module rchan
 	then
       ;] with-aligned-allot
     then
-    s" END RECV-RCHAN" trace
   ;
 
   \ Reply to a bidirectional channel

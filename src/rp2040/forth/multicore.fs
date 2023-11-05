@@ -390,6 +390,13 @@ begin-module multicore
     r> release-spinlock-end-critical ?raise
   ;
 
+  \ Exit a critical section and release another core's multitasker's spinlock,
+  \ re-claiming it and re-entering the critical section afterwards
+  : outside-critical-with-other-core-spinlock ( xt core -- )
+    task-core-0-spinlock + >r r@ [: release-spinlock-end-critical execute ;]
+    try r> claim-spinlock-begin-critical ?raise
+  ;
+
   \ Enter a critical section and claim another core's multitasker's spinlock
   : begin-critical-with-other-core-spinlock ( core -- )
     task-core-0-spinlock + claim-spinlock-begin-critical
