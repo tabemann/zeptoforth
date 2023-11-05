@@ -46,10 +46,6 @@ begin-module neopixel-test
   high neopixel-power pin!
   
   neopixel-sm neopixel-pio neopixel-count neopixel-data my-neopixel init-neopixel
-
-  : fmod { D: a D: b -- D: c }
-    a a b f/ f>s s>f b f* d-
-  ;
   
   : run-neopixel-test ( -- )
     0,0 { D: angle }
