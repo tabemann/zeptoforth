@@ -47,6 +47,19 @@ begin-module neopixel-test
   
   neopixel-sm neopixel-pio neopixel-count neopixel-data my-neopixel init-neopixel
   
+  \ Red color weight
+  1,0 2constant red-weight
+  
+  \ Green color weight
+  1,0 2,0 f/ 2constant green-weight
+  
+  \ Blue color weight
+  3,0 5,0 f/ 2constant blue-weight
+  
+  : correct-color { r g b -- r' g' b' }
+    r s>f red-weight f* f>s g s>f green-weight f* f>s b s>f blue-weight f* f>s 
+  ;
+  
   : run-neopixel-test ( -- )
     0,0 { D: angle }
     begin key? not while
@@ -70,7 +83,7 @@ begin-module neopixel-test
       5,0 h' d<= h' 6,0 d< and if
         255 0 x
       then
-      0 my-neopixel neopixel!
+      correct-color 0 my-neopixel neopixel!
       angle pi 0,0625 f* d+ 2dup pi 2,0 f* d>= if pi 2,0 f* d- then to angle
       my-neopixel update-neopixel
       50 ms
