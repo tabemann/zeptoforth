@@ -46,15 +46,28 @@ begin-module neopixel-test
   high neopixel-power pin!
   
   neopixel-sm neopixel-pio neopixel-count neopixel-data my-neopixel init-neopixel
+
+  \ Red initial color weight
+  5,0 4,0 f/ 2constant red-init-weight
+  
+  \ Green initial color weight
+  1,0 2,0 f/ 2constant green-init-weight
+  
+  \ Blue initial color weight
+  3,0 5,0 f/ 2constant blue-init-weight
+
+  \ Calculate adjustment factor
+  red-init-weight 2 fi** green-init-weight 2 fi** d+ blue-init-weight 2 fi** d+
+  sqrt 1,0 2swap f/ 2constant adjust-factor
   
   \ Red color weight
-  1,0 2constant red-weight
+  red-init-weight adjust-factor f* 2constant red-weight
   
   \ Green color weight
-  1,0 2,0 f/ 2constant green-weight
+  green-init-weight adjust-factor f* 2constant green-weight
   
   \ Blue color weight
-  3,0 5,0 f/ 2constant blue-weight
+  blue-init-weight adjust-factor f* 2constant blue-weight
   
   : correct-color { r g b -- r' g' b' }
     r s>f red-weight f* f>s g s>f green-weight f* f>s b s>f blue-weight f* f>s 
