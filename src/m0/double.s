@@ -308,25 +308,28 @@ _drshift:
 	@@ Double arithmetic right shift
 	define_word "2arshift", visible_flag
 _darshift:
+        push {r4, lr}
 	ldm dp!, {r0, r1}  @ r0 high, r1 low
 	cmp tos, #32
 	blo 1f
 	movs r3, tos
 	subs r3, #32
-	movs r2, r0
-	asrs r2, r3
+        movs r2, r0
+        asrs r2, r3
 	b 2f
-1:      lsrs r1, r6
+1:      movs r4, r1
+        lsrs r4, r6
+        movs r2, r4
 	rsbs r3, r6, #0
 	adds r3, #32
-	movs r2, r0
-	lsls r2, r3
-	orrs r1, r2
+        movs r4, r0
+        lsls r4, r3
+        orrs r2, r4
 2:      subs dp, #4
-	str r1, [dp]
+	str r2, [dp]
 	asrs r0, tos
 	movs tos, r0
-	bx lr
+	pop {r4, pc}
 	end_inlined
 	
 	@@ Negate a double word
