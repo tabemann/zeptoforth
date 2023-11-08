@@ -59,6 +59,15 @@ begin-module neopixel-test
   : correct-color { r g b -- r' g' b' }
     r s>f red-weight f* f>s g s>f green-weight f* f>s b s>f blue-weight f* f>s 
   ;
+
+  : correct-brightness { r g b -- r' g' b' }
+    255,0 r s>f red-weight f/ 2 fi**
+    g s>f green-weight f/ 2 fi** d+
+    b s>f blue-weight f/ 2 fi** d+ sqrt f/ { D: adjust }
+    r s>f adjust f* f>s
+    g s>f adjust f* f>s
+    b s>f adjust f* f>s
+  ;
   
   : run-neopixel-test ( -- )
     0,0 { D: angle }
@@ -83,7 +92,7 @@ begin-module neopixel-test
       5,0 h' d<= h' 6,0 d< and if
         255 0 x
       then
-      correct-color 0 my-neopixel neopixel!
+      correct-color correct-brightness 0 my-neopixel neopixel!
       angle pi 0,0625 f* d+ 2dup pi 2,0 f* d>= if pi 2,0 f* d- then to angle
       my-neopixel update-neopixel
       50 ms
