@@ -40,11 +40,11 @@ begin-module simple-font
     \ Parse a row the font
     : %% ( -- )
       0 { data }
-      source >parse @ 8 + min + source drop >parse @ 1+ + ?do
+      source >parse @ 7 + min + source drop >parse @ + ?do
         data 1 lshift to data
         i c@ [char] # = if data 1 or to data then
       loop
-      source >parse @ 8 + min >parse ! drop
+      source >parse @ 7 + min >parse ! drop
       data c,
       ."  Data: " data h.2
     ;
