@@ -24,7 +24,6 @@ begin-module cyw43-nvram
 
     \ Append an NVRAM null-terminated string
     : nvram," ( length "string" -- length' )
-      advance-once
       [char] " internal::parse-to-char
       rot over + 1+ -rot
       begin ?dup while 1- swap dup c@ c, 1+ swap repeat drop 0 c,
