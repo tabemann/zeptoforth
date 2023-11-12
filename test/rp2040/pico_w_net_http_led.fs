@@ -18,6 +18,22 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
+\ Use instructions
+\
+\ 1. Load this code into RAM on a zeptoforth install where zeptoIP has already
+\    been installed using a terminal which supports zeptoforth, e.g. zeptocom.js
+\    or e4thcom in noforth mode.
+\ 2. Execute: s" <WiFi SSID>" s" <WiFi password>"
+\             pico-w-net-http-server::start-server
+\
+\ At this point the console will report the IPv4 address acquired via DHCP. You
+\ may then connect to the HTTP server started at:
+\
+\ http://<the reported IPv4 address>:80/
+\
+\ You will be presented with a web page with three buttons on it, to turn on
+\ the Raspberry Pi Pico W's LED, to turn it off, and to toggle it.
+
 begin-module pico-w-net-http-server
 
   oo import
@@ -549,9 +565,7 @@ begin-module pico-w-net-http-server
     \ Do a connection close
     :noname { self -- }
       self actually-closed? @ not if
-        cr ." CLOSING....!"
         self http-endpoint @ my-interface @ close-tcp-endpoint
-        cr ." CLOSED!"
         self init-http-state
       then
     ; define actually-close
@@ -612,7 +626,6 @@ begin-module pico-w-net-http-server
       endpoint endpoint-tcp-state@ { state }
       state TCP_SYN_RECEIVED = if
         http-server start-connection
-        cr ." OPENING....!"
       else
         state TCP_ESTABLISHED = state TCP_CLOSE_WAIT = or if
           http-server schedule-close
@@ -627,7 +640,7 @@ begin-module pico-w-net-http-server
   <tcp-echo-handler> class-size buffer: my-tcp-echo-handler
   
   \ Initialize the test
-  : init-test { D: ssid D: pass -- }
+  : start-server { D: ssid D: pass -- }
     pio-addr sm-index pio-instance <pico-w-cyw43-net> my-cyw43-net init-object
     my-cyw43-net cyw43-control@ my-cyw43-control !
     my-cyw43-net net-interface@ my-interface !

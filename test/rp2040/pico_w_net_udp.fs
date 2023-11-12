@@ -18,6 +18,20 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
+\ 1. Load this code into RAM on a zeptoforth install where zeptoIP has already
+\    been installed using a terminal which supports zeptoforth, e.g. zeptocom.js
+\    or e4thcom in noforth mode.
+\ 2. Execute: s" <WiFi SSID>" s" <WiFi password>" pico-w-net-udp::start-server
+\
+\ This will establish a UDP server on port 4444 at the IPv4 address acquired via
+\ DHCP that is reported on the console.
+\
+\ The recommended means of communicating with this REPL is:
+\
+\ nc -u <the reported IPv4 address> 4444
+\
+\ Each line transmitted by netcat will be echoed back to the user via UDP.
+
 begin-module pico-w-net-udp
   
   oo import
@@ -84,8 +98,8 @@ begin-module pico-w-net-udp
   \ Event message buffer
   event-message-size aligned-buffer: my-event
 
-  \ Run the test
-  : run-test { D: ssid D: pass -- }
+  \ Start the server
+  : start-server { D: ssid D: pass -- }
     init-test
     cyw43-consts::PM_AGGRESSIVE my-cyw43-control @ cyw43-power-management!
     begin ssid pass my-cyw43-control @ join-cyw43-wpa2 nip until
@@ -96,9 +110,7 @@ begin-module pico-w-net-udp
         my-event my-cyw43-control @ get-cyw43-event
         my-event evt-event-type @ EVENT_DISASSOC =
         my-event evt-event-type @ EVENT_DISASSOC_IND = or if
-          [: cr display-red ." *** RECONNECTING TO WIFI... *** " display-normal ;] usb::with-usb-output
           begin ssid pass my-cyw43-control @ join-cyw43-wpa2 nip until
-          [: cr display-red ." *** RECONNECTED TO WIFI *** " display-normal ;] usb::with-usb-output
         then
       again
     ;] 512 128 1024 task::spawn task::run
