@@ -71,11 +71,6 @@
 <p>( xt lock – )</p>
 <p>Execute an xt with a given lock <em>lock</em> locked while it executes, unlocking it afterwards. If an exception is raised by <em>xt</em>, unlock <em>lock</em> and then re-raise the exception.</p>
 </section>
-<section id="update-lock-priority">
-<h3><code class="docutils literal notranslate"><span class="pre">update-lock-priority</span></code><a class="headerlink" href="#update-lock-priority" title="Permalink to this heading">¶</a></h3>
-<p>( lock – )</p>
-<p>Update the priority of the holder of a lock, and the priority of the holder of a lock waited on by the holder of this lock, and so on, in order to avoid priority inversion. Note that this must not be called within a critical section.</p>
-</section>
 </section>
 </section>
 
@@ -162,6 +157,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../extra/font.html">Fonts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/bitmap_utils.html">Bitmap Utiliteis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../extra/neopixel.html">Neopixels on the RP2040</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/net.html">zeptoIP Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extra/cyw43.html">CYW43xxx Words</a></li>
 </ul>
 
 <div class="relations">

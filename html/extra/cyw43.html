@@ -1,0 +1,280 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>CYW43xxx Words &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="zeptoIP Words" href="net.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="cyw43xxx-words">
+<h1>CYW43xxx Words<a class="headerlink" href="#cyw43xxx-words" title="Permalink to this heading">¶</a></h1>
+<p>A driver for CYW43xxx WiFi chips is included with zeptoforth. The external API for controlling them is provided by the <code class="docutils literal notranslate"><span class="pre">&lt;cyw43-control&gt;</span></code> class in the <code class="docutils literal notranslate"><span class="pre">cyw43-control</span></code> module. This class exposes a frame interface and a means of retrieving WiFi interface events.</p>
+<section id="cyw43-control">
+<h2><code class="docutils literal notranslate"><span class="pre">cyw43-control</span></code><a class="headerlink" href="#cyw43-control" title="Permalink to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">cyw43-control</span></code> module contains the following constant:</p>
+<section id="default-mac-addr">
+<h3><code class="docutils literal notranslate"><span class="pre">default-mac-addr</span></code><a class="headerlink" href="#default-mac-addr" title="Permalink to this heading">¶</a></h3>
+<p>( – D: default-mac-addr )</p>
+<p>This is a token when provided to the <code class="docutils literal notranslate"><span class="pre">&lt;cyw43-control&gt;</span></code> class when instatiated indicates that the default MAC address is to be used.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">cyw43-control</span></code> module contains the following class:</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;cyw43-control&gt;</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;cyw43-control&gt;</span></code> class has the constructor:</p>
+<section id="new">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#new" title="Permalink to this heading">¶</a></h4>
+<p>( D: mac-addr clm-addr clm-bytes fw-addr fw-bytes pwr clk dio cs pio-addr sm pio – )</p>
+<p>This instantiates a <code class="docutils literal notranslate"><span class="pre">&lt;cyw43-control&gt;</span></code> instance to use the MAC address <em>mac-addr</em> (which if <code class="docutils literal notranslate"><span class="pre">default-mac-addr</span></code> indicates that the default MAC address is to be used<code class="docutils literal notranslate"><span class="pre">),</span> <span class="pre">CLM</span> <span class="pre">firmware</span> <span class="pre">of</span> <span class="pre">*clm-bytes*</span> <span class="pre">at</span> <span class="pre">*clm-addr*,</span> <span class="pre">main</span> <span class="pre">firmware</span> <span class="pre">of</span> <span class="pre">*fw-bytes*</span> <span class="pre">at</span> <span class="pre">*fw-addr*,</span> <span class="pre">*pwr*,</span> <span class="pre">*clk*,</span> <span class="pre">*dio*,</span> <span class="pre">and</span> <span class="pre">*cs*</span> <span class="pre">GPIO</span> <span class="pre">pins</span> <span class="pre">for</span> <span class="pre">communication</span> <span class="pre">with</span> <span class="pre">the</span> <span class="pre">CYW43xxx,</span> <span class="pre">and</span> <span class="pre">PIO</span> <span class="pre">instruction</span> <span class="pre">base</span> <span class="pre">address</span> <span class="pre">*pio-addr*,</span> <span class="pre">PIO</span> <span class="pre">state</span> <span class="pre">machine</span> <span class="pre">index</span> <span class="pre">*sm*,</span> <span class="pre">and</span> <span class="pre">PIO</span> <span class="pre">instance</span> <span class="pre">*pio*</span> <span class="pre">(</span></code>pio::PIO0<code class="docutils literal notranslate"><span class="pre">or</span></code>pio::PIO1`).</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;cyw43-control&gt;</span></code> class has the following methods:</p>
+</section>
+<section id="init-cyw43">
+<h4><code class="docutils literal notranslate"><span class="pre">init-cyw43</span></code><a class="headerlink" href="#init-cyw43" title="Permalink to this heading">¶</a></h4>
+<p>( self – )</p>
+<p>Initialize the CYW43.</p>
+</section>
+<section id="cyw43-country">
+<h4><code class="docutils literal notranslate"><span class="pre">cyw43-country!</span></code><a class="headerlink" href="#cyw43-country" title="Permalink to this heading">¶</a></h4>
+<p>( abbrev-addr abbrev-bytes code-addr code-bytes country-rev self – )</p>
+<p>Initialize the country abbrevation, code, and revision; these default to <code class="docutils literal notranslate"><span class="pre">XX</span></code>, <code class="docutils literal notranslate"><span class="pre">XX</span></code>, and -1. Note that this must be called before <code class="docutils literal notranslate"><span class="pre">init-cyw43</span></code>, if it called at all.</p>
+</section>
+<section id="cyw43-power-management">
+<h4><code class="docutils literal notranslate"><span class="pre">cyw43-power-management!</span></code><a class="headerlink" href="#cyw43-power-management" title="Permalink to this heading">¶</a></h4>
+<p>( pm self – )</p>
+<p>Set power management to <em>pm</em>, defined in the module <code class="docutils literal notranslate"><span class="pre">cyw43-consts</span></code>.</p>
+</section>
+<section id="join-cyw43-open">
+<h4><code class="docutils literal notranslate"><span class="pre">join-cyw43-open</span></code><a class="headerlink" href="#join-cyw43-open" title="Permalink to this heading">¶</a></h4>
+<p>( ssid-addr ssid-bytes self – status success? )</p>
+<p>Join an open AP. <em>ssid-addr</em> and <em>ssid-bytes</em> comprise the SSID of the AP being connected to. On success <em>success?</em> of true and <em>status</em> of 0 will be returned.</p>
+</section>
+<section id="join-cyw43-wpa2">
+<h4><code class="docutils literal notranslate"><span class="pre">join-cyw43-wpa2</span></code><a class="headerlink" href="#join-cyw43-wpa2" title="Permalink to this heading">¶</a></h4>
+<p>( ssid-addr ssid-bytes pass-addr pass-bytes self – status success? )</p>
+<p>Join a WPA2 AP. <em>ssid-addr</em> and <em>ssid-bytes</em> comprise the SSID of the AP being connected to. <em>pass-addr</em> and <em>pass-bytes</em> comprise the password of the AP being connected to. On success <em>success?</em> of true and <em>status</em> of 0 will be returned.</p>
+</section>
+<section id="start-cyw43-open">
+<h4><code class="docutils literal notranslate"><span class="pre">start-cyw43-open</span></code><a class="headerlink" href="#start-cyw43-open" title="Permalink to this heading">¶</a></h4>
+<p>( ssid-addr ssid-bytes channel self – )</p>
+<p>Start open AP. <em>ssid-addr</em> and <em>ssid-bytes</em> comprise the SSID of the AP being started. <em>channel</em> comprises the channel of the AP being started.</p>
+</section>
+<section id="start-cyw43-wpa2">
+<h4><code class="docutils literal notranslate"><span class="pre">start-cyw43-wpa2</span></code><a class="headerlink" href="#start-cyw43-wpa2" title="Permalink to this heading">¶</a></h4>
+<p>( ssid-addr ssid-bytes pass-addr pass-bytes channel self – )</p>
+<p>Start WPA2 AP. <em>ssid-addr</em> and <em>ssid-bytes</em> comprise the SSID of the AP being started. <em>pass-addr</em> and <em>pass-bytes</em> comprise the password of the AP being started. <em>channel</em> comprises the channel of the AP being started.</p>
+</section>
+<section id="cyw43-gpio">
+<h4><code class="docutils literal notranslate"><span class="pre">cyw43-gpio!</span></code><a class="headerlink" href="#cyw43-gpio" title="Permalink to this heading">¶</a></h4>
+<p>( val index self – )</p>
+<p>Set a GPIO on the CYW43xxx.</p>
+</section>
+<section id="enable-cyw43-event">
+<h4><code class="docutils literal notranslate"><span class="pre">enable-cyw43-event</span></code><a class="headerlink" href="#enable-cyw43-event" title="Permalink to this heading">¶</a></h4>
+<p>( event self – )</p>
+<p>Enable an event. <em>event</em> is an <code class="docutils literal notranslate"><span class="pre">EVENT_*</span></code> value found in the <code class="docutils literal notranslate"><span class="pre">cyw43-events</span></code> module.</p>
+</section>
+<section id="enable-cyw43-events">
+<h4><code class="docutils literal notranslate"><span class="pre">enable-cyw43-events</span></code><a class="headerlink" href="#enable-cyw43-events" title="Permalink to this heading">¶</a></h4>
+<p>( event-addr event-count self – )</p>
+<p>Enable multiple events. <em>event-addr</em> is an array of <em>event-count</em> bytes, each being an <code class="docutils literal notranslate"><span class="pre">EVENT_*</span></code> value found in the <code class="docutils literal notranslate"><span class="pre">cyw43-events</span></code> module.</p>
+</section>
+<section id="disable-cyw43-event">
+<h4><code class="docutils literal notranslate"><span class="pre">disable-cyw43-event</span></code><a class="headerlink" href="#disable-cyw43-event" title="Permalink to this heading">¶</a></h4>
+<p>( event self – )</p>
+<p>Disable an event. <em>event</em> is an <code class="docutils literal notranslate"><span class="pre">EVENT_*</span></code> value found in the <code class="docutils literal notranslate"><span class="pre">cyw43-events</span></code> module.</p>
+</section>
+<section id="disable-cyw43-events">
+<h4><code class="docutils literal notranslate"><span class="pre">disable-cyw43-events</span></code><a class="headerlink" href="#disable-cyw43-events" title="Permalink to this heading">¶</a></h4>
+<p>( event-addr event-count self – )</p>
+<p>Disable multiple events. <em>event-addr</em> is an array of <em>event-count</em> bytes, each being an <code class="docutils literal notranslate"><span class="pre">EVENT_*</span></code> value found in the <code class="docutils literal notranslate"><span class="pre">cyw43-events</span></code> module.</p>
+</section>
+<section id="disable-all-cyw43-events">
+<h4><code class="docutils literal notranslate"><span class="pre">disable-all-cyw43-events</span></code><a class="headerlink" href="#disable-all-cyw43-events" title="Permalink to this heading">¶</a></h4>
+<p>( self – )</p>
+<p>Disable all events.</p>
+</section>
+<section id="cyw43-frame-interface">
+<h4><code class="docutils literal notranslate"><span class="pre">cyw43-frame-interface&#64;</span></code><a class="headerlink" href="#cyw43-frame-interface" title="Permalink to this heading">¶</a></h4>
+<p>( self – interface )</p>
+<p>Get the CYW43 frame interface.</p>
+</section>
+<section id="get-cyw43-event">
+<h4><code class="docutils literal notranslate"><span class="pre">get-cyw43-event</span></code><a class="headerlink" href="#get-cyw43-event" title="Permalink to this heading">¶</a></h4>
+<p>( addr self – )</p>
+<p>Carry out a blocking dequeue of an event message. <em>addr</em> points to a block of memory for an event message of <code class="docutils literal notranslate"><span class="pre">cyw43-events::event-message-size</span></code> size.</p>
+</section>
+<section id="poll-cyw43-event">
+<h4><code class="docutils literal notranslate"><span class="pre">poll-cyw43-event</span></code><a class="headerlink" href="#poll-cyw43-event" title="Permalink to this heading">¶</a></h4>
+<p>( addr self – found? )</p>
+<p>Poll for an event message. <em>addr</em> points to a block of memory for an event message of <code class="docutils literal notranslate"><span class="pre">cyw43-events::event-message-size</span></code> size. Its contents are only valid if <em>found?</em> is true, indicating that an event was found.</p>
+</section>
+<section id="clear-cyw43-events">
+<h4><code class="docutils literal notranslate"><span class="pre">clear-cyw43-events</span></code><a class="headerlink" href="#clear-cyw43-events" title="Permalink to this heading">¶</a></h4>
+<p>( self – )</p>
+<p>Clear the event queue.</p>
+</section>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../words/basic.html">Basic Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/module.html">Module Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/compat.html">ANS Forth / Forth 2012 Compatibility Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/wordlist.html">Wordlist Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/console.html">Console Redirection Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/alarm.html">Software Alarm Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/action.html">Action Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pin.html">Pin Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/led.html">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/gpio.html">GPIO Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pio.html">Programmable Input/Output Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/uart.html">UART Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/adc.html">Analog-Digital Converter Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/spi.html">SPI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/i2c.html">I2C Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pwm.html">Pulse Width Modulation Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/rtc.html">Realtime Clock (RTC) Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/timer.html">Hardware Timers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/sdcard.html">SDHC/SDXC Card Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/fat32.html">FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/simple_fat32.html">Simple FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/fat32_tools.html">FAT32 Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/multicore.html">Multicore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/armv6m.html">ARMv6-M Assembler Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/line.html">Line Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/value.html">Value and Local Variable Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/closure.html">Closures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/temp.html">Temporary Buffer Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/task_pool.html">Task Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/action_pool.html">Action Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/heap.html">Heap Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pool.html">Pool Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/map.html">Map Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/oo.html">Object Orientation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/core_lock.html">Core Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/channel.html">Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/fchannel.html">Rendezvous Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/schannel.html">Simple channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/rchannel.html">Bidirectional Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/stream.html">Stream Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/tqueue.html">Task Queue Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/rng.html">Random Number Generator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/ansi_term.html">ANSI Terminal words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/qspi.html">Quad SPI words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/block.html">Block words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/edit.html">Block Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/test.html">Testing Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/internal.html">Internal Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/asm.html">Compilation-specific words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="font.html">Fonts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bitmap_utils.html">Bitmap Utiliteis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="neopixel.html">Neopixels on the RP2040</a></li>
+<li class="toctree-l1"><a class="reference internal" href="net.html">zeptoIP Words</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">CYW43xxx Words</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="net.html" title="previous chapter">zeptoIP Words</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Travis Bemann.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/extra/cyw43.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
