@@ -18,6 +18,20 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE
 
+\ Use instructions
+\
+\ 1. Load this code into RAM on a zeptoforth install where zeptoIP has already
+\    been installed using a terminal which supports zeptoforth, e.g. zeptocom.js
+\    or e4thcom in noforth mode.
+\ 2. Execute: s" <WiFi SSID>" s" <WiFi password>" pico-w-net-uart::start-server
+\
+\ At this point one will be able to establish a TCP connection to port 6668 on
+\ the IPv4 address acquired via DHCP that is reported on the console. Any data
+\ received by the Raspberry Pi Pico W via this TCP connection will be then
+\ transmitted via UART0. Likewise, any data received via UART0 will be
+\ transmitted via this TCP connnection. Note that UART0 will be mapped to its
+\ default of GPIO pins 0 and 1.
+
 begin-module pico-w-net-uart
 
   oo import
@@ -106,15 +120,9 @@ begin-module pico-w-net-uart
         tx-buffer-addr @ tx-count @ { buffer count }
         count 0> if
           my-endpoint @ if
-            buffer count my-endpoint @ my-interface @ ['] send-tcp-endpoint try
-            ?dup if
-              nip nip nip nip
-              [: display-red execute display-normal ;] usb::with-usb-output
-            then
+            buffer count my-endpoint @ my-interface @ send-tcp-endpoint
             \ my-cyw43-net toggle-pico-w-led
             0 tx-count !
-          else
-            [: cr ." NO ENDPOINT " ;] usb::with-usb-output
           then
         then
       then
@@ -186,13 +194,8 @@ begin-module pico-w-net-uart
           0 0 endpoint [: drop { endpoint }
             false server-active? !
             endpoint my-interface @ close-tcp-endpoint
-            cr ." Got " rx-byte-count @ . ." bytes"
             endpoint endpoint-tcp-state@ TCP_CLOSED = if
               false closing? !
-              endpoint
-              [:
-                cr ." Got CLOSED after close-tcp-endpoint on " h.8
-              ;] usb::with-usb-output
             then
             0 rx-byte-count !
             server-port my-interface @ allocate-tcp-listen-endpoint if
@@ -241,6 +244,7 @@ begin-module pico-w-net-uart
 
   \ Connect to WiFi
   : connect-wifi { D: ssid D: pass -- }
+    init-test
     cyw43-consts::PM_AGGRESSIVE my-cyw43-control @ cyw43-power-management!
     begin ssid pass my-cyw43-control @ join-cyw43-wpa2 nip until
     my-cyw43-control @ disable-all-cyw43-events
@@ -250,9 +254,7 @@ begin-module pico-w-net-uart
         my-event my-cyw43-control @ get-cyw43-event
         my-event evt-event-type @ EVENT_DISASSOC =
         my-event evt-event-type @ EVENT_DISASSOC_IND = or if
-          [: cr display-red ." *** RECONNECTING TO WIFI... *** " display-normal ;] usb::with-usb-output
           begin ssid pass my-cyw43-control @ join-cyw43-wpa2 nip until
-          [: cr display-red ." *** RECONNECTED TO WIFI *** " display-normal ;] usb::with-usb-output
         then
       again
     ;] 512 128 1024 task::spawn task::run
@@ -269,7 +271,8 @@ begin-module pico-w-net-uart
   ;
 
   \ Start the server
-  : start-server ( -- )
+  : start-server ( D: ssid D: pass -- )
+    connect-wifi
     server-port my-interface @ allocate-tcp-listen-endpoint if
       my-endpoint !
     else
