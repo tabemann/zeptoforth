@@ -1,8 +1,18 @@
 # Building and Using zeptoIP
 
-zeptoIP is an IP stack for zeptoforth, which at the present is layered on top of a CYW43439 driver for the Raspberry Pi Pico W. This is currently in an beta state, and is being made available for testing prior to becoming part of the zeptoforth master branch. Note that it can be used with with zeptoforth in the `master` branch and the pre-built binaries.
+zeptoIP is an IP stack for zeptoforth, which at the present is layered on top of a CYW43439 driver for the Raspberry Pi Pico W. It is designed to enable communication by zeptoforth via WiFi. Note that it is currently IPv4-only, but with sufficient demand an IPv6 port may appear in the future. Also, while it is originally implemented specifically for the Raspberry Pi Pico W, it is designed to be easily ported to any interface that directly exposes receiving and transmitting Ethernet frames, whether directly or encapsulated in some other protocol. For instance, future targets may include Ethernet interfaces on STM32 boards.
 
 zeptoIP, the CYW43439 driver, and the CYW43439 firmware on the Raspberry Pi Pico W require a `rp2040_big` platform build, because there is barely enough space with them on a standard `rp2040` platform build. This is at the expense of 512 KB of space for blocks, and leaves approximately 571 KB (at last check) of space available for code in flash (assuming 2 MB of flash). Note that for boards that do have more than 2 MB of flash available custom builds are needed to take advantage of this space.
+
+For examples of demos involving zeptoIP, there are:
+
+* `test/rp2040/pico_w_net_http_led.fs`, a very simple web server for controlling the LED on a Raspberry Pi Pico W
+* `test/rp2040/pico_w_net_http_download.fs`, an extremely simple web client that connects to `www.google.com` and echos its reponse
+* `test/rp2040/pico_w_net_repl.fs`, a basic TCP Forth REPL (note - this does no authentication, so don't expose this to the open Internet)
+* `test/rp2040/pico_w_net_udp.fs`, a tiny UDP echo server
+* `test/rp2040/pico_w_net_uart.fs`, a TCP-UART interface server
+
+Directions for use of the individual demos are included therein.
 
 ## Uploading the CYW43439 firmware
 

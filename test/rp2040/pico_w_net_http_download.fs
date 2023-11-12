@@ -18,6 +18,17 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
+\ Use instructions
+\
+\ 1. Load this code into RAM on a zeptoforth install where zeptoIP has already
+\    been installed using a terminal which supports zeptoforth, e.g. zeptocom.js
+\    or e4thcom in noforth mode.
+\ 2. Execute: s" <WiFi SSID>" s" <WiFi password>" pico-w-net-http::init-test
+\ 3. Execute: pico-w-net-http::run-test
+\
+\ If all goes well, then the contents of the reply from a GET request to
+\ www.google.com will be echoed on the console.
+
 begin-module pico-w-net-http
   
   oo import
@@ -73,10 +84,8 @@ begin-module pico-w-net-http
         cr ." CLOSING CONNECTION" cr
         closing? not if
           true to closing?
-          cr ." REGISTERING CLOSE ALARM" cr
           500 0 endpoint [:
             drop my-interface @ close-tcp-endpoint
-            cr ." close-tcp-endpoint RETURNED" cr
           ;] my-close-alarm set-alarm-delay-default
         then
       then
