@@ -2992,6 +2992,8 @@ begin-module net
       endpoint endpoint-remote-mac-addr @
       self send-ipv4-basic-tcp
       endpoint reset-endpoint-local-port
+      TCP_CLOSED endpoint endpoint-tcp-state!
+      endpoint self put-ready-endpoint
     ; define send-ipv4-rst
 
     \ Send a basic IPv4 TCP packet
@@ -3064,7 +3066,6 @@ begin-module net
           exit
         then
         endpoint endpoint-tcp-state@ { state }
-\        endpoint endpoint-waiting-bytes@ { waiting-bytes }
         addr bytes endpoint self
         state case
           TCP_SYN_SENT of
@@ -3088,7 +3089,7 @@ begin-module net
           TCP_LAST_ACK of
             process-ipv4-ack-last-ack
           endof
-          drop send-ipv4-rst-for-ack exit
+          drop 2drop 2drop
         endcase
         endpoint endpoint-waiting-bytes@ 0>
         endpoint endpoint-tcp-state@ state <> or if
@@ -3109,17 +3110,10 @@ begin-module net
         addr tcp-dest-port hunaligned@ rev16 endpoint endpoint-local-port@ <> if
           exit
         then
-\        addr bytes endpoint self
-\        endpoint endpoint-waiting-bytes@ { waiting-bytes }
-        \ endpoint endpoint-tcp-state@ { state }
-        \ state case
-        \   TCP_ESTABLISHED of process-ipv4-ack-established endof
-        \   TCP_CLOSE_WAIT of process-ipv4-ack-close-wait endof
-        \   TCP_LAST_ACK of process-ipv4-ack-last-ack endof
-        \   >r send-ipv4-rst-for-ack r>
-        \ endcase
+        endpoint endpoint-tcp-state@ { state }
+        addr bytes endpoint self process-ipv4-basic-ack
         addr bytes endpoint self
-        endpoint endpoint-tcp-state@ case
+        state case
           TCP_ESTABLISHED of process-ipv4-ack-fin-established endof
           TCP_FIN_WAIT_1 of process-ipv4-ack-fin-fin-wait-1 endof
           TCP_FIN_WAIT_2 of process-ipv4-ack-fin-fin-wait-2 endof
@@ -3226,6 +3220,8 @@ begin-module net
     :noname { addr bytes endpoint self -- }
       endpoint endpoint-ipv4-remote@ drop addr bytes
       self send-ipv4-rst-for-packet
+      TCP_CLOSED endpoint endpoint-tcp-state!
+      endpoint self put-ready-endpoint
     ; define send-ipv4-rst-for-ack
     
     \ \ Process an IPv4 FIN packet
@@ -3966,7 +3962,7 @@ begin-module net
       [: { endpoint self }
         endpoint endpoint-tcp-state@ case
           TCP_SYN_SENT of endpoint self send-ipv4-rst endof
-          TCP_SYN_RECEIVED of endpoint self close-tcp-established endof
+          TCP_SYN_RECEIVED of endpoint self send-ipv4-rst endof
           TCP_ESTABLISHED of endpoint self close-tcp-established endof
           TCP_FIN_WAIT_1 of endpoint self wait-endpoint-closed endof
           TCP_FIN_WAIT_2 of endpoint self wait-endpoint-closed endof
