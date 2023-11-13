@@ -69,7 +69,7 @@ The library of code included along with the zeptoforth kernel, which is present 
 
 There is also support for loadable extras not included in any builds:
 
-* An IPv4 stack for the Raspberry Pi Pico W (aka 'zeptoIP')
+* An IPv4 stack for the Raspberry Pi Pico W (aka 'zeptoIP'); for more info consult `BUILDING_AND_USING_ZEPTOIP.md`.
 * Bitmaps (in `extra/common/bitmap.fs`)
 * SSD1306-based displays (in `extra/common/ssd1306.fs`)
 * Monospace, bitmap fonts (in `extra/common/font.fs`)
