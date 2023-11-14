@@ -2691,6 +2691,9 @@ begin-module net
 
     \ Resolve a DNS name's IPv4 address
     method resolve-dns-ipv4-addr ( c-addr bytes self -- ipv4-addr success? )
+
+    \ Wait for an endpoint to become ready
+    method wait-ready-endpoint ( endpoint self -- )
     
     \ Dequeue a ready receiving IP endpoint
     method get-ready-endpoint ( self -- endpoint )
@@ -3736,6 +3739,27 @@ begin-module net
       [then]
 
     ; define put-ready-endpoint
+
+    \ Wait for a specific endpoint to become ready
+    :noname { endpoint self -- }
+      begin
+        self endpoint-queue-sema take
+        endpoint [: { endpoint }
+          endpoint endpoint-enqueued? if
+            endpoint clear-endpoint-enqueued
+            endpoint clear-endpoint-event
+            true
+          else
+            false
+          then
+        ;] self endpoint-queue-lock with-lock
+        dup not if
+          self endpoint-queue-sema give
+          pause
+        then
+        endpoint promote-rx-data
+      until
+    ; define wait-ready-endpoint
 
     \ Dequeue a ready receiving IP endpoint
     :noname { self -- endpoint }

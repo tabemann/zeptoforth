@@ -43,8 +43,12 @@ begin-module pico-w-cyw43-net
       
     end-module
     
-    \ initialize the CYW43439 network and interface object
-    method init-cyw43-net ( self -- ) 
+    \ Initialize the CYW43439 network and interface object
+    method init-cyw43-net ( self -- )
+
+    \ Initialize the CYW43439 network and interface object without starting
+    \ the endpoint process
+    method init-cyw43-net-no-handler ( self -- )
 
     \ Set the state of the Pico W's LED
     method pico-w-led! ( state self -- ) 
@@ -68,11 +72,18 @@ begin-module pico-w-cyw43-net
       false self pico-w-led-state !
     ; define new
 
-    \ initialize the CYW43439 network and interface object
+    \ Initialize the CYW43439 network and interface object
     :noname { self -- }
       self <simple-cyw43-net>->init-cyw43-net
       self pico-w-led-state @ self pico-w-led!
     ; define init-cyw43-net
+
+    \ Initialize the CYW43439 network and interface object without starting
+    \ the endpoint process
+    :noname { self -- }
+      self <simple-cyw43-net>->init-cyw43-net-no-handler
+      self pico-w-led-state @ self pico-w-led!
+    ; define init-cyw43-net-no-handler
 
     \ Set the state of the Pico W's LED
     :noname { state self -- }
