@@ -7,6 +7,7 @@ zeptoIP, the CYW43439 driver, and the CYW43439 firmware on the Raspberry Pi Pico
 For examples of demos involving zeptoIP, there are:
 
 * `test/rp2040/pico_w_net_http_led.fs`, a very simple web server for controlling the LED on a Raspberry Pi Pico W
+* `test/rp2040/pico_w_net_http_led_wait.fs`, a very simple web server for controlling the LED on a Raspberry Pi Pico W; this differs from `test/rp2040/pico_w_net_http_led.fs` in that it uses `net::wait-ready-endpoint` instead of an endpoint handler
 * `test/rp2040/pico_w_net_http_download.fs`, an extremely simple web client that connects to `www.google.com` and echos its reponse
 * `test/rp2040/pico_w_net_repl.fs`, a basic TCP Forth REPL (note - this does no authentication, so don't expose this to the open Internet)
 * `test/rp2040/pico_w_net_udp.fs`, a tiny UDP echo server
