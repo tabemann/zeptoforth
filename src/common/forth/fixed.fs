@@ -242,7 +242,7 @@ commit-flash
 
 \ Calculate a fixed point power b^x
 : f** ( fb fx -- fb^x )
-  2dup d0= 2 pick 2 pick d0= and triggers x-domain-error
+  2over d0= >r 2dup d0= r> and triggers x-domain-error
   over 0= if
     dup 0>= if
       nip fi**
