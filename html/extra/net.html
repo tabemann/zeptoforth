@@ -454,7 +454,13 @@
 </section>
 <section id="simple-cyw43-net">
 <h2><code class="docutils literal notranslate"><span class="pre">simple-cyw43-net</span></code><a class="headerlink" href="#simple-cyw43-net" title="Permalink to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">simple-cyw43-net</span></code> module contains the following word:</p>
+<section id="x-endpoint-process-not-started">
+<h3><code class="docutils literal notranslate"><span class="pre">x-endpoint-process-not-started</span></code><a class="headerlink" href="#x-endpoint-process-not-started" title="Permalink to this heading">¶</a></h3>
+<p>( – )</p>
+<p>This exception is raised if one attempts to obtain the endpoint process from a <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net&gt;</span></code> or <code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net&gt;</span></code> instance for which the endpoint process has not been started.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">simple-cyw43-net</span></code> module contains the following class:</p>
+</section>
 <section id="id18">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net&gt;</span></code><a class="headerlink" href="#id18" title="Permalink to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net&gt;</span></code> class encapsulates a CYW43xxx driver and a zeptoIP network stack while simplifying their configuration.</p>
@@ -469,6 +475,11 @@
 <h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net</span></code><a class="headerlink" href="#init-cyw43-net" title="Permalink to this heading">¶</a></h4>
 <p>( driver – )</p>
 <p>This initializes a <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net&gt;</span></code> instance.</p>
+</section>
+<section id="init-cyw43-net-no-handler">
+<h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net-no-handler</span></code><a class="headerlink" href="#init-cyw43-net-no-handler" title="Permalink to this heading">¶</a></h4>
+<p>( driver – )</p>
+<p>This initalizes a <code class="docutils literal notranslate"><span class="pre">&lt;simple-cyw43-net&gt;</span></code> instance without starting an endpoint processing task.</p>
 </section>
 <section id="cyw43-net-country">
 <h4><code class="docutils literal notranslate"><span class="pre">cyw43-net-country!</span></code><a class="headerlink" href="#cyw43-net-country" title="Permalink to this heading">¶</a></h4>
@@ -493,7 +504,7 @@
 <section id="net-endpoint-process">
 <h4><code class="docutils literal notranslate"><span class="pre">net-endpoint-process&#64;</span></code><a class="headerlink" href="#net-endpoint-process" title="Permalink to this heading">¶</a></h4>
 <p>( driver – endpoint-processor )</p>
-<p>This gets the zeptoIP endpoint processor instance.</p>
+<p>This gets the zeptoIP endpoint processor instance. This raises <code class="docutils literal notranslate"><span class="pre">x-endpoint-process-not-started</span></code> if <code class="docutils literal notranslate"><span class="pre">init-cyw43-net</span></code> has not been called (e.g. if <code class="docutils literal notranslate"><span class="pre">init-cyw43-net-no-handler</span></code> has been called instead).</p>
 </section>
 <section id="run-net-process">
 <h4><code class="docutils literal notranslate"><span class="pre">run-net-process</span></code><a class="headerlink" href="#run-net-process" title="Permalink to this heading">¶</a></h4>
@@ -515,13 +526,23 @@
 <p>This instantiates an instance with a base PIO instruction address <em>pio-addr</em>, a PIO state machine <em>sm-index</em>, and a PIO instance (<code class="docutils literal notranslate"><span class="pre">pio::PIO0</span></code> or <code class="docutils literal notranslate"><span class="pre">pio::PIO1</span></code>) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.</p>
 <p>It has the following methods:</p>
 </section>
+<section id="id22">
+<h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net</span></code><a class="headerlink" href="#id22" title="Permalink to this heading">¶</a></h4>
+<p>( driver – )</p>
+<p>This initializes a <code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net&gt;</span></code> instance.</p>
+</section>
+<section id="id23">
+<h4><code class="docutils literal notranslate"><span class="pre">init-cyw43-net-no-handler</span></code><a class="headerlink" href="#id23" title="Permalink to this heading">¶</a></h4>
+<p>( driver – )</p>
+<p>This initalizes a <code class="docutils literal notranslate"><span class="pre">&lt;pico-w-cyw43-net&gt;</span></code> instance without starting an endpoint processing task.</p>
+</section>
 <section id="pico-w-led">
 <h4><code class="docutils literal notranslate"><span class="pre">pico-w-led!</span></code><a class="headerlink" href="#pico-w-led" title="Permalink to this heading">¶</a></h4>
 <p>( state driver – )</p>
 <p>This sets the LED on the Raspberry Pi Pico W to <em>state</em>.</p>
 </section>
-<section id="id22">
-<h4><code class="docutils literal notranslate"><span class="pre">pico-w-led&#64;</span></code><a class="headerlink" href="#id22" title="Permalink to this heading">¶</a></h4>
+<section id="id24">
+<h4><code class="docutils literal notranslate"><span class="pre">pico-w-led&#64;</span></code><a class="headerlink" href="#id24" title="Permalink to this heading">¶</a></h4>
 <p>( driver – state )</p>
 <p>This gets the state of the LED on the Raspberry Pi Pico W.</p>
 </section>
