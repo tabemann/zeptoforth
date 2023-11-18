@@ -417,6 +417,13 @@ Poll a frame to transmit.
 
 ### `simple-cyw43-net`
 
+The `simple-cyw43-net` module contains the following word:
+
+##### `x-endpoint-process-not-started`
+( -- )
+
+This exception is raised if one attempts to obtain the endpoint process from a `<simple-cyw43-net>` or `<pico-w-cyw43-net>` instance for which the endpoint process has not been started.
+
 The `simple-cyw43-net` module contains the following class:
 
 #### `<simple-cyw43-net>`
@@ -436,6 +443,11 @@ It has the following methods:
 ( driver -- )
 
 This initializes a `<simple-cyw43-net>` instance.
+
+##### `init-cyw43-net-no-handler`
+( driver -- )
+
+This initalizes a `<simple-cyw43-net>` instance without starting an endpoint processing task.
 
 ##### `cyw43-net-country!`
 ( abbrev-addr abbrev-bytes code-addr code-bytes country-rev self -- )
@@ -460,7 +472,7 @@ This gets the zeptoIP interface instance.
 ##### `net-endpoint-process@`
 ( driver -- endpoint-processor )
 
-This gets the zeptoIP endpoint processor instance.
+This gets the zeptoIP endpoint processor instance. This raises `x-endpoint-process-not-started` if `init-cyw43-net` has not been called (e.g. if `init-cyw43-net-no-handler` has been called instead).
 
 ##### `run-net-process`
 ( driver -- )
@@ -483,6 +495,16 @@ It has the following constructor:
 This instantiates an instance with a base PIO instruction address *pio-addr*, a PIO state machine *sm-index*, and a PIO instance (`pio::PIO0` or `pio::PIO1`) for the PIO program and state machine for implementing the half-duplex protocol for communicating with the CYW43xxx.
 
 It has the following methods:
+
+##### `init-cyw43-net`
+( driver -- )
+
+This initializes a `<pico-w-cyw43-net>` instance.
+
+##### `init-cyw43-net-no-handler`
+( driver -- )
+
+This initalizes a `<pico-w-cyw43-net>` instance without starting an endpoint processing task.
 
 ##### `pico-w-led!`
 ( state driver -- )
