@@ -19,7 +19,7 @@ Disable an I2C peripheral. Note that multiple nested disablings are permitted.
 ##### `i2c-clock!`
 ( clock i2c -- )
 
-Set the clock for an I2C peripheral. Note that for most purposes a clock of 4000000 is recommended, and it is this value to which the clock of an I2C peripheral defaults.
+Set the clock for an I2C peripheral. Note that for most purposes a clock of 400000 is recommended, and it is this value to which the clock of an I2C peripheral defaults.
 
 ##### `i2c-alternate`
 ( i2c -- alternate )
