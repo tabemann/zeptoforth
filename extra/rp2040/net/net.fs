@@ -1282,7 +1282,7 @@ begin-module net
       <out-packets> class-size member endpoint-out-packets
       
       \ The endpoint buffer
-      max-payload-size cell align member endpoint-buf
+      max-endpoint-in-size cell align member endpoint-buf
 
       \ The initial local sequence number
       cell member endpoint-init-local-seq
@@ -1541,7 +1541,7 @@ begin-module net
       0 self endpoint-local-port !
       0 self endpoint-rx-size !
       0 self endpoint-delayed-size !
-      self endpoint-buf max-payload-size
+      self endpoint-buf max-endpoint-in-size
       <in-packets> self endpoint-in-packets init-object
       <out-packets> self endpoint-out-packets init-object
       self endpoint-lock init-lock
@@ -2443,6 +2443,11 @@ begin-module net
       method send-ipv4-basic-tcp
       ( remote-addr remote-port local-port seq ack window flags D: mac-addr )
       ( self -- )
+
+      \ Send an IPv4 TCP packet with an MSS option
+      method send-ipv4-tcp-with-mss
+      ( remote-addr remote-port local-port seq ack window flags D: mac-addr )
+      ( self -- )
       
       \ Process an IPv4 TCP SYN+ACK packet
       method process-ipv4-syn-ack-packet ( src-addr addr bytes self -- )
@@ -2940,11 +2945,10 @@ begin-module net
       endpoint endpoint-local-port@
       endpoint endpoint-local-seq@ 1-
       0
-      [ mtu-size ethernet-header-size - ipv4-header-size - tcp-header-size - ]
-      literal
+      max-endpoint-in-size
       TCP_SYN
       endpoint endpoint-remote-mac-addr@
-      self send-ipv4-basic-tcp
+      self send-ipv4-tcp-with-mss
     ; define send-syn
 
     \ Send an IPv4 TCP SYN+ACK packet
@@ -2965,7 +2969,7 @@ begin-module net
       [ TCP_SYN TCP_ACK or ] literal
       endpoint endpoint-remote-mac-addr@
 
-      self send-ipv4-basic-tcp
+      self send-ipv4-tcp-with-mss
       TCP_SYN_RECEIVED endpoint endpoint-tcp-state!
       endpoint endpoint-ack-sent
       endpoint reset-endpoint-refresh
@@ -3028,6 +3032,37 @@ begin-module net
         true
       ;] 6 pick construct-and-send-ipv4-packet drop
     ; define send-ipv4-basic-tcp
+
+    \ Send an IPv4 TCP packet with an MSS field
+    :noname
+      ( remote-addr remote-port local-port seq ack window flags D: mac-addr )
+      ( self -- )
+      -rot 9 pick PROTOCOL_TCP tcp-header-size 8 +
+      ( self D: mac-addr remote-addr protocol bytes )
+      [: { remote-addr remote-port local-port seq ack window flags self buf }
+        local-port rev16 buf tcp-src-port hunaligned!
+        remote-port rev16 buf tcp-dest-port hunaligned!
+        seq rev buf tcp-seq-no unaligned!
+        ack rev buf tcp-ack-no unaligned!
+        [ 7 4 lshift ] literal buf tcp-data-offset c!
+        flags buf tcp-flags c!
+        window rev16 buf tcp-window-size hunaligned!
+        0 buf tcp-urgent-ptr hunaligned!
+        [ TCP_OPT_MSS 24 lshift 4 16 lshift or
+        mtu-size ethernet-header-size - ipv4-header-size - tcp-header-size - or
+        rev ] literal
+        buf tcp-header-size + unaligned!
+        [ $01010100 rev ] literal buf tcp-header-size + 4 + unaligned!
+        self intf-ipv4-addr@ remote-addr buf tcp-header-size 8 + 0 tcp-checksum
+        compute-tcp-checksum rev16 buf tcp-checksum hunaligned!
+
+        [ debug? ] [if]
+          buf [: cr ." @@@@@ SENDING TCP:" tcp. ;] debug-hook execute
+        [then]
+        
+        true
+      ;] 6 pick construct-and-send-ipv4-packet drop
+    ; define send-ipv4-tcp-with-mss
     
     \ Process an IPv4 TCP SYN+ACK packet
     :noname ( src-addr addr bytes self -- )
