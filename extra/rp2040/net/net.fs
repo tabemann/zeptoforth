@@ -2551,7 +2551,7 @@ begin-module net
       ( xt: ? buf -- ? sent? )    
       
       \ Wait for a TCP endpoint to close
-      method wait-endpoint-closed ( endpoint self -- )
+      method wait-endpoint-closed ( timeout start endpoint self -- )
 
       \ Add an endpoint time wait
       method add-time-wait ( addr bytes endpoint self -- )
@@ -2637,6 +2637,10 @@ begin-module net
       \ Allocate an endpoint
       method allocate-endpoint ( self -- endpoint success? )
 
+      \ Claim the endpoint queue lock, and if an exception occurs, restore the
+      \ endpoint queue status
+      method with-endpoint-queue ( xt start-ticks self -- )
+      
     end-module
     
     \ Get the IPv4 address
@@ -3455,14 +3459,16 @@ begin-module net
     
     \ Construct and send a frame
     :noname ( ? bytes xt self -- ? sent? ) ( xt: ? buf -- ? send? )
-      [: { bytes xt self }
-        bytes mtu-size u<= averts x-oversized-frame
-        self outgoing-buf xt execute if
-          self outgoing-buf bytes self send-frame true
-        else
-          false
-        then
-      ;] over outgoing-buf-lock with-lock
+      [:
+        [: { bytes xt self }
+          bytes mtu-size u<= averts x-oversized-frame
+          self outgoing-buf xt execute if
+            self outgoing-buf bytes self send-frame true
+          else
+            false
+          then
+        ;] over outgoing-buf-lock with-lock
+      ;] task::no-timeout task::with-timeout
     ; define construct-and-send-frame
 
     \ Construct and send a IPv4 packet with a specified source IPv4 address
@@ -3526,9 +3532,8 @@ begin-module net
         else
           task::timeout @ { old-timeout }
           tick mac-addr-resolve-interval + systick::systick-counter -
-          task::timeout !
-          self mac-addr-resolve-sema ['] take try
-          dup ['] task::x-timed-out = if 2drop 0 then
+          self swap [: task::timeout ! mac-addr-resolve-sema take ;] try
+          dup ['] task::x-timed-out = if 2drop drop 0 then
           ?raise
           old-timeout task::timeout !
         then
@@ -3558,8 +3563,8 @@ begin-module net
         else
           task::timeout @ { old-timeout }
           tick dhcp-arp-interval + systick::systick-counter - task::timeout !
-          self mac-addr-resolve-sema ['] take try
-          dup ['] task::x-timed-out = if 2drop 0 then
+          self swap [: task::timeout ! mac-addr-resolve-sema take ;] try
+          dup ['] task::x-timed-out = if 2drop drop 0 then
           ?raise
           old-timeout task::timeout !
         then
@@ -3706,44 +3711,62 @@ begin-module net
       then
     ; define send-ipv4-udp-packet
 
+    \ Claim the endpoint queue lock, and if an exception occurs, restore the
+    \ endpoint queue status
+    :noname ( xt start-ticks self -- ) { self }
+      self [:
+        [:
+          endpoint-queue-lock with-lock
+        ;] rot task::timeout @ swap task::with-timeout-from-start
+      ;] try
+      dup if self endpoint-queue-sema give then
+      ?raise
+    ; define with-endpoint-queue
+
     \ Enqueue a ready receiving IP endpoint
-    :noname ( endpoint self -- ) { self }
+    :noname ( endpoint self -- )
 
-      [ debug? ] [if]
-        [: cr ." +++ Begin enqueue endpoint" ;] debug-hook execute
-      [then]
-      
-      self [: { endpoint self }
-        endpoint endpoint-pending? not if
-          endpoint mark-endpoint-pending
-          true
-        else
-          endpoint signal-endpoint-event
-          false
-        then
-        endpoint wake-endpoint
-      ;] self endpoint-queue-lock with-lock
-      if
-        self endpoint-queue-sema give
-
+      [: { self }
+        
         [ debug? ] [if]
-          [: cr ." +++ GAVE SEMAPHORE FOR PUT-READY-ENDPOINT" ;]
-          debug-hook execute
+          [: cr ." +++ Begin enqueue endpoint" ;] debug-hook execute
         [then]
         
-        pause
-      then
+        self [: { endpoint self }
+          endpoint endpoint-pending? not if
+            endpoint mark-endpoint-pending
+            true
+          else
+            endpoint signal-endpoint-event
+            false
+          then
+          endpoint wake-endpoint
+        ;] self endpoint-queue-lock with-lock
+        if
+          self endpoint-queue-sema give
+          
+          [ debug? ] [if]
+            [: cr ." +++ GAVE SEMAPHORE FOR PUT-READY-ENDPOINT" ;]
+            debug-hook execute
+          [then]
+          
+          pause
+        then
+        
+        [ debug? ] [if]
+          [: cr ." +++ End enqueue endpoint" ;] debug-hook execute
+        [then]
 
-      [ debug? ] [if]
-        [: cr ." +++ End enqueue endpoint" ;] debug-hook execute
-      [then]
+      ;] task::no-timeout task::with-timeout
 
     ; define put-ready-endpoint
 
     \ Wait for a specific endpoint to become ready
     :noname { endpoint self -- }
+      systick::systick-counter { start }
       begin
-        self endpoint-queue-sema take
+        self [: endpoint-queue-sema take ;]
+        task::timeout @ task::with-timeout-from-start
         endpoint [: { endpoint }
           endpoint endpoint-enqueued? if
             endpoint clear-endpoint-enqueued
@@ -3752,23 +3775,26 @@ begin-module net
           else
             false
           then
-        ;] self endpoint-queue-lock with-lock
+        ;] start self with-endpoint-queue
         dup not if
           self endpoint-queue-sema give
           pause
         then
-        endpoint promote-rx-data
+        endpoint [: promote-rx-data ;] task::no-timeout task::with-timeout
       until
     ; define wait-ready-endpoint
 
     \ Dequeue a ready receiving IP endpoint
     :noname { self -- endpoint }
 
+      systick::systick-counter { start }
+
       [ debug? ] [if]
         [: cr ." +++ Begin dequeue endpoint" ;] debug-hook execute
       [then]
 
-      self endpoint-queue-sema take
+      self [: endpoint-queue-sema take ;]
+      task::timeout @ start task::with-timeout-from-start
 
       [ debug? ] [if]
         [: cr ." +++ Got queue semaphore" ;] debug-hook execute
@@ -3786,7 +3812,7 @@ begin-module net
           self endpoint-queue-index @ { index }
           self intf-endpoints <endpoint> class-size index * + { endpoint }
           endpoint endpoint-enqueued? if
-
+            
             [ debug? ] [if]
               index [: cr ." Got endpoint: " . ;] debug-hook execute
             [then]
@@ -3799,23 +3825,23 @@ begin-module net
             [ debug? ] [if]
               index [: cr ." Skipped endpoint: " . ;] debug-hook execute
             [then]
-
+            
             false
           then
           index 1+ max-endpoints umod self endpoint-queue-index !
-
+          
           [ debug? ] [if]
             [: cr ." Releasing endpoint queue lock" ;] debug-hook execute
           [then]
           
-        ;] self endpoint-queue-lock with-lock
+        ;] start self with-endpoint-queue
       until
 
       [ debug? ] [if]
         [: cr ." Promoting RX data" ;] debug-hook execute
       [then]
 
-      dup promote-rx-data
+      dup [: promote-rx-data ;] task::no-timeout task::with-timeout
       
       [ debug? ] [if]
         [: cr ." +++ End dequeue endpoint" ;] debug-hook execute
@@ -3983,22 +4009,34 @@ begin-module net
 
     \ Close a TCP endpoint
     :noname ( endpoint self -- )
-      [: { endpoint self }
-        endpoint endpoint-tcp-state@ case
-          TCP_SYN_SENT of endpoint self send-ipv4-rst endof
-          TCP_SYN_RECEIVED of endpoint self send-ipv4-rst endof
-          TCP_ESTABLISHED of endpoint self close-tcp-established endof
-          TCP_FIN_WAIT_1 of endpoint self wait-endpoint-closed endof
-          TCP_FIN_WAIT_2 of endpoint self wait-endpoint-closed endof
-          TCP_CLOSE_WAIT of endpoint self send-fin-reply endof
-          TCP_LAST_ACK of endpoint self wait-endpoint-closed endof
-        endcase
-      ;] 2 pick with-ctrl-endpoint
+      systick::systick-counter { start }
+      task::timeout @ start 2swap [:
+        [: { timeout start endpoint self }
+          endpoint endpoint-tcp-state@ case
+            TCP_SYN_SENT of endpoint self send-ipv4-rst endof
+            TCP_SYN_RECEIVED of endpoint self send-ipv4-rst endof
+            TCP_ESTABLISHED of
+              timeout start endpoint self close-tcp-established
+            endof
+            TCP_FIN_WAIT_1 of
+              timeout start endpoint self wait-endpoint-closed
+            endof
+            TCP_FIN_WAIT_2 of
+              timeout start endpoint self wait-endpoint-closed
+            endof
+            TCP_CLOSE_WAIT of
+              timeout start endpoint self send-fin-reply
+            endof
+            TCP_LAST_ACK of
+              timeout start endpoint self wait-endpoint-closed
+            endof
+          endcase
+        ;] 2 pick with-ctrl-endpoint
+      ;] task::timeout @ start task::with-timeout-from-start
     ; define close-tcp-endpoint
 
     \ Wait for a TCP endpoint to close
-    :noname { endpoint self -- }
-      systick::systick-counter { start }
+    :noname { timeout start endpoint self -- }
       begin
         endpoint endpoint-tcp-state@ case
           TCP_FIN_WAIT_1 of true endof
@@ -4007,12 +4045,12 @@ begin-module net
           false swap
         endcase
       while
-        start close-timeout + systick::systick-counter - 0 max { timeout }
+        timeout task::no-timeout = if close-timeout else timeout then
+        start + systick::systick-counter - 0 max { current-timeout }
         task::timeout @ { old-timeout }
-        timeout task::timeout !
-        endpoint ['] wait-endpoint try
+        endpoint current-timeout [: task::timeout ! wait-endpoint ;] try
         old-timeout task::timeout !
-        dup ['] task::x-timed-out = if 2drop true 0 else false swap then
+        dup ['] task::x-timed-out = if 2drop drop true 0 else false swap then
         ?raise
         if
           TCP_CLOSED endpoint endpoint-tcp-state!
@@ -4041,92 +4079,93 @@ begin-module net
     ; define send-fin
     
     \ Close an established conection
-    :noname { endpoint self -- }
-      TCP_FIN_WAIT_1 endpoint self send-fin
-      endpoint self wait-endpoint-closed
+    :noname ( timeout start endpoint self -- )
+      2dup TCP_FIN_WAIT_1 -rot send-fin wait-endpoint-closed
     ; define close-tcp-established
 
     \ Send a reply FIN packet
-    :noname { endpoint self -- }
-      TCP_LAST_ACK endpoint self send-fin
-      endpoint self wait-endpoint-closed
+    :noname ( timeout start endpoint self -- )
+      2dup TCP_LAST_ACK -rot send-fin wait-endpoint-closed
     ; define send-fin-reply
 
     \ Send data on a TCP endpoint
     :noname ( addr bytes endpoint self -- )
-      2 pick 0= if 2drop 2drop exit then
-      [: { addr bytes endpoint self }
-        endpoint endpoint-id@ { id }
-        id addr bytes endpoint [: { id addr bytes endpoint }
-          endpoint endpoint-tcp-state@
-          dup TCP_ESTABLISHED = swap TCP_CLOSE_WAIT = or
-          id endpoint endpoint-id@ = and if
-            addr bytes endpoint start-endpoint-send true
-          else
+      [:
+        2 pick 0= if 2drop 2drop exit then
+        [: { addr bytes endpoint self }
+          endpoint endpoint-id@ { id }
+          id addr bytes endpoint [: { id addr bytes endpoint }
+            endpoint endpoint-tcp-state@
+            dup TCP_ESTABLISHED = swap TCP_CLOSE_WAIT = or
+            id endpoint endpoint-id@ = and if
+              addr bytes endpoint start-endpoint-send true
+            else
 
-            [ debug? ] [if]
-              endpoint endpoint-tcp-state@
-              [: cr ." *** TCP STATE: " . ;] debug-hook execute
-            [then]
-            
-            false
-          then
-        ;] over with-endpoint if
-          endpoint start-endpoint-timeout
-          begin
-            id endpoint self [: { id endpoint self }
-              endpoint endpoint-tcp-state@
-              dup TCP_ESTABLISHED = swap TCP_CLOSE_WAIT = or
-              id endpoint endpoint-id@ = and if
-                endpoint endpoint-send-done? not if
-                  endpoint endpoint-send-outstanding? if
-                    systick::systick-counter endpoint endpoint-timeout-start@ -
-                    endpoint endpoint-timeout@ > if
-                      endpoint increase-endpoint-timeout
-                      endpoint resend-endpoint
+              [ debug? ] [if]
+                endpoint endpoint-tcp-state@
+                [: cr ." *** TCP STATE: " . ;] debug-hook execute
+              [then]
+              
+              false
+            then
+          ;] over with-endpoint if
+            endpoint start-endpoint-timeout
+            begin
+              id endpoint self [: { id endpoint self }
+                endpoint endpoint-tcp-state@
+                dup TCP_ESTABLISHED = swap TCP_CLOSE_WAIT = or
+                id endpoint endpoint-id@ = and if
+                  endpoint endpoint-send-done? not if
+                    endpoint endpoint-send-outstanding? if
+                      systick::systick-counter
+                      endpoint endpoint-timeout-start@ -
+                      endpoint endpoint-timeout@ > if
+                        endpoint increase-endpoint-timeout
+                        endpoint resend-endpoint
+                      then
+                    else
+                      endpoint start-endpoint-timeout
+                    then
+                    endpoint endpoint-send-ready?
+                    self out-frame-interface @ tx-full? not and
+                    self out-frame-interface @ rx-full? not and if
+                      endpoint get-endpoint-send-packet
+                      endpoint endpoint-send-last?
+                      endpoint self send-data-ack
+                      endpoint endpoint-send-ready? not
+                      self out-frame-interface @ tx-full? or
+                      self out-frame-interface @ rx-full? or true
+                    else
+                      true true
                     then
                   else
-                    endpoint start-endpoint-timeout
-                  then
-                  endpoint endpoint-send-ready?
-                  self out-frame-interface @ tx-full? not and
-                  self out-frame-interface @ rx-full? not and if
-                    endpoint get-endpoint-send-packet
-                    endpoint endpoint-send-last?
-                    endpoint self send-data-ack
-                    endpoint endpoint-send-ready? not
-                    self out-frame-interface @ tx-full? or
-                    self out-frame-interface @ rx-full? or true
-                  else
-                    true true
+                    endpoint clear-endpoint-send false
                   then
                 else
-                  endpoint clear-endpoint-send false
-                then
-              else
-                
-                [ debug? ] [if]
-                  endpoint endpoint-tcp-state@
-                  [: cr ." *** TCP STATE: " . ;] debug-hook execute
-                [then]
+                  
+                  [ debug? ] [if]
+                    endpoint endpoint-tcp-state@
+                    [: cr ." *** TCP STATE: " . ;] debug-hook execute
+                  [then]
 
-                endpoint clear-endpoint-send false 
+                  endpoint clear-endpoint-send false 
+                then
+              ;] endpoint with-endpoint
+            while
+              if
+                task::timeout @ { old-timeout }
+                endpoint endpoint-timeout@
+                systick::systick-counter endpoint endpoint-timeout-start@ - -
+                send-check-interval max
+                endpoint swap [: task::timeout ! wait-endpoint ;] try
+                dup ['] task::x-timed-out = if 2drop drop 0 then
+                old-timeout task::timeout !
+                ?raise
               then
-            ;] endpoint with-endpoint
-          while
-            if
-              task::timeout @ { old-timeout }
-              endpoint endpoint-timeout@
-              systick::systick-counter endpoint endpoint-timeout-start@ - -
-              send-check-interval max task::timeout !
-              endpoint ['] wait-endpoint try
-              dup ['] task::x-timed-out = if 2drop 0 then
-              old-timeout task::timeout !
-              ?raise
-            then
-          repeat
-        then
-      ;] 2 pick with-ctrl-endpoint
+            repeat
+          then
+        ;] 2 pick with-ctrl-endpoint
+      ;] task::no-timeout task::with-timeout
     ; define send-tcp-endpoint
 
     \ Send a data ACK packet

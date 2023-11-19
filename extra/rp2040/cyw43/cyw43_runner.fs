@@ -221,125 +221,137 @@ begin-module cyw43-runner
     \ true constant debug? \ DEBUG
 
     \ Put a received frame
-    :noname ( addr bytes self -- ) { self }
-      [ debug? ] [if] [: cr ." ### BEGIN put-rx-frame" ;] usb::with-usb-output [then]
-      self [: { addr bytes self }
-        self cyw43-rx-count @ rx-mtu-count < if
-          addr self cyw43-rx-buf self cyw43-rx-put-index @ mtu-size * + bytes
-          move
-          bytes self cyw43-rx-sizes self cyw43-rx-put-index @ cells + !
-          self cyw43-rx-put-index @ 1+ rx-mtu-count umod
-          self cyw43-rx-put-index !
-          1 self cyw43-rx-count +! true
-        else
-          [ debug? ] [if] bytes [: cr ." DROPPED RX PACKET: " . ;] usb::with-usb-output [then]
-          false
-        then
-      ;] self cyw43-rx-lock with-lock
-      if self cyw43-rx-sema give then
-      [ debug? ] [if] [: cr ." ### END put-rx-frame" ;] usb::with-usb-output [then]
+    :noname ( addr bytes self -- )
+      [: { self }
+        [ debug? ] [if] [: cr ." ### BEGIN put-rx-frame" ;] usb::with-usb-output [then]
+        self [: { addr bytes self }
+          self cyw43-rx-count @ rx-mtu-count < if
+            addr self cyw43-rx-buf self cyw43-rx-put-index @ mtu-size * + bytes
+            move
+            bytes self cyw43-rx-sizes self cyw43-rx-put-index @ cells + !
+            self cyw43-rx-put-index @ 1+ rx-mtu-count umod
+            self cyw43-rx-put-index !
+            1 self cyw43-rx-count +! true
+          else
+            [ debug? ] [if] bytes [: cr ." DROPPED RX PACKET: " . ;] usb::with-usb-output [then]
+            false
+          then
+        ;] self cyw43-rx-lock with-lock
+        if self cyw43-rx-sema give then
+        [ debug? ] [if] [: cr ." ### END put-rx-frame" ;] usb::with-usb-output [then]
+      ;] no-timeout with-timeout
     ; define put-rx-frame
 
     \ Get a received frame
-    :noname ( addr bytes self -- bytes' ) { self }
+    :noname ( addr bytes self -- bytes' ) 
       [ debug? ] [if] [: cr ." ### BEGIN get-rx-frame" ;] usb::with-usb-output [then]
-      self cyw43-rx-sema take
-      self [: { addr bytes self }
-        self cyw43-rx-count @ 0> if
-          self cyw43-rx-sizes self cyw43-rx-get-index @ cells + @ { actual }
-          self cyw43-rx-buf self cyw43-rx-get-index @ mtu-size * + addr actual
-          move
-          self cyw43-rx-get-index @ 1+ rx-mtu-count umod
-          self cyw43-rx-get-index !
-          -1 self cyw43-rx-count +!
-          actual
-        else
-          [ debug? ] [if] [: cr ." MISSING RX PACKET" ;] usb::with-usb-output [then]
-          0
-        then
-      ;] self cyw43-rx-lock with-lock
-      [ debug? ] [if] [: cr ." ### END get-rx-frame" ;] usb::with-usb-output [then]
+      dup cyw43-rx-sema take
+      [:
+        [: { addr bytes self }
+          self cyw43-rx-count @ 0> if
+            self cyw43-rx-sizes self cyw43-rx-get-index @ cells + @ { actual }
+            self cyw43-rx-buf self cyw43-rx-get-index @ mtu-size * + addr actual
+            move
+            self cyw43-rx-get-index @ 1+ rx-mtu-count umod
+            self cyw43-rx-get-index !
+            -1 self cyw43-rx-count +!
+            actual
+          else
+            [ debug? ] [if] [: cr ." MISSING RX PACKET" ;] usb::with-usb-output [then]
+            0
+          then
+        ;] over cyw43-rx-lock with-lock
+        [ debug? ] [if] [: cr ." ### END get-rx-frame" ;] usb::with-usb-output [then]
+      ;] no-timeout with-timeout
     ; define get-rx-frame
 
     \ Poll a received frame
-    :noname ( addr bytes self -- bytes' found? ) { self }
-      self [: { addr bytes self }
-        self cyw43-rx-count @ 0> if
-          [ debug? ] [if] [: cr ." ### BEGIN poll-rx-frame" ;] usb::with-usb-output [then]
-          self cyw43-rx-sema take
-          self cyw43-rx-sizes self cyw43-rx-get-index @ cells + @ { actual }
-          self cyw43-rx-buf self cyw43-rx-get-index @ mtu-size * + addr actual
-          move
-          self cyw43-rx-get-index @ 1+ rx-mtu-count umod
-          self cyw43-rx-get-index !
-          -1 self cyw43-rx-count +!
-          actual true
-          [ debug? ] [if] [: cr ." ### END poll-rx-frame" ;] usb::with-usb-output [then]
-        else
-          0 false
-        then
-      ;] self cyw43-rx-lock with-lock
+    :noname ( addr bytes self -- bytes' found? )
+      [: { self }
+        self [: { addr bytes self }
+          self cyw43-rx-count @ 0> if
+            [ debug? ] [if] [: cr ." ### BEGIN poll-rx-frame" ;] usb::with-usb-output [then]
+            self cyw43-rx-sema take
+            self cyw43-rx-sizes self cyw43-rx-get-index @ cells + @ { actual }
+            self cyw43-rx-buf self cyw43-rx-get-index @ mtu-size * + addr actual
+            move
+            self cyw43-rx-get-index @ 1+ rx-mtu-count umod
+            self cyw43-rx-get-index !
+            -1 self cyw43-rx-count +!
+            actual true
+            [ debug? ] [if] [: cr ." ### END poll-rx-frame" ;] usb::with-usb-output [then]
+          else
+            0 false
+          then
+        ;] self cyw43-rx-lock with-lock
+      ;] no-timeout with-timeout
     ; define poll-rx-frame
 
     \ Put a frame to transmit
-    :noname ( addr bytes self -- ) { self }
-      [ debug? ] [if] [: cr ." ### BEGIN put-tx-frame" ;] usb::with-usb-output [then]
-      self [: { addr bytes self }
-        self cyw43-tx-count @ tx-mtu-count < if
-          addr self cyw43-tx-buf self cyw43-tx-put-index @ mtu-size * + bytes
-          move
-          bytes self cyw43-tx-sizes self cyw43-tx-put-index @ cells + !
-          self cyw43-tx-put-index @ 1+ tx-mtu-count umod
-          self cyw43-tx-put-index !
-          1 self cyw43-tx-count +! true
-        else
-          [ debug? ] [if] bytes [: cr ." DROPPED TX PACKET: " . ;] usb::with-usb-output [then]
-          false
-        then
-      ;] self cyw43-tx-lock with-lock
-      if self cyw43-tx-sema give then
-      [ debug? ] [if] [: cr ." ### END put-tx-frame" ;] usb::with-usb-output [then]
+    :noname ( addr bytes self -- )
+      [: { self }
+        [ debug? ] [if] [: cr ." ### BEGIN put-tx-frame" ;] usb::with-usb-output [then]
+        self [: { addr bytes self }
+          self cyw43-tx-count @ tx-mtu-count < if
+            addr self cyw43-tx-buf self cyw43-tx-put-index @ mtu-size * + bytes
+            move
+            bytes self cyw43-tx-sizes self cyw43-tx-put-index @ cells + !
+            self cyw43-tx-put-index @ 1+ tx-mtu-count umod
+            self cyw43-tx-put-index !
+            1 self cyw43-tx-count +! true
+          else
+            [ debug? ] [if] bytes [: cr ." DROPPED TX PACKET: " . ;] usb::with-usb-output [then]
+            false
+          then
+        ;] self cyw43-tx-lock with-lock
+        if self cyw43-tx-sema give then
+        [ debug? ] [if] [: cr ." ### END put-tx-frame" ;] usb::with-usb-output [then]
+      ;] no-timeout with-timeout
     ; define put-tx-frame
 
     \ Get a frame to transmit
-    :noname ( addr bytes self -- bytes' ) { self }
+    :noname ( addr bytes self -- bytes' )
       [ debug? ] [if] [: cr ." ### BEGIN get-tx-frame" ;] usb::with-usb-output [then]
-      self cyw43-tx-sema take
-      self [: { addr bytes self }
-        self cyw43-tx-count @ 0> if
-          self cyw43-tx-sizes self cyw43-tx-get-index @ cells + @ { actual }
-          self cyw43-tx-buf self cyw43-tx-get-index @ mtu-size * + addr actual
-          move
-          self cyw43-tx-get-index @ 1+ tx-mtu-count umod
-          self cyw43-tx-get-index !
-          -1 self cyw43-tx-count +!
-          actual
-        else
-          [ debug? ] [if] [: cr ." MISSING TX PACKET" ;] usb::with-usb-output [then]
-          0
-        then
-      ;] self cyw43-tx-lock with-lock
-      [ debug? ] [if] [: cr ." ### END get-tx-frame" ;] usb::with-usb-output [then]
+      dup cyw43-tx-sema take
+      [:
+        [: { addr bytes self }
+          self cyw43-tx-count @ 0> if
+            self cyw43-tx-sizes self cyw43-tx-get-index @ cells + @ { actual }
+            self cyw43-tx-buf self cyw43-tx-get-index @ mtu-size * + addr actual
+            move
+            self cyw43-tx-get-index @ 1+ tx-mtu-count umod
+            self cyw43-tx-get-index !
+            -1 self cyw43-tx-count +!
+            actual
+          else
+            [ debug? ] [if] [: cr ." MISSING TX PACKET" ;] usb::with-usb-output [then]
+            0
+          then
+        ;] over cyw43-tx-lock with-lock
+        [ debug? ] [if] [: cr ." ### END get-tx-frame" ;] usb::with-usb-output [then]
+      ;] no-timeout with-timeout
     ; define get-tx-frame
 
     \ Poll a frame to transmit
-    :noname ( addr bytes self -- bytes' found? ) { self }
-      self [: { addr bytes self }
-        self cyw43-tx-count @ 0> if
-          [ debug? ] [if] [: cr ." ### BEGIN poll-tx-frame" ;] usb::with-usb-output [then]
-          self cyw43-tx-sema take
-          self cyw43-tx-sizes self cyw43-tx-get-index @ cells + @ { actual }
-          self cyw43-tx-buf self cyw43-tx-get-index @ mtu-size * + addr actual
-          move
-          self cyw43-tx-get-index @ 1+ tx-mtu-count umod
-          self cyw43-tx-get-index !
-          -1 self cyw43-tx-count +!
-          actual true
-          [ debug? ] [if] [: cr ." ### END poll-tx-frame" ;] usb::with-usb-output [then]
-        else
-          0 false
-        then
-      ;] self cyw43-tx-lock with-lock
+    :noname ( addr bytes self -- bytes' found? )
+      [: { self }
+        self [: { addr bytes self }
+          self cyw43-tx-count @ 0> if
+            [ debug? ] [if] [: cr ." ### BEGIN poll-tx-frame" ;] usb::with-usb-output [then]
+            self cyw43-tx-sema take
+            self cyw43-tx-sizes self cyw43-tx-get-index @ cells + @ { actual }
+            self cyw43-tx-buf self cyw43-tx-get-index @ mtu-size * + addr actual
+            move
+            self cyw43-tx-get-index @ 1+ tx-mtu-count umod
+            self cyw43-tx-get-index !
+            -1 self cyw43-tx-count +!
+            actual true
+            [ debug? ] [if] [: cr ." ### END poll-tx-frame" ;] usb::with-usb-output [then]
+          else
+            0 false
+          then
+        ;] self cyw43-tx-lock with-lock
+      ;] no-timeout with-timeout
     ; define poll-tx-frame
 
     \ Frame receiving is full?
