@@ -35,8 +35,8 @@ begin-module net-config
   \ The maximum fragment buffer size
   1500 constant fragment-buf-size
 
-  \ The maximum IP payload size
-  1500 constant max-payload-size
+  \ The maximum IP endpoint in size
+  3000 constant max-endpoint-in-size
 
   \ The maximum fragment unit count
   fragment-buf-size 8 align 8 / constant max-fragment-units
