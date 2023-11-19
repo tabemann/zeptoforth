@@ -252,6 +252,16 @@ Get whether a task has timed out.
 
 An exception raised when timeout validation fails.
 
+##### `with-timeout`
+( xt timeout -- )
+
+Execute an xt with a timeout, restored to its previous value afterwards.
+
+##### `with-timeout-from-start`
+( xt timeout ticks-start -- )
+
+Execute an xt with a timeout after a start time in ticks.
+
 ##### `validate-timeout`
 ( task -- )
 

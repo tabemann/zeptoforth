@@ -723,6 +723,24 @@ begin-module task
     dup validate-not-terminated task-state h@ block-timed-out =
   ;
 
+  \ Execute an xt with a timeout, restored to its previous value afterwards
+  : with-timeout ( xt timeout -- )
+    timeout @ { old-timeout }
+    [: timeout ! execute ;] try
+    old-timeout timeout !
+    ?raise
+  ;
+
+  \ Execute an xt with a timeout after a start time in ticks
+  : with-timeout-from-start ( xt timeout ticks-start -- )
+    over no-timeout = if
+      drop with-timeout
+    else
+      + systick-counter 2dup - 0> averts x-timed-out
+      - 0 max with-timeout
+    then
+  ;
+
   \ Get whether a task has timed out and clear the timeout status
   : check-timeout ( task -- timed-out? )
     [:
