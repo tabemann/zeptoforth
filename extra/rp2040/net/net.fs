@@ -3005,6 +3005,7 @@ begin-module net
       endpoint reset-endpoint-local-port
       TCP_CLOSED endpoint endpoint-tcp-state!
       endpoint self put-ready-endpoint
+      endpoint free-endpoint
     ; define send-ipv4-rst
 
     \ Send a basic IPv4 TCP packet
@@ -3264,6 +3265,7 @@ begin-module net
       self send-ipv4-rst-for-packet
       TCP_CLOSED endpoint endpoint-tcp-state!
       endpoint self put-ready-endpoint
+      endpoint free-endpoint
     ; define send-ipv4-rst-for-ack
     
     \ \ Process an IPv4 FIN packet
