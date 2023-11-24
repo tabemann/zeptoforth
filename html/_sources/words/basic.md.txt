@@ -433,6 +433,13 @@ Exit a word
 An empty init routine, to call if no other init routines are
 available, so as to enable any source file to call a preceding init
 
+##### `initializer`
+( "init-word" -- )
+
+Specify an initializer word, to execute immediately if currently compiling to RAM, or to execute on bootup after any previous `init` routines but before `turnkey` or `welcome` if currently compiling to flash; in the latter case, a new `init` routine will be compiled which first calls any previous `init` routine and then calls the referenced word. This is the commended way for any new code from this point on to specify initializers, as it will enable initializing properly both when code is compiled to RAM or is compiled to flash.
+
+Note that this word _must not_ reference `init` or else it will inappropriately cause the preceding `init` to be immediately be run again, if compiling to RAM, or to be run twice, if compiling to flash. This will put the system in an undefined state (i.e. it will probably crash as a result).
+
 ##### `[immediate]`
 ( -- )
 
