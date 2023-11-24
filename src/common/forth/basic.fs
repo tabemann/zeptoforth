@@ -2522,6 +2522,21 @@ commit-flash
   then
 ;
 
+\ Specify an initializer, whether when compiling to flash or to RAM
+: initializer ( "init-word" -- )
+  token-word >xt 
+  compiling-to-flash? if
+    s" init" flash-latest find-all-dict
+    s" init" start-compile
+    visible
+    ?dup if >xt lit, postpone execute then
+    lit, postpone execute
+    end-compile,
+  else
+    execute
+  then
+;
+
 #include src/common/forth/welcome.fs
 #include src/common/forth/legal.fs
 

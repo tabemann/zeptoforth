@@ -448,6 +448,12 @@ compilation mode</p>
 <p>An empty init routine, to call if no other init routines are
 available, so as to enable any source file to call a preceding init</p>
 </section>
+<section id="initializer">
+<h3><code class="docutils literal notranslate"><span class="pre">initializer</span></code></h3>
+<p>( “init-word” – )</p>
+<p>Specify an initializer word, to execute immediately if currently compiling to RAM, or to execute on bootup after any previous <code class="docutils literal notranslate"><span class="pre">init</span></code> routines but before <code class="docutils literal notranslate"><span class="pre">turnkey</span></code> or <code class="docutils literal notranslate"><span class="pre">welcome</span></code> if currently compiling to flash; in the latter case, a new <code class="docutils literal notranslate"><span class="pre">init</span></code> routine will be compiled which first calls any previous <code class="docutils literal notranslate"><span class="pre">init</span></code> routine and then calls the referenced word. This is the commended way for any new code from this point on to specify initializers, as it will enable initializing properly both when code is compiled to RAM or is compiled to flash.</p>
+<p>Note that this word <em>must not</em> reference <code class="docutils literal notranslate"><span class="pre">init</span></code> or else it will inappropriately cause the preceding <code class="docutils literal notranslate"><span class="pre">init</span></code> to be immediately be run again, if compiling to RAM, or to be run twice, if compiling to flash. This will put the system in an undefined state (i.e. it will probably crash as a result).</p>
+</section>
 <section id="immediate">
 <h3><code class="docutils literal notranslate"><span class="pre">[immediate]</span></code></h3>
 <p>( – )</p>
