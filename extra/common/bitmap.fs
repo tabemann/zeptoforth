@@ -77,7 +77,10 @@ begin-module bitmap
       method dirty-area ( start-col end-col start-row end-row bitmap -- )
 
     end-module> import
-      
+
+    \ Get bitmap dimensions
+    method dim@ ( bitmap -- cols rows )
+    
     \ Clear the bitmap
     method clear-bitmap ( bitmap -- )
 
@@ -103,7 +106,7 @@ begin-module bitmap
 
   <bitmap> begin-implement
 
-    \ Initialize an BITMAP device
+    \ Initialize a bitmap
     :noname { buf cols rows self -- }
       self <object>->new
       rows self bitmap-rows !
@@ -120,6 +123,11 @@ begin-module bitmap
     
     \ Get whether a bitmap is dirty
     :noname ( bitmap -- dirty? ) drop true ; define dirty?
+
+    \ Get bitmap dimensions
+    :noname ( bitmap -- cols rows )
+      dup bitmap-cols @ swap bitmap-rows @
+    ; define dim@
     
     \ Clear the bitmap
     :noname { self -- }
@@ -696,136 +704,6 @@ begin-module bitmap
           strip-row-count +to dst-row
         repeat
       ;
-
-      \ Clip a destination-only rectangle
-      : clip-dst-only
-        { dst-col col-count dst-row row-count dst --
-        new-dst-col new-col-count new-dst-row new-row-count }
-        dst-col 0 < if
-          dst-col col-count + 0>= if
-            dst-col +to col-count
-          else
-            0 to col-count
-          then
-          0 to dst-col
-        then
-        dst-col dst bitmap-cols @ < if
-          dst-col col-count + dst bitmap-cols @ > if
-            dst bitmap-cols @ dst-col col-count + - +to col-count
-          then
-        else
-          0 to col-count
-          dst bitmap-cols @ to dst-col
-        then
-        dst-row 0 < if
-          dst-row row-count + 0>= if
-            dst-row +to row-count
-          else
-            0 to row-count
-          then
-          0 to dst-row
-        then
-        dst-row dst bitmap-rows @ < if
-          dst-row row-count + dst bitmap-rows @ > if
-            dst bitmap-rows @ dst-row row-count + - +to row-count
-          then
-        else
-          0 to row-count
-          dst bitmap-rows @ to dst-row
-        then
-        dst-col col-count dst-row row-count
-      ;
-
-      \ Clip a rectangle to the source dimensions
-      : clip-src
-        { src-col dst-col col-count src-row dst-row row-count src --
-        new-src-col new-dst-col new-col-count new-src-row new-dst-row
-        new-row-count }
-        src-col 0 < if
-          src-col negate +to dst-col
-          src-col col-count + 0>= if
-            src-col +to col-count
-          else
-            0 to col-count
-          then
-          0 to src-col
-        then
-        src-col src bitmap-cols @ < if
-          src-col col-count + src bitmap-cols @ > if
-            src bitmap-cols @ src-col col-count + - +to col-count
-          then
-        else
-          0 to row-count
-          src bitmap-cols @ to dst-col
-        then
-        src-row 0 < if
-          src-row negate +to dst-row
-          src-row row-count + 0>= if
-            src-row +to row-count
-          else
-            0 to row-count
-          then
-          0 to src-row
-        then
-        src-row src bitmap-rows @ < if
-          src-row row-count + src bitmap-rows @ > if
-            src bitmap-rows @ src-row row-count + - +to row-count
-          then
-        else
-          0 to row-count
-          src bitmap-rows @ to dst-row
-        then
-        src-col dst-col col-count src-row dst-row row-count
-      ;
-
-      \ Clip a rectangle to the destination dimensions
-      : clip-dst
-        { src-col dst-col col-count src-row dst-row row-count dst --
-        new-src-col new-dst-col new-col-count new-src-row new-dst-row
-        new-row-count }
-        dst-col 0 < if
-          dst-col negate +to src-col
-          dst-col col-count + 0>= if
-            dst-col +to col-count
-          else
-            0 to col-count
-          then
-          0 to dst-col
-        then
-        dst-col dst bitmap-cols @ < if
-          dst-col col-count + dst bitmap-cols @ > if
-            dst bitmap-cols @ dst-col col-count + - +to col-count
-          then
-        else
-          0 to row-count
-          dst bitmap-cols @ to src-col
-        then
-        dst-row 0 < if
-          dst-row negate +to src-row
-          dst-row row-count + 0>= if
-            dst-row +to row-count
-          else
-            0 to row-count
-          then
-          0 to dst-row
-        then
-        dst-row dst bitmap-rows @ < if
-          dst-row row-count + dst bitmap-rows @ > if
-            dst bitmap-rows @ dst-row row-count + - +to row-count
-          then
-        else
-          0 to row-count
-          dst bitmap-rows @ to src-row
-        then
-        src-col dst-col col-count src-row dst-row row-count
-      ;
-
-      \ Clip a rectangle
-      : clip
-        ( start-src-col start-dst-col col-count start-src-row start-dst-row )
-        ( row-count src-bitmap dst-bitmap -- )
-        { src dst } src clip-src dst clip-dst
-      ;
         
       \ Set a pixel with a constant value
       : set-pixel-const { const dst-col dst-row dst -- }
@@ -875,7 +753,7 @@ begin-module bitmap
       \ Set a rectangle with a constant value
       : set-rect-const
         ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
-        { dst } dst clip-dst-only
+        { dst } dst dim@ clip::clip-dst-only
         { const dst-col col-count dst-row row-count }
         dst-col dup col-count + dst-row dup row-count + dst dirty-area
         const dst-col col-count dst-row row-count dst
@@ -885,7 +763,7 @@ begin-module bitmap
       \ Or a rectangle with a constant value
       : or-rect-const
         ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
-        { dst } dst clip-dst-only
+        { dst } dst dim@ clip::clip-dst-only
         { const dst-col col-count dst-row row-count }
         dst-col dup col-count + dst-row dup row-count + dst dirty-area
         const dst-col col-count dst-row row-count dst
@@ -895,7 +773,7 @@ begin-module bitmap
       \ And a rectangle with a constant value
       : and-rect-const
         ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
-        { dst } dst clip-dst-only
+        { dst } dst dim@ clip::clip-dst-only
         { const dst-col col-count dst-row row-count }
         dst-col dup col-count + dst-row dup row-count + dst dirty-area
         const dst-col col-count dst-row row-count dst
@@ -905,7 +783,7 @@ begin-module bitmap
       \ Bit-clear a rectangle with a constant value
       : bic-rect-const
         ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
-        { dst } dst clip-dst-only
+        { dst } dst dim@ clip::clip-dst-only
         { const dst-col col-count dst-row row-count }
         dst-col dup col-count + dst-row dup row-count + dst dirty-area
         const dst-col col-count dst-row row-count dst
@@ -915,7 +793,7 @@ begin-module bitmap
       \ Exclusive-or a rectangle with a constant value
       : xor-rect-const
         ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
-        { dst } dst clip-dst-only
+        { dst } dst dim@ clip::clip-dst-only
         { const dst-col col-count dst-row row-count }
         dst-col dup col-count + dst-row dup row-count + dst dirty-area
         const dst-col col-count dst-row row-count dst
@@ -926,7 +804,7 @@ begin-module bitmap
       : set-rect
         ( start-src-col start-dst-col col-count start-src-row start-dst-row )
         ( row-count src-bitmap dst-bitmap -- )
-        { src dst } src dst clip
+        { src dst } src dim@ dst dim@ clip::clip-src-dst
         { src-col dst-col col-count src-row dst-row row-count }
         dst-col dup col-count + dst-row dup row-count + dst dirty-area
         src-col dst-col col-count src-row dst-row row-count src dst
@@ -937,7 +815,7 @@ begin-module bitmap
       : or-rect
         ( start-src-col start-dst-col col-count start-src-row start-dst-row )
         ( row-count src-bitmap dst-bitmap -- )
-        { src dst } src dst clip
+        { src dst } src dim@ dst dim@ clip::clip-src-dst
         { src-col dst-col col-count src-row dst-row row-count }
         dst-col dup col-count + dst-row dup row-count + dst dirty-area
         src-col dst-col col-count src-row dst-row row-count src dst
@@ -948,7 +826,7 @@ begin-module bitmap
       : and-rect
         ( start-src-col start-dst-col col-count start-src-row start-dst-row )
         ( row-count src-bitmap dst-bitmap -- )
-        { src dst } src dst clip
+        { src dst } src dim@ dst dim@ clip::clip-src-dst
         { src-col dst-col col-count src-row dst-row row-count }
         dst-col dup col-count + dst-row dup row-count + dst dirty-area
         src-col dst-col col-count src-row dst-row row-count src dst
@@ -959,7 +837,7 @@ begin-module bitmap
       : bic-rect
         ( start-src-col start-dst-col col-count start-src-row start-dst-row )
         ( row-count src-bitmap dst-bitmap -- )
-        { src dst } src dst clip
+        { src dst } src dim@ dst dim@ clip::clip-src-dst
         { src-col dst-col col-count src-row dst-row row-count }
         dst-col dup col-count + dst-row dup row-count + dst dirty-area
         src-col dst-col col-count src-row dst-row row-count src dst
@@ -970,7 +848,7 @@ begin-module bitmap
       : xor-rect
         ( start-src-col start-dst-col col-count start-src-row start-dst-row )
         ( row-count src-bitmap dst-bitmap -- )
-        { src dst } src dst clip
+        { src dst } src dim@ dst dim@ clip::clip-src-dst
         { src-col dst-col col-count src-row dst-row row-count }
         dst-col dup col-count + dst-row dup row-count + dst dirty-area
         src-col dst-col col-count src-row dst-row row-count src dst
