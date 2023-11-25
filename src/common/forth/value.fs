@@ -691,7 +691,7 @@ end-module> import
         then
       then
     else
-      2drop eval-eof @ ?dup if execute false else true then
+      2drop eval-eof @ ?dup if execute else true then
       if
         drop clear-locals ['] x-token-expected ?raise
       else
