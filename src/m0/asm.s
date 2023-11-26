@@ -19,6 +19,7 @@
 @ SOFTWARE.
 
 	@@ Compile the header of a word
+        @@ ( c-addr u -- )
 	define_internal_word "start-compile-header", visible_flag
 _asm_start_header:
 	push {lr}
@@ -57,6 +58,7 @@ _asm_start_header:
 	end_inlined
 
 	@@ Compile the start of a word without the push {lr}
+        @@ ( c-addr u -- )
         define_internal_word "start-compile-no-push", visible_flag
 _asm_start_no_push:
         push {lr}
@@ -72,6 +74,7 @@ _asm_start_no_push:
         end_inlined
         
 	@@ Compile the start of a word
+        @@ ( c-addr u -- )
 	define_internal_word "start-compile", visible_flag
 _asm_start:
 	push {lr}
@@ -1083,21 +1086,8 @@ _asm_reserve_literal:
 	define_internal_word "literal!", visible_flag
 _asm_store_literal:	
 	push {lr}
-@	movs r0, tos
-@	ldr r1, [dp]
-@	push {r0, r1}
+        bl _asm_cond_dump_consts
 	bl _asm_register_const
-@	pop {r0, r1}
-@	push_tos
-@	movs tos, #0
-@	push_tos
-@	movs tos, r1
-@	push_tos
-@	movs tos, r1
-@	push_tos
-@	movs tos, r0
-@	adds tos, #2
-@	bl _asm_store_ldr_imm
 	pop {pc}
 	end_inlined
 	
@@ -1214,6 +1204,7 @@ _asm_beq_back:
 	define_internal_word "literal,", visible_flag
 _asm_literal:
 	push {lr}
+        bl _asm_cond_dump_consts
 	movs r0, tos
 	pull_tos
 	movs r1, #255
@@ -1651,22 +1642,6 @@ _asm_mvn:
 	@@ Assemble instructions to pull a value from the stack
 	define_internal_word "pull,", visible_flag
 _asm_pull:
-@	push {lr}
-@	movs r0, tos
-@	movs tos, #0
-@	push_tos
-@	movs tos, #7
-@	push_tos
-@	movs tos, r0
-@	bl _asm_ldr_imm
-@	push_tos
-@	movs tos, #4
-@	push_tos
-@	movs tos, #7
-@	bl _asm_add_imm
-@	pop {pc}
-@	end_inlined
-	
 	push {lr}
 	movs r0, #1
 	lsls r0, r0, tos
@@ -1838,29 +1813,26 @@ _asm_store_ldr_pc:
 	@@ Write out constants
 	define_internal_word "consts,", visible_flag
 _asm_dump_consts:
-	push {lr}
+	push {r4, r5, lr}
 	ldr r0, =consts_used_count
 	ldr r1, [r0]
 	cmp r1, #0
-	beq 2f
-	push {r0}
+	beq 3f
+        bl _asm_fill_const_map
+        bl _asm_regular_const_map
 	bl _asm_word_align
-	pop {r0}
+        bl _current_here
 	movs r1, #0
 1:	ldr r0, =consts_used_count
 	ldr r2, [r0]
 	cmp r1, r2
 	beq 2f
-	push_tos
-	movs tos, r1
-	push {r1}
-	bl _asm_const_index
-	pop {r1}
-	movs r0, tos
-	pull_tos
-	push {r0, r1}
-	bl _current_here
-	pop {r0, r1}
+        ldr r0, =const_buffer_map
+        ldrsb r2, [r0, r1]
+        mvns r2, r2
+        lsls r2, r2, #2
+        push_tos
+        adds tos, r2
 	push_tos
 	ldr r2, =const_buffer_reg
 	ldrb tos, [r2, r1]
@@ -1868,44 +1840,160 @@ _asm_dump_consts:
 	ldr r2, =const_buffer_addr
 	lsls r3, r1, #2
 	ldr tos, [r2, r3]
-	push {r0, r1}
-@	bl _asm_store_unaligned_adr
-	bl _asm_store_ldr_pc
-	pop {r0, r1}
-	push_tos
-	ldr r2, =const_buffer_value
-	lsls r0, r0, #2
-	ldr tos, [r2, r0]
 	push {r1}
-	bl _current_comma_4
+	bl _asm_store_ldr_pc
 	pop {r1}
-	adds r1, #1
+        adds r1, #1
 	b 1b
-2:	movs r1, #0
+2:	pull_tos
+        bl _asm_write_consts
+        ldr r0, =consts_used_count
+	movs r1, #0
 	str r1, [r0]
-	pop {pc}
+3:      pop {r4, r5, pc}
 	end_inlined
 
-	@@ Get index of constant to use (to resolve duplicate constants)
-	@@ ( index -- index' )
-	define_internal_word "const-index", visible_flag
-_asm_const_index:	
-	lsls tos, tos, #2
-	ldr r0, =const_buffer_value
-	ldr r3, [r0, tos]
-	movs r1, #0
-1:	cmp r1, tos
-	beq 2f
-	ldr r2, [r0, r1]
-	cmp r2, r3
-	beq 3f
-	adds r1, #4
-	b 1b
-2:	lsrs tos, tos, #2
-	bx lr
-3:	lsrs tos, r1, #2
-	bx lr
-	end_inlined
+        @@ Actually write out constants
+        @@ ( count -- )
+        define_internal_word "write-consts", visible_flag
+_asm_write_consts:
+        push {lr}
+        movs r0, #0
+1:      cmp tos, r0
+        beq 3f
+        ldr r2, =const_buffer_map_value
+        lsls r3, r0, #2
+        push_tos
+        ldr tos, [r2, r3]
+        push {r0}
+        bl _current_comma_4
+        pop {r0}
+2:      adds r0, #1
+        b 1b
+3:      pull_tos
+        pop {pc}
+        end_inlined
+
+        @@ Conditionally dump constants
+        @@ ( -- )
+        define_internal_word "cond-consts,", visible_flag
+_asm_cond_dump_consts:
+        push {r4, lr}
+        bl _current_here
+        movs r1, #0
+        ldr r0, =consts_used_count
+        ldr r0, [r0]
+        ldr r2, =const_buffer_addr
+        ldr r4, =512
+1:      cmp r0, r1
+        beq 3f
+        lsls r3, r1, #2
+        ldr r3, [r2, r3]
+        push_tos
+        subs tos, r3
+        cmp tos, r4
+        bge 2f
+        pull_tos
+        adds r1, #1
+        b 1b
+2:      pull_tos
+        bl _asm_dump_consts
+3:      pull_tos
+        pop {r4, pc}
+        end_inlined
+        
+        @@ Get the last index of a value
+        @@ ( value -- last-index | -1 )
+        define_internal_word "last-const-index", visible_flag
+_asm_last_const_index:
+        movs r1, #0
+        movs r2, #0
+        mvns r2, r2
+1:      ldr r0, =consts_used_count
+        ldr r0, [r0]
+        cmp r1, r0
+        beq 3f
+        ldr r0, =const_buffer_value
+        lsls r3, r1, #2
+        ldr r0, [r0, r3]
+        cmp r0, tos
+        bne 2f
+        movs r2, r1
+2:      adds r1, #1
+        b 1b
+3:      movs tos, r2
+        bx lr
+        end_inlined
+
+        @@ Fill the const buffer map
+        @@ ( -- )
+        define_internal_word "fill-const-map", visible_flag
+_asm_fill_const_map:
+        push {lr}
+        push_tos
+        movs r1, #0
+1:      ldr r0, =consts_used_count
+        ldr r0, [r0]
+        cmp r1, r0
+        beq 2f
+        ldr r0, =const_buffer_value
+        lsls r2, r1, #2
+        ldr tos, [r0, r2]
+        push {r1}
+        bl _asm_last_const_index
+        pop {r1}
+        ldr r0, =const_buffer_map
+        strb tos, [r0, r1]
+        adds r1, #1
+        b 1b
+2:      pull_tos
+        pop {pc}
+        end_inlined
+
+        @@ Regularize the const buffer map
+        @@ ( -- count )
+        define_internal_word "regular-const-map", visible_flag
+_asm_regular_const_map:
+        push {r4, r5, lr}
+        movs r1, #0
+        movs r3, #0
+        mvns r3, r3
+1:      ldr r0, =consts_used_count
+        ldr r0, [r0]
+        cmp r1, r0
+        beq 6f
+        ldr r0, =const_buffer_map
+        ldrsb r2, [r0, r1]
+        cmp r2, #0
+        bge 2f
+        adds r1, #1
+        b 1b
+2:      ldr r0, =const_buffer_value
+        lsls r5, r1, #2
+        ldr r0, [r0, r5]
+        ldr r4, =const_buffer_map_value
+        mvns r5, r3
+        lsls r5, r5, #2
+        str r0, [r4, r5]
+        movs r4, r1
+3:      ldr r0, =consts_used_count
+        ldr r0, [r0]
+        cmp r4, r0
+        beq 5f
+        ldr r0, =const_buffer_map
+        ldrsb r5, [r0, r4]
+        cmp r2, r5
+        bne 4f
+        strb r3, [r0, r4]
+4:      adds r4, #1
+        b 3b
+5:      adds r1, #1
+        subs r3, #1
+        b 1b
+6:      push_tos
+        mvns tos, r3
+        pop {r4, r5, pc}
+        end_inlined
 
 	@@ Write out constants to the code
 	define_internal_word "consts-inline,", visible_flag
@@ -1942,8 +2030,7 @@ _asm_register_const:
 	pull_tos
 	adds r1, #1
 	str r1, [r0]
-	movs r3, #const_count
-	cmp r1, r3
+	cmp r1, #const_count
 	bne 2f
 	bl _asm_dump_consts_inline
 2:	pop {pc}
