@@ -32,4 +32,8 @@
 
 	allot const_buffer_value, 4 * const_count
 
+        allot const_buffer_map, const_count
+
+        allot const_buffer_map_value, 4 * const_count
+
 	allot suppress_suppress_inline, 4
