@@ -646,10 +646,10 @@ internal set-current
   else
     reserve-literal
   then
-  reserve-literal build-target !
-  0 bx,
   word-exit-hook @ ?execute
   word-end-hook @ ?execute
+  reserve-literal build-target !
+  0 bx,
   $003F h,
   visible
   finalize,

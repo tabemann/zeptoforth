@@ -26,6 +26,9 @@ begin-module font
   \ Out of range character exception
   : x-out-of-range-char ( -- ) ." out of range character" cr ;
 
+  \ 16-bit pixmaps are not implemented
+  : x-pixmap16-not-available ( -- ) ." pixmap16 not available" cr ;
+  
   \ Get the size of a font buffer in bytes for a given number or of columns and
   \ rows per character and a given minimum character index and a given maximum
   \ character index
@@ -66,6 +69,12 @@ begin-module font
 
     \ Draw a string onto a bitmap
     method draw-string ( c-addr u col row op bitmap font -- )
+
+    \ Draw a character onto a 16-bit pixmap
+    method draw-char-to-pixmap16 ( color c col row pixmap16 font -- )
+    
+    \ Draw a string onto a 16-bit pixmap
+    method draw-string-to-pixmap16 ( color c-addr u col row pixmap16 font -- )
     
   end-class
 
@@ -125,6 +134,34 @@ begin-module font
       loop
     ; define draw-string
 
+    \ Draw a character onto a 16-bit pixmap
+    :noname { color c col row pixmap self -- }
+      [ defined? pixmap16 ] [if]
+        c self min-char-index @ u< if self default-char-index @ to c then
+        c self max-char-index @ u> if self default-char-index @ to c then
+        color
+        c self find-char-col col self char-cols @
+        0 row self char-rows @
+        self font-bitmap pixmap pixmap16::draw-rect-const-mask
+      [else]
+        ['] x-pixmap16-not-available ?raise
+      [then]
+    ; define draw-char-to-pixmap16
+    
+    \ Draw a string onto a 16-bit pixmap
+    :noname { color c-addr u col row pixmap self -- }
+      [ defined? pixmap16 ] [if]
+        u 0 ?do
+          color c-addr i + c@ col i self char-cols @ * + row pixmap self
+          draw-char-to-pixmap16
+        loop
+      [else]
+        ['] x-pixmap16-not-available ?raise
+      [then]
+    ; define draw-string-to-pixmap16
+      
+    [then]
+    
   end-implement
     
 end-module
