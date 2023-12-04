@@ -1897,7 +1897,7 @@ _asm_cond_dump_consts:
         adds r1, #1
         b 1b
 2:      pull_tos
-        bl _asm_dump_consts
+        bl _asm_dump_consts_inline
 3:      pull_tos
         pop {r4, pc}
         end_inlined
