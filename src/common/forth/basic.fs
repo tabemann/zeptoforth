@@ -1678,29 +1678,6 @@ commit-flash
   rdrop
 ;
 
-\ Begin lambda
-: [: ( -- )
-  [immediate]
-  [compile-only]
-  undefer-lit
-  reserve-branch
-  here
-  $B500 h,
-  word-begin-hook @ ?execute
-;
-
-\ End lambda
-: ;] ( -- )
-  [immediate]
-  [compile-only]
-  undefer-lit
-  word-exit-hook @ ?execute
-  word-end-hook @ ?execute
-  $BD00 h,
-  here rot branch-back!
-  lit,
-;
-
 \ Print out multiple spaces
 : spaces ( u -- ) begin dup 0> while space 1- repeat drop ;
 
@@ -1990,6 +1967,14 @@ forth set-current
   ram-here! swap if compile-to-flash then
 ;
 
+\ Match a close-paren
+: match-close-paren [char] ) = ;
+
+\ Match a quote
+: match-quote [char] " = ;
+
+commit-flash
+
 \ Set forth
 forth set-current
 
@@ -2000,11 +1985,11 @@ forth set-current
     s" [else]" ofstrcase 1- dup if 1+ then endof
     s" [then]" ofstrcase 1- endof
     s" \" ofstrcase ['] newline? skip-until	endof
-    s" (" ofstrcase [: [char] ) = ;] skip-until endof
-    s\" s\"" ofstrcase [: [char] " = ;] skip-until endof
-    s\" c\"" ofstrcase [: [char] " = ;] skip-until endof
-    s\" .\"" ofstrcase [: [char] " = ;] skip-until endof
-    s" .(" ofstrcase [: [char] ) = ;] skip-until endof
+    s" (" ofstrcase ['] match-close-paren skip-until endof
+    s\" s\"" ofstrcase ['] match-quote skip-until endof
+    s\" c\"" ofstrcase ['] match-quote skip-until endof
+    s\" .\"" ofstrcase ['] match-quote skip-until endof
+    s" .(" ofstrcase ['] match-close-paren skip-until endof
     s\" s\\\"" ofstrcase [char] " skip-esc-string endof
     s\" c\\\"" ofstrcase [char] " skip-esc-string endof
     s\" .\\\"" ofstrcase [char] " skip-esc-string endof
@@ -2039,6 +2024,33 @@ commit-flash
 
 \ Finish conditional execution/compilation
 : [then] ( -- ) [immediate] ;
+
+commit-flash
+
+\ Begin lambda
+: [: ( -- )
+  [immediate]
+  [compile-only]
+  undefer-lit
+  [ thumb-2? not ] [if] consts-inline, [then]
+  reserve-branch
+  here
+  $B500 h,
+  word-begin-hook @ ?execute
+;
+
+\ End lambda
+: ;] ( -- )
+  [immediate]
+  [compile-only]
+  undefer-lit
+  word-exit-hook @ ?execute
+  word-end-hook @ ?execute
+  [ thumb-2? not ] [if] consts-inline, [then]
+  $BD00 h,
+  here rot branch-back!
+  lit,
+;
 
 \ Try and display an error
 : try-and-display-error ( xt -- exception-xt )
