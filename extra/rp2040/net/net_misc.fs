@@ -31,6 +31,9 @@ begin-module net-misc
     swap $FF and 16 lshift or
     swap $FF and 24 lshift or
   ;
+
+  \ Max domain name length
+  253 constant max-dns-name-len
   
   \ DNS port
   53 constant dns-port
@@ -451,7 +454,7 @@ begin-module net-misc
       addr all-addr u>=
       addr all-addr all-bytes + u< and
       bytes all-bytes u< and
-      offset 253 < and if
+      offset max-dns-name-len < and if
         addr c@ { part-len }
         part-len $C0 and $C0 = if
           level parse-dns-name-depth = if 0 false exit then
@@ -462,7 +465,7 @@ begin-module net-misc
           1 +to level
         else
           part-len 63 u>
-          part-len offset + 1+ 253 u> or if 0 false exit then
+          part-len offset + 1+ max-dns-name-len u> or if 0 false exit then
           part-len 0= if
             offset true exit
           then
