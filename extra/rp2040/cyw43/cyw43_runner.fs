@@ -787,7 +787,7 @@ begin-module cyw43-runner
             self cyw43-scratch-buf self handle-cyw43-irq
           then
         again
-      ;] 1024 512 512 1 spawn-on-core run
+      ;] 2048 512 512 1 spawn-on-core run
     ; define run-cyw43
 
     \ Handle CYW43 IRQ's

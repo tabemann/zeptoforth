@@ -1082,7 +1082,6 @@ begin-module net
     \ Evict a DNS entry
     :noname ( c-addr bytes self -- )
       [: { c-addr bytes self }
-        c-addr bytes validate-dns-name
         max-dns-cache 0 ?do
           self cached-dns-names i cells + @ ?dup if
             count c-addr bytes equal-case-strings?
@@ -3661,6 +3660,7 @@ begin-module net
 
     \ Resolve a DNS name's IPv4 address
     :noname { c-addr bytes self -- ipv4-addr success? }
+      c-addr bytes validate-dns-name
       systick::systick-counter dns-resolve-interval - { tick }
       max-dns-resolve-attempts { attempts }
       c-addr bytes self dns-cache lookup-ipv4-addr-by-dns if
@@ -3695,8 +3695,9 @@ begin-module net
     ; define resolve-dns-ipv4-addr
 
     \ Evict a DNS name's cache entry, forcing it to be re-resolved
-    :noname ( c-addr bytes self -- )
-      dns-cache net-internal::evict-dns
+    :noname { c-addr bytes self -- }
+      c-addr bytes validate-dns-name
+      c-addr bytes self dns-cache net-internal::evict-dns
     ; define evict-dns
 
     \ Send an ARP request packet
