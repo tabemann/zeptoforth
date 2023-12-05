@@ -659,7 +659,11 @@ begin-module armv6m
   
   \ Begin an assembly block
   : code[
-    [compile-only] [immediate] undefer-lit armv6m-instr import postpone [
+    [compile-only] [immediate]
+    undefer-lit
+    [ thumb-2? not ] [if] consts-inline, [then]
+    armv6m-instr import
+    postpone [
   ;
 
   \ End an assembly block

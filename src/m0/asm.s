@@ -1999,6 +1999,10 @@ _asm_regular_const_map:
 	define_internal_word "consts-inline,", visible_flag
 _asm_dump_consts_inline:
 	push {lr}
+        ldr r0, =consts_used_count
+        ldr r0, [r0]
+        cmp r0, #0
+        beq 1f
 	bl _current_reserve_2
 	bl _asm_dump_consts
 	movs r0, tos
@@ -2009,7 +2013,7 @@ _asm_dump_consts_inline:
 	push_tos
 	movs tos, r0
 	bl _asm_branch_back
-	pop {pc}
+1:      pop {pc}
 	end_inlined
 	
 	@@ Register a constant
