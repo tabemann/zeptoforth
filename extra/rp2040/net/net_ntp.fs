@@ -29,6 +29,9 @@ begin-module ntp
 
   begin-module ntp-internal
 
+    \ Initial NTP delay
+    40000 constant init-ntp-poll-multiplier
+
     \ The minimum NTP polling rate as a power of two
     6 constant min-ntp-poll-pow2
     
@@ -92,7 +95,7 @@ begin-module ntp
     3 constant client-mode
     
     \ LI-VN-Mode constant
-    0 6 lshift ntp-version 4 lshift or client-mode or constant li-vn-mode
+    0 6 lshift ntp-version 3 lshift or client-mode or constant li-vn-mode
 
     \ Load an unaligned big-endian 64-bit value
     : 2beunaligned@ { addr -- D: value }
@@ -102,6 +105,11 @@ begin-module ntp
     \ Store an unaligned big-endian 64-bit value
     : 2beunaligned! { lo hi addr -- }
       lo rev addr cell + unaligned! hi rev addr unaligned!
+    ;
+
+    \ Get an initial NTP delay
+    : init-ntp-delay ( -- delay )
+      rng::random 0 init-ntp-poll-multiplier s>f f* f>s
     ;
     
   end-module> import
@@ -140,6 +148,9 @@ begin-module ntp
       \ Is the time set
       cell member ntp-time-set
 
+      \ Is the time delay set
+      cell member ntp-time-alarm-set
+      
       \ The starting time
       2 cells member ntp-start-time
 
@@ -195,19 +206,20 @@ begin-module ntp
   <ntp> begin-implement
 
     \ Construct an <ntp> instance
-    :noname { ip-interface self -- } ." *a* "
-      self <endpoint-handler>->new ." *b* "
-      ip-interface self ntp-interface ! ." *c* "
-      0 self ntp-server-ipv4-addr ! ." *d* "
-      0 self ntp-endpoint ! ." *e* "
-      default-ntp-delay self ntp-delay ! ." *f* "
-      false self ntp-reschedule ! ." *g* "
-      self ntp-server-dns-name max-dns-name-len 0 fill ." *h* "
-      false self ntp-time-set ! ." *i* "
-      0. self ntp-start-time 2! ." *j* "
-      0. self ntp-start-us 2! ." *k* "
-      0 self ntp-server-dns-name-len ! ." *l* "
-      320 128 1024 0 self ntp-alarm-task init-alarm-task ." *m* "
+    :noname { ip-interface self -- }
+      self <endpoint-handler>->new
+      ip-interface self ntp-interface !
+      0 self ntp-server-ipv4-addr !
+      0 self ntp-endpoint !
+      init-ntp-delay self ntp-delay !
+      false self ntp-reschedule !
+      self ntp-server-dns-name max-dns-name-len 0 fill
+      false self ntp-time-set !
+      false self ntp-time-alarm-set !
+      0. self ntp-start-time 2!
+      0. self ntp-start-us 2!
+      0 self ntp-server-dns-name-len !
+      320 128 1024 0 self ntp-alarm-task init-alarm-task
     ; define new
 
     \ Initialize the NTP client
@@ -216,7 +228,8 @@ begin-module ntp
       dns-name self ntp-server-dns-name dns-name-len move
       dns-name-len self ntp-server-dns-name-len !
       port self ntp-server-port !
-      self set-ntp-lookup-alarm
+      \ self set-ntp-lookup-alarm
+      self lookup-ntp-addr
     ; define init-ntp
     
     \ Handle an endpoint packet
@@ -248,23 +261,26 @@ begin-module ntp
         else
           endpoint self ntp-interface @ endpoint-done
           endpoint self ntp-interface @ close-udp-endpoint
-          0 self ntp-endpoint !          
+          0 self ntp-endpoint !
         then
       then
     ; define handle-endpoint
 
     \ Set the time
     :noname { D: time self -- }
+      self ntp-time-set @ not if default-ntp-delay self ntp-delay ! then
+      self ntp-time-set @ not self ntp-time-alarm-set @ and { reset-alarm }
       time self ntp-start-time 2!
       timer::us-counter self ntp-start-us 2!
       true self ntp-time-set !
+      reset-alarm if self set-ntp-alarm then
     ; define current-time!
 
     \ Get the time
     :noname { self -- D: time }
       timer::us-counter self ntp-start-us 2@ d-
-      dup 1000000 u/ { secs }
-      1000000 umod s>f 1000000,0 f/ drop { fract }
+      1000000. ud/mod d>s -rot d>s { secs us }
+      us s>f 1000000,0 f/ drop { fract }
       self ntp-start-time 2@ fract secs d+
     ; define current-time@
 
@@ -295,8 +311,13 @@ begin-module ntp
     
     \ Carry out the NTP alarm
     :noname { self -- }
-      self ntp-delay @ 0 self [: drop send-ntp-packet ;]
+      self ntp-time-alarm-set @ if
+        self ntp-alarm unset-alarm
+      then
+      self ntp-time-set @ if self ntp-delay @ else init-ntp-delay then
+      0 self [: drop send-ntp-packet ;]
       self ntp-alarm self ntp-alarm-task set-alarm-delay
+      true self ntp-time-alarm-set !
     ; define set-ntp-alarm
 
     \ Send an NTP packet
@@ -329,7 +350,7 @@ begin-module ntp
               0. buffer ntp-rx-timestamp 2beunaligned!
               self current-time@ buffer ntp-tx-timestamp 2beunaligned!
               true
-            ;] self send-ipv4-udp-packet
+            ;] self ntp-interface @ send-ipv4-udp-packet
           else
             drop
           then
@@ -344,6 +365,7 @@ begin-module ntp
       2dup self ntp-interface @ evict-dns
       self ntp-interface @ resolve-dns-ipv4-addr if
         self ntp-server-ipv4-addr !
+        self set-ntp-alarm
       else
         drop
       then

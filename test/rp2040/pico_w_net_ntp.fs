@@ -91,7 +91,7 @@ begin-module pico-w-net-ntp
     my-interface @ gateway-ipv4-addr@ cr ." Gateway IPv4 address: " ipv4.
     my-interface @ dns-server-ipv4-addr@ cr ." DNS server IPv4 address: " ipv4.
     my-cyw43-net toggle-pico-w-led
-    s" pool.ntp.org" my-ntp init-ntp
+    s" pool.ntp.org" ntp-port my-ntp init-ntp
     0 [:
       begin
         my-ntp time-set? if
