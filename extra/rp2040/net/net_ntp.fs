@@ -270,7 +270,9 @@ begin-module ntp
     :noname { D: time self -- }
       self ntp-time-set @ not if default-ntp-delay self ntp-delay ! then
       self ntp-time-set @ not self ntp-time-alarm-set @ and { reset-alarm }
-      time self ntp-start-time 2!
+      time self ntp-start-time 2@ du> if
+        time self ntp-start-time 2!
+      then
       timer::us-counter self ntp-start-us 2!
       true self ntp-time-set !
       reset-alarm if self set-ntp-alarm then
