@@ -350,7 +350,7 @@ begin-module ntp
               0. buffer ntp-rx-timestamp 2beunaligned!
               self current-time@ buffer ntp-tx-timestamp 2beunaligned!
               true
-            ;] self ntp-interface @ send-ipv4-udp-packet
+            ;] self ntp-interface @ send-ipv4-udp-packet drop
           else
             drop
           then
