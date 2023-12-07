@@ -32,7 +32,22 @@ begin-module net
   heap import
 
   \ Oversized frame exception
-  : x-oversized-frame ( -- ) cr ." oversized frame" ;
+  : x-oversized-frame ( -- ) ." oversized frame" cr ;
+
+  \ Invalid DNS name
+  : x-invalid-dns-name ( -- ) ." invalid DNS name" cr ;
+
+  \ Validate DNS name
+  : validate-dns-name { addr len -- }
+    len 0 > averts x-invalid-dns-name
+    len max-dns-name-len <= averts x-invalid-dns-name
+    addr c@ [char] . <> averts x-invalid-dns-name
+    addr len 1- + c@ [char] . <> averts x-invalid-dns-name
+    len 1- 0 ?do
+      addr i + c@ dup $20 > averts x-invalid-dns-name
+      [char] . = if addr i 1+ + c@ [char] . <> averts x-invalid-dns-name then
+    loop
+  ;
 
   \ zeptoIP internals
   begin-module net-internal
@@ -960,6 +975,9 @@ begin-module net
 
     \ Reserve a DNS entry
     method reserve-dns ( ident c-addr bytes self -- )
+
+    \ Evict a DNS entry
+    method evict-dns ( c-addr bytes self -- )
     
     \ Save an IPv4 address by a DNS name
     method save-ipv4-addr-by-dns ( ipv4-addr ident c-addr bytes self -- )
@@ -1001,6 +1019,7 @@ begin-module net
     \ Look up an IPv4 address by a DNS name
     :noname ( c-addr bytes self -- ipv4-addr response found? )
       [: { c-addr bytes self }
+        c-addr bytes validate-dns-name
         max-dns-cache 0 ?do
           self cached-dns-names i cells + @ ?dup if
             count c-addr bytes equal-case-strings?
@@ -1059,6 +1078,33 @@ begin-module net
         -1 self cached-dns-responses index cells + !
       ;] over dns-cache-lock with-lock
     ; define reserve-dns
+
+    \ Evict a DNS entry
+    :noname ( c-addr bytes self -- )
+      [: { c-addr bytes self }
+        max-dns-cache 0 ?do
+          self cached-dns-names i cells + @ ?dup if
+            count c-addr bytes equal-case-strings?
+            -1 self cached-dns-idents i cells + @ = and if
+              self newest-dns-age @ { current-age }
+              max-dns-cache 0 ?do
+                self cached-dns-names i cells + @ if
+                  self cached-dns-ages i cells + @ { age }
+                  age self newest-dns-age @ -
+                  current-age self newest-dns-age @ - < if
+                    age to current-age
+                  then
+                then
+              loop
+              current-age 1- self cached-dns-ages i cells + !
+              self cached-dns-names i cells + @ self dns-cache-name-heap free
+              0 self cached-dns-names i cells + !
+              unloop exit
+            then
+          then
+        loop
+      ;] over dns-cache-lock with-lock
+    ; define evict-dns
 
     \ Save an abnormal response by a DNS name
     :noname ( response ident self -- )
@@ -2701,6 +2747,9 @@ begin-module net
     \ Resolve a DNS name's IPv4 address
     method resolve-dns-ipv4-addr ( c-addr bytes self -- ipv4-addr success? )
 
+    \ Evict a DNS name's entry, forcing it to be re-resolved
+    method evict-dns ( c-addr bytes self -- )
+    
     \ Wait for an endpoint to become ready
     method wait-ready-endpoint ( endpoint self -- )
     
@@ -3611,6 +3660,7 @@ begin-module net
 
     \ Resolve a DNS name's IPv4 address
     :noname { c-addr bytes self -- ipv4-addr success? }
+      c-addr bytes validate-dns-name
       systick::systick-counter dns-resolve-interval - { tick }
       max-dns-resolve-attempts { attempts }
       c-addr bytes self dns-cache lookup-ipv4-addr-by-dns if
@@ -3643,6 +3693,12 @@ begin-module net
         then
       until
     ; define resolve-dns-ipv4-addr
+
+    \ Evict a DNS name's cache entry, forcing it to be re-resolved
+    :noname { c-addr bytes self -- }
+      c-addr bytes validate-dns-name
+      c-addr bytes self dns-cache net-internal::evict-dns
+    ; define evict-dns
 
     \ Send an ARP request packet
     :noname ( dest-addr self -- )

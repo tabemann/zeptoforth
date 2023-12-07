@@ -1148,12 +1148,12 @@ Create a word referring to memory after it
 ##### `<builds`
 ( "name" -- )
 
-Create a word that executes code specified by DOES>
+Create a word that executes code specified by `does>`
 
 ##### `does>`
 ( -- )
 
-Specify code for a word created wth <BUILDS
+Specify code for a word created wth `<builds`
 
 ##### `defer`
 ( "name" -- )
@@ -1404,11 +1404,6 @@ Begin lambda
 ( -- ) ( compiled: -- xt )
 
 End lambda
-
-##### `x"`
-( <text>" -- )
-
-Create an anonymous word for an exception
 
 ##### `ws?`
 ( c -- flag )
