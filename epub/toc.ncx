@@ -11890,185 +11890,191 @@
         </navPoint>
         <navPoint id="navPoint1981" playOrder="1824">
           <navLabel>
+            <text>x-invalid-dns-name</text>
+          </navLabel>
+          <content src="extra/net.xhtml#x-invalid-dns-name" />  
+        </navPoint>
+        <navPoint id="navPoint1982" playOrder="1825">
+          <navLabel>
             <text>&lt;interface&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#interface" />  
         </navPoint>
-        <navPoint id="navPoint1982" playOrder="1825">
+        <navPoint id="navPoint1983" playOrder="1826">
           <navLabel>
             <text>&lt;endpoint&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#endpoint" />  
         </navPoint>
-        <navPoint id="navPoint1983" playOrder="1826">
+        <navPoint id="navPoint1984" playOrder="1827">
           <navLabel>
             <text>waiting-rx-data?</text>
           </navLabel>
           <content src="extra/net.xhtml#waiting-rx-data" />  
         </navPoint>
-        <navPoint id="navPoint1984" playOrder="1827">
+        <navPoint id="navPoint1985" playOrder="1828">
           <navLabel>
             <text>&lt;ip-handler&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#ip-handler" />  
         </navPoint>
-        <navPoint id="navPoint1985" playOrder="1828">
+        <navPoint id="navPoint1986" playOrder="1829">
           <navLabel>
             <text>&lt;arp-handler&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#arp-handler" />  
         </navPoint>
       </navPoint>
-      <navPoint id="navPoint1986" playOrder="1829">
+      <navPoint id="navPoint1987" playOrder="1830">
         <navLabel>
           <text>net-consts</text>
         </navLabel>
         <content src="extra/net.xhtml#net-consts" />  
-        <navPoint id="navPoint1987" playOrder="1829">
+        <navPoint id="navPoint1988" playOrder="1830">
           <navLabel>
             <text>net-consts</text>
           </navLabel>
           <content src="extra/net.xhtml#net-consts" />  
         </navPoint>
-        <navPoint id="navPoint1988" playOrder="1830">
+        <navPoint id="navPoint1989" playOrder="1831">
           <navLabel>
             <text>TCP states</text>
           </navLabel>
           <content src="extra/net.xhtml#tcp-states" />  
         </navPoint>
-        <navPoint id="navPoint1989" playOrder="1831">
+        <navPoint id="navPoint1990" playOrder="1832">
           <navLabel>
             <text>Ports</text>
           </navLabel>
           <content src="extra/net.xhtml#ports" />  
         </navPoint>
       </navPoint>
-      <navPoint id="navPoint1990" playOrder="1832">
+      <navPoint id="navPoint1991" playOrder="1833">
         <navLabel>
           <text>endpoint-process</text>
         </navLabel>
         <content src="extra/net.xhtml#endpoint-process" />  
-        <navPoint id="navPoint1991" playOrder="1832">
+        <navPoint id="navPoint1992" playOrder="1833">
           <navLabel>
             <text>endpoint-process</text>
           </navLabel>
           <content src="extra/net.xhtml#endpoint-process" />  
         </navPoint>
-        <navPoint id="navPoint1992" playOrder="1833">
+        <navPoint id="navPoint1993" playOrder="1834">
           <navLabel>
             <text>&lt;endpoint-handler&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#endpoint-handler" />  
         </navPoint>
-        <navPoint id="navPoint1993" playOrder="1834">
+        <navPoint id="navPoint1994" playOrder="1835">
           <navLabel>
             <text>&lt;endpoint-process&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#id10" />  
         </navPoint>
       </navPoint>
-      <navPoint id="navPoint1994" playOrder="1835">
+      <navPoint id="navPoint1995" playOrder="1836">
         <navLabel>
           <text>frame-process</text>
         </navLabel>
         <content src="extra/net.xhtml#frame-process" />  
-        <navPoint id="navPoint1995" playOrder="1835">
+        <navPoint id="navPoint1996" playOrder="1836">
           <navLabel>
             <text>frame-process</text>
           </navLabel>
           <content src="extra/net.xhtml#frame-process" />  
         </navPoint>
-        <navPoint id="navPoint1996" playOrder="1836">
+        <navPoint id="navPoint1997" playOrder="1837">
           <navLabel>
             <text>&lt;frame-handler&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#frame-handler" />  
         </navPoint>
-        <navPoint id="navPoint1997" playOrder="1837">
+        <navPoint id="navPoint1998" playOrder="1838">
           <navLabel>
             <text>&lt;frame-process&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#id14" />  
         </navPoint>
       </navPoint>
-      <navPoint id="navPoint1998" playOrder="1838">
+      <navPoint id="navPoint1999" playOrder="1839">
         <navLabel>
           <text>frame-interface</text>
         </navLabel>
         <content src="extra/net.xhtml#frame-interface" />  
-        <navPoint id="navPoint1999" playOrder="1838">
+        <navPoint id="navPoint2000" playOrder="1839">
           <navLabel>
             <text>frame-interface</text>
           </navLabel>
           <content src="extra/net.xhtml#frame-interface" />  
         </navPoint>
-        <navPoint id="navPoint2000" playOrder="1839">
+        <navPoint id="navPoint2001" playOrder="1840">
           <navLabel>
             <text>&lt;frame-interface&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#id16" />  
         </navPoint>
       </navPoint>
-      <navPoint id="navPoint2001" playOrder="1840">
+      <navPoint id="navPoint2002" playOrder="1841">
         <navLabel>
           <text>simple-cyw43-net</text>
         </navLabel>
         <content src="extra/net.xhtml#simple-cyw43-net" />  
-        <navPoint id="navPoint2002" playOrder="1840">
+        <navPoint id="navPoint2003" playOrder="1841">
           <navLabel>
             <text>simple-cyw43-net</text>
           </navLabel>
           <content src="extra/net.xhtml#simple-cyw43-net" />  
         </navPoint>
-        <navPoint id="navPoint2003" playOrder="1841">
+        <navPoint id="navPoint2004" playOrder="1842">
           <navLabel>
             <text>x-endpoint-process-not-started</text>
           </navLabel>
           <content src="extra/net.xhtml#x-endpoint-process-not-started" />  
         </navPoint>
-        <navPoint id="navPoint2004" playOrder="1842">
+        <navPoint id="navPoint2005" playOrder="1843">
           <navLabel>
             <text>&lt;simple-cyw43-net&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#id18" />  
         </navPoint>
       </navPoint>
-      <navPoint id="navPoint2005" playOrder="1843">
+      <navPoint id="navPoint2006" playOrder="1844">
         <navLabel>
           <text>pico-w-cyw43-net</text>
         </navLabel>
         <content src="extra/net.xhtml#pico-w-cyw43-net" />  
-        <navPoint id="navPoint2006" playOrder="1843">
+        <navPoint id="navPoint2007" playOrder="1844">
           <navLabel>
             <text>pico-w-cyw43-net</text>
           </navLabel>
           <content src="extra/net.xhtml#pico-w-cyw43-net" />  
         </navPoint>
-        <navPoint id="navPoint2007" playOrder="1844">
+        <navPoint id="navPoint2008" playOrder="1845">
           <navLabel>
             <text>&lt;pico-w-cyw43-net&gt;</text>
           </navLabel>
           <content src="extra/net.xhtml#id20" />  
         </navPoint>
       </navPoint>
-      <navPoint id="navPoint2008" playOrder="1845">
+      <navPoint id="navPoint2009" playOrder="1846">
         <navLabel>
           <text>net-misc</text>
         </navLabel>
         <content src="extra/net.xhtml#net-misc" />  
-        <navPoint id="navPoint2009" playOrder="1845">
+        <navPoint id="navPoint2010" playOrder="1846">
           <navLabel>
             <text>net-misc</text>
           </navLabel>
           <content src="extra/net.xhtml#net-misc" />  
         </navPoint>
-        <navPoint id="navPoint2010" playOrder="1846">
+        <navPoint id="navPoint2011" playOrder="1847">
           <navLabel>
             <text>make-ipv4-addr</text>
           </navLabel>
           <content src="extra/net.xhtml#make-ipv4-addr" />  
         </navPoint>
-        <navPoint id="navPoint2011" playOrder="1847">
+        <navPoint id="navPoint2012" playOrder="1848">
           <navLabel>
             <text>ipv4.</text>
           </navLabel>
@@ -12076,35 +12082,35 @@
         </navPoint>
       </navPoint>
     </navPoint>
-    <navPoint id="navPoint2012" playOrder="1848">
+    <navPoint id="navPoint2013" playOrder="1849">
       <navLabel>
         <text>CYW43xxx Words</text>
       </navLabel>
       <content src="extra/cyw43.xhtml" />  
-      <navPoint id="navPoint2013" playOrder="1848">
+      <navPoint id="navPoint2014" playOrder="1849">
         <navLabel>
           <text>CYW43xxx Words</text>
         </navLabel>
         <content src="extra/cyw43.xhtml" />  
       </navPoint>
-      <navPoint id="navPoint2014" playOrder="1849">
+      <navPoint id="navPoint2015" playOrder="1850">
         <navLabel>
           <text>cyw43-control</text>
         </navLabel>
         <content src="extra/cyw43.xhtml#cyw43-control" />  
-        <navPoint id="navPoint2015" playOrder="1849">
+        <navPoint id="navPoint2016" playOrder="1850">
           <navLabel>
             <text>cyw43-control</text>
           </navLabel>
           <content src="extra/cyw43.xhtml#cyw43-control" />  
         </navPoint>
-        <navPoint id="navPoint2016" playOrder="1850">
+        <navPoint id="navPoint2017" playOrder="1851">
           <navLabel>
             <text>default-mac-addr</text>
           </navLabel>
           <content src="extra/cyw43.xhtml#default-mac-addr" />  
         </navPoint>
-        <navPoint id="navPoint2017" playOrder="1851">
+        <navPoint id="navPoint2018" playOrder="1852">
           <navLabel>
             <text>&lt;cyw43-control&gt;</text>
           </navLabel>

@@ -27,6 +27,11 @@ The `net` module contains the following words:
 
 This exception is raised if a frame larger than the MTU would be raised.
 
+##### `x-invalid-dns-name`
+( -- )
+
+This exception is raised if an invalid DNS name is provided.
+
 The `net` module contains the following classes:
 
 #### `<interface>`
@@ -122,6 +127,11 @@ Attempt to resolve the MAC address of an IPv4 address; if successful, true and t
 ( c-addr bytes interface -- ipv4-addr success? )
 
 Attempt to resolve the IPv4 address of a hostname via DNS; if successful, true and the IPv4 address are returned, else false and a apdding cell is returned.
+
+##### `evict-dns`
+( c-addr bytes interface -- )
+
+Evict a DNS name's cache entry, forcing it to be re-resolved.
 
 ##### `get-ready-endpoint`
 ( interface -- endpoint )

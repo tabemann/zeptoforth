@@ -32,6 +32,11 @@
 <h3><code class="docutils literal notranslate"><span class="pre">x-oversized-frame</span></code></h3>
 <p>( – )</p>
 <p>This exception is raised if a frame larger than the MTU would be raised.</p>
+</section>
+<section id="x-invalid-dns-name">
+<h3><code class="docutils literal notranslate"><span class="pre">x-invalid-dns-name</span></code></h3>
+<p>( – )</p>
+<p>This exception is raised if an invalid DNS name is provided.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">net</span></code> module contains the following classes:</p>
 </section>
 <section id="interface">
@@ -126,6 +131,11 @@
 <h4><code class="docutils literal notranslate"><span class="pre">resolve-dns-ipv4-addr</span></code></h4>
 <p>( c-addr bytes interface – ipv4-addr success? )</p>
 <p>Attempt to resolve the IPv4 address of a hostname via DNS; if successful, true and the IPv4 address are returned, else false and a apdding cell is returned.</p>
+</section>
+<section id="evict-dns">
+<h4><code class="docutils literal notranslate"><span class="pre">evict-dns</span></code></h4>
+<p>( c-addr bytes interface – )</p>
+<p>Evict a DNS name’s cache entry, forcing it to be re-resolved.</p>
 </section>
 <section id="get-ready-endpoint">
 <h4><code class="docutils literal notranslate"><span class="pre">get-ready-endpoint</span></code></h4>
