@@ -55,7 +55,7 @@ To practically use this object system, one has to consider how to create `<objec
 
 Actually initializing an object is not normally done with calling `new` directly but rather through calling `init-object` with the object's class and the starting address at which the `<object>` will live, because `init-object` does preliminary initialization before `new` can be called (which it calls itself).
 
-Note that it is good manners for `new` of a given class to call the `new` of its superclass before it does anything else with a new <object>, or else the `<object>` may not function as intended.
+Note that it is good manners for `new` of a given class to call the `new` of its superclass before it does anything else with a new `<object>`, or else the `<object>` may not function as intended.
 
 Destroying an object is done through calling `destroy` on an object, which will carry out cleanup for an object. Note that actually freeing space for the `<object>` is up to the user. The normal convention is that each `destroy` of a given class calls the `destroy` of its superclass after it has cleaned up for itself; however, this should be broken with if a class handles freeing memory allocated for itself, e.g. in a heap, where this should be done after all superclasses' `destroy` methods have been called.
 
