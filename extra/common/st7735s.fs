@@ -43,6 +43,9 @@ begin-module st7735s
       \ CS pin
       cell member st7735s-cs-pin
 
+      \ Backlight pin
+      cell member st7735s-backlight-pin
+
       \ CLK pin
       cell member st7735s-clk-pin
 
@@ -67,6 +70,9 @@ begin-module st7735s
       \ Initialize the ST7735S
       method init-st7735s ( self -- )
 
+      \ Set the backlight
+      method backlight! ( backlight self -- )
+      
       \ Send a command to the ST7735S
       method cmd>st7735s ( cmd self -- )
 
@@ -89,22 +95,25 @@ begin-module st7735s
   <st7735s> begin-implement
 
     \ Constructor
-    :noname { din clk dc cs reset buf cols rows device self -- }
+    :noname { din clk dc cs backlight reset buf cols rows device self -- }
       buf cols rows self <pixmap16>->new
       device self st7735s-device !
       reset self st7735s-reset-pin !
       dc self st7735s-dc-pin !
       cs self st7735s-cs-pin !
+      backlight self st7735s-backlight-pin !
       clk self st7735s-clk-pin !
       din self st7735s-din-pin !
       dc output-pin
       cs output-pin
+      backlight output-pin
       high dc pin!
       high cs pin!
+      high backlight pin!
       reset output-pin
       low reset pin!
-      clk device spi-pin
-      din device spi-pin
+      device clk spi-pin
+      device din spi-pin
       device master-spi
       10000000 device spi-baud!
       8 device spi-data-size!
@@ -131,54 +140,53 @@ begin-module st7735s
       
       120 ms
       
-      $21 self cmd>st7735s
-      
-      $21 self cmd>st7735s
-      
+      $21 self cmd>st7735s 
+      $21 self cmd>st7735s 
+
       $B1 self cmd>st7735s
       $05 self data>st7735s
       $3A self data>st7735s
       $3A self data>st7735s
-      
+
       $B2 self cmd>st7735s
       $05 self data>st7735s
       $3A self data>st7735s
       $3A self data>st7735s
-      
-      $B3 self cmd>st7735s
+
+      $B3 self cmd>st7735s 
       $05 self data>st7735s
       $3A self data>st7735s
       $3A self data>st7735s
       $05 self data>st7735s
       $3A self data>st7735s
       $3A self data>st7735s
-      
+
       $B4 self cmd>st7735s
       $03 self data>st7735s
-      
+
       $C0 self cmd>st7735s
       $62 self data>st7735s
       $02 self data>st7735s
       $04 self data>st7735s
-      
+
       $C1 self cmd>st7735s
       $C0 self data>st7735s
-      
+
       $C2 self cmd>st7735s
       $0D self data>st7735s
       $00 self data>st7735s
-      
+
       $C3 self cmd>st7735s
       $8D self data>st7735s
-      $6A self data>st7735s
-      
+      $6A self data>st7735s   
+
       $C4 self cmd>st7735s
-      $8D self data>st7735s
+      $BD self data>st7735s 
       $EE self data>st7735s
-      
-      $C5 self cmd>st7735s \ VCOM
+
+      $C5 self cmd>st7735s
       $0E self data>st7735s
-      
+
       $E0 self cmd>st7735s
       $10 self data>st7735s
       $0E self data>st7735s
@@ -196,7 +204,7 @@ begin-module st7735s
       $0D self data>st7735s
       $0E self data>st7735s
       $10 self data>st7735s
-      
+
       $E1 self cmd>st7735s
       $10 self data>st7735s
       $0E self data>st7735s
@@ -214,16 +222,21 @@ begin-module st7735s
       $0D self data>st7735s
       $0E self data>st7735s
       $10 self data>st7735s
-      
-      $3A self cmd>st7735s
+
+      $3A self cmd>st7735s 
       $05 self data>st7735s
-      
+
       $36 self cmd>st7735s
       $A8 self data>st7735s
-      
+
       $29 self cmd>st7735s
       
     ; define init-st7735s
+
+    \ Set the backlight pin
+    :noname { backlight self -- }
+      backlight self st7735s-backlight-pin @ pin!
+    ; define backlight!
     
     \ Send a command to the ST7735S
     :noname { W^ cmd self -- }
@@ -302,11 +315,11 @@ begin-module st7735s
 
     \ Update a rectangular space on the SSD1306 device
     :noname { start-col end-col start-row end-row self -- }
-      start-col end-col start-row end-row st7735s-window!
+      start-col end-col start-row end-row self st7735s-window!
       high self st7735s-dc-pin @ pin!
       low self st7735s-cs-pin @ pin!
       end-row start-row ?do
-        start-col i self pixel-addr end-col start-col -
+        start-col i self pixel-addr end-col start-col - 1+ 1 lshift
         self st7735s-device @ buffer>spi
       loop
       high self st7735s-cs-pin @ pin!

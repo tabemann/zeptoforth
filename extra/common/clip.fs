@@ -296,14 +296,4 @@ begin-module clip
     dst-cols dst-rows clip-dst
   ;
 
-  \ Clip a masked rectable
-  : clip-mask-src-dst
-    ( mask-col dst-col src-col cols mask-row src-row dst-row rows )
-    ( mask-cols mask-rows src-cols src-rows dst-cols dst-rows -- )
-    { mask-cols mask-rows src-cols src-rows dst-cols dst-rows }
-    mask-cols mask-rows clip-mask
-    src-cols src-rows clip-src-w/-mask
-    dst-cols dst-rows clip-dst-w/-mask
-  ;
-
 end-module

@@ -32,7 +32,7 @@ begin-module pixmap16
 
   \ Get the size of a pixmap buffer in bytes for a given number of columns and
   \ rows
-  : pixmap16-buf-size ( cols rows -- bytes ) * 1 lshift ;
+  : pixmap16-buf-size ( cols rows -- bytes ) * 1 lshift cell align ;
 
   \ The <pixmap16> class
   <object> begin-class <pixmap16>
@@ -225,7 +225,7 @@ begin-module pixmap16
 
       \ Copy a strip from one pixmap to another for all the 1 bits in a bitmap
       : set-strip-mask
-        { mask-col src-col dst-col mask-row src-row dst-row col-count mask dst src -- }
+        { mask-col src-col dst-col mask-row src-row dst-row col-count mask src dst -- }
         mask-row 3 rshift mask
         bitmap::bitmap-internal::page-addr mask-col + { mask-addr }
         src-col src-row src pixel-addr { src-addr }
@@ -318,13 +318,11 @@ begin-module pixmap16
     
     \ Draw a rectangle on a pixmap from another bixmap using a bitmap as a mask
     :noname
-      { mask-col src-col dst-col cols
-      mask-row src-row dst-row rows mask src dst -- }
-      mask-col src-col dst-col cols mask-row src-row dst-row rows
-      mask bitmap::dim@ src dim@ dst dim@
-      clip::clip-mask-src-dst
-      to rows to dst-row to src-row to mask-row
-      to cols to dst-col to src-col to mask-col
+      { mask src dst }
+      mask bitmap::dim@ clip::clip-mask
+      src dim@ clip::clip-src-w/-mask
+      dst dim@ clip::clip-dst-w/-mask
+      { mask-col src-col dst-col cols mask-row src-row dst-row rows }
       rows 0 ?do
         mask-col src-col dst-col
         mask-row i + src-row i +  dst-row i +
