@@ -193,7 +193,7 @@ begin-module ntp
     end-module
 
     \ Initialize the NTP client
-    method init-ntp ( ipv4-addr self -- )
+    method init-ntp ( dns-name dns-name-len port self -- )
     
     \ Get the time
     method current-time@ ( self -- D: time )
@@ -280,10 +280,14 @@ begin-module ntp
 
     \ Get the time
     :noname { self -- D: time }
-      timer::us-counter self ntp-start-us 2@ d-
-      1000000. ud/mod d>s -rot d>s { secs us }
-      us s>f 1000000,0 f/ drop { fract }
-      self ntp-start-time 2@ fract secs d+
+      self ntp-time-set @ if
+        timer::us-counter self ntp-start-us 2@ d-
+        1000000. ud/mod d>s -rot d>s { secs us }
+        us s>f 1000000,0 f/ drop { fract }
+        self ntp-start-time 2@ fract secs d+
+      else
+        0.
+      then
     ; define current-time@
 
     \ Get the reference time
