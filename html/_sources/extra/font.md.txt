@@ -67,6 +67,16 @@ This draws a glyph *character* of font *font* with drawing operation *op* to *bi
 
 This draws a string at address *c-addr* of size *bytes* with glyphs from font *font* with drawing operation *op* to *bitmap* with the top left corner of the string's glyphs set to the bitmap being at column *column* and row *row*.
 
+##### `draw-char-to-pixmap16`
+( color character column row pixmap font -- )
+
+This draws a glyph *character* of font *font* to *pixmap* with the top left corner of the glyph set to the pixmap being at column *column* and row *row*. Note that the glyph is treated as a mask for a bitmap-to-pixmap drawing operation, so if one wants to change the background color one must do so with a separate drawing operation.
+
+##### `draw-string-to-pixmap16`
+( color c-addr bytes column row pixmap font -- )
+
+This draws a string at address *c-addr* of size *bytes* with glyphs from font *font* to *pixmap* with the top left corner of the string's glyphs set to the pixmap being at column *column* and row *row*. Note that the glyph is treated as a mask for a bitmap-to-pixmap drawing operation, so if one wants to change the background color one must do so with a separate drawing operation.
+
 ### `simple-font`
 
 The `simple-font` module contains the following words:

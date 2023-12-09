@@ -78,6 +78,16 @@
 <p>( c-addr bytes column row op bitmap font – )</p>
 <p>This draws a string at address <em>c-addr</em> of size <em>bytes</em> with glyphs from font <em>font</em> with drawing operation <em>op</em> to <em>bitmap</em> with the top left corner of the string’s glyphs set to the bitmap being at column <em>column</em> and row <em>row</em>.</p>
 </section>
+<section id="draw-char-to-pixmap16">
+<h3><code class="docutils literal notranslate"><span class="pre">draw-char-to-pixmap16</span></code></h3>
+<p>( color character column row pixmap font – )</p>
+<p>This draws a glyph <em>character</em> of font <em>font</em> to <em>pixmap</em> with the top left corner of the glyph set to the pixmap being at column <em>column</em> and row <em>row</em>. Note that the glyph is treated as a mask for a bitmap-to-pixmap drawing operation, so if one wants to change the background color one must do so with a separate drawing operation.</p>
+</section>
+<section id="draw-string-to-pixmap16">
+<h3><code class="docutils literal notranslate"><span class="pre">draw-string-to-pixmap16</span></code></h3>
+<p>( color c-addr bytes column row pixmap font – )</p>
+<p>This draws a string at address <em>c-addr</em> of size <em>bytes</em> with glyphs from font <em>font</em> to <em>pixmap</em> with the top left corner of the string’s glyphs set to the pixmap being at column <em>column</em> and row <em>row</em>. Note that the glyph is treated as a mask for a bitmap-to-pixmap drawing operation, so if one wants to change the background color one must do so with a separate drawing operation.</p>
+</section>
 </section>
 <section id="simple-font">
 <h2><code class="docutils literal notranslate"><span class="pre">simple-font</span></code></h2>

@@ -99,8 +99,8 @@ begin-module bitmap
 
     \ Draw a rectangle on a bitmap from another bitmap
     method draw-rect
-    ( start-src-col start-dst-col cols start-src-row start-dst-row )
-    ( rows op src-bitmap dst-bitmap -- )
+    ( start-src-col start-src-row start-dst-col start-dst-row cols rows )
+    ( op src-bitmap dst-bitmap -- )
 
   end-class
 
@@ -752,9 +752,9 @@ begin-module bitmap
       
       \ Set a rectangle with a constant value
       : set-rect-const
-        ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
+        ( const start-dst-col start-dst-row col-count row-count dst-bitmap -- )
         { dst } dst dim@ clip::clip-dst-only
-        { const dst-col col-count dst-row row-count }
+        { const dst-col dst-row col-count row-count }
         dst-col dup col-count + dst-row dup row-count + dst dirty-area
         const dst-col col-count dst-row row-count dst
         ['] set-strip-const blit-const
@@ -762,9 +762,9 @@ begin-module bitmap
 
       \ Or a rectangle with a constant value
       : or-rect-const
-        ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
+        ( const start-dst-col start-dst-row col-count row-count dst-bitmap -- )
         { dst } dst dim@ clip::clip-dst-only
-        { const dst-col col-count dst-row row-count }
+        { const dst-col dst-row col-count row-count }
         dst-col dup col-count + dst-row dup row-count + dst dirty-area
         const dst-col col-count dst-row row-count dst
         ['] or-strip-const blit-const
@@ -772,9 +772,9 @@ begin-module bitmap
 
       \ And a rectangle with a constant value
       : and-rect-const
-        ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
+        ( const start-dst-col start-dst-row col-count row-count dst-bitmap -- )
         { dst } dst dim@ clip::clip-dst-only
-        { const dst-col col-count dst-row row-count }
+        { const dst-col dst-row col-count row-count }
         dst-col dup col-count + dst-row dup row-count + dst dirty-area
         const dst-col col-count dst-row row-count dst
         ['] and-strip-const blit-const
@@ -782,9 +782,9 @@ begin-module bitmap
 
       \ Bit-clear a rectangle with a constant value
       : bic-rect-const
-        ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
+        ( const start-dst-col start-dst-row col-count row-count dst-bitmap -- )
         { dst } dst dim@ clip::clip-dst-only
-        { const dst-col col-count dst-row row-count }
+        { const dst-col dst-row col-count row-count }
         dst-col dup col-count + dst-row dup row-count + dst dirty-area
         const dst-col col-count dst-row row-count dst
         ['] bic-strip-const blit-const
@@ -792,9 +792,9 @@ begin-module bitmap
 
       \ Exclusive-or a rectangle with a constant value
       : xor-rect-const
-        ( const start-dst-col col-count start-dst-row row-count dst-bitmap -- )
+        ( const start-dst-col start-dst-row col-count row-count dst-bitmap -- )
         { dst } dst dim@ clip::clip-dst-only
-        { const dst-col col-count dst-row row-count }
+        { const dst-col dst-row col-count row-count }
         dst-col dup col-count + dst-row dup row-count + dst dirty-area
         const dst-col col-count dst-row row-count dst
         ['] xor-strip-const blit-const
@@ -802,10 +802,10 @@ begin-module bitmap
 
       \ Set a rectangle
       : set-rect
-        ( start-src-col start-dst-col col-count start-src-row start-dst-row )
+        ( start-src-col start-src-row start-dst-col start-dst-row col-count )
         ( row-count src-bitmap dst-bitmap -- )
         { src dst } src dim@ dst dim@ clip::clip-src-dst
-        { src-col dst-col col-count src-row dst-row row-count }
+        { src-col src-row dst-col dst-row col-count row-count }
         dst-col dup col-count + dst-row dup row-count + dst dirty-area
         src-col dst-col col-count src-row dst-row row-count src dst
         ['] set-strip blit
@@ -813,10 +813,10 @@ begin-module bitmap
       
       \ Or a rectangle
       : or-rect
-        ( start-src-col start-dst-col col-count start-src-row start-dst-row )
+        ( start-src-col start-src-row start-dst-col start-dst-row col-count )
         ( row-count src-bitmap dst-bitmap -- )
         { src dst } src dim@ dst dim@ clip::clip-src-dst
-        { src-col dst-col col-count src-row dst-row row-count }
+        { src-col src-row dst-col dst-row col-count row-count }
         dst-col dup col-count + dst-row dup row-count + dst dirty-area
         src-col dst-col col-count src-row dst-row row-count src dst
         ['] or-strip blit
@@ -824,10 +824,10 @@ begin-module bitmap
       
       \ And a rectangle
       : and-rect
-        ( start-src-col start-dst-col col-count start-src-row start-dst-row )
+        ( start-src-col start-src-row start-dst-col start-dst-row col-count )
         ( row-count src-bitmap dst-bitmap -- )
         { src dst } src dim@ dst dim@ clip::clip-src-dst
-        { src-col dst-col col-count src-row dst-row row-count }
+        { src-col src-row dst-col dst-row col-count row-count }
         dst-col dup col-count + dst-row dup row-count + dst dirty-area
         src-col dst-col col-count src-row dst-row row-count src dst
         ['] and-strip blit
@@ -835,10 +835,10 @@ begin-module bitmap
 
       \ Bit-clear a rectangle
       : bic-rect
-        ( start-src-col start-dst-col col-count start-src-row start-dst-row )
+        ( start-src-col start-src-row start-dst-col start-dst-row col-count )
         ( row-count src-bitmap dst-bitmap -- )
         { src dst } src dim@ dst dim@ clip::clip-src-dst
-        { src-col dst-col col-count src-row dst-row row-count }
+        { src-col src-row dst-col dst-row col-count row-count }
         dst-col dup col-count + dst-row dup row-count + dst dirty-area
         src-col dst-col col-count src-row dst-row row-count src dst
         ['] bic-strip blit
@@ -846,10 +846,10 @@ begin-module bitmap
 
       \ Exclusive-or a rectangle
       : xor-rect
-        ( start-src-col start-dst-col col-count start-src-row start-dst-row )
+        ( start-src-col start-src-row start-dst-col start-dst-row col-count )
         ( row-count src-bitmap dst-bitmap -- )
         { src dst } src dim@ dst dim@ clip::clip-src-dst
-        { src-col dst-col col-count src-row dst-row row-count }
+        { src-col src-row dst-col dst-row col-count row-count }
         dst-col dup col-count + dst-row dup row-count + dst dirty-area
         src-col dst-col col-count src-row dst-row row-count src dst
         ['] xor-strip blit
@@ -880,7 +880,7 @@ begin-module bitmap
     ; define draw-pixel-const
 
     \ Draw a constant rectangle on a bitmap
-    :noname ( const start-dst-col cols start-dst-row rows op dst -- )
+    :noname ( const start-dst-col start-dst-row cols rows op dst -- )
       swap case
         op-set of set-rect-const endof
         op-or of or-rect-const endof
@@ -893,8 +893,8 @@ begin-module bitmap
 
     \ Draw a rectangle on a bitmap from another bitmap
     :noname
-      ( start-src-col start-dst-col cols start-src-row start-dst-row )
-      ( rows op src dst -- )
+      ( start-src-col start-src-row start-dst-col start-dst-row cols rows )
+      ( op src dst -- )
       rot case
         op-set of set-rect endof
         op-or of or-rect endof

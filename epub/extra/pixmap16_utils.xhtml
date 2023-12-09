@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Pixmap Utilities</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="pixmap-utilities">
+<h1>Pixmap Utilities</h1>
+<p>Under <code class="docutils literal notranslate"><span class="pre">extra/common/pixmap16_utils.fs</span></code> there is optional code for supporting additional pixmap operations, particularly line and circle-drawing.</p>
+<section id="pixmap16-utils">
+<h2><code class="docutils literal notranslate"><span class="pre">pixmap16-utils</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">pixmap16-utils</span></code> module contains the following words:</p>
+<section id="draw-pixel-line">
+<h3><code class="docutils literal notranslate"><span class="pre">draw-pixel-line</span></code></h3>
+<p>( color x0 y0 x1 y1 dst-pixmap – )</p>
+<p>This draws a pixel line on <em>dst-pixmap</em> from (<em>x0</em>, *y0) to (<em>x1</em>, <em>y1</em>) using the <em>color</em> value as used by <code class="docutils literal notranslate"><span class="pre">pixmap16::draw-pixel-const</span></code>.</p>
+</section>
+<section id="draw-rect-line">
+<h3><code class="docutils literal notranslate"><span class="pre">draw-rect-line</span></code></h3>
+<p>( color width height x0 y0 x1 y1 dst-pixmap – )</p>
+<p>This draws a line with a rectangular pen of <em>width</em> and <em>height</em> on <em>dst-pixmap</em> from (<em>x0</em>, <em>y0</em>) to (<em>x1</em>, <em>y1</em>) with the pen centered on the line using the <em>color</em> value as used by <code class="docutils literal notranslate"><span class="pre">pixmap16::draw-rect-const</span></code>. Note that the drawing operation <code class="docutils literal notranslate"><span class="pre">op-xor</span></code> is not recommended because it will most likely give undesirable results.</p>
+</section>
+<section id="draw-bitmap-line">
+<h3><code class="docutils literal notranslate"><span class="pre">draw-bitmap-line</span></code></h3>
+<p>( color mask-x mask-y width height x0 y0 x1 y1 mask-bitmap dst-pixmap – )</p>
+<p>This draws a line with a rectangle from (<em>mask-x</em>, <em>mask-y</em>) to (<em>mask-x</em> + <em>width</em>, <em>mask-y</em> + <em>height</em>) in <em>mask-bitmap</em> as a pen on <em>dst-pixmap</em> from (<em>x0</em>, <em>y0</em>) to (<em>x1</em>, <em>y1</em>) with the pen centered on the line, where only bits in <em>mask-bitmap</em> which are set to one are colored with <em>color</em>.</p>
+</section>
+<section id="draw-pixmap-line">
+<h3><code class="docutils literal notranslate"><span class="pre">draw-pixmap-line</span></code></h3>
+<p>( src-x src-y width height x0 y0 x1 y1 src-pixmap dst-pixmap – )</p>
+<p>This draws a line with the rectangle from (<em>src-x</em>, <em>src-y</em>) to (<em>src-x</em> + <em>width</em>, <em>src-y</em> + <em>height</em>) in <em>src-pixmap</em> as a pen on <em>dst-pixmap</em> from (<em>x0</em>, <em>y0</em>) to (<em>x1</em>, <em>y1</em>) with the pen centered on the line.</p>
+</section>
+<section id="draw-mask-line">
+<h3><code class="docutils literal notranslate"><span class="pre">draw-mask-line</span></code></h3>
+<p>( color mask-x mask-y src-x src-y width height x0 y0 x1 y1 mask-bitmap src-pixmap dst-pixmap – )</p>
+<p>This draws a line with a rectangle from (<em>src-x</em>, <em>src-y</em>) to (<em>src-x</em> + <em>width</em>, <em>src-y</em> + <em>height</em>) in <em>src-pixmap</em> as a pen and (<em>mask-x</em>, <em>mask-y</em>) to (<em>mask-x</em> + <em>width</em>, <em>mask-y</em> + <em>height</em>) in <em>mask-bitmap</em> as a mask for said pen on <em>dst-pixmap</em> from (<em>x0</em>, <em>y0</em>) to (<em>x1</em>, <em>y1</em>) with the pen centered on the line, where only bits in <em>mask-bitmap</em> which are set to one have the corresponding pixels copied from <em>src-pixmap</em> to <em>dst-pixmap</em>.</p>
+</section>
+<section id="draw-pixel-circle">
+<h3><code class="docutils literal notranslate"><span class="pre">draw-pixel-circle</span></code></h3>
+<p>( color x y radius dst-pixmap – )</p>
+<p>This draws an unfilled pixel circle on <em>dst-pixmap</em> centered at (<em>x</em>, <em>y</em>) with <em>radius</em> using the <em>color</em> value as used by *pixmap16::draw-pixel-const`.</p>
+</section>
+<section id="draw-rect-circle">
+<h3><code class="docutils literal notranslate"><span class="pre">draw-rect-circle</span></code></h3>
+<p>( color width height x y radius dst-pixmap – )</p>
+<p>This draws an unfilled circle with a rectangular pen of <em>width</em> and <em>height</em> on <em>dst-pixmap</em> centered at (<em>x</em>, <em>y</em>) with <em>radius</em> with the pen centered on the edge of the circle using the <em>color</em> value as used by <code class="docutils literal notranslate"><span class="pre">pixmap16::draw-rect-const</span></code>.</p>
+</section>
+<section id="draw-bitmap-circle">
+<h3><code class="docutils literal notranslate"><span class="pre">draw-bitmap-circle</span></code></h3>
+<p>( color mask-x mask-y width height x y radius mask-bitmap dst-pixmap – )</p>
+<p>This draws an unfilled circle with the rectangle from (<em>mask-x</em>, <em>mask-y</em>) to (<em>mask-x</em> + <em>width</em>, <em>mask-y</em> + <em>height</em>) in <em>mask-bitmap</em> as a pen on <em>dst-pixmap</em> centered at (<em>x</em>, <em>y</em>) with <em>radius</em> with the pen centered on the edge of the circle, where only bits in <em>mask-bitmap</em> which are set to one are colored with <em>color</em>.</p>
+</section>
+<section id="draw-pixmap-circle">
+<h3><code class="docutils literal notranslate"><span class="pre">draw-pixmap-circle</span></code></h3>
+<p>( src-x src-y width height x y radius src-pixmap dst-pixmap – )</p>
+<p>This draws an unfilled circle with the rectangle from (<em>src-x</em>, <em>src-y</em>) to (<em>src-x</em> + <em>width</em>, <em>src-y</em> + <em>height</em>) in <em>src-pixmap</em> as a pen on <em>dst-pixmap</em> centered at (<em>x</em>, <em>y</em>) with <em>radius</em> with the pen centered on the edge of the circle.</p>
+</section>
+<section id="draw-mask-circle">
+<h3><code class="docutils literal notranslate"><span class="pre">draw-mask-circle</span></code></h3>
+<p>( mask-x mask-y src-x src-y width height x y radius mask-bitmap src-pixmap dst-pixmap – )</p>
+<p>This draws an unfilled circle with a rectangle from (<em>src-x</em>, <em>src-y</em>) to (<em>src-x</em> + <em>width</em>, <em>src-y</em> + <em>height</em>) in <em>src-pixmap</em> as a pen and (<em>mask-x</em>, <em>mask-y</em>) to (<em>mask-x</em> + <em>width</em>, <em>mask-y</em> + <em>height</em>) in <em>mask-bitmap</em> as a mask for said pen on <em>dst-pixmap</em> centered at (<em>x</em>, <em>y</em>) with <em>radius</em> with the pen centered on the edge of the circle.</p>
+</section>
+<section id="draw-filled-circle">
+<h3><code class="docutils literal notranslate"><span class="pre">draw-filled-circle</span></code></h3>
+<p>( color x y radius dst-pixmap – )</p>
+<p>This draws a filled pixel circle on <em>dst-pixmap</em> centered at (<em>x</em>, <em>y</em>) with <em>radius</em> using the <em>color</em> value as used by *pixmap16::draw-pixel-const`.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

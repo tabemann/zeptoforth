@@ -80,6 +80,11 @@
 <p>The address of a cell containing the number of rows in a bitmap.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> class includes the following methods:</p>
 </section>
+<section id="dim">
+<h3><code class="docutils literal notranslate"><span class="pre">dim&#64;</span></code></h3>
+<p>( bitmap – columns rows )</p>
+<p>Get the number of columns and rows in a pixmap.</p>
+</section>
 <section id="clear-bitmap">
 <h3><code class="docutils literal notranslate"><span class="pre">clear-bitmap</span></code></h3>
 <p>( bitmap – )</p>
@@ -102,13 +107,101 @@
 </section>
 <section id="draw-rect-const">
 <h3><code class="docutils literal notranslate"><span class="pre">draw-rect-const</span></code></h3>
-<p>( constant dst-column column-count dst-row row-count op dst-bitmap – )</p>
-<p>Apply an operation <em>op</em> to a rectangle at <em>dst-column</em> to <em>dst-column</em> plus <em>column-count</em> minus one and <em>dst-row</em> to <em>dst-row</em> plus <em>row-count</em> minus one of <em>dst-bitmap</em> with a constant value consisting of the bit row modulo eight of <em>constant</em> and mark that pixel as dirty.</p>
+<p>( constant dst-column dst-row column-count row-count op dst-bitmap – )</p>
+<p>Apply an operation <em>op</em> to a rectangle at <em>dst-column</em> to <em>dst-column</em> plus <em>column-count</em> minus one and <em>dst-row</em> to <em>dst-row</em> plus <em>row-count</em> minus one of <em>dst-bitmap</em> with a constant value consisting of the bit row modulo eight of <em>constant</em> and mark that rectangle as dirty.</p>
 </section>
 <section id="draw-rect">
 <h3><code class="docutils literal notranslate"><span class="pre">draw-rect</span></code></h3>
-<p>( src-column dst-column column-count src-row dst-row row-count op src-bitmap dst-bitmap – )</p>
+<p>( src-column src-row dst-column dst-row column-count row-count op src-bitmap dst-bitmap – )</p>
 <p>Apply an operation <em>op</em> to a rectangle in <em>dst-bitmap</em> at <em>dst-column</em> to <em>dst-column</em> plus <em>column-count</em> minus one and <em>dst-row</em> to <em>dst-row</em> plus <em>row-count</em> minus one of <em>dst-bitmap</em> with the contents of a rectangle in <em>src-bitmap</em> at <em>src-column</em> to <em>src-column</em> plus <em>column-count</em> minus one and <em>src-row</em> to <em>src-row</em> plus <em>row-count</em> minus one.</p>
+</section>
+</section>
+<section id="pixmap16">
+<h2><code class="docutils literal notranslate"><span class="pre">pixmap16</span></code></h2>
+<p>Thie <code class="docutils literal notranslate"><span class="pre">pixmap16</span></code> module contains the following words:</p>
+<section id="rgb16">
+<h3><code class="docutils literal notranslate"><span class="pre">rgb16</span></code></h3>
+<p>( r g b – color )</p>
+<p>Constructs a 16-bit color from three 8-bit components.</p>
+</section>
+<section id="pixmap16-buf-size">
+<h3><code class="docutils literal notranslate"><span class="pre">pixmap16-buf-size</span></code></h3>
+<p>( cols rows – bytes )</p>
+<p>Get the size of a pixmap buffer in bytes for a given number of columns and rows.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;pixmap16&gt;</span></code> class is the base class for 16-bit pixmaps. It can be used directly, e.g. for offscreen pixmaps, or through its subclass <code class="docutils literal notranslate"><span class="pre">&lt;st7735s&gt;</span></code></p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;pixmap16&gt;</span></code> class includes the following constructor:</p>
+</section>
+<section id="id2">
+<h3><code class="docutils literal notranslate"><span class="pre">new</span></code></h3>
+<p>( buffer-addr columns rows pixmap – )</p>
+<p>This constructor initializes a <code class="docutils literal notranslate"><span class="pre">&lt;pixmap16&gt;</span></code> instance to have <em>columns</em> columns, <em>rows</em> rows, and a pixmap buffer at address <em>buffer-addr</em>. Note that the buffer pointed to by <em>buffer-addr</em>  must be of size <em>columns</em> times <em>rows</em> times two. When this is called, the buffer will be zeroed out and the entire pixmap will be  marked as dirty.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;pixmap16&gt;</span></code> class includes the following members:</p>
+</section>
+<section id="pixmap-cols">
+<h3><code class="docutils literal notranslate"><span class="pre">pixmap-cols</span></code></h3>
+<p>( pixmap – addr )</p>
+<p>The address of a cell containing the number of columns in a pixmap.</p>
+</section>
+<section id="pixmap-rows">
+<h3><code class="docutils literal notranslate"><span class="pre">pixmap-rows</span></code></h3>
+<p>( pixmap – addr )</p>
+<p>The address of a cell containing the number of rows in a pixmap.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;pixmap16&gt;</span></code> class includes the following methods:</p>
+</section>
+<section id="id3">
+<h3><code class="docutils literal notranslate"><span class="pre">dim&#64;</span></code></h3>
+<p>( pixmap – columns rows )</p>
+<p>Get the number of columns and rows in a pixmap.</p>
+</section>
+<section id="clear-pixmap">
+<h3><code class="docutils literal notranslate"><span class="pre">clear-pixmap</span></code></h3>
+<p>( pixmap – )</p>
+<p>Set an entire pixmap to zero and mark it as dirty.</p>
+</section>
+<section id="pixel-addr">
+<h3><code class="docutils literal notranslate"><span class="pre">pixel-addr</span></code></h3>
+<p>( column row pixmap – addr )</p>
+<p>Get the address of a pixel in a pixmap’s buffer.</p>
+</section>
+<section id="dirty-pixel">
+<h3><code class="docutils literal notranslate"><span class="pre">dirty-pixel</span></code></h3>
+<p>( column row pixmap – )</p>
+<p>Dirty a pixel in a pixmap; note that this is a no-op in <code class="docutils literal notranslate"><span class="pre">&lt;pixmap16&gt;</span></code>, but may be overridden in subclasses such as <code class="docutils literal notranslate"><span class="pre">&lt;st7735s&gt;</span></code>.</p>
+</section>
+<section id="dirty-area">
+<h3><code class="docutils literal notranslate"><span class="pre">dirty-area</span></code></h3>
+<p>( start-column end-column start-row end-row pixmap – )</p>
+<p>Dirty a rectangle in a pixmap; note that this is a no-op in <code class="docutils literal notranslate"><span class="pre">&lt;pixmap16&gt;</span></code>, but may be overridden in subclasses such as <code class="docutils literal notranslate"><span class="pre">&lt;st7735s&gt;</span></code>.</p>
+</section>
+<section id="id4">
+<h3><code class="docutils literal notranslate"><span class="pre">pixel&#64;</span></code></h3>
+<p>( column row pixmap – color )</p>
+<p>Get the color of a pixel at <em>column</em> and <em>row</em> in <em>pixmap</em>. If the pixel is outside the bounds of <em>pixmap</em>, 0 is returned.</p>
+</section>
+<section id="id5">
+<h3><code class="docutils literal notranslate"><span class="pre">draw-pixel-const</span></code></h3>
+<p>( color dst-column dst-row dst-pixmap – )</p>
+<p>Draw a single pixel of color *color at <em>dst-column</em> and <em>dst-row</em> on <em>dst-pixmap</em> and mark that pixel as dirty.</p>
+</section>
+<section id="id6">
+<h3><code class="docutils literal notranslate"><span class="pre">draw-rect-const</span></code></h3>
+<p>( color dst-column dst-row column-count row-count dst-pixmap – )</p>
+<p>Draw a rectangle of color <em>color</em> at <em>dst-column</em> to <em>dst-column</em> plus <em>column-count</em> minus one and <em>dst-row</em> to <em>dst-row</em> plus <em>row-count</em> minus one of <em>dst-pixmap</em> and mark that rectangle as dirty.</p>
+</section>
+<section id="id7">
+<h3><code class="docutils literal notranslate"><span class="pre">draw-rect</span></code></h3>
+<p>( src-column src-row dst-column dst-row column-count row-count src-pixmap dst-pixmap – )</p>
+<p>Copy a rectangle of <em>src-column</em> to <em>src-column</em> plus <em>column-count</em> minus one and <em>src-row</em> to <em>src-row</em> plus <em>row-count</em> minus one of <em>src-pixmap</em> to <em>dst-column</em> to <em>dst-column</em> plus <em>column-count</em> minus one and <em>dst-row</em> to <em>dst-row</em> plus <em>row-count</em> minus one of <em>dst-pixmap</em> and mark that rectangle as dirty.</p>
+</section>
+<section id="draw-rect-const-mask">
+<h3><code class="docutils literal notranslate"><span class="pre">draw-rect-const-mask</span></code></h3>
+<p>( color mask-column mask-row dst-column dst-row column-count row-count mask-bitmap dst-pixmap – )</p>
+<p>Draw a rectangle of <em>color</em> where <em>mask-column</em> to <em>mask-column</em> plus <em>column-count</em> minus one and <em>mask-row</em> to <em>mask-row</em> plus <em>row-count</em> minus one of <em>mask-bitmap</em> is set to one to <em>dst-column</em> to <em>dst-column</em> plus <em>column-count</em> minus one and <em>dst-row</em> to <em>dst-row</em> plus <em>row-count</em> minus one of <em>dst-pixmap</em> and mark that rectangle as dirty.</p>
+</section>
+<section id="draw-rect-mask">
+<h3><code class="docutils literal notranslate"><span class="pre">draw-rect-mask</span></code></h3>
+<p>( mask-column mask-row src-column src-row dst-column dst-row column-count row-count mask-bitmap src-pixmap dst-pixmap – )</p>
+<p>Copy a rectangle of <em>src-column</em> to <em>src-column</em> plus <em>column-count</em> minus one and <em>src-row</em> to <em>src-row</em> plus <em>row-count</em> minus one where <em>mask-column</em> to <em>mask-column</em> plus <em>column-count</em> minus one and <em>mask-row</em> to <em>mask-row</em> plus <em>row-count</em> minus one of <em>mask-bitmap</em> is set to one to <em>dst-column</em> to <em>dst-column</em> plus <em>column-count</em> minus one and <em>dst-row</em> to <em>dst-row</em> plus <em>row-count</em> minus one of <em>dst-pixmap</em> and mark that rectangle as dirty.</p>
 </section>
 </section>
 <section id="ssd1306">
@@ -119,22 +212,48 @@
 <p>( – i2c-addr )</p>
 <p>The default I2C address for SSD1306-based displays, $3C.</p>
 </section>
-<section id="id2">
+<section id="id8">
 <h3><code class="docutils literal notranslate"><span class="pre">&lt;ssd1306&gt;</span></code></h3>
 <p>( – class )</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;ssd1306&gt;</span></code> class is the class for I2C SSD1306-based displays. It inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> class and can be drawn to using the operations defined in that class. It maintains a dirty rectangle, which is updated when the user invokes its <code class="docutils literal notranslate"><span class="pre">update-display</span></code> method. Note that column zero is on the lefthand side of the display and row zero is on the top of the display.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&lt;ssd1306&gt;</span></code> class includes the following constructor:</p>
 </section>
-<section id="id3">
+<section id="id9">
 <h3><code class="docutils literal notranslate"><span class="pre">new</span></code></h3>
 <p>( pin0 pin1 buffer-addr columns rows i2c-addr i2c-device ssd1306 – )</p>
 <p>This constructor initializes an I2C SSD1306 display with the SDA and SCK pins specified as GPIO pins <em>pin0</em> and <em>pin1</em> (it does not matter which is which), a backing buffer at <em>buffer-addr</em> (with the same considerations as backing buffers for other <code class="docutils literal notranslate"><span class="pre">&lt;bitmap&gt;</span></code> instances), <em>columns</em> columns, <em>rows</em> rows, the I2C address <em>i2c-addr</em>, the I2C device index <em>i2c-device</em> (note that this must match the I2C device index for pins <em>pin0</em> and <em>pin1</em>), and the <code class="docutils literal notranslate"><span class="pre">&lt;ssd1306&gt;</span></code> instance being initialized, <em>ssd1306</em>.</p>
-<p>The <ssd1306> class includes the following method:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ssd1306&gt;</span></code> class includes the following method:</p>
 </section>
 <section id="update-display">
 <h3><code class="docutils literal notranslate"><span class="pre">update-display</span></code></h3>
 <p>( ssd1306 – )</p>
 <p>This updates the SSD1306-based display with the current contents of its dirty rectangle, and then clears its dirty state. This must be called to update the display’s contents after drawing to the display, which otherwise has no effect on the display itself.</p>
+</section>
+</section>
+<section id="st7735s">
+<h2><code class="docutils literal notranslate"><span class="pre">st7735s</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">st7735s</span></code> module contains the following words:</p>
+<section id="id10">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;st7735s&gt;</span></code></h3>
+<p>( – class )</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7735s&gt;</span></code> class is the class for 16-bit SPI ST7735S-based displays. It inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;pixmap16&gt;</span></code> class and can be drawn to using the operations defined in that class. It maintains a dirty rectangle, which is updated when the user invokes its <code class="docutils literal notranslate"><span class="pre">update-display</span></code> method. Note that column zero is on the lefthand side of the display and row zero is on the top of the display.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7735s&gt;</span></code> class includes the following constructor:</p>
+</section>
+<section id="id11">
+<h3><code class="docutils literal notranslate"><span class="pre">new</span></code></h3>
+<p>( din-pin clk-pin dc-pin cs-pin backlight-pin reset-pin buffer-addr columns rows spi-device st7735s – )</p>
+<p>This constructor initializes an SPI ST7735S display at the SPI device <em>spi-device</em>, a backing buffer at <em>buffer-addr</em> (with the same considerations as backing buffers for other <code class="docutils literal notranslate"><span class="pre">&lt;pixmap16&gt;</span></code> instances), <em>columns</em> columns, <em>rows</em> rows, the DIN pin <em>din-pin</em>, the CLK pin <em>clk-pin</em>, the DC pin <em>dc-pin</em>, the chip-select pin <em>cs-pin</em>, the backlight pin <em>backlight-pin</em>, the reset pin <em>reset-pin</em>, and the <code class="docutils literal notranslate"><span class="pre">&lt;st7735s&gt;</span></code> instance being initialized, <em>st7735s</em>. Note that <em>din-pin</em> and <em>clk-pin</em> must match the SPI device <em>spi-device</em> specified.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;st7735s&gt;</span></code> class includes the following method:</p>
+</section>
+<section id="id12">
+<h3><code class="docutils literal notranslate"><span class="pre">update-display</span></code></h3>
+<p>( st7735s – )</p>
+<p>This updates the ST7735S-based display with the current contents of its dirty rectangle, and then clears its dirty state. This must be called to update the display’s contents after drawing to the display, which otherwise has no effect on the display itself.</p>
+</section>
+<section id="backlight">
+<h3><code class="docutils literal notranslate"><span class="pre">backlight!</span></code></h3>
+<p>( backlight st7735s – )</p>
+<p>Set the on/off state of the ST7735S_based display’s backlight.</p>
 </section>
 </section>
 </section>

@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Bitmap Utiliteis</title>
+    <title>Bitmap Utilities</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
   </head><body>
@@ -14,8 +14,8 @@
       <div class="documentwrapper">
           <div class="body" role="main">
             
-  <section id="bitmap-utiliteis">
-<h1>Bitmap Utiliteis</h1>
+  <section id="bitmap-utilities">
+<h1>Bitmap Utilities</h1>
 <p>Under <code class="docutils literal notranslate"><span class="pre">extra/common/bitmap_utils.fs</span></code> there is optional code for supporting additional bitmap operations, particularly line and circle-drawing.</p>
 <section id="bitmap-utils">
 <h2><code class="docutils literal notranslate"><span class="pre">bitmap-utils</span></code></h2>
@@ -32,7 +32,7 @@
 </section>
 <section id="draw-bitmap-line">
 <h3><code class="docutils literal notranslate"><span class="pre">draw-bitmap-line</span></code></h3>
-<p>( src-x src-y width height x0 y0 x1 y1 op src-bitmap dst-bitmap –)</p>
+<p>( src-x src-y width height x0 y0 x1 y1 op src-bitmap dst-bitmap – )</p>
 <p>This draws a line with the rectangle from (<em>src-x</em>, <em>src-y</em>) to (<em>src-x</em> + <em>width</em>, <em>src-y</em> + <em>height</em>) in <em>src-bitmap</em> as a pen with drawing operation <em>op</em> on <em>dst-bitmap</em> from (<em>x0</em>, <em>y0</em>) to (<em>x1</em>, <em>y1</em>) with the pen centered on the line. Note that the drawing operation <code class="docutils literal notranslate"><span class="pre">op-xor</span></code> is not recommended because it will most likely give undesirable results. The same may be true of <code class="docutils literal notranslate"><span class="pre">op-set</span></code> in some cases as well.</p>
 </section>
 <section id="draw-pixel-circle">
@@ -47,7 +47,7 @@
 </section>
 <section id="draw-bitmap-circle">
 <h3><code class="docutils literal notranslate"><span class="pre">draw-bitmap-circle</span></code></h3>
-<p>( src-x src-y width height x y radius op src-bitmap dst-bitmap –)</p>
+<p>( src-x src-y width height x y radius op src-bitmap dst-bitmap – )</p>
 <p>This draws an unfilled circle with the rectangle from (<em>src-x</em>, <em>src-y</em>) to (<em>src-x</em> + <em>width</em>, <em>src-y</em> + <em>height</em>) in <em>src-bitmap</em> as a pen with drawing operation <em>op</em> on <em>dst-bitmap</em> centered at (<em>x</em>, <em>y</em>) with <em>radius</em> with the pen centered on the edge of the circle. Note that the drawing operation <code class="docutils literal notranslate"><span class="pre">op-xor</span></code> is not recommended because it will most likely give undesirable results. The same may be true of <code class="docutils literal notranslate"><span class="pre">op-set</span></code> in some cases as well.</p>
 </section>
 <section id="draw-filled-circle">
