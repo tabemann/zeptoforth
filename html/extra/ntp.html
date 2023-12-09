@@ -1,0 +1,211 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Simple Network Time Protocol Client &#8212; zeptoforth  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="simple-network-time-protocol-client">
+<h1>Simple Network Time Protocol Client<a class="headerlink" href="#simple-network-time-protocol-client" title="Permalink to this heading">¶</a></h1>
+<p>There is a SNTP (Simple Network Time Protocol) client implemented using zeptoIP. As an SNTP client it uses only one NTP server, as opposed to NTP clients which use multiple SNTP servers. It is not automatically included with the code loaded with <code class="docutils literal notranslate"><span class="pre">extra/rp2040/pico_w_net_all.fs</span></code> and it is up to the user whether to compile it to flash or to RAM.</p>
+<p>Note that it gives time as a 32.32 unsigned fixed-point number of seconds from 1 Jan 1900 00:00:00 GMT. Consequently, if one tries to treat this number as a conventional S31.32 signed fixed-point number, it will (i.e. as of writing) to be treated as negative until the current NTP era ends.</p>
+<p>Kiss-of-death (including reduce-rate) packets are supported. Also, the address resolved with DNS is regularly re-resolved so as to properly use DNS server pools where multiple DNS server as behind a single DNS name.</p>
+<section id="ntp">
+<h2><code class="docutils literal notranslate"><span class="pre">ntp</span></code><a class="headerlink" href="#ntp" title="Permalink to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">ntp</span></code> module contains the following word:</p>
+<section id="ntp-port">
+<h3><code class="docutils literal notranslate"><span class="pre">ntp-port</span></code><a class="headerlink" href="#ntp-port" title="Permalink to this heading">¶</a></h3>
+<p>( – port )</p>
+<p>This returns the default NTP port, i.e 123.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">ntp</span></code> module contains the following class:</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;ntp&gt;</span></code><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ntp&gt;</span></code> class inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;endpoint-handler&gt;</span></code> class defined in the <code class="docutils literal notranslate"><span class="pre">endpoint-process</span></code> module. It has the following constructor:</p>
+<section id="new">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code><a class="headerlink" href="#new" title="Permalink to this heading">¶</a></h4>
+<p>( ip-interface sntp-client – )</p>
+<p>This constructor takes an instance of <code class="docutils literal notranslate"><span class="pre">&lt;interface&gt;</span></code> <em>ip-interface</em> and the <code class="docutils literal notranslate"><span class="pre">&lt;ntp&gt;</span></code> instance being constructed. <em>ip-interface</em> will be used by the NTP client for looking up the NTP server via DNS and communicating with it.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ntp&gt;</span></code> class has the following methods:</p>
+</section>
+<section id="init-ntp">
+<h4><code class="docutils literal notranslate"><span class="pre">init-ntp</span></code><a class="headerlink" href="#init-ntp" title="Permalink to this heading">¶</a></h4>
+<p>( dns-name dns-name-len port sntp-client – )</p>
+<p>This method starts the SNTP client with <em>dns-name</em> and <em>dns-name-len</em> being the hostname used to lookup the NTP server (note that using NTP servers by fixed IPv4 addresses is <em>not</em> supported) using the port <em>port</em> (typically <code class="docutils literal notranslate"><span class="pre">ntp-port</span></code>, i.e. 123).</p>
+</section>
+<section id="current-time">
+<h4><code class="docutils literal notranslate"><span class="pre">current-time&#64;</span></code><a class="headerlink" href="#current-time" title="Permalink to this heading">¶</a></h4>
+<p>( sntp-client – D: time )</p>
+<p>Get the current time as a 32.32 unsigned fixed-point number of seconds from 1 Jan 1900 00:00:00 GMT. Note that if <code class="docutils literal notranslate"><span class="pre">time-set?</span></code> does not return <code class="docutils literal notranslate"><span class="pre">true</span></code> this value will be invalid (and will be fixed to <code class="docutils literal notranslate"><span class="pre">0.</span></code>).</p>
+</section>
+<section id="time-set">
+<h4><code class="docutils literal notranslate"><span class="pre">time-set?</span></code><a class="headerlink" href="#time-set" title="Permalink to this heading">¶</a></h4>
+<p>( sntp-client – time-set? )</p>
+<p>Get whether a time has been established for the SNTP client. This will initially return <code class="docutils literal notranslate"><span class="pre">false</span></code> and will only return <code class="docutils literal notranslate"><span class="pre">true</span></code> after a (relatively short) delay provided the NTP server can be looked up and responds to SNTP requests.</p>
+</section>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">zeptoforth</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../words/basic.html">Basic Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/module.html">Module Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/lambda.html">Lambda Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/compat.html">ANS Forth / Forth 2012 Compatibility Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/wordlist.html">Wordlist Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/console.html">Console Redirection Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/task.html">Multitasking Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/alarm.html">Software Alarm Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/action.html">Action Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pin.html">Pin Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/led.html">LED Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/gpio.html">GPIO Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/exti.html">EXTI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pio.html">Programmable Input/Output Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/uart.html">UART Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/adc.html">Analog-Digital Converter Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/spi.html">SPI Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/i2c.html">I2C Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pwm.html">Pulse Width Modulation Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/rtc.html">Realtime Clock (RTC) Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/timer.html">Hardware Timers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/sdcard.html">SDHC/SDXC Card Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/fat32.html">FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/simple_fat32.html">Simple FAT32 Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/fat32_tools.html">FAT32 Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/interrupt.html">Interrupt Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/multicore.html">Multicore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/dev_tools.html">Development Tools Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/armv6m.html">ARMv6-M Assembler Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/line.html">Line Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/double.html">Double-Cell Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/value.html">Value and Local Variable Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/closure.html">Closures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/temp.html">Temporary Buffer Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/task_pool.html">Task Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/action_pool.html">Action Pool words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/heap.html">Heap Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/pool.html">Pool Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/map.html">Map Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/oo.html">Object Orientation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/lock.html">Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/slock.html">Simple Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/core_lock.html">Core Lock Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/channel.html">Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/fchannel.html">Rendezvous Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/schannel.html">Simple channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/rchannel.html">Bidirectional Channel Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/semaphore.html">Semaphore Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/stream.html">Stream Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/tqueue.html">Task Queue Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/systick.html">SysTick Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/rng.html">Random Number Generator Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/ansi_term.html">ANSI Terminal words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/qspi.html">Quad SPI words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/block.html">Block words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/edit.html">Block Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/test.html">Testing Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/internal.html">Internal Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/asm.html">Compilation-specific words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../words/expose.html">Exposed Kernel Variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="display.html">Bitmaps and Displays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="font.html">Fonts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bitmap_utils.html">Bitmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pixmap16_utils.html">Pixmap Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="neopixel.html">Neopixels on the RP2040</a></li>
+<li class="toctree-l1"><a class="reference internal" href="net.html">zeptoIP Words</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cyw43.html">CYW43xxx Words</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Travis Bemann.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/extra/ntp.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

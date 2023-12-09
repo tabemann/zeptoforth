@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Simple Network Time Protocol Client</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/epub.css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="simple-network-time-protocol-client">
+<h1>Simple Network Time Protocol Client</h1>
+<p>There is a SNTP (Simple Network Time Protocol) client implemented using zeptoIP. As an SNTP client it uses only one NTP server, as opposed to NTP clients which use multiple SNTP servers. It is not automatically included with the code loaded with <code class="docutils literal notranslate"><span class="pre">extra/rp2040/pico_w_net_all.fs</span></code> and it is up to the user whether to compile it to flash or to RAM.</p>
+<p>Note that it gives time as a 32.32 unsigned fixed-point number of seconds from 1 Jan 1900 00:00:00 GMT. Consequently, if one tries to treat this number as a conventional S31.32 signed fixed-point number, it will (i.e. as of writing) to be treated as negative until the current NTP era ends.</p>
+<p>Kiss-of-death (including reduce-rate) packets are supported. Also, the address resolved with DNS is regularly re-resolved so as to properly use DNS server pools where multiple DNS server as behind a single DNS name.</p>
+<section id="ntp">
+<h2><code class="docutils literal notranslate"><span class="pre">ntp</span></code></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">ntp</span></code> module contains the following word:</p>
+<section id="ntp-port">
+<h3><code class="docutils literal notranslate"><span class="pre">ntp-port</span></code></h3>
+<p>( – port )</p>
+<p>This returns the default NTP port, i.e 123.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">ntp</span></code> module contains the following class:</p>
+</section>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">&lt;ntp&gt;</span></code></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ntp&gt;</span></code> class inherits from the <code class="docutils literal notranslate"><span class="pre">&lt;endpoint-handler&gt;</span></code> class defined in the <code class="docutils literal notranslate"><span class="pre">endpoint-process</span></code> module. It has the following constructor:</p>
+<section id="new">
+<h4><code class="docutils literal notranslate"><span class="pre">new</span></code></h4>
+<p>( ip-interface sntp-client – )</p>
+<p>This constructor takes an instance of <code class="docutils literal notranslate"><span class="pre">&lt;interface&gt;</span></code> <em>ip-interface</em> and the <code class="docutils literal notranslate"><span class="pre">&lt;ntp&gt;</span></code> instance being constructed. <em>ip-interface</em> will be used by the NTP client for looking up the NTP server via DNS and communicating with it.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&lt;ntp&gt;</span></code> class has the following methods:</p>
+</section>
+<section id="init-ntp">
+<h4><code class="docutils literal notranslate"><span class="pre">init-ntp</span></code></h4>
+<p>( dns-name dns-name-len port sntp-client – )</p>
+<p>This method starts the SNTP client with <em>dns-name</em> and <em>dns-name-len</em> being the hostname used to lookup the NTP server (note that using NTP servers by fixed IPv4 addresses is <em>not</em> supported) using the port <em>port</em> (typically <code class="docutils literal notranslate"><span class="pre">ntp-port</span></code>, i.e. 123).</p>
+</section>
+<section id="current-time">
+<h4><code class="docutils literal notranslate"><span class="pre">current-time&#64;</span></code></h4>
+<p>( sntp-client – D: time )</p>
+<p>Get the current time as a 32.32 unsigned fixed-point number of seconds from 1 Jan 1900 00:00:00 GMT. Note that if <code class="docutils literal notranslate"><span class="pre">time-set?</span></code> does not return <code class="docutils literal notranslate"><span class="pre">true</span></code> this value will be invalid (and will be fixed to <code class="docutils literal notranslate"><span class="pre">0.</span></code>).</p>
+</section>
+<section id="time-set">
+<h4><code class="docutils literal notranslate"><span class="pre">time-set?</span></code></h4>
+<p>( sntp-client – time-set? )</p>
+<p>Get whether a time has been established for the SNTP client. This will initially return <code class="docutils literal notranslate"><span class="pre">false</span></code> and will only return <code class="docutils literal notranslate"><span class="pre">true</span></code> after a (relatively short) delay provided the NTP server can be looked up and responds to SNTP requests.</p>
+</section>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>
