@@ -64,17 +64,6 @@ begin-module st7735s-random-test
     random 0 my-cols s>f f* f>s random 0 my-rows s>f f* f>s
   ;
 
-  \ Generate a random rectangle
-  : random-rect ( -- col cols row rows )
-    random-coord { first-col first-row }
-    random-coord { second-col second-row }
-    first-col second-col min { start-col }
-    first-col second-col max { end-col }
-    first-row second-row min { start-row }
-    first-row second-row max { end-row }
-    start-col end-col over - start-row end-row over -
-  ;
-
   \ Generate a random color
   : random-color ( -- color16 )
     random 255 and random 255 and random 255 and rgb16

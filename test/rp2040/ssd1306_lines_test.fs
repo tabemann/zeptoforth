@@ -44,9 +44,9 @@ begin-module lines-test
     <ssd1306> my-ssd1306 init-object
     my-brush-buf my-brush-width my-brush-height <bitmap> my-brush init-object
 
-    $FF 2 2 0 my-brush-height op-set my-brush draw-rect-const
-    $FF 0 my-brush-width 2 2 op-set my-brush draw-rect-const
-    $FF 1 4 1 4 op-set my-brush draw-rect-const
+    $FF 2 0 2 my-brush-height op-set my-brush draw-rect-const
+    $FF 0 2 my-brush-width 2 op-set my-brush draw-rect-const
+    $FF 1 1 4 4 op-set my-brush draw-rect-const
 
     $FF 0 0 my-width 1- my-height 1- op-set my-ssd1306 draw-pixel-line
 
@@ -56,11 +56,13 @@ begin-module lines-test
     my-width 3 / my-height 2 / my-width 3 / 2 * my-height 2 /
     op-or my-brush my-ssd1306 draw-bitmap-line
 
-    $FF my-width 4 / my-width 2 / my-height 4 / my-height 2 /
+    $FF my-width 4 / my-height 4 / my-width 2 / my-height 2 /
     op-xor my-ssd1306 draw-rect-const
 
-    0 my-width 2 / my-brush-width 2 / - my-brush-width
-    0 my-height 2 / my-brush-height 2 / - my-brush-height
+    0 0
+    my-width 2 / my-brush-width 2 / -
+    my-height 2 / my-brush-height 2 / -
+    my-brush-width my-brush-height
     op-xor my-brush my-ssd1306 draw-rect
 
     my-ssd1306 update-display

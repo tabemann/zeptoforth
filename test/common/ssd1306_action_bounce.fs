@@ -114,9 +114,9 @@ begin-module action-bounce
     my-sprite-buf my-sprite-width my-sprite-height
     <bitmap> my-sprite init-object
     my-sprite clear-bitmap
-    $FF 1 2 0 1 op-set my-sprite draw-rect-const
-    $FF 0 4 1 2 op-set my-sprite draw-rect-const
-    $FF 1 2 3 1 op-set my-sprite draw-rect-const
+    $FF 1 0 2 1 op-set my-sprite draw-rect-const
+    $FF 0 1 4 2 op-set my-sprite draw-rect-const
+    $FF 1 3 2 1 op-set my-sprite draw-rect-const
   ;
   
   \ Initialize the test overall
@@ -133,8 +133,9 @@ begin-module action-bounce
   
   \ Draw a particle to the display (or erase it, as it is using XOR)
   : draw-particle ( -- )
-    0 current-data particle-x 2@ nip my-sprite-width
-    0 current-data particle-y 2@ nip my-sprite-height
+    0 0
+    current-data particle-x 2@ nip current-data particle-y 2@ nip
+    my-sprite-width my-sprite-height
     op-xor my-sprite my-ssd1306 draw-rect
   ;
   

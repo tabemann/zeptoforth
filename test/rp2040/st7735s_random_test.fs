@@ -71,7 +71,7 @@ begin-module st7735s-random-test
     first-col second-col max { end-col }
     first-row second-row min { start-row }
     first-row second-row max { end-row }
-    start-col end-col over - start-row end-row over -
+    start-col start-row end-col start-col - end-row start-row -
   ;
 
   \ Generate a random color

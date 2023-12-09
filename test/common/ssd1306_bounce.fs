@@ -62,9 +62,9 @@ begin-module ssd1306-test
   : init-sprite ( -- )
     my-sprite-buf width height <bitmap> my-sprite init-object
     my-sprite clear-bitmap
-    $FF 1 2 0 1 op-set my-sprite draw-rect-const
-    $FF 0 4 1 2 op-set my-sprite draw-rect-const
-    $FF 1 2 3 1 op-set my-sprite draw-rect-const
+    $FF 1 0 2 1 op-set my-sprite draw-rect-const
+    $FF 0 1 4 2 op-set my-sprite draw-rect-const
+    $FF 1 3 2 1 op-set my-sprite draw-rect-const
   ;
   
   \ Initialize the test
@@ -79,7 +79,7 @@ begin-module ssd1306-test
     inited? not if init-test true to inited? then
     0 0 1 1 { column row delta-column delta-row }
     begin key? not while
-      $FF column width row height op-xor my-ssd1306 draw-rect-const
+      $FF column row width height op-xor my-ssd1306 draw-rect-const
       my-ssd1306 update-display
       column width + my-cols >= if
         -1 to delta-column
@@ -107,7 +107,7 @@ begin-module ssd1306-test
     inited? not if init-test true to inited? then
     0 0 1 1 { column row delta-column delta-row }
     begin key? not while
-      0 column width 0 row height op-or my-sprite my-ssd1306 draw-rect
+      0 0 column row width height op-or my-sprite my-ssd1306 draw-rect
       my-ssd1306 update-display
       column width + my-cols >= if
         -1 to delta-column
@@ -202,8 +202,7 @@ begin-module ssd1306-test
   : random-sprites ( -- )
     inited? not if init-test true to inited? then
     begin key? not while
-      0 random my-cols width - umod width
-      0 random my-rows height -  umod height
+      0 0 random my-cols width - umod random my-rows height - umod width height
       op-xor my-sprite my-ssd1306 draw-rect
       my-ssd1306 update-display
     repeat

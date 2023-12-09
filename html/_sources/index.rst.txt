@@ -69,6 +69,7 @@ Zeptoforth Documentation
    extra/display
    extra/font
    extra/bitmap_utils
+   extra/pixmap16_utils
    extra/neopixel
    extra/net
    extra/cyw43

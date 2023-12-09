@@ -142,7 +142,7 @@ begin-module pixmap16
     :noname ( col row pixmap -- ) drop 2drop ; define dirty-pixel
 
     \ Dirty an area on a pixmap
-    :noname ( start-col end-col start-row end-row pixmap = -- )
+    :noname ( start-col end-col start-row end-row pixmap -- )
       drop 2drop 2drop
     ; define dirty-area
 
@@ -284,9 +284,10 @@ begin-module pixmap16
     ; define draw-pixel-const
 
     \ Draw a constant rectangle on a pixmap
-    :noname { color dst-col cols dst-row rows dst -- }
-      dst-col cols dst-row rows dst dim@ clip::clip-dst-only
-      to rows to dst-row to cols to dst-col
+    :noname
+      { dst }
+      dst dim@ clip::clip-dst-only
+      { color dst-col dst-row cols rows }
       rows 0 ?do
         color dst-col dst-row i + cols dst set-strip-const
       loop
@@ -294,10 +295,10 @@ begin-module pixmap16
     ; define draw-rect-const
 
     \ Draw a rectangle on a pixmap from another pixmap
-    :noname { src-col dst-col cols src-row dst-row rows src dst -- }
-      src-col dst-col cols src-row dst-row rows src dim@ dst dim@
-      clip::clip-src-dst
-      to rows to dst-row to src-row to cols to dst-col to src-col
+    :noname
+      { src dst }
+      src dim@ dst dim@ clip::clip-src-dst
+      { src-col src-row dst-col dst-row cols rows }
       rows 0 ?do
         src-col dst-col src-row i + dst-row i + cols src dst set-strip
       loop
@@ -305,10 +306,10 @@ begin-module pixmap16
     ; define draw-rect
 
     \ Draw a rectangle on a pixmap from a bitmap where 1 bits are given a color
-    :noname { color mask-col dst-col cols mask-row dst-row rows mask dst -- }
-      mask-col dst-col cols mask-row dst-row rows mask bitmap::dim@ dst dim@
-      clip::clip-src-dst
-      to rows to dst-row to mask-row to cols to dst-col to mask-col
+    :noname
+      { mask dst }
+      mask bitmap::dim@ dst dim@ clip::clip-src-dst
+      { color mask-col mask-row dst-col dst-row cols rows }
       rows 0 ?do
         color mask-col dst-col mask-row i + dst-row i +
         cols mask dst set-strip-const-mask
@@ -322,7 +323,7 @@ begin-module pixmap16
       mask bitmap::dim@ clip::clip-mask
       src dim@ clip::clip-src-w/-mask
       dst dim@ clip::clip-dst-w/-mask
-      { mask-col src-col dst-col cols mask-row src-row dst-row rows }
+      { mask-col mask-row src-col src-row dst-col dst-row cols rows }
       rows 0 ?do
         mask-col src-col dst-col
         mask-row i + src-row i +  dst-row i +

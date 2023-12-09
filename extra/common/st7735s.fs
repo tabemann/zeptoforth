@@ -70,9 +70,6 @@ begin-module st7735s
       \ Initialize the ST7735S
       method init-st7735s ( self -- )
 
-      \ Set the backlight
-      method backlight! ( backlight self -- )
-      
       \ Send a command to the ST7735S
       method cmd>st7735s ( cmd self -- )
 
@@ -87,6 +84,9 @@ begin-module st7735s
       
     end-module> import
 
+    \ Set the backlight
+    method backlight! ( backlight self -- )
+      
     \ Update the ST7735S device
     method update-display ( self -- )
     

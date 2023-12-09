@@ -95,7 +95,7 @@ begin-module st7735s-random-test
     my-back clear-pixmap
     random-color random-char 0 0 my-back a-simple-font draw-char-to-pixmap16
     random-coord { dst-col dst-row }
-    0 dst-col 8 0 dst-row 8 my-back my-display draw-rect
+    0 0 dst-col dst-row 8 8 my-back my-display draw-rect
   ;
 
   \ Carry out the test

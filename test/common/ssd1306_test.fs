@@ -47,32 +47,32 @@ begin-module ssd1306-test
 
   \ Run the tests
 
-  : set-test { const start-col end-col start-row end-row -- }
-    const start-col end-col over - start-row end-row over -
+  : set-test { const start-col start-row end-col end-row -- }
+    const start-col start-row end-col start-col - end-row start-row -
     op-set my-ssd1306 draw-rect-const
     my-ssd1306 update-display
   ;
 
-  : or-test { const start-col end-col start-row end-row -- }
-    const start-col end-col over - start-row end-row over -
+  : or-test { const start-col start-row end-col end-row -- }
+    const start-col start-row end-col start-col - end-row start-row -
     op-or my-ssd1306 draw-rect-const
     my-ssd1306 update-display
   ;
   
-  : and-test { const start-col end-col start-row end-row -- }
-    const start-col end-col over - start-row end-row over -
+  : and-test { const start-col start-row end-col end-row -- }
+    const start-col start-row end-col start-col - end-row start-row -
     op-and my-ssd1306 draw-rect-const
     my-ssd1306 update-display
   ;
 
-  : bic-test { const start-col end-col start-row end-row -- }
-    const start-col end-col over - start-row end-row over -
+  : bic-test { const start-col start-row end-col end-row -- }
+    const start-col start-row end-col start-col - end-row start-row -
     op-bic my-ssd1306 draw-rect-const
     my-ssd1306 update-display
   ;
 
-  : xor-test { const start-col end-col start-row end-row -- }
-    const start-col end-col over - start-row end-row over -
+  : xor-test { const start-col start-row end-col end-row -- }
+    const start-col start-row end-col start-col - end-row start-row -
     op-xor my-ssd1306 draw-rect-const
     my-ssd1306 update-display
   ;

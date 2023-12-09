@@ -21,10 +21,8 @@
 begin-module st7735s-random-test
 
   oo import
-  bitmap import
   pixmap16 import
-  font import
-  simple-font import
+  pixmap16-utils import
   st7735s import
   rng import
 
@@ -34,11 +32,11 @@ begin-module st7735s-random-test
   \ Rows
   80 constant my-rows
 
-  \ Backend columns
-  8 constant my-back-cols
+  \ Brush columns
+  8 constant my-brush-cols
 
-  \ Backend rows
-  8 constant my-back-rows
+  \ Brush rows
+  8 constant my-brush-rows
   
   \ SPI device
   1 constant my-device
@@ -54,30 +52,23 @@ begin-module st7735s-random-test
   \ Buffer
   my-cols my-rows pixmap16-buf-size buffer: my-buffer
 
-  \ Mask buffer
-  my-back-cols my-back-rows bitmap-buf-size buffer: my-mask-buffer
-
-  \ Masked buffer
-  my-back-cols my-back-rows pixmap16-buf-size buffer: my-masked-buffer
-
+  \ Pixmap buffer
+  my-brush-cols my-brush-rows pixmap16-buf-size buffer: my-brush-buffer
+  
   \ Display
   <st7735s> class-size buffer: my-display
 
-  \ Mask
-  <bitmap> class-size buffer: my-mask
-
-  \ Masked pixmap
-  <pixmap16> class-size buffer: my-masked
+  \ Brush
+  <pixmap16> class-size buffer: my-brush
 
   \ Initialize the test:
   : init-test
-    init-simple-font
     lcd-din lcd-clk lcd-dc lcd-cs lcd-bl lcd-rst
     my-buffer my-cols my-rows my-device <st7735s> my-display init-object
-    my-mask-buffer my-back-cols my-back-rows <bitmap> my-mask init-object
-    my-masked-buffer my-back-cols my-back-rows <pixmap16> my-masked init-object
+    my-brush-buffer my-brush-cols my-brush-rows <pixmap16> my-brush init-object
     my-display clear-pixmap
     my-display update-display
+    my-brush clear-pixmap
   ;
 
   initializer init-test
@@ -87,15 +78,9 @@ begin-module st7735s-random-test
     random 0 my-cols s>f f* f>s random 0 my-rows s>f f* f>s
   ;
 
-  \ Generate a random rectangle
-  : random-rect ( -- col cols row rows )
-    random-coord { first-col first-row }
-    random-coord { second-col second-row }
-    first-col second-col min { start-col }
-    first-col second-col max { end-col }
-    first-row second-row min { start-row }
-    first-row second-row max { end-row }
-    start-col end-col over - start-row end-row over -
+  \ Generate a random radius
+  : random-radius ( -- radius )
+    random 0 [ my-rows 2 / ] literal s>f f* f>s
   ;
 
   \ Generate a random color
@@ -103,26 +88,18 @@ begin-module st7735s-random-test
     random 255 and random 255 and random 255 and rgb16
   ;
 
-  \ Generate a random character
-  : random-char ( -- char )
-    [ $75 $21 - ] literal s>f random 0 f* f>s $21 +
-  ;
-  
-  \ Draw a random character
-  : draw-random-char ( -- )
-    my-mask clear-bitmap
-    random-char 0 0 op-set my-mask a-simple-font draw-char
-    random-color 0 0 my-back-cols my-back-rows my-masked draw-rect-const
-    random-coord { dst-col dst-row }
-    0 0 0 0 dst-col dst-row 8 8 my-mask my-masked my-display draw-rect-mask
+  \ Draw a random circle
+  : draw-random-circle ( -- )
+    random-color 0 0 my-brush-cols my-brush-rows my-brush draw-rect-const
+    0 0 my-brush-cols my-brush-rows random-coord random-radius
+    my-brush my-display draw-pixmap-circle
   ;
 
   \ Carry out the test
   : run-test ( -- )
     begin key? not while
-      draw-random-char
+      draw-random-circle
       my-display update-display
-\      500 ms
     repeat
     key drop
   ;

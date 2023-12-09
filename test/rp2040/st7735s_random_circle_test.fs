@@ -93,7 +93,6 @@ begin-module st7735s-random-test
         draw-random-filled-circle
       then
       my-display update-display
-      100 ms
     repeat
     key drop
   ;
