@@ -49,10 +49,10 @@ begin-module bitmap-line-test
     $FF 64 32 16 - 64 32 16 + op-set my-ssd1306 draw-pixel-line
     $FF 64 16 - 32 64 16 + 32 op-set my-ssd1306 draw-pixel-line
     
-    $FF 4 4 2 2 2 61 op-set my-ssad1306 draw-rect-line
-    $FF 4 4 2 61 125 61 op-set my-ssad1306 draw-rect-line
-    $FF 4 4 126 61 126 2 op-set my-ssad1306 draw-rect-line
-    $FF 4 4 126 2 2 2 op-set my-ssad1306 draw-rect-line
+    $FF 4 4 2 2 2 61 op-set my-ssd1306 draw-rect-line
+    $FF 4 4 2 61 125 61 op-set my-ssd1306 draw-rect-line
+    $FF 4 4 126 61 126 2 op-set my-ssd1306 draw-rect-line
+    $FF 4 4 126 2 2 2 op-set my-ssd1306 draw-rect-line
     
     0 0 4 4 64 16 - 32 16 - 64 16 + 32 16 + op-or my-sprite my-ssd1306 draw-bitmap-line
     0 0 4 4 64 16 - 32 16 + 64 16 + 32 16 - op-or my-sprite my-ssd1306 draw-bitmap-line
