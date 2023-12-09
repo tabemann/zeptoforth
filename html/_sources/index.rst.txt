@@ -72,4 +72,5 @@ Zeptoforth Documentation
    extra/pixmap16_utils
    extra/neopixel
    extra/net
+   extra/net_ntp
    extra/cyw43
