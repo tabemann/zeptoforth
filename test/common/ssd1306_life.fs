@@ -114,7 +114,7 @@ begin-module life
   \ Draw an alive cell on the display
   : draw-alive-cell { col row -- }
     magnify-life? @ if
-      $FF col life-start-col @ - 2 * 2 row life-start-row @ - 2 * 2
+      $FF col row life-start-col @ - 2 * life-start-row @ - 2 * 2 w
       op-set my-ssd1306 draw-rect-const
     else
       $FF col row op-set my-ssd1306 draw-pixel-const
@@ -124,7 +124,7 @@ begin-module life
   \ Draw a dead cell on the display
   : draw-dead-cell { col row -- }
     magnify-life? @ if
-      $00 col life-start-col @ - 2 * 2 row life-start-row @ - 2 * 2
+      $00 col row life-start-col @ - 2 * life-start-row @ - 2 * 2 2
       op-set my-ssd1306 draw-rect-const
     else
       $00 col row op-set my-ssd1306 draw-pixel-const

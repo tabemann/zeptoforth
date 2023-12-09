@@ -80,7 +80,7 @@ begin-module ssd1306-print
     ;
     
     : draw-cursor { col row -- }
-      $FF col my-char-width * my-char-width row my-char-height * my-char-height op-xor my-ssd1306 draw-rect-const
+      $FF col my-char-width * row my-char-height * my-char-width my-char-height op-xor my-ssd1306 draw-rect-const
     ;
 
     : init-ssd1306-text ( -- )

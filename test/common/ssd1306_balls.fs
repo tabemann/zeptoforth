@@ -129,7 +129,7 @@ begin-module balls
   : draw-ball { ball -- }
     ball ball-col 2@ nip my-sprite-cols 2 / - { sprite-col }
     ball ball-row 2@ nip my-sprite-rows 2 / - { sprite-row }
-    0 sprite-col my-sprite-cols 0 sprite-row my-sprite-rows
+    0 0 sprite-col sprite-row my-sprite-cols my-sprite-rows
     op-xor my-sprite my-ssd1306 draw-rect
   ;
 

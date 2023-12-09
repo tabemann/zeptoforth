@@ -122,8 +122,7 @@ begin-module font
     :noname { c col row op bitmap self -- }
       c self min-char-index @ u< if self default-char-index @ to c then
       c self max-char-index @ u> if self default-char-index @ to c then
-      c self find-char-col col self char-cols @
-      0 row self char-rows @
+      c self find-char-col 0 col row self char-cols @ self char-rows @
       op self font-bitmap bitmap draw-rect
     ; define draw-char
 
@@ -140,8 +139,7 @@ begin-module font
         c self min-char-index @ u< if self default-char-index @ to c then
         c self max-char-index @ u> if self default-char-index @ to c then
         color
-        c self find-char-col col self char-cols @
-        0 row self char-rows @
+        c self find-char-col 0 col row self char-cols @ self char-rows @
         self font-bitmap pixmap pixmap16::draw-rect-const-mask
       [else]
         ['] x-pixmap16-not-available ?raise

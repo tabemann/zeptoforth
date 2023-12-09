@@ -71,6 +71,11 @@ The address of a cell containing the number of rows in a bitmap.
 
 The `<bitmap>` class includes the following methods:
 
+##### `dim@`
+( bitmap -- columns rows )
+
+Get the number of columns and rows in a pixmap.
+
 ##### `clear-bitmap`
 ( bitmap -- )
 
@@ -92,14 +97,106 @@ Get whether a pixel at *column* and *row* in *bitmap* is on or off, returning tr
 Apply an operation *op* to a pixel at *dst-column* and *dst-row* of *dst-bitmap* with a constant value consisting of the bit *dst-row* modulo eight of *constant* and mark that pixel as dirty.
 
 ##### `draw-rect-const`
-( constant dst-column column-count dst-row row-count op dst-bitmap -- )
+( constant dst-column dst-row column-count row-count op dst-bitmap -- )
 
-Apply an operation *op* to a rectangle at *dst-column* to *dst-column* plus *column-count* minus one and *dst-row* to *dst-row* plus *row-count* minus one of *dst-bitmap* with a constant value consisting of the bit row modulo eight of *constant* and mark that pixel as dirty.
+Apply an operation *op* to a rectangle at *dst-column* to *dst-column* plus *column-count* minus one and *dst-row* to *dst-row* plus *row-count* minus one of *dst-bitmap* with a constant value consisting of the bit row modulo eight of *constant* and mark that rectangle as dirty.
 
 ##### `draw-rect`
-( src-column dst-column column-count src-row dst-row row-count op src-bitmap dst-bitmap -- )
+( src-column src-row dst-column dst-row column-count row-count op src-bitmap dst-bitmap -- )
 
 Apply an operation *op* to a rectangle in *dst-bitmap* at *dst-column* to *dst-column* plus *column-count* minus one and *dst-row* to *dst-row* plus *row-count* minus one of *dst-bitmap* with the contents of a rectangle in *src-bitmap* at *src-column* to *src-column* plus *column-count* minus one and *src-row* to *src-row* plus *row-count* minus one.
+
+### `pixmap16`
+
+Thie `pixmap16` module contains the following words:
+
+##### `rgb16`
+( r g b -- color )
+
+Constructs a 16-bit color from three 8-bit components.
+
+##### `pixmap16-buf-size`
+( cols rows -- bytes )
+
+Get the size of a pixmap buffer in bytes for a given number of columns and rows.
+
+The `<pixmap16>` class is the base class for 16-bit pixmaps. It can be used directly, e.g. for offscreen pixmaps, or through its subclass `<st7735s>`
+
+The `<pixmap16>` class includes the following constructor:
+
+##### `new`
+( buffer-addr columns rows pixmap -- )
+
+This constructor initializes a `<pixmap16>` instance to have *columns* columns, *rows* rows, and a pixmap buffer at address *buffer-addr*. Note that the buffer pointed to by *buffer-addr*  must be of size *columns* times *rows* times two. When this is called, the buffer will be zeroed out and the entire pixmap will be  marked as dirty.
+
+The `<pixmap16>` class includes the following members:
+
+##### `pixmap-cols`
+( pixmap -- addr )
+
+The address of a cell containing the number of columns in a pixmap.
+
+##### `pixmap-rows`
+( pixmap -- addr )
+
+The address of a cell containing the number of rows in a pixmap.
+
+The `<pixmap16>` class includes the following methods:
+
+##### `dim@`
+( pixmap -- columns rows )
+
+Get the number of columns and rows in a pixmap.
+
+##### `clear-pixmap`
+( pixmap -- )
+
+Set an entire pixmap to zero and mark it as dirty.
+
+##### `pixel-addr`
+( column row pixmap -- addr )
+
+Get the address of a pixel in a pixmap's buffer.
+
+##### `dirty-pixel`
+( column row pixmap -- )
+
+Dirty a pixel in a pixmap; note that this is a no-op in `<pixmap16>`, but may be overridden in subclasses such as `<st7735s>`.
+
+##### `dirty-area`
+( start-column end-column start-row end-row pixmap -- )
+
+Dirty a rectangle in a pixmap; note that this is a no-op in `<pixmap16>`, but may be overridden in subclasses such as `<st7735s>`.
+
+##### `pixel@`
+( column row pixmap -- color )
+
+Get the color of a pixel at *column* and *row* in *pixmap*. If the pixel is outside the bounds of *pixmap*, 0 is returned.
+
+##### `draw-pixel-const`
+( color dst-column dst-row dst-pixmap -- )
+
+Draw a single pixel of color *color at *dst-column* and *dst-row* on *dst-pixmap* and mark that pixel as dirty.
+
+##### `draw-rect-const`
+( color dst-column dst-row column-count row-count dst-pixmap -- )
+
+Draw a rectangle of color *color* at *dst-column* to *dst-column* plus *column-count* minus one and *dst-row* to *dst-row* plus *row-count* minus one of *dst-pixmap* and mark that rectangle as dirty.
+
+##### `draw-rect`
+( src-column src-row dst-column dst-row column-count row-count src-pixmap dst-pixmap -- )
+
+Copy a rectangle of *src-column* to *src-column* plus *column-count* minus one and *src-row* to *src-row* plus *row-count* minus one of *src-pixmap* to *dst-column* to *dst-column* plus *column-count* minus one and *dst-row* to *dst-row* plus *row-count* minus one of *dst-pixmap* and mark that rectangle as dirty.
+
+##### `draw-rect-const-mask`
+( color mask-column mask-row dst-column dst-row column-count row-count mask-bitmap dst-pixmap -- )
+
+Draw a rectangle of *color* where *mask-column* to *mask-column* plus *column-count* minus one and *mask-row* to *mask-row* plus *row-count* minus one of *mask-bitmap* is set to one to *dst-column* to *dst-column* plus *column-count* minus one and *dst-row* to *dst-row* plus *row-count* minus one of *dst-pixmap* and mark that rectangle as dirty.
+
+##### `draw-rect-mask`
+( mask-column mask-row src-column src-row dst-column dst-row column-count row-count mask-bitmap src-pixmap dst-pixmap -- )
+
+Copy a rectangle of *src-column* to *src-column* plus *column-count* minus one and *src-row* to *src-row* plus *row-count* minus one where *mask-column* to *mask-column* plus *column-count* minus one and *mask-row* to *mask-row* plus *row-count* minus one of *mask-bitmap* is set to one to *dst-column* to *dst-column* plus *column-count* minus one and *dst-row* to *dst-row* plus *row-count* minus one of *dst-pixmap* and mark that rectangle as dirty.
 
 ### `ssd1306`
 
@@ -122,9 +219,37 @@ The `<ssd1306>` class includes the following constructor:
 
 This constructor initializes an I2C SSD1306 display with the SDA and SCK pins specified as GPIO pins *pin0* and *pin1* (it does not matter which is which), a backing buffer at *buffer-addr* (with the same considerations as backing buffers for other `<bitmap>` instances), *columns* columns, *rows* rows, the I2C address *i2c-addr*, the I2C device index *i2c-device* (note that this must match the I2C device index for pins *pin0* and *pin1*), and the `<ssd1306>` instance being initialized, *ssd1306*.
 
-The <ssd1306> class includes the following method:
+The `<ssd1306>` class includes the following method:
 
 ##### `update-display`
 ( ssd1306 -- )
 
 This updates the SSD1306-based display with the current contents of its dirty rectangle, and then clears its dirty state. This must be called to update the display's contents after drawing to the display, which otherwise has no effect on the display itself.
+
+### `st7735s`
+
+The `st7735s` module contains the following words:
+
+##### `<st7735s>`
+( -- class )
+
+The `<st7735s>` class is the class for 16-bit SPI ST7735S-based displays. It inherits from the `<pixmap16>` class and can be drawn to using the operations defined in that class. It maintains a dirty rectangle, which is updated when the user invokes its `update-display` method. Note that column zero is on the lefthand side of the display and row zero is on the top of the display.
+
+The `<st7735s>` class includes the following constructor:
+
+##### `new`
+( din-pin clk-pin dc-pin cs-pin backlight-pin reset-pin buffer-addr columns rows spi-device st7735s -- )
+
+This constructor initializes an SPI ST7735S display at the SPI device *spi-device*, a backing buffer at *buffer-addr* (with the same considerations as backing buffers for other `<pixmap16>` instances), *columns* columns, *rows* rows, the DIN pin *din-pin*, the CLK pin *clk-pin*, the DC pin *dc-pin*, the chip-select pin *cs-pin*, the backlight pin *backlight-pin*, the reset pin *reset-pin*, and the `<st7735s>` instance being initialized, *st7735s*. Note that *din-pin* and *clk-pin* must match the SPI device *spi-device* specified.
+
+The `<st7735s>` class includes the following method:
+
+##### `update-display`
+( st7735s -- )
+
+This updates the ST7735S-based display with the current contents of its dirty rectangle, and then clears its dirty state. This must be called to update the display's contents after drawing to the display, which otherwise has no effect on the display itself.
+
+##### `backlight!`
+( backlight st7735s -- )
+
+Set the on/off state of the ST7735S_based display's backlight.

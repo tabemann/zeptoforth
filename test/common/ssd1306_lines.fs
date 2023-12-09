@@ -42,9 +42,9 @@ begin-module bitmap-line-test
   : run-test ( -- )
     14 15 my-buf my-width my-height SSD1306_I2C_ADDR 1 <ssd1306> my-ssd1306 init-object
     my-sprite-buf my-sprite-width my-sprite-height <bitmap> my-sprite init-object
-    $FF 1 2 0 1 op-set my-sprite draw-rect-const
-    $FF 0 4 1 2 op-set my-sprite draw-rect-const
-    $FF 1 2 3 1 op-set my-sprite draw-rect-const
+    $FF 1 0 2 1 op-set my-sprite draw-rect-const
+    $FF 0 1 4 2 op-set my-sprite draw-rect-const
+    $FF 1 3 2 1 op-set my-sprite draw-rect-const
     
     $FF 64 32 16 - 64 32 16 + op-set my-ssd1306 draw-pixel-line
     $FF 64 16 - 32 64 16 + 32 op-set my-ssd1306 draw-pixel-line
