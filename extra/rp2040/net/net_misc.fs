@@ -328,6 +328,27 @@ begin-module net-misc
     h 8 rshift addr 1+ c!
   ;
 
+  \ Do an alignment-safe IPv6 address load
+  : ipv6-unaligned@ { addr -- x0 x1 x2 x3 }
+    addr [ 3 cells ] literal + unaligned@
+    addr [ 2 cells ] literal + unaligned@
+    addr cell + unaligned@
+    addr unaligned@
+  ;
+
+  \ Do an alignment-safe IPv6 address store
+  : ipv6-unaligned! { x0 x1 x2 x3 addr -- }
+    x3 addr unaligned!
+    x2 addr cell + unaligned!
+    x1 addr [ 2 cells ] literal + unaligned!
+    x0 addr [ 3 cells ] literal + unaligned!
+  ;
+
+  \ Compare two IPv6 addresses
+  : ipv6= { x0-0 x0-1 x0-2 x0-3 x1-0 x1-1 x1-2 x1-3 -- equal? }
+    x0-0 x1-0 = x0-1 x1-1 = and x0-2 x1-2 = and x0-3 x1-3 = and
+  ;
+  
   \ Print a MAC address
   : mac. { D: addr -- }
     0 5 ?do
