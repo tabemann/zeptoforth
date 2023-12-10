@@ -21,7 +21,7 @@
 \ 1. Load this code into RAM on a zeptoforth install where zeptoIP has already
 \    been installed using a terminal which supports zeptoforth, e.g. zeptocom.js
 \    or e4thcom in noforth mode.
-\ 2. Execute: s" <WiFi SSID>" s" <WiFi password>" pico-w-net-udp::start-client
+\ 2. Execute: s" <WiFi SSID>" s" <WiFi password>" pico-w-net-ntp::start-client
 \
 \ This will start an NTP client pointed at pool.ntp.org and regularly report
 \ the time.
