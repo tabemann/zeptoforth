@@ -38,7 +38,7 @@ begin-module cyw43-spi
     
     \ The PIO program used for communicating
     0 constant SIDE_0
-    31 constant SIDE_1
+    16 constant SIDE_1
     create cyw43-pio-program
     1 SIDE_0 OUT_PINS out+,
     0 SIDE_1 COND_X1- jmp+,
