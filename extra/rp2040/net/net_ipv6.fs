@@ -37,6 +37,9 @@ begin-module net
   \ Invalid DNS name
   : x-invalid-dns-name ( -- ) ." invalid DNS name" cr ;
 
+  \ Out of range prefix length
+  : x-out-of-range-prefix-len ( -- ) ." out of range prefix length" cr ;
+
   \ Validate DNS name
   : validate-dns-name { addr len -- }
     len 0 > averts x-invalid-dns-name
@@ -2228,6 +2231,120 @@ begin-module net
 
   end-implement
 
+    continue-module net-internal
+
+    \ The fragment collector class
+    <object> begin-class <fragment-collect>
+      
+      \ Is the fragment collector active
+      cell member fragment-active
+      
+      \ The fragment source IP address
+      cell member fragment-src-ipv4-addr
+      
+      \ The fragment protocol
+      cell member fragment-protocol
+      
+      \ The fragment identification field
+      cell member fragment-ident
+      
+      \ Maximum fragment length
+      cell member fragment-end-length
+      
+      \ The fragment bitmap
+      max-fragment-units 8 align 8 / member fragment-bitmap
+      
+      \ The fragment buffer
+      fragment-buf-size cell align member fragment-buf
+      
+      \ Apply a fragment
+      method apply-fragment ( addr byte self -- complete? )
+      
+      \ Clear the fragment
+      method clear-fragment ( self -- )
+      
+      \ Get the completed packet
+      method get-completed-packet ( self -- src-ipv4-addr protocol addr bytes )
+      
+    end-class
+
+    \ Implement the fragment collector class
+    <fragment-collect> begin-implement
+
+      \ Constructor
+      :noname { self -- }
+        self <object>->new
+        self clear-fragment
+      ; define new
+      
+      \ Apply a fragment
+      :noname { addr bytes self -- complete? }
+        addr ipv4-fragment? not if false exit then
+        addr ipv4-identification h@ rev16 { ident }
+        ident self fragment-ident @ <> if self clear-fragment then
+        addr ipv4-protocol c@ self fragment-protocol @ <> if
+          self clear-fragment
+        then
+        addr ipv4-version-ihl c@ $F 5 max and 4 * { header-size }
+        addr ipv4-total-len h@ rev16
+        dup bytes <> if false exit then
+        header-size - { len }
+        addr ipv4-flags-fragment-offset h@ rev16
+        dup $1FFF and { offset }
+        13 rshift { flags }
+        offset 8 * len + fragment-buf-size <= if
+          true self fragment-active !
+          ident self fragment-ident !
+          addr ipv4-src-addr unaligned@ rev self fragment-src-ipv4-addr !
+          addr ipv4-protocol c@ self fragment-protocol !
+          flags MF and 0= if
+            offset 8 * len + self fragment-end-length !
+          then
+          len 8 align 8 / offset + offset ?do
+            i 7 and bit i 3 rshift self fragment-bitmap + 2dup cbit@ not if
+              cbis!
+            else
+              2drop self clear-fragment false unloop exit
+            then
+          loop
+          addr header-size + self fragment-buf offset 8 * + len move
+          self fragment-end-length @ -1 <> if
+            self fragment-end-length @ 8 align 8 / 0 ?do
+              i 7 and bit i 3 rshift self fragment-bitmap + cbit@ not if
+                false unloop exit
+              then
+            loop
+            true
+          else
+            false
+          then
+        else
+          self clear-fragment false
+        then
+      ; define apply-fragment
+
+      \ Clear the fragment
+      :noname { self -- }
+        false self fragment-active !
+        0 self fragment-src-ipv4-addr !
+        0 self fragment-protocol !
+        0 self fragment-ident !
+        -1 self fragment-end-length !
+        self fragment-bitmap max-fragment-units 8 align 8 / 0 fill
+      ; define clear-fragment
+
+      \ Get the completed packet
+      :noname { self -- src-ipv4-addr protocol addr bytes }
+        self fragment-src-ipv4-addr @
+        self fragment-protocol @
+        self fragment-buf
+        self fragment-end-length @
+      ; define get-completed-packet
+
+    end-implement
+
+  end-module
+
   \ The interface class
   <object> begin-class <interface>
 
@@ -2320,6 +2437,9 @@ begin-module net
       \ The DNS cache
       <dns-cache> class-size member dns-cache
       
+      \ The IPv4 fragment collector
+      <fragment-collect> class-size member fragment-collect
+
       \ Outgoing buffer lock
       lock-size member outgoing-buf-lock
 
@@ -2362,7 +2482,10 @@ begin-module net
       \ Process a MAC address for an IPv6 address
       method process-ipv6-mac-addr
       ( D: mac-addr ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
-      
+
+      \ Process a fragment
+      method process-fragment ( addr bytes self -- )
+
       \ Process an IPv6 packet
       method process-ipv6-packet
       ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 protocol addr bytes self -- )
@@ -2706,7 +2829,7 @@ begin-module net
     :noname { frame-interface self -- }
       self <object>->new
       frame-interface self out-frame-interface !
-      0  0 0 0 self intf-ipv6-addr ipv6-unaligned!
+      0 0 0 0 self intf-ipv6-addr ipv6-unaligned!
       128 addr iptf-ipv6-prefix-len !
       $fe80 $0000 $0000 $0000 $0000 $0000 $0000 $0000 make-ipv6-addr
       self gateway-ipv6-addr ipv6-unaligned!
@@ -2716,9 +2839,9 @@ begin-module net
       1 0 self mac-addr-resolve-sema init-sema
       1 0 self dns-resolve-sema init-sema
       0 self current-dhcp-xid !
-      0 self dhcp-server-ipv4-addr !
+      0 0 0 0 self dhcp-server-ipv6-addr ipv6-unaligned!
       $FFFFFFFFFF. self dhcp-server-mac-addr 2!
-      DEFAULT_IPV4_ADDR self dhcp-req-ipv4-addr !
+      0 0 0 0 self dhcp-req-ipv6-addr ipv6-unaligned!
       dhcp-not-discovering self dhcp-discover-state !
       systick::systick-counter
       dhcp-arp-attempt-count self dhcp-remaining-arp-attempts !
@@ -2750,51 +2873,52 @@ begin-module net
       <dns-cache> self dns-cache init-object
     ; define new
 
-    \ Get the IPv4 address
-    :noname ( self -- addr )
-      intf-ipv4-addr @
-    ; define intf-ipv4-addr@
+    \ Get the IPv6 address
+    :noname ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
+      intf-ipv6-addr ipv6-unaligned@
+    ; define intf-ipv6-addr@
     
-    \ Set the IPv4 address
-    :noname ( addr self -- )
-      intf-ipv4-addr !
-    ; define intf-ipv4-addr!
+    \ Set the IPv6 address
+    :noname ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
+      intf-ipv6-addr ipv6-unaligned!
+    ; define intf-ipv6-addr!
 
-    \ Get the IPv4 netmask
-    :noname ( self -- netmask )
-      intf-ipv4-netmask @
-    ; define intf-ipv4-netmask@
+    \ Get the IPv6 prefix length
+    :noname ( self -- length )
+      intf-ipv6-prefix-len @
+    ; define intf-ipv6-prefix-len@
 
-    \ Set the IPv4 netmask
-    :noname ( netmask self -- )
-      intf-ipv4-netmask !
+    \ Set the IPv6 prefix length
+    :noname ( length self -- )
+      over 128 u<= averts x-out-of-range-prefix-len
+      intf-ipv6-prefix-len !
     ; define intf-ipv4-netmask!
 
-    \ Get the gateway IPv4 address
-    :noname ( self -- addr )
-      gateway-ipv4-addr @
-    ; define gateway-ipv4-addr@
+    \ Get the gateway IPv6 address
+    :noname ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
+      gateway-ipv6-addr ipv6-unaligned@
+    ; define gateway-ipv6-addr@
     
-    \ Set the gateway IPv4 address
-    :noname ( addr self -- )
-      gateway-ipv4-addr !
+    \ Set the gateway IPv6 address
+    :noname ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
+      gateway-ipv6-addr ipv6-unaligned!
     ; define gateway-ipv4-addr!
 
-    \ Get the DNS server IPv4 address
-    :noname ( self -- addr )
-      dns-server-ipv4-addr @
-    ; define dns-server-ipv4-addr@
+    \ Get the DNS server IPv6 address
+    :noname ( self -- ipv6-0 ipv6-1 ipv6-2 ipv6-3 )
+      dns-server-ipv6-addr ipv6-unaligned@
+    ; define dns-server-ipv6-addr@
     
-    \ Set the DNS server IPv4 address
-    :noname ( addr self -- )
-      dns-server-ipv4-addr !
-    ; define dns-server-ipv4-addr!
+    \ Set the DNS server IPv6 address
+    :noname ( ipv6-0 ipv6-1 ipv6-2 ipv6-3 self -- )
+      dns-server-ipv6-addr ipv6-unaligned!
+    ; define dns-server-ipv6-addr!
 
-    \ Get the IPv4 broadcast address
-    :noname { self -- addr }
-      self intf-ipv4-addr @ self intf-ipv4-netmask @ and
-      $FFFFFFFF self intf-ipv4-netmask @ bic or
-    ; define intf-ipv4-broadcast@
+    \ \ Get the IPv4 broadcast address
+    \ :noname { self -- addr }
+    \   self intf-ipv4-addr @ self intf-ipv4-netmask @ and
+    \   $FFFFFFFF self intf-ipv4-netmask @ bic or
+    \ ; define intf-ipv4-broadcast@
 
     \ Get the MAC address
     :noname ( self -- D: addr )
@@ -2821,45 +2945,54 @@ begin-module net
       addr bytes self out-frame-interface @ put-tx-frame
     ; define send-frame
     
-    \ Process a MAC address for an IPv4 address
-    :noname { D: mac-addr ipv4-addr self -- }
-      mac-addr ipv4-addr self address-map save-mac-addr-by-ipv4
+    \ Process a MAC address for an IPv6 address
+    :noname { D: mac-addr ipv6-0 ipv6-1 ipv6-2 ipv6-2 self -- }
+      mac-addr ipv6-0 ipv6-1 ipv6-2 ipv6-3
+      self address-map save-mac-addr-by-ipv6
       self mac-addr-resolve-sema broadcast
       self mac-addr-resolve-sema give
-    ; define process-ipv4-mac-addr
+    ; define process-ipv6-mac-addr
 
-    \ Process an IPv4 packet
-    :noname ( src-addr protocol addr bytes self -- )
+    \ Process a fragment
+    :noname ( addr bytes self -- )
+      dup { self }
+      fragment-collect apply-fragment if
+        self fragment-collect get-completed-packet self process-ipv6-packet
+        fragment-collect clear-fragment
+      then
+    ; define process-fragment
+
+    \ Process an IPv6 packet
+    :noname ( src-0 src-1 src-2 src-3 protocol addr bytes self -- )
       3 pick case
-        PROTOCOL_UDP of process-ipv4-udp-packet endof
-        PROTOCOL_TCP of process-ipv4-tcp-packet endof
-        PROTOCOL_ICMP of process-ipv4-icmp-packet endof
-        >r 2drop 2drop drop r>
+        PROTOCOL_UDP of process-ipv6-udp-packet endof
+        PROTOCOL_TCP of process-ipv6-tcp-packet endof
+        PROTOCOL_ICMP of process-ipv6-icmp-packet endof
+        >r 2drop 2drop 2drop 2drop r>
       endcase
-    ; define process-ipv4-packet
+    ; define process-ipv6-packet
 
-    \ Process an IPv4 TCP packet
-    :noname { src-addr protocol addr bytes self -- }
-      bytes tcp-header-size >= if
+    \ Process an IPv6 TCP packet
+    :noname { src-0 src-1 src-2 src-3 protocol addr bytes self -- }
+      bytes ipv6-tcp-header-size >= if
         addr full-tcp-header-size bytes > if exit then
 
         [ debug? ] [if]
           addr [: cr ." @@@@@ RECEIVING TCP:" tcp. ;] debug-hook execute
         [then]
         
-        src-addr addr bytes self
+        src-0 src-1 src-2 src-3 addr bytes self
         addr tcp-flags c@ TCP_CONTROL and
         case
-          TCP_SYN of process-ipv4-syn-packet endof
-          [ TCP_SYN TCP_ACK or ] literal of process-ipv4-syn-ack-packet endof
-          TCP_ACK of process-ipv4-ack-packet endof
-\          TCP_FIN of process-ipv4-fin-packet endof
-          [ TCP_FIN TCP_ACK or ] literal of process-ipv4-fin-ack-packet endof
-          TCP_RST of process-ipv4-rst-packet endof
-          nip nip nip nip
+          TCP_SYN of process-ipv6-syn-packet endof
+          [ TCP_SYN TCP_ACK or ] literal of process-ipv6-syn-ack-packet endof
+          TCP_ACK of process-ipv6-ack-packet endof
+          [ TCP_FIN TCP_ACK or ] literal of process-ipv6-fin-ack-packet endof
+          TCP_RST of process-ipv6-rst-packet endof
+          nip nip nip nip nip nip nip
         endcase
       then
-    ; define process-ipv4-tcp-packet
+    ; define process-ipv6-tcp-packet
 
     \ Find a listening IPv4 TCP endpoint
     :noname { src-addr addr bytes self -- endpoint found? }
@@ -2919,8 +3052,8 @@ begin-module net
       rng::random endpoint endpoint-init-local-seq!
       addr tcp-seq-no unaligned@ rev 1+
       addr bytes tcp-mss@ not if
-        drop [ mtu-size ethernet-header-size - ipv4-header-size -
-        tcp-header-size - ] literal
+        drop [ max-ipv6-packet-size ipv6-header-size - tcp-header-size - ]
+        literal
       then
       addr tcp-window-size hunaligned@ rev16
       endpoint init-tcp-stream
@@ -3013,7 +3146,7 @@ begin-module net
         window rev16 buf tcp-window-size hunaligned!
         0 buf tcp-urgent-ptr hunaligned!
         [ TCP_OPT_MSS 24 lshift 4 16 lshift or
-        mtu-size ethernet-header-size - ipv4-header-size - tcp-header-size - or
+        max-ipv6-packet-size ipv6-header-size - tcp-header-size - or
         rev ] literal
         buf tcp-header-size + unaligned!
         [ $01010100 rev ] literal buf tcp-header-size + 4 + unaligned!
@@ -3042,7 +3175,7 @@ begin-module net
           endpoint endpoint-init-local-seq@ <> if exit then
           addr tcp-seq-no unaligned@ rev 1+
           addr bytes tcp-mss@ not if
-            drop [ mtu-size ethernet-header-size - ipv4-header-size -
+            drop [ max-ipv6-packet-size ipv4-header-size -
             tcp-header-size - ] literal
           then
           addr tcp-window-size hunaligned@ rev16
@@ -3163,7 +3296,7 @@ begin-module net
       [: { addr bytes endpoint self }
         addr tcp-seq-no unaligned@ rev 1+
         addr bytes tcp-mss@ not if
-          drop [ mtu-size ethernet-header-size - ipv4-header-size -
+          drop [ max-ipv6-packet-size ipv4-header-size -
           tcp-header-size - ] literal
         then
         addr tcp-window-size hunaligned@ rev16
@@ -4858,7 +4991,7 @@ begin-module net
   end-implement
 
   \ The IP protocol handler
-  <frame-handler> begin-class <ip-handler>
+  <frame-handler> begin-class <ipv6-handler>
 
     continue-module net-internal
     
@@ -4870,7 +5003,7 @@ begin-module net
   end-class
 
   \ Implemnt the IP protocol handler
-  <ip-handler> begin-implement
+  <ipv6-handler> begin-implement
 
     \ Constructor
     :noname { ip self -- }
@@ -4880,31 +5013,31 @@ begin-module net
 
     \ Handle a frame
     :noname { addr bytes self -- }
-      addr ethh-ether-type h@ [ ETHER_TYPE_IPV4 rev16 ] literal = if
+      addr ethh-ether-type h@ [ ETHER_TYPE_IPV6 rev16 ] literal = if
         addr ethh-source-mac mac@ { D: src-mac-addr }
         ethernet-header-size +to addr
         [ ethernet-header-size negate ] literal +to bytes
-        bytes ipv4-header-size >= if
-          src-mac-addr addr ipv4-src-addr unaligned@ rev
+        bytes ipv6-header-size >= if
+          src-mac-addr addr ipv6-src-addr ipv6-unaligned@
           self ip-interface @
-          process-ipv4-mac-addr
-          bytes addr ipv4-total-len h@ rev16 min to bytes
-          addr ipv4-version-ihl c@ $F and dup { ihl } 5 >=
-          ihl 4 * bytes <= and if
-            addr ipv4-dest-addr unaligned@ rev
-            dup self ip-interface @ intf-ipv4-addr@ =
-            over self ip-interface @ intf-ipv4-broadcast@ = or
-            over $FFFFFFFF = or
-            self ip-interface @ dhcp-discover-state @ dhcp-wait-ack =
-            rot self ip-interface @ dhcp-req-ipv4-addr @ = and or
-            self ip-interface @ dhcp-discover-state @ dhcp-wait-offer = or if
-              addr ipv4-fragment? if
-                addr bytes self ip-interface @ process-fragment
+          process-ipv6-mac-addr
+          bytes addr ipv6-payload-len h@ rev16 min to bytes
+          addr ipv6-dest-addr ipv6-unaligned@
+          self ip-interface @ intf-ipv6-addr@ ipv6=
+\          over self ip-interface @ intf-ipv4-broadcast@ = or
+          \          over $FFFFFFFF = or
+          self ip-interface @ dhcp-discover-state @ dhcp-wait-ack =
+          addr ipv6-dest-addr ipv6-unaligned@
+          self ip-interface @ dhcp-req-ipv6-addr ipv6-unaligned@ ipv6= and or
+          self ip-interface @ dhcp-discover-state @ dhcp-wait-offer = or if
+            addr find-ipv6-fragment nip nip if
+              addr bytes self ip-interface @ process-fragment
+            else
+              addr ipv6-src-addr ipv6-unaligned@ =
+              addr bytes find-ipv6-payload if 
+                self ip-interface @ process-ipv6-packet
               else
-                addr ipv4-src-addr unaligned@ rev
-                addr ipv4-protocol c@
-                addr ihl cells + bytes ihl cells -
-                self ip-interface @ process-ipv4-packet
+                2drop drop
               then
             then
           then
