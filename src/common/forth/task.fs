@@ -1772,6 +1772,12 @@ begin-module task
       field: task-info-ticks-delay
       field: task-info-ticks-start
       field: task-info-priority
+      field: task-info-dict-size
+      field: task-info-dict-used
+      hfield: task-info-stack-size
+      hfield: task-info-stack-used
+      hfield: task-info-rstack-size
+      hfield: task-info-rstack-used
       field: task-info-name-len
       28 +field task-info-name-bytes
       
@@ -1788,7 +1794,7 @@ begin-module task
     : copy-task-name-for-info { info task -- }
       task task-name@ ?dup if
         count dup info task-info-name-len !
-        info task-info-name-bytes swap 24 min move
+        info task-info-name-bytes swap 23 min move
       else
         0 info task-info-name-len !
       then
@@ -1817,6 +1823,15 @@ begin-module task
       task task-state h@ info task-info-state h!
       task task-current-notify @ info task-info-current-notify !
       task task-priority@ info task-info-priority !
+      task task-rstack-size h@ info task-info-rstack-size h!
+      task task-stack-size h@ info task-info-stack-size h!
+      task task-dict-size @ info task-info-dict-size !
+      task ['] task-rstack-base for-task@
+      task task-rstack-current @ - info task-info-rstack-used h!
+      task ['] task-stack-base for-task@
+      task task-stack-current - info task-info-stack-used h!
+      task task-dict-current
+      task task-dict-base @ - info task-info-dict-used !
       info task copy-task-name-for-info
       info task copy-task-delay-for-info
     ;
@@ -1824,7 +1839,7 @@ begin-module task
     \ Dump task name
     : dump-task-name { info -- }
       info task-info-name-len @ ?dup if
-        info task-info-name-bytes over type 25 swap - 0 max spaces
+        info task-info-name-bytes over type 24 swap - 0 max spaces
       else
         25 spaces
       then
@@ -1874,11 +1889,49 @@ begin-module task
 	22 spaces
       then
     ;
+
+    \ Dump return stack size
+    : dump-rstack-size ( info -- )
+      here swap task-info-rstack-size h@ format-unsigned
+      dup 11 swap - spaces type
+    ;
+
+    \ Dump return stack used
+    : dump-rstack-used ( info -- )
+      here swap task-info-rstack-used h@ format-unsigned
+      dup 11 swap - spaces type
+    ;
     
+    \ Dump stack size
+    : dump-stack-size ( info -- )
+      here swap task-info-stack-size h@ format-unsigned
+      dup 10 swap - spaces type
+    ;
+    
+    \ Dump stack used
+    : dump-stack-used ( info -- )
+      here swap task-info-stack-used h@ format-unsigned
+      dup 10 swap - spaces type
+    ;
+
+    \ Dump dictionary size
+    : dump-dict-size ( info -- )
+      here swap task-info-dict-size @ format-unsigned
+      dup 10 swap - spaces type
+    ;
+
+    \ Dump dictionary used
+    : dump-dict-used ( info -- )
+      here swap task-info-dict-used @ format-unsigned
+      dup 10 swap - spaces type
+    ;
+
     \ Dump task ehader
     : dump-task-header ( -- )
-      cr ." task     name                      priority state      "
+      cr ." task     name                     priority state      "
       ." until       delay"
+      cr ."          rstack-size rstack-used stack-size stack-used "
+      ." dict-size  dict-used  "
     ;
 
   end-module
@@ -1905,6 +1958,12 @@ begin-module task
               space info dump-task-priority
               space info dump-task-state
               space info dump-task-until
+              cr ."          " info dump-rstack-size
+              space info dump-rstack-used
+              space info dump-stack-size
+              space info dump-stack-used
+              space info dump-dict-size
+              space info dump-dict-used
               task-info-size +to info
             loop
           ;] swap outside-critical-with-other-core-spinlock
