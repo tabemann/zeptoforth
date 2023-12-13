@@ -1841,7 +1841,7 @@ begin-module task
       info task-info-name-len @ ?dup if
         info task-info-name-bytes over type 24 swap - 0 max spaces
       else
-        25 spaces
+        24 spaces
       then
     ;
     
