@@ -3859,7 +3859,7 @@ begin-module net
       systick::systick-counter { start }
       begin
         self [: endpoint-queue-sema take ;]
-        task::timeout @ task::with-timeout-from-start
+        task::timeout @ start task::with-timeout-from-start
         endpoint [: { endpoint }
           endpoint endpoint-enqueued? if
             endpoint clear-endpoint-enqueued

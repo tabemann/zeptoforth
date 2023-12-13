@@ -235,6 +235,8 @@ begin-module pico-w-net-uart
     0 ['] do-uart-rx 512 128 512 1 task::spawn-on-core uart-rx-task !
     tx-notify-area 1 tx-task @ task::config-notify
     uart-rx-notify-area 1 uart-rx-task @ task::config-notify
+    c" tx" tx-task @ task::task-name!
+    c" uart-rx" uart-rx-task @ task::task-name!
     tx-task @ task::run
     uart-rx-task @ task::run
   ;
@@ -257,7 +259,9 @@ begin-module pico-w-net-uart
           begin ssid pass my-cyw43-control @ join-cyw43-wpa2 nip until
         then
       again
-    ;] 512 128 1024 task::spawn task::run
+    ;] 512 128 1024 task::spawn
+    c" cyw43-event-rx" over task::task-name!
+    task::run
     EVENT_DISASSOC my-cyw43-control @ cyw43-control::enable-cyw43-event
     EVENT_DISASSOC_IND my-cyw43-control @ cyw43-control::enable-cyw43-event
     my-cyw43-net run-net-process

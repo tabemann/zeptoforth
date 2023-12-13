@@ -352,6 +352,7 @@ begin-module pico-w-net-repl
     my-tcp-session-handler
     my-cyw43-net net-endpoint-process@ add-endpoint-handler
     0 ['] do-server 512 128 1024 1 task::spawn-on-core server-task !
+    c" repl-tx" server-task @ task::task-name!
     server-task @ task::run
   ;
 
@@ -373,7 +374,9 @@ begin-module pico-w-net-repl
           begin ssid pass my-cyw43-control @ join-cyw43-wpa2 nip until
         then
       again
-    ;] 512 128 1024 task::spawn task::run
+    ;] 512 128 1024 task::spawn
+    c" cyw43-event-rx" over task::task-name!
+    task::run
     EVENT_DISASSOC my-cyw43-control @ cyw43-control::enable-cyw43-event
     EVENT_DISASSOC_IND my-cyw43-control @ cyw43-control::enable-cyw43-event
     my-cyw43-net run-net-process
