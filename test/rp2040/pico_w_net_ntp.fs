@@ -80,7 +80,9 @@ begin-module pico-w-net-ntp
           begin ssid pass my-cyw43-control @ join-cyw43-wpa2 nip until
         then
       again
-    ;] 512 128 1024 task::spawn task::run
+    ;] 512 128 1024 task::spawn
+    c" cyw43-event-rx" over task::task-name!
+    task::run
     EVENT_DISASSOC my-cyw43-control @ cyw43-control::enable-cyw43-event
     EVENT_DISASSOC_IND my-cyw43-control @ cyw43-control::enable-cyw43-event
     my-cyw43-net run-net-process
@@ -99,7 +101,9 @@ begin-module pico-w-net-ntp
         then
         1000 ms
       again
-    ;] 320 128 512 task::spawn task::run
+    ;] 320 128 512 task::spawn
+    c" ntp-display" over task::task-name!
+    task::run
   ;
 
 end-module

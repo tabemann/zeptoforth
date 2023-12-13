@@ -134,7 +134,7 @@ begin-module endpoint-process
         begin
           self interface @ get-ready-endpoint self process-endpoint
         again
-      ;] 1024 256 1024 spawn run
+      ;] 1024 256 1024 spawn c" endpoint-process" over task-name! run
     ; define run-endpoint-process
 
   end-implement
