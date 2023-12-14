@@ -133,7 +133,7 @@
 .equ PLL_POSTDIV2, 12
 .equ PLL_START   , (1<<PLL_VCOPD) | (1<<PLL_PD)
 .equ PLL_SYS_DIV , (6<<PLL_POSTDIV1) | (2<<PLL_POSTDIV2)
-.equ PLL_USB_DIV , (5<<PLL_POSTDIV1) | (2<<PLL_POSTDIV2)
+.equ PLL_USB_DIV , (5<<PLL_POSTDIV1) | (4<<PLL_POSTDIV2)
 
 @ -----------------------------------------------------------------------------
 @ UARTs
@@ -355,10 +355,10 @@ Init_PLLs:
 	str  r0, [r3, #PLL_CS]
 
 	// SYS: VCO = 12MHz * 125 = 1500MHz
-	// USB: VCO = 12MHz *  40 =  480MHz
+	// USB: VCO = 12MHz *  80 =  960MHz
 	movs r0, #125
 	str  r0, [r2, #PLL_FBDIV]
-	movs r0, #40
+	movs r0, #80
 	str  r0, [r3, #PLL_FBDIV]
 
 	// Start PLLs
