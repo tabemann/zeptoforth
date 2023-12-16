@@ -26,6 +26,9 @@ begin-module monitor
   multicore import
 
   begin-module monitor-internal
+
+    \ Monitor dictionary space
+    2048 value monitor-dict-space
     
     \ Our flag signaling whether this has been initialized
     false value inited?
@@ -67,6 +70,9 @@ begin-module monitor
     ;
     
   end-module> import
+
+  \ Set the default monitor dictionary space
+  : monitor-dict-space! ( bytes -- ) cell align to monitor-dict-space ;
   
   \ Start the monitor (if it has not already been started)
   : start-monitor ( -- )
@@ -74,7 +80,7 @@ begin-module monitor
       inited? not if true to inited? true else false then
     ;] critical-with-all-core-spinlock
     if
-      0 ['] run-monitor 320 128 512 spawn monitor-task !
+      0 ['] run-monitor monitor-dict-space 128 512 spawn monitor-task !
       monitor-mailbox-buf 1 monitor-task @ config-notify
       c" monitor" monitor-task @ task-name!
       32767 monitor-task @ task-priority!

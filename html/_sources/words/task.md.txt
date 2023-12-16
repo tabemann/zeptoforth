@@ -424,3 +424,8 @@ The following words are in the `monitor` module (note that this module is only p
 ( -- )
 
 This word starts the task monitor in the current core; if the task monitor has already been started, it has no effect. Once started, Control-T `t` dumps information on all running tasks.
+
+##### `monitor-dict-space!`
+( bytes -- )
+
+Set the dictionary space used by the monitor prior to starting it. The default space is 2048 bytes. If not enough space is available the monitor will not be able to display the tasks for a given core due to that `task::dump-tasks` loads a copy of relevant information into the monitor task's dictionary prior to displaying it on the console.
