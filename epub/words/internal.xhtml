@@ -478,6 +478,96 @@ the next column</p>
 <p>( b-addr bytes – addr|0 )</p>
 <p>Find a word by name in the current wordlist order, making use of the RAM dictionary if compiling to RAM, and making use of the flash mini-dictionary, returning the word’s address or, if not found, 0. (RP2040 only.)</p>
 </section>
+<section id="push-syntax">
+<h3><code class="docutils literal notranslate"><span class="pre">push-syntax</span></code></h3>
+<p>( syntax – )</p>
+<p>Push syntax onto the syntax stack.</p>
+</section>
+<section id="verify-syntax">
+<h3><code class="docutils literal notranslate"><span class="pre">verify-syntax</span></code></h3>
+<p>( syntax – )</p>
+<p>Verify that the previous syntax on the syntax stack is the specified syntax.</p>
+</section>
+<section id="verify-syntax-2">
+<h3><code class="docutils literal notranslate"><span class="pre">verify-syntax-2</span></code></h3>
+<p>( syntax1 syntax0 – )</p>
+<p>Verify that the previous syntax on th syntax stack is one of two specified syntaxes.</p>
+</section>
+<section id="drop-syntax">
+<h3><code class="docutils literal notranslate"><span class="pre">drop-syntax</span></code></h3>
+<p>( – )</p>
+<p>Drop the syntax from the top of the syntax stack.</p>
+</section>
+<section id="x-unexpected-syntax">
+<h3><code class="docutils literal notranslate"><span class="pre">x-unexpected-syntax</span></code></h3>
+<p>( – )</p>
+<p>Unexpected syntax exception, raised by <code class="docutils literal notranslate"><span class="pre">verify-syntax</span></code> and <code class="docutils literal notranslate"><span class="pre">verify-syntax-2</span></code>.</p>
+</section>
+<section id="x-syntax-underflow">
+<h3><code class="docutils literal notranslate"><span class="pre">x-syntax-underflow</span></code></h3>
+<p>( – )</p>
+<p>Syntax stack underflow exception, raised by <code class="docutils literal notranslate"><span class="pre">verify-syntax</span></code>, <code class="docutils literal notranslate"><span class="pre">verify-syntax-2</span></code>, and <code class="docutils literal notranslate"><span class="pre">drop-syntax</span></code>.</p>
+</section>
+<section id="x-syntax-overflow">
+<h3><code class="docutils literal notranslate"><span class="pre">x-syntax-overflow</span></code></h3>
+<p>( – )</p>
+<p>Syntax stack overflow exception, raised by <code class="docutils literal notranslate"><span class="pre">push-syntax</span></code>.</p>
+</section>
+<section id="syntax-none">
+<h3><code class="docutils literal notranslate"><span class="pre">syntax-none</span></code></h3>
+<p>( – syntax )</p>
+<p>Syntax constant for no syntax.</p>
+</section>
+<section id="syntax-word">
+<h3><code class="docutils literal notranslate"><span class="pre">syntax-word</span></code></h3>
+<p>( – syntax )</p>
+<p>Syntax constant for word definition.</p>
+</section>
+<section id="syntax-lambda">
+<h3><code class="docutils literal notranslate"><span class="pre">syntax-lambda</span></code></h3>
+<p>( – syntax )</p>
+<p>Syntax constant for lambda definitoin.</p>
+</section>
+<section id="syntax-if">
+<h3><code class="docutils literal notranslate"><span class="pre">syntax-if</span></code></h3>
+<p>( – syntax )</p>
+<p>Syntax constant for <code class="docutils literal notranslate"><span class="pre">if</span></code> blocks.</p>
+</section>
+<section id="syntax-else">
+<h3><code class="docutils literal notranslate"><span class="pre">syntax-else</span></code></h3>
+<p>( – syntax )</p>
+<p>Syntax constant for <code class="docutils literal notranslate"><span class="pre">else</span></code> blocks.</p>
+</section>
+<section id="syntax-begin">
+<h3><code class="docutils literal notranslate"><span class="pre">syntax-begin</span></code></h3>
+<p>( – syntax )</p>
+<p>Syntax constant for <code class="docutils literal notranslate"><span class="pre">begin</span></code> blocks.</p>
+</section>
+<section id="syntax-while">
+<h3><code class="docutils literal notranslate"><span class="pre">syntax-while</span></code></h3>
+<p>( – syntax )</p>
+<p>Syntax constant for <code class="docutils literal notranslate"><span class="pre">while</span></code> blocks.</p>
+</section>
+<section id="syntax-do">
+<h3><code class="docutils literal notranslate"><span class="pre">syntax-do</span></code></h3>
+<p>( – syntax )</p>
+<p>Syntax constant for <code class="docutils literal notranslate"><span class="pre">do</span></code> and <code class="docutils literal notranslate"><span class="pre">?do</span></code> blocks.</p>
+</section>
+<section id="syntax-begin-structure">
+<h3><code class="docutils literal notranslate"><span class="pre">syntax-begin-structure</span></code></h3>
+<p>( – syntax )</p>
+<p>Syntax constant for <code class="docutils literal notranslate"><span class="pre">begin-structure</span></code> blocks.</p>
+</section>
+<section id="syntax-begin-class">
+<h3><code class="docutils literal notranslate"><span class="pre">syntax-begin-class</span></code></h3>
+<p>( – syntax )</p>
+<p>Syntax constant for <code class="docutils literal notranslate"><span class="pre">begin-class</span></code> blocks.</p>
+</section>
+<section id="syntax-begin-implement">
+<h3><code class="docutils literal notranslate"><span class="pre">syntax-begin-implement</span></code></h3>
+<p>( – syntax )</p>
+<p>Syntax constant for <code class="docutils literal notranslate"><span class="pre">begin-implement</span></code> blocks.</p>
+</section>
 </section>
 </section>
 
