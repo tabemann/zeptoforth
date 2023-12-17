@@ -2080,6 +2080,8 @@ commit-flash
   lit,
 ;
 
+commit-flash
+
 \ Try and display an error
 : try-and-display-error ( xt -- exception-xt )
   try dup >r ?dup if
