@@ -164,6 +164,7 @@ _pause:	ldr r0, =SIO_BASE + 0x000
 	.include "../rp2040/flashrom.s"
 	.include "../rp2040/console.s"
 	.include "../rp2040/expose.s"
+        .include "../common/syntax.s"
 	.include "../m0/core.s"
 	.include "../rp2040/divide.s"
 	.include "../m0/outer.s"

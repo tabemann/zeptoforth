@@ -576,6 +576,9 @@ _with_error_console:
 _quit:	bl _rstack_base
 	ldr tos, [tos]
 	mov sp, tos
+        ldr r0, =syntax_stack + syntax_stack_size
+        ldr r1, =syntax_stack_ptr
+        str r0, [r1]
         bl _prepare_prompt
 	ldr tos, =_main
 	bl _try

@@ -86,6 +86,7 @@ outer_exc_handled:
 	.include "flashrom.s"
 	.include "console.s"
 	.include "expose.s"
+        .include "../common/syntax.s"
 	.include "../m4_m7/core.s"
 	.include "../m4_m7/divide.s"
 	.include "../common/outer.s"
