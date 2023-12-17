@@ -49,3 +49,4 @@
 	.equ pad_offset, 128
 	.equ cpu_count, 2
 	.equ const_count, 8
+        .equ syntax_stack_size, 64 @ in bytes

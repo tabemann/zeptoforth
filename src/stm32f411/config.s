@@ -44,3 +44,5 @@
 	.equ pad_offset, 128
 	.equ flash_mini_dict_size, 0 @ in bytes
 	.equ cpu_count, 1
+        .equ syntax_stack_size, 64 @ in bytes
+        

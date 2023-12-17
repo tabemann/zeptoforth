@@ -2165,6 +2165,9 @@ _init_variables:
         str r1, [r0]
         ldr r0, =uart_special_enabled
         str r1, [r0]
+        ldr r1, =syntax_stack + syntax_stack_size
+        ldr r0, =syntax_stack_ptr
+        str r1, [r0]
         ldr r0, =ram_current
 	@@ Initialize the data stack base
 	ldr r1, =stack_top

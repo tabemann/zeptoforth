@@ -77,6 +77,9 @@ _if:	push {lr}
 	bl _asm_branch_not_zero
 	bl _asm_reserve_branch
         bl _begin_block
+        push_tos
+        movs tos, #syntax_if
+        bl _push_syntax
 	push_tos
 	ldr tos, =-1
 	pop {pc}
@@ -86,6 +89,13 @@ _if:	push {lr}
 	define_word "else", visible_flag | immediate_flag | compiled_flag
 _else:	push {lr}
 	bl _asm_undefer_lit
+        push_tos
+        movs tos, #syntax_if
+        bl _verify_syntax
+        bl _drop_syntax
+        push_tos
+        movs tos, #syntax_else
+        bl _push_syntax
 	cmp tos, #0
 	beq 1f
 	pull_tos
@@ -121,6 +131,12 @@ _not_following_if:
 	define_word "then", visible_flag | immediate_flag | compiled_flag
 _then:	push {lr}
 	bl _asm_undefer_lit
+        push_tos
+        movs tos, #syntax_if
+        push_tos
+        movs tos, #syntax_else
+        bl _verify_syntax_2
+        bl _drop_syntax
         bl _end_block
 	movs r1, tos
 	pull_tos
@@ -146,6 +162,12 @@ _then:	push {lr}
 _then_no_block:
         push {lr}
 	bl _asm_undefer_lit
+        push_tos
+        movs tos, #syntax_if
+        push_tos
+        movs tos, #syntax_else
+        bl _verify_syntax_2
+        bl _drop_syntax
 	movs r1, tos
 	pull_tos
 	movs r0, tos
@@ -169,12 +191,22 @@ _begin:	push {lr}
 	bl _asm_undefer_lit
 	bl _current_here
         bl _begin_block
+        push_tos
+        movs tos, #syntax_begin
+        bl _push_syntax
 	pop {pc}
 
 	@@ Start a WHILE block
 	define_word "while", visible_flag | immediate_flag | compiled_flag
 _while:	push {lr}
 	bl _asm_undefer_lit
+        push_tos
+        movs tos, #syntax_begin
+        bl _verify_syntax
+        bl _drop_syntax
+        push_tos
+        movs tos, #syntax_while
+        bl _push_syntax
         bl _end_block
 	push_tos
 	movs tos, #0
@@ -204,6 +236,10 @@ _while:	push {lr}
 _repeat:
 	push {lr}
 	bl _asm_undefer_lit
+        push_tos
+        movs tos, #syntax_while
+        bl _verify_syntax
+        bl _drop_syntax
         bl _end_block
 	movs r0, tos
 	pull_tos
@@ -221,6 +257,10 @@ _repeat:
 	define_word "until", visible_flag | immediate_flag | compiled_flag
 _until:	push {lr}
 	bl _asm_undefer_lit
+        push_tos
+        movs tos, #syntax_begin
+        bl _verify_syntax
+        bl _drop_syntax
         bl _end_block
 	push_tos
 	movs tos, #0
@@ -248,6 +288,10 @@ _until:	push {lr}
 	define_word "again", visible_flag | immediate_flag | compiled_flag
 _again:	push {lr}
 	bl _asm_undefer_lit
+        push_tos
+        movs tos, #syntax_begin
+        bl _verify_syntax
+        bl _drop_syntax
         bl _end_block
 	bl _asm_branch
 	pop {pc}

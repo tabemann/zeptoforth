@@ -23,6 +23,9 @@
 _asm_start_header:
 	push {lr}
 	bl _asm_undefer_lit
+        push_tos
+        movs tos, #syntax_word
+        bl _push_syntax
 	movs r0, #0
 	ldr r1, =suppress_inline
 	str r0, [r1]
@@ -107,6 +110,10 @@ _asm_link:
 _asm_finalize:
 	push {lr}
 	bl _asm_undefer_lit
+        push_tos
+        movs tos, #syntax_word
+        bl _verify_syntax
+        bl _drop_syntax
 	bl _asm_word_align
 	push_tos
 	ldr tos, =current_flags
@@ -159,6 +166,10 @@ _asm_finalize:
 _asm_finalize_no_align:
 	push {lr}
 	bl _asm_undefer_lit
+        push_tos
+        movs tos, #syntax_word
+        bl _verify_syntax
+        bl _drop_syntax
 	bl _asm_word_align
 	push_tos
 	ldr tos, =current_flags
