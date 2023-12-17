@@ -28,6 +28,15 @@ dp 	.req r7
 	@@ False value
 	.equ false_value, 0
 	
+        @@ Built-in syntax values
+        .equ syntax_none, 0
+        .equ syntax_word, 1
+        .equ syntax_if, 2
+        .equ syntax_else, 3
+        .equ syntax_begin, 4
+        .equ syntax_while, 5
+        .equ syntax_do, 6
+
 	@@ Invisible word
 	.equ invisible_flag, 0x0000
 
