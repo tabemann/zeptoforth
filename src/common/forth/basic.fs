@@ -147,9 +147,11 @@ internal set-current
 5 constant syntax-begin
 6 constant syntax-while
 7 constant syntax-do
-8 constant syntax-begin-structure
-9 constant syntax-begin-class
-10 constant syntax-begin-implement
+8 constant syntax-case
+9 constant syntax-of
+10 constant syntax-begin-structure
+11 constant syntax-begin-class
+12 constant syntax-begin-implement
 
 \ Set forth
 forth set-current
@@ -787,16 +789,19 @@ commit-flash
   [compile-only]
   begin-block
   0
+  syntax-case push-syntax
 ;
 
 \ Start an OF clause
 : of ( x -- )
   [immediate]
   [compile-only]
+  syntax-case verify-syntax
   postpone over
   postpone =
   postpone if
   postpone drop
+  syntax-of push-syntax
 ;
 
 \ End an OF clause
@@ -804,6 +809,7 @@ commit-flash
   [immediate]
   [compile-only]
   undefer-lit
+  syntax-of verify-syntax drop-syntax
   end-block
   rot ?dup if
     here swap branch-back!
@@ -817,6 +823,7 @@ commit-flash
   [immediate]
   [compile-only]
   undefer-lit
+  syntax-case verify-syntax drop-syntax
   postpone drop
   ?dup if
     here swap branch-back!
@@ -831,6 +838,7 @@ commit-flash
 : ofstr ( x -- )
   [immediate]
   [compile-only]
+  syntax-case verify-syntax
   3 lit,
   postpone pick
   3 lit,
@@ -838,12 +846,14 @@ commit-flash
   postpone equal-strings?
   postpone if
   postpone 2drop
+  syntax-of push-syntax
 ;
 
 \ Start an OFSTRCASE clause
 : ofstrcase ( x -- )
   [immediate]
   [compile-only]
+  syntax-case verify-syntax
   3 lit,
   postpone pick
   3 lit,
@@ -851,6 +861,7 @@ commit-flash
   postpone equal-case-strings?
   postpone if
   postpone 2drop
+  syntax-of push-syntax
 ;
 
 \ End a CASE statement comparing against a string
@@ -858,6 +869,7 @@ commit-flash
   [immediate]
   [compile-only]
   undefer-lit
+  syntax-case verify-syntax drop-syntax
   postpone 2drop
   ?dup if
     here swap branch-back!
