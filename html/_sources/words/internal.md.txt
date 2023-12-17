@@ -537,6 +537,16 @@ Syntax constant for `while` blocks.
 
 Syntax constant for `do` and `?do` blocks.
 
+##### `syntax-case`
+( -- syntax )
+
+Syntax constant for `case` blocks.
+
+##### `syntax-of`
+( -- syntax )
+
+Syntax constant for `of`/`ofstr`/`ofstrcase` blocks.
+
 ##### `syntax-begin-structure`
 ( -- syntax )
 
