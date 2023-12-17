@@ -101,19 +101,6 @@ $20 constant bl
 \ String marker
 $DEFE constant start-string
 
-\ Syntax values
-0 constant syntax-none
-1 constant syntax-word
-2 constant syntax-lambda
-3 constant syntax-if
-4 constant syntax-else
-5 constant syntax-begin
-6 constant syntax-while
-7 constant syntax-do
-8 constant syntax-begin-structure
-9 constant syntax-begin-class
-10 constant syntax-begin-implement
-
 \ DMB instruction
 : dmb ( -- ) [inlined] [ undefer-lit $F3BF h, $8F5F h, ] ;
 
@@ -150,6 +137,19 @@ internal set-current
   repeat
   drop
 ;
+
+\ Syntax values
+0 constant syntax-none
+1 constant syntax-word
+2 constant syntax-lambda
+3 constant syntax-if
+4 constant syntax-else
+5 constant syntax-begin
+6 constant syntax-while
+7 constant syntax-do
+8 constant syntax-begin-structure
+9 constant syntax-begin-class
+10 constant syntax-begin-implement
 
 \ Set forth
 forth set-current

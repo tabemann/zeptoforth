@@ -461,3 +461,94 @@ Find a word by name with the specified wordlist ID making use of the flash mini-
 ( b-addr bytes -- addr|0 )
 
 Find a word by name in the current wordlist order, making use of the RAM dictionary if compiling to RAM, and making use of the flash mini-dictionary, returning the word's address or, if not found, 0. (RP2040 only.)
+
+##### `push-syntax`
+( syntax -- )
+
+Push syntax onto the syntax stack.
+
+##### `verify-syntax`
+( syntax -- )
+
+Verify that the previous syntax on the syntax stack is the specified syntax.
+
+##### `verify-syntax-2`
+( syntax1 syntax0 -- )
+
+Verify that the previous syntax on th syntax stack is one of two specified syntaxes.
+
+##### `drop-syntax`
+( -- )
+
+Drop the syntax from the top of the syntax stack.
+
+##### `x-unexpected-syntax`
+( -- )
+
+Unexpected syntax exception, raised by `verify-syntax` and `verify-syntax-2`.
+
+##### `x-syntax-underflow`
+( -- )
+
+Syntax stack underflow exception, raised by `verify-syntax`, `verify-syntax-2`, and `drop-syntax`.
+
+##### `x-syntax-overflow`
+( -- )
+
+Syntax stack overflow exception, raised by `push-syntax`.
+
+##### `syntax-none`
+( -- syntax )
+
+Syntax constant for no syntax.
+
+##### `syntax-word`
+( -- syntax )
+
+Syntax constant for word definition.
+
+##### `syntax-lambda`
+( -- syntax )
+
+Syntax constant for lambda definitoin.
+
+##### `syntax-if`
+( -- syntax )
+
+Syntax constant for `if` blocks.
+
+##### `syntax-else`
+( -- syntax )
+
+Syntax constant for `else` blocks.
+
+##### `syntax-begin`
+( -- syntax )
+
+Syntax constant for `begin` blocks.
+
+##### `syntax-while`
+( -- syntax )
+
+Syntax constant for `while` blocks.
+
+##### `syntax-do`
+( -- syntax )
+
+Syntax constant for `do` and `?do` blocks.
+
+##### `syntax-begin-structure`
+( -- syntax )
+
+Syntax constant for `begin-structure` blocks.
+
+##### `syntax-begin-class`
+( -- syntax )
+
+Syntax constant for `begin-class` blocks.
+
+##### `syntax-begin-implement`
+( -- syntax )
+
+Syntax constant for `begin-implement` blocks.
+
