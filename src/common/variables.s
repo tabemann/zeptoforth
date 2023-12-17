@@ -224,3 +224,8 @@
 	@@ The flash mini-dictionary
 	allot flash_mini_dict, flash_mini_dict_size
 	
+        @@ The syntax stack
+        allot syntax_stack, syntax_stack_size
+
+        @@ The syntax stack pointer
+        allot syntax_stack_ptr, 4

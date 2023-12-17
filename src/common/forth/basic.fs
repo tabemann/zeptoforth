@@ -138,6 +138,19 @@ internal set-current
   drop
 ;
 
+\ Syntax values
+0 constant syntax-none
+1 constant syntax-word
+2 constant syntax-lambda
+3 constant syntax-if
+4 constant syntax-else
+5 constant syntax-begin
+6 constant syntax-while
+7 constant syntax-do
+8 constant syntax-begin-structure
+9 constant syntax-begin-class
+10 constant syntax-begin-implement
+
 \ Set forth
 forth set-current
 
@@ -702,26 +715,33 @@ commit-flash
 
 \ Begin declaring a structure
 : begin-structure ( "name" -- offset )
+  syntax-begin-structure push-syntax
   <builds here 0 4 allot does> @
 ;
 
 \ Finish declaring a structure
-: end-structure ( offset -- ) swap current! ;
+: end-structure ( offset -- )
+  syntax-begin-structure verify-syntax drop-syntax
+  swap current!
+;
 
 \ Create an arbitrary-sized field
 : +field ( offset size "name" -- offset )
+  syntax-begin-structure verify-syntax
   : over 65536 u< thumb-2? or if inlined then
     over lit, postpone + postpone ; +
 ;
 
 \ Create a byte-sized field
 : cfield: ( offset "name" -- offset )
+  syntax-begin-structure verify-syntax
   : dup 65536 u< thumb-2? or if inlined then
     dup lit, postpone + postpone ; 1+
 ;
 
 \ Create a halfword-sized field
 : hfield: ( offset "name" -- offset )
+  syntax-begin-structure verify-syntax
   : 2 align
     dup 65536 u< thumb-2? or if inlined then
     dup lit, postpone + postpone ; 2 +
@@ -729,6 +749,7 @@ commit-flash
 
 \ Create a cell-sized field
 : field: ( offset "name" -- offset )
+  syntax-begin-structure verify-syntax
   : cell align
     dup 65536 u< thumb-2? or if inlined then
     dup lit, postpone + postpone ; cell+
@@ -736,6 +757,7 @@ commit-flash
 
 \ Create a double cell-sized field
 : 2field: ( offset "name" -- offset )
+  syntax-begin-structure verify-syntax
   : cell align
     dup 65536 u< thumb-2? or if inlined then
     dup lit, postpone + postpone ; 2 cells +
@@ -1420,6 +1442,7 @@ commit-flash
   reserve-literal
   postpone (do)
   here
+  syntax-do push-syntax
 ;
 
 \ Begin a ?do loop
@@ -1431,12 +1454,14 @@ commit-flash
   reserve-literal
   postpone (?do)
   here
+  syntax-do push-syntax
 ;
 
 \ End a do loop
 : loop ( R: leave current end -- leave current end | )
   [immediate]
   [compile-only]
+  syntax-do verify-syntax drop-syntax
   1+ lit, postpone (loop)
   here 1+ 6 rot literal!
 ;
@@ -1445,6 +1470,7 @@ commit-flash
 : +loop ( increment -- ) ( R: leave current end -- leave current end | )
   [immediate]
   [compile-only]
+  syntax-do verify-syntax drop-syntax
   1+ lit, postpone (+loop)
   here 1+ 6 rot literal!
 ;
@@ -2037,6 +2063,7 @@ commit-flash
   here
   $B500 h,
   word-begin-hook @ ?execute
+  syntax-lambda push-syntax
 ;
 
 \ End lambda
@@ -2044,6 +2071,7 @@ commit-flash
   [immediate]
   [compile-only]
   undefer-lit
+  syntax-lambda verify-syntax drop-syntax
   word-exit-hook @ ?execute
   word-end-hook @ ?execute
   [ thumb-2? not ] [if] consts-inline, [then]

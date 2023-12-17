@@ -146,8 +146,11 @@ begin-module task
       \ Dictionary size
       dup constant .task-dict-size field: task-dict-size
 
-      \ Current return stack adress
+      \ Current return stack address
       dup constant .task-rstack-current field: task-rstack-current
+
+      \ Saved data stack address
+      dup constant .task-saved-stack-current field: task-saved-stack-current
 
       \ Current dictionary base
       dup constant .task-dict-base field: task-dict-base
@@ -390,7 +393,7 @@ begin-module task
 
     \ Get task current stack address
     : task-stack-current ( task -- addr )
-      dup last-task @ = if drop sp@ else task-rstack-current @ 12 + @ then
+      dup current-task @ = if drop sp@ else task-rstack-current @ 12 + @ then
     ;
 
     \ Get task current dictionary address
@@ -400,7 +403,8 @@ begin-module task
 
     \ Set task current stack address
     : task-stack-current! ( addr task -- )
-      dup last-task @ = if drop sp! else task-rstack-current @ 12 + ! then
+      2dup task-saved-stack-current !
+      dup current-task @ = if drop sp! else task-rstack-current @ 12 + ! then
     ;
 
     \ Set task current dictionary address
@@ -1204,6 +1208,7 @@ begin-module task
       stack-base @ stack-end @ - over task-stack-size h!
       free-end @ task-size - next-ram-space - over task-dict-size !
       rp@ over task-rstack-current !
+      sp@ over task-saved-stack-current !
       0 over task-priority h!
       0 over task-saved-priority h!
       1 over task-active h!
@@ -1278,7 +1283,9 @@ begin-module task
 	over ['] task-rstack-base for-task!
 	dup task-stack-size h@ over + task-size +
 	over ['] task-rstack-end for-task!
-	dup ['] task-rstack-end for-task@ over ['] task-stack-base for-task!
+        dup ['] task-rstack-end for-task@
+        2dup swap ['] task-stack-base for-task!
+        over task-saved-stack-current !
 	dup task-size + over ['] task-stack-end for-task!
 	0 over task-ready-count !
 	0 over ['] task-handler for-task!
@@ -1382,7 +1389,8 @@ begin-module task
     over ['] task-rstack-base for-task!
     dup task-stack-size h@ over + task-size +
     over ['] task-rstack-end for-task!
-    dup ['] task-rstack-end for-task@ over ['] task-stack-base for-task!
+    dup ['] task-rstack-end for-task@ 2dup swap ['] task-stack-base for-task!
+    over task-saved-stack-current !
     dup task-size + over ['] task-stack-end for-task!
     0 over task-ready-count !
     0 over ['] task-handler for-task!
@@ -1705,9 +1713,11 @@ begin-module task
 
           prev-task @ current-task @ <> if
             disable-int
+            sp@ current-task @ task-saved-stack-current !
             current-task @ task-rstack-current @ context-switch
             prev-task @ if prev-task @ task-rstack-current ! else drop then
             current-task @ restore-task-state
+            sp@ current-task @ task-saved-stack-current !
             enable-int
           then
 
@@ -1829,7 +1839,8 @@ begin-module task
       task ['] task-rstack-base for-task@
       task task-rstack-current @ - info task-info-rstack-used h!
       task ['] task-stack-base for-task@
-      task task-stack-current - info task-info-stack-used h!
+      task current-task @ <> if task task-saved-stack-current @ else sp@ then
+      - info task-info-stack-used h!
       task task-dict-current
       task task-dict-base @ - info task-info-dict-used !
       info task copy-task-name-for-info
@@ -1841,7 +1852,7 @@ begin-module task
       info task-info-name-len @ ?dup if
         info task-info-name-bytes over type 24 swap - 0 max spaces
       else
-        25 spaces
+        24 spaces
       then
     ;
     
@@ -1934,8 +1945,11 @@ begin-module task
       ." dict-size  dict-used  "
     ;
 
-  end-module
+  \ Extra space when calculating room needed for dumping tasks
+  64 constant extra-space
   
+  end-module
+
   \ Dump task information for all tasks
   : dump-tasks ( -- )
     dump-task-header
@@ -1944,30 +1958,38 @@ begin-module task
         cr ." cpu " i (.) ." :"
       then
       i [:
-        dup get-cpu-task-count dup task-info-size * [: { cpu count info }
-          info { current-info }
-          cpu cpu-first-task @ begin ?dup while
-            current-info over copy-task-info
-            task-prev @
-            task-info-size +to current-info
-          repeat
-          count info cpu [: { count info }
-            count 0 ?do
-              cr info task-info-task @ h.8
-              space info dump-task-name
-              space info dump-task-priority
-              space info dump-task-state
-              space info dump-task-until
-              cr ."          " info dump-rstack-size
+        current-task @ task-dict-end
+        current-task @ task-dict-current - { space }
+        dup get-cpu-task-count dup task-info-size *
+        dup extra-space + space u< if
+          [: { cpu count info }
+            info { current-info }
+            cpu cpu-first-task @ begin ?dup while
+              current-info over copy-task-info
+              task-prev @
+              task-info-size +to current-info
+            repeat
+            count info cpu [: { count info }
+              count 0 ?do
+                cr info task-info-task @ h.8
+                space info dump-task-name
+                space info dump-task-priority
+                space info dump-task-state
+                space info dump-task-until
+                cr ."          " info dump-rstack-size
               space info dump-rstack-used
-              space info dump-stack-size
-              space info dump-stack-used
-              space info dump-dict-size
-              space info dump-dict-used
-              task-info-size +to info
-            loop
-          ;] swap outside-critical-with-other-core-spinlock
-        ;] with-aligned-allot
+                space info dump-stack-size
+                space info dump-stack-used
+                space info dump-dict-size
+                space info dump-dict-used
+                task-info-size +to info
+              loop
+            ;] swap outside-critical-with-other-core-spinlock
+          ;] with-aligned-allot
+        else
+          2drop drop
+          cr ." *** NOT ENOUGH DICTIONARY SPACE AVAILABLE TO DISPLAY TASKS ***"
+        then
       ;] i critical-with-other-core-spinlock
     loop
   ;

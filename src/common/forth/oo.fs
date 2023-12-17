@@ -129,10 +129,12 @@ begin-module oo
     super-class class-method-list @
     super-class method-count @
     compiling-to-flash? if flash-block-align, then
+    internal::syntax-begin-class internal::push-syntax
   ;
 
   \ Finish the declaration of a class
   : end-class ( class-header member-offset list method-count -- )
+    internal::syntax-begin-class internal::verify-syntax internal::drop-syntax
     { class-header member-offset method-list #methods }
     member-offset class-header members-size current!
     #methods class-header method-count current!
@@ -151,10 +153,13 @@ begin-module oo
       dup class-methods @ cell+ over class-method-list @ method-index @ 1+ cells
       0 fill
     then
+    internal::syntax-begin-implement internal::push-syntax
   ;
 
   \ End the implementation of a class
   : end-implement { class-header -- }
+    internal::syntax-begin-implement internal::verify-syntax
+    internal::drop-syntax
     class-header class-method-list @ { current-method }
     begin current-method while
       current-method method-index @ { index }
@@ -173,6 +178,7 @@ begin-module oo
 
   \ Declare a member of a class
   : member ( member-offset list method-count size "name" -- member-offset list method-count )
+    internal::syntax-begin-class internal::verify-syntax
     { member-offset method-list #methods size }
     : inlined member-offset cell+ lit, postpone + postpone ;
     member-offset size + method-list #methods
@@ -180,6 +186,7 @@ begin-module oo
   
   \ Declare a method of a class
   : method ( list method-count "name" -- list method-count )
+    internal::syntax-begin-class internal::verify-syntax
     { method-list #methods }
     #methods 31 < if
       :
@@ -210,6 +217,7 @@ begin-module oo
 
   \ Define a method of a class
   : define ( class-header xt "name" -- class-header )
+    internal::syntax-begin-implement internal::verify-syntax
     1 or
     token
     dup 0= triggers x-token-expected

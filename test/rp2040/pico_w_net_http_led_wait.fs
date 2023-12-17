@@ -610,7 +610,7 @@ begin-module pico-w-net-http-server
           then
           endpoint my-interface @ endpoint-done
         again
-      ;] 320 256 1024 task::spawn task::run
+      ;] 320 256 1024 task::spawn c" http" over task::task-name! task::run
     ; define start-http-task
     
   end-implement
