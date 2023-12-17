@@ -727,7 +727,7 @@ end-module> import
   [ armv6m-instr unimport ]
   here swap
   begin-block
-  syntax-do internal::push-syntax
+  internal::syntax-do internal::push-syntax
 ;
 
 \ Start a ?DO LOOP
@@ -760,14 +760,14 @@ end-module> import
   [ armv6m-instr unimport ]
   here swap
   begin-block
-  syntax-do internal::push-syntax
+  internal::syntax-do internal::push-syntax
 ;
 
 \ Close a DO LOOP
 : loop ( compile: loop-addr leave-addr -- ) ( runtime: -- )
   [immediate] [compile-only]
   undefer-lit
-  syntax-do internal::verify-syntax internal::drop-syntax
+  internal::syntax-do internal::verify-syntax internal::drop-syntax
   end-block
   swap
   [ armv6m-instr import ]
@@ -788,7 +788,7 @@ end-module> import
 : +loop ( compile: loop-addr leave-addr -- ) ( runtime: -- )
   [immediate] [compile-only]
   undefer-lit
-  syntax-do internal::verify-syntax internal::drop-syntax
+  internal::syntax-do internal::verify-syntax internal::drop-syntax
   end-block
   swap
   [ armv6m-instr import ]

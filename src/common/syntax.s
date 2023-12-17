@@ -18,8 +18,8 @@
 @ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 @ SOFTWARE.
 
-        @ Push a token onto the syntax stack
-        @ ( token -- )
+        @ Push a syntax onto the syntax stack
+        @ ( syntax -- )
         define_internal_word "push-syntax", visible_flag
 _push_syntax:
         push {lr}
@@ -37,8 +37,8 @@ _push_syntax:
         pop {pc}
         end_inlined
 
-        @ Verify a token on the syntax stack against one token
-        @ ( token -- )
+        @ Verify a syntax on the syntax stack against one syntax
+        @ ( syntax -- )
         define_internal_word "verify-syntax", visible_flag
 _verify_syntax:
         push {lr}
@@ -58,8 +58,8 @@ _verify_syntax:
         pop {pc}
         end_inlined
 
-        @ Verify a token on the syntax stack against two tokens
-        @ ( token1 token0 -- )
+        @ Verify a syntax on the syntax stack against two syntaxes
+        @ ( syntax1 syntax0 -- )
         define_internal_word "verify-syntax-2", visible_flag
 _verify_syntax_2:
         push {lr}
@@ -85,7 +85,7 @@ _verify_syntax_2:
         pop {pc}
         end_inlined
 
-        @ Drop a token on the syntax stack
+        @ Drop a syntax on the syntax stack
         @ ( -- )
         define_internal_word "drop-syntax", visible_flag
 _drop_syntax:
