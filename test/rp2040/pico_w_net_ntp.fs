@@ -18,9 +18,34 @@
 \ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 \ SOFTWARE.
 
-\ 1. Load this code into RAM on a zeptoforth install where zeptoIP has already
-\    been installed using a terminal which supports zeptoforth, e.g. zeptocom.js
-\    or e4thcom in noforth mode.
+\ Note that prior to running this code, one must have uploaded the CYW43439
+\ firmware, CYW43439 driver, and zeptoIP to one's Raspberry Pi Pico W (this
+\ does not work on a Raspberry Pi Pico) as follows:
+\ 
+\ Execute from the base directory of zeptoforth:
+\ 
+\ utils/load_cyw43_fw.sh <tty device> <43439A0.bin path> <43439A0_clm.bin path>
+\ 
+\ 43439A0.bin and 43439A0_clm.bin can be gotten from:
+\ https://github.com/tabemann/cyw43-firmware/tree/master/cyw43439-firmware
+\ 
+\ Then execute from the base directory of zeptoforth:
+\ 
+\ utils/codeload3.sh -B 115200 -p <tty device> serial extra/rp2040/pico_w_net_all.fs
+\
+\ Afterwards, if you had not already installed the CYW43439 firmware, driver,
+\ and zeptoIP, make sure to reboot zeptoforth, either by executing:
+\
+\ reboot
+\
+\ or by entering control-C at a terminal or Reboot with zeptocom.js.
+\ 
+\ Use instructions
+\ 
+\ 1. Load extra/rp2040/net/net_ntp.fs (relative to the base directory of
+\    zeptoforth) and then this code into RAM on a zeptoforth install where
+\    zeptoIP has already been installed using a terminal which supports
+\    zeptoforth, e.g. zeptocom.js or e4thcom in noforth mode.
 \ 2. Execute: s" <WiFi SSID>" s" <WiFi password>" pico-w-net-ntp::start-client
 \
 \ This will start an NTP client pointed at pool.ntp.org and regularly report
