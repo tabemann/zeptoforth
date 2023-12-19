@@ -563,10 +563,10 @@ begin-module sd
           block CMD_READ_BLOCK sd send-sd-cmd 0= if
             sd wait-sd-start-block
             dup not if
-              sd end-sd-cmd swap 1- dup 0> averts sd-read-timeout swap
+              sd end-sd-cmd swap 1- dup 0> averts x-sd-timeout swap
             then
           else
-            sd end-sd-cmd 1- dup 0> averts sd-read-timeout false
+            sd end-sd-cmd 1- dup 0> averts x-sd-timeout false
           then
 	until
         drop
@@ -583,10 +583,10 @@ begin-module sd
           0 cmd sd send-sd-cmd 0= if
             sd wait-sd-start-block
             dup not if
-              sd end-sd-cmd swap 1- dup 0> averts sd-read-timeout swap
+              sd end-sd-cmd swap 1- dup 0> averts x-sd-timeout swap
             then
           else
-            sd end-sd-cmd 1- dup 0> averts sd-read-timeout false
+            sd end-sd-cmd 1- dup 0> averts x-sd-timeout false
           then
         until
         drop
@@ -609,15 +609,15 @@ begin-module sd
             sd end-sd-cmd
             0 CMD_SEND_STATUS sd send-sd-cmd 0= if
               sd get-byte 0= dup if
-                sd end-sd-cmd swap 1- dup 0> averts sd-write-timeout swap
+                sd end-sd-cmd swap 1- dup 0> averts x-sd-timeout swap
               else
                 sd end-sd-cmd
               then
             else
-              sd end-sd-cmd 1- dup 0> averts sd-write-timeout false
+              sd end-sd-cmd 1- dup 0> averts x-sd-timeout false
             then
           else
-            sd end-sd-cmd 1- dup 0> averts sd-write-timeout false
+            sd end-sd-cmd 1- dup 0> averts x-sd-timeout false
           then
         until
         drop
