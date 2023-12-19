@@ -28,6 +28,7 @@ begin-module sd
   pin import
   systick import
   lock import
+  armv6m import
 
   \ SD Card timeout
   : x-sd-timeout ( -- ) ." SD card timeout" cr ;
@@ -48,6 +49,18 @@ begin-module sd
   : x-block-zero-protected ( - ) ." SD card block zero is protected" cr ;
   
   begin-module sd-internal
+
+    \ Reverse byte order
+    : rev ( x -- x' ) code[ r6 r6 rev_,_ ]code ;
+
+    \ Dummy buffer size
+    256 constant dummy-size
+
+    \ Write out a dummy buffer
+    : dummy, ( -- ) dummy-size 0 ?do $FF c, loop ;
+    
+    \ Dummy buffer
+    create dummy-buffer dummy,
     
     \ SD Card init timeout
     $100000 constant sd-init-timeout
@@ -432,21 +445,27 @@ begin-module sd
       ( over h.2 ." >" ) spi-device @ tuck >spi spi> ( dup h.2 space )
     ; define send-get-byte
     
-    :noname ( tx sd-card -- ) send-get-byte drop ; define send-byte
+    :noname { W^ tx sd-card -- }
+      tx 1 sd-card spi-device @ buffer>spi
+    ; define send-byte
     
-    :noname ( sd-card -- rx ) $FF swap send-get-byte ; define get-byte
+    :noname { sd-card -- rx }
+      0 { W^ buffer }
+      buffer 1 $FF sd-card spi-device @ spi>buffer buffer c@
+    ; define get-byte
     
-    :noname ( sd-card -- rx )
-      >r r@ get-byte 8 lshift
-      r@ get-byte or 8 lshift
-      r@ get-byte or 8 lshift
-      r> get-byte or
+    :noname { sd-card -- rx }
+      0 { W^ buffer }
+      buffer cell $FF sd-card spi-device @ spi>buffer buffer @ rev
     ; define get-word
     
-    :noname ( sd-card -- ) $FF swap send-get-byte drop ; define dummy-byte
+    :noname { sd-card -- }
+      0 { W^ buffer }
+      buffer 1 $FF sd-card spi-device @ spi>buffer
+    ; define dummy-byte
     
-    :noname ( sd-card -- )
-      ( display-red ) >r 64 begin ?dup while r@ dummy-byte 1- repeat rdrop ( display-normal )
+    :noname { sd-card -- }
+      dummy-buffer dummy-size sd-card spi-device @ buffer>spi
     ; define dummy-bytes
     
     :noname ( argument command sd-card -- response )
