@@ -1074,17 +1074,16 @@ begin-module fat32
       rdrop
     ; define free-cluster-tail
     
-    :noname ( index cluster fs -- index cluster | -1 -1 )
-      begin 2 pick over dir-cluster-entry-count@ > while
-        rot over dir-cluster-entry-count@ - rot
-        2dup 0 swap fat@
-        dup link-cluster? if
-          rot drop swap
+    :noname { index cluster fs -- index cluster | -1 -1 }
+      begin index fs dir-cluster-entry-count@ >= while
+        fs dir-cluster-entry-count@ negate +to index
+        cluster 0 fs fat@ dup link-cluster? if
+          cluster-link to cluster
         else
-          2drop 2drop -1 -1 exit
+          drop -1 -1 exit
         then
       repeat
-      drop
+      index cluster
     ; define find-entry 
     
     :noname ( entry index cluster fs -- )
@@ -1202,7 +1201,7 @@ begin-module fat32
     :noname ( index cluster fs -- )
       rot 1+ over cluster-sectors @ sector-size * entry-size u/ umod -rot
       2 pick 0= if
-        rot drop dup allocate-link-cluster ( fs cluster )
+        rot drop dup -rot allocate-link-cluster ( fs cluster )
         <fat32-entry> [: ( fs cluster entry )
           dup init-end-entry -rot 0 -rot swap ( entry index cluster fs ) entry!
         ;] with-object
@@ -1506,19 +1505,20 @@ begin-module fat32
       then ( exists? )
     ; define path-exists?
 
-    :noname ( entry dir -- entry-read? )
-      >r begin
-        r@ dir-offset @ r@ dir-current-cluster-index @ 1+
-        r@ dir-fs @ dir-cluster-entry-count@ * < if
-          dup r@ dir-offset @ r@ dir-fs @ dir-cluster-entry-count@ umod
-          r@ dir-current-cluster @ r@ dir-fs @ entry@
-          dup entry-end? if
-            drop false true
+    :noname { entry dir -- entry-read? }
+      dir dir-fs @ { fs }
+      begin
+        dir dir-offset @ dir dir-current-cluster-index @ 1+
+        fs dir-cluster-entry-count@ * < if
+          entry dir dir-offset @ fs dir-cluster-entry-count@ umod
+          dir dir-current-cluster @ fs entry@
+          entry entry-end? if
+            false true
           else
-            1 r@ dir-offset +!
-            dup entry-deleted? not if
-              dup entry-file? over entry-dir? or if
-                drop true true
+            1 dir dir-offset +!
+            entry entry-deleted? not if
+              entry entry-file? entry entry-dir? or if
+                true true
               else
                 false
               then
@@ -1527,16 +1527,15 @@ begin-module fat32
             then
           then
         else
-          r@ dir-current-cluster @ 0 r@ dir-fs @ fat@ dup link-cluster? if
-            cluster-link r@ dir-current-cluster !
-            1 r@ dir-current-cluster-index +!
+          dir dir-current-cluster @ 0 fs fat@ dup link-cluster? if
+            cluster-link dir dir-current-cluster !
+            1 dir dir-current-cluster-index +!
             false
           else
-            2drop false true
+            false true
           then
         then
       until
-      rdrop
     ; define read-dir 
     
     :noname ( c-addr u new-file dir -- )
