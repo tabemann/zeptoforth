@@ -1508,8 +1508,10 @@ begin-module fat32
 
     :noname ( entry dir -- entry-read? )
       >r begin
-        r@ dir-offset @ r@ dir-current-cluster-index @ 1+ 32 * < if
-          dup r@ dir-offset @ 32 umod r@ dir-current-cluster @ r@ dir-fs @ entry@
+        r@ dir-offset @ r@ dir-current-cluster-index @ 1+
+        r@ dir-fs @ dir-cluster-entry-count@ * < if
+          dup r@ dir-offset @ r@ dir-fs @ dir-cluster-entry-count@ umod
+          r@ dir-current-cluster @ r@ dir-fs @ entry@
           dup entry-end? if
             drop false true
           else
