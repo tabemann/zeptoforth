@@ -54,7 +54,7 @@ begin-module sd
     : rev ( x -- x' ) code[ r6 r6 rev_,_ ]code ;
 
     \ Dummy buffer size
-    256 constant dummy-size
+    128 constant dummy-size
 
     \ Write out a dummy buffer
     : dummy, ( -- ) dummy-size 0 ?do $FF c, loop ;
@@ -63,16 +63,16 @@ begin-module sd
     create dummy-buffer dummy,
     
     \ SD Card init timeout
-    $100000 constant sd-init-timeout
+    $1000000 constant sd-init-timeout
 
     \ SD Card erase timeout
-    $100000 constant sd-erase-timeout
+    $1000000 constant sd-erase-timeout
 
     \ SD Card read timeout
-    $10000 constant sd-read-timeout
+    $1000000 constant sd-read-timeout
 
     \ SD Card write timeout
-    $10000 constant sd-write-timeout
+    $1000000 constant sd-write-timeout
     
     \ SD Card dummy timeout
     $10000 constant sd-dummy-timeout
@@ -81,8 +81,11 @@ begin-module sd
     $100 constant sd-real-read-timeout
     
     \ Real SD card write timeout
-    $100 constant sd-real-write-timeout
+    $1000 constant sd-real-write-timeout
 
+    \ Number of SD send cmd data retries before timing out
+    $100000 constant send-sd-cmd-data-retries
+    
     \ init card in spi mode if CS low
     $00 constant CMD_GO_IDLE_STATE
 
@@ -240,7 +243,7 @@ begin-module sd
       method init-sd-card ( sd-card -- )
 
       \ Wait for a start block token
-      method wait-sd-start-block ( sd-card -- )
+      method wait-sd-start-block ( sd-card -- success? )
 
       \ Read a block from the SD card
       method read-sd-block ( index block sd-card -- )
@@ -466,54 +469,53 @@ begin-module sd
     
     :noname { sd-card -- }
       dummy-buffer dummy-size sd-card spi-device @ buffer>spi
+      dummy-buffer dummy-size sd-card spi-device @ buffer>spi
+      dummy-buffer dummy-size sd-card spi-device @ buffer>spi
+      dummy-buffer dummy-size sd-card spi-device @ buffer>spi
     ; define dummy-bytes
     
-    :noname ( argument command sd-card -- response )
-\      [:
-	>r
-	r@ deassert-cs
-	r@ dummy-bytes
-	r@ assert-cs
-	r@ dummy-bytes
-	tuck $40 or r@ send-byte
-	dup 24 rshift r@ send-byte
-	dup 16 rshift $FF and r@ send-byte
-	dup 8 rshift $FF and r@ send-byte
-	$FF and r@ send-byte
-	case
-	  CMD_GO_IDLE_STATE of \ CRC for CMD0 with arg 0x000
-	    $95 r@ send-byte
-	  endof
-	  CMD_SEND_IF_COND of \ CRC for CMD8 with arg 0x1AA
-	    $87 r@ send-byte
-	  endof
-	  CMD_READ_OCR of \ CRC for CMD58 with arg $00000000
-	    $25 r@ send-byte
-	  endof
-	  CMD_CRC_ON_OFF of \ CRC for CMD59 with arg $00000000
-            $91 r@ send-byte
-          endof
-	  ACMD_SD_SEND_OP_CMD of \ CRC for ACMD41 with arg $40000000
-	    $77 r@ send-byte
-	  endof
-\	  ACMD_SD_SEND_OP_CMD of \ CRC for ACMD41 with arg $50000000
-\	    $17 r@ send-byte
-\	  endof
-	  $FF r@ send-byte \ CRC is ignored otherwise
-	endcase
-	0 begin
-	  dup $10000 < if
-	    r@ get-byte dup $80 and if
-	      drop 1+ false
-	    else
-	      nip true
-	    then
-	  else
-            ['] x-sd-timeout ?raise
-	  then
-	until
-	rdrop
-\      ;] critical
+    :noname { argument command sd-card -- response }
+      sd-card deassert-cs
+      sd-card dummy-bytes
+      sd-card assert-cs
+      sd-card dummy-bytes
+      command $40 or sd-card send-byte
+      argument 24 rshift sd-card send-byte
+      argument 16 rshift $FF and sd-card send-byte
+      argument 8 rshift $FF and sd-card send-byte
+      argument $FF and sd-card send-byte
+      command case
+        CMD_GO_IDLE_STATE of \ CRC for CMD0 with arg 0x000
+          $95 sd-card send-byte
+        endof
+        CMD_SEND_IF_COND of \ CRC for CMD8 with arg 0x1AA
+          $87 sd-card send-byte
+        endof
+        CMD_READ_OCR of \ CRC for CMD58 with arg $00000000
+          $25 sd-card send-byte
+        endof
+        CMD_CRC_ON_OFF of \ CRC for CMD59 with arg $00000000
+          $91 sd-card send-byte
+        endof
+        ACMD_SD_SEND_OP_CMD of \ CRC for ACMD41 with arg $40000000
+          $77 sd-card send-byte
+        endof
+        \	  ACMD_SD_SEND_OP_CMD of \ CRC for ACMD41 with arg $50000000
+        \	    $17 sd-card send-byte
+        \	  endof
+        $FF sd-card send-byte \ CRC is ignored otherwise
+      endcase
+      0 begin
+        dup send-sd-cmd-data-retries < if
+          sd-card get-byte dup $80 and if
+            drop 1+ false
+          else
+            nip true
+          then
+        else
+          sd-card end-sd-cmd ['] x-sd-timeout ?raise
+        then
+      until
     ; define send-sd-cmd
     
     :noname ( sd-card -- )
@@ -577,70 +579,51 @@ begin-module sd
     ; define wait-sd-start-block
 
     :noname { index block sd -- }
-\      [:
-	sd-real-read-timeout begin
-          block CMD_READ_BLOCK sd send-sd-cmd 0= if
-            sd wait-sd-start-block
-            dup not if
-              sd end-sd-cmd swap 1- dup 0> averts x-sd-timeout swap
-            then
-          else
-            sd end-sd-cmd 1- dup 0> averts x-sd-timeout false
-          then
-	until
-        drop
+      block CMD_READ_BLOCK sd send-sd-cmd 0= if
+        sd wait-sd-start-block not if
+          sd end-sd-cmd ['] x-sd-read-error ?raise
+        then
         index sector-size * sd sd-buffers + sector-size $FF
         sd spi-device @ spi>buffer
 	2 begin ?dup while sd dummy-byte 1- repeat
         sd end-sd-cmd
-\      ;] critical
+      else
+        sd end-sd-cmd ['] x-sd-read-error ?raise
+      then
     ; define read-sd-block
 
     :noname { addr cmd sd -- }
-\      [:
-	sd-real-read-timeout begin
-          0 cmd sd send-sd-cmd 0= if
-            sd wait-sd-start-block
-            dup not if
-              sd end-sd-cmd swap 1- dup 0> averts x-sd-timeout swap
-            then
-          else
-            sd end-sd-cmd 1- dup 0> averts x-sd-timeout false
-          then
-        until
-        drop
+      0 cmd sd send-sd-cmd 0= if
+        sd wait-sd-start-block not if
+          sd end-sd-cmd ['] x-sd-read-error ?raise
+        then
         addr 16 + addr ?do sd get-byte i c! loop
 	2 begin ?dup while sd dummy-byte 1- repeat
 	sd end-sd-cmd
-\      ;] critical
+      else
+        sd end-sd-cmd ['] x-sd-read-error ?raise
+      then
     ; define read-sd-register
 
     :noname { index block sd -- }
-\      [:
-	sd-real-write-timeout begin
-          block 0= sd sd-protect-block-zero @ and
-          triggers x-block-zero-protected
-          block CMD_WRITE_BLOCK sd send-sd-cmd 0= if
-            DATA_START_TOKEN sd spi-device @ >spi sd spi-device @ spi> drop
-            index sector-size * sd sd-buffers + sector-size
-            sd spi-device @ buffer>spi
-            sd-write-timeout sd wait-sd-not-busy
-            sd end-sd-cmd
-            0 CMD_SEND_STATUS sd send-sd-cmd 0= if
-              sd get-byte 0= dup if
-                sd end-sd-cmd swap 1- dup 0> averts x-sd-timeout swap
-              else
-                sd end-sd-cmd
-              then
-            else
-              sd end-sd-cmd 1- dup 0> averts x-sd-timeout false
-            then
-          else
-            sd end-sd-cmd 1- dup 0> averts x-sd-timeout false
-          then
-        until
-        drop
-\      ;] critical
+      block 0= sd sd-protect-block-zero @ and triggers x-block-zero-protected
+      block CMD_WRITE_BLOCK sd send-sd-cmd 0= if
+        sd dummy-bytes
+        DATA_START_TOKEN sd send-byte
+        index sector-size * sd sd-buffers + sector-size
+        sd spi-device @ buffer>spi
+        -1 { W^ buffer }
+        buffer 2 sd spi-device @ buffer>spi
+        sd-write-timeout sd wait-sd-not-busy
+        sd end-sd-cmd
+        \ 0 CMD_SEND_STATUS sd send-sd-cmd 0= if
+        \   sd get-byte 0<> sd end-sd-cmd averts x-sd-write-error
+        \ else
+        \   sd end-sd-cmd ['] x-sd-write-error ?raise
+        \ then
+      else
+        sd end-sd-cmd ['] x-sd-write-error ?raise
+      then
     ; define write-sd-block
 
     :noname ( timeout sd-card -- )
