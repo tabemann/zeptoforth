@@ -185,4 +185,18 @@ begin-module fat32-test
     true my-sd write-through!
   ;
 
+  : create-many-small-binary-files { start -- }
+    false my-sd write-through!
+    100000000 start ?do key? if key drop leave then
+      i 12 [: { file-index name-buffer }
+        file-index 0 <# # # # # # # # # #> name-buffer swap move
+        s" .BIN" name-buffer 8 + swap move
+        cr name-buffer 12 type ." : "
+        name-buffer 12 [: my-file swap fat32::create-file ;] my-fs with-root-path
+        s" QUUX" my-file write-file drop
+      ;] with-aligned-allot
+    loop
+    true my-sd write-through!
+  ;
+  
 end-module

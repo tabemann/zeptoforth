@@ -250,6 +250,16 @@ begin-module exception
     recover-from-fault
   ;
 
+  \ Handle a system manic
+  : handle-panic ( -- )
+    collect-registers prepare-faulted-state
+    display-red cr ." *** PANIC *** "
+    dump-registers dump-stack dump-rstack 
+    cr cr ." Environment limited"
+    display-normal cr
+    abort
+  ;
+
   \ Initialize processor exception handling
   : init-exception ( -- )
     ['] handle-hard-fault hard-fault-vector vector!
