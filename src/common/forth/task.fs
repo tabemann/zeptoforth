@@ -64,6 +64,12 @@ begin-module task
 
     \ Task has terminated due to a hardware exception
     3 constant terminated-crashed
+
+    \ Task has terminated due to a stack overflow
+    4 constant terminated-overflowed
+
+    \ Task guard value
+    $DEADCAFE constant task-guard-value
     
     \ In task change
     cpu-variable cpu-in-task-change in-task-change
@@ -239,6 +245,9 @@ begin-module task
       
       \ Task termination reason
       dup constant .task-terminate-reason field: task-terminate-reason
+
+      \ Task guard value
+      dup constant .task-guard field: task-guard
       
     end-structure
 
@@ -1239,6 +1248,7 @@ begin-module task
       0 current-lock-held !
       0 over task-next !
       0 over task-prev !
+      task-guard-value over task-guard !
       dup main-task !
       dup first-task !
       dup last-task !
@@ -1321,7 +1331,8 @@ begin-module task
 	next-user-space over task-dict-base @ +
 	over ['] task-ram-here for-task!
 	0 over task-next !
-	0 over task-prev !
+        0 over task-prev !
+        task-guard-value over task-guard !
 	dup >r init-aux-task-stack
 	r> ['] task-rstack-base for-task@
       ;
@@ -1435,6 +1446,7 @@ begin-module task
     next-user-space over task-dict-base @ + over ['] task-ram-here for-task!
     0 over task-next !
     0 over task-prev !
+    task-guard-value over task-guard !
     swap >r >r
     begin dup 0<> while
       dup roll r@ push-task-stack 1-
@@ -1661,11 +1673,17 @@ begin-module task
       b<
       ]code
     ;
-    
+
     \ Handle task-switching
     : switch-tasks ( -- )
       r> pendsv-return !
 
+      current-task @ if
+        current-task @ task-guard @ task-guard-value <> if
+          exception::handle-panic
+        then
+      then
+        
       in-critical @ 0= in-task-change @ 0= and if
 
         handle-pending-ops
