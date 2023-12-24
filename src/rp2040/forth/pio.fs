@@ -1099,19 +1099,22 @@ begin-module pio
     RXF @
   ;
 
-  \ Set pins to PIO mode
-  : pins-pio-alternate ( pin-base pin-count -- )
+  \ Set pins to PIO mode for a given pio
+  : pins-pio-alternate ( pin-base pin-count pio -- )
+    dup validate-pio
+    PIO0 = if 6 else 7 then -rot
     dup 30 u<= averts x-too-many-pins
     over 30 u< averts x-pin-out-of-range
-    over + swap ?do 6 i 30 umod alternate-pin loop
+    over + swap ?do dup i 30 umod alternate-pin loop
+    drop
   ;
 
   \ Set the sideset pins for a state machine
-  : sm-sideset-pins! ( pin-base pin-count state-matchine pio -- )
+  : sm-sideset-pins! ( pin-base pin-count state-machine pio -- )
     2dup validate-sm-pio
     2 pick 6 u< averts x-too-many-pins
     3 pick validate-pin
-    2>r 2dup pins-pio-alternate
+    2>r
     2r@ SM_PINCTRL_SIDESET_COUNT!
     2r> SM_PINCTRL_SIDESET_BASE!
   ;
@@ -1121,7 +1124,7 @@ begin-module pio
     2dup validate-sm-pio
     2 pick 6 u< averts x-too-many-pins
     3 pick validate-pin
-    2>r 2dup pins-pio-alternate
+    2>r
     2r@ SM_PINCTRL_SET_COUNT!
     2r> SM_PINCTRL_SET_BASE!
   ;
@@ -1131,7 +1134,7 @@ begin-module pio
     2dup validate-sm-pio
     2 pick 32 u<= averts x-too-many-pins
     3 pick validate-pin
-    2>r 2dup pins-pio-alternate
+    2>r
     2r@ SM_PINCTRL_OUT_COUNT!
     2r> SM_PINCTRL_OUT_BASE!
   ;

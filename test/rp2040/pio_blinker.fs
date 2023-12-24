@@ -46,6 +46,7 @@ continue-module forth
     %0001 PIO0 sm-disable
     %0001 PIO0 sm-restart
     0 62500 0 PIO0 sm-clkdiv!
+    25 1 PIO0 pins-pio-alternate
     25 1 0 PIO0 sm-set-pins!
     0 9 0 PIO0 sm-wrap!
     on 0 PIO0 sm-out-sticky!
