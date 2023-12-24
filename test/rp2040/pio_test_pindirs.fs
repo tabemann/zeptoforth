@@ -41,6 +41,7 @@ continue-module forth
     %0001 PIO0 sm-restart
     on 0 PIO0 sm-sideset-pindir!
     0 1 0 PIO0 sm-clkdiv!
+    your-pin 1 PIO0 pins-pio-alternate
     your-pin 1 0 PIO0 sm-sideset-pins!
     your-pin 1 0 PIO0 sm-set-pins!
     0 1 0 PIO0 sm-wrap!

@@ -178,7 +178,7 @@ begin-module read-temp
       begin self sensor-read? @ not while
         systick-counter start-systick - temp-timeout < averts x-temp-error
         pause
-      then
+      repeat
       self sensor-temp @
     ; define sensor-temp@
 
