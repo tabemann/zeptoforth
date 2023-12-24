@@ -87,11 +87,11 @@ PIO1 IRQ1 index.
 #### PIO Words
 
 ##### `pins-pio-alternate`
-( pin-base pin-count -- )
+( pin-base pin-count pio -- )
 
-Configure GPIO pins starting from *pin-base* of a count up to *pin-count* to be in an alternate function state such that the PIO may make use to them. Note that the pins wrap around, e.g. `29 3 pins-pio-alternate` configures GPIO pins 29, 0, and 1. Note that this is unnecessary when configuring pins with `sm-sideset-pins!`, `sm-set-pins!`, or `sm-out-pins!` as these internally call this word.
+Configure GPIO pins starting from *pin-base* of a count up to *pin-count* to be in an alternate function state such that the PIO may make use to them. Note that the pins wrap around, e.g. `29 3 PIO0 pins-pio-alternate` configures GPIO pins 29, 0, and 1.
 
-However, this is necessary with `sm-in-pin-base!` because any number of pins may be used by the `in` instruction and there exists no register to set specifying a number of pins to use with this instruction
+**Note**: this was previously specified as not being needed with `sm-sideset-pins!`, `sm-set-pins!`, or `sm-out-pins!`, but as it turned out that this could not be implemented as intended with `sm-sideset-pins!`, this functionality was removed from `sm-sideset-pins!`, and for the sake of consistency, from `sm-set-pins!` and `sm-out-pins!` as well. Conversely, this is not needed for inputs, as the PIO does not require alternate functions to input from GPIO pins.
 
 ##### `pio-instr-mem!`
 ( addr count pio -- )

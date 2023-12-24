@@ -222,6 +222,8 @@ begin-module cyw43-spi
       pio-addr pio-addr 8 + sm pio sm-wrap!
 
       \ Configure the pins to be PIO output, input, set, and sidset pins
+      dio 1 pio pins-pio-alternate
+      clk 1 pio pins-pio-alternate
       dio 1 sm pio sm-out-pins!
       dio sm pio sm-in-pin-base!
       dio 1 sm pio sm-set-pins!
