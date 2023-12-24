@@ -65,6 +65,9 @@ begin-module music
 
   end-module> import
 
+  \ Lyric "pitch"
+  65535 constant lyric-pitch
+
   begin-structure note-size
 
     \ Note length in ms
@@ -74,6 +77,24 @@ begin-module music
     hfield: note-pitch
     
   end-structure
+
+  \ Write a lyric to a part
+  : lyric, { c-addr u -- }
+    u h, lyric-pitch h, c-addr u + c-addr ?do i c@ c, loop cell align,
+  ;
+  
+  \ Integrate a lyric string
+  : lyric" ( "string" -- )
+    [immediate]
+    state @ if
+      [char] " compile-cstring postpone count postpone lyric,
+    else
+      [char] " internal::parse-to-char lyric,
+    then
+  ;
+  
+  \ Integrate a single lyric newline
+  : lyric-cr ( -- ) s\" \r\n" lyric, ;
 
   begin-structure part-size
 
@@ -110,14 +131,17 @@ begin-module music
       \ Are we playing
       cell member playing-voice
 
+      \ Start a tone
+      method tone-on ( S31.S32-frequency-in-Hz voice -- )
+      
+      \ End a tone
+      method tone-off ( voice -- )
+
+      \ Play a note at a given time in micrseconds
+      method play-note ( us voice -- )
+    
     end-module
 
-    \ Start a tone
-    method tone-on ( S31.S32-frequency-in-Hz voice -- )
-
-    \ End a tone
-    method tone-off ( voice -- )
-    
     \ Play a voice
     method play-voice ( us voice -- )
     
@@ -169,6 +193,31 @@ begin-module music
       voice pin-index @ input-pin
       voice pwm-index @ bit disable-pwm
     ; define tone-off
+    
+    \ Play a note at a given time in micrseconds
+    :noname { us voice -- }
+      begin
+        voice current-note @ voice voice-end @ < if
+          us voice note-start !
+          voice current-note @ note-pitch h@ ?dup if
+            dup lyric-pitch = if
+              drop
+              voice current-note @ note-length h@ { chars }
+              cell voice current-note +!
+              voice current-note @ chars type
+              voice current-note @ chars + cell align voice current-note !
+              false
+            else
+              s>f voice tone-on true
+            then
+          else
+            voice tone-off true
+          then
+        else
+          voice tone-off true
+        then
+      until
+    ; define play-note
 
     \ Play a voice
     :noname { us voice -- }
@@ -177,17 +226,7 @@ begin-module music
           us voice note-start @ -
           voice current-note @ note-length h@ 1000 * > if
             note-size voice current-note +!
-            voice current-note @ voice voice-end @ < if
-              us voice note-start !
-              voice current-note @ note-pitch h@ ?dup if
-                s>f voice tone-on
-              else
-                voice tone-off
-              then
-            else
-              false voice playing-voice !
-              voice tone-off
-            then
+            us voice play-note
           then
         else
           false voice playing-voice !
@@ -196,13 +235,8 @@ begin-module music
       else
         voice voice-start @ voice voice-end @ <> if
           true voice playing-voice !
-          us voice note-start !
           voice voice-start @ voice current-note !
-          voice current-note @ note-pitch h@ ?dup if
-            s>f voice tone-on
-          else
-            voice tone-off
-          then
+          us voice play-note
         else
           false voice playing-voice !
           voice tone-off
