@@ -123,6 +123,7 @@ begin-module neopixel
     24 init-sm init-pio sm-pull-threshold!
     off init-pin init-sm init-pio sm-pin!
     out init-pin init-sm init-pio sm-pindir!
+    init-pin 1 init-pio pins-pio-alternate
     init-pin 1 init-sm init-pio sm-sideset-pins!
     off init-sm init-pio sm-sideset-high-enable!
     off init-sm init-pio sm-sideset-pindir!
