@@ -237,11 +237,6 @@
 <p>( state-machine pio – x )</p>
 <p>Read from the RX FIFO of a state machine.</p>
 </section>
-<section id="id1">
-<h4><code class="docutils literal notranslate"><span class="pre">pins-pio-alternate</span></code></h4>
-<p>( pin-base pin-count – )</p>
-<p>Set pins to PIO mode.</p>
-</section>
 <section id="sm-pin">
 <h4><code class="docutils literal notranslate"><span class="pre">sm-pin!</span></code></h4>
 <p>( on/off pin state-machine pio – )</p>
@@ -365,47 +360,47 @@
 <p>( data destination – )</p>
 <p>PIO SET instruction. Set <em>destination</em> to <em>data</em>, which is a value from $00 to $1F.</p>
 </section>
-<section id="id2">
+<section id="id1">
 <h4><code class="docutils literal notranslate"><span class="pre">jmp+,</span></code></h4>
 <p>( address delay/side-set condition – )</p>
 <p>PIO JMP instruction with delay or side-set. Branch, conditionally or unconditionally. <em>Condition</em> is the condition, with or without a decrement, to apply to whether to branch. <em>Address</em> is the PIO instruction address to branch to. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
 </section>
-<section id="id3">
+<section id="id2">
 <h4><code class="docutils literal notranslate"><span class="pre">wait+,</span></code></h4>
 <p>( index delay/side-set source polarity – )</p>
 <p>PIO WAIT instruction with delay or side-set. Wait for a condition to be true. <em>Polarity</em> is whether to wait for a 1 or a 0. <em>Source</em> is whether to wait for an absolute GPIO pin, a pin relative to the absolute <code class="docutils literal notranslate"><span class="pre">IN</span></code> pin base, or a PIO IRQ index. <em>Index</em> is the pin or PIO IRQ index to wait for. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
 </section>
-<section id="id4">
+<section id="id3">
 <h4><code class="docutils literal notranslate"><span class="pre">in+,</span></code></h4>
 <p>( bit-count delay/side-set source – )</p>
 <p>PIO IN instruction with delay or side-set. Input bits from a source into the current state machine’s ISR register. <em>Source</em> is the source to shift bits into the ISR register for the current state machine into, according to the configured shift in direction. <em>Bit-count</em> is how many bits to shift, a value from 1 to 32. The ISR bit shift count is increased by the bit count, saturating at 32. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
 </section>
-<section id="id5">
+<section id="id4">
 <h4><code class="docutils literal notranslate"><span class="pre">out+,</span></code></h4>
 <p>( bit-count delay/side-set destination – )</p>
 <p>PIO OUT instruction with delay or side-set. Output bits from the current state machine’s OSR register to a destination. <em>Destination</em> is the destination to shift bits into from the OSR register for the current state machine, according to the configured shift out direction. <em>Bit-count</em> is how many bits to shift, value from 1 to 32. The OSR bit shift count is increased by the bit count, saturating at 32. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
 </section>
-<section id="id6">
+<section id="id5">
 <h4><code class="docutils literal notranslate"><span class="pre">push+,</span></code></h4>
 <p>( delay/side-set block if-full – )</p>
 <p>PIO PUSH instruction with delay or side-set. Push the contents of the current state machine’s ISR register into the current state machine’s RX FIFO and reset the ISR register to all zeros. <em>If-full</em> is the condition as to whether to conditionally push. <em>Block</em> is whether to stall if pushing is not possible due to the RX FIFO being full. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
 </section>
-<section id="id7">
+<section id="id6">
 <h4><code class="docutils literal notranslate"><span class="pre">pull+,</span></code></h4>
 <p>( delay/side-set block if-empty – )</p>
 <p>PIO PULL instruction with delay or side-set. Pull a 32-bit value from the current state machine’s TX FIFO into the current state machine’s OSR register. <em>If-empty</em> is the condition as to whether to conditionally pull. <em>Block</em> is whether to stall if pulling is not possible due to the TX FIFO being empty.</p>
 </section>
-<section id="id8">
+<section id="id7">
 <h4><code class="docutils literal notranslate"><span class="pre">mov+,</span></code></h4>
 <p>( source delay/side-set op destination – )</p>
 <p>PIO MOV instruction with delay or side-set. Transfer a value from <em>source</em> to <em>destination</em>, applying <em>op</em> (which may be a no-op) to the value in the process. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
 </section>
-<section id="id9">
+<section id="id8">
 <h4><code class="docutils literal notranslate"><span class="pre">irq+,</span></code></h4>
 <p>( index delay/side-set set/wait – )</p>
 <p>PIO IRQ instruction with delay or side-set. Set or wait on a PIO IRQ <em>index</em>, from 0 to 7 before <code class="docutils literal notranslate"><span class="pre">REL</span></code> is applied. Note that <code class="docutils literal notranslate"><span class="pre">REL</span></code> can be used to mark a PIO IRQ as relative to the current state machine ID by adding the state machine ID to the lower two bits of the IRQ index, by way of module-4 addition on the two LSB’s. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
 </section>
-<section id="id10">
+<section id="id9">
 <h4><code class="docutils literal notranslate"><span class="pre">set+,</span></code></h4>
 <p>( data delay/side-set destination – )</p>
 <p>PIO SET instruction with delay or side-set. Set <em>destination</em> to <em>data</em>, which is a value from $00 to $1F. <em>Delay/side-set</em> is either a number of state machine cycles to delay after the instruction is executed, or up to five bits to write to the pins configured to sideset, depending upon how the current state machine is configured.</p>
