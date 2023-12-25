@@ -230,11 +230,6 @@ Write to the TX FIFO of a state machine.
 
 Read from the RX FIFO of a state machine.
 
-##### `pins-pio-alternate`
-( pin-base pin-count -- )
-
-Set pins to PIO mode.
-
 ##### `sm-pin!`
 ( on/off pin state-machine pio -- )
 
