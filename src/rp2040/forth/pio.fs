@@ -1254,7 +1254,7 @@ begin-module pio
       dup $E000 and 0= if
         dup >r $1F and 2 pick + r> $1F bic or
       then
-      i 2 pick INSTR_MEM !
+      2 pick i + 2 pick INSTR_MEM !
     loop
     2drop drop
   ;
