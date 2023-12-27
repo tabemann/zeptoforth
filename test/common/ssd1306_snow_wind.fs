@@ -46,7 +46,7 @@ begin-module snow-wind
   false constant my-accumulate
   2,0 2constant my-divider
   2,0 my-divider f/ 2constant my-flake-chance
-  50,0 my-divider f/ nip constant my-delay
+  1000,0 my-divider f/ nip constant my-delay
   -0,25 my-divider f/ 2constant my-min-flake-x-delta-vary
   0,25 my-divider f/ 2constant my-max-flake-x-delta-vary
   -0,25 my-divider f/ 2constant my-min-flake-y-delta-vary
@@ -102,8 +102,8 @@ begin-module snow-wind
 
   : free-flake? ( -- free? ) free-flake-count @ 0> ;
 
-  : new-flake? ( -- new? )
-    free-flake? if random 0 my-flake-chance d<= else false then
+  : new-flake? { D: interval -- new? }
+    free-flake? if random 0 my-flake-chance interval f* d<= else false then
   ;
 
   : find-free-flake ( -- index )
@@ -153,15 +153,16 @@ begin-module snow-wind
     ;] for-all-flakes
   ;
 
-  : snow-fall ( -- )
+  : snow-fall ( D: interval -- )
     [: { flake }
-      flake flake-x-delta 2@ flake flake-x 2+!
-      flake flake-y-delta 2@ flake flake-y 2+!
+      2dup flake flake-x-delta 2@ f* flake flake-x 2+!
+      2dup flake flake-y-delta 2@ f* flake flake-y 2+!
     ;] for-all-flakes
+    2drop
   ;
 
-  : adjust-wind ( -- )
-    vary-wind 2dup new-flake-x-delta 2+!
+  : adjust-wind ( D: interval -- )
+    vary-wind f* 2dup new-flake-x-delta 2+!
     [: { flake } 2dup flake flake-x-delta 2+! ;] for-all-flakes
     2drop
   ;
@@ -171,15 +172,16 @@ begin-module snow-wind
     clear-snow
     systick-counter { start-systick }
     begin key? not while
+      systick-counter { new-systick }
+      new-systick start-systick - s>f my-delay s>f f/ { D: interval }
+      new-systick to start-systick
       draw-snow
       my-accumulate if free-snow then
       erase-snow
       my-accumulate not if free-snow then
-      snow-fall
-      adjust-wind
-      new-flake? if init-flake then
-      my-delay start-systick current-task delay
-      my-delay +to start-systick
+      interval snow-fall
+      interval adjust-wind
+      interval new-flake? if init-flake then
     repeat
     clear-snow
     key drop
@@ -192,15 +194,16 @@ begin-module snow-wind
     0 [:
       systick-counter { start-systick }
       begin continue-run? @ while
+        systick-counter { new-systick }
+        new-systick start-systick - s>f my-delay s>f f/ { D: interval }
+        new-systick to start-systick
         draw-snow
         my-accumulate if free-snow then
         erase-snow
         my-accumulate not if free-snow then
-        snow-fall
-        adjust-wind
-        new-flake? if init-flake then
-        my-delay start-systick current-task delay
-        my-delay +to start-systick
+        interval snow-fall
+        interval adjust-wind
+        interval new-flake? if init-flake then
       repeat
       clear-snow
     ;] my-task-pool spawn-from-task-pool run
