@@ -39,20 +39,30 @@ begin-module file-edit
   \ Heap size
   65536 constant backing-heap-size \ Temporary heap storage size
 
+  \ Heap block size
+  dyn-buffer-internal::segment-header-size default-segment-size +
+  constant heap-block-size
+  
   \ Display width
   variable display-width
 
   \ Display height
   variable display-height
+
+  \ Go to a buffer coordinate
+  : go-to-buffer-coord ( row col -- ) swap 1+ swap go-to-coord ;
   
   \ Buffer class
   <object> begin-class <buffer>
 
+    \ Heap
+    cell member buffer-heap
+    
     \ Buffer name
-    cell member buffer-name
+    2 cells member buffer-name
 
     \ Buffer path
-    cell member buffer-path
+    2 cells member buffer-path
 
     \ Previous buffer
     cell member buffer-prev
@@ -78,20 +88,140 @@ begin-module file-edit
     \ Select cursor
     <cursor> class-size member buffer-select-cursor
 
-    \ Update the display
-    method update-display ( buffer -- )
+    \ Get whether two cursors share the same preceding newline
+    method cursors-before-same-newline? ( cursor0 cursor1 buffer -- same? )
 
+    \ Get whether two cursors are on the same line
+    method cursors-on-same-line? ( cursor0 cursor1 buffer -- same? )
+    
+    \ Find the distance of a cursor from the previous newline
+    method cursor-start-dist ( orig-cursor buffer -- distance )
+
+    \ Find the distance of a cursor from the next newline
+    method cursor-end-dist ( orig-cursor buffer -- distance )
+
+    \ Get a cursor's distance from the left-hand side of the display
+    method cursor-left-space ( cursor buffer -- col row )
+
+    \ Get the length of a line a cursor is on
+    method cursor-line-len ( cursor buffer -- length )
+
+    \ Get the number of rows making up a line
+    method cursor-line-rows ( cursor buffer -- rows )
+    
+    \ Get the length of the last row of a line
+    method cursor-line-last-row-len ( cursor buffer -- length )
+
+    \ Is a cursor in the last row of a line?
+    method cursor-line-last? ( cursor buffer -- last? )
+
+    \ Edit cursor left space
+    method edit-cursor-left-space ( buffer -- cols rows )
+
+    \ Edit cursor offset
+    method edit-cursor-offset@ ( buffer -- offset )
+
+    \ Buffer content length
+    method buffer-len@ ( buffer -- length )
+
+    \ Are we at the start of a line?
+    method edit-cursor-at-start? ( buffer -- start? )
+
+    \ Are we at the end of a line?
+    method edit-cursor-at-end? ( buffer -- end? )
+
+    \ Is the edit cursor in the last row of a line
+    method edit-cursor-line-last? ( buffer -- last? )
+
+    \ Is the edit cursor at the start of the last row of a line
+    method edit-cursor-line-last-first? ( buffer -- last-first? )
+
+    \ Is the edit cursor in the first row of the first line
+    method edit-cursor-first-row? ( buffer -- first-row? )
+
+    \ Is the edit cursor in the last row of the last line
+    method edit-cursor-last-row? ( buffer -- last-row? )
+
+    \ Output buffer title
+    method output-title ( buffer -- )
+    
+    \ Refresh the current line
+    method refresh-line ( buffer -- )
+    
     \ Refresh the display
     method refresh-display ( buffer -- )
+
+    \ Center the display
+    method center-cursor ( center-cursor dest-cursor buffer -- )
+    
+    \ Get the number of rows between two cursors
+    method rows-between-cursors ( cursor0 cursor1 buffer -- rows )
+    
+    \ Update the display
+    method update-display ( buffer -- update? )
+
+    \ Display a single character
+    method output-char ( c buffer -- )
+
+    \ Backspace a single char
+    method output-backspace ( buffer -- )
+
+    \ Move the cursor to the left
+    method output-left ( buffer -- )
+
+    \ Move the cursor to the end of the previous row
+    method output-prev-row ( buffer -- )
+
+    \ Move the cursor to the end of the previous line
+    method output-prev-line ( buffer -- )
+
+    \ Move the cursor to the right
+    method output-right ( buffer -- )
+
+    \ Move the cursor to the start of the next row
+    method output-next-row ( buffer -- )
+
+    \ Move the cursor to the start of the next line
+    method output-next-line ( buffer -- )
+
+    \ Move the cursor to the first position in a buffer
+    method output-first ( buffer -- )
+
+    \ Move the cursor to the previous line
+    method output-up ( buffer -- )
+
+    \ Move the cursor to the last position in a buffer
+    method output-last ( buffer -- )
+    
+    \ Move the cursor to the next line
+    method output-down ( buffer -- )
+    
+    \ Go to the first position in a buffer
+    method do-first ( buffer -- )
+
+    \ Go to the last position in a buffer
+    method do-last ( buffer -- )
+    
+    \ Move the edit cursor left by one character
+    method do-backward ( buffer -- )
+
+    \ Move the edit cursor right by one character
+    method do-forward ( buffer -- )
+
+    \ Move the edit cursor up by one character
+    method do-up ( buffer -- )
+
+    \ Move the edit cursor down by one character
+    method do-down ( buffer -- )
     
     \ Enter a character into the buffer
-    method do-char ( c buffer -- )
+    method do-insert ( c buffer -- )
 
     \ Backspace in the buffer
-    method do-backspace ( buffer -- )
+    method do-delete ( buffer -- )
 
     \ Delete in the buffer
-    method do-delete ( buffer -- )
+    method do-delete-forward ( buffer -- )
 
     \ Kill a range in the buffer
     method do-kill ( clip buffer -- )
@@ -135,21 +265,33 @@ begin-module file-edit
 
     \ Current buffer
     cell member editor-current
-
-    \ Display
-    <display> class-size member editor-display
     
     \ Clipboard
     <clip> class-size member editor-clip
 
+    \ Go left one character
+    method handle-backward ( editor -- )
+
+    \ Go right one character
+    method handle-forward ( editor -- )
+
+    \ Go up one character
+    method handle-up ( editor -- )
+
+    \ Go down one character
+    method handle-down ( editor -- )
+    
     \ Enter a character into the editor
-    method handle-char ( c editor -- )
+    method handle-insert ( c editor -- )
+
+    \ Enter a newline into the editor
+    method handle-newline ( editor -- )
 
     \ Backspace in the editor
-    method handle-backspace ( editor -- )
+    method handle-delete ( editor -- )
 
     \ Delete in the editor
-    method handle-delete ( editor -- )
+    method handle-delete-forward ( editor -- )
 
     \ Kill a range in the editor
     method handle-kill ( editor -- )
@@ -159,12 +301,43 @@ begin-module file-edit
 
     \ Paste in the editor
     method handle-paste ( editor -- )
-    
+
   end-class
 
   \ Implement buffers
   <buffer> begin-implement
+    
+    \ Constructor
+    :noname { name-addr name-bytes heap buffer -- }
+      buffer <object>->new
+      heap buffer buffer-heap !
+      name-bytes heap allocate { new-name-addr }
+      name-addr new-name-addr name-bytes move
+      name-bytes heap allocate { new-path-addr }
+      name-addr new-path-addr name-bytes move
+      new-name-addr name-bytes buffer buffer-name 2!
+      new-path-addr name-bytes buffer buffer-path 2!
+      0 buffer buffer-prev !
+      0 buffer buffer-prev !
+      0 buffer buffer-edit-col !
+      0 buffer buffer-edit-row !
+      heap <dyn-buffer> buffer buffer-dyn-buffer init-object
+      buffer buffer-dyn-buffer <cursor> buffer buffer-display-cursor init-object
+      buffer buffer-dyn-buffer <cursor> buffer buffer-edit-cursor init-object
+      buffer buffer-dyn-buffer <cursor> buffer buffer-select-cursor init-object
+    ; define new
 
+    \ Destructor
+    :noname { buffer -- }
+      buffer buffer-select-cursor destroy
+      buffer buffer-edit-cursor destroy
+      buffer buffer-display-cursor destroy
+      buffer buffer-dyn-buffer destroy
+      buffer buffer-name 2@ drop buffer buffer-heap @ free
+      buffer buffer-path 2@ drop buffer buffer-heap @ free
+      buffer <object>->destroy
+    ; define destroy
+    
     \ Get whether two cursors share the same preceding newline
     :noname ( cursor0 cursor1 buffer -- same? )
       buffer-dyn-buffer <cursor> [: { cursor0 cursor1 cursor }
@@ -238,6 +411,21 @@ begin-module file-edit
       len display-width @ < if len dist >= else dist 0= then
     ; define cursor-line-last?
 
+    \ Edit cursor left space
+    :noname ( buffer -- cols rows )
+      dup buffer-edit-cursor swap cursor-left-space
+    ; define edit-cursor-left-space
+
+    \ Edit cursor offset
+    :noname ( buffer -- offset )
+      buffer-edit-cursor offset@
+    ; define edit-cursor-offset@
+
+    \ Buffer content length
+    :noname ( buffer -- length )
+      buffer-dyn-buffer dyn-buffer-len@
+    ; define buffer-len@
+
     \ Are we at the start of a line?
     :noname ( buffer -- start? )
       dup buffer-edit-cursor -rot cursor-left-space drop 0=
@@ -253,6 +441,7 @@ begin-module file-edit
       dup buffer-edit-cursor -rot cursor-line-last?
     ; define edit-cursor-line-last?
 
+    \ Is the edit cursor at the start of the last row of a line
     :noname ( buffer -- last-first? )
       2dup edit-cursor-line-last? if
         dup buffer-edit-cursor -rot cursor-left-space drop 0=
@@ -261,6 +450,37 @@ begin-module file-edit
       then
     ; define edit-cursor-line-last-first?
 
+    \ Is the edit cursor in the first row of the first line
+    :noname ( buffer -- first-row? )
+      dup buffer-edit-cursor over cursor-start-dist swap offset@ =
+    ; define edit-cursor-first-row?
+
+    \ Is the edit cursor in the last row of the last line
+    :noname { buffer -- last-row? }
+      buffer buffer-edit-cursor offset@
+      buffer buffer-edit-cursor buffer cursor-end-dist +
+      buffer buffer-dyn-buffer dyn-buffer-len@ = if
+        buffer edit-cursor-line-last?
+      else
+        false
+      then
+    ; define edit-cursor-last-row?
+    
+    \ Output buffer title
+    :noname { buffer -- }
+      0 0 go-to-coord
+      buffer buffer-name 2@ dup display-width @ < if
+        type erase-end-of-line
+      else
+        dup display-width @ = if
+          type
+        else
+          display-width @ - { offset }
+          offset - swap offset + swap type
+        then
+      then
+    ; define output-title
+    
     \ Refresh the current line
     :noname ( buffer -- )
       dup <cursor> [:
@@ -269,7 +489,7 @@ begin-module file-edit
           buffer buffer-edit-cursor buffer cursor-end-dist { end-dist }
           start-dist end-dist + { len }
           hide-cursor
-          buffer buffer-edit-row @ 0 go-to-coord
+          buffer buffer-edit-row @ 0 go-to-buffer-coord
           buffer buffer-edit-cursor cursor copy-cursor
           start-dist negate cursor adjust-offset
           begin len 0> while
@@ -281,7 +501,7 @@ begin-module file-edit
           repeat
           start-dist end-dist + display-width @ < if erase-end-of-line then
           start-dist buffer buffer-edit-col !
-          buffer buffer-edit-row @ buffer buffer-edit-col @ go-to-coord
+          buffer buffer-edit-row @ buffer buffer-edit-col @ go-to-buffer-coord
           show-cursor
         ;] with-allot
       ;] with-object
@@ -299,12 +519,13 @@ begin-module file-edit
           buffer buffer-edit-cursor offset@  { edit-offset }
           hide-cursor
           page
+          buffer output-title
           begin
             rows-remaining 0> if
-              data default-segment-size data-cursor read-data { actual-cols }
+              data default-segment-size data-cursor read-data { actual-bytes }
               data { current-data }
               begin
-                actual-cols 0> rows-remaining 0> and if
+                actual-bytes 0> rows-remaining 0> and if
                   edit-offset display-offset = if
                     display-height @ rows-remaining - to edit-row
                     display-width @ cols-remaining - to edit-col
@@ -324,7 +545,8 @@ begin-module file-edit
                       display-width @ to cols-remaining
                     then
                   then
-                  -1 +to actual-cols
+                  -1 +to actual-bytes
+                  1 +to current-data
                   1 +to display-offset
                   false
                 else
@@ -336,7 +558,7 @@ begin-module file-edit
               true
             then
           until
-          edit-row edit-col go-to-coord
+          edit-row edit-col go-to-buffer-coord
           edit-row buffer buffer-edit-row !
           edit-col buffer buffer-edit-col !
           show-cursor
@@ -448,10 +670,131 @@ begin-module file-edit
       -1 buffer buffer-edit-col +!
     ; define output-backspace
 
-    \ Move the cursor left by one character
+    \ Move the cursor to the left
     :noname { buffer -- }
-      
-    ; define do-left
+      -1 buffer buffer-edit-col +!
+      buffer buffer-edit-row @ buffer buffer-edit-col @ go-to-buffer-coord
+    ; define output-left
+
+    \ Move the cursor to the end of the previous row
+    :noname { buffer -- }
+      -1 buffer buffer-edit-row +!
+      display-width @ 1- buffer buffer-edit-col !
+      buffer buffer-edit-row @ buffer buffer-edit-col @ go-to-buffer-coord      
+    ; define output-prev-row
+
+    \ Move the cursor to the end of the previous line
+    :noname { buffer -- }
+      -1 buffer buffer-edit-row +!
+      buffer edit-cursor-left-space drop buffer buffer-edit-col !
+      buffer buffer-edit-row @ buffer buffer-edit-col @ go-to-buffer-coord      
+    ; define output-prev-line
+
+    \ Move the cursor to the right
+    :noname { buffer -- }
+      1 buffer buffer-edit-col +!
+      buffer buffer-edit-row @ buffer buffer-edit-col @ go-to-buffer-coord
+    ; define output-right
+
+    \ Move the cursor to the start of the next row
+    :noname { buffer -- }
+      1 buffer buffer-edit-row +!
+      0 buffer buffer-edit-col !
+      buffer buffer-edit-row @ buffer buffer-edit-col @ go-to-buffer-coord
+    ; define output-next-row
+
+    \ Move the cursor to the start of the next line
+    :noname { buffer -- }
+      1 buffer buffer-edit-row +!
+      0 buffer buffer-edit-col !
+      buffer buffer-edit-row @ buffer buffer-edit-col @ go-to-buffer-coord
+    ; define output-next-line
+
+    \ Move the cursor to the first position in a buffer
+    :noname { buffer -- }
+      0 buffer buffer-edit-row !
+      0 buffer buffer-edit-col !
+      buffer buffer-edit-row @ buffer buffer-edit-col @ go-to-buffer-coord
+    ; define output-first
+
+    \ Move the cursor to the previous line
+    :noname { buffer -- }
+      buffer edit-cursor-left-space { cols rows }
+      -1 buffer buffer-edit-row +!
+      cols buffer buffer-edit-col !
+      buffer buffer-edit-row @ buffer buffer-edit-col @ go-to-buffer-coord
+    ; define output-up
+
+    \ Move the cursor to the last position in a buffer
+    :noname { buffer -- }
+      buffer edit-cursor-left-space { cols rows }
+      buffer buffer-edit-cursor buffer cursor-end-dist { dist }
+      cols dist + buffer buffer-edit-col !
+      buffer buffer-edit-row @ buffer buffer-edit-col @ go-to-buffer-coord
+    ; define output-last
+    
+    \ Move the cursor to the next line
+    :noname { buffer -- }
+      buffer edit-cursor-left-space { cols rows }
+      1 buffer buffer-edit-row +!
+      cols buffer buffer-edit-col !
+      buffer buffer-edit-row @ buffer buffer-edit-col @ go-to-buffer-coord
+    ; define output-down
+    
+    \ Go to the first position in a buffer
+    :noname ( buffer -- )
+      buffer-edit-cursor go-to-start
+    ; define do-first
+
+    \ Go to the last position in a buffer
+    :noname ( buffer -- )
+      dup buffer-dyn-buffer dyn-buffer-len@ swap buffer-edit-cursor go-to-offset
+    ; define do-last
+    
+    \ Move the edit cursor left by one character
+    :noname { buffer -- }
+      -1 buffer buffer-edit-cursor adjust-offset
+    ; define do-backward
+
+    \ Move the edit cursor right by one character
+    :noname { buffer -- }
+      1 buffer buffer-edit-cursor adjust-offset
+    ; define do-forward
+
+    \ Move the edit cursor up by one character
+    :noname { buffer -- }
+      buffer buffer-edit-cursor buffer cursor-start-dist { dist }
+      dist display-width @ <= if
+        [: $0A = ;] buffer buffer-edit-cursor find-prev
+        -1 buffer buffer-edit-cursor adjust-offset
+        buffer buffer-edit-cursor buffer cursor-start-dist { len }
+        len display-width @ umod dup { last-len } dist >= if
+          last-len negate dist + buffer buffer-edit-cursor adjust-offset
+        then
+      else
+        display-width @ negate buffer buffer-edit-cursor adjust-offset
+      then
+    ; define do-up
+
+    \ Move the edit cursor down by one character
+    :noname { buffer -- }
+      buffer buffer-edit-cursor buffer cursor-start-dist { dist }
+      buffer buffer-edit-cursor buffer cursor-left-space { col row }
+      buffer edit-cursor-line-last? if
+        dist display-width @ umod { last-len }
+        [: $0A = ;] buffer buffer-edit-cursor find-next
+        1 buffer buffer-edit-cursor adjust-offset
+        buffer buffer-edit-cursor buffer cursor-line-len { next-len }
+        last-len next-len min buffer buffer-edit-cursor adjust-offset
+      else
+        buffer buffer-edit-cursor buffer cursor-line-len { len }
+        len dist - dist display-width @ umod > if
+          display-width @ buffer buffer-edit-cursor adjust-offset
+        else
+          len dist - buffer buffer-edit-cursor adjust-offset
+        then
+      then
+    ; define do-down
     
     \ Enter a character into the buffer
     :noname { W^ c buffer -- }
@@ -459,7 +802,7 @@ begin-module file-edit
       { select-diff )
       c 1 buffer buffer-edit-cursor insert-data
       select-diff 0>= if 1 buffer buffer-select-cursor adjust-offset then
-    ; define do-char
+    ; define do-insert
 
     \ Backspace in the buffer
     :noname { buffer -- }
@@ -467,7 +810,7 @@ begin-module file-edit
       { select-diff )
       1 buffer buffer-edit-cursor delete-data
       select-diff 0>= if -1 buffer buffer-select-cursor adjust-offset then
-    ; define do-backspace
+    ; define do-delete
 
     \ Delete in the buffer
     :noname { buffer -- }
@@ -476,7 +819,7 @@ begin-module file-edit
       1 buffer buffer-edit-cursor adjust-offset
       1 buffer buffer-edit-cursor delete-data
       select-diff 0> if -1 buffer buffer-select-cursor adjust-offset then
-    ; define do-delete
+    ; define do-delete-forward
 
     \ Kill a range in the buffer
     :noname { clip buffer -- }
@@ -523,6 +866,20 @@ begin-module file-edit
   
   \ Implement the clipboard
   <clip> begin-implement
+
+    \ Constructor
+    :noname { heap clip -- }
+      clip <object>->new
+      heap <dyn-buffer> clip clip-dyn-buffer init-object
+      clip clip-dyn-buffer <cursor> clip clip-cursor init-object
+    ; define new
+
+    \ Destructor
+    :noname { clip -- }
+      clip clip-cursor destroy
+      clip clip-dyn-buffer destroy
+      clip <object>->destroy
+    ; define destroy
     
     \ Copy from a starting cursor to an ending cursor
     :noname ( start-cursor end-cursor src-dyn-buffer clip -- )
@@ -576,6 +933,110 @@ begin-module file-edit
   
   \ Implement the editor
   <editor> begin-implement
+
+    \ Constructor
+    :noname { heap editor -- }
+      editor <object>->new
+      heap editor editor-heap !
+      heap <clip> editor editor-clip init-object
+      <buffer> class-size heap allocate { buffer }
+      s" F00bar" heap <buffer> buffer init-object
+      buffer editor editor-first !
+      buffer editor editor-last !
+      buffer editor editor-current !
+    ; define new
+
+    \ Destructor
+    :noname { editor -- }
+      editor editor-current @ destroy
+      editor editor-current @ editor editor-heap @ free
+      editor <object>->destroy
+    ; define destroy
+    
+    \ Go left one character
+    :noname { editor -- }
+      editor editor-current @ { current }
+      current edit-cursor-offset@ 0> if
+        current edit-cursor-left-space { cols rows }
+        current do-backward
+        current update-display if
+          current refresh-display
+        else
+          cols 0> if
+            current output-left
+          else
+            rows 0> if
+              current output-prev-row
+            else
+              current output-prev-line
+            then
+          then
+        then
+      then
+    ; define handle-backward
+
+    \ Go right one character
+    :noname { editor -- }
+      editor editor-current @ { current }
+      current edit-cursor-offset@ current buffer-len@ < if
+        current edit-cursor-left-space { cols rows }
+        current edit-cursor-at-end? { at-end? }
+        current do-forward
+        current update-display if
+          current refresh-display
+        else
+          at-end? if
+            current output-next-line
+          else
+            cols display-width @ 1- < if
+              current output-right
+            else
+              current output-next-row
+            then
+          then
+        then
+      then
+    ; define handle-forward
+
+    \ Go up one character
+    :noname { editor -- }
+      editor editor-current @ { current }
+      current edit-cursor-first-row? if
+        current do-first
+        current update-display if
+          current refresh-display
+        else
+          current output-first
+        then
+      else
+        current do-up
+        current update-display if
+          current refresh-display
+        else
+          current output-up
+        then
+      then
+    ; define handle-up
+
+    \ Go down one character
+    :noname { editor -- }
+      editor editor-current @ { current }
+      current edit-cursor-last-row? if
+        current do-last
+        current update-display if
+          current refresh-display
+        else
+          current output-last
+        then
+      else
+        current do-down
+        current update-display if
+          current refresh-display
+        else
+          current output-down
+        then
+      then
+    ; define handle-down
     
     \ Enter a character into the editor
     :noname { c editor -- }
@@ -589,7 +1050,7 @@ begin-module file-edit
           in-middle
         then
       then { position }
-      c current do-char
+      c current do-insert
       current update-display if
         current refresh-display
       else
@@ -599,7 +1060,15 @@ begin-module file-edit
           at-end of c current output-char endof
         endcase
       then
-    ; define handle-char
+    ; define handle-insert
+
+    \ Enter a newline into the editor
+    :noname { editor -- }
+      editor editor-current @ { current }
+      $0A current do-insert
+      current update-display drop
+      current refresh-display
+    ; define handle-newline
 
     \ Backspace in the editor
     :noname { editor -- }
@@ -617,7 +1086,7 @@ begin-module file-edit
           then
         then
       then { position }
-      current do-backspace
+      current do-delete
       current update-display if
         current refresh-display
       else
@@ -629,7 +1098,7 @@ begin-module file-edit
         endcase
       then
       current refresh-line
-    ; define handle-backspace
+    ; define handle-delete
 
     \ Delete in the editor
     :noname { editor -- }
@@ -639,7 +1108,7 @@ begin-module file-edit
       else
         in-middle
       then { position }
-      current do-delete
+      current do-delete-forward
       current update-display if
         current refresh-display
       else
@@ -648,7 +1117,7 @@ begin-module file-edit
           in-last-line of current refresh-line endof
         endcase
       then
-    ; define handle-delete
+    ; define handle-delete-forward
 
     \ Kill a range in the editor
     :noname { editor -- }
@@ -694,592 +1163,11 @@ begin-module file-edit
   $17 constant ctrl-w
   $18 constant ctrl-x
 
-  \ Get a particular buffer
-  : get-buffer ( u -- b-addr )
-    block-size * edit-state @ edit-buffers +
-  ;
-
-  \ Get a particular row
-  : get-row ( u -- b-addr )
-    buffer-width * edit-state @ edit-current @ get-buffer +
-  ;
-  
-  \ Get the current row index
-  : current-row-index@ ( -- row )
-    edit-state @ edit-cursor-row @ edit-state @ edit-start-row @ -
-  ;
-
-  \ Get the current column index
-  : current-column-index@ ( -- column )
-    edit-state @ edit-cursor-column @ edit-state @ edit-start-column @ -
-  ;
-
-  \ Set the current row index
-  : current-row-index! ( row -- )
-    edit-state @ edit-start-row @ + edit-state @ edit-cursor-row !
-  ;
-
-  \ Set the current column index
-  : current-column-index! ( column -- )
-    edit-state @ edit-start-column @ + edit-state @ edit-cursor-column !
-  ;
-
-  \ Get the current row in the buffer
-  : current-row ( -- b-addr )
-    current-row-index@ get-row
-  ;
-
-  \ Get whether a buffer is dirty
-  : dirty? ( index -- dirty ) bit edit-state @ edit-dirty bit@ ;
-
-  \ Set whether a buffer is dirty
-  : dirty! ( dirty index -- )
-    bit swap if
-      edit-state @ edit-dirty bis!
-    else
-      edit-state @ edit-dirty bic!
-    then
-  ;
-
-  \ Set a buffer's id
-  : id! ( id index -- ) cells edit-state @ edit-ids + ! ;
-
-  \ Get a buffer's id
-  : id@ ( index -- id ) cells edit-state @ edit-ids + @ ;
-
-  \ Get the current buffer's id
-  : current-id ( -- id ) edit-state @ edit-current @ id@ ;
-
-  \ Buffer not found exception
-  : x-buffer-not-found ( -- ) ." buffer not found" cr ;
-  
-  \ Get a buffer's index by id
-  : buffer-of-id ( id -- index )
-    buffer-count 0 ?do i id@ over = if drop i unloop exit then loop
-    drop -1
-\    ['] x-buffer-not-found ?raise
-  ;
-
-  \ Set the current buffer by id
-  : current-by-id! ( id -- )
-    buffer-of-id dup -1 <> if edit-state @ edit-current ! else drop then
-  ;
-  
-  \ Get the length of a row in the buffer
-  : row-len ( row -- u )
-    get-row 0 buffer-width 0 ?do
-      over i + c@ dup $20 > swap $7F <> and if
-	drop i 1+
-      then
-    loop
-    nip
-  ;
-
   \ Get whether a byte is the start of a unicode code point greater than 127
   : unicode-start? ( b -- flag ) $C0 and $C0 = ;
 
   \ Get whether a byte is part of a unicode code point greater than 127
   : unicode? ( b -- flag ) $80 and 0<> ;
-
-  \ Initally draw the empty block editor
-  : draw-empty ( -- )
-    cr
-    [char] + emit buffer-width 3 + 0 ?do [char] - emit loop [char] + emit
-    buffer-height 0 ?do
-      cr [char] | emit buffer-width 3 + 0 ?do space loop [char] | emit
-    loop
-    cr [char] + emit buffer-width 3 + 0 ?do [char] - emit loop [char] + emit
-  ;
-
-  \ Actually draw a row of the block editor
-  : draw-row ( row -- )
-    [:
-      dup edit-state @ edit-start-row @ +
-      edit-state @ edit-start-column @ go-to-coord
-      dup 9 < if space then
-      dup 1+ .
-      0 swap get-row dup buffer-width + swap ?do
-	i c@ dup $20 >= over $7F <> and over unicode? not and if
-	  emit 1+
-	else
-	  dup unicode? if
-	    dup emit
-	    unicode-start? if 1+ then
-	  else
-	    drop leave
-	  then
-	then
-      loop
-      buffer-width swap - 0 ?do space loop
-    ;] execute-hide-cursor
-  ;
-
-  \ Draw all rows
-  : draw-all-rows ( -- )
-    [: buffer-height 0 ?do i draw-row loop ;] execute-hide-cursor
-  ;
-
-  \ Draw header
-  : draw-header ( -- )
-    [:
-      edit-state @ edit-start-row @ 1-
-      edit-state @ edit-start-column @ 1- go-to-coord
-      ." +-[ "
-      edit-state @ edit-current @ id@ 0 <# #s #> dup >r type
-      edit-state @ edit-current @ dirty? if
-	space [char] * emit r> 1+ >r
-      then
-      space ." ]"
-      buffer-width r> 2 + - 0 ?do [char] - emit loop
-    ;] execute-hide-cursor
-  ;
-
-  \ Update the current row
-  : update-row ( row -- )
-    [: draw-row ;] execute-preserve-cursor
-  ;
-
-  \ Update all the rows
-  : update-all-rows
-    [: draw-all-rows ;] execute-preserve-cursor
-  ;
-
-  \ Update everything
-  : update-all
-    [: draw-all-rows draw-header ;] execute-preserve-cursor
-  ;
-
-  \ Update header
-  : update-header
-    [: draw-header ;] execute-preserve-cursor
-  ;
-
-  \ Update current row
-  : update-current-row ( -- ) current-row-index@ update-row ;
-
-  \ Initialize buffer
-  : init-buffer ( index -- )
-    get-buffer block-size $20 fill
-  ;
-  
-  \ Get the lowest buffer id
-  : lowest-id ( -- id )
-    -1 buffer-count 0 ?do dup i id@ u> if drop i id@ then loop
-  ;
-
-  \ Get the highest buffer id
-  : highest-id ( -- id )
-    0 buffer-count 0 ?do dup i id@ u< if drop i id@ then loop
-  ;
-  
-  \ Load a buffer
-  : load-buffer ( id index -- )
-    false over dirty!
-    2dup id!
-    over block? if
-      swap find-block swap get-buffer block-size move
-    else
-      nip init-buffer
-    then
-  ;
-
-  \ Get the starting block to load
-  : blocks-first ( id -- id )
-    dup half-buffer-count u< if
-      drop 0
-    else
-      dup -1 half-buffer-count - u>= if
-	drop -1 buffer-count -
-      else
-	half-buffer-count -
-      then
-    then
-  ;
-
-  \ Load all of the buffers
-  : load-all-buffers ( id -- )
-    dup blocks-first buffer-count 0 ?do
-      dup i load-buffer 1+
-    loop
-    drop current-by-id!
-  ;
-
-  \ Save a buffer by id
-  : save-buffer ( id -- )
-    dup buffer-of-id dirty? if
-      false over buffer-of-id dirty!
-      dup buffer-of-id get-buffer swap block!
-    else
-      drop
-    then
-  ;
-
-  \ Save all the buffers
-  : save-all-buffers ( -- )
-    buffer-count 0 ?do
-      i cells edit-state @ edit-ids + @ save-buffer
-    loop
-  ;
-
-  \ Change buffers
-  : change-buffer ( id -- )
-    dup highest-id u> if
-      lowest-id save-buffer
-      dup lowest-id buffer-of-id load-buffer
-    else
-      dup lowest-id u< if
-	highest-id save-buffer
-	dup highest-id buffer-of-id load-buffer
-      else
-      then
-    then
-    current-by-id!
-    update-all
-  ;
-
-  \ Get the current column byte index
-  : current-column-bytes ( -- offset )
-    0 current-column-index@ begin dup 0> while
-      over buffer-width < if
-	swap 1+ swap over current-row + c@
-	dup $20 >= over $80 < and if
-	  drop 1-
-	else
-	  dup unicode? swap unicode-start? and if
-	    1-
-	    begin
-	      over buffer-width < if
-		over current-row + c@
-		dup unicode? swap unicode-start? not and if
-		  swap 1+ swap false
-		else
-		  true
-		then
-	      else
-		true
-	      then
-	    until
-	  then
-	then
-      else
-	drop 0
-      then
-    repeat
-    drop
-  ;
-
-  \ Get the maximum number of columns in a row
-  : max-columns ( -- columns )
-    current-row-index@ row-len
-  ;
-
-  \ Get the number of bytes of the character to the left of the cursor
-  : left-bytes ( -- count )
-    0 current-column-bytes begin
-      dup 0> if
-	swap 1+ swap 1- dup current-row + c@
-	dup unicode-start? if
-	  drop true
-	else
-	  unicode? not
-	then
-      else
-	true
-      then
-    until
-    drop
-  ;
-
-  \ Get the number of bytes of the character to the right of the cursor
-  : right-bytes ( -- count )
-    current-column-bytes buffer-width < if
-      current-row current-column-bytes + c@
-      dup $80 u< if
-	drop 1
-      else
-	1 current-column-bytes 1+ begin
-	  dup buffer-width u< if
-	    dup current-row + c@
-	    dup unicode-start? if
-	      drop drop true
-	    else
-	      unicode? if
-		1+ swap 1+ swap false
-	      else
-		drop true
-	      then
-	    then
-	  else
-	    drop true
-	  then
-	until
-      then
-    else
-      0
-    then
-  ;
-
-  \ Save the current column
-  : save-current-column ( -- ) 
-    edit-state @ edit-cursor-column @ edit-state @ edit-saved-cursor-column !
-  ;
-
-  \ Go to the current coordinate
-  : go-to-current-coord ( -- )
-    edit-state @ edit-cursor-row @ edit-state @ edit-cursor-column @ 3 +
-    go-to-coord
-  ;
-
-  \ Dirty the current buffer
-  : dirty ( -- )
-    edit-state @ edit-current @ dirty?
-    true edit-state @ edit-current @ dirty!
-    not if update-header then
-  ;
-
-  \ Finish unicode insertion
-  : finish-insert ( -- )
-    save-current-column
-    update-current-row
-    go-to-current-coord
-    dirty
-    false edit-state @ edit-unicode-entered !
-  ;
-  
-  \ Resolve unicode entered
-  : resolve-unicode-entered ( -- )
-    edit-state @ edit-unicode-entered @ if
-      systick-counter
-      begin
-	systick-counter over - 100 u< if
-	  key? not if
-	    pause
-	  else
-	    get-key dup unicode? over unicode-start? not and if
-	      current-row-index@ row-len buffer-width u< if
-		current-row current-column-bytes +
-		current-row current-column-bytes 1+ +
-		buffer-width current-column-bytes - 1- move
-		dup current-row current-column-bytes + c!
-	      else
-		drop
-	      then
-	      false
-	    else
-	      set-key finish-insert
-	      true
-	    then
-	  then
-	else
-	  finish-insert
-	  true
-	then
-      until
-      drop
-    then
-  ;
-  
-  \ Handle insertion
-  : handle-insert ( b -- )
-    current-row-index@ row-len buffer-width u< if
-      current-row current-column-bytes +
-      current-row current-column-bytes 1+ +
-      buffer-width current-column-bytes - 1- move
-      dup current-row current-column-bytes + c!
-      dup $20 >= over $80 < and if
-	drop
-	1 edit-state @ edit-cursor-column +!
-	save-current-column
-	update-current-row
-	go-to-current-coord
-	dirty
-      else
-	unicode-start? if
-	  1 edit-state @ edit-cursor-column +!
-	  true edit-state @ edit-unicode-entered !
-	then
-      then
-    else
-      drop
-    then
-  ;
-
-  \ Handle deletion
-  : handle-delete ( -- )
-    current-column-index@ 0 > if
-      left-bytes
-      current-row current-column-bytes +
-      2dup swap -
-      buffer-width current-column-bytes - move
-      current-row buffer-width + over - swap $20 fill
-      -1 edit-state @ edit-cursor-column +!
-      save-current-column
-      update-current-row
-      go-to-current-coord
-      dirty
-    then
-  ;
-
-  \ Handle delete forward
-  : handle-delete-forward ( -- )
-    current-column-bytes buffer-width < if
-      right-bytes
-      current-row current-column-bytes +
-      2dup swap + swap
-      buffer-width current-column-bytes - 3 pick - move
-      current-row buffer-width + over - swap $20 fill
-      save-current-column
-      update-current-row
-      dirty
-    then
-  ;
-
-  \ Handle inserting a row
-  : handle-insert-row ( -- )
-    current-row-index@ buffer-height 1- < if
-      buffer-height 1- row-len 0= if
-	current-row current-row buffer-width +
-	buffer-height current-row-index@ - 1- buffer-width * move
-	current-row buffer-width $20 fill
-	0 current-column-index!
-	save-current-column
-	update-all
-	dirty
-      then
-    then
-  ;
-
-  \ Handle deleting a row
-  : handle-delete-row ( -- )
-    max-columns 0> if
-      current-column-bytes current-row over + buffer-width rot - $20 fill
-      update-all
-      dirty
-    else
-      current-row-index@ buffer-height 1- < if
-	current-row buffer-width + current-row
-	buffer-height current-row-index@ - 1- buffer-width * move
-	buffer-height 1- get-row buffer-width $20 fill
-	0 current-column-index!
-	save-current-column
-	update-all
-	dirty
-	go-to-current-coord
-      then
-    then
-  ;
-  
-  \ Handle going forward
-  : handle-forward ( -- )
-    current-column-bytes buffer-width < if
-      1 edit-state @ edit-cursor-column +!
-      save-current-column
-      go-to-current-coord
-    then
-  ;
-
-  \ Handle going backward
-  : handle-backward ( -- )
-    current-column-index@ 0> if
-      -1 edit-state @ edit-cursor-column +!
-      save-current-column
-      go-to-current-coord
-    then
-  ;
-
-  \ Handle the saved cursor column
-  : use-saved-cursor-column ( -- )
-    edit-state @ edit-saved-cursor-column @ edit-state @ edit-start-column @ -
-    max-columns < if
-      edit-state @ edit-saved-cursor-column @ edit-state @ edit-cursor-column !
-    else
-      max-columns edit-state @ edit-start-column @ +
-      edit-state @ edit-cursor-column !
-    then
-  ;
-
-  \ Handle going to the next buffer
-  : handle-next ( -- )
-    current-id 1+ dup $FFFFFFFF u< if change-buffer else drop then
-    use-saved-cursor-column
-    go-to-current-coord
-  ;
-
-  \ Handle going to the previous buffer
-  : handle-prev ( -- )
-    current-id dup 0<> if 1- change-buffer else drop then
-    use-saved-cursor-column
-    go-to-current-coord
-  ;
-
-  \ Handle going up
-  : handle-up ( -- )
-    current-row-index@ 0> if
-      -1 edit-state @ edit-cursor-row +!
-      use-saved-cursor-column
-      go-to-current-coord
-    \ else
-    \   buffer-height 1- current-row-index!
-    \   handle-prev
-    then
-  ;
-
-  \ Handle going down
-  : handle-down ( -- )
-    current-row-index@ buffer-height 1- < if
-      1 edit-state @ edit-cursor-row +!
-      use-saved-cursor-column
-      go-to-current-coord
-    \ else
-    \   0 current-row-index!
-    \   handle-next
-    then
-  ;
-
-  \ Handle a newline
-  : handle-newline ( -- )
-    0 current-column-index!
-    save-current-column
-    current-row-index@ buffer-height 1- < if
-      1 edit-state @ edit-cursor-row +!
-      go-to-current-coord
-    else
-      0 current-row-index!
-      handle-next
-    then
-  ;
-
-  \ Handle start
-  : handle-start ( -- )
-    0 current-column-index!
-    save-current-column
-    go-to-current-coord
-  ;
-
-  \ Handle end
-  : handle-end ( -- )
-    max-columns current-column-index!
-    save-current-column
-    go-to-current-coord
-  ;
-
-  \ Handle tab
-  : handle-tab ( -- )
-    current-column-index@ 1 and 0= if $20 handle-insert then
-    $20 handle-insert
-  ;
-
-  \ Revert the current buffer
-  : handle-revert ( -- )
-    current-id edit-state @ edit-current @ load-buffer
-    update-all
-  ;
-
-  \ Write the current buffer
-  : handle-write ( -- )
-    current-id save-buffer
-    update-all
-  ;
 
   \ Configure the block editor
   : config-edit ( id -- )
@@ -1289,24 +1177,7 @@ begin-module file-edit
     false edit-state @ edit-unicode-entered !
     buffer-width 4 + - 0 max edit-state @ edit-start-column !
     buffer-height - 0 max edit-state @ edit-start-row !
-    get-terminal-size
-    edit-state @ edit-terminal-columns ! edit-state @ edit-terminal-rows !
-    edit-state @ edit-start-row @ edit-state @ edit-cursor-row !
-    edit-state @ edit-start-column @ edit-state @ edit-cursor-column !
-    go-to-current-coord
-    save-current-column
-    0 edit-state @ edit-current !
-    0 edit-state @ edit-dirty !
-    buffer-count 0 ?do i edit-state @ edit-ids i cells + ! loop
-    load-all-buffers
-    current-id change-buffer
-  ;
-
-  \ Leave the editor
-  : leave-edit ( -- )
-    edit-state @ edit-start-row @ buffer-height +
-    edit-state @ edit-start-column @ buffer-width 4 + + go-to-coord
-    edit-state @ ram-here!
+    get-terminal-size display-width ! 2 - display-height !
   ;
 
   \ Handle a special key
@@ -1347,30 +1218,30 @@ begin-module file-edit
   ;
   
   \ Edit a block
-  : edit ( id -- )
-    dup $FFFFFFFF <> averts x-invalid-block-id
-    edit-size [:
-      edit-state !
+  : edit ( -- )
+    here dup [: { heap-addr }
+      heap-block-size backing-heap-size backing-heap-size / heap-addr init-heap
       config-edit
+      <editor> class-size heap-addr allocate { editor }
+      heap-addr <editor> editor init-object
       begin
-	resolve-unicode-entered
 	get-key
 	dup $20 u< if
 	  case
-	    return of handle-newline false endof
-	    newline of handle-newline false endof
-	    tab of handle-tab false endof
-	    ctrl-a of handle-start false endof
-	    ctrl-e of handle-end false endof
-	    ctrl-f of handle-forward false endof
-	    ctrl-b of handle-backward false endof
-	    ctrl-n of handle-next false endof
-	    ctrl-p of handle-prev false endof
+	    return of editor handle-newline false endof
+	    newline of editor handle-newline false endof
+\	    tab of handle-tab false endof
+\	    ctrl-a of editor handle-start false endof
+\	    ctrl-e of editor handle-end false endof
+	    ctrl-f of editor handle-forward false endof
+	    ctrl-b of editor handle-backward false endof
+\	    ctrl-n of editor handle-next false endof
+\	    ctrl-p of editor handle-prev false endof
 	    ctrl-v of true endof
-	    ctrl-w of handle-write false endof
-	    ctrl-x of handle-revert false endof
-	    ctrl-u of handle-insert-row false endof
-	    ctrl-k of handle-delete-row false endof
+\	    ctrl-w of handle-write false endof
+\	    ctrl-x of handle-revert false endof
+\	    ctrl-u of handle-insert-row false endof
+\	    ctrl-k of handle-delete-row false endof
 	    escape of handle-escape false endof
 	    swap false swap
 	  endcase
