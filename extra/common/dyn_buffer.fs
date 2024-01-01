@@ -129,7 +129,7 @@ begin-module dyn-buffer
       
       \ Mark cursors after cursor invalid
       method mark-cursors-invalid-on-insert ( cursor -- )
-      
+
       \ Insert data into segment
       method insert-data-into-segment ( addr bytes cursor -- addr' bytes' )
       
@@ -141,6 +141,15 @@ begin-module dyn-buffer
       
       \ Split segment
       method split-segment ( cursor -- )
+      
+      \ Invalidate sursors for deletion
+      method mark-cursors-invalid-on-delete ( cursor -- )
+
+      \ Delete data within a segment
+      method delete-data-within-segment ( bytes cursor -- bytes' )
+
+      \ Delete a whole segment
+      method delete-whole-segment ( bytes cursor -- bytes' )
       
     end-module
 
@@ -207,7 +216,8 @@ begin-module dyn-buffer
 
     \ Request a segment
     :noname { bytes dyn-buffer -- segment }
-      bytes segment-header-size + dyn-buffer dyn-buffer-heap @ allocate
+      bytes segment-header-size + cell align
+      dyn-buffer dyn-buffer-heap @ allocate
       bytes over segment-size !
       0 over segment-prev !
       0 over segment-next !
@@ -219,7 +229,8 @@ begin-module dyn-buffer
     
     \ Request a segment after another segment
     :noname { bytes prev-segment dyn-buffer -- segment }
-      bytes segment-header-size + dyn-buffer dyn-buffer-heap @ allocate
+      bytes segment-header-size + cell align
+      dyn-buffer dyn-buffer-heap @ allocate
       bytes over segment-size !
       prev-segment over segment-prev !
       prev-segment segment-next @ over segment-next !
@@ -233,7 +244,8 @@ begin-module dyn-buffer
 
     \ Request a segment before another segment
     :noname { bytes next-segment dyn-buffer -- segment }
-      bytes segment-header-size + dyn-buffer dyn-buffer-heap @ allocate
+      bytes segment-header-size + cell align
+      dyn-buffer dyn-buffer-heap @ allocate
       bytes over segment-size !
       next-segment over segment-next !
       next-segment segment-prev @ over segment-prev !
@@ -252,10 +264,14 @@ begin-module dyn-buffer
       prev-segment new-segment segment-prev !
       prev-segment 0= if
         new-segment dyn-buffer dyn-buffer-first !
+      else
+        new-segment prev-segment segment-next !
       then
       next-segment new-segment segment-next !
       next-segment 0= if
         new-segment dyn-buffer dyn-buffer-last !
+      else
+        new-segment next-segment segment-prev !
       then
       old-segment dyn-buffer dyn-buffer-heap @ free
     ; define replace-segment
@@ -278,28 +294,28 @@ begin-module dyn-buffer
     ; define delete-segment
     
     \ Execute xt for all other cursors
-    :noname { xt cursor dyn-buffer -- } ( xt: cursor -- )
-      dyn-buffer dyn-buffer-first-cursor @ { current-cursor }
-      begin current-cursor while
-        current-cursor cursor <> if
-          current-cursor xt execute
-        then
-        current-cursor cursor-next @ to current-cursor
-      repeat
+    :noname { xt cursor dyn-buffer -- } ( xt: cursor -- ) \ ." *A* "
+      dyn-buffer dyn-buffer-first-cursor @ { current-cursor } \ ." *B* "
+      begin current-cursor while \ ." *C* "
+        current-cursor cursor <> if \ ." *D* "
+          current-cursor xt execute \ ." *E* "
+        then \ ." *F* "
+        current-cursor cursor-next @ to current-cursor \ ." *G* "
+      repeat \ ." *H* "
     ; define for-all-other-cursors
 
     \ Resolve invalidated cursors
-    :noname { dyn-buffer -- }
-      dyn-buffer dyn-buffer-first-cursor @ { current-cursor }
-      begin current-cursor while
-        current-cursor cursor-invalid @ if
-          current-cursor offset@
-          current-cursor go-to-start
-          current-cursor go-to-offset
-          false current-cursor cursor-invalid !
-        then
-        current-cursor cursor-next @ to current-cursor
-      repeat
+    :noname { dyn-buffer -- } \ ." *a* "
+      dyn-buffer dyn-buffer-first-cursor @ { current-cursor } \ ." *b* "
+      begin current-cursor while \ ." *c* "
+        current-cursor cursor-invalid @ if \ ." *d* "
+          current-cursor offset@ \ ." *e* "
+          current-cursor go-to-start \ ." *f* "
+          current-cursor go-to-offset \ ." *g* "
+          false current-cursor cursor-invalid ! \ ." *h* "
+        then \ ." *i* "
+        current-cursor cursor-next @ to current-cursor \ ." *j* "
+      repeat \ ." *k* "
     ; define resolve-cursors
     
   end-implement
@@ -352,16 +368,16 @@ begin-module dyn-buffer
 
     \ Move to the start
     :noname { cursor -- }
-      cursor dyn-buffer @ dyn-buffer-first @ cursor cursor-segment !
+      cursor cursor-dyn-buffer @ dyn-buffer-first @ cursor cursor-segment !
       0 cursor cursor-offset !
       0 cursor cursor-global-offset !
     ; define go-to-start
 
     \ Move to the end
     :noname { cursor -- }
-      cursor dyn-buffer @ dyn-buffer-last @ cursor cursor-segment !
+      cursor cursor-dyn-buffer @ dyn-buffer-last @ cursor cursor-segment !
       cursor cursor-segment @ segment-size @ cursor cursor-offset !
-      cursor dyn-buffer @ dyn-buffer-len@ cursor cursor-global-offset !
+      cursor cursor-dyn-buffer @ dyn-buffer-len@ cursor cursor-global-offset !
     ; define go-to-end
 
     \ Go to an offset
@@ -376,14 +392,22 @@ begin-module dyn-buffer
 
     \ Change the offset of the cursor
     :noname { change cursor -- }
-      cursor cursor-segment @ 0= if exit then
+      cursor cursor-dyn-buffer @ dyn-buffer-first @ 0= if
+        0 cursor cursor-segment !
+        0 cursor cursor-offset !
+        0 cursor cursor-global-offset !
+        exit
+      then
+      cursor cursor-segment @ 0= if cursor go-to-start then
       begin
         cursor cursor-segment @ { segment }
         change 0< if
           cursor cursor-offset @ change + 0>= if
             change cursor cursor-offset +!
+            change cursor cursor-global-offset +!
             true
           else
+            cursor cursor-offset @ negate cursor cursor-global-offset +!
             cursor cursor-offset @ +to change
             segment segment-prev @ ?dup if
               dup cursor cursor-segment !
@@ -396,11 +420,14 @@ begin-module dyn-buffer
           then
         else
           change 0> if
-            cursor cursor-offset @ change + segment segment-size @ < if
+            cursor cursor-offset @ change + segment segment-size @ <= if
+              change cursor cursor-global-offset +!
               change cursor cursor-offset +!
               true
             else
-              segment segment-size @ cursor cursor-offset @ - negate +to change
+              segment segment-size @ cursor cursor-offset @ - { diff }
+              diff cursor cursor-global-offset +!
+              diff negate +to change
               segment segment-next @ ?dup if
                 cursor cursor-segment !
                 0 cursor cursor-offset !
@@ -511,6 +538,7 @@ begin-module dyn-buffer
       part-size +to addr
       part-size negate +to bytes
       part-size dyn-buffer adjust-dyn-buffer-len
+      addr bytes
     ; define insert-data-before-segment
 
     \ Split segment
@@ -558,80 +586,123 @@ begin-module dyn-buffer
       cursor cursor-dyn-buffer @ resolve-cursors
     ; define insert-data
 
+    \ Invalidate cursors for deletion
+    :noname { cursor -- }
+      cursor cursor-dyn-buffer @ { dyn-buffer }
+      cursor [: over { current-cursor orig-cursor }
+        orig-cursor cursor-segment @ { current-segment }
+        current-cursor cursor-global-offset @
+        orig-cursor cursor-global-offset @ >=
+        current-segment orig-cursor cursor-segment @ = or
+        current-segment orig-cursor cursor-segment @ segment-prev @ = or
+        current-cursor cursor-invalid @ or current-cursor cursor-invalid !
+      ;] cursor dyn-buffer for-all-other-cursors
+      drop
+    ; define mark-cursors-invalid-on-delete
+
+    \ Delete data within a segment
+    :noname { bytes cursor -- bytes' }
+      cursor cursor-dyn-buffer @ { dyn-buffer }
+      cursor cursor-segment @ { old-segment }
+      cursor cursor-offset @ { offset }
+      old-segment segment-size @ { old-size }
+      offset bytes min { part-size }
+      \ cr ." DELETE-DATA-WITHIN-SEGMENT: "
+      \ ." old-segment: " old-segment h.8 space
+      \ ." prev-segment: " old-segment segment-prev @ h.8 space
+      \ ." next-segment: " old-segment segment-next @ h.8 space
+      \ ." bytes: " bytes .
+      \ ." offset: " offset .
+      \ ." old-size: " old-size .
+      \ ." part-size: " part-size .
+      \ ." global-offset: " cursor cursor-global-offset @ .
+      old-size part-size - dyn-buffer request-segment { new-segment }
+      old-segment segment-header-size + { old-addr }
+      new-segment segment-header-size + { new-addr }
+      old-addr new-addr offset part-size - move
+      old-addr offset + new-addr offset + part-size - old-size offset - move
+      new-segment old-segment dyn-buffer replace-segment
+      part-size negate dyn-buffer adjust-dyn-buffer-len
+      new-segment cursor cursor-segment !
+      part-size negate cursor cursor-global-offset +!
+      part-size negate cursor cursor-offset +!
+      \ ." new-segment: " new-segment h.8 space
+      \ ." new-prev-segment: " new-segment segment-prev @ h.8 space
+      \ ." new-next-segment: " new-segment segment-next @ h.8 space
+      \ ." new-global-offset: " cursor cursor-global-offset @ .
+      \ ." new-offset: " cursor cursor-offset @ .
+      bytes part-size -
+      \ ." new-bytes: " dup .
+    ; define delete-data-within-segment
+
+    \ Delete a whole segment
+    :noname { bytes cursor -- bytes' }
+      cursor cursor-dyn-buffer @ { dyn-buffer }
+      cursor cursor-segment @ { old-segment }
+      old-segment segment-size @ { part-size }
+      \ cr ." DELETE-WHOLE-SEGMENT: "
+      \ ." old-segment: " old-segment h.8 space
+      \ ." prev-segment: " old-segment segment-prev @ h.8 space
+      \ ." next-segment: " old-segment segment-next @ h.8 space
+      \ ." bytes: " bytes .
+      \ ." part-size: " part-size .
+      \ ." global-offset: " cursor cursor-global-offset @ .
+      old-segment segment-prev @ { prev-segment }
+      old-segment segment-next @ { next-segment }
+      old-segment dyn-buffer delete-segment
+      prev-segment if
+        prev-segment cursor cursor-segment !
+        prev-segment segment-size @ cursor cursor-offset !
+      else
+        next-segment if
+          next-segment cursor cursor-segment !
+        else
+          0 cursor cursor-segment !
+        then
+        0 cursor cursor-offset !
+      then
+      part-size negate dyn-buffer adjust-dyn-buffer-len
+      part-size negate cursor cursor-global-offset +!
+      \ ." new-global-offset: " cursor cursor-global-offset @ .
+      \ ." new-offset: " cursor cursor-offset @ .
+      bytes part-size -
+      \ ." new-bytes: " dup .
+    ; define delete-whole-segment
+    
     \ Delete data; note that this invalidates all other cursors for the dynamic
     \ buffer
     :noname { bytes cursor -- }
+      cursor cursor-global-offset @ bytes min to bytes
+      bytes 0= if exit then
       cursor cursor-dyn-buffer @ { dyn-buffer }
       begin
         cursor cursor-segment @ { segment }
-        cursor [: over { current-cursor orig-cursor }
-          current-cursor cursor-global-offset @
-          orig-cursor cursor-global-offset @ >
-          current-cursor cursor-segment @ orig-cursor cursor-segment @ = or
-          current-cursor cursor-segment @
-          orig-cursor cursor-segment @ segment-prev @ = or
-          current-cursor cursor-invalid @ or current-cursor cursor-invalid !
-        ;] cursor dup cursor-dyn-buffer @ for-all-other-cursors
-        drop
-        segment 0= if exit then
-        bytes cursor cursor-offset @ >
-        cursor cursor-segment @ segment-prev @ 0<> and if
-          segment segment-prev @ { old-segment }
-          segment segment-size @ cursor cursor-offset @ - { orig-bytes }
-          old-segment segment-size @ orig-bytes +
-          dyn-buffer request-segment { new-segment }
-          old-segment segment-header-size + { old-addr }
-          segment segment-header-size + { orig-addr }
-          new-segment segment-header-size + { new-addr }
-          old-segment segment-size @ { old-bytes }
-          old-addr new-addr old-bytes move
-          orig-addr cursor cursor-offset @ + new-addr old-bytes +
-          orig-bytes move
-          new-segment old-segment dyn-buffer replace-segment
-          segment dyn-buffer delete-segment
-          cursor cursor-offset @ negate +to bytes
-          cursor cursor-offset @ negate dyn-buffer adjust-dyn-buffer-len
-          new-segment cursor cursor-segment !
-          old-bytes orig-bytes + cursor cursor-offset !
-          false
-        else
-          cursor cursor-offset @ segment segment-size @ <
-          bytes cursor cursor-offset @ <= xor if
-            segment segment-size @ bytes - { new-bytes }
-            new-bytes dyn-buffer request-segment { new-segment }
-            segment segment-header-size + { old-addr }
-            new-segment segment-header-size + { new-addr }
-            cursor cursor-offset @ bytes - { first-bytes }
-            segment segment-size @ cursor cursor-offset @ - { last-bytes }
-            bytes negate dyn-buffer adjust-dyn-buffer-len
-            old-addr new-addr first-bytes move
-            old-addr cursor cursor-offset @ + new-addr first-bytes + last-bytes
-            move
-            new-segment segment dyn-buffer replace-segment
-            new-segment cursor cursor-segment !
-            first-bytes cursor cursor-offset !
-            true
-          else
-            segment segment-prev @ ?dup if
-              dup cursor cursor-segment !
-              segment-size @ cursor cursor-offset !
-              segment segment-size @ negate +to bytes
-            else
-              segment segment-next @ ?dup if
-                cursor cursor-segment !
-              else
-                0 cursor cursor-segment !
-              then
-              segment segment-size @ negate dyn-buffer adjust-dyn-buffer-len
-              segment dyn-buffer delete-segment
-              0 cursor cursor-offset !
-              0 to bytes
-            then
-            bytes 0>
-          then
+        segment 0= if
+          cursor cursor-dyn-buffer @ resolve-cursors
+          exit
         then
+        cursor mark-cursors-invalid-on-delete
+        bytes 0>
+        cursor cursor-offset @ 0<> segment segment-prev @ 0<> or and if
+          cursor cursor-offset @ 0= segment segment-prev @ 0<> and if
+            segment segment-prev @ cursor cursor-segment !
+            segment segment-prev @ segment-size @ cursor cursor-offset !
+            false
+          else
+            cursor cursor-offset @ segment segment-size @ <>
+            bytes segment segment-size @ < or if
+              bytes cursor delete-data-within-segment to bytes
+              false
+            else
+              bytes cursor delete-whole-segment to bytes
+              false
+            then
+          then
+        else
+          true
+        then
+        cursor cursor-dyn-buffer @ resolve-cursors
       until
-      cursor cursor-dyn-buffer @ resolve-cursors
     ; define delete-data
 
     \ Read data
@@ -643,14 +714,23 @@ begin-module dyn-buffer
       begin total-bytes bytes < segment 0<> and while
         segment segment-header-size + offset + { segment-addr }
         segment segment-size @ offset - { remaining }
-        bytes total-bytes - remaining > if
+        bytes total-bytes - remaining >= if
           segment-addr addr remaining move
           remaining +to addr
           remaining +to total-bytes
           segment segment-next @ to segment
+          segment if
+            segment cursor cursor-segment !
+            0 cursor cursor-offset !
+          else
+            remaining cursor cursor-offset +!
+          then
+          remaining cursor cursor-global-offset +!
           0 to offset
         else
           segment-addr addr bytes total-bytes - move
+          bytes total-bytes - cursor cursor-offset +!
+          bytes total-bytes - cursor cursor-global-offset +!
           bytes
           exit
         then
@@ -661,12 +741,13 @@ begin-module dyn-buffer
     \ Find previous
     :noname { xt cursor -- } ( xt: c -- match? )
       0 { W^ buffer }
+      -1 cursor adjust-offset
       begin cursor offset@ 0> while
-        -1 cursor adjust-offset
         buffer 1 cursor read-data 0> if
           buffer c@ xt execute if
-            1 cursor adjust-offset
             exit
+          else
+            -2 cursor adjust-offset
           then
         else
           exit
@@ -680,9 +761,8 @@ begin-module dyn-buffer
       begin cursor offset@ cursor cursor-dyn-buffer @ dyn-buffer-len @ < while
         buffer 1 cursor read-data 0> if
           buffer c@ xt execute if
+            -1 cursor adjust-offset
             exit
-          else
-            1 cursor adjust-offset
           then
         else
           exit
