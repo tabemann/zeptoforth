@@ -495,7 +495,6 @@ begin-module file-edit
           begin len 0> while
             len default-segment-size min { part-size }
             data part-size cursor read-data { real-size }
-            real-size cursor adjust-offset
             data real-size type
             part-size negate +to len
           repeat
@@ -894,7 +893,6 @@ begin-module file-edit
             part-size 0> if
               buffer part-size src-cursor read-data to part-size
               buffer part-size clip clip-cursor insert-data
-              part-size src-cursor adjust-offset
               false
             else
               true
@@ -915,7 +913,6 @@ begin-module file-edit
           part-size 0> if
             buffer part-size src-cursor read-data to part-size
             buffer part-size dest-cursor insert-data
-            part-size src-cursor adjust-offset
           else
             true
           then
