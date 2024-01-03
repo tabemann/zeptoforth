@@ -30,6 +30,12 @@ begin-module file-edit
   \ DEBUG
   : *echo* [immediate] char lit, postpone internal::serial-emit ;
   \ DEBUG
+
+  \ Normal video
+  : normal-video ( -- ) csi ." 0m" ;
+
+  \ Inverse video
+  : inverse-video ( -- ) csi ." 7m" ;
   
   \ Tab size
   2 constant tab-size \ small to save space in the blocks
@@ -79,6 +85,9 @@ begin-module file-edit
     
     \ Edit cursor row
     cell member buffer-edit-row
+
+    \ Select enabled
+    cell member buffer-select-enabled
 
     \ Buffer dynamic buffer
     <dyn-buffer> class-size member buffer-dyn-buffer
@@ -244,6 +253,15 @@ begin-module file-edit
 
     \ Paste in the buffer
     method do-paste ( clip buffer -- )
+
+    \ Is there a selection in the buffer
+    method selected? ( buffer -- selected? )
+    
+    \ Select in the buffer
+    method do-select ( buffer -- )
+
+    \ Deselect in the buffer
+    method do-deselect ( buffer -- )
     
   end-class
 
@@ -317,7 +335,10 @@ begin-module file-edit
 
     \ Paste in the editor
     method handle-paste ( editor -- )
-
+    
+    \ Select in the editor
+    method handle-select ( editor -- )
+    
   end-class
 
   \ Implement buffers
@@ -337,6 +358,7 @@ begin-module file-edit
       0 buffer buffer-prev !
       0 buffer buffer-edit-col !
       0 buffer buffer-edit-row !
+      false buffer buffer-select-enabled !
       heap <dyn-buffer> buffer buffer-dyn-buffer init-object
       buffer buffer-dyn-buffer <cursor> buffer buffer-display-cursor init-object
       buffer buffer-dyn-buffer <cursor> buffer buffer-edit-cursor init-object
@@ -548,10 +570,17 @@ begin-module file-edit
           display-width @ { cols-remaining }
           0 0 { edit-col edit-row }
           buffer buffer-edit-cursor offset@ { edit-offset }
+          buffer buffer-select-cursor offset@ { select-offset }
           hide-cursor
-          page
+          normal-video
+          0 0 go-to-coord
           buffer output-title
           0 0 go-to-buffer-coord
+          buffer buffer-select-enabled @ if
+            select-offset display-offset <= if
+              inverse-video
+            then
+          then
           begin
             rows-remaining 0> if
               data default-segment-size data-cursor read-data { actual-bytes }
@@ -559,13 +588,28 @@ begin-module file-edit
               actual-bytes 0> if
                 begin
                   actual-bytes 0> rows-remaining 0> and if
+                    buffer buffer-select-enabled @
+                    select-offset display-offset = and if
+                      edit-offset display-offset <= if
+                        normal-video
+                      else
+                        inverse-video
+                      then
+                    then
                     edit-offset display-offset = if
+                      buffer buffer-select-enabled @ if
+                        select-offset display-offset <= if
+                          normal-video
+                        else
+                          inverse-video
+                        then
+                      then
                       display-height @ rows-remaining - to edit-row
                       display-width @ cols-remaining - to edit-col
                     then
                     current-data c@ { byte }
                     byte $0A = if
-                      cr
+                      erase-end-of-line cr
                       -1 +to rows-remaining
                       display-width @ to cols-remaining
                     else
@@ -593,6 +637,9 @@ begin-module file-edit
               true
             then
           until
+          normal-video
+          erase-end-of-line
+          rows-remaining 0 ?do cr erase-end-of-line loop
           edit-offset display-offset = if
             display-height @ rows-remaining - to edit-row
             display-width @ cols-remaining - to edit-col
@@ -694,6 +741,7 @@ begin-module file-edit
           false
         then
       then
+      buffer buffer-select-enabled @ or
     ; define update-display
 
     \ Display a single character
@@ -900,10 +948,29 @@ begin-module file-edit
     :noname { clip buffer -- }
       buffer buffer-edit-cursor { edit }
       buffer buffer-select-cursor { select }
-      select offset@ edit offset@ - { select-diff }
+      edit offset@ { edit-offset }
+      select offset@ edit-offset - { select-diff }
       edit clip insert-from-clip
-      select-diff 0>= if edit offset@ select-diff ! select go-to-offset then
+      select-diff 0>= if
+        edit offset@ edit-offset - buffer buffer-select-cursor adjust-offset
+      then
     ; define do-paste
+
+    \ Is there a selection in the buffer
+    :noname ( buffer -- selected? )
+      buffer-select-enabled @
+    ; define selected?
+    
+    \ Select in the buffer
+    :noname { buffer -- }
+      true buffer buffer-select-enabled !
+      buffer buffer-edit-cursor buffer buffer-select-cursor copy-cursor
+    ; define do-select
+
+    \ Deselect in the buffer
+    :noname ( buffer -- )
+      false swap buffer-select-enabled !
+    ; define do-deselect
 
   end-implement
   
@@ -930,7 +997,7 @@ begin-module file-edit
         2 pick <cursor> [:
           { start-cursor end-cursor src-dyn-buffer clip buffer src-cursor }
           clip clip-cursor offset@ clip clip-cursor delete-data
-          start-cursor offset@ src-cursor go-to-offset
+          start-cursor src-cursor copy-cursor
           begin
             end-cursor offset@ src-cursor offset@ - default-segment-size min
             { part-size }
@@ -957,6 +1024,7 @@ begin-module file-edit
           part-size 0> if
             buffer part-size src-cursor read-data to part-size
             buffer part-size dest-cursor insert-data
+            false
           else
             true
           then
@@ -1091,10 +1159,11 @@ begin-module file-edit
     :noname { c editor -- }
       editor editor-current @ { current }
       current edit-cursor-at-end? if
-        current edit-cursor-at-row-end? if
-          at-last-last
-        else
+        current edit-cursor-single-row?
+        current edit-cursor-at-row-end? not and if
           at-end
+        else
+          at-last-last
         then
       else
         current edit-cursor-single-row? if
@@ -1177,15 +1246,22 @@ begin-module file-edit
     \ Kill a range in the editor
     :noname { editor -- }
       editor editor-current @ { current }
-      editor editor-clip current do-kill
-      current update-display drop
-      current refresh-display
+      current selected? if
+        editor editor-clip current do-kill
+        current do-deselect
+        current update-display drop
+        current refresh-display
+      then
     ; define handle-kill
 
     \ Copy a range in the editor
     :noname { editor -- }
       editor editor-current @ { current }
-      editor editor-clip current do-copy
+      current selected? if
+        editor editor-clip current do-copy
+        current do-deselect
+        current refresh-display
+      then
     ; define handle-copy
 
     \ Paste in the editor
@@ -1195,6 +1271,17 @@ begin-module file-edit
       current update-display drop
       current refresh-display
     ; define handle-paste
+
+    \ Select in the editor
+    :noname { editor -- }
+      editor editor-current @ { current }
+      current selected? if
+        current do-deselect
+      else
+        current do-select
+      then
+      current refresh-display
+    ; define handle-select
 
   end-implement
 
@@ -1206,6 +1293,7 @@ begin-module file-edit
   $7F constant delete
   $0A constant newline
   $0D constant return
+  $00 constant ctrl-space
   $01 constant ctrl-a
   $02 constant ctrl-b
   $05 constant ctrl-e
@@ -1217,6 +1305,7 @@ begin-module file-edit
   $16 constant ctrl-v
   $17 constant ctrl-w
   $18 constant ctrl-x
+  $19 constant ctrl-y
 
   \ Get whether a byte is the start of a unicode code point greater than 127
   : unicode-start? ( b -- flag ) $C0 and $C0 = ;
@@ -1262,6 +1351,7 @@ begin-module file-edit
   \ Handle the escape key
   : handle-escape { editor -- }
     get-key case
+      ctrl-k of editor handle-copy endof
       [char] [ of editor handle-special endof
       clear-keys
     endcase
@@ -1281,7 +1371,8 @@ begin-module file-edit
 	  case
 	    return of editor handle-newline false endof
 	    newline of editor handle-newline false endof
-\	    tab of handle-tab false endof
+            \	    tab of handle-tab false endof
+            ctrl-space of editor handle-select false endof
 \	    ctrl-a of editor handle-start false endof
 \	    ctrl-e of editor handle-end false endof
 	    ctrl-f of editor handle-forward false endof
@@ -1292,10 +1383,12 @@ begin-module file-edit
 \	    ctrl-w of handle-write false endof
 \	    ctrl-x of handle-revert false endof
 \	    ctrl-u of handle-insert-row false endof
-\	    ctrl-k of handle-delete-row false endof
+            ctrl-k of editor handle-kill false endof
+            ctrl-y of editor handle-paste false endof
 	    escape of editor handle-escape false endof
 	    swap false swap
-	  endcase
+          endcase
+          depth 1 < if ." *** " then \ DEBUG
 	else
 	  dup delete = if
 	    drop editor handle-delete
