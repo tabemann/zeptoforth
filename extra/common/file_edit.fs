@@ -37,6 +37,31 @@ begin-module file-edit
   \ Inverse video
   : inverse-video ( -- ) csi ." 7m" ;
   
+  \ Get whether a byte is the start of a unicode code point greater than 127
+  : unicode-start? ( b -- flag ) $C0 and $C0 = ;
+
+  \ Get whether a byte is part of a unicode code point greater than 127
+  : unicode? ( b -- flag ) $80 and 0<> ;
+
+  \ Character constants
+  $09 constant tab
+  $7F constant delete
+  $0A constant newline
+  $0D constant return
+  $00 constant ctrl-space
+  $01 constant ctrl-a
+  $02 constant ctrl-b
+  $05 constant ctrl-e
+  $06 constant ctrl-f
+  $0B constant ctrl-k
+  $0E constant ctrl-n
+  $10 constant ctrl-p
+  $15 constant ctrl-u
+  $16 constant ctrl-v
+  $17 constant ctrl-w
+  $18 constant ctrl-x
+  $19 constant ctrl-y
+
   \ Tab size
   2 constant tab-size \ small to save space in the blocks
 
@@ -59,9 +84,29 @@ begin-module file-edit
   \ Display height
   variable display-height
 
+  \ Tab character size
+  variable tab-char-size
+
   \ Go to a buffer coordinate
   : go-to-buffer-coord ( row col -- ) swap 1+ swap go-to-coord ;
-  
+
+  \ Get the length of a string
+  : string-len { addr bytes }
+    0 { chars }
+    bytes 0 ?do
+      addr i + c@ { byte }
+      byte tab = if
+        tab-char-size @ chars tab-char-size @ umod - +to chars
+      else
+        byte $20 >= byte $7F < and
+        byte unicode-start? or if
+          1 +to chars
+        then
+      then
+    loop
+    chars
+  ;
+          
   \ Buffer class
   <object> begin-class <buffer>
 
@@ -106,9 +151,21 @@ begin-module file-edit
 
     \ Get whether two cursors are on the same line
     method cursors-on-same-line? ( cursor0 cursor1 buffer -- same? )
+
+    \ Get the distance between two offsets
+    method char-dist ( offset0 offset1 buffer -- distance )
     
+    \ Get the byte before a cursor
+    method cursor-before ( orig-cursor buffer -- c|0 )
+
+    \ Get the byte before the edit cursor
+    method edit-cursor-before ( buffer -- c|0 )
+
     \ Find the distance of a cursor from the previous newline
     method cursor-start-dist ( orig-cursor buffer -- distance )
+
+    \ Find the raw distance of a cursor from the next newline
+    method cursor-raw-end-dist ( orig-cursor buffer -- distance )
 
     \ Find the distance of a cursor from the next newline
     method cursor-end-dist ( orig-cursor buffer -- distance )
@@ -398,24 +455,78 @@ begin-module file-edit
         false
       then
     ; define cursors-on-same-line?
+
+    \ Get the distance between two offsets
+    :noname ( offset0 offset1 buffer -- distance )
+      buffer-dyn-buffer <cursor> [:
+        default-segment-size [: { offset0 offset1 cursor data }
+          offset0 offset1 min { start-offset }
+          offset0 offset1 max { end-offset }
+          start-offset cursor go-to-offset
+          0 { chars }
+          begin
+            end-offset cursor offset@ - default-segment-size min 0 max
+            { part-size }
+            part-size 0> if
+              data part-size cursor read-data to part-size
+              data part-size string-len +to chars
+              false
+            else
+              true
+            then
+          until
+          chars offset1 offset0 < if negate then
+        ;] with-allot
+      ;] with-object
+    ; define char-dist
+
+    \ Get the byte before a cursor
+    :noname ( orig-cursor buffer -- c|0 )
+      buffer-dyn-buffer <cursor> [: { orig-cursor cursor }
+        orig-cursor offset@ 0> if
+          orig-cursor cursor copy-cursor
+          -1 cursor adjust-offset
+          0 { W^ data }
+          data 1 cursor read-data
+          data c@
+        else
+          0
+        then
+      ;] with-object
+    ; define cursor-before
+
+    \ Get the byte before the edit cursor
+    :noname ( buffer -- c|0 )
+      dup buffer-edit-cursor swap cursor-before
+    ; define edit-cursor-before
     
     \ Find the distance of a cursor from the previous newline
     :noname ( orig-cursor buffer -- distance )
-      buffer-dyn-buffer <cursor> [: { orig-cursor cursor }
+      dup buffer-dyn-buffer <cursor> [: { orig-cursor buffer cursor }
         orig-cursor cursor copy-cursor
         cursor offset@ { orig-offset }
         [: $0A = ;] cursor find-prev
-        orig-offset cursor offset@ -
+        cursor offset@ orig-offset buffer char-dist
       ;] with-object
     ; define cursor-start-dist
 
-    \ Find the distance of a cursor from the next newline
+    \ Find the raw distance of a cursor from the next newline
     :noname ( orig-cursor buffer -- distance )
       buffer-dyn-buffer <cursor> [: { orig-cursor cursor }
         orig-cursor cursor copy-cursor
         cursor offset@ { orig-offset }
         [: $0A = ;] cursor find-next
         cursor offset@ orig-offset -
+      ;] with-object
+    ; define cursor-raw-end-dist
+    
+    \ Find the distance of a cursor from the next newline
+    :noname ( orig-cursor buffer -- distance )
+      dup buffer-dyn-buffer <cursor> [: { orig-cursor buffer cursor }
+        orig-cursor cursor copy-cursor
+        cursor offset@ { orig-offset }
+        [: $0A = ;] cursor find-next
+        orig-offset cursor offset@ buffer char-dist
       ;] with-object
     ; define cursor-end-dist
 
@@ -512,7 +623,7 @@ begin-module file-edit
     \ Is the edit cursor in the last row of the last line
     :noname { buffer -- last-row? }
       buffer buffer-edit-cursor offset@
-      buffer buffer-edit-cursor buffer cursor-end-dist +
+      buffer buffer-edit-cursor buffer cursor-raw-end-dist +
       buffer buffer-dyn-buffer dyn-buffer-len@ = if
         buffer edit-cursor-line-last?
       else
@@ -546,13 +657,28 @@ begin-module file-edit
           buffer buffer-edit-row @ 0 go-to-buffer-coord
           buffer buffer-edit-cursor cursor copy-cursor
           start-dist negate cursor adjust-offset
+          0 { chars }
           begin len 0> while
             len default-segment-size min { part-size }
             data part-size cursor read-data { real-size }
+            real-size 0 ?do
+              data i + c@ { byte }
+              byte tab = if
+                tab-char-size @ chars tab-char-size @ umod - { tab-spaces }
+                tab-spaces spaces
+                tab-spaces +to chars
+              else
+                byte emit
+                byte $20 >= byte $7F < and
+                byte unicode-start? or if
+                  1 +to chars
+                then
+              then
+            loop
             data real-size type
             part-size negate +to len
           repeat
-          start-dist end-dist + display-width @ < if erase-end-of-line then
+          chars display-width @ < if erase-end-of-line then
           start-dist buffer buffer-edit-col !
           buffer buffer-edit-row @ buffer buffer-edit-col @ go-to-buffer-coord
           show-cursor
@@ -613,12 +739,29 @@ begin-module file-edit
                       -1 +to rows-remaining
                       display-width @ to cols-remaining
                     else
-                      byte emit
-                      cols-remaining 1 > if
-                        -1 +to cols-remaining
+                      byte tab = if
+                        display-width @ cols-remaining - { chars }
+                        tab-char-size @ chars tab-char-size @ umod -
+                        { tab-spaces }
+                        tab-spaces spaces
+                        tab-spaces negate +to cols-remaining
+                        begin cols-remaining 0 < while
+                          rows-remaining 0 > if
+                            -1 +to rows-remaining
+                          then
+                          display-width @ +to cols-remaining
+                        repeat
                       else
-                        -1 +to rows-remaining
-                        display-width @ to cols-remaining
+                        byte emit
+                        byte $20 >= byte $7F < and
+                        byte unicode-start? or if
+                          cols-remaining 1 > if
+                            -1 +to cols-remaining
+                          else
+                            -1 +to rows-remaining
+                            display-width @ to cols-remaining
+                          then
+                        then
                       then
                     then
                     -1 +to actual-bytes
@@ -666,7 +809,7 @@ begin-module file-edit
           cursor offset@ { old-offset }
           [: $0A = ;] cursor find-prev
           cursor offset@ { new-offset }
-          old-offset new-offset - { diff }
+          new-offset old-offset buffer char-dist { diff }
           diff 0> if
             diff display-width @ u/
             diff display-width @ umod 0> if 1+ then
@@ -704,7 +847,7 @@ begin-module file-edit
           cursor offset@ { old-offset }
           [: $0A = ;] cursor find-prev
           cursor offset@ { new-offset }
-          old-offset new-offset - { diff }
+          new-offset old-offset buffer char-dist { diff }
           new-offset cursor0 offset@ >= if
             diff 0> if
               diff display-width @ u/
@@ -714,7 +857,7 @@ begin-module file-edit
             then
             +to rows
           else
-            old-offset cursor0 offset@ - to diff
+            cursor0 offset@ old-offset buffer char-dist to diff
             diff display-width @ umod 0> if 1 +to rows then
             diff display-width @ u/ +to rows
           then
@@ -899,8 +1042,20 @@ begin-module file-edit
     :noname { buffer -- }
       buffer buffer-select-cursor offset@ buffer buffer-edit-cursor offset@ -
       { select-diff }
-      1 buffer buffer-edit-cursor delete-data
-      select-diff 0>= if -1 buffer buffer-select-cursor adjust-offset then
+      begin
+        buffer buffer-edit-cursor offset@ 0> if
+          -1 buffer buffer-edit-cursor adjust-offset
+          0 { W^ data }
+          data 1 buffer buffer-edit-cursor read-data
+          1 buffer buffer-edit-cursor delete-data
+          select-diff 0>= if -1 buffer buffer-select-cursor adjust-offset then
+          data c@ { byte }
+          byte $0A = byte tab = or byte $20 >= byte $7F < and or
+          byte unicode-start? or
+        else
+          true
+        then
+      until
     ; define do-delete
 
     \ Delete in the buffer
@@ -1161,7 +1316,11 @@ begin-module file-edit
       current edit-cursor-at-end? if
         current edit-cursor-single-row?
         current edit-cursor-at-row-end? not and if
-          at-end
+          c tab <> if
+            at-end
+          else
+            in-single-row
+          then
         else
           at-last-last
         then
@@ -1200,7 +1359,8 @@ begin-module file-edit
         at-start
       else
         current edit-cursor-at-end?
-        current edit-cursor-at-row-end? and if
+        current edit-cursor-at-row-end? and
+        current edit-cursor-before tab <> and if
           at-end
         else
           current edit-cursor-single-row? if
@@ -1288,35 +1448,11 @@ begin-module file-edit
   \ The line editor
   variable edit-state
   
-  \ Character constants
-  $09 constant tab
-  $7F constant delete
-  $0A constant newline
-  $0D constant return
-  $00 constant ctrl-space
-  $01 constant ctrl-a
-  $02 constant ctrl-b
-  $05 constant ctrl-e
-  $06 constant ctrl-f
-  $0B constant ctrl-k
-  $0E constant ctrl-n
-  $10 constant ctrl-p
-  $15 constant ctrl-u
-  $16 constant ctrl-v
-  $17 constant ctrl-w
-  $18 constant ctrl-x
-  $19 constant ctrl-y
-
-  \ Get whether a byte is the start of a unicode code point greater than 127
-  : unicode-start? ( b -- flag ) $C0 and $C0 = ;
-
-  \ Get whether a byte is part of a unicode code point greater than 127
-  : unicode? ( b -- flag ) $80 and 0<> ;
-
   \ Configure the editor
   : config-edit ( -- )
     reset-ansi-term
     get-terminal-size display-width ! 2 - display-height !
+    8 tab-char-size !
   ;
 
   \ Handle a special key
@@ -1367,7 +1503,7 @@ begin-module file-edit
       editor refresh-editor
       begin
 	get-key
-	dup $20 u< if
+	dup $20 u< over tab <> and if
 	  case
 	    return of editor handle-newline false endof
 	    newline of editor handle-newline false endof
