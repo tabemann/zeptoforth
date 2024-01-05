@@ -91,17 +91,13 @@ begin-module file-edit
   : go-to-buffer-coord ( row col -- ) swap 1+ swap go-to-coord ;
 
   \ Get the length of a string
-  : string-len { addr bytes }
-    0 { chars }
+  : string-len { chars addr bytes -- chars' }
     bytes 0 ?do
       addr i + c@ { byte }
       byte tab = if
         tab-char-size @ chars tab-char-size @ umod - +to chars
       else
-        byte $20 >= byte $7F < and
-        byte unicode-start? or if
-          1 +to chars
-        then
+        byte $20 >= byte $7F < and byte unicode-start? or if 1 +to chars then
       then
     loop
     chars
@@ -153,14 +149,29 @@ begin-module file-edit
     method cursors-on-same-line? ( cursor0 cursor1 buffer -- same? )
 
     \ Get the distance between two offsets
-    method char-dist ( offset0 offset1 buffer -- distance )
+    method char-dist ( init-chars offset0 offset1 buffer -- distance )
     
     \ Get the byte before a cursor
     method cursor-before ( orig-cursor buffer -- c|0 )
 
+    \ Get the byte at a cursor
+    method cursor-at ( orig-cursor buffer -- c|0 )
+
     \ Get the byte before the edit cursor
     method edit-cursor-before ( buffer -- c|0 )
 
+    \ Get the byte at the edit cursor
+    method edit-cursor-at ( buffer -- c|0 )
+
+    \ Length in spaces of the character before the edit cursor
+    method edit-cursor-before-spaces ( buffer -- spaces )
+
+    \ Length in spaces of the character at the edit cursor
+    method edit-cursor-at-spaces ( buffer -- spaces )
+
+    \ Find the raw distance of a cursor from the previous newline
+    method cursor-raw-start-dist ( orig-cursor buffer -- distance )
+    
     \ Find the distance of a cursor from the previous newline
     method cursor-start-dist ( orig-cursor buffer -- distance )
 
@@ -246,7 +257,7 @@ begin-module file-edit
     method output-backspace ( buffer -- )
 
     \ Move the cursor to the left
-    method output-left ( buffer -- )
+    method output-left ( spaces buffer -- )
 
     \ Move the cursor to the end of the previous row
     method output-prev-row ( buffer -- )
@@ -255,7 +266,7 @@ begin-module file-edit
     method output-prev-line ( buffer -- )
 
     \ Move the cursor to the right
-    method output-right ( buffer -- )
+    method output-right ( spaces buffer -- )
 
     \ Move the cursor to the start of the next row
     method output-next-row ( buffer -- )
@@ -457,25 +468,25 @@ begin-module file-edit
     ; define cursors-on-same-line?
 
     \ Get the distance between two offsets
-    :noname ( offset0 offset1 buffer -- distance )
+    :noname ( init-chars offset0 offset1 buffer -- distance )
       buffer-dyn-buffer <cursor> [:
-        default-segment-size [: { offset0 offset1 cursor data }
+        default-segment-size [: { init-chars offset0 offset1 cursor data }
           offset0 offset1 min { start-offset }
           offset0 offset1 max { end-offset }
           start-offset cursor go-to-offset
-          0 { chars }
+          init-chars { chars }
           begin
             end-offset cursor offset@ - default-segment-size min 0 max
             { part-size }
             part-size 0> if
               data part-size cursor read-data to part-size
-              data part-size string-len +to chars
+              chars data part-size string-len to chars
               false
             else
               true
             then
           until
-          chars offset1 offset0 < if negate then
+          chars init-chars - offset1 offset0 < if negate then
         ;] with-allot
       ;] with-object
     ; define char-dist
@@ -487,7 +498,7 @@ begin-module file-edit
           orig-cursor cursor copy-cursor
           -1 cursor adjust-offset
           0 { W^ data }
-          data 1 cursor read-data
+          data 1 cursor read-data drop
           data c@
         else
           0
@@ -495,18 +506,77 @@ begin-module file-edit
       ;] with-object
     ; define cursor-before
 
+    \ Get the byte at a cursor
+    :noname ( orig-cursor buffer -- c|0 )
+      dup buffer-dyn-buffer <cursor> [: { orig-cursor buffer cursor }
+        orig-cursor offset@ buffer buffer-len@ < if
+          orig-cursor cursor copy-cursor
+          0 { W^ data }
+          data 1 cursor read-data drop
+          data c@
+        else
+          0
+        then
+      ;] with-object
+    ; define cursor-at
+    
     \ Get the byte before the edit cursor
     :noname ( buffer -- c|0 )
       dup buffer-edit-cursor swap cursor-before
     ; define edit-cursor-before
+
+    \ Get the byte at the edit cursor
+    :noname ( buffer -- c|0 )
+      dup buffer-edit-cursor swap cursor-at
+    ; define edit-cursor-at
     
+    \ Length in spaces of the character before the edit cursor
+    :noname ( buffer -- spaces )
+      dup edit-cursor-before
+      tab = if
+        dup buffer-dyn-buffer <cursor> [: { buffer cursor }
+          buffer buffer-edit-cursor cursor copy-cursor
+          -1 cursor adjust-offset
+          cursor buffer cursor-start-dist { init-chars }
+          init-chars cursor offset@ buffer buffer-edit-cursor offset@
+          buffer char-dist
+        ;] with-object
+      else
+        drop 1
+      then
+    ; define edit-cursor-before-spaces
+
+    \ Length in spaces of the character at the edit cursor
+    :noname ( buffer -- spaces )
+      dup edit-cursor-at tab = if
+        dup buffer-dyn-buffer <cursor> [: { buffer cursor }
+          buffer buffer-edit-cursor buffer cursor-end-dist { first-dist }
+          buffer buffer-edit-cursor cursor copy-cursor
+          1 cursor adjust-offset
+          first-dist cursor buffer cursor-end-dist -
+        ;] with-object
+      else
+        drop 1
+      then
+    ; define edit-cursor-at-spaces
+
+    \ Find the raw distance of a cursor from the previous newline
+    :noname ( orig-cursor buffer -- distance )
+      buffer-dyn-buffer <cursor> [: { orig-cursor cursor }
+        orig-cursor cursor copy-cursor
+        cursor offset@ { orig-offset }
+        [: $0A = ;] cursor find-prev
+        orig-offset cursor offset@ -
+      ;] with-object
+    ; define cursor-raw-start-dist
+
     \ Find the distance of a cursor from the previous newline
     :noname ( orig-cursor buffer -- distance )
       dup buffer-dyn-buffer <cursor> [: { orig-cursor buffer cursor }
         orig-cursor cursor copy-cursor
         cursor offset@ { orig-offset }
         [: $0A = ;] cursor find-prev
-        cursor offset@ orig-offset buffer char-dist
+        0 cursor offset@ orig-offset buffer char-dist
       ;] with-object
     ; define cursor-start-dist
 
@@ -523,10 +593,11 @@ begin-module file-edit
     \ Find the distance of a cursor from the next newline
     :noname ( orig-cursor buffer -- distance )
       dup buffer-dyn-buffer <cursor> [: { orig-cursor buffer cursor }
+        orig-cursor buffer cursor-start-dist { init-chars }
         orig-cursor cursor copy-cursor
         cursor offset@ { orig-offset }
         [: $0A = ;] cursor find-next
-        orig-offset cursor offset@ buffer char-dist
+        init-chars orig-offset cursor offset@ buffer char-dist
       ;] with-object
     ; define cursor-end-dist
 
@@ -650,8 +721,8 @@ begin-module file-edit
     :noname ( buffer -- )
       dup buffer-dyn-buffer <cursor> [:
         default-segment-size [: { buffer cursor data }
-          buffer buffer-edit-cursor buffer cursor-start-dist { start-dist }
-          buffer buffer-edit-cursor buffer cursor-end-dist { end-dist }
+          buffer buffer-edit-cursor buffer cursor-raw-start-dist { start-dist }
+          buffer buffer-edit-cursor buffer cursor-raw-end-dist { end-dist }
           start-dist end-dist + { len }
           hide-cursor
           buffer buffer-edit-row @ 0 go-to-buffer-coord
@@ -660,6 +731,7 @@ begin-module file-edit
           0 { chars }
           begin len 0> while
             len default-segment-size min { part-size }
+            cursor offset@ { prev-offset }
             data part-size cursor read-data { real-size }
             real-size 0 ?do
               data i + c@ { byte }
@@ -674,12 +746,14 @@ begin-module file-edit
                   1 +to chars
                 then
               then
+              prev-offset i + buffer buffer-edit-cursor offset@ = if
+                chars buffer buffer-edit-col !
+              then
             loop
-            data real-size type
             part-size negate +to len
           repeat
+          end-dist 0= if chars buffer buffer-edit-col ! then
           chars display-width @ < if erase-end-of-line then
-          start-dist buffer buffer-edit-col !
           buffer buffer-edit-row @ buffer buffer-edit-col @ go-to-buffer-coord
           show-cursor
         ;] with-allot
@@ -809,7 +883,7 @@ begin-module file-edit
           cursor offset@ { old-offset }
           [: $0A = ;] cursor find-prev
           cursor offset@ { new-offset }
-          new-offset old-offset buffer char-dist { diff }
+          0 new-offset old-offset buffer char-dist { diff }
           diff 0> if
             diff display-width @ u/
             diff display-width @ umod 0> if 1+ then
@@ -847,7 +921,7 @@ begin-module file-edit
           cursor offset@ { old-offset }
           [: $0A = ;] cursor find-prev
           cursor offset@ { new-offset }
-          new-offset old-offset buffer char-dist { diff }
+          0 new-offset old-offset buffer char-dist { diff }
           new-offset cursor0 offset@ >= if
             diff 0> if
               diff display-width @ u/
@@ -857,7 +931,7 @@ begin-module file-edit
             then
             +to rows
           else
-            cursor0 offset@ old-offset buffer char-dist to diff
+            0 cursor0 offset@ old-offset buffer char-dist to diff
             diff display-width @ umod 0> if 1 +to rows then
             diff display-width @ u/ +to rows
           then
@@ -905,8 +979,8 @@ begin-module file-edit
     ; define output-backspace
 
     \ Move the cursor to the left
-    :noname { buffer -- }
-      -1 buffer buffer-edit-col +!
+    :noname { spaces buffer -- }
+      spaces negate buffer buffer-edit-col +!
       buffer buffer-edit-row @ buffer buffer-edit-col @ go-to-buffer-coord
     ; define output-left
 
@@ -925,8 +999,8 @@ begin-module file-edit
     ; define output-prev-line
 
     \ Move the cursor to the right
-    :noname { buffer -- }
-      1 buffer buffer-edit-col +!
+    :noname { spaces buffer -- }
+      spaces buffer buffer-edit-col +!
       buffer buffer-edit-row @ buffer buffer-edit-col @ go-to-buffer-coord
     ; define output-right
 
@@ -1044,12 +1118,9 @@ begin-module file-edit
       { select-diff }
       begin
         buffer buffer-edit-cursor offset@ 0> if
-          -1 buffer buffer-edit-cursor adjust-offset
-          0 { W^ data }
-          data 1 buffer buffer-edit-cursor read-data
+          buffer edit-cursor-before { byte }
           1 buffer buffer-edit-cursor delete-data
           select-diff 0>= if -1 buffer buffer-select-cursor adjust-offset then
-          data c@ { byte }
           byte $0A = byte tab = or byte $20 >= byte $7F < and or
           byte unicode-start? or
         else
@@ -1230,12 +1301,13 @@ begin-module file-edit
       editor editor-current @ { current }
       current edit-cursor-offset@ 0> if
         current edit-cursor-left-space { cols rows }
+        current edit-cursor-before-spaces { spaces }
         current do-backward
         current update-display if
           current refresh-display
         else
           cols 0> if
-            current output-left
+            spaces current output-left
           else
             rows 0> if
               current output-prev-row
@@ -1252,6 +1324,7 @@ begin-module file-edit
       editor editor-current @ { current }
       current edit-cursor-offset@ current buffer-len@ < if
         current edit-cursor-left-space { cols rows }
+        current edit-cursor-at-spaces { spaces }
         current edit-cursor-at-end? { at-end? }
         current do-forward
         current update-display if
@@ -1261,7 +1334,7 @@ begin-module file-edit
             current output-next-line
           else
             cols display-width @ 1- < if
-              current output-right
+              spaces current output-right
             else
               current output-next-row
             then
