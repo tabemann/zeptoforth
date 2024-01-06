@@ -55,6 +55,7 @@
 #include src/rp2040/forth/i2c.fs
 #include src/rp2040/forth/pwm.fs
 #include src/rp2040/forth/rtc.fs
+#include src/rp2040/forth/clocks.fs
 #include src/common/forth/full_extra.fs
 #include src/common/forth/save_minidict.fs
 

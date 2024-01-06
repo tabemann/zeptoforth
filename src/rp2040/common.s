@@ -97,6 +97,9 @@ _init_platform_variables:
 	ldr r1, =hold_core
 	str r0, [r1]
 	str r0, [r1, #4]
+	ldr r0, =125000000
+	ldr r1, =sysclk
+	str r0, [r1]
 	bx lr
 
 	@ Prepare for rebooting

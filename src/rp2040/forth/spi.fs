@@ -337,7 +337,7 @@ begin-module spi
     \ Find a prescale for a baud rate
     : find-spi-prescale ( baud -- prescale )
       2 begin dup 254 <= while
-	dup 2 + 256 * 2 pick * 125000000 > if
+	dup 2 + 256 * 2 pick * sysclk @ > if
 	  nip exit
 	else
 	  2 +
@@ -349,7 +349,7 @@ begin-module spi
     \ Find a postdiv for a baud rate and prescale
     : find-spi-postdiv ( baud prescale -- postdiv )
       256 begin dup 1 > while
-	2dup 1- * 125000000 swap / 3 pick > if
+	2dup 1- * sysclk @ swap / 3 pick > if
 	  nip nip exit
 	else
 	  1-
@@ -363,7 +363,7 @@ begin-module spi
   \ Set the SPI baud
   : spi-baud! ( baud spi -- )
     dup validate-spi swap
-    dup 125000000 u<= averts x-invalid-spi-clock
+    dup sysclk @ u<= averts x-invalid-spi-clock
     dup find-spi-prescale
     dup 254 u<= averts x-invalid-spi-clock
     tuck find-spi-postdiv
