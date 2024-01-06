@@ -225,7 +225,9 @@ begin-module ansi-term
 	  set-key true
 	else
 	  drop dup systick-counter <
-	then
+        then
+      else
+        pause dup systick-counter <
       then
     until
     drop
