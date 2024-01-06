@@ -61,12 +61,22 @@ begin-module file-edit
   $17 constant ctrl-w
   $18 constant ctrl-x
   $19 constant ctrl-y
+  $1A constant ctrl-z
 
   \ Tab size
   2 constant tab-size \ small to save space in the blocks
 
   \ My base heap size
   65536 constant my-base-heap-size
+
+  \ Maximum undo count
+  64 constant max-undo-count
+
+  \ Maximum undo byte count
+  1024 constant max-undo-byte-count
+
+  \ Delete undo accumulation
+  -40 constant delete-undo-accumulation
   
   \ My block size
   default-segment-size dyn-buffer-internal::segment-header-size +
@@ -102,6 +112,17 @@ begin-module file-edit
     loop
     chars
   ;
+
+  \ Undo header
+  begin-structure undo-header-size
+
+    \ Size
+    field: undo-size
+
+    \ Offset
+    field: undo-offset
+
+  end-structure
           
   \ Buffer class
   <object> begin-class <buffer>
@@ -142,6 +163,39 @@ begin-module file-edit
     \ Select cursor
     <cursor> class-size member buffer-select-cursor
 
+    \ Undo count
+    cell member buffer-undo-count
+
+    \ Undo byte count
+    cell member buffer-undo-bytes
+
+    \ Undo array
+    max-undo-count cells member buffer-undo-array
+
+    \ Get the oldest undo
+    method oldest-undo@ ( buffer -- undo )
+
+    \ Get the newest undo
+    method newest-undo@ ( buffer -- undo )
+
+    \ Push an undo
+    method push-undo ( bytes buffer -- undo )
+
+    \ Drop an undo
+    method drop-undo ( buffer -- )
+
+    \ Free an undo
+    method free-undo ( undo buffer -- )
+    
+    \ Make room for undos
+    method ensure-undo-space ( bytes buffer -- )
+    
+    \ Add an insert undo
+    method add-insert-undo ( start-offset end-offset insert-offset buffer -- )
+
+    \ Add a delete undo
+    method add-delete-undo ( bytes offset buffer -- )
+    
     \ Get whether two cursors share the same preceding newline
     method cursors-before-same-newline? ( cursor0 cursor1 buffer -- same? )
 
@@ -313,6 +367,12 @@ begin-module file-edit
     \ Enter a character into the buffer
     method do-insert ( c buffer -- )
 
+    \ Find the begin and end offsets for a delete
+    method find-delete-range ( buffer -- start-offset end-offset )
+
+    \ Find the begin and end offsets for a delete forward
+    method find-delete-forward-range ( buffer -- start-offset end-offset )
+
     \ Backspace in the buffer
     method do-delete ( buffer -- )
 
@@ -336,6 +396,9 @@ begin-module file-edit
 
     \ Deselect in the buffer
     method do-deselect ( buffer -- )
+
+    \ Undo in the buffer
+    method do-undo ( buffer -- )
     
   end-class
 
@@ -348,6 +411,9 @@ begin-module file-edit
     \ Clipboard cursor
     <cursor> class-size member clip-cursor
 
+    \ Get the clip size
+    method clip-size@ ( clip -- bytes )
+    
     \ Copy from a starting cursor to an ending cursor
     method copy-to-clip ( start-cursor end-cursor src-dyn-buffer clip -- )
 
@@ -412,6 +478,9 @@ begin-module file-edit
     
     \ Select in the editor
     method handle-select ( editor -- )
+
+    \ Undo in the editor
+    method handle-undo ( editor -- )
     
   end-class
 
@@ -432,6 +501,8 @@ begin-module file-edit
       0 buffer buffer-prev !
       0 buffer buffer-edit-col !
       0 buffer buffer-edit-row !
+      0 buffer buffer-undo-count !
+      0 buffer buffer-undo-bytes !
       false buffer buffer-select-enabled !
       heap <dyn-buffer> buffer buffer-dyn-buffer init-object
       buffer buffer-dyn-buffer <cursor> buffer buffer-display-cursor init-object
@@ -441,6 +512,7 @@ begin-module file-edit
 
     \ Destructor
     :noname { buffer -- }
+      begin buffer newest-undo@ while buffer drop-undo repeat
       buffer buffer-select-cursor destroy
       buffer buffer-edit-cursor destroy
       buffer buffer-display-cursor destroy
@@ -449,6 +521,100 @@ begin-module file-edit
       buffer buffer-path 2@ drop buffer buffer-heap @ free
       buffer <object>->destroy
     ; define destroy
+
+    \ Get the oldest undo
+    :noname { buffer -- undo }
+      buffer buffer-undo-count @ 0> if
+        buffer buffer-undo-array buffer buffer-undo-count @ 1- cells +
+      else
+        0
+      then
+    ; define oldest-undo@
+
+    \ Get the newest undo
+    :noname { buffer -- undo }
+      buffer buffer-undo-count @ 0> if
+        buffer buffer-undo-array
+      else
+        0
+      then
+    ; define newest-undo@
+
+    \ Push an undo
+    :noname { bytes buffer -- undo }
+      bytes [ undo-header-size cell+ ] literal + buffer ensure-undo-space
+      buffer buffer-undo-array buffer buffer-undo-array cell+
+      buffer buffer-undo-count @ cells move
+      bytes [ undo-header-size cell+ ] literal + buffer buffer-undo-bytes +!
+      1 buffer buffer-undo-count +!
+      buffer buffer-undo-array
+    ; define push-undo
+
+    \ Drop an undo
+    :noname { buffer -- }
+      buffer buffer-undo-count @ 0> if
+        buffer newest-undo@ buffer free-undo
+        buffer buffer-undo-array cell+ buffer buffer-undo-array
+        buffer buffer-undo-count @ cells move
+      then
+    ; define drop-undo
+    
+    \ Free an undo
+    :noname { undo buffer -- }
+      undo undo-size @ [ undo-header-size cell+ ] literal + negate
+      buffer buffer-undo-bytes +!
+      -1 buffer buffer-undo-count +!
+      undo buffer buffer-heap @ free
+    ; define free-undo
+    
+    \ Make room for undos
+    :noname { bytes buffer -- }
+      begin
+        max-undo-byte-count buffer buffer-undo-bytes @ bytes + >
+        buffer buffer-undo-count @ 0> and
+      while
+        buffer oldest-undo@ buffer free-undo
+      repeat
+    ; define ensure-undo-space
+
+    \ Add an insert undo
+    :noname ( start-offset end-offset insert-offset buffer -- )
+      dup buffer-dyn-buffer <cursor> [:
+        default-segment-size [:
+          { start-offset end-offset insert-offset buffer cursor data }
+          end-offset start-offset - { bytes }
+          bytes buffer push-undo { undo }
+          start-offset cursor go-to-offset
+          0 { data-offset }
+          begin data-offset bytes < while
+            bytes data-offset - default-segment-size min { part-size }
+            data part-size cursor read-data to part-size
+            data undo undo-header-size + data-offset + part-size move
+            part-size +to data-offset
+          repeat
+          bytes undo undo-size !
+          insert-offset undo undo-offset !
+        ;] with-allot
+      ;] with-object
+    ; define add-insert-undo
+
+    \ Add a delete undo
+    :noname { bytes offset buffer -- }
+      buffer newest-undo@ { undo }
+      undo if
+        undo undo-size @ 0<
+        undo undo-size @ bytes - delete-undo-accumulation >= and
+        offset bytes - undo undo-offset @ = and
+      else
+        false
+      then if
+        bytes negate undo undo-size +!
+      else
+        0 buffer push-undo to undo
+        bytes negate undo undo-size !
+      then
+      offset undo undo-offset !
+    ; define add-delete-undo
     
     \ Get whether two cursors share the same preceding newline
     :noname ( cursor0 cursor1 buffer -- same? )
@@ -1151,10 +1317,62 @@ begin-module file-edit
       { select-diff }
       c 1 buffer buffer-edit-cursor insert-data
       select-diff 0> if 1 buffer buffer-select-cursor adjust-offset then
+      1 buffer buffer-edit-cursor offset@ buffer add-delete-undo
     ; define do-insert
 
-    \ Backspace in the buffer
+    \ Find the begin and end offsets for a delete
+    :noname ( buffer -- start-offset end-offset )
+      dup buffer-dyn-buffer <cursor> [: { buffer cursor }
+        buffer buffer-edit-cursor cursor copy-cursor
+        cursor offset@ { begin-offset }
+        begin
+          cursor offset@ 0> if
+            cursor buffer cursor-before { byte }
+            -1 cursor adjust-offset
+            byte unicode? not byte unicode-start? or
+          else
+            true
+          then
+        until
+        cursor offset@ begin-offset
+      ;] with-object
+    ; define find-delete-range
+    
+    \ Find the begin and end offsets for a delete forward
+    :noname ( buffer -- start-offset end-offset )
+      dup buffer-dyn-buffer <cursor> [: { buffer cursor }
+        buffer buffer-edit-cursor cursor copy-cursor
+        cursor buffer cursor-at { byte }
+        byte unicode? byte unicode-start? not and if
+          begin
+            -1 cursor adjust-offset
+            cursor offset@ 0> if
+              cursor buffer cursor-at to byte
+              byte unicode? not byte unicode-start? or
+            else
+              true
+            then
+          until
+        then
+        cursor offset@ { begin-offset }
+        0 { count }
+        begin
+          cursor offset@ buffer buffer-len@ < if
+            1 cursor adjust-offset
+            1 +to count
+            buffer cursor cursor-at to byte
+            byte unicode? not byte unicode-start? or
+          else
+            true
+          then
+        until
+        begin-offset dup count +
+      ;] with-object
+    ; define find-delete-forward-range
+
+    \ Delete in the buffer
     :noname { buffer -- }
+      buffer find-delete-range over buffer add-insert-undo
       buffer buffer-select-cursor offset@ buffer buffer-edit-cursor offset@ -
       { select-diff }
       begin
@@ -1169,8 +1387,9 @@ begin-module file-edit
       until
     ; define do-delete
 
-    \ Delete in the buffer
+    \ Delete forward in the buffer
     :noname { buffer -- }
+      buffer find-delete-forward-range over negate buffer add-insert-undo
       buffer go-to-unicode-start
       buffer buffer-select-cursor offset@ buffer buffer-edit-cursor offset@ -
       { select-diff }
@@ -1194,10 +1413,12 @@ begin-module file-edit
       select offset@ { select-offset }
       edit offset@ { edit-offset }
       select-offset edit-offset < if
+        select edit select buffer add-insert-undo
         select edit buffer buffer-dyn-buffer clip copy-to-clip
         edit-offset select-offset - edit delete-data
       else
         edit-offset select-offset < if
+          edit select edit buffer add-insert-undo
           edit select buffer buffer-dyn-buffer clip copy-to-clip
           select-offset edit-offset - select delete-data
         then
@@ -1229,6 +1450,8 @@ begin-module file-edit
       select-diff 0>= if
         edit offset@ edit-offset - buffer buffer-select-cursor adjust-offset
       then
+      edit offset@ { new-edit-offset }
+      new-edit-offset edit-offset - new-edit-offset buffer add-delete-undo
     ; define do-paste
 
     \ Is there a selection in the buffer
@@ -1246,6 +1469,38 @@ begin-module file-edit
     :noname ( buffer -- )
       false swap buffer-select-enabled !
     ; define do-deselect
+
+    \ Undo in the buffer
+    :noname { buffer -- }
+      buffer newest-undo@ { undo }
+      undo if
+        buffer buffer-select-cursor offset@ { select-offset }
+        undo undo-size @ 0> if
+          undo undo-offset @ 0> if
+            undo undo-offset @ buffer buffer-edit-cursor go-to-offset
+            undo undo-header-size + undo undo-size @
+            buffer buffer-edit-cursor insert-data
+            select-offset undo undo-offset @ > if
+              undo undo-size @ buffer buffer-select-cursor adjust-offset
+            then
+          else
+            undo undo-offset @ negate buffer buffer-edit-cursor go-to-offset
+            undo undo-header-size + undo undo-size @
+            buffer buffer-edit-cursor insert-data
+            select-offset undo undo-offset @ negate > if
+              undo undo-size @ buffer buffer-select-cursor adjust-offset
+            then
+          then
+        else
+          undo undo-offset @ buffer buffer-edit-cursor go-to-offset
+          undo undo-size @ negate buffer buffer-edit-cursor delete-data
+          select-offset undo undo-offset @ > if
+            undo undo-size @ buffer buffer-select-cursor adjust-offset
+          then
+        then
+        buffer drop-undo
+      then
+    ; define do-undo
 
   end-implement
   
@@ -1265,7 +1520,12 @@ begin-module file-edit
       clip clip-dyn-buffer destroy
       clip <object>->destroy
     ; define destroy
-    
+
+    \ Get the clip size
+    :noname { clip -- bytes }
+      clip clip-cursor offset@
+    ; define clip-size@
+
     \ Copy from a starting cursor to an ending cursor
     :noname ( start-cursor end-cursor src-dyn-buffer clip -- )
       default-segment-size [:
@@ -1578,6 +1838,14 @@ begin-module file-edit
       current refresh-display
     ; define handle-select
 
+    \ Undo in the editor
+    :noname { editor -- }
+      editor editor-current @ { current }
+      current do-undo
+      current update-display drop
+      current refresh-display
+    ; define handle-undo
+    
   end-implement
 
   \ The line editor
@@ -1656,6 +1924,7 @@ begin-module file-edit
 \	    ctrl-u of handle-insert-row false endof
             ctrl-k of editor handle-kill false endof
             ctrl-y of editor handle-paste false endof
+            ctrl-z of editor handle-undo false endof
 	    escape of editor handle-escape false endof
 	    swap false swap
           endcase
