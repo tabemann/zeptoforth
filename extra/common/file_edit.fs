@@ -1363,7 +1363,7 @@ begin-module file-edit
           cursor offset@ buffer buffer-len@ < if
             1 cursor adjust-offset
             1 +to count
-            buffer cursor cursor-at to byte
+            cursor buffer cursor-at to byte
             byte unicode? not byte unicode-start? or
           else
             true
@@ -1492,6 +1492,7 @@ begin-module file-edit
             undo undo-offset @ negate buffer buffer-edit-cursor go-to-offset
             undo undo-header-size + undo undo-size @
             buffer buffer-edit-cursor insert-data
+            undo undo-size @ negate buffer buffer-edit-cursor adjust-offset
             select-offset undo undo-offset @ negate > if
               undo undo-size @ buffer buffer-select-cursor adjust-offset
             then
