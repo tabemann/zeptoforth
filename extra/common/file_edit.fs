@@ -542,12 +542,15 @@ begin-module file-edit
 
     \ Push an undo
     :noname { bytes buffer -- undo }
-      bytes [ undo-header-size cell+ ] literal + buffer ensure-undo-space
+      bytes [ undo-header-size cell+ ] literal + { full-bytes }
+      full-bytes buffer ensure-undo-space
       buffer buffer-undo-array buffer buffer-undo-array cell+
       buffer buffer-undo-count @ cells move
-      bytes [ undo-header-size cell+ ] literal + buffer buffer-undo-bytes +!
+      full-bytes buffer buffer-undo-bytes +!
       1 buffer buffer-undo-count +!
-      buffer buffer-undo-array
+      full-bytes buffer buffer-heap @ allocate { undo }
+      undo buffer buffer-undo-array !
+      undo
     ; define push-undo
 
     \ Drop an undo
